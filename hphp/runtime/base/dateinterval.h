@@ -40,10 +40,10 @@ struct DateInterval : SweepableResourceData {
     static const StaticString result("DateInterval");
     return result;
   }
-  const String& o_getClassNameHook() const override { return classnameof(); }
+  const OptString& o_getClassNameHook() const override { return classnameof(); }
 
   DateInterval();
-  explicit DateInterval(const String& date_interval, bool date_string = false);
+  explicit DateInterval(const OptString& date_interval, bool date_string = false);
   explicit DateInterval(timelib_rel_time *di);
 
   int64_t getYears()      const    { return m_di->y;                      }
@@ -69,7 +69,7 @@ struct DateInterval : SweepableResourceData {
     if (isValid()) m_di->days = value;
   }
 
-  String format(const String& format_spec);
+  OptString format(const OptString& format_spec);
 
   bool isValid() const { return get(); }
   req::ptr<DateInterval> cloneDateInterval() const;
@@ -80,8 +80,8 @@ protected:
   timelib_rel_time *get() const { return m_di.get(); }
 
 private:
-  void setDateString(const String& date_string);
-  void setInterval(const String& date_interval);
+  void setDateString(const OptString& date_string);
+  void setInterval(const OptString& date_interval);
   struct dateinterval_deleter {
     void operator()(timelib_rel_time *di) {
       if (di) {

@@ -32,7 +32,7 @@ bool same_arrays(const Array& a1, const Array& a2) {
 }
 
 TEST(Array, Constructors) {
-  const String s_name("name");
+  const OptString s_name("name");
 
   Array arr;
   EXPECT_TRUE(arr.empty());
@@ -67,7 +67,7 @@ TEST(Array, Constructors) {
   EXPECT_TRUE(arr.size() == 1);
   EXPECT_TRUE(arr.length() == 1);
   EXPECT_TRUE(!arr.isNull());
-  EXPECT_TRUE(equal(arr[0], String("test").get()));
+  EXPECT_TRUE(equal(arr[0], OptString("test").get()));
   EXPECT_TRUE(arr.isVec());
   EXPECT_FALSE(arr.isDict());
   EXPECT_FALSE(arr.isKeyset());
@@ -117,11 +117,11 @@ TEST(Array, Iteration) {
   int i = 0;
   for (ArrayIter iter = arr.begin(); iter; ++iter, ++i) {
     if (i == 0) {
-      EXPECT_TRUE(equal(iter.first(), String("n1").get()));
-      EXPECT_TRUE(equal(iter.second(), String("v1").get()));
+      EXPECT_TRUE(equal(iter.first(), OptString("n1").get()));
+      EXPECT_TRUE(equal(iter.second(), OptString("v1").get()));
     } else {
-      EXPECT_TRUE(equal(iter.first(), String("n2").get()));
-      EXPECT_TRUE(equal(iter.second(), String("v2").get()));
+      EXPECT_TRUE(equal(iter.first(), OptString("n2").get()));
+      EXPECT_TRUE(equal(iter.second(), OptString("v2").get()));
     }
   }
   EXPECT_TRUE(i == 2);
@@ -131,10 +131,10 @@ TEST(Array, Iteration) {
   for (ArrayIter iter = arr.begin(); iter; ++iter, ++i) {
     if (i == 0) {
       EXPECT_TRUE(equal(iter.first(), static_cast<int64_t>(0)));
-      EXPECT_TRUE(equal(iter.second(), String("v1").get()));
+      EXPECT_TRUE(equal(iter.second(), OptString("v1").get()));
     } else {
       EXPECT_TRUE(equal(iter.first(), static_cast<int64_t>(1)));
-      EXPECT_TRUE(equal(iter.second(), String("v2").get()));
+      EXPECT_TRUE(equal(iter.second(), OptString("v2").get()));
     }
   }
   EXPECT_TRUE(i == 2);
@@ -143,11 +143,11 @@ TEST(Array, Iteration) {
   i = 0;
   for (ArrayIter iter = arr.begin(); iter; ++iter, ++i) {
     if (i == 0) {
-      EXPECT_TRUE(equal(iter.first(), String("k1").get()));
-      EXPECT_TRUE(equal(iter.second(), String("v1").get()));
+      EXPECT_TRUE(equal(iter.first(), OptString("k1").get()));
+      EXPECT_TRUE(equal(iter.second(), OptString("v1").get()));
     } else {
-      EXPECT_TRUE(equal(iter.first(), String("k2").get()));
-      EXPECT_TRUE(equal(iter.second(), String("v2").get()));
+      EXPECT_TRUE(equal(iter.first(), OptString("k2").get()));
+      EXPECT_TRUE(equal(iter.second(), OptString("v2").get()));
     }
   }
   EXPECT_TRUE(i == 2);
@@ -156,20 +156,20 @@ TEST(Array, Iteration) {
   i = 0;
   for (ArrayIter iter = arr.begin(); iter; ++iter, ++i) {
     if (i == 0) {
-      EXPECT_TRUE(equal(iter.first(), String("v1").get()));
-      EXPECT_TRUE(equal(iter.second(), String("v1").get()));
+      EXPECT_TRUE(equal(iter.first(), OptString("v1").get()));
+      EXPECT_TRUE(equal(iter.second(), OptString("v1").get()));
     } else {
-      EXPECT_TRUE(equal(iter.first(), String("v2").get()));
-      EXPECT_TRUE(equal(iter.second(), String("v2").get()));
+      EXPECT_TRUE(equal(iter.first(), OptString("v2").get()));
+      EXPECT_TRUE(equal(iter.second(), OptString("v2").get()));
     }
   }
   EXPECT_TRUE(i == 2);
 }
 
 TEST(Array, Conversions) {
-  const String s_Vec("Vec");
-  const String s_Dict("Dict");
-  const String s_Keyset("Keyset");
+  const OptString s_Vec("Vec");
+  const OptString s_Dict("Dict");
+  const OptString s_Keyset("Keyset");
 
   Array arr0;
   EXPECT_TRUE(arr0.empty() == true);
@@ -217,9 +217,9 @@ TEST(Array, Conversions) {
 }
 
 TEST(Array, Offsets) {
-  const String s_n1("n1");
-  const String s_n2("n2");
-  const String s_1("1");
+  const OptString s_n1("n1");
+  const OptString s_n2("n2");
+  const OptString s_1("1");
 
   {
     Array arr;
@@ -235,16 +235,16 @@ TEST(Array, Offsets) {
   }
   {
     Array arr = Array::CreateDict();
-    Variant v1 = String("v1");
-    Variant v2 = String("v2");
+    Variant v1 = OptString("v1");
+    Variant v2 = OptString("v2");
     arr.set(0, *v1.asTypedValue());
     arr.set(1, *v2.asTypedValue());
     EXPECT_TRUE(same_arrays(arr, make_vec_array("v1", "v2").toDict()));
   }
   {
     Array arr = Array::CreateDict();
-    Variant v1 = String("v1");
-    Variant v2 = String("v2");
+    Variant v1 = OptString("v1");
+    Variant v2 = OptString("v2");
     arr.set(s_n1, *v1.asTypedValue());
     arr.set(s_n2, *v2.asTypedValue());
     EXPECT_TRUE(same_arrays(arr, make_dict_array("n1", "v1", "n2", "v2")));
@@ -252,7 +252,7 @@ TEST(Array, Offsets) {
   {
     Array arr = Array::CreateDict();
     Variant name = "name";
-    Variant value = String("value");
+    Variant value = OptString("value");
     arr.set(name, *value.asTypedValue());
     EXPECT_TRUE(same_arrays(arr, make_dict_array("name", "value")));
   }
@@ -331,15 +331,15 @@ TEST(Array, Offsets) {
 }
 
 TEST(Array, Membership) {
-  const String s_n1("n1");
-  const String s_n2("n2");
-  const String s_name("name");
-  const String s_1("1");
+  const OptString s_n1("n1");
+  const OptString s_n2("n2");
+  const OptString s_name("name");
+  const OptString s_1("1");
 
   {
     Array arr = Array::CreateDict();
-    Variant v1 = String("v1");
-    Variant v2 = String("v2");
+    Variant v1 = OptString("v1");
+    Variant v2 = OptString("v2");
     arr.set(0, *v1.asTypedValue());
     arr.set(1, *v2.asTypedValue());
     EXPECT_TRUE(arr.exists(0));
@@ -350,17 +350,17 @@ TEST(Array, Membership) {
     EXPECT_TRUE(same_arrays(arr, make_dict_array(1, "v2", 2, "v3")));
   }
   {
-    const String s_0("0");
+    const OptString s_0("0");
     Array arr = Array::CreateDict();
-    Variant v1 = String("v1");
+    Variant v1 = OptString("v1");
     arr.set(0, *v1.asTypedValue());
     EXPECT_TRUE(arr.exists(0));
-    arr.remove(String(s_0));
+    arr.remove(OptString(s_0));
     EXPECT_TRUE(arr.exists(0));
   }
   {
     Array arr = Array::CreateDict();
-    Variant v1 = String("v1");
+    Variant v1 = OptString("v1");
     arr.set(0, *v1.asTypedValue());
     EXPECT_TRUE(arr.exists(0));
     arr.remove(Variant("0"));
@@ -368,7 +368,7 @@ TEST(Array, Membership) {
   }
   {
     Array arr = Array::CreateDict();
-    Variant v1 = String("v1");
+    Variant v1 = OptString("v1");
     arr.set(0, *v1.asTypedValue());
     EXPECT_TRUE(arr.exists(0));
     arr.remove(Variant(Variant("0")));
@@ -376,8 +376,8 @@ TEST(Array, Membership) {
   }
   {
     Array arr = Array::CreateDict();
-    Variant v1 = String("v1");
-    Variant v2 = String("v2");
+    Variant v1 = OptString("v1");
+    Variant v2 = OptString("v2");
     arr.set(s_n1, *v1.asTypedValue());
     arr.set(s_n2, *v2.asTypedValue());
     EXPECT_TRUE(arr.exists(s_n1));
@@ -399,13 +399,13 @@ TEST(Array, Membership) {
   }
   {
     Array arr = Array::CreateDict();
-    Variant value = String("value");
+    Variant value = OptString("value");
     arr.set(s_name, *value.asTypedValue());
     EXPECT_TRUE(arr.exists(s_name));
   }
   {
     Array arr = Array::CreateDict();
-    Variant value = String("value");
+    Variant value = OptString("value");
     arr.set(1, *value.asTypedValue());
     EXPECT_TRUE(arr.exists(1));
     EXPECT_TRUE(!arr.exists(s_1));
@@ -414,7 +414,7 @@ TEST(Array, Membership) {
   }
   {
     Array arr = Array::CreateDict();
-    Variant value = String("value");
+    Variant value = OptString("value");
     arr.set(s_1, *value.asTypedValue());
     EXPECT_TRUE(!arr.exists(1));
     EXPECT_TRUE(arr.exists(s_1));
@@ -423,7 +423,7 @@ TEST(Array, Membership) {
   }
   {
     Array arr = Array::CreateDict();
-    Variant value = String("value");
+    Variant value = OptString("value");
     arr.set(Variant("1"), *value.asTypedValue());
     EXPECT_TRUE(!arr.exists(1));
     EXPECT_TRUE(arr.exists(s_1));

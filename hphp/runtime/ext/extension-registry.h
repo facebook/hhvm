@@ -18,12 +18,12 @@ namespace ExtensionRegistry {
 void registerExtension(Extension* ext);
 
 bool isLoaded(const char* name);
-inline bool isLoaded(const String& name) {
+inline bool isLoaded(const OptString& name) {
   return isLoaded(name.data());
 }
 
 Extension* get(const char* name, bool ignoreDisabled = true);
-inline Extension* get(const String& name) {
+inline Extension* get(const OptString& name) {
   return get(name.data());
 }
 

@@ -53,13 +53,13 @@ HSLLocaleICUOps::~HSLLocaleICUOps() {
   delete m_collator;
 }
 
-int64_t HSLLocaleICUOps::strlen(const String& str) const {
+int64_t HSLLocaleICUOps::strlen(const OptString& str) const {
   return HHVM_FN(fb_utf8_strlen)(str);
 }
 
 namespace {
 
-ALWAYS_INLINE icu::StringPiece icu_string_piece(const HPHP::String& str) {
+ALWAYS_INLINE icu::StringPiece icu_string_piece(const HPHP::OptString& str) {
   return icu::StringPiece(str.data(), str.size());
 }
 
@@ -77,8 +77,8 @@ ALWAYS_INLINE icu::UnicodeString ustr_from_utf8<TypedValue>(const TypedValue& tv
   return ustr_from_utf8(tv.val().pstr);
 }
 
-ALWAYS_INLINE String utf8_icu_op(
-  const String& utf8_in,
+ALWAYS_INLINE OptString utf8_icu_op(
+  const OptString& utf8_in,
   std::function<void(icu::UnicodeString&)> op
 ) {
   if (utf8_in.empty()) {
@@ -89,33 +89,33 @@ ALWAYS_INLINE String utf8_icu_op(
   op(mut);
   std::string ret;
   mut.toUTF8String(ret);
-  return String(ret);
+  return OptString(ret);
 }
 
 } // namespace
 
-String HSLLocaleICUOps::uppercase(const String& str) const {
+OptString HSLLocaleICUOps::uppercase(const OptString& str) const {
   return utf8_icu_op(
     str,
     [this](icu::UnicodeString& mut) { mut.toUpper(this->m_ctype); }
   );
 }
 
-String HSLLocaleICUOps::lowercase(const String& str) const {
+OptString HSLLocaleICUOps::lowercase(const OptString& str) const {
   return utf8_icu_op(
     str,
     [this](icu::UnicodeString& mut) { mut.toLower(this->m_ctype); }
   );
 }
 
-String HSLLocaleICUOps::foldcase(const String& str) const {
+OptString HSLLocaleICUOps::foldcase(const OptString& str) const {
   return utf8_icu_op(
     str,
     [this](icu::UnicodeString& mut) { mut.foldCase(this->m_caseFoldFlags); }
   );
 }
 
-Array HSLLocaleICUOps::chunk(const String& str, int64_t chunk_size) const {
+Array HSLLocaleICUOps::chunk(const OptString& str, int64_t chunk_size) const {
   assert(chunk_size > 0);
   auto icustr = ustr_from_utf8(str);
   const auto len = icustr.countChar32();
@@ -139,7 +139,7 @@ Array HSLLocaleICUOps::chunk(const String& str, int64_t chunk_size) const {
   return ret.toArray();
 }
 
-int64_t HSLLocaleICUOps::strcoll(const String& a, const String& b) const {
+int64_t HSLLocaleICUOps::strcoll(const OptString& a, const OptString& b) const {
   assertx(!a.isNull() && !b.isNull());
 
   icu::ErrorCode err;
@@ -148,7 +148,7 @@ int64_t HSLLocaleICUOps::strcoll(const String& a, const String& b) const {
   return coll->compareUTF8(icu_string_piece(a), icu_string_piece(b), err);
 }
 
-int64_t HSLLocaleICUOps::strcasecmp(const String& a, const String& b) const {
+int64_t HSLLocaleICUOps::strcasecmp(const OptString& a, const OptString& b) const {
   assertx(!a.isNull() && !b.isNull());
 
   icu::ErrorCode err;
@@ -157,7 +157,7 @@ int64_t HSLLocaleICUOps::strcasecmp(const String& a, const String& b) const {
   return coll->compareUTF8(icu_string_piece(a), icu_string_piece(b), err);
 }
 
-bool HSLLocaleICUOps::starts_with(const String& str, const String& prefix) const {
+bool HSLLocaleICUOps::starts_with(const OptString& str, const OptString& prefix) const {
   assertx(!str.isNull() && !prefix.isNull());
   if (str.substr(0, prefix.size()) == prefix) {
     return true;
@@ -178,7 +178,7 @@ bool HSLLocaleICUOps::starts_with(const String& str, const String& prefix) const
   return nstr.startsWith(nprefix);
 }
 
-bool HSLLocaleICUOps::ends_with(const String& str, const String& suffix) const {
+bool HSLLocaleICUOps::ends_with(const OptString& str, const OptString& suffix) const {
   assertx(!str.isNull() && !suffix.isNull());
   int64_t off = str.size() - suffix.size();
   if (off >= 0 && str.substr((int) off, suffix.size()) == suffix) {
@@ -200,7 +200,7 @@ bool HSLLocaleICUOps::ends_with(const String& str, const String& suffix) const {
   return nstr.endsWith(nsuffix);
 }
 
-bool HSLLocaleICUOps::starts_with_ci(const String& str, const String& prefix) const {
+bool HSLLocaleICUOps::starts_with_ci(const OptString& str, const OptString& prefix) const {
   assertx(!str.isNull() && !prefix.isNull());
   if (str.substr(0, prefix.size()) == prefix) {
     return true;
@@ -221,7 +221,7 @@ bool HSLLocaleICUOps::starts_with_ci(const String& str, const String& prefix) co
   return nstr.startsWith(nprefix);
 }
 
-bool HSLLocaleICUOps::ends_with_ci(const String& str, const String& suffix) const {
+bool HSLLocaleICUOps::ends_with_ci(const OptString& str, const OptString& suffix) const {
   assertx(!str.isNull() && !suffix.isNull());
   int64_t off = str.size() - suffix.size();
   if (off >= 0 && str.substr(off, suffix.size()) == suffix) {
@@ -243,7 +243,7 @@ bool HSLLocaleICUOps::ends_with_ci(const String& str, const String& suffix) cons
   return nstr.endsWith(nsuffix);
 }
 
-String HSLLocaleICUOps::strip_prefix(const String& str, const String& prefix) const {
+OptString HSLLocaleICUOps::strip_prefix(const OptString& str, const OptString& prefix) const {
   if (str.substr(0, prefix.size()) == prefix) {
     return str.substr(prefix.size());
   }
@@ -269,7 +269,7 @@ String HSLLocaleICUOps::strip_prefix(const String& str, const String& prefix) co
   return ret;
 }
 
-String HSLLocaleICUOps::strip_suffix(const String& str, const String& suffix) const {
+OptString HSLLocaleICUOps::strip_suffix(const OptString& str, const OptString& suffix) const {
   auto ustr = ustr_from_utf8(str);
   auto usuffix = ustr_from_utf8(suffix);
   icu::ErrorCode err;
@@ -321,8 +321,8 @@ enum class CaseSensitivity {
   CASE_INSENSITIVE
 };
 
-int64_t strpos_impl(const String& haystack,
-                    const String& needle,
+int64_t strpos_impl(const OptString& haystack,
+                    const OptString& needle,
                     int64_t offset,
                     Direction dir,
                     CaseSensitivity ci,
@@ -372,7 +372,7 @@ int64_t strpos_impl(const String& haystack,
 
 } // namespace
 
-int64_t HSLLocaleICUOps::strpos(const String& haystack, const String& needle, int64_t offset) const {
+int64_t HSLLocaleICUOps::strpos(const OptString& haystack, const OptString& needle, int64_t offset) const {
   return strpos_impl(haystack,
                      needle,
                      offset,
@@ -381,7 +381,7 @@ int64_t HSLLocaleICUOps::strpos(const String& haystack, const String& needle, in
                      /* n/a: case fold flags */ 0);
 }
 
-int64_t HSLLocaleICUOps::strrpos(const String& haystack, const String& needle, int64_t offset) const {
+int64_t HSLLocaleICUOps::strrpos(const OptString& haystack, const OptString& needle, int64_t offset) const {
   return strpos_impl(haystack,
                      needle,
                      offset,
@@ -390,7 +390,7 @@ int64_t HSLLocaleICUOps::strrpos(const String& haystack, const String& needle, i
                      /* n/a: case fold flags */ 0);
 }
 
-int64_t HSLLocaleICUOps::stripos(const String& haystack, const String& needle, int64_t offset) const {
+int64_t HSLLocaleICUOps::stripos(const OptString& haystack, const OptString& needle, int64_t offset) const {
   return strpos_impl(haystack,
                      needle,
                      offset,
@@ -399,7 +399,7 @@ int64_t HSLLocaleICUOps::stripos(const String& haystack, const String& needle, i
                      m_caseFoldFlags);
 }
 
-int64_t HSLLocaleICUOps::strripos(const String& haystack, const String& needle, int64_t offset) const {
+int64_t HSLLocaleICUOps::strripos(const OptString& haystack, const OptString& needle, int64_t offset) const {
   return strpos_impl(haystack,
                      needle,
                      offset,
@@ -408,7 +408,7 @@ int64_t HSLLocaleICUOps::strripos(const String& haystack, const String& needle, 
                      m_caseFoldFlags);
 }
 
-String HSLLocaleICUOps::slice(const String& str, int64_t offset, int64_t length) const {
+OptString HSLLocaleICUOps::slice(const OptString& str, int64_t offset, int64_t length) const {
   auto ustr = ustr_from_utf8(str);
   const auto char32_full_len = ustr.countChar32();
   if (length < 0) {
@@ -428,7 +428,7 @@ String HSLLocaleICUOps::slice(const String& str, int64_t offset, int64_t length)
   return ret;
 }
 
-String HSLLocaleICUOps::reverse(const String& str) const {
+OptString HSLLocaleICUOps::reverse(const OptString& str) const {
   auto mut = ustr_from_utf8(str);
   mut.reverse();
   std::string ret;
@@ -436,7 +436,7 @@ String HSLLocaleICUOps::reverse(const String& str) const {
   return ret;
 }
 
-String HSLLocaleICUOps::pad_left(const String& str, int64_t desired_len, const String& pad) const {
+OptString HSLLocaleICUOps::pad_left(const OptString& str, int64_t desired_len, const OptString& pad) const {
   auto ustr = ustr_from_utf8(str);
   const auto strl = ustr.countChar32();
   if (strl >= desired_len) {
@@ -456,7 +456,7 @@ String HSLLocaleICUOps::pad_left(const String& str, int64_t desired_len, const S
   return ret;
 }
 
-String HSLLocaleICUOps::pad_right(const String& str, int64_t desired_len, const String& pad) const {
+OptString HSLLocaleICUOps::pad_right(const OptString& str, int64_t desired_len, const OptString& pad) const {
   auto ustr = ustr_from_utf8(str);
   const auto strl = ustr.countChar32();
   if (strl >= desired_len) {
@@ -474,7 +474,7 @@ String HSLLocaleICUOps::pad_right(const String& str, int64_t desired_len, const 
   return ret;
 }
 
-Array HSLLocaleICUOps::split(const String& str, const String& delimiter, int64_t limit) const {
+Array HSLLocaleICUOps::split(const OptString& str, const OptString& delimiter, int64_t limit) const {
   assertx(limit > 0);
 
   auto ustr = ustr_from_utf8(str);
@@ -537,8 +537,8 @@ Array HSLLocaleICUOps::split(const String& str, const String& delimiter, int64_t
   return ret.toArray();
 }
 
-String HSLLocaleICUOps::splice(const String& str,
-                               const String& replacement,
+OptString HSLLocaleICUOps::splice(const OptString& str,
+                               const OptString& replacement,
                                int64_t offset,
                                int64_t length) const {
 
@@ -569,7 +569,7 @@ String HSLLocaleICUOps::splice(const String& str,
   return ret;
 }
 
-String HSLLocaleICUOps::trim_impl(const String& str,
+OptString HSLLocaleICUOps::trim_impl(const OptString& str,
                                   const std::function<bool(UChar32)>& test,
                                   TrimSides sides) const {
   auto ustr = ustr_from_utf8(str);
@@ -600,11 +600,11 @@ String HSLLocaleICUOps::trim_impl(const String& str,
   return ret;
 }
 
-String HSLLocaleICUOps::trim(const String& str, TrimSides sides) const {
+OptString HSLLocaleICUOps::trim(const OptString& str, TrimSides sides) const {
   return trim_impl(str, u_isUWhiteSpace, sides);
 }
 
-String HSLLocaleICUOps::trim(const String& str, const String& what, TrimSides sides) const {
+OptString HSLLocaleICUOps::trim(const OptString& str, const OptString& what, TrimSides sides) const {
   std::set<UChar32> what_set;
   const auto uwhat = ustr_from_utf8(what);
   for (int32_t i = 0; i < uwhat.length(); i = uwhat.moveIndex32(i, 1)) {
@@ -620,9 +620,9 @@ String HSLLocaleICUOps::trim(const String& str, const String& what, TrimSides si
   );
 }
 
-String HSLLocaleICUOps::replace(const String& haystack,
-                                 const String& needle,
-                                 const String& replacement) const {
+OptString HSLLocaleICUOps::replace(const OptString& haystack,
+                                 const OptString& needle,
+                                 const OptString& replacement) const {
   auto uhaystack = ustr_from_utf8(haystack);
   auto uneedle = ustr_from_utf8(needle);
   const auto ureplacement = ustr_from_utf8(replacement);
@@ -640,9 +640,9 @@ String HSLLocaleICUOps::replace(const String& haystack,
   return ret;
 }
 
-String HSLLocaleICUOps::replace_ci(const String& haystack,
-                                    const String& needle,
-                                    const String& replacement) const {
+OptString HSLLocaleICUOps::replace_ci(const OptString& haystack,
+                                    const OptString& needle,
+                                    const OptString& replacement) const {
   auto uhaystack = ustr_from_utf8(haystack);
   auto uneedle = ustr_from_utf8(needle);
   const auto ureplacement = ustr_from_utf8(replacement);
@@ -678,7 +678,7 @@ String HSLLocaleICUOps::replace_ci(const String& haystack,
   return ret;
 }
 
-String HSLLocaleICUOps::replace_every(const String& haystack,
+OptString HSLLocaleICUOps::replace_every(const OptString& haystack,
                                       const Array& replacements) const {
   auto uhaystack = ustr_from_utf8(haystack);
   icu::ErrorCode err;
@@ -699,7 +699,7 @@ String HSLLocaleICUOps::replace_every(const String& haystack,
   return ret;
 }
 
-String HSLLocaleICUOps::replace_every_ci(const String& haystack,
+OptString HSLLocaleICUOps::replace_every_ci(const OptString& haystack,
                                          const Array& replacements) const {
   auto uhaystack = ustr_from_utf8(haystack);
   icu::ErrorCode err;
@@ -734,7 +734,7 @@ String HSLLocaleICUOps::replace_every_ci(const String& haystack,
   return ret;
 }
 
-String HSLLocaleICUOps::replace_every_nonrecursive(const String& haystack,
+OptString HSLLocaleICUOps::replace_every_nonrecursive(const OptString& haystack,
                                                    const Array& replacements) const {
   icu::ErrorCode err;
   // Singleton, do not free
@@ -743,8 +743,8 @@ String HSLLocaleICUOps::replace_every_nonrecursive(const String& haystack,
   return HPHP::replace_every_nonrecursive<icu::UnicodeString>(
     haystack,
     replacements,
-    [](const HPHP::String& s) { return ustr_from_utf8(s); },
-    [](const icu::UnicodeString& s) -> String {
+    [](const HPHP::OptString& s) { return ustr_from_utf8(s); },
+    [](const icu::UnicodeString& s) -> OptString {
       std::string ret;
       s.toUTF8String(ret);
       return ret;
@@ -760,7 +760,7 @@ String HSLLocaleICUOps::replace_every_nonrecursive(const String& haystack,
   );
 }
 
-String HSLLocaleICUOps::replace_every_nonrecursive_ci(const String& haystack,
+OptString HSLLocaleICUOps::replace_every_nonrecursive_ci(const OptString& haystack,
                                                       const Array& replacements) const {
   icu::ErrorCode err;
   // Singleton, do not free
@@ -769,8 +769,8 @@ String HSLLocaleICUOps::replace_every_nonrecursive_ci(const String& haystack,
   return HPHP::replace_every_nonrecursive<icu::UnicodeString>(
     haystack,
     replacements,
-    [](const HPHP::String& s) { return ustr_from_utf8(s); },
-    [](const icu::UnicodeString& s) -> String {
+    [](const HPHP::OptString& s) { return ustr_from_utf8(s); },
+    [](const icu::UnicodeString& s) -> OptString {
       std::string ret;
       s.toUTF8String(ret);
       return ret;

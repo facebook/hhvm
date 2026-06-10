@@ -47,7 +47,7 @@ struct TimeZone : SweepableResourceData {
   /**
    * Get/set current timezone that controls how local time is interpreted.
    */
-  static String CurrentName();              // current timezone's name
+  static OptString CurrentName();              // current timezone's name
   static req::ptr<TimeZone> Current();      // current timezone
   static bool SetCurrent(const char* name); // returns false if invalid
 
@@ -56,7 +56,7 @@ struct TimeZone : SweepableResourceData {
    */
   static bool IsValid(const char* name);
   static Array GetAbbreviations();
-  static String AbbreviationToName(String abbr, int utcoffset = -1,
+  static OptString AbbreviationToName(OptString abbr, int utcoffset = -1,
                                    int isdst = 1);
 
 public:
@@ -64,7 +64,7 @@ public:
    * Constructing a timezone object by name or a raw pointer (internal).
    */
   TimeZone();
-  explicit TimeZone(const String& name);
+  explicit TimeZone(const OptString& name);
   explicit TimeZone(timelib_tzinfo *tzi);
 
   static StaticString& classnameof() {
@@ -72,7 +72,7 @@ public:
     return result;
   }
   // overriding ResourceData
-  const String& o_getClassNameHook() const override { return classnameof(); }
+  const OptString& o_getClassNameHook() const override { return classnameof(); }
 
   /**
    * Whether this represents a valid timezone.
@@ -93,8 +93,8 @@ public:
   /**
    * Get timezone's name or abbreviation.
    */
-  String name() const;
-  String abbr(int type = 0) const;
+  OptString name() const;
+  OptString abbr(int type = 0) const;
   int type() const;
 
   /**
@@ -121,9 +121,9 @@ public:
   /**
    * Timezone Database version
    */
-  static String getVersion() {
+  static OptString getVersion() {
     const timelib_tzdb* db = GetDatabase();
-    return String(db->version, CopyString);
+    return OptString(db->version, CopyString);
   }
 
   /**
@@ -160,7 +160,7 @@ private:
   timelib_tzinfo* m_tzi = nullptr;
   int m_offset;
   int m_dst;
-  String m_abbr;
+  OptString m_abbr;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

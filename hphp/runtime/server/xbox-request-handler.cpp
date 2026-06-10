@@ -202,7 +202,7 @@ bool XboxRequestHandler::executePHPFunction(Transport *transport) {
   size_t size;
   const void *data = transport->getPostData(size);
   if (data && size) {
-    params.append(String((char*)data, size, CopyString));
+    params.append(OptString((char*)data, size, CopyString));
   }
 
   int code;
@@ -237,7 +237,7 @@ bool XboxRequestHandler::executePHPFunction(Transport *transport) {
   }
   if (ret) {
     bool serializeFailed = false;
-    String response;
+    OptString response;
     try {
       response = internal_serialize(funcRet);
     } catch (...) {

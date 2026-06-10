@@ -345,7 +345,7 @@ void phpDebuggerDefFuncHook(const Func* func) {
 }
 
 // Called by the VM when a function intercept is registered.
-void phpDebuggerInterceptRegisterHook(const String& name) {
+void phpDebuggerInterceptRegisterHook(const OptString& name) {
   VMRegAnchor anchor;
   auto hook = getDebuggerHook();
   if (hook != nullptr) {
@@ -608,7 +608,7 @@ PCFilter* getFlowFilter() {
   return &RID().m_flowFilter;
 }
 
-String getCurrentFilePath(int* pLine) {
+OptString getCurrentFilePath(int* pLine) {
   VMRegAnchor anchor;
   auto pc = vmpc();
   auto const func = vmfp()->func();
@@ -617,7 +617,7 @@ String getCurrentFilePath(int* pLine) {
     *pLine = func->getLineNumber(func->offsetOf(pc));
   }
   auto const filepath = const_cast<StringData*>(unit->filepath());
-  return File::TranslatePath(String(filepath));
+  return File::TranslatePath(OptString(filepath));
 }
 
 /////////////////////////////////////////////////////////////////////////

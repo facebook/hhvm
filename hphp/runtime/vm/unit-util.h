@@ -78,10 +78,10 @@ inline const StringData* normalizeNS(const StringData* name) {
   return name;
 }
 
-inline String normalizeNS(const String& name) {
+inline OptString normalizeNS(const OptString& name) {
   if (needsNSNormalization(name.get())) {
     std::string_view normalized = normalizeNS(std::string_view{name.slice()});
-    return String(normalized);
+    return OptString(normalized);
   }
   return name;
 }

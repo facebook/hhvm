@@ -155,20 +155,20 @@ Variant ArrayUtil::Range(unsigned char low, unsigned char high,
   auto ret = Array::CreateVec();
   if (low > high) { // Negative Steps
     for (; low >= high; low -= (unsigned int)step) {
-      ret.append(String::FromChar(low));
+      ret.append(OptString::FromChar(low));
       if (((signed int)low - step) < 0) {
         break;
       }
     }
   } else if (high > low) { // Positive Steps
     for (; low <= high; low += (unsigned int)step) {
-      ret.append(String::FromChar(low));
+      ret.append(OptString::FromChar(low));
       if (((signed int)low + step) > 255) {
         break;
       }
     }
   } else {
-    ret.append(String::FromChar(low));
+    ret.append(OptString::FromChar(low));
   }
   return ret;
 }

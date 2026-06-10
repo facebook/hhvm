@@ -53,8 +53,8 @@ Array enumWrappers() {
   return ret.toArray();
 }
 
-Wrapper* getWrapper(const String& scheme, bool warn /*= false */) {
-  String lscheme = HHVM_FN(strtolower)(scheme);
+Wrapper* getWrapper(const OptString& scheme, bool warn /*= false */) {
+  OptString lscheme = HHVM_FN(strtolower)(scheme);
 
   if (*rl_fileHandler && lscheme == s_file) {
     return *rl_fileHandler;
@@ -73,7 +73,7 @@ Wrapper* getWrapper(const String& scheme, bool warn /*= false */) {
   return nullptr;
 }
 
-String getWrapperProtocol(const char* uri_string, int* pathIndex) {
+OptString getWrapperProtocol(const char* uri_string, int* pathIndex) {
   /* Special case for PHP4 Backward Compatibility */
   if (!strncasecmp(uri_string, "zlib:", sizeof("zlib:") - 1)) {
     if (pathIndex != nullptr) *pathIndex = sizeof("zlib:") - 1;
@@ -104,10 +104,10 @@ String getWrapperProtocol(const char* uri_string, int* pathIndex) {
 
   int len = colon - uri_string;
   if (pathIndex != nullptr) *pathIndex = len + sizeof("://") - 1;
-  return String(uri_string, len, CopyString);
+  return OptString(uri_string, len, CopyString);
 }
 
-Wrapper* getWrapperFromURI(const String& uri,
+Wrapper* getWrapperFromURI(const OptString& uri,
                            int* pathIndex /* = NULL */,
                            bool warn /*= true */) {
   return getWrapper(getWrapperProtocol(uri.data(), pathIndex), warn);

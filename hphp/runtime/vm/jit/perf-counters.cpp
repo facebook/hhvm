@@ -53,7 +53,7 @@ void getPerfCounters(Array& ret) {
   for (auto const& pair : Timer::Counters()) {
     if (pair.second.total == 0 && pair.second.count == 0) continue;
 
-    ret.set(String("jit_time_") + pair.first, pair.second.total);
+    ret.set(OptString("jit_time_") + pair.first, pair.second.total);
   }
 }
 

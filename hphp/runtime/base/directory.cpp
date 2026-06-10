@@ -60,7 +60,7 @@ PlainDirectory::PlainDirectory(int fd) {
   m_dir = ::fdopendir(fd);
 }
 
-PlainDirectory::PlainDirectory(const String& path) {
+PlainDirectory::PlainDirectory(const OptString& path) {
   m_dir = ::opendir(path.data());
 }
 
@@ -84,7 +84,7 @@ Variant PlainDirectory::read() {
   if (ret != 0 || !result) {
     return false;
   }
-  return String(entry.d_name, CopyString);
+  return OptString(entry.d_name, CopyString);
 }
 
 void PlainDirectory::rewind() {
@@ -116,7 +116,7 @@ bool ArrayDirectory::isEof() const {
   return m_it.end();
 }
 
-String ArrayDirectory::path() {
+OptString ArrayDirectory::path() {
   if (!m_it) {
     return empty_string();
   }
@@ -126,7 +126,7 @@ String ArrayDirectory::path() {
   return HHVM_FN(dirname)(entry.toString());
 }
 
-CachedDirectory::CachedDirectory(const String& path) {
+CachedDirectory::CachedDirectory(const OptString& path) {
   assertx(File::IsVirtualDirectory(path));
   m_files = StaticContentCache::TheFileCache->listDirectory(path.toCppString());
 }

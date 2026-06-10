@@ -799,7 +799,7 @@ pcre_get_compiled_regex_cache(PCRECache::Accessor& accessor,
   }
 
   /* Make a copy of the actual pattern. */
-  String spattern(p, pp-p, CopyString);
+  OptString spattern(p, pp-p, CopyString);
   const char *pattern = spattern.data();
 
   /* Move on to the options */
@@ -980,7 +980,7 @@ static int* create_offset_array(const pcre_cache_entry* pce,
   return (int *)req::malloc_noptrs(size_offsets * sizeof(int));
 }
 
-static Array str_offset_pair(const String& str, int offset) {
+static Array str_offset_pair(const OptString& str, int offset) {
   return make_vec_array(str, offset);
 }
 
@@ -1074,7 +1074,7 @@ ALWAYS_INLINE Variant preg_return_no_error(Variant&& return_value) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant preg_grep(const String& pattern, const Array& input, int flags /* = 0 */) {
+Variant preg_grep(const OptString& pattern, const Array& input, int flags /* = 0 */) {
   PCRECache::Accessor accessor;
   if (!pcre_get_compiled_regex_cache(accessor, pattern.get())) {
     return preg_return_bad_regex_error(false);
@@ -1097,7 +1097,7 @@ Variant preg_grep(const String& pattern, const Array& input, int flags /* = 0 */
   init_local_extra(&extra, pce->extra);
 
   for (ArrayIter iter(input); iter; ++iter) {
-    String entry = iter.second().toString();
+    OptString entry = iter.second().toString();
     int count = 0;
 
     if (pce->literal_data) {
@@ -1203,7 +1203,7 @@ static Variant preg_match_impl(StringData* pattern,
   const char** stringlist; // Holds list of subpatterns
   auto const get_value = [&](int i) {
     auto const length = offsets[(i<<1)+1] - offsets[i<<1];
-    auto const match = String(stringlist[i], length, CopyString);
+    auto const match = OptString(stringlist[i], length, CopyString);
     return offset_capture
       ? Variant(str_offset_pair(match, offsets[i<<1]))
       : Variant(match);
@@ -1228,7 +1228,7 @@ static Variant preg_match_impl(StringData* pattern,
   }
   auto const set_subpats = [&](auto& arr, int i, const Variant& value) {
     if (is_literal) return;
-    if (subpat_names[i]) arr.set(String(subpat_names[i]), value);
+    if (subpat_names[i]) arr.set(OptString(subpat_names[i]), value);
   };
 
   int i;
@@ -1364,7 +1364,7 @@ static Variant preg_match_impl(StringData* pattern,
   return preg_return_no_error(std::move(matched));
 }
 
-Variant preg_match(const String& pattern, const String& subject,
+Variant preg_match(const OptString& pattern, const OptString& subject,
                    Variant* matches /* = nullptr */, int flags /* = 0 */,
                    int offset /* = 0 */) {
   return preg_match(pattern.get(), subject.get(), matches, flags, offset);
@@ -1376,7 +1376,7 @@ Variant preg_match(StringData* pattern, const StringData* subject,
   return preg_match_impl(pattern, subject, matches, flags, offset, false);
 }
 
-Variant preg_match_all(const String& pattern, const String& subject,
+Variant preg_match_all(const OptString& pattern, const OptString& subject,
                        Variant* matches /* = nullptr */,
                        int flags /* = 0 */, int offset /* = 0 */) {
   return preg_match_all(pattern.get(), subject.get(), matches, flags, offset);
@@ -1388,7 +1388,7 @@ Variant preg_match_all(StringData* pattern, const StringData* subject,
   return preg_match_impl(pattern, subject, matches, flags, offset, true);
 }
 
-Variant preg_get_error_message_if_invalid(const String& pattern) {
+Variant preg_get_error_message_if_invalid(const OptString& pattern) {
   PCRECache::Accessor accessor;
   StringData* error_message = nullptr;
   bool is_valid;
@@ -1409,7 +1409,7 @@ Variant preg_get_error_message_if_invalid(const String& pattern) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static String preg_do_repl_func(const Variant& function, const String& subject,
+static OptString preg_do_repl_func(const Variant& function, const OptString& subject,
                                 int* offsets, const char* const* subpat_names,
                                 int count) {
   Array subpats = Array::CreateDict();
@@ -1419,7 +1419,7 @@ static String preg_do_repl_func(const Variant& function, const String& subject,
     auto sub = subject.substr(off1, off2 - off1);
 
     if (subpat_names && subpat_names[i]) {
-      subpats.set(String(subpat_names[i]), sub);
+      subpats.set(OptString(subpat_names[i]), sub);
     }
     subpats.set(i, sub);
   }
@@ -1464,7 +1464,7 @@ static bool preg_get_backref(const char** str, int* backref) {
   return true;
 }
 
-static Variant php_pcre_replace(const String& pattern, const String& subject,
+static Variant php_pcre_replace(const OptString& pattern, const OptString& subject,
                                 const Variant& replace_var, bool callable,
                                 int limit, int* replace_count) {
   PCRECache::Accessor accessor;
@@ -1493,7 +1493,7 @@ static Variant php_pcre_replace(const String& pattern, const String& subject,
   const char* replace = nullptr;
   const char* replace_end = nullptr;
   int replace_len = 0;
-  String replace_val;
+  OptString replace_val;
 
   if (!callable) {
     replace_val = replace_var.toString();
@@ -1550,7 +1550,7 @@ static Variant php_pcre_replace(const String& pattern, const String& subject,
         /* Set the match location in subject */
         match = subject.data() + offsets[0];
 
-        String callable_result;
+        OptString callable_result;
         if (callable) {
           /* Use custom function to get replacement string and its length. */
           callable_result = preg_do_repl_func(replace_var, subject, offsets,
@@ -1632,7 +1632,7 @@ static Variant php_pcre_replace(const String& pattern, const String& subject,
         if (pcre_need_log_error(count)) {
           const char* s;
           int size;
-          String stemp;
+          OptString stemp;
           if (callable) {
             if (replace_var.isObject()) {
               stemp = replace_var.asCObjRef()->getClassName().asString()
@@ -1672,7 +1672,7 @@ static Variant php_pcre_replace(const String& pattern, const String& subject,
 }
 
 static Variant php_replace_in_subject(const Variant& regex, const Variant& replace,
-                                      String subject, int limit, bool callable,
+                                      OptString subject, int limit, bool callable,
                                       int* replace_count) {
   if (!regex.isArray()) {
     return php_pcre_replace(regex.toString(), subject, replace, callable,
@@ -1682,7 +1682,7 @@ static Variant php_replace_in_subject(const Variant& regex, const Variant& repla
   if (callable || !replace.isArray()) {
     Array arr = regex.toDict();
     for (ArrayIter iterRegex(arr); iterRegex; ++iterRegex) {
-      String regex_entry = iterRegex.second().toString();
+      OptString regex_entry = iterRegex.second().toString();
       auto ret = php_pcre_replace(regex_entry, subject, replace, callable,
                                   limit, replace_count);
       if (!ret.isString()) {
@@ -1699,7 +1699,7 @@ static Variant php_replace_in_subject(const Variant& regex, const Variant& repla
   Array arrRegex = regex.toDict();
   ArrayIter iterReplace(arrReplace);
   for (ArrayIter iterRegex(arrRegex); iterRegex; ++iterRegex) {
-    String regex_entry = iterRegex.second().toString();
+    OptString regex_entry = iterRegex.second().toString();
     Variant replace_value;
     if (iterReplace) {
       replace_value = iterReplace.second();
@@ -1747,7 +1747,7 @@ Variant preg_replace_impl(const Variant& pattern, const Variant& replacement,
   Array arrSubject = subject.toDict();
   for (ArrayIter iter(arrSubject); iter; ++iter) {
     auto old_replace_count = replace_count;
-    String subject_entry = iter.second().toString();
+    OptString subject_entry = iter.second().toString();
     auto ret = php_replace_in_subject(pattern, replacement, subject_entry,
                                       limit, is_callable, &replace_count);
 
@@ -1789,7 +1789,7 @@ const StaticString s_OneUnicodeCharPattern("/./us");
 
 } // namespace
 
-Variant preg_split(const String& pattern, const String& subject,
+Variant preg_split(const OptString& pattern, const OptString& subject,
                    int limit /* = -1 */, int flags /* = 0 */) {
   PCRECache::Accessor accessor;
   if (!pcre_get_compiled_regex_cache(accessor, pattern.get())) {
@@ -1854,7 +1854,7 @@ Variant preg_split(const String& pattern, const String& subject,
     if (count > 0 && offsets[1] >= offsets[0]) {
       if (!no_empty || subject.data() + offsets[0] != last_match) {
         auto const length = subject.data() + offsets[0] - last_match;
-        auto const match = String(last_match, length, CopyString);
+        auto const match = OptString(last_match, length, CopyString);
         auto const value = offset_capture
           ? Variant(str_offset_pair(match, next_offset))
           : Variant(match);
@@ -1971,8 +1971,8 @@ Variant preg_split(const String& pattern, const String& subject,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-String preg_quote(const String& str,
-                  const String& delimiter /* = null_string */) {
+OptString preg_quote(const OptString& str,
+                  const OptString& delimiter /* = null_string */) {
   const char* in_str = str.data();
   const char* in_str_end = in_str + str.size();
 
@@ -1993,7 +1993,7 @@ String preg_quote(const String& str,
   static_assert(
     (StringData::MaxSize * 4 + 1) < std::numeric_limits<int64_t>::max()
   );
-  String ret(4 * str.size() + 1, ReserveString);
+  OptString ret(4 * str.size() + 1, ReserveString);
   char* out_str = ret.mutableData();
 
   /* Go through the string and quote necessary characters */
@@ -2088,7 +2088,7 @@ static void php_reg_eprint(int err, regex_t* re) {
   req::free(message);
 }
 
-Variant php_split(const String& spliton, const String& str, int count,
+Variant php_split(const OptString& spliton, const OptString& str, int count,
                   bool icase) {
   const char* strp = str.data();
   const char* endp = strp + str.size();
@@ -2124,7 +2124,7 @@ Variant php_split(const String& spliton, const String& str, int count,
       int size = subs[0].rm_so;
 
       /* add it to the array */
-      return_value.append(String(strp, size, CopyString));
+      return_value.append(OptString(strp, size, CopyString));
 
       /* point at our new starting point */
       strp = strp + subs[0].rm_eo;
@@ -2146,7 +2146,7 @@ Variant php_split(const String& spliton, const String& str, int count,
 
   /* otherwise we just have one last element to add to the array */
   int size = endp - strp;
-  return_value.append(String(strp, size, CopyString));
+  return_value.append(OptString(strp, size, CopyString));
 
   regfree(&re);
   return return_value;

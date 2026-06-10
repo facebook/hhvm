@@ -13,7 +13,7 @@ const StaticString s_SpoofChecker("SpoofChecker");
       "Call to invalid SpoofChecker Object"); \
   }
 
-static bool HHVM_METHOD(SpoofChecker, isSuspicious, const String& text,
+static bool HHVM_METHOD(SpoofChecker, isSuspicious, const OptString& text,
                                                     int64_t& issuesFound) {
   FETCH_SPOOF(data, this_);
   UErrorCode error = U_ZERO_ERROR;
@@ -29,8 +29,8 @@ static bool HHVM_METHOD(SpoofChecker, isSuspicious, const String& text,
   return ret != 0;
 }
 
-static bool HHVM_METHOD(SpoofChecker, areConfusable, const String& s1,
-                                                     const String& s2,
+static bool HHVM_METHOD(SpoofChecker, areConfusable, const OptString& s1,
+                                                     const OptString& s2,
                                                      int64_t& issuesFound) {
   FETCH_SPOOF(data, this_);
   UErrorCode error = U_ZERO_ERROR;
@@ -47,7 +47,7 @@ static bool HHVM_METHOD(SpoofChecker, areConfusable, const String& s1,
   return ret != 0;
 }
 
-static void HHVM_METHOD(SpoofChecker, setAllowedLocales, const String& locs) {
+static void HHVM_METHOD(SpoofChecker, setAllowedLocales, const OptString& locs) {
   FETCH_SPOOF(data, this_);
   UErrorCode error = U_ZERO_ERROR;
   uspoof_setAllowedLocales(data->checker(), locs.c_str(), &error);

@@ -51,7 +51,7 @@ struct MCrypt : SweepableResourceData {
 
   CLASSNAME_IS("mcrypt")
   // overriding ResourceData
-  const String& o_getClassNameHook() const override { return classnameof(); }
+  const OptString& o_getClassNameHook() const override { return classnameof(); }
 
   DECLARE_RESOURCE_ALLOCATION(MCrypt)
 
@@ -80,9 +80,9 @@ static mcrypt_data s_globals;
 #define MCRYPT_OPEN_MODULE_FAILED(str) \
  raise_warning("%s(): Module initialization failed", str);
 
-static Variant php_mcrypt_do_crypt(const String& cipher, const String& key,
-                                   const String& data, const String& mode,
-                                   const String& iv, bool dencrypt,
+static Variant php_mcrypt_do_crypt(const OptString& cipher, const OptString& key,
+                                   const OptString& data, const OptString& mode,
+                                   const OptString& iv, bool dencrypt,
                                    char *name) {
   MCRYPT td = mcrypt_module_open((char*)cipher.data(),
                                  (char*)MCG(algorithms_dir).data(),
@@ -149,19 +149,19 @@ static Variant php_mcrypt_do_crypt(const String& cipher, const String& key,
 
   int block_size;
   unsigned long int data_size;
-  String s;
+  OptString s;
   char *data_s;
   /* Check blocksize */
   if (mcrypt_enc_is_block_mode(td) == 1) { /* It's a block algorithm */
     block_size = mcrypt_enc_get_block_size(td);
     data_size = (((data.size() - 1) / block_size) + 1) * block_size;
-    s = String(data_size, ReserveString);
+    s = OptString(data_size, ReserveString);
     data_s = (char*)s.mutableData();
     memset(data_s, 0, data_size);
     memcpy(data_s, data.data(), data.size());
   } else { /* It's not a block algorithm */
     data_size = data.size();
-    s = String(data_size, ReserveString);
+    s = OptString(data_size, ReserveString);
     data_s = (char*)s.mutableData();
     memcpy(data_s, data.data(), data.size());
   }
@@ -199,7 +199,7 @@ static req::ptr<MCrypt> get_valid_mcrypt_resource(const OptResource& td) {
   return pm;
 }
 
-static Variant mcrypt_generic(const OptResource& td, const String& data,
+static Variant mcrypt_generic(const OptResource& td, const OptString& data,
                               bool dencrypt) {
   auto pm = get_valid_mcrypt_resource(td);
   if (!pm) {
@@ -214,20 +214,20 @@ static Variant mcrypt_generic(const OptResource& td, const String& data,
     return false;
   }
 
-  String s;
+  OptString s;
   unsigned char* data_s;
   int block_size, data_size;
   /* Check blocksize */
   if (mcrypt_enc_is_block_mode(pm->m_td) == 1) { /* It's a block algorithm */
     block_size = mcrypt_enc_get_block_size(pm->m_td);
     data_size = (((data.size() - 1) / block_size) + 1) * block_size;
-    s = String(data_size, ReserveString);
+    s = OptString(data_size, ReserveString);
     data_s = (unsigned char *)s.mutableData();
     memset(data_s, 0, data_size);
     memcpy(data_s, data.data(), data.size());
   } else { /* It's not a block algorithm */
     data_size = data.size();
-    s = String(data_size, ReserveString);
+    s = OptString(data_size, ReserveString);
     data_s = (unsigned char *)s.mutableData();
     memcpy(data_s, data.data(), data.size());
   }
@@ -243,9 +243,9 @@ static Variant mcrypt_generic(const OptResource& td, const String& data,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant HHVM_FUNCTION(mcrypt_module_open, const String& algorithm,
-                                          const String& algorithm_directory,
-                             const String& mode, const String& mode_directory) {
+Variant HHVM_FUNCTION(mcrypt_module_open, const OptString& algorithm,
+                                          const OptString& algorithm_directory,
+                             const OptString& mode, const OptString& mode_directory) {
   MCRYPT td = mcrypt_module_open
     ((char*)algorithm.data(),
      (char*)(algorithm_directory.empty() ? MCG(algorithms_dir).data() :
@@ -273,8 +273,8 @@ bool HHVM_FUNCTION(mcrypt_module_close, const OptResource& td) {
 }
 
 Array HHVM_FUNCTION(mcrypt_list_algorithms,
-                    const String& lib_dir /* = null_string */) {
-  String dir = lib_dir.empty() ? String(MCG(algorithms_dir)) : lib_dir;
+                    const OptString& lib_dir /* = null_string */) {
+  OptString dir = lib_dir.empty() ? OptString(MCG(algorithms_dir)) : lib_dir;
 
   int count = 0;
   char **modules = mcrypt_list_algorithms((char*)dir.data(), &count);
@@ -283,15 +283,15 @@ Array HHVM_FUNCTION(mcrypt_list_algorithms,
   }
   VecInit ret(count);
   for (int i = 0; i < count; i++) {
-    ret.append(String(modules[i], CopyString));
+    ret.append(OptString(modules[i], CopyString));
   }
   mcrypt_free_p(modules, count);
   return ret.toArray();
 }
 
 Array HHVM_FUNCTION(mcrypt_list_modes,
-                    const String& lib_dir /* = null_string */) {
-  String dir = lib_dir.empty() ? String(MCG(modes_dir)) : lib_dir;
+                    const OptString& lib_dir /* = null_string */) {
+  OptString dir = lib_dir.empty() ? OptString(MCG(modes_dir)) : lib_dir;
 
   int count = 0;
   char **modules = mcrypt_list_modes((char*)dir.data(), &count);
@@ -300,31 +300,31 @@ Array HHVM_FUNCTION(mcrypt_list_modes,
   }
   VecInit ret(count);
   for (int i = 0; i < count; i++) {
-    ret.append(String(modules[i], CopyString));
+    ret.append(OptString(modules[i], CopyString));
   }
   mcrypt_free_p(modules, count);
   return ret.toArray();
 }
 
 int64_t HHVM_FUNCTION(mcrypt_module_get_algo_block_size,
-                                   const String& algorithm,
-                                   const String& lib_dir /* = null_string */) {
-  String dir = lib_dir.empty() ? String(MCG(algorithms_dir)) : lib_dir;
+                                   const OptString& algorithm,
+                                   const OptString& lib_dir /* = null_string */) {
+  OptString dir = lib_dir.empty() ? OptString(MCG(algorithms_dir)) : lib_dir;
   return mcrypt_module_get_algo_block_size((char*)algorithm.data(),
                                            (char*)dir.data());
 }
 
-int64_t HHVM_FUNCTION(mcrypt_module_get_algo_key_size, const String& algorithm,
-                                   const String& lib_dir /* = null_string */) {
-  String dir = lib_dir.empty() ? String(MCG(algorithms_dir)) : lib_dir;
+int64_t HHVM_FUNCTION(mcrypt_module_get_algo_key_size, const OptString& algorithm,
+                                   const OptString& lib_dir /* = null_string */) {
+  OptString dir = lib_dir.empty() ? OptString(MCG(algorithms_dir)) : lib_dir;
   return mcrypt_module_get_algo_key_size((char*)algorithm.data(),
                                          (char*)dir.data());
 }
 
 Array HHVM_FUNCTION(mcrypt_module_get_supported_key_sizes,
-                    const String& algorithm,
-                    const String& lib_dir /* = null_string */) {
-  String dir = lib_dir.empty() ? String(MCG(algorithms_dir)) : lib_dir;
+                    const OptString& algorithm,
+                    const OptString& lib_dir /* = null_string */) {
+  OptString dir = lib_dir.empty() ? OptString(MCG(algorithms_dir)) : lib_dir;
 
   int count = 0;
   int *key_sizes = mcrypt_module_get_algo_supported_key_sizes
@@ -338,30 +338,30 @@ Array HHVM_FUNCTION(mcrypt_module_get_supported_key_sizes,
   return ret.toArray();
 }
 
-bool HHVM_FUNCTION(mcrypt_module_is_block_algorithm_mode, const String& mode,
-                                  const String& lib_dir /* = null_string */) {
-  String dir = lib_dir.empty() ? String(MCG(modes_dir)) : lib_dir;
+bool HHVM_FUNCTION(mcrypt_module_is_block_algorithm_mode, const OptString& mode,
+                                  const OptString& lib_dir /* = null_string */) {
+  OptString dir = lib_dir.empty() ? OptString(MCG(modes_dir)) : lib_dir;
   return mcrypt_module_is_block_algorithm_mode((char*)mode.data(),
                                                (char*)dir.data()) == 1;
 }
 
-bool HHVM_FUNCTION(mcrypt_module_is_block_algorithm, const String& algorithm,
-                                  const String& lib_dir /* = null_string */) {
-  String dir = lib_dir.empty() ? String(MCG(algorithms_dir)) : lib_dir;
+bool HHVM_FUNCTION(mcrypt_module_is_block_algorithm, const OptString& algorithm,
+                                  const OptString& lib_dir /* = null_string */) {
+  OptString dir = lib_dir.empty() ? OptString(MCG(algorithms_dir)) : lib_dir;
   return mcrypt_module_is_block_algorithm((char*)algorithm.data(),
                                           (char*)dir.data()) == 1;
 }
 
-bool HHVM_FUNCTION(mcrypt_module_is_block_mode, const String& mode,
-                                   const String& lib_dir /* = null_string */) {
-  String dir = lib_dir.empty() ? String(MCG(modes_dir)) : lib_dir;
+bool HHVM_FUNCTION(mcrypt_module_is_block_mode, const OptString& mode,
+                                   const OptString& lib_dir /* = null_string */) {
+  OptString dir = lib_dir.empty() ? OptString(MCG(modes_dir)) : lib_dir;
   return mcrypt_module_is_block_mode((char*)mode.data(),
                                      (char*)dir.data()) == 1;
 }
 
-bool HHVM_FUNCTION(mcrypt_module_self_test, const String& algorithm,
-                               const String& lib_dir /* = null_string */) {
-  String dir = lib_dir.empty() ? String(MCG(algorithms_dir)) : lib_dir;
+bool HHVM_FUNCTION(mcrypt_module_self_test, const OptString& algorithm,
+                               const OptString& lib_dir /* = null_string */) {
+  OptString dir = lib_dir.empty() ? OptString(MCG(algorithms_dir)) : lib_dir;
   return mcrypt_module_self_test((char*)algorithm.data(),
                                  (char*)dir.data()) == 0;
 }
@@ -400,63 +400,63 @@ Variant HHVM_FUNCTION(mcrypt_create_iv, int64_t size, int64_t source /* = 0 */) 
       iv[--size] = (char)HHVM_FN(rand)(0, 255);
     }
   }
-  return String(iv, n, AttachString);
+  return OptString(iv, n, AttachString);
 }
 
-Variant HHVM_FUNCTION(mcrypt_encrypt, const String& cipher, const String& key,
-                                      const String& data, const String& mode,
+Variant HHVM_FUNCTION(mcrypt_encrypt, const OptString& cipher, const OptString& key,
+                                      const OptString& data, const OptString& mode,
                                       const Variant& viv /* = null_string */) {
-  String iv = viv.toString();
+  OptString iv = viv.toString();
   return php_mcrypt_do_crypt(cipher, key, data, mode, iv, false,
                              "mcrypt_encrypt");
 }
 
-Variant HHVM_FUNCTION(mcrypt_decrypt, const String& cipher, const String& key,
-                                      const String& data, const String& mode,
+Variant HHVM_FUNCTION(mcrypt_decrypt, const OptString& cipher, const OptString& key,
+                                      const OptString& data, const OptString& mode,
                                       const Variant& viv /* = null_string */) {
-  String iv = viv.toString();
+  OptString iv = viv.toString();
   return php_mcrypt_do_crypt(cipher, key, data, mode, iv, true,
                              "mcrypt_decrypt");
 }
 
-Variant HHVM_FUNCTION(mcrypt_cbc, const String& cipher, const String& key,
-                                  const String& data, const Variant& mode,
+Variant HHVM_FUNCTION(mcrypt_cbc, const OptString& cipher, const OptString& key,
+                                  const OptString& data, const Variant& mode,
                                   const Variant& viv /* = null_string */) {
   raise_deprecated("Function mcrypt_cbc() is deprecated");
-  String iv = viv.toString();
+  OptString iv = viv.toString();
   return php_mcrypt_do_crypt(cipher, key, data, "cbc", iv, (int)mode.toInt64(),
                              "mcrypt_cbc");
 }
 
-Variant HHVM_FUNCTION(mcrypt_cfb, const String& cipher, const String& key,
-                                  const String& data, const Variant& mode,
+Variant HHVM_FUNCTION(mcrypt_cfb, const OptString& cipher, const OptString& key,
+                                  const OptString& data, const Variant& mode,
                                   const Variant& viv /* = null_string */) {
   raise_deprecated("Function mcrypt_cfb() is deprecated");
-  String iv = viv.toString();
+  OptString iv = viv.toString();
   return php_mcrypt_do_crypt(cipher, key, data, "cfb", iv, (int)mode.toInt64(),
                              "mcrypt_cfb");
 }
 
-Variant HHVM_FUNCTION(mcrypt_ecb, const String& cipher, const String& key,
-                                  const String& data, const Variant& mode,
+Variant HHVM_FUNCTION(mcrypt_ecb, const OptString& cipher, const OptString& key,
+                                  const OptString& data, const Variant& mode,
                                   const Variant& viv /* = null_string */) {
   raise_deprecated("Function mcrypt_ecb() is deprecated");
-  String iv = viv.toString();
+  OptString iv = viv.toString();
   return php_mcrypt_do_crypt(cipher, key, data, "ecb", iv, (int)mode.toInt64(),
                              "mcrypt_ecb");
 }
 
-Variant HHVM_FUNCTION(mcrypt_ofb, const String& cipher, const String& key,
-                                  const String& data, const Variant& mode,
+Variant HHVM_FUNCTION(mcrypt_ofb, const OptString& cipher, const OptString& key,
+                                  const OptString& data, const Variant& mode,
                                   const Variant& viv /* = null_string */) {
   raise_deprecated("Function mcrypt_ofb() is deprecated");
-  String iv = viv.toString();
+  OptString iv = viv.toString();
   return php_mcrypt_do_crypt(cipher, key, data, "ofb", iv, (int)mode.toInt64(),
                              "mcrypt_ofb");
 }
 
-Variant HHVM_FUNCTION(mcrypt_get_block_size, const String& cipher,
-                                             const String& mode) {
+Variant HHVM_FUNCTION(mcrypt_get_block_size, const OptString& cipher,
+                                             const OptString& mode) {
   MCRYPT td = mcrypt_module_open((char*)cipher.data(),
                                  (char*)MCG(algorithms_dir).data(),
                                  (char*)mode.data(),
@@ -471,7 +471,7 @@ Variant HHVM_FUNCTION(mcrypt_get_block_size, const String& cipher,
   return ret;
 }
 
-Variant HHVM_FUNCTION(mcrypt_get_cipher_name, const String& cipher) {
+Variant HHVM_FUNCTION(mcrypt_get_cipher_name, const OptString& cipher) {
   MCRYPT td = mcrypt_module_open((char*)cipher.data(),
                                  (char*)MCG(algorithms_dir).data(),
                                  (char*)"ecb",
@@ -489,13 +489,13 @@ Variant HHVM_FUNCTION(mcrypt_get_cipher_name, const String& cipher) {
 
   char *cipher_name = mcrypt_enc_get_algorithms_name(td);
   mcrypt_module_close(td);
-  String ret(cipher_name, CopyString);
+  OptString ret(cipher_name, CopyString);
   mcrypt_free(cipher_name);
   return ret;
 }
 
-Variant HHVM_FUNCTION(mcrypt_get_iv_size, const String& cipher,
-                                          const String& mode) {
+Variant HHVM_FUNCTION(mcrypt_get_iv_size, const OptString& cipher,
+                                          const OptString& mode) {
   MCRYPT td = mcrypt_module_open((char*)cipher.data(),
                                  (char*)MCG(algorithms_dir).data(),
                                  (char*)mode.data(),
@@ -510,8 +510,8 @@ Variant HHVM_FUNCTION(mcrypt_get_iv_size, const String& cipher,
   return ret;
 }
 
-Variant HHVM_FUNCTION(mcrypt_get_key_size, const String& cipher,
-                                           const String& module) {
+Variant HHVM_FUNCTION(mcrypt_get_key_size, const OptString& cipher,
+                                           const OptString& module) {
   MCRYPT td = mcrypt_module_open((char*)cipher.data(),
                                  (char*)MCG(algorithms_dir).data(),
                                  (char*)module.data(),
@@ -533,7 +533,7 @@ Variant HHVM_FUNCTION(mcrypt_enc_get_algorithms_name, const OptResource& td) {
   }
 
   char *name = mcrypt_enc_get_algorithms_name(pm->m_td);
-  String ret(name, CopyString);
+  OptString ret(name, CopyString);
   mcrypt_free(name);
   return ret;
 }
@@ -572,7 +572,7 @@ Variant HHVM_FUNCTION(mcrypt_enc_get_modes_name, const OptResource& td) {
   }
 
   char *name = mcrypt_enc_get_modes_name(pm->m_td);
-  String ret(name, CopyString);
+  OptString ret(name, CopyString);
   mcrypt_free(name);
   return ret;
 }
@@ -632,8 +632,8 @@ Variant HHVM_FUNCTION(mcrypt_enc_self_test, const OptResource& td) {
 }
 
 Variant HHVM_FUNCTION(mcrypt_generic_init, const OptResource& td,
-                                           const String& key,
-                                           const String& iv) {
+                                           const OptString& key,
+                                           const OptString& iv) {
   auto pm = get_valid_mcrypt_resource(td);
   if (!pm) {
     return false;
@@ -696,12 +696,12 @@ Variant HHVM_FUNCTION(mcrypt_generic_init, const OptResource& td,
   return result;
 }
 
-Variant HHVM_FUNCTION(mcrypt_generic, const OptResource& td, const String& data) {
+Variant HHVM_FUNCTION(mcrypt_generic, const OptResource& td, const OptString& data) {
   return mcrypt_generic(td, data, false);
 }
 
 Variant HHVM_FUNCTION(mdecrypt_generic, const OptResource& td,
-                                        const String& data) {
+                                        const OptString& data) {
   return mcrypt_generic(td, data, true);
 }
 

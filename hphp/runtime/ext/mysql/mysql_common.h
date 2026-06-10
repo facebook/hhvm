@@ -67,19 +67,19 @@ struct MySQL {
   void setLastError(const char *func);
   void close();
 
-  bool connect(const String& host, int port,
-               const String& socket,
-               const String& username,
-               const String& password,
-               const String& database,
+  bool connect(const OptString& host, int port,
+               const OptString& socket,
+               const OptString& username,
+               const OptString& password,
+               const OptString& database,
                int client_flags,
                int connect_timeout);
 
-  bool reconnect(const String& host, int port,
-                 const String& socket,
-                 const String& username,
-                 const String& password,
-                 const String& database,
+  bool reconnect(const OptString& host, int port,
+                 const OptString& socket,
+                 const OptString& username,
+                 const OptString& password,
+                 const OptString& database,
                  int client_flags,
                  int connect_timeout);
 
@@ -112,28 +112,28 @@ struct MySQL {
   /**
    * Default settings.
    */
-  static String GetDefaultServer()   { return String();}
+  static OptString GetDefaultServer()   { return OptString();}
   static int GetDefaultPort();
-  static String GetDefaultSocket();
-  static String GetDefaultUsername() { return String();}
-  static String GetDefaultPassword() { return String();}
-  static String GetDefaultDatabase() { return String();}
+  static OptString GetDefaultSocket();
+  static OptString GetDefaultUsername() { return OptString();}
+  static OptString GetDefaultPassword() { return OptString();}
+  static OptString GetDefaultDatabase() { return OptString();}
 
   /**
    * A connection may be persistent across multiple HTTP requests.
    */
-  static std::shared_ptr<MySQL> GetPersistent(const String& host, int port,
-                                              const String& socket,
-                                              const String& username,
-                                              const String& password,
+  static std::shared_ptr<MySQL> GetPersistent(const OptString& host, int port,
+                                              const OptString& socket,
+                                              const OptString& username,
+                                              const OptString& password,
                                               int client_flags) {
     return GetCachedImpl(host, port, socket, username, password, client_flags);
   }
 
-  static void SetPersistent(const String& host, int port,
-                            const String& socket,
-                            const String& username,
-                            const String& password,
+  static void SetPersistent(const OptString& host, int port,
+                            const OptString& socket,
+                            const OptString& username,
+                            const OptString& password,
                             int client_flags,
                             const std::shared_ptr<MySQL>& conn) {
     SetCachedImpl(host, port, socket, username, password, client_flags, conn);
@@ -159,22 +159,22 @@ private:
   static int s_max_num_persistent;
   static const std::string s_persistent_type;
 
-  static std::string GetHash(const String& host, int port,
-                             const String& socket,
-                             const String& username,
-                             const String& password,
+  static std::string GetHash(const OptString& host, int port,
+                             const OptString& socket,
+                             const OptString& username,
+                             const OptString& password,
                              int client_flags);
 
-  static std::shared_ptr<MySQL> GetCachedImpl(const String& host, int port,
-                                              const String& socket,
-                                              const String& username,
-                                              const String& password,
+  static std::shared_ptr<MySQL> GetCachedImpl(const OptString& host, int port,
+                                              const OptString& socket,
+                                              const OptString& username,
+                                              const OptString& password,
                                               int client_flags);
 
-  static void SetCachedImpl(const String& host, int port,
-                            const String& socket,
-                            const String& username,
-                            const String& password,
+  static void SetCachedImpl(const OptString& host, int port,
+                            const OptString& socket,
+                            const OptString& username,
+                            const OptString& password,
                             int client_flags,
                             std::shared_ptr<MySQL> conn);
 
@@ -229,7 +229,7 @@ struct MySQLResource : SweepableResourceData {
   DECLARE_RESOURCE_ALLOCATION(MySQLResource)
 
   // overriding ResourceData
-  const String& o_getClassNameHook() const override { return classnameof(); }
+  const OptString& o_getClassNameHook() const override { return classnameof(); }
   bool isInvalid() const override { return m_mysql->get() == nullptr; }
 
   std::shared_ptr<MySQL> mysql() const { return m_mysql; }
@@ -257,12 +257,12 @@ struct MySQLRequestData final : RequestEventHandler {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct MySQLFieldInfo {
-  String name;
-  String org_name;
-  String table;
-  String org_table;
-  String def;
-  String db;
+  OptString name;
+  OptString org_name;
+  OptString table;
+  OptString org_table;
+  OptString def;
+  OptString db;
   int64_t max_length{0};
   int64_t length{0};
   int type{0};
@@ -281,7 +281,7 @@ struct MySQLResult : SweepableResourceData {
 
   CLASSNAME_IS("mysql result")
   // overriding ResourceData
-  const String& o_getClassNameHook() const override { return classnameof(); }
+  const OptString& o_getClassNameHook() const override { return classnameof(); }
 
   void close() {
     sweep();
@@ -364,7 +364,7 @@ struct MySQLStmt : public SweepableResourceData {
   CLASSNAME_IS("mysql stmt")
 
   // overriding ResourceData
-  const String& o_getClassNameHook() const override { return classnameof(); }
+  const OptString& o_getClassNameHook() const override { return classnameof(); }
 
   Variant close();
 
@@ -383,10 +383,10 @@ struct MySQLStmt : public SweepableResourceData {
   Variant insert_id();
   Variant num_rows();
   Variant param_count();
-  Variant prepare(const String& query);
+  Variant prepare(const OptString& query);
   Variant reset();
   Variant result_metadata();
-  Variant send_long_data(int64_t param_idx, const String& data);
+  Variant send_long_data(int64_t param_idx, const OptString& data);
   Variant sqlstate();
   Variant store_result();
 
@@ -412,10 +412,10 @@ enum MySQLFieldEntryType { NAME, TABLE, LEN, TYPE, FLAGS };
 Variant php_mysql_field_info(const OptResource& result, int field, int entry_type);
 Variant php_mysql_do_connect_on_link(
     std::shared_ptr<MySQL> mySQL,
-    String server,
-    String username,
-    String password,
-    String database,
+    OptString server,
+    OptString username,
+    OptString password,
+    OptString database,
     int client_flags,
     bool persistent,
     int connect_timeout_ms,
@@ -426,10 +426,10 @@ Variant php_mysql_do_connect_on_link(
 );
 
 Variant php_mysql_do_connect(
-    const String& server,
-    const String& username,
-    const String& password,
-    const String& database,
+    const OptString& server,
+    const OptString& username,
+    const OptString& password,
+    const OptString& database,
     int client_flags,
     bool persistent,
     int connect_timeout_ms,
@@ -437,10 +437,10 @@ Variant php_mysql_do_connect(
     const Array* conn_attrs = nullptr);
 
 Variant php_mysql_do_connect_with_ssl(
-    const String& server,
-    const String& username,
-    const String& password,
-    const String& database,
+    const OptString& server,
+    const OptString& username,
+    const OptString& password,
+    const OptString& database,
     int client_flags,
     int connect_timeout_ms,
     int query_timeout_ms,
@@ -449,11 +449,11 @@ Variant php_mysql_do_connect_with_ssl(
 
 enum MySQLQueryReturn { FAIL = 0, OK = 1, OK_FETCH_RESULT = 2 };
 MySQLQueryReturn php_mysql_do_query(
-    const String& query,
+    const OptString& query,
     const Variant& link_id);
 Variant php_mysql_get_result(const Variant& link_id, bool use_store);
 Variant php_mysql_do_query_and_get_result(
-    const String& query,
+    const OptString& query,
     const Variant& link_id,
     bool use_store);
 
@@ -463,8 +463,8 @@ Variant php_mysql_do_query_and_get_result(
 
 Variant php_mysql_fetch_hash(const OptResource& result, int result_type);
 
-Variant mysql_makevalue(const String& data, MYSQL_FIELD *mysql_field);
-Variant mysql_makevalue(const String& data, enum_field_types field_type);
+Variant mysql_makevalue(const OptString& data, MYSQL_FIELD *mysql_field);
+Variant mysql_makevalue(const OptString& data, enum_field_types field_type);
 const char *php_mysql_get_field_name(int field_type);
 
 ///////////////////////////////////////////////////////////////////////////////

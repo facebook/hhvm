@@ -29,7 +29,7 @@
 
 namespace HPHP {
 
-struct String;
+struct OptString;
 struct StaticString;
 
 struct AliasRes { AliasKind ak; Array unres; };
@@ -63,7 +63,7 @@ struct TSEnv {
   // Vector of typestructures that need to be put in for reified generics
   const req::vector<Array>* tsList;
   // Set of type aliases currently being resolved
-  req::fast_map<String, AliasRes, hphp_string_hash, hphp_string_same> resolving;
+  req::fast_map<OptString, AliasRes, hphp_string_hash, hphp_string_same> resolving;
 };
 
 struct TSCtx {
@@ -110,7 +110,7 @@ struct WithCaseType {
 private:
   TSEnv& m_env;
   bool m_allowPreresolved;
-  std::vector<std::pair<String, AliasRes>> m_aliases;
+  std::vector<std::pair<OptString, AliasRes>> m_aliases;
 };
 
 /*
@@ -642,7 +642,7 @@ void resolveRefinementTypes(TSEnv& env, const TSCtx& ctx,
     }
 
     resolvedRefinements.set(
-      String(k.m_data.pstr), Variant(resolvedMember));
+      OptString(k.m_data.pstr), Variant(resolvedMember));
   });
   newarr.set(s_with_refinements, Variant(resolvedRefinements));
 }
@@ -665,7 +665,7 @@ std::string resolveContextMsg(const TSCtx& ctx) {
  * the name is not an alias, return an empty Array. The bool is
  * whether the returned type-structure is already resolved or not.
 */
-std::pair<Array, bool> getAlias(TSEnv& env, const String& aliasName,
+std::pair<Array, bool> getAlias(TSEnv& env, const OptString& aliasName,
                                 bool usePreResolved) {
 
   if (aliasName.same(s_this) || Class::lookup(aliasName.get())) {
@@ -706,7 +706,7 @@ std::pair<Array, bool> getAlias(TSEnv& env, const String& aliasName,
   return std::make_pair(typeAlias->typeStructure(), false);
 }
 
-const Class* getClass(TSEnv& env, const TSCtx& ctx, const String& clsName) {
+const Class* getClass(TSEnv& env, const TSCtx& ctx, const OptString& clsName) {
   auto checkPersistent = [&](const Class* cls) {
     env.persistent &= classHasPersistentRDS(cls);
     return cls;
@@ -789,9 +789,9 @@ Array resolveShape(TSEnv& env, const TSCtx& ctx, const Array& arr) {
       folly::split("::", clsCns, clsName, cnsName);
 
       // look up clsName::cnsName
-      auto cls = getClass(env, ctx, String(clsName));
+      auto cls = getClass(env, ctx, OptString(clsName));
       if (!cls) throw Exception("failed to resolve shape classname");
-      auto cnsValue = tvClassToString(cls->clsCnsGet(String(cnsName).get()));
+      auto cnsValue = tvClassToString(cls->clsCnsGet(OptString(cnsName).get()));
 
       if (isStringType(cnsValue.m_type) || isIntType(cnsValue.m_type)) {
         key = tvAsVariant(&cnsValue);
@@ -821,7 +821,7 @@ Array resolveShape(TSEnv& env, const TSCtx& ctx, const Array& arr) {
 }
 
 bool resolveClass(TSEnv& env, const TSCtx& ctx, Array& ret,
-                  const String& clsName) {
+                  const OptString& clsName) {
   auto const cls = getClass(env, ctx, clsName);
   if (!cls) return false;
 
@@ -947,7 +947,7 @@ Array resolveTSImpl(TSEnv& env, const TSCtx& ctx, const Array& arr) {
                                    generic_types.size());
           DictInit newarr(sz);
           for (auto i = 0; i < sz; i++) {
-            newarr.set(String(typevars[i]), generic_types[i]);
+            newarr.set(OptString(typevars[i]), generic_types[i]);
           }
           auto generics = newarr.toArray();
           return generics;
@@ -1184,9 +1184,9 @@ std::string xhpNameFromTS(const Array& arr) {
   return name;
 }
 
-String TypeStructure::toString(const Array& arr, TSDisplayType type) {
-  if (arr.empty()) return String();
-  return String(fullName(arr, type));
+OptString TypeStructure::toString(const Array& arr, TSDisplayType type) {
+  if (arr.empty()) return OptString();
+  return OptString(fullName(arr, type));
 }
 
 /*
@@ -1211,7 +1211,7 @@ Array TypeStructure::resolve(const ArrayData* ts,
 /*
  * Called by TypeAlias to get resolved TypeStructure for type aliases.
  */
-Array TypeStructure::resolve(const String& aliasName,
+Array TypeStructure::resolve(const OptString& aliasName,
                              const Array& arr,
                              bool& persistent,
                              const Array& generics) {
@@ -1296,7 +1296,7 @@ bool coerceToTypeStructureList(Array& arr, bool shape=false);
 
 // Returns true and performs coercion if the given field of `arr` can be
 // coerced to a valid, resolved TypeStructure.
-bool coerceTSField(Array& arr, const String& name) {
+bool coerceTSField(Array& arr, const OptString& name) {
   assertx(!arr->cowCheck());
   auto field = arr.lookup(name);
   if (!tvIsDict(field)) return false;
@@ -1305,7 +1305,7 @@ bool coerceTSField(Array& arr, const String& name) {
 
 // Returns true and performs coercion if the given field of `arr` can be
 // coerced to a list of valid, resolved TypeStructures.
-bool coerceTSListField(Array& arr, const String& name, bool shape=false) {
+bool coerceTSListField(Array& arr, const OptString& name, bool shape=false) {
   assertx(!arr->cowCheck());
   if (!arr.exists(name)) return false;
   auto field = arr.lval(name);
@@ -1315,14 +1315,14 @@ bool coerceTSListField(Array& arr, const String& name, bool shape=false) {
 }
 
 // Same as above, except that they allow the field to be missing.
-bool coerceOptTSField(Array& arr, const String& name) {
+bool coerceOptTSField(Array& arr, const OptString& name) {
   assertx(!arr->cowCheck());
   auto field = arr.lookup(name);
   if (!field.is_init()) return true;
   if (!tvIsDict(field)) return false;
   return coerceToTypeStructure(ArrNR(val(field).parr).asArray());
 }
-bool coerceOptTSListField(Array& arr, const String& name, bool shape=false) {
+bool coerceOptTSListField(Array& arr, const OptString& name, bool shape=false) {
   assertx(!arr->cowCheck());
   if (!arr.exists(name)) return true;
   auto field = arr.lval(name);

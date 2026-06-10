@@ -32,7 +32,7 @@ using namespace HPHP;
 
 static const std::string s_DsD("$s$"), s_D("$");
 
-Variant HHVM_FUNCTION(scrypt_enc, const String& password, const String& salt,
+Variant HHVM_FUNCTION(scrypt_enc, const OptString& password, const OptString& salt,
                       int64_t N, int64_t r, int64_t p) {
 
   int cryptN = N;
@@ -64,10 +64,10 @@ Variant HHVM_FUNCTION(scrypt_enc, const String& password, const String& salt,
   if (ret)
     return false;
 
-  String buf_str((char *) buf, sizeof(buf), CopyString);
-  return s_DsD + String((int)cryptN) +
-         s_D + String((int)cryptR) +
-         s_D + String((int)cryptP) +
+  OptString buf_str((char *) buf, sizeof(buf), CopyString);
+  return s_DsD + OptString((int)cryptN) +
+         s_D + OptString((int)cryptR) +
+         s_D + OptString((int)cryptP) +
          s_D + StringUtil::Base64Encode(salt) +
          s_D + StringUtil::Base64Encode(buf_str);
 }

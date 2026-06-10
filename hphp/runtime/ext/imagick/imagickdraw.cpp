@@ -29,7 +29,7 @@ using CUCString = const unsigned char*;
 // class ImagickDraw
 ALWAYS_INLINE
 static void getAffineMatrixElement(
-    const Array& array, const String& key, double& ret) {
+    const Array& array, const OptString& key, double& ret) {
   auto const value = array.lookup(key);
   if (isNullType(value.type())) {
     IMAGICKDRAW_THROW(
@@ -53,7 +53,7 @@ static bool HHVM_METHOD(ImagickDraw, affine, const Array& affine) {
 }
 
 static bool HHVM_METHOD(ImagickDraw, annotation,
-    double x, double y, const String& text) {
+    double x, double y, const OptString& text) {
   auto wand = getDrawingWandResource(Object{this_});
   DrawAnnotation(wand->getWand(), x, y, (CUCString)text.c_str());
   return true;
@@ -109,7 +109,7 @@ static bool HHVM_METHOD(ImagickDraw, color,
 }
 
 static bool HHVM_METHOD(ImagickDraw, comment,
-    const String& comment) {
+    const OptString& comment) {
   auto wand = getDrawingWandResource(Object{this_});
   DrawComment(wand->getWand(), comment.c_str());
   return true;
@@ -151,7 +151,7 @@ static bool HHVM_METHOD(ImagickDraw, ellipse,
   return true;
 }
 
-static String HHVM_METHOD(ImagickDraw, getClipPath) {
+static OptString HHVM_METHOD(ImagickDraw, getClipPath) {
   auto wand = getDrawingWandResource(Object{this_});
   return convertMagickString(DrawGetClipPath(wand->getWand()));
 }
@@ -183,12 +183,12 @@ static int64_t HHVM_METHOD(ImagickDraw, getFillRule) {
   return DrawGetFillRule(wand->getWand());
 }
 
-static String HHVM_METHOD(ImagickDraw, getFont) {
+static OptString HHVM_METHOD(ImagickDraw, getFont) {
   auto wand = getDrawingWandResource(Object{this_});
   return convertMagickString(DrawGetFont(wand->getWand()));
 }
 
-static String HHVM_METHOD(ImagickDraw, getFontFamily) {
+static OptString HHVM_METHOD(ImagickDraw, getFontFamily) {
   auto wand = getDrawingWandResource(Object{this_});
   return convertMagickString(DrawGetFontFamily(wand->getWand()));
 }
@@ -282,7 +282,7 @@ static int64_t HHVM_METHOD(ImagickDraw, getTextDecoration) {
   return DrawGetTextDecoration(wand->getWand());
 }
 
-static String HHVM_METHOD(ImagickDraw, getTextEncoding) {
+static OptString HHVM_METHOD(ImagickDraw, getTextEncoding) {
   auto wand = getDrawingWandResource(Object{this_});
   return convertMagickString(DrawGetTextEncoding(wand->getWand()));
 }
@@ -294,7 +294,7 @@ static Object HHVM_METHOD(ImagickDraw, getTextUnderColor) {
   return createImagickPixel(pixel);
 }
 
-static String HHVM_METHOD(ImagickDraw, getVectorGraphics) {
+static OptString HHVM_METHOD(ImagickDraw, getVectorGraphics) {
   auto wand = getDrawingWandResource(Object{this_});
   return convertMagickString(DrawGetVectorGraphics(wand->getWand()));
 }
@@ -530,7 +530,7 @@ static bool HHVM_METHOD(ImagickDraw, push) {
 }
 
 static bool HHVM_METHOD(ImagickDraw, pushClipPath,
-    const String& clip_mask_id) {
+    const OptString& clip_mask_id) {
   auto wand = getDrawingWandResource(Object{this_});
   DrawPushClipPath(wand->getWand(), clip_mask_id.c_str());
   return true;
@@ -543,7 +543,7 @@ static bool HHVM_METHOD(ImagickDraw, pushDefs) {
 }
 
 static bool HHVM_METHOD(ImagickDraw, pushPattern,
-    const String& pattern_id, double x, double y, double width, double height) {
+    const OptString& pattern_id, double x, double y, double width, double height) {
   auto wand = getDrawingWandResource(Object{this_});
   DrawPushPattern(wand->getWand(), pattern_id.c_str(), x, y, width, height);
   return true;
@@ -589,7 +589,7 @@ static bool HHVM_METHOD(ImagickDraw, scale,
 }
 
 static bool HHVM_METHOD(ImagickDraw, setClipPath,
-    const String& clip_mask) {
+    const OptString& clip_mask) {
   auto wand = getDrawingWandResource(Object{this_});
   auto status = DrawSetClipPath(wand->getWand(), clip_mask.c_str());
   if (status == MagickFalse) {
@@ -634,7 +634,7 @@ static bool HHVM_METHOD(ImagickDraw, setFillOpacity,
 }
 
 static bool HHVM_METHOD(ImagickDraw, setFillPatternURL,
-    const String& fill_url) {
+    const OptString& fill_url) {
   auto wand = getDrawingWandResource(Object{this_});
   auto status = DrawSetFillPatternURL(wand->getWand(), fill_url.c_str());
   if (status == MagickFalse) {
@@ -651,7 +651,7 @@ static bool HHVM_METHOD(ImagickDraw, setFillRule,
 }
 
 static bool HHVM_METHOD(ImagickDraw, setFont,
-    const String& font_name) {
+    const OptString& font_name) {
   auto wand = getDrawingWandResource(Object{this_});
   if (font_name.empty()) {
     IMAGICKDRAW_THROW("Can not set empty font");
@@ -668,7 +668,7 @@ static bool HHVM_METHOD(ImagickDraw, setFont,
 }
 
 static bool HHVM_METHOD(ImagickDraw, setFontFamily,
-    const String& font_family) {
+    const OptString& font_family) {
   auto wand = getDrawingWandResource(Object{this_});
   if (font_family.empty()) {
     IMAGICKDRAW_THROW("Can not set empty font family");
@@ -798,7 +798,7 @@ static bool HHVM_METHOD(ImagickDraw, setStrokeOpacity,
 }
 
 static bool HHVM_METHOD(ImagickDraw, setStrokePatternURL,
-    const String& stroke_url) {
+    const OptString& stroke_url) {
   auto wand = getDrawingWandResource(Object{this_});
   auto status = DrawSetStrokePatternURL(wand->getWand(), stroke_url.c_str());
   if (status == MagickFalse) {
@@ -835,7 +835,7 @@ static bool HHVM_METHOD(ImagickDraw, setTextDecoration,
 }
 
 static bool HHVM_METHOD(ImagickDraw, setTextEncoding,
-    const String& encoding) {
+    const OptString& encoding) {
   auto wand = getDrawingWandResource(Object{this_});
   DrawSetTextEncoding(wand->getWand(), encoding.c_str());
   return true;
@@ -850,7 +850,7 @@ static bool HHVM_METHOD(ImagickDraw, setTextUnderColor,
 }
 
 static bool HHVM_METHOD(ImagickDraw, setVectorGraphics,
-    const String& xml) {
+    const OptString& xml) {
   auto wand = getDrawingWandResource(Object{this_});
   auto status = DrawSetVectorGraphics(wand->getWand(), xml.c_str());
   if (status == MagickFalse) {

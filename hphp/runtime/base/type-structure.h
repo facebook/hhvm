@@ -23,7 +23,7 @@
 
 namespace HPHP {
 
-struct String;
+struct OptString;
 struct Array;
 struct DictInit;
 
@@ -42,7 +42,7 @@ enum class TSDisplayType : uint8_t {
   TSDisplayTypeInternal   = 2,
 };
 
-String toString(const Array& arr, TSDisplayType type);
+OptString toString(const Array& arr, TSDisplayType type);
 
 /*
  * Coerces the given array to a valid, resolved, list of type structures that
@@ -74,7 +74,7 @@ Array resolve(const ArrayData* ts,
               const Class* typeCnsCls,
               bool& persistent);
 
-Array resolve(const String& aliasName,
+Array resolve(const OptString& aliasName,
               const Array& arr,
               bool& persistent,
               const Array& generics = Array());

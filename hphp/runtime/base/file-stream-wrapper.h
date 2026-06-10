@@ -43,23 +43,23 @@ namespace HPHP {
 struct Directory;
 
 struct FileStreamWrapper final : Stream::Wrapper {
-  static req::ptr<MemFile> openFromCache(const String& filename,
-                                         const String& mode);
-  req::ptr<File> open(const String& filename, const String& mode, int options,
+  static req::ptr<MemFile> openFromCache(const OptString& filename,
+                                         const OptString& mode);
+  req::ptr<File> open(const OptString& filename, const OptString& mode, int options,
                       const req::ptr<StreamContext>& context) override;
-  int access(const String& path, int mode) override {
+  int access(const OptString& path, int mode) override {
     return ::access(File::TranslatePath(path).data(), mode);
   }
-  int stat(const String& path, struct stat* buf) override {
+  int stat(const OptString& path, struct stat* buf) override {
     return ::stat(File::TranslatePath(path).data(), buf);
   }
-  int lstat(const String& path, struct stat* buf) override {
+  int lstat(const OptString& path, struct stat* buf) override {
     return ::lstat(File::TranslatePath(path).data(), buf);
   }
-  int unlink(const String& path) override;
-  int rename(const String& oldname, const String& newname) override;
-  int mkdir(const String& path, int mode, int options) override;
-  int rmdir(const String& path, int /*options*/) override {
+  int unlink(const OptString& path) override;
+  int rename(const OptString& oldname, const OptString& newname) override;
+  int mkdir(const OptString& path, int mode, int options) override;
+  int rmdir(const OptString& path, int /*options*/) override {
     ERROR_RAISE_WARNING(::rmdir(File::TranslatePath(path).data()));
     return ret;
   }
@@ -68,14 +68,14 @@ struct FileStreamWrapper final : Stream::Wrapper {
 
   bool isNormalFileStream() const override { return true; }
 
-  req::ptr<Directory> opendir(const String& path) override;
+  req::ptr<Directory> opendir(const OptString& path) override;
 
-  String realpath(const String& path) override {
+  OptString realpath(const OptString& path) override {
     return realpathLibc(File::TranslatePath(path).data());
   }
 
  private:
-  int mkdir_recursive(const String& path, int mode);
+  int mkdir_recursive(const OptString& path, int mode);
 };
 
 extern FileStreamWrapper s_file_stream_wrapper;

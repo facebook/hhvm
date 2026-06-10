@@ -56,11 +56,11 @@ static Variant get_column_value(sqlite3_stmt *stmt, int column) {
   case SQLITE_NULL:
     break;
   case SQLITE3_TEXT:
-    data = String((char*)sqlite3_column_text(stmt, column), CopyString);
+    data = OptString((char*)sqlite3_column_text(stmt, column), CopyString);
     break;
   case SQLITE_BLOB:
   default:
-    data = String((char*)sqlite3_column_blob(stmt, column),
+    data = OptString((char*)sqlite3_column_blob(stmt, column),
                   sqlite3_column_bytes(stmt, column), CopyString);
   }
   return data;
@@ -80,7 +80,7 @@ static Variant get_value(sqlite3_value *argv) {
   case SQLITE_BLOB:
   case SQLITE3_TEXT:
   default:
-    value = String((char*)sqlite3_value_text(argv),
+    value = OptString((char*)sqlite3_value_text(argv),
                    sqlite3_value_bytes(argv), CopyString);
     break;
   }
@@ -121,7 +121,7 @@ static void sqlite3_do_callback(sqlite3_context *context,
     } else if (ret.isDouble()) {
       sqlite3_result_double(context, ret.toDouble());
     } else {
-      String sret = ret.toString();
+      OptString sret = ret.toString();
       sqlite3_result_text(context, sret.data(), sret.size(), SQLITE_TRANSIENT);
     }
   } else {
@@ -175,7 +175,7 @@ void SQLite3::sweep() {
 }
 
 void HHVM_METHOD(SQLite3, __construct,
-                 const String& filename,
+                 const OptString& filename,
                  int64_t flags /* = SQLITE3_OPEN_READWRITE |
                    SQLITE3_OPEN_CREATE */,
                  const Variant& encryption_key /* = null */) {
@@ -188,7 +188,7 @@ void SQLite3::validate() const {
   }
 }
 
-void HHVM_METHOD(SQLite3, open, const String& filename,
+void HHVM_METHOD(SQLite3, open, const OptString& filename,
                  int64_t flags /* = SQLITE3_OPEN_READWRITE |
                    SQLITE3_OPEN_CREATE */,
                  const Variant& /*encryption_key*/ /* = null */) {
@@ -197,7 +197,7 @@ void HHVM_METHOD(SQLite3, open, const String& filename,
     SystemLib::throwExceptionObject("Already initialized DB Object");
   }
 
-  String fname;
+  OptString fname;
   if (strncmp(filename.data(), ":memory:", 8) != 0) {
     FileUtil::checkPathAndError(filename, "SQLite3::__construct", 1);
     fname = File::TranslatePath(filename);
@@ -212,7 +212,7 @@ void HHVM_METHOD(SQLite3, open, const String& filename,
   }
 
 #ifdef SQLITE_HAS_CODEC
-  const String& str_encryption_key = encryption_key.isNull()
+  const OptString& str_encryption_key = encryption_key.isNull()
                                    ? null_string
                                    : encryption_key.toString();
   if (!str_encryption_key.empty() &&
@@ -252,7 +252,7 @@ bool HHVM_METHOD(SQLite3, close) {
 }
 
 bool HHVM_METHOD(SQLite3, exec,
-                 const String& sql) {
+                 const OptString& sql) {
   auto *data = Native::data<SQLite3>(this_);
   SYNC_VM_REGS_SCOPED();
   data->validate();
@@ -273,7 +273,7 @@ const StaticString
 
 Array HHVM_STATIC_METHOD(SQLite3, version) {
   return make_dict_array(
-    s_versionString, String((char*)sqlite3_libversion(), CopyString),
+    s_versionString, OptString((char*)sqlite3_libversion(), CopyString),
     s_versionNumber, (int64_t)sqlite3_libversion_number()
   );
 }
@@ -290,14 +290,14 @@ int64_t HHVM_METHOD(SQLite3, lasterrorcode) {
   return sqlite3_errcode(data->m_raw_db);
 }
 
-String HHVM_METHOD(SQLite3, lasterrormsg) {
+OptString HHVM_METHOD(SQLite3, lasterrormsg) {
   auto *data = Native::data<SQLite3>(this_);
   data->validate();
-  return String((char*)sqlite3_errmsg(data->m_raw_db), CopyString);
+  return OptString((char*)sqlite3_errmsg(data->m_raw_db), CopyString);
 }
 
 bool HHVM_METHOD(SQLite3, loadExtension,
-                 const String& extension) {
+                 const OptString& extension) {
   auto *data = Native::data<SQLite3>(this_);
   data->validate();
 
@@ -305,7 +305,7 @@ bool HHVM_METHOD(SQLite3, loadExtension,
     return false;
   }
 
-  String translated = File::TranslatePath(extension);
+  OptString translated = File::TranslatePath(extension);
   if (translated.empty()) {
     raise_warning("Unable to load extension at '%s'", extension.data());
     return false;
@@ -330,12 +330,12 @@ int64_t HHVM_METHOD(SQLite3, changes) {
   return sqlite3_changes(data->m_raw_db);
 }
 
-String HHVM_STATIC_METHOD(SQLite3, escapestring,
-                          const String& sql) {
+OptString HHVM_STATIC_METHOD(SQLite3, escapestring,
+                          const OptString& sql) {
   if (!sql.empty()) {
     char *ret = sqlite3_mprintf("%q", sql.data());
     if (ret) {
-      String sret(ret, CopyString);
+      OptString sret(ret, CopyString);
       sqlite3_free(ret);
       return sret;
     }
@@ -344,7 +344,7 @@ String HHVM_STATIC_METHOD(SQLite3, escapestring,
 }
 
 Variant HHVM_METHOD(SQLite3, prepare,
-                    const String& sql) {
+                    const OptString& sql) {
   auto *data = Native::data<SQLite3>(this_);
   data->validate();
   if (!sql.empty()) {
@@ -359,7 +359,7 @@ Variant HHVM_METHOD(SQLite3, prepare,
 }
 
 Variant HHVM_METHOD(SQLite3, query,
-                    const String& sql) {
+                    const OptString& sql) {
   auto *data = Native::data<SQLite3>(this_);
   SYNC_VM_REGS_SCOPED();
   data->validate();
@@ -375,7 +375,7 @@ Variant HHVM_METHOD(SQLite3, query,
 }
 
 Variant HHVM_METHOD(SQLite3, querysingle,
-                    const String& sql,
+                    const OptString& sql,
                     bool entire_row /* = false */) {
   auto *data = Native::data<SQLite3>(this_);
   SYNC_VM_REGS_SCOPED();
@@ -392,7 +392,7 @@ Variant HHVM_METHOD(SQLite3, querysingle,
         if (entire_row) {
           Array ret = Array::CreateDict();
           for (int i = 0; i < sqlite3_data_count(pstmt); i++) {
-            ret.set(String((char*)sqlite3_column_name(pstmt, i), CopyString),
+            ret.set(OptString((char*)sqlite3_column_name(pstmt, i), CopyString),
                     get_column_value(pstmt, i));
           }
           return ret;
@@ -414,7 +414,7 @@ Variant HHVM_METHOD(SQLite3, querysingle,
 }
 
 bool HHVM_METHOD(SQLite3, createfunction,
-                 const String& name,
+                 const OptString& name,
                  const Variant& callback,
                  int64_t argcount /* = -1 */) {
   auto *data = Native::data<SQLite3>(this_);
@@ -441,7 +441,7 @@ bool HHVM_METHOD(SQLite3, createfunction,
 }
 
 bool HHVM_METHOD(SQLite3, createaggregate,
-                 const String& name,
+                 const OptString& name,
                  const Variant& step,
                  const Variant& final,
                  int64_t argcount /* = -1 */) {
@@ -475,8 +475,8 @@ bool HHVM_METHOD(SQLite3, createaggregate,
   return false;
 }
 
-bool HHVM_METHOD(SQLite3, openblob, const String& /*table*/,
-                 const String& /*column*/, int64_t /*rowid*/,
+bool HHVM_METHOD(SQLite3, openblob, const OptString& /*table*/,
+                 const OptString& /*column*/, int64_t /*rowid*/,
                  const Variant& /*dbname*/ /* = null */) {
   throw_not_supported(__func__, "sqlite3 stream");
 }
@@ -495,7 +495,7 @@ void SQLite3Stmt::sweep() {
 
 void HHVM_METHOD(SQLite3Stmt, __construct,
                  const Object& dbobject,
-                 const String& statement) {
+                 const OptString& statement) {
   auto *data = Native::data<SQLite3Stmt>(this_);
   if (!statement.empty()) {
     assertx(dbobject.instanceof(SQLite3::classof()));
@@ -567,10 +567,10 @@ bool HHVM_METHOD(SQLite3Stmt, bindvalue,
   param->value = parameter;
 
   if (name.isString()) {
-    String sname = name.toString();
+    OptString sname = name.toString();
     if (sname.charAt(0) != ':') {
       /* We need a : prefix to resolve a name to a parameter number */
-      sname = String(":") + sname;
+      sname = OptString(":") + sname;
     }
     param->index = sqlite3_bind_parameter_index(data->m_raw_stmt, sname.data());
   } else {
@@ -610,7 +610,7 @@ Variant HHVM_METHOD(SQLite3Stmt, execute) {
       break;
     case SQLITE_BLOB:
       {
-        String sblob;
+        OptString sblob;
         if (p.value.isResource()) {
           Variant blob = HHVM_FN(stream_get_contents)(p.value.toResource());
           if (same(blob, false)) {
@@ -628,7 +628,7 @@ Variant HHVM_METHOD(SQLite3Stmt, execute) {
       }
     case SQLITE3_TEXT:
       {
-        String stext = p.value.toString();
+        OptString stext = p.value.toString();
         sqlite3_bind_text(data->m_raw_stmt, p.index, stext.data(), stext.size(),
                           SQLITE_STATIC);
         break;
@@ -690,11 +690,11 @@ int64_t HHVM_METHOD(SQLite3Result, numcolumns) {
   return sqlite3_column_count(data->m_stmt->m_raw_stmt);
 }
 
-String HHVM_METHOD(SQLite3Result, columnname,
+OptString HHVM_METHOD(SQLite3Result, columnname,
                    int64_t column) {
   auto *data = Native::data<SQLite3Result>(this_);
   data->validate();
-  return String((char*)sqlite3_column_name(data->m_stmt->m_raw_stmt, column),
+  return OptString((char*)sqlite3_column_name(data->m_stmt->m_raw_stmt, column),
                 CopyString);
 }
 

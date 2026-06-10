@@ -220,9 +220,9 @@ int cli_server_active_workers();
  * IO happening on this fd. So, the user may experience surprising behavior
  * where files change even after the script is "dead".
  */
-int cli_openfd_unsafe(const String& filename, int flags, mode_t mode,
+int cli_openfd_unsafe(const OptString& filename, int flags, mode_t mode,
                       bool use_include_path, bool quiet);
-int cli_openfd_unsafe(const String& filename, int flags, mode_t mode,
+int cli_openfd_unsafe(const OptString& filename, int flags, mode_t mode,
                       bool use_include_path, std::string& error);
 
 /*

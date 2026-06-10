@@ -72,16 +72,16 @@ bool TestExtServer::test_pagelet_server_task_status() {
 bool TestExtServer::test_pagelet_server_task_result() {
   const int TEST_SIZE = 20;
 
-  String baseurl("ext/pageletserver?getparam=");
-  String baseheader("MyHeader: ");
-  String basepost("postparam=");
+  OptString baseurl("ext/pageletserver?getparam=");
+  OptString baseheader("MyHeader: ");
+  OptString basepost("postparam=");
 
   std::vector<OptResource> tasks;
   tasks.reserve(TEST_SIZE);
   for (int i = 0; i < TEST_SIZE; ++i) {
-    String url = baseurl + String(i);
-    String header = baseheader + String(i);
-    String post = basepost + String(i);
+    OptString url = baseurl + OptString(i);
+    OptString header = baseheader + OptString(i);
+    OptString post = basepost + OptString(i);
     OptResource task = HHVM_FN(pagelet_server_task_start)(url,
       make_vec_array(header), post);
     tasks.push_back(task);
@@ -100,12 +100,12 @@ bool TestExtServer::test_pagelet_server_task_result() {
   }
 
   for (int i = 0; i < TEST_SIZE; ++i)  {
-    String expected = "pagelet postparam: postparam=";
-    expected += String(i);
+    OptString expected = "pagelet postparam: postparam=";
+    expected += OptString(i);
     expected += "pagelet getparam: ";
-    expected += String(i);
+    expected += OptString(i);
     expected += "pagelet header: ";
-    expected += String(i);
+    expected += OptString(i);
 
     // A timeout of 0 indicates an infinite timeout that blocks.
     Array headers;
@@ -115,7 +115,7 @@ bool TestExtServer::test_pagelet_server_task_result() {
     VS(code, 200);
 
     bool hasResponseHeader = false;
-    auto const expectedHeader = String("ResponseHeader: okay");
+    auto const expectedHeader = OptString("ResponseHeader: okay");
 
     for (int headerIdx = 0; headerIdx < headers.size(); headerIdx++) {
       if (headers[headerIdx].toString() == expectedHeader) {

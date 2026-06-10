@@ -17,10 +17,10 @@
 #ifndef HPHP_EXT_FILTER_FILTER_PRIVATE_H
 #define HPHP_EXT_FILTER_FILTER_PRIVATE_H
 
-struct String;
+struct OptString;
 struct Variant;
 
-#define PHP_INPUT_FILTER_PARAM_DECL const String& value, long flags, \
+#define PHP_INPUT_FILTER_PARAM_DECL const OptString& value, long flags, \
                                     const Variant& option_array
 
 #define RETURN_VALIDATION_FAILED    \

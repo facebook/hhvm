@@ -358,7 +358,7 @@ public:
    * The function's short name (e.g., foo).
    */
   const StringData* name() const;
-  String nameWithClosureName() const;
+  OptString nameWithClosureName() const;
   StrNR nameStr() const;
 
   /*
@@ -370,7 +370,7 @@ public:
    * The function's fully class-qualified, name (e.g., C::foo).
    */
   const StringData* fullName() const;
-  String fullNameWithClosureName() const;
+  OptString fullNameWithClosureName() const;
   StrNR fullNameStr() const;
 
   /*

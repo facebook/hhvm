@@ -27,7 +27,7 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
 struct Array;
-struct String;
+struct OptString;
 struct TypedValue;
 
 //////////////////////////////////////////////////////////////////////
@@ -70,7 +70,7 @@ inline bool is_static_string(const StringData* s) {
 StringData* makeStaticString(const StringData* str);
 StringData* makeStaticString(folly::StringPiece);
 StringData* makeStaticString(const std::string& str);
-StringData* makeStaticString(const String& str);
+StringData* makeStaticString(const OptString& str);
 StringData* makeStaticString(const char* str, size_t len);
 StringData* makeStaticString(const char* str);
 

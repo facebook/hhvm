@@ -21,20 +21,20 @@
 
 namespace HPHP {
 
-Variant HHVM_FUNCTION(snappy_compress, const String& data) {
-  String s = String(snappy::MaxCompressedLength(data.size()), ReserveString);
+Variant HHVM_FUNCTION(snappy_compress, const OptString& data) {
+  OptString s = OptString(snappy::MaxCompressedLength(data.size()), ReserveString);
   size_t size;
   snappy::RawCompress(data.data(), data.size(), s.mutableData(), &size);
   return s.shrink(size);
 }
 
-Variant HHVM_FUNCTION(snappy_uncompress, const String& data) {
+Variant HHVM_FUNCTION(snappy_uncompress, const OptString& data) {
   size_t dsize;
   if (!snappy::GetUncompressedLength(data.data(), data.size(), &dsize)) {
     return false;
   }
 
-  String s = String(dsize, ReserveString);
+  OptString s = OptString(dsize, ReserveString);
   if (!snappy::RawUncompress(data.data(), data.size(), s.mutableData())) {
     return false;
   }

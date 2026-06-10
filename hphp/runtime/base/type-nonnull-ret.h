@@ -45,6 +45,6 @@ private:
 } // namespace HPHP
 
 using ArrayRet = HPHP::NonNullReturnType<HPHP::ArrayData, HPHP::Array>;
-using StringRet = HPHP::NonNullReturnType<HPHP::StringData, HPHP::String>;
+using StringRet = HPHP::NonNullReturnType<HPHP::StringData, HPHP::OptString>;
 using ObjectRet = HPHP::NonNullReturnType<HPHP::ObjectData, HPHP::Object>;
 using ResourceRet = HPHP::NonNullReturnType<HPHP::ResourceData, HPHP::OptResource>;

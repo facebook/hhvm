@@ -44,18 +44,18 @@ struct RepoAutoloadMap final : AutoloadMap {
     HashMapTypeIndex typeAliases,
     CaseSensitiveHashMapIndex modules);
 
-  Optional<AutoloadMap::FileResult> getTypeOrTypeAliasFile(const String& typeName) override;
-  Optional<AutoloadMap::FileResult> getTypeOrTypeAliasFileRelative(const String& typeName) override;
-  Optional<AutoloadMap::FileResult> getTypeFile(const String& typeName) override;
-  Optional<AutoloadMap::FileResult> getTypeFileRelative(const String& typeName) override;
-  Optional<AutoloadMap::FileResult> getFunctionFile(const String& functionName) override;
-  Optional<AutoloadMap::FileResult> getFunctionFileRelative(const String& functionName) override;
-  Optional<AutoloadMap::FileResult> getConstantFile(const String& constantName) override;
-  Optional<AutoloadMap::FileResult> getConstantFileRelative(const String& constantName) override;
-  Optional<AutoloadMap::FileResult> getTypeAliasFile(const String& typeAliasName) override;
-  Optional<AutoloadMap::FileResult> getTypeAliasFileRelative(const String& typeAliasName) override;
-  Optional<AutoloadMap::FileResult> getModuleFile(const String& moduleName) override;
-  Optional<AutoloadMap::FileResult> getModuleFileRelative(const String& moduleName) override;
+  Optional<AutoloadMap::FileResult> getTypeOrTypeAliasFile(const OptString& typeName) override;
+  Optional<AutoloadMap::FileResult> getTypeOrTypeAliasFileRelative(const OptString& typeName) override;
+  Optional<AutoloadMap::FileResult> getTypeFile(const OptString& typeName) override;
+  Optional<AutoloadMap::FileResult> getTypeFileRelative(const OptString& typeName) override;
+  Optional<AutoloadMap::FileResult> getFunctionFile(const OptString& functionName) override;
+  Optional<AutoloadMap::FileResult> getFunctionFileRelative(const OptString& functionName) override;
+  Optional<AutoloadMap::FileResult> getConstantFile(const OptString& constantName) override;
+  Optional<AutoloadMap::FileResult> getConstantFileRelative(const OptString& constantName) override;
+  Optional<AutoloadMap::FileResult> getTypeAliasFile(const OptString& typeAliasName) override;
+  Optional<AutoloadMap::FileResult> getTypeAliasFileRelative(const OptString& typeAliasName) override;
+  Optional<AutoloadMap::FileResult> getModuleFile(const OptString& moduleName) override;
+  Optional<AutoloadMap::FileResult> getModuleFileRelative(const OptString& moduleName) override;
 
   Optional<std::filesystem::path> getTypeOrTypeAliasFile(std::string_view name) override;
   Optional<std::filesystem::path> getTypeOrTypeAliasFileRelative(std::string_view name) override;
@@ -70,13 +70,13 @@ struct RepoAutoloadMap final : AutoloadMap {
   Optional<std::filesystem::path> getModuleFile(std::string_view name) override;
   Optional<std::filesystem::path> getModuleFileRelative(std::string_view name) override;
 
-  Array getFileTypes(const String& path) override;
-  Array getFileFunctions(const String& path) override;
-  Array getFileConstants(const String& path) override;
-  Array getFileTypeAliases(const String& path) override;
-  Array getFileModules(const String& path) override;
+  Array getFileTypes(const OptString& path) override;
+  Array getFileFunctions(const OptString& path) override;
+  Array getFileConstants(const OptString& path) override;
+  Array getFileTypeAliases(const OptString& path) override;
+  Array getFileModules(const OptString& path) override;
 
-  Optional<std::string> getSha1(const String& path) override;
+  Optional<std::string> getSha1(const OptString& path) override;
 
   void ensureUpdated() override {}
 

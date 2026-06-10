@@ -42,9 +42,9 @@ struct PageletServer {
    * if there are no worker threads.
    */
   static OptResource TaskStart(
-    const String& url, const Array& headers,
-    const String& remote_host,
-    const String& post_data = null_string,
+    const OptString& url, const Array& headers,
+    const OptString& remote_host,
+    const OptString& post_data = null_string,
     const Array& files = null_array,
     int timeoutSeconds = -1,
     PageletServerTaskEvent *event = nullptr
@@ -60,7 +60,7 @@ struct PageletServer {
    * Get results of a task. This is blocking until task is finished or times
    * out. The status code is set to -1 in the event of a timeout.
    */
-  static String TaskResult(const OptResource& task,
+  static OptString TaskResult(const OptResource& task,
                            Array &headers,
                            int &code,
                            int64_t timeout_ms);
@@ -89,8 +89,8 @@ const StaticString s_pagelet("pagelet");
 
 struct PageletTransport final : Transport, Synchronizable {
   PageletTransport(
-    const String& url, const Array& headers, const String& postData,
-    const String& remoteHost,
+    const OptString& url, const Array& headers, const OptString& postData,
+    const OptString& remoteHost,
     const std::set<std::string> &rfc1867UploadedFiles,
     const Array& files, int timeoutSeconds);
 
@@ -109,13 +109,13 @@ struct PageletTransport final : Transport, Synchronizable {
   void sendImpl(const void *data, int size, int code, bool chunked, bool eom)
        override;
   void onSendEndImpl() override;
-  bool isUploadedFile(const String& filename) override;
+  bool isUploadedFile(const OptString& filename) override;
   bool getFiles(std::string &files) override;
 
   /**
    * Get a description of the type of transport.
    */
-  String describe() const override {
+  OptString describe() const override {
     return s_pagelet;
   }
 
@@ -126,7 +126,7 @@ struct PageletTransport final : Transport, Synchronizable {
 
   bool isPipelineEmpty();
 
-  String getResults(
+  OptString getResults(
     Array &headers,
     int &code,
     int64_t timeout_ms

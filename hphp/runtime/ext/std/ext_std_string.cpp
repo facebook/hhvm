@@ -25,8 +25,8 @@ namespace HPHP {
 
 const StaticString s_nl("\n");
 
-Variant HHVM_FUNCTION(wordwrap, const String& str, int64_t linewidth /* = 75 */,
-                      const String& brk /* = s_nl */, bool cut /* = false */) {
+Variant HHVM_FUNCTION(wordwrap, const OptString& str, int64_t linewidth /* = 75 */,
+                      const OptString& brk /* = s_nl */, bool cut /* = false */) {
   const char* brkstr = brk.data();
   size_t textlen = str.size();
   size_t brklen = brk.size();
@@ -146,30 +146,30 @@ Variant HHVM_FUNCTION(wordwrap, const String& str, int64_t linewidth /* = 75 */,
 // We take format as a variant in order to get the right conversion
 // failure notice (as opposed to parameter typehint warning)
 Variant HHVM_FUNCTION(sprintf, const Variant& vformat, const Array& args) {
-  String format = vformat.toString();
-  String output = string_printf(format.data(), format.size(), args);
+  OptString format = vformat.toString();
+  OptString output = string_printf(format.data(), format.size(), args);
   if (output.isNull()) return false;
   return output;
 }
 
 Variant HHVM_FUNCTION(vsprintf, const Variant& vformat, const Variant& args) {
-  String format = vformat.toString();
-  String output = string_printf(format.data(), format.size(), args.toArray());
+  OptString format = vformat.toString();
+  OptString output = string_printf(format.data(), format.size(), args.toArray());
   if (output.isNull()) return false;
   return output;
 }
 
 Variant HHVM_FUNCTION(printf, const Variant& vformat, const Array& args) {
-  String format = vformat.toString();
-  String output = string_printf(format.data(), format.size(), args);
+  OptString format = vformat.toString();
+  OptString output = string_printf(format.data(), format.size(), args);
   if (output.isNull()) return false;
   g_context->write(output.data(), output.size());
   return output.size();
 }
 
 Variant HHVM_FUNCTION(vprintf, const Variant& vformat, const Variant& args) {
-  String format = vformat.toString();
-  String output = string_printf(format.data(), format.size(), args.toArray());
+  OptString format = vformat.toString();
+  OptString output = string_printf(format.data(), format.size(), args.toArray());
   if (output.isNull()) return false;
   g_context->write(output.data(), output.size());
   return output.size();

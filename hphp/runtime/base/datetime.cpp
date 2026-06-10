@@ -147,7 +147,7 @@ const StaticString
     ret.set(name, (int)parsed_time->elem);              \
   }
 
-Array DateTime::Parse(const String& datetime) {
+Array DateTime::Parse(const OptString& datetime) {
 
   timelib_error_container* error;
   timelib_time* parsed_time =
@@ -156,7 +156,7 @@ Array DateTime::Parse(const String& datetime) {
   return DateTime::ParseTime(parsed_time, error);
 }
 
-Array DateTime::Parse(const String& format, const String& date) {
+Array DateTime::Parse(const OptString& format, const OptString& date) {
   timelib_error_container* error;
   timelib_time* parsed_time =
     timelib_parse_from_format((char *)format.data(), (char *)date.data(),
@@ -165,7 +165,7 @@ Array DateTime::Parse(const String& format, const String& date) {
   return DateTime::ParseTime(parsed_time, error);
 }
 
-Array DateTime::ParseAsStrptime(const String& format, const String& date) {
+Array DateTime::ParseAsStrptime(const OptString& format, const OptString& date) {
   struct tm parsed_time;
   memset(&parsed_time, 0, sizeof(parsed_time));
   char* unparsed_part = strptime(date.data(), format.data(), &parsed_time);
@@ -182,7 +182,7 @@ Array DateTime::ParseAsStrptime(const String& format, const String& date) {
     s_tm_year, parsed_time.tm_year,
     s_tm_wday, parsed_time.tm_wday,
     s_tm_yday, parsed_time.tm_yday,
-    s_unparsed, String(unparsed_part, CopyString)
+    s_unparsed, OptString(unparsed_part, CopyString)
   );
 }
 
@@ -232,16 +232,16 @@ Array DateTime::ParseAsStrptime(const String& format, const String& date) {
       break;
     case TIMELIB_ZONETYPE_ID:
       if (parsed_time->tz_abbr) {
-        ret.set(s_tz_abbr, String(parsed_time->tz_abbr, CopyString));
+        ret.set(s_tz_abbr, OptString(parsed_time->tz_abbr, CopyString));
       }
       if (parsed_time->tz_info) {
-        ret.set(s_tz_id, String(parsed_time->tz_info->name, CopyString));
+        ret.set(s_tz_id, OptString(parsed_time->tz_info->name, CopyString));
       }
       break;
     case TIMELIB_ZONETYPE_ABBR:
       PHP_DATE_PARSE_DATE_SET_TIME_ELEMENT(s_zone, z);
       ret.set(s_is_dst, (bool)parsed_time->dst);
-      ret.set(s_tz_abbr, String(parsed_time->tz_abbr, CopyString));
+      ret.set(s_tz_abbr, OptString(parsed_time->tz_abbr, CopyString));
       break;
     }
   }
@@ -510,7 +510,7 @@ void DateTime::setTimezone(req::ptr<TimeZone> timezone) {
   timelib_unixtime2local(m_time.get(), m_time->sse);
 }
 
-bool DateTime::modify(const String& diff) {
+bool DateTime::modify(const OptString& diff) {
   timelib_error_container* error = nullptr;
   timelib_time *tmp_time = timelib_strtotime((char*)diff.data(), diff.size(),
                                              &error, TimeZone::GetDatabase(),
@@ -674,12 +674,12 @@ int64_t DateTime::toInteger(char format) const {
   return -1;
 }
 
-String DateTime::toString(const String& format, bool stdc /* = false */) const {
-  if (format.empty()) return String();
+OptString DateTime::toString(const OptString& format, bool stdc /* = false */) const {
+  if (format.empty()) return OptString();
   return stdc ? stdcFormat(format) : rfcFormat(format);
 }
 
-String DateTime::toString(DateFormat format) const {
+OptString DateTime::toString(DateFormat format) const {
   switch (format) {
   case DateFormat::RFC822:     return rfcFormat(DateFormatRFC822);
   case DateFormat::RFC850:     return rfcFormat(DateFormatRFC850);
@@ -694,10 +694,10 @@ String DateTime::toString(DateFormat format) const {
     assertx(false);
   }
   raise_invalid_argument_warning("format: %d", static_cast<int>(format));
-  return String();
+  return OptString();
 }
 
-String DateTime::rfcFormat(const String& format) const {
+OptString DateTime::rfcFormat(const OptString& format) const {
   StringBuffer s;
   bool rfc_colon = false;
   bool error;
@@ -834,7 +834,7 @@ String DateTime::rfcFormat(const String& format) const {
   return s.detach();
 }
 
-String DateTime::stdcFormat(const String& format) const {
+OptString DateTime::stdcFormat(const OptString& format) const {
   // TODO: Fixme under MSVC!
   struct tm ta;
   timelib_time_offset *offset = nullptr;
@@ -865,7 +865,7 @@ String DateTime::stdcFormat(const String& format) const {
       (ta.tm_wday < 0 || ta.tm_wday > 6) ||
       (ta.tm_yday < 0 || ta.tm_yday > 365)) {
     raise_invalid_argument_warning("argument: invalid time");
-    return String();
+    return OptString();
   }
 
   int max_reallocs = 5;
@@ -884,11 +884,11 @@ String DateTime::stdcFormat(const String& format) const {
     timelib_time_offset_dtor(offset);
   }
   if (real_len && real_len != buf_len) {
-    return String(buf, real_len, AttachString);
+    return OptString(buf, real_len, AttachString);
   }
   free(buf);
   raise_invalid_argument_warning("format: (over internal buffer)");
-  return String();
+  return OptString();
 }
 
 Array DateTime::toArray(ArrayFormat format) const {
@@ -944,7 +944,7 @@ Array DateTime::toArray(ArrayFormat format) const {
   return empty_vec_array();
 }
 
-bool DateTime::fromString(const String& input, req::ptr<TimeZone> tz,
+bool DateTime::fromString(const OptString& input, req::ptr<TimeZone> tz,
                           const char* format /*=NUL*/,
                           bool throw_on_error /*= true*/) {
   timelib_error_container *error;
@@ -1162,7 +1162,7 @@ Variant DateTime::getSunInfo(SunInfoFormat retformat,
     char retstr[6];
     snprintf(retstr, sizeof(retstr),
              "%02d:%02d", (int) N, (int) (60 * (N - (int) N)));
-    return String(retstr, CopyString);
+    return OptString(retstr, CopyString);
   }
 
   assertx(retformat == SunInfoFormat::ReturnDouble);

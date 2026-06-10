@@ -128,7 +128,7 @@ void HHVM_FUNCTION(dummy_lots_inout,
                    Variant& p9, Variant& p10, Variant& p11, Variant& p12) {
 }
 
-String HHVM_FUNCTION(serialize_with_format, const Variant& thing,
+OptString HHVM_FUNCTION(serialize_with_format, const Variant& thing,
                      int64_t format) {
   if (format > static_cast<int64_t>(VariableSerializer::Type::Last)) {
     raise_invalid_argument_warning("invalid serializer format");
@@ -137,7 +137,7 @@ String HHVM_FUNCTION(serialize_with_format, const Variant& thing,
   return vs.serialize(thing, true);
 }
 
-Variant HHVM_FUNCTION(deserialize_with_format, const String& str,
+Variant HHVM_FUNCTION(deserialize_with_format, const OptString& str,
                       int64_t format) {
   if (format > static_cast<int64_t>(VariableUnserializer::Type::Last)) {
     raise_invalid_argument_warning("invalid serializer format");
@@ -147,7 +147,7 @@ Variant HHVM_FUNCTION(deserialize_with_format, const String& str,
   return vu.unserialize();
 }
 
-String HHVM_FUNCTION(serialize_keep_dvarrays, const Variant& value) {
+OptString HHVM_FUNCTION(serialize_keep_dvarrays, const Variant& value) {
   return serialize_keep_dvarrays(value);
 }
 
@@ -254,7 +254,7 @@ void HHVM_FUNCTION(hhbbc_fail_verification) {
 Array HHVM_FUNCTION(
   builtin_io,
   StringArg s,
-  String& str,
+  OptString& str,
   int64_t& num,
   int64_t i,
   Object& obj,
@@ -399,11 +399,11 @@ void HHVM_FUNCTION(drain_unit_prefetcher) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-String HHVM_FUNCTION(debug_get_bytecode) {
+OptString HHVM_FUNCTION(debug_get_bytecode) {
   return fromCaller([] (const BTFrame& frame) {
     std::ostringstream ss;
     frame.func()->prettyPrint(ss);
-    return String(ss.str());
+    return OptString(ss.str());
   });
 }
 
@@ -412,7 +412,7 @@ Array HHVM_FUNCTION(debug_file_deps) {
     auto const& deps = frame.func()->unit()->deps();
     VecInit vinit{deps.size()};
     for (auto const& [name, sha] : deps) {
-      vinit.append(String(name));
+      vinit.append(OptString(name));
     }
     return vinit.toArray();
   });

@@ -26,9 +26,9 @@ namespace thrift {
 ///////////////////////////////////////////////////////////////////////////////
 
 void
-setThriftType(Variant value, const Object& obj, const String& fieldName);
+setThriftType(Variant value, const Object& obj, const OptString& fieldName);
 
-Variant getThriftType(const Object& obj, const String& fieldName);
+Variant getThriftType(const Object& obj, const OptString& fieldName);
 
 ///////////////////////////////////////////////////////////////////////////////
 } // namespace thrift

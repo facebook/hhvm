@@ -154,7 +154,7 @@ ArrayRet HHVM_FUNCTION(hphp_debug_caller_info) {
 
 
 bool hphp_debug_caller_identifier_impl(
-    String& result, bool& skipped, const Func* func) {
+    OptString& result, bool& skipped, const Func* func) {
   if (!skipped && func->isSkipFrame()) return false;
   if (!skipped) {
     skipped = true;
@@ -176,8 +176,8 @@ bool hphp_debug_caller_identifier_impl(
  * hphp_debug_caller_identifier() as the "callee", and we refer to the
  * function that called the callee as the "caller".
  */
-String HHVM_FUNCTION(hphp_debug_caller_identifier) {
-  String result = empty_string();
+OptString HHVM_FUNCTION(hphp_debug_caller_identifier) {
+  OptString result = empty_string();
   bool skipped = false;
   walkStack([&] (const BTFrame& frm) {
     return hphp_debug_caller_identifier_impl(
@@ -198,7 +198,7 @@ void HHVM_FUNCTION(debug_print_backtrace, int64_t options /* = 0 */,
   g_context->write(debug_string_backtrace(false, ignore_args, limit));
 }
 
-String stringify_backtrace(const Array& bt, bool ignore_args) {
+OptString stringify_backtrace(const Array& bt, bool ignore_args) {
   StringBuffer buf;
   int i = 0;
   for (ArrayIter it = bt.begin(); !it.end(); it.next(), i++) {
@@ -243,7 +243,7 @@ String stringify_backtrace(const Array& bt, bool ignore_args) {
   return buf.detach();
 }
 
-String debug_string_backtrace(bool skip, bool ignore_args /* = false */,
+OptString debug_string_backtrace(bool skip, bool ignore_args /* = false */,
                               int64_t limit /* = 0 */) {
   Array bt;
   bt = createBacktrace(BacktraceArgs()
@@ -254,7 +254,7 @@ String debug_string_backtrace(bool skip, bool ignore_args /* = false */,
 }
 
 Array HHVM_FUNCTION(error_get_last) {
-  String lastError = g_context->getLastError();
+  OptString lastError = g_context->getLastError();
   if (lastError.isNull()) {
     return null_array;
   }
@@ -266,7 +266,7 @@ Array HHVM_FUNCTION(error_get_last) {
   );
 }
 
-bool HHVM_FUNCTION(error_log, const String& message, int64_t message_type /* = 0 */,
+bool HHVM_FUNCTION(error_log, const OptString& message, int64_t message_type /* = 0 */,
                    const Variant& destination /* = null */,
                    const Variant& /*extra_headers*/ /* = null */) {
   // error_log() should not invoke the user error handler,
@@ -333,11 +333,11 @@ Variant HHVM_FUNCTION(set_exception_handler, const Variant& exception_handler) {
   return g_context->pushUserExceptionHandler(exception_handler);
 }
 
-void HHVM_FUNCTION(hphp_set_error_page, const String& page) {
+void HHVM_FUNCTION(hphp_set_error_page, const OptString& page) {
   g_context->setErrorPage(page);
 }
 
-void HHVM_FUNCTION(hphp_throw_fatal_error, const String& error_msg) {
+void HHVM_FUNCTION(hphp_throw_fatal_error, const OptString& error_msg) {
   std::string msg = error_msg.data();
   raise_error(msg);
 }
@@ -348,7 +348,7 @@ void HHVM_FUNCTION(hphp_clear_unflushed) {
   g_context->obProtect(true);
 }
 
-bool HHVM_FUNCTION(trigger_error, const String& error_msg,
+bool HHVM_FUNCTION(trigger_error, const OptString& error_msg,
                    int64_t error_type /* = ErrorMode::USER_NOTICE */) {
   std::string msg = error_msg.data(); // not toCppString()
   if (UNLIKELY(g_context->getThrowAllErrors())) {
@@ -415,7 +415,7 @@ bool HHVM_FUNCTION(trigger_error, const String& error_msg,
   return false;
 }
 
-bool HHVM_FUNCTION(trigger_sampled_error, const String& error_msg,
+bool HHVM_FUNCTION(trigger_sampled_error, const OptString& error_msg,
                    int64_t sample_rate,
                    int64_t error_type /* = (int)ErrorMode::USER_NOTICE */) {
   if (!folly::Random::oneIn(sample_rate, threadLocalRng64())) {
@@ -424,7 +424,7 @@ bool HHVM_FUNCTION(trigger_sampled_error, const String& error_msg,
   return HHVM_FN(trigger_error)(error_msg, error_type);
 }
 
-bool HHVM_FUNCTION(user_error, const String& error_msg,
+bool HHVM_FUNCTION(user_error, const OptString& error_msg,
                    int64_t error_type /* = (int)ErrorMode::USER_NOTICE */) {
   return HHVM_FN(trigger_error)(error_msg, error_type);
 }

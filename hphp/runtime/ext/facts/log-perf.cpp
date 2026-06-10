@@ -72,79 +72,80 @@ void FactsLogger::validate(const std::set<std::string>& types_to_ignore) {
 }
 
 Optional<AutoloadMap::FileResult> FactsLogger::getTypeOrTypeAliasFile(
-    const String& typeName) {
+    const OptString& typeName) {
   return logPerf(__func__, typeName.slice(), [&]() {
     return m_inner->getTypeOrTypeAliasFile(typeName);
   });
 }
 
 Optional<AutoloadMap::FileResult> FactsLogger::getTypeOrTypeAliasFileRelative(
-    const String& typeName) {
+    const OptString& typeName) {
   return logPerf(__func__, typeName.slice(), [&]() {
     return m_inner->getTypeOrTypeAliasFileRelative(typeName);
   });
 }
 
-Optional<AutoloadMap::FileResult> FactsLogger::getTypeFile(const String& name) {
+Optional<AutoloadMap::FileResult> FactsLogger::getTypeFile(
+    const OptString& name) {
   return logPerf(
       __func__, name.slice(), [&]() { return m_inner->getTypeFile(name); });
 }
 
 Optional<AutoloadMap::FileResult> FactsLogger::getTypeFileRelative(
-    const String& name) {
+    const OptString& name) {
   return logPerf(__func__, name.slice(), [&]() {
     return m_inner->getTypeFileRelative(name);
   });
 }
 
 Optional<AutoloadMap::FileResult> FactsLogger::getFunctionFile(
-    const String& name) {
+    const OptString& name) {
   return logPerf(
       __func__, name.slice(), [&]() { return m_inner->getFunctionFile(name); });
 }
 
 Optional<AutoloadMap::FileResult> FactsLogger::getFunctionFileRelative(
-    const String& name) {
+    const OptString& name) {
   return logPerf(__func__, name.slice(), [&]() {
     return m_inner->getFunctionFileRelative(name);
   });
 }
 
 Optional<AutoloadMap::FileResult> FactsLogger::getConstantFile(
-    const String& name) {
+    const OptString& name) {
   return logPerf(
       __func__, name.slice(), [&]() { return m_inner->getConstantFile(name); });
 }
 
 Optional<AutoloadMap::FileResult> FactsLogger::getConstantFileRelative(
-    const String& name) {
+    const OptString& name) {
   return logPerf(__func__, name.slice(), [&]() {
     return m_inner->getConstantFileRelative(name);
   });
 }
 
 Optional<AutoloadMap::FileResult> FactsLogger::getTypeAliasFile(
-    const String& name) {
+    const OptString& name) {
   return logPerf(__func__, name.slice(), [&]() {
     return m_inner->getTypeAliasFile(name);
   });
 }
 
 Optional<AutoloadMap::FileResult> FactsLogger::getTypeAliasFileRelative(
-    const String& name) {
+    const OptString& name) {
   return logPerf(__func__, name.slice(), [&]() {
     return m_inner->getTypeAliasFileRelative(name);
   });
 }
 
 Optional<AutoloadMap::FileResult> FactsLogger::getModuleFile(
-    const String& name) {
+    const OptString& name) {
   return logPerf(
       __func__, name.slice(), [&]() { return m_inner->getModuleFile(name); });
 }
 
 Optional<AutoloadMap::FileResult> FactsLogger::getModuleFileRelative(
-    const String& name) {
+    const OptString& name) {
   return logPerf(__func__, name.slice(), [&]() {
     return m_inner->getModuleFileRelative(name);
   });
@@ -211,7 +212,7 @@ Optional<std::filesystem::path> FactsLogger::getTypeAliasFileRelative(
   });
 }
 
-Optional<std::string> FactsLogger::getSha1(const String& path) {
+Optional<std::string> FactsLogger::getSha1(const OptString& path) {
   return logPerf(
       __func__, path.slice(), [&]() { return m_inner->getSha1(path); });
 }
@@ -228,30 +229,30 @@ Optional<std::filesystem::path> FactsLogger::getModuleFileRelative(
       __func__, name, [&]() { return m_inner->getModuleFileRelative(name); });
 }
 
-Array FactsLogger::getFileTypes(const String& path) {
+Array FactsLogger::getFileTypes(const OptString& path) {
   return logPerf(
       __func__, path.slice(), [&]() { return m_inner->getFileTypes(path); });
 }
 
-Array FactsLogger::getFileFunctions(const String& path) {
+Array FactsLogger::getFileFunctions(const OptString& path) {
   return logPerf(__func__, path.slice(), [&]() {
     return m_inner->getFileFunctions(path);
   });
 }
 
-Array FactsLogger::getFileConstants(const String& path) {
+Array FactsLogger::getFileConstants(const OptString& path) {
   return logPerf(__func__, path.slice(), [&]() {
     return m_inner->getFileConstants(path);
   });
 }
 
-Array FactsLogger::getFileTypeAliases(const String& path) {
+Array FactsLogger::getFileTypeAliases(const OptString& path) {
   return logPerf(__func__, path.slice(), [&]() {
     return m_inner->getFileTypeAliases(path);
   });
 }
 
-Array FactsLogger::getFileModules(const String& path) {
+Array FactsLogger::getFileModules(const OptString& path) {
   return logPerf(
       __func__, path.slice(), [&]() { return m_inner->getFileModules(path); });
 }
@@ -260,13 +261,15 @@ Array FactsLogger::getAllModules() {
   return logPerf(__func__, "", [&]() { return m_inner->getAllModules(); });
 }
 
-Optional<String> FactsLogger::getFileModuleMembership(const String& path) {
+Optional<OptString> FactsLogger::getFileModuleMembership(
+    const OptString& path) {
   return logPerf(__func__, path.slice(), [&]() {
     return m_inner->getFileModuleMembership(path);
   });
 }
 
-Optional<String> FactsLogger::getFilePackageMembership(const String& path) {
+Optional<OptString> FactsLogger::getFilePackageMembership(
+    const OptString& path) {
   return logPerf(__func__, path.slice(), [&]() {
     return m_inner->getFilePackageMembership(path);
   });
@@ -276,40 +279,42 @@ void FactsLogger::close() {
   return logPerf(__func__, "", [&]() { m_inner->close(); });
 }
 
-Variant FactsLogger::getTypeName(const String& name) {
+Variant FactsLogger::getTypeName(const OptString& name) {
   return logPerf(
       __func__, name.slice(), [&]() { return m_inner->getTypeName(name); });
 }
 
-Variant FactsLogger::getKind(const String& name) {
+Variant FactsLogger::getKind(const OptString& name) {
   return logPerf(
       __func__, name.slice(), [&]() { return m_inner->getKind(name); });
 }
 
-bool FactsLogger::isTypeAbstract(const String& name) {
+bool FactsLogger::isTypeAbstract(const OptString& name) {
   return logPerf(
       __func__, name.slice(), [&]() { return m_inner->isTypeAbstract(name); });
 }
 
-bool FactsLogger::isTypeFinal(const String& name) {
+bool FactsLogger::isTypeFinal(const OptString& name) {
   return logPerf(
       __func__, name.slice(), [&]() { return m_inner->isTypeFinal(name); });
 }
 
-Array FactsLogger::getBaseTypes(const String& name, const Variant& filter) {
+Array FactsLogger::getBaseTypes(const OptString& name, const Variant& filter) {
   return logPerf(__func__, name.slice(), [&]() {
     return m_inner->getBaseTypes(name, filter);
   });
 }
 
-Array FactsLogger::getDerivedTypes(const String& name, const Variant& filter) {
+Array FactsLogger::getDerivedTypes(
+    const OptString& name,
+    const Variant& filter) {
   return logPerf(__func__, name.slice(), [&]() {
     return m_inner->getDerivedTypes(name, filter);
   });
 }
 
 Array FactsLogger::getTransitiveDerivedTypes(
-    const String& name,
+    const OptString& name,
     const Variant& filter,
     bool includeInterfaceRequireExtends) {
   return logPerf(__func__, name.slice(), [&]() {
@@ -318,100 +323,104 @@ Array FactsLogger::getTransitiveDerivedTypes(
   });
 }
 
-Array FactsLogger::getTypesWithAttribute(const String& name) {
+Array FactsLogger::getTypesWithAttribute(const OptString& name) {
   return logPerf(__func__, name.slice(), [&]() {
     return m_inner->getTypesWithAttribute(name);
   });
 }
 
-Array FactsLogger::getTypeAliasesWithAttribute(const String& name) {
+Array FactsLogger::getTypeAliasesWithAttribute(const OptString& name) {
   return logPerf(__func__, name.slice(), [&]() {
     return m_inner->getTypeAliasesWithAttribute(name);
   });
 }
 
-Array FactsLogger::getMethodsWithAttribute(const String& name) {
+Array FactsLogger::getMethodsWithAttribute(const OptString& name) {
   return logPerf(__func__, name.slice(), [&]() {
     return m_inner->getMethodsWithAttribute(name);
   });
 }
 
-Array FactsLogger::getTypeMethodAttributes(const String& type) {
+Array FactsLogger::getTypeMethodAttributes(const OptString& type) {
   return logPerf(__func__, type.slice(), [&]() {
     return m_inner->getTypeMethodAttributes(type);
   });
 }
 
-Array FactsLogger::getFilesWithAttribute(const String& name) {
+Array FactsLogger::getFilesWithAttribute(const OptString& name) {
   return logPerf(__func__, name.slice(), [&]() {
     return m_inner->getFilesWithAttribute(name);
   });
 }
 
-Array FactsLogger::getFilesAndAttrValsWithAttribute(const String& name) {
+Array FactsLogger::getFilesAndAttrValsWithAttribute(const OptString& name) {
   return logPerf(__func__, name.slice(), [&]() {
     return m_inner->getFilesAndAttrValsWithAttribute(name);
   });
 }
 
 Array FactsLogger::getFilesWithAttributeAndAnyValue(
-    const String& name,
+    const OptString& name,
     const folly::dynamic& val) {
   return logPerf(__func__, name.slice(), [&]() {
     return m_inner->getFilesWithAttributeAndAnyValue(name, val);
   });
 }
 
-Array FactsLogger::getTypeAttributes(const String& name) {
+Array FactsLogger::getTypeAttributes(const OptString& name) {
   return logPerf(__func__, name.slice(), [&]() {
     return m_inner->getTypeAttributes(name);
   });
 }
 
-Array FactsLogger::getTypeAliasAttributes(const String& name) {
+Array FactsLogger::getTypeAliasAttributes(const OptString& name) {
   return logPerf(__func__, name.slice(), [&]() {
     return m_inner->getTypeAliasAttributes(name);
   });
 }
 
 Array FactsLogger::getMethodAttributes(
-    const String& type,
-    const String& method) {
+    const OptString& type,
+    const OptString& method) {
   return logPerf(__func__, type.slice(), [&]() {
     return m_inner->getMethodAttributes(type, method);
   });
 }
 
-Array FactsLogger::getFileAttributes(const String& path) {
+Array FactsLogger::getFileAttributes(const OptString& path) {
   return logPerf(__func__, path.slice(), [&]() {
     return m_inner->getFileAttributes(path);
   });
 }
 
-Array FactsLogger::getTypeAttrArgs(const String& type, const String& attr) {
+Array FactsLogger::getTypeAttrArgs(
+    const OptString& type,
+    const OptString& attr) {
   return logPerf(__func__, type.slice(), [&]() {
     return m_inner->getTypeAttrArgs(type, attr);
   });
 }
 
 Array FactsLogger::getTypeAliasAttrArgs(
-    const String& type,
-    const String& attr) {
+    const OptString& type,
+    const OptString& attr) {
   return logPerf(__func__, type.slice(), [&]() {
     return m_inner->getTypeAliasAttrArgs(type, attr);
   });
 }
 
 Array FactsLogger::getMethodAttrArgs(
-    const String& type,
-    const String& method,
-    const String& attr) {
+    const OptString& type,
+    const OptString& method,
+    const OptString& attr) {
   return logPerf(__func__, type.slice(), [&]() {
     return m_inner->getMethodAttrArgs(type, method, attr);
   });
 }
 
-Array FactsLogger::getFileAttrArgs(const String& file, const String& attr) {
+Array FactsLogger::getFileAttrArgs(
+    const OptString& file,
+    const OptString& attr) {
   return logPerf(__func__, file.slice(), [&]() {
     return m_inner->getFileAttrArgs(file, attr);
   });

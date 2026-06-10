@@ -347,7 +347,7 @@ const StaticString
   s_query("query"),
   s_namespaces("namespaces");
 
-static Variant dom_canonicalization(xmlNodePtr nodep, const String& file,
+static Variant dom_canonicalization(xmlNodePtr nodep, const OptString& file,
                                     bool exclusive, bool with_comments,
                                     const Variant& xpath_array,
                                     const Variant& ns_prefixes,
@@ -384,7 +384,7 @@ static Variant dom_canonicalization(xmlNodePtr nodep, const String& file,
   } else {
     // xpath query from xpath_array
     Array arr = xpath_array.toArray();
-    String xquery;
+    OptString xquery;
     if (!arr.exists(s_query)) {
       raise_warning("'query' missing from xpath array");
       return false;
@@ -465,7 +465,7 @@ static Variant dom_canonicalization(xmlNodePtr nodep, const String& file,
     if (mode == 0) {
       ret = xmlOutputBufferGetSize(buf);
       if (ret > 0) {
-        retval = String((char *)xmlOutputBufferGetContent(buf), ret, CopyString);
+        retval = OptString((char *)xmlOutputBufferGetContent(buf), ret, CopyString);
       } else {
         retval = empty_string();
       }
@@ -656,7 +656,7 @@ static xmlNsPtr dom_get_ns(xmlNodePtr nodep, const char *uri, int *errorcode,
 }
 
 static xmlDocPtr dom_document_parser(DOMNode* domnode, bool isFile,
-                                     const String& source,
+                                     const OptString& source,
                                      int options) {
   VMRegGuard _;
 
@@ -674,7 +674,7 @@ static xmlDocPtr dom_document_parser(DOMNode* domnode, bool isFile,
   req::ptr<File> stream;
 
   if (isFile) {
-    String file_dest = libxml_get_valid_file_path(source);
+    OptString file_dest = libxml_get_valid_file_path(source);
     if (!file_dest.empty()) {
       // This is considerably more verbose than just using
       // xmlCreateFileParserCtxt, but it allows us to bypass the external
@@ -701,7 +701,7 @@ static xmlDocPtr dom_document_parser(DOMNode* domnode, bool isFile,
   /* If loading from memory, we need to set the base directory for the
    * document */
   if (!isFile) {
-    String directory = g_context->getCwd();
+    OptString directory = g_context->getCwd();
     if (!directory.empty()) {
       if (ctxt->directory != nullptr) xmlFree(ctxt->directory);
 
@@ -797,7 +797,7 @@ DOMXPath* getDOMXPath(const Object& obj) {
 
 }
 
-static bool HHVM_METHOD(DOMDocument, _load, const String& source,
+static bool HHVM_METHOD(DOMDocument, _load, const OptString& source,
                         int64_t options, bool isFile) {
   if (source.empty()) {
     raise_warning("Empty string supplied as input");
@@ -821,7 +821,7 @@ static bool HHVM_METHOD(DOMDocument, _load, const String& source,
   return true;
 }
 
-static bool HHVM_METHOD(DOMDocument, _loadHTML, const String& source,
+static bool HHVM_METHOD(DOMDocument, _loadHTML, const OptString& source,
                         int64_t options, bool isFile) {
   VMRegGuard _;
 
@@ -869,7 +869,7 @@ static bool HHVM_METHOD(DOMDocument, _loadHTML, const String& source,
 }
 
 static bool _dom_document_relaxNG_validate(DOMNode* domdoc,
-                                           const String& source, int type) {
+                                           const OptString& source, int type) {
   xmlRelaxNGParserCtxtPtr parser;
   xmlRelaxNGPtr           sptr;
   xmlRelaxNGValidCtxtPtr  vptr;
@@ -885,7 +885,7 @@ static bool _dom_document_relaxNG_validate(DOMNode* domdoc,
   switch (type) {
   case DOM_LOAD_FILE:
     {
-      String valid_file = libxml_get_valid_file_path(source.data());
+      OptString valid_file = libxml_get_valid_file_path(source.data());
       if (valid_file.empty()) {
         raise_warning("Invalid RelaxNG file source");
         return false;
@@ -929,7 +929,7 @@ static bool _dom_document_relaxNG_validate(DOMNode* domdoc,
 }
 
 static bool _dom_document_schema_validate(DOMNode* domdoc,
-                                          const String& source, int type) {
+                                          const OptString& source, int type) {
   xmlDocPtr docp = (xmlDocPtr)domdoc->nodep();
   xmlSchemaParserCtxtPtr  parser;
   xmlSchemaPtr            sptr;
@@ -944,7 +944,7 @@ static bool _dom_document_schema_validate(DOMNode* domdoc,
   switch (type) {
   case DOM_LOAD_FILE:
     {
-      String valid_file = libxml_get_valid_file_path(source.data());
+      OptString valid_file = libxml_get_valid_file_path(source.data());
       if (valid_file.empty()) {
         raise_warning("Invalid Schema file source");
         return false;
@@ -1117,7 +1117,7 @@ static xmlNsPtr dom_get_nsdecl(xmlNode *node, xmlChar *localName) {
   return ret;
 }
 
-static String domClassname(xmlNodePtr obj) {
+static OptString domClassname(xmlNodePtr obj) {
   switch (obj->type) {
   case XML_DOCUMENT_NODE:
   case XML_HTML_DOCUMENT_NODE: return DOMDocument::className();
@@ -1136,13 +1136,13 @@ static String domClassname(xmlNodePtr obj) {
   case XML_NOTATION_NODE:      return DOMNotation::className();
   case XML_NAMESPACE_DECL:     return DOMNameSpaceNode::className();
   default:
-    return String((StringData*)nullptr);
+    return OptString((StringData*)nullptr);
   }
 }
 
 Variant php_dom_create_object(xmlNodePtr obj,
                               req::ptr<XMLDocumentData> doc) {
-  String clsname = domClassname(obj);
+  OptString clsname = domClassname(obj);
   if (!clsname) {
     raise_warning("Unsupported node type: %d", obj->type);
     return init_null();
@@ -1196,7 +1196,7 @@ static Variant create_node_object(xmlNodePtr obj, Object docObj) {
   return create_node_object(obj);
 }
 
-static Variant php_xpath_eval(DOMXPath* domxpath, const String& expr,
+static Variant php_xpath_eval(DOMXPath* domxpath, const OptString& expr,
                               const Object& context, int type,
                               bool registerNodeNS) {
   xmlXPathObjectPtr xpathobjp;
@@ -1302,7 +1302,7 @@ static Variant php_xpath_eval(DOMXPath* domxpath, const String& expr,
     ret = (double)(xpathobjp->floatval);
     break;
   case XPATH_STRING:
-    ret = String((char*)xpathobjp->stringval, CopyString);
+    ret = OptString((char*)xpathobjp->stringval, CopyString);
     break;
   default:
     ret = uninit_null();
@@ -1361,7 +1361,7 @@ static xmlNsPtr _dom_new_reconNs(xmlDocPtr doc, xmlNodePtr tree, xmlNsPtr ns) {
   return(def);
 }
 
-static const char * getStringData(const String& str) {
+static const char * getStringData(const OptString& str) {
   if (str.isNull()) {
     return nullptr;
   }
@@ -1484,22 +1484,22 @@ struct cmpdpa {
  */
 template <class Derived>
 struct DOMPropHandler: Native::BasePropHandler {
-  static Variant getProp(const Object& this_, const String& name) {
+  static Variant getProp(const Object& this_, const OptString& name) {
     return Derived::map.getter(name)(this_);
   }
 
   static Variant setProp(const Object& this_,
-                         const String& name,
+                         const OptString& name,
                          const Variant& value) {
     Derived::map.setter(name)(this_, value);
     return true;
   }
 
-  static Variant issetProp(const Object& this_, const String& name) {
+  static Variant issetProp(const Object& this_, const OptString& name) {
     return Derived::map.isset(this_, name);
   }
 
-  static bool isPropSupported(const String& name, const String& /*op*/) {
+  static bool isPropSupported(const OptString& name, const OptString& /*op*/) {
     return Derived::map.isPropertySupported(name);
   }
 };
@@ -1519,7 +1519,7 @@ struct DOMPropertyAccessorMap :
     }
   }
 
-  bool isPropertySupported(const String& name) {
+  bool isPropertySupported(const OptString& name) {
     auto dpa = DOMPropertyAccessor {
       name.data(), nullptr, nullptr
     };
@@ -1527,7 +1527,7 @@ struct DOMPropertyAccessorMap :
     return iter != end();
   }
 
-  Variant (*getter(const String& name))(const Object&) {
+  Variant (*getter(const OptString& name))(const Object&) {
     auto dpa = DOMPropertyAccessor {
       name.data(), nullptr, nullptr
     };
@@ -1542,7 +1542,7 @@ struct DOMPropertyAccessorMap :
     return dummy_getter;
   }
 
-  void (*setter(const String& name))(const Object&, const Variant&) {
+  void (*setter(const OptString& name))(const Object&, const Variant&) {
     auto dpa = DOMPropertyAccessor {
       name.data(), nullptr, nullptr
     };
@@ -1557,7 +1557,7 @@ struct DOMPropertyAccessorMap :
     return dummy_setter;
   }
 
-  bool isset(const Object& obj, const String& name) {
+  bool isset(const Object& obj, const OptString& name) {
     auto dpa = DOMPropertyAccessor {
       name.data(), nullptr, nullptr
     };
@@ -1579,7 +1579,7 @@ struct DOMPropertyAccessorMap :
       if (value.isObject()) {
         value = s_object_value_omitted;
       }
-      ret.set(String(it->name, CopyString), value);
+      ret.set(OptString(it->name, CopyString), value);
     }
     return ret;
   }
@@ -1615,8 +1615,8 @@ static Object newDOMNamedNodeMap(req::ptr<XMLDocumentData> doc, Object base,
 }
 
 static Object newDOMNodeList(req::ptr<XMLDocumentData> doc, Object base,
-                             int node_type, String local = String(),
-                             String ns = String()) {
+                             int node_type, OptString local = OptString(),
+                             OptString ns = OptString()) {
   Object ret{DOMNodeList::classof()};
   auto data = Native::data<DOMIterable>(ret);
   data->m_doc = doc;
@@ -1693,7 +1693,7 @@ static Variant domnode_nodename_read(const Object& obj) {
     raise_warning("Invalid Node Type");
     break;
   }
-  String retval(str, CopyString);
+  OptString retval(str, CopyString);
   if (qname != nullptr) {
     xmlFree(qname);
   }
@@ -1721,7 +1721,7 @@ static Variant domnode_nodevalue_read(const Object& obj) {
     break;
   }
   if (str != nullptr) {
-    String retval(str, CopyString);
+    OptString retval(str, CopyString);
     xmlFree(str);
     return retval;
   } else {
@@ -1745,7 +1745,7 @@ static void domnode_nodevalue_write(const Object& obj, const Variant& value) {
   case XML_CDATA_SECTION_NODE:
   case XML_PI_NODE:
     {
-      String valueStr = value.toString();
+      OptString valueStr = value.toString();
       xmlNodeSetContentLen(nodep,
                            (const xmlChar*)valueStr.data(),
                            valueStr.size() + 1);
@@ -1849,7 +1849,7 @@ static Variant domnode_namespaceuri_read(const Object& obj) {
     break;
   }
   if (str) {
-    return String(str, CopyString);
+    return OptString(str, CopyString);
   }
   return init_null();
 }
@@ -1872,13 +1872,13 @@ static Variant domnode_prefix_read(const Object& obj) {
   }
 
   if (str) {
-    return String(str, CopyString);
+    return OptString(str, CopyString);
   }
   return empty_string_variant();
 }
 
 static void domnode_prefix_write(const Object& obj, const Variant& value) {
-  String svalue;
+  OptString svalue;
   xmlNode *nsnode = nullptr;
   xmlNsPtr ns = nullptr, curns;
   const char *strURI;
@@ -1942,7 +1942,7 @@ static Variant domnode_localname_read(const Object& obj) {
   if (nodep->type == XML_ELEMENT_NODE ||
       nodep->type == XML_ATTRIBUTE_NODE ||
       nodep->type == XML_NAMESPACE_DECL) {
-    return String((char *)(nodep->name), CopyString);
+    return OptString((char *)(nodep->name), CopyString);
   }
   return init_null();
 }
@@ -1951,7 +1951,7 @@ static Variant domnode_baseuri_read(const Object& obj) {
   CHECK_NODE(nodep);
   xmlChar *baseuri = xmlNodeGetBase(nodep->doc, nodep);
   if (baseuri) {
-    String ret((char *)(baseuri), CopyString);
+    OptString ret((char *)(baseuri), CopyString);
     xmlFree(baseuri);
     return ret;
   }
@@ -1962,7 +1962,7 @@ static Variant domnode_textcontent_read(const Object& obj) {
   CHECK_NODE(nodep);
   char *str = (char *)xmlNodeGetContent(nodep);
   if (str) {
-    String ret(str, CopyString);
+    OptString ret(str, CopyString);
     xmlFree(str);
     return ret;
   }
@@ -2334,7 +2334,7 @@ Variant HHVM_METHOD(DOMNode, insertBefore,
 }
 
 bool HHVM_METHOD(DOMNode, isDefaultNamespace,
-                 const String& namespaceuri) {
+                 const OptString& namespaceuri) {
   auto* data = Native::data<DOMNode>(this_);
   xmlNodePtr nodep = data->nodep();
   if (!nodep) {
@@ -2363,8 +2363,8 @@ bool HHVM_METHOD(DOMNode, isSameNode,
 }
 
 bool HHVM_METHOD(DOMNode, isSupported,
-                 const String& feature,
-                 const String& version) {
+                 const OptString& feature,
+                 const OptString& version) {
   return dom_has_feature(feature.data(), version.data());
 }
 
@@ -2391,7 +2391,7 @@ Variant HHVM_METHOD(DOMNode, lookupNamespaceUri,
     }
   }
 
-  String nsuri = namespaceuri.toString();
+  OptString nsuri = namespaceuri.toString();
   const char* ns = nsuri.data();
   if (namespaceuri.isNull()) {
     ns = nullptr;
@@ -2399,13 +2399,13 @@ Variant HHVM_METHOD(DOMNode, lookupNamespaceUri,
 
   nsptr = xmlSearchNs(nodep->doc, nodep, (xmlChar*)ns);
   if (nsptr && nsptr->href != nullptr) {
-    return String((char *)nsptr->href, CopyString);
+    return OptString((char *)nsptr->href, CopyString);
   }
   return init_null();
 }
 
 Variant HHVM_METHOD(DOMNode, lookupPrefix,
-                    const String& prefix) {
+                    const OptString& prefix) {
   auto* data = Native::data<DOMNode>(this_);
   xmlNodePtr nodep = data->nodep();
   if (!nodep) {
@@ -2436,7 +2436,7 @@ Variant HHVM_METHOD(DOMNode, lookupPrefix,
         (nsptr = xmlSearchNsByHref(lookupp->doc, lookupp,
                                    (xmlChar*)prefix.data()))) {
       if (nsptr->prefix != nullptr) {
-        return String((char *)nsptr->prefix, CopyString);
+        return OptString((char *)nsptr->prefix, CopyString);
       }
     }
   }
@@ -2583,7 +2583,7 @@ Variant HHVM_METHOD(DOMNode, C14N,
 }
 
 Variant HHVM_METHOD(DOMNode, C14Nfile,
-                    const String& uri,
+                    const OptString& uri,
                     bool exclusive /* = false */,
                     bool with_comments /* = false */,
                     const Variant& xpath /* = null */,
@@ -2606,7 +2606,7 @@ Variant HHVM_METHOD(DOMNode, getNodePath) {
   }
   char *value = (char*)xmlGetNodePath(n);
   if (value) {
-    String ret(value, CopyString);
+    OptString ret(value, CopyString);
     xmlFree(value);
     return ret;
   }
@@ -2636,7 +2636,7 @@ Variant HHVM_METHOD(DOMNode, getNodePath) {
 
 static Variant domattr_name_read(const Object& obj) {
   CHECK_ATTR(attrp);
-  return String((char *)(attrp->name), CopyString);
+  return OptString((char *)(attrp->name), CopyString);
 }
 
 static Variant domattr_specified_read(const Object& /*obj*/) {
@@ -2648,7 +2648,7 @@ static Variant domattr_value_read(const Object& obj) {
   CHECK_ATTR(attrp);
   xmlChar *content = xmlNodeGetContent((xmlNodePtr) attrp);
   if (content) {
-    String ret((const char*)content, CopyString);
+    OptString ret((const char*)content, CopyString);
     xmlFree(content);
     return ret;
   }
@@ -2657,7 +2657,7 @@ static Variant domattr_value_read(const Object& obj) {
 
 static void domattr_value_write(const Object& obj, const Variant& value) {
   CHECK_WRITE_ATTR(attrp);
-  String svalue = value.toString();
+  OptString svalue = value.toString();
   xmlNodeSetContentLen((xmlNodePtr)attrp, (xmlChar*)svalue.data(),
                        svalue.size() + 1);
 }
@@ -2690,7 +2690,7 @@ struct DOMAttrPropHandler : public DOMPropHandler<DOMAttrPropHandler> {
 ///////////////////////////////////////////////////////////////////////////////
 
 void HHVM_METHOD(DOMAttr, __construct,
-                 const String& name,
+                 const OptString& name,
                  const Variant& value /* = null_string */) {
   auto data = Native::data<DOMNode>(this_);
   int name_valid = xmlValidateName((xmlChar *)name.data(), 0);
@@ -2698,7 +2698,7 @@ void HHVM_METHOD(DOMAttr, __construct,
     php_dom_throw_error(INVALID_CHARACTER_ERR, 1);
     return;
   }
-  const String& str_value = value.isNull() ? null_string : value.toString();
+  const OptString& str_value = value.isNull() ? null_string : value.toString();
   data->setNode((xmlNodePtr)xmlNewProp(nullptr, (xmlChar*)name.data(),
                                        (xmlChar*)str_value.data()));
 
@@ -2732,7 +2732,7 @@ static Variant dom_characterdata_data_read(const Object& obj) {
   CHECK_NODE(nodep);
   xmlChar *content = xmlNodeGetContent(nodep);
   if (content) {
-    String ret((const char*)content, CopyString);
+    OptString ret((const char*)content, CopyString);
     xmlFree(content);
     return ret;
   }
@@ -2741,7 +2741,7 @@ static Variant dom_characterdata_data_read(const Object& obj) {
 
 static void dom_characterdata_data_write(const Object& obj, const Variant& value) {
   CHECK_WRITE_NODE(nodep);
-  String svalue = value.toString();
+  OptString svalue = value.toString();
   xmlNodeSetContentLen(nodep, (xmlChar*)svalue.data(), svalue.size() + 1);
 }
 
@@ -2781,7 +2781,7 @@ Array HHVM_METHOD(DOMCharacterData, __debugInfo) {
 }
 
 bool HHVM_METHOD(DOMCharacterData, appendData,
-                 const String& arg) {
+                 const OptString& arg) {
   auto data = Native::data<DOMNode>(this_);
   xmlNodePtr nodep = data->nodep();
   if (!nodep) {
@@ -2842,7 +2842,7 @@ bool HHVM_METHOD(DOMCharacterData, deleteData,
 
 bool HHVM_METHOD(DOMCharacterData, insertData,
                  int64_t offset,
-                 const String& data) {
+                 const OptString& data) {
   auto native_data = Native::data<DOMNode>(this_);
   xmlNodePtr node = native_data->nodep();
   if (!node) {
@@ -2874,7 +2874,7 @@ bool HHVM_METHOD(DOMCharacterData, insertData,
 bool HHVM_METHOD(DOMCharacterData, replaceData,
                  int64_t offset,
                  int64_t count,
-                 const String& data) {
+                 const OptString& data) {
   auto native_data = Native::data<DOMNode>(this_);
   xmlNodePtr node = native_data->nodep();
   if (!node) {
@@ -2914,7 +2914,7 @@ bool HHVM_METHOD(DOMCharacterData, replaceData,
   return true;
 }
 
-String HHVM_METHOD(DOMCharacterData, substringData,
+OptString HHVM_METHOD(DOMCharacterData, substringData,
                    int64_t offset,
                    int64_t count) {
   auto native_data = Native::data<DOMNode>(this_);
@@ -2940,7 +2940,7 @@ String HHVM_METHOD(DOMCharacterData, substringData,
   substring = xmlUTF8Strsub(cur, offset, count);
   xmlFree(cur);
   if (substring) {
-    String ret((char*)substring, CopyString);
+    OptString ret((char*)substring, CopyString);
     xmlFree(substring);
     return ret;
   }
@@ -2953,7 +2953,7 @@ String HHVM_METHOD(DOMCharacterData, substringData,
 void HHVM_METHOD(DOMComment, __construct,
                  const Variant& value /* = null_string */) {
   auto data = Native::data<DOMNode>(this_);
-  const String& str_value = value.isNull() ? null_string : value.toString();
+  const OptString& str_value = value.isNull() ? null_string : value.toString();
   data->setNode(xmlNewComment((xmlChar *)str_value.data()));
   if (!data->node()) {
     php_dom_throw_error(INVALID_STATE_ERR, 1);
@@ -2981,7 +2981,7 @@ static Variant dom_text_whole_text_read(const Object& obj) {
   }
 
   if (wholetext) {
-    String ret((const char*)wholetext, CopyString);
+    OptString ret((const char*)wholetext, CopyString);
     xmlFree(wholetext);
     return ret;
   }
@@ -3005,7 +3005,7 @@ struct DOMTextPropHandler :
 void HHVM_METHOD(DOMText, __construct,
                  const Variant& value /* = null_string */) {
   auto data = Native::data<DOMNode>(this_);
-  const String& str_value = value.isNull() ? null_string : value.toString();
+  const OptString& str_value = value.isNull() ? null_string : value.toString();
   data->setNode(xmlNewText((xmlChar *)str_value.data()));
   if (!data->node()) {
     php_dom_throw_error(INVALID_STATE_ERR, 1);
@@ -3086,7 +3086,7 @@ Variant HHVM_METHOD(DOMText, splitText,
 
 
 void HHVM_METHOD(DOMCdataSection, __construct,
-                 const String& value) {
+                 const OptString& value) {
   auto data = Native::data<DOMNode>(this_);
   data->setNode(xmlNewCDataBlock(nullptr, (xmlChar *)value.data(),
                                  value.size()));
@@ -3142,7 +3142,7 @@ static Variant dom_document_encoding_read(const Object& obj) {
   CHECK_DOC(docp);
   char *encoding = (char *) docp->encoding;
   if (encoding) {
-    return String(encoding, CopyString);
+    return OptString(encoding, CopyString);
   }
   return init_null();
 }
@@ -3151,7 +3151,7 @@ static void dom_document_encoding_write(const Object& obj,
                                         const Variant& value) {
   CHECK_WRITE_DOC(docp);
 
-  String svalue = value.toString();
+  OptString svalue = value.toString();
   xmlCharEncodingHandlerPtr handler =
     xmlFindCharEncodingHandler(svalue.data());
 
@@ -3188,7 +3188,7 @@ static Variant dom_document_version_read(const Object& obj) {
   CHECK_DOC(docp);
   char *version = (char *) docp->version;
   if (version) {
-    return String(version, CopyString);
+    return OptString(version, CopyString);
   }
   return init_null();
 }
@@ -3199,7 +3199,7 @@ static void dom_document_version_write(const Object& obj,
   if (docp->version != nullptr) {
     xmlFree((xmlChar *)docp->version);
   }
-  String svalue = value.toString();
+  OptString svalue = value.toString();
   docp->version = xmlStrdup((const xmlChar *)svalue.data());
 }
 
@@ -3227,7 +3227,7 @@ static Variant dom_document_document_uri_read(const Object& obj) {
   CHECK_DOC(docp);
   char *url = (char *)docp->URL;
   if (url) {
-    return String(url, CopyString);
+    return OptString(url, CopyString);
   }
   return init_null();
 }
@@ -3238,7 +3238,7 @@ static void dom_document_document_uri_write(const Object& obj,
   if (docp->URL != nullptr) {
     xmlFree((xmlChar *) docp->URL);
   }
-  String svalue = value.toString();
+  OptString svalue = value.toString();
   docp->URL = xmlStrdup((const xmlChar *)svalue.data());
 }
 
@@ -3301,7 +3301,7 @@ void HHVM_METHOD(DOMDocument, __construct,
     php_dom_throw_error(INVALID_STATE_ERR, 1);
     return;
   }
-  const String& str_encoding = encoding.isNull()
+  const OptString& str_encoding = encoding.isNull()
     ? null_string : encoding.toString();
   if (str_encoding.size() > 0) {
     docp->encoding = (const xmlChar*)xmlStrdup((xmlChar*)str_encoding.data());
@@ -3319,7 +3319,7 @@ Array HHVM_METHOD(DOMDocument, __debugInfo) {
 }
 
 Variant HHVM_METHOD(DOMDocument, createAttribute,
-                    const String& name) {
+                    const OptString& name) {
   auto* data = Native::data<DOMNode>(this_);
   xmlDocPtr docp = (xmlDocPtr)data->nodep();
   if (xmlValidateName((xmlChar*)name.data(), 0) != 0) {
@@ -3337,8 +3337,8 @@ Variant HHVM_METHOD(DOMDocument, createAttribute,
 }
 
 Variant HHVM_METHOD(DOMDocument, createAttributeNS,
-                    const String& namespaceuri,
-                    const String& qualifiedname) {
+                    const OptString& namespaceuri,
+                    const OptString& qualifiedname) {
   auto* data = Native::data<DOMNode>(this_);
   xmlDocPtr docp = (xmlDocPtr)data->nodep();
   xmlNodePtr nodep = nullptr;
@@ -3392,7 +3392,7 @@ Variant HHVM_METHOD(DOMDocument, createAttributeNS,
 }
 
 Variant HHVM_METHOD(DOMDocument, createCDATASection,
-                    const String& data) {
+                    const OptString& data) {
   auto* native_data = Native::data<DOMNode>(this_);
   xmlDocPtr docp = (xmlDocPtr)native_data->nodep();
   xmlNode *node = xmlNewCDataBlock(docp, (xmlChar*)data.data(), data.size());
@@ -3406,7 +3406,7 @@ Variant HHVM_METHOD(DOMDocument, createCDATASection,
 }
 
 Variant HHVM_METHOD(DOMDocument, createComment,
-                    const String& data) {
+                    const OptString& data) {
   auto* native_data = Native::data<DOMNode>(this_);
   xmlDocPtr docp = (xmlDocPtr)native_data->nodep();
   xmlNode *node = xmlNewComment((xmlChar*)data.data());
@@ -3433,7 +3433,7 @@ Variant HHVM_METHOD(DOMDocument, createDocumentFragment) {
 }
 
 Variant HHVM_METHOD(DOMDocument, createElement,
-                    const String& name,
+                    const OptString& name,
                     const Variant& value /*= null_string*/) {
   auto* data = Native::data<DOMNode>(this_);
   xmlDocPtr docp = (xmlDocPtr)data->nodep();
@@ -3442,7 +3442,7 @@ Variant HHVM_METHOD(DOMDocument, createElement,
                         data->doc()->m_stricterror);
     return false;
   }
-  const String& str_value = value.isNull() ? null_string : value.toString();
+  const OptString& str_value = value.isNull() ? null_string : value.toString();
   xmlNode *node = xmlNewDocNode(docp, nullptr, (xmlChar*)name.data(),
                                 (xmlChar*)getStringData(str_value));
   if (!node) {
@@ -3455,8 +3455,8 @@ Variant HHVM_METHOD(DOMDocument, createElement,
 }
 
 Variant HHVM_METHOD(DOMDocument, createElementNS,
-                    const String& namespaceuri,
-                    const String& qualifiedname,
+                    const OptString& namespaceuri,
+                    const OptString& qualifiedname,
                     const Variant& value /*= null_string*/) {
   auto* data = Native::data<DOMNode>(this_);
   xmlDocPtr docp = (xmlDocPtr)data->nodep();
@@ -3468,7 +3468,7 @@ Variant HHVM_METHOD(DOMDocument, createElementNS,
                                   qualifiedname.size());
   if (errorcode == 0) {
     if (xmlValidateName((xmlChar*)localname, 0) == 0) {
-      const String& str_value = value.isNull() ? null_string : value.toString();
+      const OptString& str_value = value.isNull() ? null_string : value.toString();
       nodep = xmlNewDocNode(docp, nullptr, (xmlChar*)localname,
                             (xmlChar*)getStringData(str_value));
       if (nodep != nullptr && !namespaceuri.isNull()) {
@@ -3507,7 +3507,7 @@ Variant HHVM_METHOD(DOMDocument, createElementNS,
 }
 
 Variant HHVM_METHOD(DOMDocument, createEntityReference,
-                    const String& name) {
+                    const OptString& name) {
   auto* data = Native::data<DOMNode>(this_);
   xmlDocPtr docp = (xmlDocPtr)data->nodep();
   if (xmlValidateName((xmlChar*)name.data(), 0) != 0) {
@@ -3525,7 +3525,7 @@ Variant HHVM_METHOD(DOMDocument, createEntityReference,
 }
 
 Variant HHVM_METHOD(DOMDocument, createProcessingInstruction,
-                    const String& target,
+                    const OptString& target,
                     const Variant& data /* = null_string */) {
   auto* native_data = Native::data<DOMNode>(this_);
   xmlDocPtr docp = (xmlDocPtr)native_data->nodep();
@@ -3534,7 +3534,7 @@ Variant HHVM_METHOD(DOMDocument, createProcessingInstruction,
                         native_data->doc()->m_stricterror);
     return false;
   }
-  const String& str_data = data.isNull() ? null_string : data.toString();
+  const OptString& str_data = data.isNull() ? null_string : data.toString();
   xmlNode *node = xmlNewPI((xmlChar*)target.data(),
                            (xmlChar*)getStringData(str_data));
   if (!node) {
@@ -3547,7 +3547,7 @@ Variant HHVM_METHOD(DOMDocument, createProcessingInstruction,
 }
 
 Variant HHVM_METHOD(DOMDocument, createTextNode,
-                    const String& data) {
+                    const OptString& data) {
   auto* native_data = Native::data<DOMNode>(this_);
   xmlDocPtr docp = (xmlDocPtr)native_data->nodep();
   xmlNode *node = xmlNewDocText(docp, (xmlChar*)data.data());
@@ -3561,7 +3561,7 @@ Variant HHVM_METHOD(DOMDocument, createTextNode,
 }
 
 Variant HHVM_METHOD(DOMDocument, getElementById,
-                    const String& elementid) {
+                    const OptString& elementid) {
   auto* data = Native::data<DOMNode>(this_);
   xmlDocPtr docp = (xmlDocPtr)data->nodep();
   xmlAttrPtr attrp = xmlGetID(docp, (xmlChar*)elementid.data());
@@ -3573,14 +3573,14 @@ Variant HHVM_METHOD(DOMDocument, getElementById,
 }
 
 ObjectRet HHVM_METHOD(DOMDocument, getElementsByTagName,
-                      const String& name) {
+                      const OptString& name) {
   auto* data = Native::data<DOMNode>(this_);
   return newDOMNodeList(data->doc(), Object{this_}, 0, name);
 }
 
 ObjectRet HHVM_METHOD(DOMDocument, getElementsByTagNameNS,
-                      const String& namespaceuri,
-                      const String& localname) {
+                      const OptString& namespaceuri,
+                      const OptString& localname) {
   auto* data = Native::data<DOMNode>(this_);
   return newDOMNodeList(data->doc(), Object{this_}, 0, localname, namespaceuri);
 }
@@ -3632,8 +3632,8 @@ void HHVM_METHOD(DOMDocument, normalizeDocument) {
 }
 
 bool HHVM_METHOD(DOMDocument, registerNodeClass,
-                 const String& baseclass,
-                 const String& extendedclass) {
+                 const OptString& baseclass,
+                 const OptString& extendedclass) {
   if (!HHVM_FN(class_exists)(baseclass)) {
     raise_error("Class %s does not exist", baseclass.data());
     return false;
@@ -3658,20 +3658,20 @@ bool HHVM_METHOD(DOMDocument, registerNodeClass,
 }
 
 bool HHVM_METHOD(DOMDocument, relaxNGValidate,
-                 const String& filename) {
+                 const OptString& filename) {
   VMRegGuard _;
   auto* data = Native::data<DOMNode>(this_);
   return _dom_document_relaxNG_validate(data, filename, DOM_LOAD_FILE);
 }
 
-bool HHVM_METHOD(DOMDocument, relaxNGValidateSource, const String& source) {
+bool HHVM_METHOD(DOMDocument, relaxNGValidateSource, const OptString& source) {
   VMRegGuard _;
   auto* data = Native::data<DOMNode>(this_);
   return _dom_document_relaxNG_validate(data, source, DOM_LOAD_STRING);
 }
 
 Variant HHVM_METHOD(DOMDocument, save,
-                    const String& file,
+                    const OptString& file,
                     int64_t options /* = 0 */) {
   VMRegGuard _;
   auto* data = Native::data<DOMNode>(this_);
@@ -3695,7 +3695,7 @@ Variant HHVM_METHOD(DOMDocument, save,
 }
 
 Variant HHVM_METHOD(DOMDocument, saveHTMLFile,
-                    const String& file) {
+                    const OptString& file) {
   VMRegGuard _;
   auto* data = Native::data<DOMNode>(this_);
   xmlDocPtr docp = (xmlDocPtr)data->nodep();
@@ -3773,7 +3773,7 @@ Variant save_html_or_xml(DOMNode* obj,
       xmlBufferFree(buf);
       return false;
     }
-    String ret = String((char*)mem, CopyString);
+    OptString ret = OptString((char*)mem, CopyString);
     xmlBufferFree(buf);
     return ret;
   }
@@ -3792,20 +3792,20 @@ Variant save_html_or_xml(DOMNode* obj,
     if (mem) xmlFree(mem);
     return false;
   }
-  String ret = String((char*)mem, size, CopyString);
+  OptString ret = OptString((char*)mem, size, CopyString);
   xmlFree(mem);
   return ret;
 }
 
 bool HHVM_METHOD(DOMDocument, schemaValidate,
-                 const String& filename) {
+                 const OptString& filename) {
   VMRegGuard _;
   auto* data = Native::data<DOMNode>(this_);
   return _dom_document_schema_validate(data, filename, DOM_LOAD_FILE);
 }
 
 bool HHVM_METHOD(DOMDocument, schemaValidateSource,
-                 const String& source) {
+                 const OptString& source) {
   VMRegGuard _;
   auto* data = Native::data<DOMNode>(this_);
   return _dom_document_schema_validate(data, source, DOM_LOAD_STRING);
@@ -3864,7 +3864,7 @@ void HHVM_METHOD(DOMDocumentFragment, __construct) {
 }
 
 bool HHVM_METHOD(DOMDocumentFragment, appendXML,
-                 const String& data) {
+                 const OptString& data) {
   auto native_data = Native::data<DOMNode>(this_);
   xmlNodePtr nodep = native_data->nodep();
   if (!nodep) {
@@ -3906,7 +3906,7 @@ bool HHVM_METHOD(DOMDocumentFragment, appendXML,
 
 static Variant dom_documenttype_name_read(const Object& obj) {
   CHECK_DOCTYPE(dtdptr);
-  return String((char *)(dtdptr->name), CopyString);
+  return OptString((char *)(dtdptr->name), CopyString);
 }
 
 static Variant dom_documenttype_entities_read(const Object& obj) {
@@ -3926,7 +3926,7 @@ static Variant dom_documenttype_notations_read(const Object& obj) {
 static Variant dom_documenttype_public_id_read(const Object& obj) {
   CHECK_DOCTYPE(dtdptr);
   if (dtdptr->ExternalID) {
-    return String((char *)(dtdptr->ExternalID), CopyString);
+    return OptString((char *)(dtdptr->ExternalID), CopyString);
   }
   return empty_string_variant();
 }
@@ -3934,7 +3934,7 @@ static Variant dom_documenttype_public_id_read(const Object& obj) {
 static Variant dom_documenttype_system_id_read(const Object& obj) {
   CHECK_DOCTYPE(dtdptr);
   if (dtdptr->SystemID) {
-    return String((char *)(dtdptr->SystemID), CopyString);
+    return OptString((char *)(dtdptr->SystemID), CopyString);
   }
   return empty_string_variant();
 }
@@ -3954,7 +3954,7 @@ static Variant dom_documenttype_internal_subset_read(const Object& obj) {
       strintsubset = xmlStrndup(xmlOutputBufferGetContent(buff),
                                 xmlOutputBufferGetSize(buff));
       (void)xmlOutputBufferClose(buff);
-      return String((char *)strintsubset, CopyString);
+      return OptString((char *)strintsubset, CopyString);
     }
   }
   return empty_string_variant();
@@ -3998,11 +3998,11 @@ static Variant dom_element_tag_name_read(const Object& obj) {
     qname = xmlStrdup(ns->prefix);
     qname = xmlStrcat(qname, (xmlChar *)":");
     qname = xmlStrcat(qname, nodep->name);
-    String ret((char *)qname, CopyString);
+    OptString ret((char *)qname, CopyString);
     xmlFree(qname);
     return ret;
   }
-  return String((char *)nodep->name, CopyString);
+  return OptString((char *)nodep->name, CopyString);
 }
 
 static Variant dom_element_schema_type_info_read(const Object& /*obj*/) {
@@ -4024,7 +4024,7 @@ struct DOMElementPropHandler : public DOMPropHandler<DOMElementPropHandler> {
 };
 
 void HHVM_METHOD(DOMElement, __construct,
-                 const String& name,
+                 const OptString& name,
                  const Variant& value /* = null_string */,
                  const Variant& namespaceuri /*= null_string*/) {
   auto* data = Native::data<DOMElement>(this_);
@@ -4041,7 +4041,7 @@ void HHVM_METHOD(DOMElement, __construct,
 
   /* Namespace logic is separate and only when uri passed in to insure
      no BC breakage */
-  const String& str_namespaceuri = namespaceuri.isNull()
+  const OptString& str_namespaceuri = namespaceuri.isNull()
                                  ? null_string
                                  : namespaceuri.toString();
   if (!str_namespaceuri.empty()) {
@@ -4083,7 +4083,7 @@ void HHVM_METHOD(DOMElement, __construct,
     return;
   }
 
-  const String& str_value = value.isNull() ? null_string : value.toString();
+  const OptString& str_value = value.isNull() ? null_string : value.toString();
   if (!str_value.empty()) {
     xmlNodeSetContentLen(nodep, (xmlChar *)str_value.data(), str_value.size());
   }
@@ -4098,8 +4098,8 @@ Array HHVM_METHOD(DOMElement, __debugInfo) {
   return domelement_properties_map.debugInfo(Object{this_});
 }
 
-String HHVM_METHOD(DOMElement, getAttribute,
-                   const String& name) {
+OptString HHVM_METHOD(DOMElement, getAttribute,
+                   const OptString& name) {
   auto* data = Native::data<DOMElement>(this_);
   xmlNodePtr nodep = data->nodep();
   if (!nodep) {
@@ -4122,7 +4122,7 @@ String HHVM_METHOD(DOMElement, getAttribute,
     }
   }
   if (value) {
-    String ret((char*)value, CopyString);
+    OptString ret((char*)value, CopyString);
     xmlFree(value);
     return ret;
   }
@@ -4130,7 +4130,7 @@ String HHVM_METHOD(DOMElement, getAttribute,
 }
 
 Variant HHVM_METHOD(DOMElement, getAttributeNode,
-                    const String& name) {
+                    const OptString& name) {
   auto data = Native::data<DOMElement>(this_);
   xmlNodePtr nodep = data->nodep();
   if (!nodep) {
@@ -4165,8 +4165,8 @@ Variant HHVM_METHOD(DOMElement, getAttributeNode,
 }
 
 Variant HHVM_METHOD(DOMElement, getAttributeNodeNS,
-                    const String& namespaceuri,
-                    const String& localname) {
+                    const OptString& namespaceuri,
+                    const OptString& localname) {
   auto* data = Native::data<DOMElement>(this_);
   xmlNodePtr elemp = data->nodep();
   if (!elemp) {
@@ -4182,9 +4182,9 @@ Variant HHVM_METHOD(DOMElement, getAttributeNodeNS,
   return php_dom_create_object((xmlNodePtr)attrp, data->doc());
 }
 
-String HHVM_METHOD(DOMElement, getAttributeNS,
-                   const String& namespaceuri,
-                   const String& localname) {
+OptString HHVM_METHOD(DOMElement, getAttributeNS,
+                   const OptString& namespaceuri,
+                   const OptString& localname) {
   auto* data = Native::data<DOMElement>(this_);
   xmlNodePtr elemp = data->nodep();
   if (!elemp) {
@@ -4196,7 +4196,7 @@ String HHVM_METHOD(DOMElement, getAttributeNS,
   strattr = xmlGetNsProp(elemp, (xmlChar*)localname.data(),
                          (xmlChar*)namespaceuri.data());
   if (strattr != nullptr) {
-    String ret((char*)strattr, CopyString);
+    OptString ret((char*)strattr, CopyString);
     xmlFree(strattr);
     return ret;
   } else {
@@ -4204,7 +4204,7 @@ String HHVM_METHOD(DOMElement, getAttributeNS,
                     (xmlChar*)DOM_XMLNS_NAMESPACE)) {
       nsptr = dom_get_nsdecl(elemp, (xmlChar*)localname.data());
       if (nsptr != nullptr) {
-        return String((char*)nsptr->href, CopyString);
+        return OptString((char*)nsptr->href, CopyString);
       }
     }
   }
@@ -4212,21 +4212,21 @@ String HHVM_METHOD(DOMElement, getAttributeNS,
 }
 
 Object HHVM_METHOD(DOMElement, getElementsByTagName,
-                   const String& name) {
+                   const OptString& name) {
   auto* data = Native::data<DOMElement>(this_);
   return newDOMNodeList(data->doc(), Object{this_}, 0, name);
 }
 
 Object HHVM_METHOD(DOMElement, getElementsByTagNameNS,
-                   const String& namespaceuri,
-                   const String& localname) {
+                   const OptString& namespaceuri,
+                   const OptString& localname) {
   auto* data = Native::data<DOMElement>(this_);
   return newDOMNodeList(data->doc(), Object{this_}, 0, localname,
                         namespaceuri);
 }
 
 bool HHVM_METHOD(DOMElement, hasAttribute,
-                 const String& name) {
+                 const OptString& name) {
   auto* data = Native::data<DOMElement>(this_);
   xmlNodePtr nodep = data->nodep();
   if (!nodep) {
@@ -4237,8 +4237,8 @@ bool HHVM_METHOD(DOMElement, hasAttribute,
 }
 
 bool HHVM_METHOD(DOMElement, hasAttributeNS,
-                 const String& namespaceuri,
-                 const String& localname) {
+                 const OptString& namespaceuri,
+                 const OptString& localname) {
   auto* data = Native::data<DOMElement>(this_);
   xmlNodePtr elemp = data->nodep();
   if (!elemp) {
@@ -4264,7 +4264,7 @@ bool HHVM_METHOD(DOMElement, hasAttributeNS,
 }
 
 bool HHVM_METHOD(DOMElement, removeAttribute,
-                 const String& name) {
+                 const OptString& name) {
   auto* data = Native::data<DOMElement>(this_);
   xmlNodePtr nodep = data->nodep();
   if (!nodep) {
@@ -4322,8 +4322,8 @@ Variant HHVM_METHOD(DOMElement, removeAttributeNode,
 }
 
 Variant HHVM_METHOD(DOMElement, removeAttributeNS,
-                    const String& namespaceuri,
-                    const String& localname) {
+                    const OptString& namespaceuri,
+                    const OptString& localname) {
   auto* data = Native::data<DOMElement>(this_);
   xmlNodePtr nodep = data->nodep();
   if (!nodep) {
@@ -4362,8 +4362,8 @@ Variant HHVM_METHOD(DOMElement, removeAttributeNS,
 }
 
 Variant HHVM_METHOD(DOMElement, setAttribute,
-                    const String& name,
-                    const String& value) {
+                    const OptString& name,
+                    const OptString& value) {
   auto* data = Native::data<DOMElement>(this_);
   xmlNodePtr nodep = data->nodep();
   if (!nodep) {
@@ -4505,9 +4505,9 @@ Variant HHVM_METHOD(DOMElement, setAttributeNodeNS,
 }
 
 Variant HHVM_METHOD(DOMElement, setAttributeNS,
-                    const String& namespaceuri,
-                    const String& name,
-                    const String& value) {
+                    const OptString& namespaceuri,
+                    const OptString& name,
+                    const OptString& value) {
   auto* data = Native::data<DOMElement>(this_);
   xmlNodePtr elemp = data->nodep();
   if (!elemp) {
@@ -4611,7 +4611,7 @@ Variant HHVM_METHOD(DOMElement, setAttributeNS,
 }
 
 Variant HHVM_METHOD(DOMElement, setIDAttribute,
-                    const String& name,
+                    const OptString& name,
                     bool isid) {
   auto* data = Native::data<DOMElement>(this_);
   xmlNodePtr nodep = data->nodep();
@@ -4663,8 +4663,8 @@ Variant HHVM_METHOD(DOMElement, setIDAttributeNode,
 }
 
 Variant HHVM_METHOD(DOMElement, setIDAttributeNS,
-                    const String& namespaceuri,
-                    const String& localname,
+                    const OptString& namespaceuri,
+                    const OptString& localname,
                     bool isid) {
   auto* data = Native::data<DOMElement>(this_);
   xmlNodePtr elemp = data->nodep();
@@ -4704,7 +4704,7 @@ static Variant dom_entity_public_id_read(const Object& obj) {
   if (nodep->etype != XML_EXTERNAL_GENERAL_UNPARSED_ENTITY) {
     return init_null();
   }
-  return String((char *)(nodep->ExternalID), CopyString);
+  return OptString((char *)(nodep->ExternalID), CopyString);
 }
 
 static Variant dom_entity_system_id_read(const Object& obj) {
@@ -4712,7 +4712,7 @@ static Variant dom_entity_system_id_read(const Object& obj) {
   if (nodep->etype != XML_EXTERNAL_GENERAL_UNPARSED_ENTITY) {
     return init_null();
   }
-  return String((char *)(nodep->SystemID), CopyString);
+  return OptString((char *)(nodep->SystemID), CopyString);
 }
 
 static Variant dom_entity_notation_name_read(const Object& obj) {
@@ -4721,7 +4721,7 @@ static Variant dom_entity_notation_name_read(const Object& obj) {
     return init_null();
   }
   char *content = (char*)xmlNodeGetContent((xmlNodePtr) nodep);
-  String ret(content, CopyString);
+  OptString ret(content, CopyString);
   xmlFree(content);
   return ret;
 }
@@ -4786,7 +4786,7 @@ Array HHVM_METHOD(DOMEntity, __debugInfo) {
 
 
 void HHVM_METHOD(DOMEntityReference, __construct,
-                 const String& name) {
+                 const OptString& name) {
   auto data = Native::data<DOMNode>(this_);
   int name_valid = xmlValidateName((xmlChar *)name.data(), 0);
   if (name_valid != 0) {
@@ -4814,7 +4814,7 @@ void HHVM_METHOD(DOMEntityReference, __construct,
 static Variant dom_notation_public_id_read(const Object& obj) {
   CHECK_NOTATION(nodep);
   if (nodep->ExternalID) {
-    return String((char *)(nodep->ExternalID), CopyString);
+    return OptString((char *)(nodep->ExternalID), CopyString);
   }
   return empty_string_variant();
 }
@@ -4822,7 +4822,7 @@ static Variant dom_notation_public_id_read(const Object& obj) {
 static Variant dom_notation_system_id_read(const Object& obj) {
   CHECK_NOTATION(nodep);
   if (nodep->SystemID) {
-    return String((char *)(nodep->SystemID), CopyString);
+    return OptString((char *)(nodep->SystemID), CopyString);
   }
   return empty_string_variant();
 }
@@ -4856,14 +4856,14 @@ Array HHVM_METHOD(DOMNotation, __debugInfo) {
 
 static Variant dom_processinginstruction_target_read(const Object& obj) {
   CHECK_NODE(nodep);
-  return String((char *)(nodep->name), CopyString);
+  return OptString((char *)(nodep->name), CopyString);
 }
 
 static Variant dom_processinginstruction_data_read(const Object& obj) {
   CHECK_NODE(nodep);
   xmlChar *content = xmlNodeGetContent(nodep);
   if (content) {
-    String ret((char*)content, CopyString);
+    OptString ret((char*)content, CopyString);
     xmlFree(content);
     return ret;
   }
@@ -4873,7 +4873,7 @@ static Variant dom_processinginstruction_data_read(const Object& obj) {
 static void dom_processinginstruction_data_write(const Object& obj,
                                                  const Variant& value) {
   CHECK_WRITE_NODE(nodep);
-  String svalue = value.toString();
+  OptString svalue = value.toString();
   xmlNodeSetContentLen(nodep, (xmlChar*)svalue.data(), svalue.size() + 1);
 }
 
@@ -4896,7 +4896,7 @@ struct DOMProcessingInstructionPropHandler :
 ///////////////////////////////////////////////////////////////////////////////
 
 void HHVM_METHOD(DOMProcessingInstruction, __construct,
-                 const String& name,
+                 const OptString& name,
                  const Variant& value /*= null_string*/) {
   int name_valid = xmlValidateName((xmlChar *)name.data(), 0);
   if (name_valid != 0) {
@@ -4905,7 +4905,7 @@ void HHVM_METHOD(DOMProcessingInstruction, __construct,
   }
 
   auto* data = Native::data<DOMNode>(this_);
-  const String& str_value = value.isNull() ? null_string : value.toString();
+  const OptString& str_value = value.isNull() ? null_string : value.toString();
   data->setNode(xmlNewPI((xmlChar *)name.data(), (xmlChar *)str_value.data()));
   if (!data->node()) {
     php_dom_throw_error(INVALID_STATE_ERR, 1);
@@ -4963,7 +4963,7 @@ struct DOMNamedNodeMapPropHandler :
 ///////////////////////////////////////////////////////////////////////////////
 
 Variant HHVM_METHOD(DOMNamedNodeMap, getNamedItem,
-                    const String& name) {
+                    const OptString& name) {
   auto* data = Native::data<DOMIterable>(this_);
   xmlNodePtr itemnode = nullptr;
   if (data->m_nodetype == XML_NOTATION_NODE
@@ -5000,8 +5000,8 @@ Variant HHVM_METHOD(DOMNamedNodeMap, getNamedItem,
 }
 
 Variant HHVM_METHOD(DOMNamedNodeMap, getNamedItemNS,
-                    const String& namespaceuri,
-                    const String& localname) {
+                    const OptString& namespaceuri,
+                    const OptString& localname) {
   auto data = Native::data<DOMIterable>(this_);
   xmlNodePtr itemnode = nullptr;
   if (data->m_nodetype == XML_NOTATION_NODE
@@ -5220,10 +5220,10 @@ Variant HHVM_METHOD(DOMImplementation, createDocument,
   int errorcode = 0;
   char *prefix = nullptr, *localname = nullptr;
   xmlDtdPtr doctype = nullptr;
-  const String& str_namespaceuri = namespaceuri.isNull()
+  const OptString& str_namespaceuri = namespaceuri.isNull()
                                  ? null_string
                                  : namespaceuri.toString();
-  const String& str_qualifiedname = qualifiedname.isNull()
+  const OptString& str_qualifiedname = qualifiedname.isNull()
                                   ? null_string
                                   : qualifiedname.toString();
   const Object& obj_doctypeobj = doctypeobj.isNull()
@@ -5318,13 +5318,13 @@ Variant HHVM_METHOD(DOMImplementation, createDocumentType,
   xmlDtd *doctype;
   xmlChar *pch1 = nullptr, *pch2 = nullptr, *localname = nullptr;
   xmlURIPtr uri;
-  const String& str_qualifiedname = qualifiedname.isNull()
+  const OptString& str_qualifiedname = qualifiedname.isNull()
                                   ? null_string
                                   : qualifiedname.toString();
-  const String& str_publicid = publicid.isNull()
+  const OptString& str_publicid = publicid.isNull()
                              ? null_string
                              : publicid.toString();
-  const String& str_systemid = systemid.isNull()
+  const OptString& str_systemid = systemid.isNull()
                              ? null_string
                              : systemid.toString();
   if (str_qualifiedname.empty()) {
@@ -5362,8 +5362,8 @@ Variant HHVM_METHOD(DOMImplementation, createDocumentType,
 }
 
 bool HHVM_METHOD(DOMImplementation, hasFeature,
-                 const String& feature,
-                 const String& version) {
+                 const OptString& feature,
+                 const OptString& version) {
   return dom_has_feature(feature.data(), version.data());
 }
 
@@ -5429,7 +5429,7 @@ static void dom_xpath_ext_function_php(xmlXPathParserContextPtr ctxt,
     obj = valuePop(ctxt);
     switch (obj->type) {
     case XPATH_STRING:
-      arg = String((char *)obj->stringval, CopyString);
+      arg = OptString((char *)obj->stringval, CopyString);
       break;
     case XPATH_BOOLEAN:
       arg = (bool)obj->boolval;
@@ -5440,7 +5440,7 @@ static void dom_xpath_ext_function_php(xmlXPathParserContextPtr ctxt,
     case XPATH_NODESET:
       if (type == 1) {
         char *str = (char *)xmlXPathCastToString(obj);
-        arg = String(str, CopyString);
+        arg = OptString(str, CopyString);
         xmlFree(str);
       } else if (type == 2) {
         Array argArr = Array::CreateVec();
@@ -5473,7 +5473,7 @@ static void dom_xpath_ext_function_php(xmlXPathParserContextPtr ctxt,
       }
       break;
     default:
-      arg = String((char *)xmlXPathCastToString(obj), CopyString);
+      arg = OptString((char *)xmlXPathCastToString(obj), CopyString);
     }
     xmlXPathFreeObject(obj);
     args_vec.append(arg);
@@ -5491,7 +5491,7 @@ static void dom_xpath_ext_function_php(xmlXPathParserContextPtr ctxt,
     raise_warning("Handler name must be a string");
     return;
   }
-  String handler((char*)obj->stringval, CopyString);
+  OptString handler((char*)obj->stringval, CopyString);
   xmlXPathFreeObject(obj);
 
   if (!is_callable(handler)) {
@@ -5518,7 +5518,7 @@ static void dom_xpath_ext_function_php(xmlXPathParserContextPtr ctxt,
       valuePush(ctxt, xmlXPathNewString((xmlChar *)""));
       raise_warning("A PHP Object cannot be converted to an XPath-string");
     } else {
-      String sretval = retval.toString();
+      OptString sretval = retval.toString();
       valuePush(ctxt, xmlXPathNewString((xmlChar*)sretval.data()));
     }
   }
@@ -5546,7 +5546,7 @@ void HHVM_METHOD(DOMXPath, __construct,
   auto* data = Native::data<DOMXPath>(this_);
   data->m_doc = doc.toObject();
   if (!data->m_doc->instanceof(DOMNode::classof())) {
-    SystemLib::throwExceptionObject(String("DOMXPath::__construct expects "
+    SystemLib::throwExceptionObject(OptString("DOMXPath::__construct expects "
                                            "parameter 1 to be DOMNode"));
     return;
   }
@@ -5577,7 +5577,7 @@ Array HHVM_METHOD(DOMXPath, __debugInfo) {
 }
 
 Variant HHVM_METHOD(DOMXPath, evaluate,
-                    const String& expr,
+                    const OptString& expr,
                     const Variant& context /* = null_object */,
                     bool registerNodeNS /* = true */) {
   auto* data = Native::data<DOMXPath>(this_);
@@ -5590,7 +5590,7 @@ Variant HHVM_METHOD(DOMXPath, evaluate,
 }
 
 Variant HHVM_METHOD(DOMXPath, query,
-                    const String& expr,
+                    const OptString& expr,
                     const Variant& context /* = null_object */,
                     bool registerNodeNS /* = true */) {
   auto* data = Native::data<DOMXPath>(this_);
@@ -5603,8 +5603,8 @@ Variant HHVM_METHOD(DOMXPath, query,
 }
 
 bool HHVM_METHOD(DOMXPath, registerNamespace,
-                 const String& prefix,
-                 const String& uri) {
+                 const OptString& prefix,
+                 const OptString& uri) {
   auto* data = Native::data<DOMXPath>(this_);
   xmlXPathContextPtr ctxp = (xmlXPathContextPtr)data->m_node;
   if (ctxp == nullptr) {
@@ -5715,7 +5715,7 @@ Variant HHVM_METHOD(DOMNodeIterator, key) {
       php_dom_throw_error(INVALID_STATE_ERR, 0);
       return false;
     }
-    return String((const char *)curnode->name, CopyString);
+    return OptString((const char *)curnode->name, CopyString);
   }
   return data->m_index;
 }

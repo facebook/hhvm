@@ -191,7 +191,7 @@ TypedValue makeTV(const folly::dynamic& data) {
             res.set(k.getInt(), makeTV(v));
             break;
           case folly::dynamic::STRING:
-            res.set(String{k.getString()}, makeTV(v));
+            res.set(OptString{k.getString()}, makeTV(v));
             break;
           default:
             SystemLib::throwInvalidOperationExceptionObject(fmt::format(

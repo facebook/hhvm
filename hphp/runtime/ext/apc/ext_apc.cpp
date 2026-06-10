@@ -61,7 +61,7 @@ ConcurrentTableSharedStore& apc_store() {
   return *static_cast<ConcurrentTableSharedStore*>(vpStore);
 }
 
-bool isKeyInvalid(const String &key) {
+bool isKeyInvalid(const OptString &key) {
   // T39154441 - check if invalid chars exist
   return key.find('\0') != -1;
 }
@@ -193,7 +193,7 @@ Variant apc_store_impl(const Variant& key_or_array,
     raise_invalid_argument_warning("apc key: (not a string)");
     return Variant(false);
   }
-  String strKey = key_or_array.toString();
+  OptString strKey = key_or_array.toString();
 
   if (strKey.empty()) {
     raise_invalid_argument_warning("apc key: (empty string)");
@@ -305,7 +305,7 @@ Variant HHVM_FUNCTION(apc_add_with_pure_sleep,
   return apc_add_impl(key_or_array, var, ttl, bump_ttl, guaranteed_acyclic, true);
 }
 
-bool HHVM_FUNCTION(apc_extend_ttl, const String& key, int64_t new_ttl) {
+bool HHVM_FUNCTION(apc_extend_ttl, const OptString& key, int64_t new_ttl) {
   if (!apcExtension::Enable) return false;
 
   if (new_ttl < 0) return false;
@@ -392,7 +392,7 @@ Variant HHVM_FUNCTION(apc_delete,
 
 
 Variant HHVM_FUNCTION(apc_inc,
-                      const String& key,
+                      const OptString& key,
                       int64_t step,
                       bool& success) {
   if (!apcExtension::Enable) return false;
@@ -405,7 +405,7 @@ Variant HHVM_FUNCTION(apc_inc,
 }
 
 Variant HHVM_FUNCTION(apc_dec,
-                      const String& key,
+                      const OptString& key,
                       int64_t step,
                       bool& success) {
   if (!apcExtension::Enable) return false;
@@ -418,7 +418,7 @@ Variant HHVM_FUNCTION(apc_dec,
 }
 
 bool HHVM_FUNCTION(apc_cas,
-                   const String& key,
+                   const OptString& key,
                    int64_t old_cas,
                    int64_t new_cas) {
   if (!apcExtension::Enable) return false;
@@ -439,7 +439,7 @@ Variant HHVM_FUNCTION(apc_exists,
       failed = true;
       return true;
     }
-    auto strKey = String{val(k).pstr};
+    auto strKey = OptString{val(k).pstr};
     if (apc_store().exists(strKey)) {
       init.append(strKey);
     }
@@ -449,7 +449,7 @@ Variant HHVM_FUNCTION(apc_exists,
   return init.toVariant();
 }
 
-TypedValue HHVM_FUNCTION(apc_size, const String& key) {
+TypedValue HHVM_FUNCTION(apc_size, const OptString& key) {
   if (!apcExtension::Enable) return make_tv<KindOfNull>();
 
   bool found = false;
@@ -481,7 +481,7 @@ const int32_t kEntryInfoSize = 10;
 
 Array HHVM_FUNCTION(
   apc_cache_info,
-  const String& cache_type,
+  const OptString& cache_type,
   bool limited /* = false */) {
 
   DictInit info(kCacheInfoSize);
@@ -700,7 +700,7 @@ int apc_rfc1867_progress(apc_rfc1867_data* rfc1867ApcData, unsigned int event,
 ///////////////////////////////////////////////////////////////////////////////
 // apc serialization
 
-String apc_serialize(const_variant_ref value, bool pure) {
+OptString apc_serialize(const_variant_ref value, bool pure) {
   auto const enableApcSerialize = apcExtension::EnableApcSerialize;
   VariableSerializer::Type sType =
     enableApcSerialize ?

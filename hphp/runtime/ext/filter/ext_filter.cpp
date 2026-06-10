@@ -261,7 +261,7 @@ Variant HHVM_FUNCTION(filter_list) {
 }
 
 Variant HHVM_FUNCTION(filter_id,
-                      const String& filtername) {
+                      const OptString& filtername) {
   size_t size = sizeof(filter_list) / sizeof(filter_list_entry);
   for (size_t i = 0; i < size; ++i) {
     if (filter_list[i].name == filtername) {

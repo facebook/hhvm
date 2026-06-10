@@ -80,7 +80,7 @@ static bool get_sockaddr(sockaddr *sa, socklen_t salen,
         folly::SocketAddress addr;
         addr.setFromSockaddr(sin6);
 
-        address = String(addr.getAddressStr(), CopyString);
+        address = OptString(addr.getAddressStr(), CopyString);
         port = addr.getPort();
       } catch (...) {
         address = s_2colons;
@@ -95,7 +95,7 @@ static bool get_sockaddr(sockaddr *sa, socklen_t salen,
         folly::SocketAddress addr;
         addr.setFromSockaddr(sin);
 
-        address = String(addr.getAddressStr(), CopyString);
+        address = OptString(addr.getAddressStr(), CopyString);
         port = addr.getPort();
       } catch (...) {
         address = s_0_0_0_0;
@@ -106,7 +106,7 @@ static bool get_sockaddr(sockaddr *sa, socklen_t salen,
   case AF_UNIX:
     {
 #ifdef _MSC_VER
-      address = String("Unsupported");
+      address = OptString("Unsupported");
 #else
       // NB: an unnamed socket has no path, and sun_path should not be
       // inspected. In that case the length is just the size of the
@@ -117,7 +117,7 @@ static bool get_sockaddr(sockaddr *sa, socklen_t salen,
         // - `sun_len` MAY include that trailing null on Linux.
         const auto max_path_len = salen - offsetof(struct sockaddr_un, sun_path);
         const auto actual_path_len = ::strnlen(s_un->sun_path, max_path_len);
-        address = String(s_un->sun_path, actual_path_len, CopyString);
+        address = OptString(s_un->sun_path, actual_path_len, CopyString);
       } else {
         address = empty_string();
       }
@@ -234,7 +234,7 @@ static bool php_set_inet_addr(struct sockaddr_in *sin,
 }
 
 static bool set_sockaddr(sockaddr_storage &sa_storage, req::ptr<Socket> sock,
-                         const String& addr, int port,
+                         const OptString& addr, int port,
                          struct sockaddr *&sa_ptr, size_t &sa_size) {
   // Always zero it out:
   // - fields are added over time; zeroing it out is future-proofing; for
@@ -407,7 +407,7 @@ static int php_read(req::ptr<Socket> sock, void *buf, int64_t maxlen,
   return n;
 }
 
-String HHVM_FUNCTION(socket_strerror,
+OptString HHVM_FUNCTION(socket_strerror,
                      int64_t errnum) {
   /*
    * PHP5 encodes both the h_errno and errno values into a single int:
@@ -417,12 +417,12 @@ String HHVM_FUNCTION(socket_strerror,
   if (errnum < -10000) {
     errnum = (-errnum) - 10000;
 #if HAVE_HSTRERROR
-    return String(hstrerror(errnum), CopyString);
+    return OptString(hstrerror(errnum), CopyString);
 #endif
     return fmt::format("Host lookup error {}", errnum);
   }
 
-  return String(folly::errnoStr(errnum));
+  return OptString(folly::errnoStr(errnum));
 }
 
 static req::ptr<Socket> create_new_socket(
@@ -575,7 +575,7 @@ static Variant new_socket_connect(const HostURL &hosturl, double timeout,
     struct addrinfo *aiHead;
     int errcode = getaddrinfo(host.c_str(), port.c_str(), &hints, &aiHead);
     if (errcode != 0) {
-      errstr = String(gai_strerror(errcode), CopyString);
+      errstr = OptString(gai_strerror(errcode), CopyString);
       return false;
     }
     SCOPE_EXIT { freeaddrinfo(aiHead); };
@@ -907,7 +907,7 @@ bool HHVM_FUNCTION(socket_set_option,
 
 bool HHVM_FUNCTION(socket_connect,
                    const OptResource& socket,
-                   const String& address,
+                   const OptString& address,
                    int64_t port /* = 0 */) {
   auto sock = cast<Socket>(socket);
 
@@ -946,7 +946,7 @@ bool HHVM_FUNCTION(socket_connect,
 
 bool HHVM_FUNCTION(socket_bind,
                    const OptResource& socket,
-                   const String& address,
+                   const OptString& address,
                    int64_t port /* = 0 */) {
   auto sock = cast<Socket>(socket);
 
@@ -1083,7 +1083,7 @@ Variant HHVM_FUNCTION(socket_select,
 }
 
 Variant HHVM_FUNCTION(socket_server,
-                      const String& hostname,
+                      const OptString& hostname,
                       int64_t port,
                       Variant& errnum,
                       Variant& errstr) {
@@ -1174,12 +1174,12 @@ Variant HHVM_FUNCTION(socket_read,
   }
 
   tmpbuf[retval] = '\0' ;
-  return String(tmpbuf, retval, AttachString);
+  return OptString(tmpbuf, retval, AttachString);
 }
 
 Variant HHVM_FUNCTION(socket_write,
                       const OptResource& socket,
-                      const String& buffer,
+                      const OptString& buffer,
                       int64_t length /* = 0 */) {
   auto sock = cast<Socket>(socket);
   if (length < 0) return false;
@@ -1196,7 +1196,7 @@ Variant HHVM_FUNCTION(socket_write,
 
 Variant HHVM_FUNCTION(socket_send,
                       const OptResource& socket,
-                      const String& buf,
+                      const OptString& buf,
                       int64_t len,
                       int64_t flags) {
   auto sock = cast<Socket>(socket);
@@ -1214,10 +1214,10 @@ Variant HHVM_FUNCTION(socket_send,
 
 Variant HHVM_FUNCTION(socket_sendto,
                       const OptResource& socket,
-                      const String& buf,
+                      const OptString& buf,
                       int64_t len,
                       int64_t flags,
-                      const String& addr,
+                      const OptString& addr,
                       int64_t port /* = -1 */) {
   auto sock = cast<Socket>(socket);
   if (len < 0) return false;
@@ -1312,7 +1312,7 @@ Variant HHVM_FUNCTION(socket_recv,
     buf = init_null();
   } else {
     recv_buf[retval] = '\0';
-    buf = String(recv_buf, retval, AttachString);
+    buf = OptString(recv_buf, retval, AttachString);
   }
 
   if (retval == -1) {
@@ -1358,12 +1358,12 @@ Variant HHVM_FUNCTION(socket_recvfrom,
       }
 
       recv_buf[retval] = 0;
-      buf = String(recv_buf, retval, AttachString);
+      buf = OptString(recv_buf, retval, AttachString);
       // - `sun_path` MAY have trailing nulls
       // - `sun_len` MAY include that trailing null on Linux.
       const auto max_path_len = slen - offsetof(struct sockaddr_un, sun_path);
       const auto actual_path_len = ::strnlen(s_un.sun_path, max_path_len);
-      name = String(s_un.sun_path, actual_path_len, CopyString);
+      name = OptString(s_un.sun_path, actual_path_len, CopyString);
 #endif
     }
     break;
@@ -1382,13 +1382,13 @@ Variant HHVM_FUNCTION(socket_recvfrom,
         return false;
       }
       recv_buf[retval] = 0;
-      buf = String(recv_buf, retval, AttachString);
+      buf = OptString(recv_buf, retval, AttachString);
 
       try {
         folly::SocketAddress addr;
         addr.setFromSockaddr(&sin);
 
-        name = String(addr.getAddressStr(), CopyString);
+        name = OptString(addr.getAddressStr(), CopyString);
         port = addr.getPort();
       } catch (...) {
         name = s_0_0_0_0;
@@ -1412,13 +1412,13 @@ Variant HHVM_FUNCTION(socket_recvfrom,
       }
 
       recv_buf[retval] = 0;
-      buf = String(recv_buf, retval, AttachString);
+      buf = OptString(recv_buf, retval, AttachString);
 
       try {
         folly::SocketAddress addr;
         addr.setFromSockaddr(&sin6);
 
-        name = String(addr.getAddressStr(), CopyString);
+        name = OptString(addr.getAddressStr(), CopyString);
         port = addr.getPort();
       } catch (...) {
         name = s_2colons;
@@ -1537,7 +1537,7 @@ Variant sockopen_impl(const HostURL &hosturl, Variant& errnum,
 }
 
 Variant HHVM_FUNCTION(fsockopen,
-                      const String& hostname,
+                      const OptString& hostname,
                       int64_t port,
                       Variant& errnum,
                       Variant& errstr,
@@ -1547,7 +1547,7 @@ Variant HHVM_FUNCTION(fsockopen,
 }
 
 Variant HHVM_FUNCTION(pfsockopen,
-                      const String& hostname,
+                      const OptString& hostname,
                       int64_t port,
                       Variant& errnum,
                       Variant& errstr,
@@ -1556,7 +1556,7 @@ Variant HHVM_FUNCTION(pfsockopen,
   return sockopen_impl(hosturl, errnum, errstr, timeout, true, uninit_variant);
 }
 
-String ipaddr_convert(struct sockaddr *addr, int addrlen) {
+OptString ipaddr_convert(struct sockaddr *addr, int addrlen) {
   char buffer[NI_MAXHOST];
   int error = getnameinfo(addr, addrlen, buffer, sizeof(buffer), NULL, 0, NI_NUMERICHOST);
 
@@ -1564,7 +1564,7 @@ String ipaddr_convert(struct sockaddr *addr, int addrlen) {
     raise_warning("%s", gai_strerror(error));
     return empty_string();
   }
-  return String(buffer, CopyString);
+  return OptString(buffer, CopyString);
 }
 
 const StaticString
@@ -1578,8 +1578,8 @@ const StaticString
   s_sockaddr("sockaddr");
 
 Variant HHVM_FUNCTION(getaddrinfo,
-                      const String& host,
-                      const String& port,
+                      const OptString& host,
+                      const OptString& port,
                       int64_t family /* = 0 */,
                       int64_t socktype /* = 0 */,
                       int64_t protocol /* = 0 */,
@@ -1625,7 +1625,7 @@ Variant HHVM_FUNCTION(getaddrinfo,
       case AF_INET:
       {
         struct sockaddr_in *a;
-        String buffer = ipaddr_convert(res->ai_addr, sizeof(*a));
+        OptString buffer = ipaddr_convert(res->ai_addr, sizeof(*a));
         if (!buffer.empty()) {
           a = (struct sockaddr_in *)res->ai_addr;
           data.set(
@@ -1641,7 +1641,7 @@ Variant HHVM_FUNCTION(getaddrinfo,
       case AF_INET6:
       {
         struct sockaddr_in6 *a;
-        String buffer = ipaddr_convert(res->ai_addr, sizeof(*a));
+        OptString buffer = ipaddr_convert(res->ai_addr, sizeof(*a));
         if (!buffer.empty()) {
           a = (struct sockaddr_in6 *)res->ai_addr;
           data.set(

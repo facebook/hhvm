@@ -449,8 +449,8 @@ struct Debugger final {
     VSCommand* command
   );
 
-  bool getDebuggerOption(const HPHP::String& option);
-  void setDebuggerOption(const HPHP::String& option, bool value);
+  bool getDebuggerOption(const HPHP::OptString& option);
+  void setDebuggerOption(const HPHP::OptString& option, bool value);
   void setDebuggerOptions(DebuggerOptions options);
 
   DebuggerOptions getDebuggerOptions() {

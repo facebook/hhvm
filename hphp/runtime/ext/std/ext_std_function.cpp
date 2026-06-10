@@ -46,7 +46,7 @@ Array HHVM_FUNCTION(get_defined_functions) {
                      s_user, Unit::getUserFunctions());
 }
 
-bool HHVM_FUNCTION(function_exists, const String& function_name,
+bool HHVM_FUNCTION(function_exists, const OptString& function_name,
                        bool autoload /* = true */) {
   return
     function_exists(function_name) ||
@@ -171,7 +171,7 @@ void HHVM_FUNCTION(register_shutdown_function, const Variant& function) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-String HHVM_FUNCTION(HH_fun_get_function, TypedValue v) {
+OptString HHVM_FUNCTION(HH_fun_get_function, TypedValue v) {
   if (tvIsFunc(v)) {
     auto const f = val(v).pfunc;
     return f->nameStr();

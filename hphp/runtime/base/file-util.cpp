@@ -370,15 +370,15 @@ size_t dirname_impl(char *path, int len) {
 
 }
 
-String FileUtil::dirname(const String& path) {
-  String str{path, CopyString};
+OptString FileUtil::dirname(const OptString& path) {
+  OptString str{path, CopyString};
   auto new_length = dirname_impl(str.mutableData(), str.length());
   str.setSize(new_length);
   return str;
 }
 
-String FileUtil::relativePath(const std::string& fromDir,
-                              const String& toFile) {
+OptString FileUtil::relativePath(const std::string& fromDir,
+                              const OptString& toFile) {
 
   size_t maxlen = (fromDir.size() + toFile.size()) * 3;
 
@@ -394,7 +394,7 @@ String FileUtil::relativePath(const std::string& fromDir,
     return toFile.substr(from_len);
   }
 
-  String ret(maxlen, ReserveString);
+  OptString ret(maxlen, ReserveString);
   char* path = ret.mutableData();
 
   const char* from_dir = fromDir.c_str();
@@ -447,11 +447,11 @@ String FileUtil::relativePath(const std::string& fromDir,
   return ret.setSize(strlen(path));
 }
 
-String FileUtil::canonicalize(const String &path) {
+OptString FileUtil::canonicalize(const OptString &path) {
   return canonicalize(path.data(), path.size());
 }
 
-String FileUtil::canonicalize(const std::string &path) {
+OptString FileUtil::canonicalize(const std::string &path) {
   return canonicalize(path.c_str(), path.size());
 }
 
@@ -471,7 +471,7 @@ String FileUtil::canonicalize(const std::string &path) {
  * limitations under the License.
  */
 
-String FileUtil::canonicalize(const char *addpath, size_t addlen,
+OptString FileUtil::canonicalize(const char *addpath, size_t addlen,
                               bool collapse_slashes /* = true */) {
   assertx(strlen(addpath) <= addlen);
   // 4 for slashes at start, after root, and at end, plus trailing
@@ -486,7 +486,7 @@ String FileUtil::canonicalize(const char *addpath, size_t addlen,
   if (!addpath)
     addpath = "";
 
-  String ret(maxlen-1, ReserveString);
+  OptString ret(maxlen-1, ReserveString);
   char *path = ret.mutableData();
 
   if (addpath[0] == '/' && collapse_slashes) {
@@ -617,11 +617,11 @@ void FileUtil::find(std::vector<std::string> &out,
        });
 }
 
-bool FileUtil::isValidPath(const String& path) {
+bool FileUtil::isValidPath(const OptString& path) {
   return path.size() == strlen(path.data());
 }
 
-bool FileUtil::checkPathAndWarn(const String& path,
+bool FileUtil::checkPathAndWarn(const OptString& path,
                                 const char* func_name,
                                 int param_pos) {
   if (!FileUtil::isValidPath(path)) {
@@ -635,7 +635,7 @@ bool FileUtil::checkPathAndWarn(const String& path,
   return true;
 }
 
-void FileUtil::checkPathAndError(const String& path,
+void FileUtil::checkPathAndError(const OptString& path,
                                  const char* func_name,
                                  int param_pos) {
   if (!FileUtil::isValidPath(path)) {

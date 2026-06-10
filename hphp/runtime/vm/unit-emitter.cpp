@@ -171,18 +171,18 @@ const RepoAuthType::Array* UnitEmitter::lookupRATArray(Id id) const {
   return array;
 }
 
-String UnitEmitter::lookupLitstrIdCopy(Id id) const {
+OptString UnitEmitter::lookupLitstrIdCopy(Id id) const {
   assertx(id >= 0 && id < m_litstrs.size());
   auto& elem = m_litstrs[id];
   auto wrapper = elem.copy();
   if (wrapper.isPtr()) {
     assertx(!wrapper.ptr() || wrapper.ptr()->isStatic());
-    if (!wrapper.ptr()) return String{};
-    return String::attach(const_cast<StringData*>(wrapper.ptr()));
+    if (!wrapper.ptr()) return OptString{};
+    return OptString::attach(const_cast<StringData*>(wrapper.ptr()));
   }
   auto const str = loadLitstrFromRepo(m_sn, wrapper.token(), false);
-  if (!str) return String{};
-  return String::attach(const_cast<StringData*>(str));
+  if (!str) return OptString{};
+  return OptString::attach(const_cast<StringData*>(str));
 }
 
 Array UnitEmitter::lookupArrayIdCopy(Id id) const {

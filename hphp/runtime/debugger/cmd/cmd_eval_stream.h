@@ -45,7 +45,7 @@ protected:
   void recvImpl(DebuggerThriftBuffer&) override;
 
 private:
-  req::root<String> m_output;
+  req::root<OptString> m_output;
 
   int m_frame{};
   bool m_bypassAccessCheck{false};

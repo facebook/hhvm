@@ -55,7 +55,7 @@ void CmdInterrupt::sendImpl(DebuggerThriftBuffer &thrift) {
     } else if (e.isObject()) {
       thrift.write(e.toObject()->getClassName());
     } else {
-      String ex(BreakPointInfo::ErrorClassName);
+      OptString ex(BreakPointInfo::ErrorClassName);
       thrift.write(ex);
     }
     thrift.write(e.toString());

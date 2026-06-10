@@ -182,11 +182,11 @@ APCHandle::Pair APCObject::ConstructSlow(ObjectData* objectData,
       prop->val = nullptr;
     }
 
-    const String& keySD = key.asCStrRef();
+    const OptString& keySD = key.asCStrRef();
 
     if (!keySD.empty() && *keySD.data() == '\0') {
       int32_t subLen = keySD.find('\0', 1) + 1;
-      String cls = keySD.substr(1, subLen - 2);
+      OptString cls = keySD.substr(1, subLen - 2);
       if (cls.size() == 1 && cls[0] == '*') {
         // Protected.
         prop->ctx = nullptr;

@@ -30,9 +30,9 @@ struct Wrapper;
 bool registerWrapper(const std::string &scheme, Wrapper *wrapper);
 Array enumWrappers();
 
-String getWrapperProtocol(const char* url, int* pathIndex = nullptr);
-Wrapper* getWrapper(const String& scheme, bool warn = true);
-Wrapper* getWrapperFromURI(const String& uri,
+OptString getWrapperProtocol(const char* url, int* pathIndex = nullptr);
+Wrapper* getWrapper(const OptString& scheme, bool warn = true);
+Wrapper* getWrapperFromURI(const OptString& uri,
                            int* pathIndex = nullptr, bool warn = true);
 
 /* Called during process init to register core wrappers */

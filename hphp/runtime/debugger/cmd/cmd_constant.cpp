@@ -53,7 +53,7 @@ void CmdConstant::help(DebuggerClient &client) {
 void CmdConstant::onClient(DebuggerClient &client) {
   if (DebuggerCommand::displayedHelp(client)) return;
 
-  String text;
+  OptString text;
   if (client.argCount() == 1) {
     text = client.argValue(1);
   } else if (client.argCount() != 0) {

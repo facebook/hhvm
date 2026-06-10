@@ -22,10 +22,10 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant HHVM_FUNCTION(ini_get, const String& varname);
-String HHVM_FUNCTION(php_sapi_name);
-Variant HHVM_FUNCTION(php_uname, const String& mode = empty_string_ref);
-String HHVM_FUNCTION(sys_get_temp_dir);
+Variant HHVM_FUNCTION(ini_get, const OptString& varname);
+OptString HHVM_FUNCTION(php_sapi_name);
+Variant HHVM_FUNCTION(php_uname, const OptString& mode = empty_string_ref);
+OptString HHVM_FUNCTION(sys_get_temp_dir);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -102,7 +102,7 @@ Variant Variant::fromDynamic(const folly::dynamic& dy) {
     DictInit ret{dy.size()};
     for (auto const& [k, v] : dy.items()) {
       if (k.isString()) {
-        ret.set(String{k.getString()}, Variant::fromDynamic(v));
+        ret.set(OptString{k.getString()}, Variant::fromDynamic(v));
       } else if (k.isInt()) {
         ret.set(k.getInt(), Variant::fromDynamic(v));
       }

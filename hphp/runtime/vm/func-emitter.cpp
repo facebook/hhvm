@@ -556,7 +556,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   return f;
 }
 
-String FuncEmitter::nativeFullname() const {
+OptString FuncEmitter::nativeFullname() const {
   return Native::fullName(name, m_pce ? m_pce->name() : nullptr,
                           (attrs & AttrStatic));
 }
@@ -728,7 +728,7 @@ int FuncEmitter::parseNativeAttributes(Attr& attrs_) const {
   for (ArrayIter it(userAttr.m_data.parr); it; ++it) {
     Variant userAttrVal = it.second();
     if (userAttrVal.isString()) {
-      String userAttrStrVal = userAttrVal.toString();
+      OptString userAttrStrVal = userAttrVal.toString();
       if (userAttrStrVal.get()->tsame(s_nofcallbuiltin.get())) {
         attrs_ |= AttrNoFCallBuiltin;
       } else if (userAttrStrVal.get()->tsame(s_noinjection.get())) {

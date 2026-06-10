@@ -45,7 +45,7 @@ inline ArrayData* SetInPlace(ArrayData* ad, int64_t k, TypedValue v) {
 inline ArrayData* SetInPlace(ArrayData* ad, StringData* k, TypedValue v) {
   return VanillaDict::SetStrInPlace(ad, k, tvToInit(v));
 }
-inline ArrayData* SetInPlace(ArrayData* ad, const String& k, TypedValue v) {
+inline ArrayData* SetInPlace(ArrayData* ad, const OptString& k, TypedValue v) {
   return VanillaDict::SetStrInPlace(ad, k.get(), tvToInit(v));
 }
 inline ArrayData* SetInPlace(ArrayData* ad, TypedValue k, TypedValue v) {
@@ -220,7 +220,7 @@ struct DictInit : ArrayInitBase<detail::Dict, KindOfDict> {
     performOp([&]{ return arr_init::SetInPlace(m_arr, name, tv); });
     return *this;
   }
-  DictInit& set(const String& name, TypedValue tv) {
+  DictInit& set(const OptString& name, TypedValue tv) {
     performOp([&]{ return arr_init::SetInPlace(m_arr, name, tv); });
     return *this;
   }
@@ -232,7 +232,7 @@ struct DictInit : ArrayInitBase<detail::Dict, KindOfDict> {
 
   IMPL_SET(int64_t)
   IMPL_SET(StringData*)
-  IMPL_SET(const String&)
+  IMPL_SET(const OptString&)
 
   DictInit& set(const char*, TypedValue tv) = delete;
   DictInit& set(const char*, const Variant& v) = delete;
@@ -361,16 +361,16 @@ namespace make_array_detail {
     vec_impl(init, std::forward<Vals>(vals)...);
   }
 
-  inline String init_key(const char* s) { return String(s); }
+  inline OptString init_key(const char* s) { return OptString(s); }
   inline int64_t init_key(int k) { return k; }
   inline int64_t init_key(int64_t k) { return k; }
-  inline const String& init_key(const String& k) { return k; }
-  inline const String init_key(StringData* k) { return String{k}; }
+  inline const OptString& init_key(const OptString& k) { return k; }
+  inline const OptString init_key(StringData* k) { return OptString{k}; }
 
-  inline String dict_init_key(const char* s) { return String(s); }
+  inline OptString dict_init_key(const char* s) { return OptString(s); }
   inline int64_t dict_init_key(int k) { return k; }
   inline int64_t dict_init_key(int64_t k) { return k; }
-  inline StringData* dict_init_key(const String& k) { return k.get(); }
+  inline StringData* dict_init_key(const OptString& k) { return k.get(); }
   inline StringData* dict_init_key(StringData* k) { return k; }
 
   inline void dict_impl(DictInit&) {}
@@ -382,10 +382,10 @@ namespace make_array_detail {
     dict_impl(init, std::forward<KVPairs>(kvpairs)...);
   }
 
-  inline String keyset_init_key(const char* s) { return String(s); }
+  inline OptString keyset_init_key(const char* s) { return OptString(s); }
   inline int64_t keyset_init_key(int k) { return k; }
   inline int64_t keyset_init_key(int64_t k) { return k; }
-  inline StringData* keyset_init_key(const String& k) { return k.get(); }
+  inline StringData* keyset_init_key(const OptString& k) { return k.get(); }
   inline StringData* keyset_init_key(StringData* k) { return k; }
 
   inline void keyset_impl(KeysetInit&) {}

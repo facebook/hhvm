@@ -28,12 +28,12 @@ extern const int64_t k_FORCE_DEFLATE;
 ///////////////////////////////////////////////////////////////////////////////
 // zlib functions
 
-Variant HHVM_FUNCTION(gzcompress, const String& data,
+Variant HHVM_FUNCTION(gzcompress, const OptString& data,
                                   int64_t level = -1);
-Variant HHVM_FUNCTION(gzuncompress, const String& data,
+Variant HHVM_FUNCTION(gzuncompress, const OptString& data,
                                     int64_t limit = 0);
-Variant HHVM_FUNCTION(gzinflate, const String& data, int64_t limit = 0);
-Variant HHVM_FUNCTION(gzencode, const String& data, int64_t level = -1,
+Variant HHVM_FUNCTION(gzinflate, const OptString& data, int64_t limit = 0);
+Variant HHVM_FUNCTION(gzencode, const OptString& data, int64_t level = -1,
                                 int64_t encoding_mode = k_FORCE_GZIP);
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -55,7 +55,7 @@ struct XmlParser : SweepableResourceData {
   ~XmlParser() override;
   void cleanupImpl();
   CLASSNAME_IS("xml")
-  const String& o_getClassNameHook() const override;
+  const OptString& o_getClassNameHook() const override;
 
   int case_folding{0};
   XML_Parser parser{nullptr};
@@ -109,7 +109,7 @@ void XmlParser::sweep() {
   cleanupImpl();
 }
 
-const String& XmlParser::o_getClassNameHook() const {
+const OptString& XmlParser::o_getClassNameHook() const {
   return classnameof();
 }
 
@@ -213,9 +213,9 @@ static int _xml_xmlcharlen(const XML_Char *s) {
   return len;
 }
 
-String xml_utf8_decode(const XML_Char *s, int len,
+OptString xml_utf8_decode(const XML_Char *s, int len,
                        const XML_Char *encoding) {
-  String str = String(len, ReserveString);
+  OptString str = OptString(len, ReserveString);
   char *newbuf = str.mutableData();
   char (*decoder)(unsigned short) = nullptr;
   xml_encoding *enc = xml_get_encoding(encoding);
@@ -252,12 +252,12 @@ static Variant _xml_xmlchar_zval(const XML_Char *s, int len,
   if (len == 0) {
     len = _xml_xmlcharlen(s);
   }
-  String ret = xml_utf8_decode(s, len, encoding);
+  OptString ret = xml_utf8_decode(s, len, encoding);
   return ret;
 }
 
 static
-String _xml_decode_tag(const req::ptr<XmlParser>& parser, const char *tag) {
+OptString _xml_decode_tag(const req::ptr<XmlParser>& parser, const char *tag) {
   auto newstr = xml_utf8_decode((const XML_Char*)tag, strlen(tag),
                                 parser->target_encoding);
   if (parser->case_folding) {
@@ -266,8 +266,8 @@ String _xml_decode_tag(const req::ptr<XmlParser>& parser, const char *tag) {
   return newstr;
 }
 
-static Variant php_xml_parser_create_impl(const String& encoding_param,
-                                          const String& ns_param,
+static Variant php_xml_parser_create_impl(const OptString& encoding_param,
+                                          const OptString& ns_param,
                                           int ns_support) {
   int auto_detect = 0;
   XML_Char *encoding;
@@ -294,7 +294,7 @@ static Variant php_xml_parser_create_impl(const String& encoding_param,
     encoding = XML(default_encoding);
   }
 
-  String separator;
+  OptString separator;
   if (ns_support && ns_param.empty()) {
     separator = ":";
   } else {
@@ -316,10 +316,10 @@ static Variant php_xml_parser_create_impl(const String& encoding_param,
   return Variant(std::move(parser));
 }
 
-static bool name_contains_class(const String& name) {
+static bool name_contains_class(const OptString& name) {
   if (name) {
     int pos = name.find("::");
-    return pos != 0 && pos != String::npos && pos + 2 < name.size();
+    return pos != 0 && pos != OptString::npos && pos + 2 < name.size();
   }
   return false;
 }
@@ -347,7 +347,7 @@ static Variant xml_call_handler(const req::ptr<XmlParser>& parser,
 }
 
 static void _xml_add_to_info(const req::ptr<XmlParser>& parser,
-                             const String& nameStr) {
+                             const OptString& nameStr) {
   if (parser->info.isNull()) {
     return;
   }
@@ -428,7 +428,7 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len) {
       int i;
       int doprint = 0;
 
-      String decoded_value;
+      OptString decoded_value;
       int decoded_len;
       decoded_value = xml_utf8_decode(s,len,
                                           parser->target_encoding);
@@ -448,7 +448,7 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len) {
       }
       if (doprint || (! parser->skipwhite)) {
         if (parser->lastwasopen) {
-          String myval;
+          OptString myval;
           auto ctag = parser->data.asArrRef().lval(parser->ctag);
           // check if value exists, if yes append to that
           if (asCArrRef(ctag).exists(s_value)) {
@@ -462,8 +462,8 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len) {
             );
           }
         } else {
-          String myval;
-          String mytype;
+          OptString myval;
+          OptString mytype;
 
           auto curtag = parser->data.asArrRef().pop();
           SCOPE_EXIT {
@@ -486,7 +486,7 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len) {
             _xml_add_to_info(parser, parser->ltags[parser->level-1] +
                              parser->toffset);
             Array tag = make_dict_array(
-              s_tag, String(parser->ltags[parser->level-1] +
+              s_tag, OptString(parser->ltags[parser->level-1] +
                                   parser->toffset, CopyString),
               s_value, decoded_value,
               s_type, s_cdata,
@@ -522,7 +522,7 @@ void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Ch
   if (parser) {
     parser->level++;
 
-    String tag_name = _xml_decode_tag(parser, (const char*)name);
+    OptString tag_name = _xml_decode_tag(parser, (const char*)name);
 
     if (parser->startElementHandler.toBoolean()) {
       Array args = make_vec_array(
@@ -532,8 +532,8 @@ void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Ch
       );
 
       while (attributes && *attributes) {
-        String att = _xml_decode_tag(parser, (const char*)attributes[0]);
-        String val = xml_utf8_decode(attributes[1],
+        OptString att = _xml_decode_tag(parser, (const char*)attributes[0]);
+        OptString val = xml_utf8_decode(attributes[1],
                                     strlen((const char*)attributes[1]),
                                     parser->target_encoding);
         auto const arr = args.lval(2);
@@ -562,8 +562,8 @@ void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Ch
         attributes = (const XML_Char **) attrs;
 
         while (attributes && *attributes) {
-          String att = _xml_decode_tag(parser, (const char*)attributes[0]);
-          String val = xml_utf8_decode(attributes[1],
+          OptString att = _xml_decode_tag(parser, (const char*)attributes[0]);
+          OptString val = xml_utf8_decode(attributes[1],
                                       strlen((const char*)attributes[1]),
                                       parser->target_encoding);
           atr.set(att, val);
@@ -698,7 +698,7 @@ static void xml_set_handler(Variant * handler, const Variant& data) {
 
 OptResource HHVM_FUNCTION(xml_parser_create,
                        const Variant& encoding /* = uninit_variant */) {
-  const String& strEncoding = encoding.isNull()
+  const OptString& strEncoding = encoding.isNull()
                             ? null_string
                             : encoding.toString();
   return php_xml_parser_create_impl(strEncoding, null_string, 0).toResource();
@@ -707,10 +707,10 @@ OptResource HHVM_FUNCTION(xml_parser_create,
 OptResource HHVM_FUNCTION(xml_parser_create_ns,
                        const Variant& encoding /* = uninit_variant */,
                        const Variant& separator /* = uninit_variant */) {
-  const String& strEncoding = encoding.isNull()
+  const OptString& strEncoding = encoding.isNull()
                             ? null_string
                             : encoding.toString();
-  const String& strSeparator = separator.isNull()
+  const OptString& strSeparator = separator.isNull()
                              ? null_string
                              : separator.toString();
   return php_xml_parser_create_impl(strEncoding, strSeparator, 1).toResource();
@@ -729,7 +729,7 @@ bool HHVM_FUNCTION(xml_parser_free,
 
 int64_t HHVM_FUNCTION(xml_parse,
                       const OptResource& parser,
-                      const String& data,
+                      const OptString& data,
                       bool is_final /* = true */) {
   // XML_Parse can reenter the VM, and it will do so after we've lost
   // the frame pointer by calling through the system's copy of XML_Parse
@@ -747,7 +747,7 @@ int64_t HHVM_FUNCTION(xml_parse,
 
 int64_t HHVM_FUNCTION(xml_parse_into_struct,
                       const OptResource& parser,
-                      const String& data,
+                      const OptString& data,
                       Array& values,
                       Array& index) {
   SYNC_VM_REGS_SCOPED();
@@ -783,7 +783,7 @@ Variant HHVM_FUNCTION(xml_parser_get_option,
   case PHP_XML_OPTION_CASE_FOLDING:
     return p->case_folding;
   case PHP_XML_OPTION_TARGET_ENCODING:
-    return String((const char*)p->target_encoding, CopyString);
+    return OptString((const char*)p->target_encoding, CopyString);
   default:
     raise_warning("Unknown option");
     return false;
@@ -941,23 +941,23 @@ int64_t HHVM_FUNCTION(xml_get_error_code,
   return XML_GetErrorCode(p->parser);
 }
 
-String HHVM_FUNCTION(xml_error_string,
+OptString HHVM_FUNCTION(xml_error_string,
                      int64_t code) {
   char * str = (char *)XML_ErrorString((XML_Error)/*(int)*/code);
-  return String(str, CopyString);
+  return OptString(str, CopyString);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-String HHVM_FUNCTION(utf8_decode,
-                     const String& data) {
+OptString HHVM_FUNCTION(utf8_decode,
+                     const OptString& data) {
   return xml_utf8_decode(data.c_str(), data.size(), "ISO-8859-1");
 }
 
-String HHVM_FUNCTION(utf8_encode,
-                     const String& data) {
+OptString HHVM_FUNCTION(utf8_encode,
+                     const OptString& data) {
   auto const maxSize = safe_cast<size_t>(data.size()) * 2;
-  String str = String(maxSize, ReserveString);
+  OptString str = OptString(maxSize, ReserveString);
   char *newbuf = str.mutableData();
   int newlen = 0;
   const char *s = data.data();

@@ -68,7 +68,7 @@ bool HHVM_METHOD(Awaitable, isFailed) {
   return wait_handle<c_Awaitable>(this_)->isFailed();
 }
 
-String HHVM_METHOD(Awaitable, getName) {
+OptString HHVM_METHOD(Awaitable, getName) {
   auto obj = wait_handle<c_Awaitable>(this_);
   if (obj->isSucceeded()) {
     return s_result;

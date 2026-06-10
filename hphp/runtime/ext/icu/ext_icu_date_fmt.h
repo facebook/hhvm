@@ -40,10 +40,10 @@ struct IntlDateFormatter : IntlError,
     }
   }
 
-  void setDateFormatter(const String& locale,
+  void setDateFormatter(const OptString& locale,
                         int64_t datetype, int64_t timetype,
                         const Variant& timezone, const Variant& calendar,
-                        const String& pattern);
+                        const OptString& pattern);
   void setDateFormatter(const IntlDateFormatter *orig);
 
   bool isValid() const {

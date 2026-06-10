@@ -44,7 +44,7 @@ extern const int64_t k_THRIFT_MARK_LEGACY_ARRAYS;
 void HHVM_FUNCTION(
     thrift_protocol_write_binary,
     const Object& transportobj,
-    const String& method_name,
+    const OptString& method_name,
     int64_t msgtype,
     const Object& request_struct,
     int64_t seqid,
@@ -56,28 +56,28 @@ void HHVM_FUNCTION(
     const Object& transportobj,
     const Object& request_struct);
 
-String HHVM_FUNCTION(
+OptString HHVM_FUNCTION(
     thrift_protocol_write_binary_struct_to_string,
     const Object& request_struct);
 
 Object HHVM_FUNCTION(
     thrift_protocol_read_binary,
     const Object& transportobj,
-    const String& obj_typename,
+    const OptString& obj_typename,
     bool strict_read,
     int64_t options);
 
 Variant HHVM_FUNCTION(
     thrift_protocol_read_binary_struct,
     const Object& transportobj,
-    const String& obj_typename,
+    const OptString& obj_typename,
     int64_t options);
 
 
 Object HHVM_FUNCTION(
     thrift_protocol_read_binary_struct_from_string,
-    const String& serialized,
-    const String& obj_typename,
+    const OptString& serialized,
+    const OptString& obj_typename,
     int64_t options);
 
 int64_t HHVM_FUNCTION(thrift_protocol_set_compact_version, int64_t version);
@@ -85,7 +85,7 @@ int64_t HHVM_FUNCTION(thrift_protocol_set_compact_version, int64_t version);
 void HHVM_FUNCTION(
     thrift_protocol_write_compact2,
     const Object& transportobj,
-    const String& method_name,
+    const OptString& method_name,
     int64_t msgtype,
     const Object& request_struct,
     int64_t seqid,
@@ -98,7 +98,7 @@ void HHVM_FUNCTION(
     const Object& request_struct,
     int64_t version = 2);
 
-String HHVM_FUNCTION(
+OptString HHVM_FUNCTION(
     thrift_protocol_write_compact_struct_to_string,
     const Object& request_struct,
     int64_t version);
@@ -106,20 +106,20 @@ String HHVM_FUNCTION(
 Variant HHVM_FUNCTION(
     thrift_protocol_read_compact,
     const Object& transportobj,
-    const String& obj_typename,
+    const OptString& obj_typename,
     int64_t options);
 
 Object HHVM_FUNCTION(
     thrift_protocol_read_compact_struct,
     const Object& transportobj,
-    const String& obj_typename,
+    const OptString& obj_typename,
     int64_t options,
     int64_t version = 2);
 
 Object HHVM_FUNCTION(
     thrift_protocol_read_compact_struct_from_string,
-    const String& serialized,
-    const String& obj_typename,
+    const OptString& serialized,
+    const OptString& obj_typename,
     int64_t options,
     int64_t version = 2);
 
@@ -127,11 +127,11 @@ Object HHVM_FUNCTION(
 // Helper functions for compact serialization and deserialization
 
 Object compact_deserialize_from_string(
-    const String& serialized,
-    const String& thrift_typename,
+    const OptString& serialized,
+    const OptString& thrift_typename,
     int64_t options = 0, int64_t version = 2);
 
-String compact_serialize_to_string(
+OptString compact_serialize_to_string(
                    const Object& thrift_struct,
                    int64_t version = 2);
 
@@ -455,14 +455,14 @@ struct TClientSink : SystemLib::ClassLoader<"TClientSink"> {
 };
 } // namespace thrift
 
-inline String ioBufToString(const folly::IOBuf& ioBuf) {
+inline OptString ioBufToString(const folly::IOBuf& ioBuf) {
   auto resultStringData = StringData::Make(ioBuf.computeChainDataLength());
   for (const auto& buf : ioBuf) {
     auto const data = reinterpret_cast<const char*>(buf.data());
     auto const piece = folly::StringPiece{data, buf.size()};
     resultStringData->append(piece);
   }
-  return String::attach(resultStringData);
+  return OptString::attach(resultStringData);
 }
 
 struct Thrift2StreamEvent final : AsioExternalThreadEvent {
@@ -492,7 +492,7 @@ struct Thrift2StreamEvent final : AsioExternalThreadEvent {
               ));
     }
 
-    String errorStr = null_string;
+    OptString errorStr = null_string;
     if (error_.errorMsg_) {
       if (error_.isEncoded_) {
         // Encoded stream exceptions need to be deserialized by generated code.

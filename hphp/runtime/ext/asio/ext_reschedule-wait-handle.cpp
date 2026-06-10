@@ -72,7 +72,7 @@ void c_RescheduleWaitHandle::run() {
   parentChain.unblock();
 }
 
-String c_RescheduleWaitHandle::getName() {
+OptString c_RescheduleWaitHandle::getName() {
   return s_reschedule;
 }
 

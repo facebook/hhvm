@@ -23,77 +23,77 @@ namespace HPHP {
 
 #define VS(str1, str2) EXPECT_TRUE(!strcmp((str1), (str2)))
 
-TEST(String, Constructors) {
+TEST(OptString, Constructors) {
   // constructors
-  VS(String(15).c_str(), "15");
-  VS(String(-15).c_str(), "-15");
-  VS(String(int64_t(12345678912345678LL)).c_str(), "12345678912345678");
-  VS(String(int64_t(-12345678912345678LL)).c_str(), "-12345678912345678");
-  VS(String(5.603).c_str(), "5.603");
-  VS(String("test").c_str(), "test");
-  VS(String(String("test")).c_str(), "test");
+  VS(OptString(15).c_str(), "15");
+  VS(OptString(-15).c_str(), "-15");
+  VS(OptString(int64_t(12345678912345678LL)).c_str(), "12345678912345678");
+  VS(OptString(int64_t(-12345678912345678LL)).c_str(), "-12345678912345678");
+  VS(OptString(5.603).c_str(), "5.603");
+  VS(OptString("test").c_str(), "test");
+  VS(OptString(OptString("test")).c_str(), "test");
 }
 
-TEST(String, Informational) {
-  EXPECT_TRUE(String().isNull());
-  EXPECT_TRUE(!String("").isNull());
-  EXPECT_TRUE(String().empty());
-  EXPECT_TRUE(String("").empty());
-  EXPECT_TRUE(!String("test").empty());
-  EXPECT_TRUE(String().size() == 0);
-  EXPECT_TRUE(String().length() == 0);
-  EXPECT_TRUE(String("").size() == 0);
-  EXPECT_TRUE(String("").length() == 0);
-  EXPECT_TRUE(String("test").size() == 4);
-  EXPECT_TRUE(String("test").length() == 4);
-  EXPECT_TRUE(!String("2test").isNumeric());
-  EXPECT_TRUE(!String("test").isNumeric());
-  EXPECT_TRUE(String("23").isNumeric());
-  EXPECT_TRUE(String("23.3").isNumeric());
+TEST(OptString, Informational) {
+  EXPECT_TRUE(OptString().isNull());
+  EXPECT_TRUE(!OptString("").isNull());
+  EXPECT_TRUE(OptString().empty());
+  EXPECT_TRUE(OptString("").empty());
+  EXPECT_TRUE(!OptString("test").empty());
+  EXPECT_TRUE(OptString().size() == 0);
+  EXPECT_TRUE(OptString().length() == 0);
+  EXPECT_TRUE(OptString("").size() == 0);
+  EXPECT_TRUE(OptString("").length() == 0);
+  EXPECT_TRUE(OptString("test").size() == 4);
+  EXPECT_TRUE(OptString("test").length() == 4);
+  EXPECT_TRUE(!OptString("2test").isNumeric());
+  EXPECT_TRUE(!OptString("test").isNumeric());
+  EXPECT_TRUE(OptString("23").isNumeric());
+  EXPECT_TRUE(OptString("23.3").isNumeric());
 }
 
-TEST(String, Operators) {
-  String s;
+TEST(OptString, Operators) {
+  OptString s;
   s = "test1";                   VS(s.c_str(), "test1");
-  s = String("test2");           VS(s.c_str(), "test2");
-  s = String("a") + "b";         VS(s.c_str(), "ab");
-  s = String("c") + String("d"); VS(s.c_str(), "cd");
+  s = OptString("test2");           VS(s.c_str(), "test2");
+  s = OptString("a") + "b";         VS(s.c_str(), "ab");
+  s = OptString("c") + OptString("d"); VS(s.c_str(), "cd");
   s += "efg";                    VS(s.c_str(), "cdefg");
-  s += String("hij");            VS(s.c_str(), "cdefghij");
+  s += OptString("hij");            VS(s.c_str(), "cdefghij");
 }
 
-TEST(String, Manipulations) {
-  String s = HHVM_FN(strtolower)("Test");
+TEST(OptString, Manipulations) {
+  OptString s = HHVM_FN(strtolower)("Test");
   VS(s.c_str(), "test");
 }
 
-TEST(String, Conversions) {
-  EXPECT_TRUE(!String().toBoolean());
-  EXPECT_TRUE(String("123").toBoolean());
-  EXPECT_TRUE((int)String("1234567890").toInt64() == 1234567890);
-  EXPECT_TRUE(String("123456789012345678").toInt64() == 123456789012345678LL);
-  EXPECT_TRUE(String("123.45").toDouble() == 123.45);
+TEST(OptString, Conversions) {
+  EXPECT_TRUE(!OptString().toBoolean());
+  EXPECT_TRUE(OptString("123").toBoolean());
+  EXPECT_TRUE((int)OptString("1234567890").toInt64() == 1234567890);
+  EXPECT_TRUE(OptString("123456789012345678").toInt64() == 123456789012345678LL);
+  EXPECT_TRUE(OptString("123.45").toDouble() == 123.45);
 }
 
-TEST(String, Compare) {
-  EXPECT_TRUE(String("abc").compare("abc") == 0);
-  EXPECT_TRUE(String("abc").compare("bbc") < 0);
-  EXPECT_TRUE(String("bbc").compare("abc") > 0);
-  EXPECT_TRUE(String("abc").compare(String("abc")) == 0);
-  EXPECT_TRUE(String("abc").compare(String("bbc")) < 0);
-  EXPECT_TRUE(String("bbc").compare(String("abc")) > 0);
+TEST(OptString, Compare) {
+  EXPECT_TRUE(OptString("abc").compare("abc") == 0);
+  EXPECT_TRUE(OptString("abc").compare("bbc") < 0);
+  EXPECT_TRUE(OptString("bbc").compare("abc") > 0);
+  EXPECT_TRUE(OptString("abc").compare(OptString("abc")) == 0);
+  EXPECT_TRUE(OptString("abc").compare(OptString("bbc")) < 0);
+  EXPECT_TRUE(OptString("bbc").compare(OptString("abc")) > 0);
 
-  EXPECT_TRUE(String("abc").compare("abcd") < 0);
-  EXPECT_TRUE(String("abcd").compare("abc") > 0);
-  EXPECT_TRUE(String("abc").compare(String("abcd")) < 0);
-  EXPECT_TRUE(String("abcd").compare(String("abc")) > 0);
+  EXPECT_TRUE(OptString("abc").compare("abcd") < 0);
+  EXPECT_TRUE(OptString("abcd").compare("abc") > 0);
+  EXPECT_TRUE(OptString("abc").compare(OptString("abcd")) < 0);
+  EXPECT_TRUE(OptString("abcd").compare(OptString("abc")) > 0);
 
   // check Strings with embedded nulls
   std::string str1("a\0bc", 4);
   std::string str2("a\0bb", 4);
-  EXPECT_TRUE(String(str1).compare(String(str1)) == 0);
-  EXPECT_TRUE(String(str1).compare(String(str2)) > 0);
-  EXPECT_TRUE(String(str2).compare(String(str1)) < 0);
+  EXPECT_TRUE(OptString(str1).compare(OptString(str1)) == 0);
+  EXPECT_TRUE(OptString(str1).compare(OptString(str2)) > 0);
+  EXPECT_TRUE(OptString(str2).compare(OptString(str1)) < 0);
 }
 
 }

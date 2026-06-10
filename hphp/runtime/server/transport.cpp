@@ -279,10 +279,10 @@ void Transport::getSplitParam(const char *name,
 ///////////////////////////////////////////////////////////////////////////////
 // headers
 
-bool Transport::splitHeader(const String& header, String &name, const char *&value) {
+bool Transport::splitHeader(const OptString& header, OptString &name, const char *&value) {
   int pos = header.find(':');
 
-  if (pos != String::npos) {
+  if (pos != OptString::npos) {
     name = header.substr(0, pos);
     value = header.data() + pos;
 
@@ -297,9 +297,9 @@ bool Transport::splitHeader(const String& header, String &name, const char *&val
   // header("HTTP/1.0 404");
   if (strncasecmp(header.data(), "http/", 5) == 0) {
     int pos1 = header.find(' ');
-    if (pos1 != String::npos) {
+    if (pos1 != OptString::npos) {
       int pos2 = header.find(' ', pos1 + 1);
-      if (pos2 == String::npos) pos2 = header.size();
+      if (pos2 == OptString::npos) pos2 = header.size();
       if (pos2 - pos1 > 1) {
         setResponse(atoi(header.data() + pos1),
                     header.size() - pos2 > 1 ? header.data() + pos2 : nullptr);
@@ -347,8 +347,8 @@ void Transport::addHeader(const char *name, const char *value) {
   addHeaderNoLock(name, value);
 }
 
-void Transport::addHeader(const String& header) {
-  String name;
+void Transport::addHeader(const OptString& header) {
+  OptString name;
   const char *value;
   if (splitHeader(header, name, value)) {
     addHeader(name.data(), value);
@@ -362,8 +362,8 @@ void Transport::replaceHeader(const char *name, const char *value) {
   addHeaderNoLock(name, value);
 }
 
-void Transport::replaceHeader(const String& header) {
-  String name;
+void Transport::replaceHeader(const OptString& header) {
+  OptString name;
   const char *value;
   if (splitHeader(header, name, value)) {
     replaceHeader(name.data(), value);
@@ -457,12 +457,12 @@ size_t Transport::getRequestSize() const {
   return 0;
 }
 
-void Transport::setMimeType(const String& mimeType) {
+void Transport::setMimeType(const OptString& mimeType) {
   m_mimeType = mimeType.data();
 }
 
-String Transport::getMimeType() {
-  return String(m_mimeType);
+OptString Transport::getMimeType() {
+  return OptString(m_mimeType);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -472,7 +472,7 @@ namespace {
 
 // Make sure cookie names do not contain any illegal characters.
 // Throw a fatal exception if one does.
-void validateCookieNameString(const String& str) {
+void validateCookieNameString(const OptString& str) {
   if (!str.empty() && strpbrk(str.data(), "=,; \t\r\n\013\014")) {
     raise_error("Cookie names can not contain any of the following "
                 "'=,; \\t\\r\\n\\013\\014'");
@@ -482,7 +482,7 @@ void validateCookieNameString(const String& str) {
 // Make sure a component (path, value, domain) of a cookie does not
 // contain any illegal characters.  Throw a fatal exception if it
 // does.
-void validateCookieString(const String& str, const char* component) {
+void validateCookieString(const OptString& str, const char* component) {
   if (!str.empty() && strpbrk(str.data(), ",; \t\r\n\013\014")) {
     raise_error("Cookie %s can not contain any of the following "
                 "',; \\t\\r\\n\\013\\014'", component);
@@ -491,8 +491,8 @@ void validateCookieString(const String& str, const char* component) {
 
 }
 
-bool Transport::setCookie(const String& name, const String& value, int64_t expire /* = 0 */,
-                          const String& path /* = "" */, const String& domain /* = "" */,
+bool Transport::setCookie(const OptString& name, const OptString& value, int64_t expire /* = 0 */,
+                          const OptString& path /* = "" */, const OptString& domain /* = "" */,
                           bool secure /* = false */,
                           bool httponly /* = false */,
                           bool encode_url /* = true */) {
@@ -506,7 +506,7 @@ bool Transport::setCookie(const String& name, const String& value, int64_t expir
 
   validateCookieString(domain, "domains");
 
-  String encoded_value;
+  OptString encoded_value;
   int len = 0;
   if (!value.empty()) {
     encoded_value = encode_url ? url_encode(value.data(), value.size())
@@ -524,7 +524,7 @@ bool Transport::setCookie(const String& name, const String& value, int64_t expir
      * so in order to force cookies to be deleted, even on MSIE, we
      * pick an expiry date in the past
      */
-    String sdt = req::make<DateTime>(1, true)->
+    OptString sdt = req::make<DateTime>(1, true)->
       toString(DateTime::DateFormat::Cookie);
     cookie += name.data();
     cookie += "=deleted; expires=";
@@ -540,11 +540,11 @@ bool Transport::setCookie(const String& name, const String& value, int64_t expir
         return false;
       }
       cookie += "; expires=";
-      String sdt = req::make<DateTime>(expire, true)->
+      OptString sdt = req::make<DateTime>(expire, true)->
         toString(DateTime::DateFormat::Cookie);
       cookie += sdt.data();
       cookie += "; Max-Age=";
-      String sdelta = String(expire - time(0));
+      OptString sdelta = OptString(expire - time(0));
       cookie += sdelta.data();
     }
   }
@@ -567,7 +567,7 @@ bool Transport::setCookie(const String& name, const String& value, int64_t expir
   // PHP5 does not deduplicate cookies. That behavior is preserved when
   // CookieDeduplicate is not enabled. Otherwise, we will only keep the
   // last cookie for a given name-domain-path triplet.
-  String dedup_key = name + "\n" + domain + "\n" + path;
+  OptString dedup_key = name + "\n" + domain + "\n" + path;
 
   m_responseCookies[dedup_key.data()] = cookie;
 
@@ -618,7 +618,7 @@ void Transport::prepareHeaders(bool precompressed, bool chunked,
           "at the same time. Dropping Content-MD5.");
       } else {
         std::string cur_md5 = it->second[0];
-        String expected_md5 = StringUtil::Base64Encode(StringUtil::MD5(
+        OptString expected_md5 = StringUtil::Base64Encode(StringUtil::MD5(
           orig_response.data(), orig_response.size(), true));
         // Can never trust these PHP people...
         if (expected_md5.c_str() != cur_md5) {
@@ -642,15 +642,15 @@ void Transport::prepareHeaders(bool precompressed, bool chunked,
   }
 
   if (Cfg::Server::ExposeHPHP) {
-    addHeaderImpl("X-Powered-By", (String("HHVM/") + HHVM_VERSION).c_str());
+    addHeaderImpl("X-Powered-By", (OptString("HHVM/") + HHVM_VERSION).c_str());
   }
 
   if ((Cfg::Server::ExposeXFBServer || Cfg::Server::ExposeXFBDebug) &&
       !Cfg::Server::XFBDebugSSLKey.empty() &&
       m_responseHeaders.find("X-FB-Debug") == m_responseHeaders.end()) {
-    String ip = this->getServerAddr();
-    String key = Cfg::Server::XFBDebugSSLKey;
-    String cipher("AES-256-CBC");
+    OptString ip = this->getServerAddr();
+    OptString key = Cfg::Server::XFBDebugSSLKey;
+    OptString cipher("AES-256-CBC");
     bool crypto_strong = false;
     auto const iv_len = (int)HHVM_FN(openssl_cipher_iv_length)(cipher).toInt64();
     auto const iv = HHVM_FN(openssl_random_pseudo_bytes)(
@@ -900,7 +900,7 @@ int Transport::getLastChunkSentSize() {
 ///////////////////////////////////////////////////////////////////////////////
 // support rfc1867
 
-bool Transport::isUploadedFile(const String& filename) {
+bool Transport::isUploadedFile(const OptString& filename) {
   return is_uploaded_file(filename.c_str());
 }
 

@@ -270,15 +270,15 @@ Object initEmptyContext() {
   return obj;
 }
 
-String HHVM_FUNCTION(get_state_unsafe) {
+OptString HHVM_FUNCTION(get_state_unsafe) {
   assertx(*ImplicitContext::activeCtx);
   auto const obj = *ImplicitContext::activeCtx;
   auto const context = Native::data<ImplicitContext>(obj);
 
   if (context->m_memoKey == kAgnosticMemoKey) {
-    return String{s_ICStateInaccessible.get()};
+    return OptString{s_ICStateInaccessible.get()};
   }
-  return String{s_ICStateValue.get()};
+  return OptString{s_ICStateValue.get()};
 }
 
 TypedValue HHVM_FUNCTION(get_implicit_context, TypedValue key) {

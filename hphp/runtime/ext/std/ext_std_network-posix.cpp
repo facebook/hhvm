@@ -81,8 +81,8 @@ static void php_dns_free_res(struct __res_state *res) {
 #endif
 }
 
-bool HHVM_FUNCTION(checkdnsrr, const String& host,
-                               const String& type /* = null_string */) {
+bool HHVM_FUNCTION(checkdnsrr, const OptString& host,
+                               const OptString& type /* = null_string */) {
   int ntype;
   if (!validate_dns_arguments(host, type, ntype)) {
     return false;
@@ -196,13 +196,13 @@ static unsigned char *php_parserr(unsigned char *cp, unsigned char* end,
     return cp;
   }
 
-  subarray.set(s_host, String(name, CopyString));
+  subarray.set(s_host, OptString(name, CopyString));
   switch (type) {
   case DNS_T_A:
     CHECKCP(4);
     subarray.set(s_type, s_A);
     snprintf(name, sizeof(name), "%d.%d.%d.%d", cp[0], cp[1], cp[2], cp[3]);
-    subarray.set(s_ip, String(name, CopyString));
+    subarray.set(s_ip, OptString(name, CopyString));
     cp += dlen;
     break;
   case DNS_T_MX:
@@ -230,7 +230,7 @@ static unsigned char *php_parserr(unsigned char *cp, unsigned char* end,
       return NULL;
     }
     cp += n;
-    subarray.set(s_target, String(name, CopyString));
+    subarray.set(s_target, OptString(name, CopyString));
     break;
   case DNS_T_HINFO:
     /* See RFC 1010 for values */
@@ -239,13 +239,13 @@ static unsigned char *php_parserr(unsigned char *cp, unsigned char* end,
     n = *cp & 0xFF;
     cp++;
     CHECKCP(n);
-    subarray.set(s_cpu, String((const char *)cp, n, CopyString));
+    subarray.set(s_cpu, OptString((const char *)cp, n, CopyString));
     cp += n;
     CHECKCP(1);
     n = *cp & 0xFF;
     cp++;
     CHECKCP(n);
-    subarray.set(s_os, String((const char *)cp, n, CopyString));
+    subarray.set(s_os, OptString((const char *)cp, n, CopyString));
     cp += n;
     break;
   case DNS_T_CAA:
@@ -259,20 +259,20 @@ static unsigned char *php_parserr(unsigned char *cp, unsigned char* end,
     n = *cp & 0xFF;
     cp++;
     CHECKCP(n);
-    subarray.set(s_tag, String((const char *)cp, n, CopyString));
+    subarray.set(s_tag, OptString((const char *)cp, n, CopyString));
     cp += n;
 		if ( (size_t) dlen < ((size_t)n) + 2 ) {
 			return NULL;
 	  }
     n = dlen - n - 2;
     CHECKCP(n);
-    subarray.set(s_value, String((const char *)cp, n, CopyString));
+    subarray.set(s_value, OptString((const char *)cp, n, CopyString));
     cp += n;
     break;
   case DNS_T_TXT: {
     int l1 = 0, l2 = 0;
 
-    String s = String(dlen, ReserveString);
+    OptString s = OptString(dlen, ReserveString);
     tp = (unsigned char *)s.mutableData();
 
     while (l1 < dlen) {
@@ -299,13 +299,13 @@ static unsigned char *php_parserr(unsigned char *cp, unsigned char* end,
       return NULL;
     }
     cp += n;
-    subarray.set(s_mname, String(name, CopyString));
+    subarray.set(s_mname, OptString(name, CopyString));
     n = dn_expand(answer->qb2, end, cp, name, (sizeof name) -2);
     if (n < 0) {
       return NULL;
     }
     cp += n;
-    subarray.set(s_rname, String(name, CopyString));
+    subarray.set(s_rname, OptString(name, CopyString));
     CHECKCP(5*4);
     GETLONG(n, cp);
     subarray.set(s_serial, n);
@@ -350,7 +350,7 @@ static unsigned char *php_parserr(unsigned char *cp, unsigned char* end,
     }
     tp[0] = '\0';
     subarray.set(s_type, s_AAAA);
-    subarray.set(s_ipv6, String(name, CopyString));
+    subarray.set(s_ipv6, OptString(name, CopyString));
     break;
   case DNS_T_A6:
     p = cp;
@@ -419,7 +419,7 @@ static unsigned char *php_parserr(unsigned char *cp, unsigned char* end,
       tp++;
     }
     tp[0] = '\0';
-    subarray.set(s_ipv6, String(name, CopyString));
+    subarray.set(s_ipv6, OptString(name, CopyString));
     if (cp < p + dlen) {
       n = dn_expand(answer->qb2, end, cp, name,
                     (sizeof name) - 2);
@@ -427,7 +427,7 @@ static unsigned char *php_parserr(unsigned char *cp, unsigned char* end,
         return NULL;
       }
       cp += n;
-      subarray.set(s_chain, String(name, CopyString));
+      subarray.set(s_chain, OptString(name, CopyString));
     }
     break;
   case DNS_T_SRV:
@@ -444,7 +444,7 @@ static unsigned char *php_parserr(unsigned char *cp, unsigned char* end,
       return NULL;
     }
     cp += n;
-    subarray.set(s_target, String(name, CopyString));
+    subarray.set(s_target, OptString(name, CopyString));
     break;
   case DNS_T_NAPTR:
     CHECKCP(2*2);
@@ -458,21 +458,21 @@ static unsigned char *php_parserr(unsigned char *cp, unsigned char* end,
     n = (cp[0] & 0xFF);
     ++cp;
     CHECKCP(n);
-    subarray.set(s_flags, String((const char *)cp, n, CopyString));
+    subarray.set(s_flags, OptString((const char *)cp, n, CopyString));
     cp += n;
 
     CHECKCP(1);
     n = (cp[0] & 0xFF);
     ++cp;
     CHECKCP(n);
-    subarray.set(s_services, String((const char *)cp, n, CopyString));
+    subarray.set(s_services, OptString((const char *)cp, n, CopyString));
     cp += n;
 
     CHECKCP(1);
     n = (cp[0] & 0xFF);
     ++cp;
     CHECKCP(n);
-    subarray.set(s_regex, String((const char *)cp, n, CopyString));
+    subarray.set(s_regex, OptString((const char *)cp, n, CopyString));
     cp += n;
 
     n = dn_expand(answer->qb2, end, cp, name, (sizeof name) - 2);
@@ -480,7 +480,7 @@ static unsigned char *php_parserr(unsigned char *cp, unsigned char* end,
       return NULL;
     }
     cp += n;
-    subarray.set(s_replacement, String(name, CopyString));
+    subarray.set(s_replacement, OptString(name, CopyString));
     break;
   default:
     cp += dlen;
@@ -491,7 +491,7 @@ static unsigned char *php_parserr(unsigned char *cp, unsigned char* end,
   return cp;
 }
 
-Variant HHVM_FUNCTION(dns_get_record, const String& hostname, int64_t type,
+Variant HHVM_FUNCTION(dns_get_record, const OptString& hostname, int64_t type,
                       Variant& authnsRef,
                       Variant& addtlRef) {
   IOStatusHelper io("dns_get_record", hostname.data(), type);
@@ -618,7 +618,7 @@ Variant HHVM_FUNCTION(dns_get_record, const String& hostname, int64_t type,
   return ret;
 }
 
-bool HHVM_FUNCTION(getmxrr, const String& hostname,
+bool HHVM_FUNCTION(getmxrr, const OptString& hostname,
                             Variant& mxhostsRef,
                             Variant& weightsRef) {
   IOStatusHelper io("dns_get_mx", hostname.data());
@@ -684,7 +684,7 @@ bool HHVM_FUNCTION(getmxrr, const String& hostname,
       return false;
     }
     cp += i;
-    mxhosts.append(String(buf, CopyString));
+    mxhosts.append(OptString(buf, CopyString));
     weights.append(weight);
   }
   res_nclose(res);

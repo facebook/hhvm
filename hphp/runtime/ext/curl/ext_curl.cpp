@@ -98,7 +98,7 @@ Variant HHVM_FUNCTION(curl_version, int64_t uversion /* = CURLVERSION_NOW */) {
   char **p = (char **) d->protocols;
   Array protocol_list;
   while (*p != nullptr) {
-    protocol_list.append(String(*p++, CopyString));
+    protocol_list.append(OptString(*p++, CopyString));
   }
   ret.set(s_protocols, protocol_list);
   return ret.toVariant();
@@ -142,7 +142,7 @@ Array create_certinfo(struct curl_certinfo *ci) {
       Array certData = Array::CreateDict();
       while (slist) {
         Array parts = StringUtil::Explode(
-          String(slist->data, CopyString),
+          OptString(slist->data, CopyString),
           ":",
           2).toArray();
         if (parts.size() == 2) {
@@ -206,11 +206,11 @@ Variant HHVM_FUNCTION(curl_getinfo, const OptResource& ch, int64_t opt /* = 0 */
 
     Array ret;
     if (curl_easy_getinfo(cp, CURLINFO_EFFECTIVE_URL, &s_code) == CURLE_OK) {
-      ret.set(s_url, String(s_code, CopyString));
+      ret.set(s_url, OptString(s_code, CopyString));
     }
     if (curl_easy_getinfo(cp, CURLINFO_CONTENT_TYPE, &s_code) == CURLE_OK) {
       if (s_code != nullptr) {
-        ret.set(s_content_type, String(s_code, CopyString));
+        ret.set(s_content_type, OptString(s_code, CopyString));
       } else {
         ret.set(s_content_type, init_null());
       }
@@ -276,12 +276,12 @@ Variant HHVM_FUNCTION(curl_getinfo, const OptResource& ch, int64_t opt /* = 0 */
     }
 #if LIBCURL_VERSION_NUM >= 0x071202 /* Available since 7.18.2 */
     if (curl_easy_getinfo(cp, CURLINFO_REDIRECT_URL, &s_code) == CURLE_OK) {
-      ret.set(s_redirect_url, String(s_code, CopyString));
+      ret.set(s_redirect_url, OptString(s_code, CopyString));
     }
 #endif
 #if LIBCURL_VERSION_NUM >= 0x071300 /* Available since 7.19.0 */
     if (curl_easy_getinfo(cp, CURLINFO_PRIMARY_IP, &s_code) == CURLE_OK) {
-      ret.set(s_primary_ip, String(s_code, CopyString));
+      ret.set(s_primary_ip, OptString(s_code, CopyString));
     }
 #endif
 #if LIBCURL_VERSION_NUM >= 0x071301 /* Available since 7.19.1 */
@@ -294,7 +294,7 @@ Variant HHVM_FUNCTION(curl_getinfo, const OptResource& ch, int64_t opt /* = 0 */
       ret.set(s_primary_port, l_code);
     }
     if (curl_easy_getinfo(cp, CURLINFO_LOCAL_IP, &s_code) == CURLE_OK) {
-      ret.set(s_local_ip, String(s_code, CopyString));
+      ret.set(s_local_ip, OptString(s_code, CopyString));
     }
     if (curl_easy_getinfo(cp, CURLINFO_LOCAL_PORT, &l_code) == CURLE_OK) {
       ret.set(s_local_port, l_code);
@@ -302,23 +302,23 @@ Variant HHVM_FUNCTION(curl_getinfo, const OptResource& ch, int64_t opt /* = 0 */
 #endif
 #if LIBCURL_VERSION_NUM >= 0x074800 /* Available since 7.72.0 */
     if (curl_easy_getinfo(cp, CURLINFO_EFFECTIVE_METHOD, &s_code) == CURLE_OK) {
-      ret.set(s_effective_method, String(s_code, CopyString));
+      ret.set(s_effective_method, OptString(s_code, CopyString));
     }
 #endif
 #if LIBCURL_VERSION_NUM >= 0x074c00 /* Available since 7.76.0 */
     if (curl_easy_getinfo(cp, CURLINFO_REFERER, &s_code) == CURLE_OK) {
-      ret.set(s_referer, String(s_code, CopyString));
+      ret.set(s_referer, OptString(s_code, CopyString));
     }
 #endif
 #if LIBCURL_VERSION_NUM >= 0x075400 /* Available since 7.84.0 */
     if (curl_easy_getinfo(cp, CURLINFO_CAPATH, &s_code) == CURLE_OK) {
-      ret.set(s_capath, String(s_code, CopyString));
+      ret.set(s_capath, OptString(s_code, CopyString));
     }
     if (curl_easy_getinfo(cp, CURLINFO_CAINFO, &s_code) == CURLE_OK) {
-      ret.set(s_cainfo, String(s_code, CopyString));
+      ret.set(s_cainfo, OptString(s_code, CopyString));
     }
 #endif
-    String header = curl->getHeader();
+    OptString header = curl->getHeader();
     if (!header.empty()) {
       ret.set(s_request_header, header);
     }
@@ -327,7 +327,7 @@ Variant HHVM_FUNCTION(curl_getinfo, const OptResource& ch, int64_t opt /* = 0 */
 
   switch (opt) {
     case CURLINFO_HEADER_OUT: {
-      String header = curl->getHeader();
+      OptString header = curl->getHeader();
       if (!header.empty()) {
         return header;
       }
@@ -349,7 +349,7 @@ Variant HHVM_FUNCTION(curl_getinfo, const OptResource& ch, int64_t opt /* = 0 */
       char *s_code = nullptr;
       if (curl_easy_getinfo(cp, (CURLINFO)opt, &s_code) == CURLE_OK &&
           s_code) {
-        return String(s_code, CopyString);
+        return OptString(s_code, CopyString);
       }
       return false;
     }
@@ -406,7 +406,7 @@ Variant HHVM_FUNCTION(curl_error, const OptResource& ch) {
   return curl->getErrorString();
 }
 
-String HHVM_FUNCTION(curl_strerror, int64_t code) {
+OptString HHVM_FUNCTION(curl_strerror, int64_t code) {
   return curl_easy_strerror((CURLcode)code);
 }
 

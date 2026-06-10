@@ -24,7 +24,7 @@ namespace HPHP {
 
 struct PhpStreamWrapper final : Stream::Wrapper {
   req::ptr<File> openFD(const char *sFD);
-  req::ptr<File> open(const String& filename, const String& mode, int options,
+  req::ptr<File> open(const OptString& filename, const OptString& mode, int options,
                       const req::ptr<StreamContext>& context) override;
 };
 

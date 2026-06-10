@@ -177,7 +177,7 @@ struct HashContext : SweepableResourceData {
   DECLARE_RESOURCE_ALLOCATION(HashContext)
 
   // overriding ResourceData
-  const String& o_getClassNameHook() const override { return classnameof(); }
+  const OptString& o_getClassNameHook() const override { return classnameof(); }
 
   HashEnginePtr ops;
   void *context;
@@ -210,12 +210,12 @@ static req::ptr<HashContext> get_valid_hash_context_resource(const OptResource& 
 Array HHVM_FUNCTION(hash_algos) {
   VecInit ret(HashEngines.size());
   for (auto const& engine : HashEngines) {
-    ret.append(String(engine.first));
+    ret.append(OptString(engine.first));
   }
   return ret.toArray();
 }
 
-static HashEnginePtr php_hash_fetch_ops(const String& algo) {
+static HashEnginePtr php_hash_fetch_ops(const OptString& algo) {
   HashEngineMap::const_iterator iter =
     HashEngines.find(HHVM_FN(strtolower)(algo).data());
   if (iter == HashEngines.end()) {
@@ -224,7 +224,7 @@ static HashEnginePtr php_hash_fetch_ops(const String& algo) {
   return iter->second;
 }
 
-static Variant php_hash_do_hash(const String& algo, const String& data,
+static Variant php_hash_do_hash(const OptString& algo, const OptString& data,
                                 bool isfilename,
                                 bool raw_output) {
   HashEnginePtr ops = php_hash_fetch_ops(algo);
@@ -247,14 +247,14 @@ static Variant php_hash_do_hash(const String& algo, const String& data,
     for (Variant chunk = HHVM_FN(fread)(f.toResource(), 1024);
          !is_empty_string(chunk.asTypedValue());
          chunk = HHVM_FN(fread)(f.toResource(), 1024)) {
-      String schunk = chunk.toString();
+      OptString schunk = chunk.toString();
       ops->hash_update(context, (unsigned char *)schunk.data(), schunk.size());
     }
   } else {
     ops->hash_update(context, (unsigned char *)data.data(), data.size());
   }
 
-  String raw = String(ops->digest_size, ReserveString);
+  OptString raw = OptString(ops->digest_size, ReserveString);
   char *digest = raw.mutableData();
   ops->hash_final((unsigned char *)digest, context);
   req::free(context);
@@ -266,12 +266,12 @@ static Variant php_hash_do_hash(const String& algo, const String& data,
   return HHVM_FN(bin2hex)(raw);
 }
 
-Variant HHVM_FUNCTION(hash, const String& algo, const String& data,
+Variant HHVM_FUNCTION(hash, const OptString& algo, const OptString& data,
                             bool raw_output /* = false */) {
   return php_hash_do_hash(algo, data, false, raw_output);
 }
 
-Variant HHVM_FUNCTION(hash_file, const String& algo, const String& filename,
+Variant HHVM_FUNCTION(hash_file, const OptString& algo, const OptString& filename,
                                  bool raw_output /* = false */) {
   if (filename.size() != strlen(filename.data())) {
     raise_warning(
@@ -283,7 +283,7 @@ Variant HHVM_FUNCTION(hash_file, const String& algo, const String& filename,
 }
 
 static char *prepare_hmac_key(HashEnginePtr ops, void *context,
-                              const String& key) {
+                              const OptString& key) {
   char *K = (char*)req::malloc_noptrs(ops->block_size);
   memset(K, 0, ops->block_size);
   if (key.size() > ops->block_size) {
@@ -322,9 +322,9 @@ static void finalize_hmac_key(char *K, HashEnginePtr ops, void *context,
   req::free(K);
 }
 
-Variant HHVM_FUNCTION(hash_init, const String& algo,
+Variant HHVM_FUNCTION(hash_init, const OptString& algo,
                                  int64_t options /* = 0 */,
-                                 const String& key /* = null_string */) {
+                                 const OptString& key /* = null_string */) {
   HashEnginePtr ops = php_hash_fetch_ops(algo);
   if (!ops) {
     raise_warning("Unknown hashing algorithm: %s", algo.data());
@@ -346,7 +346,7 @@ Variant HHVM_FUNCTION(hash_init, const String& algo,
   return Variant(std::move(hash));
 }
 
-bool HHVM_FUNCTION(hash_update, const OptResource& context, const String& data) {
+bool HHVM_FUNCTION(hash_update, const OptResource& context, const OptString& data) {
   auto hash = get_valid_hash_context_resource(context, __FUNCTION__);
   if (!hash) {
     return false;
@@ -363,7 +363,7 @@ Variant HHVM_FUNCTION(hash_final, const OptResource& context,
     return false;
   }
 
-  String raw = String(hash->ops->digest_size, ReserveString);
+  OptString raw = OptString(hash->ops->digest_size, ReserveString);
   char *digest = raw.mutableData();
   hash->ops->hash_final((unsigned char *)digest, hash->context);
   if (hash->options & k_HASH_HMAC) {
@@ -412,8 +412,8 @@ bool HHVM_FUNCTION(hash_equals, const Variant& known, const Variant& user) {
     );
     return false;
   }
-  String known_str = known.toString();
-  String user_str = user.toString();
+  OptString known_str = known.toString();
+  OptString user_str = user.toString();
   const auto known_len = known_str.size();
   const auto known_limit = known_len - 1;
   const auto user_len = user_str.size();
@@ -429,13 +429,13 @@ bool HHVM_FUNCTION(hash_equals, const Variant& known, const Variant& user) {
   return (result == 0);
 }
 
-int64_t HHVM_FUNCTION(furchash_hphp_ext, const String& key,
+int64_t HHVM_FUNCTION(furchash_hphp_ext, const OptString& key,
                                          int64_t len, int64_t nPart) {
   len = std::max<int64_t>(std::min<int64_t>(len, key.size()), 0);
   return furc_hash(key.data(), len, nPart);
 }
 
-int64_t HHVM_FUNCTION(hphp_murmurhash, const String& key,
+int64_t HHVM_FUNCTION(hphp_murmurhash, const OptString& key,
                                        int64_t len, int64_t seed) {
   len = std::max<int64_t>(std::min<int64_t>(len, key.size()), 0);
   return murmur_hash_64A(key.data(), len, seed);

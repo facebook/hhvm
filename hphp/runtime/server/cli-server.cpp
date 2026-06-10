@@ -231,11 +231,11 @@ struct CLIClientGuardedFile : PlainFile {
     assertClientAlive();
     return PlainFile::getc();
   }
-  String read() override {
+  OptString read() override {
     assertClientAlive();
     return PlainFile::read();
   }
-  String read(int64_t length) override {
+  OptString read(int64_t length) override {
     assertClientAlive();
     return PlainFile::read(length);
   }
@@ -418,27 +418,27 @@ struct CLIWorker
 struct CLIWrapper final : Stream::ExtendedWrapper {
   explicit CLIWrapper(int fd) : m_cli_fd(fd) {}
 
-  req::ptr<File> open(const String& filename,
-                      const String& mode,
+  req::ptr<File> open(const OptString& filename,
+                      const OptString& mode,
                       int options,
                       const req::ptr<StreamContext>& context) override;
-  int access(const String& path, int mode) override;
-  int lstat(const String& path, struct stat* buf) override;
-  int stat(const String& path, struct stat* buf) override;
-  int unlink(const String& path) override;
-  int rename(const String& oldname, const String& newname) override;
-  int mkdir(const String& path, int mode, int options) override;
-  int rmdir(const String& path, int options) override;
-  req::ptr<Directory> opendir(const String& path) override;
-  String realpath(const String& path) override;
+  int access(const OptString& path, int mode) override;
+  int lstat(const OptString& path, struct stat* buf) override;
+  int stat(const OptString& path, struct stat* buf) override;
+  int unlink(const OptString& path) override;
+  int rename(const OptString& oldname, const OptString& newname) override;
+  int mkdir(const OptString& path, int mode, int options) override;
+  int rmdir(const OptString& path, int options) override;
+  req::ptr<Directory> opendir(const OptString& path) override;
+  OptString realpath(const OptString& path) override;
 
   // extended api
-  bool touch(const String& path, int64_t mtime, int64_t atime) override;
-  bool chmod(const String& path, int64_t mode) override;
-  bool chown(const String& path, int64_t uid) override;
-  bool chown(const String& path, const String& uid) override;
-  bool chgrp(const String& path, int64_t gid) override;
-  bool chgrp(const String& path, const String& gid) override;
+  bool touch(const OptString& path, int64_t mtime, int64_t atime) override;
+  bool chmod(const OptString& path, int64_t mode) override;
+  bool chown(const OptString& path, int64_t uid) override;
+  bool chown(const OptString& path, const OptString& uid) override;
+  bool chgrp(const OptString& path, int64_t gid) override;
+  bool chgrp(const OptString& path, const OptString& gid) override;
 
   Optional<std::string> getxattr(const char* path, const char* xattr) override;
 
@@ -881,14 +881,14 @@ Array init_cli_globals(int argc, char** argv,
   auto serverVariables = make_map(get_setting(ini, "hhvm.server_variables"));
 
   for (const auto& envvar : envVariables) {
-    retEnv.set(String(envvar.first), String(envvar.second));
+    retEnv.set(OptString(envvar.first), OptString(envvar.second));
   }
 
   for (auto env = envp; *env; ++env) {
     char *p = strchr(*env, '=');
     if (p) {
-      String name(*env, p - *env, CopyString);
-      String val(p + 1, CopyString);
+      OptString name(*env, p - *env, CopyString);
+      OptString val(p + 1, CopyString);
       retEnv.set(name, val);
     }
   }
@@ -1078,13 +1078,13 @@ void CLIWorker::doJob(int client) {
 ////////////////////////////////////////////////////////////////////////////////
 
 namespace {
-bool path_in_repo(const String& path) {
+bool path_in_repo(const OptString& path) {
   auto const& p = tl_context->getShared()->repo;
   if (p.empty()) return false;
   return boost::starts_with(std::filesystem::path{path.toCppString()}, p);
 }
 
-bool use_local_fs(const String& path) {
+bool use_local_fs(const OptString& path) {
   if (!(tl_context->getShared()->flags & CLIContext::AssumeRepoReadable)) {
     return false;
   }
@@ -1093,7 +1093,7 @@ bool use_local_fs(const String& path) {
 }
 
 req::ptr<File>
-CLIWrapper::open(const String& filename, const String& mode, int options,
+CLIWrapper::open(const OptString& filename, const OptString& mode, int options,
                  const req::ptr<StreamContext>& context) {
   mode_t md = static_cast<mode_t>(-1);
   const char* mstr = mode.data();
@@ -1143,7 +1143,7 @@ CLIWrapper::open(const String& filename, const String& mode, int options,
   return req::make<CLIClientGuardedFile>(fd, mstr);
 }
 
-req::ptr<Directory> CLIWrapper::opendir(const String& path) {
+req::ptr<Directory> CLIWrapper::opendir(const OptString& path) {
   if (use_local_fs(path)) {
     return FileStreamWrapper().opendir(path);
   }
@@ -1169,7 +1169,7 @@ req::ptr<Directory> CLIWrapper::opendir(const String& path) {
   return req::make<PlainDirectory>(cli_read_fd(m_cli_fd));
 }
 
-int CLIWrapper::lstat(const String& path, struct stat* buf) {
+int CLIWrapper::lstat(const OptString& path, struct stat* buf) {
   if (use_local_fs(path)) {
     return FileStreamWrapper().lstat(path, buf);
   }
@@ -1182,7 +1182,7 @@ int CLIWrapper::lstat(const String& path, struct stat* buf) {
   return res;
 }
 
-int CLIWrapper::stat(const String& path, struct stat* buf) {
+int CLIWrapper::stat(const OptString& path, struct stat* buf) {
   if (use_local_fs(path)) {
     return FileStreamWrapper().stat(path, buf);
   }
@@ -1195,7 +1195,7 @@ int CLIWrapper::stat(const String& path, struct stat* buf) {
   return res;
 }
 
-String CLIWrapper::realpath(const String& path) {
+OptString CLIWrapper::realpath(const OptString& path) {
   if (path_in_repo(path)) {
     auto const flags = tl_context->getShared()->flags;
     if (flags & CLIContext::AssumeRepoRealpath) {
@@ -1208,7 +1208,7 @@ String CLIWrapper::realpath(const String& path) {
     } else if (flags & CLIContext::AssumeRepoReadable) {
       char resolved_path[PATH_MAX];
       if (!::realpath(path.data(), resolved_path)) return null_string;
-      return String(resolved_path, CopyString);
+      return OptString(resolved_path, CopyString);
     }
   }
 
@@ -1217,18 +1217,18 @@ String CLIWrapper::realpath(const String& path) {
   cli_write(m_cli_fd, "realpath", File::TranslatePath(path).data());
   cli_read(m_cli_fd, status, ret);
   if (!status) return null_string;
-  return String(ret.c_str(), CopyString);
+  return OptString(ret.c_str(), CopyString);
 }
 
 template<class T>
 typename std::enable_if<
-  !std::is_same<String,typename std::remove_cv<T>::type>::value,
+  !std::is_same<OptString,typename std::remove_cv<T>::type>::value,
   T
 >::type cli_wire_type(T&& t) { return t; }
 
 template<class T>
 typename std::enable_if<
-  std::is_same<String,typename std::remove_cv<T>::type>::value,
+  std::is_same<OptString,typename std::remove_cv<T>::type>::value,
   std::string
 >::type cli_wire_type(T&& t) {
   return File::TranslatePath(t).data();
@@ -1243,10 +1243,10 @@ int cli_send_wire(int fd, const char* name, Args... args) {
   return res;
 }
 
-int CLIWrapper::access(const String& path, int mode) {
+int CLIWrapper::access(const OptString& path, int mode) {
   return cli_send_wire(m_cli_fd, "access", path, mode);
 }
-int CLIWrapper::unlink(const String& path) {
+int CLIWrapper::unlink(const OptString& path) {
   auto ret = cli_send_wire(m_cli_fd, "unlink", path);
   if (ret != 0) {
     cli_read(m_cli_fd, errno);
@@ -1259,25 +1259,25 @@ int CLIWrapper::unlink(const String& path) {
   }
   return ret;
 }
-int CLIWrapper::rename(const String& oldname, const String& newname) {
+int CLIWrapper::rename(const OptString& oldname, const OptString& newname) {
   return cli_send_wire(m_cli_fd, "rename", oldname, newname);
 }
-int CLIWrapper::mkdir(const String& path, int mode, int options) {
+int CLIWrapper::mkdir(const OptString& path, int mode, int options) {
   return cli_send_wire(m_cli_fd, "mkdir", path, mode, options);
 }
-int CLIWrapper::rmdir(const String& path, int options) {
+int CLIWrapper::rmdir(const OptString& path, int options) {
   return cli_send_wire(m_cli_fd, "rmdir", path, options);
 }
-bool CLIWrapper::touch(const String& path, int64_t mtime, int64_t atime) {
+bool CLIWrapper::touch(const OptString& path, int64_t mtime, int64_t atime) {
   return cli_send_wire(m_cli_fd, "touch", path, mtime, atime) != -1;
 }
-bool CLIWrapper::chmod(const String& path, int64_t mode) {
+bool CLIWrapper::chmod(const OptString& path, int64_t mode) {
   return cli_send_wire(m_cli_fd, "chmod", path, mode) != -1;
 }
-bool CLIWrapper::chown(const String& path, int64_t uid) {
+bool CLIWrapper::chown(const OptString& path, int64_t uid) {
   return cli_send_wire(m_cli_fd, "chown", path, uid, (int64_t)-1) != -1;
 }
-bool CLIWrapper::chown(const String& path, const String& user) {
+bool CLIWrapper::chown(const OptString& path, const OptString& user) {
   uid_t id;
   try {
     UserInfo info(user.data());
@@ -1287,10 +1287,10 @@ bool CLIWrapper::chown(const String& path, const String& user) {
   }
   return cli_send_wire(m_cli_fd, "chown", path, id, (int64_t)-1) != -1;
 }
-bool CLIWrapper::chgrp(const String& path, int64_t gid) {
+bool CLIWrapper::chgrp(const OptString& path, int64_t gid) {
   return cli_send_wire(m_cli_fd, "chown", path, (int64_t)-1, gid) != -1;
 }
-bool CLIWrapper::chgrp(const String& path, const String& group) {
+bool CLIWrapper::chgrp(const OptString& path, const OptString& group) {
   gid_t id;
   try {
     GroupInfo info(group.data());
@@ -2161,9 +2161,9 @@ bool cli_mkstemp(char* buf) {
   return true;
 }
 
-int cli_openfd_unsafe(const String& filename, int flags, mode_t mode,
+int cli_openfd_unsafe(const OptString& filename, int flags, mode_t mode,
                       bool use_include_path, std::string& error) {
-  String fname;
+  OptString fname;
   if (StringUtil::IsFileUrl(filename)) {
     fname = StringUtil::DecodeFileUrl(filename);
     if (fname.empty()) {
@@ -2176,7 +2176,7 @@ int cli_openfd_unsafe(const String& filename, int flags, mode_t mode,
 
   if (use_include_path) {
     struct stat s;
-    String resolved_fname = resolveVmInclude(fname.get(), "", &s);
+    OptString resolved_fname = resolveVmInclude(fname.get(), "", &s);
     if (!resolved_fname.isNull()) {
       fname = resolved_fname;
     }
@@ -2197,7 +2197,7 @@ int cli_openfd_unsafe(const String& filename, int flags, mode_t mode,
   return cli_read_fd(cli_sock());
 }
 
-int cli_openfd_unsafe(const String& filename, int flags, mode_t mode,
+int cli_openfd_unsafe(const OptString& filename, int flags, mode_t mode,
                       bool use_include_path, bool quiet) {
   std::string err;
   auto const ret = cli_openfd_unsafe(filename, flags, mode, use_include_path,

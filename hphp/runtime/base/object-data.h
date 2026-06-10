@@ -271,7 +271,7 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
   StrNR getClassName() const;
 
   // instanceof() can be used for both classes and interfaces.
-  bool instanceof(const String&) const;
+  bool instanceof(const OptString&) const;
   bool instanceof(const Class*) const;
 
   template <typename T>
@@ -347,11 +347,11 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
 
   Array o_toIterArray(const Class* ctx);
 
-  Variant o_get(const String& s, bool error = true,
-                const String& context = null_string);
+  Variant o_get(const OptString& s, bool error = true,
+                const OptString& context = null_string);
 
-  void o_set(const String& s, const Variant& v,
-             const String& context = null_string);
+  void o_set(const OptString& s, const Variant& v,
+             const OptString& context = null_string);
 
   void o_setArray(const Array& properties);
   void o_getArray(Array& props,
@@ -366,8 +366,8 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
   // invokeFuncFew(), and vm_decode_function(). We should remove these APIs and
   // migrate all callers to use invokeFunc(), invokeFuncFew(), and
   // vm_decode_function() instead.
-  Variant o_invoke(const String& s, const Variant& params, bool fatal = true);
-  Variant o_invoke_few_args(const String& s,
+  Variant o_invoke(const OptString& s, const Variant& params, bool fatal = true);
+  Variant o_invoke_few_args(const OptString& s,
                             RuntimeCoeffects providedCoeffects,
                             int count,
                             const Variant& a0 = uninit_variant,
@@ -378,7 +378,7 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
 
   ObjectData* clone();
 
-  String invokeToString();
+  OptString invokeToString();
   bool hasToString();
 
   Variant invokeSleep(RuntimeCoeffects);

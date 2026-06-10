@@ -34,8 +34,8 @@ struct DummyResource : ResourceData {
   DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(DummyResource)
   CLASSNAME_IS("Unknown")
   DummyResource();
-  String m_class_name;
-  const String& o_getClassNameHook() const override;
+  OptString m_class_name;
+  const OptString& o_getClassNameHook() const override;
   bool isInvalid() const override { return m_class_name.empty(); }
   void o_setResourceId(int64_t id) { hdr()->setRawId(id); }
 };

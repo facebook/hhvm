@@ -23,7 +23,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct Array;
-struct String;
+struct OptString;
 
 /**
  * Using an integer to represent time: the value of time in seconds since 0
@@ -35,7 +35,7 @@ struct TimeStamp {
   static int64_t Current();
   static double CurrentSecond();
   static Array CurrentTime();
-  static String CurrentMicroTime();
+  static OptString CurrentMicroTime();
 
   static int64_t Get(bool &error, int hour = INT_MAX, int minute = INT_MAX,
                  int second = INT_MAX, int month = INT_MAX, int day = INT_MAX,

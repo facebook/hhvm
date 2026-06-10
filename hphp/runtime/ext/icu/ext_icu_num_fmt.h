@@ -39,9 +39,9 @@ struct NumberFormatter : IntlError, SystemLib::ClassLoader<"NumberFormatter"> {
     }
   }
 
-  void setNumberFormatter(const String& locale,
+  void setNumberFormatter(const OptString& locale,
                           int64_t style,
-                          const String& pattern);
+                          const OptString& pattern);
   void setNumberFormatter(const NumberFormatter *orig);
 
   bool isValid() const {

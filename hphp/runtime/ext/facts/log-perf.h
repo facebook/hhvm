@@ -44,18 +44,19 @@ struct FactsLogger final : public FactsStore,
   void validate(const std::set<std::string>& types_to_ignore) override;
   Holder getNativeHolder() noexcept override;
 
-  Optional<FileResult> getTypeOrTypeAliasFile(const String&) override;
-  Optional<FileResult> getTypeOrTypeAliasFileRelative(const String&) override;
-  Optional<FileResult> getTypeFile(const String&) override;
-  Optional<FileResult> getTypeFileRelative(const String&) override;
-  Optional<FileResult> getFunctionFile(const String&) override;
-  Optional<FileResult> getFunctionFileRelative(const String&) override;
-  Optional<FileResult> getConstantFile(const String&) override;
-  Optional<FileResult> getConstantFileRelative(const String&) override;
-  Optional<FileResult> getTypeAliasFile(const String&) override;
-  Optional<FileResult> getTypeAliasFileRelative(const String&) override;
-  Optional<FileResult> getModuleFile(const String&) override;
-  Optional<FileResult> getModuleFileRelative(const String&) override;
+  Optional<FileResult> getTypeOrTypeAliasFile(const OptString&) override;
+  Optional<FileResult> getTypeOrTypeAliasFileRelative(
+      const OptString&) override;
+  Optional<FileResult> getTypeFile(const OptString&) override;
+  Optional<FileResult> getTypeFileRelative(const OptString&) override;
+  Optional<FileResult> getFunctionFile(const OptString&) override;
+  Optional<FileResult> getFunctionFileRelative(const OptString&) override;
+  Optional<FileResult> getConstantFile(const OptString&) override;
+  Optional<FileResult> getConstantFileRelative(const OptString&) override;
+  Optional<FileResult> getTypeAliasFile(const OptString&) override;
+  Optional<FileResult> getTypeAliasFileRelative(const OptString&) override;
+  Optional<FileResult> getModuleFile(const OptString&) override;
+  Optional<FileResult> getModuleFileRelative(const OptString&) override;
 
   Optional<std::filesystem::path> getTypeOrTypeAliasFile(
       std::string_view) override;
@@ -77,49 +78,52 @@ struct FactsLogger final : public FactsStore,
   Optional<std::filesystem::path> getModuleFileRelative(
       std::string_view) override;
 
-  Optional<std::string> getSha1(const String& path) override;
+  Optional<std::string> getSha1(const OptString& path) override;
 
-  Array getFileTypes(const String&) override;
-  Array getFileFunctions(const String&) override;
-  Array getFileConstants(const String&) override;
-  Array getFileTypeAliases(const String&) override;
-  Array getFileModules(const String&) override;
+  Array getFileTypes(const OptString&) override;
+  Array getFileFunctions(const OptString&) override;
+  Array getFileConstants(const OptString&) override;
+  Array getFileTypeAliases(const OptString&) override;
+  Array getFileModules(const OptString&) override;
   Array getAllModules() override;
 
-  Optional<String> getFileModuleMembership(const String& path) override;
-  Optional<String> getFilePackageMembership(const String& path) override;
+  Optional<OptString> getFileModuleMembership(const OptString& path) override;
+  Optional<OptString> getFilePackageMembership(const OptString& path) override;
 
   void close() override;
-  Variant getTypeName(const String&) override;
-  Variant getKind(const String&) override;
-  bool isTypeAbstract(const String&) override;
-  bool isTypeFinal(const String&) override;
+  Variant getTypeName(const OptString&) override;
+  Variant getKind(const OptString&) override;
+  bool isTypeAbstract(const OptString&) override;
+  bool isTypeFinal(const OptString&) override;
 
-  Array getBaseTypes(const String&, const Variant&) override;
-  Array getDerivedTypes(const String&, const Variant&) override;
+  Array getBaseTypes(const OptString&, const Variant&) override;
+  Array getDerivedTypes(const OptString&, const Variant&) override;
   Array getTransitiveDerivedTypes(
-      const String&,
+      const OptString&,
       const Variant&,
       bool includeInterfaceRequireExtends) override;
-  Array getTypesWithAttribute(const String&) override;
-  Array getTypeAliasesWithAttribute(const String&) override;
-  Array getMethodsWithAttribute(const String&) override;
-  Array getTypeMethodAttributes(const String&) override;
-  Array getFilesWithAttribute(const String&) override;
-  Array getFilesAndAttrValsWithAttribute(const String&) override;
-  Array getFilesWithAttributeAndAnyValue(const String&, const folly::dynamic&)
+  Array getTypesWithAttribute(const OptString&) override;
+  Array getTypeAliasesWithAttribute(const OptString&) override;
+  Array getMethodsWithAttribute(const OptString&) override;
+  Array getTypeMethodAttributes(const OptString&) override;
+  Array getFilesWithAttribute(const OptString&) override;
+  Array getFilesAndAttrValsWithAttribute(const OptString&) override;
+  Array getFilesWithAttributeAndAnyValue(
+      const OptString&,
+      const folly::dynamic&) override;
+  Array getTypeAttributes(const OptString&) override;
+  Array getTypeAliasAttributes(const OptString&) override;
+  Array getMethodAttributes(const OptString& type, const OptString& method)
       override;
-  Array getTypeAttributes(const String&) override;
-  Array getTypeAliasAttributes(const String&) override;
-  Array getMethodAttributes(const String& type, const String& method) override;
-  Array getFileAttributes(const String&) override;
-  Array getTypeAttrArgs(const String& type, const String& attr) override;
-  Array getTypeAliasAttrArgs(const String& type, const String& attr) override;
+  Array getFileAttributes(const OptString&) override;
+  Array getTypeAttrArgs(const OptString& type, const OptString& attr) override;
+  Array getTypeAliasAttrArgs(const OptString& type, const OptString& attr)
+      override;
   Array getMethodAttrArgs(
-      const String& type,
-      const String& method,
-      const String& attr) override;
-  Array getFileAttrArgs(const String& file, const String& attr) override;
+      const OptString& type,
+      const OptString& method,
+      const OptString& attr) override;
+  Array getFileAttrArgs(const OptString& file, const OptString& attr) override;
 
  private:
   template <typename F>

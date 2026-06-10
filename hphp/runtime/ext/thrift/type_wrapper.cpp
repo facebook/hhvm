@@ -25,7 +25,7 @@ namespace HPHP {
 namespace thrift {
 ///////////////////////////////////////////////////////////////////////////////
 
-void setThriftField(Variant value, const Object& obj, const String& fieldName) {
+void setThriftField(Variant value, const Object& obj, const OptString& fieldName) {
   auto setter_name = "set_" + fieldName+"_DO_NOT_USE_THRIFT_INTERNAL";
   obj->o_invoke_few_args(
             setter_name,

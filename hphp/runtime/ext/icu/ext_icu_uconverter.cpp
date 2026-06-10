@@ -95,10 +95,10 @@ static void ucnvToUCallback(ObjectData *objval,
                             UErrorCode *pErrorCode) {
   if (MemoryManager::sweeping()) return;
   auto data = Native::data<IntlUConverter>(objval);
-  String source(args->source, args->sourceLimit - args->source, CopyString);
+  OptString source(args->source, args->sourceLimit - args->source, CopyString);
   Variant ret = objval->o_invoke_few_args(
     s_toUCallback, RuntimeCoeffects::fixme(), 4,
-    reason, source, String(codeUnits, length, CopyString), *pErrorCode);
+    reason, source, OptString(codeUnits, length, CopyString), *pErrorCode);
   if (ret.asCArrRef()[1].is(KindOfInt64)) {
     *pErrorCode = (UErrorCode)ret.asCArrRef()[1].toInt64();
   } else {
@@ -191,7 +191,7 @@ static bool setCallback(const Object& this_, UConverter *cnv) {
 
 /* get/set source/dest encodings */
 
-static UConverter* doSetEncoding(IntlUConverter *data, const String& encoding) {
+static UConverter* doSetEncoding(IntlUConverter *data, const OptString& encoding) {
   UErrorCode error = U_ZERO_ERROR;
   UConverter *cnv = ucnv_open(encoding.c_str(), &error);
 
@@ -211,13 +211,13 @@ static UConverter* doSetEncoding(IntlUConverter *data, const String& encoding) {
 }
 
 static bool HHVM_METHOD(UConverter, setSourceEncoding,
-                        const String& encoding) {
+                        const OptString& encoding) {
   FETCH_CNV(data, this_, false);
   return data->setSrc(doSetEncoding(data, encoding));
 }
 
 static bool HHVM_METHOD(UConverter, setDestinationEncoding,
-                        const String& encoding) {
+                        const OptString& encoding) {
   FETCH_CNV(data, this_, false);
   return data->setDest(doSetEncoding(data, encoding));
 }
@@ -234,7 +234,7 @@ static Variant doGetEncoding(IntlUConverter *data, UConverter *cnv) {
     return init_null();
   }
 
-  return String(name);
+  return OptString(name);
 }
 
 static Variant HHVM_METHOD(UConverter, getDestinationEncoding) {
@@ -249,8 +249,8 @@ static Variant HHVM_METHOD(UConverter, getSourceEncoding) {
 
 /* ctor */
 
-static void HHVM_METHOD(UConverter, __construct, const String& toEncoding,
-                                                 const String& fromEncoding) {
+static void HHVM_METHOD(UConverter, __construct, const OptString& toEncoding,
+                                                 const OptString& fromEncoding) {
   FETCH_CNV(data, this_,);
   data->setDest(doSetEncoding(data, toEncoding));
   data->setSrc(doSetEncoding(data, fromEncoding));
@@ -287,7 +287,7 @@ static int64_t HHVM_METHOD(UConverter, getDestinationType) {
 /* Basic substitution */
 
 static bool doSetSubstChars(IntlUConverter *data, UConverter *cnv,
-                            const String& chars) {
+                            const OptString& chars) {
   UErrorCode error = U_ZERO_ERROR;
   ucnv_setSubstChars(cnv, chars.c_str(), chars.size(), &error);
   if (U_FAILURE(error)) {
@@ -299,13 +299,13 @@ static bool doSetSubstChars(IntlUConverter *data, UConverter *cnv,
 }
 
 static bool HHVM_METHOD(UConverter, setDestinationSubstChars,
-                        const String& chars) {
+                        const OptString& chars) {
   FETCH_CNV(data, this_, false);
   return doSetSubstChars(data, data->dest(), chars);
 }
 
 static bool HHVM_METHOD(UConverter, setSourceSubstChars,
-                        const String& chars) {
+                        const OptString& chars) {
   FETCH_CNV(data, this_, false);
   return doSetSubstChars(data, data->src(), chars);
 }
@@ -321,7 +321,7 @@ static Variant doGetSubstChars(IntlUConverter *data, UConverter *cnv) {
     return init_null();
   }
 
-  return String(chars, chars_len, CopyString);
+  return OptString(chars, chars_len, CopyString);
 }
 
 static Variant HHVM_METHOD(UConverter, getDestinationSubstChars) {
@@ -337,7 +337,7 @@ static Variant HHVM_METHOD(UConverter, getSourceSubstChars) {
 /* Main workhorse functions */
 
 static Variant HHVM_METHOD(UConverter, convert,
-                           const String& str, bool reverse /*= false */) {
+                           const OptString& str, bool reverse /*= false */) {
   FETCH_CNV(data, this_, uninit_null());
   UConverter *toCnv   = reverse ? data->src()  : data->dest();
   UConverter *fromCnv = reverse ? data->dest() : data->src();
@@ -374,7 +374,7 @@ static Variant HHVM_METHOD(UConverter, convert,
     return init_null();
   }
 
-  String destStr(dest_len, ReserveString);
+  OptString destStr(dest_len, ReserveString);
   char *dest = (char*) destStr.mutableData();
   error = U_ZERO_ERROR;
   dest_len = ucnv_fromUChars(toCnv, dest, dest_len,
@@ -394,14 +394,14 @@ static int64_t HHVM_METHOD(UConverter, getErrorCode) {
   return data->getErrorCode();
 }
 
-static String HHVM_METHOD(UConverter, getErrorMessage) {
+static OptString HHVM_METHOD(UConverter, getErrorMessage) {
   FETCH_CNV(data, this_, empty_string());
   return data->getErrorMessage();
 }
 
 /* Ennumerators and lookups */
 
-#define UCNV_REASON_CASE(v) case UCNV_ ## v : return String("REASON_" #v );
+#define UCNV_REASON_CASE(v) case UCNV_ ## v : return OptString("REASON_" #v );
 static Variant HHVM_STATIC_METHOD(UConverter, reasonText, int64_t reason) {
   switch (reason) {
     UCNV_REASON_CASE(UNASSIGNED)
@@ -429,7 +429,7 @@ static Array HHVM_STATIC_METHOD(UConverter, getAvailable) {
 }
 
 static Variant HHVM_STATIC_METHOD(UConverter, getAliases,
-                                  const String& encoding) {
+                                  const OptString& encoding) {
   UErrorCode error = U_ZERO_ERROR;
   int16_t i, count = ucnv_countAliases(encoding.c_str(), &error);
 
@@ -468,8 +468,8 @@ static Variant HHVM_STATIC_METHOD(UConverter, getStandards) {
 }
 
 static Variant HHVM_STATIC_METHOD(UConverter, getStandardName,
-                                  const String& name,
-                                  const String& standard) {
+                                  const OptString& name,
+                                  const OptString& standard) {
   UErrorCode error = U_ZERO_ERROR;
   const char *standard_name = ucnv_getStandardName(name.data(),
                                                    standard.data(),
@@ -480,7 +480,7 @@ static Variant HHVM_STATIC_METHOD(UConverter, getStandardName,
     return init_null();
   }
 
-  return String(standard_name, CopyString);
+  return OptString(standard_name, CopyString);
 }
 
 void IntlExtension::registerNativeUConverter() {

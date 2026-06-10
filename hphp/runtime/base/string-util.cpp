@@ -31,16 +31,16 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // manipulations
 
-String StringUtil::Pad(const String& input, int final_length,
-                       const String& pad_string /* = " " */,
+OptString StringUtil::Pad(const OptString& input, int final_length,
+                       const OptString& pad_string /* = " " */,
                        PadType type /* = PadType::Right */) {
   int len = input.size();
   return string_pad(input.data(), len, final_length, pad_string.data(),
                     pad_string.size(), static_cast<int>(type));
 }
 
-String StringUtil::StripHTMLTags(const String& input,
-                                 const String& allowable_tags /* = "" */) {
+OptString StringUtil::StripHTMLTags(const OptString& input,
+                                 const OptString& allowable_tags /* = "" */) {
   if (input.empty()) return input;
   return string_strip_tags(input.data(), input.size(),
                            allowable_tags.data(), allowable_tags.size(), false);
@@ -49,7 +49,7 @@ String StringUtil::StripHTMLTags(const String& input,
 ///////////////////////////////////////////////////////////////////////////////
 // splits/joins
 
-Variant StringUtil::Explode(const String& input, const String& delimiter,
+Variant StringUtil::Explode(const OptString& input, const OptString& delimiter,
                             int64_t limit /* = PHP_INT_MAX */) {
   if (delimiter.empty()) {
     raise_invalid_argument_warning("delimiter: (empty)");
@@ -114,7 +114,7 @@ Variant StringUtil::Explode(const String& input, const String& delimiter,
   return ret;
 }
 
-String StringUtil::Implode(const Variant& items, const String& delim,
+OptString StringUtil::Implode(const Variant& items, const OptString& delim,
                            const bool checkIsContainer /* = true */) {
   if (checkIsContainer && !isContainer(items)) {
     throw_param_is_not_container();
@@ -122,7 +122,7 @@ String StringUtil::Implode(const Variant& items, const String& delim,
   int size = getContainerSize(items);
   if (size == 0) return empty_string();
 
-  req::vector<String> sitems;
+  req::vector<OptString> sitems;
   sitems.reserve(size);
   size_t len = 0;
   size_t lenDelim = delim.size();
@@ -133,16 +133,16 @@ String StringUtil::Implode(const Variant& items, const String& delim,
   len -= lenDelim; // always one delimiter less than count of items
   assertx(sitems.size() == size);
 
-  String s = String(len, ReserveString);
+  OptString s = OptString(len, ReserveString);
   char *buffer = s.mutableData();
   const char *sdelim = delim.data();
   char *p = buffer;
-  String &init_str = sitems[0];
+  OptString &init_str = sitems[0];
   int init_len = init_str.size();
   memcpy(p, init_str.data(), init_len);
   p += init_len;
   for (int i = 1; i < size; i++) {
-    String &item = sitems[i];
+    OptString &item = sitems[i];
     memcpy(p, sdelim, lenDelim);
     p += lenDelim;
     int lenItem = item.size();
@@ -154,7 +154,7 @@ String StringUtil::Implode(const Variant& items, const String& delim,
   return s;
 }
 
-Variant StringUtil::Split(const String& str, int64_t split_length /* = 1 */) {
+Variant StringUtil::Split(const OptString& str, int64_t split_length /* = 1 */) {
   if (split_length <= 0) {
     raise_invalid_argument_warning(
       "The length of each segment must be greater than zero"
@@ -174,14 +174,14 @@ Variant StringUtil::Split(const String& str, int64_t split_length /* = 1 */) {
   return ret.toArray();
 }
 
-Variant StringUtil::ChunkSplit(const String& body, int chunklen /* = 76 */,
-                               const String& end /* = "\r\n" */) {
+Variant StringUtil::ChunkSplit(const OptString& body, int chunklen /* = 76 */,
+                               const OptString& end /* = "\r\n" */) {
   if (chunklen <= 0) {
     raise_invalid_argument_warning("chunklen: (non-positive)");
     return false;
   }
 
-  String ret;
+  OptString ret;
   int len = body.size();
   if (chunklen >= len) {
     ret = body;
@@ -196,13 +196,13 @@ Variant StringUtil::ChunkSplit(const String& body, int chunklen /* = 76 */,
 ///////////////////////////////////////////////////////////////////////////////
 // encoding/decoding
 
-String StringUtil::HtmlEncode(const String& input, QuoteStyle quoteStyle,
+OptString StringUtil::HtmlEncode(const OptString& input, QuoteStyle quoteStyle,
                               const char *charset, bool dEncode, bool htmlEnt) {
   return HtmlEncode(input, static_cast<int64_t>(quoteStyle),
                     charset, dEncode, htmlEnt);
 }
 
-String StringUtil::HtmlEncode(const String& input, const int64_t qsBitmask,
+OptString StringUtil::HtmlEncode(const OptString& input, const int64_t qsBitmask,
                               const char *charset, bool dEncode, bool htmlEnt) {
   if (input.empty()) return input;
 
@@ -220,7 +220,7 @@ String StringUtil::HtmlEncode(const String& input, const int64_t qsBitmask,
   if (!ret) {
     return empty_string();
   }
-  return String(ret, len, AttachString);
+  return OptString(ret, len, AttachString);
 }
 
 #define A1(v, ch) ((v)|((ch) & 64 ? 0 : 1uLL<<((ch)&63)))
@@ -243,7 +243,7 @@ static const AsciiMap mapBothQuotes = {
 
 static const AsciiMap mapNothing = {};
 
-String StringUtil::HtmlEncodeExtra(const String& input, QuoteStyle quoteStyle,
+OptString StringUtil::HtmlEncodeExtra(const OptString& input, QuoteStyle quoteStyle,
                                    const char *charset, bool nbsp,
                                    Array extra) {
   if (input.empty()) return input;
@@ -293,7 +293,7 @@ String StringUtil::HtmlEncodeExtra(const String& input, QuoteStyle quoteStyle,
     tmp = *am;
     am = &tmp;
     for (ArrayIter iter(extra); iter; ++iter) {
-      String item = iter.second().toString();
+      OptString item = iter.second().toString();
       char c = item.data()[0];
       tmp.map[c & 64 ? 1 : 0] |= 1uLL << (c & 63);
     }
@@ -305,10 +305,10 @@ String StringUtil::HtmlEncodeExtra(const String& input, QuoteStyle quoteStyle,
   if (!ret) {
     raise_error("HtmlEncode called on too large input (%d)", len);
   }
-  return String(ret, len, AttachString);
+  return OptString(ret, len, AttachString);
 }
 
-String StringUtil::HtmlDecode(const String& input, QuoteStyle quoteStyle,
+OptString StringUtil::HtmlDecode(const OptString& input, QuoteStyle quoteStyle,
                               const char *charset, bool all) {
   if (input.empty()) return input;
 
@@ -325,66 +325,66 @@ String StringUtil::HtmlDecode(const String& input, QuoteStyle quoteStyle,
     // (charset is not null, see assertion above)
   }
 
-  return String(ret, len, AttachString);
+  return OptString(ret, len, AttachString);
 }
 
-String StringUtil::QuotedPrintableEncode(const String& input) {
+OptString StringUtil::QuotedPrintableEncode(const OptString& input) {
   if (input.empty()) return input;
   int len = input.size();
   return string_quoted_printable_encode(input.data(), len);
 }
 
-String StringUtil::QuotedPrintableDecode(const String& input) {
+OptString StringUtil::QuotedPrintableDecode(const OptString& input) {
   if (input.empty()) return input;
   int len = input.size();
   return string_quoted_printable_decode(input.data(), len, false);
 }
 
-String StringUtil::UUEncode(const String& input) {
+OptString StringUtil::UUEncode(const OptString& input) {
   if (input.empty()) return input;
   return string_uuencode(input.data(), input.size());
 }
 
-String StringUtil::UUDecode(const String& input) {
+OptString StringUtil::UUDecode(const OptString& input) {
   if (!input.empty()) {
     return string_uudecode(input.data(), input.size());
   }
-  return String();
+  return OptString();
 }
 
-String StringUtil::Base64Encode(const String& input) {
+OptString StringUtil::Base64Encode(const OptString& input) {
   int len = input.size();
   return string_base64_encode(input.data(), len);
 }
 
-String StringUtil::Base64Decode(const String& input,
+OptString StringUtil::Base64Decode(const OptString& input,
                                 bool strict /* = false */) {
   int len = input.size();
   return string_base64_decode(input.data(), len, strict);
 }
 
-String StringUtil::UrlEncode(const String& input,
+OptString StringUtil::UrlEncode(const OptString& input,
                              bool encodePlus /* = true */) {
   return encodePlus ?
     url_encode(input.data(), input.size()) :
     url_raw_encode(input.data(), input.size());
 }
 
-String StringUtil::UrlDecode(const String& input,
+OptString StringUtil::UrlDecode(const OptString& input,
                              bool decodePlus /* = true */) {
   return decodePlus ?
     url_decode(input.data(), input.size()) :
     url_raw_decode(input.data(), input.size());
 }
 
-bool StringUtil::IsFileUrl(const String& input) {
+bool StringUtil::IsFileUrl(const OptString& input) {
   return string_strncasecmp(
     input.data(), input.size(),
     "file://", sizeof("file://") - 1,
     sizeof("file://") - 1) == 0;
 }
 
-String StringUtil::DecodeFileUrl(const String& input) {
+OptString StringUtil::DecodeFileUrl(const OptString& input) {
   Url url;
   if (!url_parse(url, input.data(), input.size())) {
     return null_string;
@@ -406,7 +406,7 @@ String StringUtil::DecodeFileUrl(const String& input) {
 ///////////////////////////////////////////////////////////////////////////////
 // formatting
 
-String StringUtil::MoneyFormat(const char *format, double value) {
+OptString StringUtil::MoneyFormat(const char *format, double value) {
   assertx(format);
   return string_money_format(format, value);
 }
@@ -414,12 +414,12 @@ String StringUtil::MoneyFormat(const char *format, double value) {
 ///////////////////////////////////////////////////////////////////////////////
 // hashing
 
-String StringUtil::Translate(const String& input, const String& from,
-                             const String& to) {
+OptString StringUtil::Translate(const OptString& input, const OptString& from,
+                             const OptString& to) {
   if (input.empty()) return input;
 
   int len = input.size();
-  String retstr(len, ReserveString);
+  OptString retstr(len, ReserveString);
   char *ret = retstr.mutableData();
   memcpy(ret, input.data(), len);
   auto trlen = std::min(from.size(), to.size());
@@ -428,42 +428,42 @@ String StringUtil::Translate(const String& input, const String& from,
   return retstr;
 }
 
-String StringUtil::ROT13(const String& input) {
+OptString StringUtil::ROT13(const OptString& input) {
   if (input.empty()) return input;
-  return String(string_rot13(input.data(), input.size()),
+  return OptString(string_rot13(input.data(), input.size()),
                 input.size(), AttachString);
 }
 
-String StringUtil::Crypt(const String& input, const char *salt /* = "" */) {
+OptString StringUtil::Crypt(const OptString& input, const char *salt /* = "" */) {
   assertx(salt);
   if (salt[0] == '\0') {
     raise_notice("crypt(): No salt parameter was specified."
       " You must use a randomly generated salt and a strong"
       " hash function to produce a secure hash.");
   }
-  return String(string_crypt(input.c_str(), salt), AttachString);
+  return OptString(string_crypt(input.c_str(), salt), AttachString);
 }
 
-String StringUtil::MD5(const char *data, uint32_t size,
+OptString StringUtil::MD5(const char *data, uint32_t size,
                        bool raw /* = false */) {
   Md5Digest md5(data, size);
   auto const rawLen = sizeof(md5.digest);
-  if (raw) return String((char*)md5.digest, rawLen, CopyString);
+  if (raw) return OptString((char*)md5.digest, rawLen, CopyString);
   auto const hexLen = rawLen * 2;
-  String hex(hexLen, ReserveString);
+  OptString hex(hexLen, ReserveString);
   string_bin2hex((char*)md5.digest, rawLen, hex.mutableData());
   hex.setSize(hexLen);
   return hex;
 }
 
-String StringUtil::MD5(const String& input, bool raw /* = false */) {
+OptString StringUtil::MD5(const OptString& input, bool raw /* = false */) {
   return MD5(input.data(), input.length(), raw);
 }
 
-String StringUtil::SHA1(const String& input, bool raw /* = false */) {
+OptString StringUtil::SHA1(const OptString& input, bool raw /* = false */) {
   int len;
   char *ret = string_sha1(input.data(), input.size(), raw, len);
-  return String(ret, len, AttachString);
+  return OptString(ret, len, AttachString);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -59,7 +59,7 @@ struct c_WaitableWaitHandle :
   AsioContext* getContext() const;
   AsioBlockableChain& getParentChain();
   void join();
-  String getName();
+  OptString getName();
 
  protected:
   c_WaitableWaitHandle* getChild();

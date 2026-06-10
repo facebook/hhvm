@@ -119,7 +119,7 @@ private:
   mutable req::unique_ptr<const InterruptSite> m_callingSite;
   mutable const char *m_class;
   mutable std::string m_function;
-  mutable String m_file;
+  mutable OptString m_file;
   mutable std::string m_url;
 
   int32_t m_line0;

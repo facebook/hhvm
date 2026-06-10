@@ -45,7 +45,7 @@ private:
   // implementing IDebuggable
   void debuggerInfo(InfoVec&) override;
 
-  req::root<String> m_out;
+  req::root<OptString> m_out;
   std::vector<DThreadInfoPtr> m_threads;
 
   void processList(DebuggerClient &client, bool output = true);

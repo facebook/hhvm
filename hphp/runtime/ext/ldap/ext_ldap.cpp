@@ -82,7 +82,7 @@ private:
 public:
   CLASSNAME_IS("ldap link")
   // overriding ResourceData
-  const String& o_getClassNameHook() const override { return classnameof(); }
+  const OptString& o_getClassNameHook() const override { return classnameof(); }
 
   LDAP *link{nullptr};
   Variant rebindproc;
@@ -170,7 +170,7 @@ struct LdapResult : SweepableResourceData {
 
   CLASSNAME_IS("ldap result")
   // overriding ResourceData
-  const String& o_getClassNameHook() const override { return classnameof();}
+  const OptString& o_getClassNameHook() const override { return classnameof();}
 
   LDAPMessage *data;
 };
@@ -197,7 +197,7 @@ struct LdapResultEntry : SweepableResourceData {
 
   CLASSNAME_IS("ldap result entry")
   // overriding ResourceData
-  const String& o_getClassNameHook() const override { return classnameof(); }
+  const OptString& o_getClassNameHook() const override { return classnameof(); }
 
   LDAPMessage *data;
   BerElement *ber;
@@ -246,7 +246,7 @@ static int _get_lderrno(LDAP *ldap) {
   return lderr;
 }
 
-static bool php_ldap_do_modify(const OptResource& link, const String& dn, const Array& entry,
+static bool php_ldap_do_modify(const OptResource& link, const OptString& dn, const Array& entry,
                                int oper) {
   bool is_full_add = false; /* flag for full add operation so ldap_mod_add
                                can be put back into oper, gerrit THomson */
@@ -310,7 +310,7 @@ static bool php_ldap_do_modify(const OptResource& link, const String& dn, const 
     /* allow for arrays with one element, no allowance for arrays with
        none but probably not required, gerrit thomson. */
     if (num_values == 1 && !value.isArray()) {
-      String svalue = value.toString();
+      OptString svalue = value.toString();
       stringHolder.append(svalue);
       ldap_mods[i]->mod_bvalues[0] = (berval *)malloc(sizeof(struct berval));
       ldap_mods[i]->mod_bvalues[0]->bv_len = svalue.size();
@@ -324,7 +324,7 @@ static bool php_ldap_do_modify(const OptResource& link, const String& dn, const 
           num_attribs = i + 1;
           goto errexit;
         }
-        String ivalue = arr[j].toString();
+        OptString ivalue = arr[j].toString();
         ldap_mods[i]->mod_bvalues[j] = (berval *)malloc(sizeof(struct berval));
         ldap_mods[i]->mod_bvalues[j]->bv_len = ivalue.size();
         ldap_mods[i]->mod_bvalues[j]->bv_val = (char*)ivalue.data();
@@ -417,7 +417,7 @@ static Variant php_ldap_do_search(const Variant& link, const Variant& base_dn,
       raise_warning("Array initialization wrong");
       return false;
     }
-    String attr = arr_attributes[i].toString();
+    OptString attr = arr_attributes[i].toString();
     stringHolder.append(attr);
     ldap_attrs[i] = (char*)attr.data();
   }
@@ -459,7 +459,7 @@ static Variant php_ldap_do_search(const Variant& link, const Variant& base_dn,
       }
     } else {
       nfilters = 0; /* this means string, not array */
-      String sfilter = filter.toString();
+      OptString sfilter = filter.toString();
       stringHolder.append(sfilter);
       ldap_filter = (char*)sfilter.data();
     }
@@ -493,7 +493,7 @@ static Variant php_ldap_do_search(const Variant& link, const Variant& base_dn,
       if (nfilters != 0) { /* filter an array? */
         Variant entry = iterfilter.second();
         ++iterfilter;
-        String sentry = entry.toString();
+        OptString sentry = entry.toString();
         stringHolder.append(sentry);
         ldap_filter = (char*)sentry.data();
       }
@@ -532,7 +532,7 @@ static Variant php_ldap_do_search(const Variant& link, const Variant& base_dn,
   }
 
   /* not parallel search */
-  String sfilter = filter.toString();
+  OptString sfilter = filter.toString();
   ldap_filter = (char*)sfilter.data();
 
   /* If anything else than string is passed, ldap_base_dn = nullptr */
@@ -593,7 +593,7 @@ static int _ldap_rebind_proc(LDAP* /*ldap*/, const char* url, ber_tag_t /*req*/,
 
   /* callback */
   Variant ret = vm_call_user_func
-    (ld->rebindproc, make_vec_array(Variant(ld), String(url, CopyString)));
+    (ld->rebindproc, make_vec_array(Variant(ld), OptString(url, CopyString)));
   return ret.toInt64();
 }
 
@@ -616,12 +616,12 @@ static void get_attributes(Array &ret, LDAP *ldap,
     tmp.set(s_count, num_values);
     for (int i = 0; i < num_values; i++) {
       auto const val = ldap_value[i];
-      tmp.set(i, String(val->bv_val, val->bv_len, CopyString));
+      tmp.set(i, OptString(val->bv_val, val->bv_len, CopyString));
     }
     ldap_value_free_len(ldap_value);
 
-    String sAttribute = to_lower ? String(toLower(attribute))
-                                 : String(attribute, CopyString);
+    OptString sAttribute = to_lower ? OptString(toLower(attribute))
+                                 : OptString(attribute, CopyString);
     ret.set(sAttribute, tmp);
     ret.set(num_attrib, sAttribute);
 
@@ -642,7 +642,7 @@ static void get_attributes(Array &ret, LDAP *ldap,
 Variant HHVM_FUNCTION(ldap_connect,
                       const Variant& hostname /* = uninit_variant */,
                       int64_t port /* = 389 */) {
-  const String& str_hostname = hostname.isNull()
+  const OptString& str_hostname = hostname.isNull()
                              ? null_string
                              : hostname.toString();
   if (LDAPG(max_links) != -1 && LDAPG(num_links) >= LDAPG(max_links)) {
@@ -675,7 +675,7 @@ Variant HHVM_FUNCTION(ldap_connect,
 }
 
 Variant HHVM_FUNCTION(ldap_explode_dn,
-                      const String& dn,
+                      const OptString& dn,
                       int64_t with_attrib) {
   char **ldap_value;
   if (!(ldap_value = ldap_explode_dn((char*)dn.data(), with_attrib))) {
@@ -690,7 +690,7 @@ Variant HHVM_FUNCTION(ldap_explode_dn,
   Array ret;
   ret.set(s_count, count);
   for (i = 0; i < count; i++) {
-    ret.set(i, String(ldap_value[i], CopyString));
+    ret.set(i, OptString(ldap_value[i], CopyString));
   }
 
   ldap_value_free(ldap_value);
@@ -698,59 +698,59 @@ Variant HHVM_FUNCTION(ldap_explode_dn,
 }
 
 Variant HHVM_FUNCTION(ldap_dn2ufn,
-                      const String& db) {
+                      const OptString& db) {
   char *ufn = ldap_dn2ufn((char*)db.data());
   if (ufn) {
-    String ret(ufn, CopyString);
+    OptString ret(ufn, CopyString);
     ldap_memfree(ufn);
     return ret;
   }
   return false;
 }
 
-String HHVM_FUNCTION(ldap_err2str,
+OptString HHVM_FUNCTION(ldap_err2str,
                      int64_t errnum) {
-  return String(ldap_err2string(errnum), CopyString);
+  return OptString(ldap_err2string(errnum), CopyString);
 }
 
 bool HHVM_FUNCTION(ldap_add,
                    const OptResource& link,
-                   const String& dn,
+                   const OptString& dn,
                    const Array& entry) {
   return php_ldap_do_modify(link, dn, entry, PHP_LD_FULL_ADD);
 }
 
 bool HHVM_FUNCTION(ldap_mod_add,
                    const OptResource& link,
-                   const String& dn,
+                   const OptString& dn,
                    const Array& entry) {
   return php_ldap_do_modify(link, dn, entry, LDAP_MOD_ADD);
 }
 
 bool HHVM_FUNCTION(ldap_mod_del,
                    const OptResource& link,
-                   const String& dn,
+                   const OptString& dn,
                    const Array& entry) {
   return php_ldap_do_modify(link, dn, entry, LDAP_MOD_DELETE);
 }
 
 bool HHVM_FUNCTION(ldap_mod_replace,
                    const OptResource& link,
-                   const String& dn,
+                   const OptString& dn,
                    const Array& entry) {
   return php_ldap_do_modify(link, dn, entry, LDAP_MOD_REPLACE);
 }
 
 bool HHVM_FUNCTION(ldap_modify,
                    const OptResource& link,
-                   const String& dn,
+                   const OptString& dn,
                    const Array& entry) {
   return php_ldap_do_modify(link, dn, entry, LDAP_MOD_REPLACE);
 }
 
 bool HHVM_FUNCTION(ldap_modify_batch,
                    const OptResource& link,
-                   const String& dn,
+                   const OptString& dn,
                    const Array& modifs) {
   /*
   $modifs = [
@@ -787,7 +787,7 @@ bool HHVM_FUNCTION(ldap_modify_batch,
   /* perform validation */
   {
     /* make sure the DN contains no NUL bytes */
-    if (dn.find('\0') != String::npos) {
+    if (dn.find('\0') != OptString::npos) {
       raise_warning("DN must not contain NUL bytes");
       return false;
     }
@@ -823,7 +823,7 @@ bool HHVM_FUNCTION(ldap_modify_batch,
         }
 
         /* is this a valid entry? */
-        const String& modkey = modprops_iter.first().asCStrRef();
+        const OptString& modkey = modprops_iter.first().asCStrRef();
         if (modkey != s_LDAP_MODIFY_BATCH_ATTRIB
             && modkey != s_LDAP_MODIFY_BATCH_MODTYPE
             && modkey != s_LDAP_MODIFY_BATCH_VALUES) {
@@ -841,7 +841,7 @@ bool HHVM_FUNCTION(ldap_modify_batch,
                           "a string");
             return false;
           }
-          if (modprops_iter.second().asCStrRef().find('\0') != String::npos) {
+          if (modprops_iter.second().asCStrRef().find('\0') != OptString::npos) {
             raise_warning("A '" LDAP_MODIFY_BATCH_ATTRIB "' value must not "
                           "contain NUL bytes");
             return false;
@@ -937,7 +937,7 @@ bool HHVM_FUNCTION(ldap_modify_batch,
 
       /* fetch the relevant data */
       const Array& mod = modifs[i].asCArrRef();
-      const String& attrib = mod[s_LDAP_MODIFY_BATCH_ATTRIB].asCStrRef();
+      const OptString& attrib = mod[s_LDAP_MODIFY_BATCH_ATTRIB].asCStrRef();
       int64_t modtype = mod[s_LDAP_MODIFY_BATCH_MODTYPE].asInt64Val();
       const Array& vals = mod[s_LDAP_MODIFY_BATCH_VALUES].asCArrRef();
 
@@ -976,7 +976,7 @@ bool HHVM_FUNCTION(ldap_modify_batch,
         /* for each value */
         for (int64_t j = 0; j < num_modvals; ++j) {
           /* fetch it */
-          const String& modval = vals[j].asCStrRef();
+          const OptString& modval = vals[j].asCStrRef();
 
           /* allocate the data struct */
           ldap_mods[i]->mod_bvalues[j] = req::make_raw<struct berval>();
@@ -1044,10 +1044,10 @@ bool HHVM_FUNCTION(ldap_bind,
     return false;
   }
 
-  const String& str_bind_rdn = bind_rdn.isNull()
+  const OptString& str_bind_rdn = bind_rdn.isNull()
                              ? null_string
                              : bind_rdn.toString();
-  const String& str_bind_password = bind_password.isNull()
+  const OptString& str_bind_password = bind_password.isNull()
                                   ? null_string
                                   : bind_password.toString();
 
@@ -1110,7 +1110,7 @@ bool HHVM_FUNCTION(ldap_set_rebind_proc,
 bool HHVM_FUNCTION(ldap_sort,
                    const OptResource& link,
                    const OptResource& result,
-                   const String& sortfilter) {
+                   const OptString& sortfilter) {
   auto ld = get_valid_ldap_link_resource(link);
   if (!ld) {
     return false;
@@ -1229,7 +1229,7 @@ bool HHVM_FUNCTION(ldap_get_option,
         }
         return false;
       }
-      retval = String(val, CopyString);
+      retval = OptString(val, CopyString);
       ldap_memfree(val);
     } break;
 /* options not implemented
@@ -1312,7 +1312,7 @@ bool HHVM_FUNCTION(ldap_set_option,
   case LDAP_OPT_MATCHED_DN:
 #endif
     {
-      String snewval = newval.toString();
+      OptString snewval = newval.toString();
       char *val = (char*)snewval.data();
       if (ldap_set_option(ldap, option, val)) {
         return false;
@@ -1359,7 +1359,7 @@ bool HHVM_FUNCTION(ldap_set_option,
           error = 1;
           break;
         }
-        String val = ctrlval[s_oid].toString();
+        OptString val = ctrlval[s_oid].toString();
         stringHolder.append(val);
         ctrl = *ctrlp = (LDAPControl*)malloc(sizeof(**ctrlp));
         ctrl->ldctl_oid = (char*)val.data();
@@ -1446,9 +1446,9 @@ Variant HHVM_FUNCTION(ldap_search,
 
 bool HHVM_FUNCTION(ldap_rename,
                    const OptResource& link,
-                   const String& dn,
-                   const String& newrdn,
-                   const String& newparent,
+                   const OptString& dn,
+                   const OptString& newrdn,
+                   const OptString& newparent,
                    bool deleteoldrdn) {
   auto ld = get_valid_ldap_link_resource(link);
   if (!ld) {
@@ -1463,7 +1463,7 @@ bool HHVM_FUNCTION(ldap_rename,
 
 bool HHVM_FUNCTION(ldap_delete,
                    const OptResource& link,
-                   const String& dn) {
+                   const OptString& dn) {
   auto ld = get_valid_ldap_link_resource(link);
   if (!ld) {
     return false;
@@ -1479,9 +1479,9 @@ bool HHVM_FUNCTION(ldap_delete,
 
 Variant HHVM_FUNCTION(ldap_compare,
                       const OptResource& link,
-                      const String& dn,
-                      const String& attribute,
-                      const String& value) {
+                      const OptString& dn,
+                      const OptString& attribute,
+                      const OptString& value) {
   auto ld = get_valid_ldap_link_resource(link);
   if (!ld) {
     return -1LL;
@@ -1515,7 +1515,7 @@ Variant HHVM_FUNCTION(ldap_error,
   }
 
   int ld_errno = _get_lderrno(ld->link);
-  return String(ldap_err2string(ld_errno), CopyString);
+  return OptString(ldap_err2string(ld_errno), CopyString);
 }
 
 Variant HHVM_FUNCTION(ldap_get_dn,
@@ -1532,7 +1532,7 @@ Variant HHVM_FUNCTION(ldap_get_dn,
 
   char *text = ldap_get_dn(ld->link, entry->data);
   if (text) {
-    String ret(text, CopyString);
+    OptString ret(text, CopyString);
     ldap_memfree(text);
     return ret;
   }
@@ -1586,7 +1586,7 @@ Variant HHVM_FUNCTION(ldap_get_entries,
     get_attributes(tmp1, ldap, ldap_result_entry, true);
 
     char *dn = ldap_get_dn(ldap, ldap_result_entry);
-    tmp1.set(s_dn, String(dn, CopyString));
+    tmp1.set(s_dn, OptString(dn, CopyString));
     ldap_memfree(dn);
 
     ret.set(num_entries, tmp1);
@@ -1680,7 +1680,7 @@ Variant HHVM_FUNCTION(ldap_first_attribute,
     entry->ber = nullptr;
     return false;
   }
-  String ret(attribute, CopyString);
+  OptString ret(attribute, CopyString);
   ldap_memfree(attribute);
   return ret;
 }
@@ -1711,7 +1711,7 @@ Variant HHVM_FUNCTION(ldap_next_attribute,
     entry->ber = nullptr;
     return false;
   }
-  String ret(attribute, CopyString);
+  OptString ret(attribute, CopyString);
   ldap_memfree(attribute);
   return ret;
 }
@@ -1779,7 +1779,7 @@ bool HHVM_FUNCTION(ldap_parse_reference,
   if (lreferrals != nullptr) {
     refp = lreferrals;
     while (*refp) {
-      referrals.append(String(*refp, CopyString));
+      referrals.append(OptString(*refp, CopyString));
       refp++;
     }
     ldap_value_free(lreferrals);
@@ -1791,8 +1791,8 @@ bool HHVM_FUNCTION(ldap_parse_result,
                    const OptResource& link,
                    const OptResource& result,
                    int64_t& errcode,
-                   String& matcheddn,
-                   String& errmsg,
+                   OptString& matcheddn,
+                   OptString& errmsg,
                    Array& referrals) {
   auto ld = get_valid_ldap_link_resource(link);
   if (!ld) {
@@ -1821,7 +1821,7 @@ bool HHVM_FUNCTION(ldap_parse_result,
   if (lreferrals != nullptr) {
     refp = lreferrals;
     while (*refp) {
-      referrals.append(String(*refp, CopyString));
+      referrals.append(OptString(*refp, CopyString));
       refp++;
     }
     ldap_value_free(lreferrals);
@@ -1830,14 +1830,14 @@ bool HHVM_FUNCTION(ldap_parse_result,
   if (lerrmsg == nullptr) {
     errmsg = staticEmptyString();
   } else {
-    errmsg = String(lerrmsg, CopyString);
+    errmsg = OptString(lerrmsg, CopyString);
     ldap_memfree(lerrmsg);
   }
 
   if (lmatcheddn == nullptr) {
     matcheddn = staticEmptyString();
   } else {
-    matcheddn = String(lmatcheddn, CopyString);
+    matcheddn = OptString(lmatcheddn, CopyString);
     ldap_memfree(lmatcheddn);
   }
   return true;
@@ -1856,7 +1856,7 @@ bool HHVM_FUNCTION(ldap_free_result,
 Variant HHVM_FUNCTION(ldap_get_values_len,
                       const OptResource& link,
                       const OptResource& result_entry,
-                      const String& attribute) {
+                      const OptString& attribute) {
   auto ld = get_valid_ldap_link_resource(link);
   if (!ld) {
     return false;
@@ -1879,7 +1879,7 @@ Variant HHVM_FUNCTION(ldap_get_values_len,
   Array ret;
   for (int i = 0; i < num_values; i++) {
     auto const val = ldap_value_len[i];
-    ret.set(i, String(val->bv_val, val->bv_len, CopyString));
+    ret.set(i, OptString(val->bv_val, val->bv_len, CopyString));
   }
   ret.set(s_count, num_values);
   ldap_value_free_len(ldap_value_len);
@@ -1889,7 +1889,7 @@ Variant HHVM_FUNCTION(ldap_get_values_len,
 Variant HHVM_FUNCTION(ldap_get_values,
                       const OptResource& link,
                       const OptResource& result_entry,
-                      const String& attribute) {
+                      const OptString& attribute) {
   return HHVM_FN(ldap_get_values_len)(link, result_entry, attribute);
 }
 
@@ -1897,7 +1897,7 @@ bool HHVM_FUNCTION(ldap_control_paged_result,
                    const OptResource& link,
                    int64_t pagesize,
                    bool iscritical,
-                   const String& cookie) {
+                   const OptString& cookie) {
   auto ld = get_valid_ldap_link_resource(link);
   if (!ld) {
     return false;
@@ -1943,7 +1943,7 @@ bool HHVM_FUNCTION(ldap_control_paged_result,
 bool HHVM_FUNCTION(ldap_control_paged_result_response,
                    const OptResource& link,
                    const OptResource& result,
-                   String& cookie,
+                   OptString& cookie,
                    int64_t& estimated) {
   auto ld = get_valid_ldap_link_resource(link);
   if (!ld) {
@@ -2013,16 +2013,16 @@ bool HHVM_FUNCTION(ldap_control_paged_result_response,
     return false;
   }
 
-  cookie = String(lcookie.bv_val, lcookie.bv_len, CopyString);
+  cookie = OptString(lcookie.bv_val, lcookie.bv_len, CopyString);
   estimated = lestimated;
 
   ber_memfree(lcookie.bv_val);
   return true;
 }
 
-String HHVM_FUNCTION(ldap_escape,
-                     const String& value,
-                     const String& ignores /* = "" */,
+OptString HHVM_FUNCTION(ldap_escape,
+                     const OptString& value,
+                     const OptString& ignores /* = "" */,
                      int64_t flags /* = 0 */) {
   char esc[256] = {};
 
@@ -2045,7 +2045,7 @@ String HHVM_FUNCTION(ldap_escape,
 
   char hex[] = "0123456789abcdef";
 
-  String result(3UL * value.size(), ReserveString);
+  OptString result(3UL * value.size(), ReserveString);
   char *rdata = result.get()->mutableData(), *r = rdata;
 
   for (int i = 0; i < value.size(); i++) {

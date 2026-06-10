@@ -40,7 +40,7 @@ namespace HPHP {
 
 struct Array;
 struct MakeUncountedEnv;
-struct String;
+struct OptString;
 struct StringData;
 struct Unit;
 struct UnitEmitter;
@@ -324,7 +324,7 @@ public:
   bool exists(int64_t k) const;
   bool exists(const StringData* k) const;
   bool exists(TypedValue k) const;
-  bool exists(const String& k) const;
+  bool exists(const OptString& k) const;
   bool exists(const Variant& k) const;
 
   /*
@@ -333,7 +333,7 @@ public:
   arr_lval lval(int64_t k);
   arr_lval lval(StringData* k);
   arr_lval lval(TypedValue k);
-  arr_lval lval(const String& k);
+  arr_lval lval(const OptString& k);
   arr_lval lval(const Variant& k);
 
   /*
@@ -389,7 +389,7 @@ public:
   TypedValue get(int64_t k, bool error) const;
   TypedValue get(const StringData* k, bool error) const;
   TypedValue get(TypedValue k, bool error = false) const;
-  TypedValue get(const String& k, bool error = false) const;
+  TypedValue get(const OptString& k, bool error = false) const;
   TypedValue get(const Variant& k, bool error = false) const;
 
   /*
@@ -415,10 +415,10 @@ public:
   ArrayData* setMove(StringData* k, TypedValue v);
 
   ArrayData* setMove(TypedValue k, TypedValue v);
-  ArrayData* setMove(const String& k, TypedValue v);
+  ArrayData* setMove(const OptString& k, TypedValue v);
   ArrayData* setMove(int64_t k, const Variant& v);
   ArrayData* setMove(StringData* k, const Variant& v);
-  ArrayData* setMove(const String& k, const Variant& v);
+  ArrayData* setMove(const OptString& k, const Variant& v);
   ArrayData* setMove(const Variant& k, const Variant& v);
 
   /*
@@ -428,7 +428,7 @@ public:
   ArrayData* removeMove(int64_t k);
   ArrayData* removeMove(const StringData* k);
   ArrayData* removeMove(TypedValue k);
-  ArrayData* removeMove(const String& k);
+  ArrayData* removeMove(const OptString& k);
   ArrayData* removeMove(const Variant& k);
 
   /**
@@ -637,7 +637,7 @@ protected:
    */
   static bool IsValidKey(TypedValue k);
   static bool IsValidKey(const Variant& k);
-  static bool IsValidKey(const String& k);
+  static bool IsValidKey(const OptString& k);
   static bool IsValidKey(const StringData* k);
 
   /////////////////////////////////////////////////////////////////////////////

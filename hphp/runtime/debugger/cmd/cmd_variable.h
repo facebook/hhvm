@@ -25,9 +25,9 @@ namespace HPHP::Eval {
 
 struct CmdVariable : DebuggerCommand {
   static Array GetGlobalVariables();
-  static void PrintVariable(DebuggerClient &client, const String& varName);
+  static void PrintVariable(DebuggerClient &client, const OptString& varName);
   static void PrintVariables(DebuggerClient &client, const Array& variables,
-                              int frame, const String& text, int version);
+                              int frame, const OptString& text, int version);
 
   CmdVariable() : DebuggerCommand(KindOfVariable) {
     m_frame = 0;
@@ -56,8 +56,8 @@ private:
   /* Set true by onServer if it used g_context->m_globalNVTable. */
   bool m_global;
 
-  req::root<String> m_varName;
-  req::root<String> m_filter;
+  req::root<OptString> m_varName;
+  req::root<OptString> m_filter;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

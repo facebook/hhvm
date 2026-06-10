@@ -232,7 +232,7 @@ StrNR ObjectData::getClassName() const {
   return m_cls->preClass()->nameStr();
 }
 
-bool ObjectData::instanceof(const String& s) const {
+bool ObjectData::instanceof(const OptString& s) const {
   assertx(kindIsValid());
   auto const cls = Class::lookup(s.get());
   return cls && instanceof(cls);
@@ -395,8 +395,8 @@ void ObjectData::setDynProp(const StringData* key, TypedValue val) {
   reserveProperties().set(StrNR(key), val, true);
 }
 
-Variant ObjectData::o_get(const String& propName, bool error /* = true */,
-                          const String& context /*= null_string*/) {
+Variant ObjectData::o_get(const OptString& propName, bool error /* = true */,
+                          const OptString& context /*= null_string*/) {
   assertx(kindIsValid());
 
   // This is not (just) a check for empty string; property names that start
@@ -436,8 +436,8 @@ Variant ObjectData::o_get(const String& propName, bool error /* = true */,
   return uninit_null();
 }
 
-void ObjectData::o_set(const String& propName, const Variant& v,
-                       const String& context /* = null_string */) {
+void ObjectData::o_set(const OptString& propName, const Variant& v,
+                       const OptString& context /* = null_string */) {
   assertx(kindIsValid());
 
   // This is not (just) a check for empty string; property names that start
@@ -476,7 +476,7 @@ void ObjectData::o_set(const String& propName, const Variant& v,
 
 void ObjectData::o_setArray(const Array& properties) {
   for (ArrayIter iter(properties); iter; ++iter) {
-    String k = iter.first().toString();
+    OptString k = iter.first().toString();
     Class* ctx = nullptr;
     // If the key begins with a NUL, it's a private or protected property. Read
     // the class name from between the two NUL bytes.
@@ -485,7 +485,7 @@ void ObjectData::o_setArray(const Array& properties) {
     // apc-object.
     if (!k.empty() && k[0] == '\0') {
       int subLen = k.find('\0', 1) + 1;
-      String cls = k.substr(1, subLen - 2);
+      OptString cls = k.substr(1, subLen - 2);
       if (cls.size() == 1 && cls[0] == '*') {
         // Protected.
         ctx = m_cls;
@@ -704,7 +704,7 @@ Array ObjectData::o_toIterArray(const Class* ctx) {
   return retArray;
 }
 
-static bool decode_invoke(const String& s, ObjectData* obj, bool fatal,
+static bool decode_invoke(const OptString& s, ObjectData* obj, bool fatal,
                           CallCtx& ctx) {
   ctx.this_ = obj;
   ctx.cls = obj->getVMClass();
@@ -724,7 +724,7 @@ static bool decode_invoke(const String& s, ObjectData* obj, bool fatal,
   return true;
 }
 
-Variant ObjectData::o_invoke(const String& s, const Variant& params,
+Variant ObjectData::o_invoke(const OptString& s, const Variant& params,
                              bool fatal /* = true */) {
   CallCtx ctx;
   if (!decode_invoke(s, this, fatal, ctx) ||
@@ -737,7 +737,7 @@ Variant ObjectData::o_invoke(const String& s, const Variant& params,
   );
 }
 
-Variant ObjectData::o_invoke_few_args(const String& s,
+Variant ObjectData::o_invoke_few_args(const OptString& s,
                                       RuntimeCoeffects providedCoeffects,
                                       int count,
                                       const Variant& a0 /* = uninit_variant*/,
@@ -1686,7 +1686,7 @@ Variant ObjectData::invokeDebugInfo(RuntimeCoeffects provided) {
   return InvokeSimple(this, s___debugInfo, provided);
 }
 
-String ObjectData::invokeToString() {
+OptString ObjectData::invokeToString() {
   if (Cfg::Eval::FatalOnConvertObjectToString) {
     raise_convert_object_to_string(classname_cstr());
   }
@@ -1723,7 +1723,7 @@ String ObjectData::invokeToString() {
     return empty_string();
   }
 
-  if (tvIsString(tv)) return String::attach(val(tv).pstr);
+  if (tvIsString(tv)) return OptString::attach(val(tv).pstr);
   auto const op = "__toString()";
   if (tvIsLazyClass(tv)) {
     return StrNR{lazyClassToStringHelper(tv.m_data.plazyclass, op)};

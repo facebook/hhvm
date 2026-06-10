@@ -24,7 +24,7 @@ namespace HPHP {
 // pack/unpack
 
 struct Variant;
-struct String;
+struct OptString;
 struct Array;
 
 /**
@@ -37,7 +37,7 @@ struct ZendPack {
    * to the format argument. pack() idea stolen from Perl (implemented formats
    * behave the same as there).
    */
-  static Variant pack(const String& fmt, const Array& argv);
+  static Variant pack(const OptString& fmt, const Array& argv);
 
   /**
    * Unpack binary string into named array elements according to format
@@ -54,7 +54,7 @@ struct ZendPack {
    * Numeric pack types will return numbers, a and A will return strings,
    * f and d will return doubles.
    */
-  static Variant unpack(const String& fmt, const String& data);
+  static Variant unpack(const OptString& fmt, const OptString& data);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

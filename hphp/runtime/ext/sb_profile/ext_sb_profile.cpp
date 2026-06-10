@@ -3,21 +3,21 @@
 
 namespace HPHP {
 
-String HHVM_FUNCTION(sb_profile_ser,
-                     const String& sb_root,
-                     const String& prof_path) {
+OptString HHVM_FUNCTION(sb_profile_ser,
+                     const OptString& sb_root,
+                     const OptString& prof_path) {
   auto const status = jit::serializeSBProfData(sb_root.data(), prof_path.data());
-  return String{status.c_str()};
+  return OptString{status.c_str()};
 }
 
-String HHVM_FUNCTION(sb_profile_deser,
-                     const String& sb_root,
-                     const String& prof_path,
+OptString HHVM_FUNCTION(sb_profile_deser,
+                     const OptString& sb_root,
+                     const OptString& prof_path,
                      int64_t warmup) {
   auto const flags = static_cast<jit::SBWarmupFlags>(warmup);
   auto const status =
     jit::deserializeSBProfData(sb_root.data(), prof_path.data(), flags);
-  return String{status.c_str()};
+  return OptString{status.c_str()};
 }
 
 static struct SbProfileExtension final : Extension {

@@ -1800,7 +1800,7 @@ ArrayData* read_array(ProfDataDeserializer& ser) {
     ser,
     [&] () -> ArrayData* {
       auto const sz = read_raw<uint32_t>(ser);
-      String s{sz, ReserveStringMode{}};
+      OptString s{sz, ReserveStringMode{}};
       auto const range = s.bufferSlice();
       read_raw(ser, range.begin(), sz);
       s.setSize(sz);

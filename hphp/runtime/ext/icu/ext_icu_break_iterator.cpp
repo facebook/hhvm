@@ -20,7 +20,7 @@ const StaticString
 inline Object ibi_create(const char *funcname,
                          icu::BreakIterator *(*func)(const icu::Locale&,
                                                      UErrorCode&),
-                         const String& locale) {
+                         const OptString& locale) {
   UErrorCode error = U_ZERO_ERROR;
   auto bi = func(icu::Locale::createFromName(locale.c_str()), error);
   if (U_FAILURE(error)) {
@@ -117,7 +117,7 @@ static int64_t HHVM_METHOD(IntlBreakIterator, getErrorCode) {
   return data->getErrorCode();
 }
 
-static String HHVM_METHOD(IntlBreakIterator, getErrorMessage) {
+static OptString HHVM_METHOD(IntlBreakIterator, getErrorMessage) {
   FETCH_BI(data, this_, empty_string());
   return data->getErrorMessage();
 }
@@ -138,11 +138,11 @@ static Variant HHVM_METHOD(IntlBreakIterator, getLocale, int64_t locale_type) {
                    "breakiter_get_locale: Call to ICU method has failed");
     return false;
   }
-  return String(locale.getName(), CopyString);
+  return OptString(locale.getName(), CopyString);
 }
 
 static Object
-HHVM_METHOD(IntlBreakIterator, getPartsIterator, const String& /*key_type*/) {
+HHVM_METHOD(IntlBreakIterator, getPartsIterator, const OptString& /*key_type*/) {
   throw_not_implemented("IntlBreakIterator::getPartsIterator");
 }
 
@@ -244,7 +244,7 @@ static Variant HHVM_METHOD(IntlBreakIterator, previous) {
   return ret;
 }
 
-static bool HHVM_METHOD(IntlBreakIterator, setText, const String& text) {
+static bool HHVM_METHOD(IntlBreakIterator, setText, const OptString& text) {
   FETCH_BI(data, this_, false);
   return data->setText(text);
 }
@@ -259,7 +259,7 @@ static int64_t HHVM_METHOD(IntlCodePointBreakIterator, getLastCodePoint) {
 //////////////////////////////////////////////////////////////////////////////
 
 static void HHVM_METHOD(IntlRuleBasedBreakIterator, __construct,
-                        const String& rules, bool compiled /*=false*/) {
+                        const OptString& rules, bool compiled /*=false*/) {
   s_intl_error->clearError();
   auto data = Native::data<IntlBreakIterator>(this_);
   if (compiled) {
@@ -360,7 +360,7 @@ static Variant HHVM_METHOD(IntlRuleBasedBreakIterator, getBinaryRules) {
                    "rbbi_get_binary_rules: the rules are too large");
     return false;
   }
-  return String((const char*)rules, rules_len, CopyString);
+  return OptString((const char*)rules, rules_len, CopyString);
 }
 #endif
 

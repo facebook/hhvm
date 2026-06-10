@@ -75,7 +75,7 @@ struct IntlTimeZone : IntlError, SystemLib::ClassLoader<"IntlTimeZone"> {
 
   icu::TimeZone* timezone() const { return m_timezone; }
 
-  static icu::TimeZone* ParseArg(const Variant& arg, const String& funcname,
+  static icu::TimeZone* ParseArg(const Variant& arg, const OptString& funcname,
                                  IntlError *err);
  private:
   icu::TimeZone *m_timezone = nullptr;

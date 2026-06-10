@@ -87,7 +87,7 @@ void XboxTransport::onSendEndImpl() {
   notify();
 }
 
-String XboxTransport::getResults(int &code, int timeout_ms /* = 0 */) {
+OptString XboxTransport::getResults(int &code, int timeout_ms /* = 0 */) {
   {
     Lock lock(this);
     while (!m_done) {
@@ -104,7 +104,7 @@ String XboxTransport::getResults(int &code, int timeout_ms /* = 0 */) {
     }
   }
 
-  String response(m_response.c_str(), m_response.size(), CopyString);
+  OptString response(m_response.c_str(), m_response.size(), CopyString);
   code = m_code;
 
   return response;
@@ -256,7 +256,7 @@ const StaticString
   s_localhost("localhost"),
   s_127_0_0_1("127.0.0.1");
 
-static bool isLocalHost(const String& host) {
+static bool isLocalHost(const OptString& host) {
   return host.empty() || host == s_localhost || host == s_127_0_0_1;
 }
 
@@ -265,7 +265,7 @@ static bool isLocalHost(const String& host) {
 struct XboxTask : SweepableResourceData {
   DECLARE_RESOURCE_ALLOCATION(XboxTask)
 
-  XboxTask(const String& message, const String& reqInitDoc = "", const RequestId root_req_id = RequestId()) {
+  XboxTask(const OptString& message, const OptString& reqInitDoc = "", const RequestId root_req_id = RequestId()) {
     m_job = new XboxTransport(message.toCppString(), root_req_id, reqInitDoc.toCppString());
     m_job->incRefCount();
     if (cli_supports_clone()) {
@@ -284,7 +284,7 @@ struct XboxTask : SweepableResourceData {
 
   CLASSNAME_IS("XboxTask")
   // overriding ResourceData
-  const String& o_getClassNameHook() const override { return classnameof(); }
+  const OptString& o_getClassNameHook() const override { return classnameof(); }
 
 private:
   XboxTransport *m_job{nullptr};
@@ -294,8 +294,8 @@ IMPLEMENT_RESOURCE_ALLOCATION(XboxTask)
 ///////////////////////////////////////////////////////////////////////////////
 
 OptResource XboxServer::TaskStart(
-  const String& msg,
-  const String& reqInitDoc /* = "" */,
+  const OptString& msg,
+  const OptString& reqInitDoc /* = "" */,
   ServerTaskEvent<XboxServer, XboxTransport> *event /* = nullptr */,
   RequestId root_req_id /* = RequestId() */) {
   static auto xboxOverflowCounter =
@@ -368,7 +368,7 @@ int XboxServer::TaskResult(const OptResource& task, int timeout_ms, Variant *ret
 
 int XboxServer::TaskResult(XboxTransport *job, int timeout_ms, Variant *ret) {
   int code = 0;
-  String response = job->getResults(code, timeout_ms);
+  OptString response = job->getResults(code, timeout_ms);
   if (ret) {
     if (code == 200) {
       *ret =

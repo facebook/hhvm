@@ -33,27 +33,27 @@ TRACE_SET_MOD(debugger)
 
 using namespace Eval;
 
-String HHVM_FUNCTION(hphpd_auth_token) {
+OptString HHVM_FUNCTION(hphpd_auth_token) {
   TRACE(5, "in hphpd_auth_token()\n");
   if (auto proxy = Debugger::GetProxy()) {
-    return String(proxy->requestAuthToken());
+    return OptString(proxy->requestAuthToken());
   }
 
-  return String();
+  return OptString();
 }
 
-String HHVM_FUNCTION(hphp_debug_session_auth) {
+OptString HHVM_FUNCTION(hphp_debug_session_auth) {
   TRACE(5, "in hphp_debug_session_auth()\n");
   if (auto proxy = Debugger::GetProxy()) {
-    return String(proxy->requestSessionAuth());
+    return OptString(proxy->requestSessionAuth());
   } else {
     auto debugger = HPHP::VSDEBUG::VSDebugExtension::getDebugger();
     if (debugger != nullptr) {
-      return String(debugger->getDebuggerSessionAuth());
+      return OptString(debugger->getDebuggerSessionAuth());
     }
   }
 
-  return String();
+  return OptString();
 }
 
 // Hard breakpoint for the VSDebug extension debugger.
@@ -98,7 +98,7 @@ bool HHVM_FUNCTION(hphp_was_interrupted_by_debugger) {
 }
 
 
-bool HHVM_FUNCTION(hphp_debugger_set_option, const String& option, bool value) {
+bool HHVM_FUNCTION(hphp_debugger_set_option, const OptString& option, bool value) {
   auto debugger = HPHP::VSDEBUG::VSDebugExtension::getDebugger();
   if (!debugger) {
     raise_error("hphp_debugger_set_option: no debugger extension is enabled");
@@ -110,7 +110,7 @@ bool HHVM_FUNCTION(hphp_debugger_set_option, const String& option, bool value) {
   }
 }
 
-bool HHVM_FUNCTION(hphp_debugger_get_option, const String& option) {
+bool HHVM_FUNCTION(hphp_debugger_get_option, const OptString& option) {
   auto debugger = HPHP::VSDEBUG::VSDebugExtension::getDebugger();
   if (!debugger) {
     raise_error("hphp_debugger_get_option: no debugger extension is enabled");

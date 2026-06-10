@@ -23,7 +23,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 req::ptr<File>
-GlobStreamWrapper::open(const String& filename, const String& /*mode*/,
+GlobStreamWrapper::open(const OptString& filename, const OptString& /*mode*/,
                         int /*options*/,
                         const req::ptr<StreamContext>& /*context*/) {
   // Can't open a glob as a file, it's meant to be opened as a directory
@@ -40,7 +40,7 @@ GlobStreamWrapper::open(const String& filename, const String& /*mode*/,
   return nullptr;
 }
 
-req::ptr<Directory> GlobStreamWrapper::opendir(const String& path) {
+req::ptr<Directory> GlobStreamWrapper::opendir(const OptString& path) {
   const char* prefix = "glob://";
   const char* path_str = path.data();
   int path_len = path.length();
@@ -53,7 +53,7 @@ req::ptr<Directory> GlobStreamWrapper::opendir(const String& path) {
   path_str += strlen(prefix);
   path_len -= strlen(prefix);
 
-  auto glob = HHVM_FN(glob)(String(path_str, path_len, CopyString));
+  auto glob = HHVM_FN(glob)(OptString(path_str, path_len, CopyString));
   if (!glob.isArray()) {
     return nullptr;
   }

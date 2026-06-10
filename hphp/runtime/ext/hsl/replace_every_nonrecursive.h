@@ -25,11 +25,11 @@ namespace HPHP {
  * Can be used for any encoding/string type, and for both case-sensitive
  * and case-insensitive.
  */
-template<class T> String replace_every_nonrecursive(
-  const String& raw_haystack,
+template<class T> OptString replace_every_nonrecursive(
+  const OptString& raw_haystack,
   const Array& raw_replacements,
-  std::function<T(const String&)> to_t,
-  std::function<String(const T&)> from_t,
+  std::function<T(const OptString&)> to_t,
+  std::function<OptString(const T&)> from_t,
   std::function<void(T*)> normalize,
   std::function<void(T*)> fold_case,
   std::function<int32_t(const T& haystack, const T& needle, int32_t offset)> find,
@@ -46,10 +46,10 @@ template<class T> String replace_every_nonrecursive(
   IterateKV(raw_replacements.get(), [&](TypedValue rawNeedle, TypedValue rawReplacement) {
     assertx(isStringType(rawNeedle.type()));
     assertx(isStringType(rawReplacement.type()));
-    auto needle = to_t(String(rawNeedle.val().pstr));
+    auto needle = to_t(OptString(rawNeedle.val().pstr));
     normalize(&needle);
     fold_case(&needle);
-    auto replacement = to_t(String(rawReplacement.val().pstr));
+    auto replacement = to_t(OptString(rawReplacement.val().pstr));
     replacements.push_back(std::make_tuple(needle, replacement));
     auto [it, is_unique] = seen.emplace(needle);
     if (!is_unique) {

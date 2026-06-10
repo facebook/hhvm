@@ -11,7 +11,7 @@ static bool parseUChar32(const Variant& vcp, UChar32& cp) {
   if (vcp.isInteger()) {
     cp = vcp.toInt64();
   } else if (vcp.isString()) {
-    String strval = vcp.toString();
+    OptString strval = vcp.toString();
     auto cstr = strval.c_str();
     auto cstr_len = strval.size();
 
@@ -56,7 +56,7 @@ Variant HHVM_STATIC_METHOD(IntlChar, chr, const Variant& arg) {
   int buffer_len = 0;
   U8_APPEND_UNSAFE(buffer, buffer_len, cp);
   buffer[buffer_len] = 0;
-  return String(buffer, buffer_len, CopyString);
+  return OptString(buffer, buffer_len, CopyString);
 }
 
 Variant HHVM_STATIC_METHOD(IntlChar, ord, const Variant& arg) {
@@ -130,7 +130,7 @@ Variant HHVM_STATIC_METHOD(IntlChar, charName,
   int32_t buffer_len = u_charName(cp, (UCharNameChoice)choice,
                                   nullptr, 0, &error);
 
-  String buffer(buffer_len, ReserveString);
+  OptString buffer(buffer_len, ReserveString);
   error = U_ZERO_ERROR;
   buffer_len = u_charName(cp, (UCharNameChoice)choice,
                           buffer.bufferSlice().data(), buffer_len + 1, &error);
@@ -143,7 +143,7 @@ Variant HHVM_STATIC_METHOD(IntlChar, charName,
 }
 
 Variant HHVM_STATIC_METHOD(IntlChar, charFromName,
-                           const String& name, int64_t choice) {
+                           const OptString& name, int64_t choice) {
   UErrorCode error = U_ZERO_ERROR;
   auto ret = u_charFromName((UCharNameChoice)choice, name.c_str(), &error);
   if (U_FAILURE(error)) {
@@ -161,7 +161,7 @@ static UBool enumCharNames_callback(CallCtx *ctx,
   args[0].m_data.num = code;
   args[1].m_data.num = nameChoice;
 
-  Variant charName = String(name, length, CopyString);
+  Variant charName = OptString(name, length, CopyString);
   tvCopy(*charName.asTypedValue(), args[2]);
 
   tvDecRefGen(
@@ -198,7 +198,7 @@ Variant HHVM_STATIC_METHOD(IntlChar, getPropertyName,
                            int64_t prop, int64_t choice) {
   auto ret = u_getPropertyName((UProperty)prop, (UPropertyNameChoice)choice);
   if (ret) {
-    return String(ret, CopyString);
+    return OptString(ret, CopyString);
   } else {
     s_intl_error->setError(U_ILLEGAL_ARGUMENT_ERROR,
                            "Failed to get property name");
@@ -206,7 +206,7 @@ Variant HHVM_STATIC_METHOD(IntlChar, getPropertyName,
   }
 }
 
-int64_t HHVM_STATIC_METHOD(IntlChar, getPropertyEnum, const String& alias) {
+int64_t HHVM_STATIC_METHOD(IntlChar, getPropertyEnum, const OptString& alias) {
   return u_getPropertyEnum(alias.c_str());
 }
 
@@ -215,7 +215,7 @@ Variant HHVM_STATIC_METHOD(IntlChar, getPropertyValueName,
   auto ret = u_getPropertyValueName((UProperty)prop, value,
                                     (UPropertyNameChoice)choice);
   if (ret) {
-    return String(ret, CopyString);
+    return OptString(ret, CopyString);
   } else {
     s_intl_error->setError(U_ILLEGAL_ARGUMENT_ERROR,
                            "Failed to get property value name");
@@ -224,7 +224,7 @@ Variant HHVM_STATIC_METHOD(IntlChar, getPropertyValueName,
 }
 
 int64_t HHVM_STATIC_METHOD(IntlChar, getPropertyValueEnum,
-                           int64_t prop, const String& name) {
+                           int64_t prop, const OptString& name) {
   return u_getPropertyValueEnum((UProperty)prop, name.c_str());
 }
 
@@ -236,7 +236,7 @@ Variant HHVM_STATIC_METHOD(IntlChar, foldCase,
     char buffer[5];
     int buffer_len = 0;
     U8_APPEND_UNSAFE(buffer, buffer_len, ret);
-    return String(buffer, buffer_len, CopyString);
+    return OptString(buffer, buffer_len, CopyString);
   } else {
     return ret;
   }
@@ -295,7 +295,7 @@ Variant HHVM_STATIC_METHOD(IntlChar, getFC_NFKC_Closure, const Variant& arg) {
   }
   closure.releaseBuffer(closure_len);
   error = U_ZERO_ERROR;
-  String ret(u8(closure, error));
+  OptString ret(u8(closure, error));
   if (U_FAILURE(error)) {
     s_intl_error->setError(error, "Failed converting output to UTF8");
     return false;
@@ -330,7 +330,7 @@ Variant uchar_method(const Class* /*self_*/, const Variant& arg) {
   GETCP(arg, cp);
   auto ret = T(cp);
   if (arg.isString()) {
-    String buf(5, ReserveString);
+    OptString buf(5, ReserveString);
     auto s = buf.bufferSlice().data();
     int s_len = 0;
     U8_APPEND_UNSAFE(s, s_len, ret);

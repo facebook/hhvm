@@ -62,12 +62,12 @@ StringData* buildStringData(double  n);
  * String type wrapping around StringData to implement copy-on-write and
  * literal string handling (to avoid string copying).
  */
-struct String {
+struct OptString {
 protected:
   req::ptr<StringData> m_str;
 
   using NoIncRef = req::ptr<StringData>::NoIncRef;
-  String(StringData* sd, NoIncRef) : m_str(sd, NoIncRef{}) {}
+  OptString(StringData* sd, NoIncRef) : m_str(sd, NoIncRef{}) {}
 
 public:
   static const int MinPrecomputedInteger = SCHAR_MIN;
@@ -83,8 +83,8 @@ public:
   }
 
   // create a string from a character
-  static String FromChar(char ch) {
-    return String{makeStaticString(ch)};
+  static OptString FromChar(char ch) {
+    return OptString{makeStaticString(ch)};
   }
 
   static const StringData *ConvertInteger(int64_t n);
@@ -96,8 +96,8 @@ public:
   }
 
 public:
-  String() {}
-  ~String();
+  OptString() {}
+  ~OptString();
 
   StringData* get() const { return m_str.get(); }
   void reset(StringData* str = nullptr) { m_str.reset(str); }
@@ -108,76 +108,76 @@ public:
   /**
    * Constructors
    */
-  explicit String(StringData *data) : m_str(data) { }
-  /* implicit */ String(int     n);
-  /* implicit */ String(int64_t n);
-  /* implicit */ String(double  n);
-  /* implicit */ String(const char* s)
+  explicit OptString(StringData *data) : m_str(data) { }
+  /* implicit */ OptString(int     n);
+  /* implicit */ OptString(int64_t n);
+  /* implicit */ OptString(double  n);
+  /* implicit */ OptString(const char* s)
   : m_str(LIKELY((bool)s) ? StringData::Make(s, CopyString)
                            : nullptr, NoIncRef{}) { }
 
-  String(const String& str) : m_str(str.m_str) { }
-  /* implicit */ String(const StaticString& str);
+  OptString(const OptString& str) : m_str(str.m_str) { }
+  /* implicit */ OptString(const StaticString& str);
 
   /* Prevent unintentional promotion. */
-  /* implicit */ String(char) = delete;
-  /* implicit */ String(Variant&&) = delete;
+  /* implicit */ OptString(char) = delete;
+  /* implicit */ OptString(Variant&&) = delete;
 
   // Disable this---otherwise this would generally implicitly create a
   // Variant(bool) and then call String(Variant&&) ...
-  /* implicit */ String(const StringData*) = delete;
+  /* implicit */ OptString(const StringData*) = delete;
 
   // Move ctor
-  /* implicit */ String(String&& str) noexcept : m_str(std::move(str.m_str)) {}
+  /* implicit */ OptString(OptString&& str) noexcept : m_str(std::move(str.m_str)) {}
 
   // Move assign
-  String& operator=(String&& src) {
+  OptString& operator=(OptString&& src) {
     m_str = std::move(src.m_str);
     return *this;
   }
-  String& operator=(req::ptr<StringData>&& src) {
+  OptString& operator=(req::ptr<StringData>&& src) {
     m_str = std::move(src);
     return *this;
   }
 
-  String& operator=(const Variant&) = delete;
-  String& operator=(Variant&&) = delete;
+  OptString& operator=(const Variant&) = delete;
+  OptString& operator=(Variant&&) = delete;
 
-  /* implicit */ String(const std::string &s)
+  /* implicit */ OptString(const std::string &s)
   : m_str(StringData::Make(s.data(), s.size(), CopyString), NoIncRef{}) { }
 
-  /* implicit */ String(folly::StringPiece s)
+  /* implicit */ OptString(folly::StringPiece s)
   : m_str(StringData::Make(s), NoIncRef{}) {}
 
   // attach to null terminated malloc'ed string, maybe free it now.
-  String(char* s, AttachStringMode mode)
+  OptString(char* s, AttachStringMode mode)
   : m_str(LIKELY((bool)s) ? StringData::Make(s, mode) : nullptr, NoIncRef{}) {}
 
   // copy a null terminated string
-  String(const char *s, CopyStringMode mode)
+  OptString(const char *s, CopyStringMode mode)
   : m_str(LIKELY((bool)s) ? StringData::Make(s, mode) : nullptr, NoIncRef{}) {}
 
   // attach to binary malloc'ed string
-  String(char* s, size_t length, AttachStringMode mode)
+  OptString(char* s, size_t length, AttachStringMode mode)
   : m_str(LIKELY((bool)s) ? StringData::Make(s, length, mode)
                           : nullptr, NoIncRef{}) { }
 
   // make copy of binary binary string
-  String(const char *s, size_t length, CopyStringMode mode)
+  OptString(const char *s, size_t length, CopyStringMode mode)
   : m_str(LIKELY((bool)s) ? StringData::Make(s, length, mode)
                           : nullptr, NoIncRef{}) { }
 
   // force a copy of a String
-  String(const String& s, CopyStringMode mode)
+  OptString(const OptString& s, CopyStringMode mode)
   : m_str(LIKELY((bool)s) ? StringData::Make(s.c_str(), s.size(), mode)
                           : nullptr, NoIncRef{}) {}
 
   // make an empty string with cap reserve bytes, plus 1 for '\0'
-  String(size_t cap, ReserveStringMode /*mode*/)
+  OptString(size_t cap, ReserveStringMode /*mode*/)
       : m_str(StringData::Make(cap), NoIncRef{}) {}
 
-  static String attach(StringData* sd) {
-    return String(sd, NoIncRef{});
+  static OptString attach(StringData* sd) {
+    return OptString(sd, NoIncRef{});
   }
 
   void clear() { reset();}
@@ -193,12 +193,12 @@ public:
   }
 
 public:
-  const String& setSize(int64_t len) {
+  const OptString& setSize(int64_t len) {
     assertx(m_str);
     m_str->setSize(len);
     return *this;
   }
-  const String& shrink(size_t len) {
+  const OptString& shrink(size_t len) {
     assertx(m_str && !m_str->hasMultipleRefs());
     if (m_str->capacity() - len > kMinShrinkThreshold) {
       m_str = req::ptr<StringData>::attach(m_str->shrinkImpl(len));
@@ -245,7 +245,7 @@ public:
     return m_str ? m_str->isZero() : false;
   }
 
-  String substr(int start, int length = StringData::MaxSize) const;
+  OptString substr(int start, int length = StringData::MaxSize) const;
 
   /**
    * Find a character or a substring and return its position. "pos" has to be
@@ -254,44 +254,44 @@ public:
   static const int npos = -1;
   int find(char ch, int pos = 0, bool caseSensitive = true) const;
   int find(const char *s, int pos = 0, bool caseSensitive = true) const;
-  int find(const String& s, int pos = 0, bool caseSensitive = true) const;
+  int find(const OptString& s, int pos = 0, bool caseSensitive = true) const;
   int rfind(char ch, int pos = 0, bool caseSensitive = true) const;
   int rfind(const char *s, int pos = 0, bool caseSensitive = true) const;
-  int rfind(const String& s, int pos = 0, bool caseSensitive = true) const;
+  int rfind(const OptString& s, int pos = 0, bool caseSensitive = true) const;
 
   /**
    * Operators
    */
-  String& operator=(StringData *data) {
+  OptString& operator=(StringData *data) {
     m_str = data;
     return *this;
   }
-  String& operator=(const String& v) {
+  OptString& operator=(const OptString& v) {
     m_str = v.m_str;
     return *this;
   }
-  String& operator=(const StaticString& v);
-  String& operator=(const char* v);
-  String& operator=(const std::string &s);
+  OptString& operator=(const StaticString& v);
+  OptString& operator=(const char* v);
+  OptString& operator=(const std::string &s);
   // These should be members, but g++ doesn't yet support the rvalue
   // reference notation on lhs (http://goo.gl/LuCTo).
-  friend String&& operator+(String&& lhs, const char* rhs);
-  friend String&& operator+(String&& lhs, String&& rhs);
-  friend String operator+(String&& lhs, const String & rhs);
-  friend String operator+(const String& lhs, const char* rhs);
-  friend String operator+(const String & lhs, const String & rhs);
-  String& operator += (const char* v);
-  String& operator += (const String& v);
-  String& operator += (const std::string& v);
-  String& operator += (folly::StringPiece slice);
-  String& operator += (folly::MutableStringPiece slice);
-  String  operator |  (const String& v) const = delete;
-  String  operator &  (const String& v) const = delete;
-  String  operator ^  (const String& v) const = delete;
-  String& operator |= (const String& v) = delete;
-  String& operator &= (const String& v) = delete;
-  String& operator ^= (const String& v) = delete;
-  String  operator ~  () const = delete;
+  friend OptString&& operator+(OptString&& lhs, const char* rhs);
+  friend OptString&& operator+(OptString&& lhs, OptString&& rhs);
+  friend OptString operator+(OptString&& lhs, const OptString & rhs);
+  friend OptString operator+(const OptString& lhs, const char* rhs);
+  friend OptString operator+(const OptString & lhs, const OptString & rhs);
+  OptString& operator += (const char* v);
+  OptString& operator += (const OptString& v);
+  OptString& operator += (const std::string& v);
+  OptString& operator += (folly::StringPiece slice);
+  OptString& operator += (folly::MutableStringPiece slice);
+  OptString  operator |  (const OptString& v) const = delete;
+  OptString  operator &  (const OptString& v) const = delete;
+  OptString  operator ^  (const OptString& v) const = delete;
+  OptString& operator |= (const OptString& v) = delete;
+  OptString& operator &= (const OptString& v) = delete;
+  OptString& operator ^= (const OptString& v) = delete;
+  OptString  operator ~  () const = delete;
   explicit operator std::string () const { return toCppString(); }
   explicit operator bool() const { return (bool)m_str; }
 
@@ -307,12 +307,12 @@ public:
   bool operator >  (const char* v) const = delete;
   bool operator <  (const char* v) const = delete;
 
-  bool operator == (const String& v) const;
-  bool operator != (const String& v) const;
-  bool operator >= (const String& v) const = delete;
-  bool operator <= (const String& v) const = delete;
-  bool operator >  (const String& v) const;
-  bool operator <  (const String& v) const;
+  bool operator == (const OptString& v) const;
+  bool operator != (const OptString& v) const;
+  bool operator >= (const OptString& v) const = delete;
+  bool operator <= (const OptString& v) const = delete;
+  bool operator >  (const OptString& v) const;
+  bool operator <  (const OptString& v) const;
 
   bool operator == (const Variant& v) const = delete;
   bool operator != (const Variant& v) const = delete;
@@ -338,34 +338,34 @@ public:
    */
   bool same (const char* v2) const = delete;
   bool same (const StringData *v2) const;
-  bool same (const String& v2) const;
+  bool same (const OptString& v2) const;
   bool same (const Array& v2) const = delete;
   bool same (const Object& v2) const = delete;
   bool same (const OptResource& v2) const = delete;
 
   bool equal(const char* v2) const = delete;
   bool equal(const StringData *v2) const;
-  bool equal(const String& v2) const;
+  bool equal(const OptString& v2) const;
   bool equal(const Array& v2) const = delete;
   bool equal(const Object& v2) const = delete;
   bool equal(const OptResource& v2) const = delete;
 
   bool less (const char* v2) const = delete;
   bool less (const StringData *v2) const;
-  bool less (const String& v2) const;
+  bool less (const OptString& v2) const;
   bool less (const Array& v2) const = delete;
   bool less (const Object& v2) const = delete;
   bool less (const OptResource& v2) const = delete;
 
   bool more (const char* v2) const = delete;
   bool more (const StringData *v2) const;
-  bool more (const String& v2) const;
+  bool more (const OptString& v2) const;
   bool more (const Array& v2) const = delete;
   bool more (const Object& v2) const = delete;
   bool more (const OptResource& v2) const = delete;
 
   int compare(const char* v2) const;
-  int compare(const String& v2) const;
+  int compare(const OptString& v2) const;
 
   /**
    * Returns one character at specified position.
@@ -379,8 +379,8 @@ public:
   void dump() const;
 
   template <class Op> ALWAYS_INLINE
-  String forEachByte(Op action) const {
-    String ret = String(size(), ReserveString);
+  OptString forEachByte(Op action) const {
+    OptString ret = OptString(size(), ReserveString);
 
     auto srcSlice = slice();
 
@@ -398,7 +398,7 @@ public:
   }
 
   template <class Op> ALWAYS_INLINE
-  String forEachByteFast(Op action) const {
+  OptString forEachByteFast(Op action) const {
     if (this->empty()) {
       return *this;
     }
@@ -408,11 +408,11 @@ public:
 
  private:
   static void compileTimeAssertions() {
-    static_assert(sizeof(String) == sizeof(req::ptr<StringData>), "");
+    static_assert(sizeof(OptString) == sizeof(req::ptr<StringData>), "");
   }
 };
 
-extern const String null_string;
+extern const OptString null_string;
 
 ///////////////////////////////////////////////////////////////////////////////
 // StrNR
@@ -425,7 +425,7 @@ public:
   StrNR() : m_px(nullptr) {}
   explicit StrNR(StringData *sd) : m_px(sd) {}
   explicit StrNR(const StringData *sd) : m_px(const_cast<StringData*>(sd)) {}
-  explicit StrNR(const String &s) : m_px(s.get()) {} // XXX
+  explicit StrNR(const OptString &s) : m_px(s.get()) {} // XXX
   explicit StrNR(const char*) = delete;
 
   ~StrNR() {
@@ -434,7 +434,7 @@ public:
     }
   }
 
-  /* implicit */ operator const String&() const { return asString(); }
+  /* implicit */ operator const OptString&() const { return asString(); }
   const char* data() const { return m_px ? m_px->data() : ""; }
   const char* c_str() const { return data(); }
   int size() const { return m_px ? m_px->size() : 0; }
@@ -444,10 +444,10 @@ public:
     return m_px->capacity(); // intentionally skip nullptr check
   }
 
-  String& asString() {
-    return *reinterpret_cast<String*>(this);
+  OptString& asString() {
+    return *reinterpret_cast<OptString*>(this);
   }
-  const String& asString() const {
+  const OptString& asString() const {
     return const_cast<StrNR*>(this)->asString();
   }
 
@@ -465,8 +465,8 @@ private:
  * A StaticString can be co-accessed by multiple threads, therefore they are
  * not thread local.
  */
-struct StaticString : String {
-  TYPE_SCAN_IGNORE_BASES(String);
+struct StaticString : OptString {
+  TYPE_SCAN_IGNORE_BASES(OptString);
 
   template<size_t N> explicit StaticString(const char(&s)[N]) {
     construct(s, N - 1);
@@ -519,12 +519,12 @@ StaticString getDataTypeString(DataType t, bool isLegacy = false);
 
 //////////////////////////////////////////////////////////////////////
 
-inline String::String(const StaticString& str) :
+inline OptString::OptString(const StaticString& str) :
   m_str(str.m_str.get(), NoIncRef{}) {
   assertx(str.m_str->isStatic());
 }
 
-inline String& String::operator=(const StaticString& v) {
+inline OptString& OptString::operator=(const StaticString& v) {
   m_str = req::ptr<StringData>::attach(v.m_str.get());
   return *this;
 }
@@ -546,8 +546,8 @@ ALWAYS_INLINE StringData* staticEmptyString() {
 
 #endif
 
-ALWAYS_INLINE String empty_string() {
-  return String::attach(staticEmptyString());
+ALWAYS_INLINE OptString empty_string() {
+  return OptString::attach(staticEmptyString());
 }
 
 ALWAYS_INLINE TypedValue empty_string_tv() {
@@ -556,25 +556,25 @@ ALWAYS_INLINE TypedValue empty_string_tv() {
 
 //////////////////////////////////////////////////////////////////////
 
-ALWAYS_INLINE String& asStrRef(tv_lval tv) {
+ALWAYS_INLINE OptString& asStrRef(tv_lval tv) {
   assertx(tvIsPlausible(*tv));
   assertx(isStringType(type(tv)));
   type(tv) = KindOfString;
-  return reinterpret_cast<String&>(val(tv).pstr);
+  return reinterpret_cast<OptString&>(val(tv).pstr);
 }
 
-ALWAYS_INLINE const String& asCStrRef(tv_rval tv) {
+ALWAYS_INLINE const OptString& asCStrRef(tv_rval tv) {
   assertx(tvIsPlausible(*tv));
   assertx(isStringType(type(tv)));
-  return reinterpret_cast<const String&>(val(tv).pstr);
+  return reinterpret_cast<const OptString&>(val(tv).pstr);
 }
 
 }
 
 namespace folly {
-template<> class FormatValue<HPHP::String> {
+template<> class FormatValue<HPHP::OptString> {
  public:
-  explicit FormatValue(const HPHP::String& str) : m_val(str) {}
+  explicit FormatValue(const HPHP::OptString& str) : m_val(str) {}
 
   template<typename Callback>
   void format(FormatArg& arg, Callback& cb) const {
@@ -582,7 +582,7 @@ template<> class FormatValue<HPHP::String> {
   }
 
  private:
-  const HPHP::String& m_val;
+  const HPHP::OptString& m_val;
 };
 
 template<> class FormatValue<HPHP::StaticString> {

@@ -22,15 +22,15 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 TRACE_SET_MOD(debugger)
 
-String DebuggerThriftBuffer::readImpl() {
+OptString DebuggerThriftBuffer::readImpl() {
   TRACE(7, "DebuggerThriftBuffer::readImpl\n");
   assertx(m_size <= BUFFER_SIZE);
   int nread = getSocket()->readImpl(m_buffer, m_size);
   m_buffer[nread] = '\0';
-  return String(m_buffer, nread, CopyString);
+  return OptString(m_buffer, nread, CopyString);
 }
 
-void DebuggerThriftBuffer::flushImpl(const String& data) {
+void DebuggerThriftBuffer::flushImpl(const OptString& data) {
   TRACE(7, "DebuggerThriftBuffer::flushImpl\n");
   getSocket()->write(data);
 }
@@ -49,7 +49,7 @@ const StaticString
   s_message("message");
 
 template<typename T>
-static inline int serializeImpl(T data, String& sdata) {
+static inline int serializeImpl(T data, OptString& sdata) {
   TRACE(7, "DebuggerWireHelpers::serializeImpl\n");
   VariableSerializer vs(VariableSerializer::Type::DebuggerSerialize);
   try {
@@ -64,7 +64,7 @@ static inline int serializeImpl(T data, String& sdata) {
   return DebuggerWireHelpers::NoError;
 }
 
-static inline int unserializeImpl(const String& sdata, Variant& data) {
+static inline int unserializeImpl(const OptString& sdata, Variant& data) {
   TRACE(7, "DebuggerWireHelpers::unserializeImpl(CStrRef sdata,\n");
   if (sdata.same(s_hit_limit)) {
     return DebuggerWireHelpers::HitLimit;
@@ -105,22 +105,22 @@ static inline int unserializeImpl(const String& sdata, Variant& data) {
   return DebuggerWireHelpers::NoError;
 }
 
-int DebuggerWireHelpers::WireSerialize(const Array& data, String& sdata) {
+int DebuggerWireHelpers::WireSerialize(const Array& data, OptString& sdata) {
   TRACE(7, "DebuggerWireHelpers::WireSerialize(const Array& data,\n");
   return serializeImpl(data, sdata);
 }
 
-int DebuggerWireHelpers::WireSerialize(const Object& data, String& sdata) {
+int DebuggerWireHelpers::WireSerialize(const Object& data, OptString& sdata) {
   TRACE(7, "DebuggerWireHelpers::WireSerialize(const Object& data,\n");
   return serializeImpl(data, sdata);
 }
 
-int DebuggerWireHelpers::WireSerialize(const Variant& data, String& sdata) {
+int DebuggerWireHelpers::WireSerialize(const Variant& data, OptString& sdata) {
   TRACE(7, "DebuggerWireHelpers::WireSerialize(const Variant& data,\n");
   return serializeImpl(data, sdata);
 }
 
-int DebuggerWireHelpers::WireUnserialize(String& sdata, Array& data) {
+int DebuggerWireHelpers::WireUnserialize(OptString& sdata, Array& data) {
   TRACE(7, "DebuggerWireHelpers::WireUnserialize, Array& data)\n");
   Variant v;
   int ret = unserializeImpl(sdata, v);
@@ -135,7 +135,7 @@ int DebuggerWireHelpers::WireUnserialize(String& sdata, Array& data) {
   return NoError;
 }
 
-int DebuggerWireHelpers::WireUnserialize(String& sdata, Object& data) {
+int DebuggerWireHelpers::WireUnserialize(OptString& sdata, Object& data) {
   TRACE(7, "DebuggerWireHelpers::WireUnserialize, Object& data\n");
   Variant v;
   int ret = unserializeImpl(sdata, v);
@@ -150,7 +150,7 @@ int DebuggerWireHelpers::WireUnserialize(String& sdata, Object& data) {
   return NoError;
 }
 
-int DebuggerWireHelpers::WireUnserialize(String& sdata, Variant& data) {
+int DebuggerWireHelpers::WireUnserialize(OptString& sdata, Variant& data) {
   TRACE(7, "DebuggerWireHelpers::WireUnserialize\n");
   return unserializeImpl(sdata, data);
 }

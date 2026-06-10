@@ -62,29 +62,29 @@ PropAccessorMap::PropAccessorMap(PropAccessor* props,
   }
 }
 
-bool PropAccessorMap::isPropSupported(const String& name) {
+bool PropAccessorMap::isPropSupported(const OptString& name) {
   return lookupProp(name) != end();
 }
 
-Variant (*PropAccessorMap::get(const String& name))(const Object& this_) {
+Variant (*PropAccessorMap::get(const OptString& name))(const Object& this_) {
   return (*lookupProp(name))->get;
 }
 
-void (*PropAccessorMap::set(const String& name))
+void (*PropAccessorMap::set(const OptString& name))
      (const Object& this_, const Variant& value) {
   return (*lookupProp(name))->set;
 }
 
-bool (*PropAccessorMap::isset(const String& name))(const Object& this_) {
+bool (*PropAccessorMap::isset(const OptString& name))(const Object& this_) {
   return (*lookupProp(name))->isset;
 }
 
-void (*PropAccessorMap::unset(const String& name))(const Object& this_) {
+void (*PropAccessorMap::unset(const OptString& name))(const Object& this_) {
   return (*lookupProp(name))->unset;
 }
 
 PropAccessorMap::const_iterator PropAccessorMap::lookupProp(
-  const String& name) {
+  const OptString& name) {
   auto pa = PropAccessor {
     name.data(), nullptr, nullptr, nullptr, nullptr
   };
@@ -94,28 +94,28 @@ PropAccessorMap::const_iterator PropAccessorMap::lookupProp(
 ////////////////////////////////////////////////////////////////////////////////
 // API to call from object-data at property resolution.
 
-Variant getProp(const Object& obj, const String& name) {
+Variant getProp(const Object& obj, const OptString& name) {
   auto nph = obj->getVMClass()->getNativePropHandler();
   assertx(nph);
   assertx(nph->get);
   return nph->get(obj, name);
 }
 
-Variant setProp(const Object& obj, const String& name, const Variant& value) {
+Variant setProp(const Object& obj, const OptString& name, const Variant& value) {
   auto nph = obj->getVMClass()->getNativePropHandler();
   assertx(nph);
   assertx(nph->set);
   return nph->set(obj, name, value);
 }
 
-Variant issetProp(const Object& obj, const String& name) {
+Variant issetProp(const Object& obj, const OptString& name) {
   auto nph = obj->getVMClass()->getNativePropHandler();
   assertx(nph);
   assertx(nph->isset);
   return nph->isset(obj, name);
 }
 
-Variant unsetProp(const Object& obj, const String& name) {
+Variant unsetProp(const Object& obj, const OptString& name) {
   auto nph = obj->getVMClass()->getNativePropHandler();
   assertx(nph);
   assertx(nph->unset);

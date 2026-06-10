@@ -73,8 +73,8 @@ Array HSLLocale::__debugInfo() const {
       continue;
     }
     ret.set(
-      String(category.data(), category.size(), CopyString),
-      String(locale.data(), locale.size(), CopyString)
+      OptString(category.data(), category.size(), CopyString),
+      OptString(locale.data(), locale.size(), CopyString)
     );
   }
   return ret;
@@ -120,7 +120,7 @@ void HHVM_FUNCTION(set_request_locale, const Object& locale) {
 
 Object HHVM_FUNCTION(newlocale_mask,
                      int64_t mask,
-                     const String& locale,
+                     const OptString& locale,
                      const Object& base) {
   auto loc = HSLLocale::fromObject(base)->get()->newlocale(LocaleCategoryMask, mask, locale.c_str());
   if (!loc) {
@@ -134,7 +134,7 @@ Object HHVM_FUNCTION(newlocale_mask,
 
 Object HHVM_FUNCTION(newlocale_category,
                      int64_t category,
-                     const String& locale,
+                     const OptString& locale,
                      const Object& base) {
   auto loc = HSLLocale::fromObject(base)->get()->newlocale(LocaleCategory, category, locale.c_str());
   if (!loc) {
@@ -147,7 +147,7 @@ Object HHVM_FUNCTION(newlocale_category,
 }
 
 Object HHVM_FUNCTION(newlocale_all,
-                     const String& locale) {
+                     const OptString& locale) {
   // As this function is pure:
   // - we need to ban all the magic behavior
   // - implemented in C++ instead of Hack so that we can enforce purity in

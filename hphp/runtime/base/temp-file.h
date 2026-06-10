@@ -29,15 +29,15 @@ struct TempFile : PlainFile {
   DECLARE_RESOURCE_ALLOCATION(TempFile)
 
   explicit TempFile(bool autoDelete = true,
-                    const String& wrapper_type = null_string,
-                    const String& stream_type = empty_string_ref);
+                    const OptString& wrapper_type = null_string,
+                    const OptString& stream_type = empty_string_ref);
   virtual ~TempFile();
 
   // overriding ResourceData
-  const String& o_getClassNameHook() const override { return classnameof(); }
+  const OptString& o_getClassNameHook() const override { return classnameof(); }
 
   // implementing File
-  bool open(const String& filename, const String& mode) override;
+  bool open(const OptString& filename, const OptString& mode) override;
   bool close(int* unused = nullptr) final;
 
   Object await(uint16_t /*events*/, double /*timeout*/) override {

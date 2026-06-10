@@ -44,19 +44,19 @@ extern const StaticString s_cmpWithFunc;
 ///////////////////////////////////////////////////////////////////////////////
 // operators
 
-inline String concat(const String& s1, const String& s2) {
+inline OptString concat(const OptString& s1, const OptString& s2) {
   return s1 + s2;
 }
 
-String concat3(const String& s1, const String& s2, const String& s3);
-String concat4(const String& s1, const String& s2, const String& s3,
-               const String& s4);
+OptString concat3(const OptString& s1, const OptString& s2, const OptString& s3);
+OptString concat4(const OptString& s1, const OptString& s2, const OptString& s3,
+               const OptString& s4);
 
 ///////////////////////////////////////////////////////////////////////////////
 
 [[noreturn]] void NEVER_INLINE throw_missing_this(const Func* f);
 [[noreturn]] void NEVER_INLINE throw_has_this_need_static(const Func* f);
-void NEVER_INLINE throw_invalid_property_name(const String& name);
+void NEVER_INLINE throw_invalid_property_name(const OptString& name);
 
 [[noreturn]]
 void NEVER_INLINE throw_call_reified_func_without_generics(const Func* f);
@@ -207,10 +207,10 @@ Variant vm_call_user_func(T&& t, const Variant& params,
 
 // Invoke an arbitrary user-defined function.
 // If you're considering calling this function for some new code, don't.
-Variant invoke(const String& function, const Variant& params,
+Variant invoke(const OptString& function, const Variant& params,
                bool allowDynCallNoPointer = false);
 
-Variant invoke_static_method(const String& s, const String& method,
+Variant invoke_static_method(const OptString& s, const OptString& method,
                              const Variant& params, const ArrayData* namedArgNames,
                              bool fatal = true);
 
@@ -260,12 +260,12 @@ bool readonlyLocalShouldThrow(TypedValue tv, ReadonlyOp op);
 
 void check_collection_cast_to_array();
 
-Object create_object_only(const String& s);
-Object create_object(const String& s, const Array &params,
+Object create_object_only(const OptString& s);
+Object create_object(const OptString& s, const Array &params,
                      const ArrayData* namedArgNames = nullptr, bool init = true);
 Object create_object(const Class* cls, const Array &params,
                      const ArrayData* namedArgNames = nullptr, bool init = true);
-Object init_object(const String& s, const Array &params,
+Object init_object(const OptString& s, const Array &params,
                    const ArrayData* namedArgNames, ObjectData* o);
 
 [[noreturn]] void throw_object(const Object& e);
@@ -276,7 +276,7 @@ Object init_object(const String& s, const Array &params,
 #endif
 
 [[noreturn]] inline
-void throw_object(const String& s, const Array& params,
+void throw_object(const OptString& s, const Array& params,
                   const ArrayData* namedArgNames = nullptr, bool init = true) {
   throw_object(create_object(s, params, namedArgNames, init));
 }
@@ -320,9 +320,9 @@ char const kUnserializableString[] = "\x01";
  * two functions in runtime/base, as there are functions in
  * runtime/base that depend on these two functions.
  */
-String HHVM_FUNCTION(serialize, const Variant& value);
-String serialize_keep_dvarrays(const Variant& value);
-Variant unserialize_ex(const String& str,
+OptString HHVM_FUNCTION(serialize, const Variant& value);
+OptString serialize_keep_dvarrays(const Variant& value);
+Variant unserialize_ex(const OptString& str,
                        VariableUnserializer::Type type,
                        const Array& options = null_array,
                        bool pure = false);
@@ -338,23 +338,23 @@ inline Variant unserialize_from_buffer(const char* str, int len,
   return unserialize_ex(str, len, type, options, pure);
 }
 
-inline Variant unserialize_from_string(const String& str,
+inline Variant unserialize_from_string(const OptString& str,
                                        VariableUnserializer::Type type,
                                        const Array& options = null_array,
                                        bool pure = false) {
   return unserialize_from_buffer(str.data(), str.size(), type, options, pure);
 }
 
-String resolve_include(const String& file, const char* currentDir,
-                       bool (*tryFile)(const String& file, void* ctx),
+OptString resolve_include(const OptString& file, const char* currentDir,
+                       bool (*tryFile)(const OptString& file, void* ctx),
                        void* ctx);
-Variant include_impl_invoke(const String& file, bool once = false,
+Variant include_impl_invoke(const OptString& file, bool once = false,
                             const char *currentDir = "",
                             bool callByHPHPInvoke = false);
-Variant require(const String& file, bool once, const char* currentDir,
+Variant require(const OptString& file, bool once, const char* currentDir,
                 bool raiseNotice);
 
-bool function_exists(const String& function_name);
+bool function_exists(const OptString& function_name);
 
 bool is_generated(const StringData* name);
 

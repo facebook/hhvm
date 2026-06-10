@@ -33,12 +33,12 @@ static bool getRandomBytes(void *bytes, size_t length) {
   return true;
 }
 
-String HHVM_FUNCTION(random_bytes, int64_t length) {
+OptString HHVM_FUNCTION(random_bytes, int64_t length) {
   if (length < 1) {
     SystemLib::throwErrorObject("Length must be greater than 0");
   }
 
-  String ret(length, ReserveString);
+  OptString ret(length, ReserveString);
   if (!getRandomBytes(ret.mutableData(), ret.capacity())) {
     SystemLib::throwErrorObject("Could not gather sufficient random data");
   }

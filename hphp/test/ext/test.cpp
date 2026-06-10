@@ -106,14 +106,14 @@ bool Test::logTestResults(std::string name, std::string details, int pass,
   }
 
   DictInit data(8);
-  data.set(String("type"),         "hphp");
-  data.set(String("name"),         name);
-  data.set(String("contacts"),     null_array);
-  data.set(String("endedTime"),    time(nullptr));
-  data.set(String("durationSecs"), mseconds / 1000.0);
-  data.set(String("status"),       status);
-  data.set(String("summary"),      std::string(summary));
-  data.set(String("details"),      details);
+  data.set(OptString("type"),         "hphp");
+  data.set(OptString("name"),         name);
+  data.set(OptString("contacts"),     null_array);
+  data.set(OptString("endedTime"),    time(nullptr));
+  data.set(OptString("durationSecs"), mseconds / 1000.0);
+  data.set(OptString("status"),       status);
+  data.set(OptString("summary"),      std::string(summary));
+  data.set(OptString("details"),      details);
 
   if (!logger.logTest(data.toArray())) {
     printf("WARNING: Logging %s failed\n", name.c_str());

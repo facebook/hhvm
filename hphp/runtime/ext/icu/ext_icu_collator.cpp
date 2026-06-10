@@ -22,7 +22,7 @@ const StaticString s_Collator("Collator");
     return ret; \
   }
 
-static void HHVM_METHOD(Collator, __construct, const String& locale) {
+static void HHVM_METHOD(Collator, __construct, const OptString& locale) {
   auto data = Native::data<Collator>(this_);
   data->clearError();
   if (!locale.empty()) {
@@ -97,12 +97,12 @@ static int64_t HHVM_METHOD(Collator, getErrorCode) {
   return data->getErrorCode();
 }
 
-static String HHVM_METHOD(Collator, getErrorMessage) {
+static OptString HHVM_METHOD(Collator, getErrorMessage) {
   FETCH_COL(data, this_, "");
   return data->getErrorMessage();
 }
 
-static String HHVM_METHOD(Collator, getLocale, int64_t type) {
+static OptString HHVM_METHOD(Collator, getLocale, int64_t type) {
   FETCH_COL(data, this_, "");
   data->clearError();
   UErrorCode error = U_ZERO_ERROR;
@@ -111,7 +111,7 @@ static String HHVM_METHOD(Collator, getLocale, int64_t type) {
   if (U_FAILURE(error)) {
     data->setError(error, "Error getting locale by type");
   }
-  return String(loc, CopyString);
+  return OptString(loc, CopyString);
 }
 
 static int64_t HHVM_METHOD(Collator, getStrength) {
@@ -132,7 +132,7 @@ static bool HHVM_METHOD(Collator, setAttribute, int64_t attr, int64_t val) {
   return true;
 }
 
-static Variant HHVM_METHOD(Collator, getSortKey, const String& val) {
+static Variant HHVM_METHOD(Collator, getSortKey, const OptString& val) {
   FETCH_COL(data, this_, false);
   UErrorCode error = U_ZERO_ERROR;
   icu::UnicodeString strval(u16(val, error));
@@ -148,7 +148,7 @@ static Variant HHVM_METHOD(Collator, getSortKey, const String& val) {
     return false;
   }
 
-  String ret(sortkey_len, ReserveString);
+  OptString ret(sortkey_len, ReserveString);
   sortkey_len = ucol_getSortKey(data->collator(),
                                 strval.getBuffer(), strval.length(),
                                 (uint8_t*) ret.get()->mutableData(),

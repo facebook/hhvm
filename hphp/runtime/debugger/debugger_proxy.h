@@ -121,10 +121,10 @@ struct DebuggerProxy : Synchronizable,
   };
 
   std::pair<bool,Variant>
-  ExecutePHPWithStreaming(const std::string &php, String &output, DebuggerCommand& cmd, int frame, StreamStatus& stream_status, int flags);
+  ExecutePHPWithStreaming(const std::string &php, OptString &output, DebuggerCommand& cmd, int frame, StreamStatus& stream_status, int flags);
 
   std::pair<bool,Variant>
-  ExecutePHP(const std::string &php, String &output, int frame, int flags);
+  ExecutePHP(const std::string &php, OptString &output, int frame, int flags);
 
   std::string requestAuthToken();
   std::string requestSessionAuth();

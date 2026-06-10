@@ -230,10 +230,10 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
 
 bool Option::IsFileExcluded(const std::string& file,
                             const hphp_fast_string_set& patterns) {
-  String sfile(file.c_str(), file.size(), CopyString);
+  OptString sfile(file.c_str(), file.size(), CopyString);
   for (auto const& pattern : patterns) {
     Variant matches;
-    Variant ret = preg_match(String(pattern.c_str(), pattern.size(),
+    Variant ret = preg_match(OptString(pattern.c_str(), pattern.size(),
                                     CopyString), sfile, &matches);
     if (ret.toInt64() > 0) {
       return true;

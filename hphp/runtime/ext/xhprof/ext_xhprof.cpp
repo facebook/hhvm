@@ -18,7 +18,7 @@ void HHVM_FUNCTION(fb_setprofile,
     functions.get(),
     [&](TypedValue tv) -> bool {
       if (isStringType(type(tv))) {
-        g_context->m_setprofileFunctions.emplace(String(val(tv).pstr));
+        g_context->m_setprofileFunctions.emplace(OptString(val(tv).pstr));
       }
       return false;
     }

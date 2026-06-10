@@ -140,11 +140,11 @@ struct c_AsyncFunctionWaitHandle final :
   void ret(TypedValue& result);
   void fail(ObjectData* exception);
   void failCpp();
-  String getName();
+  OptString getName();
   c_WaitableWaitHandle* getChild();
   void exitContext(ContextIndex contextIdx);
   bool isRunning() { return getState() == STATE_RUNNING; }
-  String getFilename();
+  OptString getFilename();
   Offset getNextExecutionOffset();
 
   Resumable* resumable() const {

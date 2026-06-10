@@ -135,7 +135,7 @@ struct HeapGraphContext : SweepableResourceData {
   DECLARE_RESOURCE_ALLOCATION(HeapGraphContext)
 
   // overriding ResourceData
-  const String& o_getClassNameHook() const override { return classnameof(); }
+  const OptString& o_getClassNameHook() const override { return classnameof(); }
 
   std::vector<CapturedNode> cnodes;
   std::vector<CapturedPtr> cptrs;

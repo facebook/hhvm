@@ -24,13 +24,13 @@ namespace HPHP {
 
 Variant HHVM_FUNCTION(mb_ereg_replace,
                       const Variant& pattern,
-                      const String& replacement,
-                      const String& str,
+                      const OptString& replacement,
+                      const OptString& str,
                       const Variant& opt_option = uninit_variant);
 Variant HHVM_FUNCTION(mb_eregi_replace,
                       const Variant& pattern,
-                      const String& replacement,
-                      const String& str,
+                      const OptString& replacement,
+                      const OptString& str,
                       const Variant& opt_option = uninit_variant);
 
 ///////////////////////////////////////////////////////////////////////////////

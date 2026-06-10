@@ -21,8 +21,8 @@
 
 namespace HPHP {
 namespace {
-  Array HHVM_FUNCTION(HH_regex_match, const String& haystack,
-                      const String& pattern, int64_t& offset) {
+  Array HHVM_FUNCTION(HH_regex_match, const OptString& haystack,
+                      const OptString& pattern, int64_t& offset) {
     // TODO(alexeyt): make a version of preg_match that behaves how we want
     // instead of working around it here
     Variant matches, error;
@@ -74,8 +74,8 @@ namespace {
     return make_vec_array(matches_out.toArray(), init_null());
   }
 
-  Array HHVM_FUNCTION(HH_regex_replace, const String& haystack,
-                      const String& pattern, const String& replacement) {
+  Array HHVM_FUNCTION(HH_regex_replace, const OptString& haystack,
+                      const OptString& pattern, const OptString& replacement) {
     // TODO(alexeyt): make a version of preg_replace that behaves how we want
     // instead of working around it here
     Variant error;

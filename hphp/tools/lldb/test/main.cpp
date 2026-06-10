@@ -161,15 +161,15 @@ void buildTypedValues() {
 void takeStringData(StringData* UNUSED v) { return; }
 void takeConstPtrToStringData(StringData* UNUSED const v) { return; }
 void takePtrToConstStringData(const StringData* UNUSED v) { return; }
-void takeString(String UNUSED v) { return; }
-void takePtrToString(String* UNUSED v) { return; }
+void takeString(OptString UNUSED v) { return; }
+void takePtrToString(OptString* UNUSED v) { return; }
 void takeStaticString(StaticString UNUSED v) { return; }
 void takeStrNR(StrNR UNUSED v) { return; }
 void takeResource(OptResource UNUSED v) { return; }
 void takePtrToResource(OptResource* UNUSED v) { return; }
 void takeObject(Object UNUSED v) { return; }
 void takeReqPtr(req::ptr<ObjectData> UNUSED v) { return; }
-void takeOptional(Optional<String> UNUSED v) { return; }
+void takeOptional(Optional<OptString> UNUSED v) { return; }
 void takePackedPtr(PackedPtr<Class> UNUSED v) { return; }
 void takePackedPtrRef(const PackedPtr<Class> UNUSED &v) { return; }
 void takePackedStringPtr(PackedStringPtr UNUSED v) { return; }
@@ -192,7 +192,7 @@ void buildOtherValues() {
   Array dict = make_dict_array(0x0123cafe, true, 302, "Salutations, earth!", 2, 3.14, "key4", 2.718, "key5", "Hello, world!");
   Array keyset = make_keyset_array(1, "cats", 2, 3, "cats", 2, 3, "dogs", 42);
   auto sd = StringData::MakeStatic("hello");
-  auto s = String("hello");
+  auto s = OptString("hello");
   auto rsc = OptResource(req::make<DummyResource>());
   auto cls = TestObject->getVMClass();
   auto lp = PackedPtr(cls);
@@ -210,8 +210,8 @@ void buildOtherValues() {
   takePtrToResource(&rsc);
   takeObject(TestObject);
   takeReqPtr(*reinterpret_cast<req::ptr<ObjectData> *>(&TestObject)); // Want to get its sole private member m_obj
-  takeOptional(Optional<String>("hello"));
-  takeOptional(Optional<String>());
+  takeOptional(Optional<OptString>("hello"));
+  takeOptional(Optional<OptString>());
   takePackedPtr(lp);
   takePackedPtrRef(lp);
   takePackedStringPtr(PackedStringPtr(StringData::MakeStatic("hello")));
@@ -239,12 +239,12 @@ void buildOtherValues() {
 
 // Utility tests
 
-void takeHHVMString(String UNUSED v) { return; }
+void takeHHVMString(OptString UNUSED v) { return; }
 void takeCharPtr(char const* UNUSED v) { return; }
 
 void buildValuesForUtilityTests() {
   auto sd = StringData::MakeStatic("hello");
-  takeHHVMString(String("Most excellent"));
+  takeHHVMString(OptString("Most excellent"));
   takeCharPtr("Very excellent");
   takeStaticString(StaticString("cats and dogs"));
   takeStrNR(StrNR(StaticString("lions and tigers")));

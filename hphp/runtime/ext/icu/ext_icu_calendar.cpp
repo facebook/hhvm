@@ -28,7 +28,7 @@ const StaticString
 
 const icu::Calendar*
 IntlCalendar::ParseArg(const Variant& cal, const icu::Locale &locale,
-                       const String &funcname, IntlError* err,
+                       const OptString &funcname, IntlError* err,
                        int64_t &calType, bool &calOwned) {
   icu::Calendar *ret = nullptr;
   UErrorCode error = U_ZERO_ERROR;
@@ -151,14 +151,14 @@ static bool HHVM_METHOD(IntlCalendar, clear, const Variant& field) {
 }
 
 static Object HHVM_STATIC_METHOD(IntlCalendar, createInstance,
-                                 const Variant& timeZone, const String& locale) {
+                                 const Variant& timeZone, const OptString& locale) {
   icu::TimeZone *tz =
     IntlTimeZone::ParseArg(timeZone, "intlcal_create_instance",
                            s_intl_error.get());
   if (!tz) {
     return Object();
   }
-  String loc = localeOrDefault(locale);
+  OptString loc = localeOrDefault(locale);
   UErrorCode error = U_ZERO_ERROR;
   icu::Calendar *cal =
     icu::Calendar::createInstance(tz, icu::Locale::createFromName(loc.c_str()),
@@ -234,7 +234,7 @@ static Array HHVM_STATIC_METHOD(IntlCalendar, getAvailableLocales) {
   const icu::Locale *availLocales = icu::Calendar::getAvailableLocales(count);
   VecInit ret(count);
   for (int i = 0; i < count; ++i) {
-    ret.append(String(availLocales[i].getName(), CopyString));
+    ret.append(OptString(availLocales[i].getName(), CopyString));
   }
   return ret.toArray();
 }
@@ -244,8 +244,8 @@ static int64_t HHVM_METHOD(IntlCalendar, getErrorCode) {
   return data->getErrorCode();
 }
 
-static String HHVM_METHOD(IntlCalendar, getErrorMessage) {
-  CAL_FETCH(data, this_, String());
+static OptString HHVM_METHOD(IntlCalendar, getErrorMessage) {
+  CAL_FETCH(data, this_, OptString());
   return data->getErrorMessage();
 }
 
@@ -287,7 +287,7 @@ static Variant HHVM_METHOD(IntlCalendar, getLocale, int64_t localeType) {
                    "intlcal_get_locale: Call to ICU method has failed");
     return false;
   }
-  return String(locale.getName(), CopyString);
+  return OptString(locale.getName(), CopyString);
 }
 
 static Variant HHVM_METHOD(IntlCalendar, getMaximum, int64_t field) {
@@ -332,7 +332,7 @@ static Object HHVM_METHOD(IntlCalendar, getTimezone) {
 
 static Variant HHVM_METHOD(IntlCalendar, getType) {
   CAL_FETCH(data, this_, false);
-  return String(data->calendar()->getType(), CopyString);
+  return OptString(data->calendar()->getType(), CopyString);
 }
 
 static bool HHVM_METHOD(IntlCalendar, inDaylightTime) {
@@ -507,7 +507,7 @@ static bool HHVM_METHOD(IntlCalendar, setTimezone, const Variant& timeZone) {
 
 #if ((U_ICU_VERSION_MAJOR_NUM * 100) + U_ICU_VERSION_MINOR_NUM) >= 402
 static Variant HHVM_STATIC_METHOD(IntlCalendar, getKeywordValuesForLocale,
-                                 const String& key, const String& locale,
+                                 const OptString& key, const OptString& locale,
                                  bool common) {
   UErrorCode error = U_ZERO_ERROR;
   UEnumeration *uenum = ucal_getKeywordValuesForLocale(key.c_str(),

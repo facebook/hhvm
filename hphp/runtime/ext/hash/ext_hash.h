@@ -24,7 +24,7 @@ namespace HPHP {
 
 constexpr int64_t k_HASH_HMAC = 1;
 
-Variant HHVM_FUNCTION(hash_file, const String& algo, const String& filename,
+Variant HHVM_FUNCTION(hash_file, const OptString& algo, const OptString& filename,
                                  bool raw_output = false);
 
 ///////////////////////////////////////////////////////////////////////////////

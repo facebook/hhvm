@@ -33,9 +33,9 @@ struct ZipFile : File {
   virtual ~ZipFile();
 
   // overriding ResourceData
-  const String& o_getClassNameHook() const override { return classnameof(); }
+  const OptString& o_getClassNameHook() const override { return classnameof(); }
 
-  bool open(const String& filename, const String& mode) override;
+  bool open(const OptString& filename, const OptString& mode) override;
   bool close(int* unused = nullptr) final;
   int64_t readImpl(char *buffer, int64_t length) override;
   int64_t writeImpl(const char *buffer, int64_t length) override;

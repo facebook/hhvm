@@ -40,7 +40,7 @@ void BZ2File::sweep() {
   File::sweep();
 }
 
-bool BZ2File::open(const String& filename, const String& mode) {
+bool BZ2File::open(const OptString& filename, const OptString& mode) {
   assertx(m_bzFile == nullptr);
 
   return m_innerFile->open(filename, mode) &&
@@ -54,7 +54,7 @@ int64_t BZ2File::errnu() {
   return errnum;
 }
 
-String BZ2File::errstr() {
+OptString BZ2File::errstr() {
   assertx(m_bzFile);
   int errnum;
   return BZ2_bzerror(m_bzFile, &errnum);
@@ -69,7 +69,7 @@ Array BZ2File::error() {
   int errnum;
   const char * errstr;
   errstr = BZ2_bzerror(m_bzFile, &errnum);
-  return make_dict_array(s_errno, errnum, s_errstr, String(errstr));
+  return make_dict_array(s_errno, errnum, s_errstr, OptString(errstr));
 }
 
 bool BZ2File::flush() {

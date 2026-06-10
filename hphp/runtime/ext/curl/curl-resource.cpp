@@ -52,7 +52,7 @@ CurlResource::ToFree::~ToFree() {
   }
 }
 
-CurlResource::CurlResource(const String& url)
+CurlResource::CurlResource(const OptString& url)
     : m_emptyPost(true), m_safeUpload(true) {
   m_cp = curl_easy_init();
   m_multi = nullptr;
@@ -225,14 +225,14 @@ Variant CurlResource::execute() {
   return true;
 }
 
-String CurlResource::getContents() {
+OptString CurlResource::getContents() {
   if (m_write.method == PHP_CURL_RETURN) {
     if (!m_write.buf.empty()) {
       m_write.content = m_write.buf.detach();
     }
     return m_write.content;
   }
-  return String();
+  return OptString();
 }
 
 bool CurlResource::setOption(long option, const Variant& value) {
@@ -732,13 +732,13 @@ bool CurlResource::isStringOption(long option) {
   }
 }
 
-bool CurlResource::setStringOption(long option, const String& value) {
+bool CurlResource::setStringOption(long option, const OptString& value) {
   assertx(isStringOption(option));
 
   // the following options deal with files, therefore the open_basedir check
   // is required.
   if (isStringFilePathOption(option) && !value.empty()) {
-    String filename = File::TranslatePath(value);
+    OptString filename = File::TranslatePath(value);
     if (filename.empty()) {
       raise_warning(
         "open_basedir restriction in effect. File(%s) is not within "
@@ -845,7 +845,7 @@ bool CurlResource::isBlobOption(long option) {
   }
 }
 
-bool CurlResource::setBlobOption(long option, const String& value) {
+bool CurlResource::setBlobOption(long option, const OptString& value) {
 #if LIBCURL_VERSION_NUM >= 0x074700 /* Available since 7.71.0 */
   assertx(isBlobOption(option));
   struct curl_blob blob;
@@ -863,7 +863,7 @@ bool CurlResource::setPostFieldsOption(const Variant& value) {
   m_emptyPost = false;
 
   if (!value.isArray() && !value.is(KindOfObject)) {
-    String svalue = value.toString();
+    OptString svalue = value.toString();
 #if LIBCURL_VERSION_NUM >= 0x071100
     /* with curl 7.17.0 and later, we can use COPYPOSTFIELDS,
        but we have to provide size before */
@@ -886,15 +886,15 @@ bool CurlResource::setPostFieldsOption(const Variant& value) {
   curl_httppost *first = nullptr;
   curl_httppost *last  = nullptr;
   for (ArrayIter iter(arr); iter; ++iter) {
-    String key = iter.first().toString();
+    OptString key = iter.first().toString();
     Variant var_val = iter.second();
     if (UNLIKELY(var_val.isObject()
         && var_val.toObject()->instanceof(SystemLib::getCURLFileClass()))) {
       Object val = var_val.toObject();
 
-      String name = val->o_get(s_name).toString();
-      String mime = val->o_get(s_mime).toString();
-      String postname = val->o_get(s_postname).toString();
+      OptString name = val->o_get(s_name).toString();
+      OptString mime = val->o_get(s_mime).toString();
+      OptString postname = val->o_get(s_postname).toString();
 
       m_error_no = (CURLcode)curl_formadd
         (&first, &last,
@@ -909,7 +909,7 @@ bool CurlResource::setPostFieldsOption(const Variant& value) {
          CURLFORM_FILE, name.c_str(),
          CURLFORM_END);
     } else {
-      String val = var_val.toString();
+      OptString val = var_val.toString();
       auto postval = val.data();
 
       if (!Cfg::PHP7::DisallowUnsafeCurlUploads &&
@@ -930,7 +930,7 @@ bool CurlResource::setPostFieldsOption(const Variant& value) {
         );
 
         if (val.get()->hasMultipleRefs()) {
-          val = String::attach(
+          val = OptString::attach(
             StringData::Make(val.data(), val.size(), CopyString));
         }
         auto slice = val.bufferSlice();
@@ -941,7 +941,7 @@ bool CurlResource::setPostFieldsOption(const Variant& value) {
         if (type) { *type = '\0'; }
         if (filename) { *filename = '\0'; }
 
-        String localName = File::TranslatePath(mutablePostval);
+        OptString localName = File::TranslatePath(mutablePostval);
 
         /* The arguments after _NAMELENGTH and _CONTENTSLENGTH
          * must be explicitly cast to long in curl_formadd
@@ -1069,8 +1069,8 @@ bool CurlResource::setStringListOption(long option, const Variant& value) {
   Array arr = value.toArray();
   curl_slist *slist = nullptr;
   for (ArrayIter iter(arr); iter; ++iter) {
-    String key = iter.first().toString();
-    String val = iter.second().toString();
+    OptString key = iter.first().toString();
+    OptString val = iter.second().toString();
 
     slist = curl_slist_append(slist, val.c_str());
     if (!slist) {
@@ -1209,7 +1209,7 @@ size_t CurlResource::curl_read(char *data,
       case PHP_CURL_DIRECT:
         if (t->fp) {
           int data_size = size * nmemb;
-          String ret = t->fp->read(data_size);
+          OptString ret = t->fp->read(data_size);
           length = ret.size();
           if (length) {
             memcpy(data, ret.data(), length);
@@ -1226,7 +1226,7 @@ size_t CurlResource::curl_read(char *data,
           t->callback,
           make_vec_array(OptResource(ch), OptResource(t->fp), data_size));
         if (ret.isString()) {
-          String sret = ret.toString();
+          OptString sret = ret.toString();
           length = data_size < sret.size() ? data_size : sret.size();
           memcpy(data, sret.data(), length);
         }
@@ -1256,7 +1256,7 @@ size_t CurlResource::curl_write(char *data,
         g_context->write(data, length);
         break;
       case PHP_CURL_FILE:
-        return t->fp->write(String(data, length, CopyString), length);
+        return t->fp->write(OptString(data, length, CopyString), length);
       case PHP_CURL_RETURN:
         if (length > 0) {
           t->buf.append(data, (int)length);
@@ -1269,7 +1269,7 @@ size_t CurlResource::curl_write(char *data,
         };
         Variant ret = vm_call_user_func(
           t->callback,
-          make_vec_array(OptResource(ch), String(data, length, CopyString)));
+          make_vec_array(OptResource(ch), OptString(data, length, CopyString)));
         length = ret.toInt64();
         break;
       }
@@ -1302,7 +1302,7 @@ size_t CurlResource::curl_write_header(char *data,
         }
         break;
       case PHP_CURL_FILE:
-        return t->fp->write(String(data, length, CopyString), length);
+        return t->fp->write(OptString(data, length, CopyString), length);
       case PHP_CURL_USER: {
         ch->m_in_callback = true;
         SCOPE_EXIT {
@@ -1310,7 +1310,7 @@ size_t CurlResource::curl_write_header(char *data,
         };
         Variant ret = vm_call_user_func(
           t->callback,
-          make_vec_array(OptResource(ch), String(data, length, CopyString)));
+          make_vec_array(OptResource(ch), OptString(data, length, CopyString)));
         length = ret.toInt64();
         break;
       }
@@ -1330,7 +1330,7 @@ int CurlResource::curl_debug(CURL* /*cp*/, curl_infotype type, char* buf,
                              size_t buf_len, void* ctx) {
   CurlResource *ch = (CurlResource *)ctx;
   if (type == CURLINFO_HEADER_OUT && buf_len > 0) {
-    ch->m_header = String(buf, buf_len, CopyString);
+    ch->m_header = OptString(buf, buf_len, CopyString);
   }
   return 0;
 }
@@ -1394,7 +1394,7 @@ bool CurlResource::useCertCache() const {
   return true;
 }
 
-String CurlResource::cainfo(bool proxy) const {
+OptString CurlResource::cainfo(bool proxy) const {
   auto const option = proxy ? CURLOPT_PROXY_CAINFO : CURLOPT_CAINFO;
 
   static auto const defaultCainfoData = [&] () -> StringData* {
@@ -1403,7 +1403,7 @@ String CurlResource::cainfo(bool proxy) const {
     return makeStaticString(curlInfo->cainfo);
   }();
 
-  auto const defaultCainfo = defaultCainfoData ? String{defaultCainfoData} : String{};
+  auto const defaultCainfo = defaultCainfoData ? OptString{defaultCainfoData} : OptString{};
   if (!m_opts.exists(int64_t(option))) return defaultCainfo;
 
   Variant untyped_value = m_opts[int64_t(option)];

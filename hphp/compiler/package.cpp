@@ -126,7 +126,7 @@ void Package::addDirectory(const std::string& path) {
 void Package::addSourceFile(const std::string& fileName) {
   if (fileName.empty()) return;
   auto canonFileName =
-    FileUtil::canonicalize(String(fileName)).toCppString();
+    FileUtil::canonicalize(OptString(fileName)).toCppString();
   m_filesToParse.emplace(std::move(canonFileName), true);
 }
 
@@ -526,7 +526,7 @@ coro::Task<Package::GroupResult> Package::groupDirectories(
 
         if (!name.empty()) {
           auto canonFileName =
-            FileUtil::canonicalize(String(name)).toCppString();
+            FileUtil::canonicalize(OptString(name)).toCppString();
           if (m_seenFiles.emplace(std::move(canonFileName), true).second) {
             result.m_ungrouped.emplace_back(FileAndSize{name, size});
           }
@@ -1019,7 +1019,7 @@ void Package::resolveOnDemand(OndemandInfo& out,
       out.m_edges.emplace_back(SymbolRefEdge{sym, fromFile, toFile});
     }
 
-    auto canon = FileUtil::canonicalize(String(rpath)).toCppString();
+    auto canon = FileUtil::canonicalize(OptString(rpath)).toCppString();
     assertx(!canon.empty());
 
     // Only emit a file once. This ensures we eventually run out

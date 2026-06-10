@@ -19,7 +19,7 @@ NEVER_INLINE
 void HashCollection::throwTooLarge() {
   assertx(getClassName().size() == 6);
   auto clsName = getClassName().get()->slice();
-  String msg(130, ReserveString);
+  OptString msg(130, ReserveString);
   auto buf = msg.bufferSlice();
   auto sz = snprintf(buf.data(), buf.size() + 1,
     "%s object has reached its maximum capacity of %u element "
@@ -35,7 +35,7 @@ NEVER_INLINE
 void HashCollection::throwReserveTooLarge() {
   assertx(getClassName().size() == 6);
   auto clsName = getClassName().get()->slice();
-  String msg(80, ReserveString);
+  OptString msg(80, ReserveString);
   auto buf = msg.bufferSlice();
   auto sz = snprintf(buf.data(), buf.size() + 1,
     "%s does not support reserving room for more than %u elements",

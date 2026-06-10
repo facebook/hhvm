@@ -50,7 +50,7 @@ FILE_RCSID("@(#)$File: funcs.c,v 1.61 2012/10/30 23:11:51 christos Exp $")
 # define PREG_OFFSET_CAPTURE                 (1<<8)
 #endif
 
-extern public void convert_libmagic_pattern(HPHP::String& pattern, int options);
+extern public void convert_libmagic_pattern(HPHP::OptString& pattern, int options);
 
 /*
  * Like printf, only we append to a buffer.
@@ -440,7 +440,7 @@ file_printedlen(const struct magic_set *ms)
 protected int
 file_replace(struct magic_set *ms, const char *pat, const char *rep)
 {
-  HPHP::String patt(pat);
+  HPHP::OptString patt(pat);
   int opts = 0;
   int res_len;
   int64_t rep_cnt;

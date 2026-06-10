@@ -53,10 +53,10 @@ const char* StringBuffer::data() const {
   return nullptr;
 }
 
-String StringBuffer::detach() {
+OptString StringBuffer::detach() {
   if (m_str && m_len) {
     assertx(m_str->hasExactlyOneRef());
-    auto str = String::attach(m_str);
+    auto str = OptString::attach(m_str);
     str.setSize(m_len);
     m_str = nullptr;
     m_len = 0;
@@ -66,8 +66,8 @@ String StringBuffer::detach() {
   return empty_string();
 }
 
-String StringBuffer::copy() const {
-  return String(data(), size(), CopyString);
+OptString StringBuffer::copy() const {
+  return OptString(data(), size(), CopyString);
 }
 
 void StringBuffer::absorb(StringBuffer& buf) {
@@ -135,7 +135,7 @@ char* StringBuffer::appendCursor(int size) {
 void StringBuffer::append(int n) {
   char buf[12];
   int len;
-  auto const sd = String::GetIntegerStringData(n);
+  auto const sd = OptString::GetIntegerStringData(n);
   char *p;
   if (!sd) {
     auto sl = conv_10(n, buf + 12);
@@ -151,7 +151,7 @@ void StringBuffer::append(int n) {
 void StringBuffer::append(int64_t n) {
   char buf[21];
   int len;
-  auto const sd = String::GetIntegerStringData(n);
+  auto const sd = OptString::GetIntegerStringData(n);
   char *p;
   if (!sd) {
     auto sl = conv_10(n, buf + 21);

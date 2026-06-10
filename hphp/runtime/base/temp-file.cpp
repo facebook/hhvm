@@ -26,8 +26,8 @@ namespace HPHP {
 // constructor and destructor
 
 TempFile::TempFile(bool autoDelete /* = true */,
-                   const String& wrapper_type,
-                   const String& stream_type)
+                   const OptString& wrapper_type,
+                   const OptString& stream_type)
   : PlainFile(nullptr, false, wrapper_type, stream_type),
     m_autoDelete(autoDelete) {
   char path[PATH_MAX];
@@ -56,7 +56,7 @@ void TempFile::sweep() {
   PlainFile::sweep();
 }
 
-bool TempFile::open(const String& /*filename*/, const String& /*mode*/) {
+bool TempFile::open(const OptString& /*filename*/, const OptString& /*mode*/) {
   raise_fatal_error((std::string("cannot open a temp file ") +
                              getName()).c_str());
 }

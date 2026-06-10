@@ -77,7 +77,7 @@ const StaticString
   s_timeout("timeout");
 
 xmlDocPtr soap_xmlParseFile(const char *filename) {
-  String cache_key("HPHP.SOAP.WSDL.");
+  OptString cache_key("HPHP.SOAP.WSDL.");
   cache_key += filename;
 
   bool success = false;
@@ -95,7 +95,7 @@ xmlDocPtr soap_xmlParseFile(const char *filename) {
   }
 
   if (!same(content, false)) {
-    String scontent = content.toString();
+    OptString scontent = content.toString();
     xmlDocPtr ret = soap_xmlParseMemory(scontent.data(), scontent.size(),
                                         false);
     if (ret) {

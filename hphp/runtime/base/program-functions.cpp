@@ -315,7 +315,7 @@ static void process_cmd_arguments(int argc, char **argv) {
   php_global_set(s_argc, Variant(argc));
   VecInit argvArray(argc);
   for (int i = 0; i < argc; i++) {
-    argvArray.append(String(argv[i]));
+    argvArray.append(OptString(argv[i]));
   }
   php_global_set(s_argv, argvArray.toArray());
 }
@@ -326,17 +326,17 @@ static void process_env_variables(
   const std::map<std::string, std::string>& envVariables
 ) {
   for (auto const& kv : envVariables) {
-    String idx(kv.first);
+    OptString idx(kv.first);
     auto const arrkey = variables.convertKey<IntishCast::Cast>(idx);
-    String str(kv.second);
+    OptString str(kv.second);
     variables.set(arrkey, make_tv<KindOfString>(str.get()));
   }
   for (char **env = envp; env && *env; env++) {
     char *p = strchr(*env, '=');
     if (p) {
-      String name(*env, p - *env, CopyString);
+      OptString name(*env, p - *env, CopyString);
       register_variable(variables, (char*)name.data(),
-                        String(p + 1, CopyString));
+                        OptString(p + 1, CopyString));
     }
   }
 }
@@ -422,7 +422,7 @@ void register_variable(Array& variables, char *name, const Variant& value,
         auto const key = symtable->get()->getKey(symtable->get()->iter_last());
         symtable = &asArrRef(symtable->lval(key));
       } else {
-        String key_str(index, index_len, CopyString);
+        OptString key_str(index, index_len, CopyString);
         auto const key =
           symtable->convertKey<IntishCast::Cast>(key_str.asTypedValue());
         auto const v = symtable->lookup(key);
@@ -448,7 +448,7 @@ void register_variable(Array& variables, char *name, const Variant& value,
     if (!index) {
       symtable->append(value);
     } else {
-      String key_str(index, index_len, CopyString);
+      OptString key_str(index, index_len, CopyString);
       auto key =
         symtable->convertKey<IntishCast::Cast>(key_str.asTypedValue());
       if (overwrite || !symtable->exists(key)) {
@@ -641,13 +641,13 @@ static void handle_exception_helper(bool& ret,
 
 static bool hphp_chdir_file(const std::string& filename) {
   bool ret = false;
-  String s = File::TranslatePath(filename);
+  OptString s = File::TranslatePath(filename);
   char *buf = strndup(s.data(), s.size());
   char *dir = dirname(buf);
   assertx(dir);
   if (dir) {
     if (File::IsVirtualDirectory(dir)) {
-      g_context->setCwd(String(dir, CopyString));
+      g_context->setCwd(OptString(dir, CopyString));
       ret = true;
     } else {
       struct stat sb;
@@ -655,7 +655,7 @@ static bool hphp_chdir_file(const std::string& filename) {
       if ((sb.st_mode & S_IFMT) == S_IFDIR) {
         ret = true;
         if (*dir != '.') {
-          g_context->setCwd(String(dir, CopyString));
+          g_context->setCwd(OptString(dir, CopyString));
         }
       }
     }
@@ -778,9 +778,9 @@ init_command_line_globals(
   {
     auto serverArr = Array::CreateDict();
     process_env_variables(serverArr, envp, envVariables);
-    String file = empty_string();
+    OptString file = empty_string();
     if (argc > 0) {
-      file = String::attach(StringData::Make(argv[0], CopyString));
+      file = OptString::attach(StringData::Make(argv[0], CopyString));
     }
     init_server_request_time(serverArr);
     serverArr.set(s_DOCUMENT_ROOT, empty_string_tv());
@@ -795,11 +795,11 @@ init_command_line_globals(
         !gethostname(hostname, sizeof(hostname))) {
       // gethostname may not null-terminate
       hostname[sizeof(hostname) - 1] = '\0';
-      serverArr.set(s_HOSTNAME, String(hostname, CopyString));
+      serverArr.set(s_HOSTNAME, OptString(hostname, CopyString));
     }
 
     for (auto const& kv : serverVariables) {
-      serverArr.set(String{kv.first}, String{kv.second});
+      serverArr.set(OptString{kv.first}, OptString{kv.second});
     }
 
     php_global_set(s__SERVER, std::move(serverArr));
@@ -2420,7 +2420,7 @@ static int execute_program_impl(int argc, char** argv) {
         execute_command_line_begin(new_argc, new_argv);
         ret = 1;
         if (po.mode == ExecutionMode::EVAL) {
-          String code{"<?hh " + file};
+          OptString code{"<?hh " + file};
           auto const r = g_context->evalPHPDebugger(code.get(), 0);
           if (!r.failed) ret = 0;
         } else if (hphp_invoke_simple(file, false /* warmup only */)) {
@@ -2490,8 +2490,8 @@ static int execute_program_impl(int argc, char** argv) {
   return HPHP_EXIT_FAILURE;
 }
 
-String canonicalize_path(const String& p, const char* root, int rootLen) {
-  String path = FileUtil::canonicalize(p);
+OptString canonicalize_path(const OptString& p, const char* root, int rootLen) {
+  OptString path = FileUtil::canonicalize(p);
   if (path.charAt(0) == '/') {
     auto const& sourceRoot = Cfg::Server::SourceRoot;
     int len = sourceRoot.size();
@@ -2946,7 +2946,7 @@ void invoke_prelude_script(
   const std::string& document,
   const std::string& prelude
 ) {
-  const auto run_file = [currentDir] (const String& f) {
+  const auto run_file = [currentDir] (const OptString& f) {
     auto const w = Stream::getWrapperFromURI(f, nullptr, false);
     if (w->access(f, R_OK) == 0) {
       include_impl_invoke(f, true, currentDir, true);
@@ -2958,7 +2958,7 @@ void invoke_prelude_script(
   if (UNLIKELY(!prelude.starts_with(s_phpRootVar))) {
     if(!FileUtil::runRelative(
       prelude,
-      String(document, CopyString),
+      OptString(document, CopyString),
       currentDir,
       run_file
     )) {
@@ -2969,7 +2969,7 @@ void invoke_prelude_script(
 
   const auto repo_path = RepoOptions::forFile(document.c_str()).dir();
   const auto path = repo_path / prelude.substr(s_phpRootVar.length());
-  if (!run_file(String(path.native()))) {
+  if (!run_file(OptString(path.native()))) {
     Logger::Error(
       "Failed to read prelude file at %s. "
       "Ensure that %s is relative to the folder containing .hhvmconfig.hdf",
@@ -3093,7 +3093,7 @@ bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
     context->setCwd(Cfg::Server::SourceRoot);
   }
 
-  String oldCwd;
+  OptString oldCwd;
   if (isServer) {
     oldCwd = context->getCwd();
   }

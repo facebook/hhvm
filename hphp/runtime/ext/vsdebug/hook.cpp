@@ -105,7 +105,7 @@ void VSDebugHook::onExceptionThrown(ObjectData* exception) {
   const StringData* name = exception->getVMClass()->name();
   const Variant msg = exception->o_invoke_few_args(
     s_getMsg, RuntimeCoeffects::fixme(), 0);
-  const HPHP::String msg_str = msg.isNull() ? empty_string() : msg.toString();
+  const HPHP::OptString msg_str = msg.isNull() ? empty_string() : msg.toString();
 
   if (breakContext.m_debugger != nullptr &&
       breakContext.m_requestInfo != nullptr) {
@@ -265,7 +265,7 @@ void VSDebugHook::onDefClass(const Class* cls) {
   }
 }
 
-void VSDebugHook::onRegisterFuncIntercept(const String& name) {
+void VSDebugHook::onRegisterFuncIntercept(const OptString& name) {
   BreakContext breakContext(true);
 
   // This callback is invoked when a function is intercepted in HHVM.

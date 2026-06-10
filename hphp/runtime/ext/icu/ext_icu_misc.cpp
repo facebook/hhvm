@@ -14,12 +14,12 @@ static int64_t HHVM_FUNCTION(intl_get_error_code) {
   return s_intl_error->getErrorCode();
 }
 
-static String HHVM_FUNCTION(intl_get_error_message) {
+static OptString HHVM_FUNCTION(intl_get_error_message) {
   return s_intl_error->getErrorMessage();
 }
 
-static String HHVM_FUNCTION(intl_error_name, int64_t errorCode) {
-  return String(u_errorName((UErrorCode)errorCode), CopyString);
+static OptString HHVM_FUNCTION(intl_error_name, int64_t errorCode) {
+  return OptString(u_errorName((UErrorCode)errorCode), CopyString);
 }
 
 static bool HHVM_FUNCTION(intl_is_failure, int64_t errorCode) {
@@ -36,7 +36,7 @@ enum IdnVariant {
   INTL_IDNA_VARIANT_UTS46
 };
 
-static Variant doIdnTranslate2003(const String& domain, int64_t options,
+static Variant doIdnTranslate2003(const OptString& domain, int64_t options,
                                   bool toUtf8) {
   UErrorCode error = U_ZERO_ERROR;
   icu::UnicodeString uDomain(u16(domain, error));
@@ -76,7 +76,7 @@ static Variant doIdnTranslate2003(const String& domain, int64_t options,
   }
 
   error = U_ZERO_ERROR;
-  String out(u8(ret, error));
+  OptString out(u8(ret, error));
   if (U_FAILURE(error)) {
     s_intl_error->setError(error, "Error converting result from Unicode");
     return false;
@@ -91,14 +91,14 @@ const StaticString
   s_errors("errors");
 #endif
 
-static Variant doIdnTranslateUTS46(const String& domain, int64_t options,
+static Variant doIdnTranslateUTS46(const OptString& domain, int64_t options,
                                    bool toUtf8) {
 #ifdef UIDNA_INFO_INITIALIZER
   UErrorCode error = U_ZERO_ERROR;
   UIDNAInfo   info = UIDNA_INFO_INITIALIZER;
   auto idna = uidna_openUTS46(options, &error);
   SCOPE_EXIT{ uidna_close(idna); };
-  String result(255, ReserveString); // 255 == max length possible
+  OptString result(255, ReserveString); // 255 == max length possible
   int32_t len;
   auto capacity = result.capacity();
   if (toUtf8) {
@@ -131,7 +131,7 @@ static Variant doIdnTranslateUTS46(const String& domain, int64_t options,
 #endif
 }
 
-inline Variant doIdnTranslate(const String& domain, int64_t options,
+inline Variant doIdnTranslate(const OptString& domain, int64_t options,
                               int variant, bool toUtf8) {
   switch (variant) {
     case INTL_IDNA_VARIANT_2003:
@@ -142,13 +142,13 @@ inline Variant doIdnTranslate(const String& domain, int64_t options,
   return false;
 }
 
-static Variant HHVM_FUNCTION(idn_to_ascii, const String& domain,
+static Variant HHVM_FUNCTION(idn_to_ascii, const OptString& domain,
                                            int64_t options /*= 0 */,
                                            int64_t variant /*= *_2003 */) {
   return doIdnTranslate(domain, options, (int)variant, false);
 }
 
-static Variant HHVM_FUNCTION(idn_to_utf8, const String& domain,
+static Variant HHVM_FUNCTION(idn_to_utf8, const OptString& domain,
                                           int64_t options /*= 0 */,
                                           int64_t variant /*= *_2003 */) {
   return doIdnTranslate(domain, options, (int)variant, true);

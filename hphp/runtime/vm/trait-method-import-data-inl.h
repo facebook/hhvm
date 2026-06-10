@@ -24,7 +24,7 @@ namespace HPHP {
 template <class TraitMethod, class Ops>
 inline void
 TraitMethodImportData<TraitMethod, Ops>
-::add(const TraitMethod& tm, const String& name) {
+::add(const TraitMethod& tm, const OptString& name) {
   if (Ops::exclude(name)) return;
   auto const found = m_dataForName.count(name);
   m_dataForName[name].methods.push_back(tm);
@@ -108,7 +108,7 @@ TraitMethodImportData<TraitMethod, Ops>
   removeSpareTraitAbstractMethods();
   removeDiamondDuplicates(enableMethodTraitDiamond);
 
-  hphp_fast_set<String> seenNames;
+  hphp_fast_set<OptString> seenNames;
   std::vector<MethodData> output;
 
   seenNames.reserve(m_orderedNames.size());

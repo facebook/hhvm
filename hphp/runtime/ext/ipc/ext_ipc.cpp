@@ -59,8 +59,8 @@ static struct SysvshmExtension final : Extension {
 ///////////////////////////////////////////////////////////////////////////////
 
 int64_t HHVM_FUNCTION(ftok,
-                      const String& pathname,
-                      const String& proj) {
+                      const OptString& pathname,
+                      const OptString& proj) {
   if (pathname.empty()) {
     raise_warning("Pathname is empty");
     return -1;
@@ -83,7 +83,7 @@ struct MessageQueue : ResourceData {
   int id;
 
   CLASSNAME_IS("MessageQueue")
-  const String& o_getClassNameHook() const override {
+  const OptString& o_getClassNameHook() const override {
     return classnameof();
   }
 };
@@ -202,7 +202,7 @@ bool HHVM_FUNCTION(msg_send,
   }
 
   hhvm_msgbuf *buffer = nullptr;
-  String data;
+  OptString data;
   if (serialize) {
     data = HHVM_FN(serialize)(message);
   } else {
@@ -298,7 +298,7 @@ bool HHVM_FUNCTION(msg_receive,
       return false;
     }
   } else {
-    message = String((const char *)buffer->mtext);
+    message = OptString((const char *)buffer->mtext);
   }
 
   return true;
@@ -342,7 +342,7 @@ struct Semaphore : SweepableResourceData {
 
   CLASSNAME_IS("Semaphore")
   // overriding ResourceData
-  const String& o_getClassNameHook() const override { return classnameof(); }
+  const OptString& o_getClassNameHook() const override { return classnameof(); }
 
   bool op(bool acquire, bool nowait = false) {
     struct sembuf sop;
@@ -787,7 +787,7 @@ bool HHVM_FUNCTION(shm_put_var,
                    int64_t variable_key,
                    const Variant& variable) {
   /* setup string-variable and serialize */
-  String serialized = HHVM_FN(serialize)(variable);
+  OptString serialized = HHVM_FN(serialize)(variable);
 
   Lock lock(g_shm_mutex);
   auto iter = g_shms.find((sysvshm_shm*)shm_identifier);

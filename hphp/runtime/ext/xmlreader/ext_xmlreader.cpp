@@ -36,12 +36,12 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // helpers
 
-static xmlRelaxNGPtr _xmlreader_get_relaxNG(String source, int type,
+static xmlRelaxNGPtr _xmlreader_get_relaxNG(OptString source, int type,
     xmlRelaxNGValidityErrorFunc error_func,
     xmlRelaxNGValidityWarningFunc warn_func) {
   xmlRelaxNGParserCtxtPtr parser = nullptr;
   xmlRelaxNGPtr           sptr;
-  String valid_file;
+  OptString valid_file;
 
   switch (type) {
     case XMLREADER_LOAD_FILE:
@@ -107,11 +107,11 @@ void XMLReader::close() {
 }
 
 Variant HHVM_METHOD(XMLReader, open,
-                 const String& uri,
+                 const OptString& uri,
                  const Variant& encoding /*= uninit_variant*/,
                  int64_t options /*= 0*/) {
   auto* data = Native::data<XMLReader>(this_);
-  const String& str_encoding = encoding.isNull()
+  const OptString& str_encoding = encoding.isNull()
                             ? null_string
                             : encoding.toString();
   SYNC_VM_REGS_SCOPED();
@@ -126,7 +126,7 @@ Variant HHVM_METHOD(XMLReader, open,
     return init_null();
   }
 
-  String valid_file = libxml_get_valid_file_path(uri.c_str());
+  OptString valid_file = libxml_get_valid_file_path(uri.c_str());
   xmlTextReaderPtr reader = nullptr;
 
   if (!valid_file.empty()) {
@@ -157,11 +157,11 @@ Variant HHVM_METHOD(XMLReader, open,
 }
 
 bool HHVM_METHOD(XMLReader, XML,
-                 const String& source,
+                 const OptString& source,
                  const Variant& encoding /*= uninit_variant*/,
                  int64_t options /*= 0*/) {
   auto* data = Native::data<XMLReader>(this_);
-  const String& str_encoding = encoding.isNull()
+  const OptString& str_encoding = encoding.isNull()
                             ? null_string
                             : encoding.toString();
   xmlParserInputBufferPtr inputbfr = xmlParserInputBufferCreateMem(
@@ -169,7 +169,7 @@ bool HHVM_METHOD(XMLReader, XML,
 
   if (inputbfr != nullptr) {
     char *uri = nullptr;
-    String directory = g_context->getCwd();
+    OptString directory = g_context->getCwd();
     if (!directory.empty()) {
       if (directory[directory.size() - 1] != '/') {
         directory += "/";
@@ -235,7 +235,7 @@ bool HHVM_METHOD(XMLReader, read) {
 bool HHVM_METHOD(XMLReader, next,
                  const Variant& localname /*= uninit_variant*/) {
   auto* data = Native::data<XMLReader>(this_);
-  const String& str_localname = localname.isNull()
+  const OptString& str_localname = localname.isNull()
                               ? null_string
                               : localname.toString();
   SYNC_VM_REGS_SCOPED();
@@ -259,14 +259,14 @@ bool HHVM_METHOD(XMLReader, next,
   return false;
 }
 
-String XMLReader::read_string_func(xmlreader_read_char_t internal_function) {
+OptString XMLReader::read_string_func(xmlreader_read_char_t internal_function) {
   SYNC_VM_REGS_SCOPED();
   char *retchar = nullptr;
   if (m_ptr) {
     retchar = (char *)internal_function(m_ptr);
   }
   if (retchar) {
-    String ret((const char*)retchar, CopyString);
+    OptString ret((const char*)retchar, CopyString);
     xmlFree(retchar);
     return ret;
   } else {
@@ -274,17 +274,17 @@ String XMLReader::read_string_func(xmlreader_read_char_t internal_function) {
   }
 }
 
-String HHVM_METHOD(XMLReader, readString) {
+OptString HHVM_METHOD(XMLReader, readString) {
   auto* data = Native::data<XMLReader>(this_);
   return data->read_string_func(xmlTextReaderReadString);
 }
 
-String HHVM_METHOD(XMLReader, readInnerXML) {
+OptString HHVM_METHOD(XMLReader, readInnerXML) {
   auto* data = Native::data<XMLReader>(this_);
   return data->read_string_func(xmlTextReaderReadInnerXml);
 }
 
-String HHVM_METHOD(XMLReader, readOuterXML) {
+OptString HHVM_METHOD(XMLReader, readOuterXML) {
   auto* data = Native::data<XMLReader>(this_);
   return data->read_string_func(xmlTextReaderReadOuterXml);
 }
@@ -300,7 +300,7 @@ bool XMLReader::bool_func_no_arg(xmlreader_read_int_t internal_function) {
   return false;
 }
 
-Variant XMLReader::string_func_string_arg(String value,
+Variant XMLReader::string_func_string_arg(OptString value,
     xmlreader_read_one_char_t internal_function) {
   SYNC_VM_REGS_SCOPED();
 
@@ -315,7 +315,7 @@ Variant XMLReader::string_func_string_arg(String value,
   }
 
   if (retchar) {
-    String ret((const char*)retchar, CopyString);
+    OptString ret((const char*)retchar, CopyString);
     xmlFree(retchar);
     return ret;
   } else {
@@ -324,7 +324,7 @@ Variant XMLReader::string_func_string_arg(String value,
 }
 
 Variant HHVM_METHOD(XMLReader, getAttribute,
-                    const String& name) {
+                    const OptString& name) {
   auto* data = Native::data<XMLReader>(this_);
   return data->string_func_string_arg(name, xmlTextReaderGetAttribute);
 }
@@ -338,7 +338,7 @@ Variant HHVM_METHOD(XMLReader, getAttributeNo,
     retchar = (char *)xmlTextReaderGetAttributeNo(data->m_ptr, index);
   }
   if (retchar) {
-    String ret((const char*)retchar, CopyString);
+    OptString ret((const char*)retchar, CopyString);
     xmlFree(retchar);
     return ret;
   } else {
@@ -347,8 +347,8 @@ Variant HHVM_METHOD(XMLReader, getAttributeNo,
 }
 
 Variant HHVM_METHOD(XMLReader, getAttributeNs,
-                    const String& name,
-                    const String& namespaceURI) {
+                    const OptString& name,
+                    const OptString& namespaceURI) {
   auto* data = Native::data<XMLReader>(this_);
   SYNC_VM_REGS_SCOPED();
   if (name.empty() || namespaceURI.empty()) {
@@ -364,7 +364,7 @@ Variant HHVM_METHOD(XMLReader, getAttributeNs,
   }
 
   if (retchar) {
-    String ret((const char*)retchar, CopyString);
+    OptString ret((const char*)retchar, CopyString);
     xmlFree(retchar);
     return ret;
   } else {
@@ -373,7 +373,7 @@ Variant HHVM_METHOD(XMLReader, getAttributeNs,
 }
 
 bool HHVM_METHOD(XMLReader, moveToAttribute,
-                 const String& name) {
+                 const OptString& name) {
   auto* data = Native::data<XMLReader>(this_);
   SYNC_VM_REGS_SCOPED();
   if (name.empty()) {
@@ -404,8 +404,8 @@ bool HHVM_METHOD(XMLReader, moveToAttributeNo,
 }
 
 bool HHVM_METHOD(XMLReader, moveToAttributeNs,
-                 const String& name,
-                 const String& namespaceURI) {
+                 const OptString& name,
+                 const OptString& namespaceURI) {
   auto* data = Native::data<XMLReader>(this_);
   SYNC_VM_REGS_SCOPED();
   if (name.empty() || namespaceURI.empty()) {
@@ -458,13 +458,13 @@ bool HHVM_METHOD(XMLReader, getParserProperty,
 }
 
 Variant HHVM_METHOD(XMLReader, lookupNamespace,
-                    const String& prefix) {
+                    const OptString& prefix) {
   auto* data = Native::data<XMLReader>(this_);
   return data->string_func_string_arg(prefix, xmlTextReaderLookupNamespace);
 }
 
 bool HHVM_METHOD(XMLReader, setSchema,
-                 const String& source) {
+                 const OptString& source) {
   auto* data = Native::data<XMLReader>(this_);
   SYNC_VM_REGS_SCOPED();
   if (source.empty()) {
@@ -497,7 +497,7 @@ bool HHVM_METHOD(XMLReader, setParserProperty,
   return false;
 }
 
-bool XMLReader::set_relaxng_schema(String source, int type) {
+bool XMLReader::set_relaxng_schema(OptString source, int type) {
   SYNC_VM_REGS_SCOPED();
   if (source.empty()) {
     raise_warning("Schema data source is required");
@@ -530,7 +530,7 @@ bool XMLReader::set_relaxng_schema(String source, int type) {
 }
 
 Variant HHVM_METHOD(XMLReader, setRelaxNGSchema,
-                 const String& filename) {
+                 const OptString& filename) {
   if (!FileUtil::checkPathAndWarn(filename, "XMLReader::setRelaxNGSchema", 1)) {
     return init_null();
   }
@@ -540,7 +540,7 @@ Variant HHVM_METHOD(XMLReader, setRelaxNGSchema,
 }
 
 bool HHVM_METHOD(XMLReader, setRelaxNGSchemaSource,
-                 const String& source) {
+                 const OptString& source) {
   auto* data = Native::data<XMLReader>(this_);
   return data->set_relaxng_schema(source, XMLREADER_LOAD_STRING);
 }
@@ -559,7 +559,7 @@ static Variant process_result(const Object& this_) {
   if (!data->m_ptr || !(ret = get(data->m_ptr))) {
     return empty_string_variant();
   }
-  return String((char*)ret, CopyString);
+  return OptString((char*)ret, CopyString);
 }
 
 static Native::PropAccessor xmlreader_properties[] = {

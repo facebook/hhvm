@@ -54,7 +54,7 @@ struct XMLWriterData {
     return (m_ptr = xmlNewTextWriterMemory(m_output, 0));
   }
 
-  bool openURI(const String& uri) {
+  bool openURI(const OptString& uri) {
     m_uri = File::Open(uri, "wb");
     if (!m_uri) {
       return false;
@@ -70,7 +70,7 @@ struct XMLWriterData {
     return true;
   }
 
-  bool setIndentString(const String& indentString) {
+  bool setIndentString(const OptString& indentString) {
     int ret = -1;
     if (m_ptr) {
       ret = xmlTextWriterSetIndentString(m_ptr,
@@ -107,7 +107,7 @@ struct XMLWriterData {
     return ret != -1;
   }
 
-  bool startElement(const String& name) {
+  bool startElement(const OptString& name) {
     if (xmlValidateName((xmlChar*)name.data(), 0)) {
       raise_warning("invalid element name: %s", name.data());
       return false;
@@ -120,7 +120,7 @@ struct XMLWriterData {
   }
 
   bool startElementNS(const Variant& prefix,
-                                     const String& name,
+                                     const OptString& name,
                                      const Variant& uri) {
     if (xmlValidateName((xmlChar*)name.data(), 0)) {
       raise_warning("invalid element name: %s", name.data());
@@ -144,7 +144,7 @@ struct XMLWriterData {
   }
 
   bool writeElementNS(const Variant& prefix,
-                                     const String& name,
+                                     const OptString& name,
                                      const Variant& uri,
                                      const Variant& content) {
     if (xmlValidateName((xmlChar*)name.data(), 0)) {
@@ -174,7 +174,7 @@ struct XMLWriterData {
     return ret != -1;
   }
 
-  bool writeElement(const String& name, const Variant& content) {
+  bool writeElement(const OptString& name, const Variant& content) {
     if (xmlValidateName((xmlChar*)name.data(), 0)) {
       raise_warning("invalid element name: %s", name.data());
       return false;
@@ -210,9 +210,9 @@ struct XMLWriterData {
     return ret != -1;
   }
 
-  bool startAttributeNS(const String& prefix,
-                                       const String& name,
-                                       const String& uri) {
+  bool startAttributeNS(const OptString& prefix,
+                                       const OptString& name,
+                                       const OptString& uri) {
     if (xmlValidateName((xmlChar*)name.data(), 0)) {
       raise_warning("invalid attribute name: %s", name.data());
       return false;
@@ -226,7 +226,7 @@ struct XMLWriterData {
     return ret != -1;
   }
 
-  bool startAttribute(const String& name) {
+  bool startAttribute(const OptString& name) {
     if (xmlValidateName((xmlChar*)name.data(), 0)) {
       raise_warning("invalid attribute name: %s", name.data());
       return false;
@@ -238,10 +238,10 @@ struct XMLWriterData {
     return ret != -1;
   }
 
-  bool writeAttributeNS(const String& prefix,
-                                    const String& name,
-                                    const String& uri,
-                                    const String& content) {
+  bool writeAttributeNS(const OptString& prefix,
+                                    const OptString& name,
+                                    const OptString& uri,
+                                    const OptString& content) {
     if (xmlValidateName((xmlChar*)name.data(), 0)) {
       raise_warning("invalid attribute name: %s", name.data());
       return false;
@@ -256,7 +256,7 @@ struct XMLWriterData {
     return ret != -1;
   }
 
-  bool writeAttribute(const String& name, const String& value) {
+  bool writeAttribute(const OptString& name, const OptString& value) {
     if (xmlValidateName((xmlChar*)name.data(), 0)) {
       raise_warning("invalid attribute name: %s", name.data());
       return false;
@@ -285,7 +285,7 @@ struct XMLWriterData {
     return ret != -1;
   }
 
-  bool writeCData(const String& content) {
+  bool writeCData(const OptString& content) {
     int ret = -1;
     if (m_ptr) {
       ret = xmlTextWriterWriteCDATA(m_ptr, (xmlChar*)content.data());
@@ -309,7 +309,7 @@ struct XMLWriterData {
     return ret != -1;
   }
 
-  bool writeComment(const String& content) {
+  bool writeComment(const OptString& content) {
     int ret = -1;
     if (m_ptr) {
       ret = xmlTextWriterWriteComment(m_ptr, (xmlChar*)content.data());
@@ -333,7 +333,7 @@ struct XMLWriterData {
     return ret != -1;
   }
 
-  bool startPI(const String& target) {
+  bool startPI(const OptString& target) {
     if (xmlValidateName((xmlChar*)target.data(), 0)) {
       raise_warning("invalid PI target: %s", target.data());
       return false;
@@ -345,7 +345,7 @@ struct XMLWriterData {
     return ret != -1;
   }
 
-  bool writePI(const String& target, const String& content) {
+  bool writePI(const OptString& target, const OptString& content) {
     if (xmlValidateName((xmlChar*)target.data(), 0)) {
       raise_warning("invalid PI target: %s", target.data());
       return false;
@@ -366,7 +366,7 @@ struct XMLWriterData {
     return ret != -1;
   }
 
-  bool text(const String& content) {
+  bool text(const OptString& content) {
     int ret = -1;
     if (m_ptr) {
       ret = xmlTextWriterWriteString(m_ptr, (xmlChar*)content.data());
@@ -374,7 +374,7 @@ struct XMLWriterData {
     return ret != -1;
   }
 
-  bool writeRaw(const String& content) {
+  bool writeRaw(const OptString& content) {
     int ret = -1;
     if (m_ptr) {
       ret = xmlTextWriterWriteRaw(m_ptr, (xmlChar*)content.data());
@@ -382,7 +382,7 @@ struct XMLWriterData {
     return ret != -1;
   }
 
-  bool startDTD(const String& qualifiedname,
+  bool startDTD(const OptString& qualifiedname,
                                const Variant& publicid,
                                const Variant& systemid) {
     int ret = -1;
@@ -393,7 +393,7 @@ struct XMLWriterData {
     return ret != -1;
   }
 
-  bool writeDTD(const String& name,
+  bool writeDTD(const OptString& name,
                                const Variant& publicid,
                                const Variant& systemid,
                                const Variant& subset) {
@@ -405,7 +405,7 @@ struct XMLWriterData {
     return ret != -1;
   }
 
-  bool startDTDElement(const String& qualifiedname) {
+  bool startDTDElement(const OptString& qualifiedname) {
     if (xmlValidateName((xmlChar*)qualifiedname.data(), 0)) {
       raise_warning("invalid element name: %s", qualifiedname.data());
       return false;
@@ -418,7 +418,7 @@ struct XMLWriterData {
     return ret != -1;
   }
 
-  bool writeDTDElement(const String& name, const String& content) {
+  bool writeDTDElement(const OptString& name, const OptString& content) {
     if (xmlValidateName((xmlChar*)name.data(), 0)) {
       raise_warning("invalid element name: %s", name.data());
       return false;
@@ -439,7 +439,7 @@ struct XMLWriterData {
     return ret != -1;
   }
 
-  bool startDTDAttlist(const String& name) {
+  bool startDTDAttlist(const OptString& name) {
     if (xmlValidateName((xmlChar*)name.data(), 0)) {
       raise_warning("invalid element name: %s", name.data());
       return false;
@@ -451,7 +451,7 @@ struct XMLWriterData {
     return ret != -1;
   }
 
-  bool writeDTDAttlist(const String& name, const String& content) {
+  bool writeDTDAttlist(const OptString& name, const OptString& content) {
     if (xmlValidateName((xmlChar*)name.data(), 0)) {
       raise_warning("invalid element name: %s", name.data());
       return false;
@@ -472,7 +472,7 @@ struct XMLWriterData {
     return ret != -1;
   }
 
-  bool startDTDEntity(const String& name, bool isparam) {
+  bool startDTDEntity(const OptString& name, bool isparam) {
     if (xmlValidateName((xmlChar*)name.data(), 0)) {
       raise_warning("invalid attribute name: %s", name.data());
       return false;
@@ -485,12 +485,12 @@ struct XMLWriterData {
     return ret != -1;
   }
 
-  bool writeDTDEntity(const String& name,
-                                     const String& content,
+  bool writeDTDEntity(const OptString& name,
+                                     const OptString& content,
                                      bool pe,
-                                     const String& publicid,
-                                     const String& systemid,
-                                     const String& ndataid) {
+                                     const OptString& publicid,
+                                     const OptString& systemid,
+                                     const OptString& ndataid) {
     if (xmlValidateName((xmlChar*)name.data(), 0)) {
       raise_warning("invalid element name: %s", name.data());
       return false;
@@ -521,10 +521,10 @@ struct XMLWriterData {
     return ret != -1;
   }
 
-  String flush(const Variant& empty /*= true*/) {
+  OptString flush(const Variant& empty /*= true*/) {
     if (m_ptr && m_output) {
       xmlTextWriterFlush(m_ptr);
-      String ret((char*)m_output->content, CopyString);
+      OptString ret((char*)m_output->content, CopyString);
       if (!empty.isNull() && empty.asBooleanVal()) {
         xmlBufferEmpty(m_output);
       }
@@ -533,7 +533,7 @@ struct XMLWriterData {
     return empty_string();
   }
 
-  String outputMemory(const Variant& flush /*= true*/) {
+  OptString outputMemory(const Variant& flush /*= true*/) {
     return this->flush(flush);
   }
 
@@ -568,7 +568,7 @@ private:
 public:
   CLASSNAME_IS("xmlwriter")
 
-  const String& o_getClassNameHook() const override {
+  const OptString& o_getClassNameHook() const override {
     return classnameof();
   }
 
@@ -695,10 +695,10 @@ static Variant HHVM_FUNCTION(xmlwriter_open_memory) {
 }
 
 XMLWRITER_METHOD(bool, openURI,
-                 const String&, uri)
+                 const OptString&, uri)
 
 static Variant HHVM_FUNCTION(xmlwriter_open_uri,
-                             const String& uri) {
+                             const OptString& uri) {
   auto data = req::make<XMLWriterResource>();
 
   bool opened = data->m_writer.openURI(uri);
@@ -709,7 +709,7 @@ static Variant HHVM_FUNCTION(xmlwriter_open_uri,
 }
 
 XMLWRITER_METHOD(bool, setIndentString,
-                 const String&, indentString)
+                 const OptString&, indentString)
 
 static Variant HHVM_FUNCTION(xmlwriter_set_indent_string,
                          const OptResource& wr, const Variant& indentString) {
@@ -731,21 +731,21 @@ XMLWRITER_METHOD_AND_FUNCTION(bool, xmlwriter_start_document, startDocument,
                               const Variant&, standalone /*= ""*/)
 
 XMLWRITER_METHOD_AND_FUNCTION(bool, xmlwriter_start_element, startElement,
-                              const String&, name)
+                              const OptString&, name)
 
 XMLWRITER_METHOD_AND_FUNCTION(bool, xmlwriter_start_element_ns, startElementNS,
                               const Variant&, prefix,
-                              const String&, name,
+                              const OptString&, name,
                               const Variant&, uri)
 
 XMLWRITER_METHOD_AND_FUNCTION(bool, xmlwriter_write_element_ns, writeElementNS,
                               const Variant&, prefix,
-                              const String&, name,
+                              const OptString&, name,
                               const Variant&, uri,
                               const Variant&, content)
 
 XMLWRITER_METHOD_AND_FUNCTION(bool, xmlwriter_write_element, writeElement,
-                              const String&, name,
+                              const OptString&, name,
                               const Variant&, content)
 
 XMLWRITER_METHOD_AND_FUNCTION_NO_ARGS(bool, xmlwriter_end_element, endElement)
@@ -755,23 +755,23 @@ XMLWRITER_METHOD_AND_FUNCTION_NO_ARGS(bool, xmlwriter_full_end_element,
 
 XMLWRITER_METHOD_AND_FUNCTION(bool, xmlwriter_start_attribute_ns,
                               startAttributeNS,
-                              const String&, prefix,
-                              const String&, name,
-                              const String&, uri)
+                              const OptString&, prefix,
+                              const OptString&, name,
+                              const OptString&, uri)
 
 XMLWRITER_METHOD_AND_FUNCTION(bool, xmlwriter_start_attribute, startAttribute,
-                              const String&, name)
+                              const OptString&, name)
 
 XMLWRITER_METHOD_AND_FUNCTION(bool, xmlwriter_write_attribute_ns,
                               writeAttributeNS,
-                              const String&, prefix,
-                              const String&, name,
-                              const String&, uri,
-                              const String&, content)
+                              const OptString&, prefix,
+                              const OptString&, name,
+                              const OptString&, uri,
+                              const OptString&, content)
 
 XMLWRITER_METHOD_AND_FUNCTION(bool, xmlwriter_write_attribute, writeAttribute,
-                              const String&, name,
-                              const String&, value)
+                              const OptString&, name,
+                              const OptString&, value)
 
 XMLWRITER_METHOD_AND_FUNCTION_NO_ARGS(bool, xmlwriter_end_attribute,
                                       endAttribute)
@@ -779,7 +779,7 @@ XMLWRITER_METHOD_AND_FUNCTION_NO_ARGS(bool, xmlwriter_end_attribute,
 XMLWRITER_METHOD_AND_FUNCTION_NO_ARGS(bool, xmlwriter_start_cdata, startCData)
 
 XMLWRITER_METHOD_AND_FUNCTION(bool, xmlwriter_write_cdata, writeCData,
-                              const String&, content)
+                              const OptString&, content)
 
 XMLWRITER_METHOD_AND_FUNCTION_NO_ARGS(bool, xmlwriter_end_cdata, endCData)
 
@@ -787,73 +787,73 @@ XMLWRITER_METHOD_AND_FUNCTION_NO_ARGS(bool, xmlwriter_start_comment,
                                       startComment)
 
 XMLWRITER_METHOD_AND_FUNCTION(bool, xmlwriter_write_comment, writeComment,
-                              const String&, content)
+                              const OptString&, content)
 
 XMLWRITER_METHOD_AND_FUNCTION_NO_ARGS(bool, xmlwriter_end_comment, endComment)
 
 XMLWRITER_METHOD_AND_FUNCTION_NO_ARGS(bool, xmlwriter_end_document, endDocument)
 
 XMLWRITER_METHOD_AND_FUNCTION(bool, xmlwriter_start_pi, startPI,
-                              const String&, target)
+                              const OptString&, target)
 
 XMLWRITER_METHOD_AND_FUNCTION(bool, xmlwriter_write_pi, writePI,
-                              const String&, target,
-                              const String&, content)
+                              const OptString&, target,
+                              const OptString&, content)
 
 XMLWRITER_METHOD_AND_FUNCTION_NO_ARGS(bool, xmlwriter_end_pi, endPI)
 
 XMLWRITER_METHOD_AND_FUNCTION(bool, xmlwriter_text, text,
-                              const String&, content)
+                              const OptString&, content)
 
 XMLWRITER_METHOD_AND_FUNCTION(bool, xmlwriter_write_raw, writeRaw,
-                              const String&, content)
+                              const OptString&, content)
 
 XMLWRITER_METHOD_AND_FUNCTION(bool, xmlwriter_start_dtd, startDTD,
-                              const String&, qualifiedname,
+                              const OptString&, qualifiedname,
                               const Variant&, publicid /*= ""*/,
                               const Variant&, systemid /*= ""*/)
 
 XMLWRITER_METHOD_AND_FUNCTION(bool, xmlwriter_write_dtd, writeDTD,
-                              const String&, name,
+                              const OptString&, name,
                               const Variant&, publicid /*= ""*/,
                               const Variant&, systemid /*= ""*/,
                               const Variant&, subset /*= ""*/)
 
 XMLWRITER_METHOD_AND_FUNCTION(bool, xmlwriter_start_dtd_element,
                               startDTDElement,
-                              const String&, qualifiedname)
+                              const OptString&, qualifiedname)
 
 XMLWRITER_METHOD_AND_FUNCTION(bool, xmlwriter_write_dtd_element,
                               writeDTDElement,
-                              const String&, name,
-                              const String&, content)
+                              const OptString&, name,
+                              const OptString&, content)
 
 XMLWRITER_METHOD_AND_FUNCTION_NO_ARGS(bool, xmlwriter_end_dtd_element,
                               endDTDElement)
 
 XMLWRITER_METHOD_AND_FUNCTION(bool, xmlwriter_start_dtd_attlist,
                               startDTDAttlist,
-                              const String&, name)
+                              const OptString&, name)
 
 XMLWRITER_METHOD_AND_FUNCTION(bool, xmlwriter_write_dtd_attlist,
                               writeDTDAttlist,
-                              const String&, name,
-                              const String&, content)
+                              const OptString&, name,
+                              const OptString&, content)
 
 XMLWRITER_METHOD_AND_FUNCTION_NO_ARGS(bool, xmlwriter_end_dtd_attlist,
                               endDTDAttlist)
 
 XMLWRITER_METHOD_AND_FUNCTION(bool, xmlwriter_start_dtd_entity, startDTDEntity,
-                              const String&, name,
+                              const OptString&, name,
                               bool, isparam)
 
 XMLWRITER_METHOD_AND_FUNCTION(bool, xmlwriter_write_dtd_entity, writeDTDEntity,
-                              const String&, name,
-                              const String&, content,
+                              const OptString&, name,
+                              const OptString&, content,
                               bool, pe /*= false*/,
-                              const String&, publicid /*= ""*/,
-                              const String&, systemid /*= ""*/,
-                              const String&, ndataid /*= ""*/)
+                              const OptString&, publicid /*= ""*/,
+                              const OptString&, systemid /*= ""*/,
+                              const OptString&, ndataid /*= ""*/)
 
 XMLWRITER_METHOD_AND_FUNCTION_NO_ARGS(bool, xmlwriter_end_dtd_entity,
                                       endDTDEntity)
@@ -863,7 +863,7 @@ XMLWRITER_METHOD_AND_FUNCTION_NO_ARGS(bool, xmlwriter_end_dtd, endDTD)
 XMLWRITER_METHOD_AND_FUNCTION(Variant, xmlwriter_flush, flush,
                               const Variant&, empty /*= true*/)
 
-XMLWRITER_METHOD_AND_FUNCTION(String, xmlwriter_output_memory, outputMemory,
+XMLWRITER_METHOD_AND_FUNCTION(OptString, xmlwriter_output_memory, outputMemory,
                               const Variant&, flush /*= true*/)
 
 ///////////////////////////////////////////////////////////////////////////////

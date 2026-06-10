@@ -158,7 +158,7 @@ VariableSerializer::getKind(const ArrayData* arr) const {
   return VariableSerializer::ArrayKind::Keyset;
 }
 
-void VariableSerializer::pushObjectInfo(const String& objClass, char objCode) {
+void VariableSerializer::pushObjectInfo(const OptString& objClass, char objCode) {
   assertx(objCode == 'O' || objCode == 'V' || objCode == 'K');
   m_objectInfos.emplace_back(
     ObjectInfo { m_objClass, m_objCode, m_rsrcName, m_rsrcId }
@@ -169,7 +169,7 @@ void VariableSerializer::pushObjectInfo(const String& objClass, char objCode) {
   m_rsrcId = 0;
 }
 
-void VariableSerializer::pushResourceInfo(const String& rsrcName, int rsrcId) {
+void VariableSerializer::pushResourceInfo(const OptString& rsrcName, int rsrcId) {
   m_objectInfos.emplace_back(
     ObjectInfo { m_objClass, m_objCode, m_rsrcName, m_rsrcId }
   );
@@ -195,7 +195,7 @@ void VariableSerializer::popResourceInfo() {
   popObjectInfo();
 }
 
-String VariableSerializer::serialize(const_variant_ref v, bool ret,
+OptString VariableSerializer::serialize(const_variant_ref v, bool ret,
                                      bool keepCount /* = false */) {
   StringBuffer buf;
   m_buf = &buf;
@@ -216,13 +216,13 @@ String VariableSerializer::serialize(const_variant_ref v, bool ret,
   if (ret) {
     return m_buf->detach();
   } else {
-    String str = m_buf->detach();
+    OptString str = m_buf->detach();
     g_context->write(str);
   }
-  return String();
+  return OptString();
 }
 
-String VariableSerializer::serializeValue(const Variant& v, bool limit) {
+OptString VariableSerializer::serializeValue(const Variant& v, bool limit) {
   StringBuffer buf;
   m_buf = &buf;
   if (limit) {
@@ -233,12 +233,12 @@ String VariableSerializer::serializeValue(const Variant& v, bool limit) {
   return m_buf->detach();
 }
 
-String VariableSerializer::serializeWithLimit(const Variant& v, int limit) {
+OptString VariableSerializer::serializeWithLimit(const Variant& v, int limit) {
   if (m_type == Type::Serialize || m_type == Type::Internal ||
       m_type == Type::JSON || m_type == Type::APCSerialize ||
       m_type == Type::DebuggerSerialize) {
     assertx(false);
-    return String();
+    return OptString();
   }
   StringBuffer buf;
   m_buf = &buf;
@@ -651,7 +651,7 @@ void VariableSerializer::write(const char *v, int len /* = -1 */,
   }
 }
 
-void VariableSerializer::write(const String& v) {
+void VariableSerializer::write(const OptString& v) {
   if (m_type == Type::APCSerialize && !v.isNull() && v.get()->isStatic()) {
     union {
       char buf[8];
@@ -1109,7 +1109,7 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData,
   }
 }
 
-void VariableSerializer::writePropertyKey(const String& prop) {
+void VariableSerializer::writePropertyKey(const OptString& prop) {
   const char *key = prop.data();
   int kl = prop.size();
   if (!*key && kl) {
@@ -1155,7 +1155,7 @@ void VariableSerializer::writeArrayKey(
     if (kind == AK::Keyset) return;
     m_buf->append('[');
     if (info.is_object && skey) {
-      writePropertyKey(String{keyCell->m_data.pstr});
+      writePropertyKey(OptString{keyCell->m_data.pstr});
     } else {
       m_buf->append(key);
     }
@@ -1188,7 +1188,7 @@ void VariableSerializer::writeArrayKey(
     } else {
       m_buf->append('"');
       if (info.is_object) {
-        writePropertyKey(String{keyCell->m_data.pstr});
+        writePropertyKey(OptString{keyCell->m_data.pstr});
       } else {
         m_buf->append(keyCell->m_data.pstr);
         m_buf->append('"');
@@ -1417,8 +1417,8 @@ void VariableSerializer::writeArrayFooter(
   m_arrayInfos.pop_back();
 }
 
-void VariableSerializer::writeSerializableObject(const String& clsname,
-                                                 const String& serialized) {
+void VariableSerializer::writeSerializableObject(const OptString& clsname,
+                                                 const OptString& serialized) {
   m_buf->append("C:");
   m_buf->append(clsname.size());
   m_buf->append(":\"");
@@ -1995,7 +1995,7 @@ void VariableSerializer::serializeResource(const ResourceData* res) {
   decNestedLevel(&tv);
 }
 
-void VariableSerializer::serializeString(const String& str) {
+void VariableSerializer::serializeString(const OptString& str) {
   if (str) {
     write(str.data(), str.size());
   } else {
@@ -2377,8 +2377,8 @@ void VariableSerializer::serializeObjectImpl(const ObjectData* obj) {
       assertx(isArrayLikeType(ret.getType()));
       const Array &props = ret.asCArrRef();
       for (ArrayIter iter(props); iter; ++iter) {
-        String memberName = iter.second().toString();
-        String propName = memberName;
+        OptString memberName = iter.second().toString();
+        OptString propName = memberName;
         auto obj_cls = obj->getVMClass();
         Class* ctx = obj_cls;
         auto attrMask = AttrNone;
@@ -2390,7 +2390,7 @@ void VariableSerializer::serializeObjectImpl(const ObjectData* obj) {
               memberName = memberName.substr(subLen);
             } else {
               attrMask = AttrPrivate;
-              String cls = memberName.substr(1, subLen - 2);
+              OptString cls = memberName.substr(1, subLen - 2);
               ctx = Class::lookup(cls.get());
               if (ctx) {
                 memberName = memberName.substr(subLen);

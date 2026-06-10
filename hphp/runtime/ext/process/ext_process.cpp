@@ -56,7 +56,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 // build environment pair list
-static char** build_envp(const Array& envs, req::vector<String> &senvs) {
+static char** build_envp(const Array& envs, req::vector<OptString> &senvs) {
   auto const size = envs.size();
   if (!size) return nullptr;
   auto envp = req::make_raw_array<char*>(size + 1);
@@ -66,7 +66,7 @@ static char** build_envp(const Array& envs, req::vector<String> &senvs) {
     nvpair.append(iter.first().toString());
     nvpair.append('=');
     nvpair.append(iter.second().toString());
-    String env = nvpair.detach();
+    OptString env = nvpair.detach();
     senvs.push_back(env);
     envp[i] = (char*)env.data();
   }
@@ -152,7 +152,7 @@ static void checkExecAllowed() {
 }
 
 void HHVM_FUNCTION(pcntl_exec,
-                   const String& path,
+                   const OptString& path,
                    const Array& args /* = null_array */,
                    const Array& envs /* = null_array */) {
   checkExecAllowed();
@@ -162,7 +162,7 @@ void HHVM_FUNCTION(pcntl_exec,
   }
 
   // build argument list
-  req::vector<String> sargs; // holding those char *
+  req::vector<OptString> sargs; // holding those char *
   auto const size = args.size();
   auto argv = req::make_raw_array<char*>(size + 2);
   argv[0] = (char*)path.data();
@@ -170,7 +170,7 @@ void HHVM_FUNCTION(pcntl_exec,
   if (size) {
     sargs.reserve(size);
     for (ArrayIter iter(args); iter; ++iter, ++i) {
-      String arg = iter.second().toString();
+      OptString arg = iter.second().toString();
       sargs.push_back(arg);
       argv[i] = (char*)arg.data();
     }
@@ -178,7 +178,7 @@ void HHVM_FUNCTION(pcntl_exec,
   argv[i] = nullptr;
 
   // build environment pair list
-  req::vector<String> senvs; // holding those char *
+  req::vector<OptString> senvs; // holding those char *
   auto envp = build_envp(envs, senvs);
   if (execve(path.c_str(), argv, envp) == -1) {
     raise_warning("Error has occurred: (errno %d) %s",

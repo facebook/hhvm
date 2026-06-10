@@ -45,7 +45,7 @@ struct c_SleepWaitHandle final :
   bool cancel(const Object& exception);
   bool cancelNoThrow();
   bool process();
-  String getName();
+  OptString getName();
   void exitContext(ContextIndex contextIdx);
   AsioSession::TimePoint getWakeTime() const { return m_waketime; }
   void registerToContext();

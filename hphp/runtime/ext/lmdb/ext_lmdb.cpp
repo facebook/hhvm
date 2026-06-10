@@ -188,7 +188,7 @@ Array HHVM_FUNCTION(lmdb_mdb_env_create) {
 void HHVM_FUNCTION(
     lmdb_mdb_env_open,
     const Array& env,
-    const String& path,
+    const OptString& path,
     int64_t flags,
     int64_t mode) {
   auto* env_ptr = getEnvironment(env);
@@ -257,11 +257,11 @@ Array HHVM_FUNCTION(lmdb_mdb_env_stat, const Array& env) {
 }
 
 // int  mdb_env_get_path(MDB_env *env, const char **path);
-String HHVM_FUNCTION(lmdb_mdb_env_get_path, const Array& env) {
+OptString HHVM_FUNCTION(lmdb_mdb_env_get_path, const Array& env) {
   auto* env_ptr = getEnvironment(env);
   const char* path = nullptr;
   THROW_ON_ERROR(mdb_env_get_path(env_ptr, &path));
-  return String{path};
+  return OptString{path};
 }
 
 // int  mdb_env_get_maxkeysize(MDB_env *env);
@@ -342,7 +342,7 @@ Array HHVM_FUNCTION(
 
   MDB_dbi dbi;
   if (name.isString()) {
-    String n = name.toString();
+    OptString n = name.toString();
     THROW_ON_ERROR(mdb_dbi_open(txn_ptr, n.c_str(), flags, &dbi));
   } else {
     THROW_ON_ERROR(mdb_dbi_open(txn_ptr, nullptr, flags, &dbi));
@@ -365,7 +365,7 @@ int64_t HHVM_FUNCTION(lmdb_mdb_reader_check, const Array& env) {
 namespace {
 // The string used by the return value must
 // outlive the return value.
-MDB_val wrapStringIntoVal(const String& str) {
+MDB_val wrapStringIntoVal(const OptString& str) {
   MDB_val val;
   val.mv_size = str.size();
   val.mv_data = (void*)str.c_str();
@@ -398,7 +398,7 @@ int64_t get(
   }
 
   if (raw) {
-    data = String::attach(StringData::Make((const char*)dv.mv_data, dv.mv_size, CopyString));
+    data = OptString::attach(StringData::Make((const char*)dv.mv_data, dv.mv_size, CopyString));
   } else {
     VariableUnserializer vu(
         (const char*)dv.mv_data,
@@ -434,7 +434,7 @@ int64_t put(
 
   MDB_val kv = keyToMdbVal(key);
 
-  String serialized_value;
+  OptString serialized_value;
   if (raw && data.isString()) {
     serialized_value = data.toString();
   } else {
@@ -452,7 +452,7 @@ int64_t put(
   // The inout value of dv only gets updated if this flag is set
   if ((flags & MDB_NOOVERWRITE) != 0) {
     if (raw) {
-      data = String::attach(StringData::Make((const char*)dv.mv_data, dv.mv_size, CopyString));
+      data = OptString::attach(StringData::Make((const char*)dv.mv_data, dv.mv_size, CopyString));
     } else {
       VariableUnserializer vu(
           (const char*)dv.mv_data,
@@ -515,7 +515,7 @@ int64_t HHVM_FUNCTION(
   auto* txn_ptr = getTransaction(txn);
 
   VariableSerializer vs(VariableSerializer::Type::Serialize);
-  String serialized_value = vs.serializeValue(data, true);
+  OptString serialized_value = vs.serializeValue(data, true);
 
   MDB_val kv = keyToMdbVal(key);
   MDB_val dv = wrapStringIntoVal(serialized_value);
@@ -548,7 +548,7 @@ int64_t HHVM_FUNCTION(
   auto* cursor_ptr = getCursor(cursor);
 
   VariableSerializer vs(VariableSerializer::Type::Serialize);
-  String serialized_data = vs.serializeValue(data, true);
+  OptString serialized_data = vs.serializeValue(data, true);
 
   MDB_val kv = keyToMdbVal(key);
   MDB_val dv = wrapStringIntoVal(serialized_data);

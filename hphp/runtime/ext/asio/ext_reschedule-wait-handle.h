@@ -45,7 +45,7 @@ struct c_RescheduleWaitHandle final :
 
  public:
   void run();
-  String getName();
+  OptString getName();
   void exitContext(ContextIndex contextIdx);
   void scheduleInContext();
 

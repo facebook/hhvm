@@ -25,7 +25,7 @@ namespace HPHP {
 
 void HHVM_FUNCTION(var_dump,
                    const Variant& v, const Array& _argv = null_array);
-String HHVM_FUNCTION(serialize, const Variant& value);
+OptString HHVM_FUNCTION(serialize, const Variant& value);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

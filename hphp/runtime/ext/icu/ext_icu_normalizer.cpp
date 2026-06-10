@@ -10,7 +10,7 @@ namespace HPHP::Intl {
 const StaticString s_Normalizer("Normalizer");
 
 static bool HHVM_STATIC_METHOD(Normalizer, isNormalized,
-                                  const String& input, int64_t form) {
+                                  const OptString& input, int64_t form) {
   s_intl_error->clearError();
   switch (form) {
     case UNORM_NFD:
@@ -47,7 +47,7 @@ static bool HHVM_STATIC_METHOD(Normalizer, isNormalized,
 }
 
 static Variant HHVM_STATIC_METHOD(Normalizer, normalize,
-                                  const String& input, int64_t form) {
+                                  const OptString& input, int64_t form) {
   s_intl_error->clearError();
 
   int expansion_factor = 1;
@@ -103,7 +103,7 @@ static Variant HHVM_STATIC_METHOD(Normalizer, normalize,
   dest.releaseBuffer(size_needed);
 
   error = U_ZERO_ERROR;
-  String ret(u8(dest, error));
+  OptString ret(u8(dest, error));
   if (U_FAILURE(error)) {
     s_intl_error->setError(error, "normalizer_normalize: "
                                   "error converting normalized text UTF-8");

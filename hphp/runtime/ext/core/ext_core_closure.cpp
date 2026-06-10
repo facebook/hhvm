@@ -34,7 +34,7 @@ const StaticString
   s_Closure("Closure");
 
 struct ClosurePropHandler: Native::BasePropHandler {
-  static bool isPropSupported(const String&, const String&) {
+  static bool isPropSupported(const OptString&, const OptString&) {
     raise_error("Closure object cannot have properties");
     return false;
   }

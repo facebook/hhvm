@@ -27,7 +27,7 @@ const StaticString s_php_output("php://output");
 const StaticString s_php("PHP");
 const StaticString s_output("Output");
 
-OutputFile::OutputFile(const String& filename): File(true, s_php, s_output) {
+OutputFile::OutputFile(const OptString& filename): File(true, s_php, s_output) {
   if (filename != s_php_output) {
     raise_fatal_error("not a php://output file ");
   }
@@ -43,7 +43,7 @@ void OutputFile::sweep() {
   File::sweep();
 }
 
-bool OutputFile::open(const String& /*filename*/, const String& /*mode*/) {
+bool OutputFile::open(const OptString& /*filename*/, const OptString& /*mode*/) {
   raise_fatal_error("cannot open a php://output file ");
 }
 

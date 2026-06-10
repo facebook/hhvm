@@ -36,7 +36,7 @@ bool hphp_debug_caller_info_impl(
     Array& result, bool& skipped, const Func* func, Offset offset);
 
 bool hphp_debug_caller_identifier_impl(
-    String& result, bool& skipped, const Func* func);
+    OptString& result, bool& skipped, const Func* func);
 
 Array HHVM_FUNCTION(debug_backtrace,
                     int64_t options = k_DEBUG_BACKTRACE_PROVIDE_OBJECT,
@@ -44,9 +44,9 @@ Array HHVM_FUNCTION(debug_backtrace,
 int64_t HHVM_FUNCTION(error_reporting, const Variant& level = uninit_variant);
 
 ArrayData* debug_backtrace_jit(int64_t options);
-String debug_string_backtrace(bool skip, bool ignore_args = false,
+OptString debug_string_backtrace(bool skip, bool ignore_args = false,
                               int64_t limit = 0);
-String stringify_backtrace(const Array& bt, bool ignore_args);
+OptString stringify_backtrace(const Array& bt, bool ignore_args);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

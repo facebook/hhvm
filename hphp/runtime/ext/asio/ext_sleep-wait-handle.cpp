@@ -143,7 +143,7 @@ bool c_SleepWaitHandle::process() {
   return true;
 }
 
-String c_SleepWaitHandle::getName() {
+OptString c_SleepWaitHandle::getName() {
   return s_sleep;
 }
 

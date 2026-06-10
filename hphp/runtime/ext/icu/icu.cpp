@@ -80,14 +80,14 @@ void IntlExtension::bindIniSettings() {
                  );
 }
 
-const String GetDefaultLocale() {
+const OptString GetDefaultLocale() {
   if (s_defaultLocale->empty()) {
-    return String(uloc_getDefault(), CopyString);
+    return OptString(uloc_getDefault(), CopyString);
   }
   return *(s_defaultLocale.get());
 }
 
-bool SetDefaultLocale(const String& locale) {
+bool SetDefaultLocale(const OptString& locale) {
   *s_defaultLocale = locale.toCppString();
   return true;
 }
@@ -279,7 +279,7 @@ icu::UnicodeString u16(const char *u8, int32_t u8_len, UErrorCode &error,
   return ret;
 }
 
-String u8(const UChar *u16, int32_t u16_len, UErrorCode &error) {
+OptString u8(const UChar *u16, int32_t u16_len, UErrorCode &error) {
   error = U_ZERO_ERROR;
   if (u16_len == 0) {
     return empty_string();
@@ -287,14 +287,14 @@ String u8(const UChar *u16, int32_t u16_len, UErrorCode &error) {
   int32_t outlen;
   u_strToUTF8(nullptr, 0, &outlen, u16, u16_len, &error);
   if (error != U_BUFFER_OVERFLOW_ERROR) {
-    return String();
+    return OptString();
   }
-  String ret(outlen + 1, ReserveString);
+  OptString ret(outlen + 1, ReserveString);
   char *out = ret.get()->mutableData();
   error = U_ZERO_ERROR;
   u_strToUTF8(out, outlen + 1, &outlen, u16, u16_len, &error);
   if (U_FAILURE(error)) {
-    return String();
+    return OptString();
   }
   ret.setSize(outlen);
   return ret;

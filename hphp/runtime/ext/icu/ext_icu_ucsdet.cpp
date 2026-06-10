@@ -50,13 +50,13 @@ std::shared_ptr<UCharsetDetector> EncodingDetector::detector() {
   return encodingDetector;
 }
 
-static void HHVM_METHOD(EncodingDetector, setText, const String& text) {
+static void HHVM_METHOD(EncodingDetector, setText, const OptString& text) {
   FETCH_DET(data, this_);
   data->setText(text);
 }
 
 static void HHVM_METHOD(EncodingDetector, setDeclaredEncoding,
-                        const String& declaredEncoding) {
+                        const OptString& declaredEncoding) {
   FETCH_DET(data, this_);
   data->setDeclaredEncoding(declaredEncoding);
 }
@@ -107,7 +107,7 @@ static bool HHVM_METHOD(EncodingMatch, isValid) {
   return data && data->isValid();
 }
 
-static String HHVM_METHOD(EncodingMatch, getEncoding) {
+static OptString HHVM_METHOD(EncodingMatch, getEncoding) {
   FETCH_MATCH(data, this_);
   UErrorCode error = U_ZERO_ERROR;
   auto encoding = ucsdet_getName(data->match(), &error);
@@ -115,7 +115,7 @@ static String HHVM_METHOD(EncodingMatch, getEncoding) {
     data->throwException("Could not get encoding for match, error %d (%s)",
                          error, u_errorName(error));
   }
-  return String(encoding, CopyString);
+  return OptString(encoding, CopyString);
 }
 
 static int64_t HHVM_METHOD(EncodingMatch, getConfidence) {
@@ -129,7 +129,7 @@ static int64_t HHVM_METHOD(EncodingMatch, getConfidence) {
   return confidence;
 }
 
-static String HHVM_METHOD(EncodingMatch, getLanguage) {
+static OptString HHVM_METHOD(EncodingMatch, getLanguage) {
   FETCH_MATCH(data, this_);
   UErrorCode error = U_ZERO_ERROR;
   auto language = ucsdet_getLanguage(data->match(), &error);
@@ -137,10 +137,10 @@ static String HHVM_METHOD(EncodingMatch, getLanguage) {
     data->throwException("Could not get language for match, error %d (%s)",
                          error, u_errorName(error));
   }
-  return String(language, CopyString);
+  return OptString(language, CopyString);
 }
 
-static String HHVM_METHOD(EncodingMatch, getUTF8) {
+static OptString HHVM_METHOD(EncodingMatch, getUTF8) {
   FETCH_MATCH(data, this_);
   UErrorCode error;
   icu::UnicodeString ustr;
@@ -164,7 +164,7 @@ static String HHVM_METHOD(EncodingMatch, getUTF8) {
   }
 
   error = U_ZERO_ERROR;
-  String ret(u8(ustr, error));
+  OptString ret(u8(ustr, error));
   if (U_FAILURE(error)) {
     data->throwException("Error converting buffer to UTF8 %d (%d)",
                          error, u_errorName(error));

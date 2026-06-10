@@ -99,70 +99,70 @@ public:
    * Manipulations. Note, all these functions will create a new string than
    * modifying input, although names of these functions sound like mutating.
    */
-  static String Pad(const String& input, int final_length,
-                    const String& pad_string = " ",
+  static OptString Pad(const OptString& input, int final_length,
+                    const OptString& pad_string = " ",
                     PadType type = PadType::Right);
-  static String StripHTMLTags(const String& input,
-                              const String& allowable_tags = "");
+  static OptString StripHTMLTags(const OptString& input,
+                              const OptString& allowable_tags = "");
 
   /**
    * Split/joins.
    */
-  static Variant Explode(const String& input, const String& delimiter,
+  static Variant Explode(const OptString& input, const OptString& delimiter,
                          int64_t limit = k_PHP_INT_MAX);
-    static String Implode(const Variant& items, const String& delim,
+    static OptString Implode(const Variant& items, const OptString& delim,
                           const bool checkIsContainer = true); // == Join()
-  static Variant Split(const String& str, int64_t split_length = 1);
+  static Variant Split(const OptString& str, int64_t split_length = 1);
   static Variant ChunkSplit(
-    const String& body, int chunklen = 76,
-    const String& end = "\r\n"); // for email (rfc822/2822)
+    const OptString& body, int chunklen = 76,
+    const OptString& end = "\r\n"); // for email (rfc822/2822)
 
   /**
    * Encoding/decoding.
    */
-  static String HtmlEncode(const String& input, QuoteStyle quoteStyle,
+  static OptString HtmlEncode(const OptString& input, QuoteStyle quoteStyle,
                            const char *charset, bool dEncode, bool htmlEnt);
-  static String HtmlEncode(const String& input, const int64_t qsBitmask,
+  static OptString HtmlEncode(const OptString& input, const int64_t qsBitmask,
                            const char *charset, bool dEncode, bool htmlEnt);
-  static String HtmlEncodeExtra(const String& input, QuoteStyle quoteStyle,
+  static OptString HtmlEncodeExtra(const OptString& input, QuoteStyle quoteStyle,
                                 const char *charset, bool nbsp, Array extra);
-  static String HtmlDecode(const String& input, QuoteStyle quoteStyle,
+  static OptString HtmlDecode(const OptString& input, QuoteStyle quoteStyle,
                            const char *charset, bool all);
-  static String QuotedPrintableEncode(const String& input);
-  static String QuotedPrintableDecode(const String& input);
-  static String UUEncode(const String& input);
-  static String UUDecode(const String& input);
-  static String Base64Encode(const String& input);
-  static String Base64Decode(const String& input, bool strict = false);
-  static String UrlEncode(const String& input, bool encodePlus = true);
-  static String UrlDecode(const String& input, bool decodePlus = true);
+  static OptString QuotedPrintableEncode(const OptString& input);
+  static OptString QuotedPrintableDecode(const OptString& input);
+  static OptString UUEncode(const OptString& input);
+  static OptString UUDecode(const OptString& input);
+  static OptString Base64Encode(const OptString& input);
+  static OptString Base64Decode(const OptString& input, bool strict = false);
+  static OptString UrlEncode(const OptString& input, bool encodePlus = true);
+  static OptString UrlDecode(const OptString& input, bool decodePlus = true);
 
   /**
    * Determine if a string looks like a file URL. Does not check for validity.
    */
-  static bool IsFileUrl(const String& input);
+  static bool IsFileUrl(const OptString& input);
 
   /**
    * Determine if a string is a valid local file URL. If it is, the decoded
    * path part is returned. If it is not, an empty string is returned.
    */
-  static String DecodeFileUrl(const String& input);
+  static OptString DecodeFileUrl(const OptString& input);
 
   /**
    * Formatting.
    */
-  static String MoneyFormat(const char *format, double value);
+  static OptString MoneyFormat(const char *format, double value);
 
   /**
    * Hashing
    */
-  static String Translate(const String& input, const String& from,
-                          const String& to);
-  static String ROT13(const String& input);
-  static String Crypt(const String& input, const char *salt = "");
-  static String MD5(const String& input, bool raw = false);
-  static String MD5(const char *data, uint32_t size, bool raw = false);
-  static String SHA1(const String& input, bool raw = false);
+  static OptString Translate(const OptString& input, const OptString& from,
+                          const OptString& to);
+  static OptString ROT13(const OptString& input);
+  static OptString Crypt(const OptString& input, const char *salt = "");
+  static OptString MD5(const OptString& input, bool raw = false);
+  static OptString MD5(const char *data, uint32_t size, bool raw = false);
+  static OptString SHA1(const OptString& input, bool raw = false);
 };
 
 size_t safe_address(size_t nmemb, size_t size, size_t offset);

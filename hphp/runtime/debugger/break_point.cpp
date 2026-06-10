@@ -138,7 +138,7 @@ void InterruptSite::Initialize(ActRec *fp) {
   bail_on(!m_func);
   auto const unit = m_func->unit();
   bail_on(!unit);
-  m_file = String(StrNR{unit->filepath()});
+  m_file = OptString(StrNR{unit->filepath()});
   if (m_func->getSourceLoc(m_offset, m_sourceLoc)) {
     m_line0 = m_sourceLoc.line0;
     m_char0 = m_sourceLoc.char0;
@@ -967,13 +967,13 @@ bool BreakPointInfo::MatchClass(const char *fcls, const std::string &bcls,
     return Match(fcls, 0, bcls, true, true);
   }
 
-  String sdBClsName(bcls);
+  OptString sdBClsName(bcls);
   Class* clsB = Class::lookup(sdBClsName.get());
   if (!clsB) return false;
-  String sdFClsName(fcls, CopyString);
+  OptString sdFClsName(fcls, CopyString);
   Class* clsF = Class::lookup(sdFClsName.get());
   if (clsB == clsF) return true;
-  String sdFuncName(func, CopyString);
+  OptString sdFuncName(func, CopyString);
   Func* f = clsB->lookupMethod(sdFuncName.get());
   return f && f->baseCls() == clsF;
 }
@@ -996,9 +996,9 @@ bool BreakPointInfo::Match(const char *haystack, int haystack_len,
   }
 
   Variant matches;
-  Variant r = preg_match(String(needle.c_str(), needle.size(),
+  Variant r = preg_match(OptString(needle.c_str(), needle.size(),
                                 CopyString),
-                         String(haystack, haystack_len, CopyString),
+                         OptString(haystack, haystack_len, CopyString),
                          &matches);
   return HPHP::same(r, static_cast<int64_t>(1));
 }
@@ -1074,7 +1074,7 @@ bool BreakPointInfo::checkClause(DebuggerProxy &proxy) {
         m_php = DebuggerProxy::MakePHP(m_clause);
       }
     }
-    String output;
+    OptString output;
     {
       // Don't hit more breakpoints while attempting to decide if we should stop
       // at this breakpoint.

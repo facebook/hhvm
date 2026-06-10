@@ -30,46 +30,46 @@ namespace HPHP {
     explicit HSLLocaleICUOps(const Locale& locale);
     virtual ~HSLLocaleICUOps() override;
 
-    virtual int64_t strlen(const String&) const override;
-    virtual String uppercase(const String&) const override;
-    virtual String lowercase(const String&) const override;
-    virtual String foldcase(const String&) const override;
+    virtual int64_t strlen(const OptString&) const override;
+    virtual OptString uppercase(const OptString&) const override;
+    virtual OptString lowercase(const OptString&) const override;
+    virtual OptString foldcase(const OptString&) const override;
 
-    virtual int64_t strcoll(const String&, const String&) const override;
-    virtual int64_t strcasecmp(const String&, const String&) const override;
-    virtual bool starts_with(const String& str, const String& prefix) const override;
-    virtual bool starts_with_ci(const String& str, const String& prefix) const override;
-    virtual bool ends_with(const String& str, const String& suffix) const override;
-    virtual bool ends_with_ci(const String& str, const String& suffix) const override;
+    virtual int64_t strcoll(const OptString&, const OptString&) const override;
+    virtual int64_t strcasecmp(const OptString&, const OptString&) const override;
+    virtual bool starts_with(const OptString& str, const OptString& prefix) const override;
+    virtual bool starts_with_ci(const OptString& str, const OptString& prefix) const override;
+    virtual bool ends_with(const OptString& str, const OptString& suffix) const override;
+    virtual bool ends_with_ci(const OptString& str, const OptString& suffix) const override;
 
-    virtual String strip_prefix(const String& str, const String& prefix) const override;
-    virtual String strip_suffix(const String& str, const String& suffix) const override;
+    virtual OptString strip_prefix(const OptString& str, const OptString& prefix) const override;
+    virtual OptString strip_suffix(const OptString& str, const OptString& suffix) const override;
 
-    virtual int64_t strpos(const String& haystack, const String& needle, int64_t offset) const override;
-    virtual int64_t strrpos(const String& haystack, const String& needle, int64_t offset) const override;
-    virtual int64_t stripos(const String& haystack, const String& needle, int64_t offset) const override;
-    virtual int64_t strripos(const String& haystack, const String& needle, int64_t offset) const override;
+    virtual int64_t strpos(const OptString& haystack, const OptString& needle, int64_t offset) const override;
+    virtual int64_t strrpos(const OptString& haystack, const OptString& needle, int64_t offset) const override;
+    virtual int64_t stripos(const OptString& haystack, const OptString& needle, int64_t offset) const override;
+    virtual int64_t strripos(const OptString& haystack, const OptString& needle, int64_t offset) const override;
 
-    virtual Array chunk(const String&, int64_t) const override;
-    virtual String slice(const String& str, int64_t offset, int64_t length) const override;
-    virtual String splice(const String& str, const String& replacement, int64_t offset, int64_t length) const override;
-    virtual Array split(const String& str, const String& delimiter, int64_t limit = -1) const override;
+    virtual Array chunk(const OptString&, int64_t) const override;
+    virtual OptString slice(const OptString& str, int64_t offset, int64_t length) const override;
+    virtual OptString splice(const OptString& str, const OptString& replacement, int64_t offset, int64_t length) const override;
+    virtual Array split(const OptString& str, const OptString& delimiter, int64_t limit = -1) const override;
 
-    virtual String reverse(const String& str) const override;
+    virtual OptString reverse(const OptString& str) const override;
 
-    virtual String pad_left(const String& str, int64_t len, const String& pad) const override;
-    virtual String pad_right(const String& str, int64_t len, const String& pad) const override;
+    virtual OptString pad_left(const OptString& str, int64_t len, const OptString& pad) const override;
+    virtual OptString pad_right(const OptString& str, int64_t len, const OptString& pad) const override;
 
-    virtual String trim(const String& str, TrimSides sides) const override;
-    virtual String trim(const String& str, const String& what, TrimSides sides) const override;
+    virtual OptString trim(const OptString& str, TrimSides sides) const override;
+    virtual OptString trim(const OptString& str, const OptString& what, TrimSides sides) const override;
 
-    virtual String replace(const String& haystack, const String& needle, const String& replacement) const override;
-    virtual String replace_ci(const String& haystack, const String& needle, const String& replacement) const override;
+    virtual OptString replace(const OptString& haystack, const OptString& needle, const OptString& replacement) const override;
+    virtual OptString replace_ci(const OptString& haystack, const OptString& needle, const OptString& replacement) const override;
 
-    virtual String replace_every(const String& haystack, const Array& replacements) const override;
-    virtual String replace_every_ci(const String& haystack, const Array& replacements) const override;
-    virtual String replace_every_nonrecursive(const String& haystack, const Array& replacements) const override;
-    virtual String replace_every_nonrecursive_ci(const String& haystack, const Array& replacements) const override;
+    virtual OptString replace_every(const OptString& haystack, const Array& replacements) const override;
+    virtual OptString replace_every_ci(const OptString& haystack, const Array& replacements) const override;
+    virtual OptString replace_every_nonrecursive(const OptString& haystack, const Array& replacements) const override;
+    virtual OptString replace_every_nonrecursive_ci(const OptString& haystack, const Array& replacements) const override;
     private:
       icu::Locale m_collate;
       icu::Locale m_ctype;
@@ -77,8 +77,8 @@ namespace HPHP {
       icu::Collator* m_collator = nullptr;
 
       icu::Collator* collator() const;
-      String trim_impl(
-        const String& str,
+      OptString trim_impl(
+        const OptString& str,
         const std::function<bool(int32_t)>& test,
         TrimSides sides
       ) const;

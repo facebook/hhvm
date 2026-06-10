@@ -57,7 +57,7 @@ struct ReplayTransport final : Transport {
   /**
    * Get a description of the type of transport.
    */
-  String describe() const override {
+  OptString describe() const override {
     return s_replay;
   }
 

@@ -36,10 +36,10 @@ const StaticString
   s_tm_yday("tm_yday"),
   s_tm_isdst("tm_isdst");
 
-void IntlDateFormatter::setDateFormatter(const String& locale,
+void IntlDateFormatter::setDateFormatter(const OptString& locale,
                                          int64_t datetype, int64_t timetype,
                                          const Variant& timezone, const Variant& calendar,
-                                         const String& pattern) {
+                                         const OptString& pattern) {
   auto loc = icu::Locale::createFromName(locale.c_str());
   int64_t calType = UCAL_GREGORIAN;
   bool calOwned = false;
@@ -178,27 +178,27 @@ double IntlDateFormatter::getTimestamp(const Variant& arg) {
 // class IntlDateFormatter
 
 static void HHVM_METHOD(IntlDateFormatter, __construct,
-                        const String& locale,
+                        const OptString& locale,
                         int64_t datetype, int64_t timetype,
                         const Variant& timezone /*= null */,
                         const Variant& calendar /*= null */,
-                        const String& pattern /*= empty_string_ref */) {
+                        const OptString& pattern /*= empty_string_ref */) {
   auto data = Native::data<IntlDateFormatter>(this_);
   data->setDateFormatter(locale, datetype, timetype,
                          timezone, calendar, pattern);
 }
 
-static String HHVM_METHOD(IntlDateFormatter, format, const Variant& value) {
-  DATFMT_GET(data, this_, String());
+static OptString HHVM_METHOD(IntlDateFormatter, format, const Variant& value) {
+  DATFMT_GET(data, this_, OptString());
   double ts = data->getTimestamp(value);
   if (ts == NAN) {
-    return String();
+    return OptString();
   }
   UErrorCode error = U_ZERO_ERROR;
   int32_t len = udat_format(data->datefmt(), ts, nullptr, 0, nullptr, &error);
   if (error != U_BUFFER_OVERFLOW_ERROR) {
     data->setError(error);
-    return String();
+    return OptString();
   }
   error = U_ZERO_ERROR;
   icu::UnicodeString ret;
@@ -206,18 +206,18 @@ static String HHVM_METHOD(IntlDateFormatter, format, const Variant& value) {
   udat_format(data->datefmt(), ts, buffer, len + 1, nullptr, &error);
   if (U_FAILURE(error)) {
     data->setError(error);
-    return String();
+    return OptString();
   }
   ret.releaseBuffer(len);
-  String out(u8(ret, error));
+  OptString out(u8(ret, error));
   if (U_FAILURE(error)) {
     data->setError(error);
-    return String();
+    return OptString();
   }
   return out;
 }
 
-static String
+static OptString
 HHVM_STATIC_METHOD(IntlDateFormatter, FormatObject, const Object& /*object*/,
                    const Variant& /*format*/, const Variant& /*locale*/) {
   // TODO: Need IntlCalendar implemented first
@@ -239,28 +239,28 @@ static int64_t HHVM_METHOD(IntlDateFormatter, getErrorCode) {
   return data->getErrorCode();
 }
 
-static String HHVM_METHOD(IntlDateFormatter, getErrorMessage) {
-  DATFMT_GET(data, this_, String());
+static OptString HHVM_METHOD(IntlDateFormatter, getErrorMessage) {
+  DATFMT_GET(data, this_, OptString());
   return data->getErrorMessage();
 }
 
-static String HHVM_METHOD(IntlDateFormatter, getLocale, const Variant& which) {
+static OptString HHVM_METHOD(IntlDateFormatter, getLocale, const Variant& which) {
   std::underlying_type<ULocDataLocaleType>::type whichloc = ULOC_ACTUAL_LOCALE;
   if (!which.isNull()) whichloc = which.toInt64();
 
-  DATFMT_GET(data, this_, String());
+  DATFMT_GET(data, this_, OptString());
   UErrorCode error = U_ZERO_ERROR;
   const char *loc = udat_getLocaleByType(data->datefmt(),
                                          (ULocDataLocaleType)whichloc, &error);
   if (U_FAILURE(error)) {
     data->setError(error);
-    return String();
+    return OptString();
   }
-  return String(loc, CopyString);
+  return OptString(loc, CopyString);
 }
 
-static String HHVM_METHOD(IntlDateFormatter, getPattern) {
-  DATFMT_GET(data, this_, String());
+static OptString HHVM_METHOD(IntlDateFormatter, getPattern) {
+  DATFMT_GET(data, this_, OptString());
   UErrorCode error = U_ZERO_ERROR;
   int32_t len = udat_toPattern(data->datefmt(), false, nullptr, 0, &error);
   icu::UnicodeString tmp;
@@ -269,13 +269,13 @@ static String HHVM_METHOD(IntlDateFormatter, getPattern) {
   udat_toPattern(data->datefmt(), false, buf, len + 1, &error);
   if (U_FAILURE(error)) {
     data->setError(error, "Error getting formatter pattern");
-    return String();
+    return OptString();
   }
   tmp.releaseBuffer(len);
-  String ret(u8(tmp, error));
+  OptString ret(u8(tmp, error));
   if (U_FAILURE(error)) {
     data->setError(error);
-    return String();
+    return OptString();
   }
   return ret;
 }
@@ -285,15 +285,15 @@ static int64_t HHVM_METHOD(IntlDateFormatter, getTimeType) {
   return data->timeType();
 }
 
-static String HHVM_METHOD(IntlDateFormatter, getTimezoneId) {
+static OptString HHVM_METHOD(IntlDateFormatter, getTimezoneId) {
   DATFMT_GET(data, this_, 0);
   icu::UnicodeString id;
   data->datefmtObject()->getTimeZone().getID(id);
   UErrorCode error = U_ZERO_ERROR;
-  String ret(u8(id, error));
+  OptString ret(u8(id, error));
   if (U_FAILURE(error)) {
     data->setError(error, "Could not convert time zone id to UTF-8");
-    return String();
+    return OptString();
   }
   return ret;
 }
@@ -323,7 +323,7 @@ static bool HHVM_METHOD(IntlDateFormatter, isLenient) {
 
 static void add_to_localtime_arr(Array &ret, const UCalendar *cal,
                                  UCalendarDateFields calfield,
-                                 const String& name, UErrorCode &error,
+                                 const OptString& name, UErrorCode &error,
                                  int64_t delta = 0) {
   if (U_FAILURE(error)) { return; }
   long calendar_field_val = ucal_get(cal, calfield, &error);
@@ -332,7 +332,7 @@ static void add_to_localtime_arr(Array &ret, const UCalendar *cal,
 }
 
 static Variant HHVM_METHOD(IntlDateFormatter, localtime,
-                           const String& value, Variant& position) {
+                           const OptString& value, Variant& position) {
   DATFMT_GET(data, this_, uninit_null());
   int32_t parse_pos = -1;
   if (!position.isNull()) {
@@ -385,7 +385,7 @@ static Variant HHVM_METHOD(IntlDateFormatter, localtime,
 }
 
 static Variant HHVM_METHOD(IntlDateFormatter, parseWithPosition,
-                           const String& value, Variant& position) {
+                           const OptString& value, Variant& position) {
   DATFMT_GET(data, this_, 0);
   data->clearError();
   int32_t pos = position.toInt64();
@@ -430,7 +430,7 @@ static bool HHVM_METHOD(IntlDateFormatter, setLenient, bool lenient) {
 }
 
 static bool HHVM_METHOD(IntlDateFormatter, setPattern,
-                        const String& pattern) {
+                        const OptString& pattern) {
   DATFMT_GET(data, this_, false);
   UErrorCode error = U_ZERO_ERROR;
   icu::UnicodeString pat(u16(pattern, error));

@@ -27,7 +27,7 @@ DateInterval::DateInterval() {
   m_di = DateIntervalPtr();
 }
 
-DateInterval::DateInterval(const String& date_interval,
+DateInterval::DateInterval(const OptString& date_interval,
                            bool date_string /*= false */) {
   if (date_string) {
     setDateString(date_interval);
@@ -40,7 +40,7 @@ DateInterval::DateInterval(timelib_rel_time *di) {
   m_di = DateIntervalPtr(di, dateinterval_deleter());
 }
 
-void DateInterval::setDateString(const String& date_string) {
+void DateInterval::setDateString(const OptString& date_string) {
   timelib_error_container *errors = nullptr;
 
   auto time = timelib_strtotime((char*)date_string.data(), date_string.size(),
@@ -54,7 +54,7 @@ void DateInterval::setDateString(const String& date_string) {
   m_di = DateIntervalPtr(di, dateinterval_deleter());
 }
 
-void DateInterval::setInterval(const String& date_interval) {
+void DateInterval::setInterval(const OptString& date_interval) {
   timelib_rel_time *di = nullptr;
   timelib_error_container *errors = nullptr;
 
@@ -79,7 +79,7 @@ void DateInterval::setInterval(const String& date_interval) {
   m_di = DateIntervalPtr(di, dateinterval_deleter());
 }
 
-String DateInterval::format(const String& format_spec) {
+OptString DateInterval::format(const OptString& format_spec) {
   StringBuffer s;
   for(int i = 0; i < format_spec.length(); i++) {
     const int MAXLEN = 22; // 64bit signed int string length, plus terminating \0

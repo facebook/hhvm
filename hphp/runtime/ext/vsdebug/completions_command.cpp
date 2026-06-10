@@ -351,7 +351,7 @@ void CompletionsCommand::addClassConstantCompletions(
   SuggestionContext& context,
   folly::dynamic& targets
 ) {
-  HPHP::String classStr(context.matchContext.c_str());
+  HPHP::OptString classStr(context.matchContext.c_str());
   Class* cls = Class::load(classStr.get());
   if (cls == nullptr) {
     return;
@@ -385,7 +385,7 @@ void CompletionsCommand::addClassStaticCompletions(
   SuggestionContext& context,
   folly::dynamic& targets
 ) {
-  HPHP::String classStr(context.matchContext.c_str());
+  HPHP::OptString classStr(context.matchContext.c_str());
   Class* cls = Class::load(classStr.get());
 
   while (cls != nullptr) {
@@ -441,7 +441,7 @@ void CompletionsCommand::addFuncConstantCompletions(
 
   auto const consts = lookupDefinedConstants();
   IterateKV(consts.get(), [&] (TypedValue k, TypedValue) {
-    auto const& name = String::attach(tvCastToStringData(k));
+    auto const& name = OptString::attach(tvCastToStringData(k));
     addIfMatch(
       name.toCppString(),
       context.matchPrefix,

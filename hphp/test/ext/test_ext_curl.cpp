@@ -48,8 +48,8 @@ struct TestCurlRequestHandler final : HPHP::RequestHandler {
     if (transport->getMethod() == Transport::Method::POST) {
       size_t len = 0;
       const void *data = transport->getPostData(len);
-      String res = "POST: ";
-      res += String((char*)data, len, CopyString);
+      OptString res = "POST: ";
+      res += OptString((char*)data, len, CopyString);
       transport->sendString(res.c_str());
     } else {
       transport->sendString("OK");
@@ -145,7 +145,7 @@ bool TestExtCurl::test_curl_version() {
 bool TestExtCurl::test_curl_setopt() {
   Variant c = HHVM_FN(curl_init)();
   HHVM_FN(curl_setopt)(c.toResource(), CURLOPT_URL,
-                       String(get_request_uri()));
+                       OptString(get_request_uri()));
   HHVM_FN(curl_setopt)(c.toResource(), CURLOPT_RETURNTRANSFER, true);
   Variant res = HHVM_FN(curl_exec)(c.toResource());
   VS(res, "OK");
@@ -156,7 +156,7 @@ bool TestExtCurl::test_curl_setopt_array() {
   Variant c = HHVM_FN(curl_init)();
   HHVM_FN(curl_setopt_array)
     (c.toResource(),
-     make_dict_array(CURLOPT_URL, String(get_request_uri()),
+     make_dict_array(CURLOPT_URL, OptString(get_request_uri()),
                     CURLOPT_RETURNTRANSFER, true));
   Variant res = HHVM_FN(curl_exec)(c.toResource());
   VS(res, "OK");
@@ -165,13 +165,13 @@ bool TestExtCurl::test_curl_setopt_array() {
 
 bool TestExtCurl::test_curl_exec() {
   {
-    Variant c = HHVM_FN(curl_init)(String(get_request_uri()));
+    Variant c = HHVM_FN(curl_init)(OptString(get_request_uri()));
     HHVM_FN(curl_setopt)(c.toResource(), CURLOPT_RETURNTRANSFER, true);
     Variant res = HHVM_FN(curl_exec)(c.toResource());
     VS(res, "OK");
   }
   {
-    Variant c = HHVM_FN(curl_init)(String(get_request_uri()));
+    Variant c = HHVM_FN(curl_init)(OptString(get_request_uri()));
     HHVM_FN(curl_setopt)(c.toResource(), CURLOPT_WRITEFUNCTION,
                          "curl_write_func");
     HHVM_FN(ob_start)();
@@ -184,13 +184,13 @@ bool TestExtCurl::test_curl_exec() {
 }
 
 bool TestExtCurl::test_curl_getinfo() {
-  Variant c = HHVM_FN(curl_init)(String(get_request_uri()));
+  Variant c = HHVM_FN(curl_init)(OptString(get_request_uri()));
   HHVM_FN(curl_setopt)(c.toResource(), CURLOPT_RETURNTRANSFER, true);
   HHVM_FN(curl_exec)(c.toResource());
   Variant ret = HHVM_FN(curl_getinfo)(c.toResource());
-  VS(ret.toArray()[s_url], String(get_request_uri()));
+  VS(ret.toArray()[s_url], OptString(get_request_uri()));
   ret = HHVM_FN(curl_getinfo)(c.toResource(), CURLINFO_EFFECTIVE_URL);
-  VS(ret, String(get_request_uri()));
+  VS(ret, OptString(get_request_uri()));
   return Count(true);
 }
 
@@ -208,16 +208,16 @@ bool TestExtCurl::test_curl_error() {
   HHVM_FN(curl_setopt)(c.toResource(), CURLOPT_RETURNTRANSFER, true);
   HHVM_FN(curl_exec)(c.toResource());
   Variant err = HHVM_FN(curl_error)(c.toResource());
-  VERIFY(equal(err, String("Couldn't resolve host 'www.thereisnosuchanurl'").get()) ||
-         equal(err, String("Could not resolve host: www.thereisnosuchanurl"
+  VERIFY(equal(err, OptString("Couldn't resolve host 'www.thereisnosuchanurl'").get()) ||
+         equal(err, OptString("Could not resolve host: www.thereisnosuchanurl"
                 " (Domain name not found)").get()) ||
-         equal(err, String("Could not resolve: www.thereisnosuchanurl"
+         equal(err, OptString("Could not resolve: www.thereisnosuchanurl"
                 " (Domain name not found)").get()));
   return Count(true);
 }
 
 bool TestExtCurl::test_curl_close() {
-  Variant c = HHVM_FN(curl_init)(String(get_request_uri()));
+  Variant c = HHVM_FN(curl_init)(OptString(get_request_uri()));
   HHVM_FN(curl_setopt)(c.toResource(), CURLOPT_RETURNTRANSFER, true);
   HHVM_FN(curl_exec)(c.toResource());
   HHVM_FN(curl_close)(c.toResource());
@@ -231,8 +231,8 @@ bool TestExtCurl::test_curl_multi_init() {
 
 bool TestExtCurl::test_curl_multi_add_handle() {
   OptResource mh = HHVM_FN(curl_multi_init)();
-  Variant c1 = HHVM_FN(curl_init)(String(get_request_uri()));
-  Variant c2 = HHVM_FN(curl_init)(String(get_request_uri()));
+  Variant c1 = HHVM_FN(curl_init)(OptString(get_request_uri()));
+  Variant c2 = HHVM_FN(curl_init)(OptString(get_request_uri()));
   HHVM_FN(curl_multi_add_handle)(mh, c1.toResource());
   HHVM_FN(curl_multi_add_handle)(mh, c2.toResource());
   return Count(true);
@@ -240,8 +240,8 @@ bool TestExtCurl::test_curl_multi_add_handle() {
 
 bool TestExtCurl::test_curl_multi_remove_handle() {
   OptResource mh = HHVM_FN(curl_multi_init)();
-  Variant c1 = HHVM_FN(curl_init)(String(get_request_uri()));
-  Variant c2 = HHVM_FN(curl_init)(String(get_request_uri()));
+  Variant c1 = HHVM_FN(curl_init)(OptString(get_request_uri()));
+  Variant c2 = HHVM_FN(curl_init)(OptString(get_request_uri()));
   HHVM_FN(curl_multi_add_handle)(mh, c1.toResource());
   HHVM_FN(curl_multi_add_handle)(mh, c2.toResource());
   HHVM_FN(curl_multi_remove_handle)(mh, c1.toResource());
@@ -250,8 +250,8 @@ bool TestExtCurl::test_curl_multi_remove_handle() {
 
 bool TestExtCurl::test_curl_multi_exec() {
   OptResource mh = HHVM_FN(curl_multi_init)();
-  Variant c1 = HHVM_FN(curl_init)(String(get_request_uri()));
-  Variant c2 = HHVM_FN(curl_init)(String(get_request_uri()));
+  Variant c1 = HHVM_FN(curl_init)(OptString(get_request_uri()));
+  Variant c2 = HHVM_FN(curl_init)(OptString(get_request_uri()));
   HHVM_FN(curl_setopt)(c1.toResource(), CURLOPT_RETURNTRANSFER, true);
   HHVM_FN(curl_setopt)(c2.toResource(), CURLOPT_RETURNTRANSFER, true);
   HHVM_FN(curl_multi_add_handle)(mh, c1.toResource());
@@ -267,8 +267,8 @@ bool TestExtCurl::test_curl_multi_exec() {
 
 bool TestExtCurl::test_curl_multi_select() {
   OptResource mh = HHVM_FN(curl_multi_init)();
-  Variant c1 = HHVM_FN(curl_init)(String(get_request_uri()));
-  Variant c2 = HHVM_FN(curl_init)(String(get_request_uri()));
+  Variant c1 = HHVM_FN(curl_init)(OptString(get_request_uri()));
+  Variant c2 = HHVM_FN(curl_init)(OptString(get_request_uri()));
   HHVM_FN(curl_multi_add_handle)(mh, c1.toResource());
   HHVM_FN(curl_multi_add_handle)(mh, c2.toResource());
   VS(HHVM_FN(curl_multi_select)(mh), 0);
@@ -277,8 +277,8 @@ bool TestExtCurl::test_curl_multi_select() {
 
 bool TestExtCurl::test_curl_multi_getcontent() {
   OptResource mh = HHVM_FN(curl_multi_init)();
-  Variant c1 = HHVM_FN(curl_init)(String(get_request_uri()));
-  Variant c2 = HHVM_FN(curl_init)(String(get_request_uri()));
+  Variant c1 = HHVM_FN(curl_init)(OptString(get_request_uri()));
+  Variant c2 = HHVM_FN(curl_init)(OptString(get_request_uri()));
   HHVM_FN(curl_setopt)(c1.toResource(), CURLOPT_RETURNTRANSFER, true);
   HHVM_FN(curl_setopt)(c2.toResource(), CURLOPT_RETURNTRANSFER, true);
   HHVM_FN(curl_multi_add_handle)(mh, c1.toResource());
@@ -298,8 +298,8 @@ bool TestExtCurl::test_curl_multi_getcontent() {
 
 bool TestExtCurl::test_curl_multi_info_read() {
   OptResource mh = HHVM_FN(curl_multi_init)();
-  Variant c1 = HHVM_FN(curl_init)(String(get_request_uri()));
-  Variant c2 = HHVM_FN(curl_init)(String(get_request_uri()));
+  Variant c1 = HHVM_FN(curl_init)(OptString(get_request_uri()));
+  Variant c2 = HHVM_FN(curl_init)(OptString(get_request_uri()));
   HHVM_FN(curl_setopt)(c1.toResource(), CURLOPT_RETURNTRANSFER, true);
   HHVM_FN(curl_setopt)(c2.toResource(), CURLOPT_RETURNTRANSFER, true);
   HHVM_FN(curl_multi_add_handle)(mh, c1.toResource());
@@ -318,8 +318,8 @@ bool TestExtCurl::test_curl_multi_info_read() {
 
 bool TestExtCurl::test_curl_multi_close() {
   OptResource mh = HHVM_FN(curl_multi_init)();
-  Variant c1 = HHVM_FN(curl_init)(String(get_request_uri()));
-  Variant c2 = HHVM_FN(curl_init)(String(get_request_uri()));
+  Variant c1 = HHVM_FN(curl_init)(OptString(get_request_uri()));
+  Variant c2 = HHVM_FN(curl_init)(OptString(get_request_uri()));
   HHVM_FN(curl_setopt)(c1.toResource(), CURLOPT_RETURNTRANSFER, true);
   HHVM_FN(curl_setopt)(c2.toResource(), CURLOPT_RETURNTRANSFER, true);
   HHVM_FN(curl_multi_add_handle)(mh, c1.toResource());

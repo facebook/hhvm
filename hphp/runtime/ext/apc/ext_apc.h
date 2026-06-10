@@ -98,8 +98,8 @@ static_assert(sizeof(int64_t) == sizeof(long long),
 ///////////////////////////////////////////////////////////////////////////////
 // apc serialization
 
-String apc_serialize(const_variant_ref value, bool pure);
-inline String apc_serialize(const Variant& var, bool pure) {
+OptString apc_serialize(const_variant_ref value, bool pure);
+inline OptString apc_serialize(const Variant& var, bool pure) {
   return apc_serialize(const_variant_ref{var}, pure);
 }
 Variant apc_unserialize(const char* data, int len, bool pure);

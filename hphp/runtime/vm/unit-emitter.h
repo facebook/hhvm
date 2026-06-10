@@ -118,7 +118,7 @@ struct UnitEmitter {
    * verifier, where we want to lookup the values, but not keep them
    * around.
    */
-  String lookupLitstrIdCopy(Id id) const;
+  OptString lookupLitstrIdCopy(Id id) const;
   Array lookupArrayIdCopy(Id id) const;
 
   Id numArrays() const { return m_arrays.size(); }

@@ -36,7 +36,7 @@ static bool ctype(const Variant& v, int (*iswhat)(int)) {
   }
 
   if (v.isString()) {
-    String s = v.toString();
+    OptString s = v.toString();
     if (!s.empty()) {
       const char *p = s.data();
       const char *e = s.data() + s.size();

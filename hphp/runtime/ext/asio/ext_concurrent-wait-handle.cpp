@@ -152,7 +152,7 @@ void c_ConcurrentWaitHandle::markAsFailed(const Object& exception) {
   decRefObj(this);
 }
 
-String c_ConcurrentWaitHandle::getName() {
+OptString c_ConcurrentWaitHandle::getName() {
   return s_concurrent;
 }
 

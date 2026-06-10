@@ -48,7 +48,7 @@ struct HphpdHook final : DebuggerHook {
 
   void onError(const ExtendedException& /*ee*/, int /*errnum*/,
                const std::string& message) override {
-    Debugger::InterruptVMHook(ExceptionThrown, String(message));
+    Debugger::InterruptVMHook(ExceptionThrown, OptString(message));
   }
 
   void onFileLoad(Unit* unit) override;

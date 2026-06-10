@@ -198,9 +198,9 @@ bool is_callable(const Variant& v, bool syntax_only, Variant* name) {
     }
 
     if (name) {
-      *name = concat3(String{clsString},
+      *name = concat3(OptString{clsString},
                              s_colon2,
-                             String{mthname.val().pstr});
+                             OptString{mthname.val().pstr});
     }
     return ret;
   }
@@ -224,8 +224,8 @@ bool is_callable(const Variant& v, bool syntax_only, Variant* name) {
 
 namespace {
 Class* vm_decode_class_from_name(
-  const String& clsName,
-  const String& funcName,
+  const OptString& clsName,
+  const OptString& funcName,
   bool nameContainsClass,
   ActRec* ar,
   bool& forwarding,
@@ -265,7 +265,7 @@ Class* vm_decode_class_from_name(
     }
   } else {
     if (flags == DecodeFlags::Warn && nameContainsClass) {
-      String nameClass = funcName.substr(0, funcName.find("::"));
+      OptString nameClass = funcName.substr(0, funcName.find("::"));
       if (nameClass.get()->tsame(s_self.get())   ||
           nameClass.get()->tsame(s_static.get())) {
         raise_warning("behavior of call_user_func(array('%s', '%s')) "
@@ -278,7 +278,7 @@ Class* vm_decode_class_from_name(
 }
 
 const Func* vm_decode_func_from_name(
-  const String& funcName,
+  const OptString& funcName,
   ActRec* ar,
   bool forwarding,
   ObjectData*& this_,
@@ -471,8 +471,8 @@ vm_decode_function(const_variant_ref function,
     // nameContainsClass.
     this_ = nullptr;
     cls = nullptr;
-    String name;
-    int pos = String::npos;
+    OptString name;
+    int pos = OptString::npos;
     bool nameContainsClass = false;
     if (function.isString()) {
       // If 'function' is a string we simply assign it to name and
@@ -480,7 +480,7 @@ vm_decode_function(const_variant_ref function,
       name = function.toString();
       pos = name.find("::");
       nameContainsClass =
-        (pos != 0 && pos != String::npos && pos + 2 < name.size());
+        (pos != 0 && pos != OptString::npos && pos + 2 < name.size());
     } else {
       // If 'function' is an array with exactly two indices 0 and 1, we
       // assign the value at index 1 to name and we use the value at index
@@ -517,7 +517,7 @@ vm_decode_function(const_variant_ref function,
       name = elem1.toString();
       pos = name.find("::");
       nameContainsClass =
-        (pos != 0 && pos != String::npos && pos + 2 < name.size());
+        (pos != 0 && pos != OptString::npos && pos + 2 < name.size());
       if (elem0.isString() || elem0.isLazyClass()) {
         auto const clsName = elem0.isString() ?
           elem0.toString() : StrNR{elem0.toLazyClassVal().name()};
@@ -541,7 +541,7 @@ vm_decode_function(const_variant_ref function,
 
     HPHP::Class* cc = cls;
     if (nameContainsClass) {
-      String c = name.substr(0, pos);
+      OptString c = name.substr(0, pos);
       name = name.substr(pos + 2);
       if (c.get()->tsame(s_self.get())) {
         if (cls) {
@@ -671,7 +671,7 @@ Variant vm_call_user_func(const_variant_ref function, const Variant& params,
 }
 
 Variant
-invoke(const String& function, const Variant& params,
+invoke(const OptString& function, const Variant& params,
        bool allowDynCallNoPointer /* = false */) {
   Func* func = Func::load(function.get());
   if (func && (isContainer(params) || params.isNull())) {
@@ -690,7 +690,7 @@ invoke(const String& function, const Variant& params,
                           function.c_str());
 }
 
-Variant invoke_static_method(const String& s, const String& method,
+Variant invoke_static_method(const OptString& s, const OptString& method,
                              const Variant& params, const ArrayData* namedArgNames,
                              bool fatal /* = true */) {
   HPHP::Class* class_ = Class::lookup(s.get());
@@ -739,7 +739,7 @@ void throw_missing_this(const Func* f) {
   SystemLib::throwBadMethodCallExceptionObject(msg);
 }
 
-void NEVER_INLINE throw_invalid_property_name(const String& name) {
+void NEVER_INLINE throw_invalid_property_name(const OptString& name) {
   if (!name.size()) {
     raise_error("Cannot access empty property");
   }
@@ -976,17 +976,17 @@ void check_collection_cast_to_array() {
   }
 }
 
-Object create_object_only(const String& s) {
+Object create_object_only(const OptString& s) {
   return Object::attach(g_context->createObjectOnly(s.get()));
 }
 
-Object init_object(const String& s, const Array& params,
+Object init_object(const OptString& s, const Array& params,
                    const ArrayData* namedArgNames, ObjectData* o) {
   return Object{g_context->initObject(s.get(), params, namedArgNames, o)};
 }
 
 Object
-create_object(const String& s, const Array& params,
+create_object(const OptString& s, const Array& params,
               const ArrayData* namedArgNames /* = nullptr */, bool init /* = true */) {
   return Object::attach(g_context->createObject(s.get(), params, namedArgNames, init));
 }
@@ -1108,19 +1108,19 @@ Variant unserialize_ex(const char* str, int len,
   return v;
 }
 
-Variant unserialize_ex(const String& str,
+Variant unserialize_ex(const OptString& str,
                        VariableUnserializer::Type type,
                        const Array& options /* = null_array */,
                        bool pure /* = false */) {
   return unserialize_ex(str.data(), str.size(), type, options, pure);
 }
 
-String concat3(const String& s1, const String& s2, const String& s3) {
+OptString concat3(const OptString& s1, const OptString& s2, const OptString& s3) {
   auto r1 = s1.slice();
   auto r2 = s2.slice();
   auto r3 = s3.slice();
   auto len = r1.size() + r2.size() + r3.size();
-  auto str = String::attach(StringData::Make(len));
+  auto str = OptString::attach(StringData::Make(len));
   auto const r = str.mutableData();
   memcpy(r,                         r1.data(), r1.size());
   memcpy(r + r1.size(),             r2.data(), r2.size());
@@ -1129,14 +1129,14 @@ String concat3(const String& s1, const String& s2, const String& s3) {
   return str;
 }
 
-String concat4(const String& s1, const String& s2, const String& s3,
-               const String& s4) {
+OptString concat4(const OptString& s1, const OptString& s2, const OptString& s3,
+               const OptString& s4) {
   auto r1 = s1.slice();
   auto r2 = s2.slice();
   auto r3 = s3.slice();
   auto r4 = s4.slice();
   auto len = r1.size() + r2.size() + r3.size() + r4.size();
-  auto str = String::attach(StringData::Make(len));
+  auto str = OptString::attach(StringData::Make(len));
   auto const r = str.mutableData();
   memcpy(r,                                     r1.data(), r1.size());
   memcpy(r + r1.size(),                         r2.data(), r2.size());
@@ -1146,7 +1146,7 @@ String concat4(const String& s1, const String& s2, const String& s3,
   return str;
 }
 
-static bool invoke_file_impl(Variant& res, const String& path, bool once,
+static bool invoke_file_impl(Variant& res, const OptString& path, bool once,
                              const char *currentDir,
                              bool callByHPHPInvoke) {
   bool initial;
@@ -1162,7 +1162,7 @@ static NEVER_INLINE Variant throw_missing_file(const char* file) {
   throw PhpFileDoesNotExistException(file);
 }
 
-static Variant invoke_file(const String& s,
+static Variant invoke_file(const OptString& s,
                            bool once,
                            const char *currentDir,
                            bool callByHPHPInvoke) {
@@ -1173,7 +1173,7 @@ static Variant invoke_file(const String& s,
   return throw_missing_file(s.c_str());
 }
 
-Variant include_impl_invoke(const String& file, bool once,
+Variant include_impl_invoke(const OptString& file, bool once,
                             const char *currentDir, bool callByHPHPInvoke) {
   if (FileUtil::isAbsolutePath(file.toCppString())) {
     if (Cfg::Sandbox::Mode || !Cfg::Server::AlwaysUseRelativePath) {
@@ -1183,7 +1183,7 @@ Variant include_impl_invoke(const String& file, bool once,
     }
 
     try {
-      String rel_path(FileUtil::relativePath(Cfg::Server::SourceRoot,
+      OptString rel_path(FileUtil::relativePath(Cfg::Server::SourceRoot,
                                            string(file.data())));
 
       // Don't try/catch - We want the exception to be passed along
@@ -1210,7 +1210,7 @@ struct IncludeImplInvokeContext {
   Variant returnValue;
 };
 
-static bool include_impl_invoke_context(const String& file, void* ctx) {
+static bool include_impl_invoke_context(const OptString& file, void* ctx) {
   struct IncludeImplInvokeContext* context = (IncludeImplInvokeContext*)ctx;
   bool invoked_file = false;
   try {
@@ -1228,13 +1228,13 @@ static bool include_impl_invoke_context(const String& file, void* ctx) {
  * determine if a path references a real file.  ctx is a pointer to some context
  * information that will be passed through to tryFile.  (It's a hacky closure)
  */
-String resolve_include(const String& file, const char* currentDir,
-                       bool (*tryFile)(const String& file, void*), void* ctx) {
+OptString resolve_include(const OptString& file, const char* currentDir,
+                       bool (*tryFile)(const OptString& file, void*), void* ctx) {
   const char* c_file = file.data();
 
-  auto const getCwd = [] () -> String {
+  auto const getCwd = [] () -> OptString {
     if (LIKELY(!g_context.isNull())) return g_context->getCwd();
-    return String(Process::CurrentWorkingDirectory, CopyString);
+    return OptString(Process::CurrentWorkingDirectory, CopyString);
   };
 
   if (!File::IsPlainFilePath(file)) {
@@ -1244,7 +1244,7 @@ String resolve_include(const String& file, const char* currentDir,
     }
 
   } else if (FileUtil::isAbsolutePath(file.toCppString())) {
-    String can_path = FileUtil::canonicalize(file);
+    OptString can_path = FileUtil::canonicalize(file);
 
     if (tryFile(can_path, ctx)) {
       return can_path;
@@ -1253,8 +1253,8 @@ String resolve_include(const String& file, const char* currentDir,
   } else if ((c_file[0] == '.' && (c_file[1] == '/' || (
     c_file[1] == '.' && c_file[2] == '/')))) {
 
-    String path(String(getCwd() + "/" + file));
-    String can_path = FileUtil::canonicalize(path);
+    OptString path(OptString(getCwd() + "/" + file));
+    OptString can_path = FileUtil::canonicalize(path);
 
     if (tryFile(can_path, ctx)) {
       return can_path;
@@ -1265,7 +1265,7 @@ String resolve_include(const String& file, const char* currentDir,
       auto const& includePaths = RID().getIncludePaths();
 
       for (auto const& includePath : includePaths) {
-        String path("");
+        OptString path("");
         auto const is_stream_wrapper =
           includePath.find("://") != std::string::npos;
 
@@ -1281,11 +1281,11 @@ String resolve_include(const String& file, const char* currentDir,
 
         path += file;
 
-        String can_path;
+        OptString can_path;
         if (!is_stream_wrapper) {
           can_path = FileUtil::canonicalize(path);
         } else {
-          can_path = String(path.c_str());
+          can_path = OptString(path.c_str());
         }
 
         if (tryFile(can_path, ctx)) {
@@ -1295,17 +1295,17 @@ String resolve_include(const String& file, const char* currentDir,
     }
 
     if (FileUtil::isAbsolutePath(currentDir)) {
-      String path(currentDir);
+      OptString path(currentDir);
       path += "/";
       path += file;
-      String can_path = FileUtil::canonicalize(path);
+      OptString can_path = FileUtil::canonicalize(path);
 
       if (tryFile(can_path, ctx)) {
         return can_path;
       }
     } else {
-      String path(getCwd() + "/" + currentDir + file);
-      String can_path = FileUtil::canonicalize(path);
+      OptString path(getCwd() + "/" + currentDir + file);
+      OptString can_path = FileUtil::canonicalize(path);
 
       if (tryFile(can_path, ctx)) {
         return can_path;
@@ -1313,14 +1313,14 @@ String resolve_include(const String& file, const char* currentDir,
     }
   }
 
-  return String();
+  return OptString();
 }
 
-static Variant include_impl(const String& file, bool once,
+static Variant include_impl(const OptString& file, bool once,
                             const char *currentDir, bool required,
                             bool raiseNotice) {
   struct IncludeImplInvokeContext ctx = {once, currentDir};
-  String can_path = resolve_include(file, currentDir,
+  OptString can_path = resolve_include(file, currentDir,
                                     include_impl_invoke_context, (void*)&ctx);
 
   if (can_path.isNull()) {
@@ -1329,7 +1329,7 @@ static Variant include_impl(const String& file, bool once,
       raise_notice("Tried to invoke %s but file not found.", file.data());
     }
     if (required) {
-      String ms = "Required file that does not exist: ";
+      OptString ms = "Required file that does not exist: ";
       ms += file;
       raise_fatal_error(ms.data());
     }
@@ -1339,14 +1339,14 @@ static Variant include_impl(const String& file, bool once,
   return ctx.returnValue;
 }
 
-Variant require(const String& file,
+Variant require(const OptString& file,
                 bool once,
                 const char* currentDir,
                 bool raiseNotice) {
   return include_impl(file, once, currentDir, true, raiseNotice);
 }
 
-bool function_exists(const String& function_name) {
+bool function_exists(const OptString& function_name) {
   auto f = Func::lookup(function_name.get());
   return f != nullptr;
 }

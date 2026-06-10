@@ -98,7 +98,7 @@ const int64_t k_JSON_ERROR_UNSUPPORTED_TYPE
 
 // Handles output of `json_encode` with fallback value for
 // partial output on errors, and `false` otherwise.
-Variant json_guard_error_result(const String& partial_error_output,
+Variant json_guard_error_result(const OptString& partial_error_output,
                                 int64_t options /* = 0*/) {
   int is_partial_output = options & k_JSON_PARTIAL_OUTPUT_ON_ERROR;
 
@@ -142,7 +142,7 @@ TypedValue json_encode_impl(const Variant& value, int64_t options,
   if (options & k_JSON_FB_FULL_FLOAT_PRECISION) vs.setFullFloatPrecision();
   if (pure) vs.setPure();
 
-  String json = vs.serializeValue(value, !(options & k_JSON_FB_UNLIMITED));
+  OptString json = vs.serializeValue(value, !(options & k_JSON_FB_UNLIMITED));
   assertx(json.get() != nullptr);
   if (UNLIKELY(StructuredLog::coinflip(Cfg::Eval::SerDesSampleRate))) {
     StructuredLog::logSerDes("json", "ser", json, value);
@@ -190,7 +190,7 @@ TypedValue HHVM_FUNCTION(json_encode_pure, const Variant& value,
   return json_encode_with_error_impl(value, error, options, depth, true);
 }
 
-TypedValue HHVM_FUNCTION(json_decode, const String& json,
+TypedValue HHVM_FUNCTION(json_decode, const OptString& json,
                          bool assoc, int64_t depth, int64_t options) {
   json_set_last_error_code(json_error_codes::JSON_ERROR_NONE);
 
@@ -222,7 +222,7 @@ TypedValue HHVM_FUNCTION(json_decode, const String& json,
     return tvReturn(std::move(z));
   }
 
-  String trimmed = HHVM_FN(trim)(json, "\t\n\r ");
+  OptString trimmed = HHVM_FN(trim)(json, "\t\n\r ");
 
   if (trimmed.size() == 4) {
     if (!strcasecmp(trimmed.data(), "null")) {
@@ -269,7 +269,7 @@ TypedValue HHVM_FUNCTION(json_decode, const String& json,
 
     // Wrap the string in an array to allow the JSON_parser to handle
     // things like unicode escape sequences, then unwrap to get result
-    String wrapped("[");
+    OptString wrapped("[");
     wrapped += json + "]";
     // Stick to a normal hhvm array for the wrapper
     const int64_t mask = ~(k_JSON_FB_COLLECTIONS | k_JSON_FB_STABLE_MAPS);
@@ -295,7 +295,7 @@ TypedValue HHVM_FUNCTION(json_decode, const String& json,
   return make_tv<KindOfNull>();
 }
 
-TypedValue HHVM_FUNCTION(json_decode_with_error, const String& json,
+TypedValue HHVM_FUNCTION(json_decode_with_error, const OptString& json,
                          Variant& error, bool assoc, int64_t depth,
                          int64_t options) {
   // fn is pure, so prior state must be preserved and restored

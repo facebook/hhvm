@@ -231,7 +231,7 @@ struct FastCGITransport final : Transport, private Synchronizable {
 #undef FCGI_PROTOCOL_HEADERS
 
   // Get a description of the type of transport.
-  String describe() const override {
+  OptString describe() const override {
     return s_fastcgi;
   }
 

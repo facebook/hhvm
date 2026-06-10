@@ -49,8 +49,8 @@ namespace HPHP::Intl {
 
 const StaticString s_MessageFormatter("MessageFormatter");
 
-bool MessageFormatter::openFormatter(const String& pattern,
-                                     const String& locale) {
+bool MessageFormatter::openFormatter(const OptString& pattern,
+                                     const OptString& locale) {
   UErrorCode error = U_ZERO_ERROR;
   icu::UnicodeString pat(u16(pattern, error));
   if (U_FAILURE(error)) {
@@ -78,8 +78,8 @@ bool MessageFormatter::openFormatter(const String& pattern,
 }
 
 static void HHVM_METHOD(MessageFormatter, __construct,
-                        const String& locale,
-                        const String& pattern) {
+                        const OptString& locale,
+                        const OptString& pattern) {
   auto data = Native::data<MessageFormatter>(this_);
   if (!data->openFormatter(pattern, localeOrDefault(locale))) {
     data->throwException("%s", data->getErrorMessage().c_str());
@@ -293,7 +293,7 @@ bool MessageFormatter::mapArgs(std::vector<icu::Formattable>& types,
       char buffer[12];
       int32_t len = snprintf(buffer, sizeof(buffer), "%d", (int)num);
       UErrorCode error = U_ZERO_ERROR;
-      icu::UnicodeString numName(u16(String(buffer, len, CopyString), error));
+      icu::UnicodeString numName(u16(OptString(buffer, len, CopyString), error));
       names[arg_num] = numName;
     }
 
@@ -367,7 +367,7 @@ static Variant HHVM_METHOD(MessageFormatter, format, const Array& args) {
     return false;
   }
 
-  String ret(u8(result, error));
+  OptString ret(u8(result, error));
   if (U_FAILURE(error)) {
     data->setError(error, "Unable to format result as UTF-8");
     return false;
@@ -380,22 +380,22 @@ static int64_t HHVM_METHOD(MessageFormatter, getErrorCode) {
   return data->getErrorCode();
 }
 
-static String HHVM_METHOD(MessageFormatter, getErrorMessage) {
+static OptString HHVM_METHOD(MessageFormatter, getErrorMessage) {
   FETCH_MFMT(data, this_);
   return data->getErrorMessage();
 }
 
-static String HHVM_METHOD(MessageFormatter, getLocale) {
+static OptString HHVM_METHOD(MessageFormatter, getLocale) {
   FETCH_MFMT(data, this_);
-  return String(umsg_getLocale(data->formatter()), CopyString);
+  return OptString(umsg_getLocale(data->formatter()), CopyString);
 }
 
-static String HHVM_METHOD(MessageFormatter, getPattern) {
+static OptString HHVM_METHOD(MessageFormatter, getPattern) {
   FETCH_MFMT(data, this_);
   icu::UnicodeString pat16;
   data->formatterObj()->toPattern(pat16);
   UErrorCode error = U_ZERO_ERROR;
-  String pat(u8(pat16, error));
+  OptString pat(u8(pat16, error));
   if (U_FAILURE(error)) {
     data->throwException("Unable to return pattern to utf8");
     not_reached();
@@ -403,7 +403,7 @@ static String HHVM_METHOD(MessageFormatter, getPattern) {
   return pat;
 }
 
-static Variant HHVM_METHOD(MessageFormatter, parse, const String& value) {
+static Variant HHVM_METHOD(MessageFormatter, parse, const OptString& value) {
   FETCH_MFMT(data, this_);
   UErrorCode error = U_ZERO_ERROR;
   icu::UnicodeString ustr(u16(value, error));
@@ -440,7 +440,7 @@ static Variant HHVM_METHOD(MessageFormatter, parse, const String& value) {
         icu::UnicodeString tmp;
         fargs[i].getString(tmp);
         error = U_ZERO_ERROR;
-        String str(u8(tmp, error));
+        OptString str(u8(tmp, error));
         if (U_FAILURE(error)) {
           data->setError(error, "Unable to convert to utf-8");
           return false;
@@ -457,7 +457,7 @@ static Variant HHVM_METHOD(MessageFormatter, parse, const String& value) {
   return ret;
 }
 
-bool MessageFormatter::setPattern(const String& pattern) {
+bool MessageFormatter::setPattern(const OptString& pattern) {
   UErrorCode error = U_ZERO_ERROR;
   icu::UnicodeString pat(u16(pattern, error));
   if (U_FAILURE(error)) {
@@ -491,7 +491,7 @@ bool MessageFormatter::setPattern(const String& pattern) {
   return true;
 }
 
-static bool HHVM_METHOD(MessageFormatter, setPattern, const String& value) {
+static bool HHVM_METHOD(MessageFormatter, setPattern, const OptString& value) {
   FETCH_MFMT(data, this_);
   return data->setPattern(value);
 }

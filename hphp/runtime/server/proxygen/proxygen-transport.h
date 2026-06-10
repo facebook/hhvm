@@ -177,7 +177,7 @@ struct ProxygenTransport final
   /**
    * Get a description of the type of transport.
    */
-  String describe() const override {
+  OptString describe() const override {
     return s_proxygen;
   }
 

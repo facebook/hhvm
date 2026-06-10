@@ -100,7 +100,7 @@ const StaticString s_passphrase("passphrase");
 int SSLSocket::passwdCallback(char* buf, int num, int /*verify*/, void* data) {
   /* TODO: could expand this to make a callback into PHP user-space */
   SSLSocket *stream = (SSLSocket *)data;
-  String passphrase = stream->m_context[s_passphrase].toString();
+  OptString passphrase = stream->m_context[s_passphrase].toString();
   if (!passphrase.empty() && passphrase.size() < num - 1) {
     memcpy(buf, passphrase.data(), passphrase.size() + 1);
     return passphrase.size();
@@ -124,8 +124,8 @@ SSL *SSLSocket::createSSL(SSL_CTX *ctx) {
     SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER, verifyCallback);
 
     /* CA stuff */
-    String cafile = m_context[s_cafile].toString();
-    String capath = m_context[s_capath].toString();
+    OptString cafile = m_context[s_cafile].toString();
+    OptString capath = m_context[s_capath].toString();
 
     if (!FileUtil::isValidPath(cafile)) {
       raise_warning("cafile expected to be a path, string given");
@@ -161,18 +161,18 @@ SSL *SSLSocket::createSSL(SSL_CTX *ctx) {
     SSL_CTX_set_default_passwd_cb(ctx, passwdCallback);
   }
 
-  String cipherlist = m_context[s_ciphers].toString();
+  OptString cipherlist = m_context[s_ciphers].toString();
   if (cipherlist.empty()) {
     cipherlist = "DEFAULT";
   }
   SSL_CTX_set_cipher_list(ctx, cipherlist.data());
 
-  String certfile = m_context[s_local_cert].toString();
+  OptString certfile = m_context[s_local_cert].toString();
   if (!FileUtil::isValidPath(certfile)) {
     raise_warning("local_cert expected to be a path, string given");
     return nullptr;
   } else if (!certfile.empty()) {
-    String resolved_path_buff = File::TranslatePath(certfile);
+    OptString resolved_path_buff = File::TranslatePath(certfile);
     if (!resolved_path_buff.empty()) {
       /* a certificate to use for authentication */
       if (SSL_CTX_use_certificate_chain_file(ctx, resolved_path_buff.data())
@@ -595,7 +595,7 @@ bool SSLSocket::applyVerificationPolicy(X509 *peer) {
   /* if the cert passed the usual checks, apply our own local policies now */
 
   /* Does the common name match ? (used primarily for https://) */
-  String cnmatch = m_context[s_CN_match].toString();
+  OptString cnmatch = m_context[s_CN_match].toString();
   if (!cnmatch.empty()) {
     X509_NAME *name = X509_get_subject_name(peer);
     char buf[1024];
@@ -788,9 +788,9 @@ IMPLEMENT_RESOURCE_ALLOCATION(Certificate)
 
 BIO *Certificate::ReadData(const Variant& var, bool *file /* = NULL */) {
   if (var.isString() || var.isObject()) {
-    String svar = var.toString();
+    OptString svar = var.toString();
     if (StringUtil::IsFileUrl(svar)) {
-      String decoded = StringUtil::DecodeFileUrl(svar);
+      OptString decoded = StringUtil::DecodeFileUrl(svar);
       if (decoded.empty()) {
         raise_warning("invalid file URL, %s", svar.data());
         return nullptr;

@@ -950,7 +950,7 @@ load_1(struct magic_set *ms, int action, const char *fn, int *errs,
 
   memset(&me, 0, sizeof(me));
   /* read and parse this file */
-  HPHP::String strline;
+  HPHP::OptString strline;
   for (ms->line = 1; (strline = file->readLine()); ms->line++) {
     line = strline.data();
     len = strline.size();
@@ -1172,7 +1172,7 @@ apprentice_load(struct magic_set *ms, const char *fn, int action)
       if (!d.toBoolean()) {
         break;
       }
-      HPHP::String s = d.toString();
+      HPHP::OptString s = d.toString();
       if ((mflen = snprintf(mfn, sizeof(mfn), "%s/%s", fn, s.data())) < 0) {
         file_oomem(ms,
         strlen(fn) + s.size() + 2);

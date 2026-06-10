@@ -260,7 +260,7 @@ StringData* lookupStaticString(folly::StringPiece slice) {
   return nullptr;
 }
 
-StringData* makeStaticString(const String& str) {
+StringData* makeStaticString(const OptString& str) {
   assertx(!str.isNull());
   return makeStaticString(str.get());
 }

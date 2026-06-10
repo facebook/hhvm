@@ -511,11 +511,11 @@ struct DebuggerStdoutHook final : ExecutionContext::StdoutHook {
 struct DebuggerStreamStdoutHook final : ExecutionContext::StdoutHook {
   DebuggerProxy& proxy;
   DebuggerCommand& cmd;
-  String &output;
+  OptString &output;
   StreamStatus& stream_status;
   explicit DebuggerStreamStdoutHook(DebuggerProxy& proxy,
                                     DebuggerCommand &cmd,
-                                    String &output,
+                                    OptString &output,
                                     StreamStatus& stream_status)
     : proxy(proxy), cmd(cmd), output(output), stream_status(stream_status) {}
   void operator()(const char* s, int len) override {
@@ -791,7 +791,7 @@ void DebuggerProxy::processInterrupt(CmdInterrupt &cmd) {
 ///////////////////////////////////////////////////////////////////////////////
 
 std::pair<bool,Variant>
-DebuggerProxy::ExecutePHPWithStreaming(const std::string &php, String &output, DebuggerCommand &cmd,
+DebuggerProxy::ExecutePHPWithStreaming(const std::string &php, OptString &output, DebuggerCommand &cmd,
                           int frame, StreamStatus& stream_status, int flags) {
   TRACE(2, "DebuggerProxy::ExecutePHPWithStreaming\n");
   // Wire up stdout and stderr to our own string buffer so we can pass
@@ -826,7 +826,7 @@ DebuggerProxy::ExecutePHPWithStreaming(const std::string &php, String &output, D
     m_evalOutputHook = previousEvalOutputHook;
   };
   stream_status = StreamStatus::INITIALIZED;
-  String code(php.c_str(), php.size(), CopyString);
+  OptString code(php.c_str(), php.size(), CopyString);
   // We're about to start executing more PHP. This is typically done
   // in response to commands from the client, and the client expects
   // those commands to send more interrupts since, of course, the
@@ -855,7 +855,7 @@ DebuggerProxy::ExecutePHPWithStreaming(const std::string &php, String &output, D
 
 
 std::pair<bool,Variant>
-DebuggerProxy::ExecutePHP(const std::string &php, String &output,
+DebuggerProxy::ExecutePHP(const std::string &php, OptString &output,
                           int frame, int flags) {
   TRACE(2, "DebuggerProxy::ExecutePHP\n");
   // Wire up stdout and stderr to our own string buffer so we can pass
@@ -889,7 +889,7 @@ DebuggerProxy::ExecutePHP(const std::string &php, String &output,
 
     m_evalOutputHook = previousEvalOutputHook;
   };
-  String code(php.c_str(), php.size(), CopyString);
+  OptString code(php.c_str(), php.size(), CopyString);
   // We're about to start executing more PHP. This is typically done
   // in response to commands from the client, and the client expects
   // those commands to send more interrupts since, of course, the

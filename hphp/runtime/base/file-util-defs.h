@@ -114,13 +114,13 @@ void find(const std::string &root, const std::string& path,
 const StaticString s_slash("/");
 
 template <class Action>
-bool runRelative(std::string suffix, String cmd,
+bool runRelative(std::string suffix, OptString cmd,
                  const char* currentDir, Action action) {
   suffix = "/" + suffix;
   auto cwd = resolve_include(
     cmd,
     currentDir,
-    [] (const String& f, void*) {
+    [] (const OptString& f, void*) {
       if (!is_cli_server_mode()) {
         return access(f.data(), R_OK) == 0;
       }
@@ -132,7 +132,7 @@ bool runRelative(std::string suffix, String cmd,
   if (cwd.isNull()) return false;
   do {
     cwd = HHVM_FN(dirname)(cwd);
-    auto const f = String::attach(
+    auto const f = OptString::attach(
       StringData::Make(cwd.data(), suffix.data())
     );
     if (action(f)) return true;

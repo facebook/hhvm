@@ -368,8 +368,8 @@ bool TestCppBase::TestVirtualHost() {
 
   VERIFY(VirtualHost::GetDefault().getPathTranslation() == "htm/");
   VERIFY(VirtualHost::GetDefault().hasLogFilter() == true);
-  String rw("/html/common/");
-  String h("default");
+  OptString rw("/html/common/");
+  OptString h("default");
   bool q = false;
   int rd = 0;
   VirtualHost::GetDefault().rewriteURL(h, rw, q, rd);
@@ -490,8 +490,8 @@ bool TestCppBase::TestVirtualHostIni() {
 
   VERIFY(VirtualHost::GetDefault().getPathTranslation() == "htm/");
   VERIFY(VirtualHost::GetDefault().hasLogFilter() == true);
-  String rw("/html/common/");
-  String h("default");
+  OptString rw("/html/common/");
+  OptString h("default");
   bool q = false;
   int rd = 0;
   VirtualHost::GetDefault().rewriteURL(h, rw, q, rd);

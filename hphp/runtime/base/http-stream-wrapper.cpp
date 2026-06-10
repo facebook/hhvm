@@ -43,8 +43,8 @@ const StaticString
   s_user_agent("user_agent"),
   s_User_Agent("User-Agent");
 
-req::ptr<File> HttpStreamWrapper::open(const String& filename,
-                                       const String& mode, int /*options*/,
+req::ptr<File> HttpStreamWrapper::open(const OptString& filename,
+                                       const OptString& mode, int /*options*/,
                                        const req::ptr<StreamContext>& context) {
   if (Cfg::Server::HttpSafeMode && !is_cli_server_mode()) {
     return nullptr;
@@ -56,11 +56,11 @@ req::ptr<File> HttpStreamWrapper::open(const String& filename,
   }
 
   Array headers;
-  String method = s_GET;
-  String post_data = null_string;
-  String proxy_host;
-  String proxy_user;
-  String proxy_pass;
+  OptString method = s_GET;
+  OptString post_data = null_string;
+  OptString proxy_host;
+  OptString proxy_user;
+  OptString proxy_pass;
   int proxy_port = -1;
   int max_redirs = 20;
   int timeout = -1;

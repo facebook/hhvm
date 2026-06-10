@@ -135,14 +135,14 @@ bool register_intercept_fast_method_intercept(const Variant& callback,
   return true;
 }
 
-bool register_intercept(const String& name, const Variant& callback) {
+bool register_intercept(const OptString& name, const Variant& callback) {
   SCOPE_EXIT {
     DEBUGGER_ATTACHED_ONLY(phpDebuggerInterceptRegisterHook(name));
   };
 
   auto const interceptedFunc = [&]() -> Func* {
     auto const pos = name.find("::");
-    if (pos != 0 && pos != String::npos && pos + 2 < name.size()) {
+    if (pos != 0 && pos != OptString::npos && pos + 2 < name.size()) {
       auto const cls = Class::load(name.substr(0, pos).get());
       if (!cls) return nullptr;
       auto const meth = cls->lookupMethod(name.substr(pos + 2).get());
@@ -242,7 +242,7 @@ void reset_all_intercepted_functions() {
 ///////////////////////////////////////////////////////////////////////////////
 // fb_rename_function()
 
-void rename_function(const String& old_name, const String& new_name) {
+void rename_function(const OptString& old_name, const OptString& new_name) {
   auto const old = old_name.get();
   auto const n3w = new_name.get();
   auto const oldNe = const_cast<NamedFunc*>(NamedFunc::getNoCreate(old));

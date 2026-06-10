@@ -177,8 +177,8 @@ static void PrepareEnv(Array& env, Transport *transport) {
   HeaderMap transportParams;
   transport->getTransportParams(transportParams);
   for (auto const& header : transportParams) {
-    String key(header.first);
-    String value(header.second.back());
+    OptString key(header.first);
+    OptString value(header.second.back());
     g_context->setenv(key, value);
     env.set(env.convertKey<IntishCast::Cast>(key),
             make_tv<KindOfString>(value.get()));
@@ -396,8 +396,8 @@ void HttpProtocol::PreparePostVariables(Array& post,
       }
     } else {
       auto string_data = needDelete ?
-        String((char*)data, size, AttachString) :
-        String((char*)data, size, CopyString);
+        OptString((char*)data, size, AttachString) :
+        OptString((char*)data, size, CopyString);
       g_context->setRawPostData(string_data);
       if (Cfg::Server::AlwaysPopulateRawPostData || ! needDelete) {
         // For literal we disregard Cfg::Server::AlwaysPopulateRawPostData
@@ -445,7 +445,7 @@ static void CopyHeaderVariables(Array& server,
 
     if (!values.empty()) {
       // When a header has multiple values, we always take the last one.
-      server.set(normalizedKey, String(values.back()));
+      server.set(normalizedKey, OptString(values.back()));
     }
   }
 
@@ -483,7 +483,7 @@ static void CopyTransportParams(Array& server, Transport* transport) {
   for (auto const& header : transportParams) {
     // These overwrite anything already set in the $_SERVER
     // When a header has multiple values, we always take the last one.
-    server.set(String(header.first), String(header.second.back()));
+    server.set(OptString(header.first), OptString(header.second.back()));
   }
 }
 
@@ -492,8 +492,8 @@ static void CopyServerInfo(Array& server,
                            const VirtualHost *vhost) {
 
   std::string hostHeader = transport->getHeader("Host");
-  String hostName(vhost->serverName(hostHeader));
-  String serverNameHeader(transport->getServerName());
+  OptString hostName(vhost->serverName(hostHeader));
+  OptString serverNameHeader(transport->getServerName());
   if (hostHeader.empty()) {
     server.set(s_HTTP_HOST, hostName);
     StackTraceNoHeap::AddExtraLogging("Server", hostName.data());
@@ -512,7 +512,7 @@ static void CopyServerInfo(Array& server,
 
   // _SERVER['SERVER_NAME'] shouldn't contain the port number
   int colonPos = hostName.find(':');
-  if (colonPos != String::npos) {
+  if (colonPos != OptString::npos) {
     hostName = hostName.substr(0, colonPos);
   }
 
@@ -529,8 +529,8 @@ static void CopyServerInfo(Array& server,
 }
 
 static void CopyRemoteInfo(Array& server, Transport *transport) {
-  String remoteAddr(transport->getRemoteAddr(), CopyString);
-  String remoteHost(transport->getRemoteHost(), CopyString);
+  OptString remoteAddr(transport->getRemoteAddr(), CopyString);
+  OptString remoteHost(transport->getRemoteHost(), CopyString);
   if (remoteAddr.empty()) {
     remoteAddr = remoteHost;
   }
@@ -549,15 +549,15 @@ static void CopyAuthInfo(Array& server, Transport *transport) {
     if (strncmp(authorization.c_str(), "Basic ", 6) == 0) {
       // it's safe to pass this as a string literal since authorization
       // outlives decodedAuth; this saves us a superfluous copy.
-      String decodedAuth =
-        StringUtil::Base64Decode(String(authorization.c_str() + 6));
+      OptString decodedAuth =
+        StringUtil::Base64Decode(OptString(authorization.c_str() + 6));
       int colonPos = decodedAuth.find(':');
-      if (colonPos != String::npos) {
+      if (colonPos != OptString::npos) {
         server.set(s_PHP_AUTH_USER, decodedAuth.substr(0, colonPos));
         server.set(s_PHP_AUTH_PW, decodedAuth.substr(colonPos + 1));
       }
     } else if (strncmp(authorization.c_str(), "Digest ", 7) == 0) {
-      server.set(s_PHP_AUTH_DIGEST, String(authorization.c_str() + 7));
+      server.set(s_PHP_AUTH_DIGEST, OptString(authorization.c_str() + 7));
     }
   }
 }
@@ -566,9 +566,9 @@ static void CopyPathInfo(Array& server,
                          Transport *transport,
                          const RequestURI& r,
                          const VirtualHost *vhost) {
-  server.set(s_REQUEST_URI, String(transport->getUrl(), CopyString));
+  server.set(s_REQUEST_URI, OptString(transport->getUrl(), CopyString));
   server.set(s_SCRIPT_URL, r.originalURL());
-  String prefix(transport->isSSL() ? "https://" : "http://");
+  OptString prefix(transport->isSSL() ? "https://" : "http://");
 
   // Need to append port
   assertx(server.exists(s_SERVER_PORT));
@@ -583,7 +583,7 @@ static void CopyPathInfo(Array& server,
     }
   }
 
-  String port_suffix("");
+  OptString port_suffix("");
   if (!transport->isSSL() && serverPort != "80") {
     port_suffix = folly::format(":{}", serverPort).str();
   }
@@ -592,18 +592,18 @@ static void CopyPathInfo(Array& server,
   if (server.exists(s_HTTP_HOST)) {
     hostHeader = server[s_HTTP_HOST].asCStrRef().data();
   }
-  String hostName;
+  OptString hostName;
   if (server.exists(s_SERVER_NAME)) {
     assertx(server[s_SERVER_NAME].isString());
     hostName = server[s_SERVER_NAME].asCStrRef();
   }
   server.set(s_SCRIPT_URI,
-             String(prefix + (hostHeader.empty() ? hostName + port_suffix :
-                              String(hostHeader)) + r.originalURL()));
+             OptString(prefix + (hostHeader.empty() ? hostName + port_suffix :
+                              OptString(hostHeader)) + r.originalURL()));
 
   if (r.rewritten()) {
     // when URL is rewritten, PHP decided to put original URL as SCRIPT_NAME
-    String name = r.originalURL();
+    OptString name = r.originalURL();
     if (!r.pathInfo().empty()) {
       int pos = name.find(r.pathInfo());
       if (pos >= 0) {
@@ -611,13 +611,13 @@ static void CopyPathInfo(Array& server,
       }
     }
     if (r.globalDoc()) {
-      name = String(Cfg::Server::GlobalDocument);
+      name = OptString(Cfg::Server::GlobalDocument);
     }
     if (r.defaultDoc()) {
       if (!name.empty() && name[name.length() - 1] != '/') {
         name += "/";
       }
-      name += String(Cfg::Server::DefaultDocument);
+      name += OptString(Cfg::Server::DefaultDocument);
     }
     server.set(s_SCRIPT_NAME, name);
   } else {
@@ -630,7 +630,7 @@ static void CopyPathInfo(Array& server,
     server.set(s_PHP_SELF, r.resolvedURL() + r.origPathInfo());
   }
 
-  String documentRoot = transport->getDocumentRoot();
+  OptString documentRoot = transport->getDocumentRoot();
   if (documentRoot.empty()) {
     // Right now this is just Cfg::Server::SourceRoot but mwilliams wants to
     // fix it so it is settable, so I'll leave this for now
@@ -653,15 +653,15 @@ static void CopyPathInfo(Array& server,
     if (!pathTranslated.empty()) {
       if (documentRoot == s_forwardslash) {
         // path outside document root or / is document root
-        server.set(s_PATH_TRANSLATED, String(pathTranslated));
+        server.set(s_PATH_TRANSLATED, OptString(pathTranslated));
       } else {
         server.set(s_PATH_TRANSLATED,
-                   String(server[s_DOCUMENT_ROOT].asCStrRef() +
+                   OptString(server[s_DOCUMENT_ROOT].asCStrRef() +
                           s_forwardslash + pathTranslated));
       }
     } else {
       server.set(s_PATH_TRANSLATED,
-                 String(server[s_DOCUMENT_ROOT].asCStrRef() +
+                 OptString(server[s_DOCUMENT_ROOT].asCStrRef() +
                         server[s_SCRIPT_NAME].asCStrRef() +
                         r.pathInfo().data()));
     }
@@ -718,24 +718,24 @@ void HttpProtocol::PrepareServerVariable(Array& server,
 
   // APE sets CONTENT_TYPE and CONTENT_LENGTH without HTTP_
   if (!contentType.empty()) {
-    server.set(s_CONTENT_TYPE, String(contentType));
+    server.set(s_CONTENT_TYPE, OptString(contentType));
   }
   if (!contentLength.empty()) {
-    server.set(s_CONTENT_LENGTH, String(contentLength));
+    server.set(s_CONTENT_LENGTH, OptString(contentLength));
   }
 
   for (auto& kv : RuntimeOption::ServerVariables) {
-    String idx(kv.first);
+    OptString idx(kv.first);
     const auto arrkey =
       server.convertKey<IntishCast::Cast>(idx);
-    String str(kv.second);
+    OptString str(kv.second);
     server.set(arrkey, make_tv<KindOfString>(str.get()), true);
   }
   for (auto& kv : vhost->getServerVars()) {
-    String idx(kv.first);
+    OptString idx(kv.first);
     const auto arrkey =
       server.convertKey<IntishCast::Cast>(idx);
-    String str(kv.second);
+    OptString str(kv.second);
     server.set(arrkey, make_tv<KindOfString>(str.get()), true);
   }
   server = SourceRootInfo::SetServerVariables(std::move(server));
@@ -781,14 +781,14 @@ void HttpProtocol::DecodeParameters(Array& variables, const char *data,
   while (s < e && (p = (const char *)memchr(s, '&', (e - s)))) {
   last_value:
     if ((val = (const char *)memchr(s, '=', (p - s)))) {
-      String sname = url_decode(s, val - s);
+      OptString sname = url_decode(s, val - s);
 
       val++;
-      String value = url_decode(val, p - val);
+      OptString value = url_decode(val, p - val);
 
       register_variable(variables, (char*)sname.data(), value);
     } else if (!post) {
-      String sname = url_decode(s, p - s);
+      OptString sname = url_decode(s, p - s);
       register_variable(variables, (char*)sname.data(), empty_string());
     }
     s = p + 1;
@@ -815,14 +815,14 @@ void HttpProtocol::DecodeCookies(Array& variables, char *data) {
 
     if (var != val && *var != '\0') {
       if (val) { /* have a value */
-        String sname = url_decode(var, val - var);
+        OptString sname = url_decode(var, val - var);
 
         ++val;
-        String value = url_decode(val, strlen(val));
+        OptString value = url_decode(val, strlen(val));
 
         register_variable(variables, (char*)sname.data(), value, false);
       } else {
-        String sname = url_decode(var, strlen(var));
+        OptString sname = url_decode(var, strlen(var));
 
         register_variable(variables, (char*)sname.data(),
                           empty_string(), false);
@@ -959,7 +959,7 @@ bool HttpProtocol::ProxyRequest(Transport *transport, bool force,
     data = (const char *)transport->getPostData(size);
   }
 
-  req::vector<String> responseHeaders;
+  req::vector<OptString> responseHeaders;
   HttpClient http;
   code = http.request(transport->getMethodName(),
                       url.c_str(), data, size, response, &requestHeaders,
@@ -974,8 +974,8 @@ bool HttpProtocol::ProxyRequest(Transport *transport, bool force,
   }
 
   for (unsigned int i = 0; i < responseHeaders.size(); i++) {
-    String &header = responseHeaders[i];
-    if (header.find(":") != String::npos &&
+    OptString &header = responseHeaders[i];
+    if (header.find(":") != OptString::npos &&
         header.find("Content-Length: ") != 0 &&
         header.find("Client-Transfer-Encoding: ") != 0 &&
         header.find("Transfer-Encoding: ") != 0 &&

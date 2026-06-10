@@ -30,7 +30,7 @@ inline bool outside_string(int64_t offset, int32_t max_len) {
                       : (offset >= (long) max_len));
 }
 
-inline bool is_ascii(const String& str) {
+inline bool is_ascii(const OptString& str) {
   int len = str.size();
   const unsigned char *s = (const unsigned char*)str.c_str();
   while (len--) {
@@ -81,8 +81,8 @@ inline int32_t grapheme_get_haystack_offset(UBreakIterator *bi,
   return offset ? -1 : pos;
 }
 
-static Variant grapheme_do_strpos(const String& haystack,
-                                  const String& needle,
+static Variant grapheme_do_strpos(const OptString& haystack,
+                                  const OptString& needle,
                                   int64_t &pos,
                                   int64_t offset,
                                   bool case_insensitive,
@@ -170,8 +170,8 @@ static Variant grapheme_do_strpos(const String& haystack,
   return false;
 }
 
-inline Variant grapheme_do_strpos(const String& haystack,
-                                  const String& needle,
+inline Variant grapheme_do_strpos(const OptString& haystack,
+                                  const OptString& needle,
                                   int64_t offset,
                                   bool case_insensitive,
                                   bool reverse) {
@@ -180,8 +180,8 @@ inline Variant grapheme_do_strpos(const String& haystack,
                             offset, case_insensitive, reverse);
 }
 
-static Variant grapheme_do_strstr(const String& haystack,
-                                               const String& needle,
+static Variant grapheme_do_strstr(const OptString& haystack,
+                                               const OptString& needle,
                                                bool before_needle = false,
                                                bool case_insensitive = false) {
   int64_t gpos;
@@ -238,7 +238,7 @@ inline int32_t grapheme_extract_max_iter(UBreakIterator *bi,
   not_reached();
 }
 
-static Variant HHVM_FUNCTION(grapheme_extract, const String& haystack,
+static Variant HHVM_FUNCTION(grapheme_extract, const OptString& haystack,
                                                int64_t size,
                                                int64_t extract_type,
                                                int64_t start,
@@ -286,10 +286,10 @@ static Variant HHVM_FUNCTION(grapheme_extract, const String& haystack,
    *  might be the beginning of a grapheme cluster)
    */
 
-  if (is_ascii(String(p, ((size + 1) < len) ? (size + 1) : len, CopyString))) {
+  if (is_ascii(OptString(p, ((size + 1) < len) ? (size + 1) : len, CopyString))) {
     int32_t nsize = (size < len) ? size : len;
     next = start + nsize;
-    return String(p, nsize, CopyString);
+    return OptString(p, nsize, CopyString);
   }
 
   UErrorCode error = U_ZERO_ERROR;
@@ -318,23 +318,23 @@ static Variant HHVM_FUNCTION(grapheme_extract, const String& haystack,
   }
 
   next = start + pos;
-  return String(p, pos, CopyString);
+  return OptString(p, pos, CopyString);
 }
 
-static Variant HHVM_FUNCTION(grapheme_stripos, const String& haystack,
-                                               const String& needle,
+static Variant HHVM_FUNCTION(grapheme_stripos, const OptString& haystack,
+                                               const OptString& needle,
                                                int64_t offset /*= 0 */) {
   return grapheme_do_strpos(haystack, needle, offset, true, false);
 }
 
 
-static Variant HHVM_FUNCTION(grapheme_stristr, const String& haystack,
-                                               const String& needle,
+static Variant HHVM_FUNCTION(grapheme_stristr, const OptString& haystack,
+                                               const OptString& needle,
                                                bool before_needle /*=false*/) {
   return grapheme_do_strstr(haystack, needle, before_needle, true);
 }
 
-static Variant HHVM_FUNCTION(grapheme_strlen, const String& str) {
+static Variant HHVM_FUNCTION(grapheme_strlen, const OptString& str) {
   if (is_ascii(str)) {
     return str.size();
   }
@@ -349,32 +349,32 @@ static Variant HHVM_FUNCTION(grapheme_strlen, const String& str) {
   return retlen;
 }
 
-static Variant HHVM_FUNCTION(grapheme_strpos, const String& haystack,
-                                              const String& needle,
+static Variant HHVM_FUNCTION(grapheme_strpos, const OptString& haystack,
+                                              const OptString& needle,
                                               int64_t offset /* = 0 */) {
   offset = offset >= 0 ? offset : 0;
   return grapheme_do_strpos(haystack, needle, offset, false, false);
 }
 
-static Variant HHVM_FUNCTION(grapheme_strrpos, const String& haystack,
-                                               const String& needle,
+static Variant HHVM_FUNCTION(grapheme_strrpos, const OptString& haystack,
+                                               const OptString& needle,
                                                int64_t offset /*= 0 */) {
   return grapheme_do_strpos(haystack, needle, offset, false, true);
 }
 
-static Variant HHVM_FUNCTION(grapheme_strripos, const String& haystack,
-                                                const String& needle,
+static Variant HHVM_FUNCTION(grapheme_strripos, const OptString& haystack,
+                                                const OptString& needle,
                                                 int64_t offset /*= 0 */) {
   return grapheme_do_strpos(haystack, needle, offset, true, true);
 }
 
-static Variant HHVM_FUNCTION(grapheme_strstr, const String& haystack,
-                                              const String& needle,
+static Variant HHVM_FUNCTION(grapheme_strstr, const OptString& haystack,
+                                              const OptString& needle,
                                               bool before_needle /*=false */) {
   return grapheme_do_strstr(haystack, needle, before_needle, false);
 }
 
-static Variant HHVM_FUNCTION(grapheme_substr, const String& str,
+static Variant HHVM_FUNCTION(grapheme_substr, const OptString& str,
                                               int64_t start,
                                               const Variant& len /*= NULL */) {
   if (outside_string(start, str.size())) {

@@ -37,7 +37,7 @@ struct MimePart : ResourceData {
     DecodeNoBody    = 4,  /* don't include the body */
   };
 
-  static bool ProcessLine(req::ptr<MimePart> workpart, const String& line);
+  static bool ProcessLine(req::ptr<MimePart> workpart, const OptString& line);
 
 public:
   DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(MimePart)
@@ -45,7 +45,7 @@ public:
   MimePart();
 
   CLASSNAME_IS("mailparse_mail_structure")
-  const String& o_getClassNameHook() const override {
+  const OptString& o_getClassNameHook() const override {
     return classnameof();
   }
 
@@ -68,11 +68,11 @@ private:
     bool empty() const { return m_empty;}
     void clear();
 
-    Variant get(const String& attrname);
-    void getAll(Array &ret, const String& valuelabel, const String& attrprefix);
+    Variant get(const OptString& attrname);
+    void getAll(Array &ret, const OptString& valuelabel, const OptString& attrprefix);
 
     bool m_empty;
-    String m_value;
+    OptString m_value;
     Array m_attributes;
 
   private:
@@ -91,12 +91,12 @@ private:
   int m_bodystart, m_bodyend; /* offsets of the body content of this part */
   int m_nlines, m_nbodylines; /* number of lines in section/body */
 
-  String m_mime_version;
-  String m_content_transfer_encoding;
-  String m_content_location;
-  String m_content_base;
-  String m_boundary;
-  String m_charset;
+  OptString m_mime_version;
+  OptString m_content_transfer_encoding;
+  OptString m_content_location;
+  OptString m_content_base;
+  OptString m_boundary;
+  OptString m_charset;
 
   MimeHeader m_content_type;
   MimeHeader m_content_disposition;
@@ -104,7 +104,7 @@ private:
   Array m_headers; /* a record of all the headers */
 
   /* these are used during part extraction */
-  using PFN_CALLBACK = void (MimePart::*)(const String&);
+  using PFN_CALLBACK = void (MimePart::*)(const OptString&);
   PFN_CALLBACK m_extract_func;
   mbfl_convert_filter *m_extract_filter;
   Variant m_extract_context;
@@ -115,8 +115,8 @@ private:
     bool is_dummy;
     bool completed;
 
-    String workbuf;
-    String headerbuf;
+    OptString workbuf;
+    OptString headerbuf;
     req::ptr<MimePart> lastpart;
   } m_parsedata;
 
@@ -126,14 +126,14 @@ private:
   const req::ptr<MimePart>& getParent() { return m_parent; }
 
   void decoderPrepare(bool do_decode);
-  void decoderFeed(const String& str);
+  void decoderFeed(const OptString& str);
   void decoderFinish();
 
   // extract callbacks
-  void callUserFunc(const String& s);
-  void outputToStdout(const String& s);
-  void outputToFile(const String& s);
-  void outputToString(const String& s);
+  void callUserFunc(const OptString& s);
+  void outputToStdout(const OptString& s);
+  void outputToFile(const OptString& s);
+  void outputToString(const OptString& s);
 
   // enumeration
   struct Enumerator {

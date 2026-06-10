@@ -25,21 +25,21 @@
 
 namespace HPHP {
 
-String HHVM_FUNCTION(gethostbyname, const String& hostname);
-Variant HHVM_FUNCTION(getservbyname, const String& service,
-                                     const String& protocol);
-bool HHVM_FUNCTION(checkdnsrr, const String& host,
-                               const String& type = null_string);
-Variant HHVM_FUNCTION(dns_get_record, const String& hostname, int64_t type,
+OptString HHVM_FUNCTION(gethostbyname, const OptString& hostname);
+Variant HHVM_FUNCTION(getservbyname, const OptString& service,
+                                     const OptString& protocol);
+bool HHVM_FUNCTION(checkdnsrr, const OptString& host,
+                               const OptString& type = null_string);
+Variant HHVM_FUNCTION(dns_get_record, const OptString& hostname, int64_t type,
                                       Variant& authnsRef,
                                       Variant& addtlRef);
-bool HHVM_FUNCTION(getmxrr, const String& hostname,
+bool HHVM_FUNCTION(getmxrr, const OptString& hostname,
                             Variant& mxhostsRef,
                             Variant& weightsRef);
-void HHVM_FUNCTION(header, const String& str, bool replace = true,
+void HHVM_FUNCTION(header, const OptString& str, bool replace = true,
                    int64_t http_response_code = 0);
 bool HHVM_FUNCTION(headers_sent);
 
-bool validate_dns_arguments(const String& host, const String& type,
+bool validate_dns_arguments(const OptString& host, const OptString& type,
                             int& ntype);
 }

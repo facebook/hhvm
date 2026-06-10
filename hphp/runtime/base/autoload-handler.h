@@ -68,12 +68,12 @@ struct AutoloadHandler final : RequestEventHandler {
    * autoloadTypeOrTypeAlias() tries to autoload either a type or a type
    * alias with the specified name.
    */
-  bool autoloadTypeOrTypeAlias(const String& className);
+  bool autoloadTypeOrTypeAlias(const OptString& className);
 
-  bool autoloadType(const String& className);
+  bool autoloadType(const OptString& className);
   bool autoloadFunc(StringData* name);
   bool autoloadConstant(StringData* name);
-  bool autoloadTypeAlias(const String& name);
+  bool autoloadTypeAlias(const OptString& name);
   bool autoloadModule(StringData* name);
   static RDS_LOCAL(AutoloadHandler, s_instance);
 
@@ -89,7 +89,7 @@ struct AutoloadHandler final : RequestEventHandler {
     return m_facts;
   }
 
-  Optional<AutoloadMap::FileResult> getFile(const String& name,
+  Optional<AutoloadMap::FileResult> getFile(const OptString& name,
                                             AutoloadMap::KindOf kind);
 
   static void setRepoAutoloadMap(std::unique_ptr<RepoAutoloadMap>);
@@ -99,7 +99,7 @@ private:
    * This method may return true on success or false on failure.
    */
   template <class T>
-  bool loadFromMapImpl(const String& name, AutoloadMap::KindOf kind,
+  bool loadFromMapImpl(const OptString& name, AutoloadMap::KindOf kind,
                        const T &checkExists, Variant& err);
 
   /**
@@ -107,7 +107,7 @@ private:
    * and will return true on success.
    */
   template <class T>
-  bool loadFromMap(const String& name, AutoloadMap::KindOf kind,
+  bool loadFromMap(const OptString& name, AutoloadMap::KindOf kind,
                    const T &checkExists);
 
 private:

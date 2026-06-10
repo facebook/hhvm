@@ -26,8 +26,8 @@ namespace HPHP {
 
 bool libxml_use_internal_error();
 void libxml_add_error(const std::string& msg);
-String libxml_get_valid_file_path(const String& source);
-String libxml_get_valid_file_path(const char* source);
+OptString libxml_get_valid_file_path(const OptString& source);
+OptString libxml_get_valid_file_path(const char* source);
 
 int libxml_streams_IO_read(void* context, char* buffer, int len);
 int libxml_streams_IO_write(void* context, const char* buffer, int len);

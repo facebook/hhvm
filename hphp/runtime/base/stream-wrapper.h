@@ -39,43 +39,43 @@ struct Wrapper {
 
   void registerAs(const std::string &scheme);
 
-  virtual req::ptr<File> open(const String& filename,
-                              const String& mode,
+  virtual req::ptr<File> open(const OptString& filename,
+                              const OptString& mode,
                               int options,
                               const req::ptr<StreamContext>& context) = 0;
-  virtual int access(const String& /*path*/, int /*mode*/) {
+  virtual int access(const OptString& /*path*/, int /*mode*/) {
     errno = ENOSYS;
     return -1;
   }
-  virtual int lstat(const String& /*path*/, struct stat* /*buf*/) {
+  virtual int lstat(const OptString& /*path*/, struct stat* /*buf*/) {
     errno = ENOSYS;
     return -1;
   }
-  virtual int stat(const String& /*path*/, struct stat* /*buf*/) {
+  virtual int stat(const OptString& /*path*/, struct stat* /*buf*/) {
     errno = ENOSYS;
     return -1;
   }
-  virtual int unlink(const String& /*path*/) {
+  virtual int unlink(const OptString& /*path*/) {
     errno = ENOSYS;
     return -1;
   }
-  virtual int rename(const String& /*oldname*/, const String& /*newname*/) {
+  virtual int rename(const OptString& /*oldname*/, const OptString& /*newname*/) {
     errno = ENOSYS;
     return -1;
   }
-  virtual int mkdir(const String& /*path*/, int /*mode*/, int /*options*/) {
+  virtual int mkdir(const OptString& /*path*/, int /*mode*/, int /*options*/) {
     errno = ENOSYS;
     return -1;
   }
-  virtual int rmdir(const String& /*path*/, int /*options*/) {
+  virtual int rmdir(const OptString& /*path*/, int /*options*/) {
     errno = ENOSYS;
     return -1;
   }
-  virtual req::ptr<Directory> opendir(const String& /*path*/) {
+  virtual req::ptr<Directory> opendir(const OptString& /*path*/) {
     errno = ENOSYS;
     return nullptr;
   }
-  virtual String realpath(const String& /*path*/) { return null_string; }
+  virtual OptString realpath(const OptString& /*path*/) { return null_string; }
 
   virtual Optional<std::string> getxattr(const char* /*path*/,
                                          const char* /*xattr*/) {
@@ -101,12 +101,12 @@ struct Wrapper {
  * also required when proxying through a client in remote unix server mode.
  */
 struct ExtendedWrapper : Wrapper {
-  virtual bool touch(const String& path, int64_t mtime, int64_t atime) = 0;
-  virtual bool chmod(const String& path, int64_t mode) = 0;
-  virtual bool chown(const String& path, int64_t uid) = 0;
-  virtual bool chown(const String& path, const String& uid) = 0;
-  virtual bool chgrp(const String& path, int64_t gid) = 0;
-  virtual bool chgrp(const String& path, const String& gid) = 0;
+  virtual bool touch(const OptString& path, int64_t mtime, int64_t atime) = 0;
+  virtual bool chmod(const OptString& path, int64_t mode) = 0;
+  virtual bool chown(const OptString& path, int64_t uid) = 0;
+  virtual bool chown(const OptString& path, const OptString& uid) = 0;
+  virtual bool chgrp(const OptString& path, int64_t gid) = 0;
+  virtual bool chgrp(const OptString& path, const OptString& gid) = 0;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

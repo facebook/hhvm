@@ -25,7 +25,7 @@ namespace HPHP {
 
 /* static */ Optional<uint64_t> 
 ProfilingCounters::getStatFromServerNote(const std::string& name) {
-  String note = ServerNote::Get(name);
+  OptString note = ServerNote::Get(name);
   if (note.isNull()) {
     return std::nullopt;
   }

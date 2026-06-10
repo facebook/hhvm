@@ -65,7 +65,7 @@ struct IntlCalendar : IntlError, SystemLib::ClassLoader<"IntlCalendar"> {
   }
 
   static const icu::Calendar* ParseArg(const Variant& cal, const icu::Locale &locale,
-                                       const String &funcname, IntlError *err,
+                                       const OptString &funcname, IntlError *err,
                                        int64_t &calType, bool &calOwned);
  protected:
   icu::Calendar *m_cal = nullptr;

@@ -27,12 +27,12 @@ namespace HPHP {
 
 const StaticString s_file("file");
 
-static void replace_controlchars(String& output, const char *str, int len) {
+static void replace_controlchars(OptString& output, const char *str, int len) {
   if (!str) return;
 
   unsigned char *s = (unsigned char *)str;
   unsigned char *e = (unsigned char *)str + len;
-  output = String(str, len, CopyString);
+  output = OptString(str, len, CopyString);
   char *outbuf = output.mutableData();
   while (s < e) {
     if (iscntrl(*s)) {
@@ -297,8 +297,8 @@ static int php_htoi(char *s) {
 
 static unsigned char hexchars[] = "0123456789ABCDEF";
 
-String url_encode(const char *s, size_t len) {
-  String retString(safe_address(len, 3, 1), ReserveString);
+OptString url_encode(const char *s, size_t len) {
+  OptString retString(safe_address(len, 3, 1), ReserveString);
 
   auto from = (unsigned char const *)s;
   auto end = (unsigned char const *)s + len;
@@ -326,8 +326,8 @@ String url_encode(const char *s, size_t len) {
   return retString;
 }
 
-String url_decode(const char *s, size_t len) {
-  String retString(s, len, CopyString);
+OptString url_decode(const char *s, size_t len) {
+  OptString retString(s, len, CopyString);
   char *str = retString.mutableData();
   char *dest = str;
   char *data = str;
@@ -377,8 +377,8 @@ size_t url_decode_ex(char *value, size_t len) {
   return o;
 }
 
-String url_raw_encode(const char *s, size_t len) {
-  String retString(safe_address(len, 3, 1), ReserveString);
+OptString url_raw_encode(const char *s, size_t len) {
+  OptString retString(safe_address(len, 3, 1), ReserveString);
   size_t x, y;
   unsigned char *str = (unsigned char *)retString.mutableData();
 
@@ -397,8 +397,8 @@ String url_raw_encode(const char *s, size_t len) {
   return retString;
 }
 
-String url_raw_decode(const char *s, size_t len) {
-  String retString(s, len, CopyString);
+OptString url_raw_decode(const char *s, size_t len) {
+  OptString retString(s, len, CopyString);
   char *str = retString.mutableData();
   char *dest = str;
   char *data = str;

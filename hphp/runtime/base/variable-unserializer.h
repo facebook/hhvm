@@ -130,7 +130,7 @@ struct VariableUnserializer {
   /*
    * True if clsName is allowed to be unserialized.
    */
-  bool whitelistCheck(const String& clsName) const;
+  bool whitelistCheck(const OptString& clsName) const;
 
   /*
    * Push v onto the vector of refs for future reference.
@@ -187,7 +187,7 @@ private:
   Array unserializeBespokeTypeStructure();
   folly::StringPiece unserializeStringPiece(char delimiter0 = '"',
                                             char delimiter1 = '"');
-  String unserializeString(char delimiter0 = '"', char delimiter1 = '"');
+  OptString unserializeString(char delimiter0 = '"', char delimiter1 = '"');
   void unserializeCollection(ObjectData* obj, int64_t sz, char type);
   void unserializeVector(ObjectData*, int64_t sz,
                          char type);
@@ -196,8 +196,8 @@ private:
   void unserializePair(ObjectData*, int64_t sz, char type);
   void unserializePropertyValue(tv_lval v, int remainingProps);
   bool tryUnserializeStrIntMap(struct BaseMap* map, int64_t sz);
-  void unserializeProp(ObjectData* obj, const String& key, Class* ctx,
-                       const String& realKey, int nProp);
+  void unserializeProp(ObjectData* obj, const OptString& key, Class* ctx,
+                       const OptString& realKey, int nProp);
   void unserializeRemainingProps(Object& obj, int remainingProps,
                                  Variant& serializedNativeData,
                                  bool& hasSerializedNativeData);

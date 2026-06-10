@@ -66,7 +66,7 @@ template<> void req::root<TypedValue>::detach() {
   m_type = KindOfNull;
 }
 
-template struct root<String>;
+template struct root<OptString>;
 template struct root<Array>;
 template struct root<Object>;
 template struct root<Variant>;

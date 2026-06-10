@@ -28,8 +28,8 @@ OptResource::~OptResource() {
   // force it out of line
 }
 
-String OptResource::toString() const {
-  return m_res ? m_res->data()->o_toString() : String();
+OptString OptResource::toString() const {
+  return m_res ? m_res->data()->o_toString() : OptString();
 }
 
 Array OptResource::toArray() const {

@@ -153,18 +153,18 @@ private:
 static void throw_soap_server_fault(const char* code, const char* fault);
 static void model_to_string(sdlContentModelPtr model, StringBuffer &buf,
                             int level);
-static void header_if_not_sent(const String& str);
+static void header_if_not_sent(const OptString& str);
 
 ///////////////////////////////////////////////////////////////////////////////
 // client helpers
 
-static Object create_soap_fault(const String& code, const String& fault) {
+static Object create_soap_fault(const OptString& code, const OptString& fault) {
   return SystemLib::AllocSoapFaultObject(code, fault);
 }
 
 static Object create_soap_fault(Exception& e) {
   USE_SOAP_GLOBAL;
-  return create_soap_fault(SOAP_GLOBAL(error_code), String(e.getMessage()));
+  return create_soap_fault(SOAP_GLOBAL(error_code), OptString(e.getMessage()));
 }
 
 static sdlParamPtr get_param(sdlFunction *function, const char *param_name,
@@ -210,9 +210,9 @@ static xmlNodePtr serialize_zval(const Variant& val, sdlParamPtr param,
     if (val.isNull()) {
       if (param->element) {
         if (!param->element->fixed.empty()) {
-          v = String(param->element->fixed);
+          v = OptString(param->element->fixed);
         } else if (!param->element->def.empty() && !param->element->nillable) {
-          v = String(param->element->def);
+          v = OptString(param->element->def);
         }
       }
     }
@@ -482,9 +482,9 @@ static xmlDocPtr serialize_function_call(SoapClient *client,
 
 // Forward declare
 Variant HHVM_METHOD(SoapClient, __dorequest,
-                    const String& buf,
-                    const String& location,
-                    const String& action,
+                    const OptString& buf,
+                    const OptString& location,
+                    const OptString& action,
                     int64_t version,
                     bool oneway /* = false */);
 
@@ -501,12 +501,12 @@ static bool do_request(ObjectData* obj_client, xmlDoc *request,
   }
 
   if (client->m_trace) {
-    client->m_last_request = String((char*)buf, buf_size, CopyString);
+    client->m_last_request = OptString((char*)buf, buf_size, CopyString);
   }
   response = obj_client->o_invoke_few_args(s___dorequest, RuntimeCoeffects::fixme(), 5,
-                                           String(buf, buf_size, CopyString),
-                                           String(location, CopyString),
-                                           String(action, CopyString),
+                                           OptString(buf, buf_size, CopyString),
+                                           OptString(location, CopyString),
+                                           OptString(action, CopyString),
                                            version, one_way);
   if (!response.isString()) {
     if (client->m_soap_fault.isNull()) {
@@ -550,12 +550,12 @@ static encodeMapPtr soap_create_typemap_impl(sdl *sdl, Array &ht) {
     }
     Array ht2 = tmp.toArray();
 
-    String type_name, type_ns;
+    OptString type_name, type_ns;
     Variant to_xml, to_zval;
     for (ArrayIter it(ht2); it; ++it) {
       tmp = it.second();
       if (it.first().isString()) {
-        String name = it.first().toString();
+        OptString name = it.first().toString();
         if (name == s_type_name) {
           if (tmp.isString()) type_name = tmp.toString();
         } else if (name == s_type_ns) {
@@ -637,7 +637,7 @@ static void output_xml_header(int soap_version) {
  * The PHP5 extension uses SAPI to set known headers; unlike header(), this
  * silently fails if headers_sent(). We need to do the same.
  */
-static void header_if_not_sent(const String& str) {
+static void header_if_not_sent(const OptString& str) {
   if (!HHVM_FN(headers_sent)()) {
     HHVM_FN(header)(str);
   }
@@ -768,7 +768,7 @@ get_doc_function(sdl *sdl, xmlNodePtr params) {
 static std::shared_ptr<sdlFunction>
 get_function(sdl *sdl, const char *function_name) {
   if (sdl) {
-    String lowered = HHVM_FN(strtolower)(function_name);
+    OptString lowered = HHVM_FN(strtolower)(function_name);
     sdlFunctionMap::iterator iter = sdl->functions.find(lowered.data());
     if (iter == sdl->functions.end()) {
       iter = sdl->requests.find(lowered.data());
@@ -782,7 +782,7 @@ get_function(sdl *sdl, const char *function_name) {
 }
 
 static std::shared_ptr<sdlFunction>
-find_function(sdl *sdl, xmlNodePtr func, String &function_name) {
+find_function(sdl *sdl, xmlNodePtr func, OptString &function_name) {
   auto function = get_function(sdl, (char*)func->name);
   if (function && function->binding &&
       function->binding->bindingType == BINDING_SOAP) {
@@ -798,16 +798,16 @@ find_function(sdl *sdl, xmlNodePtr func, String &function_name) {
   }
 
   if (function != nullptr) {
-    function_name = String(function->functionName);
+    function_name = OptString(function->functionName);
   } else {
-    function_name = String((char *)func->name, CopyString);
+    function_name = OptString((char *)func->name, CopyString);
   }
 
   return function;
 }
 
 static std::shared_ptr<sdlFunction> deserialize_function_call
-(sdl *sdl, xmlDocPtr request, const char* actor, String &function_name,
+(sdl *sdl, xmlDocPtr request, const char* actor, OptString &function_name,
  Array &parameters, int &version, Array &headers) {
   USE_SOAP_GLOBAL;
   char* envelope_ns = nullptr;
@@ -931,7 +931,7 @@ static std::shared_ptr<sdlFunction> deserialize_function_call
   if (func == nullptr) {
     function = get_doc_function(sdl, nullptr);
     if (function != nullptr) {
-      function_name = String(function->functionName);
+      function_name = OptString(function->functionName);
     } else {
       throw_soap_server_fault
         ("Client", "looks like we got \"Body\" without function call");
@@ -1167,7 +1167,7 @@ static int serialize_response_call2(xmlNodePtr body, sdlFunction *function,
     for (ArrayIter iter(arr); iter; ++iter, ++i) {
       Variant data = iter.second();
       Variant key = iter.first();
-      String param_name;
+      OptString param_name;
       int64_t param_index = i;
       if (key.isString()) {
         param_name = key.toString();
@@ -1340,7 +1340,7 @@ static xmlDocPtr serialize_response_call(
     if (version == SOAP_1_1) {
       if (!obj->o_get("faultcode").toString().empty()) {
         xmlNodePtr node = xmlNewNode(nullptr, BAD_CAST("faultcode"));
-        String str = StringUtil::HtmlEncode(obj->o_get("faultcode").toString(),
+        OptString str = StringUtil::HtmlEncode(obj->o_get("faultcode").toString(),
                                             StringUtil::QuoteStyle::Double,
                                             "UTF-8", true, true);
         xmlAddChild(param, node);
@@ -1374,7 +1374,7 @@ static xmlDocPtr serialize_response_call(
     } else {
       if (!obj->o_get("faultcode").toString().empty()) {
         xmlNodePtr node = xmlNewChild(param, ns, BAD_CAST("Code"), nullptr);
-        String str = StringUtil::HtmlEncode(obj->o_get("faultcode").toString(),
+        OptString str = StringUtil::HtmlEncode(obj->o_get("faultcode").toString(),
                                             StringUtil::QuoteStyle::Double,
                                             "UTF-8", true, true);
         node = xmlNewChild(node, ns, BAD_CAST("Value"), nullptr);
@@ -1613,7 +1613,7 @@ static void type_to_string(sdlType *type, StringBuffer &buf, int level) {
   for (int i = 0; i < level;i++) {
     sbspaces.append(' ');
   }
-  String spaces = sbspaces.detach();
+  OptString spaces = sbspaces.detach();
   buf.append(spaces);
 
   switch (type->kind) {
@@ -1836,7 +1836,7 @@ static void send_soap_server_fault(
   xmlChar *buf; int size;
   xmlDocDumpMemory(doc_return, &buf, &size);
   if (buf) {
-    g_context->write(String((const char *)buf, size, CopyString));
+    g_context->write(OptString((const char *)buf, size, CopyString));
     xmlFree(buf);
   }
   xmlFreeDoc(doc_return);
@@ -1963,7 +1963,7 @@ void HHVM_METHOD(SoapServer, __construct,
     }
 
     if (options[s_encoding].isString()) {
-      String tmp = options[s_encoding].toString();
+      OptString tmp = options[s_encoding].toString();
       data->m_encoding = xmlFindCharEncodingHandler(tmp.data());
       if (data->m_encoding == nullptr) {
         throw SoapException("Invalid 'encoding' option - '%s'", tmp.data());
@@ -2004,10 +2004,10 @@ void HHVM_METHOD(SoapServer, __construct,
     data->m_sdl = s_soap_data->get_sdl(wsdl.toString().data(), cache_wsdl);
     if (data->m_uri.isNull()) {
       if (!data->m_sdl->target_ns.empty()) {
-        data->m_uri = String(data->m_sdl->target_ns);
+        data->m_uri = OptString(data->m_sdl->target_ns);
       } else {
         /*FIXME*/
-        data->m_uri = String("http://unknown-uri/");
+        data->m_uri = OptString("http://unknown-uri/");
       }
     }
   }
@@ -2022,7 +2022,7 @@ void HHVM_METHOD(SoapServer, __construct,
 }
 
 void HHVM_METHOD(SoapServer, setClass,
-                 const String& name,
+                 const OptString& name,
                  const Array& argv /* = null_array */) {
   auto* data = Native::data<SoapServer>(this_);
   SoapServerScope ss(this_);
@@ -2070,7 +2070,7 @@ void HHVM_METHOD(SoapServer, addFunction,
         raise_warning("Tried to add a function that isn't a string");
         return;
       }
-      String function_name = iter.second().toString();
+      OptString function_name = iter.second().toString();
       // Lookup function, autoload if necessary.
       if (!HHVM_FN(function_exists)(function_name)) {
         raise_warning("Tried to add a non existent function '%s'",
@@ -2088,7 +2088,7 @@ Variant HHVM_METHOD(SoapServer, getfunctions) {
   auto* data = Native::data<SoapServer>(this_);
   SoapServerScope ss(this_);
 
-  String class_name;
+  OptString class_name;
   if (data->m_type == SOAP_OBJECT) {
     class_name = data->m_soap_object->getClassName();
   } else if (data->m_type == SOAP_CLASS) {
@@ -2121,7 +2121,7 @@ Variant HHVM_METHOD(SoapServer, getfunctions) {
 }
 
 static bool valid_function(SoapServer *server, Object &soap_obj,
-                           const String& fn_name) {
+                           const OptString& fn_name) {
   HPHP::Class* cls = nullptr;
   if (server->m_type == SOAP_OBJECT) {
     cls = server->m_soap_object->getVMClass();
@@ -2175,7 +2175,7 @@ void HHVM_METHOD(SoapServer, handle,
   }
 
   // 1. process request
-  String req;
+  OptString req;
   if (!request.isNull()) {
     req = request.toString();
   } else {
@@ -2187,16 +2187,16 @@ void HHVM_METHOD(SoapServer, handle,
     if (!data || !*data || !size) {
       return;
     }
-    req = String(data, size, CopyString);
+    req = OptString(data, size, CopyString);
 
     if (php_global(s__SERVER).toArray().exists(s_HTTP_CONTENT_ENCODING)) {
-      String encoding = php_global(s__SERVER)
+      OptString encoding = php_global(s__SERVER)
         .toArray()[s_HTTP_CONTENT_ENCODING].toString();
       Variant ret;
       if (encoding == s_gzip || encoding == s_xgzip) {
-        ret = HHVM_FN(gzinflate)(String(data, size, CopyString));
+        ret = HHVM_FN(gzinflate)(OptString(data, size, CopyString));
       } else if (encoding == s_deflate) {
-        ret = HHVM_FN(gzuncompress)(String(data, size, CopyString));
+        ret = HHVM_FN(gzuncompress)(OptString(data, size, CopyString));
       } else {
         raise_warning("Request is encoded with unknown compression '%s'",
                         encoding.data());
@@ -2228,7 +2228,7 @@ void HHVM_METHOD(SoapServer, handle,
 
   // 2. find out which PHP function to call with what params
   SoapServiceScope sss(data);
-  String function_name;
+  OptString function_name;
   Array params;
   int soap_version = 0;
   std::shared_ptr<sdlFunction> function;
@@ -2268,7 +2268,7 @@ void HHVM_METHOD(SoapServer, handle,
       continue;
     }
 
-    String fn_name = h->function_name;
+    OptString fn_name = h->function_name;
     if (valid_function(data, soap_obj, fn_name)) {
       try {
         if (data->m_type == SOAP_CLASS || data->m_type == SOAP_OBJECT) {
@@ -2292,7 +2292,7 @@ void HHVM_METHOD(SoapServer, handle,
   }
 
   // 5. main call
-  String fn_name = function_name;
+  OptString fn_name = function_name;
   Variant retval;
   if (valid_function(data, soap_obj, fn_name)) {
     try {
@@ -2316,7 +2316,7 @@ void HHVM_METHOD(SoapServer, handle,
   }
 
   // 6. serialize response
-  String response_name;
+  OptString response_name;
   if (function && !function->responseName.empty()) {
     response_name = function->responseName;
   } else {
@@ -2360,7 +2360,7 @@ void HHVM_METHOD(SoapServer, handle,
   }
   output_xml_header(soap_version);
   if (buf) {
-    g_context->write(String((char*)buf, size, CopyString));
+    g_context->write(OptString((char*)buf, size, CopyString));
     xmlFree(buf);
   }
 }
@@ -2384,13 +2384,13 @@ void HHVM_METHOD(SoapServer, setpersistence,
 
 void HHVM_METHOD(SoapServer, fault,
                  const Variant& code,
-                 const String& fault,
+                 const OptString& fault,
                  const Variant& actor /* = null */,
                  const Variant& detail /* = null */,
                  const Variant& name /* = null */) {
   SoapServerScope ss(this_);
-  const String& str_actor = actor.isNull() ? null_string : actor.toString();
-  const String& str_name = name.isNull() ? null_string : name.toString();
+  const OptString& str_actor = actor.isNull() ? null_string : actor.toString();
+  const OptString& str_name = name.isNull() ? null_string : name.toString();
   auto obj =
     SystemLib::AllocSoapFaultObject(code,
                                     fault,
@@ -2500,7 +2500,7 @@ void HHVM_METHOD(SoapClient, __construct,
       data->m_compression = (int)options[s_compression].toInt64();
     }
 
-    String encoding = options[s_encoding].toString();
+    OptString encoding = options[s_encoding].toString();
     if (!encoding.empty()) {
       data->m_encoding = xmlFindCharEncodingHandler(encoding.data());
       if (data->m_encoding == nullptr) {
@@ -2527,7 +2527,7 @@ void HHVM_METHOD(SoapClient, __construct,
   if (!wsdl.isNull()) {
     int old_soap_version = SOAP_GLOBAL(soap_version);
     SOAP_GLOBAL(soap_version) = data->m_soap_version;
-    String swsdl = wsdl.toString();
+    OptString swsdl = wsdl.toString();
     if (swsdl.find("http://") == 0 || swsdl.find("https://") == 0) {
       HttpClient http(data->m_connection_timeout, data->m_max_redirect,
                       data->m_use11, true);
@@ -2567,14 +2567,14 @@ void HHVM_METHOD(SoapClient, __construct,
 }
 
 Variant HHVM_METHOD(SoapClient, soapcallImpl,
-                    const String& name,
+                    const OptString& name,
                     const Array& args,
                     const Array& options = null_array,
                     const Variant& input_headers = uninit_variant) {
   auto* data = Native::data<SoapClient>(this_);
   SoapClientScope ss(this_);
 
-  String location, soap_action, uri;
+  OptString location, soap_action, uri;
   if (!options.isNull()) {
     if (options[s_location].isString()) {
       location = options[s_location].toString();
@@ -2664,7 +2664,7 @@ Variant HHVM_METHOD(SoapClient, soapcallImpl,
 
       if (ret && response.isString()) {
         encode_reset_ns();
-        String sresponse = response.toString();
+        OptString sresponse = response.toString();
         ret = parse_packet_soap(data, sresponse.data(), sresponse.size(),
                                 fn, nullptr, return_value, output_headers);
         encode_finish();
@@ -2707,7 +2707,7 @@ Variant HHVM_METHOD(SoapClient, soapcallImpl,
       xmlFreeDoc(request);
       if (ret && response.isString()) {
         encode_reset_ns();
-        String sresponse = response.toString();
+        OptString sresponse = response.toString();
         ret = parse_packet_soap(data, sresponse.data(), sresponse.size(),
                                 std::shared_ptr<sdlFunction>(),
                                 name.data(),
@@ -2779,8 +2779,8 @@ Variant HHVM_METHOD(SoapClient, __getTypes) {
   return init_null();
 }
 
-static bool content_type_is_xml(const String& response,
-                                const req::vector<String>& responseHeaders) {
+static bool content_type_is_xml(const OptString& response,
+                                const req::vector<OptString>& responseHeaders) {
   if (response.empty()) return false;
   for (auto header : responseHeaders) {
     auto cheader = header.c_str();
@@ -2811,9 +2811,9 @@ static bool content_type_is_xml(const String& response,
 }
 
 Variant HHVM_METHOD(SoapClient, __dorequest,
-                    const String& buf,
-                    const String& location,
-                    const String& action,
+                    const OptString& buf,
+                    const OptString& location,
+                    const OptString& action,
                     int64_t version,
                     bool oneway /* = false */) {
   auto* data = Native::data<SoapClient>(this_);
@@ -2828,7 +2828,7 @@ Variant HHVM_METHOD(SoapClient, __dorequest,
 
   HeaderMap headers;
 
-  String buffer(buf);
+  OptString buffer(buf);
 
   // compression
   if (data->m_compression > 0) {
@@ -2909,13 +2909,13 @@ Variant HHVM_METHOD(SoapClient, __dorequest,
   }
 
   StringBuffer responseBuffer;
-  req::vector<String> responseHeaders;
+  req::vector<OptString> responseHeaders;
   int code = http.post(location.data(), buffer.data(), buffer.size(),
                        responseBuffer, &headers, &responseHeaders);
-  String response = responseBuffer.detach();
+  OptString response = responseBuffer.detach();
 
   if (code == 0) {
-    String msg = "Failed Sending HTTP Soap request";
+    OptString msg = "Failed Sending HTTP Soap request";
     auto const& error = http.getLastError();
     if (!error.empty()) {
       msg += ": ";
@@ -2946,7 +2946,7 @@ Variant HHVM_METHOD(SoapClient, __dorequest,
 }
 
 Variant HHVM_METHOD(SoapClient, __setcookie,
-                    const String& name,
+                    const OptString& name,
                     const Variant& value /* = null_string */) {
   auto* data = Native::data<SoapClient>(this_);
   // FIXME: data->m_cookies is a write-only value
@@ -3000,10 +3000,10 @@ const StaticString
 void HHVM_METHOD(SoapVar, __construct,
                  const Variant& data,
                  const Variant& type,
-                 const String& type_name /* = null_string */,
-                 const String& type_namespace /* = null_string */,
-                 const String& node_name /* = null_string */,
-                 const String& node_namespace /* = null_string */) {
+                 const OptString& type_name /* = null_string */,
+                 const OptString& type_namespace /* = null_string */,
+                 const OptString& node_name /* = null_string */,
+                 const OptString& node_namespace /* = null_string */) {
   USE_SOAP_GLOBAL;
   int64_t ntype;
   if (type.isNull()) {
@@ -3037,7 +3037,7 @@ void HHVM_METHOD(SoapVar, __construct,
 
 void HHVM_METHOD(SoapParam, __construct,
                  const Variant& data,
-                 const String& name) {
+                 const OptString& name) {
   auto* nativeData = Native::data<SoapParam>(this_);
   if (name.empty()) {
     raise_warning("Invalid parameter name");
@@ -3057,8 +3057,8 @@ static const StaticString
   s_mustUnderstand("mustUnderstand");
 
 void HHVM_METHOD(SoapHeader, __construct,
-                 const String& ns,
-                 const String& name,
+                 const OptString& ns,
+                 const OptString& name,
                  const Variant& data /* = null */,
                  bool mustunderstand /* = false */,
                  const Variant& actor /* = null */) {

@@ -25,7 +25,7 @@
 
 namespace HPHP {
 
-static int check_id_allowed(const String& id, long bf) {
+static int check_id_allowed(const OptString& id, long bf) {
   if (bf & DateTimeZoneData::AFRICA && id.find("Africa/") == 0) return 1;
   if (bf & DateTimeZoneData::AMERICA && id.find("America/") == 0) return 1;
   if (bf & DateTimeZoneData::ANTARCTICA && id.find("Antarctica/") == 0)
@@ -46,7 +46,7 @@ const StaticString
   s_formatID("e"),
   s_formatAbbr("T");
 
-static String zone_type_to_string(int zoneType, req::ptr<DateTime> dt) {
+static OptString zone_type_to_string(int zoneType, req::ptr<DateTime> dt) {
   switch (zoneType) {
     case TIMELIB_ZONETYPE_OFFSET:
       return dt->toString(s_formatOffset);
@@ -124,7 +124,7 @@ DateIntervalData* getDateIntervalData(ObjectData* this_) {
 // DateTime
 
 void HHVM_METHOD(DateTime, __construct,
-                 const String& time /*= "now"*/,
+                 const OptString& time /*= "now"*/,
                  const Variant& timezone /*= uninit_variant*/) {
   DateTimeData* data = Native::data<DateTimeData>(this_);
   auto tz = TimeZone::Current();
@@ -144,8 +144,8 @@ void HHVM_METHOD(DateTime, __construct,
 }
 
 Variant HHVM_STATIC_METHOD(DateTime, createFromFormat,
-                           const String& format,
-                           const String& time,
+                           const OptString& format,
+                           const OptString& time,
                            const Variant& timezone /*= uninit_variant */) {
   auto tz = TimeZone::Current();
   if (!timezone.isNull()) {
@@ -159,7 +159,7 @@ Variant HHVM_STATIC_METHOD(DateTime, createFromFormat,
   }
   Object obj{DateTimeData::classof()};
   DateTimeData* data = Native::data<DateTimeData>(obj);
-  const auto curr = (format.find("!") != String::npos) ? 0 : ::time(0);
+  const auto curr = (format.find("!") != OptString::npos) ? 0 : ::time(0);
   data->m_dt = req::make<DateTime>(curr, false);
   if (!data->m_dt->fromString(time, tz, format.data(), false)) {
     return false;
@@ -177,7 +177,7 @@ Object HHVM_METHOD(DateTime, diff,
   return DateIntervalData::wrap(dt2);
 }
 
-String HHVM_METHOD(DateTime, format,
+OptString HHVM_METHOD(DateTime, format,
                    const Variant& format) {
   auto const data = getDateTimeData(this_);
   return data->format(format.toString());
@@ -221,7 +221,7 @@ Variant HHVM_METHOD(DateTime, getTimezone) {
 }
 
 Variant HHVM_METHOD(DateTime, modify,
-                   const String& modify) {
+                   const OptString& modify) {
   auto const data = getDateTimeData(this_);
   if (!data->m_dt->modify(modify)) {
     return false;
@@ -403,7 +403,7 @@ req::ptr<DateTime> DateTimeData::unwrap(const Object& datetime) {
 // DateTimeZone
 
 void HHVM_METHOD(DateTimeZone, __construct,
-                 const String& timezone) {
+                 const OptString& timezone) {
   DateTimeZoneData* data = Native::data<DateTimeZoneData>(this_);
   data->m_tz = req::make<TimeZone>(timezone);
   if (!data->m_tz->isValid()) {
@@ -419,7 +419,7 @@ Array HHVM_METHOD(DateTimeZone, getLocation) {
   return data->m_tz->getLocation();
 }
 
-String HHVM_METHOD(DateTimeZone, getName) {
+OptString HHVM_METHOD(DateTimeZone, getName) {
   auto const data = getDateTimeZoneData(this_);
   return data->getName();
 }
@@ -450,7 +450,7 @@ Array HHVM_STATIC_METHOD(DateTimeZone, listAbbreviations) {
 
 Variant HHVM_STATIC_METHOD(DateTimeZone, listIdentifiers,
                            int64_t what,
-                           const String& country) {
+                           const OptString& country) {
   // This is the same check that PHP5 performs, no validation needed.
   // See ext/date/php_date.c lines 4496-4499
   if (what == DateTimeZoneData::PER_COUNTRY && country.length() != 2) {
@@ -469,13 +469,13 @@ Variant HHVM_STATIC_METHOD(DateTimeZone, listIdentifiers,
     // When country code is unknown or not in use anymore, ?? is used instead.
     // There is no known better way to extract this information out.
     const char* infoString = (const char*)&tzdb->data[table[i].pos];
-    String countryCode = String(&infoString[5], 2, CopyString);
+    OptString countryCode = OptString(&infoString[5], 2, CopyString);
     if ((what == DateTimeZoneData::PER_COUNTRY && equal(country.get(), countryCode.get()))
         || what == DateTimeZoneData::ALL_WITH_BC
         || (check_id_allowed(table[i].id, what)
             && tzdb->data[table[i].pos + 4] == '\1')) {
 
-      ret.append(String(table[i].id, CopyString));
+      ret.append(OptString(table[i].id, CopyString));
     }
   }
   return ret;
@@ -516,7 +516,7 @@ Array DateTimeZoneData::getDebugInfo() const {
 // DateInterval
 
 void HHVM_METHOD(DateInterval, __construct,
-                 const String& interval_spec) {
+                 const OptString& interval_spec) {
   DateIntervalData* data = Native::data<DateIntervalData>(this_);
   data->m_di = req::make<DateInterval>(interval_spec);
   if (!data->m_di->isValid()) {
@@ -573,12 +573,12 @@ struct DateIntervalPropHandler : Native::MapPropHandler<DateIntervalPropHandler>
 };
 
 Object HHVM_STATIC_METHOD(DateInterval, createFromDateString,
-                          const String& time) {
+                          const OptString& time) {
   return DateIntervalData::wrap(req::make<DateInterval>(time, true));
 }
 
-String HHVM_METHOD(DateInterval, format,
-                   const String& format) {
+OptString HHVM_METHOD(DateInterval, format,
+                   const OptString& format) {
   auto const data = getDateIntervalData(this_);
   return data->m_di->format(format);
 }
@@ -671,7 +671,7 @@ Variant HHVM_FUNCTION(gmmktime,
 }
 
 static TypedValue HHVM_FUNCTION(idate,
-                                const String& fmt, TypedValue timestamp) {
+                                const OptString& fmt, TypedValue timestamp) {
   if (fmt.size() != 1) {
     raise_invalid_argument_warning("format: %s", fmt.data());
     return make_tv<KindOfBoolean>(false);
@@ -685,12 +685,12 @@ static TypedValue HHVM_FUNCTION(idate,
 }
 
 template<bool gmt>
-static TypedValue date_impl(const String& format, TypedValue timestamp) {
+static TypedValue date_impl(const OptString& format, TypedValue timestamp) {
   if (!gmt && format.empty()) {
     return tvReturn(empty_string());
   }
 
-  String ret = req::make<DateTime>(
+  OptString ret = req::make<DateTime>(
     tvIsNull(timestamp) ? TimeStamp::Current() : tvAssertInt(timestamp),
     gmt
   )->toString(format, false);
@@ -699,8 +699,8 @@ static TypedValue date_impl(const String& format, TypedValue timestamp) {
 }
 
 template<bool gmt>
-static TypedValue strftime_impl(const String& format, TypedValue timestamp) {
-  String ret = req::make<DateTime>(
+static TypedValue strftime_impl(const OptString& format, TypedValue timestamp) {
+  OptString ret = req::make<DateTime>(
     tvIsNull(timestamp) ? TimeStamp::Current() : tvAssertInt(timestamp),
     gmt
   )->toString(format, true);
@@ -709,7 +709,7 @@ static TypedValue strftime_impl(const String& format, TypedValue timestamp) {
 }
 
 TypedValue HHVM_FUNCTION(strtotime,
-                         const String& input, TypedValue timestamp) {
+                         const OptString& input, TypedValue timestamp) {
   if (input.empty()) {
     return make_tv<KindOfBoolean>(false);
   }
@@ -740,8 +740,8 @@ static Variant HHVM_FUNCTION(localtime,
 }
 
 Variant HHVM_FUNCTION(strptime,
-                      const String& date,
-                      const String& format) {
+                      const OptString& date,
+                      const OptString& format) {
   Array ret = DateTime::ParseAsStrptime(format, date);
   if (ret.empty()) {
     return false;
@@ -752,27 +752,27 @@ Variant HHVM_FUNCTION(strptime,
 ///////////////////////////////////////////////////////////////////////////////
 // timezone
 
-String HHVM_FUNCTION(date_default_timezone_get) {
+OptString HHVM_FUNCTION(date_default_timezone_get) {
   return TimeZone::Current()->name();
 }
 
 bool HHVM_FUNCTION(date_default_timezone_set,
-                   const String& name) {
+                   const OptString& name) {
   return TimeZone::SetCurrent(name.c_str());
 }
 
 Variant HHVM_FUNCTION(timezone_name_from_abbr,
-                      const String& abbr,
+                      const OptString& abbr,
                       int64_t gmtoffset /* = -1 */,
                       int64_t isdst /* = 1 */) {
-  String ret = TimeZone::AbbreviationToName(abbr, gmtoffset, isdst);
+  OptString ret = TimeZone::AbbreviationToName(abbr, gmtoffset, isdst);
   if (ret.isNull()) {
     return false;
   }
   return ret;
 }
 
-String HHVM_FUNCTION(timezone_version_get) {
+OptString HHVM_FUNCTION(timezone_version_get) {
   return TimeZone::getVersion();
 }
 
@@ -787,8 +787,8 @@ bool HHVM_FUNCTION(checkdate,
 }
 
 Variant HHVM_FUNCTION(date_parse_from_format,
-                      const String& format,
-                      const String& date) {
+                      const OptString& format,
+                      const OptString& date) {
   Array ret = DateTime::Parse(format, date);
   if (ret.empty()) {
     return false;
@@ -799,7 +799,7 @@ Variant HHVM_FUNCTION(date_parse_from_format,
 Variant HHVM_FUNCTION(date_create,
                       const Variant& time /* = null_string */,
                       const Variant& timezone /* = uninit_variant */) {
-  const String& str_time = time.isNull() ? null_string : time.toString();
+  const OptString& str_time = time.isNull() ? null_string : time.toString();
   auto tz = TimeZone::Current();
   if (!timezone.isNull()) {
     const Object& obj_timezone = timezone.toObject();
@@ -825,7 +825,7 @@ Variant HHVM_FUNCTION(date_create,
 
 Variant HHVM_FUNCTION(date_format,
                       const Object& datetime,
-                      const String& format) {
+                      const OptString& format) {
   if (!datetime.instanceof(s_DateTimeInterface)) {
     raise_argument_warning("date_format", 1, s_DateTimeInterface, datetime);
     return false;
@@ -835,7 +835,7 @@ Variant HHVM_FUNCTION(date_format,
 }
 
 Variant HHVM_FUNCTION(date_parse,
-                      const String& date) {
+                      const OptString& date) {
   Array ret = DateTime::Parse(date);
   if (ret.empty()) {
     return false;

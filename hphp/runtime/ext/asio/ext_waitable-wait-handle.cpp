@@ -66,7 +66,7 @@ void c_WaitableWaitHandle::join() {
   ImplicitContext::setActive(Object{savedIC});
 }
 
-String c_WaitableWaitHandle::getName() {
+OptString c_WaitableWaitHandle::getName() {
   switch (getKind()) {
     case Kind::Static:              not_reached();
     case Kind::AsyncFunction:       return asAsyncFunction()->getName();

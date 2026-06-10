@@ -64,11 +64,11 @@ bool ClsMethData::validate() const {
   return true;
 }
 
-String ClsMethData::getClsStr() const {
+OptString ClsMethData::getClsStr() const {
   return getCls()->nameStr();
 }
 
-String ClsMethData::getFuncStr() const {
+OptString ClsMethData::getFuncStr() const {
   return getFunc()->nameStr();
 }
 

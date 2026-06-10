@@ -75,10 +75,10 @@ void php_str2num(bc_num *num, const char *str) {
   }
 }
 
-String php_num2str(bc_num num) {
+OptString php_num2str(bc_num num) {
   auto const str = bc_num2str(num);
   SCOPE_EXIT { bc_free(str); };
-  return String{str, CopyString};
+  return OptString{str, CopyString};
 }
 
 }
@@ -90,7 +90,7 @@ static bool HHVM_FUNCTION(bcscale, int64_t scale) {
   return true;
 }
 
-static String HHVM_FUNCTION(bcadd, const String& left, const String& right,
+static OptString HHVM_FUNCTION(bcadd, const OptString& left, const OptString& right,
                             int64_t scale /* = -1 */) {
   scale = adjust_scale(scale);
   bc_num first, second, result;
@@ -109,7 +109,7 @@ static String HHVM_FUNCTION(bcadd, const String& left, const String& right,
   return php_num2str(result);
 }
 
-static String HHVM_FUNCTION(bcsub, const String& left, const String& right,
+static OptString HHVM_FUNCTION(bcsub, const OptString& left, const OptString& right,
                             int64_t scale /* = -1 */) {
   scale = adjust_scale(scale);
   bc_num first, second, result;
@@ -128,7 +128,7 @@ static String HHVM_FUNCTION(bcsub, const String& left, const String& right,
   return php_num2str(result);
 }
 
-static int64_t HHVM_FUNCTION(bccomp, const String& left, const String& right,
+static int64_t HHVM_FUNCTION(bccomp, const OptString& left, const OptString& right,
                              int64_t scale /* = -1 */) {
   scale = adjust_scale(scale);
   bc_num first, second;
@@ -141,7 +141,7 @@ static int64_t HHVM_FUNCTION(bccomp, const String& left, const String& right,
   return bc_compare(first, second);
 }
 
-static String HHVM_FUNCTION(bcmul, const String& left, const String& right,
+static OptString HHVM_FUNCTION(bcmul, const OptString& left, const OptString& right,
                             int64_t scale /* = -1 */) {
   scale = adjust_scale(scale);
   bc_num first, second, result;
@@ -160,7 +160,7 @@ static String HHVM_FUNCTION(bcmul, const String& left, const String& right,
   return php_num2str(result);
 }
 
-static Variant HHVM_FUNCTION(bcdiv, const String& left, const String& right,
+static Variant HHVM_FUNCTION(bcdiv, const OptString& left, const OptString& right,
                int64_t scale /* = -1 */) {
   scale = adjust_scale(scale);
   bc_num first, second, result;
@@ -179,7 +179,7 @@ static Variant HHVM_FUNCTION(bcdiv, const String& left, const String& right,
   return php_num2str(result);
 }
 
-static Variant HHVM_FUNCTION(bcmod, const String& left, const String& right) {
+static Variant HHVM_FUNCTION(bcmod, const OptString& left, const OptString& right) {
   bc_num first, second, result;
   bc_init_num(&first);
   SCOPE_EXIT { bc_free_num(&first); };
@@ -196,7 +196,7 @@ static Variant HHVM_FUNCTION(bcmod, const String& left, const String& right) {
   return php_num2str(result);
 }
 
-static String HHVM_FUNCTION(bcpow, const String& left, const String& right,
+static OptString HHVM_FUNCTION(bcpow, const OptString& left, const OptString& right,
                            int64_t scale /* = -1 */) {
   scale = adjust_scale(scale);
   bc_num first, second, result;
@@ -215,8 +215,8 @@ static String HHVM_FUNCTION(bcpow, const String& left, const String& right,
   return php_num2str(result);
 }
 
-static Variant HHVM_FUNCTION(bcpowmod, const String& left, const String& right,
-                             const String& modulus, int64_t scale /* = -1 */) {
+static Variant HHVM_FUNCTION(bcpowmod, const OptString& left, const OptString& right,
+                             const OptString& modulus, int64_t scale /* = -1 */) {
   scale = adjust_scale(scale);
   bc_num first, second, mod, result;
   bc_init_num(&first);
@@ -239,7 +239,7 @@ static Variant HHVM_FUNCTION(bcpowmod, const String& left, const String& right,
   return php_num2str(result);
 }
 
-static Variant HHVM_FUNCTION(bcsqrt, const String& operand,
+static Variant HHVM_FUNCTION(bcsqrt, const OptString& operand,
                              int64_t scale /* = -1 */) {
   scale = adjust_scale(scale);
   bc_num result;

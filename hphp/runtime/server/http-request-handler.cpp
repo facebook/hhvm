@@ -71,9 +71,9 @@ static __thread unsigned int s_randState = 0xfaceb00c;
 
 static bool matchAnyPattern(const std::string &path,
                             const std::vector<std::string> &patterns) {
-  String spath(path.c_str(), path.size(), CopyString);
+  OptString spath(path.c_str(), path.size(), CopyString);
   for (unsigned int i = 0; i < patterns.size(); i++) {
-    Variant ret = preg_match(String(patterns[i].c_str(), patterns[i].size(),
+    Variant ret = preg_match(OptString(patterns[i].c_str(), patterns[i].size(),
                                     CopyString),
                              spath);
     if (ret.toInt64() > 0) return true;
@@ -185,7 +185,7 @@ void HttpRequestHandler::sendStaticContent(Transport *transport,
     if (rule.match(cmd)) {
       const vector<string> &headers = rule.getHeaders();
       for (unsigned int j = 0; j < headers.size(); j++) {
-        transport->addHeader(String(headers[j]));
+        transport->addHeader(OptString(headers[j]));
       }
     }
   }
@@ -341,7 +341,7 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
     }
 
     if (Cfg::Server::EnableStaticContentFromDisk) {
-      String translated = File::TranslatePath(String(absPath));
+      OptString translated = File::TranslatePath(OptString(absPath));
       if (!translated.empty() &&
           handleFileRequest(transport, translated, path, ext)) {
         return;
@@ -437,7 +437,7 @@ bool HttpRequestHandler::executePHPRequest(Transport *transport,
     if (Cfg::Server::OutputHandler.empty()) {
       context->obStart();
     } else {
-      context->obStart(String(Cfg::Server::OutputHandler));
+      context->obStart(OptString(Cfg::Server::OutputHandler));
     }
   }
   InitFiniNode::RequestStart();
@@ -478,7 +478,7 @@ bool HttpRequestHandler::executePHPRequest(Transport *transport,
                     true /* allowDynCallNoPointer */);
 
   if (ret) {
-    String content = context->obDetachContents();
+    OptString content = context->obDetachContents();
     transport->sendRaw(content.data(), content.size());
     code = transport->getResponseCode();
   } else if (error) {
@@ -503,7 +503,7 @@ bool HttpRequestHandler::executePHPRequest(Transport *transport,
                         Cfg::Eval::PreludePath,
                         true /* allowDynCallNoPointer */);
       if (ret) {
-        String content = context->obDetachContents();
+        OptString content = context->obDetachContents();
         transport->sendRaw(content.data(), content.size());
         code = transport->getResponseCode();
       } else {
@@ -606,7 +606,7 @@ bool HttpRequestHandler::handleProxyRequest(Transport *transport, bool force) {
 }
 
 bool HttpRequestHandler::handleFileRequest(Transport* transport,
-                                           const String& translated,
+                                           const OptString& translated,
                                            const std::string& path,
                                            const char* ext) {
   static constexpr size_t kMaxCap = INT_MAX - 1;
@@ -622,7 +622,7 @@ bool HttpRequestHandler::handleFileRequest(Transport* transport,
         auto const str = folly::to<std::string>(
           "file ", filename, " is too large"
         );
-        throw StringBufferLimitException(kMaxCap, String(str.c_str()));
+        throw StringBufferLimitException(kMaxCap, OptString(str.c_str()));
       }
       auto buffer = (char*)safe_malloc(cap + 1);
       size_t len = 0;

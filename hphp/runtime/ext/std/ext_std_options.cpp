@@ -76,7 +76,7 @@ const StaticString s_cli_workers("cli_workers");
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static bool HHVM_FUNCTION(extension_loaded, const String& name) {
+static bool HHVM_FUNCTION(extension_loaded, const OptString& name) {
   return ExtensionRegistry::isLoaded(name);
 }
 
@@ -85,7 +85,7 @@ HHVM_FUNCTION(get_loaded_extensions, bool /*zend_extensions*/ /*=false */) {
   return ExtensionRegistry::getLoaded();
 }
 
-static TypedValue HHVM_FUNCTION(get_extension_funcs, const String& module_name) {
+static TypedValue HHVM_FUNCTION(get_extension_funcs, const OptString& module_name) {
   auto extension = ExtensionRegistry::get(module_name);
   if (!extension) return make_tv<KindOfBoolean>(false);
 
@@ -97,7 +97,7 @@ static TypedValue HHVM_FUNCTION(get_extension_funcs, const String& module_name) 
   return make_array_like_tv(result.create());
 }
 
-static String HHVM_FUNCTION(get_current_user) {
+static OptString HHVM_FUNCTION(get_current_user) {
 #ifdef _MSC_VER
   return Process::GetCurrentUser();
 #else
@@ -117,7 +117,7 @@ static String HHVM_FUNCTION(get_current_user) {
     return empty_string();
   }
 
-  String ret(pw->pw_name, CopyString);
+  OptString ret(pw->pw_name, CopyString);
   return ret;
 #endif
 }
@@ -126,7 +126,7 @@ static Array HHVM_FUNCTION(get_defined_constants, bool categorize /*=false */) {
   return lookupDefinedConstants(categorize);
 }
 
-static String HHVM_FUNCTION(get_include_path) {
+static OptString HHVM_FUNCTION(get_include_path) {
   static StaticString s_include_path("include_path");
   return IniSetting::Get(s_include_path);
 }
@@ -137,8 +137,8 @@ static void HHVM_FUNCTION(restore_include_path) {
   IniSetting::SetUser("include_path", path);
 }
 
-static String HHVM_FUNCTION(set_include_path, const Variant& new_include_path) {
-  String s = HHVM_FN(get_include_path)();
+static OptString HHVM_FUNCTION(set_include_path, const Variant& new_include_path) {
+  OptString s = HHVM_FN(get_include_path)();
   IniSetting::SetUser("include_path", new_include_path.toString());
   return s;
 }
@@ -163,8 +163,8 @@ static Array HHVM_FUNCTION(get_visited_files) {
      : g_context->m_visitedFiles;
 }
 
-static Variant HHVM_FUNCTION(getenv, const String& varname) {
-  String ret = g_context->getenv(varname);
+static Variant HHVM_FUNCTION(getenv, const OptString& varname) {
+  OptString ret = g_context->getenv(varname);
   if (!ret.isNull()) {
     return ret;
   }
@@ -428,7 +428,7 @@ static req::vector<opt_struct> parse_opts(const char *opts, int opts_len) {
 const StaticString s_argv("argv");
 
 static Array HHVM_FUNCTION(getopt_with_optind,
-                           const String& options,
+                           const OptString& options,
                            const Variant& longopts,
                            int64_t& optind) {
   if (optind <= 0) {
@@ -448,7 +448,7 @@ static Array HHVM_FUNCTION(getopt_with_optind,
     opt_vec.resize(opt_vec.size() + arropts.size() + 1);
 
     for (ArrayIter iter(arropts); iter; ++iter) {
-      String entry = iter.second().toString();
+      OptString entry = iter.second().toString();
 
       auto& opt = opt_vec[i];
       opt.need_param = 0;
@@ -479,11 +479,11 @@ static Array HHVM_FUNCTION(getopt_with_optind,
   auto const& vargv = php_global(s_argv).toArray();
   int argc = vargv.size();
   req::vector<char*> argv(argc + 1);
-  req::vector<String> holders;
+  req::vector<OptString> holders;
   holders.reserve(argc);
   int index = 0;
   for (ArrayIter iter(vargv); iter; ++iter) {
-    String arg = iter.second().toString();
+    OptString arg = iter.second().toString();
     holders.push_back(arg);
     argv[index++] = (char*)arg.data();
   }
@@ -527,7 +527,7 @@ static Array HHVM_FUNCTION(getopt_with_optind,
 
     if (php_optarg != nullptr) {
       /* keep the arg as binary, since the encoding is not known */
-      val = String(php_optarg, CopyString);
+      val = OptString(php_optarg, CopyString);
     } else {
       val = false;
     }
@@ -551,7 +551,7 @@ static Array HHVM_FUNCTION(getopt_with_optind,
       }
     } else {
       /* other strings */
-      String key(optname, strlen(optname), CopyString);
+      OptString key(optname, strlen(optname), CopyString);
       if (ret.exists(key)) {
         auto const lval = ret.lval(key);
         if (!isArrayLikeType(lval.type())) {
@@ -571,7 +571,7 @@ static Array HHVM_FUNCTION(getopt_with_optind,
   return ret;
 }
 
-static Array HHVM_FUNCTION(getopt, const String& options,
+static Array HHVM_FUNCTION(getopt, const OptString& options,
                                    const Variant& longopts /*=null */) {
   int64_t optind = 1;
   return HHVM_FN(getopt_with_optind)(options, longopts, optind);
@@ -671,11 +671,11 @@ static int64_t HHVM_FUNCTION(cpu_get_count) {
   return Process::GetCPUCount();
 }
 
-static String HHVM_FUNCTION(cpu_get_model) {
+static OptString HHVM_FUNCTION(cpu_get_model) {
   return Process::GetCPUModel();
 }
 
-Variant HHVM_FUNCTION(ini_get, const String& varname) {
+Variant HHVM_FUNCTION(ini_get, const OptString& varname) {
   Variant value;
   bool ret = IniSetting::Get(varname, value);
 
@@ -699,16 +699,16 @@ Variant HHVM_FUNCTION(ini_get, const String& varname) {
 }
 
 static ArrayRet HHVM_FUNCTION(ini_get_all,
-                           const String& extension, bool detailed) {
+                           const OptString& extension, bool detailed) {
   return IniSetting::GetAll(extension, detailed);
 }
 
-static void HHVM_FUNCTION(ini_restore, const String& varname) {
+static void HHVM_FUNCTION(ini_restore, const OptString& varname) {
   IniSetting::RestoreUser(varname);
 }
 
 Variant HHVM_FUNCTION(ini_set,
-                      const String& varname, const Variant& newvalue) {
+                      const OptString& varname, const Variant& newvalue) {
   auto oldvalue = HHVM_FN(ini_get)(varname);
   auto ret = IniSetting::SetUser(varname, newvalue);
   if (!ret) {
@@ -782,7 +782,7 @@ static bool HHVM_FUNCTION(set_oom_multiplier, int64_t m) {
 
 const StaticString s_srv("srv"), s_cli("cli");
 
-String HHVM_FUNCTION(php_sapi_name) {
+OptString HHVM_FUNCTION(php_sapi_name) {
   return is_any_cli_mode() ? s_cli : s_srv;
 }
 
@@ -793,32 +793,32 @@ const StaticString
   s_v("v"),
   s_m("m");
 
-Variant HHVM_FUNCTION(php_uname, const String& mode /*="" */) {
+Variant HHVM_FUNCTION(php_uname, const OptString& mode /*="" */) {
   struct utsname buf;
   if (uname((struct utsname *)&buf) == -1) {
     return init_null();
   }
 
   if (mode == s_s) {
-    return String(buf.sysname, CopyString);
+    return OptString(buf.sysname, CopyString);
   } else if (mode == s_r) {
-    return String(buf.release, CopyString);
+    return OptString(buf.release, CopyString);
   } else if (mode == s_n) {
-    return String(buf.nodename, CopyString);
+    return OptString(buf.nodename, CopyString);
   } else if (mode == s_v) {
-    return String(buf.version, CopyString);
+    return OptString(buf.version, CopyString);
   } else if (mode == s_m) {
-    return String(buf.machine, CopyString);
+    return OptString(buf.machine, CopyString);
   } else { /* assume mode == "a" */
     char tmp_uname[512];
     snprintf(tmp_uname, sizeof(tmp_uname), "%s %s %s %s %s",
              buf.sysname, buf.nodename, buf.release, buf.version,
              buf.machine);
-    return String(tmp_uname, CopyString);
+    return OptString(tmp_uname, CopyString);
   }
 }
 
-static Variant HHVM_FUNCTION(phpversion, const String& extension /*="" */) {
+static Variant HHVM_FUNCTION(phpversion, const OptString& extension /*="" */) {
   Extension *ext;
 
   if (extension.empty()) {
@@ -833,11 +833,11 @@ static Variant HHVM_FUNCTION(phpversion, const String& extension /*="" */) {
   return false;
 }
 
-static bool HHVM_FUNCTION(putenv, const String& setting) {
+static bool HHVM_FUNCTION(putenv, const OptString& setting) {
   int pos = setting.find('=');
   if (pos >= 0) {
-    String name = setting.substr(0, pos);
-    String value = setting.substr(pos + 1);
+    OptString name = setting.substr(0, pos);
+    OptString value = setting.substr(pos + 1);
     g_context->setenv(name, value);
   } else {
     g_context->unsetenv(setting);
@@ -869,9 +869,9 @@ static void HHVM_FUNCTION(set_pre_timeout_handler,
   g_context->m_timeThresholdCallback = callback;
 }
 
-String HHVM_FUNCTION(sys_get_temp_dir) {
+OptString HHVM_FUNCTION(sys_get_temp_dir) {
   char *env = getenv("TMPDIR");
-  if (env && *env) return String(env, CopyString);
+  if (env && *env) return OptString(env, CopyString);
   return s_DEFAULT_TEMP_DIR;
 }
 
@@ -1043,9 +1043,9 @@ static int php_version_compare(const char *orig_ver1, const char *orig_ver2) {
 }
 
 Variant HHVM_FUNCTION(version_compare,
-                      const String& version1,
-                      const String& version2,
-                      const String& sop /*="" */) {
+                      const OptString& version1,
+                      const OptString& version2,
+                      const OptString& sop /*="" */) {
   const char *op = sop.data();
   int op_len = sop.size();
   int compare = php_version_compare(version1.data(), version2.data());
@@ -1092,7 +1092,7 @@ Array HHVM_FUNCTION(tc_usage) {
     shape.set(s_used, info.used);
     shape.set(s_capacity, info.capacity);
     shape.set(s_global, info.global);
-    dict.set(String(info.name), shape.toArray());
+    dict.set(OptString(info.name), shape.toArray());
   }
 
   return dict;

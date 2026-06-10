@@ -369,7 +369,7 @@ bool HotCache::clearValueIdx(Idx idx) {
 
 //////////////////////////////////////////////////////////////////////
 
-bool ConcurrentTableSharedStore::eraseKey(const String& key) {
+bool ConcurrentTableSharedStore::eraseKey(const OptString& key) {
   assertx(!key.isNull());
   return eraseImpl(tagStringData(key.get()), false, nullptr);
 }
@@ -488,7 +488,7 @@ void ConcurrentTableSharedStore::purgeDeferred(req::vector<StringData*>&& keys) 
   keys.clear();
 }
 
-bool ConcurrentTableSharedStore::handlePromoteObj(const String& key,
+bool ConcurrentTableSharedStore::handlePromoteObj(const OptString& key,
                                                   APCHandle* svar,
                                                   const Variant& value,
                                                   bool pure) {
@@ -522,7 +522,7 @@ bool ConcurrentTableSharedStore::handlePromoteObj(const String& key,
   return false;
 }
 
-bool ConcurrentTableSharedStore::checkExpire(const String& keyStr,
+bool ConcurrentTableSharedStore::checkExpire(const OptString& keyStr,
                                                 Map::const_accessor& acc) {
   auto const tag = tagStringData(keyStr.get());
   if (!m_vars.find(acc, tag)) return true;
@@ -591,7 +591,7 @@ bool ConcurrentTableSharedStore::checkExpire(const String& keyStr,
   return false;
 }
 
-bool ConcurrentTableSharedStore::get(const String& keyStr, Variant& value, bool pure) {
+bool ConcurrentTableSharedStore::get(const OptString& keyStr, Variant& value, bool pure) {
   FTRACE(3, "Get {}\n", keyStr.get()->data());
   HotCache::Idx hotIdx;
   if (s_hotCache.get(keyStr.get(), value, hotIdx, pure)) return true;
@@ -644,7 +644,7 @@ bool ConcurrentTableSharedStore::get(const String& keyStr, Variant& value, bool 
   return true;
 }
 
-int64_t ConcurrentTableSharedStore::inc(const String& key, int64_t step,
+int64_t ConcurrentTableSharedStore::inc(const OptString& key, int64_t step,
                                         bool& found) {
   found = false;
   std::shared_lock l(m_lock);
@@ -686,7 +686,7 @@ int64_t ConcurrentTableSharedStore::inc(const String& key, int64_t step,
   return ret;
 }
 
-bool ConcurrentTableSharedStore::cas(const String& key, int64_t old,
+bool ConcurrentTableSharedStore::cas(const OptString& key, int64_t old,
                                      int64_t val) {
   std::shared_lock l(m_lock);
 
@@ -716,7 +716,7 @@ bool ConcurrentTableSharedStore::cas(const String& key, int64_t old,
   return true;
 }
 
-bool ConcurrentTableSharedStore::exists(const String& keyStr) {
+bool ConcurrentTableSharedStore::exists(const OptString& keyStr) {
   if (s_hotCache.hasValue(keyStr.get())) return true;
   std::shared_lock l(m_lock);
   {
@@ -728,7 +728,7 @@ bool ConcurrentTableSharedStore::exists(const String& keyStr) {
   return true;
 }
 
-int64_t ConcurrentTableSharedStore::size(const String& key, bool& found) {
+int64_t ConcurrentTableSharedStore::size(const OptString& key, bool& found) {
   found = false;
   std::shared_lock l(m_lock);
 
@@ -755,7 +755,7 @@ static int64_t apply_ttl_limit(int64_t ttl) {
   return ttl;
 }
 
-bool ConcurrentTableSharedStore::extendTTL(const String& key, int64_t new_ttl) {
+bool ConcurrentTableSharedStore::extendTTL(const OptString& key, int64_t new_ttl) {
   std::shared_lock l(m_lock);
   Map::accessor acc;
   if (!m_vars.find(acc, tagStringData(key.get()))) {
@@ -786,7 +786,7 @@ bool ConcurrentTableSharedStore::extendTTL(const String& key, int64_t new_ttl) {
 }
 
 
-bool ConcurrentTableSharedStore::add(const String& key,
+bool ConcurrentTableSharedStore::add(const OptString& key,
                                      const Variant& val,
                                      int64_t max_ttl,
                                      int64_t bump_ttl,
@@ -795,7 +795,7 @@ bool ConcurrentTableSharedStore::add(const String& key,
   return storeImpl(key, val, max_ttl, bump_ttl, false, level, pure);
 }
 
-void ConcurrentTableSharedStore::set(const String& key,
+void ConcurrentTableSharedStore::set(const OptString& key,
                                      const Variant& val,
                                      int64_t max_ttl,
                                      int64_t bump_ttl,
@@ -804,7 +804,7 @@ void ConcurrentTableSharedStore::set(const String& key,
   storeImpl(key, val, max_ttl, bump_ttl, true, level, pure);
 }
 
-bool ConcurrentTableSharedStore::storeImpl(const String& key,
+bool ConcurrentTableSharedStore::storeImpl(const OptString& key,
                                            const Variant& value,
                                            int64_t max_ttl,
                                            int64_t bump_ttl,
@@ -922,7 +922,7 @@ EntryInfo ConcurrentTableSharedStore::makeEntryInfo(const char* key,
   auto ttl = calcTTL(sval->rawExpire());
   auto maxTTL = calcTTL(sval->maxExpireTime.load(std::memory_order_acquire));
   return EntryInfo(key, size, ttl, maxTTL, sval->bumpTTL.load(std::memory_order_acquire),
-                   type, sval->c_time, s_hotCache.hasValue(String(key).get()));
+                   type, sval->c_time, s_hotCache.hasValue(OptString(key).get()));
 }
 
 std::vector<EntryInfo> ConcurrentTableSharedStore::getEntriesInfo() {

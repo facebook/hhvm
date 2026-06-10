@@ -33,7 +33,7 @@ const StaticString
   s_fromThrift("fromThrift"),
   s_toThrift("toThrift");
 
-Variant applyAdapter(Variant value, Class& adapter, const String& methodName) {
+Variant applyAdapter(Variant value, Class& adapter, const OptString& methodName) {
   if (value.isNull()) {
     return value;
   }

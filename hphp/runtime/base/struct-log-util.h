@@ -32,7 +32,7 @@ namespace HPHP {
 namespace StructuredLog {
 void logSerDes(const char* format,
                const char* op,
-               const String& serialized,
+               const OptString& serialized,
                const Variant& value);
 }
 

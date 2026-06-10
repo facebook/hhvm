@@ -130,14 +130,14 @@ struct ShmRec {
       return Variant(false);
     }
 
-    return Variant(String(&m_addr[start], count, CopyString));
+    return Variant(OptString(&m_addr[start], count, CopyString));
   }
 
   int64_t size() {
     return m_size;
   }
 
-  Variant write(const String& data, int64_t offset) {
+  Variant write(const OptString& data, int64_t offset) {
     if (m_readonly) {
       raise_warning("shmop_write(): trying to write to a read only segment");
       return Variant(false);
@@ -215,7 +215,7 @@ bool HHVM_FUNCTION(shmop_delete, int64_t shmid) {
 
 Variant HHVM_FUNCTION(shmop_open,
                              int64_t key,
-                             const String& flags,
+                             const OptString& flags,
                              int64_t mode,
                              int64_t size) {
 
@@ -244,7 +244,7 @@ int64_t HHVM_FUNCTION(shmop_size, int64_t shmid) {
 
 Variant HHVM_FUNCTION(shmop_write,
                              int64_t shmid,
-                             const String& data,
+                             const OptString& data,
                              int64_t offset) {
   auto shm = s_data->findShm("shmop_write", shmid);
   if (!shm) return false;

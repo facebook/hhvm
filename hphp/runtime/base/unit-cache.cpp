@@ -370,7 +370,7 @@ HashCache& getHashCache(const std::string& repo) {
   return *acc->second;
 }
 
-Optional<String> loadFileContents(const char* path,
+Optional<OptString> loadFileContents(const char* path,
                                   Stream::Wrapper* wrapper) {
   std::string contents;
   assertx(path);
@@ -383,7 +383,7 @@ Optional<String> loadFileContents(const char* path,
   if (wrapper) {
     // We only allow normal file streams, which cannot re-enter
     assertx(wrapper->isNormalFileStream());
-    if (auto const f = wrapper->open(String{path}, "r", 0, nullptr)) {
+    if (auto const f = wrapper->open(OptString{path}, "r", 0, nullptr)) {
       return f->read();
     }
     return {};
@@ -970,7 +970,7 @@ FOLLY_NOINLINE const StringData* resolveRequestedPath(const StringData* requeste
     return rpath(requestedPath);
   }
   return rpath(
-    (String{SourceRootInfo::GetCurrentSourceRoot()} +
+    (OptString{SourceRootInfo::GetCurrentSourceRoot()} +
      StrNR{requestedPath}).get()
   );
 }
@@ -1376,7 +1376,7 @@ CachedUnit lookupUnitNonRepoAuth(const StringData* requestedPath,
 struct ResolveIncludeContext {
   struct stat* s; // stat for the file
   bool allow_dir; // return true for dirs?
-  String path;    // translated path of the file
+  OptString path;    // translated path of the file
 };
 
 bool findFile(const StringData* path, struct stat* s, bool allow_dir,
@@ -1405,7 +1405,7 @@ bool findFile(const StringData* path, struct stat* s, bool allow_dir,
   return false;
 }
 
-bool findFileWrapper(const String& file, void* ctx) {
+bool findFileWrapper(const OptString& file, void* ctx) {
   auto const context = static_cast<ResolveIncludeContext*>(ctx);
   assertx(context->path.isNull());
 
@@ -1414,7 +1414,7 @@ bool findFileWrapper(const String& file, void* ctx) {
 
   // TranslatePath() will canonicalize the path and also check
   // whether the file is in an allowed directory.
-  String translatedPath = File::TranslatePathKeepRelative(file);
+  OptString translatedPath = File::TranslatePathKeepRelative(file);
   if (!FileUtil::isAbsolutePath(file.toCppString())) {
     if (findFile(translatedPath.get(), context->s, context->allow_dir,
                  wrapper)) {
@@ -1438,7 +1438,7 @@ bool findFileWrapper(const String& file, void* ctx) {
       server_root += FileUtil::getDirSeparator();
     }
   }
-  String rel_path(FileUtil::relativePath(server_root, translatedPath.data()));
+  OptString rel_path(FileUtil::relativePath(server_root, translatedPath.data()));
   if (findFile(rel_path.get(), context->s, context->allow_dir,
                wrapper)) {
     context->path = rel_path;
@@ -1451,7 +1451,7 @@ void logLoad(
   StructuredLogEntry& ent,
   const StringData* path,
   const char* cwd,
-  String rpath,
+  OptString rpath,
   const CachedUnit& cu
 ) {
   ent.setStr("include_path", path->data());
@@ -1528,7 +1528,7 @@ std::string mangleUnitSha1(const folly::StringPiece fileSha1,
 
 Optional<SHA1> getHashForFile(const std::string& path,
                               const std::filesystem::path& root) {
-  auto wrapper = Stream::getWrapperFromURI(String{root.string()});
+  auto wrapper = Stream::getWrapperFromURI(OptString{root.string()});
   return getHashForFile(path, wrapper, root);
 }
 
@@ -1639,7 +1639,7 @@ void invalidateUnit(StringData* path) {
   erase(s_nonRepoUnitCache);
 }
 
-FOLLY_NOINLINE String resolveVmInclude(const StringData* path,
+FOLLY_NOINLINE OptString resolveVmInclude(const StringData* path,
                         const char* currentDir,
                         struct stat* s,
                         bool allow_dir /* = false */) {
@@ -1683,7 +1683,7 @@ Unit* lookupUnit(const StringData* path, const RepoUnitInfo* info,
   forAutoload &= *rl_trustAutoloadedUnits;
 
   struct stat s;
-  String spath;
+  OptString spath;
   if (info) {
     assertx(!path->empty());
     assertx(path->data()[0] == '/');

@@ -31,24 +31,24 @@ struct PlainFile : File {
 
   explicit PlainFile(FILE *stream = nullptr,
                      bool nonblocking = false,
-                     const String& wrapper_type = null_string,
-                     const String& stream_type = null_string);
+                     const OptString& wrapper_type = null_string,
+                     const OptString& stream_type = null_string);
   explicit PlainFile(int fd,
                      bool nonblocking = false,
-                     const String& wrapper = null_string,
-                     const String& stream_type = null_string);
+                     const OptString& wrapper = null_string,
+                     const OptString& stream_type = null_string);
   ~PlainFile() override;
 
   // overriding ResourceData
-  const String& o_getClassNameHook() const override { return classnameof(); }
+  const OptString& o_getClassNameHook() const override { return classnameof(); }
 
   // implementing File
-  bool open(const String& filename, const String& mode) override;
+  bool open(const OptString& filename, const OptString& mode) override;
   bool close(int* unused = nullptr) override;
   int64_t readImpl(char *buffer, int64_t length) override;
   int getc() override;
-  String read() override;
-  String read(int64_t length) override;
+  OptString read() override;
+  OptString read(int64_t length) override;
   int64_t writeImpl(const char *buffer, int64_t length) override;
   bool seekable() override { return true;}
   bool seek(int64_t offset, int whence = SEEK_SET) override;

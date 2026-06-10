@@ -77,18 +77,18 @@ Array HHVM_FUNCTION(get_declared_traits) {
   return Unit::getTraitsInfo();
 }
 
-bool HHVM_FUNCTION(class_exists, const String& class_name,
+bool HHVM_FUNCTION(class_exists, const OptString& class_name,
                                  bool autoload /* = true */) {
   return Class::exists(class_name.get(), autoload, ClassKind::Class);
 }
 
-bool HHVM_FUNCTION(interface_exists, const String& interface_name,
+bool HHVM_FUNCTION(interface_exists, const OptString& interface_name,
                                      bool autoload /* = true */) {
   return
     Class::exists(interface_name.get(), autoload, ClassKind::Interface);
 }
 
-bool HHVM_FUNCTION(trait_exists, const String& trait_name,
+bool HHVM_FUNCTION(trait_exists, const OptString& trait_name,
                                  bool autoload /* = true */) {
   return Class::exists(trait_name.get(), autoload, ClassKind::Trait);
 }
@@ -109,7 +109,7 @@ bool HHVM_FUNCTION(enum_exists, const Variant& enum_name,
   return cls && isAnyEnum(cls);
 }
 
-bool HHVM_FUNCTION(type_alias_exists, const String& name,
+bool HHVM_FUNCTION(type_alias_exists, const OptString& name,
                    bool autoload /* = true */) {
   auto const typeAlias = autoload
     ? TypeAlias::load(name.get())
@@ -126,7 +126,7 @@ Variant HHVM_FUNCTION(get_class_methods, const Variant& class_or_object) {
   return Variant::attach(HHVM_FN(array_values)(ret)).toArray();
 }
 
-Array HHVM_FUNCTION(get_class_constants, const String& className) {
+Array HHVM_FUNCTION(get_class_constants, const OptString& className) {
   auto const cls = Class::load(className.get());
   if (cls == NULL) {
     return empty_dict_array();
@@ -155,7 +155,7 @@ Array HHVM_FUNCTION(get_class_constants, const String& className) {
   return arrayInit.toArray();
 }
 
-Variant HHVM_FUNCTION(get_class_vars, const String& className) {
+Variant HHVM_FUNCTION(get_class_vars, const OptString& className) {
   const Class* cls = Class::load(className.get());
   if (!cls) {
     return false;
@@ -245,7 +245,7 @@ Variant HHVM_FUNCTION(get_parent_class, const Variant& object) {
   return Variant{cls->parentStr().get(), Variant::PersistentStrInit{}};
 }
 
-static bool is_a_impl(const Variant& class_or_object, const String& class_name,
+static bool is_a_impl(const Variant& class_or_object, const OptString& class_name,
                       bool allow_str_cls, bool subclass_only) {
   if (!(class_or_object.isString() ||
         class_or_object.isObject() ||
@@ -269,19 +269,19 @@ static bool is_a_impl(const Variant& class_or_object, const String& class_name,
 }
 
 bool HHVM_FUNCTION(is_a, const Variant& class_or_object,
-                         const String& class_name,
+                         const OptString& class_name,
                          bool allow_str_cls /* = false */) {
   return is_a_impl(class_or_object, class_name, allow_str_cls, false);
 }
 
 bool HHVM_FUNCTION(is_subclass_of, const Variant& class_or_object,
-                                   const String& class_name,
+                                   const OptString& class_name,
                                    bool allow_str_cls /* = true */) {
   return is_a_impl(class_or_object, class_name, allow_str_cls, true);
 }
 
 bool HHVM_FUNCTION(method_exists, const Variant& class_or_object,
-                                  const String& method_name) {
+                                  const OptString& method_name) {
   const Class* cls = get_cls(class_or_object);
   if (!cls) return false;
   if (cls->lookupMethod(method_name.get()) != NULL) return true;
@@ -295,7 +295,7 @@ bool HHVM_FUNCTION(method_exists, const Variant& class_or_object,
 }
 
 Variant HHVM_FUNCTION(property_exists, const Variant& class_or_object,
-                                       const String& property) {
+                                       const OptString& property) {
   Class* cls = nullptr;
   ObjectData* obj = nullptr;
   if (class_or_object.isObject()) {
@@ -340,7 +340,7 @@ Array HHVM_FUNCTION(get_object_vars, const Object& object) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-String HHVM_FUNCTION(HH_class_meth_get_class, TypedValue v) {
+OptString HHVM_FUNCTION(HH_class_meth_get_class, TypedValue v) {
   if (tvIsClsMeth(v)) {
     return val(v).pclsmeth->getCls()->nameStr();
   } else if (tvIsRClsMeth(v)) {
@@ -352,7 +352,7 @@ String HHVM_FUNCTION(HH_class_meth_get_class, TypedValue v) {
   }
 }
 
-String HHVM_FUNCTION(HH_class_meth_get_method, TypedValue v) {
+OptString HHVM_FUNCTION(HH_class_meth_get_method, TypedValue v) {
   if (tvIsClsMeth(v)) {
     return val(v).pclsmeth->getFunc()->nameStr();
   } else if (tvIsRClsMeth(v)) {
@@ -364,7 +364,7 @@ String HHVM_FUNCTION(HH_class_meth_get_method, TypedValue v) {
   }
 }
 
-bool HHVM_FUNCTION(HH_module_exists, const String& module_name,
+bool HHVM_FUNCTION(HH_module_exists, const OptString& module_name,
                    bool autoload /* = true */) {
   if (autoload) return Module::load(module_name.get()) != nullptr;
   return Module::lookup(module_name.get()) != nullptr;
@@ -417,21 +417,21 @@ StringData* getMethCallerClsOrMethNameFromDynMethCallerHelperClass(const ObjectD
 }
 
 template<bool isGetClass>
-String getMethCallerClsOrMethNameHelper(const char* fn, TypedValue v) {
+OptString getMethCallerClsOrMethNameHelper(const char* fn, TypedValue v) {
   if (tvIsFunc(v)) {
     if (val(v).pfunc->isMethCaller()) {
       auto const name =
         getMethCallerClsOrMethNameFromMethCallerFunc<isGetClass>(val(v).pfunc);
-      return String::attach(const_cast<StringData*>(name));
+      return OptString::attach(const_cast<StringData*>(name));
     }
   } else if (tvIsObject(v)) {
     auto const obj = val(v).pobj;
     auto const cls = obj->getVMClass();
     if (cls == SystemLib::getDynMethCallerHelperClass()) {
-      return String(getMethCallerClsOrMethNameFromDynMethCallerHelperClass<isGetClass>(obj));
+      return OptString(getMethCallerClsOrMethNameFromDynMethCallerHelperClass<isGetClass>(obj));
     }
     if (cls == SystemLib::getMethCallerHelperClass()) {
-      return String(getMethCallerClsOrMethNameFromMethCallerHelperClass<isGetClass>(fn, obj));
+      return OptString(getMethCallerClsOrMethNameFromMethCallerHelperClass<isGetClass>(fn, obj));
     }
   }
   raise_error("Argument 1 passed to %s() must be a MethCaller", fn);
@@ -468,11 +468,11 @@ Func* getFuncFromDynMethCallerHelperClass(const ObjectData* o) {
   );
 }
 
-String HHVM_FUNCTION(HH_meth_caller_get_class, TypedValue v) {
+OptString HHVM_FUNCTION(HH_meth_caller_get_class, TypedValue v) {
   return getMethCallerClsOrMethNameHelper<true>(__FUNCTION__+5, v);
 }
 
-String HHVM_FUNCTION(HH_meth_caller_get_method, TypedValue v) {
+OptString HHVM_FUNCTION(HH_meth_caller_get_method, TypedValue v) {
   return getMethCallerClsOrMethNameHelper<false>(__FUNCTION__+5, v);
 }
 

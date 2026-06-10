@@ -196,12 +196,12 @@ Array getReifiedClasses(const ActRec* ar) {
     case K::T_trait:
     case K::T_enum:
       clist.append(
-        String{const_cast<StringData*>(get_ts_classname(val(ts).parr))}
+        OptString{const_cast<StringData*>(get_ts_classname(val(ts).parr))}
       );
       break;
 
     case K::T_xhp:
-      clist.append(String{xhpNameFromTS(ArrNR{val(ts).parr})});
+      clist.append(OptString{xhpNameFromTS(ArrNR{val(ts).parr})});
       break;
 
     case K::T_union:

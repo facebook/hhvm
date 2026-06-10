@@ -37,7 +37,7 @@ const StaticString s_isset{"isset"};
 template<bool oob>
 [[noreturn]] ALWAYS_INLINE
 void throwInt(int64_t key) {
-  String msg(50, ReserveString);
+  OptString msg(50, ReserveString);
   auto buf = msg.bufferSlice();
   auto sz = snprintf(
     buf.data(), buf.size() + 1,
@@ -60,7 +60,7 @@ void throwUndef(const StringData* key) {
   folly::StringPiece part3 = keyIsLarge ? "\" (truncated) is not defined" :
                                    "\" is not defined";
   folly::StringPiece part2(key->data(), keyIsLarge ? maxDisplaySize : keySize);
-  String msg(part1.size() + part2.size() + part2.size(), ReserveString);
+  OptString msg(part1.size() + part2.size() + part2.size(), ReserveString);
   msg += part1;
   msg += part2;
   msg += part3;

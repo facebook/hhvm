@@ -1816,7 +1816,7 @@ file_strncmp16(const char *a, const char *b, size_t len, uint32_t flags)
 }
 
 public void
-convert_libmagic_pattern(HPHP::String& pattern, int options)
+convert_libmagic_pattern(HPHP::OptString& pattern, int options)
 {
     int i, j=0;
     char *t;
@@ -1846,7 +1846,7 @@ convert_libmagic_pattern(HPHP::String& pattern, int options)
 
     t[j]='\0';
 
-    pattern = HPHP::String(t, j, HPHP::CopyString);
+    pattern = HPHP::OptString(t, j, HPHP::CopyString);
 }
 
 private int
@@ -2010,7 +2010,7 @@ magiccheck(struct magic_set *ms, struct magic *m)
   case FILE_REGEX: {
     int options = 0;
 
-    HPHP::String pattern((char *)m->value.s, m->vallen, HPHP::CopyString);
+    HPHP::OptString pattern((char *)m->value.s, m->vallen, HPHP::CopyString);
 
     options |= PCRE_MULTILINE;
     if (m->str_flags & STRING_IGNORE_CASE) {
@@ -2023,7 +2023,7 @@ magiccheck(struct magic_set *ms, struct magic *m)
     HPHP::Variant matches;
     auto retval = preg_match_all(
       pattern,
-      HPHP::String(ms->search.s, ms->search.s_len, HPHP::CopyString),
+      HPHP::OptString(ms->search.s, ms->search.s_len, HPHP::CopyString),
       &matches,
       PREG_OFFSET_CAPTURE,
       0

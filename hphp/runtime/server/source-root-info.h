@@ -39,7 +39,7 @@ bool SandboxOn();
 bool IsInitialized();
 
 std::filesystem::path GetCurrentSourceRoot();
-String RelativeToPhpRoot(const String& path);
+OptString RelativeToPhpRoot(const OptString& path);
 
 Eval::DSandboxInfo GetSandboxInfo();
 

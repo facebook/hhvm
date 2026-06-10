@@ -27,7 +27,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-struct String;
+struct OptString;
 struct StaticString;
 struct Array;
 struct Variant;
@@ -35,7 +35,7 @@ struct Variant;
 #define uninit_variant    tvAsCVarRef(&immutable_uninit_base)
 #define init_null_variant tvAsCVarRef(&immutable_null_base)
 
-extern const String null_string;
+extern const OptString null_string;
 extern const Array null_array;
 
 // Use empty_string() if you're returning String

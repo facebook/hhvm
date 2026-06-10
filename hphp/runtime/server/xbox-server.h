@@ -46,7 +46,7 @@ public:
   /**
    * Local tasklet for parallel processing.
    */
-  static OptResource TaskStart(const String& msg, const String& reqInitDoc = "",
+  static OptResource TaskStart(const OptString& msg, const OptString& reqInitDoc = "",
       ServerTaskEvent<XboxServer, XboxTransport> *event = nullptr, RequestId m_root_req_id = RequestId());
   static bool TaskStatus(const OptResource& task);
   static int TaskResult(const OptResource& task, int timeout_ms, Variant *ret);
@@ -122,7 +122,7 @@ struct XboxTransport final : Transport, Synchronizable {
   /**
    * Get a description of the type of transport.
    */
-  String describe() const override {
+  OptString describe() const override {
     return s_xbox;
   }
 
@@ -130,7 +130,7 @@ struct XboxTransport final : Transport, Synchronizable {
    * Task interface.
    */
   bool isDone() { return m_done; }
-  String getResults(int &code, int timeout_ms = 0);
+  OptString getResults(int &code, int timeout_ms = 0);
 
   void setHost(const std::string &host) { m_host = host;}
   void setAsioEvent(ServerTaskEvent<XboxServer, XboxTransport> *event) {

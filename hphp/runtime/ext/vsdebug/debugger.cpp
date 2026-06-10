@@ -46,7 +46,7 @@ void Debugger::setTransport(DebugTransport* transport) {
   setClientConnected(m_transport->clientConnected());
 }
 
-bool Debugger::getDebuggerOption(const HPHP::String& option) {
+bool Debugger::getDebuggerOption(const HPHP::OptString& option) {
   std::string optionStr = option.toCppString();
 
   // It's easier for the user if this routine is not case-sensitive.
@@ -76,7 +76,7 @@ bool Debugger::getDebuggerOption(const HPHP::String& option) {
   }
 }
 
-void Debugger::setDebuggerOption(const HPHP::String& option, bool value) {
+void Debugger::setDebuggerOption(const HPHP::OptString& option, bool value) {
   std::string optionStr = option.toCppString();
 
   // It's easier for the user if this routine is not case-sensitive.
@@ -1770,7 +1770,7 @@ bool Debugger::tryResolveBreakpoint(
   } else {
     assertx(bp->m_type == BreakpointType::Function);
 
-    const HPHP::String functionName(bp->m_function);
+    const HPHP::OptString functionName(bp->m_function);
     Func* func = Func::lookup(functionName.get());
 
     if (func != nullptr) {
@@ -2401,7 +2401,7 @@ void Debugger::onError(DebuggerRequestInfo* requestInfo,
 
 std::string Debugger::getFilePathForUnit(const HPHP::Unit* compilationUnit) {
   const auto path =
-    HPHP::String(const_cast<StringData*>(compilationUnit->filepath()));
+    HPHP::OptString(const_cast<StringData*>(compilationUnit->filepath()));
   const auto translatedPath = File::TranslatePath(path).toCppString();
   return realpathLibc(translatedPath.c_str());
 }

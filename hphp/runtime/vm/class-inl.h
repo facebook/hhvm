@@ -878,7 +878,7 @@ inline Class* Class::get(const StringData* name, bool tryAutoload) {
     if (auto const result = name->getCachedClass()) return result;
   }
   auto const orig = name;
-  String normStr;
+  OptString normStr;
   auto ne = NamedType::getNoCreate(name, &normStr);
 
   if (!ne && !tryAutoload) return nullptr;

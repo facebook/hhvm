@@ -72,7 +72,7 @@ Array& Array::operator=(Variant&& v) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-ArrayIter Array::begin(const String& /*context*/ /* = null_string */) const {
+ArrayIter Array::begin(const OptString& /*context*/ /* = null_string */) const {
   return ArrayIter(*this);
 }
 
@@ -257,7 +257,7 @@ Array Array::diffImpl(const Array& array, bool by_key, bool by_value, bool match
 ///////////////////////////////////////////////////////////////////////////////
 // Type conversions.
 
-String Array::toString() const {
+OptString Array::toString() const {
   if (m_arr == nullptr) return empty_string();
   if (m_arr->isVecType()) {
     SystemLib::throwInvalidOperationExceptionObject(
@@ -369,7 +369,7 @@ template<> tv_lval not_found<tv_lval>() {
  */
 template<typename Fn, typename... Args> ALWAYS_INLINE
 decltype(auto) elem(const Array& arr, Fn fn, bool is_key,
-                    const String& key, Args&&... args) {
+                    const OptString& key, Args&&... args) {
   if (is_key) return fn(key, std::forward<Args>(args)...);
 
   auto const ad = arr.get() ? arr.get() : ArrayData::CreateDict();
@@ -415,7 +415,7 @@ decltype(auto) elem(const Array& arr, Fn fn, bool is_key,
   C(TypedValue, __VA_ARGS__)            \
   I(int, __VA_ARGS__)             \
   I(int64_t, __VA_ARGS__)         \
-  V(const String&, __VA_ARGS__)   \
+  V(const OptString&, __VA_ARGS__)   \
   V(const Variant&, __VA_ARGS__)
 
 #define FK(flags) any(flags & AccessFlags::Key)
@@ -698,73 +698,73 @@ int Array::SortNumericDescending(const Variant& v1, const Variant& v2,
 
 int Array::SortStringAscending(const Variant& v1, const Variant& v2,
                                const void* /*data*/) {
-  String s1 = v1.toString();
-  String s2 = v2.toString();
+  OptString s1 = v1.toString();
+  OptString s2 = v2.toString();
   return string_strcmp(s1.data(), s1.size(), s2.data(), s2.size());
 }
 
 int Array::SortStringAscendingCase(const Variant& v1, const Variant& v2,
                                    const void* /*data*/) {
-  String s1 = v1.toString();
-  String s2 = v2.toString();
+  OptString s1 = v1.toString();
+  OptString s2 = v2.toString();
   return bstrcasecmp(s1.data(), s1.size(), s2.data(), s2.size());
 }
 
 int Array::SortStringDescending(const Variant& v1, const Variant& v2,
                                 const void* /*data*/) {
-  String s1 = v1.toString();
-  String s2 = v2.toString();
+  OptString s1 = v1.toString();
+  OptString s2 = v2.toString();
   return string_strcmp(s2.data(), s2.size(), s1.data(), s1.size());
 }
 
 int Array::SortStringDescendingCase(const Variant& v1, const Variant& v2,
                                     const void* /*data*/) {
-  String s1 = v1.toString();
-  String s2 = v2.toString();
+  OptString s1 = v1.toString();
+  OptString s2 = v2.toString();
   return bstrcasecmp(s2.data(), s2.size(), s1.data(), s1.size());
 }
 
 int Array::SortLocaleStringAscending(const Variant& v1, const Variant& v2,
                                      const void* /*data*/) {
-  String s1 = v1.toString();
-  String s2 = v2.toString();
+  OptString s1 = v1.toString();
+  OptString s2 = v2.toString();
 
   return strcoll(s1.data(), s2.data());
 }
 
 int Array::SortLocaleStringDescending(const Variant& v1, const Variant& v2,
                                       const void* /*data*/) {
-  String s1 = v1.toString();
-  String s2 = v2.toString();
+  OptString s1 = v1.toString();
+  OptString s2 = v2.toString();
 
   return strcoll(s2.data(), s1.data());
 }
 
 int Array::SortNaturalAscending(const Variant& v1, const Variant& v2,
                                 const void* /*data*/) {
-  String s1 = v1.toString();
-  String s2 = v2.toString();
+  OptString s1 = v1.toString();
+  OptString s2 = v2.toString();
   return string_natural_cmp(s1.data(), s1.size(), s2.data(), s2.size(), 0);
 }
 
 int Array::SortNaturalDescending(const Variant& v1, const Variant& v2,
                                  const void* /*data*/) {
-  String s1 = v1.toString();
-  String s2 = v2.toString();
+  OptString s1 = v1.toString();
+  OptString s2 = v2.toString();
   return string_natural_cmp(s2.data(), s2.size(), s1.data(), s1.size(), 0);
 }
 
 int Array::SortNaturalCaseAscending(const Variant& v1, const Variant& v2,
                                     const void* /*data*/) {
-  String s1 = v1.toString();
-  String s2 = v2.toString();
+  OptString s1 = v1.toString();
+  OptString s2 = v2.toString();
   return string_natural_cmp(s1.data(), s1.size(), s2.data(), s2.size(), 1);
 }
 
 int Array::SortNaturalCaseDescending(const Variant& v1, const Variant& v2,
                                      const void* /*data*/) {
-  String s1 = v1.toString();
-  String s2 = v2.toString();
+  OptString s1 = v1.toString();
+  OptString s2 = v2.toString();
   return string_natural_cmp(s2.data(), s2.size(), s1.data(), s1.size(), 1);
 }
 

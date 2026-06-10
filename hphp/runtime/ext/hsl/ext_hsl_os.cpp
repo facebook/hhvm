@@ -67,7 +67,7 @@ const Slot
 IMPLEMENT_REQUEST_LOCAL(std::set<int>, s_fds_to_close);
 
 [[noreturn]]
-void throw_errno_exception(int number, const String& message = String()) {
+void throw_errno_exception(int number, const OptString& message = OptString()) {
   throw_object(
     s_ErrnoException,
     make_vec_array(
@@ -127,7 +127,7 @@ Object hsl_sockaddr_from_native(const sockaddr_storage& addr, socklen_t len) {
 
         return create_object(
           s_HSL_sockaddr_un_pathname,
-          make_vec_array(String(detail->sun_path, actual_path_len, CopyString))
+          make_vec_array(OptString(detail->sun_path, actual_path_len, CopyString))
         );
       }
       break;
@@ -159,7 +159,7 @@ Object hsl_sockaddr_from_native(const sockaddr_storage& addr, socklen_t len) {
           make_vec_array(
             ntohs(detail->sin6_port),
             ntohs(detail->sin6_flowinfo),
-            String(reinterpret_cast<const char*>(detail->sin6_addr.s6_addr), 16, CopyString),
+            OptString(reinterpret_cast<const char*>(detail->sin6_addr.s6_addr), 16, CopyString),
             ntohs(detail->sin6_scope_id)
           )
         );
@@ -391,7 +391,7 @@ struct HSLFileDescriptor :
   }
 
   Array __debugInfo() const {
-    String type;
+    OptString type;
     switch (m_type) {
       case Type::FD:
         type = s_fd;
@@ -464,7 +464,7 @@ CLI_CLIENT_HANDLER(HSL_os_open, std::string path, int64_t flags, int64_t mode) {
   return { CLISuccess {}, ReturnedFdData { fd } };
 }
 
-Object HHVM_FUNCTION(HSL_os_open, const String& path, int64_t flags, int64_t mode) {
+Object HHVM_FUNCTION(HSL_os_open, const OptString& path, int64_t flags, int64_t mode) {
   int fd = HSL_CLI_INVOKE(
     HSL_os_open,
     path.toCppString(),
@@ -504,7 +504,7 @@ CLI_CLIENT_HANDLER(HSL_os_mkostemps, std::string path_template, int64_t suffixle
   return { CLISuccess {}, std::make_tuple(ReturnedFdData { fd }, std::string(buf)) };
 }
 
-Array HHVM_FUNCTION(HSL_os_mkostemps, const String& path_template, int64_t suffixlen, int64_t flags) {
+Array HHVM_FUNCTION(HSL_os_mkostemps, const OptString& path_template, int64_t suffixlen, int64_t flags) {
   ReturnedFdData fd;
   std::string path;
   std::tie(fd, path) = HSL_CLI_INVOKE(
@@ -535,18 +535,18 @@ CLI_CLIENT_HANDLER(HSL_os_mkdtemp, std::string path_template) {
   return { CLISuccess {}, std::string(buf) };
 }
 
-String HHVM_FUNCTION(HSL_os_mkdtemp, const String& path_template) {
+OptString HHVM_FUNCTION(HSL_os_mkdtemp, const OptString& path_template) {
   return HSL_CLI_INVOKE(HSL_os_mkdtemp, path_template.toCppString());
 }
 
-String HHVM_FUNCTION(HSL_os_read, const Object& obj, int64_t max) {
+OptString HHVM_FUNCTION(HSL_os_read, const Object& obj, int64_t max) {
   if (max <= 0) {
     throw_errno_exception(EINVAL, "Max bytes can not be negative");
   }
   if (max > StringData::MaxSize) {
     max = StringData::MaxSize;
   }
-  String buf(max, ReserveString);
+  OptString buf(max, ReserveString);
   auto fd = HSLFileDescriptor::fd(obj);
   ssize_t read = retry_on_eintr(-1, ::read, fd, buf.mutableData(), max);
   if (read < 0) {
@@ -557,7 +557,7 @@ String HHVM_FUNCTION(HSL_os_read, const Object& obj, int64_t max) {
   return buf;
 }
 
-int64_t HHVM_FUNCTION(HSL_os_write, const Object& obj, const String& data) {
+int64_t HHVM_FUNCTION(HSL_os_write, const Object& obj, const OptString& data) {
   auto fd = HSLFileDescriptor::fd(obj);
   ssize_t written = retry_on_eintr(-1, ::write, fd, data.data(), data.length());
   throw_errno_if_minus_one(written);
@@ -780,7 +780,7 @@ bool HHVM_FUNCTION(HSL_os_isatty, const Object& obj) {
   throw_errno_exception(errno, "isatty() call failed");
 }
 
-String HHVM_FUNCTION(HSL_os_ttyname, const Object& obj) {
+OptString HHVM_FUNCTION(HSL_os_ttyname, const Object& obj) {
   const auto fd = HSLFileDescriptor::fd(obj);
   char buf[1024];
   auto error = ttyname_r(fd, buf, sizeof(buf));
@@ -791,7 +791,7 @@ String HHVM_FUNCTION(HSL_os_ttyname, const Object& obj) {
   if (len < 1) {
     throw_errno_exception(ERANGE, "Did not get a valid ttyname");
   }
-  return String(buf, len, CopyString);
+  return OptString(buf, len, CopyString);
 }
 
 int64_t HHVM_FUNCTION(HSL_os_getsockopt_int,
@@ -959,7 +959,7 @@ void checkExecAllowed() {
 }
 
 int64_t HHVM_FUNCTION(HSL_os_fork_and_execve,
-                      const String& path,
+                      const OptString& path,
                       const Array& argv,
                       const Array& envp,
                       const Array& fds,

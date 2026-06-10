@@ -75,7 +75,7 @@ struct TraitMethodImportData {
   /////////////////////////////////////////////////////////////////////////////
   // Types.
 
-  using String = const StringData*;
+  using OptString = const StringData*;
 
   /*
    * Data associated with a given trait name.
@@ -86,7 +86,7 @@ struct TraitMethodImportData {
     // For error reporting, list of names of traits that declare
     // methods with the name Includes duplicates that might have been
     // removed from methods.
-    std::vector<String> methodOriginsWithDuplicates;
+    std::vector<OptString> methodOriginsWithDuplicates;
   };
 
   /*
@@ -94,7 +94,7 @@ struct TraitMethodImportData {
    * method) pair.
    */
   struct MethodData {
-    String name;
+    OptString name;
     TraitMethod tm;
   };
 
@@ -108,7 +108,7 @@ struct TraitMethodImportData {
    * The add() methods should be called in the order in which the trait methods
    * were included in the importing class.
    */
-  void add(const TraitMethod& tm, const String& name);
+  void add(const TraitMethod& tm, const OptString& name);
 
   /*
    * Declare that all imports have been added---and that all rules have been
@@ -132,11 +132,11 @@ private:
 
 private:
   // Map from trait method name to NameData.
-  hphp_fast_map<String, NameData,
+  hphp_fast_map<OptString, NameData,
                 string_data_hash, string_data_same> m_dataForName;
 
   // Method names in order of first declaration.
-  std::vector<String> m_orderedNames;
+  std::vector<OptString> m_orderedNames;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -48,14 +48,14 @@ struct AutoloadMap {
   };
 
   struct FileResult {
-    String m_path;
+    OptString m_path;
     const RepoUnitInfo* m_info;
 
-    FileResult(String path, const RepoUnitInfo* info)
+    FileResult(OptString path, const RepoUnitInfo* info)
       : m_path(path), m_info(info) {}
-    explicit FileResult(String path): m_path(path), m_info(nullptr) {}
+    explicit FileResult(OptString path): m_path(path), m_info(nullptr) {}
 
-    FileResult& operator=(String path) {
+    FileResult& operator=(OptString path) {
       m_path = path;
       m_info = nullptr;
       return *this;
@@ -118,7 +118,7 @@ struct AutoloadMap {
    * In general this is only safe to call on request threads because the
    * resulting string (absolute path) may be allocated on the request heap.
    */
-  Optional<FileResult> getFile(KindOf kind, const String& symbol) {
+  Optional<FileResult> getFile(KindOf kind, const OptString& symbol) {
     switch (kind) {
       case AutoloadMap::KindOf::TypeOrTypeAlias: return getTypeOrTypeAliasFile(symbol);
       case AutoloadMap::KindOf::Type: return getTypeFile(symbol);
@@ -149,18 +149,18 @@ struct AutoloadMap {
   /**
    * Map symbols to files
    */
-  virtual Optional<FileResult> getTypeOrTypeAliasFile(const String& typeName) = 0;
-  virtual Optional<FileResult> getTypeOrTypeAliasFileRelative(const String& typeName) = 0;
-  virtual Optional<FileResult> getTypeFile(const String& typeName) = 0;
-  virtual Optional<FileResult> getTypeFileRelative(const String& typeName) = 0;
-  virtual Optional<FileResult> getFunctionFile(const String& functionName) = 0;
-  virtual Optional<FileResult> getFunctionFileRelative(const String& functionName) = 0;
-  virtual Optional<FileResult> getConstantFile(const String& constantName) = 0;
-  virtual Optional<FileResult> getConstantFileRelative(const String& constantName) = 0;
-  virtual Optional<FileResult> getTypeAliasFile(const String& aliasName) = 0;
-  virtual Optional<FileResult> getTypeAliasFileRelative(const String& aliasName) = 0;
-  virtual Optional<FileResult> getModuleFile(const String& moduleName) = 0;
-  virtual Optional<FileResult> getModuleFileRelative(const String& moduleName) = 0;
+  virtual Optional<FileResult> getTypeOrTypeAliasFile(const OptString& typeName) = 0;
+  virtual Optional<FileResult> getTypeOrTypeAliasFileRelative(const OptString& typeName) = 0;
+  virtual Optional<FileResult> getTypeFile(const OptString& typeName) = 0;
+  virtual Optional<FileResult> getTypeFileRelative(const OptString& typeName) = 0;
+  virtual Optional<FileResult> getFunctionFile(const OptString& functionName) = 0;
+  virtual Optional<FileResult> getFunctionFileRelative(const OptString& functionName) = 0;
+  virtual Optional<FileResult> getConstantFile(const OptString& constantName) = 0;
+  virtual Optional<FileResult> getConstantFileRelative(const OptString& constantName) = 0;
+  virtual Optional<FileResult> getTypeAliasFile(const OptString& aliasName) = 0;
+  virtual Optional<FileResult> getTypeAliasFileRelative(const OptString& aliasName) = 0;
+  virtual Optional<FileResult> getModuleFile(const OptString& moduleName) = 0;
+  virtual Optional<FileResult> getModuleFileRelative(const OptString& moduleName) = 0;
 
   virtual Optional<std::filesystem::path> getTypeOrTypeAliasFile(std::string_view name) = 0;
   virtual Optional<std::filesystem::path> getTypeOrTypeAliasFileRelative(std::string_view name) = 0;
@@ -178,17 +178,17 @@ struct AutoloadMap {
   /**
    * Map path to symbols
    */
-  virtual Array getFileTypes(const String& path) = 0;
-  virtual Array getFileFunctions(const String& path) = 0;
-  virtual Array getFileConstants(const String& path) = 0;
-  virtual Array getFileTypeAliases(const String& path) = 0;
-  virtual Array getFileModules(const String& path) = 0;
+  virtual Array getFileTypes(const OptString& path) = 0;
+  virtual Array getFileFunctions(const OptString& path) = 0;
+  virtual Array getFileConstants(const OptString& path) = 0;
+  virtual Array getFileTypeAliases(const OptString& path) = 0;
+  virtual Array getFileModules(const OptString& path) = 0;
 
   /**
    * Implementation specific APIs.
    * Non symbol related mapping.
    */
-  virtual Optional<std::string> getSha1(const String& path) = 0;
+  virtual Optional<std::string> getSha1(const OptString& path) = 0;
 };
 
 /**
@@ -218,76 +218,76 @@ struct FactsStore : public AutoloadMap {
    * Return `null` if `type` is not defined, or if it is defined in more than
    * one file.
    */
-  virtual Variant getTypeName(const String& type) = 0;
+  virtual Variant getTypeName(const OptString& type) = 0;
 
   /**
    * Return whether the given type is a class, enum, interface, or trait.
    *
    * Return `null` if given none of the above.
    */
-  virtual Variant getKind(const String& type) = 0;
+  virtual Variant getKind(const OptString& type) = 0;
 
   /**
    * Return true iff the type cannot be constructed.
    */
-  virtual bool isTypeAbstract(const String& type) = 0;
+  virtual bool isTypeAbstract(const OptString& type) = 0;
 
   /**
    * Return true iff no other type can inherit from this type.
    */
-  virtual bool isTypeFinal(const String& type) = 0;
+  virtual bool isTypeFinal(const OptString& type) = 0;
 
   /**
    * Return all types in the repo which the given type extends.
    */
   virtual Array getBaseTypes(
-      const String& derivedType, const Variant& filters) = 0;
+      const OptString& derivedType, const Variant& filters) = 0;
 
   /**
    * Return all types in the repo which extend the given type.
    */
   virtual Array getDerivedTypes(
-      const String& baseType, const Variant& filters) = 0;
+      const OptString& baseType, const Variant& filters) = 0;
 
   /**
    * Return all types in the repo which transitively 
    * extend the given type.
    */
   virtual Array getTransitiveDerivedTypes(
-      const String& baseType, const Variant& filters, bool includeInterfaceRequireExtends) = 0;
+      const OptString& baseType, const Variant& filters, bool includeInterfaceRequireExtends) = 0;
 
   /**
    * Return all types decorated with the given attribute.
    */
-  virtual Array getTypesWithAttribute(const String& attr) = 0;
+  virtual Array getTypesWithAttribute(const OptString& attr) = 0;
 
   /**
    * Return all type aliases decorated with the given attribute.
    */
-  virtual Array getTypeAliasesWithAttribute(const String& attr) = 0;
+  virtual Array getTypeAliasesWithAttribute(const OptString& attr) = 0;
 
   /**
    * Return all methods decorated with the given attribute.
    */
-  virtual Array getMethodsWithAttribute(const String& attr) = 0;
+  virtual Array getMethodsWithAttribute(const OptString& attr) = 0;
 
   /**
    * Return the methods of a given type that have any indexed attribute,
    * mapped to their attribute names.
    */
-  virtual Array getTypeMethodAttributes(const String& type) = 0;
+  virtual Array getTypeMethodAttributes(const OptString& type) = 0;
 
   /**
    * Return all files decorated with the given attribute.
    */
-  virtual Array getFilesWithAttribute(const String& attr) = 0;
+  virtual Array getFilesWithAttribute(const OptString& attr) = 0;
 
   /**
    * Return all files decorated with the given attribute and
    * the given value passed into that attribute.
    */
   virtual Array getFilesWithAttributeAndAnyValue(
-      const String& attr, const folly::dynamic& value) = 0;
+      const OptString& attr, const folly::dynamic& value) = 0;
 
 
   /**
@@ -296,27 +296,27 @@ struct FactsStore : public AutoloadMap {
    * one attr value for that attribute, the file will appear in the returned
    * list more than once.
    */
-  virtual Array getFilesAndAttrValsWithAttribute(const String& attr) = 0;
+  virtual Array getFilesAndAttrValsWithAttribute(const OptString& attr) = 0;
 
   /**
    * Return all attributes decorating the given type.
    */
-  virtual Array getTypeAttributes(const String& type) = 0;
+  virtual Array getTypeAttributes(const OptString& type) = 0;
 
   /**
    * Return all attributes decorating the given type alias.
    */
-  virtual Array getTypeAliasAttributes(const String& typeAlias) = 0;
+  virtual Array getTypeAliasAttributes(const OptString& typeAlias) = 0;
 
   /**
    * Return all attributes decorating the given method.
    */
-  virtual Array getMethodAttributes(const String& type, const String& method) = 0;
+  virtual Array getMethodAttributes(const OptString& type, const OptString& method) = 0;
 
   /**
    * Return all attributes decorating the given file.
    */
-  virtual Array getFileAttributes(const String& file) = 0;
+  virtual Array getFileAttributes(const OptString& file) = 0;
 
   /**
    * Return the arguments associated with the given type and attribute, as a
@@ -324,7 +324,7 @@ struct FactsStore : public AutoloadMap {
    *
    * If the given type does not have the given attribute, return an empty vec.
    */
-  virtual Array getTypeAttrArgs(const String& type, const String& attr) = 0;
+  virtual Array getTypeAttrArgs(const OptString& type, const OptString& attr) = 0;
 
   /**
    * Return the arguments associated with the given type alias and attribute,
@@ -333,7 +333,7 @@ struct FactsStore : public AutoloadMap {
    * If the given type alias does not have the given attribute, return an
    * empty vec.
    */
-  virtual Array getTypeAliasAttrArgs(const String& type, const String& attr) = 0;
+  virtual Array getTypeAliasAttrArgs(const OptString& type, const OptString& attr) = 0;
 
   /**
    * Return the arguments associated with the given method and attribute, as a
@@ -342,7 +342,7 @@ struct FactsStore : public AutoloadMap {
    * If the given method does not have the given attribute, return an empty vec.
    */
   virtual Array getMethodAttrArgs(
-      const String& type, const String& method, const String& attr) = 0;
+      const OptString& type, const OptString& method, const OptString& attr) = 0;
 
   /**
    * Return the arguments associated with the given file and attribute, as a
@@ -350,12 +350,12 @@ struct FactsStore : public AutoloadMap {
    *
    * If the given file does not have the given attribute, return an empty vec.
    */
-  virtual Array getFileAttrArgs(const String& file, const String& attr) = 0;
+  virtual Array getFileAttrArgs(const OptString& file, const OptString& attr) = 0;
 
   /**
    * Returns the module the given file is a member of, if any.
    */
-  virtual Optional<String> getFileModuleMembership(const String& path) = 0;
+  virtual Optional<OptString> getFileModuleMembership(const OptString& path) = 0;
 
   /**
    * Returns all modules defined in the repo.
@@ -365,7 +365,7 @@ struct FactsStore : public AutoloadMap {
   /**
    * Returns the package that the file is a member of, or empty string if the file is not known.
    */
-  virtual Optional<String> getFilePackageMembership(const String& path) = 0;
+  virtual Optional<OptString> getFilePackageMembership(const OptString& path) = 0;
 };
 
 } // namespace HPHP

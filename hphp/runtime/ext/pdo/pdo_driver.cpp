@@ -46,9 +46,9 @@ PDODriver::PDODriver(const char *name) : m_name(name) {
   s_drivers[name] = this;
 }
 
-req::ptr<PDOResource> PDODriver::createResource(const String& datasource,
-                                                const String& username,
-                                                const String& password,
+req::ptr<PDOResource> PDODriver::createResource(const OptString& datasource,
+                                                const OptString& username,
+                                                const OptString& password,
                                                 const Array& options) {
   auto const rsrc = createResourceImpl();
   auto const& conn = rsrc->conn();
@@ -163,20 +163,20 @@ bool PDOConnection::closer() {
   return false;
 }
 
-bool PDOConnection::preparer(const String& /*sql*/, sp_PDOStatement* /*stmt*/,
+bool PDOConnection::preparer(const OptString& /*sql*/, sp_PDOStatement* /*stmt*/,
                              const Variant& /*options*/) {
   throw_pdo_exception(uninit_null(),
                       "This driver doesn't support %s", __func__);
   return false;
 }
 
-int64_t PDOConnection::doer(const String& /*sql*/) {
+int64_t PDOConnection::doer(const OptString& /*sql*/) {
   throw_pdo_exception(uninit_null(),
                       "This driver doesn't support %s", __func__);
   return 0;
 }
 
-bool PDOConnection::quoter(const String& /*input*/, String& /*quoted*/,
+bool PDOConnection::quoter(const OptString& /*input*/, OptString& /*quoted*/,
                            PDOParamType /*paramtype*/) {
   throw_pdo_exception(uninit_null(),
                       "This driver doesn't support %s", __func__);
@@ -207,10 +207,10 @@ bool PDOConnection::setAttribute(int64_t /*attr*/, const Variant& /*value*/) {
   return false;
 }
 
-String PDOConnection::lastId(const char* /*name*/) {
+OptString PDOConnection::lastId(const char* /*name*/) {
   throw_pdo_exception(uninit_null(),
                       "This driver doesn't support %s", __func__);
-  return String();
+  return OptString();
 }
 
 bool PDOConnection::fetchErr(PDOStatement* /*stmt*/, Array& /*info*/) {

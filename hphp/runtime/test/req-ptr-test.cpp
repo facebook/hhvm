@@ -26,8 +26,8 @@ struct DummyResource2 : DummyResource {
   DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(DummyResource2)
   CLASSNAME_IS("Unknown")
   DummyResource2() {}
-  String m_class_name;
-  const String& o_getClassNameHook() const override {
+  OptString m_class_name;
+  const OptString& o_getClassNameHook() const override {
     if (m_class_name.empty()) {
       return classnameof();
     }

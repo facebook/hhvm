@@ -22,12 +22,12 @@
 namespace HPHP {
   struct HSLLocale::Ops {
     virtual ~Ops() {}
-    virtual int64_t strlen(const String&) const = 0;
-    virtual String uppercase(const String&) const = 0;
-    virtual String lowercase(const String&) const = 0;
-    virtual String foldcase(const String&) const = 0;
-    virtual int64_t strcoll(const String&, const String&) const = 0;
-    virtual int64_t strcasecmp(const String&, const String&) const = 0;
+    virtual int64_t strlen(const OptString&) const = 0;
+    virtual OptString uppercase(const OptString&) const = 0;
+    virtual OptString lowercase(const OptString&) const = 0;
+    virtual OptString foldcase(const OptString&) const = 0;
+    virtual int64_t strcoll(const OptString&, const OptString&) const = 0;
+    virtual int64_t strcasecmp(const OptString&, const OptString&) const = 0;
 
     // Special-case each of these instead of adding `substrcoll`/`substrcasecmp`
     // as:
@@ -35,28 +35,28 @@ namespace HPHP {
     // - they can be more performant, especially for the HSL; for example,
     //   calculating offsets and lengths may require an encoding conversion
     //   which we're going to have to do here anyway, let's not do it twice
-    virtual bool starts_with(const String& str, const String& prefix) const = 0;
-    virtual bool starts_with_ci(const String& str, const String& prefix) const = 0;
-    virtual bool ends_with(const String& str, const String& prefix) const = 0;
-    virtual bool ends_with_ci(const String& str, const String& prefix) const = 0;
+    virtual bool starts_with(const OptString& str, const OptString& prefix) const = 0;
+    virtual bool starts_with_ci(const OptString& str, const OptString& prefix) const = 0;
+    virtual bool ends_with(const OptString& str, const OptString& prefix) const = 0;
+    virtual bool ends_with_ci(const OptString& str, const OptString& prefix) const = 0;
 
-    virtual String strip_prefix(const String& str, const String& prefix) const = 0;
-    virtual String strip_suffix(const String& str, const String& suffix) const = 0;
+    virtual OptString strip_prefix(const OptString& str, const OptString& prefix) const = 0;
+    virtual OptString strip_suffix(const OptString& str, const OptString& suffix) const = 0;
 
-    virtual int64_t strpos(const String& haystack, const String& needle, int64_t offset) const = 0;
-    virtual int64_t strrpos(const String& haystack, const String& needle, int64_t offset) const = 0;
-    virtual int64_t stripos(const String& haystack, const String& needle, int64_t offset) const = 0;
-    virtual int64_t strripos(const String& haystack, const String& needle, int64_t offset) const = 0;
+    virtual int64_t strpos(const OptString& haystack, const OptString& needle, int64_t offset) const = 0;
+    virtual int64_t strrpos(const OptString& haystack, const OptString& needle, int64_t offset) const = 0;
+    virtual int64_t stripos(const OptString& haystack, const OptString& needle, int64_t offset) const = 0;
+    virtual int64_t strripos(const OptString& haystack, const OptString& needle, int64_t offset) const = 0;
 
-    virtual Array chunk(const String&, int64_t chunk_size) const = 0;
-    virtual String slice(const String& str, int64_t offset, int64_t length) const = 0;
-    virtual String splice(const String& str, const String& replacement, int64_t offset, int64_t length) const = 0;
-    virtual Array split(const String& str, const String& delimiter, int64_t limit = -1) const = 0;
+    virtual Array chunk(const OptString&, int64_t chunk_size) const = 0;
+    virtual OptString slice(const OptString& str, int64_t offset, int64_t length) const = 0;
+    virtual OptString splice(const OptString& str, const OptString& replacement, int64_t offset, int64_t length) const = 0;
+    virtual Array split(const OptString& str, const OptString& delimiter, int64_t limit = -1) const = 0;
 
-    virtual String reverse(const String& str) const = 0;
+    virtual OptString reverse(const OptString& str) const = 0;
 
-    virtual String pad_left(const String& str, int64_t len, const String& pad) const = 0;
-    virtual String pad_right(const String& str, int64_t len, const String& pad) const = 0;
+    virtual OptString pad_left(const OptString& str, int64_t len, const OptString& pad) const = 0;
+    virtual OptString pad_right(const OptString& str, int64_t len, const OptString& pad) const = 0;
 
     enum class TrimSides: uint8_t {
       LEFT = 1,
@@ -64,15 +64,15 @@ namespace HPHP {
       BOTH = LEFT | RIGHT
     };
 
-    virtual String trim(const String& str, TrimSides sides) const = 0;
-    virtual String trim(const String& str, const String& what, TrimSides sides) const = 0;
+    virtual OptString trim(const OptString& str, TrimSides sides) const = 0;
+    virtual OptString trim(const OptString& str, const OptString& what, TrimSides sides) const = 0;
 
-    virtual String replace(const String& haystack, const String& needle, const String& replacement) const = 0;
-    virtual String replace_ci(const String& haystack, const String& needle, const String& replacement) const = 0;
-    virtual String replace_every(const String& haystack, const Array& replacements) const = 0;
-    virtual String replace_every_ci(const String& haystack, const Array& replacements) const = 0;
-    virtual String replace_every_nonrecursive(const String& haystack, const Array& replacements) const = 0;
-    virtual String replace_every_nonrecursive_ci(const String& haystack, const Array& replacements) const = 0;
+    virtual OptString replace(const OptString& haystack, const OptString& needle, const OptString& replacement) const = 0;
+    virtual OptString replace_ci(const OptString& haystack, const OptString& needle, const OptString& replacement) const = 0;
+    virtual OptString replace_every(const OptString& haystack, const Array& replacements) const = 0;
+    virtual OptString replace_every_ci(const OptString& haystack, const Array& replacements) const = 0;
+    virtual OptString replace_every_nonrecursive(const OptString& haystack, const Array& replacements) const = 0;
+    virtual OptString replace_every_nonrecursive_ci(const OptString& haystack, const Array& replacements) const = 0;
 
     static int64_t normalize_offset(int64_t offset, int64_t length);
   };

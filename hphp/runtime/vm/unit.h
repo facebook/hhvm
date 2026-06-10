@@ -59,7 +59,7 @@ struct ArrayData;
 struct Class;
 struct Func;
 struct PreClass;
-struct String;
+struct OptString;
 struct StringData;
 struct UnitExtended;
 

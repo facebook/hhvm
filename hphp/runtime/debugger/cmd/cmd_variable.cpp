@@ -30,7 +30,7 @@ void CmdVariable::sendImpl(DebuggerThriftBuffer &thrift) {
   DebuggerCommand::sendImpl(thrift);
   thrift.write(m_frame);
   {
-    String sdata;
+    OptString sdata;
     DebuggerWireHelpers::WireSerialize(m_variables, sdata);
     thrift.write(sdata);
   }
@@ -46,7 +46,7 @@ void CmdVariable::recvImpl(DebuggerThriftBuffer &thrift) {
   DebuggerCommand::recvImpl(thrift);
   thrift.read(m_frame);
   {
-    String sdata;
+    OptString sdata;
     thrift.read(sdata);
     auto error = DebuggerWireHelpers::WireUnserialize(sdata, m_variables);
     if (error != DebuggerWireHelpers::NoError) {
@@ -88,7 +88,7 @@ const StaticString
   s_HTTP_RAW_POST_DATA("HTTP_RAW_POST_DATA"),
   s_omitted("...(omitted)");
 
-void CmdVariable::PrintVariable(DebuggerClient &client, const String& varName) {
+void CmdVariable::PrintVariable(DebuggerClient &client, const OptString& varName) {
   CmdVariable cmd;
   auto charCount = client.getDebuggerClientShortPrintCharCount();
   cmd.m_frame = client.getFrame();
@@ -151,7 +151,7 @@ void CmdVariable::PrintVariable(DebuggerClient &client, const String& varName) {
 }
 
 void CmdVariable::PrintVariables(DebuggerClient &client, const Array& variables,
-                                 int frame, const String& text, int version) {
+                                 int frame, const OptString& text, int version) {
   bool global = frame == -1; // I.e. we were called from CmdGlobal, or the
   //client's current frame is the global frame, according to OnServer
   bool system = true;
@@ -162,7 +162,7 @@ void CmdVariable::PrintVariables(DebuggerClient &client, const Array& variables,
 
   for (ArrayIter iter(variables); iter; ++iter) {
     auto const name = iter.first().toString();
-    String value;
+    OptString value;
 
     // Using the new protocol, so variables contain only names.  Fetch the value
     // separately.
@@ -221,7 +221,7 @@ void CmdVariable::PrintVariables(DebuggerClient &client, const Array& variables,
 void CmdVariable::onClient(DebuggerClient &client) {
   if (DebuggerCommand::displayedHelp(client)) return;
 
-  String text;
+  OptString text;
   if (client.argCount() == 1) {
     text = client.argValue(1);
   } else if (client.argCount() != 0) {

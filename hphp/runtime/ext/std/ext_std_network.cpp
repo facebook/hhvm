@@ -55,7 +55,7 @@ TypedValue HHVM_FUNCTION(gethostname) {
   return make_tv<KindOfPersistentString>(hostname);
 }
 
-Variant HHVM_FUNCTION(gethostbyaddr, const String& ip_address) {
+Variant HHVM_FUNCTION(gethostbyaddr, const OptString& ip_address) {
   IOStatusHelper io("gethostbyaddr", ip_address.data());
   struct addrinfo hints, *res, *res0;
   char h_name[NI_MAXHOST];
@@ -74,13 +74,13 @@ Variant HHVM_FUNCTION(gethostbyaddr, const String& ip_address) {
       continue;
     }
     freeaddrinfo(res0);
-    return String(h_name, CopyString);
+    return OptString(h_name, CopyString);
   }
   freeaddrinfo(res0);
   return ip_address;
 }
 
-String HHVM_FUNCTION(gethostbyname, const String& hostname) {
+OptString HHVM_FUNCTION(gethostbyname, const OptString& hostname) {
   IOStatusHelper io("gethostbyname", hostname.data());
 
   HostEnt result;
@@ -91,13 +91,13 @@ String HHVM_FUNCTION(gethostbyname, const String& hostname) {
   struct in_addr in;
   memcpy(&in.s_addr, *(result.hostbuf.h_addr_list), sizeof(in.s_addr));
   try {
-    return String(folly::IPAddressV4(in).str());
+    return OptString(folly::IPAddressV4(in).str());
   } catch (folly::IPAddressFormatException& ) {
     return hostname;
   }
 }
 
-Variant HHVM_FUNCTION(gethostbynamel, const String& hostname) {
+Variant HHVM_FUNCTION(gethostbynamel, const OptString& hostname) {
   IOStatusHelper io("gethostbynamel", hostname.data());
   HostEnt result;
   if (!safe_gethostbyname(hostname.data(), result)) {
@@ -108,7 +108,7 @@ Variant HHVM_FUNCTION(gethostbynamel, const String& hostname) {
   for (int i = 0 ; result.hostbuf.h_addr_list[i] != 0 ; i++) {
     struct in_addr in = *(struct in_addr *)result.hostbuf.h_addr_list[i];
     try {
-      ret.append(String(folly::IPAddressV4(in).str()));
+      ret.append(OptString(folly::IPAddressV4(in).str()));
     } catch (folly::IPAddressFormatException& ) {
         // ok to skip
     }
@@ -116,7 +116,7 @@ Variant HHVM_FUNCTION(gethostbynamel, const String& hostname) {
   return ret;
 }
 
-Variant HHVM_FUNCTION(getprotobyname, const String& name) {
+Variant HHVM_FUNCTION(getprotobyname, const OptString& name) {
   Lock lock(NetworkMutex);
 
   struct protoent *ent = getprotobyname(name.data());
@@ -133,11 +133,11 @@ Variant HHVM_FUNCTION(getprotobynumber, int64_t number) {
   if (ent == NULL) {
     return false;
   }
-  return String(ent->p_name, CopyString);
+  return OptString(ent->p_name, CopyString);
 }
 
-Variant HHVM_FUNCTION(getservbyname, const String& service,
-                                     const String& protocol) {
+Variant HHVM_FUNCTION(getservbyname, const OptString& service,
+                                     const OptString& protocol) {
   Lock lock(NetworkMutex);
 
   struct servent *serv = getservbyname(service.data(), protocol.data());
@@ -147,17 +147,17 @@ Variant HHVM_FUNCTION(getservbyname, const String& service,
   return ntohs(serv->s_port);
 }
 
-Variant HHVM_FUNCTION(getservbyport, int64_t port, const String& protocol) {
+Variant HHVM_FUNCTION(getservbyport, int64_t port, const OptString& protocol) {
   Lock lock(NetworkMutex);
 
   struct servent *serv = getservbyport(htons(port), protocol.data());
   if (serv == NULL) {
     return false;
   }
-  return String(serv->s_name, CopyString);
+  return OptString(serv->s_name, CopyString);
 }
 
-Variant HHVM_FUNCTION(inet_ntop, const String& in_addr) {
+Variant HHVM_FUNCTION(inet_ntop, const OptString& in_addr) {
   int af = AF_INET;
   if (in_addr.size() == 16) {
     af = AF_INET6;
@@ -171,19 +171,19 @@ Variant HHVM_FUNCTION(inet_ntop, const String& in_addr) {
     raise_warning("An unknown error occurred");
     return false;
   }
-  return String(buffer, CopyString);
+  return OptString(buffer, CopyString);
 }
 
-TypedValue HHVM_FUNCTION(inet_ntop_folly, const String& in_addr) {
+TypedValue HHVM_FUNCTION(inet_ntop_folly, const OptString& in_addr) {
   try {
     auto const ip = folly::IPAddress::fromBinary(in_addr.slice());
-    return tvReturn(String{std::move(ip.str())});
+    return tvReturn(OptString{std::move(ip.str())});
   } catch (folly::IPAddressFormatException&) {
     return make_tv<KindOfNull>();
   }
 }
 
-TypedValue HHVM_FUNCTION(inet_ntop_nullable, const String& in_addr) {
+TypedValue HHVM_FUNCTION(inet_ntop_nullable, const OptString& in_addr) {
   int af = AF_INET6;
   size_t buflen = INET6_ADDRSTRLEN;
   switch (in_addr.size()) {
@@ -195,7 +195,7 @@ TypedValue HHVM_FUNCTION(inet_ntop_nullable, const String& in_addr) {
     default:
       return make_tv<KindOfNull>();
   }
-  String ret(buflen, ReserveString);
+  OptString ret(buflen, ReserveString);
   auto buffer = ret.mutableData();
   if (!::inet_ntop(af, in_addr.data(), buffer, buflen)) {
     return make_tv<KindOfNull>();
@@ -204,11 +204,11 @@ TypedValue HHVM_FUNCTION(inet_ntop_nullable, const String& in_addr) {
   return tvReturn(std::move(ret));
 }
 
-Variant HHVM_FUNCTION(inet_pton, const String& address) {
+Variant HHVM_FUNCTION(inet_pton, const OptString& address) {
   int af = AF_INET;
-  if (address.find(':') != String::npos) {
+  if (address.find(':') != OptString::npos) {
     af = AF_INET6;
-  } else if (address.find('.') == String::npos) {
+  } else if (address.find('.') == OptString::npos) {
     raise_warning("Unrecognized address %s", address.c_str());
     return false;
   }
@@ -221,10 +221,10 @@ Variant HHVM_FUNCTION(inet_pton, const String& address) {
     return false;
   }
 
-  return String(buffer, af == AF_INET ? 4 : 16, CopyString);
+  return OptString(buffer, af == AF_INET ? 4 : 16, CopyString);
 }
 
-Variant HHVM_FUNCTION(ip2long, const String& ip_address) {
+Variant HHVM_FUNCTION(ip2long, const OptString& ip_address) {
   struct in_addr ip;
   if (ip_address.empty() ||
       inet_pton(AF_INET, ip_address.data(), &ip) != 1) {
@@ -234,7 +234,7 @@ Variant HHVM_FUNCTION(ip2long, const String& ip_address) {
   return (int64_t)ntohl(ip.s_addr);
 }
 
-String HHVM_FUNCTION(long2ip, const String& proper_address) {
+OptString HHVM_FUNCTION(long2ip, const OptString& proper_address) {
   unsigned long ul = strtoul(proper_address.c_str(), nullptr, 0);
   try {
     return folly::IPAddress::fromLongHBO(ul).str();
@@ -246,13 +246,13 @@ String HHVM_FUNCTION(long2ip, const String& proper_address) {
 ///////////////////////////////////////////////////////////////////////////////
 // http
 
-void HHVM_FUNCTION(header, const String& str, bool replace /* = true */,
+void HHVM_FUNCTION(header, const OptString& str, bool replace /* = true */,
                    int64_t http_response_code /* = 0 */) {
   if (HHVM_FN(headers_sent)()) {
     raise_warning("Cannot modify header information - headers already sent");
   }
 
-  String header = HHVM_FN(rtrim)(str);
+  OptString header = HHVM_FN(rtrim)(str);
 
   // new line safety check
   if (header.find('\n') >= 0 || header.find('\r') >= 0) {
@@ -289,7 +289,7 @@ void HHVM_FUNCTION(header, const String& str, bool replace /* = true */,
     }
 
     const char *colon_offset = strchr(header_line, ':');
-    String newHeader;
+    OptString newHeader;
     if (colon_offset) {
       if (!strncasecmp(header_line, "Content-Type",
                        colon_offset - header_line)) {
@@ -344,7 +344,7 @@ Array HHVM_FUNCTION(headers_list) {
     transport->getResponseHeaders(headers);
     for (const auto& iter : headers) {
       for (const auto& values : iter.second) {
-        ret.append(String(iter.first + ": " + values));
+        ret.append(OptString(iter.first + ": " + values));
       }
     }
   }
@@ -356,7 +356,7 @@ bool HHVM_FUNCTION(headers_sent_with_file_line,
                    Variant& line) {
   Transport *transport = g_context->getTransport();
   if (transport) {
-    file = String(transport->getFirstHeaderFile());
+    file = OptString(transport->getFirstHeaderFile());
     line = transport->getFirstHeaderLine();
     return transport->headersSent();
   }
@@ -409,7 +409,7 @@ int64_t HHVM_FUNCTION(get_http_request_size) {
   }
 }
 
-Array HHVM_FUNCTION(parse_cookies, const String& header_value) {
+Array HHVM_FUNCTION(parse_cookies, const OptString& header_value) {
   auto ret = Array::CreateDict();
   // DecodeCookies asserts a nonempty string, avoid fatals by checking length
   if (header_value.length() != 0) {
@@ -421,11 +421,11 @@ Array HHVM_FUNCTION(parse_cookies, const String& header_value) {
   return ret;
 }
 
-bool HHVM_FUNCTION(setcookie, const String& name,
-                              const String& value /* = null_string */,
+bool HHVM_FUNCTION(setcookie, const OptString& name,
+                              const OptString& value /* = null_string */,
                               int64_t expire /* = 0 */,
-                              const String& path /* = null_string */,
-                              const String& domain /* = null_string */,
+                              const OptString& path /* = null_string */,
+                              const OptString& domain /* = null_string */,
                               bool secure /* = false */,
                               bool httponly /* = false */) {
   Transport *transport = g_context->getTransport();
@@ -436,11 +436,11 @@ bool HHVM_FUNCTION(setcookie, const String& name,
   return false;
 }
 
-bool HHVM_FUNCTION(setrawcookie, const String& name,
-                                 const String& value /* = null_string */,
+bool HHVM_FUNCTION(setrawcookie, const OptString& name,
+                                 const OptString& value /* = null_string */,
                                  int64_t expire /* = 0 */,
-                                 const String& path /* = null_string */,
-                                 const String& domain /* = null_string */,
+                                 const OptString& path /* = null_string */,
+                                 const OptString& domain /* = null_string */,
                                  bool secure /* = false */,
                                  bool httponly /* = false */) {
   Transport *transport = g_context->getTransport();
@@ -453,7 +453,7 @@ bool HHVM_FUNCTION(setrawcookie, const String& name,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-bool HHVM_FUNCTION(openlog, const String& ident, int64_t option, int64_t facility) {
+bool HHVM_FUNCTION(openlog, const OptString& ident, int64_t option, int64_t facility) {
   openlog(ident.data(), option, facility);
   return true;
 }
@@ -463,12 +463,12 @@ bool HHVM_FUNCTION(closelog) {
   return true;
 }
 
-bool HHVM_FUNCTION(syslog, int64_t priority, const String& message) {
+bool HHVM_FUNCTION(syslog, int64_t priority, const OptString& message) {
   syslog(priority, "%s", message.data());
   return true;
 }
 
-bool validate_dns_arguments(const String& host, const String& type,
+bool validate_dns_arguments(const OptString& host, const OptString& type,
                             int& ntype) {
   IOStatusHelper io("dns_check_record", host.data());
   const char *stype;

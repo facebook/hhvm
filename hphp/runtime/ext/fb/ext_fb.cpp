@@ -126,7 +126,7 @@ Variant HHVM_FUNCTION(fb_serialize, const Variant& thing, int64_t options) {
       size_t len = HPHP::serialize
         ::FBSerializer<VariantControllerPostHackArrayMigration>
         ::serializedSize(thing);
-      String s(len, ReserveString);
+      OptString s(len, ReserveString);
       HPHP::serialize
         ::FBSerializer<VariantControllerPostHackArrayMigration>
         ::serialize(thing, s.mutableData());
@@ -136,7 +136,7 @@ Variant HHVM_FUNCTION(fb_serialize, const Variant& thing, int64_t options) {
       size_t len = HPHP::serialize
         ::FBSerializer<VariantControllerUsingHackArrays>
         ::serializedSize(thing);
-      String s(len, ReserveString);
+      OptString s(len, ReserveString);
       HPHP::serialize
         ::FBSerializer<VariantControllerUsingHackArrays>
         ::serialize(thing, s.mutableData());
@@ -146,7 +146,7 @@ Variant HHVM_FUNCTION(fb_serialize, const Variant& thing, int64_t options) {
       size_t len = HPHP::serialize
         ::FBSerializer<VariantControllerUsingHackArraysAndKeyset>
         ::serializedSize(thing);
-      String s(len, ReserveString);
+      OptString s(len, ReserveString);
       HPHP::serialize
         ::FBSerializer<VariantControllerUsingHackArraysAndKeyset>
         ::serialize(thing, s.mutableData());
@@ -156,7 +156,7 @@ Variant HHVM_FUNCTION(fb_serialize, const Variant& thing, int64_t options) {
       size_t len = HPHP::serialize
         ::FBSerializer<VariantControllerUsingVarrayDarray>
         ::serializedSize(thing);
-      String s(len, ReserveString);
+      OptString s(len, ReserveString);
       HPHP::serialize
         ::FBSerializer<VariantControllerUsingVarrayDarray>
         ::serialize(thing, s.mutableData());
@@ -165,7 +165,7 @@ Variant HHVM_FUNCTION(fb_serialize, const Variant& thing, int64_t options) {
     } else {
       size_t len =
         HPHP::serialize::FBSerializer<VariantController>::serializedSize(thing);
-      String s(len, ReserveString);
+      OptString s(len, ReserveString);
       HPHP::serialize::FBSerializer<VariantController>::serialize(
         thing, s.mutableData());
       s.setSize(len);
@@ -199,7 +199,7 @@ Variant HHVM_FUNCTION(fb_unserialize,
                       int64_t options) {
 #ifndef HPHP_OSS
   if (thing.isString()) {
-    String sthing = thing.toString();
+    OptString sthing = thing.toString();
 
     if (sthing.size() && (sthing.data()[0] & 0x80)) {
       Variant error;
@@ -429,7 +429,7 @@ static void fb_compact_serialize_int64(StringBuffer& sb, int64_t val) {
   }
 }
 
-static void fb_compact_serialize_string(StringBuffer& sb, const String& str) {
+static void fb_compact_serialize_string(StringBuffer& sb, const OptString& str) {
   int len = str.size();
   if (len == 0) {
     fb_compact_serialize_code(sb, FB_CS_STRING_0);
@@ -685,7 +685,7 @@ static int fb_compact_serialize_variant(
   return 1;
 }
 
-String fb_compact_serialize(const Variant& thing, int64_t options) {
+OptString fb_compact_serialize(const Variant& thing, int64_t options) {
   /**
    * If thing is a single int value [0, 127] normally we would serialize
    * it as a single byte (7 bit unsigned int).
@@ -698,7 +698,7 @@ String fb_compact_serialize(const Variant& thing, int64_t options) {
   if (thing.getType() == KindOfInt64) {
     int64_t val = thing.toInt64();
     if (val >= 0 && (uint64_t)val <= kInt7Mask) {
-      String s(2, ReserveString);
+      OptString s(2, ReserveString);
       *(uint16_t*)(s.mutableData()) = (uint16_t)htons(kInt13Prefix | val);
       s.setSize(2);
       return s;
@@ -707,7 +707,7 @@ String fb_compact_serialize(const Variant& thing, int64_t options) {
 
   StringBuffer sb;
   if (fb_compact_serialize_variant(sb, thing, 0, options)) {
-    return String();
+    return OptString();
   }
 
   return sb.detach();
@@ -720,7 +720,7 @@ Variant HHVM_FUNCTION(
 #ifndef HPHP_OSS
   return fb_compact_serialize(thing, options);
 #else
-  return String();
+  return OptString();
 #endif
 }
 
@@ -1029,7 +1029,7 @@ Variant HHVM_FUNCTION(fb_compact_unserialize,
     return false;
   }
 
-  String s = thing.toString();
+  OptString s = thing.toString();
   return fb_compact_unserialize(s.data(), s.size(), success, errcode);
 #else
     success = false;
@@ -1041,7 +1041,7 @@ Variant HHVM_FUNCTION(fb_compact_unserialize,
 ///////////////////////////////////////////////////////////////////////////////
 
 bool HHVM_FUNCTION(fb_utf8ize, Variant& input) {
-  String s = input.toString();
+  OptString s = input.toString();
   const char* const srcBuf = s.data();
   int32_t srcLenBytes = s.size();
 
@@ -1085,7 +1085,7 @@ bool HHVM_FUNCTION(fb_utf8ize, Variant& input) {
   if (dstMaxLenBytes > INT_MAX) {
     return false; // Too long.
   }
-  String dstStr(dstMaxLenBytes, ReserveString);
+  OptString dstStr(dstMaxLenBytes, ReserveString);
   char *dstBuf = dstStr.mutableData();
 
   // Copy valid bytes found so far as one solid block.
@@ -1125,7 +1125,7 @@ bool HHVM_FUNCTION(fb_utf8ize, Variant& input) {
  *
  * deprecated=true: instead return byte count on invalid UTF-8 sequence.
  */
-static int fb_utf8_strlen_impl(const String& input, bool deprecated) {
+static int fb_utf8_strlen_impl(const OptString& input, bool deprecated) {
   // Count, don't modify.
   int32_t sourceLength = input.size();
   const char* const sourceBuffer = input.data();
@@ -1144,11 +1144,11 @@ static int fb_utf8_strlen_impl(const String& input, bool deprecated) {
   return num_code_points;
 }
 
-int64_t HHVM_FUNCTION(fb_utf8_strlen, const String& input) {
+int64_t HHVM_FUNCTION(fb_utf8_strlen, const OptString& input) {
   return fb_utf8_strlen_impl(input, /* deprecated */ false);
 }
 
-int64_t HHVM_FUNCTION(fb_utf8_strlen_deprecated, const String& input) {
+int64_t HHVM_FUNCTION(fb_utf8_strlen_deprecated, const OptString& input) {
   return fb_utf8_strlen_impl(input, /* deprecated */ true);
 }
 
@@ -1171,7 +1171,7 @@ Array HHVM_FUNCTION(fb_utf8_decompose, StringArg input) {
     } else if (LIKELY(next == off + 1)) {
       ret.append(StrNR{precomputed_chars[uint8_t(bufp[off])]}.asString());
     } else {
-      ret.append(String{&bufp[off], size_t(next - off), CopyString});
+      ret.append(OptString{&bufp[off], size_t(next - off), CopyString});
     }
   } while (next < len);
 
@@ -1181,7 +1181,7 @@ Array HHVM_FUNCTION(fb_utf8_decompose, StringArg input) {
 /**
  * Private helper; requires non-negative firstCodePoint and desiredCodePoints.
  */
-static String fb_utf8_substr_simple(const String& str,
+static OptString fb_utf8_substr_simple(const OptString& str,
                                     int32_t firstCodePoint,
                                     int32_t numDesiredCodePoints) {
   const char* const srcBuf = str.data();
@@ -1215,7 +1215,7 @@ static String fb_utf8_substr_simple(const String& str,
   if (dstMaxLenBytes > INT_MAX) {
     return empty_string(); // Too long.
   }
-  String dstStr(dstMaxLenBytes, ReserveString);
+  OptString dstStr(dstMaxLenBytes, ReserveString);
   char* dstBuf = dstStr.mutableData();
   int32_t dstPosBytes = 0;
 
@@ -1248,7 +1248,7 @@ static String fb_utf8_substr_simple(const String& str,
   return empty_string();
 }
 
-String HHVM_FUNCTION(fb_utf8_substr, const String& str, int64_t start,
+OptString HHVM_FUNCTION(fb_utf8_substr, const OptString& str, int64_t start,
                                      int64_t length /* = INT_MAX */) {
   if (length > INT_MAX) {
     length = INT_MAX;
@@ -1279,16 +1279,16 @@ String HHVM_FUNCTION(fb_utf8_substr, const String& str, int64_t start,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-bool HHVM_FUNCTION(fb_intercept2, const String& name, const Variant& handler) {
+bool HHVM_FUNCTION(fb_intercept2, const OptString& name, const Variant& handler) {
   return register_intercept(name, handler);
 }
 
-bool HHVM_FUNCTION(fb_intercept2_named_args, const String& name, const Variant& handler) {
+bool HHVM_FUNCTION(fb_intercept2_named_args, const OptString& name, const Variant& handler) {
   return register_intercept(name, handler);
 }
 
-bool HHVM_FUNCTION(fb_rename_function, const String& orig_func_name,
-                                       const String& new_func_name) {
+bool HHVM_FUNCTION(fb_rename_function, const OptString& orig_func_name,
+                                       const OptString& new_func_name) {
   if (orig_func_name.empty() || new_func_name.empty() ||
       orig_func_name.get()->fsame(new_func_name.get())) {
     raise_invalid_argument_warning("unable to rename %s", orig_func_name.data());
@@ -1412,7 +1412,7 @@ int64_t HHVM_FUNCTION(fb_get_last_flush_size) {
 extern Array stat_impl(struct stat*); // ext_file.cpp
 
 template<class Function>
-static Variant do_lazy_stat(Function dostat, const String& filename) {
+static Variant do_lazy_stat(Function dostat, const OptString& filename) {
   struct stat sb;
   if (dostat(File::TranslatePathWithFileCache(filename).c_str(), &sb)) {
     Logger::Verbose("%s/%d: %s", __FUNCTION__, __LINE__,
@@ -1422,14 +1422,14 @@ static Variant do_lazy_stat(Function dostat, const String& filename) {
   return stat_impl(&sb);
 }
 
-Variant HHVM_FUNCTION(fb_lazy_lstat, const String& filename) {
+Variant HHVM_FUNCTION(fb_lazy_lstat, const OptString& filename) {
   if (!FileUtil::checkPathAndWarn(filename, __FUNCTION__ + 2, 1)) {
     return false;
   }
   return do_lazy_stat(lstatSyscall, filename);
 }
 
-Variant HHVM_FUNCTION(fb_lazy_realpath, const String& filename) {
+Variant HHVM_FUNCTION(fb_lazy_realpath, const OptString& filename) {
   if (!FileUtil::checkPathAndWarn(filename, __FUNCTION__ + 2, 1)) {
     return false;
   }
@@ -1519,7 +1519,7 @@ Variant HHVM_FUNCTION(get_product_attribution_id_internal) {
 
 namespace {
 
-Array fb_call_user_func_message(const String& initialDoc,
+Array fb_call_user_func_message(const OptString& initialDoc,
                                 const Variant& function,
                                 const Array& _argv) {
   if (function.isArray()) {
@@ -1545,7 +1545,7 @@ Array fb_call_user_func_message(const String& initialDoc,
   return msg;
 }
 
-Variant HHVM_FUNCTION(fb_call_user_func_array_async, const String& initialDoc,
+Variant HHVM_FUNCTION(fb_call_user_func_array_async, const OptString& initialDoc,
                       const Variant& function, const Array& params) {
   Array msg = fb_call_user_func_message(initialDoc, function, params);
   if (msg.empty()) {
@@ -1571,7 +1571,7 @@ Variant HHVM_FUNCTION(fb_end_user_func_async, const OptResource& handle) {
   return ret;
 }
 
-Variant HHVM_FUNCTION(fb_gen_user_func_array, const String& initialDoc,
+Variant HHVM_FUNCTION(fb_gen_user_func_array, const OptString& initialDoc,
                       const Variant& function, const Array& _argv) {
   Array msg = fb_call_user_func_message(initialDoc, function, _argv);
   if (msg.empty()) {
@@ -1595,7 +1595,7 @@ Variant HHVM_FUNCTION(fb_gen_user_func_array, const String& initialDoc,
   return Variant{event->getWaitHandle()};
 }
 
-Variant HHVM_FUNCTION(extension_warmup_data, const String& extension_name) {
+Variant HHVM_FUNCTION(extension_warmup_data, const OptString& extension_name) {
   auto ext = ExtensionRegistry::get(extension_name.data(), true);
   if (!ext) return init_null();
   auto data = ext->getWarmupData();

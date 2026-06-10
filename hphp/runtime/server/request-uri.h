@@ -30,15 +30,15 @@ struct RequestURI {
              const std::string &sourceRoot);
   explicit RequestURI(const std::string & rpcFunc);
 
-  const String& originalURL() const { return m_originalURL; }
-  const String& resolvedURL() const { return m_resolvedURL; }
-  const String& queryString() const { return m_queryString; }
+  const OptString& originalURL() const { return m_originalURL; }
+  const OptString& resolvedURL() const { return m_resolvedURL; }
+  const OptString& queryString() const { return m_queryString; }
 
-  const String& path() const { return m_path; }
+  const OptString& path() const { return m_path; }
   const char *ext() const { return m_ext; }
-  const String& absolutePath() const { return m_absolutePath; }
-  const String& pathInfo() const { return m_pathInfo; }
-  const String& origPathInfo() const { return m_origPathInfo; }
+  const OptString& absolutePath() const { return m_absolutePath; }
+  const OptString& pathInfo() const { return m_pathInfo; }
+  const OptString& origPathInfo() const { return m_origPathInfo; }
 
   bool rewritten() const { return m_rewritten; }
   bool defaultDoc() const { return m_defaultDoc; }
@@ -49,18 +49,18 @@ struct RequestURI {
   void dump();
   void clear();
 
-  static void splitURL(String url, String &base, String &query);
+  static void splitURL(OptString url, OptString &base, OptString &query);
 private:
-  String m_originalURL;  // without being rewritten, without query string
-  String m_queryString;
-  String m_rewrittenURL; // possibly rewritten
-  String m_resolvedURL;  // possibly appended with default document and
+  OptString m_originalURL;  // without being rewritten, without query string
+  OptString m_queryString;
+  OptString m_rewrittenURL; // possibly rewritten
+  OptString m_resolvedURL;  // possibly appended with default document and
                          // without pathinfo
 
-  String m_pathInfo;
-  String m_origPathInfo;
-  String m_absolutePath;
-  String m_path;  // path relative to SourceRoot
+  OptString m_pathInfo;
+  OptString m_origPathInfo;
+  OptString m_absolutePath;
+  OptString m_path;  // path relative to SourceRoot
 
   bool m_rewritten;  // whether rewrite rules have applied
   bool m_defaultDoc; // whether DefaultDocument was appended
@@ -90,18 +90,18 @@ private:
   bool virtualFileExists(const VirtualHost *vhost,
                          const std::string &pathTranslation,
                          const std::string &sourceRoot,
-                         const String& filename);
+                         const OptString& filename);
   bool virtualFolderExists(const VirtualHost *vhost,
                            const std::string &pathTranslation,
                            const std::string &sourceRoot,
-                           const String& foldername);
+                           const OptString& foldername);
   void processExt();
 
   std::vector<std::string> m_triedURLs;
   const std::string getDefault404();
 
-  static const char *parseExt(const String& s);
-  static void PrependSlash(String &s);
+  static const char *parseExt(const OptString& s);
+  static void PrependSlash(OptString &s);
 
 };
 

@@ -49,12 +49,12 @@ bool HHVM_FUNCTION(pagelet_server_is_enabled) {
 const StaticString s_Host("Host");
 
 OptResource HHVM_FUNCTION(pagelet_server_task_start,
-                       const String& url,
+                       const OptString& url,
                        const Array& headers /* = null_array */,
-                       const String& post_data /* = null_string */,
+                       const OptString& post_data /* = null_string */,
                        const Array& files /* = null_array */,
                        int64_t desired_timeout /* = 0 */) {
-  String remote_host;
+  OptString remote_host;
   Transport *transport = g_context->getTransport();
   // If a non-zero timeout is requested, use it and cap it at the remaining
   // request time.
@@ -82,13 +82,13 @@ int64_t HHVM_FUNCTION(pagelet_server_task_status,
   return PageletServer::TaskStatus(task);
 }
 
-String HHVM_FUNCTION(pagelet_server_task_result,
+OptString HHVM_FUNCTION(pagelet_server_task_result,
                      const OptResource& task,
                      Array& headers,
                      int64_t& code,
                      int64_t timeout_ms /* = 0 */) {
   int rcode;
-  String response = PageletServer::TaskResult(task, headers, rcode,
+  OptString response = PageletServer::TaskResult(task, headers, rcode,
                                               timeout_ms);
   code = rcode;
   return response;
@@ -105,7 +105,7 @@ void HHVM_FUNCTION(pagelet_server_flush) {
       transport->getThreadType() == Transport::ThreadType::PageletThread) {
     // this method is only meaningful in a pagelet thread
     context->obFlushAll();
-    String content = context->obDetachContents();
+    OptString content = context->obDetachContents();
     std::string s(content.data(), content.size());
     if (!s.empty()) {
       PageletServer::AddToPipeline(s);
@@ -127,7 +127,7 @@ bool HHVM_FUNCTION(pagelet_server_is_done) {
 // xbox
 
 OptResource HHVM_FUNCTION(xbox_task_start,
-                       const String& message) {
+                       const OptString& message) {
   return XboxServer::TaskStart(message);
 }
 
@@ -145,7 +145,7 @@ int64_t HHVM_FUNCTION(xbox_task_result,
 }
 
 Variant HHVM_FUNCTION(xbox_process_call_message,
-                      const String& msg) {
+                      const OptString& msg) {
   Variant v =
     unserialize_from_string(msg, VariableUnserializer::Type::Internal);
   if (!v.isArray()) {

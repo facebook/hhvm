@@ -70,7 +70,7 @@ struct IntlIterator : IntlError, SystemLib::ClassLoader<"IntlIterator"> {
       s_intl_error->setError(error, "Error fetching next iteration element");
       m_current = uninit_null();
     } else {
-      m_current = String(e, len, CopyString);
+      m_current = OptString(e, len, CopyString);
     }
     m_key++;
     return m_current;

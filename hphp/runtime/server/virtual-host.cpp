@@ -62,7 +62,7 @@ const VirtualHost *VirtualHost::GetCurrent() {
 }
 
 VirtualHost* VirtualHost::Resolve(const std::string& host) {
-  auto const hostString = String(host.c_str(), host.size(), CopyString);
+  auto const hostString = OptString(host.c_str(), host.size(), CopyString);
   for (auto vhost : RuntimeOption::VirtualHosts) {
     if (vhost->match(hostString)) {
       return vhost.get();
@@ -111,7 +111,7 @@ void VirtualHost::UpdateSerializationSizeLimit() {
   }
 }
 
-bool VirtualHost::alwaysDecodePostData(const String& origPath) const {
+bool VirtualHost::alwaysDecodePostData(const OptString& origPath) const {
   if (!m_alwaysDecodePostData) return false;
   if (m_decodePostDataBlackList.empty()) return true;
   return !m_decodePostDataBlackList.contains(origPath.toCppString());
@@ -355,7 +355,7 @@ void VirtualHost::init(const IniSetting::Map& ini, const Hdf& vh,
   }
 }
 
-bool VirtualHost::match(const String &host) const {
+bool VirtualHost::match(const OptString &host) const {
   if (m_pattern) {
     Variant ret = preg_match(m_pattern, host.get());
     return ret.toInt64() > 0;
@@ -376,11 +376,11 @@ static int get_backref(const char **s) {
   return val;
 }
 
-bool VirtualHost::rewriteURL(const String& host, String &url, bool &qsa,
+bool VirtualHost::rewriteURL(const OptString& host, OptString &url, bool &qsa,
                              int &redirect) const {
-  String normalized = url;
+  OptString normalized = url;
   if (normalized.empty() || normalized.charAt(0) != '/') {
-    normalized = String("/") + normalized;
+    normalized = OptString("/") + normalized;
   }
 
   Logger::Verbose("Matching host:%s url:%s using vhost:%s",
@@ -392,7 +392,7 @@ bool VirtualHost::rewriteURL(const String& host, String &url, bool &qsa,
     bool passed = true;
     for (auto it = rule.rewriteConds.begin();
         it != rule.rewriteConds.end(); ++it) {
-      String subject;
+      OptString subject;
       if (it->type == RewriteCond::Type::Request) {
         subject = normalized;
       } else {
@@ -440,7 +440,7 @@ bool VirtualHost::rewriteURL(const String& host, String &url, bool &qsa,
           }
         }
         if (backref >= 0) {
-          String br = matches.toArray()[backref].toString();
+          OptString br = matches.toArray()[backref].toString();
           if (rule.encode_backrefs) {
             br = StringUtil::UrlEncode(br);
           }
@@ -479,11 +479,11 @@ std::string VirtualHost::serverName(const std::string &host) const {
     if (m_pattern) {
       Variant matches;
       Variant ret = preg_match(m_pattern,
-                               String(host.c_str(), host.size(),
+                               OptString(host.c_str(), host.size(),
                                       CopyString).get(),
                                &matches);
       if (ret.toInt64() > 0) {
-        String prefix = matches.toArray()[1].toString();
+        OptString prefix = matches.toArray()[1].toString();
         if (prefix.empty()) {
           prefix = matches.toArray()[0].toString();
         }
@@ -511,10 +511,10 @@ std::string VirtualHost::filterUrl(const std::string &url) const {
 
     bool match = true;
     if (!filter.urlPattern.empty()) {
-      Variant ret = preg_match(String(filter.urlPattern.c_str(),
+      Variant ret = preg_match(OptString(filter.urlPattern.c_str(),
                                       filter.urlPattern.size(),
                                       CopyString),
-                               String(url.c_str(), url.size(),
+                               OptString(url.c_str(), url.size(),
                                       CopyString));
       match = (ret.toInt64() > 0);
     }
@@ -526,10 +526,10 @@ std::string VirtualHost::filterUrl(const std::string &url) const {
 
       Variant ret;
       int count = preg_replace(ret, filter.namePattern.c_str(),
-                               String(filter.replaceWith.c_str(),
+                               OptString(filter.replaceWith.c_str(),
                                       filter.replaceWith.size(),
                                       CopyString),
-                               String(url.c_str(), url.size(),
+                               OptString(url.c_str(), url.size(),
                                       CopyString));
       if (!same(ret, false) && count > 0) {
         return ret.toString().data();

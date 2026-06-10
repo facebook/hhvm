@@ -144,8 +144,8 @@ struct MockHeaders : ITransportHeaders {
     addHeaderNoLock(name, value);
   }
 
-  void addHeader(const String& header) override {
-    String name;
+  void addHeader(const OptString& header) override {
+    OptString name;
     const char *value;
     if (splitHeader(header, name, value)) {
       addHeader(name.data(), value);
@@ -156,8 +156,8 @@ struct MockHeaders : ITransportHeaders {
     removeHeader(name);
     addHeader(name, value);
   }
-  void replaceHeader(const String& header) override {
-    String name;
+  void replaceHeader(const OptString& header) override {
+    OptString name;
     const char *value;
     if (splitHeader(header, name, value)) {
       replaceHeader(name.data(), value);
@@ -188,10 +188,10 @@ struct MockHeaders : ITransportHeaders {
   }
 
  private:
-  bool splitHeader(const String& header, String &name, const char *&value) {
+  bool splitHeader(const OptString& header, OptString &name, const char *&value) {
     int pos = header.find(':');
 
-    if (pos != String::npos) {
+    if (pos != OptString::npos) {
       name = header.substr(0, pos);
       value = header.data() + pos;
 

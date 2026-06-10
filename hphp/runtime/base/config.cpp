@@ -420,9 +420,9 @@ bool valueMatchesPattern(const std::string &value,
                          std::string &pattern,
                          const std::string &suffix) {
   if (!suffix.empty()) pattern += suffix;
-  Variant ret = preg_match(String(pattern.c_str(), pattern.size(),
+  Variant ret = preg_match(OptString(pattern.c_str(), pattern.size(),
                                   CopyString),
-                           String(value.c_str(), value.size(),
+                           OptString(value.c_str(), value.size(),
                                   CopyString));
   return ret.toInt64() > 0;
 }
@@ -449,7 +449,7 @@ bool Config::matchHdfPatternSet(const std::string &value,
                                                            std::vector<std::string>{},
                                                            false);
   if (!patterns.empty()) {
-    String valueString = String(value.c_str(), value.size(), CopyString);
+    OptString valueString = OptString(value.c_str(), value.size(), CopyString);
     for (std::string pattern: patterns) {
       if (!pattern.empty()) {
         // PatternSets are applied only to multiline values

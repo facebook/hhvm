@@ -56,33 +56,33 @@ constexpr int64_t k_STR_PAD_LEFT  = 0;
 constexpr int64_t k_STR_PAD_RIGHT = 1;
 constexpr int64_t k_STR_PAD_BOTH  = 2;
 
-String HHVM_FUNCTION(addcslashes,
-                     const String& str,
-                     const String& charlist);
-String HHVM_FUNCTION(addslashes,
-                     const String& str);
-String HHVM_FUNCTION(bin2hex,
-                     const String& str);
+OptString HHVM_FUNCTION(addcslashes,
+                     const OptString& str,
+                     const OptString& charlist);
+OptString HHVM_FUNCTION(addslashes,
+                     const OptString& str);
+OptString HHVM_FUNCTION(bin2hex,
+                     const OptString& str);
 Variant HHVM_FUNCTION(hex2bin,
-                      const String& str);
-String HHVM_FUNCTION(strrev,
-                     const String& str);
-String HHVM_FUNCTION(strtolower,
-                     const String& str);
-String HHVM_FUNCTION(strtoupper,
-                     const String& str);
-String HHVM_FUNCTION(trim,
-                     const String& str,
-                     const String& charlist = k_HPHP_TRIM_CHARLIST);
-String HHVM_FUNCTION(ltrim,
-                     const String& str,
-                     const String& charlist = k_HPHP_TRIM_CHARLIST);
-String HHVM_FUNCTION(rtrim,
-                     const String& str,
-                     const String& charlist = k_HPHP_TRIM_CHARLIST);
+                      const OptString& str);
+OptString HHVM_FUNCTION(strrev,
+                     const OptString& str);
+OptString HHVM_FUNCTION(strtolower,
+                     const OptString& str);
+OptString HHVM_FUNCTION(strtoupper,
+                     const OptString& str);
+OptString HHVM_FUNCTION(trim,
+                     const OptString& str,
+                     const OptString& charlist = k_HPHP_TRIM_CHARLIST);
+OptString HHVM_FUNCTION(ltrim,
+                     const OptString& str,
+                     const OptString& charlist = k_HPHP_TRIM_CHARLIST);
+OptString HHVM_FUNCTION(rtrim,
+                     const OptString& str,
+                     const OptString& charlist = k_HPHP_TRIM_CHARLIST);
 Variant HHVM_FUNCTION(explode,
-                      const String& delimiter,
-                      const String& str,
+                      const OptString& delimiter,
+                      const OptString& str,
                       int64_t limit = k_PHP_INT_MAX);
 TypedValue HHVM_FUNCTION(str_replace,
                          const Variant& search,
@@ -92,26 +92,26 @@ TypedValue HHVM_FUNCTION(str_ireplace,
                          const Variant& search,
                          const Variant& replace,
                          const Variant& subject);
-String HHVM_FUNCTION(str_repeat,
-                     const String& input,
+OptString HHVM_FUNCTION(str_repeat,
+                     const OptString& input,
                      int64_t multiplier);
 
 ///////////////////////////////////////////////////////////////////////////////
 // encoding/decoding
 
-String HHVM_FUNCTION(htmlentities,
-                     const String& str,
+OptString HHVM_FUNCTION(htmlentities,
+                     const OptString& str,
                      int64_t quote_style = k_ENT_HTML_QUOTE_DOUBLE,
-                     const String& charset = "UTF-8",
+                     const OptString& charset = "UTF-8",
                      bool double_encode = true);
-String HHVM_FUNCTION(md5,
-                     const String& str,
+OptString HHVM_FUNCTION(md5,
+                     const OptString& str,
                      bool raw_output = false);
 StringRet HHVM_FUNCTION(sha1,
-                     const String& str,
+                     const OptString& str,
                      bool raw_output = false);
 Variant HHVM_FUNCTION(strtr,
-                      const String& str,
+                      const OptString& str,
                       const Variant& from,
                       const Variant& to = uninit_variant);
 
@@ -119,28 +119,28 @@ Variant HHVM_FUNCTION(strtr,
 // input/output
 
 Variant HHVM_FUNCTION(sscanf,
-                      const String& str,
-                      const String& format);
+                      const OptString& str,
+                      const OptString& format);
 
 ///////////////////////////////////////////////////////////////////////////////
 // analysis
 
-bool str_contains_any_of(const String& haystack, const String& char_list);
+bool str_contains_any_of(const OptString& haystack, const OptString& char_list);
 
 TypedValue HHVM_FUNCTION(strpos,
-                         const String& haystack,
+                         const OptString& haystack,
                          const Variant& needle,
                          int64_t offset = 0);
 TypedValue HHVM_FUNCTION(stripos,
-                         const String& haystack,
+                         const OptString& haystack,
                          const Variant& needle,
                          int64_t offset = 0);
 TypedValue HHVM_FUNCTION(strrpos,
-                        const String& haystack,
+                        const OptString& haystack,
                         const Variant& needle,
                         int64_t offset = 0);
 TypedValue HHVM_FUNCTION(strripos,
-                        const String& haystack,
+                        const OptString& haystack,
                         const Variant& needle,
                         int64_t offset = 0);
 

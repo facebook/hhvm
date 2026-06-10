@@ -25,7 +25,7 @@ namespace HPHP {
 
 struct Class;
 struct Func;
-struct String;
+struct OptString;
 
 struct ClsMethData {
 #ifdef USE_PACKEDPTR
@@ -48,9 +48,9 @@ struct ClsMethData {
     return m_func;
   }
 
-  String getClsStr() const;
+  OptString getClsStr() const;
 
-  String getFuncStr() const;
+  OptString getFuncStr() const;
 
   static constexpr ptrdiff_t clsOffset() {
     return offsetof(ClsMethData, m_cls);

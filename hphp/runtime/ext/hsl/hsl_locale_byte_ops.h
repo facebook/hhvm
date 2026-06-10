@@ -25,7 +25,7 @@ namespace HPHP {
     explicit HSLLocaleByteOps();
     virtual ~HSLLocaleByteOps() override;
 
-    virtual int64_t strcoll(const String&, const String&) const override;
-    virtual int64_t strcasecmp(const String&, const String&) const override;
+    virtual int64_t strcoll(const OptString&, const OptString&) const override;
+    virtual int64_t strcasecmp(const OptString&, const OptString&) const override;
   };
 }

@@ -395,7 +395,7 @@ void throw_pdo_exception(const Variant& info, const char *fmt, ...) {
   va_start(ap, fmt);
   string msg;
   string_vsnprintf(msg, fmt, ap);
-  obj->o_set(s_message, String(msg), s_PDOException);
+  obj->o_set(s_message, OptString(msg), s_PDOException);
   va_end(ap);
 
   if (!info.isNull()) {
@@ -424,7 +424,7 @@ void pdo_raise_impl_error(sp_PDOResource rsrc, PDOStatement* stmt,
     raise_warning("%s", err.c_str());
   } else {
     VecInit info(2);
-    info.append(String(*pdo_err, CopyString));
+    info.append(OptString(*pdo_err, CopyString));
     info.append(0LL);
     throw_pdo_exception(info.toArray(), "%s",
                         err.c_str());
@@ -453,10 +453,10 @@ void pdo_handle_error(sp_PDOResource rsrc, PDOStatement* stmt) {
   const char *msg = s_err_hash.description(*pdo_err);
 
   int64_t native_code = 0;
-  String supp;
+  OptString supp;
   Array info;
   if (dbh->support(PDOConnection::MethodFetchErr)) {
-    info = make_vec_array(String(*pdo_err, CopyString));
+    info = make_vec_array(OptString(*pdo_err, CopyString));
     if (dbh->fetchErr(stmt, info)) {
       if (info.exists(1)) {
         native_code = info[1].toInt64();
@@ -469,7 +469,7 @@ void pdo_handle_error(sp_PDOResource rsrc, PDOStatement* stmt) {
 
   string err = "SQLSTATE["; err += *pdo_err; err += "]: "; err += msg;
   if (!supp.empty()) {
-    err += ": "; err += String(native_code).data();
+    err += ": "; err += OptString(native_code).data();
     err += " ";  err += supp.data();
   }
 
@@ -497,9 +497,9 @@ static inline int64_t pdo_attr_lval(const Array& options, PDOAttributeType name,
   return defval;
 }
 
-static Object pdo_stmt_instantiate(sp_PDOResource dbh, const String& clsname,
+static Object pdo_stmt_instantiate(sp_PDOResource dbh, const OptString& clsname,
                                    const Variant& ctor_args) {
-  String name = clsname;
+  OptString name = clsname;
   if (name.empty()) {
     name = "PDOStatement";
   }
@@ -519,7 +519,7 @@ static Object pdo_stmt_instantiate(sp_PDOResource dbh, const String& clsname,
 const StaticString s_queryString("queryString");
 
 static void pdo_stmt_construct(sp_PDOStatement stmt, Object object,
-                               const String& clsname,
+                               const OptString& clsname,
                                const Variant& ctor_args) {
   object->setProp(nullctx, s_queryString.get(), stmt->query_string.asTypedValue());
   if (clsname.empty()) {
@@ -536,7 +536,7 @@ static void pdo_stmt_construct(sp_PDOStatement stmt, Object object,
 }
 
 static bool valid_statement_class(sp_PDOResource dbh, const Variant& opt,
-                                  String &clsname, Variant &ctor_args) {
+                                  OptString &clsname, Variant &ctor_args) {
   if (!opt.isArray() || !opt.toArray().exists(0) ||
       !opt.toArray()[0].isString() ||
       !HHVM_FN(class_exists)(opt.toArray()[0].toString())) {
@@ -549,7 +549,7 @@ static bool valid_statement_class(sp_PDOResource dbh, const Variant& opt,
     return false;
   }
   clsname = opt.toArray()[0].toString();
-  if (clsname == String("PDOStatement")) {
+  if (clsname == OptString("PDOStatement")) {
     ctor_args = Variant(Array());
     return true;
   }
@@ -678,7 +678,7 @@ static bool pdo_stmt_verify_mode(sp_PDOStatement stmt, int64_t mode,
 }
 
 static bool do_fetch_class_prepare(sp_PDOStatement stmt) {
-  String clsname = stmt->fetch.clsname;
+  OptString clsname = stmt->fetch.clsname;
   if (clsname.empty()) {
     stmt->fetch.clsname = "stdClass";
   }
@@ -847,21 +847,21 @@ namespace {
 
 const StaticString s_PDO("PDO");
 
-void HHVM_METHOD(PDO, __construct, const String& dsn,
-                 const String& username /* = null_string */,
-                 const String& password /* = null_string */,
+void HHVM_METHOD(PDO, __construct, const OptString& dsn,
+                 const OptString& username /* = null_string */,
+                 const OptString& password /* = null_string */,
                  const Variant& optionsV /* = null_array */) {
   auto data = Native::data<PDOData>(this_);
   auto options = optionsV.isNull() ? null_array : optionsV.toArray();
 
-  String data_source = dsn;
+  OptString data_source = dsn;
 
   /* parse the data source name */
   const char *colon = strchr(data_source.data(), ':');
   if (!colon) {
     /* let's see if this string has a matching dsn in the php.ini */
-    String name = "pdo.dsn."; name += data_source;
-    String ini_dsn;
+    OptString name = "pdo.dsn."; name += data_source;
+    OptString ini_dsn;
     if (!IniSetting::Get(name, ini_dsn)) {
       throw_pdo_exception(uninit_null(), "invalid data source name");
     }
@@ -888,7 +888,7 @@ void HHVM_METHOD(PDO, __construct, const String& dsn,
   }
 
   const PDODriverMap &drivers = PDODriver::GetDrivers();
-  String name = data_source.substr(0, colon - data_source.data());
+  OptString name = data_source.substr(0, colon - data_source.data());
   PDODriverMap::const_iterator iter = drivers.find(name.data());
   if (iter == drivers.end()) {
     /* NB: don't want to include the data_source in the error message as
@@ -905,7 +905,7 @@ void HHVM_METHOD(PDO, __construct, const String& dsn,
     StringBuffer hashkey;
     if (options.exists(PDO_ATTR_PERSISTENT)) {
       Variant v = options[PDO_ATTR_PERSISTENT];
-      String sv = v.toString();
+      OptString sv = v.toString();
       if (v.isString() && !sv.isNumeric() && !sv.empty()) {
         /* user specified key */
         hashkey.printf("PDO:DBH:DSN=%s:%s:%s:%s",
@@ -984,7 +984,7 @@ void HHVM_METHOD(PDO, __construct, const String& dsn,
   }
 }
 
-Variant HHVM_METHOD(PDO, prepare, const String& statement,
+Variant HHVM_METHOD(PDO, prepare, const OptString& statement,
                     const Array& options = null_array) {
   auto data = Native::data<PDOData>(this_);
 
@@ -992,7 +992,7 @@ Variant HHVM_METHOD(PDO, prepare, const String& statement,
   setPDOErrorNone(data->m_dbh->conn()->error_code);
   data->m_dbh->query_stmt = nullptr;
 
-  String clsname;
+  OptString clsname;
   Variant ctor_args;
   if (options.exists(PDO_ATTR_STATEMENT_CLASS)) {
     Variant opt = options[PDO_ATTR_STATEMENT_CLASS];
@@ -1173,7 +1173,7 @@ bool HHVM_METHOD(PDO, setAttribute, int64_t attribute,
         PDO_HANDLE_DBH_ERR(data->m_dbh);
         return false;
       }
-      String clsname;
+      OptString clsname;
       if (!valid_statement_class(data->m_dbh, value, clsname,
                                  data->m_dbh->def_stmt_ctor_args)) {
         return false;
@@ -1226,11 +1226,11 @@ Variant HHVM_METHOD(PDO, getAttribute, int64_t attribute) {
     return (int64_t)data->m_dbh->conn()->error_mode;
 
   case PDO_ATTR_DRIVER_NAME:
-    return String(data->m_dbh->conn()->driver->getName());
+    return OptString(data->m_dbh->conn()->driver->getName());
 
   case PDO_ATTR_STATEMENT_CLASS: {
     Array ret;
-    ret.append(String(data->m_dbh->conn()->def_stmt_clsname));
+    ret.append(OptString(data->m_dbh->conn()->def_stmt_clsname));
     if (!data->m_dbh->def_stmt_ctor_args.isNull()) {
       ret.append(data->m_dbh->def_stmt_ctor_args);
     }
@@ -1259,7 +1259,7 @@ Variant HHVM_METHOD(PDO, getAttribute, int64_t attribute) {
   return ret;
 }
 
-Variant HHVM_METHOD(PDO, exec, const String& query) {
+Variant HHVM_METHOD(PDO, exec, const OptString& query) {
   auto data = Native::data<PDOData>(this_);
 
   SYNC_VM_REGS_SCOPED();
@@ -1282,7 +1282,7 @@ Variant HHVM_METHOD(PDO, exec, const String& query) {
 }
 
 static Variant HHVM_METHOD(PDO, lastInsertId,
-                           const String& seqname /* = null_string */) {
+                           const OptString& seqname /* = null_string */) {
   auto data = Native::data<PDOData>(this_);
 
   assertx(data->m_dbh->conn()->driver);
@@ -1295,7 +1295,7 @@ static Variant HHVM_METHOD(PDO, lastInsertId,
     return false;
   }
 
-  String ret = data->m_dbh->conn()->lastId(seqname.data());
+  OptString ret = data->m_dbh->conn()->lastId(seqname.data());
   if (ret.empty()) {
     PDO_HANDLE_DBH_ERR(data->m_dbh);
     return false;
@@ -1308,7 +1308,7 @@ static Variant HHVM_METHOD(PDO, errorCode) {
 
   assertx(data->m_dbh->conn()->driver);
   if (data->m_dbh->query_stmt) {
-    return String(data->m_dbh->query_stmt->error_code, CopyString);
+    return OptString(data->m_dbh->query_stmt->error_code, CopyString);
   }
 
   if (data->m_dbh->conn()->error_code[0] == '\0') {
@@ -1319,7 +1319,7 @@ static Variant HHVM_METHOD(PDO, errorCode) {
    * Making sure that we fallback to the default implementation
    * if the dbh->error_code is not null.
    */
-  return String(data->m_dbh->conn()->error_code, CopyString);
+  return OptString(data->m_dbh->conn()->error_code, CopyString);
 }
 
 static Array HHVM_METHOD(PDO, errorInfo) {
@@ -1329,9 +1329,9 @@ static Array HHVM_METHOD(PDO, errorInfo) {
 
   Array ret = Array::CreateVec();
   if (data->m_dbh->query_stmt) {
-    ret.append(String(data->m_dbh->query_stmt->error_code, CopyString));
+    ret.append(OptString(data->m_dbh->query_stmt->error_code, CopyString));
   } else {
-    ret.append(String(data->m_dbh->conn()->error_code, CopyString));
+    ret.append(OptString(data->m_dbh->conn()->error_code, CopyString));
   }
 
   if (data->m_dbh->conn()->support(PDOConnection::MethodFetchErr)) {
@@ -1354,7 +1354,7 @@ static Array HHVM_METHOD(PDO, errorInfo) {
   return ret;
 }
 
-Variant HHVM_METHOD(PDO, query, const String& sql, const Array& _argv) {
+Variant HHVM_METHOD(PDO, query, const OptString& sql, const Array& _argv) {
 
   auto data = Native::data<PDOData>(this_);
   SYNC_VM_REGS_SCOPED();
@@ -1424,7 +1424,7 @@ Variant HHVM_METHOD(PDO, query, const String& sql, const Array& _argv) {
   return false;
 }
 
-static Variant HHVM_METHOD(PDO, quote, const String& str,
+static Variant HHVM_METHOD(PDO, quote, const OptString& str,
                            int64_t paramtype /* = PDO_PARAM_STR */) {
   auto data = Native::data<PDOData>(this_);
 
@@ -1438,7 +1438,7 @@ static Variant HHVM_METHOD(PDO, quote, const String& str,
     return false;
   }
 
-  String quoted;
+  OptString quoted;
   if (data->m_dbh->conn()->quoter(str, quoted, (PDOParamType)paramtype)) {
     return quoted;
   }
@@ -1446,7 +1446,7 @@ static Variant HHVM_METHOD(PDO, quote, const String& str,
   return false;
 }
 
-static bool HHVM_METHOD(PDO, sqliteCreateFunction, const String& name,
+static bool HHVM_METHOD(PDO, sqliteCreateFunction, const OptString& name,
                         const Variant& callback, int64_t argcount /* = -1 */) {
 #ifdef ENABLE_EXTENSION_PDO_SQLITE
   auto data = Native::data<PDOData>(this_);
@@ -1462,7 +1462,7 @@ static bool HHVM_METHOD(PDO, sqliteCreateFunction, const String& name,
 #endif
 }
 
-static bool HHVM_METHOD(PDO, sqliteCreateAggregate, const String& /*name*/,
+static bool HHVM_METHOD(PDO, sqliteCreateAggregate, const OptString& /*name*/,
                         const Variant& /*step*/, const Variant& /*final*/,
                         int64_t /*argcount*/ /* = -1 */) {
   raise_recoverable_error("PDO::sqliteCreateAggregate not implemented");
@@ -1579,7 +1579,7 @@ static bool really_register_bound_param(sp_PDOBoundParam param,
   param->stmt = stmt.get();
 
   if (!param->name.empty() && param->name[0] != ':') {
-    param->name = String(":") + param->name;
+    param->name = OptString(":") + param->name;
   }
 
   if (!rewrite_name_to_position(stmt, param)) {
@@ -1739,7 +1739,7 @@ static bool do_fetch(sp_PDOStatement stmt,
     return true;
   }
 
-  String clsname, old_clsname;
+  OptString clsname, old_clsname;
   Variant old_ctor_args;
   ret = false;
   int i = 0;
@@ -1869,7 +1869,7 @@ static bool do_fetch(sp_PDOStatement stmt,
   }
 
   for (int idx = 0; i < stmt->column_count; i++, idx++) {
-    const String& name = cast<PDOColumn>(stmt->columns[i])->name;
+    const OptString& name = cast<PDOColumn>(stmt->columns[i])->name;
     Variant val;
     fetch_value(stmt, val, i, NULL);
 
@@ -2328,11 +2328,11 @@ struct placeholder {
   char *pos;
   int len;
   int bindno;
-  String quoted;  /* quoted value */
+  OptString quoted;  /* quoted value */
   struct placeholder *next;
 };
 
-int pdo_parse_params(sp_PDOStatement stmt, const String& in, String &out) {
+int pdo_parse_params(sp_PDOStatement stmt, const OptString& in, OptString &out) {
   Scanner s;
   const char *ptr;
   char *newbuffer;
@@ -2424,7 +2424,7 @@ int pdo_parse_params(sp_PDOStatement stmt, const String& in, String &out) {
     if (query_type != PDO_PLACEHOLDER_POSITIONAL && bindno > params.size()) {
       int ok = 1;
       for (plc = placeholders; plc; plc = plc->next) {
-        if (!params.exists(String(plc->pos, plc->len, CopyString))) {
+        if (!params.exists(OptString(plc->pos, plc->len, CopyString))) {
           ok = 0;
           break;
         }
@@ -2452,7 +2452,7 @@ safe:
       if (query_type == PDO_PLACEHOLDER_POSITIONAL) {
         vparam = params[plc->bindno];
       } else {
-        String str(plc->pos, plc->len, CopyString);
+        OptString str(plc->pos, plc->len, CopyString);
         auto const arrkey = params.convertKey<IntishCast::Cast>(str);
         vparam = params[arrkey];
       }
@@ -2538,7 +2538,7 @@ safe:
 
 rewrite:
     /* allocate output buffer */
-    out = String(newbuffer_len, ReserveString);
+    out = OptString(newbuffer_len, ReserveString);
     newbuffer = out.mutableData();
 
     /* and build the query */
@@ -2579,7 +2579,7 @@ rewrite:
 
     for (plc = placeholders; plc; plc = plc->next) {
       int skip_map = 0;
-      String name(plc->pos, plc->len, CopyString);
+      OptString name(plc->pos, plc->len, CopyString);
       auto const name_key =
         stmt->bound_param_map.convertKey<IntishCast::Cast>(name);
 
@@ -2614,7 +2614,7 @@ rewrite:
     newbuffer_len = in.size();
 
     for (plc = placeholders; plc; plc = plc->next) {
-      String name(plc->pos, plc->len, CopyString);
+      OptString name(plc->pos, plc->len, CopyString);
       stmt->bound_param_map.set(plc->bindno, name);
       plc->quoted = "?";
     }
@@ -2755,7 +2755,7 @@ static Variant HHVM_METHOD(PDOStatement, fetch, int64_t how  = 0,
 }
 
 static Variant HHVM_METHOD(PDOStatement, fetchObject,
-                           const String& class_name /* = null_string */,
+                           const OptString& class_name /* = null_string */,
                            const Variant& ctor_args /* = null */) {
   auto data = Native::data<PDOStatementData>(this_);
   if (data->m_stmt == nullptr) {
@@ -2767,7 +2767,7 @@ static Variant HHVM_METHOD(PDOStatement, fetchObject,
     return false;
   }
 
-  String old_clsname = data->m_stmt->fetch.clsname;
+  OptString old_clsname = data->m_stmt->fetch.clsname;
   Variant old_ctor_args = data->m_stmt->fetch.ctor_args;
   bool error = false;
 
@@ -2833,7 +2833,7 @@ Variant HHVM_METHOD(PDOStatement, fetchAll, int64_t how /* = 0 */,
     return false;
   }
 
-  String old_clsname = self->m_stmt->fetch.clsname;
+  OptString old_clsname = self->m_stmt->fetch.clsname;
   Variant old_ctor_args = self->m_stmt->fetch.ctor_args;
   int error = 0;
 
@@ -2968,7 +2968,7 @@ static Variant HHVM_METHOD(PDOStatement, errorCode) {
   if (data->m_stmt->error_code[0] == '\0') {
     return init_null();
   }
-  return String(data->m_stmt->error_code, CopyString);
+  return OptString(data->m_stmt->error_code, CopyString);
 }
 
 static Array HHVM_METHOD(PDOStatement, errorInfo) {
@@ -2978,7 +2978,7 @@ static Array HHVM_METHOD(PDOStatement, errorInfo) {
   }
 
   Array ret = Array::CreateVec();
-  ret.append(String(data->m_stmt->error_code, CopyString));
+  ret.append(OptString(data->m_stmt->error_code, CopyString));
 
   if (data->m_stmt->dbh->conn()->support(PDOConnection::MethodFetchErr)) {
     data->m_stmt->dbh->conn()->fetchErr(data->m_stmt.get(), ret);
@@ -3195,7 +3195,7 @@ static Variant HHVM_METHOD(PDOStatement, debugDumpParams) {
             make_vec_array(data->m_stmt->bound_params.size()));
   for (ArrayIter iter(data->m_stmt->bound_params); iter; ++iter) {
     if (iter.first().isString()) {
-      String key = iter.first().toString();
+      OptString key = iter.first().toString();
       f->printf(
         "Key: Name: [%d] %.*s\n",
         make_vec_array(key.size(), key.size(), key.data())

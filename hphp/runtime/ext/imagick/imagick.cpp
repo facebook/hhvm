@@ -122,7 +122,7 @@ const ImageGeometry ImageGeometry::empty_geometry(0, 0);
 // assertion
 ALWAYS_INLINE
 static void ensureImageHasFormat(MagickWand* wand) {
-  String format = convertMagickString(MagickGetImageFormat(wand));
+  OptString format = convertMagickString(MagickGetImageFormat(wand));
   if (format.empty()) {
     IMAGICK_THROW("Image has no format");
   }
@@ -140,10 +140,10 @@ static void ensurePageIsValid(
 }
 
 ALWAYS_INLINE
-static void ensureChannelMapIsValid(const String& map) {
+static void ensureChannelMapIsValid(const OptString& map) {
   static const StaticString s_channels("RGBAOCYMKIP");
   for (int i = 0; i < map.size(); ++i) {
-    if (s_channels.find(map[i]) == String::npos) {
+    if (s_channels.find(map[i]) == OptString::npos) {
       IMAGICK_THROW("The map contains disallowed characters");
     }
   }
@@ -186,14 +186,14 @@ static StorageType resolveStorageType(StorageType storage) {
 
 // misc
 ALWAYS_INLINE
-static String getImageMimeType(MagickWand* wand) {
-  String format = convertMagickString(MagickGetImageFormat(wand));
+static OptString getImageMimeType(MagickWand* wand) {
+  OptString format = convertMagickString(MagickGetImageFormat(wand));
   if (format.empty()) {
-    return String();
+    return OptString();
   }
-  String mimetype = convertMagickString(MagickToMime(format.c_str()));
+  OptString mimetype = convertMagickString(MagickToMime(format.c_str()));
   if (mimetype.empty()) {
-    return String();
+    return OptString();
   }
   return mimetype;
 }
@@ -223,7 +223,7 @@ Array magickQueryFormats(const char* pattern /* = "*" */) {
   return magickQuery(pattern, MagickQueryFormats);
 }
 
-String magickResolveFont(const String& fontName) {
+OptString magickResolveFont(const OptString& fontName) {
   Array fonts = magickQueryFonts();
   for (ArrayIter it(fonts); it; ++it) {
     if (strcasecmp(val(it.secondValPlus()).pstr->data(),
@@ -233,7 +233,7 @@ String magickResolveFont(const String& fontName) {
   }
   auto font = HHVM_FN(realpath)(fontName);
   if (font.isBoolean() && !font.toBoolean()) {
-    return String();
+    return OptString();
   } else {
     return font.toString();
   }
@@ -323,7 +323,7 @@ static bool HHVM_METHOD(Imagick, affineTransformImage, const Object& matrix) {
   return true;
 }
 
-static bool HHVM_METHOD(Imagick, animateImages, const String& x_server) {
+static bool HHVM_METHOD(Imagick, animateImages, const OptString& x_server) {
   auto wand = getMagickWandResource(Object{this_});
   MagickSetFirstIterator(wand->getWand());
   auto status = MagickAnimateImages(wand->getWand(), x_server.c_str());
@@ -334,7 +334,7 @@ static bool HHVM_METHOD(Imagick, animateImages, const String& x_server) {
 }
 
 static bool HHVM_METHOD(Imagick, annotateImage, const Object& draw_settings,
-    double x, double y, double angle, const String& text) {
+    double x, double y, double angle, const OptString& text) {
   auto wand = getMagickWandResource(Object{this_});
   auto drawing = getDrawingWandResource(draw_settings);
   auto status = MagickAnnotateImage(
@@ -443,7 +443,7 @@ static bool HHVM_METHOD(Imagick, clipImage) {
 }
 
 static bool HHVM_METHOD(Imagick, clipPathImage,
-    const String& pathname, bool inside) {
+    const OptString& pathname, bool inside) {
   auto wand = getMagickWandResource(Object{this_});
   auto status = MagickClipImagePath(
     wand->getWand(), pathname.c_str(), toMagickBool(inside));
@@ -538,7 +538,7 @@ static Object HHVM_METHOD(Imagick, combineImages, int64_t channelType) {
   return createImagick(magick);
 }
 
-static bool HHVM_METHOD(Imagick, commentImage, const String& comment) {
+static bool HHVM_METHOD(Imagick, commentImage, const OptString& comment) {
   auto wand = getMagickWandResource(Object{this_});
   auto status = MagickCommentImage(wand->getWand(), comment.c_str());
   if (status == MagickFalse) {
@@ -710,7 +710,7 @@ static bool HHVM_METHOD(Imagick, cycleColormapImage, int64_t displace) {
   return true;
 }
 
-static bool HHVM_METHOD(Imagick, decipherImage, const String& passphrase) {
+static bool HHVM_METHOD(Imagick, decipherImage, const OptString& passphrase) {
   auto wand = getMagickWandResource(Object{this_});
   auto status = MagickDecipherImage(wand->getWand(), passphrase.c_str());
   if (status == MagickFalse) {
@@ -729,7 +729,7 @@ static Object HHVM_METHOD(Imagick, deconstructImages) {
 }
 
 static bool HHVM_METHOD(Imagick, deleteImageArtifact,
-    const String& artifact) {
+    const OptString& artifact) {
   auto wand = getMagickWandResource(Object{this_});
   auto status = MagickDeleteImageArtifact(wand->getWand(), artifact.c_str());
   if (status == MagickFalse) {
@@ -760,7 +760,7 @@ static bool HHVM_METHOD(Imagick, destroy) {
   return HHVM_MN(Imagick, clear)(this_);
 }
 
-static bool HHVM_METHOD(Imagick, displayImage, const String& servername) {
+static bool HHVM_METHOD(Imagick, displayImage, const OptString& servername) {
   auto wand = getMagickWandResource(Object{this_});
   auto status = MagickDisplayImage(wand->getWand(), servername.c_str());
   if (status == MagickFalse) {
@@ -769,7 +769,7 @@ static bool HHVM_METHOD(Imagick, displayImage, const String& servername) {
   return true;
 }
 
-static bool HHVM_METHOD(Imagick, displayImages, const String& servername) {
+static bool HHVM_METHOD(Imagick, displayImages, const OptString& servername) {
   auto wand = getMagickWandResource(Object{this_});
   auto status = MagickDisplayImages(wand->getWand(), servername.c_str());
   if (status == MagickFalse) {
@@ -824,7 +824,7 @@ static bool HHVM_METHOD(Imagick, embossImage, double radius, double sigma) {
   return true;
 }
 
-static bool HHVM_METHOD(Imagick, encipherImage, const String& passphrase) {
+static bool HHVM_METHOD(Imagick, encipherImage, const OptString& passphrase) {
   auto wand = getMagickWandResource(Object{this_});
   auto status = MagickEncipherImage(wand->getWand(), passphrase.c_str());
   if (status == MagickFalse) {
@@ -866,7 +866,7 @@ template<StorageType T>
 ALWAYS_INLINE
 static vector<typename StorageTypeCPPType<T>::T> exportImagePixels(
     req::ptr<WandResource<MagickWand>> wand, int64_t x, int64_t y,
-    int64_t width, int64_t height, const String& map) {
+    int64_t width, int64_t height, const OptString& map) {
   size_t size = width * height * map.length();
   vector<typename StorageTypeCPPType<T>::T> ret(size);
   auto status = MagickExportImagePixels(
@@ -880,7 +880,7 @@ static vector<typename StorageTypeCPPType<T>::T> exportImagePixels(
 static Array HHVM_METHOD(Imagick, exportImagePixels,
                          int64_t x, int64_t y,
                          int64_t width, int64_t height,
-                         const String& map, int64_t storage_) {
+                         const OptString& map, int64_t storage_) {
   auto wand = getMagickWandResource(Object{this_});
   ensurePageIsValid(x, y, width, height);
   ensureChannelMapIsValid(map);
@@ -991,7 +991,7 @@ static bool HHVM_METHOD(Imagick, functionImage,
 }
 
 static Object HHVM_METHOD(Imagick, fxImage,
-    const String& expression, int64_t channel) {
+    const OptString& expression, int64_t channel) {
   auto wand = getMagickWandResource(Object{this_});
   auto magick = MagickFxImageChannel(
     wand->getWand(), (ChannelType)channel, expression.c_str());
@@ -1037,21 +1037,21 @@ static int64_t HHVM_METHOD(Imagick, getCompressionQuality) {
   return MagickGetCompressionQuality(wand->getWand());
 }
 
-static String HHVM_STATIC_METHOD(Imagick, getCopyright) {
+static OptString HHVM_STATIC_METHOD(Imagick, getCopyright) {
   return MagickGetCopyright();
 }
 
-static String HHVM_METHOD(Imagick, getFilename) {
+static OptString HHVM_METHOD(Imagick, getFilename) {
   auto wand = getMagickWandResource(Object{this_});
   return convertMagickString(MagickGetFilename(wand->getWand()));
 }
 
-static String HHVM_METHOD(Imagick, getFont) {
+static OptString HHVM_METHOD(Imagick, getFont) {
   auto wand = getMagickWandResource(Object{this_});
   return convertMagickString(MagickGetFont(wand->getWand()));
 }
 
-static String HHVM_METHOD(Imagick, getFormat) {
+static OptString HHVM_METHOD(Imagick, getFormat) {
   auto wand = getMagickWandResource(Object{this_});
   return convertMagickString(MagickGetFormat(wand->getWand()));
 }
@@ -1061,7 +1061,7 @@ static int64_t HHVM_METHOD(Imagick, getGravity) {
   return MagickGetGravity(wand->getWand());
 }
 
-static String HHVM_STATIC_METHOD(Imagick, getHomeURL) {
+static OptString HHVM_STATIC_METHOD(Imagick, getHomeURL) {
   return convertMagickString(MagickGetHomeURL());
 }
 
@@ -1079,8 +1079,8 @@ static int64_t HHVM_METHOD(Imagick, getImageAlphaChannel) {
   return MagickGetImageAlphaChannel(wand->getWand());
 }
 
-static String HHVM_METHOD(Imagick, getImageArtifact,
-    const String& artifact) {
+static OptString HHVM_METHOD(Imagick, getImageArtifact,
+    const OptString& artifact) {
   auto wand = getMagickWandResource(Object{this_});
   return convertMagickString(
     MagickGetImageArtifact(wand->getWand(), artifact.c_str()));
@@ -1097,7 +1097,7 @@ static Object HHVM_METHOD(Imagick, getImageBackgroundColor) {
   return createImagickPixel(pixel->releaseWand());
 }
 
-static String HHVM_METHOD(Imagick, getImageBlob) {
+static OptString HHVM_METHOD(Imagick, getImageBlob) {
   auto wand = getMagickWandResource(Object{this_});
   ensureImageHasFormat(wand->getWand());
   size_t size;
@@ -1321,12 +1321,12 @@ static Array HHVM_METHOD(Imagick, getImageExtrema) {
     s_max, (int64_t)max);
 }
 
-static String HHVM_METHOD(Imagick, getImageFilename) {
+static OptString HHVM_METHOD(Imagick, getImageFilename) {
   auto wand = getMagickWandResource(Object{this_});
   return convertMagickString(MagickGetImageFilename(wand->getWand()));
 }
 
-static String HHVM_METHOD(Imagick, getImageFormat) {
+static OptString HHVM_METHOD(Imagick, getImageFormat) {
   auto wand = getMagickWandResource(Object{this_});
   ensureImageHasFormat(wand->getWand());
   return convertMagickString(MagickGetImageFormat(wand->getWand()));
@@ -1428,7 +1428,7 @@ static Object HHVM_METHOD(Imagick, getImageMatteColor) {
   return createImagickPixel(pixel->releaseWand());
 }
 
-static String HHVM_METHOD(Imagick, getImageMimeType) {
+static OptString HHVM_METHOD(Imagick, getImageMimeType) {
   auto wand = getMagickWandResource(Object{this_});
   return getImageMimeType(wand->getWand());
 }
@@ -1466,7 +1466,7 @@ static Object HHVM_METHOD(Imagick, getImagePixelColor,
 }
 
 ALWAYS_INLINE
-static String magickGetImageProfile(MagickWand* wand, const char* name) {
+static OptString magickGetImageProfile(MagickWand* wand, const char* name) {
   size_t length;
   auto profile = MagickGetImageProfile(wand, name, &length);
   if (profile == nullptr) {
@@ -1476,13 +1476,13 @@ static String magickGetImageProfile(MagickWand* wand, const char* name) {
   }
 }
 
-static String HHVM_METHOD(Imagick, getImageProfile, const String& name) {
+static OptString HHVM_METHOD(Imagick, getImageProfile, const OptString& name) {
   auto wand = getMagickWandResource(Object{this_});
   return magickGetImageProfile(wand->getWand(), name.c_str());
 }
 
 static Variant HHVM_METHOD(Imagick, getImageProfiles,
-    const String& pattern, bool with_values) {
+    const OptString& pattern, bool with_values) {
   auto wand = getMagickWandResource(Object{this_});
   size_t count;
   auto profiles = MagickGetImageProfiles(
@@ -1495,7 +1495,7 @@ static Variant HHVM_METHOD(Imagick, getImageProfiles,
     DictInit ret(count);
     for (size_t i = 0; i < count; ++i) {
       ret.set(
-        String(profiles[i]),
+        OptString(profiles[i]),
         magickGetImageProfile(wand->getWand(), profiles[i]));
     }
     freeMagickMemory(profiles);
@@ -1506,12 +1506,12 @@ static Variant HHVM_METHOD(Imagick, getImageProfiles,
 }
 
 ALWAYS_INLINE
-static String magickGetImageProperty(MagickWand* wand, const char* name) {
+static OptString magickGetImageProperty(MagickWand* wand, const char* name) {
   return convertMagickString(MagickGetImageProperty(wand, name));
 }
 
 static Variant HHVM_METHOD(Imagick, getImageProperties,
-    const String& pattern, bool with_values) {
+    const OptString& pattern, bool with_values) {
   auto wand = getMagickWandResource(Object{this_});
   size_t count;
   auto properties = MagickGetImageProperties(
@@ -1524,7 +1524,7 @@ static Variant HHVM_METHOD(Imagick, getImageProperties,
     DictInit ret(count);
     for (size_t i = 0; i < count; ++i) {
       ret.set(
-        String(properties[i]),
+        OptString(properties[i]),
         magickGetImageProperty(wand->getWand(), properties[i]));
     }
     freeMagickMemory(properties);
@@ -1534,7 +1534,7 @@ static Variant HHVM_METHOD(Imagick, getImageProperties,
   }
 }
 
-static String HHVM_METHOD(Imagick, getImageProperty, const String& name) {
+static OptString HHVM_METHOD(Imagick, getImageProperty, const OptString& name) {
   auto wand = getMagickWandResource(Object{this_});
   return magickGetImageProperty(wand->getWand(), name.c_str());
 }
@@ -1574,7 +1574,7 @@ static Array HHVM_METHOD(Imagick, getImageResolution) {
   return make_dict_array(s_x, x, s_y, y);
 }
 
-static String HHVM_METHOD(Imagick, getImagesBlob) {
+static OptString HHVM_METHOD(Imagick, getImagesBlob) {
   auto wand = getMagickWandResource(Object{this_});
   int current = MagickGetIteratorIndex(wand->getWand());
   MagickResetIterator(wand->getWand());
@@ -1595,7 +1595,7 @@ static int64_t HHVM_METHOD(Imagick, getImageScene) {
   return MagickGetImageScene(wand->getWand());
 }
 
-static String HHVM_METHOD(Imagick, getImageSignature) {
+static OptString HHVM_METHOD(Imagick, getImageSignature) {
   auto wand = getMagickWandResource(Object{this_});
   return MagickGetImageSignature(wand->getWand());
 }
@@ -1666,12 +1666,12 @@ static int64_t HHVM_METHOD(Imagick, getNumberImages) {
   return MagickGetNumberImages(wand->getWand());
 }
 
-static String HHVM_METHOD(Imagick, getOption, const String& key) {
+static OptString HHVM_METHOD(Imagick, getOption, const OptString& key) {
   auto wand = getMagickWandResource(Object{this_});
   return convertMagickString(MagickGetOption(wand->getWand(), key.c_str()));
 }
 
-static String HHVM_STATIC_METHOD(Imagick, getPackageName) {
+static OptString HHVM_STATIC_METHOD(Imagick, getPackageName) {
   return MagickGetPackageName();
 }
 
@@ -1720,7 +1720,7 @@ static Array HHVM_STATIC_METHOD(Imagick, getQuantumRange) {
     s_quantumRangeString, quantumRange);
 }
 
-static String HHVM_STATIC_METHOD(Imagick, getReleaseDate) {
+static OptString HHVM_STATIC_METHOD(Imagick, getReleaseDate) {
   return MagickGetReleaseDate();
 }
 
@@ -1794,7 +1794,7 @@ static bool HHVM_METHOD(Imagick, hasPreviousImage) {
 }
 
 ALWAYS_INLINE
-static vector<pair<String, String>> parseIdentify(const String& identify) {
+static vector<pair<OptString, OptString>> parseIdentify(const OptString& identify) {
   using Keys = vector<pair<string, StaticString>>;
   static const Keys keys = {
     {"Format: ", s_format},
@@ -1805,11 +1805,11 @@ static vector<pair<String, String>> parseIdentify(const String& identify) {
     {"Compression: ", s_compression}
   };
 
-  vector<pair<String, String>> ret;
+  vector<pair<OptString, OptString>> ret;
   Array lines = HHVM_FN(explode)("\r\n", identify).toArray();
   ret.reserve(keys.size());
   for (ArrayIter it(lines); it; ++it) {
-    String line = HHVM_FN(trim)(
+    OptString line = HHVM_FN(trim)(
       tvCastToString(it.secondValPlus())
     );
     auto key = std::find_if(keys.begin(), keys.end(),
@@ -1827,15 +1827,15 @@ static vector<pair<String, String>> parseIdentify(const String& identify) {
 static Array HHVM_METHOD(Imagick, identifyImage, bool appendRawOutput) {
   static const StaticString s_unknown("unknown");
   auto wand = getMagickWandResource(Object{this_});
-  String identify = convertMagickString(MagickIdentifyImage(wand->getWand()));
+  OptString identify = convertMagickString(MagickIdentifyImage(wand->getWand()));
   auto parsedIdentify = parseIdentify(identify);
   DictInit ret(parsedIdentify.size() + 6);
 
   ret.set(s_imageName,
     convertMagickString(MagickGetImageFilename(wand->getWand())));
 
-  String mimetype = HHVM_MN(Imagick, getImageMimeType)(this_);
-  ret.set(s_mimetype, mimetype.empty() ? String(s_unknown) : mimetype);
+  OptString mimetype = HHVM_MN(Imagick, getImageMimeType)(this_);
+  ret.set(s_mimetype, mimetype.empty() ? OptString(s_unknown) : mimetype);
 
   for (const auto& i: parsedIdentify) {
     ret.set(i.first, i.second);
@@ -1871,7 +1871,7 @@ template<StorageType T>
 ALWAYS_INLINE
 static void importImagePixels(req::ptr<WandResource<MagickWand>> wand,
     int64_t x, int64_t y, int64_t width, int64_t height,
-    const String& map, const vector<double>& array) {
+    const OptString& map, const vector<double>& array) {
   vector<typename StorageTypeCPPType<T>::T> data(array.begin(), array.end());
   auto status = MagickImportImagePixels(wand->getWand(),
     x, y, width, height, map.c_str(), T, data.data());
@@ -1882,7 +1882,7 @@ static void importImagePixels(req::ptr<WandResource<MagickWand>> wand,
 
 static bool HHVM_METHOD(Imagick, importImagePixels,
                         int64_t x, int64_t y, int64_t width, int64_t height,
-                        const String& map, int64_t storage_,
+                        const OptString& map, int64_t storage_,
                         const Array& pixels) {
   auto wand = getMagickWandResource(Object{this_});
   ensurePageIsValid(x, y, width, height);
@@ -1908,7 +1908,7 @@ static bool HHVM_METHOD(Imagick, importImagePixels,
   return true;
 }
 
-static bool HHVM_METHOD(Imagick, labelImage, const String& label) {
+static bool HHVM_METHOD(Imagick, labelImage, const OptString& label) {
   auto wand = getMagickWandResource(Object{this_});
   auto status = MagickLabelImage(wand->getWand(), label.c_str());
   if (status == MagickFalse) {
@@ -2039,8 +2039,8 @@ static bool HHVM_METHOD(Imagick, modulateImage,
 }
 
 static Object HHVM_METHOD(Imagick, montageImage, const Object& draw,
-    const String& tile_geometry, const String& thumbnail_geometry,
-    int64_t montage_mode, const String& frame) {
+    const OptString& tile_geometry, const OptString& thumbnail_geometry,
+    int64_t montage_mode, const OptString& frame) {
   auto wand = getMagickWandResource(Object{this_});
   auto drawing = getDrawingWandResource(draw);
   auto magick = MagickMontageImage(
@@ -2100,7 +2100,7 @@ static bool HHVM_METHOD(Imagick, negateImage, bool gray, int64_t channel) {
 
 static bool HHVM_METHOD(Imagick, newImage,
     int64_t cols, int64_t rows, const Variant& background,
-    const String& format) {
+    const OptString& format) {
   auto wand = getMagickWandResource(Object{this_});
   auto pixel = buildColorWand(background);
   auto status = MagickNewImage(wand->getWand(), cols, rows, pixel->getWand());
@@ -2119,7 +2119,7 @@ static bool HHVM_METHOD(Imagick, newImage,
 }
 
 static bool HHVM_METHOD(Imagick, newPseudoImage,
-    int64_t columns, int64_t rows, const String& pseudoString) {
+    int64_t columns, int64_t rows, const OptString& pseudoString) {
   auto wand = getMagickWandResource(Object{this_});
   if (!isMagickPseudoFormat(pseudoString)) {
     IMAGICK_THROW("Invalid pseudo format string");
@@ -2183,7 +2183,7 @@ static Object HHVM_METHOD(Imagick, optimizeImageLayers) {
 }
 
 static bool HHVM_METHOD(Imagick, orderedPosterizeImage,
-    const String& threshold_map, int64_t channel) {
+    const OptString& threshold_map, int64_t channel) {
   auto wand = getMagickWandResource(Object{this_});
   auto status = MagickOrderedPosterizeImageChannel(
     wand->getWand(), (ChannelType)channel, threshold_map.c_str());
@@ -2252,13 +2252,13 @@ static bool HHVM_METHOD(Imagick, paintTransparentImage,
   return true;
 }
 
-static bool HHVM_METHOD(Imagick, pingImage, const String& filename) {
+static bool HHVM_METHOD(Imagick, pingImage, const OptString& filename) {
   auto wand = getMagickWandResource(Object{this_});
   imagickReadOp(wand->getWand(), filename, MagickPingImage);
   return true;
 }
 
-static bool HHVM_METHOD(Imagick, pingImageBlob, const String& image) {
+static bool HHVM_METHOD(Imagick, pingImageBlob, const OptString& image) {
   auto wand = getMagickWandResource(Object{this_});
   if (image.empty()) {
     IMAGICK_THROW("Empty image string passed");
@@ -2272,7 +2272,7 @@ static bool HHVM_METHOD(Imagick, pingImageBlob, const String& image) {
 }
 
 static bool HHVM_METHOD(Imagick, pingImageFile, const OptResource& filehandle,
-                        const String& /*fileName*/) {
+                        const OptString& /*fileName*/) {
   auto wand = getMagickWandResource(Object{this_});
   imagickReadOp(wand->getWand(), filehandle, MagickPingImageFile);
   return true;
@@ -2318,7 +2318,7 @@ static bool HHVM_METHOD(Imagick, previousImage) {
 }
 
 static bool HHVM_METHOD(Imagick, profileImage,
-    const String& name, const String& profile) {
+    const OptString& name, const OptString& profile) {
   auto wand = getMagickWandResource(Object{this_});
   auto status = MagickProfileImage(
     wand->getWand(), name.c_str(), profile.c_str(), profile.length());
@@ -2355,14 +2355,14 @@ static bool HHVM_METHOD(Imagick, quantizeImages,
 }
 
 static Array HHVM_METHOD(Imagick, queryFontMetrics,
-    const Object& properties, const String& text,
+    const Object& properties, const OptString& text,
     const Variant& query_multiline) {
   auto wand = getMagickWandResource(Object{this_});
   auto drawing = getDrawingWandResource(properties);
 
   // No parameter passed, this means we should autodetect
   bool multiline = query_multiline.isNull()
-                 ? text.find('\n') != String::npos
+                 ? text.find('\n') != OptString::npos
                  : query_multiline.toBoolean();
 
   // wand is empty, create a 1x1 pixel image to use as a temporary canvas
@@ -2428,12 +2428,12 @@ static Array HHVM_METHOD(Imagick, queryFontMetrics,
 }
 
 static Array HHVM_STATIC_METHOD(Imagick, queryFonts,
-    const String& pattern) {
+    const OptString& pattern) {
   return magickQueryFonts(pattern.c_str());
 }
 
 static Array HHVM_STATIC_METHOD(Imagick, queryFormats,
-    const String& pattern) {
+    const OptString& pattern) {
   return magickQueryFormats(pattern.c_str());
 }
 
@@ -2470,14 +2470,14 @@ static bool HHVM_METHOD(Imagick, randomThresholdImage,
   return true;
 }
 
-static bool HHVM_METHOD(Imagick, readImage, const String& filename) {
+static bool HHVM_METHOD(Imagick, readImage, const OptString& filename) {
   auto wand = getMagickWandResource(Object{this_});
   imagickReadOp(wand->getWand(), filename, MagickReadImage);
   return true;
 }
 
 static bool HHVM_METHOD(Imagick, readImageBlob,
-    const String& image, const String& filename) {
+    const OptString& image, const OptString& filename) {
   auto wand = getMagickWandResource(Object{this_});
   auto status = MagickReadImageBlob(
     wand->getWand(), image.c_str(), image.size());
@@ -2492,7 +2492,7 @@ static bool HHVM_METHOD(Imagick, readImageBlob,
 }
 
 static bool HHVM_METHOD(Imagick, readImageFile,
-    const OptResource& filehandle, const String& fileName) {
+    const OptResource& filehandle, const OptString& fileName) {
   auto wand = getMagickWandResource(Object{this_});
   imagickReadOp(wand->getWand(), filehandle, MagickReadImageFile);
   if (!fileName.empty()) {
@@ -2573,7 +2573,7 @@ static bool HHVM_METHOD(Imagick, removeImage) {
   return true;
 }
 
-static String HHVM_METHOD(Imagick, removeImageProfile, const String& name) {
+static OptString HHVM_METHOD(Imagick, removeImageProfile, const OptString& name) {
   auto wand = getMagickWandResource(Object{this_});
   size_t length;
   auto profile = MagickRemoveImageProfile(
@@ -2596,7 +2596,7 @@ static bool HHVM_METHOD(Imagick, resampleImage,
   return true;
 }
 
-static bool HHVM_METHOD(Imagick, resetImagePage, const String& page) {
+static bool HHVM_METHOD(Imagick, resetImagePage, const OptString& page) {
   auto wand = getMagickWandResource(Object{this_});
   auto status = MagickResetImagePage(wand->getWand(), page.c_str());
   if (status == MagickFalse) {
@@ -2817,7 +2817,7 @@ static bool HHVM_METHOD(Imagick, setCompressionQuality, int64_t quality) {
   return true;
 }
 
-static bool HHVM_METHOD(Imagick, setFilename, const String& filename) {
+static bool HHVM_METHOD(Imagick, setFilename, const OptString& filename) {
   auto wand = getMagickWandResource(Object{this_});
   auto status = MagickSetFilename(wand->getWand(), filename.c_str());
   if (status == MagickFalse) {
@@ -2833,7 +2833,7 @@ static bool HHVM_METHOD(Imagick, setFirstIterator) {
   return true;
 }
 
-static bool HHVM_METHOD(Imagick, setFont, const String& fontName) {
+static bool HHVM_METHOD(Imagick, setFont, const OptString& fontName) {
   auto wand = getMagickWandResource(Object{this_});
   auto font = magickResolveFont(fontName);
   if (font.isNull() ||
@@ -2843,7 +2843,7 @@ static bool HHVM_METHOD(Imagick, setFont, const String& fontName) {
   return true;
 }
 
-static bool HHVM_METHOD(Imagick, setFormat, const String& format) {
+static bool HHVM_METHOD(Imagick, setFormat, const OptString& format) {
   auto wand = getMagickWandResource(Object{this_});
   auto status = MagickSetFormat(wand->getWand(), format.c_str());
   if (status == MagickFalse) {
@@ -2882,7 +2882,7 @@ static bool HHVM_METHOD(Imagick, setImageAlphaChannel, int64_t mode) {
 }
 
 static bool HHVM_METHOD(Imagick, setImageArtifact,
-    const String& artifact, const String& value) {
+    const OptString& artifact, const OptString& value) {
   auto wand = getMagickWandResource(Object{this_});
   auto status = MagickSetImageArtifact(
     wand->getWand(), artifact.c_str(), value.c_str());
@@ -3043,7 +3043,7 @@ static bool HHVM_METHOD(Imagick, setImageExtent,
   return true;
 }
 
-static bool HHVM_METHOD(Imagick, setImageFilename, const String& filename) {
+static bool HHVM_METHOD(Imagick, setImageFilename, const OptString& filename) {
   auto wand = getMagickWandResource(Object{this_});
   auto status = MagickSetImageFilename(wand->getWand(), filename.c_str());
   if (status == MagickFalse) {
@@ -3052,7 +3052,7 @@ static bool HHVM_METHOD(Imagick, setImageFilename, const String& filename) {
   return true;
 }
 
-static bool HHVM_METHOD(Imagick, setImageFormat, const String& format) {
+static bool HHVM_METHOD(Imagick, setImageFormat, const OptString& format) {
   auto wand = getMagickWandResource(Object{this_});
   auto status = MagickSetImageFormat(wand->getWand(), format.c_str());
   if (status == MagickFalse) {
@@ -3183,7 +3183,7 @@ static bool HHVM_METHOD(Imagick, setImagePage,
 }
 
 static bool HHVM_METHOD(Imagick, setImageProfile,
-    const String& name, const String& profile) {
+    const OptString& name, const OptString& profile) {
   auto wand = getMagickWandResource(Object{this_});
   auto status = MagickSetImageProfile(
     wand->getWand(), name.c_str(), profile.c_str(), profile.length());
@@ -3194,7 +3194,7 @@ static bool HHVM_METHOD(Imagick, setImageProfile,
 }
 
 static bool HHVM_METHOD(Imagick, setImageProperty,
-    const String& name, const String& value) {
+    const OptString& name, const OptString& value) {
   auto wand = getMagickWandResource(Object{this_});
   auto status = MagickSetImageProperty(
     wand->getWand(), name.c_str(), value.c_str());
@@ -3321,7 +3321,7 @@ static bool HHVM_METHOD(Imagick, setLastIterator) {
 }
 
 static bool HHVM_METHOD(Imagick, setOption,
-    const String& key, const String& value) {
+    const OptString& key, const OptString& value) {
   auto wand = getMagickWandResource(Object{this_});
   auto status = MagickSetOption(wand->getWand(), key.c_str(), value.c_str());
   if (status == MagickFalse) {
@@ -3636,7 +3636,7 @@ static bool HHVM_METHOD(Imagick, tintImage,
 }
 
 static Object HHVM_METHOD(Imagick, transformImage,
-    const String& crop, const String& geometry) {
+    const OptString& crop, const OptString& geometry) {
   auto wand = getMagickWandResource(Object{this_});
   auto magick = MagickTransformImage(
     wand->getWand(), crop.c_str(), geometry.c_str());
@@ -3739,21 +3739,21 @@ static bool HHVM_METHOD(Imagick, whiteThresholdImage,
   return true;
 }
 
-static bool HHVM_METHOD(Imagick, writeImage, const String& filename) {
+static bool HHVM_METHOD(Imagick, writeImage, const OptString& filename) {
   auto wand = getMagickWandResource(Object{this_});
   imagickWriteOp(wand->getWand(), filename, MagickWriteImage);
   return true;
 }
 
 static bool HHVM_METHOD(Imagick, writeImageFile,
-    const OptResource& filehandle, const String& format) {
+    const OptResource& filehandle, const OptString& format) {
   auto wand = getMagickWandResource(Object{this_});
   imagickWriteOp(wand->getWand(), filehandle, format, MagickWriteImageFile);
   return true;
 }
 
 static bool HHVM_METHOD(Imagick, writeImages,
-    const String& filename, bool adjoin) {
+    const OptString& filename, bool adjoin) {
   auto wand = getMagickWandResource(Object{this_});
   imagickWriteOp(wand->getWand(), filename,
     [=](MagickWand* magick, const char* path) {
@@ -3763,7 +3763,7 @@ static bool HHVM_METHOD(Imagick, writeImages,
 }
 
 static bool HHVM_METHOD(Imagick, writeImagesFile,
-    const OptResource& filehandle, const String& format) {
+    const OptResource& filehandle, const OptString& format) {
   auto wand = getMagickWandResource(Object{this_});
   imagickWriteOp(wand->getWand(), filehandle, format, MagickWriteImagesFile);
   return true;

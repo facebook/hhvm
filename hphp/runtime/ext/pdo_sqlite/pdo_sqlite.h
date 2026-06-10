@@ -55,18 +55,18 @@ struct PDOSqliteConnection : PDOConnection {
 
   bool support(SupportedMethod method) override;
   bool closer() override;
-  bool preparer(const String& sql,
+  bool preparer(const OptString& sql,
                 sp_PDOStatement* stmt,
                 const Variant& options) override;
-  int64_t doer(const String& sql) override;
-  bool quoter(const String& input,
-              String& quoted,
+  int64_t doer(const OptString& sql) override;
+  bool quoter(const OptString& input,
+              OptString& quoted,
               PDOParamType paramtype) override;
   bool begin() override;
   bool commit() override;
   bool rollback() override;
   bool setAttribute(int64_t attr, const Variant& value) override;
-  String lastId(const char *name) override;
+  OptString lastId(const char *name) override;
   bool fetchErr(PDOStatement *stmt, Array &info) override;
   int getAttribute(int64_t attr, Variant &value) override;
 
@@ -87,7 +87,7 @@ struct PDOSqliteResource : PDOResource {
     return std::dynamic_pointer_cast<PDOSqliteConnection>(m_conn);
   }
 
-  bool createFunction(const String& name,
+  bool createFunction(const OptString& name,
                       const Variant& callback,
                       int argcount);
 

@@ -116,7 +116,7 @@ Array getLoaded() {
   VecInit ret(s_exts->size());
   for (auto& kv : (*s_exts)) {
     if (kv.second->moduleEnabled()) {
-      ret.append(String(kv.second->getName()));
+      ret.append(OptString(kv.second->getName()));
     }
   }
   return ret.toArray();

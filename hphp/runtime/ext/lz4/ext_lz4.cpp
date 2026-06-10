@@ -57,14 +57,14 @@ static int VarintDecode(const char** src, int max_size) {
   return val;
 }
 
-Variant HHVM_FUNCTION(lz4_compress, const String& uncompressed,
+Variant HHVM_FUNCTION(lz4_compress, const OptString& uncompressed,
                                     bool high /* = false */) {
   int bufsize = LZ4_compressBound(uncompressed.size());
   if (bufsize < 0) {
     return false;
   }
   int headerSize = VarintSize(uncompressed.size());
-  String s = String(bufsize + headerSize, ReserveString);
+  OptString s = OptString(bufsize + headerSize, ReserveString);
   char* compressed = s.mutableData();
   VarintEncode(uncompressed.size(), &compressed);  // write the header
 
@@ -82,7 +82,7 @@ Variant HHVM_FUNCTION(lz4_compress, const String& uncompressed,
   return s.shrink(size + headerSize);
 }
 
-Variant HHVM_FUNCTION(lz4_uncompress, const String& compressed) {
+Variant HHVM_FUNCTION(lz4_uncompress, const OptString& compressed) {
   const char* compressed_ptr = compressed.data();
   int dsize = VarintDecode(&compressed_ptr, compressed.size());
   if (dsize < 0) {
@@ -90,7 +90,7 @@ Variant HHVM_FUNCTION(lz4_uncompress, const String& compressed) {
   }
 
   int inSize = compressed.size() - (compressed_ptr - compressed.data());
-  String s = String(dsize, ReserveString);
+  OptString s = OptString(dsize, ReserveString);
   char* uncompressed = s.mutableData();
   int ret = LZ4_decompress_safe(compressed_ptr, uncompressed, inSize, dsize);
   if (ret != dsize) {

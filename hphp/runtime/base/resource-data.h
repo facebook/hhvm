@@ -27,7 +27,7 @@
 namespace HPHP {
 
 struct Array;
-struct String;
+struct OptString;
 struct ResourceData;
 
 namespace req {
@@ -140,9 +140,9 @@ struct ResourceData : type_scan::MarkCollectable<ResourceData> {
 
   void operator delete(void* /*p*/) { always_assert(false); }
 
-  const String& o_getClassName() const;
-  virtual const String& o_getClassNameHook() const;
-  virtual const String& o_getResourceName() const;
+  const OptString& o_getClassName() const;
+  virtual const OptString& o_getClassNameHook() const;
+  virtual const OptString& o_getResourceName() const;
   virtual bool isInvalid() const { return false; }
 
   template <typename T>
@@ -156,7 +156,7 @@ struct ResourceData : type_scan::MarkCollectable<ResourceData> {
   bool o_toBoolean() const { return true; }
   int64_t o_toInt64() const { return hdr()->getId(); }
   double o_toDouble() const { return hdr()->getId(); }
-  String o_toString() const;
+  OptString o_toString() const;
   Array o_toArray() const;
 
  private:

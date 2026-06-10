@@ -1009,7 +1009,7 @@ Func* Func::load(const NamedFunc* ne, const StringData* name) {
 }
 
 Func* Func::load(const StringData* name) {
-  String normStr;
+  OptString normStr;
   auto ne = NamedFunc::getNoCreate(name, &normStr);
   if (ne != nullptr) {
     // Try to fetch from NamedFunc cache

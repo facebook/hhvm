@@ -67,11 +67,11 @@ inline void ExecutionContext::setRequestTrace(rqtrace::Trace* trace) {
   m_requestTrace = trace;
 }
 
-inline String ExecutionContext::getCwd() const {
+inline OptString ExecutionContext::getCwd() const {
   return m_cwd;
 }
 
-inline void ExecutionContext::setCwd(const String& cwd) {
+inline void ExecutionContext::setCwd(const OptString& cwd) {
   m_cwd = cwd;
 }
 
@@ -95,11 +95,11 @@ inline StringBuffer* ExecutionContext::swapOutputBuffer(StringBuffer* sb) {
   return current;
 }
 
-inline String ExecutionContext::getRawPostData() const {
+inline OptString ExecutionContext::getRawPostData() const {
   return m_rawPostData;
 }
 
-inline void ExecutionContext::setRawPostData(const String& pd) {
+inline void ExecutionContext::setRawPostData(const OptString& pd) {
   m_rawPostData = pd;
 }
 
@@ -113,7 +113,7 @@ inline void ExecutionContext::setErrorState(
   m_errorState = state;
 }
 
-inline String ExecutionContext::getLastError() const {
+inline OptString ExecutionContext::getLastError() const {
   return m_lastError;
 }
 
@@ -121,15 +121,15 @@ inline int ExecutionContext::getLastErrorNumber() const {
   return m_lastErrorNum;
 }
 
-inline String ExecutionContext::getErrorPage() const {
+inline OptString ExecutionContext::getErrorPage() const {
   return m_errorPage;
 }
 
-inline void ExecutionContext::setErrorPage(const String& page) {
+inline void ExecutionContext::setErrorPage(const OptString& page) {
   m_errorPage = page;
 }
 
-inline String ExecutionContext::getLastErrorPath() const {
+inline OptString ExecutionContext::getLastErrorPath() const {
   return m_lastErrorPath;
 }
 
@@ -147,11 +147,11 @@ inline Array ExecutionContext::getEnvs() const {
   return m_envs;
 }
 
-inline String ExecutionContext::getTimezone() const {
+inline OptString ExecutionContext::getTimezone() const {
   return m_timezone;
 }
 
-inline void ExecutionContext::setTimezone(const String& timezone) {
+inline void ExecutionContext::setTimezone(const OptString& timezone) {
   m_timezone = timezone;
 }
 
@@ -204,11 +204,11 @@ inline void ExecutionContext::setVirtualHost(const VirtualHost* vhost) {
   m_vhost = vhost;
 }
 
-inline const String& ExecutionContext::getSandboxId() const {
+inline const OptString& ExecutionContext::getSandboxId() const {
   return m_sandboxId;
 }
 
-inline void ExecutionContext::setSandboxId(const String& sandboxId) {
+inline void ExecutionContext::setSandboxId(const OptString& sandboxId) {
   m_sandboxId = sandboxId;
 }
 

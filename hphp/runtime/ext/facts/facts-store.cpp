@@ -77,7 +77,7 @@ Optional<fs::path> resolvePathRelativeToRoot(
   return fs::relative(path, root);
 }
 
-Optional<Path> ensureRelativePath(const String& path, const fs::path& root) {
+Optional<Path> ensureRelativePath(const OptString& path, const fs::path& root) {
   if (path.empty()) {
     return {};
   }
@@ -614,7 +614,7 @@ struct FactsStoreImpl final
     }
   }
 
-  Variant getTypeName(const String& type) override {
+  Variant getTypeName(const OptString& type) override {
     auto name = m_symbolMap.getTypeName(*type.get());
     if (!name) {
       return Variant{Variant::NullInit{}};
@@ -623,7 +623,7 @@ struct FactsStoreImpl final
     }
   }
 
-  Variant getKind(const String& type) override {
+  Variant getKind(const OptString& type) override {
     auto const kind = m_symbolMap.getKind(Symbol<SymKind::Type>{*type.get()});
     auto const kindStr = typeKindToString(kind).get();
 
@@ -634,16 +634,16 @@ struct FactsStoreImpl final
     }
   }
 
-  bool isTypeAbstract(const String& type) override {
+  bool isTypeAbstract(const OptString& type) override {
     return m_symbolMap.isTypeAbstract(*type.get());
   }
 
-  bool isTypeFinal(const String& type) override {
+  bool isTypeFinal(const OptString& type) override {
     return m_symbolMap.isTypeFinal(*type.get());
   }
 
   Optional<AutoloadMap::FileResult> getTypeOrTypeAliasFile(
-      const String& type) override {
+      const OptString& type) override {
     return getSymbolFile<SymKind::Type>(
         type, [](SymbolMap& m, Symbol<SymKind::Type> s) {
           return m.getTypeOrTypeAliasFile(s);
@@ -651,28 +651,29 @@ struct FactsStoreImpl final
   }
 
   Optional<AutoloadMap::FileResult> getTypeOrTypeAliasFileRelative(
-      const String& type) override {
+      const OptString& type) override {
     return getSymbolFileRelative<SymKind::Type>(
         type, [](SymbolMap& m, Symbol<SymKind::Type> s) {
           return m.getTypeOrTypeAliasFile(s);
         });
   }
 
-  Optional<AutoloadMap::FileResult> getTypeFile(const String& type) override {
+  Optional<AutoloadMap::FileResult> getTypeFile(
+      const OptString& type) override {
     return getSymbolFile<SymKind::Type>(
         type,
         [](SymbolMap& m, Symbol<SymKind::Type> s) { return m.getTypeFile(s); });
   }
 
   Optional<AutoloadMap::FileResult> getTypeFileRelative(
-      const String& type) override {
+      const OptString& type) override {
     return getSymbolFileRelative<SymKind::Type>(
         type,
         [](SymbolMap& m, Symbol<SymKind::Type> s) { return m.getTypeFile(s); });
   }
 
   Optional<AutoloadMap::FileResult> getFunctionFile(
-      const String& function) override {
+      const OptString& function) override {
     return getSymbolFile<SymKind::Function>(
         function, [](SymbolMap& m, Symbol<SymKind::Function> s) {
           return m.getFunctionFile(s);
@@ -680,7 +681,7 @@ struct FactsStoreImpl final
   }
 
   Optional<AutoloadMap::FileResult> getFunctionFileRelative(
-      const String& function) override {
+      const OptString& function) override {
     return getSymbolFileRelative<SymKind::Function>(
         function, [](SymbolMap& m, Symbol<SymKind::Function> s) {
           return m.getFunctionFile(s);
@@ -688,7 +689,7 @@ struct FactsStoreImpl final
   }
 
   Optional<AutoloadMap::FileResult> getConstantFile(
-      const String& constant) override {
+      const OptString& constant) override {
     return getSymbolFile<SymKind::Constant>(
         constant, [](SymbolMap& m, Symbol<SymKind::Constant> s) {
           return m.getConstantFile(s);
@@ -696,7 +697,7 @@ struct FactsStoreImpl final
   }
 
   Optional<AutoloadMap::FileResult> getConstantFileRelative(
-      const String& constant) override {
+      const OptString& constant) override {
     return getSymbolFileRelative<SymKind::Constant>(
         constant, [](SymbolMap& m, Symbol<SymKind::Constant> s) {
           return m.getConstantFile(s);
@@ -704,7 +705,7 @@ struct FactsStoreImpl final
   }
 
   Optional<AutoloadMap::FileResult> getTypeAliasFile(
-      const String& typeAlias) override {
+      const OptString& typeAlias) override {
     return getSymbolFile<SymKind::Type>(
         typeAlias, [](SymbolMap& m, Symbol<SymKind::Type> s) {
           return m.getTypeAliasFile(s);
@@ -712,7 +713,7 @@ struct FactsStoreImpl final
   }
 
   Optional<AutoloadMap::FileResult> getTypeAliasFileRelative(
-      const String& typeAlias) override {
+      const OptString& typeAlias) override {
     return getSymbolFileRelative<SymKind::Type>(
         typeAlias, [](SymbolMap& m, Symbol<SymKind::Type> s) {
           return m.getTypeAliasFile(s);
@@ -720,7 +721,7 @@ struct FactsStoreImpl final
   }
 
   Optional<AutoloadMap::FileResult> getModuleFile(
-      const String& module) override {
+      const OptString& module) override {
     return getSymbolFile<SymKind::Module>(
         module, [](SymbolMap& m, Symbol<SymKind::Module> s) {
           return m.getModuleFile(s);
@@ -728,7 +729,7 @@ struct FactsStoreImpl final
   }
 
   Optional<AutoloadMap::FileResult> getModuleFileRelative(
-      const String& module) override {
+      const OptString& module) override {
     return getSymbolFileRelative<SymKind::Module>(
         module, [](SymbolMap& m, Symbol<SymKind::Module> s) {
           return m.getModuleFile(s);
@@ -818,27 +819,27 @@ struct FactsStoreImpl final
         });
   }
 
-  Array getFileTypes(const String& path) override {
+  Array getFileTypes(const OptString& path) override {
     return getFileSymbols<SymKind::Type>(
         path, [](SymbolMap& m, Path s) { return m.getFileTypes(s); });
   }
 
-  Array getFileFunctions(const String& path) override {
+  Array getFileFunctions(const OptString& path) override {
     return getFileSymbols<SymKind::Function>(
         path, [](SymbolMap& m, Path s) { return m.getFileFunctions(s); });
   }
 
-  Array getFileConstants(const String& path) override {
+  Array getFileConstants(const OptString& path) override {
     return getFileSymbols<SymKind::Constant>(
         path, [](SymbolMap& m, Path s) { return m.getFileConstants(s); });
   }
 
-  Array getFileTypeAliases(const String& path) override {
+  Array getFileTypeAliases(const OptString& path) override {
     return getFileSymbols<SymKind::Type>(
         path, [](SymbolMap& m, Path s) { return m.getFileTypeAliases(s); });
   }
 
-  Array getFileModules(const String& path) override {
+  Array getFileModules(const OptString& path) override {
     return getFileSymbols<SymKind::Module>(
         path, [](SymbolMap& m, Path s) { return m.getFileModules(s); });
   }
@@ -852,7 +853,7 @@ struct FactsStoreImpl final
     return symbols.toArray();
   }
 
-  Optional<String> getFileModuleMembership(const String& path) override {
+  Optional<OptString> getFileModuleMembership(const OptString& path) override {
     auto relativePath = ensureRelativePath(path, m_root);
     if (!relativePath.has_value()) {
       return std::nullopt;
@@ -865,7 +866,7 @@ struct FactsStoreImpl final
     }
   }
 
-  Optional<String> getFilePackageMembership(const String& path) override {
+  Optional<OptString> getFilePackageMembership(const OptString& path) override {
     auto relativePath = ensureRelativePath(path, m_root);
     if (!relativePath.has_value()) {
       return std::nullopt;
@@ -893,7 +894,7 @@ struct FactsStoreImpl final
     auto const& packageInfo = requestOptions->packageInfo();
     auto path_string = relativePath.value().slice();
 
-    Optional<String> package;
+    Optional<OptString> package;
     size_t best_match_length = 0;
     // Facts expects that, within a given package, paths are sorted in reverse
     // lex ordering such that the longest possible match will always appear
@@ -919,7 +920,7 @@ struct FactsStoreImpl final
     return package;
   }
 
-  Array getBaseTypes(const String& derivedType, const Variant& filters)
+  Array getBaseTypes(const OptString& derivedType, const Variant& filters)
       override {
     return filterBaseTypes(
         derivedType,
@@ -927,7 +928,7 @@ struct FactsStoreImpl final
             filters.isArray() ? filters.getArrayData() : nullptr));
   }
 
-  Array getDerivedTypes(const String& baseType, const Variant& filters)
+  Array getDerivedTypes(const OptString& baseType, const Variant& filters)
       override {
     return filterDerivedTypes(
         baseType,
@@ -936,7 +937,7 @@ struct FactsStoreImpl final
   }
 
   Array getTransitiveDerivedTypes(
-      const String& baseType,
+      const OptString& baseType,
       const Variant& filters,
       bool includeInterfaceRequireExtends) override {
     return filterTransitiveDerivedTypes(
@@ -946,16 +947,16 @@ struct FactsStoreImpl final
             filters.isArray() ? filters.getArrayData() : nullptr));
   }
 
-  Array getTypesWithAttribute(const String& attr) override {
+  Array getTypesWithAttribute(const OptString& attr) override {
     return makeVecOfLazyClass(m_symbolMap.getTypesWithAttribute(*attr.get()));
   }
 
-  Array getTypeAliasesWithAttribute(const String& attr) override {
+  Array getTypeAliasesWithAttribute(const OptString& attr) override {
     return makeVecOfString(
         m_symbolMap.getTypeAliasesWithAttribute(*attr.get()));
   }
 
-  Array getMethodsWithAttribute(const String& attr) override {
+  Array getMethodsWithAttribute(const OptString& attr) override {
     if (UNLIKELY(!m_symbolMap.isAttrIndexed(*attr.get()))) {
       HPHP::SystemLib::throwRuntimeExceptionObject(
           fmt::format(
@@ -967,17 +968,17 @@ struct FactsStoreImpl final
         m_symbolMap.getMethodsWithAttribute(*attr.get()));
   }
 
-  Array getTypeMethodAttributes(const String& type) override {
+  Array getTypeMethodAttributes(const OptString& type) override {
     return makeDictOfStringVecString(
         m_symbolMap.getTypeMethodAttributes(*type.get()));
   }
 
-  Array getFilesWithAttribute(const String& attr) override {
+  Array getFilesWithAttribute(const OptString& attr) override {
     return makeVecOfString(m_symbolMap.getFilesWithAttribute(*attr.get()));
   }
 
   Array getFilesWithAttributeAndAnyValue(
-      const String& attr,
+      const OptString& attr,
       const folly::dynamic& value) override {
     return makeVecOfString(
         m_symbolMap.getFilesWithAttributeAndAnyValue(*attr.get(), value));
@@ -995,54 +996,58 @@ struct FactsStoreImpl final
    * actually represent the output as a vec<(string, ?string)> in hack.
    * The second item is nullable because not every attr has values.
    */
-  Array getFilesAndAttrValsWithAttribute(const String& attr) override {
+  Array getFilesAndAttrValsWithAttribute(const OptString& attr) override {
     auto toConvert = m_symbolMap.getFilesAndAttrValsWithAttribute(*attr.get());
     return makeVecOfDynamicDynamic(toConvert);
   }
 
-  Array getTypeAttributes(const String& type) override {
+  Array getTypeAttributes(const OptString& type) override {
     return makeVecOfString(m_symbolMap.getAttributesOfType(*type.get()));
   }
 
-  Array getTypeAliasAttributes(const String& typeAlias) override {
+  Array getTypeAliasAttributes(const OptString& typeAlias) override {
     return makeVecOfString(
         m_symbolMap.getAttributesOfTypeAlias(*typeAlias.get()));
   }
 
-  Array getMethodAttributes(const String& type, const String& method) override {
+  Array getMethodAttributes(const OptString& type, const OptString& method)
+      override {
     return makeVecOfString(
         m_symbolMap.getAttributesOfMethod(*type.get(), *method.get()));
   }
 
-  Array getFileAttributes(const String& file) override {
+  Array getFileAttributes(const OptString& file) override {
     return makeVecOfString(m_symbolMap.getAttributesOfFile(Path{*file.get()}));
   }
 
-  Array getTypeAttrArgs(const String& type, const String& attribute) override {
+  Array getTypeAttrArgs(const OptString& type, const OptString& attribute)
+      override {
     return makeVecOfDynamic(
         m_symbolMap.getTypeAttributeArgs(*type.get(), *attribute.get()));
   }
 
-  Array getTypeAliasAttrArgs(const String& typeAlias, const String& attribute)
-      override {
+  Array getTypeAliasAttrArgs(
+      const OptString& typeAlias,
+      const OptString& attribute) override {
     return makeVecOfDynamic(m_symbolMap.getTypeAliasAttributeArgs(
         *typeAlias.get(), *attribute.get()));
   }
 
   Array getMethodAttrArgs(
-      const String& type,
-      const String& method,
-      const String& attribute) override {
+      const OptString& type,
+      const OptString& method,
+      const OptString& attribute) override {
     return makeVecOfDynamic(m_symbolMap.getMethodAttributeArgs(
         *type.get(), *method.get(), *attribute.get()));
   }
 
-  Array getFileAttrArgs(const String& file, const String& attribute) override {
+  Array getFileAttrArgs(const OptString& file, const OptString& attribute)
+      override {
     return makeVecOfDynamic(
         m_symbolMap.getFileAttributeArgs(Path{*file.get()}, *attribute.get()));
   }
 
-  Optional<std::string> getSha1(const String& path) {
+  Optional<std::string> getSha1(const OptString& path) {
     return m_symbolMap.getSha1(Path{*path.get()});
   }
 
@@ -1429,7 +1434,7 @@ struct FactsStoreImpl final
   }
 
   Array filterBaseTypes(
-      const String& derivedType,
+      const OptString& derivedType,
       const TypeFilterData& filters) {
     std::vector<Symbol<SymKind::Type>> baseTypes;
 
@@ -1459,7 +1464,7 @@ struct FactsStoreImpl final
   }
 
   Array filterDerivedTypes(
-      const String& baseType,
+      const OptString& baseType,
       const TypeFilterData& filters) {
     std::vector<Symbol<SymKind::Type>> derivedTypes;
 
@@ -1489,7 +1494,7 @@ struct FactsStoreImpl final
   }
 
   Array filterTransitiveDerivedTypes(
-      const String& baseType,
+      const OptString& baseType,
       bool includeInterfaceRequireExtends,
       const TypeFilterData& filters) {
     auto derivedTypes = m_symbolMap.getTransitiveDerivedTypes(
@@ -1514,7 +1519,7 @@ struct FactsStoreImpl final
   Optional<std::filesystem::path> m_suppressionFilePath;
 
   template <SymKind k, typename TLambda>
-  Array getFileSymbols(const String& path, TLambda lambda) {
+  Array getFileSymbols(const OptString& path, TLambda lambda) {
     auto relativePath = ensureRelativePath(path, m_root);
     if (!relativePath) {
       return Array::CreateVec();
@@ -1530,13 +1535,13 @@ struct FactsStoreImpl final
 
   template <SymKind K, class T>
   Optional<AutoloadMap::FileResult> getSymbolFile(
-      const String& symbol,
+      const OptString& symbol,
       T lambda) {
     auto path = getSymbolFile<K>(std::string_view{symbol.slice()}, lambda);
     if (UNLIKELY(!path)) {
       return {};
     }
-    return AutoloadMap::FileResult(String{path->native()});
+    return AutoloadMap::FileResult(OptString{path->native()});
   }
 
   template <SymKind K, class T>
@@ -1551,14 +1556,14 @@ struct FactsStoreImpl final
 
   template <SymKind K, class T>
   Optional<AutoloadMap::FileResult> getSymbolFileRelative(
-      const String& symbol,
+      const OptString& symbol,
       T lambda) {
     auto path =
         getSymbolFileRelative<K>(std::string_view{symbol.slice()}, lambda);
     if (UNLIKELY(!path)) {
       return {};
     }
-    return AutoloadMap::FileResult(String{path->native()});
+    return AutoloadMap::FileResult(OptString{path->native()});
   }
 
   template <SymKind K, class T>

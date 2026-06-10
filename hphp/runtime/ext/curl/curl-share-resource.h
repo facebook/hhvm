@@ -27,7 +27,7 @@ namespace HPHP {
 struct CurlShareResource : SweepableResourceData {
   DECLARE_RESOURCE_ALLOCATION(CurlShareResource)
   CLASSNAME_IS("curl_share")
-  const String& o_getClassNameHook() const override { return classnameof(); }
+  const OptString& o_getClassNameHook() const override { return classnameof(); }
   bool isInvalid() const override { return !m_share; }
 
   CurlShareResource();

@@ -41,7 +41,7 @@ namespace HPHP {
 
 struct BZ2StreamWrapper final : Stream::Wrapper {
   req::ptr<File>
-  open(const String& filename, const String& mode, int /*options*/,
+  open(const OptString& filename, const OptString& mode, int /*options*/,
        const req::ptr<StreamContext>& /*context*/) override {
     static const char cz[] = "compress.bzip2://";
 
@@ -50,8 +50,8 @@ struct BZ2StreamWrapper final : Stream::Wrapper {
       return nullptr;
     }
 
-    String fname(filename.substr(sizeof(cz) - 1));
-    String translated;
+    OptString fname(filename.substr(sizeof(cz) - 1));
+    OptString translated;
     if (fname.find("://") == -1) {
       translated = File::TranslatePath(fname);
       if (auto file = FileStreamWrapper::openFromCache(translated, mode)) {
@@ -83,14 +83,14 @@ Variant HHVM_FUNCTION(bzread, const OptResource& bz, int64_t length /* = 1024 */
   return HHVM_FN(fread)(bz, length);
 }
 
-Variant HHVM_FUNCTION(bzwrite, const OptResource& bz, const String& data,
+Variant HHVM_FUNCTION(bzwrite, const OptResource& bz, const OptString& data,
                                int64_t length /* = 0 */) {
   return HHVM_FN(fwrite)(bz, data, length);
 }
 
 const StaticString s_r("r"), s_w("w");
 
-Variant HHVM_FUNCTION(bzopen, const Variant& filename, const String& mode) {
+Variant HHVM_FUNCTION(bzopen, const Variant& filename, const OptString& mode) {
   if (mode != s_r && mode != s_w) {
     raise_warning(
       "'%s' is not a valid mode for bzopen(). "
@@ -176,14 +176,14 @@ Variant HHVM_FUNCTION(bzerrno, const OptResource& bz) {
   return f->errnu();
 }
 
-Variant HHVM_FUNCTION(bzcompress, const String& source, int64_t blocksize /* = 4 */,
+Variant HHVM_FUNCTION(bzcompress, const OptString& source, int64_t blocksize /* = 4 */,
                                   int64_t workfactor /* = 0 */) {
   unsigned int source_len, dest_len;
 
   source_len = source.length();
   dest_len = source.length() + source.length() / 64 + 601;
 
-  auto ret = String(dest_len, ReserveString);
+  auto ret = OptString(dest_len, ReserveString);
 
   int error = BZ2_bzBuffToBuffCompress(ret.mutableData(), &dest_len,
                                    (char*)source.c_str(), source_len,
@@ -197,7 +197,7 @@ Variant HHVM_FUNCTION(bzcompress, const String& source, int64_t blocksize /* = 4
   }
 }
 
-Variant HHVM_FUNCTION(bzdecompress, const String& source, int64_t small /* = 0 */) {
+Variant HHVM_FUNCTION(bzdecompress, const OptString& source, int64_t small /* = 0 */) {
   int source_len = source.length();
   int error;
   uint64_t size = 0;
@@ -216,7 +216,7 @@ Variant HHVM_FUNCTION(bzdecompress, const String& source, int64_t small /* = 0 *
   // in most cases bz2 offers at least 2:1 compression, so we use that as our
   // base
   bzs.avail_out = source_len * 2;
-  String ret(bzs.avail_out, ReserveString);
+  OptString ret(bzs.avail_out, ReserveString);
   bzs.next_out = ret.mutableData();
 
   while ((error = BZ2_bzDecompress(&bzs)) == BZ_OK && bzs.avail_in > 0) {
@@ -261,7 +261,7 @@ struct ChunkedBunzipper {
     return m_eof;
   }
 
-  String inflateChunk(const String& chunk) {
+  OptString inflateChunk(const OptString& chunk) {
     if (m_eof) {
       raise_warning("Tried to inflate after final chunk");
       return empty_string();
@@ -269,7 +269,7 @@ struct ChunkedBunzipper {
     m_bzstream.next_in = (char *) chunk.data();
     m_bzstream.avail_in = chunk.length();
     unsigned int offset = 0;
-    String result(1024 * 1024, ReserveString);
+    OptString result(1024 * 1024, ReserveString);
     int status;
     bool completed = false;
     for (int i = 0; i < 20; i++) {
@@ -334,9 +334,9 @@ bool HHVM_METHOD(ChunkedBunzipper, eof) {
   return data->eof();
 }
 
-String HHVM_METHOD(ChunkedBunzipper,
+OptString HHVM_METHOD(ChunkedBunzipper,
                    inflateChunk,
-                   const String& chunk) {
+                   const OptString& chunk) {
   FETCH_CHUNKED_BUNZIPPER(data, this_);
   assertx(data);
   return data->inflateChunk(chunk);

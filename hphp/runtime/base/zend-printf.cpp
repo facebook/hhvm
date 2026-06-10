@@ -312,7 +312,7 @@ inline static int getnumber(const char *buffer, int *pos) {
  * Str\format. If you make any changes here, please ensure that the two
  * implementations will be in sync.
  */
-String string_printf(const char *format, int len, const Array& args) {
+OptString string_printf(const char *format, int len, const Array& args) {
   Array vargs = args;
   if (!vargs.isNull() && !vargs->isVectorData()) {
     vargs = Array::CreateVec();
@@ -361,7 +361,7 @@ String string_printf(const char *format, int len, const Array& args) {
         argnum = getnumber(format, &inpos);
         if (argnum <= 0) {
           raise_invalid_argument_warning("argnum: must be greater than zero");
-          return String();
+          return OptString();
         }
         inpos++;  /* skip the '$' */
       } else {
@@ -392,7 +392,7 @@ String string_printf(const char *format, int len, const Array& args) {
         if ((width = getnumber(format, &inpos)) < 0) {
           raise_invalid_argument_warning("width: must be greater than zero "
                                  "and less than %d", INT_MAX);
-          return String();
+          return OptString();
         }
         adjusting |= ADJ_WIDTH;
       } else {
@@ -407,7 +407,7 @@ String string_printf(const char *format, int len, const Array& args) {
           if ((precision = getnumber(format, &inpos)) < 0) {
             raise_invalid_argument_warning("precision: must be greater than zero "
                                    "and less than %d", INT_MAX);
-            return String();
+            return OptString();
           }
           ch = format[inpos];
           adjusting |= ADJ_PRECISION;
@@ -425,7 +425,7 @@ String string_printf(const char *format, int len, const Array& args) {
 
     if (argnum > vargs.size()) {
       raise_invalid_argument_warning("arguments: (too few)");
-      return String();
+      return OptString();
     }
 
     if (ch == 'l') {
@@ -436,7 +436,7 @@ String string_printf(const char *format, int len, const Array& args) {
 
     switch (ch) {
     case 's': {
-      String s = tmp.toString();
+      OptString s = tmp.toString();
       appendstring(&result, s.c_str(),
                    width, precision, padding, alignment, s.size(),
                    0, expprec, 0);

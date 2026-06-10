@@ -38,8 +38,8 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // DNS
 
-bool HHVM_FUNCTION(checkdnsrr, const String& host,
-                               const String& type /* = null_string */) {
+bool HHVM_FUNCTION(checkdnsrr, const OptString& host,
+                               const OptString& type /* = null_string */) {
   int ntype;
   if (!validate_dns_arguments(host, type, ntype)) {
     return false;
@@ -161,11 +161,11 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store,
     DWORD i = 0;
     DNS_TXT_DATA *data_txt = &pRec->Data.TXT;
     DWORD count = data_txt->dwStringCount;
-    String txt;
+    OptString txt;
 
     subarray->set(s_type, s_TXT);
     for (i = 0; i < count; i++) {
-      txt += String(data_txt->pStringArray[i], CopyString);
+      txt += OptString(data_txt->pStringArray[i], CopyString);
     }
     subarray->set(s_txt, txt);
   }
@@ -272,7 +272,7 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store,
 
 }
 
-Variant HHVM_FUNCTION(dns_get_record, const String& hostname, int64_t type,
+Variant HHVM_FUNCTION(dns_get_record, const OptString& hostname, int64_t type,
                       Variant& authnsRef,
                       Variant& addtlRef) {
   IOStatusHelper io("dns_get_record", hostname.data(), type);
@@ -412,7 +412,7 @@ Variant HHVM_FUNCTION(dns_get_record, const String& hostname, int64_t type,
   return ret;
 }
 
-bool HHVM_FUNCTION(getmxrr, const String& hostname,
+bool HHVM_FUNCTION(getmxrr, const OptString& hostname,
                             Variant& mxhostsRef,
                             Variant& weightsRef) {
   IOStatusHelper io("dns_get_mx", hostname.data());
@@ -440,7 +440,7 @@ bool HHVM_FUNCTION(getmxrr, const String& hostname,
       continue;
     }
 
-    mxhosts.append(String(pRec->Data.MX.pNameExchange, CopyString));
+    mxhosts.append(OptString(pRec->Data.MX.pNameExchange, CopyString));
     weights.append(srv->wPriority);
   }
 

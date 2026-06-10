@@ -115,7 +115,7 @@ void Socket::setError(int err) {
   *s_lastErrno = m_data->m_error = err;
 }
 
-bool Socket::open(const String& /*filename*/, const String& /*mode*/) {
+bool Socket::open(const OptString& /*filename*/, const OptString& /*mode*/) {
   throw_not_supported(__func__, "cannot open socket this way");
 }
 

@@ -205,16 +205,16 @@ public:
   std::shared_ptr<stream_transport::StreamTransport> getServerStreamTransport() const;
   void setRequestTrace(rqtrace::Trace*);
   std::string getRequestUrl(size_t szLimit = std::string::npos);
-  String getMimeType() const;
-  void setContentType(const String& mimetype, const String& charset);
-  String getCwd() const;
-  void setCwd(const String&);
+  OptString getMimeType() const;
+  void setContentType(const OptString& mimetype, const OptString& charset);
+  OptString getCwd() const;
+  void setCwd(const OptString&);
   rqtrace::Trace* getRequestTrace();
 
   /**
    * Write to output.
    */
-  void write(const String&);
+  void write(const OptString&);
   void write(const char* s, int len);
   void write(const char*);
 
@@ -244,8 +244,8 @@ public:
   void obStart(const Variant& handler = uninit_null(),
                int chunk_size = 0,
                OBFlags flags = OBFlags::Default);
-  String obCopyContents();
-  String obDetachContents();
+  OptString obCopyContents();
+  OptString obDetachContents();
   int obGetContentLength();
   void obClean(int handler_flag);
   bool obFlush(bool force = false);
@@ -253,15 +253,15 @@ public:
   bool obEnd();
   void obEndAll();
   int obGetLevel();
-  String obGetBufferName();
+  OptString obGetBufferName();
   Array obGetStatus(bool full);
   void obSetImplicitFlush(bool on);
   Array obGetHandlers();
   void obProtect(bool on); // making sure obEnd() never passes current level
   void flush();
   StringBuffer* swapOutputBuffer(StringBuffer*);
-  String getRawPostData() const;
-  void setRawPostData(const String& pd);
+  OptString getRawPostData() const;
+  void setRawPostData(const OptString& pd);
 
   /**
    * Request sequences and program execution hooks.
@@ -301,11 +301,11 @@ public:
   bool onUnhandledException(Object e);
   ErrorState getErrorState() const;
   void setErrorState(ErrorState);
-  String getLastError() const;
+  OptString getLastError() const;
   int getLastErrorNumber() const;
-  String getErrorPage() const;
-  void setErrorPage(const String&);
-  String getLastErrorPath() const;
+  OptString getErrorPage() const;
+  void setErrorPage(const OptString&);
+  OptString getLastErrorPath() const;
   int getLastErrorLine() const;
 
   // Obtain the current queued errors, resetting the queue in the process.
@@ -314,13 +314,13 @@ public:
   /**
    * Misc. settings
    */
-  String getenv(const String& name) const;
-  void setenv(const String& name, const String& value);
-  void unsetenv(const String& name);
+  OptString getenv(const OptString& name) const;
+  void setenv(const OptString& name, const OptString& value);
+  void unsetenv(const OptString& name);
   Array getEnvs() const;
 
-  String getTimezone() const;
-  void setTimezone(const String&);
+  OptString getTimezone() const;
+  void setTimezone(const OptString&);
 
   bool getThrowAllErrors() const;
 
@@ -339,8 +339,8 @@ public:
   const VirtualHost* getVirtualHost() const;
   void setVirtualHost(const VirtualHost*);
 
-  const String& getSandboxId() const;
-  void setSandboxId(const String&);
+  const OptString& getSandboxId() const;
+  void setSandboxId(const OptString&);
 
   bool hasRequestEventHandlers() const;
 
@@ -387,7 +387,7 @@ public:
   void enqueueAPCHandle(APCHandle* handle, size_t size);
 
   void manageAPCHandle();
-  void enqueueAPCDeferredExpire(const String&);
+  void enqueueAPCDeferredExpire(const OptString&);
   void cleanup();
 
 public:
@@ -484,7 +484,7 @@ public:
   ActRec* getFrameAtDepthForDebuggerUnsafe(int frame = 0) const;
   Array getLocalDefinedVariablesDebugger(int frame);
   Variant getEvaledArg(const StringData* val,
-                       const String& namespacedName,
+                       const OptString& namespacedName,
                        const Unit* funcUnit);
 
 private:
@@ -579,7 +579,7 @@ private:
 private:
   // system settings
   Transport* m_transport;
-  String m_cwd;
+  OptString m_cwd;
 
   // output buffering
   StringBuffer* m_sb = nullptr; // current buffer being populated with data
@@ -597,7 +597,7 @@ private:
   VSDEBUG::DebuggerStdoutHook* m_debuggerStdoutHook = nullptr;
   std::unordered_set<StdoutHook*> m_stdoutHooks;
   size_t m_stdoutBytesWritten;
-  String m_rawPostData;
+  OptString m_rawPostData;
 
   // request handlers
   req::vector<RequestEventHandler*> m_requestEventHandlers;
@@ -608,14 +608,14 @@ private:
   req::vector<std::pair<Variant,int>> m_userErrorHandlers;
   req::vector<Variant> m_userExceptionHandlers;
   ErrorState m_errorState;
-  String m_lastError;
+  OptString m_lastError;
   int m_lastErrorNum;
-  String m_errorPage;
+  OptString m_errorPage;
   Array m_deferredErrors;
 
   // misc settings
   Array m_envs;
-  String m_timezone;
+  OptString m_timezone;
   bool m_throwAllErrors;
   req::ptr<StreamContext> m_streamContext;
 
@@ -624,7 +624,7 @@ private:
   req::vector<std::pair<Variant,int>> m_userErrorHandlersBackup;
   req::vector<Variant> m_userExceptionHandlersBackup;
   Variant m_exitCallback;
-  String m_sandboxId; // cache the sandbox id for the request
+  OptString m_sandboxId; // cache the sandbox id for the request
   int m_pageletTasksStarted{0};
   int m_xboxTasksStarted{0};
   const VirtualHost* m_vhost;
@@ -670,16 +670,16 @@ public:
 
 private:
   Array m_evaledArgs;
-  String m_lastErrorPath;
+  OptString m_lastErrorPath;
   int m_lastErrorLine;
 public:
   Variant m_setprofileCallback;
   Variant m_memThresholdCallback;
   Variant m_timeThresholdCallback;
-  String m_xenonRequestOutputFile;
+  OptString m_xenonRequestOutputFile;
   uint64_t m_setprofileFlags;
   bool m_executingSetprofileCallback;
-  req::fast_set<String,
+  req::fast_set<OptString,
                 hphp_string_hash, hphp_string_fsame> m_setprofileFunctions;
 public:
   enum class InternalEventHook: uint8_t {
@@ -692,7 +692,7 @@ public:
   using InternalEventHookCallbackType = void(*)(const ActRec*,
                                                 InternalEventHook);
   InternalEventHookCallbackType m_internalEventHookCallback{nullptr};
-  req::fast_map<String, uint32_t, hphp_string_hash, hphp_string_same>
+  req::fast_map<OptString, uint32_t, hphp_string_hash, hphp_string_same>
       m_internalEventHookNameMap;
 
 public:

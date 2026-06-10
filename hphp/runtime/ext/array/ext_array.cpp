@@ -1362,8 +1362,8 @@ TypedValue HHVM_FUNCTION(range,
   /* We only want positive step values. */
   if (dstep < 0.0) dstep *= -1;
   if (low.isString() && high.isString()) {
-    String slow = low.toString();
-    String shigh = high.toString();
+    OptString slow = low.toString();
+    OptString shigh = high.toString();
     if (slow.size() >= 1 && shigh.size() >=1) {
       int64_t n1, n2;
       double d1, d2;
@@ -1630,7 +1630,7 @@ void array_diff_intersect_key_check_arr(ArrayData* ad, TypedValue k, TypedValue 
     }
     if (coerceAd) {
       // Also need to check if ad has a key that will coerce to this int value.
-      auto s = String::attach(buildStringData(k.m_data.num));
+      auto s = OptString::attach(buildStringData(k.m_data.num));
       if (ad->exists(s.get())) {
         if (!diff) setInt(k.m_data.num, v);
         return;
@@ -2307,13 +2307,13 @@ TypedValue HHVM_FUNCTION(array_intersect_ukey,
 // sorting functions
 
 struct Collator final : RequestEventHandler {
-  String getLocale() {
+  OptString getLocale() {
     return m_locale;
   }
   Intl::IntlError &getErrorRef() {
     return m_errcode;
   }
-  bool setLocale(const String& locale) {
+  bool setLocale(const OptString& locale) {
     if (m_locale.same(locale)) {
       return true;
     }
@@ -2377,7 +2377,7 @@ struct Collator final : RequestEventHandler {
   }
 
   void requestInit() override {
-    m_locale = String(uloc_getDefault(), CopyString);
+    m_locale = OptString(uloc_getDefault(), CopyString);
     m_errcode.clearError();
     UErrorCode error = U_ZERO_ERROR;
     m_ucoll = ucol_open(m_locale.data(), &error);
@@ -2397,7 +2397,7 @@ struct Collator final : RequestEventHandler {
   }
 
 private:
-  String     m_locale;
+  OptString     m_locale;
   UCollator *m_ucoll;
   Intl::IntlError m_errcode;
 };
@@ -2681,12 +2681,12 @@ TypedValue HHVM_FUNCTION(array_unique,
   }
 }
 
-String HHVM_FUNCTION(i18n_loc_get_default) {
+OptString HHVM_FUNCTION(i18n_loc_get_default) {
   return s_collator->getLocale();
 }
 
 bool HHVM_FUNCTION(i18n_loc_set_default,
-                   const String& locale) {
+                   const OptString& locale) {
   return s_collator->setLocale(locale);
 }
 

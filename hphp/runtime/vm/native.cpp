@@ -590,13 +590,13 @@ const char* checkTypeFunc(const NativeSig& sig,
   return argIt == endIt ? nullptr : kInvalidArgCountMessage;
 }
 
-String fullName(const StringData* fname, const StringData* cname,
+OptString fullName(const StringData* fname, const StringData* cname,
                 bool isStatic) {
   return {
-    cname == nullptr ? String{const_cast<StringData*>(fname)} :
-    (String{const_cast<StringData*>(cname)} +
+    cname == nullptr ? OptString{const_cast<StringData*>(fname)} :
+    (OptString{const_cast<StringData*>(cname)} +
       (isStatic ? "::" : "->") +
-      String{const_cast<StringData*>(fname)})
+      OptString{const_cast<StringData*>(fname)})
   };
 }
 
@@ -720,7 +720,7 @@ using ClassExtraDataHandlerMap = std::unordered_map
 
 static ClassExtraDataHandlerMap s_classExtraDataHandlerMap;
 
-void registerClassExtraDataHandler(const String& clsName, FinishFunc fn) {
+void registerClassExtraDataHandler(const OptString& clsName, FinishFunc fn) {
   assertx(s_classExtraDataHandlerMap.find(clsName.get()) ==
     s_classExtraDataHandlerMap.end());
   s_classExtraDataHandlerMap[clsName.get()] = fn;

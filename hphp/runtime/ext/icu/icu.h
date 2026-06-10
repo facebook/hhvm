@@ -42,7 +42,7 @@ struct IntlError {
 
   UErrorCode getErrorCode() const { return m_errorCode; }
 
-  String getErrorMessage(bool appendCode = true) const {
+  OptString getErrorMessage(bool appendCode = true) const {
     if (!appendCode) {
       return m_errorMessage;
     }
@@ -89,26 +89,26 @@ T* GetData(ObjectData* obj, const StaticString& name) {
 }
 
 template<class T>
-T* GetData(Object, const String&);  // get a link error.
+T* GetData(Object, const OptString&);  // get a link error.
 
 /////////////////////////////////////////////////////////////////////////////
 
-const String GetDefaultLocale();
-inline String localeOrDefault(const String& str) {
+const OptString GetDefaultLocale();
+inline OptString localeOrDefault(const OptString& str) {
   return str.empty() ? GetDefaultLocale() : str;
 }
-bool SetDefaultLocale(const String& locale);
+bool SetDefaultLocale(const OptString& locale);
 double VariantToMilliseconds(const Variant& arg);
 
 // Common encoding conversions UTF8<->UTF16
 icu::UnicodeString u16(const char* u8, int32_t u8_len, UErrorCode &error,
                        UChar32 subst = 0);
-inline icu::UnicodeString u16(const String& u8, UErrorCode& error,
+inline icu::UnicodeString u16(const OptString& u8, UErrorCode& error,
                        UChar32 subst = 0) {
   return u16(u8.c_str(), u8.size(), error, subst);
 }
-String u8(const UChar *u16, int32_t u16_len, UErrorCode &error);
-inline String u8(const icu::UnicodeString& u16, UErrorCode& error) {
+OptString u8(const UChar *u16, int32_t u16_len, UErrorCode &error);
+inline OptString u8(const icu::UnicodeString& u16, UErrorCode& error) {
   return u8(u16.getBuffer(), u16.length(), error);
 }
 

@@ -31,9 +31,9 @@ namespace HPHP {
 Array HHVM_FUNCTION(sbcc_get_stats) {
   auto stats = SandboxBytecodeCache::getRequestStats();
   return make_dict_array(
-    String("hits"),    stats.hits,
-    String("misses"),  stats.misses,
-    String("corrupt"), stats.corrupt
+    OptString("hits"),    stats.hits,
+    OptString("misses"),  stats.misses,
+    OptString("corrupt"), stats.corrupt
   );
 }
 
@@ -46,10 +46,10 @@ void HHVM_FUNCTION(sbcc_reset_stats) {
 Array HHVM_FUNCTION(sbcc_get_global_stats) {
   auto stats = SandboxBytecodeCache::getStats();
   return make_dict_array(
-    String("hits"),        stats.hits,
-    String("misses"),      stats.misses,
-    String("corrupt"),     stats.corrupt,
-    String("init_errors"), stats.init_errors
+    OptString("hits"),        stats.hits,
+    OptString("misses"),      stats.misses,
+    OptString("corrupt"),     stats.corrupt,
+    OptString("init_errors"), stats.init_errors
   );
 }
 

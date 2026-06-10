@@ -65,14 +65,14 @@ StaticString File::s_resource_name("stream");
 
 const int File::USE_INCLUDE_PATH = 1;
 
-String File::TranslatePathKeepRelative(const char* filename, uint32_t size) {
+OptString File::TranslatePathKeepRelative(const char* filename, uint32_t size) {
   // canonicalize asserts that we don't have nulls
-  String canonicalized = FileUtil::canonicalize(filename, size);
+  OptString canonicalized = FileUtil::canonicalize(filename, size);
   if (RID().hasSafeFileAccess()) {
     auto const& allowedDirectories = RID().getAllowedDirectoriesProcessed();
     auto it = std::upper_bound(allowedDirectories.begin(),
                                allowedDirectories.end(), canonicalized,
-                               [](const String& val, const std::string& dir) {
+                               [](const OptString& val, const std::string& dir) {
                                  return strcmp(val.c_str(), dir.c_str()) < 0;
                                });
     if (it != allowedDirectories.begin()) {
@@ -98,52 +98,52 @@ String File::TranslatePathKeepRelative(const char* filename, uint32_t size) {
   return canonicalized;
 }
 
-String File::TranslatePath(const String& filename) {
+OptString File::TranslatePath(const OptString& filename) {
   if (filename.empty()) {
     // Special case: an empty string should continue to be an empty string.
     // Otherwise it would be canonicalized to CWD, which is inconsistent with
     // PHP and most filesystem utilities.
     return filename;
   } else if (!FileUtil::isAbsolutePath(filename.slice())) {
-    String cwd = g_context->getCwd();
+    OptString cwd = g_context->getCwd();
     return TranslatePathKeepRelative(cwd + "/" + filename);
   } else {
     return TranslatePathKeepRelative(filename);
   }
 }
 
-String File::TranslatePathWithFileCache(const String& filename) {
+OptString File::TranslatePathWithFileCache(const OptString& filename) {
   // canonicalize asserts that we don't have nulls
-  String canonicalized = FileUtil::canonicalize(filename);
-  String translated = TranslatePath(canonicalized);
+  OptString canonicalized = FileUtil::canonicalize(filename);
+  OptString translated = TranslatePath(canonicalized);
   if (!translated.empty() && access(translated.data(), F_OK) < 0 &&
       StaticContentCache::TheFileCache) {
     if (StaticContentCache::TheFileCache->exists(canonicalized.toCppString())) {
       // we use file cache's file name to make stat() work
-      translated = String(Cfg::Server::FileCache);
+      translated = OptString(Cfg::Server::FileCache);
     }
   }
   return translated;
 }
 
-String File::TranslateCommand(const String& cmd) {
+OptString File::TranslateCommand(const OptString& cmd) {
   //TODO: security checking
   return cmd;
 }
 
-bool File::IsVirtualDirectory(const String& filename) {
+bool File::IsVirtualDirectory(const OptString& filename) {
   return
     StaticContentCache::TheFileCache &&
     StaticContentCache::TheFileCache->dirExists(filename.toCppString());
 }
 
-bool File::IsVirtualFile(const String& filename) {
+bool File::IsVirtualFile(const OptString& filename) {
   return
     StaticContentCache::TheFileCache &&
     StaticContentCache::TheFileCache->fileExists(filename.toCppString());
 }
 
-req::ptr<File> File::Open(const String& filename, const String& mode,
+req::ptr<File> File::Open(const OptString& filename, const OptString& mode,
                           int options /* = 0 */,
                           const req::ptr<StreamContext>& context /* = null */) {
   Stream::Wrapper *wrapper = Stream::getWrapperFromURI(filename);
@@ -167,16 +167,16 @@ req::ptr<File> File::Open(const String& filename, const String& mode,
 
 File::File(
   std::shared_ptr<FileData> data,
-  const String& wrapper_type, /* = null_string */
-  const String& stream_type /* = empty_string_ref*/)
+  const OptString& wrapper_type, /* = null_string */
+  const OptString& stream_type /* = empty_string_ref*/)
 : m_data(data),
   m_wrapperType(wrapper_type.get()),
   m_streamType(stream_type.get())
 { }
 
 File::File(bool nonblocking /* = true */,
-           const String& wrapper_type /* = null_string */,
-           const String& stream_type /* = empty_string_ref */)
+           const OptString& wrapper_type /* = null_string */,
+           const OptString& stream_type /* = empty_string_ref */)
 : File(std::make_shared<FileData>(nonblocking), wrapper_type, stream_type)
 { }
 
@@ -221,7 +221,7 @@ int File::getc() {
   return (int)(unsigned char)buffer[0];
 }
 
-String File::read() {
+OptString File::read() {
   StringBuffer sb;
   int64_t copied = 0;
   int64_t avail = bufferedLen();
@@ -250,7 +250,7 @@ String File::read() {
   return sb.detach();
 }
 
-String File::read(int64_t length) {
+OptString File::read(int64_t length) {
   if (length <= 0) {
     raise_notice("Invalid length %" PRId64, length);
     // XXX: Changing this to empty_string causes problems, something is
@@ -260,7 +260,7 @@ String File::read(int64_t length) {
   }
 
   auto const allocSize = length;
-  String s = String(allocSize, ReserveString);
+  OptString s = OptString(allocSize, ReserveString);
   char *ret = s.mutableData();
   int64_t copied = 0;
   int64_t avail = bufferedLen();
@@ -302,7 +302,7 @@ String File::read(int64_t length) {
   return s;
 }
 
-int64_t File::write(const String& data, int64_t length /* = 0 */) {
+int64_t File::write(const OptString& data, int64_t length /* = 0 */) {
   if (seekable()) {
     int64_t offset = m_data->m_readpos - m_data->m_writepos;
     // Writing shouldn't change the EOF status, but because we have a
@@ -443,10 +443,10 @@ Array File::getMetaData() {
   return make_dict_array(
     s_wrapper_type, getWrapperType(),
     s_stream_type,  getStreamType(),
-    s_mode,         String(m_data->m_mode),
+    s_mode,         OptString(m_data->m_mode),
     s_unread_bytes, 0,
     s_seekable,     seekable(),
-    s_uri,          String(m_data->m_name),
+    s_uri,          OptString(m_data->m_name),
     s_timed_out,    false,
     s_blocked,      true,
     s_eof,          eof(),
@@ -454,17 +454,17 @@ Array File::getMetaData() {
   );
 }
 
-String File::getWrapperType() const {
+OptString File::getWrapperType() const {
   if (!m_wrapperType || m_wrapperType->empty()) {
     return o_getClassName();
   }
-  return String{m_wrapperType};
+  return OptString{m_wrapperType};
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // utility functions
 
-String File::readLine(int64_t maxlen /* = 0 */) {
+OptString File::readLine(int64_t maxlen /* = 0 */) {
   size_t current_buf_size = 0;
   size_t total_copied = 0;
   char *ret = nullptr;
@@ -553,14 +553,14 @@ String File::readLine(int64_t maxlen /* = 0 */) {
 
   if (total_copied == 0) {
     assertx(ret == nullptr);
-    return String();
+    return OptString();
   }
 
   ret[total_copied] = '\0';
-  return String(ret, total_copied, AttachString);
+  return OptString(ret, total_copied, AttachString);
 }
 
-Variant File::readRecord(const String& delimiter, int64_t maxlen /* = 0 */) {
+Variant File::readRecord(const OptString& delimiter, int64_t maxlen /* = 0 */) {
   if (eof() && m_data->m_writepos == m_data->m_readpos) {
     return false;
   }
@@ -632,7 +632,7 @@ Variant File::readRecord(const String& delimiter, int64_t maxlen /* = 0 */) {
   }
 
   if (toread >= 0) {
-    String s = String(toread, ReserveString);
+    OptString s = OptString(toread, ReserveString);
     char *buf = s.mutableData();
     if (toread) {
       memcpy(buf, m_data->m_buffer + m_data->m_readpos, toread);
@@ -663,13 +663,13 @@ int64_t File::print() {
   return total;
 }
 
-int64_t File::printf(const String& format, const Array& args) {
-  String str = string_printf(format.data(), format.size(), args);
+int64_t File::printf(const OptString& format, const Array& args) {
+  OptString str = string_printf(format.data(), format.size(), args);
   return write(str);
 }
 
 const StaticString s_Unknown("Unknown");
-const String& File::o_getResourceName() const {
+const OptString& File::o_getResourceName() const {
   if (isInvalid()) return s_Unknown;
   return s_resource_name;
 }
@@ -701,7 +701,7 @@ int64_t File::writeCSV(const Array& fields, char delimiter_char /* = ',' */,
   StringBuffer csvline(1024);
 
   for (ArrayIter iter(fields); iter; ++iter) {
-    String value = iter.second().toString();
+    OptString value = iter.second().toString();
     bool need_enclosure = false;
     for (int i = 0; i < value.size(); i++) {
       char ch = value.charAt(i);
@@ -761,13 +761,13 @@ Array File::readCSV(int64_t length /* = 0 */,
                     char delimiter_char /* = ',' */,
                     char enclosure_char /* = '"' */,
                     char escape_char /* = '\\' */,
-                    const String* input /* = nullptr */) {
-  const String& line = (input != nullptr) ? *input : readLine(length);
+                    const OptString* input /* = nullptr */) {
+  const OptString& line = (input != nullptr) ? *input : readLine(length);
   if (line.empty()) {
     return null_array;
   }
 
-  String new_line;
+  OptString new_line;
   const char *buf = line.data();
   int64_t buf_len = line.size();
 
@@ -855,7 +855,7 @@ Array File::readCSV(int64_t length /* = 0 */,
               memcpy(tptr, line_end, line_end_len);
               tptr += line_end_len;
 
-              new_line = (input != nullptr) ? String() : readLine(length);
+              new_line = (input != nullptr) ? OptString() : readLine(length);
               const char *new_buf = new_line.data();
               int64_t new_len = new_line.size();
               if (new_len == 0) {
@@ -978,7 +978,7 @@ Array File::readCSV(int64_t length /* = 0 */,
 
     /* 3. Now pass our field back to php */
     *comp_end = '\0';
-    ret.append(String(temp, comp_end - temp, CopyString));
+    ret.append(OptString(temp, comp_end - temp, CopyString));
   } while (inc_len > 0);
 out:
 
@@ -986,8 +986,8 @@ out:
   return ret;
 }
 
-String File::getLastError() {
-  return String(folly::errnoStr(errno));
+OptString File::getLastError() {
+  return OptString(folly::errnoStr(errno));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

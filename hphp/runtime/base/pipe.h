@@ -31,10 +31,10 @@ struct Pipe : PlainFile {
   virtual ~Pipe();
 
   // overriding ResourceData
-  const String& o_getClassNameHook() const override { return classnameof(); }
+  const OptString& o_getClassNameHook() const override { return classnameof(); }
 
   // implementing File
-  bool open(const String& filename, const String& mode) override;
+  bool open(const OptString& filename, const OptString& mode) override;
   bool close(int* raw_pclose_return = nullptr) final;
 };
 

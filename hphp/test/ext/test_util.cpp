@@ -47,13 +47,13 @@ bool TestUtil::RunTests(const std::string &which) {
 // data types
 
 struct testhash {
-  size_t operator()(const HPHP::String& s) const {
+  size_t operator()(const HPHP::OptString& s) const {
     return HPHP::hash_string_i_unsafe(s.data(), s.size());
   }
 };
 
 struct testeqstr {
-  bool operator()(const HPHP::String& s1, const HPHP::String& s2) const {
+  bool operator()(const HPHP::OptString& s1, const HPHP::OptString& s2) const {
     return HPHP::string_strcmp(s1.data(), s1.size(), s2.data(), s2.size()) == 0;
   }
 };
@@ -66,32 +66,32 @@ struct IEq {
 };
 
 bool TestUtil::TestCanonicalize() {
-  VERIFY(HPHP::FileUtil::canonicalize(HPHP::String("foo")) == HPHP::String("foo"));
-  VERIFY(FileUtil::canonicalize(String("/foo")) == String("/foo"));
-  VERIFY(FileUtil::canonicalize(String("foo/bar")) == String("foo/bar"));
-  VERIFY(FileUtil::canonicalize(String("foo/////bar")) == String("foo/bar"));
-  VERIFY(FileUtil::canonicalize(String("foo/bar/")) == String("foo/bar/"));
-  VERIFY(FileUtil::canonicalize(String("./foo")) == String("foo"));
-  VERIFY(FileUtil::canonicalize(String(".")) == String("."));
-  VERIFY(FileUtil::canonicalize(String("./")) == String("./"));
-  VERIFY(FileUtil::canonicalize(String("././")) == String("./"));
-  VERIFY(FileUtil::canonicalize(String("foo/./")) == String("foo/"));
-  VERIFY(FileUtil::canonicalize(String("foo/../bar")) == String("bar"));
-  VERIFY(FileUtil::canonicalize(String("./foo/../bar")) == String("bar"));
-  VERIFY(FileUtil::canonicalize(String(".////foo/xyz////..////../bar"))
-         == String("bar"));
-  VERIFY(FileUtil::canonicalize(String("a/foo../bar"))
-         == String("a/foo../bar"));
-  VERIFY(FileUtil::canonicalize(String("a./foo/./bar"))
-         == String("a./foo/bar"));
-  VERIFY(FileUtil::canonicalize(String("////a/foo")) == String("/a/foo"));
-  VERIFY(FileUtil::canonicalize(String("../foo")) == String("../foo"));
-  VERIFY(FileUtil::canonicalize(String("foo/../../bar")) == String("../bar"));
-  VERIFY(FileUtil::canonicalize(String("./../../")) == String("../../"));
-  VERIFY(FileUtil::canonicalize(String("/test\0", 6, CopyString))
-         == String(""));
-  VERIFY(FileUtil::canonicalize(String("/test\0test", 10, CopyString))
-         == String(""));
+  VERIFY(HPHP::FileUtil::canonicalize(HPHP::OptString("foo")) == HPHP::OptString("foo"));
+  VERIFY(FileUtil::canonicalize(OptString("/foo")) == OptString("/foo"));
+  VERIFY(FileUtil::canonicalize(OptString("foo/bar")) == OptString("foo/bar"));
+  VERIFY(FileUtil::canonicalize(OptString("foo/////bar")) == OptString("foo/bar"));
+  VERIFY(FileUtil::canonicalize(OptString("foo/bar/")) == OptString("foo/bar/"));
+  VERIFY(FileUtil::canonicalize(OptString("./foo")) == OptString("foo"));
+  VERIFY(FileUtil::canonicalize(OptString(".")) == OptString("."));
+  VERIFY(FileUtil::canonicalize(OptString("./")) == OptString("./"));
+  VERIFY(FileUtil::canonicalize(OptString("././")) == OptString("./"));
+  VERIFY(FileUtil::canonicalize(OptString("foo/./")) == OptString("foo/"));
+  VERIFY(FileUtil::canonicalize(OptString("foo/../bar")) == OptString("bar"));
+  VERIFY(FileUtil::canonicalize(OptString("./foo/../bar")) == OptString("bar"));
+  VERIFY(FileUtil::canonicalize(OptString(".////foo/xyz////..////../bar"))
+         == OptString("bar"));
+  VERIFY(FileUtil::canonicalize(OptString("a/foo../bar"))
+         == OptString("a/foo../bar"));
+  VERIFY(FileUtil::canonicalize(OptString("a./foo/./bar"))
+         == OptString("a./foo/bar"));
+  VERIFY(FileUtil::canonicalize(OptString("////a/foo")) == OptString("/a/foo"));
+  VERIFY(FileUtil::canonicalize(OptString("../foo")) == OptString("../foo"));
+  VERIFY(FileUtil::canonicalize(OptString("foo/../../bar")) == OptString("../bar"));
+  VERIFY(FileUtil::canonicalize(OptString("./../../")) == OptString("../../"));
+  VERIFY(FileUtil::canonicalize(OptString("/test\0", 6, CopyString))
+         == OptString(""));
+  VERIFY(FileUtil::canonicalize(OptString("/test\0test", 10, CopyString))
+         == OptString(""));
   return Count(true);
 }
 

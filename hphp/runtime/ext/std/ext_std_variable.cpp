@@ -48,7 +48,7 @@ const StaticString
   s_meth_caller_cls("__SystemLib\\MethCallerHelper"),
   s_dyn_meth_caller_cls("__SystemLib\\DynMethCallerHelper");
 
-String HHVM_FUNCTION(gettype, const Variant& v) {
+OptString HHVM_FUNCTION(gettype, const Variant& v) {
   if (v.getType() == KindOfResource && v.toCResRef().isInvalid()) {
     return s_unknown_type;
   }
@@ -65,7 +65,7 @@ String HHVM_FUNCTION(gettype, const Variant& v) {
   return getDataTypeString(v.getType());
 }
 
-String HHVM_FUNCTION(get_resource_type, const OptResource& handle) {
+OptString HHVM_FUNCTION(get_resource_type, const OptResource& handle) {
   return handle->o_getResourceName();
 }
 
@@ -77,7 +77,7 @@ double HHVM_FUNCTION(floatval, const Variant& v) {
   return v.toDouble();
 }
 
-String HHVM_FUNCTION(strval, const Variant& v) {
+OptString HHVM_FUNCTION(strval, const Variant& v) {
   return v.toString();
 }
 
@@ -450,7 +450,7 @@ struct SerializeOptions {
   bool ignoreStringSizeLimit = false;
 };
 
-ALWAYS_INLINE String serialize_impl(const Variant& value,
+ALWAYS_INLINE OptString serialize_impl(const Variant& value,
                                     const SerializeOptions& opts,
                                     bool pure) {
   switch (value.getType()) {
@@ -530,11 +530,11 @@ ALWAYS_INLINE String serialize_impl(const Variant& value,
 
 }
 
-String HHVM_FUNCTION(serialize, const Variant& value) {
+OptString HHVM_FUNCTION(serialize, const Variant& value) {
   return serialize_impl(value, SerializeOptions(), false);
 }
 
-String HHVM_FUNCTION(serialize_pure, const Variant& value) {
+OptString HHVM_FUNCTION(serialize_pure, const Variant& value) {
   return serialize_impl(value, SerializeOptions(), true);
 }
 
@@ -550,7 +550,7 @@ const StaticString
   s_ignoreStringSizeLimit("ignoreStringSizeLimit"),
   s_keepClasses("keepClasses");
 
-String HHVM_FUNCTION(HH_serialize_with_options,
+OptString HHVM_FUNCTION(HH_serialize_with_options,
                      const Variant& value, const Array& options) {
   SerializeOptions opts;
   opts.keepDVArrays = options.exists(s_keepDVArrays) &&
@@ -577,13 +577,13 @@ String HHVM_FUNCTION(HH_serialize_with_options,
   return serialize_impl(value, opts, false);
 }
 
-String serialize_keep_dvarrays(const Variant& value) {
+OptString serialize_keep_dvarrays(const Variant& value) {
   SerializeOptions opts;
   opts.keepDVArrays = true;
   return serialize_impl(value, opts, false);
 }
 
-Variant HHVM_FUNCTION(unserialize, const String& str,
+Variant HHVM_FUNCTION(unserialize, const OptString& str,
                                    const Array& options) {
   return unserialize_from_string(
     str,
@@ -592,7 +592,7 @@ Variant HHVM_FUNCTION(unserialize, const String& str,
   );
 }
 
-Variant HHVM_FUNCTION(unserialize_slice, const String& str, int64_t start, int64_t length,
+Variant HHVM_FUNCTION(unserialize_slice, const OptString& str, int64_t start, int64_t length,
                                    const Array& options) {
   // unserialize_from_buffer accepts empty strings. We ban them here to guarantee behavior
   // consistent with other apis.
@@ -610,7 +610,7 @@ Variant HHVM_FUNCTION(unserialize_slice, const String& str, int64_t start, int64
     );
 }
 
-Variant HHVM_FUNCTION(unserialize_pure, const String& str,
+Variant HHVM_FUNCTION(unserialize_pure, const OptString& str,
                                         const Array& options) {
   return unserialize_from_string(
     str,
@@ -624,7 +624,7 @@ Variant HHVM_FUNCTION(unserialize_pure, const String& str,
 // variable table
 
 void HHVM_FUNCTION(parse_str,
-                   const String& str,
+                   const OptString& str,
                    Array& arr) {
   arr = Array::CreateDict();
   HttpProtocol::DecodeParameters(arr, str.data(), str.size());
@@ -634,7 +634,7 @@ void HHVM_FUNCTION(parse_str,
 
 bool HHVM_FUNCTION(HH_is_late_init_prop_init,
                    const Object& obj,
-                   const String& name) {
+                   const OptString& name) {
   auto const func = fromCaller(
     [] (const BTFrame& frm) { return frm.func(); }
   );
@@ -653,8 +653,8 @@ bool HHVM_FUNCTION(HH_is_late_init_prop_init,
 }
 
 bool HHVM_FUNCTION(HH_is_late_init_sprop_init,
-                   const String& clsName,
-                   const String& name) {
+                   const OptString& clsName,
+                   const OptString& name) {
   auto const cls = Class::load(clsName.get());
   if (!cls) {
     SystemLib::throwInvalidArgumentExceptionObject(

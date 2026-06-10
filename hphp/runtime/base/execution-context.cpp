@@ -185,15 +185,15 @@ void ExecutionContext::restoreSession() {
 ///////////////////////////////////////////////////////////////////////////////
 // system functions
 
-String ExecutionContext::getMimeType() const {
-  String mimetype;
+OptString ExecutionContext::getMimeType() const {
+  OptString mimetype;
   if (m_transport) {
     mimetype = m_transport->getMimeType();
   }
 
   if (strncasecmp(mimetype.data(), "text/", 5) == 0) {
     int pos = mimetype.find(';');
-    if (pos != String::npos) {
+    if (pos != OptString::npos) {
       mimetype = mimetype.substr(0, pos);
     }
   } else if (m_transport && m_transport->getUseDefaultContentType()) {
@@ -211,10 +211,10 @@ std::string ExecutionContext::getRequestUrl(size_t szLimit) {
   return ret;
 }
 
-void ExecutionContext::setContentType(const String& mimetype,
-                                          const String& charset) {
+void ExecutionContext::setContentType(const OptString& mimetype,
+                                          const OptString& charset) {
   if (m_transport) {
-    String contentType = mimetype;
+    OptString contentType = mimetype;
     contentType += "; ";
     contentType += "charset=";
     contentType += charset;
@@ -226,7 +226,7 @@ void ExecutionContext::setContentType(const String& mimetype,
 ///////////////////////////////////////////////////////////////////////////////
 // write()
 
-void ExecutionContext::write(const String& s) {
+void ExecutionContext::write(const OptString& s) {
   write(s.data(), s.size());
 }
 
@@ -329,7 +329,7 @@ void ExecutionContext::obStart(const Variant& handler /* = null */,
   resetCurrentBuffer();
 }
 
-String ExecutionContext::obCopyContents() {
+OptString ExecutionContext::obCopyContents() {
   if (!m_buffers.empty()) {
     StringBuffer &oss = m_buffers.back().oss;
     if (!oss.empty()) {
@@ -339,7 +339,7 @@ String ExecutionContext::obCopyContents() {
   return empty_string();
 }
 
-String ExecutionContext::obDetachContents() {
+OptString ExecutionContext::obDetachContents() {
   if (!m_buffers.empty()) {
     StringBuffer &oss = m_buffers.back().oss;
     if (!oss.empty()) {
@@ -509,9 +509,9 @@ Array ExecutionContext::obGetStatus(bool full) {
   return ret;
 }
 
-String ExecutionContext::obGetBufferName() {
+OptString ExecutionContext::obGetBufferName() {
   if (m_buffers.empty()) {
-    return String();
+    return OptString();
   } else if (m_buffers.size() <= m_protectedLevel) {
     return s_default_output_handler;
   } else {
@@ -917,7 +917,7 @@ bool ExecutionContext::callUserErrorHandler(const Exception& e, int errnum,
       SCOPE_EXIT { m_deferredErrors = empty_vec_array(); };
       if (!same(vm_call_user_func
                 (m_userErrorHandlers.back().first,
-                 make_vec_array(errnum, String(e.getMessage()),
+                 make_vec_array(errnum, OptString(e.getMessage()),
                      fileAndLine.first, fileAndLine.second, empty_dict_array(),
                      backtrace, ImplicitContext::getBlameVectors()),
                  RuntimeCoeffects::defaults()),
@@ -1004,7 +1004,7 @@ bool ExecutionContext::onFatalError(const Exception& e) {
 }
 
 bool ExecutionContext::onUnhandledException(Object e) {
-  String err = throwable_to_string(e.get());
+  OptString err = throwable_to_string(e.get());
   if (Cfg::Log::AlwaysLogUnhandledExceptions) {
     Logger::Error("\nFatal error: Uncaught %s", err.data());
   }
@@ -1049,31 +1049,31 @@ void ExecutionContext::debuggerInfo(
                     IDebuggable::FormatTime(RID().getTimeout() * 1000));
 }
 
-void ExecutionContext::setenv(const String& name, const String& value) {
+void ExecutionContext::setenv(const OptString& name, const OptString& value) {
   m_envs.set(m_envs.convertKey<IntishCast::Cast>(name),
              make_tv<KindOfString>(value.get()));
 }
 
-void ExecutionContext::unsetenv(const String& name) {
+void ExecutionContext::unsetenv(const OptString& name) {
   m_envs.remove(name);
 }
 
-String ExecutionContext::getenv(const String& name) const {
+OptString ExecutionContext::getenv(const OptString& name) const {
   if (m_envs.exists(name)) {
     return m_envs[name].toString();
   }
   if (is_cli_server_mode()) {
     auto envs = cli_env();
     if (envs.exists(name)) return envs[name].toString();
-    return String();
+    return OptString();
   }
   if (auto value = ::getenv(name.data())) {
-    return String(value, CopyString);
+    return OptString(value, CopyString);
   }
   if (RuntimeOption::EnvVariables.find(name.c_str()) != RuntimeOption::EnvVariables.end()) {
-    return String(RuntimeOption::EnvVariables[name.c_str()].data(), CopyString);
+    return OptString(RuntimeOption::EnvVariables[name.c_str()].data(), CopyString);
   }
-  return String();
+  return OptString();
 }
 
 TypedValue ExecutionContext::lookupClsCns(const NamedType* ne,
@@ -1906,7 +1906,7 @@ ActRec* ExecutionContext::getPrevVMState(const ActRec* fp,
 }
 
 Variant ExecutionContext::getEvaledArg(const StringData* val,
-                                       const String& namespacedName,
+                                       const OptString& namespacedName,
                                        const Unit* funcUnit) {
   auto key = StrNR(val);
 
@@ -1915,8 +1915,8 @@ Variant ExecutionContext::getEvaledArg(const StringData* val,
     if (arg.is_init()) return Variant::wrap(arg);
   }
 
-  String code;
-  String funcName;
+  OptString code;
+  OptString funcName;
   int pos = namespacedName.rfind('\\');
   if (pos != -1) {
     auto ns = namespacedName.substr(0, pos);
@@ -1954,9 +1954,9 @@ Variant ExecutionContext::getEvaledArg(const StringData* val,
 }
 
 void ExecutionContext::recordLastError(const Exception& e, int errnum) {
-  m_lastError = String(e.getMessage());
+  m_lastError = OptString(e.getMessage());
   m_lastErrorNum = errnum;
-  m_lastErrorPath = String::attach(getContainingFileName());
+  m_lastErrorPath = OptString::attach(getContainingFileName());
   m_lastErrorLine = getLine();
   if (auto const ee = dynamic_cast<const ExtendedException*>(&e)) {
     m_lastErrorPath = ee->getFileAndLine().first;
@@ -1965,13 +1965,13 @@ void ExecutionContext::recordLastError(const Exception& e, int errnum) {
 }
 
 void ExecutionContext::clearLastError() {
-  m_lastError = String();
+  m_lastError = OptString();
   m_lastErrorNum = 0;
   m_lastErrorPath = staticEmptyString();
   m_lastErrorLine = 0;
 }
 
-void ExecutionContext::enqueueAPCDeferredExpire(const String& key) {
+void ExecutionContext::enqueueAPCDeferredExpire(const OptString& key) {
   auto keyStr = key.get();
   keyStr->incRefCount();
   m_apcDeferredExpire.push_back(keyStr);

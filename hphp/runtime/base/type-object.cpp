@@ -38,8 +38,8 @@ Array Object::toArray(bool ignore_late_init /* = false */) const {
   return m_obj ? m_obj->toArray(/* pubOnly */ false, ignore_late_init) : Array();
 }
 
-String Object::toString() const {
-  return m_obj ? m_obj->invokeToString() : String();
+OptString Object::toString() const {
+  return m_obj ? m_obj->invokeToString() : OptString();
 }
 
 const char* Object::classname_cstr() const {

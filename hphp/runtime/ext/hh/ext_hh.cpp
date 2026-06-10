@@ -86,7 +86,7 @@ AutoloadMap& autoloadMap() {
 
 } // end anonymous namespace
 
-Variant HHVM_FUNCTION(autoload_type_to_path, const String& type) {
+Variant HHVM_FUNCTION(autoload_type_to_path, const OptString& type) {
   auto fileRes = autoloadMap().getTypeFile(type);
   if (!fileRes) {
     return Variant{Variant::NullInit{}};
@@ -95,7 +95,7 @@ Variant HHVM_FUNCTION(autoload_type_to_path, const String& type) {
   }
 }
 
-Variant HHVM_FUNCTION(autoload_function_to_path, const String& function) {
+Variant HHVM_FUNCTION(autoload_function_to_path, const OptString& function) {
   auto fileRes = autoloadMap().getFunctionFile(function);
   if (!fileRes) {
     return Variant{Variant::NullInit{}};
@@ -104,7 +104,7 @@ Variant HHVM_FUNCTION(autoload_function_to_path, const String& function) {
   }
 }
 
-Variant HHVM_FUNCTION(autoload_constant_to_path, const String& constant) {
+Variant HHVM_FUNCTION(autoload_constant_to_path, const OptString& constant) {
   auto fileRes = autoloadMap().getConstantFile(constant);
   if (!fileRes) {
     return Variant{Variant::NullInit{}};
@@ -113,7 +113,7 @@ Variant HHVM_FUNCTION(autoload_constant_to_path, const String& constant) {
   }
 }
 
-Variant HHVM_FUNCTION(autoload_module_to_path, const String& module) {
+Variant HHVM_FUNCTION(autoload_module_to_path, const OptString& module) {
   auto fileRes = autoloadMap().getModuleFile(module);
   if (!fileRes) {
     return Variant{Variant::NullInit{}};
@@ -122,7 +122,7 @@ Variant HHVM_FUNCTION(autoload_module_to_path, const String& module) {
   }
 }
 
-Variant HHVM_FUNCTION(autoload_type_alias_to_path, const String& typeAlias) {
+Variant HHVM_FUNCTION(autoload_type_alias_to_path, const OptString& typeAlias) {
   auto fileRes = autoloadMap().getTypeAliasFile(typeAlias);
   if (!fileRes) {
     return Variant{Variant::NullInit{}};
@@ -131,7 +131,7 @@ Variant HHVM_FUNCTION(autoload_type_alias_to_path, const String& typeAlias) {
   }
 }
 
-Variant HHVM_FUNCTION(autoload_type_or_type_alias_to_path, const String& type) {
+Variant HHVM_FUNCTION(autoload_type_or_type_alias_to_path, const OptString& type) {
   auto fileRes = autoloadMap().getTypeOrTypeAliasFile(type);
   if (!fileRes) {
     return Variant{Variant::NullInit{}};
@@ -140,27 +140,27 @@ Variant HHVM_FUNCTION(autoload_type_or_type_alias_to_path, const String& type) {
   }
 }
 
-Array HHVM_FUNCTION(autoload_path_to_types, const String& path) {
+Array HHVM_FUNCTION(autoload_path_to_types, const OptString& path) {
   return autoloadMap().getFileTypes(path);
 }
 
-Array HHVM_FUNCTION(autoload_path_to_functions, const String& path) {
+Array HHVM_FUNCTION(autoload_path_to_functions, const OptString& path) {
   return autoloadMap().getFileFunctions(path);
 }
 
-Array HHVM_FUNCTION(autoload_path_to_constants, const String& path) {
+Array HHVM_FUNCTION(autoload_path_to_constants, const OptString& path) {
   return autoloadMap().getFileConstants(path);
 }
 
-Array HHVM_FUNCTION(autoload_path_to_modules, const String& path) {
+Array HHVM_FUNCTION(autoload_path_to_modules, const OptString& path) {
   return autoloadMap().getFileModules(path);
 }
 
-Array HHVM_FUNCTION(autoload_path_to_type_aliases, const String& path) {
+Array HHVM_FUNCTION(autoload_path_to_type_aliases, const OptString& path) {
   return autoloadMap().getFileTypeAliases(path);
 }
 
-bool HHVM_FUNCTION(could_include, const String& file) {
+bool HHVM_FUNCTION(could_include, const OptString& file) {
   return lookupUnit(file.get(), "", nullptr /* initial_opt */,
                     nullptr, false) != nullptr;
 }
@@ -634,7 +634,7 @@ bool HHVM_FUNCTION(clear_static_memoization,
   return false;
 }
 
-String HHVM_FUNCTION(ffp_parse_string_native, const String& str) {
+OptString HHVM_FUNCTION(ffp_parse_string_native, const OptString& str) {
   auto const file = fromCaller(
     [] (const BTFrame& frm) { return frm.func()->unit()->filepath()->data(); }
   );
@@ -659,7 +659,7 @@ String HHVM_FUNCTION(ffp_parse_string_native, const String& str) {
 }
 
 bool HHVM_FUNCTION(clear_lsb_memoization,
-                   const String& clsStr, TypedValue funcStr) {
+                   const OptString& clsStr, TypedValue funcStr) {
   auto const clear = [](const Class* cls, const Func* func) {
     if (!func->isStatic()) return false;
     if (!func->isMemoizeWrapperLSB()) return false;
@@ -727,7 +727,7 @@ template<class T>
 ArrayData* from_stats_list(T stats) {
   DictInit init(stats.size());
   for (auto& pair : stats) {
-    init.set(String(pair.first), Array::attach(from_stats(pair.second)));
+    init.set(OptString(pair.first), Array::attach(from_stats(pair.second)));
   }
   return init.create();
 }
@@ -828,7 +828,7 @@ void HHVM_FUNCTION(prefetch_units, const Array& paths, bool hint) {
       [&] (TypedValue v) {
         assertx(isStringType(v.m_type));
         lookupUnit(
-          File::TranslatePath(String{v.m_data.pstr}).get(),
+          File::TranslatePath(OptString{v.m_data.pstr}).get(),
           "",
           nullptr,
           nullptr,
@@ -1078,7 +1078,7 @@ void check_coverage_flags() {
 
 Unit* loadUnit(StringData* path) {
   auto const unit = lookupUnit(
-    File::TranslatePath(String{path}).get(),
+    File::TranslatePath(OptString{path}).get(),
     "",
     nullptr,
     nullptr,
@@ -1131,7 +1131,7 @@ Array HHVM_FUNCTION(get_files_with_coverage) {
   }
   if (units.empty()) return Array::CreateKeyset();
   KeysetInit k{units.size()};
-  for (auto s : units) k.add(String{const_cast<StringData*>(s)});
+  for (auto s : units) k.add(OptString{const_cast<StringData*>(s)});
   return k.toArray();
 }
 
@@ -1164,19 +1164,19 @@ bespoke::TypeStructure* getBespokeTS(const Array& ts) {
     ? bespoke::TypeStructure::As(ts.get())
     : nullptr;
 }
-bool getBool(const Array& ts, const String& key) {
+bool getBool(const Array& ts, const OptString& key) {
   auto const tv = ts.get()->get(key.get());
   if (isNullType(tv.m_type)) return false;
   assertx(isBoolType(tv.m_type));
   return tv.m_data.num;
 }
-String getString(const Array& ts, const String& key) {
+OptString getString(const Array& ts, const OptString& key) {
   auto const tv = ts.get()->get(key.get());
-  if (isNullType(tv.m_type)) return String{};
+  if (isNullType(tv.m_type)) return OptString{};
   assertx(isStringType(tv.m_type));
-  return String{tv.m_data.pstr};
+  return OptString{tv.m_data.pstr};
 }
-Array getArray(const Array& ts, const String& key) {
+Array getArray(const Array& ts, const OptString& key) {
   auto const tv = ts.get()->get(key.get());
   if (isNullType(tv.m_type)) return Array{};
   assertx(isArrayLikeType(tv.m_type));
@@ -1222,16 +1222,16 @@ bool HHVM_FUNCTION(get_optional_shape_field, const Array& ts) {
   return getBool(ts, s_optional_shape_field);
 }
 
-String HHVM_FUNCTION(get_alias, const Array& ts) {
+OptString HHVM_FUNCTION(get_alias, const Array& ts) {
   if (auto const bespokeTS = getBespokeTS(ts)) {
-    return String{bespokeTS->alias()};
+    return OptString{bespokeTS->alias()};
   }
   return getString(ts, s_alias);
 }
 
-String HHVM_FUNCTION(get_typevars, const Array& ts) {
+OptString HHVM_FUNCTION(get_typevars, const Array& ts) {
   if (auto const bespokeTS = getBespokeTS(ts)) {
-    return String{bespokeTS->typevars()};
+    return OptString{bespokeTS->typevars()};
   }
   return getString(ts, s_typevars);
 }
@@ -1309,13 +1309,13 @@ Array HHVM_FUNCTION(get_variadic_type, const Array& ts) {
   return getArray(ts, s_variadic_type);
 }
 
-String HHVM_FUNCTION(get_name, const Array& ts) {
+OptString HHVM_FUNCTION(get_name, const Array& ts) {
   if (auto bespokeTS = getBespokeTS(ts)) {
     if (bespokeTS->typeKind() != TypeStructure::Kind::T_typevar) {
-      return String{};
+      return OptString{};
     }
     auto const s = reinterpret_cast<bespoke::TSTypevar*>(bespokeTS);
-    return String{s->name()};
+    return OptString{s->name()};
   }
   return getString(ts, s_name);
 }
@@ -1332,13 +1332,13 @@ Array HHVM_FUNCTION(get_generic_types, const Array& ts) {
   return getArray(ts, s_generic_types);
 }
 
-String HHVM_FUNCTION(get_classname, const Array& ts) {
+OptString HHVM_FUNCTION(get_classname, const Array& ts) {
   if (auto bespokeTS = getBespokeTS(ts)) {
     if (bespokeTS->fieldsByte() != bespoke::TSWithClassishTypes::kFieldsByte) {
-      return String{};
+      return OptString{};
     }
     auto const s = reinterpret_cast<bespoke::TSWithClassishTypes*>(bespokeTS);
-    return String{s->classname()};
+    return OptString{s->classname()};
   }
   return getString(ts, s_classname);
 }
@@ -1492,7 +1492,7 @@ bool HHVM_FUNCTION(reflection_class_is_abstract, TypedValue cls) {
   return isAbstract(c);
 }
 
-String HHVM_FUNCTION(reflection_class_get_name, TypedValue cls) {
+OptString HHVM_FUNCTION(reflection_class_get_name, TypedValue cls) {
   auto const c = getClass(cls);
   return c->name()->data();
 }
@@ -1550,15 +1550,15 @@ Array HHVM_FUNCTION(get_all_packages) {
     DictInit package(3);
 
     VecInit includes(p.m_includes.size());
-    for (auto& s : p.m_includes) includes.append(String{makeStaticString(s)});
+    for (auto& s : p.m_includes) includes.append(OptString{makeStaticString(s)});
     package.set(s_includes.get(), includes.toVariant());
 
     VecInit soft_includes(p.m_soft_includes.size());
-    for (auto& s : p.m_soft_includes) soft_includes.append(String{makeStaticString(s)});
+    for (auto& s : p.m_soft_includes) soft_includes.append(OptString{makeStaticString(s)});
     package.set(s_soft_includes.get(), soft_includes.toVariant());
 
     VecInit include_paths(p.m_include_paths.size());
-    for (auto& s : p.m_include_paths) include_paths.append(String{makeStaticString(s)});
+    for (auto& s : p.m_include_paths) include_paths.append(OptString{makeStaticString(s)});
     package.set(s_include_paths.get(), include_paths.toVariant());
     result.set(makeStaticString(name), package.toVariant());
   }
@@ -1573,11 +1573,11 @@ Array HHVM_FUNCTION(get_all_deployments) {
     DictInit deployment(2);
 
     VecInit packages(d.m_packages.size());
-    for (auto& s : d.m_packages) packages.append(String{makeStaticString(s)});
+    for (auto& s : d.m_packages) packages.append(OptString{makeStaticString(s)});
     deployment.set(s_packages.get(), packages.toVariant());
 
     VecInit soft_packages(d.m_soft_packages.size());
-    for (auto& s : d.m_soft_packages) soft_packages.append(String{makeStaticString(s)});
+    for (auto& s : d.m_soft_packages) soft_packages.append(OptString{makeStaticString(s)});
     deployment.set(s_soft_packages.get(), soft_packages.toVariant());
 
     result.set(makeStaticString(name), deployment.toVariant());
@@ -1594,13 +1594,13 @@ bool HHVM_FUNCTION(package_exists, StringArg name) {
 
 Array HHVM_FUNCTION(active_config_experiments) {
   VecInit v{RO::ActiveExperiments.size()};
-  for (auto& s : RO::ActiveExperiments) v.append(String(s));
+  for (auto& s : RO::ActiveExperiments) v.append(OptString(s));
   return v.toArray();
 }
 
 Array HHVM_FUNCTION(inactive_config_experiments) {
   VecInit v{RO::InactiveExperiments.size()};
-  for (auto& s : RO::InactiveExperiments) v.append(String(s));
+  for (auto& s : RO::InactiveExperiments) v.append(OptString(s));
   return v.toArray();
 }
 
@@ -1608,7 +1608,7 @@ bool HHVM_FUNCTION(is_cli_server_mode) {
   return is_cli_server_mode();
 }
 
-String HHVM_FUNCTION(mangle_unit_sha1, const String& sha1, const String& ext,
+OptString HHVM_FUNCTION(mangle_unit_sha1, const OptString& sha1, const OptString& ext,
                      const Variant& repo) {
   auto const& ro = [&] () -> const RepoOptions& {
     if (!repo.isNull()) {

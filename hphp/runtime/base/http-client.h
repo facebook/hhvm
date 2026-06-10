@@ -78,7 +78,7 @@ struct HttpClient {
    */
   int get(const char *url, StringBuffer &response,
           const HeaderMap *requestHeaders = nullptr,
-          req::vector<String> *responseHeaders = nullptr);
+          req::vector<OptString> *responseHeaders = nullptr);
 
   /**
    * POST data to an URL and returns its response code.
@@ -86,12 +86,12 @@ struct HttpClient {
   int post(const char *url, const char *data, size_t size,
            StringBuffer &response,
            const HeaderMap *requestHeaders = nullptr,
-           req::vector<String> *responseHeaders = nullptr);
+           req::vector<OptString> *responseHeaders = nullptr);
 
   int request(const char* method,
               const char *url, const char *data, size_t size,
               StringBuffer &response, const HeaderMap *requestHeaders,
-              req::vector<String> *responseHeaders);
+              req::vector<OptString> *responseHeaders);
 
   const std::string& getLastError() const {
     return m_error;
@@ -106,7 +106,7 @@ private:
   bool m_decompress;
 
   StringBuffer *m_response;
-  req::vector<String> *m_responseHeaders;
+  req::vector<OptString> *m_responseHeaders;
   std::string m_error;
 
   bool m_basic;

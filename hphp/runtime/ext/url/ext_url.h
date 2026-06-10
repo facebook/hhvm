@@ -35,9 +35,9 @@ extern const int64_t k_PHP_QUERY_RFC3986;
 
 Variant HHVM_FUNCTION(http_build_query, const Variant& formdata,
                            const Variant& numeric_prefix /* = null_string */,
-                           const String& arg_separator /* = null_string */,
+                           const OptString& arg_separator /* = null_string */,
                            int64_t enc_type = k_PHP_QUERY_RFC1738);
-Variant HHVM_FUNCTION(parse_url, const String& url,
+Variant HHVM_FUNCTION(parse_url, const OptString& url,
                                  int64_t component /* = -1 */);
 
 ///////////////////////////////////////////////////////////////////////////////

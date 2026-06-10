@@ -65,13 +65,13 @@ TEST(COUNTERS, pcre_cache) {
     int ss = getVal(key);
     EXPECT_EQ(ss, preg_pcre_cache_size());
 
-    preg_grep(String{"/.ba./"}, make_vec_array(String{"ababu"}, String{"bananas"}));
+    preg_grep(OptString{"/.ba./"}, make_vec_array(OptString{"ababu"}, OptString{"bananas"}));
     ++ss;
     EXPECT_EQ(ss, getVal(key));
     EXPECT_EQ(ss, preg_pcre_cache_size());
 
     // confirm we're correctly skipping when hitting the cache
-    preg_grep(String{"/.ba./"}, make_vec_array(String{"ababu"}, String{"bananas"}));
+    preg_grep(OptString{"/.ba./"}, make_vec_array(OptString{"ababu"}, OptString{"bananas"}));
     EXPECT_EQ(ss, getVal(key));
     EXPECT_EQ(ss, preg_pcre_cache_size());
 
@@ -87,13 +87,13 @@ TEST(COUNTERS, named_entities) {
     int ss = getVal(key);
     EXPECT_EQ(ss, namedEntityTableSize());
 
-    const auto str = String{"MyNewHilariousType"};
+    const auto str = OptString{"MyNewHilariousType"};
     NamedType::getOrCreate(str.get());
     ++ss;
     EXPECT_EQ(ss, getVal(key));
     EXPECT_EQ(ss, namedEntityTableSize());
 
-    const auto str2 = String{"MyNewHilariousFunc"};
+    const auto str2 = OptString{"MyNewHilariousFunc"};
     NamedFunc::getOrCreate(str2.get());
     ++ss;
     EXPECT_EQ(ss, getVal(key));

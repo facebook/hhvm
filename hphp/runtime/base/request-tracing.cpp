@@ -41,7 +41,7 @@ void record_trace(Trace&& t) {
 void register_trace_hook(std::function<void(const Trace&)> h) { s_hook = h; }
 
 EventStats process_stats_for(folly::StringPiece k) {
-  if (auto key = lookupStaticString(String(k).get())) {
+  if (auto key = lookupStaticString(OptString(k).get())) {
     auto it = detail::g_events.find(key);
     if (it != detail::g_events.end()) return it->second;
   }

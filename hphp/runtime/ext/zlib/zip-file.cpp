@@ -38,7 +38,7 @@ void ZipFile::sweep() {
   File::sweep();
 }
 
-bool ZipFile::open(const String& filename, const String& mode) {
+bool ZipFile::open(const OptString& filename, const OptString& mode) {
   assertx(m_gzFile == nullptr);
 
   if (strchr(mode.c_str(), '+')) {

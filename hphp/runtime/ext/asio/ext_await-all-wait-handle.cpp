@@ -200,7 +200,7 @@ void c_AwaitAllWaitHandle::markAsFailed(const Object& exception) {
   decRefObj(this);
 }
 
-String c_AwaitAllWaitHandle::getName() {
+OptString c_AwaitAllWaitHandle::getName() {
   return s_awaitAll;
 }
 

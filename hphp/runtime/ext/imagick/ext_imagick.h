@@ -127,7 +127,7 @@ public:
   }
 
   CLASSNAME_IS("WandResource")
-  const String& o_getClassNameHook() const override {
+  const OptString& o_getClassNameHook() const override {
     return classnameof();
   }
 
@@ -251,7 +251,7 @@ getPixelIteratorResource(const Object& obj) {
 
 //////////////////////////////////////////////////////////////////////////////
 // IO
-bool isMagickPseudoFormat(const String& path, char mode = '*');
+bool isMagickPseudoFormat(const OptString& path, char mode = '*');
 
 using ImagickFileOp =
   std::function<MagickBooleanType(MagickWand*, const char*)>;
@@ -259,11 +259,11 @@ using ImagickHandleOp =
   std::function<MagickBooleanType(MagickWand*, FILE*)>;
 
 void imagickReadOp(MagickWand* wand,
-                   const String& path,
+                   const OptString& path,
                    const ImagickFileOp& op);
 
 void imagickWriteOp(MagickWand* wand,
-                    const String& path,
+                    const OptString& path,
                     const ImagickFileOp& op);
 
 void imagickReadOp(MagickWand* wand,
@@ -272,7 +272,7 @@ void imagickReadOp(MagickWand* wand,
 
 void imagickWriteOp(MagickWand* wand,
                     const OptResource& res,
-                    const String& format,
+                    const OptString& format,
                     const ImagickHandleOp& op);
 
 //////////////////////////////////////////////////////////////////////////////
@@ -293,9 +293,9 @@ void freeMagickMemory(T* &resource) {
   }
 }
 
-String convertMagickString(char* &&str);
+OptString convertMagickString(char* &&str);
 
-String convertMagickData(size_t size, unsigned char* &data);
+OptString convertMagickData(size_t size, unsigned char* &data);
 
 template<typename T>
 ALWAYS_INLINE
@@ -342,7 +342,7 @@ Array magickQueryFonts(const char* pattern = "*");
 
 Array magickQueryFormats(const char* pattern = "*");
 
-String magickResolveFont(const String& fontName);
+OptString magickResolveFont(const OptString& fontName);
 
 //////////////////////////////////////////////////////////////////////////////
 // ImagickPixel Helper

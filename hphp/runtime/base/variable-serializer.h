@@ -72,15 +72,15 @@ struct VariableSerializer {
   /**
    * Top level entry function called by native builtins.
    */
-  String serialize(const_variant_ref v, bool ret, bool keepCount = false);
-  String serialize(const Variant& var, bool ret, bool keepCount = false) {
+  OptString serialize(const_variant_ref v, bool ret, bool keepCount = false);
+  OptString serialize(const Variant& var, bool ret, bool keepCount = false) {
     return serialize(const_variant_ref{var}, ret, keepCount);
   }
-  String serializeValue(const Variant& v, bool limit);
+  OptString serializeValue(const Variant& v, bool limit);
 
   // Serialize with limit size of output, always return the serialized string.
   // It does not work with Serialize, JSON, APCSerialize, DebuggerSerialize.
-  String serializeWithLimit(const Variant& v, int limit);
+  OptString serializeWithLimit(const Variant& v, int limit);
 
   // for ext_json
   void setDepthLimit(size_t depthLimit) { m_maxDepth = depthLimit; }
@@ -164,7 +164,7 @@ private:
   void write(const char *v, int len = -1, bool isArrayKey = false,
              bool noQuotes = false);
 
-  void write(const String& v);
+  void write(const OptString& v);
   void write(const Object& v);
   void write(const_variant_ref v, bool isArrayKey = false);
 
@@ -185,7 +185,7 @@ private:
   );
   void writeArrayFooter(ArrayKind kind);
   void writeCollectionKVSorted(ObjectData* obj);
-  void writeSerializableObject(const String& clsname, const String& serialized);
+  void writeSerializableObject(const OptString& clsname, const OptString& serialized);
 
   /**
    * Helpers.
@@ -194,9 +194,9 @@ private:
   void setRefCount(RefCount count) { m_refCount = count; }
   bool incNestedLevel(tv_rval tv);
   void decNestedLevel(tv_rval tv);
-  void pushObjectInfo(const String& objClass, char objCode);
+  void pushObjectInfo(const OptString& objClass, char objCode);
   void popObjectInfo();
-  void pushResourceInfo(const String& rsrcName, int rsrcId);
+  void pushResourceInfo(const OptString& rsrcName, int rsrcId);
   void popResourceInfo();
 
   ArrayKind getKind(const ArrayData* arr) const;
@@ -204,7 +204,7 @@ private:
   // The func parameter will be invoked only if there is no overflow.
   // Otherwise, writeOverflow will be invoked instead.
   void preventOverflow(const Object& v, const std::function<void()>& func);
-  void writePropertyKey(const String& prop);
+  void writePropertyKey(const OptString& prop);
 
   // Serialize a Variant recursively.
   // The last param noQuotes indicates to serializer to not put the output in
@@ -223,7 +223,7 @@ private:
   void serializeArrayImpl(const ArrayData* arr, bool isVectorData);
   void serializeResource(const ResourceData*);
   void serializeResourceImpl(const ResourceData* res);
-  void serializeString(const String&);
+  void serializeString(const OptString&);
   void serializeRFunc(const RFuncData* func);
   void serializeFunc(const Func* func);
   void serializeClass(const Class* cls);
@@ -312,9 +312,9 @@ private:
   bool m_sortArrayKeys{false};   // Sort keys of associative arrays
   bool m_fullFloatPrecision{false}; // Output full precision for floats (17 decimal places)
   RefCount m_refCount{OneReference}; // current variable's reference count
-  String m_objClass;             // for object serialization
+  OptString m_objClass;             // for object serialization
   char m_objCode{0};             // for object serialization
-  String m_rsrcName;             // for resource serialization
+  OptString m_rsrcName;             // for resource serialization
   int m_rsrcId{0};               // for resource serialization
   int m_maxCount;                // for max recursive levels
   int m_levelDebugger{0};        // keep track of levels for DebuggerSerialize
@@ -333,9 +333,9 @@ private:
   req::vector<ArrayInfo> m_arrayInfos;
 
   struct ObjectInfo {
-    String objClass;
+    OptString objClass;
     char   objCode;
-    String rsrcName;
+    OptString rsrcName;
     int    rsrcId;
   };
   req::vector<ObjectInfo> m_objectInfos;
@@ -346,7 +346,7 @@ private:
   const StringData* m_unitFilename{nullptr};
 };
 
-inline String internal_serialize(const Variant& v) {
+inline OptString internal_serialize(const Variant& v) {
   VariableSerializer vs{VariableSerializer::Type::Internal};
   return vs.serializeValue(v, false);
 }
@@ -354,7 +354,7 @@ inline String internal_serialize(const Variant& v) {
 // For internal HHVM use: JSON encode without invoking JsonSerializable.
 // This is intended to allow extensions to encode as json without
 // re-entering the VM.
-inline String json_encode_skip_jsonserializable(
+inline OptString json_encode_skip_jsonserializable(
     const Variant& v,
     int64_t options = 0,
     bool limit = true

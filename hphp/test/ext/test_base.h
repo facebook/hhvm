@@ -107,7 +107,7 @@ inline bool toBoolean(const char* v) = delete;
 inline bool toBoolean(const HPHP::StringData *v) {
   return v ? v->toBoolean() : false;
 }
-inline bool toBoolean(const HPHP::String& v) { return toBoolean(v.get());}
+inline bool toBoolean(const HPHP::OptString& v) { return toBoolean(v.get());}
 inline bool toBoolean(const HPHP::ArrayData *v) {
   return v && !v->empty();
 }

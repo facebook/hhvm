@@ -140,7 +140,7 @@ public:
     directOnewayFlush();
   }
 
-  String getPHPBuffer() {
+  OptString getPHPBuffer() {
     if (buffer_used != 0) {
       raise_warning("runtime/ext_thrift: Output buffer has %lu unflushed bytes", buffer_used);
     }
@@ -156,7 +156,7 @@ private:
   }
   void directWrite(const char* data, size_t len) {
     m_transport->o_invoke_few_args(s_write, RuntimeCoeffects::fixme(),
-                                   1, String(data, len, CopyString));
+                                   1, OptString(data, len, CopyString));
   }
 
   char buffer[SIZE];
@@ -192,9 +192,9 @@ struct PHPInputTransport {
   void put_back() {
     if (buffer_used) {
       m_transport->o_invoke_few_args(s_putBack, RuntimeCoeffects::fixme(),
-                           1, String(buffer_ptr, buffer_used, CopyString));
+                           1, OptString(buffer_ptr, buffer_used, CopyString));
     }
-    buffer = String();
+    buffer = OptString();
     buffer_used = 0;
     buffer_ptr = nullptr;
   }
@@ -276,7 +276,7 @@ private:
     buffer_ptr = buffer.data();
   }
 
-  String buffer;
+  OptString buffer;
   const char* buffer_ptr{nullptr};
   size_t buffer_used{0};
 

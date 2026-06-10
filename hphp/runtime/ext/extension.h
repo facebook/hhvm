@@ -144,7 +144,7 @@ public:
   // access the list of functions (excluding methods);
   // helper for get_extension_funcs()
   const std::vector<StringData*>& getExtensionFunctions() const;
-  void registerExtensionFunction(const String& name);
+  void registerExtensionFunction(const OptString& name);
 
   Native::FuncTable& nativeFuncs() {
     return m_nativeFuncs;

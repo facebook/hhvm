@@ -146,7 +146,7 @@ void c_ConditionWaitHandle::onUnblocked() {
   decRefObj(this);
 }
 
-String c_ConditionWaitHandle::getName() {
+OptString c_ConditionWaitHandle::getName() {
   return s_condition;
 }
 

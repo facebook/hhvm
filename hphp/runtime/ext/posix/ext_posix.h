@@ -26,7 +26,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 bool HHVM_FUNCTION(posix_access,
-                   const String& file,
+                   const OptString& file,
                    int64_t mode = 0);
 
 int64_t HHVM_FUNCTION(posix_getpid);

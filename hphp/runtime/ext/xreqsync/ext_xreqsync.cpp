@@ -331,7 +331,7 @@ namespace {
   }
 }
 
-Object HHVM_STATIC_METHOD(XReqSync, get, const String& name) {
+Object HHVM_STATIC_METHOD(XReqSync, get, const OptString& name) {
   throwIfRepoMode();
   Object obj{XReqSync::classof()};
   auto nobj = Native::data<XReqSync>(obj);

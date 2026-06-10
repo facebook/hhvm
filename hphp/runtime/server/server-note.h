@@ -21,10 +21,10 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct ServerNote final {
-  static void Add(const String& name, const String& value);
+  static void Add(const OptString& name, const OptString& value);
   static void AddNotes(const Array& notes);
-  static String Get(const String& name);
-  static void Delete(const String& name);
+  static OptString Get(const OptString& name);
+  static void Delete(const OptString& name);
   static void Reset();
 private:
   Array m_notes;

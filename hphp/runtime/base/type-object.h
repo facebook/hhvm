@@ -129,7 +129,7 @@ public:
   explicit operator bool() const { return (bool)m_obj; }
 
   bool isNull() const { return !m_obj; }
-  bool instanceof(const String& s) const {
+  bool instanceof(const OptString& s) const {
     return m_obj && m_obj->instanceof(s);
   }
   bool instanceof(const Class* cls) const {
@@ -141,7 +141,7 @@ public:
    */
   int64_t toInt64  () const { return m_obj ? m_obj->toInt64() : 0; }
   double  toDouble () const { return m_obj ? m_obj->toDouble() : 0; }
-  String  toString () const;
+  OptString  toString () const;
   Array   toArray  (bool ignore_late_init = false) const;
 
   // Transfer ownership of our reference to this object.

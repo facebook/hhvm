@@ -63,7 +63,7 @@ struct IntlBreakIterator : IntlError,
     return dynamic_cast<CodePointBreakIterator*>(m_breakIterator);
   }
 
-  bool setText(const String& str) {
+  bool setText(const OptString& str) {
     assertx(isValid());
     m_text = str.toCppString();
     UErrorCode error = U_ZERO_ERROR;
@@ -86,7 +86,7 @@ struct IntlBreakIterator : IntlError,
   // BreakIterator doesn't keep track of this for us, so we have to
   // A value of -1 means unknown and unknowable
   int32_t m_key{0};
-  String m_compiledRules;
+  OptString m_compiledRules;
  private:
   icu::BreakIterator *m_breakIterator{nullptr};
   std::string m_text;

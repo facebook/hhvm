@@ -75,16 +75,16 @@ static std::vector<std::string> g_grandfathered_preferred = {
   "jbo", "tlh", "lb", "nv", "nb", "nn"
 };
 
-static int getGrandfatheredOffset(const String& locale) {
+static int getGrandfatheredOffset(const OptString& locale) {
   auto it = std::find(g_grandfathered.begin(),
                       g_grandfathered.end(), locale.data());
   if (it == g_grandfathered.end()) return -1;
   return (it - g_grandfathered.begin());
 }
 
-static String getGrandfatheredPreferred(int ofs) {
+static OptString getGrandfatheredPreferred(int ofs) {
   if ((ofs < 0) || (ofs >= g_grandfathered.size())) {
-    return String();
+    return OptString();
   }
   if (ofs < g_grandfathered_preferred.size()) {
     return g_grandfathered_preferred[ofs];
@@ -138,7 +138,7 @@ static const StaticString LocaleName(LocaleTag tag) {
   not_reached();
 }
 
-static int singleton_pos(const String& str) {
+static int singleton_pos(const OptString& str) {
   auto len = str.size();
   for (int i = 0; i < (len - 2); ++i) {
     if (!isIDSeparator(str[i])) continue;
@@ -149,9 +149,9 @@ static int singleton_pos(const String& str) {
 }
 
 
-static Variant get_icu_value(const String &locale, LocaleTag tag,
+static Variant get_icu_value(const OptString &locale, LocaleTag tag,
                              bool fromParseLocale = false) {
-  String locale_name(locale);
+  OptString locale_name(locale);
   CHECK_LOCALELEN_OR_RETURN(locale_name, false);
   if (tag != LOC_CANONICALIZE) {
     if (getGrandfatheredOffset(locale) >= 0) {
@@ -186,7 +186,7 @@ static Variant get_icu_value(const String &locale, LocaleTag tag,
       return false;
   }
 
-  String buf(64, ReserveString);
+  OptString buf(64, ReserveString);
   do {
     UErrorCode error = U_ZERO_ERROR;
     int32_t len = ulocfunc(locale_name.c_str(),
@@ -207,17 +207,17 @@ static Variant get_icu_value(const String &locale, LocaleTag tag,
                              "Got invalid response from ICU");
       return false;
     }
-    buf = String(len, ReserveString);
+    buf = OptString(len, ReserveString);
   } while (true);
 
   not_reached();
   return false;
 }
 
-static Variant get_icu_display_value(const String& locale,
-                                     const String& disp_locale,
+static Variant get_icu_display_value(const OptString& locale,
+                                     const OptString& disp_locale,
                                      LocaleTag tag) {
-  String locname(locale);
+  OptString locname(locale);
   CHECK_LOCALELEN_OR_RETURN(locname, false);
   if (tag != LOC_DISPLAY) {
     int ofs = getGrandfatheredOffset(locale);
@@ -265,7 +265,7 @@ static Variant get_icu_display_value(const String& locale,
       buf.releaseBuffer(len);
 
       error = U_ZERO_ERROR;
-      String out(u8(buf, error));
+      OptString out(u8(buf, error));
       if (U_FAILURE(error)) {
         s_intl_error->setError(error, "Unable to convert result from "
                                       "locale_get_display_%s to UTF-8",
@@ -292,7 +292,7 @@ static Variant get_icu_display_value(const String& locale,
 }
 
 static Variant HHVM_STATIC_METHOD(Locale, acceptFromHttp,
-                                  const String& header) {
+                                  const OptString& header) {
   UErrorCode error = U_ZERO_ERROR;
   UEnumeration *avail = ures_openAvailableLocales(nullptr, &error);
   ULOC_CHECK(error, false);
@@ -326,10 +326,10 @@ static Variant HHVM_STATIC_METHOD(Locale, acceptFromHttp,
   if (len < 0 || result == ULOC_ACCEPT_FAILED) {
     return false;
   }
-  return String(out, len, CopyString);
+  return OptString(out, len, CopyString);
 }
 
-static Variant HHVM_STATIC_METHOD(Locale, canonicalize, const String& locale) {
+static Variant HHVM_STATIC_METHOD(Locale, canonicalize, const OptString& locale) {
   return get_icu_value(localeOrDefault(locale), LOC_CANONICALIZE);
 }
 
@@ -339,7 +339,7 @@ inline void element_not_string() {
                          "not a string");
 }
 
-static bool append_key_value(String& ret,
+static bool append_key_value(OptString& ret,
                              const Array& subtags,
                              LocaleTag tag) {
   auto name = LocaleName(tag);
@@ -353,7 +353,7 @@ static bool append_key_value(String& ret,
   return true;
 }
 
-static bool append_multiple_key_values(String& ret,
+static bool append_multiple_key_values(OptString& ret,
                                        const Array& subtags,
                                        LocaleTag tag) {
   auto name = LocaleName(tag);
@@ -399,7 +399,7 @@ static bool append_multiple_key_values(String& ret,
   int max = (tag == LOC_EXTLANG) ? 3 : 15;
   bool first = true;
   for (int i = 0; i < max; ++i) {
-    auto namenum = name + String(i, CopyString);
+    auto namenum = name + OptString(i, CopyString);
     if (!subtags.exists(namenum)) continue;
     auto val = subtags[namenum];
     if (!val.isString()) {
@@ -432,7 +432,7 @@ static Variant HHVM_STATIC_METHOD(Locale, composeLocale, const Array& subtags) {
                            "parameter array does not contain 'language' tag.");
     return false;
   }
-  String ret(subtags[s_LOC_LANG].toString());
+  OptString ret(subtags[s_LOC_LANG].toString());
   if (!append_multiple_key_values(ret, subtags, LOC_EXTLANG) ||
       !append_key_value(ret, subtags, LOC_SCRIPT) ||
       !append_key_value(ret, subtags, LOC_REGION) ||
@@ -443,9 +443,9 @@ static Variant HHVM_STATIC_METHOD(Locale, composeLocale, const Array& subtags) {
   return ret;
 }
 
-static Array HHVM_STATIC_METHOD(Locale, getAllVariants, const String& locale) {
+static Array HHVM_STATIC_METHOD(Locale, getAllVariants, const OptString& locale) {
   Variant val = get_icu_value(localeOrDefault(locale), LOC_VARIANT);
-  String strval = val.toString();
+  OptString strval = val.toString();
   if (strval.empty()) {
     return Array();
   }
@@ -456,70 +456,70 @@ static Array HHVM_STATIC_METHOD(Locale, getAllVariants, const String& locale) {
     if ((p - s) <= 1) {
       return ret;
     }
-    ret.append(String(s, p - s, CopyString));
+    ret.append(OptString(s, p - s, CopyString));
     s = p + 1;
   }
   if ((e - s) > 1) {
-    ret.append(String(s, e - s, CopyString));
+    ret.append(OptString(s, e - s, CopyString));
   }
   return ret;
 }
 
-static String HHVM_STATIC_METHOD(Locale, getDefault) {
+static OptString HHVM_STATIC_METHOD(Locale, getDefault) {
   return GetDefaultLocale();
 }
 
-static String HHVM_STATIC_METHOD(Locale, getDisplayLanguage,
-                                 const String& locale,
-                                 const String& in_locale) {
+static OptString HHVM_STATIC_METHOD(Locale, getDisplayLanguage,
+                                 const OptString& locale,
+                                 const OptString& in_locale) {
   return get_icu_display_value(
     localeOrDefault(locale), localeOrDefault(in_locale), LOC_LANG
   ).toString();
 }
 
-static String HHVM_STATIC_METHOD(Locale, getDisplayName,
-                                 const String& locale,
-                                 const String& in_locale) {
+static OptString HHVM_STATIC_METHOD(Locale, getDisplayName,
+                                 const OptString& locale,
+                                 const OptString& in_locale) {
   return get_icu_display_value(
     localeOrDefault(locale), localeOrDefault(in_locale), LOC_DISPLAY
   ).toString();
 }
 
-static String HHVM_STATIC_METHOD(Locale, getDisplayRegion,
-                                 const String& locale,
-                                 const String& in_locale) {
+static OptString HHVM_STATIC_METHOD(Locale, getDisplayRegion,
+                                 const OptString& locale,
+                                 const OptString& in_locale) {
   return get_icu_display_value(
     localeOrDefault(locale), localeOrDefault(in_locale), LOC_REGION
   ).toString();
 }
 
-static String HHVM_STATIC_METHOD(Locale, getDisplayScript,
-                                 const String& locale,
-                                 const String& in_locale) {
+static OptString HHVM_STATIC_METHOD(Locale, getDisplayScript,
+                                 const OptString& locale,
+                                 const OptString& in_locale) {
   return get_icu_display_value(
     localeOrDefault(locale), localeOrDefault(in_locale), LOC_SCRIPT
   ).toString();
 }
 
-static String HHVM_STATIC_METHOD(Locale, getDisplayVariant,
-                                 const String& locale,
-                                 const String& in_locale) {
+static OptString HHVM_STATIC_METHOD(Locale, getDisplayVariant,
+                                 const OptString& locale,
+                                 const OptString& in_locale) {
   return get_icu_display_value(
     localeOrDefault(locale), localeOrDefault(in_locale), LOC_VARIANT
   ).toString();
 }
 
-static Array HHVM_STATIC_METHOD(Locale, getKeywords, const String& locale) {
+static Array HHVM_STATIC_METHOD(Locale, getKeywords, const OptString& locale) {
   UErrorCode error = U_ZERO_ERROR;
   CHECK_LOCALELEN_OR_RETURN(locale, Array());
-  String locname = localeOrDefault(locale);
+  OptString locname = localeOrDefault(locale);
   UEnumeration *e = uloc_openKeywords(locname.c_str(), &error);
   if (!e) return Array();
 
   Array ret = Array::CreateDict();
   const char *key;
   int key_len;
-  String val(128, ReserveString);
+  OptString val(128, ReserveString);
   char *ptr = val.get()->mutableData();
   error = U_ZERO_ERROR;
   while ((key = uenum_next(e, &key_len, &error))) {
@@ -528,7 +528,7 @@ tryagain:
     int val_len = uloc_getKeywordValue(locname.c_str(), key,
                                        ptr, val.capacity() + 1, &error);
     if (error == U_BUFFER_OVERFLOW_ERROR) {
-      val = String(val_len + 128, ReserveString);
+      val = OptString(val_len + 128, ReserveString);
       ptr = val.get()->mutableData();
       goto tryagain;
     }
@@ -538,25 +538,25 @@ tryagain:
                                     " keyword");
       return Array();
     }
-    ret.set(String(key, key_len, CopyString), String(ptr, val_len, CopyString));
+    ret.set(OptString(key, key_len, CopyString), OptString(ptr, val_len, CopyString));
   }
   return ret;
 }
 
-static String HHVM_STATIC_METHOD(Locale, getPrimaryLanguage,
-                                 const String& locale) {
+static OptString HHVM_STATIC_METHOD(Locale, getPrimaryLanguage,
+                                 const OptString& locale) {
   return get_icu_value(localeOrDefault(locale), LOC_LANG).toString();
 }
 
-static Variant HHVM_STATIC_METHOD(Locale, getRegion, const String& locale) {
+static Variant HHVM_STATIC_METHOD(Locale, getRegion, const OptString& locale) {
   return get_icu_value(localeOrDefault(locale), LOC_REGION);
 }
 
-static Variant HHVM_STATIC_METHOD(Locale, getScript, const String& locale) {
+static Variant HHVM_STATIC_METHOD(Locale, getScript, const OptString& locale) {
   return get_icu_value(localeOrDefault(locale), LOC_SCRIPT);
 }
 
-static String locale_suffix_strip(const String& locale) {
+static OptString locale_suffix_strip(const OptString& locale) {
   for (int i = locale.size(); i >= 0; --i) {
     if (isIDSeparator(locale[i])) {
       if ((i >= 2) && isIDSeparator(locale[i - 2])) {
@@ -566,10 +566,10 @@ static String locale_suffix_strip(const String& locale) {
       }
     }
   }
-  return String();
+  return OptString();
 }
 
-inline void normalize_for_match(String& v) {
+inline void normalize_for_match(OptString& v) {
   for (char *ptr = v.get()->mutableData(), *end = ptr + v.size(); ptr < end;
        ++ptr) {
     if (*ptr == '-') {
@@ -581,12 +581,12 @@ inline void normalize_for_match(String& v) {
   v.get()->invalidateHash();
 }
 
-static String HHVM_STATIC_METHOD(Locale, lookup, const Array& langtag,
-                                 const String& locale,
-                                 bool canonicalize, const String& def) {
-  String locname(localeOrDefault(locale), CopyString);
+static OptString HHVM_STATIC_METHOD(Locale, lookup, const Array& langtag,
+                                 const OptString& locale,
+                                 bool canonicalize, const OptString& def) {
+  OptString locname(localeOrDefault(locale), CopyString);
   CHECK_LOCALELEN_OR_RETURN(locale, def);
-  req::vector<std::pair<String,String>> cur_arr;
+  req::vector<std::pair<OptString,OptString>> cur_arr;
   for (ArrayIter iter(langtag); iter; ++iter) {
     auto val = iter.second();
     if (!val.isString()) {
@@ -594,7 +594,7 @@ static String HHVM_STATIC_METHOD(Locale, lookup, const Array& langtag,
                              "locale array element is not a string");
       return def;
     }
-    String normalized(val.toString(), CopyString);
+    OptString normalized(val.toString(), CopyString);
     normalize_for_match(normalized);
     if (canonicalize) {
       normalized = get_icu_value(normalized, LOC_CANONICALIZE).toString();
@@ -629,9 +629,9 @@ static String HHVM_STATIC_METHOD(Locale, lookup, const Array& langtag,
   return def;
 }
 
-static Variant get_private_subtags(const String& locname) {
+static Variant get_private_subtags(const OptString& locname) {
   if (locname.empty()) return init_null();
-  String locale(locname);
+  OptString locale(locname);
   int pos;
   while ((pos = singleton_pos(locale)) >= 0) {
     if ((locale[pos] == 'x') || (locale[pos] == 'X')) {
@@ -650,7 +650,7 @@ static Variant get_private_subtags(const String& locname) {
 }
 
 static void add_array_entry(Array& ret,
-                            const String& locname,
+                            const OptString& locname,
                             LocaleTag tag) {
   Variant val;
   if (tag == LOC_PRIVATE) {
@@ -659,7 +659,7 @@ static void add_array_entry(Array& ret,
     val = get_icu_value(locname, tag, true);
   }
   if (val.isNull()) return;
-  String strval = val.toString();
+  OptString strval = val.toString();
   if (strval.empty()) {
     return;
   }
@@ -675,18 +675,18 @@ static void add_array_entry(Array& ret,
   for (cnt = 0, p = s; p < e; ++p) {
     if (!isIDSeparator(*p)) continue;
     if ((p - s) > 1) {
-      ret.set(name + String(cnt++), String(s, p - s, CopyString));
+      ret.set(name + OptString(cnt++), OptString(s, p - s, CopyString));
     }
     s = p + 1;
   }
   if ((e - s) > 1) {
-    ret.set(name + String(cnt++), String(s, e - s, CopyString));
+    ret.set(name + OptString(cnt++), OptString(s, e - s, CopyString));
   }
 }
 
-static Array HHVM_STATIC_METHOD(Locale, parseLocale, const String& locale) {
+static Array HHVM_STATIC_METHOD(Locale, parseLocale, const OptString& locale) {
   CHECK_LOCALELEN_OR_RETURN(locale, Array());
-  String locname = localeOrDefault(locale);
+  OptString locname = localeOrDefault(locale);
   Array ret = Array::CreateDict();
   if (std::find(g_grandfathered.begin(),
                 g_grandfathered.end(), locale.data()) !=
@@ -702,7 +702,7 @@ static Array HHVM_STATIC_METHOD(Locale, parseLocale, const String& locale) {
   return ret;
 }
 
-static bool HHVM_STATIC_METHOD(Locale, setDefault, const String& locale) {
+static bool HHVM_STATIC_METHOD(Locale, setDefault, const OptString& locale) {
   return SetDefaultLocale(locale);
 }
 

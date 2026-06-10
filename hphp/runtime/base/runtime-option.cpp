@@ -362,7 +362,7 @@ const RepoOptions& RepoOptions::forFile(const std::string& path) {
     wrapper = Stream::getWrapperFromURI(path, nullptr);
     if (wrapper && !wrapper->isNormalFileStream()) wrapper = nullptr;
   }
-  auto const wrapped_open = [&](const char* path) -> Optional<String> {
+  auto const wrapped_open = [&](const char* path) -> Optional<OptString> {
     if (wrapper) {
       if (auto const file = wrapper->open(path, "r", 0, nullptr)) {
         return file->read();
@@ -1116,7 +1116,7 @@ void RuntimeOption::Load(
   std::string relConfigsError;
   Config::Bind(s_RelativeConfigs, ini, config, "RelativeConfigs");
   if (!cmd.empty() && !s_RelativeConfigs.empty()) {
-    String strcmd(cmd, CopyString);
+    OptString strcmd(cmd, CopyString);
     Process::InitProcessStatics();
     auto const currentDir = Process::CurrentWorkingDirectory.data();
     std::vector<std::string> newConfigs;
@@ -1127,7 +1127,7 @@ void RuntimeOption::Load(
       std::string fullpath;
       auto const found = FileUtil::runRelative(
         str, strcmd, currentDir,
-        [&] (const String& f) {
+        [&] (const OptString& f) {
           if (access(f.data(), R_OK) == 0) {
             fullpath = f.toCppString();
             FTRACE_MOD(Trace::facts, 3, "Parsing {}\n", fullpath);

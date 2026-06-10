@@ -31,7 +31,7 @@ namespace HPHP {
 /**
  * Detects multiple/malformed multiple newlines in mail headers.
  */
-static int php_mail_detect_multiple_crlf(const String& str) {
+static int php_mail_detect_multiple_crlf(const OptString& str) {
 
   std::string hdr(str.c_str());
   unsigned int l = hdr.length();
@@ -74,7 +74,7 @@ static int php_mail_detect_multiple_crlf(const String& str) {
 /**
  * Removes whitespaces from the end.
  */
-static String php_rtrim(const String& str) {
+static OptString php_rtrim(const OptString& str) {
   std::string s(str.c_str());
   unsigned int l = s.length();
   while (l > 0 && isspace((unsigned char)s[l - 1])) {
@@ -87,7 +87,7 @@ static String php_rtrim(const String& str) {
  * Removes whitespaces from the end, and replaces control characters with ' '
  * from the beginning.
  */
-static String php_trim(const String& str) {
+static OptString php_trim(const OptString& str) {
   std::string s(str.c_str());
   unsigned int l = s.length();
   while (l > 0 && isspace((unsigned char)s[l - 1])) {
@@ -109,8 +109,8 @@ static String php_trim(const String& str) {
   return s.substr(0, l);
 }
 
-bool php_mail(const String& to, const String& subject, const String& message,
-              const String& headers, const String& extra_cmd) {
+bool php_mail(const OptString& to, const OptString& subject, const OptString& message,
+              const OptString& headers, const OptString& extra_cmd) {
   // assumes we always have sendmail installed
   always_assert(!Cfg::Mail::SendmailPath.empty());
 
@@ -146,17 +146,17 @@ const StaticString
   s_space(" ");
 
 bool HHVM_FUNCTION(mail,
-                   const String& to,
-                   const String& subject,
-                   const String& message,
-                   const String& additional_headers /* = null_string */,
-                   const String& additional_parameters /* = null_string */) {
+                   const OptString& to,
+                   const OptString& subject,
+                   const OptString& message,
+                   const OptString& additional_headers /* = null_string */,
+                   const OptString& additional_parameters /* = null_string */) {
 
   // replace \0 with spaces
-  String to2 = string_replace(to, s_zero, s_space);
-  String subject2 = string_replace(subject, s_zero, s_space);
-  String message2 = string_replace(message, s_zero, s_space);
-  String headers2;
+  OptString to2 = string_replace(to, s_zero, s_space);
+  OptString subject2 = string_replace(subject, s_zero, s_space);
+  OptString message2 = string_replace(message, s_zero, s_space);
+  OptString headers2;
   if (!additional_headers.empty()) {
     headers2 = string_replace(additional_headers, s_zero, s_space);
     headers2 = php_rtrim(headers2);
@@ -166,7 +166,7 @@ bool HHVM_FUNCTION(mail,
       return false;
     }
   }
-  String params2;
+  OptString params2;
   if (!additional_parameters.empty()) {
     params2 = string_replace(additional_parameters, s_zero, s_space);
   }
@@ -184,7 +184,7 @@ bool HHVM_FUNCTION(mail,
   return php_mail(to2, subject2, message2, headers2, params2);
 }
 
-int64_t HHVM_FUNCTION(ezmlm_hash, const String& addr) {
+int64_t HHVM_FUNCTION(ezmlm_hash, const OptString& addr) {
   unsigned int h = 5381;
   int str_len = addr.length();
   for (int i = 0; i < str_len; i++) {

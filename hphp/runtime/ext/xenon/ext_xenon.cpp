@@ -272,7 +272,7 @@ void XenonRequestLocalData::log(Xenon::SampleType t,
   auto& existing_m_map = context->m_map;
   DictInit ic_state(existing_m_map.size());
   for (auto const& p : existing_m_map) {
-    ic_state.set(String(p.first->nameStr()), p.second.first);
+    ic_state.set(OptString(p.first->nameStr()), p.second.first);
   }
 
   Array dict = make_dict_array(
@@ -295,13 +295,13 @@ void XenonRequestLocalData::log(Xenon::SampleType t,
   );
   m_stackSnapshots.append(dict);
 
-  const String path = g_context->m_xenonRequestOutputFile;
+  const OptString path = g_context->m_xenonRequestOutputFile;
   if (!path.isNull() && !path.empty()) {
     // Since callers may use the same file for multiple requests,
     // we want to include the originating thread ID and provide locking.
     dict.set(s_tid, Process::GetThreadPid());
     auto const opts = k_JSON_FB_FORCE_HACK_ARRAYS;
-    String out = json_encode_skip_jsonserializable(dict, opts, true /* limit */);
+    OptString out = json_encode_skip_jsonserializable(dict, opts, true /* limit */);
 
     // Synchronize file append using a static mutex
     static std::mutex xenon_file_mutex;
@@ -377,7 +377,7 @@ bool HHVM_FUNCTION(xenon_get_is_profiled_request, void) {
   return Xenon::getInstance().getIsProfiledRequest();
 }
 
-void HHVM_FUNCTION(xenon_set_request_output_file, const String& path) {
+void HHVM_FUNCTION(xenon_set_request_output_file, const OptString& path) {
   g_context->m_xenonRequestOutputFile = path;
 }
 

@@ -98,8 +98,8 @@ static bool stream_context_set_option0(const req::ptr<StreamContext>& context,
 }
 
 static bool stream_context_set_option1(const req::ptr<StreamContext>& context,
-                                       const String& wrapper,
-                                       const String& option,
+                                       const OptString& wrapper,
+                                       const OptString& option,
                                        const Variant& value) {
   context->setOption(wrapper, option, value);
   return true;
@@ -196,7 +196,7 @@ Variant HHVM_FUNCTION(stream_copy_to_stream,
     while (!srcFile->eof()) {
       // We read 0x10000 (64 KB at a time) because the size of a StringBuffer
       // is limited.
-      String buf = srcFile->read(0x10000);
+      OptString buf = srcFile->read(0x10000);
 
       if (buf.size() == 0) break;
       if (destFile->write(buf) != buf.size()) {
@@ -210,7 +210,7 @@ Variant HHVM_FUNCTION(stream_copy_to_stream,
       int64_t remaining = maxlength - cbytes;
       //srcFile->getChunkSize currently returns an int64_t
       auto chunkSize = srcFile->getChunkSize();
-      String buf = srcFile->read(std::min(remaining, chunkSize));
+      OptString buf = srcFile->read(std::min(remaining, chunkSize));
       if (buf.size() == 0) break;
       if (destFile->write(buf) != buf.size()) {
         return false;
@@ -247,7 +247,7 @@ Variant HHVM_FUNCTION(stream_get_contents,
     return false;
   }
 
-  String ret;
+  OptString ret;
   if (maxlen != -1) {
     if (maxlen < 0) {
       return false;
@@ -263,7 +263,7 @@ Variant HHVM_FUNCTION(stream_get_line,
                       const OptResource& handle,
                       int64_t length /* = 0 */,
                       const Variant& ending /* = uninit_variant */) {
-  const String& strEnding = ending.isNull() ? null_string : ending.toString();
+  const OptString& strEnding = ending.isNull() ? null_string : ending.toString();
   return cast<File>(handle)->readRecord(strEnding, length);
 }
 
@@ -282,14 +282,14 @@ Array HHVM_FUNCTION(stream_get_transports) {
   return make_vec_array("tcp", "udp", "unix", "udg", "ssl", "tls");
 }
 
-Variant HHVM_FUNCTION(stream_resolve_include_path, const String& filename,
+Variant HHVM_FUNCTION(stream_resolve_include_path, const OptString& filename,
                       const Variant& /*context*/ /* = uninit_variant */) {
   if (!FileUtil::checkPathAndWarn(filename, __FUNCTION__ + 2, 1)) {
     return init_null();
   }
 
   struct stat s;
-  String ret = resolveVmInclude(filename.get(), "", &s, /*allow_dir*/true);
+  OptString ret = resolveVmInclude(filename.get(), "", &s, /*allow_dir*/true);
   if (ret.isNull()) {
     return false;
   }
@@ -474,7 +474,7 @@ static Variant socket_accept_impl(
   return Variant(std::move(new_sock));
 }
 
-static String get_sockaddr_name(struct sockaddr_storage *sas, socklen_t sl) {
+static OptString get_sockaddr_name(struct sockaddr_storage *sas, socklen_t sl) {
   char abuf[256];
   char* buf = nullptr;
   char textaddr[1024] = {'\0'};
@@ -521,8 +521,8 @@ static String get_sockaddr_name(struct sockaddr_storage *sas, socklen_t sl) {
     break;
   }
 
-  if (textaddrlen) return String(textaddr, textaddrlen, CopyString);
-  return String();
+  if (textaddrlen) return OptString(textaddr, textaddrlen, CopyString);
+  return OptString();
 }
 
 Variant HHVM_FUNCTION(stream_socket_accept,
@@ -557,7 +557,7 @@ Variant HHVM_FUNCTION(stream_socket_accept,
 }
 
 Variant HHVM_FUNCTION(stream_socket_server,
-                      const String& local_socket,
+                      const OptString& local_socket,
                       Variant& errnum,
                       Variant& errstr,
                       int64_t flags /* = 0 */,
@@ -567,7 +567,7 @@ Variant HHVM_FUNCTION(stream_socket_server,
 }
 
 Variant HHVM_FUNCTION(stream_socket_client,
-                      const String& remote_socket,
+                      const OptString& remote_socket,
                       Variant& errnum,
                       Variant& errstr,
                       double timeout /* = -1.0 */,
@@ -676,11 +676,11 @@ Variant HHVM_FUNCTION(stream_socket_recvfrom,
 
 Variant HHVM_FUNCTION(stream_socket_sendto,
                       const OptResource& socket,
-                      const String& data,
+                      const OptString& data,
                       int64_t flags /* = 0 */,
                       const Variant& address /* = uninit_variant */) {
-  String host; int port;
-  const String& strAddress = address.isNull()
+  OptString host; int port;
+  const OptString& strAddress = address.isNull()
                            ? null_string
                            : address.toString();
 
@@ -762,8 +762,8 @@ void StreamContext::mergeOptions(const Array& options) {
   }
 }
 
-void StreamContext::setOption(const String& wrapper,
-                               const String& option,
+void StreamContext::setOption(const OptString& wrapper,
+                               const OptString& option,
                                const Variant& value) {
   if (m_options.isNull()) {
     m_options = Array::CreateDict();

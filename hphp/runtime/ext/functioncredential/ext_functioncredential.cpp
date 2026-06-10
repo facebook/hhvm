@@ -51,8 +51,8 @@ class FunctionCredentialAuthKey {
  public:
   explicit FunctionCredentialAuthKey(bool testMode = false);
 
-  String sign(const std::string& message) const;
-  String verify(const String& signedMessage) const;
+  OptString sign(const std::string& message) const;
+  OptString verify(const OptString& signedMessage) const;
 
  private:
   std::array<unsigned char, crypto_auth_KEYBYTES> key_;
@@ -76,8 +76,8 @@ struct ParsedSignedMessage {
   folly::StringPiece hexTag;
 };
 
-void validateSignedMessageFormat(const String& signedMessage);
-ParsedSignedMessage parseSignedMessage(const String& signedMessage);
+void validateSignedMessageFormat(const OptString& signedMessage);
+ParsedSignedMessage parseSignedMessage(const OptString& signedMessage);
 std::string decodeAuthTag(folly::StringPiece hexTag);
 void verifyAuthTag(
     const std::string& tag,
@@ -125,12 +125,12 @@ static TypedValue HHVM_METHOD(FunctionCredential, getClassName) {
 
 static StringRet HHVM_METHOD(FunctionCredential, getFunctionName) {
   auto data = FunctionCredential::fromObject(this_);
-  return String{makeStaticString(data->func()->name())};
+  return OptString{makeStaticString(data->func()->name())};
 }
 
 static StringRet HHVM_METHOD(FunctionCredential, getFilename) {
   auto data = FunctionCredential::fromObject(this_);
-  return String{makeStaticString(data->func()->filename())};
+  return OptString{makeStaticString(data->func()->filename())};
 }
 
 static StringRet HHVM_METHOD(FunctionCredential, getMethodOrFunctionName) {
@@ -138,10 +138,10 @@ static StringRet HHVM_METHOD(FunctionCredential, getMethodOrFunctionName) {
   auto func = data->func();
   auto cls = func->cls();
   if (cls) {
-    return String(
+    return OptString(
         fmt::format("{}::{}", cls->name()->data(), func->name()->data()));
   }
-  return String{makeStaticString(func->name())};
+  return OptString{makeStaticString(func->name())};
 }
 
 static StringRet HHVM_METHOD(FunctionCredential, pack) {
@@ -174,8 +174,8 @@ static StringRet HHVM_METHOD(FunctionCredential, pack) {
 }
 
 static ObjectRet
-HHVM_STATIC_METHOD(FunctionCredential, unpack, const String& packed) {
-  String jsonStr = getAuthKey().verify(packed);
+HHVM_STATIC_METHOD(FunctionCredential, unpack, const OptString& packed) {
+  OptString jsonStr = getAuthKey().verify(packed);
 
   // Parse the JSON
   folly::dynamic jsonObj;
@@ -234,7 +234,7 @@ FunctionCredentialAuthKey::FunctionCredentialAuthKey(bool testMode)
   }
 }
 
-String FunctionCredentialAuthKey::sign(const std::string& message) const {
+OptString FunctionCredentialAuthKey::sign(const std::string& message) const {
   std::array<unsigned char, crypto_auth_BYTES> tag;
   crypto_auth(
       tag.data(),
@@ -244,18 +244,18 @@ String FunctionCredentialAuthKey::sign(const std::string& message) const {
 
   // Hex-encode the tag and format as "message:hex_tag"
   auto hexTag = folly::hexlify(folly::ByteRange(tag.data(), tag.size()));
-  return String(fmt::format("{}:{}", message, hexTag));
+  return OptString(fmt::format("{}:{}", message, hexTag));
 }
 
-String FunctionCredentialAuthKey::verify(const String& signedMessage) const {
+OptString FunctionCredentialAuthKey::verify(const OptString& signedMessage) const {
   validateSignedMessageFormat(signedMessage);
   auto parsed = parseSignedMessage(signedMessage);
   auto tag = decodeAuthTag(parsed.hexTag);
   verifyAuthTag(tag, parsed.message, key_);
-  return String(parsed.message.data(), parsed.message.size(), CopyString);
+  return OptString(parsed.message.data(), parsed.message.size(), CopyString);
 }
 
-void validateSignedMessageFormat(const String& packedMessage) {
+void validateSignedMessageFormat(const OptString& packedMessage) {
   if (packedMessage.size() < kMinSignedMessageLen) {
     SystemLib::throwInvalidArgumentExceptionObject(
         "Invalid packed FunctionCredential: data too short");
@@ -268,7 +268,7 @@ void validateSignedMessageFormat(const String& packedMessage) {
   }
 }
 
-ParsedSignedMessage parseSignedMessage(const String& signedMessage) {
+ParsedSignedMessage parseSignedMessage(const OptString& signedMessage) {
   size_t messageLen = signedMessage.size() - kHexTagLen - 1;
   return ParsedSignedMessage{
       folly::StringPiece(signedMessage.data(), messageLen),
@@ -303,7 +303,7 @@ void verifyAuthTag(
 }
 
 const Func* loadFreeFunctionOrThrow(folly::StringPiece funcNamePiece) {
-  String funcName{funcNamePiece};
+  OptString funcName{funcNamePiece};
 
   const auto* func = Func::load(funcName.get());
 
@@ -317,7 +317,7 @@ const Func* loadFreeFunctionOrThrow(folly::StringPiece funcNamePiece) {
 const Func* loadClassMethodOrThrow(
     folly::StringPiece classNamePiece,
     folly::StringPiece funcNamePiece) {
-  String className{classNamePiece};
+  OptString className{classNamePiece};
 
   const auto* cls = Class::load(className.get());
 
@@ -326,7 +326,7 @@ const Func* loadClassMethodOrThrow(
         fmt::format("Unable to find class {}", className.c_str()));
   }
 
-  String funcName{funcNamePiece};
+  OptString funcName{funcNamePiece};
 
   const auto* func = cls->lookupMethod(funcName.get());
 

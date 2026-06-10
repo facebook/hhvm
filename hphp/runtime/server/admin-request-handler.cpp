@@ -1189,7 +1189,7 @@ bool AdminRequestHandler::handleInvalidateUnitRequest(const std::string &cmd,
 
   bool first = true;
   for (auto const& path : paths) {
-    String translatedPath = File::TranslatePathKeepRelative(path);
+    OptString translatedPath = File::TranslatePathKeepRelative(path);
     invalidateUnit(translatedPath.get());
 
     if (first) {

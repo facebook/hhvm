@@ -26,10 +26,10 @@ namespace HPHP {
 struct File;
 
 struct StringBufferLimitException : FatalErrorException {
-  StringBufferLimitException(int size, const String& partialResult)
+  StringBufferLimitException(int size, const OptString& partialResult)
     : FatalErrorException(0, "StringBuffer exceeded %d bytes of memory", size),
       m_result(partialResult) {}
-  req::root<String> m_result;
+  req::root<OptString> m_result;
 };
 
 /*
@@ -100,13 +100,13 @@ struct StringBuffer {
    *
    * Post: empty()
    */
-  String detach();
+  OptString detach();
 
   /*
    * Copy this buffer into a String.  The contents of this buffer
    * object are unchanged.
    */
-  String copy() const;
+  OptString copy() const;
 
   /*
    * Set the length of this string to zero.
@@ -167,7 +167,7 @@ struct StringBuffer {
   }
   void append(unsigned char c) { append((char)c);}
   void append(const char* s) { assertx(s); append(s, strlen(s)); }
-  void append(const String& s) { append(s.data(), s.size()); }
+  void append(const OptString& s) { append(s.data(), s.size()); }
   void append(const std::string& s) { append(s.data(), s.size()); }
   void append(const StringData* s) { append(s->data(), s->size()); }
   void append(folly::StringPiece s) { append(s.data(), s.size()); }

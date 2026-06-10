@@ -89,7 +89,7 @@ void c_PriorityBridgeWaitHandle::onUnblocked() {
   decRefObj(this);
 }
 
-String c_PriorityBridgeWaitHandle::getName() { return s_priorityBridge; }
+OptString c_PriorityBridgeWaitHandle::getName() { return s_priorityBridge; }
 
 c_WaitableWaitHandle* c_PriorityBridgeWaitHandle::getChild() {
   assertx(getState() == STATE_BLOCKED);

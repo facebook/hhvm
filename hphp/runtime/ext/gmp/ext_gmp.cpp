@@ -32,13 +32,13 @@ const StaticString s_GMP_g("g");
 
 ///////////////////////////////////////////////////////////////////////////////
 // helpers
-static String mpzToString(mpz_t gmpData, const int64_t base) {
+static OptString mpzToString(mpz_t gmpData, const int64_t base) {
   int charLength = mpz_sizeinbase(gmpData, std::abs(base)) + 1;
   if (mpz_sgn(gmpData) < 0) {
     ++charLength;
   }
 
-  String str{size_t(charLength), ReserveString};
+  OptString str{size_t(charLength), ReserveString};
   auto buf = str.mutableData();
   mpz_get_str(buf, base, gmpData);
   return str.setSize(strlen(buf));
@@ -56,9 +56,9 @@ static Object mpzToGMPObject(mpz_t gmpData) {
 
 
 static bool setMpzFromString(mpz_t gmpData,
-                             const String& stringInput,
+                             const OptString& stringInput,
                              int64_t base) {
-  String strNum(stringInput);
+  OptString strNum(stringInput);
   int64_t strLength = strNum.length();
 
   if (strLength == 0) {
@@ -1242,7 +1242,7 @@ static Variant HHVM_FUNCTION(gmp_strval,
     return false;
   }
 
-  String returnValue(mpzToString(gmpData, base));
+  OptString returnValue(mpzToString(gmpData, base));
 
   mpz_clear(gmpData);
 
@@ -1325,7 +1325,7 @@ static Variant HHVM_FUNCTION(gmp_xor,
 
 ///////////////////////////////////////////////////////////////////////////////
 // extension class methods
-static String HHVM_METHOD(GMP, serialize) {
+static OptString HHVM_METHOD(GMP, serialize) {
   auto data = Native::data<GMPData>(this_);
 
   // We first serialize our number as a string, then we need to serialize
@@ -1346,7 +1346,7 @@ static String HHVM_METHOD(GMP, serialize) {
 
 static void HHVM_METHOD(GMP, unserialize,
                         const Variant& data) {
-  String serialData = data.toString();
+  OptString serialData = data.toString();
   VariableUnserializer unserializer(serialData.data(),
                                     serialData.length(),
                                     VariableUnserializer::Type::Serialize);
@@ -1378,7 +1378,7 @@ static Array HHVM_METHOD(GMP, __debugInfo) {
   auto gmpObjectData = Native::data<GMPData>(this_);
   Array ret = this_->toArray(true);
 
-  String num = mpzToString(gmpObjectData->getGMPMpz(), 10);
+  OptString num = mpzToString(gmpObjectData->getGMPMpz(), 10);
   ret.set(s_GMP_num, num);
 
   return ret;

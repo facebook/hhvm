@@ -31,16 +31,16 @@ struct BZ2File : File {
   DECLARE_RESOURCE_ALLOCATION(BZ2File)
 
   // overriding ResourceData
-  const String& o_getClassNameHook() const override { return classnameof(); }
+  const OptString& o_getClassNameHook() const override { return classnameof(); }
 
   BZ2File();
   explicit BZ2File(req::ptr<PlainFile>&& innerFile);
   virtual ~BZ2File();
 
-  bool open(const String& filename, const String& mode) override;
+  bool open(const OptString& filename, const OptString& mode) override;
   bool close(int* unused = nullptr) final;
   int64_t errnu();
-  String errstr();
+  OptString errstr();
   Array error();
   bool flush() override;
   int64_t readImpl(char * buf, int64_t length) override;

@@ -76,7 +76,7 @@ enum php_openssl_cipher_type {
   PHP_OPENSSL_CIPHER_DEFAULT = PHP_OPENSSL_CIPHER_RC2_40
 };
 
-Variant openssl_pkcs7_verify_core(const String& filename, int flags,
+Variant openssl_pkcs7_verify_core(const OptString& filename, int flags,
                                 const Variant& voutfilename /* = null_string */,
                                 const Variant& vcainfo /* = null_array */,
                                 const Variant& vextracerts /* = null_string */,
@@ -84,19 +84,19 @@ Variant openssl_pkcs7_verify_core(const String& filename, int flags,
                                 bool ignore_cert_expiration);
 Variant HHVM_FUNCTION(openssl_random_pseudo_bytes, int64_t length,
                                         bool& crypto_strong);
-Variant HHVM_FUNCTION(openssl_cipher_iv_length, const String& method);
-Variant HHVM_FUNCTION(openssl_encrypt, const String& data, const String& method,
-                                       const String& password,
+Variant HHVM_FUNCTION(openssl_cipher_iv_length, const OptString& method);
+Variant HHVM_FUNCTION(openssl_encrypt, const OptString& data, const OptString& method,
+                                       const OptString& password,
                                        int64_t options = 0,
-                                       const String& iv = null_string,
-                                       const String& aad = null_string,
+                                       const OptString& iv = null_string,
+                                       const OptString& aad = null_string,
                                        int64_t tag_length = 16);
-Variant HHVM_FUNCTION(openssl_decrypt, const String& data, const String& method,
-                                       const String& password,
+Variant HHVM_FUNCTION(openssl_decrypt, const OptString& data, const OptString& method,
+                                       const OptString& password,
                                        int64_t options = 0,
-                                       const String& iv = null_string,
-                                       const String& tag = null_string,
-                                       const String& aad = null_string);
+                                       const OptString& iv = null_string,
+                                       const OptString& tag = null_string,
+                                       const OptString& aad = null_string);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

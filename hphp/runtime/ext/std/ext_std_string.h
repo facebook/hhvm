@@ -24,8 +24,8 @@ namespace HPHP {
 
 extern const StaticString s_nl;
 
-Variant HHVM_FUNCTION(wordwrap, const String& str, int64_t linewidth = 75,
-                      const String& brk = s_nl, bool cut = false);
+Variant HHVM_FUNCTION(wordwrap, const OptString& str, int64_t linewidth = 75,
+                      const OptString& brk = s_nl, bool cut = false);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

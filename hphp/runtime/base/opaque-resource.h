@@ -26,7 +26,7 @@ namespace HPHP {
 struct OpaqueResource : ResourceData {
   OpaqueResource(int64_t id, Variant val) : m_id(id), m_value(val) {}
   virtual ~OpaqueResource() = default;
-  const String& o_getClassNameHook() const override {
+  const OptString& o_getClassNameHook() const override {
     static StaticString OpaqueValue("OpaqueValue");
     return OpaqueValue;
   }

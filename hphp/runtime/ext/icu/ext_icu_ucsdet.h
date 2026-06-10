@@ -23,22 +23,22 @@ struct EncodingDetector : IntlError, SystemLib::ClassLoader<"EncodingDetector"> 
     return GetData<EncodingDetector>(obj, className());
   }
 
-  const String& text() const { return m_text; }
-  const String& declaredEncoding() const { return m_declaredEncoding; }
+  const OptString& text() const { return m_text; }
+  const OptString& declaredEncoding() const { return m_declaredEncoding; }
 
   std::shared_ptr<UCharsetDetector> detector();
 
-  void setText(const String& text) {
+  void setText(const OptString& text) {
     m_text = text;
   }
 
-  void setDeclaredEncoding(const String& encoding) {
+  void setDeclaredEncoding(const OptString& encoding) {
     m_declaredEncoding = encoding;
   }
 
  private:
-  String m_text;
-  String m_declaredEncoding;
+  OptString m_text;
+  OptString m_declaredEncoding;
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -55,8 +55,8 @@ struct EncodingMatch : IntlError, SystemLib::ClassLoader<"EncodingMatch"> {
 
   static Object newInstance(const UCharsetMatch* match,
                             const std::shared_ptr<UCharsetDetector>& det,
-                            const String& text,
-                            const String& declaredEncoding) {
+                            const OptString& text,
+                            const OptString& declaredEncoding) {
     Object ret{classof()};
     auto const data = Native::data<EncodingMatch>(ret);
     data->m_match = const_cast<UCharsetMatch*>(match);
@@ -81,8 +81,8 @@ struct EncodingMatch : IntlError, SystemLib::ClassLoader<"EncodingMatch"> {
   std::shared_ptr<UCharsetDetector> m_encodingDetector;
   UCharsetMatch* m_match{nullptr};
   // m_text and m_declaredEncoding are used by m_encodingDetector
-  String m_text;
-  String m_declaredEncoding;
+  OptString m_text;
+  OptString m_declaredEncoding;
 };
 
 /////////////////////////////////////////////////////////////////////////////

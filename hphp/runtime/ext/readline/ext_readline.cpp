@@ -51,7 +51,7 @@ static Variant HHVM_FUNCTION(readline, const Variant& prompt /* = null */) {
   }
 }
 
-static bool HHVM_FUNCTION(readline_add_history, const String& line) {
+static bool HHVM_FUNCTION(readline_add_history, const OptString& line) {
   add_history(line.data());
   return true;
 }
@@ -73,7 +73,7 @@ static char* _readline_command_generator(const char* text, int state) {
   if (state == 0) {
     iter = s_readline->array.begin();
   }
-  auto text_str = String(text);
+  auto text_str = OptString(text);
   while (iter) {
     auto value = tvCastToString(iter.secondVal());
     ++iter;
@@ -183,7 +183,7 @@ Variant HHVM_FUNCTION(readline_info, const Variant& varnameMixed /* = null */,
     auto const varname = varnameMixed.toString();
     Variant oldval;
     if (varname == s_line_buffer) {
-      oldval = String(convert_null_to_empty(rl_line_buffer));
+      oldval = OptString(convert_null_to_empty(rl_line_buffer));
       if (!newvalueMixed.isNull() &&
           oldval.toString() != newvalueMixed.toString()) {
         Lock lock(info_lock);
@@ -230,7 +230,7 @@ Variant HHVM_FUNCTION(readline_info, const Variant& varnameMixed /* = null */,
     } else if (varname == s_library_version) {
       return convert_null_to_empty(rl_library_version);
     } else if (varname == s_readline_name) {
-      oldval = String(convert_null_to_empty(rl_readline_name));
+      oldval = OptString(convert_null_to_empty(rl_readline_name));
       if (!newvalueMixed.isNull() &&
           oldval.toString() != newvalueMixed.toString()) {
         Lock lock(info_lock);

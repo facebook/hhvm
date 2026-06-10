@@ -43,7 +43,7 @@ struct Image : SweepableResourceData {
 
   CLASSNAME_IS("gd")
   // overriding ResourceData
-  const String& o_getClassNameHook() const override { return classnameof(); }
+  const OptString& o_getClassNameHook() const override { return classnameof(); }
   bool isInvalid() const override { return m_gdImage == nullptr; }
 
   DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(Image)

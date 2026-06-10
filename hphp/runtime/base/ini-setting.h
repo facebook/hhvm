@@ -34,7 +34,7 @@ namespace HPHP {
 
 struct Array;
 struct Extension;
-struct String;
+struct OptString;
 struct StructuredLogEntry;
 
 /**
@@ -72,8 +72,8 @@ struct IniSettingMap {
   IniSettingMap& operator=(const IniSettingMap& i);
 
 public:
-  const IniSettingMap operator[](const String& key) const;
-  String toString() const { return m_map.toString();}
+  const IniSettingMap operator[](const OptString& key) const;
+  OptString toString() const { return m_map.toString();}
   Array toArray() const { return m_map.toArray();}
   Object toObject() const { return m_map.toObject();}
   bool isNull() const { return m_map.isNull();}
@@ -81,7 +81,7 @@ public:
   bool isArray() const { return m_map.isArray();}
   bool isObject() const { return m_map.isObject();}
   Variant& toVariant() { return m_map; }
-  void set(const String& key, const Variant& v);
+  void set(const OptString& key, const Variant& v);
   TypedValue detach() noexcept {
     return m_map.detach();
   }
@@ -93,7 +93,7 @@ struct IniSetting {
 private:
 
   struct CallbackData {
-    String active_name;
+    OptString active_name;
     Variant active_section;
     Variant arr;
   };
@@ -136,9 +136,9 @@ public:
 
   private:
     // Substitution copy or symlink via @ or : markers in the config line
-    void makeSettingSub(const String &key, const std::string &offset,
+    void makeSettingSub(const OptString &key, const std::string &offset,
                         const std::string &value, Variant& cur_settings);
-    void traverseToSet(const String &key, const std::string& offset,
+    void traverseToSet(const OptString &key, const std::string& offset,
                        tv_lval value, Variant& cur_settings,
                        const std::string& stopChar);
 
@@ -180,19 +180,19 @@ public:
   };
 
 public:
-  static Variant FromString(const String& ini, const String& filename,
+  static Variant FromString(const OptString& ini, const OptString& filename,
                             bool process_sections = false,
                             int scanner_mode = NormalScanner);
   static IniSettingMap FromStringAsMap(const std::string& ini,
                                        const std::string& filename);
 
   static bool Get(const std::string& name, std::string &value);
-  static bool Get(const String& name, std::string &value);
-  static bool Get(const String& name, Variant& value);
-  static bool Get(const String& name, String& value);
+  static bool Get(const OptString& name, std::string &value);
+  static bool Get(const OptString& name, Variant& value);
+  static bool Get(const OptString& name, OptString& value);
   static std::string Get(const std::string& name);
-  static std::string Get(const String& name);
-  static Array GetAll(const String& extension, bool details);
+  static std::string Get(const OptString& name);
+  static Array GetAll(const OptString& extension, bool details);
   static std::string GetAllAsJSON();
   static folly::dynamic GetAllAsDynamic();
   static size_t HashAll(const hphp_fast_string_set& toLog,
@@ -207,22 +207,22 @@ public:
   /**
    * Change an INI setting as if it was in the php.ini file
    */
-  static bool SetSystem(const String& name, const Variant& value);
+  static bool SetSystem(const OptString& name, const Variant& value);
   /**
    * Get a system value
    */
-  static bool GetSystem(const String& name, Variant& value);
+  static bool GetSystem(const OptString& name, Variant& value);
 
   /**
    * Change an INI setting as if there was a call to ini_set()
    */
-  static bool SetUser(const String& name, const Variant& value);
+  static bool SetUser(const OptString& name, const Variant& value);
 
   /**
    * Restore an INI setting to the default value before the first call to
    * SetUser().
    */
-  static void RestoreUser(const String& name);
+  static void RestoreUser(const OptString& name);
 
   /**
    * Fill in constant that may not have been bound when an
@@ -233,7 +233,7 @@ public:
   /**
    * Get the mode for a setting
    */
-  static Optional<Mode> GetMode(const String& name);
+  static Optional<Mode> GetMode(const OptString& name);
 
 #define INI_COMMA ,
 #define INI_TYPES(X) \

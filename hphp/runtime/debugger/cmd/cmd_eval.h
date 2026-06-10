@@ -43,7 +43,7 @@ protected:
 private:
   void handleReply(DebuggerClient&);
 
-  req::root<String> m_output;
+  req::root<OptString> m_output;
   int m_frame;
   bool m_bypassAccessCheck{false};
   bool m_failed{false};

@@ -29,12 +29,12 @@ HSLLocaleByteOps::HSLLocaleByteOps(
 HSLLocaleByteOps::~HSLLocaleByteOps() {
 }
 
-int64_t HSLLocaleByteOps::strcoll(const String& a, const String& b) const {
+int64_t HSLLocaleByteOps::strcoll(const OptString& a, const OptString& b) const {
   assertx(!a.isNull() && !b.isNull());
   return string_strcmp(a.data(), a.size(), b.data(), b.size());
 }
 
-int64_t HSLLocaleByteOps::strcasecmp(const String& a, const String& b) const {
+int64_t HSLLocaleByteOps::strcasecmp(const OptString& a, const OptString& b) const {
   assertx(!a.isNull() && !b.isNull());
   return bstrcasecmp(a.data(), a.size(), b.data(), b.size());
 }

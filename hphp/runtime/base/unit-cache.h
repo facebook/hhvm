@@ -34,7 +34,7 @@ struct stat;
 namespace HPHP {
 
 struct Unit;
-struct String;
+struct OptString;
 struct StringData;
 struct RepoOptions;
 struct RepoUnitInfo;
@@ -131,7 +131,7 @@ std::vector<Unit*> loadedUnitsNonRepoAuth();
  * Note: it's unclear what's "vm" about this, and why it's not just
  * resolve_include.  (Likely naming relic from hphpc days.)
  */
-String resolveVmInclude(const StringData* path,
+OptString resolveVmInclude(const StringData* path,
                         const char* currentDir,
                         struct stat* s,  // out
                         bool allow_dir = false);
@@ -307,7 +307,7 @@ private:
   // Points to either m_contents (if loaded from file), or some
   // external string (if provided in ctor).
   folly::StringPiece m_contents_ptr;
-  String m_contents;
+  OptString m_contents;
   // Is m_contents_ptr valid?
   bool m_loaded;
 };

@@ -126,7 +126,7 @@ namespace {
 
 const StaticString s_OutOnly("__OutOnly");
 
-StringData* makeDocComment(const String& s) {
+StringData* makeDocComment(const OptString& s) {
   if (Cfg::Eval::GenerateDocComments) return makeStaticString(s);
   return staticEmptyString();
 }
@@ -1596,9 +1596,9 @@ std::vector<char> parse_long_string_raw(AsmState& as) {
  * `long-string-literal' is a python-style longstring.  See
  * readLongString for more details.
  */
-String parse_long_string(AsmState& as) {
+OptString parse_long_string(AsmState& as) {
   auto buffer = parse_long_string_raw(as);
-  return String(&buffer[0], buffer.size() - 1, CopyString);
+  return OptString(&buffer[0], buffer.size() - 1, CopyString);
 }
 
 /*
@@ -1606,7 +1606,7 @@ String parse_long_string(AsmState& as) {
  *                           |
  *                           ;
  */
-String parse_maybe_long_string(AsmState& as) {
+OptString parse_maybe_long_string(AsmState& as) {
   as.in.skipWhitespace();
 
   std::vector<char> buffer;
@@ -1620,7 +1620,7 @@ String parse_maybe_long_string(AsmState& as) {
   // String wants a null, and dereferences one past the size we give
   // it.
   buffer.push_back('\0');
-  return String(&buffer[0], buffer.size() - 1, CopyString);
+  return OptString(&buffer[0], buffer.size() - 1, CopyString);
 }
 
 Variant checkSize(Variant val) {
@@ -2293,7 +2293,7 @@ void parse_parameter_list(AsmState& as) {
       as.in.skipWhitespace();
       ch = as.in.getc();
       if (ch == '(') {
-        String str = parse_long_string(as);
+        OptString str = parse_long_string(as);
         auto v = makeStaticString(str);
         auto id = as.ue->mergeLitstr(v);
         parse_default_value(param, id, v);

@@ -124,9 +124,9 @@ struct FuncExistsChecker {
 };
 
 struct ClassExistsChecker {
-  const String& m_name;
+  const OptString& m_name;
   mutable NamedType* m_ne;
-  explicit ClassExistsChecker(const String& name)
+  explicit ClassExistsChecker(const OptString& name)
     : m_name(name), m_ne(nullptr) {}
   bool operator()() const {
     if (!m_ne) {
@@ -149,9 +149,9 @@ struct ConstExistsChecker {
 };
 
 struct TypeAliasExistsChecker {
-  const String& m_name;
+  const OptString& m_name;
   mutable NamedType* m_ne;
-  explicit TypeAliasExistsChecker(const String& name)
+  explicit TypeAliasExistsChecker(const OptString& name)
     : m_name(name), m_ne(nullptr) {}
   bool operator()() const {
     if (!m_ne) {
@@ -165,9 +165,9 @@ struct TypeAliasExistsChecker {
 };
 
 struct NamedTypeExistsChecker {
-  const String& m_name;
+  const OptString& m_name;
   mutable NamedType* m_ne;
-  explicit NamedTypeExistsChecker(const String& name)
+  explicit NamedTypeExistsChecker(const OptString& name)
     : m_name(name), m_ne(nullptr) {}
   bool operator()() const {
     if (!m_ne) {
@@ -197,7 +197,7 @@ const StaticString
   s_line("line");
 
 Optional<AutoloadMap::FileResult> AutoloadHandler::getFile(
-  const String& name, AutoloadMap::KindOf kind) {
+  const OptString& name, AutoloadMap::KindOf kind) {
   assertx(m_map);
   // Always normalize name before autoloading
   return m_map->getFile(kind, normalizeNS(name));
@@ -205,7 +205,7 @@ Optional<AutoloadMap::FileResult> AutoloadHandler::getFile(
 
 template <class T>
 bool
-AutoloadHandler::loadFromMapImpl(const String& name,
+AutoloadHandler::loadFromMapImpl(const OptString& name,
                                  AutoloadMap::KindOf kind,
                                  const T &checkExists,
                                  Variant& err) {
@@ -263,7 +263,7 @@ AutoloadHandler::loadFromMapImpl(const String& name,
     log_err(e.toString().c_str());
     err = e;
   } catch (...) {
-    String msg = "Unknown exception";
+    OptString msg = "Unknown exception";
     log_err(msg.c_str());
     err = msg;
   }
@@ -272,7 +272,7 @@ AutoloadHandler::loadFromMapImpl(const String& name,
 
 template <class T>
 bool
-AutoloadHandler::loadFromMap(const String& name,
+AutoloadHandler::loadFromMap(const OptString& name,
                              AutoloadMap::KindOf kind,
                              const T &checkExists) {
   assertx(m_map);
@@ -283,7 +283,7 @@ AutoloadHandler::loadFromMap(const String& name,
 bool AutoloadHandler::autoloadFunc(StringData* name) {
   tracing::BlockNoTrace _{(m_map) ? "autoload-func" : "no-autoload-func"};
   return m_map &&
-    loadFromMap(String{name},
+    loadFromMap(OptString{name},
                 AutoloadMap::KindOf::Function,
                 FuncExistsChecker(name));
 }
@@ -291,12 +291,12 @@ bool AutoloadHandler::autoloadFunc(StringData* name) {
 bool AutoloadHandler::autoloadConstant(StringData* name) {
   tracing::BlockNoTrace _{(m_map) ? "autoload-const" : "no-autoload-const"};
   return m_map &&
-    loadFromMap(String{name},
+    loadFromMap(OptString{name},
                 AutoloadMap::KindOf::Constant,
                 ConstExistsChecker(name));
 }
 
-bool AutoloadHandler::autoloadTypeAlias(const String& name) {
+bool AutoloadHandler::autoloadTypeAlias(const OptString& name) {
   tracing::BlockNoTrace _{(m_map) ? "autoload-typedef" : "no-autoload-typedef"};
   return m_map &&
     loadFromMap(name, AutoloadMap::KindOf::TypeAlias,
@@ -306,7 +306,7 @@ bool AutoloadHandler::autoloadTypeAlias(const String& name) {
 bool AutoloadHandler::autoloadModule(StringData* name) {
   tracing::BlockNoTrace _{(m_map) ? "autoload-module" : "no-autoload-module"};
   return m_map &&
-    loadFromMap(String{name},
+    loadFromMap(OptString{name},
                 AutoloadMap::KindOf::Module,
                 ModuleExistsChecker(name));
 }
@@ -330,10 +330,10 @@ bool is_valid_class_name(folly::StringPiece className) {
   ) == className.size();
 }
 
-bool AutoloadHandler::autoloadType(const String& clsName) {
+bool AutoloadHandler::autoloadType(const OptString& clsName) {
   tracing::BlockNoTrace _{(m_map) ? "autoload-native" : "autoload"};
   if (clsName.empty()) return false;
-  const String& className = normalizeNS(clsName);
+  const OptString& className = normalizeNS(clsName);
   // Verify class name before trying to load it
   if (!is_valid_class_name(className.slice())) {
     return false;
@@ -343,11 +343,11 @@ bool AutoloadHandler::autoloadType(const String& clsName) {
                 ClassExistsChecker(className));
 }
 
-bool AutoloadHandler::autoloadTypeOrTypeAlias(const String& clsName) {
+bool AutoloadHandler::autoloadTypeOrTypeAlias(const OptString& clsName) {
   tracing::BlockNoTrace _{(m_map) ? "autoload-native" : "autoload"};
 
   if (clsName.empty()) return false;
-  const String& className = normalizeNS(clsName);
+  const OptString& className = normalizeNS(clsName);
 
   return m_map &&
     loadFromMap(className, AutoloadMap::KindOf::TypeOrTypeAlias,

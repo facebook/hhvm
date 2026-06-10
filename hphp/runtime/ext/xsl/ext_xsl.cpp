@@ -102,7 +102,7 @@ struct XSLTProcessorData {
   int m_secprefs;
   int m_registerPhpFunctions;
   Array m_registered_phpfunctions;
-  String m_profile;
+  OptString m_profile;
 
   // Only used to hold DOMElements in scope when constructing a new document
   Array m_usedElements = Array::CreateVec();
@@ -262,7 +262,7 @@ static xmlChar *xslt_string_to_xpathexpr(const char *str) {
   return value;
 }
 
-static Object newNode(const String name, xmlNodePtr obj) {
+static Object newNode(const OptString name, xmlNodePtr obj) {
   auto const cls = Class::load(name.get());
   Object ret{cls};
   auto retData = Native::data<DOMNode>(ret);
@@ -318,7 +318,7 @@ static void xslt_ext_function_php(xmlXPathParserContextPtr ctxt,
     }
     switch (obj->type) {
     case XPATH_STRING:
-      arg = String((char*)obj->stringval, CopyString);
+      arg = OptString((char*)obj->stringval, CopyString);
       break;
     case XPATH_BOOLEAN:
       arg = (bool)obj->boolval;
@@ -329,7 +329,7 @@ static void xslt_ext_function_php(xmlXPathParserContextPtr ctxt,
     case XPATH_NODESET:
       if (type == 1) {
         char *str = (char*)xmlXPathCastToString(obj);
-        arg = String(str, CopyString);
+        arg = OptString(str, CopyString);
         xmlFree(str);
       } else if (type == 2) {
         arg = Array::CreateVec();
@@ -364,7 +364,7 @@ static void xslt_ext_function_php(xmlXPathParserContextPtr ctxt,
       }
       break;
     default:
-      arg = String((char*)xmlXPathCastToString(obj), CopyString);
+      arg = OptString((char*)xmlXPathCastToString(obj), CopyString);
     }
     xmlXPathFreeObject(obj);
     args_vec.append(arg);
@@ -384,7 +384,7 @@ static void xslt_ext_function_php(xmlXPathParserContextPtr ctxt,
     valuePush(ctxt, xmlXPathNewString((xmlChar*)""));
     return;
   }
-  String handler((char*)obj->stringval, CopyString);
+  OptString handler((char*)obj->stringval, CopyString);
   xmlXPathFreeObject(obj);
 
   if (!is_callable(handler)) {
@@ -411,7 +411,7 @@ static void xslt_ext_function_php(xmlXPathParserContextPtr ctxt,
       // Push an empty string to get an xslt result.
       valuePush(ctxt, xmlXPathNewString((xmlChar*)""));
     } else {
-      String sretval = retval.toString();
+      OptString sretval = retval.toString();
       valuePush(ctxt, xmlXPathNewString((xmlChar*)sretval.data()));
     }
   }
@@ -449,7 +449,7 @@ static void xslt_ext_error_handler(void* /*ctx*/, const char* fmt, ...) {
 
 static Variant
 HHVM_METHOD(XSLTProcessor, getParameter, const Variant& /*namespaceURI*/,
-            const String& localName) {
+            const OptString& localName) {
   auto data = Native::data<XSLTProcessorData>(this_);
 
   // namespaceURI argument is unused in PHP5 XSL extension.
@@ -495,7 +495,7 @@ static void HHVM_METHOD(XSLTProcessor, importStylesheet,
 
 static bool
 HHVM_METHOD(XSLTProcessor, removeParameter, const Variant& /*namespaceURI*/,
-            const String& localName) {
+            const OptString& localName) {
   auto data = Native::data<XSLTProcessorData>(this_);
 
   // namespaceURI argument is unused in PHP5 XSL extension.
@@ -583,7 +583,7 @@ static int64_t HHVM_METHOD(XSLTProcessor, setSecurityPrefs,
 }
 
 static bool HHVM_METHOD(XSLTProcessor, setProfiling,
-                        const String& filename) {
+                        const OptString& filename) {
   auto data = Native::data<XSLTProcessorData>(this_);
 
   if (!FileUtil::checkPathAndWarn(filename, "XSLTProcessor::setProfiling", 1)) {
@@ -591,7 +591,7 @@ static bool HHVM_METHOD(XSLTProcessor, setProfiling,
   }
 
   if (filename.length() > 0) {
-    String translated = File::TranslatePath(filename);
+    OptString translated = File::TranslatePath(filename);
     Stream::Wrapper* w = Stream::getWrapperFromURI(translated);
     if (!w) return false;
     if (w->access(translated, W_OK)) {
@@ -625,7 +625,7 @@ static Variant HHVM_METHOD(XSLTProcessor, transformToDoc,
 
 static Variant HHVM_METHOD(XSLTProcessor, transformToURI,
                            const Object& doc,
-                           const String& uri) {
+                           const OptString& uri) {
   auto data = Native::data<XSLTProcessorData>(this_);
 
   if (!FileUtil::checkPathAndWarn(uri, "XSLTProcessor::transformToUri", 2)) {
@@ -638,7 +638,7 @@ static Variant HHVM_METHOD(XSLTProcessor, transformToURI,
       libxml_register_node(xmlCopyDoc ((xmlDocPtr)domdoc->nodep(),
                                        /*recursive*/ 1));
 
-    String translated = libxml_get_valid_file_path(uri);
+    OptString translated = libxml_get_valid_file_path(uri);
     if (translated.empty()) {
       raise_warning("Invalid URI");
       return false;
@@ -689,7 +689,7 @@ static Variant HHVM_METHOD(XSLTProcessor, transformToXML,
       return false;
     }
 
-    String ret = String((char*)mem, size, CopyString);
+    OptString ret = OptString((char*)mem, size, CopyString);
     xmlFree(mem);
     return ret;
   }

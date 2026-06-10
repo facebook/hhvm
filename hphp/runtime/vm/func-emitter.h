@@ -190,7 +190,7 @@ public:
    */
   std::pair<int,int> getLocation() const;
 
-  String nativeFullname() const;
+  OptString nativeFullname() const;
 
   /////////////////////////////////////////////////////////////////////////////
   // Complex setters.

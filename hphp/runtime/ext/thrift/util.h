@@ -33,11 +33,11 @@ enum class TTransportError {
   END_OF_FILE = 4,
 };
 
-[[noreturn]] inline void thrift_error(const String& what, TError why) {
+[[noreturn]] inline void thrift_error(const OptString& what, TError why) {
   throw_object(s_TProtocolException, make_vec_array(what, why));
 }
 
-[[noreturn]] inline void thrift_transport_error(const String& what, TTransportError why) {
+[[noreturn]] inline void thrift_transport_error(const OptString& what, TTransportError why) {
   throw_object(s_TTransportException, make_vec_array(what, static_cast<int>(why)));
 }
 
@@ -106,7 +106,7 @@ inline void check_container_size(const uint32_t size) {
 
 class StrictUnionChecker {
 public:
-  StrictUnionChecker(bool enabled, const String& clsName)
+  StrictUnionChecker(bool enabled, const OptString& clsName)
       : enabled_{enabled}, clsName_{clsName}, unionFieldFound_{false} {}
 
   void markFieldFound() {
@@ -123,7 +123,7 @@ public:
   }
 private:
   bool enabled_{false};
-  String clsName_;
+  OptString clsName_;
   bool unionFieldFound_{false};
   bool alreadyRaised_{false};
 };

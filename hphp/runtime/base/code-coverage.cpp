@@ -116,14 +116,14 @@ Array CodeCoverage::Report(bool report_frequency /* = false*/,
 
     if (report_frequency) {
       auto count = lines.count();
-      ret.set(String(iter.first), Variant((int64_t)count));
+      ret.set(OptString(iter.first), Variant((int64_t)count));
     } else {
       auto tmp = Array::CreateDict();
       auto const end = req::dynamic_bitset::npos;
       for (int i = lines.find_first(); i != end; i = lines.find_next(i)) {
         tmp.set(i, Variant((int64_t)1));
       }
-      ret.set(String(iter.first), Variant(tmp));
+      ret.set(OptString(iter.first), Variant(tmp));
     }
   }
 

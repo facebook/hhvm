@@ -52,7 +52,7 @@ const StaticString s_FRIBIDI_WRTL("FRIBIDI_WRTL");
 
 static Variant HHVM_FUNCTION(
     fribidi_log2vis,
-    const String& logical_str,
+    const OptString& logical_str,
     int64_t direction,
     int64_t charset
   ) {
@@ -109,7 +109,7 @@ static Variant HHVM_FUNCTION(
   visual_str_len = fribidi_unicode_to_charset(
     (FriBidiCharSet)charset, visual_ustr, ustr_len, visual_str);
 
-  return String(visual_str, visual_str_len, CopyString);
+  return OptString(visual_str, visual_str_len, CopyString);
 }
 
 static Array HHVM_FUNCTION(
@@ -119,18 +119,18 @@ static Array HHVM_FUNCTION(
   Array result = Array::CreateDict();
 
   result.set(
-    String("name"),
-    String((char *)fribidi_char_set_name((FriBidiCharSet)charset))
+    OptString("name"),
+    OptString((char *)fribidi_char_set_name((FriBidiCharSet)charset))
   );
   result.set(
-    String("title"),
-    String((char *)fribidi_char_set_title((FriBidiCharSet)charset))
+    OptString("title"),
+    OptString((char *)fribidi_char_set_title((FriBidiCharSet)charset))
   );
 
   if (fribidi_char_set_desc((FriBidiCharSet)charset)) {
     result.set(
-      String("desc"),
-      String((char *)fribidi_char_set_desc((FriBidiCharSet)charset))
+      OptString("desc"),
+      OptString((char *)fribidi_char_set_desc((FriBidiCharSet)charset))
     );
   }
 

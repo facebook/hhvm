@@ -36,7 +36,7 @@ namespace HPHP {
 
 static int s_pcre_has_jit = 0;
 
-Variant HHVM_FUNCTION(preg_grep, const String& pattern, const Variant& input,
+Variant HHVM_FUNCTION(preg_grep, const OptString& pattern, const Variant& input,
                       int64_t flags /* = 0 */) {
   if (!isContainer(input)) {
     raise_warning("input to preg_grep must be an array or collection");
@@ -45,7 +45,7 @@ Variant HHVM_FUNCTION(preg_grep, const String& pattern, const Variant& input,
   return preg_grep(pattern, input.toArray(), flags);
 }
 
-Variant HHVM_FUNCTION(preg_grep_with_error, const String& pattern,
+Variant HHVM_FUNCTION(preg_grep_with_error, const OptString& pattern,
                       const Variant& input, Variant& error, int64_t flags /* = 0 */) {
   PregWithErrorGuard guard(error);
   return HHVM_FN(preg_grep)(pattern, input, flags);
@@ -61,7 +61,7 @@ TypedValue HHVM_FUNCTION(preg_match,
 }
 
 Variant HHVM_FUNCTION(preg_get_error_message_if_invalid,
-                      const String& pattern) {
+                      const OptString& pattern) {
   return preg_get_error_message_if_invalid(pattern);
 }
 
@@ -299,14 +299,14 @@ Variant HHVM_FUNCTION(preg_filter, const Variant& pattern, const Variant& callba
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant HHVM_FUNCTION(preg_split, const String& pattern, const String& subject,
+Variant HHVM_FUNCTION(preg_split, const OptString& pattern, const OptString& subject,
                                   const Variant& limit, int64_t flags /* = 0 */) {
   //NOTE: .toInt64() returns 0 for null
   return preg_split(pattern, subject, limit.toInt64(), flags);
 }
 
-Variant HHVM_FUNCTION(preg_split_with_error, const String& pattern,
-                      const String& subject, Variant& error,
+Variant HHVM_FUNCTION(preg_split_with_error, const OptString& pattern,
+                      const OptString& subject, Variant& error,
                       const Variant& limit /* = null */, int64_t flags /* = 0 */) {
   PregWithErrorGuard guard(error);
   //NOTE: .toInt64() returns 0 for null
@@ -315,7 +315,7 @@ Variant HHVM_FUNCTION(preg_split_with_error, const String& pattern,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-String HHVM_FUNCTION(preg_quote, const String& str,
+OptString HHVM_FUNCTION(preg_quote, const OptString& str,
                                  const Variant& delimiter /* = null_string */) {
   if (delimiter.isNull()) {
     return preg_quote(str, null_string);
@@ -327,32 +327,32 @@ String HHVM_FUNCTION(preg_quote, const String& str,
 ///////////////////////////////////////////////////////////////////////////////
 // ereg
 
-String HHVM_FUNCTION(ereg_replace, const String& pattern,
-                                   const String& replacement,
-                                   const String& str) {
+OptString HHVM_FUNCTION(ereg_replace, const OptString& pattern,
+                                   const OptString& replacement,
+                                   const OptString& str) {
   return HHVM_FN(mb_ereg_replace)(pattern, replacement, str).toString();
 }
 
-String HHVM_FUNCTION(eregi_replace, const String& pattern,
-                                    const String& replacement,
-                                    const String& str) {
+OptString HHVM_FUNCTION(eregi_replace, const OptString& pattern,
+                                    const OptString& replacement,
+                                    const OptString& str) {
   return HHVM_FN(mb_eregi_replace)(pattern, replacement, str).toString();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // regexec
 
-Variant HHVM_FUNCTION(split, const String& pattern, const String& str,
+Variant HHVM_FUNCTION(split, const OptString& pattern, const OptString& str,
                              int64_t limit /* = -1 */) {
   return php_split(pattern, str, limit, false);
 }
 
-Variant HHVM_FUNCTION(spliti, const String& pattern, const String& str,
+Variant HHVM_FUNCTION(spliti, const OptString& pattern, const OptString& str,
                               int64_t limit /* = -1 */) {
   return php_split(pattern, str, limit, true);
 }
 
-String HHVM_FUNCTION(sql_regcase, const String& str) {
+OptString HHVM_FUNCTION(sql_regcase, const OptString& str) {
   StringBuffer out(str.size());
   for (int i = 0; i < str.size(); i++) {
     unsigned char c = (unsigned char)str.charAt(i);

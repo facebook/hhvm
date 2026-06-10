@@ -28,7 +28,7 @@ struct HttpStreamWrapper final : Stream::Wrapper {
   HttpStreamWrapper() {
     m_isLocal = false;
   }
-  req::ptr<File> open(const String& filename, const String& mode, int options,
+  req::ptr<File> open(const OptString& filename, const OptString& mode, int options,
                       const req::ptr<StreamContext>& context) override;
 };
 

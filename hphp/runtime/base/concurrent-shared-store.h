@@ -196,7 +196,7 @@ struct ConcurrentTableSharedStore {
    * Retrieve a value from the store.  Returns false if the value wasn't
    * contained in the table (or was expired).
    */
-  bool get(const String& key, Variant& value, bool pure = false);
+  bool get(const OptString& key, Variant& value, bool pure = false);
 
   /*
    * Add a value to the store if no (unexpired) value with this key is already
@@ -207,7 +207,7 @@ struct ConcurrentTableSharedStore {
    * Returns: true if the value was added, including if we've replaced an
    * expired value.
    */
-  bool add(const String& key, const Variant& val, int64_t max_ttl,
+  bool add(const OptString& key, const Variant& val, int64_t max_ttl,
            int64_t bump_ttl, APCHandleLevel level, bool pure = false);
 
   /*
@@ -216,7 +216,7 @@ struct ConcurrentTableSharedStore {
    *
    * The requested ttl is limited by the ApcTTLLimit.
    */
-  void set(const String& key, const Variant& val, int64_t max_ttl,
+  void set(const OptString& key, const Variant& val, int64_t max_ttl,
            int64_t bump_ttl, APCHandleLevel level, bool pure = false);
 
   /*
@@ -226,7 +226,7 @@ struct ConcurrentTableSharedStore {
    *
    * Returns: the new value for the key, or zero if the key was not found.
    */
-  int64_t inc(const String& key, int64_t step, bool& found);
+  int64_t inc(const OptString& key, int64_t step, bool& found);
 
   /*
    * Attempt to atomically compare and swap the value for the key `key' from
@@ -234,12 +234,12 @@ struct ConcurrentTableSharedStore {
    * same value as `oldVal' (after conversions), set it to `newVal' and return
    * true.  Otherwise returns false.
    */
-  bool cas(const String& key, int64_t oldVal, int64_t newVal);
+  bool cas(const OptString& key, int64_t oldVal, int64_t newVal);
 
   /*
    * Returns: true if this key exists in the store, and is not expired.
    */
-  bool exists(const String& key);
+  bool exists(const OptString& key);
 
   /*
    * Extend the expiration time to now + new_ttl if that is longer than
@@ -247,13 +247,13 @@ struct ConcurrentTableSharedStore {
    * it succeeds (the key exists in apc, is unexpired, and the expiration
    * was actually adjusted), false otherwise.
    */
-  bool extendTTL(const String& key, int64_t new_ttl);
+  bool extendTTL(const OptString& key, int64_t new_ttl);
 
   /*
    * Returns the size of an entry if it exists. Sets `found` to true if it
    * exists and false if not.
    */
-  int64_t size(const String& key, bool& found);
+  int64_t size(const OptString& key, bool& found);
 
   /*
    * Remove the specified key, if it exists in the table.
@@ -261,7 +261,7 @@ struct ConcurrentTableSharedStore {
    * Returns: false if the key was not in the table, true if the key was in the
    * table **even if it was expired**.
    */
-  bool eraseKey(const String& key);
+  bool eraseKey(const OptString& key);
 
   /*
    * Schedule deletion of expired entries.
@@ -401,10 +401,10 @@ public:
   static constexpr size_t NodeSize = sizeof(Map::node);
 
 private:
-  bool checkExpire(const String& keyStr, Map::const_accessor& acc);
+  bool checkExpire(const OptString& keyStr, Map::const_accessor& acc);
   bool eraseImpl(const char*, bool, ExpSet::accessor* expAcc);
-  bool storeImpl(const String&, const Variant&, int64_t, int64_t, bool, APCHandleLevel, bool);
-  bool handlePromoteObj(const String&, APCHandle*, const Variant&, bool);
+  bool storeImpl(const OptString&, const Variant&, int64_t, int64_t, bool, APCHandleLevel, bool);
+  bool handlePromoteObj(const OptString&, APCHandle*, const Variant&, bool);
   void dumpKeyAndValue(std::ostream&);
   static EntryInfo makeEntryInfo(const char*, StoreValue*, int64_t curr_time);
 

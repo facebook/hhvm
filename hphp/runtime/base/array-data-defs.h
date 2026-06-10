@@ -286,7 +286,7 @@ inline ArrayData* ArrayData::removeMove(TypedValue k) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-inline bool ArrayData::exists(const String& k) const {
+inline bool ArrayData::exists(const OptString& k) const {
   assertx(IsValidKey(k));
   return exists(k.get());
 }
@@ -295,7 +295,7 @@ inline bool ArrayData::exists(const Variant& k) const {
   return exists(*k.asTypedValue());
 }
 
-inline arr_lval ArrayData::lval(const String& k) {
+inline arr_lval ArrayData::lval(const OptString& k) {
   assertx(IsValidKey(k));
   return lval(k.get());
 }
@@ -304,7 +304,7 @@ inline arr_lval ArrayData::lval(const Variant& k) {
   return lval(*k.asTypedValue());
 }
 
-inline TypedValue ArrayData::get(const String& k, bool error) const {
+inline TypedValue ArrayData::get(const OptString& k, bool error) const {
   assertx(IsValidKey(k));
   return get(k.get(), error);
 }
@@ -322,7 +322,7 @@ inline ArrayData* ArrayData::setMove(TypedValue k, TypedValue v) {
                              : setMove(detail::getStringKey(k), v);
 }
 
-inline ArrayData* ArrayData::setMove(const String& k, TypedValue v) {
+inline ArrayData* ArrayData::setMove(const OptString& k, TypedValue v) {
   assertx(tvIsPlausible(v));
   assertx(IsValidKey(k));
 
@@ -338,7 +338,7 @@ inline ArrayData* ArrayData::setMove(StringData* k, const Variant& v) {
   return setMove(k, *v.asTypedValue());
 }
 
-inline ArrayData* ArrayData::setMove(const String& k, const Variant& v) {
+inline ArrayData* ArrayData::setMove(const OptString& k, const Variant& v) {
   assertx(IsValidKey(k));
   return setMove(k.get(), *v.asTypedValue());
 }
@@ -347,7 +347,7 @@ inline ArrayData* ArrayData::setMove(const Variant& k, const Variant& v) {
   return setMove(*k.asTypedValue(), *v.asTypedValue());
 }
 
-inline ArrayData* ArrayData::removeMove(const String& k) {
+inline ArrayData* ArrayData::removeMove(const OptString& k) {
   assertx(IsValidKey(k));
   return removeMove(k.get());
 }

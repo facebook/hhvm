@@ -128,7 +128,7 @@ public:
   double toDouble() const {
     return m_res ? m_res->data()->o_toDouble() : 0;
   }
-  String toString() const;
+  OptString toString() const;
   Array toArray() const;
 
 private:

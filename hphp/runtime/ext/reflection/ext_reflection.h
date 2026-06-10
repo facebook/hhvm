@@ -127,7 +127,7 @@ struct ReflectionClassHandle : SystemLib::ClassLoader<"ReflectionClass"> {
     m_cls = that_.m_cls;
     return *this;
   }
-  String init(const String& name) {
+  OptString init(const OptString& name) {
     auto const cls = Class::load(name.get());
     if (!cls) return empty_string();
     setClass(cls);
@@ -150,7 +150,7 @@ struct ReflectionClassHandle : SystemLib::ClassLoader<"ReflectionClass"> {
   }
 
   Variant sleep() const {
-    return m_cls ? String(m_cls->nameStr()) : empty_string();
+    return m_cls ? OptString(m_cls->nameStr()) : empty_string();
   }
 
   void wakeup(const Variant& content, ObjectData* obj);
@@ -274,13 +274,13 @@ struct ReflectionTypeAliasHandle :
 };
 
 namespace DebuggerReflection {
-Array get_function_info(const String& name);
-Array get_class_info(const String& name);
+Array get_function_info(const OptString& name);
+Array get_class_info(const OptString& name);
 }
 
 // These helpers are shared by an FB-specific extension.
 Class* get_cls(const Variant& class_or_object);
-const Func* get_method_func(const Class* cls, const String& meth_name);
+const Func* get_method_func(const Class* cls, const OptString& meth_name);
 Variant default_arg_from_php_code(const Func::ParamInfo& fpi, const Func* func,
                                   unsigned argIdx);
 

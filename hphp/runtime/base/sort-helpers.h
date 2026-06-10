@@ -104,7 +104,7 @@ struct IntElmCompare {
     int lenLeft;
     int lenRight;
     // Take advantage of precomputed StringDatas if they are available
-    const StringData* sdLeft = String::GetIntegerStringData(iLeft);
+    const StringData* sdLeft = OptString::GetIntegerStringData(iLeft);
     if (sdLeft) {
       sLeft = sdLeft->data();
       lenLeft = sdLeft->size();
@@ -114,7 +114,7 @@ struct IntElmCompare {
       sLeft = sl.data();
       lenLeft = sl.size();
     }
-    const StringData* sdRight = String::GetIntegerStringData(iRight);
+    const StringData* sdRight = OptString::GetIntegerStringData(iRight);
     if (sdRight) {
       sRight = sdRight->data();
       lenRight = sdRight->size();
@@ -281,8 +281,8 @@ struct ElmCompare {
       double dRight = vRight.toDouble();
       return ascending ? dLeft > dRight : dLeft < dRight;
     }
-    String strLeft = vLeft.toString();
-    String strRight = vRight.toString();
+    OptString strLeft = vLeft.toString();
+    OptString strRight = vRight.toString();
     const char* sLeft = strLeft.data();
     int lenLeft = strLeft.size();
     const char* sRight = strRight.data();

@@ -820,7 +820,7 @@ struct UncheckedBuffer {
     *p = 0;
     return begin;
   }
-  String copy() { return String(data(), size(), CopyString); }
+  OptString copy() { return OptString(data(), size(), CopyString); }
 
   char* p{nullptr};
   char* begin{nullptr};
@@ -837,7 +837,7 @@ struct UncheckedBuffer {
 struct json_parser {
   struct json_state {
     Mode mode;
-    String key;
+    OptString key;
     Variant val;
   };
   req::vector<json_state> stack;
@@ -998,7 +998,7 @@ static int pop(json_parser *json, Mode mode) {
   return true;
 }
 
-static String copy_and_clear(UncheckedBuffer &buf) {
+static OptString copy_and_clear(UncheckedBuffer &buf) {
   auto ret = buf.size() > 0 ? buf.copy() : empty_string();
   buf.clear();
   return ret;
@@ -1131,7 +1131,7 @@ StaticString s__empty_("_empty_");
 
 static void object_set(const json_parser* json,
                        Variant &var,
-                       const String& key,
+                       const OptString& key,
                        const Variant& value,
                        int assoc,
                        JSONContainerType container_type) {
@@ -1160,7 +1160,7 @@ static void object_set(const json_parser* json,
 }
 
 static void attach_zval(json_parser *json,
-                        const String& key,
+                        const OptString& key,
                         int assoc,
                         JSONContainerType container_type) {
   if (json->top < 1) {

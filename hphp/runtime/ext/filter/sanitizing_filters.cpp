@@ -26,7 +26,7 @@ namespace HPHP {
 
 using filter_map = unsigned long[256];
 
-static String php_filter_encode_html(const String& value,
+static OptString php_filter_encode_html(const OptString& value,
                                      const unsigned char *chars) {
   int len = value.length();
   unsigned char *s = (unsigned char *)value.data();
@@ -61,7 +61,7 @@ static const unsigned char hexchars[] = "0123456789ABCDEF";
 #define DEFAULT_URL_ENCODE    LOWALPHA HIALPHA DIGIT "-._"
 
 static Variant
-php_filter_encode_url(const String& value, const unsigned char* chars,
+php_filter_encode_url(const OptString& value, const unsigned char* chars,
                       const int char_len, int /*high*/, int /*low*/,
                       int /*encode_nul*/) {
   unsigned char tmp[256];
@@ -94,7 +94,7 @@ php_filter_encode_url(const String& value, const unsigned char* chars,
   return str.detach();
 }
 
-static Variant php_filter_strip(const String& value, long flags) {
+static Variant php_filter_strip(const OptString& value, long flags) {
   unsigned char *str;
   int i;
   int len = value.length();
@@ -135,7 +135,7 @@ static void filter_map_update(filter_map *map, int flag,
   }
 }
 
-static Variant filter_map_apply(const String& value, filter_map *map) {
+static Variant filter_map_apply(const OptString& value, filter_map *map) {
   unsigned char *str;
   int i;
   int len = value.length();
@@ -175,10 +175,10 @@ Variant php_filter_string(PHP_INPUT_FILTER_PARAM_DECL) {
     memset(enc + 127, 1, sizeof(enc) - 127);
   }
 
-  String encoded(php_filter_encode_html(stripped, enc));
+  OptString encoded(php_filter_encode_html(stripped, enc));
   int len = encoded.length();
   auto const empty = staticEmptyString();
-  String ret = string_strip_tags(
+  OptString ret = string_strip_tags(
     encoded.data(), len, empty->data(), empty->size(), true
   );
 

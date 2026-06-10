@@ -168,19 +168,19 @@ bool TimeZone::IsValid(const char* name) {
   return timelib_timezone_id_is_valid((char*)name, GetDatabase());
 }
 
-String TimeZone::CurrentName() {
+OptString TimeZone::CurrentName() {
   /* Checking configure timezone */
   auto& tz = RID().getTimezone();
   if (!tz.empty()) {
-    return String(tz);
+    return OptString(tz);
   }
 
   /* Check environment variable */
   char *env = getenv("TZ");
   if (env && *env && IsValid(env)) {
-    return String(env, CopyString);
+    return OptString(env, CopyString);
   }
-  return String(s_guessed_timezone.m_tzid);
+  return OptString(s_guessed_timezone.m_tzid);
 }
 
 req::ptr<TimeZone> TimeZone::Current() {
@@ -233,14 +233,14 @@ Array TimeZone::GetAbbreviations() {
     element.set(s_dst, (bool)entry->type);
     element.set(s_offset, entry->gmtoffset);
     if (entry->full_tz_name) {
-      element.set(s_timezone_id, String(entry->full_tz_name, CopyString));
+      element.set(s_timezone_id, OptString(entry->full_tz_name, CopyString));
     } else {
       element.set(s_timezone_id, uninit_null());
     }
     if (ret.isNull()) {
       ret = Array::CreateDict();
     }
-    String key{entry->name};
+    OptString key{entry->name};
     if (!ret.exists(key)) {
       ret.set(key, Array::CreateVec());
     }
@@ -250,12 +250,12 @@ Array TimeZone::GetAbbreviations() {
   return ret;
 }
 
-String TimeZone::AbbreviationToName(String abbr, int utcoffset /* = -1 */,
+OptString TimeZone::AbbreviationToName(OptString abbr, int utcoffset /* = -1 */,
                                     int isdst /* = 1 */) {
   if (isdst != 0 && isdst != 1) {
     isdst = -1;
   }
-  return String(timelib_timezone_id_from_abbr(abbr.data(), utcoffset,
+  return OptString(timelib_timezone_id_from_abbr(abbr.data(), utcoffset,
                                               isdst),
                 CopyString);
 }
@@ -267,7 +267,7 @@ TimeZone::TimeZone() {
   m_tzi = nullptr;
 }
 
-TimeZone::TimeZone(const String& name) {
+TimeZone::TimeZone(const OptString& name) {
   /* We can't just use GetTimeZoneInfoRaw, as that requires a real timezone
    * name; we need to handle other cases like `GMT+2`. Quirks:
    *
@@ -323,7 +323,7 @@ TimeZone::TimeZone(const String& name) {
     case TIMELIB_ZONETYPE_ABBR:
       m_offset = dummy->z;
       m_dst = dummy->dst;
-      m_abbr = String(dummy->tz_abbr, CopyString);
+      m_abbr = OptString(dummy->tz_abbr, CopyString);
       break;
   }
 }
@@ -344,13 +344,13 @@ req::ptr<TimeZone> TimeZone::cloneTimeZone() const {
   return tz;
 }
 
-String TimeZone::name() const {
+OptString TimeZone::name() const {
   switch (m_tztype) {
     case TIMELIB_ZONETYPE_ID:
       assertx(m_tzi);
-      return String(m_tzi->name, CopyString);
+      return OptString(m_tzi->name, CopyString);
     case TIMELIB_ZONETYPE_ABBR:
-      return String(m_abbr, CopyString);
+      return OptString(m_abbr, CopyString);
     case TIMELIB_ZONETYPE_OFFSET: {
       char buf[sizeof("+00:00")];
 
@@ -373,19 +373,19 @@ String TimeZone::name() const {
         abs(m_offset % 60)
       );
 #endif
-      return String(buf, sizeof("+00:00") - 1, CopyString);
+      return OptString(buf, sizeof("+00:00") - 1, CopyString);
     }
   }
   always_assert(false && "invalid tz type");
 }
 
-String TimeZone::abbr(int type /* = 0 */) const {
+OptString TimeZone::abbr(int type /* = 0 */) const {
   if (m_tztype == TIMELIB_ZONETYPE_ABBR) {
-    return String(m_abbr, CopyString);
+    return OptString(m_abbr, CopyString);
   }
 
-  if (!m_tzi) return String();
-  return String(&m_tzi->timezone_abbr[m_tzi->type[type].abbr_idx], CopyString);
+  if (!m_tzi) return OptString();
+  return OptString(&m_tzi->timezone_abbr[m_tzi->type[type].abbr_idx], CopyString);
 }
 
 int TimeZone::type() const {
@@ -468,7 +468,7 @@ Array TimeZone::transitions(int64_t timestamp_begin, /* = k_PHP_INT_MIN */
       s_time, dt->toString(DateTime::DateFormat::ISO8601),
       s_offset, offset.offset,
       s_isdst, (bool)offset.isdst,
-      s_abbr, String(abbr, CopyString)
+      s_abbr, OptString(abbr, CopyString)
     ));
   }
 
@@ -487,7 +487,7 @@ Array TimeZone::transitions(int64_t timestamp_begin, /* = k_PHP_INT_MIN */
         s_time, dt->toString(DateTime::DateFormat::ISO8601),
         s_offset, offset.offset,
         s_isdst, (bool)offset.isdst,
-        s_abbr, String(abbr, CopyString)
+        s_abbr, OptString(abbr, CopyString)
       ));
     }
   }
@@ -501,10 +501,10 @@ Array TimeZone::getLocation() const {
   if (!m_tzi) return Array{};
   DictInit ret(4);
 
-  ret.set(s_country_code, String(m_tzi->location.country_code, CopyString));
+  ret.set(s_country_code, OptString(m_tzi->location.country_code, CopyString));
   ret.set(s_latitude,     m_tzi->location.latitude);
   ret.set(s_longitude,    m_tzi->location.longitude);
-  ret.set(s_comments,     String(m_tzi->location.comments, CopyString));
+  ret.set(s_comments,     OptString(m_tzi->location.comments, CopyString));
 
   return ret.toArray();
 }

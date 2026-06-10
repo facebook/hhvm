@@ -1024,7 +1024,7 @@ void invalidatePath(const std::string& path) {
      * this lookup; since the path has changed, the file we'll get out is
      * going to be some new file, not the old file that needs invalidation.
      */
-    String spath(path);
+    OptString spath(path);
     lookupUnit(spath.get(), "", nullptr /* initial_opt */, nullptr, false);
   });
 }

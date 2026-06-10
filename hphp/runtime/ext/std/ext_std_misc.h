@@ -28,8 +28,8 @@ constexpr int64_t k_PHP_INT_MAX = std::numeric_limits<int64_t>::max();
 
 StaticString get_PHP_VERSION();
 
-Variant HHVM_FUNCTION(constant, const String& name);
-bool HHVM_FUNCTION(defined, const String& name, bool autoload = true);
+Variant HHVM_FUNCTION(constant, const OptString& name);
+bool HHVM_FUNCTION(defined, const OptString& name, bool autoload = true);
 
 extern const double k_INF;
 extern const double k_NAN;

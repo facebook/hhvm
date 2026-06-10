@@ -69,12 +69,12 @@ Array TimeStamp::CurrentTime() {
   return ret;
 }
 
-String TimeStamp::CurrentMicroTime() {
+OptString TimeStamp::CurrentMicroTime() {
   struct timeval tp;
   gettimeofday(&tp, nullptr);
   char ret[100];
   snprintf(ret, 100, "%.8F %ld", (double)tp.tv_usec / 1000000, tp.tv_sec);
-  return String(ret, CopyString);
+  return OptString(ret, CopyString);
 }
 
 int64_t TimeStamp::Get(bool &error, int hou, int min, int sec, int mon, int day,

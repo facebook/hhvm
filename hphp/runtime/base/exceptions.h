@@ -64,7 +64,7 @@ struct ExtendedException : Exception {
 
   Array getBacktrace() const;
   void leakBacktrace() { m_btp.detach(); }
-  std::pair<String,int> getFileAndLine() const;
+  std::pair<OptString,int> getFileAndLine() const;
 
   // a silent exception does not have its exception message logged
   bool isSilent() const { return m_silent; }
@@ -210,7 +210,7 @@ void throwable_recompute_backtrace_from_wh(ObjectData* throwable,
  */
 void throwable_mark_array(const ObjectData* throwable, Array& props);
 
-String throwable_to_string(ObjectData* throwable);
+OptString throwable_to_string(ObjectData* throwable);
 
 //////////////////////////////////////////////////////////////////////
 

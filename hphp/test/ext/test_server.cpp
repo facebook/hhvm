@@ -87,7 +87,7 @@ bool TestServer::VerifyServerResponse(const char* input, const char** outputs,
 
   int url = 0;
   for (url = 0; url < nUrls; url++) {
-    String server = "http://";
+    OptString server = "http://";
     server += HHVM_FN(php_uname)("n").toString();
     server += ":" + folly::to<std::string>(port) + "/";
     server += urls[url];
@@ -180,7 +180,7 @@ void TestServer::RunServer() {
 void TestServer::StopServer() {
   for (int i = 0; i < 10; i++) {
     Variant c = HHVM_FN(curl_init)();
-    String url = "http://";
+    OptString url = "http://";
     url += HHVM_FN(php_uname)("n").toString();
     url += ":" + folly::to<std::string>(s_admin_port) + "/stop";
     HHVM_FN(curl_setopt)(c.toResource(), CURLOPT_URL, url);
@@ -493,7 +493,7 @@ struct TestTransport final : Transport {
   /**
    * Get a description of the type of transport.
    */
-  String describe() const override {
+  OptString describe() const override {
     return s_test;
   }
 
@@ -544,7 +544,7 @@ bool TestServer::TestRequestHandling() {
   }
   for (unsigned int i = 0; i < TEST_SIZE; i++) {
     VS(transports[i]->m_code, 200);
-    VS(String(transports[i]->m_response), "Hello, world!");
+    VS(OptString(transports[i]->m_response), "Hello, world!");
   }
   return Count(true);
 }
@@ -675,7 +675,7 @@ bool TestServer::TestHttpClient() {
   for (int i = 0; i < 10; i++) {
     HttpClient http;
     StringBuffer response;
-    req::vector<String> responseHeaders;
+    req::vector<OptString> responseHeaders;
     int code = http.get(url.c_str(), response, &headers, &responseHeaders);
     VS(code, 200);
     VS(response.data(),
@@ -699,7 +699,7 @@ bool TestServer::TestHttpClient() {
   for (int i = 0; i < 10; i++) {
     HttpClient http;
     StringBuffer response;
-    req::vector<String> responseHeaders;
+    req::vector<OptString> responseHeaders;
     int code = http.post(url.c_str(), "postdata", 8, response, &headers,
                          &responseHeaders);
     VS(code, 200);

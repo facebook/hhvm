@@ -59,11 +59,11 @@ SatelliteServerInfo::SatelliteServerInfo(const IniSetting::Map& ini,
 }
 
 bool SatelliteServerInfo::checkMainURL(const std::string& path) {
-  String url(path.c_str(), path.size(), CopyString);
+  OptString url(path.c_str(), path.size(), CopyString);
   for (auto iter = SatelliteServerInfo::InternalURLs.begin();
        iter != SatelliteServerInfo::InternalURLs.end(); ++iter) {
     Variant ret = preg_match
-      (String(iter->c_str(), iter->size(), CopyString), url);
+      (OptString(iter->c_str(), iter->size(), CopyString), url);
     if (ret.toInt64() > 0) {
       return false;
     }

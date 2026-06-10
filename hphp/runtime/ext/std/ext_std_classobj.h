@@ -22,15 +22,15 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-bool HHVM_FUNCTION(class_exists, const String& class_name,
+bool HHVM_FUNCTION(class_exists, const OptString& class_name,
                                  bool autoload = true);
 // If allow_str_cls is true, class_or_object can be a class or a classname.
 // Otherwise, it must be an object.
 bool HHVM_FUNCTION(is_a, const Variant& class_or_object,
-                         const String& class_name,
+                         const OptString& class_name,
                          bool allow_str_cls = false);
 bool HHVM_FUNCTION(is_subclass_of, const Variant& class_or_object,
-                                   const String& class_name,
+                                   const OptString& class_name,
                                    bool allow_str_cls = true);
 Array HHVM_FUNCTION(get_object_vars, const Object& object);
 

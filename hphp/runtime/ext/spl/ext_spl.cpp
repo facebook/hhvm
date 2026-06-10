@@ -54,7 +54,7 @@ void throw_spl_exception(const char *fmt, ...) {
 static uint64_t s_hash_mask_handle = 0;
 static std::once_flag s_hash_mask_handle_inited;
 
-String HHVM_FUNCTION(spl_object_hash, const Object& obj) {
+OptString HHVM_FUNCTION(spl_object_hash, const Object& obj) {
   std::call_once(s_hash_mask_handle_inited, [] {
     HHVM_FN(mt_srand)();
 
@@ -72,7 +72,7 @@ String HHVM_FUNCTION(spl_object_hash, const Object& obj) {
   // See t6299529.
   snprintf(buf, sizeof(buf), "%032" PRIx64,
            s_hash_mask_handle ^ (int64_t)obj.get());
-  return String(buf, CopyString);
+  return OptString(buf, CopyString);
 }
 
 // Using the object address here could interfere with a moving GC algorithm.
@@ -94,7 +94,7 @@ Variant HHVM_FUNCTION(class_implements, const Variant& obj,
                                        obj.toLazyClassVal().name();
     cls = Class::get(name, autoload);
     if (!cls) {
-      String err = "class_implements(): Class %s does not exist";
+      OptString err = "class_implements(): Class %s does not exist";
       if (autoload) {
         err += " and could not be loaded";
       }
@@ -126,7 +126,7 @@ Variant HHVM_FUNCTION(class_parents, const Variant& obj,
                                        obj.toLazyClassVal().name();
     cls = Class::get(name, autoload);
     if (!cls) {
-      String err = "class_parents(): Class %s does not exist";
+      OptString err = "class_parents(): Class %s does not exist";
       if (autoload) {
         err += " and could not be loaded";
       }
@@ -156,7 +156,7 @@ Variant HHVM_FUNCTION(class_uses, const Variant& obj,
                                        obj.toLazyClassVal().name();
     cls = Class::get(name, autoload);
     if (!cls) {
-      String err = "class_uses(): Class %s does not exist";
+      OptString err = "class_uses(): Class %s does not exist";
       if (autoload) {
         err += " and could not be loaded";
       }
@@ -181,7 +181,7 @@ Variant HHVM_FUNCTION(class_uses, const Variant& obj,
 
 struct ExtensionList final : RequestEventHandler {
   void requestInit() override {
-    extensions = make_vec_array(String(".inc"), String(".php"));
+    extensions = make_vec_array(OptString(".inc"), OptString(".php"));
   }
   void requestShutdown() override {
     extensions.reset();

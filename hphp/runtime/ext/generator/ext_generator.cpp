@@ -131,16 +131,16 @@ void Generator::done() {
 }
 
 const StaticString s__closure_("{closure}");
-String HHVM_METHOD(Generator, getOrigFuncName) {
+OptString HHVM_METHOD(Generator, getOrigFuncName) {
   Generator* gen = Native::data<Generator>(this_);
   const Func* origFunc = gen->actRec()->func();
   auto const origName = origFunc->isClosureBody() ? s__closure_.get()
                                                   : origFunc->name();
   assertx(origName->isStatic());
-  return String(const_cast<StringData*>(origName));
+  return OptString(const_cast<StringData*>(origName));
 }
 
-String HHVM_METHOD(Generator, getCalledClass) {
+OptString HHVM_METHOD(Generator, getCalledClass) {
   auto const gen = Native::data<Generator>(this_);
   auto const ar = gen->actRec();
 

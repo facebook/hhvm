@@ -27,7 +27,7 @@ struct MessageFormatter : IntlError {
     }
   }
 
-  bool openFormatter(const String& pattern, const String& locale);
+  bool openFormatter(const OptString& pattern, const OptString& locale);
   UNUSED
   bool processNamedTypes();
   bool processNumericTypes();
@@ -51,7 +51,7 @@ struct MessageFormatter : IntlError {
     return (icu::MessageFormat*)m_formatter;
   }
 
-  bool setPattern(const String& pattern);
+  bool setPattern(const OptString& pattern);
 
   bool isTzSet() const { return m_tzSet; }
   bool usesDate() const { return m_usesDate; }

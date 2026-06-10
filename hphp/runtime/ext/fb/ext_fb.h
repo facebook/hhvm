@@ -27,7 +27,7 @@ extern const int64_t k_FB_SERIALIZE_HACK_ARRAYS_AND_KEYSETS;
 extern const int64_t k_FB_SERIALIZE_VARRAY_DARRAY;
 extern const int64_t k_FB_SERIALIZE_POST_HACK_ARRAY_MIGRATION;
 
-int64_t HHVM_FUNCTION(fb_utf8_strlen, const String& input);
+int64_t HHVM_FUNCTION(fb_utf8_strlen, const OptString& input);
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -35,7 +35,7 @@ Variant fb_unserialize(const char* str,
                        int len,
                        bool& success,
                        int64_t options);
-String fb_compact_serialize(const Variant& thing, int64_t options);
+OptString fb_compact_serialize(const Variant& thing, int64_t options);
 Variant fb_compact_unserialize(const char* str, int len,
                                bool& success,
                                Variant& errcode);

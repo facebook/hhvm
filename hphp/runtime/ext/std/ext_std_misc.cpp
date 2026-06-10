@@ -57,7 +57,7 @@ const int64_t k_CONNECTION_TIMEOUT = 2;
 
 namespace {
 
-String HHVM_FUNCTION(server_warmup_status) {
+OptString HHVM_FUNCTION(server_warmup_status) {
   // Fail if we jitted at least Eval.JitWarmupStatusBytes of code.
   size_t begin, end;
   jit::tc::codeEmittedThisRequest(begin, end);
@@ -100,11 +100,11 @@ String HHVM_FUNCTION(server_warmup_status) {
   return empty_string();
 }
 
-String HHVM_FUNCTION(server_warmup_status_monotonic) {
-  return String(jit::tc::warmupStatusString());
+OptString HHVM_FUNCTION(server_warmup_status_monotonic) {
+  return OptString(jit::tc::warmupStatusString());
 }
 
-void HHVM_FUNCTION(set_endpoint_name, const String& endpoint) {
+void HHVM_FUNCTION(set_endpoint_name, const OptString& endpoint) {
   ServerStats::SetEndpoint(endpoint.c_str());
 }
 
@@ -113,7 +113,7 @@ const StaticString
   s_cli("cli"),
   s_worker("worker");
 
-String HHVM_FUNCTION(execution_context) {
+OptString HHVM_FUNCTION(execution_context) {
   if (auto t = g_context->getTransport()) return t->describe();
   if (is_cli_server_mode()) return s_clisrv;
   return Cfg::Server::Mode ? s_worker : s_cli;
@@ -181,11 +181,11 @@ int64_t HHVM_FUNCTION(connection_timeout) {
 }
 
 static Class* getClassByName(const char* name, int len) {
-  String className(name, len, CopyString);
+  OptString className(name, len, CopyString);
   return Class::load(className.get());
 }
 
-Variant HHVM_FUNCTION(constant, const String& name) {
+Variant HHVM_FUNCTION(constant, const OptString& name) {
   auto const warning = "constant() is deprecated and subject"
   " to removal from the Hack language";
   switch (Cfg::HackLang::PhpismDisableConstant) {
@@ -204,7 +204,7 @@ Variant HHVM_FUNCTION(constant, const String& name) {
     char *constantName = colon + 2;
     Class* cls = getClassByName(data, classNameLen);
     if (cls) {
-      String cnsName(constantName, data + len - constantName, CopyString);
+      OptString cnsName(constantName, data + len - constantName, CopyString);
       TypedValue cns = cls->clsCnsGet(cnsName.get());
       if (type(cns) != KindOfUninit) {
         return tvAsCVarRef(cns);
@@ -219,7 +219,7 @@ Variant HHVM_FUNCTION(constant, const String& name) {
   return init_null();
 }
 
-bool HHVM_FUNCTION(defined, const String& name, bool autoload /* = true */) {
+bool HHVM_FUNCTION(defined, const OptString& name, bool autoload /* = true */) {
   if (!name.get()) return false;
   const char *data = name.data();
   int len = name.length();
@@ -231,7 +231,7 @@ bool HHVM_FUNCTION(defined, const String& name, bool autoload /* = true */) {
     char *constantName = colon + 2;
     Class* cls = getClassByName(data, classNameLen);
     if (cls) {
-      String cnsName(constantName, data + len - constantName, CopyString);
+      OptString cnsName(constantName, data + len - constantName, CopyString);
       return cls->clsCnsGet(cnsName.get()).m_type != KindOfUninit;
     }
     return false;
@@ -245,7 +245,7 @@ int64_t HHVM_FUNCTION(ignore_user_abort, bool /*setting*/ /* = false */) {
   return 0;
 }
 
-Variant HHVM_FUNCTION(pack, const String& format, const Array& argv) {
+Variant HHVM_FUNCTION(pack, const OptString& format, const Array& argv) {
   // pack() returns false if there was an error, String otherwise
   return ZendPack::pack(format, argv);
 }
@@ -358,7 +358,7 @@ bool HHVM_FUNCTION(time_sleep_until, double timestamp) {
   return true;
 }
 
-String HHVM_FUNCTION(uniqid, const String& prefix /* = null_string */,
+OptString HHVM_FUNCTION(uniqid, const OptString& prefix /* = null_string */,
                      bool more_entropy /* = false */) {
   if (!more_entropy) {
     Transport *transport = g_context->getTransport();
@@ -373,7 +373,7 @@ String HHVM_FUNCTION(uniqid, const String& prefix /* = null_string */,
   int sec = (int)tv.tv_sec;
   int usec = (int)(tv.tv_usec % 0x100000);
 
-  String uniqid(prefix.size() + 64, ReserveString);
+  OptString uniqid(prefix.size() + 64, ReserveString);
   auto ptr = uniqid.mutableData();
   // StringData::capacity() returns the buffer size without the null terminator.
   // snprintf() expects a "size" parameter that is the buffer capacity including
@@ -394,7 +394,7 @@ String HHVM_FUNCTION(uniqid, const String& prefix /* = null_string */,
   return uniqid;
 }
 
-Variant HHVM_FUNCTION(unpack, const String& format, const String& data) {
+Variant HHVM_FUNCTION(unpack, const OptString& format, const OptString& data) {
   return ZendPack::unpack(format, data);
 }
 
@@ -424,7 +424,7 @@ bool HHVM_FUNCTION(is_array_marked_legacy, const Variant& v) {
   return v.isArray() && v.asCArrRef()->isLegacyArray();
 }
 
-String HHVM_FUNCTION(hphp_to_string, const Variant& v) {
+OptString HHVM_FUNCTION(hphp_to_string, const Variant& v) {
   return v.toString();
 }
 
@@ -440,8 +440,8 @@ Variant HHVM_FUNCTION(SystemLib_min2, const Variant& value1,
   return more(value1, value2) ? value2 : value1;
 }
 
-String HHVM_FUNCTION(hhvm_binary) {
-  return String(current_executable_path());
+OptString HHVM_FUNCTION(hhvm_binary) {
+  return OptString(current_executable_path());
 }
 
 void StandardExtension::registerNativeMisc() {

@@ -104,7 +104,7 @@ struct ShellExecContext final {
     }
   }
 
-  FILE *exec(const String& cmd_string) {
+  FILE *exec(const OptString& cmd_string) {
     assertx(m_proc == nullptr);
     const auto cmd = cmd_string.c_str();
     if (strlen(cmd) != cmd_string.size()) {
@@ -187,7 +187,7 @@ void checkExecAllowed(bool allowGated) {
 } // anonymous namespace
 
 Variant HHVM_FUNCTION(shell_exec,
-                      const String& cmd) {
+                      const OptString& cmd) {
   checkExecAllowed(false);
   ShellExecContext ctx;
   FILE *fp = ctx.exec(cmd);
@@ -197,8 +197,8 @@ Variant HHVM_FUNCTION(shell_exec,
   return sbuf.detach();
 }
 
-String HHVM_FUNCTION(exec,
-                     const String& command,
+OptString HHVM_FUNCTION(exec,
+                     const OptString& command,
                      Array& output,
                      int64_t& return_var) {
   checkExecAllowed(false);
@@ -224,14 +224,14 @@ String HHVM_FUNCTION(exec,
   output = pai.toArray();
 
   if (!count || lines.empty()) {
-    return String();
+    return OptString();
   }
 
   return HHVM_FN(rtrim)(lines[count - 1].toString());
 }
 
 void HHVM_FUNCTION(passthru,
-                   const String& command,
+                   const OptString& command,
                    int64_t& return_var) {
   checkExecAllowed(false);
   ShellExecContext ctx;
@@ -244,15 +244,15 @@ void HHVM_FUNCTION(passthru,
     if (len == -1 && errno == EINTR) continue;
     if (len <= 0) break; // break on error or EOF
     buffer[len] = '\0';
-    g_context->write(String(buffer, len, CopyString));
+    g_context->write(OptString(buffer, len, CopyString));
   }
   int ret = ctx.exit();
   MAYBE_WIFEXITED(ret);
   return_var = ret;
 }
 
-String HHVM_FUNCTION(system,
-                     const String& command,
+OptString HHVM_FUNCTION(system,
+                     const OptString& command,
                      int64_t& return_var) {
   checkExecAllowed(false);
   ShellExecContext ctx;
@@ -278,7 +278,7 @@ String HHVM_FUNCTION(system,
     ectx.write("\n");
   }
   if (!count || lines.empty()) {
-    return String();
+    return OptString();
   }
 
   return HHVM_FN(rtrim)(lines[count - 1].toString());
@@ -292,12 +292,12 @@ struct ChildProcess : SweepableResourceData {
 
   pid_t child;
   Array pipes;
-  String command;
+  OptString command;
   Variant env;
 
   CLASSNAME_IS("process")
   // overriding ResourceData
-  const String& o_getClassNameHook() const override { return classnameof(); }
+  const OptString& o_getClassNameHook() const override { return classnameof(); }
 
   int close() {
     // Although the PHP doc about proc_close() says that the pipes need to be
@@ -381,7 +381,7 @@ public:
     return true;
   }
 
-  bool readPipe(const String& zmode) {
+  bool readPipe(const OptString& zmode) {
     mode = DESC_PIPE;
     FileDescriptor newpipe[2];
     if (0 != pipe(newpipe)) {
@@ -402,7 +402,7 @@ public:
     return true;
   }
 
-  bool openFile(const String& zfile, const String& zmode) {
+  bool openFile(const OptString& zfile, const OptString& zmode) {
     mode = DESC_FILE;
     /* try a wrapper */
     Variant vfile = HHVM_FN(fopen)(zfile.c_str(), zmode.c_str());
@@ -491,7 +491,7 @@ static bool pre_proc_open(const Array& descriptorspec,
         raise_warning("Missing handle qualifier in array");
         break;
       }
-      String ztype = descarr[int64_t(0)].toString();
+      OptString ztype = descarr[int64_t(0)].toString();
       if (ztype == s_pipe) {
         if (!descarr.exists(int64_t(1))) {
           raise_warning("Missing mode parameter for 'pipe'");
@@ -525,7 +525,7 @@ static bool pre_proc_open(const Array& descriptorspec,
   return false;
 }
 
-static Variant post_proc_open(const String& cmd, Array& pipes,
+static Variant post_proc_open(const OptString& cmd, Array& pipes,
                               const Variant& env,
                               std::vector<DescriptorItem> &items,
                               pid_t child
@@ -560,7 +560,7 @@ static Variant post_proc_open(const String& cmd, Array& pipes,
 }
 
 Variant
-HHVM_FUNCTION(proc_open, const String& cmd, const Array& descriptorspec,
+HHVM_FUNCTION(proc_open, const OptString& cmd, const Array& descriptorspec,
               Array& pipes, const Variant& cwd /* = uninit_variant */,
               const Variant& env /* = uninit_variant */,
               const Variant& /*other_options*/ /* = uninit_variant */) {
@@ -591,15 +591,15 @@ HHVM_FUNCTION(proc_open, const String& cmd, const Array& descriptorspec,
 
       // Env vars defined in the hdf file go in first
       for (const auto& envvar : RuntimeOption::EnvVariables) {
-        enva.set(String(envvar.first), String(envvar.second));
+        enva.set(OptString(envvar.first), OptString(envvar.second));
       }
 
       // global environment overrides the hdf
       for (char **env = environ; env && *env; env++) {
         char *p = strchr(*env, '=');
         if (p) {
-          String name(*env, p - *env, CopyString);
-          String val(p + 1, CopyString);
+          OptString name(*env, p - *env, CopyString);
+          OptString val(p + 1, CopyString);
           enva.set(name, val);
         }
       }
@@ -760,17 +760,17 @@ bool HHVM_FUNCTION(proc_nice,
 
 const StaticString s_twosinglequotes("''");
 
-String HHVM_FUNCTION(escapeshellarg,
-                     const String& arg) {
+OptString HHVM_FUNCTION(escapeshellarg,
+                     const OptString& arg) {
   if (!arg.empty()) {
     return string_escape_shell_arg(arg.c_str());
   } else {
-    return String(s_twosinglequotes);
+    return OptString(s_twosinglequotes);
   }
 }
 
-String HHVM_FUNCTION(escapeshellcmd,
-                     const String& command) {
+OptString HHVM_FUNCTION(escapeshellcmd,
+                     const OptString& command) {
   if (!command.empty()) {
     return string_escape_shell_cmd(command.c_str());
   }

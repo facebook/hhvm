@@ -25,7 +25,7 @@ static Variant extractValue(ResourceBundle* data,
       auto ret = bundle.getString(error);
       EXTRACT_ERR(string);
       error = U_ZERO_ERROR;
-      String ret8(u8(ret, error));
+      OptString ret8(u8(ret, error));
       if (U_FAILURE(error)) {
         data->setError(error, "Failed converting value to utf-8");
         return init_null();
@@ -36,7 +36,7 @@ static Variant extractValue(ResourceBundle* data,
       int32_t len;
       auto ret = bundle.getBinary(len, error);
       EXTRACT_ERR(binary);
-      return String((char*)ret, len, CopyString);
+      return OptString((char*)ret, len, CopyString);
     }
     case URES_INT: {
       auto ret = bundle.getInt(error);
@@ -66,10 +66,10 @@ static Variant extractValue(ResourceBundle* data,
 static void HHVM_METHOD(ResourceBundle, __construct, const Variant& localeName,
                                                      const Variant& bundleName,
                                                      bool fallback) {
-  auto bundle = bundleName.isNull() ? String{} : bundleName.toString();
+  auto bundle = bundleName.isNull() ? OptString{} : bundleName.toString();
   if (bundle.length() > PATH_MAX) {
     raise_warning("Bundle name too long");
-    bundle = String{};
+    bundle = OptString{};
   }
   auto const locale = icu::Locale::createFromName(
     localeOrDefault(localeName.toString()).c_str()
@@ -109,7 +109,7 @@ static int64_t HHVM_METHOD(ResourceBundle, getErrorCode) {
   return data->getErrorCode();
 }
 
-static String HHVM_METHOD(ResourceBundle, getErrorMessage) {
+static OptString HHVM_METHOD(ResourceBundle, getErrorMessage) {
   FETCH_RSRC(data, this_);
   return data->getErrorMessage();
 }
@@ -165,7 +165,7 @@ static Variant HHVM_METHOD(ResourceBundle, get,
 }
 
 static Variant HHVM_STATIC_METHOD(ResourceBundle, getLocales,
-                                                  const String& bundleName) {
+                                                  const OptString& bundleName) {
   UErrorCode error = U_ZERO_ERROR;
   const char *bundle = bundleName.length() ? bundleName.c_str() : nullptr;
   if (bundleName.length() >= PATH_MAX) {
@@ -188,7 +188,7 @@ static Variant HHVM_STATIC_METHOD(ResourceBundle, getLocales,
   const char *entry;
   int32_t entry_len;
   while ((entry = uenum_next(le, &entry_len, &error))) {
-    ret.append(String(entry, entry_len, CopyString));
+    ret.append(OptString(entry, entry_len, CopyString));
   }
   return ret;
 }

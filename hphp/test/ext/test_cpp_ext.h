@@ -33,8 +33,8 @@ struct TestCppExt : TestCppBase {
   TestCppExt();
 };
 
-inline void evalCodeForCppExt(const HPHP::String& code_str) {
-  HPHP::String prefixedCode = concat("<?hh ", code_str);
+inline void evalCodeForCppExt(const HPHP::OptString& code_str) {
+  HPHP::OptString prefixedCode = concat("<?hh ", code_str);
   HPHP::Unit* unit = compileEvalString(prefixedCode.get());
   tvDecRefGen(HPHP::g_context->invokeUnit(unit));
 }

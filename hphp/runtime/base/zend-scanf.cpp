@@ -792,7 +792,7 @@ int string_sscanf(const char *string, const char *format, int numVars,
       }
       if (!(flags & SCAN_SUPPRESS)) {
         auto const key = safe_cast<int64_t>(returnArray.size());
-        returnArray.set(key, String(string, end-string, CopyString));
+        returnArray.set(key, OptString(string, end-string, CopyString));
       }
       string = end;
       break;
@@ -826,7 +826,7 @@ int string_sscanf(const char *string, const char *format, int numVars,
       }
       if (!(flags & SCAN_SUPPRESS)) {
         auto const key = safe_cast<int64_t>(returnArray.size());
-        returnArray.set(key, String(string, end-string, CopyString));
+        returnArray.set(key, OptString(string, end-string, CopyString));
       }
       string = end;
       break;
@@ -952,7 +952,7 @@ int string_sscanf(const char *string, const char *format, int numVars,
         auto const key = safe_cast<int64_t>(returnArray.size());
         if ((flags & SCAN_UNSIGNED) && (value < 0)) {
           snprintf(buf, sizeof(buf), "%lu", (long)value); /* INTL: ISO digit */
-          returnArray.set(key, String(buf, CopyString));
+          returnArray.set(key, OptString(buf, CopyString));
         } else {
           returnArray.set(key, value);
         }

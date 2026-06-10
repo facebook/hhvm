@@ -66,16 +66,16 @@ public:
   /**
    * Dump detailed information to return string.
    */
-  virtual String debuggerDump() {
-    return String();
+  virtual OptString debuggerDump() {
+    return OptString();
   }
 
   /**
    * Execute a debugger action.
    */
-  virtual String debuggerVerb(const std::string& /*verb*/,
+  virtual OptString debuggerVerb(const std::string& /*verb*/,
                               const std::vector<std::string>& /*args*/) {
-    return String();
+    return OptString();
   }
 };
 

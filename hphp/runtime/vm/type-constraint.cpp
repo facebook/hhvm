@@ -970,7 +970,7 @@ const TypeAlias* getTypeAliasWithAutoload(const NamedType* ne,
   auto def = ne->getCachedTypeAlias();
   if (!def) {
     VMRegAnchor _;
-    String nameStr(const_cast<StringData*>(name));
+    OptString nameStr(const_cast<StringData*>(name));
     if (!AutoloadHandler::s_instance->autoloadTypeAlias(nameStr)) {
       return nullptr;
     }
@@ -1003,7 +1003,7 @@ getNamedTypeWithAutoload(const NamedType* ne,
   if (auto klass = ne->getCachedClass()) return FoundClass{klass};
 
   // We don't have the class or the typedef, so autoload.
-  String nameStr(const_cast<StringData*>(name));
+  OptString nameStr(const_cast<StringData*>(name));
   if (AutoloadHandler::s_instance->autoloadTypeOrTypeAlias(nameStr)) {
     // Autoload succeeded, try to grab a typedef or a class.
     if (auto def = ne->getCachedTypeAlias()) return FoundTypeAlias{def};

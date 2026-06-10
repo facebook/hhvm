@@ -63,7 +63,7 @@ req::ptr<File> PhpStreamWrapper::openFD(const char *sFD) {
 }
 
 req::ptr<File>
-PhpStreamWrapper::open(const String& filename, const String& mode,
+PhpStreamWrapper::open(const OptString& filename, const OptString& mode,
                        int options, const req::ptr<StreamContext>& context) {
   if (strncasecmp(filename.c_str(), "php://", 6)) {
     return nullptr;

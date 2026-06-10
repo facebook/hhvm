@@ -32,17 +32,17 @@ const char* formats[] = {
 
 std::string CmdPrint::FormatResult(const char* format, const Variant& ret) {
   if (format == nullptr) {
-    String sret = DebuggerClient::FormatVariable(ret);
+    OptString sret = DebuggerClient::FormatVariable(ret);
     return std::string(sret.data(), sret.size());
   }
 
   if (strcmp(format, "r") == 0) {
-    String sret = DebuggerClient::FormatVariable(ret, 'r');
+    OptString sret = DebuggerClient::FormatVariable(ret, 'r');
     return std::string(sret.data(), sret.size());
   }
 
   if (strcmp(format, "v") == 0) {
-    String sret = DebuggerClient::FormatVariable(ret, 'v');
+    OptString sret = DebuggerClient::FormatVariable(ret, 'v');
     return std::string(sret.data(), sret.size());
   }
 
@@ -94,7 +94,7 @@ std::string CmdPrint::FormatResult(const char* format, const Variant& ret) {
     assertx(false);
   }
 
-  String sret = DebuggerClient::FormatVariable(ret);
+  OptString sret = DebuggerClient::FormatVariable(ret);
   if (strcmp(format, "hex") == 0 || strcmp(format, "x") == 0 ||
       strcmp(format, "oct") == 0) {
     StringBuffer sb;
@@ -121,7 +121,7 @@ std::string CmdPrint::FormatResult(const char* format, const Variant& ret) {
       bool err;
       ts = dt.toTimeStamp(err);
     }
-    return String(ts).data();
+    return OptString(ts).data();
   }
 
   assertx(false);
@@ -136,7 +136,7 @@ void CmdPrint::sendImpl(DebuggerThriftBuffer &thrift) {
     g_context->debuggerSettings.printLevel = m_printLevel;
   }
   {
-    String sdata;
+    OptString sdata;
     DebuggerWireHelpers::WireSerialize(m_ret, sdata);
     thrift.write(sdata);
   }
@@ -153,7 +153,7 @@ void CmdPrint::sendImpl(DebuggerThriftBuffer &thrift) {
 void CmdPrint::recvImpl(DebuggerThriftBuffer &thrift) {
   DebuggerCommand::recvImpl(thrift);
   {
-    String sdata;
+    OptString sdata;
     thrift.read(sdata);
     auto const error = DebuggerWireHelpers::WireUnserialize(sdata, m_ret);
     if (error == DebuggerWireHelpers::ErrorMsg) {

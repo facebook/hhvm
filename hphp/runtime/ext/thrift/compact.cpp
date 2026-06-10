@@ -302,7 +302,7 @@ struct CompactWriter {
       version = _version;
     }
 
-    void writeHeader(const String& name, uint8_t msgtype, uint32_t seqid) {
+    void writeHeader(const OptString& name, uint8_t msgtype, uint32_t seqid) {
       writeUByte(PROTOCOL_ID);
       writeUByte(version | (msgtype << TYPE_SHIFT_AMOUNT));
       writeVarint(seqid);
@@ -690,7 +690,7 @@ struct CompactWriter {
       transport.push(buf, wsize);
     }
 
-    void writeString(const String& s) {
+    void writeString(const OptString& s) {
       auto slice = s.slice();
       writeVarint(slice.size());
       transport.write(slice.data(), slice.size());
@@ -718,7 +718,7 @@ struct CompactReader {
       version = _version;
     }
 
-    Variant read(const String& resultClassName) {
+    Variant read(const OptString& resultClassName) {
       uint8_t protoId = readUByte();
       if (protoId != PROTOCOL_ID) {
         thrift_error("Bad protocol id in TCompact message", ERR_BAD_VERSION);
@@ -788,7 +788,7 @@ struct CompactReader {
       assertx(dest->assertPropTypeHints());
     }
 
-    Object readStruct(const String& clsName) {
+    Object readStruct(const OptString& clsName) {
       auto const cls = Class::load(clsName.get());
       if (cls == nullptr) raise_error(Strings::UNKNOWN_CLASS, clsName.data());
 
@@ -1155,7 +1155,7 @@ struct CompactReader {
         }
         case TType::T_STRING: {
           for (uint32_t i = 0; i < size; i++) {
-            String key = readField(spec.key(), keyType, hasTypeWrapper).toString();
+            OptString key = readField(spec.key(), keyType, hasTypeWrapper).toString();
             Variant value = readField(spec.val(), valueType, hasTypeWrapper);
             arr.set(key, value);
           }
@@ -1451,11 +1451,11 @@ struct CompactReader {
       return result;
     }
 
-    String readString(void) {
+    OptString readString(void) {
       uint32_t size = readVarint();
 
       if (size && (size + 1)) {
-        String s = String(size, ReserveString);
+        OptString s = OptString(size, ReserveString);
         char* buf = s.mutableData();
 
         transport.pull(buf, size);
@@ -1488,7 +1488,7 @@ struct CompactReader {
 ///////////////////////////////////////////////////////////////////////////////
 
 Object compact_deserialize_from_string(
-                     const String& serialized, const String& thrift_typename,
+                     const OptString& serialized, const OptString& thrift_typename,
                      int64_t options, int64_t version) {
   CoeffectsAutoGuard _;
   // Suppress class-to-string conversion warnings that occur during
@@ -1517,7 +1517,7 @@ Object compact_deserialize_from_string(
   }
 }
 
-String compact_serialize_to_string(const Object& thrift_struct,
+OptString compact_serialize_to_string(const Object& thrift_struct,
                    int64_t version) {
   CoeffectsAutoGuard _;
   // Suppress class-to-string conversion warnings that occur during
@@ -1525,7 +1525,7 @@ String compact_serialize_to_string(const Object& thrift_struct,
   SuppressClassConversionNotice suppressor;
 
   VMRegAnchor _2;
-  String ret = String(1024, ReserveString);
+  OptString ret = OptString(1024, ReserveString);
   auto iobuf = folly::IOBuf::wrapBufferAsValue(ret.mutableData(), ret.capacity());
   iobuf.clear();
   folly::io::Appender appender(&iobuf, 1024);
@@ -1559,7 +1559,7 @@ int64_t HHVM_FUNCTION(thrift_protocol_set_compact_version,
 
 void HHVM_FUNCTION(thrift_protocol_write_compact2,
                    const Object& transportobj,
-                   const String& method_name,
+                   const OptString& method_name,
                    int64_t msgtype,
                    const Object& request_struct,
                    int64_t seqid,
@@ -1604,7 +1604,7 @@ void HHVM_FUNCTION(thrift_protocol_write_compact_struct,
   transport.flush();
 }
 
-String HHVM_FUNCTION(thrift_protocol_write_compact_struct_to_string,
+OptString HHVM_FUNCTION(thrift_protocol_write_compact_struct_to_string,
                      const Object& request_struct,
                      int64_t version) {
   return compact_serialize_to_string(request_struct, version);
@@ -1612,7 +1612,7 @@ String HHVM_FUNCTION(thrift_protocol_write_compact_struct_to_string,
 
 Variant HHVM_FUNCTION(thrift_protocol_read_compact,
                       const Object& transportobj,
-                      const String& obj_typename,
+                      const OptString& obj_typename,
                       int64_t options) {
   CoeffectsAutoGuard _;
   // Suppress class-to-string conversion warnings that occur during
@@ -1628,7 +1628,7 @@ Variant HHVM_FUNCTION(thrift_protocol_read_compact,
 
 Object HHVM_FUNCTION(thrift_protocol_read_compact_struct,
                      const Object& transportobj,
-                     const String& obj_typename,
+                     const OptString& obj_typename,
                      int64_t options,
                      int64_t version) {
   CoeffectsAutoGuard _;
@@ -1645,8 +1645,8 @@ Object HHVM_FUNCTION(thrift_protocol_read_compact_struct,
 }
 
 Object HHVM_FUNCTION(thrift_protocol_read_compact_struct_from_string,
-                     const String& serialized,
-                     const String& obj_typename,
+                     const OptString& serialized,
+                     const OptString& obj_typename,
                      int64_t options,
                      int64_t version) {
   return compact_deserialize_from_string(serialized, obj_typename, options, version);

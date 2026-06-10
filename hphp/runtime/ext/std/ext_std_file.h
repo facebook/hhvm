@@ -71,8 +71,8 @@ constexpr int64_t k_INI_SCANNER_RAW = 1;
 // file handle based file operations
 
 Variant HHVM_FUNCTION(fopen,
-                      const String& filename,
-                      const String& mode,
+                      const OptString& filename,
+                      const OptString& mode,
                       bool use_include_path = false,
                       const Variant& context = uninit_null());
 bool HHVM_FUNCTION(fclose, const OptResource& handle);
@@ -94,71 +94,71 @@ Variant HHVM_FUNCTION(fgets,
 Variant HHVM_FUNCTION(fgetss,
                       const OptResource& handle,
                       int64_t length = 0,
-                      const String& allowable_tags = null_string);
+                      const OptString& allowable_tags = null_string);
 Variant HHVM_FUNCTION(fpassthru, const OptResource& handle);
 Variant HHVM_FUNCTION(fwrite,
                       const OptResource& handle,
-                      const String& data,
+                      const OptString& data,
                       int64_t length = 0);
 
 ///////////////////////////////////////////////////////////////////////////////
 // file name based file operations
 
 Variant HHVM_FUNCTION(file_get_contents,
-                      const String& filename,
+                      const OptString& filename,
                       bool use_include_path = false,
                       const Variant& context = uninit_null(),
                       int64_t offset = -1,
                       int64_t maxlen = -1);
 Variant HHVM_FUNCTION(readfile,
-                      const String& filename,
+                      const OptString& filename,
                       bool use_include_path = false,
                       const Variant& context = uninit_null());
 
 ///////////////////////////////////////////////////////////////////////////////
 // shell commands
 
-String HHVM_FUNCTION(basename,
-                     const String& path,
-                     const String& suffix = null_string);
+OptString HHVM_FUNCTION(basename,
+                     const OptString& path,
+                     const OptString& suffix = null_string);
 Variant HHVM_FUNCTION(glob,
-                      const String& pattern,
+                      const OptString& pattern,
                       int64_t flags = 0);
 
 ///////////////////////////////////////////////////////////////////////////////
 // stats functions
 
 bool HHVM_FUNCTION(is_writable,
-                   const String& filename);
+                   const OptString& filename);
 bool HHVM_FUNCTION(is_readable,
-                   const String& filename);
+                   const OptString& filename);
 bool HHVM_FUNCTION(is_file,
-                   const String& filename);
+                   const OptString& filename);
 bool HHVM_FUNCTION(is_dir,
-                   const String& filename);
+                   const OptString& filename);
 bool HHVM_FUNCTION(file_exists,
-                   const String& filename);
+                   const OptString& filename);
 Variant HHVM_FUNCTION(realpath,
-                      const String& path);
+                      const OptString& path);
 Variant HHVM_FUNCTION(pathinfo,
-                      const String& path,
+                      const OptString& path,
                       int64_t opt = 15);
 
 ///////////////////////////////////////////////////////////////////////////////
 // directory functions
 
 bool HHVM_FUNCTION(mkdir,
-                   const String& pathname,
+                   const OptString& pathname,
                    int64_t mode = 0777,
                    bool recursive = false,
                    const Variant& context = uninit_null());
-String HHVM_FUNCTION(dirname,
-                     const String& path);
+OptString HHVM_FUNCTION(dirname,
+                     const OptString& path);
 Variant HHVM_FUNCTION(getcwd);
 Variant HHVM_FUNCTION(readdir,
                       const Variant& dir_handle = uninit_variant);
 Variant HHVM_FUNCTION(scandir,
-                      const String& directory,
+                      const OptString& directory,
                       bool descending = false,
                       const Variant& context = uninit_null());
 

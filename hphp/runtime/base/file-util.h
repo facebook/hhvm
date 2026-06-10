@@ -72,14 +72,14 @@ int ssystem(const char *command);
 /**
  * Find the relative path from a directory with trailing slash to the file
  */
-String relativePath(const std::string& fromDir, const String& toFile);
+OptString relativePath(const std::string& fromDir, const OptString& toFile);
 
 /**
  * Canonicalize path to remove "..", "." and "\/", etc..
  */
-String canonicalize(const String& path);
-String canonicalize(const std::string& path);
-String canonicalize(const char* path, size_t len,
+OptString canonicalize(const OptString& path);
+OptString canonicalize(const std::string& path);
+OptString canonicalize(const char* path, size_t len,
                     bool collapse_slashes = true);
 
 std::string expandUser(const std::string& path,
@@ -92,7 +92,7 @@ std::string normalizeDir(const std::string &dirname);
 /**
  * Thread-safe dirname().
  */
-String dirname(const String& path);
+OptString dirname(const OptString& path);
 
 /**
  * Search for PHP, JS, or other files under a directory.
@@ -116,15 +116,15 @@ void find(std::vector<std::string> &out,
  * Determines if a given string is a valid path or not
  * (ie: contains no null bytes)
  */
-bool isValidPath(const String& path);
+bool isValidPath(const OptString& path);
 
 /**
  * Helper functions for use with FileUtil::isValidPath
  */
-bool checkPathAndWarn(const String& path,
+bool checkPathAndWarn(const OptString& path,
                       const char* func_name,
                       int param_pos);
-void checkPathAndError(const String& path,
+void checkPathAndError(const OptString& path,
                        const char* func_name,
                        int param_pos);
 
@@ -135,7 +135,7 @@ void checkPathAndError(const String& path,
  * action() returns true.
  */
 template <class Action>
-bool runRelative(std::string suffix, String cmd,
+bool runRelative(std::string suffix, OptString cmd,
                  const char* currentDir, Action action);
 
 bool isSystemName(folly::StringPiece path);

@@ -23,7 +23,7 @@ struct CurlResource : SweepableResourceData {
     Variant            callback;
     req::ptr<File>     fp;
     StringBuffer       buf;
-    String             content;
+    OptString             content;
     int                type{0};
   };
 
@@ -49,11 +49,11 @@ struct CurlResource : SweepableResourceData {
   };
 
   CLASSNAME_IS("curl")
-  const String& o_getClassNameHook() const override { return classnameof(); }
+  const OptString& o_getClassNameHook() const override { return classnameof(); }
   DECLARE_RESOURCE_ALLOCATION(CurlResource)
   bool isInvalid() const override { return !m_cp; }
 
-  explicit CurlResource(const String& url);
+  explicit CurlResource(const OptString& url);
   ~CurlResource() { close(); }
 
   void closeForSweep();
@@ -62,15 +62,15 @@ struct CurlResource : SweepableResourceData {
   void reset();
 
   Variant execute();
-  String getUrl() { return m_url; }
-  String getHeader() { return m_header; }
-  String getContents();
+  OptString getUrl() { return m_url; }
+  OptString getHeader() { return m_header; }
+  OptString getContents();
 
   bool setOption(long option, const Variant& value);
   Variant getOption(long option);
 
   int getError() { return m_error_no; }
-  String getErrorString() { return String(m_error_str, CopyString); }
+  OptString getErrorString() { return OptString(m_error_str, CopyString); }
 
   CURL *get();
 
@@ -99,7 +99,7 @@ struct CurlResource : SweepableResourceData {
   bool setLongOption(long option, long value);
   static bool isStringOption(long option);
   static bool isStringFilePathOption(long option);
-  bool setStringOption(long option, const String& value);
+  bool setStringOption(long option, const OptString& value);
   static bool isNullableStringOption(long option);
   bool setNullableStringOption(long option, const Variant& value);
   bool setPostFieldsOption(const Variant& value);
@@ -110,7 +110,7 @@ struct CurlResource : SweepableResourceData {
   static bool isNonCurlOption(long option);
   bool setNonCurlOption(long option, const Variant& value);
   static bool isBlobOption(long option);
-  bool setBlobOption(long option, const String& value);
+  bool setBlobOption(long option, const OptString& value);
 
   void handle_exception();
   static size_t curl_read(char *data, size_t size, size_t nmemb, void *ctx);
@@ -129,7 +129,7 @@ struct CurlResource : SweepableResourceData {
   friend struct CurlMultiResource;
 
   bool useCertCache() const;
-  String cainfo(bool proxy) const;
+  OptString cainfo(bool proxy) const;
 
   CURL *m_cp;
   TYPE_SCAN_IGNORE_FIELD(m_cp);
@@ -142,9 +142,9 @@ struct CurlResource : SweepableResourceData {
 
   req::shared_ptr<ToFree> m_to_free;
 
-  String m_url;
-  String m_cainfo;
-  String m_header;
+  OptString m_url;
+  OptString m_cainfo;
+  OptString m_header;
   Array  m_opts;
 
   WriteHandler m_write;

@@ -1356,7 +1356,7 @@ OPTBLD_INLINE void iopClsCnsL(tv_lval local) {
   tvSet(clsCns, *clsTV);
 }
 
-String toStringWithNotice(const Variant& c) {
+OptString toStringWithNotice(const Variant& c) {
   static ConvNoticeLevel notice_level =
     flagToConvNoticeLevel(Cfg::Eval::NoticeOnCoerceForStrConcat);
   return c.toString(notice_level, s_ConvNoticeReasonConcat.get());
@@ -2309,7 +2309,7 @@ OPTBLD_INLINE void iopThrow(PC&) {
 }
 
 OPTBLD_INLINE void iopThrowNonExhaustiveSwitch() {
-  SystemLib::throwRuntimeExceptionObject(String(Strings::NONEXHAUSTIVE_SWITCH));
+  SystemLib::throwRuntimeExceptionObject(OptString(Strings::NONEXHAUSTIVE_SWITCH));
 }
 
 OPTBLD_INLINE void iopRaiseClassStringConversionNotice() {
@@ -3745,7 +3745,7 @@ OPTBLD_INLINE JitResumeAddr fcallFuncArr(PC origpc, PC& pc,
 OPTBLD_INLINE JitResumeAddr fcallFuncStr(PC origpc, PC& pc,
                                          const FCallArgs& fca) {
   assertx(tvIsString(vmStack().topC()));
-  auto str = String::attach(vmStack().topC()->m_data.pstr);
+  auto str = OptString::attach(vmStack().topC()->m_data.pstr);
   vmStack().discard();
 
   ObjectData* thiz = nullptr;
@@ -3970,7 +3970,7 @@ static void throw_call_non_object(const char* methodName,
     methodName, typeName);
 
   if (Cfg::ErrorHandling::ThrowExceptionOnBadMethodCall) {
-    SystemLib::throwBadMethodCallExceptionObject(String(msg));
+    SystemLib::throwBadMethodCallExceptionObject(OptString(msg));
   }
   raise_fatal_error(msg.c_str());
 }
@@ -4414,7 +4414,7 @@ OPTBLD_INLINE void iopIterFree(Iter* it) {
 
 OPTBLD_INLINE void inclOp(InclOpFlags flags, const char* opName) {
   TypedValue* c1 = vmStack().topC();
-  auto path = String::attach(prepareKey(*c1));
+  auto path = OptString::attach(prepareKey(*c1));
   bool initial;
   TRACE(2, "inclOp %s %s %s %s \"%s\"\n",
         flags & InclOpFlags::Once ? "Once" : "",
@@ -4432,7 +4432,7 @@ OPTBLD_INLINE void inclOp(InclOpFlags flags, const char* opName) {
 
   auto const unit = [&] {
     if (flags & InclOpFlags::Relative) {
-      String absPath = curUnitFilePath() + '/';
+      OptString absPath = curUnitFilePath() + '/';
       absPath += path;
       return lookupUnit(absPath.get(), "", &initial, nullptr, false);
     }
@@ -4500,8 +4500,8 @@ OPTBLD_INLINE void iopEval() {
     raise_error("You can't use eval when disabled");
   }
 
-  auto code = String::attach(prepareKey(*c1));
-  String prefixedCode = concat("<?hh ", code);
+  auto code = OptString::attach(prepareKey(*c1));
+  OptString prefixedCode = concat("<?hh ", code);
 
   auto evalFilename = std::string();
   auto vm = &*g_context;

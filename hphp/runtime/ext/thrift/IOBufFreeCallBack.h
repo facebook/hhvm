@@ -50,7 +50,7 @@ struct IOBufFreeCallBack {
 };
 
 std::unique_ptr<folly::IOBuf> createIOBufWithMemoryTracking(
-    const String& response,
+    const OptString& response,
     std::function<void(uint64_t)> cbToRecordAllocFreeInIOThread) {
   IOBufFreeCallBack* cbPtr = new IOBufFreeCallBack(cbToRecordAllocFreeInIOThread);
 

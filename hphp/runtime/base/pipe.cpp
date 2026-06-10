@@ -32,7 +32,7 @@ Pipe::~Pipe() {
   Pipe::close();
 }
 
-bool Pipe::open(const String& filename, const String& mode) {
+bool Pipe::open(const OptString& filename, const OptString& mode) {
   assertx(m_stream == nullptr);
   assertx(getFd() == -1);
 

@@ -184,7 +184,7 @@ static req::ptr<File> libxml_streams_IO_open_wrapper(
   ITRACE(1, "libxml_open_wrapper({}, {}, {})\n", filename, mode, read_only);
   Trace::Indent _i;
 
-  auto strFilename = String::attach(StringData::Make(filename, CopyString));
+  auto strFilename = OptString::attach(StringData::Make(filename, CopyString));
   /* FIXME: PHP calls stat() here if the wrapper has a non-null stat handler,
    * in order to skip the open of a missing file, thus suppressing warnings.
    * Our stat handlers are virtual, so there's no easy way to tell if stat
@@ -215,7 +215,7 @@ int libxml_streams_IO_read(void* context, char* buffer, int len) {
   auto stream = getStream(context);
   assertx(len >= 0);
   if (len > 0) {
-    String str = stream->read(len);
+    OptString str = stream->read(len);
     if (str.size() <= len) {
       std::memcpy(buffer, str.data(), str.size());
       return str.size();
@@ -230,7 +230,7 @@ int libxml_streams_IO_write(void* context, const char* buffer, int len) {
   Trace::Indent _i;
 
   auto stream = getStream(context);
-  int64_t ret = stream->write(String(buffer, len, CopyString));
+  int64_t ret = stream->write(OptString(buffer, len, CopyString));
   return (ret < INT_MAX) ? ret : -1;
 }
 
@@ -264,7 +264,7 @@ static std::unordered_set<
   string_data_same_nocase
 > s_ext_entity_whitelist;
 
-static bool allow_ext_entity_protocol(const String& protocol) {
+static bool allow_ext_entity_protocol(const OptString& protocol) {
   return s_ext_entity_whitelist.contains(protocol.get());
 }
 
@@ -598,15 +598,15 @@ void php_libxml_node_free_resource(xmlNodePtr node, xmlNodePtr root) {
   LibXmlDeferredTrees::decref(root);
 }
 
-String libxml_get_valid_file_path(const char* source) {
-  return libxml_get_valid_file_path(String(source, CopyString));
+OptString libxml_get_valid_file_path(const char* source) {
+  return libxml_get_valid_file_path(OptString(source, CopyString));
 }
 
-String libxml_get_valid_file_path(const String& source) {
+OptString libxml_get_valid_file_path(const OptString& source) {
   bool isFileUri = false;
   bool isUri = false;
 
-  String file_dest(source);
+  OptString file_dest(source);
 
   Url url;
   if (url_parse(url, file_dest.data(), file_dest.size())) {
@@ -652,13 +652,13 @@ static Object create_libxmlerror(const xmlError &error) {
   ret->setProp(nullctx, s_code.get(), make_tv<KindOfInt64>(error.code));
   ret->setProp(nullctx, s_column.get(), make_tv<KindOfInt64>(error.int2));
   if (error.message) {
-    String message(error.message);
+    OptString message(error.message);
     ret->setProp(nullctx, s_message.get(), message.asTypedValue());
   } else {
     ret->setProp(nullctx, s_message.get(), make_tv<KindOfNull>());
   }
   if (error.file) {
-    String file(error.file);
+    OptString file(error.file);
     ret->setProp(nullctx, s_file.get(), file.asTypedValue());
   } else {
     ret->setProp(nullctx, s_file.get(), make_tv<KindOfNull>());

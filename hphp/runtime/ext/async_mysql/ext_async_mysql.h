@@ -79,7 +79,7 @@ struct AsyncMysqlConnection : SystemLib::ClassLoader<"AsyncMysqlConnection"> {
       const AttributeMap& queryAttributes = AttributeMap());
 
   std::unique_ptr<am::Connection> m_conn;
-  String m_host;
+  OptString m_host;
   int m_port;
   bool m_closed;
   // Stats at the moment the Connection was created
@@ -139,9 +139,9 @@ struct AsyncMysqlResult {
   void sweep() { m_op.reset(); }
 
   bool sslSessionReused();
-  String getSslCertCn();
-  String getSslCertSan();
-  String getSslCertExtensions();
+  OptString getSslCertCn();
+  OptString getSslCertSan();
+  OptString getSslCertExtensions();
   bool isSslCertValidationEnforced();
 
   std::shared_ptr<am::Operation> m_op;
@@ -218,15 +218,15 @@ struct AsyncMysqlQueryErrorResult :
 struct FieldIndex {
   explicit FieldIndex(const am::RowFields* row_fields);
 
-  size_t getFieldIndex(const String& field_name) const;
-  String getFieldString(size_t field_index) const;
+  size_t getFieldIndex(const OptString& field_name) const;
+  OptString getFieldString(size_t field_index) const;
 
  private:
   // NB: It's possible to just use a req::vector_map<String> for names,
   // and rely on insertion order to compute indexes, but sometimes this
   // FieldIndex has duplicate names. last-name-wins, requiring the map.
-  req::vector<String> field_names_;
-  req::fast_map<String, size_t, hphp_string_hash, hphp_string_same>
+  req::vector<OptString> field_names_;
+  req::fast_map<OptString, size_t, hphp_string_hash, hphp_string_same>
     field_name_map_;
 };
 

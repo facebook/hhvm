@@ -85,7 +85,7 @@ void throwInvalidPair() {
 }
 
 [[noreturn]] NEVER_INLINE
-void throwInvalidOFormat(const String& clsName) {
+void throwInvalidOFormat(const OptString& clsName) {
   throw Exception("%s does not support the 'O' serialization format",
                   clsName.data());
 }
@@ -101,12 +101,12 @@ void throwUnterminatedProperty() {
 }
 
 [[noreturn]] NEVER_INLINE
-void throwNotCollection(const String& clsName) {
+void throwNotCollection(const OptString& clsName) {
   throw Exception("%s is not a collection class", clsName.data());
 }
 
 [[noreturn]] NEVER_INLINE
-void throwUnexpectedType(const String& key, const ObjectData* obj,
+void throwUnexpectedType(const OptString& key, const ObjectData* obj,
                          TypedValue type) {
   auto msg = folly::format(
     "Property {} for class {} was deserialized with type ({}) that "
@@ -121,7 +121,7 @@ void throwUnexpectedType(const String& key, const ObjectData* obj,
 [[noreturn]] NEVER_INLINE
 void throwUnexpectedType(const StringData* key, const ObjectData* obj,
                          TypedValue type) {
-  String str(key->data(), key->size(), CopyString);
+  OptString str(key->data(), key->size(), CopyString);
   throwUnexpectedType(str, obj, type);
 }
 
@@ -204,7 +204,7 @@ void throwInvalidClassName() {
   throw Exception("Provided class name is invalid");
 }
 
-void warnOrThrowUnknownClass(const String& clsName) {
+void warnOrThrowUnknownClass(const OptString& clsName) {
   if (Cfg::Eval::ForbidUnserializeIncompleteClass) {
     auto const msg = folly::sformat(
       "Attempted to unserialize class named '{}' but it doesn't exist",
@@ -338,7 +338,7 @@ Variant VariableUnserializer::unserialize() {
   Variant v;
   unserializeVariant(v.asTypedValue());
   if (UNLIKELY(StructuredLog::coinflip(Cfg::Eval::SerDesSampleRate))) {
-    String ser(m_begin, m_end - m_begin, CopyString);
+    OptString ser(m_begin, m_end - m_begin, CopyString);
     auto const fmt = folly::sformat("VU{}", (int)m_type);
     StructuredLog::logSerDes(fmt.c_str(), "des", ser, v);
   }
@@ -402,7 +402,7 @@ void VariableUnserializer::expectChar(char expected) {
 }
 
 namespace {
-bool isWhitelistClass(const String& requestedClassName,
+bool isWhitelistClass(const OptString& requestedClassName,
                       const Array& list,
                       bool includeSubclasses) {
   if (!list.empty()) {
@@ -422,7 +422,7 @@ const StaticString s_throw("throw");
 const StaticString s_allowed_classes("allowed_classes");
 const StaticString s_include_subclasses("include_subclasses");
 
-bool VariableUnserializer::whitelistCheck(const String& clsName) const {
+bool VariableUnserializer::whitelistCheck(const OptString& clsName) const {
   if (m_type != Type::Serialize || m_options.isNull()) {
     return true;
   }
@@ -542,9 +542,9 @@ void VariableUnserializer::unserializePropertyValue(tv_lval v,
 // nProp should include the current property being unserialized.
 NEVER_INLINE
 void VariableUnserializer::unserializeProp(ObjectData* obj,
-                                           const String& key,
+                                           const OptString& key,
                                            Class* ctx,
-                                           const String& realKey,
+                                           const OptString& realKey,
                                            int nProp) {
 
   auto const cls = obj->getVMClass();
@@ -605,7 +605,7 @@ void VariableUnserializer::unserializeRemainingProps(
     */
     Variant v;
     unserializeVariant(v.asTypedValue(), UnserializeMode::Key);
-    String key = v.toString();
+    OptString key = v.toString();
     int ksize = key.size();
     const char *kdata = key.data();
     int subLen = 0;
@@ -626,14 +626,14 @@ void VariableUnserializer::unserializeRemainingProps(
           throwMangledPrivateProperty();
         }
       }
-      String k(kdata + subLen, ksize - subLen, CopyString);
+      OptString k(kdata + subLen, ksize - subLen, CopyString);
       // We use (Class*)-8 as the sentinel value during deserialization to represent
       // that we are allowed to look up protected properties. -8 allows 3 extra
       // bits to be used for other purposes.
       Class* ctx = (Class*)-8;
       if (kdata[1] != '*') {
         ctx = Class::lookup(
-          String(kdata + 1, subLen - 2, CopyString).get());
+          OptString(kdata + 1, subLen - 2, CopyString).get());
       }
       unserializeProp(obj.get(), k, ctx, key,
                       remainingProps--);
@@ -824,7 +824,7 @@ void VariableUnserializer::unserializeVariant(
     break;
   case 'l':
     {
-      String c = unserializeString();
+      OptString c = unserializeString();
       if (mode == UnserializeMode::Value) {
         tvMove(
           make_tv<KindOfLazyClass>(
@@ -844,7 +844,7 @@ void VariableUnserializer::unserializeVariant(
     break;
   case 's':
     {
-      String v = unserializeString();
+      OptString v = unserializeString();
       tvMove(make_tv<KindOfString>(v.detach()), self);
       if (!endOfBuffer()) {
         // Semicolon *should* always be required,
@@ -935,7 +935,7 @@ void VariableUnserializer::unserializeVariant(
     {
       int64_t id = readInt();
       expectChar(':');
-      String rsrcName = unserializeString();
+      OptString rsrcName = unserializeString();
       expectChar('{');
       expectChar('}');
       auto rsrc = req::make<DummyResource>();
@@ -948,7 +948,7 @@ void VariableUnserializer::unserializeVariant(
   case 'V':
   case 'K':
     {
-      String clsName = unserializeString();
+      OptString clsName = unserializeString();
 
       expectChar(':');
       const int64_t size = readInt();
@@ -1091,7 +1091,7 @@ void VariableUnserializer::unserializeVariant(
               while (remainingProps > 0) {
                 Variant v;
                 unserializeVariant(v.asTypedValue(), UnserializeMode::Key);
-                String key = v.toString();
+                OptString key = v.toString();
                 if (key == s_serializedNativeDataKey) {
                   unserializePropertyValue(serializedNativeData.asTypedValue(),
                                            remainingProps--);
@@ -1173,10 +1173,10 @@ void VariableUnserializer::unserializeVariant(
       if (this->type() == VariableUnserializer::Type::DebuggerSerialize) {
         raise_error("Debugger shouldn't call custom unserialize method");
       }
-      String clsName = unserializeString();
+      OptString clsName = unserializeString();
 
       expectChar(':');
-      String serialized = unserializeString('{', '}');
+      OptString serialized = unserializeString('{', '}');
 
       auto obj = [&]() -> Object {
         if (whitelistCheck(clsName)) {
@@ -1573,10 +1573,10 @@ VariableUnserializer::unserializeStringPiece(char delimiter0, char delimiter1) {
   return piece;
 }
 
-String VariableUnserializer::unserializeString(char delimiter0,
+OptString VariableUnserializer::unserializeString(char delimiter0,
                                                char delimiter1) {
   auto const piece = unserializeStringPiece(delimiter0, delimiter1);
-  return String::attach(readOnly() ?
+  return OptString::attach(readOnly() ?
                         makeStaticString(piece) :
                         StringData::Make(piece, CopyString));
 }
@@ -1651,7 +1651,7 @@ bool VariableUnserializer::tryUnserializeStrIntMap(BaseMap* map, int64_t sz) {
   for (; i < sz; ++i) {
     auto sd = readStringData(b, end, maxKeyLen);
     if (!sd) break;
-    String key = String::attach(sd);
+    OptString key = OptString::attach(sd);
     auto tv = map->batchInsert(key.get());
     tv->m_type = KindOfNull;
     if (*b == 'i') {

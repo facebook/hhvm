@@ -18,7 +18,7 @@ struct CurlMultiResource : SweepableResourceData {
 
   DECLARE_RESOURCE_ALLOCATION(CurlMultiResource)
   CLASSNAME_IS("curl_multi")
-  const String& o_getClassNameHook() const override { return classnameof(); }
+  const OptString& o_getClassNameHook() const override { return classnameof(); }
   bool isInvalid() const override { return !m_multi; }
 
   CurlMultiResource();

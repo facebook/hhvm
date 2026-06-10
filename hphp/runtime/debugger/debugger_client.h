@@ -138,12 +138,12 @@ public:
   static bool Match(const char *input, const char *cmd);
   static bool IsValidNumber(const std::string &arg);
 
-  static String FormatVariable(const Variant& v, char format = 'd');
-  static String FormatVariableWithLimit(const Variant& v, int maxlen);
+  static OptString FormatVariable(const Variant& v, char format = 'd');
+  static OptString FormatVariableWithLimit(const Variant& v, int maxlen);
 
-  static String FormatInfoVec(const IDebuggable::InfoVec &info,
+  static OptString FormatInfoVec(const IDebuggable::InfoVec &info,
                               int *nameLen = nullptr);
-  static String FormatTitle(const char *title);
+  static OptString FormatTitle(const char *title);
 
 public:
   explicit DebuggerClient();
@@ -173,11 +173,11 @@ public:
   void error  (ATTRIBUTE_PRINTF_STRING const char *fmt, ...)
     ATTRIBUTE_PRINTF(2,3);
 
-  void print  (const String& s);
-  void help   (const String& s);
-  void info   (const String& s);
-  void output (const String& s);
-  void error  (const String& s);
+  void print  (const OptString& s);
+  void help   (const OptString& s);
+  void info   (const OptString& s);
+  void output (const OptString& s);
+  void error  (const OptString& s);
 
   void print  (const std::string& s);
   void help   (const std::string& s);
@@ -191,7 +191,7 @@ public:
   void output (folly::StringPiece);
   void error  (folly::StringPiece);
 
-  bool code(const String& source, int lineFocus = 0, int line1 = 0,
+  bool code(const OptString& source, int lineFocus = 0, int line1 = 0,
             int line2 = 0,
             int charFocus0 = 0, int lineFocus1 = 0, int charFocus1 = 0);
   void shortCode(BreakPointInfoPtr bp);

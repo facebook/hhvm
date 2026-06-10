@@ -111,8 +111,8 @@ struct DOMIterable {
   Object m_baseobj;
   int m_nodetype;
   xmlHashTable* m_ht {nullptr};
-  String m_local;
-  String m_ns;
+  OptString m_local;
+  OptString m_ns;
   Array m_baseobjptr;
 };
 

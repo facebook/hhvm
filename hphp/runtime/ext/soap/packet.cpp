@@ -25,10 +25,10 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-static void add_soap_fault(SoapClient *client, const String& code,
-                           const String& fault) {
+static void add_soap_fault(SoapClient *client, const OptString& code,
+                           const OptString& fault) {
   client->m_soap_fault =
-    SystemLib::AllocSoapFaultObject(String(code, CopyString), fault);
+    SystemLib::AllocSoapFaultObject(OptString(code, CopyString), fault);
 }
 
 /* SOAP client calls this function to parse response from SOAP server */
@@ -207,7 +207,7 @@ bool parse_packet_soap(SoapClient* obj, const char* buffer, int buffer_size,
   fault = get_node_ex(body->children,"Fault",envelope_ns);
   if (fault != nullptr) {
     char *faultcode = nullptr;
-    String faultstring, faultactor;
+    OptString faultstring, faultactor;
     Variant details;
     xmlNodePtr tmp;
 
@@ -261,7 +261,7 @@ bool parse_packet_soap(SoapClient* obj, const char* buffer, int buffer_size,
       }
     }
     obj->m_soap_fault =
-        SystemLib::AllocSoapFaultObject(String(faultcode, CopyString),
+        SystemLib::AllocSoapFaultObject(OptString(faultcode, CopyString),
                                         faultstring,
                                         faultactor,
                                         details);
@@ -352,7 +352,7 @@ bool parse_packet_soap(SoapClient* obj, const char* buffer, int buffer_size,
               tmp = master_to_zval(encodePtr(), val);
             }
           }
-          return_value.asArrRef().set(String(param->paramName), tmp);
+          return_value.asArrRef().set(OptString(param->paramName), tmp);
           param_count++;
         }
       }
@@ -368,7 +368,7 @@ bool parse_packet_soap(SoapClient* obj, const char* buffer, int buffer_size,
           if (!node_is_equal_ex(val,"result",RPC_SOAP12_NAMESPACE)) {
             Variant tmp = master_to_zval(encodePtr(), val);
             if (val->name) {
-              String key((char*)val->name, CopyString);
+              OptString key((char*)val->name, CopyString);
               if (return_value.asCArrRef().exists(key)) {
                 auto const lval = return_value.asArrRef().lval(key);
                 if (!isArrayLikeType(lval.type())) {
@@ -423,7 +423,7 @@ bool parse_packet_soap(SoapClient* obj, const char* buffer, int buffer_size,
             enc = iter->second->encode;
           }
         }
-        soap_headers.set(String((char*)trav->name, CopyString),
+        soap_headers.set(OptString((char*)trav->name, CopyString),
                          master_to_zval(enc, trav));
       }
       trav = trav->next;

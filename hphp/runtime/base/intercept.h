@@ -21,7 +21,7 @@ namespace HPHP {
 
 struct Array;
 struct Func;
-struct String;
+struct OptString;
 struct Variant;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -32,11 +32,11 @@ struct Variant;
  * instead. If it returns FALSE, continues execution. Otherwise, return its
  * return.
  */
-bool register_intercept(const String& name, const Variant& callback);
+bool register_intercept(const OptString& name, const Variant& callback);
 
 /* The legacy implementation of method intercept, based on surprise flags.
  */
-bool register_intercept_surprise_flag(const String& name,
+bool register_intercept_surprise_flag(const OptString& name,
                                       const Variant& callback);
 
 /**
@@ -52,7 +52,7 @@ Variant* get_intercept_handler(const Func* func);
 /**
  * Call intercept handler with original parameters.
  */
-bool handle_intercept(const Variant& handler, const String& name,
+bool handle_intercept(const Variant& handler, const OptString& name,
                       const Array& params, Variant& ret);
 
 /**
@@ -64,7 +64,7 @@ void reset_all_intercepted_functions();
 ///////////////////////////////////////////////////////////////////////////////
 // fb_rename_function()
 
-void rename_function(const String& old_name, const String& new_name);
+void rename_function(const OptString& old_name, const OptString& new_name);
 
 ///////////////////////////////////////////////////////////////////////////////
 

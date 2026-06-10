@@ -34,8 +34,8 @@ using std::string;
 ///////////////////////////////////////////////////////////////////////////////
 
 static Variant
-HHVM_FUNCTION(mysql_connect, const String& server, const String& username,
-              const String& password, bool /*new_link*/, int64_t client_flags,
+HHVM_FUNCTION(mysql_connect, const OptString& server, const OptString& username,
+              const OptString& password, bool /*new_link*/, int64_t client_flags,
               int64_t connect_timeout_ms, int64_t query_timeout_ms,
               const Array& conn_attrs) {
   return Variant(php_mysql_do_connect(
@@ -52,10 +52,10 @@ HHVM_FUNCTION(mysql_connect, const String& server, const String& username,
 
 static Variant HHVM_FUNCTION(
     mysql_connect_with_ssl,
-    const String& server,
-    const String& username,
-    const String& password,
-    const String& database,
+    const OptString& server,
+    const OptString& username,
+    const OptString& password,
+    const OptString& database,
     int64_t client_flags,
     int64_t connect_timeout_ms,
     int64_t query_timeout_ms,
@@ -73,9 +73,9 @@ static Variant HHVM_FUNCTION(
       sslContextProvider));
 }
 
-static Variant HHVM_FUNCTION(mysql_connect_with_db, const String& server,
-                             const String& username, const String& password,
-                             const String& database, bool /*new_link*/,
+static Variant HHVM_FUNCTION(mysql_connect_with_db, const OptString& server,
+                             const OptString& username, const OptString& password,
+                             const OptString& database, bool /*new_link*/,
                              int64_t client_flags, int64_t connect_timeout_ms,
                              int64_t query_timeout_ms, const Array& conn_attrs) {
   return Variant(php_mysql_do_connect(
@@ -91,9 +91,9 @@ static Variant HHVM_FUNCTION(mysql_connect_with_db, const String& server,
 }
 
 static Variant HHVM_FUNCTION(mysql_pconnect,
-  const String& server,
-  const String& username,
-  const String& password,
+  const OptString& server,
+  const OptString& username,
+  const OptString& password,
   int64_t client_flags,
   int64_t connect_timeout_ms,
   int64_t query_timeout_ms,
@@ -112,10 +112,10 @@ static Variant HHVM_FUNCTION(mysql_pconnect,
 }
 
 static Variant HHVM_FUNCTION(mysql_pconnect_with_db,
-  const String& server,
-  const String& username,
-  const String& password,
-  const String& database,
+  const OptString& server,
+  const OptString& username,
+  const OptString& password,
+  const OptString& database,
   int64_t client_flags,
   int64_t connect_timeout_ms,
   int64_t query_timeout_ms,
@@ -139,9 +139,9 @@ static bool HHVM_FUNCTION(mysql_set_timeout, int64_t query_timeout_ms /* = -1 */
   return true;
 }
 
-static String HHVM_FUNCTION(mysql_escape_string,
-                            const String& unescaped_string) {
-  String new_str((size_t)unescaped_string.size() * 2 + 1, ReserveString);
+static OptString HHVM_FUNCTION(mysql_escape_string,
+                            const OptString& unescaped_string) {
+  OptString new_str((size_t)unescaped_string.size() * 2 + 1, ReserveString);
   unsigned long new_len = mysql_escape_string(new_str.mutableData(),
                                     unescaped_string.data(),
                                     unescaped_string.size());
@@ -150,11 +150,11 @@ static String HHVM_FUNCTION(mysql_escape_string,
 }
 
 static Variant HHVM_FUNCTION(mysql_real_escape_string,
-                             const String& unescaped_string,
+                             const OptString& unescaped_string,
                              const Variant& link_identifier /* = null */) {
   MYSQL *conn = MySQL::GetConn(link_identifier);
   if (conn) {
-    String new_str((size_t)unescaped_string.size() * 2 + 1, ReserveString);
+    OptString new_str((size_t)unescaped_string.size() * 2 + 1, ReserveString);
     unsigned long new_len = mysql_real_escape_string(conn,
                                       new_str.mutableData(),
                                       unescaped_string.data(),
@@ -166,11 +166,11 @@ static Variant HHVM_FUNCTION(mysql_real_escape_string,
   return false;
 }
 
-String HHVM_FUNCTION(mysql_get_client_info) {
-  return String(mysql_get_client_info(), CopyString);
+OptString HHVM_FUNCTION(mysql_get_client_info) {
+  return OptString(mysql_get_client_info(), CopyString);
 }
 
-static Variant HHVM_FUNCTION(mysql_set_charset, const String& charset,
+static Variant HHVM_FUNCTION(mysql_set_charset, const OptString& charset,
                    const Variant& link_identifier /* = uninit_null() */) {
   MYSQL *conn = MySQL::GetConn(link_identifier);
   if (!conn) return init_null();
@@ -187,7 +187,7 @@ static Variant HHVM_FUNCTION(mysql_client_encoding,
                       const Variant& link_identifier /* = uninit_null() */) {
   MYSQL *conn = MySQL::GetConn(link_identifier);
   if (!conn) return false;
-  return String(mysql_character_set_name(conn), CopyString);
+  return OptString(mysql_character_set_name(conn), CopyString);
 }
 static bool HHVM_FUNCTION(mysql_close,
                    const Variant& link_identifier /* = uninit_null() */) {
@@ -220,10 +220,10 @@ Variant HHVM_FUNCTION(mysql_error,
   }
   MYSQL *conn = mySQL->get();
   if (conn) {
-    return String(mysql_error(conn), CopyString);
+    return OptString(mysql_error(conn), CopyString);
   }
   if (mySQL->m_last_error_set) {
-    return String(mySQL->m_last_error);
+    return OptString(mySQL->m_last_error);
   }
   return false;
 }
@@ -246,7 +246,7 @@ Variant HHVM_FUNCTION(mysql_get_host_info,
                       const Variant& link_identifier /* = uninit_null() */) {
   MYSQL *conn = MySQL::GetConn(link_identifier);
   if (!conn) return false;
-  return String(mysql_get_host_info(conn), CopyString);
+  return OptString(mysql_get_host_info(conn), CopyString);
 }
 Variant HHVM_FUNCTION(mysql_get_proto_info,
                       const Variant& link_identifier /* = uninit_null() */) {
@@ -258,13 +258,13 @@ Variant HHVM_FUNCTION(mysql_get_server_info,
                       const Variant& link_identifier /* = uninit_null() */) {
   MYSQL *conn = MySQL::GetConn(link_identifier);
   if (!conn) return false;
-  return String(mysql_get_server_info(conn), CopyString);
+  return OptString(mysql_get_server_info(conn), CopyString);
 }
 Variant HHVM_FUNCTION(mysql_info,
                       const Variant& link_identifier /* = uninit_null() */) {
   MYSQL *conn = MySQL::GetConn(link_identifier);
   if (!conn) return false;
-  return String(mysql_info(conn), CopyString);
+  return OptString(mysql_info(conn), CopyString);
 }
 Variant HHVM_FUNCTION(mysql_insert_id,
                       const Variant& link_identifier /* = uninit_null() */) {
@@ -276,7 +276,7 @@ static Variant HHVM_FUNCTION(mysql_stat,
                       const Variant& link_identifier /* = uninit_null() */) {
   MYSQL *conn = MySQL::GetConn(link_identifier);
   if (!conn) return false;
-  return String(mysql_stat(conn), CopyString);
+  return OptString(mysql_stat(conn), CopyString);
 }
 Variant HHVM_FUNCTION(mysql_thread_id,
                       const Variant& link_identifier /* = uninit_null() */) {
@@ -285,7 +285,7 @@ Variant HHVM_FUNCTION(mysql_thread_id,
   return (int64_t)mysql_thread_id(conn);
 }
 
-static bool HHVM_FUNCTION(mysql_select_db, const String& db,
+static bool HHVM_FUNCTION(mysql_select_db, const OptString& db,
                    const Variant& link_identifier /* = uninit_null() */) {
   MYSQL *conn = MySQL::GetConn(link_identifier);
   if (!conn) return false;
@@ -302,12 +302,12 @@ Variant HHVM_FUNCTION(mysql_affected_rows,
 ///////////////////////////////////////////////////////////////////////////////
 // query functions
 
-static Variant HHVM_FUNCTION(mysql_query, const String& query,
+static Variant HHVM_FUNCTION(mysql_query, const OptString& query,
                       const Variant& link_identifier /* = null */) {
   return php_mysql_do_query_and_get_result(query, link_identifier, true);
 }
 
-static Variant HHVM_FUNCTION(mysql_multi_query, const String& query,
+static Variant HHVM_FUNCTION(mysql_multi_query, const OptString& query,
                       const Variant& link_identifier /* = null */) {
   MYSQL *conn = MySQL::GetConn(link_identifier);
   if (conn == nullptr) {
@@ -382,7 +382,7 @@ static Variant HHVM_FUNCTION(mysql_fetch_result,
     return Variant(req::make<MySQLResult>(mysql_result));
 }
 
-static Variant HHVM_FUNCTION(mysql_unbuffered_query, const String& query,
+static Variant HHVM_FUNCTION(mysql_unbuffered_query, const OptString& query,
                       const Variant& link_identifier /* = null */) {
   return php_mysql_do_query_and_get_result(query, link_identifier, false);
 }
@@ -399,7 +399,7 @@ static Variant HHVM_FUNCTION(mysql_list_dbs,
   return Variant(req::make<MySQLResult>(res));
 }
 
-static Variant HHVM_FUNCTION(mysql_list_tables, const String& database,
+static Variant HHVM_FUNCTION(mysql_list_tables, const OptString& database,
                       const Variant& link_identifier /* = null */) {
   MYSQL *conn = MySQL::GetConn(link_identifier);
   if (!conn) return false;
@@ -443,7 +443,7 @@ static Variant HHVM_FUNCTION(mysql_fetch_array, const OptResource& result,
 
 static Variant HHVM_FUNCTION(mysql_fetch_object,
                       const Variant& var_result,
-                      const String& class_name /* = "stdClass" */,
+                      const OptString& class_name /* = "stdClass" */,
                       const Variant& params /* = null */) {
 
   OptResource result = var_result.isResource() ? var_result.toResource()
@@ -542,9 +542,9 @@ static Variant HHVM_FUNCTION(mysql_result, const OptResource& result, int64_t ro
   int field_offset = 0;
   if (!field.isNull()) {
     if (field.isString()) {
-      String sfield = field.toString();
+      OptString sfield = field.toString();
       const char *tmp = strchr(sfield.data(), '.');
-      String table_name, field_name;
+      OptString table_name, field_name;
       if (tmp) {
         int pos = tmp - sfield.data();
         table_name = sfield.substr(0, pos);
@@ -589,7 +589,7 @@ static Variant HHVM_FUNCTION(mysql_result, const OptResource& result, int64_t ro
     }
   } else {
     if (sql_row[field_offset]) {
-      return String(sql_row[field_offset], sql_row_lengths[field_offset],
+      return OptString(sql_row[field_offset], sql_row_lengths[field_offset],
                     CopyString);
     }
   }

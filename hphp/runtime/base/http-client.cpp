@@ -66,7 +66,7 @@ size_t HttpClient::header(char *data, size_t size, size_t nmemb) {
   size_t length = size * nmemb;
   if (length > 2 && data[length - 2] == '\r' && data[length - 1] == '\n' &&
       m_responseHeaders) {
-    m_responseHeaders->push_back(String(data, length - 2, CopyString));
+    m_responseHeaders->push_back(OptString(data, length - 2, CopyString));
   }
   return length;
 }
@@ -97,7 +97,7 @@ void HttpClient::setHttpsProxy(const std::string& proxyCaBundle,
 
 int HttpClient::get(const char *url, StringBuffer &response,
                     const HeaderMap *requestHeaders /* = NULL */,
-                    req::vector<String> *responseHeaders /* = NULL */) {
+                    req::vector<OptString> *responseHeaders /* = NULL */) {
   return request(nullptr,
                  url, nullptr, 0, response, requestHeaders, responseHeaders);
 }
@@ -105,7 +105,7 @@ int HttpClient::get(const char *url, StringBuffer &response,
 int HttpClient::post(const char *url, const char *data, size_t size,
                      StringBuffer &response,
                      const HeaderMap *requestHeaders /* = NULL */,
-                     req::vector<String> *responseHeaders /* = NULL */) {
+                     req::vector<OptString> *responseHeaders /* = NULL */) {
   return request(nullptr,
                  url, data, size, response, requestHeaders, responseHeaders);
 }
@@ -125,7 +125,7 @@ const StaticString
 int HttpClient::request(const char* verb,
                      const char *url, const char *data, size_t size,
                      StringBuffer &response, const HeaderMap *requestHeaders,
-                     req::vector<String> *responseHeaders) {
+                     req::vector<OptString> *responseHeaders) {
   SlowTimer timer(Cfg::Http::SlowQueryThreshold, "curl", url);
 
   m_response = &response;
@@ -209,7 +209,7 @@ int HttpClient::request(const char* verb,
     for (HeaderMap::const_iterator iter = requestHeaders->begin();
          iter != requestHeaders->end(); ++iter) {
       for (unsigned int i = 0; i < iter->second.size(); i++) {
-        String header = iter->first + ": " + iter->second[i];
+        OptString header = iter->first + ": " + iter->second[i];
         slist = curl_slist_append(slist, header.data());
       }
     }

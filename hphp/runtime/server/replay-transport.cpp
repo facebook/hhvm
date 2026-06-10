@@ -61,7 +61,7 @@ void ReplayTransport::recordInput(Transport* transport, const char *filename) {
   size_t size;
   const void *data = transport->getPostData(size);
   if (size) {
-    String encoded = string_uuencode((const char *)data, safe_cast<int>(size));
+    OptString encoded = string_uuencode((const char *)data, safe_cast<int>(size));
     hdf["post"] = encoded.get()->data();
   } else {
     hdf["post"] = "";
@@ -82,7 +82,7 @@ void ReplayTransport::replayInput(Hdf hdf) {
 }
 
 void ReplayTransport::replayInputImpl() {
-  String postData = StringUtil::UUDecode(Config::GetString(m_ini, m_hdf, "post",
+  OptString postData = StringUtil::UUDecode(Config::GetString(m_ini, m_hdf, "post",
                                                            "", false));
   m_postData = std::string(postData.data(), postData.size());
   m_requestHeaders.clear();

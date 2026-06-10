@@ -113,7 +113,7 @@ static bool hasAvailableServers(const MemcacheData* data) {
   return true;
 }
 
-static bool isServerReachable(const String& host, int port /*= 0*/) {
+static bool isServerReachable(const OptString& host, int port /*= 0*/) {
   auto hostInfo = HHVM_FN(getaddrinfo)(host, port);
   if (hostInfo.isBoolean() && !hostInfo.toBoolean()) {
     raise_warning("Memcache: Can't connect to %s:%d", host.c_str(), port);
@@ -125,7 +125,7 @@ static bool isServerReachable(const String& host, int port /*= 0*/) {
 ///////////////////////////////////////////////////////////////////////////////
 // methods
 
-static bool HHVM_METHOD(Memcache, connect, const String& host, int64_t port /*= 0*/,
+static bool HHVM_METHOD(Memcache, connect, const OptString& host, int64_t port /*= 0*/,
                         int64_t /*timeout*/ /*= 0*/, int64_t /*timeoutms*/ /*= 0*/) {
   auto data = Native::data<MemcacheData>(this_);
   memcached_return_t ret;
@@ -194,7 +194,7 @@ static void memcache_set_type_from_flag(Variant& var, uint32_t flags) {
 static std::vector<char> memcache_prepare_for_storage(const MemcacheData* data,
                                                       const Variant& var,
                                                       int64_t &flag) {
-  String v;
+  OptString v;
   if (var.isString()) {
     v = var.toString();
   } else if (var.isNumeric() || var.isBoolean()) {
@@ -234,8 +234,8 @@ static std::vector<char> memcache_prepare_for_storage(const MemcacheData* data,
   return payload;
 }
 
-static String memcache_prepare_key(const String& var) {
-  String var_mutable(var, CopyString);
+static OptString memcache_prepare_key(const OptString& var) {
+  OptString var_mutable(var, CopyString);
   auto data = var_mutable.get()->mutableData();
   for (int i = 0; i < var.length(); i++) {
     // This is a stupid encoding since it causes collisions but it matches php5
@@ -260,7 +260,7 @@ static Variant unserialize_if_serialized(const char *payload,
     if (payload_len == 0) {
       ret = empty_string();
     } else {
-      ret = String(payload, payload_len, CopyString);
+      ret = OptString(payload, payload_len, CopyString);
     }
   }
   return ret;
@@ -300,7 +300,7 @@ static Variant memcache_fetch_from_storage(const char *payload,
   return ret;
 }
 
-static bool HHVM_METHOD(Memcache, add, const String& key, const Variant& var,
+static bool HHVM_METHOD(Memcache, add, const OptString& key, const Variant& var,
                                        int64_t flag /*= 0*/, int64_t expire /*= 0*/) {
   if (key.empty()) {
     raise_warning("Key cannot be empty");
@@ -315,7 +315,7 @@ static bool HHVM_METHOD(Memcache, add, const String& key, const Variant& var,
 
   std::vector<char> serialized = memcache_prepare_for_storage(data, var, flag);
 
-  String serializedKey = memcache_prepare_key(key);
+  OptString serializedKey = memcache_prepare_key(key);
   memcached_return_t ret = memcached_add(&data->m_memcache,
                                         serializedKey.c_str(),
                                         serializedKey.length(),
@@ -326,7 +326,7 @@ static bool HHVM_METHOD(Memcache, add, const String& key, const Variant& var,
   return (ret == MEMCACHED_SUCCESS);
 }
 
-static bool HHVM_METHOD(Memcache, set, const String& key, const Variant& var,
+static bool HHVM_METHOD(Memcache, set, const OptString& key, const Variant& var,
                                        int64_t flag /*= 0*/, int64_t expire /*= 0*/) {
   if (key.empty()) {
     raise_warning("Key cannot be empty");
@@ -339,7 +339,7 @@ static bool HHVM_METHOD(Memcache, set, const String& key, const Variant& var,
     return false;
   }
 
-  String serializedKey = memcache_prepare_key(key);
+  OptString serializedKey = memcache_prepare_key(key);
   std::vector<char> serializedVar =
     memcache_prepare_for_storage(data, var, flag);
 
@@ -356,7 +356,7 @@ static bool HHVM_METHOD(Memcache, set, const String& key, const Variant& var,
   return false;
 }
 
-static bool HHVM_METHOD(Memcache, replace, const String& key,
+static bool HHVM_METHOD(Memcache, replace, const OptString& key,
                                            const Variant& var, int64_t flag /*= 0*/,
                                            int64_t expire /*= 0*/) {
   if (key.empty()) {
@@ -370,7 +370,7 @@ static bool HHVM_METHOD(Memcache, replace, const String& key,
     return false;
   }
 
-  String serializedKey = memcache_prepare_key(key);
+  OptString serializedKey = memcache_prepare_key(key);
   std::vector<char> serialized = memcache_prepare_for_storage(data, var, flag);
 
   memcached_return_t ret = memcached_replace(&data->m_memcache,
@@ -400,7 +400,7 @@ HHVM_METHOD(Memcache, get, const Variant& key) {
 
     for (ArrayIter iter(keyArr); iter; ++iter) {
       auto key = iter.second().toString();
-      String serializedKey = memcache_prepare_key(key);
+      OptString serializedKey = memcache_prepare_key(key);
       char *k = new char[serializedKey.length()+1];
       memcpy(k, serializedKey.c_str(), serializedKey.length() + 1);
       real_keys.push_back(k);
@@ -436,7 +436,7 @@ HHVM_METHOD(Memcache, get, const Variant& key) {
         res_key     = memcached_result_key_value(&result);
         res_key_len = memcached_result_key_length(&result);
 
-        return_val.set(String(res_key, res_key_len, CopyString),
+        return_val.set(OptString(res_key, res_key_len, CopyString),
                        memcache_fetch_from_storage(payload,
                                                    payload_len, flags));
       }
@@ -453,7 +453,7 @@ HHVM_METHOD(Memcache, get, const Variant& key) {
     uint32_t flags = 0;
 
     memcached_return_t ret;
-    String serializedKey = memcache_prepare_key(key.toString());
+    OptString serializedKey = memcache_prepare_key(key.toString());
 
     if (serializedKey.length() == 0) {
       return false;
@@ -483,7 +483,7 @@ HHVM_METHOD(Memcache, get, const Variant& key) {
   return false;
 }
 
-static bool HHVM_METHOD(Memcache, delete, const String& key,
+static bool HHVM_METHOD(Memcache, delete, const OptString& key,
                                           int64_t expire /*= 0*/) {
   if (key.empty()) {
     raise_warning("Key cannot be empty");
@@ -496,7 +496,7 @@ static bool HHVM_METHOD(Memcache, delete, const String& key,
     return false;
   }
 
-  String serializedKey = memcache_prepare_key(key);
+  OptString serializedKey = memcache_prepare_key(key);
   memcached_return_t ret = memcached_delete(&data->m_memcache,
                                             serializedKey.c_str(),
                                             serializedKey.length(),
@@ -504,7 +504,7 @@ static bool HHVM_METHOD(Memcache, delete, const String& key,
   return (ret == MEMCACHED_SUCCESS);
 }
 
-static Variant HHVM_METHOD(Memcache, increment, const String& key,
+static Variant HHVM_METHOD(Memcache, increment, const OptString& key,
                                                 int64_t offset /*= 1*/) {
   if (key.empty()) {
     raise_warning("Key cannot be empty");
@@ -518,7 +518,7 @@ static Variant HHVM_METHOD(Memcache, increment, const String& key,
   }
 
   uint64_t value;
-  String serializedKey = memcache_prepare_key(key);
+  OptString serializedKey = memcache_prepare_key(key);
   memcached_return_t ret = memcached_increment(&data->m_memcache,
                                                serializedKey.c_str(),
                                                serializedKey.length(), offset,
@@ -531,7 +531,7 @@ static Variant HHVM_METHOD(Memcache, increment, const String& key,
   return false;
 }
 
-static Variant HHVM_METHOD(Memcache, decrement, const String& key,
+static Variant HHVM_METHOD(Memcache, decrement, const OptString& key,
                                                 int64_t offset /*= 1*/) {
   if (key.empty()) {
     raise_warning("Key cannot be empty");
@@ -545,7 +545,7 @@ static Variant HHVM_METHOD(Memcache, decrement, const String& key,
   }
 
   uint64_t value;
-  String serializedKey = memcache_prepare_key(key);
+  OptString serializedKey = memcache_prepare_key(key);
   memcached_return_t ret = memcached_decrement(&data->m_memcache,
                                                serializedKey.c_str(),
                                                serializedKey.length(), offset,
@@ -588,7 +588,7 @@ static Variant HHVM_METHOD(Memcache, getversion) {
     version_len = snprintf(version, sizeof(version),
         "%" PRIu8 ".%" PRIu8 ".%" PRIu8,
         majorVersion, minorVersion, microVersion);
-    return String(version, version_len, CopyString);
+    return OptString(version, version_len, CopyString);
   }
 
   return false;
@@ -641,8 +641,8 @@ static Array memcache_build_stats(const memcached_st *ptr,
     if (*ret != MEMCACHED_SUCCESS) {
       break;
     }
-    return_val.set(String(*curr_key, CopyString),
-                   String(mc_val, CopyString));
+    return_val.set(OptString(*curr_key, CopyString),
+                   OptString(mc_val, CopyString));
     free(mc_val);
   }
 
@@ -652,7 +652,7 @@ static Array memcache_build_stats(const memcached_st *ptr,
 
 
 static Array HHVM_METHOD(Memcache, getstats,
-                         const String& type /* = null_string */,
+                         const OptString& type /* = null_string */,
                          int64_t slabid /* = 0 */, int64_t limit /* = 100 */) {
   auto data = Native::data<MemcacheData>(this_);
   if (!memcached_server_count(&data->m_memcache)) {
@@ -684,7 +684,7 @@ static Array HHVM_METHOD(Memcache, getstats,
 }
 
 static Array HHVM_METHOD(Memcache, getextendedstats,
-                         const String& /*type*/ /* = null_string */,
+                         const OptString& /*type*/ /* = null_string */,
                          int64_t /*slabid*/ /* = 0 */, int64_t /*limit*/ /* = 100 */) {
   auto data = Native::data<MemcacheData>(this_);
   memcached_return_t ret;
@@ -715,7 +715,7 @@ static Array HHVM_METHOD(Memcache, getextendedstats,
 
     auto const port_str = folly::to<std::string>(port);
     auto const key_len = strlen(hostname) + 1 + port_str.length();
-    auto key = String(key_len, ReserveString);
+    auto key = OptString(key_len, ReserveString);
     key += hostname;
     key += ":";
     key += port_str;
@@ -730,7 +730,7 @@ static Array HHVM_METHOD(Memcache, getextendedstats,
 }
 
 static bool
-HHVM_METHOD(Memcache, addserver, const String& host, int64_t port /* = 11211 */,
+HHVM_METHOD(Memcache, addserver, const OptString& host, int64_t port /* = 11211 */,
             bool /*persistent*/ /* = false */, int64_t weight /* = 0 */,
             int64_t /*timeout*/ /* = 0 */, int64_t /*retry_interval*/ /* = 0 */,
             bool /*status*/ /* = true */,

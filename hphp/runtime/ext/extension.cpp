@@ -77,7 +77,7 @@ void Extension::moduleRegisterNative()
 {}
 
 void Extension::moduleInfo(Array &info) {
-  info.set(String(m_name), true);
+  info.set(OptString(m_name), true);
 }
 
 void Extension::cliClientInit()
@@ -108,7 +108,7 @@ const Extension::DependencySet Extension::getDeps() const {
   return DependencySet();
 }
 
-void Extension::registerExtensionFunction(const String& name) {
+void Extension::registerExtensionFunction(const OptString& name) {
   assertx(name.get()->isStatic());
   m_functions.push_back(name.get());
 }

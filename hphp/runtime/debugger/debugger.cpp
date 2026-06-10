@@ -82,7 +82,7 @@ void Debugger::RegisterSandbox(const DSandboxInfo &sandbox) {
   get().registerSandbox(sandbox);
 }
 
-void Debugger::UnregisterSandbox(const String& id) {
+void Debugger::UnregisterSandbox(const OptString& id) {
   TRACE(2, "Debugger::UnregisterSandbox\n");
   get().unregisterSandbox(id.get());
 }
@@ -104,7 +104,7 @@ int Debugger::CountConnectedProxy() {
 
 DebuggerProxyPtr Debugger::GetProxy() {
   TRACE(7, "Debugger::GetProxy\n");
-  const String& sandboxId = g_context->getSandboxId();
+  const OptString& sandboxId = g_context->getSandboxId();
   return get().findProxy(sandboxId.get());
 }
 
@@ -223,7 +223,7 @@ void Debugger::InterruptRequestEnded(const char *url) {
   if (isDebuggerAttached()) {
     InterruptWithUrl(RequestEnded, url);
   }
-  const String& sandboxId = g_context->getSandboxId();
+  const OptString& sandboxId = g_context->getSandboxId();
   get().unregisterSandbox(sandboxId.get());
 }
 
@@ -314,18 +314,18 @@ void Debugger::SetTextColors() {
   s_stderr_color = ANSI_COLOR_RED;
 }
 
-String Debugger::ColorStdout(const String& s) {
+OptString Debugger::ColorStdout(const OptString& s) {
   TRACE(2, "Debugger::ColorStdout\n");
   if (s_stdout_color) {
-    return String(s_stdout_color) + s + String(ANSI_COLOR_END);
+    return OptString(s_stdout_color) + s + OptString(ANSI_COLOR_END);
   }
   return s;
 }
 
-String Debugger::ColorStderr(const String& s) {
+OptString Debugger::ColorStderr(const OptString& s) {
   TRACE(2, "Debugger::ColorStderr\n");
   if (s_stderr_color) {
-    return String(s_stderr_color) + s + String(ANSI_COLOR_END);
+    return OptString(s_stderr_color) + s + OptString(ANSI_COLOR_END);
   }
   return s;
 }

@@ -86,7 +86,7 @@ static Array HHVM_STATIC_METHOD(BuiltinEnum, getNames) {
     vm_call_user_func(
       Func::lookup(s_invariant_violation.get()),
       make_vec_array(
-        String{
+        OptString{
           fmt::format(
             "Enum {} has overlapping values {} and {}",
             self_->name()->data(),

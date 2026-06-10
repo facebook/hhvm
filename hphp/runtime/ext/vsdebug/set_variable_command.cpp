@@ -265,7 +265,7 @@ bool SetVariableCommand::setArrayVariable(
 
       auto keyVariant = iter.first();
       if (keyVariant.isString()) {
-        HPHP::String key = keyVariant.toString();
+        HPHP::OptString key = keyVariant.toString();
         arr.set(key, tvToInit(*arrayValue));
       } else if (keyVariant.isInteger()) {
         int64_t key = keyVariant.toInt64();
@@ -290,7 +290,7 @@ bool SetVariableCommand::setObjectVariable(
   Variant& var = object->m_variable;
   assertx(var.isObject());
 
-  HPHP::String key(name);
+  HPHP::OptString key(name);
   ObjectData* obj = var.getObjectData();
   Variant currentValue = obj->o_get(key, false);
   if (!currentValue.isInitialized()) {

@@ -104,7 +104,7 @@ file_fsmagic(struct magic_set *ms, const char *fn, struct stat *sb, php_stream *
 
 #define COMMA  (did++ ? ", " : "")
 
-  HPHP::String name;
+  HPHP::OptString name;
   if (stream) {
     name = stream->getName();
     fn = name.data();

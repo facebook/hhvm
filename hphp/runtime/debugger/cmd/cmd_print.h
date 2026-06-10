@@ -48,7 +48,7 @@ protected:
 
 private:
   req::root<Variant> m_ret;
-  req::root<String> m_output;
+  req::root<OptString> m_output;
   int m_frame;
   int m_printLevel;
   bool m_bypassAccessCheck{false};

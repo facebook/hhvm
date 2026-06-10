@@ -91,7 +91,7 @@ bool HHVM_METHOD(
     data->sinkBridge_->push({});
     return false;
   } else if (payload.isString()) {
-    const String& sVal = payload.toString();
+    const OptString& sVal = payload.toString();
     data->sinkBridge_->push(
         folly::Try<apache::thrift::StreamPayload>(apache::thrift::StreamPayload(
             folly::IOBuf::copyBuffer(sVal.c_str(), sVal.size()), {})));
@@ -104,7 +104,7 @@ bool HHVM_METHOD(
 void HHVM_METHOD(
     TClientSink,
     sendClientException,
-    const String& ex_encoded_string,
+    const OptString& ex_encoded_string,
     const Variant& ex_msg) {
   auto data = TClientSink::GetDataOrThrowException(this_);
   if (!data->sinkBridge_) {
@@ -221,35 +221,35 @@ Object HHVM_METHOD(RpcOptions, setChunkBufferSize, int64_t chunk_buffer_size) {
   return Object(this_);
 }
 
-Object HHVM_METHOD(RpcOptions, setRoutingKey, const String& routing_key) {
+Object HHVM_METHOD(RpcOptions, setRoutingKey, const OptString& routing_key) {
   auto data = RpcOptions::GetDataOrThrowException(this_);
   data->rpcOptions.setRoutingKey(
     std::string(routing_key.c_str(), routing_key.size()));
   return Object(this_);
 }
 
-Object HHVM_METHOD(RpcOptions, setShardId, const String& shard_id) {
+Object HHVM_METHOD(RpcOptions, setShardId, const OptString& shard_id) {
   auto data = RpcOptions::GetDataOrThrowException(this_);
   data->rpcOptions.setShardId(std::string(shard_id.c_str(), shard_id.size()));
   return Object(this_);
 }
 
 // TODO (partisan): Deprecate in favor of more clear for extrnal users setHeader
-Object HHVM_METHOD(RpcOptions, setWriteHeader, const String& key, const String& value) {
+Object HHVM_METHOD(RpcOptions, setWriteHeader, const OptString& key, const OptString& value) {
   auto data = RpcOptions::GetDataOrThrowException(this_);
   data->rpcOptions.setWriteHeader(std::string(key.c_str(), key.size()),
     std::string(value.c_str(), value.size()));
   return Object(this_);
 }
 
-Object HHVM_METHOD(RpcOptions, setHeader, const String& key, const String& value) {
+Object HHVM_METHOD(RpcOptions, setHeader, const OptString& key, const OptString& value) {
   auto data = RpcOptions::GetDataOrThrowException(this_);
   data->rpcOptions.setWriteHeader(std::string(key.c_str(), key.size()),
     std::string(value.c_str(), value.size()));
   return Object(this_);
 }
 
-Object HHVM_METHOD(RpcOptions, setLoggingContext, const String& loggingContext) {
+Object HHVM_METHOD(RpcOptions, setLoggingContext, const OptString& loggingContext) {
   auto data = RpcOptions::GetDataOrThrowException(this_);
   data->rpcOptions.setLoggingContext(
     std::string(loggingContext.c_str(), loggingContext.size()));
@@ -281,14 +281,14 @@ Object HHVM_METHOD(RpcOptions, setInteractionId, const Object& interaction_id) {
   return Object(this_);
 }
 
-Object HHVM_METHOD(RpcOptions, setSerializedAuthProofs, const String& payload) {
+Object HHVM_METHOD(RpcOptions, setSerializedAuthProofs, const OptString& payload) {
   auto data = RpcOptions::GetDataOrThrowException(this_);
   data->rpcOptions.setSerializedAuthProofs(
       apache::thrift::SerializedAuthProofs(folly::IOBuf::copyBuffer(payload.data(), payload.size())));
   return Object(this_);
 }
 
-String HHVM_METHOD(RpcOptions, __toString) {
+OptString HHVM_METHOD(RpcOptions, __toString) {
   auto data = RpcOptions::GetDataOrThrowException(this_);
   std::string result("RpcOptions(");
   result += "chunkBufferSize: " +

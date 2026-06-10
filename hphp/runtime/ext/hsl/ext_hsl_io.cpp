@@ -32,7 +32,7 @@ namespace {
     );
   }
 
-  int64_t HHVM_FUNCTION(HH_io_response_write, const String& data) {
+  int64_t HHVM_FUNCTION(HH_io_response_write, const OptString& data) {
     if (is_any_cli_mode()) {
       auto stream = dyn_cast_or_null<File>(BuiltinFiles::getSTDOUT());
       if (!stream) {
@@ -54,7 +54,7 @@ namespace {
 
   RDS_LOCAL(ssize_t, request_read_offset);
 
-  String HHVM_FUNCTION(HH_io_request_read, int64_t max) {
+  OptString HHVM_FUNCTION(HH_io_request_read, int64_t max) {
     if (is_any_cli_mode()) {
       auto stream = dyn_cast_or_null<File>(BuiltinFiles::getSTDIN());
       if (!stream) {

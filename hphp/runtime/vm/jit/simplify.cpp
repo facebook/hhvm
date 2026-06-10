@@ -2010,7 +2010,7 @@ SSATmp* simplifyMethodExists(State& env, const IRInstruction* inst) {
 static auto concat_litstrs(State& env, SSATmp* s1, SSATmp* s2) {
   auto const str1 = const_cast<StringData*>(s1->strVal());
   auto const str2 = const_cast<StringData*>(s2->strVal());
-  auto const sval = String::attach(concat_ss(str1, str2));
+  auto const sval = OptString::attach(concat_ss(str1, str2));
   return cns(env, makeStaticString(sval.get()));
 }
 
@@ -2276,7 +2276,7 @@ SSATmp* simplifyConvStrToInt(State& env, const IRInstruction* inst) {
 SSATmp* simplifyConvDblToStr(State& env, const IRInstruction* inst) {
   auto const src = inst->src(0);
   if (src->hasConstVal()) {
-    auto const dblStr = String::attach(buildStringData(src->dblVal()));
+    auto const dblStr = OptString::attach(buildStringData(src->dblVal()));
     return cns(env, makeStaticString(dblStr));
   }
   return nullptr;

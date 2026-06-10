@@ -24,14 +24,14 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-MemFile::MemFile(const String& wrapper, const String& stream)
+MemFile::MemFile(const OptString& wrapper, const OptString& stream)
   : File(false, wrapper, stream), m_data(nullptr), m_len(-1), m_cursor(0),
     m_malloced(false) {
   setIsLocal(true);
 }
 
 MemFile::MemFile(const char *data, int64_t len,
-                 const String& wrapper, const String& stream)
+                 const OptString& wrapper, const OptString& stream)
   : File(false, wrapper, stream), m_data(nullptr), m_len(len), m_cursor(0),
     m_malloced(true) {
   m_data = (char*)malloc(len + 1);
@@ -51,7 +51,7 @@ void MemFile::sweep() {
   File::sweep();
 }
 
-bool MemFile::open(const String& filename, const String& mode) {
+bool MemFile::open(const OptString& filename, const OptString& mode) {
   assertx(m_len == -1);
   // mem files are read-only
   const char* mode_str = mode.c_str();

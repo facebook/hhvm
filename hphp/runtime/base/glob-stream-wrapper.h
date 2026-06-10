@@ -24,9 +24,9 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct GlobStreamWrapper final : Stream::Wrapper {
-  req::ptr<File> open(const String& filename, const String& mode, int options,
+  req::ptr<File> open(const OptString& filename, const OptString& mode, int options,
                       const req::ptr<StreamContext>& context) override;
-  req::ptr<Directory> opendir(const String& path) override;
+  req::ptr<Directory> opendir(const OptString& path) override;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -28,7 +28,7 @@ const StaticString s_finfo("finfo");
 struct FileinfoResource : SweepableResourceData {
   DECLARE_RESOURCE_ALLOCATION(FileinfoResource)
   CLASSNAME_IS("file_info")
-  const String& o_getClassNameHook() const override { return classnameof(); }
+  const OptString& o_getClassNameHook() const override { return classnameof(); }
 
   explicit FileinfoResource(struct magic_set* magic) : m_magic(magic) {}
   ~FileinfoResource() override { close(); }
@@ -55,7 +55,7 @@ static Variant HHVM_FUNCTION(finfo_open,
     return false;
   }
 
-  String mf;
+  OptString mf;
   if (!magic_file.isNull()) {
     mf = magic_file.toString();
   }
@@ -96,8 +96,8 @@ static bool HHVM_FUNCTION(finfo_set_flags, const OptResource& finfo, int64_t opt
 static Variant
 php_finfo_get_type(const OptResource& object, const Variant& what, int64_t options,
                    const Variant& /*context*/, int mode, int mimetype_emu) {
-  String ret_val;
-  String buffer;
+  OptString ret_val;
+  OptString buffer;
   char mime_directory[] = "directory";
   struct magic_set *magic = NULL;
 
@@ -206,11 +206,11 @@ clean:
   return false;
 }
 
-static String HHVM_FUNCTION(finfo_buffer,
+static OptString HHVM_FUNCTION(finfo_buffer,
     const OptResource& finfo, const Variant& string,
     int64_t options, const Variant& context) {
 
-  String s;
+  OptString s;
   if (!string.isNull()) {
     s = string.toString();
   }
@@ -219,11 +219,11 @@ static String HHVM_FUNCTION(finfo_buffer,
       FILEINFO_MODE_BUFFER, 0).toString();
 }
 
-static String HHVM_FUNCTION(finfo_file,
+static OptString HHVM_FUNCTION(finfo_file,
     const OptResource& finfo, const Variant& file_name,
     int64_t options, const Variant& context) {
 
-  String fn;
+  OptString fn;
   if (!file_name.isNull()) {
     fn = file_name.toString();
   }
@@ -232,7 +232,7 @@ static String HHVM_FUNCTION(finfo_file,
       FILEINFO_MODE_FILE, 0).toString();
 }
 
-static String HHVM_FUNCTION(mime_content_type, const Variant& filename) {
+static OptString HHVM_FUNCTION(mime_content_type, const Variant& filename) {
   return php_finfo_get_type(
     OptResource{}, filename, 0, uninit_null(), -1, 1
   ).toString();

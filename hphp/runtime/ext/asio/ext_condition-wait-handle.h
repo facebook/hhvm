@@ -47,7 +47,7 @@ struct c_ConditionWaitHandle final :
     return offsetof(c_ConditionWaitHandle, m_blockable);
   }
 
-  String getName();
+  OptString getName();
   void onUnblocked();
   c_WaitableWaitHandle* getChild();
 

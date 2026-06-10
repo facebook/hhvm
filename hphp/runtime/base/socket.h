@@ -63,10 +63,10 @@ struct Socket : File {
   ~Socket() override;
 
   // overriding ResourceData
-  const String& o_getClassNameHook() const override { return classnameof(); }
+  const OptString& o_getClassNameHook() const override { return classnameof(); }
 
   // implementing File
-  bool open(const String& filename, const String& mode) override;
+  bool open(const OptString& filename, const OptString& mode) override;
   int64_t readImpl(char *buffer, int64_t length) override;
   int64_t writeImpl(const char *buffer, int64_t length) override;
   bool eof() override;
@@ -138,8 +138,8 @@ struct ConcreteSocket final : Socket {
   explicit ConcreteSocket(std::shared_ptr<SocketData> data) : Socket(data) { }
 
   // overriding ResourceData
-  const String& o_getClassNameHook() const override { return classnameof(); }
-  const String& o_getResourceName() const override { return resourcenameof(); }
+  const OptString& o_getClassNameHook() const override { return classnameof(); }
+  const OptString& o_getResourceName() const override { return resourcenameof(); }
 };
 
 // This class provides exactly the same functionality as ConcreteSocket but

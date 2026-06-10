@@ -29,17 +29,17 @@
 
 namespace HPHP {
 
-const String null_string = String();
+const OptString null_string = OptString();
 const StaticString empty_string_ref("");
 
 ///////////////////////////////////////////////////////////////////////////////
 // statics
 
 #define NUM_CONVERTED_INTEGERS \
-  (String::MaxPrecomputedInteger - String::MinPrecomputedInteger + 1)
+  (OptString::MaxPrecomputedInteger - OptString::MinPrecomputedInteger + 1)
 
-StringData const **String::converted_integers_raw;
-StringData const **String::converted_integers;
+StringData const **OptString::converted_integers_raw;
+StringData const **OptString::converted_integers;
 
 static const StringData* convert_integer_helper(int64_t n) {
   char tmpbuf[21];
@@ -48,7 +48,7 @@ static const StringData* convert_integer_helper(int64_t n) {
   return makeStaticString(sl);
 }
 
-const StringData *String::ConvertInteger(int64_t n) {
+const StringData *OptString::ConvertInteger(int64_t n) {
   StringData const **psd = converted_integers + n;
   const StringData *sd = convert_integer_helper(n);
   *psd = sd;
@@ -57,10 +57,10 @@ const StringData *String::ConvertInteger(int64_t n) {
 
 static int precompute_integers();
 static int precompute_integers() {
-  String::converted_integers_raw =
+  OptString::converted_integers_raw =
     (StringData const **)calloc(NUM_CONVERTED_INTEGERS, sizeof(StringData*));
-  String::converted_integers = String::converted_integers_raw
-    - String::MinPrecomputedInteger;
+  OptString::converted_integers = OptString::converted_integers_raw
+    - OptString::MinPrecomputedInteger;
   return NUM_CONVERTED_INTEGERS;
 }
 
@@ -68,23 +68,23 @@ static int ATTRIBUTE_UNUSED initIntegers = precompute_integers();
 static InitFiniNode prepopulate_integers([] {
   // Proactively populate, in order to increase cache locality for sequential
   // access patterns.
-  for (int n = String::MinPrecomputedInteger;
-       n <= String::MaxPrecomputedInteger; n++) {
-    String::ConvertInteger(n);
+  for (int n = OptString::MinPrecomputedInteger;
+       n <= OptString::MaxPrecomputedInteger; n++) {
+    OptString::ConvertInteger(n);
   }
 }, InitFiniNode::When::PostRuntimeOptions);
 
 ///////////////////////////////////////////////////////////////////////////////
 // constructors
 
-String::~String() {}
+OptString::~OptString() {}
 
 StringData* buildStringData(int n) {
   return buildStringData(static_cast<int64_t>(n));
 }
 
 StringData* buildStringData(int64_t n) {
-  if (auto const sd = String::GetIntegerStringData(n)) {
+  if (auto const sd = OptString::GetIntegerStringData(n)) {
     assertx(sd->isStatic());
     return const_cast<StringData*>(sd);
   }
@@ -95,8 +95,8 @@ StringData* buildStringData(int64_t n) {
   return StringData::Make(sl, CopyString);
 }
 
-String::String(int n) : String(static_cast<int64_t>(n)) {}
-String::String(int64_t n) : m_str(buildStringData(n), NoIncRef{}) {}
+OptString::OptString(int n) : OptString(static_cast<int64_t>(n)) {}
+OptString::OptString(int64_t n) : m_str(buildStringData(n), NoIncRef{}) {}
 
 void formatPhpDblStr(char **pbuf, double n) {
   if (n == 0.0) {
@@ -111,24 +111,24 @@ StringData* buildStringData(double n) {
   return StringData::Make(buf, AttachString);
 }
 
-String::String(double n) : m_str(buildStringData(n), NoIncRef{}) { }
+OptString::OptString(double n) : m_str(buildStringData(n), NoIncRef{}) { }
 
 ///////////////////////////////////////////////////////////////////////////////
 // informational
 
-String String::substr(int start, int length /* = StringData::MaxSize */) const {
-  return String::attach(
+OptString OptString::substr(int start, int length /* = StringData::MaxSize */) const {
+  return OptString::attach(
     m_str ? m_str->substr(start, length) : staticEmptyString());
 }
 
-int String::find(char ch, int pos /* = 0 */,
+int OptString::find(char ch, int pos /* = 0 */,
                  bool caseSensitive /* = true */) const {
   if (empty()) return -1;
   return string_find(m_str->data(), m_str->size(), ch, pos,
                      caseSensitive);
 }
 
-int String::find(const char *s, int pos /* = 0 */,
+int OptString::find(const char *s, int pos /* = 0 */,
                  bool caseSensitive /* = true */) const {
   assertx(s);
   if (empty()) return -1;
@@ -139,7 +139,7 @@ int String::find(const char *s, int pos /* = 0 */,
                      pos, caseSensitive);
 }
 
-int String::find(const String& s, int pos /* = 0 */,
+int OptString::find(const OptString& s, int pos /* = 0 */,
                  bool caseSensitive /* = true */) const {
   if (empty()) return -1;
   if (s.size() == 1) {
@@ -149,14 +149,14 @@ int String::find(const String& s, int pos /* = 0 */,
                      s.data(), s.size(), pos, caseSensitive);
 }
 
-int String::rfind(char ch, int pos /* = 0 */,
+int OptString::rfind(char ch, int pos /* = 0 */,
                   bool caseSensitive /* = true */) const {
   if (empty()) return -1;
   return string_rfind(m_str->data(), m_str->size(), ch,
                       pos, caseSensitive);
 }
 
-int String::rfind(const char *s, int pos /* = 0 */,
+int OptString::rfind(const char *s, int pos /* = 0 */,
                   bool caseSensitive /* = true */) const {
   assertx(s);
   if (empty()) return -1;
@@ -167,7 +167,7 @@ int String::rfind(const char *s, int pos /* = 0 */,
                       pos, caseSensitive);
 }
 
-int String::rfind(const String& s, int pos /* = 0 */,
+int OptString::rfind(const OptString& s, int pos /* = 0 */,
                   bool caseSensitive /* = true */) const {
   if (empty()) return -1;
   if (s.size() == 1) {
@@ -180,7 +180,7 @@ int String::rfind(const String& s, int pos /* = 0 */,
 ///////////////////////////////////////////////////////////////////////////////
 // offset functions: cannot inline these due to dependencies
 
-char String::charAt(int pos) const {
+char OptString::charAt(int pos) const {
   assertx(pos >= 0 && pos <= size());
   const char *s = data();
   return s[pos];
@@ -189,13 +189,13 @@ char String::charAt(int pos) const {
 ///////////////////////////////////////////////////////////////////////////////
 // assignments
 
-String& String::operator=(const char* s) {
+OptString& OptString::operator=(const char* s) {
   m_str = req::ptr<StringData>::attach(
     s ? StringData::Make(s, CopyString) : nullptr);
   return *this;
 }
 
-String& String::operator=(const std::string& s) {
+OptString& OptString::operator=(const std::string& s) {
   m_str = req::ptr<StringData>::attach(
     StringData::Make(s.c_str(), s.size(), CopyString));
   return *this;
@@ -204,16 +204,16 @@ String& String::operator=(const std::string& s) {
 ///////////////////////////////////////////////////////////////////////////////
 // concatenation and increments
 
-String& String::operator+=(const char* s) {
+OptString& OptString::operator+=(const char* s) {
   if (!s) return *this;
   return operator+=(folly::StringPiece{s, strlen(s)});
 }
 
-String& String::operator+=(const std::string& str) {
+OptString& OptString::operator+=(const std::string& str) {
   return operator+=(folly::StringPiece{str});
 }
 
-String& String::operator+=(const String& str) {
+OptString& OptString::operator+=(const OptString& str) {
   if (str.empty()) return *this;
   if (empty()) {
     // lhs is empty, just return str. No attempt to append in place even
@@ -224,7 +224,7 @@ String& String::operator+=(const String& str) {
   return operator+=(str.slice());
 }
 
-String& String::operator+=(folly::StringPiece slice) {
+OptString& OptString::operator+=(folly::StringPiece slice) {
   if (slice.empty()) {
     return *this;
   }
@@ -250,71 +250,71 @@ String& String::operator+=(folly::StringPiece slice) {
   return *this;
 }
 
-String& String::operator+=(folly::MutableStringPiece slice) {
+OptString& OptString::operator+=(folly::MutableStringPiece slice) {
   return operator+=(folly::StringPiece{slice.begin(), slice.size()});
 }
 
-String&& operator+(String&& lhs, const char* rhs) {
+OptString&& operator+(OptString&& lhs, const char* rhs) {
   lhs += rhs;
   return std::move(lhs);
 }
 
-String operator+(const String & lhs, const char* rhs) {
+OptString operator+(const OptString & lhs, const char* rhs) {
   if (lhs.empty()) return rhs;
   if (!rhs || !*rhs) return lhs;
-  return String::attach(StringData::Make(lhs.slice(), rhs));
+  return OptString::attach(StringData::Make(lhs.slice(), rhs));
 }
 
-String&& operator+(String&& lhs, String&& rhs) {
+OptString&& operator+(OptString&& lhs, OptString&& rhs) {
   return std::move(lhs += rhs);
 }
 
-String operator+(String&& lhs, const String & rhs) {
+OptString operator+(OptString&& lhs, const OptString & rhs) {
   return std::move(lhs += rhs);
 }
 
-String operator+(const String & lhs, const String & rhs) {
+OptString operator+(const OptString & lhs, const OptString & rhs) {
   if (lhs.empty()) return rhs;
   if (rhs.empty()) return lhs;
-  return String::attach(StringData::Make(lhs.slice(), rhs.slice()));
+  return OptString::attach(StringData::Make(lhs.slice(), rhs.slice()));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // comparisons
 
-bool String::same(const StringData *v2) const {
+bool OptString::same(const StringData *v2) const {
   return HPHP::same(get(), v2);
 }
 
-bool String::same(const String& v2) const {
+bool OptString::same(const OptString& v2) const {
   return HPHP::same(get(), v2.get());
 }
 
-bool String::equal(const StringData *v2) const {
+bool OptString::equal(const StringData *v2) const {
   return HPHP::equal(get(), v2);
 }
 
-bool String::equal(const String& v2) const {
+bool OptString::equal(const OptString& v2) const {
   return HPHP::equal(get(), v2.get());
 }
 
-bool String::less(const StringData *v2) const {
+bool OptString::less(const StringData *v2) const {
   return HPHP::less(get(), v2);
 }
 
-bool String::less(const String& v2) const {
+bool OptString::less(const OptString& v2) const {
   return HPHP::less(get(), v2.get());
 }
 
-bool String::more(const StringData *v2) const {
+bool OptString::more(const StringData *v2) const {
   return HPHP::more(get(), v2);
 }
 
-bool String::more(const String& v2) const {
+bool OptString::more(const OptString& v2) const {
   return HPHP::more(get(), v2.get());
 }
 
-int String::compare(const char* v2) const {
+int OptString::compare(const char* v2) const {
   int lengthDiff = length() - strlen(v2);
   if(lengthDiff == 0)
     return memcmp(data(), v2, length());
@@ -322,7 +322,7 @@ int String::compare(const char* v2) const {
     return lengthDiff;
 }
 
-int String::compare(const String& v2) const {
+int OptString::compare(const OptString& v2) const {
   int lengthDiff = length() - v2.length();
   if(lengthDiff == 0)
     return memcmp(data(), v2.data(), length());
@@ -333,26 +333,26 @@ int String::compare(const String& v2) const {
 ///////////////////////////////////////////////////////////////////////////////
 // comparison operators
 
-bool String::operator==(const String& v) const {
+bool OptString::operator==(const OptString& v) const {
   return HPHP::equal(get(), v.get());
 }
 
-bool String::operator!=(const String& v) const {
+bool OptString::operator!=(const OptString& v) const {
   return !HPHP::equal(get(), v.get());
 }
 
-bool String::operator>(const String& v) const {
+bool OptString::operator>(const OptString& v) const {
   return HPHP::more(get(), v.get());
 }
 
-bool String::operator<(const String& v) const {
+bool OptString::operator<(const OptString& v) const {
   return HPHP::less(get(), v.get());
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // debugging
 
-void String::dump() const {
+void OptString::dump() const {
   if (m_str) {
     m_str->dump();
   } else {

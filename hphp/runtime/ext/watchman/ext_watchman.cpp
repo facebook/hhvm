@@ -192,7 +192,7 @@ TypedValue makeTV(const folly::dynamic& data) {
             res.set(k.getInt(), makeTV(v));
             break;
           case folly::dynamic::STRING:
-            res.set(String{k.getString()}, makeTV(v));
+            res.set(OptString{k.getString()}, makeTV(v));
             break;
           default:
             SystemLib::throwInvalidOperationExceptionObject(fmt::format(
@@ -336,7 +336,7 @@ getWatchmanClientForSocket(const std::string& socket_path) {
 
 // (PHP entry-point)
 Object HHVM_FUNCTION(HH_watchman_run,
-  const String& _json_query,
+  const OptString& _json_query,
   const Variant& _socket_path
 ) {
   std::lock_guard<std::mutex> g(s_sharedDataMutex);

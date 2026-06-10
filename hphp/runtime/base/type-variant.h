@@ -89,8 +89,8 @@ public:
   auto toDouble()  const { return tvCastToDouble(*m_val); }
   auto toString(ConvNoticeLevel level = ConvNoticeLevel::None,
                 const StringData* notice_reason = nullptr) const {
-    if (isStringType(type(m_val))) return String{val(m_val).pstr};
-    return String::attach(tvCastToStringData(*m_val, level, notice_reason));
+    if (isStringType(type(m_val))) return OptString{val(m_val).pstr};
+    return OptString::attach(tvCastToStringData(*m_val, level, notice_reason));
   }
   auto toArray() const {
     if (isArrayLikeType(type(m_val))) return Array{val(m_val).parr};
@@ -193,7 +193,7 @@ struct variant_ref : variant_ref_detail::base<false> {
   void set(double  v) noexcept;
   void set(const char* v) = delete;
   void set(const std::string & v) {
-    return set(String(v));
+    return set(OptString(v));
   }
   void set(StringData  *v) noexcept;
   void set(ArrayData   *v) noexcept;
@@ -206,13 +206,13 @@ struct variant_ref : variant_ref_detail::base<false> {
   void set(const ResourceData *v) = delete;
   void set(const ResourceHdr *v) = delete;
 
-  void set(const String& v) noexcept { set(v.get()); }
+  void set(const OptString& v) noexcept { set(v.get()); }
   void set(const StaticString & v) noexcept;
   void set(const Array& v) noexcept { set(v.get()); }
   void set(const Object& v) noexcept { set(v.get()); }
   void set(const OptResource& v) noexcept { set(v.hdr()); }
 
-  void set(String&& v) noexcept { steal(v.detach()); }
+  void set(OptString&& v) noexcept { steal(v.detach()); }
   void set(Array&& v) noexcept { steal(v.detach()); }
   void set(Object&& v) noexcept { steal(v.detach()); }
   void set(OptResource&& v) noexcept { steal(v.detachHdr()); }
@@ -336,7 +336,7 @@ struct Variant : private TypedValue {
     m_data.pstr = v.get();
   }
 
-  /* implicit */ Variant(const String& v) noexcept : Variant(v.get()) {}
+  /* implicit */ Variant(const OptString& v) noexcept : Variant(v.get()) {}
   /* implicit */ Variant(const Array& v) noexcept : Variant(v.get()) { }
   /* implicit */ Variant(const Object& v) noexcept : Variant(v.get()) {}
   /* implicit */ Variant(const OptResource& v) noexcept
@@ -507,7 +507,7 @@ struct Variant : private TypedValue {
   }
 
   // Move ctor for strings
-  /* implicit */ Variant(String&& v) noexcept {
+  /* implicit */ Variant(OptString&& v) noexcept {
     StringData *s = v.get();
     if (LIKELY(s != nullptr)) {
       m_data.pstr = s;
@@ -686,17 +686,17 @@ struct Variant : private TypedValue {
 ///////////////////////////////////////////////////////////////////////////////
 // string
 
-  ALWAYS_INLINE const String& asCStrRef() const {
+  ALWAYS_INLINE const OptString& asCStrRef() const {
     assertx(isStringType(m_type) && m_data.pstr);
-    return *reinterpret_cast<const String*>(&m_data.pstr);
+    return *reinterpret_cast<const OptString*>(&m_data.pstr);
   }
 
-  ALWAYS_INLINE String& asStrRef() {
+  ALWAYS_INLINE OptString& asStrRef() {
     assertx(isStringType(m_type) && m_data.pstr);
     // The caller is likely going to modify the string, so we have to eagerly
     // promote KindOfPersistentString -> KindOfString.
     m_type = KindOfString;
-    return *reinterpret_cast<String*>(&m_data.pstr);
+    return *reinterpret_cast<OptString*>(&m_data.pstr);
   }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -960,17 +960,17 @@ struct Variant : private TypedValue {
     return tvCastToDouble(*asTypedValue());
   }
 
-  String toString(ConvNoticeLevel level = ConvNoticeLevel::None,
+  OptString toString(ConvNoticeLevel level = ConvNoticeLevel::None,
                   const StringData* notice_reason = nullptr) const& {
-    if (isStringType(m_type)) return String{m_data.pstr};
-    return String::attach(tvCastToStringData(*this, level, notice_reason));
+    if (isStringType(m_type)) return OptString{m_data.pstr};
+    return OptString::attach(tvCastToStringData(*this, level, notice_reason));
   }
 
-  String toString(ConvNoticeLevel level = ConvNoticeLevel::None,
+  OptString toString(ConvNoticeLevel level = ConvNoticeLevel::None,
                   const StringData* notice_reason = nullptr) && {
     if (isStringType(m_type)) {
       m_type = KindOfNull;
-      return String::attach(m_data.pstr);
+      return OptString::attach(m_data.pstr);
     }
     return toString(level, notice_reason);
   }
@@ -1272,7 +1272,7 @@ struct Variant : private TypedValue {
   void set(double  v) noexcept;
   void set(const char* v) = delete;
   void set(const std::string & v) {
-    return set(String(v));
+    return set(OptString(v));
   }
   void set(StringData  *v) noexcept;
   void set(ArrayData   *v) noexcept;
@@ -1285,13 +1285,13 @@ struct Variant : private TypedValue {
   void set(const ResourceData *v) = delete;
   void set(const ResourceHdr *v) = delete;
 
-  void set(const String& v) noexcept { set(v.get()); }
+  void set(const OptString& v) noexcept { set(v.get()); }
   void set(const StaticString & v) noexcept;
   void set(const Array& v) noexcept { set(v.get()); }
   void set(const Object& v) noexcept { set(v.get()); }
   void set(const OptResource& v) noexcept { set(v.hdr()); }
 
-  void set(String&& v) noexcept { steal(v.detach()); }
+  void set(OptString&& v) noexcept { steal(v.detach()); }
   void set(Array&& v) noexcept { steal(v.detach()); }
   void set(Object&& v) noexcept { steal(v.detach()); }
   void set(OptResource&& v) noexcept { steal(v.detachHdr()); }
@@ -1366,7 +1366,7 @@ inline variant_ref& variant_ref::operator=(Variant &&rhs) noexcept {
 // VarNR
 
 struct VarNR : private TypedValue {
-  static VarNR MakeKey(const String& s) {
+  static VarNR MakeKey(const OptString& s) {
     if (s.empty()) return VarNR(staticEmptyString());
     return VarNR(s);
   }
@@ -1387,7 +1387,7 @@ struct VarNR : private TypedValue {
     m_data.pstr = v.get();
   }
 
-  explicit VarNR(const String& v) : VarNR(v.get()) {}
+  explicit VarNR(const OptString& v) : VarNR(v.get()) {}
   explicit VarNR(const Array& v) : VarNR(v.get()) {}
   explicit VarNR(const Object& v) : VarNR(v.get()) {}
 
@@ -1492,7 +1492,7 @@ inline Variant Array::operator[](int key) const {
 inline Variant Array::operator[](int64_t key) const {
   return Variant::wrap(lookup(key));
 }
-inline Variant Array::operator[](const String& key) const {
+inline Variant Array::operator[](const OptString& key) const {
   return Variant::wrap(lookup(key));
 }
 inline Variant Array::operator[](const Variant& key) const {
@@ -1513,7 +1513,7 @@ ALWAYS_INLINE Variant init_null() {
 
 inline void concat_assign(Variant &v1, const char* s2) = delete;
 
-inline void concat_assign(tv_lval lhs, const String& s2) {
+inline void concat_assign(tv_lval lhs, const OptString& s2) {
   if (!tvIsString(lhs)) {
     const auto notice_level =
       flagToConvNoticeLevel(Cfg::Eval::NoticeOnCoerceForStrConcat2);

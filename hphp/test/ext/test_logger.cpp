@@ -46,14 +46,14 @@ bool TestLogger::initializeRun() {
   std::string hostname = buf;
 
   DictInit data(8);
-  data.set(String("startedTime"),  time(nullptr));
-  data.set(String("stillRunning"), true);
-  data.set(String("hostname"),     hostname);
-  data.set(String("username"),     getpwuid(getuid())->pw_name);
-  data.set(String("repository"),   getRepoRoot());
-  data.set(String("svnRevision"),  getSVNRevision());
-  data.set(String("gitRevision"),  getGitRevision());
-  data.set(String("tags"),         make_vec_array("hphp", "c++"));
+  data.set(OptString("startedTime"),  time(nullptr));
+  data.set(OptString("stillRunning"), true);
+  data.set(OptString("hostname"),     hostname);
+  data.set(OptString("username"),     getpwuid(getuid())->pw_name);
+  data.set(OptString("repository"),   getRepoRoot());
+  data.set(OptString("svnRevision"),  getSVNRevision());
+  data.set(OptString("gitRevision"),  getGitRevision());
+  data.set(OptString("tags"),         make_vec_array("hphp", "c++"));
 
   auto dataArr = data.toArray();
 
@@ -132,7 +132,7 @@ std::string TestLogger::getRepoRoot() {
 
     // Need to normalize of this commands succeeds
     if (getOutput("git rev-parse --show-cdup", out) != -1)
-      return HHVM_FN(realpath)(String(out)).toString().data();
+      return HHVM_FN(realpath)(OptString(out)).toString().data();
   }
 
   // Fall back to our current directory

@@ -24,7 +24,7 @@ namespace HPHP {
 
 TypedValue HHVM_FUNCTION(json_encode, const Variant& value,
                          int64_t options = 0, int64_t depth = 512);
-TypedValue HHVM_FUNCTION(json_decode, const String& json, bool assoc = false,
+TypedValue HHVM_FUNCTION(json_decode, const OptString& json, bool assoc = false,
                          int64_t depth = 512, int64_t options = 0);
 
 extern const int64_t k_JSON_HEX_TAG;

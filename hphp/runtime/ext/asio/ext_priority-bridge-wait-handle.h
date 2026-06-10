@@ -48,7 +48,7 @@ public:
     return offsetof(c_PriorityBridgeWaitHandle, m_blockable);
   }
 
-  String getName();
+  OptString getName();
   void onUnblocked();
   c_WaitableWaitHandle* getChild();
 

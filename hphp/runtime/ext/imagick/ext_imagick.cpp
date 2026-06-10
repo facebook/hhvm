@@ -31,7 +31,7 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////////////
 // IO
-bool isMagickPseudoFormat(const String& path, char mode /* = '*' */) {
+bool isMagickPseudoFormat(const OptString& path, char mode /* = '*' */) {
   static const vector<pair<string, string>> pseudoFormats = {
     // Pseudo-image Formats
     {"CANVAS:",          "R"},
@@ -81,14 +81,14 @@ bool isMagickPseudoFormat(const String& path, char mode /* = '*' */) {
 #define IMAGICK_THROW imagickThrow<ImagickException>
 
 void imagickReadOp(MagickWand* wand,
-                   const String& path,
+                   const OptString& path,
                    const ImagickFileOp& op) {
-  String realpath;
+  OptString realpath;
   if (isMagickPseudoFormat(path, 'R')) {
     realpath = path;
   } else {
     auto var = HHVM_FN(realpath)(path);
-    realpath = var.isString() ? var.toString() : String();
+    realpath = var.isString() ? var.toString() : OptString();
     if (realpath.empty() ||
         !HHVM_FN(is_file)(realpath) ||
         !HHVM_FN(is_readable)(realpath)) {
@@ -108,9 +108,9 @@ void imagickReadOp(MagickWand* wand,
 }
 
 void imagickWriteOp(MagickWand* wand,
-                    const String& path_,
+                    const OptString& path_,
                     const ImagickFileOp& op) {
-  String path = path_;
+  OptString path = path_;
   if (path.empty()) {
     path = convertMagickString(MagickGetImageFilename(wand));
   }
@@ -118,12 +118,12 @@ void imagickWriteOp(MagickWand* wand,
     IMAGICK_THROW("No image filename specified");
   }
 
-  String realpath;
+  OptString realpath;
   if (isMagickPseudoFormat(path, 'W')) {
     realpath = path;
   } else {
     static const int PHP_PATHINFO_DIRNAME = 1;
-    String dirname = HHVM_FN(pathinfo)(path, PHP_PATHINFO_DIRNAME).toString();
+    OptString dirname = HHVM_FN(pathinfo)(path, PHP_PATHINFO_DIRNAME).toString();
     if (!HHVM_FN(is_dir)(dirname)) {
       // nothing to do here
     } else if (!HHVM_FN(is_file)(path)) {
@@ -183,12 +183,12 @@ void imagickReadOp(MagickWand* wand,
 
 void imagickWriteOp(MagickWand* wand,
                     const OptResource& res,
-                    const String& format,
+                    const OptString& format,
                     const ImagickHandleOp& op) {
   auto fp = getFILE(res, true);
 
   // Get the current name
-  String filename = convertMagickString(MagickGetImageFilename(wand));
+  OptString filename = convertMagickString(MagickGetImageFilename(wand));
   if (!format.empty()) {
     MagickSetImageFilename(wand, (format + ":").c_str());
   }
@@ -223,21 +223,21 @@ void raiseDeprecated(const char* className,
                    className, methodName, newClass, newMethod);
 }
 
-String convertMagickString(char* &&str) {
+OptString convertMagickString(char* &&str) {
   if (str == nullptr) {
-    return String();
+    return OptString();
   } else {
-    String ret(str);
+    OptString ret(str);
     freeMagickMemory(str);
     return ret;
   }
 }
 
-String convertMagickData(size_t size, unsigned char* &data) {
+OptString convertMagickData(size_t size, unsigned char* &data) {
   if (data == nullptr) {
-    return String();
+    return OptString();
   } else {
-    String ret((char*)data, size, CopyString);
+    OptString ret((char*)data, size, CopyString);
     freeMagickMemory(data);
     return ret;
   }
@@ -289,7 +289,7 @@ std::vector<PointInfo> toPointInfoArray(const Array& coordinates) {
     }
 
     for (ArrayIter jt(coordinate); jt; ++jt) {
-      const String& key = jt.first().toString();
+      const OptString& key = jt.first().toString();
       double value = tvCastToDouble(jt.secondValPlus());
       if (key == s_x) {
         ret[idx].x = value;

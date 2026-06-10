@@ -26,7 +26,7 @@ ServerNote* get_server_note() {
   return s_note.getCheck();
 }
 
-void ServerNote::Add(const String& name, const String& value) {
+void ServerNote::Add(const OptString& name, const OptString& value) {
   Array &arr = s_note->m_notes;
   arr.set(name, value);
 }
@@ -42,13 +42,13 @@ void ServerNote::AddNotes(const Array& notes) {
   });
 }
 
-String ServerNote::Get(const String& name) {
+OptString ServerNote::Get(const OptString& name) {
   Array &arr = s_note->m_notes;
   auto const tv = arr.lookup(name);
-  return tv.is_init() ? tvCastToString(tv) : String{};
+  return tv.is_init() ? tvCastToString(tv) : OptString{};
 }
 
-void ServerNote::Delete(const String& name) {
+void ServerNote::Delete(const OptString& name) {
   s_note->m_notes.remove(name);
 }
 

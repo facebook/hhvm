@@ -378,9 +378,9 @@ void raiseCoeffectsCallViolation(const Func* callee,
     VMRegAnchor _;
     if (!vmfp()) {
       // VM is entering to the first frame
-      return String{makeStaticString("[vm-entry]")};
+      return OptString{makeStaticString("[vm-entry]")};
     }
-    String result;
+    OptString result;
     walkStack([&] (const BTFrame& frm) {
       assertx(frm);
       auto const func = frm.func();

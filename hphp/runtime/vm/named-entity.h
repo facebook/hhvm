@@ -33,7 +33,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct Func;
-struct String;
+struct OptString;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -160,11 +160,11 @@ struct NamedType {
    * out through `normalizedStr' if it is provided.
    */
   static NamedType* getNoCreate(const StringData* str,
-                        String* normalizedStr = nullptr) {
+                        OptString* normalizedStr = nullptr) {
     return get<false>(str, normalizedStr);
   }
   static NamedType* getOrCreate(const StringData* str,
-                        String* normalizedStr = nullptr) {
+                        OptString* normalizedStr = nullptr) {
     return get<true>(str, normalizedStr);
   }
 
@@ -182,7 +182,7 @@ private:
   static Map* types();
 
   template<bool AllowCreate>
-  static NamedType* get(const StringData* str, String* normalizedStr) FLATTEN;
+  static NamedType* get(const StringData* str, OptString* normalizedStr) FLATTEN;
 
   /////////////////////////////////////////////////////////////////////////////
   // Data members.
@@ -265,11 +265,11 @@ struct NamedFunc {
    * out through `normalizedStr' if it is provided.
    */
   static NamedFunc* getNoCreate(const StringData* str,
-                        String* normalizedStr = nullptr) FLATTEN {
+                        OptString* normalizedStr = nullptr) FLATTEN {
     return get<false>(str, normalizedStr);
   }
   static NamedFunc* getOrCreate(const StringData* str,
-                        String* normalizedStr = nullptr) FLATTEN {
+                        OptString* normalizedStr = nullptr) FLATTEN {
     return get<true>(str, normalizedStr);
   }
 
@@ -278,7 +278,7 @@ struct NamedFunc {
 
 private:
   template <bool AllowCreate>
-  static NamedFunc* get(const StringData* str, String* normalizedStr) FLATTEN;
+  static NamedFunc* get(const StringData* str, OptString* normalizedStr) FLATTEN;
 
 private:
   static Map* funcs();

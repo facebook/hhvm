@@ -69,7 +69,7 @@ void register_variable(Array& variables,
                        const Variant& value,
                        bool overwrite = true);
 
-String canonicalize_path(const String& path, const char* root, int rootLen);
+OptString canonicalize_path(const OptString& path, const char* root, int rootLen);
 
 /**
  * Translate hex encode stack into both C++ and PHP frames.

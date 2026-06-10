@@ -129,7 +129,7 @@ Class* get_cls(const Variant& class_or_object) {
   return Class::load(class_or_object.toString().get());
 }
 
-const Func* get_method_func(const Class* cls, const String& meth_name) {
+const Func* get_method_func(const Class* cls, const OptString& meth_name) {
   const Func* func = cls->lookupMethod(meth_name.get());
   if (!func) {
     if (cls->attrs() & (AttrInterface | AttrAbstract  | AttrTrait)) {
@@ -192,7 +192,7 @@ Variant default_arg_from_php_code(const Func::ParamInfo& fpi,
   }
 }
 
-Array HHVM_FUNCTION(hphp_get_extension_info, const String& name) {
+Array HHVM_FUNCTION(hphp_get_extension_info, const OptString& name) {
 
   Extension *ext = ExtensionRegistry::get(name);
 
@@ -342,7 +342,7 @@ static bool resolveConstant(const char *p, int64_t len, Variant &cns) {
     len--;
   }
 
-  String cname(p, len, CopyString);
+  OptString cname(p, len, CopyString);
 
   if (!HHVM_FN(defined)(cname)) {
     cns = uninit_null();
@@ -401,8 +401,8 @@ static const StaticString s_unsupported_callable_type(
 );
 
 Variant HHVM_FUNCTION(hphp_invoke_method, const Variant& obj,
-                                          const String& cls,
-                                          const String& name,
+                                          const OptString& cls,
+                                          const OptString& name,
                                           const Variant& params) {
   if (obj.isNull()) {
     return invoke_static_method(cls, name, params, nullptr);
@@ -498,20 +498,20 @@ Variant HHVM_FUNCTION(hphp_invoke_callable_named_args,
   );
 }
 
-Object HHVM_FUNCTION(hphp_create_object, const String& name,
+Object HHVM_FUNCTION(hphp_create_object, const OptString& name,
                      const Variant& params) {
   return Object::attach(g_context->createObject(name.get(), params, nullptr));
 }
 
 Object HHVM_FUNCTION(hphp_create_object_without_constructor,
-                      const String& name) {
+                      const OptString& name) {
   return Object::attach(
     g_context->createObject(name.get(), init_null_variant, nullptr, false)
   );
 }
 
-Variant HHVM_FUNCTION(hphp_get_property, const Object& obj, const String& cls,
-                                         const String& prop) {
+Variant HHVM_FUNCTION(hphp_get_property, const Object& obj, const OptString& cls,
+                                         const OptString& prop) {
   /* It's possible to get a ReflectionProperty for a property which
    * no longer exists.  Silentyly fail to match PHP5 behavior
    */
@@ -520,8 +520,8 @@ Variant HHVM_FUNCTION(hphp_get_property, const Object& obj, const String& cls,
   return init_null();
 }
 
-void HHVM_FUNCTION(hphp_set_property, const Object& obj, const String& cls,
-                                      const String& prop, const Variant& value) {
+void HHVM_FUNCTION(hphp_set_property, const Object& obj, const OptString& cls,
+                                      const OptString& prop, const Variant& value) {
   if (!cls.empty() && Cfg::Eval::AuthoritativeMode) {
     raise_error(
       "We've already made many assumptions about private variables. "
@@ -532,8 +532,8 @@ void HHVM_FUNCTION(hphp_set_property, const Object& obj, const String& cls,
   obj->o_set(prop, value, cls);
 }
 
-Variant HHVM_FUNCTION(hphp_get_static_property, const String& cls,
-                                                const String& prop,
+Variant HHVM_FUNCTION(hphp_get_static_property, const OptString& cls,
+                                                const OptString& prop,
                                                 bool force) {
   auto const sd = cls.get();
   auto const class_ = Class::lookup(sd);
@@ -562,8 +562,8 @@ Variant HHVM_FUNCTION(hphp_get_static_property, const String& cls,
   return tvAsVariant(lookup.val);
 }
 
-void HHVM_FUNCTION(hphp_set_static_property, const String& cls,
-                                             const String& prop,
+void HHVM_FUNCTION(hphp_set_static_property, const OptString& cls,
+                                             const OptString& prop,
                                              const Variant& value,
                                              bool force) {
   if (Cfg::Eval::AuthoritativeMode) {
@@ -746,13 +746,13 @@ StringData* type_structure_classname_impl(TypedValue cls_or_obj,
   return val(classname).pstr;
 }
 
-String HHVM_FUNCTION(type_structure_classname,
+OptString HHVM_FUNCTION(type_structure_classname,
                      TypedValue cls_or_obj, const Variant& cns_name) {
-  return String::attach(type_structure_classname_impl(cls_or_obj, cns_name));
+  return OptString::attach(type_structure_classname_impl(cls_or_obj, cns_name));
 }
 
 TypedValue HHVM_FUNCTION(type_structure_class,
-                         TypedValue cls_or_obj, const String& cns_name) {
+                         TypedValue cls_or_obj, const OptString& cns_name) {
   auto const cn = type_structure_classname_impl(cls_or_obj, cns_name);
   auto const cls = Class::load(cn);
   assertx(cls != nullptr);
@@ -768,7 +768,7 @@ namespace {
 
 static Variant get_module_from_name(const StringData* name) {
   if (!name || Module::isDefault(name)) return init_null_variant;
-  return String::attach(const_cast<StringData*>(name));
+  return OptString::attach(const_cast<StringData*>(name));
 }
 
 } // namespace
@@ -822,7 +822,7 @@ static TypedValue HHVM_METHOD(ReflectionFunctionAbstract, getDocComment) {
 static StringRet HHVM_METHOD(ReflectionFunctionAbstract, getName) {
   auto const func = ReflectionFuncHandle::GetFuncFor(this_);
   auto ret = const_cast<StringData*>(func->name());
-  return String(ret);
+  return OptString(ret);
 }
 
 static bool HHVM_METHOD(ReflectionFunctionAbstract, isHack) {
@@ -985,14 +985,14 @@ static Array HHVM_METHOD(ReflectionFunctionAbstract, getParamInfo) {
 }
 
 // helper for getReturnTypeText
-static String HHVM_METHOD(ReflectionFunctionAbstract, getReturnTypeHint) {
+static OptString HHVM_METHOD(ReflectionFunctionAbstract, getReturnTypeHint) {
   auto const func = ReflectionFuncHandle::GetFuncFor(this_);
   auto retTypeSD = func->returnUserType();
   if (retTypeSD && retTypeSD->size()) {
     auto ret = const_cast<StringData*>(retTypeSD);
-    return String(ret);
+    return OptString(ret);
   }
-  return String();
+  return OptString();
 }
 
 static Array HHVM_METHOD(ReflectionFunctionAbstract, getRetTypeInfo) {
@@ -1084,7 +1084,7 @@ static Array HHVM_METHOD(ReflectionFunctionAbstract, getAttributesNamespaced) {
 
 // helper for __construct
 static bool HHVM_METHOD(ReflectionMethod, __init,
-                        const Variant& cls_or_object, const String& meth_name) {
+                        const Variant& cls_or_object, const OptString& meth_name) {
   auto const cls = get_cls(cls_or_object);
   if (!cls || meth_name.isNull()) {
     // caller raises exception
@@ -1150,16 +1150,16 @@ static int64_t HHVM_METHOD(ReflectionMethod, getModifiers) {
   return get_modifiers(func->attrs(), false, false);
 }
 
-static String HHVM_METHOD(ReflectionMethod, getCanonicalClassname) {
+static OptString HHVM_METHOD(ReflectionMethod, getCanonicalClassname) {
   if (Cfg::Eval::AuthoritativeMode) {
     Reflection::ThrowReflectionExceptionObject(s_canonical_class_in_repo_mode);
   }
   auto const func = ReflectionFuncHandle::GetFuncFor(this_);
-  return String::attach(const_cast<StringData*>(func->preClass()->name()));
+  return OptString::attach(const_cast<StringData*>(func->preClass()->name()));
 }
 
 // private helper for getPrototype
-static String HHVM_METHOD(ReflectionMethod, getPrototypeClassname) {
+static OptString HHVM_METHOD(ReflectionMethod, getPrototypeClassname) {
   auto const func = ReflectionFuncHandle::GetFuncFor(this_);
   const Class *prototypeCls = nullptr;
   if (func->baseCls() != nullptr && func->baseCls() != func->implCls()) {
@@ -1173,22 +1173,22 @@ static String HHVM_METHOD(ReflectionMethod, getPrototypeClassname) {
   }
   if (prototypeCls) {
     auto ret = const_cast<StringData*>(prototypeCls->name());
-    return String(ret);
+    return OptString(ret);
   }
-  return String();
+  return OptString();
 }
 
 // private helper for getDeclaringClass
-static String HHVM_METHOD(ReflectionMethod, getDeclaringClassname) {
+static OptString HHVM_METHOD(ReflectionMethod, getDeclaringClassname) {
   auto const func = ReflectionFuncHandle::GetFuncFor(this_);
   auto ret = const_cast<StringData*>(func->implCls()->name());
-  return String(ret);
+  return OptString(ret);
 }
 
 // ------------------------- class ReflectionFile
 
 // helper for __construct
-static String HHVM_METHOD(ReflectionFile, __init, const String& name) {
+static OptString HHVM_METHOD(ReflectionFile, __init, const OptString& name) {
   if (name.isNull()) {
     Reflection::ThrowReflectionExceptionObject(
       "Tried to construct ReflectionFile but the name was null"
@@ -1212,7 +1212,7 @@ static String HHVM_METHOD(ReflectionFile, __init, const String& name) {
 
   ReflectionFileHandle::Get(this_)->setUnit(unit);
 
-  return String::attach(const_cast<StringData*>(unit->filepath()));
+  return OptString::attach(const_cast<StringData*>(unit->filepath()));
 }
 
 static Array HHVM_METHOD(ReflectionFile, getAttributesNamespaced) {
@@ -1237,7 +1237,7 @@ static Variant HHVM_METHOD(ReflectionFile, getModule) {
 // ------------------------- class ReflectionModule
 
 // helper for __construct
-static void HHVM_METHOD(ReflectionModule, __init, const String& name) {
+static void HHVM_METHOD(ReflectionModule, __init, const OptString& name) {
   if (name.isNull()) {
     Reflection::ThrowReflectionExceptionObject(
       "Tried to construct ReflectionModule but the name was null"
@@ -1283,7 +1283,7 @@ static TypedValue HHVM_METHOD(ReflectionModule, getDocComment) {
 // ------------------------- class ReflectionFunction
 
 // helper for __construct
-static bool HHVM_METHOD(ReflectionFunction, __initName, const String& name) {
+static bool HHVM_METHOD(ReflectionFunction, __initName, const OptString& name) {
   if (name.isNull()) { return false; }
   const Func* func = Func::load(name.get());
   if (!func) { return false; }
@@ -1317,7 +1317,7 @@ static Variant HHVM_METHOD(ReflectionFunction, getClosureScopeClassname,
     SystemLib::throwExceptionObject(s_ExpectedClosureInstance);
   }
   if (auto scope = c_Closure::fromObject(closure.get())->getScope()) {
-    return String(const_cast<StringData*>(scope->name()));
+    return OptString(const_cast<StringData*>(scope->name()));
   }
   return init_null_variant;
 }
@@ -1338,18 +1338,18 @@ static Variant HHVM_METHOD(ReflectionFunction, getClosureThisObject,
 // class ReflectionClass
 
 // helper for __construct
-static StringRet HHVM_METHOD(ReflectionClass, __init, const String& name) {
+static StringRet HHVM_METHOD(ReflectionClass, __init, const OptString& name) {
   return ReflectionClassHandle::Get(this_)->init(name);
 }
 
 static StringRet HHVM_METHOD(ReflectionClass, getName) {
   auto const cls = ReflectionClassHandle::GetClassFor(this_);
-  return String{cls->nameStr()};
+  return OptString{cls->nameStr()};
 }
 
 static StringRet HHVM_METHOD(ReflectionClass, getParentName) {
   auto const cls = ReflectionClassHandle::GetClassFor(this_);
-  return String{cls->parentStr()};
+  return OptString{cls->parentStr()};
 }
 
 static bool HHVM_METHOD(ReflectionClass, isHack) {
@@ -1403,7 +1403,7 @@ static bool HHVM_METHOD(ReflectionClass, isEnum) {
   return cls->attrs() & (AttrEnum|AttrEnumClass);
 }
 
-static String HHVM_METHOD(ReflectionClass, getEnumUnderlyingType) {
+static OptString HHVM_METHOD(ReflectionClass, getEnumUnderlyingType) {
   auto const cls = ReflectionClassHandle::GetClassFor(this_);
   if (!(cls->attrs() & (AttrEnum|AttrEnumClass))) {
     Reflection::ThrowReflectionExceptionObject(
@@ -1509,7 +1509,7 @@ static Variant HHVM_METHOD(ReflectionClass, getRequiredClass) {
 
   for (auto const& req: requirementsRange) {
     if (req->kind() == PreClass::RequirementKind::RequirementClass) {
-      return String::attach(const_cast<StringData*>(req->name()));
+      return OptString::attach(const_cast<StringData*>(req->name()));
     }
   }
   return init_null_variant;
@@ -1540,7 +1540,7 @@ static Variant HHVM_METHOD(ReflectionClass, getRequiredThisAsClass) {
 
   for (auto const& req: requirementsRange) {
     if (req->kind() == PreClass::RequirementKind::RequirementThisAs) {
-      return String::attach(const_cast<StringData*>(req->name()));
+      return OptString::attach(const_cast<StringData*>(req->name()));
     }
   }
   return init_null_variant;
@@ -1575,13 +1575,13 @@ static ArrayRet HHVM_METHOD(ReflectionClass, getTraitNames) {
   return ai.toArray();
 }
 
-static bool HHVM_METHOD(ReflectionClass, hasMethod, const String& name) {
+static bool HHVM_METHOD(ReflectionClass, hasMethod, const OptString& name) {
   auto const cls = ReflectionClassHandle::GetClassFor(this_);
   return (get_method_func(cls, name) != nullptr);
 }
 
 namespace {
-  const Class* get_class_from_name(const String& name) {
+  const Class* get_class_from_name(const OptString& name) {
     auto const cls = Class::load(name.get());
     if (!cls) {
       auto message = fmt::format(
@@ -1598,7 +1598,7 @@ namespace {
 static Array HHVM_STATIC_METHOD(
   ReflectionClass,
   getMethodOrder,
-  const String& clsname,
+  const OptString& clsname,
   int64_t filter) {
   auto const cls = get_class_from_name(clsname);
   Attr mask = attrs_from_modifiers(filter, false);
@@ -1687,12 +1687,12 @@ static Array HHVM_STATIC_METHOD(
   return st;
 }
 
-static bool HHVM_METHOD(ReflectionClass, hasConstant, const String& name) {
+static bool HHVM_METHOD(ReflectionClass, hasConstant, const OptString& name) {
   auto const cls = ReflectionClassHandle::GetClassFor(this_);
   return cls->hasConstant(name.get());
 }
 
-static TypedValue HHVM_METHOD(ReflectionClass, getConstant, const String& name) {
+static TypedValue HHVM_METHOD(ReflectionClass, getConstant, const OptString& name) {
   auto const cls = ReflectionClassHandle::GetClassFor(this_);
   auto value = cls->clsCnsGet(name.get());
   if (value.m_type == KindOfUninit) return make_tv<KindOfBoolean>(false);
@@ -1750,7 +1750,7 @@ void addClassConstantNames(const Class* cls,
 static Array HHVM_STATIC_METHOD(
   ReflectionClass,
   getOrderedConstants,
-  const String& clsname) {
+  const OptString& clsname) {
   auto const cls = get_class_from_name(clsname);
 
   size_t numConsts = cls->numConstants();
@@ -1802,7 +1802,7 @@ static Array orderedConstantsHelper(const Class* cls, Fn filterFn) {
 static Array HHVM_STATIC_METHOD(
   ReflectionClass,
   getOrderedAbstractConstants,
-  const String& clsname
+  const OptString& clsname
 ) {
   return orderedConstantsHelper(
     get_class_from_name(clsname),
@@ -1815,7 +1815,7 @@ static Array HHVM_STATIC_METHOD(
 static Array HHVM_STATIC_METHOD(
   ReflectionClass,
   getOrderedTypeConstants,
-  const String& clsname
+  const OptString& clsname
 ) {
   return orderedConstantsHelper(
     get_class_from_name(clsname),
@@ -1885,7 +1885,7 @@ static Array HHVM_METHOD(
 static Array HHVM_STATIC_METHOD(
   ReflectionClass,
   getNonDynamicPropNames,
-  const String& clsname) {
+  const OptString& clsname) {
   /*
    * FIXME: This implementation is pretty horrible and should be rewritten
    * when ReflectionProperty is ported.
@@ -1939,12 +1939,12 @@ static Array HHVM_METHOD(ReflectionClass, getDynamicPropertyInfos,
   return ret.toArray();
 }
 
-static String HHVM_METHOD(ReflectionClass, getConstructorName) {
+static OptString HHVM_METHOD(ReflectionClass, getConstructorName) {
   auto const cls = ReflectionClassHandle::GetClassFor(this_);
   auto ctor = cls->getDeclaredCtor();
-  if (!ctor) { return String(); }
+  if (!ctor) { return OptString(); }
   auto ret = const_cast<StringData*>(ctor->name());
-  return String(ret);
+  return OptString(ret);
 }
 
 void ReflectionClassHandle::wakeup(const Variant& content, ObjectData* obj) {
@@ -1952,11 +1952,11 @@ void ReflectionClassHandle::wakeup(const Variant& content, ObjectData* obj) {
     throw Exception("Native data of ReflectionClass should be a class name");
   }
 
-  String clsName = content.toString();
-  String result = init(clsName);
+  OptString clsName = content.toString();
+  OptString result = init(clsName);
   if (result.empty()) {
     auto msg = fmt::format("Class {} does not exist", clsName.c_str());
-    Reflection::ThrowReflectionExceptionObject(String(msg));
+    Reflection::ThrowReflectionExceptionObject(OptString(msg));
   }
 
   // It is possible that $name does not get serialized. If a class derives
@@ -2000,7 +2000,7 @@ struct reflection_extension_PropHandler :
 
 // helper for __construct
 static bool HHVM_METHOD(ReflectionTypeConstant, __init,
-                        const Variant& cls_or_obj, const String& const_name) {
+                        const Variant& cls_or_obj, const OptString& const_name) {
   auto const cls = get_cls(cls_or_obj);
   if (!cls || const_name.isNull()) {
     // caller raises exception
@@ -2024,10 +2024,10 @@ static bool HHVM_METHOD(ReflectionTypeConstant, __init,
   return false;
 }
 
-static String HHVM_METHOD(ReflectionTypeConstant, getName) {
+static OptString HHVM_METHOD(ReflectionTypeConstant, getName) {
   auto const cns = ReflectionConstHandle::GetConstFor(this_);
   auto ret = const_cast<StringData*>(cns->name.get());
-  return String(ret);
+  return OptString(ret);
 }
 
 static bool HHVM_METHOD(ReflectionTypeConstant, isAbstract) {
@@ -2035,11 +2035,11 @@ static bool HHVM_METHOD(ReflectionTypeConstant, isAbstract) {
 }
 
 // helper for getAssignedTypeText
-static String HHVM_METHOD(ReflectionTypeConstant, getAssignedTypeHint) {
+static OptString HHVM_METHOD(ReflectionTypeConstant, getAssignedTypeHint) {
   auto const cns = ReflectionConstHandle::GetConstFor(this_);
 
   if (isStringType(cns->val.m_type)) {
-    return String(cns->val.m_data.pstr);
+    return OptString(cns->val.m_data.pstr);
   }
 
   if (isArrayLikeType(cns->val.m_type)) {
@@ -2051,15 +2051,15 @@ static String HHVM_METHOD(ReflectionTypeConstant, getAssignedTypeHint) {
       TypeStructure::TSDisplayType::TSDisplayTypeReflection);
   }
 
-  return String();
+  return OptString();
 }
 
-static String HHVM_METHOD(ReflectionTypeConstant, getCanonicalClassname) {
+static OptString HHVM_METHOD(ReflectionTypeConstant, getCanonicalClassname) {
   if (Cfg::Eval::AuthoritativeMode) {
     Reflection::ThrowReflectionExceptionObject(s_canonical_class_in_repo_mode);
   }
   auto const cnst = ReflectionConstHandle::GetConstFor(this_);
-  return String::attach(const_cast<StringData*>(
+  return OptString::attach(const_cast<StringData*>(
     cnst->preConst && cnst->preConst->cls()
      ? cnst->preConst->cls()
      : cnst->cls->name()
@@ -2067,11 +2067,11 @@ static String HHVM_METHOD(ReflectionTypeConstant, getCanonicalClassname) {
 }
 
 // private helper for getDeclaringClass
-static String HHVM_METHOD(ReflectionTypeConstant, getDeclaringClassname) {
+static OptString HHVM_METHOD(ReflectionTypeConstant, getDeclaringClassname) {
   auto const cns = ReflectionConstHandle::GetConstFor(this_);
   auto cls = cns->cls;
   auto ret = const_cast<StringData*>(cls->name());
-  return String(ret);
+  return OptString(ret);
 }
 
 // private helper for getClass and getTypeStructure
@@ -2084,7 +2084,7 @@ static TypedValue HHVM_METHOD(ReflectionTypeConstant, getClassPtr) {
 // class ReflectionProperty
 
 static void HHVM_METHOD(ReflectionProperty, __construct,
-                        const Variant& cls_or_obj, const String& prop_name) {
+                        const Variant& cls_or_obj, const OptString& prop_name) {
   auto const cls = get_cls(cls_or_obj);
   if (!cls) {
     Reflection::ThrowReflectionExceptionObject(fmt::format(
@@ -2283,7 +2283,7 @@ static TypedValue HHVM_METHOD(ReflectionProperty, getDocComment) {
   }
 }
 
-static String HHVM_METHOD(ReflectionProperty, getTypeText) {
+static OptString HHVM_METHOD(ReflectionProperty, getTypeText) {
   auto const data = Native::data<ReflectionPropHandle>(this_);
   const StringData *type = nullptr;
   switch (data->getType()) {
@@ -2386,7 +2386,7 @@ static bool HHVM_METHOD(ReflectionProperty, isReadonly) {
 
 // helper for __construct:
 // caller throws exception when return value is false
-static String HHVM_METHOD(ReflectionTypeAlias, __init, const String& name) {
+static OptString HHVM_METHOD(ReflectionTypeAlias, __init, const OptString& name) {
   auto const typeAlias = TypeAlias::load(name.get());
 
   if (!typeAlias) {
@@ -2394,7 +2394,7 @@ static String HHVM_METHOD(ReflectionTypeAlias, __init, const String& name) {
   }
 
   ReflectionTypeAliasHandle::Get(this_)->setTypeAlias(typeAlias);
-  return String::attach(const_cast<StringData*>(typeAlias->name()));
+  return OptString::attach(const_cast<StringData*>(typeAlias->name()));
 }
 
 static Array HHVM_METHOD(ReflectionTypeAlias, getTypeStructure) {
@@ -2406,7 +2406,7 @@ static Array HHVM_METHOD(ReflectionTypeAlias, getTypeStructure) {
   return typeStructure;
 }
 
-static String HHVM_METHOD(ReflectionTypeAlias, getAssignedTypeText) {
+static OptString HHVM_METHOD(ReflectionTypeAlias, getAssignedTypeText) {
   auto const req = ReflectionTypeAliasHandle::GetTypeAliasFor(this_);
   assertx(req);
   auto const typeStructure = req->typeStructure();
@@ -2428,7 +2428,7 @@ static Array HHVM_METHOD(ReflectionTypeAlias, getAttributesNamespaced) {
   return ai.toArray();
 }
 
-static String HHVM_METHOD(ReflectionTypeAlias, getFileName) {
+static OptString HHVM_METHOD(ReflectionTypeAlias, getFileName) {
   auto const req = ReflectionTypeAliasHandle::GetTypeAliasFor(this_);
   assertx(req);
   auto file = req->unit()->filepath();
@@ -2436,7 +2436,7 @@ static String HHVM_METHOD(ReflectionTypeAlias, getFileName) {
   if (file->data()[0] != '/') {
     return SourceRootInfo::RelativeToPhpRoot(StrNR(file));
   }
-  return String::attach(const_cast<StringData*>(file));
+  return OptString::attach(const_cast<StringData*>(file));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2706,7 +2706,7 @@ static void set_debugger_reflection_method_info(Array& ret, const Func* func,
   set_debugger_reflection_method_prototype_info(ret, resolved_func);
 }
 
-Array get_function_info(const String& name) {
+Array get_function_info(const OptString& name) {
   if (name.get() == nullptr) return null_array;
   const Func* func = Func::load(name.get());
   if (!func) return null_array;
@@ -2720,7 +2720,7 @@ Array get_function_info(const String& name) {
   return ret;
 }
 
-Array get_class_info(const String& name) {
+Array get_class_info(const OptString& name) {
   auto cls = get_cls(name);
   if (!cls) return null_array;
 

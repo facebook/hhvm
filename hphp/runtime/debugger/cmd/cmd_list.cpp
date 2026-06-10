@@ -190,12 +190,12 @@ bool CmdList::listFunctionOrClass(DebuggerClient &client) {
   ArrayIter iter(info);
   Array funcInfo = iter.second().toArray();
   if (!subsymbol.empty()) {
-    String key = CmdInfo::FindSubSymbol(funcInfo[s_methods].toArray(),
+    OptString key = CmdInfo::FindSubSymbol(funcInfo[s_methods].toArray(),
                                         subsymbol);
     if (key.isNull()) return false;
     funcInfo = funcInfo[s_methods].toArray()[key].toArray();
   }
-  String file = funcInfo[s_file].toString();
+  OptString file = funcInfo[s_file].toString();
   auto line1 = (int)funcInfo[s_line1].toInt64();
   auto line2 = (int)funcInfo[s_line2].toInt64();
   int line = line1 ? line1 : line2;

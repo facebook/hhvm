@@ -64,16 +64,16 @@ struct PDOMySqlConnection : PDOConnection {
 
   bool support(SupportedMethod method) override;
   bool closer() override;
-  bool preparer(const String& sql, sp_PDOStatement *stmt,
+  bool preparer(const OptString& sql, sp_PDOStatement *stmt,
                 const Variant& options) override;
-  int64_t doer(const String& sql) override;
-  bool quoter(const String& input, String &quoted,
+  int64_t doer(const OptString& sql) override;
+  bool quoter(const OptString& input, OptString &quoted,
               PDOParamType paramtype) override;
   bool begin() override;
   bool commit() override;
   bool rollback() override;
   bool setAttribute(int64_t attr, const Variant& value) override;
-  String lastId(const char *name) override;
+  OptString lastId(const char *name) override;
   bool fetchErr(PDOStatement* stmt, Array &info) override;
   int getAttribute(int64_t attr, Variant &value) override;
   bool checkLiveness() override;
@@ -111,7 +111,7 @@ struct PDOMySqlStatement : PDOStatement {
   PDOMySqlStatement(req::ptr<PDOMySqlResource>&& conn, MYSQL* server);
   ~PDOMySqlStatement() override;
 
-  bool create(const String& sql, const Array& options);
+  bool create(const OptString& sql, const Array& options);
 
   bool support(SupportedMethod method) override;
   bool executer() override;
@@ -158,14 +158,14 @@ static long pdo_attr_lval(const Array& options, int opt, long defaultValue) {
   return defaultValue;
 }
 
-static String pdo_attr_strval(const Array& options, int opt, const char *def) {
+static OptString pdo_attr_strval(const Array& options, int opt, const char *def) {
   if (options.exists(opt)) {
     return options[opt].toString();
   }
   if (def) {
     return def;
   }
-  return String();
+  return OptString();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -222,11 +222,11 @@ bool PDOMySqlConnection::create(const Array& options) {
   dbname = vars[1].optval;
 
   // Extract port number from a host in case it's inlined.
-  String host(vars[2].optval, CopyString);
+  OptString host(vars[2].optval, CopyString);
   if (!host.same(s_localhost)) {
     HostURL hosturl(host.toCppString(), port);
     if (hosturl.isValid()) {
-      host = String(hosturl.getHost().c_str(), CopyString);
+      host = OptString(hosturl.getHost().c_str(), CopyString);
       port = hosturl.getPort();
     }
   }
@@ -258,7 +258,7 @@ bool PDOMySqlConnection::create(const Array& options) {
                                        -1);
 
     long local_infile = pdo_attr_lval(options, PDO_MYSQL_ATTR_LOCAL_INFILE, 0);
-    String init_cmd, default_file, default_group, ssl_ca, ssl_capath, ssl_cert,
+    OptString init_cmd, default_file, default_group, ssl_ca, ssl_capath, ssl_cert,
            ssl_key, ssl_cipher;
     long compress = 0;
     m_buffered = pdo_attr_lval(options, PDO_MYSQL_ATTR_USE_BUFFERED_QUERY, 1);
@@ -491,12 +491,12 @@ int PDOMySqlConnection::handleError(const char *file, int line,
     pdo_raise_impl_error(stmt->dbh, nullptr, pdo_err[0], einfo->errmsg);
   } else {
     Array info = Array::CreateVec();
-    info.append(String(*pdo_err, CopyString));
+    info.append(OptString(*pdo_err, CopyString));
     if (stmt) {
       stmt->dbh->conn()->fetchErr(stmt, info);
     } else {
       info.append(Variant((unsigned long) einfo->errcode));
-      info.append(String(einfo->errmsg, CopyString));
+      info.append(OptString(einfo->errmsg, CopyString));
     }
     throw_pdo_exception(info,
                         "SQLSTATE[%s] [%d] %s",
@@ -505,7 +505,7 @@ int PDOMySqlConnection::handleError(const char *file, int line,
   return einfo->errcode;
 }
 
-bool PDOMySqlConnection::preparer(const String& sql, sp_PDOStatement *stmt,
+bool PDOMySqlConnection::preparer(const OptString& sql, sp_PDOStatement *stmt,
                                   const Variant& options) {
   auto rsrc = req::make<PDOMySqlResource>(
       std::dynamic_pointer_cast<PDOMySqlConnection>(shared_from_this()));
@@ -531,7 +531,7 @@ bool PDOMySqlConnection::preparer(const String& sql, sp_PDOStatement *stmt,
   return false;
 }
 
-int64_t PDOMySqlConnection::doer(const String& sql) {
+int64_t PDOMySqlConnection::doer(const OptString& sql) {
   if (mysql_real_query(m_server, sql.data(), sql.size())) {
     handleError(__FILE__, __LINE__);
     return -1;
@@ -556,9 +556,9 @@ int64_t PDOMySqlConnection::doer(const String& sql) {
   return c;
 }
 
-bool PDOMySqlConnection::quoter(const String& input, String& quoted,
+bool PDOMySqlConnection::quoter(const OptString& input, OptString& quoted,
                                 PDOParamType /*paramtype*/) {
-  String s(2 * input.size() + 3, ReserveString);
+  OptString s(2 * input.size() + 3, ReserveString);
   char *buf = s.mutableData();
   int len = mysql_real_escape_string(m_server, buf + 1,
                                      input.data(), input.size());
@@ -614,14 +614,14 @@ bool PDOMySqlConnection::setAttribute(int64_t attr, const Variant& value) {
   }
 }
 
-String PDOMySqlConnection::lastId(const char* /*name*/) {
+OptString PDOMySqlConnection::lastId(const char* /*name*/) {
   return (int64_t)mysql_insert_id(m_server);
 }
 
 bool PDOMySqlConnection::fetchErr(PDOStatement* /*stmt*/, Array& info) {
   if (m_einfo.errcode) {
     info.append((int64_t)m_einfo.errcode);
-    info.append(String(m_einfo.errmsg, CopyString));
+    info.append(OptString(m_einfo.errmsg, CopyString));
   }
   return true;
 }
@@ -629,18 +629,18 @@ bool PDOMySqlConnection::fetchErr(PDOStatement* /*stmt*/, Array& info) {
 int PDOMySqlConnection::getAttribute(int64_t attr, Variant &value) {
   switch (attr) {
   case PDO_ATTR_CLIENT_VERSION:
-    value = String((char *)mysql_get_client_info(), CopyString);
+    value = OptString((char *)mysql_get_client_info(), CopyString);
     break;
   case PDO_ATTR_SERVER_VERSION:
-    value = String((char *)mysql_get_server_info(m_server), CopyString);
+    value = OptString((char *)mysql_get_server_info(m_server), CopyString);
     break;
   case PDO_ATTR_CONNECTION_STATUS:
-    value = String((char *)mysql_get_host_info(m_server), CopyString);
+    value = OptString((char *)mysql_get_host_info(m_server), CopyString);
     break;
   case PDO_ATTR_SERVER_INFO: {
     char *tmp = (char *)mysql_stat(m_server);
     if (tmp) {
-      value = String(tmp, CopyString);
+      value = OptString(tmp, CopyString);
     } else {
       handleError(__FILE__, __LINE__);
       return -1;
@@ -907,10 +907,10 @@ void PDOMySqlStatement::sweep() {
   }
 }
 
-bool PDOMySqlStatement::create(const String& sql, const Array& options) {
+bool PDOMySqlStatement::create(const OptString& sql, const Array& options) {
   supports_placeholders = PDO_PLACEHOLDER_POSITIONAL;
 
-  String nsql;
+  OptString nsql;
   int ret = pdo_parse_params(sp_PDOStatement(this), sql, nsql);
   if (ret == 1) {
     /* query was rewritten */
@@ -1065,10 +1065,10 @@ bool PDOMySqlStatement::describer(int colno) {
     col = cast<PDOColumn>(columns[i]);
 
     if (m_conn->fetch_table_names()) {
-      col->name = String(m_fields[i].table) + "." +
-        String(m_fields[i].name);
+      col->name = OptString(m_fields[i].table) + "." +
+        OptString(m_fields[i].name);
     } else {
-      col->name = String(m_fields[i].name, CopyString);
+      col->name = OptString(m_fields[i].name, CopyString);
     }
 
     col->precision = m_fields[i].decimals;
@@ -1104,16 +1104,16 @@ bool PDOMySqlStatement::getColumn(int colno, Variant &value) {
       setPDOError(error_code, "01004"); /* truncated */
       m_out_length[colno] = m_bound_result[colno].buffer_length;
       len = m_out_length[colno];
-      value = String(ptr, len, CopyString);
+      value = OptString(ptr, len, CopyString);
       return false;
     }
     len = m_out_length[colno];
-    value = String(ptr, len, CopyString);
+    value = OptString(ptr, len, CopyString);
     return true;
   }
   ptr = m_current_data[colno];
   len = m_current_lengths[colno];
-  value = String(ptr, len, CopyString);
+  value = OptString(ptr, len, CopyString);
   return true;
 }
 
@@ -1178,7 +1178,7 @@ bool PDOMySqlStatement::paramHook(PDOBoundParam* param,
       }
 
       if (param->parameter.isString()) {
-        String sparam = param->parameter.toString();
+        OptString sparam = param->parameter.toString();
         b->buffer_type = MYSQL_TYPE_STRING;
         b->buffer = (void*)sparam.data();
         b->buffer_length = sparam.size();
@@ -1233,7 +1233,7 @@ bool PDOMySqlStatement::getColumnMeta(int64_t colno, Array &ret) {
 
   const MYSQL_FIELD *F = m_fields + colno;
   if (F->def) {
-    ret.set(s_mysql_def, String(F->def, CopyString));
+    ret.set(s_mysql_def, OptString(F->def, CopyString));
   }
   if (IS_NOT_NULL(F->flags)) {
     flags.append(s_not_null);
@@ -1255,7 +1255,7 @@ bool PDOMySqlStatement::getColumnMeta(int64_t colno, Array &ret) {
     ret.set(s_native_type, str);
   }
   ret.set(s_flags, flags);
-  ret.set(s_table, String(F->table, CopyString));
+  ret.set(s_table, OptString(F->table, CopyString));
   return true;
 }
 

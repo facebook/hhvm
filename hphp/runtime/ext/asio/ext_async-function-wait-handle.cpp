@@ -283,7 +283,7 @@ void c_AsyncFunctionWaitHandle::failCpp() {
   parentChain.unblock();
 }
 
-String c_AsyncFunctionWaitHandle::getName() {
+OptString c_AsyncFunctionWaitHandle::getName() {
   switch (getState()) {
     case STATE_BLOCKED:
     case STATE_READY:
@@ -297,13 +297,13 @@ String c_AsyncFunctionWaitHandle::getName() {
           const char* p = strchr(name->data(), ':');
           if (p) {
             return
-              concat(String(name->data(), p + 1 - name->data(), CopyString),
+              concat(OptString(name->data(), p + 1 - name->data(), CopyString),
                      s__closure_);
           } else {
             return s__closure_;
           }
         }
-        return String{const_cast<StringData*>(name)};
+        return OptString{const_cast<StringData*>(name)};
       }
 
       auto const cls = actRec()->hasThis() ?
@@ -311,7 +311,7 @@ String c_AsyncFunctionWaitHandle::getName() {
         actRec()->getClass();
 
       if (cls == func->cls() && !func->isClosureBody()) {
-        return String{const_cast<StringData*>(func->fullName())};
+        return OptString{const_cast<StringData*>(func->fullName())};
       }
 
       StrNR funcName(func->isClosureBody() ? s__closure_.get() : func->name());
@@ -383,7 +383,7 @@ void c_AsyncFunctionWaitHandle::exitContext(ContextIndex contextIdx) {
 }
 
 // Get the filename in which execution will proceed when execution resumes.
-String c_AsyncFunctionWaitHandle::getFilename() {
+OptString c_AsyncFunctionWaitHandle::getFilename() {
   if (actRec()->func()->originalUnit()) {
     return actRec()->func()->originalUnit()->data();
   } else {

@@ -26,7 +26,7 @@ namespace HPHP::Eval {
 
 struct CmdInfo : DebuggerCommand {
   static void UpdateLiveLists(DebuggerClient &client);
-  static String GetProtoType(DebuggerClient &client, const std::string &cls,
+  static OptString GetProtoType(DebuggerClient &client, const std::string &cls,
                              const std::string &func);
 
   CmdInfo() : DebuggerCommand(KindOfInfo) {}
@@ -44,7 +44,7 @@ struct CmdInfo : DebuggerCommand {
     return m_info;
   }
 
-  static String FindSubSymbol(const Array& symbols, const std::string &symbol);
+  static OptString FindSubSymbol(const Array& symbols, const std::string &symbol);
 
   std::string name() const override { return "info"; }
 
@@ -62,14 +62,14 @@ private:
   };
 
   int8_t m_type;
-  req::root<String> m_symbol;
+  req::root<OptString> m_symbol;
   req::root<Array>  m_info;
   std::shared_ptr<DebuggerClient::LiveLists> m_acLiveLists;
 
-  static String GetParams(const Array& params, bool varg, bool detailed=false);
-  static String GetParam(const Array& params, int index);
-  static String GetModifier(const Array& info, const String&);
-  static String GetTypeProfilingInfo(const Array& profilingArray,
+  static OptString GetParams(const Array& params, bool varg, bool detailed=false);
+  static OptString GetParam(const Array& params, int index);
+  static OptString GetModifier(const Array& info, const OptString&);
+  static OptString GetTypeProfilingInfo(const Array& profilingArray,
                                      const Array& params);
 
   static bool TryConstant(StringBuffer &sb, const Array& info,

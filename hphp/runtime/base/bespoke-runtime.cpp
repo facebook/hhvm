@@ -68,7 +68,7 @@ RuntimeStruct::RuntimeStruct(
 }
 
 RuntimeStruct* RuntimeStruct::registerRuntimeStruct(
-    const String& stableIdentifier, const FieldIndexVector& fields) {
+    const OptString& stableIdentifier, const FieldIndexVector& fields) {
   assertx(stableIdentifier.get()->isStatic());
 
   if (!allowBespokeArrayLikes()) return nullptr;
@@ -322,11 +322,11 @@ void StructDictInit::set(size_t idx, StringData* key, TypedValue value) {
   }
 }
 
-void StructDictInit::set(size_t idx, const String& key, TypedValue value) {
+void StructDictInit::set(size_t idx, const OptString& key, TypedValue value) {
   set(idx, key.get(), value);
 }
 
-void StructDictInit::set(size_t idx, const String& key, const Variant& value) {
+void StructDictInit::set(size_t idx, const OptString& key, const Variant& value) {
   set(idx, key, *value.asTypedValue());
 }
 
@@ -359,7 +359,7 @@ void StructDictInit::set(int64_t key, const Variant& value) {
   set(key, *value.asTypedValue());
 }
 
-void StructDictInit::setIntishCast(size_t idx, const String& key,
+void StructDictInit::setIntishCast(size_t idx, const OptString& key,
                                    const Variant& value) {
   if (m_struct) {
     // No keys registered with a RuntimeStruct will ever intish cast.

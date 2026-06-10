@@ -158,7 +158,7 @@ bool FieldGenerator::gen(char field, const std::string& arg, T& out) {
   case 'n':
     if (arg.empty()) return false;
     {
-      String note = ServerNote::Get(arg);
+      OptString note = ServerNote::Get(arg);
       if (note.isNull()) return false;
       out = folly::to<T>(note.data());
     }
@@ -216,7 +216,7 @@ bool FieldGenerator::gen(char field, const std::string& arg, T& out) {
     break;
   case 'U':
     {
-      String b, q;
+      OptString b, q;
       RequestURI::splitURL(transport->getUrl(), b, q);
       out = folly::to<T>(b.c_str());
     }

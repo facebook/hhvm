@@ -95,10 +95,10 @@ struct CollectionsExtension : Extension {
 extern const StaticString s_isset;
 
 struct CollectionPropHandler: Native::BasePropHandler {
-  static Variant issetProp(const Object&, const String&) {
+  static Variant issetProp(const Object&, const OptString&) {
     return false;
   }
-  static bool isPropSupported(const String&, const String& op) {
+  static bool isPropSupported(const OptString&, const OptString& op) {
     if (op.same(s_isset)) return true;
     SystemLib::throwInvalidOperationExceptionObject(
       "Cannot access a property on a collection");

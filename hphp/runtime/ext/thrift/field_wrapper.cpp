@@ -25,7 +25,7 @@ namespace HPHP {
 namespace thrift {
 ///////////////////////////////////////////////////////////////////////////////
 
-void setThriftType(Variant value, const Object& obj, const String& fieldName) {
+void setThriftType(Variant value, const Object& obj, const OptString& fieldName) {
   auto getter_name = "get_" + fieldName;
   auto field_val =
       obj->o_invoke_few_args(getter_name, RuntimeCoeffects::pure(), 0);
@@ -43,7 +43,7 @@ void setThriftType(Variant value, const Object& obj, const String& fieldName) {
   }
 }
 
-Variant getThriftType(const Object& obj, const String& fieldName) {
+Variant getThriftType(const Object& obj, const OptString& fieldName) {
   auto getter_name = "get_" + fieldName;
   auto field_val =
       obj->o_invoke_few_args(getter_name, RuntimeCoeffects::pure(), 0);

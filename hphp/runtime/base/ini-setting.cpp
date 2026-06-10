@@ -114,7 +114,7 @@ namespace {
 
 template<typename T>
 void set(DictInit& arr, const std::string& key, const T& value) {
-  auto keyStr = String(key);
+  auto keyStr = OptString(key);
   int64_t n;
   if (keyStr.get()->isStrictlyInteger(n)) {
     arr.set(n, value);
@@ -504,7 +504,7 @@ IniSettingMap::IniSettingMap(IniSettingMap&& i) noexcept {
   m_map = v;
 }
 
-const IniSettingMap IniSettingMap::operator[](const String& key) const {
+const IniSettingMap IniSettingMap::operator[](const OptString& key) const {
   assertx(this->isArray());
   int64_t intish;
   if (key.get()->isStrictlyInteger(intish)) {
@@ -535,7 +535,7 @@ void mergeSettings(tv_lval curval, TypedValue v) {
 }
 }
 
-void IniSettingMap::set(const String& key, const Variant& v) {
+void IniSettingMap::set(const OptString& key, const Variant& v) {
   assertx(this->isArray());
   auto& mapref = m_map.asArrRef();
   if (!mapref.exists(key)) {
@@ -588,7 +588,7 @@ void IniSetting::ParserCallback::onLabel(const std::string& /*name*/,
 void IniSetting::ParserCallback::onEntry(
     const std::string &key, const std::string &value, void *arg) {
   auto arr = static_cast<Variant*>(arg);
-  String skey(key);
+  OptString skey(key);
   Variant sval(value);
   forceToArrayForMode(*arr).set(skey, sval);
 }
@@ -600,7 +600,7 @@ void IniSetting::ParserCallback::onPopEntry(
     void *arg) {
   auto arr = static_cast<Variant*>(arg);
 
-  String skey(key);
+  OptString skey(key);
   auto& arr_ref = forceToArrayForMode(*arr);
   if (!arr_ref.exists(skey)) {
     arr_ref.set(skey, emptyArrayForMode());
@@ -623,7 +623,7 @@ void IniSetting::ParserCallback::makeArray(tv_lval val,
   auto p = start;
   bool last = false;
   for (;;) {
-    String index(p);
+    OptString index(p);
     last = p + index.size() >= start + offset.size();
     // This is mandatory in case we have a nested array like:
     //   hhvm.a[b][c][d]
@@ -699,7 +699,7 @@ void IniSetting::SectionParserCallback::onSection(
     data->active_section.unset();
   }
   data->active_section = emptyArrayForMode();
-  data->active_name = String(name);
+  data->active_name = OptString(name);
 }
 
 Variant* IniSetting::SectionParserCallback::activeArray(CallbackData* data) {
@@ -766,7 +766,7 @@ void IniSetting::SystemParserCallback::onConstant(std::string &result,
 ///////////////////////////////////////////////////////////////////////////////
 
 static Mutex s_mutex;
-Variant IniSetting::FromString(const String& ini, const String& filename,
+Variant IniSetting::FromString(const OptString& ini, const OptString& filename,
                                bool process_sections /* = false */,
                                int scanner_mode /* = NormalScanner */) {
   Lock lock(s_mutex); // ini parser is not thread-safe
@@ -940,7 +940,7 @@ struct IniCallbackData {
 };
 
 using CallbackMap = folly::F14FastMap<
-  String, IniCallbackData, hphp_string_hash, hphp_string_same>;
+  OptString, IniCallbackData, hphp_string_hash, hphp_string_same>;
 
 struct SystemSettings {
   std::unordered_map<std::string,Variant> settings;
@@ -1018,7 +1018,7 @@ void IniSetting::Bind(
   // in neither s_user_callbacks nor s_system_ini_callbacks. The bottom
   // line is that we can't really use ModulesInitialised() to help steer
   // the choices here.
-  auto const staticName = String::attach(makeStaticString(name));
+  auto const staticName = OptString::attach(makeStaticString(name));
   assertx(IMPLIES(!is_thread_local, !s_user_callbacks->count(staticName)));
 
   // For now, we require the extensions to use their own thread local
@@ -1053,7 +1053,7 @@ void IniSetting::Unbind(const std::string& name) {
   s_user_callbacks->erase(name);
 }
 
-static IniCallbackData* get_callback(const String& name) {
+static IniCallbackData* get_callback(const OptString& name) {
   auto iter = s_system_ini_callbacks.find(name);
   if (iter == s_system_ini_callbacks.end()) {
     iter = s_user_callbacks->find(name);
@@ -1071,21 +1071,21 @@ bool IniSetting::Get(const std::string& name, std::string &value) {
   return ret && !value.empty();
 }
 
-bool IniSetting::Get(const String& name, std::string &value) {
+bool IniSetting::Get(const OptString& name, std::string &value) {
   Variant b;
   auto ret = Get(name, b);
   value = b.toString().toCppString();
   return ret && !value.empty();
 }
 
-bool IniSetting::Get(const String& name, String& value) {
+bool IniSetting::Get(const OptString& name, OptString& value) {
   Variant b;
   auto ret = Get(name, b);
   value = b.toString();
   return ret;
 }
 
-static bool shouldHideSetting(const String& name) {
+static bool shouldHideSetting(const OptString& name) {
   for (auto& sub : Cfg::Eval::IniGetHide) {
     if (name.find(sub) != -1) {
       return true;
@@ -1094,7 +1094,7 @@ static bool shouldHideSetting(const String& name) {
   return false;
 }
 
-bool IniSetting::Get(const String& name, Variant& value) {
+bool IniSetting::Get(const OptString& name, Variant& value) {
   if (shouldHideSetting(name)) {
     return false;
   }
@@ -1112,13 +1112,13 @@ std::string IniSetting::Get(const std::string& name) {
   return ret;
 }
 
-std::string IniSetting::Get(const String& name) {
+std::string IniSetting::Get(const OptString& name) {
   std::string ret;
   Get(name, ret);
   return ret;
 }
 
-static bool ini_set(const String& name, const Variant& value,
+static bool ini_set(const OptString& name, const Variant& value,
                     IniSetting::Mode mode) {
   auto cb = get_callback(name);
   if (!cb || !IniSetting::canSet(cb->mode, mode)) {
@@ -1142,7 +1142,7 @@ bool IniSetting::FillInConstant(const std::string& name,
   return ret;
 }
 
-bool IniSetting::SetSystem(const String& name, const Variant& value) {
+bool IniSetting::SetSystem(const OptString& name, const Variant& value) {
   // Shouldn't be calling this function after the runtime options are loaded.
   assertx(!s_system_settings_are_set);
   // Since we're going to keep these settings for the lifetime of the program,
@@ -1153,7 +1153,7 @@ bool IniSetting::SetSystem(const String& name, const Variant& value) {
   return ini_set(name, value, Mode::Config);
 }
 
-bool IniSetting::GetSystem(const String& name, Variant& value) {
+bool IniSetting::GetSystem(const OptString& name, Variant& value) {
   auto it = s_system_settings.settings.find(name.toCppString());
   if (it == s_system_settings.settings.end()) {
     return false;
@@ -1162,7 +1162,7 @@ bool IniSetting::GetSystem(const String& name, Variant& value) {
   return true;
 }
 
-bool IniSetting::SetUser(const String& name, const Variant& value) {
+bool IniSetting::SetUser(const OptString& name, const Variant& value) {
   auto& defaults = s_saved_defaults->init();
   if (!defaults.contains(name.toCppString())) {
     Variant def;
@@ -1174,7 +1174,7 @@ bool IniSetting::SetUser(const String& name, const Variant& value) {
   return ini_set(name, value, Mode::Request);
 }
 
-void IniSetting::RestoreUser(const String& name) {
+void IniSetting::RestoreUser(const OptString& name) {
   if (!s_saved_defaults->empty()) {
     auto& defaults = s_saved_defaults->settings.value();
     auto it = defaults.find(name.toCppString());
@@ -1209,7 +1209,7 @@ bool IniSetting::canSet(Mode settingMode, Mode checkMode) {
   return settingMode <= checkMode;
 }
 
-Optional<IniSetting::Mode> IniSetting::GetMode(const String& name) {
+Optional<IniSetting::Mode> IniSetting::GetMode(const OptString& name) {
   auto cb = get_callback(name);
   if (!cb) {
     return {};
@@ -1258,7 +1258,7 @@ size_t IniSetting::HashAll(const hphp_fast_string_set& toLog,
   return hash;
 }
 
-Array IniSetting::GetAll(const String& ext_name, bool details) {
+Array IniSetting::GetAll(const OptString& ext_name, bool details) {
   Array r = Array::CreateDict();
 
   const Extension* ext = nullptr;
@@ -1293,9 +1293,9 @@ Array IniSetting::GetAll(const String& ext_name, bool details) {
       item.set(s_global_value, value);
       item.set(s_local_value, value);
       item.set(s_access, Variant(int64_t(iter.second.mode)));
-      r.set(String(iter.first), item);
+      r.set(OptString(iter.first), item);
     } else {
-      r.set(String(iter.first), value);
+      r.set(OptString(iter.first), value);
     }
   }
   return r;
@@ -1304,7 +1304,7 @@ Array IniSetting::GetAll(const String& ext_name, bool details) {
 std::string IniSetting::GetAllAsJSON() {
   Array settings = GetAll(empty_string(), true);
   auto const opts = k_JSON_FB_FORCE_HACK_ARRAYS;
-  String out = Variant::attach(HHVM_FN(json_encode)(settings, opts)).toString();
+  OptString out = Variant::attach(HHVM_FN(json_encode)(settings, opts)).toString();
   return std::string(out.c_str());
 }
 

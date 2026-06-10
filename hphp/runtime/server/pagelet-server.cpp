@@ -41,8 +41,8 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 PageletTransport::PageletTransport(
-    const String& url, const Array& headers, const String& postData,
-    const String& remoteHost, const set<std::string> &rfc1867UploadedFiles,
+    const OptString& url, const Array& headers, const OptString& postData,
+    const OptString& remoteHost, const set<std::string> &rfc1867UploadedFiles,
     const Array& files, int timeoutSeconds)
     : m_refCount(0),
       m_timeoutSeconds(timeoutSeconds),
@@ -81,7 +81,7 @@ PageletTransport::PageletTransport(
         std::string value = header.substr(pos + 2).data();
 
         if (Cfg::PageletServer::HeaderCollide > 0 &&
-            headers->exists(String(name))) {
+            headers->exists(OptString(name))) {
           auto const msg = folly::sformat(
             "Detected Pagelet header specified using both \"key: value\" "
             "and key => \"value\" syntax: {}",
@@ -181,7 +181,7 @@ void PageletTransport::onSendEndImpl() {
   notify();
 }
 
-bool PageletTransport::isUploadedFile(const String& filename) {
+bool PageletTransport::isUploadedFile(const OptString& filename) {
   return m_rfc1867UploadedFiles.find(filename.c_str()) !=
          m_rfc1867UploadedFiles.end();
 }
@@ -223,7 +223,7 @@ Array PageletTransport::getAsyncResults(bool allow_empty) {
     assertx(m_done || !m_pipeline.empty() || allow_empty);
     while (!m_pipeline.empty()) {
       std::string &str = m_pipeline.front();
-      String response(str.c_str(), str.size(), CopyString);
+      OptString response(str.c_str(), str.size(), CopyString);
       results.append(response);
       m_pipeline.pop_front();
     }
@@ -231,7 +231,7 @@ Array PageletTransport::getAsyncResults(bool allow_empty) {
 
     if (m_done) {
       code = m_code;
-      String response(m_response.c_str(), m_response.size(), CopyString);
+      OptString response(m_response.c_str(), m_response.size(), CopyString);
       results.append(response);
     } else {
       next_event = new PageletServerTaskEvent();
@@ -249,7 +249,7 @@ Array PageletTransport::getAsyncResults(bool allow_empty) {
     .toArray();
 }
 
-String PageletTransport::getResults(
+OptString PageletTransport::getResults(
   Array &headers,
   int &code,
   int64_t timeout_ms
@@ -283,7 +283,7 @@ String PageletTransport::getResults(
     }
   }
 
-  String response(m_response.c_str(), m_response.size(), CopyString);
+  OptString response(m_response.c_str(), m_response.size(), CopyString);
   headers = Array::CreateVec();
   for (HeaderMap::const_iterator iter = m_responseHeaders.begin();
        iter != m_responseHeaders.end(); ++iter) {
@@ -370,8 +370,8 @@ struct PageletWorker
 struct PageletTask : SweepableResourceData {
   DECLARE_RESOURCE_ALLOCATION(PageletTask)
 
-  PageletTask(const String& url, const Array& headers, const String& post_data,
-              const String& remote_host,
+  PageletTask(const OptString& url, const Array& headers, const OptString& post_data,
+              const OptString& remote_host,
               const std::set<std::string> &rfc1867UploadedFiles,
               const Array& files, int timeoutSeconds) {
     m_job = new PageletTransport(url, headers, remote_host, post_data,
@@ -387,7 +387,7 @@ struct PageletTask : SweepableResourceData {
 
   CLASSNAME_IS("PageletTask")
   // overriding ResourceData
-  const String& o_getClassNameHook() const override { return classnameof(); }
+  const OptString& o_getClassNameHook() const override { return classnameof(); }
 
 private:
   PageletTransport *m_job;
@@ -450,9 +450,9 @@ void PageletServer::Stop() {
 }
 
 OptResource PageletServer::TaskStart(
-  const String& url, const Array& headers,
-  const String& remote_host,
-  const String& post_data /* = null_string */,
+  const OptString& url, const Array& headers,
+  const OptString& remote_host,
+  const OptString& post_data /* = null_string */,
   const Array& files /* = null_array */,
   int timeoutSeconds /* = -1 */,
   PageletServerTaskEvent *event /* = nullptr*/
@@ -510,7 +510,7 @@ int64_t PageletServer::TaskStatus(const OptResource& task) {
   return PAGELET_NOT_READY;
 }
 
-String PageletServer::TaskResult(const OptResource& task, Array &headers, int &code,
+OptString PageletServer::TaskResult(const OptResource& task, Array &headers, int &code,
                                  int64_t timeout_ms) {
   auto ptask = cast<PageletTask>(task);
   return ptask->getJob()->getResults(headers, code, timeout_ms);

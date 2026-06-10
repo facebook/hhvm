@@ -64,21 +64,21 @@ extern const StaticString s_new_instance_of_not_string;
 
 namespace detail {
 
-ALWAYS_INLINE bool is_ts_bool(const ArrayData* ts, const String& s) {
+ALWAYS_INLINE bool is_ts_bool(const ArrayData* ts, const OptString& s) {
   auto const field = ts->get(s.get());
   assertx(!field.is_init() || (isBoolType(field.type()) && field.val().num));
   return field.is_init();
 }
 
 ALWAYS_INLINE const ArrayData* get_ts_varray(const ArrayData* ts,
-                                             const String& s) {
+                                             const OptString& s) {
   auto const field = ts->get(s.get());
   assertx(tvIsVec(field));
   return field.val().parr;
 }
 
 ALWAYS_INLINE const ArrayData* get_ts_varray_opt(const ArrayData* ts,
-                                                 const String& s) {
+                                                 const OptString& s) {
   auto const field = ts->get(s.get());
   if (!field.is_init()) return nullptr;
   assertx(tvIsVec(field));
@@ -86,14 +86,14 @@ ALWAYS_INLINE const ArrayData* get_ts_varray_opt(const ArrayData* ts,
 }
 
 ALWAYS_INLINE const ArrayData* get_ts_darray(const ArrayData* ts,
-                                             const String& s) {
+                                             const OptString& s) {
   auto const field = ts->get(s.get());
   assertx(tvIsDict(field));
   return field.val().parr;
 }
 
 ALWAYS_INLINE const ArrayData* get_ts_darray_opt(const ArrayData* ts,
-                                                 const String& s) {
+                                                 const OptString& s) {
   auto const field = ts->get(s.get());
   if (!field.is_init()) return nullptr;
   assertx(tvIsDict(field));
@@ -101,14 +101,14 @@ ALWAYS_INLINE const ArrayData* get_ts_darray_opt(const ArrayData* ts,
 }
 
 ALWAYS_INLINE const StringData* get_ts_string(const ArrayData* ts,
-                                              const String& s) {
+                                              const OptString& s) {
   auto const field = ts->get(s.get());
   assertx(isStringType(field.type()));
   return field.val().pstr;
 }
 
 ALWAYS_INLINE const StringData* get_ts_string_opt(const ArrayData* ts,
-                                                  const String& s) {
+                                                  const OptString& s) {
   auto const field = ts->get(s.get());
   if (!field.is_init()) return nullptr;
   assertx(isStringType(field.type()));

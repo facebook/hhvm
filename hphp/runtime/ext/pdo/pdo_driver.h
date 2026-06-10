@@ -239,9 +239,9 @@ struct PDODriver {
 
   const char *getName() const { return m_name;}
 
-  req::ptr<PDOResource> createResource(const String& datasource,
-                                       const String& username,
-                                       const String& password,
+  req::ptr<PDOResource> createResource(const OptString& datasource,
+                                       const OptString& username,
+                                       const OptString& password,
                                        const Array& options);
   virtual req::ptr<PDOResource>
     createResource(const sp_PDOConnection& conn) = 0;
@@ -298,20 +298,20 @@ struct PDOConnection : std::enable_shared_from_this<PDOConnection> {
   /*
    * Prepare a statement and stash driver specific portion into `stmt'.
    */
-  virtual bool preparer(const String& sql,
+  virtual bool preparer(const OptString& sql,
                         sp_PDOStatement *stmt,
                         const Variant& options);
 
   /*
    * Execute a statement (that does not return a result set).
    */
-  virtual int64_t doer(const String& sql);
+  virtual int64_t doer(const OptString& sql);
 
   /*
    * Quote a string.
    */
-  virtual bool quoter(const String& input,
-                      String &quoted,
+  virtual bool quoter(const OptString& input,
+                      OptString &quoted,
                       PDOParamType paramtype);
 
   /*
@@ -330,7 +330,7 @@ struct PDOConnection : std::enable_shared_from_this<PDOConnection> {
    * Return last insert ID.  Null indicates error condition; otherwise, the
    * return value MUST be an emalloc'd NULL terminated string.
    */
-  virtual String lastId(const char *name);
+  virtual OptString lastId(const char *name);
 
   /*
    * Fetch error information.  If `stmt' is not null, fetch information
@@ -452,7 +452,7 @@ struct PDOResource : SweepableResourceData {
   DECLARE_RESOURCE_ALLOCATION(PDOResource)
 
   // overriding ResourceData
-  const String& o_getClassNameHook() const override { return classnameof(); }
+  const OptString& o_getClassNameHook() const override { return classnameof(); }
 
   const sp_PDOConnection& conn() const { return m_conn; }
 
@@ -482,12 +482,12 @@ struct PDOColumn : ResourceData {
   ~PDOColumn();
 
   CLASSNAME_IS("PDOColumn")
-  const String& o_getClassNameHook() const override {
+  const OptString& o_getClassNameHook() const override {
     return classnameof();
   }
 
 public:
-  String name;
+  OptString name;
   unsigned long maxlen;
   PDOParamType param_type;
   unsigned long precision;
@@ -503,12 +503,12 @@ struct PDOBoundParam final : SweepableResourceData {
 
   CLASSNAME_IS("PDOBoundParam")
   // overriding ResourceData
-  const String& o_getClassNameHook() const override { return classnameof(); }
+  const OptString& o_getClassNameHook() const override { return classnameof(); }
 
 public:
   int64_t paramno;           /* if -1, then it has a name, and we don't
                               know the index *yet* */
-  String name;
+  OptString name;
 
   Variant parameter;       /* the variable itself */
   PDOParamType param_type; /* desired or suggested type */
@@ -552,7 +552,7 @@ public:
 
   CLASSNAME_IS("PDOStatement")
   // overriding ResourceData
-  const String& o_getClassNameHook() const override { return classnameof(); }
+  const OptString& o_getClassNameHook() const override { return classnameof(); }
 
   virtual bool support(SupportedMethod method);
 
@@ -664,10 +664,10 @@ public:
   long row_count;
 
   /* used to hold the statement's current query */
-  String query_string;
+  OptString query_string;
 
   /* copy of the query with expanded binds ONLY for emulated-prepare drivers */
-  String active_query_string;
+  OptString active_query_string;
 
   /* the cursor specific error code. */
   PDOErrorType error_code;
@@ -680,10 +680,10 @@ public:
   PDOFetchType default_fetch_type;
   struct {
     int column;
-    String clsname;
-    String constructor;
+    OptString clsname;
+    OptString constructor;
     Variant ctor_args;
-    String func;
+    OptString func;
     Variant fetch_args;
     Object object;
     Variant values;
@@ -695,7 +695,7 @@ public:
   const char *named_rewrite_template;
 };
 
-int pdo_parse_params(sp_PDOStatement stmt, const String& in, String &out);
+int pdo_parse_params(sp_PDOStatement stmt, const OptString& in, OptString &out);
 void pdo_raise_impl_error(sp_PDOResource rsrc, sp_PDOStatement stmt,
                           const char *sqlstate, const char *supp);
 void pdo_raise_impl_error(sp_PDOResource rsrc, PDOStatement* stmt,

@@ -601,7 +601,7 @@ void HHVM_FUNCTION(facts_sync) {
   Facts::getFactsOrThrow().ensureUpdated();
 }
 
-Variant HHVM_FUNCTION(facts_db_path, const String& rootStr) {
+Variant HHVM_FUNCTION(facts_db_path, const OptString& rootStr) {
   // Turn rootStr into an absolute path.
   auto root = [&]() -> Optional<fs::path> {
     fs::path maybeRoot{rootStr.toCppString()};
@@ -644,7 +644,7 @@ int64_t HHVM_FUNCTION(facts_schema_version) {
   return Facts::kSchemaVersion;
 }
 
-Variant HHVM_FUNCTION(facts_type_to_path, const String& typeName) {
+Variant HHVM_FUNCTION(facts_type_to_path, const OptString& typeName) {
   auto fileRes = Facts::getFactsOrThrow().getTypeFileRelative(typeName);
   if (!fileRes) {
     return Variant{Variant::NullInit{}};
@@ -655,7 +655,7 @@ Variant HHVM_FUNCTION(facts_type_to_path, const String& typeName) {
 
 Variant HHVM_FUNCTION(
     facts_type_or_type_alias_to_path,
-    const String& typeName) {
+    const OptString& typeName) {
   auto fileRes =
       Facts::getFactsOrThrow().getTypeOrTypeAliasFileRelative(typeName);
   if (!fileRes) {
@@ -665,7 +665,7 @@ Variant HHVM_FUNCTION(
   }
 }
 
-Variant HHVM_FUNCTION(facts_function_to_path, const String& functionName) {
+Variant HHVM_FUNCTION(facts_function_to_path, const OptString& functionName) {
   auto fileRes = Facts::getFactsOrThrow().getFunctionFileRelative(functionName);
   if (!fileRes) {
     return Variant{Variant::NullInit{}};
@@ -674,7 +674,7 @@ Variant HHVM_FUNCTION(facts_function_to_path, const String& functionName) {
   }
 }
 
-Variant HHVM_FUNCTION(facts_constant_to_path, const String& constantName) {
+Variant HHVM_FUNCTION(facts_constant_to_path, const OptString& constantName) {
   auto fileRes = Facts::getFactsOrThrow().getConstantFileRelative(constantName);
   if (!fileRes) {
     return Variant{Variant::NullInit{}};
@@ -683,7 +683,7 @@ Variant HHVM_FUNCTION(facts_constant_to_path, const String& constantName) {
   }
 }
 
-Variant HHVM_FUNCTION(facts_module_to_path, const String& moduleName) {
+Variant HHVM_FUNCTION(facts_module_to_path, const OptString& moduleName) {
   auto fileRes = Facts::getFactsOrThrow().getModuleFileRelative(moduleName);
   if (!fileRes) {
     return Variant{Variant::NullInit{}};
@@ -692,7 +692,9 @@ Variant HHVM_FUNCTION(facts_module_to_path, const String& moduleName) {
   }
 }
 
-Variant HHVM_FUNCTION(facts_type_alias_to_path, const String& typeAliasName) {
+Variant HHVM_FUNCTION(
+    facts_type_alias_to_path,
+    const OptString& typeAliasName) {
   auto fileRes =
       Facts::getFactsOrThrow().getTypeAliasFileRelative(typeAliasName);
   if (!fileRes) {
@@ -702,23 +704,23 @@ Variant HHVM_FUNCTION(facts_type_alias_to_path, const String& typeAliasName) {
   }
 }
 
-Array HHVM_FUNCTION(facts_path_to_types, const String& path) {
+Array HHVM_FUNCTION(facts_path_to_types, const OptString& path) {
   return Facts::getFactsOrThrow().getFileTypes(path);
 }
 
-Array HHVM_FUNCTION(facts_path_to_functions, const String& path) {
+Array HHVM_FUNCTION(facts_path_to_functions, const OptString& path) {
   return Facts::getFactsOrThrow().getFileFunctions(path);
 }
 
-Array HHVM_FUNCTION(facts_path_to_constants, const String& path) {
+Array HHVM_FUNCTION(facts_path_to_constants, const OptString& path) {
   return Facts::getFactsOrThrow().getFileConstants(path);
 }
 
-Array HHVM_FUNCTION(facts_path_to_modules, const String& path) {
+Array HHVM_FUNCTION(facts_path_to_modules, const OptString& path) {
   return Facts::getFactsOrThrow().getFileModules(path);
 }
 
-Variant HHVM_FUNCTION(facts_path_to_module_membership, const String& path) {
+Variant HHVM_FUNCTION(facts_path_to_module_membership, const OptString& path) {
   auto result = Facts::getFactsOrThrow().getFileModuleMembership(path);
   if (!result) {
     return Variant{Variant::NullInit{}};
@@ -731,7 +733,7 @@ Array HHVM_FUNCTION(facts_all_modules) {
   return Facts::getFactsOrThrow().getAllModules();
 }
 
-Variant HHVM_FUNCTION(facts_path_to_package, const String& path) {
+Variant HHVM_FUNCTION(facts_path_to_package, const OptString& path) {
   auto result = Facts::getFactsOrThrow().getFilePackageMembership(path);
   if (!result) {
     return Variant{Variant::NullInit{}};
@@ -740,29 +742,29 @@ Variant HHVM_FUNCTION(facts_path_to_package, const String& path) {
   }
 }
 
-Array HHVM_FUNCTION(facts_path_to_type_aliases, const String& path) {
+Array HHVM_FUNCTION(facts_path_to_type_aliases, const OptString& path) {
   return Facts::getFactsOrThrow().getFileTypeAliases(path);
 }
 
-Variant HHVM_FUNCTION(facts_type_name, const String& type) {
+Variant HHVM_FUNCTION(facts_type_name, const OptString& type) {
   return Facts::getFactsOrThrow().getTypeName(type);
 }
 
-Variant HHVM_FUNCTION(facts_kind, const String& type) {
+Variant HHVM_FUNCTION(facts_kind, const OptString& type) {
   return Facts::getFactsOrThrow().getKind(type);
 }
 
-Variant HHVM_FUNCTION(facts_sha1, const String& path) {
+Variant HHVM_FUNCTION(facts_sha1, const OptString& path) {
   auto maybeSha1 = Facts::getFactsOrThrow().getSha1(path);
   return maybeSha1.has_value() ? Variant{maybeSha1.value()}
                                : Variant{Variant::NullInit{}};
 }
 
-bool HHVM_FUNCTION(facts_is_abstract, const String& type) {
+bool HHVM_FUNCTION(facts_is_abstract, const OptString& type) {
   return Facts::getFactsOrThrow().isTypeAbstract(type);
 }
 
-bool HHVM_FUNCTION(facts_is_final, const String& type) {
+bool HHVM_FUNCTION(facts_is_final, const OptString& type) {
   return Facts::getFactsOrThrow().isTypeFinal(type);
 }
 
@@ -811,79 +813,81 @@ Array HHVM_FUNCTION(facts_types_with_attribute, const TypedValue attr) {
       StrNR(className(attr)).asString());
 }
 
-Array HHVM_FUNCTION(facts_type_aliases_with_attribute, const String& attr) {
+Array HHVM_FUNCTION(facts_type_aliases_with_attribute, const OptString& attr) {
   return Facts::getFactsOrThrow().getTypeAliasesWithAttribute(attr);
 }
 
-Array HHVM_FUNCTION(facts_methods_with_attribute, const String& attr) {
+Array HHVM_FUNCTION(facts_methods_with_attribute, const OptString& attr) {
   return Facts::getFactsOrThrow().getMethodsWithAttribute(attr);
 }
 
-Array HHVM_FUNCTION(facts_type_method_attributes, const String& type) {
+Array HHVM_FUNCTION(facts_type_method_attributes, const OptString& type) {
   return Facts::getFactsOrThrow().getTypeMethodAttributes(type);
 }
 
-Array HHVM_FUNCTION(facts_files_with_attribute, const String& attr) {
+Array HHVM_FUNCTION(facts_files_with_attribute, const OptString& attr) {
   return Facts::getFactsOrThrow().getFilesWithAttribute(attr);
 }
 
 Array HHVM_FUNCTION(
     facts_files_with_attribute_and_any_value,
-    const String& attr,
+    const OptString& attr,
     const Variant& value) {
   return Facts::getFactsOrThrow().getFilesWithAttributeAndAnyValue(
       attr, Facts::dynamicFromVariant(value));
 }
 
-Array HHVM_FUNCTION(facts_files_and_attr_args_with_attr, const String& attr) {
+Array HHVM_FUNCTION(
+    facts_files_and_attr_args_with_attr,
+    const OptString& attr) {
   return Facts::getFactsOrThrow().getFilesAndAttrValsWithAttribute(attr);
 }
 
-Array HHVM_FUNCTION(facts_type_attributes, const String& type) {
+Array HHVM_FUNCTION(facts_type_attributes, const OptString& type) {
   return Facts::getFactsOrThrow().getTypeAttributes(type);
 }
 
-Array HHVM_FUNCTION(facts_type_alias_attributes, const String& typeAlias) {
+Array HHVM_FUNCTION(facts_type_alias_attributes, const OptString& typeAlias) {
   return Facts::getFactsOrThrow().getTypeAliasAttributes(typeAlias);
 }
 
 Array HHVM_FUNCTION(
     facts_method_attributes,
-    const String& type,
-    const String& method) {
+    const OptString& type,
+    const OptString& method) {
   return Facts::getFactsOrThrow().getMethodAttributes(type, method);
 }
 
-Array HHVM_FUNCTION(facts_file_attributes, const String& file) {
+Array HHVM_FUNCTION(facts_file_attributes, const OptString& file) {
   return Facts::getFactsOrThrow().getFileAttributes(file);
 }
 
 Array HHVM_FUNCTION(
     facts_type_attribute_parameters,
-    const String& type,
-    const String& attr) {
+    const OptString& type,
+    const OptString& attr) {
   return Facts::getFactsOrThrow().getTypeAttrArgs(type, attr);
 }
 
 Array HHVM_FUNCTION(
     facts_type_alias_attribute_parameters,
-    const String& type,
-    const String& attr) {
+    const OptString& type,
+    const OptString& attr) {
   return Facts::getFactsOrThrow().getTypeAliasAttrArgs(type, attr);
 }
 
 Array HHVM_FUNCTION(
     facts_method_attribute_parameters,
-    const String& type,
-    const String& method,
-    const String& attr) {
+    const OptString& type,
+    const OptString& method,
+    const OptString& attr) {
   return Facts::getFactsOrThrow().getMethodAttrArgs(type, method, attr);
 }
 
 Array HHVM_FUNCTION(
     facts_file_attribute_parameters,
-    const String& file,
-    const String& attr) {
+    const OptString& file,
+    const OptString& attr) {
   return Facts::getFactsOrThrow().getFileAttrArgs(file, attr);
 }
 

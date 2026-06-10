@@ -484,7 +484,7 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
       // Closures have an m_this but they aren't in object context.
       auto const ctx = func->cls();
       if (ctx != nullptr && !func->isClosureBody()) {
-        String clsname{const_cast<StringData*>(ctx->name())};
+        OptString clsname{const_cast<StringData*>(ctx->name())};
         if (Cfg::Eval::EnableArgsInBacktraces &&
             frm.localsAvailable() &&
             !frm.isInlined() &&
@@ -526,7 +526,7 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
 
         if (withNames) {
           auto const argname = func->localVarName(i);
-          args.set(String(const_cast<StringData*>(argname)), val);
+          args.set(OptString(const_cast<StringData*>(argname)), val);
         } else {
           args.append(val);
         }

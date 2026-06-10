@@ -21,7 +21,7 @@
 namespace HPHP::StructuredLog {
 
 void logSerDes(const char* format, const char* op,
-               const String& serialized, const Variant& value) {
+               const OptString& serialized, const Variant& value) {
   StructuredLogEntry sample;
   sample.setStr("format", format);
   sample.setStr("operation", op);

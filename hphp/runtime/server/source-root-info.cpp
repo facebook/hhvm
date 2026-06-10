@@ -58,20 +58,20 @@ InitFiniNode r_debug_destroy_info(
 );
 #endif
 
-bool createFromCommonRoot(Info* info, const String& sandboxName) {
+bool createFromCommonRoot(Info* info, const OptString& sandboxName) {
   auto sroot = Cfg::Sandbox::DirectoriesRoot;
   auto sname = sandboxName.toCppString();
 
   info->user = "";
   info->sandbox = sname;
-  String logsRoot(Cfg::Sandbox::LogsRoot);
+  OptString logsRoot(Cfg::Sandbox::LogsRoot);
 
   if (!sroot.empty() && sroot.back() != '/') sroot += '/';
   if (!sname.empty() && sname.back() != '/') sname += '/';
   info->path = fs::weakly_canonical(fs::path(sroot + sname)) / "";
 
-  String logPath = logsRoot + "/" + sandboxName + "_error.log";
-  String accessLogPath = logsRoot + "/" + sandboxName + "_access.log";
+  OptString logPath = logsRoot + "/" + sandboxName + "_error.log";
+  OptString accessLogPath = logsRoot + "/" + sandboxName + "_access.log";
   if (!Logger::SetThreadLog(logPath.c_str(), false)) {
     Logger::Warning("Sandbox error log %s could not be opened",
                     logPath.c_str());
@@ -268,20 +268,20 @@ Array SetServerVariables(Array server) {
   auto const info = tl_info.get();
 
   for (auto const& it : Cfg::Sandbox::ServerVariables) {
-    String idx(it.first);
+    OptString idx(it.first);
     const auto arrkey = server.convertKey<IntishCast::Cast>(idx);
-    String str(parseServerVariable(info, it.second));
+    OptString str(parseServerVariable(info, it.second));
     server.set(arrkey, make_tv<KindOfString>(str.get()), true);
   }
 
   auto sandbox_servervars_callback = [&] (const IniSetting::Map &ini_ss,
                                           const Hdf &hdf_ss,
                                           const std::string &ini_ss_key) {
-    String name(
+    OptString name(
       hdf_ss.exists() && !hdf_ss.isEmpty() ? hdf_ss.getName() : ini_ss_key
     );
     if (!server.exists(name)) {
-      server.set(name, String(Config::GetString(ini_ss, hdf_ss)));
+      server.set(name, OptString(Config::GetString(ini_ss, hdf_ss)));
     }
   };
   Config::Iterate(sandbox_servervars_callback, info->ini, info->config,
@@ -308,7 +308,7 @@ fs::path GetCurrentSourceRoot() {
   }
 }
 
-String RelativeToPhpRoot(const String& path) {
+OptString RelativeToPhpRoot(const OptString& path) {
   return (GetCurrentSourceRoot() / path.toCppString()).native();
 }
 

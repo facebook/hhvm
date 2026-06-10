@@ -73,7 +73,7 @@ struct SSLSocket final : Socket {
 
   CLASSNAME_IS("SSLSocket")
   // overriding ResourceData
-  const String& o_getClassNameHook() const override { return classnameof(); }
+  const OptString& o_getClassNameHook() const override { return classnameof(); }
 
   bool waitForData();
   virtual int64_t readImpl(char *buffer, int64_t length) override;
@@ -144,7 +144,7 @@ struct Certificate : SweepableResourceData {
 
   CLASSNAME_IS("OpenSSL X.509")
   // overriding ResourceData
-  const String& o_getClassNameHook() const override { return classnameof(); }
+  const OptString& o_getClassNameHook() const override { return classnameof(); }
 
   DECLARE_RESOURCE_ALLOCATION(Certificate)
 

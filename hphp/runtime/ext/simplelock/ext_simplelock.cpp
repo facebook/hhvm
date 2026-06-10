@@ -106,7 +106,7 @@ void unlock(LockAtom* lock) {
   if (expected) expected->acquire(lock);
 }
 
-Object HHVM_FUNCTION(lock_mutex, const String& name) {
+Object HHVM_FUNCTION(lock_mutex, const OptString& name) {
   auto const l = get_lock(name.toCppString());
   if (auto ev = try_lock(l)) return Object{ev->getWaitHandle()};
 
@@ -114,7 +114,7 @@ Object HHVM_FUNCTION(lock_mutex, const String& name) {
   return Object{c_StaticWaitHandle::CreateSucceeded(make_tv<KindOfNull>())};
 }
 
-bool HHVM_FUNCTION(try_lock_mutex, const String& name) {
+bool HHVM_FUNCTION(try_lock_mutex, const OptString& name) {
   auto const l = get_lock(name.toCppString());
   auto exp = UNLOCKED;
   if (l->compare_exchange_strong(exp, nullptr, std::memory_order_acq_rel)) {
@@ -124,7 +124,7 @@ bool HHVM_FUNCTION(try_lock_mutex, const String& name) {
   return false;
 }
 
-void HHVM_FUNCTION(unlock_mutex, const String& name) {
+void HHVM_FUNCTION(unlock_mutex, const OptString& name) {
   auto const l = get_lock(name.toCppString());
   if (!tl_heldLocks->erase(l)) {
     SystemLib::throwInvalidOperationExceptionObject(
@@ -134,7 +134,7 @@ void HHVM_FUNCTION(unlock_mutex, const String& name) {
   unlock(l);
 }
 
-bool HHVM_FUNCTION(is_held, const String& name) {
+bool HHVM_FUNCTION(is_held, const OptString& name) {
   auto const l = get_lock(name.toCppString());
   return l->load(std::memory_order_relaxed) != UNLOCKED;
 }

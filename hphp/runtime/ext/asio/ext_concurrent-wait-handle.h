@@ -99,7 +99,7 @@ struct c_ConcurrentWaitHandle final :
     return offsetof(c_ConcurrentWaitHandle, m_children);
   }
 
-  String getName();
+  OptString getName();
   void onUnblocked(uint32_t idx);
   c_WaitableWaitHandle* getChild();
   template<typename T> void forEachChild(T fn);

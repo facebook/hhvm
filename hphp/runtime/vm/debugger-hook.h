@@ -183,7 +183,7 @@ struct DebuggerHook {
   virtual void onFileLoad(Unit* /*efile*/) {}
   virtual void onDefClass(const Class* /*cls*/) {}
   virtual void onDefFunc(const Func* /*func*/) {}
-  virtual void onRegisterFuncIntercept(const String& /*name*/) {}
+  virtual void onRegisterFuncIntercept(const OptString& /*name*/) {}
 
   // Called whenever the program counter is at a location that could be
   // interesting to a debugger. Such as when have hit a registered breakpoint
@@ -249,7 +249,7 @@ void phpDebuggerEvalHook(const Func* f);
 void phpDebuggerFileLoadHook(Unit* efile);
 void phpDebuggerDefClassHook(const Class* cls);
 void phpDebuggerDefFuncHook(const Func* func);
-void phpDebuggerInterceptRegisterHook(const String& name);
+void phpDebuggerInterceptRegisterHook(const OptString& name);
 
 ////////////////////////////////////////////////////////////////////////////////
 // Flow commands
@@ -307,6 +307,6 @@ StackDepthDisposition getStackDisposition(int baseline);
 PCFilter* getBreakPointFilter();
 PCFilter* getFlowFilter();
 
-String getCurrentFilePath(int* pLine);
+OptString getCurrentFilePath(int* pLine);
 
 }

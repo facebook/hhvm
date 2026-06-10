@@ -31,9 +31,9 @@ void HHVM_FUNCTION(apache_notes, const Array& notes) {
   ServerNote::AddNotes(notes);
 }
 
-Variant HHVM_FUNCTION(apache_note, const String& note_name,
+Variant HHVM_FUNCTION(apache_note, const OptString& note_name,
                       const Variant& note_value /* = empty_string */) {
-  String prev = ServerNote::Get(note_name);
+  OptString prev = ServerNote::Get(note_name);
   if (note_value.isNull()) {
     ServerNote::Delete(note_name);
   } else if (!note_value.isString()) {
@@ -81,8 +81,8 @@ Array HHVM_FUNCTION(apache_response_headers) {
   return empty_dict_array();
 }
 
-bool HHVM_FUNCTION(apache_setenv, const String& /*variable*/,
-                   const String& /*value*/,
+bool HHVM_FUNCTION(apache_setenv, const OptString& /*variable*/,
+                   const OptString& /*value*/,
                    bool /*walk_to_top*/ /* = false */) {
   return false;
 }

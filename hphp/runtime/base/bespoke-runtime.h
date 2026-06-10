@@ -64,7 +64,7 @@ struct RuntimeStructSerde;
  * creation sites.
  */
 struct RuntimeStruct {
-  using FieldIndexVector = std::vector<std::pair<size_t, String>>;
+  using FieldIndexVector = std::vector<std::pair<size_t, OptString>>;
 
   // required will either be 0 or 1; we use an int instead of a bool so that
   // we can do the "all required fields" check by simply summing values.
@@ -80,7 +80,7 @@ struct RuntimeStruct {
    * supply to StructDictInit.
    */
   static RuntimeStruct* registerRuntimeStruct(
-      const String& stableIdentifier, const FieldIndexVector& fields);
+      const OptString& stableIdentifier, const FieldIndexVector& fields);
   static void eachRuntimeStruct(std::function<void(RuntimeStruct*)>);
 
   static RuntimeStruct* findById(const StringData* stableIdentifier);
@@ -155,11 +155,11 @@ struct StructDictInit {
   StructDictInit(RuntimeStruct* structHandle, size_t n);
   ~StructDictInit();
   void set(size_t idx, StringData* key, TypedValue value);
-  void set(size_t idx, const String& key, TypedValue value);
-  void set(size_t idx, const String& key, const Variant& value);
+  void set(size_t idx, const OptString& key, TypedValue value);
+  void set(size_t idx, const OptString& key, const Variant& value);
   void set(int64_t key, const Variant& value);
   void set(int64_t key, TypedValue value);
-  void setIntishCast(size_t idx, const String& key, const Variant& value);
+  void setIntishCast(size_t idx, const OptString& key, const Variant& value);
 
   Variant toVariant();
   Array toArray();

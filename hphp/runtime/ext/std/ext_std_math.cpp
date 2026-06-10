@@ -179,25 +179,25 @@ Variant HHVM_FUNCTION(round,
   return dval;
 }
 
-String HHVM_FUNCTION(decbin, const Variant& number) {
+OptString HHVM_FUNCTION(decbin, const Variant& number) {
   return string_long_to_base(number.toInt64(), 2);
 }
-String HHVM_FUNCTION(dechex, const Variant& number) {
+OptString HHVM_FUNCTION(dechex, const Variant& number) {
   return string_long_to_base(number.toInt64(), 16);
 }
-String HHVM_FUNCTION(decoct, const Variant& number) {
+OptString HHVM_FUNCTION(decoct, const Variant& number) {
   return string_long_to_base(number.toInt64(), 8);
 }
 Variant HHVM_FUNCTION(bindec, const Variant& binary_string) {
-  String str = binary_string.toString();
+  OptString str = binary_string.toString();
   return string_base_to_numeric(str.data(), str.size(), 2);
 }
 Variant HHVM_FUNCTION(hexdec, const Variant& hex_string) {
-  String str = hex_string.toString();
+  OptString str = hex_string.toString();
   return string_base_to_numeric(str.data(), str.size(), 16);
 }
 Variant HHVM_FUNCTION(octdec, const Variant& octal_string) {
-  String str = octal_string.toString();
+  OptString str = octal_string.toString();
   return string_base_to_numeric(str.data(), str.size(), 8);
 }
 
@@ -213,7 +213,7 @@ Variant HHVM_FUNCTION(base_convert,
     raise_invalid_argument_warning("Invalid tobase: %" PRId64, tobase);
     return false;
   }
-  String str = number.toString();
+  OptString str = number.toString();
   Variant v = string_base_to_numeric(str.data(), str.size(), frombase);
   return string_numeric_to_base(v, tobase);
 }

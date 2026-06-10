@@ -648,7 +648,7 @@ bool ArrayData::IsValidKey(const Variant& k) {
   return IsValidKey(*k.asTypedValue());
 }
 
-bool ArrayData::IsValidKey(const String& k) {
+bool ArrayData::IsValidKey(const OptString& k) {
   return IsValidKey(k.get());
 }
 
@@ -1172,7 +1172,7 @@ void BlobEncoderHelper<const ArrayData*>::serde(BlobDecoder& decoder,
         TypedValue v;
         decoder(k, makeStatic)(v, makeStatic);
         if (tvIsString(k)) {
-          d.set(String::attach(k.m_data.pstr), Variant::attach(v));
+          d.set(OptString::attach(k.m_data.pstr), Variant::attach(v));
         } else {
           assertx(tvIsInt(k));
           d.set(k.m_data.num, Variant::attach(v));

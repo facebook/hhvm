@@ -55,7 +55,7 @@ struct Debugger {
 
   // Add a new sandbox a debugger can connect to.
   static void RegisterSandbox(const DSandboxInfo &sandbox);
-  static void UnregisterSandbox(const String& id);
+  static void UnregisterSandbox(const OptString& id);
 
   // Add/remove/change DebuggerProxy.
   static DebuggerProxyPtr CreateProxy(req::ptr<Socket> socket, bool local);
@@ -92,8 +92,8 @@ struct Debugger {
 
   // Surround text with color, if set.
   static void SetTextColors();
-  static String ColorStdout(const String& s);
-  static String ColorStderr(const String& s);
+  static OptString ColorStdout(const OptString& s);
+  static OptString ColorStderr(const OptString& s);
 
   // Log debugging state when we're shutting the server down.
   enum ShutdownKind {

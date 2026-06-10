@@ -38,11 +38,11 @@ struct XMLReader {
   ~XMLReader();
   void sweep();
   void close();
-  String read_string_func(xmlreader_read_char_t internal_function);
+  OptString read_string_func(xmlreader_read_char_t internal_function);
   bool bool_func_no_arg(xmlreader_read_int_t internal_function);
-  Variant string_func_string_arg(String value,
+  Variant string_func_string_arg(OptString value,
                                  xmlreader_read_one_char_t internal_function);
-  bool set_relaxng_schema(String source, int type);
+  bool set_relaxng_schema(OptString source, int type);
 
   req::ptr<File> m_stream; // input stream
   xmlTextReaderPtr m_ptr;

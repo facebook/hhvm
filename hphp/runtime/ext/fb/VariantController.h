@@ -43,9 +43,9 @@ inline void mapSetConvertStatic(Array& map, StringData* str, Variant&& v) {
   if (IC == IntishCast::Cast && str->isStrictlyInteger(i)) {
     map.set(i, *v.asTypedValue());
   } else if (auto sstr = str->isStatic() ? str : lookupStaticString(str)) {
-    map.set(String::attach(sstr), *v.asTypedValue());
+    map.set(OptString::attach(sstr), *v.asTypedValue());
   } else {
-    map.set(String(str), *v.asTypedValue());
+    map.set(OptString(str), *v.asTypedValue());
   }
 }
 
@@ -80,7 +80,7 @@ struct VariantControllerImpl {
   using MapType = Array;
   using VectorType = Array;
   using SetType = Array;
-  using StringType = String;
+  using StringType = OptString;
   using StructHandle = RuntimeStruct*;
 
   // variant accessors
@@ -171,7 +171,7 @@ struct VariantControllerImpl {
   static int64_t asInt64(const_variant_ref obj) { return obj.toInt64(); }
   static bool asBool(const_variant_ref obj) { return obj.toInt64() != 0; }
   static double asDouble(const_variant_ref obj) { return obj.toDouble(); }
-  static String asString(const_variant_ref obj) { return obj.toString(); }
+  static OptString asString(const_variant_ref obj) { return obj.toString(); }
   static Array asMap(const_variant_ref obj) { return obj.toArray(); }
   static Array asVector(const_variant_ref obj) { return obj.toArray(); }
   static Array asSet(const_variant_ref obj) { return obj.toArray(); }
@@ -222,7 +222,7 @@ struct VariantControllerImpl {
       int64_t key) {
     return map[key];
   }
-  static String mapKeyAsString(const Variant& k) {
+  static OptString mapKeyAsString(const Variant& k) {
     return k.toString();
   }
   static bool mapExistsStringKey(const MapType& map, const StringType& key) {
@@ -357,12 +357,12 @@ struct VariantControllerImpl {
 
   // string methods
   static StringType createMutableString(size_t n) {
-    String ret(n, ReserveString);
+    OptString ret(n, ReserveString);
     ret.setSize(n);
     return ret;
   }
   static StringType createStaticString(const char* str, size_t len) {
-    String ret = String(makeStaticString(str, len));
+    OptString ret = OptString(makeStaticString(str, len));
     return ret;
   }
   static StringType createStaticStringSafe(const char* str, size_t len) {
@@ -374,7 +374,7 @@ struct VariantControllerImpl {
   static char* getMutablePtr(StringType& s) {
     return s.mutableData();
   }
-  static void shrinkString(String& s, size_t length) {
+  static void shrinkString(OptString& s, size_t length) {
     s.shrink(length);
   }
   static StringType stringFromData(const char* src, int n) {
@@ -389,7 +389,7 @@ struct VariantControllerImpl {
   }
 
   static StructHandle registerStruct(
-      const String& stableIdentifier,
+      const OptString& stableIdentifier,
       const std::vector<std::pair<size_t, StringType>>& fields) {
     auto const runtimeStruct =
       RuntimeStruct::registerRuntimeStruct(stableIdentifier, fields);

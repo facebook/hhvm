@@ -35,7 +35,7 @@ static void allocAndJoin(size_t size, bool free) {
       SCOPE_EXIT { HPHP::rds::local::fini(); };
       tl_heap.getCheck();
       if (free) {
-        String str(size, ReserveString);
+        OptString str(size, ReserveString);
       } else {
         StringData::Make(size); // Leak.
       }
@@ -221,7 +221,7 @@ TEST(MemoryManager, GCLeakBig) {
 namespace {
 
 struct BgThreadFreeWorker {
-  void allocate(const String& s) {
+  void allocate(const OptString& s) {
     assertx(!m_buf);
     m_buf = folly::IOBuf::copyBuffer(s.data(), s.size());
   }
@@ -233,7 +233,7 @@ struct BgThreadFreeWorker {
   std::unique_ptr<folly::IOBuf> m_buf;
 };
 
-void give_memory_to_bg_thread(const String& payload) {
+void give_memory_to_bg_thread(const OptString& payload) {
   BgThreadFreeWorker worker;
   {
     /*
@@ -252,7 +252,7 @@ void give_memory_to_bg_thread(const String& payload) {
   AsyncFunc<BgThreadFreeWorker>(&worker, &BgThreadFreeWorker::doJob).run();
 }
 
-void give_memory_to_bg_thread2(const String& payload) {
+void give_memory_to_bg_thread2(const OptString& payload) {
   BgThreadFreeWorker worker;
   uint64_t allocated = 0;
   {
@@ -273,7 +273,7 @@ void give_memory_to_bg_thread2(const String& payload) {
 }
 
 struct BgThreadAllocWorker {
-  explicit BgThreadAllocWorker(const String& s): m_str(s) {}
+  explicit BgThreadAllocWorker(const OptString& s): m_str(s) {}
   void doJob() {
     assertx(!m_buf);
     m_buf = folly::IOBuf::copyBuffer(m_str.data(), m_str.size());
@@ -283,11 +283,11 @@ struct BgThreadAllocWorker {
     folly::IOBuf::destroy(std::move(m_buf));
   }
  private:
-  const String& m_str;
+  const OptString& m_str;
   std::unique_ptr<folly::IOBuf> m_buf;
 };
 
-void get_memory_from_bg_thread (const String& payload) {
+void get_memory_from_bg_thread (const OptString& payload) {
   BgThreadAllocWorker worker(payload);
   AsyncFunc<BgThreadAllocWorker>(&worker, &BgThreadAllocWorker::doJob).run();
   {
@@ -299,7 +299,7 @@ void get_memory_from_bg_thread (const String& payload) {
 } // end anonymous namespace
 
 TEST(MemoryManager, GiveMemoryToBgThread) {
-  String payload(std::string(1024, 'x'));
+  OptString payload(std::string(1024, 'x'));
   auto const usage_at_start = tl_heap->getStatsCopy().usage();
   for (int i = 0; i < 1024; i++) {
     give_memory_to_bg_thread(payload);
@@ -309,7 +309,7 @@ TEST(MemoryManager, GiveMemoryToBgThread) {
 }
 
 TEST(MemoryManager, GiveMemoryToBgThread2) {
-  String payload(std::string(1024, 'x'));
+  OptString payload(std::string(1024, 'x'));
   auto const usage_at_start = tl_heap->getStatsCopy().usage();
   for (int i = 0; i < 1024; i++) {
     give_memory_to_bg_thread2(payload);
@@ -319,7 +319,7 @@ TEST(MemoryManager, GiveMemoryToBgThread2) {
 }
 
 TEST(MemoryManager, GetMemoryFromBgThread) {
-  String payload(std::string(1024, 'x'));
+  OptString payload(std::string(1024, 'x'));
   auto const usage_at_start = tl_heap->getStatsCopy().usage();
   for (int i = 0; i < 1024; i++) {
     get_memory_from_bg_thread(payload);

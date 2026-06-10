@@ -48,13 +48,13 @@ static Array get_headers(const HeaderMap& headers, bool allHeaders = false) {
     const auto& values = iter.second;
     if (auto size = values.size()) {
       if (!allHeaders) {
-        ret.set(String(iter.first), String(values.back()));
+        ret.set(OptString(iter.first), OptString(values.back()));
       } else {
         VecInit dups(size);
         for (auto& dup : values) {
-          dups.append(String(dup));
+          dups.append(OptString(dup));
         }
-        ret.set(String(toLower(iter.first)), dups.toArray());
+        ret.set(OptString(toLower(iter.first)), dups.toArray());
       }
     }
   }

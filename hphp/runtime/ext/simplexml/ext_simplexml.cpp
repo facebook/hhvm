@@ -128,9 +128,9 @@ using SimpleXMLIterator = SimpleXMLElement;
 #define SXE_NS_PREFIX(ns) (ns->prefix ? (char*)ns->prefix : "")
 
 static inline void sxe_add_namespace_name(Array& ret, xmlNsPtr ns) {
-  String prefix = String(SXE_NS_PREFIX(ns));
+  OptString prefix = OptString(SXE_NS_PREFIX(ns));
   if (!ret.exists(prefix)) {
-    ret.set(prefix, String((char*)ns->href, CopyString));
+    ret.set(prefix, OptString((char*)ns->href, CopyString));
   }
 }
 
@@ -363,7 +363,7 @@ static Object sxe_prop_dim_read(SimpleXMLElement* sxe, const Variant& member,
                                 bool elements, bool attribs) {
   xmlNodePtr node = sxe->nodep();
 
-  String name = "";
+  OptString name = "";
   if (member.isNull() || member.isInteger()) {
     if (sxe->iter.type != SXE_ITER_ATTRLIST) {
       attribs = false;
@@ -703,11 +703,11 @@ static bool sxe_prop_dim_exists(SimpleXMLElement* sxe, const Variant& member,
   return exists;
 }
 
-static inline String sxe_xmlNodeListGetString(xmlDocPtr doc, xmlNodePtr list,
+static inline OptString sxe_xmlNodeListGetString(xmlDocPtr doc, xmlNodePtr list,
                                               bool inLine) {
   xmlChar* tmp = xmlNodeListGetString(doc, list, inLine);
   if (tmp) {
-    String ret = String((char*)tmp);
+    OptString ret = OptString((char*)tmp);
     xmlFree(tmp);
     return ret;
   } else {
@@ -723,7 +723,7 @@ static Variant _get_base_node_value(SimpleXMLElement* sxe_ref,
       !xmlIsBlankNode(node->children)) {
     xmlChar* contents = xmlNodeListGetString(node->doc, node->children, 1);
     if (contents) {
-      String obj = String((char*)contents);
+      OptString obj = OptString((char*)contents);
       xmlFree(contents);
       return obj;
     }
@@ -742,7 +742,7 @@ static Variant _get_base_node_value(SimpleXMLElement* sxe_ref,
 }
 
 static void sxe_properties_add(Array& rv, char* name, const Variant& value) {
-  String sName = String(name);
+  OptString sName = OptString(name);
   if (rv.exists(sName)) {
     Variant existVal = rv[sName];
     if (existVal.isArray()) {
@@ -782,7 +782,7 @@ static void sxe_get_prop_hash(SimpleXMLElement* sxe, bool is_debug,
         if ((!test || !xmlStrcmp(attr->name, sxe->iter.name)) &&
             match_ns(sxe, (xmlNodePtr)attr, sxe->iter.nsprefix,
                      sxe->iter.isprefix)) {
-          zattr.set(String((char*)attr->name),
+          zattr.set(OptString((char*)attr->name),
                     sxe_xmlNodeListGetString(
                       sxe->docp(),
                       attr->children,
@@ -913,7 +913,7 @@ Variant SimpleXMLElement_objectCast(const ObjectData* obj, DataType type) {
     }
   }
 
-  String ret = String((char*)contents);
+  OptString ret = OptString((char*)contents);
   if (contents) {
     xmlFree(contents);
   }
@@ -1130,7 +1130,7 @@ next_iter:
 ///////////////////////////////////////////////////////////////////////////////
 // SimpleXML
 
-static const Class* class_from_name(const String& class_name,
+static const Class* class_from_name(const OptString& class_name,
                                     const char* callee) {
   const Class* cls;
   if (!class_name.empty()) {
@@ -1157,7 +1157,7 @@ const StaticString s_DOMNode("DOMNode");
 
 static Variant HHVM_FUNCTION(simplexml_import_dom,
                              const Object& node,
-                             const String& class_name) {
+                             const OptString& class_name) {
   if (!node->instanceof(s_DOMNode)) {
     raise_warning("Invalid Nodetype to import");
     return init_null();
@@ -1193,10 +1193,10 @@ static Variant HHVM_FUNCTION(simplexml_import_dom,
 }
 
 static Variant HHVM_FUNCTION(simplexml_load_string,
-  const String& data,
-  const String& class_name /* = "SimpleXMLElement" */,
+  const OptString& data,
+  const OptString& class_name /* = "SimpleXMLElement" */,
   int64_t options /* = 0 */,
-  const String& ns /* = "" */,
+  const OptString& ns /* = "" */,
   bool is_prefix /* = false */) {
   SYNC_VM_REGS_SCOPED();
   auto cls = class_from_name(class_name, "simplexml_load_string");
@@ -1219,9 +1219,9 @@ static Variant HHVM_FUNCTION(simplexml_load_string,
 }
 
 static Variant
-HHVM_FUNCTION(simplexml_load_file, const String& filename,
-              const String& class_name /* = "SimpleXMLElement" */,
-              int64_t /*options*/ /* = 0 */, const String& ns /* = "" */,
+HHVM_FUNCTION(simplexml_load_file, const OptString& filename,
+              const OptString& class_name /* = "SimpleXMLElement" */,
+              int64_t /*options*/ /* = 0 */, const OptString& ns /* = "" */,
               bool is_prefix /* = false */) {
   SYNC_VM_REGS_SCOPED();
   auto cls = class_from_name(class_name, "simplexml_load_file");
@@ -1269,10 +1269,10 @@ HHVM_FUNCTION(simplexml_load_file, const String& filename,
 // SimpleXMLElement
 
 static void HHVM_METHOD(SimpleXMLElement, __construct,
-                        const String& data,
+                        const OptString& data,
                         int64_t options /* = 0 */,
                         bool data_is_url /* = false */,
-                        const String& ns /* = "" */,
+                        const OptString& ns /* = "" */,
                         bool is_prefix /* = false */) {
   SYNC_VM_REGS_SCOPED();
   xmlDocPtr docp = data_is_url ?
@@ -1288,7 +1288,7 @@ static void HHVM_METHOD(SimpleXMLElement, __construct,
   sxe->node = libxml_register_node(xmlDocGetRootElement(docp));
 }
 
-static Variant HHVM_METHOD(SimpleXMLElement, xpath, const String& path) {
+static Variant HHVM_METHOD(SimpleXMLElement, xpath, const OptString& path) {
   auto data = Native::data<SimpleXMLElement>(this_);
   if (data->iter.type == SXE_ITER_ATTRLIST) {
     return init_null(); // attributes don't have attributes
@@ -1365,7 +1365,7 @@ static Variant HHVM_METHOD(SimpleXMLElement, xpath, const String& path) {
 }
 
 static bool HHVM_METHOD(SimpleXMLElement, registerXPathNamespace,
-                        const String& prefix, const String& ns) {
+                        const OptString& prefix, const OptString& ns) {
   auto data = Native::data<SimpleXMLElement>(this_);
   if (!data->xpath) {
     data->xpath = xmlXPathNewContext(data->docp());
@@ -1380,7 +1380,7 @@ static bool HHVM_METHOD(SimpleXMLElement, registerXPathNamespace,
 }
 
 static Variant HHVM_METHOD(SimpleXMLElement, asXML,
-                           const String& filename /* = "" */) {
+                           const OptString& filename /* = "" */) {
   auto data = Native::data<SimpleXMLElement>(this_);
   xmlNodePtr node = data->nodep();
   xmlOutputBufferPtr outbuf = nullptr;
@@ -1426,7 +1426,7 @@ static Variant HHVM_METHOD(SimpleXMLElement, asXML,
       if (!strval) {
         return false;
       }
-      String ret = String((char*)strval);
+      OptString ret = OptString((char*)strval);
       xmlFree(strval);
       return ret;
     } else {
@@ -1450,7 +1450,7 @@ static Variant HHVM_METHOD(SimpleXMLElement, asXML,
       if (!str) {
         return false;
       }
-      String ret = String(str);
+      OptString ret = OptString(str);
       xmlOutputBufferClose(outbuf);
       return ret;
     }
@@ -1489,7 +1489,7 @@ static Array HHVM_METHOD(SimpleXMLElement, getDocNamespaces,
 }
 
 static Variant HHVM_METHOD(SimpleXMLElement, children,
-                           const String& ns = empty_string(),
+                           const OptString& ns = empty_string(),
                            bool is_prefix = false) {
   auto data = Native::data<SimpleXMLElement>(this_);
   if (data->iter.type == SXE_ITER_ATTRLIST) {
@@ -1502,18 +1502,18 @@ static Variant HHVM_METHOD(SimpleXMLElement, children,
                        (xmlChar*)ns.data(), is_prefix);
 }
 
-static String HHVM_METHOD(SimpleXMLElement, getName) {
+static OptString HHVM_METHOD(SimpleXMLElement, getName) {
   auto data = Native::data<SimpleXMLElement>(this_);
   xmlNodePtr node = data->nodep();
   node = php_sxe_get_first_node(data, node);
   if (node) {
-    return String((char*)node->name);
+    return OptString((char*)node->name);
   }
   return empty_string();
 }
 
 static Variant HHVM_METHOD(SimpleXMLElement, attributes,
-                           const String& ns /* = "" */,
+                           const OptString& ns /* = "" */,
                            bool is_prefix /* = false */) {
   auto data = Native::data<SimpleXMLElement>(this_);
   if (data->iter.type == SXE_ITER_ATTRLIST) {
@@ -1527,8 +1527,8 @@ static Variant HHVM_METHOD(SimpleXMLElement, attributes,
 }
 
 static Variant HHVM_METHOD(SimpleXMLElement, addChild,
-                           const String& qname,
-                           const String& value /* = null_string */,
+                           const OptString& qname,
+                           const OptString& value /* = null_string */,
                            const Variant& ns /* = null */) {
   if (qname.empty()) {
     raise_warning("Element name is required");
@@ -1562,7 +1562,7 @@ static Variant HHVM_METHOD(SimpleXMLElement, addChild,
 
   xmlNsPtr nsptr = nullptr;
   if (!ns.isNull()) {
-    const String& ns_ = ns.toString();
+    const OptString& ns_ = ns.toString();
     if (ns_.empty()) {
       newnode->ns = nullptr;
       nsptr = xmlNewNs(newnode, (xmlChar*)ns_.data(), prefix);
@@ -1586,9 +1586,9 @@ static Variant HHVM_METHOD(SimpleXMLElement, addChild,
 }
 
 static void HHVM_METHOD(SimpleXMLElement, addAttribute,
-                        const String& qname,
-                        const String& value /* = null_string */,
-                        const String& ns /* = null_string */) {
+                        const OptString& qname,
+                        const OptString& value /* = null_string */,
+                        const OptString& ns /* = null_string */) {
   if (qname.size() == 0) {
     raise_warning("Attribute name is required");
     return;
@@ -1646,36 +1646,36 @@ static void HHVM_METHOD(SimpleXMLElement, addAttribute,
   }
 }
 
-static String HHVM_METHOD(SimpleXMLElement, __toString) {
+static OptString HHVM_METHOD(SimpleXMLElement, __toString) {
   return SimpleXMLElement_objectCast(this_, KindOfString).toString();
 }
 
 struct SimpleXMLElementPropHandler: Native::BasePropHandler {
-  static Variant getProp(const Object& this_, const String& name) {
+  static Variant getProp(const Object& this_, const OptString& name) {
     auto data = Native::data<SimpleXMLElement>(this_.get());
     return sxe_prop_dim_read(data, name, true, false);
   }
 
   static Variant setProp(const Object& this_,
-                         const String& name,
+                         const OptString& name,
                          const Variant& value) {
     auto data = Native::data<SimpleXMLElement>(this_.get());
     return sxe_prop_dim_write(data, name, value, true, false, nullptr);
     return true;
   }
 
-  static Variant issetProp(const Object& this_, const String& name) {
+  static Variant issetProp(const Object& this_, const OptString& name) {
     auto data = Native::data<SimpleXMLElement>(this_.get());
     return sxe_prop_dim_exists(data, name, false, true, false);
   }
 
-  static Variant unsetProp(const Object& this_, const String& name) {
+  static Variant unsetProp(const Object& this_, const OptString& name) {
     auto data = Native::data<SimpleXMLElement>(this_.get());
     sxe_prop_dim_delete(data, name, true, false);
     return true;
   }
 
-  static bool isPropSupported(const String&, const String&) {
+  static bool isPropSupported(const OptString&, const OptString&) {
     // TODO: we really ought to pull out checking of whether a prop is supported
     // to here, but it's currently very entagled in the normal functionality
     // so defer that tech debt to later :p
@@ -1741,7 +1741,7 @@ static Variant HHVM_METHOD(SimpleXMLElementIterator, key) {
     ? nullptr
     : Native::data<SimpleXMLElement>(curobj.get())->nodep();
   if (curnode) {
-    return String((char*)curnode->name);
+    return OptString((char*)curnode->name);
   } else {
     return init_null();
   }
@@ -1779,7 +1779,7 @@ static Variant HHVM_METHOD(SimpleXMLIterator, key) {
 
   assertx(curobj->instanceof(SimpleXMLElementLoader::classof()));
   auto curnode = Native::data<SimpleXMLElement>(curobj.get())->nodep();
-  return String((char*)curnode->name);
+  return OptString((char*)curnode->name);
 }
 
 static void HHVM_METHOD(SimpleXMLIterator, next) {

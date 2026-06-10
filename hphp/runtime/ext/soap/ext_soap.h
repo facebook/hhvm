@@ -29,8 +29,8 @@ struct SoapServer : SystemLib::ClassLoader<"SoapServer"> {
   soapFunctions              m_soap_functions;
   soapClass                  m_soap_class;
   Object                     m_soap_object;
-  String                     m_actor;
-  String                     m_uri;
+  OptString                     m_actor;
+  OptString                     m_uri;
   int                        m_version;
   sdl                       *m_sdl;
   xmlCharEncodingHandlerPtr  m_encoding;
@@ -52,25 +52,25 @@ struct SoapClient : SystemLib::ClassLoader<"SoapClient"> {
   encodeMap                  *m_typemap;
   Array                       m_client_classmap;
   int                         m_features;
-  String                      m_uri;
-  String                      m_location;
+  OptString                      m_uri;
+  OptString                      m_location;
   int                         m_style;
   int                         m_use;
-  String                      m_login;
-  String                      m_password;
+  OptString                      m_login;
+  OptString                      m_password;
   int                         m_authentication;
   bool                        m_digest;
-  String                      m_proxy_host;
+  OptString                      m_proxy_host;
   int                         m_proxy_port;
-  String                      m_proxy_login;
-  String                      m_proxy_password;
-  String                      m_proxy_ssl_cert_path;
-  String                      m_proxy_ssl_key_path;
-  String                      m_proxy_ssl_ca_bundle;
+  OptString                      m_proxy_login;
+  OptString                      m_proxy_password;
+  OptString                      m_proxy_ssl_cert_path;
+  OptString                      m_proxy_ssl_key_path;
+  OptString                      m_proxy_ssl_ca_bundle;
   int                         m_connection_timeout;
   int                         m_max_redirect;
   bool                        m_use11;
-  String                      m_user_agent;
+  OptString                      m_user_agent;
   int                         m_ssl_method = -1;
   int                         m_compression;
   Variant                     m_default_headers;
@@ -116,14 +116,14 @@ struct SoapVar : SystemLib::ClassLoader<"SoapVar"> {
   }
 
 #define X(Name, str_name) \
-  static void setEnc##Name(ObjectData* obj, const String& str) { \
+  static void setEnc##Name(ObjectData* obj, const OptString& str) { \
     if (str.isNull()) { \
       obj->setProp(nullctx, s_enc_##str_name.get(), make_tv<KindOfNull>()); \
     } else { \
       obj->setProp(nullctx, s_enc_##str_name.get(), str.asTypedValue()); \
     } \
   } \
-  static String getEnc##Name(ObjectData* obj) { \
+  static OptString getEnc##Name(ObjectData* obj) { \
     return getStrValue(obj, s_enc_##str_name); \
   }
 
@@ -135,12 +135,12 @@ struct SoapVar : SystemLib::ClassLoader<"SoapVar"> {
 #undef X
 
  private:
-  static String getStrValue(ObjectData* obj, const String& prop) {
+  static OptString getStrValue(ObjectData* obj, const OptString& prop) {
     auto str = obj->o_get(prop, false);
     if (str.isString()) {
       return str.toString();
     } else {
-      return String();
+      return OptString();
     }
   }
 };
@@ -148,15 +148,15 @@ struct SoapVar : SystemLib::ClassLoader<"SoapVar"> {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct SoapParam : SystemLib::ClassLoader<"SoapParam"> {
-  String                      m_name;
-  String                      m_data;
+  OptString                      m_name;
+  OptString                      m_data;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 
 struct SoapHeader : SystemLib::ClassLoader<"SoapHeader"> {
-  String                      m_namespace;
-  String                      m_name;
+  OptString                      m_namespace;
+  OptString                      m_name;
   Variant                     m_data;
   bool                        m_mustUnderstand;
   Variant                     m_actor;

@@ -95,7 +95,7 @@ struct Extension;
         HHVM_FN(fn)(__VA_ARGS__)
 #define HHVM_NAMED_FE_STR(fn, fimpl, functable) \
         do { \
-          String name{makeStaticString(fn)}; \
+          OptString name{makeStaticString(fn)}; \
           registerExtensionFunction(name); \
           REGISTER_NATIVE_FUNC(functable, fn, fimpl); \
         } while(0)
@@ -218,7 +218,7 @@ void coerceFCallArgsFromLocals(const ActRec* fp,
   X(Double,     double,               double)         \
   X(Bool,       bool,                 bool)           \
   X(Object,     const Object&,        Object)         \
-  X(String,     const String&,        String)         \
+  X(String,     const OptString&,        OptString)         \
   X(Array,      const Array&,         Array)          \
   X(Resource,   const OptResource&,   OptResource)    \
   X(Func,       Func*,                Func*)          \
@@ -236,7 +236,7 @@ void coerceFCallArgsFromLocals(const ActRec* fp,
   X(DoubleIO,   double&,              double&)        \
   X(BoolIO,     bool&,                bool&)          \
   X(ObjectIO,   Object&,              Object&)        \
-  X(StringIO,   String&,              String&)        \
+  X(StringIO,   OptString&,              OptString&)        \
   X(ArrayIO,    Array&,               Array&)         \
   X(ResourceIO, OptResource&,         OptResource&)   \
   X(FuncIO,     Func*&,               Func*&)         \
@@ -469,7 +469,7 @@ registerNativeFunc(FuncTable& nativeFuncs, const char* name, Fun func) {
 // Helper accepting a possibly nonstatic HPHP::String name
 template <class Fun> typename
   std::enable_if<!std::is_member_function_pointer<Fun>::value, void>::type
-registerNativeFunc(FuncTable& nativeFuncs, const String& name, Fun func) {
+registerNativeFunc(FuncTable& nativeFuncs, const OptString& name, Fun func) {
   static_assert(
     std::is_pointer<Fun>::value &&
     std::is_function<typename std::remove_pointer<Fun>::type>::value,
@@ -530,7 +530,7 @@ registerNativeFunc(FuncTable& nativeFuncs, const char* name,
 const char* checkTypeFunc(const NativeSig& sig,
                           const FuncEmitter* func);
 
-String fullName(const StringData* fname, const StringData* cname,
+OptString fullName(const StringData* fname, const StringData* cname,
                 bool isStatic);
 
 NativeFunctionInfo getNativeFunction(const FuncTable& nativeFuncs,
@@ -627,7 +627,7 @@ const ConstantMap* getClassConstants(const StringData* clsName) {
 
 typedef void (*FinishFunc)(Class* cls);
 
-void registerClassExtraDataHandler(const String& clsName, FinishFunc fn);
+void registerClassExtraDataHandler(const OptString& clsName, FinishFunc fn);
 
 FinishFunc getClassExtraDataHandler(const StringData* clsName);
 

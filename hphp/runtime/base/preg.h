@@ -122,9 +122,9 @@ void pcre_dump_cache(folly::File& file);
 ///////////////////////////////////////////////////////////////////////////////
 // PHP API
 
-Variant preg_grep(const String& pattern, const Array& input, int flags = 0);
+Variant preg_grep(const OptString& pattern, const Array& input, int flags = 0);
 
-Variant preg_match(const String& pattern, const String& subject,
+Variant preg_match(const OptString& pattern, const OptString& subject,
                    Variant* matches = nullptr,
                    int flags = 0, int offset = 0);
 
@@ -132,7 +132,7 @@ Variant preg_match(StringData* pattern, const StringData* subject,
                    Variant* matches = nullptr,
                    int flags = 0, int offset = 0);
 
-Variant preg_match_all(const String& pattern, const String& subject,
+Variant preg_match_all(const OptString& pattern, const OptString& subject,
                        Variant* matches = nullptr,
                        int flags = 0, int offset = 0);
 
@@ -140,7 +140,7 @@ Variant preg_match_all(StringData* pattern, const StringData* subject,
                        Variant* matches = nullptr,
                        int flags = 0, int offset = 0);
 
-Variant preg_get_error_message_if_invalid(const String& pattern);
+Variant preg_get_error_message_if_invalid(const OptString& pattern);
 
 Variant preg_replace_impl(const Variant& pattern, const Variant& replacement,
                           const Variant& subject, int limit, int64_t* count,
@@ -156,12 +156,12 @@ int preg_replace_callback(Variant& result,
                           const Variant& subject,
                           int limit = -1);
 
-Variant preg_split(const String& pattern,
-                   const String& subject,
+Variant preg_split(const OptString& pattern,
+                   const OptString& subject,
                    int limit = -1,
                    int flags = 0);
-String preg_quote(const String& str, const String& delimiter = null_string);
-Variant php_split(const String& spliton, const String& str, int count,
+OptString preg_quote(const OptString& str, const OptString& delimiter = null_string);
+Variant php_split(const OptString& spliton, const OptString& str, int count,
                   bool icase);
 
 int preg_last_error();

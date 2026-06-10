@@ -108,8 +108,8 @@ Array ExtendedException::getBacktrace() const {
   return Array(m_btp.get());
 }
 
-std::pair<String, int> ExtendedException::getFileAndLine() const {
-  String file = empty_string();
+std::pair<OptString, int> ExtendedException::getFileAndLine() const {
+  OptString file = empty_string();
   int line = 0;
   Array bt = getBacktrace();
   if (!bt.empty()) {
@@ -356,7 +356,7 @@ void throwable_mark_array(const ObjectData* throwable, Array& props) {
   props.set(name, marked);
 }
 
-String throwable_to_string(ObjectData* throwable) {
+OptString throwable_to_string(ObjectData* throwable) {
   auto const cls = throwable->getVMClass();
   if (cls->classof(SystemLib::getThrowableClass())) {
     try {
@@ -376,9 +376,9 @@ String throwable_to_string(ObjectData* throwable) {
                                       makeStaticString("message"));
     if (!message) {
       Logger::Error("Throwable object doesn't have the expected message field");
-      return String{StringData::Make(cls->name(), ": no message")};
+      return OptString{StringData::Make(cls->name(), ": no message")};
     }
-    return String{StringData::Make(cls->name()->slice(),
+    return OptString{StringData::Make(cls->name()->slice(),
                               folly::StringPiece{": "},
                               message.val().pstr->slice())};
   } else {

@@ -185,11 +185,11 @@ T* insertNamedEntity(const StringData* str, typename T::Map* map) {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-template NamedType* NamedType::get<true>(const StringData*, String*);
-template NamedType* NamedType::get<false>(const StringData*, String*);
+template NamedType* NamedType::get<true>(const StringData*, OptString*);
+template NamedType* NamedType::get<false>(const StringData*, OptString*);
 
 template<bool AllowCreate>
-NamedType* NamedType::get(const StringData* str, String* normalizedStr /* = nullptr */) {
+NamedType* NamedType::get(const StringData* str, OptString* normalizedStr /* = nullptr */) {
   if (str->isSymbol()) {
     if (auto const result = str->getNamedType()) return result;
   }
@@ -224,11 +224,11 @@ NamedType* NamedType::get(const StringData* str, String* normalizedStr /* = null
   return result;
 }
 
-template NamedFunc* NamedFunc::get<true>(const StringData*, String*);
-template NamedFunc* NamedFunc::get<false>(const StringData*, String*);
+template NamedFunc* NamedFunc::get<true>(const StringData*, OptString*);
+template NamedFunc* NamedFunc::get<false>(const StringData*, OptString*);
 
 template<bool AllowCreate>
-NamedFunc* NamedFunc::get(const StringData* str, String* normalizedStr /* = nullptr */) {
+NamedFunc* NamedFunc::get(const StringData* str, OptString* normalizedStr /* = nullptr */) {
   if (UNLIKELY(!s_namedFuncMap)) {
     initializeNamedFuncMap();
   }

@@ -170,10 +170,10 @@ inline const StringData* Func::name() const {
   return m_name;
 }
 
-inline String Func::nameWithClosureName() const {
-  if (!isClosureBody()) return String(const_cast<StringData*>(name()));
+inline OptString Func::nameWithClosureName() const {
+  if (!isClosureBody()) return OptString(const_cast<StringData*>(name()));
   // Strip the file hash from the closure name.
-  String name{const_cast<StringData*>(baseCls()->name())};
+  OptString name{const_cast<StringData*>(baseCls()->name())};
   auto const pos = name.find(';');
   if (pos < 0) return name;
   return name.substr(0, pos);
@@ -201,8 +201,8 @@ inline const StringData* Func::fullName() const {
   return m_fullName;
 }
 
-inline String Func::fullNameWithClosureName() const {
-  if (!isClosureBody()) return String(const_cast<StringData*>(fullName()));
+inline OptString Func::fullNameWithClosureName() const {
+  if (!isClosureBody()) return OptString(const_cast<StringData*>(fullName()));
   return nameWithClosureName();
 }
 

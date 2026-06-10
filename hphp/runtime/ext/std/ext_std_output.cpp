@@ -107,7 +107,7 @@ Variant HHVM_FUNCTION(ob_get_clean) {
   return output;
 }
 Variant HHVM_FUNCTION(ob_get_flush) {
-  String output = g_context->obCopyContents();
+  OptString output = g_context->obCopyContents();
   if (!HHVM_FN(ob_end_flush)()) {
     return false;
   }
@@ -135,14 +135,14 @@ Array HHVM_FUNCTION(ob_list_handlers) {
   return g_context->obGetHandlers();
 }
 
-void HHVM_FUNCTION(hphp_crash_log, const String& name, const String& value) {
+void HHVM_FUNCTION(hphp_crash_log, const OptString& name, const OptString& value) {
   StackTraceNoHeap::AddExtraLogging(name.data(), value.data());
 }
 
-void HHVM_FUNCTION(hphp_stats, const String& name, int64_t value) {
+void HHVM_FUNCTION(hphp_stats, const OptString& name, int64_t value) {
   ServerStats::Log(name.data(), value);
 }
-int64_t HHVM_FUNCTION(hphp_get_stats, const String& name) {
+int64_t HHVM_FUNCTION(hphp_get_stats, const OptString& name) {
   if (strcmp(name.c_str(), "units") == 0) {
     return numLoadedUnits();
   }
@@ -154,7 +154,7 @@ int64_t HHVM_FUNCTION(hphp_get_stats, const String& name) {
 Array HHVM_FUNCTION(hphp_get_status) {
   auto const out = ServerStats::ReportStatus(Writer::Format::JSON);
   auto result = HHVM_FN(json_decode)(
-    String(out),
+    OptString(out),
     false,
     512,
     HPHP::k_JSON_FB_DARRAYS_AND_VARRAYS);
@@ -163,17 +163,17 @@ Array HHVM_FUNCTION(hphp_get_status) {
 Array HHVM_FUNCTION(hphp_get_iostatus) {
   return ServerStats::GetThreadIOStatuses();
 }
-void HHVM_FUNCTION(hphp_set_iostatus_address, const String& name) {
+void HHVM_FUNCTION(hphp_set_iostatus_address, const OptString& name) {
 }
 
 static double ts_float(const timespec &ts) {
   return (double)ts.tv_sec + (double)ts.tv_nsec / 1000000000;
 }
 
-static String ts_microtime(const timespec &ts) {
+static OptString ts_microtime(const timespec &ts) {
   char ret[100];
   snprintf(ret, 100, "%.8F %ld", (double)ts.tv_nsec / 1000000000, ts.tv_sec);
-  return String(ret, CopyString);
+  return OptString(ret, CopyString);
 }
 
 const StaticString
@@ -239,7 +239,7 @@ Variant HHVM_FUNCTION(hphp_get_hardware_counters) {
   HardwareCounter::GetPerfEvents(
     [] (const std::string& key, int64_t value, void* data) {
       Array& ret = *reinterpret_cast<Array*>(data);
-      ret.set(String(key), value);
+      ret.set(OptString(key), value);
     },
     &ret
   );

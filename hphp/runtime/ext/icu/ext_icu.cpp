@@ -41,8 +41,8 @@ using PatternStringMap = tbb::concurrent_hash_map<const StringData*,
 
 static PatternStringMap s_patternCacheMap;
 
-static Variant icu_match_impl(const String& pattern,
-                              const String& subject,
+static Variant icu_match_impl(const OptString& pattern,
+                              const OptString& subject,
                               Array* matches,
                               int64_t flags) {
   UErrorCode status = U_ZERO_ERROR;
@@ -59,7 +59,7 @@ static Variant icu_match_impl(const String& pattern,
   bpattern.append(pattern);
   bpattern.append(':');
   bpattern.append(flags);
-  String spattern = bpattern.detach();
+  OptString spattern = bpattern.detach();
 
   // Find compiled pattern matcher in hash map or add it.
   PatternStringMap::accessor accessor;
@@ -108,7 +108,7 @@ static Variant icu_match_impl(const String& pattern,
         // Convert UnicodeString back to UTF-8.
         std::string string;
         ustring.toUTF8String(string);
-        String match = String(string);
+        OptString match = OptString(string);
 
         if (flags & k_UREGEX_OFFSET_CAPTURE) {
           // start() returns the index in UnicodeString, which
@@ -132,15 +132,15 @@ static Variant icu_match_impl(const String& pattern,
 }
 
 static Variant HHVM_FUNCTION(icu_match,
-                             const String& pattern,
-                             const String& subject,
+                             const OptString& pattern,
+                             const OptString& subject,
                              int64_t flags /* = 0 */) {
   return icu_match_impl(pattern, subject, nullptr, flags);
 }
 
 static Variant HHVM_FUNCTION(icu_match_with_matches,
-                             const String& pattern,
-                             const String& subject,
+                             const OptString& pattern,
+                             const OptString& subject,
                              Array& matches,
                              int64_t flags /* = 0 */) {
   return icu_match_impl(pattern, subject, &matches, flags);
@@ -204,7 +204,7 @@ private:
 
 static TransliteratorWrapper s_transliterator;
 
-static String HHVM_FUNCTION(icu_transliterate, const String& str,
+static OptString HHVM_FUNCTION(icu_transliterate, const OptString& str,
                                                bool remove_accents) {
   UnicodeString u_str = UnicodeString::fromUTF8(str.data());
   if (remove_accents) {
@@ -216,7 +216,7 @@ static String HHVM_FUNCTION(icu_transliterate, const String& str,
   // Convert UnicodeString back to UTF-8.
   std::string string;
   u_str.toUTF8String(string);
-  return String(string);
+  return OptString(string);
 }
 
 
@@ -325,10 +325,10 @@ void normalizeToken(struct Token& token) {
  * Other: replaced with empty string
  *
  */
-static Array HHVM_FUNCTION(icu_tokenize, const String& text) {
+static Array HHVM_FUNCTION(icu_tokenize, const OptString& text) {
   // Boundary markers that indicate the beginning and end of a token stream.
-  const String BEGIN_MARKER("_B_");
-  const String END_MARKER("_E_");
+  const OptString BEGIN_MARKER("_B_");
+  const OptString END_MARKER("_E_");
 
   Array ret = Array::CreateVec();
   std::vector<Token> tokens;
@@ -342,7 +342,7 @@ static Array HHVM_FUNCTION(icu_tokenize, const String& text) {
     const UnicodeString& word = iter->value;
     // Ignore spaces and empty strings.
     if (!s_spaceMatcher->matches(word) && word.length() > 0) {
-      ret.append(String(icuStringToUTF8(word)));
+      ret.append(OptString(icuStringToUTF8(word)));
     }
   }
   ret.append(END_MARKER);

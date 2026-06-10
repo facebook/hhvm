@@ -37,9 +37,9 @@ namespace HPHP {
 
 static struct ZlibStreamWrapper final : Stream::Wrapper {
   req::ptr<File>
-  open(const String& filename, const String& mode, int /*options*/,
+  open(const OptString& filename, const OptString& mode, int /*options*/,
        const req::ptr<StreamContext>& /*context*/) override {
-    String fname;
+    OptString fname;
     static const char cz[] = "compress.zlib://";
 
     if (!strncmp(filename.data(), "zlib:", sizeof("zlib:") - 1)) {
@@ -50,7 +50,7 @@ static struct ZlibStreamWrapper final : Stream::Wrapper {
       return nullptr;
     }
 
-    String translated;
+    OptString translated;
     if (fname.find("://") == -1) {
       translated = File::TranslatePath(fname);
       if (auto file = FileStreamWrapper::openFromCache(translated, mode)) {
@@ -95,7 +95,7 @@ static void hhvm_zlib_free(voidpf /*opaque*/, voidpf address) {
 
 /////////////////////////////////////////////////////////////////////////////
 
-static Variant hhvm_zlib_encode(const String& data,
+static Variant hhvm_zlib_encode(const OptString& data,
                                 int64_t level, int64_t enc) {
   if ((level < -1) || (level > 9)) {
     raise_warning("compression level (%" PRId64 ") must be within -1..9",
@@ -123,7 +123,7 @@ static Variant hhvm_zlib_encode(const String& data,
                                      MAX_MEM_LEVEL, Z_DEFAULT_STRATEGY))) {
     SCOPE_EXIT { deflateEnd(&Z); };
     size_t outlen = hhvm_zlib_buffer_size_guess(data.size());
-    String ret(outlen, ReserveString);
+    OptString ret(outlen, ReserveString);
 
     Z.next_in = (Bytef *) data.c_str();
     Z.next_out = (Bytef *) ret.mutableData();
@@ -140,19 +140,19 @@ static Variant hhvm_zlib_encode(const String& data,
   return false;
 }
 
-Variant HHVM_FUNCTION(zlib_encode, const String& data,
+Variant HHVM_FUNCTION(zlib_encode, const OptString& data,
                                           int64_t encoding,
                                           int64_t level /*= -1 */) {
   return hhvm_zlib_encode(data, level, encoding);
 }
-Variant HHVM_FUNCTION(gzcompress, const String& data,
+Variant HHVM_FUNCTION(gzcompress, const OptString& data,
                                   int64_t level) {
   return hhvm_zlib_encode(data, level, k_ZLIB_ENCODING_DEFLATE);
 }
-Variant HHVM_FUNCTION(gzdeflate, const String& data, int64_t level) {
+Variant HHVM_FUNCTION(gzdeflate, const OptString& data, int64_t level) {
   return hhvm_zlib_encode(data, level, k_ZLIB_ENCODING_RAW);
 }
-Variant HHVM_FUNCTION(gzencode, const String& data, int64_t level,
+Variant HHVM_FUNCTION(gzencode, const OptString& data, int64_t level,
                                 int64_t encoding_mode) {
   return hhvm_zlib_encode(data, level, encoding_mode);
 }
@@ -169,11 +169,11 @@ Variant HHVM_FUNCTION(gzencode, const String& data, int64_t level,
  * Runs at most 100 times, if we haven't finished by then,
  * call it a data error to avoid going nuts.
  */
-static String hhvm_zlib_inflate_rounds(z_stream *Z, int64_t maxlen,
+static OptString hhvm_zlib_inflate_rounds(z_stream *Z, int64_t maxlen,
                                        int &status) {
   assertx(maxlen >= 0);
   size_t retsize = (maxlen && maxlen < Z->avail_in) ? maxlen : Z->avail_in;
-  String ret;
+  OptString ret;
   size_t retused = 0;
   int round = 0;
 
@@ -187,7 +187,7 @@ static String hhvm_zlib_inflate_rounds(z_stream *Z, int64_t maxlen,
 
     auto const ms = [&]() -> folly::MutableStringPiece {
       if (!ret.get()) {
-        ret = String(retsize + 1, ReserveString);
+        ret = OptString(retsize + 1, ReserveString);
         return ret.bufferSlice();
       }
       return ret.reserve(retsize + 1);
@@ -213,10 +213,10 @@ static String hhvm_zlib_inflate_rounds(z_stream *Z, int64_t maxlen,
   if (Z_OK == status) {
     status = Z_DATA_ERROR;
   }
-  return String();
+  return OptString();
 }
 
-static Variant hhvm_zlib_decode(const String& data,
+static Variant hhvm_zlib_decode(const OptString& data,
                                 int64_t maxlen, int64_t enc) {
   if (data.empty()) {
     raise_warning("%s", zError(Z_DATA_ERROR));
@@ -240,7 +240,7 @@ retry_raw_inflate:
   if (Z_OK == status) {
     Z.next_in = (Bytef*)data.c_str();
     Z.avail_in = data.size() + 1;
-    String ret = hhvm_zlib_inflate_rounds(&Z, maxlen, status);
+    OptString ret = hhvm_zlib_inflate_rounds(&Z, maxlen, status);
     if (status == Z_STREAM_END) {
       return ret;
     }
@@ -255,25 +255,25 @@ retry_raw_inflate:
   return false;
 }
 
-Variant HHVM_FUNCTION(zlib_decode, const String& data,
+Variant HHVM_FUNCTION(zlib_decode, const OptString& data,
                                    int64_t limit) {
   return hhvm_zlib_decode(data, limit, k_ZLIB_ENCODING_ANY);
 }
-Variant HHVM_FUNCTION(gzuncompress, const String& data,
+Variant HHVM_FUNCTION(gzuncompress, const OptString& data,
                                     int64_t limit) {
   return hhvm_zlib_decode(data, limit, k_ZLIB_ENCODING_DEFLATE);
 }
-Variant HHVM_FUNCTION(gzinflate, const String& data, int64_t limit) {
+Variant HHVM_FUNCTION(gzinflate, const OptString& data, int64_t limit) {
   return hhvm_zlib_decode(data, limit, k_ZLIB_ENCODING_RAW);
 }
-Variant HHVM_FUNCTION(gzdecode, const String& data, int64_t limit) {
+Variant HHVM_FUNCTION(gzdecode, const OptString& data, int64_t limit) {
   return hhvm_zlib_decode(data, limit, k_ZLIB_ENCODING_GZIP);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // stream functions
 
-Variant HHVM_FUNCTION(gzopen, const String& filename, const String& mode,
+Variant HHVM_FUNCTION(gzopen, const OptString& filename, const OptString& mode,
                       int64_t /*use_include_path*/ /* = 0 */) {
   if (!FileUtil::checkPathAndWarn(filename, __FUNCTION__ + 2, 1)) {
     return init_null();
@@ -313,13 +313,13 @@ Variant HHVM_FUNCTION(gzgets, const OptResource& zp, int64_t length /* = 0 */) {
   return HHVM_FN(fgets)(zp, length);
 }
 Variant HHVM_FUNCTION(gzgetss, const OptResource& zp, int64_t length /* = 0 */,
-                            const String& allowable_tags /* = null_string */) {
+                            const OptString& allowable_tags /* = null_string */) {
   return HHVM_FN(fgetss)(zp, length, allowable_tags);
 }
 Variant HHVM_FUNCTION(gzpassthru, const OptResource& zp) {
   return HHVM_FN(fpassthru)(zp);
 }
-Variant HHVM_FUNCTION(gzwrite, const OptResource& zp, const String& str,
+Variant HHVM_FUNCTION(gzwrite, const OptResource& zp, const OptString& str,
                                int64_t length /* = 0 */) {
   return HHVM_FN(fwrite)(zp, str, length);
 }
@@ -327,7 +327,7 @@ Variant HHVM_FUNCTION(gzwrite, const OptResource& zp, const String& str,
 ///////////////////////////////////////////////////////////////////////////////
 // zlib functions
 
-Variant HHVM_FUNCTION(readgzfile, const String& filename,
+Variant HHVM_FUNCTION(readgzfile, const OptString& filename,
                                   int64_t use_include_path /* = 0 */) {
   if (!FileUtil::checkPathAndWarn(filename, __FUNCTION__ + 2, 1)) {
     return init_null();
@@ -340,7 +340,7 @@ Variant HHVM_FUNCTION(readgzfile, const String& filename,
   return HHVM_FN(gzpassthru)(stream.toResource());
 }
 
-Variant HHVM_FUNCTION(gzfile, const String& filename,
+Variant HHVM_FUNCTION(gzfile, const OptString& filename,
                               int64_t use_include_path /* = 0 */) {
   if (!FileUtil::checkPathAndWarn(filename, __FUNCTION__ + 2, 1)) {
     return init_null();
@@ -373,9 +373,9 @@ struct nzlib_format_t {
     Bytef buf[0];
 };
 
-Variant HHVM_FUNCTION(nzcompress, const String& uncompressed) {
+Variant HHVM_FUNCTION(nzcompress, const OptString& uncompressed) {
   uLong len = compressBound(uncompressed.size());
-  String str(sizeof(nzlib_format_t) + len, ReserveString);
+  OptString str(sizeof(nzlib_format_t) + len, ReserveString);
   nzlib_format_t* format = (nzlib_format_t*)str.mutableData();
 
   format->magic = htonl(NZLIB_MAGIC);
@@ -390,7 +390,7 @@ Variant HHVM_FUNCTION(nzcompress, const String& uncompressed) {
   return false;
 }
 
-Variant HHVM_FUNCTION(nzuncompress, const String& compressed) {
+Variant HHVM_FUNCTION(nzuncompress, const OptString& compressed) {
   if (compressed.size() < (ssize_t)sizeof(nzlib_format_t)) {
     return false;
   }
@@ -405,7 +405,7 @@ Variant HHVM_FUNCTION(nzuncompress, const String& compressed) {
     return empty_string_variant();
   }
 
-  String str(len, ReserveString);
+  OptString str(len, ReserveString);
   char* uncompressed = str.mutableData();
   int rc = uncompress((Bytef*)uncompressed, &len, format->buf,
                       compressed.size() - sizeof(*format));
@@ -449,7 +449,7 @@ struct ChunkedDecompressor {
     return m_eof;
   }
 
-  String inflateChunk(const String& chunk) {
+  OptString inflateChunk(const OptString& chunk) {
     if (m_eof) {
       raise_warning("Tried to inflate after final chunk");
       return empty_string();
@@ -457,7 +457,7 @@ struct ChunkedDecompressor {
     m_zstream.next_in = (Bytef*) chunk.data();
     m_zstream.avail_in = chunk.length();
     unsigned int offset = 0;
-    String result(1024 * 1024, ReserveString);
+    OptString result(1024 * 1024, ReserveString);
     int status;
     bool completed = false;
     for (int i = 0; i < 20; i++) {
@@ -543,9 +543,9 @@ bool HHVM_METHOD(ChunkedInflator, eof) {
   return data->eof();
 }
 
-String HHVM_METHOD(ChunkedInflator,
+OptString HHVM_METHOD(ChunkedInflator,
                    inflateChunk,
-                   const String& chunk) {
+                   const OptString& chunk) {
   FETCH_CHUNKED_INFLATOR(data, this_);
   assertx(data);
   return data->inflateChunk(chunk);
@@ -572,9 +572,9 @@ bool HHVM_METHOD(ChunkedGunzipper, eof) {
   return data->eof();
 }
 
-String HHVM_METHOD(ChunkedGunzipper,
+OptString HHVM_METHOD(ChunkedGunzipper,
                    inflateChunk,
-                   const String& chunk) {
+                   const OptString& chunk) {
   FETCH_CHUNKED_GUNZIPPER(data, this_);
   assertx(data);
   return data->inflateChunk(chunk);

@@ -200,7 +200,7 @@ public:
    *
    * See array-iterator.h for end() and next().
    */
-  ArrayIter begin(const String& context = null_string) const;
+  ArrayIter begin(const OptString& context = null_string) const;
 
   /*
    * Converts `k' to a valid key for this array kind.
@@ -315,7 +315,7 @@ public:
    */
   int64_t toInt64() const { return empty() ? 0 : 1; }
   double toDouble() const { return empty() ? 0.0 : 1.0; }
-  String toString() const;
+  OptString toString() const;
 
   /*
    * Enable the legacy behavior bit on this array
@@ -329,7 +329,7 @@ public:
   C(TypedValue, __VA_ARGS__)            \
   I(int, __VA_ARGS__)             \
   I(int64_t, __VA_ARGS__)         \
-  V(const String&, __VA_ARGS__)   \
+  V(const OptString&, __VA_ARGS__)   \
   V(const Variant&, __VA_ARGS__)  \
   D(double, __VA_ARGS__)
 
@@ -339,7 +339,7 @@ public:
   Variant operator[](TypedValue key) const;
   Variant operator[](int key) const;
   Variant operator[](int64_t key) const;
-  Variant operator[](const String& key) const;
+  Variant operator[](const OptString& key) const;
   Variant operator[](const Variant& key) const;
   Variant operator[](double key) const = delete;
   Variant operator[](const char*) const = delete;

@@ -63,7 +63,7 @@ struct ResourceBundle : IntlError, SystemLib::ClassLoader<"ResourceBundle"> {
     if (m_isTable) {
       UErrorCode error = U_ZERO_ERROR;
       auto key = m_rsrc->get(m_iterIndex, error).getKey();
-      return String(key, CopyString);
+      return OptString(key, CopyString);
     }
     return m_iterIndex;
   }

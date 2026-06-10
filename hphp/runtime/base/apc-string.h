@@ -42,7 +42,7 @@ struct APCString {
     return MakeSharedString(APCKind::SerializedKeyset, str);
   }
 
-  static APCHandle::Pair MakeSerializedObject(const String& str) {
+  static APCHandle::Pair MakeSerializedObject(const OptString& str) {
     return MakeSharedString(APCKind::SerializedObject, str.get());
   }
 

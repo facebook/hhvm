@@ -47,7 +47,7 @@ bool RunToLocationCommand::executeImpl(DebuggerSession* session,
   }
 
   const ClientPreferences& prefs = m_debugger->getClientPreferences();
-  const std::string& path = File::TranslatePath(String(filePath)).toCppString();
+  const std::string& path = File::TranslatePath(OptString(filePath)).toCppString();
   BreakpointManager* bpMgr = session->getBreakpointManager();
 
   int line = tryGetInt(args, "line", -1);
@@ -74,7 +74,7 @@ bool RunToLocationCommand::executeImpl(DebuggerSession* session,
   }
 
   // Find a compilation unit to place a temp bp in.
-  HPHP::String unitPath(path.c_str());
+  HPHP::OptString unitPath(path.c_str());
   const auto compilationUnit = lookupUnit(unitPath.get(), "", nullptr, nullptr,
                                           false);
   if (compilationUnit == nullptr) {

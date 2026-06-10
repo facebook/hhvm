@@ -57,7 +57,7 @@ void packFloat(const Variant& val, std::endian endian, char *output) {
   memcpy(output, &f, sizeof(T));
 }
 
-Variant ZendPack::pack(const String& fmt, const Array& argv) {
+Variant ZendPack::pack(const OptString& fmt, const Array& argv) {
   /* Preprocess format into formatcodes and formatargs */
   req::TinyVector<char, 64> formatcodes; // up to 64 codes on the stack
   req::TinyVector<int, 64> formatargs;
@@ -246,7 +246,7 @@ Variant ZendPack::pack(const String& fmt, const Array& argv) {
     }
   }
 
-  String str = String(outputsize, ReserveString);
+  OptString str = OptString(outputsize, ReserveString);
   char *output = str.mutableData();
   outputpos = 0;
   currentarg = 0;
@@ -255,7 +255,7 @@ Variant ZendPack::pack(const String& fmt, const Array& argv) {
   for (int i = 0; i < (int)formatcodes.size(); i++) {
     int code = (int) formatcodes[i];
     int arg = formatargs[i];
-    String val;
+    OptString val;
     const char *s;
     int slen;
 
@@ -469,7 +469,7 @@ double unpackFloat(const char *data, std::endian endian) {
   return (double)result;
 }
 
-Variant ZendPack::unpack(const String& fmt, const String& data) {
+Variant ZendPack::unpack(const OptString& fmt, const OptString& data) {
   const char *format = fmt.c_str();
   int formatlen = fmt.size();
   const char *input = data.c_str();
@@ -601,17 +601,17 @@ Variant ZendPack::unpack(const String& fmt, const String& data) {
     /* Do actual unpacking */
     for (int i = 0; i != arg; i++ ) {
       /* Space for name + number, safe as namelen is ensured <= 200 */
-      String n_str;
+      OptString n_str;
 
       if (namelen == 0) {
-        n_str = String(i + 1);
+        n_str = OptString(i + 1);
       } else if (arg != 1) {
         /* Need to add element number to name */
-        n_str = String(name, namelen, CopyString);
-        n_str += String(i + 1);
+        n_str = OptString(name, namelen, CopyString);
+        n_str += OptString(i + 1);
       } else {
         /* Truncate name to next format code or end of string */
-        n_str = String(name, namelen, CopyString);
+        n_str = OptString(name, namelen, CopyString);
       }
 
       int64_t n_int;
@@ -667,7 +667,7 @@ Variant ZendPack::unpack(const String& fmt, const String& data) {
           if (type=='A')
             len++;
 
-          ret.set(n_key, String(input + inputpos, len, CopyString));
+          ret.set(n_key, OptString(input + inputpos, len, CopyString));
           break;
         }
 
@@ -688,7 +688,7 @@ Variant ZendPack::unpack(const String& fmt, const String& data) {
             len -= argb % 2;
           }
 
-          String s = String(len, ReserveString);
+          OptString s = OptString(len, ReserveString);
           buf = s.mutableData();
 
           for (ipos = opos = 0; opos < len; opos++) {

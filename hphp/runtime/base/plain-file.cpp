@@ -62,7 +62,7 @@ void clearThreadLocalIO() {
 // constructor and destructor
 
 PlainFile::PlainFile(FILE *stream, bool nonblocking,
-                     const String& wrapper_type, const String& stream_type)
+                     const OptString& wrapper_type, const OptString& stream_type)
   : File(nonblocking,
          wrapper_type.isNull() ? s_plainfile : wrapper_type,
          stream_type.isNull() ? s_stdio : stream_type),
@@ -77,7 +77,7 @@ PlainFile::PlainFile(FILE *stream, bool nonblocking,
 }
 
 PlainFile::PlainFile(int fd, bool nonblocking,
-                     const String& wrapper_type, const String& stream_type)
+                     const OptString& wrapper_type, const OptString& stream_type)
   : File(nonblocking,
          wrapper_type.isNull() ? s_plainfile : wrapper_type,
          stream_type.isNull() ? s_stdio : stream_type),
@@ -94,7 +94,7 @@ void PlainFile::sweep() {
   File::sweep();
 }
 
-bool PlainFile::open(const String& filename, const String& mode) {
+bool PlainFile::open(const OptString& filename, const OptString& mode) {
   int fd;
   FILE *f;
   assertx(m_stream == nullptr);
@@ -183,11 +183,11 @@ int PlainFile::getc() {
 // This definition is needed to avoid triggering a gcc compiler error about
 // an overloaded virtual when only overriding the one parameter version from
 // File.
-String PlainFile::read() {
+OptString PlainFile::read() {
   return File::read();
 }
 
-String PlainFile::read(int64_t length) {
+OptString PlainFile::read(int64_t length) {
   if (length) setEof(false);
   return File::read(length);
 }

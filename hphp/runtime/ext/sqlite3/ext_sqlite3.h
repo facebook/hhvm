@@ -43,7 +43,7 @@ public:
 };
 
 void HHVM_METHOD(SQLite3, open,
-                 const String& filename,
+                 const OptString& filename,
                  int64_t flags /* = SQLITE3_OPEN_READWRITE |
                    SQLITE3_OPEN_CREATE */,
                  const Variant& encryption_key /* = null */);
@@ -70,7 +70,7 @@ public:
 
 void HHVM_METHOD(SQLite3Stmt, __construct,
                  const Object& dbobject,
-                 const String& statement);
+                 const OptString& statement);
 Variant HHVM_METHOD(SQLite3Stmt, execute);
 
 ///////////////////////////////////////////////////////////////////////////////

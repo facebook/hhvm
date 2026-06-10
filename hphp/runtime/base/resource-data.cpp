@@ -48,8 +48,8 @@ ResourceData::~ResourceData() {
   hdr()->setRawId(-1);
 }
 
-String ResourceData::o_toString() const {
-  return String("Resource id #") + String(getId());
+OptString ResourceData::o_toString() const {
+  return OptString("Resource id #") + OptString(getId());
 }
 
 Array ResourceData::o_toArray() const {
@@ -58,16 +58,16 @@ Array ResourceData::o_toArray() const {
 
 const StaticString s_Unknown("Unknown");
 
-const String& ResourceData::o_getClassName() const {
+const OptString& ResourceData::o_getClassName() const {
   if (isInvalid()) return s_Unknown;
   return o_getClassNameHook();
 }
 
-const String& ResourceData::o_getClassNameHook() const {
+const OptString& ResourceData::o_getClassNameHook() const {
   raise_fatal_error("Resource did not provide a name");
 }
 
-const String& ResourceData::o_getResourceName() const {
+const OptString& ResourceData::o_getResourceName() const {
   return o_getClassName();
 }
 

@@ -166,15 +166,15 @@ int MySQL::GetDefaultPort() {
   return s_default_port;
 }
 
-String MySQL::GetDefaultSocket() {
+OptString MySQL::GetDefaultSocket() {
   if (!mysqlExtension::Socket.empty()) {
     return mysqlExtension::Socket;
   }
   return MYSQL_UNIX_ADDR;
 }
 
-std::string MySQL::GetHash(const String& host, int port, const String& socket,
-                           const String& username, const String& password,
+std::string MySQL::GetHash(const OptString& host, int port, const OptString& socket,
+                           const OptString& username, const OptString& password,
                            int client_flags) {
   char buf[1024];
   snprintf(buf, sizeof(buf), "%s:%d:%s:%s:%s:%d",
@@ -188,19 +188,19 @@ using StorageT = std::unordered_map<std::string, std::shared_ptr<MySQL>>;
 RDS_LOCAL(StorageT, s_connections);
 }
 
-std::shared_ptr<MySQL> MySQL::GetCachedImpl(const String& host, int port,
-                                            const String& socket,
-                                            const String& username,
-                                            const String& password,
+std::shared_ptr<MySQL> MySQL::GetCachedImpl(const OptString& host, int port,
+                                            const OptString& socket,
+                                            const OptString& username,
+                                            const OptString& password,
                                             int client_flags) {
   auto key = GetHash(host, port, socket, username, password, client_flags);
   return (*s_connections)[key];
 }
 
-void MySQL::SetCachedImpl(const String& host, int port,
-                          const String& socket,
-                          const String& username,
-                          const String& password,
+void MySQL::SetCachedImpl(const OptString& host, int port,
+                          const OptString& socket,
+                          const OptString& username,
+                          const OptString& password,
                           int client_flags,
                           std::shared_ptr<MySQL> conn) {
   auto key = GetHash(host, port, socket, username, password, client_flags);
@@ -302,9 +302,9 @@ void MySQL::close() {
   m_state = MySQLState::CLOSED;
 }
 
-bool MySQL::connect(const String& host, int port, const String& socket,
-                    const String& username, const String& password,
-                    const String& database, int client_flags,
+bool MySQL::connect(const OptString& host, int port, const OptString& socket,
+                    const OptString& username, const OptString& password,
+                    const OptString& database, int client_flags,
                     int connect_timeout) {
   if (m_conn == nullptr) {
     m_conn = create_new_conn();
@@ -331,8 +331,8 @@ bool MySQL::connect(const String& host, int port, const String& socket,
                             socket.empty() ? nullptr : socket.data(),
                             client_flags);
   if (ret && mysqlExtension::WaitTimeout > 0) {
-    String query("set session wait_timeout=");
-    query += String((int64_t)(mysqlExtension::WaitTimeout / 1000));
+    OptString query("set session wait_timeout=");
+    query += OptString((int64_t)(mysqlExtension::WaitTimeout / 1000));
     if (mysql_real_query(m_conn, query.data(), query.size())) {
       raise_notice("MySQL::connect: failed setting session wait timeout: %s",
                    mysql_error(m_conn));
@@ -342,9 +342,9 @@ bool MySQL::connect(const String& host, int port, const String& socket,
   return ret;
 }
 
-bool MySQL::reconnect(const String& host, int port, const String& socket,
-                      const String& username, const String& password,
-                      const String& database, int client_flags,
+bool MySQL::reconnect(const OptString& host, int port, const OptString& socket,
+                      const OptString& username, const OptString& password,
+                      const OptString& database, int client_flags,
                       int connect_timeout) {
   bool ret = false;
   if (m_conn == nullptr) {
@@ -556,7 +556,7 @@ Variant php_mysql_field_info(const OptResource& result, int field,
         len--;
       }
 
-      return String(buf, len, CopyString);
+      return OptString(buf, len, CopyString);
     }
   default:
     break;
@@ -565,10 +565,10 @@ Variant php_mysql_field_info(const OptResource& result, int field,
 }
 
 Variant php_mysql_do_connect(
-    const String& server,
-    const String& username,
-    const String& password,
-    const String& database,
+    const OptString& server,
+    const OptString& username,
+    const OptString& password,
+    const OptString& database,
     int client_flags,
     bool persistent,
     int connect_timeout_ms,
@@ -588,10 +588,10 @@ Variant php_mysql_do_connect(
 }
 
 Variant php_mysql_do_connect_with_ssl(
-    const String& server,
-    const String& username,
-    const String& password,
-    const String& database,
+    const OptString& server,
+    const OptString& username,
+    const OptString& password,
+    const OptString& database,
     int client_flags,
     int connect_timeout_ms,
     int query_timeout_ms,
@@ -640,8 +640,8 @@ static void mysql_set_ssl_options(
   ssl_provider->setMysqlSSLOptions(mySQL->get());
 }
 
-static void mysql_set_conn_attr(MYSQL* mysql, const String& key,
-                                const String& value) {
+static void mysql_set_conn_attr(MYSQL* mysql, const OptString& key,
+                                const OptString& value) {
   if (key.empty()) {
     raise_warning("MySQL: Invalid connection attribute - empty key");
   }
@@ -692,10 +692,10 @@ static void mysql_store_ssl_session(
 
 Variant php_mysql_do_connect_on_link(
     std::shared_ptr<MySQL> mySQL,
-    String server,
-    String username,
-    String password,
-    String database,
+    OptString server,
+    OptString username,
+    OptString password,
+    OptString database,
     int client_flags,
     bool persistent,
     int connect_timeout_ms,
@@ -716,7 +716,7 @@ Variant php_mysql_do_connect_on_link(
 
   // server format: hostname[:port][:/path/to/socket]
   // ipv6 hostname:port is of the form [1:2:3:4:5]:port
-  String host, socket;
+  OptString host, socket;
   int port;
   int savePersistent = false;
 
@@ -851,12 +851,12 @@ void MySQLResult::setFieldCount(int64_t fields) {
 
 void MySQLResult::setFieldInfo(int64_t f, MYSQL_FIELD *field) {
   MySQLFieldInfo &info = m_fields[f];
-  info.name       = String(field->name, CopyString);
-  info.org_name   = String(field->org_name, CopyString);
-  info.table      = String(field->table, CopyString);
-  info.org_table  = String(field->org_table, CopyString);
-  info.def        = String(field->def, CopyString);
-  info.db         = String(field->db, CopyString);
+  info.name       = OptString(field->name, CopyString);
+  info.org_name   = OptString(field->org_name, CopyString);
+  info.table      = OptString(field->table, CopyString);
+  info.org_table  = OptString(field->org_table, CopyString);
+  info.def        = OptString(field->def, CopyString);
+  info.db         = OptString(field->db, CopyString);
   info.max_length = (int64_t)field->max_length;
   info.length     = (int64_t)field->length;
   info.type       = (int)field->type;
@@ -1039,7 +1039,7 @@ Variant MySQLStmt::get_errno() {
 
 Variant MySQLStmt::get_error() {
   VALIDATE_STMT
-  return String(mysql_stmt_error(m_stmt), CopyString);
+  return OptString(mysql_stmt_error(m_stmt), CopyString);
 }
 
 Variant MySQLStmt::close() {
@@ -1100,7 +1100,7 @@ Variant MySQLStmt::param_count() {
   return (int64_t)mysql_stmt_param_count(m_stmt);
 }
 
-Variant MySQLStmt::prepare(const String& query) {
+Variant MySQLStmt::prepare(const OptString& query) {
   VALIDATE_STMT
 
   m_prepared = !mysql_stmt_prepare(m_stmt, query.c_str(), query.size());
@@ -1132,7 +1132,7 @@ Variant MySQLStmt::result_metadata() {
   return obj;
 }
 
-Variant MySQLStmt::send_long_data(int64_t param_idx, const String& data) {
+Variant MySQLStmt::send_long_data(int64_t param_idx, const OptString& data) {
   VALIDATE_PREPARED
   return !mysql_stmt_send_long_data(m_stmt, param_idx, data.c_str(),
                                     data.size());
@@ -1140,7 +1140,7 @@ Variant MySQLStmt::send_long_data(int64_t param_idx, const String& data) {
 
 Variant MySQLStmt::sqlstate() {
   VALIDATE_STMT
-  return String(mysql_stmt_sqlstate(m_stmt), CopyString);
+  return OptString(mysql_stmt_sqlstate(m_stmt), CopyString);
 }
 
 Variant MySQLStmt::store_result() {
@@ -1157,11 +1157,11 @@ Variant MySQLStmt::store_result() {
 // Zend returns strings and NULL only, not integers or floats.  We
 // return ints (and, sometimes, actual doubles). This behavior can be
 // disabled with MySQL { TypedResults = false } runtime option.
-Variant mysql_makevalue(const String& data, MYSQL_FIELD *mysql_field) {
+Variant mysql_makevalue(const OptString& data, MYSQL_FIELD *mysql_field) {
   return mysql_makevalue(data, mysql_field->type);
 }
 
-Variant mysql_makevalue(const String& data, enum_field_types field_type) {
+Variant mysql_makevalue(const OptString& data, enum_field_types field_type) {
   if (field_type == MYSQL_TYPE_NULL) {
     return init_null();
   } else if (mysqlExtension::TypedResults) {
@@ -1185,7 +1185,7 @@ Variant mysql_makevalue(const String& data, enum_field_types field_type) {
   return data;
 }
 
-MySQLQueryReturn php_mysql_do_query(const String& query, const Variant& link_id) {
+MySQLQueryReturn php_mysql_do_query(const OptString& query, const Variant& link_id) {
   SYNC_VM_REGS_SCOPED();
   if (mysqlExtension::ReadOnly &&
       same(preg_match("/^((\\/\\*.*?\\*\\/)|\\(|\\s)*select/i", query),
@@ -1205,7 +1205,7 @@ MySQLQueryReturn php_mysql_do_query(const String& query, const Variant& link_id)
     // removing comments, which can be wrong actually if some string field's
     // value has /* or */ in it.
     Variant result;
-    String q = preg_replace(result, "/\\/\\*.*?\\*\\//", " ", query) ?
+    OptString q = preg_replace(result, "/\\/\\*.*?\\*\\//", " ", query) ?
       result.toString() : query;
 
     Variant matches;
@@ -1330,7 +1330,7 @@ Variant php_mysql_get_result(const Variant& link_id, bool use_store) {
   return Variant(std::move(r));
 }
 
-Variant php_mysql_do_query_and_get_result(const String& query, const Variant& link_id,
+Variant php_mysql_do_query_and_get_result(const OptString& query, const Variant& link_id,
                                           bool use_store) {
   MySQLQueryReturn result = php_mysql_do_query(query, link_id);
 
@@ -1394,14 +1394,14 @@ Variant php_mysql_fetch_hash(const OptResource& result, int result_type) {
        mysql_field = mysql_fetch_field(mysql_result), i++) {
     Variant data;
     if (mysql_row[i]) {
-      data = mysql_makevalue(String(mysql_row[i], mysql_row_lengths[i],
+      data = mysql_makevalue(OptString(mysql_row[i], mysql_row_lengths[i],
                                     CopyString), mysql_field);
     }
     if (result_type & PHP_MYSQL_NUM) {
       ret.set(i, data);
     }
     if (result_type & PHP_MYSQL_ASSOC) {
-      String str(mysql_field->name, CopyString);
+      OptString str(mysql_field->name, CopyString);
       auto const array_key = ret.convertKey<IntishCast::Cast>(str);
       ret.set(array_key, *data.asTypedValue());
     }

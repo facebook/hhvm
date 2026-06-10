@@ -181,7 +181,7 @@ void c_AsyncGeneratorWaitHandle::failCpp() {
   decRefObj(this);
 }
 
-String c_AsyncGeneratorWaitHandle::getName() {
+OptString c_AsyncGeneratorWaitHandle::getName() {
   return s_asyncGenerator;
 }
 

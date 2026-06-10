@@ -79,8 +79,8 @@ const StaticString
   s_wordwrap("wordwrap"),
   s_hhvm_never_save_config("hhvm.never_save_config");
 
-static String wordwrap(const String& str, int width /* = 75 */,
-                       const String& wordbreak /* = "\n" */,
+static OptString wordwrap(const OptString& str, int width /* = 75 */,
+                       const OptString& wordbreak /* = "\n" */,
                        bool cut /* = false */) {
   Array args = make_vec_array(str, width, wordbreak, cut);
   return vm_call_user_func(Func::lookup(s_wordwrap.get()), args).toString();
@@ -450,12 +450,12 @@ bool DebuggerClient::IsValidNumber(const std::string &arg) {
   return true;
 }
 
-String DebuggerClient::FormatVariable(
+OptString DebuggerClient::FormatVariable(
   const Variant& v,
   char format /* = 'd' */
 ) {
   TRACE(2, "DebuggerClient::FormatVariable\n");
-  String value;
+  OptString value;
   try {
     auto const t =
       format == 'r' ? VariableSerializer::Type::PrintR :
@@ -476,7 +476,7 @@ String DebuggerClient::FormatVariable(
  * Serializes a Variant, and truncates it to a limit if necessary.  Returns the
  * truncated result, and the number of bytes truncated.
  */
-String DebuggerClient::FormatVariableWithLimit(const Variant& v, int maxlen) {
+OptString DebuggerClient::FormatVariableWithLimit(const Variant& v, int maxlen) {
   assertx(maxlen >= 0);
 
   VariableSerializer vs(VariableSerializer::Type::DebuggerDump, 0, 2);
@@ -492,7 +492,7 @@ String DebuggerClient::FormatVariableWithLimit(const Variant& v, int maxlen) {
   return sb.detach();
 }
 
-String DebuggerClient::FormatInfoVec(const IDebuggable::InfoVec &info,
+OptString DebuggerClient::FormatInfoVec(const IDebuggable::InfoVec &info,
                                      int *nameLen /* = NULL */) {
   TRACE(2, "DebuggerClient::FormatInfoVec\n");
   // vertical align names
@@ -519,9 +519,9 @@ String DebuggerClient::FormatInfoVec(const IDebuggable::InfoVec &info,
   return sb.detach();
 }
 
-String DebuggerClient::FormatTitle(const char *title) {
+OptString DebuggerClient::FormatTitle(const char *title) {
   TRACE(2, "DebuggerClient::FormatTitle\n");
-  String dash = HHVM_FN(str_repeat)(BOX_H, (LineWidth - strlen(title)) / 2 - 4);
+  OptString dash = HHVM_FN(str_repeat)(BOX_H, (LineWidth - strlen(title)) / 2 - 4);
 
   StringBuffer sb;
   sb.append("\n");
@@ -708,7 +708,7 @@ bool DebuggerClient::tryConnect(const std::string &host, int port,
       port
     );
     sock->unregister();
-    if (HHVM_FN(socket_connect)(OptResource(sock), String(host), port)) {
+    if (HHVM_FN(socket_connect)(OptResource(sock), OptString(host), port)) {
       if (clearmachines) {
         for (unsigned int i = 0; i < m_machines.size(); i++) {
           if (m_machines[i] == m_machine) {
@@ -907,7 +907,7 @@ void DebuggerClient::promptFunctionPrototype() {
     }
   }
 
-  String output = highlight_code(CmdInfo::GetProtoType(*this, cls, func));
+  OptString output = highlight_code(CmdInfo::GetProtoType(*this, cls, func));
   print("\n%s", output.data());
   rl_forced_update_display();
 }
@@ -1394,13 +1394,13 @@ void DebuggerClient::shortCode(BreakPointInfoPtr bp) {
   }
 }
 
-bool DebuggerClient::code(const String& source, int line1 /*= 0*/,
+bool DebuggerClient::code(const OptString& source, int line1 /*= 0*/,
                           int line2 /*= 0*/,
                           int lineFocus0 /* = 0 */, int charFocus0 /* = 0 */,
                           int lineFocus1 /* = 0 */, int charFocus1 /* = 0 */) {
   TRACE(2, "DebuggerClient::code\n");
   if (line1 == 0 && line2 == 0) {
-    String highlighted = highlight_code(source, 0, lineFocus0, charFocus0,
+    OptString highlighted = highlight_code(source, 0, lineFocus0, charFocus0,
                                         lineFocus1, charFocus1);
     if (!highlighted.empty()) {
       print(highlighted);
@@ -1409,7 +1409,7 @@ bool DebuggerClient::code(const String& source, int line1 /*= 0*/,
     return false;
   }
 
-  String highlighted = highlight_php(source, 1, lineFocus0, charFocus0,
+  OptString highlighted = highlight_php(source, 1, lineFocus0, charFocus0,
                                      lineFocus1, charFocus1);
   int line = 1;
   const char *begin = highlighted.data();
@@ -1476,7 +1476,7 @@ void DebuggerClient::print(const char* fmt, ...) {
   print(msg);
 }
 
-void DebuggerClient::print(const String& msg) {
+void DebuggerClient::print(const OptString& msg) {
   TRACE(2, "DebuggerClient::print(const String& msg)\n");
   DWRITE(msg.data(), 1, msg.length(), stdout);
   DWRITE("\n", 1, 1, stdout);
@@ -1510,7 +1510,7 @@ void DebuggerClient::print(folly::StringPiece msg) {
     fflush(where);                                                      \
   }                                                                     \
                                                                         \
-  void DebuggerClient::name(const String& msg) {                        \
+  void DebuggerClient::name(const OptString& msg) {                        \
     name(msg.slice());                                                  \
   }                                                                     \
                                                                         \
@@ -1536,7 +1536,7 @@ IMPLEMENT_COLOR_OUTPUT(error,    stderr,  ErrorColor)
 
 std::string DebuggerClient::wrap(const std::string &s) {
   TRACE(2, "DebuggerClient::wrap\n");
-  String ret = wordwrap(String(s.c_str(), s.size(), CopyString), LineWidth - 4,
+  OptString ret = wordwrap(OptString(s.c_str(), s.size(), CopyString), LineWidth - 4,
                         "\n", true);
   return std::string(ret.data(), ret.size());
 }
@@ -1581,8 +1581,8 @@ void DebuggerClient::helpCmds(const std::vector<const char *> &cmds) {
 
   StringBuffer sb;
   for (unsigned int i = 0; i < cmds.size() - 1; i += 2) {
-    String cmd(cmds[i], CopyString);
-    String desc(cmds[i+1], CopyString);
+    OptString cmd(cmds[i], CopyString);
+    OptString desc(cmds[i+1], CopyString);
 
     // two special formats
     if (cmd.empty() && desc.empty()) {
@@ -1632,13 +1632,13 @@ void DebuggerClient::tutorial(const char *text) {
   TRACE(2, "DebuggerClient::tutorial\n");
   if (m_tutorial < 0) return;
 
-  String ret = string_replace(String(text), "\t", "    ");
+  OptString ret = string_replace(OptString(text), "\t", "    ");
   ret = wordwrap(ret, LineWidth - 4, "\n", true);
   Array lines = StringUtil::Explode(ret, "\n").toArray();
 
   StringBuffer sb;
-  String header = "  Tutorial - '[h]elp [t]utorial off|auto' to turn off  ";
-  String hr = HHVM_FN(str_repeat)(BOX_H, LineWidth - 2);
+  OptString header = "  Tutorial - '[h]elp [t]utorial off|auto' to turn off  ";
+  OptString hr = HHVM_FN(str_repeat)(BOX_H, LineWidth - 2);
 
   sb.append(BOX_UL); sb.append(hr); sb.append(BOX_UR); sb.append("\n");
 
@@ -1658,10 +1658,10 @@ void DebuggerClient::tutorial(const char *text) {
   }
   sb.append(BOX_LL); sb.append(hr); sb.append(BOX_LR); sb.append("\n");
 
-  String content = sb.detach();
+  OptString content = sb.detach();
 
   if (m_tutorial == 0) {
-    String hash = StringUtil::MD5(content);
+    OptString hash = StringUtil::MD5(content);
     if (m_tutorialVisited.find(hash.data()) != m_tutorialVisited.end()) {
       return;
     }
@@ -2239,7 +2239,7 @@ void DebuggerClient::moveToFrame(int index, bool display /* = true */) {
   }
   const Array& frame = m_stacktrace[m_frame].toArray();
   if (!frame.isNull()) {
-    String file = frame[s_file].toString();
+    OptString file = frame[s_file].toString();
     auto line = (int)frame[s_line].toInt64();
     if (!file.empty() && line) {
       if (m_frame == 0) {
@@ -2283,7 +2283,7 @@ void DebuggerClient::printFrame(int index, const Array& frame) {
   }
   func.append(frame[s_function].toString());
 
-  String sindex(index);
+  OptString sindex(index);
 
   print("#%s  %s (%s)",
         sindex.data(),
@@ -2293,7 +2293,7 @@ void DebuggerClient::printFrame(int index, const Array& frame) {
     auto line = (int)frame[s_line].toInt64();
     auto fileLineInfo =
       folly::stringPrintf(" %s  at %s",
-                          String("           ").substr(0, sindex.size()).data(),
+                          OptString("           ").substr(0, sindex.size()).data(),
                           frame[s_file].toString().data());
     if (line > 0) {
       fileLineInfo += folly::stringPrintf(":%d", line);

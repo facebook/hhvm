@@ -154,12 +154,12 @@ DECLARE_EXTERN_REQUEST_LOCAL(SoapData, s_soap_data);
 // types used by SoapServer
 
 struct soapFunctions {
-  req::vector_set<String, hphp_string_hash, hphp_string_fsame> funcs;
+  req::vector_set<OptString, hphp_string_hash, hphp_string_fsame> funcs;
   bool functions_all;
 };
 
 struct soapClass {
-  String name;
+  OptString name;
   Array argv;
   int persistance;
 };
@@ -168,12 +168,12 @@ struct soapHeader : ResourceData {
   DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(soapHeader)
 
   CLASSNAME_IS("soapHeader")
-  const String& o_getClassNameHook() const override {
+  const OptString& o_getClassNameHook() const override {
     return classnameof();
   }
 
   sdlFunction                      *function;
-  String                            function_name;
+  OptString                            function_name;
   bool                              mustUnderstand;
   Array                             parameters;
   Variant                           retval;

@@ -219,9 +219,9 @@ public:
    * Returns are really in special PHP formats, and please read datetime.cpp
    * for details.
    */
-  static Array Parse(const String& datetime);
-  static Array Parse(const String& format, const String& date);
-  static Array ParseAsStrptime(const String& format, const String& date);
+  static Array Parse(const OptString& datetime);
+  static Array Parse(const OptString& format, const OptString& date);
+  static Array ParseAsStrptime(const OptString& format, const OptString& date);
 
 public:
   // constructor
@@ -232,7 +232,7 @@ public:
 
   CLASSNAME_IS("DateTime")
   // overriding ResourceData
-  const String& o_getClassNameHook() const override { return classnameof(); }
+  const OptString& o_getClassNameHook() const override { return classnameof(); }
 
   // informational
   bool local() const { return m_time->is_localtime;}
@@ -272,7 +272,7 @@ public:
   void setISODate(int year, int week, int day = 1);
   void setTime(int hour, int minute, int second = 0);
   void setTimezone(req::ptr<TimeZone> tz);
-  bool modify(const String& diff); // PHP's date_modify() function, muy powerful
+  bool modify(const OptString& diff); // PHP's date_modify() function, muy powerful
   void add(const req::ptr<DateInterval>& interval);
   void sub(const req::ptr<DateInterval>& interval);
 
@@ -280,11 +280,11 @@ public:
   void toTm(struct tm &ta) const;
   int64_t toTimeStamp(bool &err) const;
   int64_t toInteger(char format) const;
-  String toString(const String& format, bool stdc = false) const;
-  String toString(DateFormat format) const;
+  OptString toString(const OptString& format, bool stdc = false) const;
+  OptString toString(DateFormat format) const;
   Array toArray(ArrayFormat format) const;
   void fromTimeStamp(int64_t timestamp, bool utc = false);
-  bool fromString(const String& input, req::ptr<TimeZone> tz,
+  bool fromString(const OptString& input, req::ptr<TimeZone> tz,
                   const char* format=nullptr, bool throw_on_error = true);
 
   // comparison
@@ -324,7 +324,7 @@ private:
       DictInit ret(m_errors->warning_count);
       for(int i = 0; i < m_errors->warning_count; i++) {
         timelib_error_message *em = m_errors->warning_messages + i;
-        ret.set(em->position, String(em->message, CopyString));
+        ret.set(em->position, OptString(em->message, CopyString));
       }
       return ret.toArray();
     }
@@ -333,7 +333,7 @@ private:
       DictInit ret(m_errors->error_count);
       for(int i = 0; i < m_errors->error_count; i++) {
         timelib_error_message *em = m_errors->error_messages + i;
-        ret.set(em->position, String(em->message, CopyString));
+        ret.set(em->position, OptString(em->message, CopyString));
       }
       return ret.toArray();
     }
@@ -369,8 +369,8 @@ private:
                         timelib_error_container* error);
 
   void update();
-  String rfcFormat(const String& format) const;
-  String stdcFormat(const String& format) const;
+  OptString rfcFormat(const OptString& format) const;
+  OptString stdcFormat(const OptString& format) const;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

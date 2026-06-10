@@ -69,9 +69,9 @@ struct ITransportHeaders {
   /* Response header methods */
   virtual void addHeaderNoLock(const char *name, const char *value) = 0;
   virtual void addHeader(const char *name, const char *value) = 0;
-  virtual void addHeader(const String& header) = 0;
+  virtual void addHeader(const OptString& header) = 0;
   virtual void replaceHeader(const char *name, const char *value) = 0;
-  virtual void replaceHeader(const String& header) = 0;
+  virtual void replaceHeader(const OptString& header) = 0;
   virtual void removeHeader(const char *name) = 0;
   virtual void removeAllHeaders() = 0;
   virtual void getResponseHeaders(HeaderMap& headers) = 0;
@@ -257,16 +257,16 @@ public:
   /**
    * Get a description of the type of transport.
    */
-  virtual String describe() const = 0;
+  virtual OptString describe() const = 0;
 
   /**
    * Get/set response headers.
    */
   void addHeaderNoLock(const char *name, const char *value) override;
   void addHeader(const char *name, const char *value) override;
-  void addHeader(const String& header) override;
+  void addHeader(const OptString& header) override;
   void replaceHeader(const char *name, const char *value) override;
-  void replaceHeader(const String& header) override;
+  void replaceHeader(const OptString& header) override;
   void removeHeader(const char *name) override;
   void removeAllHeaders() override;
   void getResponseHeaders(HeaderMap &headers) override;
@@ -279,8 +279,8 @@ public:
   /**
    * Content/MIME type related functions.
    */
-  void setMimeType(const String& mimeType);
-  String getMimeType();
+  void setMimeType(const OptString& mimeType);
+  OptString getMimeType();
   bool getUseDefaultContentType() { return m_sendContentType;}
   void setUseDefaultContentType(bool send) { m_sendContentType = send;}
 
@@ -294,8 +294,8 @@ public:
   /**
    * Set cookie response header.
    */
-  bool setCookie(const String& name, const String& value, int64_t expire = 0,
-                 const String& path = "", const String& domain = "",
+  bool setCookie(const OptString& name, const OptString& value, int64_t expire = 0,
+                 const OptString& path = "", const OptString& domain = "",
                  bool secure = false, bool httponly = false,
                  bool encode_url = true);
 
@@ -484,7 +484,7 @@ public:
   void redirect(const char *location, int code, const char *info = nullptr);
 
   // TODO: support rfc1867
-  virtual bool isUploadedFile(const String& filename);
+  virtual bool isUploadedFile(const OptString& filename);
 
   // For streaming transports, only getResponseSentSize is valid.
   int getResponseSize() const { return m_responseSize; }
@@ -582,7 +582,7 @@ protected:
   void parsePostParams();
   static void parseQuery(char *query, ParamMap &params);
   static void urlUnescape(char *value);
-  bool splitHeader(const String& header, String &name, const char *&value);
+  bool splitHeader(const OptString& header, OptString &name, const char *&value);
   std::list<std::string> getCookieLines();
 
   ResponseCompressorManager& getCompressor();

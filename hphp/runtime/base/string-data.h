@@ -38,7 +38,7 @@ namespace HPHP {
 
 struct APCString;
 struct Array;
-struct String;
+struct OptString;
 struct APCHandle;
 struct NamedType;
 struct UnitEmitter;

@@ -71,7 +71,7 @@ const int INVALID_DATA = 1;
 const int BAD_VERSION = 4;
 
 [[noreturn]] NEVER_INLINE
-void throw_tprotocolexception(const String& what, long errorcode) {
+void throw_tprotocolexception(const OptString& what, long errorcode) {
   throw_object(s_TProtocolException, make_vec_array(what, errorcode));
 }
 
@@ -91,7 +91,7 @@ struct BinaryReader {
       : transport(transport), options(options) {}
 
  public:
-  Object read(const String& resultClassName, 
+  Object read(const OptString& resultClassName, 
                      bool strict_read) {
     int8_t messageType = 0;
     int32_t sz = transport.template readBE<int32_t>();
@@ -102,7 +102,7 @@ struct BinaryReader {
       if (version != VERSION_1) {
         char errbuf[128];
         snprintf(errbuf, sizeof(errbuf), "Bad version identifier, sz=%d", sz);
-        throw_tprotocolexception(String(errbuf, CopyString), BAD_VERSION);
+        throw_tprotocolexception(OptString(errbuf, CopyString), BAD_VERSION);
       }
       messageType = (sz & 0x000000ff);
       int32_t namelen = transport.template readBE<int32_t>();
@@ -117,7 +117,7 @@ struct BinaryReader {
             "No version identifier... "
             "old protocol client in strict mode? sz=%d",
             sz);
-        throw_tprotocolexception(String(errbuf, CopyString), BAD_VERSION);
+        throw_tprotocolexception(OptString(errbuf, CopyString), BAD_VERSION);
       } else {
         // Handle pre-versioned input
         transport.skip(sz); // skip string body
@@ -132,7 +132,7 @@ struct BinaryReader {
     return readStruct(resultClassName);
   }
 
-  Object readStruct(const String& clsName) {
+  Object readStruct(const OptString& clsName) {
     return binary_deserialize_struct(clsName);
   }
 
@@ -203,7 +203,7 @@ struct BinaryReader {
       case T_STRING: {
         uint32_t size = transport.template readBE<uint32_t>();
         if (size && (size + 1)) {
-          String s = String(size, ReserveString);
+          OptString s = OptString(size, ReserveString);
           char* strbuf = s.mutableData();
           transport.pull(strbuf, size);
           s.setSize(size);
@@ -237,7 +237,7 @@ struct BinaryReader {
                 break;
               }
               case TType::T_STRING: {
-                String key = binary_deserialize(
+                OptString key = binary_deserialize(
                                  types[0], key_spec, options, hasTypeWrapper)
                                  .toString();
                 Variant value = binary_deserialize(
@@ -360,7 +360,7 @@ struct BinaryReader {
 
     char errbuf[128];
     snprintf(errbuf, sizeof(errbuf), "Unknown thrift typeID %d", thrift_typeID);
-    throw_tprotocolexception(String(errbuf, CopyString), INVALID_DATA);
+    throw_tprotocolexception(OptString(errbuf, CopyString), INVALID_DATA);
     return init_null();
   }
 
@@ -462,7 +462,7 @@ struct BinaryReader {
     char errbuf[128];
     snprintf(
         errbuf, sizeof(errbuf), "Unknown thrift typeID %ld", thrift_typeID);
-    throw_tprotocolexception(String(errbuf, CopyString), INVALID_DATA);
+    throw_tprotocolexception(OptString(errbuf, CopyString), INVALID_DATA);
   }
 
   NEVER_INLINE
@@ -504,7 +504,7 @@ struct BinaryReader {
     assertx(zthis->assertPropTypeHints());
   }
 
-  Object binary_deserialize_struct(const String& clsName) {
+  Object binary_deserialize_struct(const OptString& clsName) {
     auto const cls = Class::load(clsName.get());
     if (cls == nullptr) raise_error(Strings::UNKNOWN_CLASS, clsName.data());
 
@@ -579,7 +579,7 @@ struct BinaryWriter {
   explicit BinaryWriter(Transport& transport) : transport(transport) {}
 
  public:
-  void write(const String& method_name,
+  void write(const OptString& method_name,
              int64_t msgtype,
              int64_t seqid,
              bool strict_write,
@@ -623,7 +623,7 @@ struct BinaryWriter {
     transport.push(reinterpret_cast<const uint8_t*>(&i), 2);
   }
 
-  void writeString(const String& s) {
+  void writeString(const OptString& s) {
     auto slice = s.slice();
     uint32_t len = htonl(slice.size());
     transport.push(reinterpret_cast<const uint8_t*>(&len), 4);
@@ -705,7 +705,7 @@ struct BinaryWriter {
               "type as a T_STRING",
               INVALID_DATA);
         }
-        String sv = value.toString();
+        OptString sv = value.toString();
         writeString(sv);
       }
         return;
@@ -747,7 +747,7 @@ struct BinaryWriter {
     };
     char errbuf[128];
     snprintf(errbuf, sizeof(errbuf), "Unknown thrift typeID %d", thrift_typeID);
-    throw_tprotocolexception(String(errbuf, CopyString), INVALID_DATA);
+    throw_tprotocolexception(OptString(errbuf, CopyString), INVALID_DATA);
   }
 
   void binary_serialize(
@@ -844,7 +844,7 @@ struct BinaryWriter {
 
 void HHVM_FUNCTION(thrift_protocol_write_binary,
                    const Object& transportobj,
-                   const String& method_name,
+                   const OptString& method_name,
                    int64_t msgtype,
                    const Object& request_struct,
                    int64_t seqid,
@@ -892,7 +892,7 @@ void HHVM_FUNCTION(thrift_protocol_write_binary_struct,
 
 Object HHVM_FUNCTION(thrift_protocol_read_binary,
                      const Object& transportobj,
-                     const String& obj_typename,
+                     const OptString& obj_typename,
                      bool strict_read,
                      int64_t options) {
   CoeffectsAutoGuard _;
@@ -909,7 +909,7 @@ Object HHVM_FUNCTION(thrift_protocol_read_binary,
 
 Variant HHVM_FUNCTION(thrift_protocol_read_binary_struct,
                       const Object& transportobj,
-                      const String& obj_typename,
+                      const OptString& obj_typename,
                       int64_t options) {
   // Suppress class-to-string conversion warnings that occur during
   // serialization and deserialization.
@@ -922,7 +922,7 @@ Variant HHVM_FUNCTION(thrift_protocol_read_binary_struct,
   return reader.readStruct(obj_typename);
 }
 
-String HHVM_FUNCTION(thrift_protocol_write_binary_struct_to_string,
+OptString HHVM_FUNCTION(thrift_protocol_write_binary_struct_to_string,
                      const Object& request_struct) {
   
   CoeffectsAutoGuard _;
@@ -931,7 +931,7 @@ String HHVM_FUNCTION(thrift_protocol_write_binary_struct_to_string,
   SuppressClassConversionNotice suppressor;
 
   VMRegAnchor _2;
-  String ret = String(1024, ReserveString);
+  OptString ret = OptString(1024, ReserveString);
   auto iobuf = folly::IOBuf::wrapBufferAsValue(ret.mutableData(), ret.capacity());
   iobuf.clear();
   folly::io::Appender appender(&iobuf, 1024);
@@ -955,8 +955,8 @@ String HHVM_FUNCTION(thrift_protocol_write_binary_struct_to_string,
 }
 
 Object HHVM_FUNCTION(thrift_protocol_read_binary_struct_from_string,
-                     const String& serialized,
-                     const String& obj_typename,
+                     const OptString& serialized,
+                     const OptString& obj_typename,
                      int64_t options) {
   CoeffectsAutoGuard _;
   // Suppress class-to-string conversion warnings that occur during

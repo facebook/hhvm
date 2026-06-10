@@ -70,7 +70,7 @@ void tvSetLegacyArrayInPlace(tv_lval tv, bool isLegacy);
 bool tvCastToBoolean(TypedValue tv);
 int64_t tvCastToInt64(TypedValue tv);
 double tvCastToDouble(TypedValue tv);
-String tvCastToString(TypedValue tv);
+OptString tvCastToString(TypedValue tv);
 template <IntishCast IC = IntishCast::None>
 Array tvCastToArrayLike(TypedValue tv);
 

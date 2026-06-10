@@ -28,7 +28,7 @@ TRACE_SET_MOD(debugger)
 void CmdWhere::sendImpl(DebuggerThriftBuffer &thrift) {
   DebuggerCommand::sendImpl(thrift);
   {
-    String sdata;
+    OptString sdata;
     DebuggerWireHelpers::WireSerialize(m_stacktrace, sdata);
     thrift.write(sdata);
   }
@@ -38,7 +38,7 @@ void CmdWhere::sendImpl(DebuggerThriftBuffer &thrift) {
 void CmdWhere::recvImpl(DebuggerThriftBuffer &thrift) {
   DebuggerCommand::recvImpl(thrift);
   {
-    String sdata;
+    OptString sdata;
     thrift.read(sdata);
     if (DebuggerWireHelpers::WireUnserialize(sdata, m_stacktrace) !=
         DebuggerWireHelpers::NoError) {

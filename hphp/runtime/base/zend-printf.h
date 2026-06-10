@@ -23,13 +23,13 @@
 
 namespace HPHP {
 
-struct String;
+struct OptString;
 struct Array;
 
 /**
  * How PHP formats a string. Called by ext/ext_string.cpp.
  */
-String string_printf(const char *format, int len, const Array& args);
+OptString string_printf(const char *format, int len, const Array& args);
 
 }
 

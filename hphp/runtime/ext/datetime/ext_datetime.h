@@ -44,7 +44,7 @@ struct DateTimeData : SystemLib::ClassLoader<"DateTime"> {
     bool err = false;
     return m_dt->toTimeStamp(err);
   }
-  String format(const String& format) const {
+  OptString format(const OptString& format) const {
     assertx(m_dt);
     return m_dt->toString(format, false);
   }
@@ -61,7 +61,7 @@ struct DateTimeData : SystemLib::ClassLoader<"DateTime"> {
 };
 
 void HHVM_METHOD(DateTime, __construct,
-                 const String& time = "now",
+                 const OptString& time = "now",
                  const Variant& timezone = uninit_variant);
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -75,7 +75,7 @@ struct DateTimeZoneData : SystemLib::ClassLoader<"DateTimeZone"> {
     return *this;
   }
 
-  String getName() const {
+  OptString getName() const {
     assertx(m_tz);
     return m_tz->name();
   }
@@ -104,7 +104,7 @@ struct DateTimeZoneData : SystemLib::ClassLoader<"DateTimeZone"> {
 };
 
 void HHVM_METHOD(DateTimeZone, __construct,
-                 const String& timezone);
+                 const OptString& timezone);
 
 ///////////////////////////////////////////////////////////////////////////////
 // class DateInterval
@@ -127,7 +127,7 @@ struct DateIntervalData : SystemLib::ClassLoader<"DateInterval"> {
 ///////////////////////////////////////////////////////////////////////////////
 // timezone
 
-String HHVM_FUNCTION(date_default_timezone_get);
+OptString HHVM_FUNCTION(date_default_timezone_get);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

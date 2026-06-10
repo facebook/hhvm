@@ -56,7 +56,7 @@ void ThriftBuffer::reset(bool read) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void ThriftBuffer::write(const String& data) {
+void ThriftBuffer::write(const OptString& data) {
   int32_t len = data.size();
   write(len);
 
@@ -73,7 +73,7 @@ void ThriftBuffer::write(const String& data) {
 
 void ThriftBuffer::flush() {
   *m_p = '\0';
-  String data(m_buf, m_p - m_buf, CopyString);
+  OptString data(m_buf, m_p - m_buf, CopyString);
   m_p = m_buf;
   flushImpl(data);
 }
@@ -96,7 +96,7 @@ void ThriftBuffer::read(char *data, int len) {
   data += avail;
 
   while (true) {
-    String ret = readImpl();
+    OptString ret = readImpl();
     if (ret.empty()) {
       throwError("unable to read enough bytes",INVALID_DATA);
     }
@@ -196,7 +196,7 @@ void ThriftBuffer::throwInvalidStringSize(int size) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static Variant unserialize_with_no_notice(const String& str) {
+static Variant unserialize_with_no_notice(const OptString& str) {
   VariableUnserializer vu(str.data(), str.size(),
       VariableUnserializer::Type::Serialize, true);
   Variant v;
@@ -211,13 +211,13 @@ static Variant unserialize_with_no_notice(const String& str) {
 }
 
 void ThriftBuffer::read(std::string &data) {
-  String sdata;
+  OptString sdata;
   read(sdata);
   data = std::string(sdata.data(), sdata.size());
 }
 
 void ThriftBuffer::write(const std::string &data) {
-  write(String(data.data(), data.size(), CopyString));
+  write(OptString(data.data(), data.size(), CopyString));
 }
 
 void ThriftBuffer::read(std::vector<std::string> &data) {
@@ -238,38 +238,38 @@ void ThriftBuffer::write(const std::vector<std::string> &data) {
 }
 
 void ThriftBuffer::read(Array &data) {
-  String sdata;
+  OptString sdata;
   read(sdata);
   data = unserialize_with_no_notice(sdata).toArray();
 }
 
 void ThriftBuffer::write(const Array& data) {
   VariableSerializer vs(m_serializerType);
-  String sdata = vs.serialize(VarNR(data), true);
+  OptString sdata = vs.serialize(VarNR(data), true);
   write(sdata);
 }
 
 void ThriftBuffer::read(Object &data) {
-  String sdata;
+  OptString sdata;
   read(sdata);
   data = unserialize_with_no_notice(sdata).toObject();
 }
 
 void ThriftBuffer::write(const Object& data) {
   VariableSerializer vs(m_serializerType);
-  String sdata = vs.serialize(VarNR(data), true);
+  OptString sdata = vs.serialize(VarNR(data), true);
   write(sdata);
 }
 
 void ThriftBuffer::read(Variant &data) {
-  String sdata;
+  OptString sdata;
   read(sdata);
   data = unserialize_with_no_notice(sdata);
 }
 
 void ThriftBuffer::write(const Variant& data) {
   VariableSerializer vs(m_serializerType);
-  String sdata = vs.serialize(data, true);
+  OptString sdata = vs.serialize(data, true);
   write(sdata);
 }
 

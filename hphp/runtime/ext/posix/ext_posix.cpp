@@ -56,21 +56,21 @@ static struct POSIXExtension final : Extension {
 ///////////////////////////////////////////////////////////////////////////////
 
 bool HHVM_FUNCTION(posix_access,
-                   const String& file,
+                   const OptString& file,
                    int64_t mode /* = 0 */) {
   if (!FileUtil::checkPathAndWarn(file, __FUNCTION__ + 2, 1)) {
     return false;
   }
 
-  String path = File::TranslatePath(file);
+  OptString path = File::TranslatePath(file);
   if (path.empty()) {
     return false;
   }
   return !access(path.data(), mode);
 }
 
-String HHVM_FUNCTION(posix_ctermid) {
-  String s = String(L_ctermid, ReserveString);
+OptString HHVM_FUNCTION(posix_ctermid) {
+  OptString s = OptString(L_ctermid, ReserveString);
   char *buffer = s.mutableData();
   ctermid(buffer);
   s.setSize(strlen(buffer));
@@ -85,8 +85,8 @@ int64_t HHVM_FUNCTION(posix_errno) {
   return errno;
 }
 
-String HHVM_FUNCTION(posix_getcwd) {
-  String s = String(PATH_MAX, ReserveString);
+OptString HHVM_FUNCTION(posix_getcwd) {
+  OptString s = OptString(PATH_MAX, ReserveString);
   char *buffer = s.mutableData();
   if (getcwd(buffer, PATH_MAX) == NULL) {
     return "/";
@@ -129,12 +129,12 @@ static Variant php_posix_group_to_array(group* gr) {
 
   auto members = Array::CreateVec();
   for (int count=0; gr->gr_mem[count] != NULL; count++) {
-    members.append(String(gr->gr_mem[count], CopyString));
+    members.append(OptString(gr->gr_mem[count], CopyString));
   }
 
   return make_dict_array(
-    s_name, String(gr->gr_name, CopyString),
-    s_passwd, String(gr->gr_passwd, CopyString),
+    s_name, OptString(gr->gr_name, CopyString),
+    s_passwd, OptString(gr->gr_passwd, CopyString),
     s_members, members,
     s_gid, (int)gr->gr_gid
   );
@@ -154,7 +154,7 @@ Variant HHVM_FUNCTION(posix_getgrgid,
 }
 
 Variant HHVM_FUNCTION(posix_getgrnam,
-                      const String& name) {
+                      const OptString& name) {
   if (name.size() == 0) return false;
 
   auto buf = GroupBuffer{};
@@ -183,7 +183,7 @@ Variant HHVM_FUNCTION(posix_getgroups) {
 Variant HHVM_FUNCTION(posix_getlogin) {
   char buf[L_cuserid];
   if (!getlogin_r(buf, sizeof(buf) - 1)) {
-    return String(buf, CopyString);
+    return OptString(buf, CopyString);
   }
   return false;
 }
@@ -212,18 +212,18 @@ static Variant php_posix_passwd_to_array(passwd* pw) {
   if (pw == nullptr) return false;
 
   return make_dict_array(
-    s_name,   String(pw->pw_name,   CopyString),
-    s_passwd, String(pw->pw_passwd, CopyString),
+    s_name,   OptString(pw->pw_name,   CopyString),
+    s_passwd, OptString(pw->pw_passwd, CopyString),
     s_uid,    (int)pw->pw_uid,
     s_gid,    (int)pw->pw_gid,
-    s_gecos,  String(pw->pw_gecos,  CopyString),
-    s_dir,    String(pw->pw_dir,    CopyString),
-    s_shell,  String(pw->pw_shell,  CopyString)
+    s_gecos,  OptString(pw->pw_gecos,  CopyString),
+    s_dir,    OptString(pw->pw_dir,    CopyString),
+    s_shell,  OptString(pw->pw_shell,  CopyString)
   );
 }
 
 Variant HHVM_FUNCTION(posix_getpwnam,
-                      const String& username) {
+                      const OptString& username) {
   if (username.size() == 0) return false;
 
   auto buf = PasswdBuffer{};
@@ -263,8 +263,8 @@ bool posix_addlimit(int limit, const char *name, T &ret) {
     return false;
   }
 
-  String softStr(soft, CopyString);
-  String hardStr(hard, CopyString);
+  OptString softStr(soft, CopyString);
+  OptString hardStr(hard, CopyString);
 
   if (rl.rlim_cur == RLIM_INFINITY) {
     ret.set(softStr, s_unlimited);
@@ -327,7 +327,7 @@ int64_t HHVM_FUNCTION(posix_getuid) {
 }
 
 bool HHVM_FUNCTION(posix_initgroups,
-                   const String& name,
+                   const OptString& name,
                    int64_t base_group_id) {
   if (name.empty()) return false;
   return !initgroups(name.data(), base_group_id);
@@ -382,7 +382,7 @@ bool HHVM_FUNCTION(posix_kill,
 }
 
 bool HHVM_FUNCTION(posix_mkfifo,
-                   const String& pathname,
+                   const OptString& pathname,
                    int64_t mode) {
   if (!FileUtil::checkPathAndWarn(pathname, __FUNCTION__ + 2, 1)) {
     return false;
@@ -392,7 +392,7 @@ bool HHVM_FUNCTION(posix_mkfifo,
 }
 
 bool HHVM_FUNCTION(posix_mknod,
-                   const String& pathname,
+                   const OptString& pathname,
                    int64_t mode,
                    int64_t major /* = 0 */,
                    int64_t minor /* = 0 */) {
@@ -448,9 +448,9 @@ bool HHVM_FUNCTION(posix_setuid,
   return setuid(uid);
 }
 
-String HHVM_FUNCTION(posix_strerror,
+OptString HHVM_FUNCTION(posix_strerror,
                      int64_t errnum) {
-  return String(folly::errnoStr(errnum));
+  return OptString(folly::errnoStr(errnum));
 }
 
 const StaticString
@@ -483,7 +483,7 @@ Variant HHVM_FUNCTION(posix_ttyname,
     return false;
   }
 
-  String ttyname(ttyname_maxlen, ReserveString);
+  OptString ttyname(ttyname_maxlen, ReserveString);
   char *p = ttyname.mutableData();
   if (ttyname_r(php_posix_get_fd(fd), p, ttyname_maxlen)) {
     return false;
@@ -507,13 +507,13 @@ Variant HHVM_FUNCTION(posix_uname) {
   }
 
   return make_dict_array(
-    s_sysname,      String(u.sysname,    CopyString)
-    , s_nodename,   String(u.nodename,   CopyString)
-    , s_release,    String(u.release,    CopyString)
-    , s_version,    String(u.version,    CopyString)
-    , s_machine,    String(u.machine,    CopyString)
+    s_sysname,      OptString(u.sysname,    CopyString)
+    , s_nodename,   OptString(u.nodename,   CopyString)
+    , s_release,    OptString(u.release,    CopyString)
+    , s_version,    OptString(u.version,    CopyString)
+    , s_machine,    OptString(u.machine,    CopyString)
 #if defined(_GNU_SOURCE)
-    , s_domainname, String(u.domainname, CopyString)
+    , s_domainname, OptString(u.domainname, CopyString)
 #endif
   );
 }

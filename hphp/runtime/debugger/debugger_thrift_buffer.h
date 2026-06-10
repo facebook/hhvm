@@ -47,8 +47,8 @@ struct DebuggerThriftBuffer : ThriftBuffer {
   }
 
 protected:
- String readImpl() override;
- void flushImpl(const String& data) override;
+ OptString readImpl() override;
+ void flushImpl(const OptString& data) override;
  void throwError(const char* msg, int code) override;
 
 private:
@@ -70,12 +70,12 @@ struct DebuggerWireHelpers {
   // Serialization functions for Array, Object, and Variant
   // Return true on success, false on error
   // On error, the result would be a special string indicating the error
-  static int WireSerialize(const Array& data, String& sdata);
-  static int WireSerialize(const Object& data, String& sdata);
-  static int WireSerialize(const Variant& data, String& sdata);
-  static int WireUnserialize(String& sdata, Array& data);
-  static int WireUnserialize(String& sdata, Object& data);
-  static int WireUnserialize(String& sdata, Variant& data);
+  static int WireSerialize(const Array& data, OptString& sdata);
+  static int WireSerialize(const Object& data, OptString& sdata);
+  static int WireSerialize(const Variant& data, OptString& sdata);
+  static int WireUnserialize(OptString& sdata, Array& data);
+  static int WireUnserialize(OptString& sdata, Object& data);
+  static int WireUnserialize(OptString& sdata, Variant& data);
 };
 
 

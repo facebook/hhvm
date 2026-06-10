@@ -25,7 +25,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // class Awaitable
 
-String HHVM_METHOD(Awaitable, getName);
+OptString HHVM_METHOD(Awaitable, getName);
 
 /**
  * A wait handle is an object that describes operation that is potentially

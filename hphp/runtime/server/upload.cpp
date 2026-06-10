@@ -830,7 +830,7 @@ void rfc1867PostHandler(Transport* transport,
           new_val_len = newlength;
         }
 
-        String val(value, new_val_len, CopyString);
+        OptString val(value, new_val_len, CopyString);
         safe_php_register_variable(param, val, post, 0);
 
         if (!strcasecmp(param, "MAX_FILE_SIZE")) {
@@ -1076,10 +1076,10 @@ void rfc1867PostHandler(Transport* transport,
         snprintf(lbuf, llen, "%s[name]", param);
       }
       if (s) {
-        String val(s+1, strlen(s+1), CopyString);
+        OptString val(s+1, strlen(s+1), CopyString);
         safe_php_register_variable(lbuf, val, files, 0);
       } else {
-        String val(filename, strlen(filename), CopyString);
+        OptString val(filename, strlen(filename), CopyString);
         safe_php_register_variable(lbuf, val, files, 0);
       }
       free(filename);
@@ -1104,7 +1104,7 @@ void rfc1867PostHandler(Transport* transport,
       } else {
         snprintf(lbuf, llen, "%s[type]", param);
       }
-      String val(cd, strlen(cd), CopyString);
+      OptString val(cd, strlen(cd), CopyString);
       safe_php_register_variable(lbuf, val, files, 0);
 
       /* Restore Content-Type Header */

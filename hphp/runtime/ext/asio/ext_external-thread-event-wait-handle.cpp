@@ -243,7 +243,7 @@ void c_ExternalThreadEventWaitHandle::process() {
   }
 }
 
-String c_ExternalThreadEventWaitHandle::getName() {
+OptString c_ExternalThreadEventWaitHandle::getName() {
   return s_externalThreadEvent;
 }
 

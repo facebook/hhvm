@@ -114,9 +114,9 @@ static void mcr_throwOptionException(
   VecInit errorArray(errors.size());
   for (auto err : errors) {
     auto e = make_dict_array(
-      s_option, String(err.requestedName),
-      s_value, String(err.requestedValue),
-      s_error, String(err.errorMsg)
+      s_option, OptString(err.requestedName),
+      s_value, OptString(err.requestedValue),
+      s_error, OptString(err.errorMsg)
     );
     errorArray.append(e);
   }
@@ -163,7 +163,7 @@ struct MCRouter {
   template <class Request>
   void send(std::unique_ptr<const Request> request, MCRouterResult* res);
 
-  void init(const Array& options, const String& pid) {
+  void init(const Array& options, const OptString& pid) {
     mc::McrouterOptions opts;
     parseOptions(opts, options);
 
@@ -246,7 +246,7 @@ struct MCRouterResult : AsioExternalThreadEvent {
       // Deferred string value and cas, see below
       Array ret = make_dict_array(
         s_value,
-          String(m_stringResult.c_str(), m_stringResult.size(), CopyString),
+          OptString(m_stringResult.c_str(), m_stringResult.size(), CopyString),
         s_cas, (int64_t)m_cas,
         s_flags, (int64_t)m_flags
       );
@@ -399,19 +399,19 @@ Object MCRouter::issue(std::unique_ptr<const Request> request) {
 /////////////////////////////////////////////////////////////////////////////
 
 static void HHVM_METHOD(MCRouter, __construct,
-                        const Array& opts, const String& pid) {
+                        const Array& opts, const OptString& pid) {
   Native::data<MCRouter>(this_)->init(opts, pid);
 }
 
 template <class M>
-static Object mcr_str(ObjectData* this_, const String& key) {
+static Object mcr_str(ObjectData* this_, const OptString& key) {
   return Native::data<MCRouter>(this_)->issue(
       std::make_unique<const M>(folly::StringPiece(key.c_str(), key.size())));
 }
 
 template <class Request>
 static Object mcr_set(ObjectData* this_,
-                      const String& key, const String& val,
+                      const OptString& key, const OptString& val,
                       int64_t flags, int64_t expiration) {
   auto request =
       std::make_unique<Request>(folly::StringPiece(key.c_str(), key.size()));
@@ -425,7 +425,7 @@ static Object mcr_set(ObjectData* this_,
 
 template <class Request>
 static Object mcr_aprepend(ObjectData* this_,
-                           const String& key, const String& val) {
+                           const OptString& key, const OptString& val) {
   auto request =
       std::make_unique<Request>(folly::StringPiece(key.c_str(), key.size()));
   request->value_ref() = folly::IOBuf(
@@ -436,7 +436,7 @@ static Object mcr_aprepend(ObjectData* this_,
 
 template <class Request>
 static Object mcr_str_delta(ObjectData* this_,
-                            const String& key, int64_t val) {
+                            const OptString& key, int64_t val) {
   auto request =
       std::make_unique<Request>(folly::StringPiece(key.c_str(), key.size()));
   request->delta_ref() = val;
@@ -460,8 +460,8 @@ static Object mcr_version(ObjectData* this_) {
 
 static Object HHVM_METHOD(MCRouter, cas,
                           int64_t cas,
-                          const String& key,
-                          const String& val,
+                          const OptString& key,
+                          const OptString& val,
                           int64_t expiration /*=0*/) {
   using Request = mc::McCasRequest;
 
@@ -477,7 +477,7 @@ static Object HHVM_METHOD(MCRouter, cas,
 
 /////////////////////////////////////////////////////////////////////////////
 
-static String HHVM_STATIC_METHOD(MCRouter, getOpName, int64_t op) {
+static OptString HHVM_STATIC_METHOD(MCRouter, getOpName, int64_t op) {
   auto name = mc_op_to_string((mc_op_t)op);
   if (!name) {
     std::string msg = "Unknown mc_op_* value: ";
@@ -487,7 +487,7 @@ static String HHVM_STATIC_METHOD(MCRouter, getOpName, int64_t op) {
   return name;
 }
 
-static String HHVM_STATIC_METHOD(MCRouter, getResultName, int64_t res) {
+static OptString HHVM_STATIC_METHOD(MCRouter, getResultName, int64_t res) {
   auto name = compatibility::carbonResultToString((carbon::Result)res);
   if (!name) {
     std::string msg = "Unknown mc_res_* value: ";

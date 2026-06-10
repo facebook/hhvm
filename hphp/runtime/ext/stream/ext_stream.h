@@ -106,14 +106,14 @@ struct StreamContext final : ResourceData {
   DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(StreamContext)
 
   CLASSNAME_IS("stream-context")
-  const String& o_getClassNameHook() const override { return classnameof(); }
+  const OptString& o_getClassNameHook() const override { return classnameof(); }
 
   StreamContext(const Array& options, const Array& params)
     : m_options(options), m_params(params) {
   }
 
   static bool validateOptions(const Variant& options);
-  void setOption(const String& wrapper, const String& option,
+  void setOption(const OptString& wrapper, const OptString& option,
                  const Variant& value);
   void mergeOptions(const Array& options);
   Array getOptions() const;

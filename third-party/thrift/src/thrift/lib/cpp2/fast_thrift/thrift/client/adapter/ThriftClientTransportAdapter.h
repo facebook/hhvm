@@ -26,6 +26,7 @@
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/Messages.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/common/RocketClientConnection.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/Messages.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/client/common/Event.h>
 
 namespace apache::thrift::fast_thrift::thrift::client {
 
@@ -88,6 +89,18 @@ class ThriftClientTransportAdapter {
     connection_->appAdapter->setOnWriteReady([this]() noexcept {
       if (pipeline_) {
         pipeline_->onWriteReady();
+      }
+    });
+    // Bridge the rocket transport's graceful-close notification (server sent
+    // CONNECTION_CLOSE) into a thrift CloseConnection event. The
+    // pipeline-resident drain handler reacts to it; the bridge only
+    // translates the rocket-native signal into thrift vocabulary.
+    connection_->appAdapter->setOnClose([this]() noexcept {
+      if (pipeline_) {
+        pipeline_->fireEvent(
+            ThriftClientEventType::CloseConnection,
+            channel_pipeline::erase_and_box(
+                ThriftClientEvent{ThriftClientEventType::CloseConnection}));
       }
     });
   }

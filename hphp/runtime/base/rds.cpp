@@ -24,6 +24,7 @@
 #include <vector>
 
 #include <folly/Bits.h>
+#include <folly/container/FBVector.h>
 #include <folly/portability/SysMman.h>
 #include <folly/sorted_vector_types.h>
 #include <folly/String.h>
@@ -633,11 +634,25 @@ void unbind(Symbol key, Handle handle) {
 using namespace detail;
 
 void visitSymbols(std::function<void(const Symbol&,Handle,uint32_t)> fun) {
-  Guard g(s_allocMutex);
-  // make sure that find/count don't interfere with iteration.
-  s_linkTable.rehash();
-  for (auto it : s_linkTable) {
-    fun(it.first, it.second.handle, it.second.size);
+  struct LinkSnapshot {
+    Symbol symbol;
+    Handle handle;
+    uint32_t size;
+  };
+  folly::fbvector<LinkSnapshot> links;
+  links.reserve(s_linkTable.size());
+
+  {
+    Guard g(s_allocMutex);
+    // make sure that find/count don't interfere with iteration.
+    s_linkTable.rehash();
+    for (auto const& it : s_linkTable) {
+      links.push_back({it.first, it.second.handle, it.second.size});
+    }
+  }
+
+  for (auto const& link : links) {
+    fun(link.symbol, link.handle, link.size);
   }
 }
 
@@ -996,8 +1011,6 @@ Ordering profiledOrdering() {
   assertx(shouldProfileAccesses());
   assertx(Cfg::Repo::Authoritative);
 
-  Guard g(s_allocMutex);
-
   struct ItemHasher {
     size_t operator()(const Ordering::Item& i) const {
       return folly::hash::hash_combine(
@@ -1022,12 +1035,21 @@ Ordering profiledOrdering() {
   Map localMap;
   Map normalMap;
 
+  folly::fbvector<ProfilingMeta> profiles;
+  profiles.reserve(s_profiling.size());
+  {
+    Guard g(s_allocMutex);
+    for (auto const& profile : s_profiling) {
+      profiles.emplace_back(profile.second);
+    }
+  }
+
   auto const bases = allTLBases();
-  for (auto const& profile : s_profiling) {
-    assertx(isLocalHandle(profile.second.countHandle));
+  for (auto const& profile : profiles) {
+    assertx(isLocalHandle(profile.countHandle));
 
     auto& map = [&] () -> Map& {
-      switch (profile.second.mode) {
+      switch (profile.mode) {
         case Mode::Persistent: return persistentMap;
         case Mode::Local:      return localMap;
         case Mode::Normal:     return normalMap;
@@ -1037,15 +1059,15 @@ Ordering profiledOrdering() {
     }();
 
     auto const key = Ordering::Item{
-      profilingKeyForSymbol(profile.second.symbol),
-      profile.second.size,
-      profile.second.alignment
+      profilingKeyForSymbol(profile.symbol),
+      profile.size,
+      profile.alignment
     };
 
     for (auto const base : bases) {
       map[key] += handleToRef<uint64_t, Mode::Local, false>(
         base,
-        profile.second.countHandle
+        profile.countHandle
       );
     }
   }

@@ -73,6 +73,16 @@ interaction Boom {
   void noop();
 }
 
+// Interaction whose only method is a sink. Sink/bidi interaction methods are
+// gated out of the generated interface (deferred to a later change), so *all* of
+// this interaction's methods are gated and the generated `SinkOnlyInterface`
+// body is empty -- exercising the `has_interface_methods? == false` codegen path
+// that must emit a bare `pass` (and a still-valid, subclassable interface).
+interaction SinkOnly {
+  // @lint-ignore THRIFTCHECKS avoid-sink-method (empty-interface codegen coverage)
+  sink<i32, i32> collect();
+}
+
 service Calculator {
   // baseline non-interaction method (regression guard)
   i32 echo(1: i32 n);
@@ -92,4 +102,8 @@ service Calculator {
   // explicit factory whose server-side `createBoom` raises (exercises the
   // maybeFulfillTilePromise factory-exception path)
   Boom newBoom();
+
+  // factory for the sink-only interaction; only here so `createSinkOnly` and the
+  // empty `SinkOnlyInterface` are generated and exercised at build/import time.
+  performs SinkOnly;
 }

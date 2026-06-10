@@ -40,7 +40,7 @@ from {{program.base_library_package}}.serializer import serialize_iobuf, deseria
 import {{program.base_library_package}}.mutable_containers as _fbthrift_python_mutable_containers
 from {{program.base_library_package}}.mutable_serializer import serialize_iobuf, deserialize, Protocol
 {{/if python.generate_mutable_types?}}
-from {{program.base_library_package}}.server import FunctionEntry as _fbthrift_FunctionEntry, ServiceInterface as _fbthrift_ServiceInterface, RpcKind, PythonUserException
+from {{program.base_library_package}}.server import FunctionEntry as _fbthrift_FunctionEntry, Interaction as _fbthrift_Interaction, ServiceInterface as _fbthrift_ServiceInterface, RpcKind, PythonUserException
 from {{program.base_library_package}}.streaming.closeable import CloseableGenerator, UserExceptionMeta
 
 import {{program.module_path}}.{{#partial m_types.import_path}} as {{program.module_mangle}}__{{#partial m_types.import_path}}
@@ -79,7 +79,18 @@ class {{service.name}}Interface(
     def getFunctionTable(self) -> _typing.Mapping[bytes, _fbthrift_FunctionEntry]:
         functionTable = {
         {{#each service.supported_functions as |function|}}
+          {{#if function.creates_interaction?}}
+            b"{{function.name}}": _fbthrift_FunctionEntry({{#function}}{{> services/function_kind }}{{/function}}, self._fbthrift__handler_{{function.name}}, interaction=b"{{function.created_interaction.name}}", creates_interaction=True, interaction_factory=self.create{{function.created_interaction.name}}),
+          {{#else}}
             b"{{function.name}}": _fbthrift_FunctionEntry({{#function}}{{> services/function_kind }}{{/function}}, self._fbthrift__handler_{{function.name}}),
+          {{/if function.creates_interaction?}}
+        {{/each}}
+        {{#each service.interactions as |interaction|}}
+          {{#each interaction.supported_functions as |function|}}
+          {{#if (not function.sink_or_stream?)}}{{#if (not function.bidirectional_stream?)}}
+            b"{{interaction.name}}.{{function.name}}": _fbthrift_FunctionEntry({{#function}}{{> services/function_kind }}{{/function}}, {{interaction.name}}Interface._fbthrift__handler_{{function.name}}, interaction=b"{{interaction.name}}", interaction_factory=self.create{{interaction.name}}),
+          {{/if (not function.bidirectional_stream?)}}{{/if (not function.sink_or_stream?)}}
+          {{/each}}
         {{/each}}
         }
         return {**super().getFunctionTable(), **functionTable}
@@ -258,6 +269,59 @@ class {{service.name}}Interface(
         return (serialize_iobuf(return_struct, protocol), return_bidi_callback)
           {{/if (not function.bidirectional_stream?)}}
         {{/if (not function.oneway?)}}
+
+{{/each}}
+{{! Abstract factories for interactions this service can create. The runtime
+    calls these to construct the per-session handler (Tile). }}
+{{#each service.interactions as |interaction|}}
+    def create{{interaction.name}}(self) -> {{interaction.name}}Interface:
+        raise NotImplementedError("create{{interaction.name}} is not implemented")
+
+{{/each}}
+{{! Interaction handler interfaces. Single request/response + oneway only;
+    streaming/sink methods are generated in a later change. }}
+{{#each service.interactions as |interaction|}}
+class {{interaction.name}}Interface(
+    _fbthrift_Interaction,
+    metaclass=ABCMeta
+):
+{{#if (not interaction.has_single_request_functions?)}}
+    pass
+{{/if (not interaction.has_single_request_functions?)}}
+{{#each interaction.supported_functions as |function|}}
+{{#if (not function.sink_or_stream?)}}{{#if (not function.bidirectional_stream?)}}
+
+    async def {{function.name}}(
+            self{{#each function.params.fields as |field|}},
+            {{field.py_name}}: {{#partial typehints.field_pep484_type field=field}}{{/each}}
+        ) -> {{> services/service_func_return_type }}:
+        raise NotImplementedError("async def {{function.name}} is not implemented")
+
+    async def _fbthrift__handler_{{function.name}}(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) {{!
+            }}-> {{> services/service_handler_return_type }}:
+        args_struct = deserialize({{#partial m_functions.args_type service=interaction function=function}}, args, protocol)
+        {{#if function.exceptions?}}
+        try:
+            value = await self.{{function.name}}({{#function.params.fields}}args_struct.{{field:py_name}},{{/function.params.fields}})
+            return_struct = {{#partial m_functions.return_type service=interaction function=function}}({{#if function.with_regular_response?}}success=value{{/if}})
+        {{#each (array.enumerate function.exceptions) as |index field|}}
+        except {{field.type.module_mangle}}.{{#partial m_types.unadapted_name type=field.type}} as e:
+            return_struct = {{#partial m_functions.return_type service=interaction function=function}}({{#partial m_fields.exception_field_name field=field index=index}}=e)
+            buf = serialize_iobuf(return_struct, protocol)
+            exp = PythonUserException('{{field.type.py3_namespace}}{{#partial m_types.unadapted_name type=field.type}}', str(e), buf)
+            raise exp
+        {{/each}}
+        {{#else}}
+        value = await self.{{function.name}}({{#function.params.fields}}args_struct.{{field:py_name}},{{/function.params.fields}})
+          {{#if (not function.oneway?)}}
+        return_struct = {{#partial m_functions.return_type service=interaction function=function}}({{#if function.with_regular_response?}}success=value{{/if}})
+          {{/if (not function.oneway?)}}
+        {{/if function.exceptions?}}
+        {{#if (not function.oneway?)}}
+        return serialize_iobuf(return_struct, protocol)
+        {{/if (not function.oneway?)}}
+{{/if (not function.bidirectional_stream?)}}{{/if (not function.sink_or_stream?)}}
+{{/each}}
 
 {{/each}}
 {{/each}}

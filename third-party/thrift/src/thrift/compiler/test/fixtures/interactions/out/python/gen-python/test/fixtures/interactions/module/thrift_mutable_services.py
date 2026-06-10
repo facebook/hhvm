@@ -17,7 +17,7 @@ import folly.iobuf as _fbthrift_iobuf
 import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 import thrift.python.mutable_containers as _fbthrift_python_mutable_containers
 from thrift.python.mutable_serializer import serialize_iobuf, deserialize, Protocol
-from thrift.python.server import FunctionEntry as _fbthrift_FunctionEntry, ServiceInterface as _fbthrift_ServiceInterface, RpcKind, PythonUserException
+from thrift.python.server import FunctionEntry as _fbthrift_FunctionEntry, Interaction as _fbthrift_Interaction, ServiceInterface as _fbthrift_ServiceInterface, RpcKind, PythonUserException
 from thrift.python.streaming.closeable import CloseableGenerator, UserExceptionMeta
 
 import test.fixtures.interactions.module.thrift_mutable_types as _fbthrift__test__fixtures__interactions__module__thrift_mutable_types
@@ -37,9 +37,14 @@ class MyServiceInterface(
     def getFunctionTable(self) -> _typing.Mapping[bytes, _fbthrift_FunctionEntry]:
         functionTable = {
             b"foo": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_foo),
-            b"interact": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_interact),
-            b"interactFast": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_interactFast),
-            b"serialize": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE, self._fbthrift__handler_serialize),
+            b"interact": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_interact, interaction=b"MyInteraction", creates_interaction=True, interaction_factory=self.createMyInteraction),
+            b"interactFast": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_interactFast, interaction=b"MyInteractionFast", creates_interaction=True, interaction_factory=self.createMyInteractionFast),
+            b"serialize": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE, self._fbthrift__handler_serialize, interaction=b"SerialInteraction", creates_interaction=True, interaction_factory=self.createSerialInteraction),
+            b"MyInteraction.frobnicate": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, MyInteractionInterface._fbthrift__handler_frobnicate, interaction=b"MyInteraction", interaction_factory=self.createMyInteraction),
+            b"MyInteraction.ping": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_NO_RESPONSE, MyInteractionInterface._fbthrift__handler_ping, interaction=b"MyInteraction", interaction_factory=self.createMyInteraction),
+            b"MyInteractionFast.frobnicate": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, MyInteractionFastInterface._fbthrift__handler_frobnicate, interaction=b"MyInteractionFast", interaction_factory=self.createMyInteractionFast),
+            b"MyInteractionFast.ping": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_NO_RESPONSE, MyInteractionFastInterface._fbthrift__handler_ping, interaction=b"MyInteractionFast", interaction_factory=self.createMyInteractionFast),
+            b"SerialInteraction.frobnicate": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, SerialInteractionInterface._fbthrift__handler_frobnicate, interaction=b"SerialInteraction", interaction_factory=self.createSerialInteraction),
         }
         return {**super().getFunctionTable(), **functionTable}
 
@@ -125,6 +130,87 @@ class MyServiceInterface(
         return_stream = self._fbthrift__stream_wrapper_serialize(stream, protocol)
         return (serialize_iobuf(return_struct, protocol), return_stream)
 
+    def createMyInteraction(self) -> MyInteractionInterface:
+        raise NotImplementedError("createMyInteraction is not implemented")
+
+    def createMyInteractionFast(self) -> MyInteractionFastInterface:
+        raise NotImplementedError("createMyInteractionFast is not implemented")
+
+    def createSerialInteraction(self) -> SerialInteractionInterface:
+        raise NotImplementedError("createSerialInteraction is not implemented")
+
+class MyInteractionInterface(
+    _fbthrift_Interaction,
+    metaclass=ABCMeta
+):
+
+    async def frobnicate(
+            self
+        ) -> builtins.int:
+        raise NotImplementedError("async def frobnicate is not implemented")
+
+    async def _fbthrift__handler_frobnicate(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
+        args_struct = deserialize(_fbthrift__test__fixtures__interactions__module__thrift_mutable_types._fbthrift_MyInteraction_frobnicate_args, args, protocol)
+        try:
+            value = await self.frobnicate()
+            return_struct = _fbthrift__test__fixtures__interactions__module__thrift_mutable_types._fbthrift_MyInteraction_frobnicate_result(success=value)
+        except _fbthrift__test__fixtures__interactions__module__thrift_mutable_types.CustomException as e:
+            return_struct = _fbthrift__test__fixtures__interactions__module__thrift_mutable_types._fbthrift_MyInteraction_frobnicate_result(_ex0__ex=e)
+            buf = serialize_iobuf(return_struct, protocol)
+            exp = PythonUserException('test.fixtures.interactions.CustomException', str(e), buf)
+            raise exp
+        return serialize_iobuf(return_struct, protocol)
+
+    async def ping(
+            self
+        ) -> None:
+        raise NotImplementedError("async def ping is not implemented")
+
+    async def _fbthrift__handler_ping(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> None:
+        args_struct = deserialize(_fbthrift__test__fixtures__interactions__module__thrift_mutable_types._fbthrift_MyInteraction_ping_args, args, protocol)
+        value = await self.ping()
+
+class MyInteractionFastInterface(
+    _fbthrift_Interaction,
+    metaclass=ABCMeta
+):
+
+    async def frobnicate(
+            self
+        ) -> builtins.int:
+        raise NotImplementedError("async def frobnicate is not implemented")
+
+    async def _fbthrift__handler_frobnicate(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
+        args_struct = deserialize(_fbthrift__test__fixtures__interactions__module__thrift_mutable_types._fbthrift_MyInteractionFast_frobnicate_args, args, protocol)
+        value = await self.frobnicate()
+        return_struct = _fbthrift__test__fixtures__interactions__module__thrift_mutable_types._fbthrift_MyInteractionFast_frobnicate_result(success=value)
+        return serialize_iobuf(return_struct, protocol)
+
+    async def ping(
+            self
+        ) -> None:
+        raise NotImplementedError("async def ping is not implemented")
+
+    async def _fbthrift__handler_ping(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> None:
+        args_struct = deserialize(_fbthrift__test__fixtures__interactions__module__thrift_mutable_types._fbthrift_MyInteractionFast_ping_args, args, protocol)
+        value = await self.ping()
+
+class SerialInteractionInterface(
+    _fbthrift_Interaction,
+    metaclass=ABCMeta
+):
+
+    async def frobnicate(
+            self
+        ) -> None:
+        raise NotImplementedError("async def frobnicate is not implemented")
+
+    async def _fbthrift__handler_frobnicate(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
+        args_struct = deserialize(_fbthrift__test__fixtures__interactions__module__thrift_mutable_types._fbthrift_SerialInteraction_frobnicate_args, args, protocol)
+        value = await self.frobnicate()
+        return_struct = _fbthrift__test__fixtures__interactions__module__thrift_mutable_types._fbthrift_SerialInteraction_frobnicate_result()
+        return serialize_iobuf(return_struct, protocol)
+
 class FactoriesInterface(
     _fbthrift_ServiceInterface,
     metaclass=ABCMeta
@@ -137,9 +223,14 @@ class FactoriesInterface(
     def getFunctionTable(self) -> _typing.Mapping[bytes, _fbthrift_FunctionEntry]:
         functionTable = {
             b"foo": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_foo),
-            b"interact": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_interact),
-            b"interactFast": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_interactFast),
-            b"serialize": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE, self._fbthrift__handler_serialize),
+            b"interact": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_interact, interaction=b"MyInteraction", creates_interaction=True, interaction_factory=self.createMyInteraction),
+            b"interactFast": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_interactFast, interaction=b"MyInteractionFast", creates_interaction=True, interaction_factory=self.createMyInteractionFast),
+            b"serialize": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE, self._fbthrift__handler_serialize, interaction=b"SerialInteraction", creates_interaction=True, interaction_factory=self.createSerialInteraction),
+            b"MyInteraction.frobnicate": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, MyInteractionInterface._fbthrift__handler_frobnicate, interaction=b"MyInteraction", interaction_factory=self.createMyInteraction),
+            b"MyInteraction.ping": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_NO_RESPONSE, MyInteractionInterface._fbthrift__handler_ping, interaction=b"MyInteraction", interaction_factory=self.createMyInteraction),
+            b"MyInteractionFast.frobnicate": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, MyInteractionFastInterface._fbthrift__handler_frobnicate, interaction=b"MyInteractionFast", interaction_factory=self.createMyInteractionFast),
+            b"MyInteractionFast.ping": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_NO_RESPONSE, MyInteractionFastInterface._fbthrift__handler_ping, interaction=b"MyInteractionFast", interaction_factory=self.createMyInteractionFast),
+            b"SerialInteraction.frobnicate": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, SerialInteractionInterface._fbthrift__handler_frobnicate, interaction=b"SerialInteraction", interaction_factory=self.createSerialInteraction),
         }
         return {**super().getFunctionTable(), **functionTable}
 
@@ -225,6 +316,87 @@ class FactoriesInterface(
         return_stream = self._fbthrift__stream_wrapper_serialize(stream, protocol)
         return (serialize_iobuf(return_struct, protocol), return_stream)
 
+    def createMyInteraction(self) -> MyInteractionInterface:
+        raise NotImplementedError("createMyInteraction is not implemented")
+
+    def createMyInteractionFast(self) -> MyInteractionFastInterface:
+        raise NotImplementedError("createMyInteractionFast is not implemented")
+
+    def createSerialInteraction(self) -> SerialInteractionInterface:
+        raise NotImplementedError("createSerialInteraction is not implemented")
+
+class MyInteractionInterface(
+    _fbthrift_Interaction,
+    metaclass=ABCMeta
+):
+
+    async def frobnicate(
+            self
+        ) -> builtins.int:
+        raise NotImplementedError("async def frobnicate is not implemented")
+
+    async def _fbthrift__handler_frobnicate(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
+        args_struct = deserialize(_fbthrift__test__fixtures__interactions__module__thrift_mutable_types._fbthrift_MyInteraction_frobnicate_args, args, protocol)
+        try:
+            value = await self.frobnicate()
+            return_struct = _fbthrift__test__fixtures__interactions__module__thrift_mutable_types._fbthrift_MyInteraction_frobnicate_result(success=value)
+        except _fbthrift__test__fixtures__interactions__module__thrift_mutable_types.CustomException as e:
+            return_struct = _fbthrift__test__fixtures__interactions__module__thrift_mutable_types._fbthrift_MyInteraction_frobnicate_result(_ex0__ex=e)
+            buf = serialize_iobuf(return_struct, protocol)
+            exp = PythonUserException('test.fixtures.interactions.CustomException', str(e), buf)
+            raise exp
+        return serialize_iobuf(return_struct, protocol)
+
+    async def ping(
+            self
+        ) -> None:
+        raise NotImplementedError("async def ping is not implemented")
+
+    async def _fbthrift__handler_ping(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> None:
+        args_struct = deserialize(_fbthrift__test__fixtures__interactions__module__thrift_mutable_types._fbthrift_MyInteraction_ping_args, args, protocol)
+        value = await self.ping()
+
+class MyInteractionFastInterface(
+    _fbthrift_Interaction,
+    metaclass=ABCMeta
+):
+
+    async def frobnicate(
+            self
+        ) -> builtins.int:
+        raise NotImplementedError("async def frobnicate is not implemented")
+
+    async def _fbthrift__handler_frobnicate(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
+        args_struct = deserialize(_fbthrift__test__fixtures__interactions__module__thrift_mutable_types._fbthrift_MyInteractionFast_frobnicate_args, args, protocol)
+        value = await self.frobnicate()
+        return_struct = _fbthrift__test__fixtures__interactions__module__thrift_mutable_types._fbthrift_MyInteractionFast_frobnicate_result(success=value)
+        return serialize_iobuf(return_struct, protocol)
+
+    async def ping(
+            self
+        ) -> None:
+        raise NotImplementedError("async def ping is not implemented")
+
+    async def _fbthrift__handler_ping(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> None:
+        args_struct = deserialize(_fbthrift__test__fixtures__interactions__module__thrift_mutable_types._fbthrift_MyInteractionFast_ping_args, args, protocol)
+        value = await self.ping()
+
+class SerialInteractionInterface(
+    _fbthrift_Interaction,
+    metaclass=ABCMeta
+):
+
+    async def frobnicate(
+            self
+        ) -> None:
+        raise NotImplementedError("async def frobnicate is not implemented")
+
+    async def _fbthrift__handler_frobnicate(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
+        args_struct = deserialize(_fbthrift__test__fixtures__interactions__module__thrift_mutable_types._fbthrift_SerialInteraction_frobnicate_args, args, protocol)
+        value = await self.frobnicate()
+        return_struct = _fbthrift__test__fixtures__interactions__module__thrift_mutable_types._fbthrift_SerialInteraction_frobnicate_result()
+        return serialize_iobuf(return_struct, protocol)
+
 class PerformInterface(
     _fbthrift_ServiceInterface,
     metaclass=ABCMeta
@@ -237,6 +409,11 @@ class PerformInterface(
     def getFunctionTable(self) -> _typing.Mapping[bytes, _fbthrift_FunctionEntry]:
         functionTable = {
             b"foo": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_foo),
+            b"MyInteraction.frobnicate": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, MyInteractionInterface._fbthrift__handler_frobnicate, interaction=b"MyInteraction", interaction_factory=self.createMyInteraction),
+            b"MyInteraction.ping": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_NO_RESPONSE, MyInteractionInterface._fbthrift__handler_ping, interaction=b"MyInteraction", interaction_factory=self.createMyInteraction),
+            b"MyInteractionFast.frobnicate": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, MyInteractionFastInterface._fbthrift__handler_frobnicate, interaction=b"MyInteractionFast", interaction_factory=self.createMyInteractionFast),
+            b"MyInteractionFast.ping": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_NO_RESPONSE, MyInteractionFastInterface._fbthrift__handler_ping, interaction=b"MyInteractionFast", interaction_factory=self.createMyInteractionFast),
+            b"SerialInteraction.frobnicate": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, SerialInteractionInterface._fbthrift__handler_frobnicate, interaction=b"SerialInteraction", interaction_factory=self.createSerialInteraction),
         }
         return {**super().getFunctionTable(), **functionTable}
 
@@ -273,6 +450,87 @@ class PerformInterface(
         return_struct = _fbthrift__test__fixtures__interactions__module__thrift_mutable_types._fbthrift_Perform_foo_result()
         return serialize_iobuf(return_struct, protocol)
 
+    def createMyInteraction(self) -> MyInteractionInterface:
+        raise NotImplementedError("createMyInteraction is not implemented")
+
+    def createMyInteractionFast(self) -> MyInteractionFastInterface:
+        raise NotImplementedError("createMyInteractionFast is not implemented")
+
+    def createSerialInteraction(self) -> SerialInteractionInterface:
+        raise NotImplementedError("createSerialInteraction is not implemented")
+
+class MyInteractionInterface(
+    _fbthrift_Interaction,
+    metaclass=ABCMeta
+):
+
+    async def frobnicate(
+            self
+        ) -> builtins.int:
+        raise NotImplementedError("async def frobnicate is not implemented")
+
+    async def _fbthrift__handler_frobnicate(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
+        args_struct = deserialize(_fbthrift__test__fixtures__interactions__module__thrift_mutable_types._fbthrift_MyInteraction_frobnicate_args, args, protocol)
+        try:
+            value = await self.frobnicate()
+            return_struct = _fbthrift__test__fixtures__interactions__module__thrift_mutable_types._fbthrift_MyInteraction_frobnicate_result(success=value)
+        except _fbthrift__test__fixtures__interactions__module__thrift_mutable_types.CustomException as e:
+            return_struct = _fbthrift__test__fixtures__interactions__module__thrift_mutable_types._fbthrift_MyInteraction_frobnicate_result(_ex0__ex=e)
+            buf = serialize_iobuf(return_struct, protocol)
+            exp = PythonUserException('test.fixtures.interactions.CustomException', str(e), buf)
+            raise exp
+        return serialize_iobuf(return_struct, protocol)
+
+    async def ping(
+            self
+        ) -> None:
+        raise NotImplementedError("async def ping is not implemented")
+
+    async def _fbthrift__handler_ping(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> None:
+        args_struct = deserialize(_fbthrift__test__fixtures__interactions__module__thrift_mutable_types._fbthrift_MyInteraction_ping_args, args, protocol)
+        value = await self.ping()
+
+class MyInteractionFastInterface(
+    _fbthrift_Interaction,
+    metaclass=ABCMeta
+):
+
+    async def frobnicate(
+            self
+        ) -> builtins.int:
+        raise NotImplementedError("async def frobnicate is not implemented")
+
+    async def _fbthrift__handler_frobnicate(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
+        args_struct = deserialize(_fbthrift__test__fixtures__interactions__module__thrift_mutable_types._fbthrift_MyInteractionFast_frobnicate_args, args, protocol)
+        value = await self.frobnicate()
+        return_struct = _fbthrift__test__fixtures__interactions__module__thrift_mutable_types._fbthrift_MyInteractionFast_frobnicate_result(success=value)
+        return serialize_iobuf(return_struct, protocol)
+
+    async def ping(
+            self
+        ) -> None:
+        raise NotImplementedError("async def ping is not implemented")
+
+    async def _fbthrift__handler_ping(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> None:
+        args_struct = deserialize(_fbthrift__test__fixtures__interactions__module__thrift_mutable_types._fbthrift_MyInteractionFast_ping_args, args, protocol)
+        value = await self.ping()
+
+class SerialInteractionInterface(
+    _fbthrift_Interaction,
+    metaclass=ABCMeta
+):
+
+    async def frobnicate(
+            self
+        ) -> None:
+        raise NotImplementedError("async def frobnicate is not implemented")
+
+    async def _fbthrift__handler_frobnicate(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
+        args_struct = deserialize(_fbthrift__test__fixtures__interactions__module__thrift_mutable_types._fbthrift_SerialInteraction_frobnicate_args, args, protocol)
+        value = await self.frobnicate()
+        return_struct = _fbthrift__test__fixtures__interactions__module__thrift_mutable_types._fbthrift_SerialInteraction_frobnicate_result()
+        return serialize_iobuf(return_struct, protocol)
+
 class InteractWithSharedInterface(
     _fbthrift_ServiceInterface,
     metaclass=ABCMeta
@@ -285,6 +543,11 @@ class InteractWithSharedInterface(
     def getFunctionTable(self) -> _typing.Mapping[bytes, _fbthrift_FunctionEntry]:
         functionTable = {
             b"do_some_similar_things": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_do_some_similar_things),
+            b"MyInteraction.frobnicate": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, MyInteractionInterface._fbthrift__handler_frobnicate, interaction=b"MyInteraction", interaction_factory=self.createMyInteraction),
+            b"MyInteraction.ping": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_NO_RESPONSE, MyInteractionInterface._fbthrift__handler_ping, interaction=b"MyInteraction", interaction_factory=self.createMyInteraction),
+            b"SharedInteraction.init": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, SharedInteractionInterface._fbthrift__handler_init, interaction=b"SharedInteraction", interaction_factory=self.createSharedInteraction),
+            b"SharedInteraction.do_something": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, SharedInteractionInterface._fbthrift__handler_do_something, interaction=b"SharedInteraction", interaction_factory=self.createSharedInteraction),
+            b"SharedInteraction.tear_down": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, SharedInteractionInterface._fbthrift__handler_tear_down, interaction=b"SharedInteraction", interaction_factory=self.createSharedInteraction),
         }
         return {**super().getFunctionTable(), **functionTable}
 
@@ -321,6 +584,81 @@ class InteractWithSharedInterface(
         return_struct = _fbthrift__test__fixtures__interactions__module__thrift_mutable_types._fbthrift_InteractWithShared_do_some_similar_things_result(success=value)
         return serialize_iobuf(return_struct, protocol)
 
+    def createMyInteraction(self) -> MyInteractionInterface:
+        raise NotImplementedError("createMyInteraction is not implemented")
+
+    def createSharedInteraction(self) -> SharedInteractionInterface:
+        raise NotImplementedError("createSharedInteraction is not implemented")
+
+class MyInteractionInterface(
+    _fbthrift_Interaction,
+    metaclass=ABCMeta
+):
+
+    async def frobnicate(
+            self
+        ) -> builtins.int:
+        raise NotImplementedError("async def frobnicate is not implemented")
+
+    async def _fbthrift__handler_frobnicate(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
+        args_struct = deserialize(_fbthrift__test__fixtures__interactions__module__thrift_mutable_types._fbthrift_MyInteraction_frobnicate_args, args, protocol)
+        try:
+            value = await self.frobnicate()
+            return_struct = _fbthrift__test__fixtures__interactions__module__thrift_mutable_types._fbthrift_MyInteraction_frobnicate_result(success=value)
+        except _fbthrift__test__fixtures__interactions__module__thrift_mutable_types.CustomException as e:
+            return_struct = _fbthrift__test__fixtures__interactions__module__thrift_mutable_types._fbthrift_MyInteraction_frobnicate_result(_ex0__ex=e)
+            buf = serialize_iobuf(return_struct, protocol)
+            exp = PythonUserException('test.fixtures.interactions.CustomException', str(e), buf)
+            raise exp
+        return serialize_iobuf(return_struct, protocol)
+
+    async def ping(
+            self
+        ) -> None:
+        raise NotImplementedError("async def ping is not implemented")
+
+    async def _fbthrift__handler_ping(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> None:
+        args_struct = deserialize(_fbthrift__test__fixtures__interactions__module__thrift_mutable_types._fbthrift_MyInteraction_ping_args, args, protocol)
+        value = await self.ping()
+
+class SharedInteractionInterface(
+    _fbthrift_Interaction,
+    metaclass=ABCMeta
+):
+
+    async def init(
+            self
+        ) -> builtins.int:
+        raise NotImplementedError("async def init is not implemented")
+
+    async def _fbthrift__handler_init(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
+        args_struct = deserialize(_fbthrift__test__fixtures__interactions__module__thrift_mutable_types._fbthrift_SharedInteraction_init_args, args, protocol)
+        value = await self.init()
+        return_struct = _fbthrift__test__fixtures__interactions__module__thrift_mutable_types._fbthrift_SharedInteraction_init_result(success=value)
+        return serialize_iobuf(return_struct, protocol)
+
+    async def do_something(
+            self
+        ) -> _fbthrift__test__fixtures__another_interactions__shared__thrift_mutable_types.DoSomethingResult:
+        raise NotImplementedError("async def do_something is not implemented")
+
+    async def _fbthrift__handler_do_something(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
+        args_struct = deserialize(_fbthrift__test__fixtures__interactions__module__thrift_mutable_types._fbthrift_SharedInteraction_do_something_args, args, protocol)
+        value = await self.do_something()
+        return_struct = _fbthrift__test__fixtures__interactions__module__thrift_mutable_types._fbthrift_SharedInteraction_do_something_result(success=value)
+        return serialize_iobuf(return_struct, protocol)
+
+    async def tear_down(
+            self
+        ) -> None:
+        raise NotImplementedError("async def tear_down is not implemented")
+
+    async def _fbthrift__handler_tear_down(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
+        args_struct = deserialize(_fbthrift__test__fixtures__interactions__module__thrift_mutable_types._fbthrift_SharedInteraction_tear_down_args, args, protocol)
+        value = await self.tear_down()
+        return_struct = _fbthrift__test__fixtures__interactions__module__thrift_mutable_types._fbthrift_SharedInteraction_tear_down_result()
+        return serialize_iobuf(return_struct, protocol)
+
 class BoxServiceInterface(
     _fbthrift_ServiceInterface,
     metaclass=ABCMeta
@@ -332,7 +670,8 @@ class BoxServiceInterface(
 
     def getFunctionTable(self) -> _typing.Mapping[bytes, _fbthrift_FunctionEntry]:
         functionTable = {
-            b"getABoxSession": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_getABoxSession),
+            b"getABoxSession": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_getABoxSession, interaction=b"BoxedInteraction", creates_interaction=True, interaction_factory=self.createBoxedInteraction),
+            b"BoxedInteraction.getABox": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, BoxedInteractionInterface._fbthrift__handler_getABox, interaction=b"BoxedInteraction", interaction_factory=self.createBoxedInteraction),
         }
         return {**super().getFunctionTable(), **functionTable}
 
@@ -368,6 +707,25 @@ class BoxServiceInterface(
         args_struct = deserialize(_fbthrift__test__fixtures__interactions__module__thrift_mutable_types._fbthrift_BoxService_getABoxSession_args, args, protocol)
         value = await self.getABoxSession(args_struct.req,)
         return_struct = _fbthrift__test__fixtures__interactions__module__thrift_mutable_types._fbthrift_BoxService_getABoxSession_result(success=value)
+        return serialize_iobuf(return_struct, protocol)
+
+    def createBoxedInteraction(self) -> BoxedInteractionInterface:
+        raise NotImplementedError("createBoxedInteraction is not implemented")
+
+class BoxedInteractionInterface(
+    _fbthrift_Interaction,
+    metaclass=ABCMeta
+):
+
+    async def getABox(
+            self
+        ) -> _fbthrift__test__fixtures__interactions__module__thrift_mutable_types.ShouldBeBoxed:
+        raise NotImplementedError("async def getABox is not implemented")
+
+    async def _fbthrift__handler_getABox(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
+        args_struct = deserialize(_fbthrift__test__fixtures__interactions__module__thrift_mutable_types._fbthrift_BoxedInteraction_getABox_args, args, protocol)
+        value = await self.getABox()
+        return_struct = _fbthrift__test__fixtures__interactions__module__thrift_mutable_types._fbthrift_BoxedInteraction_getABox_result(success=value)
         return serialize_iobuf(return_struct, protocol)
 
 

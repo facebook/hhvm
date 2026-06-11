@@ -185,7 +185,7 @@ func (s *server) ServeContext(ctx context.Context) error {
 	return r.Serve(ctx)
 }
 
-func (s *server) acceptor(_ context.Context, setup payload.SetupPayload, sendingSocket rsocket.CloseableRSocket) (rsocket.RSocket, error) {
+func (s *server) acceptor(ctx context.Context, setup payload.SetupPayload, sendingSocket rsocket.CloseableRSocket) (rsocket.RSocket, error) {
 	if err := rocket.CheckRequestSetupMetadata8(setup); err != nil {
 		return nil, err
 	}
@@ -194,7 +194,8 @@ func (s *server) acceptor(_ context.Context, setup payload.SetupPayload, sending
 		return nil, err
 	}
 	sendingSocket.MetadataPush(serverMetadataPush)
-	socket := newRocketServerSocket(s)
+	connInfo, _ := connInfoFromContext(ctx)
+	socket := newRocketServerSocket(s, connInfo)
 	return rsocket.NewAbstractSocket(
 		rsocket.MetadataPush(socket.metadataPush),
 		rsocket.RequestResponse(socket.requestResponse),
@@ -274,6 +275,8 @@ func (s *server) defaultLoadFn() uint32 {
 type rocketServerSocket struct {
 	*server
 
+	connInfo ConnInfo
+
 	// InteractionID to interaction processor map
 	interactions      map[int64]Processor
 	interactionsMutex sync.Mutex
@@ -281,9 +284,11 @@ type rocketServerSocket struct {
 
 func newRocketServerSocket(
 	server *server,
+	connInfo ConnInfo,
 ) *rocketServerSocket {
 	return &rocketServerSocket{
-		server: server,
+		server:       server,
+		connInfo:     connInfo,
 		interactions: make(map[int64]Processor),
 	}
 }

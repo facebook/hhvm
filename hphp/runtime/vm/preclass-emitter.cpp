@@ -55,7 +55,7 @@ PreClassEmitter::Prop::Prop(
 {
   memcpy(&m_val, val, sizeof(TypedValue));
   if (m_attrs & AttrInternal &&
-      m_userAttributes.find(s_SoftInternal.get()) != m_userAttributes.end()) {
+      m_userAttributes.contains(s_SoftInternal.get())) {
     m_attrs |= AttrInternalSoft;
   }
 }
@@ -268,7 +268,7 @@ PreClass* PreClassEmitter::create(Unit& unit) const {
   }
 
   if (attrs & AttrInternal &&
-      m_userAttributes.find(s_SoftInternal.get()) != m_userAttributes.end()) {
+      m_userAttributes.contains(s_SoftInternal.get())) {
     attrs |= AttrInternalSoft;
   }
 

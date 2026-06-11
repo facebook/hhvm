@@ -17,9 +17,9 @@
 package com.facebook.thrift.client.v2.manager;
 
 import com.facebook.thrift.client.RpcClient;
-import com.facebook.thrift.client.RpcClientSource;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
+import reactor.core.Disposable;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
 
@@ -29,7 +29,7 @@ import reactor.core.publisher.Sinks;
  * <p>This is the ownership boundary. The binding gates {@link #acquire()} after close and decides
  * whether {@link #dispose()} propagates to the underlying manager.
  */
-public final class RpcClientBinding implements RpcClientSource {
+public final class RpcClientBinding implements Disposable {
   private final RpcClientManager manager;
   private final ClientOwnership ownership;
   private final AtomicBoolean closed = new AtomicBoolean(false);

@@ -34,10 +34,6 @@ import reactor.core.publisher.Mono;
 public interface RpcClientFactory {
   Mono<RpcClient> createRpcClient(SocketAddress socketAddress);
 
-  default RpcClientSource createRpcClientSource(SocketAddress socketAddress) {
-    return new LegacyRpcClientSource(createRpcClient(socketAddress));
-  }
-
   /**
    * Returns an OWNED {@link RpcClientBinding} backed by a {@link SingleRpcClientManager} wrapping
    * this transport factory. Closing the typed client disposes the underlying connection.

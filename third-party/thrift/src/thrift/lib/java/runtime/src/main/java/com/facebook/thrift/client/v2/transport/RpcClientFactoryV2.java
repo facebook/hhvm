@@ -25,7 +25,6 @@ import com.facebook.thrift.client.InstrumentedRpcClientFactory;
 import com.facebook.thrift.client.ReconnectingRpcClientFactory;
 import com.facebook.thrift.client.RpcClient;
 import com.facebook.thrift.client.RpcClientFactory;
-import com.facebook.thrift.client.RpcClientSource;
 import com.facebook.thrift.client.SimpleLoadBalancingRpcClientFactory;
 import com.facebook.thrift.client.ThriftClientConfig;
 import com.facebook.thrift.client.ThriftClientStatsHolder;
@@ -53,8 +52,8 @@ import reactor.core.publisher.Mono;
  * V2 transport/factory entrypoint.
  *
  * <p>The legacy {@link Mono}-returning surface is kept for compatibility, while typed-client
- * construction should use {@link #createRpcClientSource(SocketAddress)} to enter the manager-backed
- * v2 lifecycle stack.
+ * construction should use {@link #createRpcClientBinding(SocketAddress)} to enter the
+ * manager-backed v2 lifecycle stack.
  */
 public final class RpcClientFactoryV2 implements RpcClientFactory {
   private final RpcClientFactory legacyMonoFactory;
@@ -76,17 +75,9 @@ public final class RpcClientFactoryV2 implements RpcClientFactory {
   }
 
   /**
-   * V2 entrypoint. Creates a manager-backed {@link RpcClientSource} with OWNED semantics. This is
-   * the path that {@link ClientBuilder#build(RpcClientFactory, SocketAddress)} uses.
-   */
-  @Override
-  public RpcClientSource createRpcClientSource(SocketAddress socketAddress) {
-    return createRpcClientBinding(socketAddress);
-  }
-
-  /**
-   * Returns an OWNED {@link RpcClientBinding} backed by the manager factory's per-address manager.
-   * Closing the typed client disposes the manager and its underlying transports.
+   * V2 entrypoint. Creates a manager-backed {@link RpcClientBinding} with OWNED semantics. This is
+   * the path that {@link ClientBuilder#build(RpcClientFactory, SocketAddress)} uses. Closing the
+   * typed client disposes the manager and its underlying transports.
    */
   @Override
   public RpcClientBinding createRpcClientBinding(SocketAddress socketAddress) {

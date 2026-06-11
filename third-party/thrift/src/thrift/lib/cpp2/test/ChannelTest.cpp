@@ -438,6 +438,52 @@ TEST(Channel, MessageCloseTest) {
   MessageCloseTest().run();
 }
 
+class DestroyChannelFromSendQueuedTest
+    : public SocketPairTest<Cpp2Channel, Cpp2Channel> {
+ public:
+  DestroyChannelFromSendQueuedTest()
+      : sendCallback_(&channel0_, &eventBase_), header_(new THeader) {}
+
+  void preLoop() override {
+    channel0_->sendMessage(&sendCallback_, makeTestBuf(10), header_.get());
+  }
+
+  void postLoop() override {
+    EXPECT_EQ(sendCallback_.queued_, 1);
+    EXPECT_EQ(sendCallback_.sendError_, 1);
+    EXPECT_EQ(sendCallback_.sent_, 0);
+  }
+
+ private:
+  using Cpp2ChannelPtr =
+      unique_ptr<Cpp2Channel, folly::DelayedDestruction::Destructor>;
+
+  class DestroyChannelCallback : public MessageCallback {
+   public:
+    DestroyChannelCallback(Cpp2ChannelPtr* channel, folly::EventBase* eventBase)
+        : channel_(channel), eventBase_(eventBase) {}
+
+    void sendQueued() override {
+      ++queued_;
+      channel_->reset();
+      eventBase_->terminateLoopSoon();
+    }
+
+    uint32_t queued_{0};
+
+   private:
+    Cpp2ChannelPtr* channel_;
+    folly::EventBase* eventBase_;
+  };
+
+  DestroyChannelCallback sendCallback_;
+  unique_ptr<THeader> header_;
+};
+
+TEST(Channel, DestroyChannelFromSendQueuedTest) {
+  DestroyChannelFromSendQueuedTest().run();
+}
+
 class MessageEOFTest : public SocketPairTest<Cpp2Channel, Cpp2Channel>,
                        public MessageCallback {
  public:

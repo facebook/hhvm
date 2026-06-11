@@ -59,7 +59,7 @@ folly::Future<folly::Unit> Cpp2Channel::close(Context* ctx) {
     // socket is transferred to GetHandler.
     processReadEOF();
   }
-  return ctx->fireClose();
+  return CHECK_NOTNULL(ctx)->fireClose();
 }
 
 void Cpp2Channel::closeNow() {
@@ -83,14 +83,14 @@ void Cpp2Channel::destroy() {
 
 void Cpp2Channel::attachEventBase(EventBase* eventBase) {
   evb_ = eventBase;
-  transportHandler_->attachEventBase(eventBase);
+  CHECK_NOTNULL(transportHandler_)->attachEventBase(eventBase);
 }
 
 void Cpp2Channel::detachEventBase() {
-  getEventBase()->dcheckIsInEventBaseThread();
+  CHECK_NOTNULL(getEventBase())->dcheckIsInEventBaseThread();
   evb_ = nullptr;
   outputBufferingHandler_->cleanUp();
-  transportHandler_->detachEventBase();
+  CHECK_NOTNULL(transportHandler_)->detachEventBase();
 }
 
 EventBase* Cpp2Channel::getEventBase() {
@@ -170,6 +170,8 @@ void Cpp2Channel::sendMessage(
   // Callback may be null.
   assert(buf);
 
+  DestructorGuard dg(this);
+
   if (!transport_->good()) {
     VLOG(5) << "Channel is !good() in sendMessage";
     // Callback must be last thing in sendMessage, or use guard
@@ -184,9 +186,17 @@ void Cpp2Channel::sendMessage(
   if (callback) {
     callback->sendQueued();
   }
-  sendCallbacks_.push_back(callback);
 
-  DestructorGuard dg(this);
+  if (getDestroyPending() || !pipeline_) {
+    if (callback) {
+      callback->messageSendError(
+          folly::make_exception_wrapper<TTransportException>(
+              "Channel is closed"));
+    }
+    return;
+  }
+
+  sendCallbacks_.push_back(callback);
 
   auto future = pipeline_->write(std::make_pair(std::move(buf), header));
   std::move(future).thenTry([this, dg](folly::Try<folly::Unit>&& t) {
@@ -215,10 +225,11 @@ void Cpp2Channel::setReceiveCallback(RecvCallback* callback) {
     return;
   }
 
+  auto& transportHandler = *CHECK_NOTNULL(transportHandler_);
   if (callback) {
-    transportHandler_->attachReadCallback();
+    transportHandler.attachReadCallback();
   } else {
-    transportHandler_->detachReadCallback();
+    transportHandler.detachReadCallback();
   }
 
   // Transport might have gotten into a bad state (e.g., closed) while attaching

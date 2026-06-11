@@ -16,7 +16,12 @@
 
 #include <thrift/lib/cpp2/async/PooledRequestChannel.h>
 
+#include <fmt/core.h>
+#include <folly/logging/xlog.h>
+
+#include <thrift/lib/cpp/transport/TTransportException.h>
 #include <thrift/lib/cpp2/async/FutureRequest.h>
+#include <thrift/lib/cpp2/transport/rocket/compression/CompressionManager.h>
 
 namespace apache::thrift {
 namespace {
@@ -88,6 +93,40 @@ folly::Executor::KeepAlive<folly::EventBase> PooledRequestChannel::getEvb(
 
 uint16_t PooledRequestChannel::getProtocolId() {
   return protocolId_;
+}
+
+void PooledRequestChannel::decompressResponse(ClientReceiveState& state) {
+  // PooledRequestChannel wraps per-EventBase impls; the response is delivered
+  // to the caller thread before this hook runs, and decompression is purely a
+  // function of the payload + the algorithm carried on THeader. Do the work
+  // inline rather than hopping back to an IO thread.
+  auto* tHeader = state.header();
+  if (!tHeader) {
+    return;
+  }
+
+  auto algorithm = tHeader->getResponseCompressionAlgorithm();
+  if (algorithm == CompressionAlgorithm::NONE ||
+      algorithm == CompressionAlgorithm::CUSTOM) {
+    return;
+  }
+
+  auto& response = state.serializedResponse();
+  if (!response.buffer) {
+    return;
+  }
+
+  try {
+    rocket::CompressionManager compressionMgr;
+    response.buffer =
+        compressionMgr.uncompressBuffer(std::move(response.buffer), algorithm);
+  } catch (const std::exception& ex) {
+    XLOG(ERR) << "Response decompression failed: " << ex.what();
+    state.exception() =
+        folly::make_exception_wrapper<transport::TTransportException>(
+            transport::TTransportException::CORRUPTED_DATA,
+            fmt::format("Response decompression failed: {}", ex.what()));
+  }
 }
 
 template <typename SendFunc>

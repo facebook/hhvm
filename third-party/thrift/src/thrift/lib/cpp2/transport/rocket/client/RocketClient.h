@@ -549,6 +549,8 @@ class RocketClient : public virtual folly::DelayedDestruction,
       bool next,
       bool complete);
 
+  folly::Try<StreamPayload> unpackStreamPayload(Payload&& fullPayload);
+
   template <typename CallbackType>
   void handleErrorFrame(
       CallbackType& serverCallback, std::unique_ptr<folly::IOBuf> frame);

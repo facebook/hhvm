@@ -19,9 +19,12 @@
 #include <thrift/lib/cpp2/Flags.h>
 #include <thrift/lib/cpp2/async/RocketClientChannel.h>
 #include <thrift/lib/cpp2/test/e2e/E2ETestFixture.h>
+#include <thrift/lib/cpp2/test/e2e/gen-cpp2/TestBiDiService.h>
+#include <thrift/lib/cpp2/test/e2e/gen-cpp2/TestSinkE2EService.h>
 #include <thrift/lib/cpp2/test/e2e/gen-cpp2/TestStreamE2EService.h>
 
 THRIFT_FLAG_DECLARE_bool(thrift_server_compress_response_on_cpu);
+THRIFT_FLAG_DECLARE_bool(thrift_client_compress_request_on_cpu);
 
 using namespace ::testing;
 
@@ -205,6 +208,140 @@ CO_TEST_F(StreamCompressionE2ETest, PublisherStreamWithCpuCompression) {
     EXPECT_EQ(*item, expected);
   }
   EXPECT_FALSE((co_await gen.next()).has_value());
+}
+
+RequestChannel::Ptr makeCompressedChannel(
+    folly::AsyncSocket::UniquePtr socket) {
+  auto channel = RocketClientChannel::newChannel(std::move(socket));
+  CompressionConfig compressionConfig;
+  compressionConfig.codecConfig().ensure().set_zstdConfig();
+  channel->setDesiredCompressionConfig(compressionConfig);
+  return channel;
+}
+
+// Verifies that a declared stream exception is correctly decompressed and
+// delivered to the client when CPU-thread decompression is enabled. Without the
+// fix in decode_stream_exception, the client would attempt to deserialize
+// still-compressed exception bytes and crash.
+CO_TEST_F(
+    StreamCompressionE2ETest, StreamDeclaredExceptionWithCpuDecompression) {
+  THRIFT_FLAG_SET_MOCK(thrift_client_compress_request_on_cpu, true);
+
+  struct Handler : public ServiceHandler<detail::test::TestStreamE2EService> {
+    ServerStream<int32_t> canThrow(int32_t from, int32_t to) override {
+      for (int32_t i = from; i < to; ++i) {
+        co_yield int32_t(i);
+      }
+      throw detail::test::StreamDeclaredException{std::string(256, 'E')};
+    }
+  };
+
+  testConfig({std::make_shared<Handler>(), {}, makeCompressedChannel});
+  auto client = makeClient<detail::test::TestStreamE2EService>();
+  auto gen = (co_await client->co_canThrow(0, 3)).toAsyncGenerator();
+
+  for (int32_t expected = 0; expected < 3; ++expected) {
+    auto item = co_await gen.next();
+    EXPECT_TRUE(item.has_value());
+    EXPECT_EQ(*item, expected);
+  }
+  EXPECT_THROW(co_await gen.next(), detail::test::StreamDeclaredException);
+}
+
+CO_TEST_F(
+    StreamCompressionE2ETest, StreamUndeclaredExceptionWithCpuDecompression) {
+  THRIFT_FLAG_SET_MOCK(thrift_client_compress_request_on_cpu, true);
+
+  struct Handler : public ServiceHandler<detail::test::TestStreamE2EService> {
+    ServerStream<int32_t> canThrow(int32_t from, int32_t to) override {
+      for (int32_t i = from; i < to; ++i) {
+        co_yield int32_t(i);
+      }
+      throw std::runtime_error{std::string(256, 'E')};
+    }
+  };
+
+  testConfig({std::make_shared<Handler>(), {}, makeCompressedChannel});
+  auto client = makeClient<detail::test::TestStreamE2EService>();
+  auto gen = (co_await client->co_canThrow(0, 3)).toAsyncGenerator();
+
+  for (int32_t expected = 0; expected < 3; ++expected) {
+    auto item = co_await gen.next();
+    EXPECT_TRUE(item.has_value());
+    EXPECT_EQ(*item, expected);
+  }
+  EXPECT_THROW(co_await gen.next(), apache::thrift::TApplicationException);
+}
+
+class SinkCompressionE2ETest : public test::E2ETestFixture {};
+
+CO_TEST_F(
+    SinkCompressionE2ETest, SinkFinalResponseExceptionWithCpuDecompression) {
+  THRIFT_FLAG_SET_MOCK(thrift_client_compress_request_on_cpu, true);
+
+  struct Handler : public ServiceHandler<detail::test::TestSinkE2EService> {
+    SinkConsumer<int32_t, std::string> canThrow() override {
+      return SinkConsumer<int32_t, std::string>{
+          [](folly::coro::AsyncGenerator<int32_t&&> gen)
+              -> folly::coro::Task<std::string> {
+            while (auto item = co_await gen.next()) {
+            }
+            throw detail::test::SinkFinalException{std::string(256, 'E')};
+          },
+          10};
+    }
+  };
+
+  testConfig({std::make_shared<Handler>(), {}, makeCompressedChannel});
+  auto client = makeClient<detail::test::TestSinkE2EService>();
+  auto sink = co_await client->co_canThrow();
+  EXPECT_THROW(
+      co_await sink.sink([]() -> folly::coro::AsyncGenerator<int32_t&&> {
+        co_yield int32_t(1);
+      }()),
+      detail::test::SinkFinalException);
+}
+
+class BiDiCompressionE2ETest : public test::E2ETestFixture {};
+
+CO_TEST_F(BiDiCompressionE2ETest, BiDiStreamExceptionWithCpuDecompression) {
+  THRIFT_FLAG_SET_MOCK(thrift_client_compress_request_on_cpu, true);
+
+  struct Handler : public ServiceHandler<detail::test::TestBiDiService> {
+    folly::coro::Task<StreamTransformation<int64_t, int64_t>> co_canThrow()
+        override {
+      co_return StreamTransformation<int64_t, int64_t>{
+          [](folly::coro::AsyncGenerator<int64_t&&> input)
+              -> folly::coro::AsyncGenerator<int64_t&&> {
+            while (auto item = co_await input.next()) {
+              co_yield std::move(*item);
+            }
+            throw detail::test::BiDiStreamException{std::string(256, 'E')};
+          }};
+    }
+  };
+
+  testConfig({std::make_shared<Handler>(), {}, makeCompressedChannel});
+  auto client = makeClient<detail::test::TestBiDiService>();
+  BidirectionalStream<int64_t, int64_t> bidi = co_await client->co_canThrow();
+
+  auto sinkGen =
+      folly::coro::co_invoke([]() -> folly::coro::AsyncGenerator<int64_t&&> {
+        co_yield int64_t(1);
+        co_yield int64_t(2);
+      });
+  co_await bidi.sink.sink(std::move(sinkGen));
+
+  auto streamGen = std::move(bidi.stream).toAsyncGenerator();
+  auto first = co_await streamGen.next();
+  EXPECT_TRUE(first.has_value());
+  EXPECT_EQ(*first, 1);
+
+  auto second = co_await streamGen.next();
+  EXPECT_TRUE(second.has_value());
+  EXPECT_EQ(*second, 2);
+
+  EXPECT_THROW(co_await streamGen.next(), detail::test::BiDiStreamException);
 }
 
 } // namespace

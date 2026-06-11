@@ -22,6 +22,7 @@
 #include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
 #include <thrift/lib/cpp2/protocol/Protocol.h>
+#include <thrift/lib/cpp2/transport/rocket/compression/CompressionManager.h>
 #if __has_include(<thrift/lib/thrift/gen-cpp2/any_rep_types.h>)
 #include <thrift/lib/cpp2/type/Any.h>
 #include <thrift/lib/cpp2/type/AnyValue.h>
@@ -87,6 +88,18 @@ folly::exception_wrapper try_extract_any_exception(
 } // namespace detail::ac
 
 namespace detail::ap {
+
+void decompressStreamPayload(StreamPayload& payload) {
+  if (auto compression = payload.metadata.compression()) {
+    if (*compression != CompressionAlgorithm::NONE &&
+        *compression != CompressionAlgorithm::CUSTOM) {
+      rocket::CompressionManager mgr;
+      payload.payload =
+          mgr.uncompressBuffer(std::move(payload.payload), *compression);
+      payload.metadata.compression().reset();
+    }
+  }
+}
 
 template <typename ProtocolReader, typename ProtocolWriter>
 std::unique_ptr<folly::IOBuf> helper<ProtocolReader, ProtocolWriter>::write_exn(

@@ -91,8 +91,9 @@ class Client<::cpp2::NestedContainers> : public apache::thrift::GeneratedAsyncCl
     const bool cancellable = cancelToken.canBeCancelled();
     apache::thrift::ClientReceiveState returnState;
     apache::thrift::ClientCoroCallback<false> callback(&returnState, co_await folly::coro::co_current_executor);
-    auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
-    auto protocolId = channel->getProtocolId();
+    auto channelShared = apache::thrift::GeneratedAsyncClient::getChannelShared();
+    auto protocolId = channelShared->getProtocolId();
+    std::weak_ptr<apache::thrift::RequestChannel> channelWeak = std::move(channelShared);
     auto [ctx, header] = mapListCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
@@ -130,7 +131,9 @@ class Client<::cpp2::NestedContainers> : public apache::thrift::GeneratedAsyncCl
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
-    channel->decompressResponse(returnState);
+    if (auto channel = channelWeak.lock()) {
+      channel->decompressResponse(returnState);
+    }
     auto ew = recv_wrapped_mapList(returnState);
     if (returnState.ctx()) {
       auto interceptorResult = returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew);
@@ -211,8 +214,9 @@ class Client<::cpp2::NestedContainers> : public apache::thrift::GeneratedAsyncCl
     const bool cancellable = cancelToken.canBeCancelled();
     apache::thrift::ClientReceiveState returnState;
     apache::thrift::ClientCoroCallback<false> callback(&returnState, co_await folly::coro::co_current_executor);
-    auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
-    auto protocolId = channel->getProtocolId();
+    auto channelShared = apache::thrift::GeneratedAsyncClient::getChannelShared();
+    auto protocolId = channelShared->getProtocolId();
+    std::weak_ptr<apache::thrift::RequestChannel> channelWeak = std::move(channelShared);
     auto [ctx, header] = mapSetCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
@@ -250,7 +254,9 @@ class Client<::cpp2::NestedContainers> : public apache::thrift::GeneratedAsyncCl
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
-    channel->decompressResponse(returnState);
+    if (auto channel = channelWeak.lock()) {
+      channel->decompressResponse(returnState);
+    }
     auto ew = recv_wrapped_mapSet(returnState);
     if (returnState.ctx()) {
       auto interceptorResult = returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew);
@@ -331,8 +337,9 @@ class Client<::cpp2::NestedContainers> : public apache::thrift::GeneratedAsyncCl
     const bool cancellable = cancelToken.canBeCancelled();
     apache::thrift::ClientReceiveState returnState;
     apache::thrift::ClientCoroCallback<false> callback(&returnState, co_await folly::coro::co_current_executor);
-    auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
-    auto protocolId = channel->getProtocolId();
+    auto channelShared = apache::thrift::GeneratedAsyncClient::getChannelShared();
+    auto protocolId = channelShared->getProtocolId();
+    std::weak_ptr<apache::thrift::RequestChannel> channelWeak = std::move(channelShared);
     auto [ctx, header] = listMapCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
@@ -370,7 +377,9 @@ class Client<::cpp2::NestedContainers> : public apache::thrift::GeneratedAsyncCl
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
-    channel->decompressResponse(returnState);
+    if (auto channel = channelWeak.lock()) {
+      channel->decompressResponse(returnState);
+    }
     auto ew = recv_wrapped_listMap(returnState);
     if (returnState.ctx()) {
       auto interceptorResult = returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew);
@@ -451,8 +460,9 @@ class Client<::cpp2::NestedContainers> : public apache::thrift::GeneratedAsyncCl
     const bool cancellable = cancelToken.canBeCancelled();
     apache::thrift::ClientReceiveState returnState;
     apache::thrift::ClientCoroCallback<false> callback(&returnState, co_await folly::coro::co_current_executor);
-    auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
-    auto protocolId = channel->getProtocolId();
+    auto channelShared = apache::thrift::GeneratedAsyncClient::getChannelShared();
+    auto protocolId = channelShared->getProtocolId();
+    std::weak_ptr<apache::thrift::RequestChannel> channelWeak = std::move(channelShared);
     auto [ctx, header] = listSetCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
@@ -490,7 +500,9 @@ class Client<::cpp2::NestedContainers> : public apache::thrift::GeneratedAsyncCl
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
-    channel->decompressResponse(returnState);
+    if (auto channel = channelWeak.lock()) {
+      channel->decompressResponse(returnState);
+    }
     auto ew = recv_wrapped_listSet(returnState);
     if (returnState.ctx()) {
       auto interceptorResult = returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew);
@@ -571,8 +583,9 @@ class Client<::cpp2::NestedContainers> : public apache::thrift::GeneratedAsyncCl
     const bool cancellable = cancelToken.canBeCancelled();
     apache::thrift::ClientReceiveState returnState;
     apache::thrift::ClientCoroCallback<false> callback(&returnState, co_await folly::coro::co_current_executor);
-    auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
-    auto protocolId = channel->getProtocolId();
+    auto channelShared = apache::thrift::GeneratedAsyncClient::getChannelShared();
+    auto protocolId = channelShared->getProtocolId();
+    std::weak_ptr<apache::thrift::RequestChannel> channelWeak = std::move(channelShared);
     auto [ctx, header] = turtlesCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
@@ -610,7 +623,9 @@ class Client<::cpp2::NestedContainers> : public apache::thrift::GeneratedAsyncCl
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
-    channel->decompressResponse(returnState);
+    if (auto channel = channelWeak.lock()) {
+      channel->decompressResponse(returnState);
+    }
     auto ew = recv_wrapped_turtles(returnState);
     if (returnState.ctx()) {
       auto interceptorResult = returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew);

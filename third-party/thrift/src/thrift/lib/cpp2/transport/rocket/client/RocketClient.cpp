@@ -37,6 +37,7 @@
 #include <folly/portability/GFlags.h>
 
 #include <thrift/lib/cpp/transport/TTransportException.h>
+#include <thrift/lib/cpp2/Flags.h>
 #include <thrift/lib/cpp2/transport/core/TryUtil.h>
 #include <thrift/lib/cpp2/transport/rocket/FdSocket.h>
 #include <thrift/lib/cpp2/transport/rocket/RocketException.h>
@@ -513,8 +514,11 @@ void RocketClient::handleFirstResponse(
     contractViolation(kErrorMsg);
     return;
   }
-  auto firstResponse = getPayloadSerializer()->unpack<FirstResponsePayload>(
-      std::move(fullPayload), encodeMetadataUsingBinary_);
+  auto firstResponse = THRIFT_FLAG(thrift_client_compress_request_on_cpu)
+      ? getPayloadSerializer()->unpackAsCompressed<FirstResponsePayload>(
+            std::move(fullPayload), encodeMetadataUsingBinary_)
+      : getPayloadSerializer()->unpack<FirstResponsePayload>(
+            std::move(fullPayload), encodeMetadataUsingBinary_);
   if (firstResponse.hasException()) {
     serverCallback.onInitialError(std::move(firstResponse.exception()));
     freeStream(streamId);
@@ -572,6 +576,15 @@ void RocketClient::handleFirstResponse(
   }
 }
 
+folly::Try<StreamPayload> RocketClient::unpackStreamPayload(
+    Payload&& fullPayload) {
+  return apache::thrift::clientCompressRequestOnCpu()
+      ? getPayloadSerializer()->unpackAsCompressed<StreamPayload>(
+            std::move(fullPayload), encodeMetadataUsingBinary_)
+      : getPayloadSerializer()->unpack<StreamPayload>(
+            std::move(fullPayload), encodeMetadataUsingBinary_);
+}
+
 template <typename CallbackType>
 void RocketClient::handleStreamResponse(
     StreamId streamId,
@@ -580,8 +593,7 @@ void RocketClient::handleStreamResponse(
     bool next,
     bool complete) {
   if (next) {
-    auto streamPayload = getPayloadSerializer()->unpack<StreamPayload>(
-        std::move(fullPayload), encodeMetadataUsingBinary_);
+    auto streamPayload = unpackStreamPayload(std::move(fullPayload));
     if (streamPayload.hasException()) {
       serverCallback.onStreamError(std::move(streamPayload.exception()));
       freeStream(streamId);
@@ -661,8 +673,7 @@ void RocketClient::handleSinkResponse(
     contractViolation(msg);
   };
   if (next) {
-    auto streamPayload = getPayloadSerializer()->unpack<StreamPayload>(
-        std::move(fullPayload), encodeMetadataUsingBinary_);
+    auto streamPayload = unpackStreamPayload(std::move(fullPayload));
     if (streamPayload.hasException()) {
       serverCallback.onFinalResponseError(std::move(streamPayload.exception()));
       freeStream(streamId);
@@ -710,8 +721,7 @@ void RocketClient::handleBiDiResponse(
     bool next,
     bool complete) {
   if (next) {
-    auto streamPayload = getPayloadSerializer()->unpack<StreamPayload>(
-        std::move(fullPayload), encodeMetadataUsingBinary_);
+    auto streamPayload = unpackStreamPayload(std::move(fullPayload));
     if (streamPayload.hasException()) {
       bool needsFree = !serverCallback.state().isSinkOpen();
       serverCallback.onStreamError(std::move(streamPayload.exception()));

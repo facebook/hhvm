@@ -761,6 +761,8 @@ decltype(auto) withProtocolReader(
 
 namespace detail::ap {
 
+void decompressStreamPayload(StreamPayload& payload);
+
 //  Everything templated on only protocol goes here. The corresponding .cpp file
 //  explicitly instantiates this struct for each supported protocol.
 template <typename ProtocolReader, typename ProtocolWriter>
@@ -1520,6 +1522,7 @@ folly::exception_wrapper decode_stream_exception(folly::exception_wrapper ew) {
       },
       [&hijacked](apache::thrift::detail::EncodedStreamError& err) {
         auto& payload = err.encoded;
+        decompressStreamPayload(payload);
         DCHECK_EQ(payload.metadata.payloadMetadata().has_value(), true);
         DCHECK_EQ(
             folly::to_underlying(payload.metadata.payloadMetadata()->getType()),
@@ -1608,6 +1611,7 @@ template <typename Protocol, typename PResult, typename T>
 folly::Try<T> decode_stream_element(
     folly::Try<apache::thrift::StreamPayload>&& payload) {
   if (payload.hasValue()) {
+    decompressStreamPayload(*payload);
     return folly::Try<T>(
         decode_stream_payload<Protocol, PResult, T>(*payload->payload));
   } else if (payload.hasException()) {

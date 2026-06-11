@@ -899,7 +899,9 @@ folly::coro::Task<apache::thrift::ClientSink<::std::int32_t, ::std::int32_t>> ap
   const bool cancellable = cancelToken.canBeCancelled();
   apache::thrift::ClientReceiveState returnState;
   apache::thrift::ClientCoroCallback<false> callback(&returnState, co_await folly::coro::co_current_executor);
-  auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+  auto channelShared = apache::thrift::GeneratedAsyncClient::getChannelShared();
+  auto protocolId = channelShared->getProtocolId();
+  std::weak_ptr<apache::thrift::RequestChannel> channelWeak = std::move(channelShared);
   auto [ctx, header] = sink_stuffCtx(&rpcOptions);
   using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
   auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
@@ -928,6 +930,9 @@ folly::coro::Task<apache::thrift::ClientSink<::std::int32_t, ::std::int32_t>> ap
   }
   returnState.resetProtocolId(protocolId);
   returnState.resetCtx(std::move(ctx));
+  if (auto channel = channelWeak.lock()) {
+    channel->decompressResponse(returnState);
+  }
   co_return recv_sink_stuff(returnState);
 }
 #endif // FOLLY_HAS_COROUTINES

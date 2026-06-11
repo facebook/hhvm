@@ -27,6 +27,7 @@
 #include <folly/io/IOBuf.h>
 #include <folly/io/async/AsyncTransport.h>
 #include <folly/io/async/EventBase.h>
+#include <folly/logging/xlog.h>
 
 #include <thrift/lib/cpp/TApplicationException.h>
 #include <thrift/lib/cpp/protocol/TBase64Utils.h>
@@ -45,6 +46,7 @@
 #include <thrift/lib/cpp2/transport/rocket/FdSocket.h>
 #include <thrift/lib/cpp2/transport/rocket/RocketException.h>
 #include <thrift/lib/cpp2/transport/rocket/client/RocketClient.h>
+#include <thrift/lib/cpp2/transport/rocket/compression/CompressionManager.h>
 #include <thrift/lib/cpp2/transport/rocket/payload/PayloadSerializer.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_constants.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
@@ -988,6 +990,44 @@ void RocketClientChannelBase::sendRequestBiDi(
       std::move(frameworkMetadata));
 }
 
+void RocketClientChannelBase::decompressResponse(ClientReceiveState& state) {
+  // No flag guard here: callers invoke this unconditionally. When the IO
+  // thread decompressed, THeader carries no compression algorithm and this is
+  // a no-op. When decompression was skipped on the IO thread (e.g. because
+  // thrift_client_compress_request_on_cpu is set), THeader carries the
+  // algorithm and we decompress here on the caller thread.
+  auto* tHeader = state.header();
+  if (!tHeader) {
+    return;
+  }
+
+  auto algorithm = tHeader->getResponseCompressionAlgorithm();
+  if (algorithm == CompressionAlgorithm::NONE ||
+      algorithm == CompressionAlgorithm::CUSTOM) {
+    return;
+  }
+
+  auto& response = state.serializedResponse();
+  if (!response.buffer) {
+    return;
+  }
+
+  try {
+    rocket::CompressionManager compressionMgr;
+    response.buffer =
+        compressionMgr.uncompressBuffer(std::move(response.buffer), algorithm);
+  } catch (const std::exception& ex) {
+    // Surface the failure via ClientReceiveState rather than rethrowing —
+    // callers reach this from contexts that cannot tolerate an exception
+    // here. Setting the exception gives a clear "decompression failed" error
+    // instead of a downstream deserialization crash.
+    XLOG(ERR) << "Response decompression failed: " << ex.what();
+    state.exception() = folly::make_exception_wrapper<TTransportException>(
+        TTransportException::CORRUPTED_DATA,
+        fmt::format("Response decompression failed: {}", ex.what()));
+  }
+}
+
 template <typename Callback>
 void RocketClientChannelBase::sendThriftRequest(
     const RpcOptions& rpcOptions,
@@ -1081,7 +1121,8 @@ void RocketClientChannelBase::sendThriftRequest(
             requestSerializedSize,
             std::move(requestPayload),
             std::move(clientCallback),
-            /*skipDecompression=*/false);
+            /*skipDecompression=*/
+            apache::thrift::clientCompressRequestOnCpu());
         break;
 
       default:

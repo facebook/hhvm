@@ -105,8 +105,9 @@ class Calculator final : public apache::thrift::InteractionHandle {
     const bool cancellable = cancelToken.canBeCancelled();
     apache::thrift::ClientReceiveState returnState;
     apache::thrift::ClientCoroCallback<false> callback(&returnState, co_await folly::coro::co_current_executor);
-    auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
-    auto protocolId = channel->getProtocolId();
+    auto channelShared = apache::thrift::GeneratedAsyncClient::getChannelShared();
+    auto protocolId = channelShared->getProtocolId();
+    std::weak_ptr<apache::thrift::RequestChannel> channelWeak = std::move(channelShared);
     auto [ctx, header] = addCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
@@ -145,7 +146,9 @@ class Calculator final : public apache::thrift::InteractionHandle {
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
-    channel->decompressResponse(returnState);
+    if (auto channel = channelWeak.lock()) {
+      channel->decompressResponse(returnState);
+    }
     auto ew = recv_wrapped_add(_return, returnState);
     if (returnState.ctx()) {
       auto interceptorResult = returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return);
@@ -219,8 +222,9 @@ class Calculator final : public apache::thrift::InteractionHandle {
     const bool cancellable = cancelToken.canBeCancelled();
     apache::thrift::ClientReceiveState returnState;
     apache::thrift::ClientCoroCallback<false> callback(&returnState, co_await folly::coro::co_current_executor);
-    auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
-    auto protocolId = channel->getProtocolId();
+    auto channelShared = apache::thrift::GeneratedAsyncClient::getChannelShared();
+    auto protocolId = channelShared->getProtocolId();
+    std::weak_ptr<apache::thrift::RequestChannel> channelWeak = std::move(channelShared);
     auto [ctx, header] = processIOBufCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
@@ -258,7 +262,9 @@ class Calculator final : public apache::thrift::InteractionHandle {
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
-    channel->decompressResponse(returnState);
+    if (auto channel = channelWeak.lock()) {
+      channel->decompressResponse(returnState);
+    }
     auto ew = recv_wrapped_processIOBuf(returnState);
     if (returnState.ctx()) {
       auto interceptorResult = returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew);
@@ -339,8 +345,9 @@ class Calculator final : public apache::thrift::InteractionHandle {
     const bool cancellable = cancelToken.canBeCancelled();
     apache::thrift::ClientReceiveState returnState;
     apache::thrift::ClientCoroCallback<false> callback(&returnState, co_await folly::coro::co_current_executor);
-    auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
-    auto protocolId = channel->getProtocolId();
+    auto channelShared = apache::thrift::GeneratedAsyncClient::getChannelShared();
+    auto protocolId = channelShared->getProtocolId();
+    std::weak_ptr<apache::thrift::RequestChannel> channelWeak = std::move(channelShared);
     auto [ctx, header] = getStructCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
@@ -379,7 +386,9 @@ class Calculator final : public apache::thrift::InteractionHandle {
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
-    channel->decompressResponse(returnState);
+    if (auto channel = channelWeak.lock()) {
+      channel->decompressResponse(returnState);
+    }
     auto ew = recv_wrapped_getStruct(_return, returnState);
     if (returnState.ctx()) {
       auto interceptorResult = returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return);
@@ -459,8 +468,9 @@ class Calculator final : public apache::thrift::InteractionHandle {
     const bool cancellable = cancelToken.canBeCancelled();
     apache::thrift::ClientReceiveState returnState;
     apache::thrift::ClientCoroCallback<false> callback(&returnState, co_await folly::coro::co_current_executor);
-    auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
-    auto protocolId = channel->getProtocolId();
+    auto channelShared = apache::thrift::GeneratedAsyncClient::getChannelShared();
+    auto protocolId = channelShared->getProtocolId();
+    std::weak_ptr<apache::thrift::RequestChannel> channelWeak = std::move(channelShared);
     auto [ctx, header] = setStructCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
@@ -498,7 +508,9 @@ class Calculator final : public apache::thrift::InteractionHandle {
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
-    channel->decompressResponse(returnState);
+    if (auto channel = channelWeak.lock()) {
+      channel->decompressResponse(returnState);
+    }
     auto ew = recv_wrapped_setStruct(returnState);
     if (returnState.ctx()) {
       auto interceptorResult = returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew);
@@ -579,8 +591,9 @@ class Calculator final : public apache::thrift::InteractionHandle {
     const bool cancellable = cancelToken.canBeCancelled();
     apache::thrift::ClientReceiveState returnState;
     apache::thrift::ClientCoroCallback<false> callback(&returnState, co_await folly::coro::co_current_executor);
-    auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
-    auto protocolId = channel->getProtocolId();
+    auto channelShared = apache::thrift::GeneratedAsyncClient::getChannelShared();
+    auto protocolId = channelShared->getProtocolId();
+    std::weak_ptr<apache::thrift::RequestChannel> channelWeak = std::move(channelShared);
     auto [ctx, header] = setStructListCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
@@ -618,7 +631,9 @@ class Calculator final : public apache::thrift::InteractionHandle {
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
-    channel->decompressResponse(returnState);
+    if (auto channel = channelWeak.lock()) {
+      channel->decompressResponse(returnState);
+    }
     auto ew = recv_wrapped_setStructList(returnState);
     if (returnState.ctx()) {
       auto interceptorResult = returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew);
@@ -699,8 +714,9 @@ class Calculator final : public apache::thrift::InteractionHandle {
     const bool cancellable = cancelToken.canBeCancelled();
     apache::thrift::ClientReceiveState returnState;
     apache::thrift::ClientCoroCallback<false> callback(&returnState, co_await folly::coro::co_current_executor);
-    auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
-    auto protocolId = channel->getProtocolId();
+    auto channelShared = apache::thrift::GeneratedAsyncClient::getChannelShared();
+    auto protocolId = channelShared->getProtocolId();
+    std::weak_ptr<apache::thrift::RequestChannel> channelWeak = std::move(channelShared);
     auto [ctx, header] = getStructListCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
@@ -739,7 +755,9 @@ class Calculator final : public apache::thrift::InteractionHandle {
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
-    channel->decompressResponse(returnState);
+    if (auto channel = channelWeak.lock()) {
+      channel->decompressResponse(returnState);
+    }
     auto ew = recv_wrapped_getStructList(_return, returnState);
     if (returnState.ctx()) {
       auto interceptorResult = returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return);
@@ -819,8 +837,9 @@ class Calculator final : public apache::thrift::InteractionHandle {
     const bool cancellable = cancelToken.canBeCancelled();
     apache::thrift::ClientReceiveState returnState;
     apache::thrift::ClientCoroCallback<false> callback(&returnState, co_await folly::coro::co_current_executor);
-    auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
-    auto protocolId = channel->getProtocolId();
+    auto channelShared = apache::thrift::GeneratedAsyncClient::getChannelShared();
+    auto protocolId = channelShared->getProtocolId();
+    std::weak_ptr<apache::thrift::RequestChannel> channelWeak = std::move(channelShared);
     auto [ctx, header] = getNestedContainerCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
@@ -859,7 +878,9 @@ class Calculator final : public apache::thrift::InteractionHandle {
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
-    channel->decompressResponse(returnState);
+    if (auto channel = channelWeak.lock()) {
+      channel->decompressResponse(returnState);
+    }
     auto ew = recv_wrapped_getNestedContainer(_return, returnState);
     if (returnState.ctx()) {
       auto interceptorResult = returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return);
@@ -939,8 +960,9 @@ class Calculator final : public apache::thrift::InteractionHandle {
     const bool cancellable = cancelToken.canBeCancelled();
     apache::thrift::ClientReceiveState returnState;
     apache::thrift::ClientCoroCallback<false> callback(&returnState, co_await folly::coro::co_current_executor);
-    auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
-    auto protocolId = channel->getProtocolId();
+    auto channelShared = apache::thrift::GeneratedAsyncClient::getChannelShared();
+    auto protocolId = channelShared->getProtocolId();
+    std::weak_ptr<apache::thrift::RequestChannel> channelWeak = std::move(channelShared);
     auto [ctx, header] = getTypedefStructCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
@@ -979,7 +1001,9 @@ class Calculator final : public apache::thrift::InteractionHandle {
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
-    channel->decompressResponse(returnState);
+    if (auto channel = channelWeak.lock()) {
+      channel->decompressResponse(returnState);
+    }
     auto ew = recv_wrapped_getTypedefStruct(_return, returnState);
     if (returnState.ctx()) {
       auto interceptorResult = returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return);
@@ -1059,8 +1083,9 @@ class Calculator final : public apache::thrift::InteractionHandle {
     const bool cancellable = cancelToken.canBeCancelled();
     apache::thrift::ClientReceiveState returnState;
     apache::thrift::ClientCoroCallback<false> callback(&returnState, co_await folly::coro::co_current_executor);
-    auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
-    auto protocolId = channel->getProtocolId();
+    auto channelShared = apache::thrift::GeneratedAsyncClient::getChannelShared();
+    auto protocolId = channelShared->getProtocolId();
+    std::weak_ptr<apache::thrift::RequestChannel> channelWeak = std::move(channelShared);
     auto [ctx, header] = getTypedefListCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
@@ -1099,7 +1124,9 @@ class Calculator final : public apache::thrift::InteractionHandle {
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
-    channel->decompressResponse(returnState);
+    if (auto channel = channelWeak.lock()) {
+      channel->decompressResponse(returnState);
+    }
     auto ew = recv_wrapped_getTypedefList(_return, returnState);
     if (returnState.ctx()) {
       auto interceptorResult = returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return);
@@ -1179,8 +1206,9 @@ class Calculator final : public apache::thrift::InteractionHandle {
     const bool cancellable = cancelToken.canBeCancelled();
     apache::thrift::ClientReceiveState returnState;
     apache::thrift::ClientCoroCallback<false> callback(&returnState, co_await folly::coro::co_current_executor);
-    auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
-    auto protocolId = channel->getProtocolId();
+    auto channelShared = apache::thrift::GeneratedAsyncClient::getChannelShared();
+    auto protocolId = channelShared->getProtocolId();
+    std::weak_ptr<apache::thrift::RequestChannel> channelWeak = std::move(channelShared);
     auto [ctx, header] = getUnionCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
@@ -1219,7 +1247,9 @@ class Calculator final : public apache::thrift::InteractionHandle {
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
-    channel->decompressResponse(returnState);
+    if (auto channel = channelWeak.lock()) {
+      channel->decompressResponse(returnState);
+    }
     auto ew = recv_wrapped_getUnion(_return, returnState);
     if (returnState.ctx()) {
       auto interceptorResult = returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return);
@@ -1298,8 +1328,9 @@ class Calculator final : public apache::thrift::InteractionHandle {
     const bool cancellable = cancelToken.canBeCancelled();
     apache::thrift::ClientReceiveState returnState;
     apache::thrift::ClientCoroCallback<false> callback(&returnState, co_await folly::coro::co_current_executor);
-    auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
-    auto protocolId = channel->getProtocolId();
+    auto channelShared = apache::thrift::GeneratedAsyncClient::getChannelShared();
+    auto protocolId = channelShared->getProtocolId();
+    std::weak_ptr<apache::thrift::RequestChannel> channelWeak = std::move(channelShared);
     auto [ctx, header] = getCalculatorCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
@@ -1338,7 +1369,9 @@ class Calculator final : public apache::thrift::InteractionHandle {
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
-    channel->decompressResponse(returnState);
+    if (auto channel = channelWeak.lock()) {
+      channel->decompressResponse(returnState);
+    }
     auto ew = recv_wrapped_getCalculator(returnState);
     if (returnState.ctx()) {
       auto interceptorResult = returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew);
@@ -1408,8 +1441,9 @@ class Calculator final : public apache::thrift::InteractionHandle {
     const bool cancellable = cancelToken.canBeCancelled();
     apache::thrift::ClientReceiveState returnState;
     apache::thrift::ClientCoroCallback<false> callback(&returnState, co_await folly::coro::co_current_executor);
-    auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
-    auto protocolId = channel->getProtocolId();
+    auto channelShared = apache::thrift::GeneratedAsyncClient::getChannelShared();
+    auto protocolId = channelShared->getProtocolId();
+    std::weak_ptr<apache::thrift::RequestChannel> channelWeak = std::move(channelShared);
     auto [ctx, header] = streamStructsCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
@@ -1450,7 +1484,9 @@ class Calculator final : public apache::thrift::InteractionHandle {
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
-    channel->decompressResponse(returnState);
+    if (auto channel = channelWeak.lock()) {
+      channel->decompressResponse(returnState);
+    }
     auto ew = recv_wrapped_streamStructs(_return, returnState);
     if (returnState.ctx()) {
       auto interceptorResult = returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return);
@@ -1529,8 +1565,9 @@ class Calculator final : public apache::thrift::InteractionHandle {
     const bool cancellable = cancelToken.canBeCancelled();
     apache::thrift::ClientReceiveState returnState;
     apache::thrift::ClientCoroCallback<false> callback(&returnState, co_await folly::coro::co_current_executor);
-    auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
-    auto protocolId = channel->getProtocolId();
+    auto channelShared = apache::thrift::GeneratedAsyncClient::getChannelShared();
+    auto protocolId = channelShared->getProtocolId();
+    std::weak_ptr<apache::thrift::RequestChannel> channelWeak = std::move(channelShared);
     auto [ctx, header] = streamWithSinkInitialCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
@@ -1571,7 +1608,9 @@ class Calculator final : public apache::thrift::InteractionHandle {
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
-    channel->decompressResponse(returnState);
+    if (auto channel = channelWeak.lock()) {
+      channel->decompressResponse(returnState);
+    }
     auto ew = recv_wrapped_streamWithSinkInitial(_return, returnState);
     if (returnState.ctx()) {
       auto interceptorResult = returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return);
@@ -1650,8 +1689,9 @@ class Calculator final : public apache::thrift::InteractionHandle {
     const bool cancellable = cancelToken.canBeCancelled();
     apache::thrift::ClientReceiveState returnState;
     apache::thrift::ClientCoroCallback<false> callback(&returnState, co_await folly::coro::co_current_executor);
-    auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
-    auto protocolId = channel->getProtocolId();
+    auto channelShared = apache::thrift::GeneratedAsyncClient::getChannelShared();
+    auto protocolId = channelShared->getProtocolId();
+    std::weak_ptr<apache::thrift::RequestChannel> channelWeak = std::move(channelShared);
     auto [ctx, header] = streamWithSinkExceptionCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
@@ -1692,7 +1732,9 @@ class Calculator final : public apache::thrift::InteractionHandle {
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
-    channel->decompressResponse(returnState);
+    if (auto channel = channelWeak.lock()) {
+      channel->decompressResponse(returnState);
+    }
     auto ew = recv_wrapped_streamWithSinkException(_return, returnState);
     if (returnState.ctx()) {
       auto interceptorResult = returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return);

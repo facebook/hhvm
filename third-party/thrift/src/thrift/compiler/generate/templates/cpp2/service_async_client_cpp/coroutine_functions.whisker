@@ -32,7 +32,9 @@ folly::coro::Task<{{#partial client.return_type function=function service=interf
   const bool cancellable = cancelToken.canBeCancelled();
   apache::thrift::ClientReceiveState returnState;
   apache::thrift::ClientCoroCallback<false> callback(&returnState, co_await folly::coro::co_current_executor);
-  auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+  auto channelShared = apache::thrift::GeneratedAsyncClient::getChannelShared();
+  auto protocolId = channelShared->getProtocolId();
+  std::weak_ptr<apache::thrift::RequestChannel> channelWeak = std::move(channelShared);
   auto [ctx, header] = {{function.cpp_name}}Ctx(&rpcOptions);
   using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
   auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
@@ -66,6 +68,9 @@ folly::coro::Task<{{#partial client.return_type function=function service=interf
   }
   returnState.resetProtocolId(protocolId);
   returnState.resetCtx(std::move(ctx));
+  if (auto channel = channelWeak.lock()) {
+    channel->decompressResponse(returnState);
+  }
     {{#if function.creates_interaction?}}
   co_return std::make_pair(
     std::move(interactionHandle),

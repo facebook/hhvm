@@ -28,10 +28,6 @@ import reactor.core.publisher.Mono;
  * <p>Generated service interfaces expose a static {@code clientBuilder()} method that returns a
  * concrete subclass. Callers configure protocol and headers, then choose a {@code build()} overload
  * to create the client.
- *
- * <p>The builder delegates to {@link RpcClientSource} so that the same generated code works with
- * both the legacy {@code Mono<RpcClient>} runtime and the v2 manager-backed runtime. The runtime is
- * selected transparently by {@link ClientRuntimeSelector}.
  */
 public abstract class ClientBuilder<T> {
   protected ProtocolId protocolId = ProtocolId.COMPACT;
@@ -67,14 +63,6 @@ public abstract class ClientBuilder<T> {
   /** Builds a typed client from a factory and address. */
   public T build(RpcClientFactory factory, SocketAddress address) {
     return build(factory.createRpcClientSource(address));
-  }
-
-  /**
-   * Builds a typed client from a raw {@code Mono<RpcClient>}. Prefer {@link
-   * #build(RpcClientFactory, SocketAddress)} for new code.
-   */
-  public T build(Mono<? extends RpcClient> rpcClientMono) {
-    return build(ClientRuntimeSelector.createSource(rpcClientMono));
   }
 
   /**

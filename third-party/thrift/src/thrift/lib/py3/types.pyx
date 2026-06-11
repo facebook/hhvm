@@ -183,9 +183,6 @@ cdef class Struct:
     cdef uint32_t _fbthrift_deserialize(self, const cIOBuf* buf, Protocol proto) except? 0:
         return 0
 
-    cdef object _fbthrift_isset(self):
-        raise TypeError(f"{type(self)} does not have concept of isset")
-
     @classmethod
     def _fbthrift_get_field_name_by_index(cls, idx):
         raise NotImplementedError()
@@ -271,6 +268,15 @@ cdef class Struct:
 SetMetaClass(<PyTypeObject*> Struct, <PyTypeObject*> StructMeta)
 
 
+cdef frozenset _fbthrift_py3_get_set_fields_fallback(Struct struct):
+    # Used when a struct was deserialized rather than locally constructed, so we
+    # never captured the set kwargs. Mirrors thrift-python: unqualified fields are
+    # always considered set, optional fields only if their value is not None. In
+    # thrift-py3 an unset optional field reads back as None while unqualified
+    # fields always have a (non-None) value, so this reduces to "value not None".
+    return frozenset(name for name, value in struct if value is not None)
+
+
 def get_locally_set_fields(struct):
     if isinstance(struct, (_fbthrift_python_Struct, _fbthrift_python_GeneratedError)):
         return _fbthrift_python_get_locally_set_fields(struct)
@@ -281,12 +287,21 @@ def get_locally_set_fields(struct):
                 "Add @python.EnableUnsafeIssetInspection to the struct definition."
             )
         if hasattr(struct.__class__, "_FBTHRIFT__PYTHON_CLASS"):
+            # In-place migrated struct: defer to the backing thrift-python inner.
             isset_dict = struct._fbthrift__isset()
-        else:
-            isset_dict = (<Struct?>struct)._fbthrift_isset()
-        return frozenset(
-            name for name, is_set in isset_dict.items() if is_set
-        )
+            return frozenset(
+                name for name, is_set in isset_dict.items() if is_set
+            )
+        result = getattr(struct, "_fbthrift_locally_set_fields", None)
+        if result is None:
+            # The struct was deserialized, not locally constructed, so the set
+            # kwargs were never captured. Serialization discards the isset status
+            # of unqualified fields, so fall back to a best-effort reconstruction.
+            logGetLocallySetFieldsCalledOnDeserializedStruct(
+                type(struct).__name__.encode("utf-8")
+            )
+            return _fbthrift_py3_get_set_fields_fallback(<Struct>struct)
+        return result
     raise TypeError(
         f"{type(struct).__name__} is not a thrift struct"
     )

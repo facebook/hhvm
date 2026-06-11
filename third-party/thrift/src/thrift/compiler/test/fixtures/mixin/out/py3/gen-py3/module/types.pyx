@@ -83,7 +83,6 @@ cdef class Mixin1(thrift.py3.types.Struct):
     cdef void _fbthrift_set_field(self, str name, object value) except *:
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
-
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cMixin1] cpp_obj):
         __fbthrift_inst = <Mixin1>Mixin1.__new__(Mixin1)
@@ -191,7 +190,6 @@ cdef class Mixin2(thrift.py3.types.Struct):
 
     cdef void _fbthrift_set_field(self, str name, object value) except *:
         self._fields_setter.set_field(name.encode("utf-8"), value)
-
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cMixin2] cpp_obj):
@@ -312,7 +310,6 @@ cdef class Mixin3Base(thrift.py3.types.Struct):
     cdef void _fbthrift_set_field(self, str name, object value) except *:
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
-
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cMixin3Base] cpp_obj):
         __fbthrift_inst = <Mixin3Base>Mixin3Base.__new__(Mixin3Base)
@@ -420,7 +417,6 @@ cdef class Foo(thrift.py3.types.Struct):
 
     cdef void _fbthrift_set_field(self, str name, object value) except *:
         self._fields_setter.set_field(name.encode("utf-8"), value)
-
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cFoo] cpp_obj):

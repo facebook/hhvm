@@ -429,7 +429,6 @@ cdef class MyField(thrift.py3.types.Struct):
     cdef void _fbthrift_set_field(self, str name, object value) except *:
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
-
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cMyField] cpp_obj):
         __fbthrift_inst = <MyField>MyField.__new__(MyField)
@@ -630,7 +629,6 @@ cdef class MyStruct(thrift.py3.types.Struct):
     cdef void _fbthrift_set_field(self, str name, object value) except *:
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
-
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cMyStruct] cpp_obj):
         __fbthrift_inst = <MyStruct>MyStruct.__new__(MyStruct)
@@ -765,7 +763,6 @@ cdef class StructWithUnion(thrift.py3.types.Struct):
     cdef void _fbthrift_set_field(self, str name, object value) except *:
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
-
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cStructWithUnion] cpp_obj):
         __fbthrift_inst = <StructWithUnion>StructWithUnion.__new__(StructWithUnion)
@@ -898,7 +895,6 @@ cdef class RecursiveStruct(thrift.py3.types.Struct):
     cdef void _fbthrift_set_field(self, str name, object value) except *:
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
-
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cRecursiveStruct] cpp_obj):
         __fbthrift_inst = <RecursiveStruct>RecursiveStruct.__new__(RecursiveStruct)
@@ -1010,7 +1006,6 @@ cdef class StructWithContainers(thrift.py3.types.Struct):
 
     cdef void _fbthrift_set_field(self, str name, object value) except *:
         self._fields_setter.set_field(name.encode("utf-8"), value)
-
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cStructWithContainers] cpp_obj):
@@ -1179,7 +1174,6 @@ cdef class StructWithSharedConst(thrift.py3.types.Struct):
     cdef void _fbthrift_set_field(self, str name, object value) except *:
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
-
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cStructWithSharedConst] cpp_obj):
         __fbthrift_inst = <StructWithSharedConst>StructWithSharedConst.__new__(StructWithSharedConst)
@@ -1307,7 +1301,6 @@ cdef class Empty(thrift.py3.types.Struct):
     cdef void _fbthrift_set_field(self, str name, object value) except *:
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
-
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cEmpty] cpp_obj):
         __fbthrift_inst = <Empty>Empty.__new__(Empty)
@@ -1408,7 +1401,6 @@ cdef class StructWithRef(thrift.py3.types.Struct):
 
     cdef void _fbthrift_set_field(self, str name, object value) except *:
         self._fields_setter.set_field(name.encode("utf-8"), value)
-
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cStructWithRef] cpp_obj):
@@ -1544,7 +1536,6 @@ cdef class StructWithBox(thrift.py3.types.Struct):
     cdef void _fbthrift_set_field(self, str name, object value) except *:
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
-
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cStructWithBox] cpp_obj):
         __fbthrift_inst = <StructWithBox>StructWithBox.__new__(StructWithBox)
@@ -1677,7 +1668,6 @@ cdef class StructWithInternBox(thrift.py3.types.Struct):
     cdef void _fbthrift_set_field(self, str name, object value) except *:
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
-
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cStructWithInternBox] cpp_obj):
         __fbthrift_inst = <StructWithInternBox>StructWithInternBox.__new__(StructWithInternBox)
@@ -1796,7 +1786,6 @@ cdef class StructWithTerseInternBox(thrift.py3.types.Struct):
 
     cdef void _fbthrift_set_field(self, str name, object value) except *:
         self._fields_setter.set_field(name.encode("utf-8"), value)
-
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cStructWithTerseInternBox] cpp_obj):
@@ -1917,7 +1906,6 @@ cdef class AdaptedStructWithInternBox(thrift.py3.types.Struct):
     cdef void _fbthrift_set_field(self, str name, object value) except *:
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
-
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cAdaptedStructWithInternBox] cpp_obj):
         __fbthrift_inst = <AdaptedStructWithInternBox>AdaptedStructWithInternBox.__new__(AdaptedStructWithInternBox)
@@ -2037,7 +2025,6 @@ cdef class AdaptedStructWithTerseInternBox(thrift.py3.types.Struct):
     cdef void _fbthrift_set_field(self, str name, object value) except *:
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
-
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cAdaptedStructWithTerseInternBox] cpp_obj):
         __fbthrift_inst = <AdaptedStructWithTerseInternBox>AdaptedStructWithTerseInternBox.__new__(AdaptedStructWithTerseInternBox)
@@ -2156,7 +2143,6 @@ cdef class StructWithRefTypeUnique(thrift.py3.types.Struct):
 
     cdef void _fbthrift_set_field(self, str name, object value) except *:
         self._fields_setter.set_field(name.encode("utf-8"), value)
-
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cStructWithRefTypeUnique] cpp_obj):
@@ -2292,7 +2278,6 @@ cdef class StructWithRefTypeShared(thrift.py3.types.Struct):
     cdef void _fbthrift_set_field(self, str name, object value) except *:
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
-
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cStructWithRefTypeShared] cpp_obj):
         __fbthrift_inst = <StructWithRefTypeShared>StructWithRefTypeShared.__new__(StructWithRefTypeShared)
@@ -2426,7 +2411,6 @@ cdef class StructWithRefTypeSharedConst(thrift.py3.types.Struct):
 
     cdef void _fbthrift_set_field(self, str name, object value) except *:
         self._fields_setter.set_field(name.encode("utf-8"), value)
-
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cStructWithRefTypeSharedConst] cpp_obj):
@@ -2562,7 +2546,6 @@ cdef class StructWithRefAndAnnotCppNoexceptMoveCtor(thrift.py3.types.Struct):
     cdef void _fbthrift_set_field(self, str name, object value) except *:
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
-
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cStructWithRefAndAnnotCppNoexceptMoveCtor] cpp_obj):
         __fbthrift_inst = <StructWithRefAndAnnotCppNoexceptMoveCtor>StructWithRefAndAnnotCppNoexceptMoveCtor.__new__(StructWithRefAndAnnotCppNoexceptMoveCtor)
@@ -2674,7 +2657,6 @@ cdef class StructWithString(thrift.py3.types.Struct):
 
     cdef void _fbthrift_set_field(self, str name, object value) except *:
         self._fields_setter.set_field(name.encode("utf-8"), value)
-
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cStructWithString] cpp_obj):

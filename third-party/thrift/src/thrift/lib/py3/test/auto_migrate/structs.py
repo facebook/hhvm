@@ -704,3 +704,29 @@ class GetLocallySetFieldsTests(unittest.TestCase):
         i = Integers(large=2)
         with self.assertRaises((AttributeError, TypeError)):
             get_locally_set_fields(i)
+
+    def test_call_replace_tracks_fields(self) -> None:
+        # __call__ (functional update) propagates the tracked set from the
+        # source struct and merges in the newly-set kwargs.
+        s = StructWithIssetInspection(int_field=42)
+        s2 = s(opt_str_field="hello")
+        result = get_locally_set_fields(s2)
+        self.assertIn("int_field", result)
+        self.assertIn("opt_str_field", result)
+        # passing a field as None via __call__ removes it from the tracked set
+        s3 = s2(opt_str_field=None)
+        result3 = get_locally_set_fields(s3)
+        self.assertIn("int_field", result3)
+        self.assertNotIn("opt_str_field", result3)
+
+    def test_call_on_deserialized_struct(self) -> None:
+        # __call__ on a deserialized struct (no tracked set) leaves the copy
+        # without a tracked set, so it falls back to best-effort reconstruction.
+        s = deserialize(
+            StructWithIssetInspection,
+            serialize(StructWithIssetInspection(int_field=42)),
+        )
+        s2 = s(opt_str_field="hello")
+        result = get_locally_set_fields(s2)
+        self.assertIn("int_field", result)  # unqualified, via fallback
+        self.assertIn("opt_str_field", result)

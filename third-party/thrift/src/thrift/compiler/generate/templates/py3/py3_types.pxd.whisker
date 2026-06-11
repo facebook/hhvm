@@ -68,6 +68,10 @@ cdef extern from "{{program.include_prefix}}gen-python-capi/{{program.name}}/thr
 
 
 cdef class {{struct.name}}({{#partial types.python_struct_class struct=struct}}):
+    {{#if (and struct.enable_unsafe_isset_inspection? (not struct.union?) (not struct.exception?))}}
+    {{! Locally-set field names (frozenset), or None if deserialized; readonly so get_locally_set_fields can read it cross-module.}}
+    cdef readonly object _fbthrift_locally_set_fields
+    {{/if (and struct.enable_unsafe_isset_inspection? (not struct.union?) (not struct.exception?))}}
     cdef shared_ptr[{{program.module_path_for_alias}}_cbindings.{{#partial types.c_binding node=struct}}] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
   {{#if (not struct.union?)}}
     cdef _fbthrift_types_fields.__{{struct.name}}_FieldsSetter _fields_setter

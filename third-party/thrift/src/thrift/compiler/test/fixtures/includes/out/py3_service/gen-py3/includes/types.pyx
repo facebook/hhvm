@@ -85,7 +85,6 @@ cdef class Included(thrift.py3.types.Struct):
     cdef void _fbthrift_set_field(self, str name, object value) except *:
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
-
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_includes_cbindings.cIncluded] cpp_obj):
         __fbthrift_inst = <Included>Included.__new__(Included)

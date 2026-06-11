@@ -111,6 +111,7 @@ cdef class Float32Struct(thrift.py3.types.Struct):
 
 
 cdef class IssetInspectionStruct(thrift.py3.types.Struct):
+    cdef readonly object _fbthrift_locally_set_fields
     cdef shared_ptr[_module_cbindings.cIssetInspectionStruct] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__IssetInspectionStruct_FieldsSetter _fields_setter
     cdef inline object int_field_impl(self)

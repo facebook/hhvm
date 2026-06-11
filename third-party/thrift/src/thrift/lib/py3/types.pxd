@@ -38,6 +38,9 @@ cdef extern from "<memory>" namespace "std" nogil:
 cdef extern from "<memory>" namespace "std" nogil:
     cdef shared_ptr[const T] const_pointer_cast "std::const_pointer_cast"[T](shared_ptr[T])
 
+cdef extern from "<thrift/lib/python/types.h>" namespace "::apache::thrift::python":
+    void logGetLocallySetFieldsCalledOnDeserializedStruct(const char* structName)
+
 cdef extern from "thrift/lib/py3/types.h" namespace "::thrift::py3" nogil:
     shared_ptr[T] constant_shared_ptr[T](T)
     shared_ptr[T] reference_shared_ptr[T](const T& ref, ...)
@@ -71,7 +74,6 @@ cdef class Struct:
     cdef object __weakref__
     cdef IOBuf _fbthrift_serialize(self, Protocol proto)
     cdef uint32_t _fbthrift_deserialize(self, const cIOBuf* buf, Protocol proto) except? 0
-    cdef object _fbthrift_isset(self)
     cdef bint _fbthrift_noncomparable_eq(self, other)
     cdef object _fbthrift_cmp_sametype(self, other, int op)
     cdef void _fbthrift_set_field(self, str name, object value) except *

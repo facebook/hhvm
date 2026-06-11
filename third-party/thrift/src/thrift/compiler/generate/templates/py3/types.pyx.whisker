@@ -178,6 +178,13 @@ cdef class {{struct.name}}({{#partial types.python_struct_class struct=struct}})
         self.{{#partial types.cpp_obj}} = make_shared[{{program.module_path_for_alias}}_cbindings.{{#partial types.c_binding node=struct}}]()
         self._fields_setter = _fbthrift_types_fields.__{{struct.name}}_FieldsSetter._fbthrift_create(self.{{#partial types.cpp_obj}}.get())
         super().__init__({{#if struct.exception?}} *args, {{/if}}**kwargs)
+        {{#if (and struct.enable_unsafe_isset_inspection? (not struct.exception?))}}
+        self._fbthrift_locally_set_fields = frozenset(
+            __fbthrift_name
+            for __fbthrift_name, __fbthrift_value in kwargs.items()
+            if __fbthrift_value is not None
+        )
+        {{/if (and struct.enable_unsafe_isset_inspection? (not struct.exception?))}}
         {{#if (and (not struct.exception?) (not struct.cpp_noncopyable?))}}
 
     def __call__({{struct.name}} self, **kwargs):
@@ -191,23 +198,20 @@ cdef class {{struct.name}}({{#partial types.python_struct_class struct=struct}})
         __fbthrift_inst._fields_setter = _fbthrift_types_fields.__{{struct.name}}_FieldsSetter._fbthrift_create(__fbthrift_inst.{{#partial types.cpp_obj}}.get())
         for __fbthrift_name, _fbthrift_value in kwargs.items():
             (<thrift.py3.types.Struct>__fbthrift_inst)._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
+        {{#if (and struct.enable_unsafe_isset_inspection? (not struct.exception?))}}
+        __fbthrift_isset_fields = self._fbthrift_locally_set_fields
+        if __fbthrift_isset_fields is not None:
+            __fbthrift_inst._fbthrift_locally_set_fields = (
+                __fbthrift_isset_fields
+                | frozenset(__k for __k, __v in kwargs.items() if __v is not None)
+            ) - frozenset(__k for __k, __v in kwargs.items() if __v is None)
+        {{/if (and struct.enable_unsafe_isset_inspection? (not struct.exception?))}}
         return __fbthrift_inst
           {{/if (array.empty? struct.py3_fields)}}
         {{/if (and (not struct.exception?) (not struct.cpp_noncopyable?))}}
 
     cdef void _fbthrift_set_field(self, str name, object value) except *:
         self._fields_setter.set_field(name.encode("utf-8"), value)
-
-    {{#if (and struct.enable_unsafe_isset_inspection? (not struct.exception?))}}
-    cdef object _fbthrift_isset(self):
-        return {
-        {{#each struct.py3_fields as |field|}}
-          {{#if (and field.has_ref_accessor? (not field.terse?))}}
-          "{{field.py_name}}": deref(self.{{#partial types.cpp_obj}}).{{field.py_name}}_ref().has_value(),
-          {{/if (and field.has_ref_accessor? (not field.terse?))}}
-        {{/each}}
-        }
-    {{/if (and struct.enable_unsafe_isset_inspection? (not struct.exception?))}}
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[{{program.module_path_for_alias}}_cbindings.{{#partial types.c_binding node=struct}}] cpp_obj):

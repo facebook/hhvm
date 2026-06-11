@@ -18,14 +18,14 @@ package com.facebook.thrift.client;
 
 import java.util.Objects;
 
-public abstract class DelegatingRpcClientFactory implements RpcClientFactory {
-  private final RpcClientFactory delegate;
+public abstract class DelegatingRpcClientFactory implements RpcClientTransportFactory {
+  private final RpcClientTransportFactory delegate;
 
-  public DelegatingRpcClientFactory(RpcClientFactory delegate) {
+  public DelegatingRpcClientFactory(RpcClientTransportFactory delegate) {
     this.delegate = Objects.requireNonNull(delegate);
   }
 
-  protected RpcClientFactory getDelegate() {
+  protected RpcClientTransportFactory getDelegate() {
     return delegate;
   }
 }

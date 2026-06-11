@@ -17,13 +17,13 @@
 package com.facebook.thrift.rsocket.client;
 
 import com.facebook.thrift.client.RpcClient;
-import com.facebook.thrift.client.RpcClientFactory;
+import com.facebook.thrift.client.RpcClientTransportFactory;
 import com.facebook.thrift.client.ThriftClientConfig;
 import com.facebook.thrift.util.ReactorHooks;
 import java.net.SocketAddress;
 import reactor.core.publisher.Mono;
 
-public final class HeaderAwareRpcClientFactory implements RpcClientFactory {
+public final class HeaderAwareRpcClientFactory implements RpcClientTransportFactory {
   static {
     ReactorHooks.init();
   }

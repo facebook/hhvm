@@ -21,12 +21,12 @@ import java.net.SocketAddress;
 import java.util.List;
 import reactor.core.publisher.Mono;
 
-public class EventHandlerRpcClientFactory implements RpcClientFactory {
-  private final RpcClientFactory delegate;
+public class EventHandlerRpcClientFactory implements RpcClientTransportFactory {
+  private final RpcClientTransportFactory delegate;
   private final List<? extends ThriftClientEventHandler> eventHandlers;
 
   public EventHandlerRpcClientFactory(
-      RpcClientFactory delegate, List<? extends ThriftClientEventHandler> eventHandlers) {
+      RpcClientTransportFactory delegate, List<? extends ThriftClientEventHandler> eventHandlers) {
     this.delegate = delegate;
     this.eventHandlers = eventHandlers;
   }

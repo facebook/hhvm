@@ -17,7 +17,7 @@
 package com.facebook.thrift.client.v2.manager;
 
 import com.facebook.thrift.client.RpcClient;
-import com.facebook.thrift.client.RpcClientFactory;
+import com.facebook.thrift.client.RpcClientTransportFactory;
 import java.net.SocketAddress;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
@@ -35,14 +35,15 @@ public final class SingleRpcClientManager extends AbstractRpcClientManager {
       AtomicReferenceFieldUpdater.newUpdater(
           SingleRpcClientManager.class, RpcClient.class, "rpcClient");
 
-  private final RpcClientFactory transportFactory;
+  private final RpcClientTransportFactory transportFactory;
   private final SocketAddress socketAddress;
   private final Object lock = new Object();
 
   private volatile RpcClient rpcClient;
   private volatile Mono<RpcClient> connecting;
 
-  public SingleRpcClientManager(RpcClientFactory transportFactory, SocketAddress socketAddress) {
+  public SingleRpcClientManager(
+      RpcClientTransportFactory transportFactory, SocketAddress socketAddress) {
     this.transportFactory = Objects.requireNonNull(transportFactory);
     this.socketAddress = Objects.requireNonNull(socketAddress);
   }

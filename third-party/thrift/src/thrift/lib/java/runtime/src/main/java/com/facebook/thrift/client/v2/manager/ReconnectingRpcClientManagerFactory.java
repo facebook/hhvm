@@ -16,7 +16,7 @@
 
 package com.facebook.thrift.client.v2.manager;
 
-import com.facebook.thrift.client.RpcClientFactory;
+import com.facebook.thrift.client.RpcClientTransportFactory;
 import java.net.SocketAddress;
 import java.util.Objects;
 
@@ -27,9 +27,9 @@ import java.util.Objects;
  * reconnecting Mono abstraction.
  */
 public final class ReconnectingRpcClientManagerFactory implements RpcClientManagerFactory {
-  private final RpcClientFactory transportFactory;
+  private final RpcClientTransportFactory transportFactory;
 
-  public ReconnectingRpcClientManagerFactory(RpcClientFactory transportFactory) {
+  public ReconnectingRpcClientManagerFactory(RpcClientTransportFactory transportFactory) {
     this.transportFactory = Objects.requireNonNull(transportFactory);
   }
 

@@ -20,11 +20,12 @@ import java.net.SocketAddress;
 import java.util.Map;
 import reactor.core.publisher.Mono;
 
-public class TokenPassingRpcClientFactory implements RpcClientFactory {
-  private final RpcClientFactory delegate;
+public class TokenPassingRpcClientFactory implements RpcClientTransportFactory {
+  private final RpcClientTransportFactory delegate;
   private final Map<String, String> headerTokens;
 
-  public TokenPassingRpcClientFactory(RpcClientFactory delegate, Map<String, String> headerTokens) {
+  public TokenPassingRpcClientFactory(
+      RpcClientTransportFactory delegate, Map<String, String> headerTokens) {
     this.delegate = delegate;
     this.headerTokens = headerTokens;
   }

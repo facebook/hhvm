@@ -18,9 +18,7 @@ package com.facebook.thrift.client;
 
 import com.facebook.swift.service.ThriftClientEventHandler;
 import com.facebook.swift.service.ThriftClientStats;
-import com.facebook.thrift.client.v2.manager.ClientOwnership;
 import com.facebook.thrift.client.v2.manager.RpcClientBinding;
-import com.facebook.thrift.client.v2.manager.SingleRpcClientManager;
 import com.facebook.thrift.client.v2.transport.RpcClientFactoryV2;
 import com.facebook.thrift.util.resources.RpcResources;
 import com.google.common.base.Preconditions;
@@ -28,20 +26,19 @@ import java.net.SocketAddress;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import reactor.core.publisher.Mono;
 
-@FunctionalInterface
+/**
+ * Higher-level binding factory for typed Thrift clients.
+ *
+ * <p>Produces {@link RpcClientBinding} handles that own the manager-backed lifecycle for a typed
+ * client. For the lower-level raw-transport contract see {@link RpcClientTransportFactory}.
+ */
 public interface RpcClientFactory {
-  Mono<RpcClient> createRpcClient(SocketAddress socketAddress);
-
   /**
-   * Returns an OWNED {@link RpcClientBinding} backed by a {@link SingleRpcClientManager} wrapping
-   * this transport factory. Closing the typed client disposes the underlying connection.
+   * Returns an OWNED {@link RpcClientBinding} for the given address. Closing the typed client
+   * disposes the underlying manager and its transports.
    */
-  default RpcClientBinding createRpcClientBinding(SocketAddress socketAddress) {
-    return new RpcClientBinding(
-        new SingleRpcClientManager(this, socketAddress), ClientOwnership.OWNED);
-  }
+  RpcClientBinding createRpcClientBinding(SocketAddress socketAddress);
 
   /**
    * Builder to create an RpcClientFactory. By default it creates an RpcClientFactory with RSocket

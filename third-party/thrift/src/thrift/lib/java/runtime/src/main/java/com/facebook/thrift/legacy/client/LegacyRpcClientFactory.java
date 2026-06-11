@@ -22,7 +22,7 @@ import static io.netty.channel.ChannelOption.CONNECT_TIMEOUT_MILLIS;
 import static java.util.Objects.requireNonNull;
 
 import com.facebook.thrift.client.RpcClient;
-import com.facebook.thrift.client.RpcClientFactory;
+import com.facebook.thrift.client.RpcClientTransportFactory;
 import com.facebook.thrift.client.ThriftClientConfig;
 import com.facebook.thrift.protocol.TProtocolType;
 import com.facebook.thrift.util.NettyUtil;
@@ -36,7 +36,7 @@ import io.netty.handler.ssl.SslContext;
 import java.net.SocketAddress;
 import reactor.core.publisher.Mono;
 
-public final class LegacyRpcClientFactory implements RpcClientFactory {
+public final class LegacyRpcClientFactory implements RpcClientTransportFactory {
   private final ThriftClientConfig nettyConfig;
   private final boolean forceExecutionOffEventLoop;
 

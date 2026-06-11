@@ -16,7 +16,7 @@
 
 package com.facebook.thrift.client.v2.manager;
 
-import com.facebook.thrift.client.RpcClientFactory;
+import com.facebook.thrift.client.RpcClientTransportFactory;
 import java.net.SocketAddress;
 import java.util.Objects;
 
@@ -26,9 +26,9 @@ import java.util.Objects;
  * <p>Each created manager owns one address and one live transport at a time.
  */
 public final class SingleRpcClientManagerFactory implements RpcClientManagerFactory {
-  private final RpcClientFactory transportFactory;
+  private final RpcClientTransportFactory transportFactory;
 
-  public SingleRpcClientManagerFactory(RpcClientFactory transportFactory) {
+  public SingleRpcClientManagerFactory(RpcClientTransportFactory transportFactory) {
     this.transportFactory = Objects.requireNonNull(transportFactory);
   }
 

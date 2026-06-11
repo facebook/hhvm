@@ -21,8 +21,8 @@ import com.facebook.swift.service.ThriftClientStats;
 import com.facebook.thrift.client.ClientBuilder;
 import com.facebook.thrift.client.EventHandlerRpcClientFactory;
 import com.facebook.thrift.client.InstrumentedRpcClientFactory;
-import com.facebook.thrift.client.RpcClient;
 import com.facebook.thrift.client.RpcClientFactory;
+import com.facebook.thrift.client.RpcClientTransportFactory;
 import com.facebook.thrift.client.ThriftClientConfig;
 import com.facebook.thrift.client.ThriftClientStatsHolder;
 import com.facebook.thrift.client.TimeoutRpcClientFactory;
@@ -43,28 +43,19 @@ import java.net.SocketAddress;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import reactor.core.publisher.Mono;
 
 /**
- * V2 transport/factory entrypoint. Constructs manager-backed {@link RpcClientBinding} handles for
+ * V2 binding-factory entrypoint. Constructs manager-backed {@link RpcClientBinding} handles for
  * typed clients via {@link #createRpcClientBinding(SocketAddress)}.
  *
- * <p>The {@link RpcClientFactory#createRpcClient(SocketAddress)} contract is intentionally
- * unsupported here: this class is a binding factory, not a raw transport factory. Raw transport is
- * owned by the transport-layer factories that {@link Builder#buildManagerTransportFactory()}
- * composes.
+ * <p>Raw transport is owned by the transport-layer factories ({@link RpcClientTransportFactory}
+ * implementations) that {@link Builder#buildManagerTransportFactory()} composes internally.
  */
 public final class RpcClientFactoryV2 implements RpcClientFactory {
   private final RpcClientManagerFactory managerFactory;
 
   private RpcClientFactoryV2(RpcClientManagerFactory managerFactory) {
     this.managerFactory = Objects.requireNonNull(managerFactory);
-  }
-
-  @Override
-  public Mono<RpcClient> createRpcClient(SocketAddress socketAddress) {
-    throw new UnsupportedOperationException(
-        "RpcClientFactoryV2 is a binding factory; call createRpcClientBinding(...) instead");
   }
 
   /**
@@ -189,7 +180,7 @@ public final class RpcClientFactoryV2 implements RpcClientFactory {
      * slots. Connection caching is handled by {@code SingleRpcClientManager} internally.
      */
     private RpcClientManagerFactory buildManagerFactoryInternal() {
-      RpcClientFactory transportFactory = buildManagerTransportFactory();
+      RpcClientTransportFactory transportFactory = buildManagerTransportFactory();
       RpcClientManagerFactory managerFactory =
           disableReconnectingClient
               ? new SingleRpcClientManagerFactory(transportFactory)
@@ -208,8 +199,8 @@ public final class RpcClientFactoryV2 implements RpcClientFactory {
      * decoration (stats, tokens, event handlers, timeout) but excludes lifecycle concerns
      * (reconnecting, caching, load-balancing) which are handled by the manager layer above.
      */
-    private RpcClientFactory buildManagerTransportFactory() {
-      RpcClientFactory transportFactory;
+    private RpcClientTransportFactory buildManagerTransportFactory() {
+      RpcClientTransportFactory transportFactory;
       if (disableRSocket) {
         if (handleHeaderResponse) {
           throw new IllegalArgumentException(

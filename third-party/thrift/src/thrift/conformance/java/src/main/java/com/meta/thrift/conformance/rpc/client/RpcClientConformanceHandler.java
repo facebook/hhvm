@@ -16,7 +16,7 @@
 
 package com.meta.thrift.conformance.rpc.client;
 
-import com.facebook.thrift.client.RpcClientFactory;
+import com.facebook.thrift.client.RpcClientTransportFactory;
 import com.facebook.thrift.client.RpcOptions;
 import com.facebook.thrift.client.ThriftClientConfig;
 import com.facebook.thrift.rsocket.client.RSocketRpcClientFactory;
@@ -87,7 +87,7 @@ public class RpcClientConformanceHandler {
   }
 
   private void initClient(int port) {
-    final RpcClientFactory clientFactory =
+    final RpcClientTransportFactory clientFactory =
         new RSocketRpcClientFactory(new ThriftClientConfig().setDisableSSL(true));
     SocketAddress address = InetSocketAddress.createUnresolved("::1", port);
 

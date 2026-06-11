@@ -20,12 +20,12 @@ import com.facebook.swift.service.ThriftClientStats;
 import java.net.SocketAddress;
 import reactor.core.publisher.Mono;
 
-public class InstrumentedRpcClientFactory implements RpcClientFactory {
-  private final RpcClientFactory delegate;
+public class InstrumentedRpcClientFactory implements RpcClientTransportFactory {
+  private final RpcClientTransportFactory delegate;
   private final ThriftClientStats thriftClientStats;
 
   public InstrumentedRpcClientFactory(
-      RpcClientFactory delegate, ThriftClientStats thriftClientStats) {
+      RpcClientTransportFactory delegate, ThriftClientStats thriftClientStats) {
     this.delegate = delegate;
     this.thriftClientStats = thriftClientStats;
   }

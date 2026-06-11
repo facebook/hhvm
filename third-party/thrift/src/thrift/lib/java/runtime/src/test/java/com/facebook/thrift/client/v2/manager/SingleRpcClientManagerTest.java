@@ -24,7 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.facebook.thrift.client.RpcClient;
-import com.facebook.thrift.client.RpcClientFactory;
+import com.facebook.thrift.client.RpcClientTransportFactory;
 import java.lang.reflect.Field;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -48,7 +48,7 @@ public class SingleRpcClientManagerTest {
     TestRpcClient client1 = new TestRpcClient("c1");
     TestRpcClient client2 = new TestRpcClient("c2");
     AtomicInteger createCalls = new AtomicInteger(0);
-    RpcClientFactory factory =
+    RpcClientTransportFactory factory =
         __ -> Mono.just(createCalls.getAndIncrement() == 0 ? client1 : client2);
 
     SingleRpcClientManager manager = new SingleRpcClientManager(factory, ADDRESS);
@@ -122,7 +122,7 @@ public class SingleRpcClientManagerTest {
   public void testLateConnectCompletionIsRejectedAndDisposedAfterShutdown() throws Exception {
     Sinks.One<RpcClient> connectSink = Sinks.one();
     Sinks.One<Void> subscribedSink = Sinks.one();
-    RpcClientFactory factory =
+    RpcClientTransportFactory factory =
         __ ->
             Mono.<RpcClient>create(
                 sink -> {

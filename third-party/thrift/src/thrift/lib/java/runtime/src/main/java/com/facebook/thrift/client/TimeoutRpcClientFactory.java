@@ -38,7 +38,7 @@ public class TimeoutRpcClientFactory extends DelegatingRpcClientFactory {
   private final long defaultClientTimeoutMs;
   private final long connectionTimeoutMs;
 
-  public TimeoutRpcClientFactory(RpcClientFactory delegate, ThriftClientConfig config) {
+  public TimeoutRpcClientFactory(RpcClientTransportFactory delegate, ThriftClientConfig config) {
     super(delegate);
 
     Objects.requireNonNull(config, "config is null");

@@ -17,7 +17,7 @@
 package com.facebook.thrift.client.v2.manager;
 
 import com.facebook.thrift.client.RpcClient;
-import com.facebook.thrift.client.RpcClientFactory;
+import com.facebook.thrift.client.RpcClientTransportFactory;
 import java.net.SocketAddress;
 import java.time.Duration;
 import reactor.core.publisher.Mono;
@@ -36,7 +36,7 @@ public final class ReconnectingRpcClientManager extends AbstractRpcClientManager
   private final SingleRpcClientManager delegate;
 
   public ReconnectingRpcClientManager(
-      RpcClientFactory transportFactory, SocketAddress socketAddress) {
+      RpcClientTransportFactory transportFactory, SocketAddress socketAddress) {
     this.delegate = new SingleRpcClientManager(transportFactory, socketAddress);
   }
 

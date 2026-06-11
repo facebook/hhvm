@@ -17,7 +17,7 @@
 package com.facebook.thrift.rsocket.client;
 
 import com.facebook.thrift.client.RpcClient;
-import com.facebook.thrift.client.RpcClientFactory;
+import com.facebook.thrift.client.RpcClientTransportFactory;
 import com.facebook.thrift.client.ThriftClientConfig;
 import com.facebook.thrift.metadata.ThriftTransportType;
 import com.facebook.thrift.rsocket.transport.reactor.client.ReactorClientTransport;
@@ -32,7 +32,7 @@ import java.net.SocketAddress;
 import java.time.Duration;
 import reactor.core.publisher.Mono;
 
-public class RSocketRpcClientFactory implements RpcClientFactory {
+public class RSocketRpcClientFactory implements RpcClientTransportFactory {
   private static final int MAX_FRAME_SIZE =
       Integer.parseInt(
           System.getProperty(

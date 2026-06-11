@@ -44,7 +44,7 @@ public class TimeoutRpcClientFactoryTest {
   public void testThrowExceptionWhenConfigIsNull() {
     Assertions.assertThrows(
         NullPointerException.class,
-        () -> new TimeoutRpcClientFactory(Mockito.mock(RpcClientFactory.class), null));
+        () -> new TimeoutRpcClientFactory(Mockito.mock(RpcClientTransportFactory.class), null));
   }
 
   @Test
@@ -70,7 +70,7 @@ public class TimeoutRpcClientFactoryTest {
           ThriftClientConfig config = new ThriftClientConfig();
           Duration duration = Duration.succinctDuration(0, TimeUnit.SECONDS);
           config.setRequestTimeout(duration);
-          new TimeoutRpcClientFactory(Mockito.mock(RpcClientFactory.class), config);
+          new TimeoutRpcClientFactory(Mockito.mock(RpcClientTransportFactory.class), config);
         });
   }
 
@@ -78,7 +78,7 @@ public class TimeoutRpcClientFactoryTest {
   public void testTimeoutRpcClientShouldWrap() {
     SocketAddress address = Mockito.mock(SocketAddress.class);
     RpcClient delegateClient = Mockito.mock(RpcClient.class);
-    RpcClientFactory delegate = Mockito.mock(RpcClientFactory.class);
+    RpcClientTransportFactory delegate = Mockito.mock(RpcClientTransportFactory.class);
     Mockito.when(delegate.createRpcClient(address)).thenReturn(Mono.just(delegateClient));
 
     TimeoutRpcClientFactory factory =
@@ -98,7 +98,7 @@ public class TimeoutRpcClientFactoryTest {
     RpcClient delegateClient = Mockito.mock(RpcClient.class);
     Mockito.when(delegateClient.singleRequestSingleResponse(payload, options))
         .thenReturn(Mono.never());
-    RpcClientFactory delegate = Mockito.mock(RpcClientFactory.class);
+    RpcClientTransportFactory delegate = Mockito.mock(RpcClientTransportFactory.class);
     Mockito.when(delegate.createRpcClient(address)).thenReturn(Mono.just(delegateClient));
 
     TimeoutRpcClientFactory factory =
@@ -140,7 +140,7 @@ public class TimeoutRpcClientFactoryTest {
     RpcClient delegateClient = Mockito.mock(RpcClient.class);
     Mockito.when(delegateClient.singleRequestSingleResponse(payload, options))
         .thenReturn(Mono.never());
-    RpcClientFactory delegate = Mockito.mock(RpcClientFactory.class);
+    RpcClientTransportFactory delegate = Mockito.mock(RpcClientTransportFactory.class);
     Mockito.when(delegate.createRpcClient(address)).thenReturn(Mono.just(delegateClient));
 
     TimeoutRpcClientFactory factory =
@@ -160,7 +160,7 @@ public class TimeoutRpcClientFactoryTest {
   @Timeout(value = 10_000, unit = TimeUnit.MILLISECONDS)
   public void testConnectionTimeout() {
     SocketAddress address = Mockito.mock(SocketAddress.class);
-    RpcClientFactory delegate = Mockito.mock(RpcClientFactory.class);
+    RpcClientTransportFactory delegate = Mockito.mock(RpcClientTransportFactory.class);
     Mockito.when(delegate.createRpcClient(address)).thenReturn(Mono.never());
 
     TimeoutRpcClientFactory factory =

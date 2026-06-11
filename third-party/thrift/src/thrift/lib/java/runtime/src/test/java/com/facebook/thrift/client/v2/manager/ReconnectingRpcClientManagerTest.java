@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.facebook.thrift.client.RpcClient;
-import com.facebook.thrift.client.RpcClientFactory;
+import com.facebook.thrift.client.RpcClientTransportFactory;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.concurrent.CompletableFuture;
@@ -38,7 +38,7 @@ public class ReconnectingRpcClientManagerTest {
   @Test
   public void testDisposeDuringRetryBackoffFailsAcquirePromptly() throws Exception {
     CountDownLatch firstFailure = new CountDownLatch(1);
-    RpcClientFactory factory =
+    RpcClientTransportFactory factory =
         __ ->
             Mono.defer(
                 () ->

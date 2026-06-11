@@ -16,7 +16,9 @@
 
 package com.facebook.thrift.client;
 
+import com.facebook.thrift.client.v2.manager.ClientOwnership;
 import com.facebook.thrift.client.v2.manager.RpcClientBinding;
+import com.facebook.thrift.client.v2.manager.SingleRpcClientManager;
 import com.google.common.base.Preconditions;
 import java.net.SocketAddress;
 import java.util.Map;
@@ -61,9 +63,21 @@ public abstract class ClientBuilder<T> {
     return this;
   }
 
-  /** Builds a typed client from a factory and address. */
+  /** Builds a typed client from a binding factory and address. */
   public T build(RpcClientFactory factory, SocketAddress address) {
     return build(factory.createRpcClientBinding(address));
+  }
+
+  /**
+   * Builds a typed client from a raw transport factory and address. The typed client owns a
+   * lazily-connected single transport via {@link SingleRpcClientManager}. Use this overload when
+   * you've constructed a transport factory directly (e.g., {@code new LegacyRpcClientFactory(...)
+   * }) rather than going through {@link RpcClientFactory#builder()}.
+   */
+  public T build(RpcClientTransportFactory transportFactory, SocketAddress address) {
+    return build(
+        new RpcClientBinding(
+            new SingleRpcClientManager(transportFactory, address), ClientOwnership.OWNED));
   }
 
   /**

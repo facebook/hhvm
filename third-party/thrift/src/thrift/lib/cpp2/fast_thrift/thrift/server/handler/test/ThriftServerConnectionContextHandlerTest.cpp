@@ -21,8 +21,6 @@
 
 #include <gtest/gtest.h>
 
-#include <boost/intrusive_ptr.hpp>
-
 #include <folly/ExceptionWrapper.h>
 
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Common.h>

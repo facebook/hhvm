@@ -188,16 +188,21 @@ bool RocketBiDiClientCallback::onStreamCancel() {
 
   state_.onStreamCancel();
   bool wasTerminal = state_.isTerminal();
-  if (!serverCallback_->onStreamCancel()) {
+  auto& connection = connection_;
+  auto streamId = streamId_;
+  auto* serverCallback = serverCallback_;
+  if (wasTerminal) {
+    serverCallback_ = nullptr;
+  }
+  if (!serverCallback->onStreamCancel()) {
     if (wasTerminal) {
-      serverCallback_ = nullptr;
-      return freeStreamAndReturn(false);
+      connection.freeStream(streamId, /* markRequestComplete */ true);
     }
     return false;
   }
   if (wasTerminal) {
-    serverCallback_ = nullptr;
-    return freeStreamAndReturn(false);
+    connection.freeStream(streamId, /* markRequestComplete */ true);
+    return false;
   }
   DCHECK(state_.isAlive());
   return true;
@@ -219,16 +224,21 @@ bool RocketBiDiClientCallback::onSinkError(folly::exception_wrapper ew) {
 
   state_.onSinkError();
   bool wasTerminal = state_.isTerminal();
-  if (!serverCallback_->onSinkError(std::move(ew))) {
+  auto& connection = connection_;
+  auto streamId = streamId_;
+  auto* serverCallback = serverCallback_;
+  if (wasTerminal) {
+    serverCallback_ = nullptr;
+  }
+  if (!serverCallback->onSinkError(std::move(ew))) {
     if (wasTerminal) {
-      serverCallback_ = nullptr;
-      return freeStreamAndReturn(false);
+      connection.freeStream(streamId, /* markRequestComplete */ true);
     }
     return false;
   }
   if (wasTerminal) {
-    serverCallback_ = nullptr;
-    return freeStreamAndReturn(false);
+    connection.freeStream(streamId, /* markRequestComplete */ true);
+    return false;
   }
   DCHECK(state_.isAlive());
   return true;
@@ -240,16 +250,21 @@ bool RocketBiDiClientCallback::onSinkComplete() {
 
   state_.onSinkComplete();
   bool wasTerminal = state_.isTerminal();
-  if (!serverCallback_->onSinkComplete()) {
+  auto& connection = connection_;
+  auto streamId = streamId_;
+  auto* serverCallback = serverCallback_;
+  if (wasTerminal) {
+    serverCallback_ = nullptr;
+  }
+  if (!serverCallback->onSinkComplete()) {
     if (wasTerminal) {
-      serverCallback_ = nullptr;
-      return freeStreamAndReturn(false);
+      connection.freeStream(streamId, /* markRequestComplete */ true);
     }
     return false;
   }
   if (wasTerminal) {
-    serverCallback_ = nullptr;
-    return freeStreamAndReturn(false);
+    connection.freeStream(streamId, /* markRequestComplete */ true);
+    return false;
   }
   DCHECK(state_.isAlive());
   return true;

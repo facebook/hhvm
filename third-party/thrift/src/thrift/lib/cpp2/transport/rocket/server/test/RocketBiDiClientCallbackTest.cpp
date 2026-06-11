@@ -136,7 +136,7 @@ TEST_F(RocketBiDiClientCallbackTest, HandleErrorNonCanceledPostReady) {
   makeReady();
 
   EXPECT_CALL(serverCallback_, onSinkError(_))
-      .WillOnce([](folly::exception_wrapper ew) {
+      .WillOnce([](const folly::exception_wrapper& ew) {
         EXPECT_TRUE(ew.is_compatible_with<RocketException>());
         return true;
       });
@@ -171,6 +171,26 @@ TEST_F(RocketBiDiClientCallbackTest, HandleCancelPostReady) {
 
   CancelFrame frame(kStreamId);
   callback_->handleFrame(std::move(frame));
+}
+
+TEST_F(RocketBiDiClientCallbackTest, HandleTerminalCancelCompletesInline) {
+  makeReady();
+
+  EXPECT_CALL(serverCallback_, onSinkComplete()).WillOnce(Return(true));
+  PayloadFrame completeFrame(kStreamId, Payload{}, Flags().complete(true));
+  callback_->handleFrame(std::move(completeFrame));
+
+  EXPECT_CALL(connection_, sendPayload(kStreamId, _, _, _)).Times(1);
+  EXPECT_CALL(connection_, freeStream(kStreamId, true))
+      .WillOnce([&](StreamId, bool) { callback_.reset(); })
+      .WillOnce([](StreamId, bool) {});
+  EXPECT_CALL(serverCallback_, onStreamCancel()).WillOnce([&] {
+    callback_->onStreamComplete();
+    return false;
+  });
+
+  CancelFrame cancelFrame(kStreamId);
+  callback_->handleFrame(std::move(cancelFrame));
 }
 
 TEST_F(RocketBiDiClientCallbackTest, HandleCancelPreReadyClosesConnection) {
@@ -677,7 +697,7 @@ TEST_F(
   // This prevents use-after-free if the bridge's onSinkError destroys the
   // server callback, which would make the subsequent onStreamCancel call crash.
   EXPECT_CALL(serverCallback_, onSinkError(_))
-      .WillOnce([this](folly::exception_wrapper) {
+      .WillOnce([this](const folly::exception_wrapper&) {
         EXPECT_FALSE(callback_->serverCallbackReady());
         return true;
       });

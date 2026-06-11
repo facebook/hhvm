@@ -16,11 +16,9 @@
 
 package com.facebook.thrift.runner;
 
-import com.facebook.thrift.client.ReconnectingRpcClientFactory;
 import com.facebook.thrift.client.RpcClientFactory;
 import com.facebook.thrift.client.ThriftClientConfig;
 import com.facebook.thrift.example.ping.PingService;
-import com.facebook.thrift.legacy.client.LegacyRpcClientFactory;
 import io.netty.util.ResourceLeakDetector;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -32,13 +30,15 @@ public class ReconnectingAsyncNetty4Client extends AbstractAsyncClient {
   private final RpcClientFactory factory;
 
   public ReconnectingAsyncNetty4Client() {
-    LegacyRpcClientFactory rpcClientFactory =
-        new LegacyRpcClientFactory(
-            new ThriftClientConfig()
-                .setDisableSSL(true)
-                .setRequestTimeout(io.airlift.units.Duration.succinctDuration(1, TimeUnit.DAYS)));
-
-    this.factory = new ReconnectingRpcClientFactory(rpcClientFactory);
+    this.factory =
+        RpcClientFactory.builder()
+            .setDisableLoadBalancing(true)
+            .setThriftClientConfig(
+                new ThriftClientConfig()
+                    .setDisableSSL(true)
+                    .setRequestTimeout(
+                        io.airlift.units.Duration.succinctDuration(1, TimeUnit.DAYS)))
+            .build();
   }
 
   public static void main(String... args) {

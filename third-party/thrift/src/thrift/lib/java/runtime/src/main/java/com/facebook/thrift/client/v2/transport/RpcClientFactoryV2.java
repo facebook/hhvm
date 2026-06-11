@@ -18,14 +18,11 @@ package com.facebook.thrift.client.v2.transport;
 
 import com.facebook.swift.service.ThriftClientEventHandler;
 import com.facebook.swift.service.ThriftClientStats;
-import com.facebook.thrift.client.CachedRpcClientFactory;
 import com.facebook.thrift.client.ClientBuilder;
 import com.facebook.thrift.client.EventHandlerRpcClientFactory;
 import com.facebook.thrift.client.InstrumentedRpcClientFactory;
-import com.facebook.thrift.client.ReconnectingRpcClientFactory;
 import com.facebook.thrift.client.RpcClient;
 import com.facebook.thrift.client.RpcClientFactory;
-import com.facebook.thrift.client.SimpleLoadBalancingRpcClientFactory;
 import com.facebook.thrift.client.ThriftClientConfig;
 import com.facebook.thrift.client.ThriftClientStatsHolder;
 import com.facebook.thrift.client.TimeoutRpcClientFactory;
@@ -49,29 +46,25 @@ import java.util.Objects;
 import reactor.core.publisher.Mono;
 
 /**
- * V2 transport/factory entrypoint.
+ * V2 transport/factory entrypoint. Constructs manager-backed {@link RpcClientBinding} handles for
+ * typed clients via {@link #createRpcClientBinding(SocketAddress)}.
  *
- * <p>The legacy {@link Mono}-returning surface is kept for compatibility, while typed-client
- * construction should use {@link #createRpcClientBinding(SocketAddress)} to enter the
- * manager-backed v2 lifecycle stack.
+ * <p>The {@link RpcClientFactory#createRpcClient(SocketAddress)} contract is intentionally
+ * unsupported here: this class is a binding factory, not a raw transport factory. Raw transport is
+ * owned by the transport-layer factories that {@link Builder#buildManagerTransportFactory()}
+ * composes.
  */
 public final class RpcClientFactoryV2 implements RpcClientFactory {
-  private final RpcClientFactory legacyMonoFactory;
   private final RpcClientManagerFactory managerFactory;
 
-  private RpcClientFactoryV2(
-      RpcClientFactory legacyMonoFactory, RpcClientManagerFactory managerFactory) {
-    this.legacyMonoFactory = Objects.requireNonNull(legacyMonoFactory);
+  private RpcClientFactoryV2(RpcClientManagerFactory managerFactory) {
     this.managerFactory = Objects.requireNonNull(managerFactory);
   }
 
-  /**
-   * Legacy entrypoint preserved for callers that still use raw {@code Mono<RpcClient>}. This
-   * delegates to the legacy mono factory chain and does NOT enter the v2 manager stack.
-   */
   @Override
   public Mono<RpcClient> createRpcClient(SocketAddress socketAddress) {
-    return legacyMonoFactory.createRpcClient(socketAddress);
+    throw new UnsupportedOperationException(
+        "RpcClientFactoryV2 is a binding factory; call createRpcClientBinding(...) instead");
   }
 
   /**
@@ -100,7 +93,6 @@ public final class RpcClientFactoryV2 implements RpcClientFactory {
     private List<ThriftClientEventHandler> clientEventHandlers;
     private int connectionPoolSize = RpcResources.getNumEventLoopThreads();
     private boolean handleHeaderResponse = false;
-    private boolean cacheClient = true;
 
     private ThriftClientConfig thriftClientConfig;
     private ThriftClientStats thriftClientStats = ThriftClientStatsHolder.getThriftClientStats();
@@ -156,11 +148,6 @@ public final class RpcClientFactoryV2 implements RpcClientFactory {
       return this;
     }
 
-    public Builder setCacheClient(boolean cacheClient) {
-      this.cacheClient = cacheClient;
-      return this;
-    }
-
     public Builder setThriftClientConfig(ThriftClientConfig thriftClientConfig) {
       this.thriftClientConfig = thriftClientConfig;
       return this;
@@ -180,7 +167,7 @@ public final class RpcClientFactoryV2 implements RpcClientFactory {
     public RpcClientFactoryV2 build() {
       validate();
       recordTransport();
-      return new RpcClientFactoryV2(buildLegacyMonoFactory(), buildManagerFactoryInternal());
+      return new RpcClientFactoryV2(buildManagerFactoryInternal());
     }
 
     private void validate() {
@@ -199,8 +186,7 @@ public final class RpcClientFactoryV2 implements RpcClientFactory {
     /**
      * Builds the v2 manager factory chain: transport factory (raw connections + per-request
      * decoration) wrapped in reconnecting or single managers, optionally load-balanced across N
-     * slots. CachedRpcClientFactory is intentionally omitted because SingleRpcClientManager handles
-     * connection caching internally.
+     * slots. Connection caching is handled by {@code SingleRpcClientManager} internally.
      */
     private RpcClientManagerFactory buildManagerFactoryInternal() {
       RpcClientFactory transportFactory = buildManagerTransportFactory();
@@ -215,57 +201,6 @@ public final class RpcClientFactoryV2 implements RpcClientFactory {
       }
 
       return managerFactory;
-    }
-
-    /**
-     * Builds the full legacy decorator chain for the {@link #createRpcClient} compatibility path.
-     * This is the same chain that {@link RpcClientFactory.Builder#buildLegacyFactory()} produces.
-     */
-    private RpcClientFactory buildLegacyMonoFactory() {
-      RpcClientFactory rpcClientFactory;
-      if (disableRSocket) {
-        if (handleHeaderResponse) {
-          throw new IllegalArgumentException(
-              "handleHeaderResponse is only applicable if using RSocket");
-        }
-        rpcClientFactory = new LegacyRpcClientFactory(thriftClientConfig);
-      } else {
-        if (handleHeaderResponse) {
-          rpcClientFactory = new HeaderAwareRpcClientFactory(thriftClientConfig);
-        } else {
-          rpcClientFactory = new RSocketRpcClientFactory(thriftClientConfig);
-        }
-        if (cacheClient) {
-          rpcClientFactory = new CachedRpcClientFactory(rpcClientFactory);
-        }
-      }
-
-      if (!disableStats) {
-        rpcClientFactory = new InstrumentedRpcClientFactory(rpcClientFactory, thriftClientStats);
-      }
-
-      if (headerTokens != null && !headerTokens.isEmpty()) {
-        rpcClientFactory = new TokenPassingRpcClientFactory(rpcClientFactory, headerTokens);
-      }
-
-      if (clientEventHandlers != null && !clientEventHandlers.isEmpty()) {
-        rpcClientFactory = new EventHandlerRpcClientFactory(rpcClientFactory, clientEventHandlers);
-      }
-
-      if (!disableReconnectingClient) {
-        rpcClientFactory = new ReconnectingRpcClientFactory(rpcClientFactory);
-      }
-
-      if (!disableTimeout) {
-        rpcClientFactory = new TimeoutRpcClientFactory(rpcClientFactory, thriftClientConfig);
-      }
-
-      if (connectionPoolSize >= 1) {
-        rpcClientFactory =
-            new SimpleLoadBalancingRpcClientFactory(rpcClientFactory, connectionPoolSize);
-      }
-
-      return rpcClientFactory;
     }
 
     /**

@@ -45,9 +45,8 @@ import reactor.util.retry.Retry;
  * For each currently selected host it reuses or creates a child manager, up to {@code poolSize}
  * hosts. {@link #acquire()} then picks one current child manager by sticky hash or round-robin.
  *
- * <p>This is the manager-layer replacement for the older {@code PooledRpcClientMono}. It is used
- * for direct Service Router clients that bypass the local proxy and therefore need Java to track
- * the current backend host set itself.
+ * <p>Used for direct Service Router clients that bypass the local proxy and therefore need Java to
+ * track the current backend host set itself.
  */
 public final class PooledRpcClientManager extends AbstractRpcClientManager {
   private static final AtomicIntegerFieldUpdater<PooledRpcClientManager> CURRENT_INDEX =

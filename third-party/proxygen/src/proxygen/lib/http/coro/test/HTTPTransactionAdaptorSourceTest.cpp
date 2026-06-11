@@ -12,6 +12,7 @@
 #include "proxygen/lib/http/coro/client/test/HTTPClientTestsCommon.h"
 #include "proxygen/lib/http/coro/test/Mocks.h"
 #include "proxygen/lib/http/coro/util/test/TestHelpers.h"
+#include <folly/coro/Baton.h>
 #include <folly/coro/DetachOnCancel.h>
 
 using namespace proxygen::coro;
@@ -25,6 +26,40 @@ static std::chrono::milliseconds kTestDefaultTimeout =
     std::chrono::milliseconds(1000);
 static folly::SocketAddress kTestAddress("127.0.0.1", 80);
 static wangle::TransportInfo kTestTransportInfo;
+
+// Source that delivers headers synchronously, then suspends on a baton
+// before returning trailers. This simulates a real network source where
+// trailers arrive asynchronously.
+class AsyncTrailerSource : public HTTPSource {
+ public:
+  explicit AsyncTrailerSource(std::unique_ptr<HTTPMessage> msg)
+      : msg_(std::move(msg)) {
+    setHeapAllocated();
+  }
+
+  folly::coro::Task<HTTPHeaderEvent> readHeaderEvent() override {
+    HTTPHeaderEvent event(std::move(msg_), false /* eom */);
+    auto guard = folly::makeGuard(lifetime(event));
+    co_return event;
+  }
+
+  folly::coro::Task<HTTPBodyEvent> readBodyEvent(uint32_t) override {
+    co_await baton_;
+    auto trailers = std::make_unique<HTTPHeaders>();
+    trailers->add("Test", "Success");
+    HTTPBodyEvent event(std::move(trailers));
+    auto guard = folly::makeGuard(lifetime(event));
+    co_return event;
+  }
+
+  void stopReading(
+      folly::Optional<const HTTPErrorCode> = folly::none) noexcept override {
+    delete this;
+  }
+
+  folly::coro::Baton baton_;
+  std::unique_ptr<HTTPMessage> msg_;
+};
 
 } // namespace
 
@@ -374,6 +409,63 @@ CO_TEST_P_X(HTTPTransactionAdaptorSourceTests,
 
   // Terminate before egress loop is complete.
   getHandler()->detachTransaction();
+}
+
+CO_TEST_P_X(HTTPTransactionAdaptorSourceTests,
+            EgressTrailersAfterDetachNoCrash) {
+  // Reproduce the production crash: the egress loop suspends waiting for the
+  // next body event (async source). While suspended, detachTransaction fires
+  // — setting txn_ = nullptr and requesting cancellation. The source then
+  // delivers trailers. reader.read() resumes and dispatches to the TRAILERS
+  // switch case without re-checking the stop flag, so the onTrailers
+  // callback runs with a null txn_. Without the cancellation guard in
+  // onTrailers, this is a SIGSEGV.
+  auto ingressSource = adaptor_->getIngressSource();
+
+  auto msg = std::make_unique<HTTPMessage>();
+  msg->setMethod(HTTPMethod::GET);
+  msg->setURL("https://www.facebook.com/");
+
+  // Buffer ingress — consumed later for lifecycle cleanup.
+  getHandler()->onHeadersComplete(std::move(msg));
+  getHandler()->onEOM();
+
+  auto resp = std::make_unique<HTTPMessage>();
+  resp->setStatusCode(200);
+  auto* asyncSource = new AsyncTrailerSource(std::move(resp));
+  auto* batonPtr = &asyncSource->baton_;
+
+  folly::coro::Baton headersSent;
+  EXPECT_CALL(*mockTxn_, sendHeadersWithOptionalEOM)
+      .Times(1)
+      .WillOnce([&](const HTTPMessage&, auto) { headersSent.post(); });
+  EXPECT_CALL(*mockTxn_, sendTrailers).Times(0);
+  EXPECT_CALL(*mockTxn_, sendEOM).Times(0);
+
+  adaptor_->setEgressSource(HTTPSourceHolder(asyncSource));
+
+  // Wait until egress headers are sent. The egress loop is now suspended
+  // inside readBodyEvent at the baton.
+  co_await headersSent;
+
+  // Detach sets txn_ = nullptr and requests cancellation. IngressComplete
+  // is not yet set, so the gate does not fire and the adaptor stays alive.
+  getHandler()->detachTransaction();
+
+  // Unblock readBodyEvent — it returns the TRAILERS event. The reader
+  // dispatches to the onTrailers callback without rechecking the stop flag.
+  batonPtr->post();
+
+  // Yield so the egress loop continuation runs and processes trailers.
+  co_await folly::coro::co_reschedule_on_current_executor;
+
+  // Consume the buffered ingress to trigger IngressComplete and allow the
+  // gate to fire for proper adaptor cleanup.
+  HTTPSourceReader ingressReader;
+  ingressReader.setSource(ingressSource)
+      .onHeaders([](auto, auto, bool) { return HTTPSourceReader::Continue; })
+      .onError([](auto, auto) {});
+  co_await ingressReader.read();
 }
 
 CO_TEST_P_X(HTTPTransactionAdaptorSourceTests, DownstreamErrors) {

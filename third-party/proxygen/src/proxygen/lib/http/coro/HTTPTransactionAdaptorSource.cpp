@@ -181,7 +181,11 @@ folly::coro::Task<void> HTTPTransactionAdaptorSource::egressLoop() {
         }
         return HTTPSourceReader::Continue;
       })
-      .onTrailers([&](std::unique_ptr<HTTPHeaders> trailers) {
+      .onTrailers([&, token = cancelSource_.getToken()](
+                      std::unique_ptr<HTTPHeaders> trailers) {
+        if (token.isCancellationRequested()) {
+          return;
+        }
         txn_->sendTrailers(*trailers);
       })
       .onError([&, token = cancelSource_.getToken()](

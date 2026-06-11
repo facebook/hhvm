@@ -155,6 +155,8 @@ if (BUILD_SAMPLES)
       Folly::folly_portability_gflags
   )
   install(TARGETS hq EXPORT proxygen-exports DESTINATION bin)
+
+  add_subdirectory(samples/masque)
 endif()
 
 file(

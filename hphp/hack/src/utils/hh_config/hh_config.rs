@@ -63,7 +63,6 @@ pub struct HhConfig {
     pub eden_fetch_parallelism: usize,
     pub use_distc_crawl_dircache: bool,
     pub distc_avoid_unnecessary_saved_state_work: bool,
-    pub distc_weak_edge_decl_discovery: bool,
     pub distc_min_worker_memory_gib: i64,
     pub distc_min_cpu_units: i64,
     pub distc_parallel_decl_decode: bool,
@@ -91,7 +90,6 @@ impl Default for HhConfig {
             eden_fetch_parallelism: 0,
             use_distc_crawl_dircache: false,
             distc_avoid_unnecessary_saved_state_work: false,
-            distc_weak_edge_decl_discovery: false,
             distc_min_worker_memory_gib: 0,
             distc_min_cpu_units: 0,
             distc_parallel_decl_decode: false,
@@ -699,9 +697,6 @@ impl HhConfig {
                 "distc_avoid_unnecessary_saved_state_work" => {
                     c.distc_avoid_unnecessary_saved_state_work = parse_json(&value)?;
                 }
-                "distc_weak_edge_decl_discovery" => {
-                    c.distc_weak_edge_decl_discovery = parse_json(&value)?;
-                }
                 "distc_min_worker_memory_gib" => {
                     c.distc_min_worker_memory_gib = parse_json(&value)?;
                 }
@@ -728,7 +723,6 @@ impl HhConfig {
             "eden_fetch_parallelism": self.eden_fetch_parallelism,
             "use_distc_crawl_dircache": self.use_distc_crawl_dircache,
             "distc_avoid_unnecessary_saved_state_work": self.distc_avoid_unnecessary_saved_state_work,
-            "distc_weak_edge_decl_discovery": self.distc_weak_edge_decl_discovery,
             "distc_min_worker_memory_gib": self.distc_min_worker_memory_gib,
             "distc_min_cpu_units": self.distc_min_cpu_units,
             "distc_parallel_decl_decode": self.distc_parallel_decl_decode,

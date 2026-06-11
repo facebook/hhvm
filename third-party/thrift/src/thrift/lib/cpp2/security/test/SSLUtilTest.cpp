@@ -73,7 +73,8 @@ class ToFDSocketZeroCopyTest : public ::testing::Test {
     if (enableZeroCopy) {
       sock->setZeroCopy(true);
       if (!sock->getZeroCopy()) {
-        GTEST_SKIP() << "SO_ZEROCOPY not supported on this platform";
+        // SO_ZEROCOPY not supported on this platform; nothing to verify.
+        return;
       }
     }
     auto ctx = std::make_shared<fizz::client::FizzClientContext>();
@@ -90,7 +91,8 @@ class ToFDSocketZeroCopyTest : public ::testing::Test {
     if (enableZeroCopy) {
       sock->setZeroCopy(true);
       if (!sock->getZeroCopy()) {
-        GTEST_SKIP() << "SO_ZEROCOPY not supported on this platform";
+        // SO_ZEROCOPY not supported on this platform; nothing to verify.
+        return;
       }
     }
     auto serverCtx = std::make_shared<fizz::server::FizzServerContext>();

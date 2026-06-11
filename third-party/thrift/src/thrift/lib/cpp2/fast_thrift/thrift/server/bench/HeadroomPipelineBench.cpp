@@ -40,7 +40,6 @@
 #include <thrift/lib/cpp2/fast_thrift/frame/handler/FrameCodecHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/read/FrameParser.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/FrameHeaders.h>
-#include <thrift/lib/cpp2/fast_thrift/frame/write/FrameWriter.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/Messages.h>
 #include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>

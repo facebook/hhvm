@@ -26,7 +26,7 @@ folly::coro::Task<HTTPHeaderEvent> HTTPSourceFilter::readHeaderEventImpl(
       delete this;
     }
   }
-  co_return event;
+  co_yield folly::coro::co_result(std::move(event));
 }
 
 folly::coro::Task<HTTPBodyEvent> HTTPSourceFilter::readBodyEventImpl(
@@ -39,7 +39,7 @@ folly::coro::Task<HTTPBodyEvent> HTTPSourceFilter::readBodyEventImpl(
       delete this;
     }
   }
-  co_return event;
+  co_yield folly::coro::co_result(std::move(event));
 }
 
 void HTTPSourceFilter::stopReading(

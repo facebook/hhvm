@@ -16,7 +16,6 @@
 
 package com.facebook.thrift.client;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -31,37 +30,9 @@ import reactor.test.StepVerifier;
 public class ClientRuntimeSelectorTest {
 
   @Test
-  public void testResolveHonorsExplicitConfigOverride() {
-    assertEquals(
-        ClientRuntimeMode.LEGACY,
-        ClientRuntimeSelector.resolve(
-            new ThriftClientConfig().setClientRuntimeMode(ClientRuntimeMode.LEGACY)));
-    assertEquals(
-        ClientRuntimeMode.V2,
-        ClientRuntimeSelector.resolve(
-            new ThriftClientConfig().setClientRuntimeMode(ClientRuntimeMode.V2)));
-  }
-
-  @Test
-  public void testLegacySourceKeepsDisposeNoop() {
+  public void testSourceOwnsAcquiredClientAndRejectsAfterDispose() {
     TestRpcClient rpcClient = new TestRpcClient();
-    RpcClientSource source =
-        ClientRuntimeSelector.createSource(Mono.just(rpcClient), ClientRuntimeMode.LEGACY);
-
-    assertSame(rpcClient, source.acquire().block());
-
-    source.dispose();
-
-    assertFalse(source.isDisposed());
-    assertFalse(rpcClient.isDisposed());
-    assertSame(rpcClient, source.acquire().block());
-  }
-
-  @Test
-  public void testV2SourceOwnsAcquiredClientAndRejectsAfterDispose() {
-    TestRpcClient rpcClient = new TestRpcClient();
-    RpcClientSource source =
-        ClientRuntimeSelector.createSource(Mono.just(rpcClient), ClientRuntimeMode.V2);
+    RpcClientSource source = ClientRuntimeSelector.createSource(Mono.just(rpcClient));
 
     assertSame(rpcClient, source.acquire().block());
 
@@ -73,11 +44,10 @@ public class ClientRuntimeSelectorTest {
   }
 
   @Test
-  public void testV2SourceDoesNotDisposeDisposableSourceMono() {
+  public void testSourceDoesNotDisposeDisposableSourceMono() {
     TestRpcClient rpcClient = new TestRpcClient();
     TestDisposableRpcClientMono rpcClientMono = new TestDisposableRpcClientMono(rpcClient);
-    RpcClientSource source =
-        ClientRuntimeSelector.createSource(rpcClientMono, ClientRuntimeMode.V2);
+    RpcClientSource source = ClientRuntimeSelector.createSource(rpcClientMono);
 
     assertSame(rpcClient, source.acquire().block());
 

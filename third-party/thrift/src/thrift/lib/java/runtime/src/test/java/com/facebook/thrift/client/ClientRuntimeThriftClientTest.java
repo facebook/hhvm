@@ -17,7 +17,6 @@
 package com.facebook.thrift.client;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -54,32 +53,11 @@ public class ClientRuntimeThriftClientTest {
 
   @Test
   @Timeout(30)
-  public void testLegacyFactoryBuildKeepsReactiveClientUsableAfterDispose() {
-    ServerTransport transport = createHeaderServer();
-    try {
-      PingService.Reactive client =
-          createReactiveClient(
-              createFactory(ClientRuntimeMode.LEGACY), (InetSocketAddress) transport.getAddress());
-
-      assertPing(client, "before-close", "before-close_pong_0");
-
-      client.dispose();
-
-      assertFalse(client.isDisposed());
-      assertPing(client, "after-close", "after-close_pong_1");
-    } finally {
-      transport.dispose();
-    }
-  }
-
-  @Test
-  @Timeout(30)
   public void testV2FactoryBuildFailsFastAfterDispose() {
     ServerTransport transport = createHeaderServer();
     try {
       PingService.Reactive client =
-          createReactiveClient(
-              createFactory(ClientRuntimeMode.V2), (InetSocketAddress) transport.getAddress());
+          createReactiveClient(createFactory(), (InetSocketAddress) transport.getAddress());
 
       client.pingVoid(new PingRequest.Builder().setRequest("before-close-void").build()).block();
       assertPing(client, "before-close", "before-close_pong_0");
@@ -97,12 +75,11 @@ public class ClientRuntimeThriftClientTest {
 
   @Test
   @Timeout(30)
-  public void testV2BlockingFactoryBuildOverHeaderSupportsLegacyParityCalls() {
+  public void testBlockingFactoryBuildOverHeader() {
     ServerTransport transport = createHeaderServer();
     try {
       PingService client =
-          createBlockingClient(
-              createFactory(ClientRuntimeMode.V2), (InetSocketAddress) transport.getAddress());
+          createBlockingClient(createFactory(), (InetSocketAddress) transport.getAddress());
 
       assertBlockingClientCoreCalls(client);
     } finally {
@@ -112,12 +89,11 @@ public class ClientRuntimeThriftClientTest {
 
   @Test
   @Timeout(30)
-  public void testV2AsyncFactoryBuildOverHeaderSupportsLegacyParityCalls() throws Exception {
+  public void testAsyncFactoryBuildOverHeader() throws Exception {
     ServerTransport transport = createHeaderServer();
     try {
       PingService.Async client =
-          createAsyncClient(
-              createFactory(ClientRuntimeMode.V2), (InetSocketAddress) transport.getAddress());
+          createAsyncClient(createFactory(), (InetSocketAddress) transport.getAddress());
 
       assertAsyncClientCoreCalls(client);
     } finally {
@@ -127,12 +103,11 @@ public class ClientRuntimeThriftClientTest {
 
   @Test
   @Timeout(30)
-  public void testV2FactoryBuildOverHeaderSupportsReactiveServerImplementations() {
+  public void testFactoryBuildOverHeaderSupportsReactiveServerImplementations() {
     ServerTransport transport = createHeaderServer(createReactiveServerHandler());
     try {
       PingService.Reactive client =
-          createReactiveClient(
-              createFactory(ClientRuntimeMode.V2), (InetSocketAddress) transport.getAddress());
+          createReactiveClient(createFactory(), (InetSocketAddress) transport.getAddress());
 
       assertPing(client, "reactive-server", "reactive-server_pong_0");
     } finally {
@@ -217,13 +192,12 @@ public class ClientRuntimeThriftClientTest {
 
   @Test
   @Timeout(30)
-  public void testV2BlockingFactoryBuildOverRSocketSupportsLegacyParityCalls() {
+  public void testBlockingFactoryBuildOverRSocket() {
     ServerTransport transport = createRSocketServer();
     try {
       PingService client =
           createBlockingClient(
-              createRSocketFactory(ClientRuntimeMode.V2, true),
-              (InetSocketAddress) transport.getAddress());
+              createRSocketFactory(true), (InetSocketAddress) transport.getAddress());
 
       assertBlockingClientCoreCalls(client);
     } finally {
@@ -233,13 +207,11 @@ public class ClientRuntimeThriftClientTest {
 
   @Test
   @Timeout(30)
-  public void testV2AsyncFactoryBuildOverRSocketSupportsLegacyParityCalls() throws Exception {
+  public void testAsyncFactoryBuildOverRSocket() throws Exception {
     ServerTransport transport = createRSocketServer();
     try {
       PingService.Async client =
-          createAsyncClient(
-              createRSocketFactory(ClientRuntimeMode.V2, true),
-              (InetSocketAddress) transport.getAddress());
+          createAsyncClient(createRSocketFactory(true), (InetSocketAddress) transport.getAddress());
 
       assertAsyncClientCoreCalls(client);
     } finally {
@@ -249,13 +221,12 @@ public class ClientRuntimeThriftClientTest {
 
   @Test
   @Timeout(30)
-  public void testV2FactoryBuildOverRSocketSupportsStreaming() {
+  public void testFactoryBuildOverRSocketSupportsStreaming() {
     ServerTransport transport = createRSocketServer(createReactiveServerHandler());
     try {
       PingService.Reactive client =
           createReactiveClient(
-              createRSocketFactory(ClientRuntimeMode.V2, true),
-              (InetSocketAddress) transport.getAddress());
+              createRSocketFactory(true), (InetSocketAddress) transport.getAddress());
 
       StepVerifier.create(
               client.streamOfPings(new PingRequest.Builder().setRequest("ping").build(), 10))
@@ -268,13 +239,12 @@ public class ClientRuntimeThriftClientTest {
 
   @Test
   @Timeout(30)
-  public void testV2FactoryBuildOverRSocketSupportsRepeatedCallsAndFailsFastAfterDispose() {
+  public void testFactoryBuildOverRSocketSupportsRepeatedCallsAndFailsFastAfterDispose() {
     ServerTransport transport = createRSocketServer();
     try {
       PingService.Reactive client =
           createReactiveClient(
-              createRSocketFactory(ClientRuntimeMode.V2, true),
-              (InetSocketAddress) transport.getAddress());
+              createRSocketFactory(true), (InetSocketAddress) transport.getAddress());
 
       client.pingVoid(new PingRequest.Builder().setRequest("before-close-void").build()).block();
       assertPing(client, "before-close", "before-close_pong_0");
@@ -365,31 +335,21 @@ public class ClientRuntimeThriftClientTest {
         .build(ClientRuntimeSelector.createBorrowedSource(manager));
   }
 
-  private static RpcClientFactory createFactory(ClientRuntimeMode runtimeMode) {
-    return createFactory(runtimeMode, false);
-  }
-
-  private static RpcClientFactory createFactory(ClientRuntimeMode runtimeMode, boolean useRSocket) {
-    return createFactory(runtimeMode, useRSocket, false);
-  }
-
-  private static RpcClientFactory createFactory(
-      ClientRuntimeMode runtimeMode, boolean useRSocket, boolean disableReconnectingClient) {
+  private static RpcClientFactory createFactory() {
     return RpcClientFactory.builder()
         .setDisableLoadBalancing(true)
-        .setDisableRSocket(!useRSocket)
-        .setDisableReconnectingClient(disableReconnectingClient)
-        .setThriftClientConfig(baseClientConfig().setClientRuntimeMode(runtimeMode))
+        .setDisableRSocket(true)
+        .setDisableReconnectingClient(false)
+        .setThriftClientConfig(baseClientConfig())
         .build();
   }
 
-  private static RpcClientFactory createRSocketFactory(
-      ClientRuntimeMode runtimeMode, boolean disableReconnectingClient) {
+  private static RpcClientFactory createRSocketFactory(boolean disableReconnectingClient) {
     return RpcClientFactory.builder()
         .setDisableLoadBalancing(true)
         .setDisableRSocket(false)
         .setDisableReconnectingClient(disableReconnectingClient)
-        .setThriftClientConfig(rSocketClientConfig().setClientRuntimeMode(runtimeMode))
+        .setThriftClientConfig(rSocketClientConfig())
         .build();
   }
 
@@ -397,7 +357,7 @@ public class ClientRuntimeThriftClientTest {
     return RpcClientFactoryV2.builder()
         .setDisableLoadBalancing(true)
         .setDisableRSocket(true)
-        .setThriftClientConfig(baseClientConfig().setClientRuntimeMode(ClientRuntimeMode.V2))
+        .setThriftClientConfig(baseClientConfig())
         .buildManagerFactory();
   }
 

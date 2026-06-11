@@ -17,7 +17,6 @@
 package com.facebook.thrift.util.resources;
 
 import com.facebook.swift.service.ThriftMeterRegistry;
-import com.facebook.thrift.client.ClientRuntimeMode;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.buffer.UnpooledByteBufAllocator;
 import io.netty.channel.EventLoopGroup;
@@ -54,10 +53,6 @@ public final class RpcResources {
   // TODO: remove when rolled out
   public static boolean enableOperatorFusion() {
     return ResourceConfiguration.enableOperatorFusion;
-  }
-
-  public static ClientRuntimeMode getClientRuntimeMode() {
-    return ResourceConfiguration.getClientRuntimeMode();
   }
 
   public static HashedWheelTimer getHashedWheelTimer() {

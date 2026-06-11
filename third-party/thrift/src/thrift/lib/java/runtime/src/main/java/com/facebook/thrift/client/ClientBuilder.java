@@ -64,17 +64,13 @@ public abstract class ClientBuilder<T> {
     return this;
   }
 
-  /**
-   * Builds a typed client from a factory and address. The factory's {@link
-   * RpcClientFactory#createRpcClientSource} determines whether the legacy or v2 runtime is used.
-   */
+  /** Builds a typed client from a factory and address. */
   public T build(RpcClientFactory factory, SocketAddress address) {
     return build(factory.createRpcClientSource(address));
   }
 
   /**
-   * Builds a typed client from a raw {@code Mono<RpcClient>}. Runtime selection (legacy vs v2) is
-   * determined by the global {@link ClientRuntimeMode} setting. Prefer {@link
+   * Builds a typed client from a raw {@code Mono<RpcClient>}. Prefer {@link
    * #build(RpcClientFactory, SocketAddress)} for new code.
    */
   public T build(Mono<? extends RpcClient> rpcClientMono) {

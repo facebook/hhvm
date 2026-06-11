@@ -19,10 +19,6 @@ package com.facebook.thrift.client;
 import com.facebook.swift.service.ThriftClientEventHandler;
 import com.facebook.swift.service.ThriftClientStats;
 import com.facebook.thrift.client.v2.transport.RpcClientFactoryV2;
-import com.facebook.thrift.legacy.client.LegacyRpcClientFactory;
-import com.facebook.thrift.metadata.ClientInfo;
-import com.facebook.thrift.rsocket.client.HeaderAwareRpcClientFactory;
-import com.facebook.thrift.rsocket.client.RSocketRpcClientFactory;
 import com.facebook.thrift.util.resources.RpcResources;
 import com.google.common.base.Preconditions;
 import java.net.SocketAddress;
@@ -121,70 +117,6 @@ public interface RpcClientFactory {
     public RpcClientFactory build() {
       Objects.requireNonNull(thriftClientConfig, "ThriftClientConfig is required");
       Objects.requireNonNull(thriftClientStats, "thriftClientStats is required");
-
-      if (ClientRuntimeSelector.resolve(thriftClientConfig) == ClientRuntimeMode.V2) {
-        return buildV2Factory();
-      }
-      return buildLegacyFactory();
-    }
-
-    private RpcClientFactory buildLegacyFactory() {
-      RpcClientFactory rpcClientFactory;
-      if (disableRSocket) {
-        if (handleHeaderResponse) {
-          throw new IllegalArgumentException(
-              "handleHeaderResponse is only applicable if using RSocket");
-        }
-        rpcClientFactory = new LegacyRpcClientFactory(thriftClientConfig);
-        ClientInfo.addTransport(ClientInfo.Transport.HEADER);
-      } else {
-        if (handleHeaderResponse) {
-          rpcClientFactory = new HeaderAwareRpcClientFactory(thriftClientConfig);
-          ClientInfo.addTransport(ClientInfo.Transport.HEADER);
-        } else {
-          rpcClientFactory = new RSocketRpcClientFactory(thriftClientConfig);
-          ClientInfo.addTransport(ClientInfo.Transport.ROCKET);
-        }
-        // If cache is enabled, wrap it with CachedRpcClientFactory
-        if (cacheClient) {
-          rpcClientFactory = new CachedRpcClientFactory(rpcClientFactory);
-        }
-      }
-
-      if (!disableStats) {
-        rpcClientFactory = new InstrumentedRpcClientFactory(rpcClientFactory, thriftClientStats);
-      }
-
-      if (headerTokens != null && !headerTokens.isEmpty()) {
-        rpcClientFactory = new TokenPassingRpcClientFactory(rpcClientFactory, headerTokens);
-      }
-
-      if (clientEventHandlers != null && !clientEventHandlers.isEmpty()) {
-        rpcClientFactory = new EventHandlerRpcClientFactory(rpcClientFactory, clientEventHandlers);
-      }
-
-      if (!disableReconnectingClient) {
-        rpcClientFactory = new ReconnectingRpcClientFactory(rpcClientFactory);
-      }
-
-      // TimeoutRpcClientFactory needs to come after ReconnectingRpcClientFactory to make
-      // sure that it times out. ReconnectingRpcClientFactory does emit unless there is a
-      // connection, and some code flatMaps on the emission. If the timeout is add inside
-      // the flatMap it won't be applied until the flatMap emits which isn't guaranteed to
-      // happen.
-      if (!disableTimeout) {
-        rpcClientFactory = new TimeoutRpcClientFactory(rpcClientFactory, thriftClientConfig);
-      }
-
-      if (connectionPoolSize >= 1) {
-        rpcClientFactory =
-            new SimpleLoadBalancingRpcClientFactory(rpcClientFactory, connectionPoolSize);
-      }
-
-      return rpcClientFactory;
-    }
-
-    private RpcClientFactory buildV2Factory() {
       return RpcClientFactoryV2.builder()
           .setDisableRSocket(disableRSocket)
           .setEnableHandleHeaderResponse(handleHeaderResponse)

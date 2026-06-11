@@ -326,7 +326,7 @@ TEST(SerializationTest, TestBuildCombinedClientAndServerPEM) {
   credVec2.emplace_back(
       Extension{
           ExtensionType::delegated_credential,
-          folly::IOBuf::copyBuffer(std::move(credData2))});
+          folly::IOBuf::copyBuffer(credData2)});
   folly::Optional<DelegatedCredential> clientCred;
   EXPECT_EQ(
       getExtension<DelegatedCredential>(clientCred, err, credVec2),

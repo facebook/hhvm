@@ -37,9 +37,9 @@ public interface BiDiService extends java.io.Closeable, com.facebook.thrift.util
     static com.facebook.thrift.client.ClientBuilder<BiDiService> clientBuilder() {
         return new ClientBuilder<BiDiService>() {
             @java.lang.Override
-            public BiDiService build(RpcClientSource rpcClientSource) {
+            public BiDiService build(com.facebook.thrift.client.v2.manager.RpcClientBinding rpcClientBinding) {
                 BiDiService.Reactive _delegate =
-                    new BiDiServiceReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
+                    new BiDiServiceReactiveClient(protocolId, rpcClientBinding, headersMono, persistentHeadersMono);
                 return new BiDiServiceReactiveBlockingWrapper(_delegate);
             }
         };
@@ -59,9 +59,9 @@ public interface BiDiService extends java.io.Closeable, com.facebook.thrift.util
         static com.facebook.thrift.client.ClientBuilder<BiDiService.Async> clientBuilder() {
             return new ClientBuilder<BiDiService.Async>() {
                 @java.lang.Override
-                public BiDiService.Async build(RpcClientSource rpcClientSource) {
+                public BiDiService.Async build(com.facebook.thrift.client.v2.manager.RpcClientBinding rpcClientBinding) {
                     BiDiService.Reactive _delegate =
-                        new BiDiServiceReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
+                        new BiDiServiceReactiveClient(protocolId, rpcClientBinding, headersMono, persistentHeadersMono);
                     return new BiDiServiceReactiveAsyncWrapper(_delegate);
                 }
             };
@@ -86,8 +86,8 @@ public interface BiDiService extends java.io.Closeable, com.facebook.thrift.util
         static com.facebook.thrift.client.ClientBuilder<BiDiService.Reactive> clientBuilder() {
             return new ClientBuilder<BiDiService.Reactive>() {
                 @java.lang.Override
-                public BiDiService.Reactive build(RpcClientSource rpcClientSource) {
-                    return new BiDiServiceReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
+                public BiDiService.Reactive build(com.facebook.thrift.client.v2.manager.RpcClientBinding rpcClientBinding) {
+                    return new BiDiServiceReactiveClient(protocolId, rpcClientBinding, headersMono, persistentHeadersMono);
                 }
             };
         }

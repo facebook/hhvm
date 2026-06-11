@@ -37,9 +37,9 @@ public interface Service extends java.io.Closeable, com.facebook.thrift.util.Blo
     static com.facebook.thrift.client.ClientBuilder<Service> clientBuilder() {
         return new ClientBuilder<Service>() {
             @java.lang.Override
-            public Service build(RpcClientSource rpcClientSource) {
+            public Service build(com.facebook.thrift.client.v2.manager.RpcClientBinding rpcClientBinding) {
                 Service.Reactive _delegate =
-                    new ServiceReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
+                    new ServiceReactiveClient(protocolId, rpcClientBinding, headersMono, persistentHeadersMono);
                 return new ServiceReactiveBlockingWrapper(_delegate);
             }
         };
@@ -59,9 +59,9 @@ public interface Service extends java.io.Closeable, com.facebook.thrift.util.Blo
         static com.facebook.thrift.client.ClientBuilder<Service.Async> clientBuilder() {
             return new ClientBuilder<Service.Async>() {
                 @java.lang.Override
-                public Service.Async build(RpcClientSource rpcClientSource) {
+                public Service.Async build(com.facebook.thrift.client.v2.manager.RpcClientBinding rpcClientBinding) {
                     Service.Reactive _delegate =
-                        new ServiceReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
+                        new ServiceReactiveClient(protocolId, rpcClientBinding, headersMono, persistentHeadersMono);
                     return new ServiceReactiveAsyncWrapper(_delegate);
                 }
             };
@@ -129,8 +129,8 @@ public interface Service extends java.io.Closeable, com.facebook.thrift.util.Blo
         static com.facebook.thrift.client.ClientBuilder<Service.Reactive> clientBuilder() {
             return new ClientBuilder<Service.Reactive>() {
                 @java.lang.Override
-                public Service.Reactive build(RpcClientSource rpcClientSource) {
-                    return new ServiceReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
+                public Service.Reactive build(com.facebook.thrift.client.v2.manager.RpcClientBinding rpcClientBinding) {
+                    return new ServiceReactiveClient(protocolId, rpcClientBinding, headersMono, persistentHeadersMono);
                 }
             };
         }

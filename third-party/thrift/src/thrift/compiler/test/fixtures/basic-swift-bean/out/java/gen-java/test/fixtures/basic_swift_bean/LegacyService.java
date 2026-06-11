@@ -37,9 +37,9 @@ public interface LegacyService extends java.io.Closeable, com.facebook.thrift.ut
     static com.facebook.thrift.client.ClientBuilder<LegacyService> clientBuilder() {
         return new ClientBuilder<LegacyService>() {
             @java.lang.Override
-            public LegacyService build(RpcClientSource rpcClientSource) {
+            public LegacyService build(com.facebook.thrift.client.v2.manager.RpcClientBinding rpcClientBinding) {
                 LegacyService.Reactive _delegate =
-                    new LegacyServiceReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
+                    new LegacyServiceReactiveClient(protocolId, rpcClientBinding, headersMono, persistentHeadersMono);
                 return new LegacyServiceReactiveBlockingWrapper(_delegate);
             }
         };
@@ -59,9 +59,9 @@ public interface LegacyService extends java.io.Closeable, com.facebook.thrift.ut
         static com.facebook.thrift.client.ClientBuilder<LegacyService.Async> clientBuilder() {
             return new ClientBuilder<LegacyService.Async>() {
                 @java.lang.Override
-                public LegacyService.Async build(RpcClientSource rpcClientSource) {
+                public LegacyService.Async build(com.facebook.thrift.client.v2.manager.RpcClientBinding rpcClientBinding) {
                     LegacyService.Reactive _delegate =
-                        new LegacyServiceReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
+                        new LegacyServiceReactiveClient(protocolId, rpcClientBinding, headersMono, persistentHeadersMono);
                     return new LegacyServiceReactiveAsyncWrapper(_delegate);
                 }
             };
@@ -123,8 +123,8 @@ public interface LegacyService extends java.io.Closeable, com.facebook.thrift.ut
         static com.facebook.thrift.client.ClientBuilder<LegacyService.Reactive> clientBuilder() {
             return new ClientBuilder<LegacyService.Reactive>() {
                 @java.lang.Override
-                public LegacyService.Reactive build(RpcClientSource rpcClientSource) {
-                    return new LegacyServiceReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
+                public LegacyService.Reactive build(com.facebook.thrift.client.v2.manager.RpcClientBinding rpcClientBinding) {
+                    return new LegacyServiceReactiveClient(protocolId, rpcClientBinding, headersMono, persistentHeadersMono);
                 }
             };
         }

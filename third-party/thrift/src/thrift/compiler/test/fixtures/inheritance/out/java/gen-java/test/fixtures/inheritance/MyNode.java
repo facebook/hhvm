@@ -37,9 +37,9 @@ public interface MyNode extends java.io.Closeable, com.facebook.thrift.util.Bloc
     static com.facebook.thrift.client.ClientBuilder<MyNode> clientBuilder() {
         return new ClientBuilder<MyNode>() {
             @java.lang.Override
-            public MyNode build(RpcClientSource rpcClientSource) {
+            public MyNode build(com.facebook.thrift.client.v2.manager.RpcClientBinding rpcClientBinding) {
                 MyNode.Reactive _delegate =
-                    new MyNodeReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
+                    new MyNodeReactiveClient(protocolId, rpcClientBinding, headersMono, persistentHeadersMono);
                 return new MyNodeReactiveBlockingWrapper(_delegate);
             }
         };
@@ -59,9 +59,9 @@ public interface MyNode extends java.io.Closeable, com.facebook.thrift.util.Bloc
         static com.facebook.thrift.client.ClientBuilder<MyNode.Async> clientBuilder() {
             return new ClientBuilder<MyNode.Async>() {
                 @java.lang.Override
-                public MyNode.Async build(RpcClientSource rpcClientSource) {
+                public MyNode.Async build(com.facebook.thrift.client.v2.manager.RpcClientBinding rpcClientBinding) {
                     MyNode.Reactive _delegate =
-                        new MyNodeReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
+                        new MyNodeReactiveClient(protocolId, rpcClientBinding, headersMono, persistentHeadersMono);
                     return new MyNodeReactiveAsyncWrapper(_delegate);
                 }
             };
@@ -111,8 +111,8 @@ public interface MyNode extends java.io.Closeable, com.facebook.thrift.util.Bloc
         static com.facebook.thrift.client.ClientBuilder<MyNode.Reactive> clientBuilder() {
             return new ClientBuilder<MyNode.Reactive>() {
                 @java.lang.Override
-                public MyNode.Reactive build(RpcClientSource rpcClientSource) {
-                    return new MyNodeReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
+                public MyNode.Reactive build(com.facebook.thrift.client.v2.manager.RpcClientBinding rpcClientBinding) {
+                    return new MyNodeReactiveClient(protocolId, rpcClientBinding, headersMono, persistentHeadersMono);
                 }
             };
         }

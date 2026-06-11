@@ -37,9 +37,9 @@ public interface BoxService extends java.io.Closeable, com.facebook.thrift.util.
     static com.facebook.thrift.client.ClientBuilder<BoxService> clientBuilder() {
         return new ClientBuilder<BoxService>() {
             @java.lang.Override
-            public BoxService build(RpcClientSource rpcClientSource) {
+            public BoxService build(com.facebook.thrift.client.v2.manager.RpcClientBinding rpcClientBinding) {
                 BoxService.Reactive _delegate =
-                    new BoxServiceReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
+                    new BoxServiceReactiveClient(protocolId, rpcClientBinding, headersMono, persistentHeadersMono);
                 return new BoxServiceReactiveBlockingWrapper(_delegate);
             }
         };
@@ -59,9 +59,9 @@ public interface BoxService extends java.io.Closeable, com.facebook.thrift.util.
         static com.facebook.thrift.client.ClientBuilder<BoxService.Async> clientBuilder() {
             return new ClientBuilder<BoxService.Async>() {
                 @java.lang.Override
-                public BoxService.Async build(RpcClientSource rpcClientSource) {
+                public BoxService.Async build(com.facebook.thrift.client.v2.manager.RpcClientBinding rpcClientBinding) {
                     BoxService.Reactive _delegate =
-                        new BoxServiceReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
+                        new BoxServiceReactiveClient(protocolId, rpcClientBinding, headersMono, persistentHeadersMono);
                     return new BoxServiceReactiveAsyncWrapper(_delegate);
                 }
             };
@@ -134,8 +134,8 @@ public interface BoxService extends java.io.Closeable, com.facebook.thrift.util.
         static com.facebook.thrift.client.ClientBuilder<BoxService.Reactive> clientBuilder() {
             return new ClientBuilder<BoxService.Reactive>() {
                 @java.lang.Override
-                public BoxService.Reactive build(RpcClientSource rpcClientSource) {
-                    return new BoxServiceReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
+                public BoxService.Reactive build(com.facebook.thrift.client.v2.manager.RpcClientBinding rpcClientBinding) {
+                    return new BoxServiceReactiveClient(protocolId, rpcClientBinding, headersMono, persistentHeadersMono);
                 }
             };
         }

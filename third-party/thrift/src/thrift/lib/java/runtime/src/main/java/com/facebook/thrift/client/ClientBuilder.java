@@ -16,6 +16,7 @@
 
 package com.facebook.thrift.client;
 
+import com.facebook.thrift.client.v2.manager.RpcClientBinding;
 import com.google.common.base.Preconditions;
 import java.net.SocketAddress;
 import java.util.Map;
@@ -62,12 +63,12 @@ public abstract class ClientBuilder<T> {
 
   /** Builds a typed client from a factory and address. */
   public T build(RpcClientFactory factory, SocketAddress address) {
-    return build(factory.createRpcClientSource(address));
+    return build(factory.createRpcClientBinding(address));
   }
 
   /**
-   * Builds a typed client from a pre-constructed {@link RpcClientSource}. This is the abstract
+   * Builds a typed client from a pre-constructed {@link RpcClientBinding}. This is the abstract
    * method that generated service builders implement.
    */
-  public abstract T build(RpcClientSource rpcClientSource);
+  public abstract T build(RpcClientBinding rpcClientBinding);
 }

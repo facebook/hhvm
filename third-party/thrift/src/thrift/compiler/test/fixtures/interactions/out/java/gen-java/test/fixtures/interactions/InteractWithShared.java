@@ -37,9 +37,9 @@ public interface InteractWithShared extends java.io.Closeable, com.facebook.thri
     static com.facebook.thrift.client.ClientBuilder<InteractWithShared> clientBuilder() {
         return new ClientBuilder<InteractWithShared>() {
             @java.lang.Override
-            public InteractWithShared build(RpcClientSource rpcClientSource) {
+            public InteractWithShared build(com.facebook.thrift.client.v2.manager.RpcClientBinding rpcClientBinding) {
                 InteractWithShared.Reactive _delegate =
-                    new InteractWithSharedReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
+                    new InteractWithSharedReactiveClient(protocolId, rpcClientBinding, headersMono, persistentHeadersMono);
                 return new InteractWithSharedReactiveBlockingWrapper(_delegate);
             }
         };
@@ -59,9 +59,9 @@ public interface InteractWithShared extends java.io.Closeable, com.facebook.thri
         static com.facebook.thrift.client.ClientBuilder<InteractWithShared.Async> clientBuilder() {
             return new ClientBuilder<InteractWithShared.Async>() {
                 @java.lang.Override
-                public InteractWithShared.Async build(RpcClientSource rpcClientSource) {
+                public InteractWithShared.Async build(com.facebook.thrift.client.v2.manager.RpcClientBinding rpcClientBinding) {
                     InteractWithShared.Reactive _delegate =
-                        new InteractWithSharedReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
+                        new InteractWithSharedReactiveClient(protocolId, rpcClientBinding, headersMono, persistentHeadersMono);
                     return new InteractWithSharedReactiveAsyncWrapper(_delegate);
                 }
             };
@@ -173,8 +173,8 @@ public interface InteractWithShared extends java.io.Closeable, com.facebook.thri
         static com.facebook.thrift.client.ClientBuilder<InteractWithShared.Reactive> clientBuilder() {
             return new ClientBuilder<InteractWithShared.Reactive>() {
                 @java.lang.Override
-                public InteractWithShared.Reactive build(RpcClientSource rpcClientSource) {
-                    return new InteractWithSharedReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
+                public InteractWithShared.Reactive build(com.facebook.thrift.client.v2.manager.RpcClientBinding rpcClientBinding) {
+                    return new InteractWithSharedReactiveClient(protocolId, rpcClientBinding, headersMono, persistentHeadersMono);
                 }
             };
         }

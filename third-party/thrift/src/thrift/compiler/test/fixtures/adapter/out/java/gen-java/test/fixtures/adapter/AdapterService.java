@@ -37,9 +37,9 @@ public interface AdapterService extends java.io.Closeable, com.facebook.thrift.u
     static com.facebook.thrift.client.ClientBuilder<AdapterService> clientBuilder() {
         return new ClientBuilder<AdapterService>() {
             @java.lang.Override
-            public AdapterService build(RpcClientSource rpcClientSource) {
+            public AdapterService build(com.facebook.thrift.client.v2.manager.RpcClientBinding rpcClientBinding) {
                 AdapterService.Reactive _delegate =
-                    new AdapterServiceReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
+                    new AdapterServiceReactiveClient(protocolId, rpcClientBinding, headersMono, persistentHeadersMono);
                 return new AdapterServiceReactiveBlockingWrapper(_delegate);
             }
         };
@@ -59,9 +59,9 @@ public interface AdapterService extends java.io.Closeable, com.facebook.thrift.u
         static com.facebook.thrift.client.ClientBuilder<AdapterService.Async> clientBuilder() {
             return new ClientBuilder<AdapterService.Async>() {
                 @java.lang.Override
-                public AdapterService.Async build(RpcClientSource rpcClientSource) {
+                public AdapterService.Async build(com.facebook.thrift.client.v2.manager.RpcClientBinding rpcClientBinding) {
                     AdapterService.Reactive _delegate =
-                        new AdapterServiceReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
+                        new AdapterServiceReactiveClient(protocolId, rpcClientBinding, headersMono, persistentHeadersMono);
                     return new AdapterServiceReactiveAsyncWrapper(_delegate);
                 }
             };
@@ -143,8 +143,8 @@ public interface AdapterService extends java.io.Closeable, com.facebook.thrift.u
         static com.facebook.thrift.client.ClientBuilder<AdapterService.Reactive> clientBuilder() {
             return new ClientBuilder<AdapterService.Reactive>() {
                 @java.lang.Override
-                public AdapterService.Reactive build(RpcClientSource rpcClientSource) {
-                    return new AdapterServiceReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
+                public AdapterService.Reactive build(com.facebook.thrift.client.v2.manager.RpcClientBinding rpcClientBinding) {
+                    return new AdapterServiceReactiveClient(protocolId, rpcClientBinding, headersMono, persistentHeadersMono);
                 }
             };
         }

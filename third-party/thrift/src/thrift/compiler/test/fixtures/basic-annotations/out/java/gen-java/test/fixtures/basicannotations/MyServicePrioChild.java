@@ -37,9 +37,9 @@ public interface MyServicePrioChild extends java.io.Closeable, com.facebook.thri
     static com.facebook.thrift.client.ClientBuilder<MyServicePrioChild> clientBuilder() {
         return new ClientBuilder<MyServicePrioChild>() {
             @java.lang.Override
-            public MyServicePrioChild build(RpcClientSource rpcClientSource) {
+            public MyServicePrioChild build(com.facebook.thrift.client.v2.manager.RpcClientBinding rpcClientBinding) {
                 MyServicePrioChild.Reactive _delegate =
-                    new MyServicePrioChildReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
+                    new MyServicePrioChildReactiveClient(protocolId, rpcClientBinding, headersMono, persistentHeadersMono);
                 return new MyServicePrioChildReactiveBlockingWrapper(_delegate);
             }
         };
@@ -59,9 +59,9 @@ public interface MyServicePrioChild extends java.io.Closeable, com.facebook.thri
         static com.facebook.thrift.client.ClientBuilder<MyServicePrioChild.Async> clientBuilder() {
             return new ClientBuilder<MyServicePrioChild.Async>() {
                 @java.lang.Override
-                public MyServicePrioChild.Async build(RpcClientSource rpcClientSource) {
+                public MyServicePrioChild.Async build(com.facebook.thrift.client.v2.manager.RpcClientBinding rpcClientBinding) {
                     MyServicePrioChild.Reactive _delegate =
-                        new MyServicePrioChildReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
+                        new MyServicePrioChildReactiveClient(protocolId, rpcClientBinding, headersMono, persistentHeadersMono);
                     return new MyServicePrioChildReactiveAsyncWrapper(_delegate);
                 }
             };
@@ -111,8 +111,8 @@ public interface MyServicePrioChild extends java.io.Closeable, com.facebook.thri
         static com.facebook.thrift.client.ClientBuilder<MyServicePrioChild.Reactive> clientBuilder() {
             return new ClientBuilder<MyServicePrioChild.Reactive>() {
                 @java.lang.Override
-                public MyServicePrioChild.Reactive build(RpcClientSource rpcClientSource) {
-                    return new MyServicePrioChildReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
+                public MyServicePrioChild.Reactive build(com.facebook.thrift.client.v2.manager.RpcClientBinding rpcClientBinding) {
+                    return new MyServicePrioChildReactiveClient(protocolId, rpcClientBinding, headersMono, persistentHeadersMono);
                 }
             };
         }

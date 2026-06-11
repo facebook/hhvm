@@ -37,9 +37,9 @@ public interface Perform extends java.io.Closeable, com.facebook.thrift.util.Blo
     static com.facebook.thrift.client.ClientBuilder<Perform> clientBuilder() {
         return new ClientBuilder<Perform>() {
             @java.lang.Override
-            public Perform build(RpcClientSource rpcClientSource) {
+            public Perform build(com.facebook.thrift.client.v2.manager.RpcClientBinding rpcClientBinding) {
                 Perform.Reactive _delegate =
-                    new PerformReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
+                    new PerformReactiveClient(protocolId, rpcClientBinding, headersMono, persistentHeadersMono);
                 return new PerformReactiveBlockingWrapper(_delegate);
             }
         };
@@ -59,9 +59,9 @@ public interface Perform extends java.io.Closeable, com.facebook.thrift.util.Blo
         static com.facebook.thrift.client.ClientBuilder<Perform.Async> clientBuilder() {
             return new ClientBuilder<Perform.Async>() {
                 @java.lang.Override
-                public Perform.Async build(RpcClientSource rpcClientSource) {
+                public Perform.Async build(com.facebook.thrift.client.v2.manager.RpcClientBinding rpcClientBinding) {
                     Perform.Reactive _delegate =
-                        new PerformReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
+                        new PerformReactiveClient(protocolId, rpcClientBinding, headersMono, persistentHeadersMono);
                     return new PerformReactiveAsyncWrapper(_delegate);
                 }
             };
@@ -183,8 +183,8 @@ public interface Perform extends java.io.Closeable, com.facebook.thrift.util.Blo
         static com.facebook.thrift.client.ClientBuilder<Perform.Reactive> clientBuilder() {
             return new ClientBuilder<Perform.Reactive>() {
                 @java.lang.Override
-                public Perform.Reactive build(RpcClientSource rpcClientSource) {
-                    return new PerformReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
+                public Perform.Reactive build(com.facebook.thrift.client.v2.manager.RpcClientBinding rpcClientBinding) {
+                    return new PerformReactiveClient(protocolId, rpcClientBinding, headersMono, persistentHeadersMono);
                 }
             };
         }

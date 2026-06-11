@@ -37,9 +37,9 @@ public interface NestedContainers extends java.io.Closeable, com.facebook.thrift
     static com.facebook.thrift.client.ClientBuilder<NestedContainers> clientBuilder() {
         return new ClientBuilder<NestedContainers>() {
             @java.lang.Override
-            public NestedContainers build(RpcClientSource rpcClientSource) {
+            public NestedContainers build(com.facebook.thrift.client.v2.manager.RpcClientBinding rpcClientBinding) {
                 NestedContainers.Reactive _delegate =
-                    new NestedContainersReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
+                    new NestedContainersReactiveClient(protocolId, rpcClientBinding, headersMono, persistentHeadersMono);
                 return new NestedContainersReactiveBlockingWrapper(_delegate);
             }
         };
@@ -59,9 +59,9 @@ public interface NestedContainers extends java.io.Closeable, com.facebook.thrift
         static com.facebook.thrift.client.ClientBuilder<NestedContainers.Async> clientBuilder() {
             return new ClientBuilder<NestedContainers.Async>() {
                 @java.lang.Override
-                public NestedContainers.Async build(RpcClientSource rpcClientSource) {
+                public NestedContainers.Async build(com.facebook.thrift.client.v2.manager.RpcClientBinding rpcClientBinding) {
                     NestedContainers.Reactive _delegate =
-                        new NestedContainersReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
+                        new NestedContainersReactiveClient(protocolId, rpcClientBinding, headersMono, persistentHeadersMono);
                     return new NestedContainersReactiveAsyncWrapper(_delegate);
                 }
             };
@@ -245,8 +245,8 @@ public interface NestedContainers extends java.io.Closeable, com.facebook.thrift
         static com.facebook.thrift.client.ClientBuilder<NestedContainers.Reactive> clientBuilder() {
             return new ClientBuilder<NestedContainers.Reactive>() {
                 @java.lang.Override
-                public NestedContainers.Reactive build(RpcClientSource rpcClientSource) {
-                    return new NestedContainersReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
+                public NestedContainers.Reactive build(com.facebook.thrift.client.v2.manager.RpcClientBinding rpcClientBinding) {
+                    return new NestedContainersReactiveClient(protocolId, rpcClientBinding, headersMono, persistentHeadersMono);
                 }
             };
         }

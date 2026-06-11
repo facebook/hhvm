@@ -37,9 +37,9 @@ public interface MyLeaf extends java.io.Closeable, com.facebook.thrift.util.Bloc
     static com.facebook.thrift.client.ClientBuilder<MyLeaf> clientBuilder() {
         return new ClientBuilder<MyLeaf>() {
             @java.lang.Override
-            public MyLeaf build(RpcClientSource rpcClientSource) {
+            public MyLeaf build(com.facebook.thrift.client.v2.manager.RpcClientBinding rpcClientBinding) {
                 MyLeaf.Reactive _delegate =
-                    new MyLeafReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
+                    new MyLeafReactiveClient(protocolId, rpcClientBinding, headersMono, persistentHeadersMono);
                 return new MyLeafReactiveBlockingWrapper(_delegate);
             }
         };
@@ -59,9 +59,9 @@ public interface MyLeaf extends java.io.Closeable, com.facebook.thrift.util.Bloc
         static com.facebook.thrift.client.ClientBuilder<MyLeaf.Async> clientBuilder() {
             return new ClientBuilder<MyLeaf.Async>() {
                 @java.lang.Override
-                public MyLeaf.Async build(RpcClientSource rpcClientSource) {
+                public MyLeaf.Async build(com.facebook.thrift.client.v2.manager.RpcClientBinding rpcClientBinding) {
                     MyLeaf.Reactive _delegate =
-                        new MyLeafReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
+                        new MyLeafReactiveClient(protocolId, rpcClientBinding, headersMono, persistentHeadersMono);
                     return new MyLeafReactiveAsyncWrapper(_delegate);
                 }
             };
@@ -111,8 +111,8 @@ public interface MyLeaf extends java.io.Closeable, com.facebook.thrift.util.Bloc
         static com.facebook.thrift.client.ClientBuilder<MyLeaf.Reactive> clientBuilder() {
             return new ClientBuilder<MyLeaf.Reactive>() {
                 @java.lang.Override
-                public MyLeaf.Reactive build(RpcClientSource rpcClientSource) {
-                    return new MyLeafReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
+                public MyLeaf.Reactive build(com.facebook.thrift.client.v2.manager.RpcClientBinding rpcClientBinding) {
+                    return new MyLeafReactiveClient(protocolId, rpcClientBinding, headersMono, persistentHeadersMono);
                 }
             };
         }

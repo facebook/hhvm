@@ -37,9 +37,9 @@ public interface ExtendedService extends java.io.Closeable, com.facebook.thrift.
     static com.facebook.thrift.client.ClientBuilder<ExtendedService> clientBuilder() {
         return new ClientBuilder<ExtendedService>() {
             @java.lang.Override
-            public ExtendedService build(RpcClientSource rpcClientSource) {
+            public ExtendedService build(com.facebook.thrift.client.v2.manager.RpcClientBinding rpcClientBinding) {
                 ExtendedService.Reactive _delegate =
-                    new ExtendedServiceReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
+                    new ExtendedServiceReactiveClient(protocolId, rpcClientBinding, headersMono, persistentHeadersMono);
                 return new ExtendedServiceReactiveBlockingWrapper(_delegate);
             }
         };
@@ -59,9 +59,9 @@ public interface ExtendedService extends java.io.Closeable, com.facebook.thrift.
         static com.facebook.thrift.client.ClientBuilder<ExtendedService.Async> clientBuilder() {
             return new ClientBuilder<ExtendedService.Async>() {
                 @java.lang.Override
-                public ExtendedService.Async build(RpcClientSource rpcClientSource) {
+                public ExtendedService.Async build(com.facebook.thrift.client.v2.manager.RpcClientBinding rpcClientBinding) {
                     ExtendedService.Reactive _delegate =
-                        new ExtendedServiceReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
+                        new ExtendedServiceReactiveClient(protocolId, rpcClientBinding, headersMono, persistentHeadersMono);
                     return new ExtendedServiceReactiveAsyncWrapper(_delegate);
                 }
             };
@@ -123,8 +123,8 @@ public interface ExtendedService extends java.io.Closeable, com.facebook.thrift.
         static com.facebook.thrift.client.ClientBuilder<ExtendedService.Reactive> clientBuilder() {
             return new ClientBuilder<ExtendedService.Reactive>() {
                 @java.lang.Override
-                public ExtendedService.Reactive build(RpcClientSource rpcClientSource) {
-                    return new ExtendedServiceReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
+                public ExtendedService.Reactive build(com.facebook.thrift.client.v2.manager.RpcClientBinding rpcClientBinding) {
+                    return new ExtendedServiceReactiveClient(protocolId, rpcClientBinding, headersMono, persistentHeadersMono);
                 }
             };
         }

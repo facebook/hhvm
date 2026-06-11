@@ -37,9 +37,9 @@ public interface DbMixedStackArguments extends java.io.Closeable, com.facebook.t
     static com.facebook.thrift.client.ClientBuilder<DbMixedStackArguments> clientBuilder() {
         return new ClientBuilder<DbMixedStackArguments>() {
             @java.lang.Override
-            public DbMixedStackArguments build(RpcClientSource rpcClientSource) {
+            public DbMixedStackArguments build(com.facebook.thrift.client.v2.manager.RpcClientBinding rpcClientBinding) {
                 DbMixedStackArguments.Reactive _delegate =
-                    new DbMixedStackArgumentsReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
+                    new DbMixedStackArgumentsReactiveClient(protocolId, rpcClientBinding, headersMono, persistentHeadersMono);
                 return new DbMixedStackArgumentsReactiveBlockingWrapper(_delegate);
             }
         };
@@ -59,9 +59,9 @@ public interface DbMixedStackArguments extends java.io.Closeable, com.facebook.t
         static com.facebook.thrift.client.ClientBuilder<DbMixedStackArguments.Async> clientBuilder() {
             return new ClientBuilder<DbMixedStackArguments.Async>() {
                 @java.lang.Override
-                public DbMixedStackArguments.Async build(RpcClientSource rpcClientSource) {
+                public DbMixedStackArguments.Async build(com.facebook.thrift.client.v2.manager.RpcClientBinding rpcClientBinding) {
                     DbMixedStackArguments.Reactive _delegate =
-                        new DbMixedStackArgumentsReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
+                        new DbMixedStackArgumentsReactiveClient(protocolId, rpcClientBinding, headersMono, persistentHeadersMono);
                     return new DbMixedStackArgumentsReactiveAsyncWrapper(_delegate);
                 }
             };
@@ -149,8 +149,8 @@ public interface DbMixedStackArguments extends java.io.Closeable, com.facebook.t
         static com.facebook.thrift.client.ClientBuilder<DbMixedStackArguments.Reactive> clientBuilder() {
             return new ClientBuilder<DbMixedStackArguments.Reactive>() {
                 @java.lang.Override
-                public DbMixedStackArguments.Reactive build(RpcClientSource rpcClientSource) {
-                    return new DbMixedStackArgumentsReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
+                public DbMixedStackArguments.Reactive build(com.facebook.thrift.client.v2.manager.RpcClientBinding rpcClientBinding) {
+                    return new DbMixedStackArgumentsReactiveClient(protocolId, rpcClientBinding, headersMono, persistentHeadersMono);
                 }
             };
         }

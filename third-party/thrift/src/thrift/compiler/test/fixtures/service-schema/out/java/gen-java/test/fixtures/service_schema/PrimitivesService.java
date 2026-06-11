@@ -37,9 +37,9 @@ public interface PrimitivesService extends java.io.Closeable, com.facebook.thrif
     static com.facebook.thrift.client.ClientBuilder<PrimitivesService> clientBuilder() {
         return new ClientBuilder<PrimitivesService>() {
             @java.lang.Override
-            public PrimitivesService build(RpcClientSource rpcClientSource) {
+            public PrimitivesService build(com.facebook.thrift.client.v2.manager.RpcClientBinding rpcClientBinding) {
                 PrimitivesService.Reactive _delegate =
-                    new PrimitivesServiceReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
+                    new PrimitivesServiceReactiveClient(protocolId, rpcClientBinding, headersMono, persistentHeadersMono);
                 return new PrimitivesServiceReactiveBlockingWrapper(_delegate);
             }
         };
@@ -59,9 +59,9 @@ public interface PrimitivesService extends java.io.Closeable, com.facebook.thrif
         static com.facebook.thrift.client.ClientBuilder<PrimitivesService.Async> clientBuilder() {
             return new ClientBuilder<PrimitivesService.Async>() {
                 @java.lang.Override
-                public PrimitivesService.Async build(RpcClientSource rpcClientSource) {
+                public PrimitivesService.Async build(com.facebook.thrift.client.v2.manager.RpcClientBinding rpcClientBinding) {
                     PrimitivesService.Reactive _delegate =
-                        new PrimitivesServiceReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
+                        new PrimitivesServiceReactiveClient(protocolId, rpcClientBinding, headersMono, persistentHeadersMono);
                     return new PrimitivesServiceReactiveAsyncWrapper(_delegate);
                 }
             };
@@ -193,8 +193,8 @@ public interface PrimitivesService extends java.io.Closeable, com.facebook.thrif
         static com.facebook.thrift.client.ClientBuilder<PrimitivesService.Reactive> clientBuilder() {
             return new ClientBuilder<PrimitivesService.Reactive>() {
                 @java.lang.Override
-                public PrimitivesService.Reactive build(RpcClientSource rpcClientSource) {
-                    return new PrimitivesServiceReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
+                public PrimitivesService.Reactive build(com.facebook.thrift.client.v2.manager.RpcClientBinding rpcClientBinding) {
+                    return new PrimitivesServiceReactiveClient(protocolId, rpcClientBinding, headersMono, persistentHeadersMono);
                 }
             };
         }

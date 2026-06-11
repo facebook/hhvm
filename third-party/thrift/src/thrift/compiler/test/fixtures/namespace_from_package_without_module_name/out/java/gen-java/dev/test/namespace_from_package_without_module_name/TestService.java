@@ -37,9 +37,9 @@ public interface TestService extends java.io.Closeable, com.facebook.thrift.util
     static com.facebook.thrift.client.ClientBuilder<TestService> clientBuilder() {
         return new ClientBuilder<TestService>() {
             @java.lang.Override
-            public TestService build(RpcClientSource rpcClientSource) {
+            public TestService build(com.facebook.thrift.client.v2.manager.RpcClientBinding rpcClientBinding) {
                 TestService.Reactive _delegate =
-                    new TestServiceReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
+                    new TestServiceReactiveClient(protocolId, rpcClientBinding, headersMono, persistentHeadersMono);
                 return new TestServiceReactiveBlockingWrapper(_delegate);
             }
         };
@@ -59,9 +59,9 @@ public interface TestService extends java.io.Closeable, com.facebook.thrift.util
         static com.facebook.thrift.client.ClientBuilder<TestService.Async> clientBuilder() {
             return new ClientBuilder<TestService.Async>() {
                 @java.lang.Override
-                public TestService.Async build(RpcClientSource rpcClientSource) {
+                public TestService.Async build(com.facebook.thrift.client.v2.manager.RpcClientBinding rpcClientBinding) {
                     TestService.Reactive _delegate =
-                        new TestServiceReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
+                        new TestServiceReactiveClient(protocolId, rpcClientBinding, headersMono, persistentHeadersMono);
                     return new TestServiceReactiveAsyncWrapper(_delegate);
                 }
             };
@@ -117,8 +117,8 @@ public interface TestService extends java.io.Closeable, com.facebook.thrift.util
         static com.facebook.thrift.client.ClientBuilder<TestService.Reactive> clientBuilder() {
             return new ClientBuilder<TestService.Reactive>() {
                 @java.lang.Override
-                public TestService.Reactive build(RpcClientSource rpcClientSource) {
-                    return new TestServiceReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
+                public TestService.Reactive build(com.facebook.thrift.client.v2.manager.RpcClientBinding rpcClientBinding) {
+                    return new TestServiceReactiveClient(protocolId, rpcClientBinding, headersMono, persistentHeadersMono);
                 }
             };
         }

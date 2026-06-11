@@ -17,8 +17,8 @@ import org.apache.thrift.ClientPushMetadata;
 import org.apache.thrift.InteractionCreate;
 import org.apache.thrift.InteractionTerminate;
 import com.facebook.thrift.client.ResponseWrapper;
-import com.facebook.thrift.client.RpcClientSource;
 import com.facebook.thrift.client.RpcOptions;
+import com.facebook.thrift.client.v2.manager.RpcClientBinding;
 import com.facebook.thrift.util.Readers;
 
 public class PrimitivesServiceReactiveClient 
@@ -26,7 +26,7 @@ public class PrimitivesServiceReactiveClient
   private static final AtomicLong _interactionCounter = new AtomicLong(0);
 
   protected final org.apache.thrift.ProtocolId _protocolId;
-  protected final RpcClientSource _clientSource;
+  protected final RpcClientBinding _clientBinding;
   protected final reactor.core.publisher.Mono<Map<String, String>> _headersMono;
   protected final reactor.core.publisher.Mono<Map<String, String>> _persistentHeadersMono;
   protected final Set<Long> _activeInteractions;
@@ -44,29 +44,29 @@ public class PrimitivesServiceReactiveClient
     _methodThatThrows_EXCEPTION_READERS.put((short)1, _methodThatThrows_EXCEPTION_READER0);
   }
 
-  public PrimitivesServiceReactiveClient(org.apache.thrift.ProtocolId _protocolId, RpcClientSource _clientSource) {
+  public PrimitivesServiceReactiveClient(org.apache.thrift.ProtocolId _protocolId, RpcClientBinding _clientBinding) {
     this._protocolId = _protocolId;
-    this._clientSource = _clientSource;
+    this._clientBinding = _clientBinding;
     this._headersMono = reactor.core.publisher.Mono.empty();
     this._persistentHeadersMono = reactor.core.publisher.Mono.empty();
     this._activeInteractions = ConcurrentHashMap.newKeySet();
   }
 
-  public PrimitivesServiceReactiveClient(org.apache.thrift.ProtocolId _protocolId, RpcClientSource _clientSource, Map<String, String> _headers, Map<String, String> _persistentHeaders) {
-    this(_protocolId, _clientSource, reactor.core.publisher.Mono.just(_headers != null ? _headers : java.util.Collections.emptyMap()), reactor.core.publisher.Mono.just(_persistentHeaders != null ? _persistentHeaders : java.util.Collections.emptyMap()), new AtomicLong(), ConcurrentHashMap.newKeySet());
+  public PrimitivesServiceReactiveClient(org.apache.thrift.ProtocolId _protocolId, RpcClientBinding _clientBinding, Map<String, String> _headers, Map<String, String> _persistentHeaders) {
+    this(_protocolId, _clientBinding, reactor.core.publisher.Mono.just(_headers != null ? _headers : java.util.Collections.emptyMap()), reactor.core.publisher.Mono.just(_persistentHeaders != null ? _persistentHeaders : java.util.Collections.emptyMap()), new AtomicLong(), ConcurrentHashMap.newKeySet());
   }
 
-  public PrimitivesServiceReactiveClient(org.apache.thrift.ProtocolId _protocolId, RpcClientSource _clientSource, reactor.core.publisher.Mono<Map<String, String>> _headersMono, reactor.core.publisher.Mono<Map<String, String>> _persistentHeadersMono) {
-    this(_protocolId, _clientSource, _headersMono, _persistentHeadersMono, new AtomicLong(), ConcurrentHashMap.newKeySet());
+  public PrimitivesServiceReactiveClient(org.apache.thrift.ProtocolId _protocolId, RpcClientBinding _clientBinding, reactor.core.publisher.Mono<Map<String, String>> _headersMono, reactor.core.publisher.Mono<Map<String, String>> _persistentHeadersMono) {
+    this(_protocolId, _clientBinding, _headersMono, _persistentHeadersMono, new AtomicLong(), ConcurrentHashMap.newKeySet());
   }
 
-  public PrimitivesServiceReactiveClient(org.apache.thrift.ProtocolId _protocolId, RpcClientSource _clientSource, Map<String, String> _headers, Map<String, String> _persistentHeaders, AtomicLong interactionCounter, Set<Long> activeInteractions) {
-    this(_protocolId,_clientSource, reactor.core.publisher.Mono.just(_headers != null ? _headers : java.util.Collections.emptyMap()), reactor.core.publisher.Mono.just(_persistentHeaders != null ? _persistentHeaders : java.util.Collections.emptyMap()), interactionCounter, activeInteractions);
+  public PrimitivesServiceReactiveClient(org.apache.thrift.ProtocolId _protocolId, RpcClientBinding _clientBinding, Map<String, String> _headers, Map<String, String> _persistentHeaders, AtomicLong interactionCounter, Set<Long> activeInteractions) {
+    this(_protocolId,_clientBinding, reactor.core.publisher.Mono.just(_headers != null ? _headers : java.util.Collections.emptyMap()), reactor.core.publisher.Mono.just(_persistentHeaders != null ? _persistentHeaders : java.util.Collections.emptyMap()), interactionCounter, activeInteractions);
   }
 
-  public PrimitivesServiceReactiveClient(org.apache.thrift.ProtocolId _protocolId, RpcClientSource _clientSource, reactor.core.publisher.Mono<Map<String, String>> _headersMono, reactor.core.publisher.Mono<Map<String, String>> _persistentHeadersMono, AtomicLong interactionCounter, Set<Long> activeInteractions) {
+  public PrimitivesServiceReactiveClient(org.apache.thrift.ProtocolId _protocolId, RpcClientBinding _clientBinding, reactor.core.publisher.Mono<Map<String, String>> _headersMono, reactor.core.publisher.Mono<Map<String, String>> _persistentHeadersMono, AtomicLong interactionCounter, Set<Long> activeInteractions) {
     this._protocolId = _protocolId;
-    this._clientSource = _clientSource;
+    this._clientBinding = _clientBinding;
     this._headersMono = _headersMono;
     this._persistentHeadersMono = _persistentHeadersMono;
     this._activeInteractions = activeInteractions;
@@ -74,12 +74,12 @@ public class PrimitivesServiceReactiveClient
 
   @java.lang.Override
   public void dispose() {
-    _clientSource.dispose();
+    _clientBinding.dispose();
   }
 
   @java.lang.Override
   public boolean isDisposed() {
-    return _clientSource.isDisposed();
+    return _clientBinding.isDisposed();
   }
 
   private com.facebook.thrift.payload.Writer _createinitWriter(final long param0, final long param1) {
@@ -115,7 +115,7 @@ public class PrimitivesServiceReactiveClient
 
   @java.lang.Override
   public reactor.core.publisher.Mono<com.facebook.thrift.client.ResponseWrapper<Long>> initWrapper(final long param0, final long param1,  final com.facebook.thrift.client.RpcOptions rpcOptions) {
-    return _clientSource.acquire()
+    return _clientBinding.acquire()
       .flatMap(_rpc -> getHeaders(rpcOptions).flatMap(headers -> {
         org.apache.thrift.RequestRpcMetadata _metadata = new org.apache.thrift.RequestRpcMetadata.Builder()
                 .setName("init")
@@ -163,7 +163,7 @@ public class PrimitivesServiceReactiveClient
 
   @java.lang.Override
   public reactor.core.publisher.Mono<com.facebook.thrift.client.ResponseWrapper<test.fixtures.service_schema.Result>> methodThatThrowsWrapper( final com.facebook.thrift.client.RpcOptions rpcOptions) {
-    return _clientSource.acquire()
+    return _clientBinding.acquire()
       .flatMap(_rpc -> getHeaders(rpcOptions).flatMap(headers -> {
         org.apache.thrift.RequestRpcMetadata _metadata = new org.apache.thrift.RequestRpcMetadata.Builder()
                 .setName("method_that_throws")
@@ -229,7 +229,7 @@ public class PrimitivesServiceReactiveClient
 
   @java.lang.Override
   public reactor.core.publisher.Mono<com.facebook.thrift.client.ResponseWrapper<Void>> returnVoidMethodWrapper(final long id, final test.fixtures.service_schema.I i,  final com.facebook.thrift.client.RpcOptions rpcOptions) {
-    return _clientSource.acquire()
+    return _clientBinding.acquire()
       .flatMap(_rpc -> getHeaders(rpcOptions).flatMap(headers -> {
         org.apache.thrift.RequestRpcMetadata _metadata = new org.apache.thrift.RequestRpcMetadata.Builder()
                 .setName("return_void_method")

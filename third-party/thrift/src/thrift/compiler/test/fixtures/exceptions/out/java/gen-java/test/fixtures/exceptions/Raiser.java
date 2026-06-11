@@ -37,9 +37,9 @@ public interface Raiser extends java.io.Closeable, com.facebook.thrift.util.Bloc
     static com.facebook.thrift.client.ClientBuilder<Raiser> clientBuilder() {
         return new ClientBuilder<Raiser>() {
             @java.lang.Override
-            public Raiser build(RpcClientSource rpcClientSource) {
+            public Raiser build(com.facebook.thrift.client.v2.manager.RpcClientBinding rpcClientBinding) {
                 Raiser.Reactive _delegate =
-                    new RaiserReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
+                    new RaiserReactiveClient(protocolId, rpcClientBinding, headersMono, persistentHeadersMono);
                 return new RaiserReactiveBlockingWrapper(_delegate);
             }
         };
@@ -59,9 +59,9 @@ public interface Raiser extends java.io.Closeable, com.facebook.thrift.util.Bloc
         static com.facebook.thrift.client.ClientBuilder<Raiser.Async> clientBuilder() {
             return new ClientBuilder<Raiser.Async>() {
                 @java.lang.Override
-                public Raiser.Async build(RpcClientSource rpcClientSource) {
+                public Raiser.Async build(com.facebook.thrift.client.v2.manager.RpcClientBinding rpcClientBinding) {
                     Raiser.Reactive _delegate =
-                        new RaiserReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
+                        new RaiserReactiveClient(protocolId, rpcClientBinding, headersMono, persistentHeadersMono);
                     return new RaiserReactiveAsyncWrapper(_delegate);
                 }
             };
@@ -209,8 +209,8 @@ public interface Raiser extends java.io.Closeable, com.facebook.thrift.util.Bloc
         static com.facebook.thrift.client.ClientBuilder<Raiser.Reactive> clientBuilder() {
             return new ClientBuilder<Raiser.Reactive>() {
                 @java.lang.Override
-                public Raiser.Reactive build(RpcClientSource rpcClientSource) {
-                    return new RaiserReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
+                public Raiser.Reactive build(com.facebook.thrift.client.v2.manager.RpcClientBinding rpcClientBinding) {
+                    return new RaiserReactiveClient(protocolId, rpcClientBinding, headersMono, persistentHeadersMono);
                 }
             };
         }

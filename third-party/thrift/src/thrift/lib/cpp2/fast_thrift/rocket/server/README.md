@@ -16,15 +16,15 @@ stream state for inbound requests and outbound responses.
 | `RocketServerMessageMarshalHandler` | Wraps inbound `ParsedFrame` into `RocketRequestMessage`; unwraps outbound `RocketResponseMessage` into `ComposedFrame`. Wire bytes are handled by the shared `frame::handler::FrameCodecHandler` upstream. |
 | `RocketServerSetupFrameHandler` | Validates and consumes the RSocket SETUP frame on connection establishment |
 | `RocketServerStreamStateHandler` | Manages stream IDs and request/response routing for client-initiated streams; consumes connection-level frames |
-| `RocketServerRequestResponseFrameHandler` | Duplex handler for REQUEST_RESPONSE interactions (inbound request tracking + outbound response serialization) |
+| `RocketServerRequestResponseHandler` | Duplex handler for REQUEST_RESPONSE interactions (inbound request tracking + outbound response serialization) |
 
 ---
 
 ## Pipeline Architecture
 
 ```
-Inbound:  Transport -> FrameHandler -> FrameCodecHandler -> FrameDefragmentationHandler -> RocketServerMessageMarshalHandler -> RocketServerSetupFrameHandler -> RocketServerRequestResponseFrameHandler -> RocketServerStreamStateHandler -> App
-Outbound: Transport <- FrameHandler <- FrameCodecHandler <- FrameFragmentationHandler <- RocketServerMessageMarshalHandler <- RocketServerSetupFrameHandler <- RocketServerRequestResponseFrameHandler <- RocketServerStreamStateHandler <- App
+Inbound:  Transport -> FrameHandler -> FrameCodecHandler -> FrameDefragmentationHandler -> RocketServerMessageMarshalHandler -> RocketServerSetupFrameHandler -> RocketServerRequestResponseHandler -> RocketServerStreamStateHandler -> App
+Outbound: Transport <- FrameHandler <- FrameCodecHandler <- FrameFragmentationHandler <- RocketServerMessageMarshalHandler <- RocketServerSetupFrameHandler <- RocketServerRequestResponseHandler <- RocketServerStreamStateHandler <- App
 ```
 
 Note: `frame::handler::FrameCodecHandler` parses raw IOBuf into ParsedFrame and
@@ -32,7 +32,7 @@ serializes ComposedFrame back to IOBuf. `RocketServerMessageMarshalHandler` is
 the rocket↔frame boundary that wraps/unwraps `RocketRequestMessage` /
 `RocketResponseMessage`. `RocketServerSetupFrameHandler` validates the first frame is a valid
 SETUP and consumes it (does not forward downstream), then becomes a near-zero-cost
-passthrough. `RocketServerRequestResponseFrameHandler` tracks REQUEST_RESPONSE streams
+passthrough. `RocketServerRequestResponseHandler` tracks REQUEST_RESPONSE streams
 and serializes their response frames. `RocketServerStreamStateHandler` manages active
 stream state for all stream types and consumes connection-level frames (streamId == 0).
 
@@ -178,8 +178,8 @@ Delivered to the application layer when a client sends a request:
 ```cpp
 struct RocketRequestMessage {
   frame::read::ParsedFrame frame;
-  folly::exception_wrapper error;  // Set on connection failure
   uint32_t streamId{0};
+  frame::FrameType streamType{RESERVED};  // Originating REQUEST_* type
 };
 ```
 
@@ -189,11 +189,8 @@ Sent by the application layer to respond to a client request:
 
 ```cpp
 struct RocketResponseMessage {
-  std::unique_ptr<folly::IOBuf> payload;
-  std::unique_ptr<folly::IOBuf> metadata;
-  uint32_t streamId{0};
-  uint32_t errorCode{0};
-  bool complete{true};  // Terminal response removes the stream
+  frame::ComposedFrame frame;              // Logical frame for serialization
+  frame::FrameType streamType{RESERVED};   // Originating REQUEST_* type
 };
 ```
 
@@ -260,7 +257,7 @@ struct RocketResponseMessage {
 └───────────────────────┘
           │
           ▼
-    [RocketServerRequestResponseFrameHandler]
+    [RocketServerRequestResponseHandler]
 ```
 
 ## Error Handling
@@ -289,11 +286,11 @@ buck2 test fbcode//thrift/lib/cpp2/fast_thrift/rocket/server/test:server_stream_
 
 ---
 
-# RocketServerRequestResponseFrameHandler
+# RocketServerRequestResponseHandler
 
 ## Overview
 
-The `RocketServerRequestResponseFrameHandler` is a **duplex handler** that manages both
+The `RocketServerRequestResponseHandler` is a **duplex handler** that manages both
 inbound request tracking and outbound response serialization for REQUEST_RESPONSE
 streams. It tracks which stream IDs belong to request-response interactions to
 properly serialize outbound response frames.
@@ -305,7 +302,7 @@ properly serialize outbound response frames.
 ### Pipeline Position
 
 ```
-App <-> RocketServerStreamStateHandler <-> RocketServerRequestResponseFrameHandler <-> RocketServerSetupFrameHandler <-> FrameHandler <-> Transport
+App <-> RocketServerStreamStateHandler <-> RocketServerRequestResponseHandler <-> RocketServerSetupFrameHandler <-> FrameHandler <-> Transport
 ```
 
 The handler receives `ParsedFrame` from `RocketServerSetupFrameHandler` on the inbound
@@ -343,7 +340,7 @@ request-response responses into wire-format PAYLOAD frames.
           │
           ▼
 ┌──────────────────────────────────────────────────┐
-│ RocketServerRequestResponseFrameHandler                │
+│ RocketServerRequestResponseHandler                     │
 │ 1. Check if REQUEST_RESPONSE frame type          │
 │    - If yes: track stream ID, forward            │
 │    - Roll back tracking if downstream fails      │
@@ -370,7 +367,7 @@ request-response responses into wire-format PAYLOAD frames.
           │
           ▼
 ┌──────────────────────────────────────────────────┐
-│ RocketServerRequestResponseFrameHandler                │
+│ RocketServerRequestResponseHandler                     │
 │ 1. Check if stream is tracked                    │
 │    - If not: forward unchanged                   │
 │ 2. Remove from tracking                          │
@@ -395,17 +392,17 @@ request-response responses into wire-format PAYLOAD frames.
 ## Usage Example
 
 ```cpp
-#include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerRequestResponseFrameHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerRequestResponseHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/Messages.h>
 
 using namespace apache::thrift::fast_thrift::rocket::server;
 
 // Create handler
-RocketServerRequestResponseFrameHandler handler;
+RocketServerRequestResponseHandler handler;
 
 // The handler is typically added to a channel pipeline after RocketServerSetupFrameHandler
 // and before RocketServerStreamStateHandler
-// pipeline.addHandler<RocketServerRequestResponseFrameHandler>();
+// pipeline.addHandler<RocketServerRequestResponseHandler>();
 
 // Inbound: Handler tracks REQUEST_RESPONSE streams and forwards frames
 // to RocketServerStreamStateHandler

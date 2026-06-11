@@ -12,6 +12,8 @@ connection setup and stream state for outbound requests and inbound responses.
 
 | Handler | Purpose |
 |---------|---------|
+| `RocketClientFrameCodecHandler` | Duplex codec: parse IOBuf→ParsedFrame (read), extract serialized frame (write) |
+| `RocketClientConnectionErrorHandler` | Intercept connection-level ERROR frames (streamId=0): convert faults to exceptions, relay CONNECTION_CLOSE as event |
 | `RocketClientSetupFrameHandler` | Sends the RSocket SETUP frame on connect |
 | `RocketClientStreamStateHandler` | Manages stream IDs and request/response correlation |
 | `RocketClientRequestResponseFrameHandler` | Duplex handler for REQUEST_RESPONSE interactions (outbound serialization + inbound response handling) |
@@ -21,8 +23,8 @@ connection setup and stream state for outbound requests and inbound responses.
 ## Pipeline Architecture
 
 ```
-Outbound: App Layer -> RocketClientStreamStateHandler -> RocketClientRequestResponseFrameHandler -> Transport
-Inbound:  App Layer <- RocketClientSetupFrameHandler <- RocketClientStreamStateHandler <- FrameHandler <- Transport
+Outbound: App → RocketClientStreamStateHandler → RocketClientRequestResponseFrameHandler → RocketClientFrameCodecHandler → Transport
+Inbound:  App ← RocketClientSetupFrameHandler ← RocketClientStreamStateHandler ← RocketClientRequestResponseFrameHandler ← RocketClientConnectionErrorHandler ← RocketClientFrameCodecHandler ← Transport
 ```
 
 Note: `RocketClientSetupFrameHandler` is an inbound handler that sends the setup frame on connect.

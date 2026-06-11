@@ -69,10 +69,52 @@ TEST_F(RocketSinkClientCallbackTest, HandlePayloadOnSinkNext) {
   callback_->handleFrame(std::move(frame));
 }
 
+TEST_F(RocketSinkClientCallbackTest, HandlePayloadOnSinkNextCompletesInline) {
+  makeReady();
+
+  EXPECT_CALL(connection_, sendPayload(kStreamId, _, _, _)).Times(1);
+  EXPECT_CALL(connection_, freeStream(kStreamId, true))
+      .WillOnce([&](StreamId, bool) { callback_.reset(); });
+  EXPECT_CALL(serverCallback_, onSinkNext(_)).WillOnce([&](StreamPayload&&) {
+    callback_->onFinalResponse(
+        StreamPayload(folly::IOBuf::copyBuffer("done"), StreamPayloadMetadata()));
+    return false;
+  });
+  EXPECT_CALL(connection_, close(_)).Times(0);
+
+  auto data = folly::IOBuf::copyBuffer("test");
+  StreamPayload sp(std::move(data), StreamPayloadMetadata());
+  auto packed =
+      connection_.getPayloadSerializer()->pack(std::move(sp), false, nullptr);
+  PayloadFrame frame(kStreamId, std::move(packed), Flags().next(true));
+  callback_->handleFrame(std::move(frame));
+}
+
 TEST_F(RocketSinkClientCallbackTest, HandlePayloadOnSinkComplete) {
   makeReady();
 
   EXPECT_CALL(serverCallback_, onSinkComplete()).WillOnce(Return(true));
+
+  PayloadFrame frame(kStreamId, Payload{}, Flags().complete(true));
+  callback_->handleFrame(std::move(frame));
+}
+
+TEST_F(
+    RocketSinkClientCallbackTest,
+    HandlePayloadOnSinkCompleteCompletesInline) {
+  makeReady();
+
+  EXPECT_CALL(connection_, incInflightFinalResponse()).Times(1);
+  EXPECT_CALL(connection_, sendPayload(kStreamId, _, _, _)).Times(1);
+  EXPECT_CALL(connection_, freeStream(kStreamId, true))
+      .WillOnce([&](StreamId, bool) { callback_.reset(); });
+  EXPECT_CALL(connection_, decInflightFinalResponse()).Times(1);
+  EXPECT_CALL(serverCallback_, onSinkComplete()).WillOnce([&] {
+    callback_->onFinalResponse(
+        StreamPayload(folly::IOBuf::copyBuffer("done"), StreamPayloadMetadata()));
+    return false;
+  });
+  EXPECT_CALL(connection_, close(_)).Times(0);
 
   PayloadFrame frame(kStreamId, Payload{}, Flags().complete(true));
   callback_->handleFrame(std::move(frame));

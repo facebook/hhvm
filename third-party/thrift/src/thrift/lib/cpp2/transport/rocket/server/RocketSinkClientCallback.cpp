@@ -306,19 +306,32 @@ void RocketSinkClientCallback::handleFrame(PayloadFrame&& payloadFrame) {
     return;
   }
 
-  bool notViolateContract = true;
+  auto& connection = connection_;
+  auto streamId = streamId_;
+  auto closeContractViolation = [&] {
+    connection.close(
+        folly::make_exception_wrapper<transport::TTransportException>(
+            transport::TTransportException::TTransportExceptionType::
+                STREAMING_CONTRACT_VIOLATION,
+            "receiving sink payload frame after sink completion"));
+  };
+
   if (next) {
+    if (state_ != State::BothOpen) {
+      closeContractViolation();
+      return;
+    }
+
     auto streamPayload =
         connection_.getPayloadSerializer()->unpack<StreamPayload>(
             std::move(*fullPayload),
             connection_.isDecodingMetadataUsingBinaryProtocol());
     if (streamPayload.hasException()) {
-      notViolateContract = onSinkError(std::move(streamPayload.exception()));
-      if (notViolateContract) {
+      if (onSinkError(std::move(streamPayload.exception()))) {
         // freeStream may destroy this callback, return immediately.
-        connection_.freeStream(streamId_, true);
-        return;
+        connection.freeStream(streamId, true);
       }
+      return;
     } else {
       // FIXME: As noted in `RocketClient::handleSinkResponse`, sinks
       // currently lack the codegen to be able to support FD passing.
@@ -331,30 +344,28 @@ void RocketSinkClientCallback::handleFrame(PayloadFrame&& payloadFrame) {
       if (payloadMetadataRef &&
           payloadMetadataRef->getType() ==
               PayloadMetadata::Type::exceptionMetadata) {
-        notViolateContract = onSinkError(
-            apache::thrift::detail::EncodedStreamError(
-                std::move(streamPayload.value())));
-        if (notViolateContract) {
+        if (onSinkError(apache::thrift::detail::EncodedStreamError(
+                std::move(streamPayload.value())))) {
           // freeStream may destroy this callback, return immediately.
-          connection_.freeStream(streamId_, true);
+          connection.freeStream(streamId, true);
+        }
+        return;
+      } else {
+        if (!onSinkNext(std::move(*streamPayload))) {
           return;
         }
-      } else {
-        notViolateContract = onSinkNext(std::move(*streamPayload));
       }
     }
   }
 
-  if (complete && notViolateContract) {
-    notViolateContract = onSinkComplete();
-  }
-
-  if (!notViolateContract) {
-    connection_.close(
-        folly::make_exception_wrapper<transport::TTransportException>(
-            transport::TTransportException::TTransportExceptionType::
-                STREAMING_CONTRACT_VIOLATION,
-            "receiving sink payload frame after sink completion"));
+  if (complete) {
+    if (state_ != State::BothOpen) {
+      closeContractViolation();
+      return;
+    }
+    if (!onSinkComplete()) {
+      return;
+    }
   }
 }
 
@@ -384,11 +395,13 @@ void RocketSinkClientCallback::handleFrame(ErrorFrame&& errorFrame) {
     }
   }();
 
+  auto& connection = connection_;
+  auto streamId = streamId_;
   bool notViolateContract = onSinkError(std::move(ew));
   if (notViolateContract) {
-    connection_.freeStream(streamId_, true);
+    connection.freeStream(streamId, true);
   } else {
-    connection_.close(
+    connection.close(
         folly::make_exception_wrapper<transport::TTransportException>(
             transport::TTransportException::TTransportExceptionType::
                 STREAMING_CONTRACT_VIOLATION,

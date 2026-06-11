@@ -22,7 +22,6 @@ import com.facebook.thrift.client.ThriftClientConfig;
 import com.facebook.thrift.example.ping.PingRequest;
 import com.facebook.thrift.example.ping.PingResponse;
 import com.facebook.thrift.example.ping.PingService;
-import com.facebook.thrift.example.ping.PingServiceReactiveClient;
 import com.facebook.thrift.example.ping.PingServiceRpcServerHandler;
 import com.facebook.thrift.legacy.server.LegacyServerTransportFactory;
 import com.facebook.thrift.util.SPINiftyMetrics;
@@ -100,8 +99,9 @@ public class ReactiveRpcBenchmarks {
                   new ThriftClientConfig().setDisableSSL(true).setProtocol(protocolId))
               .build();
 
-      return new PingServiceReactiveClient(
-          protocolId, clientFactory.createRpcClient(socketAddress));
+      return PingService.Reactive.clientBuilder()
+          .setProtocolId(protocolId)
+          .build(clientFactory, socketAddress);
     }
 
     @Benchmark

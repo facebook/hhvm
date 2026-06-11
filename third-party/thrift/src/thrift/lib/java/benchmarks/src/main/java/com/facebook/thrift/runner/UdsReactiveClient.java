@@ -16,12 +16,11 @@
 
 package com.facebook.thrift.runner;
 
+import com.facebook.thrift.client.RpcClientFactory;
 import com.facebook.thrift.client.ThriftClientConfig;
 import com.facebook.thrift.example.ping.PingRequest;
 import com.facebook.thrift.example.ping.PingResponse;
 import com.facebook.thrift.example.ping.PingService;
-import com.facebook.thrift.example.ping.PingServiceReactiveClient;
-import com.facebook.thrift.legacy.client.LegacyRpcClientFactory;
 import io.netty.channel.unix.DomainSocketAddress;
 import io.netty.util.ResourceLeakDetector;
 import java.net.SocketAddress;
@@ -50,14 +49,20 @@ public class UdsReactiveClient extends AbstractClient<PingService.Reactive> {
 
   @Override
   protected PingService.Reactive getClient(SocketAddress address) {
-    LegacyRpcClientFactory rpcClientFactory =
-        new LegacyRpcClientFactory(
-            new ThriftClientConfig()
-                .setDisableSSL(true)
-                .setRequestTimeout(io.airlift.units.Duration.succinctDuration(1, TimeUnit.DAYS)));
+    RpcClientFactory rpcClientFactory =
+        RpcClientFactory.builder()
+            .setDisableLoadBalancing(true)
+            .setDisableReconnectingClient(true)
+            .setThriftClientConfig(
+                new ThriftClientConfig()
+                    .setDisableSSL(true)
+                    .setRequestTimeout(
+                        io.airlift.units.Duration.succinctDuration(1, TimeUnit.DAYS)))
+            .build();
 
-    return new PingServiceReactiveClient(
-        ProtocolId.BINARY, rpcClientFactory.createRpcClient(address).cache());
+    return PingService.Reactive.clientBuilder()
+        .setProtocolId(ProtocolId.BINARY)
+        .build(rpcClientFactory, address);
   }
 
   @Override

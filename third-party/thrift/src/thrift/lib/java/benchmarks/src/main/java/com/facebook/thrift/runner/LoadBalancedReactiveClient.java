@@ -21,7 +21,6 @@ import com.facebook.thrift.client.ThriftClientConfig;
 import com.facebook.thrift.example.ping.PingRequest;
 import com.facebook.thrift.example.ping.PingResponse;
 import com.facebook.thrift.example.ping.PingService;
-import com.facebook.thrift.example.ping.PingServiceReactiveClient;
 import io.netty.util.ResourceLeakDetector;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -55,8 +54,9 @@ public class LoadBalancedReactiveClient extends AbstractClient<PingService.React
             .build();
 
     client =
-        new PingServiceReactiveClient(
-            ProtocolId.BINARY, rpcClientFactory.createRpcClient(new InetSocketAddress(host, port)));
+        PingService.Reactive.clientBuilder()
+            .setProtocolId(ProtocolId.BINARY)
+            .build(rpcClientFactory, new InetSocketAddress(host, port));
 
     LoadBalancedReactiveClient c = new LoadBalancedReactiveClient();
     c.runTest(

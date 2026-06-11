@@ -25,9 +25,7 @@ import com.facebook.thrift.client.ThriftClientConfig;
 import com.facebook.thrift.example.ping.PingRequest;
 import com.facebook.thrift.example.ping.PingResponse;
 import com.facebook.thrift.example.ping.PingService;
-import com.facebook.thrift.example.ping.PingServiceReactiveClient;
 import com.facebook.thrift.example.ping.PingServiceRpcServerHandler;
-import com.facebook.thrift.legacy.client.LegacyRpcClientFactory;
 import com.facebook.thrift.legacy.server.LegacyServerTransport;
 import com.facebook.thrift.legacy.server.LegacyServerTransportFactory;
 import com.facebook.thrift.legacy.server.testservices.BlockingPingService;
@@ -142,16 +140,20 @@ public class TestServerDecoder {
     LegacyServerTransport transport = transportFactory.createServerTransport(serverHandler).block();
     InetSocketAddress address = (InetSocketAddress) transport.getAddress();
 
-    // Use LegacyRpcClientFactory which uses framed protocol
-    LegacyRpcClientFactory clientFactory =
-        new LegacyRpcClientFactory(
-            new ThriftClientConfig()
-                .setDisableSSL(true)
-                .setRequestTimeout(Duration.succinctDuration(10, TimeUnit.SECONDS)));
+    RpcClientFactory clientFactory =
+        RpcClientFactory.builder()
+            .setDisableLoadBalancing(true)
+            .setDisableReconnectingClient(true)
+            .setThriftClientConfig(
+                new ThriftClientConfig()
+                    .setDisableSSL(true)
+                    .setRequestTimeout(Duration.succinctDuration(10, TimeUnit.SECONDS)))
+            .build();
 
-    PingServiceReactiveClient client =
-        new PingServiceReactiveClient(
-            ProtocolId.BINARY, clientFactory.createRpcClient(address).cache());
+    PingService.Reactive client =
+        PingService.Reactive.clientBuilder()
+            .setProtocolId(ProtocolId.BINARY)
+            .build(clientFactory, address);
 
     // Create message that exceeds maxFrameSize (1KB)
     StringBuilder largeString = new StringBuilder();

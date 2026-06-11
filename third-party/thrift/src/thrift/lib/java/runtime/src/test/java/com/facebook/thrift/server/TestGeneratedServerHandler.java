@@ -20,13 +20,12 @@ import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 
 import com.facebook.swift.service.ThriftServerConfig;
+import com.facebook.thrift.client.RpcClientFactory;
 import com.facebook.thrift.client.ThriftClientConfig;
 import com.facebook.thrift.example.ping.CustomException;
 import com.facebook.thrift.example.ping.PingRequest;
 import com.facebook.thrift.example.ping.PingService;
-import com.facebook.thrift.example.ping.PingServiceReactiveClient;
 import com.facebook.thrift.example.ping.PingServiceRpcServerHandler;
-import com.facebook.thrift.legacy.client.LegacyRpcClientFactory;
 import com.facebook.thrift.legacy.server.LegacyServerTransport;
 import com.facebook.thrift.legacy.server.LegacyServerTransportFactory;
 import com.facebook.thrift.legacy.server.testservices.BlockingPingService;
@@ -54,14 +53,19 @@ public class TestGeneratedServerHandler {
         transportFactory.createServerTransport(serverHandler).block();
     InetSocketAddress address = (InetSocketAddress) serverTransport.getAddress();
 
-    LegacyRpcClientFactory rpcClientFactory =
-        new LegacyRpcClientFactory(
-            new ThriftClientConfig()
-                .setDisableSSL(true)
-                .setRequestTimeout(Duration.succinctDuration(1, TimeUnit.DAYS)));
+    RpcClientFactory rpcClientFactory =
+        RpcClientFactory.builder()
+            .setThriftClientConfig(
+                new ThriftClientConfig()
+                    .setDisableSSL(true)
+                    .setRequestTimeout(Duration.succinctDuration(1, TimeUnit.DAYS)))
+            .setDisableLoadBalancing(true)
+            .setDisableReconnectingClient(true)
+            .build();
     this.client =
-        new PingServiceReactiveClient(
-            ProtocolId.BINARY, rpcClientFactory.createRpcClient(address).cache());
+        PingService.Reactive.clientBuilder()
+            .setProtocolId(ProtocolId.BINARY)
+            .build(rpcClientFactory, address);
   }
 
   @Test

@@ -744,11 +744,6 @@ class HTTPTransaction
 
   ~HTTPTransaction() override;
 
-  void reset(bool useFlowControl,
-             uint32_t receiveInitialWindowSize,
-             uint32_t receiveStreamWindowSize,
-             uint32_t sendInitialWindowSize);
-
   HTTPCodec::StreamID getID() const {
     return id_;
   }

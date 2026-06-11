@@ -207,16 +207,6 @@ HTTPTransaction::~HTTPTransaction() {
   }
 }
 
-void HTTPTransaction::reset(bool useFlowControl,
-                            uint32_t receiveInitialWindowSize,
-                            uint32_t receiveStreamWindowSize,
-                            uint32_t sendInitialWindowSize) {
-  useFlowControl_ = useFlowControl;
-  recvWindow_.setCapacity(receiveInitialWindowSize);
-  setReceiveWindow(receiveStreamWindowSize);
-  sendWindow_.setCapacity(sendInitialWindowSize);
-}
-
 void HTTPTransaction::onIngressHeadersComplete(
     std::unique_ptr<HTTPMessage> msg) {
   DestructorGuard g(this);

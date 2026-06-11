@@ -1,0 +1,3 @@
+${dict["x" => 1,"y" => "hello"]}
+${dict["outer" => dict["inner" => 42]]}
+${dict[]}

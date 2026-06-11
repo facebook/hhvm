@@ -2,7 +2,7 @@ ERROR: File "shape_at_wrong.php", line 9, characters 10-98:
 Invalid return type (Typing[4110])
   File "shape_at_wrong.php", line 8, characters 15-43:
   Expected `dynamic`
-  File "expr_tree.php", line 101, characters 8-32:
+  File "expr_tree.php", line 109, characters 8-32:
   But got `ExampleExpression<_>`
 ERROR: File "shape_at_wrong.php", line 9, characters 10-98:
 Invalid return type (Typing[4110])
@@ -28,7 +28,11 @@ Too few positional arguments (required 2 but got 1) (Typing[4104])
   Definition is here
 ERROR: File "shape_at_wrong.php", line 27, characters 33-35:
 You are calling `Shapes::at()` on a field known to not exist (Typing[4251])
-  File "shape_at_wrong.php", line 5, characters 36-62:
+  File "shape_at_wrong.php", line 16, characters 15-28:
   The field `x` is not defined in this shape
-ERROR: File "shape_at_wrong.php", line 30, characters 5-33:
-`HH\string` does not support this operator (it has no instance method named `__unwrap`) (Typing[4053])
+ERROR: File "shape_at_wrong.php", line 30, characters 25-27:
+Invalid argument (Typing[4110])
+  File "Shapes.hhi", line 84, characters 18-23:
+  Expected `shape(?'y' => _, ...)`
+  File "expr_tree.php", line 164, characters 40-45:
+  But got `string`

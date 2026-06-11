@@ -3,6 +3,7 @@
 <<file: __EnableUnstableFeatures('case_types')>>
 <<file: __EnableUnstableFeatures('case_type_where_clauses')>>
 <<file: __EnableUnstableFeatures('like_type_hints')>>
+<<file: __EnableUnstableFeatures('representable_as')>>
 
 /**
  * An example DSL for testing expression trees (ETs).
@@ -37,7 +38,11 @@ type ExprTreeInfo<TInfer> = shape(
   'lexically_enclosing_tree' => ?ExprPos,
 );
 
-case type HackValue = int | float | string | bool | Container<mixed>;
+case type HackValue = int
+  | float
+  | string
+  | bool
+  | HH\Runtime\RepresentableAs<Container<?HackValue>>;
 
 case type ExampleUnion<+THack as ?HackValue, +TInfer> =
   | THack
@@ -47,7 +52,8 @@ case type ExampleAutoLiftable as HackValue,ExprTreeOpType<ExampleMixedOpType> =
   | int
   | float
   | string
-  | bool;
+  | bool
+  | HH\Runtime\RepresentableAs<dict<arraykey, ?ExampleAutoLiftable>>;
 
 case type ExprTreeOpType<+T as ExampleMixedOpType> =
   | null where T super ExampleMixedOpType
@@ -55,6 +61,8 @@ case type ExprTreeOpType<+T as ExampleMixedOpType> =
   | float where T super ExampleFloatOpType
   | string where T super ExampleStringOpType
   | bool where T super ExampleBoolOpType
+  | HH\Runtime\RepresentableAs<dict<arraykey, mixed>>
+    where T super ExampleMixedOpType
   | T;
 
 final class ExprTree<TInfer> implements ExampleExpression<TInfer> {
@@ -114,6 +122,15 @@ class ExampleDsl {
       return $visitor->visitFloat(null, $e);
     } else if ($e is string) {
       return $visitor->visitString(null, $e);
+    } else if ($e is dict<_, _>) {
+      return $visitor->visitDict(
+        null,
+        HH\Lib\Vec\map_with_key(
+          $e,
+          ($k, $v) ==>
+            tuple(self::autolift($visitor, $k), self::autolift($visitor, $v)),
+        ),
+      );
     } else {
       return $visitor->visitBool(null, $e);
     }
@@ -579,6 +596,7 @@ case type ExampleMixedNonNull as ExprTreeOpType<ExampleMixedOpType> =
   | float
   | string
   | bool
+  | HH\Runtime\RepresentableAs<dict<arraykey, mixed>>
   | ExampleMixedOpType;
 
 case type ExampleMixed as ?ExampleMixedNonNull =
@@ -597,10 +615,7 @@ interface ExampleFunction<T> extends ExampleMixedOpType {
   public function __unwrap(): T;
 }
 
-interface ExampleShape<T> extends ExampleMixedOpType {
-  <<__NoAutoLikes>>
-  public function __unwrap(): T;
-}
+type ExampleShape<+T> = T;
 
 abstract class ExampleKeyedCollection<+Tkey as arraykey, +Tvalue> {
   public static function __makeType<Tk as arraykey, Tv>(

@@ -82,6 +82,11 @@ type t = {
   ignore_string_methods: bool;
       (** Ignore the methods defined in the string class in string.hhi *)
   enable_intrinsics_extension: bool;
+  expression_tree_shape_no_unwrap: bool;
+      (** When true, the Expression Tree desugarer stops emitting `->__unwrap()` on the first
+          argument of the shape ops (`shapeAt`/`shapeIdx`/`shapePut`). Used to roll out making the
+          DSL's shape wrapper type a transparent type alias, after which the unwrap call no longer
+          typechecks. *)
 }
 [@@deriving show, eq]
 

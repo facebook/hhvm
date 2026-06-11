@@ -64,6 +64,8 @@ module Hhconfig : sig
 
   val enable_xhp_class_modifier : string
 
+  val expression_tree_shape_no_unwrap : string
+
   val everything_sdt : string
 
   val ignore_string_methods : string

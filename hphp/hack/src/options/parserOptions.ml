@@ -47,6 +47,7 @@ type t = {
   treat_non_annotated_memoize_as_kbic: bool;
   ignore_string_methods: bool;
   enable_intrinsics_extension: bool;
+  expression_tree_shape_no_unwrap: bool;
 }
 [@@deriving show, eq]
 
@@ -90,6 +91,7 @@ let default =
     treat_non_annotated_memoize_as_kbic = false;
     ignore_string_methods = true;
     enable_intrinsics_extension = false;
+    expression_tree_shape_no_unwrap = false;
   }
 
 (* Changes here need to be synchronized with rust_parser_errors_ffi.rs *)

@@ -112,6 +112,7 @@ pub fn desugar(
         static_method_pointers: vec![],
         errors: vec![],
         contains_spliced_await: false,
+        shape_no_unwrap: env.parser_options.expression_tree_shape_no_unwrap,
     };
     let rewritten_expr = state.rewrite_expr(e, visitor_name);
 
@@ -772,6 +773,12 @@ struct RewriteState {
     static_method_pointers: Vec<Expr>,
     errors: Vec<(Pos, String)>,
     contains_spliced_await: bool,
+    // When true, the desugarer skips wrapping the first argument of shape ops
+    // (`shapeAt`/`shapeIdx`/`shapePut`) in `->__unwrap()`. Mirrors the global
+    // `expression_tree_shape_no_unwrap` parser option, set when the DSL's shape
+    // wrapper type is a transparent type alias so the unwrap call no longer
+    // typechecks.
+    shape_no_unwrap: bool,
 }
 
 impl RewriteState {
@@ -2673,7 +2680,7 @@ impl<'ast> Visitor<'ast> for LiveVars {
  * Rewrite the args into virtual and desugared args, treating the second
  * virtual argument (if present) as a shape field and so using the source
  * rather than virtualized expression. Wrap the first virtual argument with
- * an ->unwrap() call.
+ * an ->unwrap() call, unless `expression_tree_shape_no_unwrap` is enabled.
  */
 fn rewrite_and_fixup_for_shape_op(
     state: &mut RewriteState,
@@ -2688,7 +2695,7 @@ fn rewrite_and_fixup_for_shape_op(
         None
     };
     let (mut virtual_args, desugar_args) = state.rewrite_exprs(args, visitor_name);
-    if !virtual_args.is_empty() {
+    if !virtual_args.is_empty() && !state.shape_no_unwrap {
         let mut a = null_literal(Pos::NONE);
         std::mem::swap(&mut virtual_args[0], &mut a);
         virtual_args[0] = _virtualize_call(a, nullsafe, pos);

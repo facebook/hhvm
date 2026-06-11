@@ -64,6 +64,8 @@ module Hhconfig = struct
 
   let enable_xhp_class_modifier = key "enable_xhp_class_modifier"
 
+  let expression_tree_shape_no_unwrap = key "expression_tree_shape_no_unwrap"
+
   let everything_sdt = key "everything_sdt"
 
   let ignore_string_methods = key "ignore_string_methods"

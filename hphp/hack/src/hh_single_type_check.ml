@@ -877,6 +877,8 @@ let parse_options () =
           !treat_non_annotated_memoize_as_kbic;
         ignore_string_methods = default.ignore_string_methods;
         enable_intrinsics_extension = default.enable_intrinsics_extension;
+        expression_tree_shape_no_unwrap =
+          default.expression_tree_shape_no_unwrap;
       }
   in
 

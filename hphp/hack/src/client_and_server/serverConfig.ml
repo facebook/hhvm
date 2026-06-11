@@ -437,6 +437,9 @@ let load_config (config : Config_file_common.t) (options : GlobalOptions.t) :
           bool_opt Config_keys.Hhconfig.ignore_string_methods config
           >?? po_opt.ignore_string_methods;
         enable_intrinsics_extension = po_opt.enable_intrinsics_extension;
+        expression_tree_shape_no_unwrap =
+          bool_opt Config_keys.Hhconfig.expression_tree_shape_no_unwrap config
+          >?? po_opt.expression_tree_shape_no_unwrap;
       }
   in
   GlobalOptions.set

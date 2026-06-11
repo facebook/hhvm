@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<5c84650e70296309759722da70f0a50e>>
+// @generated SignedSource<<60f42860b985b65503f4e5cd57abfcee>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -119,6 +119,11 @@ pub struct ParserOptions {
     /// Ignore the methods defined in the string class in string.hhi
     pub ignore_string_methods: bool,
     pub enable_intrinsics_extension: bool,
+    /// When true, the Expression Tree desugarer stops emitting `->__unwrap()` on the first
+    /// argument of the shape ops (`shapeAt`/`shapeIdx`/`shapePut`). Used to roll out making the
+    /// DSL's shape wrapper type a transparent type alias, after which the unwrap call no longer
+    /// typechecks.
+    pub expression_tree_shape_no_unwrap: bool,
 }
 
 #[derive(

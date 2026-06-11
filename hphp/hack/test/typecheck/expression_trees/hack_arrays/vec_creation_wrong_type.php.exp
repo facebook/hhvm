@@ -2,17 +2,17 @@ ERROR: File "vec_creation_wrong_type.php", line 8, characters 12-14:
 Invalid argument (Typing[4110])
   File "vec_creation_wrong_type.php", line 7, characters 15-24:
   Expected `int`
-  File "expr_tree.php", line 147, characters 40-45:
+  File "expr_tree.php", line 164, characters 40-45:
   But got `string`
 ERROR: File "vec_creation_wrong_type.php", line 8, characters 17-19:
 Invalid argument (Typing[4110])
   File "vec_creation_wrong_type.php", line 7, characters 15-24:
   Expected `int`
-  File "expr_tree.php", line 147, characters 40-45:
+  File "expr_tree.php", line 164, characters 40-45:
   But got `string`
 ERROR: File "vec_creation_wrong_type.php", line 15, characters 15-17:
 Invalid argument (Typing[4110])
   File "vec_creation_wrong_type.php", line 14, characters 15-24:
   Expected `int`
-  File "expr_tree.php", line 147, characters 40-45:
+  File "expr_tree.php", line 164, characters 40-45:
   But got `string`

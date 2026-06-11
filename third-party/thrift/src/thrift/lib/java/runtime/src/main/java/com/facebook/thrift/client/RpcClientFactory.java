@@ -18,8 +18,16 @@ package com.facebook.thrift.client;
 
 import com.facebook.swift.service.ThriftClientEventHandler;
 import com.facebook.swift.service.ThriftClientStats;
+import com.facebook.thrift.client.v2.manager.ClientOwnership;
+import com.facebook.thrift.client.v2.manager.ReconnectingRpcClientManagerFactory;
 import com.facebook.thrift.client.v2.manager.RpcClientBinding;
-import com.facebook.thrift.client.v2.transport.RpcClientFactoryV2;
+import com.facebook.thrift.client.v2.manager.RpcClientManagerFactory;
+import com.facebook.thrift.client.v2.manager.SimpleLoadBalancingRpcClientManagerFactory;
+import com.facebook.thrift.client.v2.manager.SingleRpcClientManagerFactory;
+import com.facebook.thrift.legacy.client.LegacyRpcClientFactory;
+import com.facebook.thrift.metadata.ClientInfo;
+import com.facebook.thrift.rsocket.client.HeaderAwareRpcClientFactory;
+import com.facebook.thrift.rsocket.client.RSocketRpcClientFactory;
 import com.facebook.thrift.util.resources.RpcResources;
 import com.google.common.base.Preconditions;
 import java.net.SocketAddress;
@@ -28,23 +36,34 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * Higher-level binding factory for typed Thrift clients.
+ * Binding factory for typed Thrift clients.
  *
- * <p>Produces {@link RpcClientBinding} handles that own the manager-backed lifecycle for a typed
- * client. For the lower-level raw-transport contract see {@link RpcClientTransportFactory}.
+ * <p>Produces manager-backed {@link RpcClientBinding} handles for typed clients via {@link
+ * #createRpcClientBinding(SocketAddress)}. The lower-level raw-transport contract is {@link
+ * RpcClientTransportFactory}; the {@link Builder} composes transport factories internally.
  */
-public interface RpcClientFactory {
-  /**
-   * Returns an OWNED {@link RpcClientBinding} for the given address. Closing the typed client
-   * disposes the underlying manager and its transports.
-   */
-  RpcClientBinding createRpcClientBinding(SocketAddress socketAddress);
+public final class RpcClientFactory {
+  private final RpcClientManagerFactory managerFactory;
+
+  private RpcClientFactory(RpcClientManagerFactory managerFactory) {
+    this.managerFactory = Objects.requireNonNull(managerFactory);
+  }
 
   /**
-   * Builder to create an RpcClientFactory. By default it creates an RpcClientFactory with RSocket
-   * disabled, stats enabled, reconnecting client enabled, and simple load balancing enabled.
+   * Creates a manager-backed {@link RpcClientBinding} with OWNED semantics. This is the path that
+   * {@link ClientBuilder#build(RpcClientFactory, SocketAddress)} uses. Closing the typed client
+   * disposes the manager and its underlying transports.
    */
-  final class Builder {
+  public RpcClientBinding createRpcClientBinding(SocketAddress socketAddress) {
+    return new RpcClientBinding(
+        managerFactory.createRpcClientManager(socketAddress), ClientOwnership.OWNED);
+  }
+
+  /**
+   * Builder for the manager-backed runtime. Defaults: RSocket disabled, stats enabled, reconnecting
+   * client enabled, single-slot connection pool (no load balancing), timeout enabled.
+   */
+  public static final class Builder {
     private boolean disableRSocket = true;
     private boolean disableStats = false;
     private boolean disableReconnectingClient = false;
@@ -118,25 +137,97 @@ public interface RpcClientFactory {
       return this;
     }
 
+    /**
+     * Builds the manager factory chain directly, skipping the binding-factory wrapper. Used by SR
+     * proxy-client code that composes its own manager pipeline on top of the v2 transport stack.
+     */
+    public RpcClientManagerFactory buildManagerFactory() {
+      validate();
+      recordTransport();
+      return buildManagerFactoryInternal();
+    }
+
     public RpcClientFactory build() {
+      validate();
+      recordTransport();
+      return new RpcClientFactory(buildManagerFactoryInternal());
+    }
+
+    private void validate() {
       Objects.requireNonNull(thriftClientConfig, "ThriftClientConfig is required");
       Objects.requireNonNull(thriftClientStats, "thriftClientStats is required");
-      return RpcClientFactoryV2.builder()
-          .setDisableRSocket(disableRSocket)
-          .setEnableHandleHeaderResponse(handleHeaderResponse)
-          .setDisableStats(disableStats)
-          .setDisableReconnectingClient(disableReconnectingClient)
-          .setDisableTimeout(disableTimeout)
-          .setHeaderTokens(headerTokens)
-          .setClientEventHandlers(clientEventHandlers)
-          .setConnectionPoolSize(connectionPoolSize)
-          .setThriftClientConfig(thriftClientConfig)
-          .setThriftClientStats(thriftClientStats)
-          .build();
+    }
+
+    private void recordTransport() {
+      if (disableRSocket || handleHeaderResponse) {
+        ClientInfo.addTransport(ClientInfo.Transport.HEADER);
+      } else {
+        ClientInfo.addTransport(ClientInfo.Transport.ROCKET);
+      }
+    }
+
+    /**
+     * Builds the manager factory chain: transport factory (raw connections + per-request
+     * decoration) wrapped in reconnecting or single managers, optionally load-balanced across N
+     * slots. Connection caching is handled by {@code SingleRpcClientManager} internally.
+     */
+    private RpcClientManagerFactory buildManagerFactoryInternal() {
+      RpcClientTransportFactory transportFactory = buildManagerTransportFactory();
+      RpcClientManagerFactory managerFactory =
+          disableReconnectingClient
+              ? new SingleRpcClientManagerFactory(transportFactory)
+              : new ReconnectingRpcClientManagerFactory(transportFactory);
+
+      if (connectionPoolSize > 1) {
+        managerFactory =
+            new SimpleLoadBalancingRpcClientManagerFactory(managerFactory, connectionPoolSize);
+      }
+
+      return managerFactory;
+    }
+
+    /**
+     * Builds the transport-only factory. This includes per-connection decoration (stats, tokens,
+     * event handlers, timeout) but excludes lifecycle concerns (reconnecting, caching,
+     * load-balancing) which are handled by the manager layer above.
+     */
+    private RpcClientTransportFactory buildManagerTransportFactory() {
+      RpcClientTransportFactory transportFactory;
+      if (disableRSocket) {
+        if (handleHeaderResponse) {
+          throw new IllegalArgumentException(
+              "handleHeaderResponse is only applicable if using RSocket");
+        }
+        transportFactory = new LegacyRpcClientFactory(thriftClientConfig);
+      } else {
+        if (handleHeaderResponse) {
+          transportFactory = new HeaderAwareRpcClientFactory(thriftClientConfig);
+        } else {
+          transportFactory = new RSocketRpcClientFactory(thriftClientConfig);
+        }
+      }
+
+      if (!disableStats) {
+        transportFactory = new InstrumentedRpcClientFactory(transportFactory, thriftClientStats);
+      }
+
+      if (headerTokens != null && !headerTokens.isEmpty()) {
+        transportFactory = new TokenPassingRpcClientFactory(transportFactory, headerTokens);
+      }
+
+      if (clientEventHandlers != null && !clientEventHandlers.isEmpty()) {
+        transportFactory = new EventHandlerRpcClientFactory(transportFactory, clientEventHandlers);
+      }
+
+      if (!disableTimeout) {
+        transportFactory = new TimeoutRpcClientFactory(transportFactory, thriftClientConfig);
+      }
+
+      return transportFactory;
     }
   }
 
-  static Builder builder() {
+  public static Builder builder() {
     return new Builder();
   }
 }

@@ -26,7 +26,6 @@ import com.facebook.thrift.client.v2.manager.ClientOwnership;
 import com.facebook.thrift.client.v2.manager.RpcClientBinding;
 import com.facebook.thrift.client.v2.manager.RpcClientManager;
 import com.facebook.thrift.client.v2.manager.RpcClientManagerFactory;
-import com.facebook.thrift.client.v2.transport.RpcClientFactoryV2;
 import com.facebook.thrift.example.ping.CustomException;
 import com.facebook.thrift.example.ping.PingRequest;
 import com.facebook.thrift.example.ping.PingResponse;
@@ -356,7 +355,7 @@ public class ClientRuntimeThriftClientTest {
   }
 
   private static RpcClientManagerFactory createV2ManagerFactory() {
-    return RpcClientFactoryV2.builder()
+    return RpcClientFactory.builder()
         .setDisableLoadBalancing(true)
         .setDisableRSocket(true)
         .setThriftClientConfig(baseClientConfig())

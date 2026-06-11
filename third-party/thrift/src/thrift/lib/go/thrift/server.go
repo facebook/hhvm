@@ -519,7 +519,7 @@ func (s *rocketServerSocket) fireAndForget(msg payload.Payload) {
 }
 
 func (s *rocketServerSocket) requestStream(msg payload.Payload) flux.Flux {
-	metadata, pfunc, argStruct, err := s.preprocessRequest(msg)
+	metadata, pfunc, argStruct, reqCtx, err := s.preprocessRequest(msg)
 	if err != nil {
 		return flux.Error(err)
 	}
@@ -533,6 +533,7 @@ func (s *rocketServerSocket) requestStream(msg payload.Payload) flux.Flux {
 
 	return flux.Create(
 		func(ctx context.Context, sink flux.Sink) {
+			ctx = WithRequestContext(ctx, reqCtx)
 			protoID := types.ProtocolID(metadata.GetProtocol())
 			responseCompressionAlgo := rocket.CompressionAlgorithmFromCompressionConfig(metadata.GetCompressionConfig())
 
@@ -635,23 +636,24 @@ func (s *rocketServerSocket) requestStream(msg payload.Payload) flux.Flux {
 }
 
 func (s *rocketServerSocket) requestChannel(request payload.Payload, requests flux.Flux) flux.Flux {
-	metadata, pfunc, argStruct, err := s.preprocessRequest(request)
+	metadata, pfunc, argStruct, reqCtx, err := s.preprocessRequest(request)
 	if err != nil {
 		return flux.Error(err)
 	}
 
 	rpcFuncName := metadata.GetName()
 	if pfuncSink, ok := pfunc.(processorFunctionSink); ok {
-		return s.requestChannelSink(metadata, argStruct, pfuncSink, requests)
+		return s.requestChannelSink(metadata, reqCtx, argStruct, pfuncSink, requests)
 	}
 	if pfuncBiDi, ok := pfunc.(processorFunctionBiDi); ok {
-		return s.requestChannelBiDi(metadata, argStruct, pfuncBiDi, requests)
+		return s.requestChannelBiDi(metadata, reqCtx, argStruct, pfuncBiDi, requests)
 	}
 	return flux.Error(fmt.Errorf("not a sink or bidi function: %q", rpcFuncName))
 }
 
 func (s *rocketServerSocket) requestChannelSink(
 	metadata *rpcmetadata.RequestRpcMetadata,
+	reqCtx *RequestContext,
 	argStruct ReadableStruct,
 	pfuncSink processorFunctionSink,
 	requests flux.Flux,
@@ -680,6 +682,7 @@ func (s *rocketServerSocket) requestChannelSink(
 	}
 
 	return flux.Create(func(ctx context.Context, sink flux.Sink) {
+		ctx = WithRequestContext(ctx, reqCtx)
 		firstResponseQueued := make(chan struct{})
 
 		makePayload := func(respStruct WritableStruct, isFirstResponse bool) (payload.Payload, error) {
@@ -850,6 +853,7 @@ func (s *rocketServerSocket) requestChannelSink(
 
 func (s *rocketServerSocket) requestChannelBiDi(
 	metadata *rpcmetadata.RequestRpcMetadata,
+	reqCtx *RequestContext,
 	argStruct ReadableStruct,
 	pfuncBiDi processorFunctionBiDi,
 	requests flux.Flux,
@@ -876,6 +880,7 @@ func (s *rocketServerSocket) requestChannelBiDi(
 	}
 
 	return flux.Create(func(ctx context.Context, sink flux.Sink) {
+		ctx = WithRequestContext(ctx, reqCtx)
 		firstResponseQueued := make(chan struct{})
 
 		makePayload := func(respStruct WritableStruct, isFirstResponse bool) (payload.Payload, error) {
@@ -1069,11 +1074,13 @@ func newProtocolBufferFromRequest(payloadDataBytes []byte, metadata *rpcmetadata
 // reads the request argument struct. Callers type-assert the returned
 // ProcessorFunction to the concrete interaction kind they support (stream /
 // sink / bidi) and wrap any returned error in the transport-appropriate form
-// (e.g. flux.Error).
+// (e.g. flux.Error). It also returns a *RequestContext built from the request
+// metadata and connection info; callers attach it to the request ctx.
 func (s *rocketServerSocket) preprocessRequest(msg payload.Payload) (
 	*rpcmetadata.RequestRpcMetadata,
 	ProcessorFunction,
 	ReadableStruct,
+	*RequestContext,
 	error,
 ) {
 	// TODO: this clone helps prevent a race-condition where the payload gets
@@ -1085,7 +1092,7 @@ func (s *rocketServerSocket) preprocessRequest(msg payload.Payload) (
 	if err != nil {
 		s.observer.ConnDropped()
 		s.observer.TaskKilled()
-		return nil, nil, nil, err
+		return nil, nil, nil, nil, err
 	}
 
 	rpcFuncName := metadata.GetName()
@@ -1093,7 +1100,7 @@ func (s *rocketServerSocket) preprocessRequest(msg payload.Payload) (
 	if err != nil {
 		s.observer.ConnDropped()
 		s.observer.TaskKilled()
-		return nil, nil, nil, err
+		return nil, nil, nil, nil, err
 	}
 
 	s.observer.ReceivedRequest()
@@ -1102,23 +1109,30 @@ func (s *rocketServerSocket) preprocessRequest(msg payload.Payload) (
 	if s.isOverloaded() {
 		s.observer.ConnDropped()
 		s.observer.ServerOverloaded()
-		return nil, nil, nil, loadSheddingError
+		return nil, nil, nil, nil, loadSheddingError
 	}
 
 	pfunc, exists := s.proc.ProcessorFunctionMap()[rpcFuncName]
 	if !exists {
-		return nil, nil, nil, fmt.Errorf("no such function: %q", rpcFuncName)
+		return nil, nil, nil, nil, fmt.Errorf("no such function: %q", rpcFuncName)
 	}
 
 	argStruct := pfunc.NewReqArgs()
 	err = argStruct.Read(protocol)
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, nil, nil, nil, err
 	}
 	err = protocol.ReadMessageEnd()
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, nil, nil, nil, err
 	}
 
-	return metadata, pfunc, argStruct, nil
+	reqCtx := &RequestContext{
+		ServiceName: s.proc.FunctionServiceMap()[rpcFuncName],
+		MethodName:  rpcFuncName,
+		ConnInfo:    s.connInfo,
+	}
+	reqCtx.SetReadHeaders(protocol.getResponseHeaders())
+
+	return metadata, pfunc, argStruct, reqCtx, nil
 }

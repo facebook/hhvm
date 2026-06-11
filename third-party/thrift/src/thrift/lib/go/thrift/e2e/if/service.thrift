@@ -19,4 +19,10 @@ namespace go thrift.lib.go.thrift.e2e.service
 service E2E {
   map<string, string> EchoHeaders();
   map<string, string> EchoConnInfo();
+
+  // Streaming variants used to verify that RequestContext (headers + conn info)
+  // is populated on the streaming server path. The first response carries the
+  // echoed data; the stream itself is empty.
+  map<string, string>, stream<i32> EchoHeadersStream();
+  map<string, string>, stream<i32> EchoConnInfoStream();
 }

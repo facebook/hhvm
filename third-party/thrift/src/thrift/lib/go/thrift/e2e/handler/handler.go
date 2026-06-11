@@ -47,3 +47,28 @@ func (h *E2EHandler) EchoConnInfo(ctx context.Context) (map[string]string, error
 	}
 	return result, nil
 }
+
+// EchoHeadersStream returns the request's read headers as the first (and only)
+// response; the stream itself is empty. It exercises RequestContext population
+// on the streaming server path.
+func (h *E2EHandler) EchoHeadersStream(ctx context.Context) (map[string]string, func(context.Context, chan<- int32) error, error) {
+	emptyStream := func(context.Context, chan<- int32) error {
+		return nil
+	}
+	// reqCtx should never be nil on the server path; let the test panic if it is.
+	reqCtx := thrift.GetRequestContext(ctx)
+	return reqCtx.GetReadHeaders(), emptyStream, nil
+}
+
+func (h *E2EHandler) EchoConnInfoStream(ctx context.Context) (map[string]string, func(context.Context, chan<- int32) error, error) {
+	emptyStream := func(context.Context, chan<- int32) error {
+		return nil
+	}
+	result := make(map[string]string)
+	// reqCtx should never be nil on the server path; let the test panic if it is.
+	reqCtx := thrift.GetRequestContext(ctx)
+	if reqCtx.ConnInfo.RemoteAddr != nil {
+		result["remote_address"] = reqCtx.ConnInfo.RemoteAddr.String()
+	}
+	return result, emptyStream, nil
+}

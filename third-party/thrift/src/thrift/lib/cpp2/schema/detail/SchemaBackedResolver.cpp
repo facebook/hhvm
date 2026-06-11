@@ -135,6 +135,10 @@ class SchemaIndex {
   using SourceIdentifiersByUri =
       folly::F14FastMap<std::string_view, type_system::SourceIdentifier>;
   SourceIdentifiersByUri sourceIdentifiersByUri_;
+  // An index of source location to definition keys at that location.
+  using DefinitionKeysByLocation = folly::
+      F14FastMap<std::string, folly::F14FastMap<std::string, DefinitionKeyRef>>;
+  DefinitionKeysByLocation definitionKeysByLocation_;
 
   // A set of unresolved definition keys collected while updating indexes.
   // This can be used to detect missing definitions in selective resolver.
@@ -237,6 +241,8 @@ class SchemaIndex {
   const DefinitionNode* definitionForUri(std::string_view uri) const;
   const DefinitionNode* definitionForSourceIdentifier(
       type_system::SourceIdentifierView sourceIdentifier) const;
+  const DefinitionKeysByLocation::mapped_type* definitionsForLocation(
+      std::string_view location) const;
   std::optional<type_system::SourceIdentifierView> sourceIdentifierForUri(
       std::string_view uri) const;
   std::optional<folly::F14FastSet<type_system::Uri>> getKnownUris() const;
@@ -516,6 +522,11 @@ const DefinitionNode* SchemaIndex::definitionForSourceIdentifier(
   return definitionOf(*definitionKey);
 }
 
+const SchemaIndex::DefinitionKeysByLocation::mapped_type*
+SchemaIndex::definitionsForLocation(std::string_view location) const {
+  return folly::get_ptr(definitionKeysByLocation_, location);
+}
+
 std::optional<type_system::SourceIdentifierView>
 SchemaIndex::sourceIdentifierForUri(std::string_view uri) const {
   return folly::get_optional<std::optional<type_system::SourceIdentifierView>>(
@@ -686,6 +697,10 @@ void SchemaIndex::updateSourceIdentifiers(
     const auto& program = definition.program();
     std::string sourceIdentifierUri = "file://";
     sourceIdentifierUri += program.path();
+
+    definitionKeysByLocation_[sourceIdentifierUri].emplace(
+        std::string{definition.name()}, definitionKey);
+
     type_system::SourceIdentifier sourceIdentifier{
         std::move(sourceIdentifierUri), std::string{definition.name()}};
 
@@ -1133,6 +1148,20 @@ const DefinitionNode* SchemaBackedResolver::getDefinitionNodeByUri(
 const DefinitionNode* SchemaBackedResolver::getDefinitionNodeBySourceIdentifier(
     type_system::SourceIdentifierView sourceIdentifier) const {
   return index_->definitionForSourceIdentifier(sourceIdentifier);
+}
+
+SchemaBackedResolver::DefinitionNodesByName
+SchemaBackedResolver::getDefinitionNodesByLocation(
+    std::string_view location) const {
+  DefinitionNodesByName result;
+  if (auto* entries = index_->definitionsForLocation(location)) {
+    for (const auto& [name, defKeyRef] : *entries) {
+      if (auto* node = index_->definitionOf(defKeyRef)) {
+        result.emplace(name, node);
+      }
+    }
+  }
+  return result;
 }
 
 std::optional<type_system::SourceIdentifierView>

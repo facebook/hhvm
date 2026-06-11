@@ -1033,8 +1033,13 @@ class TypeSystemFacade final : public type_system::TypeSystem {
   }
 
   type_system::TypeSystem::NameToDefinitionsMap getUserDefinedTypesAtLocation(
-      std::string_view) const override {
-    throw std::runtime_error("not implemented");
+      std::string_view location) const override {
+    type_system::TypeSystem::NameToDefinitionsMap result;
+    for (const auto& [name, node] :
+         resolver_.getDefinitionNodesByLocation(location)) {
+      result.emplace(std::string(name), convertUserDefinedType(node));
+    }
+    return result;
   }
 
   // Convert the definition to TypeSystem's representation.

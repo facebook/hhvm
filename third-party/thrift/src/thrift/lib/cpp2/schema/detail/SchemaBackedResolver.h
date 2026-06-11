@@ -46,6 +46,15 @@ class SchemaBackedResolver : public Resolver {
       type_system::SourceIdentifierView sourceIdentifier) const;
 
   /**
+   * Gets all definition nodes at a given source location (e.g.
+   * "file://path.thrift").
+   */
+  using DefinitionNodesByName =
+      folly::F14FastMap<std::string_view, const DefinitionNode*>;
+  virtual DefinitionNodesByName getDefinitionNodesByLocation(
+      std::string_view location) const;
+
+  /**
    * Gets source identifier for given definition, or returns nullopt if not
    * found.
    */

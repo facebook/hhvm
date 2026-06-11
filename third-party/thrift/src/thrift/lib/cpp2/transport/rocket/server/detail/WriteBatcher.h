@@ -64,8 +64,12 @@ class WriteBatcher : private folly::EventBase::LoopCallback,
       apache::thrift::MessageChannel::SendCallbackPtr cb,
       StreamId streamId,
       folly::SocketFds fds) {
+    auto dg = connection_.getDestructorGuard();
     if (cb) {
       cb->sendQueued();
+      if (connection_.getDestroyPending()) {
+        return;
+      }
       bufferedWritesContext_.sendCallbacks.push_back(std::move(cb));
     }
 

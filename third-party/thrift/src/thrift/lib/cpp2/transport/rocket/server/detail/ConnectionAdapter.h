@@ -71,6 +71,8 @@ class ConnectionAdapter {
 
   auto getDestructorGuard() { return connection_->getDestructorGuard(); }
 
+  bool getDestroyPending() const { return connection_->getDestroyPending(); }
+
   void close(folly::exception_wrapper ew) { connection_->close(std::move(ew)); }
 
   void setDecodeMetadataUsingBinary(bool value) {
@@ -312,6 +314,9 @@ class ConnectionAdapter {
     --pendingOutgoingFrames_;
     connection_->send(
         std::move(serializedFrame), std::move(sendCallback), streamId);
+    if (connection_->getDestroyPending()) {
+      return;
+    }
     if (pendingOutgoingFrames_ == 0) {
       connection_->closeIfNeeded();
     }
@@ -421,6 +426,10 @@ void ConnectionAdapter<AdaptedConnectionT>::flushPendingWrites() {
   for (auto& cb : pendingSendCallbacks_) {
     if (cb) {
       cb->sendQueued();
+      if (connection_->getDestroyPending()) {
+        resetPendingWritesState();
+        return;
+      }
     }
   }
 

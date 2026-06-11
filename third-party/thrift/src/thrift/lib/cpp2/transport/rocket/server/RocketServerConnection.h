@@ -288,8 +288,12 @@ class RocketServerConnection final : public IRocketServerConnection {
         MessageChannel::SendCallbackPtr cb,
         StreamId streamId,
         folly::SocketFds fds) {
+      folly::DelayedDestruction::DestructorGuard dg(&connection_);
       if (cb) {
         cb->sendQueued();
+        if (connection_.getDestroyPending()) {
+          return;
+        }
         bufferedWritesContext_.sendCallbacks.push_back(std::move(cb));
       }
 

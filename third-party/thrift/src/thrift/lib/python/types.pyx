@@ -2889,6 +2889,15 @@ def fill_specs(*structured_thrift_classes):
             cls._fbthrift_store_field_values()
 
 
+def isset_DEPRECATED(StructOrError struct):
+    cdef StructInfo info = struct._fbthrift_struct_info
+    isset_bytes = struct._fbthrift_data[0]
+    return {
+        name: bool(isset_bytes[index])
+        for name, index in info.name_to_index.items()
+    }
+
+
 cdef frozenset _get_set_fields_fallback(StructOrError struct):
     cdef StructInfo info = struct._fbthrift_struct_info
     fields = []

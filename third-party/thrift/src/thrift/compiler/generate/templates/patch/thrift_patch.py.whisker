@@ -73,6 +73,7 @@ class {{structured.py_name}}Patch(
     Base{{#if structured.union?}}Union{{#else}}Struct{{/if}}Patch[{{program.module_mangle}}__thrift_types.{{structured.py_name}}]
 ):
     pass
+    {{#if (not structured.assign_only_patch?)}}
     {{#each structured.fields_ordered_by_id as |field|}}
       {{#if (not field.type.contains_patch?)}}
     @property
@@ -91,6 +92,7 @@ class {{structured.py_name}}Patch(
             {{#if field.is_type_iobuf?}}_fbthrift_python_types.typeinfo_iobuf{{#else}}{{#partial m_types.typeinfo type=field.type}}{{/if}})
       {{/if (not field.type.contains_patch?)}}
     {{/each}}
+    {{/if (not structured.assign_only_patch?)}}
     {{#if (not program.safe_patch?)}}{{! If the program is already a safe patch, we should not generate to_safe_patch/from_safe_patch, otherwise it becomes a safe patch of safe patch}}
 
     def to_safe_patch(self) -> _fbthrift_safe_patch_types.{{structured.name}}SafePatch:

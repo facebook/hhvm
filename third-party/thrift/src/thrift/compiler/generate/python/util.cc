@@ -101,7 +101,8 @@ static void get_needed_includes_by_patch_impl(
         root, asMap->val_type().deref(), seen, result);
   }
   if (const t_structured* asStructured = type.try_as<t_structured>()) {
-    if (!should_generate_patch(asStructured)) {
+    if (!should_generate_patch(asStructured) ||
+        is_assign_only_patch(asStructured)) {
       return;
     }
     for (auto& field : asStructured->fields()) {
@@ -165,6 +166,10 @@ bool has_structured_with_generate_patch_new_annotation(const t_program* root) {
 bool should_generate_patch(const t_structured* type) {
   return !has_structured_with_generate_patch_new_annotation(type->program()) ||
       has_generate_patch_new_annotation(type);
+}
+
+bool is_assign_only_patch(const t_structured* type) {
+  return type->find_structured_annotation_or_null(kAssignOnlyPatchUri);
 }
 
 std::vector<std::string> get_py3_namespace(const t_program* prog) {

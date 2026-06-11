@@ -1021,6 +1021,9 @@ class t_mstch_python_prototypes_generator : public t_whisker_generator {
     def.property("should_generate_patch?", [](const t_structured& self) {
       return should_generate_patch(&self);
     });
+    def.property("assign_only_patch?", [](const t_structured& self) {
+      return is_assign_only_patch(&self);
+    });
     def.property("fields_ordered_by_id", [&proto](const t_structured& self) {
       return to_array(self.fields_id_order(), proto.of<t_field>());
     });

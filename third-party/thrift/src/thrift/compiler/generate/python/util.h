@@ -58,6 +58,7 @@ std::unordered_set<const t_program*> needed_includes_by_patch(
 
 bool has_structured_with_generate_patch_new_annotation(const t_program*);
 bool has_generate_patch_new_annotation(const t_structured*);
+bool is_assign_only_patch(const t_structured*);
 bool should_generate_patch(const t_structured*);
 
 inline const std::unordered_set<std::string>& get_python_reserved_names() {

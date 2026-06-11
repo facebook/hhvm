@@ -243,5 +243,7 @@ inline constexpr auto kRustEnumTypeUri =
 // Patch:
 inline constexpr auto kGeneratePatchNewUri =
     "facebook.com/thrift/op/GeneratePatchNew";
+inline constexpr auto kAssignOnlyPatchUri =
+    "facebook.com/thrift/op/AssignOnlyPatch";
 
 } // namespace apache::thrift::compiler

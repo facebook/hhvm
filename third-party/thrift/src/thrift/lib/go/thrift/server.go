@@ -113,7 +113,7 @@ func NewServer(proc Processor, listener net.Listener, transportType TransportID,
 
 	config := newServerConfig(options...)
 	rocket.SetRsocketLogger(config.log)
-	result := &rocketServer{
+	result := &server{
 		proc:          proc,
 		listener:      listener,
 		transportID:   actualTransportID,
@@ -134,7 +134,7 @@ func NewServer(proc Processor, listener net.Listener, transportType TransportID,
 	return result
 }
 
-type rocketServer struct {
+type server struct {
 	proc          Processor
 	listener      net.Listener
 	transportID   TransportID
@@ -150,7 +150,7 @@ type rocketServer struct {
 	loadFn                  func() uint32
 }
 
-func (s *rocketServer) ServeContext(ctx context.Context) error {
+func (s *server) ServeContext(ctx context.Context) error {
 	// TODO: support graceful shutdown and track with thrift.task_killed
 
 	transporter := func(context.Context) (transport.ServerTransport, error) {
@@ -185,7 +185,7 @@ func (s *rocketServer) ServeContext(ctx context.Context) error {
 	return r.Serve(ctx)
 }
 
-func (s *rocketServer) acceptor(_ context.Context, setup payload.SetupPayload, sendingSocket rsocket.CloseableRSocket) (rsocket.RSocket, error) {
+func (s *server) acceptor(_ context.Context, setup payload.SetupPayload, sendingSocket rsocket.CloseableRSocket) (rsocket.RSocket, error) {
 	if err := rocket.CheckRequestSetupMetadata8(setup); err != nil {
 		return nil, err
 	}
@@ -206,14 +206,14 @@ func (s *rocketServer) acceptor(_ context.Context, setup payload.SetupPayload, s
 
 // incrementActiveRequests increments the server-level active request counter and
 // notifies the observer with the current total count across all sockets
-func (s *rocketServer) incrementActiveRequests() {
+func (s *server) incrementActiveRequests() {
 	current := s.totalActiveRequestCount.Add(1)
 	s.observer.ActiveRequests(int(current))
 }
 
 // decrementActiveRequests decrements the server-level active request counter and
 // notifies the observer with the current total count across all sockets
-func (s *rocketServer) decrementActiveRequests() {
+func (s *server) decrementActiveRequests() {
 	current := s.totalActiveRequestCount.Add(-1)
 	s.observer.ActiveRequests(int(current))
 }
@@ -222,7 +222,7 @@ func (s *rocketServer) decrementActiveRequests() {
 // Returns true if the server should reject new requests due to high load
 //
 // TODO: align with C++ implementation
-func (s *rocketServer) isOverloaded() bool {
+func (s *server) isOverloaded() bool {
 	// If maxRequests is 0 (default), overload protection is disabled
 	if s.maxRequests == 0 {
 		return false
@@ -265,14 +265,14 @@ func getQueueTimeout(metadata *rpcmetadata.RequestRpcMetadata) time.Duration {
 // should ensure your load numbers are comparable and account for this
 // (i.e. divide by NumCPU)
 // NOTE: loadFn is called on every single response.  it should be fast.
-func (s *rocketServer) defaultLoadFn() uint32 {
+func (s *server) defaultLoadFn() uint32 {
 	working := s.totalActiveRequestCount.Load()
 	denominator := float64(runtime.NumCPU())
 	return uint32(1000. * float64(working) / denominator)
 }
 
 type rocketServerSocket struct {
-	*rocketServer
+	*server
 
 	// InteractionID to interaction processor map
 	interactions      map[int64]Processor
@@ -280,10 +280,10 @@ type rocketServerSocket struct {
 }
 
 func newRocketServerSocket(
-	server *rocketServer,
+	server *server,
 ) *rocketServerSocket {
 	return &rocketServerSocket{
-		rocketServer: server,
+		server: server,
 		interactions: make(map[int64]Processor),
 	}
 }
@@ -460,7 +460,7 @@ func (s *rocketServerSocket) fireAndForget(msg payload.Payload) {
 		// Notify observer that connection was dropped and task killed due to malformed rocket payload
 		s.observer.ConnDropped()
 		s.observer.TaskKilled()
-		s.log("rocketServer fireAndForget decode request payload error: %v", err)
+		s.log("server fireAndForget decode request payload error: %v", err)
 		return
 	}
 	rpcFuncName := metadata.GetName()
@@ -469,7 +469,7 @@ func (s *rocketServerSocket) fireAndForget(msg payload.Payload) {
 		// Notify observer that connection was dropped and task killed due to protocol buffer creation error
 		s.observer.ConnDropped()
 		s.observer.TaskKilled()
-		s.log("rocketServer fireAndForget error creating protocol: %v", err)
+		s.log("server fireAndForget error creating protocol: %v", err)
 		return
 	}
 
@@ -481,7 +481,7 @@ func (s *rocketServerSocket) fireAndForget(msg payload.Payload) {
 		// Track connection drops and server overload events when rejecting requests
 		s.observer.ConnDropped()
 		s.observer.ServerOverloaded()
-		s.log("rocketServer fireAndForget: dropping request due to server overload")
+		s.log("server fireAndForget: dropping request due to server overload")
 		return
 	}
 
@@ -497,14 +497,14 @@ func (s *rocketServerSocket) fireAndForget(msg payload.Payload) {
 	queueTimeout := getQueueTimeout(metadata)
 	if processDelay > queueTimeout {
 		s.observer.TaskTimeout()
-		s.log("rocketServer fireAndForget: dropping request due to queue timeout")
+		s.log("server fireAndForget: dropping request due to queue timeout")
 		return
 	}
 
 	if _, err := s.processWithPanicTracking(context.Background(), s.proc, protocol); err != nil {
 		// Notify observer that connection was dropped due to unparseable message begin
 		s.observer.ConnDropped()
-		s.log("rocketServer fireAndForget process error: %v", err)
+		s.log("server fireAndForget process error: %v", err)
 		return
 	}
 
@@ -562,12 +562,12 @@ func (s *rocketServerSocket) requestStream(msg payload.Payload) flux.Flux {
 			onFirstResponse := func(respStruct WritableStruct) {
 				protocol, err := newProtocolBuffer(protoID, nil)
 				if err != nil {
-					s.log("rocketServer requestStream newProtocolBuffer error: %v", err)
+					s.log("server requestStream newProtocolBuffer error: %v", err)
 					return
 				}
 				err = sendWritableStruct(protocol, rpcFuncName, types.REPLY, 0, respStruct)
 				if err != nil {
-					s.log("rocketServer requestStream sendWritableStruct error: %v", err)
+					s.log("server requestStream sendWritableStruct error: %v", err)
 					return
 				}
 				loadMetricPtr := (*int64)(nil)
@@ -596,7 +596,7 @@ func (s *rocketServerSocket) requestStream(msg payload.Payload) flux.Flux {
 					)
 				}
 				if err != nil {
-					s.log("rocketServer requestStream EncodeResponsePayload error: %v", err)
+					s.log("server requestStream EncodeResponsePayload error: %v", err)
 					return
 				}
 				sink.Next(payload)
@@ -604,12 +604,12 @@ func (s *rocketServerSocket) requestStream(msg payload.Payload) flux.Flux {
 			onStreamNext := func(streamStruct WritableStruct) {
 				protocol, err := newProtocolBuffer(protoID, nil)
 				if err != nil {
-					s.log("rocketServer requestStream newProtocolBuffer error: %v", err)
+					s.log("server requestStream newProtocolBuffer error: %v", err)
 					return
 				}
 				err = sendWritableStruct(protocol, rpcFuncName, types.REPLY, 0, streamStruct)
 				if err != nil {
-					s.log("rocketServer requestStream sendWritableStruct error: %v", err)
+					s.log("server requestStream sendWritableStruct error: %v", err)
 					return
 				}
 
@@ -644,7 +644,7 @@ func (s *rocketServerSocket) requestStream(msg payload.Payload) flux.Flux {
 
 				payload, err := rocket.EncodePayloadMetadataAndData(metadata, dataBytes, responseCompressionAlgo)
 				if err != nil {
-					s.log("rocketServer requestStream EncodeStreamPayload error: %v", err)
+					s.log("server requestStream EncodeStreamPayload error: %v", err)
 					return
 				}
 				sink.Next(payload)
@@ -803,7 +803,7 @@ func (s *rocketServerSocket) requestChannelSink(
 		onFirstResponse := func(respStruct WritableStruct) {
 			respPayload, err := makePayload(respStruct, true)
 			if err != nil {
-				s.log("rocketServer requestChannel makePayload error: %v", err)
+				s.log("server requestChannel makePayload error: %v", err)
 				return
 			}
 			sink.Next(respPayload)
@@ -813,7 +813,7 @@ func (s *rocketServerSocket) requestChannelSink(
 		onFinalResponse := func(respStruct WritableStruct) {
 			finalPayload, err := makePayload(respStruct, false)
 			if err != nil {
-				s.log("rocketServer requestChannel makePayload error: %v", err)
+				s.log("server requestChannel makePayload error: %v", err)
 				return
 			}
 			sink.Next(rsocket.NewFinalPayload(finalPayload))
@@ -844,7 +844,7 @@ func (s *rocketServerSocket) requestChannelSink(
 				// All items from requests flux are sink elements
 				sinkPayloadMetadata := rpcmetadata.NewStreamPayloadMetadata()
 				if err := rocket.DecodePayloadMetadata(msg, sinkPayloadMetadata); err != nil {
-					s.log("rocketServer requestChannel decode sink element metadata error: %v", err)
+					s.log("server requestChannel decode sink element metadata error: %v", err)
 					return nil
 				}
 
@@ -870,19 +870,19 @@ func (s *rocketServerSocket) requestChannelSink(
 				}
 				dataBytes, err := rocket.MaybeDecompress(msg.Data(), compression)
 				if err != nil {
-					s.log("rocketServer requestChannel decompress sink element error: %v", err)
+					s.log("server requestChannel decompress sink element error: %v", err)
 					return nil
 				}
 
 				elemProtocol, err := newProtocolBuffer(protoID, dataBytes)
 				if err != nil {
-					s.log("rocketServer requestChannel newProtocolBuffer error: %v", err)
+					s.log("server requestChannel newProtocolBuffer error: %v", err)
 					return nil
 				}
 
 				sinkElemStruct := pfuncSink.NewSinkElem()
 				if err := sinkElemStruct.Read(elemProtocol); err != nil {
-					s.log("rocketServer requestChannel read sink element error: %v", err)
+					s.log("server requestChannel read sink element error: %v", err)
 					return nil
 				} else if sinkEx := sinkElemStruct.Exception(); sinkEx != nil {
 					sinkErrChan <- sinkEx
@@ -998,7 +998,7 @@ func (s *rocketServerSocket) requestChannelBiDi(
 		onFirstResponse := func(respStruct WritableStruct) {
 			respPayload, err := makePayload(respStruct, true)
 			if err != nil {
-				s.log("rocketServer requestChannel makePayload error: %v", err)
+				s.log("server requestChannel makePayload error: %v", err)
 				return
 			}
 			sink.Next(respPayload)
@@ -1008,7 +1008,7 @@ func (s *rocketServerSocket) requestChannelBiDi(
 		onStreamNext := func(respStruct WritableStruct) {
 			streamPayload, err := makePayload(respStruct, false)
 			if err != nil {
-				s.log("rocketServer requestChannel makePayload error: %v", err)
+				s.log("server requestChannel makePayload error: %v", err)
 				return
 			}
 			sink.Next(streamPayload)
@@ -1028,7 +1028,7 @@ func (s *rocketServerSocket) requestChannelBiDi(
 
 				sinkPayloadMetadata := rpcmetadata.NewStreamPayloadMetadata()
 				if err := rocket.DecodePayloadMetadata(msg, sinkPayloadMetadata); err != nil {
-					s.log("rocketServer requestChannel decode sink element metadata error: %v", err)
+					s.log("server requestChannel decode sink element metadata error: %v", err)
 					return nil
 				}
 
@@ -1054,19 +1054,19 @@ func (s *rocketServerSocket) requestChannelBiDi(
 				}
 				dataBytes, err := rocket.MaybeDecompress(msg.Data(), compression)
 				if err != nil {
-					s.log("rocketServer requestChannel decompress sink element error: %v", err)
+					s.log("server requestChannel decompress sink element error: %v", err)
 					return nil
 				}
 
 				elemProtocol, err := newProtocolBuffer(protoID, dataBytes)
 				if err != nil {
-					s.log("rocketServer requestChannel newProtocolBuffer error: %v", err)
+					s.log("server requestChannel newProtocolBuffer error: %v", err)
 					return nil
 				}
 
 				sinkElemStruct := pfuncBiDi.NewSinkElem()
 				if err := sinkElemStruct.Read(elemProtocol); err != nil {
-					s.log("rocketServer requestChannel read sink element error: %v", err)
+					s.log("server requestChannel read sink element error: %v", err)
 					return nil
 				} else if sinkEx := sinkElemStruct.Exception(); sinkEx != nil {
 					sinkErrChan <- sinkEx

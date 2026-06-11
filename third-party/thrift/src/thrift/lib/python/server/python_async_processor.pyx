@@ -493,6 +493,76 @@ cdef api object callInteractionFactory(object factory):
     it via ``folly::python::handlePythonError``."""
     return factory()
 
+# Strong references to in-flight ``termination_coro`` tasks. asyncio keeps only
+# a *weak* reference to a task, so without this a task could be garbage-collected
+# mid-``onInteractionTermination`` -- silently dropping the hook on the
+# fire-and-forget path, or breaking its promise (so teardown proceeds before the
+# hook finishes) on the awaited path. Each task removes itself via a done-callback
+# once it settles, so this set stays bounded; on graceful loop shutdown pending
+# tasks are cancelled, which ``termination_coro``'s ``finally`` turns into a
+# completed promise -- no leak.
+_inflight_termination_tasks = set()
+
+async def termination_coro(object handler, Promise_cFollyUnit promise):
+    """Run an interaction handler's async ``onInteractionTermination`` hook.
+
+    Exceptions are logged and swallowed: there is no client to report to and
+    termination carries no response. ``promise`` (when present) is always
+    completed in ``finally`` so the C++ ``co_onTermination`` coroutine awaiting
+    it resumes regardless of outcome. ``promise`` is ``None`` for the
+    fire-and-forget connection-close path, where nothing awaits completion.
+
+    Note ``except Exception`` deliberately does not catch ``CancelledError`` (a
+    ``BaseException``): if this task is cancelled (e.g. during loop shutdown) the
+    cancellation propagates -- interrupting the hook -- but the ``finally`` still
+    completes the promise first, so the awaiter never hangs on cancellation."""
+    try:
+        await handler.onInteractionTermination()
+    except Exception:
+        print("Unexpected error in interaction onInteractionTermination:", file=sys.stderr)
+        traceback.print_exc()
+    finally:
+        if promise is not None:
+            promise.complete(c_unit)
+
+cdef _schedule_termination(object handler, Promise_cFollyUnit promise):
+    """Schedule ``termination_coro`` on the asyncio loop. ``promise`` is a
+    ``Promise_cFollyUnit`` for the awaited explicit-terminate path and ``None``
+    for the fire-and-forget connection-close path. If the loop is already gone
+    (e.g. interpreter/loop shutting down) the task can't be scheduled: complete
+    the promise (when present) so an awaiting ``co_onTermination`` resumes
+    instead of hanging, otherwise drop best-effort. The scheduled task is held
+    in ``_inflight_termination_tasks`` until it settles so it is not
+    garbage-collected mid-flight. Must be called on the loop thread (GIL
+    held)."""
+    cdef object task
+    try:
+        task = asyncio.get_event_loop().create_task(termination_coro(handler, promise))
+    except Exception:
+        # Couldn't schedule (typically the loop is already gone during
+        # shutdown). Log for visibility, then complete the promise (when
+        # present) so an awaiting co_onTermination resumes instead of hanging;
+        # otherwise drop best-effort.
+        print("Could not schedule interaction onInteractionTermination:", file=sys.stderr)
+        traceback.print_exc()
+        if promise is not None:
+            promise.complete(c_unit)
+        return
+    _inflight_termination_tasks.add(task)
+    task.add_done_callback(_inflight_termination_tasks.discard)
+
+cdef api void handleInteractionTermination(object handler, cFollyPromise[cFollyUnit] cPromise):
+    """Schedule ``handler.onInteractionTermination()`` on the asyncio loop and fulfill the
+    promise when it finishes. Called from ``PythonTile::co_onTermination`` (on
+    the Python executor / loop thread) on an explicit client terminate."""
+    _schedule_termination(handler, Promise_cFollyUnit.create(cmove(cPromise)))
+
+cdef api void scheduleInteractionTermination(object handler):
+    """Fire-and-forget ``onInteractionTermination`` used by ``PythonTile``'s destructor when
+    the connection closed before an explicit terminate (nothing awaits it). Must
+    be called on the loop thread (GIL held)."""
+    _schedule_termination(handler, None)
+
 cdef class PythonAsyncProcessorFactory(AsyncProcessorFactory):
     @staticmethod
     cdef PythonAsyncProcessorFactory create(cServiceInterface server):

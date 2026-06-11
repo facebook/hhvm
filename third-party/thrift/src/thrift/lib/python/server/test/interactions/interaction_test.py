@@ -270,3 +270,77 @@ class CalculatorInteractionTest(unittest.IsolatedAsyncioTestCase):
             async with await self._client(addr) as calc:
                 async with calc.createCounter() as c:
                     self.assertEqual(await c.get(), 0)
+
+    # -- async termination hook --
+
+    async def test_termination_hook_fires_once_on_terminate(self) -> None:
+        # Exiting the interaction's `async with` sends the terminate signal; the
+        # server-side `onInteractionTermination` hook must run exactly once -- and
+        # must not fire again when the connection later closes and the tile is
+        # destroyed. The recorder awaits a real suspension point, so reaching the
+        # count also proves the hook is driven to completion (not dropped after
+        # the first await).
+        handler = CalculatorHandler()
+        async with _InProcessServer(handler) as addr:
+            async with await self._client(addr) as calc:
+                async with calc.createCounter() as c:
+                    await c.add(1)
+                # interaction terminated here; wait (no fixed sleep) for the hook
+                await handler.wait_for_counter_terminations(1)
+                self.assertEqual(handler.counter_terminations, 1)
+            # The connection is now closed and the tile destroyed. A buggy
+            # destroy-path double-fire would bump the count; `wait_for` must
+            # never observe a second termination.
+            with self.assertRaises(asyncio.TimeoutError):
+                await handler.wait_for_counter_terminations(2, timeout=0.5)
+            self.assertEqual(handler.counter_terminations, 1)
+
+    async def test_termination_hook_fires_per_interaction(self) -> None:
+        # Each per-session interaction handler gets its own termination hook.
+        handler = CalculatorHandler()
+        async with _InProcessServer(handler) as addr:
+            async with await self._client(addr) as calc:
+                async with calc.createCounter() as a:
+                    await a.add(1)
+                async with calc.createCounter() as b:
+                    await b.add(2)
+                # Wait (no fixed sleep) until both hooks have fired.
+                await handler.wait_for_counter_terminations(2)
+                self.assertEqual(handler.counter_terminations, 2)
+
+    async def test_termination_hook_exception_is_swallowed(self) -> None:
+        # A hook that raises must be logged-and-swallowed: the interaction still
+        # tears down cleanly (no client-visible error, no hang on the awaited
+        # terminate path) and a *subsequent* interaction's hook still fires -- one
+        # raising hook must not wedge the loop or teardown. A traceback from the
+        # swallowed error is expected on stderr.
+        handler = CalculatorHandler(raise_in_hook=True)
+        async with _InProcessServer(handler) as addr:
+            async with await self._client(addr) as calc:
+                async with calc.createCounter() as a:
+                    await a.add(1)
+                async with calc.createCounter() as b:
+                    await b.add(2)
+                # Both hooks raised after recording; both are still observed and
+                # the second interaction tore down despite the first one raising.
+                await handler.wait_for_counter_terminations(2)
+                self.assertEqual(handler.counter_terminations, 2)
+
+    async def test_termination_hook_cancellation_does_not_wedge_loop(self) -> None:
+        # If the termination coroutine is cancelled mid-hook, CancelledError (a
+        # BaseException) bypasses `termination_coro`'s `except Exception`, but its
+        # `finally` must still complete the C++ promise so `co_onTermination`
+        # cannot hang -- and the event loop must stay healthy for later
+        # interactions. Each hook here records, then cancels its own task.
+        handler = CalculatorHandler(cancel_in_hook=True)
+        async with _InProcessServer(handler) as addr:
+            async with await self._client(addr) as calc:
+                async with calc.createCounter() as a:
+                    await a.add(1)
+                await handler.wait_for_counter_terminations(1)
+                # A subsequent interaction still terminates normally: the
+                # cancelled task neither wedged the loop nor broke teardown.
+                async with calc.createCounter() as b:
+                    await b.add(2)
+                await handler.wait_for_counter_terminations(2)
+                self.assertEqual(handler.counter_terminations, 2)

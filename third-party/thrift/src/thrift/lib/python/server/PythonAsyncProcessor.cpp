@@ -115,11 +115,52 @@ PythonTile::~PythonTile() {
     return;
   }
   // The tile is destroyed on a C++ teardown thread that neither holds the GIL
-  // nor can safely acquire it (the interpreter may be finalizing). Drop the
-  // handler ref on the Python executor instead -- it runs on the asyncio loop
+  // nor can safely acquire it (the interpreter may be finalizing). Hand the
+  // handler ref to the Python executor instead -- it runs on the asyncio loop
   // thread with the GIL held, and the KeepAlive keeps it alive for this task.
-  executor_->add([handler = handler_] { Py_DECREF(handler); });
+  //
+  // If the interaction is being torn down without an explicit client terminate
+  // (e.g. the connection dropped first), `co_onTermination` never ran, so fire
+  // the `onInteractionTermination` hook now -- best-effort: the scheduled coro
+  // takes its own ref and drops it (and the tile's ref) when it finishes. If
+  // the loop is already gone (interpreter finalizing), the task is dropped
+  // along with the ref, same as the plain-decref path.
+  //
+  // Decide here (synchronously with teardown) whether this is the path that
+  // fires the hook, then hand `handler_` to the loop thread for the optional
+  // hook plus the mandatory decref in a single task.
+  const bool fireHook = !hookFired_.exchange(true);
+  executor_->add([handler = handler_, fireHook] {
+    // loop thread, GIL held
+    if (fireHook) {
+      scheduleInteractionTermination(handler);
+    }
+    Py_DECREF(handler);
+  });
 }
+
+#if FOLLY_HAS_COROUTINES
+folly::coro::Task<void> PythonTile::co_onTermination() {
+  // Explicit client terminate. Claim the hook so the destructor's
+  // connection-close path won't run it again. The framework holds a TilePtr
+  // ref across this coroutine, so `handler_` stays alive until we return.
+  hookFired_.store(true);
+  auto [promise, future] = folly::makePromiseContract<folly::Unit>();
+  // Schedule the Python `onInteractionTermination` coro on the asyncio loop
+  // (GIL held there) and resume once it completes, so the hook finishes before
+  // teardown.
+  executor_->add([handler = handler_, promise = std::move(promise)]() mutable {
+    handleInteractionTermination(handler, std::move(promise));
+  });
+  // Await the Try and ignore it: the bridge completes the promise when the hook
+  // finishes (or on cancellation / a missing loop). If the fulfilling task is
+  // dropped before it can run (e.g. a hard interpreter teardown racing this
+  // terminate), the promise breaks and the future fails -- resume and let
+  // teardown proceed rather than leaking on an unhandled exception. The hook is
+  // best-effort once we are racing shutdown.
+  co_await folly::coro::co_awaitTry(std::move(future));
+}
+#endif
 
 PyObject* FOLLY_NULLABLE
 PythonAsyncProcessor::findInteractionFactory(std::string_view name) {

@@ -52,3 +52,20 @@ class Interaction:
     base with the wire-dispatch wrappers; users subclass that generated
     interface and implement only the business-logic methods.
     """
+
+    async def onInteractionTermination(self) -> None:
+        """Async hook invoked when this interaction ends. Override to release
+        per-session resources (flush buffers, close handles, etc.).
+
+        Fires **at most once** per interaction:
+
+        - On an explicit client terminate (e.g. the client exits the
+          interaction's ``async with`` block), it runs and is awaited before the
+          interaction is torn down.
+        - If the connection drops *before* a terminate is received, it is run
+          best-effort during teardown instead (not awaited; skipped entirely if
+          the event loop is already shutting down).
+
+        Exceptions raised here are logged and swallowed -- termination has no
+        response channel. The default implementation is a no-op.
+        """

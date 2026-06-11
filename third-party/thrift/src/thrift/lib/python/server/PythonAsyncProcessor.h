@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <atomic>
 #include <map>
 #include <memory>
 #include <string>
@@ -25,6 +26,7 @@
 #include <folly/CppAttributes.h>
 #include <folly/ExceptionWrapper.h>
 #include <folly/Try.h>
+#include <folly/coro/Task.h>
 #include <thrift/lib/cpp/protocol/TProtocolTypes.h>
 #include <thrift/lib/cpp2/async/AsyncProcessor.h>
 #include <thrift/lib/cpp2/async/Interaction.h>
@@ -100,11 +102,27 @@ class PythonTile : public apache::thrift::Tile {
 
   PyObject* handler() const { return handler_; }
 
+#if FOLLY_HAS_COROUTINES
+  // Framework hook: invoked when the client terminates this interaction. Runs
+  // the handler's async `onInteractionTermination()` on the Python executor and
+  // awaits it,
+  // so the hook completes before the tile is torn down. Marks `hookFired_` so
+  // the connection-close path in the destructor does not run it a second time.
+  folly::coro::Task<void> co_onTermination() override;
+#endif
+
  private:
   PyObject* handler_; // owned reference (Py_INCREF in ctor / DECREF in dtor)
-  // Python (asyncio-loop) executor used to drop `handler_` on the loop thread
-  // at destruction; the KeepAlive guarantees it outlives that scheduled decref.
+  // Python (asyncio-loop) executor used to run the termination hook and drop
+  // `handler_` on the loop thread at destruction; the KeepAlive guarantees it
+  // outlives those scheduled tasks.
   folly::Executor::KeepAlive<> executor_;
+  // Set once the `onInteractionTermination` hook has been (scheduled to be) run
+  // -- by `co_onTermination` on an explicit client terminate, else by the
+  // destructor on connection close. Guarantees the hook fires at most once. The
+  // framework keeps the tile alive until `co_onTermination` completes, so the
+  // destructor always observes a settled value (no concurrent read/write).
+  std::atomic<bool> hookFired_{false};
 };
 
 using FunctionMapType = std::map<std::string_view, HandlerFunc>;

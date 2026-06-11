@@ -22,6 +22,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.facebook.swift.service.ThriftServerConfig;
+import com.facebook.thrift.client.v2.manager.ClientOwnership;
+import com.facebook.thrift.client.v2.manager.RpcClientBinding;
 import com.facebook.thrift.client.v2.manager.RpcClientManager;
 import com.facebook.thrift.client.v2.manager.RpcClientManagerFactory;
 import com.facebook.thrift.client.v2.transport.RpcClientFactoryV2;
@@ -332,7 +334,7 @@ public class ClientRuntimeThriftClientTest {
   private static PingService.Reactive createBorrowedReactiveClient(RpcClientManager manager) {
     return PingService.Reactive.clientBuilder()
         .setProtocolId(ProtocolId.BINARY)
-        .build(ClientRuntimeSelector.createBorrowedSource(manager));
+        .build(new RpcClientBinding(manager, ClientOwnership.BORROWED));
   }
 
   private static RpcClientFactory createFactory() {

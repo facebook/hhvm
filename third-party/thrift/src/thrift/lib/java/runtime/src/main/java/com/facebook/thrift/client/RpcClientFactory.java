@@ -18,6 +18,9 @@ package com.facebook.thrift.client;
 
 import com.facebook.swift.service.ThriftClientEventHandler;
 import com.facebook.swift.service.ThriftClientStats;
+import com.facebook.thrift.client.v2.manager.ClientOwnership;
+import com.facebook.thrift.client.v2.manager.RpcClientBinding;
+import com.facebook.thrift.client.v2.manager.SingleRpcClientManager;
 import com.facebook.thrift.client.v2.transport.RpcClientFactoryV2;
 import com.facebook.thrift.util.resources.RpcResources;
 import com.google.common.base.Preconditions;
@@ -33,6 +36,15 @@ public interface RpcClientFactory {
 
   default RpcClientSource createRpcClientSource(SocketAddress socketAddress) {
     return new LegacyRpcClientSource(createRpcClient(socketAddress));
+  }
+
+  /**
+   * Returns an OWNED {@link RpcClientBinding} backed by a {@link SingleRpcClientManager} wrapping
+   * this transport factory. Closing the typed client disposes the underlying connection.
+   */
+  default RpcClientBinding createRpcClientBinding(SocketAddress socketAddress) {
+    return new RpcClientBinding(
+        new SingleRpcClientManager(this, socketAddress), ClientOwnership.OWNED);
   }
 
   /**

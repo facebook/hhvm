@@ -20,7 +20,6 @@ import com.facebook.swift.service.ThriftClientEventHandler;
 import com.facebook.swift.service.ThriftClientStats;
 import com.facebook.thrift.client.CachedRpcClientFactory;
 import com.facebook.thrift.client.ClientBuilder;
-import com.facebook.thrift.client.ClientRuntimeSelector;
 import com.facebook.thrift.client.EventHandlerRpcClientFactory;
 import com.facebook.thrift.client.InstrumentedRpcClientFactory;
 import com.facebook.thrift.client.ReconnectingRpcClientFactory;
@@ -32,7 +31,9 @@ import com.facebook.thrift.client.ThriftClientConfig;
 import com.facebook.thrift.client.ThriftClientStatsHolder;
 import com.facebook.thrift.client.TimeoutRpcClientFactory;
 import com.facebook.thrift.client.TokenPassingRpcClientFactory;
+import com.facebook.thrift.client.v2.manager.ClientOwnership;
 import com.facebook.thrift.client.v2.manager.ReconnectingRpcClientManagerFactory;
+import com.facebook.thrift.client.v2.manager.RpcClientBinding;
 import com.facebook.thrift.client.v2.manager.RpcClientManagerFactory;
 import com.facebook.thrift.client.v2.manager.SimpleLoadBalancingRpcClientManagerFactory;
 import com.facebook.thrift.client.v2.manager.SingleRpcClientManagerFactory;
@@ -76,13 +77,21 @@ public final class RpcClientFactoryV2 implements RpcClientFactory {
 
   /**
    * V2 entrypoint. Creates a manager-backed {@link RpcClientSource} with OWNED semantics. This is
-   * the path that {@link ClientBuilder#build(RpcClientFactory, SocketAddress)} uses when the
-   * runtime is set to V2.
+   * the path that {@link ClientBuilder#build(RpcClientFactory, SocketAddress)} uses.
    */
   @Override
   public RpcClientSource createRpcClientSource(SocketAddress socketAddress) {
-    return ClientRuntimeSelector.createOwnedSource(
-        managerFactory.createRpcClientManager(socketAddress));
+    return createRpcClientBinding(socketAddress);
+  }
+
+  /**
+   * Returns an OWNED {@link RpcClientBinding} backed by the manager factory's per-address manager.
+   * Closing the typed client disposes the manager and its underlying transports.
+   */
+  @Override
+  public RpcClientBinding createRpcClientBinding(SocketAddress socketAddress) {
+    return new RpcClientBinding(
+        managerFactory.createRpcClientManager(socketAddress), ClientOwnership.OWNED);
   }
 
   /**

@@ -113,6 +113,8 @@ void H3DatagramAsyncSocket::detachTransaction() noexcept {
 
 void H3DatagramAsyncSocket::onHeadersComplete(
     std::unique_ptr<proxygen::HTTPMessage> msg) noexcept {
+  LOG(INFO) << "CONNECT-UDP response: " << msg->getStatusCode() << " "
+            << msg->getStatusMessage();
   if (msg->getStatusCode() != 200) {
     closeWithError(
         {AsyncSocketException::INTERNAL_ERROR,

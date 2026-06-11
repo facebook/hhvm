@@ -514,44 +514,16 @@ func (s *rocketServerSocket) fireAndForget(msg payload.Payload) {
 }
 
 func (s *rocketServerSocket) requestStream(msg payload.Payload) flux.Flux {
-	// TODO: this clone helps prevent a race-condition where the payload gets
-	// released by the underlying rsocket layer before we are done with it.
-	msg = payload.Clone(msg)
-
-	metadata := rpcmetadata.NewRequestRpcMetadata()
-	err := rocket.DecodePayloadMetadata(msg, metadata)
+	metadata, pfunc, argStruct, err := s.preprocessRequest(msg)
 	if err != nil {
-		s.observer.ConnDropped()
-		s.observer.TaskKilled()
 		return flux.Error(err)
 	}
+
 	rpcFuncName := metadata.GetName()
-	protocol, err := newProtocolBufferFromRequest(msg.Data(), metadata, s.observer)
-	if err != nil {
-		s.observer.ConnDropped()
-		s.observer.TaskKilled()
-		return flux.Error(err)
-	}
-
-	s.observer.ReceivedRequest()
-	s.observer.ReceivedRequestForFunction(rpcFuncName)
-
-	pfunc, exists := s.proc.ProcessorFunctionMap()[rpcFuncName]
-	if !exists {
-		return flux.Error(fmt.Errorf("no such function: %q", rpcFuncName))
-	}
 
 	pfuncStream, ok := pfunc.(processorFunctionStream)
 	if !ok {
 		return flux.Error(fmt.Errorf("not a streaming function: %q", rpcFuncName))
-	}
-
-	argStruct := pfunc.NewReqArgs()
-	if err := argStruct.Read(protocol); err != nil {
-		return flux.Error(err)
-	}
-	if err := protocol.ReadMessageEnd(); err != nil {
-		return flux.Error(err)
 	}
 
 	return flux.Create(
@@ -658,44 +630,12 @@ func (s *rocketServerSocket) requestStream(msg payload.Payload) flux.Flux {
 }
 
 func (s *rocketServerSocket) requestChannel(request payload.Payload, requests flux.Flux) flux.Flux {
-	// TODO: this clone helps prevent a race-condition where the payload gets
-	// released by the underlying rsocket layer before we are done with it.
-	request = payload.Clone(request)
-
-	// Decode initial request metadata
-	metadata := rpcmetadata.NewRequestRpcMetadata()
-	if err := rocket.DecodePayloadMetadata(request, metadata); err != nil {
-		s.observer.ConnDropped()
-		s.observer.TaskKilled()
+	metadata, pfunc, argStruct, err := s.preprocessRequest(request)
+	if err != nil {
 		return flux.Error(err)
 	}
 
 	rpcFuncName := metadata.GetName()
-
-	protocol, err := newProtocolBufferFromRequest(request.Data(), metadata, s.observer)
-	if err != nil {
-		s.observer.ConnDropped()
-		s.observer.TaskKilled()
-		return flux.Error(err)
-	}
-
-	s.observer.ReceivedRequest()
-	s.observer.ReceivedRequestForFunction(rpcFuncName)
-
-	pfunc, exists := s.proc.ProcessorFunctionMap()[rpcFuncName]
-	if !exists {
-		return flux.Error(fmt.Errorf("no such function: %q", rpcFuncName))
-	}
-
-
-	argStruct := pfunc.NewReqArgs()
-	if err := argStruct.Read(protocol); err != nil {
-		return flux.Error(err)
-	}
-	if err := protocol.ReadMessageEnd(); err != nil {
-		return flux.Error(err)
-	}
-
 	if pfuncSink, ok := pfunc.(processorFunctionSink); ok {
 		return s.requestChannelSink(metadata, argStruct, pfuncSink, requests)
 	}
@@ -1116,4 +1056,64 @@ func newProtocolBufferFromRequest(payloadDataBytes []byte, metadata *rpcmetadata
 	observer.TimeReadUsForFunction(rpcFuncName, readDuration)
 
 	return protocol, nil
+}
+
+// preprocessRequest performs the shared per-request setup for the streaming RPC
+// paths: it clones and decodes the rocket payload, builds the request protocol
+// buffer, applies overload protection, resolves the processor function, and
+// reads the request argument struct. Callers type-assert the returned
+// ProcessorFunction to the concrete interaction kind they support (stream /
+// sink / bidi) and wrap any returned error in the transport-appropriate form
+// (e.g. flux.Error).
+func (s *rocketServerSocket) preprocessRequest(msg payload.Payload) (
+	*rpcmetadata.RequestRpcMetadata,
+	ProcessorFunction,
+	ReadableStruct,
+	error,
+) {
+	// TODO: this clone helps prevent a race-condition where the payload gets
+	// released by the underlying rsocket layer before we are done with it.
+	msg = payload.Clone(msg)
+
+	metadata := rpcmetadata.NewRequestRpcMetadata()
+	err := rocket.DecodePayloadMetadata(msg, metadata)
+	if err != nil {
+		s.observer.ConnDropped()
+		s.observer.TaskKilled()
+		return nil, nil, nil, err
+	}
+
+	rpcFuncName := metadata.GetName()
+	protocol, err := newProtocolBufferFromRequest(msg.Data(), metadata, s.observer)
+	if err != nil {
+		s.observer.ConnDropped()
+		s.observer.TaskKilled()
+		return nil, nil, nil, err
+	}
+
+	s.observer.ReceivedRequest()
+	s.observer.ReceivedRequestForFunction(rpcFuncName)
+
+	if s.isOverloaded() {
+		s.observer.ConnDropped()
+		s.observer.ServerOverloaded()
+		return nil, nil, nil, loadSheddingError
+	}
+
+	pfunc, exists := s.proc.ProcessorFunctionMap()[rpcFuncName]
+	if !exists {
+		return nil, nil, nil, fmt.Errorf("no such function: %q", rpcFuncName)
+	}
+
+	argStruct := pfunc.NewReqArgs()
+	err = argStruct.Read(protocol)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	err = protocol.ReadMessageEnd()
+	if err != nil {
+		return nil, nil, nil, err
+	}
+
+	return metadata, pfunc, argStruct, nil
 }

@@ -18,10 +18,6 @@ public class ExtendedServiceReactiveBlockingWrapper  extends com.facebook.thrift
         this._delegate = _delegate;
     }
 
-    public ExtendedServiceReactiveBlockingWrapper(org.apache.thrift.ProtocolId _protocolId, reactor.core.publisher.Mono<? extends com.facebook.thrift.client.RpcClient> _rpcClient, Map<String, String> _headers, Map<String, String> _persistentHeaders) {
-        this(new ExtendedServiceReactiveClient(_protocolId, _rpcClient, _headers, _persistentHeaders));
-    }
-
     @java.lang.Override
     public void close() {
         _delegate.dispose();

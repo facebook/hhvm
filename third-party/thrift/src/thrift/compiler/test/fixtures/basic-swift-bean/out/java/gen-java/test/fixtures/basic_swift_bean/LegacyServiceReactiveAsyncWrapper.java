@@ -18,10 +18,6 @@ public class LegacyServiceReactiveAsyncWrapper
       this._delegate = _delegate;
   }
 
-  public LegacyServiceReactiveAsyncWrapper(org.apache.thrift.ProtocolId _protocolId, reactor.core.publisher.Mono<? extends com.facebook.thrift.client.RpcClient> _rpcClient, Map<String, String> _headers, Map<String, String> _persistentHeaders) {
-      this(new LegacyServiceReactiveClient(_protocolId, _rpcClient, _headers, _persistentHeaders));
-  }
-
   @java.lang.Override
   public void close() {
       _delegate.dispose();

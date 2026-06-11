@@ -16,7 +16,6 @@ import org.apache.thrift.protocol.*;
 import org.apache.thrift.ClientPushMetadata;
 import org.apache.thrift.InteractionCreate;
 import org.apache.thrift.InteractionTerminate;
-import com.facebook.thrift.client.ClientRuntimeSelector;
 import com.facebook.thrift.client.ResponseWrapper;
 import com.facebook.thrift.client.RpcClientSource;
 import com.facebook.thrift.client.RpcOptions;
@@ -51,12 +50,6 @@ public class MyServiceReactiveClient
     _ping_EXCEPTION_READERS.put((short)1, _ping_EXCEPTION_READER0);
   }
 
-  // Cutover shim: generated clients stay agnostic to whether acquisition comes from the
-  // legacy Mono<RpcClient> path or the v2 manager-backed path.
-  private static RpcClientSource _clientSourceFromMono(reactor.core.publisher.Mono<? extends com.facebook.thrift.client.RpcClient> _rpcClient) {
-    return ClientRuntimeSelector.createSource(_rpcClient);
-  }
-
   public MyServiceReactiveClient(org.apache.thrift.ProtocolId _protocolId, RpcClientSource _clientSource) {
     this._protocolId = _protocolId;
     this._clientSource = _clientSource;
@@ -65,32 +58,16 @@ public class MyServiceReactiveClient
     this._activeInteractions = ConcurrentHashMap.newKeySet();
   }
 
-  public MyServiceReactiveClient(org.apache.thrift.ProtocolId _protocolId, reactor.core.publisher.Mono<? extends com.facebook.thrift.client.RpcClient> _rpcClient) {
-    this(_protocolId, _clientSourceFromMono(_rpcClient));
-  }
-
   public MyServiceReactiveClient(org.apache.thrift.ProtocolId _protocolId, RpcClientSource _clientSource, Map<String, String> _headers, Map<String, String> _persistentHeaders) {
     this(_protocolId, _clientSource, reactor.core.publisher.Mono.just(_headers != null ? _headers : java.util.Collections.emptyMap()), reactor.core.publisher.Mono.just(_persistentHeaders != null ? _persistentHeaders : java.util.Collections.emptyMap()), new AtomicLong(), ConcurrentHashMap.newKeySet());
-  }
-
-  public MyServiceReactiveClient(org.apache.thrift.ProtocolId _protocolId, reactor.core.publisher.Mono<? extends com.facebook.thrift.client.RpcClient> _rpcClient, Map<String, String> _headers, Map<String, String> _persistentHeaders) {
-    this(_protocolId, _clientSourceFromMono(_rpcClient), _headers, _persistentHeaders);
   }
 
   public MyServiceReactiveClient(org.apache.thrift.ProtocolId _protocolId, RpcClientSource _clientSource, reactor.core.publisher.Mono<Map<String, String>> _headersMono, reactor.core.publisher.Mono<Map<String, String>> _persistentHeadersMono) {
     this(_protocolId, _clientSource, _headersMono, _persistentHeadersMono, new AtomicLong(), ConcurrentHashMap.newKeySet());
   }
 
-  public MyServiceReactiveClient(org.apache.thrift.ProtocolId _protocolId, reactor.core.publisher.Mono<? extends com.facebook.thrift.client.RpcClient> _rpcClient, reactor.core.publisher.Mono<Map<String, String>> _headersMono, reactor.core.publisher.Mono<Map<String, String>> _persistentHeadersMono) {
-    this(_protocolId, _clientSourceFromMono(_rpcClient), _headersMono, _persistentHeadersMono);
-  }
-
   public MyServiceReactiveClient(org.apache.thrift.ProtocolId _protocolId, RpcClientSource _clientSource, Map<String, String> _headers, Map<String, String> _persistentHeaders, AtomicLong interactionCounter, Set<Long> activeInteractions) {
     this(_protocolId,_clientSource, reactor.core.publisher.Mono.just(_headers != null ? _headers : java.util.Collections.emptyMap()), reactor.core.publisher.Mono.just(_persistentHeaders != null ? _persistentHeaders : java.util.Collections.emptyMap()), interactionCounter, activeInteractions);
-  }
-
-  public MyServiceReactiveClient(org.apache.thrift.ProtocolId _protocolId, reactor.core.publisher.Mono<? extends com.facebook.thrift.client.RpcClient> _rpcClient, Map<String, String> _headers, Map<String, String> _persistentHeaders, AtomicLong interactionCounter, Set<Long> activeInteractions) {
-    this(_protocolId, _clientSourceFromMono(_rpcClient), _headers, _persistentHeaders, interactionCounter, activeInteractions);
   }
 
   public MyServiceReactiveClient(org.apache.thrift.ProtocolId _protocolId, RpcClientSource _clientSource, reactor.core.publisher.Mono<Map<String, String>> _headersMono, reactor.core.publisher.Mono<Map<String, String>> _persistentHeadersMono, AtomicLong interactionCounter, Set<Long> activeInteractions) {
@@ -99,10 +76,6 @@ public class MyServiceReactiveClient
     this._headersMono = _headersMono;
     this._persistentHeadersMono = _persistentHeadersMono;
     this._activeInteractions = activeInteractions;
-  }
-
-  public MyServiceReactiveClient(org.apache.thrift.ProtocolId _protocolId, reactor.core.publisher.Mono<? extends com.facebook.thrift.client.RpcClient> _rpcClient, reactor.core.publisher.Mono<Map<String, String>> _headersMono, reactor.core.publisher.Mono<Map<String, String>> _persistentHeadersMono, AtomicLong interactionCounter, Set<Long> activeInteractions) {
-    this(_protocolId, _clientSourceFromMono(_rpcClient), _headersMono, _persistentHeadersMono, interactionCounter, activeInteractions);
   }
 
   @java.lang.Override

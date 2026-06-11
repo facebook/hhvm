@@ -18,10 +18,6 @@ public class MyServicePrioChildReactiveBlockingWrapper  extends test.fixtures.ba
         this._delegate = _delegate;
     }
 
-    public MyServicePrioChildReactiveBlockingWrapper(org.apache.thrift.ProtocolId _protocolId, reactor.core.publisher.Mono<? extends com.facebook.thrift.client.RpcClient> _rpcClient, Map<String, String> _headers, Map<String, String> _persistentHeaders) {
-        this(new MyServicePrioChildReactiveClient(_protocolId, _rpcClient, _headers, _persistentHeaders));
-    }
-
     @java.lang.Override
     public void close() {
         _delegate.dispose();

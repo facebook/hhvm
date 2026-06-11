@@ -1,14 +1,20 @@
-# V2 Client Runtime Architecture
+# Java Thrift Client Runtime Architecture
 
-This document describes the internal architecture of the v2 Java Thrift client
-runtime. For the customer-facing migration guide, see [migration.md](migration.md).
+This document describes the internal architecture of the Java Thrift client
+runtime.
+
+> Historical note: this directory is named `v2/` because the manager-backed
+> runtime was the second iteration. The original `Mono<RpcClient>`-based
+> runtime ("v1") was removed once the manager-backed runtime became the
+> default. There is no longer a "legacy vs v2" choice — this is the runtime.
 
 ## Design Goal
 
 Separate **transport creation** (how connections are established and decorated)
 from **connection lifecycle** (who owns connections, when they are reused, and
-who may dispose them). The legacy runtime conflated both inside
-`Mono<RpcClient>`, making ownership implicit. The v2 runtime makes it explicit.
+who may dispose them). Transport factories are stateless and per-connection;
+managers own and recycle live transports; bindings gate per-typed-client
+ownership.
 
 ## Layer Diagram
 
@@ -24,7 +30,7 @@ who may dispose them). The legacy runtime conflated both inside
                                  │ close() / dispose()
                                  ▼
 ┌──────────────────────────────────────────────────────────────────────┐
-│                   GENERATED WRAPPERS (unchanged)                     │
+│                   GENERATED WRAPPERS                                 │
 │             ReactiveBlockingWrapper / ReactiveAsyncWrapper           │
 │                                                                      │
 │   close() { _delegate.dispose(); }                                   │
@@ -35,43 +41,23 @@ who may dispose them). The legacy runtime conflated both inside
                                  │ dispose()
                                  ▼
 ┌──────────────────────────────────────────────────────────────────────┐
-│                   GENERATED ReactiveClient (simplified)              │
+│                   GENERATED ReactiveClient                           │
 │                   e.g. MyServiceReactiveClient                       │
 │                                                                      │
-│   Field:  RpcClientSource _clientSource                              │
+│   Field:  RpcClientBinding _binding                                  │
 │                                                                      │
-│   dispose()    { _clientSource.dispose(); }                          │
-│   isDisposed() { return _clientSource.isDisposed(); }                │
+│   dispose()    { _binding.dispose(); }                               │
+│   isDisposed() { return _binding.isDisposed(); }                     │
 │                                                                      │
 │   doStuffWrapper(request, rpcOptions) {                              │
-│     return _clientSource.acquire()                                   │
+│     return _binding.acquire()                                        │
 │       .flatMap(rpc -> /* serialize, send, deserialize */);           │
 │   }                                                                  │
 │                                                                      │
 │   Translates typed method calls into protocol-level payloads.        │
-│   Has NO connection tracking, NO wrapper identity sets.              │
-│   Delegates all lifecycle to the source.                             │
+│   Has NO connection tracking. Delegates all lifecycle to binding.    │
 └────────────────────────────────┬─────────────────────────────────────┘
                                  │ acquire() / dispose()
-                                 ▼
-┌──────────────────────────────────────────────────────────────────────┐
-│                     RpcClientSource (neutral seam)                   │
-│                                                                      │
-│   interface RpcClientSource extends Disposable {                     │
-│     Mono<RpcClient> acquire();                                       │
-│   }                                                                  │
-│                                                                      │
-│   Two implementations:                                               │
-│                                                                      │
-│   LegacyRpcClientSource              BindingRpcClientSource          │
-│   ├─ wraps Mono<RpcClient>           ├─ wraps RpcClientBinding       │
-│   ├─ acquire() = mono                ├─ acquire() = binding.acquire()│
-│   └─ dispose() = no-op              └─ dispose() = binding.dispose() │
-│                                                                      │
-│   Selected by ClientRuntimeSelector based on ClientRuntimeMode.      │
-│   Generated code is identical for both—only the source differs.      │
-└────────────────────────────────┬─────────────────────────────────────┘
-                                 │ (v2 path only below)
                                  ▼
 ┌──────────────────────────────────────────────────────────────────────┐
 │                     RpcClientBinding                                 │
@@ -146,19 +132,18 @@ who may dispose them). The legacy runtime conflated both inside
 │   │   lifecycle delegates to inner manager                      │    │
 │   │   used for ExceptionMappingRpcClient in SR                  │    │
 │   └─────────────────────────────────────────────────────────────┘    │
-│                                                                      │
-│   ┌─────────────────────────────────────────────────────────────┐    │
-│   │ MonoBackedRpcClientManager                                  │    │
-│   │   compatibility bridge for existing Mono<RpcClient> sources │    │
-│   │   tracks last-seen RpcClient for disposal                   │    │
-│   │   used by legacy build(Mono) paths in v2 mode               │    │
-│   └─────────────────────────────────────────────────────────────┘    │
 └──────────────────────────────────────────────────────────────────────┘
-                                 │ manager calls transportFactory
+                                 │ manager calls transport factory
                                  ▼
 ┌──────────────────────────────────────────────────────────────────────┐
-│                     TRANSPORT LAYER (RpcClientFactory)               │
-│                     (stateless, per-connection decoration)           │
+│                     TRANSPORT LAYER                                  │
+│                     (RpcClientTransportFactory)                      │
+│                     stateless, per-connection decoration             │
+│                                                                      │
+│   @FunctionalInterface                                               │
+│   interface RpcClientTransportFactory {                              │
+│     Mono<RpcClient> createRpcClient(SocketAddress address);          │
+│   }                                                                  │
 │                                                                      │
 │   RSocketRpcClientFactory / LegacyRpcClientFactory                   │
 │     → InstrumentedRpcClientFactory (.map)                            │
@@ -188,9 +173,21 @@ who may dispose them). The legacy runtime conflated both inside
 └──────────────────────────────────────────────────────────────────────┘
 ```
 
-## Factory Hierarchy
+## Two Factory Interfaces
 
-Factories create managers. Managers own transports.
+The runtime has two distinct factory interfaces at different layers:
+
+| Interface                     | Layer            | Produces             | Caching / lifecycle |
+|------------------------------ |----------------- |--------------------- |---------------------|
+| `RpcClientFactory`            | binding (public) | `RpcClientBinding`   | yes — wraps a manager |
+| `RpcClientTransportFactory`   | transport (raw)  | `Mono<RpcClient>`    | no — stateless        |
+
+`RpcClientFactory` is the public entrypoint that typed-client builders consume.
+`RpcClientTransportFactory` is the lower-level seam that the manager layer
+calls when it needs a fresh connection. The two interfaces never collapse:
+their callers, return types, and lifecycle expectations are different.
+
+## Factory Hierarchy
 
 ```
 RpcClientManagerFactory                         (functional interface)
@@ -208,7 +205,7 @@ RpcClientManagerFactory                         (functional interface)
         one pool per tier, periodic host refresh
 ```
 
-The standard non-SR factory chain built by `RpcClientFactoryV2.Builder`:
+The standard non-SR factory chain built by `RpcClientFactory.Builder`:
 
 ```
 SimpleLoadBalancingRpcClientManagerFactory (if poolSize > 1)
@@ -238,11 +235,14 @@ client.close();  // → binding.dispose() → OWNED → manager.dispose()
 // SR sidecar creates one shared manager for the process lifetime
 RpcClientManager sharedManager = managerFactory.createRpcClientManager(socketAddress);
 
-// Each typed client borrows the shared manager
-MyService clientA = clientBuilder.buildBorrowed(sharedManager);
-MyService clientB = clientBuilder.buildBorrowed(sharedManager);
+// Each typed client borrows the shared manager via a BORROWED binding
+RpcClientBinding bindingA = new RpcClientBinding(sharedManager, ClientOwnership.BORROWED);
+RpcClientBinding bindingB = new RpcClientBinding(sharedManager, ClientOwnership.BORROWED);
 
-clientA.close();  // → binding.dispose() → BORROWED → closed=true only
+MyService clientA = MyService.clientBuilder().build(bindingA);
+MyService clientB = MyService.clientBuilder().build(bindingB);
+
+clientA.close();  // → bindingA.dispose() → BORROWED → closed=true only
                   //   transport untouched, clientB still works
 
 clientB.doStuff();  // works fine, shared connection is alive
@@ -253,12 +253,8 @@ clientB.doStuff();  // works fine, shared connection is alive
 ### Create a standard non-SR client
 
 ```java
-// The factory resolves to v2 when the runtime is set
-ThriftClientConfig config = new ThriftClientConfig()
-    .setClientRuntimeMode(ClientRuntimeMode.V2);
-
 RpcClientFactory factory = RpcClientFactory.builder()
-    .setThriftClientConfig(config)
+    .setThriftClientConfig(new ThriftClientConfig())
     .build();
 
 MyService client = MyService.clientBuilder()
@@ -271,6 +267,19 @@ MyResponse response = client.myMethod(request);
 client.close();
 ```
 
+### Create a client over a raw transport factory
+
+When you have a transport factory directly (e.g. a `LegacyRpcClientFactory`)
+and don't need the full `RpcClientFactory.Builder` chain:
+
+```java
+RpcClientTransportFactory transport =
+    new LegacyRpcClientFactory(new ThriftClientConfig().setDisableSSL(true));
+
+MyService client = MyService.clientBuilder()
+    .build(transport, address);  // wires a SingleRpcClientManager internally
+```
+
 ### Create shared SR clients (borrowed)
 
 ```java
@@ -281,30 +290,12 @@ RpcClientManager sharedManager =
         ExceptionMappingRpcClient::new);
 
 // Create typed clients that borrow the shared manager
-MyService client = MyService.clientBuilder()
-    .build(ClientRuntimeSelector.createBorrowedSource(sharedManager));
+RpcClientBinding binding =
+    new RpcClientBinding(sharedManager, ClientOwnership.BORROWED);
+MyService client = MyService.clientBuilder().build(binding);
 
 // client.close() only closes the handle — the connection stays alive
 client.close();
-
-// Create more clients on the same shared manager
-MyService anotherClient = MyService.clientBuilder()
-    .build(ClientRuntimeSelector.createBorrowedSource(sharedManager));
-```
-
-### Create a client with explicit ownership
-
-```java
-// Direct manager construction
-RpcClientManager manager = managerFactory.createRpcClientManager(address);
-
-// OWNED — closing this client kills the manager and its transports
-MyService ownedClient = MyService.clientBuilder()
-    .build(ClientRuntimeSelector.createOwnedSource(manager));
-
-// BORROWED — closing this client only closes the handle
-MyService borrowedClient = MyService.clientBuilder()
-    .build(ClientRuntimeSelector.createBorrowedSource(manager));
 ```
 
 ### Create a direct-to-tier pooled client
@@ -318,8 +309,9 @@ PooledRpcClientManagerFactory poolFactory = new PooledRpcClientManagerFactory(
 RpcClientManager tierManager = poolFactory.createRpcClientManager(
     new TierSocketAddress("my-service"));
 
-MyService client = MyService.clientBuilder()
-    .build(ClientRuntimeSelector.createBorrowedSource(tierManager));
+RpcClientBinding binding =
+    new RpcClientBinding(tierManager, ClientOwnership.BORROWED);
+MyService client = MyService.clientBuilder().build(binding);
 
 // Shut down all pools at process exit
 poolFactory.dispose();
@@ -327,18 +319,19 @@ poolFactory.dispose();
 
 ## Key Design Decisions
 
-### Why RpcClientSource instead of RpcClientBinding in generated code?
+### Why a separate `RpcClientTransportFactory` interface?
 
-`RpcClientSource` is a neutral interface that both legacy and v2 can implement.
-Generated code depends on this seam, so the same generated `.class` files work
-in both modes. The runtime selection happens in `ClientRuntimeSelector`, not in
-codegen.
+`RpcClientFactory` produces fully-configured bindings (with managers, pools,
+reconnection). `RpcClientTransportFactory` produces single raw connections
+with optional per-request decoration. They live at different layers and have
+different lifecycle expectations. A single interface obscured this and made
+the manager layer's contract ambiguous.
 
-### Why is CachedRpcClientFactory excluded from the v2 transport factory?
+### Why is per-address caching not in the transport factory?
 
 `SingleRpcClientManager` does its own caching — it stores the live `rpcClient`
-and returns `Mono.just(current)` on the hot path. Adding
-`CachedRpcClientFactory` would be redundant.
+and returns `Mono.just(current)` on the hot path. A separate caching layer in
+the transport chain would be redundant.
 
 ### Why doesn't the manager layer include per-request timeout?
 
@@ -347,20 +340,33 @@ The transport factory chain includes `TimeoutRpcClientFactory`, which wraps the
 the manager creates. The manager layer handles connection-level concerns
 (reconnection, pooling, selection), not request-level concerns (timeout).
 
-### Why is SimpleLoadBalancingRpcClientManager skipped for poolSize == 1?
+### Why is `SimpleLoadBalancingRpcClientManager` skipped for `poolSize == 1`?
 
-Wrapping a single manager in a load-balancing container adds an indirection with
-no benefit. The old legacy path wraps even with `poolSize >= 1` due to a
-historical quirk.
+Wrapping a single manager in a load-balancing container adds an indirection
+with no benefit.
 
 ## File Inventory
 
-### v2/manager/ — Lifecycle management
+### `client/` — Public API + transport factories
+
+| File | Purpose |
+|------|---------|
+| `RpcClientFactory.java` | Public binding-factory class with `Builder` |
+| `RpcClientTransportFactory.java` | `@FunctionalInterface` for raw-transport tier |
+| `ClientBuilder.java` | Abstract typed-client builder |
+| `RpcClient.java` | Raw transport contract |
+| `DelegatingRpcClientFactory.java` | Base class for transport decorators |
+| `InstrumentedRpcClientFactory.java` | Stats decoration |
+| `TokenPassingRpcClientFactory.java` | Header-token decoration |
+| `EventHandlerRpcClientFactory.java` | Event-handler decoration |
+| `TimeoutRpcClientFactory.java` | Per-request timeout decoration |
+
+### `v2/manager/` — Lifecycle management
 
 | File | Purpose |
 |------|---------|
 | `RpcClientManager.java` | Core lifecycle interface |
-| `RpcClientManagerFactory.java` | Factory interface |
+| `RpcClientManagerFactory.java` | Manager-factory interface |
 | `ClientOwnership.java` | OWNED / BORROWED enum |
 | `RpcClientBinding.java` | Ownership gate between client and manager |
 | `AbstractRpcClientManager.java` | Shared close-state template |
@@ -368,23 +374,5 @@ historical quirk.
 | `ReconnectingRpcClientManager.java` | Retry wrapper over Single |
 | `SimpleLoadBalancingRpcClientManager.java` | Round-robin / sticky over N children |
 | `PooledRpcClientManager.java` | Dynamic host pool with periodic refresh |
-| `DecoratingRpcClientManager.java` | Stateless RpcClient decoration |
-| `MonoBackedRpcClientManager.java` | Compatibility bridge for Mono sources |
+| `DecoratingRpcClientManager.java` | Stateless `RpcClient` decoration |
 | `*Factory.java` | Corresponding factories for each manager |
-
-### v2/transport/ — V2 factory entrypoint
-
-| File | Purpose |
-|------|---------|
-| `RpcClientFactoryV2.java` | Builds both legacy mono factory and manager factory |
-| `BindingRpcClientSource.java` | V2 implementation of RpcClientSource |
-
-### client/ — Neutral seam
-
-| File | Purpose |
-|------|---------|
-| `RpcClientSource.java` | Interface: acquire() + Disposable |
-| `LegacyRpcClientSource.java` | Legacy implementation (dispose = no-op) |
-| `ClientRuntimeSelector.java` | Routes to legacy or v2 based on config |
-| `ClientRuntimeMode.java` | LEGACY / V2 enum |
-| `ClientBuilder.java` | Abstract builder, now uses RpcClientSource |

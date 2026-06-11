@@ -17,11 +17,10 @@
 #include <random>
 
 #include <gtest/gtest.h>
-#include <folly/io/IOBufQueue.h>
-#include <thrift/lib/cpp2/op/detail/Encode.h>
 #include <thrift/lib/cpp2/protocol/Json5Protocol.h>
 #include <thrift/lib/cpp2/protocol/Serializer.h>
 #include <thrift/test/testset/Populator.h>
+#include <thrift/test/testset/gen-cpp2/testset_types_custom_protocol.h>
 
 namespace apache::thrift {
 namespace {
@@ -37,24 +36,6 @@ class SerializationRoundTripTest : public testing::Test {
   void testSerializerRoundTrip(auto serializer) {
     auto serialized = serializer.template serialize<std::string>(expected);
     auto actual = serializer.template deserialize<T>(serialized);
-    EXPECT_EQ(actual, expected);
-    testStructEncodeRoundTrip(serializer);
-  }
-
-  // Round-trips through op::detail::StructEncode/StructDecode directly,
-  // bypassing the Encode/Decode<struct_t> dispatch.
-  template <typename Reader, typename Writer>
-  void testStructEncodeRoundTrip(apache::thrift::Serializer<Reader, Writer>) {
-    Writer writer;
-    folly::IOBufQueue queue;
-    writer.setOutput(&queue);
-    op::detail::StructEncode<T>{}(writer, expected);
-
-    auto serialized = queue.move();
-    Reader reader;
-    reader.setInput(serialized.get());
-    T actual;
-    op::detail::StructDecode<T>{}(reader, actual);
     EXPECT_EQ(actual, expected);
   }
 
@@ -79,9 +60,6 @@ TYPED_TEST_P(SerializationRoundTripTest, Json5Protocol) {
   auto json5 = Json5ProtocolUtils::toJson5(this->expected);
   auto actual = Json5ProtocolUtils::fromJson5<TypeParam>(json5);
   EXPECT_EQ(actual, this->expected);
-  this->template testStructEncodeRoundTrip<
-      json5::detail::Json5ProtocolReader,
-      json5::detail::Json5ProtocolWriter>({});
 }
 
 REGISTER_TYPED_TEST_CASE_P(

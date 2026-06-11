@@ -17,6 +17,7 @@
 #pragma once
 
 #include <algorithm>
+#include <utility>
 #include <vector>
 
 #include <folly/CPortability.h>
@@ -27,10 +28,8 @@
 #include <thrift/lib/cpp/protocol/TType.h>
 #include <thrift/lib/cpp2/FieldRef.h>
 #include <thrift/lib/cpp2/Thrift.h>
-#include <thrift/lib/cpp2/gen/tcc_struct_traits.h>
 #include <thrift/lib/cpp2/op/Clear.h>
 #include <thrift/lib/cpp2/op/Compare.h>
-#include <thrift/lib/cpp2/op/Create.h>
 #include <thrift/lib/cpp2/op/Get.h>
 #include <thrift/lib/cpp2/protocol/Protocol.h>
 #include <thrift/lib/cpp2/protocol/detail/protocol_methods.h>
@@ -43,13 +42,6 @@ namespace apache::thrift {
 class BinaryProtocolWriter;
 class CompactProtocolWriter;
 class SimpleJSONProtocolWriter;
-class BinaryProtocolReader;
-class CompactProtocolReader;
-class SimpleJSONProtocolReader;
-
-namespace json5::detail {
-class Json5ProtocolReader;
-} // namespace json5::detail
 
 namespace op::detail {
 
@@ -890,62 +882,28 @@ struct Decode<type::binary_t> {
 };
 
 template <typename T>
-struct StructDecode {
-  template <typename Protocol>
-  void operator()(Protocol& prot, T& t) const {
-    std::string name;
-    TType fieldType;
-    int16_t fieldId;
-
-    prot.readStructBegin(name);
-    while (true) {
-      prot.readFieldBegin(name, fieldType, fieldId);
-      if (fieldType == TType::T_STOP) {
-        break;
-      }
-
-      apache::thrift::detail::TccStructTraits<T>::translateFieldName(
-          name, fieldId, fieldType);
-
-      const bool handled = op::invoke_by_field_id<T>(
-          static_cast<FieldId>(fieldId),
-          [&](auto Id) {
-            using IdT = decltype(Id);
-            using FieldTag = op::get_field_tag<T, IdT>;
-            Decode<FieldTag>{}(prot, op::ensure<IdT>(t), t);
-            return true;
-          },
-          [] { return false; });
-
-      if (!handled) {
-        // Text protocols report fieldType as T_VOID, which the free
-        // apache::thrift::skip() can't dispatch; use the protocol's own skip().
-        prot.skip(fieldType);
-      }
-      prot.readFieldEnd();
-    }
-    prot.readStructEnd();
-  }
-};
-
-template <typename T>
 struct Decode<type::struct_t<T>> {
   template <typename Protocol>
   void operator()(Protocol& prot, T& s) const {
-    if constexpr (std::
-                      is_same_v<Protocol, json5::detail::Json5ProtocolReader>) {
-      StructDecode<T>{}(prot, s);
-    } else {
-      s.read(&prot);
-    }
+    s.read(&prot);
   }
 };
 
 template <typename T>
-struct Decode<type::union_t<T>> : Decode<type::struct_t<T>> {};
+struct Decode<type::union_t<T>> {
+  template <typename Protocol>
+  void operator()(Protocol& prot, T& s) const {
+    s.read(&prot);
+  }
+};
 
 template <typename T>
-struct Decode<type::exception_t<T>> : Decode<type::struct_t<T>> {};
+struct Decode<type::exception_t<T>> {
+  template <typename Protocol>
+  void operator()(Protocol& prot, T& s) const {
+    s.read(&prot);
+  }
+};
 
 template <typename T>
 struct Decode<type::enum_t<T>> {
@@ -1180,18 +1138,6 @@ struct Decode<
           m = adapt_detail::fromThriftField<Adapter, FieldId>(
               std::move(orig), strct);
         })(Adapter{});
-  }
-};
-
-// Non-adapted field tag: delegate to Decode<Tag>, ignoring the struct arg.
-// The adapted specialization above is more specific and wins for adapters.
-template <typename Tag, typename Struct, int16_t FieldId>
-struct Decode<type::field<Tag, FieldContext<Struct, FieldId>>> : Decode<Tag> {
-  using Decode<Tag>::operator();
-
-  template <typename Protocol, typename U>
-  void operator()(Protocol& prot, U& m, Struct&) const {
-    Decode<Tag>{}(prot, m);
   }
 };
 

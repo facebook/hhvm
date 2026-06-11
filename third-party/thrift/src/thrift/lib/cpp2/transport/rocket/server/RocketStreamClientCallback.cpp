@@ -272,11 +272,14 @@ void RocketStreamClientCallback::handleFrame(CancelFrame&&) {
     serverCallbackOrCancelled_ = kCancelledFlag;
     return;
   }
+  auto contextStack = contextStack_;
+  auto& connection = connection_;
+  auto streamId = streamId_;
   serverCallback()->onStreamCancel();
-  if (contextStack_) {
-    contextStack_->onStreamFinally(details::STREAM_ENDING_TYPES::CANCEL);
+  if (contextStack) {
+    contextStack->onStreamFinally(details::STREAM_ENDING_TYPES::CANCEL);
   }
-  connection_.freeStream(streamId_, true);
+  connection.freeStream(streamId, true);
 }
 
 void RocketStreamClientCallback::handleFrame(PayloadFrame&&) {

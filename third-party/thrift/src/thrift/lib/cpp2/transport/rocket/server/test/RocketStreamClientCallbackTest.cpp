@@ -101,6 +101,21 @@ TEST_F(RocketStreamClientCallbackTest, HandleCancelPostReady) {
   callback_->handleFrame(std::move(frame));
 }
 
+TEST_F(RocketStreamClientCallbackTest, HandleCancelCompletesInline) {
+  makeReady();
+
+  EXPECT_CALL(connection_, sendPayload(kStreamId, _, _, _)).Times(1);
+  EXPECT_CALL(connection_, freeStream(kStreamId, true))
+      .WillOnce([&](StreamId, bool) { callback_.reset(); })
+      .WillOnce([](StreamId, bool) {});
+  EXPECT_CALL(serverCallback_, onStreamCancel()).WillOnce([&] {
+    callback_->onStreamComplete();
+  });
+
+  CancelFrame frame(kStreamId);
+  callback_->handleFrame(std::move(frame));
+}
+
 TEST_F(RocketStreamClientCallbackTest, HandlePayloadClosesConnection) {
   makeReady();
 

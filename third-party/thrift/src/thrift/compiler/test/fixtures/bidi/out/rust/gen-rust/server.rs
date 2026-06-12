@@ -331,9 +331,9 @@ where
                 ::futures::stream::once(async {
                     ::std::result::Result::Err(
                         crate::services::bi_di_service::SimpleStreamExn::ApplicationException(
-                            ::fbthrift::ApplicationException::handler_panic(
-                                "BiDiService.simple",
-                                Box::new("Stream unavailable due to handler panic")
+                            ::fbthrift::ApplicationException::new(
+                                ::fbthrift::ApplicationExceptionErrorCode::Unknown,
+                                "BiDiService.simple: handler returned an error instead of a stream; see the initial response for the actual error".to_owned()
                             )
                         )
                     )
@@ -474,9 +474,9 @@ where
                 ::futures::stream::once(async {
                     ::std::result::Result::Err(
                         crate::services::bi_di_service::ResponseStreamExn::ApplicationException(
-                            ::fbthrift::ApplicationException::handler_panic(
-                                "BiDiService.response",
-                                Box::new("Stream unavailable due to handler panic")
+                            ::fbthrift::ApplicationException::new(
+                                ::fbthrift::ApplicationExceptionErrorCode::Unknown,
+                                "BiDiService.response: handler returned an error instead of a stream; see the initial response for the actual error".to_owned()
                             )
                         )
                     )
@@ -617,9 +617,9 @@ where
                 ::futures::stream::once(async {
                     ::std::result::Result::Err(
                         crate::services::bi_di_service::CanThrowStreamExn::ApplicationException(
-                            ::fbthrift::ApplicationException::handler_panic(
-                                "BiDiService.canThrow",
-                                Box::new("Stream unavailable due to handler panic")
+                            ::fbthrift::ApplicationException::new(
+                                ::fbthrift::ApplicationExceptionErrorCode::Unknown,
+                                "BiDiService.canThrow: handler returned an error instead of a stream; see the initial response for the actual error".to_owned()
                             )
                         )
                     )

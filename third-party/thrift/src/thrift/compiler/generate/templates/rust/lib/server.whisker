@@ -177,9 +177,9 @@ where
                 ::futures::stream::once(async {
                     ::std::result::Result::Err(
                         {{program.crate}}::services::{{interface.snake}}::{{function.upcamel}}StreamExn::ApplicationException(
-                            ::fbthrift::ApplicationException::handler_panic(
-                                "{{interface.name}}.{{function.name}}",
-                                Box::new("Stream unavailable due to handler panic")
+                            ::fbthrift::ApplicationException::new(
+                                ::fbthrift::ApplicationExceptionErrorCode::Unknown,
+                                "{{interface.name}}.{{function.name}}: handler returned an error instead of a stream; see the initial response for the actual error".to_owned()
                             )
                         )
                     )

@@ -320,10 +320,6 @@ class FastThriftE2ETest : public ::testing::Test {
   }
 
   void TearDown() override {
-    clientThread_->getEventBase()->runInEventBaseThreadAndWait([&] {
-      clientPipeline_.reset();
-      clientTransportAdapter_.reset();
-    });
     clientThread_.reset();
     // ConnectionManager::stop() drains all in-flight server connections
     // before returning, then force-closes any stragglers. After this returns,
@@ -421,32 +417,9 @@ class FastThriftE2ETest : public ::testing::Test {
       connection->appAdapter->setPipeline(connection->pipeline.get());
       connection->transportHandler->setPipeline(connection->pipeline.get());
 
-      // 2. Build thrift pipeline: ThriftClientChannel → TransportAdapter
-      channel = thrift::ThriftClientChannel::newChannel(evb);
-
-      clientTransportAdapter_ =
-          std::make_unique<thrift::client::ThriftClientTransportAdapter>(
-              std::move(connection));
-
-      clientPipeline_ =
-          PipelineBuilder<
-              thrift::client::ThriftClientTransportAdapter,
-              thrift::ThriftClientChannel,
-              SimpleBufferAllocator>()
-              .setEventBase(evb)
-              .setHead(clientTransportAdapter_.get())
-              .setTail(channel.get())
-              .setAllocator(&clientAllocator_)
-              .addNextInbound<
-                  thrift::client::handler::ThriftClientMetadataPushHandler>(
-                  thrift_client_metadata_push_handler_tag)
-              .addNextOutbound<
-                  thrift::client::handler::ThriftClientChecksumHandler>(
-                  thrift_client_checksum_handler_tag)
-              .build();
-
-      channel->setPipeline(clientPipeline_.get());
-      clientTransportAdapter_->setPipeline(clientPipeline_.get());
+      // 2. Hand the connected rocket connection to the channel, which drives
+      // it directly (no thrift pipeline / transport adapter).
+      channel = thrift::ThriftClientChannel::newChannel(std::move(connection));
 
       connectCallback_ = std::make_unique<ConnectCallback>(
           transportHandlerPtr, connectBaton, connected);
@@ -466,16 +439,10 @@ class FastThriftE2ETest : public ::testing::Test {
 
   void destroyClientOnEvb(
       std::unique_ptr<apache::thrift::Client<TestService>>& client) {
-    clientThread_->getEventBase()->runInEventBaseThreadAndWait([&] {
-      if (clientPipeline_) {
-        clientPipeline_->deactivate();
-        clientPipeline_->close();
-      }
-      if (clientTransportAdapter_) {
-        clientTransportAdapter_->resetPipeline();
-      }
-      client.reset();
-    });
+    // The client owns the channel, which owns the rocket connection; reset on
+    // the evb thread.
+    clientThread_->getEventBase()->runInEventBaseThreadAndWait(
+        [&] { client.reset(); });
   }
 
   std::shared_ptr<TestHandler> handler_;
@@ -483,11 +450,7 @@ class FastThriftE2ETest : public ::testing::Test {
   apache::thrift::fast_thrift::connection::ConnectionManager::Ptr
       connectionManager_;
   std::unique_ptr<folly::ScopedEventBaseThread> clientThread_;
-  SimpleBufferAllocator clientAllocator_;
   SimpleBufferAllocator serverRocketAllocator_;
-  std::unique_ptr<thrift::client::ThriftClientTransportAdapter>
-      clientTransportAdapter_;
-  PipelineImpl::Ptr clientPipeline_;
   std::unique_ptr<ConnectCallback> connectCallback_;
 };
 

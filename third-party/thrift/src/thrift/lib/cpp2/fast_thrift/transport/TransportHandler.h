@@ -354,7 +354,7 @@ class TransportHandlerT : public folly::DelayedDestruction,
     }
     state_ = State::Closing;
     pauseRead();
-    if (FOLLY_LIKELY(pipeline_)) {
+    if (pipeline_) {
       if (ex) {
         pipeline_->fireException(std::move(ex));
       }

@@ -16,35 +16,43 @@
 
 #pragma once
 
+#include <memory>
+
 #include <folly/ExceptionWrapper.h>
 #include <folly/Portability.h>
-#include <folly/io/async/AsyncTransport.h>
 #include <folly/io/async/DelayedDestruction.h>
 #include <folly/io/async/EventBase.h>
 #include <folly/logging/xlog.h>
 #include <thrift/lib/cpp2/async/RequestChannel.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Common.h>
-#include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineImpl.h>
+#include <thrift/lib/cpp2/fast_thrift/channel_pipeline/TypeErasedBox.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/read/ParsedFrame.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/Messages.h>
-#include <thrift/lib/cpp2/fast_thrift/thrift/client/Messages.h>
-#include <thrift/lib/cpp2/fast_thrift/transport/TransportHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/client/common/RocketClientConnection.h>
 #include <thrift/lib/cpp2/transport/core/RpcMetadataUtil.h>
 
 namespace apache::thrift::fast_thrift::thrift {
 
 /**
- * ThriftClientChannel - Thrift RequestChannel backed by fast_thrift
+ * ThriftClientChannel - Thrift RequestChannel backed by the fast_thrift
+ * rocket transport.
+ *
+ * This is a flavor of fast_thrift where only the transport changed: the
+ * channel owns all thrift-layer work itself (request metadata, serialization,
+ * response decoding, ClientReceiveState construction) — mirroring the legacy
+ * RocketClientChannel — and drives the fast_thrift rocket pipeline directly
+ * via its RocketClientAppAdapter instead of going through a separate thrift
  * pipeline.
  *
- * This adapter translates Thrift's RequestChannel API to the fast_thrift
- * channel pipeline. Only request-response is implemented.
+ * The caller builds the RocketClientConnection (the rocket pipeline) and hands
+ * it to newChannel(); the channel takes ownership and registers itself as the
+ * connection's response/lifecycle sink.
  *
- * This class implements the ClientInboundAppAdapter concept to receive
- * responses from the pipeline via onRead().
+ * Only request-response is implemented.
  *
  * Usage:
- *   auto channel = ThriftClientChannel::newChannel(evb, pipeline);
+ *   auto connection = makeRocketClientConnection(...);  // caller-built
+ *   auto channel = ThriftClientChannel::newChannel(std::move(connection));
  *   auto client = MyService::newClient(std::move(channel));
  */
 class ThriftClientChannel : public apache::thrift::RequestChannel {
@@ -57,23 +65,10 @@ class ThriftClientChannel : public apache::thrift::RequestChannel {
   ThriftClientChannel(ThriftClientChannel&&) = delete;
   ThriftClientChannel& operator=(ThriftClientChannel&&) = delete;
 
-  // Factory method
+  // Factory method. Takes ownership of a caller-built rocket connection.
   static UniquePtr newChannel(
-      folly::EventBase* evb,
+      std::unique_ptr<rocket::client::RocketClientConnection> connection,
       uint16_t protocolId = apache::thrift::protocol::T_COMPACT_PROTOCOL);
-
-  // Set the pipeline - must be called before sending requests. The
-  // channel installs a DestructorGuard on the pipeline so the pipeline
-  // cannot be destroyed while it is attached. Caller releases this hold
-  // via resetPipeline() (or destroys the channel, which calls
-  // resetPipeline implicitly).
-  void setPipeline(
-      apache::thrift::fast_thrift::channel_pipeline::PipelineImpl* pipeline);
-
-  // Release the channel's hold on the pipeline. After this returns the
-  // pipeline may be destroyed (modulo other guards) and sendRequest must
-  // not be called.
-  void resetPipeline() noexcept;
 
   using RequestChannel::sendRequestNoResponse;
   using RequestChannel::sendRequestResponse;
@@ -135,30 +130,29 @@ class ThriftClientChannel : public apache::thrift::RequestChannel {
   folly::EventBase* getEventBase() const override { return evb_; }
   uint16_t getProtocolId() override { return protocolId_; }
 
-  // === TailEndpointHandler lifecycle ===
-  void handlerAdded() noexcept {}
-  void handlerRemoved() noexcept { state_ = State::Closed; }
-  void onPipelineActive() noexcept;
-  void onPipelineInactive() noexcept;
-  void onWriteReady() noexcept {}
-
-  // === TailEndpointHandler interface ===
-  // Called by the pipeline when a response message arrives
-  apache::thrift::fast_thrift::channel_pipeline::Result onRead(
-      apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox&&
-          msg) noexcept;
-
-  // Called by the pipeline when an exception propagates to the application
-  void onException(folly::exception_wrapper&& e) noexcept;
-
  protected:
-  ThriftClientChannel(folly::EventBase* evb, uint16_t protocolId);
+  ThriftClientChannel(
+      std::unique_ptr<rocket::client::RocketClientConnection> connection,
+      uint16_t protocolId);
   ~ThriftClientChannel() override;
 
  private:
   enum class State { Open, Closing, Closed };
 
-  // Common implementation for sending thrift requests
+  // Per-request context allocated on the outbound path and consumed on the
+  // inbound path. Transported opaquely as a TypeErasedPtr on the rocket
+  // message; only this channel casts it back. Owns the pending Ptr — its
+  // auto-detach deleter fires onResponseError if the holder is destructed
+  // without firing.
+  struct ChannelCallbackContext {
+    apache::thrift::RequestClientCallback::Ptr cb;
+
+    explicit ChannelCallbackContext(
+        apache::thrift::RequestClientCallback::Ptr cb)
+        : cb(std::move(cb)) {}
+  };
+
+  // Common implementation for sending thrift requests.
   void sendRequestInternal(
       const apache::thrift::RpcOptions& options,
       apache::thrift::MethodMetadata&& methodMetadata,
@@ -167,14 +161,26 @@ class ThriftClientChannel : public apache::thrift::RequestChannel {
       apache::thrift::RequestClientCallback::Ptr callbackPtr,
       std::unique_ptr<folly::IOBuf> frameworkMetadata);
 
-  // Handle incoming request-response messages
+  // Registered as the rocket connection's response sink. Receives a
+  // rocket::RocketResponseMessage, decodes it, and resolves the callback.
+  apache::thrift::fast_thrift::channel_pipeline::Result onResponse(
+      apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox&&
+          msg) noexcept;
+
+  // Registered as the rocket connection's error sink.
+  void onError(folly::exception_wrapper&& e) noexcept;
+
+  // Disconnect edge from the rocket connection. The channel is always handed
+  // an already-connected connection, so it does not observe connect — it only
+  // needs to know when the connection goes down to stop accepting writes.
+  void onDisconnect() noexcept;
+
+  // Decode a single request-response and build the ClientReceiveState.
   void handleRequestResponse(
-      ThriftResponseMessage&& response,
+      apache::thrift::fast_thrift::frame::read::ParsedFrame&& frame,
       apache::thrift::RequestClientCallback::Ptr callback);
 
-  // Error handling helpers (moved out of line to keep hot path small)
-  FOLLY_NOINLINE void handleMissingPipeline(
-      apache::thrift::RequestClientCallback::Ptr callbackPtr) noexcept;
+  // Error handling helpers (out of line to keep the hot path small).
   FOLLY_NOINLINE void handleNotOpen(
       apache::thrift::RequestClientCallback::Ptr callbackPtr) noexcept;
   FOLLY_NOINLINE void handleWriteError() noexcept;
@@ -186,23 +192,8 @@ class ThriftClientChannel : public apache::thrift::RequestChannel {
       apache::thrift::RequestClientCallback::Ptr callback,
       folly::exception_wrapper ew) noexcept;
 
-  // Per-request context allocated on the outbound path and consumed on the
-  // inbound path. Transported opaquely as a TypeErasedPtr on the message
-  // variants; only this channel casts it back. Owns the pending Ptr — its
-  // auto-detach deleter fires onResponseError if the holder is destructed
-  // without firing.
-  struct ChannelCallbackContext {
-    apache::thrift::RequestClientCallback::Ptr cb;
-
-    explicit ChannelCallbackContext(
-        apache::thrift::RequestClientCallback::Ptr cb)
-        : cb(std::move(cb)) {}
-  };
-
+  std::unique_ptr<rocket::client::RocketClientConnection> connection_;
   folly::EventBase* evb_;
-  apache::thrift::fast_thrift::channel_pipeline::PipelineImpl* pipeline_{
-      nullptr};
-  std::unique_ptr<folly::DelayedDestruction::DestructorGuard> pipelineGuard_;
   uint16_t protocolId_;
   State state_{State::Open};
   folly::exception_wrapper lastError_;

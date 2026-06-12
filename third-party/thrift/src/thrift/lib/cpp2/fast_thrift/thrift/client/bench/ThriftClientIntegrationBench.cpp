@@ -338,11 +338,7 @@ struct BenchmarkFixture {
   folly::EventBase evb;
   BenchAsyncTransport* testTransport{nullptr};
 
-  // Thrift pipeline
-  std::unique_ptr<client::ThriftClientTransportAdapter> transportAdapter;
   ThriftClientChannel::UniquePtr channel;
-  PipelineImpl::Ptr thriftPipeline;
-  SimpleBufferAllocator thriftAllocator;
 
   // Track pending requests for response injection
   std::vector<uint32_t> pendingStreamIds;
@@ -351,29 +347,11 @@ struct BenchmarkFixture {
     testTransport = new BenchAsyncTransport(&evb);
     auto rocketConnection = createRocketConnection(testTransport, &evb);
 
-    // Create transport adapter (takes ownership of rocket connection)
-    transportAdapter = std::make_unique<client::ThriftClientTransportAdapter>(
-        std::move(rocketConnection));
-
-    // Build thrift pipeline
-    channel = ThriftClientChannel::newChannel(&evb);
-
-    thriftPipeline = PipelineBuilder<
-                         client::ThriftClientTransportAdapter,
-                         ThriftClientChannel,
-                         SimpleBufferAllocator>()
-                         .setEventBase(&evb)
-                         .setHead(transportAdapter.get())
-                         .setTail(channel.get())
-                         .setAllocator(&thriftAllocator)
-                         .addNextInbound<ThriftClientMetadataPushHandler>(
-                             thrift_client_metadata_push_handler_tag)
-                         .addNextOutbound<ThriftClientChecksumHandler>(
-                             thrift_client_checksum_handler_tag)
-                         .build();
-
-    channel->setPipeline(thriftPipeline.get());
-    transportAdapter->setPipeline(thriftPipeline.get());
+    // The channel is handed a fully-connected rocket connection and drives it
+    // directly (no thrift pipeline / transport adapter).
+    auto* transportHandlerPtr = rocketConnection->transportHandler.get();
+    channel = ThriftClientChannel::newChannel(std::move(rocketConnection));
+    transportHandlerPtr->onConnect();
 
     // Drive event loop and discard SETUP frame
     evb.loopOnce();

@@ -382,6 +382,7 @@ add_library(
   fast_thrift/frame/write/FrameWriter.cpp
   fast_thrift/thrift/FastThriftAdapterBase.cpp
   fast_thrift/thrift/client/ThriftClientChannel.cpp
+  fast_thrift/thrift/client/util/RocketFrameDecoder.cpp
   fast_thrift/thrift/server/ThriftServerChannel.cpp
   fast_thrift/transport/TransportHandler.cpp
   logging/ThriftBiDiLog.cpp

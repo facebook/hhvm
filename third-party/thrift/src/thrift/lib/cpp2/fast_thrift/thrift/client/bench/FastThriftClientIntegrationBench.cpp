@@ -303,33 +303,16 @@ struct ThriftBenchFixture {
 struct FastThriftChannelBenchFixture {
   folly::EventBase evb;
   BenchAsyncTransport* testTransport{nullptr};
-  SimpleBufferAllocator thriftAllocator;
-  std::unique_ptr<client::ThriftClientTransportAdapter> transportAdapter;
   std::unique_ptr<ThriftClientType> thriftClient;
-  PipelineImpl::Ptr thriftPipeline;
 
   void setup() {
     testTransport = new BenchAsyncTransport(&evb);
     auto rocketConnection = createRocketConnection(testTransport, &evb);
-    transportAdapter = std::make_unique<client::ThriftClientTransportAdapter>(
-        std::move(rocketConnection));
-    auto channel = ThriftClientChannel::newChannel(&evb);
-    auto* channelPtr = channel.get();
-    thriftPipeline = PipelineBuilder<
-                         client::ThriftClientTransportAdapter,
-                         ThriftClientChannel,
-                         SimpleBufferAllocator>()
-                         .setEventBase(&evb)
-                         .setHead(transportAdapter.get())
-                         .setTail(channelPtr)
-                         .setAllocator(&thriftAllocator)
-                         .addNextInbound<ThriftClientMetadataPushHandler>(
-                             thrift_client_metadata_push_handler_tag)
-                         .addNextOutbound<ThriftClientChecksumHandler>(
-                             thrift_client_checksum_handler_tag)
-                         .build();
-    channelPtr->setPipeline(thriftPipeline.get());
-    transportAdapter->setPipeline(thriftPipeline.get());
+    // The channel is handed a fully-connected rocket connection and drives it
+    // directly (no thrift pipeline / transport adapter).
+    auto* transportHandlerPtr = rocketConnection->transportHandler.get();
+    auto channel = ThriftClientChannel::newChannel(std::move(rocketConnection));
+    transportHandlerPtr->onConnect();
     thriftClient = std::make_unique<ThriftClientType>(std::move(channel));
 
     // Discard SETUP frame

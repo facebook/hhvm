@@ -14,633 +14,136 @@
  * limitations under the License.
  */
 
+// Unit tests for ThriftClientChannel construction/identity.
+//
+// ThriftClientChannel is rocket-direct: it is handed a fully-connected
+// RocketClientConnection and drives it via the app adapter. End-to-end
+// request/response, error, and multiplexing behavior is covered by
+// ThriftClientIntegrationTest (over a TestAsyncTransport connection) and
+// ThriftClientBackwardsCompatibilityE2ETest (against a real server); this
+// file only covers the channel's own construction surface.
+
 #include <gtest/gtest.h>
 
-#include <folly/ScopeGuard.h>
 #include <folly/io/IOBuf.h>
-#include <folly/io/IOBufQueue.h>
+#include <folly/io/async/AsyncTransport.h>
 #include <folly/io/async/EventBase.h>
-#include <thrift/lib/cpp/TApplicationException.h>
-#include <thrift/lib/cpp/transport/THeader.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Common.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineBuilder.h>
-#include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineImpl.h>
-#include <thrift/lib/cpp2/fast_thrift/channel_pipeline/TypeErasedBox.h>
-#include <thrift/lib/cpp2/fast_thrift/channel_pipeline/test/MockAdapters.h>
-#include <thrift/lib/cpp2/fast_thrift/channel_pipeline/test/MockHandler.h>
-#include <thrift/lib/cpp2/fast_thrift/frame/FrameType.h>
-#include <thrift/lib/cpp2/fast_thrift/frame/read/FrameParser.h>
-#include <thrift/lib/cpp2/fast_thrift/thrift/client/Messages.h>
+#include <thrift/lib/cpp2/fast_thrift/frame/read/handler/FrameLengthParserHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/frame/write/handler/FrameLengthEncoderHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/client/common/RocketClientConnection.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientConnectionErrorHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientFrameCodecHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientRequestResponseHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientSetupFrameHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientStreamStateHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/ThriftClientChannel.h>
-#include <thrift/lib/cpp2/protocol/Serializer.h>
+#include <thrift/lib/cpp2/fast_thrift/transport/TransportHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/transport/test/TestAsyncTransport.h>
 
 namespace apache::thrift::fast_thrift::thrift {
 
-using apache::thrift::fast_thrift::channel_pipeline::erase_and_box;
 using apache::thrift::fast_thrift::channel_pipeline::PipelineBuilder;
-using apache::thrift::fast_thrift::channel_pipeline::PipelineImpl;
-using apache::thrift::fast_thrift::channel_pipeline::Result;
-using apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox;
-using apache::thrift::fast_thrift::channel_pipeline::test::MockHandler;
-using MockTransportHandler =
-    apache::thrift::fast_thrift::channel_pipeline::test::MockHeadHandler;
-using apache::thrift::fast_thrift::channel_pipeline::test::TestAllocator;
+using apache::thrift::fast_thrift::transport::test::TestAsyncTransport;
 
-HANDLER_TAG(test_handler);
-
-namespace {
-
-// Shared state that outlives the self-deleting MockRequestCallback.
-// Tests assert against this after the callback fires and deletes itself.
-struct CallbackState {
-  bool responseReceived{false};
-  bool errorReceived{false};
-  folly::exception_wrapper error;
-  uint16_t protocolId{0};
-  apache::thrift::MessageType messageType{apache::thrift::MessageType::T_CALL};
-  std::unique_ptr<folly::IOBuf> responseBuffer;
-
-  std::string errorMessage() const {
-    std::string msg;
-    error.handle([&](const apache::thrift::TApplicationException& e) {
-      msg = e.what();
-    });
-    return msg;
-  }
-};
-
-// Self-deleting mock per Thrift's RequestClientCallback contract:
-// after onResponse/onResponseError, the callback must not be accessed again.
-class MockRequestCallback : public apache::thrift::RequestClientCallback {
- public:
-  explicit MockRequestCallback(std::shared_ptr<CallbackState> state)
-      : state_(std::move(state)) {}
-
-  void onResponse(
-      apache::thrift::ClientReceiveState&& state) noexcept override {
-    state_->responseReceived = true;
-    state_->protocolId = state.protocolId();
-    state_->messageType = state.messageType();
-    if (state.hasResponseBuffer()) {
-      state_->responseBuffer =
-          std::move(state).extractSerializedResponse().buffer;
-    }
-    delete this;
-  }
-
-  void onResponseError(folly::exception_wrapper e) noexcept override {
-    state_->errorReceived = true;
-    state_->error = std::move(e);
-    delete this;
-  }
-
- private:
-  std::shared_ptr<CallbackState> state_;
-};
-
-std::pair<
-    apache::thrift::RequestClientCallback::Ptr,
-    std::shared_ptr<CallbackState>>
-makeCallback() {
-  auto state = std::make_shared<CallbackState>();
-  auto* callback = new MockRequestCallback(state);
-  return {apache::thrift::RequestClientCallback::Ptr(callback), state};
-}
-
-} // namespace
+// Handler tags for the rocket pipeline.
+HANDLER_TAG(frame_length_parser_handler);
+HANDLER_TAG(frame_length_encoder_handler);
+HANDLER_TAG(rocket_client_frame_codec_handler);
+HANDLER_TAG(rocket_client_setup_handler);
+HANDLER_TAG(rocket_client_connection_error_handler);
+HANDLER_TAG(rocket_client_stream_state_handler);
+HANDLER_TAG(rocket_client_request_response_handler);
 
 class ThriftClientChannelTest : public ::testing::Test {
  protected:
-  void SetUp() override {
-    MockHandler::resetOrderCounter();
-    allocator_.reset();
-    mockTransport_.setOnWriteCallback(
-        [](channel_pipeline::TypeErasedBox&&) { return Result::Success; });
-  }
+  // Build a fully-connected rocket connection over a TestAsyncTransport and
+  // hand it to a new channel, mirroring how callers wire the channel.
+  ThriftClientChannel::UniquePtr makeConnectedChannel(
+      uint16_t protocolId = apache::thrift::protocol::T_COMPACT_PROTOCOL) {
+    auto transport =
+        folly::AsyncTransport::UniquePtr(new TestAsyncTransport(&evb_));
+    testTransport_ = static_cast<TestAsyncTransport*>(transport.get());
 
-  ThriftClientChannel::UniquePtr createChannel() {
-    return ThriftClientChannel::newChannel(&evb_);
-  }
+    auto connection =
+        std::make_unique<rocket::client::RocketClientConnection>();
+    connection->transportHandler =
+        rocket::client::RocketClientConnection::TransportHandler::create(
+            std::move(transport));
+    auto* transportHandlerPtr = connection->transportHandler.get();
 
-  ThriftClientChannel::UniquePtr createChannelWithProtocol(
-      uint16_t protocolId) {
-    return ThriftClientChannel::newChannel(&evb_, protocolId);
-  }
+    connection->pipeline =
+        PipelineBuilder<
+            rocket::client::RocketClientConnection::TransportHandler,
+            rocket::client::RocketClientAppAdapter,
+            channel_pipeline::SimpleBufferAllocator>()
+            .setEventBase(&evb_)
+            .setHead(connection->transportHandler.get())
+            .setTail(connection->appAdapter.get())
+            .setAllocator(&connection->allocator)
+            .addNextInbound<frame::read::handler::FrameLengthParserHandler>(
+                frame_length_parser_handler_tag)
+            .addNextOutbound<frame::write::handler::FrameLengthEncoderHandler>(
+                frame_length_encoder_handler_tag)
+            .addNextDuplex<
+                rocket::client::handler::RocketClientFrameCodecHandler>(
+                rocket_client_frame_codec_handler_tag)
+            .addNextDuplex<
+                rocket::client::handler::RocketClientSetupFrameHandler>(
+                rocket_client_setup_handler_tag,
+                []() {
+                  return std::make_pair(
+                      folly::IOBuf::copyBuffer("setup"),
+                      std::unique_ptr<folly::IOBuf>());
+                })
+            .addNextInbound<
+                rocket::client::handler::RocketClientConnectionErrorHandler>(
+                rocket_client_connection_error_handler_tag)
+            .addNextDuplex<
+                rocket::client::handler::RocketClientStreamStateHandler>(
+                rocket_client_stream_state_handler_tag)
+            .addNextInbound<
+                rocket::client::handler::RocketClientRequestResponseHandler>(
+                rocket_client_request_response_handler_tag)
+            .build();
 
-  PipelineImpl::Ptr buildPipelineWithHandler(
-      ThriftClientChannel* channel,
-      std::function<Result(
-          apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl&,
-          TypeErasedBox&&)> writeHandler) {
-    handler_ = std::make_unique<MockHandler>();
-    handler_->setOnWrite(std::move(writeHandler));
+    connection->appAdapter->setPipeline(connection->pipeline.get());
+    connection->transportHandler->setPipeline(connection->pipeline.get());
 
-    return PipelineBuilder<
-               MockTransportHandler,
-               ThriftClientChannel,
-               TestAllocator>()
-        .setEventBase(&evb_)
-        .setHead(&mockTransport_)
-        .setTail(channel)
-        .setAllocator(&allocator_)
-        .addNextDuplex<MockHandler>(test_handler_tag, std::move(handler_))
-        .build();
-  }
-
-  apache::thrift::SerializedRequest createSerializedRequest(
-      const std::string& data) {
-    return apache::thrift::SerializedRequest(folly::IOBuf::copyBuffer(data));
-  }
-
-  apache::thrift::MethodMetadata createMethodMetadata(
-      const std::string& methodName) {
-    return apache::thrift::MethodMetadata(methodName);
-  }
-
-  std::shared_ptr<apache::thrift::transport::THeader> createHeader() {
-    return std::make_shared<apache::thrift::transport::THeader>();
-  }
-
-  ThriftResponseMessage createSuccessResponse(
-      void* requestContext,
-      uint16_t /* protocolId */,
-      apache::thrift::MessageType /* mtype */,
-      const std::string& data) {
-    auto metadata = std::make_unique<apache::thrift::ResponseRpcMetadata>();
-    metadata->payloadMetadata().ensure().set_responseMetadata(
-        apache::thrift::PayloadResponseMetadata{});
-
-    ThriftResponseMessage response;
-    response.payload = ThriftClientInboundPayloadVariant{
-        ThriftInitialResponsePayload{
-            .data = folly::IOBuf::copyBuffer(data),
-            .metadata = std::move(metadata),
-            .streamId = 1,
-        },
-        apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE};
-    response.requestContext =
-        apache::thrift::fast_thrift::rocket::borrow(requestContext);
-    response.streamType =
-        apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE;
-    return response;
-  }
-
-  void teardownChannelPipeline(
-      ThriftClientChannel::UniquePtr& channel, PipelineImpl::Ptr& pipeline) {
-    if (pipeline) {
-      pipeline->deactivate();
-      pipeline->close();
-    }
-    if (channel) {
-      channel->resetPipeline();
-    }
+    auto channel =
+        ThriftClientChannel::newChannel(std::move(connection), protocolId);
+    transportHandlerPtr->onConnect();
+    evb_.loopOnce();
+    testTransport_->getWrittenData(); // discard SETUP frame
+    return channel;
   }
 
   folly::EventBase evb_;
-  MockTransportHandler mockTransport_;
-  TestAllocator allocator_;
-  std::unique_ptr<MockHandler> handler_;
+  TestAsyncTransport* testTransport_{nullptr};
 };
 
-// =============================================================================
-// Factory Method and Construction
-// =============================================================================
-
 TEST_F(ThriftClientChannelTest, NewChannelReturnsValidChannel) {
-  auto channel = createChannel();
+  auto channel = makeConnectedChannel();
   EXPECT_NE(channel, nullptr);
 }
 
 TEST_F(ThriftClientChannelTest, NewChannelSetsDefaultProtocolId) {
-  auto channel = createChannel();
+  auto channel = makeConnectedChannel();
   EXPECT_EQ(
       channel->getProtocolId(), apache::thrift::protocol::T_COMPACT_PROTOCOL);
 }
 
 TEST_F(ThriftClientChannelTest, NewChannelWithCustomProtocolId) {
   auto channel =
-      createChannelWithProtocol(apache::thrift::protocol::T_BINARY_PROTOCOL);
+      makeConnectedChannel(apache::thrift::protocol::T_BINARY_PROTOCOL);
   EXPECT_EQ(
       channel->getProtocolId(), apache::thrift::protocol::T_BINARY_PROTOCOL);
 }
 
 TEST_F(ThriftClientChannelTest, GetEventBaseReturnsCorrectEventBase) {
-  auto channel = createChannel();
+  auto channel = makeConnectedChannel();
   EXPECT_EQ(channel->getEventBase(), &evb_);
-}
-
-// =============================================================================
-// Request Sending - No Pipeline
-// =============================================================================
-
-TEST_F(ThriftClientChannelTest, SendRequestWithoutPipelineReturnsError) {
-  auto channel = createChannel();
-
-  auto [cb, state] = makeCallback();
-
-  channel->sendRequestResponse(
-      apache::thrift::RpcOptions(),
-      createMethodMetadata("testMethod"),
-      createSerializedRequest("test data"),
-      createHeader(),
-      std::move(cb),
-      nullptr);
-
-  EXPECT_TRUE(state->errorReceived);
-  EXPECT_EQ(state->errorMessage(), "Pipeline not set");
-}
-
-// =============================================================================
-// Response Handling - onMessage
-// =============================================================================
-
-TEST_F(ThriftClientChannelTest, OnMessageInvokesCallbackWithCorrectState) {
-  auto channel = createChannel();
-  void* capturedHandle{};
-
-  auto pipeline = buildPipelineWithHandler(
-      channel.get(),
-      [&](apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl&,
-          TypeErasedBox&& msg) {
-        auto& request = msg.get<ThriftRequestMessage>();
-        capturedHandle = request.requestContext.release();
-        return Result::Success;
-      });
-  channel->setPipeline(pipeline.get());
-  SCOPE_EXIT {
-    teardownChannelPipeline(channel, pipeline);
-  };
-
-  auto [cb, state] = makeCallback();
-
-  channel->sendRequestResponse(
-      apache::thrift::RpcOptions(),
-      createMethodMetadata("testMethod"),
-      createSerializedRequest("test"),
-      createHeader(),
-      std::move(cb),
-      nullptr);
-
-  auto response = createSuccessResponse(
-      capturedHandle,
-      apache::thrift::protocol::T_BINARY_PROTOCOL,
-      apache::thrift::MessageType::T_REPLY,
-      "response payload");
-
-  auto result = channel->onRead(erase_and_box(std::move(response)));
-
-  EXPECT_EQ(result, Result::Success);
-  EXPECT_TRUE(state->responseReceived);
-  EXPECT_FALSE(state->errorReceived);
-  EXPECT_EQ(state->protocolId, apache::thrift::protocol::T_COMPACT_PROTOCOL);
-  EXPECT_EQ(state->messageType, apache::thrift::MessageType::T_REPLY);
-}
-
-TEST_F(ThriftClientChannelTest, OnMessageWithErrorInvokesErrorCallback) {
-  auto channel = createChannel();
-  void* capturedHandle{};
-
-  auto pipeline = buildPipelineWithHandler(
-      channel.get(),
-      [&](apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl&,
-          TypeErasedBox&& msg) {
-        auto& request = msg.get<ThriftRequestMessage>();
-        capturedHandle = request.requestContext.release();
-        return Result::Success;
-      });
-  channel->setPipeline(pipeline.get());
-  SCOPE_EXIT {
-    teardownChannelPipeline(channel, pipeline);
-  };
-
-  auto [cb, state] = makeCallback();
-
-  channel->sendRequestResponse(
-      apache::thrift::RpcOptions(),
-      createMethodMetadata("testMethod"),
-      createSerializedRequest("test"),
-      createHeader(),
-      std::move(cb),
-      nullptr);
-
-  // Send an ERROR frame response
-  ThriftResponseMessage errorResponse;
-  errorResponse.payload = ThriftClientInboundPayloadVariant{
-      ThriftErrorPayload{
-          .data = folly::IOBuf::copyBuffer("test error"),
-          .metadata = nullptr,
-          .streamId = 1,
-          .errorCode = 0x00000201},
-      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE};
-  errorResponse.requestContext =
-      apache::thrift::fast_thrift::rocket::borrow(capturedHandle);
-  errorResponse.streamType =
-      apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE;
-
-  std::ignore = channel->onRead(erase_and_box(std::move(errorResponse)));
-
-  EXPECT_FALSE(state->responseReceived);
-  EXPECT_TRUE(state->errorReceived);
-  EXPECT_TRUE(
-      state->error.is_compatible_with<apache::thrift::TApplicationException>());
-}
-
-TEST_F(ThriftClientChannelTest, MultiplePendingCallbacksRoutedCorrectly) {
-  auto channel = createChannel();
-  std::vector<void*> capturedHandles;
-
-  auto pipeline = buildPipelineWithHandler(
-      channel.get(),
-      [&](apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl&,
-          TypeErasedBox&& msg) {
-        auto& request = msg.get<ThriftRequestMessage>();
-        capturedHandles.push_back(request.requestContext.release());
-        return Result::Success;
-      });
-  channel->setPipeline(pipeline.get());
-  SCOPE_EXIT {
-    teardownChannelPipeline(channel, pipeline);
-  };
-
-  auto [cb1, state1] = makeCallback();
-  auto [cb2, state2] = makeCallback();
-  auto [cb3, state3] = makeCallback();
-
-  channel->sendRequestResponse(
-      apache::thrift::RpcOptions(),
-      createMethodMetadata("method1"),
-      createSerializedRequest("req1"),
-      createHeader(),
-      std::move(cb1),
-      nullptr);
-
-  channel->sendRequestResponse(
-      apache::thrift::RpcOptions(),
-      createMethodMetadata("method2"),
-      createSerializedRequest("req2"),
-      createHeader(),
-      std::move(cb2),
-      nullptr);
-
-  channel->sendRequestResponse(
-      apache::thrift::RpcOptions(),
-      createMethodMetadata("method3"),
-      createSerializedRequest("req3"),
-      createHeader(),
-      std::move(cb3),
-      nullptr);
-
-  ASSERT_EQ(capturedHandles.size(), 3);
-
-  // Respond out of order: 2, 3, 1
-  auto response2 = createSuccessResponse(
-      capturedHandles[1],
-      apache::thrift::protocol::T_COMPACT_PROTOCOL,
-      apache::thrift::MessageType::T_REPLY,
-      "resp2");
-  std::ignore = channel->onRead(erase_and_box(std::move(response2)));
-
-  EXPECT_FALSE(state1->responseReceived);
-  EXPECT_TRUE(state2->responseReceived);
-  EXPECT_FALSE(state3->responseReceived);
-
-  auto response3 = createSuccessResponse(
-      capturedHandles[2],
-      apache::thrift::protocol::T_COMPACT_PROTOCOL,
-      apache::thrift::MessageType::T_REPLY,
-      "resp3");
-  std::ignore = channel->onRead(erase_and_box(std::move(response3)));
-
-  EXPECT_FALSE(state1->responseReceived);
-  EXPECT_TRUE(state2->responseReceived);
-  EXPECT_TRUE(state3->responseReceived);
-
-  auto response1 = createSuccessResponse(
-      capturedHandles[0],
-      apache::thrift::protocol::T_COMPACT_PROTOCOL,
-      apache::thrift::MessageType::T_REPLY,
-      "resp1");
-  std::ignore = channel->onRead(erase_and_box(std::move(response1)));
-
-  EXPECT_TRUE(state1->responseReceived);
-  EXPECT_TRUE(state2->responseReceived);
-  EXPECT_TRUE(state3->responseReceived);
-}
-
-// =============================================================================
-// Pipeline Write - Success Path
-// =============================================================================
-
-TEST_F(ThriftClientChannelTest, SendRequestWithPipelineCallsHandler) {
-  auto channel = createChannel();
-  bool handlerCalled = false;
-  void* capturedHandle{};
-
-  auto pipeline = buildPipelineWithHandler(
-      channel.get(),
-      [&](apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl&,
-          TypeErasedBox&& msg) {
-        handlerCalled = true;
-        auto& request = msg.get<ThriftRequestMessage>();
-        EXPECT_EQ(
-            request.payload.rpcKind(),
-            apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE);
-        capturedHandle = request.requestContext.release();
-        return Result::Success;
-      });
-  channel->setPipeline(pipeline.get());
-  SCOPE_EXIT {
-    teardownChannelPipeline(channel, pipeline);
-  };
-
-  auto [cb, state] = makeCallback();
-
-  channel->sendRequestResponse(
-      apache::thrift::RpcOptions(),
-      createMethodMetadata("testMethod"),
-      createSerializedRequest("request payload"),
-      createHeader(),
-      std::move(cb),
-      nullptr);
-
-  EXPECT_TRUE(handlerCalled);
-
-  // Deliver synthetic response to clean up the heap-allocated callback
-  // context.
-  auto response = createSuccessResponse(
-      capturedHandle,
-      apache::thrift::protocol::T_COMPACT_PROTOCOL,
-      apache::thrift::MessageType::T_REPLY,
-      "cleanup");
-  std::ignore = channel->onRead(erase_and_box(std::move(response)));
-}
-
-// =============================================================================
-// Pipeline Write - Error Handling
-// =============================================================================
-
-TEST_F(ThriftClientChannelTest, SendRequestWithPipelineErrorClosesChannel) {
-  auto channel = createChannel();
-
-  auto pipeline = buildPipelineWithHandler(
-      channel.get(),
-      [](apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl&,
-         TypeErasedBox&&) { return Result::Error; });
-  channel->setPipeline(pipeline.get());
-  SCOPE_EXIT {
-    teardownChannelPipeline(channel, pipeline);
-  };
-
-  auto [cb, state] = makeCallback();
-
-  channel->sendRequestResponse(
-      apache::thrift::RpcOptions(),
-      createMethodMetadata("testMethod"),
-      createSerializedRequest("test"),
-      createHeader(),
-      std::move(cb),
-      nullptr);
-
-  // The just-queued callback fires (via RequestClientCallback's auto-detach
-  // when the message dies on the failed write path), and the channel closes
-  // so subsequent sends are rejected with NOT_OPEN.
-  EXPECT_TRUE(state->errorReceived);
-
-  auto [cb2, state2] = makeCallback();
-  channel->sendRequestResponse(
-      apache::thrift::RpcOptions(),
-      createMethodMetadata("testMethod"),
-      createSerializedRequest("retry"),
-      createHeader(),
-      std::move(cb2),
-      nullptr);
-  EXPECT_TRUE(state2->errorReceived);
-  EXPECT_TRUE(state2->error.is_compatible_with<
-              apache::thrift::transport::TTransportException>());
-}
-
-TEST_F(ThriftClientChannelTest, SendRequestWithPipelineBackpressureProceeds) {
-  auto channel = createChannel();
-
-  bool handlerCalled = false;
-  void* capturedHandle{};
-
-  auto pipeline = buildPipelineWithHandler(
-      channel.get(),
-      [&](apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl&,
-          TypeErasedBox&& msg) {
-        handlerCalled = true;
-        auto& request = msg.get<ThriftRequestMessage>();
-        EXPECT_EQ(
-            request.payload.rpcKind(),
-            apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE);
-        capturedHandle = request.requestContext.release();
-        return Result::Backpressure;
-      });
-  channel->setPipeline(pipeline.get());
-  SCOPE_EXIT {
-    teardownChannelPipeline(channel, pipeline);
-  };
-
-  auto [cb, state] = makeCallback();
-
-  channel->sendRequestResponse(
-      apache::thrift::RpcOptions(),
-      createMethodMetadata("testMethod"),
-      createSerializedRequest("test"),
-      createHeader(),
-      std::move(cb),
-      nullptr);
-
-  EXPECT_TRUE(handlerCalled);
-  EXPECT_FALSE(state->errorReceived);
-  EXPECT_FALSE(state->responseReceived);
-
-  // Deliver synthetic response to clean up the heap-allocated callback
-  // context.
-  auto response = createSuccessResponse(
-      capturedHandle,
-      apache::thrift::protocol::T_COMPACT_PROTOCOL,
-      apache::thrift::MessageType::T_REPLY,
-      "cleanup");
-  std::ignore = channel->onRead(erase_and_box(std::move(response)));
-}
-
-// =============================================================================
-// Pipeline Write - Message Content Verification
-// =============================================================================
-
-TEST_F(ThriftClientChannelTest, SendRequestPassesCorrectMessageContent) {
-  auto channel = createChannel();
-  apache::thrift::RpcKind capturedRpcKind{};
-  std::string capturedMethodName;
-  void* capturedHandle{};
-
-  auto pipeline = buildPipelineWithHandler(
-      channel.get(),
-      [&](apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl&,
-          TypeErasedBox&& msg) {
-        auto& request = msg.get<ThriftRequestMessage>();
-        capturedRpcKind = request.payload.rpcKind();
-        // Metadata flows as a struct now; serialization happens in the
-        // transport adapter via toRocketFrame().
-        const auto& rpcMetadata =
-            *request.payload.get<ThriftRequestResponsePayload>().metadata;
-        capturedMethodName = std::string(rpcMetadata.name()->view());
-        capturedHandle = request.requestContext.release();
-        return Result::Success;
-      });
-  channel->setPipeline(pipeline.get());
-  SCOPE_EXIT {
-    teardownChannelPipeline(channel, pipeline);
-  };
-
-  auto [cb, state] = makeCallback();
-
-  channel->sendRequestResponse(
-      apache::thrift::RpcOptions(),
-      createMethodMetadata("myTestMethod"),
-      createSerializedRequest("test"),
-      createHeader(),
-      std::move(cb),
-      nullptr);
-
-  EXPECT_EQ(
-      capturedRpcKind, apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE);
-  EXPECT_EQ(capturedMethodName, "myTestMethod");
-  EXPECT_NE(capturedHandle, nullptr);
-
-  // Deliver synthetic response to clean up the heap-allocated callback
-  // context that the channel allocated during sendRequestResponse. Without
-  // this, LSAN would flag the leak under //thrift/lib/cpp2/fast_thrift/...
-  auto response = createSuccessResponse(
-      capturedHandle,
-      apache::thrift::protocol::T_COMPACT_PROTOCOL,
-      apache::thrift::MessageType::T_REPLY,
-      "cleanup");
-  std::ignore = channel->onRead(erase_and_box(std::move(response)));
-}
-
-// =============================================================================
-// onException - Pipeline Exception Handling
-// =============================================================================
-
-TEST_F(ThriftClientChannelTest, OnExceptionWithNoPendingCallbacksIsNoop) {
-  auto channel = createChannel();
-
-  auto pipeline = buildPipelineWithHandler(
-      channel.get(),
-      [](apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl&,
-         TypeErasedBox&&) { return Result::Success; });
-  channel->setPipeline(pipeline.get());
-  SCOPE_EXIT {
-    teardownChannelPipeline(channel, pipeline);
-  };
-
-  // No pending requests - onException should not crash
-  auto error =
-      folly::make_exception_wrapper<std::runtime_error>("connection lost");
-  channel->onException(std::move(error));
 }
 
 } // namespace apache::thrift::fast_thrift::thrift

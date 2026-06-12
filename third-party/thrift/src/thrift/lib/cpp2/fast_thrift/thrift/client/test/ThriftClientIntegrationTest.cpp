@@ -143,22 +143,11 @@ makeCallback() {
 
 class ThriftClientChannelIntegrationTest : public ::testing::Test {
  protected:
-  void SetUp() override { allocator_.reset(); }
+  void SetUp() override {}
 
   void TearDown() override {
-    if (pipeline_) {
-      pipeline_->deactivate();
-      pipeline_->close();
-    }
-    if (transportAdapter_) {
-      transportAdapter_->resetPipeline();
-    }
-    if (channel_) {
-      channel_->resetPipeline();
-    }
+    // The channel owns the rocket connection and tears it down on reset.
     channel_.reset();
-    pipeline_.reset();
-    transportAdapter_.reset();
     testTransport_ = nullptr;
   }
 
@@ -227,29 +216,11 @@ class ThriftClientChannelIntegrationTest : public ::testing::Test {
     connection->appAdapter->setPipeline(connection->pipeline.get());
     connection->transportHandler->setPipeline(connection->pipeline.get());
 
-    // 2. Build thrift pipeline: ThriftClientChannel → TransportAdapter
-    channel_ = ThriftClientChannel::newChannel(&evb_);
-
-    transportAdapter_ = std::make_unique<client::ThriftClientTransportAdapter>(
-        std::move(connection));
-
-    pipeline_ =
-        PipelineBuilder<
-            client::ThriftClientTransportAdapter,
-            ThriftClientChannel,
-            TestAllocator>()
-            .setEventBase(&evb_)
-            .setHead(transportAdapter_.get())
-            .setTail(channel_.get())
-            .setAllocator(&allocator_)
-            .addNextInbound<client::handler::ThriftClientMetadataPushHandler>(
-                thrift_client_metadata_push_handler_tag)
-            .addNextOutbound<client::handler::ThriftClientChecksumHandler>(
-                thrift_client_checksum_handler_tag)
-            .build();
-
-    channel_->setPipeline(pipeline_.get());
-    transportAdapter_->setPipeline(pipeline_.get());
+    // 2. Hand the connected rocket connection to the channel, which drives it
+    // directly (no thrift pipeline / transport adapter). Keep a raw handle to
+    // the app adapter so tests can inject connection-level errors.
+    appAdapter_ = connection->appAdapter.get();
+    channel_ = ThriftClientChannel::newChannel(std::move(connection));
     transportHandlerPtr->onConnect();
 
     // Drive event loop to process the SETUP frame write callback
@@ -357,10 +328,8 @@ class ThriftClientChannelIntegrationTest : public ::testing::Test {
 
   folly::EventBase evb_;
   TestAsyncTransport* testTransport_{nullptr};
-  std::unique_ptr<client::ThriftClientTransportAdapter> transportAdapter_;
+  rocket::client::RocketClientAppAdapter* appAdapter_{nullptr};
   ThriftClientChannel::UniquePtr channel_;
-  PipelineImpl::Ptr pipeline_;
-  TestAllocator allocator_;
 };
 
 // =============================================================================
@@ -854,7 +823,7 @@ TEST_F(
   setupPipeline();
 
   // Simulate fatal connection error that closes the channel
-  channel_->onException(
+  appAdapter_->onException(
       folly::make_exception_wrapper<
           apache::thrift::transport::TTransportException>(
           apache::thrift::transport::TTransportException::END_OF_FILE,
@@ -903,7 +872,7 @@ TEST_F(
 
   // Simulate CONNECTION_CLOSE: fires NOT_OPEN exception which transitions
   // state_ to State::Closing
-  channel_->onException(
+  appAdapter_->onException(
       folly::make_exception_wrapper<
           apache::thrift::transport::TTransportException>(
           apache::thrift::transport::TTransportException::NOT_OPEN,

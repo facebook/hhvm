@@ -209,6 +209,10 @@ class FakeSharedWebTransport : public WebTransport {
   makeSharedWebTransport() {
     auto a = std::make_unique<FakeSharedWebTransport>();
     auto b = std::make_unique<FakeSharedWebTransport>();
+    // Use QUIC-style stream ID spaces: client uses even types (bidi=0,
+    // uni=2), server uses odd types (bidi=1, uni=3).
+    b->nextBidiStreamId_ = 1;
+    b->nextUniStreamId_ = 3;
     a->setPeer(b.get());
     b->setPeer(a.get());
     return {std::move(a), std::move(b)};

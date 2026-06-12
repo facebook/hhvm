@@ -10,6 +10,8 @@
 #include <bitset>
 #include <map>
 #include <memory>
+#include <optional>
+#include <string>
 #include <utility>
 
 #include <folly/Range.h>
@@ -60,7 +62,8 @@ using ExtraDataCallbackT = std::function<ExtraDataMap()>;
 using AxonProxyWriteFn = std::function<folly::exception_wrapper(
     uint64_t,
     folly::F14FastMap<std::string, std::string>&&,
-    bool)>;
+    bool,
+    std::optional<std::string> /* dedupeKey */)>;
 
 struct AxonContext {
   bool fallbackAsynclog{false};

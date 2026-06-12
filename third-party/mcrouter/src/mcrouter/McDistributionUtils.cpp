@@ -8,6 +8,8 @@
 #include "mcrouter/McDistributionUtils.h"
 
 #include <optional>
+#include <string>
+#include <utility>
 
 namespace facebook {
 namespace memcache {
@@ -35,6 +37,8 @@ FOLLY_NOINLINE folly::exception_wrapper distributeWriteRequest(
     pool.emplace(axonCtx->poolFilter);
   }
 
+  // Dedupe by request key to suppress hot keys at the write proxy.
+  auto dedupeKey = req.key()->fullKey().str();
   // Run serialization off fiber
   auto kvPairs = folly::fibers::runInMainContext([&req,
                                                   &targetRegion,
@@ -57,7 +61,8 @@ FOLLY_NOINLINE folly::exception_wrapper distributeWriteRequest(
         invalidation::DistributionOperation::Write,
         sourceRegion);
   });
-  return axonCtx->writeProxyFn(bucketId, std::move(kvPairs), secureWrites);
+  return axonCtx->writeProxyFn(
+      bucketId, std::move(kvPairs), secureWrites, std::move(dedupeKey));
 }
 
 FOLLY_NOINLINE folly::exception_wrapper distributeDeleteRequest(
@@ -79,6 +84,8 @@ FOLLY_NOINLINE folly::exception_wrapper distributeDeleteRequest(
   if (!axonCtx->poolFilter.empty()) {
     pool.emplace(axonCtx->poolFilter);
   }
+  // Dedupe by request key to suppress hot keys at the write proxy.
+  auto dedupeKey = req.key()->fullKey().str();
   // Run off fiber to save fiber stack for serialization
   auto kvPairs = folly::fibers::runInMainContext(
       [&req, &region, &pool, &message, &sourceRegion, type]() {
@@ -110,7 +117,10 @@ FOLLY_NOINLINE folly::exception_wrapper distributeDeleteRequest(
             sourceRegion);
       });
   return axonCtx->writeProxyFn(
-      bucketId, std::move(kvPairs), /*secureWrites*/ false);
+      bucketId,
+      std::move(kvPairs),
+      /*secureWrites*/ false,
+      std::move(dedupeKey));
 }
 
 FOLLY_NOINLINE bool spoolAsynclog(

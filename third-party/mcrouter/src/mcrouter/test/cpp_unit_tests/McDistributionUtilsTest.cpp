@@ -26,7 +26,8 @@ TEST(McDistributionUtilsTest, distributeSetTest) {
   facebook::memcache::mcrouter::AxonProxyWriteFn writeProxyFn =
       [&](auto bucketId,
           auto&& kvPairs,
-          bool isSecureWrites) -> folly::exception_wrapper {
+          bool isSecureWrites,
+          const std::optional<std::string>&) -> folly::exception_wrapper {
     resultBucketId = bucketId;
     resultKvPairs = kvPairs;
     secureWrites = isSecureWrites;
@@ -96,7 +97,8 @@ TEST(McDistributionUtilsTest, distributeSetWithSecurityTest) {
   facebook::memcache::mcrouter::AxonProxyWriteFn writeProxyFn =
       [&](auto bucketId,
           auto&& kvPairs,
-          bool isSecureWrites) -> folly::exception_wrapper {
+          bool isSecureWrites,
+          const std::optional<std::string>&) -> folly::exception_wrapper {
     resultBucketId = bucketId;
     resultKvPairs = kvPairs;
     secureWrites = isSecureWrites;
@@ -169,7 +171,10 @@ TEST(McDistributionUtilsTest, distributeDeleteDirectedTest) {
   folly::F14FastMap<std::string, std::string> resultKvPairs;
 
   facebook::memcache::mcrouter::AxonProxyWriteFn writeProxyFn =
-      [&](auto bucketId, auto&& kvPairs, bool) -> folly::exception_wrapper {
+      [&](auto bucketId,
+          auto&& kvPairs,
+          bool,
+          const std::optional<std::string>&) -> folly::exception_wrapper {
     resultBucketId = bucketId;
     resultKvPairs = kvPairs;
     return folly::exception_wrapper();
@@ -242,7 +247,10 @@ TEST(McDistributionUtilsTest, distributeDeleteBroadcastTest) {
   folly::F14FastMap<std::string, std::string> resultKvPairs;
 
   facebook::memcache::mcrouter::AxonProxyWriteFn writeProxyFn =
-      [&](auto bucketId, auto&& kvPairs, bool) -> folly::exception_wrapper {
+      [&](auto bucketId,
+          auto&& kvPairs,
+          bool,
+          const std::optional<std::string>&) -> folly::exception_wrapper {
     resultBucketId = bucketId;
     resultKvPairs = kvPairs;
     return folly::exception_wrapper();
@@ -314,7 +322,10 @@ TEST(McDistributionUtilsTest, spoolDeleteTest) {
   folly::F14FastMap<std::string, std::string> resultKvPairs;
 
   facebook::memcache::mcrouter::AxonProxyWriteFn writeProxyFn =
-      [&](auto bucketId, auto&& kvPairs, bool) -> folly::exception_wrapper {
+      [&](auto bucketId,
+          auto&& kvPairs,
+          bool,
+          const std::optional<std::string>&) -> folly::exception_wrapper {
     resultBucketId = bucketId;
     resultKvPairs = kvPairs;
     return folly::exception_wrapper();
@@ -375,5 +386,68 @@ TEST(McDistributionUtilsTest, spoolDeleteTest) {
           std::stoi(resultKvPairs.find(kOperation)->second)),
       DistributionOperation::Delete);
   EXPECT_EQ(resultKvPairs.find(kSourceRegion)->second, sourceRegion);
+}
+
+// The dedup key passed to the write proxy is the request key, so all writes to
+// the same key collapse within the proxy's dedup window (hot-key suppression)
+// regardless of value, while writes to different keys never collapse.
+TEST(McDistributionUtilsTest, distributeSetKeyBasedDedupeKeyTest) {
+  std::string targetRegion = "texas";
+  std::string sourceRegion = "altoona";
+  std::string pool = "main";
+  uint64_t bucketId = 234532;
+  std::optional<std::string> resultDedupeKey;
+
+  facebook::memcache::mcrouter::AxonProxyWriteFn writeProxyFn =
+      [&](auto,
+          auto&&,
+          bool,
+          std::optional<std::string> dedupeKey) -> folly::exception_wrapper {
+    resultDedupeKey = std::move(dedupeKey);
+    return folly::exception_wrapper();
+  };
+
+  auto axonCtx = mcrouter::AxonContext{
+      .fallbackAsynclog = false,
+      .allDelete = false,
+      .writeProxyFn = writeProxyFn,
+      .defaultRegionFilter = sourceRegion,
+      .poolFilter = pool};
+  auto axonCtxPtr =
+      std::make_shared<facebook::memcache::mcrouter::AxonContext>(axonCtx);
+
+  auto makeReq = [](folly::StringPiece key, folly::StringPiece value) {
+    auto req = McSetRequest(key);
+    req.value() = folly::IOBuf(folly::IOBuf::COPY_BUFFER, value);
+    return req;
+  };
+
+  // Dedup key is the request key itself.
+  auto req = makeReq("key1", "value");
+  EXPECT_FALSE(distributeWriteRequest(
+                   req, axonCtxPtr, bucketId, targetRegion, sourceRegion)
+                   .has_exception_ptr());
+  ASSERT_TRUE(resultDedupeKey.has_value());
+  EXPECT_EQ(*resultDedupeKey, "key1");
+  const auto firstKey = *resultDedupeKey;
+
+  // Same key, different value -> same dedup key (collapses the hot key).
+  resultDedupeKey.reset();
+  auto sameKeyReq = makeReq("key1", "value2");
+  EXPECT_FALSE(distributeWriteRequest(
+                   sameKeyReq, axonCtxPtr, bucketId, targetRegion, sourceRegion)
+                   .has_exception_ptr());
+  ASSERT_TRUE(resultDedupeKey.has_value());
+  EXPECT_EQ(*resultDedupeKey, firstKey);
+
+  // Different key -> different dedup key (must NOT collapse).
+  resultDedupeKey.reset();
+  auto otherKeyReq = makeReq("key2", "value");
+  EXPECT_FALSE(
+      distributeWriteRequest(
+          otherKeyReq, axonCtxPtr, bucketId, targetRegion, sourceRegion)
+          .has_exception_ptr());
+  ASSERT_TRUE(resultDedupeKey.has_value());
+  EXPECT_NE(*resultDedupeKey, firstKey);
 }
 } // namespace facebook::memcache::invalidation::test

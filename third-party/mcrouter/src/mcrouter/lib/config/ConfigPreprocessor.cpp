@@ -54,7 +54,7 @@ StringPiece asStringPiece(const dynamic& obj, StringPiece objName) {
 }
 
 const dynamic&
-tryGet(const dynamic& obj, const dynamic& key, StringPiece objName) {
+tryGet(const dynamic& obj, StringPiece key, StringPiece objName) {
   auto it = obj.find(key);
   checkLogic(it != obj.items().end(), "{}: '{}' not found", objName, key);
   return it->second;

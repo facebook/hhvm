@@ -74,7 +74,7 @@ def _ensure_utf8(value: str) -> None:
 # ---------------------------------------------------------------------------
 
 
-class SerializableRecord:
+class SerializableRecordBase:
     """Base of the record-value hierarchy.
 
     Two records are equal iff they denote the same datum; subclasses implement
@@ -89,7 +89,7 @@ class SerializableRecord:
         raise NotImplementedError
 
     def __eq__(self, other: object) -> bool:
-        if not isinstance(other, SerializableRecord):
+        if not isinstance(other, SerializableRecordBase):
             return NotImplemented
         return self._key() == other._key()
 
@@ -100,7 +100,7 @@ class SerializableRecord:
         return f"{type(self).__name__}()"
 
 
-class BoolRecord(SerializableRecord):
+class BoolRecord(SerializableRecordBase):
     """A ``bool`` datum (``boolDatum``)."""
 
     __slots__ = ("_value",)
@@ -121,7 +121,7 @@ class BoolRecord(SerializableRecord):
         return f"BoolRecord({self._value!r})"
 
 
-class _IntRecord(SerializableRecord, ABC):
+class _IntRecord(SerializableRecordBase, ABC):
     """Shared implementation for the four fixed-width integer arms. Each leaf
     supplies its own ``_TAG`` so equal payloads of different widths are still
     distinct records (abstract: only the concrete arms set ``_TAG``)."""
@@ -173,7 +173,7 @@ class Int64Record(_IntRecord):
     _TAG = "int64"
 
 
-class _FloatRecord(SerializableRecord, ABC):
+class _FloatRecord(SerializableRecordBase, ABC):
     """Shared implementation for the two floating-point arms. ``NaN`` / ``-0.0``
     are rejected at construction; each leaf supplies its own ``_TAG`` (abstract:
     only the concrete arms set ``_TAG``)."""
@@ -212,7 +212,7 @@ class Float64Record(_FloatRecord):
     _TAG = "float64"
 
 
-class TextRecord(SerializableRecord):
+class TextRecord(SerializableRecordBase):
     """A UTF-8 text datum (``textDatum``). Non-UTF-8 input is rejected."""
 
     __slots__ = ("_value",)
@@ -234,7 +234,7 @@ class TextRecord(SerializableRecord):
         return f"TextRecord({self._value!r})"
 
 
-class ByteArrayRecord(SerializableRecord):
+class ByteArrayRecord(SerializableRecordBase):
     """A raw byte-array datum (``byteArrayDatum``). Not UTF-8 validated."""
 
     __slots__ = ("_value",)
@@ -255,7 +255,7 @@ class ByteArrayRecord(SerializableRecord):
         return f"ByteArrayRecord({self._value!r})"
 
 
-class FieldSetRecord(SerializableRecord):
+class FieldSetRecord(SerializableRecordBase):
     """A field-id-keyed record (``fieldSetDatum``) -- the shape of a struct/union
     value and of a structured-annotation value. Keys are i16 field ids."""
 
@@ -281,7 +281,7 @@ class FieldSetRecord(SerializableRecord):
         return f"FieldSetRecord({self._fields!r})"
 
 
-class ListRecord(SerializableRecord):
+class ListRecord(SerializableRecordBase):
     """An ordered list datum (``listDatum``). Order is significant."""
 
     __slots__ = ("_elements",)
@@ -302,7 +302,7 @@ class ListRecord(SerializableRecord):
         return f"ListRecord({list(self._elements)!r})"
 
 
-class SetRecord(SerializableRecord):
+class SetRecord(SerializableRecordBase):
     """An unordered set datum (``setDatum``). Duplicate elements are rejected;
     equality is order-independent."""
 
@@ -331,7 +331,7 @@ class SetRecord(SerializableRecord):
         return f"SetRecord({list(self._elements)!r})"
 
 
-class MapRecord(SerializableRecord):
+class MapRecord(SerializableRecordBase):
     """An unordered map datum (``mapDatum``) of ``(key, value)`` record entries.
     Duplicate keys are rejected; equality is order-independent."""
 
@@ -362,10 +362,9 @@ class MapRecord(SerializableRecord):
         return f"MapRecord({list(self._entries)!r})"
 
 
-# Static-exhaustiveness union alias (for ``match`` + ``assert_never``), mirroring
-# ``TypeRefT`` in ``type_system.py``. Defined after the classes so the runtime
-# ``X | Y`` union can be built.
-SerializableRecordT = (
+# Static-exhaustiveness union alias (for ``match`` + ``assert_never``). Defined
+# after the classes so the runtime ``X | Y`` union can be built.
+SerializableRecord = (
     BoolRecord
     | Int8Record
     | Int16Record

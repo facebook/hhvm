@@ -20,8 +20,8 @@ Pure-Python runtime TypeSystem model for the thrift-python SchemaRegistry.
 It contains:
 
 * ``Primitive`` / ``PresenceQualifier`` -- the only discriminant enums.
-* ``TypeRef`` -- a *resolved* type edge (the closed hierarchy
-  ``PrimitiveTypeRef`` / ``ListTypeRef`` / ``SetTypeRef`` / ``MapTypeRef`` /
+* ``TypeRef`` -- a type edge, discriminated by ``isinstance`` / ``match``
+  (``PrimitiveTypeRef`` / ``ListTypeRef`` / ``SetTypeRef`` / ``MapTypeRef`` /
   ``StructTypeRef`` / ``UnionTypeRef`` / ``EnumTypeRef`` / ``OpaqueAliasTypeRef``).
 * ``DefinitionNode`` -- what URI lookups return (``StructNode`` / ``UnionNode`` /
   ``EnumNode`` / ``OpaqueAliasNode``), plus ``FieldDefinition`` / ``FieldIdentity``
@@ -39,9 +39,9 @@ from __future__ import annotations
 
 import enum
 from abc import ABC, abstractmethod
-from collections.abc import Mapping, Sequence
+from collections.abc import Callable, Iterator, Mapping, Sequence
 from types import MappingProxyType
-from typing import Generic, TypeVar
+from typing import assert_never, Generic, TypeVar
 
 from thrift.lib.python.schema._record import SerializableRecord
 
@@ -90,7 +90,7 @@ class PresenceQualifier(enum.IntEnum):
 # ---------------------------------------------------------------------------
 
 
-class TypeRef:
+class TypeRefBase:
     """Base of the resolved type-reference hierarchy.
 
     Equality and hashing are *structural*: two ``TypeRef``s are equal iff they
@@ -105,7 +105,7 @@ class TypeRef:
         raise NotImplementedError
 
     def __eq__(self, other: object) -> bool:
-        if not isinstance(other, TypeRef):
+        if not isinstance(other, TypeRefBase):
             return NotImplemented
         return self._key() == other._key()
 
@@ -116,7 +116,7 @@ class TypeRef:
         return f"{type(self).__name__}()"
 
 
-class PrimitiveTypeRef(TypeRef):
+class PrimitiveTypeRef(TypeRefBase):
     """A primitive type edge (bool, i32, string, ..., any)."""
 
     __slots__ = ("_primitive",)
@@ -137,18 +137,18 @@ class PrimitiveTypeRef(TypeRef):
         return f"PrimitiveTypeRef({self._primitive.name})"
 
 
-class ListTypeRef(TypeRef):
+class ListTypeRef(TypeRefBase):
     """A ``list<T>`` type edge."""
 
     __slots__ = ("_element_type",)
     __match_args__ = ("element_type",)
-    _element_type: TypeRef
+    _element_type: TypeRefBase
 
-    def __init__(self, element_type: TypeRef) -> None:
+    def __init__(self, element_type: TypeRefBase) -> None:
         self._element_type = element_type
 
     @property
-    def element_type(self) -> TypeRef:
+    def element_type(self) -> TypeRefBase:
         return self._element_type
 
     def _key(self) -> tuple[object, ...]:
@@ -158,18 +158,18 @@ class ListTypeRef(TypeRef):
         return f"ListTypeRef({self._element_type!r})"
 
 
-class SetTypeRef(TypeRef):
+class SetTypeRef(TypeRefBase):
     """A ``set<T>`` type edge."""
 
     __slots__ = ("_element_type",)
     __match_args__ = ("element_type",)
-    _element_type: TypeRef
+    _element_type: TypeRefBase
 
-    def __init__(self, element_type: TypeRef) -> None:
+    def __init__(self, element_type: TypeRefBase) -> None:
         self._element_type = element_type
 
     @property
-    def element_type(self) -> TypeRef:
+    def element_type(self) -> TypeRefBase:
         return self._element_type
 
     def _key(self) -> tuple[object, ...]:
@@ -179,24 +179,24 @@ class SetTypeRef(TypeRef):
         return f"SetTypeRef({self._element_type!r})"
 
 
-class MapTypeRef(TypeRef):
+class MapTypeRef(TypeRefBase):
     """A ``map<K, V>`` type edge."""
 
     __slots__ = ("_key_type", "_value_type")
     __match_args__ = ("key_type", "value_type")
-    _key_type: TypeRef
-    _value_type: TypeRef
+    _key_type: TypeRefBase
+    _value_type: TypeRefBase
 
-    def __init__(self, key_type: TypeRef, value_type: TypeRef) -> None:
+    def __init__(self, key_type: TypeRefBase, value_type: TypeRefBase) -> None:
         self._key_type = key_type
         self._value_type = value_type
 
     @property
-    def key_type(self) -> TypeRef:
+    def key_type(self) -> TypeRefBase:
         return self._key_type
 
     @property
-    def value_type(self) -> TypeRef:
+    def value_type(self) -> TypeRefBase:
         return self._value_type
 
     def _key(self) -> tuple[object, ...]:
@@ -208,10 +208,10 @@ class MapTypeRef(TypeRef):
 
 # A user-defined type edge is generic over the concrete node it resolves to, so
 # each leaf narrows ``node`` to its own ``DefinitionNode`` subtype.
-_NodeT = TypeVar("_NodeT", bound="DefinitionNode")
+_NodeT = TypeVar("_NodeT", bound="DefinitionNodeBase")
 
 
-class _UserDefinedTypeRef(TypeRef, Generic[_NodeT]):
+class _UserDefinedTypeRef(TypeRefBase, Generic[_NodeT]):
     """Shared implementation for the four user-defined type edges
     (``StructTypeRef`` / ``UnionTypeRef`` / ``EnumTypeRef`` /
     ``OpaqueAliasTypeRef``): each holds a resolved ``DefinitionNode`` and is keyed
@@ -260,6 +260,18 @@ class OpaqueAliasTypeRef(_UserDefinedTypeRef["OpaqueAliasNode"]):
     cannot define one)."""
 
     __slots__ = ()
+
+
+TypeRef = (
+    PrimitiveTypeRef
+    | ListTypeRef
+    | SetTypeRef
+    | MapTypeRef
+    | StructTypeRef
+    | UnionTypeRef
+    | EnumTypeRef
+    | OpaqueAliasTypeRef
+)
 
 
 # ---------------------------------------------------------------------------
@@ -390,7 +402,7 @@ class EnumValue:
 # ---------------------------------------------------------------------------
 
 
-class DefinitionNode:
+class DefinitionNodeBase:
     """Base of the four user-defined node kinds (struct / union / enum /
     opaque-alias). Equality and hashing are *by URI* -- two distinct node
     objects with the same URI compare equal (``is`` still distinguishes them)."""
@@ -425,7 +437,7 @@ class DefinitionNode:
         # A Thrift URI names exactly one definition, so a struct and an enum can
         # never share a URI in a valid type system. Also, IndexedTypeSystem is
         # URI-keyed, so it can hold only one node per URI anyway.
-        if not isinstance(other, DefinitionNode):
+        if not isinstance(other, DefinitionNodeBase):
             return NotImplemented
         return self._uri == other._uri
 
@@ -436,7 +448,7 @@ class DefinitionNode:
         return f"{type(self).__name__}({self._uri!r})"
 
 
-class _StructuredNode(DefinitionNode):
+class _StructuredNode(DefinitionNodeBase):
     """Shared implementation for ``StructNode`` and ``UnionNode`` -- a list of
     fields plus precomputed ``by_id`` / ``by_name`` indexes."""
 
@@ -506,7 +518,7 @@ class UnionNode(_StructuredNode):
         super()._set_fields(fields)
 
 
-class EnumNode(DefinitionNode):
+class EnumNode(DefinitionNodeBase):
     """An enum: an ordered list of ``EnumValue``."""
 
     __slots__ = ("_values",)
@@ -532,7 +544,7 @@ class EnumNode(DefinitionNode):
         return self._values
 
 
-class OpaqueAliasNode(DefinitionNode):
+class OpaqueAliasNode(DefinitionNodeBase):
     """A programmatic opaque alias to a non-user-defined target type
     (primitive or container)."""
 
@@ -630,20 +642,78 @@ class IndexedTypeSystem(EnumerableTypeSystem):
         return f"IndexedTypeSystem({len(self._by_uri)} types)"
 
 
+DefinitionNode = StructNode | UnionNode | EnumNode | OpaqueAliasNode
+
+
 # ---------------------------------------------------------------------------
-# Static-exhaustiveness union aliases (for ``match`` + ``assert_never``).
-# Defined after the classes so the runtime ``X | Y`` unions can be built.
+# Shared model traversals (used by both the builder and the wire-export layer).
+# These operate purely on the model above and introduce no wire-type imports.
 # ---------------------------------------------------------------------------
 
-TypeRefT = (
-    PrimitiveTypeRef
-    | ListTypeRef
-    | SetTypeRef
-    | MapTypeRef
-    | StructTypeRef
-    | UnionTypeRef
-    | EnumTypeRef
-    | OpaqueAliasTypeRef
-)
 
-DefinitionNodeT = StructNode | UnionNode | EnumNode | OpaqueAliasNode
+def _type_ref_for_node(node: DefinitionNode) -> TypeRef:
+    """Wrap a resolved ``DefinitionNode`` in the matching user-defined ``TypeRef``
+    (``StructTypeRef`` / ``UnionTypeRef`` / ``EnumTypeRef`` /
+    ``OpaqueAliasTypeRef``)."""
+    match node:
+        case StructNode():
+            return StructTypeRef(node)
+        case UnionNode():
+            return UnionTypeRef(node)
+        case EnumNode():
+            return EnumTypeRef(node)
+        case OpaqueAliasNode():
+            return OpaqueAliasTypeRef(node)
+        case _:
+            assert_never(node)
+
+
+def _type_ref_uris(type_ref: TypeRefBase) -> Iterator[str]:
+    """The user-defined URIs reachable from a ``TypeRef``, recursing into
+    containers (primitives reference nothing)."""
+    if not isinstance(type_ref, TypeRef):
+        raise InvalidTypeError(
+            f"{type(type_ref).__name__} is not a resolved type edge (TypeRef)."
+        )
+    match type_ref:
+        case ListTypeRef() | SetTypeRef():
+            yield from _type_ref_uris(type_ref.element_type)
+        case MapTypeRef():
+            yield from _type_ref_uris(type_ref.key_type)
+            yield from _type_ref_uris(type_ref.value_type)
+        case StructTypeRef() | UnionTypeRef() | EnumTypeRef() | OpaqueAliasTypeRef():
+            yield type_ref.node.uri
+        case PrimitiveTypeRef():
+            pass  # primitives reference nothing
+        case _:
+            assert_never(type_ref)
+
+
+def _collect_closure(
+    source: TypeSystem,
+    root_uris: Sequence[str],
+    edges: Callable[[DefinitionNode], Iterator[str]],
+) -> dict[str, DefinitionNode]:
+    """DFS the closure of ``root_uris`` over ``source``, following ``edges(node)``
+    out of each resolved node. Returns a ``{uri: source node}`` map.
+
+    Raises ``InvalidTypeError`` if a root URI is absent, or if a referenced
+    (non-root) URI fails to resolve (i.e. the closure is not self-contained)."""
+    roots = set(root_uris)
+    closure: dict[str, DefinitionNode] = {}
+    worklist: list[str] = list(root_uris)
+    while worklist:
+        uri = worklist.pop()
+        if uri in closure:
+            continue
+        node = source.get_user_defined_type(uri)
+        if node is None:
+            if uri in roots:
+                raise InvalidTypeError(f"Root URI not found in source: {uri!r}")
+            raise InvalidTypeError(
+                f"Source type system is not self-contained: referenced URI "
+                f"{uri!r} is not resolvable"
+            )
+        closure[uri] = node
+        worklist.extend(edges(node))
+    return closure

@@ -37,13 +37,13 @@ from thrift.lib.python.schema.type_system import (
     SetTypeRef,
     StructNode,
     StructTypeRef,
-    TypeRefT,
+    TypeRef,
     UnionNode,
     UnionTypeRef,
 )
 
 
-def _kind_name(type_ref: TypeRefT) -> str:
+def _kind_name(type_ref: TypeRef) -> str:
     match type_ref:
         case PrimitiveTypeRef():
             return "primitive"
@@ -102,7 +102,7 @@ class TypeRefDiscriminationTest(unittest.TestCase):
             uri="test/A", target_type=PrimitiveTypeRef(Primitive.I64)
         )
 
-        cases: list[tuple[TypeRefT, str]] = [
+        cases: list[tuple[TypeRef, str]] = [
             (PrimitiveTypeRef(Primitive.I32), "primitive"),
             (ListTypeRef(PrimitiveTypeRef(Primitive.I32)), "list"),
             (SetTypeRef(PrimitiveTypeRef(Primitive.STRING)), "set"),

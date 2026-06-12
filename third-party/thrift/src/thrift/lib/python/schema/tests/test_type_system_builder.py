@@ -37,6 +37,7 @@ from thrift.lib.python.schema.type_system import (
     StructNode,
     StructTypeRef,
     TypeRef,
+    TypeRefBase,
     UnionNode,
     UnionTypeRef,
 )
@@ -67,7 +68,7 @@ STRING = PrimitiveTypeRef(Primitive.STRING)
 _BRIDGE_URI = "thrift.com/python/schema/ts_bridge"
 
 
-def _referenced_uris(type_ref: TypeRef) -> list[str]:
+def _referenced_uris(type_ref: TypeRefBase) -> list[str]:
     """The user-defined URIs reachable from a ``TypeRef`` (test-local walker used
     to assert that a pruned type system is self-contained)."""
     if isinstance(type_ref, (ListTypeRef, SetTypeRef)):

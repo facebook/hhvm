@@ -41,6 +41,9 @@ from collections.abc import Iterator
 from typing import assert_never, Sequence
 
 from thrift.lib.python.schema.type_system import (
+    _collect_closure,
+    _type_ref_for_node,
+    _type_ref_uris,
     DefinitionNode,
     EnumerableTypeSystem,
     EnumNode,
@@ -60,6 +63,7 @@ from thrift.lib.python.schema.type_system import (
     StructNode,
     StructTypeRef,
     TypeRef,
+    TypeRefBase,
     TypeSystem,
     UnionNode,
     UnionTypeRef,
@@ -71,13 +75,13 @@ from thrift.lib.python.schema.type_system import (
 # ---------------------------------------------------------------------------
 
 
-class UnresolvedTypeRef(TypeRef):
+class UnresolvedTypeRef(TypeRefBase):
     """Builder-input marker: an unresolved reference to a user-defined type by
     URI, resolved to a node-holding ``TypeRef`` during ``build()``.
 
     It is a ``TypeRef`` subclass purely so it can nest inside container input
     (``ListTypeRef`` / ``SetTypeRef`` / ``MapTypeRef``); it is **never** part of
-    a built ``TypeSystem`` and is deliberately excluded from ``TypeRefT``."""
+    a built ``TypeSystem`` (which holds only resolved edges)."""
 
     __slots__ = ("_uri",)
     _uri: str
@@ -99,7 +103,7 @@ class UnresolvedTypeRef(TypeRef):
 # A type edge supplied to the builder: a resolved primitive/container ``TypeRef``
 # (which may contain ``UnresolvedTypeRef`` markers for nested user types), or a
 # ``str`` URI referencing a user-defined type.
-TypeInput = TypeRef | str
+TypeInput = TypeRefBase | str
 
 
 def ref(uri: str) -> UnresolvedTypeRef:
@@ -192,21 +196,6 @@ _Pending = _PendingStructured | _PendingEnum | _PendingOpaqueAlias
 # ---------------------------------------------------------------------------
 # Type resolution (phase 2 helpers)
 # ---------------------------------------------------------------------------
-
-
-def _type_ref_for_node(node: DefinitionNode) -> TypeRef:
-    """Wrap a resolved ``DefinitionNode`` in the matching user-defined
-    ``TypeRef`` (``StructTypeRef`` / ``UnionTypeRef`` / ``EnumTypeRef`` /
-    ``OpaqueAliasTypeRef``)."""
-    if isinstance(node, StructNode):
-        return StructTypeRef(node)
-    if isinstance(node, UnionNode):
-        return UnionTypeRef(node)
-    if isinstance(node, EnumNode):
-        return EnumTypeRef(node)
-    if isinstance(node, OpaqueAliasNode):
-        return OpaqueAliasTypeRef(node)
-    raise InvalidTypeError(f"Unknown definition kind: {node!r}")
 
 
 def _resolve_uri(uri: str, nodes: dict[str, DefinitionNode]) -> TypeRef:
@@ -459,59 +448,25 @@ def build_pruned(
     Raises ``InvalidTypeError`` if a root URI is absent from ``source``, or if
     ``source`` is not self-contained (a referenced URI fails to resolve).
     """
-    closure = _collect_closure(source, root_uris)
+    closure = _collect_closure(source, root_uris, _referenced_uris)
     if share:
         return IndexedTypeSystem(dict(closure))
     return IndexedTypeSystem(_copy_closure(closure))
 
 
-def _collect_closure(
-    source: TypeSystem, root_uris: Sequence[str]
-) -> dict[str, DefinitionNode]:
-    """DFS the dependency closure of ``root_uris`` over ``source``, returning a
-    ``{uri: source node}`` map."""
-    roots = set(root_uris)
-    closure: dict[str, DefinitionNode] = {}
-    worklist: list[str] = list(root_uris)
-    while worklist:
-        uri = worklist.pop()
-        if uri in closure:
-            continue
-        node = source.get_user_defined_type(uri)
-        if node is None:
-            if uri in roots:
-                raise InvalidTypeError(f"Root URI not found in source: {uri!r}")
-            raise InvalidTypeError(
-                f"Source type system is not self-contained: referenced URI "
-                f"{uri!r} is not resolvable"
-            )
-        closure[uri] = node
-        worklist.extend(_referenced_uris(node))
-    return closure
-
-
 def _referenced_uris(node: DefinitionNode) -> Iterator[str]:
     """The user-defined URIs ``node`` references through its type structure
     (enum nodes reference nothing)."""
-    if isinstance(node, (StructNode, UnionNode)):
-        for field in node.fields:
-            yield from _type_ref_uris(field.type)
-    elif isinstance(node, OpaqueAliasNode):
-        yield from _type_ref_uris(node.target_type)
-
-
-def _type_ref_uris(type_ref: TypeRef) -> Iterator[str]:
-    """The user-defined URIs reachable from a ``TypeRef``, recursing into
-    containers (primitives reference nothing)."""
-    if isinstance(type_ref, (ListTypeRef, SetTypeRef)):
-        yield from _type_ref_uris(type_ref.element_type)
-    elif isinstance(type_ref, MapTypeRef):
-        yield from _type_ref_uris(type_ref.key_type)
-        yield from _type_ref_uris(type_ref.value_type)
-    elif isinstance(
-        type_ref, (StructTypeRef, UnionTypeRef, EnumTypeRef, OpaqueAliasTypeRef)
-    ):
-        yield type_ref.node.uri
+    match node:
+        case StructNode() | UnionNode():
+            for field in node.fields:
+                yield from _type_ref_uris(field.type)
+        case EnumNode():
+            pass  # enums reference no type-structure URIs
+        case OpaqueAliasNode():
+            yield from _type_ref_uris(node.target_type)
+        case _:
+            assert_never(node)
 
 
 def _copy_closure(closure: dict[str, DefinitionNode]) -> dict[str, DefinitionNode]:
@@ -528,15 +483,17 @@ def _copy_closure(closure: dict[str, DefinitionNode]) -> dict[str, DefinitionNod
 
 def _empty_copy(node: DefinitionNode) -> DefinitionNode:
     """Phase 1: an empty same-kind node carrying ``node``'s URI identity."""
-    if isinstance(node, UnionNode):
-        return UnionNode(uri=node.uri, is_sealed=node.is_sealed)
-    if isinstance(node, StructNode):
-        return StructNode(uri=node.uri, is_sealed=node.is_sealed)
-    if isinstance(node, EnumNode):
-        return EnumNode(uri=node.uri)
-    if isinstance(node, OpaqueAliasNode):
-        return OpaqueAliasNode(uri=node.uri)
-    raise InvalidTypeError(f"Cannot copy definition node: {node!r}")
+    match node:
+        case UnionNode():
+            return UnionNode(uri=node.uri, is_sealed=node.is_sealed)
+        case StructNode():
+            return StructNode(uri=node.uri, is_sealed=node.is_sealed)
+        case EnumNode():
+            return EnumNode(uri=node.uri)
+        case OpaqueAliasNode():
+            return OpaqueAliasNode(uri=node.uri)
+        case _:
+            assert_never(node)
 
 
 def _populate_copy(
@@ -546,15 +503,18 @@ def _populate_copy(
 ) -> None:
     """Phase 2: copy ``src``'s contents into ``dst``, rewiring edges to the
     copied nodes in ``new_nodes``."""
-    if isinstance(src, (StructNode, UnionNode)):
-        assert isinstance(dst, (StructNode, UnionNode))
-        dst._set_fields([_copy_field(f, new_nodes) for f in src.fields])
-    elif isinstance(src, EnumNode):
-        assert isinstance(dst, EnumNode)
-        dst._set_values([EnumValue(v.name, v.datum) for v in src.values])
-    elif isinstance(src, OpaqueAliasNode):
-        assert isinstance(dst, OpaqueAliasNode)
-        dst._set_target_type(_copy_type_ref(src.target_type, new_nodes))
+    match src:
+        case StructNode() | UnionNode():
+            assert isinstance(dst, (StructNode, UnionNode))
+            dst._set_fields([_copy_field(f, new_nodes) for f in src.fields])
+        case EnumNode():
+            assert isinstance(dst, EnumNode)
+            dst._set_values([EnumValue(v.name, v.datum) for v in src.values])
+        case OpaqueAliasNode():
+            assert isinstance(dst, OpaqueAliasNode)
+            dst._set_target_type(_copy_type_ref(src.target_type, new_nodes))
+        case _:
+            assert_never(src)
     # Annotation records are immutable value objects with no node edges, so
     # sharing them across the copy keeps the result independent of source nodes.
     dst._set_annotations(src.annotations)
@@ -573,21 +533,27 @@ def _copy_field(
     )
 
 
-def _copy_type_ref(type_ref: TypeRef, new_nodes: dict[str, DefinitionNode]) -> TypeRef:
+def _copy_type_ref(
+    type_ref: TypeRefBase, new_nodes: dict[str, DefinitionNode]
+) -> TypeRef:
     """Deep-copy a ``TypeRef``, rewiring user-defined edges to ``new_nodes``."""
-    if isinstance(type_ref, PrimitiveTypeRef):
-        return PrimitiveTypeRef(type_ref.primitive)
-    if isinstance(type_ref, ListTypeRef):
-        return ListTypeRef(_copy_type_ref(type_ref.element_type, new_nodes))
-    if isinstance(type_ref, SetTypeRef):
-        return SetTypeRef(_copy_type_ref(type_ref.element_type, new_nodes))
-    if isinstance(type_ref, MapTypeRef):
-        return MapTypeRef(
-            _copy_type_ref(type_ref.key_type, new_nodes),
-            _copy_type_ref(type_ref.value_type, new_nodes),
+    if not isinstance(type_ref, TypeRef):
+        raise InvalidTypeError(
+            f"{type(type_ref).__name__} is not a resolved type edge (TypeRef)."
         )
-    if isinstance(
-        type_ref, (StructTypeRef, UnionTypeRef, EnumTypeRef, OpaqueAliasTypeRef)
-    ):
-        return _type_ref_for_node(new_nodes[type_ref.node.uri])
-    raise InvalidTypeError(f"Cannot copy TypeRef: {type_ref!r}")
+    match type_ref:
+        case PrimitiveTypeRef():
+            return PrimitiveTypeRef(type_ref.primitive)
+        case ListTypeRef():
+            return ListTypeRef(_copy_type_ref(type_ref.element_type, new_nodes))
+        case SetTypeRef():
+            return SetTypeRef(_copy_type_ref(type_ref.element_type, new_nodes))
+        case MapTypeRef():
+            return MapTypeRef(
+                _copy_type_ref(type_ref.key_type, new_nodes),
+                _copy_type_ref(type_ref.value_type, new_nodes),
+            )
+        case StructTypeRef() | UnionTypeRef() | EnumTypeRef() | OpaqueAliasTypeRef():
+            return _type_ref_for_node(new_nodes[type_ref.node.uri])
+        case _:
+            assert_never(type_ref)

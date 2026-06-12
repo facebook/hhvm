@@ -72,27 +72,23 @@ from thrift.lib.python.schema._record import (
     TextRecord,
 )
 from thrift.lib.python.schema.type_system import (
+    _type_ref_for_node,
     DefinitionNode,
     EnumNode,
-    EnumTypeRef,
     EnumValue,
     FieldDefinition,
     FieldIdentity,
     InvalidTypeError,
     ListTypeRef,
     MapTypeRef,
-    OpaqueAliasNode,
-    OpaqueAliasTypeRef,
     PresenceQualifier,
     Primitive,
     PrimitiveTypeRef,
     SetTypeRef,
     StructNode,
-    StructTypeRef,
     TypeRef,
     TypeSystem,
     UnionNode,
-    UnionTypeRef,
 )
 
 
@@ -133,19 +129,6 @@ def _ts_presence(field: _ast.FieldNode, is_union: bool) -> PresenceQualifier:
     if field.qualifier == _ast.FieldQualifier.Terse:
         return PresenceQualifier.TERSE
     return PresenceQualifier.UNQUALIFIED
-
-
-def _ref_for_node(node: DefinitionNode) -> TypeRef:
-    """Wrap a resolved TS node in the matching user-defined ``TypeRef``."""
-    if isinstance(node, StructNode):
-        return StructTypeRef(node)
-    if isinstance(node, UnionNode):
-        return UnionTypeRef(node)
-    if isinstance(node, EnumNode):
-        return EnumTypeRef(node)
-    if isinstance(node, OpaqueAliasNode):
-        return OpaqueAliasTypeRef(node)
-    raise InvalidTypeError(f"Unexpected definition node: {node!r}")
 
 
 # ---------------------------------------------------------------------------
@@ -489,19 +472,19 @@ class SyntaxGraphBridge(TypeSystem):
             node = true_ref.node
             if node.uri == _ANY_STRUCT_URI:
                 return _interned_primitive(Primitive.ANY)
-            return _ref_for_node(
+            return _type_ref_for_node(
                 self._bridge_definition(node, added_keys, referenced_by)
             )
         if isinstance(true_ref, _ast.ExceptionTypeRef):
-            return _ref_for_node(
+            return _type_ref_for_node(
                 self._bridge_definition(true_ref.node, added_keys, referenced_by)
             )
         if isinstance(true_ref, _ast.UnionTypeRef):
-            return _ref_for_node(
+            return _type_ref_for_node(
                 self._bridge_definition(true_ref.node, added_keys, referenced_by)
             )
         if isinstance(true_ref, _ast.EnumTypeRef):
-            return _ref_for_node(
+            return _type_ref_for_node(
                 self._bridge_definition(true_ref.node, added_keys, referenced_by)
             )
         raise InvalidTypeError(f"Cannot bridge AST type to TypeSystem: {true_ref!r}")

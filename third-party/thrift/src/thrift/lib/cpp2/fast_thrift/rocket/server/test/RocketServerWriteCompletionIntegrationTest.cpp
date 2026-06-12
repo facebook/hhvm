@@ -24,14 +24,15 @@
  *   TransportHandlerT<RocketServerEventFactory>
  *     -> IntervalBatchingFrameHandlerT<
  *          WriteCompletionTrackerT<RocketServerEventFactory>>
- *     -> EventCapturingAppHandler  (subscribes to RocketServerEvent via
+ *     -> EventCapturingAppHandler  (subscribes to RocketWriteComplete via
  * onEvent)
  *
  * Each test drives outbound writes, lets the loop / interval timer flush,
  * then triggers writeSuccess / writeErr on the mocked AsyncTransport and
- * verifies the RocketServerEvent(s) the tracker fans out carry the correct
- * (status, frameCount, bytes). The app handler ignores BatchWriteComplete
- * (raw transport) events and records only RocketWriteComplete (tracker-fired).
+ * verifies the RocketWriteCompleteEvent(s) the tracker fans out carry the
+ * correct (status, frameCount, bytes). The app handler subscribes only to the
+ * tracker-fired RocketWriteComplete; the raw transport TransportWriteComplete
+ * never reaches it.
  */
 
 #include <gtest/gtest.h>
@@ -86,23 +87,22 @@ class EventCapturingAppHandler {
   void onPipelineInactive() noexcept {}
   void onWriteReady() noexcept {}
 
+  // Subscribes only to the enriched RocketWriteComplete event the tracker
+  // fires; the raw TransportWriteComplete never reaches this handler.
   static constexpr std::array<RocketServerEventId, 1> kSubscribedEvents{
-      RocketServerEventId::WriteComplete};
+      RocketServerEventId::RocketWriteComplete};
 
   void onEvent(
       RocketServerEventId /*ev*/, const cp::TypeErasedBox& box) noexcept {
-    auto& evt = box.get<RocketServerEvent>();
-    if (evt.kind == RocketServerEvent::Kind::RocketWriteComplete) {
-      events_.push_back(evt);
-    }
+    events_.push_back(box.get<RocketWriteCompleteEvent>());
   }
 
-  const std::vector<RocketServerEvent>& events() const noexcept {
+  const std::vector<RocketWriteCompleteEvent>& events() const noexcept {
     return events_;
   }
 
  private:
-  std::vector<RocketServerEvent> events_;
+  std::vector<RocketWriteCompleteEvent> events_;
 };
 
 class RocketServerWriteCompletionIntegrationTest : public ::testing::Test {

@@ -34,8 +34,11 @@
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/Messages.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/adapter/RocketClientAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/common/RocketClientAppAdapter.h>
+#include <thrift/lib/cpp2/fast_thrift/transport/WriteCompletion.h>
 
 namespace apache::thrift::fast_thrift::rocket::client::test {
+
+namespace transport = apache::thrift::fast_thrift::transport;
 
 using channel_pipeline::PipelineBuilder;
 using channel_pipeline::PipelineImpl;
@@ -198,14 +201,9 @@ TEST(RocketClientAppAdapterTest, OnEventFiresOnCloseCallback) {
   int closeCount = 0;
   adapter->setOnClose([&]() noexcept { closeCount++; });
 
+  // ConnectionClose carries no payload — the id alone is the signal.
   adapter->onEvent(
-      RocketClientEventId::ConnectionClose,
-      channel_pipeline::erase_and_box(
-          RocketClientEvent{
-              .kind = RocketClientEvent::Kind::ConnectionClose,
-              .status = {},
-              .frameCount = 0,
-              .bytes = 0}));
+      RocketClientEventId::ConnectionClose, channel_pipeline::TypeErasedBox{});
 
   EXPECT_EQ(closeCount, 1);
 }
@@ -214,13 +212,7 @@ TEST(RocketClientAppAdapterTest, OnEventNoOpWhenCloseCallbackUnset) {
   RocketClientAppAdapter::Ptr adapter(new RocketClientAppAdapter());
   // No setOnClose — must not crash.
   adapter->onEvent(
-      RocketClientEventId::ConnectionClose,
-      channel_pipeline::erase_and_box(
-          RocketClientEvent{
-              .kind = RocketClientEvent::Kind::ConnectionClose,
-              .status = {},
-              .frameCount = 0,
-              .bytes = 0}));
+      RocketClientEventId::ConnectionClose, channel_pipeline::TypeErasedBox{});
 }
 
 TEST(RocketClientAppAdapterTest, HandlerRemovedClearsOnCloseCallback) {
@@ -230,15 +222,69 @@ TEST(RocketClientAppAdapterTest, HandlerRemovedClearsOnCloseCallback) {
 
   adapter->handlerRemoved();
   adapter->onEvent(
-      RocketClientEventId::ConnectionClose,
-      channel_pipeline::erase_and_box(
-          RocketClientEvent{
-              .kind = RocketClientEvent::Kind::ConnectionClose,
-              .status = {},
-              .frameCount = 0,
-              .bytes = 0}));
+      RocketClientEventId::ConnectionClose, channel_pipeline::TypeErasedBox{});
 
   EXPECT_EQ(closeCount, 0);
+}
+
+TEST(RocketClientAppAdapterTest, OnEventInvokesOnWriteCompleteCallback) {
+  RocketClientAppAdapter::Ptr adapter(new RocketClientAppAdapter());
+  int count = 0;
+  transport::WriteCompletionStatus status{};
+  size_t frameCount = 0;
+  size_t bytes = 0;
+  adapter->setOnWriteComplete([&](const RocketWriteCompleteEvent& e) noexcept {
+    count++;
+    status = e.status;
+    frameCount = e.frameCount;
+    bytes = e.bytes;
+  });
+
+  adapter->onEvent(
+      RocketClientEventId::RocketWriteComplete,
+      TypeErasedBox(
+          RocketWriteCompleteEvent{
+              .status = transport::WriteCompletionStatus::Error,
+              .frameCount = 3,
+              .bytes = 128,
+          }));
+
+  EXPECT_EQ(count, 1);
+  EXPECT_EQ(status, transport::WriteCompletionStatus::Error);
+  EXPECT_EQ(frameCount, 3u);
+  EXPECT_EQ(bytes, 128u);
+}
+
+TEST(RocketClientAppAdapterTest, OnEventNoOpWhenCallbackUnset) {
+  RocketClientAppAdapter::Ptr adapter(new RocketClientAppAdapter());
+  // No setOnWriteComplete call — must not crash.
+  adapter->onEvent(
+      RocketClientEventId::RocketWriteComplete,
+      TypeErasedBox(
+          RocketWriteCompleteEvent{
+              .status = transport::WriteCompletionStatus::Success,
+              .frameCount = 1,
+              .bytes = 0,
+          }));
+}
+
+TEST(RocketClientAppAdapterTest, HandlerRemovedClearsOnWriteCompleteCallback) {
+  RocketClientAppAdapter::Ptr adapter(new RocketClientAppAdapter());
+  int count = 0;
+  adapter->setOnWriteComplete(
+      [&](const RocketWriteCompleteEvent&) noexcept { count++; });
+
+  adapter->handlerRemoved();
+  adapter->onEvent(
+      RocketClientEventId::RocketWriteComplete,
+      TypeErasedBox(
+          RocketWriteCompleteEvent{
+              .status = transport::WriteCompletionStatus::Success,
+              .frameCount = 1,
+              .bytes = 0,
+          }));
+
+  EXPECT_EQ(count, 0);
 }
 
 HANDLER_TAG(mock_head_tag);
@@ -308,6 +354,58 @@ TEST(RocketClientAppAdapterTest, NotifyReadReadyNoOpWhenPipelineUnset) {
   RocketClientAppAdapter::Ptr adapter(new RocketClientAppAdapter());
   // No setPipeline call — must not crash.
   adapter->notifyReadReady();
+}
+
+TEST(RocketClientAppAdapterTest, RocketWriteCompleteDeliveredThroughPipeline) {
+  folly::EventBase evb;
+  MockHeadHandler head;
+  TestAllocator allocator;
+  RocketClientAppAdapter::Ptr adapter(new RocketClientAppAdapter());
+
+  int count = 0;
+  size_t frameCount = 0;
+  adapter->setOnWriteComplete([&](const RocketWriteCompleteEvent& e) noexcept {
+    count++;
+    frameCount = e.frameCount;
+  });
+
+  // Built with RocketClientEventId so the adapter's subscription is wired; a
+  // NoEvent pipeline would compile the subscription out entirely.
+  auto pipeline = PipelineBuilder<
+                      MockHeadHandler,
+                      RocketClientAppAdapter,
+                      TestAllocator,
+                      RocketClientEventId>()
+                      .setEventBase(&evb)
+                      .setHead(&head)
+                      .setTail(adapter.get())
+                      .setAllocator(&allocator)
+                      .build();
+
+  // The enriched event reaches the subscribed callback.
+  pipeline->fireEvent(
+      RocketClientEventId::RocketWriteComplete,
+      TypeErasedBox(
+          RocketWriteCompleteEvent{
+              .status = transport::WriteCompletionStatus::Success,
+              .frameCount = 4,
+              .bytes = 256,
+          }));
+  EXPECT_EQ(count, 1);
+  EXPECT_EQ(frameCount, 4u);
+
+  // The raw transport event is not delivered — the adapter subscribes only to
+  // RocketWriteComplete.
+  pipeline->fireEvent(
+      RocketClientEventId::TransportWriteComplete,
+      TypeErasedBox(
+          TransportWriteCompleteEvent{
+              .status = transport::WriteCompletionStatus::Success,
+              .bytes = 256,
+          }));
+  EXPECT_EQ(count, 1);
+
+  pipeline->close();
 }
 
 } // namespace apache::thrift::fast_thrift::rocket::client::test

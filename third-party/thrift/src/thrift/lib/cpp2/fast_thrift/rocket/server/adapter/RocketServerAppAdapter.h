@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <array>
 #include <memory>
 
 #include <folly/ExceptionWrapper.h>
@@ -25,6 +26,7 @@
 #include <folly/logging/xlog.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Common.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineImpl.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/server/Event.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/Messages.h>
 
 namespace apache::thrift::fast_thrift::rocket::server {
@@ -87,6 +89,13 @@ class RocketServerAppAdapter : public folly::DelayedDestruction {
   // onWriteReady().
   using OnWriteReadyFn = folly::Function<void() noexcept>;
 
+  // Write-completion relay: invoked once per completed rocket-frame batch
+  // with the enriched RocketWriteCompleteEvent (status, frameCount, bytes).
+  // Only delivered when the pipeline is built with RocketServerEventId; for
+  // a default (NoEvent) pipeline the subscription compiles out entirely.
+  using OnWriteCompleteFn =
+      folly::Function<void(const RocketWriteCompleteEvent&) noexcept>;
+
   RocketServerAppAdapter() = default;
 
   RocketServerAppAdapter(const RocketServerAppAdapter&) = delete;
@@ -135,6 +144,10 @@ class RocketServerAppAdapter : public folly::DelayedDestruction {
 
   void setOnWriteReady(OnWriteReadyFn fn) noexcept {
     onWriteReady_ = std::move(fn);
+  }
+
+  void setOnWriteComplete(OnWriteCompleteFn fn) noexcept {
+    onWriteComplete_ = std::move(fn);
   }
 
   /**
@@ -202,6 +215,7 @@ class RocketServerAppAdapter : public folly::DelayedDestruction {
     onConnect_ = {};
     onDisconnect_ = {};
     onWriteReady_ = {};
+    onWriteComplete_ = {};
   }
 
   void onPipelineActive() noexcept {
@@ -231,6 +245,23 @@ class RocketServerAppAdapter : public folly::DelayedDestruction {
     }
   }
 
+  // === Event subscription ===
+
+  // Subscribes to the enriched per-batch completion fired by the rocket
+  // pipeline's WriteCompletionTracker. Wired only when the pipeline is built
+  // with RocketServerEventId; otherwise the framework compiles this out.
+  static constexpr std::array<RocketServerEventId, 1> kSubscribedEvents{
+      RocketServerEventId::RocketWriteComplete};
+
+  void onEvent(
+      RocketServerEventId /*ev*/,
+      const channel_pipeline::TypeErasedBox& box) noexcept {
+    if (FOLLY_UNLIKELY(!onWriteComplete_)) {
+      return;
+    }
+    onWriteComplete_(box.get<RocketWriteCompleteEvent>());
+  }
+
  protected:
   ~RocketServerAppAdapter() override {
     DCHECK(!pipeline_);
@@ -245,6 +276,7 @@ class RocketServerAppAdapter : public folly::DelayedDestruction {
   OnConnectFn onConnect_;
   OnDisconnectFn onDisconnect_;
   OnWriteReadyFn onWriteReady_;
+  OnWriteCompleteFn onWriteComplete_;
   bool disconnected_{true};
 };
 

@@ -35,7 +35,6 @@
  * benchmarks drive the request (outbound) path.
  */
 
-#include <array>
 #include <cstddef>
 #include <memory>
 #include <vector>
@@ -54,6 +53,7 @@
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/LoopBatchingFrameHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/WriteCompletionTracker.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/RocketClientEventFactory.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/client/adapter/RocketClientAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/transport/TransportHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/transport/WriteCompletion.h>
 #include <thrift/lib/cpp2/fast_thrift/transport/bench/BenchAsyncTransport.h>
@@ -78,28 +78,14 @@ constexpr size_t kLargeBatch = 256;
 
 HANDLER_TAG(batching);
 
-// Minimal tail endpoint. In the tracking pipeline it subscribes to the
-// write-completion event and discards it — modeling a consumer without adding
-// measurement noise. In the baseline pipeline (events disabled) the
-// subscription is simply never wired.
-struct NullEventConsumer {
-  Result onRead(TypeErasedBox&&) noexcept { return Result::Success; }
-  void onException(folly::exception_wrapper&&) noexcept {}
-  void handlerAdded() noexcept {}
-  void handlerRemoved() noexcept {}
-  void onPipelineActive() noexcept {}
-  void onPipelineInactive() noexcept {}
-  void onWriteReady() noexcept {}
-
-  static constexpr std::array<RocketClientEventId, 1> kSubscribedEvents{
-      RocketClientEventId::WriteComplete};
-  void onEvent(RocketClientEventId /*ev*/, const TypeErasedBox&) noexcept {}
-};
-
 // Fixture parameterized on the transport's event factory, the batcher's
-// tracker, and the pipeline event enum. The baseline and tracking variants
-// differ only in these three — everything else (batching, frame sizes, loop
-// driving) is identical, so the relative benchmark isolates tracking cost.
+// tracker, and the pipeline event enum. The tail is the real
+// RocketClientAppAdapter — in the tracking pipeline it subscribes to the
+// enriched write-completion event and runs the owner's onWriteComplete
+// callback; in the baseline pipeline (events disabled) the subscription
+// compiles out. The baseline and tracking variants differ only in the three
+// template parameters, so the relative benchmark isolates tracking cost
+// through the real consumer path.
 template <typename Factory, typename Tracker, typename EventEnumT>
 struct FixtureT {
   using TransportHandler =
@@ -108,7 +94,7 @@ struct FixtureT {
 
   folly::EventBase evb;
   BenchAsyncTransport* testTransport{nullptr};
-  NullEventConsumer tail;
+  RocketClientAppAdapter::Ptr appAdapter{new RocketClientAppAdapter()};
   typename TransportHandler::Ptr transportHandler;
   PipelineImpl::Ptr pipeline;
   SimpleBufferAllocator allocator;
@@ -135,15 +121,20 @@ struct FixtureT {
 
     pipeline = PipelineBuilder<
                    TransportHandler,
-                   NullEventConsumer,
+                   RocketClientAppAdapter,
                    SimpleBufferAllocator,
                    EventEnumT>()
                    .setEventBase(&evb)
                    .setHead(transportHandler.get())
-                   .setTail(&tail)
+                   .setTail(appAdapter.get())
                    .setAllocator(&allocator)
                    .template addNextOutbound<Batcher>(batching_tag)
                    .build();
+
+    // Real consumer callback — fires once per completed batch in the tracking
+    // pipeline; never invoked in the baseline (subscription compiled out).
+    appAdapter->setOnWriteComplete(
+        [](const RocketWriteCompleteEvent&) noexcept {});
 
     transportHandler->setPipeline(pipeline.get());
     transportHandler->onConnect();

@@ -29,15 +29,15 @@ namespace apache::thrift::fast_thrift::rocket::server {
  * Per-pipeline event factory for the rocket-server pipeline.
  *
  * `make(status, bytes)` satisfies the WriteCompleteEventFactory concept used
- * by TransportHandlerT — produces a BatchWriteComplete event per writev.
+ * by TransportHandlerT — produces a TransportWriteComplete event per writev.
  *
  * `makeRocketWriteComplete(status, frameCount, bytes)` is used by
  * WriteCompletionTrackerT to fire the enriched per-rocket-batch event
  * upstream after popping its frame-count FIFO.
  */
 struct RocketServerEventFactory {
-  using EventType = RocketServerEvent;
   using EventId = RocketServerEventId;
+  using TransportWriteCompleteEventType = TransportWriteCompleteEvent;
 
   static std::pair<
       EventId,
@@ -46,12 +46,10 @@ struct RocketServerEventFactory {
       apache::thrift::fast_thrift::transport::WriteCompletionStatus status,
       size_t bytes) noexcept {
     return {
-        EventId::WriteComplete,
+        EventId::TransportWriteComplete,
         apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox(
-            RocketServerEvent{
-                .kind = RocketServerEvent::Kind::BatchWriteComplete,
+            TransportWriteCompleteEvent{
                 .status = status,
-                .frameCount = 0,
                 .bytes = bytes,
             })};
   }
@@ -64,10 +62,9 @@ struct RocketServerEventFactory {
       size_t frameCount,
       size_t bytes) noexcept {
     return {
-        EventId::WriteComplete,
+        EventId::RocketWriteComplete,
         apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox(
-            RocketServerEvent{
-                .kind = RocketServerEvent::Kind::RocketWriteComplete,
+            RocketWriteCompleteEvent{
                 .status = status,
                 .frameCount = frameCount,
                 .bytes = bytes,

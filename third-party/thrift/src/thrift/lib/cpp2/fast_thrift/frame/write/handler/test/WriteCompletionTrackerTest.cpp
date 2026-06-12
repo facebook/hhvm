@@ -21,7 +21,6 @@
 
 #include <gtest/gtest.h>
 
-#include <array>
 #include <cstddef>
 #include <cstdint>
 #include <utility>
@@ -30,39 +29,37 @@
 namespace apache::thrift::fast_thrift::frame::write::handler {
 namespace {
 
-// Test event type mirroring the rocket-pipeline event shape: a nested Kind
-// enum + status/frameCount/bytes payload.
-struct TestEvent {
-  enum class Kind : uint8_t {
-    BatchWriteComplete,
-    RocketWriteComplete,
-  };
+// Test event types mirroring the rocket-pipeline shape: one message per event
+// id, no shared discriminator.
+struct TestTransportWriteCompleteEvent {
+  transport::WriteCompletionStatus status;
+  size_t bytes;
+};
 
-  Kind kind;
+struct TestRocketWriteCompleteEvent {
   transport::WriteCompletionStatus status;
   size_t frameCount;
   size_t bytes;
 };
 
-// Single-value event enum mirroring a rocket pipeline's EventId.
+// Event enum mirroring a rocket pipeline's EventId — one value per message.
 enum class TestEventId : std::uint32_t {
-  WriteComplete,
+  TransportWriteComplete,
+  RocketWriteComplete,
   Count,
 };
 
 struct TestEventFactory {
-  using EventType = TestEvent;
   using EventId = TestEventId;
+  using TransportWriteCompleteEventType = TestTransportWriteCompleteEvent;
 
   static std::pair<EventId, channel_pipeline::TypeErasedBox> make(
       transport::WriteCompletionStatus status, size_t bytes) noexcept {
     return {
-        EventId::WriteComplete,
+        EventId::TransportWriteComplete,
         channel_pipeline::TypeErasedBox(
-            TestEvent{
-                .kind = TestEvent::Kind::BatchWriteComplete,
+            TestTransportWriteCompleteEvent{
                 .status = status,
-                .frameCount = 0,
                 .bytes = bytes,
             })};
   }
@@ -73,10 +70,9 @@ struct TestEventFactory {
       size_t frameCount,
       size_t bytes) noexcept {
     return {
-        EventId::WriteComplete,
+        EventId::RocketWriteComplete,
         channel_pipeline::TypeErasedBox(
-            TestEvent{
-                .kind = TestEvent::Kind::RocketWriteComplete,
+            TestRocketWriteCompleteEvent{
                 .status = status,
                 .frameCount = frameCount,
                 .bytes = bytes,
@@ -90,17 +86,19 @@ class CapturingContext {
  public:
   void fireEvent(
       TestEventId /*ev*/, channel_pipeline::TypeErasedBox box) noexcept {
-    events_.push_back(std::move(box).take<TestEvent>());
+    events_.push_back(std::move(box).take<TestRocketWriteCompleteEvent>());
   }
 
-  const std::vector<TestEvent>& events() const noexcept { return events_; }
+  const std::vector<TestRocketWriteCompleteEvent>& events() const noexcept {
+    return events_;
+  }
 
  private:
-  std::vector<TestEvent> events_;
+  std::vector<TestRocketWriteCompleteEvent> events_;
 };
 
-// Helper: build a BatchWriteComplete box (what transport would fire).
-channel_pipeline::TypeErasedBox batchWriteComplete(
+// Helper: build a TransportWriteComplete box (what transport would fire).
+channel_pipeline::TypeErasedBox transportWriteComplete(
     transport::WriteCompletionStatus status, size_t bytes) noexcept {
   return TestEventFactory::make(status, bytes).second;
 }
@@ -117,11 +115,10 @@ TEST(WriteCompletionTrackerTest, SingleBatchFiresOneEnrichedEvent) {
   tracker.onFlush();
   tracker.onEvent(
       ctx,
-      TestEventId::WriteComplete,
-      batchWriteComplete(transport::WriteCompletionStatus::Success, 0));
+      TestEventId::TransportWriteComplete,
+      transportWriteComplete(transport::WriteCompletionStatus::Success, 0));
 
   ASSERT_EQ(ctx.events().size(), 1u);
-  EXPECT_EQ(ctx.events()[0].kind, TestEvent::Kind::RocketWriteComplete);
   EXPECT_EQ(ctx.events()[0].status, transport::WriteCompletionStatus::Success);
   EXPECT_EQ(ctx.events()[0].frameCount, 3u);
   EXPECT_EQ(ctx.events()[0].bytes, 0u);
@@ -149,16 +146,16 @@ TEST(WriteCompletionTrackerTest, MultipleInFlightBatchesPreserveFifoOrder) {
   // writeSuccess events arrive in FIFO order (AsyncSocket guarantee).
   tracker.onEvent(
       ctx,
-      TestEventId::WriteComplete,
-      batchWriteComplete(transport::WriteCompletionStatus::Success, 0));
+      TestEventId::TransportWriteComplete,
+      transportWriteComplete(transport::WriteCompletionStatus::Success, 0));
   tracker.onEvent(
       ctx,
-      TestEventId::WriteComplete,
-      batchWriteComplete(transport::WriteCompletionStatus::Success, 0));
+      TestEventId::TransportWriteComplete,
+      transportWriteComplete(transport::WriteCompletionStatus::Success, 0));
   tracker.onEvent(
       ctx,
-      TestEventId::WriteComplete,
-      batchWriteComplete(transport::WriteCompletionStatus::Success, 0));
+      TestEventId::TransportWriteComplete,
+      transportWriteComplete(transport::WriteCompletionStatus::Success, 0));
 
   ASSERT_EQ(ctx.events().size(), 3u);
   EXPECT_EQ(ctx.events()[0].frameCount, 2u);
@@ -175,11 +172,10 @@ TEST(WriteCompletionTrackerTest, ErrorStatusAndBytesPropagateToEvent) {
   tracker.onFlush();
   tracker.onEvent(
       ctx,
-      TestEventId::WriteComplete,
-      batchWriteComplete(transport::WriteCompletionStatus::Error, 137));
+      TestEventId::TransportWriteComplete,
+      transportWriteComplete(transport::WriteCompletionStatus::Error, 137));
 
   ASSERT_EQ(ctx.events().size(), 1u);
-  EXPECT_EQ(ctx.events()[0].kind, TestEvent::Kind::RocketWriteComplete);
   EXPECT_EQ(ctx.events()[0].status, transport::WriteCompletionStatus::Error);
   EXPECT_EQ(ctx.events()[0].frameCount, 2u);
   EXPECT_EQ(ctx.events()[0].bytes, 137u);
@@ -198,8 +194,8 @@ TEST(WriteCompletionTrackerTest, EmptyBatchOnFlushIsIgnored) {
   tracker.onFlush();
   tracker.onEvent(
       ctx,
-      TestEventId::WriteComplete,
-      batchWriteComplete(transport::WriteCompletionStatus::Success, 0));
+      TestEventId::TransportWriteComplete,
+      transportWriteComplete(transport::WriteCompletionStatus::Success, 0));
 
   ASSERT_EQ(ctx.events().size(), 1u);
   EXPECT_EQ(ctx.events()[0].frameCount, 1u);
@@ -213,37 +209,10 @@ TEST(WriteCompletionTrackerTest, WriteCompleteWithEmptyFifoIsNoop) {
   // happen in practice) is dropped rather than UB.
   tracker.onEvent(
       ctx,
-      TestEventId::WriteComplete,
-      batchWriteComplete(transport::WriteCompletionStatus::Success, 0));
+      TestEventId::TransportWriteComplete,
+      transportWriteComplete(transport::WriteCompletionStatus::Success, 0));
 
   EXPECT_TRUE(ctx.events().empty());
-}
-
-TEST(WriteCompletionTrackerTest, RocketWriteCompleteReFireIgnored) {
-  WriteCompletionTrackerT<TestEventFactory> tracker;
-  CapturingContext ctx;
-
-  tracker.onWrite();
-  tracker.onFlush();
-
-  // Tracker should ignore its own RocketWriteComplete kind — otherwise
-  // a fireEvent from one tracker handled by another tracker in the same
-  // pipeline would cascade or pop the wrong batch.
-  tracker.onEvent(
-      ctx,
-      TestEventId::WriteComplete,
-      TestEventFactory::makeRocketWriteComplete(
-          transport::WriteCompletionStatus::Success, 999, 0)
-          .second);
-  EXPECT_TRUE(ctx.events().empty());
-
-  // The real BatchWriteComplete still drains the FIFO correctly.
-  tracker.onEvent(
-      ctx,
-      TestEventId::WriteComplete,
-      batchWriteComplete(transport::WriteCompletionStatus::Success, 0));
-  ASSERT_EQ(ctx.events().size(), 1u);
-  EXPECT_EQ(ctx.events()[0].frameCount, 1u);
 }
 
 } // namespace apache::thrift::fast_thrift::frame::write::handler

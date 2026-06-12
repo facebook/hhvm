@@ -35,11 +35,10 @@ namespace apache::thrift::fast_thrift::frame::write::handler {
  *   - onFlush()           — when the current batch is handed off downstream
  *                           (the batch boundary).
  *   - onEvent(ctx, box)   — when the pipeline's per-pipeline event arrives
- *                           via the batcher's onEvent. The tracker
- *                           discriminates on the event's `kind` and reacts
- *                           only to the raw transport-fired BatchWriteComplete
- *                           kind (ignoring its own RocketWriteComplete
- *                           re-fires).
+ *                           via the batcher's onEvent. The tracker subscribes
+ *                           only to the raw transport-fired
+ *                           TransportWriteComplete event, so its own enriched
+ *                           re-fires are never routed back to it.
  *
  * `onEvent` is a member template parameterized on the pipeline's Context
  * type and consumes a `TypeErasedBox` directly, so the tracker — not the
@@ -80,14 +79,15 @@ static_assert(
 
 /**
  * Concrete tracker — counts outbound frames per batch and, on each raw
- * BatchWriteComplete from transport, pops the front batch's frame count
+ * TransportWriteComplete from transport, pops the front batch's frame count
  * and fires a RocketWriteComplete (enriched with frameCount) upstream
  * via `EventFactory::makeRocketWriteComplete(status, count, bytes)`.
  *
  * Templated on the pipeline's event factory; the factory must expose:
- *   - `using EventType = ...;`
- *   - The event type must have a nested `Kind` enum with at least
- *     `BatchWriteComplete` and `RocketWriteComplete` values.
+ *   - `using EventId = ...;` with `TransportWriteComplete` and
+ *     `RocketWriteComplete` values.
+ *   - `using TransportWriteCompleteEventType = ...;` — the message carried by
+ *     the TransportWriteComplete event, with `status` and `bytes` fields.
  *   - `static TypeErasedBox makeRocketWriteComplete(status, count, bytes)
  * noexcept;`
  *
@@ -98,11 +98,13 @@ static_assert(
 template <typename EventFactory>
 class WriteCompletionTrackerT {
  public:
-  // The pipeline event the tracker subscribes to and re-fires on. Sourced from
-  // the factory so the tracker stays agnostic of the concrete protocol enum.
+  // The tracker subscribes to the raw transport event and re-fires the
+  // enriched one. Sourced from the factory so the tracker stays agnostic of
+  // the concrete protocol enum. Subscribing only to TransportWriteComplete
+  // means its own RocketWriteComplete re-fires are never routed back to it.
   using EventId = typename EventFactory::EventId;
   static constexpr std::array<EventId, 1> kSubscribedEvents{
-      EventId::WriteComplete};
+      EventId::TransportWriteComplete};
 
   void onWrite() noexcept { ++framesInCurrentBatch_; }
 
@@ -120,12 +122,9 @@ class WriteCompletionTrackerT {
       EventId /*ev*/,
       const apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox&
           box) noexcept {
-    using Event = typename EventFactory::EventType;
-    auto& evt = box.template get<Event>();
-    if (evt.kind != Event::Kind::BatchWriteComplete) {
-      // Ignore other kinds (including our own RocketWriteComplete re-fires).
-      return;
-    }
+    using TransportEvent =
+        typename EventFactory::TransportWriteCompleteEventType;
+    auto& evt = box.template get<TransportEvent>();
     if (batchFrameCounts_.empty()) {
       // Defensive: writeSuccess without a prior flush shouldn't happen.
       return;

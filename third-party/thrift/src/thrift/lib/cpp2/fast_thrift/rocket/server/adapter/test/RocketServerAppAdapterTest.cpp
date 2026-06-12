@@ -30,11 +30,15 @@
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineBuilder.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineImpl.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/test/MockAdapters.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/server/Event.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/Messages.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/adapter/RocketServerAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/common/RocketServerAppAdapter.h>
+#include <thrift/lib/cpp2/fast_thrift/transport/WriteCompletion.h>
 
 namespace apache::thrift::fast_thrift::rocket::server::test {
+
+namespace transport = apache::thrift::fast_thrift::transport;
 
 using channel_pipeline::PipelineBuilder;
 using channel_pipeline::PipelineImpl;
@@ -198,6 +202,66 @@ TEST(RocketServerAppAdapterTest, OnWriteReadyNoOpWhenCallbackUnset) {
   adapter->onWriteReady();
 }
 
+TEST(RocketServerAppAdapterTest, OnEventInvokesOnWriteCompleteCallback) {
+  RocketServerAppAdapter::Ptr adapter(new RocketServerAppAdapter());
+  int count = 0;
+  transport::WriteCompletionStatus status{};
+  size_t frameCount = 0;
+  size_t bytes = 0;
+  adapter->setOnWriteComplete([&](const RocketWriteCompleteEvent& e) noexcept {
+    count++;
+    status = e.status;
+    frameCount = e.frameCount;
+    bytes = e.bytes;
+  });
+
+  adapter->onEvent(
+      RocketServerEventId::RocketWriteComplete,
+      TypeErasedBox(
+          RocketWriteCompleteEvent{
+              .status = transport::WriteCompletionStatus::Error,
+              .frameCount = 3,
+              .bytes = 128,
+          }));
+
+  EXPECT_EQ(count, 1);
+  EXPECT_EQ(status, transport::WriteCompletionStatus::Error);
+  EXPECT_EQ(frameCount, 3u);
+  EXPECT_EQ(bytes, 128u);
+}
+
+TEST(RocketServerAppAdapterTest, OnEventNoOpWhenCallbackUnset) {
+  RocketServerAppAdapter::Ptr adapter(new RocketServerAppAdapter());
+  // No setOnWriteComplete call — must not crash.
+  adapter->onEvent(
+      RocketServerEventId::RocketWriteComplete,
+      TypeErasedBox(
+          RocketWriteCompleteEvent{
+              .status = transport::WriteCompletionStatus::Success,
+              .frameCount = 1,
+              .bytes = 0,
+          }));
+}
+
+TEST(RocketServerAppAdapterTest, HandlerRemovedClearsOnWriteCompleteCallback) {
+  RocketServerAppAdapter::Ptr adapter(new RocketServerAppAdapter());
+  int count = 0;
+  adapter->setOnWriteComplete(
+      [&](const RocketWriteCompleteEvent&) noexcept { count++; });
+
+  adapter->handlerRemoved();
+  adapter->onEvent(
+      RocketServerEventId::RocketWriteComplete,
+      TypeErasedBox(
+          RocketWriteCompleteEvent{
+              .status = transport::WriteCompletionStatus::Success,
+              .frameCount = 1,
+              .bytes = 0,
+          }));
+
+  EXPECT_EQ(count, 0);
+}
+
 HANDLER_TAG(mock_head_tag);
 
 TEST(RocketServerAppAdapterTest, WriteWithPipelineCallsFireWrite) {
@@ -267,6 +331,58 @@ TEST(RocketServerAppAdapterTest, NotifyReadReadyNoOpWhenPipelineUnset) {
   RocketServerAppAdapter::Ptr adapter(new RocketServerAppAdapter());
   // No setPipeline call — must not crash.
   adapter->notifyReadReady();
+}
+
+TEST(RocketServerAppAdapterTest, RocketWriteCompleteDeliveredThroughPipeline) {
+  folly::EventBase evb;
+  MockHeadHandler head;
+  TestAllocator allocator;
+  RocketServerAppAdapter::Ptr adapter(new RocketServerAppAdapter());
+
+  int count = 0;
+  size_t frameCount = 0;
+  adapter->setOnWriteComplete([&](const RocketWriteCompleteEvent& e) noexcept {
+    count++;
+    frameCount = e.frameCount;
+  });
+
+  // Built with RocketServerEventId so the adapter's subscription is wired; a
+  // NoEvent pipeline would compile the subscription out entirely.
+  auto pipeline = PipelineBuilder<
+                      MockHeadHandler,
+                      RocketServerAppAdapter,
+                      TestAllocator,
+                      RocketServerEventId>()
+                      .setEventBase(&evb)
+                      .setHead(&head)
+                      .setTail(adapter.get())
+                      .setAllocator(&allocator)
+                      .build();
+
+  // The enriched event reaches the subscribed callback.
+  pipeline->fireEvent(
+      RocketServerEventId::RocketWriteComplete,
+      TypeErasedBox(
+          RocketWriteCompleteEvent{
+              .status = transport::WriteCompletionStatus::Success,
+              .frameCount = 4,
+              .bytes = 256,
+          }));
+  EXPECT_EQ(count, 1);
+  EXPECT_EQ(frameCount, 4u);
+
+  // The raw transport event is not delivered — the adapter subscribes only to
+  // RocketWriteComplete.
+  pipeline->fireEvent(
+      RocketServerEventId::TransportWriteComplete,
+      TypeErasedBox(
+          TransportWriteCompleteEvent{
+              .status = transport::WriteCompletionStatus::Success,
+              .bytes = 256,
+          }));
+  EXPECT_EQ(count, 1);
+
+  pipeline->close();
 }
 
 } // namespace apache::thrift::fast_thrift::rocket::server::test

@@ -23,17 +23,17 @@
  *   TransportHandlerT<FrameEventFactory>
  *     -> LoopBatchingFrameHandlerT<
  *          WriteCompletionTrackerT<RocketClientEventFactory>>
- *     -> EventCapturingAppHandler  (subscribes to RocketClientEvent via
+ *     -> EventCapturingAppHandler  (subscribes to RocketWriteComplete via
  * onEvent)
  *
  * Each test drives one or more outbound writes through the pipeline, lets the
  * loop callback flush, then triggers writeSuccess / writeErr on the mocked
- * AsyncTransport and verifies the RocketClientEvent(s) the tracker fans out
- * carry the correct (status, frameCount, bytes).
+ * AsyncTransport and verifies the RocketWriteCompleteEvent(s) the tracker fans
+ * out carry the correct (status, frameCount, bytes).
  *
  * The tests also model the per-frame attribution a real upstream consumer
  * would perform: each test handler maintains its own per-outbound FIFO and
- * pops `frameCount` entries per RocketClientEvent.
+ * pops `frameCount` entries per RocketWriteCompleteEvent.
  */
 
 #include <gtest/gtest.h>
@@ -69,10 +69,9 @@ namespace transport = apache::thrift::fast_thrift::transport;
 using transport::WriteCompletionStatus;
 using namespace testing;
 
-// One event type per pipeline: the rocket-client pipeline carries
-// RocketClientEvent. TransportHandler fires it (Kind::BatchWriteComplete)
-// and the tracker re-fires it (Kind::RocketWriteComplete) after enriching
-// with the rocket-frame count.
+// Two events per pipeline: TransportHandler fires TransportWriteComplete and
+// the tracker re-fires RocketWriteComplete after enriching with the
+// rocket-frame count.
 using TestTransportHandler =
     transport::TransportHandlerT<RocketClientEventFactory>;
 using TestBatcher = fw::LoopBatchingFrameHandlerT<
@@ -80,9 +79,9 @@ using TestBatcher = fw::LoopBatchingFrameHandlerT<
 
 HANDLER_TAG(batching);
 
-// Tail app handler that captures RocketClientEvents fired by the tracker.
-// Records its own per-outbound FIFO (size in bytes) so each test can model
-// the per-frame attribution a real upstream consumer would do.
+// Tail app handler that captures RocketWriteCompleteEvents fired by the
+// tracker. Records its own per-outbound FIFO (size in bytes) so each test can
+// model the per-frame attribution a real upstream consumer would do.
 class EventCapturingAppHandler {
  public:
   using Result = cp::Result;
@@ -97,28 +96,24 @@ class EventCapturingAppHandler {
   void onWriteReady() noexcept {}
 
   // --- Event subscription ---
-  // Receives both kinds (BatchWriteComplete from transport, RocketWriteComplete
-  // from tracker). Real consumers discriminate on `kind` and only act on
-  // RocketWriteComplete — the tests record only that kind.
+  // Subscribes only to the enriched RocketWriteComplete event the tracker
+  // fires; the raw TransportWriteComplete never reaches this handler.
   static constexpr std::array<RocketClientEventId, 1> kSubscribedEvents{
-      RocketClientEventId::WriteComplete};
+      RocketClientEventId::RocketWriteComplete};
 
   void onEvent(
       RocketClientEventId /*ev*/, const cp::TypeErasedBox& box) noexcept {
-    auto& evt = box.get<RocketClientEvent>();
-    if (evt.kind == RocketClientEvent::Kind::RocketWriteComplete) {
-      events_.push_back(evt);
-    }
+    events_.push_back(box.get<RocketWriteCompleteEvent>());
   }
 
-  const std::vector<RocketClientEvent>& events() const noexcept {
+  const std::vector<RocketWriteCompleteEvent>& events() const noexcept {
     return events_;
   }
 
   void clear() noexcept { events_.clear(); }
 
  private:
-  std::vector<RocketClientEvent> events_;
+  std::vector<RocketWriteCompleteEvent> events_;
 };
 
 class RocketClientWriteCompletionIntegrationTest : public ::testing::Test {

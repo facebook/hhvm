@@ -153,8 +153,8 @@ struct RocketClientConnectionT {
 // pipeline.
 using RocketClientConnection = RocketClientConnectionT<>;
 
-// Opt-in: fires a RocketClientEvent on each socket write completion for write
-// tracking. The pipeline must be built with RocketClientEventId and a
+// Opt-in: fires a TransportWriteComplete event on each socket write completion
+// for write tracking. The pipeline must be built with RocketClientEventId and a
 // subscriber for the events to be delivered.
 using RocketClientTrackingConnection =
     RocketClientConnectionT<RocketClientEventFactory>;

@@ -230,7 +230,7 @@ Server
   │                           RocketClientConnectionErrorHandler
   │                              │
   │                              ▼
-  │                           RocketClientEvent (ConnectionClose, no exception raised)
+  │                           ConnectionClose event (no payload, no exception raised)
   │                              │
   │                              ▼
   │                           Thrift adapter onEvent()

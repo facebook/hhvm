@@ -96,6 +96,13 @@ class RocketClientAppAdapter : public folly::DelayedDestruction {
   // onWriteReady().
   using OnWriteReadyFn = folly::Function<void() noexcept>;
 
+  // Write-completion relay: invoked once per completed rocket-frame batch
+  // with the enriched RocketWriteCompleteEvent (status, frameCount, bytes).
+  // Only delivered when the pipeline is built with RocketClientEventId; for
+  // a default (NoEvent) pipeline the subscription compiles out entirely.
+  using OnWriteCompleteFn =
+      folly::Function<void(const RocketWriteCompleteEvent&) noexcept>;
+
   RocketClientAppAdapter() = default;
 
   RocketClientAppAdapter(const RocketClientAppAdapter&) = delete;
@@ -141,6 +148,10 @@ class RocketClientAppAdapter : public folly::DelayedDestruction {
 
   // Install the "transport about to close" (graceful-drain) notification.
   void setOnClose(OnCloseFn fn) noexcept { onClose_ = std::move(fn); }
+
+  void setOnWriteComplete(OnWriteCompleteFn fn) noexcept {
+    onWriteComplete_ = std::move(fn);
+  }
 
   /**
    * Fire onReadReady() on the rocket pipeline. The pipeline walks any
@@ -212,6 +223,7 @@ class RocketClientAppAdapter : public folly::DelayedDestruction {
     onDisconnect_ = {};
     onClose_ = {};
     onWriteReady_ = {};
+    onWriteComplete_ = {};
   }
 
   void onPipelineActive() noexcept {
@@ -234,20 +246,36 @@ class RocketClientAppAdapter : public folly::DelayedDestruction {
     }
   }
 
-  // Subscribe only to the connection-close event; write-completion events on
-  // the same pipeline go to other subscribers.
-  static constexpr std::array<RocketClientEventId, 1> kSubscribedEvents{
-      RocketClientEventId::ConnectionClose};
+  // === Event subscription ===
+  //
+  // The adapter relays two pipeline events to its owner: the graceful-drain
+  // ConnectionClose signal (no payload) and the enriched per-batch
+  // RocketWriteComplete (RocketWriteCompleteEvent). Both are wired only when
+  // the pipeline is built with RocketClientEventId; otherwise the framework
+  // compiles this out.
+  static constexpr std::array<RocketClientEventId, 2> kSubscribedEvents{
+      RocketClientEventId::ConnectionClose,
+      RocketClientEventId::RocketWriteComplete};
 
-  // Relay a ConnectionClose event (server graceful drain) to the upper
-  // pipeline via onClose — the transport is about to close.
   void onEvent(
-      RocketClientEventId /*ev*/,
-      const channel_pipeline::TypeErasedBox& evt) noexcept {
-    if (evt.get<RocketClientEvent>().kind ==
-            RocketClientEvent::Kind::ConnectionClose &&
-        onClose_) {
-      onClose_();
+      RocketClientEventId ev,
+      const channel_pipeline::TypeErasedBox& box) noexcept {
+    switch (ev) {
+      case RocketClientEventId::ConnectionClose:
+        // Server graceful drain — no payload; relay to the upper (thrift)
+        // pipeline via onClose so it can begin draining.
+        if (onClose_) {
+          onClose_();
+        }
+        return;
+      case RocketClientEventId::RocketWriteComplete:
+        if (FOLLY_UNLIKELY(!onWriteComplete_)) {
+          return;
+        }
+        onWriteComplete_(box.get<RocketWriteCompleteEvent>());
+        return;
+      default:
+        return;
     }
   }
 
@@ -266,6 +294,7 @@ class RocketClientAppAdapter : public folly::DelayedDestruction {
   OnDisconnectFn onDisconnect_;
   OnCloseFn onClose_;
   OnWriteReadyFn onWriteReady_;
+  OnWriteCompleteFn onWriteComplete_;
   bool disconnected_{true};
 };
 

@@ -45,9 +45,9 @@ using apache::thrift::fast_thrift::frame::toString;
  * protocol violations — and converts them to the appropriate exception.
  *
  * CONNECTION_CLOSE is the exception: it is a graceful-drain signal, not a
- * fault, so instead of an exception it fires a RocketClientEvent with
- * Kind::ConnectionClose up the pipeline (the app adapter relays it to the
- * thrift drain handler). In-flight
+ * fault, so instead of an exception it fires a payload-less ConnectionClose
+ * event up the pipeline (the app adapter relays it to the thrift drain
+ * handler). In-flight
  * work is untouched. Stream-level ERROR frames (streamId > 0) also pass
  * through unchanged.
  */
@@ -75,7 +75,7 @@ class RocketClientConnectionErrorHandler {
    * Process inbound frames, intercepting fatal connection-level ERROR frames
    * (streamId == 0) and converting them to a TTransportException.
    *
-   * CONNECTION_CLOSE fires a RocketClientEvent (Kind::ConnectionClose) up the
+   * CONNECTION_CLOSE fires a payload-less ConnectionClose event up the
    * pipeline (graceful drain, not a fault). Stream-level ERROR frames and all
    * other frames pass
    * through unchanged.
@@ -111,12 +111,7 @@ class RocketClientConnectionErrorHandler {
     if (extractError(parsed).first == ErrorCode::CONNECTION_CLOSE) {
       ctx.fireEvent(
           RocketClientEventId::ConnectionClose,
-          apache::thrift::fast_thrift::channel_pipeline::erase_and_box(
-              RocketClientEvent{
-                  .kind = RocketClientEvent::Kind::ConnectionClose,
-                  .status = {},
-                  .frameCount = 0,
-                  .bytes = 0}));
+          apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox{});
       return apache::thrift::fast_thrift::channel_pipeline::Result::Success;
     }
 

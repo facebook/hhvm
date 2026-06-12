@@ -25,49 +25,45 @@ namespace apache::thrift::fast_thrift::rocket::client {
 
 /**
  * RocketClientEventId — the rocket-client pipeline's event enum (the
- * `EventEnum` the pipeline is built with). Subscribers register per id, so the
- * id selects which subscribers wake; the boxed payload is always a
- * RocketClientEvent, further discriminated by RocketClientEvent::kind.
+ * `EventEnum` the pipeline is built with). Each value is a distinct pipeline
+ * event with its own message type, or no payload for pure signals; subscribers
+ * select the events they consume via `kSubscribedEvents` and the id alone
+ * identifies the message.
  */
 enum class RocketClientEventId : std::uint32_t {
-  WriteComplete,
+  // Raw socket-level write-completion fired by TransportHandlerT (via
+  // RocketClientEventFactory::make) once per writev. Carries
+  // TransportWriteCompleteEvent.
+  TransportWriteComplete,
+  // Enriched per-rocket-batch completion fired by WriteCompletionTrackerT (via
+  // makeRocketWriteComplete) after popping one entry from its frame-count FIFO.
+  // Carries RocketWriteCompleteEvent.
+  RocketWriteComplete,
+  // The server sent RSocket ERROR(CONNECTION_CLOSE), the graceful-drain signal.
+  // Fired by RocketClientConnectionErrorHandler; the RocketClientAppAdapter
+  // (pipeline tail) relays it to the upper (thrift) layer via onClose. The id
+  // is the whole signal — it carries no payload. Unlike an exception, this
+  // never fails in-flight work.
   ConnectionClose,
   Count,
 };
 
 /**
- * RocketClientEvent — the single boxed payload the rocket-client pipeline
- * carries on every event id. The flavor is discriminated by `kind`:
- *
- *   - BatchWriteComplete: the raw socket-level write-completion fired by
- *     TransportHandlerT (via RocketClientEventFactory::make) once per
- *     writev. `frameCount` is meaningless (0).
- *
- *   - RocketWriteComplete: enriched per-rocket-batch completion fired by
- *     WriteCompletionTrackerT (via makeRocketWriteComplete) after popping
- *     one entry from its frame-count FIFO. `frameCount` is the number of
- *     rocket frames in that batch (> 0). Consumers that need per-request
- *     attribution subscribe to this kind and pop `frameCount` entries from
- *     their own outbound FIFO per event.
- *
- *   - ConnectionClose: the server sent RSocket ERROR(CONNECTION_CLOSE), the
- *     graceful-drain signal. Fired under RocketClientEventId::ConnectionClose
- *     by RocketClientConnectionErrorHandler; the RocketClientAppAdapter
- *     (pipeline tail) relays it to the upper (thrift) layer via onClose. The
- *     kind is the whole signal — status/frameCount/bytes are unused. Unlike an
- *     exception, this never fails in-flight work.
- *
- * Handlers that implement onEvent must discriminate on `kind` and ignore
- * kinds they don't consume.
+ * Message for RocketClientEventId::TransportWriteComplete — the outcome of one
+ * socket-level writev.
  */
-struct RocketClientEvent {
-  enum class Kind : uint8_t {
-    BatchWriteComplete,
-    RocketWriteComplete,
-    ConnectionClose,
-  };
+struct TransportWriteCompleteEvent {
+  apache::thrift::fast_thrift::transport::WriteCompletionStatus status;
+  size_t bytes;
+};
 
-  Kind kind;
+/**
+ * Message for RocketClientEventId::RocketWriteComplete — the completion of one
+ * rocket-frame batch. `frameCount` is the number of rocket frames in that batch
+ * (> 0); consumers that need per-request attribution pop `frameCount` entries
+ * from their own outbound FIFO per event.
+ */
+struct RocketWriteCompleteEvent {
   apache::thrift::fast_thrift::transport::WriteCompletionStatus status;
   size_t frameCount;
   size_t bytes;

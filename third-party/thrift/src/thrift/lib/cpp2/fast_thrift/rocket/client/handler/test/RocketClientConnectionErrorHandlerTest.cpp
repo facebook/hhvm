@@ -280,18 +280,15 @@ TEST_F(RocketClientConnectionErrorHandlerTest, ConnectionCloseFiresEvent) {
           static_cast<uint32_t>(apache::thrift::fast_thrift::frame::ErrorCode::
                                     CONNECTION_CLOSE))));
 
-  // CONNECTION_CLOSE is a graceful-drain signal: a RocketClientEvent with
-  // Kind::ConnectionClose is emitted up the pipeline (for the app adapter to
-  // relay to the thrift drain handler), the frame is consumed, and no
-  // connection-fatal exception fires.
+  // CONNECTION_CLOSE is a graceful-drain signal: a payload-less ConnectionClose
+  // event is emitted up the pipeline (for the app adapter to relay to the
+  // thrift drain handler), the frame is consumed, and no connection-fatal
+  // exception fires.
   EXPECT_EQ(result, Result::Success);
   EXPECT_FALSE(ctx_.hasException());
   EXPECT_EQ(ctx_.readMessages().size(), 0);
   ASSERT_EQ(ctx_.events().size(), 1);
   EXPECT_EQ(ctx_.eventIds()[0], RocketClientEventId::ConnectionClose);
-  EXPECT_EQ(
-      ctx_.events()[0].get<RocketClientEvent>().kind,
-      RocketClientEvent::Kind::ConnectionClose);
 }
 
 TEST_F(RocketClientConnectionErrorHandlerTest, ConnectionErrorFiresException) {

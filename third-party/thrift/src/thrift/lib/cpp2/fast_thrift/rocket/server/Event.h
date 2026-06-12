@@ -25,40 +25,38 @@ namespace apache::thrift::fast_thrift::rocket::server {
 
 /**
  * RocketServerEventId — the rocket-server pipeline's event enum (the
- * `EventEnum` the pipeline is built with). The pipeline carries a single event
- * type; the two flavors are discriminated by RocketServerEvent::kind, not by
- * separate ids.
+ * `EventEnum` the pipeline is built with). Each value is a distinct pipeline
+ * event with its own message type; subscribers select the events they consume
+ * via `kSubscribedEvents` and the id alone identifies the message.
  */
 enum class RocketServerEventId : std::uint32_t {
-  WriteComplete,
+  // Raw socket-level write-completion fired by TransportHandlerT (via
+  // RocketServerEventFactory::make) once per writev. Carries
+  // TransportWriteCompleteEvent.
+  TransportWriteComplete,
+  // Enriched per-rocket-batch completion fired by WriteCompletionTrackerT (via
+  // makeRocketWriteComplete) after popping one entry from its frame-count FIFO.
+  // Carries RocketWriteCompleteEvent.
+  RocketWriteComplete,
   Count,
 };
 
 /**
- * RocketServerEvent — the single pipeline-level event the rocket-server
- * pipeline carries. Two kinds flow through, discriminated by `kind`:
- *
- *   - BatchWriteComplete: the raw socket-level write-completion fired by
- *     TransportHandlerT (via RocketServerEventFactory::make) once per
- *     writev. `frameCount` is meaningless (0).
- *
- *   - RocketWriteComplete: enriched per-rocket-batch completion fired by
- *     WriteCompletionTrackerT (via makeRocketWriteComplete) after popping
- *     one entry from its frame-count FIFO. `frameCount` is the number of
- *     rocket frames in that batch (> 0). Consumers that need per-request
- *     attribution subscribe to this kind and pop `frameCount` entries from
- *     their own outbound FIFO per event.
- *
- * Handlers that implement onEvent must discriminate on `kind` and ignore
- * kinds they don't consume.
+ * Message for RocketServerEventId::TransportWriteComplete — the outcome of one
+ * socket-level writev.
  */
-struct RocketServerEvent {
-  enum class Kind : uint8_t {
-    BatchWriteComplete,
-    RocketWriteComplete,
-  };
+struct TransportWriteCompleteEvent {
+  apache::thrift::fast_thrift::transport::WriteCompletionStatus status;
+  size_t bytes;
+};
 
-  Kind kind;
+/**
+ * Message for RocketServerEventId::RocketWriteComplete — the completion of one
+ * rocket-frame batch. `frameCount` is the number of rocket frames in that batch
+ * (> 0); consumers that need per-request attribution pop `frameCount` entries
+ * from their own outbound FIFO per event.
+ */
+struct RocketWriteCompleteEvent {
   apache::thrift::fast_thrift::transport::WriteCompletionStatus status;
   size_t frameCount;
   size_t bytes;

@@ -522,6 +522,58 @@ void testSinkDefsKeepsDefsOutOfHotterBlocks() {
   test(AreaIndex::Cold, 10, AreaIndex::Main, 10);
 }
 
+void testSinkDefsFallsBackToLegalDominator() {
+  for (auto const kind : {CodeKind::Trace, CodeKind::Prologue}) {
+    SCOPED_TRACE(kind == CodeKind::Trace ? "trace_abi" : "prologue_abi");
+
+    Vunit unit;
+    unit.entry = unit.makeBlock(AreaIndex::Main, 1);
+    auto const src = unit.makeBlock(AreaIndex::Main, 10);
+    auto const mid = unit.makeBlock(AreaIndex::Main, 10);
+    auto const target = unit.makeBlock(AreaIndex::Main, 20);
+
+    Vout v(unit, unit.entry);
+    Vout vs(unit, src);
+    Vout vm(unit, mid);
+    Vout vt(unit, target);
+
+    auto const cand = Vreg64{vs.makeReg()};
+    auto const out = Vreg64{vt.makeReg()};
+
+    v << jmp{src};
+
+    vs << ldimmq{Immed64{42}, cand};
+    vs << jmp{mid};
+
+    vm << jmp{target};
+
+    vt << copy{cand, out};
+    vt << ret{};
+
+    sinkDefs(unit, abi(kind));
+
+    auto const& srcCode = unit.blocks[src].code;
+    ASSERT_EQ(srcCode.size(), 1);
+    ASSERT_EQ(srcCode[0].op, Vinstr::jmp);
+    EXPECT_EQ(srcCode[0].jmp_.target, mid);
+
+    auto const& midCode = unit.blocks[mid].code;
+    ASSERT_EQ(midCode.size(), 2);
+    ASSERT_EQ(midCode[0].op, Vinstr::ldimmq);
+    EXPECT_EQ(static_cast<uint64_t>(midCode[0].ldimmq_.s.q()), 42);
+    EXPECT_EQ(midCode[0].ldimmq_.d, cand);
+    ASSERT_EQ(midCode[1].op, Vinstr::jmp);
+    EXPECT_EQ(midCode[1].jmp_.target, target);
+
+    auto const& targetCode = unit.blocks[target].code;
+    ASSERT_EQ(targetCode.size(), 2);
+    ASSERT_EQ(targetCode[0].op, Vinstr::copy);
+    EXPECT_EQ(targetCode[0].copy_.s, Vreg{cand});
+    EXPECT_EQ(targetCode[0].copy_.d, Vreg{out});
+    ASSERT_EQ(targetCode[1].op, Vinstr::ret);
+  }
+}
+
 void testSinkDefsMovesDefsWithDeadSF() {
   for (auto const kind : {CodeKind::Trace, CodeKind::Prologue}) {
     SCOPED_TRACE(kind == CodeKind::Trace ? "trace_abi" : "prologue_abi");
@@ -663,6 +715,17 @@ size_t countLoadDefs(const Vunit& unit, Vreg def) {
   return count;
 }
 
+std::optional<size_t> expectOnlyLoadDefInBlock(const Vunit& unit,
+                                               Vlabel block,
+                                               Vreg def) {
+  EXPECT_EQ(size_t{1}, countLoadDefs(unit, def))
+    << stripWhitespace(show(unit));
+
+  auto const pos = findLoadDef(unit.blocks[block], def);
+  EXPECT_TRUE(pos.has_value()) << stripWhitespace(show(unit));
+  return pos;
+}
+
 void expectPureLoadSunkToExit(const PureLoadSinkLinearContext& ctx) {
   auto const cand = Vreg{ctx.cand};
   auto const& entry = ctx.unit.blocks[ctx.unit.entry];
@@ -670,10 +733,8 @@ void expectPureLoadSunkToExit(const PureLoadSinkLinearContext& ctx) {
 
   EXPECT_FALSE(findLoadDef(entry, cand).has_value())
     << stripWhitespace(show(ctx.unit));
-  ASSERT_EQ(size_t{1}, countLoadDefs(ctx.unit, cand))
-    << stripWhitespace(show(ctx.unit));
 
-  auto const exitLoad = findLoadDef(exit, cand);
+  auto const exitLoad = expectOnlyLoadDefInBlock(ctx.unit, ctx.exit, cand);
   ASSERT_TRUE(exitLoad.has_value()) << stripWhitespace(show(ctx.unit));
   ASSERT_TRUE(findUse(ctx.unit, exit, cand, *exitLoad + 1).has_value())
     << stripWhitespace(show(ctx.unit));
@@ -681,12 +742,24 @@ void expectPureLoadSunkToExit(const PureLoadSinkLinearContext& ctx) {
 
 void expectPureLoadKeptInEntry(const PureLoadSinkLinearContext& ctx) {
   auto const cand = Vreg{ctx.cand};
+  auto const& exit = ctx.unit.blocks[ctx.exit];
+
+  ASSERT_TRUE(expectOnlyLoadDefInBlock(ctx.unit, ctx.unit.entry, cand)
+                .has_value()) << stripWhitespace(show(ctx.unit));
+  EXPECT_FALSE(findLoadDef(exit, cand).has_value())
+    << stripWhitespace(show(ctx.unit));
+  ASSERT_TRUE(findUse(ctx.unit, exit, cand).has_value())
+    << stripWhitespace(show(ctx.unit));
+}
+
+void expectPureLoadSunkToMid(const PureLoadSinkLinearContext& ctx) {
+  auto const cand = Vreg{ctx.cand};
   auto const& entry = ctx.unit.blocks[ctx.unit.entry];
   auto const& exit = ctx.unit.blocks[ctx.exit];
 
-  ASSERT_EQ(size_t{1}, countLoadDefs(ctx.unit, cand))
+  EXPECT_FALSE(findLoadDef(entry, cand).has_value())
     << stripWhitespace(show(ctx.unit));
-  ASSERT_TRUE(findLoadDef(entry, cand).has_value())
+  ASSERT_TRUE(expectOnlyLoadDefInBlock(ctx.unit, ctx.mid, cand).has_value())
     << stripWhitespace(show(ctx.unit));
   EXPECT_FALSE(findLoadDef(exit, cand).has_value())
     << stripWhitespace(show(ctx.unit));
@@ -776,7 +849,7 @@ void testSinkDefsPureLoadSinksAfterUserMoves() {
   }
 }
 
-void testSinkDefsPureLoadStopsAtClobberingStore() {
+void testSinkDefsPureLoadStopsBeforeClobberingStore() {
   testSinkDefsLocalPureLoadLinear(
     0,
     [] (IRUnit& irUnit,
@@ -793,11 +866,21 @@ void testSinkDefsPureLoadStopsAtClobberingStore() {
       vm.setOrigin(nullptr);
       vm << jmp{exit};
     },
-    expectPureLoadKeptInEntry
+    [] (const PureLoadSinkLinearContext& ctx) {
+      expectPureLoadSunkToMid(ctx);
+
+      auto const& midCode = ctx.unit.blocks[ctx.mid].code;
+      ASSERT_EQ(midCode.size(), 4);
+      ASSERT_EQ(midCode[0].op, Vinstr::load);
+      EXPECT_EQ(midCode[0].load_.d, Vreg{ctx.cand});
+      ASSERT_EQ(midCode[1].op, Vinstr::ldimmq);
+      ASSERT_EQ(midCode[2].op, Vinstr::store);
+      ASSERT_EQ(midCode[3].op, Vinstr::jmp);
+    }
   );
 }
 
-void testSinkDefsPureLoadStopsAtEnterInlineFrame() {
+void testSinkDefsPureLoadStopsBeforeEnterInlineFrame() {
   testSinkDefsPureLoadLinear(
     [] (IRUnit& irUnit, BCContext bcctx, SSATmp*) {
       return makeLdStkOrigin(irUnit, bcctx, IRSPRelOffset{0});
@@ -815,12 +898,14 @@ void testSinkDefsPureLoadStopsAtEnterInlineFrame() {
       vm << jmp{exit};
     },
     [] (const PureLoadSinkLinearContext& ctx) {
-      expectPureLoadKeptInEntry(ctx);
+      expectPureLoadSunkToMid(ctx);
 
       auto const& midCode = ctx.unit.blocks[ctx.mid].code;
-      ASSERT_EQ(midCode.size(), 2);
-      ASSERT_EQ(midCode[0].op, Vinstr::inlinestart);
-      ASSERT_EQ(midCode[1].op, Vinstr::jmp);
+      ASSERT_EQ(midCode.size(), 3);
+      ASSERT_EQ(midCode[0].op, Vinstr::load);
+      EXPECT_EQ(midCode[0].load_.d, Vreg{ctx.cand});
+      ASSERT_EQ(midCode[1].op, Vinstr::inlinestart);
+      ASSERT_EQ(midCode[2].op, Vinstr::jmp);
     }
   );
 }
@@ -943,7 +1028,7 @@ void testSinkDefsPureLoadStopsAtClobberingBranchPath() {
   }
 }
 
-void testSinkDefsPureLoadStopsAtClobberingBlockEnd() {
+void testSinkDefsPureLoadStopsBeforeClobberingBlockEnd() {
   for (auto const kind : {CodeKind::Trace, CodeKind::Prologue}) {
     SCOPED_TRACE(kind == CodeKind::Trace ? "trace_abi" : "prologue_abi");
 
@@ -990,15 +1075,16 @@ void testSinkDefsPureLoadStopsAtClobberingBlockEnd() {
     sinkDefs(unit, abi(kind));
 
     auto const& entryCode = unit.blocks[unit.entry].code;
-    ASSERT_EQ(entryCode.size(), 3);
-    ASSERT_EQ(entryCode[0].op, Vinstr::ldimmq);
-    ASSERT_EQ(entryCode[1].op, Vinstr::load);
-    EXPECT_EQ(entryCode[1].load_.d, Vreg{cand});
-    ASSERT_EQ(entryCode[2].op, Vinstr::jmp);
+    ASSERT_EQ(entryCode.size(), 1);
+    ASSERT_EQ(entryCode[0].op, Vinstr::jmp);
 
     auto const& midCode = unit.blocks[mid].code;
-    ASSERT_EQ(midCode.size(), 1);
-    ASSERT_EQ(midCode[0].op, Vinstr::vinvoke);
+    ASSERT_EQ(midCode.size(), 3);
+    ASSERT_EQ(midCode[0].op, Vinstr::ldimmq);
+    EXPECT_EQ(midCode[0].ldimmq_.d, base);
+    ASSERT_EQ(midCode[1].op, Vinstr::load);
+    EXPECT_EQ(midCode[1].load_.d, Vreg{cand});
+    ASSERT_EQ(midCode[2].op, Vinstr::vinvoke);
 
     auto const& doneCode = unit.blocks[done].code;
     ASSERT_EQ(doneCode.size(), 2);
@@ -1421,14 +1507,15 @@ TEST(Vasm, Simplifier) {
   testSinkDefsMovesIntoMergeAfterPhidef();
   testSinkDefsKeepsJoinPointDefsInPlace();
   testSinkDefsKeepsDefsOutOfHotterBlocks();
+  testSinkDefsFallsBackToLegalDominator();
   testSinkDefsMovesDefsWithDeadSF();
   testSinkDefsPureLoadSinksAcrossUnrelatedStoreOrigin();
   testSinkDefsPureLoadSinksAfterUserMoves();
-  testSinkDefsPureLoadStopsAtClobberingStore();
-  testSinkDefsPureLoadStopsAtEnterInlineFrame();
+  testSinkDefsPureLoadStopsBeforeClobberingStore();
+  testSinkDefsPureLoadStopsBeforeEnterInlineFrame();
   testSinkDefsPureLoadStopsAtSelfLoopClobber();
   testSinkDefsPureLoadStopsAtClobberingBranchPath();
-  testSinkDefsPureLoadStopsAtClobberingBlockEnd();
+  testSinkDefsPureLoadStopsBeforeClobberingBlockEnd();
 }
 
 TEST(Vasm, ArmLeaLowering) {

@@ -208,6 +208,68 @@ bool pathClobbersLoad(const Vunit& unit,
   return false;
 }
 
+bool canSinkToTarget(const Vunit& unit,
+                     const SinkAnalysis& analysis,
+                     Vlabel src,
+                     size_t srcIdx,
+                     Vlabel target,
+                     const SinkDefInfo& info,
+                     boost::dynamic_bitset<>& seen,
+                     jit::vector<Vlabel>& worklist) {
+  if (targetIsHotter(unit.blocks[src], unit.blocks[target])) return false;
+  if (info.isPureLoad &&
+      pathClobbersLoad(
+        unit,
+        analysis,
+        src,
+        srcIdx,
+        target,
+        info.loadSrc,
+        seen,
+        worklist
+      )) {
+    return false;
+  }
+
+  return true;
+}
+
+Vlabel findSinkTarget(const Vunit& unit,
+                      const SinkAnalysis& analysis,
+                      Vlabel src,
+                      size_t srcIdx,
+                      Vlabel target,
+                      const SinkDefInfo& info,
+                      boost::dynamic_bitset<>& seen,
+                      jit::vector<Vlabel>& worklist) {
+  // `target` is the common dominator of the def's uses, so `src` dominates it
+  // (an SSA def dominates all its uses, hence their common dominator). Walking
+  // up the dominator tree from there reaches `src`, so every block we consider
+  // is dominated by `src` and `target == src` bounds the walk -- no need to
+  // re-check dominance each step.
+  if (!target.isValid() || !dominates(src, target, analysis.idoms)) {
+    return Vlabel{};
+  }
+
+  while (target != src) {
+    if (canSinkToTarget(
+          unit,
+          analysis,
+          src,
+          srcIdx,
+          target,
+          info,
+          seen,
+          worklist
+        )) {
+      return target;
+    }
+    target = analysis.idoms[target];
+  }
+
+  return Vlabel{};
+}
+
 jit::vector<UseBlocks> computeUseBlocks(const Vunit& unit,
                                         const jit::vector<Vlabel>& rpo) {
   auto uses = jit::vector<UseBlocks>(unit.next_vr);
@@ -269,22 +331,17 @@ jit::vector<SinkMove> collectSinkMoves(const Vunit& unit,
           analysis.rpoOrder
         );
       }
-      if (!target.isValid() || target == b) continue;
-      if (!dominates(b, target, analysis.idoms)) continue;
-      if (targetIsHotter(block, unit.blocks[target])) continue;
-      if (info.isPureLoad &&
-          pathClobbersLoad(
-            unit,
-            analysis,
-            b,
-            idx,
-            target,
-            info.loadSrc,
-            seen,
-            worklist
-          )) {
-        continue;
-      }
+      target = findSinkTarget(
+        unit,
+        analysis,
+        b,
+        idx,
+        target,
+        info,
+        seen,
+        worklist
+      );
+      if (!target.isValid()) continue;
 
       moves.push_back(SinkMove{b, idx, target});
     }

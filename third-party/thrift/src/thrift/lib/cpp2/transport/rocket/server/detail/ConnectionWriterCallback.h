@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <folly/ExceptionWrapper.h>
 #include <folly/io/async/AsyncTransport.h>
 #include <folly/logging/xlog.h>
 #include <thrift/lib/cpp/transport/TTransportException.h>

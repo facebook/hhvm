@@ -35,14 +35,13 @@ func TestNoopServerObserver(t *testing.T) {
 	observer.ConnTLSAccepted()
 	observer.TaskKilled()
 	observer.TaskTimeout()
-	observer.DeclaredException()
-	observer.UndeclaredException()
 	observer.ServerOverloaded()
-	observer.ReceivedRequest()
 	observer.SentReply()
 	observer.ActiveRequests(10)
 	observer.ProcessTime(200 * time.Millisecond)
 
 	// Test function-level stats
 	observer.ReceivedRequestForFunction("testFunction")
+	observer.UndeclaredExceptionForFunction("testFunction")
+	observer.DeclaredExceptionForFunction("testFunction")
 }

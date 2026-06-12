@@ -1118,11 +1118,9 @@ func TestRocketServerFallbackToHeader(t *testing.T) {
 	mockObserver.On("ProcessorPanic").Maybe()
 	mockObserver.On("TaskKilled").Maybe()
 	mockObserver.On("TaskTimeout").Maybe()
-	mockObserver.On("DeclaredException").Maybe()
-	mockObserver.On("UndeclaredException").Maybe()
 	mockObserver.On("ServerOverloaded").Maybe()
 	mockObserver.On("UndeclaredExceptionForFunction", mock.Anything).Maybe()
-	mockObserver.On("AnyExceptionForFunction", mock.Anything).Maybe()
+	mockObserver.On("DeclaredExceptionForFunction", mock.Anything).Maybe()
 	mockObserver.On("TimeReadUsForFunction", mock.Anything, mock.Anything).Maybe()
 	mockObserver.On("TimeProcessUsForFunction", mock.Anything, mock.Anything).Maybe()
 	mockObserver.On("TimeWriteUsForFunction", mock.Anything, mock.Anything).Maybe()
@@ -1179,11 +1177,9 @@ func TestStreamingSinkExceptionObserver(t *testing.T) {
 		mockObserver.On("ProcessorPanic").Maybe()
 		mockObserver.On("TaskKilled").Maybe()
 		mockObserver.On("TaskTimeout").Maybe()
-		mockObserver.On("DeclaredException").Maybe()
-		mockObserver.On("UndeclaredException").Maybe()
 		mockObserver.On("ServerOverloaded").Maybe()
 		mockObserver.On("UndeclaredExceptionForFunction", mock.Anything).Maybe()
-		mockObserver.On("AnyExceptionForFunction", mock.Anything).Maybe()
+		mockObserver.On("DeclaredExceptionForFunction", mock.Anything).Maybe()
 		mockObserver.On("TimeReadUsForFunction", mock.Anything, mock.Anything).Maybe()
 		mockObserver.On("TimeProcessUsForFunction", mock.Anything, mock.Anything).Maybe()
 		mockObserver.On("TimeWriteUsForFunction", mock.Anything, mock.Anything).Maybe()
@@ -1339,13 +1335,11 @@ func TestStreamingSinkExceptionObserver(t *testing.T) {
 			tt.rpcCall(t, client)
 
 			if tt.expectUndeclared {
-				mockObserver.AssertCalled(t, "UndeclaredException")
 				mockObserver.AssertCalled(t, "UndeclaredExceptionForFunction", tt.functionName)
 			}
 			if tt.expectDeclared {
-				mockObserver.AssertCalled(t, "DeclaredException")
+				mockObserver.AssertCalled(t, "DeclaredExceptionForFunction", tt.functionName)
 			}
-			mockObserver.AssertCalled(t, "AnyExceptionForFunction", tt.functionName)
 		})
 	}
 }

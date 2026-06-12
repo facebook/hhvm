@@ -30,10 +30,7 @@ type ServerObserver interface {
 	// Request processing events
 	TaskKilled()                    // request rejected due to parsing errors or shutdown
 	TaskTimeout()                   // request processing exceeded timeout
-	DeclaredException()             // handler returned declared error type
-	UndeclaredException()           // handler returned unexpected error or panic
 	ServerOverloaded()              // request rejected due to load shedding
-	ReceivedRequest()               // complete request received and parsed
 	SentReply()                     // response successfully written to connection
 	ActiveRequests(numRequests int) // current count of processing requests
 	ProcessorPanic()                // processor panic recovered during request handling
@@ -45,7 +42,7 @@ type ServerObserver interface {
 	// Function-level stats for tracking detailed request behavior
 	ReceivedRequestForFunction(function string)                       // request received for specific function
 	UndeclaredExceptionForFunction(function string)                   // undeclared exception thrown in specific function
-	AnyExceptionForFunction(function string)                          // any exception (declared or undeclared) thrown in specific function
+	DeclaredExceptionForFunction(function string)                     // declared exception thrown in specific function
 	TimeReadUsForFunction(function string, duration time.Duration)    // time spent reading/demarshaling for specific function
 	TimeProcessUsForFunction(function string, duration time.Duration) // time spent processing for specific function
 	TimeWriteUsForFunction(function string, duration time.Duration)   // time spent marshaling/writing for specific function

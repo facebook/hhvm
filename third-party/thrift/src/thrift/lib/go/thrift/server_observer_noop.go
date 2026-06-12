@@ -42,10 +42,7 @@ func (*noopServerObserver) ReceivedHeaderRequest() {}
 // Request processing events
 func (*noopServerObserver) TaskKilled()          {}
 func (*noopServerObserver) TaskTimeout()         {}
-func (*noopServerObserver) DeclaredException()   {}
-func (*noopServerObserver) UndeclaredException() {}
 func (*noopServerObserver) ServerOverloaded()    {}
-func (*noopServerObserver) ReceivedRequest()     {}
 func (*noopServerObserver) SentReply()           {}
 func (*noopServerObserver) ActiveRequests(_ int) {}
 func (*noopServerObserver) ProcessorPanic()      {}
@@ -57,7 +54,7 @@ func (*noopServerObserver) ProcessTime(_ time.Duration)  {}
 // Function-level stats (no-op implementations)
 func (*noopServerObserver) ReceivedRequestForFunction(_ string)                {}
 func (*noopServerObserver) UndeclaredExceptionForFunction(_ string)            {}
-func (*noopServerObserver) AnyExceptionForFunction(_ string)                   {}
+func (*noopServerObserver) DeclaredExceptionForFunction(_ string)              {}
 func (*noopServerObserver) TimeReadUsForFunction(_ string, _ time.Duration)    {}
 func (*noopServerObserver) TimeProcessUsForFunction(_ string, _ time.Duration) {}
 func (*noopServerObserver) TimeWriteUsForFunction(_ string, _ time.Duration)   {}

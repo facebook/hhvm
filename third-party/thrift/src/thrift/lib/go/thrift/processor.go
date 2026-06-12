@@ -183,9 +183,7 @@ func process(
 			return nil, writeErr
 		}
 		// Track undeclared exception only after successful write
-		observer.UndeclaredException()
 		observer.UndeclaredExceptionForFunction(methodName)
-		observer.AnyExceptionForFunction(methodName)
 	} else {
 		if writeErr := sendWritableStruct(prot, methodName, types.REPLY, seqID, result); writeErr != nil {
 			// close connection on write failure
@@ -193,8 +191,7 @@ func process(
 		}
 		// Track declared exceptions
 		if wr, ok := result.(types.WritableResult); ok && wr.Exception() != nil {
-			observer.DeclaredException()
-			observer.AnyExceptionForFunction(methodName)
+			observer.DeclaredExceptionForFunction(methodName)
 		}
 	}
 	// if we got here, we successfully processed the message

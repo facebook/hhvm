@@ -349,7 +349,6 @@ func (s *rocketServerSocket) requestResponse(msg payload.Payload) mono.Mono {
 	}
 
 	// Notify observer that request was received
-	s.observer.ReceivedRequest()
 	s.observer.ReceivedRequestForFunction(rpcFuncName)
 
 	if s.isOverloaded() {
@@ -479,7 +478,6 @@ func (s *rocketServerSocket) fireAndForget(msg payload.Payload) {
 	}
 
 	// Notify observer that request was received
-	s.observer.ReceivedRequest()
 	s.observer.ReceivedRequestForFunction(rpcFuncName)
 
 	if s.isOverloaded() {
@@ -556,9 +554,7 @@ func (s *rocketServerSocket) requestStream(msg payload.Payload) flux.Flux {
 				var payload payload.Payload
 				appException, isAppException := respStruct.(*types.ApplicationException)
 				if isAppException {
-					s.observer.UndeclaredException()
 					s.observer.UndeclaredExceptionForFunction(rpcFuncName)
-					s.observer.AnyExceptionForFunction(rpcFuncName)
 					payload, err = rocket.EncodeResponseApplicationErrorPayload(
 						appException,
 						protocol.getRequestHeaders(),
@@ -598,14 +594,11 @@ func (s *rocketServerSocket) requestStream(msg payload.Payload) flux.Flux {
 					exceptionMetadataBase = rocket.NewPayloadExceptionMetadataBaseV2(appEx)
 					// Response should be empty to adhere to spec
 					dataBytes = nil
-					s.observer.UndeclaredException()
 					s.observer.UndeclaredExceptionForFunction(rpcFuncName)
-					s.observer.AnyExceptionForFunction(rpcFuncName)
 				} else if streamResult, ok := streamStruct.(types.WritableResult); ok && streamResult.Exception() != nil {
 					declaredErr := streamResult.Exception()
 					exceptionMetadataBase = rocket.NewPayloadExceptionMetadataBaseV2(declaredErr)
-					s.observer.DeclaredException()
-					s.observer.AnyExceptionForFunction(rpcFuncName)
+					s.observer.DeclaredExceptionForFunction(rpcFuncName)
 				}
 
 				if exceptionMetadataBase != nil {
@@ -701,14 +694,11 @@ func (s *rocketServerSocket) requestChannelSink(
 			if appEx, ok := respStruct.(*types.ApplicationException); ok {
 				exceptionMetadata = rocket.NewPayloadExceptionMetadataBaseV2(appEx)
 				dataBytes = nil
-				s.observer.UndeclaredException()
 				s.observer.UndeclaredExceptionForFunction(rpcFuncName)
-				s.observer.AnyExceptionForFunction(rpcFuncName)
 			} else if streamResult, ok := respStruct.(types.WritableResult); ok && streamResult.Exception() != nil {
 				declaredErr := streamResult.Exception()
 				exceptionMetadata = rocket.NewPayloadExceptionMetadataBaseV2(declaredErr)
-				s.observer.DeclaredException()
-				s.observer.AnyExceptionForFunction(rpcFuncName)
+				s.observer.DeclaredExceptionForFunction(rpcFuncName)
 			}
 
 			if isFirstResponse {
@@ -899,14 +889,11 @@ func (s *rocketServerSocket) requestChannelBiDi(
 			if appEx, ok := respStruct.(*types.ApplicationException); ok {
 				exceptionMetadata = rocket.NewPayloadExceptionMetadataBaseV2(appEx)
 				dataBytes = nil
-				s.observer.UndeclaredException()
 				s.observer.UndeclaredExceptionForFunction(rpcFuncName)
-				s.observer.AnyExceptionForFunction(rpcFuncName)
 			} else if streamResult, ok := respStruct.(types.WritableResult); ok && streamResult.Exception() != nil {
 				declaredErr := streamResult.Exception()
 				exceptionMetadata = rocket.NewPayloadExceptionMetadataBaseV2(declaredErr)
-				s.observer.DeclaredException()
-				s.observer.AnyExceptionForFunction(rpcFuncName)
+				s.observer.DeclaredExceptionForFunction(rpcFuncName)
 			}
 
 			if isFirstResponse {
@@ -1103,7 +1090,6 @@ func (s *rocketServerSocket) preprocessRequest(msg payload.Payload) (
 		return nil, nil, nil, nil, err
 	}
 
-	s.observer.ReceivedRequest()
 	s.observer.ReceivedRequestForFunction(rpcFuncName)
 
 	if s.isOverloaded() {

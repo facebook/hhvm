@@ -51,19 +51,7 @@ func (m *MockServerObserver) TaskTimeout() {
 	m.Called()
 }
 
-func (m *MockServerObserver) DeclaredException() {
-	m.Called()
-}
-
-func (m *MockServerObserver) UndeclaredException() {
-	m.Called()
-}
-
 func (m *MockServerObserver) ServerOverloaded() {
-	m.Called()
-}
-
-func (m *MockServerObserver) ReceivedRequest() {
 	m.Called()
 }
 
@@ -95,7 +83,7 @@ func (m *MockServerObserver) UndeclaredExceptionForFunction(function string) {
 	m.Called(function)
 }
 
-func (m *MockServerObserver) AnyExceptionForFunction(function string) {
+func (m *MockServerObserver) DeclaredExceptionForFunction(function string) {
 	m.Called(function)
 }
 

@@ -1,6 +1,6 @@
 [project]
 name = "pywatchman"
-version = "3.0.0"
+version = "4.0.0"
 authors = [
     { name = "Meta Source Control Team", email = "sourcecontrol-dev@fb.com" },
 ]
@@ -19,6 +19,9 @@ classifiers = [
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
 ]
 keywords = [
     "watchman",

@@ -144,7 +144,6 @@ cdef extern from "thrift/lib/cpp2/FieldRef.h" namespace "apache::thrift" nogil:
         # Cython doesn't handle references very well, so use a different name
         # for value_unchecked in the contexts where references actually work.
         T& ref_unchecked "value_unchecked" ()
-        bint has_value()
 
     cdef cppclass optional_field_ref[T]:
         void assign "operator="(T)
@@ -166,7 +165,6 @@ cdef extern from "thrift/lib/cpp2/FieldRef.h" namespace "apache::thrift" nogil:
         # Cython doesn't handle references very well, so use a different name
         # for value in the contexts where references actually work.
         T& ref "value" ()
-        bint has_value()
 
     cdef cppclass optional_boxed_field_ref[T]:
         void assign "operator="(T)
@@ -190,7 +188,6 @@ cdef extern from "thrift/lib/cpp2/FieldRef.h" namespace "apache::thrift" nogil:
         # Cython doesn't handle references very well, so use a different name
         # for value in the contexts where references actually work.
         T& ref "value" ()
-        bint has_value()
 
 # Use python-types-capi to serialize of marshal _cpp_obj to thrift-python
 cdef extern from "thrift/lib/python/capi/py3_converter.h" namespace "apache::thrift::python::capi":

@@ -124,11 +124,11 @@ function bcpow(string $left, string $right, int $scale = -1): string;
  *                          can also set the global default scale for all
  *                          functions by using bcscale().
  *
- * @return string - Returns the result as a string, or NULL if modulus is 0.
+ * @return string - Returns the result as a string, or FALSE if modulus is 0.
  */
 <<__Native>>
 function bcpowmod(string $left, string $right, string $modulus,
-                  int $scale = -1): ?string;
+                  int $scale = -1): mixed;
 
 /**
  * bcsqrt() - http://php.net/function.bcsqrt

@@ -170,7 +170,7 @@ function curl_multi_exec(resource $mh, inout int $still_running): ?int;
  *   CURLOPT_RETURNTRANSFER is set.
  */
 <<__Native>>
-function curl_multi_getcontent(resource $ch): ?string;
+function curl_multi_getcontent(resource $ch): mixed;
 
 /**
  * Get information about the current transfers

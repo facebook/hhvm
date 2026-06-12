@@ -8,7 +8,10 @@
 
 #pragma once
 
+#include <deque>
+#include <folly/CancellationToken.h>
 #include <folly/ExceptionWrapper.h>
+#include <folly/container/F14Set.h>
 #include <folly/portability/GMock.h>
 #include <proxygen/lib/http/webtransport/WebTransport.h>
 #include <quic/priority/HTTPPriorityQueue.h>
@@ -76,6 +79,12 @@ class FakeStreamHandle
     if (!writeErr_) {
       writeErr_.emplace(code);
     }
+    // Per spec the writer responds with RST; shortcut locally so the
+    // tracker for our read half terminates without depending on the peer.
+    if (!fin_ && onWriteTerminal_) {
+      auto cb = std::move(onWriteTerminal_);
+      cb();
+    }
     return folly::unit;
   }
 
@@ -108,12 +117,20 @@ class FakeStreamHandle
     }
   }
 
+  // Invoked when this handle's write half reaches terminal state (FIN sent
+  // or RST via resetStream). NOT invoked on stopSending, which is a signal
+  // rather than a stream terminator. Fires at most once.
+  void setOnWriteTerminal(std::function<void()> cb) {
+    onWriteTerminal_ = std::move(cb);
+  }
+
   using WriteStreamDataRet =
       folly::Expected<WebTransport::FCState, WebTransport::ErrorCode>;
   WriteStreamDataRet writeStreamData(
       std::unique_ptr<folly::IOBuf> data,
       bool fin,
       WebTransport::ByteEventCallback* deliveryCallback) override {
+    bool wasTerminal = fin_ || writeErr_.has_value();
     size_t length = 0;
     if (data) {
       length = data->computeChainDataLength();
@@ -144,6 +161,10 @@ class FakeStreamHandle
         offsetToDeliveryCallback_[dataWritten_].push_back(deliveryCallback);
       }
     }
+    if (fin && !wasTerminal && onWriteTerminal_) {
+      auto cb = std::move(onWriteTerminal_);
+      cb();
+    }
     return WebTransport::FCState::UNBLOCKED;
   }
 
@@ -162,7 +183,13 @@ class FakeStreamHandle
       promise_->setException(WebTransport::Exception(err));
       promise_.reset();
     }
+    // Guard via onWriteTerminal_ presence (cleared on first fire) — writeErr_
+    // may already be set by an earlier stopSending and must not gate this.
     writeErr_ = err;
+    if (!fin_ && onWriteTerminal_) {
+      auto cb = std::move(onWriteTerminal_);
+      cb();
+    }
     return folly::unit;
   }
   GenericApiRet setPriority(quic::PriorityQueue::Priority priority) override {
@@ -177,6 +204,7 @@ class FakeStreamHandle
   }
 
   uint64_t id{0};
+  std::function<void()> onWriteTerminal_;
   folly::Optional<folly::Promise<WebTransport::StreamData>> promise_;
   folly::IOBufQueue buf_{folly::IOBufQueue::cacheChainLength()};
   uint32_t dataWritten_{0};
@@ -243,15 +271,25 @@ class FakeSharedWebTransport : public WebTransport {
   }
 
   folly::Expected<StreamWriteHandle*, ErrorCode> createUniStream() override {
+    if (maxLocalUniStreams_ &&
+        localUniStreams_.size() >= *maxLocalUniStreams_) {
+      return folly::makeUnexpected(ErrorCode::STREAM_CREATION_ERROR);
+    }
     auto id = nextUniStreamId_;
     nextUniStreamId_ += 4;
     auto handle = std::make_shared<FakeStreamHandle>(id);
     writeHandles.emplace(id, handle);
     peer_->readHandles.emplace(id, handle);
+    localUniStreams_.insert(id);
+    handle->setOnWriteTerminal([this, id]() { onLocalUniWriteTerminal(id); });
     peerHandler_->onNewUniStream(handle.get());
     return handle.get();
   }
   folly::Expected<BidiStreamHandle, ErrorCode> createBidiStream() override {
+    if (maxLocalBidiStreams_ &&
+        localBidiStreams_.size() >= *maxLocalBidiStreams_) {
+      return folly::makeUnexpected(ErrorCode::STREAM_CREATION_ERROR);
+    }
     auto id = nextBidiStreamId_;
     nextBidiStreamId_ += 4;
     auto readH = std::make_shared<FakeStreamHandle>(id);
@@ -260,17 +298,118 @@ class FakeSharedWebTransport : public WebTransport {
     writeHandles.emplace(id, writeH);
     peer_->readHandles.emplace(id, writeH);
     peer_->writeHandles.emplace(id, readH);
+    localBidiStreams_.emplace(id, BidiHalves{});
+    // writeH is the local write half; readH is also peer's write handle,
+    // so its onWriteTerminal fires when peer FINs or RSTs us.
+    writeH->setOnWriteTerminal([this, id]() { onLocalBidiWriteTerminal(id); });
+    readH->setOnWriteTerminal([this, id]() { onLocalBidiReadTerminal(id); });
     peerHandler_->onNewBidiStream({writeH.get(), readH.get()});
     return BidiStreamHandle({readH.get(), writeH.get()});
   }
   using AwaitStreamCreditRet = folly::SemiFuture<folly::Unit>;
   AwaitStreamCreditRet awaitUniStreamCredit() override {
-    return folly::makeFuture(folly::unit);
+    if (!maxLocalUniStreams_ ||
+        localUniStreams_.size() < *maxLocalUniStreams_) {
+      return folly::makeFuture(folly::unit);
+    }
+    auto [p, f] = folly::makePromiseContract<folly::Unit>();
+    pendingUniCreditPromises_.push_back(std::move(p));
+    return std::move(f);
   }
   AwaitStreamCreditRet awaitBidiStreamCredit() override {
-    return folly::makeFuture(folly::unit);
+    if (!maxLocalBidiStreams_ ||
+        localBidiStreams_.size() < *maxLocalBidiStreams_) {
+      return folly::makeFuture(folly::unit);
+    }
+    auto [p, f] = folly::makePromiseContract<folly::Unit>();
+    pendingBidiCreditPromises_.push_back(std::move(p));
+    return std::move(f);
   }
 
+  // Simulate QUIC peer-issued MAX_STREAMS bidi limit on this endpoint. Once
+  // set, createBidiStream() fails synchronously when the limit is reached;
+  // awaitBidiStreamCredit() returns a pending future. Credit is replenished
+  // when both halves of a locally-initiated bidi reach terminal state, or
+  // when releaseBidiCredit() is called explicitly.
+  void setMaxLocalBidiStreams(uint64_t n) {
+    maxLocalBidiStreams_ = n;
+    notifyBidiCreditAvailable();
+  }
+  void releaseBidiCredit(uint64_t id) {
+    if (localBidiStreams_.erase(id)) {
+      notifyBidiCreditAvailable();
+    }
+  }
+  // Simulate QUIC peer-issued MAX_STREAMS uni limit. Same semantics as
+  // setMaxLocalBidiStreams; credit is replenished when a locally-initiated
+  // uni stream's write half reaches terminal state, or via releaseUniCredit.
+  void setMaxLocalUniStreams(uint64_t n) {
+    maxLocalUniStreams_ = n;
+    notifyUniCreditAvailable();
+  }
+  void releaseUniCredit(uint64_t id) {
+    if (localUniStreams_.erase(id)) {
+      notifyUniCreditAvailable();
+    }
+  }
+  // FIN/RST observed on the write half of an outstanding local bidi stream.
+  void onLocalBidiWriteTerminal(uint64_t id) {
+    auto it = localBidiStreams_.find(id);
+    if (it == localBidiStreams_.end()) {
+      return;
+    }
+    it->second.writeDone = true;
+    if (it->second.readDone) {
+      localBidiStreams_.erase(it);
+      notifyBidiCreditAvailable();
+    }
+  }
+  // FIN/RST observed on the read half of an outstanding local bidi stream.
+  void onLocalBidiReadTerminal(uint64_t id) {
+    auto it = localBidiStreams_.find(id);
+    if (it == localBidiStreams_.end()) {
+      return;
+    }
+    it->second.readDone = true;
+    if (it->second.writeDone) {
+      localBidiStreams_.erase(it);
+      notifyBidiCreditAvailable();
+    }
+  }
+  // FIN/RST observed on a locally-initiated uni stream's (sole) write half.
+  void onLocalUniWriteTerminal(uint64_t id) {
+    if (localUniStreams_.erase(id)) {
+      notifyUniCreditAvailable();
+    }
+  }
+
+ public:
+  struct BidiHalves {
+    bool writeDone{false};
+    bool readDone{false};
+  };
+
+ private:
+  void notifyBidiCreditAvailable() {
+    while (!pendingBidiCreditPromises_.empty() &&
+           (!maxLocalBidiStreams_ ||
+            localBidiStreams_.size() < *maxLocalBidiStreams_)) {
+      auto p = std::move(pendingBidiCreditPromises_.front());
+      pendingBidiCreditPromises_.pop_front();
+      p.setValue(folly::unit);
+    }
+  }
+  void notifyUniCreditAvailable() {
+    while (!pendingUniCreditPromises_.empty() &&
+           (!maxLocalUniStreams_ ||
+            localUniStreams_.size() < *maxLocalUniStreams_)) {
+      auto p = std::move(pendingUniCreditPromises_.front());
+      pendingUniCreditPromises_.pop_front();
+      p.setValue(folly::unit);
+    }
+  }
+
+ public:
   using ReadStreamDataRet =
       folly::Expected<folly::SemiFuture<StreamData>, WebTransport::ErrorCode>;
   ReadStreamDataRet readStreamData(uint64_t id) override {
@@ -331,6 +470,7 @@ class FakeSharedWebTransport : public WebTransport {
     if (h == readHandles.end()) {
       return folly::makeUnexpected(WebTransport::ErrorCode::GENERIC_ERROR);
     }
+    // STOP_SENDING is a signal, not a stream terminator — no credit change.
     return h->second->stopSending(error);
   }
 
@@ -359,6 +499,18 @@ class FakeSharedWebTransport : public WebTransport {
       h.second->stopSending(closeCode);
     }
     readHandles.clear();
+    // localBidiStreams_ is intentionally not cleared so openLocalBidiStreams()
+    // can still report any leak after close.
+    while (!pendingBidiCreditPromises_.empty()) {
+      auto p = std::move(pendingBidiCreditPromises_.front());
+      pendingBidiCreditPromises_.pop_front();
+      p.setException(folly::OperationCancelled());
+    }
+    while (!pendingUniCreditPromises_.empty()) {
+      auto p = std::move(pendingUniCreditPromises_.front());
+      pendingUniCreditPromises_.pop_front();
+      p.setException(folly::OperationCancelled());
+    }
     if (peerHandler_) {
       peerHandler_->onSessionEnd(error);
     }
@@ -368,6 +520,21 @@ class FakeSharedWebTransport : public WebTransport {
 
   bool isSessionClosed() const {
     return sessionClosed_;
+  }
+
+  // Locally-initiated bidi streams whose two halves have not both reached
+  // terminal state (FIN or RST). Entries are erased automatically when both
+  // halves go terminal, so anything left here at a quiescent test point is
+  // a stream we failed to close cleanly on one or both sides. closeSession()
+  // leaves this map intact so leaks remain observable post-close.
+  const folly::F14FastMap<uint64_t, BidiHalves>& openLocalBidiStreams() const {
+    return localBidiStreams_;
+  }
+
+  // Locally-initiated uni streams whose (sole) write half has not yet reached
+  // terminal state (FIN or RST). Same closeSession() semantics as above.
+  const folly::F14FastSet<uint64_t>& openLocalUniStreams() const {
+    return localUniStreams_;
   }
 
   std::map<uint64_t, std::shared_ptr<FakeStreamHandle>> writeHandles;
@@ -381,6 +548,12 @@ class FakeSharedWebTransport : public WebTransport {
   WebTransportHandler* peerHandler_{nullptr};
   folly::SocketAddress peerAddress_{"0.0.0.0", 123};
   folly::SocketAddress localAddress_{"0.0.0.0", 456};
+  folly::Optional<uint64_t> maxLocalBidiStreams_;
+  folly::Optional<uint64_t> maxLocalUniStreams_;
+  folly::F14FastMap<uint64_t, BidiHalves> localBidiStreams_;
+  folly::F14FastSet<uint64_t> localUniStreams_;
+  std::deque<folly::Promise<folly::Unit>> pendingBidiCreditPromises_;
+  std::deque<folly::Promise<folly::Unit>> pendingUniCreditPromises_;
 };
 
 } // namespace proxygen::test

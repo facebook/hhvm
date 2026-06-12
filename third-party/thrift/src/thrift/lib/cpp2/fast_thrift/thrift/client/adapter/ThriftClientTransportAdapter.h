@@ -94,15 +94,21 @@ class ThriftClientTransportAdapter {
     // Bridge the rocket transport's graceful-close notification (server sent
     // CONNECTION_CLOSE) into a thrift CloseConnection event. The
     // pipeline-resident drain handler reacts to it; the bridge only
-    // translates the rocket-native signal into thrift vocabulary.
+    // translates the rocket-native signal into thrift vocabulary. The event
+    // carries no payload — the type alone is the signal.
     connection_->appAdapter->setOnClose([this]() noexcept {
       if (pipeline_) {
         pipeline_->fireEvent(
             ThriftClientEventType::CloseConnection,
-            channel_pipeline::erase_and_box(
-                ThriftClientEvent{ThriftClientEventType::CloseConnection}));
+            channel_pipeline::TypeErasedBox{});
       }
     });
+    // Bridge rocket-pipeline write-completion notifications into the thrift
+    // pipeline.
+    connection_->appAdapter->setOnWriteComplete(
+        [this](const rocket::client::RocketWriteCompleteEvent& e) noexcept {
+          onWriteComplete(e);
+        });
   }
 
   ~ThriftClientTransportAdapter() {
@@ -205,6 +211,23 @@ class ThriftClientTransportAdapter {
       return;
     }
     pipeline_->fireException(std::move(ew));
+  }
+
+  // Called when the rocket pipeline reports a completed write batch. Relays it
+  // up the thrift pipeline as a ThriftClientEventType::WriteComplete event
+  // carrying the batch's status / frame count / bytes. Precondition: pipeline
+  // is wired (the rocket connection that fires this is torn down before
+  // pipeline_ is cleared).
+  void onWriteComplete(
+      const rocket::client::RocketWriteCompleteEvent& event) noexcept {
+    pipeline_->fireEvent(
+        ThriftClientEventType::WriteComplete,
+        channel_pipeline::TypeErasedBox(
+            ThriftClientWriteCompleteEvent{
+                .status = event.status,
+                .frameCount = event.frameCount,
+                .bytes = event.bytes,
+            }));
   }
 
   // === HeadEndpointHandler interface ===

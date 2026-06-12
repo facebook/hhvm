@@ -82,8 +82,8 @@ class MockDrainContext {
 };
 
 TypeErasedBox makeCloseEvent() {
-  return erase_and_box(
-      ThriftClientEvent{ThriftClientEventType::CloseConnection});
+  // CloseConnection carries no payload — the type alone is the signal.
+  return TypeErasedBox{};
 }
 
 // Any inbound response — content is irrelevant to in-flight accounting; the

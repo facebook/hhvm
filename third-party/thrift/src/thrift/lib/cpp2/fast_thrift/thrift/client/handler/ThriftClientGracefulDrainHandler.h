@@ -36,8 +36,8 @@ namespace apache::thrift::fast_thrift::thrift::client::handler {
  * state, transport-agnostic, on the thrift side.
  *
  * The transport adapter translates the transport's graceful-close
- * notification (rocket CONNECTION_CLOSE) into a broadcast
- * ThriftClientEvent{CloseConnection}. This handler reacts to that event
+ * notification (rocket CONNECTION_CLOSE) into a payload-less
+ * CloseConnection event. This handler reacts to that event
  * and begins draining. While draining:
  *   - new outbound requests are rejected with a retryable NOT_OPEN so the
  *     caller redispatches to another connection
@@ -70,7 +70,7 @@ namespace apache::thrift::fast_thrift::thrift::client::handler {
  * pattern wired today; streaming will need to revisit it.
  *
  * The handler is transport-agnostic: it reacts to a thrift
- * ThriftClientEvent, not to any rocket type, so a different transport
+ * CloseConnection event, not to any rocket type, so a different transport
  * adapter that emits the same event works unchanged. It sits app-side,
  * just below the channel tail, so it rejects new writes before they
  * descend and sees every response before the tail.

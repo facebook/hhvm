@@ -44,6 +44,12 @@ ThriftServerTransportAdapter::ThriftServerTransportAdapter(
       pipeline_->onWriteReady();
     }
   });
+  // Bridge rocket-pipeline write-completion notifications into the thrift
+  // pipeline.
+  rocketConn_->appAdapter->setOnWriteComplete(
+      [this](const rocket::server::RocketWriteCompleteEvent& e) noexcept {
+        onWriteComplete(e);
+      });
 }
 
 ThriftServerTransportAdapter::~ThriftServerTransportAdapter() {

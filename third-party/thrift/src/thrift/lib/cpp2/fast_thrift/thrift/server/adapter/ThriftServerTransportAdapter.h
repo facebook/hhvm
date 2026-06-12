@@ -29,6 +29,7 @@
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/MetadataProtocol.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/adapter/RocketServerAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/common/RocketServerConnection.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/common/Event.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/Messages.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/PayloadVariants.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/util/RocketFrameDecoder.h>
@@ -154,6 +155,23 @@ class ThriftServerTransportAdapter {
    */
   void onTransportError(folly::exception_wrapper&& e) noexcept {
     pipeline_->fireException(std::move(e));
+  }
+
+  // Called when the rocket pipeline reports a completed write batch. Relays it
+  // up the thrift pipeline as a ThriftServerEventType::WriteComplete event
+  // carrying the batch's status / frame count / bytes. Precondition: pipeline
+  // is wired (the rocket connection that fires this is torn down before
+  // pipeline_ is cleared).
+  void onWriteComplete(
+      const rocket::server::RocketWriteCompleteEvent& event) noexcept {
+    pipeline_->fireEvent(
+        ThriftServerEventType::WriteComplete,
+        channel_pipeline::TypeErasedBox(
+            ThriftServerWriteCompleteEvent{
+                .status = event.status,
+                .frameCount = event.frameCount,
+                .bytes = event.bytes,
+            }));
   }
 
   // === HeadEndpointHandler interface ===

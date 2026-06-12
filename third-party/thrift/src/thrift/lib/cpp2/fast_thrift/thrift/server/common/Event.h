@@ -16,7 +16,10 @@
 
 #pragma once
 
+#include <cstddef>
 #include <cstdint>
+
+#include <thrift/lib/cpp2/fast_thrift/transport/WriteCompletion.h>
 
 namespace apache::thrift::fast_thrift::thrift {
 
@@ -26,8 +29,9 @@ namespace apache::thrift::fast_thrift::thrift {
  * Used as the channel pipeline's EventEnum template parameter: each value
  * names a distinct user event that a pipeline handler or endpoint may
  * subscribe to via `kSubscribedEvents`. `fireEvent(type, ...)` reaches only
- * the subscribers of `type`. These events are payload-less — the type is the
- * whole signal — so emitters fire an empty `TypeErasedBox`.
+ * the subscribers of `type`. Most events are payload-less — the type is the
+ * whole signal, so emitters fire an empty `TypeErasedBox` — except
+ * `WriteComplete`, which carries a `ThriftServerWriteCompleteEvent`.
  *
  * The trailing `Count` sentinel gives the pipeline the number of event types
  * at compile time and must remain the last enumerator.
@@ -45,8 +49,22 @@ enum class ThriftServerEventType : std::uint32_t {
   // before this is emitted, so consumers can assume in-flight == 0).
   // Tail adapter fires its user closeCallback in response.
   ConnectionClosed,
+  // Per-batch write completion relayed up from the rocket pipeline by
+  // ThriftServerTransportAdapter. Carries a ThriftServerWriteCompleteEvent.
+  WriteComplete,
   // Sentinel: number of event types. Keep last.
   Count,
+};
+
+/**
+ * Payload for ThriftServerEventType::WriteComplete — the completion of one
+ * rocket-frame batch, relayed up from the rocket pipeline. `frameCount` is the
+ * number of frames in the batch.
+ */
+struct ThriftServerWriteCompleteEvent {
+  apache::thrift::fast_thrift::transport::WriteCompletionStatus status;
+  size_t frameCount;
+  size_t bytes;
 };
 
 } // namespace apache::thrift::fast_thrift::thrift

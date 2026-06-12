@@ -26,17 +26,23 @@
 
 #include <gtest/gtest.h>
 
+#include <array>
+
 #include <folly/io/async/EventBase.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Common.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/EndpointAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineBuilder.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineImpl.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/test/MockAdapters.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/server/Event.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/adapter/RocketServerAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/common/RocketServerConnection.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/adapter/ThriftServerTransportAdapter.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/common/Event.h>
 
 namespace apache::thrift::fast_thrift::thrift::server::test {
+
+namespace transport = apache::thrift::fast_thrift::transport;
 
 using channel_pipeline::PipelineBuilder;
 using channel_pipeline::PipelineImpl;
@@ -216,6 +222,97 @@ TEST(
 
   EXPECT_EQ(fixture.thriftTail.pipelineInactiveCount(), 1);
   EXPECT_FALSE(fixture.rocketConnRaw->disconnected_);
+}
+
+namespace {
+
+// Thrift-pipeline tail that subscribes to the WriteComplete event and records
+// the relayed payload — models the consumer the bridge fires toward.
+struct WriteCompleteCapturingTail {
+  Result onRead(TypeErasedBox&&) noexcept { return Result::Success; }
+  void onException(folly::exception_wrapper&&) noexcept {}
+  void handlerAdded() noexcept {}
+  void handlerRemoved() noexcept {}
+  void onPipelineActive() noexcept {}
+  void onPipelineInactive() noexcept {}
+  void onWriteReady() noexcept {}
+
+  static constexpr std::array<ThriftServerEventType, 1> kSubscribedEvents{
+      ThriftServerEventType::WriteComplete};
+
+  void onEvent(
+      ThriftServerEventType /*ev*/, const TypeErasedBox& box) noexcept {
+    events.push_back(box.get<ThriftServerWriteCompleteEvent>());
+  }
+
+  std::vector<ThriftServerWriteCompleteEvent> events;
+};
+
+} // namespace
+
+TEST(
+    ThriftServerTransportAdapterTest,
+    RocketWriteCompleteRelaysToThriftWriteCompleteEvent) {
+  folly::EventBase evb;
+  MockHeadHandler rocketHead;
+  rocketHead.setOnWriteCallback(
+      [](TypeErasedBox&&) { return Result::Success; });
+  TestAllocator rocketAllocator;
+  TestAllocator thriftAllocator;
+  WriteCompleteCapturingTail thriftTail;
+
+  auto rocketConn = std::make_unique<rocket::server::RocketServerConnection>();
+  auto* rocketAdapter = rocketConn->appAdapter.get();
+  auto rocketPipeline = PipelineBuilder<
+                            MockHeadHandler,
+                            rocket::server::RocketServerAppAdapter,
+                            TestAllocator>()
+                            .setEventBase(&evb)
+                            .setHead(&rocketHead)
+                            .setTail(rocketAdapter)
+                            .setAllocator(&rocketAllocator)
+                            .build();
+  rocketAdapter->setPipeline(rocketPipeline.get());
+  rocketConn->pipeline = std::move(rocketPipeline);
+
+  auto bridge =
+      std::make_unique<ThriftServerTransportAdapter>(std::move(rocketConn));
+
+  // Thrift pipeline built with ThriftServerEventType so the tail's
+  // WriteComplete subscription is wired.
+  auto thriftPipeline = PipelineBuilder<
+                            ThriftServerTransportAdapter,
+                            WriteCompleteCapturingTail,
+                            TestAllocator,
+                            ThriftServerEventType>()
+                            .setEventBase(&evb)
+                            .setHead(bridge.get())
+                            .setTail(&thriftTail)
+                            .setAllocator(&thriftAllocator)
+                            .build();
+  bridge->setPipeline(thriftPipeline.get());
+
+  // Simulate the rocket pipeline delivering an enriched write-completion to
+  // the rocket app adapter; the bridge's callback relays it up as a thrift
+  // WriteComplete event.
+  rocketAdapter->onEvent(
+      rocket::server::RocketServerEventId::RocketWriteComplete,
+      TypeErasedBox(
+          rocket::server::RocketWriteCompleteEvent{
+              .status = transport::WriteCompletionStatus::Success,
+              .frameCount = 4,
+              .bytes = 256,
+          }));
+
+  ASSERT_EQ(thriftTail.events.size(), 1u);
+  EXPECT_EQ(
+      thriftTail.events[0].status, transport::WriteCompletionStatus::Success);
+  EXPECT_EQ(thriftTail.events[0].frameCount, 4u);
+  EXPECT_EQ(thriftTail.events[0].bytes, 256u);
+
+  thriftPipeline->deactivate();
+  thriftPipeline->close();
+  bridge.reset();
 }
 
 } // namespace apache::thrift::fast_thrift::thrift::server::test

@@ -194,6 +194,22 @@ class TypeSystemBridgeTest(unittest.TestCase):
         by_name = {v.name: v.datum for v in node.values}
         self.assertEqual(by_name, {"RED": 0, "GREEN": 1, "BLUE": 2})
 
+    def test_enum_value_annotations_populated(self) -> None:
+        node = self.registry.get_user_defined_type(f"{_URI}/AnnotatedEnum")
+        assert isinstance(node, EnumNode)
+        by_name = {v.name: v for v in node.values}
+
+        record = by_name["FIRST"].annotations.get(f"{_URI}/RecordAnno")
+        assert isinstance(record, FieldSetRecord), (
+            f"missing enum-value annotation: {by_name['FIRST'].annotations!r}"
+        )
+        # `count` (field id 1) and `label` (field id 2), re-resolved name -> id.
+        self.assertEqual(record.fields[1], Int32Record(11))
+        self.assertEqual(record.fields[2], TextRecord("first"))
+
+        # A value with no annotation keeps an empty map.
+        self.assertEqual(by_name["SECOND"].annotations, {})
+
     # -- Annotations + custom defaults ---------------------------------
 
     def test_node_annotations_populated(self) -> None:

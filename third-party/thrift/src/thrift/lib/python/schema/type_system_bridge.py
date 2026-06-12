@@ -394,7 +394,10 @@ class SyntaxGraphBridge(TypeSystem):
         if isinstance(ast_def, _ast.EnumNode):
             enum_node = EnumNode(
                 uri=ast_def.uri,
-                values=[EnumValue(v.name, v.value) for v in ast_def.values],
+                values=[
+                    EnumValue(v.name, v.value, _bridge_annotations(v.annotations))
+                    for v in ast_def.values
+                ],
                 annotations=_bridge_annotations(ast_def.annotations),
             )
             self._cache[key] = enum_node

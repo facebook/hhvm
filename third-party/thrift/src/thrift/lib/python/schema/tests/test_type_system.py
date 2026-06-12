@@ -268,6 +268,31 @@ class EnumNodeTest(unittest.TestCase):
         self.assertEqual(EnumNode(uri="test/Empty").values, ())
 
 
+class EnumValueAnnotationTest(unittest.TestCase):
+    def test_value_carries_annotations(self) -> None:
+        value = EnumValue("RED", 0, annotations={"a": Int32Record(1)})
+        self.assertEqual(dict(value.annotations), {"a": Int32Record(1)})
+
+    def test_value_annotations_default_to_empty(self) -> None:
+        self.assertEqual(dict(EnumValue("RED", 0).annotations), {})
+
+    def test_value_annotations_is_read_only_view(self) -> None:
+        value = EnumValue("RED", 0, annotations={"a": Int32Record(1)})
+        with self.assertRaises(TypeError):
+            value.annotations["b"] = Int32Record(2)  # pyre-ignore[16]: read-only
+        self.assertEqual(dict(value.annotations), {"a": Int32Record(1)})
+
+    def test_value_equality_ignores_annotations(self) -> None:
+        self.assertEqual(
+            EnumValue("RED", 0, annotations={"a": Int32Record(1)}),
+            EnumValue("RED", 0),
+        )
+        self.assertEqual(
+            hash(EnumValue("RED", 0, annotations={"a": Int32Record(1)})),
+            hash(EnumValue("RED", 0)),
+        )
+
+
 class IndexedTypeSystemTest(unittest.TestCase):
     def _make_ts(self) -> tuple[IndexedTypeSystem, StructNode, EnumNode]:
         struct_node = StructNode(uri="test/Foo", fields=[_i32_field(1, "alpha")])

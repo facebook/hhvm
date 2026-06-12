@@ -40,6 +40,16 @@ from __future__ import annotations
 from collections.abc import Iterator
 from typing import assert_never, Sequence
 
+from apache.thrift.type_system.type_system.thrift_types import (
+    SerializableFieldDefinition,
+    SerializableTypeDefinition,
+    SerializableTypeSystem,
+)
+from thrift.lib.python.schema._serializable import (
+    annotations_from_wire,
+    from_wire_record,
+    resolve_type_id,
+)
 from thrift.lib.python.schema.type_system import (
     _collect_closure,
     _type_ref_for_node,
@@ -198,35 +208,46 @@ _Pending = _PendingStructured | _PendingEnum | _PendingOpaqueAlias
 # ---------------------------------------------------------------------------
 
 
-def _resolve_uri(uri: str, nodes: dict[str, DefinitionNode]) -> TypeRef:
-    """Resolve a user-defined URI against the phase-1 node map to a node-holding
-    ``TypeRef``."""
+def _resolve_uri(
+    uri: str,
+    nodes: dict[str, DefinitionNode],
+    base: TypeSystem | None = None,
+) -> TypeRef:
+    """Resolve a user-defined URI against the phase-1 node map (falling back to
+    ``base`` for an overlay build) to a node-holding ``TypeRef``."""
     node = nodes.get(uri)
+    if node is None and base is not None:
+        node = base.get_user_defined_type(uri)
     if node is None:
         raise InvalidTypeError(f"Unresolved type URI: {uri!r}")
     return _type_ref_for_node(node)
 
 
-def _resolve(spec: TypeInput, nodes: dict[str, DefinitionNode]) -> TypeRef:
+def _resolve(
+    spec: TypeInput,
+    nodes: dict[str, DefinitionNode],
+    base: TypeSystem | None = None,
+) -> TypeRef:
     """Recursively resolve a builder ``TypeInput`` into a concrete ``TypeRef``.
 
     Primitives pass through, containers recurse, and user references (bare
-    ``str`` or :class:`UnresolvedTypeRef`) resolve against ``nodes``. Passing an
-    already node-holding ``TypeRef`` is rejected: user types must be referenced
-    by URI."""
+    ``str`` or :class:`UnresolvedTypeRef`) resolve against ``nodes`` (then
+    ``base``, for an overlay build). Passing an already node-holding ``TypeRef``
+    is rejected: user types must be referenced by URI."""
     if isinstance(spec, str):
-        return _resolve_uri(spec, nodes)
+        return _resolve_uri(spec, nodes, base)
     if isinstance(spec, UnresolvedTypeRef):
-        return _resolve_uri(spec.uri, nodes)
+        return _resolve_uri(spec.uri, nodes, base)
     if isinstance(spec, PrimitiveTypeRef):
         return spec
     if isinstance(spec, ListTypeRef):
-        return ListTypeRef(_resolve(spec.element_type, nodes))
+        return ListTypeRef(_resolve(spec.element_type, nodes, base))
     if isinstance(spec, SetTypeRef):
-        return SetTypeRef(_resolve(spec.element_type, nodes))
+        return SetTypeRef(_resolve(spec.element_type, nodes, base))
     if isinstance(spec, MapTypeRef):
         return MapTypeRef(
-            _resolve(spec.key_type, nodes), _resolve(spec.value_type, nodes)
+            _resolve(spec.key_type, nodes, base),
+            _resolve(spec.value_type, nodes, base),
         )
     if isinstance(spec, (StructTypeRef, UnionTypeRef, EnumTypeRef, OpaqueAliasTypeRef)):
         raise InvalidTypeError("reference user-defined types by URI, not by node")
@@ -326,13 +347,16 @@ class TypeSystemBuilder:
                 assert_never(pending)
         return nodes
 
-    def _populate(self, nodes: dict[str, DefinitionNode]) -> None:
-        """Phase 2: resolve and validate every node's contents."""
+    def _populate(
+        self, nodes: dict[str, DefinitionNode], base: TypeSystem | None = None
+    ) -> None:
+        """Phase 2: resolve and validate every node's contents. ``base``, when
+        set (an overlay build), is the fallback for unresolved URI references."""
         for pending in self._pending:
             if isinstance(pending, _PendingStructured):
                 node = nodes[pending.uri]
                 assert isinstance(node, (StructNode, UnionNode))
-                node._set_fields(_build_fields(pending, nodes))
+                node._set_fields(_build_fields(pending, nodes, base))
             elif isinstance(pending, _PendingEnum):
                 enum_node = nodes[pending.uri]
                 assert isinstance(enum_node, EnumNode)
@@ -340,7 +364,7 @@ class TypeSystemBuilder:
             elif isinstance(pending, _PendingOpaqueAlias):
                 alias_node = nodes[pending.uri]
                 assert isinstance(alias_node, OpaqueAliasNode)
-                target = _resolve(pending.target, nodes)
+                target = _resolve(pending.target, nodes, base)
                 if _is_user_defined(target):
                     raise InvalidTypeError(
                         f"opaque alias {pending.uri!r} target must not be "
@@ -352,7 +376,9 @@ class TypeSystemBuilder:
 
 
 def _build_fields(
-    pending: _PendingStructured, nodes: dict[str, DefinitionNode]
+    pending: _PendingStructured,
+    nodes: dict[str, DefinitionNode],
+    base: TypeSystem | None = None,
 ) -> list[FieldDefinition]:
     """Resolve a structured node's fields, rejecting duplicate ids/names and
     forcing union fields optional."""
@@ -375,27 +401,33 @@ def _build_fields(
             FieldDefinition(
                 identity=spec.identity,
                 presence=presence,
-                type=_resolve(spec.type, nodes),
+                type=_resolve(spec.type, nodes, base),
             )
         )
     return result
 
 
-def _build_enum_values(pending: _PendingEnum) -> list[EnumValue]:
-    """Validate an enum's values, rejecting duplicate names and datums."""
+def _validate_enum_values(uri: str, values: Sequence[EnumValue]) -> None:
+    """Reject duplicate enum value names and datums (shared by the programmatic
+    builder and :func:`from_serializable`)."""
     seen_names: set[str] = set()
     seen_datums: set[int] = set()
-    for value in pending.values:
+    for value in values:
         if value.name in seen_names:
             raise InvalidTypeError(
-                f"Duplicate enum value name {value.name!r} in {pending.uri!r}"
+                f"Duplicate enum value name {value.name!r} in {uri!r}"
             )
         if value.datum in seen_datums:
             raise InvalidTypeError(
-                f"Duplicate enum value datum {value.datum} in {pending.uri!r}"
+                f"Duplicate enum value datum {value.datum} in {uri!r}"
             )
         seen_names.add(value.name)
         seen_datums.add(value.datum)
+
+
+def _build_enum_values(pending: _PendingEnum) -> list[EnumValue]:
+    """Validate an enum's values, rejecting duplicate names and datums."""
+    _validate_enum_values(pending.uri, pending.values)
     return list(pending.values)
 
 
@@ -509,7 +541,9 @@ def _populate_copy(
             dst._set_fields([_copy_field(f, new_nodes) for f in src.fields])
         case EnumNode():
             assert isinstance(dst, EnumNode)
-            dst._set_values([EnumValue(v.name, v.datum) for v in src.values])
+            dst._set_values(
+                [EnumValue(v.name, v.datum, v.annotations) for v in src.values]
+            )
         case OpaqueAliasNode():
             assert isinstance(dst, OpaqueAliasNode)
             dst._set_target_type(_copy_type_ref(src.target_type, new_nodes))
@@ -557,3 +591,206 @@ def _copy_type_ref(
             return _type_ref_for_node(new_nodes[type_ref.node.uri])
         case _:
             assert_never(type_ref)
+
+
+# ---------------------------------------------------------------------------
+# from_serializable: the canonical wire form -> a self-contained TypeSystem.
+# ---------------------------------------------------------------------------
+
+
+def from_serializable(sts: SerializableTypeSystem) -> EnumerableTypeSystem:
+    """Build an independent ``IndexedTypeSystem`` from the canonical
+    ``SerializableTypeSystem`` wire form.
+
+    Two-phase (placeholders -> populate) so cyclic and mutually-recursive types
+    resolve against stable node identities. Validators (each raising
+    ``InvalidTypeError``): unique field id, unique field name, union fields
+    optional, unique enum name, unique enum datum, opaque-alias target not
+    user-defined, unknown/unresolvable URI; plus the annotation-metadata checks
+    (each annotation URI must resolve to a **struct**, and each value must be
+    a **field-set** record).
+    """
+    types = sts.types
+    arm = SerializableTypeDefinition.Type
+
+    # Phase 1: one empty placeholder per URI, of the correct kind.
+    nodes: dict[str, DefinitionNode] = {}
+    for uri, entry in types.items():
+        definition = entry.definition
+        kind = definition.type
+        if kind == arm.structDef:
+            nodes[uri] = StructNode(uri=uri, is_sealed=definition.structDef.isSealed)
+        elif kind == arm.unionDef:
+            nodes[uri] = UnionNode(uri=uri, is_sealed=definition.unionDef.isSealed)
+        elif kind == arm.enumDef:
+            nodes[uri] = EnumNode(uri=uri)
+        elif kind == arm.opaqueAliasDef:
+            nodes[uri] = OpaqueAliasNode(uri=uri)
+        else:
+            raise InvalidTypeError(
+                f"Unknown SerializableTypeDefinition for {uri!r}: {kind!r}"
+            )
+
+    # The populated nodes are mutated in place; this view resolves URI references
+    # (incl. annotation URIs) against the stable placeholders.
+    source = IndexedTypeSystem(nodes)
+    resolve_uri = source.get_user_defined_type
+
+    # Phase 2: resolve + validate, mutating the placeholders in place.
+    for uri, entry in types.items():
+        definition = entry.definition
+        kind = definition.type
+        node = nodes[uri]
+        if kind == arm.structDef:
+            assert isinstance(node, StructNode)
+            struct_def = definition.structDef
+            node._set_fields(
+                _fields_from_serializable(
+                    uri, struct_def.fields, source, is_union=False
+                )
+            )
+            node._set_annotations(
+                annotations_from_wire(struct_def.annotations, resolve_uri)
+            )
+        elif kind == arm.unionDef:
+            assert isinstance(node, UnionNode)
+            union_def = definition.unionDef
+            node._set_fields(
+                _fields_from_serializable(uri, union_def.fields, source, is_union=True)
+            )
+            node._set_annotations(
+                annotations_from_wire(union_def.annotations, resolve_uri)
+            )
+        elif kind == arm.enumDef:
+            assert isinstance(node, EnumNode)
+            enum_def = definition.enumDef
+            values = [
+                EnumValue(
+                    v.name,
+                    v.datum,
+                    annotations_from_wire(v.annotations, resolve_uri),
+                )
+                for v in enum_def.values
+            ]
+            _validate_enum_values(uri, values)
+            node._set_values(values)
+            node._set_annotations(
+                annotations_from_wire(enum_def.annotations, resolve_uri)
+            )
+        elif kind == arm.opaqueAliasDef:
+            assert isinstance(node, OpaqueAliasNode)
+            opaque_def = definition.opaqueAliasDef
+            target = resolve_type_id(opaque_def.targetType, source)
+            if _is_user_defined(target):
+                raise InvalidTypeError(
+                    f"opaque alias {uri!r} target must not be user-defined "
+                    "(got a struct/union/enum/opaque-alias)"
+                )
+            node._set_target_type(target)
+            node._set_annotations(
+                annotations_from_wire(opaque_def.annotations, resolve_uri)
+            )
+
+    return source
+
+
+def _fields_from_serializable(
+    uri: str,
+    wire_fields: Sequence[SerializableFieldDefinition],
+    source: TypeSystem,
+    *,
+    is_union: bool,
+) -> list[FieldDefinition]:
+    """Resolve and validate a structured node's wire fields. For unions, the
+    non-optional check fires before duplicate-id/name."""
+    result: list[FieldDefinition] = []
+    seen_ids: set[int] = set()
+    seen_names: set[str] = set()
+    for wire_field in wire_fields:
+        field_id = wire_field.identity.id
+        field_name = wire_field.identity.name
+        try:
+            presence = PresenceQualifier(wire_field.presence.value)
+        except ValueError as e:
+            raise InvalidTypeError(
+                f"Invalid presence qualifier in {uri!r} field {field_name!r}: "
+                f"{wire_field.presence!r}"
+            ) from e
+        if is_union and presence != PresenceQualifier.OPTIONAL:
+            raise InvalidTypeError(
+                f"Union {uri!r} field {field_name!r} must be OPTIONAL, "
+                f"not {presence.name}"
+            )
+        if field_id in seen_ids:
+            raise InvalidTypeError(f"Duplicate field id {field_id} in {uri!r}")
+        if field_name in seen_names:
+            raise InvalidTypeError(f"Duplicate field name {field_name!r} in {uri!r}")
+        seen_ids.add(field_id)
+        seen_names.add(field_name)
+        default = wire_field.customDefaultPartialRecord
+        result.append(
+            FieldDefinition(
+                identity=FieldIdentity(field_id, field_name),
+                presence=presence,
+                type=resolve_type_id(wire_field.type, source),
+                custom_default=(
+                    from_wire_record(default) if default is not None else None
+                ),
+                annotations=annotations_from_wire(
+                    wire_field.annotations, source.get_user_defined_type
+                ),
+            )
+        )
+    return result
+
+
+# ---------------------------------------------------------------------------
+# build_derived_from: additive overlay composition (overlay union base).
+# ---------------------------------------------------------------------------
+
+
+class _DerivedTypeSystem(TypeSystem):
+    """An additive overlay ``result = overlay ∪ base``: holds the overlay's own
+    nodes and **delegates** to ``base`` on a miss (base nodes are never copied)."""
+
+    __slots__ = ("_overlay", "_base")
+    _overlay: dict[str, DefinitionNode]
+    _base: TypeSystem
+
+    def __init__(self, overlay: dict[str, DefinitionNode], base: TypeSystem) -> None:
+        self._overlay = overlay
+        self._base = base
+
+    def get_user_defined_type(self, uri: str) -> DefinitionNode | None:
+        node = self._overlay.get(uri)
+        if node is not None:
+            return node
+        return self._base.get_user_defined_type(uri)
+
+    def get_known_uris(self) -> frozenset[str] | None:
+        base_uris = self._base.get_known_uris()
+        if base_uris is None:
+            return None
+        return base_uris | frozenset(self._overlay)
+
+    def __repr__(self) -> str:
+        return f"_DerivedTypeSystem({len(self._overlay)} overlay types over {self._base!r})"
+
+
+def build_derived_from(overlay: TypeSystemBuilder, base: TypeSystem) -> TypeSystem:
+    """Compose ``overlay`` (a builder of pending definitions) on top of ``base``,
+    producing an additive ``result = overlay ∪ base``.
+
+    The overlay may reference base types by URI (resolved through ``base`` during
+    the build). The result is **not** independent: it holds ``base`` and delegates
+    to it -- base nodes are never copied. A URI already defined in ``base`` raises
+    ``InvalidTypeError`` (the overlay cannot shadow or change base types)."""
+    nodes = overlay._build_placeholders()
+    for uri in nodes:
+        if base.get_user_defined_type(uri) is not None:
+            raise InvalidTypeError(
+                f"Type {uri!r} conflicts with an existing definition in the base "
+                "TypeSystem"
+            )
+    overlay._populate(nodes, base)
+    return _DerivedTypeSystem(nodes, base)

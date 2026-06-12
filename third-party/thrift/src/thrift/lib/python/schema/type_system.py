@@ -41,9 +41,12 @@ import enum
 from abc import ABC, abstractmethod
 from collections.abc import Callable, Iterator, Mapping, Sequence
 from types import MappingProxyType
-from typing import assert_never, Generic, TypeVar
+from typing import assert_never, Generic, TYPE_CHECKING, TypeVar
 
 from thrift.lib.python.schema._record import SerializableRecord
+
+if TYPE_CHECKING:
+    from apache.thrift.type_system.type_id.thrift_types import TypeId
 
 
 class InvalidTypeError(Exception):
@@ -103,6 +106,14 @@ class TypeRefBase:
 
     def _key(self) -> tuple[object, ...]:
         raise NotImplementedError
+
+    def id(self) -> TypeId:
+        """The serializable ``TypeId`` for this resolved edge. Lazily delegates
+        to ``_serializable.to_type_id`` so the model itself stays free of a
+        load-time wire-type import."""
+        from thrift.lib.python.schema._serializable import to_type_id
+
+        return to_type_id(self)
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, TypeRefBase):
@@ -367,15 +378,26 @@ class FieldDefinition:
 
 
 class EnumValue:
-    """A named value in an enum (``datum`` is an i32)."""
+    """A named value in an enum (``datum`` is an i32).
 
-    __slots__ = ("_name", "_datum")
+    ``annotations`` maps each retained structured annotation's URI to its
+    (field-id-keyed) ``SerializableRecord`` value. Equality and hashing are *by
+    name + datum only* (annotations are excluded)."""
+
+    __slots__ = ("_name", "_datum", "_annotations")
     _name: str
     _datum: int
+    _annotations: dict[str, SerializableRecord]
 
-    def __init__(self, name: str, datum: int) -> None:
+    def __init__(
+        self,
+        name: str,
+        datum: int,
+        annotations: Mapping[str, SerializableRecord] | None = None,
+    ) -> None:
         self._name = name
         self._datum = datum
+        self._annotations = dict(annotations) if annotations else {}
 
     @property
     def name(self) -> str:
@@ -384,6 +406,10 @@ class EnumValue:
     @property
     def datum(self) -> int:
         return self._datum
+
+    @property
+    def annotations(self) -> Mapping[str, SerializableRecord]:
+        return MappingProxyType(self._annotations)
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, EnumValue):

@@ -39,6 +39,7 @@ arms (``FieldSetRecord`` / ``SetRecord`` / ``MapRecord``) and order-preserving f
 
 from __future__ import annotations
 
+import ctypes
 import math
 from abc import ABC
 from collections.abc import Mapping, Sequence
@@ -58,6 +59,18 @@ def _ensure_valid_float(value: float) -> None:
         raise InvalidRecordError("NaN is not a valid Thrift datum")
     if value == 0.0 and math.copysign(1.0, value) < 0.0:
         raise InvalidRecordError("-0.0 is not a valid Thrift datum")
+
+
+def _to_float32(value: float) -> float:
+    """Narrow a Python ``float`` (double) to IEEE-754 single precision -- the
+    value a ``float32`` datum actually stores -- so the native record matches its
+    wire form and round-trips exactly."""
+    narrowed = ctypes.c_float(value).value
+    if math.isinf(narrowed) and not math.isinf(value):
+        raise InvalidRecordError(
+            f"float32 datum out of single-precision range: {value!r}"
+        )
+    return narrowed
 
 
 def _ensure_utf8(value: str) -> None:
@@ -203,6 +216,9 @@ class Float32Record(_FloatRecord):
 
     __slots__ = ()
     _TAG = "float32"
+
+    def __init__(self, value: float) -> None:
+        super().__init__(_to_float32(value))
 
 
 class Float64Record(_FloatRecord):

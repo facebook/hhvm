@@ -84,6 +84,7 @@ enum Color {
 @thrift.RuntimeAnnotation
 @scope.Structured
 @scope.Field
+@scope.EnumValue
 struct RecordAnno {
   1: i32 count;
   2: string label;
@@ -95,6 +96,13 @@ struct RecordAnno {
 struct Annotated {
   @RecordAnno{count = 3, label = "field"}
   1: i32 value;
+}
+
+// An enum whose VALUES carry structured annotations.
+enum AnnotatedEnum {
+  @RecordAnno{count = 11, label = "first"}
+  FIRST = 0,
+  SECOND = 1, // no value annotation
 }
 
 // Fields with IDL custom defaults, exercising the protocol-Value -> record path.

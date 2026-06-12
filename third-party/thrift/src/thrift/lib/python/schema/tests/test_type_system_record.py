@@ -15,6 +15,7 @@
 # pyre-strict
 
 import math
+import struct
 import unittest
 
 from apache.thrift.protocol.detail.protocol_detail.thrift_types import Object, Value
@@ -66,6 +67,26 @@ class SerializableRecordValidationTest(unittest.TestCase):
         self.assertEqual(Float64Record(0.0).value, 0.0)
         self.assertEqual(Float64Record(math.inf).value, math.inf)
         self.assertEqual(Float64Record(-math.inf).value, -math.inf)
+
+    def test_float32_narrows_to_single_precision(self) -> None:
+        # A float32 datum stores a 32-bit value; the native record canonicalizes
+        # to single precision at construction so it matches its wire form and
+        # round-trips exactly. Float64Record keeps full double precision.
+        narrowed = struct.unpack("f", struct.pack("f", 0.1))[0]
+        self.assertEqual(Float32Record(0.1).value, narrowed)
+        self.assertNotEqual(Float32Record(0.1).value, 0.1)
+        self.assertEqual(Float64Record(0.1).value, 0.1)
+        # An exactly-representable value is unchanged.
+        self.assertEqual(Float32Record(1.5).value, 1.5)
+
+    def test_float32_rejects_finite_overflow(self) -> None:
+        with self.assertRaises(InvalidRecordError):
+            Float32Record(1e39)
+        with self.assertRaises(InvalidRecordError):
+            Float32Record(-1e39)
+        # Explicit infinities are still allowed (deterministic bit pattern).
+        self.assertEqual(Float32Record(math.inf).value, math.inf)
+        self.assertEqual(Float32Record(-math.inf).value, -math.inf)
 
     def test_text_rejects_invalid_utf8(self) -> None:
         # A lone surrogate cannot be encoded as UTF-8.

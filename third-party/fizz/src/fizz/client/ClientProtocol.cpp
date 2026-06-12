@@ -1887,7 +1887,7 @@ Status EventHandler<
       keyExchangers,
       state.context()->getSupportedSigSchemes(),
       state.context()->getSupportedPskModes(),
-      std::move(sni),
+      sni,
       state.context()->getSupportedAlpns(),
       state.context()->getSupportedCertDecompressionAlgorithms(),
       folly::none,

@@ -111,12 +111,9 @@ void t_concat_generator::generate_docstring_comment(
     indent(out) << comment_start;
   }
   stringstream docs(contents, ios_base::in);
-  while (!docs.eof()) {
-    char line[1024];
-    docs.getline(line, 1024);
-    if (strlen(line) > 0 || !docs.eof()) { // skip the empty last line
-      indent(out) << line_prefix << line << std::endl;
-    }
+  std::string line;
+  while (std::getline(docs, line)) {
+    indent(out) << line_prefix << line << std::endl;
   }
   if (comment_end != "") {
     indent(out) << comment_end;

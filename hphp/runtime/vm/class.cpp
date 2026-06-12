@@ -4269,10 +4269,22 @@ void Class::setRequirements() {
       reqBuilder.add(req->name(), req);
       return;
     }
-    if (!reqBuilder[it->second]->is_same(req)) {
-      raise_error("Conflicting requirements for '%s'",
-                  req->name()->data());
+    auto const existing = reqBuilder[it->second];
+    if (existing->is_same(req)) return;
+    // Same target name but different requirement kind:
+    // - `require this as` is compatible with both `require extends`
+    //    and `require class`, the stricter should be propagated;
+    // - `require class` is incompatible with `require extends`
+    auto const thisAs = PreClass::RequirementThisAs;
+    if (existing->kind() == thisAs || req->kind() == thisAs) {
+      // Propagate the stricter (non-`require this as`) requirement.
+      if (existing->kind() == thisAs) {
+        reqBuilder[it->second] = req;
+      }
+      return;
     }
+    raise_error("Conflicting requirements for '%s'",
+                req->name()->data());
   };
 
   if (m_parent.get() != nullptr) {

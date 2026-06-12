@@ -1,0 +1,1 @@
+Fatal error: Final class 'D' uses trait '%s', but trait '%s' may only be used from class 'C', which must be final in %s/requirethis_class_compat_02.bad.php on line 25

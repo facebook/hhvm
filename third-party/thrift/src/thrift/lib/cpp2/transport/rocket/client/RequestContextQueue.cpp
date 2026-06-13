@@ -87,6 +87,10 @@ void RequestContextQueue::markAsResponded(RequestContext& req) noexcept {
 }
 
 void RequestContextQueue::failAllScheduledWrites(folly::exception_wrapper ew) {
+  if (writeScheduledQueue_.empty() &&
+      (!writeBufferQueue_ || writeBufferQueue_->empty())) {
+    return;
+  }
   auto what = ew.what().toStdString();
   failQueue(
       writeScheduledQueue_,

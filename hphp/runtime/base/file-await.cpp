@@ -50,9 +50,6 @@ FileAwait::FileAwait(
 FileAwait::~FileAwait() {
   assertx(!m_eventHandler.isHandlerRegistered());
   assertx(!m_timeoutHandler.isScheduled());
-  assertx(
-    !FileAwait::fdToFileAwaits().count(m_fd) ||
-    !FileAwait::fdToFileAwaits()[m_fd].count(this));
 }
 
 void FileAwait::unserialize(TypedValue& c) {

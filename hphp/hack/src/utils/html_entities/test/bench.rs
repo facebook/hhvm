@@ -3,7 +3,9 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-#![feature(test)]
+
+#![cfg_attr(test, feature(test))]
+
 #[cfg(test)]
 extern crate test;
 

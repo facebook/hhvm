@@ -234,6 +234,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract implements Reflector {
   public function isStatic()[]: bool;
   public function isReadonly()[]: bool;
   public function isConstructor()[]: bool;
+  <<__Deprecated("Use HH_FIXME::reflectionMethodGetClosureForCallsite instead")>>
   public function getClosure(
     mixed $object = null,
   ): HH\FIXME\MISSING_RETURN_TYPE;

@@ -709,10 +709,10 @@ class ConfigPreprocessor::BuiltIns {
       } else if (res.isObject()) {
         checkLogic(it.isObject(), "Merge: param {} is not an object", i);
         // override properties
-        for (auto& inner : it.items()) {
-          auto& key = const_cast<dynamic&>(inner.first);
-          auto& value = const_cast<dynamic&>(inner.second);
-          res.insert(std::move(key), std::move(value));
+        for (auto inner = it.items().begin(); inner != it.items().end();) {
+          inner = it.eraseInto(inner, [&](dynamic&& key, dynamic&& value) {
+            res.insert(std::move(key), std::move(value));
+          });
         }
       } else { // string
         checkLogic(it.isString(), "Merge: param {} is not a string", i);
@@ -832,11 +832,14 @@ class ConfigPreprocessor::BuiltIns {
       auto fromKey = from.stringPiece();
       auto toKey = to.stringPiece();
       // since dictionary is unordered, we should iterate over it
-      for (auto& it : dict.items()) {
-        auto& key = const_cast<dynamic&>(it.first);
-        auto& value = const_cast<dynamic&>(it.second);
+      for (auto it = dict.items().begin(); it != dict.items().end();) {
+        const auto& key = it->first;
         if (fromKey <= key.stringPiece() && key.stringPiece() <= toKey) {
-          res.insert(std::move(key), std::move(value));
+          it = dict.eraseInto(it, [&](dynamic&& movedKey, dynamic&& value) {
+            res.insert(std::move(movedKey), std::move(value));
+          });
+        } else {
+          ++it;
         }
       }
       return res;
@@ -1405,31 +1408,34 @@ class ConfigPreprocessor::BuiltIns {
     if (dictionary.isObject()) {
       auto keyTransform = json.get_ptr("keyTransform");
       dynamic res = dynamic::object();
-      for (const auto& it : dictionary.items()) {
-        auto& key = const_cast<dynamic&>(it.first);
-        auto& value = const_cast<dynamic&>(it.second);
-        // add %key% and %item% to current context.
-        keyRef = std::move(key);
-        itemRef = std::move(value);
-        auto nKey =
-            keyTransform ? p.expandMacros(*keyTransform, extContext) : keyRef;
-        checkLogic(
-            nKey.isArray() || nKey.isString(),
-            "Transformed key is not array/string");
-        if (nKey.isArray() && nKey.empty()) {
-          continue;
-        }
-        auto nItem = itemTransform ? p.expandMacros(*itemTransform, extContext)
-                                   : std::move(itemRef);
-        if (nKey.isString()) {
-          res.insert(std::move(nKey), std::move(nItem));
-        } else { // array
-          for (auto& keyIt : nKey) {
-            checkLogic(
-                keyIt.isString(), "Transformed key list item is not a string");
-            res.insert(std::move(keyIt), nItem);
+      for (auto it = dictionary.items().begin();
+           it != dictionary.items().end();) {
+        it = dictionary.eraseInto(it, [&](dynamic&& key, dynamic&& value) {
+          // add %key% and %item% to current context.
+          keyRef = std::move(key);
+          itemRef = std::move(value);
+          auto nKey =
+              keyTransform ? p.expandMacros(*keyTransform, extContext) : keyRef;
+          checkLogic(
+              nKey.isArray() || nKey.isString(),
+              "Transformed key is not array/string");
+          if (nKey.isArray() && nKey.empty()) {
+            return;
           }
-        }
+          auto nItem = itemTransform
+              ? p.expandMacros(*itemTransform, extContext)
+              : std::move(itemRef);
+          if (nKey.isString()) {
+            res.insert(std::move(nKey), std::move(nItem));
+          } else { // array
+            for (auto& keyIt : nKey) {
+              checkLogic(
+                  keyIt.isString(),
+                  "Transformed key list item is not a string");
+              res.insert(std::move(keyIt), nItem);
+            }
+          }
+        });
       }
       return res;
     } else { // array
@@ -1496,14 +1502,15 @@ class ConfigPreprocessor::BuiltIns {
     auto& itemRef = extContext.addExpanded(itemNameStr, nullptr);
     auto& valueRef = extContext.addExpanded(valueNameStr, nullptr);
     if (dictionary.isObject()) {
-      for (auto& item : dictionary.items()) {
-        auto& key = const_cast<dynamic&>(item.first);
-        auto& val = const_cast<dynamic&>(item.second);
-        // add %key%, %item% and %value% to current context.
-        keyRef = std::move(key);
-        itemRef = std::move(val);
-        valueRef = std::move(value);
-        value = p.expandMacros(transform, extContext);
+      for (auto item = dictionary.items().begin();
+           item != dictionary.items().end();) {
+        item = dictionary.eraseInto(item, [&](dynamic&& key, dynamic&& val) {
+          // add %key%, %item% and %value% to current context.
+          keyRef = std::move(key);
+          itemRef = std::move(val);
+          valueRef = std::move(value);
+          value = p.expandMacros(transform, extContext);
+        });
       }
       return value;
     } else { // array
@@ -1591,10 +1598,10 @@ class ConfigPreprocessor::BuiltIns {
       } else {
         if (result.isObject()) {
           checkLogic(use.isObject(), "Foreach: expanded item is not an object");
-          for (auto& it : use.items()) {
-            auto& key = const_cast<dynamic&>(it.first);
-            auto& value = const_cast<dynamic&>(it.second);
-            result.insert(std::move(key), std::move(value));
+          for (auto it = use.items().begin(); it != use.items().end();) {
+            it = use.eraseInto(it, [&](dynamic&& key, dynamic&& value) {
+              result.insert(std::move(key), std::move(value));
+            });
           }
         } else if (result.isArray()) {
           checkLogic(use.isArray(), "Foreach: expanded item is not an array");
@@ -1634,29 +1641,26 @@ class ConfigPreprocessor::BuiltIns {
         --top;
       }
     } else { // object
-      for (auto& curIt : from.items()) {
-        if (top == 0) {
-          break;
-        }
-        auto& curKey = const_cast<dynamic&>(curIt.first);
-        auto& curItem = const_cast<dynamic&>(curIt.second);
-
-        keyRef = std::move(curKey);
-        itemRef = std::move(curItem);
-        if (!satisfiesWhere()) {
-          continue;
-        }
-
-        if (useIt == json.items().end()) {
-          if (result.isNull()) {
-            result = dynamic::object(std::move(keyRef), std::move(itemRef));
-          } else {
-            result.insert(std::move(keyRef), std::move(itemRef));
+      for (auto curIt = from.items().begin();
+           curIt != from.items().end() && top > 0;) {
+        curIt = from.eraseInto(curIt, [&](dynamic&& curKey, dynamic&& curItem) {
+          keyRef = std::move(curKey);
+          itemRef = std::move(curItem);
+          if (!satisfiesWhere()) {
+            return;
           }
-        } else {
-          appendUseToResult();
-        }
-        --top;
+
+          if (useIt == json.items().end()) {
+            if (result.isNull()) {
+              result = dynamic::object(std::move(keyRef), std::move(itemRef));
+            } else {
+              result.insert(std::move(keyRef), std::move(itemRef));
+            }
+          } else {
+            appendUseToResult();
+          }
+          --top;
+        });
       }
     }
     if (result.isNull()) {

@@ -157,3 +157,44 @@ TEST(ConfigPreprocessorTest, comments) {
 
   EXPECT_EQ(orig, expand);
 }
+
+TEST(ConfigPreprocessorTest, objectKeyMutationStress) {
+  constexpr size_t kEntryCount = 4096;
+
+  folly::dynamic inputDictionary = folly::dynamic::object();
+  for (size_t i = 0; i < kEntryCount; ++i) {
+    inputDictionary["key" + std::to_string(i)] = "value" + std::to_string(i);
+  }
+
+  folly::dynamic transformedDictionary = folly::dynamic::object(
+      "type", "transform")("dictionary", std::move(inputDictionary))(
+      "keyTransform", "%key%")("itemTransform", "%item%");
+
+  folly::dynamic foreachUse = folly::dynamic::object(
+      "%key%",
+      folly::dynamic::object("type", "merge")(
+          "params",
+          folly::dynamic::array(
+              folly::dynamic::object("source", "%item%"),
+              folly::dynamic::object("key", "%key%"))));
+
+  folly::dynamic obj = folly::dynamic::object("consts", folly::dynamic::array)(
+      "macros", folly::dynamic::object())(
+      "orig",
+      folly::dynamic::object("type", "foreach")(
+          "from", std::move(transformedDictionary))(
+          "use", std::move(foreachUse)));
+
+  MockImportResolver resolver;
+  folly::json::metadata_map configMetadataMap;
+  auto result = ConfigPreprocessor::getConfigWithoutMacros(
+      folly::toJson(obj), resolver, kGlobalParams, &configMetadataMap);
+
+  const auto& expanded = result["orig"];
+  ASSERT_TRUE(expanded.isObject());
+  EXPECT_EQ(kEntryCount, expanded.size());
+  EXPECT_EQ("value17", expanded["key17"]["source"]);
+  EXPECT_EQ("key17", expanded["key17"]["key"]);
+  EXPECT_EQ("value4095", expanded["key4095"]["source"]);
+  EXPECT_EQ("key4095", expanded["key4095"]["key"]);
+}

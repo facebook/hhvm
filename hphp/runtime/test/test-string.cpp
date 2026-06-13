@@ -25,11 +25,11 @@ namespace HPHP {
 
 TEST(OptString, Constructors) {
   // constructors
-  VS(OptString(15).c_str(), "15");
-  VS(OptString(-15).c_str(), "-15");
-  VS(OptString(int64_t(12345678912345678LL)).c_str(), "12345678912345678");
-  VS(OptString(int64_t(-12345678912345678LL)).c_str(), "-12345678912345678");
-  VS(OptString(5.603).c_str(), "5.603");
+  VS(OptString::FromInt64(15).c_str(), "15");
+  VS(OptString::FromInt64(-15).c_str(), "-15");
+  VS(OptString::FromInt64(int64_t(12345678912345678LL)).c_str(), "12345678912345678");
+  VS(OptString::FromInt64(int64_t(-12345678912345678LL)).c_str(), "-12345678912345678");
+  VS(OptString::FromDouble(5.603).c_str(), "5.603");
   VS(OptString("test").c_str(), "test");
   VS(OptString(OptString("test")).c_str(), "test");
 }

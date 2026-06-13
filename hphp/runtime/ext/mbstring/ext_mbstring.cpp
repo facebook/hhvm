@@ -3891,7 +3891,7 @@ static Variant _php_mb_regex_ereg_exec(const Variant& pattern, const OptString& 
   if (!pattern.isString()) {
     /* we convert numbers to integers and treat them as a string */
     if (pattern.is(KindOfDouble)) {
-      spattern = OptString(pattern.toInt64()); /* get rid of decimal places */
+      spattern = OptString::FromInt64(pattern.toInt64()); /* get rid of decimal places */
     } else {
       spattern = pattern.toString();
     }

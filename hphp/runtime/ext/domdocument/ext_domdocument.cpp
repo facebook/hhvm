@@ -2921,18 +2921,18 @@ OptString HHVM_METHOD(DOMCharacterData, substringData,
   xmlNodePtr node = native_data->nodep();
   if (!node) {
     php_dom_throw_error(INVALID_STATE_ERR, 0);
-    return false;
+    return OptString::FromInt64(0);
   }
   xmlChar *cur, *substring;
   cur = xmlNodeGetContent(node);
   if (cur == nullptr) {
-    return false;
+    return OptString::FromInt64(0);
   }
   int length = xmlUTF8Strlen(cur);
   if (offset < 0 || count < 0 || offset > length) {
     xmlFree(cur);
     php_dom_throw_error(INDEX_SIZE_ERR, native_data->doc()->m_stricterror);
-    return false;
+    return OptString::FromInt64(0);
   }
   if ((offset + count) > length) {
     count = length - offset;

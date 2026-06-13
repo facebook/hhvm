@@ -114,7 +114,7 @@ static bool hasAvailableServers(const MemcacheData* data) {
 }
 
 static bool isServerReachable(const OptString& host, int port /*= 0*/) {
-  auto hostInfo = HHVM_FN(getaddrinfo)(host, port);
+  auto hostInfo = HHVM_FN(getaddrinfo)(host, OptString::FromInt64(port));
   if (hostInfo.isBoolean() && !hostInfo.toBoolean()) {
     raise_warning("Memcache: Can't connect to %s:%d", host.c_str(), port);
     return false;

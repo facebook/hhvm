@@ -259,7 +259,7 @@ struct ZipEntry : SweepableResourceData {
       case 10:
         return "implodedX";
       default:
-        return false;
+        return OptString::FromInt64(static_cast<int>(false));
     }
   }
 

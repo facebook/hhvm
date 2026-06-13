@@ -399,7 +399,7 @@ static bool append_multiple_key_values(OptString& ret,
   int max = (tag == LOC_EXTLANG) ? 3 : 15;
   bool first = true;
   for (int i = 0; i < max; ++i) {
-    auto namenum = name + OptString(i, CopyString);
+    auto namenum = name + OptString::FromInt64(i);
     if (!subtags.exists(namenum)) continue;
     auto val = subtags[namenum];
     if (!val.isString()) {
@@ -675,12 +675,12 @@ static void add_array_entry(Array& ret,
   for (cnt = 0, p = s; p < e; ++p) {
     if (!isIDSeparator(*p)) continue;
     if ((p - s) > 1) {
-      ret.set(name + OptString(cnt++), OptString(s, p - s, CopyString));
+      ret.set(name + OptString::FromInt64(cnt++), OptString(s, p - s, CopyString));
     }
     s = p + 1;
   }
   if ((e - s) > 1) {
-    ret.set(name + OptString(cnt++), OptString(s, e - s, CopyString));
+    ret.set(name + OptString::FromInt64(cnt++), OptString(s, e - s, CopyString));
   }
 }
 

@@ -286,7 +286,10 @@ static int64_t HHVM_METHOD(IntlDateFormatter, getTimeType) {
 }
 
 static OptString HHVM_METHOD(IntlDateFormatter, getTimezoneId) {
-  DATFMT_GET(data, this_, 0);
+  auto data = IntlDateFormatter::Get(this_);
+  if (!data) {
+    return OptString::FromInt64(0);
+  }
   icu::UnicodeString id;
   data->datefmtObject()->getTimeZone().getID(id);
   UErrorCode error = U_ZERO_ERROR;

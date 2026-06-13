@@ -49,7 +49,7 @@ ResourceData::~ResourceData() {
 }
 
 OptString ResourceData::o_toString() const {
-  return OptString("Resource id #") + OptString(getId());
+  return OptString("Resource id #") + OptString::FromInt64(getId());
 }
 
 Array ResourceData::o_toArray() const {

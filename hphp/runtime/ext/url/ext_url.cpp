@@ -189,9 +189,9 @@ static void url_encode_array(StringBuffer &ret, const Variant& varr,
       ret.append(key_suffix);
       ret.append("=");
       if (data.isInteger() || data.is(KindOfBoolean)) {
-        ret.append(OptString(data.toInt64()));
+        ret.append(OptString::FromInt64(data.toInt64()));
       } else if (data.is(KindOfDouble)) {
-        ret.append(OptString(data.toDouble()));
+        ret.append(OptString::FromDouble(data.toDouble()));
       } else {
         ret.append(StringUtil::UrlEncode(data.toString(), encode_plus));
       }

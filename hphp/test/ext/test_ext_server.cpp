@@ -79,9 +79,9 @@ bool TestExtServer::test_pagelet_server_task_result() {
   std::vector<OptResource> tasks;
   tasks.reserve(TEST_SIZE);
   for (int i = 0; i < TEST_SIZE; ++i) {
-    OptString url = baseurl + OptString(i);
-    OptString header = baseheader + OptString(i);
-    OptString post = basepost + OptString(i);
+    OptString url = baseurl + OptString::FromInt64(i);
+    OptString header = baseheader + OptString::FromInt64(i);
+    OptString post = basepost + OptString::FromInt64(i);
     OptResource task = HHVM_FN(pagelet_server_task_start)(url,
       make_vec_array(header), post);
     tasks.push_back(task);
@@ -101,11 +101,11 @@ bool TestExtServer::test_pagelet_server_task_result() {
 
   for (int i = 0; i < TEST_SIZE; ++i)  {
     OptString expected = "pagelet postparam: postparam=";
-    expected += OptString(i);
+    expected += OptString::FromInt64(i);
     expected += "pagelet getparam: ";
-    expected += OptString(i);
+    expected += OptString::FromInt64(i);
     expected += "pagelet header: ";
-    expected += OptString(i);
+    expected += OptString::FromInt64(i);
 
     // A timeout of 0 indicates an infinite timeout that blocks.
     Array headers;

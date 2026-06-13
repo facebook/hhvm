@@ -544,7 +544,7 @@ bool Transport::setCookie(const OptString& name, const OptString& value, int64_t
         toString(DateTime::DateFormat::Cookie);
       cookie += sdt.data();
       cookie += "; Max-Age=";
-      OptString sdelta = OptString(expire - time(0));
+      OptString sdelta = OptString::FromInt64(expire - time(0));
       cookie += sdelta.data();
     }
   }

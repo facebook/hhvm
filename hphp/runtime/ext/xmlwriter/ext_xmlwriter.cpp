@@ -863,8 +863,21 @@ XMLWRITER_METHOD_AND_FUNCTION_NO_ARGS(bool, xmlwriter_end_dtd, endDTD)
 XMLWRITER_METHOD_AND_FUNCTION(Variant, xmlwriter_flush, flush,
                               const Variant&, empty /*= true*/)
 
-XMLWRITER_METHOD_AND_FUNCTION(OptString, xmlwriter_output_memory, outputMemory,
-                              const Variant&, flush /*= true*/)
+XMLWRITER_METHOD(OptString, outputMemory,
+                 const Variant&, flush /*= true*/)
+
+// Inline CHECK_RESOURCE macro to expose false -> OptString promotion
+static OptString HHVM_FUNCTION(xmlwriter_output_memory, const OptResource& wr,
+                               const Variant& flush /* = true */) {
+  VMRegGuard _;
+  auto resource = dyn_cast_or_null<XMLWriterResource>(wr);
+  if (resource == nullptr) {
+    raise_warning("supplied argument is not a valid xmlwriter "
+                  "handle resource");
+    return OptString::FromInt64(static_cast<int>(false));
+  }
+  return resource->m_writer.outputMemory(flush);
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // extension

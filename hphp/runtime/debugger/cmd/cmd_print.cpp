@@ -121,7 +121,7 @@ std::string CmdPrint::FormatResult(const char* format, const Variant& ret) {
       bool err;
       ts = dt.toTimeStamp(err);
     }
-    return OptString(ts).data();
+    return OptString::FromInt64(ts).data();
   }
 
   assertx(false);

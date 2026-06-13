@@ -65,9 +65,9 @@ Variant HHVM_FUNCTION(scrypt_enc, const OptString& password, const OptString& sa
     return false;
 
   OptString buf_str((char *) buf, sizeof(buf), CopyString);
-  return s_DsD + OptString((int)cryptN) +
-         s_D + OptString((int)cryptR) +
-         s_D + OptString((int)cryptP) +
+  return s_DsD + OptString::FromInt64((int)cryptN) +
+         s_D + OptString::FromInt64((int)cryptR) +
+         s_D + OptString::FromInt64((int)cryptP) +
          s_D + StringUtil::Base64Encode(salt) +
          s_D + StringUtil::Base64Encode(buf_str);
 }

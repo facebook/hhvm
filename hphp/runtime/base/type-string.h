@@ -87,6 +87,10 @@ public:
     return OptString{makeStaticString(ch)};
   }
 
+  // Factory methods to replace implicit promoting constructors.
+  static OptString FromInt64(int64_t n);
+  static OptString FromDouble(double n);
+
   static const StringData *ConvertInteger(int64_t n);
   static const StringData *GetIntegerStringData(int64_t n) {
     if (HasConverted(n)) {
@@ -109,9 +113,6 @@ public:
    * Constructors
    */
   explicit OptString(StringData *data) : m_str(data) { }
-  /* implicit */ OptString(int     n);
-  /* implicit */ OptString(int64_t n);
-  /* implicit */ OptString(double  n);
   /* implicit */ OptString(const char* s)
   : m_str(LIKELY((bool)s) ? StringData::Make(s, CopyString)
                            : nullptr, NoIncRef{}) { }

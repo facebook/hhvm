@@ -95,8 +95,9 @@ StringData* buildStringData(int64_t n) {
   return StringData::Make(sl, CopyString);
 }
 
-OptString::OptString(int n) : OptString(static_cast<int64_t>(n)) {}
-OptString::OptString(int64_t n) : m_str(buildStringData(n), NoIncRef{}) {}
+OptString OptString::FromInt64(int64_t n) {
+  return attach(buildStringData(n));
+}
 
 void formatPhpDblStr(char **pbuf, double n) {
   if (n == 0.0) {
@@ -111,7 +112,9 @@ StringData* buildStringData(double n) {
   return StringData::Make(buf, AttachString);
 }
 
-OptString::OptString(double n) : m_str(buildStringData(n), NoIncRef{}) { }
+OptString OptString::FromDouble(double n) {
+  return attach(buildStringData(n));
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // informational

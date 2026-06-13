@@ -3355,7 +3355,7 @@ Variant HHVM_FUNCTION(imageaffinematrixconcat,
   }
 
   for (i = 0; i < 6; i++) {
-    ret.set(OptString(i, CopyString), dmr[i]);
+    ret.set(OptString::FromInt64(i), dmr[i]);
   }
   return ret;
 }
@@ -3429,7 +3429,7 @@ Variant HHVM_FUNCTION(imageaffinematrixget,
     return false;
   } else {
     for (i = 0; i < 6; i++) {
-      ret.set(OptString(i, CopyString), affine[i]);
+      ret.set(OptString::FromInt64(i), affine[i]);
     }
   }
   return ret;

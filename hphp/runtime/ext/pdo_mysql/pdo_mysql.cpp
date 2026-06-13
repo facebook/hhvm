@@ -615,7 +615,7 @@ bool PDOMySqlConnection::setAttribute(int64_t attr, const Variant& value) {
 }
 
 OptString PDOMySqlConnection::lastId(const char* /*name*/) {
-  return (int64_t)mysql_insert_id(m_server);
+  return OptString::FromInt64((int64_t)mysql_insert_id(m_server));
 }
 
 bool PDOMySqlConnection::fetchErr(PDOStatement* /*stmt*/, Array& info) {

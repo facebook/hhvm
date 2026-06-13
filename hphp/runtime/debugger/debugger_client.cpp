@@ -2283,7 +2283,7 @@ void DebuggerClient::printFrame(int index, const Array& frame) {
   }
   func.append(frame[s_function].toString());
 
-  OptString sindex(index);
+  OptString sindex = OptString::FromInt64(index);
 
   print("#%s  %s (%s)",
         sindex.data(),

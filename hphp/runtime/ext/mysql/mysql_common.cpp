@@ -332,7 +332,7 @@ bool MySQL::connect(const OptString& host, int port, const OptString& socket,
                             client_flags);
   if (ret && mysqlExtension::WaitTimeout > 0) {
     OptString query("set session wait_timeout=");
-    query += OptString((int64_t)(mysqlExtension::WaitTimeout / 1000));
+    query += OptString::FromInt64((int64_t)(mysqlExtension::WaitTimeout / 1000));
     if (mysql_real_query(m_conn, query.data(), query.size())) {
       raise_notice("MySQL::connect: failed setting session wait timeout: %s",
                    mysql_error(m_conn));

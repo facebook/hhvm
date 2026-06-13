@@ -249,7 +249,7 @@ bool PDOSqliteConnection::setAttribute(int64_t attr, const Variant& value) {
 }
 
 OptString PDOSqliteConnection::lastId(const char* /*name*/) {
-  return (int64_t)sqlite3_last_insert_rowid(m_db);
+  return OptString::FromInt64((int64_t)sqlite3_last_insert_rowid(m_db));
 }
 
 bool PDOSqliteConnection::fetchErr(PDOStatement* /*stmt*/, Array& info) {

@@ -604,11 +604,11 @@ Variant ZendPack::unpack(const OptString& fmt, const OptString& data) {
       OptString n_str;
 
       if (namelen == 0) {
-        n_str = OptString(i + 1);
+        n_str = OptString::FromInt64(i + 1);
       } else if (arg != 1) {
         /* Need to add element number to name */
         n_str = OptString(name, namelen, CopyString);
-        n_str += OptString(i + 1);
+        n_str += OptString::FromInt64(i + 1);
       } else {
         /* Truncate name to next format code or end of string */
         n_str = OptString(name, namelen, CopyString);

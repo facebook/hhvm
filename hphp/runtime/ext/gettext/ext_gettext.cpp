@@ -49,7 +49,7 @@ Variant HHVM_FUNCTION(textdomain, const OptString& domain) {
   CHECK_DOMAIN_LENGTH();
 
   const char* realDomain = nullptr;
-  if (!domain.empty() && domain != OptString(0)) {
+  if (!domain.empty() && domain != OptString::FromInt64(0)) {
     realDomain = domain.data();
   }
 
@@ -82,7 +82,7 @@ Variant HHVM_FUNCTION(bindtextdomain, const OptString& domain, const OptString& 
   }
 
   char dirName[PATH_MAX];
-  if (!dir.empty() && dir != OptString(0)) {
+  if (!dir.empty() && dir != OptString::FromInt64(0)) {
     auto tmp = File::TranslatePath(dir);
     if (tmp.empty()) {
       return false;

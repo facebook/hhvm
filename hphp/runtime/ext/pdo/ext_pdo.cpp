@@ -469,7 +469,7 @@ void pdo_handle_error(sp_PDOResource rsrc, PDOStatement* stmt) {
 
   string err = "SQLSTATE["; err += *pdo_err; err += "]: "; err += msg;
   if (!supp.empty()) {
-    err += ": "; err += OptString(native_code).data();
+    err += ": "; err += OptString::FromInt64(native_code).data();
     err += " ";  err += supp.data();
   }
 

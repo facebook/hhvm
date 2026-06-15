@@ -273,3 +273,62 @@ class CalculatorHandler(CalculatorInterface):
 
     async def newBoom(self) -> None:
         return None
+
+
+# Per-operation delay (seconds) used by the *Slow* handlers below. Making each
+# operation take a non-trivial, observable amount of time is what lets the
+# concurrency tests distinguish concurrent dispatch from serialization: with N
+# in-flight operations against *separate* interactions, the batch finishes in
+# ~one delay if dispatched concurrently, but ~N delays if serialized.
+CONCURRENCY_OP_DELAY: float = 0.3
+
+
+class SlowCounterHandler(CounterHandler):
+    """A ``CounterHandler`` whose request/response and stream-request methods
+    sleep ``CONCURRENCY_OP_DELAY`` before doing their (instant) work.
+
+    Only the methods the concurrency tests drive are slowed; ``get`` stays fast
+    so post-hoc isolation assertions don't add wall-clock. The sleep yields to
+    the event loop, so concurrent calls to *different* ``SlowCounterHandler``
+    instances overlap when the server dispatches them concurrently."""
+
+    async def add(self, n: int) -> None:
+        await asyncio.sleep(CONCURRENCY_OP_DELAY)
+        await super().add(n)
+
+    async def addChecked(self, n: int) -> int:
+        await asyncio.sleep(CONCURRENCY_OP_DELAY)
+        return await super().addChecked(n)
+
+    async def ticks(self, count: int) -> tuple[int, AsyncIterator[int]]:
+        # Delay the stream *request* (before the initial response), so the test
+        # measures concurrent dispatch of the stream openings themselves.
+        await asyncio.sleep(CONCURRENCY_OP_DELAY)
+        return await super().ticks(count)
+
+
+class SlowCalculatorHandler(CalculatorHandler):
+    """A ``CalculatorHandler`` whose interaction-factory methods sleep
+    ``CONCURRENCY_OP_DELAY`` and whose per-session Tiles are
+    ``SlowCounterHandler`` instances, so the concurrency tests can prove the
+    Python server dispatches factory creation, factory-with-initial-response,
+    request/response, and stream requests across separate interactions
+    concurrently rather than serializing them."""
+
+    def createCounter(self) -> SlowCounterHandler:
+        return SlowCounterHandler(on_terminate=self._record_counter_termination)
+
+    async def newCounter(self) -> None:
+        await asyncio.sleep(CONCURRENCY_OP_DELAY)
+        return None
+
+    async def initializedCounter(
+        self, start: int
+    ) -> tuple[CounterHandler, CounterSnapshot]:
+        await asyncio.sleep(CONCURRENCY_OP_DELAY)
+        if start < 0:
+            raise NegativeError(reason=f"refused negative start: {start}")
+        counter = SlowCounterHandler(
+            start=start, on_terminate=self._record_counter_termination
+        )
+        return counter, CounterSnapshot(value=start)

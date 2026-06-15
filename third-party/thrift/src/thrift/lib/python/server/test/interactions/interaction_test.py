@@ -26,6 +26,7 @@ from __future__ import annotations
 
 import asyncio
 import unittest
+from collections.abc import AsyncIterator
 
 from calculator.thrift_clients import Calculator
 from calculator.thrift_types import NegativeError, Point
@@ -34,7 +35,12 @@ from thrift.python.client import ClientType, get_client
 from thrift.python.exceptions import ApplicationError, ApplicationErrorType
 from thrift.python.server import ServiceInterface, ThriftServer
 
-from .server_handlers import CalculatorHandler, INITIALIZED_COUNTER_BOOM_START
+from .server_handlers import (
+    CalculatorHandler,
+    CONCURRENCY_OP_DELAY,
+    INITIALIZED_COUNTER_BOOM_START,
+    SlowCalculatorHandler,
+)
 
 
 class _InProcessServer:
@@ -417,3 +423,136 @@ class CalculatorInteractionTest(unittest.IsolatedAsyncioTestCase):
                     await b.add(2)
                 await handler.wait_for_counter_terminations(2)
                 self.assertEqual(handler.counter_terminations, 2)
+
+
+class ConcurrentInteractionTest(unittest.IsolatedAsyncioTestCase):
+    """Concurrent-dispatch coverage for the thrift-python *server* handler.
+
+    Every test drives a ``SlowCalculatorHandler`` whose operations each take
+    ``CONCURRENCY_OP_DELAY`` seconds, fires three of them in-flight at once
+    against *separate* interactions via ``asyncio.gather``, and asserts the
+    batch finishes in well under the serialized time. A serialized server would
+    take ~3x the delay and fail ``_assert_concurrent``; a concurrent one
+    finishes in ~one delay. Correctness (per-session isolation) is checked
+    alongside timing so a test can't pass by collapsing the interactions.
+    """
+
+    # Concurrent dispatch should finish in ~one delay; allow generous slack for
+    # scheduling/CI jitter while still being far below the serialized ~3x delay.
+    _CONCURRENT_DEADLINE: float = CONCURRENCY_OP_DELAY * 2
+
+    async def _client(self, addr: SocketAddress) -> Calculator.Async:
+        return get_client(
+            Calculator,
+            host="::1",
+            port=addr.port,
+            client_type=ClientType.THRIFT_ROCKET_CLIENT_TYPE,
+        )
+
+    def _assert_concurrent(self, elapsed: float) -> None:
+        self.assertLess(
+            elapsed,
+            self._CONCURRENT_DEADLINE,
+            f"batch took {elapsed:.2f}s (>= {self._CONCURRENT_DEADLINE:.2f}s): "
+            "requests appear to be serialized, not dispatched concurrently",
+        )
+
+    async def test_concurrent_factory_creation(self) -> None:
+        # Three explicit factory creations (no initial response) in flight at
+        # once. Each `newCounter` sleeps server-side; concurrent dispatch keeps
+        # the batch at ~one delay. The created interactions are then verified to
+        # be independent, usable Tiles.
+        async with _InProcessServer(SlowCalculatorHandler()) as addr:
+            async with await self._client(addr) as calc:
+                loop = asyncio.get_running_loop()
+                start = loop.time()
+                counters = await asyncio.gather(
+                    calc.newCounter(), calc.newCounter(), calc.newCounter()
+                )
+                self._assert_concurrent(loop.time() - start)
+
+                async with counters[0] as a, counters[1] as b, counters[2] as c:
+                    # Fresh, independent state.
+                    self.assertEqual(
+                        await asyncio.gather(a.get(), b.get(), c.get()), [0, 0, 0]
+                    )
+                    await a.add(1)
+                    self.assertEqual(
+                        [await a.get(), await b.get(), await c.get()], [1, 0, 0]
+                    )
+
+    async def test_concurrent_factory_creation_with_initial_response(self) -> None:
+        # Three factory-with-initial-response creations in flight at once.
+        # Each `initializedCounter` sleeps server-side; concurrent dispatch keeps
+        # the batch at ~one delay. The initial responses and per-session Tile
+        # state must each derive from their own `start` argument (isolation).
+        async with _InProcessServer(SlowCalculatorHandler()) as addr:
+            async with await self._client(addr) as calc:
+                loop = asyncio.get_running_loop()
+                start = loop.time()
+                results = await asyncio.gather(
+                    calc.initializedCounter(10),
+                    calc.initializedCounter(20),
+                    calc.initializedCounter(30),
+                )
+                self._assert_concurrent(loop.time() - start)
+
+                self.assertEqual([snap.value for _, snap in results], [10, 20, 30])
+                (c1, _), (c2, _), (c3, _) = results
+                async with c1 as a, c2 as b, c3 as c:
+                    self.assertEqual(
+                        await asyncio.gather(a.get(), b.get(), c.get()), [10, 20, 30]
+                    )
+
+    async def test_concurrent_requests_across_interactions(self) -> None:
+        # Three separate interactions, then a concurrent request/response on
+        # each. Each `addChecked` sleeps server-side; concurrent dispatch keeps
+        # the batch at ~one delay. Distinct return values prove per-session state
+        # isolation (each counter started at 0).
+        async with _InProcessServer(SlowCalculatorHandler()) as addr:
+            async with await self._client(addr) as calc:
+                async with (
+                    calc.createCounter() as c1,
+                    calc.createCounter() as c2,
+                    calc.createCounter() as c3,
+                ):
+                    loop = asyncio.get_running_loop()
+                    start = loop.time()
+                    results = await asyncio.gather(
+                        c1.addChecked(11), c2.addChecked(22), c3.addChecked(33)
+                    )
+                    self._assert_concurrent(loop.time() - start)
+                    self.assertEqual(results, [11, 22, 33])
+
+    async def test_concurrent_streams_across_interactions(self) -> None:
+        # Three separate interactions, then a concurrent stream request on
+        # each. Each `ticks` sleeps before its initial response; concurrent
+        # dispatch keeps the batch of stream openings at ~one delay. Each stream
+        # must reflect its own per-session state (isolation).
+        async with _InProcessServer(SlowCalculatorHandler()) as addr:
+            async with await self._client(addr) as calc:
+                async with (
+                    calc.createCounter() as c1,
+                    calc.createCounter() as c2,
+                    calc.createCounter() as c3,
+                ):
+                    # Diverge per-session state first (also concurrently).
+                    await asyncio.gather(c1.add(100), c2.add(200), c3.add(300))
+
+                    loop = asyncio.get_running_loop()
+                    start = loop.time()
+                    (i1, s1), (i2, s2), (i3, s3) = await asyncio.gather(
+                        c1.ticks(2), c2.ticks(2), c3.ticks(2)
+                    )
+                    self._assert_concurrent(loop.time() - start)
+                    self.assertEqual([i1, i2, i3], [100, 200, 300])
+
+                    async def collect(stream: AsyncIterator[int]) -> list[int]:
+                        return [v async for v in stream]
+
+                    r1, r2, r3 = await asyncio.gather(
+                        collect(s1), collect(s2), collect(s3)
+                    )
+                    self.assertEqual(r1, [100, 101])
+                    self.assertEqual(r2, [200, 201])
+                    self.assertEqual(r3, [300, 301])

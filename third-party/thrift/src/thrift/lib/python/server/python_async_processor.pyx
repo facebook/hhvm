@@ -30,7 +30,7 @@ from libcpp.unordered_set cimport unordered_set
 from libcpp.utility cimport move as cmove
 from libcpp.vector cimport vector as cvector
 
-from folly cimport cFollyPromise, cFollyUnit, c_unit, cFollyExceptionWrapper
+from folly cimport cFollyPromise, cFollyUnit, c_unit, cFollyExceptionWrapper, cFollyExecutor
 from folly.executor cimport get_executor
 from folly.iobuf cimport IOBuf, from_unique_ptr
 from libcpp.string cimport string
@@ -55,6 +55,13 @@ from thrift.python.server_impl.request_context import (
     RequestContext,
     SocketAddress,
 )
+
+cdef extern from "thrift/lib/python/server/PythonAsyncProcessor.h" namespace "apache::thrift::python":
+    void installInteractionTileFromHandler(
+        Cpp2RequestContext* context,
+        PyObject* instance,
+        cFollyExecutor* executor,
+    ) except +
 from thrift.py3.stream cimport (
     cServerStream,
     cResponseAndServerStream,
@@ -426,6 +433,17 @@ cdef api int handleServerCallback(
     cdef Promise_IOBuf __promise = Promise_IOBuf.create(cmove(cPromise))
     return combinedHandler(func, interaction_self, funcName, ctx, __promise, cmove(serializedRequest), prot, kind)
 
+def install_interaction_tile(object tile):
+    """Install ``tile`` as the per-session Tile for the in-flight interaction.
+
+    Called by the generated wrapper of a factory-with-initial-response method
+    (returns ``(interaction_handler, response)``) on the loop thread during
+    dispatch; the request context comes from the contextvar set by
+    ``combinedHandler``. The C++ side wraps ``tile`` in a PythonTile and fulfills
+    the parked TilePromise so inside-interaction calls dispatch against it."""
+    cdef RequestContext rctx = <RequestContext>THRIFT_REQUEST_CONTEXT.get()
+    installInteractionTileFromHandler(rctx._get_ctx(), <PyObject*>tile, get_executor())
+
 cdef api int handleServerStreamCallback(
     object func,
     object interaction_self,
@@ -484,38 +502,30 @@ cdef api unique_ptr[cIOBuf] getSerializedPythonMetadata(object server):
     return cmove((<IOBuf>iobuf)._ours)
 
 cdef api object callInteractionFactory(object factory):
-    """Invoke a zero-arg interaction factory callable (``self.create<Name>``)
-    and return the new per-session handler instance. Called from C++
-    ``PythonAsyncProcessor::createInteractionImpl`` /
-    ``maybeFulfillTilePromise`` to construct a ``PythonTile``. A factory
-    exception is not suppressed: it propagates per the Python C-API convention
-    (Cython returns ``nullptr`` with the error set), and the C++ caller surfaces
-    it via ``folly::python::handlePythonError``."""
+    """Invoke a zero-arg interaction factory (``self.create<Name>``) and return
+    the new per-session handler instance. Called from C++
+    (``createInteractionImpl`` / ``maybeFulfillTilePromise``) to build a
+    ``PythonTile``. A factory exception propagates per the C-API convention
+    (``nullptr`` + error set); the C++ caller surfaces it via
+    ``handlePythonError``."""
     return factory()
 
-# Strong references to in-flight ``termination_coro`` tasks. asyncio keeps only
-# a *weak* reference to a task, so without this a task could be garbage-collected
-# mid-``onInteractionTermination`` -- silently dropping the hook on the
-# fire-and-forget path, or breaking its promise (so teardown proceeds before the
-# hook finishes) on the awaited path. Each task removes itself via a done-callback
-# once it settles, so this set stays bounded; on graceful loop shutdown pending
-# tasks are cancelled, which ``termination_coro``'s ``finally`` turns into a
-# completed promise -- no leak.
+# Strong references to in-flight ``termination_coro`` tasks: asyncio holds only a
+# *weak* reference, so without this a task could be GC'd mid-flight -- dropping
+# the hook (fire-and-forget path) or breaking its promise (awaited path). Each
+# task discards itself via a done-callback once it settles, so the set stays
+# bounded; loop shutdown cancels pending tasks, which ``termination_coro``'s
+# ``finally`` turns into a completed promise -- no leak.
 _inflight_termination_tasks = set()
 
 async def termination_coro(object handler, Promise_cFollyUnit promise):
     """Run an interaction handler's async ``onInteractionTermination`` hook.
 
-    Exceptions are logged and swallowed: there is no client to report to and
-    termination carries no response. ``promise`` (when present) is always
-    completed in ``finally`` so the C++ ``co_onTermination`` coroutine awaiting
-    it resumes regardless of outcome. ``promise`` is ``None`` for the
-    fire-and-forget connection-close path, where nothing awaits completion.
-
-    Note ``except Exception`` deliberately does not catch ``CancelledError`` (a
-    ``BaseException``): if this task is cancelled (e.g. during loop shutdown) the
-    cancellation propagates -- interrupting the hook -- but the ``finally`` still
-    completes the promise first, so the awaiter never hangs on cancellation."""
+    Exceptions are logged and swallowed: there is no client to report to. The
+    ``promise`` (``None`` on the fire-and-forget connection-close path) is always
+    completed in ``finally`` so an awaiting C++ ``co_onTermination`` resumes
+    regardless of outcome -- including cancellation, which (a ``BaseException``)
+    escapes ``except Exception`` but still runs ``finally`` first."""
     try:
         await handler.onInteractionTermination()
     except Exception:
@@ -526,23 +536,16 @@ async def termination_coro(object handler, Promise_cFollyUnit promise):
             promise.complete(c_unit)
 
 cdef _schedule_termination(object handler, Promise_cFollyUnit promise):
-    """Schedule ``termination_coro`` on the asyncio loop. ``promise`` is a
-    ``Promise_cFollyUnit`` for the awaited explicit-terminate path and ``None``
-    for the fire-and-forget connection-close path. If the loop is already gone
-    (e.g. interpreter/loop shutting down) the task can't be scheduled: complete
-    the promise (when present) so an awaiting ``co_onTermination`` resumes
-    instead of hanging, otherwise drop best-effort. The scheduled task is held
-    in ``_inflight_termination_tasks`` until it settles so it is not
-    garbage-collected mid-flight. Must be called on the loop thread (GIL
-    held)."""
+    """Schedule ``termination_coro`` on the asyncio loop. ``promise`` is set for
+    the awaited explicit-terminate path and ``None`` for fire-and-forget
+    connection-close. Held in ``_inflight_termination_tasks`` until it settles so
+    it isn't GC'd mid-flight. Must be called on the loop thread (GIL held)."""
     cdef object task
     try:
         task = asyncio.get_event_loop().create_task(termination_coro(handler, promise))
     except Exception:
-        # Couldn't schedule (typically the loop is already gone during
-        # shutdown). Log for visibility, then complete the promise (when
-        # present) so an awaiting co_onTermination resumes instead of hanging;
-        # otherwise drop best-effort.
+        # Loop already gone (typically shutdown). Complete the promise (when
+        # present) so an awaiting co_onTermination resumes; else drop best-effort.
         print("Could not schedule interaction onInteractionTermination:", file=sys.stderr)
         traceback.print_exc()
         if promise is not None:
@@ -592,6 +595,7 @@ cdef class PythonAsyncProcessorFactory(AsyncProcessorFactory):
                     bytes_to_string_view(entry.interaction),
                     entry.creates_interaction,
                     factory_obj,
+                    entry.returns_initial_response,
                 )
             else:
                 funcs[name_view] = makeHandlerFunc(

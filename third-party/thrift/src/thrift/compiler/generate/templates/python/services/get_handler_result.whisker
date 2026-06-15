@@ -17,6 +17,19 @@
 }}
   {{#if (not function.bidirectional_stream?)}}
 value = {{^function.stream?}}await {{/function.stream?}}self.{{function.name}}({{#function.params.fields}}args_struct.{{field:py_name}},{{/function.params.fields}})
+    {{#if (and function.creates_interaction? function.returns_tuple?)}}
+      {{#if (and (not function.stream?) (not function.sink?))}}
+{{! Factory-with-initial-response (request/response only): the handler returns
+    (interaction_handler, initial_response). Install the returned per-session
+    Tile, and let `value` continue as the regular initial response sent to the
+    client. Stream/sink factories are intentionally excluded: for a stream
+    `value` is still an unawaited coroutine here (the await is deferred to the
+    `value, stream = await value` below), so unpacking it would raise; those
+    factories create their Tile via the zero-arg `create<Interaction>` path. }}
+_fbthrift_tile, value = value
+_fbthrift_install_interaction_tile(_fbthrift_tile)
+      {{/if (and (not function.stream?) (not function.sink?))}}
+    {{/if (and function.creates_interaction? function.returns_tuple?)}}
     {{#if function.stream?}}
       {{#if function.stream_has_first_response?}}
 value, stream = await value

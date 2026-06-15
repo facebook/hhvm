@@ -16,7 +16,7 @@ import folly.iobuf as _fbthrift_iobuf
 
 import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 from thrift.python.serializer import serialize_iobuf, deserialize, Protocol
-from thrift.python.server import FunctionEntry as _fbthrift_FunctionEntry, Interaction as _fbthrift_Interaction, ServiceInterface as _fbthrift_ServiceInterface, RpcKind, PythonUserException
+from thrift.python.server import FunctionEntry as _fbthrift_FunctionEntry, Interaction as _fbthrift_Interaction, ServiceInterface as _fbthrift_ServiceInterface, RpcKind, PythonUserException, install_interaction_tile as _fbthrift_install_interaction_tile
 from thrift.python.streaming.closeable import CloseableGenerator, UserExceptionMeta
 
 import test.namespace_from_package.module.thrift_types as _fbthrift__test__namespace_from_package__module__thrift_types

@@ -47,6 +47,14 @@ exception NegativeError {
   1: string reason;
 }
 
+// Initial response returned alongside a freshly-created `Counter` interaction by
+// the `initializedCounter` factory. Carries the starting value so the test can
+// assert the factory's initial response and the per-session Tile state both
+// derive from the same factory argument.
+struct CounterSnapshot {
+  1: i32 value;
+}
+
 interaction Counter {
   void add(1: i32 n);
   i32 get();
@@ -110,6 +118,24 @@ service Calculator {
 
   // explicit factory function (no leading response)
   Counter newCounter();
+
+  // explicit factory function *with* a leading initial response: returns both
+  // the new `Counter` interaction and a `CounterSnapshot`. The handler builds
+  // the Tile from the factory argument (so per-session state derives from
+  // `start`) and returns `tuple[Counter, CounterSnapshot]`, exercising the
+  // interaction-factory-with-initial-response (TileAndResponse) path. The
+  // declared `throws` lets the test exercise error propagation from the factory
+  // itself: a declared exception surfaces as-is, an undeclared one as an
+  // ApplicationError.
+  Counter, CounterSnapshot initializedCounter(1: i32 start) throws (
+    1: NegativeError err,
+  );
+
+  // Stream interaction factory (`Interaction, Response, stream<T>`). Regression
+  // guard for the tile-unpack-before-await codegen bug: the initial-response
+  // Tile install is gated to the request/response path, so a stream factory's
+  // Tile comes from the zero-arg `createCounter` (state starts at the default).
+  Counter, i32, stream<i32> streamingCounter(1: i32 count);
 
   // explicit factory for the request/response-less `Heartbeat` interaction
   Heartbeat newHeartbeat();

@@ -40,7 +40,7 @@ from {{program.base_library_package}}.serializer import serialize_iobuf, deseria
 import {{program.base_library_package}}.mutable_containers as _fbthrift_python_mutable_containers
 from {{program.base_library_package}}.mutable_serializer import serialize_iobuf, deserialize, Protocol
 {{/if python.generate_mutable_types?}}
-from {{program.base_library_package}}.server import FunctionEntry as _fbthrift_FunctionEntry, Interaction as _fbthrift_Interaction, ServiceInterface as _fbthrift_ServiceInterface, RpcKind, PythonUserException
+from {{program.base_library_package}}.server import FunctionEntry as _fbthrift_FunctionEntry, Interaction as _fbthrift_Interaction, ServiceInterface as _fbthrift_ServiceInterface, RpcKind, PythonUserException, install_interaction_tile as _fbthrift_install_interaction_tile
 from {{program.base_library_package}}.streaming.closeable import CloseableGenerator, UserExceptionMeta
 
 import {{program.module_path}}.{{#partial m_types.import_path}} as {{program.module_mangle}}__{{#partial m_types.import_path}}
@@ -80,7 +80,7 @@ class {{service.name}}Interface(
         functionTable = {
         {{#each service.supported_functions as |function|}}
           {{#if function.creates_interaction?}}
-            b"{{function.name}}": _fbthrift_FunctionEntry({{#function}}{{> services/function_kind }}{{/function}}, self._fbthrift__handler_{{function.name}}, interaction=b"{{function.created_interaction.name}}", creates_interaction=True, interaction_factory=self.create{{function.created_interaction.name}}),
+            b"{{function.name}}": _fbthrift_FunctionEntry({{#function}}{{> services/function_kind }}{{/function}}, self._fbthrift__handler_{{function.name}}, interaction=b"{{function.created_interaction.name}}", creates_interaction=True, interaction_factory=self.create{{function.created_interaction.name}}{{#function}}{{> services/returns_initial_response_kwarg }}{{/function}}),
           {{#else}}
             b"{{function.name}}": _fbthrift_FunctionEntry({{#function}}{{> services/function_kind }}{{/function}}, self._fbthrift__handler_{{function.name}}),
           {{/if function.creates_interaction?}}

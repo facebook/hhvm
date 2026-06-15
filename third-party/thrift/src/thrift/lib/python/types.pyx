@@ -3325,6 +3325,12 @@ cdef class FunctionEntry:
         interaction's handler instance, used to create the per-session Tile. Set
         on both the factory entry and inside-interaction entries (the latter
         lets the runtime lazily construct the Tile for implicit ``performs``).
+      - ``returns_initial_response``: ``True`` for an interaction factory that
+        also returns an initial response (``Interaction, Response factory()``).
+        Its handler returns ``(interaction_handler, response)``; the runtime
+        installs the *handler-returned* Tile (so its per-session state can derive
+        from the factory arguments) rather than calling the zero-arg
+        ``interaction_factory``.
     """
 
     def __cinit__(
@@ -3334,12 +3340,14 @@ cdef class FunctionEntry:
         bytes interaction=b"",
         bint creates_interaction=False,
         interaction_factory=None,
+        bint returns_initial_response=False,
     ):
         self.rpc_kind = rpc_kind
         self.handler = handler
         self.interaction = interaction
         self.creates_interaction = creates_interaction
         self.interaction_factory = interaction_factory
+        self.returns_initial_response = returns_initial_response
 
 
 def get_standard_immutable_default_value_for_type(TypeInfoBase typeinfo):

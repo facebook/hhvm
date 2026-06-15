@@ -348,6 +348,7 @@ class FunctionEntry:
     interaction: bytes
     creates_interaction: bool
     interaction_factory: typing.Callable[..., object] | None
+    returns_initial_response: bool
     def __init__(
         self,
         rpc_kind: RpcKind,
@@ -355,6 +356,7 @@ class FunctionEntry:
         interaction: bytes = ...,
         creates_interaction: bool = ...,
         interaction_factory: typing.Callable[..., object] | None = ...,
+        returns_initial_response: bool = ...,
     ) -> None: ...
 
 class ServiceInterface:

@@ -357,6 +357,11 @@ cdef class FunctionEntry:
     cdef readonly bytes interaction
     cdef readonly bint creates_interaction
     cdef readonly object interaction_factory
+    # True for an interaction factory that also returns an initial response
+    # (``Interaction, Response factory()``). The handler returns
+    # ``(interaction_handler, response)``; the runtime installs the returned
+    # per-session Tile instead of calling the zero-arg ``interaction_factory``.
+    cdef readonly bint returns_initial_response
 
 cdef const cTypeInfo* getCTypeInfo(type_info)
 cdef list_eq(object self, object other)

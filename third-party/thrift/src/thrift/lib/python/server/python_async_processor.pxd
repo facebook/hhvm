@@ -52,6 +52,7 @@ cdef extern from "thrift/lib/python/server/PythonAsyncProcessor.h" namespace "::
         string_view interactionName
         cInteractionType interactionType
         cbool createsInteraction
+        cbool returnsInitialResponse
         PyObjPtr factoryObject
 
     HandlerFunc makeHandlerFunc(
@@ -69,6 +70,7 @@ cdef extern from "thrift/lib/python/server/PythonAsyncProcessor.h" namespace "::
         string_view interactionName,
         cbool createsInteraction,
         PyObjPtr factoryObject,
+        cbool returnsInitialResponse,
     )
 
 cdef extern from "thrift/lib/python/server/PythonAsyncProcessorFactory.h" namespace "::apache::thrift::python":

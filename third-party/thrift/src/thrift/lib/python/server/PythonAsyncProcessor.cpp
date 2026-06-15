@@ -74,6 +74,7 @@ HandlerFunc makeHandlerFunc(
       /*interactionName=*/{},
       InteractionType::NONE,
       /*createsInteraction=*/false,
+      /*returnsInitialResponse=*/false,
       /*factoryObject=*/nullptr,
   };
 }
@@ -85,7 +86,8 @@ HandlerFunc makeInteractionHandlerFunc(
     std::string_view functionName,
     std::string_view interactionName,
     bool createsInteraction,
-    PyObject* factoryObject) {
+    PyObject* factoryObject,
+    bool returnsInitialResponse) {
   return HandlerFunc{
       kind,
       funcObject,
@@ -96,17 +98,16 @@ HandlerFunc makeInteractionHandlerFunc(
       createsInteraction ? InteractionType::NONE
                          : InteractionType::INTERACTION_V1,
       createsInteraction,
+      returnsInitialResponse,
       factoryObject,
   };
 }
 
 PythonTile::PythonTile(PyObject* handler, folly::Executor::KeepAlive<> executor)
     : handler_(handler), executor_(std::move(executor)) {
-  // Precondition: the caller holds the GIL. Both construction sites hold it
-  // when building the tile right after invoking the Python factory:
-  // createInteractionImpl wraps it in a PyGILState_Ensure() region, and
-  // maybeFulfillTilePromise runs on the Python executor (loop thread, GIL
-  // held).
+  // Precondition: the caller holds the GIL. Every construction site does --
+  // createInteractionImpl via PyGILState_Ensure(), the fulfill/install paths on
+  // the Python executor (loop thread).
   Py_XINCREF(handler_);
 }
 
@@ -114,21 +115,17 @@ PythonTile::~PythonTile() {
   if (handler_ == nullptr) {
     return;
   }
-  // The tile is destroyed on a C++ teardown thread that neither holds the GIL
-  // nor can safely acquire it (the interpreter may be finalizing). Hand the
-  // handler ref to the Python executor instead -- it runs on the asyncio loop
-  // thread with the GIL held, and the KeepAlive keeps it alive for this task.
+  // Runs on a C++ teardown thread that can't safely touch the GIL (the
+  // interpreter may be finalizing), so hand the handler ref to the Python
+  // executor (loop thread, GIL held; the KeepAlive keeps it alive for the
+  // task).
   //
-  // If the interaction is being torn down without an explicit client terminate
-  // (e.g. the connection dropped first), `co_onTermination` never ran, so fire
-  // the `onInteractionTermination` hook now -- best-effort: the scheduled coro
-  // takes its own ref and drops it (and the tile's ref) when it finishes. If
-  // the loop is already gone (interpreter finalizing), the task is dropped
-  // along with the ref, same as the plain-decref path.
-  //
-  // Decide here (synchronously with teardown) whether this is the path that
-  // fires the hook, then hand `handler_` to the loop thread for the optional
-  // hook plus the mandatory decref in a single task.
+  // If teardown happened without an explicit client terminate (e.g. the
+  // connection dropped first), `co_onTermination` never ran, so fire the
+  // `onInteractionTermination` hook now, best-effort. Claim the hook here
+  // (synchronously) so the single loop-thread task runs it plus the mandatory
+  // decref. If the loop is already gone, that task and ref drop like a plain
+  // decref.
   const bool fireHook = !hookFired_.exchange(true);
   executor_->add([handler = handler_, fireHook] {
     // loop thread, GIL held
@@ -152,12 +149,10 @@ folly::coro::Task<void> PythonTile::co_onTermination() {
   executor_->add([handler = handler_, promise = std::move(promise)]() mutable {
     handleInteractionTermination(handler, std::move(promise));
   });
-  // Await the Try and ignore it: the bridge completes the promise when the hook
-  // finishes (or on cancellation / a missing loop). If the fulfilling task is
-  // dropped before it can run (e.g. a hard interpreter teardown racing this
-  // terminate), the promise breaks and the future fails -- resume and let
-  // teardown proceed rather than leaking on an unhandled exception. The hook is
-  // best-effort once we are racing shutdown.
+  // Await the Try and ignore it: if the fulfilling task is dropped (e.g. a hard
+  // interpreter teardown racing this terminate) the future fails -- resume and
+  // let teardown proceed rather than leak. The hook is best-effort once we are
+  // racing shutdown.
   co_await folly::coro::co_awaitTry(std::move(future));
 }
 #endif
@@ -176,16 +171,12 @@ PythonAsyncProcessor::createInteractionImpl(
   if (factory == nullptr) {
     return nullptr;
   }
-  // PyGILState_Ensure() here is safe against interpreter finalization: this
-  // override only runs while a request that creates an interaction is being
-  // processed, i.e. on a live thrift request-processing thread. The Python
-  // `serve()` coroutine is parked on that C++ `ThriftServer::serve()` call the
-  // whole time, so the interpreter is up and not finalizing; and `serve()`
-  // joins all such threads (cleanUp -> stopWorkers /
-  // stopAcceptingAndJoinOutstandingRequests / stopCPUWorkers) before it returns
-  // -- so no thread can still be in here once Python can begin finalizing.
-  // (Contrast ~PythonTile, which can run during connection/server teardown as
-  // the interpreter shuts down, and so must not acquire the GIL itself.)
+  // PyGILState_Ensure() is safe against finalization here: this override only
+  // runs while a request is being processed, so Python `serve()` is still
+  // parked on `ThriftServer::serve()` (interpreter up). `serve()` joins all
+  // request threads before returning, so none can be here once Python can
+  // finalize. (Contrast ~PythonTile, which can run during teardown and so must
+  // not.)
   PyGILState_STATE g = PyGILState_Ensure();
   SCOPE_EXIT {
     PyGILState_Release(g);
@@ -230,10 +221,9 @@ folly::exception_wrapper PythonAsyncProcessor::maybeFulfillTilePromise(
   if (factory == nullptr) {
     return {};
   }
-  // This runs on the Python executor (asyncio loop thread) with the GIL already
-  // held: executeRequest hops the whole dispatch onto executor_ via
-  // `.via(executor_)` before reaching handlePythonServerCallback, so calling
-  // the Python factory here needs no manual GIL acquire (and no thread hop).
+  // Runs on the Python executor (loop thread, GIL held): executeRequest hops
+  // dispatch onto executor_ via `.via(executor_)` before this, so calling the
+  // Python factory needs no manual GIL acquire or thread hop.
   std::unique_ptr<PythonTile> pythonTile;
   PyObject* instance = callInteractionFactory(factory);
   // Drop the +1 from callInteractionFactory even if construction below throws.
@@ -278,6 +268,52 @@ folly::exception_wrapper PythonAsyncProcessor::maybeFulfillTilePromise(
   return {};
 }
 
+void installInteractionTileFromHandler(
+    apache::thrift::Cpp2RequestContext* context,
+    PyObject* instance,
+    folly::Executor* executor) {
+  // `instance` is borrowed (the generated handler wrapper still holds it); the
+  // PythonTile below takes its own ref via Py_XINCREF.
+  if (instance == nullptr || instance == Py_None || context == nullptr) {
+    return;
+  }
+  auto interactionId = context->getInteractionId();
+  auto* connCtx = context->getConnectionContext();
+  if (interactionId == 0 || connCtx == nullptr) {
+    return;
+  }
+  // The connection's EventBase owns the tile map; derive it from the transport.
+  const auto* transport = connCtx->getTransport();
+  folly::EventBase* eb = transport ? transport->getEventBase() : nullptr;
+  if (eb == nullptr) {
+    return;
+  }
+  // Runs on the Python executor (loop thread, GIL held), so constructing the
+  // PythonTile is safe without a manual GIL acquire -- as in
+  // maybeFulfillTilePromise.
+  auto keepAlive = folly::getKeepAliveToken(executor);
+  auto pythonTile = std::make_unique<PythonTile>(instance, keepAlive);
+  // Re-resolve + fulfill on the EventBase thread for atomicity, as in
+  // maybeFulfillTilePromise. Raw `connCtx` capture is safe: the outstanding
+  // factory request keeps the Cpp2Connection (owner of the Cpp2ConnContext)
+  // alive, and connection teardown is FIFO-serialized on this same EventBase,
+  // so this task runs first.
+  eb->runInEventBaseThread([eb,
+                            keepAlive = std::move(keepAlive),
+                            tile = pythonTile.release(),
+                            interactionId,
+                            connCtx]() mutable {
+    apache::thrift::TilePtr tilePtr{tile, eb};
+    apache::thrift::detail::Cpp2ConnContextInternalAPI api(*connCtx);
+    if (auto* tpromise = dynamic_cast<apache::thrift::TilePromise*>(
+            api.findTile(interactionId))) {
+      tpromise->fulfill(*tilePtr, keepAlive, *eb);
+      connCtx->tryReplaceTile(interactionId, std::move(tilePtr));
+    }
+    // else: someone already fulfilled; let our PythonTile drop on scope exit.
+  });
+}
+
 PyObject* FOLLY_NULLABLE PythonAsyncProcessor::getInteractionHandler(
     const HandlerFunc& function, apache::thrift::Cpp2RequestContext* context) {
   if (function.interactionType != InteractionType::INTERACTION_V1) {
@@ -310,7 +346,23 @@ folly::Try<PyObject*> PythonAsyncProcessor::prepareInteractionDispatch(
     const HandlerFunc& function,
     apache::thrift::Cpp2RequestContext* context,
     folly::EventBase* eb) {
+  // Codegen only sets `returnsInitialResponse` for req/resp factories;
+  // stream/sink factories get their Tile from the zero-arg factory (see
+  // `test_stream_interaction_factory`). Guard against a mismatch silently
+  // installing the wrong Tile via the zero-arg path.
+  DCHECK(
+      !function.returnsInitialResponse ||
+      function.kind == apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE)
+      << "returnsInitialResponse set for non-req/resp factory: "
+      << function.fullName;
   if (function.createsInteraction) {
+    if (function.returnsInitialResponse) {
+      // Factory-with-initial-response: the per-session Tile comes from the
+      // handler's return value (installed by `install_interaction_tile` once it
+      // completes), not the zero-arg factory. Leave the TilePromise parked;
+      // dispatch against `Py_None` since the handler is already bound.
+      return folly::Try<PyObject*>(Py_None);
+    }
     // On factory failure, return the error so the caller can fail the request
     // with the real message (instead of stranding its callback).
     if (auto factoryError = maybeFulfillTilePromise(function, context, eb)) {

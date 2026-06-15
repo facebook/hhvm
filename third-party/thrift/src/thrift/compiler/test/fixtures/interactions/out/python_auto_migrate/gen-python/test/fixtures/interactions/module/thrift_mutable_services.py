@@ -17,7 +17,7 @@ import folly.iobuf as _fbthrift_iobuf
 import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 import thrift.python.mutable_containers as _fbthrift_python_mutable_containers
 from thrift.python.mutable_serializer import serialize_iobuf, deserialize, Protocol
-from thrift.python.server import FunctionEntry as _fbthrift_FunctionEntry, Interaction as _fbthrift_Interaction, ServiceInterface as _fbthrift_ServiceInterface, RpcKind, PythonUserException
+from thrift.python.server import FunctionEntry as _fbthrift_FunctionEntry, Interaction as _fbthrift_Interaction, ServiceInterface as _fbthrift_ServiceInterface, RpcKind, PythonUserException, install_interaction_tile as _fbthrift_install_interaction_tile
 from thrift.python.streaming.closeable import CloseableGenerator, UserExceptionMeta
 
 import test.fixtures.interactions.module.thrift_mutable_types as _fbthrift__test__fixtures__interactions__module__thrift_mutable_types
@@ -38,7 +38,7 @@ class MyServiceInterface(
         functionTable = {
             b"foo": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_foo),
             b"interact": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_interact, interaction=b"MyInteraction", creates_interaction=True, interaction_factory=self.createMyInteraction),
-            b"interactFast": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_interactFast, interaction=b"MyInteractionFast", creates_interaction=True, interaction_factory=self.createMyInteractionFast),
+            b"interactFast": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_interactFast, interaction=b"MyInteractionFast", creates_interaction=True, interaction_factory=self.createMyInteractionFast, returns_initial_response=True),
             b"serialize": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE, self._fbthrift__handler_serialize, interaction=b"SerialInteraction", creates_interaction=True, interaction_factory=self.createSerialInteraction),
             b"MyInteraction.frobnicate": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, MyInteractionInterface._fbthrift__handler_frobnicate, interaction=b"MyInteraction", interaction_factory=self.createMyInteraction),
             b"MyInteraction.ping": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_NO_RESPONSE, MyInteractionInterface._fbthrift__handler_ping, interaction=b"MyInteraction", interaction_factory=self.createMyInteraction),
@@ -99,12 +99,14 @@ class MyServiceInterface(
 
     async def interactFast(
             self
-        ) -> builtins.int:
+        ) -> _typing.Tuple[MyInteractionFastInterface, builtins.int]:
         raise NotImplementedError("async def interactFast is not implemented")
 
     async def _fbthrift__handler_interactFast(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
         args_struct = deserialize(_fbthrift__test__fixtures__interactions__module__thrift_mutable_types._fbthrift_MyService_interactFast_args, args, protocol)
         value = await self.interactFast()
+        _fbthrift_tile, value = value
+        _fbthrift_install_interaction_tile(_fbthrift_tile)
         return_struct = _fbthrift__test__fixtures__interactions__module__thrift_mutable_types._fbthrift_MyService_interactFast_result(success=value)
         return serialize_iobuf(return_struct, protocol)
 
@@ -272,7 +274,7 @@ class FactoriesInterface(
         functionTable = {
             b"foo": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_foo),
             b"interact": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_interact, interaction=b"MyInteraction", creates_interaction=True, interaction_factory=self.createMyInteraction),
-            b"interactFast": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_interactFast, interaction=b"MyInteractionFast", creates_interaction=True, interaction_factory=self.createMyInteractionFast),
+            b"interactFast": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_interactFast, interaction=b"MyInteractionFast", creates_interaction=True, interaction_factory=self.createMyInteractionFast, returns_initial_response=True),
             b"serialize": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE, self._fbthrift__handler_serialize, interaction=b"SerialInteraction", creates_interaction=True, interaction_factory=self.createSerialInteraction),
             b"MyInteraction.frobnicate": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, MyInteractionInterface._fbthrift__handler_frobnicate, interaction=b"MyInteraction", interaction_factory=self.createMyInteraction),
             b"MyInteraction.ping": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_NO_RESPONSE, MyInteractionInterface._fbthrift__handler_ping, interaction=b"MyInteraction", interaction_factory=self.createMyInteraction),
@@ -333,12 +335,14 @@ class FactoriesInterface(
 
     async def interactFast(
             self
-        ) -> builtins.int:
+        ) -> _typing.Tuple[MyInteractionFastInterface, builtins.int]:
         raise NotImplementedError("async def interactFast is not implemented")
 
     async def _fbthrift__handler_interactFast(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
         args_struct = deserialize(_fbthrift__test__fixtures__interactions__module__thrift_mutable_types._fbthrift_Factories_interactFast_args, args, protocol)
         value = await self.interactFast()
+        _fbthrift_tile, value = value
+        _fbthrift_install_interaction_tile(_fbthrift_tile)
         return_struct = _fbthrift__test__fixtures__interactions__module__thrift_mutable_types._fbthrift_Factories_interactFast_result(success=value)
         return serialize_iobuf(return_struct, protocol)
 
@@ -838,7 +842,7 @@ class BoxServiceInterface(
 
     def getFunctionTable(self) -> _typing.Mapping[bytes, _fbthrift_FunctionEntry]:
         functionTable = {
-            b"getABoxSession": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_getABoxSession, interaction=b"BoxedInteraction", creates_interaction=True, interaction_factory=self.createBoxedInteraction),
+            b"getABoxSession": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_getABoxSession, interaction=b"BoxedInteraction", creates_interaction=True, interaction_factory=self.createBoxedInteraction, returns_initial_response=True),
             b"BoxedInteraction.getABox": _fbthrift_FunctionEntry(RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, BoxedInteractionInterface._fbthrift__handler_getABox, interaction=b"BoxedInteraction", interaction_factory=self.createBoxedInteraction),
         }
         return {**super().getFunctionTable(), **functionTable}
@@ -868,12 +872,14 @@ class BoxServiceInterface(
     async def getABoxSession(
             self,
             req: _fbthrift__test__fixtures__interactions__module__thrift_mutable_types.ShouldBeBoxed
-        ) -> _fbthrift__test__fixtures__interactions__module__thrift_mutable_types.ShouldBeBoxed:
+        ) -> _typing.Tuple[BoxedInteractionInterface, _fbthrift__test__fixtures__interactions__module__thrift_mutable_types.ShouldBeBoxed]:
         raise NotImplementedError("async def getABoxSession is not implemented")
 
     async def _fbthrift__handler_getABoxSession(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
         args_struct = deserialize(_fbthrift__test__fixtures__interactions__module__thrift_mutable_types._fbthrift_BoxService_getABoxSession_args, args, protocol)
         value = await self.getABoxSession(args_struct.req,)
+        _fbthrift_tile, value = value
+        _fbthrift_install_interaction_tile(_fbthrift_tile)
         return_struct = _fbthrift__test__fixtures__interactions__module__thrift_mutable_types._fbthrift_BoxService_getABoxSession_result(success=value)
         return serialize_iobuf(return_struct, protocol)
 

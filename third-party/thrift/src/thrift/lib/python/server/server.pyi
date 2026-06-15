@@ -35,6 +35,11 @@ from thrift.python.types import (
     ServiceInterface as ServiceInterface,
 )
 
+# Re-exported from thrift.python.server_impl.python_async_processor for generated
+# service code: installs a handler-returned interaction Tile for a
+# factory-with-initial-response method.
+def install_interaction_tile(tile: object) -> None: ...
+
 IPAddress = Union[ipaddress.IPv4Address, ipaddress.IPv6Address]
 # pyre-fixme[24]: Generic type `os.PathLike` expects 1 type parameter.
 Path = Union[str, bytes, os.PathLike]

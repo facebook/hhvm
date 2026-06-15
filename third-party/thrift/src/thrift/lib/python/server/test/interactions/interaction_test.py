@@ -34,7 +34,7 @@ from thrift.python.client import ClientType, get_client
 from thrift.python.exceptions import ApplicationError, ApplicationErrorType
 from thrift.python.server import ServiceInterface, ThriftServer
 
-from .server_handlers import CalculatorHandler
+from .server_handlers import CalculatorHandler, INITIALIZED_COUNTER_BOOM_START
 
 
 class _InProcessServer:
@@ -84,6 +84,58 @@ class CalculatorInteractionTest(unittest.IsolatedAsyncioTestCase):
                 counter = await calc.newCounter()
                 async with counter as c:
                     self.assertEqual(await c.get(), 0)
+
+    async def test_handshake_factory_with_initial_response(self) -> None:
+        """Explicit factory that returns `tuple[Counter, CounterSnapshot]`. The
+        client unpacks `(interaction, initial_response)`; the per-session Tile is
+        the handler-returned instance, so its state derives from the factory
+        argument (`start`)."""
+        async with _InProcessServer(CalculatorHandler()) as addr:
+            async with await self._client(addr) as calc:
+                counter, snapshot = await calc.initializedCounter(7)
+                self.assertEqual(snapshot.value, 7)
+                async with counter as c:
+                    # Tile state derived from `start`, not the zero-arg default.
+                    self.assertEqual(await c.get(), 7)
+                    await c.add(3)
+                    self.assertEqual(await c.get(), 10)
+
+    async def test_factory_with_initial_response_isolation(self) -> None:
+        # Two factory-built Counters with diverged start values keep independent
+        # per-session state.
+        async with _InProcessServer(CalculatorHandler()) as addr:
+            async with await self._client(addr) as calc:
+                c1, s1 = await calc.initializedCounter(100)
+                c2, s2 = await calc.initializedCounter(5)
+                self.assertEqual((s1.value, s2.value), (100, 5))
+                async with c1 as a, c2 as b:
+                    self.assertEqual(await a.get(), 100)
+                    self.assertEqual(await b.get(), 5)
+                    await a.add(1)
+                    self.assertEqual(await a.get(), 101)
+                    self.assertEqual(await b.get(), 5)
+
+    async def test_factory_with_initial_response_declared_exception(self) -> None:
+        # A *declared* exception raised by the factory-with-initial-response
+        # handler surfaces to the client as that exception (not ApplicationError),
+        # and no interaction Tile is installed.
+        async with _InProcessServer(CalculatorHandler()) as addr:
+            async with await self._client(addr) as calc:
+                with self.assertRaises(NegativeError):
+                    await calc.initializedCounter(-1)
+
+    async def test_factory_with_initial_response_unexpected_exception(self) -> None:
+        # An *undeclared* exception (RuntimeError) raised by the
+        # factory-with-initial-response handler is translated to
+        # ApplicationError(UNKNOWN); no Tile is installed.
+        async with _InProcessServer(CalculatorHandler()) as addr:
+            async with await self._client(addr) as calc:
+                with self.assertRaises(ApplicationError) as cm:
+                    await calc.initializedCounter(INITIALIZED_COUNTER_BOOM_START)
+                self.assertEqual(cm.exception.type, ApplicationErrorType.UNKNOWN)
+                self.assertIn(
+                    "initializedCounter failed unexpectedly", cm.exception.message
+                )
 
     async def test_handshake_heartbeat_no_request_no_response(self) -> None:
         """Request/response-less explicit factory on a dedicated interaction."""
@@ -161,6 +213,27 @@ class CalculatorInteractionTest(unittest.IsolatedAsyncioTestCase):
                 self.assertEqual(count, 3)
                 got = [v async for v in stream]
                 self.assertEqual(got, [0, 1, 2])
+
+    async def test_stream_interaction_factory(self) -> None:
+        # A stream factory that *creates* an interaction (`Counter, i32,
+        # stream<i32> streamingCounter`). Regression guard for the codegen bug
+        # where the factory-with-initial-response Tile-install block was emitted
+        # for stream factories too: there `value` is still an unawaited coroutine
+        # when the unpack runs, raising `TypeError: cannot unpack non-iterable
+        # coroutine object`. The fix gates that block to the request/response
+        # path; a stream factory's Tile comes from the zero-arg `createCounter`.
+        async with _InProcessServer(CalculatorHandler()) as addr:
+            async with await self._client(addr) as calc:
+                counter, initial, stream = await calc.streamingCounter(3)
+                # Initial response and stream are delivered (no TypeError).
+                self.assertEqual(initial, 3)
+                self.assertEqual([v async for v in stream], [0, 1, 2])
+                # The created interaction Tile (zero-arg create) is usable and
+                # starts from the default per-session state.
+                async with counter as c:
+                    self.assertEqual(await c.get(), 0)
+                    await c.add(5)
+                    self.assertEqual(await c.get(), 5)
 
     async def test_stream_inside_interaction(self) -> None:
         # The initial response and stream both derive from per-session state, so

@@ -39,8 +39,14 @@ from calculator.thrift_services import (
     HeartbeatInterface,
     SinkOnlyInterface,
 )
-from calculator.thrift_types import NegativeError, Point
+from calculator.thrift_types import CounterSnapshot, NegativeError, Point
 from thrift.python.exceptions import ApplicationError, ApplicationErrorType
+
+# Sentinel `start` for `initializedCounter` that makes the factory raise an
+# *undeclared* RuntimeError, exercising translation to ApplicationError(UNKNOWN)
+# on the factory-with-initial-response path. A negative `start` instead raises
+# the *declared* NegativeError.
+INITIALIZED_COUNTER_BOOM_START: int = 0x7F37
 
 
 class CounterHandler(CounterInterface):
@@ -209,6 +215,18 @@ class CalculatorHandler(CalculatorInterface):
 
         return count, gen()
 
+    # Stream interaction factory (`Counter, i32, stream<i32> streamingCounter`).
+    # The per-session `Counter` Tile comes from the zero-arg `createCounter`
+    # (stream factories don't carry an initial-response Tile), so this handler
+    # only returns the initial response and the stream. Exercises the codegen
+    # path for a stream factory that creates an interaction.
+    async def streamingCounter(self, count: int) -> tuple[int, AsyncIterator[int]]:
+        async def gen() -> AsyncGenerator[int, None]:
+            for i in range(count):
+                yield i
+
+        return count, gen()
+
     # Per-session Tile constructors invoked by the runtime.
     def createCounter(self) -> CounterHandler:
         return CounterHandler(on_terminate=self._record_counter_termination)
@@ -223,6 +241,28 @@ class CalculatorHandler(CalculatorInterface):
     # (the client should observe an error, not a swallowed/generic failure).
     def createBoom(self) -> BoomHandler:
         raise RuntimeError("boom: factory intentionally failed")
+
+    # Explicit wire factory *with* an initial response. Unlike `newCounter`
+    # (whose Tile comes from the zero-arg `createCounter`), this handler builds
+    # the Tile itself from the factory argument and returns it alongside the
+    # initial response as `tuple[Counter, CounterSnapshot]`. The runtime installs
+    # the returned Tile and sends the `CounterSnapshot`. Building the Tile here is
+    # what lets the per-session state derive from `start` (the zero-arg factory
+    # path cannot, since it never sees the arguments).
+    async def initializedCounter(
+        self, start: int
+    ) -> tuple[CounterHandler, CounterSnapshot]:
+        # Error propagation from the factory itself: a declared NegativeError
+        # surfaces to the client as-is; an undeclared RuntimeError is translated
+        # to ApplicationError(UNKNOWN). Neither installs a Tile.
+        if start < 0:
+            raise NegativeError(reason=f"refused negative start: {start}")
+        if start == INITIALIZED_COUNTER_BOOM_START:
+            raise RuntimeError("initializedCounter failed unexpectedly")
+        counter = CounterHandler(
+            start=start, on_terminate=self._record_counter_termination
+        )
+        return counter, CounterSnapshot(value=start)
 
     # Explicit wire factory methods; the Tile is installed via create*.
     async def newCounter(self) -> None:

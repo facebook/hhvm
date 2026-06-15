@@ -18,6 +18,9 @@ import traceback
 
 from thrift.python.exceptions import ApplicationError
 from thrift.python.server_impl.interactions import Interaction
+# Re-exported for generated service code: installs a handler-returned interaction
+# Tile for a factory-with-initial-response method.
+from thrift.python.server_impl.python_async_processor import install_interaction_tile
 from thrift.python.metadata import gen_metadata, ThriftMetadata
 from thrift.python.protocol import Protocol, RpcKind
 from thrift.python.types import FunctionEntry, ServiceInterface

@@ -60,11 +60,32 @@ struct HandlerFunc {
       interactionType{apache::thrift::AsyncProcessorFactory::MethodMetadata::
                           InteractionType::NONE};
   bool createsInteraction{false};
+  // True for a factory method that also returns an initial response
+  // (`Interaction, Response factory()`). Its Python handler returns
+  // `(interaction_handler, response)`; the runtime installs the
+  // *handler-returned* per-session Tile (so its state can derive from the
+  // factory arguments) instead of calling the zero-arg `factoryObject`, then
+  // sends `response` as the reply.
+  bool returnsInitialResponse{false};
   // Zero-arg Python callable that constructs the interaction's per-session
   // handler instance (i.e. `self.create<InteractionName>`). Borrowed reference,
   // owned by the Python function table that outlives this processor.
   PyObject* factoryObject{nullptr};
 };
+
+// Install the per-session Tile that a factory-with-initial-response handler
+// returned: wrap `instance` in a PythonTile and fulfill the interaction's
+// parked TilePromise on the connection's EventBase thread (where all tile-map
+// mutations happen). The EventBase is derived from `context`'s transport.
+// `instance` is a borrowed reference (the PythonTile takes its own). No-op if
+// `instance` is null / `Py_None` or there is no parked promise. Called directly
+// from the Cython dispatch layer (the generated handler wrapper), which runs on
+// the Python executor (asyncio loop thread, GIL held) -- the same thread/GIL
+// contract as the zero-arg factory path in maybeFulfillTilePromise.
+void installInteractionTileFromHandler(
+    apache::thrift::Cpp2RequestContext* context,
+    PyObject* instance,
+    folly::Executor* executor);
 
 // Ordinary (non-interaction) service method.
 HandlerFunc makeHandlerFunc(
@@ -84,7 +105,8 @@ HandlerFunc makeInteractionHandlerFunc(
     std::string_view functionName,
     std::string_view interactionName,
     bool createsInteraction,
-    PyObject* factoryObject);
+    PyObject* factoryObject,
+    bool returnsInitialResponse = false);
 
 // Per-interaction state on the C++ side. Holds a strong Python reference to the
 // user's interaction handler instance so subsequent inbound interaction method

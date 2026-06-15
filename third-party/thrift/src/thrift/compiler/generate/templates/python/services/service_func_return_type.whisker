@@ -38,6 +38,9 @@ _typing.AsyncIterator[{{#partial typehints.pep484_field_return_type type=functio
 {{> services/sink_callback}}
 {{#if function.sink_has_first_response?}}]{{/if}}
 
+  {{#else if function.creates_interaction?}}
+{{#if function.returns_tuple?}}_typing.Tuple[{{function.created_interaction.name}}Interface, {{#partial typehints.pep484_field_return_type type=function.return_type}}]{{#else}}{{#partial typehints.pep484_field_return_type type=function.return_type}}{{/if function.returns_tuple?}}
+
   {{#else}}
 {{#partial typehints.pep484_field_return_type type=function.return_type}}
   {{/if function.bidirectional_stream?}}

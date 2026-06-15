@@ -977,12 +977,14 @@ func (s *rocketServerSocket) preprocessRequest(msg payload.Payload) (
 	}
 
 	rpcFuncName := metadata.GetName()
-	protocol, err := newProtocolBufferFromRequest(msg.Data(), metadata, s.observer)
+	readStartTime := time.Now()
+	dataBytes, err := rocket.MaybeDecompress(msg.Data(), metadata.GetCompression())
 	if err != nil {
 		s.observer.ConnDropped()
 		s.observer.TaskKilled()
-		return nil, nil, nil, nil, err
+		return nil, nil, nil, nil, fmt.Errorf("payload data bytes decompression failed: %w", err)
 	}
+	s.observer.TimeReadUsForFunction(rpcFuncName, time.Since(readStartTime))
 
 	s.observer.ReceivedRequestForFunction(rpcFuncName)
 
@@ -998,21 +1000,26 @@ func (s *rocketServerSocket) preprocessRequest(msg payload.Payload) (
 	}
 
 	argStruct := pfunc.NewReqArgs()
-	err = argStruct.Read(protocol)
-	if err != nil {
-		return nil, nil, nil, nil, err
+	protoID := metadata.GetProtocol()
+	switch protoID {
+	case rpcmetadata.ProtocolId_BINARY:
+		err = format.DecodeBinary(dataBytes, argStruct)
+	case rpcmetadata.ProtocolId_COMPACT:
+		err = format.DecodeCompact(dataBytes, argStruct)
+	default:
+		return nil, nil, nil, nil, types.NewProtocolException(fmt.Errorf("unknown protocol id: %d", protoID))
 	}
-	err = protocol.ReadMessageEnd()
 	if err != nil {
 		return nil, nil, nil, nil, err
 	}
 
+	reqHeaders := rocket.GetRequestRpcMetadataHeaders(metadata)
 	reqCtx := &RequestContext{
 		ServiceName: s.proc.FunctionServiceMap()[rpcFuncName],
 		MethodName:  rpcFuncName,
 		ConnInfo:    s.connInfo,
 	}
-	reqCtx.SetReadHeaders(protocol.getResponseHeaders())
+	reqCtx.SetReadHeaders(reqHeaders)
 
 	return metadata, pfunc, argStruct, reqCtx, nil
 }

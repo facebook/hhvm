@@ -977,6 +977,14 @@ func (s *rocketServerSocket) preprocessRequest(msg payload.Payload) (
 	}
 
 	rpcFuncName := metadata.GetName()
+	s.observer.ReceivedRequestForFunction(rpcFuncName)
+
+	if s.isOverloaded() {
+		s.observer.ConnDropped()
+		s.observer.ServerOverloaded()
+		return nil, nil, nil, nil, loadSheddingError
+	}
+
 	readStartTime := time.Now()
 	dataBytes, err := rocket.MaybeDecompress(msg.Data(), metadata.GetCompression())
 	if err != nil {
@@ -985,14 +993,6 @@ func (s *rocketServerSocket) preprocessRequest(msg payload.Payload) (
 		return nil, nil, nil, nil, fmt.Errorf("payload data bytes decompression failed: %w", err)
 	}
 	s.observer.TimeReadUsForFunction(rpcFuncName, time.Since(readStartTime))
-
-	s.observer.ReceivedRequestForFunction(rpcFuncName)
-
-	if s.isOverloaded() {
-		s.observer.ConnDropped()
-		s.observer.ServerOverloaded()
-		return nil, nil, nil, nil, loadSheddingError
-	}
 
 	pfunc, exists := s.proc.ProcessorFunctionMap()[rpcFuncName]
 	if !exists {

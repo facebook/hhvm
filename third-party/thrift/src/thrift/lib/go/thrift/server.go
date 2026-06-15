@@ -902,20 +902,29 @@ func (s *rocketServerSocket) makeResponsePayload(
 	// Build exception metadata if applicable, reporting both undeclared and
 	// declared exceptions to the observer.
 	var exceptionMetadata *rpcmetadata.PayloadExceptionMetadataBase
+	var exceptionErr error
 	if appEx, ok := respStruct.(*types.ApplicationException); ok {
 		exceptionMetadata = rocket.NewPayloadExceptionMetadataBaseV2(appEx)
+		exceptionErr = appEx
 		dataBytes = nil
 		s.observer.UndeclaredExceptionForFunction(rpcFuncName)
 	} else if streamResult, ok := respStruct.(types.WritableResult); ok && streamResult.Exception() != nil {
 		declaredErr := streamResult.Exception()
 		exceptionMetadata = rocket.NewPayloadExceptionMetadataBaseV2(declaredErr)
+		exceptionErr = declaredErr
 		s.observer.DeclaredExceptionForFunction(rpcFuncName)
 	}
 
 	if isFirstResponse {
+		loadMetric := s.loadFn()
 		loadMetricPtr := (*int64)(nil)
 		if metadata.IsSetLoadMetric() {
-			loadMetricPtr = Pointerize(int64(s.loadFn()))
+			loadMetricPtr = Pointerize(int64(loadMetric))
+		}
+		headers[LoadHeaderKey] = strconv.FormatUint(uint64(loadMetric), 10)
+		if exceptionErr != nil {
+			headers["uex"] = errorType(exceptionErr)
+			headers["uexw"] = exceptionErr.Error()
 		}
 		if appException, ok := respStruct.(*types.ApplicationException); ok {
 			return rocket.EncodeResponseApplicationErrorPayload(

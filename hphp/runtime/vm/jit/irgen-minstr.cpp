@@ -105,10 +105,11 @@ struct PropInfo {
 Type knownTypeForProp(const Class::Prop& prop,
                       const Class* propCls,
                       const Class* ctx,
-                      bool ignoreLateInit) {
+                      bool ignoreLateInit,
+                      bool systemLibOnly = false) {
   auto knownType = TCell;
   if (Cfg::Eval::CheckPropTypeHints >= 3) {
-    knownType = typeFromPropTC(prop.typeConstraints, propCls, ctx, false);
+    knownType = typeFromPropTC(prop.typeConstraints, propCls, ctx, false, systemLibOnly);
     if (!(prop.attrs & AttrNoImplicitNullable)) knownType |= TInitNull;
   }
   knownType &= typeFromRAT(prop.repoAuthType, ctx);
@@ -1786,7 +1787,12 @@ bool propertyMayBeCountable(const Class::Prop& prop) {
   // `true` for these cases. Doing so doesn't cause unnecessary pessimization,
   // because subtypes of Object are going to be countable anyway.
   if (prop.repoAuthType.name()) return true;
-  auto const type = knownTypeForProp(prop, nullptr, nullptr, true);
+
+  // Countedness must not change based on class load order. In persistent mode a
+  // referenced class may not be loaded yet, so only trust systemlib type
+  // constraints.
+  auto const systemLibOnly = Cfg::Eval::ForceAllPersistent;
+  auto const type = knownTypeForProp(prop, nullptr, nullptr, true, systemLibOnly);
   return type.maybe(jit::TCounted);
 }
 

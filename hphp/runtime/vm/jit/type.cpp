@@ -1003,7 +1003,8 @@ template<class TGetThisType>
 Type typeFromTCImpl(const HPHP::TypeIntersectionConstraint& tcs,
                     TGetThisType getThisType,
                     const Class* ctx,
-                    bool useObjectForUnresolved = false) {
+                    bool useObjectForUnresolved = false,
+                    bool systemLibOnly = false) {
   using A = AnnotType;
   auto const atToType = [&](AnnotType at) {
     assertx(at != A::SubObject && at != A::Unresolved);
@@ -1048,6 +1049,10 @@ Type typeFromTCImpl(const HPHP::TypeIntersectionConstraint& tcs,
     always_assert(false);
   };
 
+  auto const isSystemLib = [](const Class* cls) {
+    return cls->preClass()->unit()->isSystemLib();
+  };
+
   auto baseForTC = [&](const TypeConstraint& tc) {
     if (!tc.isSubObject() && !tc.isUnresolved()) return atToType(tc.type());
 
@@ -1056,7 +1061,7 @@ Type typeFromTCImpl(const HPHP::TypeIntersectionConstraint& tcs,
       if (interface_supports_non_objects(tc.clsName())) return TInitCell;
 
       auto const cls = Class::lookupKnown(tc.clsName(), ctx);
-      if (!cls) return TObj;
+      if (!cls || (systemLibOnly && !isSystemLib(cls))) return TObj;
       assertx(!isEnum(cls));
       return Type::SubObj(cls);
     }
@@ -1064,8 +1069,15 @@ Type typeFromTCImpl(const HPHP::TypeIntersectionConstraint& tcs,
     assertx(tc.isUnresolved());
     if (interface_supports_non_objects(tc.typeName())) return TInitCell;
 
-    auto const cls = Class::lookupKnown(tc.typeName(), ctx);
-    if (cls) {
+    // If the flag is supplied, we want to return TObj this should only be set
+    // true when the call is made from a return type deduction function we are
+    // mimicking the behaviour of TypeConstraint::asSystemlibType()
+    auto const unresolvedFallback = useObjectForUnresolved ? TObj : TCell;
+
+    if (auto const cls = Class::lookupKnown(tc.typeName(), ctx)) {
+      if (systemLibOnly && !isSystemLib(cls)) {
+        return unresolvedFallback;
+      }
       if (isEnum(cls)) {
         assertx(tc.isUnresolved());
         return atToType(cls->enumBaseTy().type());
@@ -1075,6 +1087,9 @@ Type typeFromTCImpl(const HPHP::TypeIntersectionConstraint& tcs,
 
     bool persistent = false;
     if (auto const alias = TypeAlias::lookup(tc.typeName(), &persistent)) {
+      if (systemLibOnly && !alias->unit()->isSystemLib()) {
+        return unresolvedFallback;
+      }
       if (persistent && !alias->invalid) {
         auto ty = TBottom;
         for (auto const& sub : eachTypeConstraintInUnion(alias->value)) {
@@ -1096,16 +1111,7 @@ Type typeFromTCImpl(const HPHP::TypeIntersectionConstraint& tcs,
       }
     }
 
-    // If the flag is supplied, we want to return TObj
-    // this should only be set true when the call is made from
-    // a return type deduction function
-    // we are mimicking the behaviour of TypeConstraint::asSystemlibType()
-    if (useObjectForUnresolved) {
-      return TObj;
-    }
-
-    // It could be an alias to mixed so we might have refs
-    return TCell;
+    return unresolvedFallback;
   };
 
   auto type = TCell;
@@ -1137,7 +1143,8 @@ Type typeFromTCImpl(const HPHP::TypeIntersectionConstraint& tcs,
 Type typeFromPropTC(const HPHP::TypeIntersectionConstraint& tcs,
                     const Class* propCls,
                     const Class* ctx,
-                    bool isSProp) {
+                    bool isSProp,
+                    bool systemLibOnly) {
   assertx(tcs.validForProp());
 
   auto const getThisType = [&] {
@@ -1147,7 +1154,7 @@ Type typeFromPropTC(const HPHP::TypeIntersectionConstraint& tcs,
       : Type::SubObj(propCls);
   };
 
-  return typeFromTCImpl(tcs, getThisType, ctx);
+  return typeFromTCImpl(tcs, getThisType, ctx, false, systemLibOnly);
 }
 
 

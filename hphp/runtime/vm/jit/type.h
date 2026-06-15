@@ -828,7 +828,8 @@ Type typeFromRAT(RepoAuthType ty, const Class* ctx);
 Type typeFromPropTC(const HPHP::TypeIntersectionConstraint& tc,
                     const Class* propCls,
                     const Class* ctx,
-                    bool isSProp);
+                    bool isSProp,
+                    bool systemLibOnly = false);
 Type typeFromFuncParam(const Func* func, uint32_t paramId);
 Type typeFromFuncReturn(const Func* func, bool pessimizeForBuiltin = false);
 Type typeFromFuncOut(const Func* func, uint32_t inOutIdx);

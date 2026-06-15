@@ -11,7 +11,10 @@
         [{ param_annotation = (shape(?'a' => Tv));
            param_type_hint =
            ((shape(?'a' => Tv)),
-            (Some ([4:21-38], (Hshape { nsi_allows_unknown_fields = false; nsi_field_map = [{ sfi_optional = true; sfi_hint = ([4:35-37], (Habstr "Tv")); sfi_name = (SFlit_str ([4:28-31], "a")) }] }))));
+            (Some ([4:21-38],
+                   (Hshape
+                      { nsi_allows_unknown_fields = false; nsi_field_map = [{ sfi_optional = true; sfi_hint = ([4:35-37], (Habstr "Tv")); sfi_name = (SFlit_str ([4:28-31], "a")) }];
+                        nsi_unknown_fields_type = None }))));
            param_pos = [4:39-41]; param_name = "$_"; param_info = Param_required; 
            param_readonly = None; param_splat = None; param_callconv = Pnormal; 
            param_named = None; param_user_attributes = []; param_visibility = None }
@@ -41,7 +44,8 @@
              (Some ([8:17-36],
                     (Hshape
                        { nsi_allows_unknown_fields = false;
-                         nsi_field_map = [{ sfi_optional = true; sfi_hint = ([8:31-35], (Hoption ([8:32-35], (Hprim Tint)))); sfi_name = (SFlit_str ([8:24-27], "a")) }] }))));
+                         nsi_field_map = [{ sfi_optional = true; sfi_hint = ([8:31-35], (Hoption ([8:32-35], (Hprim Tint)))); sfi_name = (SFlit_str ([8:24-27], "a")) }];
+                         nsi_unknown_fields_type = None }))));
             param_pos = [8:37-39]; param_name = "$s"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
             param_named = None; param_user_attributes = []; param_visibility = None }
@@ -80,7 +84,9 @@
             param_type_hint =
             ((dynamic),
              (Some ([4:21-38],
-                    (Hshape { nsi_allows_unknown_fields = false; nsi_field_map = [{ sfi_optional = true; sfi_hint = ([4:35-37], (Habstr "Tv")); sfi_name = (SFlit_str ([4:28-31], "a")) }] }))));
+                    (Hshape
+                       { nsi_allows_unknown_fields = false; nsi_field_map = [{ sfi_optional = true; sfi_hint = ([4:35-37], (Habstr "Tv")); sfi_name = (SFlit_str ([4:28-31], "a")) }];
+                         nsi_unknown_fields_type = None }))));
             param_pos = [4:39-41]; param_name = "$_"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
             param_named = None; param_user_attributes = []; param_visibility = None }
@@ -110,7 +116,8 @@
              (Some ([8:17-36],
                     (Hshape
                        { nsi_allows_unknown_fields = false;
-                         nsi_field_map = [{ sfi_optional = true; sfi_hint = ([8:31-35], (Hoption ([8:32-35], (Hprim Tint)))); sfi_name = (SFlit_str ([8:24-27], "a")) }] }))));
+                         nsi_field_map = [{ sfi_optional = true; sfi_hint = ([8:31-35], (Hoption ([8:32-35], (Hprim Tint)))); sfi_name = (SFlit_str ([8:24-27], "a")) }];
+                         nsi_unknown_fields_type = None }))));
             param_pos = [8:37-39]; param_name = "$s"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
             param_named = None; param_user_attributes = []; param_visibility = None }

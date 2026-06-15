@@ -559,8 +559,8 @@ where S: SmartConstructors<State = St>,
     fn make_field_initializer(&mut self, arg0 : Self::Output, arg1 : Self::Output, arg2 : Self::Output) -> Self::Output {
         compose(SyntaxKind::FieldInitializer, self.s.make_field_initializer(arg0.1, arg1.1, arg2.1))
     }
-    fn make_shape_type_specifier(&mut self, arg0 : Self::Output, arg1 : Self::Output, arg2 : Self::Output, arg3 : Self::Output, arg4 : Self::Output) -> Self::Output {
-        compose(SyntaxKind::ShapeTypeSpecifier, self.s.make_shape_type_specifier(arg0.1, arg1.1, arg2.1, arg3.1, arg4.1))
+    fn make_shape_type_specifier(&mut self, arg0 : Self::Output, arg1 : Self::Output, arg2 : Self::Output, arg3 : Self::Output, arg4 : Self::Output, arg5 : Self::Output) -> Self::Output {
+        compose(SyntaxKind::ShapeTypeSpecifier, self.s.make_shape_type_specifier(arg0.1, arg1.1, arg2.1, arg3.1, arg4.1, arg5.1))
     }
     fn make_shape_expression(&mut self, arg0 : Self::Output, arg1 : Self::Output, arg2 : Self::Output, arg3 : Self::Output, arg4 : Self::Output) -> Self::Output {
         compose(SyntaxKind::ShapeExpression, self.s.make_shape_expression(arg0.1, arg1.1, arg2.1, arg3.1, arg4.1))

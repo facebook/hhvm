@@ -1528,12 +1528,13 @@ ss.serialize_field("field_initializer_arrow", &self.with(arrow))?;
 ss.serialize_field("field_initializer_value", &self.with(value))?;
       ss.end()
 } 
-SyntaxVariant::ShapeTypeSpecifier (ShapeTypeSpecifierChildren{keyword,left_paren,fields,ellipsis,right_paren} ) => {
-      let mut ss = s.serialize_struct("", 6)?;
+SyntaxVariant::ShapeTypeSpecifier (ShapeTypeSpecifierChildren{keyword,left_paren,fields,ellipsis_type,ellipsis,right_paren} ) => {
+      let mut ss = s.serialize_struct("", 7)?;
       ss.serialize_field("kind", "shape_type_specifier")?;
       ss.serialize_field("shape_type_keyword", &self.with(keyword))?;
 ss.serialize_field("shape_type_left_paren", &self.with(left_paren))?;
 ss.serialize_field("shape_type_fields", &self.with(fields))?;
+ss.serialize_field("shape_type_ellipsis_type", &self.with(ellipsis_type))?;
 ss.serialize_field("shape_type_ellipsis", &self.with(ellipsis))?;
 ss.serialize_field("shape_type_right_paren", &self.with(right_paren))?;
       ss.end()

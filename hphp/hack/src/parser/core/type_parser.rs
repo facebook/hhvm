@@ -1190,6 +1190,7 @@ where
         // SPEC
         // shape-specifier:
         //   shape ( field-specifier-list-opt )
+        //   shape ( field-specifier-list , type-specifier ... )
         // field-specifier-list:
         //   field-specifiers  ,  ...
         //   field-specifiers  ,-opt
@@ -1197,25 +1198,174 @@ where
         //   field-specifier
         //   field-specifiers  ,  field-specifier
         //
-        // TODO: ERROR RECOVERY is not very sophisticated here.
+        // We use speculative (clone-based) parsing to distinguish a typed
+        // ellipsis (e.g. `string...`) from a field whose name happens to be
+        // a type keyword.  After each comma we clone the parser, attempt to
+        // parse a type specifier, and check whether `...` follows.  If so,
+        // we have a typed ellipsis; otherwise we parse a field specifier.
         let shape = self.fetch_token();
         let lparen = self.require_left_paren();
-        let is_closing_token =
-            |x: TokenKind| x == TokenKind::RightParen || x == TokenKind::DotDotDot;
-        let fields = self.parse_comma_list_opt_allow_trailing_predicate(
-            is_closing_token,
-            Errors::error1025,
-            |x: &mut Self| x.parse_field_specifier(),
-        );
-        let ellipsis = if self.peek_token_kind() == TokenKind::DotDotDot {
-            self.assert_token(TokenKind::DotDotDot)
+
+        let mut items: Vec<S::Output> = vec![];
+        let ellipsis_type;
+        let ellipsis;
+
+        // Empty shape: shape() or shape(...)
+        if self.peek_token_kind() == TokenKind::RightParen {
+            ellipsis_type = {
+                let pos = self.pos();
+                self.sc_mut().make_missing(pos)
+            };
+            ellipsis = {
+                let pos = self.pos();
+                self.sc_mut().make_missing(pos)
+            };
+        } else if self.peek_token_kind() == TokenKind::DotDotDot {
+            ellipsis_type = {
+                let pos = self.pos();
+                self.sc_mut().make_missing(pos)
+            };
+            ellipsis = self.assert_token(TokenKind::DotDotDot);
         } else {
-            let pos = self.pos();
-            self.sc_mut().make_missing(pos)
-        };
+            // Check if the very first element is a typed ellipsis (no fields at all)
+            // e.g. shape(string...)
+            if self.is_typed_ellipsis() {
+                ellipsis_type = self.parse_type_specifier(false, true);
+                ellipsis = self.assert_token(TokenKind::DotDotDot);
+            } else {
+                // Parse the first field specifier
+                let item = self.parse_field_specifier();
+
+                // Check for separator (comma)
+                if self.peek_token_kind() == TokenKind::Comma {
+                    let separator = self.fetch_token();
+                    let list_item = self.sc_mut().make_list_item(item, separator);
+                    items.push(list_item);
+                } else {
+                    // No comma after field
+                    let pos = self.pos();
+                    let separator = self.sc_mut().make_missing(pos);
+                    let list_item = self.sc_mut().make_list_item(item, separator);
+                    items.push(list_item);
+                    // Check for ... without preceding comma (lowerer
+                    // will report the missing-comma error)
+                    if self.peek_token_kind() == TokenKind::DotDotDot {
+                        ellipsis_type = {
+                            let pos = self.pos();
+                            self.sc_mut().make_missing(pos)
+                        };
+                        ellipsis = self.assert_token(TokenKind::DotDotDot);
+                    } else if self.is_typed_ellipsis() {
+                        ellipsis_type = self.parse_type_specifier(false, true);
+                        ellipsis = self.assert_token(TokenKind::DotDotDot);
+                    } else {
+                        ellipsis_type = {
+                            let pos = self.pos();
+                            self.sc_mut().make_missing(pos)
+                        };
+                        ellipsis = {
+                            let pos = self.pos();
+                            self.sc_mut().make_missing(pos)
+                        };
+                    }
+                    let fields = self.sc_mut().make_list(items, 0);
+                    let rparen = self.require_right_paren();
+                    return self.sc_mut().make_shape_type_specifier(
+                        shape,
+                        lparen,
+                        fields,
+                        ellipsis_type,
+                        ellipsis,
+                        rparen,
+                    );
+                }
+
+                // Continue parsing more fields or typed ellipsis
+                loop {
+                    let kind = self.peek_token_kind();
+                    if kind == TokenKind::RightParen || kind == TokenKind::EndOfFile {
+                        ellipsis_type = {
+                            let pos = self.pos();
+                            self.sc_mut().make_missing(pos)
+                        };
+                        ellipsis = {
+                            let pos = self.pos();
+                            self.sc_mut().make_missing(pos)
+                        };
+                        break;
+                    }
+                    if kind == TokenKind::DotDotDot {
+                        ellipsis_type = {
+                            let pos = self.pos();
+                            self.sc_mut().make_missing(pos)
+                        };
+                        ellipsis = self.assert_token(TokenKind::DotDotDot);
+                        break;
+                    }
+                    // Check if this is a typed ellipsis
+                    if self.is_typed_ellipsis() {
+                        ellipsis_type = self.parse_type_specifier(false, true);
+                        ellipsis = self.assert_token(TokenKind::DotDotDot);
+                        break;
+                    }
+                    // Otherwise, parse as field specifier
+                    let item = self.parse_field_specifier();
+                    if self.peek_token_kind() == TokenKind::Comma {
+                        let separator = self.fetch_token();
+                        let list_item = self.sc_mut().make_list_item(item, separator);
+                        items.push(list_item);
+                    } else {
+                        let pos = self.pos();
+                        let separator = self.sc_mut().make_missing(pos);
+                        let list_item = self.sc_mut().make_list_item(item, separator);
+                        items.push(list_item);
+                        // Check for ... without preceding comma (lowerer
+                        // will report the missing-comma error)
+                        if self.peek_token_kind() == TokenKind::DotDotDot {
+                            ellipsis_type = {
+                                let pos = self.pos();
+                                self.sc_mut().make_missing(pos)
+                            };
+                            ellipsis = self.assert_token(TokenKind::DotDotDot);
+                        } else if self.is_typed_ellipsis() {
+                            ellipsis_type = self.parse_type_specifier(false, true);
+                            ellipsis = self.assert_token(TokenKind::DotDotDot);
+                        } else {
+                            ellipsis_type = {
+                                let pos = self.pos();
+                                self.sc_mut().make_missing(pos)
+                            };
+                            ellipsis = {
+                                let pos = self.pos();
+                                self.sc_mut().make_missing(pos)
+                            };
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+
+        let fields = self.sc_mut().make_list(items, 0);
         let rparen = self.require_right_paren();
-        self.sc_mut()
-            .make_shape_type_specifier(shape, lparen, fields, ellipsis, rparen)
+        self.sc_mut().make_shape_type_specifier(
+            shape,
+            lparen,
+            fields,
+            ellipsis_type,
+            ellipsis,
+            rparen,
+        )
+    }
+
+    /// Speculatively check whether the current position starts a typed ellipsis
+    /// (i.e. `type-specifier ...`).  We clone the parser, try to parse a type
+    /// specifier, and check if `...` immediately follows.  The clone is
+    /// discarded so there are no side effects on failure.
+    fn is_typed_ellipsis(&self) -> bool {
+        let mut clone = self.clone();
+        let result = clone.parse_type_specifier_opt(false, true);
+        !result.is_missing() && clone.peek_token_kind() == TokenKind::DotDotDot
     }
 
     pub(crate) fn parse_type_constraint_opt(&mut self, allow_super: bool) -> Option<S::Output> {

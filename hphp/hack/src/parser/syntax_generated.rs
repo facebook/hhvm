@@ -1836,11 +1836,12 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_shape_type_specifier(_: &C, shape_type_keyword: Self, shape_type_left_paren: Self, shape_type_fields: Self, shape_type_ellipsis: Self, shape_type_right_paren: Self) -> Self {
+    fn make_shape_type_specifier(_: &C, shape_type_keyword: Self, shape_type_left_paren: Self, shape_type_fields: Self, shape_type_ellipsis_type: Self, shape_type_ellipsis: Self, shape_type_right_paren: Self) -> Self {
         let syntax = SyntaxVariant::ShapeTypeSpecifier(Box::new(ShapeTypeSpecifierChildren {
             shape_type_keyword,
             shape_type_left_paren,
             shape_type_fields,
+            shape_type_ellipsis_type,
             shape_type_ellipsis,
             shape_type_right_paren,
         }));
@@ -3373,10 +3374,11 @@ where
                 acc
             },
             SyntaxVariant::ShapeTypeSpecifier(x) => {
-                let ShapeTypeSpecifierChildren { shape_type_keyword, shape_type_left_paren, shape_type_fields, shape_type_ellipsis, shape_type_right_paren } = *x;
+                let ShapeTypeSpecifierChildren { shape_type_keyword, shape_type_left_paren, shape_type_fields, shape_type_ellipsis_type, shape_type_ellipsis, shape_type_right_paren } = *x;
                 let acc = f(shape_type_keyword, acc);
                 let acc = f(shape_type_left_paren, acc);
                 let acc = f(shape_type_fields, acc);
+                let acc = f(shape_type_ellipsis_type, acc);
                 let acc = f(shape_type_ellipsis, acc);
                 let acc = f(shape_type_right_paren, acc);
                 acc
@@ -4863,9 +4865,10 @@ where
                  field_initializer_name: ts.pop().unwrap(),
                  
              })),
-             (SyntaxKind::ShapeTypeSpecifier, 5) => SyntaxVariant::ShapeTypeSpecifier(Box::new(ShapeTypeSpecifierChildren {
+             (SyntaxKind::ShapeTypeSpecifier, 6) => SyntaxVariant::ShapeTypeSpecifier(Box::new(ShapeTypeSpecifierChildren {
                  shape_type_right_paren: ts.pop().unwrap(),
                  shape_type_ellipsis: ts.pop().unwrap(),
+                 shape_type_ellipsis_type: ts.pop().unwrap(),
                  shape_type_fields: ts.pop().unwrap(),
                  shape_type_left_paren: ts.pop().unwrap(),
                  shape_type_keyword: ts.pop().unwrap(),
@@ -5148,7 +5151,7 @@ where
             SyntaxVariant::ClassPtrTypeSpecifier(x) => unsafe { std::slice::from_raw_parts(&x.class_ptr_keyword, 5) },
             SyntaxVariant::FieldSpecifier(x) => unsafe { std::slice::from_raw_parts(&x.field_question, 4) },
             SyntaxVariant::FieldInitializer(x) => unsafe { std::slice::from_raw_parts(&x.field_initializer_name, 3) },
-            SyntaxVariant::ShapeTypeSpecifier(x) => unsafe { std::slice::from_raw_parts(&x.shape_type_keyword, 5) },
+            SyntaxVariant::ShapeTypeSpecifier(x) => unsafe { std::slice::from_raw_parts(&x.shape_type_keyword, 6) },
             SyntaxVariant::ShapeExpression(x) => unsafe { std::slice::from_raw_parts(&x.shape_expression_keyword, 5) },
             SyntaxVariant::TupleExpression(x) => unsafe { std::slice::from_raw_parts(&x.tuple_expression_keyword, 5) },
             SyntaxVariant::GenericTypeSpecifier(x) => unsafe { std::slice::from_raw_parts(&x.generic_class_type, 2) },
@@ -5337,7 +5340,7 @@ where
             SyntaxVariant::ClassPtrTypeSpecifier(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.class_ptr_keyword, 5) },
             SyntaxVariant::FieldSpecifier(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.field_question, 4) },
             SyntaxVariant::FieldInitializer(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.field_initializer_name, 3) },
-            SyntaxVariant::ShapeTypeSpecifier(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.shape_type_keyword, 5) },
+            SyntaxVariant::ShapeTypeSpecifier(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.shape_type_keyword, 6) },
             SyntaxVariant::ShapeExpression(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.shape_expression_keyword, 5) },
             SyntaxVariant::TupleExpression(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.tuple_expression_keyword, 5) },
             SyntaxVariant::GenericTypeSpecifier(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.generic_class_type, 2) },
@@ -6851,6 +6854,7 @@ pub struct ShapeTypeSpecifierChildren<T, V> {
     pub shape_type_keyword: Syntax<T, V>,
     pub shape_type_left_paren: Syntax<T, V>,
     pub shape_type_fields: Syntax<T, V>,
+    pub shape_type_ellipsis_type: Syntax<T, V>,
     pub shape_type_ellipsis: Syntax<T, V>,
     pub shape_type_right_paren: Syntax<T, V>,
 }
@@ -8856,12 +8860,13 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 })
             },
             ShapeTypeSpecifier(x) => {
-                get_index(5).and_then(|index| { match index {
+                get_index(6).and_then(|index| { match index {
                         0 => Some(&x.shape_type_keyword),
                     1 => Some(&x.shape_type_left_paren),
                     2 => Some(&x.shape_type_fields),
-                    3 => Some(&x.shape_type_ellipsis),
-                    4 => Some(&x.shape_type_right_paren),
+                    3 => Some(&x.shape_type_ellipsis_type),
+                    4 => Some(&x.shape_type_ellipsis),
+                    5 => Some(&x.shape_type_right_paren),
                         _ => None,
                     }
                 })

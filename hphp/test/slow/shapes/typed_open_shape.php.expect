@@ -1,0 +1,45 @@
+=== Parameter and return hints ===
+int(42)
+int(1)
+string(5) "hello"
+
+=== Only typed unknown ===
+dict(2) {
+  ["x"]=>
+  string(5) "hello"
+  ["y"]=>
+  string(5) "world"
+}
+
+=== Various unknown field types ===
+string(4) "test"
+int(1)
+int(5)
+dict(1) {
+  ["k"]=>
+  dict(1) {
+    ["a"]=>
+    int(1)
+  }
+}
+
+=== Multiple named fields ===
+int(10)
+bool(true)
+
+=== Type alias ===
+string(5) "Alice"
+
+=== Class property and method ===
+int(1)
+string(4) "test"
+
+=== Nested in generics ===
+int(1)
+int(2)
+string(5) "first"
+int(10)
+string(6) "second"
+int(20)
+
+Done.

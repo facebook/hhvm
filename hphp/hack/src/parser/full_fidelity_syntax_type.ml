@@ -1154,6 +1154,7 @@ struct
         shape_type_keyword: t;
         shape_type_left_paren: t;
         shape_type_fields: t;
+        shape_type_ellipsis_type: t;
         shape_type_ellipsis: t;
         shape_type_right_paren: t;
       }

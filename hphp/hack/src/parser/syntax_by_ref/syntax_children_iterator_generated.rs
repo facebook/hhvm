@@ -1692,12 +1692,13 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 })
             },
             ShapeTypeSpecifier(x) => {
-                get_index(5).and_then(|index| { match index {
+                get_index(6).and_then(|index| { match index {
                         0 => Some(&x.keyword),
                     1 => Some(&x.left_paren),
                     2 => Some(&x.fields),
-                    3 => Some(&x.ellipsis),
-                    4 => Some(&x.right_paren),
+                    3 => Some(&x.ellipsis_type),
+                    4 => Some(&x.ellipsis),
+                    5 => Some(&x.right_paren),
                         _ => None,
                     }
                 })

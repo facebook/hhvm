@@ -169,23 +169,39 @@ let rec pp_hint ~is_ctx ppf (pos, hint_) =
       @@ pp_hint ~is_ctx:false)
       ppf
       ((all_params, hf_ctxs), hf_return_ty)
-  | Aast.(Hshape { nsi_allows_unknown_fields; nsi_field_map = [] }) ->
+  | Aast.(
+      Hshape
+        {
+          nsi_allows_unknown_fields;
+          nsi_field_map = [];
+          nsi_unknown_fields_type;
+        }) ->
+    let pp_ellipsis ppf () =
+      match nsi_unknown_fields_type with
+      | Some h ->
+        pp_hint ~is_ctx:false ppf h;
+        Fmt.string ppf "..."
+      | None -> if nsi_allows_unknown_fields then Fmt.string ppf "..."
+    in
+    Fmt.(prefix (const string "shape") @@ parens @@ pp_ellipsis) ppf ()
+  | Aast.(
+      Hshape
+        { nsi_allows_unknown_fields; nsi_field_map; nsi_unknown_fields_type })
+    ->
+    let pp_ellipsis ppf () =
+      match nsi_unknown_fields_type with
+      | Some h ->
+        Fmt.string ppf ", ";
+        pp_hint ~is_ctx:false ppf h;
+        Fmt.string ppf "..."
+      | None -> if nsi_allows_unknown_fields then Fmt.string ppf ", ..."
+    in
     Fmt.(
       prefix (const string "shape")
       @@ parens
-      @@ cond ~pp_t:(const string "...") ~pp_f:nop)
+      @@ pair ~sep:nop (list ~sep:comma pp_shape_field) pp_ellipsis)
       ppf
-      nsi_allows_unknown_fields
-  | Aast.(Hshape { nsi_allows_unknown_fields; nsi_field_map }) ->
-    Fmt.(
-      prefix (const string "shape")
-      @@ parens
-      @@ pair
-           ~sep:nop
-           (list ~sep:comma pp_shape_field)
-           (cond ~pp_t:(const string ", ...") ~pp_f:nop))
-      ppf
-      (nsi_field_map, nsi_allows_unknown_fields)
+      (nsi_field_map, ())
 
 and pp_shape_field ppf Aast.{ sfi_optional; sfi_name; sfi_hint } =
   Fmt.(

@@ -648,11 +648,14 @@ let rec hint : Env.t -> variance -> Aast_defs.hint -> unit =
         Option.iter tup_variadic ~f:(hint env variance)
       | Hsplat tup_splat -> hint env variance tup_splat
     end
-  | Hshape { nsi_allows_unknown_fields = _; nsi_field_map } ->
+  | Hshape
+      { nsi_allows_unknown_fields = _; nsi_field_map; nsi_unknown_fields_type }
+    ->
     List.iter
       nsi_field_map
       ~f:(fun { sfi_hint; sfi_optional = _; sfi_name = _ } ->
-        hint env variance sfi_hint)
+        hint env variance sfi_hint);
+    Option.iter nsi_unknown_fields_type ~f:(hint env variance)
   | Hrefinement (h, members) ->
     List.iter members ~f:(refinement_member env variance);
     hint env variance h

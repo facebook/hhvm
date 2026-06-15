@@ -161,6 +161,23 @@ fn shape_info_to_typed_value(
     Ok(TypedValue::dict(info))
 }
 
+fn is_mixed_hint(tparams: &[&str], Hint(_, h): &Hint) -> bool {
+    match h.as_ref() {
+        Hint_::Hmixed => true,
+        Hint_::Happly(ast_defs::Id(_, name), hints) => match &hints[..] {
+            [] => {
+                let mangled = hhbc::ClassName::from_ast_name_and_mangle(name).into_string();
+                ts_kind(tparams, mangled.as_str()) == TypeStructureKind::T_mixed
+            }
+            [inner] if name == naming_special_names_rust::classes::SUPPORT_DYN => {
+                is_mixed_hint(tparams, inner)
+            }
+            _ => false,
+        },
+        _ => false,
+    }
+}
+
 fn shape_allows_unknown_fields(si: &NastShapeInfo) -> Option<DictEntry> {
     if si.allows_unknown_fields {
         Some(encode_entry(
@@ -437,6 +454,20 @@ fn hint_to_type_constant_list(
                 "fields",
                 shape_info_to_typed_value(opts, tparams, targ_map, type_refinement_in_hint, si)?,
             ));
+            if let Some(ty) = &si.unknown_fields_type {
+                if !is_mixed_hint(tparams, ty) {
+                    r.push(encode_entry(
+                        "variadic_type",
+                        hint_to_type_constant(
+                            opts,
+                            tparams,
+                            targ_map,
+                            ty,
+                            type_refinement_in_hint,
+                        )?,
+                    ));
+                }
+            }
             r
         }
         Hint_::Haccess(Hint(_, h), ids) => match h.as_happly() {

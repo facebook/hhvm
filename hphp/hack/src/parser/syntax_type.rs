@@ -182,7 +182,7 @@ pub trait SyntaxType<C>: SyntaxTypeBase<C>
     fn make_class_ptr_type_specifier(ctx: &C, class_ptr_keyword: Self, class_ptr_left_angle: Self, class_ptr_type: Self, class_ptr_trailing_comma: Self, class_ptr_right_angle: Self) -> Self;
     fn make_field_specifier(ctx: &C, field_question: Self, field_name: Self, field_arrow: Self, field_type: Self) -> Self;
     fn make_field_initializer(ctx: &C, field_initializer_name: Self, field_initializer_arrow: Self, field_initializer_value: Self) -> Self;
-    fn make_shape_type_specifier(ctx: &C, shape_type_keyword: Self, shape_type_left_paren: Self, shape_type_fields: Self, shape_type_ellipsis: Self, shape_type_right_paren: Self) -> Self;
+    fn make_shape_type_specifier(ctx: &C, shape_type_keyword: Self, shape_type_left_paren: Self, shape_type_fields: Self, shape_type_ellipsis_type: Self, shape_type_ellipsis: Self, shape_type_right_paren: Self) -> Self;
     fn make_shape_expression(ctx: &C, shape_expression_keyword: Self, shape_expression_left_paren: Self, shape_expression_fields: Self, shape_expression_ellipsis: Self, shape_expression_right_paren: Self) -> Self;
     fn make_tuple_expression(ctx: &C, tuple_expression_keyword: Self, tuple_expression_left_paren: Self, tuple_expression_items: Self, tuple_expression_ellipsis: Self, tuple_expression_right_paren: Self) -> Self;
     fn make_generic_type_specifier(ctx: &C, generic_class_type: Self, generic_argument_list: Self) -> Self;

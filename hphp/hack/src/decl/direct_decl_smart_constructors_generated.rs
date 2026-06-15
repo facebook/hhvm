@@ -714,8 +714,8 @@ impl<'o, 't> SmartConstructors for DirectDeclSmartConstructors<'o, 't> {
         <Self as FlattenSmartConstructors>::make_field_initializer(self, name, arrow, value)
     }
 
-    fn make_shape_type_specifier(&mut self, keyword: Self::Output, left_paren: Self::Output, fields: Self::Output, ellipsis: Self::Output, right_paren: Self::Output) -> Self::Output {
-        <Self as FlattenSmartConstructors>::make_shape_type_specifier(self, keyword, left_paren, fields, ellipsis, right_paren)
+    fn make_shape_type_specifier(&mut self, keyword: Self::Output, left_paren: Self::Output, fields: Self::Output, ellipsis_type: Self::Output, ellipsis: Self::Output, right_paren: Self::Output) -> Self::Output {
+        <Self as FlattenSmartConstructors>::make_shape_type_specifier(self, keyword, left_paren, fields, ellipsis_type, ellipsis, right_paren)
     }
 
     fn make_shape_expression(&mut self, keyword: Self::Output, left_paren: Self::Output, fields: Self::Output, ellipsis: Self::Output, right_paren: Self::Output) -> Self::Output {

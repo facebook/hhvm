@@ -995,7 +995,7 @@ fn p_hint_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Hint_> {
             }
         }
         ShapeTypeSpecifier(c) => {
-            let allows_unknown_fields = !c.ellipsis.is_missing();
+            let allows_unknown_fields = !c.ellipsis.is_missing() || !c.ellipsis_type.is_missing();
             /* if last element lacks a separator and ellipsis is present, error */
             if allows_unknown_fields {
                 if let SyntaxList(items) = &c.fields.children {
@@ -1032,9 +1032,16 @@ fn p_hint_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Hint_> {
                 }
             }
 
+            let unknown_fields_type = if !c.ellipsis_type.is_missing() {
+                Some(p_hint(&c.ellipsis_type, env)?)
+            } else {
+                None
+            };
+
             Ok(Hshape(ast::NastShapeInfo {
                 allows_unknown_fields,
                 field_map,
+                unknown_fields_type,
             }))
         }
         TupleTypeSpecifier(c) => {

@@ -1537,6 +1537,7 @@ pub struct ShapeTypeSpecifierChildren<'a, T, V> {
     pub keyword: Syntax<'a, T, V>,
     pub left_paren: Syntax<'a, T, V>,
     pub fields: Syntax<'a, T, V>,
+    pub ellipsis_type: Syntax<'a, T, V>,
     pub ellipsis: Syntax<'a, T, V>,
     pub right_paren: Syntax<'a, T, V>,
 }

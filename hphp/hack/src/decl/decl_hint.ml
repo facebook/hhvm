@@ -341,15 +341,15 @@ and hint_ p env = function
   | Hintersection hl ->
     let tyl = List.map hl ~f:(hint env) in
     Tintersection tyl
-  | Hshape { nsi_allows_unknown_fields; nsi_field_map } ->
+  | Hshape { nsi_allows_unknown_fields; nsi_field_map; nsi_unknown_fields_type }
+    ->
     let shape_kind =
-      hint
-        env
-        ( p,
-          if nsi_allows_unknown_fields then
-            Hmixed
-          else
-            Hnothing )
+      if nsi_allows_unknown_fields then
+        match nsi_unknown_fields_type with
+        | Some type_hint -> hint env type_hint
+        | None -> hint env (p, Hmixed)
+      else
+        hint env (p, Hnothing)
     in
     let fdm =
       List.fold_left

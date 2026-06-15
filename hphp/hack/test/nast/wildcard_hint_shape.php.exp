@@ -22,7 +22,10 @@
                 (As
                    { expr = ((), [4:6-8], (Lvar ([4:6-8], $x)));
                      hint =
-                     ([4:12-27], (Hshape { nsi_allows_unknown_fields = false; nsi_field_map = [{ sfi_optional = false; sfi_hint = ([4:25-26], Hwildcard); sfi_name = (SFlit_str ([4:18-21], "y")) }] }));
+                     ([4:12-27],
+                      (Hshape
+                         { nsi_allows_unknown_fields = false; nsi_field_map = [{ sfi_optional = false; sfi_hint = ([4:25-26], Hwildcard); sfi_name = (SFlit_str ([4:18-21], "y")) }];
+                           nsi_unknown_fields_type = None }));
                      is_nullable = false; enforce_deep = true }))));
             ([5:6-40],
              (Expr
@@ -35,8 +38,8 @@
                           { nsi_allows_unknown_fields = false;
                             nsi_field_map =
                             [{ sfi_optional = false; sfi_hint = ([5:25-28], (Hprim Tint)); sfi_name = (SFlit_str ([5:18-21], "y")) };
-                              { sfi_optional = false; sfi_hint = ([5:37-38], Hwildcard); sfi_name = (SFlit_str ([5:30-33], "z")) }]
-                            }));
+                              { sfi_optional = false; sfi_hint = ([5:37-38], Hwildcard); sfi_name = (SFlit_str ([5:30-33], "z")) }];
+                            nsi_unknown_fields_type = None }));
                       is_nullable = false; enforce_deep = true }))));
             ([6:6-43],
              (Expr
@@ -49,8 +52,8 @@
                           { nsi_allows_unknown_fields = false;
                             nsi_field_map =
                             [{ sfi_optional = false; sfi_hint = ([6:25-26], Hwildcard); sfi_name = (SFlit_str ([6:18-21], "y")) };
-                              { sfi_optional = false; sfi_hint = ([6:35-41], (Happly (([6:35-41], "\\HH\\string"), []))); sfi_name = (SFlit_str ([6:28-31], "z")) }]
-                            }));
+                              { sfi_optional = false; sfi_hint = ([6:35-41], (Happly (([6:35-41], "\\HH\\string"), []))); sfi_name = (SFlit_str ([6:28-31], "z")) }];
+                            nsi_unknown_fields_type = None }));
                       is_nullable = false; enforce_deep = true }))));
             ([7:6-38],
              (Expr
@@ -63,8 +66,8 @@
                           { nsi_allows_unknown_fields = false;
                             nsi_field_map =
                             [{ sfi_optional = false; sfi_hint = ([7:25-26], Hwildcard); sfi_name = (SFlit_str ([7:18-21], "y")) };
-                              { sfi_optional = false; sfi_hint = ([7:35-36], Hwildcard); sfi_name = (SFlit_str ([7:28-31], "z")) }]
-                            }));
+                              { sfi_optional = false; sfi_hint = ([7:35-36], Hwildcard); sfi_name = (SFlit_str ([7:28-31], "z")) }];
+                            nsi_unknown_fields_type = None }));
                       is_nullable = false; enforce_deep = true }))));
             ([8:6-42],
              (Expr
@@ -79,10 +82,13 @@
                             [{ sfi_optional = false;
                                sfi_hint =
                                ([8:25-40],
-                                (Hshape { nsi_allows_unknown_fields = false; nsi_field_map = [{ sfi_optional = false; sfi_hint = ([8:38-39], Hwildcard); sfi_name = (SFlit_str ([8:31-34], "z")) }] }));
+                                (Hshape
+                                   { nsi_allows_unknown_fields = false; 
+                                     nsi_field_map = [{ sfi_optional = false; sfi_hint = ([8:38-39], Hwildcard); sfi_name = (SFlit_str ([8:31-34], "z")) }]; 
+                                     nsi_unknown_fields_type = None }));
                                sfi_name = (SFlit_str ([8:18-21], "y")) }
-                              ]
-                            }));
+                              ];
+                            nsi_unknown_fields_type = None }));
                       is_nullable = false; enforce_deep = true }))));
             ([9:6-52],
              (Expr
@@ -98,10 +104,13 @@
                               { sfi_optional = false;
                                 sfi_hint =
                                 ([9:35-50],
-                                 (Hshape { nsi_allows_unknown_fields = false; nsi_field_map = [{ sfi_optional = false; sfi_hint = ([9:48-49], Hwildcard); sfi_name = (SFlit_str ([9:41-44], "z")) }] }));
+                                 (Hshape
+                                    { nsi_allows_unknown_fields = false; 
+                                      nsi_field_map = [{ sfi_optional = false; sfi_hint = ([9:48-49], Hwildcard); sfi_name = (SFlit_str ([9:41-44], "z")) }]; 
+                                      nsi_unknown_fields_type = None }));
                                 sfi_name = (SFlit_str ([9:28-31], "w")) }
-                              ]
-                            }));
+                              ];
+                            nsi_unknown_fields_type = None }));
                       is_nullable = false; enforce_deep = true }))))
             ]
           };
@@ -135,7 +144,8 @@
                      (Hshape
                         { nsi_allows_unknown_fields = false;
                           nsi_field_map =
-                          [{ sfi_optional = false; sfi_hint = ([13:25-31], (Happly (([13:25-28], "\\HH\\vec"), [([13:29-30], Hwildcard)]))); sfi_name = (SFlit_str ([13:18-21], "x")) }] }))
+                          [{ sfi_optional = false; sfi_hint = ([13:25-31], (Happly (([13:25-28], "\\HH\\vec"), [([13:29-30], Hwildcard)]))); sfi_name = (SFlit_str ([13:18-21], "x")) }];
+                          nsi_unknown_fields_type = None }))
                     )))));
              ([14:6-47],
               (Expr
@@ -151,10 +161,11 @@
                                (Hshape
                                   { nsi_allows_unknown_fields = false;
                                     nsi_field_map =
-                                    [{ sfi_optional = false; sfi_hint = ([14:38-44], (Happly (([14:38-41], "\\HH\\vec"), [([14:42-43], Hwildcard)]))); sfi_name = (SFlit_str ([14:31-34], "y")) }] }));
+                                    [{ sfi_optional = false; sfi_hint = ([14:38-44], (Happly (([14:38-41], "\\HH\\vec"), [([14:42-43], Hwildcard)]))); sfi_name = (SFlit_str ([14:31-34], "y")) }];
+                                    nsi_unknown_fields_type = None }));
                               sfi_name = (SFlit_str ([14:18-21], "x")) }
-                             ]
-                           }))
+                             ];
+                           nsi_unknown_fields_type = None }))
                      )))));
              ([15:6-37],
               (Expr
@@ -166,8 +177,8 @@
                            nsi_field_map =
                            [{ sfi_optional = false; sfi_hint = ([15:25-35], (Happly (([15:25-29], "\\HH\\dict"), [([15:30-31], Hwildcard); ([15:33-34], Hwildcard)])));
                               sfi_name = (SFlit_str ([15:18-21], "x")) }
-                             ]
-                           }))
+                             ];
+                           nsi_unknown_fields_type = None }))
                      )))));
              ([16:6-49],
               (Expr
@@ -180,8 +191,8 @@
                            [{ sfi_optional = false; sfi_hint = ([16:25-28], (Hprim Tint)); sfi_name = (SFlit_str ([16:18-21], "x")) };
                              { sfi_optional = false; sfi_hint = ([16:37-47], (Happly (([16:37-41], "\\HH\\dict"), [([16:42-43], Hwildcard); ([16:45-46], Hwildcard)])));
                                sfi_name = (SFlit_str ([16:30-33], "y")) }
-                             ]
-                           }))
+                             ];
+                           nsi_unknown_fields_type = None }))
                      )))));
              ([17:6-51],
               (Expr
@@ -199,11 +210,11 @@
                                     nsi_field_map =
                                     [{ sfi_optional = false; sfi_hint = ([17:38-48], (Happly (([17:38-42], "\\HH\\dict"), [([17:43-44], Hwildcard); ([17:46-47], Hwildcard)])));
                                        sfi_name = (SFlit_str ([17:31-34], "y")) }
-                                      ]
-                                    }));
+                                      ];
+                                    nsi_unknown_fields_type = None }));
                               sfi_name = (SFlit_str ([17:18-21], "x")) }
-                             ]
-                           }))
+                             ];
+                           nsi_unknown_fields_type = None }))
                      )))));
              ([18:6-33],
               (Expr
@@ -215,7 +226,8 @@
                         (Hshape
                            { nsi_allows_unknown_fields = false;
                              nsi_field_map =
-                             [{ sfi_optional = false; sfi_hint = ([18:25-31], (Happly (([18:25-28], "\\HH\\vec"), [([18:29-30], Hwildcard)]))); sfi_name = (SFlit_str ([18:18-21], "x")) }] }));
+                             [{ sfi_optional = false; sfi_hint = ([18:25-31], (Happly (([18:25-28], "\\HH\\vec"), [([18:29-30], Hwildcard)]))); sfi_name = (SFlit_str ([18:18-21], "x")) }];
+                             nsi_unknown_fields_type = None }));
                        is_nullable = false; enforce_deep = true }))));
              ([19:6-47],
               (Expr
@@ -233,10 +245,11 @@
                                  (Hshape
                                     { nsi_allows_unknown_fields = false;
                                       nsi_field_map =
-                                      [{ sfi_optional = false; sfi_hint = ([19:38-44], (Happly (([19:38-41], "\\HH\\vec"), [([19:42-43], Hwildcard)]))); sfi_name = (SFlit_str ([19:31-34], "y")) }] }));
+                                      [{ sfi_optional = false; sfi_hint = ([19:38-44], (Happly (([19:38-41], "\\HH\\vec"), [([19:42-43], Hwildcard)]))); sfi_name = (SFlit_str ([19:31-34], "y")) }];
+                                      nsi_unknown_fields_type = None }));
                                 sfi_name = (SFlit_str ([19:18-21], "x")) }
-                               ]
-                             }));
+                               ];
+                             nsi_unknown_fields_type = None }));
                        is_nullable = false; enforce_deep = true }))));
              ([20:6-37],
               (Expr
@@ -250,8 +263,8 @@
                              nsi_field_map =
                              [{ sfi_optional = false; sfi_hint = ([20:25-35], (Happly (([20:25-29], "\\HH\\dict"), [([20:30-31], Hwildcard); ([20:33-34], Hwildcard)])));
                                 sfi_name = (SFlit_str ([20:18-21], "x")) }
-                               ]
-                             }));
+                               ];
+                             nsi_unknown_fields_type = None }));
                        is_nullable = false; enforce_deep = true }))));
              ([21:6-49],
               (Expr
@@ -266,8 +279,8 @@
                              [{ sfi_optional = false; sfi_hint = ([21:25-28], (Hprim Tint)); sfi_name = (SFlit_str ([21:18-21], "x")) };
                                { sfi_optional = false; sfi_hint = ([21:37-47], (Happly (([21:37-41], "\\HH\\dict"), [([21:42-43], Hwildcard); ([21:45-46], Hwildcard)])));
                                  sfi_name = (SFlit_str ([21:30-33], "y")) }
-                               ]
-                             }));
+                               ];
+                             nsi_unknown_fields_type = None }));
                        is_nullable = false; enforce_deep = true }))));
              ([22:6-51],
               (Expr
@@ -287,11 +300,11 @@
                                       nsi_field_map =
                                       [{ sfi_optional = false; sfi_hint = ([22:38-48], (Happly (([22:38-42], "\\HH\\dict"), [([22:43-44], Hwildcard); ([22:46-47], Hwildcard)])));
                                          sfi_name = (SFlit_str ([22:31-34], "y")) }
-                                        ]
-                                      }));
+                                        ];
+                                      nsi_unknown_fields_type = None }));
                                 sfi_name = (SFlit_str ([22:18-21], "x")) }
-                               ]
-                             }));
+                               ];
+                             nsi_unknown_fields_type = None }));
                        is_nullable = false; enforce_deep = true }))))
              ]
            };

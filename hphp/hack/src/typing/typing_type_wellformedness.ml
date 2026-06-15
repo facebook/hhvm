@@ -268,7 +268,9 @@ and hint_ ~in_signature env p h_ =
           | Rtype (_, TRloose { tr_lower = hl; tr_upper = hr }) -> hl @ hr @ rl)
     in
     hints env (hr :: refinement_hints)
-  | Hshape { nsi_allows_unknown_fields = _; nsi_field_map } ->
+  | Hshape
+      { nsi_allows_unknown_fields = _; nsi_field_map; nsi_unknown_fields_type }
+    ->
     let (tenv, errors) =
       let get_name sfi = sfi.sfi_name in
       Typing_shapes.check_shape_keys_validity
@@ -282,7 +284,12 @@ and hint_ ~in_signature env p h_ =
       in
       List.concat_map ~f:compute_hint_for_shape_field_info nsi_field_map
     in
-    errors @ rec_errors
+    let unknown_fields_errors =
+      match nsi_unknown_fields_type with
+      | Some h -> hint env h
+      | None -> []
+    in
+    errors @ rec_errors @ unknown_fields_errors
   | Hfun_context _ ->
     (* TODO(coeffects): check if arg is a function type in the locals? *)
     []

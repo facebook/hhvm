@@ -7,10 +7,11 @@
       fd_fun =
       { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = (); 
         f_readonly_ret = None; f_tparams = [];
-        f_ret = ((), (Some ([3:42-52], (Happly (([3:42-52], "\\HH\\supportdyn"), [([3:42-52], (Hshape { nsi_allows_unknown_fields = true; nsi_field_map = [] }))])))));
+        f_ret = ((), (Some ([3:42-52], (Happly (([3:42-52], "\\HH\\supportdyn"), [([3:42-52], (Hshape { nsi_allows_unknown_fields = true; nsi_field_map = []; nsi_unknown_fields_type = None }))])))));
         f_params =
         [{ param_annotation = ();
-           param_type_hint = ((), (Some ([3:26-36], (Happly (([3:26-36], "\\HH\\supportdyn"), [([3:26-36], (Hshape { nsi_allows_unknown_fields = true; nsi_field_map = [] }))])))));
+           param_type_hint =
+           ((), (Some ([3:26-36], (Happly (([3:26-36], "\\HH\\supportdyn"), [([3:26-36], (Hshape { nsi_allows_unknown_fields = true; nsi_field_map = []; nsi_unknown_fields_type = None }))])))));
            param_pos = [3:37-39]; param_name = "$x"; param_info = Param_required; 
            param_readonly = None; param_splat = None; param_callconv = Pnormal; 
            param_named = None; param_user_attributes = []; param_visibility = None }

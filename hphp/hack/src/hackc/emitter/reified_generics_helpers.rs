@@ -250,6 +250,7 @@ pub(crate) fn remove_erased_generics<'a>(env: &Env<'a>, h: aast::Hint) -> aast::
             Hint_::Hshape(NastShapeInfo {
                 allows_unknown_fields,
                 field_map,
+                unknown_fields_type,
             }) => {
                 let field_map = field_map
                     .into_iter()
@@ -258,9 +259,11 @@ pub(crate) fn remove_erased_generics<'a>(env: &Env<'a>, h: aast::Hint) -> aast::
                         ..sfi
                     })
                     .collect();
+                let unknown_fields_type = unknown_fields_type.map(|h| rec(env, h));
                 Hint_::Hshape(NastShapeInfo {
                     allows_unknown_fields,
                     field_map,
+                    unknown_fields_type,
                 })
             }
             Hint_::Hfun(HintFun {

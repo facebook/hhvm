@@ -124,6 +124,8 @@ let skip_check_under_dynamic t = t.GlobalOptions.tco_skip_check_under_dynamic
 let set_skip_check_under_dynamic t =
   GlobalOptions.{ t with tco_skip_check_under_dynamic = true }
 
+let typed_open_shapes t = t.GlobalOptions.tco_typed_open_shapes
+
 let interpret_soft_types_as_like_types t =
   t.GlobalOptions.po.ParserOptions.interpret_soft_types_as_like_types
 

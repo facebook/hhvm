@@ -2367,6 +2367,7 @@ let schema : schema_node list =
           ("keyword", Token);
           ("left_paren", Token);
           ("fields", ZeroOrMore (Just "FieldSpecifier"));
+          ("ellipsis_type", ZeroOrOne (Aggregate Specifier));
           ("ellipsis", ZeroOrOne Token);
           ("right_paren", Token);
         ];

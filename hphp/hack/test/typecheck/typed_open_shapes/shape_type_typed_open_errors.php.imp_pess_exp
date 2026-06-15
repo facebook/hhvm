@@ -1,0 +1,30 @@
+ERROR: File "shape_type_typed_open_errors.php", line 15, characters 22-23:
+Invalid argument (Typing[4110])
+  File "shape_type_typed_open_errors.php", line 7, characters 29-56:
+  Expected `string` because the field `b` may be set to any type in this shape
+  File "shape_type_typed_open_errors.php", line 14, characters 31-32:
+  But got `int`
+ERROR: File "shape_type_typed_open_errors.php", line 21, characters 19-20:
+Invalid argument (Typing[4110])
+  File "shape_type_typed_open_errors.php", line 8, characters 26-50:
+  Expected `int` because the field `b` may be set to any type in this shape
+  File "shape_type_typed_open_errors.php", line 20, characters 31-37:
+  But got `string`
+ERROR: File "shape_type_typed_open_errors.php", line 28, characters 10-35:
+Invalid return type (Typing[4110])
+  File "shape_type_typed_open_errors.php", line 27, characters 57-62:
+  Expected `string`
+  File "shape_type_typed_open_errors.php", line 28, characters 33-34:
+  But got `int`
+ERROR: File "shape_type_typed_open_errors.php", line 36, characters 3-32:
+hh_expect_equivalent type mismatch (Typing[4452])
+  File "shape_type_typed_open_errors.php", line 36, characters 25-27:
+  Expected `int`
+  File "shape_type_typed_open_errors.php", line 34, characters 46-51:
+  But got `string`
+ERROR: File "shape_type_typed_open_errors.php", line 36, characters 30-31:
+Invalid argument (Typing[4110])
+  File "shape_type_typed_open_errors.php", line 36, characters 25-27:
+  Expected `int`
+  File "shape_type_typed_open_errors.php", line 34, characters 46-51:
+  But got `string`

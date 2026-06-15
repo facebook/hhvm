@@ -5573,6 +5573,7 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
         shape: Self::Output,
         _lparen: Self::Output,
         fields_in: Self::Output,
+        ellipsis_type: Self::Output,
         open: Self::Output,
         rparen: Self::Output,
     ) -> Self::Output {
@@ -5590,7 +5591,12 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
                 fields.insert(key, type_);
             }
         }
-        let kind = self.make_variadic_type(&open);
+        // If a typed ellipsis was provided (e.g. `string...`), use its type
+        // for unknown fields. Otherwise fall back to the bare `...` handling.
+        let kind = match self.node_to_ty(ellipsis_type) {
+            Some(ty) => ty,
+            None => self.make_variadic_type(&open),
+        };
         let pos = self.merge_positions(&shape, &rparen);
         let origin = TypeOrigin::MissingOrigin;
         self.hint_ty(

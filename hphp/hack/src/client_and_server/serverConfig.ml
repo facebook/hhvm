@@ -518,6 +518,8 @@ let load_config (config : Config_file_common.t) (options : GlobalOptions.t) :
       (bool_opt Config_keys.Hhconfig.enable_no_auto_dynamic config)
     ?tco_skip_check_under_dynamic:
       (bool_opt Config_keys.Hhconfig.skip_check_under_dynamic config)
+    ?tco_typed_open_shapes:
+      (bool_opt Config_keys.Hhconfig.typed_open_shapes config)
     ?tco_silence_errors_under_dynamic:
       (bool_opt Config_keys.Hhconfig.silence_errors_under_dynamic config)
     ?tco_ignore_unsafe_cast:

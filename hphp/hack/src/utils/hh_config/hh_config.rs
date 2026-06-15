@@ -455,6 +455,8 @@ impl HhConfig {
                 "skip_check_under_dynamic",
                 default.tco_skip_check_under_dynamic,
             )?,
+            tco_typed_open_shapes: hhconfig
+                .get_bool_or("typed_open_shapes", default.tco_typed_open_shapes)?,
             tco_global_access_check_enabled: hhconfig.get_bool_or(
                 "tco_global_access_check_enabled",
                 default.tco_global_access_check_enabled,

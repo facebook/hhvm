@@ -102,9 +102,13 @@ let hint_to_string_and_symbols ~is_ctx (hint : Aast.hint) =
       | CKenum -> append "enum<");
       parse ~is_ctx hint;
       append ">"
-    | Hshape { nsi_allows_unknown_fields; nsi_field_map } ->
+    | Hshape
+        { nsi_allows_unknown_fields; nsi_field_map; nsi_unknown_fields_type } ->
       append "shape(";
-      parse_shape nsi_allows_unknown_fields nsi_field_map;
+      parse_shape
+        nsi_allows_unknown_fields
+        nsi_field_map
+        nsi_unknown_fields_type;
       append ")"
     | Hrefinement (hint, members) ->
       parse ~is_ctx:false hint;
@@ -170,11 +174,20 @@ let hint_to_string_and_symbols ~is_ctx (hint : Aast.hint) =
           @ opt_map cr_upper ~f:(fun x -> [(`U, x)])
       in
       parse_gen_seq ~sep:" " ~f:(parse_bound ~is_ctx:true) bounds
-  and parse_shape open_ = function
-    | [] -> if open_ then append "..."
-    | hs ->
-      parse_gen_seq ~sep:", " ~f:parse_shape_field hs;
-      if open_ then append ", ..."
+  and parse_shape open_ hs unknown_fields_type =
+    (match hs with
+    | [] -> ()
+    | _ -> parse_gen_seq ~sep:", " ~f:parse_shape_field hs);
+    match unknown_fields_type with
+    | Some h ->
+      if not (List.is_empty hs) then append ", ";
+      parse ~is_ctx:false h;
+      append "..."
+    | None ->
+      if open_ then begin
+        if not (List.is_empty hs) then append ", ";
+        append "..."
+      end
   and parse_shape_field Aast.{ sfi_optional; sfi_name; sfi_hint } =
     if sfi_optional then append "?";
     parse_shape_field_name sfi_name;
@@ -298,7 +311,7 @@ let rec hint_to_angle h =
     let values = List.map hints ~f:hint_to_angle in
     Hint.(Key (Union_ values))
   | Hoption h -> Hint.(Key (Option (hint_to_angle h)))
-  | Hshape { nsi_allows_unknown_fields; nsi_field_map } ->
+  | Hshape { nsi_allows_unknown_fields; nsi_field_map; _ } ->
     let shape_field_name_to_hint = function
       | Ast_defs.SFlit_str (_, s) -> ShapeKV.Sf_lit_string s
       | Ast_defs.SFclassname (_, c) ->

@@ -928,6 +928,11 @@ Array resolveTSImpl(TSEnv& env, const TSCtx& ctx, const Array& arr) {
     }
     case TypeStructure::Kind::T_shape: {
       newarr.set(s_fields, Variant(resolveShape(env, ctx, arr)));
+      auto tv = arr.lookup(s_variadic_type);
+      if (tv.is_init()) {
+        auto const variadicArr = tvAsVariant(tv).asCArrRef();
+        newarr.set(s_variadic_type, Variant(resolveTS(env, ctx, variadicArr, nullptr)));
+      }
       break;
     }
     case TypeStructure::Kind::T_unresolved: {
@@ -1399,7 +1404,8 @@ bool coerceToTypeStructure(Array& arr) {
       return tvIsString(arr.lookup(s_name));
     }
     case TypeStructure::Kind::T_shape: {
-      return coerceTSListField(arr, s_fields, /*shape=*/true);
+      return coerceTSListField(arr, s_fields, /*shape=*/true) &&
+             coerceOptTSField(arr, s_variadic_type);
     }
     case TypeStructure::Kind::T_tuple: {
       return coerceTSListField(arr, s_elem_types) &&

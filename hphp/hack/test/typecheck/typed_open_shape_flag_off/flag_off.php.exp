@@ -1,0 +1,6 @@
+ERROR: File "flag_off.php", line 7, characters 45-50:
+Typed open shapes (e.g. `shape('x' => int, string...)`) are not enabled. Use plain `...` for unknown fields. (Naming[2132])
+ERROR: File "flag_off.php", line 9, characters 38-43:
+Typed open shapes (e.g. `shape('x' => int, string...)`) are not enabled. Use plain `...` for unknown fields. (Naming[2132])
+ERROR: File "flag_off.php", line 12, characters 37-42:
+Typed open shapes (e.g. `shape('x' => int, string...)`) are not enabled. Use plain `...` for unknown fields. (Naming[2132])

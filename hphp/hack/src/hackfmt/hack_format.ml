@@ -2479,18 +2479,31 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           shape_type_keyword = shape_kw;
           shape_type_left_paren = left_p;
           shape_type_fields = type_fields;
+          shape_type_ellipsis_type;
           shape_type_ellipsis = ellipsis;
           shape_type_right_paren = right_p;
         } ->
+      let has_ellipsis =
+        not
+          (Syntax.is_missing ellipsis
+          && Syntax.is_missing shape_type_ellipsis_type)
+      in
       let fields =
-        if Syntax.is_missing ellipsis then
-          type_fields
-        else
+        if has_ellipsis then
           let missing_separator = make_missing () in
+          (* Build a node combining the typed ellipsis type and the ... token *)
+          let ellipsis_node =
+            if Syntax.is_missing shape_type_ellipsis_type then
+              ellipsis
+            else
+              make_list (Syntax.children shape_type_ellipsis_type @ [ellipsis])
+          in
           let ellipsis_list =
-            [Syntax.make_list_item ellipsis missing_separator]
+            [Syntax.make_list_item ellipsis_node missing_separator]
           in
           make_list (Syntax.children type_fields @ ellipsis_list)
+        else
+          type_fields
       in
       transform_container_literal
         env
@@ -2498,7 +2511,7 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
         left_p
         fields
         right_p
-        ~allow_trailing:(Syntax.is_missing ellipsis)
+        ~allow_trailing:(not has_ellipsis)
     | Syntax.ShapeExpression
         {
           shape_expression_keyword = shape_kw;

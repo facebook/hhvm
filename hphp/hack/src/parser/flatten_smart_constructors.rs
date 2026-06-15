@@ -1343,11 +1343,11 @@ pub trait FlattenSmartConstructors: SmartConstructors
         }
     }
 
-    fn make_shape_type_specifier(&mut self, arg0: Self::Output, arg1: Self::Output, arg2: Self::Output, arg3: Self::Output, arg4: Self::Output) -> Self::Output {
-        if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) && Self::is_zero(&arg4) {
+    fn make_shape_type_specifier(&mut self, arg0: Self::Output, arg1: Self::Output, arg2: Self::Output, arg3: Self::Output, arg4: Self::Output, arg5: Self::Output) -> Self::Output {
+        if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) && Self::is_zero(&arg4) && Self::is_zero(&arg5) {
           Self::zero(SyntaxKind::ShapeTypeSpecifier)
         } else {
-          self.flatten(SyntaxKind::ShapeTypeSpecifier, vec!(arg0, arg1, arg2, arg3, arg4))
+          self.flatten(SyntaxKind::ShapeTypeSpecifier, vec!(arg0, arg1, arg2, arg3, arg4, arg5))
         }
     }
 

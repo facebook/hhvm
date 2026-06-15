@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<8027c985b0d5ac83d0f540c96d110c7b>>
+// @generated SignedSource<<4b6bf0da0d039bb248d3134370e45fe9>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -1867,7 +1867,8 @@ impl<P: Params> Node<P> for NastShapeInfo {
         v: &mut dyn Visitor<'node, Params = P>,
     ) -> Result<(), P::Error> {
         self.allows_unknown_fields.accept(c, v)?;
-        self.field_map.accept(c, v)
+        self.field_map.accept(c, v)?;
+        self.unknown_fields_type.accept(c, v)
     }
 }
 impl<P: Params> Node<P> for NsKind {

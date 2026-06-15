@@ -187,10 +187,25 @@ let validator =
         (* HHVM doesn't currently support is/as on type splats, so let's reject it in Hack *)
         this#invalid acc r @@ "a tuple type with a splat element"
 
-    method! on_tshape acc _ { s_fields = fdm; _ } =
+    method! on_tshape acc _r { s_fields = fdm; s_unknown_value; _ } =
       let tyl = TShapeMap.values fdm |> List.map ~f:(fun s -> s.sft_ty) in
       let acc = List.fold_left tyl ~init:acc ~f:this#on_type in
-      this#check_for_wildcards acc tyl "shape"
+      let rec is_nothing_or_mixed ty =
+        match get_node ty with
+        | Tmixed
+        | Tunion [] ->
+          true
+        | Tapply ((_, name), [ty])
+          when String.equal name Naming_special_names.Classes.cSupportDyn ->
+          is_nothing_or_mixed ty
+        | _ -> false
+      in
+      (* HHVM doesn't currently support is/as on typed open shapes, so let's reject it in Hack *)
+      if is_nothing_or_mixed s_unknown_value then
+        this#check_for_wildcards acc tyl "shape"
+      else
+        this#invalid acc (get_reason s_unknown_value)
+        @@ "a shape type with a typed variadic element"
 
     method! on_tclass_ptr acc r _ty =
       (* TODO(T199611023) allow when we enforce inner type *)

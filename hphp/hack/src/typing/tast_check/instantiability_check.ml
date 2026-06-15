@@ -156,8 +156,13 @@ let rec check_hint env (pos, hint) =
       | Aast.Hsplat h -> check_hint env h
     end
 
-and check_shape env Aast.{ nsi_allows_unknown_fields = _; nsi_field_map } =
-  List.iter ~f:(fun v -> check_hint env v.Aast.sfi_hint) nsi_field_map
+and check_shape
+    env
+    Aast.
+      { nsi_allows_unknown_fields = _; nsi_field_map; nsi_unknown_fields_type }
+    =
+  List.iter ~f:(fun v -> check_hint env v.Aast.sfi_hint) nsi_field_map;
+  Option.iter nsi_unknown_fields_type ~f:(check_hint env)
 
 (* Need to skip the root of the Haccess element *)
 and check_access env h _ =

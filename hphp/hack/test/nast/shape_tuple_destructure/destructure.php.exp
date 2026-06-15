@@ -25,8 +25,8 @@
                       { nsi_allows_unknown_fields = false;
                         nsi_field_map =
                         [{ sfi_optional = false; sfi_hint = ([4:40-43], (Hprim Tint)); sfi_name = (SFlit_str ([4:33-36], "x")) };
-                          { sfi_optional = false; sfi_hint = ([4:52-55], (Hprim Tint)); sfi_name = (SFlit_str ([4:45-48], "y")) }]
-                        }))));
+                          { sfi_optional = false; sfi_hint = ([4:52-55], (Hprim Tint)); sfi_name = (SFlit_str ([4:45-48], "y")) }];
+                        nsi_unknown_fields_type = None }))));
            param_pos = [4:57-59]; param_name = "$s"; param_info = Param_required; 
            param_readonly = None; param_splat = None; param_callconv = Pnormal; 
            param_named = None; param_user_attributes = []; param_visibility = None }
@@ -79,8 +79,8 @@
                        { nsi_allows_unknown_fields = false;
                          nsi_field_map =
                          [{ sfi_optional = false; sfi_hint = ([8:43-46], (Hprim Tint)); sfi_name = (SFlit_str ([8:36-39], "x")) };
-                           { sfi_optional = false; sfi_hint = ([8:55-58], (Hprim Tint)); sfi_name = (SFlit_str ([8:48-51], "y")) }]
-                         }))));
+                           { sfi_optional = false; sfi_hint = ([8:55-58], (Hprim Tint)); sfi_name = (SFlit_str ([8:48-51], "y")) }];
+                         nsi_unknown_fields_type = None }))));
             param_pos = [8:60-62]; param_name = "$s"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
             param_named = None; param_user_attributes = []; param_visibility = None }
@@ -129,8 +129,8 @@
                        { nsi_allows_unknown_fields = false;
                          nsi_field_map =
                          [{ sfi_optional = false; sfi_hint = ([12:43-46], (Hprim Tint)); sfi_name = (SFlit_str ([12:36-39], "x")) };
-                           { sfi_optional = true; sfi_hint = ([12:56-59], (Hprim Tint)); sfi_name = (SFlit_str ([12:49-52], "y")) }]
-                         }))));
+                           { sfi_optional = true; sfi_hint = ([12:56-59], (Hprim Tint)); sfi_name = (SFlit_str ([12:49-52], "y")) }];
+                         nsi_unknown_fields_type = None }))));
             param_pos = [12:61-63]; param_name = "$s"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
             param_named = None; param_user_attributes = []; param_visibility = None }
@@ -183,8 +183,8 @@
                        { nsi_allows_unknown_fields = false;
                          nsi_field_map =
                          [{ sfi_optional = false; sfi_hint = ([16:43-46], (Hprim Tint)); sfi_name = (SFlit_str ([16:36-39], "x")) };
-                           { sfi_optional = false; sfi_hint = ([16:55-58], (Hprim Tint)); sfi_name = (SFlit_str ([16:48-51], "y")) }]
-                         }))));
+                           { sfi_optional = false; sfi_hint = ([16:55-58], (Hprim Tint)); sfi_name = (SFlit_str ([16:48-51], "y")) }];
+                         nsi_unknown_fields_type = None }))));
             param_pos = [16:60-62]; param_name = "$s"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
             param_named = None; param_user_attributes = []; param_visibility = None }
@@ -237,8 +237,8 @@
                        { nsi_allows_unknown_fields = false;
                          nsi_field_map =
                          [{ sfi_optional = false; sfi_hint = ([20:42-45], (Hprim Tint)); sfi_name = (SFlit_str ([20:35-38], "x")) };
-                           { sfi_optional = false; sfi_hint = ([20:54-57], (Hprim Tint)); sfi_name = (SFlit_str ([20:47-50], "y")) }]
-                         }))));
+                           { sfi_optional = false; sfi_hint = ([20:54-57], (Hprim Tint)); sfi_name = (SFlit_str ([20:47-50], "y")) }];
+                         nsi_unknown_fields_type = None }))));
             param_pos = [20:59-61]; param_name = "$s"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
             param_named = None; param_user_attributes = []; param_visibility = None }
@@ -388,8 +388,8 @@
                                 { tup_required = [([33:21-24], (Hprim Tint)); ([33:26-32], (Happly (([33:26-32], "\\HH\\string"), [])))];
                                   tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }));
                             sfi_name = (SFlit_str ([33:9-16], "inner")) }
-                           ]
-                         }))));
+                           ];
+                         nsi_unknown_fields_type = None }))));
             param_pos = [33:35-37]; param_name = "$s"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
             param_named = None; param_user_attributes = []; param_visibility = None }
@@ -448,7 +448,9 @@
              (Some ([40:3-51],
                     (Happly (([40:3-16], "\\HH\\KeyedIterator"),
                        [([40:17-35],
-                         (Hshape { nsi_allows_unknown_fields = false; nsi_field_map = [{ sfi_optional = false; sfi_hint = ([40:31-34], (Hprim Tint)); sfi_name = (SFlit_str ([40:23-27], "id")) }] }));
+                         (Hshape
+                            { nsi_allows_unknown_fields = false; nsi_field_map = [{ sfi_optional = false; sfi_hint = ([40:31-34], (Hprim Tint)); sfi_name = (SFlit_str ([40:23-27], "id")) }];
+                              nsi_unknown_fields_type = None }));
                          ([40:37-50],
                           (Htuple
                              { tup_required = [([40:38-41], (Hprim Tint)); ([40:43-49], (Happly (([40:43-49], "\\HH\\string"), [])))]; 
@@ -510,7 +512,9 @@
                          (Htuple
                             { tup_required = [([47:18-21], (Hprim Tint)); ([47:23-29], (Happly (([47:23-29], "\\HH\\string"), [])))]; tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }));
                          ([47:32-51],
-                          (Hshape { nsi_allows_unknown_fields = false; nsi_field_map = [{ sfi_optional = false; sfi_hint = ([47:46-50], (Hprim Tbool)); sfi_name = (SFlit_str ([47:38-42], "ok")) }] }))
+                          (Hshape
+                             { nsi_allows_unknown_fields = false; nsi_field_map = [{ sfi_optional = false; sfi_hint = ([47:46-50], (Hprim Tbool)); sfi_name = (SFlit_str ([47:38-42], "ok")) }];
+                               nsi_unknown_fields_type = None }))
                          ]
                        )))));
             param_pos = [47:53-59]; param_name = "$items"; param_info = Param_required; 

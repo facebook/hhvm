@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c209a9ff020087e00402fa7e8b64c834>>
+// @generated SignedSource<<1afb243cdeb24a84c2167dc811e6535c>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -2907,11 +2907,15 @@ impl Transform for NastShapeInfo {
             NastShapeInfo {
                 allows_unknown_fields: ref mut __binding_0,
                 field_map: ref mut __binding_1,
+                unknown_fields_type: ref mut __binding_2,
             } => {
                 {
                     __binding_0.transform(env, &mut pass.clone())
                 }
-                { __binding_1.transform(env, &mut pass.clone()) }
+                {
+                    __binding_1.transform(env, &mut pass.clone())
+                }
+                { __binding_2.transform(env, &mut pass.clone()) }
             }
         }
     }

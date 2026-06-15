@@ -1842,11 +1842,12 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_shape_type_specifier(ctx: &C, keyword: Self, left_paren: Self, fields: Self, ellipsis: Self, right_paren: Self) -> Self {
+    fn make_shape_type_specifier(ctx: &C, keyword: Self, left_paren: Self, fields: Self, ellipsis_type: Self, ellipsis: Self, right_paren: Self) -> Self {
         let syntax = SyntaxVariant::ShapeTypeSpecifier(ctx.get_arena().alloc(ShapeTypeSpecifierChildren {
             keyword,
             left_paren,
             fields,
+            ellipsis_type,
             ellipsis,
             right_paren,
         }));

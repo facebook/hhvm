@@ -212,6 +212,8 @@ module Hhconfig : sig
 
   val skip_check_under_dynamic : string
 
+  val typed_open_shapes : string
+
   val strict_consistent_construct : string
 
   val symbol_write_exclude_out : string

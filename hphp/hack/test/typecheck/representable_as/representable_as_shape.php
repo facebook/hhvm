@@ -54,6 +54,13 @@ function test_open_shape_dict_arraykey_mixed_ok(shape('a' => int, ...) $s): void
   test_open_shape_dict_arraykey_mixed_pass($s);
 }
 
+function test_open_shape_dict_arraykey_num_pass(\HH\Runtime\RepresentableAs<dict<arraykey, num>> $c): void {}
+function test_open_shape_dict_arraykey_string_ok(shape('a' => int, float...) $s):void {
+  test_open_shape_dict_arraykey_num_pass($s);
+  // Should FAIL
+  takes_representable_as_dict_arraykey_int($s);
+}
+
 enum E: string as string {
   A = 'a';
 }

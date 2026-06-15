@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c2a136f3849082a70d42c982d5ec374e>>
+// @generated SignedSource<<8cd3e5bb95aca9dbd0ab14723cf9af2a>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -144,6 +144,7 @@ pub enum Naming {
     InvalidTypeAccessInWhere = 2129,
     AttributeOutsideAllowedFiles = 2130,
     HhiAttributeRestriction = 2131,
+    TypedOpenShapeDisallowed = 2132,
 }
 impl TrivialDrop for Naming {}
 arena_deserializer::impl_deserialize_in_arena!(Naming);

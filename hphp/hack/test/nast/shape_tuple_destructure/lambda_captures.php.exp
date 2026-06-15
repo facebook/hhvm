@@ -24,8 +24,8 @@
                       { nsi_allows_unknown_fields = false;
                         nsi_field_map =
                         [{ sfi_optional = false; sfi_hint = ([5:17-20], (Hprim Tint)); sfi_name = (SFlit_str ([5:9-13], "id")) };
-                          { sfi_optional = false; sfi_hint = ([5:33-39], (Happly (([5:33-39], "\\HH\\string"), []))); sfi_name = (SFlit_str ([5:22-29], "label")) }]
-                        }))));
+                          { sfi_optional = false; sfi_hint = ([5:33-39], (Happly (([5:33-39], "\\HH\\string"), []))); sfi_name = (SFlit_str ([5:22-29], "label")) }];
+                        nsi_unknown_fields_type = None }))));
            param_pos = [5:41-46]; param_name = "$item"; param_info = Param_required; 
            param_readonly = None; param_splat = None; param_callconv = Pnormal; 
            param_named = None; param_user_attributes = []; param_visibility = None }
@@ -166,8 +166,8 @@
                             { nsi_allows_unknown_fields = false;
                               nsi_field_map =
                               [{ sfi_optional = false; sfi_hint = ([18:31-34], (Hprim Tint)); sfi_name = (SFlit_str ([18:23-27], "id")) };
-                                { sfi_optional = false; sfi_hint = ([18:47-53], (Happly (([18:47-53], "\\HH\\string"), []))); sfi_name = (SFlit_str ([18:36-43], "label")) }]
-                              }));
+                                { sfi_optional = false; sfi_hint = ([18:47-53], (Happly (([18:47-53], "\\HH\\string"), []))); sfi_name = (SFlit_str ([18:36-43], "label")) }];
+                              nsi_unknown_fields_type = None }));
                          ([18:56-69],
                           (Htuple
                              { tup_required = [([18:57-60], (Hprim Tint)); ([18:62-68], (Happly (([18:62-68], "\\HH\\string"), [])))]; 
@@ -278,7 +278,9 @@
                          (Htuple
                             { tup_required = [([28:18-21], (Hprim Tint)); ([28:23-29], (Happly (([28:23-29], "\\HH\\string"), [])))]; tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }));
                          ([28:32-51],
-                          (Hshape { nsi_allows_unknown_fields = false; nsi_field_map = [{ sfi_optional = false; sfi_hint = ([28:46-50], (Hprim Tbool)); sfi_name = (SFlit_str ([28:38-42], "ok")) }] }))
+                          (Hshape
+                             { nsi_allows_unknown_fields = false; nsi_field_map = [{ sfi_optional = false; sfi_hint = ([28:46-50], (Hprim Tbool)); sfi_name = (SFlit_str ([28:38-42], "ok")) }];
+                               nsi_unknown_fields_type = None }))
                          ]
                        )))));
             param_pos = [28:53-59]; param_name = "$items"; param_info = Param_required; 

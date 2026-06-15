@@ -2504,12 +2504,14 @@ module WithToken (Token : TokenType) = struct
             shape_type_keyword;
             shape_type_left_paren;
             shape_type_fields;
+            shape_type_ellipsis_type;
             shape_type_ellipsis;
             shape_type_right_paren;
           } ->
         let acc = f acc shape_type_keyword in
         let acc = f acc shape_type_left_paren in
         let acc = f acc shape_type_fields in
+        let acc = f acc shape_type_ellipsis_type in
         let acc = f acc shape_type_ellipsis in
         let acc = f acc shape_type_right_paren in
         acc
@@ -4324,6 +4326,7 @@ module WithToken (Token : TokenType) = struct
             shape_type_keyword;
             shape_type_left_paren;
             shape_type_fields;
+            shape_type_ellipsis_type;
             shape_type_ellipsis;
             shape_type_right_paren;
           } ->
@@ -4331,6 +4334,7 @@ module WithToken (Token : TokenType) = struct
           shape_type_keyword;
           shape_type_left_paren;
           shape_type_fields;
+          shape_type_ellipsis_type;
           shape_type_ellipsis;
           shape_type_right_paren;
         ]
@@ -6155,6 +6159,7 @@ module WithToken (Token : TokenType) = struct
             shape_type_keyword;
             shape_type_left_paren;
             shape_type_fields;
+            shape_type_ellipsis_type;
             shape_type_ellipsis;
             shape_type_right_paren;
           } ->
@@ -6162,6 +6167,7 @@ module WithToken (Token : TokenType) = struct
           "shape_type_keyword";
           "shape_type_left_paren";
           "shape_type_fields";
+          "shape_type_ellipsis_type";
           "shape_type_ellipsis";
           "shape_type_right_paren";
         ]
@@ -8203,6 +8209,7 @@ module WithToken (Token : TokenType) = struct
             shape_type_keyword;
             shape_type_left_paren;
             shape_type_fields;
+            shape_type_ellipsis_type;
             shape_type_ellipsis;
             shape_type_right_paren;
           ] ) ->
@@ -8211,6 +8218,7 @@ module WithToken (Token : TokenType) = struct
             shape_type_keyword;
             shape_type_left_paren;
             shape_type_fields;
+            shape_type_ellipsis_type;
             shape_type_ellipsis;
             shape_type_right_paren;
           }
@@ -10775,6 +10783,7 @@ module WithToken (Token : TokenType) = struct
           shape_type_keyword
           shape_type_left_paren
           shape_type_fields
+          shape_type_ellipsis_type
           shape_type_ellipsis
           shape_type_right_paren =
         let syntax =
@@ -10783,6 +10792,7 @@ module WithToken (Token : TokenType) = struct
               shape_type_keyword;
               shape_type_left_paren;
               shape_type_fields;
+              shape_type_ellipsis_type;
               shape_type_ellipsis;
               shape_type_right_paren;
             }

@@ -164,6 +164,7 @@ type t = {
   is_hhi: bool;
   allow_module_def: bool;
   allow_ignore_readonly: bool;
+  typed_open_shapes: bool;
 }
 
 let empty =
@@ -189,4 +190,5 @@ let empty =
     is_hhi = false;
     allow_module_def = false;
     allow_ignore_readonly = false;
+    typed_open_shapes = false;
   }

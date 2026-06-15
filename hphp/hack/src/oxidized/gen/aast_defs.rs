@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<9bdae32f9e9bbd5c114cd87168e94319>>
+// @generated SignedSource<<ad7d709b0be5a2da2abd08213ec36add>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -3180,6 +3180,7 @@ pub struct ShapeFieldInfo {
 pub struct NastShapeInfo {
     pub allows_unknown_fields: bool,
     pub field_map: Vec<ShapeFieldInfo>,
+    pub unknown_fields_type: Option<Hint>,
 }
 
 #[derive(

@@ -106,8 +106,8 @@ Errors:
                         { nsi_allows_unknown_fields = false;
                           nsi_field_map =
                           [{ sfi_optional = false; sfi_hint = ([6:40-44], (Hprim Tbool)); sfi_name = (SFlit_str ([6:33-36], "u")) };
-                            { sfi_optional = false; sfi_hint = ([6:53-57], (Hprim Tbool)); sfi_name = (SFlit_str ([6:46-49], "v")) }]
-                          }))));
+                            { sfi_optional = false; sfi_hint = ([6:53-57], (Hprim Tbool)); sfi_name = (SFlit_str ([6:46-49], "v")) }];
+                          nsi_unknown_fields_type = None }))));
              param_pos = [6:59-61]; param_name = "$y"; param_info = Param_required; 
              param_readonly = None; param_splat = None; param_callconv = Pnormal; 
              param_named = None; param_user_attributes = []; param_visibility = None }
@@ -227,8 +227,8 @@ Errors:
                           nsi_field_map =
                           [{ sfi_optional = false; sfi_hint = ([19:14-19], (Hprim Tfloat)); sfi_name = (SFlit_str ([19:7-10], "a")) };
                             { sfi_optional = false; sfi_hint = ([19:28-31], (Hprim Tint)); sfi_name = (SFlit_str ([19:21-24], "b")) };
-                            { sfi_optional = false; sfi_hint = ([19:40-43], (Hprim Tint)); sfi_name = (SFlit_str ([19:33-36], "c")) }]
-                          }))));
+                            { sfi_optional = false; sfi_hint = ([19:40-43], (Hprim Tint)); sfi_name = (SFlit_str ([19:33-36], "c")) }];
+                          nsi_unknown_fields_type = None }))));
              param_pos = [19:45-47]; param_name = "$f"; param_info = Param_required; 
              param_readonly = None; param_splat = None; param_callconv = Pnormal; 
              param_named = None; param_user_attributes = []; param_visibility = None };
@@ -257,8 +257,8 @@ Errors:
                                 { nsi_allows_unknown_fields = false;
                                   nsi_field_map =
                                   [{ sfi_optional = false; sfi_hint = ([21:20-25], (Hprim Tfloat)); sfi_name = (SFlit_str ([21:13-16], "u")) };
-                                    { sfi_optional = false; sfi_hint = ([21:34-37], (Hprim Tint)); sfi_name = (SFlit_str ([21:27-30], "v")) }]
-                                  }))
+                                    { sfi_optional = false; sfi_hint = ([21:34-37], (Hprim Tint)); sfi_name = (SFlit_str ([21:27-30], "v")) }];
+                                  nsi_unknown_fields_type = None }))
                             ];
                           tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }))));
              param_pos = [21:40-42]; param_name = "$h"; param_info = Param_required; 
@@ -495,8 +495,8 @@ Errors:
                         { nsi_allows_unknown_fields = false;
                           nsi_field_map =
                           [{ sfi_optional = false; sfi_hint = ([6:40-44], (Hprim Tbool)); sfi_name = (SFlit_str ([6:33-36], "u")) };
-                            { sfi_optional = false; sfi_hint = ([6:53-57], (Hprim Tbool)); sfi_name = (SFlit_str ([6:46-49], "v")) }]
-                          }))));
+                            { sfi_optional = false; sfi_hint = ([6:53-57], (Hprim Tbool)); sfi_name = (SFlit_str ([6:46-49], "v")) }];
+                          nsi_unknown_fields_type = None }))));
              param_pos = [6:59-61]; param_name = "$y"; param_info = Param_required; 
              param_readonly = None; param_splat = None; param_callconv = Pnormal; 
              param_named = None; param_user_attributes = []; param_visibility = None }

@@ -83,6 +83,7 @@ type t =
       expected_kind: Name_context.t;
     }
   | Field_name_already_bound of Pos.t
+  | Typed_open_shape_disallowed of Pos.t
   | Primitive_top_level of Pos.t
   | Primitive_invalid_alias of {
       pos: Pos.t;

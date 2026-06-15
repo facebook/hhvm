@@ -1451,6 +1451,7 @@ and shape_field_info = {
 and nast_shape_info = {
   nsi_allows_unknown_fields: bool;
   nsi_field_map: shape_field_info list;
+  nsi_unknown_fields_type: hint option;
 }
 
 and tuple_info = {

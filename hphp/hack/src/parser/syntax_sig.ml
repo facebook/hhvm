@@ -1019,6 +1019,7 @@ module type Syntax_S = sig
         shape_type_keyword: t;
         shape_type_left_paren: t;
         shape_type_fields: t;
+        shape_type_ellipsis_type: t;
         shape_type_ellipsis: t;
         shape_type_right_paren: t;
       }
@@ -1503,7 +1504,7 @@ module type Syntax_S = sig
 
   val make_field_initializer : t -> t -> t -> t
 
-  val make_shape_type_specifier : t -> t -> t -> t -> t -> t
+  val make_shape_type_specifier : t -> t -> t -> t -> t -> t -> t
 
   val make_shape_expression : t -> t -> t -> t -> t -> t
 

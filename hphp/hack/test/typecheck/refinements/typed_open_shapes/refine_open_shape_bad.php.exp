@@ -1,0 +1,16 @@
+ERROR: File "refine_open_shape_bad.php", line 6, characters 9-36:
+Invalid `as` expression hint (Typing[4195])
+  File "refine_open_shape_bad.php", line 6, characters 27-32:
+  The `as` operator cannot be used with a shape type with a typed variadic element
+ERROR: File "refine_open_shape_bad.php", line 10, characters 13-40:
+Invalid `is` expression hint (Typing[4195])
+  File "refine_open_shape_bad.php", line 10, characters 31-36:
+  The `is` operator cannot be used with a shape type with a typed variadic element
+ERROR: File "refine_open_shape_bad.php", line 15, characters 9-10:
+Invalid `as` expression hint (Typing[4195])
+  File "refine_open_shape_bad.php", line 3, characters 29-34:
+  The `as` operator cannot be used with a shape type with a typed variadic element
+ERROR: File "refine_open_shape_bad.php", line 19, characters 13-14:
+Invalid `is` expression hint (Typing[4195])
+  File "refine_open_shape_bad.php", line 3, characters 29-34:
+  The `is` operator cannot be used with a shape type with a typed variadic element

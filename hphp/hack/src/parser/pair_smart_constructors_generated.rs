@@ -728,8 +728,8 @@ where
         Node(self.0.make_field_initializer(name.0, arrow.0, value.0), self.1.make_field_initializer(name.1, arrow.1, value.1))
     }
 
-    fn make_shape_type_specifier(&mut self, keyword: Self::Output, left_paren: Self::Output, fields: Self::Output, ellipsis: Self::Output, right_paren: Self::Output) -> Self::Output {
-        Node(self.0.make_shape_type_specifier(keyword.0, left_paren.0, fields.0, ellipsis.0, right_paren.0), self.1.make_shape_type_specifier(keyword.1, left_paren.1, fields.1, ellipsis.1, right_paren.1))
+    fn make_shape_type_specifier(&mut self, keyword: Self::Output, left_paren: Self::Output, fields: Self::Output, ellipsis_type: Self::Output, ellipsis: Self::Output, right_paren: Self::Output) -> Self::Output {
+        Node(self.0.make_shape_type_specifier(keyword.0, left_paren.0, fields.0, ellipsis_type.0, ellipsis.0, right_paren.0), self.1.make_shape_type_specifier(keyword.1, left_paren.1, fields.1, ellipsis_type.1, ellipsis.1, right_paren.1))
     }
 
     fn make_shape_expression(&mut self, keyword: Self::Output, left_paren: Self::Output, fields: Self::Output, ellipsis: Self::Output, right_paren: Self::Output) -> Self::Output {

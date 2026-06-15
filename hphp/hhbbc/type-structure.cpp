@@ -692,6 +692,8 @@ Resolution resolve_shape(ResolveCtx& ctx, SArray ts) {
 
   return Builder::copy(ts, TS::Kind::T_shape)
     .set(s_fields, b.finish())
+    .resolve(s_variadic_type, get_ts_variadic_type_opt(ts), ctx,
+             resolve_bespoke)
     .optCopy(s_typevars, ts)
     .optCopy(s_alias, ts)
     .optCopy(s_case_type, ts)
@@ -1357,6 +1359,7 @@ void type_structure_references(SArray ts, SStringSet& names) {
       break;
     case TS::Kind::T_shape:
       onShape(ts);
+      type_structure_references(get_ts_variadic_type_opt(ts), names);
       break;
     case TS::Kind::T_typeaccess:
       names.emplace(get_ts_root_name(ts));

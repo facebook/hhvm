@@ -234,6 +234,8 @@ module Hhconfig = struct
 
   let skip_check_under_dynamic = key "skip_check_under_dynamic"
 
+  let typed_open_shapes = key "typed_open_shapes"
+
   let strict_consistent_construct = key "strict_consistent_construct"
 
   let symbol_write_exclude_out = key "symbol_write_exclude_out"

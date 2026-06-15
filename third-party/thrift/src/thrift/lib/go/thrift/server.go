@@ -994,7 +994,18 @@ func (s *rocketServerSocket) preprocessRequest(msg payload.Payload) (
 	}
 	s.observer.TimeReadUsForFunction(rpcFuncName, time.Since(readStartTime))
 
-	pfunc, exists := s.proc.ProcessorFunctionMap()[rpcFuncName]
+	processor := s.proc
+	if metadata.InteractionId != nil {
+		s.interactionsMutex.Lock()
+		interactionProcessor, ok := s.interactions[*metadata.InteractionId]
+		s.interactionsMutex.Unlock()
+		if !ok {
+			return nil, nil, nil, nil, fmt.Errorf("unknown interaction id: %d", *metadata.InteractionId)
+		}
+		processor = interactionProcessor
+	}
+
+	pfunc, exists := processor.ProcessorFunctionMap()[rpcFuncName]
 	if !exists {
 		return nil, nil, nil, nil, fmt.Errorf("no such function: %q", rpcFuncName)
 	}
@@ -1015,7 +1026,7 @@ func (s *rocketServerSocket) preprocessRequest(msg payload.Payload) (
 
 	reqHeaders := rocket.GetRequestRpcMetadataHeaders(metadata)
 	reqCtx := &RequestContext{
-		ServiceName: s.proc.FunctionServiceMap()[rpcFuncName],
+		ServiceName: processor.FunctionServiceMap()[rpcFuncName],
 		MethodName:  rpcFuncName,
 		ConnInfo:    s.connInfo,
 	}

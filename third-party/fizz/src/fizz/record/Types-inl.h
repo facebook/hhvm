@@ -144,6 +144,7 @@ struct WriterVector {
       len += getSize<T>(t);
     }
 
+    out.ensure(sizeof(N) + len);
     out.writeBE<N>(folly::to<N>(len));
     for (const auto& t : data) {
       FIZZ_RETURN_ON_ERROR(write(err, t, out));
@@ -164,6 +165,7 @@ struct WriterVector<bits24, T> {
       len += getSize<T>(t);
     }
 
+    out.ensure(bits24::size + len);
     FIZZ_RETURN_ON_ERROR(writeBits24(err, len, out));
     for (const auto& t : data) {
       FIZZ_RETURN_ON_ERROR(write(err, t, out));

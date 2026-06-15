@@ -308,9 +308,21 @@ let scrape_class_names (ast : Nast.program) : SSet.t =
   let visitor =
     object
       (* It would look less clumsy to use Aast.reduce, but would use set union which has higher complexity. *)
-      inherit [_] Aast.iter
+      inherit [_] Aast.iter as super
 
       method! on_class_name _ (_p, id) = names := SSet.add id !names
+
+      (* Before naming, explicit class references in expression position
+         (new C(), C::m(), C::BAR, C::class, C::m<>, nameof C) are
+         [CIexpr (_, _, Id _)]; the [Naming_elab_class_id] pass later rewrites
+         them to [CI]. Match them here so this visitor counts the same
+         references whether it runs on the raw AST or the NAST. On the NAST
+         this branch never fires (no [CIexpr (Id _)] remain), so behavior
+         there is unchanged. *)
+      method! on_class_id_ env cid =
+        match cid with
+        | Aast.CIexpr (_, _, Aast.Id (_, id)) -> names := SSet.add id !names
+        | _ -> super#on_class_id_ env cid
     end
   in
   visitor#on_program () ast;
@@ -338,20 +350,27 @@ let process_file
        then re-checks this file against the now-warm cache. *)
     let deferred_decls =
       if prefetch_decls_enabled && should_enable_deferring file then begin
-        let class_names =
-          Diagnostics.ignore_ (fun () -> Naming.program ctx ast)
-          |> scrape_class_names
-        in
-        let num_refs = SSet.cardinal class_names in
+        (* Cheap gate: scrape the raw AST (no naming pass) to find decl-heavy
+           files. The vast majority of files are below threshold and pay only
+           this read-only AST walk instead of a full naming pass. *)
+        let num_refs = SSet.cardinal (scrape_class_names ast) in
         if num_refs > prefetch_decls_threshold then begin
+          (* Resolve the canonical class names (needs naming) to the files that
+             declare them; unresolved refs are dropped, so this list can be
+             smaller than [num_refs]. *)
+          let deferred =
+            Diagnostics.ignore_ (fun () -> Naming.program ctx ast)
+            |> scrape_class_names
+            |> SSet.elements
+            |> List.filter_map ~f:(fun class_name ->
+                   Naming_provider.get_class_path ctx class_name >>| fun fn ->
+                   (fn, class_name))
+          in
           Hh_logger.log
             "[defer decls] %s: deferring %d decls to prefetch before type checking"
             (Relative_path.suffix fn)
-            num_refs;
-          SSet.elements class_names
-          |> List.filter_map ~f:(fun class_name ->
-                 Naming_provider.get_class_path ctx class_name >>| fun fn ->
-                 (fn, class_name))
+            (List.length deferred);
+          deferred
         end else
           []
       end else

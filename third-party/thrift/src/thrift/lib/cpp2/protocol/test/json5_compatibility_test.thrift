@@ -35,18 +35,12 @@ const list<CompatibilityTestCase> compatibilityTestCases = [
   // Bools should accept both true/false bare literals and JSON strings.
   CompatibilityTestCase{
     name = "BoolTrue",
-    inputs = [
-      "{\"boolValue\": true}",
-      "{\"boolValue\": \"true\"}",
-    ],
+    inputs = ["{\"boolValue\": true}", "{\"boolValue\": \"true\"}"],
     output = json5_test.Example{boolValue = true},
   },
   CompatibilityTestCase{
     name = "BoolFalse",
-    inputs = [
-      "{\"boolValue\": false}",
-      "{\"boolValue\": \"false\"}",
-    ],
+    inputs = ["{\"boolValue\": false}", "{\"boolValue\": \"false\"}"],
     output = json5_test.Example{boolValue = false},
   },
   // ── Map Format Compatibility ──────────────────────────────────────────────
@@ -63,27 +57,19 @@ const list<CompatibilityTestCase> compatibilityTestCases = [
   // Integers should accept both JSON numbers and JSON strings.
   CompatibilityTestCase{
     name = "Integer42",
-    inputs = [
-      "{\"i64Value\": 42}",
-      "{\"i64Value\": \"42\"}",
-    ],
+    inputs = ["{\"i64Value\": 42}", "{\"i64Value\": \"42\"}"],
     output = json5_test.Example{i64Value = 42},
   },
   CompatibilityTestCase{
     name = "IntegerNegative",
-    inputs = [
-      "{\"i64Value\": \"-123\"}",
-    ],
+    inputs = ["{\"i64Value\": \"-123\"}"],
     output = json5_test.Example{i64Value = -123},
   },
   // ── Float Format Compatibility ────────────────────────────────────────────
   // Floats should accept both JSON numbers and JSON strings.
   CompatibilityTestCase{
     name = "Float314",
-    inputs = [
-      "{\"floatValue\": 3.14}",
-      "{\"floatValue\": \"3.14\"}",
-    ],
+    inputs = ["{\"floatValue\": 3.14}", "{\"floatValue\": \"3.14\"}"],
     output = json5_test.Example{floatValue = 3.14},
   },
   CompatibilityTestCase{
@@ -96,10 +82,7 @@ const list<CompatibilityTestCase> compatibilityTestCases = [
   },
   CompatibilityTestCase{
     name = "FloatFromInteger",
-    inputs = [
-      "{\"floatValue\": 42}",
-      "{\"floatValue\": \"42\"}",
-    ],
+    inputs = ["{\"floatValue\": 42}", "{\"floatValue\": \"42\"}"],
     output = json5_test.Example{floatValue = 42.0},
   },
   // ── Enum Format Compatibility ─────────────────────────────────────────────
@@ -192,23 +175,17 @@ const list<CompatibilityTestCase> compatibilityTestCases = [
   // Bool keys in maps are encoded as strings "true" or "false"
   CompatibilityTestCase{
     name = "BoolAsKeyTrue",
-    inputs = [
-      "{\"boolAsKey\": {\"true\": 42}}",
-    ],
+    inputs = ["{\"boolAsKey\": {\"true\": 42}}"],
     output = json5_test.Example{boolAsKey = {1: 42}},
   },
   CompatibilityTestCase{
     name = "BoolAsKeyFalse",
-    inputs = [
-      "{\"boolAsKey\": {\"false\": 42}}",
-    ],
+    inputs = ["{\"boolAsKey\": {\"false\": 42}}"],
     output = json5_test.Example{boolAsKey = {0: 42}},
   },
   CompatibilityTestCase{
     name = "BoolAsKeyBoth",
-    inputs = [
-      "{\"boolAsKey\": {\"true\": 1, \"false\": 0}}",
-    ],
+    inputs = ["{\"boolAsKey\": {\"true\": 1, \"false\": 0}}"],
     output = json5_test.Example{boolAsKey = {1: 1, 0: 0}},
   },
   // ── Field Identifier Format Compatibility ────────────────────────────────────
@@ -284,10 +261,7 @@ const list<CompatibilityTestCase> compatibilityTestCases = [
   // ── Single-Quoted String Compatibility ──────────────────────────────────────
   CompatibilityTestCase{
     name = "SingleQuotedString",
-    inputs = [
-      "{\"stringValue\": 'hello'}",
-      "{'stringValue': 'hello'}",
-    ],
+    inputs = ["{\"stringValue\": 'hello'}", "{'stringValue': 'hello'}"],
     output = json5_test.Example{stringValue = "hello"},
   },
   // ── JSON5 Comments Compatibility ────────────────────────────────────────────
@@ -303,18 +277,13 @@ const list<CompatibilityTestCase> compatibilityTestCases = [
   // ── Double from Integer Compatibility ───────────────────────────────────────
   CompatibilityTestCase{
     name = "DoubleFromInteger",
-    inputs = [
-      "{\"doubleValue\": 42}",
-      "{\"doubleValue\": \"42\"}",
-    ],
+    inputs = ["{\"doubleValue\": 42}", "{\"doubleValue\": \"42\"}"],
     output = json5_test.Example{doubleValue = 42.0},
   },
   // ── Union Compatibility ─────────────────────────────────────────────────────
   CompatibilityTestCase{
     name = "UnionEmpty",
-    inputs = [
-      "{\"unionValue\": {}}",
-    ],
+    inputs = ["{\"unionValue\": {}}"],
     output = json5_test.Example{unionValue = json5_test.ExampleUnion{}},
   },
 ];

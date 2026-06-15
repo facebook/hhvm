@@ -67,8 +67,13 @@ let rec are_return_expressions_same (ret_list : Tast.expr list) : bool =
   | [_] -> true
   | [] -> true
 
-(* This function returns a list of all the expressions that follow each of the return statements in a block *)
-let get_return_expr_visitor =
+type return_or_throw =
+  | Return_expr of Tast.expr
+  | Throw_stmt
+
+(* This function returns all return expressions and throw statements in a
+   block. *)
+let get_return_or_throw_visitor =
   object
     inherit [_] Aast.reduce as super
 
@@ -78,10 +83,11 @@ let get_return_expr_visitor =
 
     method! on_stmt env s =
       match snd s with
-      | Aast.Return (Some expr) -> [expr]
+      | Aast.Return (Some expr) -> [Return_expr expr]
+      | Aast.Throw _ -> [Throw_stmt]
       | _ -> super#on_stmt env s
 
-    (* we ignore the return expressions within lambda statements *)
+    (* We ignore return expressions and throw statements within lambdas. *)
     method! on_expr_ env e =
       match e with
       | Aast.Efun _ -> []
@@ -89,14 +95,28 @@ let get_return_expr_visitor =
       | _ -> super#on_expr_ env e
   end
 
-let get_return_exprs (stmts : Tast.stmt list) : Tast.expr list =
-  get_return_expr_visitor#on_block () stmts
+let get_return_or_throw (stmts : Tast.stmt list) : return_or_throw list =
+  get_return_or_throw_visitor#on_block () stmts
 
 let check_block (block : Tast.block) : unit =
-  let ret_list = get_return_exprs block in
+  let return_or_throw = get_return_or_throw block in
+  let has_throw =
+    List.exists return_or_throw ~f:(function
+        | Throw_stmt -> true
+        | Return_expr _ -> false)
+  in
+  let ret_list =
+    List.filter_map return_or_throw ~f:(function
+        | Return_expr expr -> Some expr
+        | Throw_stmt -> None)
+  in
   match ret_list with
-  | expr1 :: _ :: _ when are_return_expressions_same ret_list ->
-    if not (is_success_ish expr1) then
+  | expr1 :: _ :: _ ->
+    if
+      (not has_throw)
+      && are_return_expressions_same ret_list
+      && not (is_success_ish expr1)
+    then
       List.iter ret_list ~f:(fun (_, pos, _) ->
           Lints_diagnostics.branches_return_same_value pos)
   | _ -> ()

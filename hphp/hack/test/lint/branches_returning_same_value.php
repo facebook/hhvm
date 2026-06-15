@@ -328,4 +328,74 @@ class Foo {
       return "hello"; //should not produce lint
     }
   }
+
+  public function returnSameValueWithThrowPath(bool $x, bool $y): bool {
+    if ($x) {
+      return false; //should not produce lint
+    }
+    if ($y) {
+      return false; //should not produce lint
+    }
+    throw new Exception("different path");
+  }
+
+  // A throw inside a lambda is ignored, so the enclosing body still always
+  // returns the same value.
+  public function returnSameValueWithThrowInLambda(bool $x): bool {
+    if ($x) {
+      return false; //should produce lint
+    }
+    $lambda = () ==> {
+      throw new Exception("throw inside lambda is ignored");
+    };
+    return false; //should produce lint
+  }
+
+  // A throw outside a lambda takes the function out of scope of this lint even
+  // when it sits in an unrelated branch: the function no longer always returns
+  // the same value.
+  public function returnSameValueWithUnrelatedThrow(bool $x, bool $y): bool {
+    if ($x) {
+      return false; //should not produce lint
+    }
+    if ($y) {
+      throw new Exception("unrelated branch");
+    }
+    return false; //should not produce lint
+  }
+}
+
+function return_same_value_with_throw_path(bool $x, bool $y): bool {
+  if ($x) {
+    return false; //should not produce lint
+  }
+  if ($y) {
+    return false; //should not produce lint
+  }
+  throw new Exception("different path");
+}
+
+// A throw inside a lambda is ignored, so the enclosing body still always
+// returns the same value.
+function return_same_value_with_throw_in_lambda(bool $x): bool {
+  if ($x) {
+    return false; //should produce lint
+  }
+  $lambda = () ==> {
+    throw new Exception("throw inside lambda is ignored");
+  };
+  return false; //should produce lint
+}
+
+// A throw outside a lambda takes the function out of scope of this lint even
+// when it sits in an unrelated branch: the function no longer always returns
+// the same value.
+function return_same_value_with_unrelated_throw(bool $x, bool $y): bool {
+  if ($x) {
+    return false; //should not produce lint
+  }
+  if ($y) {
+    throw new Exception("unrelated branch");
+  }
+  return false; //should not produce lint
 }

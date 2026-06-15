@@ -106,3 +106,11 @@ File "branches_returning_same_value.php", line 313, characters 14-20:
 There are multiple return statements, but they all return the same value. (Lint[5646])
 File "branches_returning_same_value.php", line 315, characters 14-20:
 There are multiple return statements, but they all return the same value. (Lint[5646])
+File "branches_returning_same_value.php", line 346, characters 14-18:
+There are multiple return statements, but they all return the same value. (Lint[5646])
+File "branches_returning_same_value.php", line 351, characters 12-16:
+There are multiple return statements, but they all return the same value. (Lint[5646])
+File "branches_returning_same_value.php", line 382, characters 12-16:
+There are multiple return statements, but they all return the same value. (Lint[5646])
+File "branches_returning_same_value.php", line 387, characters 10-14:
+There are multiple return statements, but they all return the same value. (Lint[5646])

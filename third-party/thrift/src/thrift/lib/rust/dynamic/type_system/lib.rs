@@ -21,145 +21,31 @@
 //! Designed for construction from (and round-tripping to)
 //! [`SerializableTypeSystem`].
 
-use std::collections::BTreeMap;
-use std::collections::HashSet;
-use std::sync::Arc;
-
-pub mod builder;
-pub mod containers;
 pub mod error;
-pub mod indexed;
+pub mod field;
 pub mod nodes;
+pub mod structured_node;
 pub mod type_ref;
+pub mod type_system;
 
-pub use builder::from_serializable;
-pub use builder::to_serializable;
-pub use containers::ListType;
-pub use containers::MapType;
-pub use containers::SetType;
 pub use error::InvalidTypeError;
-pub use indexed::IndexedTypeSystem;
-pub use nodes::AnnotationsMap;
+pub use field::AnnotationsMap;
+pub use field::FastFieldHandle;
+pub use field::FieldDefinition;
+pub use field::FieldIdentity;
+pub use field::PresenceQualifier;
 pub use nodes::EnumNode;
 pub use nodes::EnumValue;
-pub use nodes::FieldDefinition;
-pub use nodes::FieldIdentity;
+pub use nodes::ListType;
+pub use nodes::MapType;
 pub use nodes::OpaqueAliasNode;
-pub use nodes::PresenceQualifier;
+pub use nodes::SetType;
 pub use nodes::StructNode;
-pub use nodes::StructuredNode;
 pub use nodes::UnionNode;
+pub use structured_node::StructuredNode;
+pub use type_ref::DefinitionKind;
 pub use type_ref::DefinitionRef;
 pub use type_ref::Kind;
 pub use type_ref::TypeRef;
-
-/// `TypeSystem` provides a graph of runtime representations for
-/// thrift types.
-///
-/// It supports:
-/// - URI-based lookup of user-defined types, e.g. structs, unions, ...
-/// - [`TypeId`](type_id::TypeId) resolution, mapping from a description of a type to its properties
-/// - It supports ad-hoc construction of types within the `TypeSystem`, e.g. `list_of`, `map_of`, ...
-pub trait TypeSystem: type_system_digest::TypeSystemDigest {
-    /// Look up a definition by URI.
-    fn get(&self, uri: &str) -> Option<DefinitionRef>;
-
-    /// Returns the set of all known URIs.
-    fn known_uris(&self) -> HashSet<&str>;
-
-    /// Look up a user-defined type and return it as a [`TypeRef`].
-    fn user_defined(&self, uri: &str) -> Result<TypeRef, InvalidTypeError>;
-
-    /// Look up a definition by URI, returning an error if not found.
-    fn get_or_err(&self, uri: &str) -> Result<DefinitionRef, InvalidTypeError> {
-        self.get(uri)
-            .ok_or_else(|| InvalidTypeError::UnknownUri(uri.to_string()))
-    }
-
-    /// Creates a list type.
-    fn list_of(&self, element: TypeRef) -> TypeRef {
-        TypeRef::List(Arc::new(ListType { element }))
-    }
-
-    /// Creates a set type.
-    fn set_of(&self, element: TypeRef) -> TypeRef {
-        TypeRef::Set(Arc::new(SetType { element }))
-    }
-
-    /// Creates a map type.
-    fn map_of(&self, key: TypeRef, value: TypeRef) -> TypeRef {
-        TypeRef::Map(Arc::new(MapType { key, value }))
-    }
-
-    /// Resolve a [`TypeId`](type_id::TypeId) to a [`TypeRef`] within this type system.
-    fn resolve(&self, type_id: &type_id::TypeId) -> Result<TypeRef, InvalidTypeError> {
-        match type_id {
-            type_id::TypeId::boolType(_) => Ok(TypeRef::Bool),
-            type_id::TypeId::byteType(_) => Ok(TypeRef::Byte),
-            type_id::TypeId::i16Type(_) => Ok(TypeRef::I16),
-            type_id::TypeId::i32Type(_) => Ok(TypeRef::I32),
-            type_id::TypeId::i64Type(_) => Ok(TypeRef::I64),
-            type_id::TypeId::floatType(_) => Ok(TypeRef::Float),
-            type_id::TypeId::doubleType(_) => Ok(TypeRef::Double),
-            type_id::TypeId::stringType(_) => Ok(TypeRef::String),
-            type_id::TypeId::binaryType(_) => Ok(TypeRef::Binary),
-            type_id::TypeId::anyType(_) => Ok(TypeRef::Any),
-            type_id::TypeId::userDefinedType(uri) => self.user_defined(uri),
-            type_id::TypeId::listType(list) => {
-                let elem = list
-                    .elementType
-                    .as_ref()
-                    .ok_or(InvalidTypeError::EmptyTypeId)?;
-                let elem_ref = self.resolve(elem)?;
-                Ok(self.list_of(elem_ref))
-            }
-            type_id::TypeId::setType(set) => {
-                let elem = set
-                    .elementType
-                    .as_ref()
-                    .ok_or(InvalidTypeError::EmptyTypeId)?;
-                let elem_ref = self.resolve(elem)?;
-                Ok(self.set_of(elem_ref))
-            }
-            type_id::TypeId::mapType(map) => {
-                let key = map.keyType.as_ref().ok_or(InvalidTypeError::EmptyTypeId)?;
-                let value = map
-                    .valueType
-                    .as_ref()
-                    .ok_or(InvalidTypeError::EmptyTypeId)?;
-                let key_ref = self.resolve(key)?;
-                let value_ref = self.resolve(value)?;
-                Ok(self.map_of(key_ref, value_ref))
-            }
-            type_id::TypeId::UnknownField(id) => Err(InvalidTypeError::UnresolvableTypeId {
-                uri: String::new(),
-                detail: format!("unknown TypeId variant (field {id})"),
-            }),
-        }
-    }
-
-    /// Convert this type system to its serializable representation.
-    ///
-    /// The default implementation uses [`known_uris`](Self::known_uris) and
-    /// [`get`](Self::get) to iterate all definitions. Concrete implementations
-    /// may override for efficiency.
-    fn to_serializable(&self) -> type_system::SerializableTypeSystem {
-        let mut types = BTreeMap::new();
-        for uri in self.known_uris() {
-            if let Some(def_ref) = self.get(uri) {
-                types.insert(
-                    uri.to_string(),
-                    type_system::SerializableTypeDefinitionEntry {
-                        definition: builder::serialize_definition_ref(&def_ref),
-                        sourceInfo: None,
-                        ..Default::default()
-                    },
-                );
-            }
-        }
-        type_system::SerializableTypeSystem {
-            types,
-            ..Default::default()
-        }
-    }
-}
+pub use type_system::BasicTypeSystem;
+pub use type_system::TypeSystem;

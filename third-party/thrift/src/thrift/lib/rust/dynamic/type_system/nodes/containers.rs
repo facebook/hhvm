@@ -14,40 +14,51 @@
  * limitations under the License.
  */
 
+//! Container types: list, set, and map.
+
 use crate::type_ref::TypeRef;
 
-/// Thrift `list<T>` type descriptor.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct ListType {
-    pub(crate) element: TypeRef,
+    element: TypeRef,
 }
 
 impl ListType {
+    pub fn new(element: TypeRef) -> Self {
+        Self { element }
+    }
+
     pub fn element_type(&self) -> &TypeRef {
         &self.element
     }
 }
 
-/// Thrift `set<T>` type descriptor.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct SetType {
-    pub(crate) element: TypeRef,
+    element: TypeRef,
 }
 
 impl SetType {
+    pub fn new(element: TypeRef) -> Self {
+        Self { element }
+    }
+
     pub fn element_type(&self) -> &TypeRef {
         &self.element
     }
 }
 
-/// Thrift `map<K, V>` type descriptor.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct MapType {
-    pub(crate) key: TypeRef,
-    pub(crate) value: TypeRef,
+    key: TypeRef,
+    value: TypeRef,
 }
 
 impl MapType {
+    pub fn new(key: TypeRef, value: TypeRef) -> Self {
+        Self { key, value }
+    }
+
     pub fn key_type(&self) -> &TypeRef {
         &self.key
     }

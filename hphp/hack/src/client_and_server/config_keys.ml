@@ -138,6 +138,8 @@ module Hhconfig = struct
   let disallow_discarded_nullable_awaitables =
     key "disallow_discarded_nullable_awaitables"
 
+  let disallow_duplicate_enum_values = key "disallow_duplicate_enum_values"
+
   let disallow_toplevel_requires = key "disallow_toplevel_requires"
 
   let disallow_unresolved_type_variables =

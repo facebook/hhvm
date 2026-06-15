@@ -128,6 +128,8 @@ module Hhconfig : sig
 
   val disallow_discarded_nullable_awaitables : string
 
+  val disallow_duplicate_enum_values : string
+
   val disallow_toplevel_requires : string
 
   val disallow_unresolved_type_variables : string

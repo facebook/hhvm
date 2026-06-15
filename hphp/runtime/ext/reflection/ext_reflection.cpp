@@ -396,8 +396,8 @@ static const StaticString s_non_dict_named_args(
 );
 
 static const StaticString s_unsupported_callable_type(
-  "hphp_invoke_callable_named_args only supports function pointers and "
-  "static class method references for the callable."
+  "hphp_invoke_callable_named_args only supports function pointers, "
+  "static class method references, and closures for the callable."
 );
 
 Variant HHVM_FUNCTION(hphp_invoke_method, const Variant& obj,
@@ -449,12 +449,20 @@ Variant HHVM_FUNCTION(hphp_invoke_callable_named_args,
                       const Variant& namedArgs) {
   Class* cls = nullptr;
   const Func* func = nullptr;
+  ObjectData* thiz = nullptr;
   if (callable.isFunc()) {
     func = callable.toFuncVal();
   } else if (callable.isClsMeth()) {
     auto clsMeth = callable.toClsMethVal();
     func = clsMeth->getFunc();
     cls = clsMeth->getCls();
+  } else if (callable.isObject()) {
+    thiz = callable.asCObjRef().get();
+    cls = thiz->getVMClass();
+    func = cls->lookupMethod(s___invoke.get());
+    if (!func) {
+      Reflection::ThrowReflectionExceptionObject(s_unsupported_callable_type);
+    }
   } else {
     Reflection::ThrowReflectionExceptionObject(s_unsupported_callable_type);
   }
@@ -484,7 +492,7 @@ Variant HHVM_FUNCTION(hphp_invoke_callable_named_args,
       };
       return Variant::attach(
         g_context->invokeFunc(func, args, namedArgNames,
-                              nullptr, cls, RuntimeCoeffects::fixme(),
+                              thiz, cls, RuntimeCoeffects::fixme(),
                               false /* dynamic */, false /* checkRefAnnot */,
                               true /* allowDynCallNoPointer */, false /* readonlyReturn */,
                               Array() /* generics */, namedArgValues)
@@ -493,7 +501,7 @@ Variant HHVM_FUNCTION(hphp_invoke_callable_named_args,
   }
   return Variant::attach(
     g_context->invokeFunc(func, args, nullptr,
-                          nullptr, cls, RuntimeCoeffects::fixme(),
+                          thiz, cls, RuntimeCoeffects::fixme(),
                           false /* dynamic */)
   );
 }

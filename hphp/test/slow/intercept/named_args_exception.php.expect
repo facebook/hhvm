@@ -1,1 +1,1 @@
-hphp_invoke_callable_named_args only supports function pointers and static class method references for the callable.
+hphp_invoke_callable_named_args only supports function pointers, static class method references, and closures for the callable.

@@ -28,8 +28,8 @@ function hphp_invoke_method(?\HH\object $obj, string $cls, string $name,
 
 /**
  * hphp_invoke_callable_named_args() - Reflection helper to call a function
- *                                     pointer with named arguments.
- * @param object $callable    - The function pointer to invoke.
+ *                                     pointer or closure with named arguments.
+ * @param object $callable    - The function pointer or closure to invoke.
  * @param Traversable $params - The positional parameters to pass to the function.
  * @param ?dict<string, mixed> $namedArgs - A dictionary mapping named arg name to value.
  * @return mixed - The result of the invocation.

@@ -308,7 +308,9 @@ abstract class TProtocol {
           if ($ftype === TType::STOP) {
             break;
           }
-          $result += $this->skip(nullthrows($ftype, 'Got unexpected null'));
+          $result += $this->skip(
+            nullthrows($ftype, '$ftype was unexpectedly null in '.__METHOD__),
+          );
           $result += $this->readFieldEnd();
         }
         $result += $this->readStructEnd();
@@ -323,8 +325,14 @@ abstract class TProtocol {
           if ($size === null && !$this->readMapHasNext()) {
             break;
           }
-          $result += $this->skip(nullthrows($key_type, 'Got unexpected null'));
-          $result += $this->skip(nullthrows($val_type, 'Got unexpected null'));
+          $result += $this->skip(nullthrows(
+            $key_type,
+            '$key_type was unexpectedly null in '.__METHOD__,
+          ));
+          $result += $this->skip(nullthrows(
+            $val_type,
+            '$val_type was unexpectedly null in '.__METHOD__,
+          ));
         }
         $result += $this->readMapEnd();
         return $result;
@@ -337,7 +345,10 @@ abstract class TProtocol {
           if ($size === null && !$this->readSetHasNext()) {
             break;
           }
-          $result += $this->skip(nullthrows($elem_type, 'Got unexpected null'));
+          $result += $this->skip(nullthrows(
+            $elem_type,
+            '$elem_type was unexpectedly null in '.__METHOD__,
+          ));
         }
         $result += $this->readSetEnd();
         return $result;
@@ -350,7 +361,10 @@ abstract class TProtocol {
           if ($size === null && !$this->readSetHasNext()) {
             break;
           }
-          $result += $this->skip(nullthrows($elem_type, 'Got unexpected null'));
+          $result += $this->skip(nullthrows(
+            $elem_type,
+            '$elem_type was unexpectedly null in '.__METHOD__,
+          ));
         }
         $result += $this->readListEnd();
         return $result;

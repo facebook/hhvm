@@ -57,8 +57,10 @@ abstract final class ThriftSerializationHelper {
           !C\contains_key($tspec, $field_id) ||
           $field_type !== $tspec[$field_id]['type']
         ) {
-          $xfer +=
-            $protocol->skip(nullthrows($field_type, 'Got unexpected null'));
+          $xfer += $protocol->skip(nullthrows(
+            $field_type,
+            '$field_type was unexpectedly null in '.__METHOD__,
+          ));
           $xfer += $protocol->readFieldEnd();
           continue;
         }
@@ -73,15 +75,19 @@ abstract final class ThriftSerializationHelper {
         // Skip type if there is a mismatch between the tspec and the
         // type that we obtain from the buffer.
         if (!PHP\array_key_exists($field_name, $object::FIELDMAP)) {
-          $xfer +=
-            $protocol->skip(nullthrows($field_type, 'Got unexpected null'));
+          $xfer += $protocol->skip(nullthrows(
+            $field_type,
+            '$field_type was unexpectedly null in '.__METHOD__,
+          ));
           $xfer += $protocol->readFieldEnd();
           continue;
         }
 
         // This uses the TFIELDMAP to find the field id.
-        $field_id =
-          $object::FIELDMAP[nullthrows($field_name, 'Got unexpected null')];
+        $field_id = $object::FIELDMAP[nullthrows(
+          $field_name,
+          '$field_name was unexpectedly null in '.__METHOD__,
+        )];
       }
 
       $tmp = null;

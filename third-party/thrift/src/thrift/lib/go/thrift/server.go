@@ -35,6 +35,7 @@ import (
 	"github.com/rsocket/rsocket-go/rx/flux"
 	"github.com/rsocket/rsocket-go/rx/mono"
 
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/format"
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/rocket"
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 	"github.com/facebook/fbthrift/thrift/lib/thrift/rpcmetadata"
@@ -532,93 +533,22 @@ func (s *rocketServerSocket) requestStream(msg payload.Payload) flux.Flux {
 	return flux.Create(
 		func(ctx context.Context, sink flux.Sink) {
 			ctx = WithRequestContext(ctx, reqCtx)
-			protoID := types.ProtocolID(metadata.GetProtocol())
-			responseCompressionAlgo := rocket.CompressionAlgorithmFromCompressionConfig(metadata.GetCompressionConfig())
 
 			onFirstResponse := func(respStruct WritableStruct) {
-				protocol, err := newProtocolBuffer(protoID, nil)
+				respPayload, err := s.makeResponsePayload(metadata, respStruct, true /* isFirstResponse */)
 				if err != nil {
-					s.log("server requestStream newProtocolBuffer error: %v", err)
+					s.log("server requestStream makeResponsePayload error: %v", err)
 					return
 				}
-				err = sendWritableStruct(protocol, rpcFuncName, types.REPLY, 0, respStruct)
-				if err != nil {
-					s.log("server requestStream sendWritableStruct error: %v", err)
-					return
-				}
-				loadMetricPtr := (*int64)(nil)
-				if metadata.IsSetLoadMetric() {
-					// SHOULD be set iff loadMetric was set in RequestRpcMetadata
-					loadMetricPtr = Pointerize(int64(s.loadFn()))
-				}
-				var payload payload.Payload
-				appException, isAppException := respStruct.(*types.ApplicationException)
-				if isAppException {
-					s.observer.UndeclaredExceptionForFunction(rpcFuncName)
-					payload, err = rocket.EncodeResponseApplicationErrorPayload(
-						appException,
-						protocol.getRequestHeaders(),
-						responseCompressionAlgo,
-						loadMetricPtr,
-					)
-				} else {
-					payload, err = rocket.EncodeResponsePayload(
-						protocol.getRequestHeaders(),
-						responseCompressionAlgo,
-						loadMetricPtr,
-						protocol.Bytes(),
-					)
-				}
-				if err != nil {
-					s.log("server requestStream EncodeResponsePayload error: %v", err)
-					return
-				}
-				sink.Next(payload)
+				sink.Next(respPayload)
 			}
 			onStreamNext := func(streamStruct WritableStruct) {
-				protocol, err := newProtocolBuffer(protoID, nil)
+				streamPayload, err := s.makeResponsePayload(metadata, streamStruct, false /* isFirstResponse */)
 				if err != nil {
-					s.log("server requestStream newProtocolBuffer error: %v", err)
+					s.log("server requestStream makeResponsePayload error: %v", err)
 					return
 				}
-				err = sendWritableStruct(protocol, rpcFuncName, types.REPLY, 0, streamStruct)
-				if err != nil {
-					s.log("server requestStream sendWritableStruct error: %v", err)
-					return
-				}
-
-				dataBytes := protocol.Bytes()
-				payloadMetadata := rpcmetadata.NewPayloadMetadata()
-				var exceptionMetadataBase *rpcmetadata.PayloadExceptionMetadataBase
-				if appEx, ok := streamStruct.(*types.ApplicationException); ok {
-					exceptionMetadataBase = rocket.NewPayloadExceptionMetadataBaseV2(appEx)
-					// Response should be empty to adhere to spec
-					dataBytes = nil
-					s.observer.UndeclaredExceptionForFunction(rpcFuncName)
-				} else if streamResult, ok := streamStruct.(types.WritableResult); ok && streamResult.Exception() != nil {
-					declaredErr := streamResult.Exception()
-					exceptionMetadataBase = rocket.NewPayloadExceptionMetadataBaseV2(declaredErr)
-					s.observer.DeclaredExceptionForFunction(rpcFuncName)
-				}
-
-				if exceptionMetadataBase != nil {
-					payloadMetadata.SetExceptionMetadata(exceptionMetadataBase)
-				} else {
-					responseMetadata := rpcmetadata.NewPayloadResponseMetadata()
-					payloadMetadata.SetResponseMetadata(responseMetadata)
-				}
-
-				metadata := rpcmetadata.NewStreamPayloadMetadata().
-					SetOtherMetadata(protocol.getRequestHeaders()).
-					SetCompression(&responseCompressionAlgo).
-					SetPayloadMetadata(payloadMetadata)
-
-				payload, err := rocket.EncodePayloadMetadataAndData(metadata, dataBytes, responseCompressionAlgo)
-				if err != nil {
-					s.log("server requestStream EncodeStreamPayload error: %v", err)
-					return
-				}
-				sink.Next(payload)
+				sink.Next(streamPayload)
 			}
 			onStreamComplete := func() {
 				sink.Complete()
@@ -651,9 +581,7 @@ func (s *rocketServerSocket) requestChannelSink(
 	pfuncSink processorFunctionSink,
 	requests flux.Flux,
 ) flux.Flux {
-	rpcFuncName := metadata.GetName()
 	protoID := types.ProtocolID(metadata.GetProtocol())
-	responseCompressionAlgo := rocket.CompressionAlgorithmFromCompressionConfig(metadata.GetCompressionConfig())
 
 	sinkElemChan := make(chan ReadableStruct, types.DefaultStreamBufferSize)
 	sinkErrChan := make(chan error, 1)
@@ -678,70 +606,10 @@ func (s *rocketServerSocket) requestChannelSink(
 		ctx = WithRequestContext(ctx, reqCtx)
 		firstResponseQueued := make(chan struct{})
 
-		makePayload := func(respStruct WritableStruct, isFirstResponse bool) (payload.Payload, error) {
-			respProtocol, err := newProtocolBuffer(protoID, nil)
-			if err != nil {
-				return nil, err
-			}
-			if err := sendWritableStruct(respProtocol, rpcFuncName, types.REPLY, 0, respStruct); err != nil {
-				return nil, err
-			}
-			dataBytes := respProtocol.Bytes()
-			headers := respProtocol.getRequestHeaders()
-
-			// Build exception metadata if applicable
-			var exceptionMetadata *rpcmetadata.PayloadExceptionMetadataBase
-			if appEx, ok := respStruct.(*types.ApplicationException); ok {
-				exceptionMetadata = rocket.NewPayloadExceptionMetadataBaseV2(appEx)
-				dataBytes = nil
-				s.observer.UndeclaredExceptionForFunction(rpcFuncName)
-			} else if streamResult, ok := respStruct.(types.WritableResult); ok && streamResult.Exception() != nil {
-				declaredErr := streamResult.Exception()
-				exceptionMetadata = rocket.NewPayloadExceptionMetadataBaseV2(declaredErr)
-				s.observer.DeclaredExceptionForFunction(rpcFuncName)
-			}
-
-			if isFirstResponse {
-				loadMetricPtr := (*int64)(nil)
-				if metadata.IsSetLoadMetric() {
-					loadMetricPtr = Pointerize(int64(s.loadFn()))
-				}
-				if appException, ok := respStruct.(*types.ApplicationException); ok {
-					return rocket.EncodeResponseApplicationErrorPayload(
-						appException,
-						headers,
-						responseCompressionAlgo,
-						loadMetricPtr,
-					)
-				}
-				return rocket.EncodeResponsePayload(
-					headers,
-					responseCompressionAlgo,
-					loadMetricPtr,
-					dataBytes,
-				)
-			}
-
-			// Final response encoding
-			payloadMetadata := rpcmetadata.NewPayloadMetadata()
-			if exceptionMetadata != nil {
-				payloadMetadata.SetExceptionMetadata(exceptionMetadata)
-			} else {
-				payloadMetadata.SetResponseMetadata(rpcmetadata.NewPayloadResponseMetadata())
-			}
-
-			streamMetadata := rpcmetadata.NewStreamPayloadMetadata().
-				SetOtherMetadata(headers).
-				SetCompression(&responseCompressionAlgo).
-				SetPayloadMetadata(payloadMetadata)
-
-			return rocket.EncodePayloadMetadataAndData(streamMetadata, dataBytes, responseCompressionAlgo)
-		}
-
 		onFirstResponse := func(respStruct WritableStruct) {
-			respPayload, err := makePayload(respStruct, true)
+			respPayload, err := s.makeResponsePayload(metadata, respStruct, true /* isFirstResponse */)
 			if err != nil {
-				s.log("server requestChannel makePayload error: %v", err)
+				s.log("server requestChannel makeResponsePayload error: %v", err)
 				return
 			}
 			sink.Next(respPayload)
@@ -749,9 +617,9 @@ func (s *rocketServerSocket) requestChannelSink(
 		}
 
 		onFinalResponse := func(respStruct WritableStruct) {
-			finalPayload, err := makePayload(respStruct, false)
+			finalPayload, err := s.makeResponsePayload(metadata, respStruct, false /* isFirstResponse */)
 			if err != nil {
-				s.log("server requestChannel makePayload error: %v", err)
+				s.log("server requestChannel makeResponsePayload error: %v", err)
 				return
 			}
 			sink.Next(rsocket.NewFinalPayload(finalPayload))
@@ -848,9 +716,7 @@ func (s *rocketServerSocket) requestChannelBiDi(
 	pfuncBiDi processorFunctionBiDi,
 	requests flux.Flux,
 ) flux.Flux {
-	rpcFuncName := metadata.GetName()
 	protoID := types.ProtocolID(metadata.GetProtocol())
-	responseCompressionAlgo := rocket.CompressionAlgorithmFromCompressionConfig(metadata.GetCompressionConfig())
 
 	sinkElemChan := make(chan ReadableStruct, types.DefaultStreamBufferSize)
 	sinkErrChan := make(chan error, 1)
@@ -873,69 +739,10 @@ func (s *rocketServerSocket) requestChannelBiDi(
 		ctx = WithRequestContext(ctx, reqCtx)
 		firstResponseQueued := make(chan struct{})
 
-		makePayload := func(respStruct WritableStruct, isFirstResponse bool) (payload.Payload, error) {
-			respProtocol, err := newProtocolBuffer(protoID, nil)
-			if err != nil {
-				return nil, err
-			}
-			if err := sendWritableStruct(respProtocol, rpcFuncName, types.REPLY, 0, respStruct); err != nil {
-				return nil, err
-			}
-			dataBytes := respProtocol.Bytes()
-			headers := respProtocol.getRequestHeaders()
-
-			// Build exception metadata if applicable
-			var exceptionMetadata *rpcmetadata.PayloadExceptionMetadataBase
-			if appEx, ok := respStruct.(*types.ApplicationException); ok {
-				exceptionMetadata = rocket.NewPayloadExceptionMetadataBaseV2(appEx)
-				dataBytes = nil
-				s.observer.UndeclaredExceptionForFunction(rpcFuncName)
-			} else if streamResult, ok := respStruct.(types.WritableResult); ok && streamResult.Exception() != nil {
-				declaredErr := streamResult.Exception()
-				exceptionMetadata = rocket.NewPayloadExceptionMetadataBaseV2(declaredErr)
-				s.observer.DeclaredExceptionForFunction(rpcFuncName)
-			}
-
-			if isFirstResponse {
-				loadMetricPtr := (*int64)(nil)
-				if metadata.IsSetLoadMetric() {
-					loadMetricPtr = Pointerize(int64(s.loadFn()))
-				}
-				if appException, ok := respStruct.(*types.ApplicationException); ok {
-					return rocket.EncodeResponseApplicationErrorPayload(
-						appException,
-						headers,
-						responseCompressionAlgo,
-						loadMetricPtr,
-					)
-				}
-				return rocket.EncodeResponsePayload(
-					headers,
-					responseCompressionAlgo,
-					loadMetricPtr,
-					dataBytes,
-				)
-			}
-
-			payloadMetadata := rpcmetadata.NewPayloadMetadata()
-			if exceptionMetadata != nil {
-				payloadMetadata.SetExceptionMetadata(exceptionMetadata)
-			} else {
-				payloadMetadata.SetResponseMetadata(rpcmetadata.NewPayloadResponseMetadata())
-			}
-
-			streamMetadata := rpcmetadata.NewStreamPayloadMetadata().
-				SetOtherMetadata(headers).
-				SetCompression(&responseCompressionAlgo).
-				SetPayloadMetadata(payloadMetadata)
-
-			return rocket.EncodePayloadMetadataAndData(streamMetadata, dataBytes, responseCompressionAlgo)
-		}
-
 		onFirstResponse := func(respStruct WritableStruct) {
-			respPayload, err := makePayload(respStruct, true)
+			respPayload, err := s.makeResponsePayload(metadata, respStruct, true /* isFirstResponse */)
 			if err != nil {
-				s.log("server requestChannel makePayload error: %v", err)
+				s.log("server requestChannel makeResponsePayload error: %v", err)
 				return
 			}
 			sink.Next(respPayload)
@@ -943,9 +750,9 @@ func (s *rocketServerSocket) requestChannelBiDi(
 		}
 
 		onStreamNext := func(respStruct WritableStruct) {
-			streamPayload, err := makePayload(respStruct, false)
+			streamPayload, err := s.makeResponsePayload(metadata, respStruct, false /* isFirstResponse */)
 			if err != nil {
-				s.log("server requestChannel makePayload error: %v", err)
+				s.log("server requestChannel makeResponsePayload error: %v", err)
 				return
 			}
 			sink.Next(streamPayload)
@@ -1053,6 +860,93 @@ func newProtocolBufferFromRequest(payloadDataBytes []byte, metadata *rpcmetadata
 	observer.TimeReadUsForFunction(rpcFuncName, readDuration)
 
 	return protocol, nil
+}
+
+// makeResponsePayload encodes a single response struct into a rocket payload.
+// isFirstResponse selects the initial-response encoding (request-response style)
+// over the subsequent stream-element encoding. It is shared by the streaming RPC
+// paths (stream, sink, bidi).
+func (s *rocketServerSocket) makeResponsePayload(
+	metadata *rpcmetadata.RequestRpcMetadata,
+	respStruct WritableStruct,
+	isFirstResponse bool,
+) (payload.Payload, error) {
+	rpcFuncName := metadata.GetName()
+	protoID := metadata.GetProtocol()
+	compression := rocket.CompressionAlgorithmFromCompressionConfig(metadata.GetCompressionConfig())
+
+	writeStartTime := time.Now()
+
+	var dataBytes []byte
+	var err error
+	switch protoID {
+	case rpcmetadata.ProtocolId_BINARY:
+		dataBytes, err = format.EncodeBinary(respStruct)
+	case rpcmetadata.ProtocolId_COMPACT:
+		dataBytes, err = format.EncodeCompact(respStruct)
+	default:
+		return nil, types.NewProtocolException(fmt.Errorf("unknown protocol id: %d", protoID))
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	// Wrapped in a closure so time.Since is evaluated at return, not eagerly at
+	// the defer statement (deferred-call arguments are evaluated immediately).
+	defer func() {
+		s.observer.TimeWriteUsForFunction(rpcFuncName, time.Since(writeStartTime))
+	}()
+
+	headers := map[string]string{}
+
+	// Build exception metadata if applicable, reporting both undeclared and
+	// declared exceptions to the observer.
+	var exceptionMetadata *rpcmetadata.PayloadExceptionMetadataBase
+	if appEx, ok := respStruct.(*types.ApplicationException); ok {
+		exceptionMetadata = rocket.NewPayloadExceptionMetadataBaseV2(appEx)
+		dataBytes = nil
+		s.observer.UndeclaredExceptionForFunction(rpcFuncName)
+	} else if streamResult, ok := respStruct.(types.WritableResult); ok && streamResult.Exception() != nil {
+		declaredErr := streamResult.Exception()
+		exceptionMetadata = rocket.NewPayloadExceptionMetadataBaseV2(declaredErr)
+		s.observer.DeclaredExceptionForFunction(rpcFuncName)
+	}
+
+	if isFirstResponse {
+		loadMetricPtr := (*int64)(nil)
+		if metadata.IsSetLoadMetric() {
+			loadMetricPtr = Pointerize(int64(s.loadFn()))
+		}
+		if appException, ok := respStruct.(*types.ApplicationException); ok {
+			return rocket.EncodeResponseApplicationErrorPayload(
+				appException,
+				headers,
+				compression,
+				loadMetricPtr,
+			)
+		}
+		return rocket.EncodeResponsePayload(
+			headers,
+			compression,
+			loadMetricPtr,
+			dataBytes,
+		)
+	}
+
+	// Subsequent stream-element encoding.
+	payloadMetadata := rpcmetadata.NewPayloadMetadata()
+	if exceptionMetadata != nil {
+		payloadMetadata.SetExceptionMetadata(exceptionMetadata)
+	} else {
+		payloadMetadata.SetResponseMetadata(rpcmetadata.NewPayloadResponseMetadata())
+	}
+
+	streamMetadata := rpcmetadata.NewStreamPayloadMetadata().
+		SetOtherMetadata(headers).
+		SetCompression(&compression).
+		SetPayloadMetadata(payloadMetadata)
+
+	return rocket.EncodePayloadMetadataAndData(streamMetadata, dataBytes, compression)
 }
 
 // preprocessRequest performs the shared per-request setup for the streaming RPC

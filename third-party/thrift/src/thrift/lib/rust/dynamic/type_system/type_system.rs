@@ -39,6 +39,12 @@ pub trait TypeSystem {
 
     /// Resolve a serializable `TypeId` to a live `TypeRef`.
     fn resolve(&self, type_id: &TypeId) -> Result<TypeRef, InvalidTypeError>;
+
+    /// Look up a definition by URI, returning an error if not found.
+    fn get_or_err(&self, uri: &str) -> Result<DefinitionRef, InvalidTypeError> {
+        self.get(uri)
+            .ok_or_else(|| InvalidTypeError::UnknownUri(uri.to_owned()))
+    }
 }
 
 /// Internal storage for a definition node within the type system.

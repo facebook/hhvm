@@ -21,6 +21,7 @@
 //! Designed for construction from (and round-tripping to)
 //! [`SerializableTypeSystem`].
 
+pub mod builder;
 mod digest;
 pub mod error;
 pub mod field;
@@ -30,6 +31,10 @@ pub mod structured_node;
 pub mod type_ref;
 pub mod type_system;
 
+#[cfg(test)]
+mod tests;
+
+pub use builder::TypeSystemBuilder;
 pub use error::InvalidTypeError;
 pub use field::AnnotationsMap;
 pub use field::FastFieldHandle;

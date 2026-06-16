@@ -330,6 +330,7 @@ impl<'o, 't> DirectDeclSmartConstructors<'o, 't> {
     fn keep_user_attribute(&self, attr: &UserAttributeNode) -> bool {
         let name = &attr.name.1;
         self.opts.keep_user_attributes
+            || name == "__GatedByFeatureFlag"
             || name == "__NoAutoDynamic"
             || name == "__NoAutoLikes"
             || name == "__Overlapping"

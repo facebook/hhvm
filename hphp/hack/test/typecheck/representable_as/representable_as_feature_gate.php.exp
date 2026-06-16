@@ -1,0 +1,2 @@
+ERROR: File "representable_as_feature_gate.php", line 4, characters 3-34:
+`HH\Runtime\RepresentableAs` requires the unstable feature `representable_as`. Add `<<file: __EnableUnstableFeatures('representable_as')>>` to use it. (Typing[4509])

@@ -233,20 +233,6 @@ func (s *server) isOverloaded() bool {
 	return countWithNewRequest > s.maxRequests
 }
 
-// processWithPanicTracking wraps the process call to intercept and track processor panics.
-// It acts as middleware that records the panic metric, then re-panics to let the downstream
-// reactor-go library handle the error response to the client.
-// See: https://github.com/jjeffcaii/reactor-go/blob/v0.5.6/mono/create.go#L35
-func (s *rocketServerSocket) processWithPanicTracking(ctx context.Context, processor Processor, protocol *protocolBuffer) (*types.ApplicationException, error) {
-	defer func() {
-		if r := recover(); r != nil {
-			s.observer.ProcessorPanic()
-			panic(r)
-		}
-	}()
-	return process(ctx, processor, protocol, s.observer)
-}
-
 // getQueueTimeout returns the queue timeout duration from metadata, or max duration if not set
 func getQueueTimeout(metadata *rpcmetadata.RequestRpcMetadata) time.Duration {
 	if metadata.IsSetQueueTimeoutMs() {
@@ -326,38 +312,13 @@ func (s *rocketServerSocket) metadataPush(msg payload.Payload) {
 }
 
 func (s *rocketServerSocket) requestResponse(msg payload.Payload) mono.Mono {
-	// TODO: this clone helps prevent a race-condition where the payload gets
-	// released by the underlying rsocket layer before we are done with it.
-	msg = payload.Clone(msg)
-
 	requestReceivedTime := time.Now()
 
-	metadata := rpcmetadata.NewRequestRpcMetadata()
-	err := rocket.DecodePayloadMetadata(msg, metadata)
+	metadata, pfunc, argStruct, reqCtx, err := s.preprocessRequest(msg)
 	if err != nil {
-		// Notify observer that connection was dropped and task killed due to malformed rocket payload
-		s.observer.ConnDropped()
-		s.observer.TaskKilled()
 		return mono.Error(err)
 	}
 	rpcFuncName := metadata.GetName()
-	protocol, err := newProtocolBufferFromRequest(msg.Data(), metadata, s.observer)
-	if err != nil {
-		// Notify observer that connection was dropped and task killed due to protocol buffer creation error
-		s.observer.ConnDropped()
-		s.observer.TaskKilled()
-		return mono.Error(err)
-	}
-
-	// Notify observer that request was received
-	s.observer.ReceivedRequestForFunction(rpcFuncName)
-
-	if s.isOverloaded() {
-		// Track connection drops and server overload events when rejecting requests
-		s.observer.ConnDropped()
-		s.observer.ServerOverloaded()
-		return mono.Error(loadSheddingError)
-	}
 
 	workItem := func(ctx context.Context) (payload.Payload, error) {
 		// Increment active requests when processing actually starts
@@ -375,28 +336,41 @@ func (s *rocketServerSocket) requestResponse(msg payload.Payload) mono.Mono {
 			return nil, taskExpiredError
 		}
 
-		processor := s.proc
 		if metadata.InteractionCreate != nil {
 			ctx = types.WithInteractionCreateContext(ctx)
-		} else if metadata.InteractionId != nil {
-			s.interactionsMutex.Lock()
-			interactionProcessor, ok := s.interactions[*metadata.InteractionId]
-			s.interactionsMutex.Unlock()
-			if !ok {
-				return nil, fmt.Errorf("unknown interaction id: %d", *metadata.InteractionId)
-			}
-			processor = interactionProcessor
+		}
+		ctx = WithRequestContext(ctx, reqCtx)
+
+		result, runErr := func() (WritableStruct, error) {
+			defer func() {
+				if r := recover(); r != nil {
+					s.observer.ProcessorPanic()
+					panic(r)
+				}
+			}()
+			pfuncStartTime := time.Now()
+			res, err := pfunc.RunContext(ctx, argStruct)
+			s.observer.TimeProcessUsForFunction(rpcFuncName, time.Since(pfuncStartTime))
+			return res, err
+		}()
+
+		// Select the response struct: an undeclared error becomes an
+		// ApplicationException; otherwise the handler result (which may carry a
+		// declared exception).
+		respStruct := result
+		if runErr != nil {
+			respStruct = maybeWrapApplicationException(runErr)
 		}
 
-		// Track actual handler execution time
-		appException, err := s.processWithPanicTracking(ctx, processor, protocol)
-		if err != nil {
-			// Notify observer that connection was dropped due to unparseable message begin
-			s.observer.ConnDropped()
-			return nil, err
+		// Only register the interaction if the factory call succeeded. A failed
+		// factory (undeclared error or declared exception) must not create an
+		// interaction; the client treats it as a creation failure
+		// (INTERACTION_CONSTRUCTOR_ERROR) and recreates.
+		responseHasException := runErr != nil
+		if wr, ok := result.(types.WritableResult); ok && wr.Exception() != nil {
+			responseHasException = true
 		}
-
-		if metadata.InteractionCreate != nil && appException == nil {
+		if metadata.InteractionCreate != nil && !responseHasException {
 			proc := types.GetInteractionCreateProcessor(ctx).(Processor)
 			if proc == nil {
 				return nil, fmt.Errorf("handler returned nil interaction processor: %d", metadata.InteractionCreate.InteractionId)
@@ -406,46 +380,16 @@ func (s *rocketServerSocket) requestResponse(msg payload.Payload) mono.Mono {
 			s.interactionsMutex.Unlock()
 		}
 
-		loadMetric := s.loadFn()
-		loadMetricPtr := (*int64)(nil)
-		if metadata.IsSetLoadMetric() {
-			// SHOULD be set iff loadMetric was set in RequestRpcMetadata
-			loadMetricPtr = Pointerize(int64(loadMetric))
+		payload, err := s.makeResponsePayload(metadata, respStruct, true /* isFirstResponse */)
+		if err != nil {
+			s.observer.ConnDropped()
+			return nil, err
 		}
-		protocol.setRequestHeader(LoadHeaderKey, strconv.FormatUint(uint64(loadMetric), 10))
-
-		// Track time spent marshaling/writing response
-		writeStartTime := time.Now()
-
-		responseCompressionAlgo := rocket.CompressionAlgorithmFromCompressionConfig(metadata.GetCompressionConfig())
-		var payload payload.Payload
-		if appException != nil {
-			payload, err = rocket.EncodeResponseApplicationErrorPayload(
-				appException,
-				protocol.getRequestHeaders(),
-				responseCompressionAlgo,
-				loadMetricPtr,
-			)
-		} else {
-			payload, err = rocket.EncodeResponsePayload(
-				protocol.getRequestHeaders(),
-				responseCompressionAlgo,
-				loadMetricPtr,
-				protocol.Bytes(),
-			)
-		}
-
-		// Record time spent marshaling/writing response
-		s.observer.TimeWriteUsForFunction(rpcFuncName, time.Since(writeStartTime))
 
 		// Track actual handler execution time
 		processTime := time.Since(processStartTime)
 		s.observer.ProcessTime(processTime)
-
-		// Notify observer that reply was sent
-		if err == nil {
-			s.observer.SentReply()
-		}
+		s.observer.SentReply()
 
 		return payload, err
 	}
@@ -453,41 +397,14 @@ func (s *rocketServerSocket) requestResponse(msg payload.Payload) mono.Mono {
 }
 
 func (s *rocketServerSocket) fireAndForget(msg payload.Payload) {
-	// TODO: this clone helps prevent a race-condition where the payload gets
-	// released by the underlying rsocket layer before we are done with it.
-	msg = payload.Clone(msg)
-
 	requestReceivedTime := time.Now()
 
-	metadata := rpcmetadata.NewRequestRpcMetadata()
-	err := rocket.DecodePayloadMetadata(msg, metadata)
+	metadata, pfunc, argStruct, reqCtx, err := s.preprocessRequest(msg)
 	if err != nil {
-		// Notify observer that connection was dropped and task killed due to malformed rocket payload
-		s.observer.ConnDropped()
-		s.observer.TaskKilled()
-		s.log("server fireAndForget decode request payload error: %v", err)
+		s.log("server fireAndForget preprocess error: %v", err)
 		return
 	}
 	rpcFuncName := metadata.GetName()
-	protocol, err := newProtocolBufferFromRequest(msg.Data(), metadata, s.observer)
-	if err != nil {
-		// Notify observer that connection was dropped and task killed due to protocol buffer creation error
-		s.observer.ConnDropped()
-		s.observer.TaskKilled()
-		s.log("server fireAndForget error creating protocol: %v", err)
-		return
-	}
-
-	// Notify observer that request was received
-	s.observer.ReceivedRequestForFunction(rpcFuncName)
-
-	if s.isOverloaded() {
-		// Track connection drops and server overload events when rejecting requests
-		s.observer.ConnDropped()
-		s.observer.ServerOverloaded()
-		s.log("server fireAndForget: dropping request due to server overload")
-		return
-	}
 
 	// Increment active requests when processing starts
 	s.incrementActiveRequests()
@@ -505,10 +422,27 @@ func (s *rocketServerSocket) fireAndForget(msg payload.Payload) {
 		return
 	}
 
-	if _, err := s.processWithPanicTracking(context.Background(), s.proc, protocol); err != nil {
-		// Notify observer that connection was dropped due to unparseable message begin
+	// Oneway requests have no per-request scheduler context; derive one from the
+	// background context so the handler can access the RequestContext.
+	ctx := WithRequestContext(context.Background(), reqCtx)
+
+	// Run the user handler under panic tracking. Oneway requests send no
+	// response, so the handler result is discarded.
+	runErr := func() error {
+		defer func() {
+			if r := recover(); r != nil {
+				s.observer.ProcessorPanic()
+				panic(r)
+			}
+		}()
+		pfuncStartTime := time.Now()
+		_, err := pfunc.RunContext(ctx, argStruct)
+		s.observer.TimeProcessUsForFunction(rpcFuncName, time.Since(pfuncStartTime))
+		return err
+	}()
+	if runErr != nil {
 		s.observer.ConnDropped()
-		s.log("server fireAndForget process error: %v", err)
+		s.log("server fireAndForget process error: %v", runErr)
 		return
 	}
 
@@ -831,37 +765,6 @@ func (s *rocketServerSocket) requestChannelBiDi(
 	})
 }
 
-func newProtocolBufferFromRequest(payloadDataBytes []byte, metadata *rpcmetadata.RequestRpcMetadata, observer ServerObserver) (*protocolBuffer, error) {
-	readStartTime := time.Now()
-
-	rpcFuncName := metadata.GetName()
-	dataBytes, err := rocket.MaybeDecompress(payloadDataBytes, metadata.GetCompression())
-	if err != nil {
-		return nil, fmt.Errorf("payload data bytes decompression failed: %w", err)
-	}
-
-	protoID := types.ProtocolID(metadata.GetProtocol())
-	headersMap := rocket.GetRequestRpcMetadataHeaders(metadata)
-	messageType := types.CALL
-	if metadata.GetKind() == rpcmetadata.RpcKind_SINGLE_REQUEST_NO_RESPONSE {
-		messageType = types.ONEWAY
-	}
-
-	protocol, err := newProtocolBuffer(protoID, dataBytes)
-	if err != nil {
-		return nil, err
-	}
-	protocol.setResponseHeaders(headersMap)
-	if err := protocol.WriteMessageBegin(rpcFuncName, messageType, 0); err != nil {
-		return nil, err
-	}
-
-	readDuration := time.Since(readStartTime)
-	observer.TimeReadUsForFunction(rpcFuncName, readDuration)
-
-	return protocol, nil
-}
-
 // makeResponsePayload encodes a single response struct into a rocket payload.
 // isFirstResponse selects the initial-response encoding (request-response style)
 // over the subsequent stream-element encoding. It is shared by the streaming RPC
@@ -1001,8 +904,6 @@ func (s *rocketServerSocket) preprocessRequest(msg payload.Payload) (
 		s.observer.TaskKilled()
 		return nil, nil, nil, nil, fmt.Errorf("payload data bytes decompression failed: %w", err)
 	}
-	s.observer.TimeReadUsForFunction(rpcFuncName, time.Since(readStartTime))
-
 	processor := s.proc
 	if metadata.InteractionId != nil {
 		s.interactionsMutex.Lock()
@@ -1032,6 +933,7 @@ func (s *rocketServerSocket) preprocessRequest(msg payload.Payload) (
 	if err != nil {
 		return nil, nil, nil, nil, err
 	}
+	s.observer.TimeReadUsForFunction(rpcFuncName, time.Since(readStartTime))
 
 	reqHeaders := rocket.GetRequestRpcMetadataHeaders(metadata)
 	reqCtx := &RequestContext{

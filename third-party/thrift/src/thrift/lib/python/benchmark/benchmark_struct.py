@@ -518,13 +518,15 @@ string_bucket_2 = StringBucket(
     table = [
         [operation]
         + [
-            benchmark_single(
-                flavor,
-                operation,
-                st,
+            (
+                benchmark_single(
+                    flavor,
+                    operation,
+                    st,
+                )
+                if flavor not in skip_langs
+                else "n/a"
             )
-            if flavor not in skip_langs
-            else "n/a"
             for flavor in NAMESPACES
         ]
         for operation, (st, skip_langs) in operations.items()
@@ -533,6 +535,76 @@ string_bucket_2 = StringBucket(
         tabulate(
             table,
             headers=["Comparison Operations"] + list(NAMESPACES.keys()),
+            tablefmt="github",
+        )
+    )
+
+
+def benchmark_call():
+    INIT_STRING_BUCKET = """
+full_bucket = StringBucket(
+    one="one",
+    two="two",
+    three="three",
+    four="four",
+    five="five",
+    six="six",
+    seven="seven",
+    eight="eight",
+    nine="nine",
+    ten="ten",
+)
+half_bucket = StringBucket(
+    one="one",
+    two="two",
+    three="three",
+    four="four",
+    five="five",
+)
+"""
+
+    def benchmark_single(flavor, st) -> str:
+        setup = f"{get_import(flavor)}\n{INIT_STRING_BUCKET}"
+        timer = timeit.Timer(
+            stmt=st,
+            setup=setup,
+        )
+        results = timer.repeat(REPEAT, LOOP)
+        min_value_ms = min(results) * 1000 / LOOP
+        return f"{min_value_ms:.6f} ms"
+
+    # The call operator (`struct(**kwargs)`) is only supported by the immutable
+    # and mutable thrift-python flavors.
+    skip_langs = ("py-deprecated", "py3")
+
+    # format is dict[<operation_name>, <executable_statement>]
+    operations = {
+        "update 1 field of fully-set struct": "_ = full_bucket(one='updated')",
+        "update half of fields of half-set struct": (
+            "_ = half_bucket(one='a', two='b', three='c', four='d', five='e')"
+        ),
+        "reset half of fields of fully-set struct to None": (
+            "_ = full_bucket(one=None, two=None, three=None, four=None, five=None)"
+        ),
+        "reset all fields of fully-set struct to None": (
+            "_ = full_bucket("
+            "one=None, two=None, three=None, four=None, five=None, "
+            "six=None, seven=None, eight=None, nine=None, ten=None)"
+        ),
+    }
+
+    table = [
+        [operation]
+        + [
+            benchmark_single(flavor, st) if flavor not in skip_langs else "n/a"
+            for flavor in NAMESPACES
+        ]
+        for operation, st in operations.items()
+    ]
+    print(
+        tabulate(
+            table,
+            headers=["Call Operator"] + list(NAMESPACES.keys()),
             tablefmt="github",
         )
     )
@@ -629,6 +701,11 @@ def comparison_benchmark() -> None:
 
 
 @click.command()
+def call_benchmark() -> None:
+    benchmark_call()
+
+
+@click.command()
 @click.pass_context
 def run_all(ctx) -> None:
     ctx.invoke(import_benchmark)
@@ -640,6 +717,8 @@ def run_all(ctx) -> None:
     ctx.invoke(container_benchmark)
     print("\n")
     ctx.invoke(serializer_benchmark)
+    print("\n")
+    ctx.invoke(call_benchmark)
 
 
 def main() -> None:
@@ -654,6 +733,7 @@ def main() -> None:
     cli.add_command(serializer_json_benchmark)
     cli.add_command(serializer_string_json_benchmark)
     cli.add_command(comparison_benchmark)
+    cli.add_command(call_benchmark)
     cli()
 
 

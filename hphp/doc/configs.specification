@@ -2027,7 +2027,6 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 - bool Jit.RequireWriteLease = false, UNKNOWN
 - uint64_t Jit.RelocationSize = 1 << 20, UNKNOWN
 - uint64_t Jit.MatureSize = 125 << 20, UNKNOWN
-- bool Jit.MatureAfterWarmup = false, UNKNOWN
 - double Jit.MaturityExponent = 1.0, UNKNOWN
 - double Jit.MaturityProfWeight = 1.0, UNKNOWN
 - bool Jit.Timer, UNKNOWN

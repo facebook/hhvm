@@ -323,13 +323,6 @@ void reportJitMaturity() {
                         Cfg::Jit::MaturityExponent) * 99;
   }
 
-  // If Cfg::Jit::MatureAfterWarmup is set, we consider the JIT to be mature once
-  // warmupStatusString() is empty, which indicates that the JIT is warmed up
-  // based on the rate in which JITed code is being produced.
-  if (Cfg::Jit::MatureAfterWarmup && warmupStatusString().empty()) {
-    maturity = g_maxJitMaturity;
-  }
-
   if (maturity > before) {
     jitMaturityCounter->setValue(maturity);
   }

@@ -20,6 +20,7 @@ import warnings
 from cpython cimport bool as pbool, int as pint, float as pfloat
 from cpython.long cimport PyLong_AsLong
 from cpython.object cimport Py_LT, Py_EQ, PyCallable_Check
+from cpython.bytes cimport PyBytes_FromStringAndSize, PyBytes_AS_STRING, PyBytes_GET_SIZE
 from cpython.tuple cimport PyTuple_New, PyTuple_SET_ITEM, PyTuple_GET_ITEM, PyTuple_Check
 from cpython.ref cimport Py_INCREF, Py_DECREF
 from cpython.set cimport PyFrozenSet_New, PySet_Add
@@ -1246,6 +1247,83 @@ cdef void set_struct_field(tuple struct_tuple, int16_t index, value) except *:
     PyTuple_SET_ITEM(struct_tuple, index + 1, value)
     Py_DECREF(old_value)
 
+cdef tuple reset_struct_field_to_default(
+    tuple struct_tuple, int16_t index, StructInfo struct_info, tuple default_data
+):
+    """
+    Resets the field at the given `index` in `struct_tuple` to its default value
+    and clears the corresponding "isset" flag.
+
+    This is the counterpart to `set_struct_field()`: where that marks a field as
+    set, this marks it as unset (i.e. holding its default value).
+
+    Args:
+        struct_tuple: see `createImmutableStructTupleWithDefaultValues()`
+        index: field index, as defined by its insertion order in the parent
+            `StructInfo` (this is not the field id).
+        struct_info: `StructInfo` for the struct being reset.
+        default_data: a struct tuple of default values (see
+            `createImmutableStructTupleWithDefaultValues()`), or `None`. If
+            `None`, it is created lazily. The (possibly newly created) tuple is
+            returned so callers can reuse it across multiple resets.
+
+    Returns:
+        The `default_data` tuple, created lazily if it was `None`.
+    """
+    if default_data is None:
+        default_data = createImmutableStructTupleWithDefaultValues(
+            struct_info.cpp_obj.get().getStructInfo()
+        )
+    default_value = default_data[index + 1]
+    old_value = struct_tuple[index + 1]
+    Py_INCREF(default_value)
+    PyTuple_SET_ITEM(struct_tuple, index + 1, default_value)
+    Py_DECREF(old_value)
+    setStructIsset(struct_tuple, index, 0)
+    return default_data
+
+cdef void set_struct_field_from_py_value(
+    tuple struct_tuple, StructInfo struct_info, int16_t index, instance, value
+) except *:
+    """
+    Converts `value` from "Python value" representation to "internal data"
+    representation - applying the field's adapter, if any - and stores it in
+    `struct_tuple` at the given field `index`, marking the field as set.
+
+    Args:
+        struct_tuple: see `createImmutableStructTupleWithDefaultValues()`
+        struct_info: `StructInfo` for the struct being updated.
+        index: field index, as defined by its insertion order in the parent
+            `StructInfo` (this is not the field id).
+        instance: the owning struct, passed to the field adapter (and used for
+            error messages).
+        value: new value for this field, in "Python value" representation.
+
+    Errors raised during conversion are re-raised wrapped with the field name.
+    """
+    cdef FieldInfo field_spec = struct_info.fields[index]
+    try:
+        # Handle field w/ adapter
+        adapter_info = field_spec.adapter_info
+        if adapter_info is not None:
+            adapter_class, transitive_annotation = adapter_info
+            value = adapter_class.to_thrift_field(
+                value,
+                field_spec.id,
+                instance,
+                transitive_annotation=transitive_annotation(),
+            )
+        set_struct_field(
+            struct_tuple,
+            index,
+            (<TypeInfoBase>struct_info.type_infos[index]).to_internal_data(value),
+        )
+    except Exception as exc:
+        raise type(exc)(
+            f"{type(instance)}: error initializing Thrift struct field "
+            f"'{field_spec.py_name}': {exc}"
+        ) from exc
+
 cdef class StructOrUnion:
     cdef folly.iobuf.IOBuf _serialize(Struct self, Protocol proto):
         raise NotImplementedError("Not implemented on base StructOrUnion class")
@@ -1349,28 +1427,55 @@ cdef class Struct(StructOrUnion):
             none_keys = frozenset(
                 k for k, v in kwargs.items() if v is None
             )
-        klass = type(self)
-        # note this puts the set kwargs into new_inst._fbthrift_data
-        cdef Struct new_inst = klass._fbthrift_new(**kwargs)
-        not_found = object()
-        isset_flags = self._fbthrift_data[0]
 
-        for field_name, field_index in struct_info.name_to_index.items():
-            value = kwargs.pop(field_name, not_found)
-            if value is None:  # reset to default value, no change needed
+        cdef tuple old_data = self._fbthrift_data
+        cdef int16_t num_fields = len(struct_info.fields)
+
+        # Unconditionally copy the entire internal data tuple, then apply the
+        # kwargs updates below. This avoids inspecting the "isset" flags of every
+        # field (as a per-field loop would), which makes the common case of
+        # updating only one or two fields fast regardless of struct size.
+        #
+        # Element 0 (the "isset" flags) must be a *fresh* `bytes` copy because it
+        # is mutated in place by `set_struct_field` / `setStructIsset`; sharing it
+        # would corrupt `self`. `PyBytes_FromStringAndSize` with a non-NULL
+        # pointer guarantees a new buffer (unlike `bytes(...)`, which may return
+        # the same object). The remaining elements are immutable "internal data"
+        # values that can be safely shared by reference.
+        cdef bytes old_isset = old_data[0]
+        cdef bytes new_isset = PyBytes_FromStringAndSize(
+            PyBytes_AS_STRING(old_isset), PyBytes_GET_SIZE(old_isset)
+        )
+        cdef tuple new_data = PyTuple_New(num_fields + 1)
+        Py_INCREF(new_isset)
+        PyTuple_SET_ITEM(new_data, 0, new_isset)
+        cdef int16_t i
+        for i in range(1, num_fields + 1):
+            borrowed_value = old_data[i]
+            Py_INCREF(borrowed_value)
+            PyTuple_SET_ITEM(new_data, i, borrowed_value)
+
+        cdef Struct new_inst = type(self)._fbthrift_from_internal_data(new_data)
+
+        # Lazily-created tuple of default values, only needed (and only built
+        # once) if a kwarg resets a field to its default by passing `None`.
+        cdef tuple default_data = None
+        cdef int16_t field_index
+        for field_name, value in kwargs.items():
+            field_index = _get_field_index_or_raise(struct_info, self, field_name)
+
+            if value is None:
+                # Reset the field to its default value and clear its isset flag.
+                # `default_data` is built lazily on the first reset and reused.
+                default_data = reset_struct_field_to_default(
+                    new_data, field_index, struct_info, default_data
+                )
                 continue
-            if value is not_found:  # borrow ref to old value
-                if isset_flags[field_index] == 0:
-                    # old field not set, so keep default
-                    continue
-                borrowed_value = self._fbthrift_data[field_index + 1]
-                set_struct_field(new_inst._fbthrift_data, field_index, borrowed_value)
 
-        if kwargs:
-            raise TypeError(
-                f"'{type(self).__name__}' object does not have attribute(s): "
-                f"'{', '.join(kwargs.keys())}'"
+            set_struct_field_from_py_value(
+                new_data, struct_info, field_index, self, value
             )
+
         if struct_info.enable_isset_inspection:
             isset_fields = self._fbthrift_locally_set_fields
             if isset_fields is not None:
@@ -1514,33 +1619,9 @@ cdef class Struct(StructOrUnion):
             if value is None:
                 continue
 
-            field_spec = struct_info.fields[field_index]
-
-            try:
-                # Handle field w/ adapter
-                adapter_info = field_spec.adapter_info
-                if adapter_info is not None:
-                    adapter_class, transitive_annotation = adapter_info
-                    field_id = field_spec.id
-                    value = adapter_class.to_thrift_field(
-                                value,
-                                field_id,
-                                self,
-                                transitive_annotation=transitive_annotation(),
-                            )
-
-                set_struct_field(
-                    self._fbthrift_data,
-                    field_index,
-                    (
-                        <TypeInfoBase>struct_info.type_infos[field_index]
-                    ).to_internal_data(value),
-                )
-            except Exception as exc:
-                raise type(exc)(
-                    f"{type(self)}: error initializing Thrift struct field "
-                    f"'{field_spec.py_name}': {exc}"
-                ) from exc
+            set_struct_field_from_py_value(
+                self._fbthrift_data, struct_info, field_index, self, value
+            )
 
         # If any fields remain unset, initialize them with their respective default
         # values.
@@ -1648,6 +1729,25 @@ cdef inline _get_index_if_mangled(StructInfo struct_info, instance, str name) no
         return None
     cdef str mangle = f"_{instance.__class__.__name__}{name}"
     return struct_info.name_to_index.get(mangle)
+
+cdef inline int16_t _get_field_index_or_raise(
+    StructInfo struct_info, instance, str field_name
+) except -1:
+    """
+    Returns the field index for `field_name`, resolving Python name-mangled
+    (leading dunder) field names. Raises `TypeError` if `field_name` does not
+    correspond to a field of the Thrift struct.
+    """
+    field_index = struct_info.name_to_index.get(field_name)
+    if field_index is None:
+        # try mangled name if leading dunder prefix
+        field_index = _get_index_if_mangled(struct_info, instance, field_name)
+        if field_index is None:
+            raise TypeError(
+                f"'{type(instance).__name__}' object does not have attribute(s): "
+                f"'{field_name}'"
+            )
+    return field_index
 
 cdef class Union(StructOrUnion):
     """

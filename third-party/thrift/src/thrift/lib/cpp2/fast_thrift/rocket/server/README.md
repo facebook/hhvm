@@ -144,7 +144,7 @@ RocketServerSetupFrameHandler handler;
 ## Testing
 
 ```bash
-buck2 test fbcode//thrift/lib/cpp2/fast_thrift/rocket/server/test:server_setup_frame_handler_test
+buck2 test fbcode//thrift/lib/cpp2/fast_thrift/rocket/server/handler/test:rocket_server_setup_frame_handler_test
 ```
 
 ---
@@ -281,7 +281,7 @@ drops the frame. This can happen if:
 ## Testing
 
 ```bash
-buck2 test fbcode//thrift/lib/cpp2/fast_thrift/rocket/server/test:server_stream_state_handler_test
+buck2 test fbcode//thrift/lib/cpp2/fast_thrift/rocket/server/handler/test:rocket_server_stream_state_handler_test
 ```
 
 ---
@@ -448,7 +448,7 @@ When `onException` is called:
 Run the unit tests with:
 
 ```bash
-buck2 test fbcode//thrift/lib/cpp2/fast_thrift/rocket/server/test:server_request_response_frame_handler_test
+buck2 test fbcode//thrift/lib/cpp2/fast_thrift/rocket/server/handler/test:rocket_server_request_response_handler_test
 ```
 
 ---

@@ -20,6 +20,7 @@ message(STATUS "Using third-party bundled TBB")
 include(ExternalProject)
 
 set(TBB_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/src")
+set(TBB_STATIC_LIB_PATH $<IF:$<CONFIG:Debug>,_debug,_release>/${CMAKE_STATIC_LIBRARY_PREFIX}tbb$<$<CONFIG:Debug>:_debug>${CMAKE_STATIC_LIBRARY_SUFFIX})
 
 ExternalProject_Add(
   bundled_tbb
@@ -37,6 +38,7 @@ ExternalProject_Add(
       CXXFLAGS=${CMAKE_CXX_FLAGS}
       tbb
   INSTALL_COMMAND ""
+  BUILD_BYPRODUCTS "<INSTALL_DIR>${TBB_STATIC_LIB_PATH}"
 )
 
 if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
@@ -48,10 +50,8 @@ add_dependencies(tbb bundled_tbb)
 ExternalProject_Get_Property(bundled_tbb INSTALL_DIR)
 target_include_directories(tbb INTERFACE "${TBB_ROOT}/include")
 
-set(TBB_STATIC_LIB_PATH ${INSTALL_DIR}$<IF:$<CONFIG:Debug>,_debug,_release>/${CMAKE_STATIC_LIBRARY_PREFIX}tbb$<$<CONFIG:Debug>:_debug>${CMAKE_STATIC_LIBRARY_SUFFIX})
-
 target_link_libraries(
   tbb
   INTERFACE
-  "${TBB_STATIC_LIB_PATH}"
+  "${INSTALL_DIR}${TBB_STATIC_LIB_PATH}"
 )

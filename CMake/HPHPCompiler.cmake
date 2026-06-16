@@ -1,36 +1,15 @@
-set(FREEBSD FALSE)
-if("${CMAKE_SYSTEM_NAME}" STREQUAL "FreeBSD")
-  set(FREEBSD TRUE)
-endif()
-set(LINUX FALSE)
-if("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
-  set(LINUX TRUE)
-endif()
-set(DARWIN FALSE)
-if("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
-  set(DARWIN TRUE)
-endif()
-set(WINDOWS FALSE)
-if("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
-  set(WINDOWS TRUE)
-endif()
-
 # Do this until cmake has a define for ARMv8
-INCLUDE(CheckCXXSourceCompiles)
-CHECK_CXX_SOURCE_COMPILES("
-#ifndef __x86_64__
-#error Not x64
-#endif
-int main() { return 0; }" IS_X64)
-
-CHECK_CXX_SOURCE_COMPILES("
-#ifndef __AARCH64EL__
-#error Not ARMv8
-#endif
-int main() { return 0; }" IS_AARCH64)
+execute_process(COMMAND uname -m
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    OUTPUT_VARIABLE UNAME_ARCH)
+if(UNAME_ARCH STREQUAL "x86_64")
+  set(IS_X64 ON)
+elseif(UNAME_ARCH STREQUAL "aarch64")
+  set(IS_AARCH64 ON)
+endif()
 
 # using Clang or GCC
-if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
+if (HPHP_COMPILER_CLANG OR HPHP_COMPILER_GCC)
   # Warnings to disable by name, -Wno-${name}
   set(DISABLED_NAMED_WARNINGS)
   list(APPEND DISABLED_NAMED_WARNINGS
@@ -61,7 +40,6 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQU
   # General options to pass to the C++ compiler
   set(GENERAL_CXX_OPTIONS)
   list(APPEND GENERAL_CXX_OPTIONS
-    "std=gnu++1z"
     "fno-omit-frame-pointer"
     "Wall"
     "Werror=format-security"
@@ -84,7 +62,7 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQU
   set(GDB_SUBOPTION)
 
   # Enable GCC/LLVM stack-smashing protection
-  if(ENABLE_HARDENING)
+  if(HPHP_ENABLE_HARDENING)
     list(APPEND GENERAL_OPTIONS
       # Enable stack protection and stack-clash protection.
       # This needs two dashes in the name, so put one here.
@@ -119,18 +97,15 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQU
     endif()
   endif()
 
-  if (ENABLE_PIE)
-    list(APPEND GENERAL_OPTIONS "pie" "fPIC")
-  else()
-    list(APPEND GENERAL_OPTIONS "no-pie")
-  endif()
+  # HHVM doesn't support building as a PIE.
+  list(APPEND GENERAL_OPTIONS "no-pie")
 
   if (IS_X64)
     list(APPEND GENERAL_CXX_OPTIONS "march=x86-64-v3")
     set(CMAKE_ASM_FLAGS  "${CMAKE_ASM_FLAGS} -march=x86-64-v3")
   endif()
 
-  if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQUAL "AppleClang") # using Clang
+  if (HPHP_COMPILER_CLANG) # using Clang
     list(APPEND GENERAL_CXX_OPTIONS
       "Qunused-arguments"
     )
@@ -141,9 +116,11 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQU
       "return-type-c-linkage"
       "unknown-warning-option"
       "unused-command-line-argument"
+      "nontrivial-memcall"
+      "nullability-completeness"
     )
 
-    if(CLANG_FORCE_LIBCPP)
+    if(HPHP_FORCE_LIBCPP)
       list(APPEND GENERAL_CXX_OPTIONS "stdlib=libc++")
     endif()
   else() # using GCC
@@ -190,7 +167,7 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQU
       set(AARCH64_TARGET_CPU "" CACHE STRING "CPU to tell gcc to optimize for (-mcpu)")
       if(AARCH64_TARGET_CPU)
         list(APPEND GENERAL_OPTIONS "mcpu=${AARCH64_TARGET_CPU}")
-        set(CMAKE_ASM_FLAGS  "${CMAKE_ASM_FLAGS} -mcpu=${AARCH64_TARGET_CPU}")
+        set(CMAKE_ASM_FLAGS_INIT  "${CMAKE_ASM_FLAGS_INIT} -mcpu=${AARCH64_TARGET_CPU}")
 
         # Make sure GCC is not using the fix for errata 843419. This change
         # interferes with the gold linker. Note that GCC applies this fix
@@ -205,7 +182,7 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQU
     endif()
 
     if(STATIC_CXX_LIB)
-      set(CMAKE_EXE_LINKER_FLAGS "-static-libgcc -static-libstdc++")
+      set(CMAKE_EXE_LINKER_FLAGS_INIT "-static-libgcc -static-libstdc++")
     endif()
 
     if (ENABLE_SPLIT_DWARF)
@@ -217,46 +194,46 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQU
   # -Og enables some optimizations, but makes debugging harder by optimizing
   # away some functions and locals. -O0 is more debuggable.
   # -O0-ggdb was reputed to cause gdb to crash (github #4450)
-  set(CMAKE_C_FLAGS_DEBUG            "-O0 -g${GDB_SUBOPTION}")
-  set(CMAKE_CXX_FLAGS_DEBUG          "-O0 -g${GDB_SUBOPTION}")
-  set(CMAKE_C_FLAGS_DEBUGOPT         "-O2 -g${GDB_SUBOPTION}")
-  set(CMAKE_CXX_FLAGS_DEBUGOPT       "-O2 -g${GDB_SUBOPTION}")
-  set(CMAKE_C_FLAGS_MINSIZEREL       "-Os -DNDEBUG")
-  set(CMAKE_CXX_FLAGS_MINSIZEREL     "-Os -DNDEBUG")
-  set(CMAKE_C_FLAGS_RELEASE          "-O3 -DNDEBUG")
-  set(CMAKE_CXX_FLAGS_RELEASE        "-O3 -DNDEBUG")
-  set(CMAKE_C_FLAGS_RELWITHDEBINFO   "-O2 -g${GDB_SUBOPTION} -DNDEBUG")
-  set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g${GDB_SUBOPTION} -DNDEBUG")
-  set(CMAKE_C_FLAGS                  "${CMAKE_C_FLAGS} -W -Werror=implicit-function-declaration")
+  set(CMAKE_C_FLAGS_DEBUG_INIT            "-O0 -g${GDB_SUBOPTION}")
+  set(CMAKE_CXX_FLAGS_DEBUG_INIT          "-O0 -g${GDB_SUBOPTION}")
+  set(CMAKE_C_FLAGS_DEBUGOPT_INIT         "-O2 -g${GDB_SUBOPTION}")
+  set(CMAKE_CXX_FLAGS_DEBUGOPT_INIT       "-O2 -g${GDB_SUBOPTION}")
+  set(CMAKE_C_FLAGS_MINSIZEREL_INIT       "-Os")
+  set(CMAKE_CXX_FLAGS_MINSIZEREL_INIT     "-Os")
+  set(CMAKE_C_FLAGS_RELEASE_INIT          "-O3")
+  set(CMAKE_CXX_FLAGS_RELEASE_INIT        "-O3")
+  set(CMAKE_C_FLAGS_RELWITHDEBINFO_INIT   "-O2 -g${GDB_SUBOPTION}")
+  set(CMAKE_CXX_FLAGS_RELWITHDEBINFO_INIT "-O2 -g${GDB_SUBOPTION}")
+  set(CMAKE_C_FLAGS_INIT                  "${CMAKE_C_FLAGS_INIT} -W -Werror=implicit-function-declaration")
 
   mark_as_advanced(CMAKE_C_FLAGS_DEBUGOPT CMAKE_CXX_FLAGS_DEBUGOPT)
 
   foreach(opt ${DISABLED_NAMED_WARNINGS})
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-${opt}")
+    set(CMAKE_CXX_FLAGS_INIT "${CMAKE_CXX_FLAGS_INIT} -Wno-${opt}")
   endforeach()
 
   foreach(opt ${DISABLED_C_NAMED_WARNINGS})
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-${opt}")
+    set(CMAKE_C_FLAGS_INIT "${CMAKE_C_FLAGS_INIT} -Wno-${opt}")
   endforeach()
 
   foreach(opt ${GENERAL_OPTIONS})
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -${opt}")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -${opt}")
+    set(CMAKE_C_FLAGS_INIT "${CMAKE_C_FLAGS_INIT} -${opt}")
+    set(CMAKE_CXX_FLAGS_INIT "${CMAKE_CXX_FLAGS_INIT} -${opt}")
   endforeach()
 
   foreach(opt ${GENERAL_CXX_OPTIONS})
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -${opt}")
+    set(CMAKE_CXX_FLAGS_INIT "${CMAKE_CXX_FLAGS_INIT} -${opt}")
   endforeach()
 
   foreach(opt ${DEBUG_CXX_OPTIONS})
-    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -${opt}")
+    set(CMAKE_CXX_FLAGS_DEBUG_INIT "${CMAKE_CXX_FLAGS_DEBUG_INIT} -${opt}")
   endforeach()
 
   foreach(opt ${RELEASE_CXX_OPTIONS})
-    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -${opt}")
+    set(CMAKE_CXX_FLAGS_RELEASE_INIT "${CMAKE_CXX_FLAGS_RELEASE_INIT} -${opt}")
   endforeach()
 else()
   message("Warning: unknown/unsupported compiler, things may go wrong")
 endif()
 
-include(ThinArchives)
+include("${CMAKE_CURRENT_LIST_DIR}/ThinArchives.cmake")

@@ -14,7 +14,7 @@ set(
 )
 
 if(IS_X64)
-  if (ENABLE_XED)
+  if (HHVM_REQUIRE_XED)
     find_package(LibXed)
     if (LibXed_FOUND)
       include_directories(${LibXed_INCLUDE_DIR})
@@ -29,6 +29,8 @@ else()
 endif()
 
 add_executable(tc-print ${TC_PRINT_CXX_SOURCES})
+add_dependencies(tc-print hhvm)
+
 link_object_libraries(tc-print ${HHVM_WHOLE_ARCHIVE_LIBRARIES})
 target_link_libraries(tc-print ${HHVM_LINK_LIBRARIES})
 hphp_link(tc-print)

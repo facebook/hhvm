@@ -1,7 +1,3 @@
-if (${CMAKE_MAJOR_VERSION} GREATER 2)
-  cmake_policy(SET CMP0026 OLD)
-endif()
-
 include(GNUInstallDirs)
 
 function(auto_sources RETURN_VALUE PATTERN SOURCE_SUBDIRS)
@@ -109,9 +105,6 @@ function(append_systemlib TARGET SOURCE SECTNAME)
   else()
     set(${TARGET}_SLIBS ${${TARGET}_SLIBS} "--add-section" "${SECTNAME}=${SOURCE}" PARENT_SCOPE)
   endif()
-  # Add the systemlib file to the "LINK_DEPENDS" for the systemlib, this will cause it
-  # to be relinked and the systemlib re-embedded
-  set_property(TARGET ${TARGET} APPEND PROPERTY LINK_DEPENDS ${SOURCE})
 endfunction(append_systemlib)
 
 function(embed_sections TARGET DEST)
@@ -152,10 +145,10 @@ function(embed_sections TARGET DEST)
 endfunction(embed_sections)
 
 macro(embed_systemlib_byname TARGET SLIB)
-  get_filename_component(SLIB_BN ${SLIB} "NAME_WE")
-  string(LENGTH ${SLIB_BN} SLIB_BN_LEN)
-  math(EXPR SLIB_BN_REL_LEN "${SLIB_BN_LEN} - 4")
-  string(SUBSTRING ${SLIB_BN} 4 ${SLIB_BN_REL_LEN} SLIB_EXTNAME)
+  get_filename_component(SLIB_FILENAME ${SLIB} "NAME")
+
+  set(SLIB_EXTNAME "/:${SLIB_FILENAME}")
+
   string(MD5 SLIB_HASH_NAME ${SLIB_EXTNAME})
   # Some platforms limit section names to 16 characters :(
   string(SUBSTRING ${SLIB_HASH_NAME} 0 12 SLIB_HASH_NAME_SHORT)
@@ -164,26 +157,45 @@ macro(embed_systemlib_byname TARGET SLIB)
 endmacro()
 
 function(embed_all_systemlibs TARGET ROOT DEST)
-  add_dependencies(${TARGET} systemlib)
-  append_systemlib(${TARGET} ${ROOT}/system/systemlib.php systemlib)
+  add_dependencies(${TARGET} generated_systemlib)
+
   foreach(SLIB ${EXTENSION_SYSTEMLIB_SOURCES} ${EZC_SYSTEMLIB_SOURCES})
-    embed_systemlib_byname(${TARGET} ${SLIB})
+    get_filename_component(SLIB_FILENAME ${SLIB} NAME)
+    file(RELATIVE_PATH SLIB_RELATIVE_PATH ${CMAKE_SOURCE_DIR} ${SLIB})
+    list(APPEND SLIB_RELATIVE_PATHS ${SLIB_RELATIVE_PATH})
+    list(
+      APPEND PRECOMPILED_SYSTEMLIB_FILES
+      ${CMAKE_CURRENT_BINARY_DIR}/slib/${SLIB_FILENAME}.decls
+      ${CMAKE_CURRENT_BINARY_DIR}/slib/${SLIB_FILENAME}.ue
+    )
   endforeach()
+
+  add_custom_command(
+    TARGET ${TARGET} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/slib
+    COMMAND $<TARGET_FILE:hhvm> --compile-systemlib --input-dir ${CMAKE_SOURCE_DIR} --output-dir ${CMAKE_CURRENT_BINARY_DIR}/slib  ${SLIB_RELATIVE_PATHS}
+    COMMENT "Precompiling systemlib files"
+    VERBATIM)
+
+  foreach(PRECOMPILED_SLIB ${PRECOMPILED_SYSTEMLIB_FILES})
+    get_filename_component(PRECOMPILED_SLIB_FILENAME ${PRECOMPILED_SLIB} NAME)
+    embed_systemlib_byname(${TARGET} ${PRECOMPILED_SLIB})
+  endforeach()
+
   embed_sections(${TARGET} ${DEST})
 endfunction(embed_all_systemlibs)
 
 # Custom install function that doesn't relink, instead it uses chrpath to change it, if
 # it's available, otherwise, it leaves the chrpath alone
 function(HHVM_INSTALL TARGET DEST)
-  get_target_property(LOC ${TARGET} LOCATION)
   get_target_property(TY ${TARGET} TYPE)
   if (FOUND_CHRPATH)
     get_target_property(RPATH ${TARGET} INSTALL_RPATH)
     if (NOT RPATH STREQUAL "RPATH-NOTFOUND")
       if (RPATH STREQUAL "")
-        install(CODE "execute_process(COMMAND \"${CHRPATH}\" \"-d\" \"${LOC}\" ERROR_QUIET)")
+        install(CODE "execute_process(COMMAND \"${CHRPATH}\" \"-d\" \"$<TARGET_FILE,${TARGET}>\" ERROR_QUIET)")
       else()
-        install(CODE "execute_process(COMMAND \"${CHRPATH}\" \"-r\" \"${RPATH}\" \"${LOC}\" ERROR_QUIET)")
+        install(CODE "execute_process(COMMAND \"${CHRPATH}\" \"-r\" \"${RPATH}\" \"$<TARGET_FILE,${TARGET}>\" ERROR_QUIET)")
       endif()
     endif()
   endif()

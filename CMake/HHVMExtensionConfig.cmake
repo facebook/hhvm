@@ -640,6 +640,9 @@ function (HHVM_EXTENSION_INTERNAL_HANDLE_LIBRARY_DEPENDENCY extensionID dependen
     ${libraryName} STREQUAL "zlib"
   )
     # Nothing to do, they are included by default.
+  elseif(${libraryName} STREQUAL "blake3")
+    find_package(blake3 CONFIG REQUIRED)
+    HHVM_EXTENSION_INTERNAL_ADD_LINK_LIBRARIES(BLAKE3::blake3)
   elseif (${libraryName} STREQUAL "bzip2")
     find_package(BZip2 ${requiredVersion})
     find_package(EXPAT ${requiredVersion})
@@ -889,6 +892,9 @@ function (HHVM_EXTENSION_INTERNAL_HANDLE_LIBRARY_DEPENDENCY extensionID dependen
       HHVM_EXTENSION_INTERNAL_ADD_LINK_LIBRARIES(${LIBMAGICKWAND_LIBRARIES} ${LIBMAGICKCORE_LIBRARIES})
       HHVM_EXTENSION_INTERNAL_ADD_DEFINES("-DHAVE_LIBMAGICKWAND")
     endif()
+  elseif (${libraryName} STREQUAL "mcrouter")
+    HHVM_EXTENSION_INTERNAL_ADD_LINK_LIBRARIES(mcrouter::mcroutercore)
+    HHVM_EXTENSION_INTERNAL_ADD_DEFINES("-DLIBMC_FBTRACE_DISABLE")
   elseif (${libraryName} STREQUAL "mcrypt")
     find_package(Mcrypt ${requiredVersion})
     if (NOT Mcrypt_INCLUDE_DIR OR NOT Mcrypt_LIB)
@@ -958,7 +964,11 @@ function (HHVM_EXTENSION_INTERNAL_HANDLE_LIBRARY_DEPENDENCY extensionID dependen
   elseif (${libraryName} STREQUAL "squangle")
     HHVM_EXTENSION_INTERNAL_ADD_LINK_LIBRARIES(squangle)
   elseif (${libraryName} STREQUAL "thrift")
-    HHVM_EXTENSION_INTERNAL_ADD_LINK_LIBRARIES(thrift)
+    set(THRIFT_LIBRARIES
+      FBThrift::thriftcpp2 FBThrift::thriftprotocol FBThrift::transport FBThrift::async FBThrift::concurrency FBThrift::rpcmetadata FBThrift::thriftmetadata FBThrift::thriftannotation FBThrift::thrift-core FBThrift::thriftfrozen2
+      FBThrift::thrifttyperep FBThrift::thrifttype FBThrift::thriftanyrep
+    )
+    HHVM_EXTENSION_INTERNAL_ADD_LINK_LIBRARIES(${THRIFT_LIBRARIES})
   elseif (${libraryName} STREQUAL "vpx")
     find_package(LibVpx ${requiredVersion})
     if (NOT LIBVPX_INCLUDE_DIRS OR NOT LIBVPX_LIBRARIES)

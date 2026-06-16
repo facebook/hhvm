@@ -17,6 +17,35 @@
 
 include(CheckFunctionExists)
 
+if (GETDEPS_INSTALL_DIR)
+  file(GLOB _getdeps_children "${GETDEPS_INSTALL_DIR}/*")
+  foreach(_child ${_getdeps_children})
+    if (IS_DIRECTORY "${_child}")
+      list(APPEND CMAKE_PREFIX_PATH "${_child}")
+    endif()
+  endforeach()
+endif()
+
+set(FREEBSD FALSE)
+if("${CMAKE_SYSTEM_NAME}" STREQUAL "FreeBSD")
+  set(FREEBSD TRUE)
+endif()
+set(LINUX FALSE)
+if("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
+  set(LINUX TRUE)
+endif()
+set(DARWIN FALSE)
+if("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
+  set(DARWIN TRUE)
+endif()
+set(WINDOWS FALSE)
+if("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
+  set(WINDOWS TRUE)
+endif()
+
+find_program(RUSTC_EXE rustc)
+find_program(CARGO_EXE cargo)
+
 # libdl
 find_package(LibDL)
 if (LIBDL_INCLUDE_DIRS)
@@ -50,14 +79,12 @@ endif()
 set(CMAKE_REQUIRED_LIBRARIES)
 
 # libXed
-if (ENABLE_XED)
+if (HHVM_REQUIRE_XED)
   find_package(LibXed)
   if (LibXed_FOUND)
     include_directories(${LibXed_INCLUDE_DIR})
   endif()
   add_definitions(-DHAVE_XED=1)
-else()
-  message(STATUS "XED is disabled")
 endif()
 
 # CURL checks
@@ -84,6 +111,9 @@ if (FASTLZ_INCLUDE_DIR)
   include_directories(${FASTLZ_INCLUDE_DIR})
 endif()
 
+# ldap
+find_package(Ldap)
+
 # ICU
 find_package(ICU REQUIRED)
 if (ICU_FOUND)
@@ -103,67 +133,6 @@ if (ICU_FOUND)
   # ICU4c < 61.1, but now that's opt-in rather than opt-out.
   add_definitions("-DU_USING_ICU_NAMESPACE=1")
 endif (ICU_FOUND)
-
-# jemalloc/tmalloc and profiler
-if (USE_GOOGLE_HEAP_PROFILER OR USE_GOOGLE_CPU_PROFILER)
-  FIND_LIBRARY(GOOGLE_PROFILER_LIB profiler)
-  FIND_PATH(GOOGLE_PROFILER_INCLUDE_DIR NAMES google/profiler.h)
-  if (GOOGLE_PROFILER_INCLUDE_DIR)
-    include_directories(${GOOGLE_PROFILER_INCLUDE_DIR})
-  endif()
-  if (GOOGLE_PROFILER_LIB)
-    message(STATUS "Found Google profiler: ${GOOGLE_PROFILER_LIB}")
-    if (USE_GOOGLE_CPU_PROFILER)
-      set(GOOGLE_CPU_PROFILER_ENABLED 1)
-    endif()
-  else()
-    message(STATUS "Can't find Google profiler")
-  endif()
-endif()
-
-if (USE_GOOGLE_HEAP_PROFILER AND GOOGLE_PROFILER_LIB)
-  FIND_LIBRARY(GOOGLE_TCMALLOC_FULL_LIB tcmalloc)
-  if (GOOGLE_TCMALLOC_FULL_LIB)
-    message(STATUS "Found full tcmalloc: ${GOOGLE_TCMALLOC_FULL_LIB}")
-    set(GOOGLE_HEAP_PROFILER_ENABLED 1)
-    set(GOOGLE_TCMALLOC_ENABLED 1)
-  else()
-    message(STATUS "Can't find full tcmalloc - heap profiling is disabled")
-  endif()
-endif()
-
-if(USE_JEMALLOC AND NOT GOOGLE_TCMALLOC_ENABLED)
-  add_definitions(-DUSE_JEMALLOC=1)
-  set(JEMALLOC_ENABLED 1)
-
-  if(DEFINED JEMALLOC_INCLUDE_DIR AND NOT "${JEMALLOC_INCLUDE_DIR}" STREQUAL "JEMALLOC_INCLUDE_DIR-NOTFOUND")
-    include_directories(BEFORE "${JEMALLOC_INCLUDE_DIR}")
-  endif()
-else()
-  add_definitions(-DNO_JEMALLOC=1)
-endif()
-
-if (USE_TCMALLOC AND NOT JEMALLOC_ENABLED AND NOT GOOGLE_TCMALLOC_ENABLED)
-  FIND_LIBRARY(GOOGLE_TCMALLOC_MIN_LIB tcmalloc_minimal)
-  if (GOOGLE_TCMALLOC_MIN_LIB)
-    message(STATUS "Found minimal tcmalloc: ${GOOGLE_TCMALLOC_MIN_LIB}")
-    set(GOOGLE_TCMALLOC_ENABLED 1)
-  else()
-    message(STATUS "Can't find minimal tcmalloc")
-  endif()
-endif()
-
-if (GOOGLE_TCMALLOC_ENABLED)
-  add_definitions(-DGOOGLE_TCMALLOC=1)
-else()
-  add_definitions(-DNO_TCMALLOC=1)
-endif()
-if (GOOGLE_HEAP_PROFILER_ENABLED)
-  add_definitions(-DGOOGLE_HEAP_PROFILER=1)
-endif()
-if (GOOGLE_CPU_PROFILER_ENABLED)
-  add_definitions(-DGOOGLE_CPU_PROFILER=1)
-endif()
 
 # OpenSSL libs
 find_package(OpenSSL REQUIRED)
@@ -292,8 +261,175 @@ if (PAM_INCLUDE_PATH)
   include_directories(${PAM_INCLUDE_PATH})
 endif()
 
+set(
+  BOOST_COMPONENTS
+  chrono
+  context
+  date_time
+  fiber
+  filesystem
+  iostreams
+  program_options
+  regex
+  system
+  thread
+)
+
+set(
+  BOOST_COMPONENTS
+  atomic
+  chrono
+  context
+  date_time
+  fiber
+  filesystem
+  iostreams
+  program_options
+  regex
+  system
+  thread
+  headers
+)
+find_package(Boost 1.70.0  REQUIRED COMPONENTS ${BOOST_COMPONENTS})
+if("${Boost_VERSION}" EQUAL "107000")
+  # https://github.com/boostorg/variant/issues/69
+  message(FATAL_ERROR "boost is blacklisted version")
+endif()
+
+add_library(boost INTERFACE)
+
+if(Boost_FOUND)
+  message(STATUS "Using system boost")
+  target_include_directories(boost BEFORE INTERFACE ${Boost_INCLUDE_DIRS})
+  # Not just using ${Boost_LIBRARIES} as this includes imported targets, and
+  # third-party dependents (e.g folly) may need the actual path
+  foreach(COMPONENT ${BOOST_COMPONENTS})
+    string(TOUPPER ${COMPONENT} COMPONENT)
+    if(EXISTS "${Boost_${COMPONENT}_LIBRARY_RELEASE}")
+      target_link_libraries(boost INTERFACE ${Boost_${COMPONENT}_LIBRARY_RELEASE})
+    elseif(EXISTS "${Boost_${COMPONENT}_LIBRARY_DEBUG}")
+      target_link_libraries(boost INTERFACE ${Boost_${COMPONENT}_LIBRARY_DEBUG})
+    endif()
+  endforeach()
+endif()
+
+# jemalloc
+if (USE_JEMALLOC)
+  add_definitions(-DUSE_JEMALLOC=1)
+
+  find_library(JEMALLOC_LIB NAMES jemalloc)
+  find_path(JEMALLOC_INCLUDE_DIR NAMES jemalloc/jemalloc.h)
+  set(CMAKE_REQUIRED_INCLUDES "${JEMALLOC_INCLUDE_DIR}")
+  include(CheckCXXSourceCompiles)
+  check_cxx_source_compiles("
+  #include <jemalloc/jemalloc.h>
+
+  #if JEMALLOC_VERSION_MAJOR < 5 || (JEMALLOC_VERSION_MAJOR == 5 && JEMALLOC_VERSION_MINOR < 3)
+  # error jemalloc version >= 5.3 required
+  #endif
+
+  int main(void) { return 0; }" JEMALLOC_VERSION_MINIMUM)
+  set(CMAKE_REQUIRED_INCLUDES)
+
+  if (JEMALLOC_VERSION_MINIMUM)
+    message(STATUS "Found jemalloc: ${JEMALLOC_LIB} ${JEMALLOC_INCLUDE_DIR}")
+    include_directories(BEFORE "${JEMALLOC_INCLUDE_DIR}")
+  else()
+    message(FATAL_ERROR "jemalloc >=5.3.0 is required")
+  endif()
+else()
+  add_definitions(-DNO_JEMALLOC=1)
+endif()
+
+# Needed for hfsort.
+find_package(ZLIB REQUIRED)
+add_library(zlib INTERFACE)
+target_include_directories(zlib INTERFACE ${ZLIB_INCLUDE_DIRS})
+target_link_libraries(zlib INTERFACE ${ZLIB_LIBRARIES})
+
+find_library(BROTLIDEC_LIBRARY brotlidec)
+find_library(BROTLIENC_LIBRARY brotlienc)
+find_library(BROTLICOMMON_LIBRARY brotlicommon)
+find_path(BROTLI_INCLUDE_DIR brotli/decode.h)
+
+if(BROTLIDEC_LIBRARY AND BROTLIENC_LIBRARY AND BROTLICOMMON_LIBRARY AND BROTLI_INCLUDE_DIR)
+  add_library(brotli INTERFACE)
+  message(STATUS "Using system brotli: ${BROTLIDEC_LIBRARY}")
+  target_include_directories(brotli INTERFACE "${BROTLI_INCLUDE_DIR}")
+  target_link_libraries(brotli INTERFACE
+    "${BROTLIDEC_LIBRARY}" "${BROTLIENC_LIBRARY}" "${BROTLICOMMON_LIBRARY}")
+else()
+  message(FATAL_ERROR "Could not find brotli")
+endif()
+
+find_library(ZSTD_LIB NAMES zstd)
+find_path(ZSTD_INCLUDE_DIR NAMES zstd.h)
+
+if(ZSTD_LIB AND ZSTD_INCLUDE_DIR)
+  set(CMAKE_REQUIRED_INCLUDES "${ZSTD_INCLUDE_DIR}")
+  check_cxx_source_compiles("
+#include <zstd.h>
+  int main() {
+  static_assert(ZSTD_VERSION_MAJOR == 1, \"\");
+  static_assert(ZSTD_VERSION_MINOR >= 4, \"\");
+    return 0;
+  }
+  " CAN_USE_SYSTEM_ZSTD)
+  set(CMAKE_REQUIRED_INCLUDES)
+endif()
+
+if (CAN_USE_SYSTEM_ZSTD)
+  add_library(zstd INTERFACE)
+  target_include_directories(zstd INTERFACE ${ZSTD_INCLUDE_DIR})
+  target_link_libraries(zstd INTERFACE ${ZSTD_LIB})
+else()
+  message(FATAL_ERROR "zstd >=1.4.x is required")
+endif ()
+
+find_package(fmt CONFIG REQUIRED)
+find_package(magic_enum CONFIG REQUIRED)
 find_package(LibLZMA MODULE REQUIRED)
 find_package(Snappy CONFIG REQUIRED)
+find_package(FLEX REQUIRED)
+find_package(BISON 3.0 REQUIRED)
+find_package(LibZip REQUIRED)
+find_package(LibSodium 1.0.9 REQUIRED)
+if (LIBSODIUM_INCLUDE_DIRS)
+  include_directories(${LIBSODIUM_INCLUDE_DIRS})
+endif()
+find_package(LZ4 REQUIRED)
+if (LZ4_INCLUDE_DIR)
+  add_library(lz4 INTERFACE)
+  target_include_directories(lz4 INTERFACE ${LZ4_INCLUDE_DIR})
+  target_link_libraries(lz4 INTERFACE ${LZ4_LIBRARY})
+endif()
+find_package(re2 CONFIG REQUIRED)
+
+# Use the real xplat/usdt implementation for fbsource OSS builds so
+# verification doesn't silently compile away probes.
+if(EXISTS "${CMAKE_SOURCE_DIR}/xplat/usdt/usdt.h")
+  include_directories("${CMAKE_SOURCE_DIR}/xplat")
+else()
+  include_directories("${CMAKE_SOURCE_DIR}/third-party/forks")
+endif()
+
+if(LINUX)
+  # Folly symbolizer implementation details
+  find_package(Libiberty REQUIRED)
+endif()
+
+# Meta first-party deps: use pre-built libraries via find_package().
+# These are built by getdeps.py and found via CMAKE_PREFIX_PATH.
+find_package(folly CONFIG REQUIRED)
+find_package(fizz CONFIG REQUIRED)
+find_package(wangle CONFIG REQUIRED)
+find_package(mvfst CONFIG REQUIRED)
+# proxygen headers are needed even when FASTCGI is OFF (transport.h includes them)
+find_package(proxygen CONFIG REQUIRED)
+find_package(FBThrift CONFIG REQUIRED)
+if (ENABLE_MCROUTER)
+  find_package(mcrouter CONFIG REQUIRED)
+endif()
 
 include_directories(${HPHP_HOME}/hphp)
 
@@ -327,7 +463,7 @@ macro(hphp_link target)
   endif ()
 
   if (JEMALLOC_ENABLED)
-    target_link_libraries(${target} ${VISIBILITY} jemalloc)
+    target_link_libraries(${target} ${VISIBILITY} ${JEMALLOC_LIB})
   endif ()
 
   if (GOOGLE_HEAP_PROFILER_ENABLED OR GOOGLE_CPU_PROFILER_ENABLED)
@@ -340,13 +476,12 @@ macro(hphp_link target)
     target_link_libraries(${target} ${VISIBILITY} ${GOOGLE_TCMALLOC_MIN_LIB})
   endif()
 
-  target_link_libraries(${target} ${VISIBILITY} libsodium)
+  target_link_libraries(${target} ${VISIBILITY} ${LIBSODIUM_LIBRARIES})
 
   target_link_libraries(${target} ${VISIBILITY} ${PCRE_LIBRARY})
   target_link_libraries(${target} ${VISIBILITY} ${ICU_DATA_LIBRARIES} ${ICU_I18N_LIBRARIES} ${ICU_LIBRARIES})
   target_link_libraries(${target} ${VISIBILITY} ${LIBEVENT_LIB})
   target_link_libraries(${target} ${VISIBILITY} ${CURL_LIBRARIES})
-  target_link_libraries(${target} ${VISIBILITY} glog)
 
   if (LINUX)
     target_link_libraries(${target} ${VISIBILITY} ${BPF_LIBRARIES} ${SYSTEMD_LIBRARIES})
@@ -382,7 +517,6 @@ macro(hphp_link target)
     target_link_libraries(${target} ${VISIBILITY} ${LIBPTHREAD_LIBRARIES})
   endif()
 
-  target_link_libraries(${target} ${VISIBILITY} ${TBB_LIBRARIES})
   target_link_libraries(${target} ${VISIBILITY} ${OPENSSL_LIBRARIES})
   target_link_libraries(${target} ${VISIBILITY} ${ZLIB_LIBRARIES})
 
@@ -405,7 +539,7 @@ macro(hphp_link target)
   endif()
 
   target_link_libraries(${target} ${VISIBILITY} lz4)
-  target_link_libraries(${target} ${VISIBILITY} libzip)
+  target_link_libraries(${target} ${VISIBILITY} ${LIBZIP_LIBRARY})
 
   if (PCRE_LIBRARY)
     target_link_libraries(${target} ${VISIBILITY} ${PCRE_LIBRARY})
@@ -419,22 +553,17 @@ macro(hphp_link target)
     target_link_libraries(${target} ${VISIBILITY} fastlz)
   endif()
 
-  target_link_libraries(${target} ${VISIBILITY} re2)
+  target_link_libraries(${target} ${VISIBILITY} re2::re2)
 
   target_link_libraries(${target} ${VISIBILITY} timelib)
-  target_link_libraries(${target} ${VISIBILITY} folly)
-  target_link_libraries(${target} ${VISIBILITY} jemalloc)
-  target_link_libraries(${target} ${VISIBILITY} wangle)
-  target_link_libraries(${target} ${VISIBILITY} fizz)
+  target_link_libraries(${target} ${VISIBILITY} Folly::folly)
+  target_link_libraries(${target} ${VISIBILITY} ${JEMALLOC_LIB})
+  target_link_libraries(${target} ${VISIBILITY} wangle::wangle)
+  target_link_libraries(${target} ${VISIBILITY} fizz::fizz)
   target_link_libraries(${target} ${VISIBILITY} brotli)
+  target_link_libraries(${target} ${VISIBILITY} magic_enum::magic_enum)
   target_link_libraries(${target} ${VISIBILITY} hhbc_ast_header)
-  target_link_libraries(${target} ${VISIBILITY} compiler_ffi)
-  target_link_libraries(${target} ${VISIBILITY} hdf)
-  target_link_libraries(${target} ${VISIBILITY} packages_ffi)
-  target_link_libraries(${target} ${VISIBILITY} parser_ffi)
-  target_link_libraries(${target} ${VISIBILITY} hhvm_types_ffi)
-  target_link_libraries(${target} ${VISIBILITY} hhvm_hhbc_defs_ffi)
-  target_link_libraries(${target} ${VISIBILITY} hack_rust_ffi)
+  target_link_libraries(${target} ${VISIBILITY} hack_rust_ffi_bridge)
 
   target_link_libraries(${target} ${VISIBILITY} tbb)
 
@@ -444,7 +573,7 @@ macro(hphp_link target)
   target_link_libraries(${target} ${VISIBILITY} ${LIBLZMA_LIBRARIES} Snappy::snappy)
 
   if (LINUX)
-    target_link_libraries(${target} ${VISIBILITY} ${LIBUNWIND_LIBRARIES})
+    target_link_libraries(${target} ${VISIBILITY} ${LIBIBERTY_LIBRARIES} ${LIBELF_LIBRARIES} ${LIBDWARF_LIBRARIES} ${LIBUNWIND_LIBRARIES})
   endif()
 
   if (EDITLINE_LIBRARIES)
@@ -462,21 +591,11 @@ macro(hphp_link target)
     target_link_libraries(${target} ${VISIBILITY} ${ATOMIC_LIBRARY})
   endif()
 
-  if (ENABLE_XED)
+  if (HHVM_REQUIRE_XED)
     if (LibXed_FOUND)
         target_link_libraries(${target} ${VISIBILITY} ${LibXed_LIBRARY})
     else()
         target_link_libraries(${target} ${VISIBILITY} xed)
-    endif()
-  endif()
-
-  if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQUAL "AppleClang") # using Clang
-    if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9.0)
-      target_link_libraries(${target} ${VISIBILITY} c++fs)
-    endif()
-  elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
-    if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9.1)
-      target_link_libraries(${target} ${VISIBILITY} stdc++fs)
     endif()
   endif()
 endmacro()

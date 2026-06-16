@@ -1127,6 +1127,36 @@ void testArmLeaLowering() {
 #endif
 }
 
+void testArmStoreOffsetNoMaterialize() {
+#ifndef __aarch64__
+  GTEST_SKIP() << "ARM-specific store offset lowering test";
+#else
+  // A store to a constant offset that fits the 64-bit scaled-imm12 addressing
+  // form (528 = 0x210, a multiple of 8 below 32760) must fold the offset into
+  // the store's immediate displacement, not materialize it into a register --
+  // even when the stored value register is still virtual at lowering time. The
+  // load of the same field already keeps its immediate offset; the store must
+  // match it.
+  Vunit unit;
+  unit.entry = unit.makeBlock(AreaIndex::Main, 1);
+  Vout v(unit, unit.entry);
+
+  auto const base = Vreg64{arm::rarg(2)};
+  auto const val = v.makeReg();          // virtual GP value
+  v << load{base[0], val};               // define `val` (no constant offset)
+  v << store{val, base[528]};            // offset must fold into addressing mode
+  v << ret{RegSet{}};
+
+  optimize(unit, arm::abi(), false);
+  auto const out = stripWhitespace(show(unit));
+
+  // The constant offset must not be materialized into a register via ldimmq.
+  EXPECT_EQ(out.find("ldimmq"), std::string::npos) << out;
+  // The store keeps the constant displacement in its addressing mode.
+  EXPECT_NE(out.find("+ 0x210]"), std::string::npos) << out;
+#endif
+}
+
 void testArmShiftedBitTestFromShrqi() {
 #ifndef __aarch64__
   GTEST_SKIP() << "ARM-specific shifted bit test simplify";
@@ -1520,6 +1550,10 @@ TEST(Vasm, Simplifier) {
 
 TEST(Vasm, ArmLeaLowering) {
   testArmLeaLowering();
+}
+
+TEST(Vasm, ArmStoreOffsetNoMaterialize) {
+  testArmStoreOffsetNoMaterialize();
 }
 
 void testArmLoadPairNoClobberBase() {

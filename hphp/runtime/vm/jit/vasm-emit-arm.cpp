@@ -2049,20 +2049,16 @@ void lowerVptrQuad(Vptr& p, Vout& v) {
   lowerVptr(p, v, kXPositiveImmediate12, kUnscaledSignedImmediate9);
 }
 
-#define Y(vasm_opc, m, n)                                   \
+#define Y(vasm_opc, m)                                      \
 void lower(const VLS& e, vasm_opc& i, Vlabel b, size_t z) { \
   lower_impl(e.unit, b, z, [&] (Vout& v) {                  \
-    if (i.n.isGP())                                         \
-      lowerVptrQuad(i.m, v);                                \
-    else                                                    \
-      lowerVptr(i.m, v, kUnscaledSignedImmediate9,          \
-          kUnscaledSignedImmediate9);                       \
+    lowerVptrQuad(i.m, v);                                  \
     v << i;                                                 \
   });                                                       \
 }
 
-Y(load, s, d)
-Y(store, d, s)
+Y(load, s)
+Y(store, d)
 
 #undef Y
 

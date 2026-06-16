@@ -75,14 +75,8 @@ final class SimplePHPObjectProtocolTest extends WWWTest {
     if ($expect->i64s === null) {
       expect($actual->i64s)->toBeNull();
     } else {
-      $actual_ints = nullthrows(
-        $actual->i64s,
-        '$actual->i64s was unexpectedly null in '.__METHOD__,
-      );
-      $expect_ints = nullthrows(
-        $expect->i64s,
-        '$expect->i64s was unexpectedly null in '.__METHOD__,
-      );
+      $actual_ints = nullthrows($actual->i64s, 'Got unexpected null');
+      $expect_ints = nullthrows($expect->i64s, 'Got unexpected null');
       expect(C\count($actual_ints))->toEqual(C\count($expect_ints));
       foreach ($expect_ints as $i64) {
         expect(C\contains_key($actual_ints, $i64))->toBeTrue();

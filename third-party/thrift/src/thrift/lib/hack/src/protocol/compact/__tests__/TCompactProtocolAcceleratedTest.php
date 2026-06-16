@@ -272,7 +272,7 @@ final class CompactTestService implements CompactTestServiceAsyncIf {
     if ($this->throwExn) {
       throw CompactTestExn::fromShape(shape('t' => $t));
     }
-    return nullthrows($t, '$t was unexpectedly null in '.__METHOD__);
+    return nullthrows($t, 'Got unexpected null');
   }
 }
 

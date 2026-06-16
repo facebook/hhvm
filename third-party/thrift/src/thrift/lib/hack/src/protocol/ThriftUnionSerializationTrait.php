@@ -90,10 +90,8 @@ trait ThriftUnionSerializationTrait implements IThriftStruct {
         }
 
         // This uses the TFIELDMAP to find the field id.
-        $field_id = $this::FIELDMAP[nullthrows(
-          $field_name,
-          '$field_name was unexpectedly null in '.__METHOD__,
-        )];
+        $field_id =
+          $this::FIELDMAP[nullthrows($field_name, 'Got unexpected null')];
       }
 
       $field_name_tmp = null;

@@ -48,9 +48,10 @@ pub const TYPE_SYSTEM_DIGEST_VERSION: u8 = 2;
 /// Controls which parts of the type system are included in the digest.
 ///
 /// Matches the C++ `DigestMode` enum in `TypeSystemDigest.h`.
-#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+#[derive(Copy, Clone, Debug, Default, PartialEq, Eq)]
 pub enum DigestMode {
     /// Hash everything: structure, annotations, and custom defaults.
+    #[default]
     Full,
     /// Hash only structure: skip annotations and custom defaults.
     Structural,

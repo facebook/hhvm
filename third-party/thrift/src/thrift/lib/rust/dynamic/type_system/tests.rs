@@ -345,6 +345,65 @@ fn duplicate_uri_is_rejected() {
     assert!(matches!(dup, Err(InvalidTypeError::DuplicateUri(_))));
 }
 
+#[test]
+fn overlay_field_resolves_to_base_node_identity() {
+    let base = build(vec![("x/Base", struct_def(vec![]))]).unwrap();
+
+    let mut overlay_builder = TypeSystemBuilder::new();
+    overlay_builder
+        .add_entry(
+            "x/Holder".to_owned(),
+            type_system::SerializableTypeDefinitionEntry {
+                definition: struct_def(vec![optional_field(1, "base", uri_type("x/Base"))]),
+                ..Default::default()
+            },
+        )
+        .unwrap();
+    let overlay = overlay_builder
+        .build_layered_on(base)
+        .expect("layering should build");
+
+    let holder = overlay.get("x/Holder").unwrap();
+    let base_via_field = holder
+        .as_struct()
+        .unwrap()
+        .field_by_name("base")
+        .unwrap()
+        .type_ref()
+        .as_struct()
+        .unwrap();
+    let base_direct = overlay.get("x/Base").unwrap();
+    let DefinitionRef::Struct(base_node) = &base_direct else {
+        panic!("Base is a struct");
+    };
+    assert!(
+        Arc::ptr_eq(&base_via_field, base_node),
+        "overlay field and base lookup resolve to the same node"
+    );
+}
+
+#[test]
+fn overlay_uri_conflicting_with_base_is_rejected() {
+    let base = build(vec![("x/Base", struct_def(vec![]))]).unwrap();
+
+    let mut overlay_builder = TypeSystemBuilder::new();
+    overlay_builder
+        .add_entry(
+            "x/Base".to_owned(),
+            type_system::SerializableTypeDefinitionEntry {
+                definition: struct_def(vec![]),
+                ..Default::default()
+            },
+        )
+        .unwrap();
+
+    let result = overlay_builder.build_layered_on(base);
+    assert!(
+        matches!(result, Err(InvalidTypeError::DuplicateUri(_))),
+        "overlaying a URI already present in the base should be rejected, got {result:?}"
+    );
+}
+
 fn build_serializable(
     defs: Vec<(&str, type_system::SerializableTypeDefinition)>,
 ) -> type_system::SerializableTypeSystem {

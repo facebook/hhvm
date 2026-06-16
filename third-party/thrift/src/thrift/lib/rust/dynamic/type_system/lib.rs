@@ -55,4 +55,5 @@ pub use type_ref::DefinitionRef;
 pub use type_ref::Kind;
 pub use type_ref::TypeRef;
 pub use type_system::BasicTypeSystem;
+pub use type_system::LayeredTypeSystem;
 pub use type_system::TypeSystem;

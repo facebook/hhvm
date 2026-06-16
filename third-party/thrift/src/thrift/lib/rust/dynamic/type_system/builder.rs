@@ -38,6 +38,7 @@ use crate::type_ref::DefinitionRef;
 use crate::type_ref::TypeRef;
 use crate::type_system::BasicTypeSystem;
 use crate::type_system::DefinitionNode;
+use crate::type_system::LayeredTypeSystem;
 use crate::type_system::TypeSystem;
 
 /// Builds a `TypeSystem` from serializable Thrift definitions.
@@ -88,6 +89,24 @@ impl TypeSystemBuilder {
     /// Build a standalone type system.
     pub fn build(self) -> Result<BasicTypeSystem, InvalidTypeError> {
         build_basic(self.entries, None)
+    }
+
+    /// Build a type system layered on top of a base.
+    ///
+    /// The base is used during resolution to look up types not defined in this
+    /// builder. The resulting `LayeredTypeSystem` delegates lookups to the
+    /// overlay first, then falls back to the base.
+    pub fn build_layered_on<T: TypeSystem>(
+        self,
+        base: T,
+    ) -> Result<LayeredTypeSystem<T>, InvalidTypeError> {
+        for uri in self.entries.keys() {
+            if base.get(uri).is_some() {
+                return Err(InvalidTypeError::DuplicateUri(uri.clone()));
+            }
+        }
+        let overlay = build_basic(self.entries, Some(&base))?;
+        Ok(LayeredTypeSystem::new(overlay, base))
     }
 }
 

@@ -110,6 +110,80 @@ impl std::fmt::Debug for BasicTypeSystem {
     }
 }
 
+/// A type system that overlays definitions on top of a base.
+///
+/// Lookups check the overlay first, then fall back to the base.
+/// Generic over the base, enabling both static and dynamic dispatch:
+///
+/// - `LayeredTypeSystem<BasicTypeSystem>` — zero-cost static dispatch
+/// - `LayeredTypeSystem<Arc<dyn TypeSystem + Send + Sync>>` — dynamic dispatch
+/// - `LayeredTypeSystem<LayeredTypeSystem<BasicTypeSystem>>` — multi-layer
+pub struct LayeredTypeSystem<T: TypeSystem> {
+    overlay: BasicTypeSystem,
+    base: T,
+}
+
+impl<T: TypeSystem> LayeredTypeSystem<T> {
+    pub fn new(overlay: BasicTypeSystem, base: T) -> Self {
+        Self { overlay, base }
+    }
+
+    /// Access the base type system.
+    pub fn base(&self) -> &T {
+        &self.base
+    }
+}
+
+impl<T: TypeSystem> TypeSystem for LayeredTypeSystem<T> {
+    fn get(&self, uri: &str) -> Option<DefinitionRef> {
+        self.overlay.get(uri).or_else(|| self.base.get(uri))
+    }
+
+    fn known_uris(&self) -> Box<dyn Iterator<Item = &str> + '_> {
+        Box::new(
+            self.overlay.known_uris().chain(
+                self.base
+                    .known_uris()
+                    .filter(|uri| self.overlay.get(uri).is_none()),
+            ),
+        )
+    }
+
+    fn resolve(&self, type_id: &TypeId) -> Result<TypeRef, InvalidTypeError> {
+        resolve_type_id(self, type_id)
+    }
+}
+
+impl<T: TypeSystem> type_system_digest::TypeSystemDigest for LayeredTypeSystem<T> {
+    fn hash_into(&self, hasher: &mut type_system_digest::hasher::Hasher) {
+        crate::digest::hash_type_system_into(self, hasher);
+    }
+}
+
+impl<T: TypeSystem + std::fmt::Debug> std::fmt::Debug for LayeredTypeSystem<T> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("LayeredTypeSystem")
+            .field("overlay", &self.overlay)
+            .field("base", &self.base)
+            .finish()
+    }
+}
+
+// Also implement TypeSystem for Arc<dyn TypeSystem> so it can be used as a base.
+impl TypeSystem for Arc<dyn TypeSystem + Send + Sync> {
+    fn get(&self, uri: &str) -> Option<DefinitionRef> {
+        (**self).get(uri)
+    }
+
+    fn known_uris(&self) -> Box<dyn Iterator<Item = &str> + '_> {
+        (**self).known_uris()
+    }
+
+    fn resolve(&self, type_id: &TypeId) -> Result<TypeRef, InvalidTypeError> {
+        (**self).resolve(type_id)
+    }
+}
+
 /// Default `resolve` implementation usable by any `TypeSystem`.
 pub(crate) fn resolve_type_id(
     ts: &(impl TypeSystem + ?Sized),

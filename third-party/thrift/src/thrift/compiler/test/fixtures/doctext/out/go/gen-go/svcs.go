@@ -207,7 +207,7 @@ func (p *procFuncCF) NewReqArgs() thrift.ReadableStruct {
     return newReqCF()
 }
 
-func (p *procFuncCF) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+func (p *procFuncCF) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableResult, error) {
     result := newRespCF()
     err := p.handler.F(ctx)
     if err != nil {
@@ -228,7 +228,7 @@ func (p *procFuncCNumbers) NewReqArgs() thrift.ReadableStruct {
     return newReqCNumbers()
 }
 
-func (p *procFuncCNumbers) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+func (p *procFuncCNumbers) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableResult, error) {
     return nil, errors.New("not supported")
 }
 
@@ -286,7 +286,7 @@ func (p *procFuncCThing) NewReqArgs() thrift.ReadableStruct {
     return newReqCThing()
 }
 
-func (p *procFuncCThing) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+func (p *procFuncCThing) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableResult, error) {
     args := reqStruct.(*reqCThing)
     result := newRespCThing()
     retval, err := p.handler.Thing(ctx, args.A, args.B, args.C)

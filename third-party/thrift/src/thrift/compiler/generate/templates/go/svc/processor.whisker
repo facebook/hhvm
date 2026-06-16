@@ -116,7 +116,7 @@ func (p *procFunc{{svc.go_name}}{{func.go_name}}) RunStreamContext(
 {{/let partial}}
 
 {{#let export partial server_func_response |func svc| captures |types|}}
-func (p *procFunc{{svc.go_name}}{{func.go_name}}) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+func (p *procFunc{{svc.go_name}}{{func.go_name}}) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableResult, error) {
     {{#if func.params.fields?}}
     args := reqStruct.(*req{{svc.go_name}}{{func.go_name}})
     {{/if func.params.fields?}}
@@ -395,26 +395,26 @@ func (p *procFunc{{svc.go_name}}{{func.go_name}}) NewReqArgs() thrift.ReadableSt
 }
 
 {{#if func.bidirectional_stream?}}
-func (p *procFunc{{svc.go_name}}{{func.go_name}}) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+func (p *procFunc{{svc.go_name}}{{func.go_name}}) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableResult, error) {
     return nil, errors.New("not supported")
 }
 
 {{#partial server_func_bidi func=func svc=svc}}
 {{#else if func.stream?}}
-func (p *procFunc{{svc.go_name}}{{func.go_name}}) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+func (p *procFunc{{svc.go_name}}{{func.go_name}}) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableResult, error) {
     return nil, errors.New("not supported")
 }
 
 {{#partial server_func_stream func=func svc=svc}}
 {{#else if func.sink?}}
-func (p *procFunc{{svc.go_name}}{{func.go_name}}) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+func (p *procFunc{{svc.go_name}}{{func.go_name}}) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableResult, error) {
     return nil, errors.New("not supported")
 }
 
 {{#partial server_func_sink func=func svc=svc}}
 {{#else if func.oneway?}}
 {{! NOTE: temporary workaround to match interface }}
-func (p *procFunc{{svc.go_name}}{{func.go_name}}) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+func (p *procFunc{{svc.go_name}}{{func.go_name}}) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableResult, error) {
     p.RunOnewayContext(ctx, reqStruct)
     return nil, nil
 }

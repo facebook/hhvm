@@ -26,7 +26,7 @@ type ProcessorFunction interface {
 	// Returns the argument struct for the processor function.
 	NewReqArgs() ReadableStruct
 	// RunContext processes a message handing it to the client handler.
-	RunContext(ctx context.Context, args ReadableStruct) (WritableStruct, error)
+	RunContext(ctx context.Context, args ReadableStruct) (WritableResult, error)
 }
 
 // Processor is the interface for thrift processors.

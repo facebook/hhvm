@@ -135,7 +135,7 @@ func (p *procFuncTestServiceInit) NewReqArgs() thrift.ReadableStruct {
     return newReqTestServiceInit()
 }
 
-func (p *procFuncTestServiceInit) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+func (p *procFuncTestServiceInit) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableResult, error) {
     args := reqStruct.(*reqTestServiceInit)
     result := newRespTestServiceInit()
     retval, err := p.handler.Init(ctx, args.Int1)

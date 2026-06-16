@@ -163,7 +163,7 @@ func (p *procFuncMyServiceQuery) NewReqArgs() thrift.ReadableStruct {
     return newReqMyServiceQuery()
 }
 
-func (p *procFuncMyServiceQuery) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+func (p *procFuncMyServiceQuery) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableResult, error) {
     args := reqStruct.(*reqMyServiceQuery)
     result := newRespMyServiceQuery()
     err := p.handler.Query(ctx, args.S, args.I)
@@ -185,7 +185,7 @@ func (p *procFuncMyServiceHasArgDocs) NewReqArgs() thrift.ReadableStruct {
     return newReqMyServiceHasArgDocs()
 }
 
-func (p *procFuncMyServiceHasArgDocs) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+func (p *procFuncMyServiceHasArgDocs) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableResult, error) {
     args := reqStruct.(*reqMyServiceHasArgDocs)
     result := newRespMyServiceHasArgDocs()
     err := p.handler.HasArgDocs(ctx, args.S, args.I)

@@ -462,7 +462,7 @@ func (p *procFuncSinkServiceMethod) NewReqArgs() thrift.ReadableStruct {
     return newReqSinkServiceMethod()
 }
 
-func (p *procFuncSinkServiceMethod) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+func (p *procFuncSinkServiceMethod) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableResult, error) {
     return nil, errors.New("not supported")
 }
 
@@ -526,7 +526,7 @@ func (p *procFuncSinkServiceMethodAndReponse) NewReqArgs() thrift.ReadableStruct
     return newReqSinkServiceMethodAndReponse()
 }
 
-func (p *procFuncSinkServiceMethodAndReponse) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+func (p *procFuncSinkServiceMethodAndReponse) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableResult, error) {
     return nil, errors.New("not supported")
 }
 
@@ -591,7 +591,7 @@ func (p *procFuncSinkServiceMethodThrow) NewReqArgs() thrift.ReadableStruct {
     return newReqSinkServiceMethodThrow()
 }
 
-func (p *procFuncSinkServiceMethodThrow) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+func (p *procFuncSinkServiceMethodThrow) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableResult, error) {
     return nil, errors.New("not supported")
 }
 
@@ -661,7 +661,7 @@ func (p *procFuncSinkServiceMethodSinkThrow) NewReqArgs() thrift.ReadableStruct 
     return newReqSinkServiceMethodSinkThrow()
 }
 
-func (p *procFuncSinkServiceMethodSinkThrow) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+func (p *procFuncSinkServiceMethodSinkThrow) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableResult, error) {
     return nil, errors.New("not supported")
 }
 
@@ -725,7 +725,7 @@ func (p *procFuncSinkServiceMethodFinalThrow) NewReqArgs() thrift.ReadableStruct
     return newReqSinkServiceMethodFinalThrow()
 }
 
-func (p *procFuncSinkServiceMethodFinalThrow) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+func (p *procFuncSinkServiceMethodFinalThrow) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableResult, error) {
     return nil, errors.New("not supported")
 }
 
@@ -795,7 +795,7 @@ func (p *procFuncSinkServiceMethodBothThrow) NewReqArgs() thrift.ReadableStruct 
     return newReqSinkServiceMethodBothThrow()
 }
 
-func (p *procFuncSinkServiceMethodBothThrow) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+func (p *procFuncSinkServiceMethodBothThrow) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableResult, error) {
     return nil, errors.New("not supported")
 }
 
@@ -865,7 +865,7 @@ func (p *procFuncSinkServiceMethodFast) NewReqArgs() thrift.ReadableStruct {
     return newReqSinkServiceMethodFast()
 }
 
-func (p *procFuncSinkServiceMethodFast) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+func (p *procFuncSinkServiceMethodFast) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableResult, error) {
     return nil, errors.New("not supported")
 }
 

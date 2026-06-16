@@ -133,7 +133,7 @@ func (p *procFuncBadInteractionFoo) NewReqArgs() thrift.ReadableStruct {
     return newReqBadInteractionFoo()
 }
 
-func (p *procFuncBadInteractionFoo) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+func (p *procFuncBadInteractionFoo) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableResult, error) {
     result := newRespBadInteractionFoo()
     err := p.handler.Foo(ctx)
     if err != nil {
@@ -378,7 +378,7 @@ func (p *procFuncMyServicePing) NewReqArgs() thrift.ReadableStruct {
     return newReqMyServicePing()
 }
 
-func (p *procFuncMyServicePing) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+func (p *procFuncMyServicePing) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableResult, error) {
     result := newRespMyServicePing()
     err := p.handler.Ping(ctx)
     if err != nil {
@@ -405,7 +405,7 @@ func (p *procFuncMyServiceGetRandomData) NewReqArgs() thrift.ReadableStruct {
     return newReqMyServiceGetRandomData()
 }
 
-func (p *procFuncMyServiceGetRandomData) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+func (p *procFuncMyServiceGetRandomData) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableResult, error) {
     result := newRespMyServiceGetRandomData()
     retval, err := p.handler.GetRandomData(ctx)
     if err != nil {
@@ -427,7 +427,7 @@ func (p *procFuncMyServiceHasDataById) NewReqArgs() thrift.ReadableStruct {
     return newReqMyServiceHasDataById()
 }
 
-func (p *procFuncMyServiceHasDataById) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+func (p *procFuncMyServiceHasDataById) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableResult, error) {
     args := reqStruct.(*reqMyServiceHasDataById)
     result := newRespMyServiceHasDataById()
     retval, err := p.handler.HasDataById(ctx, args.Id)
@@ -450,7 +450,7 @@ func (p *procFuncMyServiceGoGetDataById) NewReqArgs() thrift.ReadableStruct {
     return newReqMyServiceGoGetDataById()
 }
 
-func (p *procFuncMyServiceGoGetDataById) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+func (p *procFuncMyServiceGoGetDataById) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableResult, error) {
     args := reqStruct.(*reqMyServiceGoGetDataById)
     result := newRespMyServiceGoGetDataById()
     retval, err := p.handler.GoGetDataById(ctx, args.Id)
@@ -473,7 +473,7 @@ func (p *procFuncMyServicePutDataById) NewReqArgs() thrift.ReadableStruct {
     return newReqMyServicePutDataById()
 }
 
-func (p *procFuncMyServicePutDataById) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+func (p *procFuncMyServicePutDataById) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableResult, error) {
     args := reqStruct.(*reqMyServicePutDataById)
     result := newRespMyServicePutDataById()
     err := p.handler.PutDataById(ctx, args.Id, args.Data)
@@ -495,7 +495,7 @@ func (p *procFuncMyServiceLobDataById) NewReqArgs() thrift.ReadableStruct {
     return newReqMyServiceLobDataById()
 }
 
-func (p *procFuncMyServiceLobDataById) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+func (p *procFuncMyServiceLobDataById) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableResult, error) {
     p.RunOnewayContext(ctx, reqStruct)
     return nil, nil
 }
@@ -516,7 +516,7 @@ func (p *procFuncMyServiceGoDoNothing) NewReqArgs() thrift.ReadableStruct {
     return newReqMyServiceGoDoNothing()
 }
 
-func (p *procFuncMyServiceGoDoNothing) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+func (p *procFuncMyServiceGoDoNothing) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableResult, error) {
     result := newRespMyServiceGoDoNothing()
     err := p.handler.GoDoNothing(ctx)
     if err != nil {
@@ -653,7 +653,7 @@ func (p *procFuncMyServicePrioParentPing) NewReqArgs() thrift.ReadableStruct {
     return newReqMyServicePrioParentPing()
 }
 
-func (p *procFuncMyServicePrioParentPing) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+func (p *procFuncMyServicePrioParentPing) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableResult, error) {
     result := newRespMyServicePrioParentPing()
     err := p.handler.Ping(ctx)
     if err != nil {
@@ -674,7 +674,7 @@ func (p *procFuncMyServicePrioParentPong) NewReqArgs() thrift.ReadableStruct {
     return newReqMyServicePrioParentPong()
 }
 
-func (p *procFuncMyServicePrioParentPong) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+func (p *procFuncMyServicePrioParentPong) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableResult, error) {
     result := newRespMyServicePrioParentPong()
     err := p.handler.Pong(ctx)
     if err != nil {
@@ -775,7 +775,7 @@ func (p *procFuncMyServicePrioChildPang) NewReqArgs() thrift.ReadableStruct {
     return newReqMyServicePrioChildPang()
 }
 
-func (p *procFuncMyServicePrioChildPang) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+func (p *procFuncMyServicePrioChildPang) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableResult, error) {
     result := newRespMyServicePrioChildPang()
     err := p.handler.Pang(ctx)
     if err != nil {
@@ -893,7 +893,7 @@ func (p *procFuncBadServiceBar) NewReqArgs() thrift.ReadableStruct {
     return newReqBadServiceBar()
 }
 
-func (p *procFuncBadServiceBar) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+func (p *procFuncBadServiceBar) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableResult, error) {
     result := newRespBadServiceBar()
     retval, err := p.handler.Bar(ctx)
     if err != nil {
@@ -1052,7 +1052,7 @@ func (p *procFuncFooBarBazServiceFooStructured) NewReqArgs() thrift.ReadableStru
     return newReqFooBarBazServiceFooStructured()
 }
 
-func (p *procFuncFooBarBazServiceFooStructured) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+func (p *procFuncFooBarBazServiceFooStructured) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableResult, error) {
     result := newRespFooBarBazServiceFooStructured()
     err := p.handler.FooStructured(ctx)
     if err != nil {
@@ -1073,7 +1073,7 @@ func (p *procFuncFooBarBazServiceBarNonStructured) NewReqArgs() thrift.ReadableS
     return newReqFooBarBazServiceBarNonStructured()
 }
 
-func (p *procFuncFooBarBazServiceBarNonStructured) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+func (p *procFuncFooBarBazServiceBarNonStructured) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableResult, error) {
     result := newRespFooBarBazServiceBarNonStructured()
     err := p.handler.BarNonStructured(ctx)
     if err != nil {
@@ -1094,7 +1094,7 @@ func (p *procFuncFooBarBazServiceBaz) NewReqArgs() thrift.ReadableStruct {
     return newReqFooBarBazServiceBaz()
 }
 
-func (p *procFuncFooBarBazServiceBaz) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+func (p *procFuncFooBarBazServiceBaz) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableResult, error) {
     result := newRespFooBarBazServiceBaz()
     err := p.handler.Baz(ctx)
     if err != nil {

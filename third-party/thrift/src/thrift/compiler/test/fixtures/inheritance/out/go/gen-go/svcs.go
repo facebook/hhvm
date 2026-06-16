@@ -134,7 +134,7 @@ func (p *procFuncMyRootDoRoot) NewReqArgs() thrift.ReadableStruct {
     return newReqMyRootDoRoot()
 }
 
-func (p *procFuncMyRootDoRoot) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+func (p *procFuncMyRootDoRoot) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableResult, error) {
     result := newRespMyRootDoRoot()
     err := p.handler.DoRoot(ctx)
     if err != nil {
@@ -235,7 +235,7 @@ func (p *procFuncMyNodeDoMid) NewReqArgs() thrift.ReadableStruct {
     return newReqMyNodeDoMid()
 }
 
-func (p *procFuncMyNodeDoMid) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+func (p *procFuncMyNodeDoMid) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableResult, error) {
     result := newRespMyNodeDoMid()
     err := p.handler.DoMid(ctx)
     if err != nil {
@@ -336,7 +336,7 @@ func (p *procFuncMyLeafDoLeaf) NewReqArgs() thrift.ReadableStruct {
     return newReqMyLeafDoLeaf()
 }
 
-func (p *procFuncMyLeafDoLeaf) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+func (p *procFuncMyLeafDoLeaf) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableResult, error) {
     result := newRespMyLeafDoLeaf()
     err := p.handler.DoLeaf(ctx)
     if err != nil {

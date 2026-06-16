@@ -223,7 +223,7 @@ func (p *procFuncNestedContainersMapList) NewReqArgs() thrift.ReadableStruct {
     return newReqNestedContainersMapList()
 }
 
-func (p *procFuncNestedContainersMapList) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+func (p *procFuncNestedContainersMapList) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableResult, error) {
     args := reqStruct.(*reqNestedContainersMapList)
     result := newRespNestedContainersMapList()
     err := p.handler.MapList(ctx, args.Foo)
@@ -245,7 +245,7 @@ func (p *procFuncNestedContainersMapSet) NewReqArgs() thrift.ReadableStruct {
     return newReqNestedContainersMapSet()
 }
 
-func (p *procFuncNestedContainersMapSet) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+func (p *procFuncNestedContainersMapSet) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableResult, error) {
     args := reqStruct.(*reqNestedContainersMapSet)
     result := newRespNestedContainersMapSet()
     err := p.handler.MapSet(ctx, args.Foo)
@@ -267,7 +267,7 @@ func (p *procFuncNestedContainersListMap) NewReqArgs() thrift.ReadableStruct {
     return newReqNestedContainersListMap()
 }
 
-func (p *procFuncNestedContainersListMap) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+func (p *procFuncNestedContainersListMap) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableResult, error) {
     args := reqStruct.(*reqNestedContainersListMap)
     result := newRespNestedContainersListMap()
     err := p.handler.ListMap(ctx, args.Foo)
@@ -289,7 +289,7 @@ func (p *procFuncNestedContainersListSet) NewReqArgs() thrift.ReadableStruct {
     return newReqNestedContainersListSet()
 }
 
-func (p *procFuncNestedContainersListSet) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+func (p *procFuncNestedContainersListSet) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableResult, error) {
     args := reqStruct.(*reqNestedContainersListSet)
     result := newRespNestedContainersListSet()
     err := p.handler.ListSet(ctx, args.Foo)
@@ -311,7 +311,7 @@ func (p *procFuncNestedContainersTurtles) NewReqArgs() thrift.ReadableStruct {
     return newReqNestedContainersTurtles()
 }
 
-func (p *procFuncNestedContainersTurtles) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+func (p *procFuncNestedContainersTurtles) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableResult, error) {
     args := reqStruct.(*reqNestedContainersTurtles)
     result := newRespNestedContainersTurtles()
     err := p.handler.Turtles(ctx, args.Foo)

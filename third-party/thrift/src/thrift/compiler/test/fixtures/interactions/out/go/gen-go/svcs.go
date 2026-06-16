@@ -241,7 +241,7 @@ func (p *procFuncMyInteractionFrobnicate) NewReqArgs() thrift.ReadableStruct {
     return newReqMyInteractionFrobnicate()
 }
 
-func (p *procFuncMyInteractionFrobnicate) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+func (p *procFuncMyInteractionFrobnicate) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableResult, error) {
     result := newRespMyInteractionFrobnicate()
     retval, err := p.handler.Frobnicate(ctx)
     if err != nil {
@@ -269,7 +269,7 @@ func (p *procFuncMyInteractionPing) NewReqArgs() thrift.ReadableStruct {
     return newReqMyInteractionPing()
 }
 
-func (p *procFuncMyInteractionPing) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+func (p *procFuncMyInteractionPing) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableResult, error) {
     p.RunOnewayContext(ctx, reqStruct)
     return nil, nil
 }
@@ -289,7 +289,7 @@ func (p *procFuncMyInteractionTruthify) NewReqArgs() thrift.ReadableStruct {
     return newReqMyInteractionTruthify()
 }
 
-func (p *procFuncMyInteractionTruthify) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+func (p *procFuncMyInteractionTruthify) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableResult, error) {
     return nil, errors.New("not supported")
 }
 
@@ -347,7 +347,7 @@ func (p *procFuncMyInteractionEncode) NewReqArgs() thrift.ReadableStruct {
     return newReqMyInteractionEncode()
 }
 
-func (p *procFuncMyInteractionEncode) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+func (p *procFuncMyInteractionEncode) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableResult, error) {
     return nil, errors.New("not supported")
 }
 
@@ -620,7 +620,7 @@ func (p *procFuncMyInteractionFastFrobnicate) NewReqArgs() thrift.ReadableStruct
     return newReqMyInteractionFastFrobnicate()
 }
 
-func (p *procFuncMyInteractionFastFrobnicate) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+func (p *procFuncMyInteractionFastFrobnicate) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableResult, error) {
     result := newRespMyInteractionFastFrobnicate()
     retval, err := p.handler.Frobnicate(ctx)
     if err != nil {
@@ -642,7 +642,7 @@ func (p *procFuncMyInteractionFastPing) NewReqArgs() thrift.ReadableStruct {
     return newReqMyInteractionFastPing()
 }
 
-func (p *procFuncMyInteractionFastPing) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+func (p *procFuncMyInteractionFastPing) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableResult, error) {
     p.RunOnewayContext(ctx, reqStruct)
     return nil, nil
 }
@@ -662,7 +662,7 @@ func (p *procFuncMyInteractionFastTruthify) NewReqArgs() thrift.ReadableStruct {
     return newReqMyInteractionFastTruthify()
 }
 
-func (p *procFuncMyInteractionFastTruthify) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+func (p *procFuncMyInteractionFastTruthify) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableResult, error) {
     return nil, errors.New("not supported")
 }
 
@@ -720,7 +720,7 @@ func (p *procFuncMyInteractionFastEncode) NewReqArgs() thrift.ReadableStruct {
     return newReqMyInteractionFastEncode()
 }
 
-func (p *procFuncMyInteractionFastEncode) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+func (p *procFuncMyInteractionFastEncode) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableResult, error) {
     return nil, errors.New("not supported")
 }
 
@@ -887,7 +887,7 @@ func (p *procFuncSerialInteractionFrobnicate) NewReqArgs() thrift.ReadableStruct
     return newReqSerialInteractionFrobnicate()
 }
 
-func (p *procFuncSerialInteractionFrobnicate) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+func (p *procFuncSerialInteractionFrobnicate) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableResult, error) {
     result := newRespSerialInteractionFrobnicate()
     err := p.handler.Frobnicate(ctx)
     if err != nil {
@@ -1010,7 +1010,7 @@ func (p *procFuncBoxedInteractionGetABox) NewReqArgs() thrift.ReadableStruct {
     return newReqBoxedInteractionGetABox()
 }
 
-func (p *procFuncBoxedInteractionGetABox) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+func (p *procFuncBoxedInteractionGetABox) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableResult, error) {
     result := newRespBoxedInteractionGetABox()
     retval, err := p.handler.GetABox(ctx)
     if err != nil {
@@ -1233,7 +1233,7 @@ func (p *procFuncMyServiceFoo) NewReqArgs() thrift.ReadableStruct {
     return newReqMyServiceFoo()
 }
 
-func (p *procFuncMyServiceFoo) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+func (p *procFuncMyServiceFoo) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableResult, error) {
     result := newRespMyServiceFoo()
     err := p.handler.Foo(ctx)
     if err != nil {
@@ -1254,7 +1254,7 @@ func (p *procFuncMyServiceInteract) NewReqArgs() thrift.ReadableStruct {
     return newReqMyServiceInteract()
 }
 
-func (p *procFuncMyServiceInteract) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+func (p *procFuncMyServiceInteract) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableResult, error) {
     args := reqStruct.(*reqMyServiceInteract)
     result := newRespMyServiceInteract()
     fbthriftInteraction, err := p.handler.Interact(ctx, args.Arg)
@@ -1277,7 +1277,7 @@ func (p *procFuncMyServiceInteractFast) NewReqArgs() thrift.ReadableStruct {
     return newReqMyServiceInteractFast()
 }
 
-func (p *procFuncMyServiceInteractFast) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+func (p *procFuncMyServiceInteractFast) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableResult, error) {
     result := newRespMyServiceInteractFast()
     fbthriftInteraction, retval, err := p.handler.InteractFast(ctx)
     if err != nil {
@@ -1300,7 +1300,7 @@ func (p *procFuncMyServiceSerialize) NewReqArgs() thrift.ReadableStruct {
     return newReqMyServiceSerialize()
 }
 
-func (p *procFuncMyServiceSerialize) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+func (p *procFuncMyServiceSerialize) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableResult, error) {
     return nil, errors.New("not supported")
 }
 
@@ -1553,7 +1553,7 @@ func (p *procFuncFactoriesFoo) NewReqArgs() thrift.ReadableStruct {
     return newReqFactoriesFoo()
 }
 
-func (p *procFuncFactoriesFoo) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+func (p *procFuncFactoriesFoo) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableResult, error) {
     result := newRespFactoriesFoo()
     err := p.handler.Foo(ctx)
     if err != nil {
@@ -1574,7 +1574,7 @@ func (p *procFuncFactoriesInteract) NewReqArgs() thrift.ReadableStruct {
     return newReqFactoriesInteract()
 }
 
-func (p *procFuncFactoriesInteract) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+func (p *procFuncFactoriesInteract) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableResult, error) {
     args := reqStruct.(*reqFactoriesInteract)
     result := newRespFactoriesInteract()
     fbthriftInteraction, err := p.handler.Interact(ctx, args.Arg)
@@ -1597,7 +1597,7 @@ func (p *procFuncFactoriesInteractFast) NewReqArgs() thrift.ReadableStruct {
     return newReqFactoriesInteractFast()
 }
 
-func (p *procFuncFactoriesInteractFast) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+func (p *procFuncFactoriesInteractFast) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableResult, error) {
     result := newRespFactoriesInteractFast()
     fbthriftInteraction, retval, err := p.handler.InteractFast(ctx)
     if err != nil {
@@ -1620,7 +1620,7 @@ func (p *procFuncFactoriesSerialize) NewReqArgs() thrift.ReadableStruct {
     return newReqFactoriesSerialize()
 }
 
-func (p *procFuncFactoriesSerialize) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+func (p *procFuncFactoriesSerialize) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableResult, error) {
     return nil, errors.New("not supported")
 }
 
@@ -1779,7 +1779,7 @@ func (p *procFuncPerformFoo) NewReqArgs() thrift.ReadableStruct {
     return newReqPerformFoo()
 }
 
-func (p *procFuncPerformFoo) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+func (p *procFuncPerformFoo) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableResult, error) {
     result := newRespPerformFoo()
     err := p.handler.Foo(ctx)
     if err != nil {
@@ -1898,7 +1898,7 @@ func (p *procFuncInteractWithSharedDoSomeSimilarThings) NewReqArgs() thrift.Read
     return newReqInteractWithSharedDoSomeSimilarThings()
 }
 
-func (p *procFuncInteractWithSharedDoSomeSimilarThings) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+func (p *procFuncInteractWithSharedDoSomeSimilarThings) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableResult, error) {
     result := newRespInteractWithSharedDoSomeSimilarThings()
     retval, err := p.handler.DoSomeSimilarThings(ctx)
     if err != nil {
@@ -2019,7 +2019,7 @@ func (p *procFuncBoxServiceGetABoxSession) NewReqArgs() thrift.ReadableStruct {
     return newReqBoxServiceGetABoxSession()
 }
 
-func (p *procFuncBoxServiceGetABoxSession) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+func (p *procFuncBoxServiceGetABoxSession) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableResult, error) {
     args := reqStruct.(*reqBoxServiceGetABoxSession)
     result := newRespBoxServiceGetABoxSession()
     fbthriftInteraction, retval, err := p.handler.GetABoxSession(ctx, args.Req)

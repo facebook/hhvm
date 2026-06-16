@@ -183,7 +183,7 @@ func (p *procFuncFinderByPlate) NewReqArgs() thrift.ReadableStruct {
     return newReqFinderByPlate()
 }
 
-func (p *procFuncFinderByPlate) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+func (p *procFuncFinderByPlate) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableResult, error) {
     args := reqStruct.(*reqFinderByPlate)
     result := newRespFinderByPlate()
     retval, err := p.handler.ByPlate(ctx, args.Plate)
@@ -206,7 +206,7 @@ func (p *procFuncFinderAliasByPlate) NewReqArgs() thrift.ReadableStruct {
     return newReqFinderAliasByPlate()
 }
 
-func (p *procFuncFinderAliasByPlate) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+func (p *procFuncFinderAliasByPlate) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableResult, error) {
     args := reqStruct.(*reqFinderAliasByPlate)
     result := newRespFinderAliasByPlate()
     retval, err := p.handler.AliasByPlate(ctx, args.Plate)
@@ -229,7 +229,7 @@ func (p *procFuncFinderPreviousPlate) NewReqArgs() thrift.ReadableStruct {
     return newReqFinderPreviousPlate()
 }
 
-func (p *procFuncFinderPreviousPlate) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+func (p *procFuncFinderPreviousPlate) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableResult, error) {
     args := reqStruct.(*reqFinderPreviousPlate)
     result := newRespFinderPreviousPlate()
     retval, err := p.handler.PreviousPlate(ctx, args.Plate)

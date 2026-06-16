@@ -550,7 +550,7 @@ func (p *procFuncPubSubStreamingServiceReturnstream) NewReqArgs() thrift.Readabl
     return newReqPubSubStreamingServiceReturnstream()
 }
 
-func (p *procFuncPubSubStreamingServiceReturnstream) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+func (p *procFuncPubSubStreamingServiceReturnstream) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableResult, error) {
     return nil, errors.New("not supported")
 }
 
@@ -609,7 +609,7 @@ func (p *procFuncPubSubStreamingServiceStreamthrows) NewReqArgs() thrift.Readabl
     return newReqPubSubStreamingServiceStreamthrows()
 }
 
-func (p *procFuncPubSubStreamingServiceStreamthrows) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+func (p *procFuncPubSubStreamingServiceStreamthrows) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableResult, error) {
     return nil, errors.New("not supported")
 }
 
@@ -675,7 +675,7 @@ func (p *procFuncPubSubStreamingServiceServicethrows) NewReqArgs() thrift.Readab
     return newReqPubSubStreamingServiceServicethrows()
 }
 
-func (p *procFuncPubSubStreamingServiceServicethrows) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+func (p *procFuncPubSubStreamingServiceServicethrows) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableResult, error) {
     return nil, errors.New("not supported")
 }
 
@@ -740,7 +740,7 @@ func (p *procFuncPubSubStreamingServiceServicethrows2) NewReqArgs() thrift.Reada
     return newReqPubSubStreamingServiceServicethrows2()
 }
 
-func (p *procFuncPubSubStreamingServiceServicethrows2) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+func (p *procFuncPubSubStreamingServiceServicethrows2) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableResult, error) {
     return nil, errors.New("not supported")
 }
 
@@ -808,7 +808,7 @@ func (p *procFuncPubSubStreamingServiceBoththrows) NewReqArgs() thrift.ReadableS
     return newReqPubSubStreamingServiceBoththrows()
 }
 
-func (p *procFuncPubSubStreamingServiceBoththrows) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+func (p *procFuncPubSubStreamingServiceBoththrows) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableResult, error) {
     return nil, errors.New("not supported")
 }
 
@@ -880,7 +880,7 @@ func (p *procFuncPubSubStreamingServiceResponseandstreamstreamthrows) NewReqArgs
     return newReqPubSubStreamingServiceResponseandstreamstreamthrows()
 }
 
-func (p *procFuncPubSubStreamingServiceResponseandstreamstreamthrows) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+func (p *procFuncPubSubStreamingServiceResponseandstreamstreamthrows) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableResult, error) {
     return nil, errors.New("not supported")
 }
 
@@ -947,7 +947,7 @@ func (p *procFuncPubSubStreamingServiceResponseandstreamservicethrows) NewReqArg
     return newReqPubSubStreamingServiceResponseandstreamservicethrows()
 }
 
-func (p *procFuncPubSubStreamingServiceResponseandstreamservicethrows) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+func (p *procFuncPubSubStreamingServiceResponseandstreamservicethrows) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableResult, error) {
     return nil, errors.New("not supported")
 }
 
@@ -1013,7 +1013,7 @@ func (p *procFuncPubSubStreamingServiceResponseandstreamboththrows) NewReqArgs()
     return newReqPubSubStreamingServiceResponseandstreamboththrows()
 }
 
-func (p *procFuncPubSubStreamingServiceResponseandstreamboththrows) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+func (p *procFuncPubSubStreamingServiceResponseandstreamboththrows) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableResult, error) {
     return nil, errors.New("not supported")
 }
 
@@ -1086,7 +1086,7 @@ func (p *procFuncPubSubStreamingServiceReturnstreamFast) NewReqArgs() thrift.Rea
     return newReqPubSubStreamingServiceReturnstreamFast()
 }
 
-func (p *procFuncPubSubStreamingServiceReturnstreamFast) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+func (p *procFuncPubSubStreamingServiceReturnstreamFast) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableResult, error) {
     return nil, errors.New("not supported")
 }
 

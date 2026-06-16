@@ -159,7 +159,7 @@ func (p *procFuncSomeServiceBounceMap) NewReqArgs() thrift.ReadableStruct {
     return newReqSomeServiceBounceMap()
 }
 
-func (p *procFuncSomeServiceBounceMap) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+func (p *procFuncSomeServiceBounceMap) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableResult, error) {
     args := reqStruct.(*reqSomeServiceBounceMap)
     result := newRespSomeServiceBounceMap()
     retval, err := p.handler.BounceMap(ctx, args.M)
@@ -182,7 +182,7 @@ func (p *procFuncSomeServiceBinaryKeyedMap) NewReqArgs() thrift.ReadableStruct {
     return newReqSomeServiceBinaryKeyedMap()
 }
 
-func (p *procFuncSomeServiceBinaryKeyedMap) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+func (p *procFuncSomeServiceBinaryKeyedMap) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableResult, error) {
     args := reqStruct.(*reqSomeServiceBinaryKeyedMap)
     result := newRespSomeServiceBinaryKeyedMap()
     retval, err := p.handler.BinaryKeyedMap(ctx, args.R)

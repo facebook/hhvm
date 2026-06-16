@@ -294,7 +294,7 @@ func (p *procFuncBiDiServiceSimple) NewReqArgs() thrift.ReadableStruct {
     return newReqBiDiServiceSimple()
 }
 
-func (p *procFuncBiDiServiceSimple) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+func (p *procFuncBiDiServiceSimple) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableResult, error) {
     return nil, errors.New("not supported")
 }
 
@@ -379,7 +379,7 @@ func (p *procFuncBiDiServiceResponse) NewReqArgs() thrift.ReadableStruct {
     return newReqBiDiServiceResponse()
 }
 
-func (p *procFuncBiDiServiceResponse) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+func (p *procFuncBiDiServiceResponse) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableResult, error) {
     return nil, errors.New("not supported")
 }
 
@@ -465,7 +465,7 @@ func (p *procFuncBiDiServiceCanThrow) NewReqArgs() thrift.ReadableStruct {
     return newReqBiDiServiceCanThrow()
 }
 
-func (p *procFuncBiDiServiceCanThrow) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+func (p *procFuncBiDiServiceCanThrow) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableResult, error) {
     return nil, errors.New("not supported")
 }
 

@@ -122,7 +122,7 @@ func (p *procFuncExtendTestServiceCheck) NewReqArgs() thrift.ReadableStruct {
     return newReqExtendTestServiceCheck()
 }
 
-func (p *procFuncExtendTestServiceCheck) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+func (p *procFuncExtendTestServiceCheck) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableResult, error) {
     args := reqStruct.(*reqExtendTestServiceCheck)
     result := newRespExtendTestServiceCheck()
     retval, err := p.handler.Check(ctx, args.Struct1)

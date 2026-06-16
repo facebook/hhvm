@@ -31,7 +31,7 @@ func ChainInterceptors(interceptors ...Interceptor) Interceptor {
 		name string,
 		pf types.ProcessorFunction,
 		args types.ReadableStruct,
-	) (types.WritableStruct, error) {
+	) (types.WritableResult, error) {
 		if len(interceptors) == 0 {
 			return pf.RunContext(ctx, args)
 		}
@@ -59,7 +59,7 @@ func (ch *chainHandler) NewReqArgs() types.ReadableStruct {
 	return nil
 }
 
-func (ch *chainHandler) RunContext(ctx context.Context, args types.ReadableStruct) (types.WritableStruct, error) {
+func (ch *chainHandler) RunContext(ctx context.Context, args types.ReadableStruct) (types.WritableResult, error) {
 	if ch.curI == len(ch.interceptors)-1 {
 		return ch.origHandler.RunContext(ctx, args)
 	}

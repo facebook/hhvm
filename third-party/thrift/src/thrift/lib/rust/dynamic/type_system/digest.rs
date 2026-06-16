@@ -152,6 +152,7 @@ impl TypeSystemDigest for DefinitionRef {
 
 #[cfg(test)]
 mod tests {
+    use std::collections::HashMap;
     use std::sync::Arc;
 
     use type_system_digest::TypeSystemDigest;
@@ -179,6 +180,7 @@ mod tests {
             defs.into_iter()
                 .map(|(uri, node)| (uri.to_owned(), node))
                 .collect(),
+            HashMap::new(),
         )
     }
 

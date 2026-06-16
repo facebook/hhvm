@@ -56,4 +56,6 @@ pub use type_ref::Kind;
 pub use type_ref::TypeRef;
 pub use type_system::BasicTypeSystem;
 pub use type_system::LayeredTypeSystem;
+pub use type_system::SourceIdentifier;
+pub use type_system::SourceIndexedTypeSystem;
 pub use type_system::TypeSystem;

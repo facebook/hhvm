@@ -44,4 +44,6 @@ pub enum InvalidTypeError {
     EmptyTypeId,
     #[error("Too many fields ({0}) in {1}, maximum is 65535")]
     TooManyFields(usize, String),
+    #[error("Duplicate source identifier '{0}' at location '{1}'")]
+    DuplicateSourceIdentifier(String, String),
 }

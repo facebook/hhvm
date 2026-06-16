@@ -17,6 +17,7 @@
 //! Builder for constructing a `TypeSystem` from serializable Thrift definitions.
 
 use std::collections::HashMap;
+use std::collections::HashSet;
 use std::sync::Arc;
 
 use type_id::TypeId;
@@ -39,17 +40,24 @@ use crate::type_ref::TypeRef;
 use crate::type_system::BasicTypeSystem;
 use crate::type_system::DefinitionNode;
 use crate::type_system::LayeredTypeSystem;
+use crate::type_system::SourceIdentifier;
 use crate::type_system::TypeSystem;
 
 /// Builds a `TypeSystem` from serializable Thrift definitions.
 pub struct TypeSystemBuilder {
     entries: HashMap<String, type_system::SerializableTypeDefinition>,
+    source_info: HashMap<String, SourceIdentifier>,
+    /// Reverse index of occupied `(location, name)` pairs, enabling O(1)
+    /// duplicate-source-identifier detection in `add_entry`.
+    source_keys: HashSet<(String, String)>,
 }
 
 impl TypeSystemBuilder {
     pub fn new() -> Self {
         Self {
             entries: HashMap::new(),
+            source_info: HashMap::new(),
+            source_keys: HashSet::new(),
         }
     }
 
@@ -61,6 +69,24 @@ impl TypeSystemBuilder {
     ) -> Result<(), InvalidTypeError> {
         if self.entries.contains_key(&uri) {
             return Err(InvalidTypeError::DuplicateUri(uri));
+        }
+        if let Some(src) = entry.sourceInfo {
+            if !self
+                .source_keys
+                .insert((src.locator.clone(), src.name.clone()))
+            {
+                return Err(InvalidTypeError::DuplicateSourceIdentifier(
+                    src.name,
+                    src.locator,
+                ));
+            }
+            self.source_info.insert(
+                uri.clone(),
+                SourceIdentifier {
+                    location: src.locator,
+                    name: src.name,
+                },
+            );
         }
         self.entries.insert(uri, entry.definition);
         Ok(())
@@ -78,17 +104,21 @@ impl TypeSystemBuilder {
     }
 
     /// Build a builder pre-populated from a serializable type system.
-    pub fn from_serializable(ts: type_system::SerializableTypeSystem) -> Self {
+    ///
+    /// Routes through [`Self::add_type_system`] so the duplicate-URI and
+    /// duplicate-source-identifier checks hold regardless of how the builder is
+    /// constructed.
+    pub fn from_serializable(
+        ts: type_system::SerializableTypeSystem,
+    ) -> Result<Self, InvalidTypeError> {
         let mut builder = Self::new();
-        for (uri, entry) in ts.types {
-            builder.entries.insert(uri, entry.definition);
-        }
-        builder
+        builder.add_type_system(ts)?;
+        Ok(builder)
     }
 
     /// Build a standalone type system.
     pub fn build(self) -> Result<BasicTypeSystem, InvalidTypeError> {
-        build_basic(self.entries, None)
+        build_basic(self.entries, self.source_info, None)
     }
 
     /// Build a type system layered on top of a base.
@@ -105,7 +135,7 @@ impl TypeSystemBuilder {
                 return Err(InvalidTypeError::DuplicateUri(uri.clone()));
             }
         }
-        let overlay = build_basic(self.entries, Some(&base))?;
+        let overlay = build_basic(self.entries, self.source_info, Some(&base))?;
         Ok(LayeredTypeSystem::new(overlay, base))
     }
 }
@@ -125,6 +155,7 @@ impl Default for TypeSystemBuilder {
 /// cycles (recursive and mutually recursive types) without a fixpoint loop.
 fn build_basic(
     entries: HashMap<String, type_system::SerializableTypeDefinition>,
+    source_info: HashMap<String, SourceIdentifier>,
     base: Option<&dyn TypeSystem>,
 ) -> Result<BasicTypeSystem, InvalidTypeError> {
     let mut shells: HashMap<String, DefinitionRef> = HashMap::with_capacity(entries.len());
@@ -147,7 +178,7 @@ fn build_basic(
         definitions.insert(uri, node);
     }
 
-    Ok(BasicTypeSystem::new(definitions))
+    Ok(BasicTypeSystem::new(definitions, source_info))
 }
 
 /// Phase 1: allocate an (empty) node for `uri`. Enums carry no type references,

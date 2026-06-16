@@ -440,6 +440,7 @@ fn serialize_roundtrip_struct_with_fields() {
         ]),
     )]);
     let live = TypeSystemBuilder::from_serializable(original.clone())
+        .unwrap()
         .build()
         .unwrap();
     let reserialized = live.to_serializable();
@@ -474,6 +475,7 @@ fn serialize_roundtrip_cross_referencing_types() {
         ),
     ]);
     let live = TypeSystemBuilder::from_serializable(original.clone())
+        .unwrap()
         .build()
         .unwrap();
     let reserialized = live.to_serializable();
@@ -494,6 +496,7 @@ fn serialize_roundtrip_cross_referencing_types() {
 fn serialize_roundtrip_enum() {
     let original = build_serializable(vec![("x/Color", enum_def(&[("RED", 0), ("GREEN", 1)]))]);
     let live = TypeSystemBuilder::from_serializable(original.clone())
+        .unwrap()
         .build()
         .unwrap();
     let reserialized = live.to_serializable();
@@ -515,6 +518,7 @@ fn serialize_roundtrip_opaque_alias() {
         opaque_alias_def(TypeId::i64Type(Default::default())),
     )]);
     let live = TypeSystemBuilder::from_serializable(original.clone())
+        .unwrap()
         .build()
         .unwrap();
     let reserialized = live.to_serializable();
@@ -537,6 +541,7 @@ fn serialize_roundtrip_union() {
         ]),
     )]);
     let live = TypeSystemBuilder::from_serializable(original.clone())
+        .unwrap()
         .build()
         .unwrap();
     let reserialized = live.to_serializable();
@@ -575,6 +580,7 @@ fn serialize_roundtrip_container_types() {
         ]),
     )]);
     let live = TypeSystemBuilder::from_serializable(original.clone())
+        .unwrap()
         .build()
         .unwrap();
     let reserialized = live.to_serializable();
@@ -613,6 +619,7 @@ fn digest_live_equals_digest_serializable() {
         ),
     ]);
     let live = TypeSystemBuilder::from_serializable(serializable.clone())
+        .unwrap()
         .build()
         .unwrap();
 
@@ -627,4 +634,140 @@ fn get_or_err_returns_error_for_unknown_uri() {
         ts.get_or_err("x/Missing"),
         Err(InvalidTypeError::UnknownUri(_))
     ));
+}
+
+/// Builds a `SerializableTypeDefinitionEntry` carrying source info.
+fn entry_with_source(
+    def: type_system::SerializableTypeDefinition,
+    locator: &str,
+    name: &str,
+) -> type_system::SerializableTypeDefinitionEntry {
+    type_system::SerializableTypeDefinitionEntry {
+        definition: def,
+        sourceInfo: Some(type_system::SerializableThriftSourceInfo {
+            locator: locator.to_owned(),
+            name: name.to_owned(),
+            ..Default::default()
+        }),
+        ..Default::default()
+    }
+}
+
+#[test]
+fn layered_to_serializable_preserves_source_info() {
+    let mut base_builder = TypeSystemBuilder::new();
+    base_builder
+        .add_entry(
+            "x/Base".to_owned(),
+            entry_with_source(struct_def(vec![]), "base.thrift", "Base"),
+        )
+        .unwrap();
+    let base = base_builder.build().unwrap();
+
+    let mut overlay_builder = TypeSystemBuilder::new();
+    overlay_builder
+        .add_entry(
+            "x/Overlay".to_owned(),
+            entry_with_source(struct_def(vec![]), "overlay.thrift", "Overlay"),
+        )
+        .unwrap();
+    let overlay = overlay_builder
+        .build_layered_on(base)
+        .expect("layering should build");
+
+    let reserialized = overlay.to_serializable();
+    assert_eq!(
+        reserialized.types["x/Overlay"]
+            .sourceInfo
+            .as_ref()
+            .map(|s| s.name.clone()),
+        Some("Overlay".to_owned()),
+        "overlay source info should survive serialization"
+    );
+    assert_eq!(
+        reserialized.types["x/Base"]
+            .sourceInfo
+            .as_ref()
+            .map(|s| s.name.clone()),
+        Some("Base".to_owned()),
+        "base source info should survive serialization"
+    );
+}
+
+/// Builds a `SerializableTypeSystem` whose entries carry source info.
+fn serializable_with_sources(
+    defs: Vec<(&str, type_system::SerializableTypeDefinition, &str, &str)>,
+) -> type_system::SerializableTypeSystem {
+    let types = defs
+        .into_iter()
+        .map(|(uri, def, locator, name)| (uri.to_owned(), entry_with_source(def, locator, name)))
+        .collect();
+    type_system::SerializableTypeSystem {
+        types,
+        ..Default::default()
+    }
+}
+
+#[test]
+fn add_entry_rejects_duplicate_source_identifier() {
+    let mut builder = TypeSystemBuilder::new();
+    builder
+        .add_entry(
+            "x/A".to_owned(),
+            entry_with_source(struct_def(vec![]), "shared.thrift", "Shared"),
+        )
+        .unwrap();
+    let dup = builder.add_entry(
+        "x/B".to_owned(),
+        entry_with_source(struct_def(vec![]), "shared.thrift", "Shared"),
+    );
+    assert!(
+        matches!(dup, Err(InvalidTypeError::DuplicateSourceIdentifier(_, _))),
+        "two URIs sharing a source identifier should be rejected, got {dup:?}"
+    );
+}
+
+#[test]
+fn from_serializable_rejects_duplicate_source_identifier() {
+    // Two distinct URIs sharing one source identifier must be rejected the same
+    // way `add_entry` rejects them; the invariant cannot depend on constructor.
+    let serializable = serializable_with_sources(vec![
+        ("x/A", struct_def(vec![]), "shared.thrift", "Shared"),
+        ("x/B", struct_def(vec![]), "shared.thrift", "Shared"),
+    ]);
+    let result = TypeSystemBuilder::from_serializable(serializable);
+    assert!(
+        matches!(
+            result,
+            Err(InvalidTypeError::DuplicateSourceIdentifier(_, _))
+        ),
+        "from_serializable should reject duplicate source identifiers"
+    );
+}
+
+#[test]
+fn from_serializable_preserves_source_info() {
+    let original = serializable_with_sources(vec![
+        ("x/A", struct_def(vec![]), "a.thrift", "A"),
+        ("x/B", struct_def(vec![]), "b.thrift", "B"),
+    ]);
+    let live = TypeSystemBuilder::from_serializable(original)
+        .unwrap()
+        .build()
+        .unwrap();
+    let reserialized = live.to_serializable();
+    assert_eq!(
+        reserialized.types["x/A"]
+            .sourceInfo
+            .as_ref()
+            .map(|s| (s.locator.clone(), s.name.clone())),
+        Some(("a.thrift".to_owned(), "A".to_owned())),
+    );
+    assert_eq!(
+        reserialized.types["x/B"]
+            .sourceInfo
+            .as_ref()
+            .map(|s| (s.locator.clone(), s.name.clone())),
+        Some(("b.thrift".to_owned(), "B".to_owned())),
+    );
 }

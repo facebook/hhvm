@@ -29,6 +29,13 @@ use crate::nodes::UnionNode;
 use crate::type_ref::DefinitionRef;
 use crate::type_ref::TypeRef;
 
+/// Source location of a type definition (Thrift file + definition name).
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct SourceIdentifier {
+    pub location: String,
+    pub name: String,
+}
+
 /// Core interface for looking up Thrift type definitions.
 pub trait TypeSystem {
     /// Look up a user-defined type by URI.
@@ -71,14 +78,42 @@ impl DefinitionNode {
     }
 }
 
+/// Extension of [`TypeSystem`] that supports source-identifier lookups.
+pub trait SourceIndexedTypeSystem: TypeSystem {
+    /// Look up a definition by its source file location and name.
+    fn get_by_source(&self, location: &str, name: &str) -> Option<DefinitionRef>;
+
+    /// Get the source identifier for a definition URI.
+    fn source_identifier(&self, uri: &str) -> Option<&SourceIdentifier>;
+
+    /// Get all definitions originating from a given source location.
+    fn definitions_at_location(&self, location: &str) -> HashMap<String, DefinitionRef>;
+}
+
 /// A flat collection of Thrift type definitions with URI-based lookup.
 pub struct BasicTypeSystem {
     definitions: HashMap<String, DefinitionNode>,
+    source_by_location: HashMap<String, HashMap<String, String>>,
+    uri_to_source: HashMap<String, SourceIdentifier>,
 }
 
 impl BasicTypeSystem {
-    pub(crate) fn new(definitions: HashMap<String, DefinitionNode>) -> Self {
-        Self { definitions }
+    pub(crate) fn new(
+        definitions: HashMap<String, DefinitionNode>,
+        uri_to_source: HashMap<String, SourceIdentifier>,
+    ) -> Self {
+        let mut source_by_location: HashMap<String, HashMap<String, String>> = HashMap::new();
+        for (uri, src) in &uri_to_source {
+            source_by_location
+                .entry(src.location.clone())
+                .or_default()
+                .insert(src.name.clone(), uri.clone());
+        }
+        Self {
+            definitions,
+            source_by_location,
+            uri_to_source,
+        }
     }
 }
 
@@ -93,6 +128,35 @@ impl TypeSystem for BasicTypeSystem {
 
     fn resolve(&self, type_id: &TypeId) -> Result<TypeRef, InvalidTypeError> {
         resolve_type_id(self, type_id)
+    }
+
+    fn to_serializable(&self) -> type_system::SerializableTypeSystem {
+        crate::serialize::to_serializable_with_source(self, &self.uri_to_source)
+    }
+}
+
+impl SourceIndexedTypeSystem for BasicTypeSystem {
+    fn get_by_source(&self, location: &str, name: &str) -> Option<DefinitionRef> {
+        self.source_by_location
+            .get(location)
+            .and_then(|names| names.get(name))
+            .and_then(|uri| self.get(uri))
+    }
+
+    fn source_identifier(&self, uri: &str) -> Option<&SourceIdentifier> {
+        self.uri_to_source.get(uri)
+    }
+
+    fn definitions_at_location(&self, location: &str) -> HashMap<String, DefinitionRef> {
+        self.source_by_location
+            .get(location)
+            .map(|names| {
+                names
+                    .iter()
+                    .filter_map(|(name, uri)| self.get(uri).map(|def| (name.clone(), def)))
+                    .collect()
+            })
+            .unwrap_or_default()
     }
 }
 
@@ -151,6 +215,38 @@ impl<T: TypeSystem> TypeSystem for LayeredTypeSystem<T> {
 
     fn resolve(&self, type_id: &TypeId) -> Result<TypeRef, InvalidTypeError> {
         resolve_type_id(self, type_id)
+    }
+
+    fn to_serializable(&self) -> type_system::SerializableTypeSystem {
+        // Merge base then overlay so source identifiers from every layer are
+        // preserved; overlay entries win on URI collisions, matching the
+        // overlay-first lookup precedence.
+        let mut serialized = self.base.to_serializable();
+        let overlay = self.overlay.to_serializable();
+        serialized.types.extend(overlay.types);
+        serialized
+    }
+}
+
+impl<T: SourceIndexedTypeSystem> SourceIndexedTypeSystem for LayeredTypeSystem<T> {
+    fn get_by_source(&self, location: &str, name: &str) -> Option<DefinitionRef> {
+        self.overlay
+            .get_by_source(location, name)
+            .or_else(|| self.base.get_by_source(location, name))
+    }
+
+    fn source_identifier(&self, uri: &str) -> Option<&SourceIdentifier> {
+        self.overlay
+            .source_identifier(uri)
+            .or_else(|| self.base.source_identifier(uri))
+    }
+
+    fn definitions_at_location(&self, location: &str) -> HashMap<String, DefinitionRef> {
+        let mut result = self.base.definitions_at_location(location);
+        for (name, def) in self.overlay.definitions_at_location(location) {
+            result.insert(name, def);
+        }
+        result
     }
 }
 

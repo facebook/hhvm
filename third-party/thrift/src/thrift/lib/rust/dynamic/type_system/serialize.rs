@@ -21,17 +21,40 @@ use std::collections::BTreeMap;
 use crate::field::FieldDefinition;
 use crate::structured_node::StructuredNode;
 use crate::type_ref::DefinitionRef;
+use crate::type_system::SourceIdentifier;
 use crate::type_system::TypeSystem;
 
 pub fn to_serializable(ts: &(impl TypeSystem + ?Sized)) -> type_system::SerializableTypeSystem {
+    to_serializable_inner(ts, &std::collections::HashMap::new())
+}
+
+pub fn to_serializable_with_source(
+    ts: &(impl TypeSystem + ?Sized),
+    uri_to_source: &std::collections::HashMap<String, SourceIdentifier>,
+) -> type_system::SerializableTypeSystem {
+    to_serializable_inner(ts, uri_to_source)
+}
+
+fn to_serializable_inner(
+    ts: &(impl TypeSystem + ?Sized),
+    uri_to_source: &std::collections::HashMap<String, SourceIdentifier>,
+) -> type_system::SerializableTypeSystem {
     let mut types = BTreeMap::new();
     for uri in ts.known_uris() {
         if let Some(def) = ts.get(uri) {
+            let source_info =
+                uri_to_source
+                    .get(uri)
+                    .map(|src| type_system::SerializableThriftSourceInfo {
+                        locator: src.location.clone(),
+                        name: src.name.clone(),
+                        ..Default::default()
+                    });
             types.insert(
                 uri.to_owned(),
                 type_system::SerializableTypeDefinitionEntry {
                     definition: serialize_definition_ref(&def),
-                    sourceInfo: None,
+                    sourceInfo: source_info,
                     ..Default::default()
                 },
             );

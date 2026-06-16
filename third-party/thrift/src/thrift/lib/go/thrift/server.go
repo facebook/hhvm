@@ -385,8 +385,7 @@ func (s *rocketServerSocket) requestResponse(msg payload.Payload) mono.Mono {
 		}
 
 		// Track actual handler execution time
-		processTime := time.Since(processStartTime)
-		s.observer.ProcessTime(processTime)
+		s.observer.ProcessTime(time.Since(processStartTime))
 		s.observer.SentReply()
 
 		return payload, err
@@ -445,8 +444,7 @@ func (s *rocketServerSocket) fireAndForget(msg payload.Payload) {
 	}
 
 	// Track actual handler execution time
-	processTime := time.Since(processStartTime)
-	s.observer.ProcessTime(processTime)
+	s.observer.ProcessTime(time.Since(processStartTime))
 }
 
 func (s *rocketServerSocket) requestStream(msg payload.Payload) flux.Flux {

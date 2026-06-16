@@ -22,11 +22,9 @@ import (
 	"log"
 	"net"
 	"os"
-	"time"
 )
 
 const (
-	defaultStatsPeriod = 1 * time.Minute
 	// GoroutinePerRequest is a special value to use in SetNumWorkers to enable
 	// a goroutine per request (instead of a worker pool of goroutines)
 	GoroutinePerRequest = -1

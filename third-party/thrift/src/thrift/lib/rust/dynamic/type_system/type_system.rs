@@ -115,6 +115,16 @@ impl BasicTypeSystem {
             uri_to_source,
         }
     }
+
+    /// Type-erase into a shared, thread-safe trait object.
+    pub fn into_shared(self) -> Arc<dyn TypeSystem + Send + Sync> {
+        Arc::new(self)
+    }
+
+    /// Type-erase into a boxed trait object.
+    pub fn into_boxed(self) -> Box<dyn TypeSystem + Send + Sync> {
+        Box::new(self)
+    }
 }
 
 impl TypeSystem for BasicTypeSystem {
@@ -195,6 +205,22 @@ impl<T: TypeSystem> LayeredTypeSystem<T> {
     /// Access the base type system.
     pub fn base(&self) -> &T {
         &self.base
+    }
+
+    /// Type-erase into a shared, thread-safe trait object.
+    pub fn into_shared(self) -> Arc<dyn TypeSystem + Send + Sync>
+    where
+        T: Send + Sync + 'static,
+    {
+        Arc::new(self)
+    }
+
+    /// Type-erase into a boxed trait object.
+    pub fn into_boxed(self) -> Box<dyn TypeSystem + Send + Sync>
+    where
+        T: Send + Sync + 'static,
+    {
+        Box::new(self)
     }
 }
 

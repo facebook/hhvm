@@ -515,8 +515,6 @@ func (s *rocketServerSocket) requestChannelSink(
 	pfuncSink processorFunctionSink,
 	requests flux.Flux,
 ) flux.Flux {
-	protoID := types.ProtocolID(metadata.GetProtocol())
-
 	sinkElemChan := make(chan ReadableStruct, types.DefaultStreamBufferSize)
 	sinkErrChan := make(chan error, 1)
 
@@ -614,17 +612,20 @@ func (s *rocketServerSocket) requestChannelSink(
 					return nil
 				}
 
-				elemProtocol, err := newProtocolBuffer(protoID, dataBytes)
-				if err != nil {
-					s.log("server requestChannel newProtocolBuffer error: %v", err)
-					return nil
-				}
-
 				sinkElemStruct := pfuncSink.NewSinkElem()
-				if err := sinkElemStruct.Read(elemProtocol); err != nil {
+				switch metadata.GetProtocol() {
+				case rpcmetadata.ProtocolId_BINARY:
+					err = format.DecodeBinary(dataBytes, sinkElemStruct)
+				case rpcmetadata.ProtocolId_COMPACT:
+					err = format.DecodeCompact(dataBytes, sinkElemStruct)
+				default:
+					err = types.NewProtocolException(fmt.Errorf("unknown protocol id: %d", metadata.GetProtocol()))
+				}
+				if err != nil {
 					s.log("server requestChannel read sink element error: %v", err)
 					return nil
-				} else if sinkEx := sinkElemStruct.Exception(); sinkEx != nil {
+				}
+				if sinkEx := sinkElemStruct.Exception(); sinkEx != nil {
 					sinkErrChan <- sinkEx
 					return nil
 				}
@@ -650,8 +651,6 @@ func (s *rocketServerSocket) requestChannelBiDi(
 	pfuncBiDi processorFunctionBiDi,
 	requests flux.Flux,
 ) flux.Flux {
-	protoID := types.ProtocolID(metadata.GetProtocol())
-
 	sinkElemChan := make(chan ReadableStruct, types.DefaultStreamBufferSize)
 	sinkErrChan := make(chan error, 1)
 
@@ -736,17 +735,20 @@ func (s *rocketServerSocket) requestChannelBiDi(
 					return nil
 				}
 
-				elemProtocol, err := newProtocolBuffer(protoID, dataBytes)
-				if err != nil {
-					s.log("server requestChannel newProtocolBuffer error: %v", err)
-					return nil
-				}
-
 				sinkElemStruct := pfuncBiDi.NewSinkElem()
-				if err := sinkElemStruct.Read(elemProtocol); err != nil {
+				switch metadata.GetProtocol() {
+				case rpcmetadata.ProtocolId_BINARY:
+					err = format.DecodeBinary(dataBytes, sinkElemStruct)
+				case rpcmetadata.ProtocolId_COMPACT:
+					err = format.DecodeCompact(dataBytes, sinkElemStruct)
+				default:
+					err = types.NewProtocolException(fmt.Errorf("unknown protocol id: %d", metadata.GetProtocol()))
+				}
+				if err != nil {
 					s.log("server requestChannel read sink element error: %v", err)
 					return nil
-				} else if sinkEx := sinkElemStruct.Exception(); sinkEx != nil {
+				}
+				if sinkEx := sinkElemStruct.Exception(); sinkEx != nil {
 					sinkErrChan <- sinkEx
 					return nil
 				}

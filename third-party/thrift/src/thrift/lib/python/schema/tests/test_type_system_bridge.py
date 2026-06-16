@@ -381,3 +381,65 @@ class UriLessBridgeRejectionTest(unittest.TestCase):
         # left behind by the failed build.
         with self.assertRaises(InvalidTypeError):
             bridge.get_user_defined_type("test.com/B")
+
+
+class BridgeSourceInfoTest(unittest.TestCase):
+    """The bridge threads provenance from the AST: each bridged node's
+    ``source_info`` is ``{"file://" + program.path, definition.name}``, or ``None``
+     when the AST carries no program."""
+
+    def setUp(self) -> None:
+        SchemaRegistry._reset()
+        self.registry = SchemaRegistry()
+
+    def _expected_locator(self, name: str) -> str:
+        ast_def = self.registry.get_definition_by_uri(f"{_URI}/{name}")
+        return "file://" + ast_def.program.path
+
+    def test_struct_source_info(self) -> None:
+        node = self.registry.get_user_defined_type(f"{_URI}/Outer")
+        assert node is not None
+        info = node.source_info
+        assert info is not None, "expected source_info on a bridged struct"
+        self.assertEqual(info.locator, self._expected_locator("Outer"))
+        self.assertEqual(info.name, "Outer")
+
+    def test_union_source_info(self) -> None:
+        node = self.registry.get_user_defined_type(f"{_URI}/MyUnion")
+        assert node is not None
+        info = node.source_info
+        assert info is not None, "expected source_info on a bridged union"
+        self.assertEqual(info.locator, self._expected_locator("MyUnion"))
+        self.assertEqual(info.name, "MyUnion")
+
+    def test_enum_source_info(self) -> None:
+        node = self.registry.get_user_defined_type(f"{_URI}/Color")
+        assert node is not None
+        info = node.source_info
+        assert info is not None, "expected source_info on a bridged enum"
+        self.assertEqual(info.locator, self._expected_locator("Color"))
+        self.assertEqual(info.name, "Color")
+
+    def test_locator_uses_file_scheme_and_real_path(self) -> None:
+        # Guards the exact "file://" + program.path shape against a non-empty
+        # fixture path.
+        node = self.registry.get_user_defined_type(f"{_URI}/Inner")
+        assert node is not None
+        info = node.source_info
+        assert info is not None
+        self.assertTrue(info.locator.startswith("file://"))
+        self.assertTrue(info.locator.endswith("type_system_bridge_test.thrift"))
+
+    def test_source_info_none_when_ast_has_no_program(self) -> None:
+        # A bridged node whose AST definition has no linked program (e.g. a
+        # programmatically built AST node, as the _StubResolver tests use)
+        # carries no source_info -- and must not crash on the asserting
+        # `Definition.program` accessor.
+        resolver = _ast._Resolver()
+        no_program = _build_ast_struct(
+            resolver, uri="test.com/NoProgram", name="NoProgram", key=b"k-noprog"
+        )
+        bridge = SyntaxGraphBridge(_StubResolver({"test.com/NoProgram": no_program}))
+        node = bridge.get_user_defined_type("test.com/NoProgram")
+        assert node is not None
+        self.assertIsNone(node.source_info)

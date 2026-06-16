@@ -43,11 +43,13 @@ from typing import assert_never, Sequence
 from apache.thrift.type_system.type_system.thrift_types import (
     SerializableFieldDefinition,
     SerializableTypeDefinition,
+    SerializableTypeDefinitionEntry,
     SerializableTypeSystem,
 )
 from thrift.lib.python.schema._serializable import (
     annotations_from_wire,
     from_wire_record,
+    PruneOptions,
     resolve_type_id,
 )
 from thrift.lib.python.schema.type_system import (
@@ -70,6 +72,7 @@ from thrift.lib.python.schema.type_system import (
     PresenceQualifier,
     PrimitiveTypeRef,
     SetTypeRef,
+    SourceInfo,
     StructNode,
     StructTypeRef,
     TypeRef,
@@ -436,28 +439,6 @@ def _build_enum_values(pending: _PendingEnum) -> list[EnumValue]:
 # ---------------------------------------------------------------------------
 
 
-class PruneOptions:
-    """Options for :func:`build_pruned`.
-
-    ``include_source_info`` is a forward-looking toggle: the current model
-    carries no ``sourceInfo``, so it currently has no effect on the pruned type
-    structure. It is accepted now so the signature is stable across milestones.
-    """
-
-    __slots__ = ("_include_source_info",)
-    _include_source_info: bool
-
-    def __init__(self, include_source_info: bool = True) -> None:
-        self._include_source_info = include_source_info
-
-    @property
-    def include_source_info(self) -> bool:
-        return self._include_source_info
-
-    def __repr__(self) -> str:
-        return f"PruneOptions(include_source_info={self._include_source_info})"
-
-
 def build_pruned(
     source: TypeSystem,
     root_uris: Sequence[str],
@@ -477,13 +458,19 @@ def build_pruned(
     ``source``'s memoized nodes (the result's lifetime is then tied to
     ``source``).
 
+    ``options.include_source_info`` (default ``True``) controls whether each
+    copied node carries its ``source_info`` provenance; it is identity-neutral
+    (excluded from the digest). With ``share=True`` the source nodes are reused
+    as-is, so their ``source_info`` is preserved regardless of this flag.
+
     Raises ``InvalidTypeError`` if a root URI is absent from ``source``, or if
     ``source`` is not self-contained (a referenced URI fails to resolve).
     """
+    opts = options if options is not None else PruneOptions()
     closure = _collect_closure(source, root_uris, _referenced_uris)
     if share:
         return IndexedTypeSystem(dict(closure))
-    return IndexedTypeSystem(_copy_closure(closure))
+    return IndexedTypeSystem(_copy_closure(closure, opts.include_source_info))
 
 
 def _referenced_uris(node: DefinitionNode) -> Iterator[str]:
@@ -501,15 +488,20 @@ def _referenced_uris(node: DefinitionNode) -> Iterator[str]:
             assert_never(node)
 
 
-def _copy_closure(closure: dict[str, DefinitionNode]) -> dict[str, DefinitionNode]:
+def _copy_closure(
+    closure: dict[str, DefinitionNode], include_source_info: bool = True
+) -> dict[str, DefinitionNode]:
     """Deep-copy a resolved closure into fresh, independent nodes, rewiring every
     edge to the copies. Two-phase (placeholder then populate) so cyclic and
-    mutually-recursive types resolve against stable node identities."""
+    mutually-recursive types resolve against stable node identities.
+
+    ``include_source_info`` propagates each node's ``source_info`` into the copy
+    (default ``True``); when ``False`` the copies carry no provenance."""
     new_nodes: dict[str, DefinitionNode] = {
         uri: _empty_copy(node) for uri, node in closure.items()
     }
     for uri, node in closure.items():
-        _populate_copy(node, new_nodes[uri], new_nodes)
+        _populate_copy(node, new_nodes[uri], new_nodes, include_source_info)
     return new_nodes
 
 
@@ -532,6 +524,7 @@ def _populate_copy(
     src: DefinitionNode,
     dst: DefinitionNode,
     new_nodes: dict[str, DefinitionNode],
+    include_source_info: bool = True,
 ) -> None:
     """Phase 2: copy ``src``'s contents into ``dst``, rewiring edges to the
     copied nodes in ``new_nodes``."""
@@ -552,6 +545,10 @@ def _populate_copy(
     # Annotation records are immutable value objects with no node edges, so
     # sharing them across the copy keeps the result independent of source nodes.
     dst._set_annotations(src.annotations)
+    # ``SourceInfo`` is likewise an immutable value with no node edges: safe to
+    # share into the copy. Skipped (left ``None``) when source info is excluded.
+    if include_source_info:
+        dst._set_source_info(src.source_info)
 
 
 def _copy_field(
@@ -691,7 +688,19 @@ def from_serializable(sts: SerializableTypeSystem) -> EnumerableTypeSystem:
                 annotations_from_wire(opaque_def.annotations, resolve_uri)
             )
 
+        _apply_wire_source_info(node, entry)
+
     return source
+
+
+def _apply_wire_source_info(
+    node: DefinitionNode, entry: SerializableTypeDefinitionEntry
+) -> None:
+    """Copy an entry's wire ``sourceInfo`` onto ``node`` when present. Source
+    info is identity-neutral, so it is read for every node kind."""
+    wire = entry.sourceInfo
+    if wire is not None:
+        node._set_source_info(SourceInfo(wire.locator, wire.name))
 
 
 def _fields_from_serializable(

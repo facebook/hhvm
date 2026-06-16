@@ -71,6 +71,7 @@ from apache.thrift.type_system.type_system.thrift_types import (
     SerializableFieldDefinition,
     SerializableOpaqueAliasDefinition,
     SerializableStructDefinition,
+    SerializableThriftSourceInfo,
     SerializableTypeDefinition,
     SerializableTypeDefinitionEntry,
     SerializableTypeSystem,
@@ -491,19 +492,53 @@ def _export_referenced_uris(node: DefinitionNode) -> Iterator[str]:
             assert_never(node)
 
 
+class PruneOptions:
+    """Options for :func:`build_pruned` and :func:`build_serializable_type_system`."""
+
+    __slots__ = ("_include_source_info",)
+    _include_source_info: bool
+
+    def __init__(self, include_source_info: bool = True) -> None:
+        self._include_source_info = include_source_info
+
+    @property
+    def include_source_info(self) -> bool:
+        return self._include_source_info
+
+    def __repr__(self) -> str:
+        return f"PruneOptions(include_source_info={self._include_source_info})"
+
+
+def _to_wire_source_info(node: DefinitionNode) -> SerializableThriftSourceInfo | None:
+    """A node's ``source_info`` as its wire form, or ``None`` when the node
+    carries none (programmatically built nodes have no ``.thrift`` source)."""
+    info = node.source_info
+    if info is None:
+        return None
+    return SerializableThriftSourceInfo(locator=info.locator, name=info.name)
+
+
 def build_serializable_type_system(
-    source: TypeSystem, root_uris: Sequence[str]
+    source: TypeSystem,
+    root_uris: Sequence[str],
+    options: PruneOptions | None = None,
 ) -> SerializableTypeSystem:
     """Export ``root_uris`` (plus their transitive type-structure + non-standard
     annotation closure) from ``source`` as a canonical ``SerializableTypeSystem``.
 
     ``source`` may be any ``TypeSystem`` (including the lazy ``SchemaRegistry``
-    view or a builder-made ``IndexedTypeSystem``)."""
+    view or a builder-made ``IndexedTypeSystem``).
+
+    ``options.include_source_info`` (default ``True``) gates whether each entry's
+    ``sourceInfo`` is emitted."""
+    opts = options if options is not None else PruneOptions()
     closure = _collect_closure(source, root_uris, _export_referenced_uris)
     types = {
         uri: SerializableTypeDefinitionEntry(
             definition=to_serializable_definition(node),
-            sourceInfo=None,
+            sourceInfo=(
+                _to_wire_source_info(node) if opts.include_source_info else None
+            ),
         )
         for uri, node in closure.items()
     }

@@ -85,6 +85,7 @@ from thrift.lib.python.schema.type_system import (
     Primitive,
     PrimitiveTypeRef,
     SetTypeRef,
+    SourceInfo,
     StructNode,
     TypeRef,
     TypeSystem,
@@ -129,6 +130,24 @@ def _ts_presence(field: _ast.FieldNode, is_union: bool) -> PresenceQualifier:
     if field.qualifier == _ast.FieldQualifier.Terse:
         return PresenceQualifier.TERSE
     return PresenceQualifier.UNQUALIFIED
+
+
+def _locator(path: str) -> str:
+    """The source locator for a program path."""
+    return "file://" + path
+
+
+def _source_info(ast_def: _BridgeableDef) -> SourceInfo | None:
+    """Provenance for a bridged definition: ``{"file://" + program.path, name}``.
+
+    Returns ``None`` when the definition has no linked program or an empty path
+    -- e.g. programmatically built AST nodes, or core types seeded via the
+    program-less omnibus schema. The ``_program`` slot is read directly because
+    the public ``Definition.program`` accessor asserts when it is unset."""
+    program = ast_def._program
+    if program is None or not program.path:
+        return None
+    return SourceInfo(_locator(program.path), ast_def.name)
 
 
 # ---------------------------------------------------------------------------
@@ -399,18 +418,20 @@ class SyntaxGraphBridge(TypeSystem):
                     for v in ast_def.values
                 ],
                 annotations=_bridge_annotations(ast_def.annotations),
+                source_info=_source_info(ast_def),
             )
             self._cache[key] = enum_node
             added_keys.add(key)
             return enum_node
 
+        source_info = _source_info(ast_def)
         # struct/exception -> StructNode; union -> UnionNode.
         structured: StructNode | UnionNode
         if isinstance(ast_def, _ast.UnionNode):
-            structured = UnionNode(uri=ast_def.uri)
+            structured = UnionNode(uri=ast_def.uri, source_info=source_info)
             is_union = True
         else:  # StructNode or ExceptionNode
-            structured = StructNode(uri=ast_def.uri)
+            structured = StructNode(uri=ast_def.uri, source_info=source_info)
             is_union = False
         # Register BEFORE populating so cyclic references resolve.
         self._cache[key] = structured

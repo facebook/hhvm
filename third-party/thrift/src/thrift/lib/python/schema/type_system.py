@@ -424,6 +424,50 @@ class EnumValue:
 
 
 # ---------------------------------------------------------------------------
+# Source provenance
+# ---------------------------------------------------------------------------
+
+
+class SourceInfo:
+    """The source provenance of a user-defined type: a ``locator`` (a URI for
+    the resource -- typically a .thrift file -- holding the source IDL, e.g.
+    ``"file://thrift/lib/thrift/standard.thrift"``) plus the definition ``name``
+    within that resource.
+
+    It is an immutable value, equal and hashed *by* ``(locator, name)``. A
+    node's ``source_info`` is deliberately **excluded** from the node's
+    ``__eq__``/``__hash__`` (nodes remain equal-by-URI) and from the
+    ``TypeSystemDigest``."""
+
+    __slots__ = ("_locator", "_name")
+    _locator: str
+    _name: str
+
+    def __init__(self, locator: str, name: str) -> None:
+        self._locator = locator
+        self._name = name
+
+    @property
+    def locator(self) -> str:
+        return self._locator
+
+    @property
+    def name(self) -> str:
+        return self._name
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, SourceInfo):
+            return NotImplemented
+        return self._locator == other._locator and self._name == other._name
+
+    def __hash__(self) -> int:
+        return hash((self._locator, self._name))
+
+    def __repr__(self) -> str:
+        return f"SourceInfo({self._locator!r}, {self._name!r})"
+
+
+# ---------------------------------------------------------------------------
 # DefinitionNode hierarchy -- what URI lookups return. Equality/hash by URI.
 # ---------------------------------------------------------------------------
 
@@ -433,23 +477,32 @@ class DefinitionNodeBase:
     opaque-alias). Equality and hashing are *by URI* -- two distinct node
     objects with the same URI compare equal (``is`` still distinguishes them)."""
 
-    __slots__: tuple[str, ...] = ("_uri", "_annotations")
+    __slots__: tuple[str, ...] = ("_uri", "_annotations", "_source_info")
     _uri: str
     _annotations: dict[str, SerializableRecord]
+    _source_info: SourceInfo | None
 
     def __init__(
         self,
         *,
         uri: str,
         annotations: Mapping[str, SerializableRecord] | None = None,
+        source_info: SourceInfo | None = None,
     ) -> None:
         self._uri = uri
         self._annotations = dict(annotations) if annotations else {}
+        self._source_info = source_info
 
     def _set_annotations(self, annotations: Mapping[str, SerializableRecord]) -> None:
         """Populate this node's annotations (used by the builder/bridge during
         the two-phase build, after the placeholder node is created)."""
         self._annotations = dict(annotations)
+
+    def _set_source_info(self, source_info: SourceInfo | None) -> None:
+        """Populate this node's source provenance (used by the builder/bridge
+        and the wire importer during the two-phase build, after the placeholder
+        node is created)."""
+        self._source_info = source_info
 
     @property
     def uri(self) -> str:
@@ -458,6 +511,10 @@ class DefinitionNodeBase:
     @property
     def annotations(self) -> Mapping[str, SerializableRecord]:
         return MappingProxyType(self._annotations)
+
+    @property
+    def source_info(self) -> SourceInfo | None:
+        return self._source_info
 
     def __eq__(self, other: object) -> bool:
         # A Thrift URI names exactly one definition, so a struct and an enum can
@@ -491,8 +548,9 @@ class _StructuredNode(DefinitionNodeBase):
         fields: Sequence[FieldDefinition] | None = None,
         is_sealed: bool = False,
         annotations: Mapping[str, SerializableRecord] | None = None,
+        source_info: SourceInfo | None = None,
     ) -> None:
-        super().__init__(uri=uri, annotations=annotations)
+        super().__init__(uri=uri, annotations=annotations, source_info=source_info)
         self._is_sealed = is_sealed
         self._fields = ()
         self._by_id = {}
@@ -556,8 +614,9 @@ class EnumNode(DefinitionNodeBase):
         uri: str,
         values: Sequence[EnumValue] | None = None,
         annotations: Mapping[str, SerializableRecord] | None = None,
+        source_info: SourceInfo | None = None,
     ) -> None:
-        super().__init__(uri=uri, annotations=annotations)
+        super().__init__(uri=uri, annotations=annotations, source_info=source_info)
         self._values = ()
         if values is not None:
             self._set_values(values)
@@ -583,8 +642,9 @@ class OpaqueAliasNode(DefinitionNodeBase):
         uri: str,
         target_type: TypeRef | None = None,
         annotations: Mapping[str, SerializableRecord] | None = None,
+        source_info: SourceInfo | None = None,
     ) -> None:
-        super().__init__(uri=uri, annotations=annotations)
+        super().__init__(uri=uri, annotations=annotations, source_info=source_info)
         self._target_type = None
         if target_type is not None:
             self._set_target_type(target_type)

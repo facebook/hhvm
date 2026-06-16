@@ -35,6 +35,7 @@ from thrift.lib.python.schema.type_system import (
     Primitive,
     PrimitiveTypeRef,
     SetTypeRef,
+    SourceInfo,
     StructNode,
     StructTypeRef,
     TypeRef,
@@ -323,3 +324,71 @@ class IndexedTypeSystemTest(unittest.TestCase):
         # lookups can never return a node that identifies as a different uri.
         with self.assertRaises(InvalidTypeError):
             IndexedTypeSystem({"test/Foo": StructNode(uri="test/Bar")})
+
+
+class SourceInfoTest(unittest.TestCase):
+    def test_exposes_locator_and_name(self) -> None:
+        info = SourceInfo("file://a.thrift", "Foo")
+        self.assertEqual(info.locator, "file://a.thrift")
+        self.assertEqual(info.name, "Foo")
+
+    def test_equality_and_hash_by_locator_and_name(self) -> None:
+        self.assertEqual(
+            SourceInfo("file://a.thrift", "Foo"),
+            SourceInfo("file://a.thrift", "Foo"),
+        )
+        self.assertEqual(
+            hash(SourceInfo("file://a.thrift", "Foo")),
+            hash(SourceInfo("file://a.thrift", "Foo")),
+        )
+        # Differs by locator.
+        self.assertNotEqual(
+            SourceInfo("file://a.thrift", "Foo"),
+            SourceInfo("file://b.thrift", "Foo"),
+        )
+        # Differs by name.
+        self.assertNotEqual(
+            SourceInfo("file://a.thrift", "Foo"),
+            SourceInfo("file://a.thrift", "Bar"),
+        )
+
+    def test_repr_is_informative(self) -> None:
+        rendered = repr(SourceInfo("file://a.thrift", "Foo"))
+        self.assertIn("file://a.thrift", rendered)
+        self.assertIn("Foo", rendered)
+
+
+class NodeSourceInfoTest(unittest.TestCase):
+    def _all_node_kinds(self, info: SourceInfo | None) -> list[DefinitionNode]:
+        return [
+            StructNode(uri="test/S", source_info=info),
+            UnionNode(uri="test/U", source_info=info),
+            EnumNode(uri="test/E", source_info=info),
+            OpaqueAliasNode(
+                uri="test/A",
+                target_type=PrimitiveTypeRef(Primitive.I64),
+                source_info=info,
+            ),
+        ]
+
+    def test_each_node_kind_carries_source_info(self) -> None:
+        info = SourceInfo("file://a.thrift", "X")
+        for node in self._all_node_kinds(info):
+            with self.subTest(kind=type(node).__name__):
+                self.assertEqual(node.source_info, info)
+
+    def test_source_info_defaults_to_none(self) -> None:
+        for node in self._all_node_kinds(None):
+            with self.subTest(kind=type(node).__name__):
+                self.assertIsNone(node.source_info)
+
+    def test_source_info_is_identity_neutral(self) -> None:
+        # Two same-URI nodes with *different* source_info (and one with None)
+        # are still equal and hash equally.
+        a = StructNode(uri="test/Same", source_info=SourceInfo("file://a", "A"))
+        b = StructNode(uri="test/Same", source_info=SourceInfo("file://b", "B"))
+        c = StructNode(uri="test/Same")  # no source_info
+        self.assertEqual(a, b)
+        self.assertEqual(a, c)
+        self.assertEqual(hash(a), hash(b))
+        self.assertEqual(hash(a), hash(c))

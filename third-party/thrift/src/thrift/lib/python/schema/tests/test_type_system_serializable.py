@@ -86,6 +86,7 @@ from thrift.lib.python.schema.type_system import (
     EnumValue,
     FieldDefinition,
     FieldIdentity,
+    IndexedTypeSystem,
     InvalidTypeError,
     ListTypeRef,
     MapTypeRef,
@@ -94,6 +95,7 @@ from thrift.lib.python.schema.type_system import (
     Primitive,
     PrimitiveTypeRef,
     SetTypeRef,
+    SourceInfo,
     StructNode,
     StructTypeRef,
     TypeRef,
@@ -102,8 +104,10 @@ from thrift.lib.python.schema.type_system import (
 )
 from thrift.lib.python.schema.type_system_builder import (
     build_derived_from,
+    build_pruned,
     FieldSpec,
     from_serializable,
+    PruneOptions,
     ref,
     TypeInput,
     TypeSystemBuilder,
@@ -927,6 +931,77 @@ class BuildDerivedFromTest(unittest.TestCase):
         )
         with self.assertRaises(InvalidTypeError):
             build_derived_from(overlay, base)
+
+
+class SourceInfoSerializationTest(unittest.TestCase):
+    """``sourceInfo`` emission on export, the import read-back, and preservation
+    through the ``build_pruned`` deep-copy."""
+
+    _FOO_INFO: SourceInfo = SourceInfo("file://test/foo.thrift", "Foo")
+
+    def _source(self) -> IndexedTypeSystem:
+        # `Foo` carries source_info; `Bare` (an enum) carries none.
+        foo = StructNode(
+            uri="test/Foo",
+            fields=[
+                FieldDefinition(
+                    identity=FieldIdentity(1, "x"),
+                    presence=PresenceQualifier.UNQUALIFIED,
+                    type=PrimitiveTypeRef(Primitive.I32),
+                )
+            ],
+            source_info=self._FOO_INFO,
+        )
+        bare = EnumNode(uri="test/Bare", values=[EnumValue("A", 0)])
+        return IndexedTypeSystem({"test/Foo": foo, "test/Bare": bare})
+
+    def test_export_emits_source_info_when_set(self) -> None:
+        sts = build_serializable_type_system(self._source(), ["test/Foo", "test/Bare"])
+        foo_info = sts.types["test/Foo"].sourceInfo
+        assert foo_info is not None, "expected sourceInfo on export of a sourced node"
+        self.assertEqual(foo_info.locator, "file://test/foo.thrift")
+        self.assertEqual(foo_info.name, "Foo")
+        # A node without source_info emits sourceInfo == None.
+        self.assertIsNone(sts.types["test/Bare"].sourceInfo)
+
+    def test_export_omits_source_info_when_disabled(self) -> None:
+        sts = build_serializable_type_system(
+            self._source(),
+            ["test/Foo"],
+            options=PruneOptions(include_source_info=False),
+        )
+        self.assertIsNone(sts.types["test/Foo"].sourceInfo)
+
+    def test_round_trip_preserves_source_info(self) -> None:
+        source = self._source()
+        roots = ["test/Foo", "test/Bare"]
+        sts = build_serializable_type_system(source, roots)
+        rebuilt = from_serializable(sts)
+
+        foo = rebuilt.get_user_defined_type("test/Foo")
+        assert foo is not None
+        self.assertEqual(foo.source_info, self._FOO_INFO)
+        bare = rebuilt.get_user_defined_type("test/Bare")
+        assert bare is not None
+        self.assertIsNone(bare.source_info)
+        # Re-export reproduces the wire form exactly.
+        self.assertEqual(build_serializable_type_system(rebuilt, roots), sts)
+
+    def test_build_pruned_preserves_source_info_by_default(self) -> None:
+        pruned = build_pruned(self._source(), ["test/Foo"])
+        foo = pruned.get_user_defined_type("test/Foo")
+        assert foo is not None
+        self.assertEqual(foo.source_info, self._FOO_INFO)
+
+    def test_build_pruned_drops_source_info_when_disabled(self) -> None:
+        pruned = build_pruned(
+            self._source(),
+            ["test/Foo"],
+            PruneOptions(include_source_info=False),
+        )
+        foo = pruned.get_user_defined_type("test/Foo")
+        assert foo is not None
+        self.assertIsNone(foo.source_info)
 
 
 if __name__ == "__main__":

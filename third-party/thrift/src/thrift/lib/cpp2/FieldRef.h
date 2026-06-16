@@ -71,8 +71,20 @@ concept ImplicitlyBindableTo = std::is_same_v<
 
 } // namespace detail
 
+#define THRIFT_FIELD_REF_CONST_ACCESS_DEPRECATED                           \
+  [[deprecated(                                                            \
+      "field_ref objects should not be const-qualified; pass and capture " \
+      "field_ref objects by value without const, and use as_const() or a " \
+      "const-qualified owning struct for const field access.")]]
+
 /// A reference to an unqualified field of the possibly const-qualified type
 /// std::remove_reference_t<T> in a Thrift-generated struct.
+///
+/// field_ref is a shallow view type. `field_ref<const T&>` views a const field
+/// value, while `const field_ref<T&>` only const-qualifies the view object and
+/// still views a mutable field. Pass and capture field_ref objects by value
+/// without const qualifiers. Use `as_const()` or access through a
+/// const-qualified owning struct when the field value should be const.
 template <typename T>
 class field_ref {
   static_assert(std::is_reference_v<T>, "not a reference");
@@ -156,20 +168,40 @@ class field_ref {
     return bool(bitref_);
   }
 
-  /// Returns a reference to the value.
-  FOLLY_ERASE reference_type value() const noexcept {
+  /// Returns a reference to the value. The returned reference's constness comes
+  /// from `T`; const-qualifying the field_ref object is deprecated.
+  FOLLY_ERASE reference_type value() noexcept {
     return static_cast<reference_type>(value_);
   }
 
-  /// Returns a reference to the value.
-  FOLLY_ERASE reference_type operator*() const noexcept {
+  /// Deprecated const-object overload. field_ref objects should be passed and
+  /// captured by value without const qualifiers.
+  THRIFT_FIELD_REF_CONST_ACCESS_DEPRECATED FOLLY_ERASE reference_type
+  value() const noexcept {
     return static_cast<reference_type>(value_);
   }
 
-  /// Returns a pointer to the value.
-  FOLLY_ERASE const value_type* operator->() const noexcept { return &value_; }
+  /// Returns a reference to the value. Equivalent to `value()`.
+  FOLLY_ERASE reference_type operator*() noexcept {
+    return static_cast<reference_type>(value_);
+  }
 
-  /// Returns a pointer to the value.
+  /// Deprecated const-object overload. field_ref objects should be passed and
+  /// captured by value without const qualifiers.
+  THRIFT_FIELD_REF_CONST_ACCESS_DEPRECATED FOLLY_ERASE reference_type
+  operator*() const noexcept {
+    return static_cast<reference_type>(value_);
+  }
+
+  /// Deprecated const-object overload. field_ref objects should be passed and
+  /// captured by value without const qualifiers.
+  THRIFT_FIELD_REF_CONST_ACCESS_DEPRECATED FOLLY_ERASE value_type* operator->()
+      const noexcept {
+    return &value_;
+  }
+
+  /// Returns a pointer to the value. The pointed-to type's constness comes from
+  /// `T`; const-qualifying the field_ref object is deprecated.
   FOLLY_ERASE value_type* operator->() noexcept { return &value_; }
 
   FOLLY_ERASE reference_type ensure() noexcept {
@@ -315,6 +347,11 @@ bool operator>=(const T& lhs, field_ref<U> rhs) {
 
 // A reference to an optional field of the possibly const-qualified type
 // std::remove_reference_t<T> in a Thrift-generated struct.
+//
+// Like field_ref, optional_field_ref is a shallow view type. Pass and capture
+// optional_field_ref objects by value without const qualifiers. Use as_const()
+// or access through a const-qualified owning struct when the field value should
+// be const.
 template <typename T>
 class optional_field_ref {
   static_assert(std::is_reference_v<T>, "not a reference");
@@ -446,8 +483,17 @@ class optional_field_ref {
   }
 
   // Returns a reference to the value if this optional_field_ref has one; throws
-  // bad_field_access otherwise.
-  FOLLY_ERASE reference_type value() const {
+  // bad_field_access otherwise. The returned reference's constness comes from
+  // T; const-qualifying the optional_field_ref object is deprecated.
+  FOLLY_ERASE reference_type value() {
+    throw_if_unset();
+    return static_cast<reference_type>(value_);
+  }
+
+  // Deprecated const-object overload. optional_field_ref objects should be
+  // passed and captured by value without const qualifiers.
+  THRIFT_FIELD_REF_CONST_ACCESS_DEPRECATED FOLLY_ERASE reference_type
+  value() const {
     throw_if_unset();
     return static_cast<reference_type>(value_);
   }
@@ -465,13 +511,27 @@ class optional_field_ref {
     return static_cast<reference_type>(value_);
   }
 
-  FOLLY_ERASE reference_type operator*() const { return value(); }
+  // Returns a reference to the value. Equivalent to value().
+  FOLLY_ERASE reference_type operator*() { return value(); }
 
-  FOLLY_ERASE const value_type* operator->() const {
+  // Deprecated const-object overload. optional_field_ref objects should be
+  // passed and captured by value without const qualifiers.
+  THRIFT_FIELD_REF_CONST_ACCESS_DEPRECATED FOLLY_ERASE reference_type
+  operator*() const {
+    throw_if_unset();
+    return static_cast<reference_type>(value_);
+  }
+
+  // Deprecated const-object overload. optional_field_ref objects should be
+  // passed and captured by value without const qualifiers.
+  THRIFT_FIELD_REF_CONST_ACCESS_DEPRECATED FOLLY_ERASE value_type* operator->()
+      const {
     throw_if_unset();
     return &value_;
   }
 
+  // Returns a pointer to the value. The pointed-to type's constness comes from
+  // T; const-qualifying the optional_field_ref object is deprecated.
   FOLLY_ERASE value_type* operator->() {
     throw_if_unset();
     return &value_;
@@ -666,8 +726,17 @@ using copy_const_t = std::conditional_t<
     std::add_const_t<To>,
     To>;
 
+template <typename T>
+using const_storage_ref_t = folly::like_t<T, const std::remove_reference_t<T>>;
+
 } // namespace detail
 
+// A reference to an optional boxed field in a Thrift-generated struct.
+//
+// Like field_ref, optional_boxed_field_ref is a shallow view type. Pass and
+// capture optional_boxed_field_ref objects by value without const qualifiers.
+// Use as_const() or access through a const-qualified owning struct when the
+// field value should be const.
 template <typename T>
 class optional_boxed_field_ref {
   static_assert(std::is_reference_v<T>, "not a reference");
@@ -767,8 +836,17 @@ class optional_boxed_field_ref {
   FOLLY_ERASE void reset() noexcept { value_.reset(); }
 
   // Returns a reference to the value if this optional_boxed_field_ref has one;
-  // throws bad_field_access otherwise.
-  FOLLY_ERASE reference_type value() const {
+  // throws bad_field_access otherwise. The returned reference's constness comes
+  // from T; const-qualifying the optional_boxed_field_ref object is deprecated.
+  FOLLY_ERASE reference_type value() {
+    throw_if_unset();
+    return static_cast<reference_type>(*value_);
+  }
+
+  // Deprecated const-object overload. optional_boxed_field_ref objects should
+  // be passed and captured by value without const qualifiers.
+  THRIFT_FIELD_REF_CONST_ACCESS_DEPRECATED FOLLY_ERASE reference_type
+  value() const {
     throw_if_unset();
     return static_cast<reference_type>(*value_);
   }
@@ -781,13 +859,27 @@ class optional_boxed_field_ref {
                        : type(static_cast<U&&>(default_value));
   }
 
-  FOLLY_ERASE reference_type operator*() const { return value(); }
+  // Returns a reference to the value. Equivalent to value().
+  FOLLY_ERASE reference_type operator*() { return value(); }
 
-  FOLLY_ERASE const value_type* operator->() const {
+  // Deprecated const-object overload. optional_boxed_field_ref objects should
+  // be passed and captured by value without const qualifiers.
+  THRIFT_FIELD_REF_CONST_ACCESS_DEPRECATED FOLLY_ERASE reference_type
+  operator*() const {
+    throw_if_unset();
+    return static_cast<reference_type>(*value_);
+  }
+
+  // Deprecated const-object overload. optional_boxed_field_ref objects should
+  // be passed and captured by value without const qualifiers.
+  THRIFT_FIELD_REF_CONST_ACCESS_DEPRECATED FOLLY_ERASE value_type* operator->()
+      const {
     throw_if_unset();
     return &*value_;
   }
 
+  // Returns a pointer to the value. The pointed-to type's constness comes from
+  // T; const-qualifying the optional_boxed_field_ref object is deprecated.
   FOLLY_ERASE value_type* operator->() {
     throw_if_unset();
     return &*value_;
@@ -820,7 +912,7 @@ class optional_boxed_field_ref {
 
   /// Produces a optional_boxed_field_ref<const T>
   FOLLY_ERASE auto as_const() const {
-    return optional_boxed_field_ref<folly::like_t<T, const value_type>>{*this};
+    return optional_boxed_field_ref<detail::const_storage_ref_t<T>>{*this};
   }
 
  private:
@@ -958,6 +1050,11 @@ bool operator!=(std::nullopt_t, const optional_boxed_field_ref<T>& a) {
 // A reference to a 'Fill' intern boxed field.
 //
 // It currently only supports Thrift structs.
+//
+// Like field_ref, intern_boxed_field_ref is a shallow view type. Pass and
+// capture intern_boxed_field_ref objects by value without const qualifiers. Use
+// as_const() or access through a const-qualified owning struct when the field
+// value should be const.
 template <typename T>
 class intern_boxed_field_ref {
   static_assert(std::is_reference_v<T>, "not a reference");
@@ -1051,12 +1148,34 @@ class intern_boxed_field_ref {
     bitref_ = false;
   }
 
+  // Returns a reference to the value. The returned reference's constness comes
+  // from T; const-qualifying the intern_boxed_field_ref object is deprecated.
   FOLLY_ERASE reference_type value()
     requires(!std::is_const_v<value_type>)
   {
     return static_cast<reference_type>(value_.mut());
   }
-  FOLLY_ERASE reference_type value() const
+
+  // Returns a reference to a const field value.
+  FOLLY_ERASE reference_type value()
+    requires(std::is_const_v<value_type>)
+  {
+    return static_cast<reference_type>(value_.value());
+  }
+
+  // Deprecated const-object overload. intern_boxed_field_ref objects should be
+  // passed and captured by value without const qualifiers.
+  THRIFT_FIELD_REF_CONST_ACCESS_DEPRECATED FOLLY_ERASE reference_type
+  value() const
+    requires(!std::is_const_v<value_type>)
+  {
+    return static_cast<reference_type>(value_.mut());
+  }
+
+  // Deprecated const-object overload. intern_boxed_field_ref objects should be
+  // passed and captured by value without const qualifiers.
+  THRIFT_FIELD_REF_CONST_ACCESS_DEPRECATED FOLLY_ERASE reference_type
+  value() const
     requires(std::is_const_v<value_type>)
   {
     return static_cast<reference_type>(value_.value());
@@ -1067,10 +1186,33 @@ class intern_boxed_field_ref {
     return static_cast<reference_type>(value_.mut());
   }
 
+  // Returns a reference to the value. Equivalent to value().
   FOLLY_ERASE reference_type operator*() { return value(); }
-  FOLLY_ERASE reference_type operator*() const { return value(); }
 
-  FOLLY_ERASE const value_type* operator->() const { return &value(); }
+  // Deprecated const-object overload. intern_boxed_field_ref objects should be
+  // passed and captured by value without const qualifiers.
+  THRIFT_FIELD_REF_CONST_ACCESS_DEPRECATED FOLLY_ERASE reference_type
+  operator*() const {
+    if constexpr (std::is_const_v<value_type>) {
+      return static_cast<reference_type>(value_.value());
+    } else {
+      return static_cast<reference_type>(value_.mut());
+    }
+  }
+
+  // Deprecated const-object overload. intern_boxed_field_ref objects should be
+  // passed and captured by value without const qualifiers.
+  THRIFT_FIELD_REF_CONST_ACCESS_DEPRECATED FOLLY_ERASE value_type* operator->()
+      const {
+    if constexpr (std::is_const_v<value_type>) {
+      return &value_.value();
+    } else {
+      return &value_.mut();
+    }
+  }
+
+  // Returns a pointer to the value. The pointed-to type's constness comes from
+  // T; const-qualifying the intern_boxed_field_ref object is deprecated.
   FOLLY_ERASE value_type* operator->() { return &value(); }
 
   template <typename... Args>
@@ -1096,7 +1238,7 @@ class intern_boxed_field_ref {
 
   /// Produces a intern_boxed_field_ref<const T>
   FOLLY_ERASE auto as_const() const {
-    return intern_boxed_field_ref<folly::like_t<T, const value_type>>{*this};
+    return intern_boxed_field_ref<detail::const_storage_ref_t<T>>{*this};
   }
 
  private:
@@ -1198,6 +1340,11 @@ bool operator>=(const U& a, intern_boxed_field_ref<T> b) {
 // A reference to a 'terse' intern boxed field.
 //
 // It currently only supports Thrift structs.
+//
+// Like field_ref, terse_intern_boxed_field_ref is a shallow view type. Pass and
+// capture terse_intern_boxed_field_ref objects by value without const
+// qualifiers. Use as_const() or access through a const-qualified owning struct
+// when the field value should be const.
 template <typename T>
 class terse_intern_boxed_field_ref {
   static_assert(std::is_reference_v<T>, "not a reference");
@@ -1260,12 +1407,35 @@ class terse_intern_boxed_field_ref {
     value_ = boxed_value_type::fromStaticConstant(&get_default_());
   }
 
+  // Returns a reference to the value. The returned reference's constness comes
+  // from T; const-qualifying the terse_intern_boxed_field_ref object is
+  // deprecated.
   FOLLY_ERASE reference_type value()
     requires(!std::is_const_v<value_type>)
   {
     return static_cast<reference_type>(value_.mut());
   }
-  FOLLY_ERASE reference_type value() const
+
+  // Returns a reference to a const field value.
+  FOLLY_ERASE reference_type value()
+    requires(std::is_const_v<value_type>)
+  {
+    return static_cast<reference_type>(value_.value());
+  }
+
+  // Deprecated const-object overload. terse_intern_boxed_field_ref objects
+  // should be passed and captured by value without const qualifiers.
+  THRIFT_FIELD_REF_CONST_ACCESS_DEPRECATED FOLLY_ERASE reference_type
+  value() const
+    requires(!std::is_const_v<value_type>)
+  {
+    return static_cast<reference_type>(value_.mut());
+  }
+
+  // Deprecated const-object overload. terse_intern_boxed_field_ref objects
+  // should be passed and captured by value without const qualifiers.
+  THRIFT_FIELD_REF_CONST_ACCESS_DEPRECATED FOLLY_ERASE reference_type
+  value() const
     requires(std::is_const_v<value_type>)
   {
     return static_cast<reference_type>(value_.value());
@@ -1275,10 +1445,33 @@ class terse_intern_boxed_field_ref {
     return static_cast<reference_type>(value_.mut());
   }
 
+  // Returns a reference to the value. Equivalent to value().
   FOLLY_ERASE reference_type operator*() { return value(); }
-  FOLLY_ERASE reference_type operator*() const { return value(); }
 
-  FOLLY_ERASE const value_type* operator->() const { return &value(); }
+  // Deprecated const-object overload. terse_intern_boxed_field_ref objects
+  // should be passed and captured by value without const qualifiers.
+  THRIFT_FIELD_REF_CONST_ACCESS_DEPRECATED FOLLY_ERASE reference_type
+  operator*() const {
+    if constexpr (std::is_const_v<value_type>) {
+      return static_cast<reference_type>(value_.value());
+    } else {
+      return static_cast<reference_type>(value_.mut());
+    }
+  }
+
+  // Deprecated const-object overload. terse_intern_boxed_field_ref objects
+  // should be passed and captured by value without const qualifiers.
+  THRIFT_FIELD_REF_CONST_ACCESS_DEPRECATED FOLLY_ERASE value_type* operator->()
+      const {
+    if constexpr (std::is_const_v<value_type>) {
+      return &value_.value();
+    } else {
+      return &value_.mut();
+    }
+  }
+
+  // Returns a pointer to the value. The pointed-to type's constness comes from
+  // T; const-qualifying the terse_intern_boxed_field_ref object is deprecated.
   FOLLY_ERASE value_type* operator->() { return &value(); }
 
   template <typename... Args>
@@ -1299,8 +1492,7 @@ class terse_intern_boxed_field_ref {
 
   /// Produces a terse_intern_boxed_field_ref<const T>
   FOLLY_ERASE auto as_const() const {
-    return terse_intern_boxed_field_ref<folly::like_t<T, const value_type>>{
-        *this};
+    return terse_intern_boxed_field_ref<detail::const_storage_ref_t<T>>{*this};
   }
 
  private:
@@ -1585,6 +1777,11 @@ constexpr apache::thrift::detail::alias_isset_fn alias_isset;
 
 // A reference to an required field of the possibly const-qualified type
 // std::remove_reference_t<T> in a Thrift-generated struct.
+//
+// Like field_ref, required_field_ref is a shallow view type. Pass and capture
+// required_field_ref objects by value without const qualifiers. Use as_const()
+// or access through a const-qualified owning struct when the field value should
+// be const.
 template <typename T>
 class required_field_ref {
   static_assert(std::is_reference_v<T>, "not a reference");
@@ -1634,16 +1831,40 @@ class required_field_ref {
   // and getting the field's value, particularly for bool fields.
   FOLLY_ERASE bool has_value() const noexcept { return true; }
 
-  // Returns a reference to the value.
-  FOLLY_ERASE reference_type value() const noexcept {
+  // Returns a reference to the value. The returned reference's constness comes
+  // from T; const-qualifying the required_field_ref object is deprecated.
+  FOLLY_ERASE reference_type value() noexcept {
     return static_cast<reference_type>(value_);
   }
 
-  FOLLY_ERASE reference_type operator*() const noexcept {
+  // Deprecated const-object overload. required_field_ref objects should be
+  // passed and captured by value without const qualifiers.
+  THRIFT_FIELD_REF_CONST_ACCESS_DEPRECATED FOLLY_ERASE reference_type
+  value() const noexcept {
     return static_cast<reference_type>(value_);
   }
 
-  FOLLY_ERASE const value_type* operator->() const noexcept { return &value_; }
+  // Returns a reference to the value. Equivalent to value().
+  FOLLY_ERASE reference_type operator*() noexcept {
+    return static_cast<reference_type>(value_);
+  }
+
+  // Deprecated const-object overload. required_field_ref objects should be
+  // passed and captured by value without const qualifiers.
+  THRIFT_FIELD_REF_CONST_ACCESS_DEPRECATED FOLLY_ERASE reference_type
+  operator*() const noexcept {
+    return static_cast<reference_type>(value_);
+  }
+
+  // Deprecated const-object overload. required_field_ref objects should be
+  // passed and captured by value without const qualifiers.
+  THRIFT_FIELD_REF_CONST_ACCESS_DEPRECATED FOLLY_ERASE value_type* operator->()
+      const noexcept {
+    return &value_;
+  }
+
+  // Returns a pointer to the value. The pointed-to type's constness comes from
+  // T; const-qualifying the required_field_ref object is deprecated.
   FOLLY_ERASE value_type* operator->() noexcept { return &value_; }
 
   FOLLY_ERASE reference_type ensure() noexcept {
@@ -1812,7 +2033,12 @@ inline constexpr union_field_ref_owner_vtable //
 
 } // namespace detail
 
-// A reference to an union field of the possibly const-qualified type
+// A reference to a union field of the possibly const-qualified type.
+//
+// Like field_ref, union_field_ref is a shallow view type. Pass and capture
+// union_field_ref objects by value without const qualifiers. Use as_const() or
+// access through a const-qualified owning struct when the field value should be
+// const.
 template <typename T>
 class union_field_ref {
   static_assert(std::is_reference_v<T>, "not a reference");
@@ -1887,9 +2113,18 @@ class union_field_ref {
 
   FOLLY_ERASE explicit operator bool() const { return has_value(); }
 
-  // Returns a reference to the value if this is union's active field,
-  // bad_field_access otherwise.
-  FOLLY_ERASE reference_type value() const {
+  // Returns a reference to the value if this is the union's active field;
+  // throws bad_field_access otherwise. The returned reference's constness comes
+  // from T; const-qualifying the union_field_ref object is deprecated.
+  FOLLY_ERASE reference_type value() {
+    throw_if_unset();
+    return static_cast<reference_type>(get_value());
+  }
+
+  // Deprecated const-object overload. union_field_ref objects should be passed
+  // and captured by value without const qualifiers.
+  THRIFT_FIELD_REF_CONST_ACCESS_DEPRECATED FOLLY_ERASE reference_type
+  value() const {
     throw_if_unset();
     return static_cast<reference_type>(get_value());
   }
@@ -1902,13 +2137,27 @@ class union_field_ref {
                        : type(static_cast<U&&>(default_value));
   }
 
-  FOLLY_ERASE reference_type operator*() const { return value(); }
+  // Returns a reference to the value. Equivalent to value().
+  FOLLY_ERASE reference_type operator*() { return value(); }
 
-  FOLLY_ERASE const value_type* operator->() const {
+  // Deprecated const-object overload. union_field_ref objects should be passed
+  // and captured by value without const qualifiers.
+  THRIFT_FIELD_REF_CONST_ACCESS_DEPRECATED FOLLY_ERASE reference_type
+  operator*() const {
+    throw_if_unset();
+    return static_cast<reference_type>(get_value());
+  }
+
+  // Deprecated const-object overload. union_field_ref objects should be passed
+  // and captured by value without const qualifiers.
+  THRIFT_FIELD_REF_CONST_ACCESS_DEPRECATED FOLLY_ERASE value_type* operator->()
+      const {
     throw_if_unset();
     return &get_value();
   }
 
+  // Returns a pointer to the value. The pointed-to type's constness comes from
+  // T; const-qualifying the union_field_ref object is deprecated.
   FOLLY_ERASE value_type* operator->() {
     throw_if_unset();
     return &get_value();
@@ -1942,7 +2191,14 @@ class union_field_ref {
 
   /// Produces a union_field_ref<const T>
   FOLLY_ERASE auto as_const() const {
-    return union_field_ref<folly::like_t<T, const value_type>>{*this};
+    using const_ref_type = union_field_ref<detail::const_storage_ref_t<T>>;
+    return const_ref_type{
+        static_cast<typename const_ref_type::storage_reference_type>(
+            storage_value_),
+        type_,
+        field_type_,
+        owner_,
+        vtable_};
   }
 
  private:
@@ -2096,6 +2352,11 @@ struct union_value_unsafe_fn {
 // std::remove_reference_t<T> in a Thrift-generated struct. Note, a terse field
 // does not need isset since we do not need to distinguish if the field is set
 // or unset.
+//
+// Like field_ref, terse_field_ref is a shallow view type. Pass and capture
+// terse_field_ref objects by value without const qualifiers. Use as_const() or
+// access through a const-qualified owning struct when the field value should be
+// const.
 template <typename T>
 class terse_field_ref {
   static_assert(std::is_reference_v<T>, "not a reference");
@@ -2151,15 +2412,40 @@ class terse_field_ref {
     value_ = static_cast<std::remove_reference_t<U>&&>(other.value_);
   }
 
-  FOLLY_ERASE reference_type value() const noexcept {
+  // Returns a reference to the value. The returned reference's constness comes
+  // from T; const-qualifying the terse_field_ref object is deprecated.
+  FOLLY_ERASE reference_type value() noexcept {
     return static_cast<reference_type>(value_);
   }
 
-  FOLLY_ERASE reference_type operator*() const noexcept {
+  // Deprecated const-object overload. terse_field_ref objects should be passed
+  // and captured by value without const qualifiers.
+  THRIFT_FIELD_REF_CONST_ACCESS_DEPRECATED FOLLY_ERASE reference_type
+  value() const noexcept {
     return static_cast<reference_type>(value_);
   }
 
-  FOLLY_ERASE const value_type* operator->() const noexcept { return &value_; }
+  // Returns a reference to the value. Equivalent to value().
+  FOLLY_ERASE reference_type operator*() noexcept {
+    return static_cast<reference_type>(value_);
+  }
+
+  // Deprecated const-object overload. terse_field_ref objects should be passed
+  // and captured by value without const qualifiers.
+  THRIFT_FIELD_REF_CONST_ACCESS_DEPRECATED FOLLY_ERASE reference_type
+  operator*() const noexcept {
+    return static_cast<reference_type>(value_);
+  }
+
+  // Deprecated const-object overload. terse_field_ref objects should be passed
+  // and captured by value without const qualifiers.
+  THRIFT_FIELD_REF_CONST_ACCESS_DEPRECATED FOLLY_ERASE value_type* operator->()
+      const noexcept {
+    return &value_;
+  }
+
+  // Returns a pointer to the value. The pointed-to type's constness comes from
+  // T; const-qualifying the terse_field_ref object is deprecated.
   FOLLY_ERASE value_type* operator->() noexcept { return &value_; }
 
   template <typename Index>
@@ -2280,5 +2566,7 @@ template <typename T, typename U>
 bool operator>=(const T& lhs, terse_field_ref<U> rhs) {
   return lhs >= *rhs;
 }
+
+#undef THRIFT_FIELD_REF_CONST_ACCESS_DEPRECATED
 
 } // namespace apache::thrift

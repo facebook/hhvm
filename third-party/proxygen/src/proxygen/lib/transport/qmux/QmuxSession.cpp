@@ -168,6 +168,10 @@ proxygen::detail::WtExpected<folly::Unit>::Type QmuxSession::closeSession(
   return folly::unit;
 }
 
+folly::AsyncTransport* QmuxSession::getUnderlyingTransport() const noexcept {
+  return transport_ ? transport_->getTransport() : nullptr;
+}
+
 proxygen::detail::WtExpected<folly::Unit>::Type QmuxSession::sendDatagram(
     std::unique_ptr<folly::IOBuf> datagram) noexcept {
   pendingDatagrams_.emplace_back(std::move(datagram));

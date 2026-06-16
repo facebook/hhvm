@@ -15,6 +15,10 @@
 #include <proxygen/lib/http/webtransport/WtUtils.h>
 #include <proxygen/lib/transport/qmux/QmuxFramer.h>
 
+namespace folly {
+class AsyncTransport;
+}
+
 namespace folly::coro {
 class TransportIf;
 }
@@ -68,6 +72,12 @@ class QmuxSession
       const noexcept override {
     return peerAddr_;
   }
+
+  // Returns the underlying byte-stream transport (e.g. the Fizz-over-TCP
+  // AsyncTransport) carrying this QMUX session, or nullptr if unavailable.
+  // Exposed so callers can read transport-level stats (TCP_INFO, byte
+  // counters); the returned transport is owned by this session.
+  [[nodiscard]] folly::AsyncTransport* getUnderlyingTransport() const noexcept;
 
   [[nodiscard]] bool isIdleTimeoutScheduled() const noexcept {
     return idleTimeout_.isScheduled();

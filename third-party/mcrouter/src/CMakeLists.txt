@@ -11,8 +11,8 @@ endif()
 
 # Package information
 set(PACKAGE_NAME "mcrouter")
-if(NOT DEFINED PACKAGE_VERSION)
-  set(PACKAGE_VERSION "0.1.0-dev")
+if(NOT DEFINED MCROUTER_PACKAGE_VERSION)
+  set(MCROUTER_PACKAGE_VERSION "0.1.0-dev")
 endif()
 
 project(${PACKAGE_NAME} CXX C)
@@ -109,7 +109,7 @@ configure_file(
 # This file is included as "mcrouter/config.h" so it goes in mcrouter/ subdir
 # of the build tree.
 
-set(MCROUTER_PACKAGE_STRING "${PACKAGE_VERSION} ${PACKAGE_NAME}")
+set(MCROUTER_PACKAGE_STRING "${MCROUTER_PACKAGE_VERSION} ${PACKAGE_NAME}")
 configure_file(
   "${CMAKE_CURRENT_SOURCE_DIR}/CMake/config.h.in"
   "${CMAKE_CURRENT_BINARY_DIR}/mcrouter/config.h"
@@ -227,14 +227,14 @@ add_fbthrift_cpp_library(
   mcrouter_common_thrift
   mcrouter/lib/network/gen/Common.thrift
   DEPENDS mcrouter_carbon_thrift
-  OPTIONS stack_arguments sync_methods_return_try deprecated_terse_writes
+  OPTIONS stack_arguments sync_methods_return_try
 )
 
 add_fbthrift_cpp_library(
   mcrouter_memcache_thrift
   mcrouter/lib/network/gen/Memcache.thrift
   DEPENDS mcrouter_common_thrift
-  OPTIONS stack_arguments sync_methods_return_try deprecated_terse_writes
+  OPTIONS stack_arguments sync_methods_return_try
 )
 
 add_fbthrift_cpp_library(
@@ -242,7 +242,7 @@ add_fbthrift_cpp_library(
   mcrouter/lib/network/gen/MemcacheService.thrift
   SERVICES Memcache
   DEPENDS mcrouter_memcache_thrift
-  OPTIONS stack_arguments sync_methods_return_try deprecated_terse_writes
+  OPTIONS stack_arguments sync_methods_return_try
 )
 
 # Add source include directories to thrift targets
@@ -270,7 +270,9 @@ set(MCROUTER_LIB_SOURCES
   mcrouter/lib/Clocks.cpp
   mcrouter/lib/Compression.cpp
   mcrouter/lib/CompressionCodecManager.cpp
+  mcrouter/lib/DynamicUtil.cpp
   mcrouter/lib/FailoverErrorsSettingsBase.cpp
+  mcrouter/lib/FiberLocalInternal.cpp
   mcrouter/lib/IOBufUtil.cpp
   mcrouter/lib/IovecCursor.cpp
   mcrouter/lib/Lz4CompressionCodec.cpp
@@ -293,6 +295,7 @@ set(MCROUTER_LIB_SOURCES
   mcrouter/lib/carbon/ReplyCommon.cpp
   mcrouter/lib/carbon/RequestCommon.cpp
   mcrouter/lib/carbon/Result.cpp
+  mcrouter/lib/carbon/connection/ExternalCarbonConnectionImpl.cpp
 
   # Config
   mcrouter/lib/config/ConfigPreprocessor.cpp
@@ -353,6 +356,12 @@ set(MCROUTER_LIB_SOURCES
   mcrouter/lib/network/gen/CommonMessagesThrift.cpp
   mcrouter/lib/network/gen/MemcacheMessages.cpp
   mcrouter/lib/network/gen/MemcacheMessagesThrift.cpp
+  mcrouter/lib/network/gen/MemcacheRouterInfo.cpp
+  mcrouter/lib/network/gen/MemcacheRouterInfo-AllFastestRoute.cpp
+  mcrouter/lib/network/gen/MemcacheRouterInfo-BuildExtraProvider.cpp
+  mcrouter/lib/network/gen/MemcacheRouterInfo-ExternTemplate.cpp
+  mcrouter/lib/network/gen/MemcacheRouterInfo-FailoverRoute.cpp
+  mcrouter/lib/network/gen/MemcacheRouterInfo-HashRoute.cpp
 )
 
 add_library(mcrouter_lib ${MCROUTER_LIB_SOURCES})
@@ -404,6 +413,7 @@ set(MCROUTER_CORE_SOURCES
   mcrouter/ProxyStats.cpp
   mcrouter/route.cpp
   mcrouter/RoutingPrefix.cpp
+  mcrouter/Server.cpp
   mcrouter/ServiceInfo.cpp
   mcrouter/stats.cpp
   mcrouter/ThreadUtil.cpp

@@ -341,7 +341,7 @@ func (s *rocketServerSocket) requestResponse(msg payload.Payload) mono.Mono {
 		}
 		ctx = WithRequestContext(ctx, reqCtx)
 
-		result, runErr := func() (WritableStruct, error) {
+		result, runErr := func() (WritableResult, error) {
 			defer func() {
 				if r := recover(); r != nil {
 					s.observer.ProcessorPanic()
@@ -357,7 +357,7 @@ func (s *rocketServerSocket) requestResponse(msg payload.Payload) mono.Mono {
 		// Select the response struct: an undeclared error becomes an
 		// ApplicationException; otherwise the handler result (which may carry a
 		// declared exception).
-		respStruct := result
+		var respStruct WritableStruct = result
 		if runErr != nil {
 			respStruct = maybeWrapApplicationException(runErr)
 		}
@@ -366,10 +366,8 @@ func (s *rocketServerSocket) requestResponse(msg payload.Payload) mono.Mono {
 		// factory (undeclared error or declared exception) must not create an
 		// interaction; the client treats it as a creation failure
 		// (INTERACTION_CONSTRUCTOR_ERROR) and recreates.
-		responseHasException := runErr != nil
-		if wr, ok := result.(types.WritableResult); ok && wr.Exception() != nil {
-			responseHasException = true
-		}
+		responseHasException := (runErr != nil || result.Exception() != nil)
+
 		if metadata.InteractionCreate != nil && !responseHasException {
 			proc := types.GetInteractionCreateProcessor(ctx).(Processor)
 			if proc == nil {

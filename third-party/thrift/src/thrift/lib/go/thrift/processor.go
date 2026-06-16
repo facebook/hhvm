@@ -143,7 +143,7 @@ func process(
 	ctx = WithRequestContext(ctx, &reqCtx)
 
 	// Step 2: Processing the message without using the Protocol.
-	var result types.WritableStruct
+	var result types.WritableResult
 	var runError error
 	if pfunc != nil {
 		pfuncStartTime := time.Now()
@@ -170,9 +170,9 @@ func process(
 	if appException != nil {
 		// ApplicationException (a.k.a. undeclared exception)
 		setRequestHeadersForError(prot, appException)
-	} else if wr, ok := result.(types.WritableResult); ok && wr.Exception() != nil {
+	} else if resEx := result.Exception(); resEx != nil {
 		// Declared exception
-		setRequestHeadersForError(prot, wr.Exception())
+		setRequestHeadersForError(prot, resEx)
 	}
 
 	// Step 3b: Write the message using only the Decoder interface on the protocol.
@@ -190,7 +190,7 @@ func process(
 			return nil, writeErr
 		}
 		// Track declared exceptions
-		if wr, ok := result.(types.WritableResult); ok && wr.Exception() != nil {
+		if resEx := result.Exception(); resEx != nil {
 			observer.DeclaredExceptionForFunction(methodName)
 		}
 	}

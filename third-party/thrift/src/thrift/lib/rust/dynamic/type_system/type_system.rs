@@ -45,6 +45,11 @@ pub trait TypeSystem {
         self.get(uri)
             .ok_or_else(|| InvalidTypeError::UnknownUri(uri.to_owned()))
     }
+
+    /// Convert this type system to its serializable representation.
+    fn to_serializable(&self) -> type_system::SerializableTypeSystem {
+        crate::serialize::to_serializable(self)
+    }
 }
 
 /// Internal storage for a definition node within the type system.

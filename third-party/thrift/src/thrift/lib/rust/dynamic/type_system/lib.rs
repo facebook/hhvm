@@ -24,6 +24,7 @@
 pub mod error;
 pub mod field;
 pub mod nodes;
+pub mod serialize;
 pub mod structured_node;
 pub mod type_ref;
 pub mod type_system;

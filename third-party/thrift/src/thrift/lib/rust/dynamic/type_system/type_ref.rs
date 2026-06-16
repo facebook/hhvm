@@ -518,24 +518,36 @@ impl Hash for DefinitionRef {
 
 #[cfg(test)]
 mod tests {
-    use std::collections::HashMap;
-
     use super::*;
+    use crate::field::AnnotationsMap;
 
     fn make_struct(uri: &str) -> Arc<StructNode> {
-        Arc::new(StructNode::new_shell(uri.to_owned(), false, HashMap::new()))
+        Arc::new(StructNode::new_shell(
+            uri.to_owned(),
+            false,
+            AnnotationsMap::default(),
+        ))
     }
 
     fn make_union(uri: &str) -> Arc<UnionNode> {
-        Arc::new(UnionNode::new_shell(uri.to_owned(), false, HashMap::new()))
+        Arc::new(UnionNode::new_shell(
+            uri.to_owned(),
+            false,
+            AnnotationsMap::default(),
+        ))
     }
 
     fn make_enum(uri: &str) -> Arc<crate::nodes::EnumNode> {
-        Arc::new(crate::nodes::EnumNode::new(uri.to_owned(), vec![], HashMap::new()).unwrap())
+        Arc::new(
+            crate::nodes::EnumNode::new(uri.to_owned(), vec![], AnnotationsMap::default()).unwrap(),
+        )
     }
 
     fn make_opaque_alias(uri: &str) -> Arc<OpaqueAliasNode> {
-        Arc::new(OpaqueAliasNode::new_shell(uri.to_owned(), HashMap::new()))
+        Arc::new(OpaqueAliasNode::new_shell(
+            uri.to_owned(),
+            AnnotationsMap::default(),
+        ))
     }
 
     #[test]

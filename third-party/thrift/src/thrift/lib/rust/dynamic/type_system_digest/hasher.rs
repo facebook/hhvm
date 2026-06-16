@@ -17,18 +17,37 @@
 use ring::digest::Context;
 use ring::digest::SHA256;
 
+use crate::DigestMode;
 use crate::TypeSystemDigest;
 
 /// SHA-256 streaming hasher for building type system digests.
 pub struct Hasher {
     context: Context,
+    mode: DigestMode,
 }
 
 impl Hasher {
     pub fn new() -> Self {
-        Hasher {
+        Self::with_mode(DigestMode::Full)
+    }
+
+    pub fn with_mode(mode: DigestMode) -> Self {
+        Self {
             context: Context::new(&SHA256),
+            mode,
         }
+    }
+
+    pub fn mode(&self) -> DigestMode {
+        self.mode
+    }
+
+    pub fn include_annotations(&self) -> bool {
+        self.mode == DigestMode::Full
+    }
+
+    pub fn include_custom_default_values(&self) -> bool {
+        self.mode == DigestMode::Full
     }
 
     /// Feed a value implementing [`TypeSystemDigest`] into this hasher.
@@ -62,7 +81,7 @@ impl Hasher {
         let mut digests: Vec<[u8; 32]> = items
             .into_iter()
             .map(|item| {
-                let mut h = Hasher::new();
+                let mut h = Hasher::with_mode(self.mode);
                 hash_fn(&mut h, &item);
                 h.finalize()
             })
@@ -89,7 +108,7 @@ impl Hasher {
         let mut sorted: Vec<([u8; 32], T)> = items
             .into_iter()
             .map(|item| {
-                let mut h = Hasher::new();
+                let mut h = Hasher::with_mode(self.mode);
                 key_hash_fn(&mut h, &item);
                 (h.finalize(), item)
             })

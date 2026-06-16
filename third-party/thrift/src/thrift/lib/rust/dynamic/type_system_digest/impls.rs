@@ -170,6 +170,9 @@ fn hash_field_set(field_set: &BTreeMap<id::FieldId, SerializableRecord>, h: &mut
 }
 
 fn hash_annotations(annotations: &BTreeMap<String, SerializableRecord>, h: &mut Hasher) {
+    if !h.include_annotations() {
+        return;
+    }
     h.hash_unordered_by_digest(annotations.iter(), |sub_h, (key, value)| {
         sub_h.hash(key.as_str());
         sub_h.hash(*value);
@@ -183,8 +186,10 @@ impl TypeSystemDigest for SerializableFieldDefinition {
         h.hash(&self.presence.0);
         h.hash(&self.r#type);
 
-        if let Some(ref custom_default) = self.customDefaultPartialRecord {
-            h.hash(custom_default);
+        if h.include_custom_default_values() {
+            if let Some(ref custom_default) = self.customDefaultPartialRecord {
+                h.hash(custom_default);
+            }
         }
         hash_annotations(&self.annotations, h);
     }

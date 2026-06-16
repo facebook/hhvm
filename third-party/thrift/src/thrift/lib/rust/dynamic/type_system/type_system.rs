@@ -96,6 +96,12 @@ impl TypeSystem for BasicTypeSystem {
     }
 }
 
+impl type_system_digest::TypeSystemDigest for BasicTypeSystem {
+    fn hash_into(&self, hasher: &mut type_system_digest::hasher::Hasher) {
+        crate::digest::hash_type_system_into(self, hasher);
+    }
+}
+
 impl std::fmt::Debug for BasicTypeSystem {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("BasicTypeSystem")

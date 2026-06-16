@@ -23,7 +23,33 @@ use record::SerializableRecord;
 use crate::type_ref::TypeRef;
 
 /// Annotations map: URI -> serializable record value.
-pub type AnnotationsMap = HashMap<String, SerializableRecord>;
+#[derive(Clone, Default, Debug)]
+pub struct AnnotationsMap(HashMap<String, SerializableRecord>);
+
+impl std::ops::Deref for AnnotationsMap {
+    type Target = HashMap<String, SerializableRecord>;
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl std::ops::DerefMut for AnnotationsMap {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
+    }
+}
+
+impl From<HashMap<String, SerializableRecord>> for AnnotationsMap {
+    fn from(map: HashMap<String, SerializableRecord>) -> Self {
+        Self(map)
+    }
+}
+
+impl FromIterator<(String, SerializableRecord)> for AnnotationsMap {
+    fn from_iter<I: IntoIterator<Item = (String, SerializableRecord)>>(iter: I) -> Self {
+        Self(iter.into_iter().collect())
+    }
+}
 
 /// Compact handle for O(1) field access by ordinal index.
 ///

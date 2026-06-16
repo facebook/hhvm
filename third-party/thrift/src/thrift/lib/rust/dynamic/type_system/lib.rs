@@ -21,6 +21,7 @@
 //! Designed for construction from (and round-tripping to)
 //! [`SerializableTypeSystem`].
 
+mod digest;
 pub mod error;
 pub mod field;
 pub mod nodes;

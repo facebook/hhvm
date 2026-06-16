@@ -45,13 +45,28 @@ pub type Digest = [u8; 32];
 /// Current hash algorithm version.
 pub const TYPE_SYSTEM_DIGEST_VERSION: u8 = 2;
 
+/// Controls which parts of the type system are included in the digest.
+///
+/// Matches the C++ `DigestMode` enum in `TypeSystemDigest.h`.
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+pub enum DigestMode {
+    /// Hash everything: structure, annotations, and custom defaults.
+    Full,
+    /// Hash only structure: skip annotations and custom defaults.
+    Structural,
+}
+
 /// Trait for types that can produce a type system digest.
 ///
 /// Implementors feed their content into a [`Hasher`] in a deterministic way
 /// that matches the C++ `TypeSystemDigest` implementation byte-for-byte.
 pub trait TypeSystemDigest {
     fn digest(&self) -> Digest {
-        let mut h = Hasher::new();
+        self.digest_with_mode(DigestMode::Full)
+    }
+
+    fn digest_with_mode(&self, mode: DigestMode) -> Digest {
+        let mut h = Hasher::with_mode(mode);
         self.hash_into(&mut h);
         h.finalize()
     }

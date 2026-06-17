@@ -207,4 +207,6 @@ class Logger {
   bool logOnDestroy_{true};
 };
 
+std::ostream& operator<<(std::ostream& os, const Logger::Filter& filter);
+
 } // namespace proxygen::coro

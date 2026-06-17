@@ -410,7 +410,18 @@ func (s *rocketServerSocket) requestResponse(msg payload.Payload) mono.Mono {
 		}
 		ctx = WithRequestContext(ctx, reqCtx)
 
-		result, runErr := func() (WritableResult, error) {
+		// Run OnRequest interceptors before the handler.
+		ctx, reqIntErr := s.runOnRequestInterceptors(ctx, argStruct)
+
+		var result WritableResult
+		var resErr error
+		func() {
+			// Skip handler if onRequest interceptors returned an error
+			if reqIntErr != nil {
+				resErr = reqIntErr
+				return
+			}
+
 			defer func() {
 				if r := recover(); r != nil {
 					s.observer.ProcessorPanic()
@@ -418,24 +429,23 @@ func (s *rocketServerSocket) requestResponse(msg payload.Payload) mono.Mono {
 				}
 			}()
 			pfuncStartTime := time.Now()
-			res, err := pfunc.RunContext(ctx, argStruct)
+			result, resErr = pfunc.RunContext(ctx, argStruct)
 			s.observer.TimeProcessUsForFunction(rpcFuncName, time.Since(pfuncStartTime))
-			return res, err
 		}()
 
-		// Select the response struct: an undeclared error becomes an
-		// ApplicationException; otherwise the handler result (which may carry a
-		// declared exception).
+		// Select the response struct: an undeclared error (from OnRequest or the
+		// handler) becomes an ApplicationException; otherwise the handler result
+		// (which may carry a declared exception).
 		var respStruct WritableStruct = result
-		if runErr != nil {
-			respStruct = maybeWrapApplicationException(runErr)
+		if resErr != nil {
+			respStruct = maybeWrapApplicationException(resErr)
 		}
 
 		// Only register the interaction if the factory call succeeded. A failed
 		// factory (undeclared error or declared exception) must not create an
 		// interaction; the client treats it as a creation failure
 		// (INTERACTION_CONSTRUCTOR_ERROR) and recreates.
-		responseHasException := (runErr != nil || result.Exception() != nil)
+		responseHasException := (resErr != nil || result.Exception() != nil)
 
 		if metadata.InteractionCreate != nil && !responseHasException {
 			proc := types.GetInteractionCreateProcessor(ctx).(Processor)
@@ -492,9 +502,17 @@ func (s *rocketServerSocket) fireAndForget(msg payload.Payload) {
 	// background context so the handler can access the RequestContext.
 	ctx := WithRequestContext(context.Background(), reqCtx)
 
-	// Run the user handler under panic tracking. Oneway requests send no
-	// response, so the handler result is discarded.
-	runErr := func() error {
+	// Run OnRequest interceptors before the handler.
+	ctx, reqIntErr := s.runOnRequestInterceptors(ctx, argStruct)
+
+	var resErr error
+	func() {
+		// Skip handler if onRequest interceptors returned an error
+		if reqIntErr != nil {
+			resErr = reqIntErr
+			return
+		}
+
 		defer func() {
 			if r := recover(); r != nil {
 				s.observer.ProcessorPanic()
@@ -502,14 +520,13 @@ func (s *rocketServerSocket) fireAndForget(msg payload.Payload) {
 			}
 		}()
 		pfuncStartTime := time.Now()
-		_, err := pfunc.RunContext(ctx, argStruct)
+		_, resErr = pfunc.RunContext(ctx, argStruct)
 		s.observer.TimeProcessUsForFunction(rpcFuncName, time.Since(pfuncStartTime))
-		return err
 	}()
-	if runErr != nil {
+
+	if resErr != nil {
 		s.observer.ConnDropped()
-		s.log("server fireAndForget process error: %v", runErr)
-		return
+		s.log("server fireAndForget error: %v", resErr)
 	}
 
 	// Track actual handler execution time
@@ -552,6 +569,15 @@ func (s *rocketServerSocket) requestStream(msg payload.Payload) flux.Flux {
 			onStreamComplete := func() {
 				sink.Complete()
 			}
+
+			// Run OnRequest interceptors before the handler.
+			ctx, reqIntErr := s.runOnRequestInterceptors(ctx, argStruct)
+			if reqIntErr != nil {
+				onFirstResponse(maybeWrapApplicationException(reqIntErr))
+				onStreamComplete()
+				return
+			}
+
 			pfuncStream.RunStreamContext(ctx, argStruct, onFirstResponse, onStreamNext, onStreamComplete)
 		},
 	)
@@ -624,6 +650,14 @@ func (s *rocketServerSocket) requestChannelSink(
 		}
 
 		onSinkError := sink.Error
+
+		// Run OnRequest interceptors before the handler.
+		ctx, reqIntErr := s.runOnRequestInterceptors(ctx, argStruct)
+		if reqIntErr != nil {
+			onFirstResponse(maybeWrapApplicationException(reqIntErr))
+			sink.Complete()
+			return
+		}
 
 		// Start the sink processor in a goroutine.
 		// It will call onFirstResponse which queues FirstResponse to the sink.
@@ -758,6 +792,14 @@ func (s *rocketServerSocket) requestChannelBiDi(
 
 		onStreamComplete := func() {
 			sink.Complete()
+		}
+
+		// Run OnRequest interceptors before the handler.
+		ctx, reqIntErr := s.runOnRequestInterceptors(ctx, argStruct)
+		if reqIntErr != nil {
+			onFirstResponse(maybeWrapApplicationException(reqIntErr))
+			onStreamComplete()
+			return
 		}
 
 		go pfuncBiDi.RunBiDiContext(ctx, argStruct, onFirstResponse, onStreamNext, onStreamComplete, sinkSeq)

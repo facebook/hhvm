@@ -19,9 +19,17 @@ package thrift
 import (
 	"context"
 	"errors"
+	"net"
+	"slices"
+	"sync"
 	"testing"
+	"time"
 
+	"golang.org/x/sync/errgroup"
+
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/dummy"
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
+	dummyif "github.com/facebook/fbthrift/thrift/test/go/if/dummy"
 	"github.com/stretchr/testify/require"
 )
 
@@ -159,4 +167,131 @@ func TestRunInterceptorsNoInterceptors(t *testing.T) {
 	require.Equal(t, context.Background(), ctx)
 
 	require.NoError(t, s.runOnResponseInterceptors(context.Background(), nil))
+}
+
+// --- End-to-end server tests ---
+//
+// These stand up a single shared Rocket DummyService server with registered
+// ServiceInterceptors and exercise the wired OnRequest behavior from the
+// official ServiceInterceptor contract:
+// https://www.internalfb.com/intern/staticdocs/thrift/docs/fb/server/service-interceptors/
+//
+// Interceptors are wired into the Rocket server path, so these tests use
+// TransportIDRocket.
+
+// serveDummyWithInterceptors stands up a Rocket DummyService server with the
+// given interceptors and returns a connected client. Shutdown is registered via
+// t.Cleanup so it runs after the test and all of its (possibly parallel)
+// subtests complete.
+func serveDummyWithInterceptors(t *testing.T, interceptors ...ServiceInterceptor) dummyif.DummyClient {
+	t.Helper()
+
+	listener, err := net.Listen("tcp", "[::]:0")
+	require.NoError(t, err)
+	addr := listener.Addr()
+
+	opts := make([]ServerOption, 0, len(interceptors))
+	for _, interceptor := range interceptors {
+		opts = append(opts, WithServiceInterceptor(interceptor))
+	}
+	processor := dummyif.NewDummyProcessor(&dummy.DummyHandler{})
+	server := NewServer(processor, listener, TransportIDRocket, opts...)
+
+	serverCtx, serverCancel := context.WithCancel(context.Background())
+	var serverEG errgroup.Group
+	serverEG.Go(func() error {
+		return server.ServeContext(serverCtx)
+	})
+
+	channel, err := NewClient(
+		getClientTransportOption(TransportIDRocket),
+		WithIoTimeout(5*time.Second),
+		WithDialer(func() (net.Conn, error) {
+			return net.DialTimeout(addr.Network(), addr.String(), 5*time.Second)
+		}),
+	)
+	require.NoError(t, err)
+	client := dummyif.NewDummyChannelClient(channel)
+
+	t.Cleanup(func() {
+		require.NoError(t, client.Close())
+		serverCancel()
+		require.ErrorIs(t, serverEG.Wait(), context.Canceled)
+	})
+	return client
+}
+
+// interceptorRecorder records, per RPC method, the ordered names of the
+// interceptors whose OnRequest fired. It is safe for concurrent use so subtests
+// sharing one server can run in parallel.
+type interceptorRecorder struct {
+	mu  sync.Mutex
+	log map[string][]string
+}
+
+func newInterceptorRecorder() *interceptorRecorder {
+	return &interceptorRecorder{log: map[string][]string{}}
+}
+
+func (r *interceptorRecorder) record(method, name string) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	r.log[method] = append(r.log[method], name)
+}
+
+func (r *interceptorRecorder) get(method string) []string {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	return slices.Clone(r.log[method])
+}
+
+// serverTestInterceptor is a concurrency-safe ServiceInterceptor for the shared
+// server tests. It records every OnRequest call (keyed by method name) into a
+// shared recorder and optionally fails OnRequest for specific methods.
+type serverTestInterceptor struct {
+	BaseServiceInterceptor
+	name     string
+	recorder *interceptorRecorder
+	failOn   map[string]error // method name -> error returned from OnRequest
+}
+
+func (i *serverTestInterceptor) OnRequest(ctx context.Context, _ types.ReadableStruct, _ any) (any, error) {
+	method := GetRequestContext(ctx).MethodName
+	i.recorder.record(method, i.name)
+	return nil, i.failOn[method]
+}
+
+// TestServiceInterceptorServer exercises the wired OnRequest behavior end-to-end
+// against a single shared server, with the subtests running in parallel. Each
+// subtest uses a distinct RPC method so their recorded calls don't overlap.
+func TestServiceInterceptorServer(t *testing.T) {
+	t.Parallel()
+
+	recorder := newInterceptorRecorder()
+	errDenied := errors.New("denied by interceptor")
+	// Two interceptors share the recorder. "a" rejects OnRequest for the Ping
+	// method (used by the error subtest); both record every OnRequest call.
+	a := &serverTestInterceptor{name: "a", recorder: recorder, failOn: map[string]error{"Ping": errDenied}}
+	b := &serverTestInterceptor{name: "b", recorder: recorder}
+	client := serveDummyWithInterceptors(t, a, b)
+
+	t.Run("OnRequest runs for all interceptors in forward order", func(t *testing.T) {
+		t.Parallel()
+		got, err := client.Echo(context.Background(), "hello")
+		require.NoError(t, err)
+		require.Equal(t, "hello", got)
+		// OnRequest runs after deserialization and before the handler, for every
+		// interceptor, in registration (forward) order.
+		require.Equal(t, []string{"a", "b"}, recorder.get("Echo"))
+	})
+
+	t.Run("OnRequest error is returned to client and skips the handler", func(t *testing.T) {
+		t.Parallel()
+		// Ping normally returns nil; the interceptor error surfaces to the client
+		// instead, which proves the handler was skipped.
+		err := client.Ping(context.Background())
+		require.ErrorContains(t, err, "denied by interceptor")
+		// Every interceptor's OnRequest still ran, even though "a" errored.
+		require.Equal(t, []string{"a", "b"}, recorder.get("Ping"))
+	})
 }

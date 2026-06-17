@@ -309,6 +309,23 @@ MCROUTER_OPTION_TOGGLE(
     no_short,
     "If true, cache is secured by binding client identities to keys")
 
+// ONLY ENABLED FOR SHADOW TESTING WHEN USING PROXY
+MCROUTER_OPTION_TOGGLE(
+    key_client_binding_nonlookaside_enable,
+    false,
+    "key-client-binding-nonlookaside-enable",
+    no_short,
+    "If true, bind the key to the kcb_identity header when a verified "
+    "MEMCACHE_ID identity vouches for it (non-lookaside KCB).")
+
+MCROUTER_OPTION_STRING(
+    key_client_binding_nonlookaside_verifier,
+    "ucache",
+    "key-client-binding-nonlookaside-verifier",
+    no_short,
+    "Service identity used to verify request CATs on the non-lookaside KCB "
+    "path. Must match the verifier the tokens are minted for.")
+
 #ifdef ADDITIONAL_STANDALONE_OPTIONS_FILE
 #include ADDITIONAL_STANDALONE_OPTIONS_FILE
 #endif

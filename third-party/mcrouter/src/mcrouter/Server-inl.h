@@ -108,7 +108,9 @@ void serverInit(
       router.externalStatsHandler(),
       standaloneOpts.prefix_acl_checker_enable,
       standaloneOpts.key_client_binding_enable,
-      router.runtimeFeatures_.enableReplySource));
+      router.runtimeFeatures_.enableReplySource,
+      standaloneOpts.key_client_binding_nonlookaside_enable,
+      standaloneOpts.key_client_binding_nonlookaside_verifier));
 
   worker.setOnConnectionAccepted(
       [proxy, &aclChecker](McServerSession& session) mutable {
@@ -337,7 +339,9 @@ bool runServerDual(
               router->externalStatsHandler(),
               standaloneOpts.prefix_acl_checker_enable,
               standaloneOpts.key_client_binding_enable,
-              router->runtimeFeatures_.enableReplySource));
+              router->runtimeFeatures_.enableReplySource,
+              standaloneOpts.key_client_binding_nonlookaside_enable,
+              standaloneOpts.key_client_binding_nonlookaside_verifier));
       carbonRouterClients.push_back(std::move(routerClient));
     }
     CHECK_EQ(carbonRouterClients.size(), mcrouterOpts.num_proxies);

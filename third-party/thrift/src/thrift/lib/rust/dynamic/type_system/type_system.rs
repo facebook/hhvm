@@ -41,6 +41,13 @@ pub trait TypeSystem {
     /// Look up a user-defined type by URI.
     fn get(&self, uri: &str) -> Option<DefinitionRef>;
 
+    /// Whether a definition with this URI exists. Implementations should
+    /// override this when a cheaper check than materializing a `DefinitionRef`
+    /// is available.
+    fn contains(&self, uri: &str) -> bool {
+        self.get(uri).is_some()
+    }
+
     /// Iterate over all known URIs.
     fn known_uris(&self) -> Box<dyn Iterator<Item = &str> + '_>;
 
@@ -132,6 +139,10 @@ impl TypeSystem for BasicTypeSystem {
         self.definitions.get(uri).map(|n| n.to_definition_ref())
     }
 
+    fn contains(&self, uri: &str) -> bool {
+        self.definitions.contains_key(uri)
+    }
+
     fn known_uris(&self) -> Box<dyn Iterator<Item = &str> + '_> {
         Box::new(self.definitions.keys().map(|s| s.as_str()))
     }
@@ -198,7 +209,13 @@ pub struct LayeredTypeSystem<T: TypeSystem> {
 }
 
 impl<T: TypeSystem> LayeredTypeSystem<T> {
-    pub fn new(overlay: BasicTypeSystem, base: T) -> Self {
+    /// Constructs a layered system from a pre-built `overlay` and `base`.
+    ///
+    /// Crate-internal by design: `TypeSystemBuilder::build_layered_on` is the
+    /// only constructor, and it enforces that overlay URIs do not collide with
+    /// the base, keeping the layering purely additive. Bypassing that check
+    /// could let an overlay shadow base types, so `new` stays `pub(crate)`.
+    pub(crate) fn new(overlay: BasicTypeSystem, base: T) -> Self {
         Self { overlay, base }
     }
 
@@ -234,7 +251,7 @@ impl<T: TypeSystem> TypeSystem for LayeredTypeSystem<T> {
             self.overlay.known_uris().chain(
                 self.base
                     .known_uris()
-                    .filter(|uri| self.overlay.get(uri).is_none()),
+                    .filter(|uri| !self.overlay.contains(uri)),
             ),
         )
     }
@@ -295,6 +312,10 @@ impl<T: TypeSystem + std::fmt::Debug> std::fmt::Debug for LayeredTypeSystem<T> {
 impl TypeSystem for Arc<dyn TypeSystem + Send + Sync> {
     fn get(&self, uri: &str) -> Option<DefinitionRef> {
         (**self).get(uri)
+    }
+
+    fn contains(&self, uri: &str) -> bool {
+        (**self).contains(uri)
     }
 
     fn known_uris(&self) -> Box<dyn Iterator<Item = &str> + '_> {

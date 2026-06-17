@@ -131,7 +131,7 @@ impl TypeSystemBuilder {
         base: T,
     ) -> Result<LayeredTypeSystem<T>, InvalidTypeError> {
         for uri in self.entries.keys() {
-            if base.get(uri).is_some() {
+            if base.contains(uri) {
                 return Err(InvalidTypeError::DuplicateUri(uri.clone()));
             }
         }

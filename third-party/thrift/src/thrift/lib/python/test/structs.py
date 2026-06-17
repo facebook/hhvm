@@ -215,6 +215,34 @@ class StructTestsParameterized(unittest.TestCase):
         y = z(values=None)
         self.assertIsNone(y.values)
 
+    def test_call_preserves_isset_single_field_struct(self) -> None:
+        # Regression test for the copy-then-update `Struct.__call__`
+        # reimplementation. The "isset" flags are copied with
+        # `PyBytes_FromStringAndSize(ptr, n)` and then mutated in place by
+        # `setStructIsset`. For a struct whose isset array is a single byte
+        # (exactly one field), that call returns one of CPython's interned
+        # single-byte `bytes` singletons instead of a fresh buffer. Two such
+        # structs then share the same isset object, so mutating one corrupts the
+        # other: the field stays readable in memory but is silently dropped on
+        # serialization.
+        #
+        # `Optionals` has exactly one (optional) field, so its isset array is a
+        # single byte. Deriving two values from the same instance -- one setting
+        # the field, one clearing it -- triggers the shared-singleton clobber.
+        base = self.Optionals()
+        # pyre-ignore[6]: TODO: Thrift-Container init
+        with_values = base(values=self.to_list(["a", "b", "c"]))
+        # Clearing the field on a sibling copy must not disturb `with_values`.
+        _ = base(values=None)
+
+        # The isset flag must still be set ...
+        self.assertTrue(self.isset(with_values)["values"])
+        # ... so the value survives a serialization round trip.
+        serialized = self.serializer.serialize_iobuf(with_values)
+        roundtrip = self.serializer.deserialize(self.Optionals, serialized)
+        self.assertIsNotNone(roundtrip.values)
+        self.assertEqual(list(roundtrip.values), ["a", "b", "c"])
+
     def test_str_subclass_param(self) -> None:
         class MyStr(str):
             pass

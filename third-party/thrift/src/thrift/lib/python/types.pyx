@@ -26,6 +26,7 @@ from cpython.ref cimport Py_INCREF, Py_DECREF
 from cpython.set cimport PyFrozenSet_New, PySet_Add
 from cpython.unicode cimport PyUnicode_AsUTF8String, PyUnicode_FromEncodedObject
 from cython.operator cimport dereference as deref
+from libc.string cimport memcpy
 from cython cimport final as _cython__final
 from libcpp cimport bool as cbool
 from libcpp.utility cimport move as cmove
@@ -1432,19 +1433,23 @@ cdef class Struct(StructOrUnion):
         cdef int16_t num_fields = len(struct_info.fields)
 
         # Unconditionally copy the entire internal data tuple, then apply the
-        # kwargs updates below. This avoids inspecting the "isset" flags of every
-        # field (as a per-field loop would), which makes the common case of
+        # kwargs, which makes the common case of
         # updating only one or two fields fast regardless of struct size.
         #
-        # Element 0 (the "isset" flags) must be a *fresh* `bytes` copy because it
-        # is mutated in place by `set_struct_field` / `setStructIsset`; sharing it
-        # would corrupt `self`. `PyBytes_FromStringAndSize` with a non-NULL
-        # pointer guarantees a new buffer (unlike `bytes(...)`, which may return
-        # the same object). The remaining elements are immutable "internal data"
-        # values that can be safely shared by reference.
+        # Element 0 (the "isset" flags) must be a *fresh*, uniquely-owned `bytes`
+        # buffer because it is mutated in place by `set_struct_field` /
+        # `setStructIsset`. Build it with a NULL pointer + `memcpy`;
+        # PyBytes_FromStringAndSize returns a shared interned singleton for 1-byte
+        # buffers for 1-field structs. The NULL forces a new allocation, not the
+        # singleton. The remaining elements are immutable "internal data" values
+        # that can be safely shared by reference.
         cdef bytes old_isset = old_data[0]
-        cdef bytes new_isset = PyBytes_FromStringAndSize(
-            PyBytes_AS_STRING(old_isset), PyBytes_GET_SIZE(old_isset)
+        cdef Py_ssize_t isset_size = PyBytes_GET_SIZE(old_isset)
+        cdef bytes new_isset = PyBytes_FromStringAndSize(NULL, isset_size)
+        memcpy(
+            PyBytes_AS_STRING(new_isset),
+            PyBytes_AS_STRING(old_isset),
+            isset_size,
         )
         cdef tuple new_data = PyTuple_New(num_fields + 1)
         Py_INCREF(new_isset)

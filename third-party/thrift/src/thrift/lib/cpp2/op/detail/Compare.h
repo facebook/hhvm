@@ -279,6 +279,25 @@ struct IdenticalTo<type::float_t> : FloatIdenticalTo<float, int32_t> {};
 template <>
 struct IdenticalTo<type::double_t> : FloatIdenticalTo<double, int64_t> {};
 
+template <typename Tag>
+  requires type::is_a_v<Tag, type::number_c>
+struct CompareWith<Tag, Tag> {
+  using T = type::native_type<Tag>;
+
+  std::weak_ordering operator()(T lhs, T rhs) const {
+    return std::weak_order(lhs, rhs);
+  }
+};
+template <typename Tag, template <class...> class LessThanType>
+  requires type::is_a_v<Tag, type::number_c>
+struct CompareThreeWay<Tag, LessThanType> {
+  using T = type::native_type<Tag>;
+
+  std::weak_ordering operator()(T lhs, T rhs) const {
+    return std::weak_order(lhs, rhs);
+  }
+};
+
 // Delegate all IOBuf comparisons directly to folly.
 template <typename LUTag, typename RUTag>
 struct CheckIOBufOp {

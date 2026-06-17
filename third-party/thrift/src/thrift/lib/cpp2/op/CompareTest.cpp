@@ -89,7 +89,7 @@ TEST(CompareTest, Double) {
       compare<type::double_t>(
           std::numeric_limits<double>::quiet_NaN(),
           std::numeric_limits<double>::quiet_NaN()),
-      std::weak_ordering::greater);
+      std::weak_ordering::equivalent);
 }
 
 TEST(CompareTest, Float) {
@@ -117,6 +117,11 @@ TEST(CompareTest, Float) {
       identical<type::float_t>(
           std::numeric_limits<float>::quiet_NaN(),
           std::numeric_limits<float>::quiet_NaN()));
+  EXPECT_EQ(
+      compare<type::float_t>(
+          std::numeric_limits<float>::quiet_NaN(),
+          std::numeric_limits<float>::quiet_NaN()),
+      std::weak_ordering::equivalent);
 }
 
 TEST(CompareTest, StructWithFloat) {

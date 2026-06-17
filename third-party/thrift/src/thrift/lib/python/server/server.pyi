@@ -30,6 +30,15 @@ SSLPolicy = _SSLPolicy
 
 # This looks really dumb but otherwise this name doesn't get re-exported
 from thrift.python.server_impl.interactions import Interaction as Interaction
+
+# Re-exported to mirror server.pyx, which imports these from
+# thrift.python.server_impl.request_context. This lets callers use the
+# thrift-python-native `from thrift.python.server import get_context`.
+from thrift.python.server_impl.request_context import (
+    get_context as get_context,
+    RequestContext as RequestContext,
+    SocketAddress as SocketAddress,
+)
 from thrift.python.types import (
     FunctionEntry as FunctionEntry,
     ServiceInterface as ServiceInterface,

@@ -27,6 +27,16 @@ void H3DatagramAsyncSocketTest::SetUp() {
   options_.httpRequest_->setMasque();
   options_.maxDatagramSize_ = kMaxDatagramSize;
 
+  createSocketAndSession();
+
+  EXPECT_CALL(readCallbacks_, getReadBuffer_(_, _))
+      .WillRepeatedly(Invoke([this](void** buf, size_t* len) {
+        *buf = &buf_;
+        *len = kMaxDatagramSize;
+      }));
+}
+
+void H3DatagramAsyncSocketTest::createSocketAndSession() {
   datagramSocket_ =
       std::make_unique<H3DatagramAsyncSocket>(&eventBase_, options_);
 
@@ -51,11 +61,6 @@ void H3DatagramAsyncSocketTest::SetUp() {
   datagramSocket_->setRcvBuf(kMaxDatagramsBufferedRead * kMaxDatagramSize);
   datagramSocket_->setSndBuf(kMaxDatagramsBufferedWrite * kMaxDatagramSize);
 
-  EXPECT_CALL(readCallbacks_, getReadBuffer_(_, _))
-      .WillRepeatedly(Invoke([this](void** buf, size_t* len) {
-        *buf = &buf_;
-        *len = kMaxDatagramSize;
-      }));
   quic::QuicSocket::TransportInfo transportInfo;
   EXPECT_CALL(*socketDriver_->getSocket(), getTransportInfo())
       .WillRepeatedly(testing::Return(transportInfo));
@@ -158,6 +163,18 @@ TEST_F(H3DatagramAsyncSocketTest, CloseAfter200Response) {
   datagramSocket_->resumeRead(&readCallbacks_);
   EXPECT_CALL(readCallbacks_, onReadClosed_()).Times(1);
   onHeadersComplete(makeResponse(200));
+}
+
+TEST_F(H3DatagramAsyncSocketTest, DestroyWithoutCloseDropsSession) {
+  datagramSocket_->connect(getRemoteAddress());
+  session_->onTransportReady();
+  session_->onReplaySafe();
+  datagramSocket_->resumeRead(&readCallbacks_);
+  onHeadersComplete(makeResponse(200));
+
+  datagramSocket_.reset();
+  session_ = nullptr;
+  eventBase_.loopOnce(EVLOOP_NONBLOCK);
 }
 
 TEST_F(H3DatagramAsyncSocketTest, EOMAfter200Response) {
@@ -416,14 +433,37 @@ TEST_F(H3DatagramAsyncSocketTest, ResumeReadReentrancy) {
   datagramSocket_->resumeRead(&readCallbacks_);
 }
 
+TEST_F(H3DatagramAsyncSocketTest, CloseNowFromBufferedReadCallback) {
+  datagramSocket_->connect(getRemoteAddress());
+  session_->onTransportReady();
+  session_->onReplaySafe();
+  onHeadersComplete(makeResponse(200));
+  onDatagram(folly::IOBuf::copyBuffer("first"));
+  onDatagram(folly::IOBuf::copyBuffer("second"));
+
+  auto expectedPeer = session_->getPeerAddress();
+  EXPECT_CALL(readCallbacks_, onDataAvailable_(_, _, _, _))
+      .Times(1)
+      .WillOnce(Invoke(
+          [&](const folly::SocketAddress& client,
+              size_t len,
+              bool /*truncated*/,
+              const MockUDPReadCallback::OnDataAvailableParams& /*params*/) {
+            EXPECT_EQ(client, expectedPeer);
+            EXPECT_EQ(std::string(buf_, len), "first");
+            datagramSocket_->closeNow();
+            session_ = nullptr;
+          }));
+  datagramSocket_->resumeRead(&readCallbacks_);
+  eventBase_.loopOnce(EVLOOP_NONBLOCK);
+}
+
 // Test delete before TransportReady
 TEST_F(H3DatagramAsyncSocketTest, DeleteSocketBeforeTransportReady) {
   datagramSocket_->connect(getRemoteAddress());
   datagramSocket_.reset();
-  eventBase_.loop();
-  session_->onConnectionError(quic::QuicError(
-      quic::QuicErrorCode(quic::TransportErrorCode::INTERNAL_ERROR),
-      std::string("connect timeout expired")));
+  session_ = nullptr;
+  eventBase_.loopOnce(EVLOOP_NONBLOCK);
 }
 
 // Test that calling close twice doesn't violate the HTTP state machine by

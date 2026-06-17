@@ -62,6 +62,7 @@ class H3DatagramAsyncSocketTest : public testing::Test {
   folly::SocketAddress& getLocalAddress();
   folly::SocketAddress& getRemoteAddress();
   ssize_t sendDatagramUpstream(std::unique_ptr<folly::IOBuf> datagram);
+  void createSocketAndSession();
 
   /*
    * Wrap private members of H3DatagramAsyncSocketTest so they can be called
@@ -84,13 +85,12 @@ class H3DatagramAsyncSocketTest : public testing::Test {
   }
 
   void SetUpRfcMode() {
+    datagramSocket_.reset();
+    session_ = nullptr;
+    socketDriver_.reset();
+
     options_.rfcMode_ = true;
-    // Recreate socket with rfcMode
-    datagramSocket_ =
-        std::make_unique<H3DatagramAsyncSocket>(&eventBase_, options_);
-    datagramSocket_->setUpstreamSession(session_);
-    datagramSocket_->setRcvBuf(kMaxDatagramsBufferedRead * kMaxDatagramSize);
-    datagramSocket_->setSndBuf(kMaxDatagramsBufferedWrite * kMaxDatagramSize);
+    createSocketAndSession();
   }
 
   folly::EventBase eventBase_;

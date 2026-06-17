@@ -32,6 +32,10 @@ H3DatagramAsyncSocket::H3DatagramAsyncSocket(folly::EventBase* evb,
       inResumeRead_(false) {
 }
 
+H3DatagramAsyncSocket::~H3DatagramAsyncSocket() {
+  closeNow();
+}
+
 const folly::AsyncTransportCertificate* FOLLY_NULLABLE
 H3DatagramAsyncSocket::getPeerCertificate() const {
   if (!upstreamSession_) {
@@ -49,6 +53,27 @@ const folly::SocketAddress& H3DatagramAsyncSocket::address() const {
     return localFallbackAddress;
   }
   return upstreamSession_->getLocalAddress();
+}
+
+void H3DatagramAsyncSocket::closeNow() {
+  pauseRead();
+  readBuf_.clear();
+  writeBuf_.clear();
+  pendingDelivery_.reset();
+  pendingError_.reset();
+  pendingEOM_ = false;
+
+  if (txn_) {
+    txn_->setHandler(nullptr);
+    txn_ = nullptr;
+  }
+  if (upstreamSession_) {
+    auto* session = upstreamSession_;
+    upstreamSession_ = nullptr;
+    session->setConnectCallback(nullptr);
+    session->setInfoCallback(nullptr);
+    session->dropConnection("H3DatagramAsyncSocket closed");
+  }
 }
 
 void H3DatagramAsyncSocket::closeWithError(const AsyncSocketException& ex) {
@@ -443,15 +468,14 @@ void H3DatagramAsyncSocket::resumeRead(ReadCallback* cob) {
   readCallback_ = CHECK_NOTNULL(cob);
   folly::DelayedDestruction::DestructorGuard dg(this);
   // if there are buffered datagrams, deliver those first.
-  auto it = readBuf_.begin();
-  while (it != readBuf_.end()) {
+  while (readCallback_ && !readBuf_.empty()) {
     // the read callback could be reset from onDataAvailable
-    if (readCallback_) {
-      deliverDatagram(std::move(*it));
-      it = readBuf_.erase(it);
-    } else {
-      return;
-    }
+    auto datagram = std::move(readBuf_.front());
+    readBuf_.pop_front();
+    deliverDatagram(std::move(datagram));
+  }
+  if (!readCallback_) {
+    return;
   }
   // then, deliver errors
   if (pendingError_.has_value()) {

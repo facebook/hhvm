@@ -57,15 +57,7 @@ class H3DatagramAsyncSocket
   H3DatagramAsyncSocket(folly::EventBase* evb,
                         H3DatagramAsyncSocket::Options options);
 
-  ~H3DatagramAsyncSocket() override {
-    if (txn_) {
-      txn_->setHandler(nullptr);
-    }
-    if (upstreamSession_) {
-      upstreamSession_->setConnectCallback(nullptr);
-      upstreamSession_->setInfoCallback(nullptr);
-    }
-  }
+  ~H3DatagramAsyncSocket() override;
 
   H3DatagramAsyncSocket(const H3DatagramAsyncSocket&) = delete;
   H3DatagramAsyncSocket& operator=(const H3DatagramAsyncSocket&) = delete;
@@ -168,6 +160,8 @@ class H3DatagramAsyncSocket
       upstreamSession_->closeWhenIdle();
     }
   }
+
+  void closeNow();
 
   folly::NetworkSocket getNetworkSocket() const override {
     // Not great but better than crashing.

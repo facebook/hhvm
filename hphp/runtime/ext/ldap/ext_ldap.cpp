@@ -709,7 +709,7 @@ Variant HHVM_FUNCTION(ldap_dn2ufn,
 }
 
 OptString HHVM_FUNCTION(ldap_err2str,
-                     int64_t errnum) {
+                        int64_t errnum) {
   return OptString(ldap_err2string(errnum), CopyString);
 }
 
@@ -2021,9 +2021,9 @@ bool HHVM_FUNCTION(ldap_control_paged_result_response,
 }
 
 OptString HHVM_FUNCTION(ldap_escape,
-                     const OptString& value,
-                     const OptString& ignores /* = "" */,
-                     int64_t flags /* = 0 */) {
+                        const OptString& value,
+                        const OptString& ignores /* = "" */,
+                        int64_t flags /* = 0 */) {
   char esc[256] = {};
 
   if (flags & k_LDAP_ESCAPE_FILTER) { // llvm.org/bugs/show_bug.cgi?id=18389

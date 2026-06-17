@@ -170,7 +170,7 @@ Variant HHVM_FUNCTION(gzencode, const OptString& data, int64_t level,
  * call it a data error to avoid going nuts.
  */
 static OptString hhvm_zlib_inflate_rounds(z_stream *Z, int64_t maxlen,
-                                       int &status) {
+                                          int &status) {
   assertx(maxlen >= 0);
   size_t retsize = (maxlen && maxlen < Z->avail_in) ? maxlen : Z->avail_in;
   OptString ret;
@@ -544,8 +544,8 @@ bool HHVM_METHOD(ChunkedInflator, eof) {
 }
 
 OptString HHVM_METHOD(ChunkedInflator,
-                   inflateChunk,
-                   const OptString& chunk) {
+                      inflateChunk,
+                      const OptString& chunk) {
   FETCH_CHUNKED_INFLATOR(data, this_);
   assertx(data);
   return data->inflateChunk(chunk);
@@ -573,8 +573,8 @@ bool HHVM_METHOD(ChunkedGunzipper, eof) {
 }
 
 OptString HHVM_METHOD(ChunkedGunzipper,
-                   inflateChunk,
-                   const OptString& chunk) {
+                      inflateChunk,
+                      const OptString& chunk) {
   FETCH_CHUNKED_GUNZIPPER(data, this_);
   assertx(data);
   return data->inflateChunk(chunk);

@@ -335,8 +335,8 @@ bool HHVM_METHOD(ChunkedBunzipper, eof) {
 }
 
 OptString HHVM_METHOD(ChunkedBunzipper,
-                   inflateChunk,
-                   const OptString& chunk) {
+                      inflateChunk,
+                      const OptString& chunk) {
   FETCH_CHUNKED_BUNZIPPER(data, this_);
   assertx(data);
   return data->inflateChunk(chunk);

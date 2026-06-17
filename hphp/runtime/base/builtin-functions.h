@@ -50,7 +50,7 @@ inline OptString concat(const OptString& s1, const OptString& s2) {
 
 OptString concat3(const OptString& s1, const OptString& s2, const OptString& s3);
 OptString concat4(const OptString& s1, const OptString& s2, const OptString& s3,
-               const OptString& s4);
+                  const OptString& s4);
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -346,8 +346,8 @@ inline Variant unserialize_from_string(const OptString& str,
 }
 
 OptString resolve_include(const OptString& file, const char* currentDir,
-                       bool (*tryFile)(const OptString& file, void* ctx),
-                       void* ctx);
+                          bool (*tryFile)(const OptString& file, void* ctx),
+                          void* ctx);
 Variant include_impl_invoke(const OptString& file, bool once = false,
                             const char *currentDir = "",
                             bool callByHPHPInvoke = false);

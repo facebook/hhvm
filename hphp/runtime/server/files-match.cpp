@@ -32,9 +32,9 @@ FilesMatch::FilesMatch(const IniSetting::Map& ini, const Hdf& vh) {
 bool FilesMatch::match(const std::string &filename) const {
   if (!m_pattern.empty()) {
     Variant ret = preg_match(OptString(m_pattern.c_str(), m_pattern.size(),
-                                    CopyString),
+                                       CopyString),
                              OptString(filename.c_str(), filename.size(),
-                                    CopyString));
+                                       CopyString));
     return ret.toInt64() > 0;
   }
   return false;

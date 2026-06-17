@@ -191,7 +191,7 @@ bool CmdList::listFunctionOrClass(DebuggerClient &client) {
   Array funcInfo = iter.second().toArray();
   if (!subsymbol.empty()) {
     OptString key = CmdInfo::FindSubSymbol(funcInfo[s_methods].toArray(),
-                                        subsymbol);
+                                           subsymbol);
     if (key.isNull()) return false;
     funcInfo = funcInfo[s_methods].toArray()[key].toArray();
   }

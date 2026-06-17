@@ -57,7 +57,7 @@ struct TimeZone : SweepableResourceData {
   static bool IsValid(const char* name);
   static Array GetAbbreviations();
   static OptString AbbreviationToName(OptString abbr, int utcoffset = -1,
-                                   int isdst = 1);
+                                      int isdst = 1);
 
 public:
   /**

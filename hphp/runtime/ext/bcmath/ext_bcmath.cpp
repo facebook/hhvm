@@ -91,7 +91,7 @@ static bool HHVM_FUNCTION(bcscale, int64_t scale) {
 }
 
 static OptString HHVM_FUNCTION(bcadd, const OptString& left, const OptString& right,
-                            int64_t scale /* = -1 */) {
+                               int64_t scale /* = -1 */) {
   scale = adjust_scale(scale);
   bc_num first, second, result;
   bc_init_num(&first);
@@ -110,7 +110,7 @@ static OptString HHVM_FUNCTION(bcadd, const OptString& left, const OptString& ri
 }
 
 static OptString HHVM_FUNCTION(bcsub, const OptString& left, const OptString& right,
-                            int64_t scale /* = -1 */) {
+                               int64_t scale /* = -1 */) {
   scale = adjust_scale(scale);
   bc_num first, second, result;
   bc_init_num(&first);
@@ -142,7 +142,7 @@ static int64_t HHVM_FUNCTION(bccomp, const OptString& left, const OptString& rig
 }
 
 static OptString HHVM_FUNCTION(bcmul, const OptString& left, const OptString& right,
-                            int64_t scale /* = -1 */) {
+                               int64_t scale /* = -1 */) {
   scale = adjust_scale(scale);
   bc_num first, second, result;
   bc_init_num(&first);

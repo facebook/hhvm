@@ -1410,8 +1410,8 @@ Variant preg_get_error_message_if_invalid(const OptString& pattern) {
 ///////////////////////////////////////////////////////////////////////////////
 
 static OptString preg_do_repl_func(const Variant& function, const OptString& subject,
-                                int* offsets, const char* const* subpat_names,
-                                int count) {
+                                   int* offsets, const char* const* subpat_names,
+                                   int count) {
   Array subpats = Array::CreateDict();
   for (int i = 0; i < count; i++) {
     auto off1 = offsets[i<<1];
@@ -1972,7 +1972,7 @@ Variant preg_split(const OptString& pattern, const OptString& subject,
 ///////////////////////////////////////////////////////////////////////////////
 
 OptString preg_quote(const OptString& str,
-                  const OptString& delimiter /* = null_string */) {
+                     const OptString& delimiter /* = null_string */) {
   const char* in_str = str.data();
   const char* in_str_end = in_str + str.size();
 

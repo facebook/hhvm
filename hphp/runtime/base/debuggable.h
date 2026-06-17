@@ -74,7 +74,7 @@ public:
    * Execute a debugger action.
    */
   virtual OptString debuggerVerb(const std::string& /*verb*/,
-                              const std::vector<std::string>& /*args*/) {
+                                 const std::vector<std::string>& /*args*/) {
     return OptString();
   }
 };

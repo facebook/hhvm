@@ -76,11 +76,11 @@ const char *string_memnstr(const char *haystack, const char *needle,
  * Replace specified substring or search string with specified replacement.
  */
 OptString string_replace(const char *s, int len, int start, int length,
-                      const char *replacement, int len_repl);
+                         const char *replacement, int len_repl);
 OptString string_replace(const char *input, int len,
-                      const char *search, int len_search,
-                      const char *replacement, int len_replace,
-                      int &count, bool case_sensitive);
+                         const char *search, int len_search,
+                         const char *replacement, int len_replace,
+                         int &count, bool case_sensitive);
 
 /**
  * Replace a substr with another and return replaced one. Note, read
@@ -92,14 +92,14 @@ OptString string_replace(const char *input, int len,
  * is never checked.
  */
 inline OptString string_replace(const OptString& str, int start, int length,
-                             const OptString& repl) {
+                                const OptString& repl) {
   return string_replace(str.data(), str.size(), start, length,
                         repl.data(), repl.size());
 }
 
 inline OptString string_replace(const OptString& str, const OptString& search,
-                             const OptString& replacement,
-                             int &count, bool caseSensitive) {
+                                const OptString& replacement,
+                                int &count, bool caseSensitive) {
   count = 0;
   if (!search.empty() && !str.empty()) {
     auto ret = string_replace(str.data(), str.size(),
@@ -114,7 +114,7 @@ inline OptString string_replace(const OptString& str, const OptString& search,
 }
 
 inline OptString string_replace(const OptString& str, const OptString& search,
-                             const OptString& replacement) {
+                                const OptString& replacement) {
   int count;
   return string_replace(str, search, replacement, count, true);
 }
@@ -123,13 +123,13 @@ inline OptString string_replace(const OptString& str, const OptString& search,
  * Reverse, repeat or shuffle a string.
  */
 OptString string_chunk_split(const char *src, int srclen, const char *end,
-                          int endlen, int chunklen);
+                             int endlen, int chunklen);
 
 /**
  * Strip HTML and PHP tags.
  */
 OptString string_strip_tags(const char *s, int len, const char *allow,
-                         int allow_len, bool allow_tag_spaces);
+                            int allow_len, bool allow_tag_spaces);
 
 /**
  * Encoding/decoding strings according to certain formats.
@@ -169,8 +169,8 @@ void string_translate(char *str, int len, const char *str_from,
 OptString string_money_format(const char *format, double value);
 
 OptString string_number_format(double d, int dec,
-                            const OptString& dec_point,
-                            const OptString& thousand_sep);
+                               const OptString& dec_point,
+                               const OptString& thousand_sep);
 
 /**
  * Similarity and other properties of strings.
@@ -182,14 +182,14 @@ int string_similar_text(const char *t1, int len1,
 OptString string_soundex(const OptString& str);
 
 OptString string_metaphone(const char *input, int word_len, long max_phonemes,
-                        int traditional);
+                           int traditional);
 
 /**
  * Locale strings.
  */
 OptString string_convert_cyrillic_string(const OptString& input, char from, char to);
 OptString string_convert_hebrew_string(const OptString& str, int max_chars_per_line,
-                                    int convert_newlines);
+                                       int convert_newlines);
 
 ///////////////////////////////////////////////////////////////////////////////
 // helpers

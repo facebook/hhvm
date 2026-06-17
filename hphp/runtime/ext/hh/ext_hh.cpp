@@ -1609,7 +1609,7 @@ bool HHVM_FUNCTION(is_cli_server_mode) {
 }
 
 OptString HHVM_FUNCTION(mangle_unit_sha1, const OptString& sha1, const OptString& ext,
-                     const Variant& repo) {
+                        const Variant& repo) {
   auto const& ro = [&] () -> const RepoOptions& {
     if (!repo.isNull()) {
       auto rpath = realpathLibc(repo.toString().data());

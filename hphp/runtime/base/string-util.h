@@ -100,10 +100,10 @@ public:
    * modifying input, although names of these functions sound like mutating.
    */
   static OptString Pad(const OptString& input, int final_length,
-                    const OptString& pad_string = " ",
-                    PadType type = PadType::Right);
+                       const OptString& pad_string = " ",
+                       PadType type = PadType::Right);
   static OptString StripHTMLTags(const OptString& input,
-                              const OptString& allowable_tags = "");
+                                 const OptString& allowable_tags = "");
 
   /**
    * Split/joins.
@@ -111,7 +111,7 @@ public:
   static Variant Explode(const OptString& input, const OptString& delimiter,
                          int64_t limit = k_PHP_INT_MAX);
     static OptString Implode(const Variant& items, const OptString& delim,
-                          const bool checkIsContainer = true); // == Join()
+                             const bool checkIsContainer = true); // == Join()
   static Variant Split(const OptString& str, int64_t split_length = 1);
   static Variant ChunkSplit(
     const OptString& body, int chunklen = 76,
@@ -121,13 +121,13 @@ public:
    * Encoding/decoding.
    */
   static OptString HtmlEncode(const OptString& input, QuoteStyle quoteStyle,
-                           const char *charset, bool dEncode, bool htmlEnt);
+                              const char *charset, bool dEncode, bool htmlEnt);
   static OptString HtmlEncode(const OptString& input, const int64_t qsBitmask,
-                           const char *charset, bool dEncode, bool htmlEnt);
+                              const char *charset, bool dEncode, bool htmlEnt);
   static OptString HtmlEncodeExtra(const OptString& input, QuoteStyle quoteStyle,
-                                const char *charset, bool nbsp, Array extra);
+                                   const char *charset, bool nbsp, Array extra);
   static OptString HtmlDecode(const OptString& input, QuoteStyle quoteStyle,
-                           const char *charset, bool all);
+                              const char *charset, bool all);
   static OptString QuotedPrintableEncode(const OptString& input);
   static OptString QuotedPrintableDecode(const OptString& input);
   static OptString UUEncode(const OptString& input);
@@ -157,7 +157,7 @@ public:
    * Hashing
    */
   static OptString Translate(const OptString& input, const OptString& from,
-                          const OptString& to);
+                             const OptString& to);
   static OptString ROT13(const OptString& input);
   static OptString Crypt(const OptString& input, const char *salt = "");
   static OptString MD5(const OptString& input, bool raw = false);

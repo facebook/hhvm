@@ -755,7 +755,7 @@ StringData* type_structure_classname_impl(TypedValue cls_or_obj,
 }
 
 OptString HHVM_FUNCTION(type_structure_classname,
-                     TypedValue cls_or_obj, const Variant& cns_name) {
+                        TypedValue cls_or_obj, const Variant& cns_name) {
   return OptString::attach(type_structure_classname_impl(cls_or_obj, cns_name));
 }
 

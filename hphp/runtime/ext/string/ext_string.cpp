@@ -74,8 +74,8 @@ OptString stringForEachBuffered(uint32_t bufLen, const OptString& str, Op action
 }
 
 OptString HHVM_FUNCTION(addcslashes,
-                     const OptString& str,
-                     const OptString& charlist) {
+                        const OptString& str,
+                        const OptString& charlist) {
   if (str.empty() || (!charlist.isNull() && charlist.empty())) {
     return str;
   }
@@ -118,7 +118,7 @@ OptString HHVM_FUNCTION(addcslashes,
 }
 
 OptString HHVM_FUNCTION(stripcslashes,
-                     const OptString& str) {
+                        const OptString& str) {
   if (str.empty()) {
     return str;
   }
@@ -180,7 +180,7 @@ OptString HHVM_FUNCTION(stripcslashes,
 }
 
 OptString HHVM_FUNCTION(addslashes,
-                     const OptString& str) {
+                        const OptString& str) {
   if (str.empty()) {
     return str;
   }
@@ -205,7 +205,7 @@ OptString HHVM_FUNCTION(addslashes,
 }
 
 OptString HHVM_FUNCTION(stripslashes,
-                     const OptString& str) {
+                        const OptString& str) {
   if (str.empty()) {
     return str;
   }
@@ -223,7 +223,7 @@ OptString HHVM_FUNCTION(stripslashes,
 }
 
 OptString HHVM_FUNCTION(bin2hex,
-                     const OptString& str) {
+                        const OptString& str) {
   if (str.empty()) {
     return str;
   }
@@ -283,8 +283,8 @@ const StaticString
   s_non_xhtml_br("<br>");
 
 OptString HHVM_FUNCTION(nl2br,
-                     const OptString& str,
-                     bool is_xhtml /* = true */) {
+                        const OptString& str,
+                        bool is_xhtml /* = true */) {
   if (str.empty()) {
     return str;
   }
@@ -326,7 +326,7 @@ OptString HHVM_FUNCTION(nl2br,
 }
 
 OptString HHVM_FUNCTION(quotemeta,
-                     const OptString& str) {
+                        const OptString& str) {
   if (str.empty()) {
     return str;
   }
@@ -355,7 +355,7 @@ OptString HHVM_FUNCTION(quotemeta,
 }
 
 OptString HHVM_FUNCTION(str_shuffle,
-                     const OptString& str) {
+                        const OptString& str) {
   if (str.size() <= 1) {
     return str;
   }
@@ -376,7 +376,7 @@ OptString HHVM_FUNCTION(str_shuffle,
 }
 
 OptString HHVM_FUNCTION(strrev,
-                     const OptString& str) {
+                        const OptString& str) {
   auto len = str.size();
 
   OptString ret(len, ReserveString);
@@ -393,12 +393,12 @@ OptString HHVM_FUNCTION(strrev,
 }
 
 OptString HHVM_FUNCTION(strtolower,
-                     const OptString& str) {
+                        const OptString& str) {
   return str.forEachByteFast(tolower);
 }
 
 OptString HHVM_FUNCTION(strtoupper,
-                     const OptString& str) {
+                        const OptString& str) {
   return str.forEachByteFast(toupper);
 }
 
@@ -416,18 +416,18 @@ OptString stringToCaseFirst(const OptString& str, OpTo tocase, OpIs iscase) {
 }
 
 OptString HHVM_FUNCTION(ucfirst,
-                     const OptString& str) {
+                        const OptString& str) {
   return stringToCaseFirst(str, toupper, isupper);
 }
 
 OptString HHVM_FUNCTION(lcfirst,
-                     const OptString& str) {
+                        const OptString& str) {
   return stringToCaseFirst(str, tolower, islower);
 }
 
 OptString HHVM_FUNCTION(ucwords,
-                     const OptString& str,
-                     const OptString& delimiters /* = " \t\r\n\f\v"*/) {
+                        const OptString& str,
+                        const OptString& delimiters /* = " \t\r\n\f\v"*/) {
   if (str.empty()) {
     return str;
   }
@@ -445,8 +445,8 @@ OptString HHVM_FUNCTION(ucwords,
 }
 
 OptString HHVM_FUNCTION(strip_tags,
-                     const OptString& str,
-                     const Variant& allowable_tags /* = "" */) {
+                        const OptString& str,
+                        const Variant& allowable_tags /* = "" */) {
   return StringUtil::StripHTMLTags(str, allowable_tags.toString());
 }
 
@@ -471,20 +471,20 @@ OptString stringTrim(const OptString& str, const OptString& charlist) {
 }
 
 OptString HHVM_FUNCTION(trim,
-                     const OptString& str,
-                     const OptString& charlist /* = k_HPHP_TRIM_CHARLIST */) {
+                        const OptString& str,
+                        const OptString& charlist /* = k_HPHP_TRIM_CHARLIST */) {
   return stringTrim<true,true>(str, charlist);
 }
 
 OptString HHVM_FUNCTION(ltrim,
-                     const OptString& str,
-                     const OptString& charlist /* = k_HPHP_TRIM_CHARLIST */) {
+                        const OptString& str,
+                        const OptString& charlist /* = k_HPHP_TRIM_CHARLIST */) {
   return stringTrim<true,false>(str, charlist);
 }
 
 OptString HHVM_FUNCTION(rtrim,
-                     const OptString& str,
-                     const OptString& charlist /* = k_HPHP_TRIM_CHARLIST */) {
+                        const OptString& str,
+                        const OptString& charlist /* = k_HPHP_TRIM_CHARLIST */) {
   return stringTrim<false,true>(str, charlist);
 }
 
@@ -502,8 +502,8 @@ Variant HHVM_FUNCTION(explode,
 }
 
 OptString HHVM_FUNCTION(implode,
-                     const Variant& arg1,
-                     const Variant& arg2 /* = uninit_variant */) {
+                        const Variant& arg1,
+                        const Variant& arg2 /* = uninit_variant */) {
   if (isContainer(arg1)) {
     return StringUtil::Implode(arg1, arg2.toString(), false);
   } else if (isContainer(arg2)) {
@@ -882,17 +882,17 @@ TypedValue HHVM_FUNCTION(substr, StringArg str, int64_t start, int64_t length) {
 }
 
 OptString HHVM_FUNCTION(str_pad,
-                     const OptString& input,
-                     int64_t pad_length,
-                     const OptString& pad_string /* = " " */,
-                     int64_t pad_type /* = k_STR_PAD_RIGHT */) {
+                        const OptString& input,
+                        int64_t pad_length,
+                        const OptString& pad_string /* = " " */,
+                        int64_t pad_type /* = k_STR_PAD_RIGHT */) {
   return StringUtil::Pad(input, pad_length, pad_string,
                          (StringUtil::PadType)pad_type);
 }
 
 OptString HHVM_FUNCTION(str_repeat,
-                     const OptString& input,
-                     int64_t multiplier) {
+                        const OptString& input,
+                        int64_t multiplier) {
   if (input.empty()) {
     return input;
   }
@@ -985,10 +985,10 @@ Variant HHVM_FUNCTION(money_format,
 }
 
 OptString HHVM_FUNCTION(number_format,
-                     double number,
-                     int64_t decimals /* = 0 */,
-                     const Variant& dec_point_in /* = "." */,
-                     const Variant& thousands_sep_in /* = "," */) {
+                        double number,
+                        int64_t decimals /* = 0 */,
+                        const Variant& dec_point_in /* = "." */,
+                        const Variant& thousands_sep_in /* = "," */) {
 
   OptString dec_point(".");
   if (!dec_point_in.isNull()) {
@@ -1660,9 +1660,9 @@ Variant HHVM_FUNCTION(metaphone, const OptString& str, int64_t /*phones*/ /* = 0
 }
 
 OptString HHVM_FUNCTION(html_entity_decode,
-                     const OptString& str,
-                     int64_t flags /* = k_ENT_HTML_QUOTE_DOUBLE */,
-                     const OptString& charset /* = "UTF-8" */) {
+                        const OptString& str,
+                        int64_t flags /* = k_ENT_HTML_QUOTE_DOUBLE */,
+                        const OptString& charset /* = "UTF-8" */) {
   const char *scharset = charset.data();
   if (!*scharset) scharset = "ISO-8859-1";
   return StringUtil::HtmlDecode(str, StringUtil::toQuoteStyle(flags),
@@ -1670,10 +1670,10 @@ OptString HHVM_FUNCTION(html_entity_decode,
 }
 
 OptString HHVM_FUNCTION(htmlentities,
-                     const OptString& str,
-                     int64_t flags /* = k_ENT_HTML_QUOTE_DOUBLE */,
-                     const OptString& charset /* = "UTF-8" */,
-                     bool double_encode /* = true */) {
+                        const OptString& str,
+                        int64_t flags /* = k_ENT_HTML_QUOTE_DOUBLE */,
+                        const OptString& charset /* = "UTF-8" */,
+                        bool double_encode /* = true */) {
   // dropping double_encode parameters and see runtime/base/zend-html.h
   const char *scharset = charset.data();
   if (!*scharset) scharset = "ISO-8859-1";
@@ -1682,17 +1682,17 @@ OptString HHVM_FUNCTION(htmlentities,
 }
 
 OptString HHVM_FUNCTION(htmlspecialchars_decode,
-                     const OptString& str,
-                     int64_t flags /* = k_ENT_HTML_QUOTE_DOUBLE */) {
+                        const OptString& str,
+                        int64_t flags /* = k_ENT_HTML_QUOTE_DOUBLE */) {
   return StringUtil::HtmlDecode(str, StringUtil::toQuoteStyle(flags),
                                 "UTF-8", false);
 }
 
 OptString HHVM_FUNCTION(htmlspecialchars,
-                     const OptString& str,
-                     int64_t flags /* = k_ENT_HTML_QUOTE_DOUBLE */,
-                     const OptString& charset /* = "UTF-8" */,
-                     bool double_encode /* = true */) {
+                        const OptString& str,
+                        int64_t flags /* = k_ENT_HTML_QUOTE_DOUBLE */,
+                        const OptString& charset /* = "UTF-8" */,
+                        bool double_encode /* = true */) {
   // dropping double_encode parameters and see runtime/base/zend-html.h
   const char *scharset = charset.data();
   if (!*scharset) scharset = "ISO-8859-1";
@@ -1701,10 +1701,10 @@ OptString HHVM_FUNCTION(htmlspecialchars,
 }
 
 OptString HHVM_FUNCTION(fb_htmlspecialchars,
-                     const OptString& str,
-                     int64_t flags /* = k_ENT_HTML_QUOTE_DOUBLE */,
-                     const OptString& charset /* = "ISO-8859-1" */,
-                     const Variant& extra /* = varray[] */) {
+                        const OptString& str,
+                        int64_t flags /* = k_ENT_HTML_QUOTE_DOUBLE */,
+                        const OptString& charset /* = "ISO-8859-1" */,
+                        const Variant& extra /* = varray[] */) {
   if (!extra.isNull() && !extra.isArray()) {
     raise_expected_array_warning("fb_htmlspecialchars");
   }
@@ -1714,12 +1714,12 @@ OptString HHVM_FUNCTION(fb_htmlspecialchars,
 }
 
 OptString HHVM_FUNCTION(quoted_printable_encode,
-                     const OptString& str) {
+                        const OptString& str) {
   return StringUtil::QuotedPrintableEncode(str);
 }
 
 OptString HHVM_FUNCTION(quoted_printable_decode,
-                     const OptString& str) {
+                        const OptString& str) {
   return StringUtil::QuotedPrintableDecode(str);
 }
 
@@ -1742,7 +1742,7 @@ Variant HHVM_FUNCTION(convert_uuencode,
 }
 
 OptString HHVM_FUNCTION(str_rot13,
-                     const OptString& str) {
+                        const OptString& str) {
   return StringUtil::ROT13(str);
 }
 
@@ -1752,14 +1752,14 @@ int64_t HHVM_FUNCTION(crc32,
 }
 
 OptString HHVM_FUNCTION(crypt,
-                     const OptString& str,
-                     const OptString& salt /* = "" */) {
+                        const OptString& str,
+                        const OptString& salt /* = "" */) {
   return StringUtil::Crypt(str, salt.c_str());
 }
 
 OptString HHVM_FUNCTION(md5,
-                     const OptString& str,
-                     bool raw_output /* = false */) {
+                        const OptString& str,
+                        bool raw_output /* = false */) {
   return StringUtil::MD5(str, raw_output);
 }
 
@@ -2398,9 +2398,9 @@ Variant HHVM_FUNCTION(nl_langinfo, int64_t item) {
 }
 
 OptString HHVM_FUNCTION(convert_cyr_string,
-                     const OptString& str,
-                     const OptString& from,
-                     const OptString& to) {
+                        const OptString& str,
+                        const OptString& from,
+                        const OptString& to) {
   return string_convert_cyrillic_string(str, from[0], to[0]);
 }
 
@@ -2540,15 +2540,15 @@ Array HHVM_FUNCTION(get_html_translation_table,
 }
 
 OptString HHVM_FUNCTION(hebrev,
-                     const OptString& hebrew_text,
-                     int64_t max_chars_per_line /* = 0 */) {
+                        const OptString& hebrew_text,
+                        int64_t max_chars_per_line /* = 0 */) {
   if (hebrew_text.empty()) return hebrew_text;
   return string_convert_hebrew_string(hebrew_text, max_chars_per_line, false);
 }
 
 OptString HHVM_FUNCTION(hebrevc,
-                     const OptString& hebrew_text,
-                     int64_t max_chars_per_line /* = 0 */) {
+                        const OptString& hebrew_text,
+                        int64_t max_chars_per_line /* = 0 */) {
   if (hebrew_text.empty()) return hebrew_text;
   return string_convert_hebrew_string(hebrew_text, max_chars_per_line, true);
 }

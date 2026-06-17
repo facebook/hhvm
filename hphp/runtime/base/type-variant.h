@@ -961,13 +961,13 @@ struct Variant : private TypedValue {
   }
 
   OptString toString(ConvNoticeLevel level = ConvNoticeLevel::None,
-                  const StringData* notice_reason = nullptr) const& {
+                     const StringData* notice_reason = nullptr) const& {
     if (isStringType(m_type)) return OptString{m_data.pstr};
     return OptString::attach(tvCastToStringData(*this, level, notice_reason));
   }
 
   OptString toString(ConvNoticeLevel level = ConvNoticeLevel::None,
-                  const StringData* notice_reason = nullptr) && {
+                     const StringData* notice_reason = nullptr) && {
     if (isStringType(m_type)) {
       m_type = KindOfNull;
       return OptString::attach(m_data.pstr);

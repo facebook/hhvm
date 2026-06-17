@@ -451,8 +451,8 @@ struct SerializeOptions {
 };
 
 ALWAYS_INLINE OptString serialize_impl(const Variant& value,
-                                    const SerializeOptions& opts,
-                                    bool pure) {
+                                       const SerializeOptions& opts,
+                                       bool pure) {
   switch (value.getType()) {
     case KindOfClass:
     case KindOfLazyClass:
@@ -551,7 +551,7 @@ const StaticString
   s_keepClasses("keepClasses");
 
 OptString HHVM_FUNCTION(HH_serialize_with_options,
-                     const Variant& value, const Array& options) {
+                        const Variant& value, const Array& options) {
   SerializeOptions opts;
   opts.keepDVArrays = options.exists(s_keepDVArrays) &&
     options[s_keepDVArrays].toBoolean();

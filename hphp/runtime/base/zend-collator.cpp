@@ -281,7 +281,7 @@ static DataType collator_is_numeric(UChar *str, int length, int64_t *lval,
 }
 
 static OptString intl_convert_str_utf8_to_utf16(const OptString& utf8_str,
-                                             UErrorCode * status) {
+                                                UErrorCode * status) {
   UChar* ustr = nullptr;
   int ustr_len = 0;
   intl_convert_utf8_to_utf16(&ustr, &ustr_len,
@@ -294,7 +294,7 @@ static OptString intl_convert_str_utf8_to_utf16(const OptString& utf8_str,
 }
 
 static OptString intl_convert_str_utf16_to_utf8(const OptString& utf16_str,
-                                             UErrorCode * status) {
+                                                UErrorCode * status) {
   char* str = nullptr;
   int str_len = 0;
   intl_convert_utf16_to_utf8(&str, &str_len,

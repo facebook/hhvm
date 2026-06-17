@@ -205,7 +205,7 @@ private:
 static TransliteratorWrapper s_transliterator;
 
 static OptString HHVM_FUNCTION(icu_transliterate, const OptString& str,
-                                               bool remove_accents) {
+                                                  bool remove_accents) {
   UnicodeString u_str = UnicodeString::fromUTF8(str.data());
   if (remove_accents) {
     s_transliterator.transliterate(u_str);

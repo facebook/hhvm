@@ -32,15 +32,15 @@ namespace HPHP {
 // manipulations
 
 OptString StringUtil::Pad(const OptString& input, int final_length,
-                       const OptString& pad_string /* = " " */,
-                       PadType type /* = PadType::Right */) {
+                          const OptString& pad_string /* = " " */,
+                          PadType type /* = PadType::Right */) {
   int len = input.size();
   return string_pad(input.data(), len, final_length, pad_string.data(),
                     pad_string.size(), static_cast<int>(type));
 }
 
 OptString StringUtil::StripHTMLTags(const OptString& input,
-                                 const OptString& allowable_tags /* = "" */) {
+                                    const OptString& allowable_tags /* = "" */) {
   if (input.empty()) return input;
   return string_strip_tags(input.data(), input.size(),
                            allowable_tags.data(), allowable_tags.size(), false);
@@ -115,7 +115,7 @@ Variant StringUtil::Explode(const OptString& input, const OptString& delimiter,
 }
 
 OptString StringUtil::Implode(const Variant& items, const OptString& delim,
-                           const bool checkIsContainer /* = true */) {
+                              const bool checkIsContainer /* = true */) {
   if (checkIsContainer && !isContainer(items)) {
     throw_param_is_not_container();
   }
@@ -197,13 +197,13 @@ Variant StringUtil::ChunkSplit(const OptString& body, int chunklen /* = 76 */,
 // encoding/decoding
 
 OptString StringUtil::HtmlEncode(const OptString& input, QuoteStyle quoteStyle,
-                              const char *charset, bool dEncode, bool htmlEnt) {
+                                 const char *charset, bool dEncode, bool htmlEnt) {
   return HtmlEncode(input, static_cast<int64_t>(quoteStyle),
                     charset, dEncode, htmlEnt);
 }
 
 OptString StringUtil::HtmlEncode(const OptString& input, const int64_t qsBitmask,
-                              const char *charset, bool dEncode, bool htmlEnt) {
+                                 const char *charset, bool dEncode, bool htmlEnt) {
   if (input.empty()) return input;
 
   assertx(charset);
@@ -244,8 +244,8 @@ static const AsciiMap mapBothQuotes = {
 static const AsciiMap mapNothing = {};
 
 OptString StringUtil::HtmlEncodeExtra(const OptString& input, QuoteStyle quoteStyle,
-                                   const char *charset, bool nbsp,
-                                   Array extra) {
+                                      const char *charset, bool nbsp,
+                                      Array extra) {
   if (input.empty()) return input;
 
   assertx(charset);
@@ -309,7 +309,7 @@ OptString StringUtil::HtmlEncodeExtra(const OptString& input, QuoteStyle quoteSt
 }
 
 OptString StringUtil::HtmlDecode(const OptString& input, QuoteStyle quoteStyle,
-                              const char *charset, bool all) {
+                                 const char *charset, bool all) {
   if (input.empty()) return input;
 
   assertx(charset);
@@ -358,20 +358,20 @@ OptString StringUtil::Base64Encode(const OptString& input) {
 }
 
 OptString StringUtil::Base64Decode(const OptString& input,
-                                bool strict /* = false */) {
+                                   bool strict /* = false */) {
   int len = input.size();
   return string_base64_decode(input.data(), len, strict);
 }
 
 OptString StringUtil::UrlEncode(const OptString& input,
-                             bool encodePlus /* = true */) {
+                                bool encodePlus /* = true */) {
   return encodePlus ?
     url_encode(input.data(), input.size()) :
     url_raw_encode(input.data(), input.size());
 }
 
 OptString StringUtil::UrlDecode(const OptString& input,
-                             bool decodePlus /* = true */) {
+                                bool decodePlus /* = true */) {
   return decodePlus ?
     url_decode(input.data(), input.size()) :
     url_raw_decode(input.data(), input.size());
@@ -415,7 +415,7 @@ OptString StringUtil::MoneyFormat(const char *format, double value) {
 // hashing
 
 OptString StringUtil::Translate(const OptString& input, const OptString& from,
-                             const OptString& to) {
+                                const OptString& to) {
   if (input.empty()) return input;
 
   int len = input.size();
@@ -431,7 +431,7 @@ OptString StringUtil::Translate(const OptString& input, const OptString& from,
 OptString StringUtil::ROT13(const OptString& input) {
   if (input.empty()) return input;
   return OptString(string_rot13(input.data(), input.size()),
-                input.size(), AttachString);
+                   input.size(), AttachString);
 }
 
 OptString StringUtil::Crypt(const OptString& input, const char *salt /* = "" */) {
@@ -445,7 +445,7 @@ OptString StringUtil::Crypt(const OptString& input, const char *salt /* = "" */)
 }
 
 OptString StringUtil::MD5(const char *data, uint32_t size,
-                       bool raw /* = false */) {
+                          bool raw /* = false */) {
   Md5Digest md5(data, size);
   auto const rawLen = sizeof(md5.digest);
   if (raw) return OptString((char*)md5.digest, rawLen, CopyString);

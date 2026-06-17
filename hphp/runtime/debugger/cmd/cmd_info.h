@@ -27,7 +27,7 @@ namespace HPHP::Eval {
 struct CmdInfo : DebuggerCommand {
   static void UpdateLiveLists(DebuggerClient &client);
   static OptString GetProtoType(DebuggerClient &client, const std::string &cls,
-                             const std::string &func);
+                                const std::string &func);
 
   CmdInfo() : DebuggerCommand(KindOfInfo) {}
 
@@ -70,7 +70,7 @@ private:
   static OptString GetParam(const Array& params, int index);
   static OptString GetModifier(const Array& info, const OptString&);
   static OptString GetTypeProfilingInfo(const Array& profilingArray,
-                                     const Array& params);
+                                        const Array& params);
 
   static bool TryConstant(StringBuffer &sb, const Array& info,
                           const std::string &subsymbol);

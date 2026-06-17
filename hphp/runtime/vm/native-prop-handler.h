@@ -251,7 +251,7 @@ struct PropAccessorMap :
   Variant (*get(const OptString& name))(const Object& this_);
 
   void    (*set(const OptString& name))(const Object& this_,
-                                     const Variant& value);
+                                        const Variant& value);
 
   bool    (*isset(const OptString& name))(const Object& this_);
   void    (*unset(const OptString& name))(const Object& this_);

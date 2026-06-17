@@ -449,7 +449,7 @@ bool HHVM_FUNCTION(posix_setuid,
 }
 
 OptString HHVM_FUNCTION(posix_strerror,
-                     int64_t errnum) {
+                        int64_t errnum) {
   return OptString(folly::errnoStr(errnum));
 }
 

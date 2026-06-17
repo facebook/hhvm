@@ -80,8 +80,8 @@ const StaticString
   s_hhvm_never_save_config("hhvm.never_save_config");
 
 static OptString wordwrap(const OptString& str, int width /* = 75 */,
-                       const OptString& wordbreak /* = "\n" */,
-                       bool cut /* = false */) {
+                          const OptString& wordbreak /* = "\n" */,
+                          bool cut /* = false */) {
   Array args = make_vec_array(str, width, wordbreak, cut);
   return vm_call_user_func(Func::lookup(s_wordwrap.get()), args).toString();
 }
@@ -493,7 +493,7 @@ OptString DebuggerClient::FormatVariableWithLimit(const Variant& v, int maxlen) 
 }
 
 OptString DebuggerClient::FormatInfoVec(const IDebuggable::InfoVec &info,
-                                     int *nameLen /* = NULL */) {
+                                        int *nameLen /* = NULL */) {
   TRACE(2, "DebuggerClient::FormatInfoVec\n");
   // vertical align names
   int maxlen = 0;
@@ -1401,7 +1401,7 @@ bool DebuggerClient::code(const OptString& source, int line1 /*= 0*/,
   TRACE(2, "DebuggerClient::code\n");
   if (line1 == 0 && line2 == 0) {
     OptString highlighted = highlight_code(source, 0, lineFocus0, charFocus0,
-                                        lineFocus1, charFocus1);
+                                           lineFocus1, charFocus1);
     if (!highlighted.empty()) {
       print(highlighted);
       return true;
@@ -1410,7 +1410,7 @@ bool DebuggerClient::code(const OptString& source, int line1 /*= 0*/,
   }
 
   OptString highlighted = highlight_php(source, 1, lineFocus0, charFocus0,
-                                     lineFocus1, charFocus1);
+                                        lineFocus1, charFocus1);
   int line = 1;
   const char *begin = highlighted.data();
   StringBuffer sb;
@@ -1537,7 +1537,7 @@ IMPLEMENT_COLOR_OUTPUT(error,    stderr,  ErrorColor)
 std::string DebuggerClient::wrap(const std::string &s) {
   TRACE(2, "DebuggerClient::wrap\n");
   OptString ret = wordwrap(OptString(s.c_str(), s.size(), CopyString), LineWidth - 4,
-                        "\n", true);
+                           "\n", true);
   return std::string(ret.data(), ret.size());
 }
 

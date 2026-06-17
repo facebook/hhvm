@@ -390,13 +390,13 @@ append_line_no(StringBuffer& sb, const char* text, int& line, const char* color,
 }
 
 OptString highlight_code(const OptString& source, int line /* = 0 */,
-                      int lineFocus0 /* = 0 */, int charFocus0 /* = 0 */,
-                      int lineFocus1 /* = 0 */, int charFocus1 /* = 0 */) {
+                         int lineFocus0 /* = 0 */, int charFocus0 /* = 0 */,
+                         int lineFocus1 /* = 0 */, int charFocus1 /* = 0 */) {
   TRACE(7, "debugger_base:highlight_code\n");
   OptString prepended = "<?hh\n";
   prepended += source;
   OptString highlighted = highlight_php(prepended, line, lineFocus0, charFocus0,
-                                     lineFocus1, charFocus1);
+                                        lineFocus1, charFocus1);
   int pos = highlighted.find("\n");
   return highlighted.substr(pos + 1);
 }
@@ -425,8 +425,8 @@ string check_char_highlight(int lineFocus0, int charFocus0,
  * the file.
  */
 OptString highlight_php(const OptString& source, int line /* = 0 */,
-                     int lineFocus0 /* = 0 */, int charFocus0 /* = 0 */,
-                     int lineFocus1 /* = 0 */, int charFocus1 /* = 0 */) {
+                        int lineFocus0 /* = 0 */, int charFocus0 /* = 0 */,
+                        int lineFocus1 /* = 0 */, int charFocus1 /* = 0 */) {
   TRACE(7, "debugger_base:highlight_php\n");
   const char *begin = source.data();
   StringBuffer res;

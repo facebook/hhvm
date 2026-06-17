@@ -408,7 +408,7 @@ static int php_read(req::ptr<Socket> sock, void *buf, int64_t maxlen,
 }
 
 OptString HHVM_FUNCTION(socket_strerror,
-                     int64_t errnum) {
+                        int64_t errnum) {
   /*
    * PHP5 encodes both the h_errno and errno values into a single int:
    * < -10000: transformed h_errno value

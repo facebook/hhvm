@@ -69,8 +69,8 @@ static Object HHVM_STATIC_METHOD(IntlDatePatternGenerator,
 }
 
 static OptString HHVM_METHOD(IntlDatePatternGenerator,
-                          getSkeleton,
-                          const OptString& pattern) {
+                             getSkeleton,
+                             const OptString& pattern) {
   GENERATOR_GET(data, this_);
 
   UErrorCode error = U_ZERO_ERROR;
@@ -87,8 +87,8 @@ static OptString HHVM_METHOD(IntlDatePatternGenerator,
 }
 
 static OptString HHVM_METHOD(IntlDatePatternGenerator,
-                          getBaseSkeleton,
-                          const OptString& pattern) {
+                             getBaseSkeleton,
+                             const OptString& pattern) {
   GENERATOR_GET(data, this_);
 
   UErrorCode error = U_ZERO_ERROR;
@@ -137,8 +137,8 @@ static void HHVM_METHOD(IntlDatePatternGenerator,
 }
 
 static OptString HHVM_METHOD(IntlDatePatternGenerator,
-                          getAppendItemFormat,
-                          int64_t fieldInt) {
+                             getAppendItemFormat,
+                             int64_t fieldInt) {
   GENERATOR_GET(data, this_);
 
   icu::UnicodeString ret;
@@ -166,8 +166,8 @@ static void HHVM_METHOD(IntlDatePatternGenerator,
 }
 
 static OptString HHVM_METHOD(IntlDatePatternGenerator,
-                          getAppendItemName,
-                          int64_t fieldInt) {
+                             getAppendItemName,
+                             int64_t fieldInt) {
   GENERATOR_GET(data, this_);
 
   icu::UnicodeString ret;
@@ -206,8 +206,8 @@ static OptString HHVM_METHOD(IntlDatePatternGenerator, getDateTimeFormat) {
 }
 
 static OptString HHVM_METHOD(IntlDatePatternGenerator,
-                          getBestPattern,
-                          const OptString& skeleton) {
+                             getBestPattern,
+                             const OptString& skeleton) {
   GENERATOR_GET(data, this_);
 
   UErrorCode error = U_ZERO_ERROR;
@@ -224,9 +224,9 @@ static OptString HHVM_METHOD(IntlDatePatternGenerator,
 }
 
 static OptString HHVM_METHOD(IntlDatePatternGenerator,
-                          replaceFieldTypes,
-                          const OptString& pattern,
-                          const OptString& skeleton) {
+                             replaceFieldTypes,
+                             const OptString& pattern,
+                             const OptString& skeleton) {
   GENERATOR_GET(data, this_);
 
   UErrorCode error = U_ZERO_ERROR;
@@ -257,8 +257,8 @@ static Object HHVM_METHOD(IntlDatePatternGenerator, getSkeletons) {
 }
 
 static OptString HHVM_METHOD(IntlDatePatternGenerator,
-                          getPatternForSkeleton,
-                          const OptString& skeleton) {
+                             getPatternForSkeleton,
+                             const OptString& skeleton) {
   GENERATOR_GET(data, this_);
 
   UErrorCode error = U_ZERO_ERROR;

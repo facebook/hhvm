@@ -359,7 +359,7 @@ bool HHVM_FUNCTION(time_sleep_until, double timestamp) {
 }
 
 OptString HHVM_FUNCTION(uniqid, const OptString& prefix /* = null_string */,
-                     bool more_entropy /* = false */) {
+                        bool more_entropy /* = false */) {
   if (!more_entropy) {
     Transport *transport = g_context->getTransport();
     if (transport) {

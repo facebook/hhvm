@@ -470,40 +470,40 @@ static OptString HHVM_STATIC_METHOD(Locale, getDefault) {
 }
 
 static OptString HHVM_STATIC_METHOD(Locale, getDisplayLanguage,
-                                 const OptString& locale,
-                                 const OptString& in_locale) {
+                                    const OptString& locale,
+                                    const OptString& in_locale) {
   return get_icu_display_value(
     localeOrDefault(locale), localeOrDefault(in_locale), LOC_LANG
   ).toString();
 }
 
 static OptString HHVM_STATIC_METHOD(Locale, getDisplayName,
-                                 const OptString& locale,
-                                 const OptString& in_locale) {
+                                    const OptString& locale,
+                                    const OptString& in_locale) {
   return get_icu_display_value(
     localeOrDefault(locale), localeOrDefault(in_locale), LOC_DISPLAY
   ).toString();
 }
 
 static OptString HHVM_STATIC_METHOD(Locale, getDisplayRegion,
-                                 const OptString& locale,
-                                 const OptString& in_locale) {
+                                    const OptString& locale,
+                                    const OptString& in_locale) {
   return get_icu_display_value(
     localeOrDefault(locale), localeOrDefault(in_locale), LOC_REGION
   ).toString();
 }
 
 static OptString HHVM_STATIC_METHOD(Locale, getDisplayScript,
-                                 const OptString& locale,
-                                 const OptString& in_locale) {
+                                    const OptString& locale,
+                                    const OptString& in_locale) {
   return get_icu_display_value(
     localeOrDefault(locale), localeOrDefault(in_locale), LOC_SCRIPT
   ).toString();
 }
 
 static OptString HHVM_STATIC_METHOD(Locale, getDisplayVariant,
-                                 const OptString& locale,
-                                 const OptString& in_locale) {
+                                    const OptString& locale,
+                                    const OptString& in_locale) {
   return get_icu_display_value(
     localeOrDefault(locale), localeOrDefault(in_locale), LOC_VARIANT
   ).toString();
@@ -544,7 +544,7 @@ tryagain:
 }
 
 static OptString HHVM_STATIC_METHOD(Locale, getPrimaryLanguage,
-                                 const OptString& locale) {
+                                    const OptString& locale) {
   return get_icu_value(localeOrDefault(locale), LOC_LANG).toString();
 }
 
@@ -582,8 +582,8 @@ inline void normalize_for_match(OptString& v) {
 }
 
 static OptString HHVM_STATIC_METHOD(Locale, lookup, const Array& langtag,
-                                 const OptString& locale,
-                                 bool canonicalize, const OptString& def) {
+                                    const OptString& locale,
+                                    bool canonicalize, const OptString& def) {
   OptString locname(localeOrDefault(locale), CopyString);
   CHECK_LOCALELEN_OR_RETURN(locale, def);
   req::vector<std::pair<OptString,OptString>> cur_arr;

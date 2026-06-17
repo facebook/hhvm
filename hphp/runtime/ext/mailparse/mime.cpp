@@ -59,7 +59,7 @@ MimePart::MimeHeader::MimeHeader(php_rfc822_tokenized_t *toks)
     if (toks->tokens[first_semi].token == ';') break;
 
   m_value = OptString(php_rfc822_recombine_tokens
-                   (toks, 2, first_semi - 2,
+                      (toks, 2, first_semi - 2,
                     PHP_RFC822_RECOMBINE_STRTOLOWER |
                     PHP_RFC822_RECOMBINE_IGNORE_COMMENTS), AttachString);
 
@@ -101,11 +101,11 @@ MimePart::MimeHeader::MimeHeader(php_rfc822_tokenized_t *toks)
         }
 
         OptString name(php_rfc822_recombine_tokens
-                    (toks, first_semi, 1,
+                       (toks, first_semi, 1,
                      PHP_RFC822_RECOMBINE_STRTOLOWER|
                      PHP_RFC822_RECOMBINE_IGNORE_COMMENTS), AttachString);
         OptString value(php_rfc822_recombine_tokens
-                     (toks, i, next_semi - i,
+                        (toks, i, next_semi - i,
                       PHP_RFC822_RECOMBINE_IGNORE_COMMENTS), AttachString);
 
         /* support rfc2231 mime parameter value
@@ -677,13 +677,13 @@ bool MimePart::processHeader() {
 
   /* get a lower-case version of the first token */
   OptString header_key(php_rfc822_recombine_tokens
-                    (toks, 0, 1,
+                       (toks, 0, 1,
                      PHP_RFC822_RECOMBINE_IGNORE_COMMENTS|
                      PHP_RFC822_RECOMBINE_STRTOLOWER), AttachString);
 
   const char *header_val = strchr(m_parsedata.headerbuf.data(), ':');
   OptString header_val_stripped(php_rfc822_recombine_tokens
-                             (toks, 2, toks->ntokens-2,
+                                (toks, 2, toks->ntokens-2,
                               PHP_RFC822_RECOMBINE_IGNORE_COMMENTS|
                               PHP_RFC822_RECOMBINE_STRTOLOWER), AttachString);
 
@@ -727,12 +727,12 @@ bool MimePart::processHeader() {
     } else if (header_key == s_content_location) {
       m_content_location =
         OptString(php_rfc822_recombine_tokens
-               (toks, 2, toks->ntokens-2,
+                  (toks, 2, toks->ntokens-2,
                 PHP_RFC822_RECOMBINE_IGNORE_COMMENTS), AttachString);
     } else if (header_key == s_content_base) {
       m_content_base =
         OptString(php_rfc822_recombine_tokens
-               (toks, 2, toks->ntokens-2,
+                  (toks, 2, toks->ntokens-2,
                 PHP_RFC822_RECOMBINE_IGNORE_COMMENTS), AttachString);
     } else if (header_key == s_content_transfer_encoding) {
       m_content_transfer_encoding = header_val_stripped;

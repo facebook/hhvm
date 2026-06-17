@@ -316,7 +316,7 @@ Variant HHVM_FUNCTION(preg_split_with_error, const OptString& pattern,
 ///////////////////////////////////////////////////////////////////////////////
 
 OptString HHVM_FUNCTION(preg_quote, const OptString& str,
-                                 const Variant& delimiter /* = null_string */) {
+                                    const Variant& delimiter /* = null_string */) {
   if (delimiter.isNull()) {
     return preg_quote(str, null_string);
   } else {
@@ -328,14 +328,14 @@ OptString HHVM_FUNCTION(preg_quote, const OptString& str,
 // ereg
 
 OptString HHVM_FUNCTION(ereg_replace, const OptString& pattern,
-                                   const OptString& replacement,
-                                   const OptString& str) {
+                                      const OptString& replacement,
+                                      const OptString& str) {
   return HHVM_FN(mb_ereg_replace)(pattern, replacement, str).toString();
 }
 
 OptString HHVM_FUNCTION(eregi_replace, const OptString& pattern,
-                                    const OptString& replacement,
-                                    const OptString& str) {
+                                       const OptString& replacement,
+                                       const OptString& str) {
   return HHVM_FN(mb_eregi_replace)(pattern, replacement, str).toString();
 }
 

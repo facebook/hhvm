@@ -1574,11 +1574,11 @@ VariableUnserializer::unserializeStringPiece(char delimiter0, char delimiter1) {
 }
 
 OptString VariableUnserializer::unserializeString(char delimiter0,
-                                               char delimiter1) {
+                                                  char delimiter1) {
   auto const piece = unserializeStringPiece(delimiter0, delimiter1);
   return OptString::attach(readOnly() ?
-                        makeStaticString(piece) :
-                        StringData::Make(piece, CopyString));
+                           makeStaticString(piece) :
+                           StringData::Make(piece, CopyString));
 }
 
 void VariableUnserializer::unserializeCollection(ObjectData* obj, int64_t sz,

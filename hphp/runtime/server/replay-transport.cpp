@@ -83,7 +83,7 @@ void ReplayTransport::replayInput(Hdf hdf) {
 
 void ReplayTransport::replayInputImpl() {
   OptString postData = StringUtil::UUDecode(Config::GetString(m_ini, m_hdf, "post",
-                                                           "", false));
+                                                              "", false));
   m_postData = std::string(postData.data(), postData.size());
   m_requestHeaders.clear();
   auto headers_callback = [&](const IniSetting::Map& ini_h, const Hdf& hdf_h,

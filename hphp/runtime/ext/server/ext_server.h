@@ -39,10 +39,10 @@ OptResource HHVM_FUNCTION(pagelet_server_task_start,
 int64_t HHVM_FUNCTION(pagelet_server_task_status,
                       const OptResource& task);
 OptString HHVM_FUNCTION(pagelet_server_task_result,
-                     const OptResource& task,
-                     Array& headers,
-                     int64_t& code,
-                     int64_t timeout_ms);
+                        const OptResource& task,
+                        Array& headers,
+                        int64_t& code,
+                        int64_t timeout_ms);
 OptResource HHVM_FUNCTION(xbox_task_start,
                        const OptString& message);
 bool HHVM_FUNCTION(xbox_task_status,

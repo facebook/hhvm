@@ -128,11 +128,11 @@ enum CodeColor {
  * highlight_code() doesn't need <?hh and will treat source entirely PHP.
  */
 OptString highlight_php(const OptString& source, int line = 0, int lineFocus0 = 0,
-                     int charFocus0 = 0, int lineFocus1 = 0,
-                     int charFocus1 = 0);
+                        int charFocus0 = 0, int lineFocus1 = 0,
+                        int charFocus1 = 0);
 OptString highlight_code(const OptString& source, int line = 0, int lineFocus0 = 0,
-                      int charFocus0 = 0, int lineFocus1 = 0,
-                      int charFocus1 = 0);
+                         int charFocus0 = 0, int lineFocus1 = 0,
+                         int charFocus1 = 0);
 
 extern const char* PHP_KEYWORDS[];
 

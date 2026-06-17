@@ -99,8 +99,8 @@ static void HHVM_METHOD(NumberFormatter, __construct,
 }
 
 static OptString HHVM_METHOD(NumberFormatter, formatCurrency,
-                          double value,
-                          const OptString& currency) {
+                             double value,
+                             const OptString& currency) {
   NUMFMT_GET(obj, this_, OptString());
   UErrorCode error = U_ZERO_ERROR;
   icu::UnicodeString uCurrency(u16(currency, error));

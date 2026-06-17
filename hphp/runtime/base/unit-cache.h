@@ -132,9 +132,9 @@ std::vector<Unit*> loadedUnitsNonRepoAuth();
  * resolve_include.  (Likely naming relic from hphpc days.)
  */
 OptString resolveVmInclude(const StringData* path,
-                        const char* currentDir,
-                        struct stat* s,  // out
-                        bool allow_dir = false);
+                           const char* currentDir,
+                           struct stat* s,  // out
+                           bool allow_dir = false);
 
 /*
  * Remove the specified unit from the cache, to force HHVM to

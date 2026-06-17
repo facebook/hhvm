@@ -704,7 +704,7 @@ static bool sxe_prop_dim_exists(SimpleXMLElement* sxe, const Variant& member,
 }
 
 static inline OptString sxe_xmlNodeListGetString(xmlDocPtr doc, xmlNodePtr list,
-                                              bool inLine) {
+                                                 bool inLine) {
   xmlChar* tmp = xmlNodeListGetString(doc, list, inLine);
   if (tmp) {
     OptString ret = OptString((char*)tmp);

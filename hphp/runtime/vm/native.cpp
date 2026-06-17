@@ -591,7 +591,7 @@ const char* checkTypeFunc(const NativeSig& sig,
 }
 
 OptString fullName(const StringData* fname, const StringData* cname,
-                bool isStatic) {
+                   bool isStatic) {
   return {
     cname == nullptr ? OptString{const_cast<StringData*>(fname)} :
     (OptString{const_cast<StringData*>(cname)} +

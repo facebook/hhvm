@@ -1513,7 +1513,7 @@ bool HHVM_FUNCTION(openssl_pkcs12_read, const OptString& pkcs12, Variant& certs,
             BUF_MEM *bio_buf;
             BIO_get_mem_ptr(bio_out, &bio_buf);
             extracerts.append(OptString((char*)bio_buf->data, bio_buf->length,
-                                     CopyString));
+                                        CopyString));
           }
           BIO_free(bio_out);
           X509_free(aCA);
@@ -2933,8 +2933,8 @@ Variant HHVM_FUNCTION(openssl_x509_parse, const Variant& x509cert,
           BIO_get_mem_ptr(bio_out, &bio_buf);
           subitem.set(OptString(extname, CopyString),
                       OptString((char*)bio_buf->data,
-                             bio_buf->length,
-                             CopyString));
+                                bio_buf->length,
+                                CopyString));
         } else {
           BIO_free(bio_out);
           return false;

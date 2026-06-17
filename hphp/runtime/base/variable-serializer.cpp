@@ -196,7 +196,7 @@ void VariableSerializer::popResourceInfo() {
 }
 
 OptString VariableSerializer::serialize(const_variant_ref v, bool ret,
-                                     bool keepCount /* = false */) {
+                                        bool keepCount /* = false */) {
   StringBuffer buf;
   m_buf = &buf;
   if (ret) {

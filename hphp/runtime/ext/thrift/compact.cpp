@@ -1605,8 +1605,8 @@ void HHVM_FUNCTION(thrift_protocol_write_compact_struct,
 }
 
 OptString HHVM_FUNCTION(thrift_protocol_write_compact_struct_to_string,
-                     const Object& request_struct,
-                     int64_t version) {
+                        const Object& request_struct,
+                        int64_t version) {
   return compact_serialize_to_string(request_struct, version);
 }
 

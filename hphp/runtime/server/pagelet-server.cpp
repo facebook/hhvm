@@ -511,7 +511,7 @@ int64_t PageletServer::TaskStatus(const OptResource& task) {
 }
 
 OptString PageletServer::TaskResult(const OptResource& task, Array &headers, int &code,
-                                 int64_t timeout_ms) {
+                                    int64_t timeout_ms) {
   auto ptask = cast<PageletTask>(task);
   return ptask->getJob()->getResults(headers, code, timeout_ms);
 }

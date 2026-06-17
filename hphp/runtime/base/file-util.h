@@ -80,7 +80,7 @@ OptString relativePath(const std::string& fromDir, const OptString& toFile);
 OptString canonicalize(const OptString& path);
 OptString canonicalize(const std::string& path);
 OptString canonicalize(const char* path, size_t len,
-                    bool collapse_slashes = true);
+                       bool collapse_slashes = true);
 
 std::string expandUser(const std::string& path,
                        const std::string& sysUser = "");

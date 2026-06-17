@@ -74,7 +74,7 @@ static bool matchAnyPattern(const std::string &path,
   OptString spath(path.c_str(), path.size(), CopyString);
   for (unsigned int i = 0; i < patterns.size(); i++) {
     Variant ret = preg_match(OptString(patterns[i].c_str(), patterns[i].size(),
-                                    CopyString),
+                                       CopyString),
                              spath);
     if (ret.toInt64() > 0) return true;
   }

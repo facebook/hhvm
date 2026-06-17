@@ -2016,8 +2016,8 @@ Variant HHVM_FUNCTION(mb_language,
 }
 
 OptString HHVM_FUNCTION(mb_output_handler,
-                     const OptString& contents,
-                     int64_t status) {
+                        const OptString& contents,
+                        int64_t status) {
   mbfl_string string, result;
   int last_feed;
 
@@ -3992,7 +3992,7 @@ static void php_mb_regex_set_options(OnigOptionType options,
 }
 
 OptString HHVM_FUNCTION(mb_regex_set_options,
-                     const Variant& opt_options) {
+                        const Variant& opt_options) {
   const OptString options = convertArg(opt_options);
 
   OnigOptionType opt;
@@ -4051,8 +4051,8 @@ Variant HHVM_FUNCTION(mb_split,
     /* add it to the array */
     if (regs->beg[0] < str.size() && regs->beg[0] >= (pos - pos0)) {
       ret.append(OptString((const char *)pos,
-                        ((OnigUChar *)(str.data() + regs->beg[0]) - pos),
-                        CopyString));
+                           ((OnigUChar *)(str.data() + regs->beg[0]) - pos),
+                           CopyString));
     } else {
       err = -2;
       break;
@@ -4432,8 +4432,8 @@ bool HHVM_FUNCTION(mb_send_mail,
        "\n", sizeof("Subject: [PHP-jp nnnnnnnn]"));
     if (pstr != nullptr) {
       encoded_subject = OptString(reinterpret_cast<char*>(pstr->val),
-                               pstr->len,
-                               AttachString);
+                                  pstr->len,
+                                  AttachString);
     }
   } else {
     raise_warning("Missing Subject: field");
@@ -4470,8 +4470,8 @@ bool HHVM_FUNCTION(mb_send_mail,
     }
     if (pstr != nullptr) {
       encoded_message = OptString(reinterpret_cast<char*>(pstr->val),
-                               pstr->len,
-                               AttachString);
+                                  pstr->len,
+                                  AttachString);
     }
   } else {
     /* this is not really an error, so it is allowed. */

@@ -2915,8 +2915,8 @@ bool HHVM_METHOD(DOMCharacterData, replaceData,
 }
 
 OptString HHVM_METHOD(DOMCharacterData, substringData,
-                   int64_t offset,
-                   int64_t count) {
+                      int64_t offset,
+                      int64_t count) {
   auto native_data = Native::data<DOMNode>(this_);
   xmlNodePtr node = native_data->nodep();
   if (!node) {
@@ -4099,7 +4099,7 @@ Array HHVM_METHOD(DOMElement, __debugInfo) {
 }
 
 OptString HHVM_METHOD(DOMElement, getAttribute,
-                   const OptString& name) {
+                      const OptString& name) {
   auto* data = Native::data<DOMElement>(this_);
   xmlNodePtr nodep = data->nodep();
   if (!nodep) {
@@ -4183,8 +4183,8 @@ Variant HHVM_METHOD(DOMElement, getAttributeNodeNS,
 }
 
 OptString HHVM_METHOD(DOMElement, getAttributeNS,
-                   const OptString& namespaceuri,
-                   const OptString& localname) {
+                      const OptString& namespaceuri,
+                      const OptString& localname) {
   auto* data = Native::data<DOMElement>(this_);
   xmlNodePtr elemp = data->nodep();
   if (!elemp) {

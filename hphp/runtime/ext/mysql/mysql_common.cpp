@@ -1395,7 +1395,7 @@ Variant php_mysql_fetch_hash(const OptResource& result, int result_type) {
     Variant data;
     if (mysql_row[i]) {
       data = mysql_makevalue(OptString(mysql_row[i], mysql_row_lengths[i],
-                                    CopyString), mysql_field);
+                                       CopyString), mysql_field);
     }
     if (result_type & PHP_MYSQL_NUM) {
       ret.set(i, data);

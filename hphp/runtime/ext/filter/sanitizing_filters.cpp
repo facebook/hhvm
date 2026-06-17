@@ -27,7 +27,7 @@ namespace HPHP {
 using filter_map = unsigned long[256];
 
 static OptString php_filter_encode_html(const OptString& value,
-                                     const unsigned char *chars) {
+                                        const unsigned char *chars) {
   int len = value.length();
   unsigned char *s = (unsigned char *)value.data();
   unsigned char *e = s + len;

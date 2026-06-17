@@ -61,7 +61,7 @@ static Variant get_column_value(sqlite3_stmt *stmt, int column) {
   case SQLITE_BLOB:
   default:
     data = OptString((char*)sqlite3_column_blob(stmt, column),
-                  sqlite3_column_bytes(stmt, column), CopyString);
+                     sqlite3_column_bytes(stmt, column), CopyString);
   }
   return data;
 }
@@ -81,7 +81,7 @@ static Variant get_value(sqlite3_value *argv) {
   case SQLITE3_TEXT:
   default:
     value = OptString((char*)sqlite3_value_text(argv),
-                   sqlite3_value_bytes(argv), CopyString);
+                      sqlite3_value_bytes(argv), CopyString);
     break;
   }
   return value;
@@ -331,7 +331,7 @@ int64_t HHVM_METHOD(SQLite3, changes) {
 }
 
 OptString HHVM_STATIC_METHOD(SQLite3, escapestring,
-                          const OptString& sql) {
+                             const OptString& sql) {
   if (!sql.empty()) {
     char *ret = sqlite3_mprintf("%q", sql.data());
     if (ret) {
@@ -691,11 +691,11 @@ int64_t HHVM_METHOD(SQLite3Result, numcolumns) {
 }
 
 OptString HHVM_METHOD(SQLite3Result, columnname,
-                   int64_t column) {
+                      int64_t column) {
   auto *data = Native::data<SQLite3Result>(this_);
   data->validate();
   return OptString((char*)sqlite3_column_name(data->m_stmt->m_raw_stmt, column),
-                CopyString);
+                   CopyString);
 }
 
 int64_t HHVM_METHOD(SQLite3Result, columntype,

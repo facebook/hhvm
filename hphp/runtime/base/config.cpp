@@ -421,9 +421,9 @@ bool valueMatchesPattern(const std::string &value,
                          const std::string &suffix) {
   if (!suffix.empty()) pattern += suffix;
   Variant ret = preg_match(OptString(pattern.c_str(), pattern.size(),
-                                  CopyString),
+                                     CopyString),
                            OptString(value.c_str(), value.size(),
-                                  CopyString));
+                                     CopyString));
   return ret.toInt64() > 0;
 }
 

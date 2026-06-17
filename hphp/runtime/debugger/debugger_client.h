@@ -142,7 +142,7 @@ public:
   static OptString FormatVariableWithLimit(const Variant& v, int maxlen);
 
   static OptString FormatInfoVec(const IDebuggable::InfoVec &info,
-                              int *nameLen = nullptr);
+                                 int *nameLen = nullptr);
   static OptString FormatTitle(const char *title);
 
 public:

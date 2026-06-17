@@ -45,7 +45,7 @@ int64_t HHVM_FUNCTION(error_reporting, const Variant& level = uninit_variant);
 
 ArrayData* debug_backtrace_jit(int64_t options);
 OptString debug_string_backtrace(bool skip, bool ignore_args = false,
-                              int64_t limit = 0);
+                                 int64_t limit = 0);
 OptString stringify_backtrace(const Array& bt, bool ignore_args);
 
 ///////////////////////////////////////////////////////////////////////////////

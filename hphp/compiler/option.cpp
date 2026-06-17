@@ -234,7 +234,7 @@ bool Option::IsFileExcluded(const std::string& file,
   for (auto const& pattern : patterns) {
     Variant matches;
     Variant ret = preg_match(OptString(pattern.c_str(), pattern.size(),
-                                    CopyString), sfile, &matches);
+                                       CopyString), sfile, &matches);
     if (ret.toInt64() > 0) {
       return true;
     }

@@ -217,9 +217,9 @@ int64_t HSLLocaleLibcOps::strripos(const OptString& haystack, const OptString& n
 }
 
 OptString HSLLocaleLibcOps::splice(const OptString& str,
-                                const OptString& replacement,
-                                int64_t offset,
-                                int64_t length) const {
+                                   const OptString& replacement,
+                                   int64_t offset,
+                                   int64_t length) const {
   assertx(length >= 0);
   offset = normalize_offset(offset, str.length());
 
@@ -270,16 +270,16 @@ OptString HSLLocaleLibcOps::trim(const OptString& str, const OptString& what, Tr
 }
 
 OptString HSLLocaleLibcOps::replace(const OptString& haystack,
-                                 const OptString& needle,
-                                 const OptString& replacement) const {
+                                    const OptString& needle,
+                                    const OptString& replacement) const {
   const auto ret = HHVM_FN(str_replace)(needle, replacement, haystack);
   assertx(isStringType(ret.type()));
   return OptString::attach(ret.val().pstr);
 }
 
 OptString HSLLocaleLibcOps::replace_ci(const OptString& haystack,
-                                    const OptString& needle,
-                                    const OptString& replacement) const {
+                                       const OptString& needle,
+                                       const OptString& replacement) const {
   const auto ret = HHVM_FN(str_ireplace)(needle, replacement, haystack);
   assertx(isStringType(ret.type()));
   return OptString::attach(ret.val().pstr);
@@ -307,22 +307,22 @@ inline OptString replace_every_impl(decltype(HHVM_FN(str_replace)) impl,
 } // namespace
 
 OptString HSLLocaleLibcOps::replace_every(const OptString& haystack,
-                                       const Array& replacements) const {
+                                          const Array& replacements) const {
   return replace_every_impl(HHVM_FN(str_replace), haystack, replacements);
 }
 
 OptString HSLLocaleLibcOps::replace_every_ci(const OptString& haystack,
-                                          const Array& replacements) const {
+                                             const Array& replacements) const {
   return replace_every_impl(HHVM_FN(str_ireplace), haystack, replacements);
 }
 
 OptString HSLLocaleLibcOps::replace_every_nonrecursive(const OptString& haystack,
-                                                    const Array& replacements) const {
+                                                       const Array& replacements) const {
   return HHVM_FN(strtr)(haystack, replacements).asCStrRef();
 }
 
 OptString HSLLocaleLibcOps::replace_every_nonrecursive_ci(const OptString& haystack,
-                                                       const Array& replacements) const {
+                                                          const Array& replacements) const {
   auto id = [](const OptString& s) -> OptString { return s; };
   return HPHP::replace_every_nonrecursive<OptString>(
     haystack,

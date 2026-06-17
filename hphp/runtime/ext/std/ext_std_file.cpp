@@ -1698,8 +1698,8 @@ bool HHVM_FUNCTION(symlink,
 }
 
 OptString HHVM_FUNCTION(basename,
-                     const OptString& path,
-                     const OptString& suffix /* = null_string */) {
+                        const OptString& path,
+                        const OptString& suffix /* = null_string */) {
   int state = 0;
   const char *c = path.data();
   const char *comp, *cend;
@@ -1901,7 +1901,7 @@ bool HHVM_FUNCTION(rmdir, const OptString& dirname,
 }
 
 OptString HHVM_FUNCTION(dirname,
-                     const OptString& path) {
+                        const OptString& path) {
   return FileUtil::dirname(path);
 }
 

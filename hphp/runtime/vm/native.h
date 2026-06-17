@@ -531,7 +531,7 @@ const char* checkTypeFunc(const NativeSig& sig,
                           const FuncEmitter* func);
 
 OptString fullName(const StringData* fname, const StringData* cname,
-                bool isStatic);
+                   bool isStatic);
 
 NativeFunctionInfo getNativeFunction(const FuncTable& nativeFuncs,
                                      const StringData* fname,

@@ -251,13 +251,13 @@ Array TimeZone::GetAbbreviations() {
 }
 
 OptString TimeZone::AbbreviationToName(OptString abbr, int utcoffset /* = -1 */,
-                                    int isdst /* = 1 */) {
+                                       int isdst /* = 1 */) {
   if (isdst != 0 && isdst != 1) {
     isdst = -1;
   }
   return OptString(timelib_timezone_id_from_abbr(abbr.data(), utcoffset,
-                                              isdst),
-                CopyString);
+                                                 isdst),
+                   CopyString);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

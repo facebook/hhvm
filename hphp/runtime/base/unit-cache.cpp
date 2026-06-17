@@ -371,7 +371,7 @@ HashCache& getHashCache(const std::string& repo) {
 }
 
 Optional<OptString> loadFileContents(const char* path,
-                                  Stream::Wrapper* wrapper) {
+                                     Stream::Wrapper* wrapper) {
   std::string contents;
   assertx(path);
 

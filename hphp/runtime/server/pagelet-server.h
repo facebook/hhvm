@@ -61,9 +61,9 @@ struct PageletServer {
    * out. The status code is set to -1 in the event of a timeout.
    */
   static OptString TaskResult(const OptResource& task,
-                           Array &headers,
-                           int &code,
-                           int64_t timeout_ms);
+                              Array &headers,
+                              int &code,
+                              int64_t timeout_ms);
 
   /**
    * Get asynchronous results of a task. Returns a tuple of 3 items:

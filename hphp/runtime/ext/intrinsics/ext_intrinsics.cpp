@@ -129,7 +129,7 @@ void HHVM_FUNCTION(dummy_lots_inout,
 }
 
 OptString HHVM_FUNCTION(serialize_with_format, const Variant& thing,
-                     int64_t format) {
+                        int64_t format) {
   if (format > static_cast<int64_t>(VariableSerializer::Type::Last)) {
     raise_invalid_argument_warning("invalid serializer format");
   }

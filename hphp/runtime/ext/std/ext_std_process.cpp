@@ -198,9 +198,9 @@ Variant HHVM_FUNCTION(shell_exec,
 }
 
 OptString HHVM_FUNCTION(exec,
-                     const OptString& command,
-                     Array& output,
-                     int64_t& return_var) {
+                        const OptString& command,
+                        Array& output,
+                        int64_t& return_var) {
   checkExecAllowed(false);
   ShellExecContext ctx;
   FILE *fp = ctx.exec(command);
@@ -252,8 +252,8 @@ void HHVM_FUNCTION(passthru,
 }
 
 OptString HHVM_FUNCTION(system,
-                     const OptString& command,
-                     int64_t& return_var) {
+                        const OptString& command,
+                        int64_t& return_var) {
   checkExecAllowed(false);
   ShellExecContext ctx;
   FILE *fp = ctx.exec(command);
@@ -761,7 +761,7 @@ bool HHVM_FUNCTION(proc_nice,
 const StaticString s_twosinglequotes("''");
 
 OptString HHVM_FUNCTION(escapeshellarg,
-                     const OptString& arg) {
+                        const OptString& arg) {
   if (!arg.empty()) {
     return string_escape_shell_arg(arg.c_str());
   } else {
@@ -770,7 +770,7 @@ OptString HHVM_FUNCTION(escapeshellarg,
 }
 
 OptString HHVM_FUNCTION(escapeshellcmd,
-                     const OptString& command) {
+                        const OptString& command) {
   if (!command.empty()) {
     return string_escape_shell_cmd(command.c_str());
   }

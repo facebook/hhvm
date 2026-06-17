@@ -1341,8 +1341,8 @@ static xmlDocPtr serialize_response_call(
       if (!obj->o_get("faultcode").toString().empty()) {
         xmlNodePtr node = xmlNewNode(nullptr, BAD_CAST("faultcode"));
         OptString str = StringUtil::HtmlEncode(obj->o_get("faultcode").toString(),
-                                            StringUtil::QuoteStyle::Double,
-                                            "UTF-8", true, true);
+                                               StringUtil::QuoteStyle::Double,
+                                               "UTF-8", true, true);
         xmlAddChild(param, node);
         if (!fault_ns.empty()) {
           xmlNsPtr nsptr = encode_add_ns(node, fault_ns.c_str());
@@ -1375,8 +1375,8 @@ static xmlDocPtr serialize_response_call(
       if (!obj->o_get("faultcode").toString().empty()) {
         xmlNodePtr node = xmlNewChild(param, ns, BAD_CAST("Code"), nullptr);
         OptString str = StringUtil::HtmlEncode(obj->o_get("faultcode").toString(),
-                                            StringUtil::QuoteStyle::Double,
-                                            "UTF-8", true, true);
+                                               StringUtil::QuoteStyle::Double,
+                                               "UTF-8", true, true);
         node = xmlNewChild(node, ns, BAD_CAST("Value"), nullptr);
         if (!fault_ns.empty()) {
           xmlNsPtr nsptr = encode_add_ns(node, fault_ns.c_str());

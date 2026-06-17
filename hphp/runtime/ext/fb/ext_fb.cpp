@@ -1182,8 +1182,8 @@ Array HHVM_FUNCTION(fb_utf8_decompose, StringArg input) {
  * Private helper; requires non-negative firstCodePoint and desiredCodePoints.
  */
 static OptString fb_utf8_substr_simple(const OptString& str,
-                                    int32_t firstCodePoint,
-                                    int32_t numDesiredCodePoints) {
+                                       int32_t firstCodePoint,
+                                       int32_t numDesiredCodePoints) {
   const char* const srcBuf = str.data();
   int32_t srcLenBytes = str.size(); // May truncate; checked before use below.
 
@@ -1249,7 +1249,7 @@ static OptString fb_utf8_substr_simple(const OptString& str,
 }
 
 OptString HHVM_FUNCTION(fb_utf8_substr, const OptString& str, int64_t start,
-                                     int64_t length /* = INT_MAX */) {
+                                        int64_t length /* = INT_MAX */) {
   if (length > INT_MAX) {
     length = INT_MAX;
   }

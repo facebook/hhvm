@@ -198,7 +198,7 @@ void CmdInfo::UpdateLiveLists(DebuggerClient &client) {
 }
 
 OptString CmdInfo::GetProtoType(DebuggerClient &client, const std::string &cls,
-                             const std::string &func) {
+                                const std::string &func) {
   CmdInfo cmd;
   cmd.m_type = KindOfFunction;
   if (cls.empty()) {
@@ -409,7 +409,7 @@ void CmdInfo::PrintHeader(DebuggerClient* client, StringBuffer &sb,
 }
 
 OptString CmdInfo::GetParams(const Array& params, bool varg,
-                          bool detailed /* = false */) {
+                             bool detailed /* = false */) {
   StringBuffer args;
   for (ArrayIter iter(params); iter; ++iter) {
     if (!args.empty()) {
@@ -488,8 +488,8 @@ bool CmdInfo::TryConstant(StringBuffer &sb, const Array& info,
 bool CmdInfo::TryProperty(StringBuffer &sb, const Array& info,
                           const std::string &subsymbol) {
   OptString key = FindSubSymbol(info[s_properties].toArray(),
-                             subsymbol[0] == '$' ?
-                             subsymbol.substr(1) : subsymbol);
+                                subsymbol[0] == '$' ?
+                                subsymbol.substr(1) : subsymbol);
   if (!key.isNull()) {
     Array prop = info[s_properties].toArray()[key].toArray();
     PrintDocComments(sb, prop);

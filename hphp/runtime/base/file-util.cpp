@@ -378,7 +378,7 @@ OptString FileUtil::dirname(const OptString& path) {
 }
 
 OptString FileUtil::relativePath(const std::string& fromDir,
-                              const OptString& toFile) {
+                                 const OptString& toFile) {
 
   size_t maxlen = (fromDir.size() + toFile.size()) * 3;
 
@@ -472,7 +472,7 @@ OptString FileUtil::canonicalize(const std::string &path) {
  */
 
 OptString FileUtil::canonicalize(const char *addpath, size_t addlen,
-                              bool collapse_slashes /* = true */) {
+                                 bool collapse_slashes /* = true */) {
   assertx(strlen(addpath) <= addlen);
   // 4 for slashes at start, after root, and at end, plus trailing
   // null

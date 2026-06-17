@@ -150,16 +150,16 @@ bool HHVM_FUNCTION(ends_with_ci_l,
 }
 
 OptString HHVM_FUNCTION(strip_prefix_l,
-                     const OptString& string,
-                     const OptString& prefix,
-                     const Variant& maybe_loc) {
+                        const OptString& string,
+                        const OptString& prefix,
+                        const Variant& maybe_loc) {
   return get_ops(maybe_loc)->strip_prefix(string, prefix);
 }
 
 OptString HHVM_FUNCTION(strip_suffix_l,
-                     const OptString& string,
-                     const OptString& suffix,
-                     const Variant& maybe_loc) {
+                        const OptString& string,
+                        const OptString& suffix,
+                        const Variant& maybe_loc) {
   return get_ops(maybe_loc)->strip_suffix(string, suffix);
 }
 
@@ -205,20 +205,20 @@ ALWAYS_INLINE int64_t normalize_length(int64_t length) {
 } // namespace
 
 OptString HHVM_FUNCTION(slice_l,
-                     const OptString& str,
-                     int64_t offset,
-                     int64_t length,
-                     const Variant& maybe_loc) {
+                        const OptString& str,
+                        int64_t offset,
+                        int64_t length,
+                        const Variant& maybe_loc) {
   length = normalize_length(length);
   return get_ops(maybe_loc)->slice(str, offset, length);
 }
 
 OptString HHVM_FUNCTION(splice_l,
-                     const OptString& str,
-                     const OptString& replacement,
-                     int64_t offset,
-                     const Variant& length,
-                     const Variant& maybe_loc) {
+                        const OptString& str,
+                        const OptString& replacement,
+                        int64_t offset,
+                        const Variant& length,
+                        const Variant& maybe_loc) {
   const int64_t int_length = normalize_length(
     length.isNull() ? StringData::MaxSize : length.asInt64Val()
   );
@@ -245,8 +245,8 @@ Array HHVM_FUNCTION(split_l,
 }
 
 OptString HHVM_FUNCTION(reverse_l,
-                     const OptString& str,
-                     const Variant& maybe_loc) {
+                        const OptString& str,
+                        const Variant& maybe_loc) {
   if (str.empty()) {
     return str;
   }
@@ -254,10 +254,10 @@ OptString HHVM_FUNCTION(reverse_l,
 }
 
 OptString HHVM_FUNCTION(pad_left_l,
-                     const OptString& str,
-                     int64_t len,
-                     const OptString& pad,
-                     const Variant& maybe_loc) {
+                        const OptString& str,
+                        int64_t len,
+                        const OptString& pad,
+                        const Variant& maybe_loc) {
   if (pad.empty()) {
     SystemLib::throwInvalidArgumentExceptionObject(
       "padding string can not be empty"
@@ -268,10 +268,10 @@ OptString HHVM_FUNCTION(pad_left_l,
 }
 
 OptString HHVM_FUNCTION(pad_right_l,
-                     const OptString& str,
-                     int64_t len,
-                     const OptString& pad,
-                     const Variant& maybe_loc) {
+                        const OptString& str,
+                        int64_t len,
+                        const OptString& pad,
+                        const Variant& maybe_loc) {
   if (pad.empty()) {
     SystemLib::throwInvalidArgumentExceptionObject(
       "padding string can not be empty"
@@ -282,9 +282,9 @@ OptString HHVM_FUNCTION(pad_right_l,
 }
 
 OptString HHVM_FUNCTION(vsprintf_l,
-                     const Variant& maybe_loc,
-                     const OptString& fmt,
-                     const Array& args) {
+                        const Variant& maybe_loc,
+                        const OptString& fmt,
+                        const Array& args) {
 
   // Okay, quite a few layers here :p
   // 1. get an HSLLocale from a nullable Locale object
@@ -313,9 +313,9 @@ OptString HHVM_FUNCTION(vsprintf_l,
 
 namespace {
 OptString trim_impl(const OptString& str,
-                 const Variant& what,
-                 const Variant& maybe_loc,
-                 HSLLocale::Ops::TrimSides sides) {
+                    const Variant& what,
+                    const Variant& maybe_loc,
+                    HSLLocale::Ops::TrimSides sides) {
   if (str.empty()) {
     return str;
   }
@@ -333,31 +333,31 @@ OptString trim_impl(const OptString& str,
 } // namespace
 
 OptString HHVM_FUNCTION(trim_l,
-                     const OptString& str,
-                     const Variant& what,
-                     const Variant& maybe_loc) {
+                        const OptString& str,
+                        const Variant& what,
+                        const Variant& maybe_loc) {
   return trim_impl(str, what, maybe_loc, HSLLocale::Ops::TrimSides::BOTH);
 }
 
 OptString HHVM_FUNCTION(trim_left_l,
-                     const OptString& str,
-                     const Variant& what,
-                     const Variant& maybe_loc) {
+                        const OptString& str,
+                        const Variant& what,
+                        const Variant& maybe_loc) {
   return trim_impl(str, what, maybe_loc, HSLLocale::Ops::TrimSides::LEFT);
 }
 
 OptString HHVM_FUNCTION(trim_right_l,
-                     const OptString& str,
-                     const Variant& what,
-                     const Variant& maybe_loc) {
+                        const OptString& str,
+                        const Variant& what,
+                        const Variant& maybe_loc) {
   return trim_impl(str, what, maybe_loc, HSLLocale::Ops::TrimSides::RIGHT);
 }
 
 OptString HHVM_FUNCTION(replace_l,
-                     const OptString& haystack,
-                     const OptString& needle,
-                     const OptString& replacement,
-                     const Variant& maybe_loc) {
+                        const OptString& haystack,
+                        const OptString& needle,
+                        const OptString& replacement,
+                        const Variant& maybe_loc) {
   if (haystack.empty() || needle.empty()) {
     return haystack;
   }
@@ -365,10 +365,10 @@ OptString HHVM_FUNCTION(replace_l,
 }
 
 OptString HHVM_FUNCTION(replace_ci_l,
-                     const OptString& haystack,
-                     const OptString& needle,
-                     const OptString& replacement,
-                     const Variant& maybe_loc) {
+                        const OptString& haystack,
+                        const OptString& needle,
+                        const OptString& replacement,
+                        const Variant& maybe_loc) {
   if (haystack.empty() || needle.empty()) {
     return haystack;
   }
@@ -393,9 +393,9 @@ void check_replace_pairs(const Array& replacements) {
 } // namespace
 
 OptString HHVM_FUNCTION(replace_every_l,
-                     const OptString& haystack,
-                     const Array& replacements,
-                     const Variant& maybe_loc) {
+                        const OptString& haystack,
+                        const Array& replacements,
+                        const Variant& maybe_loc) {
   if (haystack.empty() || replacements.empty()) {
     return haystack;
   }
@@ -404,9 +404,9 @@ OptString HHVM_FUNCTION(replace_every_l,
 }
 
 OptString HHVM_FUNCTION(replace_every_ci_l,
-                     const OptString& haystack,
-                     const Array& replacements,
-                     const Variant& maybe_loc) {
+                        const OptString& haystack,
+                        const Array& replacements,
+                        const Variant& maybe_loc) {
   if (haystack.empty() || replacements.empty()) {
     return haystack;
   }
@@ -415,9 +415,9 @@ OptString HHVM_FUNCTION(replace_every_ci_l,
 }
 
 OptString HHVM_FUNCTION(replace_every_nonrecursive_l,
-                     const OptString& haystack,
-                     const Array& replacements,
-                     const Variant& maybe_loc) {
+                        const OptString& haystack,
+                        const Array& replacements,
+                        const Variant& maybe_loc) {
   if (haystack.empty() || replacements.empty()) {
     return haystack;
   }
@@ -426,9 +426,9 @@ OptString HHVM_FUNCTION(replace_every_nonrecursive_l,
 }
 
 OptString HHVM_FUNCTION(replace_every_nonrecursive_ci_l,
-                     const OptString& haystack,
-                     const Array& replacements,
-                     const Variant& maybe_loc) {
+                        const OptString& haystack,
+                        const Array& replacements,
+                        const Variant& maybe_loc) {
   if (haystack.empty() || replacements.empty()) {
     return haystack;
   }

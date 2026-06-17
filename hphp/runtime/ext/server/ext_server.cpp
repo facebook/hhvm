@@ -83,13 +83,13 @@ int64_t HHVM_FUNCTION(pagelet_server_task_status,
 }
 
 OptString HHVM_FUNCTION(pagelet_server_task_result,
-                     const OptResource& task,
-                     Array& headers,
-                     int64_t& code,
-                     int64_t timeout_ms /* = 0 */) {
+                        const OptResource& task,
+                        Array& headers,
+                        int64_t& code,
+                        int64_t timeout_ms /* = 0 */) {
   int rcode;
   OptString response = PageletServer::TaskResult(task, headers, rcode,
-                                              timeout_ms);
+                                                 timeout_ms);
   code = rcode;
   return response;
 }

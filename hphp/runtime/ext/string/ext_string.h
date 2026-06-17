@@ -57,29 +57,29 @@ constexpr int64_t k_STR_PAD_RIGHT = 1;
 constexpr int64_t k_STR_PAD_BOTH  = 2;
 
 OptString HHVM_FUNCTION(addcslashes,
-                     const OptString& str,
-                     const OptString& charlist);
+                        const OptString& str,
+                        const OptString& charlist);
 OptString HHVM_FUNCTION(addslashes,
-                     const OptString& str);
+                        const OptString& str);
 OptString HHVM_FUNCTION(bin2hex,
-                     const OptString& str);
+                        const OptString& str);
 Variant HHVM_FUNCTION(hex2bin,
                       const OptString& str);
 OptString HHVM_FUNCTION(strrev,
-                     const OptString& str);
+                        const OptString& str);
 OptString HHVM_FUNCTION(strtolower,
-                     const OptString& str);
+                        const OptString& str);
 OptString HHVM_FUNCTION(strtoupper,
-                     const OptString& str);
+                        const OptString& str);
 OptString HHVM_FUNCTION(trim,
-                     const OptString& str,
-                     const OptString& charlist = k_HPHP_TRIM_CHARLIST);
+                        const OptString& str,
+                        const OptString& charlist = k_HPHP_TRIM_CHARLIST);
 OptString HHVM_FUNCTION(ltrim,
-                     const OptString& str,
-                     const OptString& charlist = k_HPHP_TRIM_CHARLIST);
+                        const OptString& str,
+                        const OptString& charlist = k_HPHP_TRIM_CHARLIST);
 OptString HHVM_FUNCTION(rtrim,
-                     const OptString& str,
-                     const OptString& charlist = k_HPHP_TRIM_CHARLIST);
+                        const OptString& str,
+                        const OptString& charlist = k_HPHP_TRIM_CHARLIST);
 Variant HHVM_FUNCTION(explode,
                       const OptString& delimiter,
                       const OptString& str,
@@ -93,20 +93,20 @@ TypedValue HHVM_FUNCTION(str_ireplace,
                          const Variant& replace,
                          const Variant& subject);
 OptString HHVM_FUNCTION(str_repeat,
-                     const OptString& input,
-                     int64_t multiplier);
+                        const OptString& input,
+                        int64_t multiplier);
 
 ///////////////////////////////////////////////////////////////////////////////
 // encoding/decoding
 
 OptString HHVM_FUNCTION(htmlentities,
-                     const OptString& str,
-                     int64_t quote_style = k_ENT_HTML_QUOTE_DOUBLE,
-                     const OptString& charset = "UTF-8",
-                     bool double_encode = true);
+                        const OptString& str,
+                        int64_t quote_style = k_ENT_HTML_QUOTE_DOUBLE,
+                        const OptString& charset = "UTF-8",
+                        bool double_encode = true);
 OptString HHVM_FUNCTION(md5,
-                     const OptString& str,
-                     bool raw_output = false);
+                        const OptString& str,
+                        bool raw_output = false);
 StringRet HHVM_FUNCTION(sha1,
                      const OptString& str,
                      bool raw_output = false);

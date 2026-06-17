@@ -178,7 +178,7 @@ Object HHVM_METHOD(DateTime, diff,
 }
 
 OptString HHVM_METHOD(DateTime, format,
-                   const Variant& format) {
+                      const Variant& format) {
   auto const data = getDateTimeData(this_);
   return data->format(format.toString());
 }
@@ -578,7 +578,7 @@ Object HHVM_STATIC_METHOD(DateInterval, createFromDateString,
 }
 
 OptString HHVM_METHOD(DateInterval, format,
-                   const OptString& format) {
+                      const OptString& format) {
   auto const data = getDateIntervalData(this_);
   return data->m_di->format(format);
 }

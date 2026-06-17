@@ -214,7 +214,7 @@ static int _xml_xmlcharlen(const XML_Char *s) {
 }
 
 OptString xml_utf8_decode(const XML_Char *s, int len,
-                       const XML_Char *encoding) {
+                          const XML_Char *encoding) {
   OptString str = OptString(len, ReserveString);
   char *newbuf = str.mutableData();
   char (*decoder)(unsigned short) = nullptr;
@@ -942,7 +942,7 @@ int64_t HHVM_FUNCTION(xml_get_error_code,
 }
 
 OptString HHVM_FUNCTION(xml_error_string,
-                     int64_t code) {
+                        int64_t code) {
   char * str = (char *)XML_ErrorString((XML_Error)/*(int)*/code);
   return OptString(str, CopyString);
 }
@@ -950,12 +950,12 @@ OptString HHVM_FUNCTION(xml_error_string,
 ///////////////////////////////////////////////////////////////////////////////
 
 OptString HHVM_FUNCTION(utf8_decode,
-                     const OptString& data) {
+                        const OptString& data) {
   return xml_utf8_decode(data.c_str(), data.size(), "ISO-8859-1");
 }
 
 OptString HHVM_FUNCTION(utf8_encode,
-                     const OptString& data) {
+                        const OptString& data) {
   auto const maxSize = safe_cast<size_t>(data.size()) * 2;
   OptString str = OptString(maxSize, ReserveString);
   char *newbuf = str.mutableData();

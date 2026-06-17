@@ -538,9 +538,9 @@ Array HSLLocaleICUOps::split(const OptString& str, const OptString& delimiter, i
 }
 
 OptString HSLLocaleICUOps::splice(const OptString& str,
-                               const OptString& replacement,
-                               int64_t offset,
-                               int64_t length) const {
+                                  const OptString& replacement,
+                                  int64_t offset,
+                                  int64_t length) const {
 
   assertx(length >= 0);
   auto mut = ustr_from_utf8(str);
@@ -570,8 +570,8 @@ OptString HSLLocaleICUOps::splice(const OptString& str,
 }
 
 OptString HSLLocaleICUOps::trim_impl(const OptString& str,
-                                  const std::function<bool(UChar32)>& test,
-                                  TrimSides sides) const {
+                                     const std::function<bool(UChar32)>& test,
+                                     TrimSides sides) const {
   auto ustr = ustr_from_utf8(str);
   int32_t start = 0;
   int32_t end = ustr.length();
@@ -679,7 +679,7 @@ OptString HSLLocaleICUOps::replace_ci(const OptString& haystack,
 }
 
 OptString HSLLocaleICUOps::replace_every(const OptString& haystack,
-                                      const Array& replacements) const {
+                                         const Array& replacements) const {
   auto uhaystack = ustr_from_utf8(haystack);
   icu::ErrorCode err;
   // singleton, do not free
@@ -700,7 +700,7 @@ OptString HSLLocaleICUOps::replace_every(const OptString& haystack,
 }
 
 OptString HSLLocaleICUOps::replace_every_ci(const OptString& haystack,
-                                         const Array& replacements) const {
+                                            const Array& replacements) const {
   auto uhaystack = ustr_from_utf8(haystack);
   icu::ErrorCode err;
   // singleton, do not free
@@ -735,7 +735,7 @@ OptString HSLLocaleICUOps::replace_every_ci(const OptString& haystack,
 }
 
 OptString HSLLocaleICUOps::replace_every_nonrecursive(const OptString& haystack,
-                                                   const Array& replacements) const {
+                                                      const Array& replacements) const {
   icu::ErrorCode err;
   // Singleton, do not free
   auto normalizer = icu::Normalizer2::getNFCInstance(err);
@@ -761,7 +761,7 @@ OptString HSLLocaleICUOps::replace_every_nonrecursive(const OptString& haystack,
 }
 
 OptString HSLLocaleICUOps::replace_every_nonrecursive_ci(const OptString& haystack,
-                                                      const Array& replacements) const {
+                                                         const Array& replacements) const {
   icu::ErrorCode err;
   // Singleton, do not free
   auto normalizer = icu::Normalizer2::getNFCInstance(err);

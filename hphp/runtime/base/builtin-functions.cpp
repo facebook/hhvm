@@ -199,8 +199,8 @@ bool is_callable(const Variant& v, bool syntax_only, Variant* name) {
 
     if (name) {
       *name = concat3(OptString{clsString},
-                             s_colon2,
-                             OptString{mthname.val().pstr});
+                                s_colon2,
+                                OptString{mthname.val().pstr});
     }
     return ret;
   }
@@ -1130,7 +1130,7 @@ OptString concat3(const OptString& s1, const OptString& s2, const OptString& s3)
 }
 
 OptString concat4(const OptString& s1, const OptString& s2, const OptString& s3,
-               const OptString& s4) {
+                  const OptString& s4) {
   auto r1 = s1.slice();
   auto r2 = s2.slice();
   auto r3 = s3.slice();
@@ -1229,7 +1229,7 @@ static bool include_impl_invoke_context(const OptString& file, void* ctx) {
  * information that will be passed through to tryFile.  (It's a hacky closure)
  */
 OptString resolve_include(const OptString& file, const char* currentDir,
-                       bool (*tryFile)(const OptString& file, void*), void* ctx) {
+                          bool (*tryFile)(const OptString& file, void*), void* ctx) {
   const char* c_file = file.data();
 
   auto const getCwd = [] () -> OptString {
@@ -1321,7 +1321,7 @@ static Variant include_impl(const OptString& file, bool once,
                             bool raiseNotice) {
   struct IncludeImplInvokeContext ctx = {once, currentDir};
   OptString can_path = resolve_include(file, currentDir,
-                                    include_impl_invoke_context, (void*)&ctx);
+                                       include_impl_invoke_context, (void*)&ctx);
 
   if (can_path.isNull()) {
     // Failure

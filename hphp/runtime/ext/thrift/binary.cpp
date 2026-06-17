@@ -923,7 +923,7 @@ Variant HHVM_FUNCTION(thrift_protocol_read_binary_struct,
 }
 
 OptString HHVM_FUNCTION(thrift_protocol_write_binary_struct_to_string,
-                     const Object& request_struct) {
+                        const Object& request_struct) {
   
   CoeffectsAutoGuard _;
   // Suppress class-to-string conversion warnings that occur during

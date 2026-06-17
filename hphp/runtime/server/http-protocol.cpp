@@ -599,7 +599,7 @@ static void CopyPathInfo(Array& server,
   }
   server.set(s_SCRIPT_URI,
              OptString(prefix + (hostHeader.empty() ? hostName + port_suffix :
-                              OptString(hostHeader)) + r.originalURL()));
+                                 OptString(hostHeader)) + r.originalURL()));
 
   if (r.rewritten()) {
     // when URL is rewritten, PHP decided to put original URL as SCRIPT_NAME
@@ -657,13 +657,13 @@ static void CopyPathInfo(Array& server,
       } else {
         server.set(s_PATH_TRANSLATED,
                    OptString(server[s_DOCUMENT_ROOT].asCStrRef() +
-                          s_forwardslash + pathTranslated));
+                             s_forwardslash + pathTranslated));
       }
     } else {
       server.set(s_PATH_TRANSLATED,
                  OptString(server[s_DOCUMENT_ROOT].asCStrRef() +
-                        server[s_SCRIPT_NAME].asCStrRef() +
-                        r.pathInfo().data()));
+                           server[s_SCRIPT_NAME].asCStrRef() +
+                           r.pathInfo().data()));
     }
     server.set(s_PATH_INFO, r.pathInfo());
   }

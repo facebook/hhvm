@@ -125,14 +125,14 @@ OptString OptString::substr(int start, int length /* = StringData::MaxSize */) c
 }
 
 int OptString::find(char ch, int pos /* = 0 */,
-                 bool caseSensitive /* = true */) const {
+                    bool caseSensitive /* = true */) const {
   if (empty()) return -1;
   return string_find(m_str->data(), m_str->size(), ch, pos,
                      caseSensitive);
 }
 
 int OptString::find(const char *s, int pos /* = 0 */,
-                 bool caseSensitive /* = true */) const {
+                    bool caseSensitive /* = true */) const {
   assertx(s);
   if (empty()) return -1;
   if (*s && *(s+1) == 0) {
@@ -143,7 +143,7 @@ int OptString::find(const char *s, int pos /* = 0 */,
 }
 
 int OptString::find(const OptString& s, int pos /* = 0 */,
-                 bool caseSensitive /* = true */) const {
+                    bool caseSensitive /* = true */) const {
   if (empty()) return -1;
   if (s.size() == 1) {
     return find(*s.data(), pos, caseSensitive);
@@ -153,14 +153,14 @@ int OptString::find(const OptString& s, int pos /* = 0 */,
 }
 
 int OptString::rfind(char ch, int pos /* = 0 */,
-                  bool caseSensitive /* = true */) const {
+                     bool caseSensitive /* = true */) const {
   if (empty()) return -1;
   return string_rfind(m_str->data(), m_str->size(), ch,
                       pos, caseSensitive);
 }
 
 int OptString::rfind(const char *s, int pos /* = 0 */,
-                  bool caseSensitive /* = true */) const {
+                     bool caseSensitive /* = true */) const {
   assertx(s);
   if (empty()) return -1;
   if (*s && *(s+1) == 0) {
@@ -171,7 +171,7 @@ int OptString::rfind(const char *s, int pos /* = 0 */,
 }
 
 int OptString::rfind(const OptString& s, int pos /* = 0 */,
-                  bool caseSensitive /* = true */) const {
+                     bool caseSensitive /* = true */) const {
   if (empty()) return -1;
   if (s.size() == 1) {
     return rfind(*s.data(), pos, caseSensitive);

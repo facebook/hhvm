@@ -140,7 +140,7 @@ static bool HHVM_FUNCTION(mysql_set_timeout, int64_t query_timeout_ms /* = -1 */
 }
 
 static OptString HHVM_FUNCTION(mysql_escape_string,
-                            const OptString& unescaped_string) {
+                               const OptString& unescaped_string) {
   OptString new_str((size_t)unescaped_string.size() * 2 + 1, ReserveString);
   unsigned long new_len = mysql_escape_string(new_str.mutableData(),
                                     unescaped_string.data(),
@@ -590,7 +590,7 @@ static Variant HHVM_FUNCTION(mysql_result, const OptResource& result, int64_t ro
   } else {
     if (sql_row[field_offset]) {
       return OptString(sql_row[field_offset], sql_row_lengths[field_offset],
-                    CopyString);
+                       CopyString);
     }
   }
   return init_null();

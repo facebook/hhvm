@@ -119,8 +119,8 @@ Variant HHVM_FUNCTION(readfile,
 // shell commands
 
 OptString HHVM_FUNCTION(basename,
-                     const OptString& path,
-                     const OptString& suffix = null_string);
+                        const OptString& path,
+                        const OptString& suffix = null_string);
 Variant HHVM_FUNCTION(glob,
                       const OptString& pattern,
                       int64_t flags = 0);
@@ -153,7 +153,7 @@ bool HHVM_FUNCTION(mkdir,
                    bool recursive = false,
                    const Variant& context = uninit_null());
 OptString HHVM_FUNCTION(dirname,
-                     const OptString& path);
+                        const OptString& path);
 Variant HHVM_FUNCTION(getcwd);
 Variant HHVM_FUNCTION(readdir,
                       const Variant& dir_handle = uninit_variant);

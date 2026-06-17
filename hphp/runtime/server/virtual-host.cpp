@@ -480,7 +480,7 @@ std::string VirtualHost::serverName(const std::string &host) const {
       Variant matches;
       Variant ret = preg_match(m_pattern,
                                OptString(host.c_str(), host.size(),
-                                      CopyString).get(),
+                                         CopyString).get(),
                                &matches);
       if (ret.toInt64() > 0) {
         OptString prefix = matches.toArray()[1].toString();
@@ -512,10 +512,10 @@ std::string VirtualHost::filterUrl(const std::string &url) const {
     bool match = true;
     if (!filter.urlPattern.empty()) {
       Variant ret = preg_match(OptString(filter.urlPattern.c_str(),
-                                      filter.urlPattern.size(),
-                                      CopyString),
+                                         filter.urlPattern.size(),
+                                         CopyString),
                                OptString(url.c_str(), url.size(),
-                                      CopyString));
+                                         CopyString));
       match = (ret.toInt64() > 0);
     }
 
@@ -527,10 +527,10 @@ std::string VirtualHost::filterUrl(const std::string &url) const {
       Variant ret;
       int count = preg_replace(ret, filter.namePattern.c_str(),
                                OptString(filter.replaceWith.c_str(),
-                                      filter.replaceWith.size(),
-                                      CopyString),
+                                         filter.replaceWith.size(),
+                                         CopyString),
                                OptString(url.c_str(), url.size(),
-                                      CopyString));
+                                         CopyString));
       if (!same(ret, false) && count > 0) {
         return ret.toString().data();
       }

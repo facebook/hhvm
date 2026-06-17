@@ -105,8 +105,8 @@ void string_to_case(OptString& s, int (*tocase)(int)) {
 #define STR_PAD_BOTH            2
 
 OptString string_pad(const char *input, int len, int pad_length,
-                  const char *pad_string, int pad_str_len,
-                  int pad_type) {
+                     const char *pad_string, int pad_str_len,
+                     int pad_type) {
   assertx(input);
   int num_pad_chars = pad_length - len;
 
@@ -276,7 +276,7 @@ const char *string_memnstr(const char *haystack, const char *needle,
 }
 
 OptString string_replace(const char *s, int len, int start, int length,
-                      const char *replacement, int len_repl) {
+                         const char *replacement, int len_repl) {
   assertx(s);
   assertx(replacement);
   assertx(len >= 0);
@@ -332,9 +332,9 @@ OptString string_replace(const char *s, int len, int start, int length,
 }
 
 OptString string_replace(const char *input, int len,
-                      const char *search, int len_search,
-                      const char *replacement, int len_replace,
-                      int &count, bool case_sensitive) {
+                         const char *search, int len_search,
+                         const char *replacement, int len_replace,
+                         int &count, bool case_sensitive) {
   assertx(input);
   assertx(search && len_search);
   assertx(len >= 0);
@@ -421,7 +421,7 @@ OptString string_replace(const char *input, int len,
 ///////////////////////////////////////////////////////////////////////////////
 
 OptString string_chunk_split(const char *src, int srclen, const char *end,
-                          int endlen, int chunklen) {
+                             int endlen, int chunklen) {
   int chunks = srclen / chunklen; // complete chunks!
   int restlen = srclen - chunks * chunklen; /* srclen % chunklen */
 
@@ -543,8 +543,8 @@ static int string_tag_find(const char *tag, int len, const char *set) {
  * code.
  */
 OptString string_strip_tags(const char *s, const int len,
-                         const char *allow, const int allow_len,
-                         bool allow_tag_spaces) {
+                            const char *allow, const int allow_len,
+                            bool allow_tag_spaces) {
   const char *abuf, *p;
   char *rbuf, *tbuf, *tp, *rp, c, lc;
 
@@ -1565,8 +1565,8 @@ OptString string_money_format(const char *format, double value) {
 ///////////////////////////////////////////////////////////////////////////////
 
 OptString string_number_format(double d, int dec,
-                            const OptString& dec_point,
-                            const OptString& thousand_sep) {
+                               const OptString& dec_point,
+                               const OptString& thousand_sep) {
   char *tmpbuf = nullptr, *resbuf;
   char *s, *t;  /* source, target */
   char *dp;
@@ -1889,7 +1889,7 @@ static char Lookahead(unsigned char *word, int how_far) {
 #define Isbreak(c)  (!isalpha(c))
 
 OptString string_metaphone(const char *input, int word_len, long max_phonemes,
-                        int traditional) {
+                           int traditional) {
   unsigned char *word = (unsigned char *)input;
 
   int w_idx = 0;        /* point in the phonization we're at. */

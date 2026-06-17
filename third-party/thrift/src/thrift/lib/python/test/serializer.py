@@ -904,17 +904,17 @@ class SerializerTerseWriteTests(unittest.TestCase):
     ],
 )
 class IOBufSerializationTests(unittest.TestCase):
-    """Tests documenting IOBuf field behavior through serialization roundtrip.
+    """Tests that IOBuf fields round-trip into a single coalesced node.
 
-    Plain SimpleJSON (``Protocol.JSON``) deserializes binary into a *chained*
-    IOBuf whose head node is empty (via ``folly::IOBuf::appendChain`` in
-    ``JSONProtocolCommon-inl.h``). Because ``bytes()``/``len()`` on the folly
-    Python IOBuf only read the head node, they observe an empty buffer for
-    SimpleJSON-deserialized fields, even though the data is fully present and
-    recoverable by iterating the chain (e.g. ``b"".join(iobuf)``).
+    Every protocol (JSON/SimpleJSON, JSON5, Compact, Binary) must deserialize a
+    binary field into a single-node ``folly::IOBuf``, so that ``bytes()`` and
+    ``len()`` on the folly Python IOBuf (which read only the head node) observe
+    the full value.
 
-    JSON5, Compact, and Binary instead deserialize into a single coalesced
-    node, so ``bytes()`` works as expected for those protocols.
+    SimpleJSON previously used ``folly::IOBuf::appendChain`` in
+    ``JSONProtocolCommon-inl.h``, which left an empty head node in front of the
+    data, making ``bytes()`` return ``b''``. It now assigns a single coalesced
+    node, consistent with the other protocols.
     """
 
     def setUp(self) -> None:
@@ -925,16 +925,14 @@ class IOBufSerializationTests(unittest.TestCase):
 
     @parameterized.expand(
         [
-            ("json", Protocol.JSON, True),
-            ("json5", Protocol.JSON5, False),
-            ("compact", Protocol.COMPACT, False),
-            ("binary", Protocol.BINARY, False),
+            ("json", Protocol.JSON),
+            ("json5", Protocol.JSON5),
+            ("compact", Protocol.COMPACT),
+            ("binary", Protocol.BINARY),
         ]
     )
-    def test_iobuf_roundtrip(
-        self, _name: str, protocol: Protocol, deserializes_to_chain: bool
-    ) -> None:
-        """Demonstrate current IOBuf field behavior across protocols."""
+    def test_iobuf_roundtrip(self, _name: str, protocol: Protocol) -> None:
+        """IOBuf field content is preserved and readable via bytes()."""
         test_data = b'{"key": "value", "number": 42}'
         control = self.Complex(
             val_iobuf=IOBuf(test_data),
@@ -945,17 +943,8 @@ class IOBufSerializationTests(unittest.TestCase):
             self.Complex, serialized, protocol=protocol
         )
 
-        # The data is always preserved and recoverable by iterating the chain.
-        self.assertEqual(bytes(control.val_iobuf), test_data)
-        self.assertEqual(b"".join(control.val_iobuf), test_data)
+        # The data is recoverable both via bytes()/len() (head node) and by
+        # iterating the chain -- i.e. the field is a single coalesced node.
         self.assertEqual(b"".join(deserialized.val_iobuf), test_data)
-
-        if deserializes_to_chain:
-            # SimpleJSON: deserialized into a chained IOBuf with an empty head
-            # node, so bytes()/len() (head-node-only) observe an empty buffer.
-            self.assertEqual(bytes(deserialized.val_iobuf), b"")
-            self.assertEqual(len(deserialized.val_iobuf), 0)
-        else:
-            # JSON5/Compact/Binary: coalesced into a single node, bytes() works.
-            self.assertEqual(bytes(deserialized.val_iobuf), test_data)
-            self.assertEqual(len(deserialized.val_iobuf), len(test_data))
+        self.assertEqual(bytes(deserialized.val_iobuf), test_data)
+        self.assertEqual(len(deserialized.val_iobuf), len(test_data))

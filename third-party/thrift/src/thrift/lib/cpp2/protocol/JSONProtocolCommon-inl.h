@@ -528,7 +528,13 @@ inline void JSONProtocolReaderCommon::readBinary(folly::IOBuf& str) {
   bool keyish;
   ensureAndReadContext(keyish);
   readJSONBase64(tmp);
-  str.appendChain(folly::IOBuf::copyBuffer(tmp));
+  // Assign a single coalesced node rather than appendChain() onto the (empty)
+  // default-constructed `str`. appendChain() would leave an empty head node in
+  // front of the data, producing a chained IOBuf where bytes()/length() (which
+  // only observe the head node) see an empty buffer. This matches the
+  // std::unique_ptr<folly::IOBuf>& overload above and the Binary/Compact
+  // protocol readers.
+  str = folly::IOBuf(folly::IOBuf::COPY_BUFFER, tmp);
 }
 
 /**

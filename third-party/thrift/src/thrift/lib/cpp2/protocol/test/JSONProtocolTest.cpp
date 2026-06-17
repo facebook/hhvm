@@ -510,6 +510,20 @@ TEST_F(JSONProtocolTest, readBinary) {
               p.readBinary(buf);
               return StringPiece(buf.coalesce()).str();
             }));
+  // The folly::IOBuf& overload must produce a single (non-chained) node, so
+  // that data()/length() -- which observe only the head node -- see the full
+  // value without first having to coalesce(). Reading the head node directly
+  // (no coalesce) verifies readBinary did not leave an empty head node in
+  // front of the data.
+  EXPECT_EQ(expected, reading_cpp2<string>(input, [](R& p) {
+              IOBuf buf(IOBuf::CREATE, 0);
+              p.readBinary(buf);
+              EXPECT_FALSE(buf.isChained());
+              return StringPiece(
+                         reinterpret_cast<const char*>(buf.data()),
+                         buf.length())
+                  .str();
+            }));
 }
 
 TEST_F(JSONProtocolTest, readMap_string_i64) {

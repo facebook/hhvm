@@ -16,10 +16,7 @@
 
 #pragma once
 
-#ifndef __cpp_impl_three_way_comparison
-#error "Three way comparison operator is not supported by the compiler"
-#endif
-
+#include <compare>
 #include <initializer_list>
 #include <memory>
 #include <optional>
@@ -68,6 +65,22 @@ concept ImplicitlyBindableTo = std::is_same_v<
                                    std::add_const_t<std::remove_reference_t<U>>,
                                    std::remove_reference_t<T>> &&
     !(std::is_rvalue_reference_v<T> && std::is_lvalue_reference_v<U>);
+
+template <typename L, typename R>
+FOLLY_ERASE auto compare_three_way(const L& lhs, const R& rhs) {
+  if constexpr (requires { lhs <=> rhs; }) {
+    return lhs <=> rhs;
+  } else {
+    return lhs == rhs ? std::partial_ordering::equivalent
+        : lhs < rhs   ? std::partial_ordering::less
+        : rhs < lhs   ? std::partial_ordering::greater
+                      : std::partial_ordering::unordered;
+  }
+}
+
+template <typename L, typename R>
+using compare_three_way_result_t =
+    decltype(compare_three_way(FOLLY_DECLVAL(L), FOLLY_DECLVAL(R)));
 
 } // namespace detail
 
@@ -250,100 +263,32 @@ class field_ref {
     return field_ref<folly::like_t<T, const value_type>>{*this};
   }
 
+  template <typename U>
+  FOLLY_ERASE bool operator==(field_ref<U> rhs) const {
+    return value_ == *rhs;
+  }
+
+  template <typename U>
+  FOLLY_ERASE auto operator<=>(field_ref<U> rhs) const {
+    return detail::compare_three_way(value_, *rhs);
+  }
+
+  template <typename U>
+    requires(!detail::is_any_field_ref_v<U>)
+  FOLLY_ERASE bool operator==(const U& rhs) const {
+    return value_ == rhs;
+  }
+
+  template <typename U>
+    requires(!detail::is_any_field_ref_v<U>)
+  FOLLY_ERASE auto operator<=>(const U& rhs) const {
+    return detail::compare_three_way(value_, rhs);
+  }
+
  private:
   value_type& value_;
   BitRef bitref_;
 };
-
-template <typename T, typename U>
-bool operator==(field_ref<T> lhs, field_ref<U> rhs) {
-  return *lhs == *rhs;
-}
-
-template <typename T, typename U>
-bool operator!=(field_ref<T> lhs, field_ref<U> rhs) {
-  return *lhs != *rhs;
-}
-
-template <typename T, typename U>
-bool operator<(field_ref<T> lhs, field_ref<U> rhs) {
-  return *lhs < *rhs;
-}
-
-template <typename T, typename U>
-bool operator>(field_ref<T> lhs, field_ref<U> rhs) {
-  return *lhs > *rhs;
-}
-
-template <typename T, typename U>
-bool operator<=(field_ref<T> lhs, field_ref<U> rhs) {
-  return *lhs <= *rhs;
-}
-
-template <typename T, typename U>
-bool operator>=(field_ref<T> lhs, field_ref<U> rhs) {
-  return *lhs >= *rhs;
-}
-
-template <typename T, typename U>
-bool operator==(field_ref<T> lhs, const U& rhs) {
-  return *lhs == rhs;
-}
-
-template <typename T, typename U>
-bool operator!=(field_ref<T> lhs, const U& rhs) {
-  return *lhs != rhs;
-}
-
-template <typename T, typename U>
-bool operator<(field_ref<T> lhs, const U& rhs) {
-  return *lhs < rhs;
-}
-
-template <typename T, typename U>
-bool operator>(field_ref<T> lhs, const U& rhs) {
-  return *lhs > rhs;
-}
-
-template <typename T, typename U>
-bool operator<=(field_ref<T> lhs, const U& rhs) {
-  return *lhs <= rhs;
-}
-
-template <typename T, typename U>
-bool operator>=(field_ref<T> lhs, const U& rhs) {
-  return *lhs >= rhs;
-}
-
-template <typename T, typename U>
-bool operator==(const T& lhs, field_ref<U> rhs) {
-  return lhs == *rhs;
-}
-
-template <typename T, typename U>
-bool operator!=(const T& lhs, field_ref<U> rhs) {
-  return lhs != *rhs;
-}
-
-template <typename T, typename U>
-bool operator<(const T& lhs, field_ref<U> rhs) {
-  return lhs < *rhs;
-}
-
-template <typename T, typename U>
-bool operator>(const T& lhs, field_ref<U> rhs) {
-  return lhs > *rhs;
-}
-
-template <typename T, typename U>
-bool operator<=(const T& lhs, field_ref<U> rhs) {
-  return lhs <= *rhs;
-}
-
-template <typename T, typename U>
-bool operator>=(const T& lhs, field_ref<U> rhs) {
-  return lhs >= *rhs;
-}
 
 // A reference to an optional field of the possibly const-qualified type
 // std::remove_reference_t<T> in a Thrift-generated struct.
@@ -579,6 +524,46 @@ class optional_field_ref {
     return optional_field_ref<folly::like_t<T, const value_type>>{*this};
   }
 
+  template <typename U>
+  FOLLY_ERASE bool operator==(optional_field_ref<U> rhs) const {
+    return has_value() && rhs.has_value() ? value_ == *rhs
+                                          : has_value() == rhs.has_value();
+  }
+
+  template <typename U>
+  FOLLY_ERASE auto operator<=>(optional_field_ref<U> rhs) const {
+    using result_type =
+        detail::compare_three_way_result_t<reference_type, decltype(*rhs)>;
+    if (has_value() != rhs.has_value()) {
+      return result_type(
+          has_value() ? std::strong_ordering::greater
+                      : std::strong_ordering::less);
+    }
+    if (!has_value()) {
+      return result_type(std::strong_ordering::equivalent);
+    }
+    return detail::compare_three_way(value_, *rhs);
+  }
+
+  template <typename U>
+    requires(!detail::is_any_field_ref_v<U>)
+  FOLLY_ERASE bool operator==(const U& rhs) const {
+    return has_value() ? value_ == rhs : false;
+  }
+
+  template <typename U>
+    requires(!detail::is_any_field_ref_v<U>)
+  FOLLY_ERASE auto operator<=>(const U& rhs) const {
+    using result_type =
+        detail::compare_three_way_result_t<reference_type, const U&>;
+    if (!has_value()) {
+      return result_type(std::strong_ordering::less);
+    }
+    return detail::compare_three_way(value_, rhs);
+  }
+
+  FOLLY_ERASE bool operator==(std::nullopt_t) const { return !has_value(); }
+
  private:
   FOLLY_ERASE void throw_if_unset() const {
     if (!bitref_) {
@@ -589,116 +574,6 @@ class optional_field_ref {
   value_type& value_;
   BitRef bitref_;
 };
-
-template <typename T1, typename T2>
-bool operator==(optional_field_ref<T1> a, optional_field_ref<T2> b) {
-  return a && b ? *a == *b : a.has_value() == b.has_value();
-}
-
-template <typename T1, typename T2>
-bool operator!=(optional_field_ref<T1> a, optional_field_ref<T2> b) {
-  return !(a == b);
-}
-
-template <typename T1, typename T2>
-bool operator<(optional_field_ref<T1> a, optional_field_ref<T2> b) {
-  if (a.has_value() != b.has_value()) {
-    return a.has_value() < b.has_value();
-  }
-  return a ? *a < *b : false;
-}
-
-template <typename T1, typename T2>
-bool operator>(optional_field_ref<T1> a, optional_field_ref<T2> b) {
-  return b < a;
-}
-
-template <typename T1, typename T2>
-bool operator<=(optional_field_ref<T1> a, optional_field_ref<T2> b) {
-  return !(a > b);
-}
-
-template <typename T1, typename T2>
-bool operator>=(optional_field_ref<T1> a, optional_field_ref<T2> b) {
-  return !(a < b);
-}
-
-template <typename T, typename U>
-bool operator==(optional_field_ref<T> a, const U& b) {
-  return a ? *a == b : false;
-}
-
-template <typename T, typename U>
-bool operator!=(optional_field_ref<T> a, const U& b) {
-  return !(a == b);
-}
-
-template <typename T, typename U>
-bool operator==(const U& a, optional_field_ref<T> b) {
-  return b == a;
-}
-
-template <typename T, typename U>
-bool operator!=(const U& a, optional_field_ref<T> b) {
-  return b != a;
-}
-
-template <typename T, typename U>
-bool operator<(optional_field_ref<T> a, const U& b) {
-  return a ? *a < b : true;
-}
-
-template <typename T, typename U>
-bool operator>(optional_field_ref<T> a, const U& b) {
-  return a ? *a > b : false;
-}
-
-template <typename T, typename U>
-bool operator<=(optional_field_ref<T> a, const U& b) {
-  return !(a > b);
-}
-
-template <typename T, typename U>
-bool operator>=(optional_field_ref<T> a, const U& b) {
-  return !(a < b);
-}
-
-template <typename T, typename U>
-bool operator<(const U& a, optional_field_ref<T> b) {
-  return b > a;
-}
-
-template <typename T, typename U>
-bool operator<=(const U& a, optional_field_ref<T> b) {
-  return b >= a;
-}
-
-template <typename T, typename U>
-bool operator>(const U& a, optional_field_ref<T> b) {
-  return b < a;
-}
-
-template <typename T, typename U>
-bool operator>=(const U& a, optional_field_ref<T> b) {
-  return b <= a;
-}
-
-template <class T>
-bool operator==(const optional_field_ref<T>& a, std::nullopt_t) {
-  return !a.has_value();
-}
-template <class T>
-bool operator==(std::nullopt_t, const optional_field_ref<T>& a) {
-  return !a.has_value();
-}
-template <class T>
-bool operator!=(const optional_field_ref<T>& a, std::nullopt_t) {
-  return a.has_value();
-}
-template <class T>
-bool operator!=(std::nullopt_t, const optional_field_ref<T>& a) {
-  return a.has_value();
-}
 
 namespace detail {
 
@@ -915,6 +790,46 @@ class optional_boxed_field_ref {
     return optional_boxed_field_ref<detail::const_storage_ref_t<T>>{*this};
   }
 
+  template <typename U>
+  FOLLY_ERASE bool operator==(optional_boxed_field_ref<U> rhs) const {
+    return has_value() && rhs.has_value() ? value() == *rhs
+                                          : has_value() == rhs.has_value();
+  }
+
+  template <typename U>
+  FOLLY_ERASE auto operator<=>(optional_boxed_field_ref<U> rhs) const {
+    using result_type =
+        detail::compare_three_way_result_t<reference_type, decltype(*rhs)>;
+    if (has_value() != rhs.has_value()) {
+      return result_type(
+          has_value() ? std::strong_ordering::greater
+                      : std::strong_ordering::less);
+    }
+    if (!has_value()) {
+      return result_type(std::strong_ordering::equivalent);
+    }
+    return detail::compare_three_way(value(), *rhs);
+  }
+
+  template <typename U>
+    requires(!detail::is_any_field_ref_v<U>)
+  FOLLY_ERASE bool operator==(const U& rhs) const {
+    return has_value() ? value() == rhs : false;
+  }
+
+  template <typename U>
+    requires(!detail::is_any_field_ref_v<U>)
+  FOLLY_ERASE auto operator<=>(const U& rhs) const {
+    using result_type =
+        detail::compare_three_way_result_t<reference_type, const U&>;
+    if (!has_value()) {
+      return result_type(std::strong_ordering::less);
+    }
+    return detail::compare_three_way(value(), rhs);
+  }
+
+  FOLLY_ERASE bool operator==(std::nullopt_t) const { return !has_value(); }
+
  private:
   FOLLY_ERASE void throw_if_unset() const {
     if (!has_value()) {
@@ -932,120 +847,6 @@ class optional_boxed_field_ref {
 
   std::remove_reference_t<T>& value_;
 };
-
-template <typename T1, typename T2>
-bool operator==(
-    optional_boxed_field_ref<T1> a, optional_boxed_field_ref<T2> b) {
-  return a && b ? *a == *b : a.has_value() == b.has_value();
-}
-
-template <typename T1, typename T2>
-bool operator!=(
-    optional_boxed_field_ref<T1> a, optional_boxed_field_ref<T2> b) {
-  return !(a == b);
-}
-
-template <typename T1, typename T2>
-bool operator<(optional_boxed_field_ref<T1> a, optional_boxed_field_ref<T2> b) {
-  if (a.has_value() != b.has_value()) {
-    return a.has_value() < b.has_value();
-  }
-  return a ? *a < *b : false;
-}
-
-template <typename T1, typename T2>
-bool operator>(optional_boxed_field_ref<T1> a, optional_boxed_field_ref<T2> b) {
-  return b < a;
-}
-
-template <typename T1, typename T2>
-bool operator<=(
-    optional_boxed_field_ref<T1> a, optional_boxed_field_ref<T2> b) {
-  return !(a > b);
-}
-
-template <typename T1, typename T2>
-bool operator>=(
-    optional_boxed_field_ref<T1> a, optional_boxed_field_ref<T2> b) {
-  return !(a < b);
-}
-
-template <typename T, typename U>
-bool operator==(optional_boxed_field_ref<T> a, const U& b) {
-  return a ? *a == b : false;
-}
-
-template <typename T, typename U>
-bool operator!=(optional_boxed_field_ref<T> a, const U& b) {
-  return !(a == b);
-}
-
-template <typename T, typename U>
-bool operator==(const U& a, optional_boxed_field_ref<T> b) {
-  return b == a;
-}
-
-template <typename T, typename U>
-bool operator!=(const U& a, optional_boxed_field_ref<T> b) {
-  return b != a;
-}
-
-template <typename T, typename U>
-bool operator<(optional_boxed_field_ref<T> a, const U& b) {
-  return a ? *a < b : true;
-}
-
-template <typename T, typename U>
-bool operator>(optional_boxed_field_ref<T> a, const U& b) {
-  return a ? *a > b : false;
-}
-
-template <typename T, typename U>
-bool operator<=(optional_boxed_field_ref<T> a, const U& b) {
-  return !(a > b);
-}
-
-template <typename T, typename U>
-bool operator>=(optional_boxed_field_ref<T> a, const U& b) {
-  return !(a < b);
-}
-
-template <typename T, typename U>
-bool operator<(const U& a, optional_boxed_field_ref<T> b) {
-  return b > a;
-}
-
-template <typename T, typename U>
-bool operator<=(const U& a, optional_boxed_field_ref<T> b) {
-  return b >= a;
-}
-
-template <typename T, typename U>
-bool operator>(const U& a, optional_boxed_field_ref<T> b) {
-  return b < a;
-}
-
-template <typename T, typename U>
-bool operator>=(const U& a, optional_boxed_field_ref<T> b) {
-  return b <= a;
-}
-
-template <class T>
-bool operator==(const optional_boxed_field_ref<T>& a, std::nullopt_t) {
-  return !a.has_value();
-}
-template <class T>
-bool operator==(std::nullopt_t, const optional_boxed_field_ref<T>& a) {
-  return !a.has_value();
-}
-template <class T>
-bool operator!=(const optional_boxed_field_ref<T>& a, std::nullopt_t) {
-  return a.has_value();
-}
-template <class T>
-bool operator!=(std::nullopt_t, const optional_boxed_field_ref<T>& a) {
-  return a.has_value();
-}
 
 // A reference to a 'Fill' intern boxed field.
 //
@@ -1241,101 +1042,41 @@ class intern_boxed_field_ref {
     return intern_boxed_field_ref<detail::const_storage_ref_t<T>>{*this};
   }
 
+  template <typename U>
+  FOLLY_ERASE bool operator==(intern_boxed_field_ref<U> rhs) const {
+    return comparison_value() == *rhs;
+  }
+
+  template <typename U>
+  FOLLY_ERASE auto operator<=>(intern_boxed_field_ref<U> rhs) const {
+    return detail::compare_three_way(comparison_value(), *rhs);
+  }
+
+  template <typename U>
+    requires(!detail::is_any_field_ref_v<U>)
+  FOLLY_ERASE bool operator==(const U& rhs) const {
+    return comparison_value() == rhs;
+  }
+
+  template <typename U>
+    requires(!detail::is_any_field_ref_v<U>)
+  FOLLY_ERASE auto operator<=>(const U& rhs) const {
+    return detail::compare_three_way(comparison_value(), rhs);
+  }
+
  private:
+  FOLLY_ERASE reference_type comparison_value() const {
+    if constexpr (std::is_const_v<value_type>) {
+      return static_cast<reference_type>(value_.value());
+    } else {
+      return static_cast<reference_type>(value_.mut());
+    }
+  }
+
   boxed_value_type& value_;
   get_default_t get_default_;
   BitRef bitref_;
 };
-
-template <typename T1, typename T2>
-bool operator==(intern_boxed_field_ref<T1> a, intern_boxed_field_ref<T2> b) {
-  return *a == *b;
-}
-
-template <typename T1, typename T2>
-bool operator!=(intern_boxed_field_ref<T1> a, intern_boxed_field_ref<T2> b) {
-  return !(a == b);
-}
-
-template <typename T1, typename T2>
-bool operator<(intern_boxed_field_ref<T1> a, intern_boxed_field_ref<T2> b) {
-  return *a < *b;
-}
-
-template <typename T1, typename T2>
-bool operator>(intern_boxed_field_ref<T1> a, intern_boxed_field_ref<T2> b) {
-  return b < a;
-}
-
-template <typename T1, typename T2>
-bool operator<=(intern_boxed_field_ref<T1> a, intern_boxed_field_ref<T2> b) {
-  return !(a > b);
-}
-
-template <typename T1, typename T2>
-bool operator>=(intern_boxed_field_ref<T1> a, intern_boxed_field_ref<T2> b) {
-  return !(a < b);
-}
-
-template <typename T, typename U>
-bool operator==(intern_boxed_field_ref<T> a, const U& b) {
-  return *a == b;
-}
-
-template <typename T, typename U>
-bool operator!=(intern_boxed_field_ref<T> a, const U& b) {
-  return !(a == b);
-}
-
-template <typename T, typename U>
-bool operator==(const U& a, intern_boxed_field_ref<T> b) {
-  return b == a;
-}
-
-template <typename T, typename U>
-bool operator!=(const U& a, intern_boxed_field_ref<T> b) {
-  return b != a;
-}
-
-template <typename T, typename U>
-bool operator<(intern_boxed_field_ref<T> a, const U& b) {
-  return *a < b;
-}
-
-template <typename T, typename U>
-bool operator>(intern_boxed_field_ref<T> a, const U& b) {
-  return *a > b;
-}
-
-template <typename T, typename U>
-bool operator<=(intern_boxed_field_ref<T> a, const U& b) {
-  return !(a > b);
-}
-
-template <typename T, typename U>
-bool operator>=(intern_boxed_field_ref<T> a, const U& b) {
-  return !(a < b);
-}
-
-template <typename T, typename U>
-bool operator<(const U& a, intern_boxed_field_ref<T> b) {
-  return b > a;
-}
-
-template <typename T, typename U>
-bool operator<=(const U& a, intern_boxed_field_ref<T> b) {
-  return b >= a;
-}
-
-template <typename T, typename U>
-bool operator>(const U& a, intern_boxed_field_ref<T> b) {
-  return b < a;
-}
-
-template <typename T, typename U>
-bool operator>=(const U& a, intern_boxed_field_ref<T> b) {
-  return b <= a;
-}
 
 // A reference to a 'terse' intern boxed field.
 //
@@ -1495,7 +1236,37 @@ class terse_intern_boxed_field_ref {
     return terse_intern_boxed_field_ref<detail::const_storage_ref_t<T>>{*this};
   }
 
+  template <typename U>
+  FOLLY_ERASE bool operator==(terse_intern_boxed_field_ref<U> rhs) const {
+    return comparison_value() == *rhs;
+  }
+
+  template <typename U>
+  FOLLY_ERASE auto operator<=>(terse_intern_boxed_field_ref<U> rhs) const {
+    return detail::compare_three_way(comparison_value(), *rhs);
+  }
+
+  template <typename U>
+    requires(!detail::is_any_field_ref_v<U>)
+  FOLLY_ERASE bool operator==(const U& rhs) const {
+    return comparison_value() == rhs;
+  }
+
+  template <typename U>
+    requires(!detail::is_any_field_ref_v<U>)
+  FOLLY_ERASE auto operator<=>(const U& rhs) const {
+    return detail::compare_three_way(comparison_value(), rhs);
+  }
+
  private:
+  FOLLY_ERASE reference_type comparison_value() const {
+    if constexpr (std::is_const_v<value_type>) {
+      return static_cast<reference_type>(value_.value());
+    } else {
+      return static_cast<reference_type>(value_.mut());
+    }
+  }
+
   boxed_value_type& value_;
   get_default_t get_default_;
 };
@@ -1504,102 +1275,6 @@ template <typename T>
 terse_intern_boxed_field_ref<const T&> as_const_intern_box(
     terse_intern_boxed_field_ref<T&> val) {
   return val;
-}
-
-template <typename T1, typename T2>
-bool operator==(
-    terse_intern_boxed_field_ref<T1> a, terse_intern_boxed_field_ref<T2> b) {
-  return *a == *b;
-}
-
-template <typename T1, typename T2>
-bool operator!=(
-    terse_intern_boxed_field_ref<T1> a, terse_intern_boxed_field_ref<T2> b) {
-  return !(a == b);
-}
-
-template <typename T1, typename T2>
-bool operator<(
-    terse_intern_boxed_field_ref<T1> a, terse_intern_boxed_field_ref<T2> b) {
-  return *a < *b;
-}
-
-template <typename T1, typename T2>
-bool operator>(
-    terse_intern_boxed_field_ref<T1> a, terse_intern_boxed_field_ref<T2> b) {
-  return b < a;
-}
-
-template <typename T1, typename T2>
-bool operator<=(
-    terse_intern_boxed_field_ref<T1> a, terse_intern_boxed_field_ref<T2> b) {
-  return !(a > b);
-}
-
-template <typename T1, typename T2>
-bool operator>=(
-    terse_intern_boxed_field_ref<T1> a, terse_intern_boxed_field_ref<T2> b) {
-  return !(a < b);
-}
-
-template <typename T, typename U>
-bool operator==(terse_intern_boxed_field_ref<T> a, const U& b) {
-  return *a == b;
-}
-
-template <typename T, typename U>
-bool operator!=(terse_intern_boxed_field_ref<T> a, const U& b) {
-  return !(a == b);
-}
-
-template <typename T, typename U>
-bool operator==(const U& a, terse_intern_boxed_field_ref<T> b) {
-  return b == a;
-}
-
-template <typename T, typename U>
-bool operator!=(const U& a, terse_intern_boxed_field_ref<T> b) {
-  return b != a;
-}
-
-template <typename T, typename U>
-bool operator<(terse_intern_boxed_field_ref<T> a, const U& b) {
-  return *a < b;
-}
-
-template <typename T, typename U>
-bool operator>(terse_intern_boxed_field_ref<T> a, const U& b) {
-  return *a > b;
-}
-
-template <typename T, typename U>
-bool operator<=(terse_intern_boxed_field_ref<T> a, const U& b) {
-  return !(a > b);
-}
-
-template <typename T, typename U>
-bool operator>=(terse_intern_boxed_field_ref<T> a, const U& b) {
-  return !(a < b);
-}
-
-template <typename T, typename U>
-bool operator<(const U& a, terse_intern_boxed_field_ref<T> b) {
-  return b > a;
-}
-
-template <typename T, typename U>
-bool operator<=(const U& a, terse_intern_boxed_field_ref<T> b) {
-  return b >= a;
-}
-
-template <typename T, typename U>
-bool operator>(const U& a, terse_intern_boxed_field_ref<T> b) {
-  return b < a;
-}
-
-template <typename T, typename U>
-bool operator>=(const U& a, terse_intern_boxed_field_ref<T> b) {
-  return b <= a;
 }
 
 namespace detail {
@@ -1894,99 +1569,31 @@ class required_field_ref {
     return required_field_ref<folly::like_t<T, const value_type>>{*this};
   }
 
+  template <typename U>
+  FOLLY_ERASE bool operator==(required_field_ref<U> rhs) const {
+    return value_ == *rhs;
+  }
+
+  template <typename U>
+  FOLLY_ERASE auto operator<=>(required_field_ref<U> rhs) const {
+    return detail::compare_three_way(value_, *rhs);
+  }
+
+  template <typename U>
+    requires(!detail::is_any_field_ref_v<U>)
+  FOLLY_ERASE bool operator==(const U& rhs) const {
+    return value_ == rhs;
+  }
+
+  template <typename U>
+    requires(!detail::is_any_field_ref_v<U>)
+  FOLLY_ERASE auto operator<=>(const U& rhs) const {
+    return detail::compare_three_way(value_, rhs);
+  }
+
  private:
   value_type& value_;
 };
-
-template <typename T, typename U>
-bool operator==(required_field_ref<T> lhs, required_field_ref<U> rhs) {
-  return *lhs == *rhs;
-}
-
-template <typename T, typename U>
-bool operator!=(required_field_ref<T> lhs, required_field_ref<U> rhs) {
-  return *lhs != *rhs;
-}
-
-template <typename T, typename U>
-bool operator<(required_field_ref<T> lhs, required_field_ref<U> rhs) {
-  return *lhs < *rhs;
-}
-
-template <typename T, typename U>
-bool operator>(required_field_ref<T> lhs, required_field_ref<U> rhs) {
-  return *lhs > *rhs;
-}
-
-template <typename T, typename U>
-bool operator<=(required_field_ref<T> lhs, required_field_ref<U> rhs) {
-  return *lhs <= *rhs;
-}
-
-template <typename T, typename U>
-bool operator>=(required_field_ref<T> lhs, required_field_ref<U> rhs) {
-  return *lhs >= *rhs;
-}
-
-template <typename T, typename U>
-bool operator==(required_field_ref<T> lhs, const U& rhs) {
-  return *lhs == rhs;
-}
-
-template <typename T, typename U>
-bool operator!=(required_field_ref<T> lhs, const U& rhs) {
-  return *lhs != rhs;
-}
-
-template <typename T, typename U>
-bool operator<(required_field_ref<T> lhs, const U& rhs) {
-  return *lhs < rhs;
-}
-
-template <typename T, typename U>
-bool operator>(required_field_ref<T> lhs, const U& rhs) {
-  return *lhs > rhs;
-}
-
-template <typename T, typename U>
-bool operator<=(required_field_ref<T> lhs, const U& rhs) {
-  return *lhs <= rhs;
-}
-
-template <typename T, typename U>
-bool operator>=(required_field_ref<T> lhs, const U& rhs) {
-  return *lhs >= rhs;
-}
-
-template <typename T, typename U>
-bool operator==(const T& lhs, required_field_ref<U> rhs) {
-  return lhs == *rhs;
-}
-
-template <typename T, typename U>
-bool operator!=(const T& lhs, required_field_ref<U> rhs) {
-  return lhs != *rhs;
-}
-
-template <typename T, typename U>
-bool operator<(const T& lhs, required_field_ref<U> rhs) {
-  return lhs < *rhs;
-}
-
-template <typename T, typename U>
-bool operator>(const T& lhs, required_field_ref<U> rhs) {
-  return lhs > *rhs;
-}
-
-template <typename T, typename U>
-bool operator<=(const T& lhs, required_field_ref<U> rhs) {
-  return lhs <= *rhs;
-}
-
-template <typename T, typename U>
-bool operator>=(const T& lhs, required_field_ref<U> rhs) {
-  return lhs >= *rhs;
-}
 
 namespace detail {
 
@@ -2201,6 +1808,44 @@ class union_field_ref {
         vtable_};
   }
 
+  template <typename U>
+  FOLLY_ERASE bool operator==(union_field_ref<U> rhs) const {
+    return has_value() && rhs.has_value() ? get_value() == *rhs
+                                          : has_value() == rhs.has_value();
+  }
+
+  template <typename U>
+  FOLLY_ERASE auto operator<=>(union_field_ref<U> rhs) const {
+    using result_type =
+        detail::compare_three_way_result_t<reference_type, decltype(*rhs)>;
+    if (has_value() != rhs.has_value()) {
+      return result_type(
+          has_value() ? std::strong_ordering::greater
+                      : std::strong_ordering::less);
+    }
+    if (!has_value()) {
+      return result_type(std::strong_ordering::equivalent);
+    }
+    return detail::compare_three_way(get_value(), *rhs);
+  }
+
+  template <typename U>
+    requires(!detail::is_any_field_ref_v<U>)
+  FOLLY_ERASE bool operator==(const U& rhs) const {
+    return has_value() ? get_value() == rhs : false;
+  }
+
+  template <typename U>
+    requires(!detail::is_any_field_ref_v<U>)
+  FOLLY_ERASE auto operator<=>(const U& rhs) const {
+    using result_type =
+        detail::compare_three_way_result_t<reference_type, const U&>;
+    if (!has_value()) {
+      return result_type(std::strong_ordering::less);
+    }
+    return detail::compare_three_way(get_value(), rhs);
+  }
+
  private:
   FOLLY_ERASE void throw_if_unset() const {
     if (!has_value()) {
@@ -2244,99 +1889,6 @@ class union_field_ref {
   owner owner_;
   const vtable& vtable_;
 };
-
-template <typename T1, typename T2>
-bool operator==(union_field_ref<T1> a, union_field_ref<T2> b) {
-  return a && b ? *a == *b : a.has_value() == b.has_value();
-}
-
-template <typename T1, typename T2>
-bool operator!=(union_field_ref<T1> a, union_field_ref<T2> b) {
-  return !(a == b);
-}
-
-template <typename T1, typename T2>
-bool operator<(union_field_ref<T1> a, union_field_ref<T2> b) {
-  if (a.has_value() != b.has_value()) {
-    return a.has_value() < b.has_value();
-  }
-  return a ? *a < *b : false;
-}
-
-template <typename T1, typename T2>
-bool operator>(union_field_ref<T1> a, union_field_ref<T2> b) {
-  return b < a;
-}
-
-template <typename T1, typename T2>
-bool operator<=(union_field_ref<T1> a, union_field_ref<T2> b) {
-  return !(a > b);
-}
-
-template <typename T1, typename T2>
-bool operator>=(union_field_ref<T1> a, union_field_ref<T2> b) {
-  return !(a < b);
-}
-
-template <typename T, typename U>
-bool operator==(union_field_ref<T> a, const U& b) {
-  return a ? *a == b : false;
-}
-
-template <typename T, typename U>
-bool operator!=(union_field_ref<T> a, const U& b) {
-  return !(a == b);
-}
-
-template <typename T, typename U>
-bool operator==(const U& a, union_field_ref<T> b) {
-  return b == a;
-}
-
-template <typename T, typename U>
-bool operator!=(const U& a, union_field_ref<T> b) {
-  return b != a;
-}
-
-template <typename T, typename U>
-bool operator<(union_field_ref<T> a, const U& b) {
-  return a ? *a < b : true;
-}
-
-template <typename T, typename U>
-bool operator>(union_field_ref<T> a, const U& b) {
-  return a ? *a > b : false;
-}
-
-template <typename T, typename U>
-bool operator<=(union_field_ref<T> a, const U& b) {
-  return !(a > b);
-}
-
-template <typename T, typename U>
-bool operator>=(union_field_ref<T> a, const U& b) {
-  return !(a < b);
-}
-
-template <typename T, typename U>
-bool operator<(const U& a, union_field_ref<T> b) {
-  return b > a;
-}
-
-template <typename T, typename U>
-bool operator<=(const U& a, union_field_ref<T> b) {
-  return b >= a;
-}
-
-template <typename T, typename U>
-bool operator>(const U& a, union_field_ref<T> b) {
-  return b < a;
-}
-
-template <typename T, typename U>
-bool operator>=(const U& a, union_field_ref<T> b) {
-  return b <= a;
-}
 
 namespace detail {
 struct union_value_unsafe_fn {
@@ -2473,99 +2025,31 @@ class terse_field_ref {
     return terse_field_ref<folly::like_t<T, const value_type>>{*this};
   }
 
+  template <typename U>
+  FOLLY_ERASE bool operator==(terse_field_ref<U> rhs) const {
+    return value_ == *rhs;
+  }
+
+  template <typename U>
+  FOLLY_ERASE auto operator<=>(terse_field_ref<U> rhs) const {
+    return detail::compare_three_way(value_, *rhs);
+  }
+
+  template <typename U>
+    requires(!detail::is_any_field_ref_v<U>)
+  FOLLY_ERASE bool operator==(const U& rhs) const {
+    return value_ == rhs;
+  }
+
+  template <typename U>
+    requires(!detail::is_any_field_ref_v<U>)
+  FOLLY_ERASE auto operator<=>(const U& rhs) const {
+    return detail::compare_three_way(value_, rhs);
+  }
+
  private:
   value_type& value_;
 };
-
-template <typename T, typename U>
-bool operator==(terse_field_ref<T> lhs, terse_field_ref<U> rhs) {
-  return *lhs == *rhs;
-}
-
-template <typename T, typename U>
-bool operator!=(terse_field_ref<T> lhs, terse_field_ref<U> rhs) {
-  return *lhs != *rhs;
-}
-
-template <typename T, typename U>
-bool operator<(terse_field_ref<T> lhs, terse_field_ref<U> rhs) {
-  return *lhs < *rhs;
-}
-
-template <typename T, typename U>
-bool operator>(terse_field_ref<T> lhs, terse_field_ref<U> rhs) {
-  return *lhs > *rhs;
-}
-
-template <typename T, typename U>
-bool operator<=(terse_field_ref<T> lhs, terse_field_ref<U> rhs) {
-  return *lhs <= *rhs;
-}
-
-template <typename T, typename U>
-bool operator>=(terse_field_ref<T> lhs, terse_field_ref<U> rhs) {
-  return *lhs >= *rhs;
-}
-
-template <typename T, typename U>
-bool operator==(terse_field_ref<T> lhs, const U& rhs) {
-  return *lhs == rhs;
-}
-
-template <typename T, typename U>
-bool operator!=(terse_field_ref<T> lhs, const U& rhs) {
-  return *lhs != rhs;
-}
-
-template <typename T, typename U>
-bool operator<(terse_field_ref<T> lhs, const U& rhs) {
-  return *lhs < rhs;
-}
-
-template <typename T, typename U>
-bool operator>(terse_field_ref<T> lhs, const U& rhs) {
-  return *lhs > rhs;
-}
-
-template <typename T, typename U>
-bool operator<=(terse_field_ref<T> lhs, const U& rhs) {
-  return *lhs <= rhs;
-}
-
-template <typename T, typename U>
-bool operator>=(terse_field_ref<T> lhs, const U& rhs) {
-  return *lhs >= rhs;
-}
-
-template <typename T, typename U>
-bool operator==(const T& lhs, terse_field_ref<U> rhs) {
-  return lhs == *rhs;
-}
-
-template <typename T, typename U>
-bool operator!=(const T& lhs, terse_field_ref<U> rhs) {
-  return lhs != *rhs;
-}
-
-template <typename T, typename U>
-bool operator<(const T& lhs, terse_field_ref<U> rhs) {
-  return lhs < *rhs;
-}
-
-template <typename T, typename U>
-bool operator>(const T& lhs, terse_field_ref<U> rhs) {
-  return lhs > *rhs;
-}
-
-template <typename T, typename U>
-bool operator<=(const T& lhs, terse_field_ref<U> rhs) {
-  return lhs <= *rhs;
-}
-
-template <typename T, typename U>
-bool operator>=(const T& lhs, terse_field_ref<U> rhs) {
-  return lhs >= *rhs;
-}
 
 #undef THRIFT_FIELD_REF_CONST_ACCESS_DEPRECATED
 

@@ -91,5 +91,16 @@ inline constexpr bool is_optional_or_union_field_ref_v =
     is_optional_field_ref_v<T> || is_optional_boxed_field_ref_v<T> ||
     is_union_field_ref_v<T>;
 
+template <typename T>
+inline constexpr bool is_any_field_ref_v =
+    is_field_ref_v<std::remove_cvref_t<T>> ||
+    is_optional_field_ref_v<std::remove_cvref_t<T>> ||
+    is_required_field_ref_v<std::remove_cvref_t<T>> ||
+    is_optional_boxed_field_ref_v<std::remove_cvref_t<T>> ||
+    is_union_field_ref_v<std::remove_cvref_t<T>> ||
+    is_intern_boxed_field_ref_v<std::remove_cvref_t<T>> ||
+    is_terse_intern_boxed_field_ref_v<std::remove_cvref_t<T>> ||
+    is_terse_field_ref_v<std::remove_cvref_t<T>>;
+
 } // namespace detail
 } // namespace apache::thrift

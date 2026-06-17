@@ -255,15 +255,18 @@ public class ReactiveHeaderCodec {
   private static void decodeHeaders(ByteBuf messageHeader, Map<String, String> headers) {
     int headerCount = readVarInt32(messageHeader);
     for (int i = 0; i < headerCount; i++) {
-      String key = readString(messageHeader);
-      String value = null;
+      // key is read inside the try so it is null in the log when the key itself is oversized.
+      String key = null;
       try {
-        value = readString(messageHeader);
+        key = readString(messageHeader);
+        String value = readString(messageHeader);
+        headers.put(key, value);
       } catch (Exception e) {
-        log.error("Failed to read header {}", key, e);
+        // Never log the header value; it can contain sensitive data. The key name and the
+        // byte length in the exception message are safe to log.
+        log.error("Failed to read header, key={}", key, e);
         throw e;
       }
-      headers.put(key, value);
     }
   }
 

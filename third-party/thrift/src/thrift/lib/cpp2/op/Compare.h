@@ -65,16 +65,15 @@ template <typename LTagOrT = void, typename RTagOrT = LTagOrT>
 inline constexpr Less<type::infer_tag<LTagOrT>, type::infer_tag<RTagOrT>>
     less{};
 
-/// Compares two Thrift values, returning the associated folly::ordering value.
+/// Compares two Thrift values, returning the associated std::weak_ordering
+/// value.
 ///
 /// For example:
-/// * compare<int32_t>(1, 2) -> folly::ordering::lt
-/// * less<double_t>(0.0, -0.0) -> folly::ordering::eq
-/// * compare<string_t>("aa", "a") -> folly::ordering::gt
+/// * compare<int32_t>(1, 2) -> std::weak_ordering::less
+/// * compare<double_t>(0.0, -0.0) -> std::weak_ordering::equivalent
+/// * compare<string_t>("aa", "a") -> std::weak_ordering::greater
 template <typename LTagOrT = void, typename RTagOrT = LTagOrT>
-inline constexpr detail::
-    CompareWith<type::infer_tag<LTagOrT>, type::infer_tag<RTagOrT>>
-        compare{};
+inline constexpr detail::CompareThreeWay<type::infer_tag<LTagOrT>> compare{};
 
 /// A binary operator that returns true iff one Thrift value is less than
 /// another, comparing struct fields by sorted field ID order (instead of

@@ -127,115 +127,6 @@ inline constexpr bool less_than_comparable_v =
 template <typename LTag, typename RTag = LTag, typename R = void>
 using if_less_than_comparable = folly::type_t<R, less_than_t<LTag, RTag>>;
 
-// A CompareWith implementation that delegates to EqualTo and LessThan.
-template <
-    typename LTag,
-    typename RTag = LTag,
-    typename EqualTo = EqualTo<LTag, RTag>,
-    typename LessThan = LessThan<LTag, RTag>,
-    typename L = type::native_type<LTag>,
-    typename R = type::native_type<RTag>,
-    typename = if_less_than_comparable<LTag, RTag>>
-struct DefaultCompareWith {
-  constexpr std::weak_ordering operator()(const L& lhs, const R& rhs) const {
-    if (equalTo(lhs, rhs)) {
-      return std::weak_ordering::equivalent;
-    } else if (lessThan(lhs, rhs)) {
-      return std::weak_ordering::less;
-    }
-    return std::weak_ordering::greater;
-  }
-
- protected:
-  EqualTo equalTo;
-  LessThan lessThan;
-};
-
-// The 'compare with' operator.
-//
-// TODO(afuller): Add more efficient specializations.
-template <typename LTag, typename RTag = LTag, typename = void>
-struct CompareWith : DefaultCompareWith<LTag, RTag> {}; // Delegates by default.
-
-template <>
-struct CompareWith<type::void_t> {
-  template <typename L, typename R>
-  constexpr std::weak_ordering operator()(const L& lhs, const R& rhs) const {
-    return CompareWith<type::infer_tag<L>, type::infer_tag<R>>{}(lhs, rhs);
-  }
-};
-template <typename LTag>
-struct CompareWith<LTag, type::void_t> {
-  template <typename L, typename R>
-  constexpr std::weak_ordering operator()(const L& lhs, const R& rhs) const {
-    return CompareWith<LTag, type::infer_tag<R>>{}(lhs, rhs);
-  }
-};
-template <typename RTag>
-struct CompareWith<type::void_t, RTag> {
-  template <typename L, typename R>
-  constexpr std::weak_ordering operator()(const L& lhs, const R& rhs) const {
-    return CompareWith<type::infer_tag<L>, RTag>{}(lhs, rhs);
-  }
-};
-
-// The type returned by a call to `CompareWith::operator()`, if well defined.
-template <typename LTag, typename RTag = LTag>
-using compare_with_t = decltype(CompareWith<LTag, RTag>{}(
-    std::declval<const type::native_type<LTag>&>(),
-    std::declval<const type::native_type<RTag>&>()));
-
-// If the give tags are comparable.
-template <typename LTag, typename RTag = LTag>
-inline constexpr bool comparable_v =
-    folly::is_detected_v<compare_with_t, LTag, RTag>;
-
-// Resolves to R, if the two tags *can* be used together in CompareWith.
-template <
-    typename LTag,
-    typename RTag = LTag,
-    typename R = std::partial_ordering>
-using if_comparable = folly::type_t<R, compare_with_t<LTag, RTag>>;
-
-// Resolves to R, if the two tags *cannot* be used together in CompareWith.
-template <
-    typename LTag,
-    typename RTag = LTag,
-    typename R = std::partial_ordering>
-using if_not_comparable = std::enable_if_t<!comparable_v<LTag, RTag>, R>;
-
-// An EqualTo that delegates to CompareWith.
-template <
-    typename LTag,
-    typename RTag = LTag,
-    typename CompareWith = CompareWith<LTag, RTag>,
-    typename L = type::native_type<LTag>,
-    typename R = type::native_type<RTag>>
-struct DefaultEqualTo {
-  constexpr bool operator()(const L& lhs, const R& rhs) const {
-    return std::is_eq(compareWith(lhs, rhs));
-  }
-
- protected:
-  CompareWith compareWith;
-};
-
-// A LessThan that delegates to CompareWith.
-template <
-    typename LTag,
-    typename RTag = LTag,
-    typename CompareWith = CompareWith<LTag, RTag>,
-    typename L = type::native_type<LTag>,
-    typename R = type::native_type<RTag>>
-struct DefaultLessThan {
-  constexpr bool operator()(const L& lhs, const R& rhs) const {
-    return std::is_lt(compareWith(lhs, rhs));
-  }
-
- protected:
-  CompareWith compareWith;
-};
-
 // A CompareThreeWay implementation that delegates to EqualTo and LessThan.
 template <
     typename Tag,
@@ -264,6 +155,40 @@ template <
 struct CompareThreeWay : DefaultCompareThreeWay<Tag, LessThanType> {
 }; // Delegates by default.
 
+template <template <class...> class LessThanType>
+struct CompareThreeWay<type::void_t, LessThanType> {
+  template <typename L, typename R>
+  constexpr std::weak_ordering operator()(const L& lhs, const R& rhs) const {
+    return CompareThreeWay<type::infer_tag<L>, LessThanType>{}(lhs, rhs);
+  }
+};
+
+// The type returned by a call to `CompareThreeWay::operator()`, if well
+// defined.
+template <typename LTag, typename RTag = LTag>
+using compare_three_way_t = decltype(CompareThreeWay<LTag>{}(
+    std::declval<const type::native_type<LTag>&>(),
+    std::declval<const type::native_type<RTag>&>()));
+
+// If the given tags are comparable.
+template <typename LTag, typename RTag = LTag>
+inline constexpr bool comparable_v =
+    folly::is_detected_v<compare_three_way_t, LTag, RTag>;
+
+// Resolves to R, if the two tags *can* be used together in CompareThreeWay.
+template <
+    typename LTag,
+    typename RTag = LTag,
+    typename R = std::partial_ordering>
+using if_comparable = folly::type_t<R, compare_three_way_t<LTag, RTag>>;
+
+// Resolves to R, if the two tags *cannot* be used together in CompareThreeWay.
+template <
+    typename LTag,
+    typename RTag = LTag,
+    typename R = std::partial_ordering>
+using if_not_comparable = std::enable_if_t<!comparable_v<LTag, RTag>, R>;
+
 // Use bit_cast for floating point identical.
 template <typename F, typename I>
 struct FloatIdenticalTo {
@@ -279,15 +204,6 @@ struct IdenticalTo<type::float_t> : FloatIdenticalTo<float, int32_t> {};
 template <>
 struct IdenticalTo<type::double_t> : FloatIdenticalTo<double, int64_t> {};
 
-template <typename Tag>
-  requires type::is_a_v<Tag, type::number_c>
-struct CompareWith<Tag, Tag> {
-  using T = type::native_type<Tag>;
-
-  std::weak_ordering operator()(T lhs, T rhs) const {
-    return std::weak_order(lhs, rhs);
-  }
-};
 template <typename Tag, template <class...> class LessThanType>
   requires type::is_a_v<Tag, type::number_c>
 struct CompareThreeWay<Tag, LessThanType> {
@@ -333,21 +249,6 @@ struct IOBufCompareToStd {
     return folly::to_underlying(folly::IOBufCompare{}(a, b)) <=> 0;
   }
 };
-
-template <typename LUTag, typename RUTag>
-struct CompareWith<
-    type::cpp_type<folly::IOBuf, LUTag>,
-    type::cpp_type<folly::IOBuf, RUTag>> : CheckIOBufOp<LUTag, RUTag>,
-                                           IOBufCompareToStd {};
-template <typename LUTag, typename RUTag>
-struct CompareWith<
-    type::cpp_type<std::unique_ptr<folly::IOBuf>, LUTag>,
-    type::cpp_type<std::unique_ptr<folly::IOBuf>, RUTag>>
-    : CheckIOBufOp<LUTag, RUTag>, IOBufCompareToStd {};
-
-template <typename UTag>
-struct CompareWith<type::cpp_type<folly::IOBuf, UTag>>
-    : CheckIOBufOp<UTag, UTag>, IOBufCompareToStd {};
 
 template <typename UTag>
 struct CompareThreeWay<type::cpp_type<folly::IOBuf, UTag>>

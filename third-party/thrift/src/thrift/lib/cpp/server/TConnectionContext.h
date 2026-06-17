@@ -39,9 +39,18 @@ class TConnectionContext {
   // Expose the THeader to read headers or other flags
   transport::THeader* getHeader() const { return header_; }
 
-  bool setHeader(const std::string& key, const std::string& value) {
+  bool setHeader(std::string_view key, const std::string& value) {
     if (header_) {
       header_->setHeader(key, value);
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  bool setHeader(std::string_view key, std::string&& value) {
+    if (header_) {
+      header_->setHeader(key, std::move(value));
       return true;
     } else {
       return false;

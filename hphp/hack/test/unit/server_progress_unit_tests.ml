@@ -585,8 +585,6 @@ let env =
       is_interactive = false;
       warning_switches = [];
       dump_config = false;
-      find_my_tests_max_distance = None;
-      find_my_tests_max_test_files = None;
     }
 
 let make_error_filter env =

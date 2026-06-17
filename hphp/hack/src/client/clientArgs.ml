@@ -233,8 +233,6 @@ let parse_check_args cmd ~from_default : ClientEnv.client_check_env =
   let set_mode_only_log_errors config =
     if !only_log_errors then set_mode (MODE_LOG_ERRORS config)
   in
-  let find_my_tests_max_distance = ref None in
-  let find_my_tests_max_test_files = ref None in
   (* parse args *)
   let usage =
     match cmd with
@@ -405,35 +403,10 @@ let parse_check_args cmd ~from_default : ClientEnv.client_check_env =
           (fun path -> set_mode ~validate:true (MODE_FIND_MY_TESTS path)),
         " (mode) return test files that reference the given symbols, using the version specified in the JSON config (default: staging)",
         Arg_non_user_facing );
-      ( "--find-my-tests-v1",
-        Arg.Rest
-          begin
-            fun symbol ->
-              set_mode
-                ~validate:false
-                (match !mode with
-                | None -> MODE_FIND_MY_TESTS_V1 [symbol]
-                | Some (MODE_FIND_MY_TESTS_V1 symbols) ->
-                  MODE_FIND_MY_TESTS_V1 (symbol :: symbols)
-                | _ -> raise (Arg.Bad "only a single mode should be specified"))
-          end,
-        " (mode) return test files that reference the given methods [C::m list]",
-        (* typically invoked from code *) Arg_non_user_facing );
       ( "--find-my-tests-staging",
         Arg.String
           (fun path -> set_mode ~validate:true (MODE_FIND_MY_TESTS path)),
         " (deprecated, use --find-my-tests) alias for --find-my-tests",
-        Arg_non_user_facing );
-      ( "--find-my-tests-max-distance",
-        Arg.Int
-          (fun max_distance -> find_my_tests_max_distance := Some max_distance),
-        "maximum distance between given symbol(s) and any test that --find-my-tests will return (default: 1)",
-        Arg_non_user_facing );
-      ( "--find-my-tests-max-test-files",
-        Arg.Int
-          (fun max_test_files ->
-            find_my_tests_max_test_files := Some max_test_files),
-        "maximum number of test files to return from --find-my-tests (default: unlimited)",
         Arg_non_user_facing );
       tuple_3_append
         (Common_argspecs.force_dormant_start force_dormant_start)
@@ -1162,8 +1135,6 @@ rewrite to the function names to something like `foo_1` and `foo_2`.
     is_interactive;
     warning_switches = List.rev !warning_switches;
     dump_config = !dump_config;
-    find_my_tests_max_distance = !find_my_tests_max_distance;
-    find_my_tests_max_test_files = !find_my_tests_max_test_files;
   }
 
 let parse_start_env command ~from_default =

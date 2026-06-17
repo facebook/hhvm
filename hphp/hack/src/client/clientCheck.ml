@@ -38,16 +38,6 @@ let print_refs (results : SearchTypes.Find_refs.absolute list) ~(json : bool) :
   else
     FindRefsWireFormat.CliHumanReadable.print_results results
 
-let print_find_my_tests_result_v1 result ~(json : bool) : unit =
-  let module FMT = ServerCommandTypes.Find_my_tests in
-  if json then
-    let result_json =
-      `List (List.map result ~f:FMT.yojson_of_selected_test_file)
-    in
-    print_endline (Hh_json_helpers.Out.pretty_to_string result_json)
-  else
-    List.iter result ~f:(fun file -> print_endline file.FMT.file_path)
-
 let print_find_my_tests_result result ~(json : bool) : unit =
   let module FMT = ServerCommandTypes.Find_my_tests in
   if json then
@@ -135,8 +125,6 @@ let connect
     is_interactive = _;
     warning_switches = _;
     dump_config = _;
-    find_my_tests_max_distance = _;
-    find_my_tests_max_test_files = _;
   } =
     args
   in
@@ -1041,66 +1029,8 @@ let main_internal
     in
     List.iter results ~f:(fun s -> print_refs s ~json:true);
     Lwt.return (Exit_status.No_error, Telemetry.create ())
-  | ClientEnv.MODE_FIND_MY_TESTS_V1 symbols ->
-    let open ServerCommandTypes.Find_my_tests in
-    let parse_symbol symbol =
-      let pieces = Str.split (Str.regexp "|") symbol in
-      let (kind, name) =
-        match pieces with
-        | [name] -> (None, name)
-        | [kind; name] -> (Some kind, name)
-        | _ ->
-          Printf.eprintf "Invalid input\n";
-          raise Exit_status.(Exit_with Input_error)
-      in
-      let action_kind =
-        parse_name_or_member_id
-          ~name_and_member_action:(fun class_name member_name ->
-            match kind with
-            | Some "Method"
-            | None ->
-              Method { class_name; member_name }
-            | Some "Typeconst" -> Typeconst { class_name; member_name }
-            | Some _ -> raise Exit_status.(Exit_with Input_error))
-          ~name_only_action:(fun name ->
-            match kind with
-            | Some "Class" -> Class { class_name = name }
-            | Some "Typedef" -> Typedef { name }
-            | Some _
-            | None ->
-              raise Exit_status.(Exit_with Input_error))
-          name
-      in
-      { kind = action_kind; soft = false }
-    in
-    let actions = List.map ~f:parse_symbol symbols in
-    let max_distance =
-      Option.value args.find_my_tests_max_distance ~default:1
-    in
-    let%lwt (result, telemtry) =
-      rpc args
-      @@ ServerCommandTypes.FIND_MY_TESTS_V1
-           (max_distance, args.find_my_tests_max_test_files, actions)
-    in
-    (match result with
-    | Ok fmt_result ->
-      print_find_my_tests_result_v1 fmt_result ~json:args.output_json;
-      Lwt.return (Exit_status.No_error, telemtry)
-    | Error error ->
-      Printf.eprintf "%s\n" error;
-      Lwt.return (Exit_status.Input_error, telemtry))
   | ClientEnv.MODE_FIND_MY_TESTS path ->
     let open ServerCommandTypes.Find_my_tests in
-    if Option.is_some args.find_my_tests_max_distance then begin
-      Printf.eprintf
-        "--find-my-tests-max-distance cannot be used with --find-my-tests\n";
-      raise Exit_status.(Exit_with Input_error)
-    end;
-    if Option.is_some args.find_my_tests_max_test_files then begin
-      Printf.eprintf
-        "--find-my-tests-max-test-files cannot be used with --find-my-tests\n";
-      raise Exit_status.(Exit_with Input_error)
-    end;
     let parse_symbol symbol =
       let pieces = Str.split (Str.regexp "|") symbol in
       let (kind, name) =

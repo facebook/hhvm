@@ -153,8 +153,6 @@ end
 module Find_my_tests = struct
   open Ppx_yojson_conv_lib.Yojson_conv.Primitives
 
-  (* Types Used by both V1 and staging *)
-
   type member = {
     class_name: string;
     member_name: string;
@@ -203,12 +201,6 @@ module Find_my_tests = struct
   }
   [@@deriving yojson]
 
-  (* Types only use by v1 *)
-
-  type result_v1 = (selected_test_file list, string) Result.t
-
-  (* Types used by V2 and beyond *)
-
   type result_data = {
     selected_test_files: selected_test_file list;
     out_of_time: bool;
@@ -217,7 +209,6 @@ module Find_my_tests = struct
 
   type result = (result_data, string) Result.t
 
-  (** No entry for V1 here, it has its own entry point *)
   type version =
     | V2
     | Staging
@@ -551,9 +542,6 @@ type _ t =
   | DEPS_IN_BATCH :
       (string * int * int) list
       -> Find_refs.result_or_retry list t
-  | FIND_MY_TESTS_V1 :
-      (int * int option * Find_my_tests.action list)
-      -> Find_my_tests.result_v1 t
   | FIND_MY_TESTS :
       (Find_my_tests.version * Find_my_tests.config * Find_my_tests.action list)
       -> Find_my_tests.result t
@@ -616,7 +604,6 @@ let rpc_command_needs_full_check : type a. a t -> bool =
   | IDE_FIND_REFS_BY_SYMBOL _ -> true
   | IDE_GO_TO_IMPL_BY_SYMBOL _ -> true
   | METHOD_JUMP (_, _, find_children) -> find_children (* uses find refs *)
-  | FIND_MY_TESTS_V1 _ -> true
   | FIND_MY_TESTS _ -> true
   | SAVE_NAMING _ -> false
   (* Codebase-wide rename, uses find references *)

@@ -29,7 +29,6 @@ type client_mode =
   | MODE_DUMP_SYMBOL_INFO of string
   | MODE_FIND_CLASS_REFS of string
   | MODE_FIND_REFS of string
-  | MODE_FIND_MY_TESTS_V1 of string list
   | MODE_FIND_MY_TESTS of string
   | MODE_FULL_FIDELITY_PARSE of string
   | MODE_FULL_FIDELITY_SCHEMA
@@ -123,8 +122,6 @@ type client_check_env = {
       number of places, e.g., error formatting and spinners. *)
   warning_switches: Filter_diagnostics.switch list;
   dump_config: bool;
-  find_my_tests_max_distance: int option;
-  find_my_tests_max_test_files: int option;
 }
 
 let string_to_rename_mode = function

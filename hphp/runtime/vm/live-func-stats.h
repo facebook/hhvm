@@ -23,6 +23,10 @@
 namespace HPHP {
   enum class LiveFunctionKind { RepoAuthoritative, Sandbox, Test };
 
+  // Maps a LiveFunctionKind to the "mode" string used in live-function logging
+  // ("prod", "sandbox", "test").
+  const char* liveFunctionKindToString(LiveFunctionKind kind);
+
   // Used by the runtime to log functions as live.
   void markFunctionAsLive(const Func* func, Optional<LiveFunctionKind> kind = std::nullopt);
 }

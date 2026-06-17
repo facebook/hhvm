@@ -1137,7 +1137,12 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
 - bool Eval.DumpJitProfileStats = false, UNKNOWN
 
-- bool Eval.LogJitProfileLiveness = false, UNKNOWN
+- std::string Eval.LogJitProfileLivenessPath = "", UNKNOWN
+
+  If set to a non-empty path, the live functions found in the
+  deserialized jit.prof are written as headerless "<function_name>,<mode>"
+  CSV rows to this path instead of being logged to Scuba. An empty path
+  disables the CSV dump.
 
 - uint32_t Eval.LogJitFunctionLivenessSampleRate = 0, UNKNOWN
 

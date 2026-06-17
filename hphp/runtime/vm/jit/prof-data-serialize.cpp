@@ -83,6 +83,8 @@
 #include <folly/portability/Unistd.h>
 #include <folly/String.h>
 
+#include <fstream>
+
 namespace HPHP { namespace jit {
 //////////////////////////////////////////////////////////////////////
 
@@ -2352,6 +2354,31 @@ std::string serializeSBProfData(const std::string& root,
   }
 }
 
+// Dumps every function found in the deserialized jit.prof as a headerless
+// "<function_name>,<mode>" CSV row to Eval.LogJitProfileLivenessPath, for
+// offline dead-code analysis. The columns mirror what markFunctionAsLive logs
+// to Scuba; the mode is always "prod" since a jit.prof is repo-authoritative.
+void dumpJitProfileLivenessCSV(ProfData* pd) {
+  auto const& path = Cfg::Eval::LogJitProfileLivenessPath;
+  always_assert_flog(!path.empty(),
+                     "Eval.LogJitProfileLivenessPath is empty; "
+                     "dumpJitProfileLivenessCSV should not have been called");
+
+  std::ofstream out(path, std::ios::out | std::ios::trunc);
+  if (!out.is_open()) {
+    Logger::Warning("Failed to open '%s' for live-function CSV dump",
+                    path.c_str());
+    return;
+  }
+
+  auto const mode =
+    liveFunctionKindToString(LiveFunctionKind::RepoAuthoritative);
+  pd->forEachProfilingFunc([&](auto const& func) {
+    if (func->name()->same(s_invoke.get())) return;
+    out << func->fullName()->data() << ',' << mode << '\n';
+  });
+}
+
 std::string deserializeProfData(const std::string& filename,
                                 int numWorkers,
                                 bool rds) {
@@ -2469,11 +2496,8 @@ std::string deserializeProfData(const std::string& filename,
       pd->forEachProfilingFunc(logFunc);
     }
 
-    if (Cfg::Eval::LogJitProfileLiveness) {
-      auto const logFunc = [&](auto const& func) {
-        markFunctionAsLive(func, LiveFunctionKind::RepoAuthoritative);
-      };
-      pd->forEachProfilingFunc(logFunc);
+    if (!Cfg::Eval::LogJitProfileLivenessPath.empty()) {
+      dumpJitProfileLivenessCSV(pd);
     }
 
     if (Cfg::Eval::EnableIntrinsicsExtension) {

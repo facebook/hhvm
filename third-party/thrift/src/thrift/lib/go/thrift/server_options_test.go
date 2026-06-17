@@ -117,3 +117,22 @@ func TestWithLoadFn(t *testing.T) {
 	customConfig := newServerConfig(WithLoadFn(func() uint32 { return 123 }))
 	require.NotNil(t, customConfig.loadFn)
 }
+
+func TestWithServiceInterceptor(t *testing.T) {
+	type testServiceInterceptor struct {
+		BaseServiceInterceptor
+	}
+
+	defaultConfig := newServerConfig()
+	require.Empty(t, defaultConfig.interceptors)
+
+	// Multiple registrations accumulate in order; nil interceptors are ignored.
+	first := &testServiceInterceptor{}
+	second := &testServiceInterceptor{}
+	customConfig := newServerConfig(
+		WithServiceInterceptor(first),
+		WithServiceInterceptor(nil),
+		WithServiceInterceptor(second),
+	)
+	require.Equal(t, []ServiceInterceptor{first, second}, customConfig.interceptors)
+}

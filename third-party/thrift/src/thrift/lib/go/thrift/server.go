@@ -23,6 +23,7 @@ import (
 	"math"
 	"net"
 	"runtime"
+	"slices"
 	"strconv"
 	"sync"
 	"sync/atomic"
@@ -124,8 +125,9 @@ func NewServer(proc Processor, listener net.Listener, transportType TransportID,
 
 		numWorkers: config.numWorkers,
 
-		observer:    config.serverObserver,
-		maxRequests: config.maxRequests,
+		observer:     config.serverObserver,
+		maxRequests:  config.maxRequests,
+		interceptors: config.interceptors,
 	}
 	if config.loadFn != nil {
 		result.loadFn = config.loadFn
@@ -149,6 +151,7 @@ type server struct {
 	maxRequests             int64
 	totalActiveRequestCount atomic.Int64
 	loadFn                  func() uint32
+	interceptors            []ServiceInterceptor
 }
 
 func (s *server) ServeContext(ctx context.Context) error {
@@ -257,6 +260,72 @@ func (s *server) defaultLoadFn() uint32 {
 	working := s.totalActiveRequestCount.Load()
 	denominator := float64(runtime.NumCPU())
 	return uint32(1000. * float64(working) / denominator)
+}
+
+// runOnRequestInterceptors invokes the OnRequest callback of every registered
+// ServiceInterceptor in forward (registration) order. It is meant to be called
+// by the server's RPC handling paths (oneway, request-response, stream, sink,
+// bidi, etc.) after the incoming request has been deserialized and before the
+// user's handler runs.
+//
+// For every interceptor that returns a non-nil user request state, the state is
+// stored in a derived context keyed by the interceptor instance, so the matching
+// runOnResponseInterceptors call can retrieve it. A new context is derived only
+// for non-nil states to avoid unnecessary allocations. The (possibly derived)
+// context is always returned and must be threaded through the rest of the
+// request.
+//
+// All interceptors are always invoked, even if an earlier one returns an error,
+// mirroring the C++ ServiceInterceptor contract where every OnRequest still runs
+// regardless of failures. The first error encountered is returned; a non-nil
+// error signals that the user's handler must not run.
+//
+// userConnState is currently always nil: connection-scoped interceptor state is
+// not yet supported.
+func (s *server) runOnRequestInterceptors(ctx context.Context, req ReadableStruct) (context.Context, error) {
+	var firstErr error
+	for _, interceptor := range s.interceptors {
+		reqState, err := interceptor.OnRequest(ctx, req, nil /* userConnState */)
+		if err != nil && firstErr == nil {
+			firstErr = err
+		}
+		// Persist non-nil request state for the paired OnResponse call, keyed by
+		// the interceptor instance. This is done even when an error occurred so
+		// that every interceptor's OnResponse receives its own state.
+		if reqState != nil {
+			ctx = context.WithValue(ctx, interceptor, reqState)
+		}
+	}
+	return ctx, firstErr
+}
+
+// runOnResponseInterceptors invokes the OnResponse callback of every registered
+// ServiceInterceptor in reverse order relative to registration, so that the
+// first interceptor to observe OnRequest is the last to observe OnResponse
+// (matching the C++ ServiceInterceptor ordering contract). It is meant to be
+// called by the server's RPC handling paths before the outgoing response is
+// serialized.
+//
+// For each interceptor, the user request state stored by
+// runOnRequestInterceptors is retrieved from the context (keyed by the
+// interceptor instance) and passed back into OnResponse. A nil value is passed
+// when the interceptor returned no state during OnRequest.
+//
+// All interceptors are always invoked, even if one returns an error. When
+// multiple interceptors return errors, the last one encountered is returned.
+// Because iteration is in reverse, that is the error from the earliest-registered
+// interceptor, matching the C++ behavior where an OnResponse exception overwrites
+// any currently-active exception.
+func (s *server) runOnResponseInterceptors(ctx context.Context, resp WritableStruct) error {
+	var respErr error
+	for _, interceptor := range slices.Backward(s.interceptors) {
+		userReqState := ctx.Value(interceptor)
+		err := interceptor.OnResponse(ctx, resp, userReqState)
+		if err != nil {
+			respErr = err
+		}
+	}
+	return respErr
 }
 
 type rocketServerSocket struct {

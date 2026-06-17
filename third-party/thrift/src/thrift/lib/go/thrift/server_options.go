@@ -45,6 +45,7 @@ type serverConfig struct {
 	serverObserver     ServerObserver
 	maxRequests        int64
 	loadFn             func() uint32
+	interceptors       []ServiceInterceptor
 }
 
 func newServerConfig(options ...ServerOption) *serverConfig {
@@ -128,6 +129,19 @@ func WithMaxRequests(maxRequests int64) ServerOption {
 func WithLoadFn(loadFn func() uint32) ServerOption {
 	return func(config *serverConfig) {
 		config.loadFn = loadFn
+	}
+}
+
+// WithServiceInterceptor registers a ServiceInterceptor with the server.
+// It may be called multiple times to register multiple interceptors; each call
+// appends to the list, preserving registration order. Nil interceptors are
+// ignored.
+func WithServiceInterceptor(interceptor ServiceInterceptor) ServerOption {
+	return func(config *serverConfig) {
+		if interceptor == nil {
+			return
+		}
+		config.interceptors = append(config.interceptors, interceptor)
 	}
 }
 

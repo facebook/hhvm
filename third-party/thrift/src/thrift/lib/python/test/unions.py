@@ -32,7 +32,7 @@ from parameterized import parameterized_class
 from test_thrift.thrift_types import ComplexUnion, Digits, Integers, ReservedUnion
 from thrift.python.mutable_types import _ThriftListWrapper, MutableUnion, to_thrift_list
 from thrift.python.serializer import deserialize, serialize_iobuf
-from thrift.python.types import _fbthrift_is_debug_build, Union
+from thrift.python.types import Union
 
 ListT = TypeVar("ListT")
 
@@ -73,27 +73,13 @@ class UnionTestImmutable(unittest.TestCase):
             Digits(data=[Integers(tiny=1), Integers(unbounded="123")]),
         )
 
-    def test_fromValue_type_error_on_no_match_debug(self) -> None:
-        if not _fbthrift_is_debug_build:
-            self.skipTest("debug-only: TypeError is raised in debug mode")
+    def test_fromValue_raises_on_no_match(self) -> None:
         with self.assertRaisesRegex(
             TypeError,
             r"does not match any field of union Integers",
         ):
             # pyre-ignore[6]: for test
             Integers.fromValue([1, 2, 3])
-
-    def test_fromValue_warns_on_no_match_opt(self) -> None:
-        if _fbthrift_is_debug_build:
-            self.skipTest("opt-only: RuntimeWarning is issued in opt mode")
-        value = [1, 2, 3]
-        with self.assertWarns(RuntimeWarning) as cm:
-            # pyre-ignore[6]: for test
-            union = Integers.fromValue(value)
-        self.assertIn(repr(value), str(cm.warning))
-        self.assertIn("builtins.list", str(cm.warning))
-        self.assertIn("does not match any field", str(cm.warning))
-        self.assertEqual(union.fbthrift_current_field, Integers.Type.EMPTY)
 
     def test_fromValue_no_warning_on_none(self) -> None:
         with warnings.catch_warnings(record=True) as caught:

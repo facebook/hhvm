@@ -1941,23 +1941,15 @@ cdef class Union(StructOrUnion):
                 break
         else:
             val_type = type(value)
-            msg = (
-                f"Value {value!r} of type {val_type.__module__}.{val_type.__qualname__} "
-                f"does not match any field of union {cls.__name__}."
-            )
             logUnionFromValueTypeMismatch(
                 repr(value).encode("utf-8"),
                 f"{val_type.__module__}.{val_type.__qualname__}".encode("utf-8"),
                 cls.__name__.encode("utf-8"),
             )
-            if cFollyIsDebug:
-                raise TypeError(msg)
-            else:
-                warnings.warn(
-                    f"{msg} This will become a TypeError in the future. Please address this ASAP.",
-                    RuntimeWarning,
-                    stacklevel=2,
-                )
+            raise TypeError(
+                f"Value {value!r} of type {val_type.__module__}.{val_type.__qualname__} "
+                f"does not match any field of union {cls.__name__}."
+            )
         return union_instance
 
     def __copy__(Union self):

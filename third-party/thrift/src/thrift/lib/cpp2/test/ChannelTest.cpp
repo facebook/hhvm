@@ -22,6 +22,7 @@
 #include <folly/io/IOBufQueue.h>
 #include <folly/io/async/AsyncSSLSocket.h>
 #include <folly/io/async/AsyncSocket.h>
+#include <folly/io/async/AsyncSocketException.h>
 #include <folly/io/async/AsyncTimeout.h>
 #include <folly/io/async/AsyncTransport.h>
 #include <folly/io/async/EventBase.h>
@@ -1277,3 +1278,128 @@ class NullCloseCallback : public CloseCallback {
  public:
   void channelClosed() override {}
 };
+
+class ReentrantReadAndWriteErrorTransport : public folly::AsyncTransport {
+ public:
+  explicit ReentrantReadAndWriteErrorTransport(folly::EventBase* eventBase)
+      : eventBase_(eventBase) {}
+
+  void setReadCB(folly::AsyncTransport::ReadCallback* callback) override {
+    readCallback_ = callback;
+  }
+
+  ReadCallback* getReadCallback() const override { return readCallback_; }
+
+  void write(
+      folly::AsyncTransport::WriteCallback* callback,
+      const void*,
+      size_t,
+      folly::WriteFlags) override {
+    failWrite(callback);
+  }
+
+  void writev(
+      folly::AsyncTransport::WriteCallback* callback,
+      const iovec*,
+      size_t,
+      folly::WriteFlags) override {
+    failWrite(callback);
+  }
+
+  void writeChain(
+      folly::AsyncTransport::WriteCallback* callback,
+      std::unique_ptr<folly::IOBuf>&&,
+      folly::WriteFlags) override {
+    failWrite(callback);
+  }
+
+  void close() override {}
+  void closeNow() override {}
+  void shutdownWrite() override {}
+  void shutdownWriteNow() override {}
+  bool good() const override { return true; }
+  bool readable() const override { return true; }
+  bool connecting() const override { return false; }
+  bool error() const override { return false; }
+  void attachEventBase(folly::EventBase* eventBase) override {
+    eventBase_ = eventBase;
+  }
+  void detachEventBase() override { eventBase_ = nullptr; }
+  bool isDetachable() const override { return true; }
+  folly::EventBase* getEventBase() const override { return eventBase_; }
+  void setSendTimeout(uint32_t /* ms */) override {}
+  uint32_t getSendTimeout() const override { return 0; }
+  void getLocalAddress(folly::SocketAddress*) const override {}
+  void getPeerAddress(folly::SocketAddress*) const override {}
+  size_t getAppBytesWritten() const override { return 0; }
+  size_t getRawBytesWritten() const override { return 0; }
+  size_t getAppBytesReceived() const override { return 0; }
+  size_t getRawBytesReceived() const override { return 0; }
+  void setEorTracking(bool /* track */) override {}
+  bool isEorTrackingEnabled() const override { return false; }
+
+ private:
+  void failWrite(folly::AsyncTransport::WriteCallback* callback) {
+    if (readCallback_) {
+      readCallback_->readErr(
+          folly::AsyncSocketException(
+              folly::AsyncSocketException::UNKNOWN,
+              "read failure before write completion"));
+    }
+    callback->writeErr(
+        0,
+        folly::AsyncSocketException(
+            folly::AsyncSocketException::UNKNOWN,
+            "write failure after read failure"));
+  }
+
+  folly::EventBase* eventBase_;
+  folly::AsyncTransport::ReadCallback* readCallback_{nullptr};
+};
+
+class DestroySendCallbackOnReadError : public MessageChannel::RecvCallback {
+ public:
+  DestroySendCallbackOnReadError(
+      Cpp2Channel* channel, std::unique_ptr<MessageCallback>& sendCallback)
+      : channel_(channel), sendCallback_(sendCallback) {}
+
+  void messageReceived(
+      std::unique_ptr<folly::IOBuf>&&,
+      std::unique_ptr<apache::thrift::transport::THeader>&&) override {
+    ADD_FAILURE();
+  }
+
+  void messageChannelEOF() override {}
+
+  void messageReceiveErrorWrapped(folly::exception_wrapper&&) override {
+    ++recvError_;
+    channel_->closeNow();
+    sendErrorsBeforeDestroy_ = sendCallback_->sendError_;
+    sendCallback_.reset();
+  }
+
+  uint32_t recvError_{0};
+  uint32_t sendErrorsBeforeDestroy_{0};
+
+ private:
+  Cpp2Channel* channel_;
+  std::unique_ptr<MessageCallback>& sendCallback_;
+};
+
+TEST(Channel, CloseNowCompletesPendingWriteCallbacksBeforeReturning) {
+  folly::EventBase eventBase;
+  auto* transport = new ReentrantReadAndWriteErrorTransport(&eventBase);
+  auto channel =
+      createChannel<Cpp2Channel>(folly::AsyncTransport::UniquePtr(transport));
+  auto sendCallback = std::make_unique<MessageCallback>();
+  DestroySendCallbackOnReadError recvCallback(channel.get(), sendCallback);
+  channel->setReceiveCallback(&recvCallback);
+
+  auto header = std::make_unique<THeader>();
+  channel->sendMessage(sendCallback.get(), makeTestBuf(10), header.get());
+  eventBase.loopOnce();
+
+  EXPECT_EQ(recvCallback.recvError_, 1);
+  EXPECT_EQ(recvCallback.sendErrorsBeforeDestroy_, 1);
+  EXPECT_EQ(sendCallback, nullptr);
+}

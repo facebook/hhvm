@@ -127,6 +127,9 @@ class Cpp2Channel
   }
 
  private:
+  void failPendingWrites(
+      const apache::thrift::transport::TTransportException& ex) noexcept;
+
   std::shared_ptr<folly::AsyncTransport> transport_;
   folly::EventBase* evb_;
   std::deque<SendCallback*> sendCallbacks_;

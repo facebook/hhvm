@@ -70,6 +70,8 @@ void Cpp2Channel::closeNow() {
     pipeline_->close();
   }
 
+  failPendingWrites(TTransportException("Channel is closed"));
+
   // Note that close() above might kill the pipeline_, so let's check again.
   if (pipeline_) {
     pipeline_.reset();
@@ -126,9 +128,11 @@ void Cpp2Channel::readException(Context*, folly::exception_wrapper e) {
 }
 
 void Cpp2Channel::writeSuccess() noexcept {
-  assert(sendCallbacks_.size() > 0);
-
   DestructorGuard dg(this);
+  if (sendCallbacks_.empty()) {
+    return;
+  }
+
   auto* cb = sendCallbacks_.front();
   sendCallbacks_.pop_front();
   if (cb) {
@@ -138,17 +142,30 @@ void Cpp2Channel::writeSuccess() noexcept {
 
 void Cpp2Channel::writeError(
     size_t /* bytesWritten */, const TTransportException& ex) noexcept {
-  assert(sendCallbacks_.size() > 0);
-
   // Pop last write request, call error callback
 
   DestructorGuard dg(this);
+  if (sendCallbacks_.empty()) {
+    return;
+  }
+
   VLOG(5) << "Got a write error: " << folly::exceptionStr(ex);
   auto* cb = sendCallbacks_.front();
   sendCallbacks_.pop_front();
   if (cb) {
     cb->messageSendError(
         folly::make_exception_wrapper<TTransportException>(ex));
+  }
+}
+
+void Cpp2Channel::failPendingWrites(const TTransportException& ex) noexcept {
+  while (!sendCallbacks_.empty()) {
+    auto* cb = sendCallbacks_.front();
+    sendCallbacks_.pop_front();
+    if (cb) {
+      cb->messageSendError(
+          folly::make_exception_wrapper<TTransportException>(ex));
+    }
   }
 }
 

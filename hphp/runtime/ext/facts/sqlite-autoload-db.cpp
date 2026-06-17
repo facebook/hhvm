@@ -768,88 +768,124 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
 
   static std::shared_ptr<SQLiteAutoloadDB> get(const SQLiteKey& key) {
     assertx(key.m_path.is_absolute());
-    auto db = [&]() {
-      try {
-        return SQLite::connect(key.m_path.native(), key.m_mode);
-      } catch (SQLiteExc& e) {
-        auto mode = (key.m_mode == SQLite::OpenMode::ReadWriteCreate)
-            ? "open or create"
-            : "open";
 
-        auto exception_str = fmt::format(
-            "Couldn't {} native Facts DB.\n"
-#ifdef HHVM_FACEBOOK
-            "You may be able to fix this by running 'arc fix facts'\n"
-#endif
-            "Key: {} Reason: {}\n",
-            mode,
-            key.toDebugString(),
-            e.what());
-        XLOG(ERR, exception_str);
-        throw std::runtime_error{exception_str};
+    // Opening the DB, putting it into WAL mode, and creating its schema can all
+    // surface a SQLiteExc. Handle them together so every setup failure produces
+    // a message that names the specific problem.
+    try {
+      auto db = SQLite::connect(key.m_path.native(), key.m_mode);
+
+      switch (key.m_mode) {
+        case SQLite::OpenMode::ReadOnly:
+        case SQLite::OpenMode::ReadWrite:
+          break;
+        case SQLite::OpenMode::ReadWriteCreate:
+          // Create the DB (and its -shm/-wal siblings) with the requested owner
+          // and permissions if they don't already exist.
+          std::vector<fs::path> paths_to_create = {
+              key.m_path,
+              fs::path{key.m_path} += "-shm",
+              fs::path{key.m_path} += "-wal",
+          };
+          for (const auto& path : paths_to_create) {
+            if (!createFileWithPerms(path, key.m_gid, key.m_perms)) {
+              XLOGF(
+                  ERR,
+                  "Failed createFileWithPerms for {}:  Debug data: {}",
+                  path.native(),
+                  key.toDebugString());
+            }
+          }
+          break;
       }
-    }();
 
-    switch (key.m_mode) {
-      case SQLite::OpenMode::ReadOnly:
-      case SQLite::OpenMode::ReadWrite:
-        break;
-      case SQLite::OpenMode::ReadWriteCreate:
-        // If we can create the DB, create it with the correct owner and
-        // permissions.
-        std::vector<fs::path> paths_to_create = {
-            key.m_path,
-            fs::path{key.m_path} += "-shm",
-            fs::path{key.m_path} += "-wal",
-        };
-        for (const auto& path : paths_to_create) {
-          if (!createFileWithPerms(path, key.m_gid, key.m_perms)) {
-            XLOGF(
-                ERR,
-                "Failed createFileWithPerms for {}:  Debug data: {}",
-                path.native(),
-                key.toDebugString());
+      if (!db.isReadOnly()) {
+        try {
+          db.setJournalMode(SQLite::JournalMode::WAL);
+        } catch (const SQLiteExc& e) {
+          // Another connection may put the DB into WAL mode first; only one
+          // connection needs to succeed, so a BUSY here is benign.
+          if (e.code() != SQLiteExc::Code::BUSY) {
+            throw;
           }
         }
-        break;
-    }
+      }
 
-    if (!db.isReadOnly()) {
-      try {
-        db.setJournalMode(SQLite::JournalMode::WAL);
-      } catch (SQLiteExc& e) {
-        switch (e.code()) {
-          case SQLiteExc::Code::BUSY:
-            // This happens if multiple connections attempt to set WAL mode at
-            // the same time. We only need one connection to succeed.
-            break;
-          default:
-            throw;
+      db.setSynchronousLevel(SQLite::SynchronousLevel::OFF);
+      // If the database is read only, and we don't have both requisite tables,
+      // we can't do package overrides.
+      bool excludePackageMembership = db.isReadOnly() &&
+          (!db.hasTable("packages") || !db.hasTable("file_package_membership"));
+
+      {
+        XLOGF(INFO, "Trying to open SQLite DB at {}", key.m_path.native());
+        auto txn = db.begin();
+
+        createSchema(txn, excludePackageMembership);
+        if (!db.isReadOnly()) {
+          rebuildIndices(txn);
         }
+        db.setBusyTimeout(60'000);
+        txn.commit();
+        XLOGF(INFO, "Connected to SQLite DB at {}", key.m_path.native());
       }
-    }
 
-    db.setSynchronousLevel(SQLite::SynchronousLevel::OFF);
-    // If the database is read only, and we don't have both requisite tables,
-    // we can't do package overrides.
-    bool excludePackageMembership = db.isReadOnly() &&
-        (!db.hasTable("packages") || !db.hasTable("file_package_membership"));
+      return std::make_shared<SQLiteAutoloadDBImpl>(
+          std::move(db), excludePackageMembership);
+    } catch (const SQLiteExc& e) {
+      auto action = (key.m_mode == SQLite::OpenMode::ReadWriteCreate)
+          ? "open or create"
+          : "open";
 
-    {
-      XLOGF(INFO, "Trying to open SQLite DB at {}", key.m_path.native());
-      auto txn = db.begin();
-
-      createSchema(txn, excludePackageMembership);
-      if (!db.isReadOnly()) {
-        rebuildIndices(txn);
+      // Name the specific failure, and only point at a rebuild when the DB
+      // itself is corrupt -- the other conditions need a different remedy.
+      std::string explanation;
+      switch (e.code()) {
+        case SQLiteExc::Code::CORRUPT:
+        case SQLiteExc::Code::NOTADB:
+          explanation =
+              "The native Facts DB is corrupt or not a valid database file.\n"
+#ifdef HHVM_FACEBOOK
+              "Rebuild it by running 'arc fix facts'.\n"
+#endif
+              ;
+          break;
+        case SQLiteExc::Code::FULL:
+          explanation =
+              "The disk or filesystem holding the native Facts DB is full.\n";
+          break;
+        case SQLiteExc::Code::IOERR:
+          explanation =
+              "An I/O error occurred accessing the native Facts DB; the "
+              "underlying disk/filesystem may be unhealthy or out of space.\n";
+          break;
+        case SQLiteExc::Code::CANTOPEN:
+          explanation =
+              "The native Facts DB file could not be opened; check that its "
+              "directory exists and is readable/writable.\n";
+          break;
+        case SQLiteExc::Code::PERM:
+        case SQLiteExc::Code::READONLY:
+          explanation =
+              "Insufficient permissions to access the native Facts DB.\n";
+          break;
+        case SQLiteExc::Code::BUSY:
+        case SQLiteExc::Code::LOCKED:
+          explanation = "The native Facts DB is locked by another process.\n";
+          break;
+        default:
+          break;
       }
-      db.setBusyTimeout(60'000);
-      txn.commit();
-      XLOGF(INFO, "Connected to SQLite DB at {}", key.m_path.native());
-    }
 
-    return std::make_shared<SQLiteAutoloadDBImpl>(
-        std::move(db), excludePackageMembership);
+      auto exception_str = fmt::format(
+          "Couldn't {} native Facts DB.\n{}Key: {}\nReason: {}\n",
+          action,
+          explanation,
+          key.toDebugString(),
+          e.what());
+      XLOG(ERR, exception_str);
+      throw std::runtime_error{exception_str};
+    }
   }
 
   void commit() override {

@@ -83,7 +83,13 @@ bool hasWatchedFileExtension(const std::filesystem::path& path) {
 }
 
 SQLiteKey getDBKey(const fs::path& root, const RepoOptions& repoOptions) {
-  assertx(root.is_absolute());
+  if (!root.is_absolute()) {
+    throw RepoOptionsParseExc{fmt::format(
+        "Cannot locate the native Facts DB: repo root \"{}\" is not an absolute "
+        "path. This usually means the request's repo options (.hhvmconfig.hdf) "
+        "could not be resolved.",
+        root.native())};
+  }
 
   auto trustedDBPath = [&]() -> fs::path {
     fs::path trusted{repoOptions.flags().trustedDBPath()};
@@ -110,7 +116,19 @@ SQLiteKey getDBKey(const fs::path& root, const RepoOptions& repoOptions) {
     return SQLiteKey::readOnly(std::move(trustedDBPath));
   }
   auto const dbPath = repoOptions.autoloadDB();
-  always_assert(!dbPath.empty());
+  if (dbPath.empty()) {
+    throw RepoOptionsParseExc{fmt::format(
+        "Cannot open the native Facts DB for repo \"{}\": Autoload.DB is unset. "
+        "Set Autoload.DB in the repo's .hhvmconfig.hdf.",
+        root.native())};
+  }
+  if (!dbPath.is_absolute()) {
+    throw RepoOptionsParseExc{fmt::format(
+        "Cannot open the native Facts DB for repo \"{}\": Autoload.DB path "
+        "\"{}\" is not absolute.",
+        root.native(),
+        dbPath.native())};
+  }
   // Create a DB with the given permissions if none exists
   if (Cfg::Autoload::DBCanCreate) {
     auto gid = parseDBGroup();

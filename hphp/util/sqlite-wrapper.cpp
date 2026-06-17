@@ -118,7 +118,21 @@ SQLite SQLite::connect(const char* path, OpenMode mode) {
       SQLITE_OPEN_NOMUTEX | flags,
       nullptr);
   if (rc) {
-    throw SQLiteExc{rc, ""};
+    // sqlite3_open_v2 allocates the connection handle even on failure; read its
+    // specific error message before closing it so the thrown exception explains
+    // what went wrong and for which path.
+    std::string detail = dbc ? sqlite3_errmsg(dbc) : "";
+    sqlite3_close_v2(dbc);
+    // SQLiteExc already appends sqlite3_errstr(rc); only carry the connection's
+    // message when it adds something beyond that generic text, to avoid a
+    // duplicated "...: unable to open database file: unable to open database
+    // file" tail.
+    bool detailIsRedundant = detail.empty() || detail == sqlite3_errstr(rc);
+    throw SQLiteExc{
+        rc,
+        detailIsRedundant
+            ? folly::to<std::string>("opening \"", path, "\"")
+            : folly::to<std::string>("opening \"", path, "\": ", detail)};
   }
   return SQLite{dbc};
 }

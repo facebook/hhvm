@@ -1,0 +1,3 @@
+before
+caught: Cannot open the native Facts DB for repo %A: Autoload.DB is unset. Set Autoload.DB in the repo's .hhvmconfig.hdf.
+after

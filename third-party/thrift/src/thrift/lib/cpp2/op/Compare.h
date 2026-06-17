@@ -65,13 +65,13 @@ template <typename LTagOrT = void, typename RTagOrT = LTagOrT>
 inline constexpr Less<type::infer_tag<LTagOrT>, type::infer_tag<RTagOrT>>
     less{};
 
-/// Compares two Thrift values, returning the associated std::weak_ordering
+/// Compares two Thrift values, returning the associated std::partial_ordering
 /// value.
 ///
 /// For example:
-/// * compare<int32_t>(1, 2) -> std::weak_ordering::less
-/// * compare<double_t>(0.0, -0.0) -> std::weak_ordering::equivalent
-/// * compare<string_t>("aa", "a") -> std::weak_ordering::greater
+/// * compare<int32_t>(1, 2) -> std::partial_ordering::less
+/// * compare<double_t>(0.0, -0.0) -> std::partial_ordering::equivalent
+/// * compare<string_t>("aa", "a") -> std::partial_ordering::greater
 template <typename LTagOrT = void, typename RTagOrT = LTagOrT>
 inline constexpr detail::CompareThreeWay<type::infer_tag<LTagOrT>> compare{};
 

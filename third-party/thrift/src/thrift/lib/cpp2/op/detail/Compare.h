@@ -136,14 +136,14 @@ template <
 struct DefaultCompareThreeWay {
   static_assert(type::is_concrete_v<Tag>);
 
-  constexpr std::weak_ordering operator()(const T& lhs, const T& rhs) const {
+  constexpr std::partial_ordering operator()(const T& lhs, const T& rhs) const {
     if (EqualTo<Tag>{}(lhs, rhs)) {
-      return std::weak_ordering::equivalent;
+      return std::partial_ordering::equivalent;
     }
     if (LessThanType<Tag>{}(lhs, rhs)) {
-      return std::weak_ordering::less;
+      return std::partial_ordering::less;
     }
-    return std::weak_ordering::greater;
+    return std::partial_ordering::greater;
   }
 };
 
@@ -158,7 +158,7 @@ struct CompareThreeWay : DefaultCompareThreeWay<Tag, LessThanType> {
 template <template <class...> class LessThanType>
 struct CompareThreeWay<type::void_t, LessThanType> {
   template <typename L, typename R>
-  constexpr std::weak_ordering operator()(const L& lhs, const R& rhs) const {
+  constexpr std::partial_ordering operator()(const L& lhs, const R& rhs) const {
     return CompareThreeWay<type::infer_tag<L>, LessThanType>{}(lhs, rhs);
   }
 };
@@ -209,8 +209,8 @@ template <typename Tag, template <class...> class LessThanType>
 struct CompareThreeWay<Tag, LessThanType> {
   using T = type::native_type<Tag>;
 
-  std::weak_ordering operator()(T lhs, T rhs) const {
-    return std::weak_order(lhs, rhs);
+  std::partial_ordering operator()(T lhs, T rhs) const {
+    return std::partial_order(lhs, rhs);
   }
 };
 
@@ -245,7 +245,7 @@ struct LessThan<
 
 struct IOBufCompareToStd {
   template <typename T>
-  std::weak_ordering operator()(const T& a, const T& b) const {
+  std::partial_ordering operator()(const T& a, const T& b) const {
     return folly::to_underlying(folly::IOBufCompare{}(a, b)) <=> 0;
   }
 };
@@ -262,18 +262,18 @@ template <class I1, class I2, class Cmp>
 auto lexicographicalCompareThreeWay(I1 f1, I1 l1, I2 f2, I2 l2, Cmp comp)
     -> decltype(comp(*f1, *f2)) {
   for (; f1 != l1 && f2 != l2; ++f1, ++f2) {
-    if (auto c = comp(*f1, *f2); c != std::weak_ordering::equivalent) {
+    if (auto c = comp(*f1, *f2); c != std::partial_ordering::equivalent) {
       return c;
     }
   }
 
-  return (f1 != l1) ? std::weak_ordering::greater
-      : (f2 != l2)  ? std::weak_ordering::less
-                    : std::weak_ordering::equivalent;
+  return (f1 != l1) ? std::partial_ordering::greater
+      : (f2 != l2)  ? std::partial_ordering::less
+                    : std::partial_ordering::equivalent;
 }
 
 template <class T, class Comp>
-[[maybe_unused]] std::weak_ordering sortAndLexicographicalCompareThreeWay(
+[[maybe_unused]] std::partial_ordering sortAndLexicographicalCompareThreeWay(
     const T& lhs, const T& rhs, Comp&& comp) {
   std::vector<decltype(lhs.begin())> l, r;
   for (auto i = lhs.begin(); i != lhs.end(); ++i) {
@@ -283,7 +283,7 @@ template <class T, class Comp>
     r.push_back(i);
   }
   auto less = [&](auto lhsIter, auto rhsIter) {
-    return comp(*lhsIter, *rhsIter) == std::weak_ordering::less;
+    return comp(*lhsIter, *rhsIter) == std::partial_ordering::less;
   };
   auto compare_three_way = [&](auto lhsIter, auto rhsIter) {
     return comp(*lhsIter, *rhsIter);
@@ -302,7 +302,8 @@ struct ListLessThan {
                l.end(),
                r.begin(),
                r.end(),
-               CompareThreeWay<E, LessThanType>{}) == std::weak_ordering::less;
+               CompareThreeWay<E, LessThanType>{}) ==
+        std::partial_ordering::less;
   }
 };
 
@@ -311,7 +312,7 @@ struct SetLessThan {
   bool operator()(const T& lhs, const T& rhs) const {
     return sortAndLexicographicalCompareThreeWay(
                lhs, rhs, CompareThreeWay<E, LessThanType>{}) ==
-        std::weak_ordering::less;
+        std::partial_ordering::less;
   }
 };
 
@@ -324,14 +325,14 @@ struct MapLessThan {
   bool operator()(const T& lhs, const T& rhs) const {
     auto compare_three_way = [](const auto& l, const auto& r) {
       auto ret = CompareThreeWay<K, LessThanType>{}(l.first, r.first);
-      if (ret != std::weak_ordering::equivalent) {
+      if (ret != std::partial_ordering::equivalent) {
         return ret;
       }
       return CompareThreeWay<V, LessThanType>{}(l.second, r.second);
     };
 
     return sortAndLexicographicalCompareThreeWay(lhs, rhs, compare_three_way) ==
-        std::weak_ordering::less;
+        std::partial_ordering::less;
   }
 };
 
@@ -566,7 +567,7 @@ struct IdenticalTo<type::field<Tag, Context>> : IdenticalTo<Tag> {};
 template <typename VTag>
 struct CompareThreeWay<type::list<VTag>> {
   template <typename T = type::native_type<type::list<VTag>>>
-  std::weak_ordering operator()(const T& l, const T& r) const {
+  std::partial_ordering operator()(const T& l, const T& r) const {
     return lexicographicalCompareThreeWay(
         l.begin(), l.end(), r.begin(), r.end(), CompareThreeWay<VTag>{});
   }
@@ -575,7 +576,7 @@ struct CompareThreeWay<type::list<VTag>> {
 template <typename VTag>
 struct CompareThreeWay<type::set<VTag>> {
   template <typename T = type::native_type<type::set<VTag>>>
-  std::weak_ordering operator()(const T& l, const T& r) const {
+  std::partial_ordering operator()(const T& l, const T& r) const {
     return lexicographicalCompareThreeWay(
         l.begin(), l.end(), r.begin(), r.end(), CompareThreeWay<VTag>{});
   }
@@ -622,16 +623,16 @@ struct CompareThreeWay<type::adapted<Adapter, Tag>> {
   using adapted_tag = type::adapted<Adapter, Tag>;
   static_assert(type::is_concrete_v<adapted_tag>);
   template <typename T>
-  constexpr std::weak_ordering operator()(const T& lhs, const T& rhs) const {
+  constexpr std::partial_ordering operator()(const T& lhs, const T& rhs) const {
     if constexpr (adapt_detail::is_compare_three_way_adapter_v<Adapter, T>) {
       return Adapter::compareThreeWay(lhs, rhs);
     } else {
       if (EqualTo<adapted_tag>{}(lhs, rhs)) {
-        return std::weak_ordering::equivalent;
+        return std::partial_ordering::equivalent;
       } else if (LessThan<adapted_tag>{}(lhs, rhs)) {
-        return std::weak_ordering::less;
+        return std::partial_ordering::less;
       }
-      return std::weak_ordering::greater;
+      return std::partial_ordering::greater;
     }
   }
 };
@@ -642,10 +643,10 @@ template <
     FieldIterOrder Order,
     typename T,
     template <class...> class LessThanType = LessThan>
-std::weak_ordering compareStructFields(const T& lhs, const T& rhs) {
-  std::weak_ordering result = std::weak_ordering::equivalent;
+std::partial_ordering compareStructFields(const T& lhs, const T& rhs) {
+  std::partial_ordering result = std::partial_ordering::equivalent;
   auto compareField = [&](auto id) {
-    if (result != std::weak_ordering::equivalent) {
+    if (result != std::partial_ordering::equivalent) {
       return;
     }
     using Id = decltype(id);
@@ -657,11 +658,11 @@ std::weak_ordering compareStructFields(const T& lhs, const T& rhs) {
       return;
     }
     if (lhsValue == nullptr) {
-      result = std::weak_ordering::less;
+      result = std::partial_ordering::less;
       return;
     }
     if (rhsValue == nullptr) {
-      result = std::weak_ordering::greater;
+      result = std::partial_ordering::greater;
       return;
     }
     result = CompareThreeWay<Tag, LessThanType>{}(*lhsValue, *rhsValue);
@@ -676,14 +677,14 @@ std::weak_ordering compareStructFields(const T& lhs, const T& rhs) {
 }
 
 template <typename T, template <class...> class LessThanType = LessThan>
-std::weak_ordering compareStructFieldsByFieldId(const T& lhs, const T& rhs) {
+std::partial_ordering compareStructFieldsByFieldId(const T& lhs, const T& rhs) {
   return compareStructFields<FieldIterOrder::FieldIdAscending, T, LessThanType>(
       lhs, rhs);
 }
 
 template <typename T>
 struct CompareThreeWay<type::struct_t<T>> {
-  std::weak_ordering operator()(const T& lhs, const T& rhs) const {
+  std::partial_ordering operator()(const T& lhs, const T& rhs) const {
     return compareStructFields<FieldIterOrder::Declaration, T>(lhs, rhs);
   }
 };
@@ -693,7 +694,7 @@ struct StructLessThan {
   template <class T>
   bool operator()(const T& lhs, const T& rhs) const {
     return compareStructFields<FieldIterOrder::Declaration, T, LessThanType>(
-               lhs, rhs) == std::weak_ordering::less;
+               lhs, rhs) == std::partial_ordering::less;
   }
 };
 
@@ -706,7 +707,7 @@ struct StructLessThanByFieldId {
   template <class T>
   bool operator()(const T& lhs, const T& rhs) const {
     return compareStructFieldsByFieldId<T, LessThanType>(lhs, rhs) ==
-        std::weak_ordering::less;
+        std::partial_ordering::less;
   }
 };
 

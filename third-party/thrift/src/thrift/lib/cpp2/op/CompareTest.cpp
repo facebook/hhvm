@@ -43,11 +43,12 @@ TEST(CompareTest, IOBuf) {
   EXPECT_FALSE((op::less<STag, BTag>(two, one)));
   EXPECT_FALSE((op::less<BTag, STag>(two, two)));
 
-  EXPECT_EQ(op::compare<STag>(one, one), std::weak_ordering::equivalent);
-  EXPECT_EQ(op::compare<BTag>(one, two), std::weak_ordering::less);
-  EXPECT_EQ((op::compare<STag, BTag>(two, one)), std::weak_ordering::greater);
+  EXPECT_EQ(op::compare<STag>(one, one), std::partial_ordering::equivalent);
+  EXPECT_EQ(op::compare<BTag>(one, two), std::partial_ordering::less);
   EXPECT_EQ(
-      (op::compare<BTag, STag>(two, two)), std::weak_ordering::equivalent);
+      (op::compare<STag, BTag>(two, one)), std::partial_ordering::greater);
+  EXPECT_EQ(
+      (op::compare<BTag, STag>(two, two)), std::partial_ordering::equivalent);
 }
 
 TEST(CompareTest, Double) {
@@ -58,19 +59,19 @@ TEST(CompareTest, Double) {
   EXPECT_TRUE(identical<double>(1.0, 1.0));
   EXPECT_TRUE(equal<double>(1.0, 1.0));
   EXPECT_FALSE(less<double>(1.0, 1.0));
-  EXPECT_EQ(compare<double>(1.0, 1.0), std::weak_ordering::equivalent);
+  EXPECT_EQ(compare<double>(1.0, 1.0), std::partial_ordering::equivalent);
 
   // 1 is neither identical or equal to 2.
   EXPECT_FALSE(identical<type::double_t>(1.0, 2.0));
   EXPECT_FALSE(equal<type::double_t>(1.0, 2.0));
   EXPECT_TRUE(less<type::double_t>(1.0, 2.0));
-  EXPECT_EQ(compare<type::double_t>(1.0, 2.0), std::weak_ordering::less);
+  EXPECT_EQ(compare<type::double_t>(1.0, 2.0), std::partial_ordering::less);
 
   // -0 is equal to, but not identical to 0.
   EXPECT_FALSE(identical<>(-0.0, +0.0));
   EXPECT_TRUE(equal<>(-0.0, +0.0));
   EXPECT_FALSE(less<>(-0.0, +0.0));
-  EXPECT_EQ(compare<>(-0.0, +0.0), std::weak_ordering::equivalent);
+  EXPECT_EQ(compare<>(-0.0, +0.0), std::partial_ordering::equivalent);
 
   // NaN is identical to, but not equal to itself.
   EXPECT_TRUE(
@@ -89,7 +90,7 @@ TEST(CompareTest, Double) {
       compare<type::double_t>(
           std::numeric_limits<double>::quiet_NaN(),
           std::numeric_limits<double>::quiet_NaN()),
-      std::weak_ordering::equivalent);
+      std::partial_ordering::unordered);
 }
 
 TEST(CompareTest, Float) {
@@ -121,7 +122,7 @@ TEST(CompareTest, Float) {
       compare<type::float_t>(
           std::numeric_limits<float>::quiet_NaN(),
           std::numeric_limits<float>::quiet_NaN()),
-      std::weak_ordering::equivalent);
+      std::partial_ordering::unordered);
 }
 
 TEST(CompareTest, StructWithFloat) {

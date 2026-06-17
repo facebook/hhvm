@@ -1498,6 +1498,8 @@ cdef class Struct(StructOrUnion):
         return self(**kwargs)
 
     def __eq__(Struct self, other):
+        if other is self:
+            return True
         if type(other) != type(self):
             return False
         for name, value in self:
@@ -1964,6 +1966,8 @@ cdef class Union(StructOrUnion):
         return self
 
     def __eq__(Union self not None, other):
+        if other is self:
+            return True
         if type(other) != type(self):
             return False
         cdef Union other_u = other

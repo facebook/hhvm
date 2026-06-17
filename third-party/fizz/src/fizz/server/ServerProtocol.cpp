@@ -2724,7 +2724,7 @@ Status EventHandler<
       err);
 
   ret = actions(
-      MutateState([cert = std::move(newCert)](State& newState) {
+      MutateState([cert = std::move(newCert)](State& newState) mutable {
         newState.unverifiedCertChain() = folly::none;
         newState.clientCert() = std::move(cert);
       }),

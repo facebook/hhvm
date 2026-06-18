@@ -23,13 +23,7 @@
 #include <thrift/lib/cpp2/security/SSLUtil.h>
 #include <thrift/lib/cpp2/server/Cpp2ConnContext.h>
 #include <thrift/lib/cpp2/server/RequestEncryptionState.h>
-
-#if __has_include(<common/services/cpp/security/CompositeRecordLayer.h>)
-#include <common/services/cpp/security/CompositeRecordLayer.h>
-#define THRIFT_HAS_STOPTLSV2_RECORD_LAYER 1
-#else
-#define THRIFT_HAS_STOPTLSV2_RECORD_LAYER 0
-#endif
+#include <thrift/lib/cpp2/server/StopTLSEncryptionStateProvider.h>
 
 THRIFT_FLAG_DEFINE_bool(server_request_encryption_tracking_enabled, false);
 
@@ -49,32 +43,28 @@ void checkRequestEncryptionState(Cpp2RequestContext& reqContext) {
   // StoptlsEncrypted vs StoptlsSkipped based on hasObservedPlaintext(). If
   // the record layer is unreachable for any reason, fail safe to StoptlsSkipped
   // (we can't prove encryption — don't lie).
-  //
-  // In OSS builds, the Meta-internal CompositeReadRecordLayer header is not
-  // available, so we fall through to the fail-safe path.
   if (connCtx->getSecurityProtocol() == kSecurityProtocolStopTLSV2) {
-#if THRIFT_HAS_STOPTLSV2_RECORD_LAYER
     // getUnderlyingTransport<T>() const overload returns const T*
     const auto* transport = connCtx->getTransport();
     if (transport != nullptr) {
       const auto* fizz =
           transport->getUnderlyingTransport<fizz::server::AsyncFizzServer>();
       if (fizz != nullptr) {
+        // If the record layer implements the StopTLSEncryptionStateProvider
+        // interface, then set the encryption state.
         const auto* layer = fizz->getState().readRecordLayer();
-        const auto* composite =
-            dynamic_cast<const facebook::services::CompositeReadRecordLayer*>(
-                layer);
-        if (composite != nullptr && composite->isStopTLSNegotiated()) {
+        const auto* provider =
+            dynamic_cast<const StopTLSEncryptionStateProvider*>(layer);
+        if (provider != nullptr && provider->isStopTLSNegotiated()) {
           reqContext.setRequestEncryptionState(
-              composite->hasObservedPlaintext()
+              provider->hasObservedPlaintext()
                   ? RequestEncryptionState::StoptlsSkipped
                   : RequestEncryptionState::StoptlsEncrypted);
           return;
         }
       }
     }
-#endif
-    // OSS or record layer unreachable — fail safe to StoptlsSkipped
+    // record layer unreachable / no implementer — fail safe to StoptlsSkipped
     reqContext.setRequestEncryptionState(
         RequestEncryptionState::StoptlsSkipped);
     return;
@@ -100,32 +90,28 @@ void checkWriteEncryptionState(Cpp2RequestContext& reqContext) {
   // sticky latch. If we can reach the record layer, set StoptlsEncrypted vs
   // StoptlsSkipped based on hasObservedPlaintext(). If the record layer is
   // unreachable for any reason, fail safe to StoptlsSkipped.
-  //
-  // In OSS builds, the Meta-internal CompositeWriteRecordLayer header is not
-  // available, so we fall through to the fail-safe path.
   if (connCtx->getSecurityProtocol() == kSecurityProtocolStopTLSV2) {
-#if THRIFT_HAS_STOPTLSV2_RECORD_LAYER
     // getUnderlyingTransport<T>() const overload returns const T*
     const auto* transport = connCtx->getTransport();
     if (transport != nullptr) {
       const auto* fizz =
           transport->getUnderlyingTransport<fizz::server::AsyncFizzServer>();
       if (fizz != nullptr) {
+        // If the record layer implements the StopTLSEncryptionStateProvider
+        // interface, then set the encryption state.
         const auto* layer = fizz->getState().writeRecordLayer();
-        const auto* composite =
-            dynamic_cast<const facebook::services::CompositeWriteRecordLayer*>(
-                layer);
-        if (composite != nullptr && composite->isStopTLSNegotiated()) {
+        const auto* provider =
+            dynamic_cast<const StopTLSEncryptionStateProvider*>(layer);
+        if (provider != nullptr && provider->isStopTLSNegotiated()) {
           reqContext.setWriteEncryptionState(
-              composite->hasObservedPlaintext()
+              provider->hasObservedPlaintext()
                   ? RequestEncryptionState::StoptlsSkipped
                   : RequestEncryptionState::StoptlsEncrypted);
           return;
         }
       }
     }
-#endif
-    // OSS or record layer unreachable — fail safe to StoptlsSkipped
+    // record layer unreachable / no implementer — fail safe to StoptlsSkipped
     reqContext.setWriteEncryptionState(RequestEncryptionState::StoptlsSkipped);
     return;
   }

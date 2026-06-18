@@ -73,6 +73,7 @@
 #include <thrift/lib/cpp2/server/Cpp2Worker.h>
 #include <thrift/lib/cpp2/server/ParallelConcurrencyController.h>
 #include <thrift/lib/cpp2/server/StatusServerInterface.h>
+#include <thrift/lib/cpp2/server/StopTLSEncryptionStateProvider.h>
 #include <thrift/lib/cpp2/server/ThriftQuicServer.h>
 #include <thrift/lib/cpp2/server/ThriftServer.h>
 #include <thrift/lib/cpp2/server/TokenBucketConcurrencyController.h>
@@ -2877,6 +2878,11 @@ TEST(FizzThriftFactory, CreateCompositeReadRecordLayer) {
 
   EXPECT_NE(appTrafficLayer.get(), handshakeLayer.get());
   EXPECT_NE(appTrafficLayer.get(), earlyDataLayer.get());
+
+  EXPECT_NE(
+      dynamic_cast<apache::thrift::StopTLSEncryptionStateProvider*>(
+          appTrafficLayer.get()),
+      nullptr);
 }
 
 TEST(FizzThriftFactory, CreateCompositeWriteRecordLayer) {
@@ -2896,6 +2902,11 @@ TEST(FizzThriftFactory, CreateCompositeWriteRecordLayer) {
 
   EXPECT_NE(appTrafficLayer.get(), handshakeLayer.get());
   EXPECT_NE(appTrafficLayer.get(), earlyDataLayer.get());
+
+  EXPECT_NE(
+      dynamic_cast<apache::thrift::StopTLSEncryptionStateProvider*>(
+          appTrafficLayer.get()),
+      nullptr);
 }
 
 TEST(ThriftServer, SSLRequiredAllowsLocalPlaintext) {

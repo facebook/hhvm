@@ -722,12 +722,7 @@ void HTTPSession::onHeadersComplete(HTTPCodec::StreamID streamID,
 
   // Inform observers when request headers (i.e. ingress, from downstream
   // client) are processed.
-  //
-  // TODO(T227264326) remove the `isRequest` check since it is strictly not
-  // needed. It was added as a work-around to ensure the `requestStarted`
-  // callback will never be invoked for a response, especially in certain
-  // scenario such as H2 pubsub. See D76341533 for details.
-  if (isDownstream() && msg->isRequest()) {
+  if (isDownstream()) {
     if (msg.get()) {
       const auto event =
           HTTPSessionObserverInterface::RequestStartedEvent::Builder()
@@ -1006,7 +1001,6 @@ void HTTPSession::onGoaway(uint64_t lastGoodStreamID,
   // with odd transaction IDs and downstream transactions with even IDs.
   std::vector<HTTPCodec::StreamID> refusedIds;
   std::vector<HTTPCodec::StreamID> errorIds;
-  std::vector<HTTPCodec::StreamID> pubSubControlIds;
 
   for (const auto& id : transactionIds_) {
     if (((bool)(id & 0x01) == isUpstream()) && (id > lastGoodStreamID)) {
@@ -1014,10 +1008,6 @@ void HTTPSession::onGoaway(uint64_t lastGoodStreamID,
     } else if (code != ErrorCode::NO_ERROR) {
       // Error goaway -> error all streams
       errorIds.push_back(id);
-    } else if (lastGoodStreamID < http2::kMaxStreamID &&
-               (controlStreamIds_.find(id) != controlStreamIds_.end())) {
-      // Final (non-error) goaway -> error control streams
-      pubSubControlIds.push_back(id);
     }
   }
   errorOnTransactionIds(refusedIds, kErrorStreamUnacknowledged);
@@ -1034,8 +1024,6 @@ void HTTPSession::onGoaway(uint64_t lastGoodStreamID,
                                       debugStr);
     errorOnTransactionIds(errorIds, kErrorConnectionReset, msg);
   }
-
-  errorOnTransactionIds(pubSubControlIds, kErrorStreamAbort);
 }
 
 void HTTPSession::onPingRequest(uint64_t data) {
@@ -1284,12 +1272,7 @@ void HTTPSession::sendHeaders(HTTPTransaction* txn,
 
   // If this is a client sending request headers to upstream
   // invoke requestStarted event for attached observers.
-  //
-  // TODO(T227264326) remove the `isRequest` check since it is strictly not
-  // needed. It was added as a work-around to ensure the `requestStarted`
-  // callback will never be invoked for a response, especially in certain
-  // scenario such as H2 pubsub. See D76341533 for details.
-  if (isUpstream() && headers.isRequest()) {
+  if (isUpstream()) {
     const auto event =
         HTTPSessionObserverInterface::RequestStartedEvent::Builder()
             .setTimestamp(HTTPSessionObserverInterface::Clock::now())
@@ -1578,9 +1561,6 @@ void HTTPSession::detach(HTTPTransaction* txn) noexcept {
       assocTxn->removePushedTransaction(streamID);
     }
   }
-
-  // do not track a detached control stream
-  controlStreamIds_.erase(txn->getID());
 
   auto oldStreamCount = getPipelineStreamCount();
   decrementTransactionCount(txn, true, true);

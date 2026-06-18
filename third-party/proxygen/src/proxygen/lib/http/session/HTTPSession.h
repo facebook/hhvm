@@ -703,13 +703,6 @@ class HTTPSession
   folly::F14NodeMap<HTTPCodec::StreamID, HTTPTransaction> transactions_;
   folly::F14FastSet<HTTPCodec::StreamID> transactionIds_;
 
-  /**
-   * Track all current known control streams we have within this session. A
-   *stream is considered as a control stream, after some ExStream is associated
-   *with it.
-   **/
-  folly::F14FastSet<HTTPCodec::StreamID> controlStreamIds_;
-
   /** Count of transactions awaiting input */
   uint32_t liveTransactions_{0};
 

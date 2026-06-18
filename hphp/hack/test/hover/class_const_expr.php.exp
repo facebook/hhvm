@@ -1,5 +1,5 @@
 Defined in `Foo`
 ---
-const int BAR
+const int BAR = 1
 ---
 A doc comment.

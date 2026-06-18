@@ -1115,7 +1115,7 @@ let class_id_positions_cases =
             [
               Lsp.MarkedString "Defined in `CIPos2`";
               Lsp.MarkedString "---";
-              Lsp.MarkedCode ("hack", "const int MyConstInt");
+              Lsp.MarkedCode ("hack", "const int MyConstInt = 0");
             ];
           addendum = [];
           pos = pos_at (3, 26) (3, 35);

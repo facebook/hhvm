@@ -617,8 +617,30 @@ let make_hover_info
       ( None,
         Printf.sprintf "Parameter: %s" (Option.value ~default:"$_" param_name),
         None )
+    | (SymbolOccurrence.ClassConst _, Some info) ->
+      let ((snippet, instantiation_section), class_tparams) =
+        match get_decl_ty ctx def_opt type_ with
+        | (Some class_tparams, Some decl_ty) ->
+          ( show_type_with_instantiation occurrence def_opt decl_ty info,
+            class_tparams )
+        | _ -> ((print_locl_ty_with_identity info, None), [])
+      in
+      (* The type snippet is `const <type> <name>`. Append ` = <value>` from the
+         definition text, like GConst hover. The class-const span is
+         `<name> = <value>` (no `const`/type), so strip the leading name. *)
+      let snippet =
+        match (def_opt, make_hover_const_definition entry def_opt) with
+        | (Some def, Some decl) ->
+          (match String.chop_prefix decl ~prefix:def.SymbolDefinition.name with
+          | Some value when not (String.is_empty (String.strip value)) ->
+            snippet ^ value
+          | _ -> snippet)
+        | _ -> snippet
+      in
+      ( make_defined_in_section def_opt class_tparams,
+        snippet,
+        instantiation_section )
     | (SymbolOccurrence.Method _, Some info)
-    | (SymbolOccurrence.ClassConst _, Some info)
     | (SymbolOccurrence.Property _, Some info) ->
       let ((snippet, instantiation_section), class_tparams) =
         match get_decl_ty ctx def_opt type_ with

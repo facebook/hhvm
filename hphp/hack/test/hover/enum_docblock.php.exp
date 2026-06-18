@@ -1,5 +1,5 @@
 Defined in `E`
 ---
-const E B
+const E B = 'b'
 ---
 My name is B

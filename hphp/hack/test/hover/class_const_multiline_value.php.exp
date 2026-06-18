@@ -1,0 +1,4 @@
+Defined in `Foo`
+---
+const string GK =
+    'my_gk_name'

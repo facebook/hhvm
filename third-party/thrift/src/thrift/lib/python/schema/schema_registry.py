@@ -27,7 +27,7 @@ import functools
 import importlib
 import sys
 import types
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
 from importlib import resources
 from typing import Any
 
@@ -271,6 +271,20 @@ class SchemaRegistry(TypeSystem):
         """``None`` -- the registry is lazy/module-discovery based and cannot
         enumerate all URIs up front."""
         return None
+
+    def get_user_defined_type_by_source_identifier(
+        self, locator: str, name: str
+    ) -> DefinitionNode | None:
+        """``None`` -- the registry is lazy/module-discovery based and cannot
+        build a source-identifier index up front."""
+        return None
+
+    def get_user_defined_types_at_location(
+        self, locator: str
+    ) -> Mapping[str, DefinitionNode]:
+        """``{}`` -- the registry is lazy/module-discovery based and cannot
+        enumerate the types at a source location up front."""
+        return {}
 
     def _resolve_module_for_uri(self, uri: str) -> types.ModuleType | None:
         """Find the module that defines the given URI."""

@@ -37,7 +37,8 @@ cyclic and mutually-recursive types resolve against stable node identities:
 
 from __future__ import annotations
 
-from collections.abc import Iterator
+from collections.abc import Iterator, Mapping
+from types import MappingProxyType
 from typing import assert_never, Sequence
 
 from apache.thrift.type_system.type_system.thrift_types import (
@@ -54,6 +55,7 @@ from thrift.lib.python.schema._serializable import (
 )
 from thrift.lib.python.schema.type_system import (
     _collect_closure,
+    _index_by_source,
     _type_ref_for_node,
     _type_ref_uris,
     DefinitionNode,
@@ -168,39 +170,60 @@ class FieldSpec:
 
 
 class _PendingStructured:
-    __slots__ = ("uri", "fields", "is_union", "is_sealed")
+    __slots__ = ("uri", "fields", "is_union", "is_sealed", "source_info")
     uri: str
     fields: list[FieldSpec]
     is_union: bool
     is_sealed: bool
+    source_info: SourceInfo | None
 
     def __init__(
-        self, uri: str, fields: list[FieldSpec], is_union: bool, is_sealed: bool
+        self,
+        uri: str,
+        fields: list[FieldSpec],
+        is_union: bool,
+        is_sealed: bool,
+        source_info: SourceInfo | None = None,
     ) -> None:
         self.uri = uri
         self.fields = fields
         self.is_union = is_union
         self.is_sealed = is_sealed
+        self.source_info = source_info
 
 
 class _PendingEnum:
-    __slots__ = ("uri", "values")
+    __slots__ = ("uri", "values", "source_info")
     uri: str
     values: list[EnumValue]
+    source_info: SourceInfo | None
 
-    def __init__(self, uri: str, values: list[EnumValue]) -> None:
+    def __init__(
+        self,
+        uri: str,
+        values: list[EnumValue],
+        source_info: SourceInfo | None = None,
+    ) -> None:
         self.uri = uri
         self.values = values
+        self.source_info = source_info
 
 
 class _PendingOpaqueAlias:
-    __slots__ = ("uri", "target")
+    __slots__ = ("uri", "target", "source_info")
     uri: str
     target: TypeInput
+    source_info: SourceInfo | None
 
-    def __init__(self, uri: str, target: TypeInput) -> None:
+    def __init__(
+        self,
+        uri: str,
+        target: TypeInput,
+        source_info: SourceInfo | None = None,
+    ) -> None:
         self.uri = uri
         self.target = target
+        self.source_info = source_info
 
 
 _Pending = _PendingStructured | _PendingEnum | _PendingOpaqueAlias
@@ -297,10 +320,17 @@ class TypeSystemBuilder:
         fields: Sequence[FieldSpec],
         *,
         is_sealed: bool = False,
+        source_info: SourceInfo | None = None,
     ) -> TypeSystemBuilder:
         self._reserve_uri(uri)
         self._pending.append(
-            _PendingStructured(uri, list(fields), is_union=False, is_sealed=is_sealed)
+            _PendingStructured(
+                uri,
+                list(fields),
+                is_union=False,
+                is_sealed=is_sealed,
+                source_info=source_info,
+            )
         )
         return self
 
@@ -310,21 +340,40 @@ class TypeSystemBuilder:
         fields: Sequence[FieldSpec],
         *,
         is_sealed: bool = False,
+        source_info: SourceInfo | None = None,
     ) -> TypeSystemBuilder:
         self._reserve_uri(uri)
         self._pending.append(
-            _PendingStructured(uri, list(fields), is_union=True, is_sealed=is_sealed)
+            _PendingStructured(
+                uri,
+                list(fields),
+                is_union=True,
+                is_sealed=is_sealed,
+                source_info=source_info,
+            )
         )
         return self
 
-    def add_enum(self, uri: str, values: Sequence[EnumValue]) -> TypeSystemBuilder:
+    def add_enum(
+        self,
+        uri: str,
+        values: Sequence[EnumValue],
+        *,
+        source_info: SourceInfo | None = None,
+    ) -> TypeSystemBuilder:
         self._reserve_uri(uri)
-        self._pending.append(_PendingEnum(uri, list(values)))
+        self._pending.append(_PendingEnum(uri, list(values), source_info=source_info))
         return self
 
-    def add_opaque_alias(self, uri: str, target: TypeInput) -> TypeSystemBuilder:
+    def add_opaque_alias(
+        self,
+        uri: str,
+        target: TypeInput,
+        *,
+        source_info: SourceInfo | None = None,
+    ) -> TypeSystemBuilder:
         self._reserve_uri(uri)
-        self._pending.append(_PendingOpaqueAlias(uri, target))
+        self._pending.append(_PendingOpaqueAlias(uri, target, source_info=source_info))
         return self
 
     def build(self) -> EnumerableTypeSystem:
@@ -333,19 +382,33 @@ class TypeSystemBuilder:
         return IndexedTypeSystem(nodes)
 
     def _build_placeholders(self) -> dict[str, DefinitionNode]:
-        """Phase 1: allocate one empty node per URI with stable identity."""
+        """Phase 1: allocate one empty node per URI with stable identity. Any
+        caller-supplied ``source_info`` is attached up front (it is identity-
+        neutral, so it does not affect resolution)."""
         nodes: dict[str, DefinitionNode] = {}
         for pending in self._pending:
             if isinstance(pending, _PendingStructured):
                 nodes[pending.uri] = (
-                    UnionNode(uri=pending.uri, is_sealed=pending.is_sealed)
+                    UnionNode(
+                        uri=pending.uri,
+                        is_sealed=pending.is_sealed,
+                        source_info=pending.source_info,
+                    )
                     if pending.is_union
-                    else StructNode(uri=pending.uri, is_sealed=pending.is_sealed)
+                    else StructNode(
+                        uri=pending.uri,
+                        is_sealed=pending.is_sealed,
+                        source_info=pending.source_info,
+                    )
                 )
             elif isinstance(pending, _PendingEnum):
-                nodes[pending.uri] = EnumNode(uri=pending.uri)
+                nodes[pending.uri] = EnumNode(
+                    uri=pending.uri, source_info=pending.source_info
+                )
             elif isinstance(pending, _PendingOpaqueAlias):
-                nodes[pending.uri] = OpaqueAliasNode(uri=pending.uri)
+                nodes[pending.uri] = OpaqueAliasNode(
+                    uri=pending.uri, source_info=pending.source_info
+                )
             else:
                 assert_never(pending)
         return nodes
@@ -762,13 +825,20 @@ class _DerivedTypeSystem(TypeSystem):
     """An additive overlay ``result = overlay ∪ base``: holds the overlay's own
     nodes and **delegates** to ``base`` on a miss (base nodes are never copied)."""
 
-    __slots__ = ("_overlay", "_base")
+    __slots__ = ("_overlay", "_base", "_source_index")
     _overlay: dict[str, DefinitionNode]
     _base: TypeSystem
+    _source_index: dict[str, dict[str, DefinitionNode]]
 
-    def __init__(self, overlay: dict[str, DefinitionNode], base: TypeSystem) -> None:
+    def __init__(
+        self,
+        overlay: dict[str, DefinitionNode],
+        base: TypeSystem,
+        source_index: dict[str, dict[str, DefinitionNode]],
+    ) -> None:
         self._overlay = overlay
         self._base = base
+        self._source_index = source_index
 
     def get_user_defined_type(self, uri: str) -> DefinitionNode | None:
         node = self._overlay.get(uri)
@@ -782,6 +852,21 @@ class _DerivedTypeSystem(TypeSystem):
             return None
         return base_uris | frozenset(self._overlay)
 
+    def get_user_defined_type_by_source_identifier(
+        self, locator: str, name: str
+    ) -> DefinitionNode | None:
+        node = self._source_index.get(locator, {}).get(name)
+        if node is not None:
+            return node
+        return self._base.get_user_defined_type_by_source_identifier(locator, name)
+
+    def get_user_defined_types_at_location(
+        self, locator: str
+    ) -> Mapping[str, DefinitionNode]:
+        result = dict(self._base.get_user_defined_types_at_location(locator))
+        result.update(self._source_index.get(locator, {}))
+        return MappingProxyType(result)
+
     def __repr__(self) -> str:
         return f"_DerivedTypeSystem({len(self._overlay)} overlay types over {self._base!r})"
 
@@ -792,8 +877,12 @@ def build_derived_from(overlay: TypeSystemBuilder, base: TypeSystem) -> TypeSyst
 
     The overlay may reference base types by URI (resolved through ``base`` during
     the build). The result is **not** independent: it holds ``base`` and delegates
-    to it -- base nodes are never copied. A URI already defined in ``base`` raises
-    ``InvalidTypeError`` (the overlay cannot shadow or change base types)."""
+    to it -- base nodes are never copied.
+
+    A URI already defined in ``base`` is rejected with ``InvalidTypeError`` (the
+    overlay cannot shadow or change a base type by URI). An overlay source
+    identifier ``(locator, name)`` already present in ``base`` is likewise
+    rejected (even when the URI differs) when ``base`` supports source enumeration."""
     nodes = overlay._build_placeholders()
     for uri in nodes:
         if base.get_user_defined_type(uri) is not None:
@@ -801,5 +890,21 @@ def build_derived_from(overlay: TypeSystemBuilder, base: TypeSystem) -> TypeSyst
                 f"Type {uri!r} conflicts with an existing definition in the base "
                 "TypeSystem"
             )
+    # Build the overlay's own source index eagerly so overlay-internal duplicate
+    # source identifiers are rejected up front (mirroring the eager URI check
+    # above) instead of being deferred to the first lazy source lookup.
+    overlay_source_index = _index_by_source(nodes.values())
+    # Reject an overlay source identifier that already exists in ``base`` (its URI
+    # may differ).
+    for locator, by_name in overlay_source_index.items():
+        for name in by_name:
+            if (
+                base.get_user_defined_type_by_source_identifier(locator, name)
+                is not None
+            ):
+                raise InvalidTypeError(
+                    f"Source identifier {name!r} at location {locator!r} conflicts "
+                    "with an existing definition in the base TypeSystem"
+                )
     overlay._populate(nodes, base)
-    return _DerivedTypeSystem(nodes, base)
+    return _DerivedTypeSystem(nodes, base, source_index=overlay_source_index)

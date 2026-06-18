@@ -388,6 +388,16 @@ class SyntaxGraphBridge(TypeSystem):
     def get_known_uris(self) -> None:
         return None
 
+    def get_user_defined_type_by_source_identifier(
+        self, locator: str, name: str
+    ) -> DefinitionNode | None:
+        return None
+
+    def get_user_defined_types_at_location(
+        self, locator: str
+    ) -> Mapping[str, DefinitionNode]:
+        return {}
+
     # -- internal -----------------------------------------------------------
 
     def _bridge_definition(

@@ -392,3 +392,103 @@ class NodeSourceInfoTest(unittest.TestCase):
         self.assertEqual(a, c)
         self.assertEqual(hash(a), hash(b))
         self.assertEqual(hash(a), hash(c))
+
+
+class SourceIdentifierLookupTest(unittest.TestCase):
+    _A = "file://test/a.thrift"
+    _B = "file://test/b.thrift"
+
+    def _make_ts(
+        self,
+    ) -> tuple[IndexedTypeSystem, StructNode, EnumNode, StructNode, StructNode]:
+        # `foo` and `color` share locator `_A`; `bar` is at `_B`; `nosrc`
+        # carries no source_info (so it is absent from the source index).
+        foo = StructNode(
+            uri="test/Foo",
+            fields=[_i32_field(1, "x")],
+            source_info=SourceInfo(self._A, "Foo"),
+        )
+        color = EnumNode(
+            uri="test/Color",
+            values=[EnumValue("RED", 0)],
+            source_info=SourceInfo(self._A, "Color"),
+        )
+        bar = StructNode(uri="test/Bar", source_info=SourceInfo(self._B, "Bar"))
+        nosrc = StructNode(uri="test/NoSrc")
+        ts = IndexedTypeSystem(
+            {
+                "test/Foo": foo,
+                "test/Color": color,
+                "test/Bar": bar,
+                "test/NoSrc": nosrc,
+            }
+        )
+        return ts, foo, color, bar, nosrc
+
+    def test_by_source_identifier_resolves(self) -> None:
+        ts, foo, color, bar, _ = self._make_ts()
+        self.assertIs(
+            ts.get_user_defined_type_by_source_identifier(self._A, "Foo"), foo
+        )
+        self.assertIs(
+            ts.get_user_defined_type_by_source_identifier(self._A, "Color"), color
+        )
+        self.assertIs(
+            ts.get_user_defined_type_by_source_identifier(self._B, "Bar"), bar
+        )
+
+    def test_by_source_identifier_miss_returns_none(self) -> None:
+        ts, _, _, _, _ = self._make_ts()
+        # Unknown name at a known locator.
+        self.assertIsNone(
+            ts.get_user_defined_type_by_source_identifier(self._A, "Nope")
+        )
+        # Unknown locator.
+        self.assertIsNone(
+            ts.get_user_defined_type_by_source_identifier("file://test/zzz", "Foo")
+        )
+
+    def test_at_location_returns_name_to_node_map(self) -> None:
+        ts, foo, color, bar, _ = self._make_ts()
+        self.assertEqual(
+            dict(ts.get_user_defined_types_at_location(self._A)),
+            {"Foo": foo, "Color": color},
+        )
+        self.assertEqual(
+            dict(ts.get_user_defined_types_at_location(self._B)), {"Bar": bar}
+        )
+
+    def test_at_location_unknown_is_empty(self) -> None:
+        ts, _, _, _, _ = self._make_ts()
+        self.assertEqual(dict(ts.get_user_defined_types_at_location("file://nope")), {})
+
+    def test_node_without_source_info_is_absent_from_index(self) -> None:
+        ts, _, _, _, nosrc = self._make_ts()
+        # The no-source node resolves by URI ...
+        self.assertIs(ts.get_user_defined_type("test/NoSrc"), nosrc)
+        # ... but never appears in any source-location map.
+        all_indexed = {
+            *ts.get_user_defined_types_at_location(self._A).values(),
+            *ts.get_user_defined_types_at_location(self._B).values(),
+        }
+        self.assertNotIn(nosrc, all_indexed)
+
+    def test_at_location_view_is_read_only(self) -> None:
+        ts, _, _, _, _ = self._make_ts()
+        view = ts.get_user_defined_types_at_location(self._A)
+        bar = ts.get_user_defined_type_or_throw("test/Bar")
+        with self.assertRaises(TypeError):
+            view["Bar"] = bar  # pyre-ignore[16]: read-only view
+
+    def test_duplicate_source_identifier_raises(self) -> None:
+        # Two distinct URIs sharing one (locator, name) is a malformed type
+        # system; the source index rejects it.
+        dup = SourceInfo(self._A, "Dup")
+        ts = IndexedTypeSystem(
+            {
+                "test/One": StructNode(uri="test/One", source_info=dup),
+                "test/Two": StructNode(uri="test/Two", source_info=dup),
+            }
+        )
+        with self.assertRaises(InvalidTypeError):
+            ts.get_user_defined_type_by_source_identifier(self._A, "Dup")

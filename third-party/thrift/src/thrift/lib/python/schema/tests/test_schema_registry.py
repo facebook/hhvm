@@ -482,3 +482,19 @@ class SchemaRegistryTest(unittest.TestCase):
         assert isinstance(resolved, StructTypeRef)
         self.assertEqual(resolved.node.name, "AnyStruct")
         self.assertEqual(resolved.node.uri, self._ANY_URI)
+
+    def test_source_identifier_lookups_unsupported(self) -> None:
+        # The lazy registry cannot enumerate to build a source index, so (like
+        # ``get_known_uris() -> None``) the source-identifier lookups report
+        # "nothing known": ``None`` and an empty mapping.
+        registry = SchemaRegistry()
+        registry.get_node(TestModule.MyStruct)  # populate some definitions
+        self.assertIsNone(
+            registry.get_user_defined_type_by_source_identifier(
+                "file://anything.thrift", "MyStruct"
+            )
+        )
+        self.assertEqual(
+            dict(registry.get_user_defined_types_at_location("file://anything.thrift")),
+            {},
+        )

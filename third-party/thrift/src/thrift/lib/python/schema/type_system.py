@@ -39,7 +39,7 @@ from __future__ import annotations
 
 import enum
 from abc import ABC, abstractmethod
-from collections.abc import Callable, Iterator, Mapping, Sequence
+from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence
 from types import MappingProxyType
 from typing import assert_never, Generic, TYPE_CHECKING, TypeVar
 
@@ -659,6 +659,34 @@ class OpaqueAliasNode(DefinitionNodeBase):
 
 
 # ---------------------------------------------------------------------------
+# Source-identifier index (locator -> {name -> node}).
+# ---------------------------------------------------------------------------
+
+
+def _index_by_source(
+    nodes: Iterable[DefinitionNode],
+) -> dict[str, dict[str, DefinitionNode]]:
+    """Index user-defined nodes by their source provenance as
+    ``{locator: {name: node}}``. Nodes without ``source_info`` are skipped.
+
+    Raises ``InvalidTypeError`` if two nodes share one ``(locator, name)``
+    source identifier."""
+    index: dict[str, dict[str, DefinitionNode]] = {}
+    for node in nodes:
+        info = node.source_info
+        if info is None:
+            continue
+        by_name = index.setdefault(info.locator, {})
+        if info.name in by_name:
+            raise InvalidTypeError(
+                f"Duplicate source identifier name {info.name!r} at location "
+                f"{info.locator!r}"
+            )
+        by_name[info.name] = node
+    return index
+
+
+# ---------------------------------------------------------------------------
 # TypeSystem -- a (possibly bounded) collection of user-defined types.
 # ---------------------------------------------------------------------------
 
@@ -688,6 +716,33 @@ class TypeSystem(ABC):
         finitely enumerable (e.g. the lazy registry)."""
         raise NotImplementedError
 
+    @abstractmethod
+    def get_user_defined_type_by_source_identifier(
+        self, locator: str, name: str
+    ) -> DefinitionNode | None:
+        """Resolve a source identifier ``(locator, name)`` to its
+        ``DefinitionNode``, or ``None`` on a miss.
+
+        Unlike URIs, source identifiers are not globally unique, but they
+        are unique *within* a single type system. An implementation that
+        cannot enumerate its types (e.g. the lazy registry/bridge) returns
+        ``None``."""
+        raise NotImplementedError
+
+    @abstractmethod
+    def get_user_defined_types_at_location(
+        self, locator: str
+    ) -> Mapping[str, DefinitionNode]:
+        """All user-defined types whose source ``locator`` matches, as a
+        ``{name: node}`` mapping (empty for an unknown locator).
+
+        For every name in the result,
+        ``get_user_defined_type_by_source_identifier`` with that
+        ``(locator, name)`` must also succeed. An implementation that cannot
+        enumerate its types (e.g. the lazy registry/bridge) returns an empty
+        mapping."""
+        raise NotImplementedError
+
 
 class EnumerableTypeSystem(TypeSystem):
     """A ``TypeSystem`` whose types are *finitely enumerable*: ``get_known_uris``
@@ -706,8 +761,12 @@ class IndexedTypeSystem(EnumerableTypeSystem):
     and the canonical ``EnumerableTypeSystem`` implementation;
     ``get_known_uris`` returns the exact set."""
 
-    __slots__ = ("_by_uri",)
+    __slots__ = ("_by_uri", "_source_index")
     _by_uri: dict[str, DefinitionNode]
+    # Lazily built source index: ``{locator: {name: node}}``. ``None`` until the
+    # first source-identifier lookup (most type systems are never queried this
+    # way, so the index is not paid for at construction).
+    _source_index: dict[str, dict[str, DefinitionNode]] | None
 
     def __init__(self, definitions: dict[str, DefinitionNode]) -> None:
         for uri, node in definitions.items():
@@ -717,12 +776,30 @@ class IndexedTypeSystem(EnumerableTypeSystem):
                     f"{node.uri!r}"
                 )
         self._by_uri = dict(definitions)
+        self._source_index = None
 
     def get_user_defined_type(self, uri: str) -> DefinitionNode | None:
         return self._by_uri.get(uri)
 
     def get_known_uris(self) -> frozenset[str]:
         return frozenset(self._by_uri)
+
+    def _ensure_source_index(self) -> dict[str, dict[str, DefinitionNode]]:
+        index = self._source_index
+        if index is None:
+            index = _index_by_source(self._by_uri.values())
+            self._source_index = index
+        return index
+
+    def get_user_defined_type_by_source_identifier(
+        self, locator: str, name: str
+    ) -> DefinitionNode | None:
+        return self._ensure_source_index().get(locator, {}).get(name)
+
+    def get_user_defined_types_at_location(
+        self, locator: str
+    ) -> Mapping[str, DefinitionNode]:
+        return MappingProxyType(self._ensure_source_index().get(locator, {}))
 
     def __repr__(self) -> str:
         return f"IndexedTypeSystem({len(self._by_uri)} types)"

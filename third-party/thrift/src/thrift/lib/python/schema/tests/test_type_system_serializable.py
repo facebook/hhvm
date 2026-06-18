@@ -932,6 +932,96 @@ class BuildDerivedFromTest(unittest.TestCase):
         with self.assertRaises(InvalidTypeError):
             build_derived_from(overlay, base)
 
+    def _sourced_base(self) -> TypeSystem:
+        return (
+            TypeSystemBuilder()
+            .add_struct(
+                "test/Base",
+                [_field(1, "x", PrimitiveTypeRef(Primitive.I32))],
+                source_info=SourceInfo("file://base.thrift", "Base"),
+            )
+            .build()
+        )
+
+    def test_disjoint_source_identifiers_ok(self) -> None:
+        # No false positive: overlay source identifiers disjoint from base.
+        base = self._sourced_base()
+        overlay = TypeSystemBuilder()
+        overlay.add_struct(
+            "test/Overlay",
+            [_field(1, "base", "test/Base")],
+            source_info=SourceInfo("file://overlay.thrift", "Overlay"),
+        )
+        result = build_derived_from(overlay, base)
+        # The derived view answers source-identifier lookups over overlay + base.
+        self.assertIs(
+            result.get_user_defined_type_by_source_identifier(
+                "file://overlay.thrift", "Overlay"
+            ),
+            result.get_user_defined_type("test/Overlay"),
+        )
+        self.assertIs(
+            result.get_user_defined_type_by_source_identifier(
+                "file://base.thrift", "Base"
+            ),
+            base.get_user_defined_type("test/Base"),
+        )
+        self.assertEqual(
+            set(result.get_user_defined_types_at_location("file://overlay.thrift")),
+            {"Overlay"},
+        )
+
+    def test_builder_source_info_flows_to_built_node(self) -> None:
+        # ``add_*(..., source_info=)`` attaches provenance to the built node.
+        info = SourceInfo("file://x.thrift", "Foo")
+        ts = (
+            TypeSystemBuilder()
+            .add_struct(
+                "test/Foo",
+                [_field(1, "x", PrimitiveTypeRef(Primitive.I32))],
+                source_info=info,
+            )
+            .build()
+        )
+        foo = ts.get_user_defined_type("test/Foo")
+        assert foo is not None
+        self.assertEqual(foo.source_info, info)
+        self.assertIs(
+            ts.get_user_defined_type_by_source_identifier("file://x.thrift", "Foo"),
+            foo,
+        )
+
+    def test_overlay_internal_source_identifier_collision_throws(self) -> None:
+        # Two overlay types share one (locator, name). Their URIs differ and
+        # neither collides with the base, but the overlay is internally
+        # malformed and must be rejected at build time -- not deferred to the
+        # first lazy source lookup.
+        base = self._sourced_base()
+        overlay = TypeSystemBuilder()
+        overlay.add_struct(
+            "test/OverlayA",
+            [_field(1, "a", PrimitiveTypeRef(Primitive.I32))],
+            source_info=SourceInfo("file://dup.thrift", "Dup"),
+        )
+        overlay.add_struct(
+            "test/OverlayB",
+            [_field(1, "b", PrimitiveTypeRef(Primitive.I32))],
+            source_info=SourceInfo("file://dup.thrift", "Dup"),
+        )
+        with self.assertRaises(InvalidTypeError):
+            build_derived_from(overlay, base)
+
+    def test_overlay_source_identifier_collides_with_base_throws(self) -> None:
+        base = self._sourced_base()  # test/Base @ ("file://base.thrift", "Base")
+        overlay = TypeSystemBuilder()
+        overlay.add_struct(
+            "test/OverlayDup",
+            [_field(1, "x", PrimitiveTypeRef(Primitive.I32))],
+            source_info=SourceInfo("file://base.thrift", "Base"),
+        )
+        with self.assertRaises(InvalidTypeError):
+            build_derived_from(overlay, base)
+
 
 class SourceInfoSerializationTest(unittest.TestCase):
     """``sourceInfo`` emission on export, the import read-back, and preservation
@@ -1002,6 +1092,20 @@ class SourceInfoSerializationTest(unittest.TestCase):
         foo = pruned.get_user_defined_type("test/Foo")
         assert foo is not None
         self.assertIsNone(foo.source_info)
+
+    def test_export_rejects_duplicate_source_identifier(self) -> None:
+        # A lazily-built type system can hold two URIs sharing one
+        # (locator, name); exporting both would emit a malformed wire artifact,
+        # so build_serializable_type_system must reject it.
+        dup = SourceInfo("file://dup.thrift", "Dup")
+        ts = IndexedTypeSystem(
+            {
+                "test/One": StructNode(uri="test/One", source_info=dup),
+                "test/Two": StructNode(uri="test/Two", source_info=dup),
+            }
+        )
+        with self.assertRaises(InvalidTypeError):
+            build_serializable_type_system(ts, ["test/One", "test/Two"])
 
 
 if __name__ == "__main__":

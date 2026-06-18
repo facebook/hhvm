@@ -96,6 +96,7 @@ from thrift.lib.python.schema._record import (
 )
 from thrift.lib.python.schema.type_system import (
     _collect_closure,
+    _index_by_source,
     _type_ref_for_node,
     _type_ref_uris,
     DefinitionNode,
@@ -533,6 +534,11 @@ def build_serializable_type_system(
     ``sourceInfo`` is emitted."""
     opts = options if options is not None else PruneOptions()
     closure = _collect_closure(source, root_uris, _export_referenced_uris)
+    if opts.include_source_info:
+        # Refuse to emit a malformed artifact: no two exported URIs may share one
+        # ``(locator, name)`` source identifier. ``_index_by_source`` raises
+        # ``InvalidTypeError`` on a duplicate.
+        _index_by_source(closure.values())
     types = {
         uri: SerializableTypeDefinitionEntry(
             definition=to_serializable_definition(node),

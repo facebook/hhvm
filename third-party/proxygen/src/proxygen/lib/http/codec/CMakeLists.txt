@@ -47,6 +47,7 @@ proxygen_add_library(proxygen_http_codec_codec_common
     glog::glog
   EXPORTED_DEPS
     proxygen_error
+    proxygen_http_codec_compress_compression_info
     proxygen_http_codec_compress_fast_header_name
     proxygen_http_codec_compress_header_codec
     proxygen_http_codec_compress_hpack
@@ -75,6 +76,7 @@ proxygen_add_library(proxygen_http_codec_http1x_codec
     proxygen_http_codec_util
     proxygen_http_http_headers
     Folly::folly_base64
+    Folly::folly_io_iobuf
     Folly::folly_random
     Folly::folly_ssl_openssl_hash
   EXPORTED_DEPS
@@ -200,6 +202,7 @@ proxygen_add_library(proxygen_http_codec_http_binary_codec
     proxygen_http_codec_codec_common
     proxygen_http_codec_direction
     proxygen_http_message
+    Folly::folly_io_iobuf
 )
 
 proxygen_add_library(proxygen_http_codec_varint_utils

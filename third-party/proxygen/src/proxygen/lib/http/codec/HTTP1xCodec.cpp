@@ -10,6 +10,7 @@
 
 #include <folly/Random.h>
 #include <folly/base64.h>
+#include <folly/io/Cursor.h>
 #include <folly/ssl/OpenSSLHash.h>
 #include <proxygen/lib/http/RFC2616.h>
 #include <proxygen/lib/http/codec/CodecUtil.h>

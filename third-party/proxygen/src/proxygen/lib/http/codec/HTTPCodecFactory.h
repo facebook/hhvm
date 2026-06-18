@@ -14,6 +14,8 @@
 
 namespace proxygen {
 
+class HeaderIndexingStrategy;
+
 /**
  * Factory for produces HTTPCodec objects.
  */

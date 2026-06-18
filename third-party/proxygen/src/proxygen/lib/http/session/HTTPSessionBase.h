@@ -27,6 +27,7 @@ class HTTPSessionController;
 class HTTPSessionStats;
 class HTTPTransaction;
 class ByteEventTracker;
+class HeaderIndexingStrategy;
 
 constexpr uint32_t kDefaultMaxConcurrentOutgoingStreams = 100;
 

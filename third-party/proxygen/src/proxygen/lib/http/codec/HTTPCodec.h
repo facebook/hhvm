@@ -9,6 +9,7 @@
 #pragma once
 
 #include <folly/Portability.h>
+#include <folly/io/Cursor.h>
 #include <folly/io/IOBufQueue.h>
 #include <folly/lang/Assume.h>
 #include <proxygen/lib/http/HTTPException.h>
@@ -17,7 +18,7 @@
 #include <proxygen/lib/http/codec/ErrorCode.h>
 #include <proxygen/lib/http/codec/HTTPSettings.h>
 #include <proxygen/lib/http/codec/TransportDirection.h>
-#include <proxygen/lib/http/codec/compress/HPACKCodec.h>
+#include <proxygen/lib/http/codec/compress/CompressionInfo.h>
 #include <proxygen/lib/http/codec/compress/HeaderCodec.h>
 
 namespace proxygen {

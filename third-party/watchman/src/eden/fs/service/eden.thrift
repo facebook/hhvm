@@ -951,6 +951,11 @@ enum ConflictType {
    * but it contains untracked files preventing us from updating it.
    */
   DIRECTORY_NOT_EMPTY = 6,
+  /**
+   * A path would become restricted by the destination checkout while local
+   * state at that path remains visible and must be reported as a conflict.
+   */
+  VISIBLE_RESTRICTED = 7,
 }
 
 /**

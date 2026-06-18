@@ -23,7 +23,6 @@
 
 #include <folly/Overload.h>
 #include <folly/container/F14Set.h>
-#include <folly/container/MapUtil.h>
 #include <folly/container/span.h>
 
 #include <functional>

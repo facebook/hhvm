@@ -1011,10 +1011,8 @@ let rec event_loop
             errors
             ~discard_warnings:check_info.discard_warnings
         in
-        (* In non-interactive scenarios distc can skip depgraph creation *)
-        if Path.file_exists (Path.make hhdg_path) then
-          (* TODO: Clear in memory deps. Doesn't effect correctness but can cause larger fanouts *)
-          Typing_deps.replace (Typing_deps_mode.InMemoryMode (Some hhdg_path));
+        (* TODO: Clear in memory deps. Doesn't effect correctness but can cause larger fanouts *)
+        Typing_deps.replace (Typing_deps_mode.InMemoryMode (Some hhdg_path));
         Success
           ( errors,
             Map_reduce.of_ffi map_reduce_data,

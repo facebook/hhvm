@@ -62,7 +62,6 @@ pub struct HhConfig {
     pub naming_table_compression_threads: usize,
     pub eden_fetch_parallelism: usize,
     pub use_distc_crawl_dircache: bool,
-    pub distc_avoid_unnecessary_saved_state_work: bool,
     pub distc_min_worker_memory_gib: i64,
     pub distc_min_cpu_units: i64,
     pub distc_decl_buckets: i64,
@@ -88,7 +87,6 @@ impl Default for HhConfig {
             naming_table_compression_threads: 0,
             eden_fetch_parallelism: 0,
             use_distc_crawl_dircache: false,
-            distc_avoid_unnecessary_saved_state_work: false,
             distc_min_worker_memory_gib: 0,
             distc_min_cpu_units: 0,
             distc_decl_buckets: 0,
@@ -695,9 +693,6 @@ impl HhConfig {
                 "use_distc_crawl_dircache" => {
                     c.use_distc_crawl_dircache = parse_json(&value)?;
                 }
-                "distc_avoid_unnecessary_saved_state_work" => {
-                    c.distc_avoid_unnecessary_saved_state_work = parse_json(&value)?;
-                }
                 "distc_min_worker_memory_gib" => {
                     c.distc_min_worker_memory_gib = parse_json(&value)?;
                 }
@@ -720,7 +715,6 @@ impl HhConfig {
         let experiments = json!({
             "eden_fetch_parallelism": self.eden_fetch_parallelism,
             "use_distc_crawl_dircache": self.use_distc_crawl_dircache,
-            "distc_avoid_unnecessary_saved_state_work": self.distc_avoid_unnecessary_saved_state_work,
             "distc_min_worker_memory_gib": self.distc_min_worker_memory_gib,
             "distc_min_cpu_units": self.distc_min_cpu_units,
             "distc_sort_batches": self.distc_sort_batches,

@@ -321,8 +321,6 @@ end
 module Hhconf : sig
   (* distc *)
 
-  val distc_avoid_unnecessary_saved_state_work : string
-
   val enable_fanout_aware_distc : string
 
   val hh_distc_fanout_full_init_threshold : string

@@ -27,6 +27,5 @@ type t = {
   naming_table_compression_threads: int;
   eden_fetch_parallelism: int;
   use_distc_crawl_dircache: bool;
-  distc_avoid_unnecessary_saved_state_work: bool;
 }
 [@@deriving eq, show]

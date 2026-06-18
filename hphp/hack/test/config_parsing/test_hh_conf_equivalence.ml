@@ -65,8 +65,6 @@ let build_ocaml_hh_config contents =
       local_config.ServerLocalConfig.eden_fetch_parallelism;
     use_distc_crawl_dircache =
       local_config.ServerLocalConfig.use_distc_crawl_dircache;
-    distc_avoid_unnecessary_saved_state_work =
-      local_config.ServerLocalConfig.distc_avoid_unnecessary_saved_state_work;
   }
 
 (* Test: OCaml and Rust produce equivalent full HhConfig from hh.conf *)

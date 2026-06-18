@@ -371,8 +371,6 @@ type t = {
   sharedmem_heap_size: int;  (** sharedmem_heap_size config key *)
   eden_fetch_parallelism: int;  (** eden_fetch_parallelism config key *)
   use_distc_crawl_dircache: bool;  (** use_distc_crawl_dircache config key *)
-  distc_avoid_unnecessary_saved_state_work: bool;
-      (** distc_avoid_unnecessary_saved_state_work config key *)
   gc_minor_heap_size: int;  (** gc_minor_heap_size config key *)
   gc_space_overhead: int;  (** gc_space_overhead config key *)
   ide_fall_back_to_full_index: bool;

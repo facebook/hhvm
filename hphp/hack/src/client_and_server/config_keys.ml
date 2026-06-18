@@ -349,9 +349,6 @@ end
 module Hhconf = struct
   (* distc *)
 
-  let distc_avoid_unnecessary_saved_state_work =
-    hhconf_key "distc_avoid_unnecessary_saved_state_work"
-
   let enable_fanout_aware_distc = hhconf_key "enable_fanout_aware_distc"
 
   let hh_distc_fanout_full_init_threshold =

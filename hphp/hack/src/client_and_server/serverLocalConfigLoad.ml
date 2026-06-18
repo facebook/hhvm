@@ -116,7 +116,6 @@ let default =
     sharedmem_heap_size = 0;
     eden_fetch_parallelism = 0;
     use_distc_crawl_dircache = false;
-    distc_avoid_unnecessary_saved_state_work = false;
     gc_minor_heap_size = 0;
     gc_space_overhead = 0;
     ide_fall_back_to_full_index = false;
@@ -981,12 +980,6 @@ let load_
       ~default:default.use_distc_crawl_dircache
       config
   in
-  let distc_avoid_unnecessary_saved_state_work =
-    bool_
-      Config_keys.Hhconf.distc_avoid_unnecessary_saved_state_work
-      ~default:default.distc_avoid_unnecessary_saved_state_work
-      config
-  in
   let gc_minor_heap_size =
     int_
       Config_keys.Hhconfig.gc_minor_heap_size
@@ -1154,7 +1147,6 @@ let load_
     sharedmem_heap_size;
     eden_fetch_parallelism;
     use_distc_crawl_dircache;
-    distc_avoid_unnecessary_saved_state_work;
     gc_minor_heap_size;
     gc_space_overhead;
     ide_fall_back_to_full_index;

@@ -87,8 +87,8 @@ proxygen_add_library(proxygen_dns_dns_module
     DNSModule.cpp
   DEPS
     Folly::folly_network_address
+    Folly::folly_portability_gflags
     Folly::folly_singleton
-    ${GFLAG_DEPENDENCIES}
   EXPORTED_DEPS
     proxygen_dns
     proxygen_dns_cares_dns

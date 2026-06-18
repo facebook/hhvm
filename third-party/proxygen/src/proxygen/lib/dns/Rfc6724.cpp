@@ -109,10 +109,14 @@ namespace {
 #define IPV6_ADDR_SCOPE_ORGLOCAL 0x08
 #define IPV6_ADDR_SCOPE_GLOBAL 0x0e
 
+#ifndef IPV6_ADDR_MC_SCOPE
 #define IPV6_ADDR_MC_SCOPE(a) ((a)->s6_addr[1] & 0x0f)
+#endif
 
 /* RFC 4193. */
+#ifndef IN6_IS_ADDR_ULA
 #define IN6_IS_ADDR_ULA(a) (((a)->s6_addr[0] & 0xfe) == 0xfc)
+#endif
 
 #ifndef IN_LOOPBACK // this macro is defined in mac headers: netinet/in.h
 #define IN_LOOPBACK(a) ((((long int)(a)) & 0xff000000) == 0x7f000000)

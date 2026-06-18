@@ -65,7 +65,6 @@ pub struct HhConfig {
     pub distc_avoid_unnecessary_saved_state_work: bool,
     pub distc_min_worker_memory_gib: i64,
     pub distc_min_cpu_units: i64,
-    pub distc_parallel_decl_decode: bool,
     pub distc_decl_buckets: i64,
     pub distc_sort_batches: bool,
 }
@@ -92,7 +91,6 @@ impl Default for HhConfig {
             distc_avoid_unnecessary_saved_state_work: false,
             distc_min_worker_memory_gib: 0,
             distc_min_cpu_units: 0,
-            distc_parallel_decl_decode: false,
             distc_decl_buckets: 0,
             distc_sort_batches: false,
         }
@@ -706,9 +704,6 @@ impl HhConfig {
                 "distc_min_cpu_units" => {
                     c.distc_min_cpu_units = parse_json(&value)?;
                 }
-                "distc_parallel_decl_decode" => {
-                    c.distc_parallel_decl_decode = parse_json(&value)?;
-                }
                 "distc_decl_buckets" => {
                     c.distc_decl_buckets = parse_json(&value)?;
                 }
@@ -728,7 +723,6 @@ impl HhConfig {
             "distc_avoid_unnecessary_saved_state_work": self.distc_avoid_unnecessary_saved_state_work,
             "distc_min_worker_memory_gib": self.distc_min_worker_memory_gib,
             "distc_min_cpu_units": self.distc_min_cpu_units,
-            "distc_parallel_decl_decode": self.distc_parallel_decl_decode,
             "distc_sort_batches": self.distc_sort_batches,
         });
         experiments.to_string()

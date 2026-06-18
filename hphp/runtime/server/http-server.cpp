@@ -406,6 +406,7 @@ void HttpServer::runOrExitProcess() {
     Logger::Info("debugger server started");
   }
 
+  BootStats::markStart("servers started");
   try {
     InitFiniNode::ServerInit();
   } catch (std::exception& e) {

@@ -1180,6 +1180,7 @@ static int start_server(const std::string &username) {
 
   // Before we start the webserver, make sure the entire
   // binary is paged into memory.
+  BootStats::markStart("pagein_self");
   pagein_self();
   BootStats::mark("pagein_self");
 
@@ -1211,6 +1212,7 @@ static int start_server(const std::string &username) {
   // Include hugetlb pages in core dumps.
   Process::SetCoreDumpHugePages();
 
+  BootStats::markStart("init_repo_file");
   init_repo_file();
   BootStats::mark("init_repo_file");
 
@@ -1264,6 +1266,7 @@ static int start_server(const std::string &username) {
 
   // If we have any warmup requests, replay them before listening for
   // real connections
+  BootStats::markStart("warmup");
   {
     Logger::Info("Warming up");
     if (!Cfg::Jit::ProfileWarmupRequests) profileWarmupStart();
@@ -1277,6 +1280,7 @@ static int start_server(const std::string &username) {
   if (Cfg::Server::StopOld) HttpServer::StopOldServer();
 
   if (Cfg::Eval::EnableNuma) {
+    BootStats::markStart("enable_numa");
     purge_all();
     enable_numa();
     BootStats::mark("enable_numa");
@@ -2674,9 +2678,11 @@ void init_current_pthread_stack_limits() {
 
 void hphp_process_init(bool initForWorkerProcess /* = false */,
                        bool skipRDSInit /* = false */) {
+  BootStats::markStart("pthread_init");
   init_current_pthread_stack_limits();
   BootStats::mark("pthread_init");
 
+  BootStats::markStart("Process::InitProcessStatics");
   // Freeze cache-layer registration and install the dispatcher.
   // Extensions register layers during moduleLoad() (called from
   // RuntimeOption::Load); this call finalizes the dispatch chain.
@@ -2686,9 +2692,11 @@ void hphp_process_init(bool initForWorkerProcess /* = false */,
   BootStats::mark("Process::InitProcessStatics");
 
   // initialize the tzinfo cache.
+  BootStats::markStart("timezone_init");
   timezone_init();
   BootStats::mark("timezone_init");
 
+  BootStats::markStart("xenon");
   if (!skipRDSInit) rds::processInit();
 
   hphp_thread_init(/* skipExtensions= */ initForWorkerProcess, skipRDSInit);
@@ -2703,16 +2711,19 @@ void hphp_process_init(bool initForWorkerProcess /* = false */,
   BootStats::mark("xenon");
 
   // set up strobelight signal handling
+  BootStats::markStart("strobelight");
   Strobelight::getInstance().init();
   BootStats::mark("strobelight");
 
   // reinitialize pcre table
+  BootStats::markStart("pcre_reinit");
   pcre_reinit();
   BootStats::mark("pcre_reinit");
 
   // the liboniguruma docs say this isnt needed,
   // but the implementation of init is not
   // thread safe due to bugs
+  BootStats::markStart("onig_init");
   onig_init();
   BootStats::mark("onig_init");
 
@@ -2729,6 +2740,7 @@ void hphp_process_init(bool initForWorkerProcess /* = false */,
   const uint32_t maxWorkers = Cfg::Server::Mode ? 3 : 0;
   InitFiniNode::ProcessInitConcurrentStart(maxWorkers);
   SCOPE_EXIT {
+    BootStats::markStart("extra_process_init_concurrent_wait");
     InitFiniNode::ProcessInitConcurrentWaitForEnd();
     BootStats::mark("extra_process_init_concurrent_wait");
   };
@@ -2749,21 +2761,27 @@ void hphp_process_init(bool initForWorkerProcess /* = false */,
     jit::processInitTransStats();
   }
   if (Cfg::Eval::EnableDecl) {
+    BootStats::markStart("s_builtin_symbols_populated");
     if (!initForWorkerProcess) {
       ExtensionRegistry::moduleDeclInit();
     }
     BootStats::mark("s_builtin_symbols_populated");
   }
+  BootStats::markStart("g_vmProcessInit");
   g_vmProcessInit();
   BootStats::mark("g_vmProcessInit");
 
+  BootStats::markStart("PageletServer::Restart");
   PageletServer::Restart();
   BootStats::mark("PageletServer::Restart");
+  BootStats::markStart("XboxServer::Restart");
   XboxServer::Restart();
   BootStats::mark("XboxServer::Restart");
+  BootStats::markStart("Stream::RegisterCoreWrappers");
   Stream::RegisterCoreWrappers();
   BootStats::mark("Stream::RegisterCoreWrappers");
   if (!initForWorkerProcess) {
+    BootStats::markStart("ExtensionRegistry::moduleInit");
     ExtensionRegistry::moduleInit();
     BootStats::mark("ExtensionRegistry::moduleInit");
   }
@@ -2779,6 +2797,7 @@ void hphp_process_init(bool initForWorkerProcess /* = false */,
     update_constants_and_options();
   }
 
+  BootStats::markStart("extra_process_init");
   InitFiniNode::ProcessInit();
   BootStats::mark("extra_process_init");
 

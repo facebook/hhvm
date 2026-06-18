@@ -163,6 +163,11 @@ void BootStats::done(bool log) {
   }
 }
 
+void BootStats::markStart(const std::string& info) {
+  if (!s_started) return;
+  Logger::FInfo("BootStats: starting {}", info);
+}
+
 void BootStats::mark(const std::string& info) {
   if (!s_started) return;
   auto elapsed = BootStats::s_instance->computeDeltaFromLast();

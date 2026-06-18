@@ -40,8 +40,10 @@ final class TCompactSerializer extends TProtocolWritePropsSerializer {
     bool $disable_hphp_extension = false,
   )[write_props]: string {
     $override_version ??= TCompactProtocolBase::VERSION;
+    $use_hphp_extension = !$disable_hphp_extension &&
+      !ThriftSerializationHelper::structContainsObjectKeyContainer($object);
 
-    if (self::useCompactStruct() && !$disable_hphp_extension) {
+    if (self::useCompactStruct() && $use_hphp_extension) {
       return HH\Coeffects\fb\backdoor_from_write_props__DO_NOT_USE(
         ()[defaults] ==> thrift_protocol_write_compact_struct_to_string(
           $object,
@@ -59,7 +61,7 @@ final class TCompactSerializer extends TProtocolWritePropsSerializer {
       $protocol->setWriteVersion($override_version);
     }
 
-    if (!$disable_hphp_extension) {
+    if ($use_hphp_extension) {
       HH\Coeffects\fb\backdoor_from_write_props__DO_NOT_USE(
         ()[defaults] ==> thrift_protocol_write_compact2(
           $protocol,
@@ -118,7 +120,10 @@ final class TCompactSerializer extends TProtocolWritePropsSerializer {
     bool $should_leave_extra = false,
     int $options = 0,
   )[write_props]: T {
-    if (self::useCompactStruct() && !$disable_hphp_extension) {
+    $use_hphp_extension = !$disable_hphp_extension &&
+      !ThriftSerializationHelper::structContainsObjectKeyContainer($object);
+
+    if (self::useCompactStruct() && $use_hphp_extension) {
       $override_version ??= TCompactProtocolBase::VERSION;
       return HH\Coeffects\fb\backdoor_from_write_props__DO_NOT_USE(
         ()[defaults] ==> thrift_protocol_read_compact_struct_from_string(
@@ -140,7 +145,7 @@ final class TCompactSerializer extends TProtocolWritePropsSerializer {
       $protocol->setWriteVersion($override_version);
     }
 
-    if (!$disable_hphp_extension) {
+    if ($use_hphp_extension) {
       HH\Coeffects\fb\backdoor_from_write_props__DO_NOT_USE(
         ()[defaults] ==>
           $protocol->writeMessageBegin('', TMessageType::REPLY, 0),

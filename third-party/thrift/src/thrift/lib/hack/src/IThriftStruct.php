@@ -49,6 +49,9 @@ interface IThriftStruct extends \HH\IMemoizeParam {
   )[write_props]: \TStructAnnotations;
 }
 
+// @oss-disable: <<Oncalls('thrift')>>
+interface IThriftStructWithObjectKeyContainers extends IThriftStruct {}
+
 /**
  * Base interface for Thrift structs with Sync APIs
  */

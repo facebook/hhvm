@@ -99,6 +99,33 @@ bool is_type_arraykey(const t_type& type) {
       true_type->is_byte() || true_type->is<t_enum>();
 }
 
+bool has_hack_adapter_or_wrapper(const t_type& type) {
+  if (is_transitive_annotation(type)) {
+    return false;
+  }
+  return t_typedef::get_first_structured_annotation_or_null(
+             &type, kHackAdapterUri) != nullptr ||
+      t_typedef::get_first_structured_annotation_or_null(
+          &type, kHackWrapperUri) != nullptr;
+}
+
+// Returns true if the type is a set with non-arraykey elements or a map with
+// non-arraykey keys, requiring object-key container types at runtime.
+// Also returns true when the key/element type has an adapter or wrapper,
+// since the adapted/wrapped Hack type may not be arraykey.
+bool has_object_key_type(const t_type* type) {
+  type = type->get_true_type();
+  if (const auto* tset = type->try_as<t_set>()) {
+    return !is_type_arraykey(*tset->elem_type()) ||
+        has_hack_adapter_or_wrapper(*tset->elem_type());
+  }
+  if (const auto* tmap = type->try_as<t_map>()) {
+    return !is_type_arraykey(tmap->key_type().deref()) ||
+        has_hack_adapter_or_wrapper(tmap->key_type().deref());
+  }
+  return false;
+}
+
 /**
  * Hack code generator.
  */
@@ -503,6 +530,10 @@ class t_hack_generator : public t_concat_generator {
       const std::string& struct_hack_ref);
   void generate_php_structural_id(
       std::ofstream& out, const t_structured* tstruct, bool asFunction);
+  bool structured_contains_object_key_container(
+      const t_structured* tstruct, std::set<const t_structured*>& visited);
+  bool type_contains_object_key_container(
+      const t_type* type, std::set<const t_structured*>& visited);
   bool skip_codegen(const t_field* field);
   bool skip_codegen(const t_function* function);
   bool skip_constants_codegen();
@@ -4498,6 +4529,49 @@ void t_hack_generator::generate_php_structural_id(
   }
 }
 
+bool t_hack_generator::structured_contains_object_key_container(
+    const t_structured* tstruct, std::set<const t_structured*>& visited) {
+  if (!visited.insert(tstruct).second) {
+    return false;
+  }
+
+  for (const auto& field : tstruct->fields()) {
+    if (skip_codegen(&field)) {
+      continue;
+    }
+    if (type_contains_object_key_container(&field.type().deref(), visited)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+bool t_hack_generator::type_contains_object_key_container(
+    const t_type* type, std::set<const t_structured*>& visited) {
+  type = type->get_true_type();
+  if (has_object_key_type(type)) {
+    return true;
+  }
+
+  if (const auto* tstruct = type->try_as<t_structured>()) {
+    return structured_contains_object_key_container(tstruct, visited);
+  }
+  if (const auto* tlist = type->try_as<t_list>()) {
+    return type_contains_object_key_container(
+        &tlist->elem_type().deref(), visited);
+  }
+  if (const auto* tset = type->try_as<t_set>()) {
+    return type_contains_object_key_container(
+        &tset->elem_type().deref(), visited);
+  }
+  if (const auto* tmap = type->try_as<t_map>()) {
+    return type_contains_object_key_container(
+               &tmap->key_type().deref(), visited) ||
+        type_contains_object_key_container(&tmap->val_type().deref(), visited);
+  }
+  return false;
+}
+
 const t_program* t_hack_generator::get_paramlist_program(
     const t_paramlist& params) const {
   auto itr = paramlist_programs_.find(&params);
@@ -5817,6 +5891,12 @@ void t_hack_generator::_generate_php_struct_definition(
   } else {
     out << (is_result ? " implements" : ",");
     out << " \\IThriftStructMetadata";
+  }
+  if (!generateAsTrait) {
+    std::set<const t_structured*> visited;
+    if (structured_contains_object_key_container(tstruct, visited)) {
+      out << ", \\IThriftStructWithObjectKeyContainers";
+    }
   }
 
   // Wrapper is not supported on unions.

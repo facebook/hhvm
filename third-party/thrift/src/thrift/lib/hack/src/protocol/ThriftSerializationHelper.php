@@ -24,6 +24,12 @@ use namespace FlibSL\{C, Math, Str, Vec}; // @oss-enable
 // @oss-disable: <<Oncalls('thrift')>>
 abstract final class ThriftSerializationHelper {
 
+  public static function structContainsObjectKeyContainer(
+    IThriftStruct $object,
+  )[]: bool {
+    return $object is IThriftStructWithObjectKeyContainers;
+  }
+
   public static function readStruct(
     TProtocol $protocol,
     IThriftStruct $object,

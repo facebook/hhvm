@@ -43,7 +43,10 @@ final class TBinarySerializer extends TProtocolSerializer {
     IThriftStruct $object,
     bool $disable_hphp_extension = false,
   )[write_props, read_globals]: string {
-    if (self::useBinaryStruct() && !$disable_hphp_extension) {
+    $use_hphp_extension = !$disable_hphp_extension &&
+      !ThriftSerializationHelper::structContainsObjectKeyContainer($object);
+
+    if (self::useBinaryStruct() && $use_hphp_extension) {
       return HH\Coeffects\fb\backdoor_from_write_props__DO_NOT_USE(
         ()[defaults] ==> thrift_protocol_write_binary_struct_to_string($object),
         'Binary with memory buffer would have write_props, but Hack doesn\'t '.
@@ -52,7 +55,7 @@ final class TBinarySerializer extends TProtocolSerializer {
     }
     $transport = new TMemoryBuffer();
     $protocol = new TBinaryProtocolAccelerated($transport);
-    if (!$disable_hphp_extension) {
+    if ($use_hphp_extension) {
       HH\Coeffects\fb\backdoor_from_write_props__DO_NOT_USE(
         ()[defaults] ==> thrift_protocol_write_binary(
           $protocol,
@@ -96,7 +99,10 @@ final class TBinarySerializer extends TProtocolSerializer {
     bool $should_leave_extra = false,
     int $options = 0,
   )[read_globals, write_props]: T {
-    if (self::useBinaryStruct() && !$disable_hphp_extension) {
+    $use_hphp_extension = !$disable_hphp_extension &&
+      !ThriftSerializationHelper::structContainsObjectKeyContainer($object);
+
+    if (self::useBinaryStruct() && $use_hphp_extension) {
       return HH\Coeffects\fb\backdoor_from_write_props__DO_NOT_USE(
         ()[defaults] ==> thrift_protocol_read_binary_struct_from_string(
           $str,
@@ -110,7 +116,7 @@ final class TBinarySerializer extends TProtocolSerializer {
     $transport = new TMemoryBuffer();
     $protocol = (new TBinaryProtocolAccelerated($transport))
       ->setOptions($options);
-    if (!$disable_hphp_extension) {
+    if ($use_hphp_extension) {
       HH\Coeffects\fb\backdoor_from_write_props__DO_NOT_USE(
         ()[defaults] ==>
           $protocol->writeMessageBegin('', TMessageType::REPLY, 0),

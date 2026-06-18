@@ -352,18 +352,7 @@ abstract final class ThriftSerializationHelper {
       default:
         $xfer += $protocol->skip($field_type);
     }
-    if ($object is nonnull) {
-      $adapter = Shapes::idx($tspec, 'adapter');
-      if ($adapter is nonnull) {
-        $object = $adapter::fromThrift(HH\FIXME\UNSAFE_CAST<
-          nonnull,
-          HH_FIXME\UNKNOWN_TYPE_FOR_CAST,
-        >(
-          $object,
-          'FIXME[4110] This is safe as long as $adapter::TThriftType matches the thrift type of the field',
-        ));
-      }
-    }
+    $object = self::applyAdapterFromThrift($object, $tspec);
     $has_type_wrapper =
       $has_type_wrapper || (Shapes::idx($tspec, 'is_type_wrapped') ?? false);
     return $xfer;
@@ -376,25 +365,8 @@ abstract final class ThriftSerializationHelper {
     $xfer = $protocol->writeStructBegin($object->getName());
     foreach ($object::SPEC as $field_id => $fspec) {
       $field_name = $fspec['var'];
-      $is_wrapped = Shapes::idx($fspec, 'is_wrapped', false);
       $field_type = $fspec['type'];
-      if ($is_wrapped && !Str\is_empty($field_name)) {
-        $getter_method = "get_".$field_name;
-        /* HH_FIXME[2011] dynamic method is allowed on non dynamic types */
-        $field_value = $object->$getter_method();
-        if ($field_value is IThriftWrapper<_>) {
-          $field_value = HH\FIXME\UNSAFE_CAST<
-            mixed,
-            HH_FIXME\UNKNOWN_TYPE_FOR_CAST,
-          >($field_value)->getValue_DO_NOT_USE_THRIFT_INTERNAL();
-        } else {
-          $field_value = null;
-        }
-      } else {
-        /* HH_FIXME[2011] dynamic method is allowed on non dynamic types */
-        $field_value = $object->$field_name;
-      }
-
+      $field_value = self::readStructField($object, $fspec);
       $field_value = self::unwrapApplyAdapter($field_value, $fspec);
       if (self::isFieldEmpty($field_value, $fspec)) {
         continue;
@@ -410,10 +382,41 @@ abstract final class ThriftSerializationHelper {
     return $xfer;
   }
 
+  public static function readStructField(
+    IThriftStruct $struct,
+    ThriftStructTypes::TGenericSpec $fspec,
+  )[]: mixed {
+    $field_name = Shapes::idx($fspec, 'var') ?? '';
+    $is_wrapped = Shapes::idx($fspec, 'is_wrapped', false);
+    $is_union_arm = Shapes::idx($fspec, 'union', false);
+    if (($is_wrapped || $is_union_arm) && !Str\is_empty($field_name)) {
+      $getter_method = 'get_'.$field_name;
+      // @lint-ignore DYNAMICALLY_INVOKING_TARGETS_CONSIDERED_HARMFUL
+      /* HH_FIXME[2011] dynamic method is allowed on non dynamic types */
+      $field_value = $struct->$getter_method();
+      if ($is_union_arm) {
+        return $field_value;
+      }
+      if ($field_value is IThriftWrapper<_>) {
+        return self::unwrapWrapperValue($field_value);
+      }
+      return null;
+    }
+
+    /* HH_FIXME[2011] dynamic method is allowed on non dynamic types */
+    return $struct->$field_name;
+  }
+
+  private static function unwrapWrapperValue<T>(
+    IThriftWrapper<T> $field_value,
+  )[]: T {
+    return $field_value->getValue_DO_NOT_USE_THRIFT_INTERNAL();
+  }
+
   private static function isValueTypeDefault(
     mixed $field_value,
     TType $field_type,
-  )[]: bool {
+  )[write_props]: bool {
     switch ($field_type) {
       case TType::BOOL:
         return HH\legacy_is_truthy($field_value) === false;
@@ -428,7 +431,7 @@ abstract final class ThriftSerializationHelper {
       case TType::STRING:
       case TType::UTF8:
       case TType::UTF16:
-        return Str\is_empty(PHPism_FIXME::stringCast($field_value));
+        return Str\is_empty((string)$field_value);
       case TType::LST:
       case TType::SET:
       case TType::MAP:
@@ -448,14 +451,9 @@ abstract final class ThriftSerializationHelper {
         // Potentially replace this with rollback serialization for large
         // structs.
         foreach ($struct::SPEC as $fspec) {
-          $field_name = $fspec['var'];
-          if (
-            !self::isFieldEmpty(
-              /* HH_FIXME[2011] dynamic method is allowed on non dynamic types */
-              $struct->$field_name,
-              $fspec,
-            )
-          ) {
+          $field_value = self::readStructField($struct, $fspec);
+          $field_value = self::unwrapApplyAdapter($field_value, $fspec);
+          if (!self::isFieldEmpty($field_value, $fspec)) {
             return false;
           }
         }
@@ -464,14 +462,14 @@ abstract final class ThriftSerializationHelper {
       }
       case TType::STOP:
       case TType::VOID:
-        throw new Exception('Encountered invalid type for field.');
+        invariant_violation('Encountered invalid type for field.');
     }
   }
 
-  private static function isFieldEmpty(
+  public static function isFieldEmpty(
     mixed $field_value,
     ThriftStructTypes::TGenericSpec $fspec,
-  )[]: bool {
+  )[write_props]: bool {
     // Optionals:
     // When a field is marked as optional and it's not set then
     // ignore the field. Otherwise, include default value.
@@ -484,7 +482,7 @@ abstract final class ThriftSerializationHelper {
       );
   }
 
-  private static function unwrapApplyAdapter(
+  public static function unwrapApplyAdapter(
     mixed $field_value,
     ThriftStructTypes::TGenericSpec $tspec,
   )[write_props]: mixed {
@@ -496,6 +494,23 @@ abstract final class ThriftSerializationHelper {
     if ($field_value is nonnull && $adapter is nonnull) {
       $field_value = $adapter::toThrift(HH\FIXME\UNSAFE_CAST<
         mixed,
+        HH_FIXME\UNKNOWN_TYPE_FOR_CAST,
+      >(
+        $field_value,
+        'FIXME[4110] This is safe as long as $adapter::TThriftType matches the thrift type of the field',
+      ));
+    }
+    return $field_value;
+  }
+
+  public static function applyAdapterFromThrift(
+    mixed $field_value,
+    ThriftStructTypes::TGenericSpec $tspec,
+  )[write_props]: mixed {
+    $adapter = Shapes::idx($tspec, 'adapter');
+    if ($field_value is nonnull && $adapter is nonnull) {
+      $field_value = $adapter::fromThrift(HH\FIXME\UNSAFE_CAST<
+        nonnull,
         HH_FIXME\UNKNOWN_TYPE_FOR_CAST,
       >(
         $field_value,

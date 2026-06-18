@@ -25,7 +25,8 @@ let get_error_list_json
       | Context
       | Raw
       | Highlighted
-      | Plain ->
+      | Plain
+      | PlainHighlighted ->
         None)
   in
   let (error_list, did_pass) =

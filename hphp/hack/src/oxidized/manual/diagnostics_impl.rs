@@ -282,6 +282,7 @@ impl std::fmt::Display for Format {
             Self::Highlighted => "highlighted".fmt(f),
             Self::Plain => "plain".fmt(f),
             Self::Extended => "extended".fmt(f),
+            Self::PlainHighlighted => "plain_highlighted".fmt(f),
         }
     }
 }

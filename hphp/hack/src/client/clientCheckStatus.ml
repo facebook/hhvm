@@ -24,6 +24,9 @@ let print_diagnostic_highlighted e =
 let print_diagnostic_extended e =
   Printf.printf "%s" (Extended_diagnostic_formatter.to_string e)
 
+let print_diagnostic_plain_highlighted e =
+  Printf.printf "%s" (Plain_highlighted_diagnostic_formatter.to_string e)
+
 let print_diagnostic
     ~(error_format : Diagnostics.format) (e : Diagnostics.finalized_diagnostic)
     : unit =
@@ -33,6 +36,7 @@ let print_diagnostic
   | Diagnostics.Context -> print_diagnostic_contextual e
   | Diagnostics.Highlighted -> print_diagnostic_highlighted e
   | Diagnostics.Extended -> print_diagnostic_extended e
+  | Diagnostics.PlainHighlighted -> print_diagnostic_plain_highlighted e
 
 let is_stale_msg liveness =
   match liveness with

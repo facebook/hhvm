@@ -13,7 +13,8 @@ let human_formatter_for error_format =
     | Context
     | Raw
     | Highlighted
-    | Plain ->
+    | Plain
+    | PlainHighlighted ->
       None)
 
 let print_diagnostic

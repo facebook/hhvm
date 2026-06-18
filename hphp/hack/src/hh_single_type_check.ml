@@ -148,6 +148,8 @@ let print_error format ?(oc = stderr) l =
     | Diagnostics.Plain -> (fun e -> Diagnostics.to_string e)
     | Diagnostics.Highlighted -> Highlighted_diagnostic_formatter.to_string
     | Diagnostics.Extended -> Extended_diagnostic_formatter.to_string
+    | Diagnostics.PlainHighlighted ->
+      Plain_highlighted_diagnostic_formatter.to_string
   in
   let absolute_errors = User_diagnostic.to_absolute l in
   Out_channel.output_string oc (formatter absolute_errors)
@@ -396,8 +398,10 @@ let parse_options () =
             | "highlighted" -> error_format := Some Diagnostics.Highlighted
             | "plain" -> error_format := Some Diagnostics.Plain
             | "extended" -> error_format := Some Diagnostics.Extended
+            | "plain_highlighted" ->
+              error_format := Some Diagnostics.PlainHighlighted
             | _ -> print_string "Warning: unrecognized error format.\n"),
-        "<extended|raw|context|highlighted|plain> Error formatting style; (default: highlighted)"
+        "<format> Error formatting style (default: highlighted); valid formats: extended, raw, context, highlighted, plain, plain_highlighted"
       );
       ("--lint", Arg.Unit (set_mode Lint), " Produce lint errors");
       ("--lint-json", Arg.Unit (set_mode Lint_json), " Produce json lint output");

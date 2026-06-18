@@ -20,6 +20,8 @@ type format =
   | Plain  (** Verbose positions and no color *)
   | Extended
       (** Verbose context showing expressions, statements, hints, and declarations involved in error *)
+  | PlainHighlighted
+      (** Underlines error spans with `^^^` to simulate IDE squiggles *)
 
 (** Type representing the errors for a single file. *)
 type per_file_diagnostics

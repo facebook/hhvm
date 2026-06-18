@@ -1018,16 +1018,28 @@ def run_idempotence_tests(
         sys.exit(1)  # this exit code fails the suite and lets Buck know
 
 
-def get_flags_cache(args_flags: List[str]) -> Callable[[str], List[str]]:
+def get_flags_cache(
+    args_flags: List[str], zoncolan_order: bool = False
+) -> Callable[[str], List[str]]:
     flags_cache: Dict[str, List[str]] = {}
 
     def get_flags(test_dir: str) -> List[str]:
         if test_dir not in flags_cache:
             flags_cache[test_dir] = get_hh_flags(test_dir)
-        flags = flags_cache[test_dir]
-        if args_flags is not None:
-            flags = flags + args_flags
-        return flags
+        hh_flags = flags_cache[test_dir]
+        if args_flags is None:
+            return hh_flags
+        if zoncolan_order:
+            # Zoncolan (--ai) tests: HH_FLAGS must come first. hh_single_ai merges
+            # repeated --ai via merge_for_unit_tests, which keeps the FIRST --ai's
+            # non-model_files settings (analyses=, emit_*, ...) and only unions
+            # model_files. So a directory's HH_FLAGS --ai must precede the suite's
+            # --ai for its settings to take effect.
+            return hh_flags + args_flags
+        # Default: suite-level flags go first so a directory's HH_FLAGS can
+        # override them. For repeated flags such as --error-format the typechecker
+        # honors the last occurrence, so HH_FLAGS (placed last) wins.
+        return args_flags + hh_flags
 
     return get_flags
 
@@ -1109,6 +1121,14 @@ def main() -> None:
         "--no-hh-flags", action="store_true", help="Do not read HH_FLAGS files"
     )
     parser.add_argument(
+        "--zoncolan-order",
+        action="store_true",
+        help="Place HH_FLAGS before the suite --flags (original order). Zoncolan "
+        "(--ai) tests need this: hh_single_ai's repeated-`--ai` merge keeps the "
+        "first occurrence's non-model_files settings, so the directory's HH_FLAGS "
+        "must come first.",
+    )
+    parser.add_argument(
         "--verify-pessimisation",
         type=VerifyPessimisationOptions,
         choices=list(VerifyPessimisationOptions),
@@ -1173,7 +1193,9 @@ def main() -> None:
 
     mode_flag: List[str] = [] if args.mode_flag is None else [args.mode_flag]
     get_flags: Callable[[str], List[str]] = (
-        get_flags_dummy(args.flags) if args.no_hh_flags else get_flags_cache(args.flags)
+        get_flags_dummy(args.flags)
+        if args.no_hh_flags
+        else get_flags_cache(args.flags, args.zoncolan_order)
     )
 
     results: List[Result] = run_tests(

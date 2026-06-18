@@ -24,6 +24,7 @@ type format =
   | Highlighted
   | Plain
   | Extended
+  | PlainHighlighted
 
 let claim_as_reason : Pos.t Message.t -> Pos_or_decl.t Message.t =
  (fun (p, m) -> (Pos_or_decl.of_raw_pos p, m))
@@ -496,7 +497,8 @@ let format_summary
   let no_errors_string = "No errors!" in
   match format with
   | Context
-  | Highlighted ->
+  | Highlighted
+  | PlainHighlighted ->
     let error_count_message =
       if Int.( = ) error_count 0 then
         no_errors_string

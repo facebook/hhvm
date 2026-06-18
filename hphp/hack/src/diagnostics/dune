@@ -117,6 +117,7 @@
    extended_diagnostic_formatter
    highlighted_diagnostic_formatter
    phase_error
+   plain_highlighted_diagnostic_formatter
    raw_diagnostic_formatter
    error_message_sentinel)
  (foreign_archives diagnostics_ffi)

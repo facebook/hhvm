@@ -1,0 +1,28 @@
+error: Typing[4110] Invalid return type [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+shape_field_value_mismatch_position.php:18:10
+10 | type TShape = shape(
+11 |   'a' => int,
+12 |   'b' => string,
+   |          ^^^^^^ [2]
+13 |   'c' => int,
+14 | );
+15 | 
+16 | // Wrong field in a returned shape literal: the error should point at field 'b'.
+17 | function test_return(): TShape {
+18 |   return shape(
+   |          ^^^^^^ [1]
+19 |     'a' => 1,
+   |     ^^^^^^^^^ [1]
+20 |     'b' => 3,
+   |     ^^^^^^^^^ [1]
+   |            ^ [3]
+21 |     'c' => 2,
+   |     ^^^^^^^^^ [1]
+22 |   );
+   |   ^ [1]
+23 | }
+
+1 error found

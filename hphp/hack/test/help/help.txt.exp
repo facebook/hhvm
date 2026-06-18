@@ -2,51 +2,51 @@ Usage: hh_client check [OPTION]... [WWW-ROOT]
 
 WWW-ROOT is assumed to be current directory if unspecified
 
-  --config                                                override arbitrary value from hh.conf and .hhconfig (format: <key>=<value>)
-  --deps-out-at-pos-batch                                 (mode) for each entry in input list get list of what it depends on [file:line:character list]
-  --deps-in-at-pos-batch                                  (mode) for each entry in input list get list of what depends on it [file:line:character list]
-  --error-format <extended|raw|context|highlighted|plain> Error formatting style; (default: highlighted)
-  --enforcement-at-pos-batch                              (mode) show enforcement at multiple positions [file:line:character list]
-  --file-dependents                                       (mode) Given a list of filepaths, shows list of (possibly) dependent files
-  --find-class-refs                                       (mode) finds references of the provided class name
-  --find-refs                                             (mode) finds references of the provided symbol; optionally specify the symbol kind like "Kind|Symbol" (looks for functions or methods if unspecified); valid kinds are Method, Property, Class_const, Typeconst, Function, Class, ExplicitClass, and GConst; use ExplicitClass instead of Class to exclude references via self/static/parent
-  --from                                                  so we know who's calling hh_client - e.g. nuclide, vim, emacs, vscode
-  --identify-function                                     (mode) print the full function name at the position [line:character] of the text on stdin
-  --identify                                              (mode) identify the named symbol
-  --inheritance-ancestor-classes-batch                    (mode) prints a list of classes that these classes extend
-  --inheritance-ancestor-interfaces-batch                 (mode) prints a list of interfaces that these classes implement
-  --inheritance-ancestor-traits-batch                     (mode) prints a list of traits that these classes use
-  --inheritance-ancestors                                 (mode) prints a list of all related classes or methods to the given class
-  --inheritance-children                                  (mode) prints a list of all related classes or methods to the given class
-  --json                                                  output json for machine consumption (default: false)
-  --jsonl                                                 output streaming jsonl (JSON Lines) for machine consumption (default: false)
-  --lint                                                  (mode) lint the given list of files
-  --lint-all                                              (mode) find all occurrences of lint with the given error code
-  --lint-stdin                                            (mode) lint a file given on stdin; the filename should be the argument to this option
-  --list-files                                            (mode) list files with errors
-  --max-errors                                            Maximum number of errors to display
-  --preexisting-warnings                                  show all preexisting warnings in typechecked files (default: false)
-  --logname                                               (mode) show log filename and exit
-  --outline                                               (mode) prints an outline of the text on stdin
-  --outline-for-agents                                    <file> (mode) outline the file, including line spans, to help agents efficiently navigate large files
-  --refactor                                              (mode) rename a symbol, Usage: hh_client ["Class", "Function", "Method"] <Current Name> <New Name>
-  --single <path>                                         Return errors in file with provided name (give '-' for stdin)
-  --multi <path>                                          Return errors for files read from the given file (one per line)
-  --stats                                                 display some server statistics
-  --status                                                (mode) show a human readable list of errors (default)
-  --timeout                                               set the timeout in seconds (default: no timeout)
-  --infer-dynamic                                         (mode) infer types for dynamic locals [function_name or ClassName::method_name]
-  --infer-dynamic-as-data                                 (mode) infer types for dynamic locals as data [function_name or ClassName::method_name]
-  --type-at-pos-batch                                     (mode) show types at multiple positions [file:line:character list]
-  --type-error-at-pos                                     (mode) show type error at a given position in file [line:character]
-  --is-subtype                                            (mode) take a JSON list of subtype queries via stdin
-  --version                                               (mode) show version and exit
-  -Wall                                                   show all warnings
-  -Wnone                                                  hide all warnings
-  -W                                                      show all warnings with a given code, e.g. -W 12001
-  -Wno                                                    hide all warnings with a given code, e.g. -Wno 12001
-  -Wignore-files                                          hide warnings in files matching a regexp
-  -Wgenerated                                             show warnings in generated files
-  --ultrahelp                                             see full options (for language and release teams)
-  -help                                                   Display this list of options
-  --help                                                  Display this list of options
+  --config                                 override arbitrary value from hh.conf and .hhconfig (format: <key>=<value>)
+  --deps-out-at-pos-batch                  (mode) for each entry in input list get list of what it depends on [file:line:character list]
+  --deps-in-at-pos-batch                   (mode) for each entry in input list get list of what depends on it [file:line:character list]
+  --error-format <format>                  Error formatting style (default: highlighted); valid formats: extended, raw, context, highlighted, plain, plain_highlighted
+  --enforcement-at-pos-batch               (mode) show enforcement at multiple positions [file:line:character list]
+  --file-dependents                        (mode) Given a list of filepaths, shows list of (possibly) dependent files
+  --find-class-refs                        (mode) finds references of the provided class name
+  --find-refs                              (mode) finds references of the provided symbol; optionally specify the symbol kind like "Kind|Symbol" (looks for functions or methods if unspecified); valid kinds are Method, Property, Class_const, Typeconst, Function, Class, ExplicitClass, and GConst; use ExplicitClass instead of Class to exclude references via self/static/parent
+  --from                                   so we know who's calling hh_client - e.g. nuclide, vim, emacs, vscode
+  --identify-function                      (mode) print the full function name at the position [line:character] of the text on stdin
+  --identify                               (mode) identify the named symbol
+  --inheritance-ancestor-classes-batch     (mode) prints a list of classes that these classes extend
+  --inheritance-ancestor-interfaces-batch  (mode) prints a list of interfaces that these classes implement
+  --inheritance-ancestor-traits-batch      (mode) prints a list of traits that these classes use
+  --inheritance-ancestors                  (mode) prints a list of all related classes or methods to the given class
+  --inheritance-children                   (mode) prints a list of all related classes or methods to the given class
+  --json                                   output json for machine consumption (default: false)
+  --jsonl                                  output streaming jsonl (JSON Lines) for machine consumption (default: false)
+  --lint                                   (mode) lint the given list of files
+  --lint-all                               (mode) find all occurrences of lint with the given error code
+  --lint-stdin                             (mode) lint a file given on stdin; the filename should be the argument to this option
+  --list-files                             (mode) list files with errors
+  --max-errors                             Maximum number of errors to display
+  --preexisting-warnings                   show all preexisting warnings in typechecked files (default: false)
+  --logname                                (mode) show log filename and exit
+  --outline                                (mode) prints an outline of the text on stdin
+  --outline-for-agents                     <file> (mode) outline the file, including line spans, to help agents efficiently navigate large files
+  --refactor                               (mode) rename a symbol, Usage: hh_client ["Class", "Function", "Method"] <Current Name> <New Name>
+  --single <path>                          Return errors in file with provided name (give '-' for stdin)
+  --multi <path>                           Return errors for files read from the given file (one per line)
+  --stats                                  display some server statistics
+  --status                                 (mode) show a human readable list of errors (default)
+  --timeout                                set the timeout in seconds (default: no timeout)
+  --infer-dynamic                          (mode) infer types for dynamic locals [function_name or ClassName::method_name]
+  --infer-dynamic-as-data                  (mode) infer types for dynamic locals as data [function_name or ClassName::method_name]
+  --type-at-pos-batch                      (mode) show types at multiple positions [file:line:character list]
+  --type-error-at-pos                      (mode) show type error at a given position in file [line:character]
+  --is-subtype                             (mode) take a JSON list of subtype queries via stdin
+  --version                                (mode) show version and exit
+  -Wall                                    show all warnings
+  -Wnone                                   hide all warnings
+  -W                                       show all warnings with a given code, e.g. -W 12001
+  -Wno                                     hide all warnings with a given code, e.g. -Wno 12001
+  -Wignore-files                           hide warnings in files matching a regexp
+  -Wgenerated                              show warnings in generated files
+  --ultrahelp                              see full options (for language and release teams)
+  -help                                    Display this list of options
+  --help                                   Display this list of options

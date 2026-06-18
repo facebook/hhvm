@@ -1613,15 +1613,7 @@ cdef class Struct(StructOrUnion):
             struct_info.cpp_obj.get().getStructInfo()
         )
         for name, value in kwargs.items():
-            field_index = struct_info.name_to_index.get(name)
-            if field_index is None:
-                # try mangled name if leading dunder prefix
-                field_index = _get_index_if_mangled(struct_info, self, name)
-                if field_index is None:
-                    raise TypeError(
-                        f"'{type(self).__name__}' initialization error: unknown keyword argument "
-                        f"'{name}'."
-                    )
+            field_index = _get_field_index_or_raise(struct_info, self, name)
 
             if value is None:
                 continue
@@ -1751,8 +1743,8 @@ cdef inline int16_t _get_field_index_or_raise(
         field_index = _get_index_if_mangled(struct_info, instance, field_name)
         if field_index is None:
             raise TypeError(
-                f"'{type(instance).__name__}' object does not have attribute(s): "
-                f"'{field_name}'"
+                f"'{type(instance).__name__}' initialization error: unknown "
+                f"keyword argument '{field_name}'."
             )
     return field_index
 

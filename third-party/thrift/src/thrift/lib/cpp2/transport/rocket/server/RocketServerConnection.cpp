@@ -38,7 +38,6 @@
 
 #include <wangle/acceptor/ConnectionManager.h>
 
-#include <thrift/lib/cpp/TApplicationException.h>
 #include <thrift/lib/cpp2/server/Cpp2ConnContext.h>
 #include <thrift/lib/cpp2/server/LoggingEvent.h>
 #include <thrift/lib/cpp2/server/LoggingEventTransportMetadata.h>

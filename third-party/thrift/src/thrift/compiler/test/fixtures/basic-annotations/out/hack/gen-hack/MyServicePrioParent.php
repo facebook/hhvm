@@ -92,12 +92,14 @@ class MyServicePrioParentAsyncClient extends \ThriftClientBase implements MyServ
   use MyServicePrioParentClientBase;
 
   const string THRIFT_SVC_NAME = MyServicePrioParentStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 class MyServicePrioParentClient extends \ThriftClientBase implements MyServicePrioParentClientIf {
   use MyServicePrioParentClientBase;
 
   const string THRIFT_SVC_NAME = MyServicePrioParentStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 abstract class MyServicePrioParentAsyncProcessorBase extends \ThriftAsyncProcessor {

@@ -99,12 +99,14 @@ class AdapterServiceAsyncClient extends \ThriftClientBase implements AdapterServ
   use AdapterServiceClientBase;
 
   const string THRIFT_SVC_NAME = AdapterServiceStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 class AdapterServiceClient extends \ThriftClientBase implements AdapterServiceClientIf {
   use AdapterServiceClientBase;
 
   const string THRIFT_SVC_NAME = AdapterServiceStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 // HELPER FUNCTIONS AND STRUCTURES

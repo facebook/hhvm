@@ -258,12 +258,14 @@ class SinkServiceAsyncClient extends \ThriftClientBase implements SinkServiceAsy
   use SinkServiceClientBase;
 
   const string THRIFT_SVC_NAME = SinkServiceStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 class SinkServiceClient extends \ThriftClientBase implements SinkServiceClientIf {
   use SinkServiceClientBase;
 
   const string THRIFT_SVC_NAME = SinkServiceStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 abstract class SinkServiceAsyncProcessorBase extends \ThriftAsyncProcessor {

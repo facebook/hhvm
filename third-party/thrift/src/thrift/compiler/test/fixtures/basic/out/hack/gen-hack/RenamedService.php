@@ -71,12 +71,14 @@ class RenamedServiceAsyncClient extends \ThriftClientBase implements RenamedServ
   use RenamedServiceClientBase;
 
   const string THRIFT_SVC_NAME = RenamedServiceStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 class RenamedServiceClient extends \ThriftClientBase implements RenamedServiceClientIf {
   use RenamedServiceClientBase;
 
   const string THRIFT_SVC_NAME = RenamedServiceStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 abstract class RenamedServiceAsyncProcessorBase extends \ThriftAsyncProcessor {

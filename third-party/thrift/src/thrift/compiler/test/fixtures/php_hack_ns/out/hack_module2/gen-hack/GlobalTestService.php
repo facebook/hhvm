@@ -72,12 +72,14 @@ class GlobalTestServiceAsyncClient extends \test\foo\php\ns\Deprecated_FooHackSe
   use GlobalTestServiceClientBase;
 
   const string THRIFT_SVC_NAME = GlobalTestServiceStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 class GlobalTestServiceClient extends \test\foo\php\ns\Deprecated_FooHackServiceClient implements GlobalTestServiceClientIf {
   use GlobalTestServiceClientBase;
 
   const string THRIFT_SVC_NAME = GlobalTestServiceStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 // HELPER FUNCTIONS AND STRUCTURES

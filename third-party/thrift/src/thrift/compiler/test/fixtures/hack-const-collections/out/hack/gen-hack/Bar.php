@@ -85,12 +85,14 @@ class BarAsyncClient extends \ThriftClientBase implements BarAsyncClientIf {
   use BarClientBase;
 
   const string THRIFT_SVC_NAME = BarStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 class BarClient extends \ThriftClientBase implements BarClientIf {
   use BarClientBase;
 
   const string THRIFT_SVC_NAME = BarStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 abstract class BarAsyncProcessorBase extends \ThriftAsyncProcessor {

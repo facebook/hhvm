@@ -77,12 +77,14 @@ class HackInteractionServiceAsyncClient extends \ThriftClientBase implements Hac
   use HackInteractionServiceClientBase;
 
   const string THRIFT_SVC_NAME = HackInteractionServiceStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 class HackInteractionServiceClient extends \ThriftClientBase implements HackInteractionServiceClientIf {
   use HackInteractionServiceClientBase;
 
   const string THRIFT_SVC_NAME = HackInteractionServiceStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 // INTERACTION HANDLERS

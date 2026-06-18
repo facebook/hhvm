@@ -8130,9 +8130,10 @@ void t_hack_generator::_generate_service_client_children(
 
   if (service_metadata_full_name_) {
     out << indent() << "const string THRIFT_SVC_FULL_NAME = " << long_name
-        << "StaticMetadata::THRIFT_SVC_FULL_NAME;\n\n";
+        << "StaticMetadata::THRIFT_SVC_FULL_NAME;\n";
   }
 
+  out << "\n";
   indent_down();
   out << "}\n\n";
 }

@@ -72,12 +72,14 @@ class TestServiceAsyncClient extends \ThriftClientBase implements TestServiceAsy
   use TestServiceClientBase;
 
   const string THRIFT_SVC_NAME = TestServiceStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 class TestServiceClient extends \ThriftClientBase implements TestServiceClientIf {
   use TestServiceClientBase;
 
   const string THRIFT_SVC_NAME = TestServiceStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 abstract class TestServiceAsyncProcessorBase extends \ThriftAsyncProcessor {

@@ -70,6 +70,7 @@ class FooServiceAsyncClient extends \ThriftClientBase implements FooServiceAsync
   use FooServiceClientBase;
 
   const string THRIFT_SVC_NAME = FooServiceStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 <<Oncalls('thrift')>>
@@ -77,6 +78,7 @@ class FooServiceClient extends \ThriftClientBase implements FooServiceClientIf {
   use FooServiceClientBase;
 
   const string THRIFT_SVC_NAME = FooServiceStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 // HELPER FUNCTIONS AND STRUCTURES

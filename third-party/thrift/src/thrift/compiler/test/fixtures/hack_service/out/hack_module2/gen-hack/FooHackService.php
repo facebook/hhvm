@@ -42,12 +42,14 @@ class FooHackServiceAsyncClient extends \ThriftClientBase implements FooHackServ
   use FooHackServiceClientBase;
 
   const string THRIFT_SVC_NAME = FooHackServiceStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 class FooHackServiceClient extends \ThriftClientBase implements FooHackServiceClientIf {
   use FooHackServiceClientBase;
 
   const string THRIFT_SVC_NAME = FooHackServiceStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 abstract class FooHackServiceAsyncProcessorBase extends \ThriftAsyncProcessor {

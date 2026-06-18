@@ -70,6 +70,7 @@ class FooService1AsyncClient extends \ThriftClientBase implements FooService1Asy
   use FooService1ClientBase;
 
   const string THRIFT_SVC_NAME = FooService1StaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 <<Oncalls('thrift')>>
@@ -77,6 +78,7 @@ class FooService1Client extends \ThriftClientBase implements FooService1ClientIf
   use FooService1ClientBase;
 
   const string THRIFT_SVC_NAME = FooService1StaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 // HELPER FUNCTIONS AND STRUCTURES

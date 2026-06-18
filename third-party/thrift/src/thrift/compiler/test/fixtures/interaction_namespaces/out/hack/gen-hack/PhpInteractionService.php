@@ -75,12 +75,14 @@ class PhpInteractionServiceAsyncClient extends \ThriftClientBase implements PhpI
   use PhpInteractionServiceClientBase;
 
   const string THRIFT_SVC_NAME = PhpInteractionServiceStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 class PhpInteractionServiceClient extends \ThriftClientBase implements PhpInteractionServiceClientIf {
   use PhpInteractionServiceClientBase;
 
   const string THRIFT_SVC_NAME = PhpInteractionServiceStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 // INTERACTION HANDLERS

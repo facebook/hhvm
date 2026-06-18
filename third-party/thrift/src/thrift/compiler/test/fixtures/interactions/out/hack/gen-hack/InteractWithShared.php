@@ -78,12 +78,14 @@ class InteractWithSharedAsyncClient extends \ThriftClientBase implements Interac
   use InteractWithSharedClientBase;
 
   const string THRIFT_SVC_NAME = InteractWithSharedStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 class InteractWithSharedClient extends \ThriftClientBase implements InteractWithSharedClientIf {
   use InteractWithSharedClientBase;
 
   const string THRIFT_SVC_NAME = InteractWithSharedStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 // INTERACTION HANDLERS

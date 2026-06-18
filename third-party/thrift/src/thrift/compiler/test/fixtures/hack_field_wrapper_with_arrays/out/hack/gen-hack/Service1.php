@@ -140,12 +140,14 @@ class Service1AsyncClient extends \ThriftClientBase implements Service1AsyncClie
   use Service1ClientBase;
 
   const string THRIFT_SVC_NAME = Service1StaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 class Service1Client extends \ThriftClientBase implements Service1ClientIf {
   use Service1ClientBase;
 
   const string THRIFT_SVC_NAME = Service1StaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 abstract class Service1AsyncProcessorBase extends \ThriftAsyncProcessor {

@@ -164,12 +164,14 @@ class RaiserAsyncClient extends \ThriftClientBase implements RaiserAsyncClientIf
   use RaiserClientBase;
 
   const string THRIFT_SVC_NAME = RaiserStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 class RaiserClient extends \ThriftClientBase implements RaiserClientIf {
   use RaiserClientBase;
 
   const string THRIFT_SVC_NAME = RaiserStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 // HELPER FUNCTIONS AND STRUCTURES

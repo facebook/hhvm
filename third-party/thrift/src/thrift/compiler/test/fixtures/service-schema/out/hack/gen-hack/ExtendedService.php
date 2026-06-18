@@ -76,12 +76,14 @@ class ExtendedServiceAsyncClient extends \facebook\thrift\test\fixtures\service_
   use ExtendedServiceClientBase;
 
   const string THRIFT_SVC_NAME = ExtendedServiceStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 class ExtendedServiceClient extends \facebook\thrift\test\fixtures\service_schema\BaseServiceClient implements ExtendedServiceClientIf {
   use ExtendedServiceClientBase;
 
   const string THRIFT_SVC_NAME = ExtendedServiceStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 // HELPER FUNCTIONS AND STRUCTURES

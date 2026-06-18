@@ -65,12 +65,14 @@ class MyServicePrioChildAsyncClient extends MyServicePrioParentAsyncClient imple
   use MyServicePrioChildClientBase;
 
   const string THRIFT_SVC_NAME = MyServicePrioChildStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 class MyServicePrioChildClient extends MyServicePrioParentClient implements MyServicePrioChildClientIf {
   use MyServicePrioChildClientBase;
 
   const string THRIFT_SVC_NAME = MyServicePrioChildStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 abstract class MyServicePrioChildAsyncProcessorBase extends MyServicePrioParentAsyncProcessorBase {

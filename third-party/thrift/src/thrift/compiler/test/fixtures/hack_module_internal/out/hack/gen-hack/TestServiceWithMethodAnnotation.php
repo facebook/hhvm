@@ -95,12 +95,14 @@ class TestServiceWithMethodAnnotationAsyncClient extends \ThriftClientBase imple
   use TestServiceWithMethodAnnotationClientBase;
 
   const string THRIFT_SVC_NAME = TestServiceWithMethodAnnotationStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 class TestServiceWithMethodAnnotationClient extends \ThriftClientBase implements TestServiceWithMethodAnnotationClientIf {
   use TestServiceWithMethodAnnotationClientBase;
 
   const string THRIFT_SVC_NAME = TestServiceWithMethodAnnotationStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 // HELPER FUNCTIONS AND STRUCTURES

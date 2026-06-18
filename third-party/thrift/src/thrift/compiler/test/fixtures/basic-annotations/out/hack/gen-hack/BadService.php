@@ -72,12 +72,14 @@ class BadServiceAsyncClient extends \ThriftClientBase implements BadServiceAsync
   use BadServiceClientBase;
 
   const string THRIFT_SVC_NAME = BadServiceStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 class BadServiceClient extends \ThriftClientBase implements BadServiceClientIf {
   use BadServiceClientBase;
 
   const string THRIFT_SVC_NAME = BadServiceStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 // INTERACTION HANDLERS

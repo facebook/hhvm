@@ -361,12 +361,14 @@ class PubSubStreamingServiceAsyncClient extends \ThriftClientBase implements Pub
   use PubSubStreamingServiceClientBase;
 
   const string THRIFT_SVC_NAME = PubSubStreamingServiceStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 class PubSubStreamingServiceClient extends \ThriftClientBase implements PubSubStreamingServiceClientIf {
   use PubSubStreamingServiceClientBase;
 
   const string THRIFT_SVC_NAME = PubSubStreamingServiceStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 abstract class PubSubStreamingServiceAsyncProcessorBase extends \ThriftAsyncProcessor {

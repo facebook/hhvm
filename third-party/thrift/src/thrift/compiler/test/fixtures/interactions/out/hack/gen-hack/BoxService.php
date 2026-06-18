@@ -40,12 +40,14 @@ class BoxServiceAsyncClient extends \ThriftClientBase implements BoxServiceAsync
   use BoxServiceClientBase;
 
   const string THRIFT_SVC_NAME = BoxServiceStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 class BoxServiceClient extends \ThriftClientBase implements BoxServiceClientIf {
   use BoxServiceClientBase;
 
   const string THRIFT_SVC_NAME = BoxServiceStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 // HELPER FUNCTIONS AND STRUCTURES

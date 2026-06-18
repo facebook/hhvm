@@ -84,12 +84,14 @@ class PerformAsyncClient extends \ThriftClientBase implements PerformAsyncClient
   use PerformClientBase;
 
   const string THRIFT_SVC_NAME = PerformStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 class PerformClient extends \ThriftClientBase implements PerformClientIf {
   use PerformClientBase;
 
   const string THRIFT_SVC_NAME = PerformStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 // INTERACTION HANDLERS

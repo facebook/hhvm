@@ -193,12 +193,14 @@ class NestedContainersAsyncClient extends \ThriftClientBase implements NestedCon
   use NestedContainersClientBase;
 
   const string THRIFT_SVC_NAME = NestedContainersStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 class NestedContainersClient extends \ThriftClientBase implements NestedContainersClientIf {
   use NestedContainersClientBase;
 
   const string THRIFT_SVC_NAME = NestedContainersStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 abstract class NestedContainersAsyncProcessorBase extends \ThriftAsyncProcessor {

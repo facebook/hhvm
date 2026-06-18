@@ -104,12 +104,14 @@ class Deprecated_FooHackServiceAsyncClient extends \ThriftClientBase implements 
   use Deprecated_FooHackServiceClientBase;
 
   const string THRIFT_SVC_NAME = Deprecated_FooHackServiceStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 class Deprecated_FooHackServiceClient extends \ThriftClientBase implements Deprecated_FooHackServiceClientIf {
   use Deprecated_FooHackServiceClientBase;
 
   const string THRIFT_SVC_NAME = Deprecated_FooHackServiceStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 // HELPER FUNCTIONS AND STRUCTURES

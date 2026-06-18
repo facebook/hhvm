@@ -134,12 +134,14 @@ class BiDiServiceAsyncClient extends \ThriftClientBase implements BiDiServiceAsy
   use BiDiServiceClientBase;
 
   const string THRIFT_SVC_NAME = BiDiServiceStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 class BiDiServiceClient extends \ThriftClientBase implements BiDiServiceClientIf {
   use BiDiServiceClientBase;
 
   const string THRIFT_SVC_NAME = BiDiServiceStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 abstract class BiDiServiceAsyncProcessorBase extends \ThriftAsyncProcessor {

@@ -40,12 +40,14 @@ class Beeble_BroxAsyncClient extends \ThriftClientBase implements Beeble_BroxAsy
   use Beeble_BroxClientBase;
 
   const string THRIFT_SVC_NAME = Beeble_BroxStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 class Beeble_BroxClient extends \ThriftClientBase implements Beeble_BroxClientIf {
   use Beeble_BroxClientBase;
 
   const string THRIFT_SVC_NAME = Beeble_BroxStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 // HELPER FUNCTIONS AND STRUCTURES

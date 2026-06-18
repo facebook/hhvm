@@ -139,12 +139,14 @@ class PrimitivesServiceAsyncClient extends \ThriftClientBase implements Primitiv
   use PrimitivesServiceClientBase;
 
   const string THRIFT_SVC_NAME = PrimitivesServiceStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 class PrimitivesServiceClient extends \ThriftClientBase implements PrimitivesServiceClientIf {
   use PrimitivesServiceClientBase;
 
   const string THRIFT_SVC_NAME = PrimitivesServiceStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 // HELPER FUNCTIONS AND STRUCTURES

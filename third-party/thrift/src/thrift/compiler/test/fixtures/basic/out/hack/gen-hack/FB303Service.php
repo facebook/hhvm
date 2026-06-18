@@ -73,12 +73,14 @@ class FB303ServiceAsyncClient extends \ThriftClientBase implements FB303ServiceA
   use FB303ServiceClientBase;
 
   const string THRIFT_SVC_NAME = FB303ServiceStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 class FB303ServiceClient extends \ThriftClientBase implements FB303ServiceClientIf {
   use FB303ServiceClientBase;
 
   const string THRIFT_SVC_NAME = FB303ServiceStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 abstract class FB303ServiceAsyncProcessorBase extends \ThriftAsyncProcessor {

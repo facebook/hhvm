@@ -47,12 +47,14 @@ class InteractLocallyAsyncClient extends \ThriftClientBase implements InteractLo
   use InteractLocallyClientBase;
 
   const string THRIFT_SVC_NAME = InteractLocallyStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 class InteractLocallyClient extends \ThriftClientBase implements InteractLocallyClientIf {
   use InteractLocallyClientBase;
 
   const string THRIFT_SVC_NAME = InteractLocallyStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 // INTERACTION HANDLERS

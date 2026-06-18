@@ -119,12 +119,14 @@ class FooBarBazServiceAsyncClient extends \ThriftClientBase implements FooBarBaz
   use FooBarBazServiceClientBase;
 
   const string THRIFT_SVC_NAME = FooBarBazServiceStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 class FooBarBazServiceClient extends \ThriftClientBase implements FooBarBazServiceClientIf {
   use FooBarBazServiceClientBase;
 
   const string THRIFT_SVC_NAME = FooBarBazServiceStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 abstract class FooBarBazServiceAsyncProcessorBase extends \ThriftAsyncProcessor {

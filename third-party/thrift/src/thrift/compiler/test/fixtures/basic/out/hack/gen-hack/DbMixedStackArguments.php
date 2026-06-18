@@ -102,12 +102,14 @@ class DbMixedStackArgumentsAsyncClient extends \ThriftClientBase implements DbMi
   use DbMixedStackArgumentsClientBase;
 
   const string THRIFT_SVC_NAME = DbMixedStackArgumentsStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 class DbMixedStackArgumentsClient extends \ThriftClientBase implements DbMixedStackArgumentsClientIf {
   use DbMixedStackArgumentsClientBase;
 
   const string THRIFT_SVC_NAME = DbMixedStackArgumentsStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 abstract class DbMixedStackArgumentsAsyncProcessorBase extends \ThriftAsyncProcessor {

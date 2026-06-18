@@ -158,12 +158,14 @@ class CAsyncClient extends \ThriftClientBase implements CAsyncClientIf {
   use CClientBase;
 
   const string THRIFT_SVC_NAME = CStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 class CClient extends \ThriftClientBase implements CClientIf {
   use CClientBase;
 
   const string THRIFT_SVC_NAME = CStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 // HELPER FUNCTIONS AND STRUCTURES

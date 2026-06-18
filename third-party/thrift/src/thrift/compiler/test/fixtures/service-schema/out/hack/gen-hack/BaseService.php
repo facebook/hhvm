@@ -70,12 +70,14 @@ class BaseServiceAsyncClient extends \ThriftClientBase implements BaseServiceAsy
   use BaseServiceClientBase;
 
   const string THRIFT_SVC_NAME = BaseServiceStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 class BaseServiceClient extends \ThriftClientBase implements BaseServiceClientIf {
   use BaseServiceClientBase;
 
   const string THRIFT_SVC_NAME = BaseServiceStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 // HELPER FUNCTIONS AND STRUCTURES

@@ -65,12 +65,14 @@ class FactoriesAsyncClient extends \ThriftClientBase implements FactoriesAsyncCl
   use FactoriesClientBase;
 
   const string THRIFT_SVC_NAME = FactoriesStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 class FactoriesClient extends \ThriftClientBase implements FactoriesClientIf {
   use FactoriesClientBase;
 
   const string THRIFT_SVC_NAME = FactoriesStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 // HELPER FUNCTIONS AND STRUCTURES

@@ -107,12 +107,14 @@ class TestServiceAsyncClient extends \foo\hack_ns\FooHackServiceAsyncClient impl
   use TestServiceClientBase;
 
   const string THRIFT_SVC_NAME = TestServiceStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 class TestServiceClient extends \foo\hack_ns\FooHackServiceClient implements TestServiceClientIf {
   use TestServiceClientBase;
 
   const string THRIFT_SVC_NAME = TestServiceStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 abstract class TestServiceAsyncProcessorBase extends \foo\hack_ns\FooHackServiceAsyncProcessorBase {

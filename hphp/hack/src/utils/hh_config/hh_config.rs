@@ -67,7 +67,6 @@ pub struct HhConfig {
     pub distc_min_cpu_units: i64,
     pub distc_parallel_decl_decode: bool,
     pub distc_decl_buckets: i64,
-    pub distc_hierarchical_decls: bool,
     pub distc_sort_batches: bool,
 }
 
@@ -95,7 +94,6 @@ impl Default for HhConfig {
             distc_min_cpu_units: 0,
             distc_parallel_decl_decode: false,
             distc_decl_buckets: 0,
-            distc_hierarchical_decls: false,
             distc_sort_batches: false,
         }
     }
@@ -714,9 +712,6 @@ impl HhConfig {
                 "distc_decl_buckets" => {
                     c.distc_decl_buckets = parse_json(&value)?;
                 }
-                "distc_hierarchical_decls" => {
-                    c.distc_hierarchical_decls = parse_json(&value)?;
-                }
                 "distc_sort_batches" => {
                     c.distc_sort_batches = parse_json(&value)?;
                 }
@@ -734,7 +729,6 @@ impl HhConfig {
             "distc_min_worker_memory_gib": self.distc_min_worker_memory_gib,
             "distc_min_cpu_units": self.distc_min_cpu_units,
             "distc_parallel_decl_decode": self.distc_parallel_decl_decode,
-            "distc_hierarchical_decls": self.distc_hierarchical_decls,
             "distc_sort_batches": self.distc_sort_batches,
         });
         experiments.to_string()

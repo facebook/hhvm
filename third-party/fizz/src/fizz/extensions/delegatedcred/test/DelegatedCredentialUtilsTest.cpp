@@ -14,6 +14,7 @@
 #include <fizz/crypto/Utils.h>
 #include <fizz/crypto/test/TestUtil.h>
 #include <fizz/extensions/delegatedcred/DelegatedCredentialUtils.h>
+#include <fizz/extensions/delegatedcred/test/TestData.h>
 #include <fizz/protocol/clock/test/Mocks.h>
 
 using namespace folly;
@@ -24,30 +25,6 @@ using namespace fizz::test;
 namespace fizz {
 namespace extensions {
 namespace test {
-
-StringPiece kDelegatedCred{
-    "001ce0d1040300005b3059301306072a8648ce3d020106082a8648ce3d030107"
-    "03420004db94b7b305323633ccc5a5f12a3b07c22bbf86e5d531ed94d09c5bfe"
-    "860b72e5dc73b8267729f34150a6422cbdc87484a535125ff3a02a03372c0969"
-    "3abf050504030048304602210089a87271db53ca89f4eccbc37e616df92f4b35"
-    "1f5774c56da74bacfc2774e434022100af1d4561dab905345344475a33c8f132"
-    "0d82978beae2fca0f34b8d40713b92ac"};
-
-StringPiece kCert = R"(
------BEGIN CERTIFICATE-----
-MIIB6TCCAY+gAwIBAgIJAKlQpSahHUIWMAoGCCqGSM49BAMCMEIxCzAJBgNVBAYT
-AlhYMRUwEwYDVQQHDAxEZWZhdWx0IENpdHkxHDAaBgNVBAoME0RlZmF1bHQgQ29t
-cGFueSBMdGQwHhcNMTkwNTI0MTk1MjU3WhcNMjAwNTIzMTk1MjU3WjBCMQswCQYD
-VQQGEwJYWDEVMBMGA1UEBwwMRGVmYXVsdCBDaXR5MRwwGgYDVQQKDBNEZWZhdWx0
-IENvbXBhbnkgTHRkMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE8RC+4O48vtBh
-JhSn3/wuzfygo/AQGGNMavAb5YnZpy6rMaY9UG3OlFfkRRmvETlbn3CXD0klXuc/
-wYCKoVXGYqNuMGwwHQYDVR0OBBYEFC892QWimVBjX1AODjjL+SqTN1meMB8GA1Ud
-IwQYMBaAFC892QWimVBjX1AODjjL+SqTN1meMAwGA1UdEwQFMAMBAf8wCwYDVR0P
-BAQDAgHmMA8GCSsGAQQBgtpLLAQCBQAwCgYIKoZIzj0EAwIDSAAwRQIhAPoWbJWf
-Fw+uQ6c27kul/uTNIF4GOEUCmCWVvc6qkhHVAiBKTBrUi8h8g/U0yQ4prS0/wfkw
-FghrPnYCODq235mY2A==
------END CERTIFICATE-----
-)";
 
 StringPiece kCertNoDelegatedExtension = R"(
 -----BEGIN CERTIFICATE-----
@@ -184,7 +161,7 @@ TEST_F(DelegatedCredentialUtilsTest, TestCredentialWrongKeyUsage) {
 }
 
 TEST_F(DelegatedCredentialUtilsTest, TestGetCredentialExpiresTime) {
-  auto cert = fizz::test::getCert(kCert);
+  auto cert = fizz::test::getCert(kDelegationUsageCert);
   uint32_t secondsSinceEpoch = 1000000;
   auto notBeforeTime = std::chrono::system_clock::to_time_t(
       std::chrono::system_clock::time_point(
@@ -213,7 +190,10 @@ TEST_F(DelegatedCredentialUtilsTest, TestCertExpiredCredential) {
         Error err;
         FIZZ_THROW_ON_ERROR(
             DelegatedCredentialUtils::checkCredentialTimeValidity(
-                err, fizz::test::getCert(kCert), credential, clock_),
+                err,
+                fizz::test::getCert(kDelegationUsageCert),
+                credential,
+                clock_),
             err);
       },
       "credential is no longer valid",
@@ -229,7 +209,10 @@ TEST_F(DelegatedCredentialUtilsTest, TestCredentialValidForTooLong) {
         Error err;
         FIZZ_THROW_ON_ERROR(
             DelegatedCredentialUtils::checkCredentialTimeValidity(
-                err, fizz::test::getCert(kCert), credential, clock_),
+                err,
+                fizz::test::getCert(kDelegationUsageCert),
+                credential,
+                clock_),
             err);
       },
       "credential validity is longer than a week from now",
@@ -237,7 +220,7 @@ TEST_F(DelegatedCredentialUtilsTest, TestCredentialValidForTooLong) {
 }
 
 TEST_F(DelegatedCredentialUtilsTest, TestCertNotAfter) {
-  auto cert = fizz::test::getCert(kCert);
+  auto cert = fizz::test::getCert(kDelegationUsageCert);
 
   auto notBefore = X509_get0_notBefore(cert.get());
   auto notBeforeTime =

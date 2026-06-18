@@ -15,6 +15,7 @@
 #include <fizz/crypto/test/TestUtil.h>
 #include <fizz/extensions/delegatedcred/DelegatedCredentialUtils.h>
 #include <fizz/extensions/delegatedcred/SelfDelegatedCredential.h>
+#include <fizz/extensions/delegatedcred/test/TestData.h>
 
 using namespace folly;
 
@@ -23,31 +24,6 @@ using namespace testing;
 namespace fizz {
 namespace extensions {
 namespace test {
-
-StringPiece kDelegatedCredentialCert{
-    "-----BEGIN CERTIFICATE-----\n"
-    "MIICKzCCAdGgAwIBAgIJAPi2vMRfOVd0MAoGCCqGSM49BAMCMGIxCzAJBgNVBAYT\n"
-    "AlhYMRUwEwYDVQQHDAxEZWZhdWx0IENpdHkxHDAaBgNVBAoME0RlZmF1bHQgQ29t\n"
-    "cGFueSBMdGQxHjAcBgNVBAMMFXJldnByb3h5LWRlbGVnYXRlZC1lYzAgFw0xOTA5\n"
-    "MjMwMjAyMzVaGA8yMTE5MDgzMDAyMDIzNVowYjELMAkGA1UEBhMCWFgxFTATBgNV\n"
-    "BAcMDERlZmF1bHQgQ2l0eTEcMBoGA1UECgwTRGVmYXVsdCBDb21wYW55IEx0ZDEe\n"
-    "MBwGA1UEAwwVcmV2cHJveHktZGVsZWdhdGVkLWVjMFkwEwYHKoZIzj0CAQYIKoZI\n"
-    "zj0DAQcDQgAE7EbZMKds65EYciaSULFH4wZKt/OThiUL4uQW9cybr2HIzK68corO\n"
-    "JCeHXOsV3lpYS46b39SBZr1GZprFHH5gHaNuMGwwHQYDVR0OBBYEFMLkRMB4SclK\n"
-    "8K8uYMQBaYw0gNP7MB8GA1UdIwQYMBaAFMLkRMB4SclK8K8uYMQBaYw0gNP7MAwG\n"
-    "A1UdEwQFMAMBAf8wCwYDVR0PBAQDAgHmMA8GCSsGAQQBgtpLLAQCBQAwCgYIKoZI\n"
-    "zj0EAwIDSAAwRQIgB2EWbwWohYziQ2LmY8Qmn8y0WKR6Mbm5aad0rUBvtK4CIQCv\n"
-    "0U6Z/gFrVr0Cb2kc7M37KD9z5eeTwkQuGqs5GXF8Ow==\n"
-    "-----END CERTIFICATE-----"};
-
-// This is a dummy private key for testing.
-// @lint-ignore-every PRIVATEKEY
-StringPiece kDelegatedKey{
-    "-----BEGIN PRIVATE KEY-----\n"
-    "MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgOe/v6hxwTP9uA5dE\n"
-    "se5CO6ARqeOYXEy1ede9eRCmDduhRANCAATsRtkwp2zrkRhyJpJQsUfjBkq385OG\n"
-    "JQvi5Bb1zJuvYcjMrrxyis4kJ4dc6xXeWlhLjpvf1IFmvUZmmsUcfmAd\n"
-    "-----END PRIVATE KEY-----\n"};
 
 class SelfDelegatedCredentialTest : public Test {
  public:
@@ -125,8 +101,8 @@ class SelfDelegatedCredentialTest : public Test {
 
   folly::ssl::EvpPkeyUniquePtr getKey() {
     folly::ssl::BioUniquePtr b(BIO_new_mem_buf(
-        reinterpret_cast<const void*>(kDelegatedKey.data()),
-        kDelegatedKey.size()));
+        reinterpret_cast<const void*>(kP256CredCertKey.data()),
+        kP256CredCertKey.size()));
 
     if (!b) {
       throw std::runtime_error("failed to create BIO");
@@ -144,8 +120,8 @@ class SelfDelegatedCredentialTest : public Test {
 
   folly::ssl::X509UniquePtr getCert() {
     folly::ssl::BioUniquePtr b(BIO_new_mem_buf(
-        reinterpret_cast<const void*>(kDelegatedCredentialCert.data()),
-        kDelegatedCredentialCert.size()));
+        reinterpret_cast<const void*>(kP256CredCert.data()),
+        kP256CredCert.size()));
 
     if (!b) {
       throw std::runtime_error("failed to create BIO");

@@ -715,8 +715,6 @@ impl HhConfig {
         let experiments = json!({
             "eden_fetch_parallelism": self.eden_fetch_parallelism,
             "use_distc_crawl_dircache": self.use_distc_crawl_dircache,
-            "distc_min_worker_memory_gib": self.distc_min_worker_memory_gib,
-            "distc_min_cpu_units": self.distc_min_cpu_units,
             "distc_sort_batches": self.distc_sort_batches,
         });
         experiments.to_string()

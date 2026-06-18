@@ -14,7 +14,7 @@ module hack.module.test;
  * MyStruct
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/basic/MyStruct'))>>
-class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
+class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftStructWithObjectKeyContainers {
   use \ThriftSerializationTrait;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
@@ -48,6 +48,15 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
       'var' => 'idempotent',
       'type' => \TType::BOOL,
     ),
+    8 => shape(
+      'var' => 'floatSet',
+      'type' => \TType::SET,
+      'etype' => \TType::FLOAT,
+      'elem' => shape(
+        'type' => \TType::FLOAT,
+      ),
+      'format' => 'object_key',
+    ),
   ];
   const dict<string, int> FIELDMAP = dict[
     'MyIntField' => 1,
@@ -57,6 +66,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
     'oneway' => 5,
     'readonly' => 6,
     'idempotent' => 7,
+    'floatSet' => 8,
   ];
 
   const type TConstructorShape = shape(
@@ -67,6 +77,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'oneway' => ?bool,
     ?'readonly' => ?bool,
     ?'idempotent' => ?bool,
+    ?'floatSet' => ?\ThriftSet<float>,
   );
 
   const int STRUCTURAL_ID = 6508395632048181872;
@@ -105,8 +116,13 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
    * 7: bool idempotent
    */
   public bool $idempotent;
+  /**
+   * Original thrift field:-
+   * 8: set<float> floatSet
+   */
+  public ?\ThriftSet<float> $floatSet;
 
-  public function __construct(?int $MyIntField = null, ?string $MyStringField = null, ?\test\fixtures\basic\MyDataItem $MyDataField = null, ?\test\fixtures\basic\MyEnum $myEnum = null, ?bool $oneway = null, ?bool $readonly = null, ?bool $idempotent = null)[] {
+  public function __construct(?int $MyIntField = null, ?string $MyStringField = null, ?\test\fixtures\basic\MyDataItem $MyDataField = null, ?\test\fixtures\basic\MyEnum $myEnum = null, ?bool $oneway = null, ?bool $readonly = null, ?bool $idempotent = null, ?\ThriftSet<float> $floatSet = null)[] {
     $this->MyIntField = $MyIntField ?? 0;
     $this->MyStringField = $MyStringField ?? '';
     $this->MyDataField = $MyDataField;
@@ -114,6 +130,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
     $this->oneway = $oneway ?? false;
     $this->readonly = $readonly ?? false;
     $this->idempotent = $idempotent ?? false;
+    $this->floatSet = $floatSet;
   }
 
   public static function withDefaultValues()[]: this {
@@ -129,6 +146,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
       Shapes::idx($shape, 'oneway'),
       Shapes::idx($shape, 'readonly'),
       Shapes::idx($shape, 'idempotent'),
+      Shapes::idx($shape, 'floatSet'),
     );
   }
 
@@ -233,6 +251,25 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
                 )
               ),
               "name" => "idempotent",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 8,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_set" => \tmeta_ThriftSetType::fromShape(
+                    shape(
+                      "valueType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_FLOAT_TYPE,
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "floatSet",
             )
           ),
         ],

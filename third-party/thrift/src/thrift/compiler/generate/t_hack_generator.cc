@@ -99,29 +99,60 @@ bool is_type_arraykey(const t_type& type) {
       true_type->is_byte() || true_type->is<t_enum>();
 }
 
-bool has_hack_adapter_or_wrapper(const t_type& type) {
+bool has_hack_adapter(const t_type& type) {
   if (is_transitive_annotation(type)) {
     return false;
   }
   return t_typedef::get_first_structured_annotation_or_null(
-             &type, kHackAdapterUri) != nullptr ||
-      t_typedef::get_first_structured_annotation_or_null(
-          &type, kHackWrapperUri) != nullptr;
+             &type, kHackAdapterUri) != nullptr;
+}
+
+bool has_hack_wrapper(const t_type& type) {
+  if (is_transitive_annotation(type)) {
+    return false;
+  }
+  return t_typedef::get_first_structured_annotation_or_null(
+             &type, kHackWrapperUri) != nullptr;
+}
+
+const t_structured* get_unadapted_shape_structured_type(const t_type* type) {
+  if (has_hack_adapter(*type)) {
+    return nullptr;
+  }
+  return type->get_true_type()->try_as<t_structured>();
+}
+
+void throw_if_hack_wrapper_object_key_type(
+    const t_type& type, const std::string& container_role) {
+  if (has_hack_wrapper(type)) {
+    throw std::runtime_error(
+        "using @hack.Wrapper annotation with object-key " + container_role +
+        " is not supported yet");
+  }
 }
 
 // Returns true if the type is a set with non-arraykey elements or a map with
 // non-arraykey keys, requiring object-key container types at runtime.
-// Also returns true when the key/element type has an adapter or wrapper,
-// since the adapted/wrapped Hack type may not be arraykey.
+// Also returns true when the key/element type has an adapter, since the
+// adapted Hack type may not be arraykey.
 bool has_object_key_type(const t_type* type) {
   type = type->get_true_type();
   if (const auto* tset = type->try_as<t_set>()) {
-    return !is_type_arraykey(*tset->elem_type()) ||
-        has_hack_adapter_or_wrapper(*tset->elem_type());
+    bool is_object_key = !is_type_arraykey(*tset->elem_type()) ||
+        has_hack_adapter(*tset->elem_type());
+    if (is_object_key) {
+      throw_if_hack_wrapper_object_key_type(*tset->elem_type(), "set elements");
+    }
+    return is_object_key;
   }
   if (const auto* tmap = type->try_as<t_map>()) {
-    return !is_type_arraykey(tmap->key_type().deref()) ||
-        has_hack_adapter_or_wrapper(tmap->key_type().deref());
+    bool is_object_key = !is_type_arraykey(tmap->key_type().deref()) ||
+        has_hack_adapter(tmap->key_type().deref());
+    if (is_object_key) {
+      throw_if_hack_wrapper_object_key_type(
+          tmap->key_type().deref(), "map keys");
+    }
+    return is_object_key;
   }
   return false;
 }
@@ -516,9 +547,13 @@ class t_hack_generator : public t_concat_generator {
       std::ofstream& out, const t_structured* tstruct);
 
   void generate_php_type_spec(
-      std::ofstream& out, const t_type* t, uint32_t depth);
+      std::ostream& out, const t_type* t, uint32_t depth);
+  void generate_php_inline_type_spec(
+      std::ostream& out, const t_type* t, uint32_t depth);
+  void generate_php_inline_object_key_type_spec(
+      std::ostream& out, const t_type* t);
   void generate_php_type_spec_shape_elt_helper(
-      std::ofstream& out,
+      std::ostream& out,
       const std::string& field_name,
       const t_type* t,
       uint32_t depth);
@@ -530,6 +565,8 @@ class t_hack_generator : public t_concat_generator {
       const std::string& struct_hack_ref);
   void generate_php_structural_id(
       std::ofstream& out, const t_structured* tstruct, bool asFunction);
+  bool structured_shape_methods_require_write_props(
+      const t_structured* tstruct);
   bool structured_contains_object_key_container(
       const t_structured* tstruct, std::set<const t_structured*>& visited);
   bool type_contains_object_key_container(
@@ -1538,6 +1575,10 @@ void t_hack_generator::generate_json_field(
   if (skip_codegen(tfield)) {
     return;
   }
+  // Object-key fields cannot be deserialized from JSON.
+  if (has_object_key_type(tfield->type()->get_true_type())) {
+    return;
+  }
   const t_type* type = tfield->type()->get_true_type();
 
   if (type->is_void()) {
@@ -1745,6 +1786,10 @@ void t_hack_generator::generate_json_reader(
   indent(out) << "}\n\n";
   for (const auto& tf : tstruct->fields()) {
     if (skip_codegen(&tf)) {
+      continue;
+    }
+    // Object-key fields cannot be deserialized from JSON.
+    if (has_object_key_type(tf.type()->get_true_type())) {
       continue;
     }
     indent(out) << "if (idx($parsed, '" << tf.name() << "') !== null) {\n";
@@ -2577,7 +2622,9 @@ std::string t_hack_generator::render_default_value(const t_type* type) {
       dval = "null";
     }
   } else if (type->is<t_map>()) {
-    if (hack_collections_) {
+    if (has_object_key_type(type)) {
+      dval = "null";
+    } else if (hack_collections_) {
       dval = "Map {}";
     } else {
       dval = "dict[]";
@@ -2589,7 +2636,9 @@ std::string t_hack_generator::render_default_value(const t_type* type) {
       dval = "vec[]";
     }
   } else if (type->is<t_set>()) {
-    if (arraysets_) {
+    if (has_object_key_type(type)) {
+      dval = "null";
+    } else if (arraysets_) {
       dval = "dict[]";
     } else if (hack_collections_) {
       dval = "Set {}";
@@ -3172,32 +3221,21 @@ bool t_hack_generator::is_valid_hack_type(
     return it->second;
   }
 
-  auto report_invalid_type = [&](const char* what, const t_type& type) {
-    diags_.error(
-        top_level_type,
-        "`{}` cannot be used as a {} in Hack because it is not "
-        "integer, string, binary or enum",
-        type.name(),
-        what);
-  };
-
   bool valid = false;
   if (const t_list* list = dynamic_cast<const t_list*>(type)) {
     valid = is_valid_hack_type(&*list->elem_type(), top_level_type);
   } else if (const t_set* set = dynamic_cast<const t_set*>(type)) {
     const t_type& elem_type = *set->elem_type();
-    valid = is_type_arraykey(elem_type);
-    if (!valid) {
-      report_invalid_type("set element", elem_type);
-    }
+    // Non-arraykey set elements are supported via ThriftSetWithObjectElement.
+    valid = is_type_arraykey(elem_type) ||
+        is_valid_hack_type(elem_type.get_true_type(), top_level_type);
   } else {
     const t_map* map = dynamic_cast<const t_map*>(type);
     assert(map);
     const t_type& key_type = *map->key_type();
-    valid = is_type_arraykey(key_type);
-    if (!valid) {
-      report_invalid_type("map key", key_type);
-    }
+    // Non-arraykey map keys are supported via ThriftMapWithObjectKey.
+    valid = is_type_arraykey(key_type) ||
+        is_valid_hack_type(key_type.get_true_type(), top_level_type);
     valid = valid && is_valid_hack_type(&*map->val_type(), top_level_type);
   }
   type_validity_[type] = valid;
@@ -3245,7 +3283,7 @@ void t_hack_generator::generate_xception(const t_structured* txception) {
 }
 
 void t_hack_generator::generate_php_type_spec(
-    std::ofstream& out, const t_type* t, uint32_t depth) {
+    std::ostream& out, const t_type* t, uint32_t depth) {
   // Check the adapter before resolving typedefs.
   if (std::optional<std::string> adapter = find_hack_adapter(t)) {
     indent(out) << "'adapter' => " << *adapter << "::class,\n";
@@ -3278,20 +3316,13 @@ void t_hack_generator::generate_php_type_spec(
   } else if (const auto* tmap = dynamic_cast<const t_map*>(t)) {
     const t_type* ktype = &tmap->key_type().deref();
     const t_type* vtype = &tmap->val_type().deref();
-    if (find_hack_adapter(ktype)) {
-      throw std::runtime_error(
-          "using hack.Adapter annotation with map keys is not supported yet");
-    }
-    auto [wrapper, name, ns] = find_hack_wrapper(ktype);
-    if (wrapper) {
-      throw std::runtime_error(
-          "using hack.Wrapper annotation with map keys is not supported yet");
-    }
     indent(out) << "'ktype' => " << type_to_enum(ktype) << ",\n";
     indent(out) << "'vtype' => " << type_to_enum(vtype) << ",\n";
     generate_php_type_spec_shape_elt_helper(out, "key", ktype, depth);
     generate_php_type_spec_shape_elt_helper(out, "val", vtype, depth);
-    if (legacy_arrays_) {
+    if (!is_type_arraykey(*ktype) || has_hack_adapter(*ktype)) {
+      indent(out) << "'format' => 'object_key',\n";
+    } else if (legacy_arrays_) {
       indent(out) << "'format' => 'array',\n";
     } else if (hack_collections_) {
       indent(out) << "'format' => 'collection',\n";
@@ -3311,18 +3342,11 @@ void t_hack_generator::generate_php_type_spec(
     }
   } else if (const auto* tset = dynamic_cast<const t_set*>(t)) {
     const t_type* etype = &tset->elem_type().deref();
-    if (find_hack_adapter(etype)) {
-      throw std::runtime_error(
-          "using hack.Adapter annotation with set keys is not supported yet");
-    }
-    auto [wrapper, name, ns] = find_hack_wrapper(etype);
-    if (wrapper) {
-      throw std::runtime_error(
-          "using hack.Wrapper annotation with set keys is not supported yet");
-    }
     indent(out) << "'etype' => " << type_to_enum(etype) << ",\n";
     generate_php_type_spec_shape_elt_helper(out, "elem", etype, depth);
-    if (arraysets_) {
+    if (!is_type_arraykey(*etype) || has_hack_adapter(*etype)) {
+      indent(out) << "'format' => 'object_key',\n";
+    } else if (arraysets_) {
       indent(out) << "'format' => 'array',\n";
     } else if (hack_collections_) {
       indent(out) << "'format' => 'collection',\n";
@@ -3335,8 +3359,51 @@ void t_hack_generator::generate_php_type_spec(
   }
 }
 
+void t_hack_generator::generate_php_inline_type_spec(
+    std::ostream& out, const t_type* t, uint32_t depth) {
+  out << "shape(\n";
+  indent_up();
+  generate_php_type_spec(out, t, depth);
+  indent_down();
+  indent(out) << ")";
+}
+
+void t_hack_generator::generate_php_inline_object_key_type_spec(
+    std::ostream& out, const t_type* t) {
+  const t_type* true_type = t->get_true_type();
+  if (true_type->is<t_map>() || true_type->is<t_list>() ||
+      true_type->is<t_set>() || has_hack_wrapper(*t)) {
+    generate_php_inline_type_spec(out, t, 0);
+    return;
+  }
+
+  out << "shape(";
+  if (std::optional<std::string> adapter = find_hack_adapter(t)) {
+    out << "'adapter' => " << *adapter << "::class, ";
+  }
+  out << "'type' => " << type_to_enum(true_type);
+
+  if (const auto* tbase_type = true_type->try_as<t_primitive_type>()) {
+    if (tbase_type->primitive_type() == t_primitive_type::type::t_binary) {
+      out << ", 'is_binary' => true";
+    }
+  } else if (true_type->is<t_enum>()) {
+    out << ", 'enum' => " << hack_name(true_type) << "::class";
+  } else if (
+      const auto* tstruct = dynamic_cast<const t_structured*>(true_type)) {
+    auto sname = hack_name(true_type);
+    auto [wrapper, name, ns] = find_hack_wrapper(tstruct);
+    if (wrapper) {
+      sname = hack_wrapped_type_name(name, ns);
+    }
+    out << ", 'class' => " << sname << "::class";
+  }
+
+  out << ")";
+}
+
 void t_hack_generator::generate_php_type_spec_shape_elt_helper(
-    std::ofstream& out,
+    std::ostream& out,
     const std::string& field_name,
     const t_type* t,
     uint32_t depth) {
@@ -3344,14 +3411,11 @@ void t_hack_generator::generate_php_type_spec_shape_elt_helper(
   if (depth >= min_depth_for_unsafe_cast_) {
     out << R"(\HH\FIXME\UNSAFE_CAST<mixed, \HH_FIXME\NON_DENOTABLE_TYPE>()";
   }
-  out << "shape(\n";
-  indent_up();
-  generate_php_type_spec(out, t, depth + 1);
-  indent_down();
+  generate_php_inline_type_spec(out, t, depth + 1);
   if (depth >= min_depth_for_unsafe_cast_) {
-    indent(out) << ")),\n";
+    out << "),\n";
   } else {
-    indent(out) << "),\n";
+    out << ",\n";
   }
 }
 
@@ -3632,6 +3696,15 @@ std::string t_hack_generator::type_to_recursive_shape_typehint(
                &list->elem_type().deref(), root_shape_struct) +
         ">";
   } else if (const auto* map = ttype->try_as<t_map>()) {
+    if (has_object_key_type(ttype)) {
+      return "vec<(" +
+          type_to_recursive_shape_typehint(
+                 &map->key_type().deref(), root_shape_struct) +
+          ", " +
+          type_to_recursive_shape_typehint(
+                 &map->val_type().deref(), root_shape_struct) +
+          ")>";
+    }
     std::string key_type =
         type_to_typehint(&map->key_type().deref(), shape_variations);
     if (shape_arraykeys_ && key_type == "string") {
@@ -3643,6 +3716,12 @@ std::string t_hack_generator::type_to_recursive_shape_typehint(
                &map->val_type().deref(), root_shape_struct) +
         ">";
   } else if (const auto* set = ttype->try_as<t_set>()) {
+    if (has_object_key_type(ttype)) {
+      return "vec<" +
+          type_to_recursive_shape_typehint(
+                 &set->elem_type().deref(), root_shape_struct) +
+          ">";
+    }
     std::string prefix;
     std::string suffix = ">";
     if (!legacy_arrays_ && !hack_collections_) {
@@ -3944,8 +4023,13 @@ void t_hack_generator::generate_php_struct_shape_methods(
     std::ofstream& out, const t_structured* tstruct) {
   generate_php_struct_stringifyMapKeys_method(out);
 
-  indent(out)
-      << "public static function __fromShape(self::TShape $shape)[]: this {\n";
+  const bool uses_object_key_containers =
+      structured_shape_methods_require_write_props(tstruct);
+  const std::string shape_method_context =
+      uses_object_key_containers ? "[write_props]" : "[]";
+
+  indent(out) << "public static function __fromShape(self::TShape $shape)"
+              << shape_method_context << ": this {\n";
   indent_up();
   indent(out) << "return new static(\n";
   indent_up();
@@ -3973,6 +4057,89 @@ void t_hack_generator::generate_php_struct_shape_methods(
     if (find_hack_field_adapter(field) ||
         find_hack_adapter(&field.type().deref())) {
       inner << source.str();
+    } else if (has_object_key_type(t)) {
+      is_simple_shape_index = false;
+      if (const auto* map = t->try_as<t_map>()) {
+        const t_type* key_type = &map->key_type().deref();
+        const t_type* val_type = &map->val_type().deref();
+        const auto* key_struct = get_unadapted_shape_structured_type(key_type);
+        const auto* val_struct = get_unadapted_shape_structured_type(val_type);
+        std::string key_hint = type_to_typehint(key_type);
+        std::string val_hint = type_to_typehint(val_type);
+
+        inner << "\\ThriftMap::fromShape<" << key_hint << ", " << val_hint
+              << ">(\n";
+        indent_up();
+        if (key_struct || val_struct) {
+          indent(inner) << "Vec\\map(" << source.str() << ", $_e ==> tuple(";
+          if (key_struct) {
+            std::string key_source = "$_e[0]";
+            if (type_uses_recursive_shape(key_struct, tstruct)) {
+              key_source = "HH\\FIXME\\UNSAFE_CAST<" +
+                  recursive_shape_case_type_name(key_struct) + ", " +
+                  hack_name(key_struct) +
+                  "::TShape>($_e[0], 'recursive thrift shape')";
+            }
+            inner << hack_name(key_struct) << "::__fromShape(" << key_source
+                  << ")";
+          } else {
+            inner << "$_e[0]";
+          }
+          inner << ", ";
+          if (val_struct) {
+            std::string val_source = "$_e[1]";
+            if (type_uses_recursive_shape(val_struct, tstruct)) {
+              val_source = "HH\\FIXME\\UNSAFE_CAST<" +
+                  recursive_shape_case_type_name(val_struct) + ", " +
+                  hack_name(val_struct) +
+                  "::TShape>($_e[1], 'recursive thrift shape')";
+            }
+            inner << hack_name(val_struct) << "::__fromShape(" << val_source
+                  << ")";
+          } else {
+            inner << "$_e[1]";
+          }
+          inner << ")),\n";
+        } else {
+          indent(inner) << source.str() << ",\n";
+        }
+        indent(inner) << type_to_enum(key_type) << ",\n";
+
+        indent(inner);
+        generate_php_inline_object_key_type_spec(inner, key_type);
+        inner << ",\n";
+        indent_down();
+        indent(inner) << ")";
+      } else if (const auto* set = t->try_as<t_set>()) {
+        const t_type* elem_type = &set->elem_type().deref();
+        const auto* elem_struct =
+            get_unadapted_shape_structured_type(elem_type);
+        std::string elem_hint = type_to_typehint(elem_type);
+
+        inner << "\\ThriftSet::fromVec<" << elem_hint << ">(\n";
+        indent_up();
+        if (elem_struct) {
+          std::string elem_source = "$_e";
+          if (type_uses_recursive_shape(elem_struct, tstruct)) {
+            elem_source = "HH\\FIXME\\UNSAFE_CAST<" +
+                recursive_shape_case_type_name(elem_struct) + ", " +
+                hack_name(elem_struct) +
+                "::TShape>($_e, 'recursive thrift shape')";
+          }
+          indent(inner) << "Vec\\map(" << source.str() << ", $_e ==> "
+                        << hack_name(elem_struct) << "::__fromShape("
+                        << elem_source << ")),\n";
+        } else {
+          indent(inner) << source.str() << ",\n";
+        }
+        indent(inner) << type_to_enum(elem_type) << ",\n";
+
+        indent(inner);
+        generate_php_inline_object_key_type_spec(inner, elem_type);
+        inner << ",\n";
+        indent_down();
+        indent(inner) << ")";
+      }
     } else if (t->is<t_set>()) {
       if (arraysets_ || !hack_collections_) {
         inner << source.str();
@@ -4021,7 +4188,8 @@ void t_hack_generator::generate_php_struct_shape_methods(
   indent(out) << "}\n";
   out << "\n";
 
-  indent(out) << "public function __toShape()[]: self::TShape {\n";
+  indent(out) << "public function __toShape()" << shape_method_context
+              << ": self::TShape {\n";
   indent_up();
 
   indent(out) << "return shape(\n";
@@ -4043,6 +4211,55 @@ void t_hack_generator::generate_php_struct_shape_methods(
     if (find_hack_field_adapter(field) ||
         find_hack_adapter(&field.type().deref())) {
       val << fieldRef << ",\n";
+    } else if (has_object_key_type(t)) {
+      if (const auto* map = t->try_as<t_map>()) {
+        const t_type* key_type = &map->key_type().deref();
+        const t_type* val_type = &map->val_type().deref();
+        const auto* key_struct = get_unadapted_shape_structured_type(key_type);
+        const auto* val_struct = get_unadapted_shape_structured_type(val_type);
+        if (key_struct || val_struct) {
+          if (nullable) {
+            val << fieldRef << " === null \n";
+            indent_up();
+            indent(val) << "? null \n";
+            indent(val) << ": ";
+          }
+          val << "Vec\\map(\n";
+          indent_up();
+          indent(val) << fieldRef << "->toShape(),\n";
+          indent(val) << "$_e ==> tuple(";
+          val << (key_struct ? "$_e[0]->__toShape()" : "$_e[0]");
+          val << ", ";
+          val << (val_struct ? "$_e[1]->__toShape()" : "$_e[1]");
+          val << "),\n";
+          indent_down();
+          indent(val) << "),\n";
+          if (nullable) {
+            indent_down();
+          }
+        } else {
+          val << fieldRef << (nullable ? "?" : "") << "->toShape(),\n";
+        }
+      } else if (const auto* set = t->try_as<t_set>()) {
+        const t_type* elem_type = &set->elem_type().deref();
+        const auto* elem_struct =
+            get_unadapted_shape_structured_type(elem_type);
+        if (elem_struct) {
+          if (nullable) {
+            val << fieldRef << " === null \n";
+            indent_up();
+            indent(val) << "? null \n";
+            indent(val) << ": ";
+          }
+          val << "Vec\\map(" << fieldRef
+              << "->toVec(), $_e ==> $_e->__toShape()),\n";
+          if (nullable) {
+            indent_down();
+          }
+        } else {
+          val << fieldRef << (nullable ? "?" : "") << "->toVec(),\n";
+        }
+      }
     } else if (t->is<t_container>()) {
       if (t->is<t_map>() || t->is<t_list>()) {
         if (hack_collections_) {
@@ -4172,8 +4389,138 @@ bool t_hack_generator::
     }
   }
   if (ttype->is<t_container>()) {
+    if (has_object_key_type(ttype) && is_shape_method) {
+      // Object-key containers use ThriftMap/ThriftSet
+      if (const auto* map = ttype->try_as<t_map>()) {
+        const t_type* key_type = &map->key_type().deref();
+        const t_type* val_type_inner = &map->val_type().deref();
+        const auto* key_struct = get_unadapted_shape_structured_type(key_type);
+        const auto* val_struct =
+            get_unadapted_shape_structured_type(val_type_inner);
+        auto val_wrapper = find_hack_wrapper(val_type_inner).name;
+        bool is_async_key =
+            key_struct != nullptr && is_async_shapish_struct(key_struct);
+        bool is_async_val_struct =
+            val_struct != nullptr && is_async_shapish_struct(val_struct);
+        bool is_async_val = is_async_val_struct ||
+            (val_wrapper.has_value() && !uses_thrift_only_methods);
+        bool use_map_async = is_async_key || is_async_val;
+        std::string key_hint = type_to_typehint(key_type);
+        std::string val_hint = type_to_typehint(val_type_inner);
+
+        out << "\\ThriftMap::fromShape<" << key_hint << ", " << val_hint
+            << ">(\n";
+        indent_up();
+        if (key_struct || val_struct || val_wrapper.has_value()) {
+          indent(out) << (use_map_async ? "await Vec\\map_async" : "Vec\\map")
+                      << "(\n";
+          indent_up();
+          indent(out) << val << ",\n";
+          indent(out) << (use_map_async ? "async " : "") << "$_e ==> tuple(";
+          if (key_struct) {
+            std::string key_source = "$_e[0]";
+            if (type_uses_recursive_shape(key_struct, root_shape_struct)) {
+              key_source = "HH\\FIXME\\UNSAFE_CAST<" +
+                  recursive_shape_case_type_name(key_struct) + ", " +
+                  hack_name(key_struct) +
+                  "::TShape>($_e[0], 'recursive thrift shape')";
+            }
+            out << (is_async_key ? "await " : "") << hack_name(key_struct)
+                << (is_async_key ? "::__genFromShape(" : "::__fromShape(")
+                << key_source << ")";
+          } else {
+            out << "$_e[0]";
+          }
+          out << ", ";
+          std::string val_expr = "$_e[1]";
+          if (val_struct) {
+            std::string val_source = "$_e[1]";
+            if (type_uses_recursive_shape(val_struct, root_shape_struct)) {
+              val_source = "HH\\FIXME\\UNSAFE_CAST<" +
+                  recursive_shape_case_type_name(val_struct) + ", " +
+                  hack_name(val_struct) +
+                  "::TShape>($_e[1], 'recursive thrift shape')";
+            }
+            auto [wrapper, name, ns] = find_hack_wrapper(val_struct);
+            std::string val_struct_name = wrapper
+                ? hack_wrapped_type_name(name, ns)
+                : hack_name(val_struct);
+            val_expr = std::string(is_async_val_struct ? "await " : "") +
+                val_struct_name +
+                (is_async_val_struct ? "::__genFromShape(" : "::__fromShape(") +
+                val_source + ")";
+          }
+          if (val_wrapper.has_value()) {
+            std::string val_typehint = type_to_typehint(
+                val_type_inner,
+                {{TypeToTypehintVariations::IGNORE_WRAPPER, true}});
+            out << (uses_thrift_only_methods ? "" : "await ") << *val_wrapper
+                << (uses_thrift_only_methods
+                        ? "::fromThrift_DO_NOT_USE_THRIFT_INTERNAL<"
+                        : "::genFromThrift<")
+                << val_typehint << ">(" << val_expr << ")";
+          } else {
+            out << val_expr;
+          }
+          out << "),\n";
+          indent_down();
+          indent(out) << "),\n";
+        } else {
+          indent(out) << val << ",\n";
+        }
+        indent(out) << type_to_enum(key_type) << ",\n";
+        indent(out);
+        generate_php_inline_object_key_type_spec(out, key_type);
+        out << ",\n";
+        indent_down();
+        indent(out) << ")";
+        return use_map_async;
+      } else if (const auto* set = ttype->try_as<t_set>()) {
+        const t_type* elem_type = &set->elem_type().deref();
+        const auto* elem_struct =
+            get_unadapted_shape_structured_type(elem_type);
+        bool is_async_elem =
+            elem_struct != nullptr && is_async_shapish_struct(elem_struct);
+        std::string elem_hint = type_to_typehint(elem_type);
+
+        out << "\\ThriftSet::fromVec<" << elem_hint << ">(\n";
+        indent_up();
+        if (elem_struct) {
+          std::string elem_source = "$_e";
+          if (type_uses_recursive_shape(elem_struct, root_shape_struct)) {
+            elem_source = "HH\\FIXME\\UNSAFE_CAST<" +
+                recursive_shape_case_type_name(elem_struct) + ", " +
+                hack_name(elem_struct) +
+                "::TShape>($_e, 'recursive thrift shape')";
+          }
+          indent(out) << (is_async_elem ? "await Vec\\map_async" : "Vec\\map")
+                      << "(\n";
+          indent_up();
+          indent(out) << val << ",\n";
+          indent(out) << (is_async_elem ? "async " : "") << "$_e ==> "
+                      << (is_async_elem ? "await " : "")
+                      << hack_name(elem_struct)
+                      << (is_async_elem ? "::__genFromShape("
+                                        : "::__fromShape(")
+                      << elem_source << ")"
+                      << ",\n";
+          indent_down();
+          indent(out) << "),\n";
+        } else {
+          indent(out) << val << ",\n";
+        }
+        indent(out) << type_to_enum(elem_type) << ",\n";
+        indent(out);
+        generate_php_inline_object_key_type_spec(out, elem_type);
+        out << ",\n";
+        indent_down();
+        indent(out) << ")";
+        return is_async_elem;
+      }
+      return false;
+    }
     if (ttype->is<t_set>()) {
-      if (arraysets_ || !hack_collections_) {
+      if (has_object_key_type(ttype) || arraysets_ || !hack_collections_) {
         out << val;
       } else {
         out << "new Set(Keyset\\keys(" << val << "))";
@@ -4188,6 +4535,44 @@ bool t_hack_generator::
 
     if (const t_map* map = ttype->try_as<t_map>()) {
       container_type = "Dict\\";
+      if (has_object_key_type(ttype)) {
+        const t_type* val_type_inner = &map->val_type().deref();
+        auto val_wrapper = find_hack_wrapper(val_type_inner).name;
+        if (val_wrapper.has_value()) {
+          const t_type* key_type = &map->key_type().deref();
+          std::string key_hint = type_to_typehint(key_type);
+          std::string val_hint = type_to_typehint(val_type_inner);
+          std::string val_typehint = type_to_typehint(
+              val_type_inner,
+              {{TypeToTypehintVariations::IGNORE_WRAPPER, true}});
+
+          out << "\\ThriftMap::fromShape<" << key_hint << ", " << val_hint
+              << ">(\n";
+          indent_up();
+          indent(out) << "Vec\\map(\n";
+          indent_up();
+          indent(out) << val << "->toShape(),\n";
+          indent(out) << "$_e ==> tuple(\n";
+          indent_up();
+          indent(out) << "$_e[0],\n";
+          indent(out) << *val_wrapper
+                      << "::fromThrift_DO_NOT_USE_THRIFT_INTERNAL<"
+                      << val_typehint << ">($_e[1]),\n";
+          indent_down();
+          indent(out) << "),\n";
+          indent_down();
+          indent(out) << "),\n";
+          indent(out) << type_to_enum(key_type) << ",\n";
+          indent(out);
+          generate_php_inline_object_key_type_spec(out, key_type);
+          out << ",\n";
+          indent_down();
+          indent(out) << ")";
+          return false;
+        }
+        out << val;
+        return false;
+      }
       if (shape_arraykeys_) {
         const t_type* key_type = map->key_type().deref().get_true_type();
         if (is_shape_method && key_type->is<t_primitive_type>() &&
@@ -4310,6 +4695,62 @@ bool t_hack_generator::generate_php_struct_async_toShape_method_helper(
       return false;
     }
   } else if (ttype->is<t_container>()) {
+    if (has_object_key_type(ttype)) {
+      if (const auto* map = ttype->try_as<t_map>()) {
+        const t_type* key_type = &map->key_type().deref();
+        const t_type* val_type_inner = &map->val_type().deref();
+        const auto* key_struct = get_unadapted_shape_structured_type(key_type);
+        const auto* val_struct =
+            get_unadapted_shape_structured_type(val_type_inner);
+        bool is_async_key =
+            key_struct != nullptr && is_async_shapish_struct(key_struct);
+        bool is_async_val =
+            val_struct != nullptr && is_async_shapish_struct(val_struct);
+        bool use_map_async = is_async_key || is_async_val;
+        if (key_struct || val_struct) {
+          out << (use_map_async ? "Vec\\map_async" : "Vec\\map") << "(\n";
+          indent_up();
+          indent(out) << val << "->toShape(),\n";
+          indent(out) << (use_map_async ? "async " : "") << "$_e ==> tuple(";
+          out
+              << (key_struct ? (is_async_key ? "await $_e[0]->__genToShape()"
+                                             : "$_e[0]->__toShape()")
+                             : "$_e[0]");
+          out << ", ";
+          out
+              << (val_struct ? (is_async_val ? "await $_e[1]->__genToShape()"
+                                             : "$_e[1]->__toShape()")
+                             : "$_e[1]");
+          out << "),\n";
+          indent_down();
+          indent(out) << ")";
+          return use_map_async;
+        } else {
+          out << val << "->toShape()";
+        }
+      } else if (const auto* set = ttype->try_as<t_set>()) {
+        const t_type* elem_type = &set->elem_type().deref();
+        const auto* elem_struct =
+            get_unadapted_shape_structured_type(elem_type);
+        bool is_async_elem =
+            elem_struct != nullptr && is_async_shapish_struct(elem_struct);
+        if (elem_struct) {
+          out << (is_async_elem ? "Vec\\map_async" : "Vec\\map") << "(\n";
+          indent_up();
+          indent(out) << val << "->toVec(),\n";
+          indent(out) << (is_async_elem ? "async " : "") << "$_e ==> "
+                      << (is_async_elem ? "await $_e->__genToShape()"
+                                        : "$_e->__toShape()")
+                      << ",\n";
+          indent_down();
+          indent(out) << ")";
+          return is_async_elem;
+        } else {
+          out << val << "->toVec()";
+        }
+      }
+      return false;
+    }
     if (ttype->is<t_set>()) {
       if (arraysets_ || !hack_collections_) {
         out << val;
@@ -4485,6 +4926,182 @@ void t_hack_generator::generate_php_struct_async_shape_methods(
     }
     if (std::optional<std::string> adapter = find_hack_field_adapter(field)) {
       out << fieldRef << ",\n";
+    } else if (has_object_key_type(t)) {
+      // Object-key maps use ->toShape(), sets use ->toVec()
+      if (const auto* map = t->try_as<t_map>()) {
+        const t_type* key_type = &map->key_type().deref();
+        const t_type* val_type = &map->val_type().deref();
+        const auto* key_struct = get_unadapted_shape_structured_type(key_type);
+        const auto* val_struct = get_unadapted_shape_structured_type(val_type);
+        auto val_wrapper = find_hack_wrapper(val_type).name;
+        bool is_async_key =
+            key_struct != nullptr && is_async_shapish_struct(key_struct);
+        bool is_async_val_struct =
+            val_struct != nullptr && is_async_shapish_struct(val_struct);
+        bool is_async_val = is_async_val_struct || val_wrapper.has_value();
+        bool use_map_async = is_async_key || is_async_val;
+        if (key_struct || val_struct || val_wrapper.has_value()) {
+          if (nullable && use_map_async) {
+            out << "await async {\n";
+            indent_up();
+            indent(out) << "if (" << fieldRef << " === null) {\n";
+            indent_up();
+            indent(out) << "return null;\n";
+            indent_down();
+            indent(out) << "}\n";
+            indent(out) << "return await Vec\\map_async(\n";
+            indent_up();
+            indent(out) << fieldRef << "->toShape(),\n";
+            indent(out) << "async $_e ==> ";
+            if (val_wrapper.has_value()) {
+              out << "{\n";
+              indent_up();
+              indent(out) << "$_value = await $_e[1]->genUnwrap();\n";
+              indent(out) << "return tuple(";
+            } else {
+              out << "tuple(";
+            }
+            out
+                << (key_struct ? (is_async_key ? "await $_e[0]->__genToShape()"
+                                               : "$_e[0]->__toShape()")
+                               : "$_e[0]");
+            out << ", ";
+            out
+                << (val_struct
+                        ? (is_async_val_struct
+                               ? (val_wrapper.has_value()
+                                      ? "await $_value->__genToShape()"
+                                      : "await $_e[1]->__genToShape()")
+                               : (val_wrapper.has_value()
+                                      ? "$_value->__toShape()"
+                                      : "$_e[1]->__toShape()"))
+                        : (val_wrapper.has_value() ? "$_value" : "$_e[1]"));
+            out << ")";
+            if (val_wrapper.has_value()) {
+              out << ";\n";
+              indent_down();
+              indent(out) << "},\n";
+            } else {
+              out << ",\n";
+            }
+            indent_down();
+            indent(out) << ");\n";
+            indent_down();
+            indent(out) << "},\n";
+          } else {
+            if (nullable) {
+              out << "(" << fieldRef << " === null \n";
+              indent_up();
+              indent(out) << "? null \n";
+              indent(out) << ": (\n";
+              indent_up();
+            }
+            indent(out) << (use_map_async ? "await Vec\\map_async" : "Vec\\map")
+                        << "(\n";
+            indent_up();
+            indent(out) << fieldRef << "->toShape(),\n";
+            indent(out) << (use_map_async ? "async " : "") << "$_e ==> ";
+            if (val_wrapper.has_value()) {
+              out << "{\n";
+              indent_up();
+              indent(out) << "$_value = await $_e[1]->genUnwrap();\n";
+              indent(out) << "return tuple(";
+            } else {
+              out << "tuple(";
+            }
+            out
+                << (key_struct ? (is_async_key ? "await $_e[0]->__genToShape()"
+                                               : "$_e[0]->__toShape()")
+                               : "$_e[0]");
+            out << ", ";
+            out
+                << (val_struct
+                        ? (is_async_val_struct
+                               ? (val_wrapper.has_value()
+                                      ? "await $_value->__genToShape()"
+                                      : "await $_e[1]->__genToShape()")
+                               : (val_wrapper.has_value()
+                                      ? "$_value->__toShape()"
+                                      : "$_e[1]->__toShape()"))
+                        : (val_wrapper.has_value() ? "$_value" : "$_e[1]"));
+            out << ")";
+            if (val_wrapper.has_value()) {
+              out << ";\n";
+              indent_down();
+              indent(out) << "},\n";
+            } else {
+              out << ",\n";
+            }
+            indent_down();
+            indent(out) << ")";
+            if (nullable) {
+              out << "\n";
+              indent_down();
+              indent(out) << ")\n";
+              indent_down();
+              indent(out) << "),\n";
+            } else {
+              out << ",\n";
+            }
+          }
+        } else {
+          out << fieldRef << (nullable ? "?" : "") << "->toShape(),\n";
+        }
+      } else if (const auto* set = t->try_as<t_set>()) {
+        const t_type* elem_type = &set->elem_type().deref();
+        const auto* elem_struct =
+            get_unadapted_shape_structured_type(elem_type);
+        bool is_async_elem =
+            elem_struct != nullptr && is_async_shapish_struct(elem_struct);
+        if (elem_struct) {
+          if (nullable && is_async_elem) {
+            out << "await async {\n";
+            indent_up();
+            indent(out) << "if (" << fieldRef << " === null) {\n";
+            indent_up();
+            indent(out) << "return null;\n";
+            indent_down();
+            indent(out) << "}\n";
+            indent(out) << "return await Vec\\map_async(\n";
+            indent_up();
+            indent(out) << fieldRef << "->toVec(),\n";
+            indent(out) << "async $_e ==> await $_e->__genToShape(),\n";
+            indent_down();
+            indent(out) << ");\n";
+            indent_down();
+            indent(out) << "},\n";
+          } else {
+            if (nullable) {
+              out << "(" << fieldRef << " === null \n";
+              indent_up();
+              indent(out) << "? null \n";
+              indent(out) << ": (\n";
+              indent_up();
+            }
+            indent(out) << (is_async_elem ? "await Vec\\map_async" : "Vec\\map")
+                        << "(\n";
+            indent_up();
+            indent(out) << fieldRef << "->toVec(),\n";
+            indent(out) << (is_async_elem ? "async " : "") << "$_e ==> "
+                        << (is_async_elem ? "await $_e->__genToShape()"
+                                          : "$_e->__toShape()")
+                        << ",\n";
+            indent_down();
+            indent(out) << ")";
+            if (nullable) {
+              out << "\n";
+              indent_down();
+              indent(out) << ")\n";
+              indent_down();
+              indent(out) << "),\n";
+            } else {
+              out << ",\n";
+            }
+          }
+        } else {
+          out << fieldRef << (nullable ? "?" : "") << "->toVec(),\n";
+        }
+      }
     } else if (
         !t->is<t_container>() && !t->is<t_struct>() && !t->is<t_union>()) {
       out << fieldRef << ",\n";
@@ -4527,6 +5144,12 @@ void t_hack_generator::generate_php_structural_id(
     indent(out) << "const int STRUCTURAL_ID = "
                 << generate_structural_id(tstruct) << ";\n";
   }
+}
+
+bool t_hack_generator::structured_shape_methods_require_write_props(
+    const t_structured* tstruct) {
+  std::set<const t_structured*> visited;
+  return structured_contains_object_key_container(tstruct, visited);
 }
 
 bool t_hack_generator::structured_contains_object_key_container(
@@ -4918,13 +5541,29 @@ void t_hack_generator::generate_php_struct_fields(
     if (!tstruct->is<t_union>() && is_async_typ) {
       out << "\n";
 
+      std::string field_assignment_ref = "$" + fieldName;
+      std::string internal_setter_typehint = type_to_typehint(
+          t, {{TypeToTypehintVariations::RECURSIVE_IGNORE_WRAPPER, true}});
+      if (has_object_key_type(t)) {
+        const auto* map = t->try_as<t_map>();
+        const auto* set = t->try_as<t_set>();
+        if (map != nullptr) {
+          internal_setter_typehint = "\\ThriftMap<mixed, mixed>";
+        } else if (set != nullptr) {
+          internal_setter_typehint = "\\ThriftSet<mixed>";
+        }
+        field_assignment_ref =
+            "HH\\FIXME\\UNSAFE_CAST<mixed, " +
+            type_to_typehint(
+                t,
+                {{TypeToTypehintVariations::RECURSIVE_IGNORE_WRAPPER, true}}) +
+            ">(" + field_assignment_ref +
+            ", 'Thrift object-key container value is mixed')";
+      }
+
       // set_<fieldName>_DO_NOT_USE_THRIFT_INTERNAL()
       indent(out) << "public function set_" << fieldName
-                  << "_DO_NOT_USE_THRIFT_INTERNAL("
-                  << type_to_typehint(
-                         t,
-                         {{TypeToTypehintVariations::RECURSIVE_IGNORE_WRAPPER,
-                           true}})
+                  << "_DO_NOT_USE_THRIFT_INTERNAL(" << internal_setter_typehint
                   << " $" << fieldName << ")[write_props]: void {\n";
       indent_up();
 
@@ -4933,7 +5572,7 @@ void t_hack_generator::generate_php_struct_fields(
           out,
           tstruct,
           field,
-          "$" + fieldName,
+          field_assignment_ref,
           struct_hack_name_with_ns,
           namer,
           false,
@@ -5920,6 +6559,8 @@ void t_hack_generator::_generate_php_struct_definition(
     is_async_shapish = is_async_shapish_struct(tstruct);
     if (is_async_shapish) {
       out << ", \\IThriftShapishAsyncStruct";
+    } else if (structured_shape_methods_require_write_props(tstruct)) {
+      out << ", \\IThriftShapishSyncWritePropsStruct";
     } else {
       out << ", \\IThriftShapishSyncStruct";
     }
@@ -6238,6 +6879,10 @@ void t_hack_generator::generate_php_struct_async_struct_creation_method(
   }
   for (const auto& field : tstruct->fields()) {
     if (skip_codegen(&field)) {
+      continue;
+    }
+    if (method_type == ThriftAsyncStructCreationMethod::FROM_MAP &&
+        has_object_key_type(field.type()->get_true_type())) {
       continue;
     }
     const std::string& name = field.name();
@@ -7667,16 +8312,35 @@ std::string t_hack_generator::type_to_typehint(
     return prefix + "<" +
         type_to_typehint(&tlist->elem_type().deref(), variations) + ">";
   } else if (const auto* tmap = ttype->try_as<t_map>()) {
-    std::string prefix = get_container_keyword(ttype, variations);
     std::string key_type =
         type_to_typehint(&tmap->key_type().deref(), variations);
+    std::string val_type =
+        type_to_typehint(&tmap->val_type().deref(), variations);
+    if (has_object_key_type(ttype) &&
+        variations[TypeToTypehintVariations::IS_SHAPE]) {
+      return "vec<(" + key_type + ", " + val_type + ")>";
+    }
+    if (has_object_key_type(ttype) &&
+        !variations[TypeToTypehintVariations::IS_SHAPE]) {
+      return "\\ThriftMap<" + key_type + ", " + val_type + ">";
+    }
+    std::string prefix = get_container_keyword(ttype, variations);
     if (variations[TypeToTypehintVariations::IS_SHAPE] && shape_arraykeys_ &&
         key_type == "string") {
       key_type = "arraykey";
     }
-    return prefix + "<" + key_type + ", " +
-        type_to_typehint(&tmap->val_type().deref(), variations) + ">";
+    return prefix + "<" + key_type + ", " + val_type + ">";
   } else if (const auto* tset = ttype->try_as<t_set>()) {
+    std::string elem_type =
+        type_to_typehint(&tset->elem_type().deref(), variations);
+    if (has_object_key_type(ttype) &&
+        variations[TypeToTypehintVariations::IS_SHAPE]) {
+      return "vec<" + elem_type + ">";
+    }
+    if (has_object_key_type(ttype) &&
+        !variations[TypeToTypehintVariations::IS_SHAPE]) {
+      return "\\ThriftSet<" + elem_type + ">";
+    }
     std::string prefix;
     std::string suffix = ">";
     if (!legacy_arrays_ && !hack_collections_) {
@@ -7690,8 +8354,7 @@ std::string t_hack_generator::type_to_typehint(
           ? "\\ConstSet"
           : "Set";
     }
-    return prefix + "<" +
-        type_to_typehint(&tset->elem_type().deref(), variations) + suffix;
+    return prefix + "<" + elem_type + suffix;
   } else {
     return "mixed";
   }
@@ -8575,7 +9238,9 @@ std::string t_hack_generator::declare_field(
     } else if (type->is<t_enum>()) {
       result += " = null";
     } else if (type->is<t_map>()) {
-      if (hack_collections_) {
+      if (has_object_key_type(type)) {
+        result += " = null";
+      } else if (hack_collections_) {
         result += " = Map {}";
       } else {
         result += " = dict[]";
@@ -8587,7 +9252,9 @@ std::string t_hack_generator::declare_field(
         result += " = vec[]";
       }
     } else if (type->is<t_set>()) {
-      if (arraysets_) {
+      if (has_object_key_type(type)) {
+        result += " = null";
+      } else if (arraysets_) {
         result += " = dict[]";
       } else if (hack_collections_) {
         result += " = Set {}";

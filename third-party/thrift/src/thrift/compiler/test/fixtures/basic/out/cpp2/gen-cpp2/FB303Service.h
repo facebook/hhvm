@@ -74,8 +74,8 @@ class ServiceHandler<::test::fixtures::basic::FB303Service> : public apache::thr
 namespace detail {
 template <> struct TSchemaAssociation<::test::fixtures::basic::FB303Service, false> {
   static ::folly::Range<const ::std::string_view*> bundle();
-  static constexpr int64_t programId = 142472331146909548;
-  static constexpr ::std::string_view definitionKey = {"\xf6\x0d\xec\x3a\x25\xa4\xef\xb8\x7a\xf6\xbd\xa8\x48\xc8\x95\xa3", 16};
+  static constexpr int64_t programId = 155903679714251971;
+  static constexpr ::std::string_view definitionKey = {"\x50\x95\x43\xa5\xed\x9a\x94\xed\x4c\x9c\x35\x44\x1b\x25\xbb\x32", 16};
 };
 }
 } // namespace apache::thrift

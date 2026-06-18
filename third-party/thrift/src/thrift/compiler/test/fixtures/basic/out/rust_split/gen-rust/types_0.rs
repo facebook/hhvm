@@ -482,19 +482,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyStruct {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            8 => {
-
-                let matches_type = type_id == ::std::any::TypeId::of::<hack__types::SkipCodegen>();
-                if matches_type {
-                    let mut tmp = ::std::option::Option::Some(hack__types::SkipCodegen {
-                        reason: "Invalid key type".to_owned(),
-                        ..::std::default::Default::default()
-                    });
-                    let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                    return r.take();
-                }
-            },
             9 => {
 
                 let matches_type = type_id == ::std::any::TypeId::of::<hack__types::SkipCodegen>();
@@ -769,19 +756,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyUnion {
 
         #[allow(clippy::match_single_binding)]
         match field_id {
-            4 => {
-
-                let matches_type = type_id == ::std::any::TypeId::of::<hack__types::SkipCodegen>();
-                if matches_type {
-                    let mut tmp = ::std::option::Option::Some(hack__types::SkipCodegen {
-                        reason: "Invalid key type".to_owned(),
-                        ..::std::default::Default::default()
-                    });
-                    let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                    return r.take();
-                }
-            },
             _ => {}
         }
 

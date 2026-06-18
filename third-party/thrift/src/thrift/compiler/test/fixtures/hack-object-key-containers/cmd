@@ -1,0 +1,1 @@
+hack: hack:json,server=1,shapes=1,shapes_allow_unknown_fields=1,hack_collections=1 src/module.thrift

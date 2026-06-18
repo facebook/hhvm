@@ -43,7 +43,6 @@ def get_reflection__MyStruct():
     if not _HAS_REFLECTION:
         return None
     import facebook.thrift.annotation.hack.thrift_types as _fbthrift__facebook__thrift__annotation__hack__thrift_types  # noqa: F811
-    import facebook.thrift.annotation.hack.thrift_types as _fbthrift__facebook__thrift__annotation__hack__thrift_types  # noqa: F811
     class _fbthrift_field_8_type(_fbthrift_python_container_typedefs._SetTypedefBase):
         __slots__ = ()
         __name__ = "Set__MyStruct_floatSet"
@@ -157,7 +156,6 @@ def get_reflection__MyStruct():
             qualifier=_Qualifier.UNQUALIFIED,
             default=_fbthrift_field_8_type(),
             structured_annotations={
-                "hack.SkipCodegen": _ConstantSpec(value=  _ConstantStructSpec(struct_type=_fbthrift__facebook__thrift__annotation__hack__thrift_types.SkipCodegen, fields={  "reason": _ConstantSpec(value=  "Invalid key type", thrift_type=_ThriftType.STRING),}), thrift_type=_ThriftType.STRUCT),
             },
         ),
     )
@@ -263,7 +261,6 @@ def get_reflection__MyDataItem():
 def get_reflection__MyUnion():
     if not _HAS_REFLECTION:
         return None
-    import facebook.thrift.annotation.hack.thrift_types as _fbthrift__facebook__thrift__annotation__hack__thrift_types  # noqa: F811
     class _fbthrift_field_4_type(_fbthrift_python_container_typedefs._SetTypedefBase):
         __slots__ = ()
         __name__ = "Set__MyUnion_floatSet"
@@ -325,7 +322,6 @@ def get_reflection__MyUnion():
             qualifier=_Qualifier.UNQUALIFIED,
             default=_fbthrift_field_4_type(),
             structured_annotations={
-                "hack.SkipCodegen": _ConstantSpec(value=  _ConstantStructSpec(struct_type=_fbthrift__facebook__thrift__annotation__hack__thrift_types.SkipCodegen, fields={  "reason": _ConstantSpec(value=  "Invalid key type", thrift_type=_ThriftType.STRING),}), thrift_type=_ThriftType.STRUCT),
             },
         ),
     )

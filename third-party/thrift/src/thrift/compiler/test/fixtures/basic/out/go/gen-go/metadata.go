@@ -675,19 +675,6 @@ var serviceMetadatas = func() []*metadata.ThriftService {
                     Name:       "invalid_return_for_hack",
                     IsOneway:   false,
                     ReturnType: premadeThriftType_set_float,
-                    StructuredAnnotations: []*metadata.ThriftConstStruct{
-                        &metadata.ThriftConstStruct{
-                            Type: &metadata.ThriftStructType{
-                                Name: "hack.SkipCodegen",
-                            },
-                            Fields: map[string]*metadata.ThriftConstValue{
-                                "reason":
-                                    &metadata.ThriftConstValue{
-                                        CvString: new("Invalid key type"),
-                                    },
-                            },
-                        },
-                    },
                 },
                 &metadata.ThriftFunction{
                     Name:       "rpc_skipped_codegen",

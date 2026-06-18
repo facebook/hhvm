@@ -138,7 +138,7 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
 
     @staticmethod
     def __get_thrift_definition_key__() -> bytes:
-        return b"\xf4\x5e\x0d\xfd\x3b\x96\x8a\xb8\xe2\xc1\x01\x6a\xf9\xa6\xc2\xd7"
+        return b"\x9f\x1c\x8f\x42\xa0\x25\xf9\xb6\x72\xfd\xe1\x07\x58\xd4\x68\x73"
 
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):
@@ -224,7 +224,7 @@ class Containers(metaclass=_fbthrift_python_types.StructMeta):
 
     @staticmethod
     def __get_thrift_definition_key__() -> bytes:
-        return b"\xb9\xcf\xb3\xb2\xaa\x03\x68\x56\xff\x83\x12\x78\x13\x35\xf6\x15"
+        return b"\x8b\x21\x52\x94\x1c\x0b\xec\xa9\x4b\x83\x5a\xb0\x32\x93\xd6\x25"
 
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):
@@ -277,7 +277,7 @@ class MyDataItem(metaclass=_fbthrift_python_types.StructMeta):
 
     @staticmethod
     def __get_thrift_definition_key__() -> bytes:
-        return b"\x2a\x82\xa4\xc6\x36\xa0\xac\xa9\x36\x60\x5f\x10\x60\xb1\x73\xd2"
+        return b"\xd4\x5a\xac\xbe\x7b\xab\xf2\x89\xfd\x75\x52\x44\x33\x87\xcc\x0a"
 
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):
@@ -377,7 +377,7 @@ class MyUnion(metaclass=_fbthrift_python_types.UnionMeta):
 
     @staticmethod
     def __get_thrift_definition_key__() -> bytes:
-        return b"\x2f\x7e\x4b\xfb\xb9\x54\xb2\x3e\xfa\x4c\x45\x04\x4a\x9b\xb8\xc4"
+        return b"\x49\x78\xdc\x0d\xc3\x56\x12\xd2\xbe\x50\x82\x37\x64\x2b\x77\xbd"
 
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):
@@ -477,7 +477,7 @@ class MyException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
 
     @staticmethod
     def __get_thrift_definition_key__() -> bytes:
-        return b"\x6f\x1e\x78\xde\x5b\x20\xfb\xe4\x3a\x4d\x3f\x06\x9d\xe9\x38\x10"
+        return b"\x6e\x53\x1a\x17\x84\xf7\xc0\xfb\xfa\x67\x3d\xbb\xc2\xbf\x54\x11"
 
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):
@@ -575,7 +575,7 @@ class MyExceptionWithMessage(metaclass=_fbthrift_python_exceptions.GeneratedErro
 
     @staticmethod
     def __get_thrift_definition_key__() -> bytes:
-        return b"\x73\x86\x8e\x6c\xb6\x40\x2d\x5a\x08\x62\x51\x40\x0f\xf7\x4c\x12"
+        return b"\xcf\x2d\x7c\x04\xf0\xf6\x8f\xec\xae\x1e\xdc\xfc\x87\xf9\xf2\xfe"
 
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):
@@ -644,7 +644,7 @@ class ReservedKeyword(metaclass=_fbthrift_python_types.StructMeta):
 
     @staticmethod
     def __get_thrift_definition_key__() -> bytes:
-        return b"\x6b\x59\xb2\xe6\xec\x2a\x59\xb7\x9d\x20\xb3\xbc\xec\x60\x5c\x2c"
+        return b"\xf7\x34\xc7\x98\x42\x01\xeb\x1e\x26\xfe\xa4\xf2\xac\x60\x6b\x69"
 
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):
@@ -711,7 +711,7 @@ class UnionToBeRenamed(metaclass=_fbthrift_python_types.UnionMeta):
 
     @staticmethod
     def __get_thrift_definition_key__() -> bytes:
-        return b"\xc7\x9a\xad\x62\xb6\xbf\x4a\xee\xbd\x83\x96\xe9\xfa\x19\x7c\xfe"
+        return b"\xf2\x18\xd3\x7e\x1f\xf4\x6a\xdd\x0c\x16\x2a\xfb\x29\x8f\x15\xa3"
 
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):

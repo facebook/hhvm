@@ -20,6 +20,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <limits>
+#include <optional>
 #include <set>
 #include <string>
 #include <string_view>
@@ -328,6 +329,73 @@ class adapter_or_wrapper_checker {
  private:
   sema_context& ctx_;
 };
+
+bool is_hack_arraykey_type(const t_type& type) {
+  const t_type* true_type = type.get_true_type();
+  return true_type->is_string_or_binary() || true_type->is_any_int() ||
+      true_type->is_byte() || true_type->is<t_enum>();
+}
+
+bool has_hack_adapter_annotation(const t_type& type) {
+  if (is_transitive_annotation(type)) {
+    return false;
+  }
+  return t_typedef::get_first_structured_annotation_or_null(
+             &type, kHackAdapterUri) != nullptr;
+}
+
+std::optional<std::string_view> find_hack_wrapper_type_name(
+    const t_type& type) {
+  if (is_transitive_annotation(type)) {
+    return std::nullopt;
+  }
+  const t_type* current = &type;
+  while (true) {
+    if (current->has_structured_annotation(kHackWrapperUri)) {
+      return current->name();
+    }
+    if (const auto* typedef_type = current->try_as<t_typedef>()) {
+      current = &typedef_type->type().deref();
+      continue;
+    }
+    break;
+  }
+  return std::nullopt;
+}
+
+void validate_hack_object_key_wrapper(
+    sema_context& ctx,
+    const t_container& container,
+    const t_type& type,
+    std::string_view role) {
+  if (auto wrapper_type_name = find_hack_wrapper_type_name(type)) {
+    ctx.error(
+        container,
+        "`@hack.Wrapper` on `{}` cannot be used with object-key {}.",
+        *wrapper_type_name,
+        role);
+  }
+}
+
+void validate_hack_object_key_container_wrappers(
+    sema_context& ctx, const t_container& node) {
+  if (const auto* tset = node.try_as<t_set>()) {
+    const t_type& elem_type = tset->elem_type().deref();
+    if (!is_hack_arraykey_type(elem_type) ||
+        has_hack_adapter_annotation(elem_type)) {
+      validate_hack_object_key_wrapper(ctx, node, elem_type, "set elements");
+    }
+    return;
+  }
+
+  if (const auto* tmap = node.try_as<t_map>()) {
+    const t_type& key_type = tmap->key_type().deref();
+    if (!is_hack_arraykey_type(key_type) ||
+        has_hack_adapter_annotation(key_type)) {
+      validate_hack_object_key_wrapper(ctx, node, key_type, "map keys");
+    }
+  }
+}
 
 struct service_metadata {
   std::unordered_map<std::string_view, const t_service*>
@@ -2521,6 +2589,7 @@ ast_validator standard_validator() {
   validator.add_function_visitor(&validate_sealed_function_types);
 
   validator.add_container_visitor(ValidateAnnotationPositions());
+  validator.add_container_visitor(&validate_hack_object_key_container_wrappers);
   validator.add_enum_visitor(&validate_cpp_enum_type);
   validator.add_enum_visitor(&validate_rust_enum_type);
   validator.add_const_visitor(&validate_const_type_and_value);

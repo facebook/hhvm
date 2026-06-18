@@ -1348,6 +1348,30 @@ TEST(CompilerTest, hack_wrapper_adapter) {
   )");
 }
 
+TEST(CompilerTest, hack_wrapper_object_key_containers) {
+  check_compile(R"(
+    package "facebook.com/thrift/test"
+    include "thrift/annotation/hack.thrift"
+
+    struct MyStruct {
+      1: i64 id;
+    }
+
+    @hack.Wrapper{name = "\MyStructWrapper"}
+    struct WrappedStruct {
+      1: i64 id;
+    }
+
+    struct Container {
+      1: map<WrappedStruct, string> wrapped_key_map;
+        # expected-error@-1: `@hack.Wrapper` on `WrappedStruct` cannot be used with object-key map keys.
+      2: map<MyStruct, WrappedStruct> wrapped_value_map;
+      3: set<WrappedStruct> wrapped_element_set;
+        # expected-error@-1: `@hack.Wrapper` on `WrappedStruct` cannot be used with object-key set elements.
+    }
+  )");
+}
+
 TEST(CompilerTest, invalid_and_too_many_splits) {
   check_compile(
       R"(
@@ -2122,7 +2146,7 @@ TEST(CompilerTest, inject_metadata_fields_annotation) {
   check_compile(name_contents_map, "bar.thrift");
 }
 
-TEST(CompilerTest, invalid_field_type_for_hack_codegen) {
+TEST(CompilerTest, object_key_field_type_for_hack_codegen) {
   check_compile(
       R"(
       package "facebook.com/thrift/test"
@@ -2130,34 +2154,30 @@ TEST(CompilerTest, invalid_field_type_for_hack_codegen) {
         1: i32 field;
 
         2: set<float> set_of_float;
-        # expected-error@-1: `float` cannot be used as a set element in Hack because it is not integer, string, binary or enum
 
         3: map<float, i32> map_of_float_to_int;
-        # expected-error@-1: `float` cannot be used as a map key in Hack because it is not integer, string, binary or enum
       }
       )",
       {"--gen", "hack"});
 }
 
-TEST(CompilerTest, invalid_return_type_for_hack_codegen) {
+TEST(CompilerTest, object_key_return_type_for_hack_codegen) {
   check_compile(
       R"(
       package "facebook.com/thrift/test"
       service Foo {
-        set<float> invalid_rpc_return();
-        # expected-error@-1: `float` cannot be used as a set element in Hack because it is not integer, string, binary or enum
+        set<float> rpc_return();
       }
       )",
       {"--gen", "hack"});
 }
 
-TEST(CompilerTest, invalid_param_type_for_hack_codegen) {
+TEST(CompilerTest, object_key_param_type_for_hack_codegen) {
   check_compile(
       R"(
       package "facebook.com/thrift/test"
       service Foo {
-        void invalid_rpc_param(1: set<float> arg1);
-        # expected-error@-1: `float` cannot be used as a set element in Hack because it is not integer, string, binary or enum
+        void rpc_param(1: set<float> arg1);
       }
       )",
       {"--gen", "hack"});

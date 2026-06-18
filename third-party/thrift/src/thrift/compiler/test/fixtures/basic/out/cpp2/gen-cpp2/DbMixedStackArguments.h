@@ -89,8 +89,8 @@ class ServiceHandler<::test::fixtures::basic::DbMixedStackArguments> : public ap
 namespace detail {
 template <> struct TSchemaAssociation<::test::fixtures::basic::DbMixedStackArguments, false> {
   static ::folly::Range<const ::std::string_view*> bundle();
-  static constexpr int64_t programId = 142472331146909548;
-  static constexpr ::std::string_view definitionKey = {"\xeb\xb3\x2a\x1f\x11\xd0\x0a\x18\xb6\x2d\x21\x85\xd9\x7c\xb1\xfc", 16};
+  static constexpr int64_t programId = 155903679714251971;
+  static constexpr ::std::string_view definitionKey = {"\xcd\x6e\x11\x2e\xf1\x15\x73\x00\x69\xda\x15\x43\x8b\x48\xc9\x27", 16};
 };
 }
 } // namespace apache::thrift

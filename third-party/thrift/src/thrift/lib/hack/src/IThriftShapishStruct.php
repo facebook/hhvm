@@ -27,10 +27,21 @@ interface IThriftShapishStruct extends IThriftStruct {
 }
 
 // @oss-disable: <<Oncalls('thrift')>>
-interface IThriftShapishSyncStruct extends IThriftShapishStruct {
+interface IThriftShapishSyncWritePropsStruct extends IThriftShapishStruct {
   abstract const type TShape as shape(...);
 
+  public function __toShape()[write_props]: this::TShape;
+  public static function __fromShape(this::TShape $shape)[write_props]: this;
+
+}
+
+// @oss-disable: <<Oncalls('thrift')>>
+interface IThriftShapishSyncStruct extends IThriftShapishSyncWritePropsStruct {
+  abstract const type TShape as shape(...);
+
+  <<__Override>>
   public function __toShape()[]: this::TShape;
+  <<__Override>>
   public static function __fromShape(this::TShape $shape)[]: this;
 
 }

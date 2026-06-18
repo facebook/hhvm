@@ -72,6 +72,13 @@ interface MyServiceAsyncIf extends \IThriftAsyncIf {
    *               2: string data);
    */
   public function lobDataById(int $id, string $data): Awaitable<void>;
+
+  /**
+   * Original thrift definition:-
+   * set<float>
+   *   invalid_return_for_hack();
+   */
+  public function invalid_return_for_hack(): Awaitable<\ThriftSet<float>>;
 }
 
 /**
@@ -145,6 +152,13 @@ interface MyServiceClientIf extends \IThriftSyncIf {
    *               2: string data);
    */
   public function lobDataById(int $id, string $data): Awaitable<void>;
+
+  /**
+   * Original thrift definition:-
+   * set<float>
+   *   invalid_return_for_hack();
+   */
+  public function invalid_return_for_hack(): Awaitable<\ThriftSet<float>>;
 }
 
 /**
@@ -272,6 +286,19 @@ internal trait MyServiceClientBase {
     await $this->asyncHandler_->genBefore(MyServiceStaticMetadata::THRIFT_SVC_NAME, "lobDataById", $args);
     $currentseqid = $this->sendImplHelper($args, "lobDataById", true, MyServiceStaticMetadata::THRIFT_SVC_NAME );
     await $this->genAwaitNoResponse($rpc_options);
+  }
+
+  /**
+   * Original thrift definition:-
+   * set<float>
+   *   invalid_return_for_hack();
+   */
+  public async function invalid_return_for_hack(): Awaitable<\ThriftSet<float>> {
+    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
+    $args = MyService_invalid_return_for_hack_args::withDefaultValues();
+    await $this->asyncHandler_->genBefore(MyServiceStaticMetadata::THRIFT_SVC_NAME, "invalid_return_for_hack", $args);
+    $currentseqid = $this->sendImplHelper($args, "invalid_return_for_hack", false, MyServiceStaticMetadata::THRIFT_SVC_NAME );
+    return (await $this->genAwaitResponse(MyService_invalid_return_for_hack_result::class, "invalid_return_for_hack", false, $currentseqid, $rpc_options))[0];
   }
 
 }
@@ -422,6 +449,22 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
     }
     return;
   }
+  protected async function process_invalid_return_for_hack(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
+    $handler_ctx = $this->eventHandler_->getHandlerContext('invalid_return_for_hack');
+    $reply_type = \TMessageType::REPLY;
+    $result = MyService_invalid_return_for_hack_result::withDefaultValues();
+    try {
+      $args = $this->readHelper(MyService_invalid_return_for_hack_args::class, $input, 'invalid_return_for_hack', $handler_ctx);
+      $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\basic\MyService', 'invalid_return_for_hack', $args);
+      $result->success = await $this->handler->invalid_return_for_hack();
+      $this->eventHandler_->postExec($handler_ctx, 'invalid_return_for_hack', $result);
+    } catch (\Exception $ex) {
+      $reply_type = \TMessageType::EXCEPTION;
+      $this->eventHandler_->handlerError($handler_ctx, 'invalid_return_for_hack', $ex);
+      $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
+    }
+    $this->writeHelper($result, 'invalid_return_for_hack', $seqid, $handler_ctx, $output, $reply_type);
+  }
   <<__Override>>
   protected static function getMethodMetadata(
     string $fn_name,
@@ -516,6 +559,17 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
             MyService_lobDataById_args $args,
           )[defaults] ==> {
             await $handler->lobDataById($args->id, $args->data);
+          },
+        );
+      case 'invalid_return_for_hack':
+        return new \ThriftServiceRequestResponseMethod(
+          MyService_invalid_return_for_hack_args::class,
+          MyService_invalid_return_for_hack_result::class,
+          async (
+            MyServiceAsyncIf $handler,
+            MyService_invalid_return_for_hack_args $args,
+          )[defaults] ==> {
+            return await $handler->invalid_return_for_hack();
           },
         );
       default:
@@ -1556,6 +1610,147 @@ class MyService_lobDataById_args implements \IThriftSyncStruct, \IThriftStructMe
 
 }
 
+class MyService_invalid_return_for_hack_args implements \IThriftSyncStruct, \IThriftStructMetadata {
+  use \ThriftSerializationTrait;
+
+  const \ThriftStructTypes::TSpec SPEC = dict[
+  ];
+  const dict<string, int> FIELDMAP = dict[
+  ];
+
+  const type TConstructorShape = shape(
+  );
+
+  const int STRUCTURAL_ID = 957977401221134810;
+
+  public function __construct()[] {
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+    );
+  }
+
+  public function getName()[]: string {
+    return 'MyService_invalid_return_for_hack_args';
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module.invalid_return_for_hack_args",
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+}
+
+class MyService_invalid_return_for_hack_result extends \ThriftSyncStructWithResult implements \IThriftStructMetadata, \IThriftStructWithObjectKeyContainers {
+  use \ThriftSerializationTrait;
+
+  const type TResult = \ThriftSet<float>;
+
+  const \ThriftStructTypes::TSpec SPEC = dict[
+    0 => shape(
+      'var' => 'success',
+      'type' => \TType::SET,
+      'etype' => \TType::FLOAT,
+      'elem' => shape(
+        'type' => \TType::FLOAT,
+      ),
+      'format' => 'object_key',
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'success' => 0,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'success' => ?this::TResult,
+  );
+
+  const int STRUCTURAL_ID = 6500005841072239021;
+  public ?this::TResult $success;
+
+  public function __construct(?this::TResult $success = null)[] {
+    $this->success = $success;
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'success'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'MyService_invalid_return_for_hack_result';
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module.MyService_invalid_return_for_hack_result",
+        "fields" => vec[
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 0,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_set" => \tmeta_ThriftSetType::fromShape(
+                    shape(
+                      "valueType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_FLOAT_TYPE,
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "success",
+            )
+          ),
+        ],
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+}
+
 class MyServiceStaticMetadata implements \IThriftServiceStaticMetadata {
   const string THRIFT_SVC_NAME = 'MyService';
 
@@ -1745,6 +1940,24 @@ class MyServiceStaticMetadata implements \IThriftServiceStaticMetadata {
               "is_oneway" => true,
             )
           ),
+          \tmeta_ThriftFunction::fromShape(
+            shape(
+              "name" => "invalid_return_for_hack",
+              "return_type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_set" => \tmeta_ThriftSetType::fromShape(
+                    shape(
+                      "valueType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_FLOAT_TYPE,
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+            )
+          ),
         ],
       )
     );
@@ -1783,13 +1996,6 @@ class MyServiceStaticMetadata implements \IThriftServiceStaticMetadata {
     return shape(
       'service' => dict[],
       'functions' => dict[
-        'invalid_return_for_hack' => dict[
-          '\facebook\thrift\annotation\hack\SkipCodegen' => \facebook\thrift\annotation\hack\SkipCodegen::fromShape(
-            shape(
-              "reason" => "Invalid key type",
-            )
-          ),
-        ],
         'rpc_skipped_codegen' => dict[
           '\facebook\thrift\annotation\hack\SkipCodegen' => \facebook\thrift\annotation\hack\SkipCodegen::fromShape(
             shape(

@@ -14,7 +14,7 @@ module hack.module.test;
  * MyExceptionWithMessage
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/basic/MyExceptionWithMessage'))>>
-class MyExceptionWithMessage extends \TException implements \IThriftSyncStruct, \IThriftExceptionMetadata {
+class MyExceptionWithMessage extends \TException implements \IThriftSyncStruct, \IThriftExceptionMetadata, \IThriftStructWithObjectKeyContainers {
   use \ThriftSerializationTrait;
 
   const \ThriftStructTypes::TSpec SPEC = dict[

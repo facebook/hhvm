@@ -14,6 +14,7 @@ enum MyUnionEnum: int {
   myEnum = 1;
   myStruct = 2;
   myDataItem = 3;
+  floatSet = 4;
 }
 
 /**
@@ -21,7 +22,7 @@ enum MyUnionEnum: int {
  * MyUnion
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/basic/MyUnion'))>>
-class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<\test\fixtures\basic\MyUnionEnum> {
+class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftStructWithObjectKeyContainers, \IThriftUnion<\test\fixtures\basic\MyUnionEnum> {
   use \ThriftUnionSerializationTrait;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
@@ -43,17 +44,29 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
       'type' => \TType::STRUCT,
       'class' => \test\fixtures\basic\MyDataItem::class,
     ),
+    4 => shape(
+      'var' => 'floatSet',
+      'union' => true,
+      'type' => \TType::SET,
+      'etype' => \TType::FLOAT,
+      'elem' => shape(
+        'type' => \TType::FLOAT,
+      ),
+      'format' => 'object_key',
+    ),
   ];
   const dict<string, int> FIELDMAP = dict[
     'myEnum' => 1,
     'myStruct' => 2,
     'myDataItem' => 3,
+    'floatSet' => 4,
   ];
 
   const type TConstructorShape = shape(
     ?'myEnum' => ?\test\fixtures\basic\MyEnum,
     ?'myStruct' => ?\test\fixtures\basic\MyStruct,
     ?'myDataItem' => ?\test\fixtures\basic\MyDataItem,
+    ?'floatSet' => ?\ThriftSet<float>,
   );
 
   const int STRUCTURAL_ID = 2676418211271787525;
@@ -72,9 +85,14 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
    * 3: module.MyDataItem myDataItem
    */
   public ?\test\fixtures\basic\MyDataItem $myDataItem;
+  /**
+   * Original thrift field:-
+   * 4: set<float> floatSet
+   */
+  public ?\ThriftSet<float> $floatSet;
   protected \test\fixtures\basic\MyUnionEnum $_type = \test\fixtures\basic\MyUnionEnum::_EMPTY_;
 
-  public function __construct(?\test\fixtures\basic\MyEnum $myEnum = null, ?\test\fixtures\basic\MyStruct $myStruct = null, ?\test\fixtures\basic\MyDataItem $myDataItem = null)[] {
+  public function __construct(?\test\fixtures\basic\MyEnum $myEnum = null, ?\test\fixtures\basic\MyStruct $myStruct = null, ?\test\fixtures\basic\MyDataItem $myDataItem = null, ?\ThriftSet<float> $floatSet = null)[] {
     $this->_type = \test\fixtures\basic\MyUnionEnum::_EMPTY_;
     if ($myEnum !== null) {
       $this->myEnum = $myEnum;
@@ -88,6 +106,10 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
       $this->myDataItem = $myDataItem;
       $this->_type = \test\fixtures\basic\MyUnionEnum::myDataItem;
     }
+    if ($floatSet !== null) {
+      $this->floatSet = $floatSet;
+      $this->_type = \test\fixtures\basic\MyUnionEnum::floatSet;
+    }
   }
 
   public static function withDefaultValues()[]: this {
@@ -99,6 +121,7 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
       Shapes::idx($shape, 'myEnum'),
       Shapes::idx($shape, 'myStruct'),
       Shapes::idx($shape, 'myDataItem'),
+      Shapes::idx($shape, 'floatSet'),
     );
   }
 
@@ -120,6 +143,9 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
         break;
       case \test\fixtures\basic\MyUnionEnum::myDataItem:
         $this->myDataItem = null;
+        break;
+      case \test\fixtures\basic\MyUnionEnum::floatSet:
+        $this->floatSet = null;
         break;
       case \test\fixtures\basic\MyUnionEnum::_EMPTY_:
         break;
@@ -199,6 +225,30 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
     return $this->myDataItem as nonnull;
   }
 
+  public function set_floatSet(\ThriftSet<float> $floatSet)[write_props]: this {
+    $this->reset();
+    $this->_type = \test\fixtures\basic\MyUnionEnum::floatSet;
+    $this->floatSet = $floatSet;
+    return $this;
+  }
+
+  public function get_floatSet()[]: ?\ThriftSet<float> {
+    $this->logIncorrectFieldAccessed(
+      $this->_type,
+      \test\fixtures\basic\MyUnionEnum::floatSet,
+    );
+    return $this->floatSet;
+  }
+
+  public function getx_floatSet()[]: \ThriftSet<float> {
+    invariant(
+      $this->_type === \test\fixtures\basic\MyUnionEnum::floatSet,
+      'get_floatSet called on an instance of MyUnion whose current type is %s',
+      (string)$this->_type,
+    );
+    return $this->floatSet as nonnull;
+  }
+
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return \tmeta_ThriftStruct::fromShape(
       shape(
@@ -256,6 +306,25 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
                 )
               ),
               "name" => "myDataItem",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 4,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_set" => \tmeta_ThriftSetType::fromShape(
+                    shape(
+                      "valueType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_FLOAT_TYPE,
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "floatSet",
             )
           ),
         ],

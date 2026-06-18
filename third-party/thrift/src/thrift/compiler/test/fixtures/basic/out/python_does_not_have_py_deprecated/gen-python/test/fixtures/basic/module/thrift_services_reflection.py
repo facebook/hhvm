@@ -122,7 +122,6 @@ def get_reflection__MyService():
     if not _HAS_REFLECTION:
         return None
     import facebook.thrift.annotation.hack.thrift_types as _fbthrift__facebook__thrift__annotation__hack__thrift_types  # noqa: F811
-    import facebook.thrift.annotation.hack.thrift_types as _fbthrift__facebook__thrift__annotation__hack__thrift_types  # noqa: F811
     class _fbthrift_invalid_return_for_hack_return_type(_fbthrift_python_container_typedefs._SetTypedefBase):
         __slots__ = ()
         __name__ = "Set__MyService_invalid_return_for_hack_return"
@@ -332,7 +331,6 @@ def get_reflection__MyService():
         qualifier=_QUALIFIER_MAP["Unspecified"],
         exceptions=_fbthrift_exceptions,
         structured_annotations={
-            "hack.SkipCodegen": _ConstantSpec(value=  _ConstantStructSpec(struct_type=_fbthrift__facebook__thrift__annotation__hack__thrift_types.SkipCodegen, fields={  "reason": _ConstantSpec(value=  "Invalid key type", thrift_type=_ThriftType.STRING),}), thrift_type=_ThriftType.STRUCT),
         },
     )
     _fbthrift_args = []

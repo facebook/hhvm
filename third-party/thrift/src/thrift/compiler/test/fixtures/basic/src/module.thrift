@@ -55,7 +55,6 @@ struct MyStruct {
   5: bool oneway;
   6: bool readonly;
   7: bool idempotent;
-  @hack.SkipCodegen{reason = "Invalid key type"}
   8: set<float> floatSet;
   @hack.SkipCodegen{reason = "skip field codegen for deprecation"}
   9: string no_hack_codegen_field;
@@ -75,7 +74,6 @@ union MyUnion {
   1: MyEnumAlias myEnum;
   2: MyStruct myStruct;
   3: MyDataItem myDataItem;
-  @hack.SkipCodegen{reason = "Invalid key type"}
   4: set<float> floatSet;
 }
 
@@ -137,7 +135,6 @@ service MyService {
   idempotent void deleteDataById(1: i64 id);
   oneway void lobDataById(1: i64 id, 2: string data);
 
-  @hack.SkipCodegen{reason = "Invalid key type"}
   set<float> invalid_return_for_hack();
 
   @hack.SkipCodegen{reason = "Skip function deprecation"}

@@ -14,7 +14,7 @@ doctest = false
 proc-macro = true
 
 [dependencies]
-itertools = "0.14.0"
+itertools = "0.15.0"
 proc-macro2 = { version = "1.0.106", features = ["span-locations"] }
 quote = "1.0.45"
 syn = { version = "1.0.109", features = ["extra-traits", "fold", "full", "visit", "visit-mut"] }

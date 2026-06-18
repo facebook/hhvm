@@ -18,7 +18,7 @@ escaper = { version = "0.0.0", path = "../../utils/escaper" }
 flatten_smart_constructors = { version = "0.0.0", path = "../../parser/cargo/flatten_smart_constructors" }
 hash = { version = "0.0.0", path = "../../utils/hash" }
 hh_autoimport_rust = { version = "0.0.0", path = "../../parser/cargo/hh_autoimport" }
-itertools = "0.14.0"
+itertools = "0.15.0"
 namespaces_rust = { version = "0.0.0", path = "../../parser/cargo/namespaces" }
 naming_special_names_rust = { version = "0.0.0", path = "../../naming" }
 oxidized = { version = "0.0.0", path = "../../oxidized" }

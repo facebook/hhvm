@@ -19,7 +19,7 @@ hack_macros = { version = "0.0.0", path = "../utils/hack_macros/cargo/hack_macro
 hash = { version = "0.0.0", path = "../utils/hash" }
 hhbc_string_utils = { version = "0.0.0", path = "../hackc/utils/cargo/hhbc_string_utils" }
 intern = { version = "0.1.0", path = "../utils/intern" }
-itertools = "0.14.0"
+itertools = "0.15.0"
 naming_special_names_rust = { version = "0.0.0", path = "../naming" }
 oxidized = { version = "0.0.0", path = "../oxidized" }
 relative_path = { version = "0.0.0", path = "../utils/rust/relative_path" }

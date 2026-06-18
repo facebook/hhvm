@@ -9,6 +9,7 @@
 #include <folly/logging/xlog.h>
 #include <proxygen/lib/http/codec/HTTPSettings.h>
 #include <proxygen/lib/http/webtransport/WtUtils.h>
+#include <quic/codec/QuicInteger.h>
 
 namespace {
 constexpr uint64_t kWtInitMaxData = std::numeric_limits<uint16_t>::max();
@@ -35,6 +36,22 @@ folly::Promise<folly::Unit> makeEmptyPromise() {
 folly::Promise<folly::Unit> resetPromise(
     folly::Promise<folly::Unit>& p) noexcept {
   return std::exchange(p, makeEmptyPromise());
+}
+
+// TODO(@damlaj): after migration/consolidation to QuicWtSession is complete,
+// replace all hq::writeWTStreamPreface to WtUtils writeWtFramePrefix
+enum class WtFramePrefix : uint8_t { Uni = 0x54, Bidi = 0x41 };
+void writeWtFramePrefix(folly::IOBufQueue& q,
+                        WtFramePrefix prefix,
+                        uint64_t connectStreamId) noexcept {
+  constexpr uint8_t kGrowth = 10; /*max 2 WtFramePrefix & 8 connectStreamId*/
+  folly::io::QueueAppender appender{&q, kGrowth};
+  for (uint64_t varint : {uint64_t(prefix), connectStreamId}) {
+    auto res = quic::encodeQuicInteger(varint, [&appender](auto val) {
+      appender.writeBE(folly::tag<decltype(val)>, val);
+    });
+    XCHECK(res.value());
+  }
 }
 
 }; // namespace
@@ -161,6 +178,15 @@ bool supportsH3Wt(TransportDirection dir,
   bool clientOk = client && client->getSetting(SettingsId::_HQ_DATAGRAM_RFC,
                                                /*defaultVal=*/0);
   return serverOk && clientOk;
+}
+
+void writeWtUniFramePrefix(folly::IOBufQueue& q,
+                           uint64_t connectStreamId) noexcept {
+  return writeWtFramePrefix(q, WtFramePrefix::Uni, connectStreamId);
+}
+void writeWtBidiFramePrefix(folly::IOBufQueue& q,
+                            uint64_t connectStreamId) noexcept {
+  return writeWtFramePrefix(q, WtFramePrefix::Bidi, connectStreamId);
 }
 
 void WtEventVisitor::operator()(

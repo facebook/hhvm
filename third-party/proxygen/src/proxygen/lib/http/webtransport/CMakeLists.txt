@@ -62,7 +62,6 @@ proxygen_add_library(proxygen_http_webtransport_quic_wt_session
   SRCS
     QuicWtSession.cpp
   DEPS
-    proxygen_http_codec_hq_codec
     mvfst::mvfst_common_address_quic_socket_address_bridge
   EXPORTED_DEPS
     proxygen_http_webtransport
@@ -92,6 +91,7 @@ proxygen_add_library(proxygen_http_webtransport_wt_util
     WtUtils.cpp
   DEPS
     proxygen_http_codec_codec_common
+    mvfst::mvfst_codec_types
     Folly::folly_logging_logging
   EXPORTED_DEPS
     proxygen_http_codec_direction

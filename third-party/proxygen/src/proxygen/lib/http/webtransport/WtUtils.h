@@ -34,6 +34,12 @@ WtStreamManager::WtConfig getWtConfig(const HTTPSettings* ingress,
 WtStreamManager::WtConfig getH3WtConfig(const HTTPSettings* ingress,
                                         const HTTPSettings* egress);
 
+// http/3 specific, writes the wt frame prefix to the IOBufQueue
+void writeWtUniFramePrefix(folly::IOBufQueue& q,
+                           uint64_t connectStreamId) noexcept;
+void writeWtBidiFramePrefix(folly::IOBufQueue& q,
+                            uint64_t connectStreamId) noexcept;
+
 /**
  * http/2 wt draft:
  * > In order to indicate support for WebTransport, both the client and the

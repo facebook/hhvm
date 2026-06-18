@@ -8,7 +8,6 @@
 
 #include <proxygen/lib/http/webtransport/QuicWtSession.h>
 
-#include <proxygen/lib/http/codec/HQFramer.h>
 #include <quic/common/address/QuicSocketAddressBridge.h>
 
 using namespace proxygen;
@@ -551,11 +550,10 @@ H3WtSession::createBidiStream() noexcept {
 }
 
 void H3WtSession::writeWtFramePrefix(uint64_t id) noexcept {
-  auto streamType = quic::isBidirectionalStream(id)
-                        ? hq::WebTransportStreamType::BIDI
-                        : hq::WebTransportStreamType::UNI;
+  auto* writeFn = quic::isBidirectionalStream(id) ? writeWtBidiFramePrefix
+                                                  : writeWtUniFramePrefix;
   folly::IOBufQueue writeBuf{folly::IOBufQueue::cacheChainLength()};
-  XCHECK(hq::writeWTStreamPreface(writeBuf, streamType, connectStreamId_));
+  writeFn(writeBuf, connectStreamId_);
   XCHECK(quicSocket_->writeChain(id, writeBuf.move(), false));
 }
 

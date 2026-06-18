@@ -1,27 +1,31 @@
-error: Typing[4472] Cannot access type alias used as an enforceable type hint TInt defined in package pkg2 which may not be available [1]
--> TInt is defined in cross_package_enforceable_type_alias_enums.php--foo.php [2]
--> TInt belongs to package pkg2 by this package override [3]
--> package pkg1 is available because the current file belongs to it by this package definition [4]
+error: Typing[4472] Cannot access type alias used as an enforceable type hint `TInt` defined in package `pkg2` which may not be available [1]
+-> `TInt` is defined in cross_package_enforceable_type_alias_enums.php--foo.php [2]
+-> `TInt` belongs to package `pkg2` by this package override [3]
+-> package `pkg1` is available because the current file belongs to it by this package definition [4]
 
 cross_package_enforceable_type_alias_enums.php--bar.php:11:25
-     9 | // Regular enum base: HHVM's Class::setEnumType runs at class init and fatals
-    10 | // if the base alias can't be resolved. Non-class alias base errors in v2.strict.
-[1] 11 | enum EnumWithAliasBase: TInt { X = 1; }
-    12 | 
-    13 | // Enum class base: AttrEnum-guarded setEnumType is skipped; synthesized method
+ 9 | // Regular enum base: HHVM's Class::setEnumType runs at class init and fatals
+10 | // if the base alias can't be resolved. Non-class alias base errors in v2.strict.
+11 | enum EnumWithAliasBase: TInt { X = 1; }
+   |                         ^^^^ [1]
+12 | 
+13 | // Enum class base: AttrEnum-guarded setEnumType is skipped; synthesized method
 
 cross_package_enforceable_type_alias_enums.php--foo.php:5:6
-     1 | <?hh
-     2 | // package pkg2
-[3]  3 | <<file: __PackageOverride('pkg2')>>
-     4 | type TShape = shape('x' => int);
-[2]  5 | type TInt = int;
+ 1 | <?hh
+ 2 | // package pkg2
+ 3 | <<file: __PackageOverride('pkg2')>>
+   |                           ^^^^^^ [3]
+ 4 | type TShape = shape('x' => int);
+ 5 | type TInt = int;
+   |      ^^^^ [2]
 
 PACKAGES.toml:3:11
-     1 | [packages]
-     2 | 
-[4]  3 | [packages.pkg1]
-     4 | include_paths=["//"]
-     5 | 
+ 1 | [packages]
+ 2 | 
+ 3 | [packages.pkg1]
+   |           ^^^^ [4]
+ 4 | include_paths=["//"]
+ 5 | 
 
 1 error found

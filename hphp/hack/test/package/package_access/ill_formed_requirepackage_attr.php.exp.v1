@@ -1,9 +1,10 @@
-error: Parsing[1002] The first argument to __(Soft)RequirePackage must be a string literal [1]
+error: Parsing[1002] The first argument to `__(Soft)RequirePackage` must be a string literal [1]
 
 ill_formed_requirepackage_attr.php:4:34
-    2 | // package pkg1
-    3 | 
-[1] 4 | <<__EntryPoint, __RequirePackage(123)>> // parse error
-    5 | function test() : void {}
+2 | // package pkg1
+3 | 
+4 | <<__EntryPoint, __RequirePackage(123)>> // parse error
+  |                                  ^^^ [1]
+5 | function test() : void {}
 
 1 error found

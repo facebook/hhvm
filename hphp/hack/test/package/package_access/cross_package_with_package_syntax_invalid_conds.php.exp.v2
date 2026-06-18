@@ -1,177 +1,214 @@
-warning: Warn[12009] This is check is always true. The expression on the left has type bool which is a subtype of bool. [1]
+warning: Warn[12009] This `is` check is always `true`. The expression on the left has type `bool` which is a subtype of `bool`. [1]
 
 cross_package_with_package_syntax_invalid_conds.php--pkg3.php:8:11
-    6 |         pkg8_call(); // error; comparison binops don't register package info
-    7 |       }
-[1] 8 |       if (package pkg8 is bool) {
-    9 |         pkg8_call(); // error; type ops don't register package info
-   10 |       }
+ 6 |         pkg8_call(); // error; comparison binops don't register package info
+ 7 |       }
+ 8 |       if (package pkg8 is bool) {
+   |           ^^^^^^^^^^^^^^^^^^^^ [1]
+ 9 |         pkg8_call(); // error; type ops don't register package info
+10 |       }
 
 error: Parsing[1002] Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. [1]
 
 cross_package_with_package_syntax_invalid_conds.php--pkg3.php:14:11
-    12 |         pkg8_call(); // error; function calls don't register package info
-    13 |       }
-[1] 14 |       if ($loaded = package pkg8) {
-    15 |         pkg8_call(); // error; assignments aren't allowed in conditionals
-    16 | 
+12 |         pkg8_call(); // error; function calls don't register package info
+13 |       }
+14 |       if ($loaded = package pkg8) {
+   |           ^^^^^^^ [1]
+15 |         pkg8_call(); // error; assignments aren't allowed in conditionals
+16 | 
 
-error: Typing[4472] Cannot access function pkg8_call defined in package pkg8 which may not be available [1]
--> pkg8_call is defined in cross_package_with_package_syntax_invalid_conds.php--pkg8.php [2]
--> pkg8_call belongs to package pkg8 by this package override [3]
--> package pkg3 is available because the current file belongs to it by this package override [4]
--> pkg3 includes pkg2 via its definition [5]
--> pkg3 includes pkg2_soft via its definition [6]
--> pkg3 includes pkg1 via its definition [7]
+error: Typing[4472] Cannot access function `pkg8_call` defined in package `pkg8` which may not be available [1]
+-> `pkg8_call` is defined in cross_package_with_package_syntax_invalid_conds.php--pkg8.php [2]
+-> `pkg8_call` belongs to package `pkg8` by this package override [3]
+-> package `pkg3` is available because the current file belongs to it by this package override [4]
+-> `pkg3` includes `pkg2` via its definition [5]
+-> `pkg3` includes `pkg2_soft` via its definition [6]
+-> `pkg3` includes `pkg1` via its definition [7]
 
 cross_package_with_package_syntax_invalid_conds.php--pkg3.php:6:9
-         1 | <?hh
-[4]      2 | <<file: __PackageOverride('pkg3')>>
-         3 | class C {
-         4 |     public function test() : void {
-         5 |       if (package pkg8 == package pkg7) {
-[1]      6 |         pkg8_call(); // error; comparison binops don't register package info
-         7 |       }
-         8 |       if (package pkg8 is bool) {
+ 1 | <?hh
+ 2 | <<file: __PackageOverride('pkg3')>>
+   |                           ^^^^^^ [4]
+ 3 | class C {
+ 4 |     public function test() : void {
+ 5 |       if (package pkg8 == package pkg7) {
+ 6 |         pkg8_call(); // error; comparison binops don't register package info
+   |         ^^^^^^^^^ [1]
+ 7 |       }
+ 8 |       if (package pkg8 is bool) {
 
 cross_package_with_package_syntax_invalid_conds.php--pkg8.php:3:10
-         1 | <?hh
-[3]      2 | <<file: __PackageOverride('pkg8')>>
-[2]      3 | function pkg8_call(): void {}
+ 1 | <?hh
+ 2 | <<file: __PackageOverride('pkg8')>>
+   |                           ^^^^^^ [3]
+ 3 | function pkg8_call(): void {}
+   |          ^^^^^^^^^ [2]
 
 PACKAGES.toml:18:13
-        16 | 
-        17 | [packages.pkg3]
-[5,6,7] 18 | includes = ["pkg2", "pkg2_soft", "pkg1"]
-        19 | 
-        20 | [packages.pkg4]
+16 | 
+17 | [packages.pkg3]
+18 | includes = ["pkg2", "pkg2_soft", "pkg1"]
+   |             ^^^^^^ [5]
+   |                     ^^^^^^^^^^^ [6]
+   |                                  ^^^^^^ [7]
+19 | 
+20 | [packages.pkg4]
 
-error: Typing[4472] Cannot access function pkg8_call defined in package pkg8 which may not be available [1]
--> pkg8_call is defined in cross_package_with_package_syntax_invalid_conds.php--pkg8.php [2]
--> pkg8_call belongs to package pkg8 by this package override [3]
--> package pkg3 is available because the current file belongs to it by this package override [4]
--> pkg3 includes pkg2 via its definition [5]
--> pkg3 includes pkg2_soft via its definition [6]
--> pkg3 includes pkg1 via its definition [7]
+error: Typing[4472] Cannot access function `pkg8_call` defined in package `pkg8` which may not be available [1]
+-> `pkg8_call` is defined in cross_package_with_package_syntax_invalid_conds.php--pkg8.php [2]
+-> `pkg8_call` belongs to package `pkg8` by this package override [3]
+-> package `pkg3` is available because the current file belongs to it by this package override [4]
+-> `pkg3` includes `pkg2` via its definition [5]
+-> `pkg3` includes `pkg2_soft` via its definition [6]
+-> `pkg3` includes `pkg1` via its definition [7]
 
 cross_package_with_package_syntax_invalid_conds.php--pkg3.php:9:9
-         1 | <?hh
-[4]      2 | <<file: __PackageOverride('pkg3')>>
-         3 | class C {
-         4 |     public function test() : void {
-           :
-         7 |       }
-         8 |       if (package pkg8 is bool) {
-[1]      9 |         pkg8_call(); // error; type ops don't register package info
-        10 |       }
-        11 |       if ($this->expect(package pkg8)) {
+ 1 | <?hh
+ 2 | <<file: __PackageOverride('pkg3')>>
+   |                           ^^^^^^ [4]
+ 3 | class C {
+ 4 |     public function test() : void {
+   :
+ 7 |       }
+ 8 |       if (package pkg8 is bool) {
+ 9 |         pkg8_call(); // error; type ops don't register package info
+   |         ^^^^^^^^^ [1]
+10 |       }
+11 |       if ($this->expect(package pkg8)) {
 
 cross_package_with_package_syntax_invalid_conds.php--pkg8.php:3:10
-         1 | <?hh
-[3]      2 | <<file: __PackageOverride('pkg8')>>
-[2]      3 | function pkg8_call(): void {}
+ 1 | <?hh
+ 2 | <<file: __PackageOverride('pkg8')>>
+   |                           ^^^^^^ [3]
+ 3 | function pkg8_call(): void {}
+   |          ^^^^^^^^^ [2]
 
 PACKAGES.toml:18:13
-        16 | 
-        17 | [packages.pkg3]
-[5,6,7] 18 | includes = ["pkg2", "pkg2_soft", "pkg1"]
-        19 | 
-        20 | [packages.pkg4]
+16 | 
+17 | [packages.pkg3]
+18 | includes = ["pkg2", "pkg2_soft", "pkg1"]
+   |             ^^^^^^ [5]
+   |                     ^^^^^^^^^^^ [6]
+   |                                  ^^^^^^ [7]
+19 | 
+20 | [packages.pkg4]
 
-error: Typing[4472] Cannot access function pkg8_call defined in package pkg8 which may not be available [1]
--> pkg8_call is defined in cross_package_with_package_syntax_invalid_conds.php--pkg8.php [2]
--> pkg8_call belongs to package pkg8 by this package override [3]
--> package pkg3 is available because the current file belongs to it by this package override [4]
--> pkg3 includes pkg2 via its definition [5]
--> pkg3 includes pkg2_soft via its definition [6]
--> pkg3 includes pkg1 via its definition [7]
+error: Typing[4472] Cannot access function `pkg8_call` defined in package `pkg8` which may not be available [1]
+-> `pkg8_call` is defined in cross_package_with_package_syntax_invalid_conds.php--pkg8.php [2]
+-> `pkg8_call` belongs to package `pkg8` by this package override [3]
+-> package `pkg3` is available because the current file belongs to it by this package override [4]
+-> `pkg3` includes `pkg2` via its definition [5]
+-> `pkg3` includes `pkg2_soft` via its definition [6]
+-> `pkg3` includes `pkg1` via its definition [7]
 
 cross_package_with_package_syntax_invalid_conds.php--pkg3.php:12:9
-         1 | <?hh
-[4]      2 | <<file: __PackageOverride('pkg3')>>
-         3 | class C {
-         4 |     public function test() : void {
-           :
-        10 |       }
-        11 |       if ($this->expect(package pkg8)) {
-[1]     12 |         pkg8_call(); // error; function calls don't register package info
-        13 |       }
-        14 |       if ($loaded = package pkg8) {
+ 1 | <?hh
+ 2 | <<file: __PackageOverride('pkg3')>>
+   |                           ^^^^^^ [4]
+ 3 | class C {
+ 4 |     public function test() : void {
+   :
+10 |       }
+11 |       if ($this->expect(package pkg8)) {
+12 |         pkg8_call(); // error; function calls don't register package info
+   |         ^^^^^^^^^ [1]
+13 |       }
+14 |       if ($loaded = package pkg8) {
 
 cross_package_with_package_syntax_invalid_conds.php--pkg8.php:3:10
-         1 | <?hh
-[3]      2 | <<file: __PackageOverride('pkg8')>>
-[2]      3 | function pkg8_call(): void {}
+ 1 | <?hh
+ 2 | <<file: __PackageOverride('pkg8')>>
+   |                           ^^^^^^ [3]
+ 3 | function pkg8_call(): void {}
+   |          ^^^^^^^^^ [2]
 
 PACKAGES.toml:18:13
-        16 | 
-        17 | [packages.pkg3]
-[5,6,7] 18 | includes = ["pkg2", "pkg2_soft", "pkg1"]
-        19 | 
-        20 | [packages.pkg4]
+16 | 
+17 | [packages.pkg3]
+18 | includes = ["pkg2", "pkg2_soft", "pkg1"]
+   |             ^^^^^^ [5]
+   |                     ^^^^^^^^^^^ [6]
+   |                                  ^^^^^^ [7]
+19 | 
+20 | [packages.pkg4]
 
-error: Typing[4472] Cannot access function pkg8_call defined in package pkg8 which may not be available [1]
--> pkg8_call is defined in cross_package_with_package_syntax_invalid_conds.php--pkg8.php [2]
--> pkg8_call belongs to package pkg8 by this package override [3]
--> package pkg3 is available because the current file belongs to it by this package override [4]
--> pkg3 includes pkg2 via its definition [5]
--> pkg3 includes pkg2_soft via its definition [6]
--> pkg3 includes pkg1 via its definition [7]
+error: Typing[4472] Cannot access function `pkg8_call` defined in package `pkg8` which may not be available [1]
+-> `pkg8_call` is defined in cross_package_with_package_syntax_invalid_conds.php--pkg8.php [2]
+-> `pkg8_call` belongs to package `pkg8` by this package override [3]
+-> package `pkg3` is available because the current file belongs to it by this package override [4]
+-> `pkg3` includes `pkg2` via its definition [5]
+-> `pkg3` includes `pkg2_soft` via its definition [6]
+-> `pkg3` includes `pkg1` via its definition [7]
 
 cross_package_with_package_syntax_invalid_conds.php--pkg3.php:15:9
-         1 | <?hh
-[4]      2 | <<file: __PackageOverride('pkg3')>>
-         3 | class C {
-         4 |     public function test() : void {
-           :
-        13 |       }
-        14 |       if ($loaded = package pkg8) {
-[1]     15 |         pkg8_call(); // error; assignments aren't allowed in conditionals
-        16 | 
-        17 |         if ($loaded) {
+ 1 | <?hh
+ 2 | <<file: __PackageOverride('pkg3')>>
+   |                           ^^^^^^ [4]
+ 3 | class C {
+ 4 |     public function test() : void {
+   :
+13 |       }
+14 |       if ($loaded = package pkg8) {
+15 |         pkg8_call(); // error; assignments aren't allowed in conditionals
+   |         ^^^^^^^^^ [1]
+16 | 
+17 |         if ($loaded) {
 
 cross_package_with_package_syntax_invalid_conds.php--pkg8.php:3:10
-         1 | <?hh
-[3]      2 | <<file: __PackageOverride('pkg8')>>
-[2]      3 | function pkg8_call(): void {}
+ 1 | <?hh
+ 2 | <<file: __PackageOverride('pkg8')>>
+   |                           ^^^^^^ [3]
+ 3 | function pkg8_call(): void {}
+   |          ^^^^^^^^^ [2]
 
 PACKAGES.toml:18:13
-        16 | 
-        17 | [packages.pkg3]
-[5,6,7] 18 | includes = ["pkg2", "pkg2_soft", "pkg1"]
-        19 | 
-        20 | [packages.pkg4]
+16 | 
+17 | [packages.pkg3]
+18 | includes = ["pkg2", "pkg2_soft", "pkg1"]
+   |             ^^^^^^ [5]
+   |                     ^^^^^^^^^^^ [6]
+   |                                  ^^^^^^ [7]
+19 | 
+20 | [packages.pkg4]
 
-error: Typing[4472] Cannot access function pkg8_call defined in package pkg8 which may not be available [1]
--> pkg8_call is defined in cross_package_with_package_syntax_invalid_conds.php--pkg8.php [2]
--> pkg8_call belongs to package pkg8 by this package override [3]
--> package pkg3 is available because the current file belongs to it by this package override [4]
--> pkg3 includes pkg2 via its definition [5]
--> pkg3 includes pkg2_soft via its definition [6]
--> pkg3 includes pkg1 via its definition [7]
+error: Typing[4472] Cannot access function `pkg8_call` defined in package `pkg8` which may not be available [1]
+-> `pkg8_call` is defined in cross_package_with_package_syntax_invalid_conds.php--pkg8.php [2]
+-> `pkg8_call` belongs to package `pkg8` by this package override [3]
+-> package `pkg3` is available because the current file belongs to it by this package override [4]
+-> `pkg3` includes `pkg2` via its definition [5]
+-> `pkg3` includes `pkg2_soft` via its definition [6]
+-> `pkg3` includes `pkg1` via its definition [7]
 
 cross_package_with_package_syntax_invalid_conds.php--pkg3.php:18:11
-         1 | <?hh
-[4]      2 | <<file: __PackageOverride('pkg3')>>
-         3 | class C {
-         4 |     public function test() : void {
-           :
-        16 | 
-        17 |         if ($loaded) {
-[1]     18 |           pkg8_call(); // error; cannot infer $loaded to be a package expression
-        19 |         }
-        20 |       }
+ 1 | <?hh
+ 2 | <<file: __PackageOverride('pkg3')>>
+   |                           ^^^^^^ [4]
+ 3 | class C {
+ 4 |     public function test() : void {
+   :
+16 | 
+17 |         if ($loaded) {
+18 |           pkg8_call(); // error; cannot infer $loaded to be a package expression
+   |           ^^^^^^^^^ [1]
+19 |         }
+20 |       }
 
 cross_package_with_package_syntax_invalid_conds.php--pkg8.php:3:10
-         1 | <?hh
-[3]      2 | <<file: __PackageOverride('pkg8')>>
-[2]      3 | function pkg8_call(): void {}
+ 1 | <?hh
+ 2 | <<file: __PackageOverride('pkg8')>>
+   |                           ^^^^^^ [3]
+ 3 | function pkg8_call(): void {}
+   |          ^^^^^^^^^ [2]
 
 PACKAGES.toml:18:13
-        16 | 
-        17 | [packages.pkg3]
-[5,6,7] 18 | includes = ["pkg2", "pkg2_soft", "pkg1"]
-        19 | 
-        20 | [packages.pkg4]
+16 | 
+17 | [packages.pkg3]
+18 | includes = ["pkg2", "pkg2_soft", "pkg1"]
+   |             ^^^^^^ [5]
+   |                     ^^^^^^^^^^^ [6]
+   |                                  ^^^^^^ [7]
+19 | 
+20 | [packages.pkg4]
 
 7 errors found

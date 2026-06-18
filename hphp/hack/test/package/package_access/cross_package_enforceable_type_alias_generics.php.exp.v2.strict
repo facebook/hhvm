@@ -1,229 +1,261 @@
-error: Typing[4472] Cannot access type alias used as an enforceable type hint TShape defined in package pkg2 which may not be available [1]
--> TShape is defined in cross_package_enforceable_type_alias_generics.php--foo.php [2]
--> TShape belongs to package pkg2 by this package override [3]
--> package pkg1 is available because the current file belongs to it by this package definition [4]
+error: Typing[4472] Cannot access type alias used as an enforceable type hint `TShape` defined in package `pkg2` which may not be available [1]
+-> `TShape` is defined in cross_package_enforceable_type_alias_generics.php--foo.php [2]
+-> `TShape` belongs to package `pkg2` by this package override [3]
+-> package `pkg1` is available because the current file belongs to it by this package definition [4]
 
 cross_package_enforceable_type_alias_generics.php--bar.php:9:32
-    7 | 
-    8 | // Generic upper bound constraints: non-class aliases should error in v2.strict
-[1] 9 | function generic_as_shape<T as TShape>(T $_): void {}
-   10 | function generic_as_int<T as TInt>(T $_): void {}
-   11 | 
+ 7 | 
+ 8 | // Generic upper bound constraints: non-class aliases should error in v2.strict
+ 9 | function generic_as_shape<T as TShape>(T $_): void {}
+   |                                ^^^^^^ [1]
+10 | function generic_as_int<T as TInt>(T $_): void {}
+11 | 
 
 cross_package_enforceable_type_alias_generics.php--foo.php:4:6
-    1 | <?hh
-    2 | // package pkg2
-[3] 3 | <<file: __PackageOverride('pkg2')>>
-[2] 4 | type TShape = shape('x' => int);
-    5 | type TInt = int;
-    6 | type TClassAlias = Exception;
+ 1 | <?hh
+ 2 | // package pkg2
+ 3 | <<file: __PackageOverride('pkg2')>>
+   |                           ^^^^^^ [3]
+ 4 | type TShape = shape('x' => int);
+   |      ^^^^^^ [2]
+ 5 | type TInt = int;
+ 6 | type TClassAlias = Exception;
 
 PACKAGES.toml:3:11
-    1 | [packages]
-    2 | 
-[4] 3 | [packages.pkg1]
-    4 | include_paths=["//"]
-    5 | 
+ 1 | [packages]
+ 2 | 
+ 3 | [packages.pkg1]
+   |           ^^^^ [4]
+ 4 | include_paths=["//"]
+ 5 | 
 
-error: Typing[4472] Cannot access type alias used as an enforceable type hint TInt defined in package pkg2 which may not be available [1]
--> TInt is defined in cross_package_enforceable_type_alias_generics.php--foo.php [2]
--> TInt belongs to package pkg2 by this package override [3]
--> package pkg1 is available because the current file belongs to it by this package definition [4]
+error: Typing[4472] Cannot access type alias used as an enforceable type hint `TInt` defined in package `pkg2` which may not be available [1]
+-> `TInt` is defined in cross_package_enforceable_type_alias_generics.php--foo.php [2]
+-> `TInt` belongs to package `pkg2` by this package override [3]
+-> package `pkg1` is available because the current file belongs to it by this package definition [4]
 
 cross_package_enforceable_type_alias_generics.php--bar.php:10:30
-     8 | // Generic upper bound constraints: non-class aliases should error in v2.strict
-     9 | function generic_as_shape<T as TShape>(T $_): void {}
-[1] 10 | function generic_as_int<T as TInt>(T $_): void {}
-    11 | 
-    12 | // Generic upper bound constraints: class aliases should NOT error
+ 8 | // Generic upper bound constraints: non-class aliases should error in v2.strict
+ 9 | function generic_as_shape<T as TShape>(T $_): void {}
+10 | function generic_as_int<T as TInt>(T $_): void {}
+   |                              ^^^^ [1]
+11 | 
+12 | // Generic upper bound constraints: class aliases should NOT error
 
 cross_package_enforceable_type_alias_generics.php--foo.php:5:6
-     1 | <?hh
-     2 | // package pkg2
-[3]  3 | <<file: __PackageOverride('pkg2')>>
-     4 | type TShape = shape('x' => int);
-[2]  5 | type TInt = int;
-     6 | type TClassAlias = Exception;
-     7 | class Foo {}
+ 1 | <?hh
+ 2 | // package pkg2
+ 3 | <<file: __PackageOverride('pkg2')>>
+   |                           ^^^^^^ [3]
+ 4 | type TShape = shape('x' => int);
+ 5 | type TInt = int;
+   |      ^^^^ [2]
+ 6 | type TClassAlias = Exception;
+ 7 | class Foo {}
 
 PACKAGES.toml:3:11
-     1 | [packages]
-     2 | 
-[4]  3 | [packages.pkg1]
-     4 | include_paths=["//"]
-     5 | 
+ 1 | [packages]
+ 2 | 
+ 3 | [packages.pkg1]
+   |           ^^^^ [4]
+ 4 | include_paths=["//"]
+ 5 | 
 
-error: Typing[4472] Cannot access type alias used as an enforceable type hint TClassAlias defined in package pkg2 which may not be available [1]
--> TClassAlias is defined in cross_package_enforceable_type_alias_generics.php--foo.php [2]
--> TClassAlias belongs to package pkg2 by this package override [3]
--> package pkg1 is available because the current file belongs to it by this package definition [4]
+error: Typing[4472] Cannot access type alias used as an enforceable type hint `TClassAlias` defined in package `pkg2` which may not be available [1]
+-> `TClassAlias` is defined in cross_package_enforceable_type_alias_generics.php--foo.php [2]
+-> `TClassAlias` belongs to package `pkg2` by this package override [3]
+-> package `pkg1` is available because the current file belongs to it by this package definition [4]
 
 cross_package_enforceable_type_alias_generics.php--bar.php:13:38
-    11 | 
-    12 | // Generic upper bound constraints: class aliases should NOT error
-[1] 13 | function generic_as_class_alias<T as TClassAlias>(T $_): void {}
-    14 | function generic_as_class<T as Foo>(T $_): void {}
-    15 | 
+11 | 
+12 | // Generic upper bound constraints: class aliases should NOT error
+13 | function generic_as_class_alias<T as TClassAlias>(T $_): void {}
+   |                                      ^^^^^^^^^^^ [1]
+14 | function generic_as_class<T as Foo>(T $_): void {}
+15 | 
 
 cross_package_enforceable_type_alias_generics.php--foo.php:6:6
-     1 | <?hh
-     2 | // package pkg2
-[3]  3 | <<file: __PackageOverride('pkg2')>>
-     4 | type TShape = shape('x' => int);
-     5 | type TInt = int;
-[2]  6 | type TClassAlias = Exception;
-     7 | class Foo {}
-     8 | class Box<T> { public function __construct(public T $v) {} }
+ 1 | <?hh
+ 2 | // package pkg2
+ 3 | <<file: __PackageOverride('pkg2')>>
+   |                           ^^^^^^ [3]
+ 4 | type TShape = shape('x' => int);
+ 5 | type TInt = int;
+ 6 | type TClassAlias = Exception;
+   |      ^^^^^^^^^^^ [2]
+ 7 | class Foo {}
+ 8 | class Box<T> { public function __construct(public T $v) {} }
 
 PACKAGES.toml:3:11
-     1 | [packages]
-     2 | 
-[4]  3 | [packages.pkg1]
-     4 | include_paths=["//"]
-     5 | 
+ 1 | [packages]
+ 2 | 
+ 3 | [packages.pkg1]
+   |           ^^^^ [4]
+ 4 | include_paths=["//"]
+ 5 | 
 
-error: Typing[4472] Cannot access type alias used as an enforceable type hint Foo defined in package pkg2 which may not be available [1]
--> Foo is defined in cross_package_enforceable_type_alias_generics.php--foo.php [2]
--> Foo belongs to package pkg2 by this package override [3]
--> package pkg1 is available because the current file belongs to it by this package definition [4]
+error: Typing[4472] Cannot access type alias used as an enforceable type hint `Foo` defined in package `pkg2` which may not be available [1]
+-> `Foo` is defined in cross_package_enforceable_type_alias_generics.php--foo.php [2]
+-> `Foo` belongs to package `pkg2` by this package override [3]
+-> package `pkg1` is available because the current file belongs to it by this package definition [4]
 
 cross_package_enforceable_type_alias_generics.php--bar.php:14:32
-    12 | // Generic upper bound constraints: class aliases should NOT error
-    13 | function generic_as_class_alias<T as TClassAlias>(T $_): void {}
-[1] 14 | function generic_as_class<T as Foo>(T $_): void {}
-    15 | 
-    16 | // Type aliases nested inside generics at enforceable positions: should NOT
+12 | // Generic upper bound constraints: class aliases should NOT error
+13 | function generic_as_class_alias<T as TClassAlias>(T $_): void {}
+14 | function generic_as_class<T as Foo>(T $_): void {}
+   |                                ^^^ [1]
+15 | 
+16 | // Type aliases nested inside generics at enforceable positions: should NOT
 
 cross_package_enforceable_type_alias_generics.php--foo.php:7:7
-     1 | <?hh
-     2 | // package pkg2
-[3]  3 | <<file: __PackageOverride('pkg2')>>
-     4 | type TShape = shape('x' => int);
-     5 | type TInt = int;
-     6 | type TClassAlias = Exception;
-[2]  7 | class Foo {}
-     8 | class Box<T> { public function __construct(public T $v) {} }
+ 1 | <?hh
+ 2 | // package pkg2
+ 3 | <<file: __PackageOverride('pkg2')>>
+   |                           ^^^^^^ [3]
+ 4 | type TShape = shape('x' => int);
+ 5 | type TInt = int;
+ 6 | type TClassAlias = Exception;
+ 7 | class Foo {}
+   |       ^^^ [2]
+ 8 | class Box<T> { public function __construct(public T $v) {} }
 
 PACKAGES.toml:3:11
-     1 | [packages]
-     2 | 
-[4]  3 | [packages.pkg1]
-     4 | include_paths=["//"]
-     5 | 
+ 1 | [packages]
+ 2 | 
+ 3 | [packages.pkg1]
+   |           ^^^^ [4]
+ 4 | include_paths=["//"]
+ 5 | 
 
-error: Typing[4472] Cannot access type alias used as an enforceable type hint Box defined in package pkg2 which may not be available [1]
--> Box is defined in cross_package_enforceable_type_alias_generics.php--foo.php [2]
--> Box belongs to package pkg2 by this package override [3]
--> package pkg1 is available because the current file belongs to it by this package definition [4]
+error: Typing[4472] Cannot access type alias used as an enforceable type hint `Box` defined in package `pkg2` which may not be available [1]
+-> `Box` is defined in cross_package_enforceable_type_alias_generics.php--foo.php [2]
+-> `Box` belongs to package `pkg2` by this package override [3]
+-> package `pkg1` is available because the current file belongs to it by this package definition [4]
 
 cross_package_enforceable_type_alias_generics.php--bar.php:39:20
-    37 | // Plain (non-container) generic class: HHVM enforces only the outer class
-    38 | // `Box`, not the type argument. Inner `TShape` should NOT trigger.
-[1] 39 | function box_param(Box<TShape> $_): void {}
-    40 | function box_return(): Box<TShape> { return new Box(shape('x' => 1)); }
-    41 | class WithBoxProp {
+37 | // Plain (non-container) generic class: HHVM enforces only the outer class
+38 | // `Box`, not the type argument. Inner `TShape` should NOT trigger.
+39 | function box_param(Box<TShape> $_): void {}
+   |                    ^^^^^^^^^^^ [1]
+40 | function box_return(): Box<TShape> { return new Box(shape('x' => 1)); }
+41 | class WithBoxProp {
 
 cross_package_enforceable_type_alias_generics.php--foo.php:8:7
-     1 | <?hh
-     2 | // package pkg2
-[3]  3 | <<file: __PackageOverride('pkg2')>>
-     4 | type TShape = shape('x' => int);
-     5 | type TInt = int;
-     6 | type TClassAlias = Exception;
-     7 | class Foo {}
-[2]  8 | class Box<T> { public function __construct(public T $v) {} }
+ 1 | <?hh
+ 2 | // package pkg2
+ 3 | <<file: __PackageOverride('pkg2')>>
+   |                           ^^^^^^ [3]
+ 4 | type TShape = shape('x' => int);
+ 5 | type TInt = int;
+ 6 | type TClassAlias = Exception;
+ 7 | class Foo {}
+ 8 | class Box<T> { public function __construct(public T $v) {} }
+   |       ^^^ [2]
 
 PACKAGES.toml:3:11
-     1 | [packages]
-     2 | 
-[4]  3 | [packages.pkg1]
-     4 | include_paths=["//"]
-     5 | 
+ 1 | [packages]
+ 2 | 
+ 3 | [packages.pkg1]
+   |           ^^^^ [4]
+ 4 | include_paths=["//"]
+ 5 | 
 
-error: Typing[4472] Cannot access type alias used as an enforceable type hint Box defined in package pkg2 which may not be available [1]
--> Box is defined in cross_package_enforceable_type_alias_generics.php--foo.php [2]
--> Box belongs to package pkg2 by this package override [3]
--> package pkg1 is available because the current file belongs to it by this package definition [4]
+error: Typing[4472] Cannot access type alias used as an enforceable type hint `Box` defined in package `pkg2` which may not be available [1]
+-> `Box` is defined in cross_package_enforceable_type_alias_generics.php--foo.php [2]
+-> `Box` belongs to package `pkg2` by this package override [3]
+-> package `pkg1` is available because the current file belongs to it by this package definition [4]
 
 cross_package_enforceable_type_alias_generics.php--bar.php:40:24
-    38 | // `Box`, not the type argument. Inner `TShape` should NOT trigger.
-    39 | function box_param(Box<TShape> $_): void {}
-[1] 40 | function box_return(): Box<TShape> { return new Box(shape('x' => 1)); }
-    41 | class WithBoxProp {
-    42 |   public ?Box<TShape> $box_of_shape = null;
+38 | // `Box`, not the type argument. Inner `TShape` should NOT trigger.
+39 | function box_param(Box<TShape> $_): void {}
+40 | function box_return(): Box<TShape> { return new Box(shape('x' => 1)); }
+   |                        ^^^^^^^^^^^ [1]
+41 | class WithBoxProp {
+42 |   public ?Box<TShape> $box_of_shape = null;
 
 cross_package_enforceable_type_alias_generics.php--foo.php:8:7
-     1 | <?hh
-     2 | // package pkg2
-[3]  3 | <<file: __PackageOverride('pkg2')>>
-     4 | type TShape = shape('x' => int);
-     5 | type TInt = int;
-     6 | type TClassAlias = Exception;
-     7 | class Foo {}
-[2]  8 | class Box<T> { public function __construct(public T $v) {} }
+ 1 | <?hh
+ 2 | // package pkg2
+ 3 | <<file: __PackageOverride('pkg2')>>
+   |                           ^^^^^^ [3]
+ 4 | type TShape = shape('x' => int);
+ 5 | type TInt = int;
+ 6 | type TClassAlias = Exception;
+ 7 | class Foo {}
+ 8 | class Box<T> { public function __construct(public T $v) {} }
+   |       ^^^ [2]
 
 PACKAGES.toml:3:11
-     1 | [packages]
-     2 | 
-[4]  3 | [packages.pkg1]
-     4 | include_paths=["//"]
-     5 | 
+ 1 | [packages]
+ 2 | 
+ 3 | [packages.pkg1]
+   |           ^^^^ [4]
+ 4 | include_paths=["//"]
+ 5 | 
 
-error: Typing[4472] Cannot access class Box defined in package pkg2 which may not be available [1]
--> Box is defined in cross_package_enforceable_type_alias_generics.php--foo.php [2]
--> Box belongs to package pkg2 by this package override [3]
--> package pkg1 is available because the current file belongs to it by this package definition [4]
+error: Typing[4472] Cannot access class `Box` defined in package `pkg2` which may not be available [1]
+-> `Box` is defined in cross_package_enforceable_type_alias_generics.php--foo.php [2]
+-> `Box` belongs to package `pkg2` by this package override [3]
+-> package `pkg1` is available because the current file belongs to it by this package definition [4]
 
 cross_package_enforceable_type_alias_generics.php--bar.php:40:49
-    38 | // `Box`, not the type argument. Inner `TShape` should NOT trigger.
-    39 | function box_param(Box<TShape> $_): void {}
-[1] 40 | function box_return(): Box<TShape> { return new Box(shape('x' => 1)); }
-    41 | class WithBoxProp {
-    42 |   public ?Box<TShape> $box_of_shape = null;
+38 | // `Box`, not the type argument. Inner `TShape` should NOT trigger.
+39 | function box_param(Box<TShape> $_): void {}
+40 | function box_return(): Box<TShape> { return new Box(shape('x' => 1)); }
+   |                                                 ^^^ [1]
+41 | class WithBoxProp {
+42 |   public ?Box<TShape> $box_of_shape = null;
 
 cross_package_enforceable_type_alias_generics.php--foo.php:8:7
-     1 | <?hh
-     2 | // package pkg2
-[3]  3 | <<file: __PackageOverride('pkg2')>>
-     4 | type TShape = shape('x' => int);
-     5 | type TInt = int;
-     6 | type TClassAlias = Exception;
-     7 | class Foo {}
-[2]  8 | class Box<T> { public function __construct(public T $v) {} }
+ 1 | <?hh
+ 2 | // package pkg2
+ 3 | <<file: __PackageOverride('pkg2')>>
+   |                           ^^^^^^ [3]
+ 4 | type TShape = shape('x' => int);
+ 5 | type TInt = int;
+ 6 | type TClassAlias = Exception;
+ 7 | class Foo {}
+ 8 | class Box<T> { public function __construct(public T $v) {} }
+   |       ^^^ [2]
 
 PACKAGES.toml:3:11
-     1 | [packages]
-     2 | 
-[4]  3 | [packages.pkg1]
-     4 | include_paths=["//"]
-     5 | 
+ 1 | [packages]
+ 2 | 
+ 3 | [packages.pkg1]
+   |           ^^^^ [4]
+ 4 | include_paths=["//"]
+ 5 | 
 
-error: Typing[4472] Cannot access type alias used as an enforceable type hint Box defined in package pkg2 which may not be available [1]
--> Box is defined in cross_package_enforceable_type_alias_generics.php--foo.php [2]
--> Box belongs to package pkg2 by this package override [3]
--> package pkg1 is available because the current file belongs to it by this package definition [4]
+error: Typing[4472] Cannot access type alias used as an enforceable type hint `Box` defined in package `pkg2` which may not be available [1]
+-> `Box` is defined in cross_package_enforceable_type_alias_generics.php--foo.php [2]
+-> `Box` belongs to package `pkg2` by this package override [3]
+-> package `pkg1` is available because the current file belongs to it by this package definition [4]
 
 cross_package_enforceable_type_alias_generics.php--bar.php:42:11
-    40 | function box_return(): Box<TShape> { return new Box(shape('x' => 1)); }
-    41 | class WithBoxProp {
-[1] 42 |   public ?Box<TShape> $box_of_shape = null;
-    43 | }
+40 | function box_return(): Box<TShape> { return new Box(shape('x' => 1)); }
+41 | class WithBoxProp {
+42 |   public ?Box<TShape> $box_of_shape = null;
+   |           ^^^^^^^^^^^ [1]
+43 | }
 
 cross_package_enforceable_type_alias_generics.php--foo.php:8:7
-     1 | <?hh
-     2 | // package pkg2
-[3]  3 | <<file: __PackageOverride('pkg2')>>
-     4 | type TShape = shape('x' => int);
-     5 | type TInt = int;
-     6 | type TClassAlias = Exception;
-     7 | class Foo {}
-[2]  8 | class Box<T> { public function __construct(public T $v) {} }
+ 1 | <?hh
+ 2 | // package pkg2
+ 3 | <<file: __PackageOverride('pkg2')>>
+   |                           ^^^^^^ [3]
+ 4 | type TShape = shape('x' => int);
+ 5 | type TInt = int;
+ 6 | type TClassAlias = Exception;
+ 7 | class Foo {}
+ 8 | class Box<T> { public function __construct(public T $v) {} }
+   |       ^^^ [2]
 
 PACKAGES.toml:3:11
-     1 | [packages]
-     2 | 
-[4]  3 | [packages.pkg1]
-     4 | include_paths=["//"]
-     5 | 
+ 1 | [packages]
+ 2 | 
+ 3 | [packages.pkg1]
+   |           ^^^^ [4]
+ 4 | include_paths=["//"]
+ 5 | 
 
 8 errors found

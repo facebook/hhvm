@@ -1,55 +1,66 @@
 error: NastCheck[3109] Invalid package expression [1]
--> This code is in package pkg3 by package override [2]
--> The checked package pkg1 must strictly include (i.e. cannot equal) pkg3 [3]
+-> This code is in package `pkg3` by package override [2]
+-> The checked package `pkg1` must strictly include (i.e. cannot equal) `pkg3` [3]
 
 cross_package_with_package_syntax_if_nested.php--pkg3.php:4:15
-    1 | <?hh
-[2] 2 | <<file: __PackageOverride('pkg3')>>
-    3 | function test(): void {
-[1] 4 |   if (package pkg1) {
-    5 |     if (package pkg7) {
-    6 |       // both pkg1 and pkg7 are accessible here
+1 | <?hh
+2 | <<file: __PackageOverride('pkg3')>>
+  |                           ^^^^^^ [2]
+3 | function test(): void {
+4 |   if (package pkg1) {
+  |               ^^^^ [1]
+5 |     if (package pkg7) {
+6 |       // both pkg1 and pkg7 are accessible here
 
 PACKAGES.toml:3:11
-    1 | [packages]
-    2 | 
-[3] 3 | [packages.pkg1]
-    4 | include_paths=["//"]
-    5 | 
+1 | [packages]
+2 | 
+3 | [packages.pkg1]
+  |           ^^^^ [3]
+4 | include_paths=["//"]
+5 | 
 
-error: Typing[4472] Cannot access function pkg7_call defined in package pkg7 which may not be available [1]
--> pkg7_call is defined in cross_package_with_package_syntax_if_nested.php--pkg7.php [2]
--> pkg7_call belongs to package pkg7 by this package override [3]
--> package pkg3 is available because the current file belongs to it by this package override [4]
--> package pkg1 is assumed to be deployed here [5]
--> pkg3 includes pkg2 via its definition [6]
--> pkg3 includes pkg2_soft via its definition [7]
--> pkg3 includes pkg1 via its definition [8]
+error: Typing[4472] Cannot access function `pkg7_call` defined in package `pkg7` which may not be available [1]
+-> `pkg7_call` is defined in cross_package_with_package_syntax_if_nested.php--pkg7.php [2]
+-> `pkg7_call` belongs to package `pkg7` by this package override [3]
+-> package `pkg3` is available because the current file belongs to it by this package override [4]
+-> package `pkg1` is assumed to be deployed here [5]
+-> `pkg3` includes `pkg2` via its definition [6]
+-> `pkg3` includes `pkg2_soft` via its definition [7]
+-> `pkg3` includes `pkg1` via its definition [8]
 
 cross_package_with_package_syntax_if_nested.php--pkg3.php:12:5
-         1 | <?hh
-[4]      2 | <<file: __PackageOverride('pkg3')>>
-         3 | function test(): void {
-[5]      4 |   if (package pkg1) {
-         5 |     if (package pkg7) {
-         6 |       // both pkg1 and pkg7 are accessible here
-           :
-        10 |     // only pkg1 is accessible here
-        11 |     pkg1_call(); // ok
-[1]     12 |     pkg7_call(); // error
-        13 |   }
-        14 | }
+ 1 | <?hh
+ 2 | <<file: __PackageOverride('pkg3')>>
+   |                           ^^^^^^ [4]
+ 3 | function test(): void {
+ 4 |   if (package pkg1) {
+   |               ^^^^ [5]
+ 5 |     if (package pkg7) {
+ 6 |       // both pkg1 and pkg7 are accessible here
+   :
+10 |     // only pkg1 is accessible here
+11 |     pkg1_call(); // ok
+12 |     pkg7_call(); // error
+   |     ^^^^^^^^^ [1]
+13 |   }
+14 | }
 
 cross_package_with_package_syntax_if_nested.php--pkg7.php:3:10
-         1 | <?hh
-[3]      2 | <<file: __PackageOverride('pkg7')>>
-[2]      3 | function pkg7_call(): void {}
+ 1 | <?hh
+ 2 | <<file: __PackageOverride('pkg7')>>
+   |                           ^^^^^^ [3]
+ 3 | function pkg7_call(): void {}
+   |          ^^^^^^^^^ [2]
 
 PACKAGES.toml:18:13
-        16 | 
-        17 | [packages.pkg3]
-[6,7,8] 18 | includes = ["pkg2", "pkg2_soft", "pkg1"]
-        19 | 
-        20 | [packages.pkg4]
+16 | 
+17 | [packages.pkg3]
+18 | includes = ["pkg2", "pkg2_soft", "pkg1"]
+   |             ^^^^^^ [6]
+   |                     ^^^^^^^^^^^ [7]
+   |                                  ^^^^^^ [8]
+19 | 
+20 | [packages.pkg4]
 
 2 errors found

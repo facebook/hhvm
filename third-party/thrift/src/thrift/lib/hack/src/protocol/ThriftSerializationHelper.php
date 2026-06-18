@@ -218,14 +218,19 @@ abstract final class ThriftSerializationHelper {
         }
 
         // Convert collection to the correct format.
-        if (Shapes::at($tspec, 'format') === 'harray') {
-          $list = $list;
-        } else if (Shapes::at($tspec, 'format') === 'collection') {
-          $list = new Vector($list);
-        } else { // format === 'array'
-          $list = (($protocol->getOptions() & THRIFT_MARK_LEGACY_ARRAYS) !== 0)
-            ? HH\array_mark_legacy($list)
-            : $list;
+        switch (Shapes::at($tspec, 'format')) {
+          case 'harray':
+            break;
+          case 'collection':
+            $list = new Vector($list);
+            break;
+          default: // format === 'array'
+            $list = (
+              ($protocol->getOptions() & THRIFT_MARK_LEGACY_ARRAYS) !== 0
+            )
+              ? HH\array_mark_legacy($list)
+              : $list;
+            break;
         }
 
         $object = $list;
@@ -236,52 +241,86 @@ abstract final class ThriftSerializationHelper {
         $element_type = null;
         $xfer += $protocol->readSetBegin(inout $element_type, inout $size);
 
-        $set = keyset[];
-        for ($i = 0; $size === null || $i < $size; ++$i) {
-          if ($size === null && !$protocol->readSetHasNext()) {
-            break;
-          }
-
-          $set_element = null;
-          $xfer += self::readStructHelper(
-            $protocol,
+        $format = Shapes::at($tspec, 'format');
+        if ($format === 'object_key') {
+          $obj_set = new ThriftSet(
             Shapes::at($tspec, 'etype'),
-            inout $set_element,
             Shapes::at($tspec, 'elem'),
-            inout $has_type_wrapper,
           );
+          for ($i = 0; $size === null || $i < $size; ++$i) {
+            if ($size === null && !$protocol->readSetHasNext()) {
+              break;
+            }
 
-          // If the element type is enum and the enum
-          // does not exist, it will return a null.
-          if ($set_element === null) {
-            continue;
+            $set_element = null;
+            $xfer += self::readStructHelper(
+              $protocol,
+              Shapes::at($tspec, 'etype'),
+              inout $set_element,
+              Shapes::at($tspec, 'elem'),
+              inout $has_type_wrapper,
+            );
+
+            if ($set_element === null) {
+              continue;
+            }
+
+            $obj_set->add($set_element);
+          }
+          $object = $obj_set;
+        } else {
+          $set = keyset[];
+          for ($i = 0; $size === null || $i < $size; ++$i) {
+            if ($size === null && !$protocol->readSetHasNext()) {
+              break;
+            }
+
+            $set_element = null;
+            $xfer += self::readStructHelper(
+              $protocol,
+              Shapes::at($tspec, 'etype'),
+              inout $set_element,
+              Shapes::at($tspec, 'elem'),
+              inout $has_type_wrapper,
+            );
+
+            // If the element type is enum and the enum
+            // does not exist, it will return a null.
+            if ($set_element === null) {
+              continue;
+            }
+
+            $set[] = HH\FIXME\UNSAFE_CAST<nonnull, arraykey>(
+              $set_element,
+              'Keyset value must be an arraykey',
+            );
           }
 
-          $set[] = HH\FIXME\UNSAFE_CAST<nonnull, arraykey>(
-            $set_element,
-            'Keyset value must be an arraykey',
-          );
-        }
-
-        // Convert collection to the correct format.
-        if (Shapes::at($tspec, 'format') === 'harray') {
-          $set = $set;
-        } else if (Shapes::at($tspec, 'format') === 'collection') {
-          $set = new Set($set);
-        } else { // format === 'array'
-          // When using a set array(), we can't append in the normal way.
-          // Therefore, we need to distinguish between the two types
-          // before we add the element to the set.
-          $tmp = (($protocol->getOptions() & THRIFT_MARK_LEGACY_ARRAYS) !== 0)
-            ? HH\array_mark_legacy(dict[])
-            : dict[];
-          foreach ($set as $set_element) {
-            $tmp[PHPArrayism::preserveLegacyKey($set_element)] = true;
+          // Convert collection to the correct format.
+          switch ($format) {
+            case 'harray':
+              break;
+            case 'collection':
+              $set = new Set($set);
+              break;
+            default: // format === 'array'
+              // When using a set array(), we can't append in the normal way.
+              // Therefore, we need to distinguish between the two types
+              // before we add the element to the set.
+              $tmp = (
+                ($protocol->getOptions() & THRIFT_MARK_LEGACY_ARRAYS) !== 0
+              )
+                ? HH\array_mark_legacy(dict[])
+                : dict[];
+              foreach ($set as $set_element) {
+                $tmp[PHPArrayism::preserveLegacyKey($set_element)] = true;
+              }
+              $set = $tmp;
+              break;
           }
-          $set = $tmp;
+          $object = $set;
         }
 
-        $object = $set;
         $xfer += $protocol->readSetEnd();
         break;
       case TType::MAP:
@@ -294,53 +333,96 @@ abstract final class ThriftSerializationHelper {
           inout $size,
         );
 
-        $map = dict[];
+        $format = Shapes::at($tspec, 'format');
         $val_spec = Shapes::at($tspec, 'val');
         $has_type_wrapper = $has_type_wrapper ||
           (Shapes::idx($val_spec, 'is_type_wrapped') ?? false);
-        for ($i = 0; $size === null || $i < $size; ++$i) {
-          if ($size === null && !$protocol->readMapHasNext()) {
-            break;
-          }
 
-          $key = null;
-          $val = null;
-          $xfer += self::readStructHelper(
-            $protocol,
+        if ($format === 'object_key') {
+          $obj_map = new ThriftMap<mixed, mixed>(
             Shapes::at($tspec, 'ktype'),
-            inout $key,
             Shapes::at($tspec, 'key'),
-            inout $has_type_wrapper,
           );
-          $xfer += self::readStructHelper(
-            $protocol,
-            Shapes::at($tspec, 'vtype'),
-            inout $val,
-            $val_spec,
-            inout $has_type_wrapper,
-          );
+          for ($i = 0; $size === null || $i < $size; ++$i) {
+            if ($size === null && !$protocol->readMapHasNext()) {
+              break;
+            }
 
-          // If the element type is enum and the enum
-          // does not exist, it will return a null.
-          if ($key === null || $val === null) {
-            continue;
+            $key = null;
+            $val = null;
+            $xfer += self::readStructHelper(
+              $protocol,
+              Shapes::at($tspec, 'ktype'),
+              inout $key,
+              Shapes::at($tspec, 'key'),
+              inout $has_type_wrapper,
+            );
+            $xfer += self::readStructHelper(
+              $protocol,
+              Shapes::at($tspec, 'vtype'),
+              inout $val,
+              $val_spec,
+              inout $has_type_wrapper,
+            );
+
+            if ($key === null || $val === null) {
+              continue;
+            }
+
+            $obj_map->set($key, $val);
+          }
+          $object = $obj_map;
+        } else {
+          $map = dict[];
+          for ($i = 0; $size === null || $i < $size; ++$i) {
+            if ($size === null && !$protocol->readMapHasNext()) {
+              break;
+            }
+
+            $key = null;
+            $val = null;
+            $xfer += self::readStructHelper(
+              $protocol,
+              Shapes::at($tspec, 'ktype'),
+              inout $key,
+              Shapes::at($tspec, 'key'),
+              inout $has_type_wrapper,
+            );
+            $xfer += self::readStructHelper(
+              $protocol,
+              Shapes::at($tspec, 'vtype'),
+              inout $val,
+              $val_spec,
+              inout $has_type_wrapper,
+            );
+
+            // If the element type is enum and the enum
+            // does not exist, it will return a null.
+            if ($key === null || $val === null) {
+              continue;
+            }
+
+            $map[ArgAssert::isArraykey($key)] = $val;
           }
 
-          $map[ArgAssert::isArraykey($key)] = $val;
+          // Convert collection to the correct format.
+          switch ($format) {
+            case 'harray':
+              break;
+            case 'collection':
+              $map = new Map($map);
+              break;
+            default: // format === 'array'
+              $map = (
+                ($protocol->getOptions() & THRIFT_MARK_LEGACY_ARRAYS) !== 0
+              )
+                ? HH\array_mark_legacy($map)
+                : $map;
+              break;
+          }
+          $object = $map;
         }
 
-        // Convert collection to the correct format.
-        if (Shapes::at($tspec, 'format') === 'harray') {
-          $map = $map;
-        } else if (Shapes::at($tspec, 'format') === 'collection') {
-          $map = new Map($map);
-        } else { // format === 'array'
-          $map = (($protocol->getOptions() & THRIFT_MARK_LEGACY_ARRAYS) !== 0)
-            ? HH\array_mark_legacy($map)
-            : $map;
-        }
-
-        $object = $map;
         $xfer += $protocol->readMapEnd();
         break;
       case TType::STRUCT:
@@ -591,20 +673,36 @@ abstract final class ThriftSerializationHelper {
           PHP\count($object),
         );
         if ($object !== null) {
-          foreach (
-            PHPism_FIXME::coerceKeyedTraversableOrObject(
-              HH\FIXME\UNSAFE_CAST<nonnull, KeyedTraversable<nothing, nothing>>(
-                $object,
-                'FIXME[4110] It should be a keyed traversable in this branch',
-              ),
-            ) as $key => $iter
+          $etype = Shapes::at($tspec, 'etype');
+          $espec = Shapes::at($tspec, 'elem');
+          if (
+            Shapes::at($tspec, 'format') === 'object_key' &&
+            $object is ThriftSet<_>
           ) {
-            $xfer += self::writeStructHelper(
-              $protocol,
-              Shapes::at($tspec, 'etype'),
-              Shapes::at($tspec, 'format') === 'array' ? $key : $iter,
-              Shapes::at($tspec, 'elem'),
-            );
+            foreach ($object as $elem) {
+              $elem = self::unwrapApplyAdapter($elem, $espec);
+              $xfer +=
+                self::writeStructHelper($protocol, $etype, $elem, $espec);
+            }
+          } else {
+            foreach (
+              PHPism_FIXME::coerceKeyedTraversableOrObject(
+                HH\FIXME\UNSAFE_CAST<
+                  nonnull,
+                  KeyedTraversable<nothing, nothing>,
+                >(
+                  $object,
+                  'FIXME[4110] It should be a keyed traversable in this branch',
+                ),
+              ) as $key => $iter
+            ) {
+              $xfer += self::writeStructHelper(
+                $protocol,
+                $etype,
+                Shapes::at($tspec, 'format') === 'array' ? $key : $iter,
+                $espec,
+              );
+            }
           }
         }
         $xfer += $protocol->writeSetEnd();
@@ -616,29 +714,40 @@ abstract final class ThriftSerializationHelper {
           PHP\count($object),
         );
         if ($object !== null) {
-          foreach (
-            PHPism_FIXME::coerceKeyedTraversableOrObject(
-              HH\FIXME\UNSAFE_CAST<nonnull, KeyedTraversable<nothing, nothing>>(
-                $object,
-                'FIXME[4110] It should be a keyed traversable in this branch',
-              ),
-            ) as $kiter => $viter
+          $ktype = Shapes::at($tspec, 'ktype');
+          $vtype = Shapes::at($tspec, 'vtype');
+          $kspec = Shapes::at($tspec, 'key');
+          $vspec = Shapes::at($tspec, 'val');
+          if (
+            Shapes::at($tspec, 'format') === 'object_key' &&
+            $object is ThriftMap<_, _>
           ) {
-            $vspec = Shapes::at($tspec, 'val');
-            $viter = self::unwrapApplyAdapter($viter, $vspec);
-
-            $xfer += self::writeStructHelper(
-              $protocol,
-              Shapes::at($tspec, 'ktype'),
-              $kiter,
-              Shapes::at($tspec, 'key'),
-            );
-            $xfer += self::writeStructHelper(
-              $protocol,
-              Shapes::at($tspec, 'vtype'),
-              $viter,
-              $vspec,
-            );
+            foreach ($object as $kiter => $viter) {
+              $kiter = self::unwrapApplyAdapter($kiter, $kspec);
+              $viter = self::unwrapApplyAdapter($viter, $vspec);
+              $xfer +=
+                self::writeStructHelper($protocol, $ktype, $kiter, $kspec);
+              $xfer +=
+                self::writeStructHelper($protocol, $vtype, $viter, $vspec);
+            }
+          } else {
+            foreach (
+              PHPism_FIXME::coerceKeyedTraversableOrObject(
+                HH\FIXME\UNSAFE_CAST<
+                  nonnull,
+                  KeyedTraversable<nothing, nothing>,
+                >(
+                  $object,
+                  'FIXME[4110] It should be a keyed traversable in this branch',
+                ),
+              ) as $kiter => $viter
+            ) {
+              $viter = self::unwrapApplyAdapter($viter, $vspec);
+              $xfer +=
+                self::writeStructHelper($protocol, $ktype, $kiter, $kspec);
+              $xfer +=
+                self::writeStructHelper($protocol, $vtype, $viter, $vspec);
+            }
           }
         }
         $xfer += $protocol->writeMapEnd();

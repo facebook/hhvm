@@ -80,16 +80,12 @@ class ServiceAsyncClient extends \ThriftClientBase implements ServiceAsyncClient
   use ServiceClientBase;
 
   const string THRIFT_SVC_NAME = ServiceStaticMetadata::THRIFT_SVC_NAME;
-  const string THRIFT_SVC_FULL_NAME = ServiceStaticMetadata::THRIFT_SVC_FULL_NAME;
-
 }
 
 class ServiceClient extends \ThriftClientBase implements ServiceClientIf {
   use ServiceClientBase;
 
   const string THRIFT_SVC_NAME = ServiceStaticMetadata::THRIFT_SVC_NAME;
-  const string THRIFT_SVC_FULL_NAME = ServiceStaticMetadata::THRIFT_SVC_FULL_NAME;
-
 }
 
 // HELPER FUNCTIONS AND STRUCTURES
@@ -450,7 +446,6 @@ class Service_func_result extends \ThriftSyncStructWithResult implements \IThrif
 
 class ServiceStaticMetadata implements \IThriftServiceStaticMetadata {
   const string THRIFT_SVC_NAME = 'Service';
-  const string THRIFT_SVC_FULL_NAME = '\facebook\thrift\test\fixtures\adapter\Service';
 
   public static function getServiceMetadata()[]: \tmeta_ThriftService {
     return \tmeta_ThriftService::fromShape(

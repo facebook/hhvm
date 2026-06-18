@@ -92,16 +92,12 @@ class MyServicePrioParentAsyncClient extends \ThriftClientBase implements MyServ
   use MyServicePrioParentClientBase;
 
   const string THRIFT_SVC_NAME = MyServicePrioParentStaticMetadata::THRIFT_SVC_NAME;
-  const string THRIFT_SVC_FULL_NAME = MyServicePrioParentStaticMetadata::THRIFT_SVC_FULL_NAME;
-
 }
 
 class MyServicePrioParentClient extends \ThriftClientBase implements MyServicePrioParentClientIf {
   use MyServicePrioParentClientBase;
 
   const string THRIFT_SVC_NAME = MyServicePrioParentStaticMetadata::THRIFT_SVC_NAME;
-  const string THRIFT_SVC_FULL_NAME = MyServicePrioParentStaticMetadata::THRIFT_SVC_FULL_NAME;
-
 }
 
 abstract class MyServicePrioParentAsyncProcessorBase extends \ThriftAsyncProcessor {
@@ -109,7 +105,6 @@ abstract class MyServicePrioParentAsyncProcessorBase extends \ThriftAsyncProcess
   abstract const type TThriftIf as MyServicePrioParentAsyncIf;
   const class<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = MyServicePrioParentStaticMetadata::class;
   const string THRIFT_SVC_NAME = MyServicePrioParentStaticMetadata::THRIFT_SVC_NAME;
-  const string THRIFT_SVC_FULL_NAME = MyServicePrioParentStaticMetadata::THRIFT_SVC_FULL_NAME;
 
   protected async function process_ping(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('ping');
@@ -117,7 +112,7 @@ abstract class MyServicePrioParentAsyncProcessorBase extends \ThriftAsyncProcess
     $result = MyServicePrioParent_ping_result::withDefaultValues();
     try {
       $args = $this->readHelper(MyServicePrioParent_ping_args::class, $input, 'ping', $handler_ctx);
-      $this->eventHandler_->preExec($handler_ctx, self::THRIFT_SVC_FULL_NAME, 'ping', $args);
+      $this->eventHandler_->preExec($handler_ctx, 'MyServicePrioParent', 'ping', $args);
       await $this->handler->ping();
       $this->eventHandler_->postExec($handler_ctx, 'ping', $result);
     } catch (\Exception $ex) {
@@ -133,7 +128,7 @@ abstract class MyServicePrioParentAsyncProcessorBase extends \ThriftAsyncProcess
     $result = MyServicePrioParent_pong_result::withDefaultValues();
     try {
       $args = $this->readHelper(MyServicePrioParent_pong_args::class, $input, 'pong', $handler_ctx);
-      $this->eventHandler_->preExec($handler_ctx, self::THRIFT_SVC_FULL_NAME, 'pong', $args);
+      $this->eventHandler_->preExec($handler_ctx, 'MyServicePrioParent', 'pong', $args);
       await $this->handler->pong();
       $this->eventHandler_->postExec($handler_ctx, 'pong', $result);
     } catch (\Exception $ex) {
@@ -456,7 +451,6 @@ class MyServicePrioParent_pong_result extends \ThriftSyncStructWithoutResult imp
 
 class MyServicePrioParentStaticMetadata implements \IThriftServiceStaticMetadata {
   const string THRIFT_SVC_NAME = 'MyServicePrioParent';
-  const string THRIFT_SVC_FULL_NAME = 'MyServicePrioParent';
 
   public static function getServiceMetadata()[]: \tmeta_ThriftService {
     return tmeta_ThriftService::fromShape(

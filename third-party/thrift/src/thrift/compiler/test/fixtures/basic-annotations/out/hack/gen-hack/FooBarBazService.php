@@ -119,16 +119,12 @@ class FooBarBazServiceAsyncClient extends \ThriftClientBase implements FooBarBaz
   use FooBarBazServiceClientBase;
 
   const string THRIFT_SVC_NAME = FooBarBazServiceStaticMetadata::THRIFT_SVC_NAME;
-  const string THRIFT_SVC_FULL_NAME = FooBarBazServiceStaticMetadata::THRIFT_SVC_FULL_NAME;
-
 }
 
 class FooBarBazServiceClient extends \ThriftClientBase implements FooBarBazServiceClientIf {
   use FooBarBazServiceClientBase;
 
   const string THRIFT_SVC_NAME = FooBarBazServiceStaticMetadata::THRIFT_SVC_NAME;
-  const string THRIFT_SVC_FULL_NAME = FooBarBazServiceStaticMetadata::THRIFT_SVC_FULL_NAME;
-
 }
 
 abstract class FooBarBazServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
@@ -136,7 +132,6 @@ abstract class FooBarBazServiceAsyncProcessorBase extends \ThriftAsyncProcessor 
   abstract const type TThriftIf as FooBarBazServiceAsyncIf;
   const class<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = FooBarBazServiceStaticMetadata::class;
   const string THRIFT_SVC_NAME = FooBarBazServiceStaticMetadata::THRIFT_SVC_NAME;
-  const string THRIFT_SVC_FULL_NAME = FooBarBazServiceStaticMetadata::THRIFT_SVC_FULL_NAME;
 
   protected async function process_foo(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('foo');
@@ -144,7 +139,7 @@ abstract class FooBarBazServiceAsyncProcessorBase extends \ThriftAsyncProcessor 
     $result = FooBarBazService_foo_result::withDefaultValues();
     try {
       $args = $this->readHelper(FooBarBazService_foo_args::class, $input, 'foo', $handler_ctx);
-      $this->eventHandler_->preExec($handler_ctx, self::THRIFT_SVC_FULL_NAME, 'foo', $args);
+      $this->eventHandler_->preExec($handler_ctx, 'FooBarBazService', 'foo', $args);
       await $this->handler->foo();
       $this->eventHandler_->postExec($handler_ctx, 'foo', $result);
     } catch (\Exception $ex) {
@@ -160,7 +155,7 @@ abstract class FooBarBazServiceAsyncProcessorBase extends \ThriftAsyncProcessor 
     $result = FooBarBazService_bar_result::withDefaultValues();
     try {
       $args = $this->readHelper(FooBarBazService_bar_args::class, $input, 'bar', $handler_ctx);
-      $this->eventHandler_->preExec($handler_ctx, self::THRIFT_SVC_FULL_NAME, 'bar', $args);
+      $this->eventHandler_->preExec($handler_ctx, 'FooBarBazService', 'bar', $args);
       await $this->handler->bar();
       $this->eventHandler_->postExec($handler_ctx, 'bar', $result);
     } catch (\Exception $ex) {
@@ -176,7 +171,7 @@ abstract class FooBarBazServiceAsyncProcessorBase extends \ThriftAsyncProcessor 
     $result = FooBarBazService_baz_result::withDefaultValues();
     try {
       $args = $this->readHelper(FooBarBazService_baz_args::class, $input, 'baz', $handler_ctx);
-      $this->eventHandler_->preExec($handler_ctx, self::THRIFT_SVC_FULL_NAME, 'baz', $args);
+      $this->eventHandler_->preExec($handler_ctx, 'FooBarBazService', 'baz', $args);
       await $this->handler->baz();
       $this->eventHandler_->postExec($handler_ctx, 'baz', $result);
     } catch (\Exception $ex) {
@@ -645,7 +640,6 @@ class FooBarBazService_baz_result extends \ThriftSyncStructWithoutResult impleme
 
 class FooBarBazServiceStaticMetadata implements \IThriftServiceStaticMetadata {
   const string THRIFT_SVC_NAME = 'FooBarBazService';
-  const string THRIFT_SVC_FULL_NAME = 'FooBarBazService';
 
   public static function getServiceMetadata()[]: \tmeta_ThriftService {
     return tmeta_ThriftService::fromShape(

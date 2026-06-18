@@ -42,23 +42,18 @@ class FooHackServiceAsyncClient extends \ThriftClientBase implements FooHackServ
   use FooHackServiceClientBase;
 
   const string THRIFT_SVC_NAME = FooHackServiceStaticMetadata::THRIFT_SVC_NAME;
-  const string THRIFT_SVC_FULL_NAME = FooHackServiceStaticMetadata::THRIFT_SVC_FULL_NAME;
-
 }
 
 class FooHackServiceClient extends \ThriftClientBase implements FooHackServiceClientIf {
   use FooHackServiceClientBase;
 
   const string THRIFT_SVC_NAME = FooHackServiceStaticMetadata::THRIFT_SVC_NAME;
-  const string THRIFT_SVC_FULL_NAME = FooHackServiceStaticMetadata::THRIFT_SVC_FULL_NAME;
-
 }
 
 // HELPER FUNCTIONS AND STRUCTURES
 
 class FooHackServiceStaticMetadata implements \IThriftServiceStaticMetadata {
   const string THRIFT_SVC_NAME = 'FooHackService';
-  const string THRIFT_SVC_FULL_NAME = '\foo\hack_ns\FooHackService';
 
   public static function getServiceMetadata()[]: \tmeta_ThriftService {
     return \tmeta_ThriftService::fromShape(

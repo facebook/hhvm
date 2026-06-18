@@ -104,16 +104,12 @@ class Deprecated_FooHackServiceAsyncClient extends \ThriftClientBase implements 
   use Deprecated_FooHackServiceClientBase;
 
   const string THRIFT_SVC_NAME = Deprecated_FooHackServiceStaticMetadata::THRIFT_SVC_NAME;
-  const string THRIFT_SVC_FULL_NAME = Deprecated_FooHackServiceStaticMetadata::THRIFT_SVC_FULL_NAME;
-
 }
 
 class Deprecated_FooHackServiceClient extends \ThriftClientBase implements Deprecated_FooHackServiceClientIf {
   use Deprecated_FooHackServiceClientBase;
 
   const string THRIFT_SVC_NAME = Deprecated_FooHackServiceStaticMetadata::THRIFT_SVC_NAME;
-  const string THRIFT_SVC_FULL_NAME = Deprecated_FooHackServiceStaticMetadata::THRIFT_SVC_FULL_NAME;
-
 }
 
 abstract class Deprecated_FooHackServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
@@ -121,7 +117,6 @@ abstract class Deprecated_FooHackServiceAsyncProcessorBase extends \ThriftAsyncP
   abstract const type TThriftIf as Deprecated_FooHackServiceAsyncIf;
   const class<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = Deprecated_FooHackServiceStaticMetadata::class;
   const string THRIFT_SVC_NAME = Deprecated_FooHackServiceStaticMetadata::THRIFT_SVC_NAME;
-  const string THRIFT_SVC_FULL_NAME = Deprecated_FooHackServiceStaticMetadata::THRIFT_SVC_FULL_NAME;
 
   protected async function process_fetchStatus(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('fetchStatus');
@@ -129,7 +124,7 @@ abstract class Deprecated_FooHackServiceAsyncProcessorBase extends \ThriftAsyncP
     $result = Deprecated_FooHackService_fetchStatus_result::withDefaultValues();
     try {
       $args = $this->readHelper(Deprecated_FooHackService_fetchStatus_args::class, $input, 'fetchStatus', $handler_ctx);
-      $this->eventHandler_->preExec($handler_ctx, self::THRIFT_SVC_FULL_NAME, 'fetchStatus', $args);
+      $this->eventHandler_->preExec($handler_ctx, '\test\foo\php\ns\Deprecated_FooHackService', 'fetchStatus', $args);
       $result->success = await $this->handler->fetchStatus($args->request);
       $this->eventHandler_->postExec($handler_ctx, 'fetchStatus', $result);
     } catch (\Exception $ex) {
@@ -145,7 +140,7 @@ abstract class Deprecated_FooHackServiceAsyncProcessorBase extends \ThriftAsyncP
     $result = Deprecated_FooHackService_ping_result::withDefaultValues();
     try {
       $args = $this->readHelper(Deprecated_FooHackService_ping_args::class, $input, 'ping', $handler_ctx);
-      $this->eventHandler_->preExec($handler_ctx, self::THRIFT_SVC_FULL_NAME, 'ping', $args);
+      $this->eventHandler_->preExec($handler_ctx, '\test\foo\php\ns\Deprecated_FooHackService', 'ping', $args);
       $result->success = await $this->handler->ping($args->str_arg);
       $this->eventHandler_->postExec($handler_ctx, 'ping', $result);
     } catch (\Exception $ex) {
@@ -599,7 +594,6 @@ class Deprecated_FooHackService_ping_result extends \ThriftSyncStructWithResult 
 
 class Deprecated_FooHackServiceStaticMetadata implements \IThriftServiceStaticMetadata {
   const string THRIFT_SVC_NAME = 'FooHackService';
-  const string THRIFT_SVC_FULL_NAME = '\test\foo\php\ns\Deprecated_FooHackService';
 
   public static function getServiceMetadata()[]: \tmeta_ThriftService {
     return \tmeta_ThriftService::fromShape(

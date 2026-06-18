@@ -67,16 +67,12 @@ class MyServiceAsyncClient extends \ThriftClientBase implements MyServiceAsyncCl
   use MyServiceClientBase;
 
   const string THRIFT_SVC_NAME = MyServiceStaticMetadata::THRIFT_SVC_NAME;
-  const string THRIFT_SVC_FULL_NAME = MyServiceStaticMetadata::THRIFT_SVC_FULL_NAME;
-
 }
 
 class MyServiceClient extends \ThriftClientBase implements MyServiceClientIf {
   use MyServiceClientBase;
 
   const string THRIFT_SVC_NAME = MyServiceStaticMetadata::THRIFT_SVC_NAME;
-  const string THRIFT_SVC_FULL_NAME = MyServiceStaticMetadata::THRIFT_SVC_FULL_NAME;
-
 }
 
 abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
@@ -84,7 +80,6 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
   abstract const type TThriftIf as MyServiceAsyncIf;
   const class<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = MyServiceStaticMetadata::class;
   const string THRIFT_SVC_NAME = MyServiceStaticMetadata::THRIFT_SVC_NAME;
-  const string THRIFT_SVC_FULL_NAME = MyServiceStaticMetadata::THRIFT_SVC_FULL_NAME;
 
   protected async function process_second(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('second');
@@ -92,7 +87,7 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
     $result = MyService_second_result::withDefaultValues();
     try {
       $args = $this->readHelper(MyService_second_args::class, $input, 'second', $handler_ctx);
-      $this->eventHandler_->preExec($handler_ctx, self::THRIFT_SVC_FULL_NAME, 'second', $args);
+      $this->eventHandler_->preExec($handler_ctx, 'MyService', 'second', $args);
       $result->success = await $this->handler->second($args->count);
       $this->eventHandler_->postExec($handler_ctx, 'second', $result);
     } catch (\Exception $ex) {
@@ -379,7 +374,6 @@ class MyService_second_result extends \ThriftSyncStructWithResult implements \IT
 
 class MyServiceStaticMetadata implements \IThriftServiceStaticMetadata {
   const string THRIFT_SVC_NAME = 'MyService';
-  const string THRIFT_SVC_FULL_NAME = 'MyService';
 
   public static function getServiceMetadata()[]: \tmeta_ThriftService {
     return tmeta_ThriftService::fromShape(

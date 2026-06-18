@@ -78,24 +78,18 @@ class InteractWithSharedAsyncClient extends \ThriftClientBase implements Interac
   use InteractWithSharedClientBase;
 
   const string THRIFT_SVC_NAME = InteractWithSharedStaticMetadata::THRIFT_SVC_NAME;
-  const string THRIFT_SVC_FULL_NAME = InteractWithSharedStaticMetadata::THRIFT_SVC_FULL_NAME;
-
 }
 
 class InteractWithSharedClient extends \ThriftClientBase implements InteractWithSharedClientIf {
   use InteractWithSharedClientBase;
 
   const string THRIFT_SVC_NAME = InteractWithSharedStaticMetadata::THRIFT_SVC_NAME;
-  const string THRIFT_SVC_FULL_NAME = InteractWithSharedStaticMetadata::THRIFT_SVC_FULL_NAME;
-
 }
 
 // INTERACTION HANDLERS
 
 class InteractWithShared_MyInteraction extends \ThriftClientBase {
   const string THRIFT_SVC_NAME = InteractWithSharedStaticMetadata::THRIFT_SVC_NAME;
-
-  const string THRIFT_SVC_FULL_NAME = InteractWithSharedStaticMetadata::THRIFT_SVC_FULL_NAME;
 
   private \InteractionId $interactionId;
 
@@ -329,8 +323,6 @@ $rpc_options->setInteractionId($this->interactionId);
 
 class InteractWithShared_SharedInteraction extends \ThriftClientBase {
   const string THRIFT_SVC_NAME = InteractWithSharedStaticMetadata::THRIFT_SVC_NAME;
-
-  const string THRIFT_SVC_FULL_NAME = InteractWithSharedStaticMetadata::THRIFT_SVC_FULL_NAME;
 
   private \InteractionId $interactionId;
 
@@ -1696,7 +1688,6 @@ class InteractWithShared_SharedInteraction_tear_down_result extends \ThriftSyncS
 
 class InteractWithSharedStaticMetadata implements \IThriftServiceStaticMetadata {
   const string THRIFT_SVC_NAME = 'InteractWithShared';
-  const string THRIFT_SVC_FULL_NAME = 'InteractWithShared';
 
   public static function getServiceMetadata()[]: \tmeta_ThriftService {
     return tmeta_ThriftService::fromShape(

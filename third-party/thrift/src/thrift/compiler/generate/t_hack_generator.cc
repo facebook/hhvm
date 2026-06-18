@@ -141,7 +141,8 @@ class t_hack_generator : public t_concat_generator {
     server_stream_ = option_is_specified(options, "server_stream");
     skip_constants_ = option_is_specified(options, "skip_constants");
     split_types_ = option_is_specified(options, "split_types");
-
+    service_metadata_full_name_ =
+        option_is_specified(options, "__service_metadata_full_name");
     union_logger_rollout_ =
         option_is_specified(options, "__union_logger_rollout");
 
@@ -1437,6 +1438,12 @@ class t_hack_generator : public t_concat_generator {
    * True to generate service code for streaming methods
    */
   bool server_stream_;
+
+  /**
+   * True to generate a constant with the fully-prefixed name
+   * in service metadata
+   */
+  bool service_metadata_full_name_;
 
   bool has_hack_namespace;
 
@@ -6303,11 +6310,15 @@ void t_hack_generator::generate_service_processor(
                 "SERVICE_METADATA_CLASS = "
              << long_name << "StaticMetadata::class;\n"
              << indent() << "  const string THRIFT_SVC_NAME = " << long_name
-             << "StaticMetadata::THRIFT_SVC_NAME;\n"
-             << indent()
-             << "  const string THRIFT_SVC_FULL_NAME = " << long_name
-             << "StaticMetadata::THRIFT_SVC_FULL_NAME;\n\n";
+             << "StaticMetadata::THRIFT_SVC_NAME;\n";
 
+  if (service_metadata_full_name_) {
+    f_service_ << indent()
+               << "  const string THRIFT_SVC_FULL_NAME = " << long_name
+               << "StaticMetadata::THRIFT_SVC_FULL_NAME;\n";
+  }
+
+  f_service_ << "\n";
   indent_up();
 
   // Generate both old (process_*) and new (getMethodMetadata) patterns.
@@ -6622,10 +6633,15 @@ void t_hack_generator::generate_process_function(
              << "::class, $input, '" << fn_name << "', $handler_ctx);\n";
 
   // Generate the function call
-  indent(f_service_)
-      << "$this->eventHandler_->preExec($handler_ctx, self::THRIFT_SVC_FULL_NAME, '"
-      << fn_name << "', $args);\n";
+  f_service_ << indent() << "$this->eventHandler_->preExec($handler_ctx, ";
 
+  if (service_metadata_full_name_) {
+    f_service_ << "self::THRIFT_SVC_FULL_NAME";
+  } else {
+    f_service_ << "'" << service_name << "'";
+  }
+
+  f_service_ << ", '" << fn_name << "', $args);\n";
   f_service_ << indent();
   auto is_void = tfunction->return_type()->is_void();
   if (is_bidi_stream) {
@@ -6791,8 +6807,13 @@ void t_hack_generator::generate_service_helpers(
 
   f_service_ << indent() << "const string THRIFT_SVC_NAME = '"
              << tservice->name() << "';\n";
-  f_service_ << indent() << "const string THRIFT_SVC_FULL_NAME = '"
-             << hack_service_name(tservice) << "';\n\n";
+
+  if (service_metadata_full_name_) {
+    f_service_ << indent() << "const string THRIFT_SVC_FULL_NAME = '"
+               << hack_service_name(tservice) << "';\n";
+  }
+
+  f_service_ << "\n";
 
   // Expose service metadata
   f_service_ << indent() << "public static function getServiceMetadata()[]: "
@@ -6892,9 +6913,12 @@ void t_hack_generator::generate_service_interactions(
     f_service_ << indent() << "const string THRIFT_SVC_NAME = "
                << php_servicename_mangle(mangle, tservice)
                << "StaticMetadata::THRIFT_SVC_NAME;\n\n";
-    f_service_ << indent() << "const string THRIFT_SVC_FULL_NAME = "
-               << php_servicename_mangle(mangle, tservice)
-               << "StaticMetadata::THRIFT_SVC_FULL_NAME;\n\n";
+
+    if (service_metadata_full_name_) {
+      f_service_ << indent() << "const string THRIFT_SVC_FULL_NAME = "
+                 << php_servicename_mangle(mangle, tservice)
+                 << "StaticMetadata::THRIFT_SVC_FULL_NAME;\n\n";
+    }
 
     f_service_ << indent() << "private \\InteractionId $interactionId;\n\n";
 
@@ -8103,8 +8127,12 @@ void t_hack_generator::_generate_service_client_children(
   indent_up();
   out << indent() << "const string THRIFT_SVC_NAME = " << long_name
       << "StaticMetadata::THRIFT_SVC_NAME;\n";
-  out << indent() << "const string THRIFT_SVC_FULL_NAME = " << long_name
-      << "StaticMetadata::THRIFT_SVC_FULL_NAME;\n\n";
+
+  if (service_metadata_full_name_) {
+    out << indent() << "const string THRIFT_SVC_FULL_NAME = " << long_name
+        << "StaticMetadata::THRIFT_SVC_FULL_NAME;\n\n";
+  }
+
   indent_down();
   out << "}\n\n";
 }

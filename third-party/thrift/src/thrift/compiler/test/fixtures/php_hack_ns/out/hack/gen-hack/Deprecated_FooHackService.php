@@ -104,16 +104,12 @@ class Deprecated_FooHackServiceAsyncClient extends \ThriftClientBase implements 
   use Deprecated_FooHackServiceClientBase;
 
   const string THRIFT_SVC_NAME = Deprecated_FooHackServiceStaticMetadata::THRIFT_SVC_NAME;
-  const string THRIFT_SVC_FULL_NAME = Deprecated_FooHackServiceStaticMetadata::THRIFT_SVC_FULL_NAME;
-
 }
 
 class Deprecated_FooHackServiceClient extends \ThriftClientBase implements Deprecated_FooHackServiceClientIf {
   use Deprecated_FooHackServiceClientBase;
 
   const string THRIFT_SVC_NAME = Deprecated_FooHackServiceStaticMetadata::THRIFT_SVC_NAME;
-  const string THRIFT_SVC_FULL_NAME = Deprecated_FooHackServiceStaticMetadata::THRIFT_SVC_FULL_NAME;
-
 }
 
 // HELPER FUNCTIONS AND STRUCTURES
@@ -517,7 +513,6 @@ class Deprecated_FooHackService_ping_result extends \ThriftSyncStructWithResult 
 
 class Deprecated_FooHackServiceStaticMetadata implements \IThriftServiceStaticMetadata {
   const string THRIFT_SVC_NAME = 'FooHackService';
-  const string THRIFT_SVC_FULL_NAME = '\test\foo\php\ns\Deprecated_FooHackService';
 
   public static function getServiceMetadata()[]: \tmeta_ThriftService {
     return \tmeta_ThriftService::fromShape(

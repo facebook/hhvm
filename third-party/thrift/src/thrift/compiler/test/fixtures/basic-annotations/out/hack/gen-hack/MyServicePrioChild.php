@@ -65,16 +65,12 @@ class MyServicePrioChildAsyncClient extends MyServicePrioParentAsyncClient imple
   use MyServicePrioChildClientBase;
 
   const string THRIFT_SVC_NAME = MyServicePrioChildStaticMetadata::THRIFT_SVC_NAME;
-  const string THRIFT_SVC_FULL_NAME = MyServicePrioChildStaticMetadata::THRIFT_SVC_FULL_NAME;
-
 }
 
 class MyServicePrioChildClient extends MyServicePrioParentClient implements MyServicePrioChildClientIf {
   use MyServicePrioChildClientBase;
 
   const string THRIFT_SVC_NAME = MyServicePrioChildStaticMetadata::THRIFT_SVC_NAME;
-  const string THRIFT_SVC_FULL_NAME = MyServicePrioChildStaticMetadata::THRIFT_SVC_FULL_NAME;
-
 }
 
 abstract class MyServicePrioChildAsyncProcessorBase extends MyServicePrioParentAsyncProcessorBase {
@@ -82,7 +78,6 @@ abstract class MyServicePrioChildAsyncProcessorBase extends MyServicePrioParentA
   abstract const type TThriftIf as MyServicePrioChildAsyncIf;
   const class<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = MyServicePrioChildStaticMetadata::class;
   const string THRIFT_SVC_NAME = MyServicePrioChildStaticMetadata::THRIFT_SVC_NAME;
-  const string THRIFT_SVC_FULL_NAME = MyServicePrioChildStaticMetadata::THRIFT_SVC_FULL_NAME;
 
   protected async function process_pang(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('pang');
@@ -90,7 +85,7 @@ abstract class MyServicePrioChildAsyncProcessorBase extends MyServicePrioParentA
     $result = MyServicePrioChild_pang_result::withDefaultValues();
     try {
       $args = $this->readHelper(MyServicePrioChild_pang_args::class, $input, 'pang', $handler_ctx);
-      $this->eventHandler_->preExec($handler_ctx, self::THRIFT_SVC_FULL_NAME, 'pang', $args);
+      $this->eventHandler_->preExec($handler_ctx, 'MyServicePrioChild', 'pang', $args);
       await $this->handler->pang();
       $this->eventHandler_->postExec($handler_ctx, 'pang', $result);
     } catch (\Exception $ex) {
@@ -267,7 +262,6 @@ class MyServicePrioChild_pang_result extends \ThriftSyncStructWithoutResult impl
 
 class MyServicePrioChildStaticMetadata implements \IThriftServiceStaticMetadata {
   const string THRIFT_SVC_NAME = 'MyServicePrioChild';
-  const string THRIFT_SVC_FULL_NAME = 'MyServicePrioChild';
 
   public static function getServiceMetadata()[]: \tmeta_ThriftService {
     return tmeta_ThriftService::fromShape(

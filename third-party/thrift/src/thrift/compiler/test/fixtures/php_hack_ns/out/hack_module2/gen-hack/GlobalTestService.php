@@ -72,16 +72,12 @@ class GlobalTestServiceAsyncClient extends \test\foo\php\ns\Deprecated_FooHackSe
   use GlobalTestServiceClientBase;
 
   const string THRIFT_SVC_NAME = GlobalTestServiceStaticMetadata::THRIFT_SVC_NAME;
-  const string THRIFT_SVC_FULL_NAME = GlobalTestServiceStaticMetadata::THRIFT_SVC_FULL_NAME;
-
 }
 
 class GlobalTestServiceClient extends \test\foo\php\ns\Deprecated_FooHackServiceClient implements GlobalTestServiceClientIf {
   use GlobalTestServiceClientBase;
 
   const string THRIFT_SVC_NAME = GlobalTestServiceStaticMetadata::THRIFT_SVC_NAME;
-  const string THRIFT_SVC_FULL_NAME = GlobalTestServiceStaticMetadata::THRIFT_SVC_FULL_NAME;
-
 }
 
 // HELPER FUNCTIONS AND STRUCTURES
@@ -243,7 +239,6 @@ class GlobalTestService_pong_result extends \ThriftSyncStructWithResult implemen
 
 class GlobalTestServiceStaticMetadata implements \IThriftServiceStaticMetadata {
   const string THRIFT_SVC_NAME = 'TestService';
-  const string THRIFT_SVC_FULL_NAME = '\hack_ns2\GlobalTestService';
 
   public static function getServiceMetadata()[]: \tmeta_ThriftService {
     return \tmeta_ThriftService::fromShape(

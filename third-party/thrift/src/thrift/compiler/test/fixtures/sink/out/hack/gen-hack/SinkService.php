@@ -258,16 +258,12 @@ class SinkServiceAsyncClient extends \ThriftClientBase implements SinkServiceAsy
   use SinkServiceClientBase;
 
   const string THRIFT_SVC_NAME = SinkServiceStaticMetadata::THRIFT_SVC_NAME;
-  const string THRIFT_SVC_FULL_NAME = SinkServiceStaticMetadata::THRIFT_SVC_FULL_NAME;
-
 }
 
 class SinkServiceClient extends \ThriftClientBase implements SinkServiceClientIf {
   use SinkServiceClientBase;
 
   const string THRIFT_SVC_NAME = SinkServiceStaticMetadata::THRIFT_SVC_NAME;
-  const string THRIFT_SVC_FULL_NAME = SinkServiceStaticMetadata::THRIFT_SVC_FULL_NAME;
-
 }
 
 abstract class SinkServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
@@ -275,7 +271,6 @@ abstract class SinkServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
   abstract const type TThriftIf as SinkServiceAsyncIf;
   const class<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = SinkServiceStaticMetadata::class;
   const string THRIFT_SVC_NAME = SinkServiceStaticMetadata::THRIFT_SVC_NAME;
-  const string THRIFT_SVC_FULL_NAME = SinkServiceStaticMetadata::THRIFT_SVC_FULL_NAME;
 
   protected async function process_method(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('method');
@@ -283,7 +278,7 @@ abstract class SinkServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
     $result = SinkService_method_FirstResponse::withDefaultValues();
     try {
       $args = $this->readHelper(SinkService_method_args::class, $input, 'method', $handler_ctx);
-      $this->eventHandler_->preExec($handler_ctx, self::THRIFT_SVC_FULL_NAME, 'method', $args);
+      $this->eventHandler_->preExec($handler_ctx, 'SinkService', 'method', $args);
       $response_and_sink = await $this->handler->method();
       $this->eventHandler_->postExec($handler_ctx, 'method', $result);
       $this->writeHelper($result, 'method', $seqid, $handler_ctx, $output, $reply_type);
@@ -302,7 +297,7 @@ abstract class SinkServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
     $result = SinkService_methodAndReponse_FirstResponse::withDefaultValues();
     try {
       $args = $this->readHelper(SinkService_methodAndReponse_args::class, $input, 'methodAndReponse', $handler_ctx);
-      $this->eventHandler_->preExec($handler_ctx, self::THRIFT_SVC_FULL_NAME, 'methodAndReponse', $args);
+      $this->eventHandler_->preExec($handler_ctx, 'SinkService', 'methodAndReponse', $args);
       $response_and_sink = await $this->handler->methodAndReponse();
       $result->success = $response_and_sink->response;
       $this->eventHandler_->postExec($handler_ctx, 'methodAndReponse', $result);
@@ -322,7 +317,7 @@ abstract class SinkServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
     $result = SinkService_methodThrow_FirstResponse::withDefaultValues();
     try {
       $args = $this->readHelper(SinkService_methodThrow_args::class, $input, 'methodThrow', $handler_ctx);
-      $this->eventHandler_->preExec($handler_ctx, self::THRIFT_SVC_FULL_NAME, 'methodThrow', $args);
+      $this->eventHandler_->preExec($handler_ctx, 'SinkService', 'methodThrow', $args);
       $response_and_sink = await $this->handler->methodThrow();
       $this->eventHandler_->postExec($handler_ctx, 'methodThrow', $result);
       $this->writeHelper($result, 'methodThrow', $seqid, $handler_ctx, $output, $reply_type);
@@ -345,7 +340,7 @@ abstract class SinkServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
     $result = SinkService_methodSinkThrow_FirstResponse::withDefaultValues();
     try {
       $args = $this->readHelper(SinkService_methodSinkThrow_args::class, $input, 'methodSinkThrow', $handler_ctx);
-      $this->eventHandler_->preExec($handler_ctx, self::THRIFT_SVC_FULL_NAME, 'methodSinkThrow', $args);
+      $this->eventHandler_->preExec($handler_ctx, 'SinkService', 'methodSinkThrow', $args);
       $response_and_sink = await $this->handler->methodSinkThrow();
       $this->eventHandler_->postExec($handler_ctx, 'methodSinkThrow', $result);
       $this->writeHelper($result, 'methodSinkThrow', $seqid, $handler_ctx, $output, $reply_type);
@@ -364,7 +359,7 @@ abstract class SinkServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
     $result = SinkService_methodFinalThrow_FirstResponse::withDefaultValues();
     try {
       $args = $this->readHelper(SinkService_methodFinalThrow_args::class, $input, 'methodFinalThrow', $handler_ctx);
-      $this->eventHandler_->preExec($handler_ctx, self::THRIFT_SVC_FULL_NAME, 'methodFinalThrow', $args);
+      $this->eventHandler_->preExec($handler_ctx, 'SinkService', 'methodFinalThrow', $args);
       $response_and_sink = await $this->handler->methodFinalThrow();
       $this->eventHandler_->postExec($handler_ctx, 'methodFinalThrow', $result);
       $this->writeHelper($result, 'methodFinalThrow', $seqid, $handler_ctx, $output, $reply_type);
@@ -383,7 +378,7 @@ abstract class SinkServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
     $result = SinkService_methodBothThrow_FirstResponse::withDefaultValues();
     try {
       $args = $this->readHelper(SinkService_methodBothThrow_args::class, $input, 'methodBothThrow', $handler_ctx);
-      $this->eventHandler_->preExec($handler_ctx, self::THRIFT_SVC_FULL_NAME, 'methodBothThrow', $args);
+      $this->eventHandler_->preExec($handler_ctx, 'SinkService', 'methodBothThrow', $args);
       $response_and_sink = await $this->handler->methodBothThrow();
       $this->eventHandler_->postExec($handler_ctx, 'methodBothThrow', $result);
       $this->writeHelper($result, 'methodBothThrow', $seqid, $handler_ctx, $output, $reply_type);
@@ -402,7 +397,7 @@ abstract class SinkServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
     $result = SinkService_methodFast_FirstResponse::withDefaultValues();
     try {
       $args = $this->readHelper(SinkService_methodFast_args::class, $input, 'methodFast', $handler_ctx);
-      $this->eventHandler_->preExec($handler_ctx, self::THRIFT_SVC_FULL_NAME, 'methodFast', $args);
+      $this->eventHandler_->preExec($handler_ctx, 'SinkService', 'methodFast', $args);
       $response_and_sink = await $this->handler->methodFast();
       $this->eventHandler_->postExec($handler_ctx, 'methodFast', $result);
       $this->writeHelper($result, 'methodFast', $seqid, $handler_ctx, $output, $reply_type);
@@ -2615,7 +2610,6 @@ class SinkService_methodFast_FinalResponse extends \ThriftSyncStructWithResult i
 
 class SinkServiceStaticMetadata implements \IThriftServiceStaticMetadata {
   const string THRIFT_SVC_NAME = 'SinkService';
-  const string THRIFT_SVC_FULL_NAME = 'SinkService';
 
   public static function getServiceMetadata()[]: \tmeta_ThriftService {
     return tmeta_ThriftService::fromShape(

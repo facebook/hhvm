@@ -134,16 +134,12 @@ class BiDiServiceAsyncClient extends \ThriftClientBase implements BiDiServiceAsy
   use BiDiServiceClientBase;
 
   const string THRIFT_SVC_NAME = BiDiServiceStaticMetadata::THRIFT_SVC_NAME;
-  const string THRIFT_SVC_FULL_NAME = BiDiServiceStaticMetadata::THRIFT_SVC_FULL_NAME;
-
 }
 
 class BiDiServiceClient extends \ThriftClientBase implements BiDiServiceClientIf {
   use BiDiServiceClientBase;
 
   const string THRIFT_SVC_NAME = BiDiServiceStaticMetadata::THRIFT_SVC_NAME;
-  const string THRIFT_SVC_FULL_NAME = BiDiServiceStaticMetadata::THRIFT_SVC_FULL_NAME;
-
 }
 
 abstract class BiDiServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
@@ -151,7 +147,6 @@ abstract class BiDiServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
   abstract const type TThriftIf as BiDiServiceAsyncIf;
   const class<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = BiDiServiceStaticMetadata::class;
   const string THRIFT_SVC_NAME = BiDiServiceStaticMetadata::THRIFT_SVC_NAME;
-  const string THRIFT_SVC_FULL_NAME = BiDiServiceStaticMetadata::THRIFT_SVC_FULL_NAME;
 
   protected async function process_simple(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('simple');
@@ -159,7 +154,7 @@ abstract class BiDiServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
     $result = BiDiService_simple_FirstResponse::withDefaultValues();
     try {
       $args = $this->readHelper(BiDiService_simple_args::class, $input, 'simple', $handler_ctx);
-      $this->eventHandler_->preExec($handler_ctx, self::THRIFT_SVC_FULL_NAME, 'simple', $args);
+      $this->eventHandler_->preExec($handler_ctx, 'BiDiService', 'simple', $args);
       $response_and_bidi_stream = await $this->handler->simple();
       $response_and_bidi_stream as ResponseAndStreamTransformation<_,_,_>;
       $this->eventHandler_->postExec($handler_ctx, 'simple', $result);
@@ -179,7 +174,7 @@ abstract class BiDiServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
     $result = BiDiService_response_FirstResponse::withDefaultValues();
     try {
       $args = $this->readHelper(BiDiService_response_args::class, $input, 'response', $handler_ctx);
-      $this->eventHandler_->preExec($handler_ctx, self::THRIFT_SVC_FULL_NAME, 'response', $args);
+      $this->eventHandler_->preExec($handler_ctx, 'BiDiService', 'response', $args);
       $response_and_bidi_stream = await $this->handler->response();
       $response_and_bidi_stream as ResponseAndStreamTransformation<_,_,_>;
       $result->success = $response_and_bidi_stream->response;
@@ -200,7 +195,7 @@ abstract class BiDiServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
     $result = BiDiService_canThrow_FirstResponse::withDefaultValues();
     try {
       $args = $this->readHelper(BiDiService_canThrow_args::class, $input, 'canThrow', $handler_ctx);
-      $this->eventHandler_->preExec($handler_ctx, self::THRIFT_SVC_FULL_NAME, 'canThrow', $args);
+      $this->eventHandler_->preExec($handler_ctx, 'BiDiService', 'canThrow', $args);
       $response_and_bidi_stream = await $this->handler->canThrow();
       $response_and_bidi_stream as ResponseAndStreamTransformation<_,_,_>;
       $this->eventHandler_->postExec($handler_ctx, 'canThrow', $result);
@@ -1192,7 +1187,6 @@ class BiDiService_canThrow_StreamResponse extends \ThriftSyncStructWithResult im
 
 class BiDiServiceStaticMetadata implements \IThriftServiceStaticMetadata {
   const string THRIFT_SVC_NAME = 'BiDiService';
-  const string THRIFT_SVC_FULL_NAME = 'BiDiService';
 
   public static function getServiceMetadata()[]: \tmeta_ThriftService {
     return tmeta_ThriftService::fromShape(

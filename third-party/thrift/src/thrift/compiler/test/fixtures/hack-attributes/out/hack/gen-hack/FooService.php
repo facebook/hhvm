@@ -70,8 +70,6 @@ class FooServiceAsyncClient extends \ThriftClientBase implements FooServiceAsync
   use FooServiceClientBase;
 
   const string THRIFT_SVC_NAME = FooServiceStaticMetadata::THRIFT_SVC_NAME;
-  const string THRIFT_SVC_FULL_NAME = FooServiceStaticMetadata::THRIFT_SVC_FULL_NAME;
-
 }
 
 <<Oncalls('thrift')>>
@@ -79,8 +77,6 @@ class FooServiceClient extends \ThriftClientBase implements FooServiceClientIf {
   use FooServiceClientBase;
 
   const string THRIFT_SVC_NAME = FooServiceStaticMetadata::THRIFT_SVC_NAME;
-  const string THRIFT_SVC_FULL_NAME = FooServiceStaticMetadata::THRIFT_SVC_FULL_NAME;
-
 }
 
 // HELPER FUNCTIONS AND STRUCTURES
@@ -237,7 +233,6 @@ class FooService_ping_result extends \ThriftSyncStructWithResult implements \ITh
 
 class FooServiceStaticMetadata implements \IThriftServiceStaticMetadata {
   const string THRIFT_SVC_NAME = 'FooService';
-  const string THRIFT_SVC_FULL_NAME = '\test\fixtures\jsenum\FooService';
 
   public static function getServiceMetadata()[]: \tmeta_ThriftService {
     return \tmeta_ThriftService::fromShape(

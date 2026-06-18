@@ -72,24 +72,18 @@ class BadServiceAsyncClient extends \ThriftClientBase implements BadServiceAsync
   use BadServiceClientBase;
 
   const string THRIFT_SVC_NAME = BadServiceStaticMetadata::THRIFT_SVC_NAME;
-  const string THRIFT_SVC_FULL_NAME = BadServiceStaticMetadata::THRIFT_SVC_FULL_NAME;
-
 }
 
 class BadServiceClient extends \ThriftClientBase implements BadServiceClientIf {
   use BadServiceClientBase;
 
   const string THRIFT_SVC_NAME = BadServiceStaticMetadata::THRIFT_SVC_NAME;
-  const string THRIFT_SVC_FULL_NAME = BadServiceStaticMetadata::THRIFT_SVC_FULL_NAME;
-
 }
 
 // INTERACTION HANDLERS
 
 class BadService_BadInteraction extends \ThriftClientBase {
   const string THRIFT_SVC_NAME = BadServiceStaticMetadata::THRIFT_SVC_NAME;
-
-  const string THRIFT_SVC_FULL_NAME = BadServiceStaticMetadata::THRIFT_SVC_FULL_NAME;
 
   private \InteractionId $interactionId;
 
@@ -161,7 +155,6 @@ abstract class BadServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
   abstract const type TThriftIf as BadServiceAsyncIf;
   const class<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = BadServiceStaticMetadata::class;
   const string THRIFT_SVC_NAME = BadServiceStaticMetadata::THRIFT_SVC_NAME;
-  const string THRIFT_SVC_FULL_NAME = BadServiceStaticMetadata::THRIFT_SVC_FULL_NAME;
 
   protected async function process_bar(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('bar');
@@ -169,7 +162,7 @@ abstract class BadServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
     $result = BadService_bar_result::withDefaultValues();
     try {
       $args = $this->readHelper(BadService_bar_args::class, $input, 'bar', $handler_ctx);
-      $this->eventHandler_->preExec($handler_ctx, self::THRIFT_SVC_FULL_NAME, 'bar', $args);
+      $this->eventHandler_->preExec($handler_ctx, 'BadService', 'bar', $args);
       $result->success = await $this->handler->bar();
       $this->eventHandler_->postExec($handler_ctx, 'bar', $result);
     } catch (\Exception $ex) {
@@ -511,7 +504,6 @@ class BadService_BadInteraction_foo_result extends \ThriftSyncStructWithoutResul
 
 class BadServiceStaticMetadata implements \IThriftServiceStaticMetadata {
   const string THRIFT_SVC_NAME = 'BadService';
-  const string THRIFT_SVC_FULL_NAME = 'BadService';
 
   public static function getServiceMetadata()[]: \tmeta_ThriftService {
     return tmeta_ThriftService::fromShape(

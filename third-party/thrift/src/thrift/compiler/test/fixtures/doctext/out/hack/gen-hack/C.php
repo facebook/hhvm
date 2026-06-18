@@ -158,16 +158,12 @@ class CAsyncClient extends \ThriftClientBase implements CAsyncClientIf {
   use CClientBase;
 
   const string THRIFT_SVC_NAME = CStaticMetadata::THRIFT_SVC_NAME;
-  const string THRIFT_SVC_FULL_NAME = CStaticMetadata::THRIFT_SVC_FULL_NAME;
-
 }
 
 class CClient extends \ThriftClientBase implements CClientIf {
   use CClientBase;
 
   const string THRIFT_SVC_NAME = CStaticMetadata::THRIFT_SVC_NAME;
-  const string THRIFT_SVC_FULL_NAME = CStaticMetadata::THRIFT_SVC_FULL_NAME;
-
 }
 
 // HELPER FUNCTIONS AND STRUCTURES
@@ -715,7 +711,6 @@ class C_thing_result extends \ThriftSyncStructWithResult implements \IThriftStru
 
 class CStaticMetadata implements \IThriftServiceStaticMetadata {
   const string THRIFT_SVC_NAME = 'C';
-  const string THRIFT_SVC_FULL_NAME = 'C';
 
   public static function getServiceMetadata()[]: \tmeta_ThriftService {
     return tmeta_ThriftService::fromShape(

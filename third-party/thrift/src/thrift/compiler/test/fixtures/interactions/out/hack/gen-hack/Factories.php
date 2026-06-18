@@ -65,16 +65,12 @@ class FactoriesAsyncClient extends \ThriftClientBase implements FactoriesAsyncCl
   use FactoriesClientBase;
 
   const string THRIFT_SVC_NAME = FactoriesStaticMetadata::THRIFT_SVC_NAME;
-  const string THRIFT_SVC_FULL_NAME = FactoriesStaticMetadata::THRIFT_SVC_FULL_NAME;
-
 }
 
 class FactoriesClient extends \ThriftClientBase implements FactoriesClientIf {
   use FactoriesClientBase;
 
   const string THRIFT_SVC_NAME = FactoriesStaticMetadata::THRIFT_SVC_NAME;
-  const string THRIFT_SVC_FULL_NAME = FactoriesStaticMetadata::THRIFT_SVC_FULL_NAME;
-
 }
 
 // HELPER FUNCTIONS AND STRUCTURES
@@ -185,7 +181,6 @@ class Factories_foo_result extends \ThriftSyncStructWithoutResult implements \IT
 
 class FactoriesStaticMetadata implements \IThriftServiceStaticMetadata {
   const string THRIFT_SVC_NAME = 'Factories';
-  const string THRIFT_SVC_FULL_NAME = 'Factories';
 
   public static function getServiceMetadata()[]: \tmeta_ThriftService {
     return tmeta_ThriftService::fromShape(

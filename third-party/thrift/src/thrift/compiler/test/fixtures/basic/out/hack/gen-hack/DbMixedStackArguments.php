@@ -102,16 +102,12 @@ class DbMixedStackArgumentsAsyncClient extends \ThriftClientBase implements DbMi
   use DbMixedStackArgumentsClientBase;
 
   const string THRIFT_SVC_NAME = DbMixedStackArgumentsStaticMetadata::THRIFT_SVC_NAME;
-  const string THRIFT_SVC_FULL_NAME = DbMixedStackArgumentsStaticMetadata::THRIFT_SVC_FULL_NAME;
-
 }
 
 class DbMixedStackArgumentsClient extends \ThriftClientBase implements DbMixedStackArgumentsClientIf {
   use DbMixedStackArgumentsClientBase;
 
   const string THRIFT_SVC_NAME = DbMixedStackArgumentsStaticMetadata::THRIFT_SVC_NAME;
-  const string THRIFT_SVC_FULL_NAME = DbMixedStackArgumentsStaticMetadata::THRIFT_SVC_FULL_NAME;
-
 }
 
 abstract class DbMixedStackArgumentsAsyncProcessorBase extends \ThriftAsyncProcessor {
@@ -119,7 +115,6 @@ abstract class DbMixedStackArgumentsAsyncProcessorBase extends \ThriftAsyncProce
   abstract const type TThriftIf as DbMixedStackArgumentsAsyncIf;
   const class<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = DbMixedStackArgumentsStaticMetadata::class;
   const string THRIFT_SVC_NAME = DbMixedStackArgumentsStaticMetadata::THRIFT_SVC_NAME;
-  const string THRIFT_SVC_FULL_NAME = DbMixedStackArgumentsStaticMetadata::THRIFT_SVC_FULL_NAME;
 
   protected async function process_getDataByKey0(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('getDataByKey0');
@@ -127,7 +122,7 @@ abstract class DbMixedStackArgumentsAsyncProcessorBase extends \ThriftAsyncProce
     $result = DbMixedStackArguments_getDataByKey0_result::withDefaultValues();
     try {
       $args = $this->readHelper(DbMixedStackArguments_getDataByKey0_args::class, $input, 'getDataByKey0', $handler_ctx);
-      $this->eventHandler_->preExec($handler_ctx, self::THRIFT_SVC_FULL_NAME, 'getDataByKey0', $args);
+      $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\basic\DbMixedStackArguments', 'getDataByKey0', $args);
       $result->success = await $this->handler->getDataByKey0($args->key);
       $this->eventHandler_->postExec($handler_ctx, 'getDataByKey0', $result);
     } catch (\Exception $ex) {
@@ -143,7 +138,7 @@ abstract class DbMixedStackArgumentsAsyncProcessorBase extends \ThriftAsyncProce
     $result = DbMixedStackArguments_getDataByKey1_result::withDefaultValues();
     try {
       $args = $this->readHelper(DbMixedStackArguments_getDataByKey1_args::class, $input, 'getDataByKey1', $handler_ctx);
-      $this->eventHandler_->preExec($handler_ctx, self::THRIFT_SVC_FULL_NAME, 'getDataByKey1', $args);
+      $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\basic\DbMixedStackArguments', 'getDataByKey1', $args);
       $result->success = await $this->handler->getDataByKey1($args->key);
       $this->eventHandler_->postExec($handler_ctx, 'getDataByKey1', $result);
     } catch (\Exception $ex) {
@@ -576,7 +571,6 @@ class DbMixedStackArguments_getDataByKey1_result extends \ThriftSyncStructWithRe
 
 class DbMixedStackArgumentsStaticMetadata implements \IThriftServiceStaticMetadata {
   const string THRIFT_SVC_NAME = 'DbMixedStackArguments';
-  const string THRIFT_SVC_FULL_NAME = '\test\fixtures\basic\DbMixedStackArguments';
 
   public static function getServiceMetadata()[]: \tmeta_ThriftService {
     return \tmeta_ThriftService::fromShape(

@@ -84,24 +84,18 @@ class PerformAsyncClient extends \ThriftClientBase implements PerformAsyncClient
   use PerformClientBase;
 
   const string THRIFT_SVC_NAME = PerformStaticMetadata::THRIFT_SVC_NAME;
-  const string THRIFT_SVC_FULL_NAME = PerformStaticMetadata::THRIFT_SVC_FULL_NAME;
-
 }
 
 class PerformClient extends \ThriftClientBase implements PerformClientIf {
   use PerformClientBase;
 
   const string THRIFT_SVC_NAME = PerformStaticMetadata::THRIFT_SVC_NAME;
-  const string THRIFT_SVC_FULL_NAME = PerformStaticMetadata::THRIFT_SVC_FULL_NAME;
-
 }
 
 // INTERACTION HANDLERS
 
 class Perform_MyInteraction extends \ThriftClientBase {
   const string THRIFT_SVC_NAME = PerformStaticMetadata::THRIFT_SVC_NAME;
-
-  const string THRIFT_SVC_FULL_NAME = PerformStaticMetadata::THRIFT_SVC_FULL_NAME;
 
   private \InteractionId $interactionId;
 
@@ -336,8 +330,6 @@ $rpc_options->setInteractionId($this->interactionId);
 class Perform_MyInteractionFast extends \ThriftClientBase {
   const string THRIFT_SVC_NAME = PerformStaticMetadata::THRIFT_SVC_NAME;
 
-  const string THRIFT_SVC_FULL_NAME = PerformStaticMetadata::THRIFT_SVC_FULL_NAME;
-
   private \InteractionId $interactionId;
 
   public function __construct(\TProtocol $input, ?\TProtocol $output = null, ?\IThriftMigrationAsyncChannel $channel = null)[leak_safe] {
@@ -569,8 +561,6 @@ $rpc_options->setInteractionId($this->interactionId);
 
 class Perform_SerialInteraction extends \ThriftClientBase {
   const string THRIFT_SVC_NAME = PerformStaticMetadata::THRIFT_SVC_NAME;
-
-  const string THRIFT_SVC_FULL_NAME = PerformStaticMetadata::THRIFT_SVC_FULL_NAME;
 
   private \InteractionId $interactionId;
 
@@ -2196,7 +2186,6 @@ class Perform_SerialInteraction_frobnicate_result extends \ThriftSyncStructWitho
 
 class PerformStaticMetadata implements \IThriftServiceStaticMetadata {
   const string THRIFT_SVC_NAME = 'Perform';
-  const string THRIFT_SVC_FULL_NAME = 'Perform';
 
   public static function getServiceMetadata()[]: \tmeta_ThriftService {
     return tmeta_ThriftService::fromShape(

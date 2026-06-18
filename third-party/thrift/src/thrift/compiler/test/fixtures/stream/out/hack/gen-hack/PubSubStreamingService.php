@@ -361,16 +361,12 @@ class PubSubStreamingServiceAsyncClient extends \ThriftClientBase implements Pub
   use PubSubStreamingServiceClientBase;
 
   const string THRIFT_SVC_NAME = PubSubStreamingServiceStaticMetadata::THRIFT_SVC_NAME;
-  const string THRIFT_SVC_FULL_NAME = PubSubStreamingServiceStaticMetadata::THRIFT_SVC_FULL_NAME;
-
 }
 
 class PubSubStreamingServiceClient extends \ThriftClientBase implements PubSubStreamingServiceClientIf {
   use PubSubStreamingServiceClientBase;
 
   const string THRIFT_SVC_NAME = PubSubStreamingServiceStaticMetadata::THRIFT_SVC_NAME;
-  const string THRIFT_SVC_FULL_NAME = PubSubStreamingServiceStaticMetadata::THRIFT_SVC_FULL_NAME;
-
 }
 
 abstract class PubSubStreamingServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
@@ -378,7 +374,6 @@ abstract class PubSubStreamingServiceAsyncProcessorBase extends \ThriftAsyncProc
   abstract const type TThriftIf as PubSubStreamingServiceAsyncIf;
   const class<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = PubSubStreamingServiceStaticMetadata::class;
   const string THRIFT_SVC_NAME = PubSubStreamingServiceStaticMetadata::THRIFT_SVC_NAME;
-  const string THRIFT_SVC_FULL_NAME = PubSubStreamingServiceStaticMetadata::THRIFT_SVC_FULL_NAME;
 
   <<__Override>>
   protected static function getMethodMetadata(
@@ -2720,7 +2715,6 @@ class PubSubStreamingService_returnstreamFast_FirstResponse extends \ThriftSyncS
 
 class PubSubStreamingServiceStaticMetadata implements \IThriftServiceStaticMetadata {
   const string THRIFT_SVC_NAME = 'PubSubStreamingService';
-  const string THRIFT_SVC_FULL_NAME = 'PubSubStreamingService';
 
   public static function getServiceMetadata()[]: \tmeta_ThriftService {
     return tmeta_ThriftService::fromShape(

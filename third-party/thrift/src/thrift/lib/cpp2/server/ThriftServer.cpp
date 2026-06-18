@@ -22,7 +22,6 @@
 #include <thrift/lib/cpp2/server/IOUringUtil.h>
 
 #include <thrift/lib/cpp2/server/ThriftServer.h>
-#include <thrift/lib/cpp2/server/ThriftServerInternals.h>
 
 #include <iostream>
 #include <memory>

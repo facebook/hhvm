@@ -12,42 +12,21 @@ See https://github.com/facebook/mcrouter/wiki to get started.
 
 ## Quick start guide
 
-### New! Ubuntu package available
-
-Currently, we support Ubuntu Bionic (18.04) amd64.
-Here is how to install it:
-
-Add the repo key:
-
-    $ wget -O - https://facebook.github.io/mcrouter/debrepo/bionic/PUBLIC.KEY | sudo apt-key add
-
-Add the following line to apt sources file /etc/apt/sources.list
-
-    deb https://facebook.github.io/mcrouter/debrepo/bionic bionic contrib
-
-Update the local repo cache:
-
-    $ sudo apt-get update
-
-Install mcrouter:
-
-    $ sudo apt-get install mcrouter
-
-
 ### Installing From Source
+Mcrouter depends on [folly](https://github.com/facebook/folly), [wangle](https://github.com/facebook/wangle), [fizz](https://github.com/facebookincubator/fizz), [mvfst](https://github.com/facebook/mvfst), and [fbthrift](https://github.com/facebook/fbthrift).
 
-See https://github.com/facebook/mcrouter/wiki/mcrouter-installation for more
-detailed installation instructions.
+Mcrouter is built using CMake. It's recommended to invoke it via `getdeps` to simplify the process of building and installing dependencies:
 
-Mcrouter depends on [folly](https://github.com/facebook/folly), [wangle](https://github.com/facebook/wangle), [fizz](https://github.com/facebookincubator/fizz), and [fbthrift](https://github.com/facebook/fbthrift).
+    # Optionally install system dependencies first.
+    $ ./build/fbcode_builder/getdeps.py install-system-deps --recursive mcrouter
+    # Build, preferring to use system dependencies if available.
+    $ ./build/fbcode_builder/getdeps.py build --allow-system-packages mcrouter
 
-The installation is a standard autotools flow:
+`getdeps.py` will invoke cmake etc and put output in its scratch area (you can see in logs, and can override with `--scratch-path`):
 
-    $ autoreconf --install
-    $ ./configure
-    $ make
-    $ sudo make install
-    $ mcrouter --help
+* `installed/mcrouter/bin/mcrouter`: The standalone mcrouter executable.
+* `installed/mcrouter/include`: libmcrouter development headers.
+* `installed/mcrouter/lib`: CMake targets and libraries for applications embedding libmcrouter.
 
 Assuming you have a memcached instance on the local host running on port 5001,
 the simplest mcrouter setup is:

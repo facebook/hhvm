@@ -45,7 +45,7 @@
 // This header contains the shared, flat, owning implementation of the
 // TypeSystem interface (TypeSystemImpl) along with the machinery to populate
 // it from serializable definitions. It is shared between TypeSystemBuilder
-// (which produces standalone/derived TypeSystems) and AccumulatingTypeSystem
+// (which produces standalone/layered TypeSystems) and AccumulatingTypeSystem
 // (which appends to a single instance over time).
 namespace apache::thrift::type_system::detail {
 
@@ -179,7 +179,7 @@ inline void validateDefinition(
  * appended via insertDefinitions(). Nodes are never relocated, only added.
  *
  * Optionally delegates to a base TypeSystem (the "overlay" relationship used by
- * TypeSystemBuilder::buildDerivedFrom).
+ * TypeSystemBuilder::buildLayeredOn).
  */
 class TypeSystemImpl final : public TypeSystem {
  public:

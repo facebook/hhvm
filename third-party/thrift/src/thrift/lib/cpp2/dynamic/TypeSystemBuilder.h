@@ -122,28 +122,28 @@ class TypeSystemBuilder {
   std::unique_ptr<TypeSystem> build() &&;
 
   /**
-   * Builds a TypeSystem that derives from an existing base TypeSystem.
+   * Builds a TypeSystem that is layered on top of an existing base TypeSystem.
    *
    * The definitions added to this builder form an "overlay" on top of the
-   * provided base. If a type is not defined in the overlay, then the derivation
+   * provided base. If a type is not defined in the overlay, then the lookup
    * will fall back to the base.
    *
    * In short:
    *
-   *     Derivation (result) = Overlay (this) ∪ Base (argument)
+   *     Layered (result) = Overlay (this) ∪ Base (argument)
    *
    * ──────────────────────────────────────────────────────────────────────────
-   * Derivation Semantics
+   * Layering Semantics
    * ──────────────────────────────────────────────────────────────────────────
    * Types in the overlay may reference types defined in the base. For example,
    * an newly defined struct may have a field whose type is an existing struct
    * defined in the base.
    *
-   * Derivation produces a single TypeSystem instance. This instance will
+   * Layering produces a single TypeSystem instance. This instance will
    * transparently return results from either the overlay or the base as
    * necessary.
    *
-   * Deriviation is purely additive. The overlay cannot:
+   * Layering is purely additive. The overlay cannot:
    *   - Change the schema of existing types in the base.
    *   - Hide types in the base (shadow an existing URI).
    * This eliminates schema compatibility concerns, by construction.
@@ -165,7 +165,7 @@ class TypeSystemBuilder {
    *   - InvalidTypeError if a TypeId referenced by an added type cannot be
    *     resolved.
    */
-  std::unique_ptr<TypeSystem> buildDerivedFrom(
+  std::unique_ptr<TypeSystem> buildLayeredOn(
       std::shared_ptr<const TypeSystem> base) &&;
 
   /**

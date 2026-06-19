@@ -65,10 +65,10 @@ class TypeSystemURICollector {
 } // namespace
 
 std::unique_ptr<TypeSystem> TypeSystemBuilder::build() && {
-  return std::move(*this).buildDerivedFrom(nullptr);
+  return std::move(*this).buildLayeredOn(nullptr);
 }
 
-std::unique_ptr<TypeSystem> TypeSystemBuilder::buildDerivedFrom(
+std::unique_ptr<TypeSystem> TypeSystemBuilder::buildLayeredOn(
     std::shared_ptr<const TypeSystem> base) && {
   // Detect conflicts with base TypeSystem
   if (base) {

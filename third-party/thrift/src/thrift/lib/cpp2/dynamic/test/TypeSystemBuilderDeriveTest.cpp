@@ -85,7 +85,7 @@ TEST(TypeSystemBuilderDeriveTest, DeriveFromSimpleTypeSystem_ResolveBaseType) {
   // Add an overlay type
   builder.addType("test.com/overlay/OverlayStruct", def::Struct({}));
 
-  auto overlay = std::move(builder).buildDerivedFrom(base);
+  auto overlay = std::move(builder).buildLayeredOn(base);
 
   // Should resolve base type
   auto baseRef = overlay->getUserDefinedType("test.com/base/BaseStruct");
@@ -107,7 +107,7 @@ TEST(TypeSystemBuilderDeriveTest, DeriveFromSyntaxGraph_ResolveBaseType) {
   // Add an overlay type
   builder.addType("test.com/overlay/OverlayStruct", def::Struct({}));
 
-  auto overlay = std::move(builder).buildDerivedFrom(base);
+  auto overlay = std::move(builder).buildLayeredOn(base);
 
   // Should resolve base type from SyntaxGraph
   auto baseRef =
@@ -130,7 +130,7 @@ TEST(TypeSystemBuilderDeriveTest, DeriveFromSchemaRegistry_ResolveBaseType) {
   // Add an overlay type
   builder.addType("test.com/overlay/OverlayStruct", def::Struct({}));
 
-  auto overlay = std::move(builder).buildDerivedFrom(base);
+  auto overlay = std::move(builder).buildLayeredOn(base);
 
   // Should resolve overlay type
   auto overlayRef =
@@ -159,7 +159,7 @@ TEST(TypeSystemBuilderDeriveTest, OverlayStructReferencesBaseStruct) {
               TypeIds::uri("test.com/base/BaseStruct")),
       }));
 
-  auto overlay = std::move(builder).buildDerivedFrom(base);
+  auto overlay = std::move(builder).buildLayeredOn(base);
 
   auto overlayRef =
       overlay->getUserDefinedType("test.com/overlay/OverlayStruct");
@@ -191,7 +191,7 @@ TEST(TypeSystemBuilderDeriveTest, OverlayStructReferencesBaseEnum) {
               TypeIds::uri("test.com/base/BaseEnum")),
       }));
 
-  auto overlay = std::move(builder).buildDerivedFrom(base);
+  auto overlay = std::move(builder).buildLayeredOn(base);
 
   auto overlayRef =
       overlay->getUserDefinedType("test.com/overlay/OverlayStruct");
@@ -220,7 +220,7 @@ TEST(TypeSystemBuilderDeriveTest, OverlayUnionReferencesBaseType) {
               TypeIds::uri("test.com/base/BaseStruct")),
       }));
 
-  auto overlay = std::move(builder).buildDerivedFrom(base);
+  auto overlay = std::move(builder).buildLayeredOn(base);
 
   auto overlayRef =
       overlay->getUserDefinedType("test.com/overlay/OverlayUnion");
@@ -250,7 +250,7 @@ TEST(TypeSystemBuilderDeriveTest, OverlayListOfBaseType) {
               TypeIds::list(TypeIds::uri("test.com/base/BaseStruct"))),
       }));
 
-  auto overlay = std::move(builder).buildDerivedFrom(base);
+  auto overlay = std::move(builder).buildLayeredOn(base);
 
   auto overlayRef =
       overlay->getUserDefinedType("test.com/overlay/OverlayStruct");
@@ -286,7 +286,7 @@ TEST(TypeSystemBuilderDeriveTest, OverlayMapWithBaseKeyAndValue) {
                   TypeIds::uri("test.com/base/BaseStruct"))),
       }));
 
-  auto overlay = std::move(builder).buildDerivedFrom(base);
+  auto overlay = std::move(builder).buildLayeredOn(base);
 
   auto overlayRef =
       overlay->getUserDefinedType("test.com/overlay/OverlayStruct");
@@ -322,8 +322,7 @@ TEST(TypeSystemBuilderDeriveTest, ConflictWithBaseType_ThrowsOnBuild) {
   // Try to add a type with the same URI as base
   builder.addType("test.com/base/BaseStruct", def::Struct({}));
 
-  EXPECT_THROW(
-      { std::move(builder).buildDerivedFrom(base); }, InvalidTypeError);
+  EXPECT_THROW({ std::move(builder).buildLayeredOn(base); }, InvalidTypeError);
 }
 
 TEST(TypeSystemBuilderDeriveTest, ConflictWithBaseEnum_ThrowsOnBuild) {
@@ -332,8 +331,7 @@ TEST(TypeSystemBuilderDeriveTest, ConflictWithBaseEnum_ThrowsOnBuild) {
 
   builder.addType("test.com/base/BaseEnum", def::Enum({{"DIFFERENT", 99}}));
 
-  EXPECT_THROW(
-      { std::move(builder).buildDerivedFrom(base); }, InvalidTypeError);
+  EXPECT_THROW({ std::move(builder).buildLayeredOn(base); }, InvalidTypeError);
 }
 
 TEST(TypeSystemBuilderDeriveTest, ConflictWithBaseUnion_ThrowsOnBuild) {
@@ -342,8 +340,7 @@ TEST(TypeSystemBuilderDeriveTest, ConflictWithBaseUnion_ThrowsOnBuild) {
 
   builder.addType("test.com/base/BaseUnion", def::Union({}));
 
-  EXPECT_THROW(
-      { std::move(builder).buildDerivedFrom(base); }, InvalidTypeError);
+  EXPECT_THROW({ std::move(builder).buildLayeredOn(base); }, InvalidTypeError);
 }
 
 TEST(
@@ -359,8 +356,7 @@ TEST(
       def::Struct({}),
       def::SourceInfo("base.thrift", "BaseStruct"));
 
-  EXPECT_THROW(
-      { std::move(builder).buildDerivedFrom(base); }, InvalidTypeError);
+  EXPECT_THROW({ std::move(builder).buildLayeredOn(base); }, InvalidTypeError);
 }
 
 // ============================================================================
@@ -372,7 +368,7 @@ TEST(TypeSystemBuilderDeriveTest, GetKnownUris_MergesBaseAndOverlay) {
   TypeSystemBuilder builder;
   builder.addType("test.com/overlay/OverlayStruct", def::Struct({}));
 
-  auto overlay = std::move(builder).buildDerivedFrom(base);
+  auto overlay = std::move(builder).buildLayeredOn(base);
 
   auto knownUris = overlay->getKnownUris();
   ASSERT_TRUE(knownUris.has_value());
@@ -388,7 +384,7 @@ TEST(TypeSystemBuilderDeriveTest, GetKnownUris_MergesBaseAndOverlay) {
 TEST(TypeSystemBuilderDeriveTest, GetUserDefinedType_FallsBackToBase) {
   auto base = makeSimpleTypeSystem();
   TypeSystemBuilder builder;
-  auto overlay = std::move(builder).buildDerivedFrom(base);
+  auto overlay = std::move(builder).buildLayeredOn(base);
 
   // Lookup type that only exists in base
   auto ref = overlay->getUserDefinedType("test.com/base/BaseStruct");
@@ -400,7 +396,7 @@ TEST(TypeSystemBuilderDeriveTest, GetUserDefinedType_OverlayTypeFound) {
   auto base = makeSimpleTypeSystem();
   TypeSystemBuilder builder;
   builder.addType("test.com/overlay/OverlayStruct", def::Struct({}));
-  auto overlay = std::move(builder).buildDerivedFrom(base);
+  auto overlay = std::move(builder).buildLayeredOn(base);
 
   // Lookup type that exists in overlay
   auto ref = overlay->getUserDefinedType("test.com/overlay/OverlayStruct");
@@ -417,7 +413,7 @@ TEST(
       "test.com/overlay/OverlayStruct",
       def::Struct({}),
       def::SourceInfo("overlay.thrift", "OverlayStruct"));
-  auto overlay = std::move(builder).buildDerivedFrom(base);
+  auto overlay = std::move(builder).buildLayeredOn(base);
 
   // Lookup by source identifier from base
   SourceIdentifierView baseId{"base.thrift", "BaseStruct"};
@@ -439,7 +435,7 @@ TEST(TypeSystemBuilderDeriveTest, GetUserDefinedTypesAtLocation_MergesBoth) {
       "test.com/overlay/OverlayInBase",
       def::Struct({}),
       def::SourceInfo("base.thrift", "OverlayInBase"));
-  auto overlay = std::move(builder).buildDerivedFrom(base);
+  auto overlay = std::move(builder).buildLayeredOn(base);
 
   // Get types at base.thrift - should have both base and overlay types
   auto types = overlay->getUserDefinedTypesAtLocation("base.thrift");
@@ -470,7 +466,7 @@ TEST(TypeSystemBuilderDeriveTest, ContainerOfBaseType_ResolvesCorrectly) {
               TypeIds::set(TypeIds::uri("test.com/base/BaseEnum"))),
       }));
 
-  auto overlay = std::move(builder).buildDerivedFrom(base);
+  auto overlay = std::move(builder).buildLayeredOn(base);
 
   auto ref = overlay->getUserDefinedType("test.com/overlay/WithContainers");
   ASSERT_TRUE(ref.has_value());
@@ -518,7 +514,7 @@ TEST(TypeSystemBuilderDeriveTest, NestedContainers_MixedSources) {
                       TypeIds::uri("test.com/overlay/OverlayValue")))),
       }));
 
-  auto overlay = std::move(builder).buildDerivedFrom(base);
+  auto overlay = std::move(builder).buildLayeredOn(base);
 
   auto ref =
       overlay->getUserDefinedType("test.com/overlay/WithNestedContainers");
@@ -549,7 +545,7 @@ TEST(TypeSystemBuilderDeriveTest, EmptyOverlay_DelegatesToBase) {
   TypeSystemBuilder builder;
 
   // Build with no overlay types
-  auto overlay = std::move(builder).buildDerivedFrom(base);
+  auto overlay = std::move(builder).buildLayeredOn(base);
 
   // Should still resolve base types
   auto ref = overlay->getUserDefinedType("test.com/base/BaseStruct");
@@ -570,7 +566,7 @@ TEST(TypeSystemBuilderDeriveTest, BaseTypeSystemLifetime_KeptAlive) {
     weakBase = base;
     TypeSystemBuilder builder;
     builder.addType("test.com/overlay/OverlayStruct", def::Struct({}));
-    overlay = std::move(builder).buildDerivedFrom(base);
+    overlay = std::move(builder).buildLayeredOn(base);
   }
 
   // Base should still be alive (held by overlay)
@@ -595,7 +591,7 @@ TEST(TypeSystemBuilderDeriveTest, ChainedDerivation_ThreeLevels) {
               def::Optional,
               TypeIds::uri("test.com/base/BaseStruct")),
       }));
-  auto level2 = std::move(builder2).buildDerivedFrom(level1);
+  auto level2 = std::move(builder2).buildLayeredOn(level1);
 
   // Level 3: derive from level2
   TypeSystemBuilder builder3;
@@ -611,7 +607,7 @@ TEST(TypeSystemBuilderDeriveTest, ChainedDerivation_ThreeLevels) {
               def::Optional,
               TypeIds::uri("test.com/base/BaseStruct")),
       }));
-  auto level3 = std::move(builder3).buildDerivedFrom(
+  auto level3 = std::move(builder3).buildLayeredOn(
       std::shared_ptr<TypeSystem>(std::move(level2)));
 
   // Should resolve all levels
@@ -634,7 +630,7 @@ TEST(TypeSystemBuilderDeriveTest, DeriveFromNullptr_BehavesLikeStandalone) {
   TypeSystemBuilder builder;
   builder.addType("test.com/standalone/Struct", def::Struct({}));
 
-  auto typeSystem = std::move(builder).buildDerivedFrom(nullptr);
+  auto typeSystem = std::move(builder).buildLayeredOn(nullptr);
 
   auto ref = typeSystem->getUserDefinedType("test.com/standalone/Struct");
   ASSERT_TRUE(ref.has_value());
@@ -664,7 +660,7 @@ TEST(TypeSystemBuilderDeriveTest, OverlayTypeReferencesOtherOverlayType) {
               TypeIds::uri("test.com/overlay/Inner")),
       }));
 
-  auto overlay = std::move(builder).buildDerivedFrom(base);
+  auto overlay = std::move(builder).buildLayeredOn(base);
 
   auto outerRef = overlay->getUserDefinedType("test.com/overlay/Outer");
   ASSERT_TRUE(outerRef.has_value());
@@ -689,8 +685,7 @@ TEST(
               TypeIds::uri("test.com/nonexistent/Missing")),
       }));
 
-  EXPECT_THROW(
-      { std::move(builder).buildDerivedFrom(base); }, InvalidTypeError);
+  EXPECT_THROW({ std::move(builder).buildLayeredOn(base); }, InvalidTypeError);
 }
 
 TEST(TypeSystemBuilderDeriveTest, RecursiveOverlayType) {
@@ -711,7 +706,7 @@ TEST(TypeSystemBuilderDeriveTest, RecursiveOverlayType) {
               TypeIds::uri("test.com/base/BaseStruct")),
       }));
 
-  auto overlay = std::move(builder).buildDerivedFrom(base);
+  auto overlay = std::move(builder).buildLayeredOn(base);
 
   auto ref = overlay->getUserDefinedType("test.com/overlay/Recursive");
   ASSERT_TRUE(ref.has_value());
@@ -752,7 +747,7 @@ TEST(TypeSystemBuilderDeriveTest, MutuallyRecursiveOverlayTypes) {
               TypeIds::uri("test.com/overlay/TypeA")),
       }));
 
-  auto overlay = std::move(builder).buildDerivedFrom(base);
+  auto overlay = std::move(builder).buildLayeredOn(base);
 
   auto refA = overlay->getUserDefinedType("test.com/overlay/TypeA");
   auto refB = overlay->getUserDefinedType("test.com/overlay/TypeB");
@@ -773,7 +768,7 @@ TEST(
   auto base = makeSimpleTypeSystem();
   TypeSystemBuilder builder;
   builder.addType("test.com/overlay/OverlayStruct", def::Struct({}));
-  auto overlay = std::move(builder).buildDerivedFrom(base);
+  auto overlay = std::move(builder).buildLayeredOn(base);
 
   // Lookup non-existent type
   auto ref = overlay->getUserDefinedType("test.com/nonexistent/Type");
@@ -789,7 +784,7 @@ TEST(
       "test.com/overlay/OverlayStruct",
       def::Struct({}),
       def::SourceInfo("overlay.thrift", "OverlayStruct"));
-  auto overlay = std::move(builder).buildDerivedFrom(base);
+  auto overlay = std::move(builder).buildLayeredOn(base);
 
   auto ref = overlay->getUserDefinedType("test.com/overlay/OverlayStruct");
   ASSERT_TRUE(ref.has_value());
@@ -803,7 +798,7 @@ TEST(
 TEST(TypeSystemBuilderDeriveTest, GetSourceIdentifierForUserDefinedType_Base) {
   auto base = makeSimpleTypeSystem();
   TypeSystemBuilder builder;
-  auto overlay = std::move(builder).buildDerivedFrom(base);
+  auto overlay = std::move(builder).buildLayeredOn(base);
 
   auto ref = overlay->getUserDefinedType("test.com/base/BaseStruct");
   ASSERT_TRUE(ref.has_value());
@@ -823,7 +818,7 @@ TEST(TypeSystemBuilderDeriveTest, OverlayOpaqueAlias) {
       def::OpaqueAlias(TypeIds::I64),
       def::SourceInfo("overlay.thrift", "MyAlias"));
 
-  auto overlay = std::move(builder).buildDerivedFrom(base);
+  auto overlay = std::move(builder).buildLayeredOn(base);
 
   auto ref = overlay->getUserDefinedType("test.com/overlay/MyAlias");
   ASSERT_TRUE(ref.has_value());
@@ -855,7 +850,7 @@ TEST(TypeSystemBuilderDeriveTest, MultipleOverlayTypesWithPrimitiveFields) {
               def::Identity(9, "binaryField"), def::Optional, TypeIds::Binary),
       }));
 
-  auto overlay = std::move(builder).buildDerivedFrom(base);
+  auto overlay = std::move(builder).buildLayeredOn(base);
 
   auto ref = overlay->getUserDefinedType("test.com/overlay/AllPrimitives");
   ASSERT_TRUE(ref.has_value());
@@ -875,7 +870,7 @@ TEST(TypeSystemBuilderDeriveTest, OverlaySetOfBaseType) {
               TypeIds::set(TypeIds::uri("test.com/base/BaseEnum"))),
       }));
 
-  auto overlay = std::move(builder).buildDerivedFrom(base);
+  auto overlay = std::move(builder).buildLayeredOn(base);
 
   auto ref = overlay->getUserDefinedType("test.com/overlay/WithSet");
   ASSERT_TRUE(ref.has_value());
@@ -908,7 +903,7 @@ TEST(TypeSystemBuilderDeriveTest, DeriveFromSyntaxGraph_OverlayReferencesBase) {
               TypeIds::uri("meta.com/thrift_test/TestRecursiveStruct")),
       }));
 
-  auto overlay = std::move(builder).buildDerivedFrom(base);
+  auto overlay = std::move(builder).buildLayeredOn(base);
 
   auto ref = overlay->getUserDefinedType("test.com/overlay/RefToSyntaxGraph");
   ASSERT_TRUE(ref.has_value());
@@ -943,7 +938,7 @@ TEST(TypeSystemBuilderDeriveTest, DeepNestedContainers) {
                       TypeIds::set(TypeIds::uri("test.com/base/BaseStruct"))))),
       }));
 
-  auto overlay = std::move(builder).buildDerivedFrom(base);
+  auto overlay = std::move(builder).buildLayeredOn(base);
 
   auto ref = overlay->getUserDefinedType("test.com/overlay/DeepNested");
   ASSERT_TRUE(ref.has_value());
@@ -972,7 +967,7 @@ TEST(TypeSystemBuilderDeriveTest, BuildDerivedFrom_NamePreservedFromBase) {
   auto base = makeSimpleTypeSystem();
   TypeSystemBuilder builder;
   builder.addType("test.com/overlay/OverlayStruct", def::Struct({}));
-  auto overlay = std::move(builder).buildDerivedFrom(base);
+  auto overlay = std::move(builder).buildLayeredOn(base);
 
   auto baseStructRef = overlay->getUserDefinedType("test.com/base/BaseStruct");
   ASSERT_TRUE(baseStructRef.has_value());
@@ -1003,7 +998,7 @@ TEST(TypeSystemBuilderDeriveTest, BuildDerivedFrom_NameSetOnOverlayTypes) {
       def::OpaqueAlias(TypeIds::I32),
       def::SourceInfo("overlay.thrift", "OverlayAlias"));
 
-  auto overlay = std::move(builder).buildDerivedFrom(base);
+  auto overlay = std::move(builder).buildLayeredOn(base);
 
   EXPECT_EQ(
       overlay->getUserDefinedTypeOrThrow("test.com/overlay/OverlayStruct")

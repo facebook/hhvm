@@ -367,7 +367,7 @@ void with_schematizer(
     scope.add_def_by_uri(*utility_types.back().get());
   }
 
-  schematizer schematizer{scope, sm, std::move(opts)};
+  schematizer schematizer{scope, sm, opts};
   schema_populator schema_populator{schematizer, std::move(intern_value)};
   f(*program.get(), schematizer, schema_populator);
 }

@@ -272,7 +272,7 @@ class t_java_deprecated_generator : public t_concat_generator {
       const std::string& prefix = "");
   std::string function_signature_async(
       const t_function* tfunction,
-      std::string result_handler_symbol,
+      const std::string& result_handler_symbol,
       bool use_base_method = false,
       const std::string& prefix = "");
   std::string argument_list(

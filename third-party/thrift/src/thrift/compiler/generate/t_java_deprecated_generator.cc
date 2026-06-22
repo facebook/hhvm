@@ -1333,7 +1333,7 @@ void t_java_deprecated_generator::generate_java_struct_definition(
 
   for (const t_field& m_iter : members) {
     const t_field* field = &m_iter;
-    std::string field_name = field->name();
+    const std::string& field_name = field->name();
     const t_type* type = &field->type().deref();
 
     bool can_be_null = type_can_be_null(type);
@@ -1430,7 +1430,7 @@ void t_java_deprecated_generator::generate_java_struct_equality(
     // so we treat "default" fields as required.
     bool is_optional = m_iter.qualifier() == t_field_qualifier::optional;
     bool can_be_null = type_can_be_null(t);
-    string name = m_iter.name();
+    const string& name = m_iter.name();
     string equalMethodName = "equalsNobinary";
     if (type_has_naked_binary(t)) {
       equalMethodName = "equalsSlow";
@@ -1935,7 +1935,7 @@ void t_java_deprecated_generator::generate_java_bean_boilerplate(
   for (const t_field& f_iter : tstruct->fields()) {
     const t_field* field = &f_iter;
     const t_type* type = field->type()->get_true_type();
-    std::string field_name = field->name();
+    const std::string& field_name = field->name();
     std::string cap_name = get_cap_name(field_name);
 
     // Simple getter
@@ -2061,7 +2061,7 @@ void t_java_deprecated_generator::generate_java_struct_tostring(
     bool first = true;
     for (const t_field& f_iter : tstruct->fields()) {
       const t_field* field = &f_iter;
-      string fname = field->name();
+      const string& fname = field->name();
       const t_type* ftype = field->type()->get_true_type();
 
       if (tstruct->is<t_union>()) {
@@ -2679,7 +2679,7 @@ void t_java_deprecated_generator::generate_service_async_client(
     if (!can_generate_method(&func)) {
       continue;
     }
-    string funname = func.name();
+    const string& funname = func.name();
     const t_type& ret_type = *func.return_type();
     const t_paramlist& arg_struct = func.params();
     string funclassname = funname + "_call";
@@ -3706,11 +3706,11 @@ string t_java_deprecated_generator::function_signature(
  */
 string t_java_deprecated_generator::function_signature_async(
     const t_function* tfunction,
-    string result_handler_symbol,
+    const string& result_handler_symbol,
     bool use_base_method,
     const string& prefix) {
   std::string arglist = async_function_call_arglist(
-      tfunction, std::move(result_handler_symbol), use_base_method, true);
+      tfunction, result_handler_symbol, use_base_method, true);
   std::string result =
       prefix + "void " + tfunction->name() + "(" + arglist + ")";
   return result;

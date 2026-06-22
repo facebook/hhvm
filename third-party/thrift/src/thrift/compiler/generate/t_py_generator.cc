@@ -208,8 +208,8 @@ class t_py_generator : public t_concat_generator {
       std::ofstream& out,
       const t_map* tmap,
       const std::string& prefix = "",
-      std::string key_actual_type = "",
-      std::string value_actual_type = "");
+      const std::string& key_actual_type = "",
+      const std::string& value_actual_type = "");
 
   void generate_deserialize_list_element(
       std::ofstream& out, const t_list* tlist, const std::string& prefix = "");
@@ -767,7 +767,7 @@ void t_py_generator::generate_json_reader(
     if (is_hidden(f_iter)) {
       continue;
     }
-    string field = f_iter.name();
+    const string& field = f_iter.name();
     indent(out) << "if '" << field << "' in json_obj " << "and json_obj['"
                 << field << "'] is not None:" << endl;
     indent_up();
@@ -3407,16 +3407,15 @@ void t_py_generator::generate_deserialize_map_element(
     ofstream& out,
     const t_map* tmap,
     const string& prefix,
-    string key_actual_type,
-    string value_actual_type) {
+    const string& key_actual_type,
+    const string& value_actual_type) {
   string key = tmp("_key");
   string val = tmp("_val");
   t_field fkey(tmap->key_type().deref(), key);
   t_field fval(tmap->val_type().deref(), val);
 
-  generate_deserialize_field(out, &fkey, "", false, std::move(key_actual_type));
-  generate_deserialize_field(
-      out, &fval, "", false, std::move(value_actual_type));
+  generate_deserialize_field(out, &fkey, "", false, key_actual_type);
+  generate_deserialize_field(out, &fval, "", false, value_actual_type);
 
   indent(out) << prefix << "[" << key << "] = " << val << endl;
 }

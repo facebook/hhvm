@@ -20,6 +20,7 @@
 #include <thrift/compiler/whisker/detail/type_traits.h>
 
 #include <cassert>
+#include <concepts>
 #include <exception>
 #include <initializer_list>
 #include <type_traits>
@@ -430,9 +431,8 @@ class expected {
       : storage_(std::in_place_type<unexpected<E>>, std::move(error)) {}
 
   // https://en.cppreference.com/w/cpp/utility/expected/expected#Version_9
-  template <
-      typename... Args,
-      std::enable_if_t<std::is_constructible_v<T, Args...>, int> = 0>
+  template <typename... Args>
+    requires std::constructible_from<T, Args...>
   explicit expected(std::in_place_t, Args&&... args) noexcept(
       std::is_nothrow_constructible_v<T, Args...>)
       : storage_(std::in_place_type<T>, std::forward<Args>(args)...) {}
@@ -455,9 +455,8 @@ class expected {
       : storage_(std::in_place_type<T>, ilist, std::forward<Args>(args)...) {}
 
   // https://en.cppreference.com/w/cpp/utility/expected/expected#Version_11
-  template <
-      typename... Args,
-      std::enable_if_t<std::is_constructible_v<E, Args...>, int> = 0>
+  template <typename... Args>
+    requires std::constructible_from<E, Args...>
   explicit expected(unexpect_t, Args&&... args) noexcept(
       std::is_nothrow_constructible_v<E, Args...>)
       : storage_(

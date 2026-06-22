@@ -561,7 +561,7 @@ class lexer::state_comment : public lexer::state_base {
           }
           scan = scan.make_fresh(); // start at '~'
           scan.advance(); // consume '~'
-          tokens.push_back(token(tok::tilde, scan.range()));
+          tokens.emplace_back(tok::tilde, scan.range());
           return {std::move(tokens)};
         }
       }

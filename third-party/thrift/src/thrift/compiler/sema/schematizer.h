@@ -55,7 +55,7 @@ class schematizer {
 
   explicit schematizer(
       const t_global_scope& global_scope, source_manager& sm, options opts)
-      : global_scope_(global_scope), sm_(sm), opts_(std::move(opts)) {}
+      : global_scope_(global_scope), sm_(sm), opts_(opts) {}
 
   // Gets a universally unique identifier for a definition that is consistent
   // across runs on different including programs.

@@ -47,8 +47,8 @@ struct codemod_parsing_options {
 [[nodiscard]] inline int run_codemod(
     int argc,
     char** argv,
-    std::function<void(source_manager&, t_program_bundle&)> codemod) {
-  return run_codemod(argc, argv, {}, std::move(codemod));
+    const std::function<void(source_manager&, t_program_bundle&)>& codemod) {
+  return run_codemod(argc, argv, {}, codemod);
 }
 
 } // namespace apache::thrift::compiler

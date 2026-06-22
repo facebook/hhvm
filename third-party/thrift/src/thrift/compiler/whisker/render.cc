@@ -398,8 +398,7 @@ auto source_stack::make_frame_guard(
             jumped_from, /*max_frames=*/kStackOverflowBacktraceFrames));
       }
 
-      stack.frames_.emplace_back(
-          stack_.top(), std::move(eval_ctx), std::move(reason));
+      stack.frames_.emplace_back(stack_.top(), eval_ctx, std::move(reason));
     }
     ~frame_guard() noexcept {
       assert(!stack_.frames_.empty());

@@ -12,8 +12,6 @@ ERROR: File "invalid_operator.php", line 22, characters 28-45:
 Expression trees do not support `do while` loops. Consider using a `while` loop instead. (Parsing[1002])
 ERROR: File "invalid_operator.php", line 23, characters 43-67:
 Expression trees do not support `foreach` loops. Consider using a `for` loop or a `while` loop instead. (Parsing[1002])
-ERROR: File "invalid_operator.php", line 29, characters 38-46:
-Subscript assignment is not yet supported in expression trees. (Parsing[1002])
 ERROR: File "invalid_operator.php", line 32, characters 34-40:
 Expression trees do not support compound assignments. Try the long form style `$foo = $foo + $bar` instead. (Parsing[1002])
 ERROR: File "invalid_operator.php", line 13, characters 19-27:

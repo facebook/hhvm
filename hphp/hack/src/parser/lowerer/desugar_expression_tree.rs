@@ -992,13 +992,64 @@ impl RewriteState {
                     self.errors.push((pos.clone(), "Expression trees do not support compound assignments. Try the long form style `$foo = $foo + $bar` instead.".into(),));
                 };
 
-                // Subscript assignment is not yet supported.
-                // Error on any ArrayGet as LHS of assignment (single-level and nested).
                 if matches!(&lhs, Expr(_, _, Expr_::ArrayGet(_))) {
-                    self.errors.push((
+                    let (root, chain) = Self::collect_subscript_chain(lhs);
+
+                    // Reject append (None index) at any depth — single-level
+                    // (`$arr[] = $val`) and intermediate (`$arr[][$j] = $val`)
+                    // both flow through here. Append support may be added at a
+                    // later time; empty index at intermediary is always wrong.
+                    // Checking every position avoids panicking later in the
+                    // key-rewriting loop, which expects all indices Some.
+                    if chain.iter().any(|(_, idx)| idx.is_none()) {
+                        self.errors.push((
+                            pos.clone(),
+                            "Subscript append is not yet supported in expression trees.".into(),
+                        ));
+                        return unchanged_result;
+                    }
+
+                    let rewritten_root = self.rewrite_expr(root, visitor_name);
+                    let rewritten_rhs = self.rewrite_expr(rhs, visitor_name);
+
+                    let (virtual_key_exprs, desugar_key_exprs): (Vec<Expr>, Vec<Expr>) = chain
+                        .iter()
+                        .map(|(_, idx_opt)| {
+                            let idx = idx_opt.clone().expect("checked above");
+                            let r = self.rewrite_expr(idx, visitor_name);
+                            (r.virtual_expr, r.desugar_expr)
+                        })
+                        .unzip();
+
+                    let virtual_lhs = chain.iter().zip(virtual_key_exprs).fold(
+                        rewritten_root.virtual_expr.clone(),
+                        |acc, ((ag_pos, _), key)| {
+                            Expr::new((), ag_pos.clone(), Expr_::mk_array_get(acc, Some(key)))
+                        },
+                    );
+
+                    let virtual_expr = Expr(
+                        (),
                         pos.clone(),
-                        "Subscript assignment is not yet supported in expression trees.".into(),
-                    ));
+                        Expr_::mk_assign(virtual_lhs, bop, rewritten_rhs.virtual_expr),
+                    );
+                    // Source: MyDsl`$container[$k1]...[$kN] = $value`
+                    // Virtualized: $container[$k1]...[$kN] = $value
+                    // Desugared: $0v->visitSubscriptAssign(new ExprPos(...), container, vec[k1, ..., kN], value)
+                    let desugar_expr = v_meth_call(
+                        et::VISIT_SUBSCRIPT_ASSIGN,
+                        vec![
+                            pos_expr,
+                            rewritten_root.desugar_expr,
+                            vec_literal_with_pos(&pos, desugar_key_exprs),
+                            rewritten_rhs.desugar_expr,
+                        ],
+                        &pos,
+                    );
+                    return RewriteResult {
+                        virtual_expr,
+                        desugar_expr,
+                    };
                 }
 
                 let rewritten_lhs = self.rewrite_expr(lhs, visitor_name);
@@ -2314,6 +2365,21 @@ impl RewriteState {
                 unchanged_result
             }
         }
+    }
+
+    // Collect a nested ArrayGet chain from an LHS expression into root + vec
+    // of (pos, key) pairs. Returns (root, chain) where chain is in
+    // root-to-leaf order. Each key is Option<Expr> -- None for append syntax.
+    fn collect_subscript_chain(lhs: Expr) -> (Expr, Vec<(Pos, Option<Expr>)>) {
+        let mut chain = Vec::new();
+        let mut current = lhs;
+        while let Expr(_, ag_pos, Expr_::ArrayGet(ag)) = current {
+            let (container, index) = *ag;
+            chain.push((ag_pos, index));
+            current = container;
+        }
+        chain.reverse();
+        (current, chain)
     }
 }
 

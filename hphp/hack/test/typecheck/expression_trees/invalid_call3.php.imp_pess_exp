@@ -4,5 +4,5 @@ Value of type `dynamic` called as a function (Warn[12039])
   This expression has type `dynamic`, the result of calling a `dynamic` type as a function
 ERROR: File "invalid_call3.php", line 6, characters 14-23:
 You are trying to access the method `__unwrap` but this is an int (Typing[4062])
-  File "expr_tree.php", line 560, characters 43-52:
+  File "expr_tree.php", line 574, characters 43-52:
   Definition is here

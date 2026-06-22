@@ -428,6 +428,20 @@ class ExampleDsl {
   }
 
   <<__NoAutoLikes>>
+  public function visitSubscriptAssign(
+    ?ExprPos $_,
+    ExampleDsl::TAst $root,
+    vec<ExampleDsl::TAst> $keys,
+    ExampleDsl::TAst $value,
+  )[]: ExampleDsl::TAst {
+    $path = $root;
+    foreach ($keys as $key) {
+      $path .= "[".$key."]";
+    }
+    return $path." = ".$value.";";
+  }
+
+  <<__NoAutoLikes>>
   public function visitInstanceMethod(
     ?ExprPos $_,
     ExampleDsl::TAst $expr,

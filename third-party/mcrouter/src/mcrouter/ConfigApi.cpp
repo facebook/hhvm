@@ -480,14 +480,13 @@ void ConfigApi::dumpConfigSourceToDisk(
     return;
   }
 
+  auto fileName = getBackupConfigFileName(sourcePrefix, name);
   dumpConfigToDiskExecutor_->add([this,
-                                  sourcePrefix,
-                                  name,
+                                  fileName = std::move(fileName),
                                   contents = std::move(contents),
                                   md5OrVersion]() {
     auto directory = getBackupConfigDirectory();
-    auto filePath =
-        (directory / getBackupConfigFileName(sourcePrefix, name)).string();
+    auto filePath = (directory / fileName).string();
 
     bool shouldRewrite = true;
     auto backupFileIt = backupFiles_.find(filePath);

@@ -387,6 +387,41 @@ template <class Handler>
   return {};
 }
 
+// Decompresses a compressed exception first response inline, when response
+// decompression was skipped on the IO thread (the
+// thrift_client_compress_request_on_cpu path). processFirstResponse() eagerly
+// deserializes exception payloads (anyException / proxyException), so a
+// still-compressed exception would otherwise be decoded as truncated bytes.
+// Callers pass whether decompression was skipped and invoke this before
+// processFirstResponse(). The compression algorithm is cleared from the
+// metadata so the caller-thread decompressResponse() hook does not decompress
+// the bytes a second time. Normal (non-exception) first responses are left
+// untouched and decompressed on the caller thread.
+[[nodiscard]] folly::exception_wrapper decompressFirstResponseExceptionIfNeeded(
+    FirstResponsePayload& firstResponse, bool decompressionWasSkipped) {
+  auto compression = firstResponse.metadata.compression();
+  auto payloadMetadata = firstResponse.metadata.payloadMetadata();
+  const bool isExceptionResponse = payloadMetadata &&
+      payloadMetadata->getType() == PayloadMetadata::Type::exceptionMetadata;
+  if (!decompressionWasSkipped || !isExceptionResponse || !compression ||
+      *compression == CompressionAlgorithm::NONE ||
+      *compression == CompressionAlgorithm::CUSTOM) {
+    return {};
+  }
+  try {
+    firstResponse.payload = rocket::CompressionManager().uncompressBuffer(
+        std::move(firstResponse.payload), *compression);
+    // Clear the algorithm so the caller-thread decompressResponse() hook (e.g.
+    // PooledRequestChannel's) does not decompress these bytes a second time.
+    firstResponse.metadata.compression().reset();
+  } catch (const std::exception& ex) {
+    return folly::make_exception_wrapper<TTransportException>(
+        TTransportException::CORRUPTED_DATA,
+        fmt::format("Response decompression failed: {}", ex.what()));
+  }
+  return {};
+}
+
 class FirstRequestProcessorStream : public StreamClientCallback,
                                     private StreamServerCallback {
  public:
@@ -411,11 +446,13 @@ class FirstRequestProcessorStream : public StreamClientCallback,
     };
     DCHECK_EQ(evb, evb_);
     LegacyResponseSerializationHandler handler(protocolId_, methodName_.view());
-    if (auto error = processFirstResponse(
-            protocolId_,
-            firstResponse.metadata,
-            firstResponse.payload,
-            handler)) {
+    auto error = decompressFirstResponseExceptionIfNeeded(
+        firstResponse, apache::thrift::clientCompressRequestOnCpu());
+    if (!error) {
+      error = processFirstResponse(
+          protocolId_, firstResponse.metadata, firstResponse.payload, handler);
+    }
+    if (error) {
       serverCallback->onStreamCancel();
       clientCallback_->onFirstResponseError(std::move(error));
       return false;
@@ -493,11 +530,13 @@ class FirstRequestProcessorSink : public SinkClientCallback,
       delete this;
     };
     LegacyResponseSerializationHandler handler(protocolId_, methodName_.view());
-    if (auto error = processFirstResponse(
-            protocolId_,
-            firstResponse.metadata,
-            firstResponse.payload,
-            handler)) {
+    auto error = decompressFirstResponseExceptionIfNeeded(
+        firstResponse, apache::thrift::clientCompressRequestOnCpu());
+    if (!error) {
+      error = processFirstResponse(
+          protocolId_, firstResponse.metadata, firstResponse.payload, handler);
+    }
+    if (error) {
       serverCallback->onSinkError(
           folly::make_exception_wrapper<TApplicationException>(
               TApplicationException::INTERRUPTION,
@@ -591,11 +630,13 @@ class FirstRequestProcessorBiDi : public BiDiClientCallback,
       delete this;
     };
     LegacyResponseSerializationHandler handler(protocolId_, methodName_.view());
-    if (auto error = processFirstResponse(
-            protocolId_,
-            firstResponse.metadata,
-            firstResponse.payload,
-            handler)) {
+    auto error = decompressFirstResponseExceptionIfNeeded(
+        firstResponse, apache::thrift::clientCompressRequestOnCpu());
+    if (!error) {
+      error = processFirstResponse(
+          protocolId_, firstResponse.metadata, firstResponse.payload, handler);
+    }
+    if (error) {
       clientCallback_->onFirstResponseError(std::move(error));
       return serverCallback->onStreamCancel() &&
           serverCallback->onSinkError(
@@ -771,6 +812,26 @@ class RocketClientChannelBase::SingleRequestSingleResponseCallback final
             fdMetadata.fdSeqNum().value_or(folly::SocketFds::kNoSeqNum));
       }
 
+      // processFirstResponse eagerly deserializes exception payloads
+      // (anyException / proxyException) on the IO thread. When decompression
+      // was skipped, decompress a compressed exception first response here,
+      // before that eager decode -- otherwise it reads still-compressed bytes
+      // and aborts with "the data appears to be truncated". Normal replies are
+      // not deserialized by processFirstResponse, so they keep deferring
+      // decompression to the caller thread via decompressResponse().
+      //
+      // We pass the captured `skipDecompression_` member (not a live
+      // clientCompressRequestOnCpu() read) so this decision matches the
+      // unpack-as-compressed decision made above for the same response. The
+      // stream/sink/bidi paths instead read the flag live because their unpack
+      // (RocketClient::unpackStreamPayload) also reads it live at response
+      // time.
+      if (auto error = decompressFirstResponseExceptionIfNeeded(
+              *response, skipDecompression_)) {
+        cb_.release()->onResponseError(std::move(error));
+        return;
+      }
+
       if (auto error = processFirstResponse(
               protocolId_, response->metadata, response->payload, handler)) {
         cb_.release()->onResponseError(std::move(error));
@@ -805,7 +866,10 @@ class RocketClientChannelBase::SingleRequestSingleResponseCallback final
     apache::thrift::detail::fillTHeaderFromResponseRpcMetadata(
         response->metadata, *tHeader);
     // If decompression was skipped, store the compression algorithm on THeader
-    // so the caller thread can decompress via decompressResponse().
+    // so the caller thread can decompress via decompressResponse(). For an
+    // exception first response decompressed inline above, the helper cleared
+    // the algorithm from the metadata, so this is naturally skipped and the
+    // payload is not decompressed a second time.
     if (skipDecompression_) {
       if (auto compression = response->metadata.compression()) {
         tHeader->setResponseCompressionAlgorithm(*compression);

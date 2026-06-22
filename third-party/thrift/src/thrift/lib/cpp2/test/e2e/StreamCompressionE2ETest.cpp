@@ -15,6 +15,7 @@
  */
 
 #include <fmt/core.h>
+#include <folly/base64.h>
 #include <folly/coro/GtestHelpers.h>
 #include <thrift/lib/cpp2/Flags.h>
 #include <thrift/lib/cpp2/async/RocketClientChannel.h>
@@ -273,6 +274,77 @@ CO_TEST_F(
   EXPECT_THROW(co_await gen.next(), apache::thrift::TApplicationException);
 }
 
+// HIGH-1 repro: a direct (non-SR) Rocket STREAM whose FIRST response is a
+// compressed `anyException`. FirstRequestProcessorStream::onFirstResponse calls
+// processFirstResponse eagerly on the IO thread -- before the caller-thread
+// decompressResponse() runs -- so with the flag ON the still-compressed payload
+// is decoded as if uncompressed and aborts with "... truncated". The unary fix
+// in D108684232 did NOT cover this streaming first-response path.
+//
+// The handler mimics SRProxy's sendServiceRouterError: it stashes a large,
+// compressible payload in the anyex/anyext response headers and throws, so the
+// first response is encoded as a (compressed) PayloadExceptionMetadata::
+// anyException.
+CO_TEST_F(
+    StreamCompressionE2ETest,
+    StreamFirstResponseAnyExceptionWithCpuDecompression) {
+  THRIFT_FLAG_SET_MOCK(thrift_client_compress_request_on_cpu, true);
+
+  struct Handler : public ServiceHandler<detail::test::TestStreamE2EService> {
+    ServerStream<int32_t> canThrow(int32_t, int32_t) override {
+      auto* header = getRequestContext()->getHeader();
+      header->setHeader(
+          "anyext", "facebook.com/thrift/test/e2e/SimulatedAnyException");
+      header->setHeader("anyex", folly::base64Encode(std::string(8192, 'a')));
+      throw TApplicationException("simulated overload error");
+    }
+  };
+
+  testConfig({std::make_shared<Handler>(), {}, makeCompressedChannel});
+  auto client = makeClient<detail::test::TestStreamE2EService>();
+
+  try {
+    co_await client->co_canThrow(0, 3);
+    ADD_FAILURE() << "expected co_canThrow first response to throw";
+  } catch (const TApplicationException& ex) {
+    const std::string what = ex.what();
+    EXPECT_EQ(what.find("truncated"), std::string::npos) << what;
+    EXPECT_NE(what.find("simulated overload error"), std::string::npos) << what;
+  }
+}
+
+// Companion to StreamFirstResponseAnyExceptionWithCpuDecompression: proves the
+// inline exception decompression is *not* over-triggered on the stream path. A
+// NORMAL stream (non-exception first response) under
+// thrift_client_compress_request_on_cpu must round-trip its compressed items
+// intact -- decompressFirstResponseExceptionIfNeeded() must leave the first
+// response untouched and each item must be decompressed exactly once on the
+// caller thread. An over-eager or double decompression would corrupt the items.
+CO_TEST_F(
+    StreamCompressionE2ETest,
+    StreamNormalResponseWithCpuDecompressionNotOverTriggered) {
+  THRIFT_FLAG_SET_MOCK(thrift_client_compress_request_on_cpu, true);
+
+  struct Handler : public ServiceHandler<detail::test::TestStreamE2EService> {
+    ServerStream<std::string> stringRange(int32_t from, int32_t to) override {
+      for (int32_t i = from; i <= to; ++i) {
+        co_yield std::string(256, 'a' + (i % 26));
+      }
+    }
+  };
+
+  testConfig({std::make_shared<Handler>(), {}, makeCompressedChannel});
+  auto client = makeClient<detail::test::TestStreamE2EService>();
+  auto gen = (co_await client->co_stringRange(0, 9)).toAsyncGenerator();
+
+  for (int32_t expected = 0; expected <= 9; ++expected) {
+    auto item = co_await gen.next();
+    EXPECT_TRUE(item.has_value());
+    EXPECT_EQ(*item, std::string(256, 'a' + (expected % 26)));
+  }
+  EXPECT_FALSE((co_await gen.next()).has_value());
+}
+
 class SinkCompressionE2ETest : public test::E2ETestFixture {};
 
 CO_TEST_F(
@@ -300,6 +372,35 @@ CO_TEST_F(
         co_yield int32_t(1);
       }()),
       detail::test::SinkFinalException);
+}
+
+// HIGH-1 repro (sink): same first-response anyException path through
+// FirstRequestProcessorSink::onFirstResponse.
+CO_TEST_F(
+    SinkCompressionE2ETest, SinkFirstResponseAnyExceptionWithCpuDecompression) {
+  THRIFT_FLAG_SET_MOCK(thrift_client_compress_request_on_cpu, true);
+
+  struct Handler : public ServiceHandler<detail::test::TestSinkE2EService> {
+    SinkConsumer<int32_t, std::string> canThrow() override {
+      auto* header = getRequestContext()->getHeader();
+      header->setHeader(
+          "anyext", "facebook.com/thrift/test/e2e/SimulatedAnyException");
+      header->setHeader("anyex", folly::base64Encode(std::string(8192, 'a')));
+      throw TApplicationException("simulated overload error");
+    }
+  };
+
+  testConfig({std::make_shared<Handler>(), {}, makeCompressedChannel});
+  auto client = makeClient<detail::test::TestSinkE2EService>();
+
+  try {
+    co_await client->co_canThrow();
+    ADD_FAILURE() << "expected co_canThrow first response to throw";
+  } catch (const TApplicationException& ex) {
+    const std::string what = ex.what();
+    EXPECT_EQ(what.find("truncated"), std::string::npos) << what;
+    EXPECT_NE(what.find("simulated overload error"), std::string::npos) << what;
+  }
 }
 
 class BiDiCompressionE2ETest : public test::E2ETestFixture {};
@@ -342,6 +443,36 @@ CO_TEST_F(BiDiCompressionE2ETest, BiDiStreamExceptionWithCpuDecompression) {
   EXPECT_EQ(*second, 2);
 
   EXPECT_THROW(co_await streamGen.next(), detail::test::BiDiStreamException);
+}
+
+// HIGH-1 repro (bidi): same first-response anyException path through
+// FirstRequestProcessorBiDi::onFirstResponse.
+CO_TEST_F(
+    BiDiCompressionE2ETest, BiDiFirstResponseAnyExceptionWithCpuDecompression) {
+  THRIFT_FLAG_SET_MOCK(thrift_client_compress_request_on_cpu, true);
+
+  struct Handler : public ServiceHandler<detail::test::TestBiDiService> {
+    folly::coro::Task<StreamTransformation<int64_t, int64_t>> co_canThrow()
+        override {
+      auto* header = getRequestContext()->getHeader();
+      header->setHeader(
+          "anyext", "facebook.com/thrift/test/e2e/SimulatedAnyException");
+      header->setHeader("anyex", folly::base64Encode(std::string(8192, 'a')));
+      throw TApplicationException("simulated overload error");
+    }
+  };
+
+  testConfig({std::make_shared<Handler>(), {}, makeCompressedChannel});
+  auto client = makeClient<detail::test::TestBiDiService>();
+
+  try {
+    co_await client->co_canThrow();
+    ADD_FAILURE() << "expected co_canThrow first response to throw";
+  } catch (const TApplicationException& ex) {
+    const std::string what = ex.what();
+    EXPECT_EQ(what.find("truncated"), std::string::npos) << what;
+    EXPECT_NE(what.find("simulated overload error"), std::string::npos) << what;
+  }
 }
 
 } // namespace

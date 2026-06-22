@@ -1,0 +1,6 @@
+
+Warning: Value returned from method WithoutOverride::foo$memoize_impl() must be of inherited type @string, int given in %s on line %d
+int(42)
+
+Warning: Value returned from method WithOverride::foo$memoize_impl() must be of inherited type @string, float given in %s on line %d
+float(1.5)

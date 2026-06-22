@@ -408,7 +408,7 @@ function inet_ntop(string $in_addr)[]: mixed;
  * @return null|string - Returns a string representation of the address.
  */
 <<__IsFoldable, __Native>>
-function inet_ntop_nullable(string $in_addr)[]: ?string;
+function inet_ntop_nullable(string $in_addr)[]: string;
 
 /**
  * inet_ntop() using the folly library. Used for performance benchmarking.
@@ -416,7 +416,7 @@ function inet_ntop_nullable(string $in_addr)[]: ?string;
  * @return null|string - Returns a string representation of the address.
  */
 <<__IsFoldable, __Native>>
-function inet_ntop_folly(string $in_addr)[]: ?string;
+function inet_ntop_folly(string $in_addr)[]: string;
 
 /**
  * Converts a human readable IP address to its packed in_addr representation

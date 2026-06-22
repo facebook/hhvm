@@ -619,7 +619,7 @@ void HHVM_FUNCTION(facts_sync) {
   Facts::getFactsOrThrow().ensureUpdated();
 }
 
-Variant HHVM_FUNCTION(facts_db_path, const OptString& rootStr) {
+OptString HHVM_FUNCTION(facts_db_path, const OptString& rootStr) {
   // Turn rootStr into an absolute path.
   auto root = [&]() -> Optional<fs::path> {
     fs::path maybeRoot{rootStr.toCppString()};
@@ -638,7 +638,7 @@ Variant HHVM_FUNCTION(facts_db_path, const OptString& rootStr) {
   if (!root) {
     XLOG(ERR) << "Error resolving " << rootStr.slice();
     rareSboxEvent("ext_facts", "facts_db_path bad root", rootStr.slice());
-    return Variant{Variant::NullInit{}};
+    return OptString{};
   }
   assertx(root->is_absolute());
 
@@ -647,7 +647,7 @@ Variant HHVM_FUNCTION(facts_db_path, const OptString& rootStr) {
   auto const& repoOptions = RepoOptions::forFile(optionPath.native().c_str());
 
   try {
-    return Variant{
+    return OptString{
         Facts::SqliteAutoloadMapKey::get(repoOptions).m_dbKey.m_path.native()};
   } catch (const Facts::RepoOptionsParseExc& e) {
     rareSboxEvent(
@@ -662,63 +662,63 @@ int64_t HHVM_FUNCTION(facts_schema_version) {
   return Facts::kSchemaVersion;
 }
 
-Variant HHVM_FUNCTION(facts_type_to_path, const OptString& typeName) {
+OptString HHVM_FUNCTION(facts_type_to_path, const OptString& typeName) {
   auto fileRes = Facts::getFactsOrThrow().getTypeFileRelative(typeName);
   if (!fileRes) {
-    return Variant{Variant::NullInit{}};
+    return OptString{};
   } else {
-    return Variant{fileRes->m_path};
+    return OptString{fileRes->m_path};
   }
 }
 
-Variant HHVM_FUNCTION(
+OptString HHVM_FUNCTION(
     facts_type_or_type_alias_to_path,
     const OptString& typeName) {
   auto fileRes =
       Facts::getFactsOrThrow().getTypeOrTypeAliasFileRelative(typeName);
   if (!fileRes) {
-    return Variant{Variant::NullInit{}};
+    return OptString{};
   } else {
-    return Variant{fileRes->m_path};
+    return OptString{fileRes->m_path};
   }
 }
 
-Variant HHVM_FUNCTION(facts_function_to_path, const OptString& functionName) {
+OptString HHVM_FUNCTION(facts_function_to_path, const OptString& functionName) {
   auto fileRes = Facts::getFactsOrThrow().getFunctionFileRelative(functionName);
   if (!fileRes) {
-    return Variant{Variant::NullInit{}};
+    return OptString{};
   } else {
-    return Variant{fileRes->m_path};
+    return OptString{fileRes->m_path};
   }
 }
 
-Variant HHVM_FUNCTION(facts_constant_to_path, const OptString& constantName) {
+OptString HHVM_FUNCTION(facts_constant_to_path, const OptString& constantName) {
   auto fileRes = Facts::getFactsOrThrow().getConstantFileRelative(constantName);
   if (!fileRes) {
-    return Variant{Variant::NullInit{}};
+    return OptString{};
   } else {
-    return Variant{fileRes->m_path};
+    return OptString{fileRes->m_path};
   }
 }
 
-Variant HHVM_FUNCTION(facts_module_to_path, const OptString& moduleName) {
+OptString HHVM_FUNCTION(facts_module_to_path, const OptString& moduleName) {
   auto fileRes = Facts::getFactsOrThrow().getModuleFileRelative(moduleName);
   if (!fileRes) {
-    return Variant{Variant::NullInit{}};
+    return OptString{};
   } else {
-    return Variant{fileRes->m_path};
+    return OptString{fileRes->m_path};
   }
 }
 
-Variant HHVM_FUNCTION(
+OptString HHVM_FUNCTION(
     facts_type_alias_to_path,
     const OptString& typeAliasName) {
   auto fileRes =
       Facts::getFactsOrThrow().getTypeAliasFileRelative(typeAliasName);
   if (!fileRes) {
-    return Variant{Variant::NullInit{}};
+    return OptString{};
   } else {
-    return Variant{fileRes->m_path};
+    return OptString{fileRes->m_path};
   }
 }
 
@@ -738,12 +738,14 @@ Array HHVM_FUNCTION(facts_path_to_modules, const OptString& path) {
   return Facts::getFactsOrThrow().getFileModules(path);
 }
 
-Variant HHVM_FUNCTION(facts_path_to_module_membership, const OptString& path) {
+OptString HHVM_FUNCTION(
+    facts_path_to_module_membership,
+    const OptString& path) {
   auto result = Facts::getFactsOrThrow().getFileModuleMembership(path);
   if (!result) {
-    return Variant{Variant::NullInit{}};
+    return OptString{};
   } else {
-    return Variant{result.value()};
+    return result.value();
   }
 }
 
@@ -751,12 +753,12 @@ Array HHVM_FUNCTION(facts_all_modules) {
   return Facts::getFactsOrThrow().getAllModules();
 }
 
-Variant HHVM_FUNCTION(facts_path_to_package, const OptString& path) {
+OptString HHVM_FUNCTION(facts_path_to_package, const OptString& path) {
   auto result = Facts::getFactsOrThrow().getFilePackageMembership(path);
   if (!result) {
-    return Variant{Variant::NullInit{}};
+    return OptString{};
   } else {
-    return Variant{result.value()};
+    return result.value();
   }
 }
 
@@ -772,10 +774,9 @@ Variant HHVM_FUNCTION(facts_kind, const OptString& type) {
   return Facts::getFactsOrThrow().getKind(type);
 }
 
-Variant HHVM_FUNCTION(facts_sha1, const OptString& path) {
+OptString HHVM_FUNCTION(facts_sha1, const OptString& path) {
   auto maybeSha1 = Facts::getFactsOrThrow().getSha1(path);
-  return maybeSha1.has_value() ? Variant{maybeSha1.value()}
-                               : Variant{Variant::NullInit{}};
+  return maybeSha1.has_value() ? OptString{maybeSha1.value()} : OptString{};
 }
 
 bool HHVM_FUNCTION(facts_is_abstract, const OptString& type) {

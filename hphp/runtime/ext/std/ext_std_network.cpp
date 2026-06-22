@@ -174,16 +174,16 @@ Variant HHVM_FUNCTION(inet_ntop, const OptString& in_addr) {
   return OptString(buffer, CopyString);
 }
 
-TypedValue HHVM_FUNCTION(inet_ntop_folly, const OptString& in_addr) {
+OptString HHVM_FUNCTION(inet_ntop_folly, const OptString& in_addr) {
   try {
     auto const ip = folly::IPAddress::fromBinary(in_addr.slice());
-    return tvReturn(OptString{std::move(ip.str())});
+    return OptString{std::move(ip.str())};
   } catch (folly::IPAddressFormatException&) {
-    return make_tv<KindOfNull>();
+    return OptString{};
   }
 }
 
-TypedValue HHVM_FUNCTION(inet_ntop_nullable, const OptString& in_addr) {
+OptString HHVM_FUNCTION(inet_ntop_nullable, const OptString& in_addr) {
   int af = AF_INET6;
   size_t buflen = INET6_ADDRSTRLEN;
   switch (in_addr.size()) {
@@ -193,15 +193,15 @@ TypedValue HHVM_FUNCTION(inet_ntop_nullable, const OptString& in_addr) {
       buflen = INET_ADDRSTRLEN;
       break;
     default:
-      return make_tv<KindOfNull>();
+      return OptString{};
   }
   OptString ret(buflen, ReserveString);
   auto buffer = ret.mutableData();
   if (!::inet_ntop(af, in_addr.data(), buffer, buflen)) {
-    return make_tv<KindOfNull>();
+    return OptString{};
   }
   ret.setSize(std::min(strlen(buffer), buflen));
-  return tvReturn(std::move(ret));
+  return ret;
 }
 
 Variant HHVM_FUNCTION(inet_pton, const OptString& address) {

@@ -865,9 +865,9 @@ Variant HHVM_STATIC_METHOD(
  * Returns a non empty string if the instance is in an erroneous state.
  * This can happen if parsing failed.
  */
-static Variant HHVM_METHOD(FileDecls, getError) {
+static OptString HHVM_METHOD(FileDecls, getError) {
   auto data = Native::data<FileDecls>(this_);
-  return data->error.empty() ? init_null_variant : data->error;
+  return data->error.empty() ? OptString{} : data->error;
 }
 
 /*
@@ -985,11 +985,11 @@ static Variant HHVM_METHOD(FileDecls, getFileModule, const OptString& name) {
   return decls.empty() ? init_null_variant : populateModules(decls)[0];
 }
 
-static Variant HHVM_METHOD(FileDecls, getFileModuleMembership) {
+static OptString HHVM_METHOD(FileDecls, getFileModuleMembership) {
   auto data = Native::data<FileDecls>(this_);
   data->validateState();
   auto result = hackc::get_file_module_membership(**data->declsHolder);
-  return result.empty() ? init_null_variant : rustToString(result);
+  return result.empty() ? OptString{} : rustToString(result);
 }
 
 static Array HHVM_METHOD(FileDecls, getFileTypedefs) {

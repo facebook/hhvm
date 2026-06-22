@@ -89,7 +89,7 @@ function enabled()[]: bool;
  * user.
  */
 <<__Native>>
-function db_path(string $root)[]: ?string;
+function db_path(string $root)[]: string;
 
 /**
  * Return the schema version in use by this hhvm binary.
@@ -112,17 +112,17 @@ function sync(): void;
  * Throw InvalidOperationException if Facts is not enabled.
  */
 <<__Native>>
-function module_to_path(string $module_name)[]: ?string;
+function module_to_path(string $module_name)[]: string;
 <<__Native>>
-function type_to_path(string $type_name)[]: ?string;
+function type_to_path(string $type_name)[]: string;
 <<__Native>>
-function function_to_path(string $function_name)[]: ?string;
+function function_to_path(string $function_name)[]: string;
 <<__Native>>
-function constant_to_path(string $constant_name)[]: ?string;
+function constant_to_path(string $constant_name)[]: string;
 <<__Native>>
-function type_alias_to_path(string $type_alias_name)[]: ?string;
+function type_alias_to_path(string $type_alias_name)[]: string;
 <<__Native>>
-function type_or_type_alias_to_path(string $type_name)[]: ?string;
+function type_or_type_alias_to_path(string $type_name)[]: string;
 
 /**
  * Return all the symbols defined in the given path.
@@ -144,7 +144,7 @@ function path_to_type_aliases(string $path)[]: vec<string>;
  * Return the module the file is a member of, if any.
  */
 <<__Native>>
-function path_to_module_membership(string $path)[]: ?string;
+function path_to_module_membership(string $path)[]: string;
 
 /**
  * Return all modules defined in the repo.
@@ -158,13 +158,13 @@ function all_modules()[]: vec<string>;
  * Return the package the file is a member of, if any.
  */
 <<__Native>>
-function path_to_package(string $path)[]: ?string;
+function path_to_package(string $path)[]: string;
 
 /**
  * Return the sha1 of the path, if any.
  */
 <<__Native>>
-function sha1(string $path)[]: ?string;
+function sha1(string $path)[]: string;
 
 /**
  * Resolve a string into a classname that's properly capitalized and

@@ -1663,13 +1663,13 @@ static Object HHVM_METHOD(AsyncMysqlQueryResult, responseAttributes) {
   return Object{std::move(ret)};
 }
 
-static Variant HHVM_METHOD(AsyncMysqlQueryResult, mysqlInfo) {
+static OptString HHVM_METHOD(AsyncMysqlQueryResult, mysqlInfo) {
   auto* data = Native::data<AsyncMysqlQueryResult>(this_);
   const auto& mysqlInfo = data->m_query_result->mysqlInfo();
   if (mysqlInfo) {
     return OptString(*mysqlInfo, CopyString);
   }
-  return init_null();
+  return OptString{};
 }
 
 static Variant HHVM_METHOD(AsyncMysqlQueryResult, rowsMatched) {

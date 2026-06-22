@@ -57,17 +57,17 @@ function is_cli_server_mode(): bool;
  * Throws InvalidOperationException if native autoloading is disabled.
  */
 <<__Native>>
-function autoload_type_to_path(string $type)[]: ?string;
+function autoload_type_to_path(string $type)[]: string;
 <<__Native>>
-function autoload_function_to_path(string $function)[]: ?string;
+function autoload_function_to_path(string $function)[]: string;
 <<__Native>>
-function autoload_constant_to_path(string $constant)[]: ?string;
+function autoload_constant_to_path(string $constant)[]: string;
 <<__Native>>
-function autoload_module_to_path(string $module)[]: ?string;
+function autoload_module_to_path(string $module)[]: string;
 <<__Native>>
-function autoload_type_alias_to_path(string $type_alias)[]: ?string;
+function autoload_type_alias_to_path(string $type_alias)[]: string;
 <<__Native>>
-function autoload_type_or_type_alias_to_path(string $type)[]: ?string;
+function autoload_type_or_type_alias_to_path(string $type)[]: string;
 
 /**
  * Get the types defined in the given path.

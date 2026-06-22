@@ -85,7 +85,7 @@ function bcmul(string $left, string $right, int $scale = -1): string;
  *                  right_operand is 0.
  */
 <<__Native>>
-function bcdiv(string $left, string $right, int $scale = -1): ?string;
+function bcdiv(string $left, string $right, int $scale = -1): string;
 
 /**
  * bcmod() - http://php.net/function.bcmod
@@ -96,7 +96,7 @@ function bcdiv(string $left, string $right, int $scale = -1): ?string;
  * @return string - Returns the modulus as a string, or NULL if modulus is 0.
  */
 <<__Native>>
-function bcmod(string $left, string $right): ?string;
+function bcmod(string $left, string $right): string;
 
 /**
  * bcpow() - http://php.net/function.bcpow
@@ -143,4 +143,4 @@ function bcpowmod(string $left, string $right, string $modulus,
  *                  negative.
  */
 <<__Native>>
-function bcsqrt(string $operand, int $scale = -1): ?string;
+function bcsqrt(string $operand, int $scale = -1): string;

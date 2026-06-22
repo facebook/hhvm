@@ -222,28 +222,28 @@ static bool HHVM_METHOD(UConverter, setDestinationEncoding,
   return data->setDest(doSetEncoding(data, encoding));
 }
 
-static Variant doGetEncoding(IntlUConverter *data, UConverter *cnv) {
+static OptString doGetEncoding(IntlUConverter *data, UConverter *cnv) {
   if (!cnv) {
-    return init_null();
+    return OptString{};
   }
 
   UErrorCode error = U_ZERO_ERROR;
   const char *name = ucnv_getName(cnv, &error);
   if (U_FAILURE(error)) {
     data->failure(error, "ucnv_getName");
-    return init_null();
+    return OptString{};
   }
 
   return OptString(name);
 }
 
-static Variant HHVM_METHOD(UConverter, getDestinationEncoding) {
-  FETCH_CNV(data, this_, uninit_null());
+static OptString HHVM_METHOD(UConverter, getDestinationEncoding) {
+  FETCH_CNV(data, this_, OptString{});
   return doGetEncoding(data, data->dest());
 }
 
-static Variant HHVM_METHOD(UConverter, getSourceEncoding) {
-  FETCH_CNV(data, this_, uninit_null());
+static OptString HHVM_METHOD(UConverter, getSourceEncoding) {
+  FETCH_CNV(data, this_, OptString{});
   return doGetEncoding(data, data->src());
 }
 

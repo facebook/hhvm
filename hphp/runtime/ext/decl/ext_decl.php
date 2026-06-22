@@ -342,7 +342,7 @@ namespace HH {
      * @return string - the erroneous state or null if no errors
      */
     <<__Native>>
-    public function getError()[]: ?string;
+    public function getError()[]: string;
 
     /*
      * Checks the declaration for any class or typedef with the given name.
@@ -466,7 +466,7 @@ namespace HH {
      *                   or null if file is not a member of a module.
      */
     <<__Native>>
-    public function getFileModuleMembership()[]: ?string;
+    public function getFileModuleMembership()[]: string;
 
     /*
      * Query the content for all the top level type definitions.

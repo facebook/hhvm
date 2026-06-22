@@ -168,7 +168,7 @@ class SimpleXMLElementIterator implements Iterator<SimpleXMLElement> {
   /** @return mixed
    */
   <<__Native>>
-  public function key(): ?string;
+  public function key(): string;
 
   <<__Native>>
   public function next(): void;

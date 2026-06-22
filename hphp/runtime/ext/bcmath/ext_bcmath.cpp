@@ -160,7 +160,7 @@ static OptString HHVM_FUNCTION(bcmul, const OptString& left, const OptString& ri
   return php_num2str(result);
 }
 
-static Variant HHVM_FUNCTION(bcdiv, const OptString& left, const OptString& right,
+static OptString HHVM_FUNCTION(bcdiv, const OptString& left, const OptString& right,
                int64_t scale /* = -1 */) {
   scale = adjust_scale(scale);
   bc_num first, second, result;
@@ -174,12 +174,12 @@ static Variant HHVM_FUNCTION(bcdiv, const OptString& left, const OptString& righ
   php_str2num(&second, (char*)right.data());
   if (bc_divide(first, second, &result, scale) == -1) {
     raise_warning("Division by zero");
-    return init_null();
+    return OptString{};
   }
   return php_num2str(result);
 }
 
-static Variant HHVM_FUNCTION(bcmod, const OptString& left, const OptString& right) {
+static OptString HHVM_FUNCTION(bcmod, const OptString& left, const OptString& right) {
   bc_num first, second, result;
   bc_init_num(&first);
   SCOPE_EXIT { bc_free_num(&first); };
@@ -191,7 +191,7 @@ static Variant HHVM_FUNCTION(bcmod, const OptString& left, const OptString& righ
   php_str2num(&second, (char*)right.data());
   if (bc_modulo(first, second, &result, 0) == -1) {
     raise_warning("Division by zero");
-    return init_null();
+    return OptString{};
   }
   return php_num2str(result);
 }
@@ -239,23 +239,22 @@ static Variant HHVM_FUNCTION(bcpowmod, const OptString& left, const OptString& r
   return php_num2str(result);
 }
 
-static Variant HHVM_FUNCTION(bcsqrt, const OptString& operand,
+static OptString HHVM_FUNCTION(bcsqrt, const OptString& operand,
                              int64_t scale /* = -1 */) {
   scale = adjust_scale(scale);
   bc_num result;
   bc_init_num(&result);
   SCOPE_EXIT { bc_free_num(&result); };
   php_str2num(&result, (char*)operand.data());
-  Variant ret{Variant::NullInit{}};
   if (bc_sqrt(&result, scale) != 0) {
     if (result->n_scale > scale) {
       result->n_scale = scale;
     }
-    ret = php_num2str(result);
+    return php_num2str(result);
   } else {
     raise_warning("Square root of negative number");
   }
-  return ret;
+  return OptString{};
 }
 
 ///////////////////////////////////////////////////////////////////////////////

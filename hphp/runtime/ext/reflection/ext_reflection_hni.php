@@ -263,7 +263,7 @@ abstract class ReflectionFunctionAbstract implements Reflector {
    * Returns the module associated with the given function.
    */
   <<__Native>>
-  public function getModule()[]: ?string;
+  public function getModule()[]: string;
 
   <<__Native>>
   public function returnsReadonly()[]: bool;
@@ -633,7 +633,7 @@ class ReflectionFunction extends ReflectionFunctionAbstract {
   }
 
   <<__Native>>
-  private function getClosureScopeClassname(\HH\object $closure)[]: ?string;
+  private function getClosureScopeClassname(\HH\object $closure)[]: string;
 
   public function getClosureScopeClass(): ?ReflectionClass {
     if ($this->closure) {
@@ -1647,7 +1647,7 @@ class ReflectionClass implements Reflector {
    *          string name of the class required by the require class statement
    */
   <<__Native>>
-  public function getRequiredClass()[]: ?string;
+  public function getRequiredClass()[]: string;
 
   /**
    * Gets the name of the required this as class for a trait.
@@ -1656,7 +1656,7 @@ class ReflectionClass implements Reflector {
    *          string name of the class required by the require class statement
    */
   <<__Native>>
-  public function getRequiredThisAsClass()[]: ?string;
+  public function getRequiredThisAsClass()[]: string;
 
   /**
    * ( excerpt from
@@ -1743,7 +1743,7 @@ class ReflectionClass implements Reflector {
    * @return     ?string  Returns the module name if the class is part of a module, null otherwise.
    */
   <<__Native>>
-  public function getModule()[]: ?string;
+  public function getModule()[]: string;
 
   /**
    * ( excerpt from http://php.net/manual/en/reflectionclass.istrait.php )
@@ -2620,7 +2620,7 @@ final class ReflectionFile implements Reflector {
    *                      membership statement, null otherwise.
    */
   <<__Native>>
-  public function getModule()[]: ?string;
+  public function getModule()[]: string;
 
 }
 

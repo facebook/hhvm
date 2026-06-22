@@ -86,57 +86,57 @@ AutoloadMap& autoloadMap() {
 
 } // end anonymous namespace
 
-Variant HHVM_FUNCTION(autoload_type_to_path, const OptString& type) {
+OptString HHVM_FUNCTION(autoload_type_to_path, const OptString& type) {
   auto fileRes = autoloadMap().getTypeFile(type);
   if (!fileRes) {
-    return Variant{Variant::NullInit{}};
+    return OptString{};
   } else {
-    return Variant{fileRes->m_path};
+    return fileRes->m_path;
   }
 }
 
-Variant HHVM_FUNCTION(autoload_function_to_path, const OptString& function) {
+OptString HHVM_FUNCTION(autoload_function_to_path, const OptString& function) {
   auto fileRes = autoloadMap().getFunctionFile(function);
   if (!fileRes) {
-    return Variant{Variant::NullInit{}};
+    return OptString{};
   } else {
-    return Variant{fileRes->m_path};
+    return fileRes->m_path;
   }
 }
 
-Variant HHVM_FUNCTION(autoload_constant_to_path, const OptString& constant) {
+OptString HHVM_FUNCTION(autoload_constant_to_path, const OptString& constant) {
   auto fileRes = autoloadMap().getConstantFile(constant);
   if (!fileRes) {
-    return Variant{Variant::NullInit{}};
+    return OptString{};
   } else {
-    return Variant{fileRes->m_path};
+    return fileRes->m_path;
   }
 }
 
-Variant HHVM_FUNCTION(autoload_module_to_path, const OptString& module) {
+OptString HHVM_FUNCTION(autoload_module_to_path, const OptString& module) {
   auto fileRes = autoloadMap().getModuleFile(module);
   if (!fileRes) {
-    return Variant{Variant::NullInit{}};
+    return OptString{};
   } else {
-    return Variant{fileRes->m_path};
+    return fileRes->m_path;
   }
 }
 
-Variant HHVM_FUNCTION(autoload_type_alias_to_path, const OptString& typeAlias) {
+OptString HHVM_FUNCTION(autoload_type_alias_to_path, const OptString& typeAlias) {
   auto fileRes = autoloadMap().getTypeAliasFile(typeAlias);
   if (!fileRes) {
-    return Variant{Variant::NullInit{}};
+    return OptString{};
   } else {
-    return Variant{fileRes->m_path};
+    return fileRes->m_path;
   }
 }
 
-Variant HHVM_FUNCTION(autoload_type_or_type_alias_to_path, const OptString& type) {
+OptString HHVM_FUNCTION(autoload_type_or_type_alias_to_path, const OptString& type) {
   auto fileRes = autoloadMap().getTypeOrTypeAliasFile(type);
   if (!fileRes) {
-    return Variant{Variant::NullInit{}};
+    return OptString{};
   } else {
-    return Variant{fileRes->m_path};
+    return fileRes->m_path;
   }
 }
 

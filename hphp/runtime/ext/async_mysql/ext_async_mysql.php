@@ -1490,7 +1490,7 @@ final class AsyncMysqlQueryResult extends AsyncMysqlResult {
    * @return - The MySQL info string, or `null` if not available.
    */
   <<__Native>>
-  public function mysqlInfo(): ?string;
+  public function mysqlInfo(): string;
 
   /**
    * The number of rows matched by an UPDATE or DELETE statement.

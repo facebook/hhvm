@@ -774,8 +774,8 @@ void Reflection::ThrowReflectionExceptionObject(const Variant& message) {
 
 namespace {
 
-static Variant get_module_from_name(const StringData* name) {
-  if (!name || Module::isDefault(name)) return init_null_variant;
+static OptString get_module_from_name(const StringData* name) {
+  if (!name || Module::isDefault(name)) return OptString{};
   return OptString::attach(const_cast<StringData*>(name));
 }
 
@@ -1062,7 +1062,7 @@ static Array HHVM_METHOD(ReflectionFunctionAbstract, getCoeffects) {
   return arr.toArray();
 }
 
-static Variant HHVM_METHOD(ReflectionFunctionAbstract, getModule) {
+static OptString HHVM_METHOD(ReflectionFunctionAbstract, getModule) {
   auto const func = ReflectionFuncHandle::GetFuncFor(this_);
   return get_module_from_name(func->moduleName());
 }
@@ -1225,7 +1225,7 @@ static Array HHVM_METHOD(ReflectionFile, getAttributesNamespaced) {
   return ai.toArray();
 }
 
-static Variant HHVM_METHOD(ReflectionFile, getModule) {
+static OptString HHVM_METHOD(ReflectionFile, getModule) {
   auto const unit = ReflectionFileHandle::GetUnitFor(this_);
   assertx(unit);
   return get_module_from_name(unit->moduleName());
@@ -1308,7 +1308,7 @@ static bool HHVM_METHOD(ReflectionFunction, __initClosure,
 const StaticString s_ExpectedClosureInstance("Expected closure instance");
 
 // helper for getClosureScopeClass
-static Variant HHVM_METHOD(ReflectionFunction, getClosureScopeClassname,
+static OptString HHVM_METHOD(ReflectionFunction, getClosureScopeClassname,
                            const Object& closure) {
   if (!closure->instanceof(c_Closure::classof())) {
     SystemLib::throwExceptionObject(s_ExpectedClosureInstance);
@@ -1316,7 +1316,7 @@ static Variant HHVM_METHOD(ReflectionFunction, getClosureScopeClassname,
   if (auto scope = c_Closure::fromObject(closure.get())->getScope()) {
     return OptString(const_cast<StringData*>(scope->name()));
   }
-  return init_null_variant;
+  return OptString{};
 }
 
 static Variant HHVM_METHOD(ReflectionFunction, getClosureThisObject,
@@ -1375,7 +1375,7 @@ static bool HHVM_METHOD(ReflectionClass, isInternalToModule) {
   return cls->isInternal();
 }
 
-static Variant HHVM_METHOD(ReflectionClass, getModule) {
+static OptString HHVM_METHOD(ReflectionClass, getModule) {
   auto const cls = ReflectionClassHandle::GetClassFor(this_);
   return get_module_from_name(cls->moduleName());
 }
@@ -1481,16 +1481,16 @@ static Array HHVM_METHOD(ReflectionClass, getRequirementNames) {
   return pai.toArray();
 }
 
-static Variant HHVM_METHOD(ReflectionClass, getRequiredClass) {
+static OptString HHVM_METHOD(ReflectionClass, getRequiredClass) {
   auto const cls = ReflectionClassHandle::GetClassFor(this_);
   if (!isTrait(cls)) {
     // require class only applies to traits
-    return init_null_variant;
+    return OptString{};
   }
 
   auto const& requirements = cls->allRequirements();
   if (requirements.empty()) {
-    return init_null_variant;
+    return OptString{};
   }
 
   auto const& requirementsRange = requirements.range();
@@ -1509,19 +1509,19 @@ static Variant HHVM_METHOD(ReflectionClass, getRequiredClass) {
       return OptString::attach(const_cast<StringData*>(req->name()));
     }
   }
-  return init_null_variant;
+  return OptString{};
 }
 
-static Variant HHVM_METHOD(ReflectionClass, getRequiredThisAsClass) {
+static OptString HHVM_METHOD(ReflectionClass, getRequiredThisAsClass) {
   auto const cls = ReflectionClassHandle::GetClassFor(this_);
   if (!isTrait(cls)) {
     // require as this only applies to traits
-    return init_null_variant;
+    return OptString{};
   }
 
   auto const& requirements = cls->allRequirements();
   if (requirements.empty()) {
-    return init_null_variant;
+    return OptString{};
   }
 
   auto const& requirementsRange = requirements.range();
@@ -1540,7 +1540,7 @@ static Variant HHVM_METHOD(ReflectionClass, getRequiredThisAsClass) {
       return OptString::attach(const_cast<StringData*>(req->name()));
     }
   }
-  return init_null_variant;
+  return OptString{};
 }
 
 static ArrayRet HHVM_METHOD(ReflectionClass, getInterfaceNames) {

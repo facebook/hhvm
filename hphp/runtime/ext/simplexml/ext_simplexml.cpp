@@ -1734,7 +1734,7 @@ static Object HHVM_METHOD(SimpleXMLElementIterator, current) {
   return Native::data<SimpleXMLElementIterator>(this_)->sxe()->iter.data;
 }
 
-static Variant HHVM_METHOD(SimpleXMLElementIterator, key) {
+static OptString HHVM_METHOD(SimpleXMLElementIterator, key) {
   auto sxe = Native::data<SimpleXMLElementIterator>(this_)->sxe();
   Object curobj = sxe->iter.data;
   xmlNodePtr curnode = curobj.isNull()
@@ -1743,7 +1743,7 @@ static Variant HHVM_METHOD(SimpleXMLElementIterator, key) {
   if (curnode) {
     return OptString((char*)curnode->name);
   } else {
-    return init_null();
+    return OptString{};
   }
 }
 

@@ -298,7 +298,7 @@ bool ConfigApi::getConfigFile(std::string& contents, std::string& path) {
   }
   if (!configStr.empty()) {
     path = shorten(configStr, 64);
-    contents = configStr.str();
+    contents.assign(configStr.data(), configStr.size());
     return true;
   }
   if (!opts_.config_str.empty()) {

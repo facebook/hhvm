@@ -283,6 +283,8 @@ struct MountInfo {
   5: optional string fsChannelType;
   // The FUSE transport type: "devfuse" or "io_uring". Only set for FUSE mounts.
   6: optional string fuseTransport;
+  // Whether the mount point is visible in the daemon's current mount namespace.
+  7: optional bool visibleInDaemonNamespace;
 }
 
 struct MountArgument {

@@ -2342,20 +2342,18 @@ void Class::propagateReturnTypes() const {
   // but don't have an override in the current class. Such methods may
   // provide an implementation for an interface method which could differ in
   // its return type.
-  for (Slot i = 0, n = numMethods(); i < n; ++i) {
-    auto const f = getMethod(i);
-    // Compute return types for methods that are defined on this class
-    // including trait methods imported at runtime.
-    if (!f || f->cls() != this) continue;
+  for (Slot i = 0; i < m_preClass->numMethods(); ++i) {
+    auto name = m_preClass->methods()[i]->name();
+    auto const it = overrides.find(name);
+    if ((it == overrides.end()) || !shouldInheritReturnTypes(name)) continue;
+
+    auto f = lookupMethod(name);
+    assertx(f);
 
     // Generators produce values via yield and not RetC. RetC only fires when
     // the generator body finishes, and the value on the stack at that point
     // is always null which indicates the end of the stream.
     if (f->isGenerator()) continue;
-
-    auto const name = f->name();
-    auto const it = overrides.find(name);
-    if ((it == overrides.end()) || !shouldInheritReturnTypes(name)) continue;
 
     inheritReturnTypesForMethod(f, it->second);
 
@@ -5032,11 +5030,6 @@ void importTraitMethod(Class* cls,
     modifiers = (Attr)((modifiers       &  (attrMask)) |
                        (method->attrs() & ~(attrMask)));
   }
-
-  // Don't propagate AttrHasInheritedReturnTypes from the trait method as this
-  // needs to be recomputed in the context of the current class and set via
-  // setInheritedReturnTypes.
-  modifiers = Attr(modifiers & ~AttrHasInheritedReturnTypes);
 
   Func* parentMethod = nullptr;
   if (mm_iter != builder.end()) {

@@ -205,8 +205,8 @@ void Func::freeClone() {
   }
 
   if (hasInheritedReturnTypes()) {
-    m_attrs = static_cast<Attr>(m_attrs & ~AttrHasInheritedReturnTypes);
     s_inheritedRetTypes.erase(getFuncId().toStableInt());
+    m_attrs = static_cast<Attr>(m_attrs & ~AttrHasInheritedReturnTypes);
   }
 
 #ifndef USE_PACKEDPTR

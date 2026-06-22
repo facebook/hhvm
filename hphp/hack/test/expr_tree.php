@@ -419,6 +419,15 @@ class ExampleDsl {
   }
 
   <<__NoAutoLikes>>
+  public function visitSubscript(
+    ?ExprPos $_,
+    ExampleDsl::TAst $container,
+    ExampleDsl::TAst $index,
+  )[]: ExampleDsl::TAst {
+    return $container."[".$index."]";
+  }
+
+  <<__NoAutoLikes>>
   public function visitInstanceMethod(
     ?ExprPos $_,
     ExampleDsl::TAst $expr,

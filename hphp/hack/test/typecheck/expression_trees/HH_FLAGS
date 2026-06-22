@@ -1,3 +1,3 @@
---config enable_experimental_stx_features='{"await_in_splice": "Preview", "expression_trees": "Unstable", "expression_tree_coalesce_operator": "OngoingRelease", "expression_tree_nullsafe_obj_get": "OngoingRelease", "case_types": "Preview", "case_type_where_clauses": "Preview", "like_type_hints": "Unstable", "capture_pipe_variables": "Unstable", "representable_as": "Preview"}'
+--config enable_experimental_stx_features='{"await_in_splice": "Preview", "expression_trees": "Unstable", "expression_tree_coalesce_operator": "OngoingRelease", "expression_tree_nullsafe_obj_get": "OngoingRelease", "expression_tree_subscript": "Preview", "expression_tree_hack_arrays": "Preview", "case_types": "Preview", "case_type_where_clauses": "Preview", "like_type_hints": "Unstable", "capture_pipe_variables": "Unstable", "representable_as": "Preview"}'
 --config expression_tree_shape_no_unwrap=true
 --extra-builtin ../../expr_tree.php

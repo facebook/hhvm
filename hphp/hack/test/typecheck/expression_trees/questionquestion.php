@@ -4,6 +4,7 @@
   __EnableUnstableFeatures(
     'expression_trees',
     'expression_tree_coalesce_operator',
+    'expression_tree_subscript',
   )>>
 
 function test(): void {

@@ -987,12 +987,23 @@ impl RewriteState {
             }
             Assign(assign) => {
                 let (lhs, bop, rhs) = *assign;
-                let rewritten_lhs = self.rewrite_expr(lhs, visitor_name);
-                let rewritten_rhs = self.rewrite_expr(rhs, visitor_name);
 
                 if bop.is_some() {
                     self.errors.push((pos.clone(), "Expression trees do not support compound assignments. Try the long form style `$foo = $foo + $bar` instead.".into(),));
                 };
+
+                // Subscript assignment is not yet supported.
+                // Error on any ArrayGet as LHS of assignment (single-level and nested).
+                if matches!(&lhs, Expr(_, _, Expr_::ArrayGet(_))) {
+                    self.errors.push((
+                        pos.clone(),
+                        "Subscript assignment is not yet supported in expression trees.".into(),
+                    ));
+                }
+
+                let rewritten_lhs = self.rewrite_expr(lhs, visitor_name);
+                let rewritten_rhs = self.rewrite_expr(rhs, visitor_name);
+
                 // Source: MyDsl`$x = ...`
                 // Virtualized: $x = ...
                 // Desugared: $0v->visitAssign(new ExprPos(...), $0v->visitLocal(...), ...)
@@ -1020,6 +1031,19 @@ impl RewriteState {
             // Desugared: $0v->visitUnop(new ExprPos(...), ..., '__exclamationMark')
             Unop(unop) => {
                 let (op, operand) = *unop;
+
+                // Subscript increment/decrement is not yet supported.
+                // Both single-level ($arr[$i]++) and nested ($arr[$i][$j]++)
+                // are rejected until write support is added.
+                if matches!(op, Uop::Upincr | Uop::Updecr) {
+                    if matches!(&operand, Expr(_, _, Expr_::ArrayGet(_))) {
+                        self.errors.push((
+                            pos.clone(),
+                            "Subscript increment/decrement is not yet supported in expression trees.".into(),
+                        ));
+                    }
+                }
+
                 let rewritten_operand = self.rewrite_expr(operand, visitor_name);
 
                 let op_str = match op {
@@ -1915,12 +1939,50 @@ impl RewriteState {
                     .push((pos, "`clone` is not supported in expression trees.".into()));
                 unchanged_result
             }
-            ArrayGet(_) => {
-                self.errors.push((
-                    pos,
-                    "Indexing with `[]` is not supported in expression trees.".into(),
-                ));
-                unchanged_result
+            // Source: MyDsl`$container[$index]`
+            // Virtualized: $container[$index]
+            // Desugared: $0v->visitSubscript(new ExprPos(...), container, index)
+            ArrayGet(ag) => {
+                let (container_expr, index_expr_opt) = *ag;
+
+                let index_expr = match index_expr_opt {
+                    Some(idx) => idx,
+                    None => {
+                        self.errors.push((
+                            pos.clone(),
+                            "`$arr[]` is append syntax and is currently unsupported in expression trees. Use `$arr[$idx]` for element access."
+                                .into(),
+                        ));
+                        return unchanged_result;
+                    }
+                };
+
+                let rewritten_container = self.rewrite_expr(container_expr, visitor_name);
+                let rewritten_index = self.rewrite_expr(index_expr, visitor_name);
+
+                let virtual_expr = Expr::new(
+                    (),
+                    pos.clone(),
+                    Expr_::mk_array_get(
+                        rewritten_container.virtual_expr,
+                        Some(rewritten_index.virtual_expr),
+                    ),
+                );
+
+                let desugar_expr = v_meth_call(
+                    et::VISIT_SUBSCRIPT,
+                    vec![
+                        pos_expr,
+                        rewritten_container.desugar_expr,
+                        rewritten_index.desugar_expr,
+                    ],
+                    &pos,
+                );
+
+                RewriteResult {
+                    virtual_expr,
+                    desugar_expr,
+                }
             }
             FunctionPointer(_) => {
                 self.errors.push((

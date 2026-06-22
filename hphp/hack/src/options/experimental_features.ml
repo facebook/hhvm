@@ -73,6 +73,7 @@ type feature_name =
   | AllowExtendedAwaitSyntax
   | AllowConditionalAwaitSyntax
   | ExpressionTreeHackArrays
+  | ExpressionTreeSubscript
   | ShapeFieldPunning
   | RepresentableAs
   | ClassAliasesEverywhere
@@ -127,6 +128,7 @@ let feature_name_map =
       ("allow_extended_await_syntax", AllowExtendedAwaitSyntax);
       ("allow_conditional_await_syntax", AllowConditionalAwaitSyntax);
       ("expression_tree_hack_arrays", ExpressionTreeHackArrays);
+      ("expression_tree_subscript", ExpressionTreeSubscript);
       ("shape_field_punning", ShapeFieldPunning);
       ("representable_as", RepresentableAs);
       ("class_aliases_everywhere", ClassAliasesEverywhere);

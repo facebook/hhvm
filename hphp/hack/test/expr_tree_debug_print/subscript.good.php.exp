@@ -1,0 +1,535 @@
+<?hh
+
+<<file:
+  __EnableUnstableFeatures(
+    'expression_trees',
+    'expression_tree_subscript',
+  )>>
+
+function test_vec(): void {
+  ExampleDsl::makeTree(
+    darray[
+      "path" => __FILE__,
+      "start_line" => 6,
+      "end_line" => 6,
+      "start_column" => 13,
+      "end_column" => 67,
+    ],
+    darray[
+      "splices" => dict[],
+      "functions" => vec[],
+      "static_methods" => vec[],
+      "variables" => vec[],
+      "lexically_enclosing_tree" => NULL,
+    ],
+    (
+      (ExampleDsl $v) ==> {
+        return $v->visitLambda(
+          darray[
+            "path" => __FILE__,
+            "start_line" => 6,
+            "end_line" => 6,
+            "start_column" => 13,
+            "end_column" => 67,
+          ],
+          vec["$arr", "$idx"],
+          vec[
+            $v->visitReturn(
+              darray[
+                "path" => __FILE__,
+                "start_line" => 6,
+                "end_line" => 6,
+                "start_column" => 57,
+                "end_column" => 67,
+              ],
+              $v->visitSubscript(
+                darray[
+                  "path" => __FILE__,
+                  "start_line" => 6,
+                  "end_line" => 6,
+                  "start_column" => 57,
+                  "end_column" => 67,
+                ],
+                $v->visitLocal(
+                  darray[
+                    "path" => __FILE__,
+                    "start_line" => 6,
+                    "end_line" => 6,
+                    "start_column" => 57,
+                    "end_column" => 61,
+                  ],
+                  "$arr",
+                ),
+                $v->visitLocal(
+                  darray[
+                    "path" => __FILE__,
+                    "start_line" => 6,
+                    "end_line" => 6,
+                    "start_column" => 62,
+                    "end_column" => 66,
+                  ],
+                  "$idx",
+                ),
+              ),
+            ),
+          ],
+        );
+      }
+    ),
+  );
+}
+
+function test_dict(): void {
+  ExampleDsl::makeTree(
+    darray[
+      "path" => __FILE__,
+      "start_line" => 10,
+      "end_line" => 10,
+      "start_column" => 13,
+      "end_column" => 86,
+    ],
+    darray[
+      "splices" => dict[],
+      "functions" => vec[],
+      "static_methods" => vec[],
+      "variables" => vec[],
+      "lexically_enclosing_tree" => NULL,
+    ],
+    (
+      (ExampleDsl $v) ==> {
+        return $v->visitLambda(
+          darray[
+            "path" => __FILE__,
+            "start_line" => 10,
+            "end_line" => 10,
+            "start_column" => 13,
+            "end_column" => 86,
+          ],
+          vec["$map", "$key"],
+          vec[
+            $v->visitReturn(
+              darray[
+                "path" => __FILE__,
+                "start_line" => 10,
+                "end_line" => 10,
+                "start_column" => 76,
+                "end_column" => 86,
+              ],
+              $v->visitSubscript(
+                darray[
+                  "path" => __FILE__,
+                  "start_line" => 10,
+                  "end_line" => 10,
+                  "start_column" => 76,
+                  "end_column" => 86,
+                ],
+                $v->visitLocal(
+                  darray[
+                    "path" => __FILE__,
+                    "start_line" => 10,
+                    "end_line" => 10,
+                    "start_column" => 76,
+                    "end_column" => 80,
+                  ],
+                  "$map",
+                ),
+                $v->visitLocal(
+                  darray[
+                    "path" => __FILE__,
+                    "start_line" => 10,
+                    "end_line" => 10,
+                    "start_column" => 81,
+                    "end_column" => 85,
+                  ],
+                  "$key",
+                ),
+              ),
+            ),
+          ],
+        );
+      }
+    ),
+  );
+}
+
+function test_dict_int_key(): void {
+  ExampleDsl::makeTree(
+    darray[
+      "path" => __FILE__,
+      "start_line" => 14,
+      "end_line" => 14,
+      "start_column" => 13,
+      "end_column" => 83,
+    ],
+    darray[
+      "splices" => dict[],
+      "functions" => vec[],
+      "static_methods" => vec[],
+      "variables" => vec[],
+      "lexically_enclosing_tree" => NULL,
+    ],
+    (
+      (ExampleDsl $v) ==> {
+        return $v->visitLambda(
+          darray[
+            "path" => __FILE__,
+            "start_line" => 14,
+            "end_line" => 14,
+            "start_column" => 13,
+            "end_column" => 83,
+          ],
+          vec["$map", "$key"],
+          vec[
+            $v->visitReturn(
+              darray[
+                "path" => __FILE__,
+                "start_line" => 14,
+                "end_line" => 14,
+                "start_column" => 73,
+                "end_column" => 83,
+              ],
+              $v->visitSubscript(
+                darray[
+                  "path" => __FILE__,
+                  "start_line" => 14,
+                  "end_line" => 14,
+                  "start_column" => 73,
+                  "end_column" => 83,
+                ],
+                $v->visitLocal(
+                  darray[
+                    "path" => __FILE__,
+                    "start_line" => 14,
+                    "end_line" => 14,
+                    "start_column" => 73,
+                    "end_column" => 77,
+                  ],
+                  "$map",
+                ),
+                $v->visitLocal(
+                  darray[
+                    "path" => __FILE__,
+                    "start_line" => 14,
+                    "end_line" => 14,
+                    "start_column" => 78,
+                    "end_column" => 82,
+                  ],
+                  "$key",
+                ),
+              ),
+            ),
+          ],
+        );
+      }
+    ),
+  );
+}
+
+function test_nested(): void {
+  ExampleDsl::makeTree(
+    darray["path" => __FILE__, "start_line" => 18, "end_line" => 18, "start_column" => 13, "end_column" => 87],
+    darray["splices" => dict[], "functions" => vec[], "static_methods" => vec[], "variables" => vec[], "lexically_enclosing_tree" => NULL],
+    (
+      (ExampleDsl $v) ==> {
+        return $v->visitLambda(darray["path" => __FILE__, "start_line" => 18, "end_line" => 18, "start_column" => 13, "end_column" => 87], vec["$arr", "$i", "$j"], vec[$v->visitReturn(darray["path" => __FILE__, "start_line" => 18, "end_line" => 18, "start_column" => 75, "end_column" => 87], $v->visitSubscript(darray["path" => __FILE__, "start_line" => 18, "end_line" => 18, "start_column" => 75, "end_column" => 87], $v->visitSubscript(darray["path" => __FILE__, "start_line" => 18, "end_line" => 18, "start_column" => 75, "end_column" => 83], $v->visitLocal(darray["path" => __FILE__, "start_line" => 18, "end_line" => 18, "start_column" => 75, "end_column" => 79], "$arr"), $v->visitLocal(darray["path" => __FILE__, "start_line" => 18, "end_line" => 18, "start_column" => 80, "end_column" => 82], "$i")), $v->visitLocal(darray["path" => __FILE__, "start_line" => 18, "end_line" => 18, "start_column" => 84, "end_column" => 86], "$j")))]);
+      }
+    ),
+  );
+}
+
+function test_keyset_int(): void {
+  ExampleDsl::makeTree(
+    darray[
+      "path" => __FILE__,
+      "start_line" => 22,
+      "end_line" => 22,
+      "start_column" => 13,
+      "end_column" => 68,
+    ],
+    darray[
+      "splices" => dict[],
+      "functions" => vec[],
+      "static_methods" => vec[],
+      "variables" => vec[],
+      "lexically_enclosing_tree" => NULL,
+    ],
+    (
+      (ExampleDsl $v) ==> {
+        return $v->visitLambda(
+          darray[
+            "path" => __FILE__,
+            "start_line" => 22,
+            "end_line" => 22,
+            "start_column" => 13,
+            "end_column" => 68,
+          ],
+          vec["$ks", "$key"],
+          vec[
+            $v->visitReturn(
+              darray[
+                "path" => __FILE__,
+                "start_line" => 22,
+                "end_line" => 22,
+                "start_column" => 59,
+                "end_column" => 68,
+              ],
+              $v->visitSubscript(
+                darray[
+                  "path" => __FILE__,
+                  "start_line" => 22,
+                  "end_line" => 22,
+                  "start_column" => 59,
+                  "end_column" => 68,
+                ],
+                $v->visitLocal(
+                  darray[
+                    "path" => __FILE__,
+                    "start_line" => 22,
+                    "end_line" => 22,
+                    "start_column" => 59,
+                    "end_column" => 62,
+                  ],
+                  "$ks",
+                ),
+                $v->visitLocal(
+                  darray[
+                    "path" => __FILE__,
+                    "start_line" => 22,
+                    "end_line" => 22,
+                    "start_column" => 63,
+                    "end_column" => 67,
+                  ],
+                  "$key",
+                ),
+              ),
+            ),
+          ],
+        );
+      }
+    ),
+  );
+}
+
+function test_keyset_string(): void {
+  ExampleDsl::makeTree(
+    darray[
+      "path" => __FILE__,
+      "start_line" => 26,
+      "end_line" => 26,
+      "start_column" => 13,
+      "end_column" => 74,
+    ],
+    darray[
+      "splices" => dict[],
+      "functions" => vec[],
+      "static_methods" => vec[],
+      "variables" => vec[],
+      "lexically_enclosing_tree" => NULL,
+    ],
+    (
+      (ExampleDsl $v) ==> {
+        return $v->visitLambda(
+          darray[
+            "path" => __FILE__,
+            "start_line" => 26,
+            "end_line" => 26,
+            "start_column" => 13,
+            "end_column" => 74,
+          ],
+          vec["$ks", "$key"],
+          vec[
+            $v->visitReturn(
+              darray[
+                "path" => __FILE__,
+                "start_line" => 26,
+                "end_line" => 26,
+                "start_column" => 65,
+                "end_column" => 74,
+              ],
+              $v->visitSubscript(
+                darray[
+                  "path" => __FILE__,
+                  "start_line" => 26,
+                  "end_line" => 26,
+                  "start_column" => 65,
+                  "end_column" => 74,
+                ],
+                $v->visitLocal(
+                  darray[
+                    "path" => __FILE__,
+                    "start_line" => 26,
+                    "end_line" => 26,
+                    "start_column" => 65,
+                    "end_column" => 68,
+                  ],
+                  "$ks",
+                ),
+                $v->visitLocal(
+                  darray[
+                    "path" => __FILE__,
+                    "start_line" => 26,
+                    "end_line" => 26,
+                    "start_column" => 69,
+                    "end_column" => 73,
+                  ],
+                  "$key",
+                ),
+              ),
+            ),
+          ],
+        );
+      }
+    ),
+  );
+}
+
+abstract class PropVec {
+  public vec<ExampleInt> $items;
+}
+
+abstract class PropNestedVec {
+  public vec<vec<ExampleInt>> $nested;
+}
+
+abstract class PropVecOfObj {
+  public vec<PropVec> $children;
+}
+
+abstract class PropBaz {
+  public vec<vec<ExampleInt>> $baz;
+}
+
+abstract class PropBarOfBaz {
+  public vec<vec<PropBaz>> $bar;
+}
+
+function test_mixed_read_prop_sub(): void {
+  ExampleDsl::makeTree(
+    darray[
+      "path" => __FILE__,
+      "start_line" => 50,
+      "end_line" => 50,
+      "start_column" => 13,
+      "end_column" => 66,
+    ],
+    darray[
+      "splices" => dict[],
+      "functions" => vec[],
+      "static_methods" => vec[],
+      "variables" => vec[],
+      "lexically_enclosing_tree" => NULL,
+    ],
+    (
+      (ExampleDsl $v) ==> {
+        return $v->visitLambda(
+          darray[
+            "path" => __FILE__,
+            "start_line" => 50,
+            "end_line" => 50,
+            "start_column" => 13,
+            "end_column" => 66,
+          ],
+          vec["$obj", "$idx"],
+          vec[
+            $v->visitReturn(
+              darray[
+                "path" => __FILE__,
+                "start_line" => 50,
+                "end_line" => 50,
+                "start_column" => 49,
+                "end_column" => 66,
+              ],
+              $v->visitSubscript(
+                darray[
+                  "path" => __FILE__,
+                  "start_line" => 50,
+                  "end_line" => 50,
+                  "start_column" => 49,
+                  "end_column" => 66,
+                ],
+                $v->visitPropertyAccess(
+                  darray[
+                    "path" => __FILE__,
+                    "start_line" => 50,
+                    "end_line" => 50,
+                    "start_column" => 49,
+                    "end_column" => 60,
+                  ],
+                  $v->visitLocal(
+                    darray[
+                      "path" => __FILE__,
+                      "start_line" => 50,
+                      "end_line" => 50,
+                      "start_column" => 49,
+                      "end_column" => 53,
+                    ],
+                    "$obj",
+                  ),
+                  "items",
+                ),
+                $v->visitLocal(
+                  darray[
+                    "path" => __FILE__,
+                    "start_line" => 50,
+                    "end_line" => 50,
+                    "start_column" => 61,
+                    "end_column" => 65,
+                  ],
+                  "$idx",
+                ),
+              ),
+            ),
+          ],
+        );
+      }
+    ),
+  );
+}
+
+function test_mixed_read_prop_sub2(): void {
+  ExampleDsl::makeTree(
+    darray["path" => __FILE__, "start_line" => 54, "end_line" => 54, "start_column" => 13, "end_column" => 88],
+    darray["splices" => dict[], "functions" => vec[], "static_methods" => vec[], "variables" => vec[], "lexically_enclosing_tree" => NULL],
+    (
+      (ExampleDsl $v) ==> {
+        return $v->visitLambda(darray["path" => __FILE__, "start_line" => 54, "end_line" => 54, "start_column" => 13, "end_column" => 88], vec["$obj", "$i", "$j"], vec[$v->visitReturn(darray["path" => __FILE__, "start_line" => 54, "end_line" => 54, "start_column" => 68, "end_column" => 88], $v->visitSubscript(darray["path" => __FILE__, "start_line" => 54, "end_line" => 54, "start_column" => 68, "end_column" => 88], $v->visitSubscript(darray["path" => __FILE__, "start_line" => 54, "end_line" => 54, "start_column" => 68, "end_column" => 84], $v->visitPropertyAccess(darray["path" => __FILE__, "start_line" => 54, "end_line" => 54, "start_column" => 68, "end_column" => 80], $v->visitLocal(darray["path" => __FILE__, "start_line" => 54, "end_line" => 54, "start_column" => 68, "end_column" => 72], "$obj"), "nested"), $v->visitLocal(darray["path" => __FILE__, "start_line" => 54, "end_line" => 54, "start_column" => 81, "end_column" => 83], "$i")), $v->visitLocal(darray["path" => __FILE__, "start_line" => 54, "end_line" => 54, "start_column" => 85, "end_column" => 87], "$j")))]);
+      }
+    ),
+  );
+}
+
+function test_mixed_read_sub_prop_sub(): void {
+  ExampleDsl::makeTree(
+    darray["path" => __FILE__, "start_line" => 58, "end_line" => 58, "start_column" => 13, "end_column" => 86],
+    darray["splices" => dict[], "functions" => vec[], "static_methods" => vec[], "variables" => vec[], "lexically_enclosing_tree" => NULL],
+    (
+      (ExampleDsl $v) ==> {
+        return $v->visitLambda(darray["path" => __FILE__, "start_line" => 58, "end_line" => 58, "start_column" => 13, "end_column" => 86], vec["$arr", "$i", "$j"], vec[$v->visitReturn(darray["path" => __FILE__, "start_line" => 58, "end_line" => 58, "start_column" => 67, "end_column" => 86], $v->visitSubscript(darray["path" => __FILE__, "start_line" => 58, "end_line" => 58, "start_column" => 67, "end_column" => 86], $v->visitPropertyAccess(darray["path" => __FILE__, "start_line" => 58, "end_line" => 58, "start_column" => 67, "end_column" => 82], $v->visitSubscript(darray["path" => __FILE__, "start_line" => 58, "end_line" => 58, "start_column" => 67, "end_column" => 75], $v->visitLocal(darray["path" => __FILE__, "start_line" => 58, "end_line" => 58, "start_column" => 67, "end_column" => 71], "$arr"), $v->visitLocal(darray["path" => __FILE__, "start_line" => 58, "end_line" => 58, "start_column" => 72, "end_column" => 74], "$i")), "items"), $v->visitLocal(darray["path" => __FILE__, "start_line" => 58, "end_line" => 58, "start_column" => 83, "end_column" => 85], "$j")))]);
+      }
+    ),
+  );
+}
+
+function test_mixed_read_prop_sub_prop_sub(): void {
+  ExampleDsl::makeTree(
+    darray["path" => __FILE__, "start_line" => 62, "end_line" => 62, "start_column" => 13, "end_column" => 96],
+    darray["splices" => dict[], "functions" => vec[], "static_methods" => vec[], "variables" => vec[], "lexically_enclosing_tree" => NULL],
+    (
+      (ExampleDsl $v) ==> {
+        return $v->visitLambda(darray["path" => __FILE__, "start_line" => 62, "end_line" => 62, "start_column" => 13, "end_column" => 96], vec["$foo", "$i", "$j"], vec[$v->visitReturn(darray["path" => __FILE__, "start_line" => 62, "end_line" => 62, "start_column" => 67, "end_column" => 96], $v->visitSubscript(darray["path" => __FILE__, "start_line" => 62, "end_line" => 62, "start_column" => 67, "end_column" => 96], $v->visitPropertyAccess(darray["path" => __FILE__, "start_line" => 62, "end_line" => 62, "start_column" => 67, "end_column" => 92], $v->visitSubscript(darray["path" => __FILE__, "start_line" => 62, "end_line" => 62, "start_column" => 67, "end_column" => 85], $v->visitPropertyAccess(darray["path" => __FILE__, "start_line" => 62, "end_line" => 62, "start_column" => 67, "end_column" => 81], $v->visitLocal(darray["path" => __FILE__, "start_line" => 62, "end_line" => 62, "start_column" => 67, "end_column" => 71], "$foo"), "children"), $v->visitLocal(darray["path" => __FILE__, "start_line" => 62, "end_line" => 62, "start_column" => 82, "end_column" => 84], "$i")), "items"), $v->visitLocal(darray["path" => __FILE__, "start_line" => 62, "end_line" => 62, "start_column" => 93, "end_column" => 95], "$j")))]);
+      }
+    ),
+  );
+}
+
+function test_mixed_read_extreme(): void {
+  ExampleDsl::makeTree(
+    darray["path" => __FILE__, "start_line" => 66, "end_line" => 66, "start_column" => 13, "end_column" => 127],
+    darray["splices" => dict[], "functions" => vec[], "static_methods" => vec[], "variables" => vec[], "lexically_enclosing_tree" => NULL],
+    (
+      (ExampleDsl $v) ==> {
+        return $v->visitLambda(darray["path" => __FILE__, "start_line" => 66, "end_line" => 66, "start_column" => 13, "end_column" => 127], vec["$foo", "$i", "$j", "$k", "$m"], vec[$v->visitReturn(darray["path" => __FILE__, "start_line" => 66, "end_line" => 66, "start_column" => 97, "end_column" => 127], $v->visitSubscript(darray["path" => __FILE__, "start_line" => 66, "end_line" => 66, "start_column" => 97, "end_column" => 127], $v->visitSubscript(darray["path" => __FILE__, "start_line" => 66, "end_line" => 66, "start_column" => 97, "end_column" => 123], $v->visitPropertyAccess(darray["path" => __FILE__, "start_line" => 66, "end_line" => 66, "start_column" => 97, "end_column" => 119], $v->visitSubscript(darray["path" => __FILE__, "start_line" => 66, "end_line" => 66, "start_column" => 97, "end_column" => 114], $v->visitSubscript(darray["path" => __FILE__, "start_line" => 66, "end_line" => 66, "start_column" => 97, "end_column" => 110], $v->visitPropertyAccess(darray["path" => __FILE__, "start_line" => 66, "end_line" => 66, "start_column" => 97, "end_column" => 106], $v->visitLocal(darray["path" => __FILE__, "start_line" => 66, "end_line" => 66, "start_column" => 97, "end_column" => 101], "$foo"), "bar"), $v->visitLocal(darray["path" => __FILE__, "start_line" => 66, "end_line" => 66, "start_column" => 107, "end_column" => 109], "$i")), $v->visitLocal(darray["path" => __FILE__, "start_line" => 66, "end_line" => 66, "start_column" => 111, "end_column" => 113], "$j")), "baz"), $v->visitLocal(darray["path" => __FILE__, "start_line" => 66, "end_line" => 66, "start_column" => 120, "end_column" => 122], "$k")), $v->visitLocal(darray["path" => __FILE__, "start_line" => 66, "end_line" => 66, "start_column" => 124, "end_column" => 126], "$m")))]);
+      }
+    ),
+  );
+}

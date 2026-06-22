@@ -1,0 +1,96 @@
+ERROR: File "subscript_error.php", line 50, characters 41-46:
+`$arr[]` is append syntax and is currently unsupported in expression trees. Use `$arr[$idx]` for element access. (Parsing[1002])
+ERROR: File "subscript_error.php", line 67, characters 5-10:
+`$arr[]` is append syntax and is currently unsupported in expression trees. Use `$arr[$idx]` for element access. (Parsing[1002])
+ERROR: File "subscript_error.php", line 67, characters 5-17:
+Subscript assignment is not yet supported in expression trees. (Parsing[1002])
+ERROR: File "subscript_error.php", line 73, characters 79-100:
+Expression trees do not support array access (e.g. `arr[0]`) as the left side of the null coalesce operator (`??`). (Parsing[1002])
+ERROR: File "subscript_error.php", line 79, characters 5-21:
+Subscript assignment is not yet supported in expression trees. (Parsing[1002])
+ERROR: File "subscript_error.php", line 86, characters 5-10:
+`$arr[]` is append syntax and is currently unsupported in expression trees. Use `$arr[$idx]` for element access. (Parsing[1002])
+ERROR: File "subscript_error.php", line 86, characters 5-17:
+Subscript assignment is not yet supported in expression trees. (Parsing[1002])
+ERROR: File "subscript_error.php", line 93, characters 5-23:
+Subscript assignment is not yet supported in expression trees. (Parsing[1002])
+ERROR: File "subscript_error.php", line 100, characters 5-18:
+Subscript increment/decrement is not yet supported in expression trees. (Parsing[1002])
+ERROR: File "subscript_error.php", line 50, characters 41-44:
+Variable `$arr` is undefined, or not always defined. (Naming[2050])
+ERROR: File "subscript_error.php", line 67, characters 5-8:
+Variable `$map` is undefined, or not always defined. (Naming[2050])
+ERROR: File "subscript_error.php", line 86, characters 5-8:
+Variable `$arr` is undefined, or not always defined. (Naming[2050])
+ERROR: File "subscript_error.php", line 50, characters 41-44:
+Cannot use `[]` for reading (NastCheck[3047])
+ERROR: File "subscript_error.php", line 67, characters 5-8:
+Cannot use `[]` for reading (NastCheck[3047])
+ERROR: File "subscript_error.php", line 86, characters 5-8:
+Cannot use `[]` for reading (NastCheck[3047])
+ERROR: File "subscript_error.php", line 7, characters 61-70:
+Typing error (Typing[4110])
+  File "subscript_error.php", line 7, characters 61-64:
+  Expected `int` because only `int` can be used to index into a `Vector` or `vec`.
+  File "subscript_error.php", line 7, characters 37-49:
+  But got `string`
+ERROR: File "subscript_error.php", line 7, characters 66-69:
+Invalid index type for this vec (Typing[4449])
+  File "subscript_error.php", line 7, characters 15-17:
+  This is an int because only `int` can be used to index into a `Vector` or `vec`.
+  File "subscript_error.php", line 7, characters 37-49:
+  It is incompatible with a string
+ERROR: File "subscript_error.php", line 12, characters 79-82:
+Invalid index type for this dict (Typing[4449])
+  File "subscript_error.php", line 12, characters 20-32:
+  This is a string
+  File "subscript_error.php", line 12, characters 53-62:
+  It is incompatible with an int
+ERROR: File "subscript_error.php", line 17, characters 82-85:
+Invalid index type for this dict (Typing[4449])
+  File "subscript_error.php", line 17, characters 20-29:
+  This is an int
+  File "subscript_error.php", line 17, characters 53-65:
+  It is incompatible with a string
+ERROR: File "subscript_error.php", line 23, characters 64-73:
+Invalid return type (Typing[4110])
+  File "subscript_error.php", line 23, characters 46-58:
+  Expected `string`
+  File "subscript_error.php", line 23, characters 64-73:
+  But got `int`
+  File "subscript_error.php", line 23, characters 10-19:
+    from this definition
+ERROR: File "subscript_error.php", line 31, characters 7-16:
+Invalid return type (Typing[4110])
+  File "subscript_error.php", line 30, characters 65-77:
+  Expected `string`
+  File "subscript_error.php", line 31, characters 7-16:
+  But got `int`
+  File "subscript_error.php", line 30, characters 26-35:
+    from this definition
+ERROR: File "subscript_error.php", line 39, characters 7-18:
+Invalid return type (Typing[4110])
+  File "subscript_error.php", line 38, characters 64-76:
+  Expected `string`
+  File "subscript_error.php", line 39, characters 7-18:
+  But got `int`
+  File "subscript_error.php", line 38, characters 14-23:
+    from this definition
+ERROR: File "subscript_error.php", line 45, characters 51-58:
+Typing error (Typing[4110])
+  File "subscript_error.php", line 45, characters 51-58:
+  Expected an array that can be indexed
+  File "subscript_error.php", line 45, characters 15-24:
+  But got `int`
+ERROR: File "subscript_error.php", line 56, characters 59-68:
+You are trying to access an element of this container but the container could be `null`.  (Typing[4063])
+  File "subscript_error.php", line 56, characters 15-30:
+  This is what makes me believe it can be `null`
+ERROR: File "subscript_error.php", line 61, characters 78-87:
+You are trying to access an element of this container but the container could be `null`.  (Typing[4063])
+  File "subscript_error.php", line 61, characters 15-46:
+  This is what makes me believe it can be `null`
+ERROR: File "subscript_error.php", line 67, characters 5-17:
+an object of type dict<int, string> does not allow array append (Typing[4006])
+  File "subscript_error.php", line 66, characters 15-45:
+  Definition is here

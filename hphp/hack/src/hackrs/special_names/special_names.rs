@@ -739,6 +739,7 @@ pub mod expression_trees {
     pub static visitFor: Lazy<MethodName> = lazy!(sn::expression_trees::VISIT_FOR);
     pub static visitBreak: Lazy<MethodName> = lazy!(sn::expression_trees::VISIT_BREAK);
     pub static visitContinue: Lazy<MethodName> = lazy!(sn::expression_trees::VISIT_CONTINUE);
+    pub static visitSubscript: Lazy<MethodName> = lazy!(sn::expression_trees::VISIT_SUBSCRIPT);
     pub static splice: Lazy<MethodName> = lazy!(sn::expression_trees::SPLICE);
 
     pub static dollardollarTmpVar: Lazy<Symbol> = lazy!(sn::expression_trees::DOLLARDOLLAR_TMP_VAR);

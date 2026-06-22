@@ -1,0 +1,2 @@
+ERROR: File "subscript_feature.php", line 6, characters 58-67:
+Cannot use unstable feature: `expression_tree_subscript` (Parsing[1002])

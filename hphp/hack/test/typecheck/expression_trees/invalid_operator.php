@@ -1,6 +1,6 @@
 <?hh
 
-<<file:__EnableUnstableFeatures('expression_trees')>>
+<<file:__EnableUnstableFeatures('expression_trees', 'expression_tree_subscript')>>
 
 class Foo {
   public static function bar(): int { return 1; }

@@ -73,6 +73,7 @@ type feature_name =
   | AllowExtendedAwaitSyntax
   | AllowConditionalAwaitSyntax
   | ExpressionTreeHackArrays
+  | ExpressionTreeSubscript
   | ShapeFieldPunning
   | RepresentableAs
   | ClassAliasesEverywhere

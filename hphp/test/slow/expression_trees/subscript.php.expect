@@ -1,0 +1,12 @@
+($arr,$idx) ==> {
+return $arr[$idx];}
+($map,$key) ==> {
+return $map[$key];}
+($map,$key) ==> {
+return $map[$key];}
+($arr,$i,$j) ==> {
+return $arr[$i][$j];}
+($arr,$idx) ==> {
+return $arr[$idx] __plus 1;}
+($c,$idx) ==> {
+return $c->items[$idx];}

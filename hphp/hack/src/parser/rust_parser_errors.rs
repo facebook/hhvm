@@ -5692,6 +5692,14 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             | CollectionLiteralExpression(_)
             | ETSpliceExpression(_)
             | VariableExpression(_) => {
+                // Subscript reads inside an expression tree are gated behind the
+                // `expression_tree_subscript` feature. Everything below this is the
+                // shared handling for all the expression kinds in this arm.
+                if self.context.active_expression_tree
+                    && matches!(&node.children, SubscriptExpression(_))
+                {
+                    self.check_can_use_feature(node, &FeatureName::ExpressionTreeSubscript);
+                }
                 self.check_disallowed_variables(node);
                 self.dynamic_method_call_errors(node);
                 self.expression_errors(node);

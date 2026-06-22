@@ -29,6 +29,7 @@
 #include <wangle/ssl/SSLContextConfig.h>
 
 #include <thrift/conformance/stresstest/util/IoUringUtil.h>
+#include <thrift/facebook/server/ZcrxIOThreadPoolExecutor.h>
 #include <thrift/lib/cpp2/transport/rocket/server/RocketRoutingHandler.h>
 #include "common/services/cpp/TLSConfig.h"
 
@@ -112,16 +113,6 @@ DEFINE_uint32(
     io_uring_dump_stat_interval,
     0,
     "Dump io_uring stats every N seconds (0 = disabled)");
-
-#if FOLLY_HAVE_WEAK_SYMBOLS
-FOLLY_ATTR_WEAK int callback_assign_func(
-    folly::AsyncServerSocket*, folly::NetworkSocket);
-#else
-static int callback_assign_func(
-    folly::AsyncServerSocket*, folly::NetworkSocket) {
-  return -1;
-}
-#endif
 
 namespace apache::thrift::detail {
 THRIFT_PLUGGABLE_FUNC_SET(
@@ -224,16 +215,38 @@ std::shared_ptr<ThriftServer> createStressTestServer(
   if (FLAGS_io_uring) {
     server->setPreferIoUring(!FLAGS_io_uring_async_socket);
   }
-  auto ioThreadPool = getIOThreadPool("thrift_eventbase", FLAGS_io_threads);
+  std::shared_ptr<folly::IOThreadPoolExecutor> ioThreadPool;
+  folly::AsyncServerSocket::CallbackAssignFunction assignFunc = nullptr;
+  if (FLAGS_io_zcrx) {
+    int numThreads = sanitizeNumThreads(FLAGS_io_threads);
+    int numQueues =
+        FLAGS_io_zcrx_hw_queues > 0 ? FLAGS_io_zcrx_hw_queues : numThreads;
+    apache::thrift::facebook::ZcrxIOThreadPoolExecutor::Config zcrxConfig{
+        .ifname = FLAGS_io_zcrx_ifname,
+        .numQueues = numQueues,
+        .numThreads = numThreads,
+        .port = static_cast<uint16_t>(FLAGS_port),
+        .zcrxNumPages = FLAGS_io_zcrx_num_pages,
+        .zcrxRefillEntries = FLAGS_io_zcrx_refill_entries,
+        .zcrxBufferSizeHint = FLAGS_io_zcrx_buffer_size_hint,
+    };
+    gflags::CommandLineFlagInfo info;
+    if (gflags::GetCommandLineFlagInfo("io_zcrx_queue_id", &info) &&
+        !info.is_default) {
+      zcrxConfig.startQueueId = FLAGS_io_zcrx_queue_id;
+    }
+    auto executor = apache::thrift::facebook::ZcrxIOThreadPoolExecutor::create(
+        std::move(zcrxConfig),
+        "thrift_eventbase",
+        setIoUringCommonOptionsFromFlags);
+    assignFunc = executor->getCallbackAssignFunc();
+    ioThreadPool = std::move(executor);
+  } else {
+    ioThreadPool = getIOThreadPool("thrift_eventbase", FLAGS_io_threads);
+  }
   server->setIOThreadPool(ioThreadPool);
   server->setNumCPUWorkerThreads(numCpuWorkerThreads);
   auto stressTestServerModule = std::make_unique<StressTestServerModule>();
-  if (FLAGS_io_zcrx && FLAGS_io_zcrx_hw_queues > 0) {
-    auto evbs = ioThreadPool->getAllEventBases();
-    if (!folly::setupIoUringBufferPoolSharing(evbs, FLAGS_io_zcrx_hw_queues)) {
-      LOG(FATAL) << "Failed to set up buffer pool sharing";
-    }
-  }
   if (FLAGS_io_uring && FLAGS_io_uring_dump_stat_interval > 0) {
     LOG(INFO) << "IO Uring statistics dump enabled every "
               << FLAGS_io_uring_dump_stat_interval << " seconds";
@@ -252,7 +265,7 @@ std::shared_ptr<ThriftServer> createStressTestServer(
       }
     }
   }
-  facebook::services::TLSConfig tlsConfig;
+  ::facebook::services::TLSConfig tlsConfig;
   tlsConfig.applyToThriftServer(server);
 
   if (FLAGS_enable_checksum) {
@@ -298,8 +311,8 @@ std::shared_ptr<ThriftServer> createStressTestServer(
     }
   }
 
-  if (FLAGS_io_uring) {
-    server->setCallbackAssignFunc(callback_assign_func);
+  if (FLAGS_io_zcrx) {
+    server->setCallbackAssignFunc(assignFunc);
   }
 
   std::shared_ptr<folly::Executor> executor;

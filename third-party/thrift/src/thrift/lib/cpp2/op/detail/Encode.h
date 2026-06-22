@@ -889,6 +889,11 @@ struct Decode<type::binary_t> {
   }
 };
 
+template <typename>
+inline constexpr bool kIsSharedPtrToConst = false;
+template <typename U>
+inline constexpr bool kIsSharedPtrToConst<std::shared_ptr<const U>> = true;
+
 template <typename T>
 struct StructDecode {
   template <typename Protocol>
@@ -912,7 +917,16 @@ struct StructDecode {
           [&](auto Id) {
             using IdT = decltype(Id);
             using FieldTag = op::get_field_tag<T, IdT>;
-            Decode<FieldTag>{}(prot, op::ensure<IdT>(t), t);
+            using FieldRef = folly::remove_cvref_t<decltype(op::get<IdT>(t))>;
+            if constexpr (kIsSharedPtrToConst<FieldRef>) {
+              // `shared_ptr<const T>` field can't be decoded in place.
+              using ValueTag = op::get_type_tag<T, IdT>;
+              auto value = std::make_shared<type::native_type<ValueTag>>();
+              Decode<FieldTag>{}(prot, *value, t);
+              op::get<IdT>(t) = std::move(value);
+            } else {
+              Decode<FieldTag>{}(prot, op::ensure<IdT>(t), t);
+            }
             return true;
           },
           [] { return false; });

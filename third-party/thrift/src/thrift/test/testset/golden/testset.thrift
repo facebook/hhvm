@@ -1372,6 +1372,30 @@ struct struct_map_i64_set_struct_empty_shared_cpp_ref {
   1: map<i64, set<struct_empty>> field_1;
 }
 @thrift.Sealed
+struct struct_list_bool_shared_const_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<bool> field_1;
+}
+@thrift.Sealed
+struct struct_list_struct_empty_shared_const_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<struct_empty> field_1;
+}
+@thrift.Sealed
+struct struct_set_string_shared_const_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<string> field_1;
+}
+@thrift.Sealed
+struct struct_map_i64_i16_shared_const_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, i16> field_1;
+}
+@thrift.Sealed
 struct struct_bool {
   1: bool field_1;
 }
@@ -2824,6 +2848,30 @@ struct struct_optional_map_i64_set_struct_empty_shared_cpp_ref {
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<i64, set<struct_empty>> field_1;
+}
+@thrift.Sealed
+struct struct_optional_list_bool_shared_const_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<bool> field_1;
+}
+@thrift.Sealed
+struct struct_optional_list_struct_empty_shared_const_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<struct_empty> field_1;
+}
+@thrift.Sealed
+struct struct_optional_set_string_shared_const_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<string> field_1;
+}
+@thrift.Sealed
+struct struct_optional_map_i64_i16_shared_const_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<i64, i16> field_1;
 }
 @thrift.Sealed
 struct struct_optional_bool {
@@ -4296,6 +4344,30 @@ struct struct_required_map_i64_set_struct_empty_shared_cpp_ref {
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<i64, set<struct_empty>> field_1;
+}
+@thrift.Sealed
+struct struct_required_list_bool_shared_const_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<bool> field_1;
+}
+@thrift.Sealed
+struct struct_required_list_struct_empty_shared_const_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<struct_empty> field_1;
+}
+@thrift.Sealed
+struct struct_required_set_string_shared_const_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<string> field_1;
+}
+@thrift.Sealed
+struct struct_required_map_i64_i16_shared_const_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<i64, i16> field_1;
 }
 @thrift.Sealed
 struct struct_required_bool {
@@ -5990,6 +6062,34 @@ struct struct_terse_map_i64_set_struct_empty_shared_cpp_ref {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<i64, set<struct_empty>> field_1;
+}
+@thrift.Sealed
+struct struct_terse_list_bool_shared_const_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<bool> field_1;
+}
+@thrift.Sealed
+struct struct_terse_list_struct_empty_shared_const_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<struct_empty> field_1;
+}
+@thrift.Sealed
+struct struct_terse_set_string_shared_const_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<string> field_1;
+}
+@thrift.Sealed
+struct struct_terse_map_i64_i16_shared_const_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<i64, i16> field_1;
 }
 @thrift.Sealed
 struct struct_terse_bool {
@@ -9703,6 +9803,30 @@ struct struct_map_i64_set_struct_empty_shared_cpp_ref_op_encoded {
   1: map<i64, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
+struct struct_list_bool_shared_const_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<bool> field_1;
+}
+@cpp.UseOpEncode
+struct struct_list_struct_empty_shared_const_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<struct_empty> field_1;
+}
+@cpp.UseOpEncode
+struct struct_set_string_shared_const_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<string> field_1;
+}
+@cpp.UseOpEncode
+struct struct_map_i64_i16_shared_const_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, i16> field_1;
+}
+@cpp.UseOpEncode
 struct struct_bool_op_encoded {
   1: bool field_1;
 }
@@ -11155,6 +11279,30 @@ struct struct_optional_map_i64_set_struct_empty_shared_cpp_ref_op_encoded {
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<i64, set<struct_empty>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_list_bool_shared_const_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<bool> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_list_struct_empty_shared_const_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<struct_empty> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_set_string_shared_const_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<string> field_1;
+}
+@cpp.UseOpEncode
+struct struct_optional_map_i64_i16_shared_const_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<i64, i16> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_bool_op_encoded {
@@ -12627,6 +12775,30 @@ struct struct_required_map_i64_set_struct_empty_shared_cpp_ref_op_encoded {
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<i64, set<struct_empty>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_list_bool_shared_const_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<bool> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_list_struct_empty_shared_const_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<struct_empty> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_set_string_shared_const_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<string> field_1;
+}
+@cpp.UseOpEncode
+struct struct_required_map_i64_i16_shared_const_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<i64, i16> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_bool_op_encoded {
@@ -14321,6 +14493,34 @@ struct struct_terse_map_i64_set_struct_empty_shared_cpp_ref_op_encoded {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<i64, set<struct_empty>> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_list_bool_shared_const_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<bool> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_list_struct_empty_shared_const_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<struct_empty> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_set_string_shared_const_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<string> field_1;
+}
+@cpp.UseOpEncode
+struct struct_terse_map_i64_i16_shared_const_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<i64, i16> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_bool_op_encoded {
@@ -17792,6 +17992,26 @@ exception exception_map_i64_set_struct_empty_shared_cpp_ref {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<struct_empty>> field_1;
 }
+exception exception_list_bool_shared_const_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<bool> field_1;
+}
+exception exception_list_struct_empty_shared_const_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<struct_empty> field_1;
+}
+exception exception_set_string_shared_const_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<string> field_1;
+}
+exception exception_map_i64_i16_shared_const_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, i16> field_1;
+}
 exception exception_bool {
   1: bool field_1;
 }
@@ -18978,6 +19198,26 @@ exception exception_optional_map_i64_set_struct_empty_shared_cpp_ref {
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<i64, set<struct_empty>> field_1;
+}
+exception exception_optional_list_bool_shared_const_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<bool> field_1;
+}
+exception exception_optional_list_struct_empty_shared_const_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<struct_empty> field_1;
+}
+exception exception_optional_set_string_shared_const_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<string> field_1;
+}
+exception exception_optional_map_i64_i16_shared_const_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<i64, i16> field_1;
 }
 exception exception_optional_bool {
   1: optional bool field_1;
@@ -20183,6 +20423,26 @@ exception exception_required_map_i64_set_struct_empty_shared_cpp_ref {
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<i64, set<struct_empty>> field_1;
+}
+exception exception_required_list_bool_shared_const_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<bool> field_1;
+}
+exception exception_required_list_struct_empty_shared_const_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<struct_empty> field_1;
+}
+exception exception_required_set_string_shared_const_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<string> field_1;
+}
+exception exception_required_map_i64_i16_shared_const_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<i64, i16> field_1;
 }
 exception exception_required_bool {
   1: required bool field_1;
@@ -21610,6 +21870,30 @@ exception exception_terse_map_i64_set_struct_empty_shared_cpp_ref {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<i64, set<struct_empty>> field_1;
+}
+exception exception_terse_list_bool_shared_const_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<bool> field_1;
+}
+exception exception_terse_list_struct_empty_shared_const_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<struct_empty> field_1;
+}
+exception exception_terse_set_string_shared_const_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<string> field_1;
+}
+exception exception_terse_map_i64_i16_shared_const_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<i64, i16> field_1;
 }
 exception exception_terse_bool {
   @thrift.TerseWrite
@@ -24975,6 +25259,30 @@ exception exception_map_i64_set_struct_empty_shared_cpp_ref_op_encoded {
   1: map<i64, set<struct_empty>> field_1;
 }
 @cpp.UseOpEncode
+exception exception_list_bool_shared_const_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<bool> field_1;
+}
+@cpp.UseOpEncode
+exception exception_list_struct_empty_shared_const_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<struct_empty> field_1;
+}
+@cpp.UseOpEncode
+exception exception_set_string_shared_const_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<string> field_1;
+}
+@cpp.UseOpEncode
+exception exception_map_i64_i16_shared_const_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, i16> field_1;
+}
+@cpp.UseOpEncode
 exception exception_bool_op_encoded {
   1: bool field_1;
 }
@@ -26427,6 +26735,30 @@ exception exception_optional_map_i64_set_struct_empty_shared_cpp_ref_op_encoded 
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<i64, set<struct_empty>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_list_bool_shared_const_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<bool> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_list_struct_empty_shared_const_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional list<struct_empty> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_set_string_shared_const_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional set<string> field_1;
+}
+@cpp.UseOpEncode
+exception exception_optional_map_i64_i16_shared_const_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
+  1: optional map<i64, i16> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_bool_op_encoded {
@@ -27899,6 +28231,30 @@ exception exception_required_map_i64_set_struct_empty_shared_cpp_ref_op_encoded 
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<i64, set<struct_empty>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_list_bool_shared_const_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<bool> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_list_struct_empty_shared_const_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required list<struct_empty> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_set_string_shared_const_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required set<string> field_1;
+}
+@cpp.UseOpEncode
+exception exception_required_map_i64_i16_shared_const_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
+  1: required map<i64, i16> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_bool_op_encoded {
@@ -29593,6 +29949,34 @@ exception exception_terse_map_i64_set_struct_empty_shared_cpp_ref_op_encoded {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<i64, set<struct_empty>> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_list_bool_shared_const_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<bool> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_list_struct_empty_shared_const_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: list<struct_empty> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_set_string_shared_const_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: set<string> field_1;
+}
+@cpp.UseOpEncode
+exception exception_terse_map_i64_i16_shared_const_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
+  @thrift.TerseWrite
+  1: map<i64, i16> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_bool_op_encoded {
@@ -34589,6 +34973,38 @@ union union_map_i64_set_struct_empty_shared_cpp_ref {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   2: map<i64, set<struct_empty>> field_2;
 }
+union union_list_bool_shared_const_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<bool> field_1;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
+  2: list<bool> field_2;
+}
+union union_list_struct_empty_shared_const_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<struct_empty> field_1;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
+  2: list<struct_empty> field_2;
+}
+union union_set_string_shared_const_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<string> field_1;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
+  2: set<string> field_2;
+}
+union union_map_i64_i16_shared_const_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, i16> field_1;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
+  2: map<i64, i16> field_2;
+}
 union union_bool {
   1: bool field_1;
   2: bool field_2;
@@ -36599,6 +37015,42 @@ union union_map_i64_set_struct_empty_shared_cpp_ref_op_encoded {
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   2: map<i64, set<struct_empty>> field_2;
+}
+@cpp.UseOpEncode
+union union_list_bool_shared_const_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<bool> field_1;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
+  2: list<bool> field_2;
+}
+@cpp.UseOpEncode
+union union_list_struct_empty_shared_const_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
+  1: list<struct_empty> field_1;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
+  2: list<struct_empty> field_2;
+}
+@cpp.UseOpEncode
+union union_set_string_shared_const_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
+  1: set<string> field_1;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
+  2: set<string> field_2;
+}
+@cpp.UseOpEncode
+union union_map_i64_i16_shared_const_cpp_ref_op_encoded {
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
+  1: map<i64, i16> field_1;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
+  2: map<i64, i16> field_2;
 }
 @cpp.UseOpEncode
 union union_bool_op_encoded {

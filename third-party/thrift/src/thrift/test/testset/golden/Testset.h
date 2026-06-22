@@ -17,6 +17,7 @@ enum class FieldModifier {
   Terse,
   Reference,
   SharedReference,
+  ConstSharedReference,
   Lazy,
   Box,
   CustomDefault,
@@ -1238,6 +1239,26 @@ struct struct_ByFieldType<type::map<type::i64_t, type::set<type::string_t>>, mod
 template <>
 struct struct_ByFieldType<type::map<type::i64_t, type::set<struct_empty>>, mod_set<FieldModifier::SharedReference>> {
   using type = struct_map_i64_set_struct_empty_shared_cpp_ref;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::bool_t>, mod_set<FieldModifier::ConstSharedReference>> {
+  using type = struct_list_bool_shared_const_cpp_ref;
+};
+
+template <>
+struct struct_ByFieldType<type::list<struct_empty>, mod_set<FieldModifier::ConstSharedReference>> {
+  using type = struct_list_struct_empty_shared_const_cpp_ref;
+};
+
+template <>
+struct struct_ByFieldType<type::set<type::string_t>, mod_set<FieldModifier::ConstSharedReference>> {
+  using type = struct_set_string_shared_const_cpp_ref;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::i16_t>, mod_set<FieldModifier::ConstSharedReference>> {
+  using type = struct_map_i64_i16_shared_const_cpp_ref;
 };
 
 template <>
@@ -2576,6 +2597,26 @@ struct struct_ByFieldType<type::map<type::i64_t, type::set<struct_empty>>, mod_s
 };
 
 template <>
+struct struct_ByFieldType<type::list<type::bool_t>, mod_set<FieldModifier::ConstSharedReference, FieldModifier::Optional>> {
+  using type = struct_optional_list_bool_shared_const_cpp_ref;
+};
+
+template <>
+struct struct_ByFieldType<type::list<struct_empty>, mod_set<FieldModifier::ConstSharedReference, FieldModifier::Optional>> {
+  using type = struct_optional_list_struct_empty_shared_const_cpp_ref;
+};
+
+template <>
+struct struct_ByFieldType<type::set<type::string_t>, mod_set<FieldModifier::ConstSharedReference, FieldModifier::Optional>> {
+  using type = struct_optional_set_string_shared_const_cpp_ref;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::i16_t>, mod_set<FieldModifier::ConstSharedReference, FieldModifier::Optional>> {
+  using type = struct_optional_map_i64_i16_shared_const_cpp_ref;
+};
+
+template <>
 struct struct_ByFieldType<type::bool_t, mod_set<FieldModifier::Optional>> {
   using type = struct_optional_bool;
 };
@@ -3911,6 +3952,26 @@ struct struct_ByFieldType<type::map<type::i64_t, type::set<struct_empty>>, mod_s
 };
 
 template <>
+struct struct_ByFieldType<type::list<type::bool_t>, mod_set<FieldModifier::ConstSharedReference, FieldModifier::Required>> {
+  using type = struct_required_list_bool_shared_const_cpp_ref;
+};
+
+template <>
+struct struct_ByFieldType<type::list<struct_empty>, mod_set<FieldModifier::ConstSharedReference, FieldModifier::Required>> {
+  using type = struct_required_list_struct_empty_shared_const_cpp_ref;
+};
+
+template <>
+struct struct_ByFieldType<type::set<type::string_t>, mod_set<FieldModifier::ConstSharedReference, FieldModifier::Required>> {
+  using type = struct_required_set_string_shared_const_cpp_ref;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::i16_t>, mod_set<FieldModifier::ConstSharedReference, FieldModifier::Required>> {
+  using type = struct_required_map_i64_i16_shared_const_cpp_ref;
+};
+
+template <>
 struct struct_ByFieldType<type::bool_t, mod_set<FieldModifier::Required>> {
   using type = struct_required_bool;
 };
@@ -5243,6 +5304,26 @@ struct struct_ByFieldType<type::map<type::i64_t, type::set<type::string_t>>, mod
 template <>
 struct struct_ByFieldType<type::map<type::i64_t, type::set<struct_empty>>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse>> {
   using type = struct_terse_map_i64_set_struct_empty_shared_cpp_ref;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::bool_t>, mod_set<FieldModifier::ConstSharedReference, FieldModifier::Terse>> {
+  using type = struct_terse_list_bool_shared_const_cpp_ref;
+};
+
+template <>
+struct struct_ByFieldType<type::list<struct_empty>, mod_set<FieldModifier::ConstSharedReference, FieldModifier::Terse>> {
+  using type = struct_terse_list_struct_empty_shared_const_cpp_ref;
+};
+
+template <>
+struct struct_ByFieldType<type::set<type::string_t>, mod_set<FieldModifier::ConstSharedReference, FieldModifier::Terse>> {
+  using type = struct_terse_set_string_shared_const_cpp_ref;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::i16_t>, mod_set<FieldModifier::ConstSharedReference, FieldModifier::Terse>> {
+  using type = struct_terse_map_i64_i16_shared_const_cpp_ref;
 };
 
 template <>
@@ -8186,6 +8267,26 @@ struct struct_ByFieldType<type::map<type::i64_t, type::set<struct_empty>>, mod_s
 };
 
 template <>
+struct struct_ByFieldType<type::list<type::bool_t>, mod_set<FieldModifier::ConstSharedReference, FieldModifier::OpEncode>> {
+  using type = struct_list_bool_shared_const_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<struct_empty>, mod_set<FieldModifier::ConstSharedReference, FieldModifier::OpEncode>> {
+  using type = struct_list_struct_empty_shared_const_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::set<type::string_t>, mod_set<FieldModifier::ConstSharedReference, FieldModifier::OpEncode>> {
+  using type = struct_set_string_shared_const_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::i16_t>, mod_set<FieldModifier::ConstSharedReference, FieldModifier::OpEncode>> {
+  using type = struct_map_i64_i16_shared_const_cpp_ref_op_encoded;
+};
+
+template <>
 struct struct_ByFieldType<type::bool_t, mod_set<FieldModifier::OpEncode>> {
   using type = struct_bool_op_encoded;
 };
@@ -9518,6 +9619,26 @@ struct struct_ByFieldType<type::map<type::i64_t, type::set<type::string_t>>, mod
 template <>
 struct struct_ByFieldType<type::map<type::i64_t, type::set<struct_empty>>, mod_set<FieldModifier::SharedReference, FieldModifier::Optional, FieldModifier::OpEncode>> {
   using type = struct_optional_map_i64_set_struct_empty_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::bool_t>, mod_set<FieldModifier::ConstSharedReference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_list_bool_shared_const_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<struct_empty>, mod_set<FieldModifier::ConstSharedReference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_list_struct_empty_shared_const_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::set<type::string_t>, mod_set<FieldModifier::ConstSharedReference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_set_string_shared_const_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::i16_t>, mod_set<FieldModifier::ConstSharedReference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = struct_optional_map_i64_i16_shared_const_cpp_ref_op_encoded;
 };
 
 template <>
@@ -10856,6 +10977,26 @@ struct struct_ByFieldType<type::map<type::i64_t, type::set<struct_empty>>, mod_s
 };
 
 template <>
+struct struct_ByFieldType<type::list<type::bool_t>, mod_set<FieldModifier::ConstSharedReference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_list_bool_shared_const_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<struct_empty>, mod_set<FieldModifier::ConstSharedReference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_list_struct_empty_shared_const_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::set<type::string_t>, mod_set<FieldModifier::ConstSharedReference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_set_string_shared_const_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::i16_t>, mod_set<FieldModifier::ConstSharedReference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = struct_required_map_i64_i16_shared_const_cpp_ref_op_encoded;
+};
+
+template <>
 struct struct_ByFieldType<type::bool_t, mod_set<FieldModifier::Required, FieldModifier::OpEncode>> {
   using type = struct_required_bool_op_encoded;
 };
@@ -12188,6 +12329,26 @@ struct struct_ByFieldType<type::map<type::i64_t, type::set<type::string_t>>, mod
 template <>
 struct struct_ByFieldType<type::map<type::i64_t, type::set<struct_empty>>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse, FieldModifier::OpEncode>> {
   using type = struct_terse_map_i64_set_struct_empty_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::bool_t>, mod_set<FieldModifier::ConstSharedReference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_list_bool_shared_const_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::list<struct_empty>, mod_set<FieldModifier::ConstSharedReference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_list_struct_empty_shared_const_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::set<type::string_t>, mod_set<FieldModifier::ConstSharedReference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_set_string_shared_const_cpp_ref_op_encoded;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::i16_t>, mod_set<FieldModifier::ConstSharedReference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = struct_terse_map_i64_i16_shared_const_cpp_ref_op_encoded;
 };
 
 template <>
@@ -15131,6 +15292,26 @@ struct exception_ByFieldType<type::map<type::i64_t, type::set<struct_empty>>, mo
 };
 
 template <>
+struct exception_ByFieldType<type::list<type::bool_t>, mod_set<FieldModifier::ConstSharedReference>> {
+  using type = exception_list_bool_shared_const_cpp_ref;
+};
+
+template <>
+struct exception_ByFieldType<type::list<struct_empty>, mod_set<FieldModifier::ConstSharedReference>> {
+  using type = exception_list_struct_empty_shared_const_cpp_ref;
+};
+
+template <>
+struct exception_ByFieldType<type::set<type::string_t>, mod_set<FieldModifier::ConstSharedReference>> {
+  using type = exception_set_string_shared_const_cpp_ref;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::i16_t>, mod_set<FieldModifier::ConstSharedReference>> {
+  using type = exception_map_i64_i16_shared_const_cpp_ref;
+};
+
+template <>
 struct exception_ByFieldType<type::bool_t, mod_set<>> {
   using type = exception_bool;
 };
@@ -16463,6 +16644,26 @@ struct exception_ByFieldType<type::map<type::i64_t, type::set<type::string_t>>, 
 template <>
 struct exception_ByFieldType<type::map<type::i64_t, type::set<struct_empty>>, mod_set<FieldModifier::SharedReference, FieldModifier::Optional>> {
   using type = exception_optional_map_i64_set_struct_empty_shared_cpp_ref;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::bool_t>, mod_set<FieldModifier::ConstSharedReference, FieldModifier::Optional>> {
+  using type = exception_optional_list_bool_shared_const_cpp_ref;
+};
+
+template <>
+struct exception_ByFieldType<type::list<struct_empty>, mod_set<FieldModifier::ConstSharedReference, FieldModifier::Optional>> {
+  using type = exception_optional_list_struct_empty_shared_const_cpp_ref;
+};
+
+template <>
+struct exception_ByFieldType<type::set<type::string_t>, mod_set<FieldModifier::ConstSharedReference, FieldModifier::Optional>> {
+  using type = exception_optional_set_string_shared_const_cpp_ref;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::i16_t>, mod_set<FieldModifier::ConstSharedReference, FieldModifier::Optional>> {
+  using type = exception_optional_map_i64_i16_shared_const_cpp_ref;
 };
 
 template <>
@@ -17801,6 +18002,26 @@ struct exception_ByFieldType<type::map<type::i64_t, type::set<struct_empty>>, mo
 };
 
 template <>
+struct exception_ByFieldType<type::list<type::bool_t>, mod_set<FieldModifier::ConstSharedReference, FieldModifier::Required>> {
+  using type = exception_required_list_bool_shared_const_cpp_ref;
+};
+
+template <>
+struct exception_ByFieldType<type::list<struct_empty>, mod_set<FieldModifier::ConstSharedReference, FieldModifier::Required>> {
+  using type = exception_required_list_struct_empty_shared_const_cpp_ref;
+};
+
+template <>
+struct exception_ByFieldType<type::set<type::string_t>, mod_set<FieldModifier::ConstSharedReference, FieldModifier::Required>> {
+  using type = exception_required_set_string_shared_const_cpp_ref;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::i16_t>, mod_set<FieldModifier::ConstSharedReference, FieldModifier::Required>> {
+  using type = exception_required_map_i64_i16_shared_const_cpp_ref;
+};
+
+template <>
 struct exception_ByFieldType<type::bool_t, mod_set<FieldModifier::Required>> {
   using type = exception_required_bool;
 };
@@ -19133,6 +19354,26 @@ struct exception_ByFieldType<type::map<type::i64_t, type::set<type::string_t>>, 
 template <>
 struct exception_ByFieldType<type::map<type::i64_t, type::set<struct_empty>>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse>> {
   using type = exception_terse_map_i64_set_struct_empty_shared_cpp_ref;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::bool_t>, mod_set<FieldModifier::ConstSharedReference, FieldModifier::Terse>> {
+  using type = exception_terse_list_bool_shared_const_cpp_ref;
+};
+
+template <>
+struct exception_ByFieldType<type::list<struct_empty>, mod_set<FieldModifier::ConstSharedReference, FieldModifier::Terse>> {
+  using type = exception_terse_list_struct_empty_shared_const_cpp_ref;
+};
+
+template <>
+struct exception_ByFieldType<type::set<type::string_t>, mod_set<FieldModifier::ConstSharedReference, FieldModifier::Terse>> {
+  using type = exception_terse_set_string_shared_const_cpp_ref;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::i16_t>, mod_set<FieldModifier::ConstSharedReference, FieldModifier::Terse>> {
+  using type = exception_terse_map_i64_i16_shared_const_cpp_ref;
 };
 
 template <>
@@ -22076,6 +22317,26 @@ struct exception_ByFieldType<type::map<type::i64_t, type::set<struct_empty>>, mo
 };
 
 template <>
+struct exception_ByFieldType<type::list<type::bool_t>, mod_set<FieldModifier::ConstSharedReference, FieldModifier::OpEncode>> {
+  using type = exception_list_bool_shared_const_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<struct_empty>, mod_set<FieldModifier::ConstSharedReference, FieldModifier::OpEncode>> {
+  using type = exception_list_struct_empty_shared_const_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::set<type::string_t>, mod_set<FieldModifier::ConstSharedReference, FieldModifier::OpEncode>> {
+  using type = exception_set_string_shared_const_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::i16_t>, mod_set<FieldModifier::ConstSharedReference, FieldModifier::OpEncode>> {
+  using type = exception_map_i64_i16_shared_const_cpp_ref_op_encoded;
+};
+
+template <>
 struct exception_ByFieldType<type::bool_t, mod_set<FieldModifier::OpEncode>> {
   using type = exception_bool_op_encoded;
 };
@@ -23408,6 +23669,26 @@ struct exception_ByFieldType<type::map<type::i64_t, type::set<type::string_t>>, 
 template <>
 struct exception_ByFieldType<type::map<type::i64_t, type::set<struct_empty>>, mod_set<FieldModifier::SharedReference, FieldModifier::Optional, FieldModifier::OpEncode>> {
   using type = exception_optional_map_i64_set_struct_empty_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::bool_t>, mod_set<FieldModifier::ConstSharedReference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_list_bool_shared_const_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<struct_empty>, mod_set<FieldModifier::ConstSharedReference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_list_struct_empty_shared_const_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::set<type::string_t>, mod_set<FieldModifier::ConstSharedReference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_set_string_shared_const_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::i16_t>, mod_set<FieldModifier::ConstSharedReference, FieldModifier::Optional, FieldModifier::OpEncode>> {
+  using type = exception_optional_map_i64_i16_shared_const_cpp_ref_op_encoded;
 };
 
 template <>
@@ -24746,6 +25027,26 @@ struct exception_ByFieldType<type::map<type::i64_t, type::set<struct_empty>>, mo
 };
 
 template <>
+struct exception_ByFieldType<type::list<type::bool_t>, mod_set<FieldModifier::ConstSharedReference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_list_bool_shared_const_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<struct_empty>, mod_set<FieldModifier::ConstSharedReference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_list_struct_empty_shared_const_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::set<type::string_t>, mod_set<FieldModifier::ConstSharedReference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_set_string_shared_const_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::i16_t>, mod_set<FieldModifier::ConstSharedReference, FieldModifier::Required, FieldModifier::OpEncode>> {
+  using type = exception_required_map_i64_i16_shared_const_cpp_ref_op_encoded;
+};
+
+template <>
 struct exception_ByFieldType<type::bool_t, mod_set<FieldModifier::Required, FieldModifier::OpEncode>> {
   using type = exception_required_bool_op_encoded;
 };
@@ -26078,6 +26379,26 @@ struct exception_ByFieldType<type::map<type::i64_t, type::set<type::string_t>>, 
 template <>
 struct exception_ByFieldType<type::map<type::i64_t, type::set<struct_empty>>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse, FieldModifier::OpEncode>> {
   using type = exception_terse_map_i64_set_struct_empty_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::bool_t>, mod_set<FieldModifier::ConstSharedReference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_list_bool_shared_const_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::list<struct_empty>, mod_set<FieldModifier::ConstSharedReference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_list_struct_empty_shared_const_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::set<type::string_t>, mod_set<FieldModifier::ConstSharedReference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_set_string_shared_const_cpp_ref_op_encoded;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::i16_t>, mod_set<FieldModifier::ConstSharedReference, FieldModifier::Terse, FieldModifier::OpEncode>> {
+  using type = exception_terse_map_i64_i16_shared_const_cpp_ref_op_encoded;
 };
 
 template <>
@@ -29681,6 +30002,26 @@ struct union_ByFieldType<type::map<type::i64_t, type::set<struct_empty>>, mod_se
 };
 
 template <>
+struct union_ByFieldType<type::list<type::bool_t>, mod_set<FieldModifier::ConstSharedReference>> {
+  using type = union_list_bool_shared_const_cpp_ref;
+};
+
+template <>
+struct union_ByFieldType<type::list<struct_empty>, mod_set<FieldModifier::ConstSharedReference>> {
+  using type = union_list_struct_empty_shared_const_cpp_ref;
+};
+
+template <>
+struct union_ByFieldType<type::set<type::string_t>, mod_set<FieldModifier::ConstSharedReference>> {
+  using type = union_set_string_shared_const_cpp_ref;
+};
+
+template <>
+struct union_ByFieldType<type::map<type::i64_t, type::i16_t>, mod_set<FieldModifier::ConstSharedReference>> {
+  using type = union_map_i64_i16_shared_const_cpp_ref;
+};
+
+template <>
 struct union_ByFieldType<type::bool_t, mod_set<>> {
   using type = union_bool;
 };
@@ -30923,6 +31264,26 @@ struct union_ByFieldType<type::map<type::i64_t, type::set<type::string_t>>, mod_
 template <>
 struct union_ByFieldType<type::map<type::i64_t, type::set<struct_empty>>, mod_set<FieldModifier::SharedReference, FieldModifier::OpEncode>> {
   using type = union_map_i64_set_struct_empty_shared_cpp_ref_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::list<type::bool_t>, mod_set<FieldModifier::ConstSharedReference, FieldModifier::OpEncode>> {
+  using type = union_list_bool_shared_const_cpp_ref_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::list<struct_empty>, mod_set<FieldModifier::ConstSharedReference, FieldModifier::OpEncode>> {
+  using type = union_list_struct_empty_shared_const_cpp_ref_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::set<type::string_t>, mod_set<FieldModifier::ConstSharedReference, FieldModifier::OpEncode>> {
+  using type = union_set_string_shared_const_cpp_ref_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::map<type::i64_t, type::i16_t>, mod_set<FieldModifier::ConstSharedReference, FieldModifier::OpEncode>> {
+  using type = union_map_i64_i16_shared_const_cpp_ref_op_encoded;
 };
 
 template <>

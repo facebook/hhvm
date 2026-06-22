@@ -72,6 +72,7 @@ enum class FieldModifier {{
   Terse,
   Reference,
   SharedReference,
+  ConstSharedReference,
   Lazy,
   Box,
   CustomDefault,
@@ -286,6 +287,12 @@ SHARED_CPP_REF_TRANSFORM: Dict[Target, str] = {
     Target.CPP2: "{}|FieldModifier::SharedReference",
 }
 
+CONST_SHARED_CPP_REF_TRANSFORM: Dict[Target, str] = {
+    Target.NAME: "{}_shared_const_cpp_ref",
+    Target.THRIFT: "{}|@cpp.Ref{{type = cpp.RefType.Shared}}|@cpp.AllowLegacyNonOptionalRef",
+    Target.CPP2: "{}|FieldModifier::ConstSharedReference",
+}
+
 LAZY_TRANSFORM: Dict[Target, str] = {
     Target.NAME: "{}_lazy",
     Target.THRIFT: "{}|@cpp.Lazy",
@@ -488,6 +495,10 @@ def gen_shared_cpp_ref(target: Target, values: Dict[str, str]) -> Dict[str, str]
     return _gen_unary_tramsform(SHARED_CPP_REF_TRANSFORM, target, values)
 
 
+def gen_const_shared_cpp_ref(target: Target, values: Dict[str, str]) -> Dict[str, str]:
+    return _gen_unary_tramsform(CONST_SHARED_CPP_REF_TRANSFORM, target, values)
+
+
 def gen_lazy(target: Target, values: Dict[str, str]) -> Dict[str, str]:
     return _gen_unary_tramsform(LAZY_TRANSFORM, target, values)
 
@@ -555,9 +566,28 @@ def skip_codegen_non_hack_container_key(values: Dict[str, str]) -> Dict[str, str
     return {k: maybe_mark_skip(v) for k, v in values.items()}
 
 
+# `shared_ptr<const T>` (const shared ref) fields only need a small subset to
+# cover the op::decode const-pointee path in SerializationRoundTripTest.
+# Generating the full container product here would balloon the www-synced golden
+# past the 20MB source-control file-size limit, so restrict it to these fields.
+CONST_SHARED_CPP_REF_FIELD_NAMES = (
+    "list_bool",
+    "list_struct_empty",
+    "set_string",
+    "map_i64_i16",
+)
+
+
 def gen_structured_fields(target: Target, include_empty: bool = True) -> Dict[str, str]:
     ret = gen_container_fields(target, include_empty)
-    ret.update(**gen_cpp_ref(target, ret), **gen_shared_cpp_ref(target, ret))
+    const_shared_fields = {
+        name: ret[name] for name in CONST_SHARED_CPP_REF_FIELD_NAMES if name in ret
+    }
+    ret.update(
+        **gen_cpp_ref(target, ret),
+        **gen_shared_cpp_ref(target, ret),
+        **gen_const_shared_cpp_ref(target, const_shared_fields),
+    )
     ret.update(gen_primatives(target, PRIMITIVE_TYPES))
     ret = skip_codegen_non_hack_container_key(ret)
     return ret

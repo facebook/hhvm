@@ -46,8 +46,8 @@ class t_android_generator : public t_java_deprecated_generator {
 void t_android_generator::init_generator() {
   generate_field_metadata_ = false;
   generate_immutable_structs_ = true;
-  generate_boxed_primitive = true;
-  generate_builder = false;
+  generate_boxed_primitive_ = true;
+  generate_builder_ = false;
 
   out_dir_base_ = "gen-android";
 

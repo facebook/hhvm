@@ -237,7 +237,7 @@ class token {
   static const std::unordered_map<std::string_view, tok>& keywords();
 
  private:
-  std::variant<bool, std::int64_t, std::string_view, std::string> data;
+  std::variant<bool, std::int64_t, std::string_view, std::string> data_;
 };
 
 std::string to_string(const token&);

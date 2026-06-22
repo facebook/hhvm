@@ -90,9 +90,9 @@ struct token_description {
 
 class LexerTest : public testing::Test {
  private:
-  source_manager source_mgr;
-  diagnostics_engine diags;
-  int file_id = 1;
+  source_manager source_mgr_;
+  diagnostics_engine diags_;
+  int file_id_ = 1;
 
  public:
   std::vector<diagnostic> diagnostics;
@@ -103,17 +103,17 @@ class LexerTest : public testing::Test {
 
   lexer make_lexer(const std::string& source) {
     return lexer(
-        source_mgr.add_virtual_file(path_to_file(file_id++), source), diags);
+        source_mgr_.add_virtual_file(path_to_file(file_id_++), source), diags_);
   }
 
   std::string_view token_range_text(const token& t) {
-    const char* begin = source_mgr.get_text(t.range.begin);
-    const char* end = source_mgr.get_text(t.range.end);
+    const char* begin = source_mgr_.get_text(t.range.begin);
+    const char* end = source_mgr_.get_text(t.range.end);
     return std::string_view(begin, end - begin);
   }
 
   LexerTest()
-      : diags(source_mgr, [this](diagnostic d) {
+      : diags_(source_mgr_, [this](diagnostic d) {
           diagnostics.push_back(std::move(d));
         }) {}
 };

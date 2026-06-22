@@ -34,9 +34,9 @@ namespace whisker {
 
 class ParserTest : public testing::Test {
  private:
-  source_manager src_manager;
-  diagnostics_engine diags;
-  int file_id = 1;
+  source_manager src_manager_;
+  diagnostics_engine diags_;
+  int file_id_ = 1;
 
  public:
   std::vector<diagnostic> diagnostics;
@@ -48,7 +48,8 @@ class ParserTest : public testing::Test {
   std::optional<ast::root> try_parse_ast(const std::string& source) {
     diagnostics.clear();
     return parse(
-        src_manager.add_virtual_file(path_to_file(file_id++), source), diags);
+        src_manager_.add_virtual_file(path_to_file(file_id_++), source),
+        diags_);
   }
 
   [[nodiscard]] ast::root parse_ast(const std::string& source) {
@@ -64,12 +65,12 @@ class ParserTest : public testing::Test {
 
   std::string to_string(const ast::root& ast) {
     std::ostringstream out;
-    print_ast(ast, src_manager, out);
+    print_ast(ast, src_manager_, out);
     return out.str();
   }
 
   ParserTest()
-      : diags(src_manager, [this](diagnostic d) {
+      : diags_(src_manager_, [this](diagnostic d) {
           diagnostics.push_back(std::move(d));
         }) {}
 };

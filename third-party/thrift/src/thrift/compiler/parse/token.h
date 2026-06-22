@@ -194,20 +194,20 @@ class token {
 
   static token make_bool_literal(const source_range& r, bool value) {
     auto t = token(tok::bool_literal, r);
-    t.as.bool_value = value;
+    t.as_.bool_value = value;
     return t;
   }
 
   static token make_int_literal(const source_range& r, uint64_t value) {
     auto t = token(tok::int_literal, r);
-    t.as.int_value = value;
+    t.as_.int_value = value;
     return t;
   }
 
   // Makes a floating-point literal.
   static token make_float_literal(const source_range& r, double value) {
     auto t = token(tok::float_literal, r);
-    t.as.float_value = value;
+    t.as_.float_value = value;
     return t;
   }
 
@@ -228,14 +228,14 @@ class token {
     if (kind != tok::bool_literal) {
       throw_invalid_kind("bool");
     }
-    return as.bool_value;
+    return as_.bool_value;
   }
 
   uint64_t int_value() const {
     if (kind != tok::int_literal) {
       throw_invalid_kind("int");
     }
-    return as.int_value;
+    return as_.int_value;
   }
 
   // Returns the value of a floating-point literal.
@@ -243,7 +243,7 @@ class token {
     if (kind != tok::float_literal) {
       throw_invalid_kind("float");
     }
-    return as.float_value;
+    return as_.float_value;
   }
 
   // Returns the value of an identifier, string literal or inline doc.
@@ -253,7 +253,7 @@ class token {
         kind != tok::inline_doc) {
       throw_invalid_kind("string");
     }
-    return {as.string_value.data, as.string_value.size};
+    return {as_.string_value.data, as_.string_value.size};
   }
 
  private:
@@ -267,13 +267,13 @@ class token {
     uint64_t int_value;
     double float_value;
     string_view string_value;
-  } as;
+  } as_;
 
   // Creates a string-valued token such as a string literal or an identifier.
   static token make_string_token(
       tok kind, const source_range& r, std::string_view value) {
     auto t = token(kind, r);
-    t.as.string_value = {value.data(), value.size()};
+    t.as_.string_value = {value.data(), value.size()};
     return t;
   }
 

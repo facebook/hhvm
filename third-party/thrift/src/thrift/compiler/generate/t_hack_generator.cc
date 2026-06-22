@@ -84,12 +84,12 @@ class t_result_struct final : public t_structured {
   t_result_struct(
       t_program* program, std::string name, std::string result_return_type)
       : t_structured(program, std::move(name)),
-        result_return_type{std::move(result_return_type)} {}
+        result_return_type_{std::move(result_return_type)} {}
 
-  const std::string& getResultReturnType() const { return result_return_type; }
+  const std::string& getResultReturnType() const { return result_return_type_; }
 
  private:
-  std::string result_return_type;
+  std::string result_return_type_;
 };
 
 // Returns true iff type can be used as a set or map key in Hack.
@@ -205,9 +205,9 @@ class t_hack_generator : public t_concat_generator {
         option_is_specified(options, "__union_logger_rollout");
 
     auto [_, ns_type_] = get_namespace(program_);
-    has_hack_namespace = ns_type_ == HackThriftNamespaceType::HACK ||
+    has_hack_namespace_ = ns_type_ == HackThriftNamespaceType::HACK ||
         ns_type_ == HackThriftNamespaceType::PACKAGE;
-    has_nested_ns = false;
+    has_nested_ns_ = false;
 
     if (legacy_arrays_ && explicit_arraysets) {
       throw std::runtime_error(
@@ -1197,7 +1197,7 @@ class t_hack_generator : public t_concat_generator {
       }
       return "\\" + ns + "\\" + name;
     }
-    return (!decl && (has_hack_namespace || has_nested_ns) ? "\\" : "") +
+    return (!decl && (has_hack_namespace_ || has_nested_ns_) ? "\\" : "") +
         (ns_type == HackThriftNamespaceType::PHP ? ns : "") + name;
   }
 
@@ -1227,7 +1227,7 @@ class t_hack_generator : public t_concat_generator {
 
       if (underlying_ns.has_value()) {
         return "\\" + *underlying_ns + "\\" + *underlying_name;
-      } else if (has_hack_namespace || has_nested_ns) {
+      } else if (has_hack_namespace_ || has_nested_ns_) {
         return "\\" + *underlying_name;
       }
 
@@ -1282,7 +1282,7 @@ class t_hack_generator : public t_concat_generator {
          ns_type == HackThriftNamespaceType::PACKAGE)) {
       return hack_name(prefixed_name, svc->program());
     }
-    return (extends && has_hack_namespace ? "\\" : "") + (mangle ? ns : "") +
+    return (extends && has_hack_namespace_ ? "\\" : "") + (mangle ? ns : "") +
         prefixed_name;
   }
 
@@ -1513,9 +1513,9 @@ class t_hack_generator : public t_concat_generator {
    */
   bool service_metadata_full_name_;
 
-  bool has_hack_namespace;
+  bool has_hack_namespace_;
 
-  bool has_nested_ns;
+  bool has_nested_ns_;
 
   /**
    * True to skip generating code for constants
@@ -1898,7 +1898,7 @@ void t_hack_generator::init_codegen_file(
     return;
   } else {
     auto [ns, _] = get_namespace(program_);
-    if (has_hack_namespace) {
+    if (has_hack_namespace_) {
       file_ << "namespace " << ns << ";\n\n";
     }
   }
@@ -1983,7 +1983,7 @@ void t_hack_generator::generate_typedef(const t_typedef* ttypedef) {
     // For wrapped typedef, typehint is generated in nested ns.
     // Set this flag to true to ensure that any references to other typedefs or
     // structs is prefixed with "\"
-    has_nested_ns = true;
+    has_nested_ns_ = true;
   }
   std::string typehint;
   if (auto adapter = find_hack_adapter(ttypedef)) {
@@ -2020,7 +2020,7 @@ void t_hack_generator::generate_typedef(const t_typedef* ttypedef) {
              << " = " << typehint << ";\n";
   }
   // Reset the flag
-  has_nested_ns = false;
+  has_nested_ns_ = false;
 }
 
 /**
@@ -3185,7 +3185,7 @@ void t_hack_generator::generate_struct(const t_structured* tstruct) {
     // For wrapped typedef, typehint is generated in nested ns.
     // Set this flag to true to ensure that any references to other typedefs or
     // structs is prefixed with "\"
-    has_nested_ns = true;
+    has_nested_ns_ = true;
     if (ns) {
       f_adapted_types_ << "namespace " << *ns << " {\n\n";
     }
@@ -3197,7 +3197,7 @@ void t_hack_generator::generate_struct(const t_structured* tstruct) {
       f_adapted_types_ << "\n}\n\n";
     }
     // reset the flag
-    has_nested_ns = false;
+    has_nested_ns_ = false;
   } else if (split_types_) {
     std::ofstream per_type_file;
     init_codegen_file(
@@ -6937,7 +6937,7 @@ void t_hack_generator::generate_service(const t_service* tservice) {
       if (get_hack_service_prefix(tservice).empty()) {
         // No NamePrefix: preserve the historical error messages exactly,
         // dispatched by namespace type.
-        if (has_hack_namespace) {
+        if (has_hack_namespace_) {
           throw std::runtime_error(
               "Don't use mangledsvcs with hack namespaces or package.");
         }

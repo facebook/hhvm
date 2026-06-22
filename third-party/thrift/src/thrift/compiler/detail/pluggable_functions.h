@@ -47,8 +47,8 @@ class pluggable_function_set {
   template <typename Tag>
   void set(signature<Tag>* fn) {
     std::type_index id = typeid(Tag);
-    assert(!funcs.count(id));
-    funcs[id] = reinterpret_cast<erased_fn>(fn);
+    assert(!funcs_.count(id));
+    funcs_[id] = reinterpret_cast<erased_fn>(fn);
   }
 
   template <typename Tag, typename... Args>
@@ -59,12 +59,12 @@ class pluggable_function_set {
  private:
   using erased_fn = void (*)(void);
 
-  std::unordered_map<std::type_index, erased_fn> funcs;
+  std::unordered_map<std::type_index, erased_fn> funcs_;
 
   template <typename Tag>
   signature<Tag>* get() {
     std::type_index id = typeid(Tag);
-    if (auto fn = funcs.find(id); fn != funcs.end()) {
+    if (auto fn = funcs_.find(id); fn != funcs_.end()) {
       return reinterpret_cast<signature<Tag>*>(fn->second);
     }
     return Tag::default_impl;

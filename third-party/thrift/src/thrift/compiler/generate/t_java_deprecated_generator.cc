@@ -539,7 +539,7 @@ void t_java_deprecated_generator::generate_java_struct(
   StructGenParams params;
   params.is_exception = is_exception;
   params.gen_immutable = generate_immutable_structs_;
-  params.gen_builder = generate_builder;
+  params.gen_builder = generate_builder_;
 
   generate_java_struct_definition(f_struct, tstruct, params);
   f_struct.close();
@@ -3595,7 +3595,7 @@ string t_java_deprecated_generator::type_name(
  */
 string t_java_deprecated_generator::base_type_name(
     const t_primitive_type& type, bool in_container) {
-  bool boxedPrimitive = in_container || generate_boxed_primitive;
+  bool boxedPrimitive = in_container || generate_boxed_primitive_;
   switch (type.primitive_type()) {
     case t_primitive_type::type::t_void:
       return "void";

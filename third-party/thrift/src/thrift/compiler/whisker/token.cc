@@ -183,7 +183,7 @@ std::int64_t token::i64_value() const {
   if (kind != tok::i64_literal) {
     throw_invalid_kind(to_string(tok::i64_literal));
   }
-  return std::get<std::int64_t>(data);
+  return std::get<std::int64_t>(data_);
 }
 
 std::string_view token::string_value() const {
@@ -202,7 +202,7 @@ std::string_view token::string_value() const {
                 ", ")));
   }
   return detail::variant_match(
-      data,
+      data_,
       [](const std::string_view& str) -> std::string_view { return str; },
       [](const std::string& str) -> std::string_view { return str; },
       [](auto&&) -> std::string_view {
@@ -213,48 +213,48 @@ std::string_view token::string_value() const {
 /* static */ token token::make_i64_literal(
     std::int64_t value, const source_range& r) {
   auto t = token(tok::i64_literal, r);
-  t.data = value;
+  t.data_ = value;
   return t;
 }
 
 /* static */ token token::make_string_literal(
     std::string value, const source_range& r) {
   auto t = token(tok::string_literal, r);
-  t.data = std::move(value);
+  t.data_ = std::move(value);
   return t;
 }
 
 /* static */ token token::make_identifier(
     std::string_view value, const source_range& r) {
   auto t = token(tok::identifier, r);
-  t.data = value;
+  t.data_ = value;
   return t;
 }
 
 /* static */ token token::make_path_component(
     std::string_view value, const source_range& r) {
   auto t = token(tok::path_component, r);
-  t.data = value;
+  t.data_ = value;
   return t;
 }
 
 /* static */ token token::make_text(std::string value, const source_range& r) {
   auto t = token(tok::text, r);
-  t.data = std::move(value);
+  t.data_ = std::move(value);
   return t;
 }
 
 /* static */ token token::make_whitespace(
     std::string value, const source_range& r) {
   auto t = token(tok::whitespace, r);
-  t.data = std::move(value);
+  t.data_ = std::move(value);
   return t;
 }
 
 /* static */ token token::make_newline(
     std::string_view value, const source_range& r) {
   auto t = token(tok::newline, r);
-  t.data = value;
+  t.data_ = value;
   return t;
 }
 

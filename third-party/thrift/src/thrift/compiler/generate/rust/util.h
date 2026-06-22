@@ -54,8 +54,8 @@ class rust_crate_index {
   void compute_absolute_paths_of_includes(
       const t_program* program, const std::string& absolute_path);
 
-  std::map<std::string, rust_crate> cratemap;
-  std::map<const t_program*, std::string> thrift_file_absolute_paths;
+  std::map<std::string, rust_crate> cratemap_;
+  std::map<const t_program*, std::string> thrift_file_absolute_paths_;
 };
 
 rust_crate_map load_crate_map(const std::string& path);

@@ -88,7 +88,7 @@ class add_operational_annotations {
   */
   bool has_operational_annotation() {
     std::string_view content = fm_.old_content();
-    return content.find(target_string) != std::string::npos;
+    return content.find(target_string_) != std::string::npos;
   }
 
   /*
@@ -99,7 +99,7 @@ class add_operational_annotations {
       std::string_view next_content) {
     // Check for zone policy, but ensure it's not commented out
     bool zone_policy_exists = false;
-    size_t zone_policy_pos = next_content.find(zone_policy_string);
+    size_t zone_policy_pos = next_content.find(zone_policy_string_);
     if (zone_policy_pos != std::string::npos) {
       // Check if this occurrence is commented out
       size_t line_start = next_content.rfind('\n', zone_policy_pos);
@@ -117,7 +117,7 @@ class add_operational_annotations {
     }
 
     bool operational_data_exists =
-        next_content.find(ope_category_string) != std::string::npos;
+        next_content.find(ope_category_string_) != std::string::npos;
     return {zone_policy_exists, operational_data_exists};
   }
 
@@ -131,7 +131,7 @@ class add_operational_annotations {
       bool operational_data_exists) {
     std::string annotations_to_add;
     if (!zone_policy_exists) {
-      annotations_to_add += "\n" + indentation + zone_policy_string + "{\n" +
+      annotations_to_add += "\n" + indentation + zone_policy_string_ + "{\n" +
           indentation +
           "  name = purpose_policy_names.TPurposePolicyName.DEFAULT_PURPOSES_OPERATIONAL,\n" +
           indentation +
@@ -139,7 +139,7 @@ class add_operational_annotations {
           indentation + "}";
     }
     if (!operational_data_exists) {
-      annotations_to_add += "\n" + indentation + ope_category_string + "{\n" +
+      annotations_to_add += "\n" + indentation + ope_category_string_ + "{\n" +
           indentation +
           "  category = operational_data_annotation.Category.RESTRICTED_DEFAULT,\n" +
           indentation + "}";
@@ -182,7 +182,7 @@ class add_operational_annotations {
 
       // Find all occurrences of the target string
       size_t pos = 0;
-      while ((pos = content.find(target_string, pos)) != std::string::npos) {
+      while ((pos = content.find(target_string_, pos)) != std::string::npos) {
         // Find the end of the line containing the target string
         size_t line_end = content.find('\n', pos);
         if (line_end == std::string::npos) {
@@ -223,10 +223,11 @@ class add_operational_annotations {
 
  private:
   file_manager fm_;
-  const std::string target_string =
+  const std::string target_string_ =
       "@universe.Universe{id = universe.UniverseIdentifier.OPERATIONAL}";
-  const std::string zone_policy_string = "@zone_policy.PurposePolicy";
-  const std::string ope_category_string = "@operational_data_annotation.Logger";
+  const std::string zone_policy_string_ = "@zone_policy.PurposePolicy";
+  const std::string ope_category_string_ =
+      "@operational_data_annotation.Logger";
 };
 } // namespace
 

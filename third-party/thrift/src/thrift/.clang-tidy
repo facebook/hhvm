@@ -6,5 +6,17 @@ modernize-type-traits,
 modernize-use-override,
 modernize-use-using,
 modernize-raw-string-literal,
+readability-identifier-naming,
 '
+CheckOptions:
+  - key: readability-identifier-naming.NamespaceCase
+    value: lower_case
+  - key: readability-identifier-naming.PrivateMemberSuffix
+    value: _
+  - key: readability-identifier-naming.PrivateMemberIgnoredRegexp
+    value: '^(k[A-Z].*|[A-Z0-9_]+)$'
+  - key: readability-identifier-naming.ProtectedMemberSuffix
+    value: _
+  - key: readability-identifier-naming.ProtectedMemberIgnoredRegexp
+    value: '^(k[A-Z].*|[A-Z0-9_]+)$'
 ...

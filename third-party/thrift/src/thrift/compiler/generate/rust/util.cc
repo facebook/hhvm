@@ -130,7 +130,7 @@ rust_crate_map load_crate_map(const std::string& path) {
 rust_crate_index::rust_crate_index(
     const t_program* current_program,
     std::map<std::string, rust_crate> cratemap)
-    : cratemap(std::move(cratemap)) {
+    : cratemap_(std::move(cratemap)) {
   // Traverse the entire include tree in depth-first order to resolve relative
   // import paths into absolute paths. Depth-first traversal mimicks the
   // semantics of C++ '#include' with include guards.
@@ -139,19 +139,19 @@ rust_crate_index::rust_crate_index(
 
 void rust_crate_index::compute_absolute_paths_of_includes(
     const t_program* program, const std::string& absolute_path) {
-  thrift_file_absolute_paths[program] = absolute_path;
+  thrift_file_absolute_paths_[program] = absolute_path;
 
   for (auto include : program->includes()) {
     auto dependency = include->get_program();
 
-    if (thrift_file_absolute_paths.find(dependency) !=
-        thrift_file_absolute_paths.end()) {
+    if (thrift_file_absolute_paths_.find(dependency) !=
+        thrift_file_absolute_paths_.end()) {
       // Already visited.
       continue;
     }
 
     auto raw_path = fmt::to_string(include->raw_path());
-    if (cratemap.find(raw_path) != cratemap.end()) {
+    if (cratemap_.find(raw_path) != cratemap_.end()) {
       // Include's path is already an absolute path.
       compute_absolute_paths_of_includes(dependency, raw_path);
       continue;
@@ -161,7 +161,7 @@ void rust_crate_index::compute_absolute_paths_of_includes(
     if (slash != std::string::npos) {
       std::string concatenated_path =
           fmt::format("{}/{}", absolute_path.substr(0, slash), raw_path);
-      if (cratemap.find(concatenated_path) != cratemap.end()) {
+      if (cratemap_.find(concatenated_path) != cratemap_.end()) {
         // Include's path is relative to the Thrift file containing the include.
         compute_absolute_paths_of_includes(dependency, concatenated_path);
         continue;
@@ -174,14 +174,14 @@ void rust_crate_index::compute_absolute_paths_of_includes(
 }
 
 const rust_crate* rust_crate_index::find(const t_program* program) const {
-  auto absolute_paths_entry = thrift_file_absolute_paths.find(program);
+  auto absolute_paths_entry = thrift_file_absolute_paths_.find(program);
   const std::string& absolute_path =
-      absolute_paths_entry == thrift_file_absolute_paths.end()
+      absolute_paths_entry == thrift_file_absolute_paths_.end()
       ? program->path()
       : absolute_paths_entry->second;
 
-  auto crate = cratemap.find(absolute_path);
-  if (crate == cratemap.end()) {
+  auto crate = cratemap_.find(absolute_path);
+  if (crate == cratemap_.end()) {
     return nullptr;
   } else {
     return &crate->second;
@@ -191,7 +191,7 @@ const rust_crate* rust_crate_index::find(const t_program* program) const {
 std::vector<const rust_crate*> rust_crate_index::direct_dependencies() const {
   std::vector<const rust_crate*> direct_dependencies;
   std::unordered_set<std::string_view> distinct_names;
-  for (const auto& entry : cratemap) {
+  for (const auto& entry : cratemap_) {
     const rust_crate& crate = entry.second;
     if (crate.dependency_path.size() != 1) {
       // Not a direct dependency.

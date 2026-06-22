@@ -299,7 +299,7 @@ class t_java_deprecated_generator : public t_concat_generator {
   bool type_can_be_null(const t_type* ttype) {
     ttype = ttype->get_true_type();
 
-    return generate_boxed_primitive || ttype->is<t_container>() ||
+    return generate_boxed_primitive_ || ttype->is<t_container>() ||
         ttype->is<t_structured>() || ttype->is_string_or_binary() ||
         ttype->is<t_enum>();
   }
@@ -320,8 +320,8 @@ class t_java_deprecated_generator : public t_concat_generator {
   std::string namespace_key_;
   bool generate_field_metadata_ = true;
   bool generate_immutable_structs_ = false;
-  bool generate_boxed_primitive = false;
-  bool generate_builder = true;
+  bool generate_boxed_primitive_ = false;
+  bool generate_builder_ = true;
 
   /**
    * File streams

@@ -100,7 +100,7 @@ impl<'de> serde::Deserialize<'de> for PropFlags {
             type Value = PropFlags;
 
             fn expecting(&self, formatter: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
-                write!(formatter, "a u8 for PropFlags")
+                write!(formatter, "a u16 for PropFlags")
             }
 
             fn visit_u16<E: serde::de::Error>(self, value: u16) -> Result<Self::Value, E> {
@@ -113,6 +113,6 @@ impl<'de> serde::Deserialize<'de> for PropFlags {
                 ))
             }
         }
-        deserializer.deserialize_u8(Visitor)
+        deserializer.deserialize_u16(Visitor)
     }
 }

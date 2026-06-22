@@ -93,8 +93,7 @@ static int src_port_callback(
 }
 #endif
 
-folly::IoUringBackend::Options getIoUringOptions() {
-  folly::IoUringBackend::Options options;
+void setIoUringCommonOptionsFromFlags(folly::IoUringOptions& options) {
   options.setRegisterRingFd(FLAGS_use_iouring_event_eventfd);
 
   if (FLAGS_io_prov_buffs_size > 0 && FLAGS_io_prov_buffs > 0) {
@@ -138,6 +137,23 @@ folly::IoUringBackend::Options getIoUringOptions() {
     options.setTimeout(std::chrono::microseconds(FLAGS_timeout_us));
   }
 
+  if (FLAGS_io_uring_async_socket) {
+    options.setNativeAsyncSocketSupport(true);
+  }
+
+  if (FLAGS_io_prov_buffs_use_bundles) {
+    options.setProvidedBufUseBundles(true);
+  }
+
+  if (FLAGS_io_prov_buffs_use_incremental) {
+    options.setEnableIncrementalBuffers(true);
+  }
+}
+
+folly::IoUringBackend::Options getIoUringOptions() {
+  folly::IoUringBackend::Options options;
+  setIoUringCommonOptionsFromFlags(options);
+
   static std::atomic<int32_t> currQueueId{FLAGS_io_zcrx_queue_id};
   if (FLAGS_io_zcrx) {
     int32_t queueId = currQueueId.fetch_add(1);
@@ -166,18 +182,6 @@ folly::IoUringBackend::Options getIoUringOptions() {
         folly::IoUringArena::base(),
         folly::IoUringArena::regionSize(),
         folly::IoUringArena::arenaIndex());
-  }
-
-  if (FLAGS_io_uring_async_socket) {
-    options.setNativeAsyncSocketSupport(true);
-  }
-
-  if (FLAGS_io_prov_buffs_use_bundles) {
-    options.setProvidedBufUseBundles(true);
-  }
-
-  if (FLAGS_io_prov_buffs_use_incremental) {
-    options.setEnableIncrementalBuffers(true);
   }
 
   return options;

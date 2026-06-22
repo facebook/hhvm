@@ -45,6 +45,7 @@ DECLARE_bool(io_uring_async_socket);
 #if FOLLY_HAS_LIBURING
 
 namespace apache::thrift::stress {
+void setIoUringCommonOptionsFromFlags(folly::IoUringOptions& opts);
 folly::IoUringBackend::Options getIoUringOptions();
 } // namespace apache::thrift::stress
 

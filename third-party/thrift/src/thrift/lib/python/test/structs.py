@@ -30,7 +30,6 @@ import test_thrift.thrift_mutable_types as mutable_test_types
 import test_thrift.thrift_types as immutable_test_types
 import testing.dependency.thrift_types as dep_types
 import thrift.python.mutable_serializer as mutable_serializer
-import thrift.python.mutable_types
 import thrift.python.serializer as immutable_serializer
 import thrift.python.types
 from folly.iobuf import IOBuf
@@ -97,12 +96,6 @@ isset_DEPRECATED: Callable[[StructOrUnion | GeneratedError], dict[str, bool]] = 
     thrift.python.types.isset_DEPRECATED  # pyre-ignore[16]: not declared in types.pyi
 )
 
-# `_isset` is an internal, deprecated API for mutable types intentionally excluded
-# from `mutable_types.pyi`, so reference it through the module.
-mutable_isset: Callable[[StructOrUnion | GeneratedError], dict[str, bool]] = (
-    thrift.python.mutable_types._isset  # pyre-ignore[16]: not declared in mutable_types.pyi
-)
-
 ListT = TypeVar("ListT")
 SetT = TypeVar("SetT")
 MapKey = TypeVar("MapKey")
@@ -164,15 +157,20 @@ class StructTestsParameterized(unittest.TestCase):
         )
         # pyre-ignore[16]: has no attribute `serializer_module`
         self.serializer: types.ModuleType = self.serializer_module
-        # pyre-ignore[8]: has no attribute `serializer_module`
+        # `isset_DEPRECATED` only supports immutable types. The mutable `_isset`
+        # has been removed, so isset assertions below are guarded by
+        # `is_mutable_run` to run on the immutable parameterization only.
         self.isset: Callable[[StructOrUnion | GeneratedError], dict[str, bool]] = (
-            mutable_isset if self.is_mutable_run else isset_DEPRECATED
+            isset_DEPRECATED
         )
 
     def to_list(self, list_data: list[ListT]) -> list[ListT] | _ThriftListWrapper:
         return to_thrift_list(list_data) if self.is_mutable_run else list_data
 
     def test_isset_Struct(self) -> None:
+        # `isset` is not supported for mutable types.
+        if self.is_mutable_run:
+            return
         to_serialize = self.OptionalFile(name="/dev/null", type=8)
         serialized = self.serializer.serialize_iobuf(to_serialize)
         file = self.serializer.deserialize(self.File, serialized)
@@ -186,10 +184,16 @@ class StructTestsParameterized(unittest.TestCase):
         self.assertFalse(self.isset(file)["type"])
 
     def test_isset_Error(self) -> None:
+        # `isset` is not supported for mutable types.
+        if self.is_mutable_run:
+            return
         e = self.UnusedError(message="ACK")
         self.assertTrue(self.isset(e)["message"])
 
     def test_isset_Union(self) -> None:
+        # `isset` is not supported for mutable types.
+        if self.is_mutable_run:
+            return
         i = self.Integers(large=2)
         with self.assertRaises(TypeError):
             self.isset(i)["large"]
@@ -241,8 +245,9 @@ class StructTestsParameterized(unittest.TestCase):
         # Clearing the field on a sibling copy must not disturb `with_values`.
         _ = base(values=None)
 
-        # The isset flag must still be set ...
-        self.assertTrue(self.isset(with_values)["values"])
+        # The isset flag must still be set (immutable only) ...
+        if not self.is_mutable_run:
+            self.assertTrue(self.isset(with_values)["values"])
         # ... so the value survives a serialization round trip.
         serialized = self.serializer.serialize_iobuf(with_values)
         roundtrip = self.serializer.deserialize(self.Optionals, serialized)
@@ -484,6 +489,9 @@ class StructTestsParameterized(unittest.TestCase):
             self.assertIsNone(m.opt_enum)
 
         def assert_isset(m: mixed) -> None:
+            # `isset` is not supported for mutable types.
+            if self.is_mutable_run:
+                return
             isset = self.isset(m)
             for fld_name, _ in mixed:
                 if not fld_name.startswith("opt_"):
@@ -508,15 +516,18 @@ class StructTestsParameterized(unittest.TestCase):
         ### Now with explicit `None` set
         m = self.mixed(opt_field=None)
         self.assertIsNone(m.opt_field)
-        self.assertFalse(self.isset(m)["opt_field"])
+        if not self.is_mutable_run:
+            self.assertFalse(self.isset(m)["opt_field"])
 
         m = m(opt_field=None)
         self.assertIsNone(m.opt_field)
-        self.assertFalse(self.isset(m)["opt_field"])
+        if not self.is_mutable_run:
+            self.assertFalse(self.isset(m)["opt_field"])
 
         m = self.serializer.deserialize(self.mixed, self.serializer.serialize(m))
         self.assertIsNone(m.opt_field)
-        self.assertFalse(self.isset(m)["opt_field"])
+        if not self.is_mutable_run:
+            self.assertFalse(self.isset(m)["opt_field"])
 
     def test_getattr(self) -> None:
         e = self.easy(val=1, an_int=self.Integers(small=300), name="foo")

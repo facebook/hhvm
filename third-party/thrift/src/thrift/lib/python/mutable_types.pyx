@@ -43,7 +43,6 @@ from thrift.python.types cimport (
     StringTypeInfo,
     TypeInfoBase,
     getCTypeInfo,
-    logMutableIssetDeprecated,
     _fbthrift_compare_struct_less,
     _validate_union_init_kwargs,
 )
@@ -117,23 +116,6 @@ def fill_specs(*structured_thrift_classes):
     for cls in structured_thrift_classes:
         if not isinstance(cls, MutableUnionMeta):
             cls._fbthrift_store_field_values()
-
-
-MutableStructOrError = _cython__fused_type(MutableStruct, MutableGeneratedError)
-
-def _isset(MutableStructOrError struct):
-    """
-    This is an internal function that returns the 'isset byte' of the
-    corresponding field. Immutable types expose this function publicly, but for
-    mutable types, it remains internal and should not be accessed by user code.
-    """
-    logMutableIssetDeprecated(type(struct).__name__.encode("utf-8"))
-    cdef MutableStructInfo info = struct._fbthrift_mutable_struct_info
-    isset_bytes = struct._fbthrift_data[0]
-    return {
-        name: bool(isset_bytes[index])
-        for name, index in info.name_to_index.items()
-    }
 
 
 cdef _resetFieldToStandardDefault(structOrError, field_index):

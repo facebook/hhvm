@@ -1080,6 +1080,4 @@ void logGetLocallySetFieldsCalledOnDeserializedStruct(const char* structName);
 void logUnionFromValueTypeMismatch(
     const char* valueRepr, const char* valueType, const char* unionName);
 
-void logMutableIssetDeprecated(const char* structName);
-
 } // namespace apache::thrift::python

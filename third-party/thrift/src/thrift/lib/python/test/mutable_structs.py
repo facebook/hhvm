@@ -22,7 +22,6 @@ import unittest
 from datetime import datetime
 
 import thrift.python.mutable_serializer as mutable_serializer
-import thrift.python.mutable_types as mutable_types
 from parameterized import parameterized
 from thrift.python.mutable_exceptions import MutableGeneratedError
 from thrift.python.mutable_types import (
@@ -58,12 +57,6 @@ from thrift.test.thrift_python.struct_test.thrift_types import (
     TestStructNested_1 as TestStructNested_1_Immutable,
     TestStructNested_2 as TestStructNested_2_Immutable,
     TestStructWithNestedContainers as TestStructWithNestedContainersImmutable,
-)
-
-# `_isset` is an internal, deprecated API for mutable types intentionally excluded
-# from `mutable_types.pyi`, so reference it through the module.
-mutable_isset: typing.Callable[[MutableStruct], typing.Mapping[str, bool]] = (
-    mutable_types._isset  # pyre-ignore[16]: not declared in mutable_types.pyi
 )
 
 max_byte: int = 2**7 - 1
@@ -129,25 +122,20 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         if not is_optional:
             self.assertIsNotNone(getattr(struct, field_name))
             self.assertEqual(expected_default_value, getattr(struct, field_name))
-            self.assertFalse(mutable_isset(struct)[field_name])
         else:
             self.assertIsNone(getattr(struct, field_name))
-            self.assertFalse(mutable_isset(struct)[field_name])
 
         # Set the `value`, read it back
         setattr(struct, field_name, value)
         self.assertEqual(value, getattr(struct, field_name))
-        self.assertTrue(mutable_isset(struct)[field_name])
 
         # pyre-ignore[16]: internal, could be remove/replaced later
         struct._fbthrift_internal_resetFieldToStandardDefault(field_name)
         if not is_optional:
             self.assertIsNotNone(getattr(struct, field_name))
             self.assertEqual(expected_default_value, getattr(struct, field_name))
-            self.assertTrue(mutable_isset(struct)[field_name])
         else:
             self.assertIsNone(getattr(struct, field_name))
-            self.assertFalse(mutable_isset(struct)[field_name])
 
         # `del struct.field_name` raises a `AttributeError`
         with self.assertRaises(AttributeError):
@@ -160,9 +148,9 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         else:
             # For optional fields, assigning `None` resets the field
             setattr(struct, field_name, value)
-            self.assertTrue(mutable_isset(struct)[field_name])
+            self.assertEqual(value, getattr(struct, field_name))
             setattr(struct, field_name, None)
-            self.assertFalse(mutable_isset(struct)[field_name])
+            self.assertIsNone(getattr(struct, field_name))
 
         # Value with wrong type raises `TypeError`
         with self.assertRaises(TypeError):

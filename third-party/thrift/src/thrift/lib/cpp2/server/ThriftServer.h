@@ -2633,6 +2633,10 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
 
   bool preferIoUring() const { return preferIoUring_; }
 
+  void setPreferAsyncIoUringSocket(bool b) { preferIoUring_ = b; }
+
+  bool preferAsyncIoUringSocket() const { return preferIoUring_; }
+
   bool usingIoUring() const { return usingIoUring_; }
 
   void setUseDefaultIoUringExecutor(bool b) { useDefaultIoUringExecutor_ = b; }

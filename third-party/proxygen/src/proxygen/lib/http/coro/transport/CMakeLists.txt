@@ -36,3 +36,7 @@ proxygen_add_library(proxygen_http_coro_transport_http_connect_transport
     Folly::folly_io_coro_socket
     Folly::folly_logging_logging
 )
+
+if(BUILD_TESTS)
+  add_subdirectory(test)
+endif()

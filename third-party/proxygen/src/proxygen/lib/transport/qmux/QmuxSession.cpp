@@ -341,11 +341,17 @@ folly::coro::Task<void> QmuxSession::writeLoop(Ptr self) {
           std::min(recordPayloadLimit - recordBytes - kStreamFrameOverhead,
                    maxStreamData);
       auto dequeue = sm.dequeue(*wh, /*atMost=*/atMost);
+      auto* deliveryCallback = dequeue.deliveryCallback;
+      auto deliveredOffset = dequeue.lastByteStreamOffset;
       writeWTStream(recordBuf,
                     WTStreamCapsule{.streamId = id,
                                     .streamData = std::move(dequeue.data),
                                     .fin = dequeue.fin},
                     FrameProtocol::QMUX);
+      // Without this the app's byte-event registration and keepalive leak.
+      if (deliveryCallback) {
+        deliveryCallback->onByteEvent(id, deliveredOffset);
+      }
       wh = sm.nextWritable();
     }
     flushRecord(recordBuf, egressBuf);

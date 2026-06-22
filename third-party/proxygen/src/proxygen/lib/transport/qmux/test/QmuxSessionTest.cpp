@@ -214,6 +214,24 @@ class TestWtHandler : public WebTransportHandler {
   folly::Optional<uint32_t> sessionEndError;
 };
 
+//////// Test byte-event callback ////////
+
+// Records the delivery / cancellation events the session fires so a test can
+// assert the app's ByteEventCallback is driven correctly.
+class RecordingByteEventCallback : public WebTransport::ByteEventCallback {
+ public:
+  void onByteEvent(quic::StreamId id, uint64_t offset) noexcept override {
+    byteEvents.emplace_back(id, offset);
+  }
+  void onByteEventCanceled(quic::StreamId id,
+                           uint64_t offset) noexcept override {
+    canceledEvents.emplace_back(id, offset);
+  }
+
+  std::vector<std::pair<quic::StreamId, uint64_t>> byteEvents;
+  std::vector<std::pair<quic::StreamId, uint64_t>> canceledEvents;
+};
+
 //////// Fixture ////////
 
 class QmuxSessionTest : public ::testing::Test {
@@ -490,6 +508,70 @@ TEST_F(QmuxSessionTest, InitialIngress_IsDrainedOnStartup) {
   // Clean shutdown.
   rawTransport->addReadEvent(nullptr, /*eof=*/true);
   drain();
+}
+
+// 10) writeStreamData with a ByteEventCallback fires onByteEvent once the
+//     writeLoop dequeues the buffered write and emits it on the wire.
+//     Regression: the writeLoop previously dropped dequeue.deliveryCallback, so
+//     the app's byte-event registration (and any keepalive it held) leaked and
+//     onByteEvent never fired.
+TEST_F(QmuxSessionTest, WriteWithByteEventCallback_FiresOnByteEvent) {
+  auto created = session_->createBidiStream();
+  ASSERT_TRUE(created.hasValue());
+  const auto streamId = created.value().writeHandle->getID();
+
+  RecordingByteEventCallback byteEventCb;
+  const std::string payload = "byte-event-payload";
+  auto writeResult = created.value().writeHandle->writeStreamData(
+      folly::IOBuf::copyBuffer(payload), /*fin=*/false, &byteEventCb);
+  ASSERT_TRUE(writeResult.hasValue());
+  drain();
+
+  // The data reached the wire without error...
+  parseWrites();
+  EXPECT_TRUE(wire_.cb.connectionErrors.empty());
+
+  // ...and the delivery callback fired exactly once, for this stream, at the
+  // offset of the last delivered byte (payload.size() - 1). Without the fix
+  // byteEvents stays empty.
+  ASSERT_EQ(byteEventCb.byteEvents.size(), 1);
+  EXPECT_EQ(byteEventCb.byteEvents[0].first, streamId);
+  EXPECT_EQ(byteEventCb.byteEvents[0].second, payload.size() - 1);
+  EXPECT_TRUE(byteEventCb.canceledEvents.empty());
+}
+
+// 11) Closing the session cancels the delivery callback of any write still
+//     queued behind flow control: shutdown() -> WriteHandle::cancel() ->
+//     WtBufferedStreamData::clear() fires onByteEventCanceled (not onByteEvent)
+//     so the app's byte-event registration is released rather than leaked.
+TEST_F(QmuxSessionTest, CloseSession_CancelsQueuedByteEvent) {
+  auto created = session_->createBidiStream();
+  ASSERT_TRUE(created.hasValue());
+  const auto streamId = created.value().writeHandle->getID();
+
+  RecordingByteEventCallback byteEventCb;
+  // peerMaxStreamDataBidi is 1<<16; write past it so the tail stays queued
+  // behind stream flow control and the write never fully completes.
+  const std::string payload((1 << 16) + 5000, 'x');
+  auto writeResult = created.value().writeHandle->writeStreamData(
+      folly::IOBuf::copyBuffer(payload), /*fin=*/false, &byteEventCb);
+  ASSERT_TRUE(writeResult.hasValue());
+  drain();
+
+  // The write is incomplete (blocked), so no delivery event has fired yet.
+  EXPECT_TRUE(byteEventCb.byteEvents.empty());
+  EXPECT_TRUE(byteEventCb.canceledEvents.empty());
+
+  // Closing the session must cancel the still-queued byte event.
+  auto res = session_->closeSession(/*error=*/folly::Optional<uint32_t>{42});
+  ASSERT_TRUE(res.hasValue());
+  transport_->addReadEvent(nullptr, /*eof=*/true);
+  drain();
+
+  EXPECT_TRUE(byteEventCb.byteEvents.empty());
+  ASSERT_EQ(byteEventCb.canceledEvents.size(), 1);
+  EXPECT_EQ(byteEventCb.canceledEvents[0].first, streamId);
+  EXPECT_EQ(byteEventCb.canceledEvents[0].second, payload.size() - 1);
 }
 
 TEST_F(QmuxSessionTest, IdleTimer_NotArmedWhenEffectiveTimeoutZero) {

@@ -65,3 +65,7 @@ proxygen_add_library(proxygen_transport_qmux_qmux_connector
     proxygen_transport_qmux_qmux_session
     Folly::folly_coro_task
 )
+
+if(BUILD_TESTS)
+  add_subdirectory(test)
+endif()

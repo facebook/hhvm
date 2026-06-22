@@ -22,10 +22,10 @@ import unittest
 from datetime import datetime
 
 import thrift.python.mutable_serializer as mutable_serializer
+import thrift.python.mutable_types as mutable_types
 from parameterized import parameterized
 from thrift.python.mutable_exceptions import MutableGeneratedError
 from thrift.python.mutable_types import (
-    _isset as mutable_isset,
     MutableStruct,
     MutableStructOrUnion,
     to_thrift_list,
@@ -58,6 +58,12 @@ from thrift.test.thrift_python.struct_test.thrift_types import (
     TestStructNested_1 as TestStructNested_1_Immutable,
     TestStructNested_2 as TestStructNested_2_Immutable,
     TestStructWithNestedContainers as TestStructWithNestedContainersImmutable,
+)
+
+# `_isset` is an internal, deprecated API for mutable types intentionally excluded
+# from `mutable_types.pyi`, so reference it through the module.
+mutable_isset: typing.Callable[[MutableStruct], typing.Mapping[str, bool]] = (
+    mutable_types._isset  # pyre-ignore[16]: not declared in mutable_types.pyi
 )
 
 max_byte: int = 2**7 - 1

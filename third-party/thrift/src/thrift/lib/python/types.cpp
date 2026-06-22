@@ -2124,4 +2124,11 @@ void logUnionFromValueTypeMismatch(
                 " Please address this ASAP.";
 }
 
+void logMutableIssetDeprecated(const char* structName) {
+  LOG(ERROR)
+      << "_isset() was called on mutable thrift-python struct " << structName
+      << ". This is an internal function that is deprecated for mutable types "
+         "and will be removed. It must not be accessed by user code.";
+}
+
 } // namespace apache::thrift::python

@@ -43,6 +43,7 @@ from thrift.python.types cimport (
     StringTypeInfo,
     TypeInfoBase,
     getCTypeInfo,
+    logMutableIssetDeprecated,
     _fbthrift_compare_struct_less,
     _validate_union_init_kwargs,
 )
@@ -126,6 +127,7 @@ def _isset(MutableStructOrError struct):
     corresponding field. Immutable types expose this function publicly, but for
     mutable types, it remains internal and should not be accessed by user code.
     """
+    logMutableIssetDeprecated(type(struct).__name__.encode("utf-8"))
     cdef MutableStructInfo info = struct._fbthrift_mutable_struct_info
     isset_bytes = struct._fbthrift_data[0]
     return {

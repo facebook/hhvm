@@ -30,6 +30,7 @@ import test_thrift.thrift_mutable_types as mutable_test_types
 import test_thrift.thrift_types as immutable_test_types
 import testing.dependency.thrift_types as dep_types
 import thrift.python.mutable_serializer as mutable_serializer
+import thrift.python.mutable_types
 import thrift.python.serializer as immutable_serializer
 import thrift.python.types
 from folly.iobuf import IOBuf
@@ -75,7 +76,6 @@ from test_thrift.thrift_types import (
 )
 from thrift.python.exceptions import GeneratedError
 from thrift.python.mutable_types import (
-    _isset as mutable_isset,
     _ThriftListWrapper,
     _ThriftMapWrapper,
     _ThriftSetWrapper,
@@ -95,6 +95,12 @@ from thrift.python.types import (
 # through the module to keep the suppression in a single place.
 isset_DEPRECATED: Callable[[StructOrUnion | GeneratedError], dict[str, bool]] = (
     thrift.python.types.isset_DEPRECATED  # pyre-ignore[16]: not declared in types.pyi
+)
+
+# `_isset` is an internal, deprecated API for mutable types intentionally excluded
+# from `mutable_types.pyi`, so reference it through the module.
+mutable_isset: Callable[[StructOrUnion | GeneratedError], dict[str, bool]] = (
+    thrift.python.mutable_types._isset  # pyre-ignore[16]: not declared in mutable_types.pyi
 )
 
 ListT = TypeVar("ListT")

@@ -57,6 +57,7 @@ cdef extern from "<thrift/lib/cpp2/protocol/TableBasedSerializer.h>" namespace "
 cdef extern from "<thrift/lib/python/types.h>" namespace "::apache::thrift::python":
     void logGetLocallySetFieldsCalledOnDeserializedStruct(const char* structName)
     void logUnionFromValueTypeMismatch(const char* valueRepr, const char* valueType, const char* unionName)
+    void logMutableIssetDeprecated(const char* structName)
 
     cdef cppclass cDynamicStructInfo "::apache::thrift::python::DynamicStructInfo":
         cDynamicStructInfo(

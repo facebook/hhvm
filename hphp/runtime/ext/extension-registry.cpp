@@ -1,9 +1,11 @@
 #include "hphp/runtime/ext/extension-registry.h"
 
+#include <optional>
 #include <sstream>
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/vm/jit/prof-data-serialize.h"
+#include "hphp/util/timer.h"
 
 #ifdef HAVE_LIBDL
 # include <dlfcn.h>
@@ -162,6 +164,11 @@ void moduleInit() {
 
   assertx(s_sorted);
   for (auto& ext : s_ordered) {
+    std::optional<Timer> timer;
+    if (Cfg::Server::Mode) {
+      timer.emplace(Timer::WallTime,
+                    (std::string("moduleInit:") + ext->getName()).c_str());
+    }
     ext->moduleInit();
     assertx(ext->nativeFuncs().empty());
     ext->moduleRegisterNative();

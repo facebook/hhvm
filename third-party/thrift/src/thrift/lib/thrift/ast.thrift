@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-include "thrift/annotation/cpp.thrift"
 include "thrift/lib/thrift/schema.thrift"
 
 namespace py3 apache.thrift

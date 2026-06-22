@@ -170,8 +170,7 @@ TEST(EnumTestCpp2, Parse) {
 }
 
 TEST(EnumTestCpp2, Unscoped) {
-  using MyEnumUnscopedUnderlying =
-      typename std::underlying_type<MyEnumUnscoped>::type;
+  using MyEnumUnscopedUnderlying = std::underlying_type_t<MyEnumUnscoped>;
   EXPECT_TRUE((std::is_same<MyEnumUnscopedUnderlying, int>::value));
   MyEnumUnscoped value = {};
   EXPECT_TRUE(tryParseEnum("MEU_A", &value));

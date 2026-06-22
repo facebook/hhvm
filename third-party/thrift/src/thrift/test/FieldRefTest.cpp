@@ -495,12 +495,12 @@ TEST(field_ref_test, copy_from_other_type) {
 template <template <typename> class FieldRef>
 void check_is_assignable() {
   using IntAssignableRef = FieldRef<IntAssignable&>;
-  static_assert(std::is_assignable<IntAssignableRef, int>::value);
-  static_assert(!std::is_assignable<IntAssignableRef, std::string>::value);
-  static_assert(std::is_nothrow_assignable<IntAssignableRef, int>::value);
+  static_assert(std::is_assignable_v<IntAssignableRef, int>);
+  static_assert(!std::is_assignable_v<IntAssignableRef, std::string>);
+  static_assert(std::is_nothrow_assignable_v<IntAssignableRef, int>);
 
   using StringAssignableRef = FieldRef<StringAssignable&>;
-  static_assert(!std::is_nothrow_assignable<StringAssignableRef&, int>::value);
+  static_assert(!std::is_nothrow_assignable_v<StringAssignableRef&, int>);
 }
 
 TEST(field_ref_test, is_assignable) {
@@ -525,8 +525,7 @@ TEST(field_ref_test, construct_const_from_mutable) {
 
 template <typename T>
 constexpr bool is_const_ref() {
-  return std::is_reference<T>::value &&
-      std::is_const<std::remove_reference_t<T>>::value;
+  return std::is_reference_v<T> && std::is_const_v<std::remove_reference_t<T>>;
 }
 
 TEST(field_ref_test, const_accessors) {
@@ -852,10 +851,10 @@ struct OptionalFieldRefConversionChecker {
 template <typename From, typename To>
 struct OptionalBoxedFieldRefConversionChecker {
   static_assert(
-      std::is_convertible<From, To>::value ==
-          std::is_convertible<
+      std::is_convertible_v<From, To> ==
+          std::is_convertible_v<
               optional_boxed_field_ref<From>,
-              optional_boxed_field_ref<To>>::value,
+              optional_boxed_field_ref<To>>,
       "inconsistent implicit conversion");
 };
 
@@ -1122,8 +1121,8 @@ TEST(terse_field_ref_test, conversions) {
 template <template <typename> class FieldRef>
 void check_is_assignable_boxed() {
   using IntAssignableRef = FieldRef<boxed_value_ptr<IntAssignable>&>;
-  static_assert(std::is_assignable<IntAssignableRef, int>::value);
-  static_assert(!std::is_assignable<IntAssignableRef, std::string>::value);
+  static_assert(std::is_assignable_v<IntAssignableRef, int>);
+  static_assert(!std::is_assignable_v<IntAssignableRef, std::string>);
 }
 
 const ThriftStruct* getInternDefaultAddress() {

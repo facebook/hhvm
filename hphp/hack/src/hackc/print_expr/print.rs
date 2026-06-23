@@ -6,6 +6,7 @@
 use std::borrow::Cow;
 use std::io::Result;
 use std::io::Write;
+use std::sync::LazyLock;
 use std::write;
 
 use ast_scope::Scope;
@@ -24,8 +25,6 @@ use hhbc_string_utils::mangle;
 use hhbc_string_utils::strip_global_ns;
 use hhbc_string_utils::strip_ns;
 use hhbc_string_utils::types;
-use lazy_static::__Deref;
-use lazy_static::lazy_static;
 use naming_special_names_rust::classes;
 use oxidized::ast;
 use oxidized::ast_defs;
@@ -331,12 +330,11 @@ fn print_expr(
                 // to_uppercase() here because s might be "inf" or "nan"
                 .to_uppercase();
 
-                lazy_static! {
-                    static ref UNSIGNED_EXP: Regex =
-                        Regex::new(r"(?P<first>E)(?P<second>\d+)").unwrap();
-                    static ref SIGNED_SINGLE_DIGIT_EXP: Regex =
-                        Regex::new(r"(?P<first>E[+-])(?P<second>\d$)").unwrap();
-                }
+                static UNSIGNED_EXP: LazyLock<Regex> =
+                    LazyLock::new(|| Regex::new(r"(?P<first>E)(?P<second>\d+)").unwrap());
+                static SIGNED_SINGLE_DIGIT_EXP: LazyLock<Regex> =
+                    LazyLock::new(|| Regex::new(r"(?P<first>E[+-])(?P<second>\d$)").unwrap());
+
                 // turn mEn into mE+n
                 let s = UNSIGNED_EXP.replace(&s, "${first}+${second}");
                 // turn mE+n or mE-n into mE+0n or mE-0n (where n is a single digit)
@@ -775,7 +773,7 @@ fn print_expr(
             print_expr(ctx, w, env, expr)?;
             w.write_all(b")")
         }
-        Expr_::Invalid(expr_opt) => match &expr_opt.deref() {
+        Expr_::Invalid(expr_opt) => match &**expr_opt {
             Some(expr) => print_expr(ctx, w, env, expr),
             _ => Ok(()),
         },

@@ -3,6 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::sync::LazyLock;
+
 use oxidized::i_set::ISet;
 use oxidized::pos::Pos;
 use oxidized::prim_defs::Comment;
@@ -111,11 +113,9 @@ where
                 }
             }
             FixMe | Ignore | IgnoreError => {
-                lazy_static! {
-                    static ref IGNORE_ERROR: Regex =
-                        Regex::new(r#"HH_(?:FIXME|IGNORE_ERROR|IGNORE)[ \t\n]*\[([0-9]+)\]"#)
-                            .unwrap();
-                }
+                static IGNORE_ERROR: LazyLock<Regex> = LazyLock::new(|| {
+                    Regex::new(r#"HH_(?:FIXME|IGNORE_ERROR|IGNORE)[ \t\n]*\[([0-9]+)\]"#).unwrap()
+                });
 
                 let text = t.text_raw(self.source_text());
                 let pos = self.p_pos(node);

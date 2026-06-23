@@ -5,19 +5,17 @@
 
 use std::borrow::Cow;
 use std::cell::Cell;
+use std::sync::LazyLock;
 
 use bstr::BStr;
 use escaper::*;
-use lazy_static::lazy_static;
 use naming_special_names_rust::classes as ns_classes;
 use naming_special_names_rust::members;
 use regex::Regex;
 
-lazy_static! {
-    static ref HH_NS_RE: Regex = Regex::new(r"^\\?HH\\").unwrap();
-    static ref NS_RE: Regex = Regex::new(r".*\\").unwrap();
-    static ref TYPE_RE: Regex = Regex::new(r"<.*>").unwrap();
-}
+static HH_NS_RE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^\\?HH\\").unwrap());
+static NS_RE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r".*\\").unwrap());
+static TYPE_RE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"<.*>").unwrap());
 
 #[derive(Clone)]
 pub struct GetName {

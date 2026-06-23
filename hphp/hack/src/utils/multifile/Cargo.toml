@@ -12,7 +12,6 @@ path = "../multifile.rs"
 
 [dependencies]
 anyhow = "1.0.102"
-lazy_static = "1.5"
 regex = "1.12.4"
 
 [dev-dependencies]

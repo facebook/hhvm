@@ -9,6 +9,7 @@ use std::ffi::OsStr;
 use std::iter;
 use std::os::unix::ffi::OsStrExt;
 use std::str::FromStr;
+use std::sync::LazyLock;
 
 use bstr::BString;
 use bstr::ByteVec;
@@ -57,7 +58,6 @@ use indexmap::IndexSet;
 use instruction_sequence::InstrSeq;
 use instruction_sequence::instr;
 use itertools::Itertools;
-use lazy_static::lazy_static;
 use naming_special_names_rust::classes;
 use naming_special_names_rust::collections;
 use naming_special_names_rust::emitter_special_functions;
@@ -1464,27 +1464,30 @@ fn non_numeric(s: &[u8]) -> bool {
         Ok(s) => s.replace('_', ""),
         Err(_) => return true, // numeric strings would be valid utf8
     };
-    lazy_static! {
-        static ref HEX: Regex = Regex::new(r"(?P<sign>^-?)0[xX](?P<digits>.*)").unwrap();
-        static ref OCTAL: Regex = Regex::new(r"(?P<sign>^-?)0[oO](?P<digits>.*)").unwrap();
-        static ref BINARY: Regex = Regex::new(r"(?P<sign>^-?)0[bB](?P<digits>.*)").unwrap();
-        static ref FLOAT: Regex =
-            Regex::new(r"(?P<int>\d*)\.(?P<dec>[0-9--0]*)(?P<zeros>0*)").unwrap();
-        static ref NEG_FLOAT: Regex =
-            Regex::new(r"(?P<int>-\d*)\.(?P<dec>[0-9--0]*)(?P<zeros>0*)").unwrap();
-        static ref HEX_RADIX: u32 = 16;
-        static ref OCTAL_RADIX: u32 = 8;
-        static ref BINARY_RADIX: u32 = 2;
-    }
+
+    static HEX: LazyLock<Regex> =
+        LazyLock::new(|| Regex::new(r"(?P<sign>^-?)0[xX](?P<digits>.*)").unwrap());
+    static OCTAL: LazyLock<Regex> =
+        LazyLock::new(|| Regex::new(r"(?P<sign>^-?)0[oO](?P<digits>.*)").unwrap());
+    static BINARY: LazyLock<Regex> =
+        LazyLock::new(|| Regex::new(r"(?P<sign>^-?)0[bB](?P<digits>.*)").unwrap());
+    static FLOAT: LazyLock<Regex> =
+        LazyLock::new(|| Regex::new(r"(?P<int>\d*)\.(?P<dec>[0-9--0]*)(?P<zeros>0*)").unwrap());
+    static NEG_FLOAT: LazyLock<Regex> =
+        LazyLock::new(|| Regex::new(r"(?P<int>-\d*)\.(?P<dec>[0-9--0]*)(?P<zeros>0*)").unwrap());
+    const HEX_RADIX: u32 = 16;
+    const OCTAL_RADIX: u32 = 8;
+    const BINARY_RADIX: u32 = 2;
+
     fn int_from_str(s: &str) -> Result<i64, ()> {
         // Note(hrust): OCaml Int64.of_string reads decimal, hexadecimal, octal, and binary
         (if HEX.is_match(s) {
-            u64::from_str_radix(&HEX.replace(s, "${sign}${digits}"), *HEX_RADIX).map(|x| x as i64)
+            u64::from_str_radix(&HEX.replace(s, "${sign}${digits}"), HEX_RADIX).map(|x| x as i64)
         } else if OCTAL.is_match(s) {
-            u64::from_str_radix(&OCTAL.replace(s, "${sign}${digits}"), *OCTAL_RADIX)
+            u64::from_str_radix(&OCTAL.replace(s, "${sign}${digits}"), OCTAL_RADIX)
                 .map(|x| x as i64)
         } else if BINARY.is_match(s) {
-            u64::from_str_radix(&BINARY.replace(s, "${sign}${digits}"), *BINARY_RADIX)
+            u64::from_str_radix(&BINARY.replace(s, "${sign}${digits}"), BINARY_RADIX)
                 .map(|x| x as i64)
         } else {
             i64::from_str(s)
@@ -1518,7 +1521,7 @@ fn non_numeric(s: &[u8]) -> bool {
         // reads decimal and hexadecimal
         let s = s.trim_start();
         if HEX.is_match(s) {
-            float_from_str_radix(&HEX.replace(s, "${sign}${digits}"), *HEX_RADIX)
+            float_from_str_radix(&HEX.replace(s, "${sign}${digits}"), HEX_RADIX)
         } else {
             let out_of_bounds =
                 |f: f64| out_of_bounds(s) && (f > i64::MAX as f64 || f < i64::MIN as f64);

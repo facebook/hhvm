@@ -6,6 +6,7 @@
 use std::collections::BTreeMap;
 use std::collections::BTreeSet;
 use std::path::Path;
+use std::sync::LazyLock;
 
 use bstr::ByteSlice;
 use oxidized::global_options::AllOrSome;
@@ -218,9 +219,9 @@ impl ConfigFile {
     }
 
     pub fn get_str_list(&self, key: &str) -> Option<impl Iterator<Item = &str> + use<'_>> {
-        lazy_static::lazy_static! {
-            static ref RE: regex::Regex = regex::Regex::new(",[ \n\r\x0c\t]*").unwrap();
-        }
+        static RE: LazyLock<regex::Regex> =
+            LazyLock::new(|| regex::Regex::new(",[ \n\r\x0c\t]*").unwrap());
+
         self.map.get(key).map(|s| RE.split(s.as_str()))
     }
 

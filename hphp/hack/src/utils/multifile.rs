@@ -14,35 +14,39 @@ use std::ffi::OsStr;
 use std::path::Path;
 use std::path::PathBuf;
 use std::str;
+use std::sync::LazyLock;
 
 use anyhow::anyhow;
-use lazy_static::lazy_static;
 use regex::bytes::Regex;
 
-lazy_static! {
-    // Matches a line denoting a single file within the multifile, and captures
-    // the filename.
-    // For example, the following line (ending with a newline)
-    //
-    // `//// foo.php`
-    //
-    // will result in a match, with "foo.php" captured.
-    // Note: `(?x)` ignores whitespace in the regex string.
-    static ref MULTIFILE_DELIM: Regex = Regex::new(r#"(?x)
+// Matches a line denoting a single file within the multifile, and captures
+// the filename.
+// For example, the following line (ending with a newline)
+//
+// `//// foo.php`
+//
+// will result in a match, with "foo.php" captured.
+// Note: `(?x)` ignores whitespace in the regex string.
+static MULTIFILE_DELIM: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(
+        r#"(?x)
         (?m) # allow matching on multiple lines
         ^////\s*
         (.+\S) # capture filename up to last non-whitespace character
-        \s*\n"#).unwrap();
-    // Matches a line of the format
-    //
-    // `// @directory some/path/here`
-    //
-    // optionally containing a @file tag followed by some file name; e.g.,
-    //
-    // `// @directory some/path/here @file foo.php`
-    static ref DIRECTORY: Regex =
-        Regex::new(r#"^// @directory \s*(\S+)\s*(?:@file\s*(\S+))?\n"#).unwrap();
-}
+        \s*\n"#,
+    )
+    .unwrap()
+});
+
+// Matches a line of the format
+//
+// `// @directory some/path/here`
+//
+// optionally containing a @file tag followed by some file name; e.g.,
+//
+// `// @directory some/path/here @file foo.php`
+static DIRECTORY: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r#"^// @directory \s*(\S+)\s*(?:@file\s*(\S+))?\n"#).unwrap());
 
 /// Processes multifile `content` into a list of files. This function expects `content` in one of the following formats:
 /// 1. A series of files.

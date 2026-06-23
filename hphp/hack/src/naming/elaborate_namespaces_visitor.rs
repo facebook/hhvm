@@ -6,6 +6,7 @@
 #![feature(box_patterns)]
 
 use std::sync::Arc;
+use std::sync::LazyLock;
 
 use core_utils_rust as core_utils;
 use hash::HashSet;
@@ -19,10 +20,8 @@ use oxidized::namespace_env;
 use oxidized::namespace_env::Mode;
 
 fn is_special_identifier(name: &str) -> bool {
-    use lazy_static::lazy_static;
-
-    lazy_static! {
-        static ref SPECIAL_IDENTIFIERS: HashSet<&'static str> = vec![
+    static SPECIAL_IDENTIFIERS: LazyLock<HashSet<&str>> = LazyLock::new(|| {
+        vec![
             sn::members::M_CLASS,
             sn::classes::PARENT,
             sn::classes::SELF,
@@ -32,8 +31,8 @@ fn is_special_identifier(name: &str) -> bool {
             sn::typehints::WILDCARD,
         ]
         .into_iter()
-        .collect();
-    }
+        .collect()
+    });
 
     SPECIAL_IDENTIFIERS.contains(&name)
 }

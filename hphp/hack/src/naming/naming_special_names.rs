@@ -139,8 +139,9 @@ pub mod collections {
 }
 
 pub mod members {
+    use std::sync::LazyLock;
+
     use hash::HashSet;
-    use lazy_static::lazy_static;
 
     pub const M_GET_INSTANCE_KEY: &str = "getInstanceKey";
 
@@ -180,8 +181,8 @@ pub mod members {
 
     pub const __WAKEUP: &str = "__wakeup";
 
-    lazy_static! {
-        pub static ref AS_SET: HashSet<&'static str> = vec![
+    pub static AS_SET: LazyLock<HashSet<&str>> = LazyLock::new(|| {
+        vec![
             __CONSTRUCT,
             __DESTRUCT,
             __CALL,
@@ -198,15 +199,17 @@ pub mod members {
             __SLEEP,
             __TO_STRING,
             __UNSET,
-            __WAKEUP
+            __WAKEUP,
         ]
         .into_iter()
-        .collect();
-        pub static ref UNSUPPORTED_SET: HashSet<&'static str> =
-            vec![__CALL, __CALL_STATIC, __GET, __ISSET, __SET, __UNSET]
-                .into_iter()
-                .collect();
-    }
+        .collect()
+    });
+
+    pub static UNSUPPORTED_SET: LazyLock<HashSet<&str>> = LazyLock::new(|| {
+        vec![__CALL, __CALL_STATIC, __GET, __ISSET, __SET, __UNSET]
+            .into_iter()
+            .collect()
+    });
 
     /* Any data- or aria- attribute is always valid, even if it is not declared
      * for a given XHP element */
@@ -401,8 +404,9 @@ pub mod user_attributes {
 }
 
 pub mod memoize_option {
+    use std::sync::LazyLock;
+
     use hash::HashSet;
-    use lazy_static::lazy_static;
 
     pub const KEYED_BY_IC: &str = "KeyedByIC";
 
@@ -416,9 +420,7 @@ pub mod memoize_option {
         IC_INACCESSSIBLE_SPECIAL_CASE,
     ];
 
-    lazy_static! {
-        static ref VALID_SET: HashSet<&'static str> = _ALL.iter().copied().collect();
-    }
+    static VALID_SET: LazyLock<HashSet<&str>> = LazyLock::new(|| _ALL.iter().copied().collect());
 
     pub fn is_valid(x: &str) -> bool {
         VALID_SET.contains(x)
@@ -426,8 +428,9 @@ pub mod memoize_option {
 }
 
 pub mod attribute_kinds {
+    use std::sync::LazyLock;
+
     use hash::HashMap;
-    use lazy_static::lazy_static;
 
     pub const CLS: &str = "\\HH\\ClassAttribute";
 
@@ -474,22 +477,20 @@ pub mod attribute_kinds {
         (ENUM_CLS, "an enum class"),
     ];
 
-    lazy_static! {
-        pub static ref PLAIN_ENGLISH_MAP: HashMap<&'static str, &'static str> =
-            PLAIN_ENGLISH.iter().copied().collect();
-    }
+    pub static PLAIN_ENGLISH_MAP: LazyLock<HashMap<&str, &str>> =
+        LazyLock::new(|| PLAIN_ENGLISH.iter().copied().collect());
 }
 
 /* Tested before \\-prepending name-canonicalization */
 pub mod pre_namespaced_functions {
-    use lazy_static::lazy_static;
+    use std::sync::LazyLock;
 
     pub const ECHO: &str = "echo"; /* pseudo-function */
 
     pub fn is_pre_namespaced_function(x: &str) -> bool {
-        lazy_static! {
-            static ref ALL_SPECIAL_FUNCTIONS: Vec<&'static str> = vec![ECHO].into_iter().collect();
-        }
+        static ALL_SPECIAL_FUNCTIONS: LazyLock<Vec<&str>> =
+            LazyLock::new(|| vec![ECHO].into_iter().collect());
+
         ALL_SPECIAL_FUNCTIONS.contains(&x)
     }
 }
@@ -522,8 +523,9 @@ pub mod special_idents {
 }
 
 pub mod pseudo_functions {
+    use std::sync::LazyLock;
+
     use hash::HashSet;
-    use lazy_static::lazy_static;
 
     pub const ISSET: &str = "\\isset";
 
@@ -580,10 +582,8 @@ pub mod pseudo_functions {
         PACKAGE_EXISTS,
     ];
 
-    lazy_static! {
-        static ref PSEUDO_SET: HashSet<&'static str> =
-            ALL_PSEUDO_FUNCTIONS.iter().copied().collect();
-    }
+    static PSEUDO_SET: LazyLock<HashSet<&str>> =
+        LazyLock::new(|| ALL_PSEUDO_FUNCTIONS.iter().copied().collect());
 
     pub fn is_pseudo_function(x: &str) -> bool {
         PSEUDO_SET.contains(x)
@@ -608,8 +608,9 @@ pub mod std_lib_functions {
 }
 
 pub mod typehints {
+    use std::sync::LazyLock;
+
     use hash::HashSet;
-    use lazy_static::lazy_static;
 
     pub const NULL: &str = "null";
     pub const HH_NULL: &str = "\\HH\\null";
@@ -682,18 +683,18 @@ pub mod typehints {
 
     pub const WILDCARD: &str = "_";
 
-    lazy_static! {
-        // matches definition in Tprim
-        pub static ref PRIMITIVE_TYPEHINTS: HashSet<&'static str> = vec![
-            NULL, VOID, INT, BOOL, FLOAT, RESOURCE, NUM, ARRAYKEY, NORETURN
+    // matches definition in Tprim
+    pub static PRIMITIVE_TYPEHINTS: LazyLock<HashSet<&str>> = LazyLock::new(|| {
+        vec![
+            NULL, VOID, INT, BOOL, FLOAT, RESOURCE, NUM, ARRAYKEY, NORETURN,
         ]
         .into_iter()
-        .collect();
-    }
+        .collect()
+    });
 
     pub fn is_reserved_type_hint(x: &str) -> bool {
-        lazy_static! {
-            static ref RESERVED_TYPEHINTS: HashSet<&'static str> = vec![
+        static RESERVED_TYPEHINTS: LazyLock<HashSet<&str>> = LazyLock::new(|| {
+            vec![
                 NULL,
                 VOID,
                 RESOURCE,
@@ -716,31 +717,30 @@ pub mod typehints {
                 WILDCARD,
             ]
             .into_iter()
-            .collect();
-        }
+            .collect()
+        });
 
         RESERVED_TYPEHINTS.contains(x)
     }
 
-    lazy_static! {
-        static ref RESERVED_GLOBAL_NAMES: HashSet<&'static str> =
-            vec![CALLABLE, crate::classes::SELF, crate::classes::PARENT]
-                .into_iter()
-                .collect();
-    }
+    static RESERVED_GLOBAL_NAMES: LazyLock<HashSet<&str>> = LazyLock::new(|| {
+        vec![CALLABLE, crate::classes::SELF, crate::classes::PARENT]
+            .into_iter()
+            .collect()
+    });
 
     pub fn is_reserved_global_name(x: &str) -> bool {
         RESERVED_GLOBAL_NAMES.contains(x)
     }
 
-    lazy_static! {
-        static ref RESERVED_HH_NAMES: HashSet<&'static str> = vec![
+    static RESERVED_HH_NAMES: LazyLock<HashSet<&str>> = LazyLock::new(|| {
+        vec![
             VOID, NORETURN, INT, BOOL, FLOAT, NUM, RESOURCE, MIXED, ARRAYKEY, DYNAMIC, WILDCARD,
-            NULL, NONNULL, NOTHING, THIS
+            NULL, NONNULL, NOTHING, THIS,
         ]
         .into_iter()
-        .collect();
-    }
+        .collect()
+    });
 
     pub fn is_reserved_hh_name(x: &str) -> bool {
         RESERVED_HH_NAMES.contains(x)
@@ -780,8 +780,9 @@ pub mod literal {
 }
 
 pub mod pseudo_consts {
+    use std::sync::LazyLock;
+
     use hash::HashSet;
-    use lazy_static::lazy_static;
 
     pub const G__LINE__: &str = "\\__LINE__";
 
@@ -819,9 +820,8 @@ pub mod pseudo_consts {
         EXIT,
     ];
 
-    lazy_static! {
-        static ref PSEUDO_SET: HashSet<&'static str> = ALL_PSEUDO_CONSTS.iter().copied().collect();
-    }
+    static PSEUDO_SET: LazyLock<HashSet<&str>> =
+        LazyLock::new(|| ALL_PSEUDO_CONSTS.iter().copied().collect());
 
     pub fn is_pseudo_const(x: &str) -> bool {
         PSEUDO_SET.contains(x)
@@ -857,9 +857,9 @@ pub mod readonly {
 
 pub mod coeffects {
     use std::fmt;
+    use std::sync::LazyLock;
 
     use hash::HashSet;
-    use lazy_static::lazy_static;
     use serde::Serialize;
 
     pub const DEFAULTS: &str = "defaults";
@@ -903,30 +903,30 @@ pub mod coeffects {
     pub const CAPABILITIES: &str = "HH\\Capabilities";
 
     pub fn is_any_zoned(x: &str) -> bool {
-        lazy_static! {
-            static ref ZONED_SET: HashSet<&'static str> = vec![ZONED].into_iter().collect();
-        }
+        static ZONED_SET: LazyLock<HashSet<&str>> =
+            LazyLock::new(|| vec![ZONED].into_iter().collect());
+
         ZONED_SET.contains(x)
     }
 
     pub fn is_any_zoned_or_defaults(x: &str) -> bool {
-        lazy_static! {
-            static ref ZONED_SET: HashSet<&'static str> =
-                vec![ZONED, ZONED_LOCAL, ZONED_SHALLOW, DEFAULTS]
-                    .into_iter()
-                    .collect();
-        }
+        static ZONED_SET: LazyLock<HashSet<&str>> = LazyLock::new(|| {
+            vec![ZONED, ZONED_LOCAL, ZONED_SHALLOW, DEFAULTS]
+                .into_iter()
+                .collect()
+        });
+
         ZONED_SET.contains(x)
     }
 
     // context does not provide the capability to fetch the IC even indirectly
     pub fn is_any_without_implicit_policy_or_unsafe(x: &str) -> bool {
-        lazy_static! {
-            static ref LEAK_SAFE_GLOBALS_SET: HashSet<&'static str> =
-                vec![LEAK_SAFE, GLOBALS, READ_GLOBALS, WRITE_PROPS]
-                    .into_iter()
-                    .collect();
-        }
+        static LEAK_SAFE_GLOBALS_SET: LazyLock<HashSet<&str>> = LazyLock::new(|| {
+            vec![LEAK_SAFE, GLOBALS, READ_GLOBALS, WRITE_PROPS]
+                .into_iter()
+                .collect()
+        });
+
         LEAK_SAFE_GLOBALS_SET.contains(x)
     }
 
@@ -1048,35 +1048,36 @@ pub mod coeffects {
     }
 
     pub fn capability_in_defaults_ctx(c: &Ctx) -> bool {
-        lazy_static! {
-            static ref DEFAULTS_SET: HashSet<Ctx> =
-                vec![Ctx::WriteProps, Ctx::Globals,].into_iter().collect();
-        }
+        static DEFAULTS_SET: LazyLock<HashSet<Ctx>> =
+            LazyLock::new(|| vec![Ctx::WriteProps, Ctx::Globals].into_iter().collect());
+
         DEFAULTS_SET.contains(c)
     }
 
     pub fn capability_in_policied_ctx(c: &Ctx) -> bool {
-        lazy_static! {
-            static ref POLICIED_SET: HashSet<Ctx> = vec![Ctx::WriteProps, Ctx::ReadGlobals,]
+        static POLICIED_SET: LazyLock<HashSet<Ctx>> = LazyLock::new(|| {
+            vec![Ctx::WriteProps, Ctx::ReadGlobals]
                 .into_iter()
-                .collect();
-        }
+                .collect()
+        });
+
         POLICIED_SET.contains(c)
     }
 
     pub fn capability_in_rx_ctx(c: &Ctx) -> bool {
-        lazy_static! {
-            static ref RX_SET: HashSet<Ctx> = vec![Ctx::WriteProps,].into_iter().collect();
-        }
+        static RX_SET: LazyLock<HashSet<Ctx>> =
+            LazyLock::new(|| vec![Ctx::WriteProps].into_iter().collect());
+
         RX_SET.contains(c)
     }
 
     pub fn capability_in_controlled_ctx(c: &Ctx) -> bool {
-        lazy_static! {
-            static ref CONTROLLED_SET: HashSet<Ctx> = vec![Ctx::WriteProps, Ctx::ReadGlobals,]
+        static CONTROLLED_SET: LazyLock<HashSet<Ctx>> = LazyLock::new(|| {
+            vec![Ctx::WriteProps, Ctx::ReadGlobals]
                 .into_iter()
-                .collect();
-        }
+                .collect()
+        });
+
         CONTROLLED_SET.contains(c)
     }
 }
@@ -1098,8 +1099,9 @@ pub mod shapes {
 }
 
 pub mod superglobals {
+    use std::sync::LazyLock;
+
     use hash::HashSet;
-    use lazy_static::lazy_static;
 
     pub const GLOBALS: &str = "$GLOBALS";
 
@@ -1113,9 +1115,9 @@ pub mod superglobals {
         "$_ENV",
     ];
 
-    lazy_static! {
-        static ref SUPERGLOBALS_SET: HashSet<&'static str> = SUPERGLOBALS.iter().copied().collect();
-    }
+    static SUPERGLOBALS_SET: LazyLock<HashSet<&str>> =
+        LazyLock::new(|| SUPERGLOBALS.iter().copied().collect());
+
     pub fn is_superglobal(x: &str) -> bool {
         SUPERGLOBALS_SET.contains(x)
     }

@@ -20,7 +20,6 @@ error = { version = "0.0.0", path = "../error/cargo/error" }
 escaper = { version = "0.0.0", path = "../../utils/escaper" }
 hhbc = { version = "0.0.0", path = "../hhbc/cargo/hhbc" }
 hhbc_string_utils = { version = "0.0.0", path = "../utils/cargo/hhbc_string_utils" }
-lazy_static = "1.5"
 naming_special_names_rust = { version = "0.0.0", path = "../../naming" }
 oxidized = { version = "0.0.0", path = "../../oxidized" }
 regex = "1.12.4"

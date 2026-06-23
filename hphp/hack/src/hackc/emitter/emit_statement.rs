@@ -2,6 +2,8 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+use std::sync::LazyLock;
+
 use emit_pos::emit_pos;
 use emit_pos::emit_pos_then;
 use env::Env;
@@ -25,7 +27,6 @@ use hhbc::SetRangeOp;
 use hhbc::string_id;
 use instruction_sequence::InstrSeq;
 use instruction_sequence::instr;
-use lazy_static::lazy_static;
 use naming_special_names_rust::pseudo_functions;
 use naming_special_names_rust::special_idents;
 use oxidized::aast as a;
@@ -67,10 +68,9 @@ fn is_readonly_expr(e: &ast::Expr) -> bool {
 }
 
 fn set_bytes_kind(name: &str) -> Option<SetRange> {
-    lazy_static! {
-        static ref RE: Regex =
-            Regex::new(r#"(?i)^HH\\set_bytes(_rev)?_([a-z0-9]+)(_vec)?$"#).unwrap();
-    }
+    static RE: LazyLock<Regex> =
+        LazyLock::new(|| Regex::new(r#"(?i)^HH\\set_bytes(_rev)?_([a-z0-9]+)(_vec)?$"#).unwrap());
+
     RE.captures(name).and_then(|groups| {
         let op = if groups.get(1).is_some() {
             // == _rev
@@ -1973,9 +1973,8 @@ pub fn emit_markup<'a>(
     let markup = if s.is_empty() {
         instr::empty()
     } else {
-        lazy_static! {
-            static ref HASHBANG_PAT: regex::Regex = regex::Regex::new(r"^#!.*\n").unwrap();
-        }
+        static HASHBANG_PAT: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^#!.*\n").unwrap());
+
         let tail = String::from(match HASHBANG_PAT.shortest_match(s) {
             Some(i) if check_for_hashbang => {
                 // if markup text starts with #!

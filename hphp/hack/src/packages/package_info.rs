@@ -134,15 +134,14 @@ impl PackageInfo {
 mod test {
     use std::path::Path;
     use std::path::PathBuf;
+    use std::sync::LazyLock;
 
-    use lazy_static::lazy_static;
     use regex::Regex;
 
     use super::*;
 
-    lazy_static! {
-        pub static ref SRCDIR: PathBuf = Path::new(file!()).parent().unwrap().to_path_buf();
-    }
+    pub static SRCDIR: LazyLock<PathBuf> =
+        LazyLock::new(|| Path::new(file!()).parent().unwrap().to_path_buf());
 
     #[test]
     fn test_parsing_basic_file() {

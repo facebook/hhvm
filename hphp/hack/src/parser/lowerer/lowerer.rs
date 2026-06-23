@@ -12,6 +12,7 @@ use std::rc::Rc;
 use std::slice::Iter;
 use std::str::FromStr;
 use std::sync::Arc;
+use std::sync::LazyLock;
 
 use bstr::B;
 use bstr::BString;
@@ -703,9 +704,8 @@ fn unesc_dbl(s: &str) -> Result<BString, InvalidString> {
 
 // TODO: return Cow<[u8]>
 fn unesc_xhp(s: &[u8]) -> Vec<u8> {
-    lazy_static! {
-        static ref WHITESPACE: Regex = Regex::new("[\x20\t\n\r\x0c]+").unwrap();
-    }
+    static WHITESPACE: LazyLock<Regex> = LazyLock::new(|| Regex::new("[\x20\t\n\r\x0c]+").unwrap());
+
     WHITESPACE.replace_all(s, &b" "[..]).into_owned()
 }
 
@@ -717,9 +717,9 @@ fn unesc_xhp_attr(s: &[u8]) -> Vec<u8> {
 }
 
 fn get_quoted_content(s: &[u8]) -> &[u8] {
-    lazy_static! {
-        static ref QUOTED: Regex = Regex::new(r#"^[\x20\t\n\r\x0c]*"((?:.|\n)*)""#).unwrap();
-    }
+    static QUOTED: LazyLock<Regex> =
+        LazyLock::new(|| Regex::new(r#"^[\x20\t\n\r\x0c]*"((?:.|\n)*)""#).unwrap());
+
     QUOTED
         .captures(s)
         .and_then(|c| c.get(1))
@@ -5986,9 +5986,8 @@ fn p_namespace_use_clause<'a>(
     node: S<'a>,
     env: &mut Env<'a>,
 ) -> Result<(ast::NsKind, ast::Sid, ast::Sid)> {
-    lazy_static! {
-        static ref NAMESPACE_USE: regex::Regex = regex::Regex::new("[^\\\\]*$").unwrap();
-    }
+    static NAMESPACE_USE: LazyLock<regex::Regex> =
+        LazyLock::new(|| regex::Regex::new("[^\\\\]*$").unwrap());
 
     match &node.children {
         NamespaceUseClause(NamespaceUseClauseChildren {

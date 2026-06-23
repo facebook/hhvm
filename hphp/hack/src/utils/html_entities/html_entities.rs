@@ -3,10 +3,10 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-#[macro_use]
-extern crate lazy_static;
 
 pub mod decoder;
+
+use std::sync::LazyLock;
 
 use ocaml_helper::int_of_string_opt;
 use regex::bytes::Captures;
@@ -70,9 +70,8 @@ fn decode_charref<'a>(s: &'a [u8]) -> &'a [u8] {
 }
 
 pub fn decode<'a>(s: &'a [u8]) -> Vec<u8> {
-    lazy_static! {
-        static ref ENTITY: Regex = Regex::new("&[^;&]+;").unwrap();
-    }
+    static ENTITY: LazyLock<Regex> = LazyLock::new(|| Regex::new("&[^;&]+;").unwrap());
+
     ENTITY
         .replace_all(s, |caps: &Captures<'_>| match caps.get(0) {
             None => vec![],

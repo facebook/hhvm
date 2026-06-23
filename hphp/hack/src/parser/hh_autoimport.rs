@@ -4,15 +4,13 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use std::collections::BTreeMap;
+use std::sync::LazyLock;
 
-use lazy_static::lazy_static;
-
-lazy_static! {
-    pub static ref TYPES_MAP: BTreeMap<String, String> = make_map(TYPES);
-    pub static ref FUNCS_MAP: BTreeMap<String, String> = make_map(FUNCS);
-    pub static ref CONSTS_MAP: BTreeMap<String, String> = make_map(CONSTS);
-    pub static ref NAMESPACES_MAP: BTreeMap<String, String> = make_map(NAMESPACES);
-}
+pub static TYPES_MAP: LazyLock<BTreeMap<String, String>> = LazyLock::new(|| make_map(TYPES));
+pub static FUNCS_MAP: LazyLock<BTreeMap<String, String>> = LazyLock::new(|| make_map(FUNCS));
+pub static CONSTS_MAP: LazyLock<BTreeMap<String, String>> = LazyLock::new(|| make_map(CONSTS));
+pub static NAMESPACES_MAP: LazyLock<BTreeMap<String, String>> =
+    LazyLock::new(|| make_map(NAMESPACES));
 
 pub static TYPES: &[&str] = &[
     "AnyArray",

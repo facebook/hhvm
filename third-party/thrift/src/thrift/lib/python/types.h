@@ -164,14 +164,6 @@ PyObject* createMutableStructListWithDefaultValues(
  */
 void setStructIsset(PyObject* structTuple, int16_t index, bool value);
 
-/**
- * Sets the "isset" flag of the `index`-th field of the given 'struct list'
- * `object` to the given `value`.
- *
- * Please see `createStructList()`.
- */
-void setMutableStructIsset(PyObject* structList, int16_t index, bool value);
-
 /*
  * Returns a new "struct tuple" with all its elements set to `None`
  * (i.e., `Py_None`).

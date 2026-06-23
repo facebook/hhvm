@@ -81,7 +81,6 @@ cdef extern from "<thrift/lib/python/types.h>" namespace "::apache::thrift::pyth
     cdef void resetFieldToStandardDefault(
         object, const cStructInfo& structInfo, int index
     ) except+
-    cdef void setMutableStructIsset(object, int index, bint set) except+
 
     cdef object createUnionTuple() except+
     cdef object createMutableUnionDataHolder() except+

@@ -227,9 +227,6 @@ cdef void set_mutable_struct_field(list struct_list, int16_t index, value) excep
     Updates the given `struct_list` to have the given `value` for the field at
     the given `index`.
 
-    The "isset" byte for the corresponding field (i.e., the `index`-th byte of
-     the first element of `struct_list` is set to 1.
-
      Args:
         struct_list: see `createImmutableStructListWithDefaultValues()`
         index: field index, as defined by its insertion order in the parent
@@ -237,7 +234,6 @@ cdef void set_mutable_struct_field(list struct_list, int16_t index, value) excep
         value: new value for this field, in "internal data" represntation (as
             opposed to "Python value" representation - see `*TypeInfo` classes).
     """
-    setMutableStructIsset(struct_list, index, 1)
     struct_list[index + 1] = value
 
 

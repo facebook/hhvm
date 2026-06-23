@@ -728,18 +728,14 @@ void setIsset(void* objectPtr, ptrdiff_t offset, bool value) {
 }
 
 /**
- * Sets the "isset" flag of the `index`-th field of the 'struct list'
- *
- * The `objectPtr` is double pointer to the allocated memory in PyListObject,
- * please see `DynamicStructInfo::addMutableFieldInfo()`
+ * Intentionally a no-op: the mutable runtime no longer maintains the isset byte
+ * array (field presence is derived from the field value being non-`None`). This
+ * must remain a non-null `setIsset` function pointer so that the table-based
+ * serializer's `markFieldAsSet` does not fall back to writing a raw `bool` at
+ * `object + issetOffset`, which is only valid for native C++ structs.
  */
-void setMutableIsset(void* objectPtr, ptrdiff_t offset, bool value) {
-  char* flags = PyBytes_AsString(*static_cast<PyObject**>(objectPtr));
-  if (flags == nullptr) {
-    THRIFT_PY3_CHECK_ERROR();
-  }
-  flags[offset] = value;
-}
+void setMutableIsset(
+    void* /* objectPtr */, ptrdiff_t /* offset */, bool /* value */) {}
 
 /**
  * Clears a thrift-python union.
@@ -1391,10 +1387,6 @@ void setStructIsset(PyObject* structTuple, int16_t index, bool value) {
   setStructIsset<TupleContainer>(structTuple, index, value);
 }
 
-void setMutableStructIsset(PyObject* structTuple, int16_t index, bool value) {
-  setStructIsset<ListContainer>(structTuple, index, value);
-}
-
 void populateImmutableStructTupleUnsetFieldsWithDefaultValues(
     PyObject* tuple, const detail::StructInfo& structInfo) {
   populateStructTupleUnsetFieldsWithDefaultValues(tuple, structInfo);
@@ -1426,7 +1418,6 @@ void resetFieldToStandardDefault(
   if (fieldInfo.qualifier == detail::FieldQualifier::Optional) {
     PyList_SET_ITEM(structList, index + 1, Py_None);
     Py_INCREF(Py_None);
-    setMutableStructIsset(structList, index, false);
   } else {
     // getDefaultValueForField calls `Py_INCREF`
     // This function is called only to reset the fields of mutable types.

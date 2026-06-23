@@ -99,7 +99,15 @@ class Json5EncoderExtraTest(unittest.TestCase):
                 self.assertEqual(parsed["i32Value"], value)
 
     def test_serialize_float(self) -> None:
-        for value in [0.0, 1.5, -1.5, 0.1]:
+        for value in [
+            0.0,
+            1.5,
+            -1.5,
+            0.1,
+            # Scientific notation must serialize as "1e-05", not the JSON5
+            # "1.e-05" form that json.loads rejects.
+            1e-05,
+        ]:
             with self.subTest(value=value):
                 data = test_types.Example(doubleValue=value)
                 json_str = serialize(data, protocol=Protocol.JSON5).decode()

@@ -148,7 +148,17 @@ std::uint32_t JsonWriter::writeFloatingPoint(T t) {
     n += sp.size();
     out_.value().push(sp);
   } else {
-    auto tmp = fmt::format("{:#}", t);
+    auto tmp = fmt::format("{}", t);
+    if (tmp.find_first_of(".eE") == std::string::npos) {
+      // The shortest round-trip form of a whole-valued double has no '.', 'e',
+      // or 'E' (e.g. "100000"), which would read back as an integer, so append
+      // ".0" to keep it a floating-point literal. Values that already carry a
+      // fraction or exponent are left untouched.
+      //
+      // fmt::format("{:#}", t) would also force a decimal point, but it emits
+      // "1.e-05" for scientific-notation values, which is invalid JSON.
+      tmp += ".0";
+    }
     out_.value().push(folly::StringPiece(tmp));
     n += tmp.size();
   }

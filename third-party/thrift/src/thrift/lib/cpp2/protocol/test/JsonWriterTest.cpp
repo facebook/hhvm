@@ -161,6 +161,44 @@ TEST_P(JsonWriterTest, MoreFloats) {
   }
 }
 
+TEST_P(JsonWriterTest, ScientificNotationFloats) {
+  folly::IOBufQueue queue;
+  std::size_t size = 0;
+  JsonWriter w(options());
+  w.setOutput(folly::io::QueueAppender(&queue, 4096));
+  size += w.writeObjectBegin();
+  size += w.writeObjectName("tiny");
+  size += w.writeDouble(1e-05);
+  size += w.writeObjectName("big");
+  size += w.writeDouble(1e20);
+  size += w.writeObjectName("withFrac");
+  size += w.writeDouble(1.5e-10);
+  size += w.writeObjectName("whole");
+  size += w.writeDouble(100000.0);
+  size += w.writeObjectEnd();
+  auto output = queue.move()->toString();
+  EXPECT_EQ(size, output.size());
+  if (isJson5()) {
+    EXPECT_EQ(
+        output,
+        R"({
+  tiny: 1e-05,
+  big: 1e+20,
+  withFrac: 1.5e-10,
+  whole: 100000.0,
+})");
+  } else {
+    EXPECT_EQ(
+        output,
+        R"({
+  "tiny": 1e-05,
+  "big": 1e+20,
+  "withFrac": 1.5e-10,
+  "whole": 100000.0
+})");
+  }
+}
+
 TEST_P(JsonWriterTest, Containers) {
   folly::IOBufQueue queue;
   std::size_t size = 0;

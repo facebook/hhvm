@@ -209,15 +209,14 @@ class TSimpleJSONProtocol extends TProtocol {
 
   <<__Override>>
   public function writeBool(bool $value)[write_props]: int {
-    $x = $this->getContext()->writeSeparator();
-    if ($value) {
-      $this->buffer->write('true');
-      $x += 4;
-    } else {
-      $this->buffer->write('false');
-      $x += 5;
+    $ctx = $this->getContext();
+    $x = $ctx->writeSeparator();
+    $str = $value ? 'true' : 'false';
+    if ($ctx->escapeNum()) {
+      $str = '"'.$str.'"';
     }
-    return $x;
+    $this->buffer->write($str);
+    return $x + Str\length($str);
   }
 
   <<__Override>>
@@ -440,10 +439,9 @@ class TSimpleJSONProtocol extends TProtocol {
     if ($this->readMapHasNext()) {
       // We need to guess the type of the keys/values, in case we are in a skip
       // method up the stack
-      $key_type = TType::STRING;
-      // This is not a peek, since we can do this safely again
       $result += $this->skipWhitespace();
-      $offset = $this->readJSONString(true)[1];
+      $key_type = $this->guessFieldTypeBasedOnByte($this->buffer->peek(1));
+      $offset = $this->peekJSONValueLength();
       $offset += $this->skipWhitespace(true, $offset);
       $this->expectChar(':', true, $offset);
       $offset += 1 + $this->skipWhitespace(true, $offset + 1);
@@ -525,8 +523,14 @@ class TSimpleJSONProtocol extends TProtocol {
 
   <<__Override>>
   public function readBool(inout bool $value)[write_props]: int {
-    $result = $this->getContext()->readSeparator();
+    $ctx = $this->getContext();
+    $result = $ctx->readSeparator();
     $result += $this->skipWhitespace();
+    $quoted = $ctx->escapeNum() && $this->buffer->peek(1) === '"';
+    if ($quoted) {
+      $this->expectChar('"');
+      $result++;
+    }
     $c = $this->buffer->readAll(1);
     $result++;
     switch ($c) {
@@ -548,13 +552,18 @@ class TSimpleJSONProtocol extends TProtocol {
         break;
       default:
         throw new TProtocolException(
-          'TSimpleJSONProtocol: Expected t or f, encountered 0x'.
+          'TSimpleJSONProtocol: Expected t, f, 0, or 1, encountered 0x'.
           PHP\bin2hex($c),
         );
     }
 
     for ($i = 0; $i < Str\length($target); $i++) {
       $this->expectChar($target[$i]);
+    }
+    $result += Str\length($target);
+    if ($quoted) {
+      $this->expectChar('"');
+      $result++;
     }
     return $result;
   }
@@ -822,6 +831,249 @@ class TSimpleJSONProtocol extends TProtocol {
 
     $this->expectChar('"', $peek, $start + $count);
     return tuple($sb, $count + 1);
+  }
+
+  private function peekJSONValueLength(int $start = 0)[write_props]: int {
+    $offset = $this->skipWhitespace(true, $start);
+    $value_start = $start + $offset;
+    $c = $this->buffer->peek(1, $value_start);
+    switch ($c) {
+      case '"':
+        return $offset + $this->readJSONString(true, $value_start)[1];
+      case '{':
+        return $offset + $this->peekJSONObjectLength($value_start);
+      case '[':
+        return $offset + $this->peekJSONArrayLength($value_start);
+      case 't':
+        return $offset + $this->peekJSONLiteralLength('true', $value_start);
+      case 'f':
+        return $offset + $this->peekJSONLiteralLength('false', $value_start);
+      case 'n':
+        return $offset + $this->peekJSONLiteralLength('null', $value_start);
+      case '+':
+      case '-':
+      case '.':
+      case '0':
+      case '1':
+      case '2':
+      case '3':
+      case '4':
+      case '5':
+      case '6':
+      case '7':
+      case '8':
+      case '9':
+        return $offset + $this->peekJSONNumberLength($value_start);
+      default:
+        throw new TProtocolException(
+          'TSimpleJSONProtocol: Unable to scan JSON value starting with 0x'.
+          PHP\bin2hex($c),
+        );
+    }
+  }
+
+  private function peekJSONLiteralLength(
+    string $literal,
+    int $start,
+  )[write_props]: int {
+    $this->expectString($literal, $start);
+    $length = Str\length($literal);
+    $this->expectJSONValueTerminator($start + $length);
+    return $length;
+  }
+
+  private function peekJSONObjectLength(int $start)[write_props]: int {
+    $this->expectChar('{', true, $start);
+    $offset = 1 + $this->skipWhitespace(true, $start + 1);
+    if ($this->buffer->peek(1, $start + $offset) === '}') {
+      return $offset + 1;
+    }
+
+    while (true) {
+      $offset += $this->peekJSONValueLength($start + $offset);
+      $offset += $this->skipWhitespace(true, $start + $offset);
+      $this->expectChar(':', true, $start + $offset);
+      $offset++;
+      $offset += $this->peekJSONValueLength($start + $offset);
+      $offset += $this->skipWhitespace(true, $start + $offset);
+
+      $c = $this->buffer->peek(1, $start + $offset);
+      if ($c === '}') {
+        return $offset + 1;
+      }
+      if ($c !== ',') {
+        throw new TProtocolException(
+          'TSimpleJSONProtocol: Expected "," or "}", encountered 0x'.
+          PHP\bin2hex($c),
+        );
+      }
+      $offset++;
+      $offset += $this->skipWhitespace(true, $start + $offset);
+    }
+  }
+
+  private function peekJSONArrayLength(int $start)[write_props]: int {
+    $this->expectChar('[', true, $start);
+    $offset = 1 + $this->skipWhitespace(true, $start + 1);
+    if ($this->buffer->peek(1, $start + $offset) === ']') {
+      return $offset + 1;
+    }
+
+    while (true) {
+      $offset += $this->peekJSONValueLength($start + $offset);
+      $offset += $this->skipWhitespace(true, $start + $offset);
+
+      $c = $this->buffer->peek(1, $start + $offset);
+      if ($c === ']') {
+        return $offset + 1;
+      }
+      if ($c !== ',') {
+        throw new TProtocolException(
+          'TSimpleJSONProtocol: Expected "," or "]", encountered 0x'.
+          PHP\bin2hex($c),
+        );
+      }
+      $offset++;
+      $offset += $this->skipWhitespace(true, $start + $offset);
+    }
+  }
+
+  private function peekJSONNumberLength(int $start)[write_props]: int {
+    $offset = 0;
+    $c = $this->peekJSONByteOrEmpty($start + $offset);
+    if ($c === '+' || $c === '-') {
+      $offset++;
+      $c = $this->peekJSONByteOrEmpty($start + $offset);
+    }
+
+    if ($c === '0') {
+      $offset++;
+      if (self::isJSONDigit($this->peekJSONByteOrEmpty($start + $offset))) {
+        throw new TProtocolException(
+          'TSimpleJSONProtocol: Invalid json number with leading zero',
+        );
+      }
+    } else if (self::isJSONNonZeroDigit($c)) {
+      do {
+        $offset++;
+        $c = $this->peekJSONByteOrEmpty($start + $offset);
+      } while (self::isJSONDigit($c));
+    } else {
+      throw new TProtocolException(
+        'TSimpleJSONProtocol: Expected json number, encountered 0x'.
+        PHP\bin2hex($c),
+      );
+    }
+
+    if ($this->peekJSONByteOrEmpty($start + $offset) === '.') {
+      $offset++;
+      if (!self::isJSONDigit($this->peekJSONByteOrEmpty($start + $offset))) {
+        throw new TProtocolException(
+          'TSimpleJSONProtocol: Invalid json number fraction',
+        );
+      }
+      do {
+        $offset++;
+        $c = $this->peekJSONByteOrEmpty($start + $offset);
+      } while (self::isJSONDigit($c));
+    }
+
+    $c = $this->peekJSONByteOrEmpty($start + $offset);
+    if ($c === 'E' || $c === 'e') {
+      $offset++;
+      $c = $this->peekJSONByteOrEmpty($start + $offset);
+      if ($c === '+' || $c === '-') {
+        $offset++;
+        $c = $this->peekJSONByteOrEmpty($start + $offset);
+      }
+      if (!self::isJSONDigit($c)) {
+        throw new TProtocolException(
+          'TSimpleJSONProtocol: Invalid json number exponent',
+        );
+      }
+      do {
+        $offset++;
+        $c = $this->peekJSONByteOrEmpty($start + $offset);
+      } while (self::isJSONDigit($c));
+    }
+
+    $this->expectJSONValueTerminator($start + $offset);
+    return $offset;
+  }
+
+  private function expectJSONValueTerminator(int $start)[write_props]: void {
+    $c = $this->peekJSONByteOrEmpty($start);
+    switch ($c) {
+      case '':
+      case ' ':
+      case "\t":
+      case "\n":
+      case "\r":
+      case ',':
+      case '}':
+      case ']':
+      case ':':
+        return;
+      default:
+        throw new TProtocolException(
+          'TSimpleJSONProtocol: Expected json value terminator, encountered 0x'.
+          PHP\bin2hex($c),
+        );
+    }
+  }
+
+  private function peekJSONByteOrEmpty(int $start)[write_props]: string {
+    if ($start >= $this->buffer->available()) {
+      return '';
+    }
+    return $this->buffer->peek(1, $start);
+  }
+
+  private static function isJSONDigit(string $c)[]: bool {
+    switch ($c) {
+      case '0':
+      case '1':
+      case '2':
+      case '3':
+      case '4':
+      case '5':
+      case '6':
+      case '7':
+      case '8':
+      case '9':
+        return true;
+      default:
+        return false;
+    }
+  }
+
+  private static function isJSONNonZeroDigit(string $c)[]: bool {
+    switch ($c) {
+      case '1':
+      case '2':
+      case '3':
+      case '4':
+      case '5':
+      case '6':
+      case '7':
+      case '8':
+      case '9':
+        return true;
+      default:
+        return false;
+    }
+  }
+
+  private function expectString(
+    string $expected,
+    int $start,
+  )[write_props]: void {
+    $actual = $this->buffer->peek(Str\length($expected), $start);
+    if ($actual !== $expected) {
+      throw new TProtocolException(
+        'TSimpleJSONProtocol: Expected '.$expected.', encountered '.$actual,
+      );
+    }
   }
 
   protected function skipWhitespace(

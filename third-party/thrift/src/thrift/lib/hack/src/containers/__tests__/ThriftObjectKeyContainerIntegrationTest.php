@@ -40,6 +40,62 @@ final class ThriftObjectKeyContainerIntegrationTest extends WWWTest {
     expect(self::describeContainer($binary_deserialized))->toEqual($expected);
   }
 
+  public function testObjectKeyContainersRoundTripThroughSimpleJSON(): void {
+    $container = self::newObjectKeyContainer();
+    $expected = self::expectedDescription();
+    $serialized = JSONThriftSerializer::serialize($container);
+
+    $bool_map_serialized = JSONThriftSerializer::serialize(
+      ObjectKeyContainerStruct::fromShape(shape(
+        'bool_map' => nullthrows($container->bool_map, 'bool_map must be set'),
+      )),
+    );
+    $decoded_bool_map = fb_json_decode($bool_map_serialized);
+    expect($decoded_bool_map['bool_map']['true'])->toEqual('yes');
+    expect($decoded_bool_map['bool_map']['false'])->toEqual('no');
+
+    $struct_key_serialized = JSONThriftSerializer::serialize(
+      ObjectKeyContainerStruct::fromShape(shape(
+        'struct_set' =>
+          nullthrows($container->struct_set, 'struct_set must be set'),
+        'struct_map' =>
+          nullthrows($container->struct_map, 'struct_map must be set'),
+      )),
+    );
+    $struct_key_deserialized = JSONThriftSerializer::deserialize(
+      $struct_key_serialized,
+      ObjectKeyContainerStruct::withDefaultValues(),
+    );
+    expect(self::describeStructSet($struct_key_deserialized))
+      ->toEqual($expected['struct_set']);
+    expect(self::describeStructMap($struct_key_deserialized))
+      ->toEqual($expected['struct_map']);
+
+    $json_deserialized = JSONThriftSerializer::deserialize(
+      $serialized,
+      ObjectKeyContainerStruct::withDefaultValues(),
+    );
+    expect(self::describeContainer($json_deserialized))->toEqual($expected);
+
+    $protocol_deserialized = ObjectKeyContainerStruct::withDefaultValues();
+    $protocol_deserialized->read(
+      new TSimpleJSONProtocol(new TMemoryBuffer($serialized)),
+    );
+    expect(self::describeContainer($protocol_deserialized))->toEqual($expected);
+  }
+
+  public function testObjectKeyContainersReadLegacyUnquotedSimpleJSONBoolKeys(
+  ): void {
+    $deserialized = JSONThriftSerializer::deserialize(
+      '{"bool_map":{true:"yes",false:"no"}}',
+      ObjectKeyContainerStruct::withDefaultValues(),
+    );
+
+    expect(self::sortBoolPairsTrueFirst(
+      nullthrows($deserialized->bool_map, 'bool_map must be set')->toShape(),
+    ))->toEqual(vec[tuple(true, 'yes'), tuple(false, 'no')]);
+  }
+
   public function testObjectKeyContainersRoundTripThroughShape(): void {
     $container = self::newObjectKeyContainer();
     $shape = $container->__toShape();
@@ -111,6 +167,28 @@ final class ThriftObjectKeyContainerIntegrationTest extends WWWTest {
       ObjectKeyAdaptedContainerStruct::withDefaultValues(),
     );
     expect(self::describeAdaptedContainer($binary_deserialized))
+      ->toEqual($expected);
+  }
+
+  public function testAdaptedObjectKeyContainersRoundTripThroughSimpleJSON(
+  ): void {
+    $container = self::newAdaptedObjectKeyContainer();
+    $expected = self::expectedAdaptedDescription();
+    $serialized = JSONThriftSerializer::serialize($container);
+
+    $json_deserialized = JSONThriftSerializer::deserialize(
+      $serialized,
+      ObjectKeyAdaptedContainerStruct::withDefaultValues(),
+    );
+    expect(self::describeAdaptedContainer($json_deserialized))
+      ->toEqual($expected);
+
+    $protocol_deserialized =
+      ObjectKeyAdaptedContainerStruct::withDefaultValues();
+    $protocol_deserialized->read(
+      new TSimpleJSONProtocol(new TMemoryBuffer($serialized)),
+    );
+    expect(self::describeAdaptedContainer($protocol_deserialized))
       ->toEqual($expected);
   }
 
@@ -194,6 +272,28 @@ final class ThriftObjectKeyContainerIntegrationTest extends WWWTest {
     $shape_round_tripped =
       await ObjectKeyWrappedValueContainerStruct::__genFromShape($shape);
     expect(await self::genDescribeWrappedValueContainer($shape_round_tripped))
+      ->toEqual($expected);
+  }
+
+  public async function testWrappedObjectKeyMapValuesRoundTripThroughSimpleJSON(
+  ): Awaitable<void> {
+    $container = await self::genWrappedValueObjectKeyContainer();
+    $expected = self::expectedWrappedValueDescription();
+    $serialized = JSONThriftSerializer::serialize($container);
+
+    $json_deserialized = JSONThriftSerializer::deserialize(
+      $serialized,
+      ObjectKeyWrappedValueContainerStruct::withDefaultValues(),
+    );
+    expect(await self::genDescribeWrappedValueContainer($json_deserialized))
+      ->toEqual($expected);
+
+    $protocol_deserialized =
+      ObjectKeyWrappedValueContainerStruct::withDefaultValues();
+    $protocol_deserialized->read(
+      new TSimpleJSONProtocol(new TMemoryBuffer($serialized)),
+    );
+    expect(await self::genDescribeWrappedValueContainer($protocol_deserialized))
       ->toEqual($expected);
   }
 
@@ -589,19 +689,8 @@ final class ThriftObjectKeyContainerIntegrationTest extends WWWTest {
     ObjectKeyContainerStruct $container,
   ): dict<string, mixed> {
     return dict[
-      'struct_set' => self::sortStrings(
-        Vec\map(
-          nullthrows($container->struct_set, 'struct_set must be set')->toVec(),
-          self::describeObjectKeyStruct<>,
-        ),
-      ),
-      'struct_map' => self::sortStringPairs(
-        Vec\map(
-          nullthrows($container->struct_map, 'struct_map must be set')
-            ->toShape(),
-          $entry ==> tuple(self::describeObjectKeyStruct($entry[0]), $entry[1]),
-        ),
-      ),
+      'struct_set' => self::describeStructSet($container),
+      'struct_map' => self::describeStructMap($container),
       'float_set' => Vec\sort(
         nullthrows($container->float_set, 'float_set must be set')->toVec(),
       ),
@@ -626,6 +715,28 @@ final class ThriftObjectKeyContainerIntegrationTest extends WWWTest {
       'normal_field' => $container->normal_field,
       'normal_map' => Dict\sort_by_key(dict($container->normal_map)),
     ];
+  }
+
+  private static function describeStructSet(
+    ObjectKeyContainerStruct $container,
+  ): vec<string> {
+    return self::sortStrings(
+      Vec\map(
+        nullthrows($container->struct_set, 'struct_set must be set')->toVec(),
+        self::describeObjectKeyStruct<>,
+      ),
+    );
+  }
+
+  private static function describeStructMap(
+    ObjectKeyContainerStruct $container,
+  ): vec<(string, string)> {
+    return self::sortStringPairs(
+      Vec\map(
+        nullthrows($container->struct_map, 'struct_map must be set')->toShape(),
+        $entry ==> tuple(self::describeObjectKeyStruct($entry[0]), $entry[1]),
+      ),
+    );
   }
 
   private static function sortStrings(vec<string> $values): vec<string> {

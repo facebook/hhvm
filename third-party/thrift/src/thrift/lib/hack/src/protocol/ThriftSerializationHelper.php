@@ -330,6 +330,58 @@ abstract final class ThriftSerializationHelper {
         $xfer += $protocol->readSetEnd();
         break;
       case TType::MAP:
+        $format = Shapes::at($tspec, 'format');
+        $val_spec = Shapes::at($tspec, 'val');
+        $has_type_wrapper = $has_type_wrapper ||
+          (Shapes::idx($val_spec, 'is_type_wrapped') ?? false);
+
+        if ($format === 'object_key' && $protocol is TSimplePHPObjectProtocol) {
+          $size = 0;
+          $element_type = null;
+          $xfer += $protocol->readListBegin(inout $element_type, inout $size);
+
+          $obj_map = new ThriftMap<mixed, mixed>(
+            Shapes::at($tspec, 'ktype'),
+            Shapes::at($tspec, 'key'),
+          );
+          $size = nullthrows($size, 'object-key map entry count must be set');
+          for ($i = 0; $i < $size; ++$i) {
+            $pair_element_type = null;
+            $pair_size = 0;
+            $xfer += $protocol->readListBegin(
+              inout $pair_element_type,
+              inout $pair_size,
+            );
+
+            $key = null;
+            $val = null;
+            $xfer += self::readStructHelper(
+              $protocol,
+              Shapes::at($tspec, 'ktype'),
+              inout $key,
+              Shapes::at($tspec, 'key'),
+              inout $has_type_wrapper,
+            );
+            $xfer += self::readStructHelper(
+              $protocol,
+              Shapes::at($tspec, 'vtype'),
+              inout $val,
+              $val_spec,
+              inout $has_type_wrapper,
+            );
+            $xfer += $protocol->readListEnd();
+
+            if ($key === null || $val === null) {
+              continue;
+            }
+
+            $obj_map->set($key, $val);
+          }
+          $object = $obj_map;
+          $xfer += $protocol->readListEnd();
+          break;
+        }
+
         $size = 0;
         $key_type = null;
         $value_type = null;
@@ -338,11 +390,6 @@ abstract final class ThriftSerializationHelper {
           inout $value_type,
           inout $size,
         );
-
-        $format = Shapes::at($tspec, 'format');
-        $val_spec = Shapes::at($tspec, 'val');
-        $has_type_wrapper = $has_type_wrapper ||
-          (Shapes::idx($val_spec, 'is_type_wrapped') ?? false);
 
         if ($format === 'object_key') {
           $obj_map = new ThriftMap<mixed, mixed>(

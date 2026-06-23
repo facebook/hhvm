@@ -172,6 +172,36 @@ final class TSimpleJSONProtocolTest extends WWWTest {
     expect($deserialized->m)->toEqual($obj->m);
   }
 
+  public static function provideInvalidPeekedMapKeys(): dict<string, shape(
+    'serialized' => string,
+    'message' => string,
+  )> {
+    return dict[
+      'literal with invalid suffix' => shape(
+        'serialized' => '{truex:"value"}',
+        'message' => 'Expected json value terminator',
+      ),
+      'number with multiple decimal points' => shape(
+        'serialized' => '{1.2.3:"value"}',
+        'message' => 'Expected json value terminator',
+      ),
+    ];
+  }
+
+  <<DataProvider('provideInvalidPeekedMapKeys')>>
+  public function testReadMapBeginRejectsInvalidPeekedMapKeys(
+    string $serialized,
+    string $message,
+  ): void {
+    expect(() ==> {
+      $protocol = new TSimpleJSONProtocol(new TMemoryBuffer($serialized));
+      $key_type = null;
+      $val_type = null;
+      $size = null;
+      $protocol->readMapBegin(inout $key_type, inout $val_type, inout $size);
+    })->toThrow(TProtocolException::class, $message);
+  }
+
   public static function provideSpecialFloatingPointEncodings(): dict<
     string,
     shape(

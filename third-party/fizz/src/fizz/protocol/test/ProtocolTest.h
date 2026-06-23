@@ -230,7 +230,8 @@ class ProtocolTest : public testing::Test {
       bool expectConfigureServerRecordLayer = false) {
     EXPECT_CALL(*factory_, makeEncryptedWriteRecordLayer(_))
         .InSequence(s ? *s : Sequence())
-        .WillOnce(Invoke([=](EncryptionLevel encryptionLevel) {
+        .WillOnce(Invoke([=, expectedWrite = std::move(expectedWrite)](
+                             EncryptionLevel encryptionLevel) mutable {
           auto ret =
               std::make_unique<MockEncryptedWriteRecordLayer>(encryptionLevel);
           ret->setDefaults();

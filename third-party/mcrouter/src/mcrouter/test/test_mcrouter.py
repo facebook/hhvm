@@ -11,7 +11,6 @@ import time
 
 from mcrouter.test.MCProcess import MockMemcached
 from mcrouter.test.McrouterTestCase import McrouterTestCase
-from mcrouter.test.mock_servers import ConnectionErrorServer, SleepServer
 
 
 class TestDevNull(McrouterTestCase):

@@ -720,6 +720,10 @@ module Primary : sig
         pos: Pos.t;
         decl_pos: Pos_or_decl.t;
       }
+    | This_as_function_pointer_param of {
+        pos: Pos.t;
+        decl_pos: Pos_or_decl.t;
+      }
     | Invalid_new_disposable of Pos.t
     | Invalid_return_disposable of Pos.t
     | Invalid_disposable_hint of {

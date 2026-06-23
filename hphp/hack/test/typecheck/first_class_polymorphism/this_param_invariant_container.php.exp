@@ -1,0 +1,24 @@
+ERROR: File "this_param_invariant_container.php", line 29, characters 14-22:
+Cannot take a pointer to this method because a value of type `this` can be obtained from two or more of its parameters (counting the implicit receiver of an instance method), so the function pointer could be used to relate two unrelated subtypes of `this` (Typing[4517])
+  File "this_param_invariant_container.php", line 16, characters 46-47:
+  a value of type `this` can be obtained from this parameter
+ERROR: File "this_param_invariant_container.php", line 29, characters 14-22:
+Cannot take a pointer to this method because a value of type `this` can be obtained from two or more of its parameters (counting the implicit receiver of an instance method), so the function pointer could be used to relate two unrelated subtypes of `this` (Typing[4517])
+  File "this_param_invariant_container.php", line 16, characters 60-61:
+  a value of type `this` can be obtained from this parameter
+ERROR: File "this_param_invariant_container.php", line 30, characters 14-27:
+Cannot take a pointer to this method because a value of type `this` can be obtained from two or more of its parameters (counting the implicit receiver of an instance method), so the function pointer could be used to relate two unrelated subtypes of `this` (Typing[4517])
+  File "this_param_invariant_container.php", line 18, characters 59-60:
+  a value of type `this` can be obtained from this parameter
+ERROR: File "this_param_invariant_container.php", line 31, characters 14-27:
+Cannot take a pointer to this method because a value of type `this` can be obtained from two or more of its parameters (counting the implicit receiver of an instance method), so the function pointer could be used to relate two unrelated subtypes of `this` (Typing[4517])
+  File "this_param_invariant_container.php", line 20, characters 46-47:
+  a value of type `this` can be obtained from this parameter
+ERROR: File "this_param_invariant_container.php", line 31, characters 14-27:
+Cannot take a pointer to this method because a value of type `this` can be obtained from two or more of its parameters (counting the implicit receiver of an instance method), so the function pointer could be used to relate two unrelated subtypes of `this` (Typing[4517])
+  File "this_param_invariant_container.php", line 20, characters 60-61:
+  a value of type `this` can be obtained from this parameter
+ERROR: File "this_param_invariant_container.php", line 32, characters 33-39:
+Cannot take a pointer to this method because a value of type `this` can be obtained from two or more of its parameters (counting the implicit receiver of an instance method), so the function pointer could be used to relate two unrelated subtypes of `this` (Typing[4517])
+  File "this_param_invariant_container.php", line 23, characters 35-36:
+  a value of type `this` can be obtained from this parameter

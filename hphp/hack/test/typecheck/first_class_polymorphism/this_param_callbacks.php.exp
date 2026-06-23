@@ -1,0 +1,20 @@
+ERROR: File "this_param_callbacks.php", line 45, characters 14-26:
+Cannot take a pointer to this method because a value of type `this` can be obtained from two or more of its parameters (counting the implicit receiver of an instance method), so the function pointer could be used to relate two unrelated subtypes of `this` (Typing[4517])
+  File "this_param_callbacks.php", line 17, characters 24-25:
+  a value of type `this` can be obtained from this parameter
+ERROR: File "this_param_callbacks.php", line 45, characters 14-26:
+Cannot take a pointer to this method because a value of type `this` can be obtained from two or more of its parameters (counting the implicit receiver of an instance method), so the function pointer could be used to relate two unrelated subtypes of `this` (Typing[4517])
+  File "this_param_callbacks.php", line 18, characters 24-25:
+  a value of type `this` can be obtained from this parameter
+ERROR: File "this_param_callbacks.php", line 46, characters 14-26:
+Cannot take a pointer to this method because a value of type `this` can be obtained from two or more of its parameters (counting the implicit receiver of an instance method), so the function pointer could be used to relate two unrelated subtypes of `this` (Typing[4517])
+  File "this_param_callbacks.php", line 30, characters 46-47:
+  a value of type `this` can be obtained from this parameter
+ERROR: File "this_param_callbacks.php", line 46, characters 14-26:
+Cannot take a pointer to this method because a value of type `this` can be obtained from two or more of its parameters (counting the implicit receiver of an instance method), so the function pointer could be used to relate two unrelated subtypes of `this` (Typing[4517])
+  File "this_param_callbacks.php", line 31, characters 46-47:
+  a value of type `this` can be obtained from this parameter
+ERROR: File "this_param_callbacks.php", line 47, characters 33-43:
+Cannot take a pointer to this method because a value of type `this` can be obtained from two or more of its parameters (counting the implicit receiver of an instance method), so the function pointer could be used to relate two unrelated subtypes of `this` (Typing[4517])
+  File "this_param_callbacks.php", line 37, characters 48-49:
+  a value of type `this` can be obtained from this parameter

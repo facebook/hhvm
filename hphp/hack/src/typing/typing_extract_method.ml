@@ -23,6 +23,15 @@ module Variance_analysis : sig
     env:Typing_env_types.env ->
     Ast_defs.variance option
 
+  (** Count the occurrences of the bare [this] type inside [ty], treating [ty] as
+      a parameter type (i.e. the top-level position is contravariant), from which
+      a value of type [this] can be obtained — i.e. occurrences reached
+      contravariantly or invariantly. Purely covariant occurrences (a value of
+      type [this] cannot be obtained from them) and occurrences of [this] as the
+      root of a type constant access (e.g. [this::T]) are not counted. *)
+  val count_obtainable_this_in_param :
+    Typing_defs_core.decl_ty -> env:Typing_env_types.env -> int
+
   val analyse_ty_params :
     Typing_defs_core.decl_phase Typing_defs_core.ty Typing_defs_core.fun_type ->
     SSet.t ->
@@ -367,6 +376,42 @@ end = struct
     Option.value_map v ~default:false ~f:(function
         | Ast_defs.Invariant -> true
         | _ -> false)
+
+  let count_obtainable_this_in_param ty ~env =
+    let open Typing_defs_core in
+    (* [find] already excludes [this::T] (it does not descend into [Taccess])
+       and threads variance correctly through containers, function types and
+       declared class-level variance, so we just count the [this] nodes reached
+       in a position from which a value of type [this] can be *obtained*. We
+       disable the [is_invariant] early-exit so that every occurrence is visited.
+
+       An occurrence is "obtainable" when it is reached contravariantly or
+       invariantly:
+       - contravariant (e.g. [this], [vec<this>], [(function(): this)]): the
+         caller supplies, or a callback yields, a [this] value;
+       - invariant (e.g. [Box<this>] where [Box<T>] is invariant): the value can
+         be read out (e.g. [Box::get]). Invariance pins the container's element
+         *type*, but its runtime contents may be any subtype, so two invariant
+         occurrences can still yield two values of different runtime classes.
+       Purely covariant occurrences (e.g. [(function(this): void)], which only
+       *accepts* a [this]) yield nothing and are not counted. *)
+    let update ty acc var =
+      match get_node ty with
+      | Tthis ->
+        (match var with
+        | Ast_defs.Contravariant
+        | Ast_defs.Invariant ->
+          acc + 1
+        | Ast_defs.Covariant -> acc)
+      | _ -> acc
+    in
+    find
+      ty
+      ~var:Ast_defs.Contravariant
+      ~update
+      ~is_invariant:(fun _ -> false)
+      ~acc:0
+      ~env
 
   let analyse_this fun_ty ~env =
     let v_opt =
@@ -1767,6 +1812,47 @@ let ty_generics names ty =
     Typing_defs_core.transform_top_down_decl_ty ty ~ctx:() ~on_ty ~on_rc_bound
   in
   !acc
+
+(** Returns the positions of the explicit parameters from which a value of type
+    [this] can be obtained (i.e. [this] occurs contravariantly or invariantly in
+    the parameter type), but only when the function pointer would actually be able
+    to relate two unrelated subtypes of [this] — the binary method problem.
+
+    A single obtainable occurrence can be soundly abstracted into one type
+    parameter during extraction. Two or more lets the caller obtain two values of
+    type [this] whose runtime classes can differ, which the underlying method
+    conflates as a single self type — the binary method problem. Invariance on a
+    container pins its element *type*, not the runtime class of its contents (a
+    [Box<B>] may hold any subtype of [B]), so invariant occurrences are obtainable
+    too.
+
+    For instance methods the implicit [this] receiver is itself an obtainable
+    occurrence, so [~has_implicit_this:true] should be passed; in that case a
+    single obtainable explicit occurrence is enough to trigger the error.
+
+    Covariant occurrences (e.g. a parameter of type [(function(this): void)],
+    which only *accepts* a [this]) and [this::T] type constant projections are
+    never counted. *)
+let explicit_this_param_positions ?(has_implicit_this = false) ~env fun_ty =
+  let init =
+    if has_implicit_this then
+      1
+    else
+      0
+  in
+  let (total, positions) =
+    List.fold_left
+      fun_ty.Typing_defs_core.ft_params
+      ~init:(init, [])
+      ~f:(fun (total, positions) Typing_defs_core.{ fp_type; fp_pos; _ } ->
+        match Variance_analysis.count_obtainable_this_in_param fp_type ~env with
+        | 0 -> (total, positions)
+        | n -> (total + n, fp_pos :: positions))
+  in
+  if total >= 2 then
+    List.rev positions
+  else
+    []
 
 let drop_unused_generics fun_ty ~names =
   let open Typing_defs_core in

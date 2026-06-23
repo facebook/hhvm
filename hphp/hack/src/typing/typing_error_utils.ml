@@ -2612,6 +2612,24 @@ end = struct
     in
     create ~code:Error_code.InvalidMethCallerReadonlyReturn ~claim ~reasons ()
 
+  let this_as_function_pointer_param pos decl_pos =
+    let claim =
+      lazy
+        ( pos,
+          "Cannot take a pointer to this method because a value of type `this` "
+          ^ "can be obtained from two or more of its parameters (counting the "
+          ^ "implicit receiver of an instance method), so the function pointer "
+          ^ "could be used to relate two unrelated subtypes of `this`" )
+    in
+    let reasons =
+      lazy
+        [
+          ( decl_pos,
+            "a value of type `this` can be obtained from this parameter" );
+        ]
+    in
+    create ~code:Error_code.ThisAsFunctionPointerParam ~claim ~reasons ()
+
   let invalid_new_disposable pos =
     let claim =
       lazy
@@ -5050,6 +5068,8 @@ end = struct
       invalid_meth_caller_calling_convention pos decl_pos convention
     | Invalid_meth_caller_readonly_return { pos; decl_pos } ->
       invalid_meth_caller_readonly_return pos decl_pos
+    | This_as_function_pointer_param { pos; decl_pos } ->
+      this_as_function_pointer_param pos decl_pos
     | Invalid_new_disposable pos -> invalid_new_disposable pos
     | Invalid_return_disposable pos -> invalid_return_disposable pos
     | Invalid_disposable_hint { pos; class_name } ->

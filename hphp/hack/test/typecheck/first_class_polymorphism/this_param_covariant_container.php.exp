@@ -1,0 +1,40 @@
+ERROR: File "this_param_covariant_container.php", line 33, characters 14-22:
+Cannot take a pointer to this method because a value of type `this` can be obtained from two or more of its parameters (counting the implicit receiver of an instance method), so the function pointer could be used to relate two unrelated subtypes of `this` (Typing[4517])
+  File "this_param_covariant_container.php", line 16, characters 46-47:
+  a value of type `this` can be obtained from this parameter
+ERROR: File "this_param_covariant_container.php", line 33, characters 14-22:
+Cannot take a pointer to this method because a value of type `this` can be obtained from two or more of its parameters (counting the implicit receiver of an instance method), so the function pointer could be used to relate two unrelated subtypes of `this` (Typing[4517])
+  File "this_param_covariant_container.php", line 16, characters 60-61:
+  a value of type `this` can be obtained from this parameter
+ERROR: File "this_param_covariant_container.php", line 34, characters 14-22:
+Cannot take a pointer to this method because a value of type `this` can be obtained from two or more of its parameters (counting the implicit receiver of an instance method), so the function pointer could be used to relate two unrelated subtypes of `this` (Typing[4517])
+  File "this_param_covariant_container.php", line 17, characters 42-43:
+  a value of type `this` can be obtained from this parameter
+ERROR: File "this_param_covariant_container.php", line 34, characters 14-22:
+Cannot take a pointer to this method because a value of type `this` can be obtained from two or more of its parameters (counting the implicit receiver of an instance method), so the function pointer could be used to relate two unrelated subtypes of `this` (Typing[4517])
+  File "this_param_covariant_container.php", line 17, characters 52-53:
+  a value of type `this` can be obtained from this parameter
+ERROR: File "this_param_covariant_container.php", line 35, characters 14-21:
+Cannot take a pointer to this method because a value of type `this` can be obtained from two or more of its parameters (counting the implicit receiver of an instance method), so the function pointer could be used to relate two unrelated subtypes of `this` (Typing[4517])
+  File "this_param_covariant_container.php", line 18, characters 44-45:
+  a value of type `this` can be obtained from this parameter
+ERROR: File "this_param_covariant_container.php", line 35, characters 14-21:
+Cannot take a pointer to this method because a value of type `this` can be obtained from two or more of its parameters (counting the implicit receiver of an instance method), so the function pointer could be used to relate two unrelated subtypes of `this` (Typing[4517])
+  File "this_param_covariant_container.php", line 18, characters 57-58:
+  a value of type `this` can be obtained from this parameter
+ERROR: File "this_param_covariant_container.php", line 36, characters 14-24:
+Cannot take a pointer to this method because a value of type `this` can be obtained from two or more of its parameters (counting the implicit receiver of an instance method), so the function pointer could be used to relate two unrelated subtypes of `this` (Typing[4517])
+  File "this_param_covariant_container.php", line 20, characters 24-25:
+  a value of type `this` can be obtained from this parameter
+ERROR: File "this_param_covariant_container.php", line 36, characters 14-24:
+Cannot take a pointer to this method because a value of type `this` can be obtained from two or more of its parameters (counting the implicit receiver of an instance method), so the function pointer could be used to relate two unrelated subtypes of `this` (Typing[4517])
+  File "this_param_covariant_container.php", line 21, characters 24-25:
+  a value of type `this` can be obtained from this parameter
+ERROR: File "this_param_covariant_container.php", line 37, characters 14-27:
+Cannot take a pointer to this method because a value of type `this` can be obtained from two or more of its parameters (counting the implicit receiver of an instance method), so the function pointer could be used to relate two unrelated subtypes of `this` (Typing[4517])
+  File "this_param_covariant_container.php", line 24, characters 51-52:
+  a value of type `this` can be obtained from this parameter
+ERROR: File "this_param_covariant_container.php", line 37, characters 14-27:
+Cannot take a pointer to this method because a value of type `this` can be obtained from two or more of its parameters (counting the implicit receiver of an instance method), so the function pointer could be used to relate two unrelated subtypes of `this` (Typing[4517])
+  File "this_param_covariant_container.php", line 24, characters 60-61:
+  a value of type `this` can be obtained from this parameter

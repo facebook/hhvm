@@ -1,0 +1,28 @@
+ERROR: File "this_param_arity.php", line 24, characters 14-18:
+Cannot take a pointer to this method because a value of type `this` can be obtained from two or more of its parameters (counting the implicit receiver of an instance method), so the function pointer could be used to relate two unrelated subtypes of `this` (Typing[4517])
+  File "this_param_arity.php", line 10, characters 37-38:
+  a value of type `this` can be obtained from this parameter
+ERROR: File "this_param_arity.php", line 24, characters 14-18:
+Cannot take a pointer to this method because a value of type `this` can be obtained from two or more of its parameters (counting the implicit receiver of an instance method), so the function pointer could be used to relate two unrelated subtypes of `this` (Typing[4517])
+  File "this_param_arity.php", line 10, characters 46-47:
+  a value of type `this` can be obtained from this parameter
+ERROR: File "this_param_arity.php", line 25, characters 14-20:
+Cannot take a pointer to this method because a value of type `this` can be obtained from two or more of its parameters (counting the implicit receiver of an instance method), so the function pointer could be used to relate two unrelated subtypes of `this` (Typing[4517])
+  File "this_param_arity.php", line 12, characters 47-48:
+  a value of type `this` can be obtained from this parameter
+ERROR: File "this_param_arity.php", line 26, characters 14-20:
+Cannot take a pointer to this method because a value of type `this` can be obtained from two or more of its parameters (counting the implicit receiver of an instance method), so the function pointer could be used to relate two unrelated subtypes of `this` (Typing[4517])
+  File "this_param_arity.php", line 14, characters 39-40:
+  a value of type `this` can be obtained from this parameter
+ERROR: File "this_param_arity.php", line 26, characters 14-20:
+Cannot take a pointer to this method because a value of type `this` can be obtained from two or more of its parameters (counting the implicit receiver of an instance method), so the function pointer could be used to relate two unrelated subtypes of `this` (Typing[4517])
+  File "this_param_arity.php", line 14, characters 48-49:
+  a value of type `this` can be obtained from this parameter
+ERROR: File "this_param_arity.php", line 26, characters 14-20:
+Cannot take a pointer to this method because a value of type `this` can be obtained from two or more of its parameters (counting the implicit receiver of an instance method), so the function pointer could be used to relate two unrelated subtypes of `this` (Typing[4517])
+  File "this_param_arity.php", line 14, characters 57-58:
+  a value of type `this` can be obtained from this parameter
+ERROR: File "this_param_arity.php", line 29, characters 33-39:
+Cannot take a pointer to this method because a value of type `this` can be obtained from two or more of its parameters (counting the implicit receiver of an instance method), so the function pointer could be used to relate two unrelated subtypes of `this` (Typing[4517])
+  File "this_param_arity.php", line 19, characters 30-31:
+  a value of type `this` can be obtained from this parameter

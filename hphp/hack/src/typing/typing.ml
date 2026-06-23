@@ -9019,6 +9019,21 @@ end = struct
               primary
               @@ Primary.Require_generic_explicit
                    { decl_pos; param_name; pos = use_pos })
+            ~env);
+    (* A method whose signature would reference [this] two or more times cannot
+       be soundly abstracted into a function pointer. Static methods have no
+       implicit receiver, so this requires two or more explicit [this] params.
+       In a final class [this] is nominally coincident with the class itself so
+       there is nothing to abstract and the pointer is sound *)
+    if not (Folded_class.final folded_class) then
+      List.iter
+        (Typing_extract_method.explicit_this_param_positions ~env fun_ty)
+        ~f:(fun decl_pos ->
+          Typing_error_utils.add_typing_error
+            Typing_error.(
+              primary
+              @@ Primary.This_as_function_pointer_param
+                   { pos = use_pos; decl_pos })
             ~env)
 
   (** Inspect the type attempting to synthesize a method type for each contained
@@ -9404,6 +9419,24 @@ end = struct
               primary
               @@ Primary.Require_generic_explicit
                    { decl_pos; param_name; pos = use_pos })
+            ~env);
+    (* A method whose signature would reference [this] two or more times cannot
+       be soundly abstracted into a function pointer. Instance methods carry an
+       implicit [this] receiver, so a single explicit [this] parameter is enough.
+       In a final class [this] is nominally coincident with the class itself so
+       there is nothing to abstract and the pointer is sound *)
+    if not (Folded_class.final folded_class) then
+      List.iter
+        (Typing_extract_method.explicit_this_param_positions
+           ~has_implicit_this:true
+           ~env
+           fun_ty)
+        ~f:(fun decl_pos ->
+          Typing_error_utils.add_typing_error
+            Typing_error.(
+              primary
+              @@ Primary.This_as_function_pointer_param
+                   { pos = use_pos; decl_pos })
             ~env)
 
   let unbound_method class_name method_name folded_class =

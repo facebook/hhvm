@@ -1754,9 +1754,15 @@ void RuntimeOption::Load(
   }
 
   // Bespoke array-likes
-
-  auto const enable_logging = allowBespokeArrayLikes();
-  bespoke::setLoggingEnabled(enable_logging);
+  auto const allow_bespoke_array_likes = allowBespokeArrayLikes();
+  if (!allow_bespoke_array_likes) {
+    // We can't do this in PostProcess because allowBespokeArrayLikes uses configs from both
+    // Eval and Jit sections
+    Cfg::Eval::EmitBespokeTypeStructures = false;
+    Cfg::Eval::EmitBespokeMonotypes = false;
+    Cfg::Eval::EmitBespokeStructDicts = false;
+  }
+  bespoke::setLoggingEnabled(allow_bespoke_array_likes);
   specializeVanillaDestructors();
 
   // Coeffects

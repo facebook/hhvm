@@ -584,8 +584,7 @@ Array resolveTS(TSEnv& env, const TSCtx& ctx, const Array& arr,
 Array resolveTSImpl(TSEnv& env, const TSCtx& ctx, const Array& arr);
 
 Array maybeMakeBespoke(Array& ts) {
-  if (allowBespokeArrayLikes() &&
-      Cfg::Eval::EmitBespokeTypeStructures &&
+  if (Cfg::Eval::EmitBespokeTypeStructures &&
       bespoke::TypeStructure::isValidTypeStructure(ts.get())) {
     auto const bespokeTS = bespoke::TypeStructure::MakeFromVanilla(ts.get());
     if (bespokeTS) return Array::attach(bespokeTS);

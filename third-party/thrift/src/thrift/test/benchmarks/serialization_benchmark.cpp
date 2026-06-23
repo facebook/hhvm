@@ -218,7 +218,7 @@ BENCHMARK(FlatBuffersSerialization) {
 
 BENCHMARK(FlatBuffersDerialization) {
   flatbuffers::FlatBufferBuilder builder(2048);
-  void* bufferPointer;
+  void* bufferPointer = nullptr;
   BENCHMARK_SUSPEND {
     // Create a FlatBufferBuilder object
 

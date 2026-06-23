@@ -24,6 +24,7 @@
 #ifdef Py_GIL_DISABLED
 #include <mutex>
 #endif
+#include <type_traits>
 
 #include <folly/Indestructible.h>
 #include <folly/Range.h>
@@ -601,17 +602,30 @@ void populateStructContainerUnsetFieldsWithDefaultValues(
 
   const FieldValueMap& defaultValues =
       *static_cast<const FieldValueMap*>(structInfo.customExt);
-  const char* issetFlags = getDataHolderIssetFlags<Container>(container);
+  // The mutable runtime maintains "set iff value is not None", so it derives
+  // field presence from the value rather than the isset byte array (which is
+  // being removed). The immutable runtime still consults the byte array.
+  [[maybe_unused]] const char* issetFlags = nullptr;
+  if constexpr (!std::is_same_v<Container, ListContainer>) {
+    issetFlags = getDataHolderIssetFlags<Container>(container);
+  }
   for (int i = 0; i < numFields; ++i) {
+    const detail::FieldInfo& fieldInfo = structInfo.fieldInfos[i];
+    PyObject* oldValue = Container::GET_ITEM(container, i + 1);
+
     // If the field is already set, this implies that the constructor has
     // already assigned a value to the field. In this case, we skip it and
     // avoid overwriting it with the default value.
-    if (issetFlags[i]) {
+    bool alreadySet;
+    if constexpr (std::is_same_v<Container, ListContainer>) {
+      alreadySet = oldValue != Py_None;
+    } else {
+      alreadySet = issetFlags[i];
+    }
+    if (alreadySet) {
       continue;
     }
 
-    const detail::FieldInfo& fieldInfo = structInfo.fieldInfos[i];
-    PyObject* oldValue = Container::GET_ITEM(container, i + 1);
     if (fieldInfo.qualifier == detail::FieldQualifier::Optional) {
       Container::SET_ITEM(container, i + 1, Py_None);
       Py_INCREF(Py_None);

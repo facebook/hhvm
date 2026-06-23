@@ -142,7 +142,6 @@ find_package(Boost 1.69.0 REQUIRED
 find_package(OpenSSL REQUIRED)
 find_package(LibEvent MODULE REQUIRED)
 find_package(ZLIB REQUIRED)
-find_package(double-conversion CONFIG REQUIRED)
 
 find_program(RAGEL_EXECUTABLE ragel)
 if(NOT RAGEL_EXECUTABLE)
@@ -171,7 +170,6 @@ target_link_libraries(mcrouter_deps INTERFACE
   OpenSSL::SSL
   OpenSSL::Crypto
   ZLIB::ZLIB
-  double-conversion::double-conversion
   Threads::Threads
   ${LIBEVENT_LIB}
   atomic

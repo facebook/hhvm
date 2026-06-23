@@ -104,7 +104,6 @@ function(wangle_add_library _target_name)
       ${GLOG_INCLUDE_DIRS}
       ${GFLAGS_INCLUDE_DIRS}
       ${LIBEVENT_INCLUDE_DIR}
-      ${DOUBLE_CONVERSION_INCLUDE_DIR}
   )
 
   target_compile_features(${_obj_target} PUBLIC cxx_std_17)
@@ -118,7 +117,6 @@ function(wangle_add_library _target_name)
       ${GLOG_LIBRARIES}
       ${GFLAGS_LIBRARIES}
       ${LIBEVENT_LIB}
-      ${DOUBLE_CONVERSION_LIBRARY}
       ${CMAKE_DL_LIBS}
       ${LIBRT_LIBRARIES}
   )
@@ -203,7 +201,6 @@ function(wangle_add_library _target_name)
         ${GLOG_INCLUDE_DIRS}
         ${GFLAGS_INCLUDE_DIRS}
         ${LIBEVENT_INCLUDE_DIR}
-        ${DOUBLE_CONVERSION_INCLUDE_DIR}
     )
 
     target_compile_features(${_target_name} PUBLIC cxx_std_17)
@@ -217,7 +214,6 @@ function(wangle_add_library _target_name)
         ${GLOG_LIBRARIES}
         ${GFLAGS_LIBRARIES}
         ${LIBEVENT_LIB}
-        ${DOUBLE_CONVERSION_LIBRARY}
         ${CMAKE_DL_LIBS}
         ${LIBRT_LIBRARIES}
     )
@@ -287,7 +283,6 @@ function(wangle_create_monolithic_library)
       ${GLOG_INCLUDE_DIRS}
       ${GFLAGS_INCLUDE_DIRS}
       ${LIBEVENT_INCLUDE_DIR}
-      ${DOUBLE_CONVERSION_INCLUDE_DIR}
   )
 
   target_compile_features(wangle PUBLIC cxx_std_17)
@@ -304,7 +299,6 @@ function(wangle_create_monolithic_library)
       ${GLOG_LIBRARIES}
       ${GFLAGS_LIBRARIES}
       ${LIBEVENT_LIB}
-      ${DOUBLE_CONVERSION_LIBRARY}
       ${CMAKE_DL_LIBS}
       ${LIBRT_LIBRARIES}
   )

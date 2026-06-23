@@ -614,12 +614,12 @@ struct FactsStoreImpl final
     }
   }
 
-  Variant getTypeName(const OptString& type) override {
+  OptString getTypeName(const OptString& type) override {
     auto name = m_symbolMap.getTypeName(*type.get());
     if (!name) {
-      return Variant{Variant::NullInit{}};
+      return OptString{};
     } else {
-      return Variant{name->get(), Variant::PersistentStrInit{}};
+      return OptString{const_cast<StringData*>(name->get())};
     }
   }
 

@@ -279,7 +279,7 @@ void FactsLogger::close() {
   return logPerf(__func__, "", [&]() { m_inner->close(); });
 }
 
-Variant FactsLogger::getTypeName(const OptString& name) {
+OptString FactsLogger::getTypeName(const OptString& name) {
   return logPerf(
       __func__, name.slice(), [&]() { return m_inner->getTypeName(name); });
 }

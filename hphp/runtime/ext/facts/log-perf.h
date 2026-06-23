@@ -91,7 +91,7 @@ struct FactsLogger final : public FactsStore,
   Optional<OptString> getFilePackageMembership(const OptString& path) override;
 
   void close() override;
-  Variant getTypeName(const OptString&) override;
+  OptString getTypeName(const OptString&) override;
   Variant getKind(const OptString&) override;
   bool isTypeAbstract(const OptString&) override;
   bool isTypeFinal(const OptString&) override;

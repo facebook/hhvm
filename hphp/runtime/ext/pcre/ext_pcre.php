@@ -212,7 +212,7 @@ function preg_match_with_matches_and_error(
 <<__Native>>
 function preg_get_error_message_if_invalid(
   string $pattern,
-)[]: ?string;
+)[]: string;
 
 /**
  * Quote regular expression characters

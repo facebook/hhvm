@@ -1388,7 +1388,7 @@ Variant preg_match_all(StringData* pattern, const StringData* subject,
   return preg_match_impl(pattern, subject, matches, flags, offset, true);
 }
 
-Variant preg_get_error_message_if_invalid(const OptString& pattern) {
+OptString preg_get_error_message_if_invalid(const OptString& pattern) {
   PCRECache::Accessor accessor;
   StringData* error_message = nullptr;
   bool is_valid;
@@ -1404,7 +1404,7 @@ Variant preg_get_error_message_if_invalid(const OptString& pattern) {
   if (!error_message) {
     error_message = makeStaticString("Failed to process regex for unknown reason");
   }
-  return Variant { error_message };
+  return OptString { error_message };
 }
 
 ///////////////////////////////////////////////////////////////////////////////

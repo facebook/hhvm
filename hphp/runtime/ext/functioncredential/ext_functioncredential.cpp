@@ -114,13 +114,13 @@ const FunctionCredential* FunctionCredential::fromObject(
   return Native::data<FunctionCredential>(obj);
 }
 
-static TypedValue HHVM_METHOD(FunctionCredential, getClassName) {
+static OptString HHVM_METHOD(FunctionCredential, getClassName) {
   auto data = FunctionCredential::fromObject(this_);
   auto func = data->func();
 
   auto cls = func->cls();
-  return cls ? make_tv<KindOfPersistentString>(cls->name())
-             : make_tv<KindOfNull>();
+  return cls ? OptString{const_cast<StringData*>(cls->name())}
+             : OptString{};
 }
 
 static StringRet HHVM_METHOD(FunctionCredential, getFunctionName) {

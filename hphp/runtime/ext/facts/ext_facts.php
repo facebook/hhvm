@@ -176,7 +176,7 @@ function sha1(string $path)[]: string;
  * Throw InvalidOperationException if Facts is not enabled.
  */
 <<__Native>>
-function type_name(string $type_name)[]: ?string;
+function type_name(string $type_name)[]: string;
 
 /**
  * Return a string enum representing whether the given type is, for example, a

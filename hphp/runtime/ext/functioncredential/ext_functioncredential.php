@@ -10,7 +10,7 @@ final class FunctionCredential {
   }
 
   <<__Native>>
-  public final readonly function getClassName()[]: ?string;
+  public final readonly function getClassName()[]: string;
 
   <<__Native>>
   public final readonly function getFunctionName()[]: string;

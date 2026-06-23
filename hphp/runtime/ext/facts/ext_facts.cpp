@@ -766,7 +766,7 @@ Array HHVM_FUNCTION(facts_path_to_type_aliases, const OptString& path) {
   return Facts::getFactsOrThrow().getFileTypeAliases(path);
 }
 
-Variant HHVM_FUNCTION(facts_type_name, const OptString& type) {
+OptString HHVM_FUNCTION(facts_type_name, const OptString& type) {
   return Facts::getFactsOrThrow().getTypeName(type);
 }
 

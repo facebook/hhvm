@@ -218,7 +218,7 @@ struct FactsStore : public AutoloadMap {
    * Return `null` if `type` is not defined, or if it is defined in more than
    * one file.
    */
-  virtual Variant getTypeName(const OptString& type) = 0;
+  virtual OptString getTypeName(const OptString& type) = 0;
 
   /**
    * Return whether the given type is a class, enum, interface, or trait.

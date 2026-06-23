@@ -60,7 +60,7 @@ TypedValue HHVM_FUNCTION(preg_match,
                              nullptr, flags, offset));
 }
 
-Variant HHVM_FUNCTION(preg_get_error_message_if_invalid,
+OptString HHVM_FUNCTION(preg_get_error_message_if_invalid,
                       const OptString& pattern) {
   return preg_get_error_message_if_invalid(pattern);
 }

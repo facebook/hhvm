@@ -670,11 +670,18 @@ void* setImmutableUnion(
 /**
  * @param object The (`PyObject*`) data holder of the target immutable struct
  * instance. This should correspond to a `PyTuple` instance.
+ *
+ * Derives "isset" from the field value being non-`None` rather than from the
+ * isset byte array. The table-based serializer only calls this for optional
+ * fields, for which the invariant "set iff value is not None" holds (unset
+ * optionals are `None`).
  */
 bool getImmutableIsset(const void* object, ptrdiff_t offset) {
-  const char* flags = getDataHolderIssetFlags<TupleContainer>(
-      static_cast<const PyObject*>(object));
-  return flags[offset];
+  // Field values follow element 0 (the isset flags), so field `offset` lives at
+  // tuple index `offset + 1`.
+  PyObject* value = TupleContainer::GET_ITEM(
+      static_cast<const PyObject*>(object), offset + 1);
+  return value != Py_None;
 }
 
 void* setMutableUnion(void* objectPtr, const detail::TypeInfo& /* typeInfo */) {

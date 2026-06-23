@@ -40,7 +40,7 @@ void Foo::readNoXfer(Protocol_* iprot) {
 _readField_other_foo:
   {
     _readState.beforeSubobject(iprot);
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::Foo>::readWithContext(*iprot, this->__fbthrift_field_other_foo, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::compiler::test::fixtures::aliasing::other::Foo>::readWithContext(*iprot, this->__fbthrift_field_other_foo, _readState);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(0, true);
@@ -55,7 +55,7 @@ _readField_other_foo:
 _readField_yet_another_foo:
   {
     _readState.beforeSubobject(iprot);
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::Foo>::readWithContext(*iprot, this->__fbthrift_field_yet_another_foo, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::compiler::test::fixtures::aliasing::not_module::Foo>::readWithContext(*iprot, this->__fbthrift_field_yet_another_foo, _readState);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(1, true);
@@ -118,11 +118,11 @@ uint32_t Foo::serializedSize(Protocol_ const* prot_) const {
   xfer += prot_->serializedStructSize("Foo");
   {
     xfer += prot_->serializedFieldSize("other_foo", apache::thrift::protocol::TType::T_STRUCT, 1);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::Foo>::serializedSize<false>(*prot_, this->__fbthrift_field_other_foo);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::compiler::test::fixtures::aliasing::other::Foo>::serializedSize<false>(*prot_, this->__fbthrift_field_other_foo);
   }
   {
     xfer += prot_->serializedFieldSize("yet_another_foo", apache::thrift::protocol::TType::T_STRUCT, 2);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::Foo>::serializedSize<false>(*prot_, this->__fbthrift_field_yet_another_foo);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::compiler::test::fixtures::aliasing::not_module::Foo>::serializedSize<false>(*prot_, this->__fbthrift_field_yet_another_foo);
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -134,11 +134,11 @@ uint32_t Foo::serializedSizeZC(Protocol_ const* prot_) const {
   xfer += prot_->serializedStructSize("Foo");
   {
     xfer += prot_->serializedFieldSize("other_foo", apache::thrift::protocol::TType::T_STRUCT, 1);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::Foo>::serializedSize<true>(*prot_, this->__fbthrift_field_other_foo);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::compiler::test::fixtures::aliasing::other::Foo>::serializedSize<true>(*prot_, this->__fbthrift_field_other_foo);
   }
   {
     xfer += prot_->serializedFieldSize("yet_another_foo", apache::thrift::protocol::TType::T_STRUCT, 2);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::Foo>::serializedSize<true>(*prot_, this->__fbthrift_field_yet_another_foo);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::compiler::test::fixtures::aliasing::not_module::Foo>::serializedSize<true>(*prot_, this->__fbthrift_field_yet_another_foo);
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -161,14 +161,14 @@ uint32_t Foo::write(Protocol_* prot_) const {
     constexpr int16_t kPrevFieldId = 0;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::TType::T_STRUCT, 1, kPrevFieldId>(*prot_, "other_foo", previousFieldHasValue);
     previousFieldHasValue = true;
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::Foo>::write(*prot_, this->__fbthrift_field_other_foo);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::compiler::test::fixtures::aliasing::other::Foo>::write(*prot_, this->__fbthrift_field_other_foo);
     xfer += prot_->writeFieldEnd();
   }
   {
     constexpr int16_t kPrevFieldId = 1;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::TType::T_STRUCT, 2, kPrevFieldId>(*prot_, "yet_another_foo", previousFieldHasValue);
     previousFieldHasValue = true;
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::Foo>::write(*prot_, this->__fbthrift_field_yet_another_foo);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::compiler::test::fixtures::aliasing::not_module::Foo>::write(*prot_, this->__fbthrift_field_yet_another_foo);
     xfer += prot_->writeFieldEnd();
   }
   xfer += prot_->writeFieldStop();

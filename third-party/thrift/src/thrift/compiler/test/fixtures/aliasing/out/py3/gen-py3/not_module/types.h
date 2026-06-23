@@ -20,18 +20,18 @@ namespace py3 {
 
 
 template<>
-inline void reset_field<::cpp2::Foo>(
-    ::cpp2::Foo& obj, uint16_t index) {
+inline void reset_field<::facebook::thrift::compiler::test::fixtures::aliasing::not_module::Foo>(
+    ::facebook::thrift::compiler::test::fixtures::aliasing::not_module::Foo& obj, uint16_t index) {
   switch (index) {
     case 0:
-      obj.baz_ref().copy_from(default_inst<::cpp2::Foo>().baz_ref());
+      obj.baz_ref().copy_from(default_inst<::facebook::thrift::compiler::test::fixtures::aliasing::not_module::Foo>().baz_ref());
       return;
   }
 }
 
 template<>
 inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
-    ::cpp2::Foo>::namesmap() {
+    ::facebook::thrift::compiler::test::fixtures::aliasing::not_module::Foo>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
     }

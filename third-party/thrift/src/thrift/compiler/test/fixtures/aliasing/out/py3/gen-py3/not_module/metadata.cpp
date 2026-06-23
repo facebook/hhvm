@@ -9,11 +9,11 @@
 
 #include "thrift/compiler/test/fixtures/aliasing/gen-cpp2/not_module_handlers.h"
 
-namespace cpp2 {
+namespace facebook::thrift::compiler::test::fixtures::aliasing::not_module {
 ::apache::thrift::metadata::ThriftMetadata not_module_getThriftModuleMetadata() {
   ::apache::thrift::metadata::ThriftServiceMetadataResponse response;
   ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata();
   ::apache::thrift::detail::md::StructMetadata<Foo>::gen(metadata);
   return metadata;
 }
-} // namespace cpp2
+} // namespace facebook::thrift::compiler::test::fixtures::aliasing::not_module

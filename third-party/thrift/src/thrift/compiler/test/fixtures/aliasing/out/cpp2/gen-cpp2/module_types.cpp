@@ -46,7 +46,7 @@ Foo& Foo::operator=([[maybe_unused]] Foo&& other) noexcept {
 }
 
 
-Foo::Foo(apache::thrift::FragileConstructor, ::cpp2::Foo other_foo__arg, ::cpp2::Foo yet_another_foo__arg) :
+Foo::Foo(apache::thrift::FragileConstructor, ::facebook::thrift::compiler::test::fixtures::aliasing::other::Foo other_foo__arg, ::facebook::thrift::compiler::test::fixtures::aliasing::not_module::Foo yet_another_foo__arg) :
     __fbthrift_field_other_foo(std::move(other_foo__arg)),
     __fbthrift_field_yet_another_foo(std::move(yet_another_foo__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
@@ -73,20 +73,20 @@ bool Foo::operator<([[maybe_unused]] const Foo& rhs) const {
 }
 
 
-const ::cpp2::Foo& Foo::get_other_foo() const& {
+const ::facebook::thrift::compiler::test::fixtures::aliasing::other::Foo& Foo::get_other_foo() const& {
   return __fbthrift_field_other_foo;
 }
 
-::cpp2::Foo Foo::get_other_foo() && {
-  return static_cast<::cpp2::Foo&&>(__fbthrift_field_other_foo);
+::facebook::thrift::compiler::test::fixtures::aliasing::other::Foo Foo::get_other_foo() && {
+  return static_cast<::facebook::thrift::compiler::test::fixtures::aliasing::other::Foo&&>(__fbthrift_field_other_foo);
 }
 
-const ::cpp2::Foo& Foo::get_yet_another_foo() const& {
+const ::facebook::thrift::compiler::test::fixtures::aliasing::not_module::Foo& Foo::get_yet_another_foo() const& {
   return __fbthrift_field_yet_another_foo;
 }
 
-::cpp2::Foo Foo::get_yet_another_foo() && {
-  return static_cast<::cpp2::Foo&&>(__fbthrift_field_yet_another_foo);
+::facebook::thrift::compiler::test::fixtures::aliasing::not_module::Foo Foo::get_yet_another_foo() && {
+  return static_cast<::facebook::thrift::compiler::test::fixtures::aliasing::not_module::Foo&&>(__fbthrift_field_yet_another_foo);
 }
 
 void swap([[maybe_unused]] Foo& a, [[maybe_unused]] Foo& b) {
@@ -100,13 +100,13 @@ static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         Foo,
         ::apache::thrift::type_class::structure,
-        ::cpp2::Foo>,
+        ::facebook::thrift::compiler::test::fixtures::aliasing::other::Foo>,
     "inconsistent use of json option");
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         Foo,
         ::apache::thrift::type_class::structure,
-        ::cpp2::Foo>,
+        ::facebook::thrift::compiler::test::fixtures::aliasing::not_module::Foo>,
     "inconsistent use of json option");
 
 } // namespace facebook::thrift::compiler::test::fixtures::aliasing

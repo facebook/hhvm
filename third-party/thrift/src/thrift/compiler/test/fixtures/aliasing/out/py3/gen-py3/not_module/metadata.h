@@ -12,6 +12,6 @@
 
 #include "thrift/compiler/test/fixtures/aliasing/gen-cpp2/not_module_types.h"
 
-namespace cpp2 {
+namespace facebook::thrift::compiler::test::fixtures::aliasing::not_module {
 ::apache::thrift::metadata::ThriftMetadata not_module_getThriftModuleMetadata();
-} // namespace cpp2
+} // namespace facebook::thrift::compiler::test::fixtures::aliasing::not_module

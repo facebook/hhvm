@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 
-include "thrift/annotation/thrift.thrift"
-
-@thrift.AllowLegacyMissingUris
-package;
+package "facebook.com/thrift/compiler/test/fixtures/aliasing/other"
 
 struct Foo {
   1: string bar;

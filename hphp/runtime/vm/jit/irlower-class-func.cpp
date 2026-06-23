@@ -274,30 +274,22 @@ void cgLdClsFromClsMeth(IRLS& env, const IRInstruction* inst) {
   auto const clsMethDataRef = srcLoc(env, inst, 0).reg();
   auto const dst = dstLoc(env, inst, 0).reg();
   auto& v = vmain(env);
-#ifdef USE_PACKEDPTR
   static_assert(ClsMethData::clsOffset() == 0, "Class offset must be 0");
   auto const truncated = v.makeReg();
   v << movtql{clsMethDataRef, truncated};
   auto const packed = v.makeReg();
   v << movzlq{truncated, packed};
   emitDecodePackedPtr(v, packed, dst);
-#else
-  v << load{clsMethDataRef[ClsMethData::clsOffset()], dst};
-#endif
 }
 
 void cgLdFuncFromClsMeth(IRLS& env, const IRInstruction* inst) {
   auto const clsMethDataRef = srcLoc(env, inst, 0).reg();
   auto const dst = dstLoc(env, inst, 0).reg();
   auto& v = vmain(env);
-#ifdef USE_PACKEDPTR
   static_assert(ClsMethData::funcOffset() == 4, "Func offset must be 4");
   auto packed = v.makeReg();
   v << shrqi{32, clsMethDataRef, packed, v.makeReg()};
   emitDecodePackedPtr(v, packed, dst);
-#else
-  v << load{clsMethDataRef[ClsMethData::funcOffset()], dst};
-#endif
 }
 
 void cgNewClsMeth(IRLS& env, const IRInstruction* inst) {

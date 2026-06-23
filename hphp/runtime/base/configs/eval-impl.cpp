@@ -98,10 +98,6 @@ uint32_t EvalLoader::MaxLowMemHugePagesDefault() {
   return Cfg::Server::Mode ? 8 : 0;
 }
 
-bool EvalLoader::LowStaticArraysDefault() {
-  return !use_packedptr || !Cfg::Server::Mode;
-}
-
 bool EvalLoader::VerifyDefault() {
   return getenv("HHVM_VERIFY");
 }

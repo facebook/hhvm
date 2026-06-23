@@ -33,7 +33,7 @@ struct APCClsMeth {
     , m_handle(APCKind::ClsMeth, kInvalidDataType)
   {
     assertx(meth->isMethod());
-    assertx(!cls->isPersistent() || !use_packedptr);
+    assertx(!cls->isPersistent());
   }
 
   static const APCClsMeth* fromHandle(const APCHandle* handle) {

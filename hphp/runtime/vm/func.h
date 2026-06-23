@@ -124,11 +124,6 @@ struct Func final {
   friend struct FuncEmitter;
   friend struct UnitEmitter;
 
-#ifndef USE_PACKEDPTR
-  // DO NOT access it directly, instead use Func::getFuncVec()
-  // Exposed in the header file for gdb python macros
-  static AtomicPackedPtrVector<const Func> s_funcVec;
-#endif
   /////////////////////////////////////////////////////////////////////////////
   // Types.
 
@@ -270,12 +265,6 @@ struct Func final {
    * of the process.
    */
   uint32_t getStableId() const;
-
-#ifndef USE_PACKEDPTR
-  static constexpr size_t funcIdOffset() {
-    return offsetof(Func, m_funcId);
-  }
-#endif
 
 private:
   /*
@@ -1560,7 +1549,7 @@ private:
     mutable LockFreePtrWrapper<VMCompactVector<LineInfo>> m_lineMap;
     mutable LockFreePtrWrapper<LineTablePtr> m_lineTable;
   };
-  static_assert(CheckSize<SharedData, use_packedptr ? 160 : 184>(), "");
+  static_assert(CheckSize<SharedData, 160>(), "");
 
   /*
    * If this Func represents a native function or is exceptionally large
@@ -1596,7 +1585,7 @@ private:
     // `m_localNames[0 : m_namedParamCount - 1]`.
     uint32_t m_namedParamCount;
   };
-  static_assert(CheckSize<ExtendedSharedData, use_packedptr ? 232 : 264>(), "");
+  static_assert(CheckSize<ExtendedSharedData, 232>(), "");
 
   /*
    * SharedData accessors for internal use.
@@ -1865,9 +1854,6 @@ private:
   int m_magic;
 #endif
   jit::AtomicLowTCA m_funcEntry{nullptr};
-#ifndef USE_PACKEDPTR
-  FuncId m_funcId{FuncId::Invalid};
-#endif
   mutable AtomicPackedPtr<const StringData> m_fullName{nullptr};
   PackedStringPtr m_name{nullptr};
 
@@ -1971,9 +1957,7 @@ private:
   // should not be inherited from.
   jit::AtomicLowTCA m_prologueTable[1];
 };
-static constexpr size_t kFuncSize = debug ? (use_packedptr ? 72 : 96)
-                                          : (use_packedptr ? 64 : 88);
-static_assert(CheckSize<Func, kFuncSize>(), "");
+static_assert(CheckSize<Func, debug ? 72 : 64>(), "");
 
 ///////////////////////////////////////////////////////////////////////////////
 

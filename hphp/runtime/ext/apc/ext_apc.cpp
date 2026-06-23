@@ -101,8 +101,7 @@ void apcExtension::moduleLoad(const IniSetting::Map& ini, Hdf config) {
   Config::Bind(HotLoadFactor, ini, config, "Server.APC.HotLoadFactor", 0.5);
   Config::Bind(HotKeyAllocLow, ini, config, "Server.APC.HotKeyAllocLow", false);
   Config::Bind(HotMapAllocLow, ini, config, "Server.APC.HotMapAllocLow", false);
-  Config::Bind(UseUncounted, ini, config, "Server.APC.MemModelTreadmill",
-               use_packedptr || Cfg::Server::Mode);
+  Config::Bind(UseUncounted, ini, config, "Server.APC.MemModelTreadmill", true);
   Config::Bind(ShareUncounted, ini, config, "Server.APC.ShareUncounted", true);
   if (!UseUncounted && ShareUncounted) ShareUncounted = false;
 
@@ -143,7 +142,7 @@ std::vector<std::string> apcExtension::HotPrefix;
 std::vector<std::string> apcExtension::SerializePrefix;
 bool apcExtension::HotKeyAllocLow = false;
 bool apcExtension::HotMapAllocLow = false;
-bool apcExtension::UseUncounted = use_packedptr;
+bool apcExtension::UseUncounted = true;
 bool apcExtension::ShareUncounted = true;
 bool apcExtension::Stat = true;
 // Different from zend default but matches what we've been returning for years
@@ -812,8 +811,8 @@ void apc_sample_by_size() {
 }
 
 void apcExtension::moduleInit() {
-  if (use_packedptr && !UseUncounted) {
-    Logger::Error("Server.APC.MemModelTreadmill=false ignored in packedptr build");
+  if (!UseUncounted) {
+    Logger::Error("Server.APC.MemModelTreadmill=false ignored");
     UseUncounted = true;
   }
   apc_store().init();

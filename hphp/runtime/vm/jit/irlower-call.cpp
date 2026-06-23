@@ -251,14 +251,7 @@ void cgCallFuncEntry(IRLS& env, const IRInstruction* inst) {
     auto dest = v.makeReg();
     auto const funcEntryOff = safe_cast<int32_t>(Func::funcEntryOff());
     v << loadzlq{callee[funcEntryOff], dest};
-    // We have to use an ifdef instead of `if (use_packedptr)` here due to
-    // funcIdOffset only being defined in non-packedptr mode.
-#ifdef USE_PACKEDPTR
-    // Funcs are identified with their PackedPtr representation in packedptr mode.
     emitEncodePackedPtr(v, callee, r_func_entry_callee_id());
-#else
-    v << load{callee[Func::funcIdOffset()], r_func_entry_callee_id()};
-#endif
     v << callphpr{dest, func_entry_regs(withCtx)};
   }
 

@@ -1209,12 +1209,10 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
 - bool Eval.XmlParserUseLocalArena = true, UNKNOWN
 
-- bool Eval.LowStaticArrays, UNKNOWN
+- bool Eval.LowStaticArrays = false, UNKNOWN
 
-  Allocate static (immutable) arrays in low memory (below 4GB) via
-  low_malloc. Defaults to true except when built with USE_PACKEDPTR and
-  running in server mode, where it defaults to false to conserve low
-  memory address space for compressed pointers.
+  Allocate static (immutable) arrays in low memory (below 32GB) via
+  low_malloc.
 
 - bool Eval.Verify, UNKNOWN
 

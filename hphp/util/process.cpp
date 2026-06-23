@@ -425,9 +425,7 @@ void ProcStatus::update() {
     // Various arenas where range of hugetlb pages can be reserved but only
     // partially used.
     unused += alloc::getRange(alloc::AddrRangeClass::Low).retained();
-#ifdef USE_PACKEDPTR
     unused += alloc::getRange(alloc::AddrRangeClass::Mid).retained();
-#endif
     unused += alloc::getRange(alloc::AddrRangeClass::Uncounted).retained();
     for (auto const arena : alloc::g_auto_arenas) {
       if (arena) unused += arena->retained();

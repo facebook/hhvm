@@ -125,9 +125,7 @@ struct c_Closure final : ObjectData {
   }
   void setThis(ObjectData* od) { hdr()->ctx_this = od; }
   bool hasThis() const {
-    if (use_packedptr) return !is_low_mem(hdr()->ctx);
-    return
-      getInvokeFunc() && getInvokeFunc()->cls() && !getInvokeFunc()->isStatic();
+    return !is_low_mem(hdr()->ctx);
   }
 
   Class* getClass() const {
@@ -138,9 +136,7 @@ struct c_Closure final : ObjectData {
     hdr()->ctx_class = cls;
   }
   bool hasClass() const {
-    if (use_packedptr) return hdr()->ctx && is_low_mem(hdr()->ctx);
-    return
-      getInvokeFunc() && getInvokeFunc()->cls() && getInvokeFunc()->isStatic();
+    return hdr()->ctx && is_low_mem(hdr()->ctx);
   }
 
   size_t coeffectsPropSlot() const;

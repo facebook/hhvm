@@ -119,7 +119,7 @@ void setCommonFields(StructuredLogEntry& entry) {
     v["region"] = facebook::FbWhoAmI::getRegion();
 #endif
     v["debug"] = debug ? "true" : "false";
-    v["lowptr"] = use_packedptr ? "true" : "false";
+    v["lowptr"] = "true";
     v["repo_auth"] = Cfg::Repo::Authoritative ? "true" : "false";
     v["is_server"] = Cfg::Server::Mode ? "true" : "false";
     v["is_cli_server"] = is_cli_server_mode() ? "true" : "false";

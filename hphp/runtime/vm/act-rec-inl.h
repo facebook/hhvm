@@ -93,27 +93,23 @@ inline void ActRec::setThisOrClassAllowNull(void* objOrCls) {
 inline bool ActRec::hasThis() const {
   assertx(func()->implCls());
   assertx(reinterpret_cast<uintptr_t>(m_thisUnsafe) != kTrashedThisSlot);
-  return use_packedptr ? !is_low_mem(m_thisUnsafe) : !func()->isStatic();
+  return !is_low_mem(m_thisUnsafe);
 }
 
 inline bool ActRec::hasClass() const {
   assertx(func()->implCls());
   assertx(reinterpret_cast<uintptr_t>(m_thisUnsafe) != kTrashedThisSlot);
-  return use_packedptr ? is_low_mem(m_thisUnsafe) : func()->isStatic();
+  return is_low_mem(m_thisUnsafe);
 }
 
 inline bool ActRec::hasThisInPrologue() const {
   assertx(func()->implCls());
-  return use_packedptr
-    ? !is_low_mem(m_thisUnsafe)
-    : !func()->isStaticInPrologue();
+  return !is_low_mem(m_thisUnsafe);
 }
 
 inline bool ActRec::hasClassInPrologue() const {
   assertx(func()->implCls());
-  return use_packedptr
-    ? is_low_mem(m_thisUnsafe)
-    : func()->isStaticInPrologue();
+  return is_low_mem(m_thisUnsafe);
 }
 
 inline void* ActRec::getThisOrClass() const {

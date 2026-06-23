@@ -58,7 +58,6 @@ struct TypedValue;
 extern StringData** precomputed_chars;
 
 inline bool is_static_string(const StringData* s) {
-  if (!use_packedptr) return s->isStatic();
   return is_low_mem(reinterpret_cast<void*>(const_cast<StringData*>(s)));
 }
 

@@ -263,7 +263,6 @@ void setup_low_arena(PageSpec s) {
                    numa_node_set, 0);
   lowRange.setLowMapper(lowMapper);
 
-#ifdef USE_PACKEDPTR
   auto& lowSmallRange = getRange(AddrRangeClass::LowSmall);
   auto lowSmallMapper =
     getMapperChain(lowSmallRange,
@@ -283,7 +282,6 @@ void setup_low_arena(PageSpec s) {
                    true,                // 4K
                    numa_node_set, 0);
   midRange.setLowMapper(midMapper);
-#endif
 
   auto lowEmergencyMapper =
     new BumpEmergencyMapper([]{ kill(getpid(), SIGTERM);}, lowEmergencyRange);
@@ -291,19 +289,15 @@ void setup_low_arena(PageSpec s) {
 
   auto ma = LowArena::CreateAt(&g_lowArena);
   ma->appendMapper(lowMapper);
-#ifdef USE_PACKEDPTR
   ma->appendMapper(midMapper);
   ma->appendMapper(lowSmallMapper);
-#endif
   ma->appendMapper(lowEmergencyMapper);
   low_arena = ma->id();
   low_arena_flags = MALLOCX_ARENA(low_arena) | MALLOCX_TCACHE_NONE;
 
   ma = LowArena::CreateAt(&g_lowSmallArena);
   ma->appendMapper(lowMapper);
-#ifdef USE_PACKEDPTR
   ma->appendMapper(lowSmallMapper);
-#endif
   ma->appendMapper(lowEmergencyMapper);
   low_small_arena = ma->id();
   low_small_arena_flags = MALLOCX_ARENA(low_small_arena) | MALLOCX_TCACHE_NONE;

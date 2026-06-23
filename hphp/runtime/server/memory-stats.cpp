@@ -88,8 +88,8 @@ ServiceData::CounterCallback s_counters(
     counters["mem.mid-mapped"] = alloc::getMidMapped();
     // this isn't really a counter, but whatever. we need a way for callers
     // to query if this build is limited by lowptr memory or not
-    counters["mem.use-low-ptr"] = use_packedptr ? 1 : 0;
-    counters["mem.used-ptrmode"] = use_packedptr ? 3 : 1;
+    counters["mem.use-low-ptr"] = 1;
+    counters["mem.used-ptrmode"] = 3;
 
     counters["mem.unit-size"] = MemoryStats::TotalSize(AllocKind::Unit);
     counters["mem.func-size"] = MemoryStats::TotalSize(AllocKind::Func);

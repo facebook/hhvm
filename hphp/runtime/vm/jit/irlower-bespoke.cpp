@@ -1257,15 +1257,8 @@ void cgLdStructDictKey(IRLS& env, const IRInstruction* inst) {
   auto constexpr offset = StructLayout::fieldsOffset() +
                           offsetof(StructLayout::Field, key);
   auto constexpr size = sizeof(StructLayout::Field);
-  static_assert(!use_packedptr || size == 8);
-  static_assert(use_packedptr || size == 16);
-  if constexpr (use_packedptr) {
-    emitLdPackedPtr(v, layout[rslot * 8 + offset], rdst);
-  } else {
-    auto const rslot_scaled = v.makeReg();
-    v << shlqi {4, rslot, rslot_scaled, v.makeReg()};
-    v << load{layout[rslot_scaled + offset], rdst};
-  }
+  static_assert(size == 8);
+  emitLdPackedPtr(v, layout[rslot * 8 + offset], rdst);
 }
 
 void cgLdStructDictVal(IRLS& env, const IRInstruction* inst) {

@@ -221,7 +221,7 @@ struct StructLayout : public ConcreteLayout {
     bool maybeDup;
     uint16_t slot;
   };
-  static_assert(!use_packedptr || sizeof(PerfectHashEntry) == 8);
+  static_assert(sizeof(PerfectHashEntry) == 8);
 
   static constexpr size_t kMaxColor = 511;
   static_assert(kMaxColor > 2);

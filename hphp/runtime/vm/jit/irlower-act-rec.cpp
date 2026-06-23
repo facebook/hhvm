@@ -239,15 +239,9 @@ const Func* funcFromActRecHelper(const ActRec* fp) { return fp->func(); }
 
 void cgLdARFunc(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
-  if (use_packedptr) {
-    auto const fp = srcLoc(env, inst, 0).reg();
-    auto const dst = dstLoc(env, inst, 0).reg();
-    emitLdPackedPtr(v, fp[AROFF(m_funcId)], dst);
-    return;
-  }
-  auto const args = argGroup(env, inst).ssa(0);
-  auto const target = CallSpec::direct(funcFromActRecHelper);
-  cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::None, args);
+  auto const fp = srcLoc(env, inst, 0).reg();
+  auto const dst = dstLoc(env, inst, 0).reg();
+  emitLdPackedPtr(v, fp[AROFF(m_funcId)], dst);
 }
 
 IMPL_OPCODE_CALL(LdPublicFunc)

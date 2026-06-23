@@ -16,16 +16,9 @@
 
 #pragma once
 
-#include "hphp/util/ptr-def.h"
 #include "hphp/util/ptr-impl.h"
 
 namespace HPHP {
-
-#ifdef USE_PACKEDPTR
-constexpr bool use_packedptr = true;
-#else
-constexpr bool use_packedptr = false;
-#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -47,8 +40,6 @@ using UninitFullPtr = ptrimpl::PtrImpl<T, ptrimpl::Normal, ptrimpl::UInt64, fals
 template <typename T>
 using AtomicFullPtr = ptrimpl::PtrImpl<T, ptrimpl::Atomic, ptrimpl::UInt64>;
 
-#ifdef USE_PACKEDPTR
-
 template <typename T>
 using PackedPtr = ptrimpl::PtrImpl<T, ptrimpl::Normal, ptrimpl::UInt32Packed>;
 
@@ -57,19 +48,6 @@ using UninitPackedPtr = ptrimpl::PtrImpl<T, ptrimpl::Normal, ptrimpl::UInt32Pack
 
 template <typename T>
 using AtomicPackedPtr = ptrimpl::PtrImpl<T, ptrimpl::Atomic, ptrimpl::UInt32Packed>;
-
-#else
-
-template <typename T>
-using PackedPtr = FullPtr<T>;
-
-template <typename T>
-using UninitPackedPtr = UninitFullPtr<T>;
-
-template <typename T>
-using AtomicPackedPtr = AtomicFullPtr<T>;
-
-#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 

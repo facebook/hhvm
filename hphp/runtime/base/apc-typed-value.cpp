@@ -53,7 +53,7 @@ void APCTypedValue::PushHazardPointer(const APCHandle* handle) {
 }
 
 bool APCTypedValue::UseStringHazardPointers() {
-  return !use_packedptr && !apcExtension::UseUncounted;
+  return false;
 }
 
 //////////////////////////////////////////////////////////////////////

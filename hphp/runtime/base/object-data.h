@@ -579,8 +579,7 @@ private:
 #endif
 
 #if defined(__x86_64__)
-static_assert(sizeof(ObjectData) == (use_packedptr ? 12 : 16),
-              "Change this only on purpose");
+static_assert(sizeof(ObjectData) == 12, "Change this only on purpose");
 static_assert(alignof(ObjectData) == 1);
 #else
 static_assert(sizeof(ObjectData) == 16, "Change this only on purpose");

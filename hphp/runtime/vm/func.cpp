@@ -79,15 +79,7 @@ Mutex g_funcsMutex;
  * in TreadHashMap
  */
 static std::atomic<FuncId::Int> s_nextFuncId{1};
-#ifndef USE_PACKEDPTR
-AtomicPackedPtrVector<const Func> Func::s_funcVec{0, nullptr};
-static InitFiniNode s_funcVecReinit([]{
-  UnsafeReinitEmptyAtomicPackedPtrVector(
-    Func::s_funcVec, Cfg::Eval::FuncCountHint);
-}, InitFiniNode::When::PostRuntimeOptions, "s_funcVec reinit");
-#else
 folly::ConcurrentHashMap<uint32_t, uint32_t> s_stableFuncIDs;
-#endif
 
 static ServiceData::ExportedCounter* s_funcid_counter =
   ServiceData::createCounter("admin.func_ids");
@@ -166,14 +158,6 @@ void Func::destroy(Func* func) {
     func->deregisterInDataMap();
   }
 
-#ifndef USE_PACKEDPTR
-  if (!func->m_funcId.isInvalid()) {
-    assertx(s_funcVec.get(func->m_funcId.toInt()) == func);
-    s_funcVec.set(func->m_funcId.toInt(), nullptr);
-    func->m_funcId = {FuncId::Invalid};
-  }
-#endif
-
   if (s_treadmill.load(std::memory_order_acquire)) {
     Treadmill::enqueue([func](){
       {
@@ -208,14 +192,6 @@ void Func::freeClone() {
     m_attrs = static_cast<Attr>(m_attrs & ~AttrHasInheritedReturnTypes);
     s_inheritedRetTypes.erase(getFuncId().toStableInt());
   }
-
-#ifndef USE_PACKEDPTR
-  if (!m_funcId.isInvalid()) {
-    assertx(s_funcVec.get(m_funcId.toInt()) == this);
-    s_funcVec.set(m_funcId.toInt(), nullptr);
-    m_funcId = {FuncId::Invalid};
-  }
-#endif
 
   {
     auto metaLock = jit::tc::lockMetadata();
@@ -255,9 +231,6 @@ Func* Func::clone(Class* cls, const StringData* name) const {
   // context of the class it was cloned into, so unset it for the new clone.
   f->m_attrs = Attr(f->m_attrs & ~AttrHasInheritedReturnTypes);
 
-#ifndef USE_PACKEDPTR
-  f->m_funcId = {FuncId::Invalid};
-#endif
   f->setNewFuncId();
   f->atomicFlags().unset(Func::Flags::Zombie);
   return f;
@@ -355,9 +328,6 @@ void Func::finishedEmittingParams(std::vector<ParamInfo>& fParams) {
 }
 
 void Func::registerInDataMap() {
-#ifndef USE_PACKEDPTR
-  assertx(!m_funcId.isInvalid());
-#endif
   assertx((!m_allFlags.m_isPreFunc || m_cloned.flag.test_and_set()));
   assertx(!m_allFlags.m_registeredInDataMap);
   assertx(mallocEnd());
@@ -368,9 +338,6 @@ void Func::registerInDataMap() {
 void Func::deregisterInDataMap() {
   assertx(m_allFlags.m_registeredInDataMap);
   assertx((!m_allFlags.m_isPreFunc || m_cloned.flag.test_and_set()));
-#ifndef USE_PACKEDPTR
-  assertx(!m_funcId.isInvalid());
-#endif
   data_map::deregister(this);
   m_allFlags.m_registeredInDataMap = false;
 }
@@ -403,7 +370,6 @@ FuncId::Int Func::maxFuncIdNum() {
   return s_nextFuncId.load(std::memory_order_acquire);
 }
 
-#ifdef USE_PACKEDPTR
 void Func::setNewFuncId() {
   auto const id = s_nextFuncId.fetch_add(1, std::memory_order_acq_rel);
   s_funcid_counter->increment();
@@ -429,34 +395,6 @@ const Func* Func::fromFuncId(FuncId id) {
 bool Func::isFuncIdValid(FuncId id) {
   return !id.isInvalid() && !id.isDummy();
 }
-#else
-void Func::setNewFuncId() {
-  assertx(m_funcId.isInvalid());
-  m_funcId = {s_nextFuncId.fetch_add(1, std::memory_order_acq_rel)};
-  s_funcid_counter->increment();
-
-  s_funcVec.ensureSize(m_funcId.toInt() + 1);
-  assertx(s_funcVec.get(m_funcId.toInt()) == nullptr);
-  s_funcVec.set(m_funcId.toInt(), this);
-}
-
-uint32_t Func::getStableId() const {
-  return getFuncId().toInt();
-}
-
-const Func* Func::fromFuncId(FuncId id) {
-  assertx(id.toInt() < s_nextFuncId);
-  auto const func = s_funcVec.get(id.toInt());
-  func->validate();
-  return func;
-}
-
-bool Func::isFuncIdValid(FuncId id) {
-  if (id.toInt() >= s_nextFuncId) return false;
-  return s_funcVec.get(id.toInt()) != nullptr;
-}
-#endif
-
 
 ///////////////////////////////////////////////////////////////////////////////
 // Bytecode.

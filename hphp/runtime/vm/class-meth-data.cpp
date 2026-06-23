@@ -21,22 +21,6 @@
 
 namespace HPHP {
 
-namespace {
-
-#ifndef USE_PACKEDPTR
-
-using ClsMethDataKey = std::pair<Class*, Func*>;
-
-using ClsMethDataMap = folly_concurrent_hash_map_simd<
-  ClsMethDataKey, ClsMethData*,
-  std::hash<ClsMethDataKey>, std::equal_to<ClsMethDataKey>>;
-
-ClsMethDataMap s_map;
-
-#endif
-
-}
-
 ClsMethData::ClsMethData(Class* cls, Func* func)
   : m_cls{cls}
   , m_func{func} {
@@ -45,17 +29,7 @@ ClsMethData::ClsMethData(Class* cls, Func* func)
 }
 
 ClsMethData::cls_meth_t ClsMethData::make(Class* cls, Func* func) {
-#ifdef USE_PACKEDPTR
   return ClsMethData(cls, func);
-#else
-  auto const key = ClsMethDataKey { cls, func };
-  auto const it = s_map.find(key);
-  if (it != s_map.end()) return it->second;
-  auto result = std::unique_ptr<ClsMethData>(new ClsMethData(cls, func));
-  auto const pair = s_map.insert({key, result.get()});
-  if (pair.second) result.release();
-  return pair.first->second;
-#endif
 }
 
 bool ClsMethData::validate() const {

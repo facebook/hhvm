@@ -315,15 +315,8 @@ void cgEqFuncId(IRLS& env, const IRInstruction* inst) {
 
   auto& v = vmain(env);
   auto const sf = v.makeReg();
-  #ifdef USE_PACKEDPTR
-    assertx(Cfg::Repo::Authoritative);
-    v << cmpq{func, v.cns(funcPtr), sf};
-  #else
-    auto const funcId = funcPtr->getFuncId();
-    auto const off = Func::funcIdOffset();
-    assertx(!funcId.isInvalid() && !funcId.isDummy());
-    v << cmplim{(int32_t)funcId.toInt(), func[off], sf};
-  #endif
+  assertx(Cfg::Repo::Authoritative);
+  v << cmpq{func, v.cns(funcPtr), sf};
   ifThen(v, CC_NE, sf, label(env, inst->taken()));
 }
 

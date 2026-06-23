@@ -70,15 +70,9 @@ extern void* low_bump_start_addr();
 
 constexpr size_t kLowEmergencySize = 128 << 20;
 
-#ifdef USE_PACKEDPTR
 constexpr uintptr_t kLowArenaMaxAddr = 1ull << 32;
 constexpr uintptr_t kMidArenaMaxAddr = 32ull << 30;
 constexpr size_t kLowSmallArenaSize = 128 << 20;
-#else
-constexpr uintptr_t kLowArenaMaxAddr = 64ull << 30;
-constexpr uintptr_t kMidArenaMaxAddr = kLowArenaMaxAddr;
-constexpr size_t kLowSmallArenaSize = 0;
-#endif
 
 constexpr unsigned kUncountedMaxShift = 38;
 constexpr uintptr_t kUncountedMaxAddr = 1ull << kUncountedMaxShift;
@@ -96,7 +90,6 @@ constexpr uintptr_t kArena0Base = 2ull << 40;
 constexpr uintptr_t kDebugAddr = 3ull << 39;
 
 inline bool is_low_mem(void* m) {
-  assertx(use_packedptr);
   auto i = reinterpret_cast<uintptr_t>(m);
 #ifdef LOW_BUMP_ALLOCATOR
   if (i == 0) return true;
@@ -114,7 +107,7 @@ enum AddrRangeClass : uint32_t {
   Low = 0,                         // [.., kLowArenaMaxAddr - kLowEmergencySize - kLowSmallArenaSize)
   LowSmall,                        // [kLowArenaMaxAddr - kLowEmergencySize - kLowSmallArenaSize, kLowArenaMaxAddr - kLowEmergencySize)
   LowEmergency,                    // [kLowArenaMaxAddr - kLowEmergencySize, kLowArenaMaxAddr)
-  Mid,                             // [kLowArenaMaxAddr, kMidArenaMaxAddr) (Only exists in USE_PACKEDPTR builds)
+  Mid,                             // [kLowArenaMaxAddr, kMidArenaMaxAddr)
   Uncounted,                       // [kMidArenaMaxAddr, kHighArenaMaxAddr)
   UncountedCold,                   // [kHighArenaMaxAddr, kUncountedMaxAddr)
   Global,                          // [kArena0Base, ...)

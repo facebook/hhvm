@@ -417,18 +417,12 @@ void cgLdResolvedTypeCnsClsName(IRLS& env, const IRInstruction* inst) {
   auto const slot = extra->slot;
   auto const cnsVec = v.makeReg();
   v << load{cls[Class::constantsVecOff()], cnsVec};
-#ifndef USE_PACKEDPTR
-  auto const offset = cnsVec[slot * sizeof(Class::Const) +
-                             offsetof(Class::Const, pointedClsName)];
-  v << load{offset, dst};
-#else
   auto const rawAddr = cnsVec[slot * sizeof(Class::Const) +
                               offsetof(Class::Const, val) +
                               offsetof(TypedValue, m_aux) +
                               offsetof(AuxUnion, u_constModifiers) +
                               offsetof(ConstModifiers, u_clsName)];
   emitLdPackedPtr(v, rawAddr, dst);
-#endif
 }
 
 void cgLdTypeCnsClsName(IRLS& env, const IRInstruction* inst) {

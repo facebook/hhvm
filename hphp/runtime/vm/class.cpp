@@ -297,8 +297,7 @@ constexpr size_t extra_builtin_ptrs =
   0;
 #endif
 
-static constexpr size_t kClassSize = (debug ? (use_packedptr ? 280 : 312)
-                                            : (use_packedptr ? 276 : 312)) + extra_builtin_ptrs;
+static constexpr size_t kClassSize = (debug ? 280 : 276) + extra_builtin_ptrs;
 static_assert(CheckSize<sizeof_Class, kClassSize>(), "");
 
 /*

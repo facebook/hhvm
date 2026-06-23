@@ -205,7 +205,7 @@ TEST(SerializationTest, TestBuildServerOnlyPEM) {
   credVec.emplace_back(
       Extension{
           ExtensionType::delegated_credential,
-          folly::IOBuf::copyBuffer(std::move(credData))});
+          folly::IOBuf::copyBuffer(credData)});
   folly::Optional<DelegatedCredential> serverCred;
   Error err;
   EXPECT_EQ(
@@ -233,7 +233,7 @@ TEST(SerializationTest, TestBuildClientOnlyPEM) {
   credVec.emplace_back(
       Extension{
           ExtensionType::delegated_credential,
-          folly::IOBuf::copyBuffer(std::move(credData))});
+          folly::IOBuf::copyBuffer(credData)});
   folly::Optional<DelegatedCredential> clientCred;
   Error err;
   EXPECT_EQ(
@@ -261,7 +261,7 @@ TEST(SerializationTest, TestBuildMismatchedPEM) {
   credVec.emplace_back(
       Extension{
           ExtensionType::delegated_credential,
-          folly::IOBuf::copyBuffer(std::move(credData))});
+          folly::IOBuf::copyBuffer(credData)});
   folly::Optional<DelegatedCredential> clientCred;
   Error err;
   EXPECT_EQ(

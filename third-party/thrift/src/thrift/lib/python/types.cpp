@@ -687,16 +687,19 @@ void* setMutableUnion(void* objectPtr, const detail::TypeInfo& /* typeInfo */) {
 /**
  * Gets the "isset" flag of the `index`-th field of the 'struct list'
  *
- * The `objectPtr` is double pointer to the allocated memory in PyListObject,
+ * Derives "isset" from the field value being non-`None` rather than from the
+ * isset byte array. The table-based serializer only calls this for optional
+ * fields, for which the invariant "set iff value is not None" holds (unset
+ * optionals are `None`).
+ *
+ * The `objectPtr` is a double pointer to the allocated memory in PyListObject,
  * please see `DynamicStructInfo::addMutableFieldInfo()`
  */
 bool getMutableIsset(const void* objectPtr, ptrdiff_t offset) {
-  const char* issetFlags =
-      PyBytes_AsString(*static_cast<PyObject* const*>(objectPtr));
-  if (issetFlags == nullptr) {
-    THRIFT_PY3_CHECK_ERROR();
-  }
-  return issetFlags[offset];
+  // Field values follow element 0 (the isset flags) in the data list, so field
+  // `offset` lives at list index `offset + 1`.
+  PyObject* value = static_cast<PyObject* const*>(objectPtr)[offset + 1];
+  return value != Py_None;
 }
 
 void setIsset(void* objectPtr, ptrdiff_t offset, bool value) {

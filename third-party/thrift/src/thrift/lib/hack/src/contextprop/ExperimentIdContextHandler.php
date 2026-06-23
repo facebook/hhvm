@@ -25,18 +25,16 @@ final class ExperimentIdContextHandler implements IContextHandler {
   ): void {
     $ids_from_response = $immutable_tfmr->getExperimentIds()?->get_merge();
     $length = C\count($ids_from_response ?? vec[]);
-    if (SV_ZACHZUNDEL_KILLSWITCHES::experimentIdLogging()) {
-      CategorizedOBC::typedGet(ODSCategoryID::ODS_WEB_FOUNDATION)->bumpKey(
-        'experiment_ids',
-        $length,
-        OdsAggregationType::ODS_AGGREGATION_TYPE_AVG,
-      );
+    CategorizedOBC::typedGet(ODSCategoryID::ODS_WEB_FOUNDATION)->bumpKey(
+      'experiment_ids',
+      $length,
+      OdsAggregationType::ODS_AGGREGATION_TYPE_AVG,
+    );
 
-      CategorizedOBC::typedGet(ODSCategoryID::ODS_WEB_FOUNDATION)->bumpKey(
-        'experiment_ids',
-        $length,
-      );
-    }
+    CategorizedOBC::typedGet(ODSCategoryID::ODS_WEB_FOUNDATION)->bumpKey(
+      'experiment_ids',
+      $length,
+    );
 
     $thrift_class = Shapes::idx($params, 'thrift_class');
     $limit = JustKnobs::getInt(
@@ -66,19 +64,16 @@ final class ExperimentIdContextHandler implements IContextHandler {
       }
     }
 
-    if (SV_ZACHZUNDEL_KILLSWITCHES::experimentIdLogging()) {
-      $final_length = C\count($mutable_ctx->getExperimentIds());
-      CategorizedOBC::typedGet(ODSCategoryID::ODS_FBTRACE)->bumpKey(
-        'final_incoming_downstream_experiment_ids',
-        $length,
-        OdsAggregationType::ODS_AGGREGATION_TYPE_AVG,
-      );
+    CategorizedOBC::typedGet(ODSCategoryID::ODS_FBTRACE)->bumpKey(
+      'final_incoming_downstream_experiment_ids',
+      $length,
+      OdsAggregationType::ODS_AGGREGATION_TYPE_AVG,
+    );
 
-      CategorizedOBC::typedGet(ODSCategoryID::ODS_FBTRACE)->bumpKey(
-        'final_incoming_downstream_experiment_ids',
-        $length,
-      );
-    }
+    CategorizedOBC::typedGet(ODSCategoryID::ODS_FBTRACE)->bumpKey(
+      'final_incoming_downstream_experiment_ids',
+      $length,
+    );
   }
 
   public function onOutgoingDownstream(

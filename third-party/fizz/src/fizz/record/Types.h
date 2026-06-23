@@ -8,6 +8,8 @@
 
 #pragma once
 
+#include <array>
+
 #include <fizz/protocol/Events.h>
 #include <fizz/record/Alerts.h>
 #include <fizz/util/Status.h>
@@ -255,23 +257,33 @@ struct CertificateRequest : HandshakeStruct<
   std::vector<Extension> extensions;
 };
 
+#define FIZZ_RECORD_TYPES_SIGNATURE_SCHEME(X)                      \
+  X(::fizz::SignatureScheme, ecdsa_secp256r1_sha256, 0x0403)       \
+  X(::fizz::SignatureScheme, ecdsa_secp384r1_sha384, 0x0503)       \
+  X(::fizz::SignatureScheme, ecdsa_secp521r1_sha512, 0x0603)       \
+  X(::fizz::SignatureScheme, rsa_pss_sha256, 0x0804)               \
+  X(::fizz::SignatureScheme, rsa_pss_sha384, 0x0805)               \
+  X(::fizz::SignatureScheme, rsa_pss_sha512, 0x0806)               \
+  X(::fizz::SignatureScheme, ed25519, 0x0807)                      \
+  X(::fizz::SignatureScheme, ed448, 0x0808)                        \
+  /* all batch scheme type numbers are temporarily assigned */     \
+  X(::fizz::SignatureScheme, ecdsa_secp256r1_sha256_batch, 0xFE00) \
+  X(::fizz::SignatureScheme, ecdsa_secp384r1_sha384_batch, 0xFE01) \
+  X(::fizz::SignatureScheme, ecdsa_secp521r1_sha512_batch, 0xFE02) \
+  X(::fizz::SignatureScheme, ed25519_batch, 0xFE03)                \
+  X(::fizz::SignatureScheme, ed448_batch, 0xFE04)                  \
+  X(::fizz::SignatureScheme, rsa_pss_sha256_batch, 0xFE05)
+
+#define FIZZ_GEN_ENUM_ENTRY(enclosing, name, value) name = value,
 enum class SignatureScheme : uint16_t {
-  ecdsa_secp256r1_sha256 = 0x0403,
-  ecdsa_secp384r1_sha384 = 0x0503,
-  ecdsa_secp521r1_sha512 = 0x0603,
-  rsa_pss_sha256 = 0x0804,
-  rsa_pss_sha384 = 0x0805,
-  rsa_pss_sha512 = 0x0806,
-  ed25519 = 0x0807,
-  ed448 = 0x0808,
-  // all batch scheme type numbers are temporarially assigned
-  ecdsa_secp256r1_sha256_batch = 0xFE00,
-  ecdsa_secp384r1_sha384_batch = 0xFE01,
-  ecdsa_secp521r1_sha512_batch = 0xFE02,
-  ed25519_batch = 0xFE03,
-  ed448_batch = 0xFE04,
-  rsa_pss_sha256_batch = 0xFE05,
+  FIZZ_RECORD_TYPES_SIGNATURE_SCHEME(FIZZ_GEN_ENUM_ENTRY)
 };
+#undef FIZZ_GEN_ENUM_ENTRY
+
+#define FIZZ_GEN_ARRAY_ENTRY(enclosing, name, value) enclosing::name,
+inline constexpr std::array kAllSignatureSchemes = {
+    FIZZ_RECORD_TYPES_SIGNATURE_SCHEME(FIZZ_GEN_ARRAY_ENTRY)};
+#undef FIZZ_GEN_ARRAY_ENTRY
 
 std::string toString(SignatureScheme);
 

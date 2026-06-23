@@ -20,6 +20,7 @@ package "meta.com/thrift/test/digest/struct_with_fields"
 
 namespace cpp2 apache.thrift.type_system.test.digest_struct_with_fields
 namespace rust digest_fixture_struct_with_fields
+namespace py3 apache.thrift.type_system.test
 
 @thrift.Uri{value = "meta.com/test/Person"}
 struct Person {

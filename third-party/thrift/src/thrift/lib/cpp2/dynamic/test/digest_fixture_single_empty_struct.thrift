@@ -20,6 +20,7 @@ package "meta.com/thrift/test/digest/single_empty_struct"
 
 namespace cpp2 apache.thrift.type_system.test.digest_single_empty_struct
 namespace rust digest_fixture_single_empty_struct
+namespace py3 apache.thrift.type_system.test
 
 @thrift.Uri{value = "meta.com/test/Empty"}
 struct Empty {}

@@ -20,6 +20,7 @@ package "meta.com/thrift/test/digest/enum"
 
 namespace cpp2 apache.thrift.type_system.test.digest_enum
 namespace rust digest_fixture_enum
+namespace py3 apache.thrift.type_system.test
 
 @thrift.Uri{value = "meta.com/test/Status"}
 enum Status {

@@ -22,6 +22,7 @@ package "facebook.com/thrift/type_system/test"
 
 namespace cpp2 apache.thrift.type_system.test.digest_expected_values
 namespace rust digest_expected_values
+namespace py3 apache.thrift.type_system.test
 
 // TypeSystem digests
 const string DIGEST_EMPTY = "dbc1b4c900ffe48d575b5da5c638040125f65db0fe3e24494b76ea986457d986";

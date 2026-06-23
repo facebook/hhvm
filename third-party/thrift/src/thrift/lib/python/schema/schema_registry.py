@@ -27,9 +27,12 @@ import functools
 import importlib
 import sys
 import types
-from collections.abc import Callable, Mapping
+from collections.abc import Callable, Mapping, Sequence
 from importlib import resources
-from typing import Any
+from typing import Any, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from thrift.lib.python.schema.type_system_digest import DigestMode
 
 import zstandard  # @manual=fbsource//third-party/pypi/zstandard:zstandard
 from apache.thrift.type.schema import thrift_types as _schema_types
@@ -285,6 +288,31 @@ class SchemaRegistry(TypeSystem):
         """``{}`` -- the registry is lazy/module-discovery based and cannot
         enumerate the types at a source location up front."""
         return {}
+
+    def type_system_digest(
+        self, root_uris: Sequence[str], mode: DigestMode | None = None
+    ) -> bytes:
+        """The cross-language-identical SHA-256 digest of the canonical type
+        system rooted at ``root_uris`` (their transitive closure).
+
+        Equivalent to ``digest(build_serializable_type_system(self, root_uris))``.
+        Root-pruned by design: the registry is lazy/module-discovery based and
+        cannot enumerate all URIs up front, so there is no "digest everything".
+
+        ``mode`` selects the coverage; see :class:`DigestMode` (default
+        ``FULL``; ``STRUCTURAL`` skips annotations and custom default values)."""
+        from thrift.lib.python.schema._serializable import (
+            build_serializable_type_system,
+        )
+        from thrift.lib.python.schema.type_system_digest import (
+            DigestMode,
+            type_system_digest,
+        )
+
+        return type_system_digest(
+            build_serializable_type_system(self, root_uris),
+            mode if mode is not None else DigestMode.FULL,
+        )
 
     def _resolve_module_for_uri(self, uri: str) -> types.ModuleType | None:
         """Find the module that defines the given URI."""

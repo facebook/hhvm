@@ -36,7 +36,7 @@ jobs:
         sysctl -n machdep.cpu.brand_string
         sysctl -n hw.memsize | awk '{print "Memory: " $1/1073741824 " GB"}'
 
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
 
     - name: Set up sccache
       uses: mozilla-actions/sccache-action@v0.0.10

@@ -281,8 +281,8 @@ enum class SignatureScheme : uint16_t {
 #undef FIZZ_GEN_ENUM_ENTRY
 
 #define FIZZ_GEN_ARRAY_ENTRY(enclosing, name, value) enclosing::name,
-inline constexpr std::array kAllSignatureSchemes = {
-    FIZZ_RECORD_TYPES_SIGNATURE_SCHEME(FIZZ_GEN_ARRAY_ENTRY)};
+inline constexpr std::array<SignatureScheme, 14> kAllSignatureSchemes = {
+    {FIZZ_RECORD_TYPES_SIGNATURE_SCHEME(FIZZ_GEN_ARRAY_ENTRY)}};
 #undef FIZZ_GEN_ARRAY_ENTRY
 
 std::string toString(SignatureScheme);

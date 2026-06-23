@@ -142,6 +142,10 @@ PyObject* createImmutableStructTupleWithDefaultValues(
  * `createImmutableStructTupleWithDefaultValues()` documentation for more
  * details.
  *
+ * Unlike the immutable tuple, the mutable list has NO isset byte array: its
+ * elements are the field values directly, in field order (element `i` holds
+ * field `i`).
+ *
  * The following list only highlights the difference for the "standard" value
  * for the corresponding type:
  *   * In the mutable version, the standard value for lists is an empty `list`.

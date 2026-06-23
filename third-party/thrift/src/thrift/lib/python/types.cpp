@@ -242,6 +242,10 @@ UniquePyObjectPtr getDefaultValueForMutableField(
  * A policy for handling Python tuples.
  */
 struct TupleContainer final {
+  // Data-holder index of the first field value. Immutable struct tuples reserve
+  // element 0 for the isset byte array, so fields start at index 1.
+  static constexpr Py_ssize_t kFieldStartIndex = 1;
+
   /**
    * Return a new tuple object of given size, or NULL on failure.
    */
@@ -291,6 +295,10 @@ struct TupleContainer final {
  * A policy for handling Python lists.
  */
 struct ListContainer final {
+  // Data-holder index of the first field value. Mutable struct lists no longer
+  // carry an isset byte array, so fields start at index 0.
+  static constexpr Py_ssize_t kFieldStartIndex = 0;
+
   /**
    * Return a new list object of given size, or NULL on failure.
    */
@@ -354,13 +362,16 @@ const char* getDataHolderIssetFlags(const PyObject* structDataHolder) {
 /**
  * Returns a new "struct container" with all its elements initialized.
  *
- * As in `createStructContainer()`, the first element of the tuple is a
- * 0-initialized bytearray with `numFields` bytes (to be used as isset flags).
+ * As in `createStructContainer()`, the layout depends on the `Container`
+ * policy: for `TupleContainer` (immutable) the first element is a 0-initialized
+ * isset bytearray and the `numFields` field values follow it, while for
+ * `ListContainer` (mutable) there is no isset bytearray and the field values
+ * occupy the whole container. The first field value lives at index
+ * `Container::kFieldStartIndex` (1 for tuples, 0 for lists).
  *
- * However, the remaining elements (1 through `numFields + 1`) are initialized
- * with the appropriate default value for the corresponding field (see below).
- * The order corresponds to the order of fields in the given `structInfo`
- * (i.e., the insertion order, NOT the field ids).
+ * Each field value is initialized with the appropriate default value for the
+ * corresponding field (see below), in the order of fields in the given
+ * `structInfo` (i.e., the insertion order, NOT the field ids).
  *
  * The default value for optional fields is always `Py_None`. For other fields,
  * the default value is either specified by the user or the "standard" value
@@ -380,18 +391,19 @@ PyObject* createStructContainerWithDefaultValues(
     THRIFT_PY3_CHECK_ERROR();
   }
 
-  // Initialize container[1:numFields+1] with default field values.
+  // Initialize the field elements with default field values.
   const FieldValueMap& defaultValues =
       *static_cast<const FieldValueMap*>(structInfo.customExt);
   for (int fieldIndex = 0; fieldIndex < numFields; ++fieldIndex) {
     const detail::FieldInfo& fieldInfo = structInfo.fieldInfos[fieldIndex];
     if (fieldInfo.qualifier == detail::FieldQualifier::Optional) {
-      Container::SET_ITEM(container.get(), fieldIndex + 1, Py_None);
+      Container::SET_ITEM(
+          container.get(), fieldIndex + Container::kFieldStartIndex, Py_None);
       Py_INCREF(Py_None);
     } else {
       Container::SET_ITEM(
           container.get(),
-          fieldIndex + 1,
+          fieldIndex + Container::kFieldStartIndex,
           Container::getDefaultValueForField(
               fieldInfo.typeInfo, defaultValues, fieldIndex)
               .release());
@@ -580,10 +592,11 @@ UniquePyObjectPtr getStandardMutableDefaultValueForType(
  * The `container` parameter should be a valid Python object, created by the
  * `createStructContainer()`.
  *
- * Iterates through the elements (from 1 to `numFields + 1`). If a field
- * is unset, it is populated with the corresponding default value.
- * The mechanism for determining the default value is the same as in the
- * `createStructContainerWithDefaultValues()` function. Please see the
+ * Iterates through the `numFields` field values (which start at index
+ * `Container::kFieldStartIndex` -- 1 for `TupleContainer`, 0 for
+ * `ListContainer`). If a field is unset, it is populated with the corresponding
+ * default value. The mechanism for determining the default value is the same as
+ * in the `createStructContainerWithDefaultValues()` function. Please see the
  * documentation of `createStructContainerWithDefaultValues()` for details on
  * how the default value is identified.
  *
@@ -598,7 +611,7 @@ void populateStructContainerUnsetFieldsWithDefaultValues(
 
   DCHECK(Container::Check(container));
   const int16_t numFields = structInfo.numFields;
-  DCHECK(Container::Size(container) == numFields + 1);
+  DCHECK(Container::Size(container) == numFields + Container::kFieldStartIndex);
 
   const FieldValueMap& defaultValues =
       *static_cast<const FieldValueMap*>(structInfo.customExt);
@@ -611,7 +624,8 @@ void populateStructContainerUnsetFieldsWithDefaultValues(
   }
   for (int i = 0; i < numFields; ++i) {
     const detail::FieldInfo& fieldInfo = structInfo.fieldInfos[i];
-    PyObject* oldValue = Container::GET_ITEM(container, i + 1);
+    const Py_ssize_t element = i + Container::kFieldStartIndex;
+    PyObject* oldValue = Container::GET_ITEM(container, element);
 
     // If the field is already set, this implies that the constructor has
     // already assigned a value to the field. In this case, we skip it and
@@ -627,13 +641,13 @@ void populateStructContainerUnsetFieldsWithDefaultValues(
     }
 
     if (fieldInfo.qualifier == detail::FieldQualifier::Optional) {
-      Container::SET_ITEM(container, i + 1, Py_None);
+      Container::SET_ITEM(container, element, Py_None);
       Py_INCREF(Py_None);
     } else {
       // getDefaultValueForField calls `Py_INCREF`
       Container::SET_ITEM(
           container,
-          i + 1,
+          element,
           Container::getDefaultValueForField(
               fieldInfo.typeInfo, defaultValues, i)
               .release());
@@ -717,9 +731,9 @@ void* setMutableUnion(void* objectPtr, const detail::TypeInfo& /* typeInfo */) {
  * please see `DynamicStructInfo::addMutableFieldInfo()`
  */
 bool getMutableIsset(const void* objectPtr, ptrdiff_t offset) {
-  // Field values follow element 0 (the isset flags) in the data list, so field
-  // `offset` lives at list index `offset + 1`.
-  PyObject* value = static_cast<PyObject* const*>(objectPtr)[offset + 1];
+  // The mutable data list holds field values directly (no isset header), so
+  // field `offset` lives at list index `offset`.
+  PyObject* value = static_cast<PyObject* const*>(objectPtr)[offset];
   return value != Py_None;
 }
 
@@ -1308,27 +1322,33 @@ PyObject* createMutableUnionDataHolder() {
 
 template <typename Container>
 PyObject* createStructContainer(int16_t numFields) {
-  // Allocate and 0-initialize numFields bytes.
-  UniquePyObjectPtr issetArr{PyBytes_FromStringAndSize(nullptr, numFields)};
-  if (issetArr == nullptr) {
-    return nullptr;
-  }
-  char* flags = PyBytes_AsString(issetArr.get());
-  if (flags == nullptr) {
-    return nullptr;
-  }
-  for (Py_ssize_t i = 0; i < numFields; ++i) {
-    flags[i] = '\0';
-  }
+  if constexpr (Container::kFieldStartIndex == 0) {
+    // Mutable struct lists carry no isset byte array; the container holds only
+    // the `numFields` (uninitialized) field elements.
+    return Container::New(numFields);
+  } else {
+    // Allocate and 0-initialize numFields bytes.
+    UniquePyObjectPtr issetArr{PyBytes_FromStringAndSize(nullptr, numFields)};
+    if (issetArr == nullptr) {
+      return nullptr;
+    }
+    char* flags = PyBytes_AsString(issetArr.get());
+    if (flags == nullptr) {
+      return nullptr;
+    }
+    for (Py_ssize_t i = 0; i < numFields; ++i) {
+      flags[i] = '\0';
+    }
 
-  // Create container, with isset byte array as first element (followed by
-  // `numFields` uninitialized elements).
-  PyObject* container{Container::New(numFields + 1)};
-  if (container == nullptr) {
-    return nullptr;
+    // Create container, with isset byte array as first element (followed by
+    // `numFields` uninitialized elements).
+    PyObject* container{Container::New(numFields + 1)};
+    if (container == nullptr) {
+      return nullptr;
+    }
+    Container::SET_ITEM(container, 0, issetArr.release());
+    return container;
   }
-  Container::SET_ITEM(container, 0, issetArr.release());
-  return container;
 }
 
 PyObject* createStructTuple(int16_t numFields) {
@@ -1357,9 +1377,10 @@ PyObject* createStructContainerWithNones(const detail::StructInfo& structInfo) {
     return nullptr;
   }
 
-  // Initialize container[1:numFields+1] with 'None'.
+  // Initialize the field elements with 'None'.
   for (int i = 0; i < numFields; ++i) {
-    Container::SET_ITEM(container.get(), i + 1, Py_None);
+    Container::SET_ITEM(
+        container.get(), i + Container::kFieldStartIndex, Py_None);
     Py_INCREF(Py_None);
   }
   return container.release();
@@ -1414,9 +1435,10 @@ void resetFieldToStandardDefault(
   const FieldValueMap& defaultValues =
       *static_cast<const FieldValueMap*>(structInfo.customExt);
   const detail::FieldInfo& fieldInfo = structInfo.fieldInfos[index];
-  PyObject* oldValue = PyList_GET_ITEM(structList, index + 1);
+  // The mutable data list holds field values directly (no isset header).
+  PyObject* oldValue = PyList_GET_ITEM(structList, index);
   if (fieldInfo.qualifier == detail::FieldQualifier::Optional) {
-    PyList_SET_ITEM(structList, index + 1, Py_None);
+    PyList_SET_ITEM(structList, index, Py_None);
     Py_INCREF(Py_None);
   } else {
     // getDefaultValueForField calls `Py_INCREF`
@@ -1424,7 +1446,7 @@ void resetFieldToStandardDefault(
     // Therefore, a deep copy of the given default field value is necessary.
     PyList_SET_ITEM(
         structList,
-        index + 1,
+        index,
         getDefaultValueForMutableField(fieldInfo.typeInfo, defaultValues, index)
             .release());
   }
@@ -1931,20 +1953,19 @@ void DynamicStructInfo::addMutableFieldInfo(
   int16_t idx = fieldNames_.size() - 1;
 
   // In mutable thrift-python, lists are used as the internal representation
-  // of structs. The first member of the list contains the isset flags, while
-  // the remaining members represent each field. PyListObject roughly lays out
-  // as follow:
+  // of structs. Each member of the list represents a field, in field order.
+  // PyListObject roughly lays out as follow:
   //
   // +-------------------------------+
   // |         PyListObject          |
   // +-------------------------------+
   // |  HEADER                       |
   // +-------------------------------+      +-------------------------------+
-  // |  items (PyObject **)          |----->|  PyObject *item0 (issetFlags) |
+  // |  items (PyObject **)          |----->|  PyObject *item0 (field 0)    |
   // +-------------------------------+      +-------------------------------+
   // |  ...                          |      |  ...                          |
   // +-------------------------------+      +-------------------------------+
-  //                                        |  PyObject *itemN              |
+  //                                        |  PyObject *itemN-1            |
   //                                        +-------------------------------+
   //
   // When passing a PyListObject to TableBasedSerializer, fields are expected
@@ -1953,15 +1974,17 @@ void DynamicStructInfo::addMutableFieldInfo(
   // we pass the allocated memory pointed by `items` and the following
   // calculates the offset:
   //
-  // memberOffset = (field-order + 1) * sizeof(PyObject*)
-  // (+1 accounts for the isset flags at the beginning of the list)
+  // memberOffset = field-order * sizeof(PyObject*)
+  //
+  // Mutable unions keep a 2-element holder `(type_int, value)`, so their single
+  // member offset stays at index 1.
 
   tableBasedSerializerStructInfo_->fieldInfos[idx] = detail::FieldInfo{
       /* .id */ id,
       /* .qualifier */ qualifier,
       /* .name */ fieldName.c_str(),
       /* .memberOffset */
-      static_cast<ptrdiff_t>(kFieldOffset * (isUnion() ? 1 : idx + 1)),
+      static_cast<ptrdiff_t>(kFieldOffset * (isUnion() ? 1 : idx)),
       /* .issetOffset */ isUnion() ? 0 : idx,
       /* .typeInfo */ typeInfo};
 }

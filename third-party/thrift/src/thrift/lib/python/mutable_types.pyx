@@ -161,9 +161,9 @@ cdef class _MutablePrimitiveField:
             return None
 
         if isinstance(obj, MutableStruct):
-            return (<MutableStruct>obj)._fbthrift_data[self._field_index + 1]
+            return (<MutableStruct>obj)._fbthrift_data[self._field_index]
         else:
-            return (<MutableGeneratedError>obj)._fbthrift_data[self._field_index + 1]
+            return (<MutableGeneratedError>obj)._fbthrift_data[self._field_index]
 
     def __set__(self, obj, value):
         if obj is None:
@@ -234,7 +234,7 @@ cdef void set_mutable_struct_field(list struct_list, int16_t index, value) excep
         value: new value for this field, in "internal data" represntation (as
             opposed to "Python value" representation - see `*TypeInfo` classes).
     """
-    struct_list[index + 1] = value
+    struct_list[index] = value
 
 
 cdef class MutableStructOrUnion:
@@ -267,8 +267,8 @@ cdef class MutableStruct(MutableStructOrUnion):
     struct in thrift-python.
 
     Instance variables:
-        _fbthrift_data: "mutable struct list" that holds the "isset" flag array and
-            values for all fields. See `createMutableStructListWithDefaultValues()`.
+        _fbthrift_data: "mutable struct list" that holds the values for all fields,
+            in field order. See `createMutableStructListWithDefaultValues()`.
             A `MutableStruct` instance might be appended to `_fbthrift_data` as the
             last element. This instance is not considered by the serialization or the
             deserialization logic; it is used to ensure field-cache consistency in the
@@ -367,10 +367,10 @@ cdef class MutableStruct(MutableStructOrUnion):
         """
         Initializes the underlying "struct data container".
 
-        Assigns `self._fbthrift_data` to a "struct container" with `numFields + 1`
-        fields (initialized to the "isset" flags and values of the corresponding fields
-        - either the default ones or the ones provided by `kwargs`). Most notably, it
-        does NOT hold a reference to this struct instance at the end
+        Assigns `self._fbthrift_data` to a "struct container" with `numFields`
+        fields (initialized to the values of the corresponding fields - either the
+        default ones or the ones provided by `kwargs`). Most notably, it does NOT
+        hold a reference to this struct instance at the end
         (see `_fbthrift_has_struct_instance()`).
 
         Args:
@@ -449,7 +449,7 @@ cdef class MutableStruct(MutableStructOrUnion):
         cdef TypeInfoBase field_type_info = mutable_struct_info.type_infos[index]
         cdef FieldInfo field_info = mutable_struct_info.fields[index]
 
-        data = self._fbthrift_data[index + 1]
+        data = self._fbthrift_data[index]
         if field_info.adapter_info is not None:
             py_value = field_type_info.to_python_value(data)
             adapter_class, transitive_annotation = field_info.adapter_info
@@ -558,9 +558,9 @@ cdef class MutableStruct(MutableStructOrUnion):
         """
         `MutableStruct._fbthrift_data` is populated by multiple sources, such as
         `MutableStruct.__cinit__()` or `MutableStruct._fbthrift_deserialize()`.
-        It stores the `isset` flags as the first element, followed by the data
-        for each field. If a `MutableStruct` instance is created for a specific
-        `_fbthrift_data`, that instance is appended as the last element. The
+        It stores the data for each field, in field order. If a `MutableStruct`
+        instance is created for a specific `_fbthrift_data`, that instance is
+        appended as the last element. The
         instance is not considered by the serialization/deserialization logic;
         it is used to ensure field-cache consistency in the mutable thrift-python
         runtime.

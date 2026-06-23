@@ -68,8 +68,8 @@ cdef class MutableGeneratedError(Error):
       and `BaseException`.
 
     Instance variables:
-        _fbthrift_data: "mutable struct list" that holds the "isset" flag array and
-            values for all fields. See `createMutableStructListWithDefaultValues()`.
+        _fbthrift_data: "mutable struct list" that holds the values for all fields,
+            in field order. See `createMutableStructListWithDefaultValues()`.
 
         _fbthrift_field_cache: This is a list that stores instances of a field's
             Python value. It is especially useful when creating a Python value is
@@ -161,7 +161,7 @@ cdef class MutableGeneratedError(Error):
         cdef TypeInfoBase field_type_info = mutable_struct_info.type_infos[index]
         cdef FieldInfo field_info = mutable_struct_info.fields[index]
 
-        data = self._fbthrift_data[index + 1]
+        data = self._fbthrift_data[index]
         if field_info.adapter_info is not None:
             py_value = field_type_info.to_python_value(data)
             adapter_class, transitive_annotation = field_info.adapter_info
@@ -188,7 +188,7 @@ cdef class MutableGeneratedError(Error):
         cdef MutableStructInfo struct_info = self._fbthrift_mutable_struct_info
         args = []
         for index, type_info in enumerate(struct_info.type_infos):
-            data = self._fbthrift_data[index + 1]
+            data = self._fbthrift_data[index]
             args.append(None if data is None else type_info.to_python_value(data))
 
         return args

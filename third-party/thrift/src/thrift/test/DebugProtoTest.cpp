@@ -75,13 +75,13 @@ int main() {
   *hm.big()[1].a_bite() = 0x33;
 
   std::vector<std::string> stage1;
-  stage1.push_back("and a one");
-  stage1.push_back("and a two");
+  stage1.emplace_back("and a one");
+  stage1.emplace_back("and a two");
   hm.contain()->insert(stage1);
   stage1.clear();
-  stage1.push_back("then a one, two");
-  stage1.push_back("three!");
-  stage1.push_back("FOUR!!");
+  stage1.emplace_back("then a one, two");
+  stage1.emplace_back("three!");
+  stage1.emplace_back("FOUR!!");
   hm.contain()->insert(stage1);
   stage1.clear();
   hm.contain()->insert(stage1);

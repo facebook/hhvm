@@ -65,9 +65,9 @@ class Client {
       auto context = std::make_shared<fizz::client::FizzClientContext>();
       std::vector<std::string> alpns;
       if (FLAGS_type == CHANNEL_TYPE_ROCKET) {
-        alpns.push_back("rs");
+        alpns.emplace_back("rs");
       } else {
-        alpns.push_back("thrift");
+        alpns.emplace_back("thrift");
       }
       context->setSupportedAlpns(std::move(alpns));
       if (FLAGS_cert.size() > 0) {

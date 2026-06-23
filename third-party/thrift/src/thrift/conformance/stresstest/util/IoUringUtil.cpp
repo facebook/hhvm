@@ -51,10 +51,6 @@ DEFINE_int32(
     0,
     "Number of HW queues for ZC Rx. If 0, assumes nr of io_threads == HW queues and skips buffer pool import/export.");
 DEFINE_bool(
-    io_uring_async_socket,
-    false,
-    "Use AsyncSocket with IoUringBackend nativeAsyncSocketSupport instead of AsyncIoUringSocket");
-DEFINE_bool(
     io_prov_buffs_use_bundles,
     false,
     "Enable IORING_RECVSEND_BUNDLE on IoUringBackend multishot recv operations "
@@ -137,10 +133,6 @@ void setIoUringCommonOptionsFromFlags(folly::IoUringOptions& options) {
     options.setTimeout(std::chrono::microseconds(FLAGS_timeout_us));
   }
 
-  if (FLAGS_io_uring_async_socket) {
-    options.setNativeAsyncSocketSupport(true);
-  }
-
   if (FLAGS_io_prov_buffs_use_bundles) {
     options.setProvidedBufUseBundles(true);
   }
@@ -184,6 +176,7 @@ folly::IoUringBackend::Options getIoUringOptions() {
         folly::IoUringArena::arenaIndex());
   }
 
+  options.setNativeAsyncSocketSupport(true);
   return options;
 }
 } // namespace apache::thrift::stress

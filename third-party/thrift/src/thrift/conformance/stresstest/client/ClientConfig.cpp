@@ -174,7 +174,6 @@ protocol::PROTOCOL_TYPES createThriftProtocolFromFlags() {
     connCfg.ioUringZctxArenaSize = FLAGS_io_zctx_arena_mb * 1024 * 1024;
   }
   connCfg.ioUringZcrxSocketBind = FLAGS_io_zcrx_socket_bind;
-  connCfg.ioUringAsyncSocket = FLAGS_io_uring_async_socket;
   connCfg.mss = FLAGS_mss;
   connCfg.useQuic = FLAGS_quic;
   connCfg.stopTLSv1 = FLAGS_stopTLSv1 && (security == ClientSecurity::FIZZ);

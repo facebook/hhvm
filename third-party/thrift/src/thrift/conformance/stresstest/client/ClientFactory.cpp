@@ -196,9 +196,6 @@ folly::AsyncTransport::UniquePtr createSocketWithEPoll(
 #if FOLLY_HAS_LIBURING
 folly::AsyncTransport::UniquePtr createSocketWithIOUring(
     folly::EventBase* evb, const ClientConnectionConfig& cfg) {
-  if (cfg.ioUringAsyncSocket) {
-    return createSocketWithEPoll(evb, cfg);
-  }
   switch (cfg.security) {
     case ClientSecurity::None:
       return createIOUring(evb, cfg);

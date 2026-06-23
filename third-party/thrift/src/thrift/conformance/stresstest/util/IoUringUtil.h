@@ -41,8 +41,6 @@ DECLARE_int32(io_zcrx_refill_entries);
 DECLARE_string(io_zcrx_ifname);
 DECLARE_int32(io_zcrx_queue_id);
 DECLARE_int32(io_zcrx_hw_queues);
-DECLARE_bool(io_uring_async_socket);
-
 #if FOLLY_HAS_LIBURING
 
 namespace apache::thrift::stress {

@@ -66,7 +66,6 @@ struct ClientConnectionConfig {
   bool ioUringZcrx{false};
   bool ioUringZcrxSocketBind{false};
   bool ioUringZctx{false};
-  bool ioUringAsyncSocket{false};
   size_t ioUringZctxArenaSize{0};
   bool useQuic{false};
   bool stopTLSv1{false};

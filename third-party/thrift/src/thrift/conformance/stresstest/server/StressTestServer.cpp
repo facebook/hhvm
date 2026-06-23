@@ -212,9 +212,6 @@ std::shared_ptr<ThriftServer> createStressTestServer(
   auto server = std::make_shared<ThriftServer>();
   server->setInterface(std::move(handler));
   server->setPort(FLAGS_port);
-  if (FLAGS_io_uring) {
-    server->setPreferIoUring(!FLAGS_io_uring_async_socket);
-  }
   std::shared_ptr<folly::IOThreadPoolExecutor> ioThreadPool;
   folly::AsyncServerSocket::CallbackAssignFunction assignFunc = nullptr;
   if (FLAGS_io_zcrx) {

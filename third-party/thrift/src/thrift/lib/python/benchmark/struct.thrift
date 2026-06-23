@@ -66,3 +66,53 @@ struct StringBucket {
   9: string nine;
   10: string ten;
 }
+
+/*
+ * Deeply-nested all-struct types for benchmarking. Field counts are chosen so
+ * that constructing a top-level struct in the mutable-python runtime eagerly
+ * materializes a tree of nested structs: Nested10 -> 10, Nested110 -> 110,
+ * Nested1110 -> 1110.
+ */
+struct NestedLeaf {
+  1: i64 val;
+  2: string str_val;
+}
+
+struct Nested10 {
+  1: NestedLeaf f1;
+  2: NestedLeaf f2;
+  3: NestedLeaf f3;
+  4: NestedLeaf f4;
+  5: NestedLeaf f5;
+  6: NestedLeaf f6;
+  7: NestedLeaf f7;
+  8: NestedLeaf f8;
+  9: NestedLeaf f9;
+  10: NestedLeaf f10;
+}
+
+struct Nested110 {
+  1: Nested10 f1;
+  2: Nested10 f2;
+  3: Nested10 f3;
+  4: Nested10 f4;
+  5: Nested10 f5;
+  6: Nested10 f6;
+  7: Nested10 f7;
+  8: Nested10 f8;
+  9: Nested10 f9;
+  10: Nested10 f10;
+}
+
+struct Nested1110 {
+  1: Nested110 f1;
+  2: Nested110 f2;
+  3: Nested110 f3;
+  4: Nested110 f4;
+  5: Nested110 f5;
+  6: Nested110 f6;
+  7: Nested110 f7;
+  8: Nested110 f8;
+  9: Nested110 f9;
+  10: Nested110 f10;
+}

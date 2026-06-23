@@ -610,6 +610,54 @@ half_bucket = StringBucket(
     )
 
 
+def benchmark_nested():
+    # All-struct nested trees (Nested10 -> 10 nested structs, Nested110 -> 110,
+    # Nested1110 -> 1110).
+    #
+    # NOTE: the `Initialize` column is NOT an apples-to-apples comparison across
+    # flavors. Only mutable-python eagerly materializes the whole tree on
+    # construction; the immutable runtimes (py-deprecated, py3, python) lazily
+    # default nested struct fields, so e.g. `Nested1110()` does very little work
+    # there. `Deserialize` does touch every node in all flavors.
+    structs = ["Nested10", "Nested110", "Nested1110"]
+
+    def imp(flavor: str) -> str:
+        ns = NAMESPACES[flavor]
+        return (
+            f"from thrift.benchmark.struct.{ns} import Nested10, Nested110, Nested1110"
+        )
+
+    def measure(stmt: str, setup: str) -> str:
+        timer = timeit.Timer(stmt=stmt, setup=setup)
+        # Trees can be large, so let autorange pick the iteration count.
+        number, _ = timer.autorange()
+        results = timer.repeat(repeat=5, number=number)
+        return f"{min(results) * 1000.0 / number:.6f} ms"
+
+    def bench_init(flavor: str, cls: str) -> str:
+        return measure(f"_ = {cls}()", imp(flavor))
+
+    def bench_deserialize(flavor: str, cls: str) -> str:
+        setup = (
+            f"{imp(flavor)}\n{SERIALIZER_IMPORT[flavor]}\n"
+            f"inst = {cls}()\nserialized = serialize(inst)"
+        )
+        return measure(f"_ = deserialize({cls}, serialized)", setup)
+
+    for desc, fn in [("Initialize", bench_init), ("Deserialize", bench_deserialize)]:
+        table = [
+            [flavor] + [fn(flavor, cls) for cls in structs] for flavor in NAMESPACES
+        ]
+        print(
+            tabulate(
+                table,
+                headers=[f"Nested {desc}"] + structs,
+                tablefmt="github",
+            )
+        )
+        print("\n")
+
+
 @click.group()
 def cli():
     pass
@@ -706,8 +754,17 @@ def call_benchmark() -> None:
 
 
 @click.command()
+def nested_benchmark() -> None:
+    benchmark_nested()
+
+
+@click.command()
 @click.pass_context
 def run_all(ctx) -> None:
+    # `run_all` runs the curated core subset. Specialized benchmarks
+    # (init-string, the serializer string/json variants, comparison, and the
+    # slower `nested-benchmark`) are intentionally left out and invoked on
+    # demand via their own subcommands.
     ctx.invoke(import_benchmark)
     print("\n")
     ctx.invoke(init_benchmark)
@@ -734,6 +791,7 @@ def main() -> None:
     cli.add_command(serializer_string_json_benchmark)
     cli.add_command(comparison_benchmark)
     cli.add_command(call_benchmark)
+    cli.add_command(nested_benchmark)
     cli()
 
 

@@ -16,6 +16,7 @@
  */
 
 include "thrift/annotation/thrift.thrift"
+include "thrift/annotation/hack.thrift"
 package "meta.com/thrift/core/protocol/_tests_/protocol_test"
 
 namespace hack ""
@@ -37,6 +38,70 @@ struct SimpleStruct {
 union SimpleUnion {
   1: bool a_bool;
   2: byte a_byte;
+}
+
+struct ObjectKeyStruct {
+  1: i64 id;
+  2: string name;
+}
+
+@hack.Wrapper{name = '\MyStructWrapper'}
+struct ObjectKeyWrappedValueStruct {
+  1: i64 id;
+  2: string name;
+}
+
+@hack.Adapter{name = '\ObjectKeyStructShapeAdapter'}
+typedef ObjectKeyStruct AdaptedObjectKeyStruct
+
+@hack.Adapter{name = '\AdapterTestIntToString'}
+typedef i32 AdaptedObjectKeyI32
+
+union ObjectKeyValue {
+  1: bool bool_value;
+  2: i64 int_value;
+  3: string string_value;
+  4: ObjectKeyStruct struct_value;
+  5: list<ObjectKeyValue> list_value;
+
+  @thrift.AllowUnsafeNonSealedKeyType
+  6: set<ObjectKeyValue> set_value;
+
+  @thrift.AllowUnsafeNonSealedKeyType
+  7: map<ObjectKeyValue, ObjectKeyValue> map_value;
+}
+
+struct ObjectKeyContainerStruct {
+  1: set<ObjectKeyStruct> struct_set;
+  2: map<ObjectKeyStruct, string> struct_map;
+  3: set<float> float_set;
+  4: set<bool> bool_set;
+  5: map<bool, string> bool_map;
+
+  @thrift.AllowUnsafeNonSealedKeyType
+  6: set<ObjectKeyValue> value_set;
+
+  @thrift.AllowUnsafeNonSealedKeyType
+  7: map<ObjectKeyValue, i64> value_map;
+
+  8: string normal_field;
+  9: map<string, i64> normal_map;
+}
+
+struct ObjectKeyAdaptedContainerStruct {
+  1: map<AdaptedObjectKeyStruct, string> adapted_struct_map;
+  2: set<AdaptedObjectKeyStruct> adapted_struct_set;
+  3: map<AdaptedObjectKeyI32, string> adapted_i32_map;
+  4: set<AdaptedObjectKeyI32> adapted_i32_set;
+  5: map<ObjectKeyStruct, AdaptedObjectKeyStruct> adapted_struct_value_map;
+  6: map<
+    AdaptedObjectKeyStruct,
+    AdaptedObjectKeyStruct
+  > adapted_struct_key_value_map;
+}
+
+struct ObjectKeyWrappedValueContainerStruct {
+  1: map<ObjectKeyStruct, ObjectKeyWrappedValueStruct> wrapped_struct_value_map;
 }
 
 struct ContainerStruct {

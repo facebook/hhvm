@@ -599,6 +599,7 @@ var serviceMetadatas = func() []*metadata.ThriftService {
                             Fields: map[string]*metadata.ThriftConstValue{
                                 "level":
                                     &metadata.ThriftConstValue{
+                                        CvInteger: new(int64(2)),
                                     },
                             },
                         },
@@ -616,6 +617,7 @@ var serviceMetadatas = func() []*metadata.ThriftService {
                             Fields: map[string]*metadata.ThriftConstValue{
                                 "level":
                                     &metadata.ThriftConstValue{
+                                        CvInteger: new(int64(0)),
                                     },
                             },
                         },
@@ -641,6 +643,7 @@ var serviceMetadatas = func() []*metadata.ThriftService {
                             Fields: map[string]*metadata.ThriftConstValue{
                                 "level":
                                     &metadata.ThriftConstValue{
+                                        CvInteger: new(int64(4)),
                                     },
                             },
                         },

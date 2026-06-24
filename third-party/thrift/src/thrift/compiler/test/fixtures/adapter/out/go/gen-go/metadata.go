@@ -685,6 +685,7 @@ var (
                                     },
                                 "color":
                                     &metadata.ThriftConstValue{
+                                        CvInteger: new(int64(2)),
                                     },
                             },
                         },

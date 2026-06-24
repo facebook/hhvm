@@ -81,6 +81,8 @@
     CvBool: new({{value.bool_value}}),
   {{#else if value.integer?}}
     CvInteger: new(int64({{value.integer_value}})),
+  {{#else if value.enum?}}
+    CvInteger: new(int64({{value.integer_value}})),
   {{#else if value.double?}}
     CvDouble: new(float64({{value.double_value}})),
   {{#else if value.string?}}

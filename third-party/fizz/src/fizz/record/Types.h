@@ -14,6 +14,7 @@
 #include <fizz/record/Alerts.h>
 #include <fizz/util/Status.h>
 #include <folly/Optional.h>
+#include <folly/container/Array.h>
 #include <folly/io/Cursor.h>
 #include <folly/io/IOBuf.h>
 
@@ -257,32 +258,34 @@ struct CertificateRequest : HandshakeStruct<
   std::vector<Extension> extensions;
 };
 
-#define FIZZ_RECORD_TYPES_SIGNATURE_SCHEME(X)                      \
-  X(::fizz::SignatureScheme, ecdsa_secp256r1_sha256, 0x0403)       \
-  X(::fizz::SignatureScheme, ecdsa_secp384r1_sha384, 0x0503)       \
-  X(::fizz::SignatureScheme, ecdsa_secp521r1_sha512, 0x0603)       \
-  X(::fizz::SignatureScheme, rsa_pss_sha256, 0x0804)               \
-  X(::fizz::SignatureScheme, rsa_pss_sha384, 0x0805)               \
-  X(::fizz::SignatureScheme, rsa_pss_sha512, 0x0806)               \
-  X(::fizz::SignatureScheme, ed25519, 0x0807)                      \
-  X(::fizz::SignatureScheme, ed448, 0x0808)                        \
-  /* all batch scheme type numbers are temporarily assigned */     \
-  X(::fizz::SignatureScheme, ecdsa_secp256r1_sha256_batch, 0xFE00) \
-  X(::fizz::SignatureScheme, ecdsa_secp384r1_sha384_batch, 0xFE01) \
-  X(::fizz::SignatureScheme, ecdsa_secp521r1_sha512_batch, 0xFE02) \
-  X(::fizz::SignatureScheme, ed25519_batch, 0xFE03)                \
-  X(::fizz::SignatureScheme, ed448_batch, 0xFE04)                  \
+// clang-format off
+#define FIZZ_RECORD_TYPES_SIGNATURE_SCHEME(X)                       \
+  X(::fizz::SignatureScheme, ecdsa_secp256r1_sha256, 0x0403),       \
+  X(::fizz::SignatureScheme, ecdsa_secp384r1_sha384, 0x0503),       \
+  X(::fizz::SignatureScheme, ecdsa_secp521r1_sha512, 0x0603),       \
+  X(::fizz::SignatureScheme, rsa_pss_sha256, 0x0804),               \
+  X(::fizz::SignatureScheme, rsa_pss_sha384, 0x0805),               \
+  X(::fizz::SignatureScheme, rsa_pss_sha512, 0x0806),               \
+  X(::fizz::SignatureScheme, ed25519, 0x0807),                      \
+  X(::fizz::SignatureScheme, ed448, 0x0808),                        \
+  /* all batch scheme type numbers are temporarily assigned */      \
+  X(::fizz::SignatureScheme, ecdsa_secp256r1_sha256_batch, 0xFE00), \
+  X(::fizz::SignatureScheme, ecdsa_secp384r1_sha384_batch, 0xFE01), \
+  X(::fizz::SignatureScheme, ecdsa_secp521r1_sha512_batch, 0xFE02), \
+  X(::fizz::SignatureScheme, ed25519_batch, 0xFE03),                \
+  X(::fizz::SignatureScheme, ed448_batch, 0xFE04),                  \
   X(::fizz::SignatureScheme, rsa_pss_sha256_batch, 0xFE05)
+// clang-format on
 
-#define FIZZ_GEN_ENUM_ENTRY(enclosing, name, value) name = value,
+#define FIZZ_GEN_ENUM_ENTRY(enclosing, name, value) name = value
 enum class SignatureScheme : uint16_t {
   FIZZ_RECORD_TYPES_SIGNATURE_SCHEME(FIZZ_GEN_ENUM_ENTRY)
 };
 #undef FIZZ_GEN_ENUM_ENTRY
 
-#define FIZZ_GEN_ARRAY_ENTRY(enclosing, name, value) enclosing::name,
-inline constexpr std::array<SignatureScheme, 14> kAllSignatureSchemes = {
-    {FIZZ_RECORD_TYPES_SIGNATURE_SCHEME(FIZZ_GEN_ARRAY_ENTRY)}};
+#define FIZZ_GEN_ARRAY_ENTRY(enclosing, name, value) enclosing::name
+inline constexpr auto kAllSignatureSchemes = folly::make_array<SignatureScheme>(
+    FIZZ_RECORD_TYPES_SIGNATURE_SCHEME(FIZZ_GEN_ARRAY_ENTRY));
 #undef FIZZ_GEN_ARRAY_ENTRY
 #undef FIZZ_RECORD_TYPES_SIGNATURE_SCHEME
 

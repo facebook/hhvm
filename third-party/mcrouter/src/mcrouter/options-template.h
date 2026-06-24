@@ -38,10 +38,14 @@ class OPTIONS_NAME : public McrouterOptionsBase {
           void(const std::string&, McrouterOptionData::Type, const boost::any&)>
           f) const override {
 #undef MCROUTER_OPTION
-#define MCROUTER_OPTION(_type, _name, _f, _l, _s, _d, _Type) \
-  f(#_name,                                                  \
-    McrouterOptionData::Type::_Type,                         \
-    boost::any(const_cast<_type*>(&_name)));
+#define MCROUTER_OPTION(_type, _name, _f, _l, _s, _d, _Type)            \
+  {                                                                     \
+    static const folly::Indestructible<std::string> _name##_optionName{ \
+        #_name};                                                        \
+    f(*_name##_optionName,                                              \
+      McrouterOptionData::Type::_Type,                                  \
+      boost::any(const_cast<_type*>(&_name)));                          \
+  }
 
 #include OPTIONS_FILE
   }

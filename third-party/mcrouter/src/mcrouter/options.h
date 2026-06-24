@@ -14,6 +14,8 @@
 
 #include <boost/any.hpp>
 
+#include <folly/Indestructible.h>
+
 #include "mcrouter/RoutingPrefix.h"
 #include "mcrouter/config.h"
 

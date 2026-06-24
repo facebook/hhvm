@@ -349,7 +349,7 @@ class BatchSignatureMerkleTree
     std::unique_ptr<::fizz::Hasher> hasher;
     Error err;
     FIZZ_THROW_ON_ERROR(::fizz::openssl::makeHasher<Hash>(hasher, err), err);
-    constexpr std::array<uint8_t, 1> prefix = {0x01};
+    constexpr std::array<uint8_t, 1> prefix = {{0x01}};
     FIZZ_THROW_ON_ERROR(hasher->hash_update(err, folly::range(prefix)), err);
     FIZZ_THROW_ON_ERROR(hasher->hash_update(err, leftChild), err);
 
@@ -369,7 +369,7 @@ class BatchSignatureMerkleTree
     std::unique_ptr<::fizz::Hasher> hasher;
     Error err;
     FIZZ_THROW_ON_ERROR(::fizz::openssl::makeHasher<Hash>(hasher, err), err);
-    constexpr std::array<uint8_t, 1> prefix = {0x00};
+    constexpr std::array<uint8_t, 1> prefix = {{0x00}};
     FIZZ_THROW_ON_ERROR(hasher->hash_update(err, folly::range(prefix)), err);
     FIZZ_THROW_ON_ERROR(hasher->hash_update(err, msg), err);
     FIZZ_THROW_ON_ERROR(hasher->hash_final(err, folly::range(result)), err);

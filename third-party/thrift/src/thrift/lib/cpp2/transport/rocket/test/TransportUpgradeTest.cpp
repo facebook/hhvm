@@ -16,14 +16,19 @@
 
 #include <gmock/gmock.h>
 #include <folly/fibers/FiberManagerMap.h>
+#include <folly/io/IOBuf.h>
 #include <folly/io/async/AsyncSocket.h>
 #include <folly/io/async/EventBase.h>
+#include <folly/io/async/WriteChainAsyncTransportWrapper.h>
 
 #include <thrift/lib/cpp2/Flags.h>
 #include <thrift/lib/cpp2/async/HeaderClientChannel.h>
 #include <thrift/lib/cpp2/async/RocketClientChannel.h>
+#include <thrift/lib/cpp2/server/Cpp2Worker.h>
+#include <thrift/lib/cpp2/server/ThriftServer.h>
 #include <thrift/lib/cpp2/transport/rocket/test/util/TestUtil.h>
 #include <thrift/lib/cpp2/transport/rocket/test/util/gen-cpp2/TransportUpgrade.h>
+#include <thrift/lib/cpp2/util/ScopedServerInterfaceThread.h>
 
 THRIFT_FLAG_DECLARE_int64(raw_client_rocket_upgrade_timeout_ms);
 
@@ -271,6 +276,102 @@ TEST_F(TransportUpgradeTest, Fibers) {
               TransportUpgradeAsyncClient client(std::move(channel));
               return client.sync_addTwoNumbers(40, 2);
             }).getVia(&evb));
+}
+
+namespace {
+
+// Forces a real AsyncSocket write error on the first server reply by closing
+// the underlying socket before forwarding the write.
+class CloseSocketOnFirstWriteAsyncTransport
+    : public folly::WriteChainAsyncTransportWrapper<folly::AsyncTransport> {
+ public:
+  explicit CloseSocketOnFirstWriteAsyncTransport(
+      folly::AsyncTransport::UniquePtr inner)
+      : folly::WriteChainAsyncTransportWrapper<folly::AsyncTransport>(
+            std::move(inner)) {}
+
+  void writeChain(
+      WriteCallback* callback,
+      std::unique_ptr<folly::IOBuf>&& buf,
+      folly::WriteFlags flags = folly::WriteFlags::NONE) override {
+    if (!firstWriteSeen_) {
+      firstWriteSeen_ = true;
+      transport_->closeNow();
+    }
+    transport_->writeChain(callback, std::move(buf), flags);
+  }
+
+ private:
+  bool firstWriteSeen_{false};
+};
+
+// Decorates the per-connection transport at the post-peek chokepoint
+// (createThriftTransport), where the decorator survives the non-TLS peeks that
+// would strip a wrapper installed at accept time.
+class WrappingCpp2Worker : public Cpp2Worker {
+ public:
+  explicit WrappingCpp2Worker(ThriftServer* server)
+      : Cpp2Worker(server, DoNotUse{}) {}
+
+  static std::shared_ptr<WrappingCpp2Worker> create(
+      ThriftServer* server, folly::EventBase* eventBase) {
+    auto worker = std::make_shared<WrappingCpp2Worker>(server);
+    worker->construct(server, eventBase, /* fizzContext */ nullptr);
+    return worker;
+  }
+
+  std::shared_ptr<folly::AsyncTransport> createThriftTransport(
+      folly::AsyncTransport::UniquePtr sock) override {
+    folly::AsyncTransport::UniquePtr wrapped(
+        new CloseSocketOnFirstWriteAsyncTransport(std::move(sock)));
+    return Cpp2Worker::createThriftTransport(std::move(wrapped));
+  }
+};
+
+// Installs WrappingCpp2Worker via ThriftServer::setAcceptorFactory.
+class WrappingAcceptorFactory : public ThriftAcceptorFactory<Cpp2Worker, void> {
+ public:
+  explicit WrappingAcceptorFactory(ThriftServer* server)
+      : ThriftAcceptorFactory(server) {}
+
+  std::shared_ptr<wangle::Acceptor> newAcceptor(
+      folly::EventBase* eventBase) override {
+    return WrappingCpp2Worker::create(server_, eventBase);
+  }
+};
+
+} // namespace
+
+// Regression test: forces the header->rocket upgrade reply to hit a write
+// failure while the connection is being torn down, so the deferred write error
+// lands on an already-freed upgrade SendCallback. Build/run under ASAN (e.g.
+// @//mode/dev-asan) to catch the use-after-free.
+TEST(
+    TransportUpgradeTeardownRace,
+    UpgradeReplyInFlightDuringConnectionTeardown) {
+  // Keep the upgrade from timing out; the test drives teardown explicitly.
+  THRIFT_FLAG_SET_MOCK(raw_client_rocket_upgrade_timeout_ms, 60000);
+
+  ScopedServerInterfaceThread runner(
+      std::make_shared<
+          ThriftServerAsyncProcessorFactory<TransportUpgradeService>>(
+          std::make_shared<TransportUpgradeService>()),
+      "::1",
+      0,
+      [](ThriftServer& server) {
+        server.setNumIOWorkerThreads(1);
+        server.setAcceptorFactory(
+            std::make_shared<WrappingAcceptorFactory>(&server));
+      });
+
+  auto client = runner.newClient<Client<TransportUpgrade>>(
+      nullptr, [](folly::AsyncSocket::UniquePtr socket) {
+        return HeaderClientChannel::newChannel(std::move(socket));
+      });
+
+  // Sends `upgradeToRocket`; the wrapper closes the server socket as the reply
+  // is written, so the request fails once the connection is torn down.
+  EXPECT_ANY_THROW(client->semifuture_addTwoNumbers(13, 42).get());
 }
 
 } // namespace apache::thrift

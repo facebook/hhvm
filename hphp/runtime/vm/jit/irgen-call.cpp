@@ -691,9 +691,12 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
       objOrClass ? objOrClass : cns(env, nullptr)
     );
     emitCalleeDynamicCallChecks(env, callee, prologueFlags);
+    // Coeffect rules index parameters by their full position (named params
+    // precede positionals), so include the named params in the arg count, as
+    // the prologue path and interpreter do.
     emitCalleeCoeffectChecks(env, callee, prologueFlags, coeffects,
                              fca.skipCoeffectsCheck(),
-                             posArgc,
+                             posArgc + callee->numNamedParams(),
                              objOrClass ? objOrClass : cns(env, nullptr));
     emitCalleeRecordFuncCoverage(env, callee);
     // Some of the checks above may have failed and it may be illegal to emit

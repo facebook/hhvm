@@ -14,3 +14,14 @@ vec(2) {
   int(100)
   int(200)
 }
+string(1) "x"
+string(1) "T"
+string(1) "F"
+string(1) "T"
+string(1) "F"
+string(1) "T"
+string(1) "F"
+string(1) "T"
+string(1) "F"
+string(1) "T"
+string(1) "F"

@@ -168,7 +168,19 @@ impl Coeffects {
         let mut cc_reified: Vec<CcReified> = vec![];
 
         let get_arg_pos = |name: &String| -> u32 {
-            if let Some(pos) = params.as_ref().iter().position(|x| x.name == *name) {
+            // Coeffect rules reference parameters by their runtime position.
+            // emit_body reorders params before emission (see reorder_params):
+            // named params, sorted lexicographically by name, precede positional
+            // params whose relative order is preserved. Mirror that ordering here
+            // so the index matches the emitted parameter layout.
+            let mut reordered: Vec<&a::FunParam<Ex, En>> = params.as_ref().iter().collect();
+            reordered.sort_by(|a, b| match (a.named.is_some(), b.named.is_some()) {
+                (true, true) => a.name.cmp(&b.name),
+                (true, false) => std::cmp::Ordering::Less,
+                (false, true) => std::cmp::Ordering::Greater,
+                (false, false) => std::cmp::Ordering::Equal,
+            });
+            if let Some(pos) = reordered.iter().position(|x| x.name == *name) {
                 pos as u32
             } else {
                 panic!("Invalid context");

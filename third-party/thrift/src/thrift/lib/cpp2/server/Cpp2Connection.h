@@ -359,7 +359,10 @@ class Cpp2Connection : public HeaderServerChannel::Callback,
   std::shared_ptr<Cpp2Connection> this_;
 
   bool connectionAdded_{false};
-  std::unique_ptr<MessageChannel::SendCallback> upgradeToRocketCallback_{};
+  // Set once a header->rocket upgrade reply has been queued. The upgrade
+  // SendCallback owns itself; this only guards against re-entering the upgrade
+  // flow (e.g. a second upgradeToRocket request).
+  bool upgradeToRocketInProgress_{false};
 };
 
 } // namespace apache::thrift

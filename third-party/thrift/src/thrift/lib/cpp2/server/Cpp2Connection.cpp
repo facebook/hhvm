@@ -19,6 +19,7 @@
 #include <algorithm>
 
 #include <folly/Overload.h>
+#include <folly/ScopeGuard.h>
 #include <folly/stop_watch.h>
 
 #include <thrift/lib/cpp/transport/THeader.h>
@@ -65,6 +66,10 @@ class TransportUpgradeSendCallback : public MessageChannel::SendCallback {
   void sendQueued() override {}
 
   void messageSent() override {
+    // The callback owns itself and is destroyed once it receives a completion.
+    SCOPE_EXIT {
+      delete this;
+    };
     // Close the channel, since the transport is transferring to rocket
     DCHECK(headerChannel_);
     // This should clear all but one shared references to the transport, so that
@@ -97,6 +102,9 @@ class TransportUpgradeSendCallback : public MessageChannel::SendCallback {
   }
 
   void messageSendError(folly::exception_wrapper&& ew) override {
+    SCOPE_EXIT {
+      delete this;
+    };
     VLOG(4) << "Failed to send rocket upgrade response: " << ew.what();
   }
 
@@ -407,7 +415,7 @@ bool Cpp2Connection::handleUpgradeToRocket(
     const std::string& methodName,
     apache::thrift::protocol::PROTOCOL_TYPES protoId,
     const apache::thrift::detail::ap::MessageBegin::Metadata& meta) {
-  if (upgradeToRocketCallback_ != nullptr) {
+  if (upgradeToRocketInProgress_) {
     disconnect("Unexpected Header message after Rocket upgrade");
     return true;
   }
@@ -448,14 +456,16 @@ bool Cpp2Connection::handleUpgradeToRocket(
       return true;
   }
 
-  upgradeToRocketCallback_ = std::make_unique<TransportUpgradeSendCallback>(
-      rocketHandler,
-      transport_,
-      context_.getPeerAddress(),
-      getWorker(),
-      this,
-      channel_.get());
-  hreq->sendReply(std::move(response), upgradeToRocketCallback_.get());
+  upgradeToRocketInProgress_ = true;
+  hreq->sendReply(
+      std::move(response),
+      new TransportUpgradeSendCallback(
+          rocketHandler,
+          transport_,
+          context_.getPeerAddress(),
+          getWorker(),
+          this,
+          channel_.get()));
   return true;
 }
 

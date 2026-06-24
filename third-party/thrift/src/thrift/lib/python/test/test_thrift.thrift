@@ -757,6 +757,10 @@ union _UnderscoreUnion {
 struct EmptyStruct {}
 exception EmptyError {}
 
+union UnionWithEmptyStructField {
+  1: EmptyStruct empty_struct_field;
+}
+
 struct ReflectionAnnotation {
   1: i32 count;
   2: float ratio;

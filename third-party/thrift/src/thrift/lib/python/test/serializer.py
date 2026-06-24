@@ -73,6 +73,7 @@ from test_thrift.thrift_types import (
     StrList2D,
     StrStrMap,
     StructDisabledFieldCache,
+    UnionWithEmptyStructField,
 )
 from thrift.python.exceptions import Error
 from thrift.python.mutable_types import (
@@ -178,6 +179,9 @@ class SerializerTests(unittest.TestCase):
         self.EmptyStruct: Type[TestEmptyStruct] = self.test_types.EmptyStruct
         self.StructDisabledFieldCache: Type[StructDisabledFieldCache] = (
             self.test_types.StructDisabledFieldCache
+        )
+        self.UnionWithEmptyStructField: Type[UnionWithEmptyStructField] = (
+            self.test_types.UnionWithEmptyStructField
         )
 
     def to_list(self, list_data: list[ListT]) -> list[ListT] | _ThriftListWrapper:
@@ -307,6 +311,20 @@ class SerializerTests(unittest.TestCase):
             encoded = self.serializer.serialize(control, protocol=proto)
             decoded = self.serializer.deserialize(
                 self.StructDisabledFieldCache, encoded, protocol=proto
+            )
+            self.assertEqual(decoded.empty_struct_field, self.EmptyStruct())
+            self.assertEqual(list(decoded.empty_struct_field), [])
+
+    def test_nested_empty_struct_in_union(self) -> None:
+        # A zero-field struct set as a union variant reaches the same C++
+        # data-holder construction path (`readThriftUnion` -> `setMutableStruct`)
+        # as a nested struct field, so it must round-trip just the same.
+        control = self.UnionWithEmptyStructField(empty_struct_field=self.EmptyStruct())
+        self.thrift_serialization_round_trip(control)
+        for proto in Protocol:
+            encoded = self.serializer.serialize(control, protocol=proto)
+            decoded = self.serializer.deserialize(
+                self.UnionWithEmptyStructField, encoded, protocol=proto
             )
             self.assertEqual(decoded.empty_struct_field, self.EmptyStruct())
             self.assertEqual(list(decoded.empty_struct_field), [])

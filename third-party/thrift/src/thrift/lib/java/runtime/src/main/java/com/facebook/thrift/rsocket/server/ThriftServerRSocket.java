@@ -58,10 +58,20 @@ public class ThriftServerRSocket implements RSocket {
 
   private final RpcServerHandler rpcServerHandler;
   private final ByteBufAllocator alloc;
+  private final ConnectionContext connectionContext;
 
   public ThriftServerRSocket(RpcServerHandler rpcServerHandler, ByteBufAllocator alloc) {
+    this(rpcServerHandler, alloc, null);
+  }
+
+  public ThriftServerRSocket(
+      RpcServerHandler rpcServerHandler,
+      ByteBufAllocator alloc,
+      ConnectionContext connectionContext) {
     this.rpcServerHandler = rpcServerHandler;
     this.alloc = alloc;
+    this.connectionContext =
+        connectionContext != null ? connectionContext : new NiftyConnectionContext();
   }
 
   @Override
@@ -161,8 +171,7 @@ public class ThriftServerRSocket implements RSocket {
     }
   }
 
-  private static RequestContext createRequestContext(Map<String, String> requestHeaders) {
-    ConnectionContext connectionContext = new NiftyConnectionContext();
+  private RequestContext createRequestContext(Map<String, String> requestHeaders) {
     return new NettyNiftyRequestContext(requestHeaders, connectionContext);
   }
 

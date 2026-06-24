@@ -18,7 +18,6 @@ package com.facebook.thrift.transport.unified;
 
 import static com.facebook.thrift.metadata.ThriftTransportType.HEADER;
 import static com.facebook.thrift.metadata.ThriftTransportType.RSOCKET;
-import static io.rsocket.transport.ServerTransport.ConnectionAcceptor;
 
 import com.facebook.swift.service.ThriftServerConfig;
 import com.facebook.thrift.legacy.server.ThriftHeaderFrameLengthBasedDecoder;
@@ -79,13 +78,6 @@ public class UnifiedServerTransport implements ServerTransport {
       ThriftServerConfig config,
       SPINiftyMetrics metrics) {
 
-    // Configure RSocket Server
-    ConnectionAcceptor rsocket =
-        RSocketServer.create(new ThriftSocketAcceptor(rpcServerHandler))
-            .fragment(MAX_FRAME_SIZE)
-            .payloadDecoder(PayloadDecoder.ZERO_COPY)
-            .asConnectionAcceptor();
-
     // Configure Thrift Header Server
     ThriftConnectionAcceptor thrift =
         new ThriftConnectionAcceptor(rpcServerHandler, config.getTaskExpirationTimeout());
@@ -138,7 +130,7 @@ public class UnifiedServerTransport implements ServerTransport {
               // Add protocol-specific handlers
               if (protocol == RSOCKET) {
                 connection.addHandlerLast(NettyUtil.getRSocketLengthFieldBasedFrameDecoder());
-                configureRsocket(connection, rsocket);
+                configureRsocket(connection, rpcServerHandler);
               } else {
                 int maxFrameLengthBytes =
                     (int) Math.min(config.getMaxFrameSize().toBytes(), Integer.MAX_VALUE);
@@ -195,8 +187,13 @@ public class UnifiedServerTransport implements ServerTransport {
         .subscribe(connection.disposeSubscriber());
   }
 
-  private static void configureRsocket(Connection connection, ConnectionAcceptor rsocket) {
-    rsocket
+  private static void configureRsocket(Connection connection, RpcServerHandler rpcServerHandler) {
+    RSocketServer.create(
+            new ThriftSocketAcceptor(
+                rpcServerHandler, RpcServerUtils.getNiftyConnectionContext(connection)))
+        .fragment(MAX_FRAME_SIZE)
+        .payloadDecoder(PayloadDecoder.ZERO_COPY)
+        .asConnectionAcceptor()
         .apply(new TcpDuplexConnection("server", connection))
         .then(Mono.<Void>never())
         .subscribe(connection.disposeSubscriber());

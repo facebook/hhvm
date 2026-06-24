@@ -16,6 +16,7 @@
 
 package com.facebook.thrift.rsocket.server;
 
+import com.facebook.nifty.core.ConnectionContext;
 import com.facebook.thrift.payload.Constants;
 import com.facebook.thrift.protocol.ProtocolUtil;
 import com.facebook.thrift.server.RpcServerHandler;
@@ -35,9 +36,15 @@ import reactor.core.publisher.Mono;
 public class ThriftSocketAcceptor implements SocketAcceptor {
 
   private final RpcServerHandler serverHandler;
+  private final ConnectionContext connectionContext;
 
   public ThriftSocketAcceptor(RpcServerHandler serverHandler) {
+    this(serverHandler, null);
+  }
+
+  public ThriftSocketAcceptor(RpcServerHandler serverHandler, ConnectionContext connectionContext) {
     this.serverHandler = serverHandler;
+    this.connectionContext = connectionContext;
   }
 
   @Override
@@ -48,7 +55,8 @@ public class ThriftSocketAcceptor implements SocketAcceptor {
     }
 
     ThriftServerRSocket rSocket =
-        new ThriftServerRSocket(serverHandler, RpcResources.getByteBufAllocator());
+        new ThriftServerRSocket(
+            serverHandler, RpcResources.getByteBufAllocator(), connectionContext);
 
     return sendSetupResponse(sendingSocket).thenReturn(rSocket);
   }

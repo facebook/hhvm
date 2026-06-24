@@ -38,6 +38,7 @@ import com.facebook.thrift.test.rocket.TestService;
 import com.facebook.thrift.util.RpcServerUtils;
 import com.facebook.thrift.util.SPINiftyMetrics;
 import io.airlift.units.Duration;
+import io.netty.handler.ssl.ClientAuth;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.concurrent.TimeUnit;
@@ -1229,6 +1230,7 @@ public class UnifiedServerTransportTest {
         };
 
     rpcServerHandler = TestService.Reactive.serverHandlerBuilder(contextCapturingHandler).build();
+    serverConfig.setClientAuth(ClientAuth.REQUIRE);
 
     transport =
         UnifiedServerTransport.createNewInstance(
@@ -1256,6 +1258,15 @@ public class UnifiedServerTransportTest {
 
     RequestContext ctx = capturedContext.get();
     assertNotNull(ctx, "RequestContext should be available to user handler code via ThreadLocal");
+    assertNotNull(
+        ctx.getConnectionContext(),
+        "RequestContext should have a ConnectionContext with connection info");
+    assertNotNull(
+        ctx.getConnectionContext().getRemoteAddress(),
+        "ConnectionContext should have the client's remote address");
+    assertNotNull(
+        ctx.getConnectionContext().getSslSession(),
+        "ConnectionContext should have the peer SSL session");
   }
 
   /**

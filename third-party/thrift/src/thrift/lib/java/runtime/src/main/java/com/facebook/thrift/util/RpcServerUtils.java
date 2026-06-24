@@ -18,6 +18,7 @@ package com.facebook.thrift.util;
 
 import static com.facebook.thrift.util.PlatformUtils.getOS;
 
+import com.facebook.nifty.core.NiftyConnectionContext;
 import com.facebook.nifty.core.RequestContext;
 import com.facebook.nifty.ssl.SslSession;
 import com.facebook.swift.service.ThriftServerConfig;
@@ -58,6 +59,7 @@ import org.slf4j.LoggerFactory;
 import reactor.core.Exceptions;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.netty.Connection;
 
 public final class RpcServerUtils {
 
@@ -196,6 +198,14 @@ public final class RpcServerUtils {
       LOG.info("No SSL info received from client");
     }
     return null;
+  }
+
+  public static NiftyConnectionContext getNiftyConnectionContext(Connection conn) {
+    NiftyConnectionContext connectionContext = new NiftyConnectionContext();
+    connectionContext.setRemoteAddress(conn.channel().remoteAddress());
+    connectionContext.setSslSession(
+        getThriftSslSession(conn.channel().pipeline().get(SslHandler.class)));
+    return connectionContext;
   }
 
   public static Mono<? extends ServerTransport> createServerTransport(

@@ -16,7 +16,6 @@
 
 package com.facebook.thrift.transport.unified;
 
-import static com.facebook.thrift.util.RpcServerUtils.getThriftSslSession;
 import static java.util.Objects.requireNonNull;
 import static org.apache.thrift.RpcKind.SINGLE_REQUEST_NO_RESPONSE;
 import static org.apache.thrift.RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE;
@@ -35,7 +34,6 @@ import com.facebook.thrift.util.RpcServerUtils;
 import com.facebook.thrift.util.resources.RpcResources;
 import io.airlift.units.Duration;
 import io.netty.buffer.ByteBuf;
-import io.netty.handler.ssl.SslHandler;
 import io.netty.util.ReferenceCountUtil;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -90,7 +88,7 @@ public class ThriftConnectionAcceptor implements Function<Connection, Publisher<
     NettyOutbound out = conn.outbound();
 
     // Create connection context once — remote address and SSL session don't change
-    NiftyConnectionContext connectionContext = getNiftyConnectionContext(conn);
+    NiftyConnectionContext connectionContext = RpcServerUtils.getNiftyConnectionContext(conn);
 
     return in.receive()
         // Retain ByteBuf because the message body will be held and freed by the thrift frame in
@@ -113,14 +111,6 @@ public class ThriftConnectionAcceptor implements Function<Connection, Publisher<
                     throwable);
               }
             });
-  }
-
-  private static NiftyConnectionContext getNiftyConnectionContext(Connection conn) {
-    NiftyConnectionContext connectionContext = new NiftyConnectionContext();
-    connectionContext.setRemoteAddress(conn.channel().remoteAddress());
-    connectionContext.setSslSession(
-        getThriftSslSession(conn.channel().pipeline().get(SslHandler.class)));
-    return connectionContext;
   }
 
   /**

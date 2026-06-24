@@ -16,19 +16,15 @@
 
 package com.facebook.thrift.rsocket.transport;
 
-import com.facebook.swift.service.ThriftServerConfig;
 import com.facebook.thrift.client.ThriftClientConfig;
 import com.facebook.thrift.rsocket.transport.reactor.client.ReactorClientTransport;
-import com.facebook.thrift.rsocket.transport.reactor.server.ReactorServerCloseable;
-import com.facebook.thrift.rsocket.transport.reactor.server.ReactorServerTransport;
-import com.facebook.thrift.util.RpcServerUtils;
-import com.facebook.thrift.util.SPINiftyMetrics;
 import io.rsocket.Payload;
 import io.rsocket.RSocket;
 import io.rsocket.core.RSocketConnector;
 import io.rsocket.core.RSocketServer;
+import io.rsocket.transport.netty.server.CloseableChannel;
+import io.rsocket.transport.netty.server.TcpServerTransport;
 import io.rsocket.util.DefaultPayload;
-import java.net.InetSocketAddress;
 import java.time.Duration;
 import java.util.Objects;
 import java.util.concurrent.CancellationException;
@@ -364,22 +360,18 @@ public class ReactorNettyTransportTest {
 
     private final RSocket client;
 
-    private final ReactorServerCloseable server;
+    private final CloseableChannel server;
 
     public TransportPair() {
 
       server =
           RSocketServer.create((setup, sendingSocket) -> Mono.just(new TestRSocket(data, metadata)))
-              .bind(
-                  new ReactorServerTransport(
-                      new InetSocketAddress("localhost", RpcServerUtils.findFreePort()),
-                      new ThriftServerConfig().setSslEnabled(false),
-                      new SPINiftyMetrics()))
+              .bind(TcpServerTransport.create(0))
               .block();
       client =
           RSocketConnector.connectWith(
                   new ReactorClientTransport(
-                      Objects.requireNonNull(server).getAddress(),
+                      Objects.requireNonNull(server).address(),
                       new ThriftClientConfig().setDisableSSL(true)))
               .doOnError(Throwable::printStackTrace)
               .block();

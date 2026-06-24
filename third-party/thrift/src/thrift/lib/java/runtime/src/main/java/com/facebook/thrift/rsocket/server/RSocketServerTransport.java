@@ -19,16 +19,24 @@ package com.facebook.thrift.rsocket.server;
 import static java.util.Objects.requireNonNull;
 
 import com.facebook.swift.service.ThriftServerConfig;
-import com.facebook.thrift.rsocket.transport.reactor.server.ReactorServerCloseable;
-import com.facebook.thrift.rsocket.transport.reactor.server.ReactorServerTransport;
 import com.facebook.thrift.server.RpcServerHandler;
 import com.facebook.thrift.server.ServerTransport;
+import com.facebook.thrift.util.MetricsChannelDuplexHandler;
+import com.facebook.thrift.util.NettyUtil;
+import com.facebook.thrift.util.RpcServerUtils;
 import com.facebook.thrift.util.SPINiftyMetrics;
+import com.facebook.thrift.util.resources.RpcResources;
+import io.netty.handler.ssl.SslContext;
 import io.rsocket.core.RSocketServer;
 import io.rsocket.frame.FrameLengthCodec;
 import io.rsocket.frame.decoder.PayloadDecoder;
+import io.rsocket.transport.ServerTransport.ConnectionAcceptor;
+import io.rsocket.transport.netty.TcpDuplexConnection;
 import java.net.SocketAddress;
 import reactor.core.publisher.Mono;
+import reactor.netty.DisposableServer;
+import reactor.netty.tcp.SslProvider;
+import reactor.netty.tcp.TcpServer;
 
 public class RSocketServerTransport implements ServerTransport {
 
@@ -37,10 +45,15 @@ public class RSocketServerTransport implements ServerTransport {
           System.getProperty(
               "thrift.rsocket-max-frame-size", String.valueOf(FrameLengthCodec.FRAME_LENGTH_MASK)));
 
-  private ReactorServerCloseable closable;
+  private final DisposableServer disposableServer;
+  private final SocketAddress address;
+  private final SPINiftyMetrics metrics;
 
-  RSocketServerTransport(ReactorServerCloseable closeable) {
-    this.closable = closeable;
+  RSocketServerTransport(
+      DisposableServer disposableServer, SocketAddress address, SPINiftyMetrics metrics) {
+    this.disposableServer = disposableServer;
+    this.address = address;
+    this.metrics = metrics;
   }
 
   static Mono<RSocketServerTransport> createInstance(
@@ -52,11 +65,42 @@ public class RSocketServerTransport implements ServerTransport {
       requireNonNull(rpcServerHandler, "methodInvoker is null");
       requireNonNull(config, "config is null");
 
-      return RSocketServer.create(new ThriftSocketAcceptor(rpcServerHandler))
-          .fragment(MAX_FRAME_SIZE)
-          .payloadDecoder(PayloadDecoder.ZERO_COPY)
-          .bind(new ReactorServerTransport(socketAddress, config, serverMetrics))
-          .map(RSocketServerTransport::new);
+      TcpServer tcpServer =
+          TcpServer.create()
+              .doOnConnection(
+                  connection -> {
+                    connection
+                        .addHandlerLast(NettyUtil.getDefaultThriftFlushConsolidationHandler())
+                        .addHandlerLast(new MetricsChannelDuplexHandler(serverMetrics))
+                        .addHandlerLast(NettyUtil.getRSocketLengthFieldBasedFrameDecoder());
+
+                    ConnectionAcceptor acceptor =
+                        RSocketServer.create(
+                                new ThriftSocketAcceptor(
+                                    rpcServerHandler,
+                                    RpcServerUtils.getNiftyConnectionContext(connection)))
+                            .fragment(MAX_FRAME_SIZE)
+                            .payloadDecoder(PayloadDecoder.ZERO_COPY)
+                            .asConnectionAcceptor();
+
+                    acceptor
+                        .apply(new TcpDuplexConnection("server", connection))
+                        .then(Mono.<Void>never())
+                        .subscribe(connection.disposeSubscriber());
+                  })
+              .runOn(RpcResources.getEventLoopGroup());
+
+      if (config.isSslEnabled() && !config.isEnableUDS()) {
+        SslContext sslContext = RpcServerUtils.getSslContext(config);
+        tcpServer = tcpServer.secure(SslProvider.builder().sslContext(sslContext).build());
+      } else {
+        tcpServer = tcpServer.noSSL();
+      }
+
+      return tcpServer
+          .bindAddress(() -> socketAddress)
+          .bind()
+          .map(server -> new RSocketServerTransport(server, socketAddress, serverMetrics));
     } catch (Exception e) {
       return Mono.error(e);
     }
@@ -64,26 +108,26 @@ public class RSocketServerTransport implements ServerTransport {
 
   @Override
   public SocketAddress getAddress() {
-    return closable.getAddress();
+    return address;
   }
 
   @Override
   public Mono<Void> onClose() {
-    return closable.onClose();
+    return disposableServer.onDispose();
   }
 
   @Override
   public SPINiftyMetrics getNiftyMetrics() {
-    return closable.getMetrics();
+    return metrics;
   }
 
   @Override
   public void dispose() {
-    closable.dispose();
+    disposableServer.dispose();
   }
 
   @Override
   public boolean isDisposed() {
-    return closable.isDisposed();
+    return disposableServer.isDisposed();
   }
 }

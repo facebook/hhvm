@@ -17,7 +17,6 @@
 package com.facebook.thrift.util;
 
 import com.facebook.thrift.protocol.ByteBufTProtocol;
-import com.facebook.thrift.rsocket.transport.reactor.server.RSocketProtocolDetector;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelFuture;
@@ -40,14 +39,9 @@ import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoSink;
 import reactor.core.scheduler.NonBlocking;
-import reactor.netty.Connection;
 
 public final class NettyUtil {
   private static final Logger LOGGER = LoggerFactory.getLogger(NettyUtil.class);
-
-  public static RSocketProtocolDetector getRSocketProtocolDetector(Connection connection) {
-    return new RSocketProtocolDetector(connection);
-  }
 
   public static FlushConsolidationHandler getDefaultThriftFlushConsolidationHandler() {
     return new FlushConsolidationHandler(256, true);

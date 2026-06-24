@@ -51,7 +51,7 @@ struct ProfDataTargetProfile {
 
 #define PR(T)                                                  \
  private:                                                      \
-  hphp_fast_map<const rds::Profile, T*, RdsProfileHasher, RdsProfileEquals> m_map ## T; \
+  hphp_fast_map<rds::Profile, T*, RdsProfileHasher, RdsProfileEquals> m_map ## T; \
                                                                \
  public:                                                       \
   void add(const rds::Profile& key, T* value) {                \

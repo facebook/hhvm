@@ -955,10 +955,21 @@ class EnumTypeInfo {
  * in a `PyListObject`.
  */
 inline PyObject* getListObjectItemBase(void* pyList) {
+  // A fieldless struct deserializes into a zero-length list, whose `ob_item` is
+  // NULL. The base is only ever indexed by field offset (none here), but it
+  // must stay non-NULL to satisfy the table-based serializer's `targetObject`
+  // invariant, so fall back to the list object itself.
+  if (PyList_GET_SIZE(pyList) == 0) {
+    return reinterpret_cast<PyObject*>(pyList);
+  }
   return reinterpret_cast<PyObject*>(&PyList_GET_ITEM(pyList, 0));
 }
 inline const PyObject* getListObjectItemBase(const void* pyList) {
-  return reinterpret_cast<PyObject*>(&PyList_GET_ITEM(pyList, 0));
+  if (PyList_GET_SIZE(pyList) == 0) {
+    return reinterpret_cast<const PyObject*>(pyList);
+  }
+  return reinterpret_cast<PyObject*>(
+      &PyList_GET_ITEM(const_cast<void*>(pyList), 0));
 }
 
 /**

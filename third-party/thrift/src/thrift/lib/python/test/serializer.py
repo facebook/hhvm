@@ -56,6 +56,7 @@ from test_thrift.thrift_types import (
     easy,
     EasyList,
     EasySet,
+    EmptyStruct as TestEmptyStruct,
     hard,
     I32List,
     Integers,
@@ -71,6 +72,7 @@ from test_thrift.thrift_types import (
     StringList,
     StrList2D,
     StrStrMap,
+    StructDisabledFieldCache,
 )
 from thrift.python.exceptions import Error
 from thrift.python.mutable_types import (
@@ -173,6 +175,10 @@ class SerializerTests(unittest.TestCase):
         self.serializer: types.ModuleType = self.serializer_module
         self.SortedSets: Type[SortedSets] = self.test_types.SortedSets
         self.SortedMaps: Type[SortedMaps] = self.test_types.SortedMaps
+        self.EmptyStruct: Type[TestEmptyStruct] = self.test_types.EmptyStruct
+        self.StructDisabledFieldCache: Type[StructDisabledFieldCache] = (
+            self.test_types.StructDisabledFieldCache
+        )
 
     def to_list(self, list_data: list[ListT]) -> list[ListT] | _ThriftListWrapper:
         return to_thrift_list(list_data) if self.is_mutable_run else list_data
@@ -251,6 +257,59 @@ class SerializerTests(unittest.TestCase):
         # pyre-ignore[6]: TODO: Thrift-Container init
         control = self.easy(val=5, val_list=self.to_list([1, 2, 3, 4]))
         self.thrift_serialization_round_trip(control)
+
+    def test_empty_struct(self) -> None:
+        # A struct with zero fields must round-trip and support the basic
+        # operations (iteration, equality, ordering) like any other struct.
+        control = self.EmptyStruct()
+        self.thrift_serialization_round_trip(control)
+
+        self.assertEqual(control, self.EmptyStruct())
+        self.assertEqual(list(control), [])
+
+        # The call operator (copy-with-updates) on a fieldless struct has no
+        # fields to update, so it yields an equal struct.
+        self.assertEqual(control(), control)
+
+        # Two empty instances are equal, hence neither is strictly less than the
+        # other, but each is less-than-or-equal to the other.
+        other = self.EmptyStruct()
+        self.assertFalse(control < other)
+        self.assertFalse(other < control)
+        self.assertLessEqual(control, other)
+
+        if not self.is_mutable_run:
+            # Immutable structs are hashable. `__hash__` has a dedicated branch
+            # for the fieldless case (it hashes by type rather than the empty
+            # value tuple); equal empty instances must hash equally and be usable
+            # as set/dict members.
+            self.assertEqual(hash(control), hash(other))
+            self.assertEqual({control, other}, {control})
+
+        # A deserialized empty struct compares equal to a freshly constructed
+        # one across every protocol.
+        for proto in Protocol:
+            encoded = self.serializer.serialize(control, protocol=proto)
+            decoded = self.serializer.deserialize(
+                self.EmptyStruct, encoded, protocol=proto
+            )
+            self.assertEqual(decoded, self.EmptyStruct())
+            self.assertEqual(list(decoded), [])
+
+    def test_nested_empty_struct(self) -> None:
+        # Round-tripping a zero-field struct nested inside another struct
+        # exercises the deserialization path that builds the nested struct's
+        # data holder in C++ (as opposed to the top-level holder, which is
+        # constructed in Python).
+        control = self.StructDisabledFieldCache(empty_struct_field=self.EmptyStruct())
+        self.thrift_serialization_round_trip(control)
+        for proto in Protocol:
+            encoded = self.serializer.serialize(control, protocol=proto)
+            decoded = self.serializer.deserialize(
+                self.StructDisabledFieldCache, encoded, protocol=proto
+            )
+            self.assertEqual(decoded.empty_struct_field, self.EmptyStruct())
+            self.assertEqual(list(decoded.empty_struct_field), [])
 
     def test_pickle_easy_struct(self) -> None:
         if self.is_mutable_run:

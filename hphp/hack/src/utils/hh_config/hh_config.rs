@@ -413,8 +413,7 @@ impl HhConfig {
             tco_coeffects_local: default.tco_coeffects_local,
             tco_strict_contexts: default.tco_strict_contexts,
             tco_like_casts: hhconfig.get_bool_or("like_casts", default.tco_like_casts)?,
-            tco_check_xhp_attribute: hhconfig
-                .get_bool_or("check_xhp_attribute", default.tco_check_xhp_attribute)?,
+
             tco_check_redundant_generics: hhconfig.get_bool_or(
                 "check_redundant_generics",
                 default.tco_check_redundant_generics,

@@ -460,8 +460,6 @@ let load_config (config : Config_file_common.t) (options : GlobalOptions.t) :
     ?tco_coeffects:(bool_opt Config_keys.Hhconfig.call_coeffects config)
     ?tco_coeffects_local:(bool_opt Config_keys.Hhconfig.local_coeffects config)
     ?tco_like_casts:(bool_opt Config_keys.Hhconfig.like_casts config)
-    ?tco_check_xhp_attribute:
-      (bool_opt Config_keys.Hhconfig.check_xhp_attribute config)
     ?tco_check_redundant_generics:
       (bool_opt Config_keys.Hhconfig.check_redundant_generics config)
     ?tco_disallow_unresolved_type_variables:

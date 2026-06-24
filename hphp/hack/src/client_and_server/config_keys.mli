@@ -100,8 +100,6 @@ module Hhconfig : sig
 
   val check_redundant_generics : string
 
-  val check_xhp_attribute : string
-
   val class_class_type : string
 
   val class_pointer_ban_class_array_key : string

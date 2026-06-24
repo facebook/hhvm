@@ -108,7 +108,7 @@ let check_attrs pos env sid attrs =
                  { pos; attr = attr_name; ty_reason_msg }))
       missing_attrs
 
-let create_handler ctx =
+let create_handler _ctx =
   let handler =
     object
       inherit Tast_visitor.handler_base
@@ -119,8 +119,4 @@ let create_handler ctx =
         | _ -> ()
     end
   in
-  if TypecheckerOptions.check_xhp_attribute (Provider_context.get_tcopt ctx)
-  then
-    Some handler
-  else
-    None
+  Some handler

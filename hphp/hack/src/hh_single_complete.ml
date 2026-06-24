@@ -91,7 +91,7 @@ let parse_options () =
     | None -> reference := Some value
     | Some _ -> failwith (Printf.sprintf "Attempted to set %s twice" name)
   in
-  let check_xhp_attribute = ref false in
+
   let disable_xhp_element_mangling = ref false in
   let disable_xhp_children_declarations = ref false in
   let enable_xhp_class_modifier = ref false in
@@ -108,9 +108,6 @@ let parse_options () =
       ( "--no-builtins",
         Arg.Set no_builtins,
         " Don't use builtins (e.g. ConstSet); implied by --root" );
-      ( "--check-xhp-attribute",
-        Arg.Set check_xhp_attribute,
-        " Typechecks xhp required attributes" );
       ( "--disable-xhp-element-mangling",
         Arg.Set disable_xhp_element_mangling,
         "Disable mangling of XHP elements :foo. That is, :foo:bar is now \\foo\\bar, not xhp_foo__bar"
@@ -271,7 +268,6 @@ let parse_options () =
         (GlobalOptions.default_saved_state
         |> GlobalOptions.with_saved_state_manifold_api_key
              !saved_state_manifold_api_key)
-      ~tco_check_xhp_attribute:!check_xhp_attribute
       ~allowed_fixme_codes_strict:
         (Option.value allowed_fixme_codes_strict ~default:ISet.empty)
       ~glean_reponame:!glean_reponame

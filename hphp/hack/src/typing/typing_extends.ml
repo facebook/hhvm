@@ -742,43 +742,40 @@ let check_async env ft_parent ft_child parent_pos pos on_error =
   | _ -> ()
 
 let check_xhp_attr_required env parent_class_elt class_elt on_error =
-  if not (TCO.check_xhp_attribute (Env.get_tcopt env)) then
-    ()
-  else
-    let is_less_strict = function
-      | (Some Xhp_attribute.Required, _)
-      | (Some Xhp_attribute.LateInit, Some Xhp_attribute.LateInit)
-      | (Some Xhp_attribute.LateInit, None)
-      | (None, None) ->
-        false
-      | (_, _) -> true
+  let is_less_strict = function
+    | (Some Xhp_attribute.Required, _)
+    | (Some Xhp_attribute.LateInit, Some Xhp_attribute.LateInit)
+    | (Some Xhp_attribute.LateInit, None)
+    | (None, None) ->
+      false
+    | (_, _) -> true
+  in
+  let parent_attr = get_ce_xhp_attr parent_class_elt in
+  let attr = get_ce_xhp_attr class_elt in
+  match (parent_attr, attr) with
+  | ( Some { Xhp_attribute.xa_tag = parent_tag; _ },
+      Some { Xhp_attribute.xa_tag = tag; _ } )
+    when is_less_strict (tag, parent_tag) ->
+    let (lazy parent_pos) = parent_class_elt.ce_pos in
+    let (lazy child_pos) = class_elt.ce_pos in
+    let lateinit = Markdown_lite.md_codify "@lateinit" in
+    let required = Markdown_lite.md_codify "@required" in
+    let show_tag_opt = function
+      | None -> Printf.sprintf "not %s or %s" required lateinit
+      | Some Xhp_attribute.Required -> required
+      | Some Xhp_attribute.LateInit -> lateinit
     in
-    let parent_attr = get_ce_xhp_attr parent_class_elt in
-    let attr = get_ce_xhp_attr class_elt in
-    match (parent_attr, attr) with
-    | ( Some { Xhp_attribute.xa_tag = parent_tag; _ },
-        Some { Xhp_attribute.xa_tag = tag; _ } )
-      when is_less_strict (tag, parent_tag) ->
-      let (lazy parent_pos) = parent_class_elt.ce_pos in
-      let (lazy child_pos) = class_elt.ce_pos in
-      let lateinit = Markdown_lite.md_codify "@lateinit" in
-      let required = Markdown_lite.md_codify "@required" in
-      let show_tag_opt = function
-        | None -> Printf.sprintf "not %s or %s" required lateinit
-        | Some Xhp_attribute.Required -> required
-        | Some Xhp_attribute.LateInit -> lateinit
-      in
-      Typing_error_utils.add_typing_error ~env
-      @@ Typing_error.(
-           apply_reasons ~on_error
-           @@ Secondary.Bad_xhp_attr_required_override
-                {
-                  pos = child_pos;
-                  tag = show_tag_opt tag;
-                  parent_pos;
-                  parent_tag = show_tag_opt parent_tag;
-                })
-    | (_, _) -> ()
+    Typing_error_utils.add_typing_error ~env
+    @@ Typing_error.(
+         apply_reasons ~on_error
+         @@ Secondary.Bad_xhp_attr_required_override
+              {
+                pos = child_pos;
+                tag = show_tag_opt tag;
+                parent_pos;
+                parent_tag = show_tag_opt parent_tag;
+              })
+  | (_, _) -> ()
 
 let add_pessimisation_dependency
     env child_cls member_name member_kind parent_cls =

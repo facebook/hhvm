@@ -99,8 +99,6 @@ let global_access_check_enabled t =
 
 let like_casts t = t.GlobalOptions.tco_like_casts
 
-let check_xhp_attribute t = t.GlobalOptions.tco_check_xhp_attribute
-
 let check_redundant_generics t = t.GlobalOptions.tco_check_redundant_generics
 
 let disallow_unresolved_type_variables t =

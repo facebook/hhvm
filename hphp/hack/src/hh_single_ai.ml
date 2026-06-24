@@ -121,7 +121,6 @@ let parse_options () =
       ~tco_saved_state:GlobalOptions.default_saved_state
       ~allowed_fixme_codes_strict:
         (Option.value !allowed_fixme_codes_strict ~default:ISet.empty)
-      ~tco_check_xhp_attribute:false
       GlobalOptions.default
   in
   Diagnostics.allowed_fixme_codes_strict :=

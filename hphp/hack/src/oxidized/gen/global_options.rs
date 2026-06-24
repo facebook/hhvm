@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<722d5b9cf47f55aad88a22e26589afd7>>
+// @generated SignedSource<<324e356b2f246903ed1bb926949a9266>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -228,8 +228,6 @@ pub struct GlobalOptions {
     pub tco_strict_contexts: bool,
     /// Enables like casts
     pub tco_like_casts: bool,
-    /// static check xhp required attribute
-    pub tco_check_xhp_attribute: bool,
     /// Check redundant generics in return types
     pub tco_check_redundant_generics: bool,
     /// Flag to produce an error whenever the TAST contains unresolved type variables

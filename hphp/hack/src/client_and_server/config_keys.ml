@@ -105,8 +105,6 @@ module Hhconfig = struct
 
   let check_redundant_generics = key "check_redundant_generics"
 
-  let check_xhp_attribute = key "check_xhp_attribute"
-
   let class_class_type = key "class_class_type"
 
   let class_pointer_ban_class_array_key =

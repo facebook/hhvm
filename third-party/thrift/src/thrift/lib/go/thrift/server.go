@@ -157,6 +157,13 @@ type server struct {
 func (s *server) ServeContext(ctx context.Context) error {
 	// TODO: support graceful shutdown and track with thrift.task_killed
 
+	// Notify interceptors that the server is starting up, before accepting any
+	// connections, so they can precompute schema-dependent state.
+	err := s.runOnStartServingInterceptors()
+	if err != nil {
+		return err
+	}
+
 	transporter := func(context.Context) (transport.ServerTransport, error) {
 		return newRocketServerTransport(
 			s.listener,
@@ -260,6 +267,28 @@ func (s *server) defaultLoadFn() uint32 {
 	working := s.totalActiveRequestCount.Load()
 	denominator := float64(runtime.NumCPU())
 	return uint32(1000. * float64(working) / denominator)
+}
+
+// runOnStartServingInterceptors invokes the OnStartServing callback of every
+// registered ServiceInterceptor exactly once, in forward (registration) order,
+// before the server accepts any connections. It builds the InitParams from the
+// server's processor metadata so interceptors can precompute schema-dependent
+// state.
+//
+// Unlike the per-request callbacks, startup is fail-fast: the first error
+// returned by any interceptor aborts startup and is returned to the caller, so
+// remaining interceptors are not invoked.
+func (s *server) runOnStartServingInterceptors() error {
+	initParams := InitParams{
+		ServiceMetadata: s.proc.GetThriftMetadata(),
+	}
+	for _, interceptor := range s.interceptors {
+		err := interceptor.OnStartServing(initParams)
+		if err != nil {
+			return fmt.Errorf("service interceptor startup failed: %w", err)
+		}
+	}
+	return nil
 }
 
 // runOnRequestInterceptors invokes the OnRequest callback of every registered

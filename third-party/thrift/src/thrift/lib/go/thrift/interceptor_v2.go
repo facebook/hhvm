@@ -20,7 +20,23 @@ import (
 	"context"
 
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
+	"github.com/facebook/fbthrift/thrift/lib/thrift/metadata"
 )
+
+// InitParams carries server-level information handed to every ServiceInterceptor
+// exactly once, at server startup, before any connections are accepted. It
+// mirrors the C++ ServiceInterceptorBase::InitParams: it gives interceptors
+// access to the server's Thrift schema/metadata so they can precompute
+// per-method state (for example, a method-keyed lookup table derived from
+// method annotations) instead of recomputing it on the request hot path.
+type InitParams struct {
+	// ServiceMetadata is the Thrift metadata for the server's processor,
+	// enumerating services, their functions, and the functions' structured
+	// annotations. It may be nil if the processor does not expose metadata
+	// (e.g. a raw processor), in which case schema-dependent interceptors should
+	// degrade gracefully rather than fail.
+	ServiceMetadata *metadata.ThriftMetadata
+}
 
 // ServiceInterceptor allows introspecting incoming connections, requests, and
 // outgoing responses for a server. An interceptor hooks into the connection and
@@ -38,6 +54,16 @@ import (
 // overrides just OnRequest and inherits the no-op defaults for the rest, which
 // avoids boilerplate.
 type ServiceInterceptor interface {
+	// OnStartServing is called exactly once, when the server starts serving and
+	// before any connections are accepted. It receives the server's InitParams
+	// (including the Thrift service metadata) so the interceptor can precompute
+	// any per-method or per-service state it needs on the request path.
+	//
+	// It is the Go analog of the C++ ServiceInterceptor co_onStartServing
+	// callback. Returning a non-nil error aborts server startup, so use it only
+	// for failures that should prevent the server from serving.
+	OnStartServing(initParams InitParams) error
+
 	// OnRequest is called when a new request arrives on an existing connection,
 	// after the incoming request has been deserialized. userConnState is the
 	// value returned by the corresponding OnConnectionEstablished call for this
@@ -84,6 +110,11 @@ type ServiceInterceptor interface {
 type BaseServiceInterceptor struct{}
 
 var _ ServiceInterceptor = (*BaseServiceInterceptor)(nil)
+
+// OnStartServing implements ServiceInterceptor and is a no-op by default.
+func (si *BaseServiceInterceptor) OnStartServing(initParams InitParams) error {
+	return nil
+}
 
 // OnRequest implements ServiceInterceptor and is a no-op by default.
 func (si *BaseServiceInterceptor) OnRequest(ctx context.Context, req types.ReadableStruct, userConnState any) (any, error) {

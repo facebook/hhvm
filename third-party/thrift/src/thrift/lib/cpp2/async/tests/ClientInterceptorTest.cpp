@@ -515,14 +515,14 @@ class ClientInterceptorTestP
 
  private:
   void SetUp() override {
-    runner = std::make_unique<ScopedServerInterfaceThread>(
+    runner_ = std::make_unique<ScopedServerInterfaceThread>(
         std::make_shared<TestHandler>());
     if (transportType() == TransportType::HTTP2) {
-      auto& thriftServer = runner->getThriftServer();
+      auto& thriftServer = runner_->getThriftServer();
       thriftServer.addRoutingHandler(createHTTP2RoutingHandler(thriftServer));
     }
   }
-  std::unique_ptr<ScopedServerInterfaceThread> runner;
+  std::unique_ptr<ScopedServerInterfaceThread> runner_;
 
   ScopedServerInterfaceThread::MakeChannelFunc channelFor(
       TransportType transportType) {
@@ -546,7 +546,7 @@ class ClientInterceptorTestP
 
  public:
   std::shared_ptr<RequestChannel> makeChannel() {
-    return runner
+    return runner_
         ->newClient<apache::thrift::Client<test::ClientInterceptorTest>>(
             folly::getGlobalIOExecutor().get(), // for future_ prefix-ed methods
             channelFor(transportType()))

@@ -626,13 +626,13 @@ class RequestInstrumentationTestP
     : public RequestInstrumentationTest,
       public ::testing::WithParamInterface<std::tuple<int, int, bool>> {
  protected:
-  size_t finishedRequestsLimit;
-  size_t reqNum;
-  bool rocket;
+  size_t finishedRequestsLimit_;
+  size_t reqNum_;
+  bool rocket_;
   void SetUp() override {
-    std::tie(finishedRequestsLimit, reqNum, rocket) = GetParam();
+    std::tie(finishedRequestsLimit_, reqNum_, rocket_) = GetParam();
     impl_ = std::make_unique<Impl>([&](auto& ts) {
-      ts.setMaxFinishedDebugPayloadsPerWorker(finishedRequestsLimit);
+      ts.setMaxFinishedDebugPayloadsPerWorker(finishedRequestsLimit_);
     });
   }
 };
@@ -640,7 +640,7 @@ class RequestInstrumentationTestP
 TEST_P(RequestInstrumentationTestP, requestPayloadTest) {
   std::array<std::string, 4> strList = {
       "apache", "thrift", "test", "InstrumentationTest"};
-  auto client = rocket ? makeRocketClient() : makeHeaderClient();
+  auto client = rocket_ ? makeRocketClient() : makeHeaderClient();
 
   std::vector<folly::SemiFuture<folly::IOBuf>> tasks;
   int32_t reqId = 0;
@@ -736,15 +736,15 @@ TEST_F(RequestInstrumentationTest, snapshotRecentRequestCountsTest) {
 class RecentRequestsTest : public RequestInstrumentationTest,
                            public ::testing::WithParamInterface<bool> {
  protected:
-  bool rocket;
+  bool rocket_;
   void SetUp() override {
-    rocket = GetParam();
+    rocket_ = GetParam();
     RequestInstrumentationTest::SetUp();
   }
 };
 
 TEST_P(RecentRequestsTest, Exclude) {
-  auto client = rocket ? makeRocketClient() : makeHeaderClient();
+  auto client = rocket_ ? makeRocketClient() : makeHeaderClient();
   auto debugClient = makeDebugClient();
 
   auto g = folly::makeGuard([] { excludeFromRecentRequestsCount.clear(); });
@@ -932,18 +932,18 @@ TEST(ThriftServerDeathTest, getSnapshotOnServerShutdown) {
 }
 
 TEST_P(RequestInstrumentationTestP, FinishedRequests) {
-  auto client = rocket ? makeRocketClient() : makeHeaderClient();
+  auto client = rocket_ ? makeRocketClient() : makeHeaderClient();
 
-  for (size_t i = 0; i < reqNum; i++) {
+  for (size_t i = 0; i < reqNum_; i++) {
     client->semifuture_sendRequest();
   }
 
-  handler()->waitForRequests(reqNum);
+  handler()->waitForRequests(reqNum_);
   handler()->stopRequests();
 
   // we expect all requests to stop now ...
   {
-    size_t expected = std::min(reqNum, finishedRequestsLimit);
+    size_t expected = std::min(reqNum_, finishedRequestsLimit_);
     int i = 0;
     while (i < 5 &&
            thriftServer()->getServerSnapshot().get().requests.size() !=
@@ -956,7 +956,8 @@ TEST_P(RequestInstrumentationTestP, FinishedRequests) {
 
   auto serverSnapshot = thriftServer()->getServerSnapshot().get();
   auto serverReqSnapshots = serverSnapshot.requests;
-  EXPECT_EQ(serverReqSnapshots.size(), std::min(reqNum, finishedRequestsLimit));
+  EXPECT_EQ(
+      serverReqSnapshots.size(), std::min(reqNum_, finishedRequestsLimit_));
   for (auto& req : serverReqSnapshots) {
     EXPECT_EQ(req.getMethodName(), "sendRequest");
     EXPECT_NE(req.getRootRequestContextId(), 0);
@@ -987,7 +988,7 @@ class RegistryTests
   }
 
   class MockRequest : public ResponseChannelRequest {
-    std::unique_ptr<server::ServerConfigsMock> serverConfigs =
+    std::unique_ptr<server::ServerConfigsMock> serverConfigs_ =
         std::make_unique<server::ServerConfigsMock>();
 
     Cpp2ConnContext mockConnCtx_;
@@ -1010,8 +1011,8 @@ class RegistryTests
         : registry_(std::move(registry)),
           stateMachine_(
               true,
-              serverConfigs->getAdaptiveConcurrencyController(),
-              serverConfigs->getCPUConcurrencyController()) {
+              serverConfigs_->getAdaptiveConcurrencyController(),
+              serverConfigs_->getCPUConcurrencyController()) {
       new (colocationParams.debugStubToInit) RequestsRegistry::DebugStub(
           *registry_,
           *this,
@@ -1127,10 +1128,10 @@ class TimestampsTest
     : public RequestInstrumentationTest,
       public ::testing::WithParamInterface<std::tuple<bool, bool>> {
  protected:
-  bool rocket;
-  bool forceTimestamps;
-  std::optional<server::TServerObserver::CallTimestamps> timestamps;
-  std::optional<folly::Baton<>> timestampObserverComplete;
+  bool rocket_;
+  bool forceTimestamps_;
+  std::optional<server::TServerObserver::CallTimestamps> timestamps_;
+  std::optional<folly::Baton<>> timestampObserverComplete_;
   struct Observer : public server::TServerObserver {
     explicit Observer(folly::Function<void(const CallTimestamps&)>&& f)
         : server::TServerObserver(1), f_(std::move(f)) {}
@@ -1140,13 +1141,13 @@ class TimestampsTest
     folly::Function<void(const CallTimestamps&)> f_;
   };
   void SetUp() override {
-    std::tie(rocket, forceTimestamps) = GetParam();
+    std::tie(rocket_, forceTimestamps_) = GetParam();
     impl_ = std::make_unique<Impl>([&](auto& ts) {
-      if (forceTimestamps) {
+      if (forceTimestamps_) {
         ts.setObserver(std::make_shared<Observer>([&](auto& t) {
-          timestamps = t;
-          if (timestampObserverComplete) {
-            timestampObserverComplete->post();
+          timestamps_ = t;
+          if (timestampObserverComplete_) {
+            timestampObserverComplete_->post();
           }
         }));
       }
@@ -1169,31 +1170,31 @@ void validateTimestamps(
 } // namespace
 
 TEST_P(TimestampsTest, Basic) {
-  timestampObserverComplete.emplace();
-  auto client = rocket ? makeRocketClient() : makeHeaderClient();
+  timestampObserverComplete_.emplace();
+  auto client = rocket_ ? makeRocketClient() : makeHeaderClient();
   auto now = std::chrono::steady_clock::now();
   handler()->setCallback([&](TestInterface* ti) {
     validateTimestamps(
-        forceTimestamps, now, ti->getRequestContext()->getTimestamps());
-    if (rocket) {
+        forceTimestamps_, now, ti->getRequestContext()->getTimestamps());
+    if (rocket_) {
       EXPECT_GT(ti->getRequestContext()->getWiredRequestBytes(), 0);
     }
     now = std::chrono::steady_clock::now();
   });
   client->sync_runCallback();
-  if (forceTimestamps) {
-    timestampObserverComplete->try_wait_for(1s);
-    EXPECT_GT(timestamps->processEnd, now);
-    EXPECT_GT(timestamps->writeBegin, timestamps->processEnd);
-    EXPECT_GT(timestamps->writeEnd, timestamps->writeBegin);
+  if (forceTimestamps_) {
+    timestampObserverComplete_->try_wait_for(1s);
+    EXPECT_GT(timestamps_->processEnd, now);
+    EXPECT_GT(timestamps_->writeBegin, timestamps_->processEnd);
+    EXPECT_GT(timestamps_->writeEnd, timestamps_->writeBegin);
   }
 }
 
 TEST_P(TimestampsTest, QueueTimeout) {
-  if (!forceTimestamps) {
+  if (!forceTimestamps_) {
     return;
   }
-  auto client = rocket ? makeRocketClient() : makeHeaderClient();
+  auto client = rocket_ ? makeRocketClient() : makeHeaderClient();
 
   // force queue timeout by blocking CPU worker
   folly::Baton<> receivedBlockingCall;
@@ -1219,7 +1220,7 @@ TEST_P(TimestampsTest, QueueTimeout) {
   }
   // callCompleted should not be called for requests which timed out the
   // queue.
-  EXPECT_FALSE(timestamps.has_value());
+  EXPECT_FALSE(timestamps_.has_value());
 }
 
 INSTANTIATE_TEST_CASE_P(
@@ -1249,22 +1250,23 @@ class ConnectionsObserverTest : public RequestInstrumentationTest,
       closedConnId = param.getConnectionId();
     }
   };
-  bool useRocket;
-  std::shared_ptr<Observer> observer = std::make_shared<Observer>();
+  bool useRocket_;
+  std::shared_ptr<Observer> observer_ = std::make_shared<Observer>();
   void SetUp() override {
-    useRocket = GetParam();
-    impl_ = std::make_unique<Impl>([&](auto& ts) { ts.setObserver(observer); });
+    useRocket_ = GetParam();
+    impl_ =
+        std::make_unique<Impl>([&](auto& ts) { ts.setObserver(observer_); });
   }
 };
 
 TEST_P(ConnectionsObserverTest, Basic) {
-  auto client = useRocket ? makeRocketClient() : makeHeaderClient();
+  auto client = useRocket_ ? makeRocketClient() : makeHeaderClient();
   client->sync_runCallback();
   impl_.reset();
   // Make sure both connAccepted and connClosed are invoked.
-  ASSERT_TRUE(observer->acceptedConnId != 0);
-  ASSERT_TRUE(observer->closedConnId != 0);
-  ASSERT_EQ(observer->acceptedConnId, observer->closedConnId);
+  ASSERT_TRUE(observer_->acceptedConnId != 0);
+  ASSERT_TRUE(observer_->closedConnId != 0);
+  ASSERT_EQ(observer_->acceptedConnId, observer_->closedConnId);
 }
 
 INSTANTIATE_TEST_CASE_P(

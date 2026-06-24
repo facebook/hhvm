@@ -91,7 +91,7 @@ class RocketClientTest : public testing::Test {
 
     void sync_echoRequest(
         ::std::string& _return, std::unique_ptr<::std::string> input) override {
-      hit++;
+      hit_++;
       if (*input == "big") {
         _return = getRandomString(1024 * 1024 * 80);
       } else {
@@ -99,7 +99,7 @@ class RocketClientTest : public testing::Test {
       }
     }
 
-    int getHit() { return hit; }
+    int getHit() { return hit_; }
 
    private:
     int shrinkSocketSendBuffer() {
@@ -114,7 +114,7 @@ class RocketClientTest : public testing::Test {
       return bufsize;
     }
 
-    std::atomic<int> hit{0};
+    std::atomic<int> hit_{0};
   };
 };
 

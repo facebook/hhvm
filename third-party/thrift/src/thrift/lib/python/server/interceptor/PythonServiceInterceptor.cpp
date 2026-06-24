@@ -31,8 +31,8 @@ void ensure_module_imported() {
 }
 
 struct GILGuard {
-  GILGuard() : gstate(::PyGILState_Ensure()) {}
-  ~GILGuard() { ::PyGILState_Release(gstate); }
+  GILGuard() : gstate_(::PyGILState_Ensure()) {}
+  ~GILGuard() { ::PyGILState_Release(gstate_); }
 
   GILGuard(const GILGuard&) = delete;
   GILGuard(GILGuard&&) = delete;
@@ -40,7 +40,7 @@ struct GILGuard {
   GILGuard& operator=(GILGuard&&) = delete;
 
  private:
-  ::PyGILState_STATE gstate;
+  ::PyGILState_STATE gstate_;
 };
 
 PyObject* pyObjectOrNone(PyObject** maybeNullPyObject) {

@@ -418,7 +418,7 @@ struct ScopedServerInterfaceThreadTest : public testing::Test {
   }
 
  private:
-  gflags::FlagSaver flagSaver;
+  gflags::FlagSaver flagSaver_;
 };
 
 class SlowSimpleServiceImpl

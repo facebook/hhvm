@@ -115,11 +115,11 @@ class TestHandler : public ServiceHandler<test::Calculator> {
  public:
   class Addition : public AdditionIf {
    public:
-    int32_t sync_getPrimitive() override { return acc; }
-    void sync_accumulatePrimitive(int32_t val) override { acc += val; }
+    int32_t sync_getPrimitive() override { return acc_; }
+    void sync_accumulatePrimitive(int32_t val) override { acc_ += val; }
 
    private:
-    int32_t acc{0};
+    int32_t acc_{0};
   };
 
   TileAndResponse<ServiceHandler<test::Calculator>::AdditionIf, void>

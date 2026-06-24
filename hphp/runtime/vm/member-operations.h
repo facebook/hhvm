@@ -137,6 +137,10 @@ inline void failOnNonCollectionObjArrayAccess(ObjectData* obj) {
 
 [[noreturn]] void unknownBaseType(DataType);
 
+// Sampled log of a dynamic property access ($foo->$bar); the caller must first
+// confirm the access is dynamic (member key MPC/MPL).
+void logDynamicPropAccess(TypedValue base, TypedValue key);
+
 namespace detail {
 
 [[noreturn]]

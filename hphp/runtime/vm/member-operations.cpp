@@ -17,12 +17,18 @@
 #include "hphp/runtime/vm/member-operations.h"
 
 #include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/base/datatype.h"
+#include "hphp/runtime/base/object-data.h"
+#include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/vanilla-vec.h"
-#include "hphp/runtime/base/vanilla-vec-defs.h"
 
 #include "hphp/system/systemlib.h"
+
+#include "hphp/util/configs/eval.h"
+
+#include <folly/Random.h>
 
 #include <type_traits>
 
@@ -36,6 +42,31 @@ StringData* prepareAnyKey(TypedValue* tv) {
   } else {
     return tvAsCVarRef(tv).toString().detach();
   }
+}
+
+void logDynamicPropAccess(TypedValue base, TypedValue key) {
+  // A non-object base throws on the access anyway; only object accesses matter.
+  if (base.m_type != KindOfObject) return;
+
+  auto const rate = Cfg::Eval::LogDynamicPropAccessSampleRate;
+  if (rate == 0 || folly::Random::rand32(rate) != 0) return;
+
+  auto const cls = base.m_data.pobj->getVMClass()->name()->data();
+  auto const prop = [&key]() -> std::string {
+    if (isStringType(key.m_type)) return key.m_data.pstr->data();
+    switch (key.m_type) {
+      // Scalars coerce to the same name the access uses (e.g. 42 -> "42").
+      case KindOfInt64:
+      case KindOfDouble:
+      case KindOfBoolean:
+        return tvAsCVarRef(&key).toString().toCppString();
+      default:
+        // null/arrays/objects coerce to "" or throw / run __toString; show type.
+        return tname(key.m_type);
+    }
+  }();
+
+  raise_notice(folly::sformat("Dynamic property access {}->{}", cls, prop));
 }
 
 void unknownBaseType(DataType type) {

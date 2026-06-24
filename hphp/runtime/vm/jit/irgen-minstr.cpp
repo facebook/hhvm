@@ -1375,7 +1375,16 @@ SSATmp* setElemImpl(IRGS& env, uint32_t nDiscard, SSATmp* key, Finish finish) {
   return value;
 }
 
+// Dynamic property access ($foo->$bar) is logged in the interpreter; when that
+// logging is enabled, interpret these member ops rather than translating them.
+bool dynPropAccessNeedsInterp(MemberKey mk) {
+  return Cfg::Eval::LogDynamicPropAccessSampleRate != 0 &&
+         (mk.mcode == MPC || mk.mcode == MPL);
+}
+
 SSATmp* memberKey(IRGS& env, MemberKey mk) {
+  // Logged dynamic-prop accesses are interpreted at each emitter's top, never here.
+  assertx(!dynPropAccessNeedsInterp(mk));
   auto const res = [&] () -> SSATmp* {
     switch (mk.mcode) {
       case MW:
@@ -1857,6 +1866,7 @@ void emitBaseH(IRGS& env) {
 }
 
 void emitDim(IRGS& env, MOpMode mode, MemberKey mk) {
+  if (dynPropAccessNeedsInterp(mk)) return interpOne(env);
   auto const key = memberKey(env, mk);
 
   auto const finish = [&] (SSATmp* base) {
@@ -1873,6 +1883,7 @@ void emitDim(IRGS& env, MOpMode mode, MemberKey mk) {
 }
 
 void emitQueryM(IRGS& env, uint32_t nDiscard, QueryMOp query, MemberKey mk) {
+  if (dynPropAccessNeedsInterp(mk)) return interpOne(env);
   if (mk.mcode == MW) PUNT(QueryNewElem);
   auto key = memberKey(env, mk);
   auto const baseType = env.irb->fs().mbase().type;
@@ -1933,6 +1944,7 @@ void emitQueryM(IRGS& env, uint32_t nDiscard, QueryMOp query, MemberKey mk) {
 }
 
 void emitSetM(IRGS& env, uint32_t nDiscard, MemberKey mk) {
+  if (dynPropAccessNeedsInterp(mk)) return interpOne(env);
   auto const key = memberKey(env, mk);
   auto const baseType = env.irb->fs().mbase().type;
   if (baseType <= TClsMeth) {
@@ -1968,6 +1980,7 @@ void emitSetRangeM(IRGS& env,
 }
 
 void emitIncDecM(IRGS& env, uint32_t nDiscard, IncDecOp incDec, MemberKey mk) {
+  if (dynPropAccessNeedsInterp(mk)) return interpOne(env);
   auto key = memberKey(env, mk);
 
   auto const finish = [&] (SSATmp* result) {
@@ -2121,6 +2134,7 @@ SSATmp* setOpPropImpl(IRGS& env, SetOpOp op, SSATmp* base,
 }
 
 void emitSetOpM(IRGS& env, uint32_t nDiscard, SetOpOp op, MemberKey mk) {
+  if (dynPropAccessNeedsInterp(mk)) return interpOne(env);
   auto key = memberKey(env, mk);
   auto rhs = topC(env);
 
@@ -2155,6 +2169,7 @@ void emitSetOpM(IRGS& env, uint32_t nDiscard, SetOpOp op, MemberKey mk) {
 }
 
 void emitUnsetM(IRGS& env, uint32_t nDiscard, MemberKey mk) {
+  if (dynPropAccessNeedsInterp(mk)) return interpOne(env);
   auto const key = memberKey(env, mk);
   assertx(key->type().isKnownDataType());
 

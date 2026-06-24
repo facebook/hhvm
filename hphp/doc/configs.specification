@@ -1033,6 +1033,14 @@ The format can be found in hphp/tools/configs/generate_configs.rs
   hhvm_rds_allocations table. 0 disables logging. When enabled, each call to
   alloc() is logged with probability 1/rate.
 
+- uint32_t Eval.LogDynamicPropAccessSampleRate = 0, dizzy
+
+  Sample rate for raising a notice on dynamic property accesses ($foo->$bar,
+  where the property name comes from a runtime value rather than a literal). 0
+  disables it; when enabled, each access raises a notice with probability 1/rate
+  (rate 1 = every access). The notice records the runtime class of the base and
+  the property name; the source location identifies the kind of access.
+
 - uint32_t Eval.ProfileGlobalsLimit = 200, UNKNOWN
 
 - double Eval.ProfileGlobalsSlowExitThreshold = 0.98, UNKNOWN

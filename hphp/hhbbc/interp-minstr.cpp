@@ -526,14 +526,16 @@ Optional<std::pair<Type,Promotion>> key_type_or_fixup(ISS& env, Op op) {
     // If we might throw, we don't want to const prop the key
     if (promoted.second == Promotion::YesMightThrow) return promoted;
 
-    if (auto const val = tv(promoted.first)) {
+    // Fold a constant element key to a literal/int member key. Property keys are
+    // never folded, so dynamic-property-access logging still sees $o->$x.
+    if (auto const val = tv(promoted.first); val && !isProp) {
       if (isStringType(val->m_type)) {
-        op.mkey.mcode = isProp ? MPT : MET;
+        op.mkey.mcode = MET;
         op.mkey.litstr = val->m_data.pstr;
         reduce(env, op);
         return std::nullopt;
       }
-      if (!isProp && val->m_type == KindOfInt64) {
+      if (val->m_type == KindOfInt64) {
         op.mkey.mcode = MEI;
         op.mkey.int64 = val->m_data.num;
         reduce(env, op);

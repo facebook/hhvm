@@ -2704,8 +2704,17 @@ static inline TypedValue key_tv(MemberKey key) {
   not_reached();
 }
 
-static OPTBLD_INLINE void dimDispatch(MOpMode mode, MemberKey mk) {
+static OPTBLD_INLINE
+void maybeLogDynamicProp(MemberKey mk, TypedValue key) {
+  if (!Cfg::Eval::LogDynamicPropAccessSampleRate) return;
+  if (mk.mcode != MPC && mk.mcode != MPL) return;
+  logDynamicPropAccess(*vmMInstrState().base, key);
+}
+
+static OPTBLD_INLINE
+void dimDispatch(MOpMode mode, MemberKey mk) {
   auto const key = key_tv(mk);
+  maybeLogDynamicProp(mk, key);
   if (mk.mcode == MQT) {
     propQDispatch(mode, key, mk.rop);
   } else if (mcodeIsProp(mk.mcode)) {
@@ -2751,6 +2760,7 @@ void queryMImpl(MemberKey mk, int32_t nDiscard, QueryMOp op) {
       result.m_type = KindOfBoolean;
       auto const key = key_tv(mk);
       if (mcodeIsProp(mk.mcode)) {
+        maybeLogDynamicProp(mk, key);
         auto ctx = MemberLookupContext(arGetContextClass(vmfp()), vmfp()->func());
         result.m_data.num = IssetProp(ctx, *mstate.base, key);
       } else {
@@ -2774,6 +2784,7 @@ OPTBLD_INLINE void iopSetM(uint32_t nDiscard, MemberKey mk) {
     SetNewElem<true>(mstate.base, topC);
   } else {
     auto const key = key_tv(mk);
+    maybeLogDynamicProp(mk, key);
     if (mcodeIsElem(mk.mcode)) {
       auto const result = SetElem<true>(mstate.base, key, topC);
       if (result) {
@@ -2816,6 +2827,7 @@ OPTBLD_INLINE void iopSetRangeM( uint32_t nDiscard, uint32_t size, SetRangeOp op
 
 OPTBLD_INLINE void iopIncDecM(uint32_t nDiscard, IncDecOp subop, MemberKey mk) {
   auto const key = key_tv(mk);
+  maybeLogDynamicProp(mk, key);
 
   auto& mstate = vmMInstrState();
   auto ctx = MemberLookupContext(arGetContextClass(vmfp()), vmfp()->func());
@@ -2835,6 +2847,7 @@ OPTBLD_INLINE void iopIncDecM(uint32_t nDiscard, IncDecOp subop, MemberKey mk) {
 
 OPTBLD_INLINE void iopSetOpM(uint32_t nDiscard, SetOpOp subop, MemberKey mk) {
   auto const key = key_tv(mk);
+  maybeLogDynamicProp(mk, key);
   auto const rhs = vmStack().topC();
 
   auto& mstate = vmMInstrState();
@@ -2857,6 +2870,7 @@ OPTBLD_INLINE void iopSetOpM(uint32_t nDiscard, SetOpOp subop, MemberKey mk) {
 
 OPTBLD_INLINE void iopUnsetM(uint32_t nDiscard, MemberKey mk) {
   auto const key = key_tv(mk);
+  maybeLogDynamicProp(mk, key);
   auto ctx = MemberLookupContext(arGetContextClass(vmfp()), vmfp()->func());
   auto& mstate = vmMInstrState();
   if (mcodeIsProp(mk.mcode)) {

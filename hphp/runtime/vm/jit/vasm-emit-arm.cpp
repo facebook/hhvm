@@ -489,9 +489,48 @@ struct Vgen {
   void emit(const ubfmli& i) { a->ubfm(W(i.d), W(i.s), i.mr.w(), i.ms.w()); }
   void emit(const ubfmliq& i) { a->ubfm(X(i.d), X(i.s), i.mr.l(), i.ms.l()); }
   void emit(const sbfizq& i) { a->Sbfiz(X(i.d), X(i.s), i.shift.l(), i.width.l()); }
-  void emit(const storepair& i) { a->Stp(X(i.s0), X(i.s1), M(i.d)); }
+  void emit(const storepair& i) {
+    // storepair addresses base+disp only: STP can't index, and the two-store
+    // fallback below would form an unencodable base+index+disp. Creators
+    // (storeTV, vasm-simplify) guarantee this.
+    assertx(!i.d.index.isValid());
+    Vptr hi = i.d;
+    hi.disp += 8;
+    // Emit a single STP only when both sources are in the same register bank,
+    // neither source is sp (STP's register field encodes sp as xzr, silently
+    // storing 0), and the displacement is STP-encodable. Otherwise fall back to
+    // two single stores: emit(store) lowers each correctly, including the sp
+    // special-case and out-of-range displacements.
+    if (i.s0.isGP() == i.s1.isGP() &&
+        i.s0 != arm::rsp() && i.s1 != arm::rsp() &&
+        arm::encodablePair64(i.d)) {
+      if (i.s0.isGP()) a->Stp(X(i.s0), X(i.s1), M(i.d));
+      else             a->Stp(D(i.s0), D(i.s1), M(i.d));
+    } else {
+      emit(store{i.s0, i.d});
+      emit(store{i.s1, hi});
+    }
+  }
   void emit(const storepairl& i) { a->Stp(W(i.s0), W(i.s1), M(i.d)); }
-  void emit(const loadpair& i) { a->Ldp(X(i.d0), X(i.d1), M(i.s)); }
+  void emit(const loadpair& i) {
+    // loadpair addresses base+disp only: LDP can't index, and the two-load
+    // fallback below would form an unencodable base+index+disp.
+    assertx(!i.s.index.isValid());
+    Vptr hi = i.s;
+    hi.disp += 8;
+    // Emit a single LDP only when both destinations are in the same register
+    // bank and the displacement is LDP-encodable. Otherwise fall back to two
+    // single loads, which emit(load) lowers correctly for any bank and
+    // displacement. (No sp case here: loadpair never targets sp, matching
+    // emit(load).)
+    if (i.d0.isGP() == i.d1.isGP() && arm::encodablePair64(i.s)) {
+      if (i.d0.isGP()) a->Ldp(X(i.d0), X(i.d1), M(i.s));
+      else             a->Ldp(D(i.d0), D(i.d1), M(i.s));
+    } else {
+      emit(load{i.s, i.d0});
+      emit(load{hi, i.d1});
+    }
+  }
   void emit(const loadpairl& i) { a->Ldp(W(i.d0), W(i.d1), M(i.s)); }
 
   void emit_nop() { a->Nop(); }
@@ -2141,6 +2180,40 @@ void lower(const VLS& e, lea& i, Vlabel b, size_t z) {
       // only the baseless scale-1 form needs lowering here.
       v << i;
     }
+  });
+}
+
+// storepair/loadpair lower to STP/LDP, which address base+disp only -- they can't
+// index. Flatten any index into a temp here (lea computes base+index*scale; the
+// disp rides along on the pair), so emit only ever sees base+disp. Doing this in
+// the lower pass (rather than rejecting indexed pairs at vasm emission) lets
+// storeTV/loadTV form pairs optimistically: an index present here may still be
+// folded into the displacement by a later pass.
+void lower(const VLS& e, storepair& i, Vlabel b, size_t z) {
+  if (!i.d.index.isValid()) return;
+  lower_impl(e.unit, b, z, [&] (Vout& v) {
+    auto const t = v.makeReg();
+    auto addr = i.d;
+    addr.disp = 0;
+    v << lea{addr, t};
+    i.d.base = t;
+    i.d.index = Vreg{};
+    i.d.scale = 1;
+    v << i;
+  });
+}
+
+void lower(const VLS& e, loadpair& i, Vlabel b, size_t z) {
+  if (!i.s.index.isValid()) return;
+  lower_impl(e.unit, b, z, [&] (Vout& v) {
+    auto const t = v.makeReg();
+    auto addr = i.s;
+    addr.disp = 0;
+    v << lea{addr, t};
+    i.s.base = t;
+    i.s.index = Vreg{};
+    i.s.scale = 1;
+    v << i;
   });
 }
 

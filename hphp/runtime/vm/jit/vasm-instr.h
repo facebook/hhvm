@@ -1363,9 +1363,14 @@ struct msr { Vreg64 r; Immed s; };
 struct ubfmli { Immed mr, ms; Vreg32 s, d; };
 struct ubfmliq { Immed mr, ms; Vreg64 s, d; };
 struct sbfizq { Immed shift, width; Vreg64 s, d; };
-struct loadpair { Vptr128 s; Vreg64 d0, d1; };
+// loadpair/storepair take generic Vregs (not Vreg64) so they can pair a
+// sub-64-bit GP register (e.g. a register-typed value's narrow type reg) and so
+// the emitter can dispatch on register bank like a plain load/store: GP+GP emits
+// ldp/stp of X regs, SIMD+SIMD of D regs, and a mixed GP+SIMD pair is split into
+// two ldr/str. The 32-bit variants stay Vreg32.
+struct loadpair { Vptr128 s; Vreg d0, d1; };
 struct loadpairl { Vptr64 s; Vreg32 d0, d1; };
-struct storepair { Vreg64 s0, s1; Vptr128 d; };
+struct storepair { Vreg s0, s1; Vptr128 d; };
 struct storepairl { Vreg32 s0, s1; Vptr64 d; };
 
 ///////////////////////////////////////////////////////////////////////////////

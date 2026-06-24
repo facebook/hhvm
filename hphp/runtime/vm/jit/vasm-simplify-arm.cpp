@@ -24,6 +24,7 @@
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-unit.h"
 #include "hphp/runtime/vm/jit/vasm-util.h"
+#include "hphp/runtime/vm/jit/vasm-util-arm.h"
 
 #include "hphp/vixl/hphp-compat.h"
 
@@ -456,15 +457,19 @@ bool simplify(Env& env, const movsbq& inst, Vlabel b, size_t i) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-int is_adjacent_vptr64(const Vptr64& a, const Vptr64& b, int32_t step, int32_t min_disp, int32_t max_disp) {
-  const int32_t min_disp_val = a.disp < b.disp ? a.disp : b.disp;
+template <typename VptrT, typename Encodable>
+int is_adjacent_vptr(const VptrT& a,
+                     const VptrT& b,
+                     int32_t step,
+                     Encodable encodable) {
+  auto const& min_disp_ptr = a.disp < b.disp ? a : b;
   if (a.base.isValid() && b.base.isValid() &&
       !a.index.isValid() && !b.index.isValid() &&
       a.base == b.base &&
       a.scale == 1 && b.scale == 1 &&
       a.width == b.width &&
       (a.disp - b.disp == step || b.disp - a.disp == step) &&
-      (min_disp_val >= min_disp && min_disp_val <= max_disp && (min_disp_val % step) == 0)) {
+      encodable(min_disp_ptr)) {
     return a.disp < b.disp ? -1 : 1;
   }
   return 0;
@@ -475,7 +480,7 @@ bool simplify(Env& env, const store& inst, Vlabel b, size_t i) {
   return if_inst<Vinstr::store>(env, b, i + 1, [&](const store& st) {
     if (!inst.s.isGP()) return false;
     if (!st.s.isGP()) return false;
-    const auto rv = is_adjacent_vptr64(inst.d, st.d, 8, -512, 504);
+    const auto rv = is_adjacent_vptr(inst.d, st.d, 8, encodablePair64);
     if (rv != 0) {
       // If the pair combines stores from different IR instructions, clear the
       // origin on the merged store so later alias/rematerialization logic
@@ -507,7 +512,7 @@ bool simplify(Env& env, const storel& inst, Vlabel b, size_t i) {
   return if_inst<Vinstr::storel>(env, b, i + 1, [&](const storel& st) {
     if (!inst.s.isGP()) return false;
     if (!st.s.isGP()) return false;
-    const auto rv = is_adjacent_vptr64(inst.m, st.m, 4, -256, 252);
+    const auto rv = is_adjacent_vptr(inst.m, st.m, 4, encodablePair32);
     if (rv != 0) {
       auto const sameOrigin =
         env.unit.blocks[b].code[i].origin ==
@@ -555,7 +560,7 @@ bool simplify(Env& env, const load& inst, Vlabel b, size_t i) {
     });
     if (hasDependentUse) return false;
 
-    const auto rv = is_adjacent_vptr64(inst.s, ld.s, 8, -512, 504);
+    const auto rv = is_adjacent_vptr(inst.s, ld.s, 8, encodablePair64);
     if (rv != 0) {
       auto const sameOrigin =
         env.unit.blocks[b].code[i].origin ==
@@ -603,7 +608,7 @@ bool simplify(Env& env, const loadl& inst, Vlabel b, size_t i) {
       if (inst.d == r) hasDependentUse = true;
     });
     if (hasDependentUse) return false;
-    const auto rv = is_adjacent_vptr64(inst.s, ld.s, 4, -256, 252);
+    const auto rv = is_adjacent_vptr(inst.s, ld.s, 4, encodablePair32);
     if (rv != 0) {
       auto const sameOrigin =
         env.unit.blocks[b].code[i].origin ==
@@ -865,6 +870,7 @@ VASM_STORE_UPDATE_SINGLE_LIST(DEFINE_STORE_UPDATE_SIMPLIFY)
     auto const& addr = inst.ptr_field;                                            \
     auto const base = addr.base;                                                  \
     if (!isSimpleAddress(addr, base)) return false;                               \
+    if (!Vreg(inst.s0).isGP() || !Vreg(inst.s1).isGP()) return false; \
     if (Vreg(inst.s0) == Vreg(base) || Vreg(inst.s1) == Vreg(base)) return false; \
     return foldPreUpdateImpl(env, b, i, base, size, lanes,                        \
       [&](Vout& v, int64_t off) {                                                 \
@@ -875,6 +881,7 @@ VASM_STORE_UPDATE_SINGLE_LIST(DEFINE_STORE_UPDATE_SIMPLIFY)
     auto const& addr = inst.ptr_field;                                            \
     auto const base = addr.base;                                                  \
     if (!isSimpleAddress(addr, base)) return false;                               \
+    if (!Vreg(inst.s0).isGP() || !Vreg(inst.s1).isGP()) return false; \
     if (Vreg(inst.s0) == Vreg(base) || Vreg(inst.s1) == Vreg(base)) return false; \
     return foldPostUpdateImpl(env, b, i, base, size, lanes,                       \
       [&](Vout& v, int64_t off) {                                                 \
@@ -915,6 +922,7 @@ VASM_LOAD_UPDATE_SINGLE_LIST(DEFINE_LOAD_UPDATE_SIMPLIFY)
     auto const& addr = inst.ptr_field;                                         \
     auto const base = addr.base;                                               \
     if (!isSimpleAddress(addr, base)) return false;                            \
+    if (!Vreg(inst.d0).isGP() || !Vreg(inst.d1).isGP()) return false;\
     if (Vreg(inst.d0) == Vreg(base) || Vreg(inst.d1) == Vreg(base)) return false;\
     return foldPreUpdateImpl(env, b, i, base, size, lanes,                     \
       [&](Vout& v, int64_t off) {                                              \
@@ -925,6 +933,7 @@ VASM_LOAD_UPDATE_SINGLE_LIST(DEFINE_LOAD_UPDATE_SIMPLIFY)
     auto const& addr = inst.ptr_field;                                         \
     auto const base = addr.base;                                               \
     if (!isSimpleAddress(addr, base)) return false;                            \
+    if (!Vreg(inst.d0).isGP() || !Vreg(inst.d1).isGP()) return false;\
     if (Vreg(inst.d0) == Vreg(base) || Vreg(inst.d1) == Vreg(base)) return false;\
     return foldPostUpdateImpl(env, b, i, base, size, lanes,                    \
       [&](Vout& v, int64_t off) {                                              \

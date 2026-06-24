@@ -209,35 +209,81 @@ Vreg materializeConstVal(Vout& v, Type ty) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+namespace {
+
+constexpr auto kTVTypeDataOffset = TVOFF(m_type) - TVOFF(m_data);
+static_assert(kTVTypeDataOffset == 8, "");
+
+// A TV whose value slot carries nothing to store: a statically-null type (TNull)
+// or the TNullptr sentinel. storeTV and friends skip the value store for these.
+bool isNullish(Type type) {
+  return type <= TNull || type <= TNullptr;
+}
+
+Vreg tvValRegForStore(Vout& v, Type type, Vloc srcLoc) {
+  // Nullish TVs have no value to store; callers must skip them before calling.
+  assertx(!isNullish(type));
+  if (type.hasConstVal()) return v.cns(type.rawVal());
+
+  assertx(srcLoc.hasReg(0));
+  return zeroExtendIfBool(v, type, srcLoc.reg(0));
+}
+
+Vreg tvTypeRegForStore(Vout& v, Type type, Vloc srcLoc) {
+  if (!type.needsReg()) return v.cns(type.toDataType());
+
+  assertx(srcLoc.hasReg(1));
+  return srcLoc.reg(1);
+}
+
+// Whether storeTV may fuse a TV's value and its 8-byte type word into a single
+// storepair. Pairing is ARM-only (arch::any<arch::ARM>() is a compile-time
+// constant, so this is always false -- and the pairing dropped -- on x64) and
+// requires:
+//   - !isNullish: a nullish TV has no value to store, so there's no pair to form.
+//   - !(type <= TDbl): exclude only a *definitely*-Dbl value, whose data is in a
+//     SIMD reg; the type word is always GP, so a definite Dbl can't form a
+//     same-bank STP. Everything else pairs -- general cells (GP raw bits) and
+//     unions like {Dbl|Int}. The latter have a SIMD value reg, so they form a
+//     mixed-bank pair that the emitter splits and the post-RA writeback
+//     simplifier skips (correct, just not fused). We deliberately do NOT tighten
+//     this to type.maybe(TDbl): a prod tc-dump showed `<= TDbl` yields ~1.7M
+//     fewer bytes of optimized code, because `maybe(TDbl)` also drops general
+//     cells (GP value) that pair beneficially in cold paths.
+//   - valid base. An index reg is fine here: lower(storepair)/lower(loadpair)
+//     flatten base+index into a temp before emit, so STP/LDP only ever see
+//     base+disp. We deliberately do NOT reject an index at vasm-emission time --
+//     a later vasm pass can fold a constant index into the displacement, and
+//     rejecting here would permanently forfeit those pairs.
+//   - adjacent slots: m_type immediately follows m_data.
+// STP immediate-range is intentionally not checked: the storepair emitter falls
+// back to two single stores when the displacement doesn't fit.
+bool storeTVPairable(Type type, Vptr typePtr, Vptr valPtr) {
+  return arch::any<arch::ARM>() &&
+         !isNullish(type) &&
+         !(type <= TDbl) &&
+         valPtr.base.isValid() &&
+         typePtr == valPtr + kTVTypeDataOffset;
+}
+
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 void storeTVVal(Vout& v, Type type, Vloc srcLoc, Vptr valPtr) {
   // We ignore the values of statically nullish types.
-  if (type <= TNull || type <= TNullptr) return;
+  if (isNullish(type)) return;
 
   // Store the value.
-  if (type.hasConstVal()) {
-    // Skip potential zero-extend if we know the value.
-    v << store{v.cns(type.rawVal()), valPtr};
-  } else {
-    assertx(srcLoc.hasReg(0));
-    auto const extended = zeroExtendIfBool(v, type, srcLoc.reg(0));
-    v << store{extended, valPtr};
-  }
+  v << store{tvValRegForStore(v, type, srcLoc), valPtr};
 }
 
 void storeTVType(Vout& v, Type type, Vloc srcLoc, Vptr typePtr, bool aux) {
-  if (type.needsReg()) {
-    assertx(srcLoc.hasReg(1));
-    if (aux) {
-      v << store{srcLoc.reg(1), typePtr};
-    } else {
-      v << storeb{srcLoc.reg(1), typePtr};
-    }
+  auto const typeReg = tvTypeRegForStore(v, type, srcLoc);
+  if (aux) {
+    v << store{typeReg, typePtr};
   } else {
-    if (aux) {
-      v << store{v.cns(type.toDataType()), typePtr};
-    } else {
-      v << storeb{v.cns(type.toDataType()), typePtr};
-    }
+    v << storeb{typeReg, typePtr};
   }
 }
 
@@ -252,12 +298,19 @@ void storeTV(Vout& v, Type type, Vloc srcLoc,
   if (srcLoc.isFullSIMD()) {
     // The whole TV is stored in a single SIMD reg.
     assertx(Cfg::HHIR::AllocSIMDRegs);
-    always_assert(typePtr == valPtr + (TVOFF(m_type) - TVOFF(m_data)));
+    always_assert(typePtr == valPtr + kTVTypeDataOffset);
     v << storeups{srcLoc.reg(), valPtr};
     return;
   }
-  storeTVType(v, type, srcLoc, typePtr, aux);
+  // A full 8-byte type store (aux) can fuse with the value into a storepair on
+  // ARM; the aux=false path stores a 1-byte type via storeb, which can't fuse.
+  if (aux && storeTVPairable(type, typePtr, valPtr)) {
+    v << storepair{tvValRegForStore(v, type, srcLoc),
+                   tvTypeRegForStore(v, type, srcLoc), valPtr};
+    return;
+  }
   storeTVVal(v, type, srcLoc, valPtr);
+  storeTVType(v, type, srcLoc, typePtr, aux);
 }
 
 void storeTVWithAux(Vout& v,
@@ -272,26 +325,36 @@ void storeTVWithAux(Vout& v,
   auto const type = src->type();
   auto const auxMask = auxToMask(aux);
 
+  // Materialize the full 8-byte type word with m_aux OR'd into the upper bytes.
+  Vreg typeReg;
   if (type.needsReg()) {
     assertx(srcLoc.hasReg(1));
 
     // DataType is signed. We're using movzbq here to clear out the upper 7
     // bytes of the register, not to actually extend the type value.
-    auto const typeReg = srcLoc.reg(1);
     auto const extended = v.makeReg();
     auto const result = v.makeReg();
-    v << movzbq{typeReg, extended};
+    v << movzbq{srcLoc.reg(1), extended};
     v << orq{extended, v.cns(auxMask), result, v.makeReg()};
-    v << store{result, dst + TVOFF(m_type)};
+    typeReg = result;
   } else {
     auto const dt = static_cast<std::make_unsigned<data_type_t>::type>(
       type.toDataType()
     );
     static_assert(std::numeric_limits<decltype(dt)>::digits <= 32, "");
-    v << store{v.cns(dt | auxMask), dst + TVOFF(m_type)};
+    typeReg = v.cns(dt | auxMask);
   }
 
-  storeTVVal(v, type, srcLoc, dst + TVOFF(m_data));
+  // Fuse the type+aux word with the value into a storepair on ARM when possible;
+  // otherwise store them separately.
+  auto const typePtr = dst + TVOFF(m_type);
+  auto const valPtr = dst + TVOFF(m_data);
+  if (storeTVPairable(type, typePtr, valPtr)) {
+    v << storepair{tvValRegForStore(v, type, srcLoc), typeReg, valPtr};
+    return;
+  }
+  storeTVVal(v, type, srcLoc, valPtr);
+  v << store{typeReg, typePtr};
 }
 
 void loadTV(Vout& v, const SSATmp* dst, Vloc dstLoc, Vptr src,
@@ -304,7 +367,7 @@ void loadTV(Vout& v, Type type, Vloc dstLoc, Vptr typePtr, Vptr valPtr,
   if (dstLoc.isFullSIMD()) {
     // The whole TV is loaded into a single SIMD reg.
     assertx(Cfg::HHIR::AllocSIMDRegs);
-    always_assert(typePtr == valPtr + (TVOFF(m_type) - TVOFF(m_data)));
+    always_assert(typePtr == valPtr + kTVTypeDataOffset);
     v << loadups{valPtr, dstLoc.reg()};
     return;
   }

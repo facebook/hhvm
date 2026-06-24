@@ -582,7 +582,7 @@ struct Variant : private TypedValue {
   ALWAYS_INLINE ~Variant() noexcept {
     tvDecRefGen(asTypedValue());
     if (debug) {
-      memset(this, kTVTrashFill2, sizeof(*this));
+      memset(static_cast<void*>(this), kTVTrashFill2, sizeof(*this));
     }
   }
 
@@ -1413,7 +1413,7 @@ struct VarNR : private TypedValue {
   ~VarNR() {
     if (debug) {
       checkRefCount();
-      memset(this, kTVTrashFill2, sizeof(*this));
+      memset(static_cast<void*>(this), kTVTrashFill2, sizeof(*this));
     }
   }
 

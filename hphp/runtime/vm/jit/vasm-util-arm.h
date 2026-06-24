@@ -19,11 +19,41 @@
 #include <cstddef>
 #include <cstdint>
 
+#include "hphp/runtime/vm/jit/vasm-reg.h"
+
 #include "hphp/util/assertions.h"
 
 namespace vixl::aarch64 { class Instruction; }
 
 namespace HPHP::jit::arm {
+
+///////////////////////////////////////////////////////////////////////////////
+
+// ARM LDP/STP addressing-range predicates. Pure addressing math (no ARM
+// assembler), used by the ARM vasm simplifier (to fuse adjacent loads/stores)
+// and by the ARM emitter (to decide whether a loadpair/storepair fits the STP
+// immediate range or must fall back to two single loads/stores).
+//
+// LDP/STP use a signed imm7 displacement scaled by the accessed element size.
+inline bool encodablePair(const Vptr& ptr, int32_t scale) {
+  auto const minDisp = -64 * scale;
+  auto const maxDisp = 63 * scale;
+  return ptr.base.isValid() &&
+         !ptr.index.isValid() &&
+         ptr.disp >= minDisp &&
+         ptr.disp <= maxDisp &&
+         ptr.disp % scale == 0;
+}
+
+inline bool encodablePair64(const Vptr& ptr) {
+  return encodablePair(ptr, 8);
+}
+
+inline bool encodablePair32(const Vptr& ptr) {
+  return encodablePair(ptr, 4);
+}
+
+///////////////////////////////////////////////////////////////////////////////
 
 /*
  * Represents a literal-pool load, either a single LDR (literal) ("near" form,

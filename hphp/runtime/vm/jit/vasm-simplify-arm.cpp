@@ -475,6 +475,19 @@ int is_adjacent_vptr(const VptrT& a,
   return 0;
 }
 
+template <typename Emit>
+void emit_with_conservative_irctx(Vout& v, bool sameOrigin, Emit emit) {
+  if (sameOrigin) {
+    emit();
+    return;
+  }
+
+  auto const saved = v.irctx();
+  v.setIrctx({nullptr, Vinstr::kInvalidVoff});
+  emit();
+  v.setIrctx(saved);
+}
+
 bool simplify(Env& env, const store& inst, Vlabel b, size_t i) {
   // store{s, d}; store{s, d} --> storepair{s0, s1, d}
   return if_inst<Vinstr::store>(env, b, i + 1, [&](const store& st) {
@@ -490,14 +503,13 @@ bool simplify(Env& env, const store& inst, Vlabel b, size_t i) {
         env.unit.blocks[b].code[i].origin ==
         env.unit.blocks[b].code[i + 1].origin;
       return simplify_impl(env, b, i, [&] (Vout& v) {
-        auto const saved = v.irctx();
-        if (!sameOrigin) v.setIrctx({nullptr, Vinstr::kInvalidVoff});
-        if (rv < 0) {
-          v << storepair{inst.s, st.s, inst.d};
-        } else {
-          v << storepair{st.s, inst.s, st.d};
-        }
-        if (!sameOrigin) v.setIrctx(saved);
+        emit_with_conservative_irctx(v, sameOrigin, [&] {
+          if (rv < 0) {
+            v << storepair{inst.s, st.s, inst.d};
+          } else {
+            v << storepair{st.s, inst.s, st.d};
+          }
+        });
         return 2;
       });
     }
@@ -518,18 +530,38 @@ bool simplify(Env& env, const storel& inst, Vlabel b, size_t i) {
         env.unit.blocks[b].code[i].origin ==
         env.unit.blocks[b].code[i + 1].origin;
       return simplify_impl(env, b, i, [&] (Vout& v) {
-        auto const saved = v.irctx();
-        if (!sameOrigin) v.setIrctx({nullptr, Vinstr::kInvalidVoff});
-        if (rv < 0) {
-          v << storepairl{inst.s, st.s, inst.m};
-        } else {
-          v << storepairl{st.s, inst.s, st.m};
-        }
-        if (!sameOrigin) v.setIrctx(saved);
+        emit_with_conservative_irctx(v, sameOrigin, [&] {
+          if (rv < 0) {
+            v << storepairl{inst.s, st.s, inst.m};
+          } else {
+            v << storepairl{st.s, inst.s, st.m};
+          }
+        });
         return 2;
       });
     }
     return false;
+  });
+}
+
+bool simplify(Env& env, const storeups& inst, Vlabel b, size_t i) {
+  // storeups{s, d}; storeups{s, d} --> storepairups{s0, s1, d}
+  return if_inst<Vinstr::storeups>(env, b, i + 1, [&](const storeups& st) {
+    auto const rv = is_adjacent_vptr(inst.m, st.m, 16, encodablePair128);
+    if (rv == 0) return false;
+
+    auto const sameOrigin =
+      env.unit.blocks[b].code[i].origin == env.unit.blocks[b].code[i + 1].origin;
+    return simplify_impl(env, b, i, [&](Vout& v) {
+      emit_with_conservative_irctx(v, sameOrigin, [&] {
+        if (rv < 0) {
+          v << storepairups{inst.s, st.s, inst.m};
+        } else {
+          v << storepairups{st.s, inst.s, st.m};
+        }
+      });
+      return 2;
+    });
   });
 }
 
@@ -546,6 +578,29 @@ bool simplify(Env& env, const push& inst, Vlabel b, size_t i) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+bool simplify(Env& env, const loadups& inst, Vlabel b, size_t i) {
+  // loadups{s, d}; loadups{s, d} --> loadpairups{s, d0, d1}
+  return if_inst<Vinstr::loadups>(env, b, i + 1, [&](const loadups& ld) {
+    if (inst.d == ld.d) return false;
+
+    auto const rv = is_adjacent_vptr(inst.s, ld.s, 16, encodablePair128);
+    if (rv == 0) return false;
+
+    auto const sameOrigin =
+      env.unit.blocks[b].code[i].origin == env.unit.blocks[b].code[i + 1].origin;
+    return simplify_impl(env, b, i, [&](Vout& v) {
+      emit_with_conservative_irctx(v, sameOrigin, [&] {
+        if (rv < 0) {
+          v << loadpairups{inst.s, inst.d, ld.d};
+        } else {
+          v << loadpairups{ld.s, ld.d, inst.d};
+        }
+      });
+      return 2;
+    });
+  });
+}
 
 bool simplify(Env& env, const load& inst, Vlabel b, size_t i) {
   // load{d, m}; load{d, m} --> loadpair{s, d0, d1}
@@ -566,14 +621,13 @@ bool simplify(Env& env, const load& inst, Vlabel b, size_t i) {
         env.unit.blocks[b].code[i].origin ==
         env.unit.blocks[b].code[i + 1].origin;
       return simplify_impl(env, b, i, [&] (Vout& v) {
-        auto const saved = v.irctx();
-        if (!sameOrigin) v.setIrctx({nullptr, Vinstr::kInvalidVoff});
-        if (rv < 0) {
-          v << loadpair{inst.s, inst.d, ld.d};
-        } else {
-          v << loadpair{ld.s, ld.d, inst.d};
-        }
-        if (!sameOrigin) v.setIrctx(saved);
+        emit_with_conservative_irctx(v, sameOrigin, [&] {
+          if (rv < 0) {
+            v << loadpair{inst.s, inst.d, ld.d};
+          } else {
+            v << loadpair{ld.s, ld.d, inst.d};
+          }
+        });
         return 2;
       });
     }
@@ -614,14 +668,13 @@ bool simplify(Env& env, const loadl& inst, Vlabel b, size_t i) {
         env.unit.blocks[b].code[i].origin ==
         env.unit.blocks[b].code[i + 1].origin;
       return simplify_impl(env, b, i, [&] (Vout& v) {
-        auto const saved = v.irctx();
-        if (!sameOrigin) v.setIrctx({nullptr, Vinstr::kInvalidVoff});
-        if (rv < 0) {
-          v << loadpairl{inst.s, inst.d, ld.d};
-        } else {
-          v << loadpairl{ld.s, ld.d, inst.d};
-        }
-        if (!sameOrigin) v.setIrctx(saved);
+        emit_with_conservative_irctx(v, sameOrigin, [&] {
+          if (rv < 0) {
+            v << loadpairl{inst.s, inst.d, ld.d};
+          } else {
+            v << loadpairl{ld.s, ld.d, inst.d};
+          }
+        });
         return 2;
       });
     }
@@ -704,6 +757,15 @@ Optional<int64_t> extractBaseUpdateOffset(const Vinstr& inst,
     default:
       return {};
   }
+}
+
+template <typename Reg>
+bool canFoldPairUpdate(Reg r0, Reg r1) {
+  return Vreg(r0).isGP() && Vreg(r1).isGP();
+}
+
+bool canFoldPairUpdate(Vreg128 r0, Vreg128 r1) {
+  return r0.isSIMD() && r1.isSIMD();
 }
 
 Optional<UpdateMatch> matchPreUpdate(Env& env,
@@ -870,7 +932,7 @@ VASM_STORE_UPDATE_SINGLE_LIST(DEFINE_STORE_UPDATE_SIMPLIFY)
     auto const& addr = inst.ptr_field;                                            \
     auto const base = addr.base;                                                  \
     if (!isSimpleAddress(addr, base)) return false;                               \
-    if (!Vreg(inst.s0).isGP() || !Vreg(inst.s1).isGP()) return false; \
+    if (!canFoldPairUpdate(inst.s0, inst.s1)) return false;                       \
     if (Vreg(inst.s0) == Vreg(base) || Vreg(inst.s1) == Vreg(base)) return false; \
     return foldPreUpdateImpl(env, b, i, base, size, lanes,                        \
       [&](Vout& v, int64_t off) {                                                 \
@@ -881,7 +943,7 @@ VASM_STORE_UPDATE_SINGLE_LIST(DEFINE_STORE_UPDATE_SIMPLIFY)
     auto const& addr = inst.ptr_field;                                            \
     auto const base = addr.base;                                                  \
     if (!isSimpleAddress(addr, base)) return false;                               \
-    if (!Vreg(inst.s0).isGP() || !Vreg(inst.s1).isGP()) return false; \
+    if (!canFoldPairUpdate(inst.s0, inst.s1)) return false;                       \
     if (Vreg(inst.s0) == Vreg(base) || Vreg(inst.s1) == Vreg(base)) return false; \
     return foldPostUpdateImpl(env, b, i, base, size, lanes,                       \
       [&](Vout& v, int64_t off) {                                                 \
@@ -922,7 +984,7 @@ VASM_LOAD_UPDATE_SINGLE_LIST(DEFINE_LOAD_UPDATE_SIMPLIFY)
     auto const& addr = inst.ptr_field;                                         \
     auto const base = addr.base;                                               \
     if (!isSimpleAddress(addr, base)) return false;                            \
-    if (!Vreg(inst.d0).isGP() || !Vreg(inst.d1).isGP()) return false;\
+    if (!canFoldPairUpdate(inst.d0, inst.d1)) return false;                    \
     if (Vreg(inst.d0) == Vreg(base) || Vreg(inst.d1) == Vreg(base)) return false;\
     return foldPreUpdateImpl(env, b, i, base, size, lanes,                     \
       [&](Vout& v, int64_t off) {                                              \
@@ -933,7 +995,7 @@ VASM_LOAD_UPDATE_SINGLE_LIST(DEFINE_LOAD_UPDATE_SIMPLIFY)
     auto const& addr = inst.ptr_field;                                         \
     auto const base = addr.base;                                               \
     if (!isSimpleAddress(addr, base)) return false;                            \
-    if (!Vreg(inst.d0).isGP() || !Vreg(inst.d1).isGP()) return false;\
+    if (!canFoldPairUpdate(inst.d0, inst.d1)) return false;                    \
     if (Vreg(inst.d0) == Vreg(base) || Vreg(inst.d1) == Vreg(base)) return false;\
     return foldPostUpdateImpl(env, b, i, base, size, lanes,                    \
       [&](Vout& v, int64_t off) {                                              \

@@ -411,7 +411,10 @@ Width width(Vinstr::Opcode op) {
       return Width::Quad;
 
     case Vinstr::loadups:
+    CASE_WITH_UPDATES(loadpairups)
     case Vinstr::storeups:
+    CASE_WITH_UPDATES(storepairups)
+    case Vinstr::ldimm128:
       return Width::Octa;
   }
 #undef CASE_WITH_UPDATES

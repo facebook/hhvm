@@ -53,6 +53,10 @@ inline bool encodablePair32(const Vptr& ptr) {
   return encodablePair(ptr, 4);
 }
 
+inline bool encodablePair128(const Vptr& ptr) {
+  return encodablePair(ptr, 16);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 /*

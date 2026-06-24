@@ -46,6 +46,10 @@ inline bool magFits(uint64_t val, int s) {
   return (val & ((1ull << bits) - 1)) == val;
 }
 
+constexpr uint64_t splat8x8(uint8_t byte) {
+  return uint64_t{byte} * 0x0101010101010101ULL;
+}
+
 /*
  * Immediate wrappers for the assembler.
  *

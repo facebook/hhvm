@@ -256,6 +256,7 @@ bool effectsImpl(const Vinstr& inst, bool pure) {
     case Vinstr::ldimmb:
     case Vinstr::ldimml:
     case Vinstr::ldimmq:
+    case Vinstr::ldimm128:
     case Vinstr::ldimmw:
     case Vinstr::ldundefq:
     case Vinstr::lea:
@@ -364,6 +365,7 @@ bool effectsImpl(const Vinstr& inst, bool pure) {
     case Vinstr::loadl:
     case Vinstr::loadpair:
     case Vinstr::loadpairl:
+    case Vinstr::loadpairups:
     case Vinstr::loadqd:
     case Vinstr::loadqp:
     case Vinstr::loadsbl:
@@ -498,6 +500,7 @@ bool effectsImpl(const Vinstr& inst, bool pure) {
     VASM_STORE_UPDATE_SINGLE_LIST(VASM_STORE_UPDATE_CASE)
     VASM_STORE_UPDATE_PAIR_LIST(VASM_STORE_UPDATE_CASE)
 #undef VASM_STORE_UPDATE_CASE
+    case Vinstr::storepairups:
     case Vinstr::stublogue:
     case Vinstr::stubret:
     case Vinstr::stubtophp:

@@ -275,6 +275,7 @@ struct Vgen {
   void emit(const ldimml& i);
   void emit(const ldimmq& i);
   void emit(const ldimmw& i);
+  void emit(const ldimm128& i);
   void emit(const ldundefq& /*i*/) {}
   void emit(const load& i);
 #define DECL_UPDATE(name, pre, post, ...) \
@@ -512,6 +513,7 @@ struct Vgen {
     }
   }
   void emit(const storepairl& i) { a->Stp(W(i.s0), W(i.s1), M(i.d)); }
+  void emit(const storepairups& i) { a->Stp(V(i.s0), V(i.s1), M(i.d)); }
   void emit(const loadpair& i) {
     // loadpair addresses base+disp only: LDP can't index, and the two-load
     // fallback below would form an unencodable base+index+disp.
@@ -532,6 +534,10 @@ struct Vgen {
     }
   }
   void emit(const loadpairl& i) { a->Ldp(W(i.d0), W(i.d1), M(i.s)); }
+  void emit(const loadpairups& i) {
+    assertx(i.d0 != i.d1);
+    a->Ldp(V(i.d0), V(i.d1), M(i.s));
+  }
 
   void emit_nop() { a->Nop(); }
 
@@ -1015,6 +1021,31 @@ Y(ldimmq, q, 64, X, i.s.q())
 
 #undef Y
 
+void Vgen::emit(const ldimm128& i) {
+  auto const lo = i.s0.q();
+  auto const hi = i.s1.q();
+  auto const byte = static_cast<uint8_t>(lo);
+  if (lo == splat8x8(byte) && hi == splat8x8(byte)) {
+    a->Movi(V(i.d), byte);
+    return;
+  }
+  // Build {0, byte} with three SIMD ops when only the low byte of the upper
+  // 64-bit lane is set.
+  if (lo == 0 && hi != 0 && (hi & ~uint64_t{0xff}) == 0) {
+    auto const hiByte = static_cast<uint8_t>(hi);
+    a->Movi(V(i.d).V8B(), hiByte);
+    a->ushr(D(i.d), D(i.d), 56);
+    a->Ext(V(i.d).V16B(), V(i.d).V16B(), V(i.d).V16B(), 8);
+    return;
+  }
+
+  emitSimdImmInt(a, lo, i.d);
+  if (hi != 0) {
+    a->Mov(rAsm, hi);
+    a->Ins(V(i.d).V2D(), 1, rAsm);
+  }
+}
+
 void Vgen::emit(const load& i) {
   if (i.d.isGP()) {
     a->Ldr(X(i.d), M(i.s));
@@ -1056,10 +1087,21 @@ void Vgen::emit(const load& i) {
 #define VASM_LOAD_UPDATE_SINGLE_BODY_loadtql(mem, inst) \
   a->Ldr(W((inst).d), (mem))
 
-#define VASM_LOAD_UPDATE_PAIR_BODY_loadpair(mem, inst) \
-  a->Ldp(X((inst).d0), X((inst).d1), (mem))
-#define VASM_LOAD_UPDATE_PAIR_BODY_loadpairl(mem, inst) \
-  a->Ldp(W((inst).d0), W((inst).d1), (mem))
+#define VASM_LOAD_UPDATE_PAIR_BODY_loadpair(mem, inst)               \
+  do {                                                               \
+    assertx((inst).d0 != (inst).d1);                                 \
+    a->Ldp(X((inst).d0), X((inst).d1), (mem));                       \
+  } while (false)
+#define VASM_LOAD_UPDATE_PAIR_BODY_loadpairl(mem, inst)              \
+  do {                                                               \
+    assertx((inst).d0 != (inst).d1);                                 \
+    a->Ldp(W((inst).d0), W((inst).d1), (mem));                       \
+  } while (false)
+#define VASM_LOAD_UPDATE_PAIR_BODY_loadpairups(mem, inst)            \
+  do {                                                               \
+    assertx((inst).d0 != (inst).d1);                                 \
+    a->Ldp(V((inst).d0), V((inst).d1), (mem));                       \
+  } while (false)
 
 #define DEFINE_LOAD_UPDATE_SINGLE(name, pre, post, reg, size, ptr)             \
 void Vgen::emit(const pre& i) {                                           \
@@ -1112,6 +1154,7 @@ VASM_LOAD_UPDATE_PAIR_LIST(DEFINE_LOAD_UPDATE_PAIR)
 #undef VASM_LOAD_UPDATE_SINGLE_BODY_loadtql
 #undef VASM_LOAD_UPDATE_PAIR_BODY_loadpair
 #undef VASM_LOAD_UPDATE_PAIR_BODY_loadpairl
+#undef VASM_LOAD_UPDATE_PAIR_BODY_loadpairups
 
 void Vgen::emit(const store& i) {
   if (i.s.isGP()) {
@@ -1152,6 +1195,8 @@ void Vgen::emit(const store& i) {
   a->Stp(X((inst).v0), X((inst).v1), (mem))
 #define VASM_STORE_UPDATE_PAIR_BODY_storepairl(mem, inst) \
   a->Stp(W((inst).v0), W((inst).v1), (mem))
+#define VASM_STORE_UPDATE_PAIR_BODY_storepairups(mem, inst) \
+  a->Stp(V((inst).v0), V((inst).v1), (mem))
 
 #define DEFINE_STORE_UPDATE_SINGLE(name, pre, post, reg, size, ptr)            \
 void Vgen::emit(const pre& i) {                                           \
@@ -1196,6 +1241,7 @@ VASM_STORE_UPDATE_PAIR_LIST(DEFINE_STORE_UPDATE_PAIR)
 #undef VASM_STORE_UPDATE_SINGLE_BODY_storesd
 #undef VASM_STORE_UPDATE_PAIR_BODY_storepair
 #undef VASM_STORE_UPDATE_PAIR_BODY_storepairl
+#undef VASM_STORE_UPDATE_PAIR_BODY_storepairups
 
 ///////////////////////////////////////////////////////////////////////////////
 

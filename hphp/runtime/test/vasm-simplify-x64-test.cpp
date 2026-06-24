@@ -14,7 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-// vasm immediate-folding tests are split by target architecture:
-//   - x64-specific tests live in vasm-fold-x64-test.cpp
-//   - ARM-specific tests live in vasm-fold-arm-test.cpp
-// Shared helpers live in vasm-test-helpers.h.
+#ifdef __x86_64__
+
+// Placeholder for x64-specific vasm simplification tests.
+// Arch-neutral simplifier tests live in vasm-simplify-test.cpp; ARM-specific
+// tests live in vasm-simplify-arm-test.cpp.
+
+#endif

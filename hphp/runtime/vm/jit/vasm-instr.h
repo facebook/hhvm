@@ -66,7 +66,8 @@ struct Vunit;
 
 #define VASM_STORE_UPDATE_PAIR_LIST(X) \
   X(storepair, storepairpri, storepairpi, Vreg64, 8, 2, d) \
-  X(storepairl, storepairlpri, storepairlpi, Vreg32, 4, 2, d)
+  X(storepairl, storepairlpri, storepairlpi, Vreg32, 4, 2, d) \
+  X(storepairups, storepairupspri, storepairupspi, Vreg128, 16, 2, d)
 
 #define VASM_LOAD_UPDATE_SINGLE_LIST(X) \
   X(load, loadpri, loadpi, Vreg, 8, s) \
@@ -85,7 +86,8 @@ struct Vunit;
 
 #define VASM_LOAD_UPDATE_PAIR_LIST(X) \
   X(loadpair, loadpairpri, loadpairpi, Vreg64, 8, 2, s) \
-  X(loadpairl, loadpairlpri, loadpairlpi, Vreg32, 4, 2, s)
+  X(loadpairl, loadpairlpri, loadpairlpi, Vreg32, 4, 2, s) \
+  X(loadpairups, loadpairupspri, loadpairupspi, Vreg128, 16, 2, s)
 
 #define VASM_LOAD_UPDATE_SINGLE_OP_ENTRY(name, pre, post, reg, size, ptr) \
   O(pre, I(s0), U(s), DH(base,s) D(d))\
@@ -123,6 +125,7 @@ struct Vunit;
   O(ldimmw, I(s), Un, D(d))\
   O(ldimml, I(s), Un, D(d))\
   O(ldimmq, I(s), Un, D(d))\
+  O(ldimm128, I(s0) I(s1), Un, D(d))\
   O(ldundefq, Inone, Un, D(d))\
   O(load, Inone, U(s), D(d))\
   VASM_LOAD_UPDATE_SINGLE_LIST(VASM_LOAD_UPDATE_SINGLE_OP_ENTRY)\
@@ -420,8 +423,10 @@ struct Vunit;
   O(sbfizq, I(shift) I(width), U(s), D(d))\
   O(loadpair, Inone, U(s), D(d0) D(d1))\
   O(loadpairl, Inone, U(s), D(d0) D(d1))\
+  O(loadpairups, Inone, U(s), D(d0) D(d1))\
   O(storepair, Inone, U(s0) U(s1) UW(d), Dn)\
   O(storepairl, Inone, U(s0) U(s1) UW(d), Dn)\
+  O(storepairups, Inone, U(s0) U(s1) UW(d), Dn)\
   /* */
 
 /*
@@ -587,6 +592,7 @@ struct ldimmb { Immed s; Vreg d; };
 struct ldimmw { Immed s; Vreg16 d; };
 struct ldimml { Immed s; Vreg d; };
 struct ldimmq { Immed64 s; Vreg d; };
+struct ldimm128 { Immed64 s0, s1; Vreg128 d; };
 
 /*
  * Load an undefined value. Used for a value component of TNull. Implemented
@@ -1370,8 +1376,10 @@ struct sbfizq { Immed shift, width; Vreg64 s, d; };
 // two ldr/str. The 32-bit variants stay Vreg32.
 struct loadpair { Vptr128 s; Vreg d0, d1; };
 struct loadpairl { Vptr64 s; Vreg32 d0, d1; };
+struct loadpairups { Vptr128 s; Vreg128 d0, d1; };
 struct storepair { Vreg s0, s1; Vptr128 d; };
 struct storepairl { Vreg32 s0, s1; Vptr64 d; };
+struct storepairups { Vreg128 s0, s1; Vptr128 d; };
 
 ///////////////////////////////////////////////////////////////////////////////
 

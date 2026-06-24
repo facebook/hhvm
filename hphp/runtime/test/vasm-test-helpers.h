@@ -14,7 +14,34 @@
    +----------------------------------------------------------------------+
 */
 
-// vasm immediate-folding tests are split by target architecture:
-//   - x64-specific tests live in vasm-fold-x64-test.cpp
-//   - ARM-specific tests live in vasm-fold-arm-test.cpp
-// Shared helpers live in vasm-test-helpers.h.
+#pragma once
+
+#include <cstddef>
+#include <string>
+
+namespace HPHP::jit {
+
+// Strip extraneous whitespace from vasm code strings.
+inline std::string stripWhitespace(std::string str) {
+  if (str.length() > 1 && str[0] == '\n' && str[1] == ' ') {
+    str.erase(0, 2);
+  }
+  size_t spc, pos = 0;
+  while ((spc = str.find("  ", pos)) != std::string::npos) {
+    str.erase(spc, 1);
+    pos = spc;
+  }
+  pos = 0;
+  while ((spc = str.find(" \n", pos)) != std::string::npos) {
+    str.erase(spc, 1);
+    pos = spc;
+  }
+  pos = 0;
+  while ((spc = str.find("\n ", pos)) != std::string::npos) {
+    str.erase(spc + 1, 1);
+    pos = spc;
+  }
+  return str;
+}
+
+}

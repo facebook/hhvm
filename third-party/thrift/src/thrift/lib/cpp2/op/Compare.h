@@ -22,8 +22,8 @@
 
 namespace apache::thrift::op {
 
-template <typename LTag = void, typename RTag = LTag>
-struct EqualTo : detail::EqualTo<LTag, RTag> {};
+template <typename Tag = void>
+struct EqualTo : detail::EqualTo<Tag> {};
 
 /// A binary operator that returns true iff the given Thrift values are equal to
 /// each other.
@@ -33,9 +33,8 @@ struct EqualTo : detail::EqualTo<LTag, RTag> {};
 /// * equal<double_t>(0.0, -0.0) -> true
 /// * equal<float_t>(NaN, NaN) -> false
 /// * equal<list<double_t>>([NaN, 0.0], [NaN, -0.0]) -> false
-template <typename LTagOrT = void, typename RTagOrT = LTagOrT>
-inline constexpr EqualTo<type::infer_tag<LTagOrT>, type::infer_tag<RTagOrT>>
-    equal{};
+template <typename TagOrT = void>
+inline constexpr EqualTo<type::infer_tag<TagOrT>> equal{};
 
 template <typename Tag = void>
 struct IdenticalTo : detail::IdenticalTo<Tag> {};
@@ -51,8 +50,8 @@ struct IdenticalTo : detail::IdenticalTo<Tag> {};
 template <typename TagOrT = void>
 inline constexpr IdenticalTo<type::infer_tag<TagOrT>> identical{};
 
-template <typename LTag = void, typename RTag = LTag>
-struct Less : detail::LessThan<LTag, RTag> {};
+template <typename Tag = void>
+struct Less : detail::LessThan<Tag> {};
 
 /// A binary operator that returns true iff one Thrift value is less than
 /// another.
@@ -61,9 +60,8 @@ struct Less : detail::LessThan<LTag, RTag> {};
 /// * less<int32_t>(1, 2) -> true
 /// * less<double_t>(0.0, -0.0) -> false
 /// * less<float_t>(NaN, NaN) -> false
-template <typename LTagOrT = void, typename RTagOrT = LTagOrT>
-inline constexpr Less<type::infer_tag<LTagOrT>, type::infer_tag<RTagOrT>>
-    less{};
+template <typename TagOrT = void>
+inline constexpr Less<type::infer_tag<TagOrT>> less{};
 
 /// Compares two Thrift values, returning the associated std::partial_ordering
 /// value.
@@ -72,8 +70,8 @@ inline constexpr Less<type::infer_tag<LTagOrT>, type::infer_tag<RTagOrT>>
 /// * compare<int32_t>(1, 2) -> std::partial_ordering::less
 /// * compare<double_t>(0.0, -0.0) -> std::partial_ordering::equivalent
 /// * compare<string_t>("aa", "a") -> std::partial_ordering::greater
-template <typename LTagOrT = void, typename RTagOrT = LTagOrT>
-inline constexpr detail::CompareThreeWay<type::infer_tag<LTagOrT>> compare{};
+template <typename TagOrT = void>
+inline constexpr detail::CompareThreeWay<type::infer_tag<TagOrT>> compare{};
 
 /// A binary operator that returns true iff one Thrift value is less than
 /// another, comparing struct fields by sorted field ID order (instead of

@@ -36,42 +36,23 @@ namespace apache::thrift::op::detail {
 // The 'equal to' operator.
 //
 // Delegates to operator==, by default.
-template <typename LTag = void, typename RTag = LTag, typename = void>
+template <typename Tag = void>
 struct EqualTo {
-  static_assert(type::is_concrete_v<LTag>);
-  static_assert(type::is_concrete_v<RTag>);
+  static_assert(type::is_concrete_v<Tag>);
 
-  bool operator()(
-      const type::native_type<LTag>& lhs,
-      const type::native_type<RTag>& rhs) const {
-    return lhs == rhs;
-  }
+  using T = type::native_type<Tag>;
+
+  bool operator()(const T& lhs, const T& rhs) const { return lhs == rhs; }
 };
 template <>
 struct EqualTo<type::void_t> {
   template <typename L, typename R>
   constexpr bool operator()(const L& lhs, const R& rhs) const {
-    return EqualTo<type::infer_tag<L>, type::infer_tag<R>>{}(lhs, rhs);
-  }
-};
-template <typename LTag>
-struct EqualTo<LTag, type::void_t> {
-  template <typename L, typename R>
-  constexpr bool operator()(const L& lhs, const R& rhs) const {
-    return EqualTo<LTag, type::infer_tag<R>>{}(lhs, rhs);
-  }
-};
-template <typename RTag>
-struct EqualTo<type::void_t, RTag> {
-  template <typename L, typename R>
-  constexpr bool operator()(const L& lhs, const R& rhs) const {
-    return EqualTo<type::infer_tag<L>, RTag>{}(lhs, rhs);
+    return EqualTo<type::infer_tag<L>>{}(lhs, rhs);
   }
 };
 
 // The 'identical to' operator.
-//
-// Unlike other binary operators, only accepts a single tag.
 template <typename Tag, typename = void>
 struct IdenticalTo : EqualTo<Tag> {}; // Delegates to EqualTo, by default.
 template <>
@@ -85,47 +66,32 @@ struct IdenticalTo<type::void_t> {
 // The 'less than' operator.
 //
 // For use with ordered containers.
-template <typename LTag, typename RTag = LTag, typename = void>
-struct LessThan : std::less<> { // Deletegates to std::less<>, by default.
-  static_assert(type::is_concrete_v<LTag>);
-  static_assert(type::is_concrete_v<RTag>);
+template <typename Tag = void>
+struct LessThan : std::less<> {
+  static_assert(type::is_concrete_v<Tag>);
 };
 template <>
 struct LessThan<type::void_t> {
   template <typename L, typename R>
   constexpr bool operator()(const L& lhs, const R& rhs) const {
-    return LessThan<type::infer_tag<L>, type::infer_tag<R>>{}(lhs, rhs);
-  }
-};
-template <typename LTag>
-struct LessThan<LTag, type::void_t> {
-  template <typename L, typename R>
-  constexpr bool operator()(const L& lhs, const R& rhs) const {
-    return LessThan<LTag, type::infer_tag<R>>{}(lhs, rhs);
-  }
-};
-template <typename RTag>
-struct LessThan<type::void_t, RTag> {
-  template <typename L, typename R>
-  constexpr bool operator()(const L& lhs, const R& rhs) const {
-    return LessThan<type::infer_tag<L>, RTag>{}(lhs, rhs);
+    return LessThan<type::infer_tag<L>>{}(lhs, rhs);
   }
 };
 
 // The type returned by a call to `LessThan::operator()`, if well defined.
-template <typename LTag, typename RTag = LTag>
-using less_than_t = decltype(LessThan<LTag, RTag>{}(
-    std::declval<const type::native_type<LTag>&>(),
-    std::declval<const type::native_type<RTag>&>()));
+template <typename Tag>
+using less_than_t = decltype(LessThan<Tag>{}(
+    std::declval<const type::native_type<Tag>&>(),
+    std::declval<const type::native_type<Tag>&>()));
 
-// If the give tags are comparable using LessThan.
-template <typename LTag, typename RTag = LTag>
+// If the given tag is comparable using LessThan.
+template <typename Tag>
 inline constexpr bool less_than_comparable_v =
-    folly::is_detected_v<less_than_t, LTag, RTag>;
+    folly::is_detected_v<less_than_t, Tag>;
 
-// Resolves to R, if the two tags can be used together in LessThan.
-template <typename LTag, typename RTag = LTag, typename R = void>
-using if_less_than_comparable = folly::type_t<R, less_than_t<LTag, RTag>>;
+// Resolves to R, if the tag can be used with LessThan.
+template <typename Tag, typename R = void>
+using if_less_than_comparable = folly::type_t<R, less_than_t<Tag>>;
 
 // A CompareThreeWay implementation that delegates to EqualTo and LessThan.
 template <
@@ -215,33 +181,23 @@ struct CompareThreeWay<Tag, LessThanType> {
 };
 
 // Delegate all IOBuf comparisons directly to folly.
-template <typename LUTag, typename RUTag>
+template <typename UTag>
 struct CheckIOBufOp {
   static_assert(
-      type::is_a_v<LUTag, type::string_c> &&
-          type::is_a_v<RUTag, type::string_c>,
-      "expected string or binary");
+      type::is_a_v<UTag, type::string_c>, "expected string or binary");
 };
-template <typename LUTag, typename RUTag>
-struct EqualTo<
-    type::cpp_type<folly::IOBuf, LUTag>,
-    type::cpp_type<folly::IOBuf, RUTag>> : CheckIOBufOp<LUTag, RUTag>,
-                                           folly::IOBufEqualTo {};
-template <typename LUTag, typename RUTag>
-struct EqualTo<
-    type::cpp_type<std::unique_ptr<folly::IOBuf>, LUTag>,
-    type::cpp_type<std::unique_ptr<folly::IOBuf>, RUTag>>
-    : CheckIOBufOp<LUTag, RUTag>, folly::IOBufEqualTo {};
-template <typename LUTag, typename RUTag>
-struct LessThan<
-    type::cpp_type<folly::IOBuf, LUTag>,
-    type::cpp_type<folly::IOBuf, RUTag>> : CheckIOBufOp<LUTag, RUTag>,
-                                           folly::IOBufLess {};
-template <typename LUTag, typename RUTag>
-struct LessThan<
-    type::cpp_type<std::unique_ptr<folly::IOBuf>, LUTag>,
-    type::cpp_type<std::unique_ptr<folly::IOBuf>, RUTag>>
-    : CheckIOBufOp<LUTag, RUTag>, folly::IOBufLess {};
+template <typename UTag>
+struct EqualTo<type::cpp_type<folly::IOBuf, UTag>> : CheckIOBufOp<UTag>,
+                                                     folly::IOBufEqualTo {};
+template <typename UTag>
+struct EqualTo<type::cpp_type<std::unique_ptr<folly::IOBuf>, UTag>>
+    : CheckIOBufOp<UTag>, folly::IOBufEqualTo {};
+template <typename UTag>
+struct LessThan<type::cpp_type<folly::IOBuf, UTag>> : CheckIOBufOp<UTag>,
+                                                      folly::IOBufLess {};
+template <typename UTag>
+struct LessThan<type::cpp_type<std::unique_ptr<folly::IOBuf>, UTag>>
+    : CheckIOBufOp<UTag>, folly::IOBufLess {};
 
 struct IOBufCompareToStd {
   template <typename T>
@@ -252,11 +208,11 @@ struct IOBufCompareToStd {
 
 template <typename UTag>
 struct CompareThreeWay<type::cpp_type<folly::IOBuf, UTag>>
-    : CheckIOBufOp<UTag, UTag>, IOBufCompareToStd {};
+    : CheckIOBufOp<UTag>, IOBufCompareToStd {};
 
 template <typename UTag>
 struct CompareThreeWay<type::cpp_type<std::unique_ptr<folly::IOBuf>, UTag>>
-    : CheckIOBufOp<UTag, UTag>, IOBufCompareToStd {};
+    : CheckIOBufOp<UTag>, IOBufCompareToStd {};
 
 template <class I1, class I2, class Cmp>
 auto lexicographicalCompareThreeWay(I1 f1, I1 l1, I2 f2, I2 l2, Cmp comp)
@@ -337,16 +293,14 @@ struct MapLessThan {
 };
 
 template <typename T, typename E>
-struct LessThan<
-    type::cpp_type<T, type::list<E>>,
-    type::cpp_type<T, type::list<E>>>
+struct LessThan<type::cpp_type<T, type::list<E>>>
     : std::conditional_t<
           folly::is_invocable_v<std::less<>, const T&, const T&>,
           std::less<>,
           ListLessThan<T, E>> {};
 
 template <typename VTag>
-struct LessThan<type::list<VTag>, type::list<VTag>> {
+struct LessThan<type::list<VTag>> {
   // Ideally this should be a non-template function. But there are cases like
   //
   //   @cpp.Type={name="fbvector<fbvector<double>>"}
@@ -371,25 +325,21 @@ struct LessThan<type::list<VTag>, type::list<VTag>> {
 };
 
 template <typename T, typename E>
-struct LessThan<
-    type::cpp_type<T, type::set<E>>,
-    type::cpp_type<T, type::set<E>>>
+struct LessThan<type::cpp_type<T, type::set<E>>>
     : std::conditional_t<
           folly::is_invocable_v<std::less<>, const T&, const T&>,
           std::less<>,
           SetLessThan<T, E>> {};
 
 template <typename T, typename K, typename V>
-struct LessThan<
-    type::cpp_type<T, type::map<K, V>>,
-    type::cpp_type<T, type::map<K, V>>>
+struct LessThan<type::cpp_type<T, type::map<K, V>>>
     : std::conditional_t<
           folly::is_invocable_v<std::less<>, const T&, const T&>,
           std::less<>,
           MapLessThan<T, K, V>> {};
 
 template <typename K, typename V>
-struct LessThan<type::map<K, V>, type::map<K, V>> {
+struct LessThan<type::map<K, V>> {
   using map_type = type::native_type<type::map<K, V>>;
 
   bool operator()(const map_type& x, const map_type& y) const {

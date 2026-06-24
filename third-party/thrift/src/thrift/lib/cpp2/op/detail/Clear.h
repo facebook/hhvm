@@ -161,7 +161,7 @@ struct CreateDefault {
     // check.
     static const auto& id = GetIntrinsicDefault<Tag>{}();
     static const auto& d =
-        op::equal<Tag, Tag>({}, id) ? id : *(new type::native_type<Tag>);
+        op::equal<Tag>({}, id) ? id : *(new type::native_type<Tag>);
     return d;
   }
 };

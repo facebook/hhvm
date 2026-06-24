@@ -35,20 +35,18 @@ TEST(CompareTest, IOBuf) {
 
   EXPECT_TRUE(op::equal<STag>(one, one));
   EXPECT_FALSE(op::equal<BTag>(one, two));
-  EXPECT_FALSE((op::equal<STag, BTag>(two, one)));
-  EXPECT_TRUE((op::equal<BTag, STag>(two, two)));
+  EXPECT_FALSE(op::equal<STag>(two, one));
+  EXPECT_TRUE(op::equal<BTag>(two, two));
 
   EXPECT_FALSE(op::less<STag>(one, one));
   EXPECT_TRUE(op::less<BTag>(one, two));
-  EXPECT_FALSE((op::less<STag, BTag>(two, one)));
-  EXPECT_FALSE((op::less<BTag, STag>(two, two)));
+  EXPECT_FALSE(op::less<STag>(two, one));
+  EXPECT_FALSE(op::less<BTag>(two, two));
 
   EXPECT_EQ(op::compare<STag>(one, one), std::partial_ordering::equivalent);
   EXPECT_EQ(op::compare<BTag>(one, two), std::partial_ordering::less);
-  EXPECT_EQ(
-      (op::compare<STag, BTag>(two, one)), std::partial_ordering::greater);
-  EXPECT_EQ(
-      (op::compare<BTag, STag>(two, two)), std::partial_ordering::equivalent);
+  EXPECT_EQ(op::compare<STag>(two, one), std::partial_ordering::greater);
+  EXPECT_EQ(op::compare<BTag>(two, two), std::partial_ordering::equivalent);
 }
 
 TEST(CompareTest, Double) {

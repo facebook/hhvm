@@ -501,11 +501,6 @@ cdef class PubSubStreamingServiceInterface(
             get_executor()
         )
 
-    _fbthrift_annotations_DO_NOT_USE_returnstream = {
-        'return': 'None',
-        'i32_from': 'int', 'i32_to': 'int', 
-    }
-
     async def returnstream(
             self,
             i32_from,
@@ -518,11 +513,6 @@ cdef class PubSubStreamingServiceInterface(
 
         return (ServerStream_cint32_t._fbthrift_create(cmove(deref(streams).first)), ServerPublisher_cint32_t._fbthrift_create(cmove(deref(streams).second)))
 
-    _fbthrift_annotations_DO_NOT_USE_streamthrows = {
-        'return': 'None',
-        'foo': 'int', 
-    }
-
     async def streamthrows(
             self,
             foo):
@@ -533,11 +523,6 @@ cdef class PubSubStreamingServiceInterface(
         cdef unique_ptr[pair[cServerStream[cint32_t], cServerStreamPublisher[cint32_t]]] streams = make_unique[pair[cServerStream[cint32_t], cServerStreamPublisher[cint32_t]]](cServerStream[cint32_t].createPublisher(pythonFuncToCppFunc(callback)))
 
         return (ServerStream_cint32_t._fbthrift_create(cmove(deref(streams).first)), ServerPublisher_cint32_t._fbthrift_create(cmove(deref(streams).second)))
-
-    _fbthrift_annotations_DO_NOT_USE_servicethrows = {
-        'return': 'None',
-        'foo': 'int', 
-    }
 
     async def servicethrows(
             self,
@@ -550,11 +535,6 @@ cdef class PubSubStreamingServiceInterface(
 
         return (ServerStream_cint32_t._fbthrift_create(cmove(deref(streams).first)), ServerPublisher_cint32_t._fbthrift_create(cmove(deref(streams).second)))
 
-    _fbthrift_annotations_DO_NOT_USE_servicethrows2 = {
-        'return': 'None',
-        'foo': 'int', 
-    }
-
     async def servicethrows2(
             self,
             foo):
@@ -565,11 +545,6 @@ cdef class PubSubStreamingServiceInterface(
         cdef unique_ptr[pair[cServerStream[cint32_t], cServerStreamPublisher[cint32_t]]] streams = make_unique[pair[cServerStream[cint32_t], cServerStreamPublisher[cint32_t]]](cServerStream[cint32_t].createPublisher(pythonFuncToCppFunc(callback)))
 
         return (ServerStream_cint32_t._fbthrift_create(cmove(deref(streams).first)), ServerPublisher_cint32_t._fbthrift_create(cmove(deref(streams).second)))
-
-    _fbthrift_annotations_DO_NOT_USE_boththrows = {
-        'return': 'None',
-        'foo': 'int', 
-    }
 
     async def boththrows(
             self,
@@ -582,11 +557,6 @@ cdef class PubSubStreamingServiceInterface(
 
         return (ServerStream_cint32_t._fbthrift_create(cmove(deref(streams).first)), ServerPublisher_cint32_t._fbthrift_create(cmove(deref(streams).second)))
 
-    _fbthrift_annotations_DO_NOT_USE_responseandstreamstreamthrows = {
-        'return': 'None',
-        'foo': 'int', 
-    }
-
     async def responseandstreamstreamthrows(
             self,
             foo):
@@ -597,11 +567,6 @@ cdef class PubSubStreamingServiceInterface(
         cdef unique_ptr[pair[cServerStream[cint32_t], cServerStreamPublisher[cint32_t]]] streams = make_unique[pair[cServerStream[cint32_t], cServerStreamPublisher[cint32_t]]](cServerStream[cint32_t].createPublisher(pythonFuncToCppFunc(callback)))
 
         return (ServerStream_cint32_t._fbthrift_create(cmove(deref(streams).first)), ServerPublisher_cint32_t._fbthrift_create(cmove(deref(streams).second)))
-
-    _fbthrift_annotations_DO_NOT_USE_responseandstreamservicethrows = {
-        'return': 'None',
-        'foo': 'int', 
-    }
 
     async def responseandstreamservicethrows(
             self,
@@ -614,11 +579,6 @@ cdef class PubSubStreamingServiceInterface(
 
         return (ServerStream_cint32_t._fbthrift_create(cmove(deref(streams).first)), ServerPublisher_cint32_t._fbthrift_create(cmove(deref(streams).second)))
 
-    _fbthrift_annotations_DO_NOT_USE_responseandstreamboththrows = {
-        'return': 'None',
-        'foo': 'int', 
-    }
-
     async def responseandstreamboththrows(
             self,
             foo):
@@ -629,11 +589,6 @@ cdef class PubSubStreamingServiceInterface(
         cdef unique_ptr[pair[cServerStream[cint32_t], cServerStreamPublisher[cint32_t]]] streams = make_unique[pair[cServerStream[cint32_t], cServerStreamPublisher[cint32_t]]](cServerStream[cint32_t].createPublisher(pythonFuncToCppFunc(callback)))
 
         return (ServerStream_cint32_t._fbthrift_create(cmove(deref(streams).first)), ServerPublisher_cint32_t._fbthrift_create(cmove(deref(streams).second)))
-
-    _fbthrift_annotations_DO_NOT_USE_returnstreamFast = {
-        'return': 'None',
-        'i32_from': 'int', 'i32_to': 'int', 
-    }
 
     async def returnstreamFast(
             self,

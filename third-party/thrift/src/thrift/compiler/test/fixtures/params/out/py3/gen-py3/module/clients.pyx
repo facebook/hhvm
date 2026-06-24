@@ -143,11 +143,6 @@ cdef class NestedContainers(thrift.py3.client.Client):
             cmove(channel)
         )
 
-    _fbthrift_annotations_DO_NOT_USE_mapList = {
-        'return': 'None',
-        'foo': '_typing.Mapping[int, _typing.Sequence[int]]', 
-    }
-
     @cython.always_allow_keywords(True)
     def mapList(
             NestedContainers self,
@@ -172,11 +167,6 @@ cdef class NestedContainers(thrift.py3.client.Client):
             <PyObject *> __userdata
         )
         return asyncio_shield(__future)
-
-    _fbthrift_annotations_DO_NOT_USE_mapSet = {
-        'return': 'None',
-        'foo': '_typing.Mapping[int, _typing.AbstractSet[int]]', 
-    }
 
     @cython.always_allow_keywords(True)
     def mapSet(
@@ -203,11 +193,6 @@ cdef class NestedContainers(thrift.py3.client.Client):
         )
         return asyncio_shield(__future)
 
-    _fbthrift_annotations_DO_NOT_USE_listMap = {
-        'return': 'None',
-        'foo': '_typing.Sequence[_typing.Mapping[int, int]]', 
-    }
-
     @cython.always_allow_keywords(True)
     def listMap(
             NestedContainers self,
@@ -233,11 +218,6 @@ cdef class NestedContainers(thrift.py3.client.Client):
         )
         return asyncio_shield(__future)
 
-    _fbthrift_annotations_DO_NOT_USE_listSet = {
-        'return': 'None',
-        'foo': '_typing.Sequence[_typing.AbstractSet[int]]', 
-    }
-
     @cython.always_allow_keywords(True)
     def listSet(
             NestedContainers self,
@@ -262,11 +242,6 @@ cdef class NestedContainers(thrift.py3.client.Client):
             <PyObject *> __userdata
         )
         return asyncio_shield(__future)
-
-    _fbthrift_annotations_DO_NOT_USE_turtles = {
-        'return': 'None',
-        'foo': '_typing.Sequence[_typing.Sequence[_typing.Mapping[int, _typing.Mapping[int, _typing.AbstractSet[int]]]]]', 
-    }
 
     @cython.always_allow_keywords(True)
     def turtles(

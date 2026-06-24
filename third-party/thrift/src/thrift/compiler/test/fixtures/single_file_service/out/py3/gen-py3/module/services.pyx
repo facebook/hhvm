@@ -214,11 +214,6 @@ cdef class AInterface(
             get_executor()
         )
 
-    _fbthrift_annotations_DO_NOT_USE_foo = {
-        'return': 'module.types.Foo',
-        
-    }
-
     async def foo(
             self):
         raise NotImplementedError("async def foo is not implemented")
@@ -249,20 +244,10 @@ AInterface
             get_executor()
         )
 
-    _fbthrift_annotations_DO_NOT_USE_bar = {
-        'return': 'None',
-        'foo': 'module.types.Foo', 
-    }
-
     async def bar(
             self,
             foo):
         raise NotImplementedError("async def bar is not implemented")
-
-    _fbthrift_annotations_DO_NOT_USE_stream_stuff = {
-        'return': 'None',
-        
-    }
 
     async def stream_stuff(
             self):

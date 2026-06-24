@@ -136,12 +136,6 @@ cdef class {{service.name}}({{#partial clients.client_base_type service=service}
         )
 
   {{#each service.supportedFunctions as |function|}}
-    {{! horrific workaround to expose python annotations on thrift py3 service functions}}
-    _fbthrift_annotations_DO_NOT_USE_{{function.name}} = {
-        'return': '{{#if function.sink_or_stream?}}None{{#else}}{{#partial pep484.type_period_separated type=function.return_type}}{{/if}}',
-        {{#each function.params.fields as |param|}}'{{param.py_name}}': '{{#partial pep484.type_period_separated type=param.type}}', {{/each}}
-    }
-
     @cython.always_allow_keywords(True)
     def {{function.name}}(
             {{service.name}} self{{#each function.params.fields as |param|}},

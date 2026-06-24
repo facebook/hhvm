@@ -119,11 +119,6 @@ cdef class MyRoot(thrift.py3.client.Client):
             cmove(channel)
         )
 
-    _fbthrift_annotations_DO_NOT_USE_do_root = {
-        'return': 'None',
-        
-    }
-
     @cython.always_allow_keywords(True)
     def do_root(
             MyRoot self,
@@ -172,11 +167,6 @@ cdef class MyNode(MyRoot):
             cmove(channel)
         )
 
-    _fbthrift_annotations_DO_NOT_USE_do_mid = {
-        'return': 'None',
-        
-    }
-
     @cython.always_allow_keywords(True)
     def do_mid(
             MyNode self,
@@ -224,11 +214,6 @@ cdef class MyLeaf(MyNode):
         self._client = makeClientWrapper[cMyLeafAsyncClient, cMyLeafClientWrapper](
             cmove(channel)
         )
-
-    _fbthrift_annotations_DO_NOT_USE_do_leaf = {
-        'return': 'None',
-        
-    }
 
     @cython.always_allow_keywords(True)
     def do_leaf(

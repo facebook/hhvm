@@ -42,18 +42,6 @@ thrift-py3 specific container types.
 {{/let partial}}
 
 
-{{! pep 484 typing but with period separated module path }}
-{{#let export partial type_period_separated |type| captures |type_name|}}
-{{#pragma ignore-newlines}}
-{{#if (or type.structured? type.enum?)}}{{#if type.need_module_path?}}{{type.true_type.program.module_path}}.types.{{/if}}{{type.true_type.name}}
-{{#else if type.list?}}_typing.Sequence[{{#partial type_period_separated type=type.true_type.elem_type}}]
-{{#else if type.set?}}_typing.AbstractSet[{{#partial type_period_separated type=type.true_type.elem_type}}]
-{{#else if type.map?}}_typing.Mapping[{{#partial type_period_separated type=type.true_type.key_type}}, {{#partial type_period_separated type=type.true_type.val_type}}]
-{{#else}}{{#partial type_name type=type}}
-{{/if (or type.structured? type.enum?)}}
-{{/let partial}}
-
-
 {{! Override for stream return types }}
 {{#let export partial return_type |function| captures |type_name|}}
 {{#pragma ignore-newlines}}

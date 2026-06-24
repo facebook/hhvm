@@ -491,191 +491,86 @@ cdef class ReturnServiceInterface(
             get_executor()
         )
 
-    _fbthrift_annotations_DO_NOT_USE_noReturn = {
-        'return': 'None',
-        
-    }
-
     async def noReturn(
             self):
         raise NotImplementedError("async def noReturn is not implemented")
-
-    _fbthrift_annotations_DO_NOT_USE_boolReturn = {
-        'return': 'bool',
-        
-    }
 
     async def boolReturn(
             self):
         raise NotImplementedError("async def boolReturn is not implemented")
 
-    _fbthrift_annotations_DO_NOT_USE_i16Return = {
-        'return': 'int',
-        
-    }
-
     async def i16Return(
             self):
         raise NotImplementedError("async def i16Return is not implemented")
-
-    _fbthrift_annotations_DO_NOT_USE_i32Return = {
-        'return': 'int',
-        
-    }
 
     async def i32Return(
             self):
         raise NotImplementedError("async def i32Return is not implemented")
 
-    _fbthrift_annotations_DO_NOT_USE_i64Return = {
-        'return': 'int',
-        
-    }
-
     async def i64Return(
             self):
         raise NotImplementedError("async def i64Return is not implemented")
-
-    _fbthrift_annotations_DO_NOT_USE_floatReturn = {
-        'return': 'float',
-        
-    }
 
     async def floatReturn(
             self):
         raise NotImplementedError("async def floatReturn is not implemented")
 
-    _fbthrift_annotations_DO_NOT_USE_doubleReturn = {
-        'return': 'float',
-        
-    }
-
     async def doubleReturn(
             self):
         raise NotImplementedError("async def doubleReturn is not implemented")
-
-    _fbthrift_annotations_DO_NOT_USE_stringReturn = {
-        'return': 'str',
-        
-    }
 
     async def stringReturn(
             self):
         raise NotImplementedError("async def stringReturn is not implemented")
 
-    _fbthrift_annotations_DO_NOT_USE_binaryReturn = {
-        'return': 'bytes',
-        
-    }
-
     async def binaryReturn(
             self):
         raise NotImplementedError("async def binaryReturn is not implemented")
-
-    _fbthrift_annotations_DO_NOT_USE_mapReturn = {
-        'return': '_typing.Mapping[str, int]',
-        
-    }
 
     async def mapReturn(
             self):
         raise NotImplementedError("async def mapReturn is not implemented")
 
-    _fbthrift_annotations_DO_NOT_USE_simpleTypedefReturn = {
-        'return': 'int',
-        
-    }
-
     async def simpleTypedefReturn(
             self):
         raise NotImplementedError("async def simpleTypedefReturn is not implemented")
-
-    _fbthrift_annotations_DO_NOT_USE_complexTypedefReturn = {
-        'return': '_typing.Sequence[_typing.Mapping[module.types.Empty, module.types.MyStruct]]',
-        
-    }
 
     async def complexTypedefReturn(
             self):
         raise NotImplementedError("async def complexTypedefReturn is not implemented")
 
-    _fbthrift_annotations_DO_NOT_USE_list_mostComplexTypedefReturn = {
-        'return': '_typing.Sequence[_typing.Sequence[_typing.Sequence[_typing.Mapping[module.types.Empty, module.types.MyStruct]]]]',
-        
-    }
-
     async def list_mostComplexTypedefReturn(
             self):
         raise NotImplementedError("async def list_mostComplexTypedefReturn is not implemented")
-
-    _fbthrift_annotations_DO_NOT_USE_enumReturn = {
-        'return': 'module.types.MyEnumA',
-        
-    }
 
     async def enumReturn(
             self):
         raise NotImplementedError("async def enumReturn is not implemented")
 
-    _fbthrift_annotations_DO_NOT_USE_list_EnumReturn = {
-        'return': '_typing.Sequence[module.types.MyEnumA]',
-        
-    }
-
     async def list_EnumReturn(
             self):
         raise NotImplementedError("async def list_EnumReturn is not implemented")
-
-    _fbthrift_annotations_DO_NOT_USE_structReturn = {
-        'return': 'module.types.MyStruct',
-        
-    }
 
     async def structReturn(
             self):
         raise NotImplementedError("async def structReturn is not implemented")
 
-    _fbthrift_annotations_DO_NOT_USE_set_StructReturn = {
-        'return': '_typing.AbstractSet[module.types.MyStruct]',
-        
-    }
-
     async def set_StructReturn(
             self):
         raise NotImplementedError("async def set_StructReturn is not implemented")
-
-    _fbthrift_annotations_DO_NOT_USE_unionReturn = {
-        'return': 'module.types.ComplexUnion',
-        
-    }
 
     async def unionReturn(
             self):
         raise NotImplementedError("async def unionReturn is not implemented")
 
-    _fbthrift_annotations_DO_NOT_USE_list_UnionReturn = {
-        'return': '_typing.Sequence[module.types.ComplexUnion]',
-        
-    }
-
     async def list_UnionReturn(
             self):
         raise NotImplementedError("async def list_UnionReturn is not implemented")
-
-    _fbthrift_annotations_DO_NOT_USE_readDataEb = {
-        'return': '_fbthrift_iobuf.IOBuf',
-        'size': 'int', 
-    }
 
     async def readDataEb(
             self,
             size):
         raise NotImplementedError("async def readDataEb is not implemented")
-
-    _fbthrift_annotations_DO_NOT_USE_readData = {
-        'return': '_fbthrift_iobuf.IOBuf',
-        'size': 'int', 
-    }
 
     async def readData(
             self,
@@ -708,20 +603,10 @@ cdef class ParamServiceInterface(
             get_executor()
         )
 
-    _fbthrift_annotations_DO_NOT_USE_void_ret_i16_param = {
-        'return': 'None',
-        'param1': 'int', 
-    }
-
     async def void_ret_i16_param(
             self,
             param1):
         raise NotImplementedError("async def void_ret_i16_param is not implemented")
-
-    _fbthrift_annotations_DO_NOT_USE_void_ret_byte_i16_param = {
-        'return': 'None',
-        'param1': 'int', 'param2': 'int', 
-    }
 
     async def void_ret_byte_i16_param(
             self,
@@ -729,20 +614,10 @@ cdef class ParamServiceInterface(
             param2):
         raise NotImplementedError("async def void_ret_byte_i16_param is not implemented")
 
-    _fbthrift_annotations_DO_NOT_USE_void_ret_map_param = {
-        'return': 'None',
-        'param1': '_typing.Mapping[str, int]', 
-    }
-
     async def void_ret_map_param(
             self,
             param1):
         raise NotImplementedError("async def void_ret_map_param is not implemented")
-
-    _fbthrift_annotations_DO_NOT_USE_void_ret_map_setlist_param = {
-        'return': 'None',
-        'param1': '_typing.Mapping[str, int]', 'param2': '_typing.AbstractSet[_typing.Sequence[str]]', 
-    }
 
     async def void_ret_map_setlist_param(
             self,
@@ -750,50 +625,25 @@ cdef class ParamServiceInterface(
             param2):
         raise NotImplementedError("async def void_ret_map_setlist_param is not implemented")
 
-    _fbthrift_annotations_DO_NOT_USE_void_ret_map_typedef_param = {
-        'return': 'None',
-        'param1': 'int', 
-    }
-
     async def void_ret_map_typedef_param(
             self,
             param1):
         raise NotImplementedError("async def void_ret_map_typedef_param is not implemented")
-
-    _fbthrift_annotations_DO_NOT_USE_void_ret_enum_param = {
-        'return': 'None',
-        'param1': 'module.types.MyEnumA', 
-    }
 
     async def void_ret_enum_param(
             self,
             param1):
         raise NotImplementedError("async def void_ret_enum_param is not implemented")
 
-    _fbthrift_annotations_DO_NOT_USE_void_ret_struct_param = {
-        'return': 'None',
-        'param1': 'module.types.MyStruct', 
-    }
-
     async def void_ret_struct_param(
             self,
             param1):
         raise NotImplementedError("async def void_ret_struct_param is not implemented")
 
-    _fbthrift_annotations_DO_NOT_USE_void_ret_listunion_param = {
-        'return': 'None',
-        'param1': '_typing.Sequence[module.types.ComplexUnion]', 
-    }
-
     async def void_ret_listunion_param(
             self,
             param1):
         raise NotImplementedError("async def void_ret_listunion_param is not implemented")
-
-    _fbthrift_annotations_DO_NOT_USE_bool_ret_i32_i64_param = {
-        'return': 'bool',
-        'param1': 'int', 'param2': 'int', 
-    }
 
     async def bool_ret_i32_i64_param(
             self,
@@ -801,30 +651,15 @@ cdef class ParamServiceInterface(
             param2):
         raise NotImplementedError("async def bool_ret_i32_i64_param is not implemented")
 
-    _fbthrift_annotations_DO_NOT_USE_bool_ret_map_param = {
-        'return': 'bool',
-        'param1': '_typing.Mapping[str, int]', 
-    }
-
     async def bool_ret_map_param(
             self,
             param1):
         raise NotImplementedError("async def bool_ret_map_param is not implemented")
 
-    _fbthrift_annotations_DO_NOT_USE_bool_ret_union_param = {
-        'return': 'bool',
-        'param1': 'module.types.ComplexUnion', 
-    }
-
     async def bool_ret_union_param(
             self,
             param1):
         raise NotImplementedError("async def bool_ret_union_param is not implemented")
-
-    _fbthrift_annotations_DO_NOT_USE_i64_ret_float_double_param = {
-        'return': 'int',
-        'param1': 'float', 'param2': 'float', 
-    }
 
     async def i64_ret_float_double_param(
             self,
@@ -832,21 +667,11 @@ cdef class ParamServiceInterface(
             param2):
         raise NotImplementedError("async def i64_ret_float_double_param is not implemented")
 
-    _fbthrift_annotations_DO_NOT_USE_i64_ret_string_typedef_param = {
-        'return': 'int',
-        'param1': 'str', 'param2': '_typing.AbstractSet[_typing.Sequence[_typing.Sequence[_typing.Mapping[module.types.Empty, module.types.MyStruct]]]]', 
-    }
-
     async def i64_ret_string_typedef_param(
             self,
             param1,
             param2):
         raise NotImplementedError("async def i64_ret_string_typedef_param is not implemented")
-
-    _fbthrift_annotations_DO_NOT_USE_i64_ret_i32_i32_i32_i32_i32_param = {
-        'return': 'int',
-        'param1': 'int', 'param2': 'int', 'param3': 'int', 'param4': 'int', 'param5': 'int', 
-    }
 
     async def i64_ret_i32_i32_i32_i32_i32_param(
             self,
@@ -857,50 +682,25 @@ cdef class ParamServiceInterface(
             param5):
         raise NotImplementedError("async def i64_ret_i32_i32_i32_i32_i32_param is not implemented")
 
-    _fbthrift_annotations_DO_NOT_USE_double_ret_setstruct_param = {
-        'return': 'float',
-        'param1': '_typing.AbstractSet[module.types.MyStruct]', 
-    }
-
     async def double_ret_setstruct_param(
             self,
             param1):
         raise NotImplementedError("async def double_ret_setstruct_param is not implemented")
-
-    _fbthrift_annotations_DO_NOT_USE_string_ret_string_param = {
-        'return': 'str',
-        'param1': 'str', 
-    }
 
     async def string_ret_string_param(
             self,
             param1):
         raise NotImplementedError("async def string_ret_string_param is not implemented")
 
-    _fbthrift_annotations_DO_NOT_USE_binary_ret_binary_param = {
-        'return': 'bytes',
-        'param1': 'bytes', 
-    }
-
     async def binary_ret_binary_param(
             self,
             param1):
         raise NotImplementedError("async def binary_ret_binary_param is not implemented")
 
-    _fbthrift_annotations_DO_NOT_USE_map_ret_bool_param = {
-        'return': '_typing.Mapping[str, int]',
-        'param1': 'bool', 
-    }
-
     async def map_ret_bool_param(
             self,
             param1):
         raise NotImplementedError("async def map_ret_bool_param is not implemented")
-
-    _fbthrift_annotations_DO_NOT_USE_list_ret_map_setlist_param = {
-        'return': '_typing.Sequence[bool]',
-        'param1': '_typing.Mapping[int, _typing.Sequence[str]]', 'param2': '_typing.Sequence[str]', 
-    }
 
     async def list_ret_map_setlist_param(
             self,
@@ -908,50 +708,25 @@ cdef class ParamServiceInterface(
             param2):
         raise NotImplementedError("async def list_ret_map_setlist_param is not implemented")
 
-    _fbthrift_annotations_DO_NOT_USE_mapsetlistmapliststring_ret_listlistlist_param = {
-        'return': '_typing.Mapping[_typing.AbstractSet[_typing.Sequence[int]], _typing.Mapping[_typing.Sequence[_typing.AbstractSet[str]], str]]',
-        'param1': '_typing.Sequence[_typing.Sequence[_typing.Sequence[_typing.Sequence[int]]]]', 
-    }
-
     async def mapsetlistmapliststring_ret_listlistlist_param(
             self,
             param1):
         raise NotImplementedError("async def mapsetlistmapliststring_ret_listlistlist_param is not implemented")
-
-    _fbthrift_annotations_DO_NOT_USE_typedef_ret_i32_param = {
-        'return': 'int',
-        'param1': 'int', 
-    }
 
     async def typedef_ret_i32_param(
             self,
             param1):
         raise NotImplementedError("async def typedef_ret_i32_param is not implemented")
 
-    _fbthrift_annotations_DO_NOT_USE_listtypedef_ret_typedef_param = {
-        'return': '_typing.Sequence[int]',
-        'param1': '_typing.Sequence[_typing.Mapping[module.types.Empty, module.types.MyStruct]]', 
-    }
-
     async def listtypedef_ret_typedef_param(
             self,
             param1):
         raise NotImplementedError("async def listtypedef_ret_typedef_param is not implemented")
 
-    _fbthrift_annotations_DO_NOT_USE_enum_ret_double_param = {
-        'return': 'module.types.MyEnumA',
-        'param1': 'float', 
-    }
-
     async def enum_ret_double_param(
             self,
             param1):
         raise NotImplementedError("async def enum_ret_double_param is not implemented")
-
-    _fbthrift_annotations_DO_NOT_USE_enum_ret_double_enum_param = {
-        'return': 'module.types.MyEnumA',
-        'param1': 'float', 'param2': 'module.types.MyEnumA', 
-    }
 
     async def enum_ret_double_enum_param(
             self,
@@ -959,40 +734,20 @@ cdef class ParamServiceInterface(
             param2):
         raise NotImplementedError("async def enum_ret_double_enum_param is not implemented")
 
-    _fbthrift_annotations_DO_NOT_USE_listenum_ret_map_param = {
-        'return': '_typing.Sequence[module.types.MyEnumA]',
-        'param1': '_typing.Mapping[str, int]', 
-    }
-
     async def listenum_ret_map_param(
             self,
             param1):
         raise NotImplementedError("async def listenum_ret_map_param is not implemented")
-
-    _fbthrift_annotations_DO_NOT_USE_struct_ret_i16_param = {
-        'return': 'module.types.MyStruct',
-        'param1': 'int', 
-    }
 
     async def struct_ret_i16_param(
             self,
             param1):
         raise NotImplementedError("async def struct_ret_i16_param is not implemented")
 
-    _fbthrift_annotations_DO_NOT_USE_setstruct_ret_set_param = {
-        'return': '_typing.AbstractSet[module.types.MyStruct]',
-        'param1': '_typing.AbstractSet[str]', 
-    }
-
     async def setstruct_ret_set_param(
             self,
             param1):
         raise NotImplementedError("async def setstruct_ret_set_param is not implemented")
-
-    _fbthrift_annotations_DO_NOT_USE_union_ret_i32_i32_param = {
-        'return': 'module.types.ComplexUnion',
-        'param1': 'int', 'param2': 'int', 
-    }
 
     async def union_ret_i32_i32_param(
             self,
@@ -1000,20 +755,10 @@ cdef class ParamServiceInterface(
             param2):
         raise NotImplementedError("async def union_ret_i32_i32_param is not implemented")
 
-    _fbthrift_annotations_DO_NOT_USE_listunion_string_param = {
-        'return': '_typing.Sequence[module.types.ComplexUnion]',
-        'param1': 'str', 
-    }
-
     async def listunion_string_param(
             self,
             param1):
         raise NotImplementedError("async def listunion_string_param is not implemented")
-
-    _fbthrift_annotations_DO_NOT_USE_annotatedParams = {
-        'return': 'None',
-        'no_annotation': 'module.types.ContainerStruct', 'opt_ref_type_shared': '_typing.AbstractSet[int]', 'base_type': 'int', 'list_type': '_typing.Sequence[int]', 'set_type': '_typing.AbstractSet[str]', 'map_type': '_typing.Mapping[int, float]', 'map_struct_type': '_typing.Mapping[str, module.types.ContainerStruct]', 'iobuf_type': '_fbthrift_iobuf.IOBuf', 'iobuf_ptr': '_fbthrift_iobuf.IOBuf', 'list_i32_template': '_typing.Sequence[int]', 'list_string_template': '_typing.Sequence[str]', 'set_template': '_typing.AbstractSet[str]', 'map_template': '_typing.Mapping[int, str]', 'typedef_list_template': '_typing.Sequence[int]', 'typedef_deque_template': '_typing.Sequence[str]', 'typedef_set_template': '_typing.AbstractSet[str]', 'typedef_map_template': '_typing.Mapping[int, str]', 'iobuf_type_val': '_fbthrift_iobuf.IOBuf', 'iobuf_ptr_val': '_fbthrift_iobuf.IOBuf', 'struct_struct': 'module.types.ContainerStruct', 
-    }
 
     async def annotatedParams(
             self,

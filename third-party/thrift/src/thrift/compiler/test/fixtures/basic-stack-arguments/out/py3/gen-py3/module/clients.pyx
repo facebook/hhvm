@@ -210,11 +210,6 @@ cdef class MyService(thrift.py3.client.Client):
             cmove(channel)
         )
 
-    _fbthrift_annotations_DO_NOT_USE_hasDataById = {
-        'return': 'bool',
-        'id': 'int', 
-    }
-
     @cython.always_allow_keywords(True)
     def hasDataById(
             MyService self,
@@ -242,11 +237,6 @@ cdef class MyService(thrift.py3.client.Client):
         )
         return asyncio_shield(__future)
 
-    _fbthrift_annotations_DO_NOT_USE_getDataById = {
-        'return': 'str',
-        'id': 'int', 
-    }
-
     @cython.always_allow_keywords(True)
     def getDataById(
             MyService self,
@@ -273,11 +263,6 @@ cdef class MyService(thrift.py3.client.Client):
             <PyObject *> __userdata
         )
         return asyncio_shield(__future)
-
-    _fbthrift_annotations_DO_NOT_USE_putDataById = {
-        'return': 'None',
-        'id': 'int', 'data': 'str', 
-    }
 
     @cython.always_allow_keywords(True)
     def putDataById(
@@ -307,11 +292,6 @@ cdef class MyService(thrift.py3.client.Client):
             <PyObject *> __userdata
         )
         return asyncio_shield(__future)
-
-    _fbthrift_annotations_DO_NOT_USE_lobDataById = {
-        'return': 'None',
-        'id': 'int', 'data': 'str', 
-    }
 
     @cython.always_allow_keywords(True)
     def lobDataById(
@@ -369,11 +349,6 @@ cdef class MyServiceFast(thrift.py3.client.Client):
             cmove(channel)
         )
 
-    _fbthrift_annotations_DO_NOT_USE_hasDataById = {
-        'return': 'bool',
-        'id': 'int', 
-    }
-
     @cython.always_allow_keywords(True)
     def hasDataById(
             MyServiceFast self,
@@ -401,11 +376,6 @@ cdef class MyServiceFast(thrift.py3.client.Client):
         )
         return asyncio_shield(__future)
 
-    _fbthrift_annotations_DO_NOT_USE_getDataById = {
-        'return': 'str',
-        'id': 'int', 
-    }
-
     @cython.always_allow_keywords(True)
     def getDataById(
             MyServiceFast self,
@@ -432,11 +402,6 @@ cdef class MyServiceFast(thrift.py3.client.Client):
             <PyObject *> __userdata
         )
         return asyncio_shield(__future)
-
-    _fbthrift_annotations_DO_NOT_USE_putDataById = {
-        'return': 'None',
-        'id': 'int', 'data': 'str', 
-    }
 
     @cython.always_allow_keywords(True)
     def putDataById(
@@ -466,11 +431,6 @@ cdef class MyServiceFast(thrift.py3.client.Client):
             <PyObject *> __userdata
         )
         return asyncio_shield(__future)
-
-    _fbthrift_annotations_DO_NOT_USE_lobDataById = {
-        'return': 'None',
-        'id': 'int', 'data': 'str', 
-    }
 
     @cython.always_allow_keywords(True)
     def lobDataById(
@@ -528,11 +488,6 @@ cdef class DbMixedStackArguments(thrift.py3.client.Client):
             cmove(channel)
         )
 
-    _fbthrift_annotations_DO_NOT_USE_getDataByKey0 = {
-        'return': 'bytes',
-        'key': 'str', 
-    }
-
     @cython.always_allow_keywords(True)
     def getDataByKey0(
             DbMixedStackArguments self,
@@ -555,11 +510,6 @@ cdef class DbMixedStackArguments(thrift.py3.client.Client):
             <PyObject *> __userdata
         )
         return asyncio_shield(__future)
-
-    _fbthrift_annotations_DO_NOT_USE_getDataByKey1 = {
-        'return': 'bytes',
-        'key': 'str', 
-    }
 
     @cython.always_allow_keywords(True)
     def getDataByKey1(

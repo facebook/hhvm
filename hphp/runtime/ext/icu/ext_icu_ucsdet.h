@@ -53,6 +53,10 @@ struct EncodingMatch : IntlError, SystemLib::ClassLoader<"EncodingMatch"> {
   }
   ~EncodingMatch() = default;
 
+  void sweep() {
+    m_encodingDetector.reset();
+  }
+
   static Object newInstance(const UCharsetMatch* match,
                             const std::shared_ptr<UCharsetDetector>& det,
                             const OptString& text,

@@ -3739,16 +3739,7 @@ void HQSession::onDatagramsAvailable() noexcept {
             << (ctxId ? folly::to<std::string>(ctxId->first) : std::string())
             << " len=" << datagramQ.chainLength() << " sess=" << *this;
     if (stream->wtSess_) {
-      // WebTransport datagrams are delivered to the WT session, bypassing
-      // HTTPTransaction::onDatagram() (the `else` branch) which is what
-      // refreshes the CONNECT-stream transaction idle timer. Without this,
-      // a datagram-only WT media session (no WT stream traffic) lets the
-      // CONNECT transaction idle-timeout fire at the session idle timeout,
-      // aborting the transaction and ending the WT session
-      // (onSessionEnd(kInternalError)) while the QUIC connection is still
-      // healthy. Refresh here so datagram activity keeps the session alive,
-      // matching both the non-WT datagram path and WT stream activity (which
-      // refreshes via WebTransportImpl's SessionProvider).
+      // refresh ingress timeout
       stream->txn_.refreshTimeout();
       stream->wtSess_->onDatagram(datagramQ.move());
     } else {

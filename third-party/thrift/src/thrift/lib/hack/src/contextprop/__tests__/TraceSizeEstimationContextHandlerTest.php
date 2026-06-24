@@ -25,6 +25,9 @@ final class TraceSizeEstimationContextHandlerTest extends WWWTest {
   public async function beforeEach(): Awaitable<void> {
     ThriftContextPropState::get()->clear();
     TraceSizeEstimationContextHandler::resetInstance();
+    // Reset the per-request budget so byte-budget state can't leak between
+    // tests; a permissive budget keeps the breadth-only tests unaffected.
+    ArtilleryThriftScribeSink::it()->setBudget(TraceSizeBudget::disabled());
   }
 
   public async function testGetInstanceReturnsSingleton(): Awaitable<void> {
@@ -43,6 +46,43 @@ final class TraceSizeEstimationContextHandlerTest extends WWWTest {
     $instance2 = TraceSizeEstimationContextHandler::getInstance();
 
     expect($instance1 === $instance2)->toBeFalse();
+  }
+
+  public async function testShouldBlockTraceContinuationWhenByteBudgetExceededEnabled(
+  ): Awaitable<void> {
+    $budget = strict_mock(TraceSizeBudget::class);
+    $budget->mockReturn('isExceeded', true);
+    $budget->mockReturn('getMode', TraceSizeBudgetMode::ENABLED);
+    ArtilleryThriftScribeSink::it()->setBudget($budget);
+
+    expect(
+      TraceSizeEstimationContextHandler::shouldBlockTraceContinuationOnOutgoingRequest(),
+    )->toBeTrue();
+  }
+
+  public async function testShouldNotBlockTraceContinuationWhenByteBudgetExceededShadow(
+  ): Awaitable<void> {
+    // SHADOW over-cap is counted but must not block continuation; breadth is
+    // 0 (fresh handler from beforeEach) so the breadth gate doesn't fire.
+    $budget = strict_mock(TraceSizeBudget::class);
+    $budget->mockReturn('isExceeded', true);
+    $budget->mockReturn('getMode', TraceSizeBudgetMode::SHADOW);
+    ArtilleryThriftScribeSink::it()->setBudget($budget);
+
+    expect(
+      TraceSizeEstimationContextHandler::shouldBlockTraceContinuationOnOutgoingRequest(),
+    )->toBeFalse();
+  }
+
+  public async function testShouldNotBlockTraceContinuationWhenByteBudgetNotExceeded(
+  ): Awaitable<void> {
+    $budget = strict_mock(TraceSizeBudget::class);
+    $budget->mockReturn('isExceeded', false);
+    ArtilleryThriftScribeSink::it()->setBudget($budget);
+
+    expect(
+      TraceSizeEstimationContextHandler::shouldBlockTraceContinuationOnOutgoingRequest(),
+    )->toBeFalse();
   }
 
   public async function testOnOutgoingDownstreamDoesNothingWhenTracingOff(

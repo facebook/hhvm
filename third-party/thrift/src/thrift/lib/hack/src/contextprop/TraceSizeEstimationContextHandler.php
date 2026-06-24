@@ -76,12 +76,42 @@ final class TraceSizeEstimationContextHandler implements IContextHandler {
     );
   }
 
+  private static function bumpByteBudgetRateLimitedCounter(): void {
+    CategorizedOBC::typedGet(ODSCategoryID::ODS_ARTILLERY)->bumpEntityKey(
+      'artillery_trace_continuation',
+      'hhvm.byte_budget_rate_limited',
+    );
+  }
+
+  private static function bumpByteBudgetWouldRateLimitCounter(): void {
+    CategorizedOBC::typedGet(ODSCategoryID::ODS_ARTILLERY)->bumpEntityKey(
+      'artillery_trace_continuation',
+      'hhvm.byte_budget_would_rate_limit',
+    );
+  }
+
   /**
-   * Determines if trace continuation should be blocked on outgoing requests
-   * based on the current breadth exceeding the max allowed breadth.
-   *
+   * Determines if trace continuation should be blocked on outgoing requests.
+   * Blocks when the byte-FCI TraceSizeBudget reports the trace is over its
+   * cap (ENABLED mode), or when the current breadth exceeds the max allowed
+   * breadth. SHADOW byte-budget over-cap is counted but does not block.
    */
   public static function shouldBlockTraceContinuationOnOutgoingRequest(): bool {
+    // Cross-process byte-budget gate. Stop continuing (propagating) a trace
+    // whose size — max(local bytes emitted this request, the FCI-queried
+    // cross-process total seeded at trace start) — already exceeds the
+    // threshold. Mirrors the C++ byte-budget check in
+    // ArtilleryTraceContinuationHandler::shouldBlockTraceContinuationOnOutgoingRequest.
+    $budget = ArtilleryThriftScribeSink::it()->getBudget();
+    if ($budget->isExceeded()) {
+      if ($budget->getMode() === TraceSizeBudgetMode::ENABLED) {
+        self::bumpByteBudgetRateLimitedCounter();
+        return true;
+      }
+      // SHADOW: count what would have been blocked, but allow continuation.
+      self::bumpByteBudgetWouldRateLimitCounter();
+    }
+
     // If we've already determined trace should be blocked, bump ODS counter and return cached result
     if (self::$shouldBlockTraceContinuation) {
       self::bumpBreadthRateLimitedCounter();

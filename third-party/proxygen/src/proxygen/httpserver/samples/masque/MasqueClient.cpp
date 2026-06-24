@@ -255,7 +255,6 @@ int main(int argc, char* argv[]) {
     options.mode_ = H3DatagramAsyncSocket::Mode::CLIENT;
     options.txnTimeout_ = std::chrono::milliseconds(10000);
     options.connectTimeout_ = std::chrono::milliseconds(3000);
-    options.rfcMode_ = true;
     options.maxDatagramSize_ = kMaxReadBufferSize;
     options.hostname_ = FLAGS_proxy_host;
 

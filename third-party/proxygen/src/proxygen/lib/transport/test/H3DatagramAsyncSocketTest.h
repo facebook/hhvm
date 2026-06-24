@@ -71,8 +71,10 @@ class H3DatagramAsyncSocketTest : public testing::Test {
   void setUpstreamSession(proxygen::HQUpstreamSession* session) {
     datagramSocket_->setUpstreamSession(session);
   }
-  void onDatagram(std::unique_ptr<folly::IOBuf> datagram) {
-    datagramSocket_->onDatagram(std::move(datagram));
+  void onDatagram(std::unique_ptr<folly::IOBuf> datagram, uint8_t ctxId = 0) {
+    auto buf = folly::IOBuf::copyBuffer(folly::range({ctxId}));
+    buf->appendToChain(std::move(datagram));
+    datagramSocket_->onDatagram(std::move(buf));
   }
   void connectError(quic::QuicError error) {
     datagramSocket_->connectError(std::move(error));
@@ -84,15 +86,6 @@ class H3DatagramAsyncSocketTest : public testing::Test {
     datagramSocket_->onEOM();
   }
 
-  void SetUpRfcMode() {
-    datagramSocket_.reset();
-    session_ = nullptr;
-    socketDriver_.reset();
-
-    options_.rfcMode_ = true;
-    createSocketAndSession();
-  }
-
   folly::EventBase eventBase_;
   std::unique_ptr<quic::MockQuicSocketDriver> socketDriver_;
   std::unique_ptr<proxygen::H3DatagramAsyncSocket> datagramSocket_;
@@ -100,20 +93,6 @@ class H3DatagramAsyncSocketTest : public testing::Test {
   proxygen::HQUpstreamSession* session_{nullptr};
   proxygen::H3DatagramAsyncSocket::Options options_;
   char buf_[kMaxDatagramSize];
-};
-
-// Parameterized fixture that runs tests in both legacy and RFC modes.
-// GetParam() == true → RFC mode; GetParam() == false → legacy mode.
-class H3DatagramAsyncSocketModeTest
-    : public H3DatagramAsyncSocketTest
-    , public testing::WithParamInterface<bool> {
- public:
-  void SetUp() override {
-    H3DatagramAsyncSocketTest::SetUp();
-    if (GetParam()) {
-      SetUpRfcMode();
-    }
-  }
 };
 
 }; // namespace proxygen

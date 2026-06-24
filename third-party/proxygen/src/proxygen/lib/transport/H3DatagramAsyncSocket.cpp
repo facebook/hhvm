@@ -110,9 +110,7 @@ void H3DatagramAsyncSocket::connectSuccess() {
     closeWithError({AsyncSocketException::INTERNAL_ERROR, "Transaction Error"});
     return;
   }
-  if (options_.rfcMode_) {
-    options_.httpRequest_->getHeaders().set("Capsule-Protocol", "?1");
-  }
+  options_.httpRequest_->getHeaders().set("Capsule-Protocol", "?1");
   txn_->sendHeaders(*options_.httpRequest_);
   upstreamSession_->closeWhenIdle();
   transportConnected_ = true;
@@ -156,15 +154,13 @@ void H3DatagramAsyncSocket::onHeadersComplete(
 
 void H3DatagramAsyncSocket::onDatagram(
     std::unique_ptr<folly::IOBuf> datagram) noexcept {
-  if (options_.rfcMode_) {
-    auto stripped = stripContextId(std::move(datagram));
-    if (!stripped.has_value()) {
-      // Non-zero context ID or malformed — silently drop
-      VLOG(4) << "Dropping datagram with non-zero or invalid context ID";
-      return;
-    }
-    datagram = std::move(stripped.value());
+  auto stripped = stripContextId(std::move(datagram));
+  if (!stripped.has_value()) {
+    // Non-zero context ID or malformed — silently drop
+    VLOG(4) << "Dropping datagram with non-zero or invalid context ID";
+    return;
   }
+  datagram = std::move(stripped.value());
 
   if (!readCallback_) {
     if (readBuf_.size() < rcvBufPkts_) {
@@ -339,11 +335,7 @@ void H3DatagramAsyncSocket::startClient() {
         std::make_shared<quic::DefaultCongestionControllerFactory>());
     transportSettings.datagramConfig.enabled = true;
     client->setTransportSettings(transportSettings);
-    if (options_.rfcMode_) {
-      client->setSupportedVersions({quic::QuicVersion::QUIC_V1});
-    } else {
-      client->setSupportedVersions({quic::QuicVersion::MVFST});
-    }
+    client->setSupportedVersions({quic::QuicVersion::QUIC_V1});
 
     wangle::TransportInfo tinfo;
     upstreamSession_ =
@@ -355,15 +347,9 @@ void H3DatagramAsyncSocket::startClient() {
     upstreamSession_->setSocket(client);
     upstreamSession_->setConnectCallback(this);
     upstreamSession_->setInfoCallback(this);
-    if (options_.rfcMode_) {
-      upstreamSession_->setEgressSettings(
-          {{proxygen::SettingsId::_HQ_DATAGRAM_RFC, 1},
-           {proxygen::SettingsId::ENABLE_CONNECT_PROTOCOL, 1}});
-    } else {
-      upstreamSession_->setEgressSettings(
-          {{proxygen::SettingsId::_HQ_DATAGRAM, 1}});
-    }
-
+    upstreamSession_->setEgressSettings(
+        {{proxygen::SettingsId::_HQ_DATAGRAM_RFC, 1},
+         {proxygen::SettingsId::ENABLE_CONNECT_PROTOCOL, 1}});
     VLOG(4) << "connecting to " << connectAddress_.describe();
     upstreamSession_->startNow();
     client->start(upstreamSession_, upstreamSession_);
@@ -419,11 +405,7 @@ ssize_t H3DatagramAsyncSocket::write(const folly::SocketAddress& address,
   if (!transportConnected_) {
     if (writeBuf_.size() < sndBufPkts_) {
       VLOG(10) << "Socket not connected yet. Buffering datagram";
-      auto bufCopy = buf->clone();
-      if (options_.rfcMode_) {
-        bufCopy = prependContextId(std::move(bufCopy));
-      }
-      writeBuf_.emplace_back(std::move(bufCopy));
+      writeBuf_.emplace_back(prependContextId(buf->clone()));
       return size;
     }
     LOG(ERROR) << "Socket write buffer is full. Discarding datagram";
@@ -442,10 +424,7 @@ ssize_t H3DatagramAsyncSocket::write(const folly::SocketAddress& address,
     errno = EMSGSIZE;
     return -1;
   }
-  auto datagramBuf = buf->clone();
-  if (options_.rfcMode_) {
-    datagramBuf = prependContextId(std::move(datagramBuf));
-  }
+  auto datagramBuf = prependContextId(buf->clone());
   if (!txn_->sendDatagram(std::move(datagramBuf))) {
     LOG(ERROR) << "Transport write buffer is full. Discarding datagram";
     // sendDatagram can only fail for exceeding the maximum size (checked

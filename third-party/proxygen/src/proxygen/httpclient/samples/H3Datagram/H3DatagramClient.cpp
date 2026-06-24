@@ -177,23 +177,19 @@ int main(int argc, char* argv[]) {
   options.connectTimeout_ = std::chrono::milliseconds(500);
   options.httpRequest_ = std::make_unique<HTTPMessage>();
 
+  options.httpRequest_->setMethod(proxygen::HTTPMethod::CONNECT);
+  options.httpRequest_->setUpgradeProtocol("connect-udp");
+  options.httpRequest_->setSecure(true);
   if (!FLAGS_masque_template.empty()) {
     // RFC 9298 Extended CONNECT mode
     auto target = proxygen::expandConnectUDPTemplate(
         FLAGS_masque_template, FLAGS_host, FLAGS_port);
-    options.httpRequest_->setMethod(proxygen::HTTPMethod::CONNECT);
-    options.httpRequest_->setUpgradeProtocol("connect-udp");
-    options.httpRequest_->setSecure(true);
     options.httpRequest_->setURL(target.path);
     options.httpRequest_->getHeaders().set(proxygen::HTTP_HEADER_HOST,
                                            target.authority);
     options.httpRequest_->getHeaders().set("Capsule-Protocol", "?1");
-    options.rfcMode_ = true;
   } else {
-    // Legacy CONNECT-UDP mode
-    options.httpRequest_->setMethod(proxygen::HTTPMethod::CONNECT_UDP);
     options.httpRequest_->setURL(fmt::format("{}:{}", FLAGS_host, FLAGS_port));
-    options.httpRequest_->setMasque();
   }
 
   auto parsedHeaders = CurlService::CurlClient::parseHeaders(FLAGS_headers);

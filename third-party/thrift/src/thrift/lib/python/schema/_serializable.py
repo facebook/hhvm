@@ -111,6 +111,7 @@ from thrift.lib.python.schema.type_system import (
     OpaqueAliasTypeRef,
     Primitive,
     PrimitiveTypeRef,
+    PruneOptions,
     SetTypeRef,
     StructNode,
     StructTypeRef,
@@ -481,23 +482,6 @@ def _export_referenced_uris(node: DefinitionNode) -> Iterator[str]:
             yield from _type_ref_uris(node.target_type)
         case _:
             assert_never(node)
-
-
-class PruneOptions:
-    """Options for :func:`build_pruned` and :func:`build_serializable_type_system`."""
-
-    __slots__ = ("_include_source_info",)
-    _include_source_info: bool
-
-    def __init__(self, include_source_info: bool = True) -> None:
-        self._include_source_info = include_source_info
-
-    @property
-    def include_source_info(self) -> bool:
-        return self._include_source_info
-
-    def __repr__(self) -> str:
-        return f"PruneOptions(include_source_info={self._include_source_info})"
 
 
 def _to_wire_source_info(node: DefinitionNode) -> SerializableThriftSourceInfo | None:

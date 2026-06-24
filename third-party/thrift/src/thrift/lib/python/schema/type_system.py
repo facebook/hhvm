@@ -869,3 +869,21 @@ def _collect_closure(
         closure[uri] = node
         worklist.extend(edges(node))
     return closure
+
+
+class PruneOptions:
+    """Options for ``build_pruned`` (``type_system_builder``) and
+    ``build_serializable_type_system`` (``_serializable``)."""
+
+    __slots__ = ("_include_source_info",)
+    _include_source_info: bool
+
+    def __init__(self, include_source_info: bool = True) -> None:
+        self._include_source_info = include_source_info
+
+    @property
+    def include_source_info(self) -> bool:
+        return self._include_source_info
+
+    def __repr__(self) -> str:
+        return f"PruneOptions(include_source_info={self._include_source_info})"

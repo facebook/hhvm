@@ -33,6 +33,7 @@ from thrift.lib.python.schema.type_system import (
     PresenceQualifier,
     Primitive,
     PrimitiveTypeRef,
+    PruneOptions,
     SetTypeRef,
     StructNode,
     StructTypeRef,
@@ -44,7 +45,6 @@ from thrift.lib.python.schema.type_system import (
 from thrift.lib.python.schema.type_system_builder import (
     build_pruned,
     FieldSpec,
-    PruneOptions,
     ref,
     TypeInput,
     TypeSystemBuilder,

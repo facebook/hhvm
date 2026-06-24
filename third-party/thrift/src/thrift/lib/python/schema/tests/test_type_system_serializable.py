@@ -79,6 +79,7 @@ from thrift.lib.python.schema._serializable import (
     to_type_id,
     to_wire_record,
 )
+from thrift.lib.python.schema._serializable_builder import from_serializable
 from thrift.lib.python.schema.schema_registry import SchemaRegistry
 from thrift.lib.python.schema.type_system import (
     DefinitionNode,
@@ -94,6 +95,7 @@ from thrift.lib.python.schema.type_system import (
     PresenceQualifier,
     Primitive,
     PrimitiveTypeRef,
+    PruneOptions,
     SetTypeRef,
     SourceInfo,
     StructNode,
@@ -106,8 +108,6 @@ from thrift.lib.python.schema.type_system_builder import (
     build_derived_from,
     build_pruned,
     FieldSpec,
-    from_serializable,
-    PruneOptions,
     ref,
     TypeInput,
     TypeSystemBuilder,

@@ -194,6 +194,7 @@ class CAresResolver : public DNSResolver {
   // Overrides for ares_init_options(); 0 = use c-ares default.
   struct ChannelInitOptions {
     std::chrono::milliseconds timeout{DNSResolver::kMaxTimeout};
+    std::chrono::milliseconds mintimeout{0};
     int tries{0};
   };
   void setChannelInitOptions(ChannelInitOptions opts) {

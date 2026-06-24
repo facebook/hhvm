@@ -799,6 +799,13 @@ void CAresResolver::init() {
     optmask |= ARES_OPT_TIMEOUTMS;
   }
 
+#ifdef ARES_OPT_MINTIMEOUTMS
+  if (channelInitOptions_.mintimeout.count() > 0) {
+    opts.mintimeout = static_cast<int>(channelInitOptions_.mintimeout.count());
+    optmask |= ARES_OPT_MINTIMEOUTMS;
+  }
+#endif
+
   if (channelInitOptions_.tries > 0) {
     opts.tries = channelInitOptions_.tries;
     optmask |= ARES_OPT_TRIES;

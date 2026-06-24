@@ -143,6 +143,7 @@ struct AsyncMysqlResult {
   OptString getSslCertSan();
   OptString getSslCertExtensions();
   bool isSslCertValidationEnforced();
+  OptString getSslVersion();
 
   std::shared_ptr<am::Operation> m_op;
   db::ClientPerfStats m_clientStats;

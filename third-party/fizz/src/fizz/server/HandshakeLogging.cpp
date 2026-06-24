@@ -81,6 +81,14 @@ void HandshakeLogging::populateFromClientHello(const ClientHello& chlo) {
         std::move(clientSigSchemes->supported_signature_algorithms);
   }
 
+  folly::Optional<CertificateCompressionAlgorithms> certCompressionAlgos;
+  FIZZ_THROW_ON_ERROR(
+      getExtension(certCompressionAlgos, err, chlo.extensions), err);
+  if (certCompressionAlgos) {
+    clientCertCompressionAlgorithms =
+        std::move(certCompressionAlgos->algorithms);
+  }
+
   clientSessionIdSent =
       chlo.legacy_session_id && !chlo.legacy_session_id->empty();
 

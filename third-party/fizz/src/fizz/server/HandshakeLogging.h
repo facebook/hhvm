@@ -29,6 +29,7 @@ struct HandshakeLogging : SharedChloFields {
   folly::Optional<std::vector<NamedGroup>> clientKeyShares;
   std::vector<PskKeyExchangeMode> clientKeyExchangeModes;
   std::vector<SignatureScheme> clientSignatureAlgorithms;
+  std::vector<CertificateCompressionAlgorithm> clientCertCompressionAlgorithms;
   folly::Optional<bool> clientSessionIdSent;
   folly::Optional<uint8_t> testExtensionByte;
   std::vector<std::string> clientAlpns;

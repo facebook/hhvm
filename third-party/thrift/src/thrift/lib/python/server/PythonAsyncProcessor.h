@@ -275,7 +275,9 @@ class PythonAsyncProcessor : public apache::thrift::GeneratedAsyncProcessorBase,
   // not an inside-interaction method or no PythonTile is bound. The Cython
   // dispatch layer binds the unbound `funcObject` to this instance.
   PyObject* FOLLY_NULLABLE getInteractionHandler(
-      const HandlerFunc& function, apache::thrift::Cpp2RequestContext* context);
+      const HandlerFunc& function,
+      apache::thrift::Cpp2RequestContext* context,
+      folly::EventBase* eb);
 
   // Shared interaction step for a dispatch path: for a factory method, fulfill
   // any parked TilePromise; for an inside-interaction method, return the

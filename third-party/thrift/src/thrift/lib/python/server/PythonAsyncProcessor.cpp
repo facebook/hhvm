@@ -210,13 +210,10 @@ folly::exception_wrapper PythonAsyncProcessor::maybeFulfillTilePromise(
       function.interactionName.empty() || eb == nullptr) {
     return {};
   }
-  {
-    apache::thrift::detail::Cpp2ConnContextInternalAPI api(*connCtx);
-    if (dynamic_cast<apache::thrift::TilePromise*>(
-            api.findTile(interactionId)) == nullptr) {
-      return {}; // no parked promise; nothing to fulfill
-    }
-  }
+  // Don't peek at the tile map here: `tiles_` is EventBase-thread-only, but
+  // this runs on the Python executor thread -- a racing `findTile` is a
+  // use-after-free against `createInteraction`'s rehash. The parked-promise
+  // check happens inside the runInEventBaseThread lambda below instead.
   PyObject* factory = findInteractionFactory(function.interactionName);
   if (factory == nullptr) {
     return {};
@@ -315,7 +312,9 @@ void installInteractionTileFromHandler(
 }
 
 PyObject* FOLLY_NULLABLE PythonAsyncProcessor::getInteractionHandler(
-    const HandlerFunc& function, apache::thrift::Cpp2RequestContext* context) {
+    const HandlerFunc& function,
+    apache::thrift::Cpp2RequestContext* context,
+    folly::EventBase* eb) {
   if (function.interactionType != InteractionType::INTERACTION_V1) {
     return nullptr;
   }
@@ -324,22 +323,48 @@ PyObject* FOLLY_NULLABLE PythonAsyncProcessor::getInteractionHandler(
   if (interactionId == 0 || connCtx == nullptr) {
     return nullptr;
   }
-  // Prefer the tile bound to the request's own context -- the framework's
-  // `TilePromise::fulfill()` sets it on the request before the conn-map
-  // `tryReplaceTile`, so `findTile()` on the conn map can momentarily return
-  // the stale TilePromise. `releaseTile()` + `setTile()` peeks safely (both on
-  // the request thread; there is no public read accessor).
-  apache::thrift::Tile* tile = nullptr;
-  auto reqTile = context->releaseTile();
-  if (reqTile) {
-    tile = reqTile.get();
+  // Fast path: the request's own tile is request-thread-safe and avoids the
+  // shared map. It's also preferred for correctness -- `fulfill()` sets the
+  // request tile before `tryReplaceTile` updates the conn map, so the conn map
+  // can briefly still hold the TilePromise.
+  if (auto reqTile = context->releaseTile()) {
+    auto* tile = reqTile.get();
     context->setTile(std::move(reqTile));
-  } else {
-    apache::thrift::detail::Cpp2ConnContextInternalAPI api(*connCtx);
-    tile = api.findTile(interactionId);
+    auto* pyTile = dynamic_cast<PythonTile*>(tile);
+    return pyTile ? pyTile->handler() : nullptr;
   }
-  auto* pyTile = dynamic_cast<PythonTile*>(tile);
-  return pyTile ? pyTile->handler() : nullptr;
+  // Fallback: the tile lives only in the shared map, which is EventBase-only --
+  // reading it here (Python executor thread) would race `createInteraction`'s
+  // rehash. Resolve on the EventBase thread; release the GIL across the wait so
+  // EventBase work that needs it can't deadlock.
+  if (eb == nullptr) {
+    return nullptr;
+  }
+  PyObject* handler = nullptr;
+  // PyEval_SaveThread is safe here: this runs on executor_ (GIL held) during
+  // request dispatch, and an in-flight request keeps serve() parked so Python
+  // can't be finalizing -- same invariant as createInteractionImpl above.
+  PyThreadState* saved = PyEval_SaveThread();
+  // RAII so the GIL is reacquired even if the wait throws.
+  SCOPE_EXIT {
+    PyEval_RestoreThread(saved);
+  };
+  eb->runImmediatelyOrRunInEventBaseThreadAndWait(
+      [connCtx, interactionId, context, eb, &handler]() {
+        apache::thrift::detail::Cpp2ConnContextInternalAPI api(*connCtx);
+        auto* pyTile = dynamic_cast<PythonTile*>(api.findTile(interactionId));
+        if (pyTile == nullptr) {
+          return;
+        }
+        // Anchor the tile to this request (acquires a ref on the EventBase
+        // thread, where tile refcounting is safe) so neither it nor its handler
+        // PyObject can be destroyed while dispatch is still in flight on the
+        // executor thread -- the request now owns the tile, matching the fast
+        // path above.
+        context->setTile(apache::thrift::TilePtr{pyTile, eb});
+        handler = pyTile->handler();
+      });
+  return handler;
 }
 
 folly::Try<PyObject*> PythonAsyncProcessor::prepareInteractionDispatch(
@@ -369,7 +394,7 @@ folly::Try<PyObject*> PythonAsyncProcessor::prepareInteractionDispatch(
       return folly::Try<PyObject*>(std::move(factoryError));
     }
   } else if (function.interactionType == InteractionType::INTERACTION_V1) {
-    if (PyObject* handler = getInteractionHandler(function, context)) {
+    if (PyObject* handler = getInteractionHandler(function, context, eb)) {
       return folly::Try<PyObject*>(handler);
     }
     // INTERACTION_V1 inside-method but no PythonTile is bound to this

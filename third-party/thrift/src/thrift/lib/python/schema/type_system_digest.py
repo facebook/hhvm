@@ -50,11 +50,7 @@ Encoding (little-endian throughout):
 
 from __future__ import annotations
 
-import enum
-import hashlib
-import struct
-from collections.abc import Callable, Iterable, Mapping
-from typing import TypeVar
+from collections.abc import Mapping
 
 from apache.thrift.type_system.record.thrift_types import (
     SerializableRecord as WireRecord,
@@ -71,23 +67,12 @@ from apache.thrift.type_system.type_system.thrift_types import (
     SerializableTypeSystem,
     SerializableUnionDefinition,
 )
+from thrift.lib.python.schema._digest_common import (
+    _Hasher,
+    DigestMode,
+    TYPE_SYSTEM_DIGEST_VERSION,
+)
 from thrift.lib.python.schema.type_system import InvalidTypeError
-
-# Current hash algorithm version. Bumped only for backwards-incompatible
-# changes to the digest format.
-TYPE_SYSTEM_DIGEST_VERSION = 2
-
-_T = TypeVar("_T")
-
-
-class DigestMode(enum.Enum):
-    # Hash the complete definition, including annotations and custom default
-    # values.
-    FULL = 0
-    # Hash only the wire-compatible structure (fields, ids, types, enum values),
-    # skipping annotations and custom default values. Two definitions with the
-    # same structure but differing annotations/defaults produce the same digest.
-    STRUCTURAL = 1
 
 
 # ---------------------------------------------------------------------------
@@ -144,104 +129,6 @@ def _iobuf_to_bytes(buf: object) -> bytes:
     if isinstance(buf, (bytes, bytearray, memoryview)):
         return bytes(buf)
     return b"".join(buf)  # IOBuf iterates its (memoryview) chunks
-
-
-# ---------------------------------------------------------------------------
-# The streaming SHA-256 hasher.
-# ---------------------------------------------------------------------------
-
-
-class _Hasher:
-    """A streaming SHA-256 hasher with the canonical primitive encodings.
-
-    A fresh ``_Hasher`` carries no version byte -- the version is hashed only by
-    the top-level :func:`type_system_digest`. Sub-hashers (for order-independent
-    collections) carry no version byte either, but inherit the parent's
-    :class:`DigestMode`."""
-
-    __slots__ = ("_h", "_mode")
-    _h: hashlib._Hash
-    _mode: DigestMode
-
-    def __init__(self, mode: DigestMode = DigestMode.FULL) -> None:
-        self._h = hashlib.sha256()
-        self._mode = mode
-
-    def include_annotations_and_defaults(self) -> bool:
-        return self._mode is DigestMode.FULL
-
-    def update(self, data: bytes) -> None:
-        self._h.update(data)
-
-    def hash_bool(self, value: bool) -> None:
-        self._h.update(b"\x01" if value else b"\x00")
-
-    def hash_u8(self, value: int) -> None:
-        self._h.update(struct.pack("<B", value))
-
-    def hash_i8(self, value: int) -> None:
-        self._h.update(struct.pack("<b", value))
-
-    def hash_i16(self, value: int) -> None:
-        self._h.update(struct.pack("<h", value))
-
-    def hash_i32(self, value: int) -> None:
-        self._h.update(struct.pack("<i", value))
-
-    def hash_i64(self, value: int) -> None:
-        self._h.update(struct.pack("<q", value))
-
-    def hash_u32(self, value: int) -> None:
-        self._h.update(struct.pack("<I", value))
-
-    def hash_f32(self, value: float) -> None:
-        self._h.update(struct.pack("<f", value))
-
-    def hash_f64(self, value: float) -> None:
-        self._h.update(struct.pack("<d", value))
-
-    def hash_str(self, value: str) -> None:
-        self.hash_bytes(value.encode("utf-8"))
-
-    def hash_bytes(self, value: bytes) -> None:
-        self.hash_u32(len(value))
-        self._h.update(value)
-
-    def finalize(self) -> bytes:
-        return self._h.digest()
-
-    def hash_unordered_by_digest(
-        self, items: Iterable[_T], hash_fn: Callable[[_Hasher, _T], None]
-    ) -> None:
-        """Hash ``items`` order-independently: each to its own 32-byte
-        sub-digest, then a ``u32`` count prefix, then the sorted sub-digests."""
-        digests: list[bytes] = []
-        for item in items:
-            sub = _Hasher(self._mode)
-            hash_fn(sub, item)
-            digests.append(sub.finalize())
-        self.hash_u32(len(digests))
-        digests.sort()
-        for sub_digest in digests:
-            self._h.update(sub_digest)
-
-    def hash_map_by_key_digest(
-        self,
-        items: Iterable[_T],
-        key_hash_fn: Callable[[_Hasher, _T], None],
-        entry_hash_fn: Callable[[_Hasher, _T], None],
-    ) -> None:
-        """Hash map entries order-independently: sort by the key's sub-digest
-        (``u32`` count prefixed), then hash full key+value pairs in that order."""
-        sorted_entries: list[tuple[bytes, _T]] = []
-        for item in items:
-            sub = _Hasher(self._mode)
-            key_hash_fn(sub, item)
-            sorted_entries.append((sub.finalize(), item))
-        self.hash_u32(len(sorted_entries))
-        sorted_entries.sort(key=lambda pair: pair[0])
-        for _, item in sorted_entries:
-            entry_hash_fn(self, item)
 
 
 # ---------------------------------------------------------------------------

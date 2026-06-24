@@ -26,6 +26,7 @@ both via hand-built / programmatic type systems (no bridge) and via the
 import hashlib
 import struct
 import unittest
+from collections.abc import Mapping
 
 # Importing the fixture modules makes their URIs discoverable by the registry.
 import apache.thrift.type_system.test.digest_fixture_enum.thrift_types  # noqa: F401
@@ -69,11 +70,19 @@ from apache.thrift.type_system.type_system.thrift_types import (
 )
 from thrift.lib.python.schema._serializable import (
     build_serializable_type_system,
+    to_serializable_definition,
     to_type_id,
+)
+from thrift.lib.python.schema.runtime_digest import (
+    definition_digest,
+    runtime_type_system_digest,
+    type_ref_digest,
 )
 from thrift.lib.python.schema.schema_registry import SchemaRegistry
 from thrift.lib.python.schema.type_system import (
+    DefinitionNode,
     EnumValue,
+    FieldDefinition,
     FieldIdentity,
     IndexedTypeSystem,
     PresenceQualifier,
@@ -449,10 +458,9 @@ class UnorderedCollectionTest(unittest.TestCase):
     def test_annotation_map_order_independent(self) -> None:
         anno_a = StructNode(uri="test/AnnoA", fields=[])
         anno_b = StructNode(uri="test/AnnoB", fields=[])
-        from thrift.lib.python.schema._record import FieldSetRecord
+        from thrift.lib.python.schema._record import FieldSetRecord, SerializableRecord
 
-        def _foo(anns: dict[str, object]) -> StructNode:
-            # pyre-ignore[6]: annotations are SerializableRecord values
+        def _foo(anns: Mapping[str, SerializableRecord]) -> StructNode:
             return StructNode(uri="test/Foo", fields=[], annotations=anns)
 
         rec_a = FieldSetRecord({})
@@ -905,6 +913,177 @@ class RegistryStructuralModeTest(unittest.TestCase):
             self.registry.type_system_digest(roots, DigestMode.STRUCTURAL),
             self.registry.type_system_digest(roots),
         )
+
+
+class RuntimeDigestTest(unittest.TestCase):
+    @staticmethod
+    def _wire_definition_digest(
+        node: DefinitionNode, mode: DigestMode = DigestMode.FULL
+    ) -> bytes:
+        """Oracle: the digest of ``node`` via the wire path -- convert to a
+        ``SerializableTypeDefinition`` then hash it with the wire walker."""
+        from thrift.lib.python.schema.type_system_digest import (
+            _hash_definition,
+            _Hasher,
+        )
+
+        h = _Hasher(mode)
+        _hash_definition(h, to_serializable_definition(node))
+        return h.finalize()
+
+    def _empty_struct_ts(self) -> TypeSystem:
+        return TypeSystemBuilder().add_struct("meta.com/test/Empty", []).build()
+
+    def _person_ts(self) -> TypeSystem:
+        return (
+            TypeSystemBuilder()
+            .add_struct(
+                "meta.com/test/Person",
+                [
+                    _field(1, "name", PrimitiveTypeRef(Primitive.STRING)),
+                    _field(2, "age", _i32(), PresenceQualifier.OPTIONAL),
+                ],
+            )
+            .build()
+        )
+
+    def _status_ts(self) -> TypeSystem:
+        return (
+            TypeSystemBuilder()
+            .add_enum(
+                "meta.com/test/Status",
+                [
+                    EnumValue("ACTIVE", 1),
+                    EnumValue("INACTIVE", 2),
+                    EnumValue("PENDING", 3),
+                ],
+            )
+            .build()
+        )
+
+    def _multi_ts(self) -> tuple[TypeSystem, list[str]]:
+        ts = (
+            TypeSystemBuilder()
+            .add_struct(
+                "meta.com/test/multi/Person",
+                [
+                    _field(1, "name", PrimitiveTypeRef(Primitive.STRING)),
+                    _field(2, "age", _i32(), PresenceQualifier.OPTIONAL),
+                ],
+            )
+            .add_enum(
+                "meta.com/test/multi/Status",
+                [EnumValue("ACTIVE", 1), EnumValue("INACTIVE", 2)],
+            )
+            .add_opaque_alias(
+                "meta.com/test/multi/UserId", PrimitiveTypeRef(Primitive.I64)
+            )
+            .build()
+        )
+        return ts, [
+            "meta.com/test/multi/Person",
+            "meta.com/test/multi/Status",
+            "meta.com/test/multi/UserId",
+        ]
+
+    # --- cross-language goldens, reached via the runtime entry point ---
+    def test_runtime_single_empty_struct_matches_golden(self) -> None:
+        self.assertEqual(
+            runtime_type_system_digest(self._empty_struct_ts()).hex(),
+            DIGEST_SINGLE_EMPTY_STRUCT,
+        )
+
+    def test_runtime_struct_with_fields_matches_golden(self) -> None:
+        self.assertEqual(
+            runtime_type_system_digest(self._person_ts()).hex(),
+            DIGEST_STRUCT_WITH_FIELDS,
+        )
+
+    def test_runtime_enum_matches_golden(self) -> None:
+        self.assertEqual(
+            runtime_type_system_digest(self._status_ts()).hex(), DIGEST_ENUM
+        )
+
+    def test_runtime_multi_type_matches_golden_and_wire(self) -> None:
+        ts, roots = self._multi_ts()
+        # Whole-system oracle: direct runtime walk == wire path over all URIs.
+        self.assertEqual(runtime_type_system_digest(ts), _digest_of(ts, roots))
+        self.assertEqual(runtime_type_system_digest(ts).hex(), DIGEST_MULTIPLE_TYPES)
+
+    # --- type_ref_digest ---
+    def test_type_ref_digest_primitive_goldens(self) -> None:
+        self.assertEqual(
+            type_ref_digest(PrimitiveTypeRef(Primitive.BOOL)).hex(), DIGEST_TYPE_ID_BOOL
+        )
+        self.assertEqual(type_ref_digest(_i32()).hex(), DIGEST_TYPE_ID_I32)
+        self.assertEqual(
+            type_ref_digest(PrimitiveTypeRef(Primitive.STRING)).hex(),
+            DIGEST_TYPE_ID_STRING,
+        )
+
+    # --- definition_digest ---
+    def test_definition_digest_empty_struct_byte_layout(self) -> None:
+        node = self._empty_struct_ts().get_user_defined_type_or_throw(
+            "meta.com/test/Empty"
+        )
+        # No version byte, no URI: just structDef(1) + isSealed(0) + annotations(0).
+        expected = _sha(_i32b(1) + _u8(0) + _u32(0))
+        self.assertEqual(definition_digest(node), expected)
+
+    def test_definition_digest_oracle_with_annotations_and_default(self) -> None:
+        from thrift.lib.python.schema._record import FieldSetRecord, Int32Record
+
+        # A field with a custom default + a non-standard AND a standard
+        # annotation; plus struct-level non-standard + standard annotations. The
+        # direct walker must drop the standard ones and route the default through
+        # the same wire encoders -- proven by matching the wire oracle exactly.
+        field = FieldDefinition(
+            identity=FieldIdentity(1, "f"),
+            presence=PresenceQualifier.UNQUALIFIED,
+            type=PrimitiveTypeRef(Primitive.I32),
+            custom_default=Int32Record(42),
+            annotations={
+                "meta.com/FAnn": FieldSetRecord({}),
+                "facebook.com/thrift/annotation/Cpp": FieldSetRecord({}),
+            },
+        )
+        node = StructNode(
+            uri="test/Foo",
+            fields=[field],
+            annotations={
+                "meta.com/SAnn": FieldSetRecord({}),
+                "facebook.com/thrift/annotation/Python": FieldSetRecord({}),
+            },
+        )
+        self.assertEqual(definition_digest(node), self._wire_definition_digest(node))
+        self.assertEqual(
+            definition_digest(node, DigestMode.STRUCTURAL),
+            self._wire_definition_digest(node, DigestMode.STRUCTURAL),
+        )
+        # Structural must actually differ from full here (annotations + default).
+        self.assertNotEqual(
+            definition_digest(node), definition_digest(node, DigestMode.STRUCTURAL)
+        )
+
+    # --- mode threading on the whole-system runtime digest ---
+    def test_runtime_structural_matches_wire_structural(self) -> None:
+        ts = self._person_ts()
+        roots = ["meta.com/test/Person"]
+        self.assertEqual(
+            runtime_type_system_digest(ts, DigestMode.STRUCTURAL),
+            _digest_of(ts, roots, DigestMode.STRUCTURAL),
+        )
+
+    # --- a non-enumerable TypeSystem (the lazy registry) must raise ---
+    def test_non_enumerable_type_system_raises(self) -> None:
+        from thrift.lib.python.schema.type_system import InvalidTypeError
+
+        SchemaRegistry._reset()
+        try:
+            with self.assertRaises(InvalidTypeError):
+                runtime_type_system_digest(SchemaRegistry())
+        finally:
+            SchemaRegistry._reset()
 
 
 if __name__ == "__main__":

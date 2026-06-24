@@ -41,12 +41,9 @@ import enum
 from abc import ABC, abstractmethod
 from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence
 from types import MappingProxyType
-from typing import assert_never, Generic, TYPE_CHECKING, TypeVar
+from typing import assert_never, Generic, TypeVar
 
 from thrift.lib.python.schema._record import SerializableRecord
-
-if TYPE_CHECKING:
-    from apache.thrift.type_system.type_id.thrift_types import TypeId
 
 
 class InvalidTypeError(Exception):
@@ -106,14 +103,6 @@ class TypeRefBase:
 
     def _key(self) -> tuple[object, ...]:
         raise NotImplementedError
-
-    def id(self) -> TypeId:
-        """The serializable ``TypeId`` for this resolved edge. Lazily delegates
-        to ``_serializable.to_type_id`` so the model itself stays free of a
-        load-time wire-type import."""
-        from thrift.lib.python.schema._serializable import to_type_id
-
-        return to_type_id(self)
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, TypeRefBase):

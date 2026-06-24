@@ -78,6 +78,7 @@ from apache.thrift.type_system.type_system.thrift_types import (
     SerializableUnionDefinition,
 )
 from folly.iobuf import IOBuf
+from thrift.lib.python.schema._digest_common import is_standard_annotation
 from thrift.lib.python.schema._record import (
     BoolRecord,
     ByteArrayRecord,
@@ -119,17 +120,6 @@ from thrift.lib.python.schema.type_system import (
     UnionNode,
     UnionTypeRef,
 )
-
-# Standard annotations are dropped on export to the wire form -- they are not
-# bundled in serializable type systems (circular-dependency concerns).
-# NOTE: this prefix is *broader* than the bridge's compiler-consumed filter
-# (which drops only ``Uri`` + ``scope/*``); the bridge keeps e.g.
-# ``.../annotation/Cpp``, but export drops it.
-_STANDARD_ANNOTATION_PREFIX = "facebook.com/thrift/annotation/"
-
-
-def _is_standard_annotation(uri: str) -> bool:
-    return uri.startswith(_STANDARD_ANNOTATION_PREFIX)
 
 
 # ---------------------------------------------------------------------------
@@ -353,7 +343,7 @@ def from_wire_record(wire: WireRecord) -> SerializableRecord:
 # ---------------------------------------------------------------------------
 
 
-def _to_wire_annotations(
+def to_wire_annotations(
     annotations: Mapping[str, SerializableRecord],
 ) -> dict[str, WireRecord]:
     """Convert a node/field annotation map to the wire form, dropping standard
@@ -361,7 +351,7 @@ def _to_wire_annotations(
     return {
         uri: to_wire_record(record)
         for uri, record in annotations.items()
-        if not _is_standard_annotation(uri)
+        if not is_standard_annotation(uri)
     }
 
 
@@ -409,7 +399,7 @@ def _to_wire_field(field: FieldDefinition) -> SerializableFieldDefinition:
             if field.custom_default is not None
             else None
         ),
-        annotations=_to_wire_annotations(field.annotations),
+        annotations=to_wire_annotations(field.annotations),
     )
 
 
@@ -424,7 +414,7 @@ def to_serializable_definition(node: DefinitionNode) -> SerializableTypeDefiniti
                 structDef=SerializableStructDefinition(
                     fields=[_to_wire_field(f) for f in node.fields],
                     isSealed=node.is_sealed,
-                    annotations=_to_wire_annotations(node.annotations),
+                    annotations=to_wire_annotations(node.annotations),
                 )
             )
         case UnionNode():
@@ -432,7 +422,7 @@ def to_serializable_definition(node: DefinitionNode) -> SerializableTypeDefiniti
                 unionDef=SerializableUnionDefinition(
                     fields=[_to_wire_field(f) for f in node.fields],
                     isSealed=node.is_sealed,
-                    annotations=_to_wire_annotations(node.annotations),
+                    annotations=to_wire_annotations(node.annotations),
                 )
             )
         case EnumNode():
@@ -442,18 +432,18 @@ def to_serializable_definition(node: DefinitionNode) -> SerializableTypeDefiniti
                         SerializableEnumValueDefinition(
                             name=v.name,
                             datum=v.datum,
-                            annotations=_to_wire_annotations(v.annotations),
+                            annotations=to_wire_annotations(v.annotations),
                         )
                         for v in node.values
                     ],
-                    annotations=_to_wire_annotations(node.annotations),
+                    annotations=to_wire_annotations(node.annotations),
                 )
             )
         case OpaqueAliasNode():
             return SerializableTypeDefinition(
                 opaqueAliasDef=SerializableOpaqueAliasDefinition(
                     targetType=to_type_id(node.target_type),
-                    annotations=_to_wire_annotations(node.annotations),
+                    annotations=to_wire_annotations(node.annotations),
                 )
             )
         case _:
@@ -469,7 +459,7 @@ def _non_standard_annotation_uris(
     annotations: Mapping[str, SerializableRecord],
 ) -> Iterator[str]:
     for uri in annotations:
-        if not _is_standard_annotation(uri):
+        if not is_standard_annotation(uri):
             yield uri
 
 

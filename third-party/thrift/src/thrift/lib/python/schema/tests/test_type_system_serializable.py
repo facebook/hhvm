@@ -15,9 +15,9 @@
 # pyre-strict
 
 """Tests for the wire-form boundary (``_serializable.py`` + builder edits):
-``to_type_id`` / ``resolve_type_id`` / ``TypeRef.id()``,
-``build_serializable_type_system`` (runtime -> wire),
-``from_serializable`` (wire -> runtime), and ``build_derived_from`` (overlay).
+``to_type_id`` / ``resolve_type_id``, ``build_serializable_type_system``
+(runtime -> wire), ``from_serializable`` (wire -> runtime), and
+``build_derived_from`` (overlay).
 """
 
 import unittest
@@ -259,10 +259,6 @@ class ToTypeIdTest(unittest.TestCase):
         self.assertEqual(type_id.type, TypeId.Type.userDefinedType)
         self.assertEqual(type_id.userDefinedType, "test/Foo")
 
-    def test_typeref_id_method_matches_to_type_id(self) -> None:
-        type_ref: TypeRef = ListTypeRef(PrimitiveTypeRef(Primitive.I32))
-        self.assertEqual(type_ref.id(), to_type_id(type_ref))
-
 
 class ResolveTypeIdTest(unittest.TestCase):
     def _source(self) -> TypeSystem:
@@ -276,7 +272,7 @@ class ResolveTypeIdTest(unittest.TestCase):
         source = self._source()
         for primitive, _ in _PRIMITIVE_TYPE_IDS:
             type_ref: TypeRef = PrimitiveTypeRef(primitive)
-            self.assertEqual(resolve_type_id(type_ref.id(), source), type_ref)
+            self.assertEqual(resolve_type_id(to_type_id(type_ref), source), type_ref)
 
     def test_container_round_trip(self) -> None:
         source = self._source()
@@ -287,14 +283,14 @@ class ResolveTypeIdTest(unittest.TestCase):
                 PrimitiveTypeRef(Primitive.STRING), PrimitiveTypeRef(Primitive.BOOL)
             ),
         ):
-            self.assertEqual(resolve_type_id(type_ref.id(), source), type_ref)
+            self.assertEqual(resolve_type_id(to_type_id(type_ref), source), type_ref)
 
     def test_user_defined_round_trip(self) -> None:
         source = self._source()
         foo = source.get_user_defined_type("test/Foo")
         assert isinstance(foo, StructNode)
         type_ref: TypeRef = StructTypeRef(foo)
-        resolved = resolve_type_id(type_ref.id(), source)
+        resolved = resolve_type_id(to_type_id(type_ref), source)
         self.assertEqual(resolved, type_ref)
         assert isinstance(resolved, StructTypeRef)
         self.assertIs(resolved.node, foo)

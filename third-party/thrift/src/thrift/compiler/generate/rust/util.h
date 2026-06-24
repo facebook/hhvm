@@ -75,7 +75,7 @@ std::string get_annotation_property_string(
     const t_const* annotation, const std::string& key);
 
 std::string named_rust_name(const t_named* name); // mangle()
-std::string type_rust_name(const t_type* type_); // mangle_type()
+std::string type_rust_name(const t_type* type); // mangle_type()
 inline std::string typedef_rust_name(const t_typedef* typedef_) {
   return type_rust_name(typedef_);
 }

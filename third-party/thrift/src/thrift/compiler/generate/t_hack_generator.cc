@@ -238,9 +238,7 @@ class t_hack_generator : public t_concat_generator {
   void init_generator() override;
   void close_generator() override;
   void init_codegen_file(
-      std::ofstream& file_,
-      const std::string& file_name_,
-      bool skip_ns = false);
+      std::ofstream& file, const std::string& file_name, bool skip_ns = false);
 
   /**
    * Program-level generation functions
@@ -564,7 +562,7 @@ class t_hack_generator : public t_concat_generator {
       const t_structured* tstruct,
       const std::string& struct_hack_ref);
   void generate_php_structural_id(
-      std::ofstream& out, const t_structured* tstruct, bool asFunction);
+      std::ofstream& out, const t_structured* tstruct, bool as_function);
   bool structured_shape_methods_require_write_props(
       const t_structured* tstruct);
   bool structured_contains_object_key_container(
@@ -1887,24 +1885,24 @@ void t_hack_generator::init_generator() {
 }
 
 void t_hack_generator::init_codegen_file(
-    std::ofstream& file_, const std::string& file_name_, bool skip_ns) {
-  file_.open(file_name_.c_str());
-  record_genfile(file_name_);
+    std::ofstream& file, const std::string& file_name, bool skip_ns) {
+  file.open(file_name.c_str());
+  record_genfile(file_name);
 
   // Print header
-  file_ << "<?hh\n" << autogen_comment() << "\n";
+  file << "<?hh\n" << autogen_comment() << "\n";
 
   if (skip_ns) {
     return;
   } else {
     auto [ns, _] = get_namespace(program_);
     if (has_hack_namespace_) {
-      file_ << "namespace " << ns << ";\n\n";
+      file << "namespace " << ns << ";\n\n";
     }
   }
   const std::string module = program_->get_namespace("hack.module");
   if (!module.empty()) {
-    file_ << "module " << module << ";\n";
+    file << "module " << module << ";\n";
   }
 }
 
@@ -5133,8 +5131,8 @@ void t_hack_generator::generate_php_struct_async_shape_methods(
  * for information about the structural ID.
  */
 void t_hack_generator::generate_php_structural_id(
-    std::ofstream& out, const t_structured* tstruct, bool asFunction) {
-  if (asFunction) {
+    std::ofstream& out, const t_structured* tstruct, bool as_function) {
+  if (as_function) {
     indent(out) << "public static function getStructuralID()[]: int {\n";
     indent_up();
     indent(out) << "return " << generate_structural_id(tstruct) << ";\n";

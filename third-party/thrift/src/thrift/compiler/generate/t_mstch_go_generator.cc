@@ -63,7 +63,7 @@ class t_mstch_go_generator : public t_whisker_generator {
   go::codegen_data data_;
 
   // Whisker prototype helpers
-  std::string go_qualified_name_(const t_named& self) const {
+  std::string go_qualified_name(const t_named& self) const {
     auto prefix = data_.go_package_alias_prefix(self.program());
     return prefix + go::go_name(self);
   }
@@ -473,7 +473,7 @@ class t_mstch_go_generator : public t_whisker_generator {
     def.property(
         "go_name", [](const t_named& self) { return go::go_name(self); });
     def.property("go_qualified_name", [this](const t_named& self) {
-      return go_qualified_name_(self);
+      return go_qualified_name(self);
     });
     def.property("go_package_alias_prefix", [this](const t_named& self) {
       return data_.go_package_alias_prefix(self.program());

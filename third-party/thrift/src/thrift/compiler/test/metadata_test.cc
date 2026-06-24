@@ -31,12 +31,12 @@ using apache::thrift::metadata::ThriftType;
 
 class MetadataCodegenTest : public testing::Test {
  protected:
-  ThriftStruct getStruct(const std::string& name) {
+  ThriftStruct get_struct(const std::string& name) {
     ThriftStruct s = metadata_.structs()->at(name);
     EXPECT_EQ(*s.name(), name);
     return s;
   }
-  ThriftType getResolvedType(const ThriftType& type) {
+  ThriftType get_resolved_type(const ThriftType& type) {
     ThriftType ret = type;
     while (ret.getType() == ThriftType::Type::t_typedef) {
       auto underlyingType =
@@ -46,25 +46,25 @@ class MetadataCodegenTest : public testing::Test {
     }
     return ret;
   }
-  ThriftType checkField(
+  ThriftType check_field(
       const ThriftField& field, int key, const std::string& name) {
     EXPECT_EQ(*field.name(), name);
     EXPECT_EQ(*field.id(), key);
-    return getResolvedType(*field.type());
+    return get_resolved_type(*field.type());
   }
-  void checkFieldUnion(
+  void check_field_union(
       const ThriftField& field,
       int key,
       const std::string& name,
-      const std::string& typeName,
+      const std::string& type_name,
       bool optional = true) {
-    auto type = checkField(field, key, name);
+    auto type = check_field(field, key, name);
     EXPECT_EQ(*field.is_optional(), optional);
-    EXPECT_EQ(*type.get_t_union().name(), typeName);
+    EXPECT_EQ(*type.get_t_union().name(), type_name);
   }
-  void checkFieldString(
+  void check_field_string(
       const ThriftField& field, int key, const std::string& name) {
-    auto type = checkField(field, key, name);
+    auto type = check_field(field, key, name);
     EXPECT_FALSE(*field.is_optional());
     EXPECT_EQ(type.get_t_primitive(), ThriftPrimitiveType::THRIFT_STRING_TYPE);
   }
@@ -90,23 +90,23 @@ TEST_F(MetadataCodegenTest, structTest) {
   EXPECT_EQ(e.elements()->at(10), "THRIFT_VOID_TYPE");
 
   ThriftStruct s;
-  s = getStruct("metadata.ThriftListType");
+  s = get_struct("metadata.ThriftListType");
   EXPECT_EQ(s.fields()->size(), 1);
-  checkFieldUnion(s.fields()[0], 1, "valueType", "metadata.ThriftType");
+  check_field_union(s.fields()[0], 1, "valueType", "metadata.ThriftType");
 
-  s = getStruct("metadata.ThriftMapType");
+  s = get_struct("metadata.ThriftMapType");
   EXPECT_EQ(s.fields()->size(), 2);
-  checkFieldUnion(s.fields()[0], 1, "keyType", "metadata.ThriftType");
-  checkFieldUnion(s.fields()[1], 2, "valueType", "metadata.ThriftType");
+  check_field_union(s.fields()[0], 1, "keyType", "metadata.ThriftType");
+  check_field_union(s.fields()[1], 2, "valueType", "metadata.ThriftType");
 
-  s = getStruct("metadata.ThriftEnumType");
+  s = get_struct("metadata.ThriftEnumType");
   EXPECT_EQ(s.fields()->size(), 1);
-  checkFieldString(s.fields()[0], 1, "name");
+  check_field_string(s.fields()[0], 1, "name");
 
-  s = getStruct("metadata.ThriftTypedefType");
+  s = get_struct("metadata.ThriftTypedefType");
   EXPECT_EQ(s.fields()->size(), 3);
-  checkFieldString(s.fields()[0], 1, "name");
-  checkFieldUnion(s.fields()[1], 2, "underlyingType", "metadata.ThriftType");
+  check_field_string(s.fields()[0], 1, "name");
+  check_field_union(s.fields()[1], 2, "underlyingType", "metadata.ThriftType");
 
   auto td = s.fields()[2];
   EXPECT_EQ(td.name(), "structured_annotations");

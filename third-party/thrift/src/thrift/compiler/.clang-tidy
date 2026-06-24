@@ -1,4 +1,27 @@
 ---
 InheritParentConfig: true
 Checks: '-facebook-hte-NullableReturn,-facebook-hte-BadMemberName,'
+CheckOptions:
+  - key: readability-identifier-naming.ConceptCase
+    value: lower_case
+  - key: readability-identifier-naming.TypedefCase
+    value: lower_case
+  - key: readability-identifier-naming.UnionCase
+    value: lower_case
+  - key: readability-identifier-naming.PrivateMemberCase
+    value: lower_case
+  - key: readability-identifier-naming.ProtectedMemberCase
+    value: lower_case
+  - key: readability-identifier-naming.PrivateMethodCase
+    value: lower_case
+  - key: readability-identifier-naming.ProtectedMethodCase
+    value: lower_case
+  - key: readability-identifier-naming.GlobalFunctionCase
+    value: lower_case
+  - key: readability-identifier-naming.GlobalFunctionIgnoredRegexp
+    value: '^PrintTo$'
+  - key: readability-identifier-naming.ParameterCase
+    value: lower_case
+  - key: readability-identifier-naming.ParameterIgnoredRegexp
+    value: '^(const|default|enum|struct|typedef|union)_$'
 ...

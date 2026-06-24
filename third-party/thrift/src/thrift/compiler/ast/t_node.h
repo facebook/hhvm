@@ -90,7 +90,7 @@ class t_node {
   // t_node is abstract.
   t_node() = default;
 
-  static const std::string& emptyString();
+  static const std::string& empty_string();
 
   template <typename D>
   static std::string unstructured_annotation_or(
@@ -103,12 +103,12 @@ class t_node {
 
   static const std::string& unstructured_annotation_or(
       const std::string* val, const std::string* def) {
-    return val ? *val : (def ? *def : emptyString());
+    return val ? *val : (def ? *def : empty_string());
   }
 
   static const std::string& unstructured_annotation_or(
       const std::string* val, std::string* def) {
-    return val ? *val : (def ? *def : emptyString());
+    return val ? *val : (def ? *def : empty_string());
   }
 
  private:

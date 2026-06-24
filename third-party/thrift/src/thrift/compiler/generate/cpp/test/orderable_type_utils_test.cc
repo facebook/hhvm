@@ -178,7 +178,7 @@ TEST(OrderableTypeUtilsTest, is_orderable_set_template) {
 }
 
 // The orderability should be the same as previous test case
-void checkCustomSetOrderabilityWithUriButPreservedOldBehavior(
+void check_custom_set_orderability_with_uri_but_preserved_old_behavior(
     const t_program& program) {
   EXPECT_FALSE(
       OrderableTypeUtils::is_orderable(
@@ -250,7 +250,7 @@ TEST(
       kHeaderWithUri + kOrderabilityTestProgram,
       parsing_params{},
       sema_params{});
-  checkCustomSetOrderabilityWithUriButPreservedOldBehavior(*program);
+  check_custom_set_orderability_with_uri_but_preserved_old_behavior(*program);
 }
 
 namespace {
@@ -336,7 +336,7 @@ struct TestStructTypedefCustomSetWithAnnotation {
 )";
 } // namespace
 
-void checkGetOrderableCondition(const t_program& program) {
+void check_get_orderable_condition(const t_program& program) {
   EXPECT_EQ(
       OrderableTypeUtils::get_orderable_condition(
           get_structured_named(program, "TestStructTypedefCustomSetWithUri")),
@@ -356,7 +356,7 @@ TEST(OrderableTypeUtilsTest, GetOrderableCondition) {
   source_manager source_mgr;
   std::shared_ptr<const t_program> program = dedent_and_parse_to_program(
       source_mgr, kOrderabilityTestProgram2, parsing_params{}, sema_params{});
-  checkGetOrderableCondition(*program);
+  check_get_orderable_condition(*program);
 }
 
 } // namespace apache::thrift::compiler::cpp2

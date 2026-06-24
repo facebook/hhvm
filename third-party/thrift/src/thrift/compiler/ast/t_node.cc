@@ -142,7 +142,7 @@ t_const& get_or_create_duva_annotation(t_named& node) {
 
 } // namespace
 
-const std::string& t_node::emptyString() {
+const std::string& t_node::empty_string() {
   static const std::string empty;
   return empty;
 }

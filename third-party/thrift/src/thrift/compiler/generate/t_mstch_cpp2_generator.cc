@@ -476,7 +476,7 @@ class cpp2_generator_context {
               nodes.begin(),
               nodes.end(),
               /*edges=*/cpp2::gen_dependency_graph(root, nodes),
-              /*throwOnCycle=*/true);
+              /*throw_on_cycle=*/true);
     }
   }
 

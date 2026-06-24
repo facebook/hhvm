@@ -154,8 +154,8 @@ object resolve_derived_t_type(
       [&](const t_union& union_) -> object {
         return object(proto.create<t_union>(union_));
       },
-      [&](const t_exception& exception_) -> object {
-        return object(proto.create<t_exception>(exception_));
+      [&](const t_exception& exception) -> object {
+        return object(proto.create<t_exception>(exception));
       },
       [&](const t_struct& struct_) -> object {
         // All other t_struct subtypes (t_throws, t_paramlist) should be opaque

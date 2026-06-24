@@ -53,12 +53,12 @@ std::string text::joined() const {
 }
 
 variable_component::variable_component(
-    source_range loc_,
-    std::optional<identifier> qualifier_,
-    identifier property_)
-    : loc(loc_),
-      qualifier(std::move(qualifier_)),
-      property(std::move(property_)) {
+    source_range loc_arg,
+    std::optional<identifier> qualifier_arg,
+    identifier property_arg)
+    : loc(loc_arg),
+      qualifier(std::move(qualifier_arg)),
+      property(std::move(property_arg)) {
   as_string_ = qualifier.has_value()
       ? fmt::format("{}:{}", qualifier->name, property.name)
       : property.name;

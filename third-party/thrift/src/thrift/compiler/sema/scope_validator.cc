@@ -99,7 +99,7 @@ struct allowed_scopes {
 
 } // namespace
 
-template <detail::scope_check_type check_type>
+template <detail::scope_check_type CheckType>
 void detail::validate_annotation_scopes(
     sema_context& ctx, const t_named& node) {
   // Ignore a transitive annotation definition because it is a collection of
@@ -136,13 +136,13 @@ void detail::validate_annotation_scopes(
     }
 
     auto is_valid_scope = false;
-    if constexpr (check_type == detail::scope_check_type::function_parameter) {
+    if constexpr (CheckType == detail::scope_check_type::function_parameter) {
       // Function parameters are modelled in the AST as t_field in a struct for
       // all arguments to a function, but do not accept field-scoped
       // annotations.
       is_valid_scope = allowed.scope_uris.count(kScopeFunctionParameterUri) > 0;
     } else if constexpr (
-        check_type == detail::scope_check_type::thrown_exception) {
+        CheckType == detail::scope_check_type::thrown_exception) {
       // Thrown exceptions are modelled in the AST as t_field in a struct for
       // all exceptions a function might throw, but do not accept field-scoped
       // annotations.

@@ -98,18 +98,18 @@ class node_list_view {
    private:
     itr_type itr_;
 
-#define __FBTHRIFT_NODE_SPAN_ITR_FWD_OP(op)                       \
+#define FBTHRIFT_NODE_SPAN_ITR_FWD_OP(op)                         \
   friend auto operator op(const iterator& a, const iterator& b) { \
     return a.itr_ op b.itr_;                                      \
   }
-    __FBTHRIFT_NODE_SPAN_ITR_FWD_OP(-)
-    __FBTHRIFT_NODE_SPAN_ITR_FWD_OP(==)
-    __FBTHRIFT_NODE_SPAN_ITR_FWD_OP(!=)
-    __FBTHRIFT_NODE_SPAN_ITR_FWD_OP(<)
-    __FBTHRIFT_NODE_SPAN_ITR_FWD_OP(<=)
-    __FBTHRIFT_NODE_SPAN_ITR_FWD_OP(>)
-    __FBTHRIFT_NODE_SPAN_ITR_FWD_OP(>=)
-#undef __FBTHRIFT_NODE_SPAN_ITR_FWD_OP
+    FBTHRIFT_NODE_SPAN_ITR_FWD_OP(-)
+    FBTHRIFT_NODE_SPAN_ITR_FWD_OP(==)
+    FBTHRIFT_NODE_SPAN_ITR_FWD_OP(!=)
+    FBTHRIFT_NODE_SPAN_ITR_FWD_OP(<)
+    FBTHRIFT_NODE_SPAN_ITR_FWD_OP(<=)
+    FBTHRIFT_NODE_SPAN_ITR_FWD_OP(>)
+    FBTHRIFT_NODE_SPAN_ITR_FWD_OP(>=)
+#undef FBTHRIFT_NODE_SPAN_ITR_FWD_OP
   };
 
   constexpr node_list_view() = default;

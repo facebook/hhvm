@@ -38,7 +38,7 @@ namespace apache::thrift::compiler {
 namespace ast_detail {
 
 // Visitation and registration functions for concrete AST nodes.
-#define FBTHRIFT_AST_DETAIL_AST_VISITOR_NODE_T_(name)               \
+#define FBTHRIFT_AST_DETAIL_AST_VISITOR_NODE_T(name)                \
  private:                                                           \
   using name##_type = node_type<t_##name>;                          \
   ast_detail::visitor_list<Args..., name##_type&> name##_visitors_; \
@@ -228,7 +228,7 @@ class basic_ast_visitor {
   }
 
   /** Accepts node: [const] t_program& */
-  FBTHRIFT_AST_DETAIL_AST_VISITOR_NODE_T_(program) {
+  FBTHRIFT_AST_DETAIL_AST_VISITOR_NODE_T(program) {
     begin_visit_and_call_visitors(program_visitors_, node, args...);
     visit_children_ptrs(node.services(), args...); // accept: t_service
     visit_children_ptrs(node.interactions(), args...); // accept: t_interation
@@ -269,7 +269,7 @@ class basic_ast_visitor {
   }
 
   /** Accepts node: [const] t_service& */
-  FBTHRIFT_AST_DETAIL_AST_VISITOR_NODE_T_(service) {
+  FBTHRIFT_AST_DETAIL_AST_VISITOR_NODE_T(service) {
     assert(typeid(node) == typeid(service_type)); // Must actually be a service.
     begin_visit_and_call_visitors(service_visitors_, node, args...);
 
@@ -278,7 +278,7 @@ class basic_ast_visitor {
   }
 
   /** Accepts node: [const] t_interaction& */
-  FBTHRIFT_AST_DETAIL_AST_VISITOR_NODE_T_(interaction) {
+  FBTHRIFT_AST_DETAIL_AST_VISITOR_NODE_T(interaction) {
     begin_visit_and_call_visitors(interaction_visitors_, node, args...);
 
     visit_children(node.functions(), args...); // accept: t_function
@@ -286,7 +286,7 @@ class basic_ast_visitor {
   }
 
   /** Accepts node: [const] t_function& */
-  FBTHRIFT_AST_DETAIL_AST_VISITOR_NODE_T_(function) {
+  FBTHRIFT_AST_DETAIL_AST_VISITOR_NODE_T(function) {
     begin_visit_and_call_visitors(function_visitors_, node, args...);
 
     auto* sink_or_stream = node.sink_or_stream();
@@ -307,7 +307,7 @@ class basic_ast_visitor {
   }
 
   /** Accepts node: [const] t_sink& */
-  FBTHRIFT_AST_DETAIL_AST_VISITOR_NODE_T_(sink) {
+  FBTHRIFT_AST_DETAIL_AST_VISITOR_NODE_T(sink) {
     begin_visit_and_call_visitors(sink_visitors_, node, args...);
 
     if (auto sink_exceptions = node.sink_exceptions()) {
@@ -323,7 +323,7 @@ class basic_ast_visitor {
   }
 
   /** Accepts node: [const] t_stream& */
-  FBTHRIFT_AST_DETAIL_AST_VISITOR_NODE_T_(stream) {
+  FBTHRIFT_AST_DETAIL_AST_VISITOR_NODE_T(stream) {
     begin_visit_and_call_visitors(stream_visitors_, node, args...);
 
     if (auto exceptions = node.exceptions()) {
@@ -336,7 +336,7 @@ class basic_ast_visitor {
   // Types
 
   /** Accepts node: [const] t_struct&  */
-  FBTHRIFT_AST_DETAIL_AST_VISITOR_NODE_T_(struct) {
+  FBTHRIFT_AST_DETAIL_AST_VISITOR_NODE_T(struct) {
     assert(typeid(node) == typeid(t_struct));
     begin_visit_and_call_visitors(struct_visitors_, node, args...);
     visit_children(node.fields(), args...); // accept: t_field
@@ -344,46 +344,46 @@ class basic_ast_visitor {
   }
 
   /** Accepts node: [const] t_union& */
-  FBTHRIFT_AST_DETAIL_AST_VISITOR_NODE_T_(union) {
+  FBTHRIFT_AST_DETAIL_AST_VISITOR_NODE_T(union) {
     begin_visit_and_call_visitors(union_visitors_, node, args...);
     visit_children(node.fields(), args...); // accept: t_field
     end_visit(node, args...);
   }
 
   /** Accepts node: [const] t_exception& */
-  FBTHRIFT_AST_DETAIL_AST_VISITOR_NODE_T_(exception) {
+  FBTHRIFT_AST_DETAIL_AST_VISITOR_NODE_T(exception) {
     begin_visit_and_call_visitors(exception_visitors_, node, args...);
     visit_children(node.fields(), args...); // accept: t_field
     end_visit(node, args...);
   }
 
   /** Accepts node: [const] t_field& */
-  FBTHRIFT_AST_DETAIL_AST_VISITOR_NODE_T_(field) {
+  FBTHRIFT_AST_DETAIL_AST_VISITOR_NODE_T(field) {
     begin_visit_and_call_visitors(field_visitors_, node, args...);
     end_visit(node, args...);
   }
 
   /** Accepts node: [const] t_enum& */
-  FBTHRIFT_AST_DETAIL_AST_VISITOR_NODE_T_(enum) {
+  FBTHRIFT_AST_DETAIL_AST_VISITOR_NODE_T(enum) {
     begin_visit_and_call_visitors(enum_visitors_, node, args...);
     visit_children(node.values(), args...); // accept: t_enum_value
     end_visit(node, args...);
   }
 
   /** Accepts node: [const] t_enum_value */
-  FBTHRIFT_AST_DETAIL_AST_VISITOR_NODE_T_(enum_value) {
+  FBTHRIFT_AST_DETAIL_AST_VISITOR_NODE_T(enum_value) {
     begin_visit_and_call_visitors(enum_value_visitors_, node, args...);
     end_visit(node, args...);
   }
 
   /** Accepts node: [const] t_const& */
-  FBTHRIFT_AST_DETAIL_AST_VISITOR_NODE_T_(const) {
+  FBTHRIFT_AST_DETAIL_AST_VISITOR_NODE_T(const) {
     begin_visit_and_call_visitors(const_visitors_, node, args...);
     end_visit(node, args...);
   }
 
   /** Accepts node: [const] t_typedef */
-  FBTHRIFT_AST_DETAIL_AST_VISITOR_NODE_T_(typedef) {
+  FBTHRIFT_AST_DETAIL_AST_VISITOR_NODE_T(typedef) {
     begin_visit_and_call_visitors(typedef_visitors_, node, args...);
     end_visit(node, args...);
   }
@@ -419,19 +419,19 @@ class basic_ast_visitor {
   // Container types.
 
   /** Accepts node: [const] t_set& */
-  FBTHRIFT_AST_DETAIL_AST_VISITOR_NODE_T_(set) {
+  FBTHRIFT_AST_DETAIL_AST_VISITOR_NODE_T(set) {
     begin_visit_and_call_visitors(set_visitors_, node, args...);
     end_visit(node, args...);
   }
 
   /** Accepts node: [const] t_list& */
-  FBTHRIFT_AST_DETAIL_AST_VISITOR_NODE_T_(list) {
+  FBTHRIFT_AST_DETAIL_AST_VISITOR_NODE_T(list) {
     begin_visit_and_call_visitors(list_visitors_, node, args...);
     end_visit(node, args...);
   }
 
   /** Accepts node: [const] t_map& */
-  FBTHRIFT_AST_DETAIL_AST_VISITOR_NODE_T_(map) {
+  FBTHRIFT_AST_DETAIL_AST_VISITOR_NODE_T(map) {
     begin_visit_and_call_visitors(map_visitors_, node, args...);
     end_visit(node, args...);
   }

@@ -131,7 +131,7 @@ class t_ast_generator : public t_generator {
 
  private:
   template <typename Id>
-  static Id positionToId(size_t pos) {
+  static Id position_to_id(size_t pos) {
     return Id{int64_t(pos + 1)};
   }
 
@@ -173,7 +173,7 @@ type::Schema t_ast_generator::gen_schema(
     }
 
     auto& values = ast.values().value();
-    auto ret = positionToId<schematizer::value_id>(values.size());
+    auto ret = position_to_id<schematizer::value_id>(values.size());
     values.push_back(std::move(value));
     return ret;
   };
@@ -276,7 +276,7 @@ type::Schema t_ast_generator::gen_schema(
     auto program_id = schema_opts.use_hash
         ? apache::thrift::type::ProgramId{schema_source.identify_program(
               program)}
-        : positionToId<apache::thrift::type::ProgramId>(pos);
+        : position_to_id<apache::thrift::type::ProgramId>(pos);
     program_index[&program] = program_id;
     program_pos_index[program_id] = pos;
     programs.emplace_back(schema_defs.gen_schema(program));
@@ -336,7 +336,7 @@ type::Schema t_ast_generator::gen_schema(
     auto& definitions = *ast.definitions();
     auto pos = definitions.size();
     definition_index[&node] =
-        positionToId<apache::thrift::type::DefinitionId>(pos);
+        position_to_id<apache::thrift::type::DefinitionId>(pos);
     auto& def = kind_ref_fn(definitions.emplace_back()).ensure();
     def = schema_defs.gen_schema(node);
     if (schema_opts.include_source_ranges) {

@@ -64,7 +64,7 @@ TEST(SchematizerTest, wrap_with_protocol_value) {
 
 enum class MyEnum : std::uint16_t { Foo = 1, Bar = 2 };
 
-const protocol::Value& mapAtString(
+const protocol::Value& map_at_string(
     const protocol::Value& value, std::string_view key) {
   for (const auto& [map_key, map_value] : value.as_map()) {
     if (map_key.is_string() && map_key.as_string() == key) {
@@ -74,7 +74,7 @@ const protocol::Value& mapAtString(
   throw std::out_of_range(std::string{key});
 }
 
-const protocol::Value& mapAtInt(const protocol::Value& value, int64_t key) {
+const protocol::Value& map_at_int(const protocol::Value& value, int64_t key) {
   for (const auto& [map_key, map_value] : value.as_map()) {
     if ((map_key.is_i16() && map_key.as_i16() == key) ||
         (map_key.is_i32() && map_key.as_i32() == key) ||
@@ -86,28 +86,28 @@ const protocol::Value& mapAtInt(const protocol::Value& value, int64_t key) {
 }
 
 template <typename T>
-void expectWrappedValue(
-    const protocol::Value& wrappedValue,
+void expect_wrapped_value(
+    const protocol::Value& wrapped_value,
     std::string_view label,
-    T literalValue) {
+    T literal_value) {
   if (label == "i16Value") {
-    EXPECT_TRUE(wrappedValue.is_i16());
-    EXPECT_EQ(literalValue, wrappedValue.as_i16());
+    EXPECT_TRUE(wrapped_value.is_i16());
+    EXPECT_EQ(literal_value, wrapped_value.as_i16());
   } else if (label == "i32Value") {
-    EXPECT_TRUE(wrappedValue.is_i32());
-    EXPECT_EQ(literalValue, wrappedValue.as_i32());
+    EXPECT_TRUE(wrapped_value.is_i32());
+    EXPECT_EQ(literal_value, wrapped_value.as_i32());
   } else if (label == "i64Value") {
-    EXPECT_TRUE(wrappedValue.is_i64());
-    EXPECT_EQ(literalValue, wrappedValue.as_i64());
+    EXPECT_TRUE(wrapped_value.is_i64());
+    EXPECT_EQ(literal_value, wrapped_value.as_i64());
   } else if (label == "floatValue") {
-    EXPECT_TRUE(wrappedValue.is_float());
-    EXPECT_FLOAT_EQ(literalValue, wrappedValue.as_float());
+    EXPECT_TRUE(wrapped_value.is_float());
+    EXPECT_FLOAT_EQ(literal_value, wrapped_value.as_float());
   } else if (label == "doubleValue") {
-    EXPECT_TRUE(wrappedValue.is_double());
-    EXPECT_EQ(literalValue, wrappedValue.as_double());
+    EXPECT_TRUE(wrapped_value.is_double());
+    EXPECT_EQ(literal_value, wrapped_value.as_double());
   } else if (label == "boolValue") {
-    EXPECT_TRUE(wrappedValue.is_bool());
-    EXPECT_EQ(literalValue, wrappedValue.as_bool());
+    EXPECT_TRUE(wrapped_value.is_bool());
+    EXPECT_EQ(literal_value, wrapped_value.as_bool());
   } else {
     throw std::runtime_error("Unimplemented comparison");
   }
@@ -123,12 +123,14 @@ TEST(SchematizerTest, wrap_with_protocol_passthrough) {
   // Without type mapping, integers will be mapped to i64.
   auto value_no_type_mapping =
       protocol_value_builder::as_value_type().wrap(*strct);
-  expectWrappedValue(mapAtString(value_no_type_mapping, "foo"), "i64Value", 1);
-  expectWrappedValue(mapAtString(value_no_type_mapping, "bar"), "i64Value", 2);
-  expectWrappedValue(
-      mapAtString(value_no_type_mapping, "baz"), "doubleValue", 3.14);
-  expectWrappedValue(
-      mapAtString(value_no_type_mapping, "qux"), "doubleValue", 4.2);
+  expect_wrapped_value(
+      map_at_string(value_no_type_mapping, "foo"), "i64Value", 1);
+  expect_wrapped_value(
+      map_at_string(value_no_type_mapping, "bar"), "i64Value", 2);
+  expect_wrapped_value(
+      map_at_string(value_no_type_mapping, "baz"), "doubleValue", 3.14);
+  expect_wrapped_value(
+      map_at_string(value_no_type_mapping, "qux"), "doubleValue", 4.2);
 }
 
 std::unique_ptr<t_struct> make_foo_bar(const t_program* program) {
@@ -162,12 +164,14 @@ TEST(SchematizerTest, wrap_with_protocol_with_struct_ty) {
   auto foo_bar_ty = make_foo_bar(program.get());
   auto value_no_type_mapping =
       protocol_value_builder{*foo_bar_ty.get()}.wrap(*strct);
-  expectWrappedValue(mapAtString(value_no_type_mapping, "foo"), "i32Value", 1);
-  expectWrappedValue(mapAtString(value_no_type_mapping, "bar"), "i16Value", 2);
-  expectWrappedValue(
-      mapAtString(value_no_type_mapping, "baz"), "floatValue", 3.14);
-  expectWrappedValue(
-      mapAtString(value_no_type_mapping, "qux"), "doubleValue", 4.2);
+  expect_wrapped_value(
+      map_at_string(value_no_type_mapping, "foo"), "i32Value", 1);
+  expect_wrapped_value(
+      map_at_string(value_no_type_mapping, "bar"), "i16Value", 2);
+  expect_wrapped_value(
+      map_at_string(value_no_type_mapping, "baz"), "floatValue", 3.14);
+  expect_wrapped_value(
+      map_at_string(value_no_type_mapping, "qux"), "doubleValue", 4.2);
 }
 
 std::unique_ptr<t_struct> make_foo_enum(
@@ -189,7 +193,8 @@ TEST(SchematizerTest, wrap_with_protocol_with_enum_ty) {
   auto foo_enum_ty = make_foo_enum(program.get(), my_enum.get());
   auto value_no_type_mapping =
       protocol_value_builder{*foo_enum_ty.get()}.wrap(*strct);
-  expectWrappedValue(mapAtString(value_no_type_mapping, "foo"), "i32Value", 1);
+  expect_wrapped_value(
+      map_at_string(value_no_type_mapping, "foo"), "i32Value", 1);
 }
 
 std::unique_ptr<t_list> make_foo_bar_list(const t_struct* element) {
@@ -217,20 +222,20 @@ TEST(SchematizerTest, wrap_with_protocol_list) {
 
   auto value_no_type_mapping =
       protocol_value_builder{*struct_with_list_ty}.wrap(*foos);
-  const auto& foos_val = mapAtString(value_no_type_mapping, "foos");
+  const auto& foos_val = map_at_string(value_no_type_mapping, "foos");
   EXPECT_TRUE(foos_val.is_list());
   const auto& foos_list = foos_val.as_list();
   EXPECT_EQ(foos_list.size(), 2);
 
   {
     const auto& li_val = foos_list.at(0);
-    expectWrappedValue(mapAtString(li_val, "foo"), "i32Value", 1);
-    expectWrappedValue(mapAtString(li_val, "bar"), "i16Value", 2);
+    expect_wrapped_value(map_at_string(li_val, "foo"), "i32Value", 1);
+    expect_wrapped_value(map_at_string(li_val, "bar"), "i16Value", 2);
   }
   {
     const auto& li_val = foos_list.at(1);
-    expectWrappedValue(mapAtString(li_val, "foo"), "i32Value", 1);
-    expectWrappedValue(mapAtString(li_val, "bar"), "i16Value", 2);
+    expect_wrapped_value(map_at_string(li_val, "foo"), "i32Value", 1);
+    expect_wrapped_value(map_at_string(li_val, "bar"), "i16Value", 2);
   }
 }
 
@@ -258,18 +263,18 @@ TEST(SchematizerTest, wrap_with_protocol_set) {
 
   auto value_no_type_mapping =
       protocol_value_builder{*struct_with_set_ty}.wrap(*foos);
-  const auto& foos_val = mapAtString(value_no_type_mapping, "foos");
+  const auto& foos_val = map_at_string(value_no_type_mapping, "foos");
   EXPECT_TRUE(foos_val.is_set());
   const auto& foos_set = foos_val.as_set();
   EXPECT_EQ(foos_set.size(), 2);
   bool saw_first = false;
   bool saw_second = false;
   for (const auto& set_val : foos_set) {
-    if (mapAtString(set_val, "foo").as_i32() == 1) {
-      expectWrappedValue(mapAtString(set_val, "bar"), "i16Value", 2);
+    if (map_at_string(set_val, "foo").as_i32() == 1) {
+      expect_wrapped_value(map_at_string(set_val, "bar"), "i16Value", 2);
       saw_first = true;
-    } else if (mapAtString(set_val, "foo").as_i32() == 4) {
-      expectWrappedValue(mapAtString(set_val, "bar"), "i16Value", 5);
+    } else if (map_at_string(set_val, "foo").as_i32() == 4) {
+      expect_wrapped_value(map_at_string(set_val, "bar"), "i16Value", 5);
       saw_second = true;
     }
   }
@@ -291,8 +296,10 @@ TEST(SchematizerTest, wrap_with_protocol_typedef) {
 
   auto value_no_type_mapping =
       protocol_value_builder{*foo_bar_typedef}.wrap(*strct);
-  expectWrappedValue(mapAtString(value_no_type_mapping, "foo"), "i32Value", 1);
-  expectWrappedValue(mapAtString(value_no_type_mapping, "bar"), "i16Value", 2);
+  expect_wrapped_value(
+      map_at_string(value_no_type_mapping, "foo"), "i32Value", 1);
+  expect_wrapped_value(
+      map_at_string(value_no_type_mapping, "bar"), "i16Value", 2);
 }
 
 std::unique_ptr<t_struct> make_foo_map(
@@ -329,11 +336,12 @@ TEST(SchematizerTest, wrap_with_protocol_map) {
   strct->add_map(val("foo_map"), std::move(submap));
 
   auto value_no_type_mapping = protocol_value_builder{*foo_map_ty}.wrap(*strct);
-  expectWrappedValue(mapAtString(value_no_type_mapping, "foo"), "i32Value", 1);
+  expect_wrapped_value(
+      map_at_string(value_no_type_mapping, "foo"), "i32Value", 1);
 
-  const auto& foo_map_val = mapAtString(value_no_type_mapping, "foo_map");
-  expectWrappedValue(mapAtInt(foo_map_val, 444), "i32Value", 555);
-  expectWrappedValue(mapAtInt(foo_map_val, 777), "i32Value", 888);
+  const auto& foo_map_val = map_at_string(value_no_type_mapping, "foo_map");
+  expect_wrapped_value(map_at_int(foo_map_val, 444), "i32Value", 555);
+  expect_wrapped_value(map_at_int(foo_map_val, 777), "i32Value", 888);
 }
 
 constexpr auto UTILITY_CLASSES = {

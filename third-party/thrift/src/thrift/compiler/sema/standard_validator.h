@@ -61,7 +61,7 @@ enum scope_check_type {
   thrown_exception,
 };
 
-template <scope_check_type check_type = scope_check_type::default_scopes>
+template <scope_check_type CheckType = scope_check_type::default_scopes>
 void validate_annotation_scopes(sema_context& ctx, const t_named& node);
 
 } // namespace detail

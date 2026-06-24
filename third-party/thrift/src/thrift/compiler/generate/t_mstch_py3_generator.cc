@@ -327,7 +327,7 @@ class py3_generator_context {
       if (auto* annot = field.find_structured_annotation_or_null(kCppTypeUri)) {
         field_cpp_type_annotations_[&field] = annot;
       }
-      visit_type(visit_node, /*fromTypeDef=*/false, /*field=*/&field);
+      visit_type(visit_node, /*from_type_def=*/false, /*field=*/&field);
       switch (gen::cpp::find_ref_type(field)) {
         case gen::cpp::reference_type::unique: {
           field_cpp_kinds_[&field] = field_cpp_kind::unique_ptr;
@@ -375,14 +375,14 @@ class py3_generator_context {
     visitor.add_const_visitor(
         [this](const context& ctx, const t_const& constant) {
           if (&ctx.program() == root_program_) {
-            visit_type(&constant.type_ref().deref(), /*fromTypeDef=*/false);
+            visit_type(&constant.type_ref().deref(), /*from_type_def=*/false);
           }
         });
     visitor.add_typedef_visitor(
         [this](const context& ctx, const t_typedef& td) {
           if (&ctx.program() == root_program_ && !is_hidden(td) &&
               !is_hidden(*td.get_true_type())) {
-            visit_type(&td, /*fromTypeDef=*/true);
+            visit_type(&td, /*from_type_def=*/true);
           }
         });
   }
@@ -438,7 +438,7 @@ class py3_generator_context {
 
   std::string visit_type(
       const t_type* orig_type,
-      bool fromTypeDef,
+      bool from_type_def,
       const t_field* field = nullptr);
 
   void add_typedef_namespace(const t_type* type) {
@@ -460,7 +460,7 @@ class py3_generator_context {
 };
 
 std::string py3_generator_context::visit_type(
-    const t_type* orig_type, bool fromTypeDef, const t_field* field) {
+    const t_type* orig_type, bool from_type_def, const t_field* field) {
   bool hasPy3EnableCppAdapterAnnot =
       orig_type->has_structured_annotation(kPythonPy3EnableCppAdapterUri);
   auto trueType = orig_type->get_true_type();
@@ -469,22 +469,22 @@ std::string py3_generator_context::visit_type(
   const std::string& flatName = props.flat_name();
   // Import all types either beneath a typedef, even if the current type is
   // not directly a typedef
-  fromTypeDef = fromTypeDef || orig_type->is<t_typedef>();
+  from_type_def = from_type_def || orig_type->is<t_typedef>();
   if (flatName.empty()) {
     // Recursive calls pass nullptr for field — child types should not
     // inherit the field's @cpp.Type annotation.
     std::string extra;
     if (const t_list* list = trueType->try_as<t_list>()) {
       extra = fmt::format(
-          "List__{}", visit_type(&list->elem_type().deref(), fromTypeDef));
+          "List__{}", visit_type(&list->elem_type().deref(), from_type_def));
     } else if (const t_set* set = trueType->try_as<t_set>()) {
       extra = fmt::format(
-          "Set__{}", visit_type(&set->elem_type().deref(), fromTypeDef));
+          "Set__{}", visit_type(&set->elem_type().deref(), from_type_def));
     } else if (const t_map* map = trueType->try_as<t_map>()) {
       extra = fmt::format(
           "Map__{}_{}",
-          visit_type(&map->key_type().deref(), fromTypeDef),
-          visit_type(&map->val_type().deref(), fromTypeDef));
+          visit_type(&map->key_type().deref(), from_type_def),
+          visit_type(&map->val_type().deref(), from_type_def));
     } else if (trueType->is_binary()) {
       extra = "binary";
     } else {
@@ -505,7 +505,7 @@ std::string py3_generator_context::visit_type(
   // If this type or a parent of this type is a typedef,
   // then add the namespace of the *resolved* type:
   // (parent matters if you have eg. typedef list<list<type>>)
-  if (fromTypeDef) {
+  if (from_type_def) {
     add_typedef_namespace(trueType);
   }
   // For shared types (primitives, structs, enums) with field-level @cpp.Type,
@@ -632,18 +632,18 @@ bool validate_union(sema_context& ctx, const t_union& s) {
 
 void py3_generator_context::visit_function(const t_function& function) {
   for (const auto& field : function.params().fields()) {
-    visit_type(&field.type().deref(), /*fromTypeDef=*/false);
+    visit_type(&field.type().deref(), /*from_type_def=*/false);
   }
   const t_stream* stream = function.stream();
   if (const t_throws* exceptions = stream ? stream->exceptions() : nullptr) {
     for (const t_field& field : exceptions->fields()) {
       const t_type* exType = &field.type().deref();
       stream_exceptions_.emplace(
-          visit_type(&field.type().deref(), /*fromTypeDef=*/false), exType);
+          visit_type(&field.type().deref(), /*from_type_def=*/false), exType);
     }
   }
   for (const t_field& field : get_elems(function.exceptions())) {
-    visit_type(&field.type().deref(), /*fromTypeDef=*/false);
+    visit_type(&field.type().deref(), /*from_type_def=*/false);
   }
 
   std::string return_type_name;
@@ -653,9 +653,9 @@ void py3_generator_context::visit_function(const t_function& function) {
     if (!function.has_void_initial_response()) {
       return_type_name = fmt::format(
           "ResponseAndStream__{}_",
-          visit_type(&function.return_type().deref(), /*fromTypeDef=*/false));
+          visit_type(&function.return_type().deref(), /*from_type_def=*/false));
     }
-    std::string elem_type_name = visit_type(elem_type, /*fromTypeDef=*/false);
+    std::string elem_type_name = visit_type(elem_type, /*from_type_def=*/false);
     return_type_name += elem_type_name;
     stream_types_.emplace(elem_type_name, elem_type);
     if (seen_type_names_.insert(return_type_name).second &&
@@ -666,7 +666,7 @@ void py3_generator_context::visit_function(const t_function& function) {
     const t_type_ref& type = function.is_interaction_constructor()
         ? function.interaction()
         : function.return_type();
-    return_type_name = visit_type(&type.deref(), /*fromTypeDef=*/false);
+    return_type_name = visit_type(&type.deref(), /*from_type_def=*/false);
   }
   add_function_by_unique_return_type(function, std::move(return_type_name));
 }
@@ -676,7 +676,7 @@ class t_mstch_py3_generator : public t_whisker_generator {
   using t_whisker_generator::t_whisker_generator;
 
   void generate_program() override {
-    generateRootPath_ = package_to_path();
+    generate_root_path_ = package_to_path();
     out_dir_base_ = "gen-py3";
     if (std::string_view include_prefix =
             get_compiler_option("include_prefix").value_or("");
@@ -714,7 +714,7 @@ class t_mstch_py3_generator : public t_whisker_generator {
   void generate_services();
   std::filesystem::path package_to_path();
 
-  std::filesystem::path generateRootPath_;
+  std::filesystem::path generate_root_path_;
   FileType file_type_ = FileType::NotTypesFile;
   std::unique_ptr<py3_generator_context> context_;
 
@@ -1429,7 +1429,7 @@ py3_generator_context::get_cached_type_props(
 }
 
 void t_mstch_py3_generator::generate_init_files() {
-  std::filesystem::path p = generateRootPath_;
+  std::filesystem::path p = generate_root_path_;
   while (!p.empty()) {
     t_whisker_generator::render_to_file(
         /*output_file=*/p / "__init__.py",
@@ -1511,37 +1511,37 @@ void t_mstch_py3_generator::generate_types() {
   };
 
   generate_whisker_file(
-      "cbindings.pxd", FileType::CBindingsFile, generateRootPath_);
+      "cbindings.pxd", FileType::CBindingsFile, generate_root_path_);
 
   if (has_compiler_option("enable_container_pickling_DO_NOT_USE")) {
     generate_whisker_file(
-        "__init__.py", FileType::TypesFile, generateRootPath_);
+        "__init__.py", FileType::TypesFile, generate_root_path_);
   }
   if (has_compiler_option("inplace_migrate")) {
     generate_whisker_file(
         "types_inplace_FBTHRIFT_ONLY_DO_NOT_USE.py",
         FileType::TypesFile,
-        generateRootPath_);
+        generate_root_path_);
   }
   for (const auto& file : converterFiles) {
-    generate_whisker_file(file, FileType::NotTypesFile, generateRootPath_);
+    generate_whisker_file(file, FileType::NotTypesFile, generate_root_path_);
   }
   // - if auto_migrate is present, generate types.pxd, and types.py
   // - else, just generate normal cython files
   for (const auto& file : autoMigrateFilesWithTypeContext) {
-    generate_whisker_file(file, FileType::TypesFile, generateRootPath_);
+    generate_whisker_file(file, FileType::TypesFile, generate_root_path_);
   }
   for (const auto& file : autoMigrateFilesNoTypeContext) {
-    generate_whisker_file(file, FileType::NotTypesFile, generateRootPath_);
+    generate_whisker_file(file, FileType::NotTypesFile, generate_root_path_);
   }
   for (const auto& file : cythonFilesWithTypeContext) {
-    generate_whisker_file(file, FileType::TypesFile, generateRootPath_);
+    generate_whisker_file(file, FileType::TypesFile, generate_root_path_);
   }
   for (const auto& file : cppFilesWithTypeContext) {
     generate_whisker_file(file, FileType::TypesFile);
   }
   for (const auto& file : cythonFilesNoTypeContext) {
-    generate_whisker_file(file, FileType::NotTypesFile, generateRootPath_);
+    generate_whisker_file(file, FileType::NotTypesFile, generate_root_path_);
   }
   for (const auto& file : cppFilesWithNoTypeContext) {
     generate_whisker_file(file, FileType::NotTypesFile);
@@ -1591,16 +1591,16 @@ void t_mstch_py3_generator::generate_services() {
   // - if auto_migrate isn't present, just generate all the normal files
 
   for (const auto& file : pythonFiles) {
-    generate_whisker_file(file, FileType::NotTypesFile, generateRootPath_);
+    generate_whisker_file(file, FileType::NotTypesFile, generate_root_path_);
   }
   for (const auto& file : normalCythonFiles) {
-    generate_whisker_file(file, FileType::NotTypesFile, generateRootPath_);
+    generate_whisker_file(file, FileType::NotTypesFile, generate_root_path_);
   }
   for (const auto& file : cppFiles) {
     generate_whisker_file(file, FileType::NotTypesFile);
   }
   for (const auto& file : cythonFiles) {
-    generate_whisker_file(file, FileType::NotTypesFile, generateRootPath_);
+    generate_whisker_file(file, FileType::NotTypesFile, generate_root_path_);
   }
 }
 

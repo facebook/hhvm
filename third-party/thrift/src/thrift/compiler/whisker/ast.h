@@ -197,9 +197,9 @@ struct variable_component {
 
   // Explicit constructor to ensure string representation is initialized
   variable_component(
-      source_range loc,
-      std::optional<identifier> qualifier,
-      identifier property);
+      source_range loc_arg,
+      std::optional<identifier> qualifier_arg,
+      identifier property_arg);
 
   /**
    * Determines if two variable components are syntactically equivalent,

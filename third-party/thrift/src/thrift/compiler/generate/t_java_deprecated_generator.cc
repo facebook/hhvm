@@ -1057,7 +1057,7 @@ void t_java_deprecated_generator::generate_java_constructor_using_builder(
     const t_structured* tstruct,
     const vector<const t_field*>& fields,
     uint32_t bitset_size,
-    bool useDefaultConstructor) {
+    bool use_default_constructor) {
   vector<const t_field*>::const_iterator m_iter;
 
   // BEGIN Create inner Builder class
@@ -1078,7 +1078,7 @@ void t_java_deprecated_generator::generate_java_constructor_using_builder(
 
   // - Define Builder constructor
   indent(out) << "public Builder() {" << endl;
-  if (!useDefaultConstructor) {
+  if (!use_default_constructor) {
     for (m_iter = fields.begin(); m_iter != fields.end(); ++m_iter) {
       const t_type* t = (*m_iter)->type()->get_true_type();
       if ((*m_iter)->default_value() != nullptr) {
@@ -1116,7 +1116,7 @@ void t_java_deprecated_generator::generate_java_constructor_using_builder(
   // - Define build() method
   indent(out) << "public " << tstruct->name() << " build() {" << endl;
   indent_up();
-  if (useDefaultConstructor) {
+  if (use_default_constructor) {
     indent(out) << tstruct->name() << " result = new " << tstruct->name()
                 << "();" << endl;
 

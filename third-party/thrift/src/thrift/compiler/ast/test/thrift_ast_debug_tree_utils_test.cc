@@ -54,7 +54,7 @@ constexpr auto kTestDataHeader =
 )";
 
 void maybeUpdateTestData(
-    std::string_view variableName, std::string_view content) {
+    std::string_view variable_name, std::string_view content) {
   if (FLAGS_output_test_data_path.empty()) {
     return;
   }
@@ -65,7 +65,7 @@ void maybeUpdateTestData(
     return fout;
   });
 
-  fout << "constexpr auto " << variableName << " = R\"(";
+  fout << "constexpr auto " << variable_name << " = R\"(";
   fout << content;
   fout << ")\";" << std::endl;
 }
@@ -144,10 +144,11 @@ std::string normalizeMemoryAddresses(const std::string& input) {
   return result;
 }
 
-std::string toNormalizedDebugTreeString(const t_program_bundle& programBundle) {
+std::string toNormalizedDebugTreeString(
+    const t_program_bundle& program_bundle) {
   return normalizeMemoryAddresses(
       apache::thrift::tree_printer::to_string(
-          ThriftAstDebugTreeUtils::createTreeForProgramBundle(programBundle)));
+          ThriftAstDebugTreeUtils::createTreeForProgramBundle(program_bundle)));
 }
 
 } // namespace

@@ -245,7 +245,7 @@ std::vector<T> topological_sort(
     ForwardIt begin,
     ForwardIt end,
     const Edges& edges,
-    bool throwOnCycle = false) {
+    bool throw_on_cycle = false) {
   struct iter_state {
     T node;
     std::vector<T> edges;
@@ -288,7 +288,7 @@ std::vector<T> topological_sort(
         st.emplace(*s.pos, edges.at(*s.pos));
         in_stack.insert(*s.pos);
         visited.insert(*s.pos);
-      } else if (in_stack.count(*s.pos) && throwOnCycle) {
+      } else if (in_stack.count(*s.pos) && throw_on_cycle) {
         T start = *s.pos;
         std::vector<std::string> cycle{detail::stringify(start)};
         while (st.top().node != start) {

@@ -29,7 +29,7 @@ class ThriftAstDebugTreeUtils final {
   ThriftAstDebugTreeUtils() = delete;
 
   static apache::thrift::tree_printer::scope createTreeForProgramBundle(
-      const t_program_bundle& programBundle);
+      const t_program_bundle& program_bundle);
 };
 
 } // namespace apache::thrift::compiler

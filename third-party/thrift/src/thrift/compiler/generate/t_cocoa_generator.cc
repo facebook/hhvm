@@ -167,33 +167,33 @@ class t_cocoa_generator : public t_concat_generator {
    */
 
   void generate_deserialize_field(
-      std::ofstream& out, const t_field* tfield, const std::string& fieldName);
+      std::ofstream& out, const t_field* tfield, const std::string& field_name);
 
   void generate_deserialize_struct(
-      std::ofstream& out, const t_type* tstruct, const std::string& fieldName);
+      std::ofstream& out, const t_type* tstruct, const std::string& field_name);
 
   void generate_deserialize_container(
-      std::ofstream& out, const t_type* ttype, const std::string& fieldName);
+      std::ofstream& out, const t_type* ttype, const std::string& field_name);
 
   void generate_deserialize_set_element(
-      std::ofstream& out, const t_set* tset, const std::string& fieldName);
+      std::ofstream& out, const t_set* tset, const std::string& field_name);
 
   void generate_deserialize_map_element(
-      std::ofstream& out, const t_map* tmap, const std::string& fieldName);
+      std::ofstream& out, const t_map* tmap, const std::string& field_name);
 
   void generate_deserialize_list_element(
-      std::ofstream& out, const t_list* tlist, const std::string& fieldName);
+      std::ofstream& out, const t_list* tlist, const std::string& field_name);
 
   void generate_serialize_field(
-      std::ofstream& out, const t_field* tfield, const std::string& fieldName);
+      std::ofstream& out, const t_field* tfield, const std::string& field_name);
 
   void generate_serialize_struct(
       std::ofstream& out,
       const t_struct* tstruct,
-      const std::string& fieldName);
+      const std::string& field_name);
 
   void generate_serialize_container(
-      std::ofstream& out, const t_type* ttype, const std::string& fieldName);
+      std::ofstream& out, const t_type* ttype, const std::string& field_name);
 
   void generate_serialize_map_element(
       std::ofstream& out,
@@ -208,7 +208,7 @@ class t_cocoa_generator : public t_concat_generator {
       std::ofstream& out,
       const t_list* tlist,
       const std::string& index,
-      const std::string& listName);
+      const std::string& list_name);
 
   /**
    * Helper rendering functions
@@ -232,10 +232,10 @@ class t_cocoa_generator : public t_concat_generator {
   std::string argument_list(const t_paramlist& tparamlist);
   std::string type_to_enum(const t_type* ttype);
   std::string call_field_setter(
-      const t_field* tfield, const std::string& fieldName);
-  std::string containerize(const t_type* ttype, const std::string& fieldName);
+      const t_field* tfield, const std::string& field_name);
+  std::string containerize(const t_type* ttype, const std::string& field_name);
   std::string decontainerize(
-      const t_field* tfield, const std::string& fieldName);
+      const t_field* tfield, const std::string& field_name);
   std::string get_cocoa_property_name(const t_field* tfield);
 
   bool type_can_be_null(const t_type* ttype) {
@@ -2168,7 +2168,7 @@ void t_cocoa_generator::generate_cocoa_service_server_implementation(
  * @param fieldName The variable name for this field
  */
 void t_cocoa_generator::generate_deserialize_field(
-    std::ofstream& out, const t_field* tfield, const std::string& fieldName) {
+    std::ofstream& out, const t_field* tfield, const std::string& field_name) {
   const t_type* type = tfield->type()->get_true_type();
 
   if (type->is_void()) {
@@ -2177,11 +2177,11 @@ void t_cocoa_generator::generate_deserialize_field(
   }
 
   if (type->is<t_structured>()) {
-    generate_deserialize_struct(out, type, fieldName);
+    generate_deserialize_struct(out, type, field_name);
   } else if (type->is<t_container>()) {
-    generate_deserialize_container(out, type, fieldName);
+    generate_deserialize_container(out, type, field_name);
   } else if (type->is<t_primitive_type>() || type->is<t_enum>()) {
-    indent(out) << type_name(type) << " " << fieldName << " = [inProtocol ";
+    indent(out) << type_name(type) << " " << field_name << " = [inProtocol ";
 
     if (const auto* primitive = type->try_as<t_primitive_type>()) {
       switch (primitive->primitive_type()) {
@@ -2235,17 +2235,17 @@ void t_cocoa_generator::generate_deserialize_field(
  * read:
  */
 void t_cocoa_generator::generate_deserialize_struct(
-    std::ofstream& out, const t_type* tstruct, const std::string& fieldName) {
-  indent(out) << type_name(tstruct) << fieldName << " = [["
+    std::ofstream& out, const t_type* tstruct, const std::string& field_name) {
+  indent(out) << type_name(tstruct) << field_name << " = [["
               << type_name(tstruct, true) << " alloc] init];" << std::endl;
-  indent(out) << "[" << fieldName << " read: inProtocol];" << std::endl;
+  indent(out) << "[" << field_name << " read: inProtocol];" << std::endl;
 }
 
 /**
  * Deserializes a container by reading its size and then iterating
  */
 void t_cocoa_generator::generate_deserialize_container(
-    std::ofstream& out, const t_type* ttype, const std::string& fieldName) {
+    std::ofstream& out, const t_type* ttype, const std::string& field_name) {
   std::string size = tmp("_size");
   indent(out) << "int " << size << ";" << std::endl;
 
@@ -2254,19 +2254,19 @@ void t_cocoa_generator::generate_deserialize_container(
     indent(out) << "[inProtocol readMapBeginReturningKeyType: NULL valueType: "
                    "NULL size: &"
                 << size << "];" << std::endl;
-    indent(out) << "NSMutableDictionary * " << fieldName
+    indent(out) << "NSMutableDictionary * " << field_name
                 << " = [[NSMutableDictionary alloc] initWithCapacity: " << size
                 << "];" << std::endl;
   } else if (ttype->is<t_set>()) {
     indent(out) << "[inProtocol readSetBeginReturningElementType: NULL size: &"
                 << size << "];" << std::endl;
-    indent(out) << "NSMutableSet * " << fieldName
+    indent(out) << "NSMutableSet * " << field_name
                 << " = [[NSMutableSet alloc] initWithCapacity: " << size << "];"
                 << std::endl;
   } else if (ttype->is<t_list>()) {
     indent(out) << "[inProtocol readListBeginReturningElementType: NULL size: &"
                 << size << "];" << std::endl;
-    indent(out) << "NSMutableArray * " << fieldName
+    indent(out) << "NSMutableArray * " << field_name
                 << " = [[NSMutableArray alloc] initWithCapacity: " << size
                 << "];" << std::endl;
   }
@@ -2283,11 +2283,11 @@ void t_cocoa_generator::generate_deserialize_container(
   scope_up(out);
 
   if (const t_map* map = ttype->try_as<t_map>()) {
-    generate_deserialize_map_element(out, map, fieldName);
+    generate_deserialize_map_element(out, map, field_name);
   } else if (const t_set* set = ttype->try_as<t_set>()) {
-    generate_deserialize_set_element(out, set, fieldName);
+    generate_deserialize_set_element(out, set, field_name);
   } else if (const t_list* list = ttype->try_as<t_list>()) {
-    generate_deserialize_list_element(out, list, fieldName);
+    generate_deserialize_list_element(out, list, field_name);
   }
 
   scope_down(out);
@@ -2308,42 +2308,42 @@ void t_cocoa_generator::generate_deserialize_container(
  * wrap scaler primitives in NSNumber objects.
  */
 std::string t_cocoa_generator::containerize(
-    const t_type* ttype, const std::string& fieldName) {
+    const t_type* ttype, const std::string& field_name) {
   // FIXME - optimize here to avoid autorelease pool?
   ttype = ttype->get_true_type();
   if (ttype->is<t_enum>()) {
-    return "[NSNumber numberWithInt: " + fieldName + "]";
+    return "[NSNumber numberWithInt: " + field_name + "]";
   } else if (const auto* primitive = ttype->try_as<t_primitive_type>()) {
     t_primitive_type::type tbase = primitive->primitive_type();
     switch (tbase) {
       case t_primitive_type::type::t_void:
         throw std::runtime_error("can't containerize void");
       case t_primitive_type::type::t_bool:
-        return "[NSNumber numberWithBool: " + fieldName + "]";
+        return "[NSNumber numberWithBool: " + field_name + "]";
       case t_primitive_type::type::t_byte:
-        return "[NSNumber numberWithUnsignedChar: " + fieldName + "]";
+        return "[NSNumber numberWithUnsignedChar: " + field_name + "]";
       case t_primitive_type::type::t_i16:
-        return "[NSNumber numberWithShort: " + fieldName + "]";
+        return "[NSNumber numberWithShort: " + field_name + "]";
       case t_primitive_type::type::t_i32:
-        return "[NSNumber numberWithLong: " + fieldName + "]";
+        return "[NSNumber numberWithLong: " + field_name + "]";
       case t_primitive_type::type::t_i64:
-        return "[NSNumber numberWithLongLong: " + fieldName + "]";
+        return "[NSNumber numberWithLongLong: " + field_name + "]";
       case t_primitive_type::type::t_double:
-        return "[NSNumber numberWithDouble: " + fieldName + "]";
+        return "[NSNumber numberWithDouble: " + field_name + "]";
       default:
         break;
     }
   }
 
   // do nothing
-  return fieldName;
+  return field_name;
 }
 
 /**
  * Generates code to deserialize a std::map element
  */
 void t_cocoa_generator::generate_deserialize_map_element(
-    std::ofstream& out, const t_map* tmap, const std::string& fieldName) {
+    std::ofstream& out, const t_map* tmap, const std::string& field_name) {
   std::string key = tmp("_key");
   std::string val = tmp("_val");
   const t_type* key_type = &tmap->key_type().deref();
@@ -2354,7 +2354,7 @@ void t_cocoa_generator::generate_deserialize_map_element(
   generate_deserialize_field(out, &fkey, key);
   generate_deserialize_field(out, &fval, val);
 
-  indent(out) << "[" << fieldName
+  indent(out) << "[" << field_name
               << " setObject: " << containerize(valType, val)
               << " forKey: " << containerize(key_type, key) << "];"
               << std::endl;
@@ -2378,14 +2378,14 @@ void t_cocoa_generator::generate_deserialize_map_element(
  * Deserializes a set element
  */
 void t_cocoa_generator::generate_deserialize_set_element(
-    std::ofstream& out, const t_set* tset, const std::string& fieldName) {
+    std::ofstream& out, const t_set* tset, const std::string& field_name) {
   std::string elem = tmp("_elem");
   const t_type* type = &tset->elem_type().deref();
   t_field felem(*type, elem);
 
   generate_deserialize_field(out, &felem, elem);
 
-  indent(out) << "[" << fieldName << " addObject: " << containerize(type, elem)
+  indent(out) << "[" << field_name << " addObject: " << containerize(type, elem)
               << "];" << std::endl;
 
   if (type_can_be_null(type)) {
@@ -2401,14 +2401,14 @@ void t_cocoa_generator::generate_deserialize_set_element(
  * Deserializes a list element
  */
 void t_cocoa_generator::generate_deserialize_list_element(
-    std::ofstream& out, const t_list* tlist, const std::string& fieldName) {
+    std::ofstream& out, const t_list* tlist, const std::string& field_name) {
   std::string elem = tmp("_elem");
   const t_type* type = &tlist->elem_type().deref();
   t_field felem(*type, elem);
 
   generate_deserialize_field(out, &felem, elem);
 
-  indent(out) << "[" << fieldName << " addObject: " << containerize(type, elem)
+  indent(out) << "[" << field_name << " addObject: " << containerize(type, elem)
               << "];" << std::endl;
 
   if (type_can_be_null(type)) {
@@ -2426,7 +2426,7 @@ void t_cocoa_generator::generate_deserialize_list_element(
  * @param fieldName Name to of the variable holding the field
  */
 void t_cocoa_generator::generate_serialize_field(
-    std::ofstream& out, const t_field* tfield, const std::string& fieldName) {
+    std::ofstream& out, const t_field* tfield, const std::string& field_name) {
   const t_type* type = tfield->type()->get_true_type();
 
   // Do nothing for void types
@@ -2436,9 +2436,9 @@ void t_cocoa_generator::generate_serialize_field(
   }
 
   if (type->is<t_structured>()) {
-    generate_serialize_struct(out, (t_struct*)type, fieldName);
+    generate_serialize_struct(out, (t_struct*)type, field_name);
   } else if (type->is<t_container>()) {
-    generate_serialize_container(out, type, fieldName);
+    generate_serialize_container(out, type, field_name);
   } else if (type->is<t_primitive_type>() || type->is<t_enum>()) {
     indent(out) << "[outProtocol ";
 
@@ -2447,30 +2447,30 @@ void t_cocoa_generator::generate_serialize_field(
         case t_primitive_type::type::t_void:
           throw std::runtime_error(
               "compiler error: cannot serialize void field in a struct: " +
-              fieldName);
+              field_name);
         case t_primitive_type::type::t_string:
-          out << "writeString: " << fieldName << "];";
+          out << "writeString: " << field_name << "];";
           break;
         case t_primitive_type::type::t_binary:
-          out << "writeBinary: " << fieldName << "];";
+          out << "writeBinary: " << field_name << "];";
           break;
         case t_primitive_type::type::t_bool:
-          out << "writeBool: " << fieldName << "];";
+          out << "writeBool: " << field_name << "];";
           break;
         case t_primitive_type::type::t_byte:
-          out << "writeByte: " << fieldName << "];";
+          out << "writeByte: " << field_name << "];";
           break;
         case t_primitive_type::type::t_i16:
-          out << "writeI16: " << fieldName << "];";
+          out << "writeI16: " << field_name << "];";
           break;
         case t_primitive_type::type::t_i32:
-          out << "writeI32: " << fieldName << "];";
+          out << "writeI32: " << field_name << "];";
           break;
         case t_primitive_type::type::t_i64:
-          out << "writeI64: " << fieldName << "];";
+          out << "writeI64: " << field_name << "];";
           break;
         case t_primitive_type::type::t_double:
-          out << "writeDouble: " << fieldName << "];";
+          out << "writeDouble: " << field_name << "];";
           break;
         default:
           throw std::runtime_error(
@@ -2478,7 +2478,7 @@ void t_cocoa_generator::generate_serialize_field(
               primitive->name());
       }
     } else if (type->is<t_enum>()) {
-      out << "writeI32: " << fieldName << "];";
+      out << "writeI32: " << field_name << "];";
     }
     out << std::endl;
   } else {
@@ -2496,9 +2496,11 @@ void t_cocoa_generator::generate_serialize_field(
  * @param fieldName Name of variable holding struct
  */
 void t_cocoa_generator::generate_serialize_struct(
-    std::ofstream& out, const t_struct* tstruct, const std::string& fieldName) {
+    std::ofstream& out,
+    const t_struct* tstruct,
+    const std::string& field_name) {
   (void)tstruct;
-  out << indent() << "[" << fieldName << " write: outProtocol];" << std::endl;
+  out << indent() << "[" << field_name << " write: outProtocol];" << std::endl;
 }
 
 /**
@@ -2508,36 +2510,36 @@ void t_cocoa_generator::generate_serialize_struct(
  * @param fieldName Name of variable holding container
  */
 void t_cocoa_generator::generate_serialize_container(
-    std::ofstream& out, const t_type* ttype, const std::string& fieldName) {
+    std::ofstream& out, const t_type* ttype, const std::string& field_name) {
   scope_up(out);
 
   if (const t_map* map = ttype->try_as<t_map>()) {
     indent(out) << "[outProtocol writeMapBeginWithKeyType: "
                 << type_to_enum(&map->key_type().deref())
                 << " valueType: " << type_to_enum(&map->val_type().deref())
-                << " size: (int)[" << fieldName << " count]];" << std::endl;
+                << " size: (int)[" << field_name << " count]];" << std::endl;
   } else if (const t_set* set = ttype->try_as<t_set>()) {
     indent(out) << "[outProtocol writeSetBeginWithElementType: "
                 << type_to_enum(&set->elem_type().deref()) << " size: (int)["
-                << fieldName << " count]];" << std::endl;
+                << field_name << " count]];" << std::endl;
   } else if (const t_list* list = ttype->try_as<t_list>()) {
     indent(out) << "[outProtocol writeListBeginWithElementType: "
                 << type_to_enum(&list->elem_type().deref()) << " size: (int)["
-                << fieldName << " count]];" << std::endl;
+                << field_name << " count]];" << std::endl;
   }
 
   std::string iter = tmp("_iter");
   std::string key;
   if (ttype->is<t_map>()) {
     key = tmp("key");
-    indent(out) << "NSEnumerator * " << iter << " = [" << fieldName
+    indent(out) << "NSEnumerator * " << iter << " = [" << field_name
                 << " keyEnumerator];" << std::endl;
     indent(out) << "id " << key << ";" << std::endl;
     indent(out) << "while ((" << key << " = [" << iter << " nextObject]))"
                 << std::endl;
   } else if (ttype->is<t_set>()) {
     key = tmp("obj");
-    indent(out) << "NSEnumerator * " << iter << " = [" << fieldName
+    indent(out) << "NSEnumerator * " << iter << " = [" << field_name
                 << " objectEnumerator];" << std::endl;
     indent(out) << "id " << key << ";" << std::endl;
     indent(out) << "while ((" << key << " = [" << iter << " nextObject]))"
@@ -2545,18 +2547,18 @@ void t_cocoa_generator::generate_serialize_container(
   } else if (ttype->is<t_list>()) {
     key = tmp("i");
     indent(out) << "int " << key << ";" << std::endl;
-    indent(out) << "for (" << key << " = 0; " << key << " < [" << fieldName
+    indent(out) << "for (" << key << " = 0; " << key << " < [" << field_name
                 << " count]; " << key << "++)" << std::endl;
   }
 
   scope_up(out);
 
   if (const t_map* map = ttype->try_as<t_map>()) {
-    generate_serialize_map_element(out, map, key, fieldName);
+    generate_serialize_map_element(out, map, key, field_name);
   } else if (const t_set* set = ttype->try_as<t_set>()) {
     generate_serialize_set_element(out, set, key);
   } else if (const t_list* list = ttype->try_as<t_list>()) {
-    generate_serialize_list_element(out, list, key, fieldName);
+    generate_serialize_list_element(out, list, key, field_name);
   }
 
   scope_down(out);
@@ -2577,34 +2579,34 @@ void t_cocoa_generator::generate_serialize_container(
  * primitive type, if necessary.
  */
 std::string t_cocoa_generator::decontainerize(
-    const t_field* tfield, const std::string& fieldName) {
+    const t_field* tfield, const std::string& field_name) {
   const t_type* ttype = tfield->type()->get_true_type();
   if (ttype->is<t_enum>()) {
-    return "[" + fieldName + " intValue]";
+    return "[" + field_name + " intValue]";
   } else if (const auto* primitive = ttype->try_as<t_primitive_type>()) {
     t_primitive_type::type tbase = primitive->primitive_type();
     switch (tbase) {
       case t_primitive_type::type::t_void:
         throw std::runtime_error("can't decontainerize void");
       case t_primitive_type::type::t_bool:
-        return "[" + fieldName + " boolValue]";
+        return "[" + field_name + " boolValue]";
       case t_primitive_type::type::t_byte:
-        return "[" + fieldName + " unsignedCharValue]";
+        return "[" + field_name + " unsignedCharValue]";
       case t_primitive_type::type::t_i16:
-        return "[" + fieldName + " shortValue]";
+        return "[" + field_name + " shortValue]";
       case t_primitive_type::type::t_i32:
-        return "[" + fieldName + " longValue]";
+        return "[" + field_name + " longValue]";
       case t_primitive_type::type::t_i64:
-        return "[" + fieldName + " longLongValue]";
+        return "[" + field_name + " longLongValue]";
       case t_primitive_type::type::t_double:
-        return "[" + fieldName + " doubleValue]";
+        return "[" + field_name + " doubleValue]";
       default:
         break;
     }
   }
 
   // do nothing
-  return fieldName;
+  return field_name;
 }
 
 /**
@@ -2614,11 +2616,11 @@ void t_cocoa_generator::generate_serialize_map_element(
     std::ofstream& out,
     const t_map* tmap,
     const std::string& key,
-    const std::string& mapName) {
+    const std::string& map_name) {
   t_field kfield(tmap->key_type().deref(), key);
   generate_serialize_field(out, &kfield, decontainerize(&kfield, key));
   t_field vfield(
-      tmap->val_type().deref(), "[" + mapName + " objectForKey: " + key + "]");
+      tmap->val_type().deref(), "[" + map_name + " objectForKey: " + key + "]");
   generate_serialize_field(
       out, &vfield, decontainerize(&vfield, vfield.name()));
 }
@@ -2627,9 +2629,9 @@ void t_cocoa_generator::generate_serialize_map_element(
  * Serializes the members of a set.
  */
 void t_cocoa_generator::generate_serialize_set_element(
-    std::ofstream& out, const t_set* tset, const std::string& elementName) {
-  t_field efield(*tset->elem_type(), elementName);
-  generate_serialize_field(out, &efield, decontainerize(&efield, elementName));
+    std::ofstream& out, const t_set* tset, const std::string& element_name) {
+  t_field efield(*tset->elem_type(), element_name);
+  generate_serialize_field(out, &efield, decontainerize(&efield, element_name));
 }
 
 /**
@@ -2639,9 +2641,9 @@ void t_cocoa_generator::generate_serialize_list_element(
     std::ofstream& out,
     const t_list* tlist,
     const std::string& index,
-    const std::string& listName) {
+    const std::string& list_name) {
   t_field efield(
-      *tlist->elem_type(), "[" + listName + " objectAtIndex: " + index + "]");
+      *tlist->elem_type(), "[" + list_name + " objectAtIndex: " + index + "]");
   generate_serialize_field(
       out, &efield, decontainerize(&efield, efield.name()));
 }
@@ -3014,9 +3016,9 @@ std::string t_cocoa_generator::type_to_enum(const t_type* type) {
  */
 
 std::string t_cocoa_generator::call_field_setter(
-    const t_field* tfield, const std::string& fieldName) {
+    const t_field* tfield, const std::string& field_name) {
   return "[self set" + capitalize(get_cocoa_property_name(tfield)) + ": " +
-      fieldName + "];";
+      field_name + "];";
 }
 
 std::string t_cocoa_generator::get_cocoa_property_name(const t_field* tfield) {

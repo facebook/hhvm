@@ -76,7 +76,7 @@ class t_named : public t_node {
   const t_program* program() const { return program_; }
 
   // Returns the documentation comment.
-  const std::string& doc() const { return doc_ ? doc_->value : emptyString(); }
+  const std::string& doc() const { return doc_ ? doc_->value : empty_string(); }
 
   bool has_doc() const { return !!doc_; }
 

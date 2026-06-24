@@ -268,11 +268,11 @@ void check_duplicate_keys(diagnostics_engine& diags, const t_const& const_) {
   check_key_value(diags, const_, const_.value());
 }
 
-void check_duplicate_keys(diagnostics_engine& diags, const t_field& field_) {
-  if (field_.default_value() == nullptr) {
+void check_duplicate_keys(diagnostics_engine& diags, const t_field& field) {
+  if (field.default_value() == nullptr) {
     return;
   }
-  check_key_value(diags, field_, field_.default_value());
+  check_key_value(diags, field, field.default_value());
 }
 
 } // namespace detail

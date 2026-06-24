@@ -70,14 +70,14 @@ bool field_is_orderable_walk(
     const t_field& field,
     const t_type* prev,
     is_orderable_walk_context& context,
-    bool forceCustomTypeOrderable);
+    bool force_custom_type_orderable);
 
 bool type_is_orderable_walk(
     std::unordered_map<const t_type*, bool>& memo,
     const t_type& type,
     const t_type* prev,
     is_orderable_walk_context& context,
-    bool forceCustomTypeOrderable) {
+    bool force_custom_type_orderable) {
   auto memo_it = memo.find(&type);
   if (memo_it != memo.end()) {
     return memo_it->second;
@@ -128,7 +128,7 @@ bool type_is_orderable_walk(
                *asList->elem_type(),
                &type,
                context,
-               forceCustomTypeOrderable);
+               force_custom_type_orderable);
   }
 
   // If this point is reached, `type` is one of: map, set or typedef.
@@ -136,7 +136,7 @@ bool type_is_orderable_walk(
   // custom type ordering is not enabled. Typedefs may be non-orderable if they
   // point to maps or sets that are non-orderable.
   const bool has_disqualifying_annotation =
-      is_custom_type(type) && !forceCustomTypeOrderable;
+      is_custom_type(type) && !force_custom_type_orderable;
   if (const t_typedef* asTypedef = type.try_as<t_typedef>()) {
     const t_type& typedef_true_type = *type.get_true_type();
 
@@ -146,7 +146,7 @@ bool type_is_orderable_walk(
             next /* type */,
             &type /* prev */,
             context,
-            forceCustomTypeOrderable)) {
+            force_custom_type_orderable)) {
       return result = false;
     }
 
@@ -162,7 +162,7 @@ bool type_is_orderable_walk(
                *asSet->elem_type(),
                &type,
                context,
-               forceCustomTypeOrderable);
+               force_custom_type_orderable);
   } else if (const t_map* asMap = type.try_as<t_map>()) {
     return result = !has_disqualifying_annotation &&
         type_is_orderable_walk(
@@ -170,13 +170,13 @@ bool type_is_orderable_walk(
                *asMap->key_type(),
                &type,
                context,
-               forceCustomTypeOrderable) &&
+               force_custom_type_orderable) &&
         type_is_orderable_walk(
                memo,
                *asMap->val_type(),
                &type,
                context,
-               forceCustomTypeOrderable);
+               force_custom_type_orderable);
   }
 
   throw std::logic_error(
@@ -191,20 +191,21 @@ bool field_is_orderable_walk(
     const t_field& field,
     const t_type* prev,
     is_orderable_walk_context& context,
-    bool forceCustomTypeOrderable) {
+    bool force_custom_type_orderable) {
   const t_type& field_type = field.type().deref();
   const t_type& field_true_type = *field_type.get_true_type();
   // Unlike `is_custom_type()` above, we don't consider @cpp.Adapter on the
   // field to be disqualifying, since all adapted fields can be made orderable
   // by customizing Adapter::less.
   const bool has_disqualifying_annotation =
-      field.has_structured_annotation(kCppTypeUri) && !forceCustomTypeOrderable;
+      field.has_structured_annotation(kCppTypeUri) &&
+      !force_custom_type_orderable;
   if ((field_true_type.is<t_set>() || field_true_type.is<t_map>()) &&
       has_disqualifying_annotation) {
     return false;
   } else {
     return type_is_orderable_walk(
-        memo, field_type, prev, context, forceCustomTypeOrderable);
+        memo, field_type, prev, context, force_custom_type_orderable);
   }
 }
 

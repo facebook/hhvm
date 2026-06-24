@@ -94,7 +94,7 @@ class t_java_deprecated_generator : public t_concat_generator {
       const t_structured* tstruct,
       const std::vector<const t_field*>& fields,
       uint32_t bitset_size,
-      bool useDefaultConstructor);
+      bool use_default_constructor);
   void generate_java_struct_definition(
       std::ofstream& out, const t_structured* tstruct, StructGenParams params);
   void construct_constant_fields(

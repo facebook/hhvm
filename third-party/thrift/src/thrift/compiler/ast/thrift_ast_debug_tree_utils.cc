@@ -30,11 +30,13 @@ using ::apache::thrift::tree_printer::scope;
 
 scope& addChildForSourceRange(
     const std::string& prefix,
-    const source_range& sourceRange,
-    scope& parentScope) {
-  scope& sourceRangeScope = parentScope.make_child("{} [source_range]", prefix);
-  sourceRangeScope.make_child("begin (offset): {}", sourceRange.begin.offset());
-  sourceRangeScope.make_child("end (offset): {}", sourceRange.end.offset());
+    const source_range& source_range,
+    scope& parent_scope) {
+  scope& sourceRangeScope =
+      parent_scope.make_child("{} [source_range]", prefix);
+  sourceRangeScope.make_child(
+      "begin (offset): {}", source_range.begin.offset());
+  sourceRangeScope.make_child("end (offset): {}", source_range.end.offset());
   return sourceRangeScope;
 }
 
@@ -44,23 +46,23 @@ scope& addChildForSourceRange(
 // (eg. by name, or memory address).
 
 scope& addChildForNamedPtr(
-    const std::string& prefix, const t_named* namedPtr, scope& parentScope) {
-  scope& namedScope = parentScope.make_child(
-      "{} [t_named*] {:#x}", prefix, uintptr_t(namedPtr));
-  if (namedPtr != nullptr) {
-    namedScope.make_child("scoped_name: {}", namedPtr->get_scoped_name());
+    const std::string& prefix, const t_named* named_ptr, scope& parent_scope) {
+  scope& namedScope = parent_scope.make_child(
+      "{} [t_named*] {:#x}", prefix, uintptr_t(named_ptr));
+  if (named_ptr != nullptr) {
+    namedScope.make_child("scoped_name: {}", named_ptr->get_scoped_name());
   }
   return namedScope;
 }
 
 scope& addChildForConstValuePtr(
     const std::string& prefix,
-    const t_const_value* constValuePtr,
-    scope& parentScope) {
-  scope& constValueScope = parentScope.make_child(
-      "{} [t_const_value*] {:#x}", prefix, uintptr_t(constValuePtr));
-  if (constValuePtr != nullptr) {
-    const t_const_value& constValue = *constValuePtr;
+    const t_const_value* const_value_ptr,
+    scope& parent_scope) {
+  scope& constValueScope = parent_scope.make_child(
+      "{} [t_const_value*] {:#x}", prefix, uintptr_t(const_value_ptr));
+  if (const_value_ptr != nullptr) {
+    const t_const_value& constValue = *const_value_ptr;
     std::optional<source_range> sourceRange = constValue.src_range();
     if (sourceRange.has_value()) {
       addChildForSourceRange("src_range", sourceRange.value(), constValueScope);
@@ -76,12 +78,12 @@ scope& addChildForConstValuePtr(
 
 scope& addChildForStructuredPtr(
     const std::string& prefix,
-    const t_structured* structuredPtr,
-    scope& parentScope) {
-  scope& structuredPtrScope = parentScope.make_child(
-      "{} [t_structured*] {:#x}", prefix, uintptr_t(structuredPtr));
-  if (structuredPtr != nullptr) {
-    structuredPtrScope.make_child("name: {}", structuredPtr->name());
+    const t_structured* structured_ptr,
+    scope& parent_scope) {
+  scope& structuredPtrScope = parent_scope.make_child(
+      "{} [t_structured*] {:#x}", prefix, uintptr_t(structured_ptr));
+  if (structured_ptr != nullptr) {
+    structuredPtrScope.make_child("name: {}", structured_ptr->name());
   }
 
   return structuredPtrScope;
@@ -89,21 +91,21 @@ scope& addChildForStructuredPtr(
 
 scope& addChildForProgramPtr(
     const std::string& prefix,
-    const t_program* programPtr,
-    scope& parentScope) {
-  scope& programPtrScope = parentScope.make_child(
-      "{} [t_program*] {:#x}", prefix, uintptr_t(programPtr));
-  if (programPtr != nullptr) {
-    programPtrScope.make_child("name: {}", programPtr->name());
+    const t_program* program_ptr,
+    scope& parent_scope) {
+  scope& programPtrScope = parent_scope.make_child(
+      "{} [t_program*] {:#x}", prefix, uintptr_t(program_ptr));
+  if (program_ptr != nullptr) {
+    programPtrScope.make_child("name: {}", program_ptr->name());
   }
 
   return programPtrScope;
 }
 
 scope& addChildForNode(
-    const std::string& prefix, const t_node& node, scope& parentScope) {
+    const std::string& prefix, const t_node& node, scope& parent_scope) {
   scope& nodeScope =
-      parentScope.make_child("{} [t_node] @{:#x}", prefix, uintptr_t(&node));
+      parent_scope.make_child("{} [t_node] @{:#x}", prefix, uintptr_t(&node));
   addChildForSourceRange("src_range", node.src_range(), nodeScope);
   const deprecated_annotation_map& unstructuredAnnotations =
       node.unstructured_annotations();
@@ -121,42 +123,46 @@ scope& addChildForNode(
 }
 
 scope& addChildForTypeRef(
-    const std::string& prefix, const t_type_ref& typeRef, scope& parentScope) {
-  scope& typeRefScope = parentScope.make_child("{} [t_type_ref]", prefix);
-  typeRefScope.make_child("empty? {}", typeRef.empty());
-  const bool isResolved = typeRef.resolved();
+    const std::string& prefix,
+    const t_type_ref& type_ref,
+    scope& parent_scope) {
+  scope& typeRefScope = parent_scope.make_child("{} [t_type_ref]", prefix);
+  typeRefScope.make_child("empty? {}", type_ref.empty());
+  const bool isResolved = type_ref.resolved();
   typeRefScope.make_child("resolved? {}", isResolved);
-  addChildForSourceRange("src_range", typeRef.src_range(), typeRefScope);
+  addChildForSourceRange("src_range", type_ref.src_range(), typeRefScope);
 
-  if (typeRef.resolved()) {
+  if (type_ref.resolved()) {
     typeRefScope
-        .make_child("type: [t_type*] {:#x}", uintptr_t(&typeRef.deref()))
-        .make_child("full_name: {}", typeRef->get_full_name());
-  } else if (!typeRef.empty()) {
+        .make_child("type: [t_type*] {:#x}", uintptr_t(&type_ref.deref()))
+        .make_child("full_name: {}", type_ref->get_full_name());
+  } else if (!type_ref.empty()) {
     typeRefScope.make_child(
         "unresolved_name: {}",
-        detail::unresolved_type_ref_info::unresolved_name(typeRef));
+        detail::unresolved_type_ref_info::unresolved_name(type_ref));
   }
 
   return typeRefScope;
 }
 
 scope& addChildForNamed(
-    const std::string& prefix, const t_named& named, scope& parentScope);
+    const std::string& prefix, const t_named& named, scope& parent_scope);
 
 scope& addChildForConst(
-    const std::string& prefix, const t_const& constParam, scope& parentScope) {
-  scope& constScope = parentScope.make_child("{} [t_const]", prefix);
-  addChildForNamed("(base)", constParam, constScope);
-  addChildForTypeRef("type_ref", constParam.type_ref(), constScope);
-  addChildForConstValuePtr("value", constParam.value(), constScope);
+    const std::string& prefix,
+    const t_const& const_param,
+    scope& parent_scope) {
+  scope& constScope = parent_scope.make_child("{} [t_const]", prefix);
+  addChildForNamed("(base)", const_param, constScope);
+  addChildForTypeRef("type_ref", const_param.type_ref(), constScope);
+  addChildForConstValuePtr("value", const_param.value(), constScope);
   return constScope;
 }
 
 scope& addChildForNamed(
-    const std::string& prefix, const t_named& named, scope& parentScope) {
+    const std::string& prefix, const t_named& named, scope& parent_scope) {
   scope& namedScope =
-      parentScope.make_child("{} [t_named] @{:#x}", prefix, uintptr_t(&named));
+      parent_scope.make_child("{} [t_named] @{:#x}", prefix, uintptr_t(&named));
   addChildForNode("(base)", named, namedScope);
   namedScope.make_child("name: {}", named.name());
   namedScope.make_child("scoped_name: {}", named.get_scoped_name());
@@ -189,8 +195,8 @@ scope& addChildForNamed(
 }
 
 scope& addChildForInclude(
-    const std::string& prefix, const t_include& include, scope& parentScope) {
-  scope& includeScope = parentScope.make_child(
+    const std::string& prefix, const t_include& include, scope& parent_scope) {
+  scope& includeScope = parent_scope.make_child(
       "{} [t_include] @{:#x}", prefix, uintptr_t(&include));
   addChildForNode("(base)", include, includeScope);
   includeScope.make_child("raw_path: {}", include.raw_path());
@@ -203,9 +209,9 @@ scope& addChildForInclude(
 }
 
 scope& addChildForType(
-    const std::string& prefix, const t_type& type, scope& parentScope) {
+    const std::string& prefix, const t_type& type, scope& parent_scope) {
   scope& typeScope =
-      parentScope.make_child("{} [t_type] @{:#x}", prefix, uintptr_t(&type));
+      parent_scope.make_child("{} [t_type] @{:#x}", prefix, uintptr_t(&type));
   addChildForNamed("(base)", type, typeScope);
   typeScope.make_child("full_name: {}", type.get_full_name());
 
@@ -221,8 +227,8 @@ scope& addChildForType(
 scope& addChildForContainer(
     const std::string& prefix,
     const t_container& container,
-    scope& parentScope) {
-  scope& containerScope = parentScope.make_child(
+    scope& parent_scope) {
+  scope& containerScope = parent_scope.make_child(
       "{} [t_container] @{:#x}", prefix, uintptr_t(&container));
   addChildForType("(base)", container, containerScope);
   return containerScope;
@@ -230,55 +236,55 @@ scope& addChildForContainer(
 
 scope& addChildForNamespaceNode(
     const std::string& prefix,
-    const t_namespace& namespaceNode,
-    scope& parentScope) {
-  scope& namespaceNodeScope = parentScope.make_child(
-      "{} [t_namespace] @{:#x}", prefix, uintptr_t(&namespaceNode));
+    const t_namespace& namespace_node,
+    scope& parent_scope) {
+  scope& namespaceNodeScope = parent_scope.make_child(
+      "{} [t_namespace] @{:#x}", prefix, uintptr_t(&namespace_node));
 
-  addChildForNode("(base)", namespaceNode, namespaceNodeScope);
-  namespaceNodeScope.make_child("language: {}", namespaceNode.language());
-  namespaceNodeScope.make_child("ns: {}", namespaceNode.ns());
+  addChildForNode("(base)", namespace_node, namespaceNodeScope);
+  namespaceNodeScope.make_child("language: {}", namespace_node.language());
+  namespaceNodeScope.make_child("ns: {}", namespace_node.ns());
   return namespaceNodeScope;
 }
 
 scope& addChildForTypedef(
     const std::string& prefix,
-    const t_typedef& typedefAst,
-    scope& parentScope) {
-  scope& typedefScope = parentScope.make_child(
-      "{} [t_typedef] @{:#x}", prefix, uintptr_t(&typedefAst));
-  addChildForType("(base)", typedefAst, typedefScope);
-  addChildForTypeRef("type", typedefAst.type(), typedefScope);
+    const t_typedef& typedef_ast,
+    scope& parent_scope) {
+  scope& typedefScope = parent_scope.make_child(
+      "{} [t_typedef] @{:#x}", prefix, uintptr_t(&typedef_ast));
+  addChildForType("(base)", typedef_ast, typedefScope);
+  addChildForTypeRef("type", typedef_ast.type(), typedefScope);
   return typedefScope;
 }
 
 scope& addChildForEnumValue(
     const std::string& prefix,
-    const t_enum_value& enumValue,
-    scope& parentScope) {
-  scope& enumValueScope = parentScope.make_child(
-      "{} [t_enum_value] @{:#x}", prefix, uintptr_t(&enumValue));
-  addChildForNamed("(base)", enumValue, enumValueScope);
-  enumValueScope.make_child("value: {}", enumValue.get_value());
-  enumValueScope.make_child("has_value: {}", enumValue.has_value());
+    const t_enum_value& enum_value,
+    scope& parent_scope) {
+  scope& enumValueScope = parent_scope.make_child(
+      "{} [t_enum_value] @{:#x}", prefix, uintptr_t(&enum_value));
+  addChildForNamed("(base)", enum_value, enumValueScope);
+  enumValueScope.make_child("value: {}", enum_value.get_value());
+  enumValueScope.make_child("has_value: {}", enum_value.has_value());
   return enumValueScope;
 }
 
 scope& addChildForEnum(
-    const std::string& prefix, const t_enum& enumAst, scope& parentScope) {
-  scope& enumScope =
-      parentScope.make_child("{} [t_enum] @{:#x}", prefix, uintptr_t(&enumAst));
-  addChildForType("(base)", enumAst, enumScope);
+    const std::string& prefix, const t_enum& enum_ast, scope& parent_scope) {
+  scope& enumScope = parent_scope.make_child(
+      "{} [t_enum] @{:#x}", prefix, uintptr_t(&enum_ast));
+  addChildForType("(base)", enum_ast, enumScope);
 
-  node_list_view<const t_enum_value> values = enumAst.values();
+  node_list_view<const t_enum_value> values = enum_ast.values();
   scope& valuesScope = enumScope.make_child("values (size: {})", values.size());
   for (std::size_t i = 0; i < values.size(); ++i) {
     addChildForEnumValue(fmt::format("values[{}]", i), values[i], valuesScope);
   }
 
-  enumScope.make_child("unused: {}", enumAst.unused());
+  enumScope.make_child("unused: {}", enum_ast.unused());
 
-  node_list_view<const t_const> consts = enumAst.consts();
+  node_list_view<const t_const> consts = enum_ast.consts();
   scope& constsScope = enumScope.make_child("consts (size: {})", consts.size());
   for (std::size_t i = 0; i < consts.size(); ++i) {
     addChildForConst(fmt::format("consts[{}]", i), consts[i], constsScope);
@@ -288,9 +294,9 @@ scope& addChildForEnum(
 }
 
 scope& addChildForField(
-    const std::string& prefix, const t_field& field, scope& parentScope) {
+    const std::string& prefix, const t_field& field, scope& parent_scope) {
   scope& fieldScope =
-      parentScope.make_child("{} [t_field] @{:#x}", prefix, uintptr_t(&field));
+      parent_scope.make_child("{} [t_field] @{:#x}", prefix, uintptr_t(&field));
   addChildForNamed("(base)", field, fieldScope);
 
   fieldScope.make_child("qualifier: {}", field.qualifier());
@@ -311,8 +317,8 @@ scope& addChildForField(
 scope& addChildForStructured(
     const std::string& prefix,
     const t_structured& structured,
-    scope& parentScope) {
-  scope& structuredScope = parentScope.make_child(
+    scope& parent_scope) {
+  scope& structuredScope = parent_scope.make_child(
       "{} [t_structured] @{:#x}", prefix, uintptr_t(&structured));
   addChildForType("(base)", structured, structuredScope);
 
@@ -329,8 +335,8 @@ scope& addChildForStructured(
 scope& addChildForException(
     const std::string& prefix,
     const t_exception& exception,
-    scope& parentScope) {
-  scope& exceptionScope = parentScope.make_child(
+    scope& parent_scope) {
+  scope& exceptionScope = parent_scope.make_child(
       "{} [t_exception] @{:#x}", prefix, uintptr_t(&exception));
 
   addChildForStructured("(base)", exception, exceptionScope);
@@ -348,24 +354,26 @@ scope& addChildForException(
 scope& addChildForParamlist(
     const std::string& prefix,
     const t_paramlist& paramlist,
-    scope& parentScope) {
-  scope& paramlistScope = parentScope.make_child(
+    scope& parent_scope) {
+  scope& paramlistScope = parent_scope.make_child(
       "{} [t_paramlist] @{:#x}", prefix, uintptr_t(&paramlist));
   addChildForStructured("(base)", paramlist, paramlistScope);
   return paramlistScope;
 }
 
 scope& addChildForThrows(
-    const std::string& prefix, const t_throws& throws, scope& parentScope) {
-  scope& throwsScope = parentScope.make_child(
+    const std::string& prefix, const t_throws& throws, scope& parent_scope) {
+  scope& throwsScope = parent_scope.make_child(
       "{} [t_throws] @{:#x}", prefix, uintptr_t(&throws));
   addChildForStructured("(base)", throws, throwsScope);
   return throwsScope;
 }
 
 scope& addChildForFunction(
-    const std::string& prefix, const t_function& function, scope& parentScope) {
-  scope& functionScope = parentScope.make_child(
+    const std::string& prefix,
+    const t_function& function,
+    scope& parent_scope) {
+  scope& functionScope = parent_scope.make_child(
       "{} [t_function] @{:#x}", prefix, uintptr_t(&function));
   addChildForNamed("(base)", function, functionScope);
   addChildForTypeRef("return_type", function.return_type(), functionScope);
@@ -396,8 +404,8 @@ scope& addChildForFunction(
 scope& addChildForInterface(
     const std::string& prefix,
     const t_interface& interface,
-    scope& parentScope) {
-  scope& interfaceScope = parentScope.make_child(
+    scope& parent_scope) {
+  scope& interfaceScope = parent_scope.make_child(
       "{} [t_interface] {:#x}", prefix, uintptr_t(&interface));
   addChildForType("(base)", interface, interfaceScope);
 
@@ -414,8 +422,8 @@ scope& addChildForInterface(
 }
 
 scope& addChildForService(
-    const std::string& prefix, const t_service& service, scope& parentScope) {
-  scope& serviceScope = parentScope.make_child(
+    const std::string& prefix, const t_service& service, scope& parent_scope) {
+  scope& serviceScope = parent_scope.make_child(
       "{} [t_service] @{:#x}", prefix, uintptr_t(&service));
   addChildForInterface("(base)", service, serviceScope);
   if (const t_service* extends = service.extends(); extends != nullptr) {
@@ -431,16 +439,16 @@ scope& addChildForService(
 scope& addChildForInteraction(
     const std::string& prefix,
     const t_interaction& interaction,
-    scope& parentScope) {
-  scope& interactionScope = parentScope.make_child(
+    scope& parent_scope) {
+  scope& interactionScope = parent_scope.make_child(
       "{} [t_interaction] @{:#x}", prefix, uintptr_t(&interaction));
   addChildForInterface("(base)", interaction, interactionScope);
   return interactionScope;
 }
 
 scope& addChildForPackage(
-    const std::string& prefix, const t_package& package, scope& parentScope) {
-  scope& packageScope = parentScope.make_child(
+    const std::string& prefix, const t_package& package, scope& parent_scope) {
+  scope& packageScope = parent_scope.make_child(
       "{} [t_package] @{:#x}", prefix, uintptr_t(&package));
 
   packageScope.make_child("name: {}", package.name());
@@ -451,33 +459,35 @@ scope& addChildForPackage(
 
 scope& addChildForResolutionMismatch(
     const std::string& prefix,
-    const ResolutionMismatch& resolutionMismatch,
-    scope& parentScope) {
-  scope& resolutionMismatchScope = parentScope.make_child(
-      "{} [ResolutionMismatch] @{:#x}", prefix, uintptr_t(&resolutionMismatch));
+    const ResolutionMismatch& resolution_mismatch,
+    scope& parent_scope) {
+  scope& resolutionMismatchScope = parent_scope.make_child(
+      "{} [ResolutionMismatch] @{:#x}",
+      prefix,
+      uintptr_t(&resolution_mismatch));
 
-  resolutionMismatchScope.make_child("id", resolutionMismatch.id);
+  resolutionMismatchScope.make_child("id", resolution_mismatch.id);
   addChildForSourceRange(
-      "id_loc", resolutionMismatch.id_loc, resolutionMismatchScope);
+      "id_loc", resolution_mismatch.id_loc, resolutionMismatchScope);
   resolutionMismatchScope.make_child(
-      "program: [t_program*] {:#x}", uintptr_t(resolutionMismatch.program));
+      "program: [t_program*] {:#x}", uintptr_t(resolution_mismatch.program));
   addChildForNamedPtr(
-      "local_node", resolutionMismatch.local_node, resolutionMismatchScope);
+      "local_node", resolution_mismatch.local_node, resolutionMismatchScope);
   addChildForNamedPtr(
-      "global_node", resolutionMismatch.global_node, resolutionMismatchScope);
+      "global_node", resolution_mismatch.global_node, resolutionMismatchScope);
 
   return resolutionMismatchScope;
 }
 scope& addChildForGlobalScope(
     const std::string& prefix,
-    const t_global_scope& globalScope,
-    scope& parentScope) {
-  scope& globalScopeScope = parentScope.make_child(
-      "{} [t_global_scope] @{:#x}", prefix, uintptr_t(&globalScope));
+    const t_global_scope& global_scope,
+    scope& parent_scope) {
+  scope& globalScopeScope = parent_scope.make_child(
+      "{} [t_global_scope] @{:#x}", prefix, uintptr_t(&global_scope));
 
   // resolution_mismatches
   const t_global_scope::ResolutionMismatches& resolutionMismatches =
-      globalScope.resolution_mismatches();
+      global_scope.resolution_mismatches();
   scope& resolutionMismatchesScope = globalScopeScope.make_child(
       "resolution_mismatches (size: {})", resolutionMismatches.size());
   for (const ResolutionMismatch& resolutionMismatch : resolutionMismatches) {
@@ -489,7 +499,7 @@ scope& addChildForGlobalScope(
 
   // program_scopes
   const t_global_scope::ProgramScopes& programScopes =
-      globalScope.program_scopes();
+      global_scope.program_scopes();
   scope& programScopesScope = globalScopeScope.make_child(
       "program_scopes (size: {})", programScopes.size());
   for (const auto& [key, programScopePtrs] : programScopes) {
@@ -506,17 +516,17 @@ scope& addChildForGlobalScope(
 
 scope& addChildForProgramScope(
     const std::string& prefix,
-    const program_scope& programScope,
-    scope& parentScope) {
-  scope& programScopeScope = parentScope.make_child(
-      "{} [program_scope] @{:#x}", prefix, uintptr_t(&programScope));
+    const program_scope& program_scope,
+    scope& parent_scope) {
+  scope& programScopeScope = parent_scope.make_child(
+      "{} [program_scope] @{:#x}", prefix, uintptr_t(&program_scope));
 
   return programScopeScope;
 }
 
 scope& addChildForProgram(
-    const std::string& prefix, const t_program& program, scope& parentScope) {
-  scope& programScope = parentScope.make_child(
+    const std::string& prefix, const t_program& program, scope& parent_scope) {
+  scope& programScope = parent_scope.make_child(
       "{} [t_program] @{:#x}", prefix, uintptr_t(&program));
   addChildForNamed("(base)", program, programScope);
 
@@ -694,10 +704,10 @@ scope& addChildForProgram(
 // public static
 apache::thrift::tree_printer::scope
 ThriftAstDebugTreeUtils::createTreeForProgramBundle(
-    const t_program_bundle& programBundle) {
+    const t_program_bundle& program_bundle) {
   using apache::thrift::tree_printer::scope;
   scope programBundleScope = scope::make_root("[t_program_bundle]");
-  node_list_view<const t_program> programs = programBundle.programs();
+  node_list_view<const t_program> programs = program_bundle.programs();
   scope& programsScope =
       programBundleScope.make_child("programs (size: {})", programs.size());
   for (std::size_t i = 0; i < programs.size(); ++i) {

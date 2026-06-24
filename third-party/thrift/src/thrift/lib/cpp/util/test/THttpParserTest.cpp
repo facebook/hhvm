@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#include <cstring>
+
 #include <thrift/lib/cpp/transport/THeader.h>
 #include <thrift/lib/cpp/util/THttpParser.h>
 

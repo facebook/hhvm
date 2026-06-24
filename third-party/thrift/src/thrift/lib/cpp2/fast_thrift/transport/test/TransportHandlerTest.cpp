@@ -19,6 +19,7 @@
 
 #include <gtest/gtest.h>
 
+#include <cstring>
 #include <memory>
 
 #include <folly/io/IOBuf.h>

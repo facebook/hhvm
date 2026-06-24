@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#include <cstring>
+
 #include <folly/Benchmark.h>
 #include <folly/init/Init.h>
 #include <folly/io/IOBuf.h>

@@ -36,6 +36,8 @@
  * pointer in TransportHandler.
  */
 
+#include <cstring>
+
 #include <gtest/gtest.h>
 
 #include <folly/io/Cursor.h>

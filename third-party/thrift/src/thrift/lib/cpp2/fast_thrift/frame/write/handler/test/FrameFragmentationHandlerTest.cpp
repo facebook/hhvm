@@ -23,6 +23,7 @@
 #include <folly/io/IOBuf.h>
 #include <folly/io/async/EventBase.h>
 
+#include <cstring>
 #include <map>
 #include <stdexcept>
 #include <vector>

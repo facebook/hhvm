@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#include <cstring>
+
 #include <gtest/gtest.h>
 
 #include <folly/io/IOBuf.h>

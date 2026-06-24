@@ -25,6 +25,8 @@
  *   - Write:       PAYLOAD on RR stream — stamp complete=true, next=true.
  */
 
+#include <cstring>
+
 #include <folly/Benchmark.h>
 #include <folly/init/Init.h>
 #include <folly/io/IOBuf.h>

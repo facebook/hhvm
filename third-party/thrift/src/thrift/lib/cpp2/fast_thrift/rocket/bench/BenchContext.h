@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include <cstring>
+
 #include <folly/ExceptionWrapper.h>
 #include <folly/io/IOBuf.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/BufferAllocator.h>

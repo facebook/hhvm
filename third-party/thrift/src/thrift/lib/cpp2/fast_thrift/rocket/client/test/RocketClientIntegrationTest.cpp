@@ -17,6 +17,7 @@
 #include <gtest/gtest.h>
 
 #include <algorithm>
+#include <cstring>
 
 #include <folly/io/Cursor.h>
 #include <folly/io/IOBuf.h>

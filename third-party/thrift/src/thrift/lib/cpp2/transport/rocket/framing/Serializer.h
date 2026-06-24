@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <cstring>
 #include <memory>
 #include <type_traits>
 

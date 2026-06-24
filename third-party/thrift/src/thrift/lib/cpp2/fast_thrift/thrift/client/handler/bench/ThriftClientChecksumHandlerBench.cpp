@@ -28,6 +28,8 @@
  *      is the only supported algorithm; CRC32 / SERVER_ONLY_CRC32 are not.
  */
 
+#include <cstring>
+
 #include <folly/Benchmark.h>
 #include <folly/init/Init.h>
 #include <folly/io/IOBuf.h>

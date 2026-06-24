@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include <cstring>
+
 #include <folly/io/IOBuf.h>
 #include <folly/io/IOBufQueue.h>
 #include <folly/io/async/AsyncTransport.h>

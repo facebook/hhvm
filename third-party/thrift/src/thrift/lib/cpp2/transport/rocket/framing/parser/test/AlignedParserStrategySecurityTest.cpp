@@ -23,6 +23,8 @@
 // rejects undersized frames and oversized metadata claims without underflow.
 //
 
+#include <cstring>
+
 #include <gtest/gtest.h>
 #include <folly/io/IOBuf.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/Frames.h>

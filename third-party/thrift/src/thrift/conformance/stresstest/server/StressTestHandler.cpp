@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#include <cstring>
+
 #include <common/services/cpp/security/SecureThriftUtil.h>
 #include <thrift/conformance/stresstest/server/StressTestHandler.h>
 

@@ -18,6 +18,7 @@
 
 #include <cinttypes>
 #include <cstdio>
+#include <cstring>
 #include <fstream>
 #include <iterator>
 

@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <cstring>
 #include <string>
 
 #include <boost/operators.hpp>

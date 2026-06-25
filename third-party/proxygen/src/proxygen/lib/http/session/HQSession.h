@@ -14,6 +14,7 @@
 #include <folly/io/async/DelayedDestructionBase.h>
 #include <folly/io/async/EventBase.h>
 #include <folly/lang/Assume.h>
+#include <memory>
 #include <proxygen/lib/http/codec/HQControlCodec.h>
 #include <proxygen/lib/http/codec/HQUnidirectionalCodec.h>
 #include <proxygen/lib/http/codec/HQUtils.h>
@@ -477,6 +478,10 @@ class HQSession
 
   virtual quic::QuicSocket* getQuicSocket() const {
     return sock_.get();
+  }
+
+  std::weak_ptr<quic::QuicSocket> getQuicSocketWeak() const {
+    return sock_;
   }
 
   struct SessionDropReason {

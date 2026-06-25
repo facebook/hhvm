@@ -1,3 +1,34 @@
+error: Typing[4472] Cannot access type alias used as an enforceable type hint `TFoo` defined in package `pkg2` which may not be available [1]
+-> `TFoo` is defined in cross_package_generics.php--foo.php [2]
+-> `TFoo` belongs to package `pkg2` by this package override [3]
+-> package `pkg1` is available because the current file belongs to it by this package definition [4]
+
+cross_package_generics.php--bar.php:47:17
+45 | 
+46 | // type parameter constraint (not a type arg)
+47 | class Bar3<T as TFoo> {}
+   |                 ^^^^ [1]
+48 | class Bar4<T as Foo> {}
+49 | 
+
+cross_package_generics.php--foo.php:4:6
+ 1 | <?hh
+ 2 | // package pkg2
+ 3 | <<file: __PackageOverride('pkg2')>>
+   |                           ^^^^^^ [3]
+ 4 | type TFoo = int;
+   |      ^^^^ [2]
+ 5 | interface IFoo<T> {}
+ 6 | class Foo {}
+
+PACKAGES.toml:3:11
+ 1 | [packages]
+ 2 | 
+ 3 | [packages.pkg1]
+   |           ^^^^ [4]
+ 4 | include_paths=["//"]
+ 5 | 
+
 error: Typing[4472] Cannot access symbol `IFoo` defined in package `pkg2` which may not be available [1]
 -> `IFoo` is defined in cross_package_generics.php--foo.php [2]
 -> `IFoo` belongs to package `pkg2` by this package override [3]
@@ -152,4 +183,4 @@ PACKAGES.toml:3:11
  4 | include_paths=["//"]
  5 | 
 
-5 errors found
+6 errors found

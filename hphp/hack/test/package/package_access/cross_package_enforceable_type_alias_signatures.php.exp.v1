@@ -1,3 +1,192 @@
+error: Typing[4472] Cannot access type alias used as an enforceable type hint `TShape` defined in package `pkg2` which may not be available [1]
+-> `TShape` is defined in cross_package_enforceable_type_alias_signatures.php--foo.php [2]
+-> `TShape` belongs to package `pkg2` by this package override [3]
+-> package `pkg1` is available because the current file belongs to it by this package definition [4]
+
+cross_package_enforceable_type_alias_signatures.php--bar.php:9:22
+ 7 | 
+ 8 | // Enforceable positions with non-class type aliases: should error in v2.strict
+ 9 | function param_shape(TShape $_): void {}
+   |                      ^^^^^^ [1]
+10 | function param_int(TInt $_): void {}
+11 | function return_shape(): TShape { return shape('x' => 1); }
+
+cross_package_enforceable_type_alias_signatures.php--foo.php:4:6
+ 1 | <?hh
+ 2 | // package pkg2
+ 3 | <<file: __PackageOverride('pkg2')>>
+   |                           ^^^^^^ [3]
+ 4 | type TShape = shape('x' => int);
+   |      ^^^^^^ [2]
+ 5 | type TInt = int;
+ 6 | type TClassAlias = Exception;
+
+PACKAGES.toml:3:11
+ 1 | [packages]
+ 2 | 
+ 3 | [packages.pkg1]
+   |           ^^^^ [4]
+ 4 | include_paths=["//"]
+ 5 | 
+
+error: Typing[4472] Cannot access type alias used as an enforceable type hint `TInt` defined in package `pkg2` which may not be available [1]
+-> `TInt` is defined in cross_package_enforceable_type_alias_signatures.php--foo.php [2]
+-> `TInt` belongs to package `pkg2` by this package override [3]
+-> package `pkg1` is available because the current file belongs to it by this package definition [4]
+
+cross_package_enforceable_type_alias_signatures.php--bar.php:10:20
+ 8 | // Enforceable positions with non-class type aliases: should error in v2.strict
+ 9 | function param_shape(TShape $_): void {}
+10 | function param_int(TInt $_): void {}
+   |                    ^^^^ [1]
+11 | function return_shape(): TShape { return shape('x' => 1); }
+12 | function return_int(): TInt { return 42; }
+
+cross_package_enforceable_type_alias_signatures.php--foo.php:5:6
+ 1 | <?hh
+ 2 | // package pkg2
+ 3 | <<file: __PackageOverride('pkg2')>>
+   |                           ^^^^^^ [3]
+ 4 | type TShape = shape('x' => int);
+ 5 | type TInt = int;
+   |      ^^^^ [2]
+ 6 | type TClassAlias = Exception;
+ 7 | class Foo {}
+
+PACKAGES.toml:3:11
+ 1 | [packages]
+ 2 | 
+ 3 | [packages.pkg1]
+   |           ^^^^ [4]
+ 4 | include_paths=["//"]
+ 5 | 
+
+error: Typing[4472] Cannot access type alias used as an enforceable type hint `TShape` defined in package `pkg2` which may not be available [1]
+-> `TShape` is defined in cross_package_enforceable_type_alias_signatures.php--foo.php [2]
+-> `TShape` belongs to package `pkg2` by this package override [3]
+-> package `pkg1` is available because the current file belongs to it by this package definition [4]
+
+cross_package_enforceable_type_alias_signatures.php--bar.php:11:26
+ 9 | function param_shape(TShape $_): void {}
+10 | function param_int(TInt $_): void {}
+11 | function return_shape(): TShape { return shape('x' => 1); }
+   |                          ^^^^^^ [1]
+12 | function return_int(): TInt { return 42; }
+13 | 
+
+cross_package_enforceable_type_alias_signatures.php--foo.php:4:6
+ 1 | <?hh
+ 2 | // package pkg2
+ 3 | <<file: __PackageOverride('pkg2')>>
+   |                           ^^^^^^ [3]
+ 4 | type TShape = shape('x' => int);
+   |      ^^^^^^ [2]
+ 5 | type TInt = int;
+ 6 | type TClassAlias = Exception;
+
+PACKAGES.toml:3:11
+ 1 | [packages]
+ 2 | 
+ 3 | [packages.pkg1]
+   |           ^^^^ [4]
+ 4 | include_paths=["//"]
+ 5 | 
+
+error: Typing[4472] Cannot access type alias used as an enforceable type hint `TInt` defined in package `pkg2` which may not be available [1]
+-> `TInt` is defined in cross_package_enforceable_type_alias_signatures.php--foo.php [2]
+-> `TInt` belongs to package `pkg2` by this package override [3]
+-> package `pkg1` is available because the current file belongs to it by this package definition [4]
+
+cross_package_enforceable_type_alias_signatures.php--bar.php:12:24
+10 | function param_int(TInt $_): void {}
+11 | function return_shape(): TShape { return shape('x' => 1); }
+12 | function return_int(): TInt { return 42; }
+   |                        ^^^^ [1]
+13 | 
+14 | class Bar {
+
+cross_package_enforceable_type_alias_signatures.php--foo.php:5:6
+ 1 | <?hh
+ 2 | // package pkg2
+ 3 | <<file: __PackageOverride('pkg2')>>
+   |                           ^^^^^^ [3]
+ 4 | type TShape = shape('x' => int);
+ 5 | type TInt = int;
+   |      ^^^^ [2]
+ 6 | type TClassAlias = Exception;
+ 7 | class Foo {}
+
+PACKAGES.toml:3:11
+ 1 | [packages]
+ 2 | 
+ 3 | [packages.pkg1]
+   |           ^^^^ [4]
+ 4 | include_paths=["//"]
+ 5 | 
+
+error: Typing[4472] Cannot access type alias used as an enforceable type hint `TShape` defined in package `pkg2` which may not be available [1]
+-> `TShape` is defined in cross_package_enforceable_type_alias_signatures.php--foo.php [2]
+-> `TShape` belongs to package `pkg2` by this package override [3]
+-> package `pkg1` is available because the current file belongs to it by this package definition [4]
+
+cross_package_enforceable_type_alias_signatures.php--bar.php:15:10
+13 | 
+14 | class Bar {
+15 |   public TShape $prop_shape = shape('x' => 1);
+   |          ^^^^^^ [1]
+16 |   public TInt $prop_int = 42;
+17 | }
+
+cross_package_enforceable_type_alias_signatures.php--foo.php:4:6
+ 1 | <?hh
+ 2 | // package pkg2
+ 3 | <<file: __PackageOverride('pkg2')>>
+   |                           ^^^^^^ [3]
+ 4 | type TShape = shape('x' => int);
+   |      ^^^^^^ [2]
+ 5 | type TInt = int;
+ 6 | type TClassAlias = Exception;
+
+PACKAGES.toml:3:11
+ 1 | [packages]
+ 2 | 
+ 3 | [packages.pkg1]
+   |           ^^^^ [4]
+ 4 | include_paths=["//"]
+ 5 | 
+
+error: Typing[4472] Cannot access type alias used as an enforceable type hint `TInt` defined in package `pkg2` which may not be available [1]
+-> `TInt` is defined in cross_package_enforceable_type_alias_signatures.php--foo.php [2]
+-> `TInt` belongs to package `pkg2` by this package override [3]
+-> package `pkg1` is available because the current file belongs to it by this package definition [4]
+
+cross_package_enforceable_type_alias_signatures.php--bar.php:16:10
+14 | class Bar {
+15 |   public TShape $prop_shape = shape('x' => 1);
+16 |   public TInt $prop_int = 42;
+   |          ^^^^ [1]
+17 | }
+18 | 
+
+cross_package_enforceable_type_alias_signatures.php--foo.php:5:6
+ 1 | <?hh
+ 2 | // package pkg2
+ 3 | <<file: __PackageOverride('pkg2')>>
+   |                           ^^^^^^ [3]
+ 4 | type TShape = shape('x' => int);
+ 5 | type TInt = int;
+   |      ^^^^ [2]
+ 6 | type TClassAlias = Exception;
+ 7 | class Foo {}
+
+PACKAGES.toml:3:11
+ 1 | [packages]
+ 2 | 
+ 3 | [packages.pkg1]
+   |           ^^^^ [4]
+ 4 | include_paths=["//"]
+ 5 | 
+
 error: Typing[4472] Cannot access class `Foo` defined in package `pkg2` which may not be available [1]
 -> `Foo` is defined in cross_package_enforceable_type_alias_signatures.php--foo.php [2]
 -> `Foo` belongs to package `pkg2` by this package override [3]
@@ -62,4 +251,125 @@ PACKAGES.toml:3:11
  4 | include_paths=["//"]
  5 | 
 
-2 errors found
+error: Typing[4472] Cannot access type alias used as an enforceable type hint `TShape` defined in package `pkg2` which may not be available [1]
+-> `TShape` is defined in cross_package_enforceable_type_alias_signatures.php--foo.php [2]
+-> `TShape` belongs to package `pkg2` by this package override [3]
+-> package `pkg1` is available because the current file belongs to it by this package definition [4]
+
+cross_package_enforceable_type_alias_signatures.php--bar.php:36:28
+34 | // Parameter modifiers: inout and readonly are enforced; variadic is NOT
+35 | // enforced at runtime, so variadic params should not trigger.
+36 | function inout_param(inout TShape $_): void {}
+   |                            ^^^^^^ [1]
+37 | function readonly_param(readonly TShape $_): void {}
+38 | function variadic_param(TShape ...$_): void {}
+
+cross_package_enforceable_type_alias_signatures.php--foo.php:4:6
+ 1 | <?hh
+ 2 | // package pkg2
+ 3 | <<file: __PackageOverride('pkg2')>>
+   |                           ^^^^^^ [3]
+ 4 | type TShape = shape('x' => int);
+   |      ^^^^^^ [2]
+ 5 | type TInt = int;
+ 6 | type TClassAlias = Exception;
+
+PACKAGES.toml:3:11
+ 1 | [packages]
+ 2 | 
+ 3 | [packages.pkg1]
+   |           ^^^^ [4]
+ 4 | include_paths=["//"]
+ 5 | 
+
+error: Typing[4472] Cannot access type alias used as an enforceable type hint `TShape` defined in package `pkg2` which may not be available [1]
+-> `TShape` is defined in cross_package_enforceable_type_alias_signatures.php--foo.php [2]
+-> `TShape` belongs to package `pkg2` by this package override [3]
+-> package `pkg1` is available because the current file belongs to it by this package definition [4]
+
+cross_package_enforceable_type_alias_signatures.php--bar.php:37:34
+35 | // enforced at runtime, so variadic params should not trigger.
+36 | function inout_param(inout TShape $_): void {}
+37 | function readonly_param(readonly TShape $_): void {}
+   |                                  ^^^^^^ [1]
+38 | function variadic_param(TShape ...$_): void {}
+39 | 
+
+cross_package_enforceable_type_alias_signatures.php--foo.php:4:6
+ 1 | <?hh
+ 2 | // package pkg2
+ 3 | <<file: __PackageOverride('pkg2')>>
+   |                           ^^^^^^ [3]
+ 4 | type TShape = shape('x' => int);
+   |      ^^^^^^ [2]
+ 5 | type TInt = int;
+ 6 | type TClassAlias = Exception;
+
+PACKAGES.toml:3:11
+ 1 | [packages]
+ 2 | 
+ 3 | [packages.pkg1]
+   |           ^^^^ [4]
+ 4 | include_paths=["//"]
+ 5 | 
+
+error: Typing[4472] Cannot access type alias used as an enforceable type hint `TShape` defined in package `pkg2` which may not be available [1]
+-> `TShape` is defined in cross_package_enforceable_type_alias_signatures.php--foo.php [2]
+-> `TShape` belongs to package `pkg2` by this package override [3]
+-> package `pkg1` is available because the current file belongs to it by this package definition [4]
+
+cross_package_enforceable_type_alias_signatures.php--bar.php:42:32
+40 | // Nullable `?T`: still enforced as the same type at runtime, so should error
+41 | // when used at an enforceable position.
+42 | function nullable_param_shape(?TShape $_): void {}
+   |                                ^^^^^^ [1]
+43 | function nullable_return_shape(): ?TShape { return null; }
+
+cross_package_enforceable_type_alias_signatures.php--foo.php:4:6
+ 1 | <?hh
+ 2 | // package pkg2
+ 3 | <<file: __PackageOverride('pkg2')>>
+   |                           ^^^^^^ [3]
+ 4 | type TShape = shape('x' => int);
+   |      ^^^^^^ [2]
+ 5 | type TInt = int;
+ 6 | type TClassAlias = Exception;
+
+PACKAGES.toml:3:11
+ 1 | [packages]
+ 2 | 
+ 3 | [packages.pkg1]
+   |           ^^^^ [4]
+ 4 | include_paths=["//"]
+ 5 | 
+
+error: Typing[4472] Cannot access type alias used as an enforceable type hint `TShape` defined in package `pkg2` which may not be available [1]
+-> `TShape` is defined in cross_package_enforceable_type_alias_signatures.php--foo.php [2]
+-> `TShape` belongs to package `pkg2` by this package override [3]
+-> package `pkg1` is available because the current file belongs to it by this package definition [4]
+
+cross_package_enforceable_type_alias_signatures.php--bar.php:43:36
+41 | // when used at an enforceable position.
+42 | function nullable_param_shape(?TShape $_): void {}
+43 | function nullable_return_shape(): ?TShape { return null; }
+   |                                    ^^^^^^ [1]
+
+cross_package_enforceable_type_alias_signatures.php--foo.php:4:6
+ 1 | <?hh
+ 2 | // package pkg2
+ 3 | <<file: __PackageOverride('pkg2')>>
+   |                           ^^^^^^ [3]
+ 4 | type TShape = shape('x' => int);
+   |      ^^^^^^ [2]
+ 5 | type TInt = int;
+ 6 | type TClassAlias = Exception;
+
+PACKAGES.toml:3:11
+ 1 | [packages]
+ 2 | 
+ 3 | [packages.pkg1]
+   |           ^^^^ [4]
+ 4 | include_paths=["//"]
+ 5 | 
+
+12 errors found

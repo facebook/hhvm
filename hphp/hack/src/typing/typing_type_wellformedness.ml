@@ -325,11 +325,7 @@ let hints ?in_signature env = List.concat_map ~f:(hint ?in_signature env)
 (* [should_check_package_boundary] for a type hint given whether this position
    is runtime-enforced. *)
 let enforceable_type_alias_check env ~is_enforceable =
-  if
-    Env.package_allow_enforceable_type_alias_violations env.tenv
-    || (not is_enforceable)
-    || env.in_interface
-  then
+  if (not is_enforceable) || env.in_interface then
     `No
   else
     Typing_error.Primary.Package.(`Yes Enforceable_type_alias)

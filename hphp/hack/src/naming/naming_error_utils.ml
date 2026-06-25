@@ -524,7 +524,7 @@ let this_type_forbidden pos in_extends in_req_extends =
     if in_extends then
       "This type `this` cannot be used in an `extends` clause"
     else if in_req_extends then
-      "This type `this` cannot be used in an `require extends` clause`"
+      "This type `this` cannot be used in a `require extends` clause"
     else
       "The type `this` cannot be used as a constraint on a class generic, or as the type of a static member variable"
   in

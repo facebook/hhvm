@@ -211,6 +211,7 @@ cdef class StructInfo:
     cdef tuple[FieldInfo] fields
     cdef dict name_to_index
     cdef bint enable_get_locally_set_fields
+    cdef bint enable_isset_deprecated
     cdef void _fill_struct_info(self) except *
     cdef void _initialize_default_values(self) except *
 

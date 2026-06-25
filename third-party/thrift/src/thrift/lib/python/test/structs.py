@@ -23,7 +23,7 @@ import math
 import sys
 import types
 import unittest
-from typing import Any, Callable, cast as typing_cast, Type, TypeVar
+from typing import Any, cast as typing_cast, Type, TypeVar
 from unittest import mock
 
 import test_thrift.thrift_mutable_types as mutable_test_types
@@ -63,7 +63,6 @@ from test_thrift.thrift_types import (
     Perm,
     Reserved,
     Runtime,
-    SimpleStruct,
     StringBucket,
     StrList2D,
     StructDisabledFieldCache,
@@ -72,7 +71,6 @@ from test_thrift.thrift_types import (
     StructWithMap,
     UnusedError,
 )
-from thrift.python.exceptions import GeneratedError
 from thrift.python.mutable_types import (
     _ThriftListWrapper,
     _ThriftMapWrapper,
@@ -82,18 +80,7 @@ from thrift.python.mutable_types import (
     to_thrift_set,
 )
 from thrift.python.protocol import Protocol
-from thrift.python.types import (
-    get_locally_set_fields,
-    Struct,
-    StructOrUnion,
-    update_nested_field,
-)
-
-# `isset_DEPRECATED` is intentionally excluded from `types.pyi`, so reference it
-# through the module to keep the suppression in a single place.
-isset_DEPRECATED: Callable[[StructOrUnion | GeneratedError], dict[str, bool]] = (
-    thrift.python.types.isset_DEPRECATED  # pyre-ignore[16]: not declared in types.pyi
-)
+from thrift.python.types import get_locally_set_fields, Struct, update_nested_field
 
 ListT = TypeVar("ListT")
 SetT = TypeVar("SetT")
@@ -156,46 +143,9 @@ class StructTestsParameterized(unittest.TestCase):
         )
         # pyre-ignore[16]: has no attribute `serializer_module`
         self.serializer: types.ModuleType = self.serializer_module
-        # `isset_DEPRECATED` only supports immutable types. The mutable `_isset`
-        # has been removed, so isset assertions below are guarded by
-        # `is_mutable_run` to run on the immutable parameterization only.
-        self.isset: Callable[[StructOrUnion | GeneratedError], dict[str, bool]] = (
-            isset_DEPRECATED
-        )
 
     def to_list(self, list_data: list[ListT]) -> list[ListT] | _ThriftListWrapper:
         return to_thrift_list(list_data) if self.is_mutable_run else list_data
-
-    def test_isset_Struct(self) -> None:
-        # `isset` is not supported for mutable types.
-        if self.is_mutable_run:
-            return
-        to_serialize = self.OptionalFile(name="/dev/null", type=8)
-        serialized = self.serializer.serialize_iobuf(to_serialize)
-        file = self.serializer.deserialize(self.File, serialized)
-        self.assertTrue(self.isset(file)["type"])
-        self.assertFalse(self.isset(file)["permissions"])
-
-        to_serialize = self.OptionalFile(name="/dev/null")
-        serialized = self.serializer.serialize_iobuf(to_serialize)
-        file = self.serializer.deserialize(self.File, serialized)
-        self.assertEqual(file.type, self.Kind.REGULAR)
-        self.assertFalse(self.isset(file)["type"])
-
-    def test_isset_Error(self) -> None:
-        # `isset` is not supported for mutable types.
-        if self.is_mutable_run:
-            return
-        e = self.UnusedError(message="ACK")
-        self.assertTrue(self.isset(e)["message"])
-
-    def test_isset_Union(self) -> None:
-        # `isset` is not supported for mutable types.
-        if self.is_mutable_run:
-            return
-        i = self.Integers(large=2)
-        with self.assertRaises(TypeError):
-            self.isset(i)["large"]
 
     def test_no_dict(self) -> None:
         with self.assertRaises(AttributeError):
@@ -224,29 +174,23 @@ class StructTestsParameterized(unittest.TestCase):
         y = z(values=None)
         self.assertIsNone(y.values)
 
-    def test_call_preserves_isset_single_field_struct(self) -> None:
+    def test_call_preserves_single_field_struct(self) -> None:
         # Regression test for the copy-then-update `Struct.__call__`
-        # reimplementation. The "isset" flags are copied with
-        # `PyBytes_FromStringAndSize(ptr, n)` and then mutated in place by
-        # `setStructIsset`. For a struct whose isset array is a single byte
-        # (exactly one field), that call returns one of CPython's interned
-        # single-byte `bytes` singletons instead of a fresh buffer. Two such
-        # structs then share the same isset object, so mutating one corrupts the
-        # other: the field stays readable in memory but is silently dropped on
-        # serialization.
+        # reimplementation. For a struct with exactly one field, an internal
+        # single-byte buffer can alias one of CPython's interned single-byte
+        # `bytes` singletons instead of a fresh buffer. Two such structs then
+        # share the same object, so mutating one corrupts the other: the field
+        # stays readable in memory but is silently dropped on serialization.
         #
-        # `Optionals` has exactly one (optional) field, so its isset array is a
-        # single byte. Deriving two values from the same instance -- one setting
-        # the field, one clearing it -- triggers the shared-singleton clobber.
+        # `Optionals` has exactly one (optional) field, so deriving two values
+        # from the same instance -- one setting the field, one clearing it --
+        # triggers the shared-singleton clobber.
         base = self.Optionals()
         # pyre-ignore[6]: TODO: Thrift-Container init
         with_values = base(values=self.to_list(["a", "b", "c"]))
-        # Clearing the field on a sibling copy must not disturb `with_values`.
+        # Clearing the field on a sibling copy must not disturb `with_values` ...
         _ = base(values=None)
 
-        # The isset flag must still be set (immutable only) ...
-        if not self.is_mutable_run:
-            self.assertTrue(self.isset(with_values)["values"])
         # ... so the value survives a serialization round trip.
         serialized = self.serializer.serialize_iobuf(with_values)
         roundtrip = self.serializer.deserialize(self.Optionals, serialized)
@@ -487,46 +431,27 @@ class StructTestsParameterized(unittest.TestCase):
             self.assertIsNone(m.opt_int)
             self.assertIsNone(m.opt_enum)
 
-        def assert_isset(m: mixed) -> None:
-            # `isset` is not supported for mutable types.
-            if self.is_mutable_run:
-                return
-            isset = self.isset(m)
-            for fld_name, _ in mixed:
-                if not fld_name.startswith("opt_"):
-                    continue
-                self.assertFalse(isset[fld_name], fld_name)
-
         # constructor
         m = self.mixed()
         assert_mixed(m)
-        assert_isset(m)
 
         # call operator
         m = m(some_field_="don't care")
         assert_mixed(m)
-        assert_isset(m)
 
         # serialization round-trip
         m = self.serializer.deserialize(self.mixed, self.serializer.serialize(m))
         assert_mixed(m)
-        assert_isset(m)
 
         ### Now with explicit `None` set
         m = self.mixed(opt_field=None)
         self.assertIsNone(m.opt_field)
-        if not self.is_mutable_run:
-            self.assertFalse(self.isset(m)["opt_field"])
 
         m = m(opt_field=None)
         self.assertIsNone(m.opt_field)
-        if not self.is_mutable_run:
-            self.assertFalse(self.isset(m)["opt_field"])
 
         m = self.serializer.deserialize(self.mixed, self.serializer.serialize(m))
         self.assertIsNone(m.opt_field)
-        if not self.is_mutable_run:
-            self.assertFalse(self.isset(m)["opt_field"])
 
     def test_getattr(self) -> None:
         e = self.easy(val=1, an_int=self.Integers(small=300), name="foo")
@@ -835,39 +760,6 @@ class StructTests(unittest.TestCase):
                     "a.b.c.val": 256,
                 },
             )
-
-    def test_isset_struct_for_equality_and_hash(self) -> None:
-        """
-        Test that isset flags don't affect struct equality and hash.
-        """
-        # Create s1 with some fields explicitly set to default value (isset=true)
-        s1 = SimpleStruct(value=0, name="", city="NY")
-
-        # Create s2 without setting the value and name (isset=false, uses default)
-        s2 = SimpleStruct(city="NY")
-
-        self.assertEqual(s1, s2)
-        self.assertEqual(hash(s1), hash(s2))
-        self.assertEqual(len({s1, s2}), 1)
-
-        # But isset flags should differ
-        self.assertNotEqual(isset_DEPRECATED(s1), isset_DEPRECATED(s2))
-
-        # s1 has fields explicitly set
-        self.assertTrue(isset_DEPRECATED(s1)["value"])
-        self.assertTrue(isset_DEPRECATED(s1)["name"])
-        self.assertTrue(isset_DEPRECATED(s1)["city"])
-        self.assertEqual(
-            isset_DEPRECATED(s1), {"name": True, "value": True, "city": True}
-        )
-
-        # s2 has fields unset (using defaults)
-        self.assertFalse(isset_DEPRECATED(s2)["value"])
-        self.assertFalse(isset_DEPRECATED(s2)["name"])
-        self.assertTrue(isset_DEPRECATED(s2)["city"])
-        self.assertEqual(
-            isset_DEPRECATED(s2), {"name": False, "value": False, "city": True}
-        )
 
     def test_struct_with_map_field_insertion_order(self) -> None:
         """

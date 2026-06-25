@@ -308,7 +308,9 @@ class GeneratedErrorMeta(type):
             )
         fields = dct.pop('_fbthrift_SPEC', ())
         num_fields = len(fields)
-        dct["_fbthrift_struct_info"] = StructInfo(name, fields)
+        cdef StructInfo struct_info = StructInfo(name, fields)
+        struct_info.enable_isset_deprecated = dct.pop('_fbthrift_enable_isset_deprecated', False)
+        dct["_fbthrift_struct_info"] = struct_info
         for i, f in enumerate(fields):
             dct[f.py_name] = make_fget_error(i)
         all_bases = bases if bases else (GeneratedError,)

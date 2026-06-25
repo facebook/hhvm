@@ -2189,8 +2189,10 @@ class StructMeta(type):
         fields = dct.pop('_fbthrift_SPEC', ())
 
         cdef bint enable_get_locally_set_fields = dct.pop('_fbthrift_enable_get_locally_set_fields', False)
+        cdef bint enable_isset_deprecated = dct.pop('_fbthrift_enable_isset_deprecated', False)
         cdef StructInfo struct_info = StructInfo(cls_name, fields)
         struct_info.enable_get_locally_set_fields = enable_get_locally_set_fields
+        struct_info.enable_isset_deprecated = enable_isset_deprecated
         dct["_fbthrift_struct_info"] = struct_info
 
         cdef list slots = []
@@ -2984,6 +2986,10 @@ def fill_specs(*structured_thrift_classes):
 
 def isset_DEPRECATED(StructOrError struct):
     cdef StructInfo info = struct._fbthrift_struct_info
+    if not info.enable_isset_deprecated:
+        raise AttributeError(
+            f"{type(struct).__name__} does not support isset inspection."
+        )
     isset_bytes = struct._fbthrift_data[0]
     return {
         name: bool(isset_bytes[index])

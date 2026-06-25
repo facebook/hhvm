@@ -32,6 +32,13 @@ val gconst_def : Provider_context.t -> Nast.gconst -> Tast.gconst
 
 val module_def : Provider_context.t -> Nast.module_def -> Tast.module_def
 
+(** Apply a file-level [<<file: __EnableUnstableFeatures(...)>>] attribute to the
+    typechecker options carried by the context. Per-file check entry points must
+    run this over a definition's file attributes before checking it, otherwise
+    feature gating fires spuriously for definitions that opted into the feature. *)
+val set_tcopt_unstable_features :
+  Provider_context.t -> Nast.file_attribute -> Provider_context.t
+
 (** Run typing on the given named AST (NAST) to produced a typed AST (TAST).
 
 Set [do_tast_checks] to [false] to skip running TAST checks on the resulting

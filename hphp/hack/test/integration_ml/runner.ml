@@ -25,6 +25,8 @@ let tests =
     ("ide/ide_parsing_errors", run Test_ide_parsing_errors.test);
     ("ide/naming_errors", run Test_naming_errors.test);
     ("ide/override", run Test_override.test);
+    ( "ide/union_intersection_type_hints_single_file",
+      run Test_union_intersection_type_hints_single_file.test );
     ("ide/remove_function", run Test_remove_function.test);
     ("ide/remove_parent", run Test_remove_parent.test);
     ("ide/unsaved_changes", run Test_unsaved_changes.test);

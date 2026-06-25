@@ -16,6 +16,7 @@
   test_ide_parsing_errors
   test_naming_errors
   test_override
+  test_union_intersection_type_hints_single_file
   test_remove_function
   test_remove_parent
   test_unsaved_changes)
@@ -94,6 +95,12 @@
   (run ../test_all.exe ide/override)))
 
 (rule
+ (alias union_intersection_type_hints_single_file)
+ (deps ../test_all.exe)
+ (action
+  (run ../test_all.exe ide/union_intersection_type_hints_single_file)))
+
+(rule
  (alias remove_parent)
  (deps ../test_all.exe)
  (action
@@ -131,6 +138,7 @@
   (alias diagnostics_in_closed_file)
   (alias naming_errors)
   (alias override)
+  (alias union_intersection_type_hints_single_file)
   (alias remove_parent)
   (alias failed_naming)
   (alias unsaved_changes)

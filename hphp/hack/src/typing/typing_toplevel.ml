@@ -442,6 +442,56 @@ let module_def ctx md =
     Aast.md_file_attributes = file_attributes;
   }
 
+(* Apply the effect of a file-level [<<file: __EnableUnstableFeatures(...)>>]
+   attribute to the typechecker options carried by [ctx]. Both per-file
+   check entry points (this module's [nast_to_tast] and
+   [Typing_check_job.calc_errors_and_tast]) must run this before checking a
+   definition, otherwise feature gating (e.g. [__GatedByFeatureFlag]) fires
+   spuriously for definitions that legitimately opted into an unstable feature. *)
+let set_tcopt_unstable_features ctx { Aast.fa_user_attributes; _ } =
+  match
+    Naming_attributes.find
+      SN.UserAttributes.uaEnableUnstableFeatures
+      fa_user_attributes
+  with
+  | None -> ctx
+  | Some { ua_name = _; ua_params } ->
+    List.fold ua_params ~init:ctx ~f:(fun ctx (_, _, feature) ->
+        match feature with
+        | Aast.String s ->
+          (* Always add to the unstable features set *)
+          let ctx =
+            Provider_context.map_tcopt
+              ~f:(fun t ->
+                GlobalOptions.
+                  {
+                    t with
+                    tco_enabled_unstable_features =
+                      SSet.add s t.tco_enabled_unstable_features;
+                  })
+              ctx
+          in
+          (* Then set any feature-specific options *)
+          let ctx =
+            if String.equal s SN.UnstableFeatures.expression_trees then
+              Provider_context.map_tcopt
+                ~f:(fun t ->
+                  TypecheckerOptions.set_tco_enable_expression_trees t true)
+                ctx
+            else
+              ctx
+          in
+          let ctx =
+            if String.equal s SN.UnstableFeatures.recursive_case_types then
+              Provider_context.map_tcopt
+                ~f:TypecheckerOptions.enable_recursive_case_types
+                ctx
+            else
+              ctx
+          in
+          ctx
+        | _ -> ctx)
+
 let nast_to_tast ~(do_tast_checks : bool) (ctx : Provider_context.t) nast :
     Tast.program Tast_with_dynamic.t =
   let convert_def def =
@@ -451,6 +501,12 @@ let nast_to_tast ~(do_tast_checks : bool) (ctx : Provider_context.t) nast :
      * if an error had already been registered e.g. in naming
      *)
     | Fun f -> begin
+      let ctx =
+        List.fold
+          f.Aast.fd_file_attributes
+          ~init:ctx
+          ~f:set_tcopt_unstable_features
+      in
       match fun_def ctx f with
       | Some fs -> Some (Tast_with_dynamic.map ~f:(fun f -> Aast.Fun f) fs)
       | None -> None
@@ -460,10 +516,22 @@ let nast_to_tast ~(do_tast_checks : bool) (ctx : Provider_context.t) nast :
         (Tast_with_dynamic.mk_without_dynamic
         @@ Aast.Constant (gconst_def ctx gc))
     | Typedef td ->
+      let ctx =
+        List.fold
+          td.Aast.t_file_attributes
+          ~init:ctx
+          ~f:set_tcopt_unstable_features
+      in
       Some
         (Tast_with_dynamic.mk_without_dynamic
         @@ Aast.Typedef (typedef_def ctx td))
     | Class c -> begin
+      let ctx =
+        List.fold
+          c.Aast.c_file_attributes
+          ~init:ctx
+          ~f:set_tcopt_unstable_features
+      in
       match class_def ctx c with
       | Some cs -> Some (Tast_with_dynamic.map ~f:(fun c -> Aast.Class c) cs)
       | None -> None

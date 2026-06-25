@@ -256,6 +256,13 @@ type t = {
   tco_package_allow_as_expression_violations: bool;
       (** Option for package support to bypass package boundary violation errors on types used
           in as/?as expressions *)
+  tco_package_allow_enforceable_enum_violations: bool;
+      (** Scopes the class-like carve-out to genuine classes and interfaces.
+          Default [true] preserves the carve-out's current behavior: when it is
+          on it also suppresses errors for enums, which are enforced by their
+          base type rather than by name. Set to [false] to keep reporting them —
+          unlike classes/interfaces, an enum is not covered by the class-name
+          [Cross_pkg_access] check. *)
   re_no_cache: bool;
       (** Disable RE cache when calling hh_distc. Useful for performance testing.
         Corresponds to the `--no-cache` options of hh_distc. *)
@@ -384,6 +391,7 @@ val set :
   ?tco_package_allow_classconst_violations:bool ->
   ?tco_package_allow_all_tconst_violations:bool ->
   ?tco_package_allow_as_expression_violations:bool ->
+  ?tco_package_allow_enforceable_enum_violations:bool ->
   ?re_no_cache:bool ->
   ?hh_distc_should_disable_trace_store:bool ->
   ?hh_distc_exponential_backoff_num_retries:int ->

@@ -328,8 +328,19 @@ and check_type_integrity
     | Decl_entry.Found (Env.ClassResult class_info) ->
       let should_check_package_boundary =
         match should_check_package_boundary with
-        (* Carve out class-result references at enforceable positions. *)
-        | `Yes Typing_error.Primary.Package.Enforceable_type_alias -> `No
+        (* Class/interface are covered by the class-name access check, so carve
+           them out (and enums too when enum violations are allowed). *)
+        | `Yes Typing_error.Primary.Package.Enforceable_type_alias
+          when Env.package_allow_enforceable_enum_violations env
+               || Ast_defs.is_c_class (Cls.kind class_info)
+               || Ast_defs.is_c_interface (Cls.kind class_info) ->
+          `No
+        (* An enum is enforced by its base type, not its name, so the class-name
+           check does not cover it; report it specifically. Any other kind (e.g.
+           a trait or enum class reaching here) keeps the generic diagnostic. *)
+        | `Yes Typing_error.Primary.Package.Enforceable_type_alias
+          when Ast_defs.is_c_enum (Cls.kind class_info) ->
+          `Yes Typing_error.Primary.Package.Enforceable_enum
         | other -> other
       in
       (let (errs, linter_errs) =

@@ -1,0 +1,32 @@
+error: Typing[4472] Cannot access enum used as an enforceable type hint `E` defined in package `pkg2` which may not be available [1]
+-> `E` is defined in enum.php--foo.php [2]
+-> `E` belongs to package `pkg2` by this package override [3]
+-> package `pkg1` is available because the current file belongs to it by this package definition [4]
+
+enum.php--bar.php:5:21
+3 | 
+4 | // Enum is base-type-enforced, not name-enforced: it errors when non-class-like violations are disallowed, unlike the class/interface which stay carved out.
+5 | function param_enum(E $_): void {}
+  |                     ^ [1]
+6 | function param_class(C $_): void {}
+7 | function param_interface(I $_): void {}
+
+enum.php--foo.php:4:6
+1 | <?hh
+2 | // package pkg2
+3 | <<file: __PackageOverride('pkg2')>>
+  |                           ^^^^^^ [3]
+4 | enum E: int { A = 1; }
+  |      ^ [2]
+5 | class C {}
+6 | interface I {}
+
+PACKAGES.toml:3:11
+1 | [packages]
+2 | 
+3 | [packages.pkg1]
+  |           ^^^^ [4]
+4 | include_paths=["//"]
+5 | 
+
+1 error found

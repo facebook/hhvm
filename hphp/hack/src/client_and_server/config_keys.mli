@@ -176,6 +176,8 @@ module Hhconfig : sig
 
   val package_allow_as_expression_violations : string
 
+  val package_allow_enforceable_enum_violations : string
+
   val package_allow_all_tconst_violations : string
 
   val package_allow_classconst_violations : string

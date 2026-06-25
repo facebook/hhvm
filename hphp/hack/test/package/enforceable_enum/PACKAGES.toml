@@ -1,0 +1,6 @@
+[packages]
+
+[packages.pkg1]
+include_paths=["//"]
+
+[packages.pkg2]

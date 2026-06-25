@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<e46c1b443389f067f08599d174ace635>>
+// @generated SignedSource<<f45cf57cf9f212d3be6bf4449108705a>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -360,6 +360,13 @@ pub struct GlobalOptions {
     /// Option for package support to bypass package boundary violation errors on types used
     /// in as/?as expressions
     pub tco_package_allow_as_expression_violations: bool,
+    /// Scopes the class-like carve-out to genuine classes and interfaces.
+    /// Default [true] preserves the carve-out's current behavior: when it is
+    /// on it also suppresses errors for enums, which are enforced by their
+    /// base type rather than by name. Set to [false] to keep reporting them —
+    /// unlike classes/interfaces, an enum is not covered by the class-name
+    /// [Cross_pkg_access] check.
+    pub tco_package_allow_enforceable_enum_violations: bool,
     /// Disable RE cache when calling hh_distc. Useful for performance testing.
     /// Corresponds to the `--no-cache` options of hh_distc.
     pub re_no_cache: bool,

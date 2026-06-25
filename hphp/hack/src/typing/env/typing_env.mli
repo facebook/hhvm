@@ -642,6 +642,8 @@ val package_allow_all_tconst_violations : env -> bool
 
 val package_allow_as_expression_violations : env -> bool
 
+val package_allow_enforceable_enum_violations : env -> bool
+
 (** Remove solved variable from environment by replacing it by its binding. *)
 val remove_var :
   env ->

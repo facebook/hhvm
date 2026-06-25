@@ -343,6 +343,7 @@ module Primary : sig
       | Generic
       | As_expression
       | Enforceable_type_alias
+      | Enforceable_enum
     [@@deriving show]
 
     val target_symbol_spec_to_string : target_symbol_spec -> string

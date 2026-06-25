@@ -133,6 +133,7 @@ impl Default for GlobalOptions {
             tco_package_allow_classconst_violations: true,
             tco_package_allow_all_tconst_violations: true,
             tco_package_allow_as_expression_violations: true,
+            tco_package_allow_enforceable_enum_violations: true,
             re_no_cache: false,
             hh_distc_should_disable_trace_store: false,
             hh_distc_exponential_backoff_num_retries: 10,

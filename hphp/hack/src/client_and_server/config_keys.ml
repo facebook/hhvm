@@ -191,6 +191,9 @@ module Hhconfig = struct
   let package_allow_as_expression_violations =
     key "package_allow_as_expression_violations"
 
+  let package_allow_enforceable_enum_violations =
+    key "package_allow_enforceable_enum_violations"
+
   let package_allow_all_tconst_violations =
     key "package_allow_all_tconst_violations"
 

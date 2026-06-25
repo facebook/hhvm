@@ -571,6 +571,10 @@ impl HhConfig {
                 "package_allow_as_expression_violations",
                 default.tco_package_allow_as_expression_violations,
             )?,
+            tco_package_allow_enforceable_enum_violations: hhconfig.get_bool_or(
+                "package_allow_enforceable_enum_violations",
+                default.tco_package_allow_enforceable_enum_violations,
+            )?,
             tco_package_exclude_patterns: hhconfig
                 .get_str("package_exclude_patterns")
                 .map_or(default.tco_package_exclude_patterns, parse_svec),

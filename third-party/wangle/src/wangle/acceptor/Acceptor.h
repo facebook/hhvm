@@ -318,7 +318,7 @@ class Acceptor : public folly::AsyncServerSocket::AcceptCallback,
    * Note: unlike dropAllConnections(),
    * this function can be called from any thread.
    */
-  void dropConnections(
+  virtual void dropConnections(
       double pctToDrop,
       std::chrono::milliseconds dropDuration,
       std::chrono::milliseconds roundInterval);

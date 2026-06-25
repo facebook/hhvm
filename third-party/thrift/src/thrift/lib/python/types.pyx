@@ -1406,13 +1406,13 @@ cdef class Struct(StructOrUnion):
             self._fbthrift_field_cache = None
         else:
             self._fbthrift_field_cache = PyTuple_New(len(struct_info.fields))
-        if struct_info.enable_isset_inspection:
+        if struct_info.enable_get_locally_set_fields:
             object.__setattr__(self, '_fbthrift_locally_set_fields', None)
 
     def __init__(self, **kwargs):
         self._initStructTupleWithValues(kwargs)
         cdef StructInfo struct_info = self._fbthrift_struct_info
-        if struct_info.enable_isset_inspection:
+        if struct_info.enable_get_locally_set_fields:
             object.__setattr__(self, '_fbthrift_locally_set_fields', frozenset(
                 k for k, v in kwargs.items() if v is not None
             ))
@@ -1421,7 +1421,7 @@ cdef class Struct(StructOrUnion):
         if not kwargs:
             return self
         cdef StructInfo struct_info = self._fbthrift_struct_info
-        if struct_info.enable_isset_inspection:
+        if struct_info.enable_get_locally_set_fields:
             call_keys = frozenset(
                 k for k, v in kwargs.items() if v is not None
             )
@@ -1481,7 +1481,7 @@ cdef class Struct(StructOrUnion):
                 new_data, struct_info, field_index, self, value
             )
 
-        if struct_info.enable_isset_inspection:
+        if struct_info.enable_get_locally_set_fields:
             isset_fields = self._fbthrift_locally_set_fields
             if isset_fields is not None:
                 updated = (isset_fields | (<frozenset>call_keys)) - (<frozenset>none_keys)
@@ -2188,16 +2188,16 @@ class StructMeta(type):
         # contents of the field spec tuples.
         fields = dct.pop('_fbthrift_SPEC', ())
 
-        cdef bint enable_isset_inspection = dct.pop('_fbthrift_enable_unsafe_isset_inspection', False)
+        cdef bint enable_get_locally_set_fields = dct.pop('_fbthrift_enable_get_locally_set_fields', False)
         cdef StructInfo struct_info = StructInfo(cls_name, fields)
-        struct_info.enable_isset_inspection = enable_isset_inspection
+        struct_info.enable_get_locally_set_fields = enable_get_locally_set_fields
         dct["_fbthrift_struct_info"] = struct_info
 
         cdef list slots = []
         for i, field_info in enumerate(fields):
             slots.append(field_info.py_name)
 
-        if enable_isset_inspection:
+        if enable_get_locally_set_fields:
             slots.append('_fbthrift_locally_set_fields')
         dct["__slots__"] = slots
         all_bases = bases if bases else (Struct,)

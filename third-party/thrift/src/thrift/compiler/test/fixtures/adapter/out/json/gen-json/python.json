@@ -379,7 +379,7 @@
       }
     },
     "EnableUnsafeIssetInspection" : {
-      "lineno" : 276,
+      "lineno" : 272,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -387,11 +387,11 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 276,
+          "line" : 272,
           "column" : 1
         },
         "end" : {
-          "line" : 277,
+          "line" : 273,
           "column" : 38
         }
       }

@@ -35,14 +35,18 @@ namespace HPHP::jit {
 
 namespace {
 
-// track ldimmq values
+// track ldimmq (single quad) and ldimm128 (two quads) values
 struct ImmState {
   ImmState() {}
   ImmState(Immed64 a, Vreg b) : val{a}, base{b} {}
+  ImmState(Immed64 a, Immed64 a2, Vreg b)
+    : is128{true}, val{a}, valHi{a2}, base{b} {}
 
   void reset() { base = Vreg{}; }
 
+  bool is128{false};
   Immed64 val{0};
+  Immed64 valHi{0};
   Vreg base;
 };
 
@@ -66,6 +70,7 @@ bool isMultiword(int64_t imm) {
 Optional<int> reuseCandidate(Env& env, int64_t p, Vreg& reg) {
   for (auto const& elem : env.immStateVec) {
     if (!elem.base.isValid()) continue;
+    if (elem.is128) continue;
     int64_t q = elem.val.q();
     if (((p >= q) && (p < (q + 4095))) ||
         ((p < q) && (q < (p + 4095)))) {
@@ -104,6 +109,32 @@ void reuseImmq(Env& env, const ldimmq& ld, Vlabel b, size_t i) {
     }
   }
   env.immStateVec[i % Cfg::Jit::LdimmqSpan] = ImmState{ld.s, ld.d};
+}
+
+// Exact match for a previously materialized 128-bit immediate.
+Optional<Vreg> reuse128Candidate(Env& env, Immed64 s0, Immed64 s1) {
+  for (auto const& elem : env.immStateVec) {
+    if (!elem.base.isValid()) continue;
+    if (!elem.is128) continue;
+    if (elem.val.q() == s0.q() && elem.valHi.q() == s1.q()) return elem.base;
+  }
+  return std::nullopt;
+}
+
+void reuseImmq(Env& env, const ldimm128& ld, Vlabel b, size_t i) {
+  auto const s0 = ld.s0;
+  auto const s1 = ld.s1;
+  auto const d = ld.d;
+  auto const base = reuse128Candidate(env, s0, s1);
+  if (base.has_value()) {
+    reuseimm_impl(env.unit, b, i, [&] (Vout& v) {
+      v << copy{*base, d};
+    });
+  }
+  // Keep the copied 128-bit value reusable. Unlike ldimmq offset reuse, this
+  // does not build a GP copy chain, and rematerializing ldimm128 can be several
+  // instructions on ARM.
+  env.immStateVec[i % Cfg::Jit::LdimmqSpan] = ImmState{s0, s1, d};
 }
 
 void reuseImmq(Env& env, Vlabel b, size_t i) {

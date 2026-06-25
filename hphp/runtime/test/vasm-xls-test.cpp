@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/base/datatype-macros.h"
+#include "hphp/runtime/test/vasm-regalloc-test-helpers.h"
 #include "hphp/runtime/vm/jit/abi.h"
 #ifdef __aarch64__
 #include "hphp/runtime/vm/jit/abi-arm.h"
@@ -115,6 +116,15 @@ TEST(Vasm, XlsIntXmm) {
   // 32-bit constants are unsigned. make sure not sign-extended
   EXPECT_EQ(test_const(uint32_t(0xffffffff)), 0xffffffffl);
   EXPECT_EQ(test_const(uint32_t(0x80000000)), 0x80000000l);
+}
+
+TEST(Vasm, XlsHandlesLdimm128CopyToStore) {
+  Vunit unit;
+  emitLdimm128CopyToStore(unit);
+
+  allocateRegistersWithXLS(unit, regAllocTestAbi());
+
+  expectLdimm128CopyToStoreAllocated(unit);
 }
 
 }

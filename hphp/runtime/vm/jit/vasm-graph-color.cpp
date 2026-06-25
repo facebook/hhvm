@@ -2276,11 +2276,11 @@ void infer_register_classes(State& state) {
     if (c2 == RegClass::Any) return c1;
     if (c1 == c2) return c1;
     if (c1 == RegClass::AnyNarrow &&
-        (c2 == RegClass::GP || c2 == RegClass::SIMD)) {
+        (c2 == RegClass::GP || c2 == RegClass::SIMD || c2 == RegClass::SIMDWide)) {
       return c2;
     }
     if (c2 == RegClass::AnyNarrow &&
-        (c1 == RegClass::GP || c1 == RegClass::SIMD)) {
+        (c1 == RegClass::GP || c1 == RegClass::SIMD || c1 == RegClass::SIMDWide)) {
       return c1;
     }
     return std::nullopt;

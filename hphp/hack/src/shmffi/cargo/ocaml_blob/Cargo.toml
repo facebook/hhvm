@@ -13,7 +13,7 @@ crate-type = ["lib", "staticlib"]
 
 [dependencies]
 libc = "0.2.186"
-lz4 = "1.24.0"
+lz4 = "1.28.1"
 ocamlrep = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
 shmrs = { version = "0.0.0", path = "../../../shmrs" }
 

@@ -20,7 +20,7 @@ datastore = { version = "0.0.0", path = "../../../hackrs/datastore" }
 hh24_types = { version = "0.0.0", path = "../../../utils/hh24_types" }
 intern = { version = "0.1.0", path = "../../../utils/intern" }
 lru = { version = "0.16.4", default-features = false }
-lz4 = "1.24.0"
+lz4 = "1.28.1"
 md-5 = "0.10"
 measure = { version = "0.0.0", path = "../../../utils/rust/measure" }
 ocaml_blob = { version = "0.0.0", path = "../ocaml_blob" }

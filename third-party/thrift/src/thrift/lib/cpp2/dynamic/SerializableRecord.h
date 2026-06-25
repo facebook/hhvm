@@ -38,8 +38,6 @@
 #include <string_view>
 #include <utility>
 
-// WARNING: This code is highly experimental.
-// DO NOT USE for any production code.
 namespace apache::thrift::type_system {
 
 using FieldId = type::FieldId;

@@ -27,8 +27,6 @@ namespace apache::thrift::type {
 class AnyStruct;
 } // namespace apache::thrift::type
 
-// WARNING: This code is highly experimental.
-// DO NOT USE for any production code.
 namespace apache::thrift::type_system {
 
 using UriView = std::string_view;

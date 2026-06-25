@@ -30,8 +30,6 @@
 #include <string>
 #include <string_view>
 
-// WARNING: This code is highly experimental.
-// DO NOT USE for any production code.
 namespace apache::thrift::type_system {
 
 /**

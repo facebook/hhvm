@@ -154,9 +154,6 @@
 //   - Map:     Key-value associative container
 //   - Struct:  Named, typed fields with field ID access
 //   - Union:   Exactly one active field at a time
-
-// WARNING: This code is highly experimental.
-// DO NOT USE for any production code.
 namespace apache::thrift::dynamic {
 
 // Forward declarations

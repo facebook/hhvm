@@ -191,9 +191,6 @@
 //
 // TypeRef:
 //   A reference to any node (concrete or virtual).
-
-// WARNING: This code is highly experimental.
-// DO NOT USE for any production code.
 namespace apache::thrift::type_system {
 
 /**

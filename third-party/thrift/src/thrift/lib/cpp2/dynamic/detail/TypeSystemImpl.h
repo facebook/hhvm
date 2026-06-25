@@ -39,9 +39,6 @@
 #include <variant>
 #include <vector>
 
-// WARNING: This code is highly experimental.
-// DO NOT USE for any production code.
-//
 // This header contains the shared, flat, owning implementation of the
 // TypeSystem interface (TypeSystemImpl) along with the machinery to populate
 // it from serializable definitions. It is shared between TypeSystemBuilder

@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// WARNING: This code is highly experimental.
-// DO NOT USE for any production code.
 include "thrift/annotation/cpp.thrift"
 include "thrift/annotation/python.thrift"
 include "thrift/lib/thrift/id.thrift"

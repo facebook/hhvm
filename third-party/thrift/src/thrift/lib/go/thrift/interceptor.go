@@ -45,6 +45,14 @@ type interceptorProcessor struct {
 // WrapInterceptor wraps an interceptor around the Processor p
 // such as when running the method returned by that processor it will execute
 // the interceptor instead.
+//
+// Only unary (request/response) processor functions are wrapped. Stream, sink,
+// and bidi functions are passed through untouched: the Interceptor contract is
+// unary-only (it returns a single WritableResult and calls RunContext), and
+// wrapping a non-unary function would hide its RunStreamContext /
+// RunSinkContext / RunBiDiContext methods (interceptorProcessorFunction embeds
+// the ProcessorFunction interface, which does not declare them), so the server
+// would reject the call as "not a streaming function".
 func WrapInterceptor(interceptor Interceptor, p Processor) Processor {
 	if interceptor == nil {
 		return p
@@ -57,12 +65,19 @@ func WrapInterceptor(interceptor Interceptor, p Processor) Processor {
 
 func (p *interceptorProcessor) ProcessorFunctionMap() map[string]types.ProcessorFunction {
 	m := p.Processor.ProcessorFunctionMap()
-	mi := make(map[string]types.ProcessorFunction)
+	mi := make(map[string]types.ProcessorFunction, len(m))
 	for name, pf := range m {
-		mi[name] = &interceptorProcessorFunction{
-			ProcessorFunction: pf,
-			interceptor:       p.interceptor,
-			methodName:        name,
+		switch pf.(type) {
+		case processorFunctionStream, processorFunctionSink, processorFunctionBiDi:
+			// Leave non-unary (stream/sink/bidi) functions untouched so the
+			// server can still dispatch them. See WrapInterceptor's doc for why.
+			mi[name] = pf
+		default:
+			mi[name] = &interceptorProcessorFunction{
+				ProcessorFunction: pf,
+				interceptor:       p.interceptor,
+				methodName:        name,
+			}
 		}
 	}
 	return mi

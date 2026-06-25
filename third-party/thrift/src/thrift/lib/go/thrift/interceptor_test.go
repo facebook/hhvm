@@ -179,3 +179,30 @@ func TestMaybeWrapApplicationException(t *testing.T) {
 		require.Equal(t, dummyErr.Error(), appErr.Error())
 	})
 }
+
+// TestWrapInterceptorPreservesStreaming is the regression guard for streaming:
+// WrapInterceptor must leave non-unary (stream/sink/bidi) processor functions
+// unwrapped (so they still satisfy the server's dispatch interfaces) while still
+// wrapping unary functions. Wrapping a non-unary pfunc would hide its
+// RunStreamContext/RunSinkContext/RunBiDiContext methods and the server would
+// reject the call as "not a streaming function". The Dummy service exposes one
+// of each RPC kind, so it exercises real generated processor functions.
+func TestWrapInterceptorPreservesStreaming(t *testing.T) {
+	processor := dummyif.NewDummyProcessor(&dummy.DummyHandler{})
+	m := WrapInterceptor(dummyInterceptor, processor).ProcessorFunctionMap()
+
+	// Unary methods are wrapped by the interceptor (and must not look streaming).
+	_, ok := m["Echo"].(*interceptorProcessorFunction)
+	require.True(t, ok, "unary method Echo should be wrapped by the interceptor")
+	_, ok = m["Echo"].(processorFunctionStream)
+	require.False(t, ok, "unary method Echo unexpectedly implements streaming")
+
+	// Non-unary methods are passed through untouched so they still satisfy the
+	// server's stream/sink/bidi dispatch interfaces.
+	_, ok = m["StreamOnly"].(processorFunctionStream)
+	require.True(t, ok, "stream method StreamOnly lost RunStreamContext after WrapInterceptor")
+	_, ok = m["SinkOnly"].(processorFunctionSink)
+	require.True(t, ok, "sink method SinkOnly lost RunSinkContext after WrapInterceptor")
+	_, ok = m["BiDiBasic"].(processorFunctionBiDi)
+	require.True(t, ok, "bidi method BiDiBasic lost RunBiDiContext after WrapInterceptor")
+}

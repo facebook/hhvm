@@ -1730,7 +1730,7 @@ class DiffVisitorBase {
       const Object& src, const Object& dst);
   [[nodiscard]] virtual op::AnyPatch diffAny(
       const Object& src, const Object& dst);
-  void diffField(
+  virtual void diffField(
       const Object& src,
       const Object& dst,
       FieldId id,

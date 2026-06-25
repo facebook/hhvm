@@ -615,13 +615,6 @@ void populateStructContainerUnsetFieldsWithDefaultValues(
 
   const FieldValueMap& defaultValues =
       *static_cast<const FieldValueMap*>(structInfo.customExt);
-  // The mutable runtime maintains "set iff value is not None", so it derives
-  // field presence from the value rather than the isset byte array (which is
-  // being removed). The immutable runtime still consults the byte array.
-  [[maybe_unused]] const char* issetFlags = nullptr;
-  if constexpr (!std::is_same_v<Container, ListContainer>) {
-    issetFlags = getDataHolderIssetFlags<Container>(container);
-  }
   for (int i = 0; i < numFields; ++i) {
     const detail::FieldInfo& fieldInfo = structInfo.fieldInfos[i];
     const Py_ssize_t element = i + Container::kFieldStartIndex;
@@ -629,14 +622,10 @@ void populateStructContainerUnsetFieldsWithDefaultValues(
 
     // If the field is already set, this implies that the constructor has
     // already assigned a value to the field. In this case, we skip it and
-    // avoid overwriting it with the default value.
-    bool alreadySet;
-    if constexpr (std::is_same_v<Container, ListContainer>) {
-      alreadySet = oldValue != Py_None;
-    } else {
-      alreadySet = issetFlags[i];
-    }
-    if (alreadySet) {
+    // avoid overwriting it with the default value. Presence is derived from the
+    // value being non-None for both runtimes; the isset byte array is no longer
+    // consulted.
+    if (oldValue != Py_None) {
       continue;
     }
 

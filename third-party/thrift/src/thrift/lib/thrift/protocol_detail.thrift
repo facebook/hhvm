@@ -19,7 +19,7 @@
 include "thrift/annotation/thrift.thrift"
 include "thrift/lib/thrift/standard.thrift"
 include "thrift/annotation/cpp.thrift"
-include "thrift/annotation/hack.thrift"
+
 include "thrift/annotation/rust.thrift"
 cpp_include "thrift/lib/thrift/detail/protocol.h"
 cpp_include "folly/container/F14Map.h"
@@ -106,9 +106,6 @@ union Value {
   14: list<Value> listValue;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.Type{template = "::folly::F14VectorSet"}
-  @hack.SkipCodegen{
-    reason = "Set can only have integer/string/binary/enum values",
-  }
   @cpp.AllowLegacyNonOptionalRef
   @thrift.AllowUnsafeNonSealedKeyType
   15: set<Value> setValue;
@@ -116,7 +113,6 @@ union Value {
   // TODO(dokwon): Migrate to @thrift.Box after resolving incomplete type.
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.Type{template = "::folly::F14FastMap"}
-  @hack.SkipCodegen{reason = "Map keys can only be integer/string/binary/enum"}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.AllowUnsafeNonSealedKeyType
   16: map<Value, Value> mapValue;

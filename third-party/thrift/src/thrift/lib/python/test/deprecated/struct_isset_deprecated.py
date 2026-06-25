@@ -22,7 +22,9 @@ from typing import Callable
 
 import thrift.python.serializer as serializer
 import thrift.python.types
-from test_thrift.thrift_types import (
+from testing.dependency.thrift_types import IncludedStruct
+from thrift.python.exceptions import GeneratedError
+from thrift.python.test.deprecated.isset_deprecated.thrift_types import (
     File,
     Integers,
     Kind,
@@ -32,8 +34,6 @@ from test_thrift.thrift_types import (
     SimpleStruct,
     UnusedError,
 )
-from testing.dependency.thrift_types import IncludedStruct
-from thrift.python.exceptions import GeneratedError
 from thrift.python.types import StructOrUnion
 
 # `isset_DEPRECATED` is intentionally excluded from `types.pyi`, so reference it

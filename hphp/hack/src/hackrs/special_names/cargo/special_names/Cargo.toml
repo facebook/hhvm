@@ -13,5 +13,4 @@ path = "../../special_names.rs"
 [dependencies]
 hash = { version = "0.0.0", path = "../../../../utils/hash" }
 naming_special_names_rust = { version = "0.0.0", path = "../../../../naming" }
-once_cell = "1.21.4"
 pos = { version = "0.0.0", path = "../../../pos/cargo/pos" }

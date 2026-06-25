@@ -5,10 +5,10 @@
 
 use std::ops::Deref;
 use std::ops::DerefMut;
+use std::sync::LazyLock;
 
 use hash::IndexMap;
 use hash::IndexSet;
-use once_cell::sync::Lazy;
 use serde::Deserialize;
 use toml::Spanned;
 // Preserve the order for ease of testing
@@ -34,7 +34,7 @@ pub struct Deployment {
 
 impl<'a> Default for &'a NameSet {
     fn default() -> &'a NameSet {
-        static SET: Lazy<NameSet> = Lazy::new(|| NameSet(IndexSet::default()));
+        static SET: LazyLock<NameSet> = LazyLock::new(|| NameSet(IndexSet::default()));
         &SET
     }
 }

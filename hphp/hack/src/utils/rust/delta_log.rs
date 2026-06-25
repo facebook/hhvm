@@ -1,11 +1,10 @@
+use std::sync::LazyLock;
 use std::time::Duration;
 use std::time::Instant;
 
-use once_cell::sync::Lazy;
-
-static LOG_START: Lazy<Instant> = Lazy::new(Instant::now);
-static LOG_LAST: Lazy<std::sync::RwLock<Instant>> =
-    Lazy::new(|| std::sync::RwLock::new(Instant::now()));
+static LOG_START: LazyLock<Instant> = LazyLock::new(Instant::now);
+static LOG_LAST: LazyLock<std::sync::RwLock<Instant>> =
+    LazyLock::new(|| std::sync::RwLock::new(Instant::now()));
 
 fn log_durations() -> (Duration, Duration) {
     let mut last = LOG_LAST.write().unwrap();

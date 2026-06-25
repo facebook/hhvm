@@ -3,8 +3,9 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::sync::LazyLock;
+
 use bstr::ByteSlice;
-use once_cell::sync::Lazy;
 use regex::bytes::Regex;
 
 /// This crate is a port of hphp/hack/src/utils/signed_source.ml, which was
@@ -94,13 +95,14 @@ fn make_signing_token(token: &str) -> String {
 
 static SIGNATURE_RE: &str = r"SignedSource<<([a-f0-9]+)>>";
 
-static SIGN_OR_OLD_TOKEN: Lazy<Regex> =
-    Lazy::new(|| Regex::new(&format!("{}|{}", SIGNATURE_RE, regex::escape(OLD_TOKEN))).unwrap());
+static SIGN_OR_OLD_TOKEN: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(&format!("{}|{}", SIGNATURE_RE, regex::escape(OLD_TOKEN))).unwrap()
+});
 
-static SIGNING_REGEX: Lazy<Regex> =
-    Lazy::new(|| Regex::new(&make_signing_token(SIGNATURE_RE)).unwrap());
+static SIGNING_REGEX: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(&make_signing_token(SIGNATURE_RE)).unwrap());
 
-static TOKEN_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(&regex::escape(TOKEN)).unwrap());
+static TOKEN_REGEX: LazyLock<Regex> = LazyLock::new(|| Regex::new(&regex::escape(TOKEN)).unwrap());
 
 fn hash(data: &[u8]) -> String {
     use md5::Digest;

@@ -4,6 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use std::collections::BTreeMap;
+use std::sync::LazyLock;
 
 use emit_property::PropAndInit;
 use env::Env;
@@ -350,10 +351,10 @@ fn emit_reified_extends_params<'a>(
     emit_adata::typed_value_into_instr(e, tv)
 }
 
-pub(crate) static REIFIED_INIT_METH_NAME: hhbc::Lazy<MethodName> =
-    hhbc::Lazy::new(|| MethodName::intern(string_utils::reified::INIT_METH_NAME));
-pub(crate) static REIFIED_PROP_NAME: hhbc::Lazy<PropName> =
-    hhbc::Lazy::new(|| PropName::intern(string_utils::reified::PROP_NAME));
+pub(crate) static REIFIED_INIT_METH_NAME: LazyLock<MethodName> =
+    LazyLock::new(|| MethodName::intern(string_utils::reified::INIT_METH_NAME));
+pub(crate) static REIFIED_PROP_NAME: LazyLock<PropName> =
+    LazyLock::new(|| PropName::intern(string_utils::reified::PROP_NAME));
 
 fn emit_reified_init_body<'a>(
     e: &mut Emitter,

@@ -1175,7 +1175,6 @@ name = "delta_log"
 version = "0.0.0"
 dependencies = [
  "env_logger",
- "once_cell",
 ]
 
 [[package]]
@@ -2179,7 +2178,6 @@ dependencies = [
  "dashmap",
  "fnv",
  "ocamlrep",
- "once_cell",
  "serde",
 ]
 
@@ -2383,7 +2381,6 @@ dependencies = [
  "bitflags",
  "cc",
  "maplit",
- "once_cell",
 ]
 
 [[package]]
@@ -2559,7 +2556,6 @@ dependencies = [
  "fnv",
  "hashbrown 0.17.1",
  "indexmap 2.14.0",
- "once_cell",
  "parking_lot",
  "rand 0.10.1",
  "serde",
@@ -2961,7 +2957,6 @@ version = "0.0.0"
 dependencies = [
  "hash",
  "ocamlrep",
- "once_cell",
  "parking_lot",
 ]
 
@@ -3432,7 +3427,6 @@ version = "0.0.0"
 dependencies = [
  "anyhow",
  "hash",
- "once_cell",
  "regex",
  "serde",
  "toml 1.1.2+spec-1.1.0",
@@ -4495,7 +4489,6 @@ dependencies = [
  "bstr",
  "hex",
  "md-5",
- "once_cell",
  "regex",
  "thiserror 2.0.18",
 ]
@@ -4642,7 +4635,6 @@ version = "0.0.0"
 dependencies = [
  "hash",
  "naming_special_names_rust",
- "once_cell",
  "pos",
 ]
 
@@ -5206,7 +5198,6 @@ dependencies = [
  "hash",
  "hcons",
  "ocamlrep",
- "once_cell",
  "oxidized",
  "pos",
  "serde",

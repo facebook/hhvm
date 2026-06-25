@@ -15,7 +15,6 @@ eq_modulo_pos = { version = "0.0.0", path = "../../../../utils/eq_modulo_pos" }
 hash = { version = "0.0.0", path = "../../../../utils/hash" }
 hcons = { version = "0.0.0", path = "../../../../hcons" }
 ocamlrep = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
-once_cell = "1.21.4"
 oxidized = { version = "0.0.0", path = "../../../../oxidized" }
 pos = { version = "0.0.0", path = "../../../pos/cargo/pos" }
 serde = { version = "1.0.219", features = ["derive", "rc"] }

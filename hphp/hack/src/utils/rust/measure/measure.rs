@@ -59,8 +59,9 @@
 //! A record does not store the individual measurements, just the aggregate
 //! stats, which are updated online.
 
+use std::sync::LazyLock;
+
 use ocamlrep::ToOcamlRep;
-use once_cell::sync::Lazy;
 use parking_lot::RwLock;
 
 #[derive(Debug, Default)]
@@ -92,7 +93,8 @@ impl From<(&'static str, &'static str)> for RecordName {
     }
 }
 
-static GLOBAL: Lazy<RwLock<Vec<Record>>> = Lazy::new(|| RwLock::new(vec![Default::default()]));
+static GLOBAL: LazyLock<RwLock<Vec<Record>>> =
+    LazyLock::new(|| RwLock::new(vec![Default::default()]));
 
 pub fn push_global() {
     GLOBAL.write().push(Default::default())

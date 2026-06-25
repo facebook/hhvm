@@ -133,10 +133,10 @@ int main(int, char**) {
   printf("// buck2 run :gen-rust > opcodes.rs\n");
   printf("\n");
   printf("pub use crate::{InstrFlags, Inputs, OpcodeData, Outputs, FlavorDesc, ImmType};\n");
-  printf("use once_cell::sync::OnceCell;\n");
+  printf("use std::sync::OnceLock;\n");
   printf("\n");
   printf("pub fn opcode_data() -> &'static [OpcodeData] {\n");
-  printf("    static INSTANCE: OnceCell<Box<[OpcodeData]>> = OnceCell::new();\n");
+  printf("    static INSTANCE: OnceLock<Box<[OpcodeData]>> = OnceLock::new();\n");
   printf("    INSTANCE.get_or_init(|| {\n");
   printf("        vec![\n");
   OPCODES

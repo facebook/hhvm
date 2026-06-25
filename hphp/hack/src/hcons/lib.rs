@@ -8,13 +8,13 @@ use std::hash::Hash;
 use std::hash::Hasher;
 use std::ops::Deref;
 use std::sync::Arc;
+pub use std::sync::LazyLock;
 use std::sync::Weak;
 
 use dashmap::DashMap;
 use dashmap::mapref::entry::Entry;
 use ocamlrep::FromOcamlRep;
 use ocamlrep::ToOcamlRep;
-pub use once_cell::sync::Lazy;
 use serde::Deserialize;
 use serde::Deserializer;
 use serde::Serialize;
@@ -197,14 +197,14 @@ mod test {
 
         impl Consable for (i32, i32) {
             fn conser() -> &'static Conser<Self> {
-                static CONSER: Lazy<Conser<(i32, i32)>> = Lazy::new(Conser::new);
+                static CONSER: LazyLock<Conser<(i32, i32)>> = LazyLock::new(Conser::new);
                 &CONSER
             }
         }
         impl Consable for (Hc<(i32, i32)>, Hc<(i32, i32)>) {
             fn conser() -> &'static Conser<Self> {
-                static CONSER: Lazy<Conser<(Hc<(i32, i32)>, Hc<(i32, i32)>)>> =
-                    Lazy::new(Conser::new);
+                static CONSER: LazyLock<Conser<(Hc<(i32, i32)>, Hc<(i32, i32)>)>> =
+                    LazyLock::new(Conser::new);
                 &CONSER
             }
         }

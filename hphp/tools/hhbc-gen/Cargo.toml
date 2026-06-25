@@ -13,7 +13,6 @@ path = "hhbc.rs"
 [dependencies]
 bitflags = { version = "2.11.1", features = ["serde", "std"], default-features = false }
 maplit = "1.0"
-once_cell = "1.21.4"
 
 [build-dependencies]
 anyhow = "1.0.102"

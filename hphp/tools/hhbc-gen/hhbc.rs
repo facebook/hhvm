@@ -8,9 +8,9 @@
 
 use std::collections::HashMap;
 use std::collections::HashSet;
+use std::sync::OnceLock;
 
 use bitflags::bitflags;
-use once_cell::sync::OnceCell;
 
 #[cfg(fbcode_build)]
 mod opcodes;
@@ -378,7 +378,7 @@ mod fixups {
 
 /// This function is used to apply tweaks to the source opcode data.
 pub fn opcode_data() -> &'static [OpcodeData] {
-    static INSTANCE: OnceCell<Box<[OpcodeData]>> = OnceCell::new();
+    static INSTANCE: OnceLock<Box<[OpcodeData]>> = OnceLock::new();
     INSTANCE.get_or_init(|| fixups::clone_with_fixups(opcodes::opcode_data()))
 }
 

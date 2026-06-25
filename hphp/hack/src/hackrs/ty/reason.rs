@@ -6,12 +6,12 @@
 use std::fmt::Debug;
 use std::hash::Hash;
 use std::sync::Arc;
+use std::sync::LazyLock;
 
 use eq_modulo_pos::EqModuloPos;
 use hcons::Conser;
 use ocamlrep::FromOcamlRep;
 use ocamlrep::ToOcamlRep;
-use once_cell::sync::Lazy;
 use oxidized::ast::FunKind;
 pub use oxidized::typing_reason::ArgPosition;
 pub use oxidized::typing_reason::BlameSource;
@@ -188,7 +188,7 @@ impl Reason for BReason {
 
     #[inline]
     fn decl_ty_conser() -> &'static Conser<decl::Ty_<BReason>> {
-        static CONSER: Lazy<Conser<decl::Ty_<BReason>>> = Lazy::new(Conser::new);
+        static CONSER: LazyLock<Conser<decl::Ty_<BReason>>> = LazyLock::new(Conser::new);
         &CONSER
     }
 }
@@ -239,7 +239,7 @@ impl Reason for NReason {
 
     #[inline]
     fn decl_ty_conser() -> &'static Conser<decl::Ty_<NReason>> {
-        static CONSER: Lazy<Conser<decl::Ty_<NReason>>> = Lazy::new(Conser::new);
+        static CONSER: LazyLock<Conser<decl::Ty_<NReason>>> = LazyLock::new(Conser::new);
         &CONSER
     }
 }

@@ -12,4 +12,3 @@ path = "../delta_log.rs"
 
 [dependencies]
 env_logger = { version = "0.11.10", features = ["color"] }
-once_cell = "1.21.4"

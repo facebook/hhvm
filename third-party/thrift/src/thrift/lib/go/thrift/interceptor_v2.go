@@ -69,17 +69,18 @@ type ServiceInterceptor interface {
 	// value returned by the corresponding OnConnectionEstablished call for this
 	// connection.
 	//
-	// The returned value is the user request state: it is persisted for the
-	// duration of the request and passed unchanged into the matching OnResponse
-	// call as userReqState. The runtime only guarantees this hand-off; the caller
-	// is responsible for type asserting the value back to its concrete type.
-	OnRequest(ctx context.Context, req types.ReadableStruct, userConnState any) (any /* user req state */, error)
+	// The returned context is threaded through the rest of the request lifecycle,
+	// including the matching OnResponse call. Interceptors that need to carry
+	// per-request state are responsible for storing it in the returned context
+	// (for example via context.WithValue) and reading it back in OnResponse.
+	// Returning the unchanged ctx is fine when no state needs to be carried.
+	OnRequest(ctx context.Context, req types.ReadableStruct, userConnState any) (context.Context, error)
 
 	// OnResponse is called when the response is about to be sent back, before the
-	// outgoing response is serialized. userReqState is the value returned by the
-	// corresponding OnRequest call. The caller is responsible for type asserting
-	// it back to its concrete type.
-	OnResponse(ctx context.Context, resp types.WritableStruct, userReqState any) error
+	// outgoing response is serialized. The ctx is the one returned by the
+	// request-path interceptors, so any state an interceptor stored in the
+	// context during OnRequest can be read back here.
+	OnResponse(ctx context.Context, resp types.WritableStruct) error
 
 	// OnConnectionAttempted is called when a client makes a new connection
 	// attempt, before the connection is fully established.
@@ -116,13 +117,14 @@ func (si *BaseServiceInterceptor) OnStartServing(initParams InitParams) error {
 	return nil
 }
 
-// OnRequest implements ServiceInterceptor and is a no-op by default.
-func (si *BaseServiceInterceptor) OnRequest(ctx context.Context, req types.ReadableStruct, userConnState any) (any, error) {
-	return nil, nil
+// OnRequest implements ServiceInterceptor and is a no-op by default, returning
+// the context unchanged.
+func (si *BaseServiceInterceptor) OnRequest(ctx context.Context, req types.ReadableStruct, userConnState any) (context.Context, error) {
+	return ctx, nil
 }
 
 // OnResponse implements ServiceInterceptor and is a no-op by default.
-func (si *BaseServiceInterceptor) OnResponse(ctx context.Context, resp types.WritableStruct, userReqState any) error {
+func (si *BaseServiceInterceptor) OnResponse(ctx context.Context, resp types.WritableStruct) error {
 	return nil
 }
 

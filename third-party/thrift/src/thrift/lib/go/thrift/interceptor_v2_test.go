@@ -34,8 +34,8 @@ import (
 )
 
 // recordingInterceptor is a test ServiceInterceptor that records the order in
-// which its OnRequest/OnResponse callbacks fire, optionally returns a request
-// state from OnRequest, and optionally returns errors from either callback.
+// which its OnRequest/OnResponse callbacks fire, optionally stores per-request
+// state in the context, and optionally returns errors from either callback.
 type recordingInterceptor struct {
 	BaseServiceInterceptor
 	name string
@@ -43,27 +43,49 @@ type recordingInterceptor struct {
 	// shared ordering log across all interceptors in a test
 	log *[]string
 
+	// reqState, when non-nil, is stored in the context returned by OnRequest
+	// (keyed by this interceptor's name) so the paired OnResponse can read it back.
 	reqState     any
 	onRequestErr error
 
-	// userReqState observed by OnResponse, captured for assertions
+	// gotReqState is the state OnResponse read back from the context, captured
+	// for assertions.
 	gotReqState   any
 	onResponseErr error
+
+	// When forceCtx is set, OnRequest returns forceCtxVal instead of the
+	// (sentinel-tagged) incoming context, to exercise the server's defensive
+	// handling of contexts that interceptors fail to thread correctly.
+	forceCtx    bool
+	forceCtxVal context.Context
 }
 
-func (i *recordingInterceptor) OnRequest(_ context.Context, _ types.ReadableStruct, _ any) (any, error) {
+// recordingStateKey keys the per-request state a recordingInterceptor stores in
+// the context, namespaced by interceptor name.
+type recordingStateKey string
+
+func (i *recordingInterceptor) OnRequest(ctx context.Context, _ types.ReadableStruct, _ any) (context.Context, error) {
 	*i.log = append(*i.log, "req:"+i.name)
-	return i.reqState, i.onRequestErr
+	if i.forceCtx {
+		return i.forceCtxVal, i.onRequestErr
+	}
+	if i.reqState != nil {
+		ctx = context.WithValue(ctx, recordingStateKey(i.name), i.reqState)
+	}
+	return ctx, i.onRequestErr
 }
 
-func (i *recordingInterceptor) OnResponse(_ context.Context, _ types.WritableStruct, userReqState any) error {
+func (i *recordingInterceptor) OnResponse(ctx context.Context, _ types.WritableStruct) error {
 	*i.log = append(*i.log, "resp:"+i.name)
-	i.gotReqState = userReqState
+	i.gotReqState = ctx.Value(recordingStateKey(i.name))
 	return i.onResponseErr
 }
 
 func newTestServer(interceptors ...ServiceInterceptor) *server {
-	return &server{interceptors: interceptors}
+	return &server{
+		interceptors: interceptors,
+		log:          func(string, ...any) {},
+	}
 }
 
 func TestRunOnRequestInterceptorsForwardOrder(t *testing.T) {
@@ -109,6 +131,33 @@ func TestRunInterceptorsThreadsRequestState(t *testing.T) {
 	require.Equal(t, "stateA", a.gotReqState)
 	require.Nil(t, b.gotReqState)
 	require.Equal(t, 42, c.gotReqState)
+}
+
+func TestRunOnRequestInterceptorsDiscardsInvalidContext(t *testing.T) {
+	var log []string
+	// a stores state in a valid (sentinel-tagged) context derived from the one
+	// passed in.
+	a := &recordingInterceptor{name: "a", log: &log, reqState: "stateA"}
+	// b returns a fresh context.Background(), which drops the sentinel (and every
+	// request-scoped value). The server must discard it.
+	b := &recordingInterceptor{name: "b", log: &log, forceCtx: true, forceCtxVal: context.Background()}
+	// c returns a nil context. The server must discard it too.
+	c := &recordingInterceptor{name: "c", log: &log, forceCtx: true, forceCtxVal: nil}
+	// d stores state, proving the chain survived b and c.
+	d := &recordingInterceptor{name: "d", log: &log, reqState: "stateD"}
+	s := newTestServer(a, b, c, d)
+
+	ctx, err := s.runOnRequestInterceptors(context.Background(), nil)
+	require.NoError(t, err)
+	require.NotNil(t, ctx)
+
+	err = s.runOnResponseInterceptors(ctx, nil)
+	require.NoError(t, err)
+
+	// a's and d's state survived despite b and c returning invalid contexts that
+	// were discarded.
+	require.Equal(t, "stateA", a.gotReqState)
+	require.Equal(t, "stateD", d.gotReqState)
 }
 
 func TestRunOnRequestInterceptorsKeepsFirstError(t *testing.T) {
@@ -255,10 +304,10 @@ type serverTestInterceptor struct {
 	failOn   map[string]error // method name -> error returned from OnRequest
 }
 
-func (i *serverTestInterceptor) OnRequest(ctx context.Context, _ types.ReadableStruct, _ any) (any, error) {
+func (i *serverTestInterceptor) OnRequest(ctx context.Context, _ types.ReadableStruct, _ any) (context.Context, error) {
 	method := GetRequestContext(ctx).MethodName
 	i.recorder.record(method, i.name)
-	return nil, i.failOn[method]
+	return ctx, i.failOn[method]
 }
 
 // TestServiceInterceptorServer exercises the wired OnRequest behavior end-to-end

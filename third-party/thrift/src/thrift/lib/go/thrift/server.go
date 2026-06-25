@@ -291,39 +291,46 @@ func (s *server) runOnStartServingInterceptors() error {
 	return nil
 }
 
-// runOnRequestInterceptors invokes the OnRequest callback of every registered
-// ServiceInterceptor in forward (registration) order. It is meant to be called
-// by the server's RPC handling paths (oneway, request-response, stream, sink,
-// bidi, etc.) after the incoming request has been deserialized and before the
-// user's handler runs.
+// runOnRequestInterceptors invokes every registered ServiceInterceptor's
+// OnRequest in forward (registration) order, after the request is deserialized
+// and before the handler runs.
 //
-// For every interceptor that returns a non-nil user request state, the state is
-// stored in a derived context keyed by the interceptor instance, so the matching
-// runOnResponseInterceptors call can retrieve it. A new context is derived only
-// for non-nil states to avoid unnecessary allocations. The (possibly derived)
-// context is always returned and must be threaded through the rest of the
-// request.
+// Each interceptor returns the context to use for the rest of the request;
+// interceptors carry per-request state by storing it in that context and reading
+// it back in OnResponse. To protect the chain, the returned context is accepted
+// only if it is non-nil and still carries an unexported sentinel, proving it was
+// derived from the one we passed in; otherwise it is discarded with a warning
+// and the previous context carried forward.
 //
-// All interceptors are always invoked, even if an earlier one returns an error,
-// mirroring the C++ ServiceInterceptor contract where every OnRequest still runs
-// regardless of failures. The first error encountered is returned; a non-nil
-// error signals that the user's handler must not run.
+// All interceptors always run, even if an earlier one errors; the first error is
+// returned and signals that the handler must not run.
 //
-// userConnState is currently always nil: connection-scoped interceptor state is
-// not yet supported.
+// userConnState is currently always nil: connection-scoped state is not yet
+// supported.
 func (s *server) runOnRequestInterceptors(ctx context.Context, req ReadableStruct) (context.Context, error) {
+	if len(s.interceptors) == 0 {
+		return ctx, nil
+	}
+	// interceptorContextSentinelKey marks the context we hand to OnRequest. A
+	// returned context is accepted only if it still carries this sentinel,
+	// proving it was derived from ours and not replaced with nil or a fresh
+	// context that would drop request-scoped values.
+	type interceptorContextSentinelKey struct{}
 	var firstErr error
+	// Tag the context so we can detect a context not derived from this one.
+	ctx = context.WithValue(ctx, interceptorContextSentinelKey{}, struct{}{})
 	for _, interceptor := range s.interceptors {
-		reqState, err := interceptor.OnRequest(ctx, req, nil /* userConnState */)
+		ctxPrime, err := interceptor.OnRequest(ctx, req, nil /* userConnState */)
 		if err != nil && firstErr == nil {
 			firstErr = err
 		}
-		// Persist non-nil request state for the paired OnResponse call, keyed by
-		// the interceptor instance. This is done even when an error occurred so
-		// that every interceptor's OnResponse receives its own state.
-		if reqState != nil {
-			ctx = context.WithValue(ctx, interceptor, reqState)
+		// Discard a nil context, or one missing our sentinel, and keep the
+		// previous one.
+		if ctxPrime == nil || ctxPrime.Value(interceptorContextSentinelKey{}) == nil {
+			s.log("thrift: ServiceInterceptor %T OnRequest returned an invalid context; discarding it", interceptor)
+			continue
 		}
+		ctx = ctxPrime
 	}
 	return ctx, firstErr
 }
@@ -335,10 +342,9 @@ func (s *server) runOnRequestInterceptors(ctx context.Context, req ReadableStruc
 // called by the server's RPC handling paths before the outgoing response is
 // serialized.
 //
-// For each interceptor, the user request state stored by
-// runOnRequestInterceptors is retrieved from the context (keyed by the
-// interceptor instance) and passed back into OnResponse. A nil value is passed
-// when the interceptor returned no state during OnRequest.
+// The ctx passed in is the one returned by runOnRequestInterceptors, so any
+// per-request state an interceptor stored in the context during OnRequest can be
+// read back from ctx in OnResponse.
 //
 // All interceptors are always invoked, even if one returns an error. When
 // multiple interceptors return errors, the last one encountered is returned.
@@ -348,8 +354,7 @@ func (s *server) runOnRequestInterceptors(ctx context.Context, req ReadableStruc
 func (s *server) runOnResponseInterceptors(ctx context.Context, resp WritableStruct) error {
 	var respErr error
 	for _, interceptor := range slices.Backward(s.interceptors) {
-		userReqState := ctx.Value(interceptor)
-		err := interceptor.OnResponse(ctx, resp, userReqState)
+		err := interceptor.OnResponse(ctx, resp)
 		if err != nil {
 			respErr = err
 		}

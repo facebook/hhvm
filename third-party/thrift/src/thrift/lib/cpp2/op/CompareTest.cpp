@@ -15,6 +15,8 @@
  */
 
 #include <array>
+#include <compare>
+#include <string>
 
 #include <thrift/lib/cpp2/op/Compare.h>
 
@@ -25,6 +27,26 @@
 
 namespace apache::thrift::op {
 namespace {
+
+struct CompareThreeWayBeforeLessStringAdapter {
+  [[maybe_unused]] static bool equal(const std::string&, const std::string&) {
+    return false;
+  }
+  [[maybe_unused]] static bool less(
+      const std::string& lhs, const std::string& rhs) {
+    return lhs > rhs;
+  }
+  static std::partial_ordering compareThreeWay(
+      const std::string& lhs, const std::string& rhs) {
+    return lhs <=> rhs;
+  }
+};
+
+struct EqualOnlyStringAdapter {
+  [[maybe_unused]] static bool equal(const std::string&, const std::string&) {
+    return false;
+  }
+};
 
 TEST(CompareTest, IOBuf) {
   using STag = type::cpp_type<folly::IOBuf, type::string_t>;
@@ -47,6 +69,25 @@ TEST(CompareTest, IOBuf) {
   EXPECT_EQ(op::compare<BTag>(one, two), std::partial_ordering::less);
   EXPECT_EQ(op::compare<STag>(two, one), std::partial_ordering::greater);
   EXPECT_EQ(op::compare<BTag>(two, two), std::partial_ordering::equivalent);
+}
+
+TEST(CompareTest, AdapterCompareThreeWayBeforeLessFallback) {
+  using Tag =
+      type::adapted<CompareThreeWayBeforeLessStringAdapter, type::string_t>;
+  const std::string one = "1";
+  const std::string two = "2";
+
+  EXPECT_EQ(compare<Tag>(one, two), std::partial_ordering::less);
+  EXPECT_EQ(compare<Tag>(two, one), std::partial_ordering::greater);
+}
+
+TEST(CompareTest, EqualOnlyAdapterFallsThroughToNativeCompare) {
+  using Tag = type::adapted<EqualOnlyStringAdapter, type::string_t>;
+  const std::string one = "1";
+  const std::string two = "2";
+
+  EXPECT_EQ(compare<Tag>(one, two), std::partial_ordering::less);
+  EXPECT_EQ(compare<Tag>(one, one), std::partial_ordering::equivalent);
 }
 
 TEST(CompareTest, Double) {
@@ -88,6 +129,9 @@ TEST(CompareTest, Double) {
       compare<type::double_t>(
           std::numeric_limits<double>::quiet_NaN(),
           std::numeric_limits<double>::quiet_NaN()),
+      std::partial_ordering::unordered);
+  EXPECT_EQ(
+      compare<type::double_t>(std::numeric_limits<double>::quiet_NaN(), 1.0),
       std::partial_ordering::unordered);
 }
 
@@ -269,18 +313,31 @@ TEST(CompareTest, Struct) {
   test::OneOfEach rhs;
   EXPECT_TRUE(equalTo(lhs, rhs));
   EXPECT_FALSE(lessThan(lhs, rhs));
+  EXPECT_EQ(
+      op::compare<test::OneOfEach>(lhs, rhs),
+      std::partial_ordering::equivalent);
 
   --*lhs.myStruct()->mySubI64();
   EXPECT_FALSE(equalTo(lhs, rhs));
   EXPECT_TRUE(lessThan(lhs, rhs));
+  EXPECT_EQ(
+      op::compare<test::OneOfEach>(lhs, rhs), std::partial_ordering::less);
+  EXPECT_EQ(
+      op::compare<test::OneOfEach>(rhs, lhs), std::partial_ordering::greater);
 
   --*rhs.myStruct()->mySubI64();
   EXPECT_TRUE(equalTo(lhs, rhs));
   EXPECT_FALSE(lessThan(lhs, rhs));
+  EXPECT_EQ(
+      op::compare<test::OneOfEach>(lhs, rhs),
+      std::partial_ordering::equivalent);
 
   // compare lhs with lhs
   EXPECT_TRUE(equalTo(lhs, lhs));
   EXPECT_FALSE(lessThan(lhs, lhs));
+  EXPECT_EQ(
+      op::compare<test::OneOfEach>(lhs, lhs),
+      std::partial_ordering::equivalent);
 }
 
 TEST(CompareTest, UnorderedFields) {
@@ -313,18 +370,33 @@ TEST(CompareTest, Union) {
   u2.myI32() = 1;
   EXPECT_TRUE(lessThan(empty, u1));
   EXPECT_FALSE(equalTo(empty, u1));
+  EXPECT_EQ(
+      op::compare<test::UnionIntegers>(empty, u1), std::partial_ordering::less);
   EXPECT_TRUE(lessThan(u1, u2));
   EXPECT_FALSE(equalTo(u1, u2));
+  EXPECT_EQ(
+      op::compare<test::UnionIntegers>(u1, u2), std::partial_ordering::less);
   EXPECT_FALSE(lessThan(u1, u1));
   EXPECT_TRUE(equalTo(u1, u1));
+  EXPECT_EQ(
+      op::compare<test::UnionIntegers>(u1, u1),
+      std::partial_ordering::equivalent);
   EXPECT_FALSE(lessThan(u2, u1));
   EXPECT_FALSE(equalTo(u2, u1));
+  EXPECT_EQ(
+      op::compare<test::UnionIntegers>(u2, u1), std::partial_ordering::greater);
   EXPECT_FALSE(lessThan(empty, empty));
   EXPECT_TRUE(equalTo(empty, empty));
+  EXPECT_EQ(
+      op::compare<test::UnionIntegers>(empty, empty),
+      std::partial_ordering::equivalent);
 
   u2.myI16() = 10;
   EXPECT_FALSE(lessThan(u1, u2));
   EXPECT_TRUE(equalTo(u1, u2));
+  EXPECT_EQ(
+      op::compare<test::UnionIntegers>(u1, u2),
+      std::partial_ordering::equivalent);
 }
 
 TEST(CompareTest, ListIOBufCompare) {
@@ -373,6 +445,9 @@ TEST(CompareTest, Nan) {
   value.myDouble() = NAN;
   EXPECT_FALSE(detail::StructEquality{}(value, value));
   EXPECT_FALSE(detail::StructLessThan{}(value, value));
+  EXPECT_EQ(
+      op::compare<test::OneOfEach>(value, value),
+      std::partial_ordering::unordered);
 }
 
 TEST(CompareTest, ThriftObjectModelLess_OutOfOrderStruct) {
@@ -412,14 +487,29 @@ TEST(CompareTest, ThriftObjectModelLess_OutOfOrderUnion) {
 
   // operator<: field id compared first, type id 1 < type id 2 → true
   EXPECT_TRUE(lhs < rhs);
+  EXPECT_EQ(
+      op::compare<test::OutOfOrderUnion>(lhs, rhs),
+      std::partial_ordering::less);
   // stable_less: logically, `field_1` compared first. It's set in
   // lhs but unset in rhs: 10 > unset → false
   EXPECT_FALSE(stable_less<test::OutOfOrderUnion>(lhs, rhs));
   // and the reverse
   EXPECT_FALSE(rhs < lhs);
+  EXPECT_EQ(
+      op::compare<test::OutOfOrderUnion>(rhs, lhs),
+      std::partial_ordering::greater);
   EXPECT_TRUE(stable_less<test::OutOfOrderUnion>(rhs, lhs));
 
   // Test empty case
+  EXPECT_EQ(
+      op::compare<test::OutOfOrderUnion>(empty, lhs),
+      std::partial_ordering::less);
+  EXPECT_EQ(
+      op::compare<test::OutOfOrderUnion>(lhs, empty),
+      std::partial_ordering::greater);
+  EXPECT_EQ(
+      op::compare<test::OutOfOrderUnion>(empty, empty),
+      std::partial_ordering::equivalent);
   EXPECT_TRUE(stable_less<test::OutOfOrderUnion>(empty, lhs));
   EXPECT_FALSE(stable_less<test::OutOfOrderUnion>(lhs, empty));
   EXPECT_FALSE(stable_less<test::OutOfOrderUnion>(empty, empty));
@@ -429,6 +519,8 @@ TEST(CompareTest, ThriftObjectModelLess_OutOfOrderUnion) {
   l.u() = lhs;
   r.u() = rhs;
   EXPECT_LT(l, r);
+  EXPECT_EQ(
+      op::compare<test::OutOfOrderNested>(l, r), std::partial_ordering::less);
   EXPECT_FALSE(stable_less<test::OutOfOrderNested>(l, r));
   EXPECT_TRUE(stable_less<test::OutOfOrderNested>(r, l));
 }

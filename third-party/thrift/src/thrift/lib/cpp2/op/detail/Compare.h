@@ -18,6 +18,7 @@
 
 #include <algorithm>
 #include <compare>
+#include <concepts>
 #include <functional>
 #include <memory>
 #include <unordered_map>
@@ -63,12 +64,30 @@ struct IdenticalTo<type::void_t> {
   }
 };
 
+template <typename Tag>
+struct LessThan;
+
+template <typename Tag>
+struct DefaultComparePolicy;
+
+template <
+    typename Tag,
+    template <class...> class ComparePolicy = DefaultComparePolicy,
+    typename = void>
+struct CompareThreeWay;
+
 // The 'less than' operator.
 //
 // For use with ordered containers.
-template <typename Tag = void>
-struct LessThan : std::less<> {
+template <typename Tag>
+struct LessThan {
   static_assert(type::is_concrete_v<Tag>);
+
+  using T = type::native_type<Tag>;
+
+  constexpr bool operator()(const T& lhs, const T& rhs) const {
+    return CompareThreeWay<Tag>{}(lhs, rhs) == std::partial_ordering::less;
+  }
 };
 template <>
 struct LessThan<type::void_t> {
@@ -93,67 +112,83 @@ inline constexpr bool less_than_comparable_v =
 template <typename Tag, typename R = void>
 using if_less_than_comparable = folly::type_t<R, less_than_t<Tag>>;
 
-// A CompareThreeWay implementation that delegates to EqualTo and LessThan.
-template <
-    typename Tag,
-    template <class...> class LessThanType = LessThan,
-    typename T = type::native_type<Tag>,
-    typename = void>
+// A CompareThreeWay implementation that delegates to native comparisons.
+// Thrift-aware behavior is supplied by concrete CompareThreeWay
+// specializations.
+template <typename Tag, typename T = type::native_type<Tag>, typename = void>
 struct DefaultCompareThreeWay {
   static_assert(type::is_concrete_v<Tag>);
 
   constexpr std::partial_ordering operator()(const T& lhs, const T& rhs) const {
-    if (EqualTo<Tag>{}(lhs, rhs)) {
-      return std::partial_ordering::equivalent;
+    if constexpr (requires {
+                    {
+                      lhs <=> rhs
+                    } -> std::convertible_to<std::partial_ordering>;
+                  }) {
+      return lhs <=> rhs;
+    } else {
+      if (std::equal_to<>{}(lhs, rhs)) {
+        return std::partial_ordering::equivalent;
+      }
+      if (std::less<>{}(lhs, rhs)) {
+        return std::partial_ordering::less;
+      }
+      return std::partial_ordering::greater;
     }
-    if (LessThanType<Tag>{}(lhs, rhs)) {
-      return std::partial_ordering::less;
-    }
-    return std::partial_ordering::greater;
   }
 };
 
 // The 'compare three way' operator.
 template <
     typename Tag,
-    template <class...> class LessThanType = LessThan,
-    typename = void>
-struct CompareThreeWay : DefaultCompareThreeWay<Tag, LessThanType> {
+    template <class...> class ComparePolicy,
+    typename Enable>
+struct CompareThreeWay : DefaultCompareThreeWay<Tag> {
 }; // Delegates by default.
 
-template <template <class...> class LessThanType>
-struct CompareThreeWay<type::void_t, LessThanType> {
-  template <typename L, typename R>
-  constexpr std::partial_ordering operator()(const L& lhs, const R& rhs) const {
-    return CompareThreeWay<type::infer_tag<L>, LessThanType>{}(lhs, rhs);
+template <typename Tag>
+struct DefaultComparePolicy {
+  template <typename T>
+  std::partial_ordering operator()(const T& lhs, const T& rhs) const {
+    return CompareThreeWay<Tag, DefaultComparePolicy>{}(lhs, rhs);
+  }
+};
+
+template <>
+struct DefaultComparePolicy<type::void_t> {
+  template <typename T>
+  std::partial_ordering operator()(const T& lhs, const T& rhs) const {
+    return DefaultComparePolicy<type::infer_tag<T>>{}(lhs, rhs);
+  }
+};
+
+template <template <class...> class ComparePolicy>
+struct CompareThreeWay<type::void_t, ComparePolicy> {
+  template <typename T>
+  constexpr std::partial_ordering operator()(const T& lhs, const T& rhs) const {
+    return CompareThreeWay<type::infer_tag<T>, ComparePolicy>{}(lhs, rhs);
   }
 };
 
 // The type returned by a call to `CompareThreeWay::operator()`, if well
 // defined.
-template <typename LTag, typename RTag = LTag>
-using compare_three_way_t = decltype(CompareThreeWay<LTag>{}(
-    std::declval<const type::native_type<LTag>&>(),
-    std::declval<const type::native_type<RTag>&>()));
+template <typename Tag>
+using compare_three_way_t = decltype(CompareThreeWay<Tag>{}(
+    std::declval<const type::native_type<Tag>&>(),
+    std::declval<const type::native_type<Tag>&>()));
 
-// If the given tags are comparable.
-template <typename LTag, typename RTag = LTag>
+// If the given tag is comparable.
+template <typename Tag>
 inline constexpr bool comparable_v =
-    folly::is_detected_v<compare_three_way_t, LTag, RTag>;
+    folly::is_detected_v<compare_three_way_t, Tag>;
 
-// Resolves to R, if the two tags *can* be used together in CompareThreeWay.
-template <
-    typename LTag,
-    typename RTag = LTag,
-    typename R = std::partial_ordering>
-using if_comparable = folly::type_t<R, compare_three_way_t<LTag, RTag>>;
+// Resolves to R, if the tag *can* be used with CompareThreeWay.
+template <typename Tag, typename R = std::partial_ordering>
+using if_comparable = folly::type_t<R, compare_three_way_t<Tag>>;
 
-// Resolves to R, if the two tags *cannot* be used together in CompareThreeWay.
-template <
-    typename LTag,
-    typename RTag = LTag,
-    typename R = std::partial_ordering>
-using if_not_comparable = std::enable_if_t<!comparable_v<LTag, RTag>, R>;
+// Resolves to R, if the tag *cannot* be used with CompareThreeWay.
+template <typename Tag, typename R = std::partial_ordering>
+using if_not_comparable = std::enable_if_t<!comparable_v<Tag>, R>;
 
 // Use bit_cast for floating point identical.
 template <typename F, typename I>
@@ -170,9 +205,9 @@ struct IdenticalTo<type::float_t> : FloatIdenticalTo<float, int32_t> {};
 template <>
 struct IdenticalTo<type::double_t> : FloatIdenticalTo<double, int64_t> {};
 
-template <typename Tag, template <class...> class LessThanType>
+template <typename Tag, template <class...> class ComparePolicy>
   requires type::is_a_v<Tag, type::number_c>
-struct CompareThreeWay<Tag, LessThanType> {
+struct CompareThreeWay<Tag, ComparePolicy> {
   using T = type::native_type<Tag>;
 
   std::partial_ordering operator()(T lhs, T rhs) const {
@@ -192,12 +227,6 @@ struct EqualTo<type::cpp_type<folly::IOBuf, UTag>> : CheckIOBufOp<UTag>,
 template <typename UTag>
 struct EqualTo<type::cpp_type<std::unique_ptr<folly::IOBuf>, UTag>>
     : CheckIOBufOp<UTag>, folly::IOBufEqualTo {};
-template <typename UTag>
-struct LessThan<type::cpp_type<folly::IOBuf, UTag>> : CheckIOBufOp<UTag>,
-                                                      folly::IOBufLess {};
-template <typename UTag>
-struct LessThan<type::cpp_type<std::unique_ptr<folly::IOBuf>, UTag>>
-    : CheckIOBufOp<UTag>, folly::IOBufLess {};
 
 struct IOBufCompareToStd {
   template <typename T>
@@ -206,13 +235,15 @@ struct IOBufCompareToStd {
   }
 };
 
-template <typename UTag>
-struct CompareThreeWay<type::cpp_type<folly::IOBuf, UTag>>
+template <typename UTag, template <class...> class ComparePolicy>
+struct CompareThreeWay<type::cpp_type<folly::IOBuf, UTag>, ComparePolicy>
     : CheckIOBufOp<UTag>, IOBufCompareToStd {};
 
-template <typename UTag>
-struct CompareThreeWay<type::cpp_type<std::unique_ptr<folly::IOBuf>, UTag>>
-    : CheckIOBufOp<UTag>, IOBufCompareToStd {};
+template <typename UTag, template <class...> class ComparePolicy>
+struct CompareThreeWay<
+    type::cpp_type<std::unique_ptr<folly::IOBuf>, UTag>,
+    ComparePolicy> : CheckIOBufOp<UTag>,
+                     IOBufCompareToStd {};
 
 template <class I1, class I2, class Cmp>
 auto lexicographicalCompareThreeWay(I1 f1, I1 l1, I2 f2, I2 l2, Cmp comp)
@@ -250,24 +281,58 @@ template <class T, class Comp>
       l.begin(), l.end(), r.begin(), r.end(), compare_three_way);
 }
 
-template <class T, class E, template <class...> class LessThanType = LessThan>
+template <
+    class T,
+    class E,
+    template <class...> class ComparePolicy = DefaultComparePolicy>
+std::partial_ordering compareLists(const T& lhs, const T& rhs) {
+  return lexicographicalCompareThreeWay(
+      lhs.begin(), lhs.end(), rhs.begin(), rhs.end(), ComparePolicy<E>{});
+}
+
+template <
+    class T,
+    class E,
+    template <class...> class ComparePolicy = DefaultComparePolicy>
+std::partial_ordering compareSets(const T& lhs, const T& rhs) {
+  return sortAndLexicographicalCompareThreeWay(lhs, rhs, ComparePolicy<E>{});
+}
+
+template <
+    class T,
+    class K,
+    class V,
+    template <class...> class ComparePolicy = DefaultComparePolicy>
+std::partial_ordering compareMaps(const T& lhs, const T& rhs) {
+  auto compare_three_way = [](const auto& l, const auto& r) {
+    auto ret = ComparePolicy<K>{}(l.first, r.first);
+    if (ret != std::partial_ordering::equivalent) {
+      return ret;
+    }
+    return ComparePolicy<V>{}(l.second, r.second);
+  };
+
+  return sortAndLexicographicalCompareThreeWay(lhs, rhs, compare_three_way);
+}
+
+template <
+    class T,
+    class E,
+    template <class...> class ComparePolicy = DefaultComparePolicy>
 struct ListLessThan {
-  bool operator()(const T& l, const T& r) const {
-    return lexicographicalCompareThreeWay(
-               l.begin(),
-               l.end(),
-               r.begin(),
-               r.end(),
-               CompareThreeWay<E, LessThanType>{}) ==
+  bool operator()(const T& lhs, const T& rhs) const {
+    return compareLists<T, E, ComparePolicy>(lhs, rhs) ==
         std::partial_ordering::less;
   }
 };
 
-template <class T, class E, template <class...> class LessThanType = LessThan>
+template <
+    class T,
+    class E,
+    template <class...> class ComparePolicy = DefaultComparePolicy>
 struct SetLessThan {
   bool operator()(const T& lhs, const T& rhs) const {
-    return sortAndLexicographicalCompareThreeWay(
-               lhs, rhs, CompareThreeWay<E, LessThanType>{}) ==
+    return compareSets<T, E, ComparePolicy>(lhs, rhs) ==
         std::partial_ordering::less;
   }
 };
@@ -276,18 +341,10 @@ template <
     class T,
     class K,
     class V,
-    template <class...> class LessThanType = LessThan>
+    template <class...> class ComparePolicy = DefaultComparePolicy>
 struct MapLessThan {
   bool operator()(const T& lhs, const T& rhs) const {
-    auto compare_three_way = [](const auto& l, const auto& r) {
-      auto ret = CompareThreeWay<K, LessThanType>{}(l.first, r.first);
-      if (ret != std::partial_ordering::equivalent) {
-        return ret;
-      }
-      return CompareThreeWay<V, LessThanType>{}(l.second, r.second);
-    };
-
-    return sortAndLexicographicalCompareThreeWay(lhs, rhs, compare_three_way) ==
+    return compareMaps<T, K, V, ComparePolicy>(lhs, rhs) ==
         std::partial_ordering::less;
   }
 };
@@ -514,21 +571,120 @@ struct EqualTo<type::cpp_type<T, type::map<KTag, VTag>>>
 template <typename Tag, typename Context>
 struct IdenticalTo<type::field<Tag, Context>> : IdenticalTo<Tag> {};
 
-template <typename VTag>
-struct CompareThreeWay<type::list<VTag>> {
+template <typename VTag, template <class...> class ComparePolicy>
+struct CompareThreeWay<type::list<VTag>, ComparePolicy> {
   template <typename T = type::native_type<type::list<VTag>>>
   std::partial_ordering operator()(const T& l, const T& r) const {
-    return lexicographicalCompareThreeWay(
-        l.begin(), l.end(), r.begin(), r.end(), CompareThreeWay<VTag>{});
+    return compareLists<T, VTag, ComparePolicy>(l, r);
+  }
+};
+
+template <typename T, typename E, template <class...> class ComparePolicy>
+struct CompareThreeWay<type::cpp_type<T, type::list<E>>, ComparePolicy> {
+  std::partial_ordering operator()(const T& l, const T& r) const {
+    return compareLists<T, E, ComparePolicy>(l, r);
+  }
+};
+
+template <typename T, typename E>
+struct CompareThreeWay<type::cpp_type<T, type::list<E>>, DefaultComparePolicy> {
+  std::partial_ordering operator()(const T& l, const T& r) const {
+    // Preserve existing `LessThan` behavior for custom C++ containers: prefer
+    // their native ordering when present under the default policy.
+    if constexpr (folly::is_invocable_v<std::less<>, const T&, const T&>) {
+      return DefaultCompareThreeWay<type::cpp_type<T, type::list<E>>>{}(l, r);
+    } else {
+      return compareLists<T, E>(l, r);
+    }
+  }
+};
+
+template <typename VTag, template <class...> class ComparePolicy>
+struct CompareThreeWay<type::set<VTag>, ComparePolicy> {
+  template <typename T = type::native_type<type::set<VTag>>>
+  std::partial_ordering operator()(const T& l, const T& r) const {
+    return compareSets<T, VTag, ComparePolicy>(l, r);
   }
 };
 
 template <typename VTag>
-struct CompareThreeWay<type::set<VTag>> {
+struct CompareThreeWay<type::set<VTag>, DefaultComparePolicy> {
   template <typename T = type::native_type<type::set<VTag>>>
   std::partial_ordering operator()(const T& l, const T& r) const {
-    return lexicographicalCompareThreeWay(
-        l.begin(), l.end(), r.begin(), r.end(), CompareThreeWay<VTag>{});
+    return compareSets<T, VTag>(l, r);
+  }
+};
+
+template <typename T, typename E, template <class...> class ComparePolicy>
+struct CompareThreeWay<type::cpp_type<T, type::set<E>>, ComparePolicy> {
+  std::partial_ordering operator()(const T& l, const T& r) const {
+    return compareSets<T, E, ComparePolicy>(l, r);
+  }
+};
+
+template <typename T, typename E>
+struct CompareThreeWay<type::cpp_type<T, type::set<E>>, DefaultComparePolicy> {
+  std::partial_ordering operator()(const T& l, const T& r) const {
+    // Preserve existing `LessThan` behavior for custom C++ containers: prefer
+    // their native ordering when present under the default policy.
+    if constexpr (folly::is_invocable_v<std::less<>, const T&, const T&>) {
+      return DefaultCompareThreeWay<type::cpp_type<T, type::set<E>>>{}(l, r);
+    } else {
+      return compareSets<T, E>(l, r);
+    }
+  }
+};
+
+template <typename K, typename V, template <class...> class ComparePolicy>
+struct CompareThreeWay<type::map<K, V>, ComparePolicy> {
+  using map_type = type::native_type<type::map<K, V>>;
+
+  std::partial_ordering operator()(const map_type& l, const map_type& r) const {
+    return compareMaps<map_type, K, V, ComparePolicy>(l, r);
+  }
+};
+
+template <typename K, typename V>
+struct CompareThreeWay<type::map<K, V>, DefaultComparePolicy> {
+  using map_type = type::native_type<type::map<K, V>>;
+
+  std::partial_ordering operator()(const map_type& l, const map_type& r) const {
+    // Preserve existing `LessThan` behavior for maps: prefer native ordering
+    // when present under the default policy.
+    if constexpr (folly::is_invocable_v<
+                      std::less<>,
+                      const map_type&,
+                      const map_type&>) {
+      return DefaultCompareThreeWay<type::map<K, V>>{}(l, r);
+    } else {
+      return compareMaps<map_type, K, V>(l, r);
+    }
+  }
+};
+
+template <
+    typename T,
+    typename K,
+    typename V,
+    template <class...> class ComparePolicy>
+struct CompareThreeWay<type::cpp_type<T, type::map<K, V>>, ComparePolicy> {
+  std::partial_ordering operator()(const T& l, const T& r) const {
+    return compareMaps<T, K, V, ComparePolicy>(l, r);
+  }
+};
+
+template <typename T, typename K, typename V>
+struct CompareThreeWay<
+    type::cpp_type<T, type::map<K, V>>,
+    DefaultComparePolicy> {
+  std::partial_ordering operator()(const T& l, const T& r) const {
+    // Preserve existing `LessThan` behavior for custom C++ containers: prefer
+    // their native ordering when present under the default policy.
+    if constexpr (folly::is_invocable_v<std::less<>, const T&, const T&>) {
+      return DefaultCompareThreeWay<type::cpp_type<T, type::map<K, V>>>{}(l, r);
+    } else {
+      return compareMaps<T, K, V>(l, r);
+    }
   }
 };
 
@@ -547,29 +703,17 @@ struct EqualTo<type::adapted<Adapter, Tag>> {
                              const T&>) {
       return lhs == rhs;
     } else {
-      return EqualTo<Tag>{}(Adapter::toThrift(lhs), Adapter::toThrift(rhs));
+      const auto& thriftLhs = Adapter::toThrift(lhs);
+      const auto& thriftRhs = Adapter::toThrift(rhs);
+      return EqualTo<Tag>{}(thriftLhs, thriftRhs);
     }
   }
 };
-template <typename Adapter, typename Tag>
-struct LessThan<type::adapted<Adapter, Tag>> {
-  using adapted_tag = type::adapted<Adapter, Tag>;
-  static_assert(type::is_concrete_v<adapted_tag>);
-  template <typename T>
-  constexpr bool operator()(const T& lhs, const T& rhs) const {
-    if constexpr (adapt_detail::is_less_adapter_v<Adapter, T>) {
-      return Adapter::less(lhs, rhs);
-    } else if constexpr (folly::
-                             is_invocable_v<std::less<>, const T&, const T&>) {
-      return lhs < rhs;
-    } else {
-      return LessThan<Tag>{}(Adapter::toThrift(lhs), Adapter::toThrift(rhs));
-    }
-  }
-};
-
-template <typename Adapter, typename Tag>
-struct CompareThreeWay<type::adapted<Adapter, Tag>> {
+template <
+    typename Adapter,
+    typename Tag,
+    template <class...> class ComparePolicy>
+struct CompareThreeWay<type::adapted<Adapter, Tag>, ComparePolicy> {
   using adapted_tag = type::adapted<Adapter, Tag>;
   static_assert(type::is_concrete_v<adapted_tag>);
   template <typename T>
@@ -577,13 +721,60 @@ struct CompareThreeWay<type::adapted<Adapter, Tag>> {
     if constexpr (adapt_detail::is_compare_three_way_adapter_v<Adapter, T>) {
       return Adapter::compareThreeWay(lhs, rhs);
     } else {
-      if (EqualTo<adapted_tag>{}(lhs, rhs)) {
+      return compareWithAdapterHooks(lhs, rhs);
+    }
+  }
+
+ private:
+  template <typename T>
+  static constexpr std::partial_ordering compareWithAdapterHooks(
+      const T& lhs, const T& rhs) {
+    if constexpr (adapt_detail::is_less_adapter_v<Adapter, T>) {
+      return compareWithAdapterLess(lhs, rhs);
+    } else if constexpr (folly::
+                             is_invocable_v<std::less<>, const T&, const T&>) {
+      return compareWithNativeLess(lhs, rhs);
+    } else {
+      return compareThrift(lhs, rhs);
+    }
+  }
+
+  template <typename T>
+  static constexpr std::partial_ordering compareWithAdapterLess(
+      const T& lhs, const T& rhs) {
+    if (EqualTo<adapted_tag>{}(lhs, rhs)) {
+      return std::partial_ordering::equivalent;
+    }
+    if (Adapter::less(lhs, rhs)) {
+      return std::partial_ordering::less;
+    }
+    return std::partial_ordering::greater;
+  }
+
+  template <typename T>
+  static constexpr std::partial_ordering compareWithNativeLess(
+      const T& lhs, const T& rhs) {
+    if constexpr (folly::is_invocable_v<std::equal_to<>, const T&, const T&>) {
+      return DefaultCompareThreeWay<adapted_tag, T>{}(lhs, rhs);
+    } else {
+      const auto& thriftLhs = Adapter::toThrift(lhs);
+      const auto& thriftRhs = Adapter::toThrift(rhs);
+      if (EqualTo<Tag>{}(thriftLhs, thriftRhs)) {
         return std::partial_ordering::equivalent;
-      } else if (LessThan<adapted_tag>{}(lhs, rhs)) {
+      }
+      if (std::less<>{}(lhs, rhs)) {
         return std::partial_ordering::less;
       }
       return std::partial_ordering::greater;
     }
+  }
+
+  template <typename T>
+  static constexpr std::partial_ordering compareThrift(
+      const T& lhs, const T& rhs) {
+    const auto& thriftLhs = Adapter::toThrift(lhs);
+    const auto& thriftRhs = Adapter::toThrift(rhs);
+    return ComparePolicy<Tag>{}(thriftLhs, thriftRhs);
   }
 };
 
@@ -592,7 +783,7 @@ enum class FieldIterOrder { Declaration, FieldIdAscending };
 template <
     FieldIterOrder Order,
     typename T,
-    template <class...> class LessThanType = LessThan>
+    template <class...> class ComparePolicy = DefaultComparePolicy>
 std::partial_ordering compareStructFields(const T& lhs, const T& rhs) {
   std::partial_ordering result = std::partial_ordering::equivalent;
   auto compareField = [&](auto id) {
@@ -615,7 +806,7 @@ std::partial_ordering compareStructFields(const T& lhs, const T& rhs) {
       result = std::partial_ordering::greater;
       return;
     }
-    result = CompareThreeWay<Tag, LessThanType>{}(*lhsValue, *rhsValue);
+    result = ComparePolicy<Tag>{}(*lhsValue, *rhsValue);
   };
 
   if constexpr (Order == FieldIterOrder::FieldIdAscending) {
@@ -626,24 +817,104 @@ std::partial_ordering compareStructFields(const T& lhs, const T& rhs) {
   return result;
 }
 
-template <typename T, template <class...> class LessThanType = LessThan>
+template <
+    typename T,
+    template <class...> class ComparePolicy = DefaultComparePolicy>
 std::partial_ordering compareStructFieldsByFieldId(const T& lhs, const T& rhs) {
-  return compareStructFields<FieldIterOrder::FieldIdAscending, T, LessThanType>(
-      lhs, rhs);
+  return compareStructFields<
+      FieldIterOrder::FieldIdAscending,
+      T,
+      ComparePolicy>(lhs, rhs);
 }
 
-template <typename T>
-struct CompareThreeWay<type::struct_t<T>> {
+template <typename T, template <class...> class ComparePolicy>
+struct CompareThreeWay<type::struct_t<T>, ComparePolicy> {
   std::partial_ordering operator()(const T& lhs, const T& rhs) const {
-    return compareStructFields<FieldIterOrder::Declaration, T>(lhs, rhs);
+    return compareStructFields<FieldIterOrder::Declaration, T, ComparePolicy>(
+        lhs, rhs);
   }
 };
 
-template <template <class...> class LessThanType = LessThan>
+template <typename T, template <class...> class ComparePolicy>
+struct CompareThreeWay<type::exception_t<T>, ComparePolicy> {
+  std::partial_ordering operator()(const T& lhs, const T& rhs) const {
+    return compareStructFields<FieldIterOrder::Declaration, T, ComparePolicy>(
+        lhs, rhs);
+  }
+};
+
+template <
+    typename T,
+    template <class...> class ComparePolicy = DefaultComparePolicy>
+std::partial_ordering compareUnions(const T& lhs, const T& rhs) {
+  if (lhs.getType() != rhs.getType()) {
+    // Preserve the existing generated/detail less-than order for unions:
+    // different active fields are ordered by active type id.
+    return lhs.getType() <=> rhs.getType();
+  }
+
+  return invoke_by_field_id<T>(
+      static_cast<FieldId>(lhs.getType()),
+      [&](auto id) {
+        using Id = decltype(id);
+        using Tag = get_type_tag<T, Id>;
+        ::apache::thrift::detail::union_value_unsafe_fn f;
+        return ComparePolicy<Tag>{}(f(get<Id>(lhs)), f(get<Id>(rhs)));
+      },
+      [] {
+        return std::partial_ordering::equivalent; // union is __EMPTY__
+      });
+}
+
+template <
+    typename T,
+    template <class...> class ComparePolicy = DefaultComparePolicy>
+std::partial_ordering compareUnionsByFieldId(const T& lhs, const T& rhs) {
+  if (lhs.getType() == T::Type::__EMPTY__ &&
+      rhs.getType() == T::Type::__EMPTY__) {
+    return std::partial_ordering::equivalent;
+  }
+
+  if (lhs.getType() == T::Type::__EMPTY__) {
+    return std::partial_ordering::less;
+  }
+
+  if (rhs.getType() == T::Type::__EMPTY__) {
+    return std::partial_ordering::greater;
+  }
+
+  if (lhs.getType() != rhs.getType()) {
+    // Under the Thrift object model, fields are compared in field-id order.
+    // `getType()` returns field id of active field. If `lhs` and `rhs` have
+    // different active field, we can use it to check which one is smaller.
+    //
+    // A union whose active field has a larger id compares as less-than: its
+    // earlier fields are all unset (null < non-null), so it loses before its
+    // own active field is ever reached.
+    //
+    // Example: union A { 1: i32 a1; 2: i32 a2; }
+    //   lhs.a2() = 1;  // active field id = 2
+    //   rhs.a1() = 2;  // active field id = 1
+    //   // Compare a1 first: null (lhs) < 2 (rhs) -> lhs < rhs.
+    return lhs.getType() > rhs.getType() ? std::partial_ordering::less
+                                         : std::partial_ordering::greater;
+  }
+
+  return compareUnions<T, ComparePolicy>(lhs, rhs);
+}
+
+template <typename T, template <class...> class ComparePolicy>
+struct CompareThreeWay<type::union_t<T>, ComparePolicy> {
+  std::partial_ordering operator()(const T& lhs, const T& rhs) const {
+    return compareUnions<T, ComparePolicy>(lhs, rhs);
+  }
+};
+
+template <template <class...> class ComparePolicy = DefaultComparePolicy>
 struct StructLessThan {
   template <class T>
   bool operator()(const T& lhs, const T& rhs) const {
-    return compareStructFields<FieldIterOrder::Declaration, T, LessThanType>(
+    return compareStructFields<FieldIterOrder::Declaration, T, ComparePolicy>(
                lhs, rhs) == std::partial_ordering::less;
   }
 };
@@ -652,11 +923,11 @@ struct StructLessThan {
 // field declaration order). This is used to match the behavior of the
 // Thrift Object Model, which compares struct fields by sorted field id
 // order.
-template <template <class...> class LessThanType = LessThan>
+template <template <class...> class ComparePolicy = DefaultComparePolicy>
 struct StructLessThanByFieldId {
   template <class T>
   bool operator()(const T& lhs, const T& rhs) const {
-    return compareStructFieldsByFieldId<T, LessThanType>(lhs, rhs) ==
+    return compareStructFieldsByFieldId<T, ComparePolicy>(lhs, rhs) ==
         std::partial_ordering::less;
   }
 };
@@ -699,64 +970,22 @@ struct StructEquality {
   }
 };
 
-template <template <class...> class LessThanType = LessThan>
+template <template <class...> class ComparePolicy = DefaultComparePolicy>
 struct UnionLessThan {
   template <class T>
   bool operator()(const T& lhs, const T& rhs) const {
-    if (lhs.getType() != rhs.getType()) {
-      return lhs.getType() < rhs.getType();
-    }
-
-    return invoke_by_field_id<T>(
-        static_cast<FieldId>(lhs.getType()),
-        [&](auto id) {
-          using Id = decltype(id);
-          using Tag = get_type_tag<T, Id>;
-          ::apache::thrift::detail::union_value_unsafe_fn f;
-          return LessThanType<Tag>{}(f(get<Id>(lhs)), f(get<Id>(rhs)));
-        },
-        [] {
-          return false; // union is __EMPTY__
-        });
+    return compareUnions<T, ComparePolicy>(lhs, rhs) ==
+        std::partial_ordering::less;
   }
 };
 
 // Similar to StructLessThanByFieldId, but for unions
-template <template <class...> class LessThanType = LessThan>
+template <template <class...> class ComparePolicy = DefaultComparePolicy>
 struct UnionLessThanByFieldId {
   template <class T>
   bool operator()(const T& lhs, const T& rhs) const {
-    if (lhs.getType() == T::Type::__EMPTY__ &&
-        rhs.getType() == T::Type::__EMPTY__) {
-      return false;
-    }
-
-    if (lhs.getType() == T::Type::__EMPTY__) {
-      return true;
-    }
-
-    if (rhs.getType() == T::Type::__EMPTY__) {
-      return false;
-    }
-
-    if (lhs.getType() != rhs.getType()) {
-      // Under the Thrift object model, fields are compared in field-id order.
-      // `getType()` returns field id of active field. If `lhs` and `rhs` have
-      // different active field, we can use it to check which one is smaller.
-      //
-      // A union whose active field has a larger id compares as less-than: its
-      // earlier fields are all unset (null < non-null), so it loses before its
-      // own active field is ever reached.
-      //
-      // Example: union A { 1: i32 a1; 2: i32 a2; }
-      //   lhs.a2() = 1;  // active field id = 2
-      //   rhs.a1() = 2;  // active field id = 1
-      //   // Compare a1 first: null (lhs) < 2 (rhs) → lhs < rhs.
-      return lhs.getType() > rhs.getType();
-    }
-
-    // If `lhs.getType() == rhs.getType()` fallback to normal UnionLessThan
-    return UnionLessThan<LessThanType>{}(lhs, rhs);
+    return compareUnionsByFieldId<T, ComparePolicy>(lhs, rhs) ==
+        std::partial_ordering::less;
   }
 };
 
@@ -781,30 +1010,53 @@ struct UnionEquality {
   }
 };
 
+template <class T>
+struct StableComparePolicy {
+  template <typename U>
+  std::partial_ordering operator()(const U& lhs, const U& rhs) const {
+    return CompareThreeWay<T, StableComparePolicy>{}(lhs, rhs);
+  }
+};
+
+template <>
+struct StableComparePolicy<type::void_t> {
+  template <typename T>
+  std::partial_ordering operator()(const T& lhs, const T& rhs) const {
+    return StableComparePolicy<type::infer_tag<T>>{}(lhs, rhs);
+  }
+};
+
+template <class T>
+struct StableComparePolicy<type::struct_t<T>> {
+  std::partial_ordering operator()(const T& lhs, const T& rhs) const {
+    return compareStructFieldsByFieldId<T, StableComparePolicy>(lhs, rhs);
+  }
+};
+
+template <class T>
+struct StableComparePolicy<type::union_t<T>> {
+  std::partial_ordering operator()(const T& lhs, const T& rhs) const {
+    return compareUnionsByFieldId<T, StableComparePolicy>(lhs, rhs);
+  }
+};
+
 // StableLessThan compares Thrift values recursively, comparing
 // struct fields by sorted field id order (instead of field declaration order).
 // This matches the behavior of the Thrift Object Model for comparison.
 template <class T>
-struct StableLessThan : LessThan<T> {};
+struct StableLessThan {
+  template <typename U>
+  bool operator()(const U& lhs, const U& rhs) const {
+    return StableComparePolicy<T>{}(lhs, rhs) == std::partial_ordering::less;
+  }
+};
 
-template <class T>
-struct StableLessThan<type::list<T>>
-    : ListLessThan<type::native_type<type::list<T>>, T, StableLessThan> {};
-
-template <class T>
-struct StableLessThan<type::set<T>>
-    : SetLessThan<type::native_type<type::set<T>>, T, StableLessThan> {};
-
-template <class K, class V>
-struct StableLessThan<type::map<K, V>>
-    : MapLessThan<type::native_type<type::map<K, V>>, K, V, StableLessThan> {};
-
-template <class T>
-struct StableLessThan<type::struct_t<T>>
-    : StructLessThanByFieldId<StableLessThan> {};
-
-template <class T>
-struct StableLessThan<type::union_t<T>>
-    : UnionLessThanByFieldId<StableLessThan> {};
+template <>
+struct StableLessThan<type::void_t> {
+  template <typename T>
+  bool operator()(const T& lhs, const T& rhs) const {
+    return StableLessThan<type::infer_tag<T>>{}(lhs, rhs);
+  }
+};
 
 } // namespace apache::thrift::op::detail

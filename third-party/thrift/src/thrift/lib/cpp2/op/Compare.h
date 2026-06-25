@@ -17,7 +17,6 @@
 // Operations supported by all ThriftType values.
 #pragma once
 
-#include <folly/Traits.h>
 #include <thrift/lib/cpp2/op/detail/Compare.h>
 
 namespace apache::thrift::op {

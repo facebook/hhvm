@@ -181,7 +181,6 @@ type t = {
   tco_package_allow_all_tconst_violations: bool;
   tco_package_allow_as_expression_violations: bool;
   tco_package_allow_enforceable_type_alias_violations: bool;
-  tco_package_allow_enforceable_type_alias_class_like_violations: bool;
   re_no_cache: bool;
   hh_distc_should_disable_trace_store: bool;
   hh_distc_exponential_backoff_num_retries: int;
@@ -298,7 +297,6 @@ let default =
     tco_package_allow_all_tconst_violations = true;
     tco_package_allow_as_expression_violations = true;
     tco_package_allow_enforceable_type_alias_violations = true;
-    tco_package_allow_enforceable_type_alias_class_like_violations = false;
     re_no_cache = false;
     hh_distc_should_disable_trace_store = false;
     hh_distc_exponential_backoff_num_retries = 10;
@@ -412,7 +410,6 @@ let set
     ?tco_package_allow_all_tconst_violations
     ?tco_package_allow_as_expression_violations
     ?tco_package_allow_enforceable_type_alias_violations
-    ?tco_package_allow_enforceable_type_alias_class_like_violations
     ?re_no_cache
     ?hh_distc_should_disable_trace_store
     ?hh_distc_exponential_backoff_num_retries
@@ -687,10 +684,6 @@ let set
       setting
         tco_package_allow_enforceable_type_alias_violations
         options.tco_package_allow_enforceable_type_alias_violations;
-    tco_package_allow_enforceable_type_alias_class_like_violations =
-      setting
-        tco_package_allow_enforceable_type_alias_class_like_violations
-        options.tco_package_allow_enforceable_type_alias_class_like_violations;
     re_no_cache = setting re_no_cache options.re_no_cache;
     hh_distc_should_disable_trace_store =
       setting

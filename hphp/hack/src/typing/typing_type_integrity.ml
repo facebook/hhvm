@@ -328,10 +328,8 @@ and check_type_integrity
     | Decl_entry.Found (Env.ClassResult class_info) ->
       let should_check_package_boundary =
         match should_check_package_boundary with
-        | `Yes Typing_error.Primary.Package.Enforceable_type_alias
-          when Env.package_allow_enforceable_type_alias_class_like_violations
-                 env ->
-          `No
+        (* Carve out class-result references at enforceable positions. *)
+        | `Yes Typing_error.Primary.Package.Enforceable_type_alias -> `No
         | other -> other
       in
       (let (errs, linter_errs) =
@@ -366,9 +364,7 @@ and check_type_integrity
       let should_check_package_boundary =
         match should_check_package_boundary with
         | `Yes Typing_error.Primary.Package.Enforceable_type_alias
-          when Env.package_allow_enforceable_type_alias_class_like_violations
-                 env
-               && typedef_resolves_to_class_like env typedef ->
+          when typedef_resolves_to_class_like env typedef ->
           `No
         | other -> other
       in

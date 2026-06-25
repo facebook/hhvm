@@ -178,8 +178,6 @@ module Hhconfig : sig
 
   val package_allow_enforceable_type_alias_violations : string
 
-  val package_allow_enforceable_type_alias_class_like_violations : string
-
   val package_allow_all_tconst_violations : string
 
   val package_allow_classconst_violations : string

@@ -308,37 +308,6 @@ PACKAGES.toml:3:11
  4 | include_paths=["//"]
  5 | 
 
-error: Typing[4472] Cannot access type alias used as an enforceable type hint `TClassAlias` defined in package `pkg2` which may not be available [1]
--> `TClassAlias` is defined in cross_package_enforceable_type_alias_methods.php--foo.php [2]
--> `TClassAlias` belongs to package `pkg2` by this package override [3]
--> package `pkg1` is available because the current file belongs to it by this package definition [4]
-
-cross_package_enforceable_type_alias_methods.php--bar.php:24:48
-22 |   public function method_generic_as_int<T as TInt>(T $_): void {}
-23 |   // Class alias in method generic: should NOT error
-24 |   public function method_generic_as_class<T as TClassAlias>(T $_): void {}
-   |                                                ^^^^^^^^^^^ [1]
-25 | }
-26 | 
-
-cross_package_enforceable_type_alias_methods.php--foo.php:6:6
- 1 | <?hh
- 2 | // package pkg2
- 3 | <<file: __PackageOverride('pkg2')>>
-   |                           ^^^^^^ [3]
- 4 | type TShape = shape('x' => int);
- 5 | type TInt = int;
- 6 | type TClassAlias = Exception;
-   |      ^^^^^^^^^^^ [2]
-
-PACKAGES.toml:3:11
- 1 | [packages]
- 2 | 
- 3 | [packages.pkg1]
-   |           ^^^^ [4]
- 4 | include_paths=["//"]
- 5 | 
-
 error: Typing[4472] Cannot access type alias used as an enforceable type hint `TShape` defined in package `pkg2` which may not be available [1]
 -> `TShape` is defined in cross_package_enforceable_type_alias_methods.php--foo.php [2]
 -> `TShape` belongs to package `pkg2` by this package override [3]
@@ -401,4 +370,4 @@ PACKAGES.toml:3:11
  4 | include_paths=["//"]
  5 | 
 
-13 errors found
+12 errors found

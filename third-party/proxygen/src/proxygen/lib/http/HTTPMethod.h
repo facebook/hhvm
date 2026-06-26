@@ -36,7 +36,6 @@ enum class HTTPMethod {
   DELETE,
   HEAD,
   CONNECT,
-  CONNECT_UDP,
   PUT,
   TRACE,
   PATCH,

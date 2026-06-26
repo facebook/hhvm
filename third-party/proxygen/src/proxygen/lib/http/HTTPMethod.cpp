@@ -29,7 +29,6 @@ const StringVector& getMethodStrings() {
                    "DELETE",
                    "HEAD",
                    "CONNECT",
-                   "CONNECT-UDP",
                    "PUT",
                    "TRACE",
                    "PATCH",

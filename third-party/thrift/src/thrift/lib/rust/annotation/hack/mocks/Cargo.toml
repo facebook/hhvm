@@ -19,13 +19,13 @@ doc = false
 anyhow = "1.0.102"
 async-trait = "0.1.86"
 codegen_includer_proc_macro = { version = "0.1.0", git = "https://github.com/facebookexperimental/rust-shed.git", branch = "main" }
-fbthrift = { version = "0.0.1+unstable", path = "../../.." }
+fbthrift = { version = "0.0.1", path = "../../.." }
 futures = { version = "0.3.31", features = ["async-await", "compat"] }
-hack__clients = { package = "hack_clients", version = "0.0.1+unstable", path = "../clients" }
-hack__types = { package = "hack", version = "0.0.1+unstable", path = ".." }
-scope = { version = "0.0.1+unstable", path = "../../scope" }
-scope_clients = { version = "0.0.1+unstable", path = "../../scope/clients" }
-scope_mocks = { version = "0.0.1+unstable", path = "../../scope/mocks" }
+hack__clients = { package = "hack_clients", version = "0.0.1", path = "../clients" }
+hack__types = { package = "hack", version = "0.0.1", path = ".." }
+scope = { version = "0.0.1", path = "../../scope" }
+scope_clients = { version = "0.0.1", path = "../../scope/clients" }
+scope_mocks = { version = "0.0.1", path = "../../scope/mocks" }
 tracing = { version = "0.1.41", features = ["attributes", "valuable"] }
 
 [build-dependencies]

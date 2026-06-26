@@ -18,19 +18,19 @@ doc = false
 [dependencies]
 anyhow = "1.0.102"
 codegen_includer_proc_macro = { version = "0.1.0", git = "https://github.com/facebookexperimental/rust-shed.git", branch = "main" }
-cpp = { version = "0.0.1+unstable", path = "../cpp" }
-erlang = { version = "0.0.1+unstable", path = "../erlang" }
-fbthrift = { version = "0.0.1+unstable", path = "../.." }
+cpp = { version = "0.0.1", path = "../cpp" }
+erlang = { version = "0.0.1", path = "../erlang" }
+fbthrift = { version = "0.0.1", path = "../.." }
 futures = { version = "0.3.31", features = ["async-await", "compat"] }
-go = { version = "0.0.1+unstable", path = "../go" }
-hack = { version = "0.0.1+unstable", path = "../hack" }
-java = { version = "0.0.1+unstable", path = "../java" }
-python = { version = "0.0.1+unstable", path = "../python" }
+go = { version = "0.0.1", path = "../go" }
+hack = { version = "0.0.1", path = "../hack" }
+java = { version = "0.0.1", path = "../java" }
+python = { version = "0.0.1", path = "../python" }
 ref-cast = "1.0.18"
-rust = { version = "0.0.1+unstable", path = "../rust" }
-scope = { version = "0.0.1+unstable", path = "../scope" }
+rust = { version = "0.0.1", path = "../rust" }
+scope = { version = "0.0.1", path = "../scope" }
 thiserror = "2.0.18"
-thrift = { version = "0.0.1+unstable", path = "../thrift" }
+thrift = { version = "0.0.1", path = "../thrift" }
 
 [build-dependencies]
 thrift_compiler = { version = "0.1.0", git = "https://github.com/facebookexperimental/rust-shed.git", branch = "main" }

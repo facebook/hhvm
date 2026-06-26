@@ -11,6 +11,6 @@ publish = false
 
 [dependencies]
 anyhow = "1.0.102"
-fbthrift = { version = "0.0.1+unstable", path = ".." }
+fbthrift = { version = "0.0.1", path = ".." }
 ring = "0.17.14"
 thiserror = "2.0.18"

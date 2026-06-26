@@ -16,30 +16,30 @@ doctest = false
 doc = false
 
 [dependencies]
-all__types = { package = "all", version = "0.0.1+unstable", path = ".." }
+all__types = { package = "all", version = "0.0.1", path = ".." }
 anyhow = "1.0.102"
 async-trait = "0.1.86"
 codegen_includer_proc_macro = { version = "0.1.0", git = "https://github.com/facebookexperimental/rust-shed.git", branch = "main" }
-cpp = { version = "0.0.1+unstable", path = "../../cpp" }
-cpp_clients = { version = "0.0.1+unstable", path = "../../cpp/clients" }
-erlang = { version = "0.0.1+unstable", path = "../../erlang" }
-erlang_clients = { version = "0.0.1+unstable", path = "../../erlang/clients" }
-fbthrift = { version = "0.0.1+unstable", path = "../../.." }
+cpp = { version = "0.0.1", path = "../../cpp" }
+cpp_clients = { version = "0.0.1", path = "../../cpp/clients" }
+erlang = { version = "0.0.1", path = "../../erlang" }
+erlang_clients = { version = "0.0.1", path = "../../erlang/clients" }
+fbthrift = { version = "0.0.1", path = "../../.." }
 futures = { version = "0.3.31", features = ["async-await", "compat"] }
-go = { version = "0.0.1+unstable", path = "../../go" }
-go_clients = { version = "0.0.1+unstable", path = "../../go/clients" }
-hack = { version = "0.0.1+unstable", path = "../../hack" }
-hack_clients = { version = "0.0.1+unstable", path = "../../hack/clients" }
-java = { version = "0.0.1+unstable", path = "../../java" }
-java_clients = { version = "0.0.1+unstable", path = "../../java/clients" }
-python = { version = "0.0.1+unstable", path = "../../python" }
-python_clients = { version = "0.0.1+unstable", path = "../../python/clients" }
-rust = { version = "0.0.1+unstable", path = "../../rust" }
-rust_clients = { version = "0.0.1+unstable", path = "../../rust/clients" }
-scope = { version = "0.0.1+unstable", path = "../../scope" }
-scope_clients = { version = "0.0.1+unstable", path = "../../scope/clients" }
-thrift = { version = "0.0.1+unstable", path = "../../thrift" }
-thrift_clients = { version = "0.0.1+unstable", path = "../../thrift/clients" }
+go = { version = "0.0.1", path = "../../go" }
+go_clients = { version = "0.0.1", path = "../../go/clients" }
+hack = { version = "0.0.1", path = "../../hack" }
+hack_clients = { version = "0.0.1", path = "../../hack/clients" }
+java = { version = "0.0.1", path = "../../java" }
+java_clients = { version = "0.0.1", path = "../../java/clients" }
+python = { version = "0.0.1", path = "../../python" }
+python_clients = { version = "0.0.1", path = "../../python/clients" }
+rust = { version = "0.0.1", path = "../../rust" }
+rust_clients = { version = "0.0.1", path = "../../rust/clients" }
+scope = { version = "0.0.1", path = "../../scope" }
+scope_clients = { version = "0.0.1", path = "../../scope/clients" }
+thrift = { version = "0.0.1", path = "../../thrift" }
+thrift_clients = { version = "0.0.1", path = "../../thrift/clients" }
 tracing = { version = "0.1.41", features = ["attributes", "valuable"] }
 
 [build-dependencies]

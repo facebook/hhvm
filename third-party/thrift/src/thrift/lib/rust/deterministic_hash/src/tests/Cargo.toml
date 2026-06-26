@@ -26,16 +26,16 @@ path = "deterministic_hash_test.rs"
 [dependencies]
 anyhow = "1.0.102"
 codegen_includer_proc_macro = { version = "0.1.0", git = "https://github.com/facebookexperimental/rust-shed.git", branch = "main" }
-fbthrift = { version = "0.0.1+unstable", path = "../../.." }
+fbthrift = { version = "0.0.1", path = "../../.." }
 futures = { version = "0.3.31", features = ["async-await", "compat"] }
 indexmap = { version = "2.14.0", features = ["arbitrary", "rayon", "serde"] }
 ref-cast = "1.0.18"
 smallvec = { version = "1.15.2", features = ["impl_bincode", "serde", "specialization", "union", "write"] }
 thiserror = "2.0.18"
-thrift = { version = "0.0.1+unstable", path = "../../../annotation/thrift" }
+thrift = { version = "0.0.1", path = "../../../annotation/thrift" }
 
 [dev-dependencies]
-fbthrift_deterministic_hash = { version = "0.0.1+unstable", path = "../.." }
+fbthrift_deterministic_hash = { version = "0.0.1", path = "../.." }
 maplit = "1.0"
 
 [build-dependencies]

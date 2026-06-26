@@ -19,9 +19,9 @@ doc = false
 anyhow = "1.0.102"
 async-trait = "0.1.86"
 codegen_includer_proc_macro = { version = "0.1.0", git = "https://github.com/facebookexperimental/rust-shed.git", branch = "main" }
-fbthrift = { version = "0.0.1+unstable", path = "../../.." }
+fbthrift = { version = "0.0.1", path = "../../.." }
 futures = { version = "0.3.31", features = ["async-await", "compat"] }
-scope__types = { package = "scope", version = "0.0.1+unstable", path = ".." }
+scope__types = { package = "scope", version = "0.0.1", path = ".." }
 tracing = { version = "0.1.41", features = ["attributes", "valuable"] }
 
 [build-dependencies]

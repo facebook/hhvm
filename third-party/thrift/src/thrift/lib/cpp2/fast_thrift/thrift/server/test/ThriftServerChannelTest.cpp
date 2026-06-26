@@ -31,7 +31,6 @@
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/test/MockHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/ThriftServerChannel.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/Messages.h>
-#include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
 #include <thrift/lib/cpp2/server/Cpp2ConnContext.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>

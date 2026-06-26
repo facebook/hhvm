@@ -1,0 +1,5 @@
+File "is_vec_or_dict.php", line 33, characters 5-15:
+  (KeyedContainer<int, bool> & (dict<_, _> | vec<_>))
+File "is_vec_or_dict.php", line 36, characters 5-15:
+  (int | (KeyedContainer<int, bool> & not vec<_> | dict<_, _>))
+No errors

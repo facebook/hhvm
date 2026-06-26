@@ -13,4 +13,4 @@ This `is` check is always `false`. The expression on the left has type `?(not di
 WARN: File "array.php", line 10, characters 14-31:
 This `is` check is always `false`. The expression on the left has type `?(not dict<_, _> & nonnull & not vec<_>)` which shares no values with `dict<Tk#1, Tv#1>`. (Warn[12010])
 WARN: File "array.php", line 12, characters 14-38:
-This `is` check is always `false`. The expression on the left has type `?(not dict<_, _> & nonnull & not vec<_>)` which shares no values with `vec_or_dict<arraykey, _>`. (Warn[12010])
+This `is` check is always `false`. The expression on the left has type `?(not dict<_, _> & nonnull & not vec<_>)` which shares no values with `vec_or_dict<_, _>`. (Warn[12010])

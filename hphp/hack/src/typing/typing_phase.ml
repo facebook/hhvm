@@ -374,6 +374,11 @@ and localize_ ~(ety_env : expand_env) env (dty : decl_ty) :
     ((env, None, []), ty)
   | Tvec_or_dict (tk, tv) ->
     let ety_env_targ = { ety_env with under_type_constructor = true } in
+    let tk =
+      match ety_env.wildcard_action with
+      | Wildcard_fresh_generic -> mk (get_reason tk, Twildcard)
+      | _ -> tk
+    in
     let ((env, e1, cycles1), tk) = localize ~ety_env:ety_env_targ env tk in
     let ((env, e2, cycles2), tv) = localize ~ety_env:ety_env_targ env tv in
     let ty = Tvec_or_dict (tk, tv) in

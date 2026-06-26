@@ -166,7 +166,14 @@ module TyPredicate = struct
         Result.Ok (next_wildcard_id, IsUnionOf (List.rev predicates))
     end
     | Tintersection _ -> Result.Error "intersection"
-    | Tvec_or_dict _ -> Result.Error "vec_or_dict"
+    | Tvec_or_dict (tk, tv) ->
+      let r = get_reason ty in
+      of_ty env next_wildcard_id
+      @@ Typing_make_type.union
+           r
+           [Typing_make_type.vec r tv; Typing_make_type.dict r tk tv]
+      |> Result.map ~f:(fun (next_wildcard_id, (_reason, predicate_)) ->
+             (next_wildcard_id, predicate_))
     | Taccess _ -> Result.Error "access"
     | Tvar _ -> Result.Error "tvar"
     | Tnewtype (s, _, _) -> Result.Error ("newtype-" ^ s)

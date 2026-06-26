@@ -1,0 +1,9 @@
+File "is_vec_or_dict_test_scrutinees.php", line 12, characters 5-15:
+  (vec_or_dict<arraykey, string> & (dict<_, _> | vec<_>))
+File "is_vec_or_dict_test_scrutinees.php", line 23, characters 5-15:
+  (vec_or_dict<string, string> & (dict<_, _> | vec<_>))
+File "is_vec_or_dict_test_scrutinees.php", line 34, characters 5-15:
+  (vec_or_dict<int, string> & (dict<_, _> | vec<_>))
+File "is_vec_or_dict_test_scrutinees.php", line 61, characters 5-15:
+  ((dict<string, string> | vec<string>) & (dict<_, _> | vec<_>))
+No errors

@@ -1431,7 +1431,7 @@ dependencies = [
  "opcode_test_data",
  "proc-macro2",
  "quote",
- "syn 1.0.109",
+ "syn 2.0.118",
 ]
 
 [[package]]
@@ -2020,7 +2020,7 @@ dependencies = [
  "regex",
  "relative_path",
  "serde",
- "syn 1.0.109",
+ "syn 2.0.118",
  "thiserror 2.0.18",
 ]
 
@@ -5835,7 +5835,7 @@ version = "0.0.0"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 1.0.109",
+ "syn 2.0.118",
 ]
 
 [[package]]

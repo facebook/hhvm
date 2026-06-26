@@ -8,6 +8,8 @@
 
 #include "squangle/base/ConnectionKey.h"
 
+#include <string_view>
+
 #include <boost/polymorphic_cast.hpp>
 #include <folly/hash/Hash.h>
 
@@ -63,7 +65,7 @@ std::string MysqlConnectionKey::getDisplayString(bool level2) const {
   if (unixSocketPath_.empty()) {
     return fmt::format(
         "{} [{}] ({}@{}:{})",
-        level2 ? "" : dbName_,
+        level2 ? std::string_view{} : std::string_view{dbName_},
         specialTag_,
         user_,
         host_,
@@ -72,7 +74,7 @@ std::string MysqlConnectionKey::getDisplayString(bool level2) const {
 
   return fmt::format(
       "{} [{}] ({}@{})",
-      level2 ? "" : dbName_,
+      level2 ? std::string_view{} : std::string_view{dbName_},
       specialTag_,
       user_,
       unixSocketPath_);

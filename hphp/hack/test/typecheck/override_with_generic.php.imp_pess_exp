@@ -1,0 +1,2 @@
+ERROR: File "override_with_generic.php", line 11, characters 21-21:
+This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])

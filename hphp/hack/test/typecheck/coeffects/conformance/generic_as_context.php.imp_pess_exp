@@ -1,0 +1,5 @@
+ERROR: File "generic_as_context.php", line 6, characters 2-5:
+Illegal context: `Te`
+Cannot use a context defined outside namespace \HH\Contexts (NastCheck[3090])
+ERROR: File "generic_as_context.php", line 12, characters 28-29:
+This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])

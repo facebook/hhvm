@@ -1,0 +1,4 @@
+ERROR: File "instantiate_unresolved4.php", line 12, characters 14-14:
+This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])
+ERROR: File "instantiate_unresolved4.php", line 16, characters 12-12:
+This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])

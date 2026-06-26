@@ -20,6 +20,8 @@ ERROR: File "primary_error_pos_bug.php", line 18, characters 25-30:
 Wrong number of type arguments (expected 0, got 1) (Typing[4101])
   File "primary_error_pos_bug.php", line 3, characters 7-7:
   Definition is here
+ERROR: File "primary_error_pos_bug.php", line 22, characters 22-22:
+This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])
 ERROR: File "primary_error_pos_bug.php", line 24, characters 28-31:
 Some type arguments violate their constraints (Typing[4323])
   File "primary_error_pos_bug.php", line 5, characters 9-9:

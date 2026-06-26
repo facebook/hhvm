@@ -161,7 +161,7 @@ let check_redundant_generics_class (env : Tast_env.env) class_name class_type =
   |> List.filter ~f:(fun (_, meth) -> String.equal meth.ce_origin class_name)
   |> List.iter ~f:(check_redundant_generics_class_method env)
 
-let create_handler ctx =
+let create_handler _ctx =
   let handler =
     object
       inherit Tast_visitor.handler_base
@@ -189,9 +189,4 @@ let create_handler ctx =
             check_redundant_generics_class env (snd c.c_name) cls
     end
   in
-  if
-    TypecheckerOptions.check_redundant_generics (Provider_context.get_tcopt ctx)
-  then
-    Some handler
-  else
-    None
+  Some handler

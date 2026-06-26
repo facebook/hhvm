@@ -130,8 +130,6 @@ type t = {
       (** Internal (for tests-only): whether any type can appear in a context list
          or only types defined in the appropriate Context namespace *)
   tco_like_casts: bool;  (** Enables like casts *)
-  tco_check_redundant_generics: bool;
-      (** Check redundant generics in return types *)
   tco_disallow_unresolved_type_variables: bool;
       (** Flag to produce an error whenever the TAST contains unresolved type variables *)
   tco_custom_error_config: Custom_error_config.t;
@@ -330,7 +328,6 @@ val set :
   ?tco_coeffects_local:bool ->
   ?tco_strict_contexts:bool ->
   ?tco_like_casts:bool ->
-  ?tco_check_redundant_generics:bool ->
   ?tco_disallow_unresolved_type_variables:bool ->
   ?tco_custom_error_config:Custom_error_config.t ->
   ?tco_const_attribute:bool ->

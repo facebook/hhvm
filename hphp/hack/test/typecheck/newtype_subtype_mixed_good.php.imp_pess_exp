@@ -1,0 +1,2 @@
+ERROR: File "newtype_subtype_mixed_good.php--use.php", line 4, characters 15-15:
+This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `nonnull` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])

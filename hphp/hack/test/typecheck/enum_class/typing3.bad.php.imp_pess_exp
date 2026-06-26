@@ -1,3 +1,5 @@
+ERROR: File "typing3.bad.php", line 34, characters 19-23:
+This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])
 ERROR: File "typing3.bad.php", line 42, characters 23-27:
 Invalid argument (Typing[4323])
   File "typing3.bad.php", line 34, characters 31-34:

@@ -1,0 +1,6 @@
+ERROR: File "polymorphic_function_hint_syntax.php", line 19, characters 43-48:
+This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])
+ERROR: File "polymorphic_function_hint_syntax.php", line 29, characters 34-37:
+This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])
+ERROR: File "polymorphic_function_hint_syntax.php", line 33, characters 36-39:
+This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])

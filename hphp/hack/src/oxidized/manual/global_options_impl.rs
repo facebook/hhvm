@@ -70,7 +70,6 @@ impl Default for GlobalOptions {
             tco_strict_contexts: true,
             tco_like_casts: false,
 
-            tco_check_redundant_generics: false,
             tco_disallow_unresolved_type_variables: false,
             tco_custom_error_config: CustomErrorConfig::default(),
             tco_const_attribute: false,

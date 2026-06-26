@@ -1,0 +1,14 @@
+ERROR: File "transitive_error_2.php", line 4, characters 12-12:
+This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `int` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])
+ERROR: File "transitive_error_2.php", line 12, characters 5-6:
+Invalid argument (Typing[4323])
+  File "transitive_error_2.php", line 8, characters 12-12:
+  `T` is a constrained type parameter
+  File "transitive_error_2.php", line 8, characters 17-22:
+  This type constraint is violated
+  File "transitive_error_2.php", line 8, characters 17-22:
+  Expected `string`
+  File "transitive_error_2.php", line 4, characters 20-22:
+  But got `int`
+  File "transitive_error_2.php", line 4, characters 28-28:
+    via this generic `T`

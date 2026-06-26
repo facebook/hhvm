@@ -21,6 +21,8 @@ ERROR: File "enum_class.bad.php", line 40, characters 3-50:
 This `switch` statement is nonexhaustive. At least the following cases are missing: `#String1` (Typing[4019])
   File "enum_class.bad.php", line 40, characters 11-12:
   The scrutinee has type `HH\EnumClass\Label<E, string>`.
+ERROR: File "enum_class.bad.php", line 46, characters 33-33:
+This generic parameter is redundant because it only appears in a contravariant (input) position. Consider replacing uses of generic parameter with `mixed` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])
 ERROR: File "enum_class.bad.php", line 47, characters 3-81:
 This `switch` statement is nonexhaustive. At least the following cases are missing: `#String1` (Typing[4019])
   File "enum_class.bad.php", line 47, characters 11-12:

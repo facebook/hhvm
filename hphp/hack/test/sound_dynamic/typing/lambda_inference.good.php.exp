@@ -1,1 +1,10 @@
-No errors
+error: Typing[4366] This generic parameter is redundant because it only appears in a covariant (output) position with useless as bound. Consider replacing uses of generic parameter with nothing or specifying <<__Explicit>> on the generic parameter [1]
+
+lambda_inference.good.php:13:47
+    11 | 
+    12 | <<__SupportDynamicType>>
+[1] 13 | function asyncLambda<Tv as supportdyn<mixed>, Tc as supportdyn<mixed>>(
+    14 |     AwaitablePredicate<Tv> $lambda,
+    15 |   ): ~IAsyncPredicate<Tv,Tc> {
+
+1 error found

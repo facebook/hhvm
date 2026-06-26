@@ -4,4 +4,7 @@ File "tyvar.php", line 15, characters 3-13:
   ~null
 File "tyvar.php", line 46, characters 3-13:
   ~null
-No errors
+ERROR: File "tyvar.php", line 3, characters 20-20:
+This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])
+ERROR: File "tyvar.php", line 6, characters 23-23:
+This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])

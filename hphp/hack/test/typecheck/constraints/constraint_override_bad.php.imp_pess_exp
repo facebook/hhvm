@@ -1,3 +1,5 @@
+ERROR: File "constraint_override_bad.php", line 5, characters 23-23:
+This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `C` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])
 ERROR: File "constraint_override_bad.php", line 10, characters 19-21:
 The method `foo` is not compatible with the overridden method (Typing[4341])
   File "constraint_override_bad.php", line 10, characters 19-21:
@@ -14,3 +16,5 @@ The method `foo` is not compatible with the overridden method (Typing[4341])
   Expected `T`
   File "constraint_override_bad.php", line 10, characters 31-31:
   But got `B`
+ERROR: File "constraint_override_bad.php", line 10, characters 23-23:
+This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `B` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])

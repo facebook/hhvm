@@ -103,8 +103,6 @@ module Hhconfig = struct
 
   let call_coeffects = key "call_coeffects"
 
-  let check_redundant_generics = key "check_redundant_generics"
-
   let class_class_type = key "class_class_type"
 
   let class_pointer_ban_class_array_key =

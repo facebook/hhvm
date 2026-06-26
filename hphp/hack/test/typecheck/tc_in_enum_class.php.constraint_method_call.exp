@@ -1,3 +1,7 @@
+ERROR: File "tc_in_enum_class.php", line 76, characters 5-11:
+This generic parameter is redundant because it only appears in a contravariant (input) position. Consider replacing uses of generic parameter with `IAntGetter<AntChild, TValue>` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])
+ERROR: File "tc_in_enum_class.php", line 89, characters 40-46:
+This generic parameter is redundant because it only appears in a contravariant (input) position. Consider replacing uses of generic parameter with `IAntGetter<TSource, TValue>` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])
 ERROR: File "tc_in_enum_class.php", line 103, characters 10-24:
 Typing error (Typing[4110])
   File "tc_in_enum_class.php", line 47, characters 23-25:

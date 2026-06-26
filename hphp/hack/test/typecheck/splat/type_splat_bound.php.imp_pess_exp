@@ -12,6 +12,8 @@ Some type arguments violate their constraints (Typing[4323])
   But got `mixed`
   File "type_splat_bound.php", line 4, characters 14-14:
     by the definition of `T`
+ERROR: File "type_splat_bound.php", line 5, characters 14-14:
+This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])
 ERROR: File "type_splat_bound.php", line 5, characters 34-34:
 Some type arguments violate their constraints (Typing[4323])
   File "type_splat_bound.php", line 5, characters 17-41:

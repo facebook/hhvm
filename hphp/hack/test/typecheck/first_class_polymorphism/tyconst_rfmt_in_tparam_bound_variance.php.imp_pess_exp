@@ -1,0 +1,2 @@
+ERROR: File "tyconst_rfmt_in_tparam_bound_variance.php", line 20, characters 5-6:
+This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `arraykey` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])

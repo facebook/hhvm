@@ -412,10 +412,6 @@ impl HhConfig {
             tco_strict_contexts: default.tco_strict_contexts,
             tco_like_casts: hhconfig.get_bool_or("like_casts", default.tco_like_casts)?,
 
-            tco_check_redundant_generics: hhconfig.get_bool_or(
-                "check_redundant_generics",
-                default.tco_check_redundant_generics,
-            )?,
             tco_disallow_unresolved_type_variables: default.tco_disallow_unresolved_type_variables,
             tco_custom_error_config: custom_error_config,
             tco_const_attribute: default.tco_const_attribute,

@@ -1,0 +1,6 @@
+ERROR: File "type_param_shadow2_fail.php", line 13, characters 32-32:
+You cannot re-bind the type parameter `T` (Naming[2041])
+  File "type_param_shadow2_fail.php", line 12, characters 20-20:
+  `T` is already bound here
+ERROR: File "type_param_shadow2_fail.php", line 13, characters 32-32:
+This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])

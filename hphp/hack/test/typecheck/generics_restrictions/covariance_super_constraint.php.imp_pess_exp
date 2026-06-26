@@ -1,0 +1,8 @@
+ERROR: File "covariance_super_constraint.php", line 4, characters 23-24:
+This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `T` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])
+ERROR: File "covariance_super_constraint.php", line 4, characters 32-32:
+Illegal usage of a contravariant type parameter (Typing[4121])
+  File "covariance_super_constraint.php", line 3, characters 12-12:
+  This is where the parameter was declared as contravariant `-`
+  File "covariance_super_constraint.php", line 4, characters 32-32:
+  `super` constraints on method type parameters are covariant

@@ -1,9 +1,13 @@
+ERROR: File "T139120762.php", line 7, characters 14-14:
+This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])
 ERROR: File "T139120762.php", line 10, characters 10-11:
 Invalid return type (Typing[4110])
   File "T139120762.php", line 7, characters 63-66:
   Expected `Tacc`
   File "T139120762.php", line 7, characters 52-56:
   But got `mixed`
+ERROR: File "T139120762.php", line 13, characters 14-14:
+This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])
 ERROR: File "T139120762.php", line 16, characters 10-11:
 Invalid return type (Typing[4110])
   File "T139120762.php", line 13, characters 64-70:

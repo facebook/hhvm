@@ -1,1 +1,28 @@
-No errors
+error: Typing[4366] This generic parameter is redundant because it only appears in a covariant (output) position. Consider replacing uses of generic parameter with vec<int> or specifying <<__Explicit>> on the generic parameter [1]
+
+push_generic_super.good.php:4:14
+    2 | // (c) Meta Platforms, Inc. and affiliates. Confidential and proprietary.
+    3 | 
+[1] 4 | function foo<T super vec<int>>(vec<~int> $v):~T {
+    5 |   return $v;
+    6 | }
+
+error: Typing[4366] This generic parameter is redundant because it only appears in a covariant (output) position. Consider replacing uses of generic parameter with (int, string) or specifying <<__Explicit>> on the generic parameter [1]
+
+push_generic_super.good.php:7:14
+    5 |   return $v;
+    6 | }
+[1] 7 | function bar<T super (int,string)>((~int,string) $p):~T {
+    8 |   return $p;
+    9 | }
+
+error: Typing[4366] This generic parameter is redundant because it only appears in a covariant (output) position with useless as bound. Consider replacing uses of generic parameter with vec<int> or specifying <<__Explicit>> on the generic parameter [1]
+
+push_generic_super.good.php:10:14
+     8 |   return $p;
+     9 | }
+[1] 10 | function boo<T super vec<int> as supportdyn<mixed>>(vec<~int> $v):~T {
+    11 |   return $v;
+    12 | }
+
+3 errors found

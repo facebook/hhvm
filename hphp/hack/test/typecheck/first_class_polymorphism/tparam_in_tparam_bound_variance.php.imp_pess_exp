@@ -1,0 +1,6 @@
+ERROR: File "tparam_in_tparam_bound_variance.php", line 10, characters 5-5:
+This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `Cov1<TKey>` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])
+ERROR: File "tparam_in_tparam_bound_variance.php", line 34, characters 5-5:
+This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `Contrav1<TKey>` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])
+ERROR: File "tparam_in_tparam_bound_variance.php", line 53, characters 5-5:
+This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `Inv1<TKey>` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])

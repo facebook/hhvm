@@ -98,8 +98,6 @@ module Hhconfig : sig
 
   val call_coeffects : string
 
-  val check_redundant_generics : string
-
   val class_class_type : string
 
   val class_pointer_ban_class_array_key : string

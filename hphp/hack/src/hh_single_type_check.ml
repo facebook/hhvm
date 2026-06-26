@@ -280,7 +280,6 @@ let parse_options () =
   let call_coeffects = ref true in
   let local_coeffects = ref true in
   let strict_contexts = ref true in
-  let check_redundant_generics = ref false in
 
   let enable_supportdyn_hint = ref false in
   let glean_reponame = ref (Glean_options.reponame GlobalOptions.default) in
@@ -894,7 +893,6 @@ let parse_options () =
       ?tco_timeout:!timeout
       ~allowed_fixme_codes_strict:
         (Option.value !allowed_fixme_codes_strict ~default:ISet.empty)
-      ~tco_check_redundant_generics:!check_redundant_generics
       ~tco_skip_hierarchy_checks:!skip_hierarchy_checks
       ~tco_skip_tast_checks:!skip_tast_checks
       ~tco_strict_contexts:!strict_contexts

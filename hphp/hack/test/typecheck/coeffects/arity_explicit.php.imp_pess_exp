@@ -1,0 +1,14 @@
+ERROR: File "arity_explicit.php", line 5, characters 12-12:
+This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])
+ERROR: File "arity_explicit.php", line 11, characters 3-3:
+Expected exactly one type parameter (Typing[4029])
+  File "arity_explicit.php", line 5, characters 10-10:
+  Definition is here
+ERROR: File "arity_explicit.php", line 13, characters 3-3:
+Expected exactly one type parameter (Typing[4029])
+  File "arity_explicit.php", line 5, characters 10-10:
+  Definition is here
+ERROR: File "arity_explicit.php", line 20, characters 3-3:
+Expected exactly one type parameter (Typing[4029])
+  File "arity_explicit.php", line 5, characters 10-10:
+  Definition is here

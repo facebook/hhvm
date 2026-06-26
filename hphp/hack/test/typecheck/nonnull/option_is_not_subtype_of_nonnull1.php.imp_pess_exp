@@ -1,3 +1,5 @@
+ERROR: File "option_is_not_subtype_of_nonnull1.php", line 3, characters 16-16:
+This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])
 ERROR: File "option_is_not_subtype_of_nonnull1.php", line 8, characters 10-16:
 Invalid return type (Typing[4110])
   File "option_is_not_subtype_of_nonnull1.php", line 7, characters 18-24:

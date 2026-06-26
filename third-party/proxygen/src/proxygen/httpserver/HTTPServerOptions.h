@@ -12,10 +12,13 @@
 #include <folly/Function.h>
 #include <folly/SocketAddress.h>
 #include <folly/io/async/AsyncServerSocket.h>
+#include <functional>
 #include <proxygen/httpserver/Filters.h>
 #include <proxygen/httpserver/RequestHandlerFactory.h>
 
 namespace proxygen {
+
+class HTTPMessage;
 
 /**
  * Configuration options for HTTPServer
@@ -157,6 +160,13 @@ class HTTPServerOptions {
    * between compression ratio and cpu usage.
    */
   int zstdContentCompressionLevel{8};
+
+  /**
+   * Optional selector for the zstd compression level on each request.
+   * Falls back to zstdContentCompressionLevel when unset.
+   */
+  std::function<int32_t(const HTTPMessage&)>
+      zstdContentCompressionLevelSelector;
 
   /**
    * Enable support for pub-sub extension.

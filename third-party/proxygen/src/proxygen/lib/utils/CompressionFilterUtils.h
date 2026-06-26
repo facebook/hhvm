@@ -8,6 +8,8 @@
 
 #pragma once
 
+#include <functional>
+
 #include <proxygen/lib/http/HTTPMessage.h>
 #include <proxygen/lib/http/RFC2616.h>
 #include <proxygen/lib/utils/StreamCompressor.h>
@@ -24,6 +26,7 @@ class CompressionFilterUtils {
     std::shared_ptr<const std::set<std::string>> compressibleContentTypes;
     int32_t zlibCompressionLevel = 4;
     int32_t zstdCompressionLevel = 8;
+    std::function<int32_t(const HTTPMessage&)> zstdCompressionLevelSelector;
     bool enableZstd = false;
     bool independentChunks = false;
     bool enableGzip = true;
@@ -53,16 +56,21 @@ class CompressionFilterUtils {
             },
             .headerEncoding = "gzip",
             .compressibleContentTypes = options.compressibleContentTypes};
-      case CodecType::ZSTD:
+      case CodecType::ZSTD: {
+        const auto zstdCompressionLevel =
+            options.zstdCompressionLevelSelector
+                ? options.zstdCompressionLevelSelector(msg)
+                : options.zstdCompressionLevel;
         return FilterParams{
             .minimumCompressionSize = options.minimumCompressionSize,
-            .compressorFactory = [level = options.zstdCompressionLevel,
+            .compressorFactory = [level = zstdCompressionLevel,
                                   independent = options.independentChunks]()
                 -> std::unique_ptr<StreamCompressor> {
               return std::make_unique<ZstdStreamCompressor>(level, independent);
             },
             .headerEncoding = "zstd",
             .compressibleContentTypes = options.compressibleContentTypes};
+      }
       case CodecType::NO_COMPRESSION:
         return folly::none;
     }

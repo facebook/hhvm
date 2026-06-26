@@ -264,6 +264,26 @@ using CompressionCodecs = ::testing::Types<ZlibTest, ZstdTest>;
 
 TYPED_TEST_SUITE(CompressionFilterTest, CompressionCodecs);
 
+TEST(CompressionFilterUtilsTest,
+     ZstdCompressionLevelSelectorControlsCompressorLevel) {
+  HTTPMessage msg;
+  msg.getHeaders().set(HTTP_HEADER_ACCEPT_ENCODING, "zstd");
+
+  CompressionFilterFactory::Options opts;
+  opts.enableZstd = true;
+  opts.zstdCompressionLevel = 1;
+  bool selectorCalled = false;
+  opts.zstdCompressionLevelSelector =
+      [&selectorCalled](const HTTPMessage& /* request */) {
+        selectorCalled = true;
+        return 9;
+      };
+
+  auto filterParams = CompressionFilterUtils::getFilterParams(msg, opts);
+  ASSERT_TRUE(filterParams.hasValue());
+  EXPECT_TRUE(selectorCalled);
+}
+
 // Basic smoke test
 TYPED_TEST(CompressionFilterTest, NonchunkedCompression) {
   using Codec = typename TestFixture::CodecType;

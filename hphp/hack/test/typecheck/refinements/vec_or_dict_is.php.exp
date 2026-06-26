@@ -1,0 +1,14 @@
+File "vec_or_dict_is.php", line 5, characters 5-15:
+  vec<bool>
+File "vec_or_dict_is.php", line 7, characters 5-15:
+  dict<string, bool>
+File "vec_or_dict_is.php", line 13, characters 5-15:
+  dict<string, bool>
+File "vec_or_dict_is.php", line 15, characters 5-15:
+  vec<bool>
+ERROR: File "vec_or_dict_is.php", line 22, characters 10-11:
+Invalid return type (Typing[4110])
+  File "vec_or_dict_is.php", line 21, characters 16-21:
+  Expected `string`
+  File "vec_or_dict_is.php", line 20, characters 3-11:
+  But got `int` because only `int` can be used to index into a `Vector` or `vec`.

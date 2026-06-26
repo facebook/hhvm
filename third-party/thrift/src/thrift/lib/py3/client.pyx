@@ -133,29 +133,6 @@ async def _no_op():
 
 
 @cython.auto_pickle(False)
-cdef class _ClientHeadersCtxManager:
-    """Applies persistent headers to a thrift-python client created by
-    get_client_python, which has no headers parameter of its own. The wrapped
-    object may be the client itself or a hostname-resolving context manager, so
-    headers are set after entering, once the concrete client is available."""
-    cdef object ctx
-    cdef object headers
-
-    def __init__(self, ctx, headers):
-        self.ctx = ctx
-        self.headers = headers
-
-    async def __aenter__(self):
-        client = await self.ctx.__aenter__()
-        for key, value in self.headers.items():
-            client.set_persistent_header(key, value)
-        return client
-
-    def __aexit__(self, *exc_info):
-        return self.ctx.__aexit__(*exc_info)
-
-
-@cython.auto_pickle(False)
 cdef class _AsyncResolveCtxManager:
     """This class just handles resolving of hostnames passed to get_client
        by creating a wrapping async context manager"""
@@ -205,10 +182,11 @@ def get_client(
     loop = asyncio.get_event_loop()
     # This is to prevent calling get_client at import time at module scope
     assert loop.is_running(), "Eventloop is not running"
+    # TODO (ffrancet) headers
     if issubclass(clientKlass, PythonClient):
         # get_client_python uses None for port unset
         maybe_port = None if port == -1 else port
-        client_ctx = get_client_python(
+        return get_client_python(
             clientKlass,
             host=host,
             port=maybe_port,
@@ -220,10 +198,6 @@ def get_client(
             ssl_timeout=ssl_timeout,
             channel_timeout=channel_timeout
         )
-        # get_client_python has no headers parameter, so apply them here.
-        if headers:
-            return _ClientHeadersCtxManager(client_ctx, headers)
-        return client_ctx
     assert issubclass(clientKlass, Client), "Must be a py3 thrift client"
 
     cdef uint32_t _timeout_ms = int(timeout * 1000)

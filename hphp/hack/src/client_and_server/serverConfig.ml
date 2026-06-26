@@ -399,9 +399,6 @@ let load_config (config : Config_file_common.t) (options : GlobalOptions.t) :
         union_intersection_type_hints =
           bool_opt Config_keys.Hhconfig.union_intersection_type_hints config
           >?? po_opt.union_intersection_type_hints;
-        disallow_silence =
-          bool_opt Config_keys.Hhconfig.disallow_silence config
-          >?? po_opt.disallow_silence;
         disallow_bool_cast =
           bool_opt Config_keys.Hhconfig.disallow_bool_cast config
           >?? po_opt.disallow_bool_cast;

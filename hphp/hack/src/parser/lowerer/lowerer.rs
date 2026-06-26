@@ -2287,9 +2287,7 @@ fn p_pre_post_unary_decorated_expr<'a>(node: S<'a>, env: &mut Env<'a>, pos: Pos)
     let mk_unop = |op, e| Ok(Expr_::mk_unop(op, e));
     let op_kind = token_kind(op);
     if let Some(TK::At) = op_kind {
-        if env.parser_options.disallow_silence {
-            raise_parsing_error(op, env, &syntax_error::no_silence);
-        }
+        raise_parsing_error(op, env, &syntax_error::no_silence);
         if env.is_codegen() {
             let expr = p_expr(operand, env)?;
             mk_unop(Usilence, expr)

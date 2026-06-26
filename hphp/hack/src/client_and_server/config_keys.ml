@@ -53,8 +53,6 @@ module Hhconfig = struct
 
   let disallow_non_annotated_memoize = key "disallow_non_annotated_memoize"
 
-  let disallow_silence = key "disallow_silence"
-
   let disallow_static_constants_in_default_func_args =
     key "disallow_static_constants_in_default_func_args"
 

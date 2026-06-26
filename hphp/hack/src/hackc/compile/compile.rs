@@ -582,7 +582,6 @@ fn create_emitter(native_env: &NativeEnv, decl_provider: Option<Arc<dyn DeclProv
 fn create_parser_options(opts: &Options, type_directed: bool) -> ParserOptions {
     ParserOptions {
         codegen: true,
-        disallow_silence: false,
         no_parser_readonly_check: type_directed,
         ..opts.hhvm.parser_options.clone()
     }

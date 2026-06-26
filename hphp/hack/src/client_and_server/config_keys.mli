@@ -54,8 +54,6 @@ module Hhconfig : sig
 
   val disallow_non_annotated_memoize : string
 
-  val disallow_silence : string
-
   val disallow_static_constants_in_default_func_args : string
 
   val enable_class_pointer_hint : string

@@ -49,7 +49,6 @@ type t = {
       (** Enables union and intersection type hints *)
   unwrap_concurrent: bool;
       (** Replace concurrent blocks with their bodies in the AST *)
-  disallow_silence: bool;  (** Flag to disable the error suppression operator *)
   disallow_bool_cast: bool;  (** Flag to ban (bool) casts *)
   no_parser_readonly_check: bool;  (** Disable parser-based readonly checking *)
   disable_hh_ignore_error: int;

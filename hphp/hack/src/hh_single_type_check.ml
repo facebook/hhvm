@@ -866,7 +866,6 @@ let parse_options () =
           !deregister_attributes >?? default.deregister_php_stdlib;
         everything_sdt = true;
         union_intersection_type_hints = default.union_intersection_type_hints;
-        disallow_silence = default.disallow_silence;
         disallow_bool_cast = default.disallow_bool_cast;
         disable_hh_ignore_error = default.disable_hh_ignore_error;
         allowed_decl_fixme_codes =

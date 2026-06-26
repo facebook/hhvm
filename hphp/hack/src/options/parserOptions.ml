@@ -32,7 +32,6 @@ type t = {
   deregister_php_stdlib: bool;
   union_intersection_type_hints: bool;
   unwrap_concurrent: bool;
-  disallow_silence: bool;
   disallow_bool_cast: bool;
   no_parser_readonly_check: bool;
   disable_hh_ignore_error: int;
@@ -76,7 +75,6 @@ let default =
     keep_user_attributes = false;
     union_intersection_type_hints = false;
     unwrap_concurrent = false;
-    disallow_silence = false;
     disallow_bool_cast = false;
     no_parser_readonly_check = false;
     disable_hh_ignore_error = 0;

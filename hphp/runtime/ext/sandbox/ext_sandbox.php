@@ -18,7 +18,7 @@ namespace HH\Sandbox {
    * @return dict<Tk, Tv> - An empty dict with reserved capacity
    */
   <<__Native>>
-  function dict_with_capacity<Tk as arraykey, Tv>(int $capacity)[]: dict<Tk, Tv>;
+  function dict_with_capacity(int $capacity)[]: dict<nothing, nothing>;
 
   /**
    * IMPORTANT: Returns an empty collection of default size in repo mode.
@@ -36,5 +36,5 @@ namespace HH\Sandbox {
    * @return vec<T> - An empty vec with reserved capacity
    */
   <<__Native>>
-  function vec_with_capacity<T>(int $capacity)[]: vec<T>;
+  function vec_with_capacity(int $capacity)[]: vec<nothing>;
 }

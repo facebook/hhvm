@@ -58,11 +58,11 @@ namespace HH\Lib\_Private\_Regex {
    * 2-tuple with the error number in the second position is returned.
    */
   <<__Native>>
-  function match<T as \HH\Lib\Regex\Match>(
+  function match(
     string $haystack,
-    string $pattern, // actually \HH\Lib\Regex\Pattern<T>
+    string $pattern,
     inout int $offset,
-  )[]: (?T, ?int);
+  )[]: (?\HH\Lib\Regex\Match, ?int);
 
   /**
    * Tries to match $pattern in $haystack, replacing any matches with

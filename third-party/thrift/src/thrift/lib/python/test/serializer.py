@@ -980,6 +980,84 @@ class SerializerTerseWriteTests(unittest.TestCase):
         (mutable_types, mutable_serializer),
     ],
 )
+class JsonDeserializeErrorTests(unittest.TestCase):
+    """Characterization tests for deserializing malformed JSON/JSON5 payloads.
+
+    These pin down *current* behavior; they are not a statement of desired
+    behavior. Both protocols silently skip unknown field names (which enables
+    schema evolution) and both raise `Error` on value type mismatches.
+    """
+
+    def setUp(self) -> None:
+        # pyre-ignore[16]: has no attribute `test_types`
+        self.easy: Type[easy] = self.test_types.easy
+        self.is_mutable_run: bool = self.test_types.__name__.endswith(
+            "thrift_mutable_types"
+        )
+        # pyre-ignore[16]: has no attribute `serializer_module`
+        self.serializer: types.ModuleType = self.serializer_module
+
+    def to_list(self, list_data: list[ListT]) -> list[ListT] | _ThriftListWrapper:
+        return to_thrift_list(list_data) if self.is_mutable_run else list_data
+
+    @parameterized.expand([("json", Protocol.JSON), ("json5", Protocol.JSON5)])
+    def test_unknown_field_name_is_ignored(
+        self, _name: str, protocol: Protocol
+    ) -> None:
+        # A bare unknown key has no field id to match, so it is skipped and the
+        # known fields still deserialize. (JSON5's `name (id)` strict path is
+        # covered by Json5NegativeTest, not reachable via SimpleJSON.)
+        payload = b'{"val":5,"val_list":[1,2,3],"totally_bogus_field":99}'
+        decoded = self.serializer.deserialize(self.easy, payload, protocol=protocol)
+        # pyre-ignore[6]: TODO: Thrift-Container init
+        self.assertEqual(decoded, self.easy(val=5, val_list=self.to_list([1, 2, 3])))
+
+    @parameterized.expand(
+        [
+            # `val` is i32; `val_list` is list<i32>. Each payload supplies a
+            # value of the wrong JSON type for a valid field, paired with a regex
+            # asserting the error message points at the actual problem (an SLA on
+            # debuggability -- a bare "Error" is not enough to triage a bad blob).
+            (
+                "scalar_json",
+                Protocol.JSON,
+                b'{"val":"not_an_int","val_list":[1,2,3]}',
+                r"is not a valid int",
+            ),
+            (
+                "scalar_json5",
+                Protocol.JSON5,
+                b'{"val":"not_an_int","val_list":[1,2,3]}',
+                r"expected integer value",
+            ),
+            (
+                "container_json",
+                Protocol.JSON,
+                b'{"val":5,"val_list":"not_a_list"}',
+                r"expected '\['",
+            ),
+            (
+                "container_json5",
+                Protocol.JSON5,
+                b'{"val":5,"val_list":"not_a_list"}',
+                r"expected '\['",
+            ),
+        ]
+    )
+    def test_type_mismatch_raises(
+        self, _name: str, protocol: Protocol, payload: bytes, pattern: str
+    ) -> None:
+        with self.assertRaisesRegex(Error, pattern):
+            self.serializer.deserialize(self.easy, payload, protocol=protocol)
+
+
+@parameterized_class(
+    ("test_types", "serializer_module"),
+    [
+        (immutable_types, immutable_serializer),
+        (mutable_types, mutable_serializer),
+    ],
+)
 class IOBufSerializationTests(unittest.TestCase):
     """Tests that IOBuf fields round-trip into a single coalesced node.
 

@@ -63,8 +63,10 @@ class StructIssetDeprecatedTest(unittest.TestCase):
         self.assertFalse(isset_DEPRECATED(file)["type"])
 
     def test_isset_Error(self) -> None:
+        # `isset_DEPRECATED()` is not supported for exceptions.
         e = UnusedError(message="ACK")
-        self.assertTrue(isset_DEPRECATED(e)["message"])
+        with self.assertRaises(AttributeError):
+            isset_DEPRECATED(e)
 
     def test_isset_Union(self) -> None:
         i = Integers(large=2)

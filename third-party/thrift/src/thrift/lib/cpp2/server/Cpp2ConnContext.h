@@ -520,7 +520,7 @@ class Cpp2ConnContext : public apache::thrift::server::TConnectionContext {
   void setClientType(CLIENT_TYPE clientType) { clientType_ = clientType; }
 
   void readSetupMetadata(const RequestSetupMetadata& meta) {
-    if (const auto& md = meta.clientMetadata()) {
+    if (auto md = meta.clientMetadata()) {
       setClientMetadata(*md);
     }
     if (auto interfaceKind = meta.interfaceKind()) {
@@ -861,7 +861,7 @@ class Cpp2RequestContext : public apache::thrift::server::TConnectionContext {
   const std::string* getClientRequestId() const {
     if (auto* header = getHeader()) {
       if (const auto& loggingContext = header->loggingContext()) {
-        if (const auto requestIdRef = loggingContext->requestId();
+        if (auto requestIdRef = loggingContext->requestId();
             requestIdRef.has_value() && !requestIdRef->empty()) {
           return &*requestIdRef;
         }
@@ -873,7 +873,7 @@ class Cpp2RequestContext : public apache::thrift::server::TConnectionContext {
   int getRequestAttemptId() const {
     if (auto* header = getHeader()) {
       if (const auto& loggingContext = header->loggingContext()) {
-        if (const auto attemptIdRef = loggingContext->requestAttemptId();
+        if (auto attemptIdRef = loggingContext->requestAttemptId();
             apache::thrift::is_non_optional_field_set_manually_or_by_serializer(
                 attemptIdRef)) {
           return *attemptIdRef;
@@ -886,7 +886,7 @@ class Cpp2RequestContext : public apache::thrift::server::TConnectionContext {
   const std::string* getRoutingTarget() const {
     if (auto* header = getHeader()) {
       if (const auto& loggingContext = header->loggingContext()) {
-        if (const auto routingTargetRef = loggingContext->routingTarget();
+        if (auto routingTargetRef = loggingContext->routingTarget();
             routingTargetRef.has_value() && !routingTargetRef->empty()) {
           return &*routingTargetRef;
         }

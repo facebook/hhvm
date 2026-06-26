@@ -308,6 +308,85 @@ checkSF(const Vunit& unit, const jit::vector<Vlabel>& blocks) {
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
+ * Extract the ConditionCode tested by an instruction, if it has one.
+ */
+struct CCFinder {
+  template<class T> void imm(T) {}
+  void imm(ConditionCode c) { cc = c; }
+  template<class T> void across(T) {}
+  template<class T> void use(T) {}
+  template<class T> void def(T) {}
+  template<class T, class H> void useHint(T, H) {}
+  template<class T, class H> void defHint(T, H) {}
+  ConditionCode cc{CC_None};
+};
+
+// testb*/testw* compute the sign flag from a different bit on x64 (bit 7/15 of
+// the tested byte/word) than on arm64, where the operands are widened to 32-bit
+// W-registers before the tst, so the sign reflects bit 31. A condition code
+// that depends on the sign flag would therefore evaluate differently per
+// architecture, so verify that no such consumer reads the flags of a byte/word
+// test. If this trips, the two lowerings must be reconciled.
+DEBUG_ONLY bool
+checkNarrowTestSignFlag(const Vunit& unit, const jit::vector<Vlabel>& blocks) {
+  auto const dependsOnSignFlag = [] (ConditionCode cc) {
+    switch (cc) {
+      case CC_S:  case CC_NS:   // sign set / clear
+      case CC_L:  case CC_GE:   // signed <, >=
+      case CC_LE: case CC_G:    // signed <=, >
+        return true;
+      default:
+        return false;
+    }
+  };
+  auto const isByteOrWordTest = [] (Vinstr::Opcode op) {
+    switch (op) {
+      case Vinstr::testb:   case Vinstr::testbi:
+      case Vinstr::testbim: case Vinstr::testbm:
+      case Vinstr::testw:   case Vinstr::testwi:
+      case Vinstr::testwim: case Vinstr::testwm:
+        return true;
+      default:
+        return false;
+    }
+  };
+
+  // Mark which virtual VregSFs are defined by a byte/word test. Physical SFs
+  // (post-regalloc) are skipped: register allocation preserves which test feeds
+  // which branch, so verifying the earlier SSA form is sufficient.
+  jit::vector<bool> fromNarrowTest(unit.next_vr, false);
+  for (auto const b : blocks) {
+    for (auto const& inst : unit.blocks[b].code) {
+      if (!isByteOrWordTest(inst.op)) continue;
+      visitDefs(unit, inst, [&] (Vreg r, Width w) {
+        if (w == Width::Flags && !r.isPhys()) fromNarrowTest[r] = true;
+      });
+    }
+  }
+
+  for (auto const b : blocks) {
+    for (auto const& inst : unit.blocks[b].code) {
+      CCFinder cf;
+      visitOperands(inst, cf);
+      if (!dependsOnSignFlag(cf.cc)) continue;
+      visitUses(unit, inst, [&] (Vreg r, Width w) {
+        if (w != Width::Flags || r.isPhys()) return;
+        always_assert_flog(
+          !fromNarrowTest[r],
+          "{} consumes the sign flag from a byte/word test; testb*/testw* set "
+          "SF from a different bit on x64 (bit 7/15) than arm64 (bit 31), so "
+          "the result is not portable\n{}",
+          show(unit, inst), show(unit)
+        );
+      });
+    }
+  }
+  return true;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+/*
  * Check if two width constraints have any overlap.
  */
 DEBUG_ONLY bool compatible(Width w1, Width w2) {
@@ -469,6 +548,7 @@ bool check(Vunit& unit) {
   assertx(checkSSA(unit, blocks));
   assertx(checkCalls(unit, blocks));
   assertx(checkSF(unit, blocks));
+  assertx(checkNarrowTestSignFlag(unit, blocks));
   assertx(checkVtuples(unit, blocks));
   return true;
 }

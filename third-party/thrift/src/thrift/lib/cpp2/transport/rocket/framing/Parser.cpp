@@ -16,6 +16,9 @@
 
 #include <thrift/lib/cpp2/transport/rocket/framing/Parser.h>
 
+#include <atomic>
+#include <mutex>
+
 // rocket_frame_parser flag specify which frame parser rocket transport decide
 // to use. It can take three values
 // - "strategy": rocket transport will use FrameLengthParserStrategy to parse
@@ -28,10 +31,66 @@
 THRIFT_FLAG_DEFINE_string(rocket_frame_parser, "strategy");
 
 namespace apache::thrift::rocket::detail {
+
+#if FOLLY_HAS_MEMORY_RESOURCE
+namespace {
+// Process-wide resource backing the default parser allocator. Installed via
+// setDefaultParserMemoryResource() before any connection is created, and
+// captured by getDefaultAllocator() on first use.
+std::atomic<std::pmr::memory_resource*>& defaultParserMemoryResourceSlot() {
+  static std::atomic<std::pmr::memory_resource*> slot{nullptr};
+  return slot;
+}
+
+// Set true the first time getDefaultAllocator() captures the resource. A
+// store() after this point is a no-op against the live allocator, so
+// setDefaultParserMemoryResource() surfaces it as a programming error.
+std::atomic<bool>& defaultParserMemoryResourceCaptured() {
+  static std::atomic<bool> captured{false};
+  return captured;
+}
+
+// Serializes the setter's check-then-store against the getter's
+// load-then-capture so the two cannot interleave (a TOCTOU that would let a
+// setter "succeed" while the live allocator already captured the old resource).
+std::mutex& defaultParserMemoryResourceMutex() {
+  static std::mutex m;
+  return m;
+}
+} // namespace
+
+void setDefaultParserMemoryResource(std::pmr::memory_resource* resource) {
+  std::lock_guard<std::mutex> g(defaultParserMemoryResourceMutex());
+  LOG_IF(
+      FATAL,
+      defaultParserMemoryResourceCaptured().load(std::memory_order_acquire))
+      << "setDefaultParserMemoryResource() called after the default parser "
+         "allocator was already materialized; the resource is captured on "
+         "first use and a later install has no effect. Install it before the "
+         "first RocketClient / RocketServerConnection is constructed.";
+  defaultParserMemoryResourceSlot().store(resource, std::memory_order_release);
+}
+
+ParserAllocatorType& getDefaultAllocator() {
+  // The resource is captured on first use. The mutex makes the capture atomic
+  // with respect to setDefaultParserMemoryResource(): either the setter's store
+  // happens-before the capture (resource is honored), or the capture
+  // happens-before the setter's check (setter correctly FATALs as too-late).
+  static folly::Indestructible<ParserAllocatorType> defaultAllocator([] {
+    std::lock_guard<std::mutex> g(defaultParserMemoryResourceMutex());
+    auto* r = defaultParserMemoryResourceSlot().load(std::memory_order_acquire);
+    defaultParserMemoryResourceCaptured().store(
+        true, std::memory_order_release);
+    return r ? r : std::pmr::get_default_resource();
+  }());
+  return *defaultAllocator;
+}
+#else
 ParserAllocatorType& getDefaultAllocator() {
   static folly::Indestructible<ParserAllocatorType> defaultAllocator;
   return *defaultAllocator;
 }
+#endif
 
 ParserMode stringToMode(const std::string& modeStr) noexcept {
   if (modeStr == "strategy") {

@@ -39,6 +39,33 @@ namespace detail {
 enum class ParserMode { STRATEGY, ALLOCATING, ALIGNED };
 ParserMode stringToMode(const std::string& modeStr) noexcept;
 ParserAllocatorType& getDefaultAllocator();
+
+// Install the std::pmr::memory_resource backing the default parser allocator
+// returned by getDefaultAllocator(). When set, the ALLOCATING parser (selected
+// via the rocket_frame_parser flag) reads frame buffers from this resource on
+// BOTH clients and servers that do not supply their own allocator -- the single
+// process-wide interposition point for routing large rocket frames into custom
+// (e.g. RDMA-registered) memory.
+//
+// Call this during process startup, before any RocketClient /
+// RocketServerConnection is constructed: the default allocator captures the
+// resource on first use, and any call after that point fatals (the late install
+// would have no effect). Among calls made before capture the last one wins, so
+// install exactly once to avoid ambiguity.
+// The resource is held as a non-owning pointer captured by the process-wide
+// default allocator (used for asynchronous frame/IOBuf deallocation); it MUST
+// outlive all Rocket connections and buffers (i.e. have process lifetime).
+// Passing a shorter-lived resource is a use-after-free.
+// The resource must also be thread-safe: it is shared process-wide and its
+// allocate()/deallocate() are invoked concurrently from multiple Rocket I/O
+// threads (frame/IOBuf (de)allocation) with no external synchronization.
+// Passing nullptr leaves the standard default resource in place.
+//
+// Declared only when std::pmr::memory_resource is available; callers must
+// guard call sites with FOLLY_HAS_MEMORY_RESOURCE.
+#if FOLLY_HAS_MEMORY_RESOURCE
+void setDefaultParserMemoryResource(std::pmr::memory_resource* resource);
+#endif
 } // namespace detail
 
 template <class T>

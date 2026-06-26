@@ -39,6 +39,9 @@ type t = {
   auto_namespace_map: (string * string) list;  (** Namespace aliasing map *)
   everything_sdt: bool;
       (** All classes are implcitly marked <<__SupportDynamicType>> *)
+  include_enum_member_values: bool;
+      (** If set, the parser records enum member values in decls (used by the
+          duplicate-enum-value check). *)
   keep_user_attributes: bool;
       (** Parse all user attributes rather than only the ones needed for typing *)
   stack_size: int;

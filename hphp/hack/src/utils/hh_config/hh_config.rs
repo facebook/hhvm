@@ -303,6 +303,10 @@ impl HhConfig {
             )?,
             no_parser_readonly_check: default.no_parser_readonly_check,
             everything_sdt: hhconfig.get_bool_or("everything_sdt", default.everything_sdt)?,
+            include_enum_member_values: hhconfig.get_bool_or(
+                "include_enum_member_values",
+                default.include_enum_member_values,
+            )?,
             disallow_static_constants_in_default_func_args: default
                 .disallow_static_constants_in_default_func_args,
             unwrap_concurrent: default.unwrap_concurrent,

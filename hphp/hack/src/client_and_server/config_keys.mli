@@ -124,6 +124,8 @@ module Hhconfig : sig
 
   val disallow_duplicate_enum_values : string
 
+  val include_enum_member_values : string
+
   val disallow_toplevel_requires : string
 
   val disallow_unresolved_type_variables : string

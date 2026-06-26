@@ -22,6 +22,7 @@ impl DeclParserOptions {
             interpret_soft_types_as_like_types: opts.interpret_soft_types_as_like_types,
             enable_xhp_class_modifier: opts.enable_xhp_class_modifier,
             everything_sdt: opts.everything_sdt,
+            include_enum_member_values: opts.include_enum_member_values,
             php5_compat_mode: false,
             hhvm_compat_mode: false,
             keep_user_attributes: false,

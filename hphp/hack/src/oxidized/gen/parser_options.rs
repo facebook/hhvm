@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<1e82a0c86ace48d9fea4304dbf638238>>
+// @generated SignedSource<<8e72b566fe75139b38acb8e1f94a107d>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -73,6 +73,9 @@ pub struct ParserOptions {
     pub auto_namespace_map: Vec<(String, String)>,
     /// All classes are implcitly marked <<__SupportDynamicType>>
     pub everything_sdt: bool,
+    /// If set, the parser records enum member values in decls (used by the
+    /// duplicate-enum-value check).
+    pub include_enum_member_values: bool,
     /// Parse all user attributes rather than only the ones needed for typing
     pub keep_user_attributes: bool,
     /// Stack size to use for parallel workers inside the parser.

@@ -390,6 +390,9 @@ let load_config (config : Config_file_common.t) (options : GlobalOptions.t) :
         everything_sdt =
           bool_opt Config_keys.Hhconfig.everything_sdt config
           >?? po_opt.everything_sdt;
+        include_enum_member_values =
+          bool_opt Config_keys.Hhconfig.include_enum_member_values config
+          >?? po_opt.include_enum_member_values;
         keep_user_attributes =
           bool_opt Config_keys.Hhconfig.keep_user_attributes config
           >?? po_opt.keep_user_attributes;

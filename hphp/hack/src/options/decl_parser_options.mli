@@ -12,6 +12,7 @@ type t = {
   interpret_soft_types_as_like_types: bool;
   enable_xhp_class_modifier: bool;
   everything_sdt: bool;
+  include_enum_member_values: bool;
   php5_compat_mode: bool;
   hhvm_compat_mode: bool;
   keep_user_attributes: bool;

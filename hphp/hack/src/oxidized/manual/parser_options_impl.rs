@@ -28,6 +28,7 @@ impl Default for ParserOptions {
             disallow_static_constants_in_default_func_args: false,
             auto_namespace_map: vec![],
             everything_sdt: false,
+            include_enum_member_values: false,
             deregister_php_stdlib: false,
             stack_size: 32 * 1024 * 1024, // 32 MiB is the largest stack size we can use without requiring sudo
             keep_user_attributes: false,

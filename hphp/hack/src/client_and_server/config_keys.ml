@@ -134,6 +134,8 @@ module Hhconfig = struct
 
   let disallow_duplicate_enum_values = key "disallow_duplicate_enum_values"
 
+  let include_enum_member_values = key "include_enum_member_values"
+
   let disallow_toplevel_requires = key "disallow_toplevel_requires"
 
   let disallow_unresolved_type_variables =

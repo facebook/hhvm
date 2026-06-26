@@ -27,6 +27,7 @@ type t = {
   disallow_static_constants_in_default_func_args: bool;
   auto_namespace_map: (string * string) list;
   everything_sdt: bool;
+  include_enum_member_values: bool;
   keep_user_attributes: bool;
   stack_size: int;
   deregister_php_stdlib: bool;
@@ -70,6 +71,7 @@ let default =
     disallow_static_constants_in_default_func_args = false;
     auto_namespace_map = [];
     everything_sdt = false;
+    include_enum_member_values = false;
     deregister_php_stdlib = false;
     stack_size = 32 * 1024 * 1024;
     keep_user_attributes = false;

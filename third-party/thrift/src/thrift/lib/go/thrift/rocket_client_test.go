@@ -139,17 +139,29 @@ func TestFDRelease(t *testing.T) {
 		require.NoError(t, err)
 	}
 
-	// Run GC to ensure it releases the underlying FDs
-	for range 10 {
+	// Run GC to ensure it releases the underlying FDs.
+	// The runtime.AddCleanup callbacks run asynchronously on a dedicated runtime
+	// goroutine and are not guaranteed to have finished when runtime.GC() returns,
+	// so we poll until the FD count drops or a deadline elapses.
+	const fdLimit = 200
+	const fdReleaseTimeout = 60 * time.Second
+	const fdPollInterval = 100 * time.Millisecond
+	deadline := time.Now().Add(fdReleaseTimeout)
+	var fdCount int
+	for {
 		runtime.GC()
+		fdCount = getNumFileDesciptors(t)
+		if fdCount < fdLimit || time.Now().After(deadline) {
+			break
+		}
+		time.Sleep(fdPollInterval)
 	}
-	fdCount := getNumFileDesciptors(t)
 
 	// Because we run alongside other tests concurrently - we cannot assert zero.
 	// But it is sufficient to assert that we are down to below 200 FDs.
 	// This is a very solid assertion, given that we opened 10,000 connections (FDs)
 	// in the for-loop above.
-	require.Less(t, fdCount, 200)
+	require.Less(t, fdCount, fdLimit)
 
 	serverCancel()
 	err = serverEG.Wait()

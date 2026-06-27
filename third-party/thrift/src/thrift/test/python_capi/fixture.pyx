@@ -51,6 +51,13 @@ cdef extern from "thrift/test/python_capi/gen-python-capi/serialized_dep/thrift_
 cdef extern from "thrift/test/python_capi/gen-cpp2/serialized_dep_types.h" namespace "thrift::test::python_capi":
     cppclass SerializedStruct
 
+cdef extern from "thrift/test/python_capi/gen-python-capi/isset/thrift_types_capi.h":
+    cppclass IssetNs "thrift__test__python_capi__isset::NamespaceTag"
+
+cdef extern from "thrift/test/python_capi/gen-cpp2/isset_types.h" namespace "thrift::test::python_capi":
+    cppclass IssetStruct
+    cppclass IssetEmpty
+
 cdef extern from "thrift/test/python_capi/fixture.h" namespace "apache::thrift::test":
     cdef object __shim__roundtrip[T, NsTag](object)
     cdef cbool __shim__typeCheck[T, NsTag](object)
@@ -113,6 +120,12 @@ def roundtrip_SomeBinary(object x):
 
 def roundtrip_Float32(object x):
     return __shim__roundtrip[Float32, ModuleNs](x)
+
+def roundtrip_IssetStruct(object x):
+    return __shim__roundtrip[IssetStruct, IssetNs](x)
+
+def roundtrip_IssetEmpty(object x):
+    return __shim__roundtrip[IssetEmpty, IssetNs](x)
 
 def gen_SerializedStruct(int64_t len_):
     return __shim__gen_SerializedStruct(len_)

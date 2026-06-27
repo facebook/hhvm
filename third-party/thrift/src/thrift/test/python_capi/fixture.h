@@ -22,6 +22,7 @@
 #include <thrift/lib/python/capi/iobuf.h>
 
 #include <thrift/test/python_capi/gen-python-capi/containers/thrift_types_capi.h>
+#include <thrift/test/python_capi/gen-python-capi/isset/thrift_types_capi.h>
 #include <thrift/test/python_capi/gen-python-capi/module/thrift_types_capi.h>
 #include <thrift/test/python_capi/gen-python-capi/serialized_dep/thrift_types_capi.h>
 

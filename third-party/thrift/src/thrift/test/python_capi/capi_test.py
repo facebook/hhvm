@@ -19,8 +19,10 @@ import typing
 import unittest
 from sys import getrefcount
 
+import thrift.python.types
 import thrift.python_capi.fixture as fixture
 from folly.iobuf import IOBuf
+from parameterized import parameterized
 from thrift.python.exceptions import GeneratedError, ProtocolError
 from thrift.python.serializer import deserialize, Protocol, serialize, serialize_iobuf
 from thrift.python.types import Struct as PythonStruct, StructOrUnion
@@ -29,6 +31,7 @@ from thrift.test.python_capi.containers.thrift_types import (
     TemplateMaps,
     TemplateSets,
 )
+from thrift.test.python_capi.isset.thrift_types import IssetEmpty, IssetStruct
 from thrift.test.python_capi.module.thrift_types import (
     AdaptedFields,
     AnnoyingEnum,
@@ -59,6 +62,10 @@ from thrift.test.python_capi.thrift_dep.thrift_types import (
 )
 
 sT = typing.TypeVar("sT", bound=typing.Union[StructOrUnion, GeneratedError])
+
+# `isset_DEPRECATED` is intentionally excluded from `types.pyi`, so reference it
+# through the module.
+isset_DEPRECATED = thrift.python.types.isset_DEPRECATED  # pyre-ignore[16]
 
 
 class PythonCapiFixture(unittest.TestCase):
@@ -276,6 +283,68 @@ class PythonCapiRoundtrip(PythonCapiFixture):
         with self.assertRaises(TypeError):
             # pyre-ignore[6]
             fixture.roundtrip_EmptyStruct(MyStruct())
+
+    @parameterized.expand(
+        [
+            # name, original, expected local isset, expected isset after C++ -> Python
+            (
+                "all_set",
+                IssetStruct(unqualified_int=5, optional_int=7, optional_str="x"),
+                {"unqualified_int": True, "optional_int": True, "optional_str": True},
+                {"unqualified_int": True, "optional_int": True, "optional_str": True},
+            ),
+            (
+                "unqualified_set_optionals_unset",
+                IssetStruct(unqualified_int=5),
+                {"unqualified_int": True, "optional_int": False, "optional_str": False},
+                {"unqualified_int": True, "optional_int": False, "optional_str": False},
+            ),
+            # The interesting case: an unqualified field left unset reads isset
+            # False locally, but the Constructor (C++ -> Python) always marks it
+            # set, to match deserialization behavior.
+            (
+                "unqualified_unset_promoted_to_set",
+                IssetStruct(),
+                {
+                    "unqualified_int": False,
+                    "optional_int": False,
+                    "optional_str": False,
+                },
+                {"unqualified_int": True, "optional_int": False, "optional_str": False},
+            ),
+            (
+                "optional_set_unqualified_unset_promoted",
+                IssetStruct(optional_int=7),
+                {"unqualified_int": False, "optional_int": True, "optional_str": False},
+                {"unqualified_int": True, "optional_int": True, "optional_str": False},
+            ),
+        ]
+    )
+    def test_roundtrip_isset_constructor(
+        self,
+        _name: str,
+        original: IssetStruct,
+        expected_local_isset: typing.Dict[str, bool],
+        expected_roundtrip_isset: typing.Dict[str, bool],
+    ) -> None:
+        # `roundtrip_*` returns a value built by the C++ -> Python Constructor.
+        # `IssetStruct` is compiled with `enable_isset_deprecated_unsafe`, so its
+        # isset state is readable via `isset_DEPRECATED()`. This is the only
+        # coverage of the isset-enabled capi Constructor (C++ -> Python) path.
+        self.assertEqual(isset_DEPRECATED(original), expected_local_isset)
+
+        built = fixture.roundtrip_IssetStruct(original)
+        # Field values survive the round-trip.
+        self.assertEqual(built.unqualified_int, original.unqualified_int)
+        self.assertEqual(built.optional_int, original.optional_int)
+        self.assertEqual(built.optional_str, original.optional_str)
+        # isset reflects the Constructor's view of presence.
+        self.assertEqual(isset_DEPRECATED(built), expected_roundtrip_isset)
+
+    def test_roundtrip_isset_empty(self) -> None:
+        # An isset-enabled fieldless struct round-trips through the Constructor
+        # (the data holder is a single-element tuple holding only the isset array).
+        self.assertEqual(IssetEmpty(), fixture.roundtrip_IssetEmpty(IssetEmpty()))
 
     def test_roundtrip_TypeError(self) -> None:
         with self.assertRaises(TypeError):

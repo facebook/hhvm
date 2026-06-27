@@ -21,7 +21,7 @@ TLResponseCodeStats::TLResponseCodeStats(const std::string& name,
       status3xx(name + "3xx", SUM),
       status4xx(name + "4xx", SUM),
       status5xx(name + "5xx", SUM) {
-  if (verbosity > 8) {
+  if (verbosity > kPerCodeVerbosityThreshold) {
     status39x.emplace(name + "39x", SUM);
     status200.emplace(name + "200", SUM);
     status206.emplace(name + "206", SUM);

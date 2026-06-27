@@ -13,6 +13,12 @@
 namespace proxygen {
 
 struct TLResponseCodeStats {
+  // Per-numeric-code counters (status200, status302, ...) are created only when
+  // the constructor verbosity is strictly greater than this threshold. Callers
+  // that want to suppress the per-code family while keeping the class-level
+  // _2xx/_3xx/_4xx/_5xx buckets pass a verbosity at or below this value.
+  static constexpr uint8_t kPerCodeVerbosityThreshold = 8;
+
   explicit TLResponseCodeStats(const std::string& name, uint8_t verbosity);
 
   void addStatus(int status);

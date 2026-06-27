@@ -6,6 +6,9 @@
 mod pass_generator;
 mod transform_generator;
 
+use syn::Token;
+use syn::punctuated::Punctuated;
+
 pub use crate::common::args::CommonArgs as Args;
 use crate::common::context::Context;
 use crate::common::to_snake;
@@ -68,38 +71,23 @@ fn gen_pass_ctor_method_name(
     )
 }
 
-fn contains_ocaml_attr(attrs: &[syn::Attribute], attr: &'static str) -> bool {
-    fn get_rust_to_ocaml_meta_items(attr: &syn::Attribute) -> Option<Vec<syn::NestedMeta>> {
-        if !attr.path.is_ident("rust_to_ocaml") {
-            return None;
-        }
-        match attr.parse_meta() {
-            Ok(syn::Meta::List(meta)) => Some(meta.nested.into_iter().collect()),
-            _ => None,
-        }
-    }
-    fn get_lit_str<'a>(_attr_name: &'static str, lit: &'a syn::Lit) -> Option<&'a syn::LitStr> {
-        if let syn::Lit::Str(lit) = lit {
-            Some(lit)
-        } else {
-            None
-        }
-    }
-    attrs
-        .iter()
-        .flat_map(get_rust_to_ocaml_meta_items)
-        .flatten()
-        .any(|item| {
-            use syn::Meta::NameValue;
-            use syn::NestedMeta::Meta;
-            match item {
-                Meta(NameValue(m)) if m.path.is_ident("attr") => {
-                    if let Some(s) = get_lit_str("attr", &m.lit) {
-                        return s.value() == attr;
-                    }
-                    false
+fn contains_ocaml_attr(attrs: &[syn::Attribute], value: &str) -> bool {
+    for attr in attrs {
+        if attr.path().is_ident("rust_to_ocaml")
+            && let Ok(inner) =
+                attr.parse_args_with(Punctuated::<syn::Meta, Token![,]>::parse_terminated)
+        {
+            for meta in inner {
+                if let syn::Meta::NameValue(meta) = meta
+                    && meta.path.is_ident("attr")
+                    && let syn::Expr::Lit(meta_value) = &meta.value
+                    && let syn::Lit::Str(lit) = &meta_value.lit
+                {
+                    return lit.value() == value;
                 }
-                _ => false,
             }
-        })
+        }
+    }
+
+    false
 }

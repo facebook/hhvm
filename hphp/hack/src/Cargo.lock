@@ -2264,7 +2264,7 @@ dependencies = [
  "proc-macro2",
  "quote",
  "signed_source",
- "syn 1.0.109",
+ "syn 2.0.118",
  "synstructure",
 ]
 
@@ -3181,7 +3181,7 @@ version = "0.0.0"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 1.0.109",
+ "syn 2.0.118",
  "synstructure",
 ]
 
@@ -3303,7 +3303,7 @@ version = "0.1.0"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 1.0.109",
+ "syn 2.0.118",
  "synstructure",
 ]
 
@@ -4824,14 +4824,13 @@ dependencies = [
 
 [[package]]
 name = "synstructure"
-version = "0.12.6"
+version = "0.13.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f36bdaa60a83aca3921b5259d5400cbf5e90fc51931376a9bd4a0eb79aa7210f"
+checksum = "728a70f3dbaf5bab7f0c4b1ac8d7ae5ea60a4b5549c8a5914361c99147a709d2"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 1.0.109",
- "unicode-xid",
+ "syn 2.0.118",
 ]
 
 [[package]]

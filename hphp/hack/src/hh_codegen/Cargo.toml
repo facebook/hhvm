@@ -10,7 +10,6 @@ license = "MIT"
 [[bin]]
 name = "hh_codegen"
 path = "hh_codegen.rs"
-edition = "2021"
 
 [dependencies]
 anyhow = "1.0.102"

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<1afb243cdeb24a84c2167dc811e6535c>>
+// @generated SignedSource<<ff15625890fcb8a9f036d19bd93a4666>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -186,7 +186,7 @@ impl Transform for LoopCond {
         let _ = in_pass.on_ty_loop_cond_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             LoopCond(ref mut __binding_0, ref mut __binding_1, ref mut __binding_2) => {
                 {
                     __binding_0.transform(env, &mut pass.clone())
@@ -209,7 +209,7 @@ impl Transform for LoopIter {
         let _ = in_pass.on_ty_loop_iter_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             LoopIter(ref mut __binding_0, ref mut __binding_1, ref mut __binding_2) => {
                 {
                     __binding_0.transform(env, &mut pass.clone())
@@ -232,7 +232,7 @@ impl Transform for Program {
         let _ = in_pass.on_ty_program_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             Program(ref mut __binding_0) => __binding_0.transform(env, &mut pass.clone()),
         }
     }
@@ -247,7 +247,7 @@ impl Transform for Stmt {
         let _ = in_pass.on_ty_stmt_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             Stmt(ref mut __binding_0, ref mut __binding_1) => {
                 {
                     __binding_0.transform(env, &mut pass.clone())
@@ -267,7 +267,7 @@ impl Transform for Stmt_ {
         let _ = in_pass.on_ty_stmt__bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             Stmt_::Noop => {}
             Stmt_::Fallthrough => {}
             Stmt_::Expr(ref mut __binding_0) => __binding_0.transform(env, &mut pass.clone()),
@@ -302,7 +302,7 @@ impl Transform for UsingStmt {
         let _ = in_pass.on_ty_using_stmt_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             UsingStmt {
                 is_block_scoped: ref mut __binding_0,
                 has_await: ref mut __binding_1,
@@ -333,7 +333,7 @@ impl Transform for AsExpr {
         let _ = in_pass.on_ty_as_expr_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             AsExpr::AsV(ref mut __binding_0) => __binding_0.transform(env, &mut pass.clone()),
             AsExpr::AsKv(ref mut __binding_0, ref mut __binding_1) => {
                 {
@@ -369,7 +369,7 @@ impl Transform for Block {
         let _ = in_pass.on_ty_block_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             Block(ref mut __binding_0) => __binding_0.transform(env, &mut pass.clone()),
         }
     }
@@ -384,7 +384,7 @@ impl Transform for FinallyBlock {
         let _ = in_pass.on_ty_finally_block_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             FinallyBlock(ref mut __binding_0) => __binding_0.transform(env, &mut pass.clone()),
         }
     }
@@ -399,7 +399,7 @@ impl Transform for StmtMatch {
         let _ = in_pass.on_ty_stmt_match_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             StmtMatch {
                 expr: ref mut __binding_0,
                 arms: ref mut __binding_1,
@@ -422,7 +422,7 @@ impl Transform for StmtMatchArm {
         let _ = in_pass.on_ty_stmt_match_arm_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             StmtMatchArm {
                 pat: ref mut __binding_0,
                 body: ref mut __binding_1,
@@ -445,7 +445,7 @@ impl Transform for Pattern {
         let _ = in_pass.on_ty_pattern_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             Pattern::PVar(ref mut __binding_0) => __binding_0.transform(env, &mut pass.clone()),
             Pattern::PRefinement(ref mut __binding_0) => {
                 __binding_0.transform(env, &mut pass.clone())
@@ -463,7 +463,7 @@ impl Transform for PatVar {
         let _ = in_pass.on_ty_pat_var_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             PatVar {
                 id: ref mut __binding_1,
                 ..
@@ -481,7 +481,7 @@ impl Transform for PatRefinement {
         let _ = in_pass.on_ty_pat_refinement_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             PatRefinement {
                 id: ref mut __binding_1,
                 hint: ref mut __binding_2,
@@ -505,7 +505,7 @@ impl Transform for DestructureShape {
         let _ = in_pass.on_ty_destructure_shape_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             DestructureShape {
                 fields: ref mut __binding_1,
                 ellipsis: ref mut __binding_2,
@@ -529,7 +529,7 @@ impl Transform for DestructureShapeField {
         let _ = in_pass.on_ty_destructure_shape_field_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             DestructureShapeField {
                 optional: ref mut __binding_0,
                 name: ref mut __binding_1,
@@ -556,7 +556,7 @@ impl Transform for DestructureTuple {
         let _ = in_pass.on_ty_destructure_tuple_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             DestructureTuple {
                 entries: ref mut __binding_1,
                 ellipsis: ref mut __binding_2,
@@ -580,7 +580,7 @@ impl Transform for DestructureTupleEntry {
         let _ = in_pass.on_ty_destructure_tuple_entry_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             DestructureTupleEntry {
                 optional: ref mut __binding_0,
                 target: ref mut __binding_1,
@@ -603,7 +603,7 @@ impl Transform for DestructureTarget {
         let _ = in_pass.on_ty_destructure_target_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             DestructureTarget(ref mut __binding_0, ref mut __binding_1, ref mut __binding_2) => {
                 {
                     __binding_0.transform(env, &mut pass.clone())
@@ -626,7 +626,7 @@ impl Transform for DestructureTarget_ {
         let _ = in_pass.on_ty_destructure_target__bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             DestructureTarget_::DtLvar(ref mut __binding_0) => {
                 __binding_0.transform(env, &mut pass.clone())
             }
@@ -652,7 +652,7 @@ impl Transform for ClassId {
         let _ = in_pass.on_ty_class_id_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             ClassId(ref mut __binding_0, ref mut __binding_1, ref mut __binding_2) => {
                 {
                     __binding_0.transform(env, &mut pass.clone())
@@ -675,7 +675,7 @@ impl Transform for ClassId_ {
         let _ = in_pass.on_ty_class_id__bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             ClassId_::CIparent => {}
             ClassId_::CIself => {}
             ClassId_::CIstatic => {}
@@ -697,7 +697,7 @@ impl Transform for Expr {
         let _ = in_pass.on_ty_expr_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             Expr(ref mut __binding_0, ref mut __binding_1, ref mut __binding_2) => {
                 {
                     __binding_0.transform(env, &mut pass.clone())
@@ -720,7 +720,7 @@ impl Transform for CollectionTarg {
         let _ = in_pass.on_ty_collection_targ_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             CollectionTarg::CollectionTV(ref mut __binding_0) => {
                 __binding_0.transform(env, &mut pass.clone())
             }
@@ -743,7 +743,7 @@ impl Transform for FunctionPtrId {
         let _ = in_pass.on_ty_function_ptr_id_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             FunctionPtrId::FPId(ref mut __binding_0) => {
                 __binding_0.transform(env, &mut pass.clone())
             }
@@ -766,7 +766,7 @@ impl Transform for ExpressionTree {
         let _ = in_pass.on_ty_expression_tree_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             ExpressionTree {
                 class: ref mut __binding_0,
                 runtime_expr: ref mut __binding_1,
@@ -793,7 +793,7 @@ impl Transform for As_ {
         let _ = in_pass.on_ty_as__bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             As_ {
                 expr: ref mut __binding_0,
                 hint: ref mut __binding_1,
@@ -824,7 +824,7 @@ impl Transform for EtSplice {
         let _ = in_pass.on_ty_et_splice_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             EtSplice {
                 extract_client_type: ref mut __binding_0,
                 contains_await: ref mut __binding_1,
@@ -859,7 +859,7 @@ impl Transform for Expr_ {
         let _ = in_pass.on_ty_expr__bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             Expr_::Null => {}
             Expr_::True => {}
             Expr_::False => {}
@@ -950,7 +950,7 @@ impl Transform for HoleSource {
         let _ = in_pass.on_ty_hole_source_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             HoleSource::Typing => {}
             HoleSource::UnsafeCast(ref mut __binding_0) => {
                 __binding_0.transform(env, &mut pass.clone())
@@ -972,7 +972,7 @@ impl Transform for FunctionPointerSource {
         let _ = in_pass.on_ty_function_pointer_source_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             FunctionPointerSource::Code => {}
             FunctionPointerSource::Lowered => {}
         }
@@ -988,7 +988,7 @@ impl Transform for Binop {
         let _ = in_pass.on_ty_binop_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             Binop {
                 lhs: ref mut __binding_1,
                 rhs: ref mut __binding_2,
@@ -1030,7 +1030,7 @@ impl Transform for Case {
         let _ = in_pass.on_ty_case_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             Case(ref mut __binding_0, ref mut __binding_1) => {
                 {
                     __binding_0.transform(env, &mut pass.clone())
@@ -1050,7 +1050,7 @@ impl Transform for DefaultCase {
         let _ = in_pass.on_ty_default_case_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             DefaultCase(ref mut __binding_0, ref mut __binding_1) => {
                 {
                     __binding_0.transform(env, &mut pass.clone())
@@ -1070,7 +1070,7 @@ impl Transform for Catch {
         let _ = in_pass.on_ty_catch_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             Catch(ref mut __binding_0, ref mut __binding_1, ref mut __binding_2) => {
                 {
                     __binding_0.transform(env, &mut pass.clone())
@@ -1093,7 +1093,7 @@ impl Transform for Field {
         let _ = in_pass.on_ty_field_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             Field(ref mut __binding_0, ref mut __binding_1) => {
                 {
                     __binding_0.transform(env, &mut pass.clone())
@@ -1113,7 +1113,7 @@ impl Transform for Afield {
         let _ = in_pass.on_ty_afield_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             Afield::AFvalue(ref mut __binding_0) => __binding_0.transform(env, &mut pass.clone()),
             Afield::AFkvalue(ref mut __binding_0, ref mut __binding_1) => {
                 {
@@ -1134,7 +1134,7 @@ impl Transform for XhpSimple {
         let _ = in_pass.on_ty_xhp_simple_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             XhpSimple {
                 type_: ref mut __binding_1,
                 expr: ref mut __binding_2,
@@ -1158,7 +1158,7 @@ impl Transform for XhpAttribute {
         let _ = in_pass.on_ty_xhp_attribute_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             XhpAttribute::XhpSimple(ref mut __binding_0) => {
                 __binding_0.transform(env, &mut pass.clone())
             }
@@ -1178,7 +1178,7 @@ impl Transform for FunParamInfo {
         let _ = in_pass.on_ty_fun_param_info_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             FunParamInfo::ParamOptional(ref mut __binding_0) => {
                 __binding_0.transform(env, &mut pass.clone())
             }
@@ -1197,7 +1197,7 @@ impl Transform for FunParam {
         let _ = in_pass.on_ty_fun_param_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             FunParam {
                 annotation: ref mut __binding_0,
                 type_hint: ref mut __binding_1,
@@ -1233,7 +1233,7 @@ impl Transform for Fun_ {
         let _ = in_pass.on_ty_fun__bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             Fun_ {
                 annotation: ref mut __binding_2,
                 tparams: ref mut __binding_4,
@@ -1301,7 +1301,7 @@ impl Transform for CaptureLid {
         let _ = in_pass.on_ty_capture_lid_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             CaptureLid(ref mut __binding_0, ref mut __binding_1) => {
                 {
                     __binding_0.transform(env, &mut pass.clone())
@@ -1321,7 +1321,7 @@ impl Transform for Efun {
         let _ = in_pass.on_ty_efun_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             Efun {
                 fun: ref mut __binding_0,
                 use_: ref mut __binding_1,
@@ -1352,7 +1352,7 @@ impl Transform for FuncBody {
         let _ = in_pass.on_ty_func_body_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             FuncBody {
                 fb_ast: ref mut __binding_0,
             } => __binding_0.transform(env, &mut pass.clone()),
@@ -1369,7 +1369,7 @@ impl Transform for TypeHint {
         let _ = in_pass.on_ty_type_hint_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             TypeHint(ref mut __binding_0, ref mut __binding_1) => {
                 {
                     __binding_0.transform(env, &mut pass.clone())
@@ -1389,7 +1389,7 @@ impl Transform for Targ {
         let _ = in_pass.on_ty_targ_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             Targ(ref mut __binding_0, ref mut __binding_1) => {
                 {
                     __binding_0.transform(env, &mut pass.clone())
@@ -1409,7 +1409,7 @@ impl Transform for CallExpr {
         let _ = in_pass.on_ty_call_expr_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             CallExpr {
                 func: ref mut __binding_0,
                 targs: ref mut __binding_1,
@@ -1440,7 +1440,7 @@ impl Transform for Argument {
         let _ = in_pass.on_ty_argument_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             Argument::Ainout(ref mut __binding_0, ref mut __binding_1) => {
                 {
                     __binding_0.transform(env, &mut pass.clone())
@@ -1467,7 +1467,7 @@ impl Transform for UserAttribute {
         let _ = in_pass.on_ty_user_attribute_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             UserAttribute {
                 name: ref mut __binding_0,
                 params: ref mut __binding_1,
@@ -1490,7 +1490,7 @@ impl Transform for FileAttribute {
         let _ = in_pass.on_ty_file_attribute_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             FileAttribute {
                 user_attributes: ref mut __binding_0,
                 namespace: ref mut __binding_1,
@@ -1513,7 +1513,7 @@ impl Transform for Tparam {
         let _ = in_pass.on_ty_tparam_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             Tparam {
                 name: ref mut __binding_1,
                 constraints: ref mut __binding_2,
@@ -1550,7 +1550,7 @@ impl Transform for Class_ {
         let _ = in_pass.on_ty_class__bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             Class_ {
                 annotation: ref mut __binding_1,
                 final_: ref mut __binding_3,
@@ -1752,7 +1752,7 @@ impl Transform for ClassReq {
         let _ = in_pass.on_ty_class_req_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             ClassReq(ref mut __binding_0, ref mut __binding_1) => {
                 {
                     __binding_0.transform(env, &mut pass.clone())
@@ -1775,7 +1775,7 @@ impl Transform for XhpAttr {
         let _ = in_pass.on_ty_xhp_attr_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             XhpAttr(
                 ref mut __binding_0,
                 ref mut __binding_1,
@@ -1806,7 +1806,7 @@ impl Transform for ClassConstKind {
         let _ = in_pass.on_ty_class_const_kind_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             ClassConstKind::CCAbstract(ref mut __binding_0) => {
                 __binding_0.transform(env, &mut pass.clone())
             }
@@ -1826,7 +1826,7 @@ impl Transform for ClassConst {
         let _ = in_pass.on_ty_class_const_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             ClassConst {
                 user_attributes: ref mut __binding_0,
                 type_: ref mut __binding_1,
@@ -1862,7 +1862,7 @@ impl Transform for ClassAbstractTypeconst {
         let _ = in_pass.on_ty_class_abstract_typeconst_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             ClassAbstractTypeconst {
                 as_constraint: ref mut __binding_0,
                 super_constraint: ref mut __binding_1,
@@ -1902,7 +1902,7 @@ impl Transform for ClassConcreteTypeconst {
         let _ = in_pass.on_ty_class_concrete_typeconst_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             ClassConcreteTypeconst {
                 c_tc_type: ref mut __binding_0,
             } => __binding_0.transform(env, &mut pass.clone()),
@@ -1919,7 +1919,7 @@ impl Transform for ClassTypeconst {
         let _ = in_pass.on_ty_class_typeconst_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             ClassTypeconst::TCAbstract(ref mut __binding_0) => {
                 __binding_0.transform(env, &mut pass.clone())
             }
@@ -1939,7 +1939,7 @@ impl Transform for ClassTypeconstDef {
         let _ = in_pass.on_ty_class_typeconst_def_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             ClassTypeconstDef {
                 user_attributes: ref mut __binding_0,
                 name: ref mut __binding_1,
@@ -1975,7 +1975,7 @@ impl Transform for XhpAttrInfo {
         let _ = in_pass.on_ty_xhp_attr_info_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             XhpAttrInfo {
                 tag: ref mut __binding_1,
                 ..
@@ -1993,7 +1993,7 @@ impl Transform for ClassVar {
         let _ = in_pass.on_ty_class_var_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             ClassVar {
                 final_: ref mut __binding_0,
                 xhp_attr: ref mut __binding_1,
@@ -2057,7 +2057,7 @@ impl Transform for Method_ {
         let _ = in_pass.on_ty_method__bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             Method_ {
                 annotation: ref mut __binding_1,
                 final_: ref mut __binding_2,
@@ -2149,7 +2149,7 @@ impl Transform for TypedefVisibilityAndHint {
         let _ = in_pass.on_ty_typedef_visibility_and_hint_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             TypedefVisibilityAndHint {
                 hint: ref mut __binding_1,
                 ..
@@ -2177,7 +2177,7 @@ impl Transform for TypedefCaseTypeVariant {
         let _ = in_pass.on_ty_typedef_case_type_variant_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             TypedefCaseTypeVariant {
                 hint: ref mut __binding_0,
                 where_constraints: ref mut __binding_1,
@@ -2200,7 +2200,7 @@ impl Transform for TypedefAssignment {
         let _ = in_pass.on_ty_typedef_assignment_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             TypedefAssignment::SimpleTypeDef(ref mut __binding_0) => {
                 __binding_0.transform(env, &mut pass.clone())
             }
@@ -2223,7 +2223,7 @@ impl Transform for Typedef {
         let _ = in_pass.on_ty_typedef_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             Typedef {
                 annotation: ref mut __binding_0,
                 name: ref mut __binding_1,
@@ -2307,7 +2307,7 @@ impl Transform for Gconst {
         let _ = in_pass.on_ty_gconst_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             Gconst {
                 annotation: ref mut __binding_0,
                 name: ref mut __binding_2,
@@ -2363,7 +2363,7 @@ impl Transform for FunDef {
         let _ = in_pass.on_ty_fun_def_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             FunDef {
                 namespace: ref mut __binding_0,
                 file_attributes: ref mut __binding_1,
@@ -2415,7 +2415,7 @@ impl Transform for ModuleDef {
         let _ = in_pass.on_ty_module_def_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             ModuleDef {
                 annotation: ref mut __binding_0,
                 user_attributes: ref mut __binding_2,
@@ -2447,7 +2447,7 @@ impl Transform for ClassAlias {
         let _ = in_pass.on_ty_class_alias_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             ClassAlias {
                 name: ref mut __binding_0,
                 tparams: ref mut __binding_1,
@@ -2478,7 +2478,7 @@ impl Transform for Def {
         let _ = in_pass.on_ty_def_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             Def::Fun(ref mut __binding_0) => __binding_0.transform(env, &mut pass.clone()),
             Def::Class(ref mut __binding_0) => __binding_0.transform(env, &mut pass.clone()),
             Def::ClassAlias(ref mut __binding_0) => __binding_0.transform(env, &mut pass.clone()),
@@ -2514,7 +2514,7 @@ impl Transform for XhpChild {
         let _ = in_pass.on_ty_xhp_child_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             XhpChild::ChildName(ref mut __binding_0) => {
                 __binding_0.transform(env, &mut pass.clone())
             }
@@ -2549,7 +2549,7 @@ impl Transform for Hint {
         let _ = in_pass.on_ty_hint_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             Hint(ref mut __binding_0, ref mut __binding_1) => {
                 {
                     __binding_0.transform(env, &mut pass.clone())
@@ -2569,7 +2569,7 @@ impl Transform for UserAttributes {
         let _ = in_pass.on_ty_user_attributes_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             UserAttributes(ref mut __binding_0) => __binding_0.transform(env, &mut pass.clone()),
         }
     }
@@ -2584,7 +2584,7 @@ impl Transform for Contexts {
         let _ = in_pass.on_ty_contexts_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             Contexts(ref mut __binding_0, ref mut __binding_1) => {
                 {
                     __binding_0.transform(env, &mut pass.clone())
@@ -2607,7 +2607,7 @@ impl Transform for HintFun {
         let _ = in_pass.on_ty_hint_fun_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             HintFun {
                 tparams: ref mut __binding_1,
                 param_tys: ref mut __binding_2,
@@ -2658,7 +2658,7 @@ impl Transform for HintTparam {
         let _ = in_pass.on_ty_hint_tparam_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             HintTparam {
                 name: ref mut __binding_0,
                 user_attributes: ref mut __binding_1,
@@ -2685,7 +2685,7 @@ impl Transform for ClassPtrKind {
         let _ = in_pass.on_ty_class_ptr_kind_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             ClassPtrKind::CKclass => {}
             ClassPtrKind::CKenum => {}
         }
@@ -2701,7 +2701,7 @@ impl Transform for Hint_ {
         let _ = in_pass.on_ty_hint__bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             Hint_::Hprim(ref mut __binding_0) => __binding_0.transform(env, &mut pass.clone()),
             Hint_::Happly(ref mut __binding_0, ref mut __binding_1) => {
                 {
@@ -2767,7 +2767,7 @@ impl Transform for Refinement {
         let _ = in_pass.on_ty_refinement_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             Refinement::Rctx(ref mut __binding_0, ref mut __binding_1) => {
                 {
                     __binding_0.transform(env, &mut pass.clone())
@@ -2793,7 +2793,7 @@ impl Transform for TypeRefinement {
         let _ = in_pass.on_ty_type_refinement_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             TypeRefinement::TRexact(ref mut __binding_0) => {
                 __binding_0.transform(env, &mut pass.clone())
             }
@@ -2813,7 +2813,7 @@ impl Transform for TypeRefinementBounds {
         let _ = in_pass.on_ty_type_refinement_bounds_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             TypeRefinementBounds {
                 lower: ref mut __binding_0,
                 upper: ref mut __binding_1,
@@ -2836,7 +2836,7 @@ impl Transform for CtxRefinement {
         let _ = in_pass.on_ty_ctx_refinement_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             CtxRefinement::CRexact(ref mut __binding_0) => {
                 __binding_0.transform(env, &mut pass.clone())
             }
@@ -2856,7 +2856,7 @@ impl Transform for CtxRefinementBounds {
         let _ = in_pass.on_ty_ctx_refinement_bounds_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             CtxRefinementBounds {
                 lower: ref mut __binding_0,
                 upper: ref mut __binding_1,
@@ -2879,7 +2879,7 @@ impl Transform for ShapeFieldInfo {
         let _ = in_pass.on_ty_shape_field_info_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             ShapeFieldInfo {
                 optional: ref mut __binding_0,
                 hint: ref mut __binding_1,
@@ -2903,7 +2903,7 @@ impl Transform for NastShapeInfo {
         let _ = in_pass.on_ty_nast_shape_info_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             NastShapeInfo {
                 allows_unknown_fields: ref mut __binding_0,
                 field_map: ref mut __binding_1,
@@ -2930,7 +2930,7 @@ impl Transform for TupleInfo {
         let _ = in_pass.on_ty_tuple_info_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             TupleInfo {
                 required: ref mut __binding_0,
                 extra: ref mut __binding_1,
@@ -2953,7 +2953,7 @@ impl Transform for TupleExtraInfo {
         let _ = in_pass.on_ty_tuple_extra_info_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             TupleExtraInfo {
                 optional: ref mut __binding_0,
                 variadic: ref mut __binding_1,
@@ -2976,7 +2976,7 @@ impl Transform for TupleExtra {
         let _ = in_pass.on_ty_tuple_extra_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             TupleExtra::Hextra(ref mut __binding_0) => {
                 __binding_0.transform(env, &mut pass.clone())
             }
@@ -3002,7 +3002,7 @@ impl Transform for Enum_ {
         let _ = in_pass.on_ty_enum__bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             Enum_ {
                 base: ref mut __binding_0,
                 constraint: ref mut __binding_1,
@@ -3029,7 +3029,7 @@ impl Transform for WhereConstraintHint {
         let _ = in_pass.on_ty_where_constraint_hint_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             WhereConstraintHint(ref mut __binding_0, ref mut __binding_1, ref mut __binding_2) => {
                 {
                     __binding_0.transform(env, &mut pass.clone())
@@ -3052,7 +3052,7 @@ impl Transform for Id {
         let _ = in_pass.on_ty_id_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
+        match *self {
             Id(ref mut __binding_0, ref mut __binding_1) => {
                 {
                     __binding_0.transform(env, &mut pass.clone())

@@ -33,7 +33,7 @@ fn derive_no_pos_hash(mut s: synstructure::Structure<'_>) -> TokenStream {
     workaround_non_local_def(s.gen_impl(quote! {
         gen impl ::no_pos_hash::NoPosHash for @Self {
             fn hash<__H: ::core::hash::Hasher>(&self, state: &mut __H) {
-                match self { #body }
+                match *self { #body }
             }
         }
     }))

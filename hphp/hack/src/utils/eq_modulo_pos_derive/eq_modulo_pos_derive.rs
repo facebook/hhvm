@@ -32,10 +32,10 @@ fn derive_eq_modulo_pos(mut s: Structure<'_>) -> TokenStream {
     workaround_non_local_def(s.gen_impl(quote! {
         gen impl EqModuloPos for @Self {
             fn eq_modulo_pos(&self, rhs: &Self) -> bool {
-                match self { #eq_modulo_pos }
+                match *self { #eq_modulo_pos }
             }
             fn eq_modulo_pos_and_reason(&self, rhs: &Self) -> bool {
-                match self { #eq_modulo_pos_and_reason }
+                match *self { #eq_modulo_pos_and_reason }
             }
         }
     }))
@@ -59,7 +59,7 @@ fn derive_eq_modulo_pos_body(s: &Structure<'_>) -> TokenStream {
             inner = quote! { #inner && #bi.eq_modulo_pos(#bi_rhs) }
         }
         quote!(
-            match rhs {
+            match *rhs {
                 #arm => { #inner }
                 _ => false,
             }
@@ -85,7 +85,7 @@ fn derive_eq_modulo_pos_and_reason_body(s: &Structure<'_>) -> TokenStream {
             inner = quote! { #inner && #bi.eq_modulo_pos_and_reason(#bi_rhs) }
         }
         quote!(
-            match rhs {
+            match *rhs {
                 #arm => { #inner }
                 _ => false,
             }

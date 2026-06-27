@@ -117,7 +117,7 @@ fn gen_transform_and_traverse(ctx: &Context, mut s: synstructure::Structure<'_>)
                 env: &Env,
                 pass: &mut (impl Pass + Clone),
             ) {
-                match self { #traverse_body }
+                match *self { #traverse_body }
             }
         }
     }

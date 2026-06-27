@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<28fcc32393401d590502d43f7da02d0f>>
+// @generated SignedSource<<5a444c5987d43ec9724a91e89cbdbbc5>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -84,8 +84,6 @@ pub struct ParserOptions {
     pub union_intersection_type_hints: bool,
     /// Replace concurrent blocks with their bodies in the AST
     pub unwrap_concurrent: bool,
-    /// Flag to ban (bool) casts
-    pub disallow_bool_cast: bool,
     /// Disable parser-based readonly checking
     pub no_parser_readonly_check: bool,
     /// Disable HH_IGNORE_ERROR comments, either raising an error if 1 or treating them as normal comments if 2.
@@ -159,7 +157,6 @@ pub struct FfiT(
     pub bool,
     pub bool,
     pub s_map::SMap<experimental_features::FeatureStatus>,
-    pub bool,
     pub bool,
     pub bool,
     pub bool,

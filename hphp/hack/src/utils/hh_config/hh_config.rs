@@ -274,8 +274,6 @@ impl HhConfig {
                 "const_default_lambda_args",
                 default.const_default_lambda_args,
             )?,
-            disallow_bool_cast: hhconfig
-                .get_bool_or("disallow_bool_cast", default.disallow_bool_cast)?,
             abstract_static_props: default.abstract_static_props,
             enable_xhp_class_modifier: hhconfig.get_bool_or(
                 "enable_xhp_class_modifier",

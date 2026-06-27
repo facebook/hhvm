@@ -50,7 +50,6 @@ type t = {
       (** Enables union and intersection type hints *)
   unwrap_concurrent: bool;
       (** Replace concurrent blocks with their bodies in the AST *)
-  disallow_bool_cast: bool;  (** Flag to ban (bool) casts *)
   no_parser_readonly_check: bool;  (** Disable parser-based readonly checking *)
   disable_hh_ignore_error: int;
       (** Disable HH_IGNORE_ERROR comments, either raising an error if 1 or treating them as normal comments if 2. *)
@@ -111,7 +110,6 @@ type ffi_t =
   * bool
   * bool
   * Experimental_features.feature_status SMap.t
-  * bool
   * bool
   * bool
   * bool

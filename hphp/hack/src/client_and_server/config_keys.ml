@@ -47,8 +47,6 @@ module Hhconfig = struct
 
   let disable_xhp_element_mangling = key "disable_xhp_element_mangling"
 
-  let disallow_bool_cast = key "disallow_bool_cast"
-
   let disallow_non_annotated_memoize = key "disallow_non_annotated_memoize"
 
   let disallow_static_constants_in_default_func_args =

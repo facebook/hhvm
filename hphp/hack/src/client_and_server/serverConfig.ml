@@ -399,9 +399,6 @@ let load_config (config : Config_file_common.t) (options : GlobalOptions.t) :
         union_intersection_type_hints =
           bool_opt Config_keys.Hhconfig.union_intersection_type_hints config
           >?? po_opt.union_intersection_type_hints;
-        disallow_bool_cast =
-          bool_opt Config_keys.Hhconfig.disallow_bool_cast config
-          >?? po_opt.disallow_bool_cast;
         allowed_decl_fixme_codes =
           prepare_allowed_decl_fixme_codes config
           >?? po_opt.allowed_decl_fixme_codes;

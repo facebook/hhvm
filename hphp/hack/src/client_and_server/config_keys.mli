@@ -48,8 +48,6 @@ module Hhconfig : sig
 
   val disable_xhp_element_mangling : string
 
-  val disallow_bool_cast : string
-
   val disallow_non_annotated_memoize : string
 
   val disallow_static_constants_in_default_func_args : string

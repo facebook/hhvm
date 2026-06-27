@@ -47,6 +47,12 @@ cdef extern from "thrift/lib/py3/client_wrapper.h" namespace "::thrift::py3":
         void setPersistentHeader(const string& key, const string& value)
         void addEventHandler(const shared_ptr[cTProcessorEventHandler]& handler)
 
+cdef class _ClientHeadersCtxManager:
+    cdef object ctx
+    cdef object headers
+    cdef vector[shared_ptr[cTProcessorEventHandler]] _deferred_event_handlers
+    cdef add_event_handler(self, const shared_ptr[cTProcessorEventHandler]& handler)
+
 cdef class Client:
     cdef object __weakref__
     cdef object _context_entered

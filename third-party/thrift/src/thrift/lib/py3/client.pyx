@@ -35,6 +35,7 @@ import os
 from socket import SocketKind
 from thrift.python.client.client_wrapper import Client as PythonClient
 from thrift.python.client.async_client_factory import get_client as get_client_python
+from thrift.python.client.async_client cimport AsyncClient
 
 cdef object proxy_factory = None
 
@@ -133,6 +134,43 @@ async def _no_op():
 
 
 @cython.auto_pickle(False)
+cdef class _ClientHeadersCtxManager:
+    """Applies persistent headers to a thrift-python client created by
+    get_client_python, which has no headers parameter of its own. The wrapped
+    object may be the client itself or a hostname-resolving context manager, so
+    headers (and any deferred event handlers) are applied after entering, once
+    the concrete client is available."""
+
+    def __init__(self, ctx, headers):
+        self.ctx = ctx
+        self.headers = headers
+
+    cdef add_event_handler(
+        self, const shared_ptr[cTProcessorEventHandler]& handler
+    ):
+        # Defer handlers attached before entry; applied to the concrete client in __aenter__.
+        self._deferred_event_handlers.push_back(handler)
+
+    async def __aenter__(self):
+        client = await self.ctx.__aenter__()
+        if self._deferred_event_handlers.size() > 0:
+            # get_client_python only yields AsyncClient; fail loud rather than silently drop handlers.
+            if not isinstance(client, AsyncClient):
+                raise TypeError(
+                    f"_ClientHeadersCtxManager: cannot attach deferred event "
+                    f"handlers to non-AsyncClient {type(client)!r}"
+                )
+            for handler in self._deferred_event_handlers:
+                (<AsyncClient>client).add_event_handler(handler)
+        for key, value in self.headers.items():
+            client.set_persistent_header(key, value)
+        return client
+
+    def __aexit__(self, *exc_info):
+        return self.ctx.__aexit__(*exc_info)
+
+
+@cython.auto_pickle(False)
 cdef class _AsyncResolveCtxManager:
     """This class just handles resolving of hostnames passed to get_client
        by creating a wrapping async context manager"""
@@ -182,11 +220,10 @@ def get_client(
     loop = asyncio.get_event_loop()
     # This is to prevent calling get_client at import time at module scope
     assert loop.is_running(), "Eventloop is not running"
-    # TODO (ffrancet) headers
     if issubclass(clientKlass, PythonClient):
         # get_client_python uses None for port unset
         maybe_port = None if port == -1 else port
-        return get_client_python(
+        client_ctx = get_client_python(
             clientKlass,
             host=host,
             port=maybe_port,
@@ -198,6 +235,10 @@ def get_client(
             ssl_timeout=ssl_timeout,
             channel_timeout=channel_timeout
         )
+        # get_client_python has no headers parameter, so apply them here.
+        if headers:
+            return _ClientHeadersCtxManager(client_ctx, headers)
+        return client_ctx
     assert issubclass(clientKlass, Client), "Must be a py3 thrift client"
 
     cdef uint32_t _timeout_ms = int(timeout * 1000)

@@ -1799,7 +1799,6 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 - bool Hack.Lang.ConstDefaultFuncArgs = false, UNKNOWN, repooptionsflag(Parser)|hackc(parser)
 - bool Hack.Lang.ConstStaticProps = false, UNKNOWN, repooptionsflag(Parser)|hackc(parser)
 - bool Hack.Lang.AbstractStaticProps = false, UNKNOWN, repooptionsflag(Parser)|hackc(parser)
-- bool Hack.Lang.DisallowFuncPtrsInConstants = false, UNKNOWN, repooptionsflag(Parser)|hackc(parser)
 - bool Hack.Lang.AllowUnstableFeatures = false, UNKNOWN, repooptionsflag(Parser)|hackc(parser)
 - bool Hack.Lang.EnableXHPClassModifier = true, UNKNOWN, repooptionsflag(Parser)|hackc(parser)
 - bool Hack.Lang.DisableXHPElementMangling = true, UNKNOWN, repooptionsflag(Parser)|hackc(parser)

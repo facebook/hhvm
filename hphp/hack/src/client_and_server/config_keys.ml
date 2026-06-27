@@ -49,8 +49,6 @@ module Hhconfig = struct
 
   let disallow_bool_cast = key "disallow_bool_cast"
 
-  let disallow_func_ptrs_in_constants = key "disallow_func_ptrs_in_constants"
-
   let disallow_non_annotated_memoize = key "disallow_non_annotated_memoize"
 
   let disallow_static_constants_in_default_func_args =

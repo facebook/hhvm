@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<8e72b566fe75139b38acb8e1f94a107d>>
+// @generated SignedSource<<28fcc32393401d590502d43f7da02d0f>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -44,8 +44,6 @@ pub struct ParserOptions {
     pub const_default_func_args: bool,
     /// Static properties can be abstract
     pub abstract_static_props: bool,
-    /// Flag to disallow HH\fun and HH\class_meth in constants and constant initializers
-    pub disallow_func_ptrs_in_constants: bool,
     /// Enable the new style xhp class.
     /// Old style: class :name {}
     /// New style: xhp class name {}
@@ -144,7 +142,6 @@ pub struct ParserOptions {
 )]
 #[repr(C)]
 pub struct FfiT(
-    pub bool,
     pub bool,
     pub bool,
     pub bool,

@@ -14,7 +14,6 @@ impl Default for ParserOptions {
             const_static_props: false,
             const_default_func_args: false,
             abstract_static_props: false,
-            disallow_func_ptrs_in_constants: false,
             enable_xhp_class_modifier: false,
             disable_xhp_element_mangling: false,
             allow_unstable_features: false, // true in /etc/hh.conf

@@ -277,10 +277,6 @@ impl HhConfig {
             disallow_bool_cast: hhconfig
                 .get_bool_or("disallow_bool_cast", default.disallow_bool_cast)?,
             abstract_static_props: default.abstract_static_props,
-            disallow_func_ptrs_in_constants: hhconfig.get_bool_or(
-                "disallow_func_ptrs_in_constants",
-                default.disallow_func_ptrs_in_constants,
-            )?,
             enable_xhp_class_modifier: hhconfig.get_bool_or(
                 "enable_xhp_class_modifier",
                 default.enable_xhp_class_modifier,

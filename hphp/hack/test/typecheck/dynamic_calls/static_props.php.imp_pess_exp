@@ -8,4 +8,5 @@ File "static_props.php", line 28, characters 3-24:
   ~float
 File "static_props.php", line 29, characters 3-26:
   ~float
-No errors
+ERROR: File "static_props.php", line 6, characters 44-51:
+Expected constant expression for initializer (Parsing[1002])

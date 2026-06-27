@@ -1,1 +1,1 @@
-Parser.Hack.Lang.DisallowFuncPtrsInConstants = true
+Parser.Hack.Lang.ConstStaticProps = true

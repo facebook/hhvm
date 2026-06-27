@@ -12,7 +12,6 @@ type t = {
   const_static_props: bool;
   const_default_func_args: bool;
   abstract_static_props: bool;
-  disallow_func_ptrs_in_constants: bool;
   enable_xhp_class_modifier: bool;
   disable_xhp_element_mangling: bool;
   allow_unstable_features: bool;
@@ -57,7 +56,6 @@ let default =
     const_static_props = false;
     const_default_func_args = false;
     abstract_static_props = false;
-    disallow_func_ptrs_in_constants = false;
     enable_xhp_class_modifier = false;
     disable_xhp_element_mangling = false;
     allow_unstable_features = false;
@@ -112,7 +110,6 @@ type ffi_t =
   * bool
   * bool
   * bool
-  * bool
   * Experimental_features.feature_status SMap.t
   * bool
   * bool
@@ -128,7 +125,6 @@ let to_rust_ffi_t po =
     po.const_static_props,
     po.const_default_func_args,
     po.abstract_static_props,
-    po.disallow_func_ptrs_in_constants,
     po.enable_xhp_class_modifier,
     po.disable_xhp_element_mangling,
     po.disable_xhp_children_declarations,

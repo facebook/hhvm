@@ -13,8 +13,6 @@ type t = {
   const_default_func_args: bool;
       (** Statically check default function arguments *)
   abstract_static_props: bool;  (** Static properties can be abstract *)
-  disallow_func_ptrs_in_constants: bool;
-      (** Flag to disallow HH\fun and HH\class_meth in constants and constant initializers *)
   enable_xhp_class_modifier: bool;
       (** Enable the new style xhp class.
          Old style: class :name {}
@@ -97,7 +95,6 @@ val default : t
 (* Changes here need to be synchronized with rust_parser_errors_ffi.rs *)
 type ffi_t =
   bool
-  * bool
   * bool
   * bool
   * bool

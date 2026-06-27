@@ -50,8 +50,6 @@ module Hhconfig : sig
 
   val disallow_bool_cast : string
 
-  val disallow_func_ptrs_in_constants : string
-
   val disallow_non_annotated_memoize : string
 
   val disallow_static_constants_in_default_func_args : string

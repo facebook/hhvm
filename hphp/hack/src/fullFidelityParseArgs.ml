@@ -36,7 +36,6 @@ type t = {
   const_default_lambda_args: bool;
   const_static_props: bool;
   abstract_static_props: bool;
-  disallow_func_ptrs_in_constants: bool;
   disallow_discarded_nullable_awaitables: bool;
   disable_xhp_element_mangling: bool;
   allow_unstable_features: bool;
@@ -71,7 +70,6 @@ let make
     const_default_lambda_args
     const_static_props
     abstract_static_props
-    disallow_func_ptrs_in_constants
     disallow_discarded_nullable_awaitables
     disable_xhp_element_mangling
     allow_unstable_features
@@ -104,7 +102,6 @@ let make
     const_default_lambda_args;
     const_static_props;
     abstract_static_props;
-    disallow_func_ptrs_in_constants;
     disallow_discarded_nullable_awaitables;
     disable_xhp_element_mangling;
     allow_unstable_features;
@@ -158,7 +155,6 @@ let parse_args () =
   let const_default_lambda_args = ref false in
   let const_static_props = ref false in
   let abstract_static_props = ref false in
-  let disallow_func_ptrs_in_constants = ref false in
   let disallow_discarded_nullable_awaitables = ref false in
   let disable_xhp_element_mangling = ref false in
   let allow_unstable_features = ref false in
@@ -265,10 +261,6 @@ No errors are filtered out."
       ( "--abstract-static-props",
         Arg.Set abstract_static_props,
         "Enable abstract static properties" );
-      ( "--disallow-func-ptrs-in-constants",
-        Arg.Set disallow_func_ptrs_in_constants,
-        "Disallow use of HH\\fun and HH\\class_meth in constants and constant initializers"
-      );
       ( "--disallow-discarded-nullable-awaitables",
         Arg.Set disallow_discarded_nullable_awaitables,
         "Error on using discarded nullable awaitables" );
@@ -336,7 +328,6 @@ No errors are filtered out."
     !const_default_lambda_args
     !const_static_props
     !abstract_static_props
-    !disallow_func_ptrs_in_constants
     !disallow_discarded_nullable_awaitables
     !disable_xhp_element_mangling
     !allow_unstable_features
@@ -353,7 +344,6 @@ let to_parser_options (args : t) : ParserOptions.t =
     const_default_lambda_args = args.const_default_lambda_args;
     const_static_props = args.const_static_props;
     abstract_static_props = args.abstract_static_props;
-    disallow_func_ptrs_in_constants = args.disallow_func_ptrs_in_constants;
     disable_xhp_element_mangling = args.disable_xhp_element_mangling;
     allow_unstable_features = args.allow_unstable_features;
     enable_xhp_class_modifier = args.enable_xhp_class_modifier;

@@ -5,7 +5,6 @@ enable_xhp_class_modifier = false
 disable_xhp_element_mangling = false
 disable_xhp_children_declarations = false
 disallow_silence = true
-disallow_func_ptrs_in_constants = true
 explicit_consistent_constructors = 1
 enable_strict_const_semantics = 4
 require_types_tco_require_types_class_consts = 1

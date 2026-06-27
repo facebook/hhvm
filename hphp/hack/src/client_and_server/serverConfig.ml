@@ -363,9 +363,6 @@ let load_config (config : Config_file_common.t) (options : GlobalOptions.t) :
         abstract_static_props =
           bool_opt Config_keys.Hhconfig.abstract_static_props config
           >?? po_opt.abstract_static_props;
-        disallow_func_ptrs_in_constants =
-          bool_opt Config_keys.Hhconfig.disallow_func_ptrs_in_constants config
-          >?? po_opt.disallow_func_ptrs_in_constants;
         disable_xhp_element_mangling =
           bool_opt Config_keys.Hhconfig.disable_xhp_element_mangling config
           >?? po_opt.disable_xhp_element_mangling;

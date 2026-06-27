@@ -59,12 +59,6 @@ pub fn parser_options(config: &HhvmConfig) -> Result<ParserOptions> {
         "Hack.Lang.DisableXHPElementMangling",
     )?;
 
-    // Only hdf option in use
-    init(
-        &mut flags.disallow_func_ptrs_in_constants,
-        "Hack.Lang.DisallowFuncPtrsInConstants",
-    )?;
-
     // Both options in use
     init(
         &mut flags.enable_xhp_class_modifier,

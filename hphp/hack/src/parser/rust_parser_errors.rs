@@ -4892,12 +4892,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                     _ => default(self),
                 }
             }
-            FunctionPointerExpression(_) => {
-                // Bans the equivalent of inst_meth as well as class_meth and fun
-                if self.env.parser_options.disallow_func_ptrs_in_constants {
-                    default(self)
-                }
-            }
+            FunctionPointerExpression(_) => default(self),
             ObjectCreationExpression(_) => {
                 // We allow "enum class" constants to be initialized via new.
                 if !self.is_in_enum_class() {

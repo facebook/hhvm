@@ -853,8 +853,6 @@ let parse_options () =
         const_default_lambda_args = default.const_default_lambda_args;
         const_static_props = default.const_static_props;
         abstract_static_props = default.abstract_static_props;
-        disallow_func_ptrs_in_constants =
-          default.disallow_func_ptrs_in_constants;
         disable_xhp_element_mangling = !disable_xhp_element_mangling;
         disable_xhp_children_declarations =
           default.disable_xhp_children_declarations;

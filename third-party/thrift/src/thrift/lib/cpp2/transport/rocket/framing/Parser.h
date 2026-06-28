@@ -40,12 +40,17 @@ enum class ParserMode { STRATEGY, ALLOCATING, ALIGNED };
 ParserMode stringToMode(const std::string& modeStr) noexcept;
 ParserAllocatorType& getDefaultAllocator();
 
+#if FOLLY_HAS_MEMORY_RESOURCE
+void setDefaultParserMemoryResource(std::pmr::memory_resource* resource);
+#endif
+} // namespace detail
+
 // Install the std::pmr::memory_resource backing the default parser allocator
-// returned by getDefaultAllocator(). When set, the ALLOCATING parser (selected
-// via the rocket_frame_parser flag) reads frame buffers from this resource on
-// BOTH clients and servers that do not supply their own allocator -- the single
-// process-wide interposition point for routing large rocket frames into custom
-// (e.g. RDMA-registered) memory.
+// returned by detail::getDefaultAllocator(). When set, the ALLOCATING parser
+// (selected via the rocket_frame_parser flag) reads frame buffers from this
+// resource on BOTH clients and servers that do not supply their own allocator
+// -- the single process-wide interposition point for routing large rocket
+// frames into custom (e.g. RDMA-registered) memory.
 //
 // Call this during process startup, before any RocketClient /
 // RocketServerConnection is constructed: the default allocator captures the
@@ -66,7 +71,6 @@ ParserAllocatorType& getDefaultAllocator();
 #if FOLLY_HAS_MEMORY_RESOURCE
 void setDefaultParserMemoryResource(std::pmr::memory_resource* resource);
 #endif
-} // namespace detail
 
 template <class T>
 class Parser final : public folly::AsyncTransport::ReadCallback {

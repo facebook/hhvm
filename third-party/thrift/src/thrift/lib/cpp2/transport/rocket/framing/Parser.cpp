@@ -106,3 +106,13 @@ ParserMode stringToMode(const std::string& modeStr) noexcept {
   return ParserMode::STRATEGY;
 }
 } // namespace apache::thrift::rocket::detail
+
+#if FOLLY_HAS_MEMORY_RESOURCE
+namespace apache::thrift::rocket {
+
+void setDefaultParserMemoryResource(std::pmr::memory_resource* resource) {
+  detail::setDefaultParserMemoryResource(resource);
+}
+
+} // namespace apache::thrift::rocket
+#endif

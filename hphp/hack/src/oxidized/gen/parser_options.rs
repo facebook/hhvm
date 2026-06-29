@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<5a444c5987d43ec9724a91e89cbdbbc5>>
+// @generated SignedSource<<8a59b781e5534ff82a981432b4e90717>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -60,8 +60,6 @@ pub struct ParserOptions {
     pub codegen: bool,
     /// Disable `children (foo|bar+|pcdata)` declarations as they can be implemented without special syntax
     pub disable_xhp_children_declarations: bool,
-    /// Statically check default lambda arguments. Subset of default_func_args
-    pub const_default_lambda_args: bool,
     /// <<__Soft>> T -> ~T
     pub interpret_soft_types_as_like_types: bool,
     /// Enable features used to typecheck systemlib
@@ -140,7 +138,6 @@ pub struct ParserOptions {
 )]
 #[repr(C)]
 pub struct FfiT(
-    pub bool,
     pub bool,
     pub bool,
     pub bool,

@@ -32,8 +32,6 @@ module Hhconfig : sig
 
   val auto_namespace_map : string
 
-  val const_default_lambda_args : string
-
   val const_static_props : string
 
   val deregister_php_stdlib : string

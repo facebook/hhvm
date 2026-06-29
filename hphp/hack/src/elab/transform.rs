@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ff15625890fcb8a9f036d19bd93a4666>>
+// @generated SignedSource<<a5ac9c7fbc5a8986e1e2df9d4c5579be>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -1553,6 +1553,7 @@ impl Transform for Class_ {
         match *self {
             Class_ {
                 annotation: ref mut __binding_1,
+                mode: ref mut __binding_2,
                 final_: ref mut __binding_3,
                 is_xhp: ref mut __binding_4,
                 has_xhp_keyword: ref mut __binding_5,
@@ -1583,6 +1584,9 @@ impl Transform for Class_ {
             } => {
                 {
                     __binding_1.transform(env, &mut pass.clone())
+                }
+                {
+                    __binding_2.transform(env, &mut pass.clone())
                 }
                 {
                     __binding_3.transform(env, &mut pass.clone())
@@ -2234,6 +2238,7 @@ impl Transform for Typedef {
                 runtime_type: ref mut __binding_6,
                 user_attributes: ref mut __binding_7,
                 file_attributes: ref mut __binding_8,
+                mode: ref mut __binding_9,
                 namespace: ref mut __binding_10,
                 emit_id: ref mut __binding_12,
                 is_ctx: ref mut __binding_13,
@@ -2270,6 +2275,9 @@ impl Transform for Typedef {
                 }
                 {
                     __binding_8.transform(env, &mut pass.clone())
+                }
+                {
+                    __binding_9.transform(env, &mut pass.clone())
                 }
                 {
                     __binding_10.transform(env, &mut pass.clone())
@@ -2310,6 +2318,7 @@ impl Transform for Gconst {
         match *self {
             Gconst {
                 annotation: ref mut __binding_0,
+                mode: ref mut __binding_1,
                 name: ref mut __binding_2,
                 type_: ref mut __binding_3,
                 value: ref mut __binding_4,
@@ -2321,6 +2330,9 @@ impl Transform for Gconst {
             } => {
                 {
                     __binding_0.transform(env, &mut pass.clone())
+                }
+                {
+                    __binding_1.transform(env, &mut pass.clone())
                 }
                 {
                     __binding_2.transform(env, &mut pass.clone())
@@ -2367,6 +2379,7 @@ impl Transform for FunDef {
             FunDef {
                 namespace: ref mut __binding_0,
                 file_attributes: ref mut __binding_1,
+                mode: ref mut __binding_2,
                 name: ref mut __binding_3,
                 fun: ref mut __binding_4,
                 internal: ref mut __binding_5,
@@ -2374,13 +2387,15 @@ impl Transform for FunDef {
                 tparams: ref mut __binding_7,
                 where_constraints: ref mut __binding_8,
                 package: ref mut __binding_9,
-                ..
             } => {
                 {
                     __binding_0.transform(env, &mut pass.clone())
                 }
                 {
                     __binding_1.transform(env, &mut pass.clone())
+                }
+                {
+                    __binding_2.transform(env, &mut pass.clone())
                 }
                 {
                     __binding_3.transform(env, &mut pass.clone())
@@ -2420,6 +2435,7 @@ impl Transform for ModuleDef {
                 annotation: ref mut __binding_0,
                 user_attributes: ref mut __binding_2,
                 file_attributes: ref mut __binding_3,
+                mode: ref mut __binding_5,
                 doc_comment: ref mut __binding_6,
                 ..
             } => {
@@ -2431,6 +2447,9 @@ impl Transform for ModuleDef {
                 }
                 {
                     __binding_3.transform(env, &mut pass.clone())
+                }
+                {
+                    __binding_5.transform(env, &mut pass.clone())
                 }
                 { __binding_6.transform(env, &mut pass.clone()) }
             }
@@ -2986,12 +3005,43 @@ impl Transform for TupleExtra {
         }
     }
 }
-const _: () = {
-    impl Transform for KvcKind {}
-};
-const _: () = {
-    impl Transform for VcKind {}
-};
+impl Transform for KvcKind {
+    fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
+        let mut in_pass = pass.clone();
+        if let Break(..) = pass.on_ty_kvc_kind_top_down(env, self) {
+            return;
+        }
+        stack_limit::maybe_grow(|| self.traverse(env, pass));
+        let _ = in_pass.on_ty_kvc_kind_bottom_up(env, self);
+    }
+    fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
+        match *self {
+            KvcKind::Map => {}
+            KvcKind::ImmMap => {}
+            KvcKind::Dict => {}
+        }
+    }
+}
+impl Transform for VcKind {
+    fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
+        let mut in_pass = pass.clone();
+        if let Break(..) = pass.on_ty_vc_kind_top_down(env, self) {
+            return;
+        }
+        stack_limit::maybe_grow(|| self.traverse(env, pass));
+        let _ = in_pass.on_ty_vc_kind_bottom_up(env, self);
+    }
+    fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
+        match *self {
+            VcKind::Vector => {}
+            VcKind::ImmVector => {}
+            VcKind::Vec => {}
+            VcKind::Set => {}
+            VcKind::ImmSet => {}
+            VcKind::Keyset => {}
+        }
+    }
+}
 impl Transform for Enum_ {
     fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         let mut in_pass = pass.clone();

@@ -21,7 +21,6 @@ impl Default for ParserOptions {
             hhi_mode: false,
             codegen: false,
             disable_xhp_children_declarations: false,
-            const_default_lambda_args: false,
             interpret_soft_types_as_like_types: false,
             is_systemlib: false,
             disallow_static_constants_in_default_func_args: false,

@@ -850,7 +850,6 @@ let parse_options () =
         (* The remainder are set by the command line options *)
         is_systemlib = default.is_systemlib;
         const_default_func_args = default.const_default_func_args;
-        const_default_lambda_args = default.const_default_lambda_args;
         const_static_props = default.const_static_props;
         abstract_static_props = default.abstract_static_props;
         disable_xhp_element_mangling = !disable_xhp_element_mangling;

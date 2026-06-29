@@ -5466,16 +5466,14 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             if !x.named.is_missing() {
                 self.check_can_use_feature(node, &FeatureName::NamedParameters);
             }
-            if self.env.parser_options.const_default_lambda_args {
-                match self.env.context.active_callable {
-                    Some(node) => match node.children {
-                        AnonymousFunction(_) | LambdaExpression(_) => {
-                            self.check_constant_expression_ban_static(&x.default_value);
-                        }
-                        _ => {}
-                    },
+            match self.env.context.active_callable {
+                Some(node) => match node.children {
+                    AnonymousFunction(_) | LambdaExpression(_) => {
+                        self.check_constant_expression_ban_static(&x.default_value);
+                    }
                     _ => {}
-                }
+                },
+                _ => {}
             }
             if self.env.parser_options.const_default_func_args {
                 self.check_constant_expression(

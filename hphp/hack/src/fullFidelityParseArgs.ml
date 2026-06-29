@@ -32,7 +32,6 @@ type t = {
   (* Defining the input *)
   files: string list;
   disable_lval_as_an_expression: bool;
-  const_default_lambda_args: bool;
   const_static_props: bool;
   abstract_static_props: bool;
   disallow_discarded_nullable_awaitables: bool;
@@ -65,7 +64,6 @@ let make
     show_file_name
     files
     disable_lval_as_an_expression
-    const_default_lambda_args
     const_static_props
     abstract_static_props
     disallow_discarded_nullable_awaitables
@@ -96,7 +94,6 @@ let make
     show_file_name;
     files;
     disable_lval_as_an_expression;
-    const_default_lambda_args;
     const_static_props;
     abstract_static_props;
     disallow_discarded_nullable_awaitables;
@@ -148,7 +145,6 @@ let parse_args () =
   let set_show_file_name () = show_file_name := true in
   let files = ref [] in
   let push_file file = files := file :: !files in
-  let const_default_lambda_args = ref false in
   let const_static_props = ref false in
   let abstract_static_props = ref false in
   let disallow_discarded_nullable_awaitables = ref false in
@@ -243,10 +239,6 @@ No errors are filtered out."
       ( "--disable-lval-as-an-expression",
         Arg.Set disable_lval_as_an_expression,
         "Disable lval as an expression." );
-      ( "--const-default-lambda-args",
-        Arg.Set const_default_lambda_args,
-        " Statically check default lambda args are constant."
-        ^ " Produces a subset of errors of const-default-func-args" );
       ( "--const-static-props",
         Arg.Set const_static_props,
         "Enable static properties to be const" );
@@ -316,7 +308,6 @@ No errors are filtered out."
     !show_file_name
     (List.rev !files)
     !disable_lval_as_an_expression
-    !const_default_lambda_args
     !const_static_props
     !abstract_static_props
     !disallow_discarded_nullable_awaitables
@@ -331,7 +322,6 @@ let to_parser_options (args : t) : ParserOptions.t =
     ParserOptions.default with
     ParserOptions.codegen = args.codegen;
     disable_lval_as_an_expression = args.disable_lval_as_an_expression;
-    const_default_lambda_args = args.const_default_lambda_args;
     const_static_props = args.const_static_props;
     abstract_static_props = args.abstract_static_props;
     disable_xhp_element_mangling = args.disable_xhp_element_mangling;

@@ -43,23 +43,22 @@ unsafe fn parser_options_from_ocaml_only_for_parser_errors(
         let po_enable_xhp_class_modifier = bool::from_ocaml(*ocaml_opts.add(7)).unwrap();
         let po_disable_xhp_element_mangling = bool::from_ocaml(*ocaml_opts.add(8)).unwrap();
         let po_disable_xhp_children_declarations = bool::from_ocaml(*ocaml_opts.add(9)).unwrap();
-        let po_const_default_lambda_args = bool::from_ocaml(*ocaml_opts.add(10)).unwrap();
-        let po_allow_unstable_features = bool::from_ocaml(*ocaml_opts.add(11)).unwrap();
-        let po_interpret_soft_types_as_like_types = bool::from_ocaml(*ocaml_opts.add(12)).unwrap();
-        let tco_is_systemlib = bool::from_ocaml(*ocaml_opts.add(13)).unwrap();
+        let po_allow_unstable_features = bool::from_ocaml(*ocaml_opts.add(10)).unwrap();
+        let po_interpret_soft_types_as_like_types = bool::from_ocaml(*ocaml_opts.add(11)).unwrap();
+        let tco_is_systemlib = bool::from_ocaml(*ocaml_opts.add(12)).unwrap();
         let po_disallow_static_constants_in_default_func_args =
-            bool::from_ocaml(*ocaml_opts.add(14)).unwrap();
-        let use_legacy_experimental_feature_config = bool::from_ocaml(*ocaml_opts.add(15)).unwrap();
+            bool::from_ocaml(*ocaml_opts.add(13)).unwrap();
+        let use_legacy_experimental_feature_config = bool::from_ocaml(*ocaml_opts.add(14)).unwrap();
         let po_experimental_features =
             oxidized::s_map::SMap::<experimental_features::FeatureStatus>::from_ocaml(
-                *ocaml_opts.add(16),
+                *ocaml_opts.add(15),
             )
             .unwrap();
         let consider_unspecified_experimental_features_released =
-            bool::from_ocaml(*ocaml_opts.add(17)).unwrap();
-        let enable_class_pointer_hint = bool::from_ocaml(*ocaml_opts.add(18)).unwrap();
-        let ignore_string_methods = bool::from_ocaml(*ocaml_opts.add(19)).unwrap();
-        let enable_intrinsics_extension = bool::from_ocaml(*ocaml_opts.add(20)).unwrap();
+            bool::from_ocaml(*ocaml_opts.add(16)).unwrap();
+        let enable_class_pointer_hint = bool::from_ocaml(*ocaml_opts.add(17)).unwrap();
+        let ignore_string_methods = bool::from_ocaml(*ocaml_opts.add(18)).unwrap();
+        let enable_intrinsics_extension = bool::from_ocaml(*ocaml_opts.add(19)).unwrap();
         parser_options.disable_lval_as_an_expression = po_disable_lval_as_an_expression;
         parser_options.const_static_props = po_const_static_props;
         parser_options.const_default_func_args = po_const_default_func_args;
@@ -67,7 +66,6 @@ unsafe fn parser_options_from_ocaml_only_for_parser_errors(
         parser_options.enable_xhp_class_modifier = po_enable_xhp_class_modifier;
         parser_options.disable_xhp_element_mangling = po_disable_xhp_element_mangling;
         parser_options.disable_xhp_children_declarations = po_disable_xhp_children_declarations;
-        parser_options.const_default_lambda_args = po_const_default_lambda_args;
         parser_options.allow_unstable_features = po_allow_unstable_features;
         parser_options.interpret_soft_types_as_like_types = po_interpret_soft_types_as_like_types;
         parser_options.is_systemlib = tco_is_systemlib;

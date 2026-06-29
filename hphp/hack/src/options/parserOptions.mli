@@ -29,8 +29,6 @@ type t = {
   codegen: bool;  (** Are we emitting bytecode? *)
   disable_xhp_children_declarations: bool;
       (** Disable `children (foo|bar+|pcdata)` declarations as they can be implemented without special syntax *)
-  const_default_lambda_args: bool;
-      (** Statically check default lambda arguments. Subset of default_func_args *)
   interpret_soft_types_as_like_types: bool;  (** <<__Soft>> T -> ~T *)
   is_systemlib: bool;  (** Enable features used to typecheck systemlib *)
   disallow_static_constants_in_default_func_args: bool;
@@ -94,7 +92,6 @@ val default : t
 (* Changes here need to be synchronized with rust_parser_errors_ffi.rs *)
 type ffi_t =
   bool
-  * bool
   * bool
   * bool
   * bool

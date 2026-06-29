@@ -20,7 +20,6 @@ type t = {
   hhi_mode: bool;
   codegen: bool;
   disable_xhp_children_declarations: bool;
-  const_default_lambda_args: bool;
   interpret_soft_types_as_like_types: bool;
   is_systemlib: bool;
   disallow_static_constants_in_default_func_args: bool;
@@ -62,7 +61,6 @@ let default =
     hhi_mode = false;
     codegen = false;
     disable_xhp_children_declarations = false;
-    const_default_lambda_args = false;
     interpret_soft_types_as_like_types = false;
     is_systemlib = false;
     disallow_static_constants_in_default_func_args = false;
@@ -107,7 +105,6 @@ type ffi_t =
   * bool
   * bool
   * bool
-  * bool
   * Experimental_features.feature_status SMap.t
   * bool
   * bool
@@ -125,7 +122,6 @@ let to_rust_ffi_t po =
     po.enable_xhp_class_modifier,
     po.disable_xhp_element_mangling,
     po.disable_xhp_children_declarations,
-    po.const_default_lambda_args,
     po.allow_unstable_features,
     po.interpret_soft_types_as_like_types,
     po.is_systemlib,

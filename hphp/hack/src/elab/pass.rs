@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<1989fa00aab5349f71f296855ed2a1a9>>
+// @generated SignedSource<<145695245f6e23dc4d4e263f0deba44b>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -1461,6 +1461,22 @@ pub trait Pass: PassClone {
     }
     #[inline(always)]
     fn on_ty_tuple_extra_bottom_up(&mut self, env: &Env, elem: &mut TupleExtra) -> ControlFlow<()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_kvc_kind_top_down(&mut self, env: &Env, elem: &mut KvcKind) -> ControlFlow<()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_kvc_kind_bottom_up(&mut self, env: &Env, elem: &mut KvcKind) -> ControlFlow<()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_vc_kind_top_down(&mut self, env: &Env, elem: &mut VcKind) -> ControlFlow<()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_vc_kind_bottom_up(&mut self, env: &Env, elem: &mut VcKind) -> ControlFlow<()> {
         Continue(())
     }
     #[inline(always)]
@@ -3618,6 +3634,34 @@ impl Pass for Passes {
     fn on_ty_tuple_extra_bottom_up(&mut self, env: &Env, elem: &mut TupleExtra) -> ControlFlow<()> {
         for pass in &mut self.passes {
             pass.on_ty_tuple_extra_bottom_up(env, elem)?;
+        }
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_kvc_kind_top_down(&mut self, env: &Env, elem: &mut KvcKind) -> ControlFlow<()> {
+        for pass in &mut self.passes {
+            pass.on_ty_kvc_kind_top_down(env, elem)?;
+        }
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_kvc_kind_bottom_up(&mut self, env: &Env, elem: &mut KvcKind) -> ControlFlow<()> {
+        for pass in &mut self.passes {
+            pass.on_ty_kvc_kind_bottom_up(env, elem)?;
+        }
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_vc_kind_top_down(&mut self, env: &Env, elem: &mut VcKind) -> ControlFlow<()> {
+        for pass in &mut self.passes {
+            pass.on_ty_vc_kind_top_down(env, elem)?;
+        }
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_vc_kind_bottom_up(&mut self, env: &Env, elem: &mut VcKind) -> ControlFlow<()> {
+        for pass in &mut self.passes {
+            pass.on_ty_vc_kind_bottom_up(env, elem)?;
         }
         Continue(())
     }

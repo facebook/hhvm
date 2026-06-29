@@ -180,16 +180,41 @@ module Find_my_tests = struct
 
   type provenance = { root_indices: int list } [@@deriving yojson]
 
+  (** Count for one edge-reason key in a reason-provenance multiset. The
+      [edge_key] records the reason used by an edge, together with its source and
+      target kinds, as "source_kind[root=...]|reason|target_kind". *)
+  type reason_count = {
+    edge_key: string;
+    count: int;
+  }
+  [@@deriving yojson]
+
+  (** One minimal multiset of edge-reason keys occurring on paths from a root to a
+      selected test (used for reason provenance). *)
+  type reason_multiset = reason_count list [@@deriving yojson]
+
+  type selected_cldp_member = {
+    member_name: string;
+    reason_provenance_indices: int list option;
+        (** Indices into [result_data.reason_provenance] for this CLDP test member.
+            [None] when reason provenance is not requested. *)
+  }
+  [@@deriving yojson]
+
   type selected_test_method = {
     method_name: string;
     uses_cldp: bool option; [@default None]
-    cldp_members: string list option; [@default None]
+    cldp_members: selected_cldp_member list option; [@default None]
+    reason_provenance_indices: int list option;
+        (** Indices into [result_data.reason_provenance] for this test method. *)
   }
   [@@deriving yojson]
 
   type selected_test_class = {
     class_name: string;
     methods: selected_test_method list;
+    reason_provenance_indices: int list option;
+        (** Indices into [result_data.reason_provenance] for this test class. *)
   }
   [@@deriving yojson]
 
@@ -204,6 +229,10 @@ module Find_my_tests = struct
   type result_data = {
     selected_test_files: selected_test_file list;
     out_of_time: bool;
+    reason_provenance: reason_multiset list option;
+        (** Interned pool of minimal multisets referenced by the
+            [reason_provenance_indices] fields throughout the result. [None]
+            when reason provenance is not requested. *)
   }
   [@@deriving yojson]
 
@@ -230,6 +259,9 @@ module Find_my_tests = struct
     max_distance: int; [@default 1]
     max_test_files: int option; [@default None]
     root_provenance: bool; [@default false]
+    reason_provenance: bool; [@default false]
+        (** Track, per selected test, the minimal multisets of edge-type reasons
+            on paths from a root that caused its selection. *)
     time_limit_secs: int option; [@default None]
     test_count_checkpoint_secs: int list; [@default [20; 30; 40]]
         (** Elapsed-time checkpoints (in seconds) at which to record the number of selected test files. *)
@@ -252,6 +284,7 @@ module Find_my_tests = struct
       max_distance = 1;
       max_test_files = None;
       root_provenance = false;
+      reason_provenance = false;
       time_limit_secs = None;
       test_count_checkpoint_secs = [20; 30; 40];
       max_method_parent_steps = None;

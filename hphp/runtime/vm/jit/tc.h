@@ -249,16 +249,15 @@ struct FuncMetaInfo {
 
   FuncMetaInfo() = default;
   FuncMetaInfo(Func* f, LocalTCBuffer&& buf)
-    : fid(f->getFuncId())
-    , func(f)
-    , tcBuf(std::move(buf))
-  {}
+    : tcBuf(std::move(buf))
+  {
+    funcToken = f->getFuncToken();
+  }
 
   FuncMetaInfo(FuncMetaInfo&&) = default;
   FuncMetaInfo& operator=(FuncMetaInfo&&) = default;
 
-  FuncId fid;
-  Func* func;
+  std::shared_ptr<FuncToken> funcToken;
   LocalTCBuffer tcBuf;
 
   void add(std::unique_ptr<Translator>&& p) {
@@ -280,7 +279,7 @@ struct FuncMetaInfo {
  * function. It is assumed that these translations have been emitted into per-
  * thread buffers and will need to be relocated.
  */
-void publishOptFunc(FuncMetaInfo info);
+void publishOptFunc(const Func* func, FuncMetaInfo info);
 
 /*
  * Acquires the code and metadata locks once, and then processes all the

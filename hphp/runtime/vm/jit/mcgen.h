@@ -86,7 +86,7 @@ TranslationResult retranslate(TransArgs args, const RegionContext& ctx);
  *
  * Returns true iff the function has been successfully optimized.
  */
-bool retranslateOpt(FuncId funcId);
+bool retranslateOpt(const Func* func);
 
 /*
  * In JitPGO mode, run retranslateAll if its enabled, we haven't already run it,
@@ -119,7 +119,7 @@ void joinWorkerThreads();
  * Wait until the specified function has been optimized by the
  * retranslateAll workers.
  */
-void waitForTranslate(const tc::FuncMetaInfo&);
+void waitForTranslate(const Func* func);
 
 /*
  * True iff mcgen::processInit() has been called

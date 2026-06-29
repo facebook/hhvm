@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/base/init-fini-node.h"
+#include "hphp/runtime/vm/func-token.h"
 #include "hphp/runtime/vm/jit/mcgen-translate.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/prof-data-sb.h"
@@ -325,8 +326,8 @@ struct AsyncPrologueContext {
 };
 
 struct AsyncOptimizeContext {
-  AsyncOptimizeContext(FuncId id) : funcId(id) {}
-  FuncId funcId;
+  AsyncOptimizeContext(const Func* func): funcToken(func->getFuncToken()) {}
+  std::shared_ptr<FuncToken> funcToken;
 };
 
 namespace {
@@ -406,15 +407,15 @@ struct AsyncTranslationWorker
     VMProtect _;
     ViewHolder viewer{pthread_self(), true};
 
-    if (!Func::isFuncIdValid(ctx.funcId)) return;
-    auto const func = const_cast<Func*>(Func::fromFuncId(ctx.funcId));
+    auto func = ctx.funcToken->getFunc();
+    if (func == nullptr) return;
     SCOPE_EXIT { func->atomicFlags().unset(Func::Flags::LockedForAsyncJit); };
 
     if (!profData()) return;
-    assertx(!profData()->optimized(ctx.funcId));
+    assertx(!profData()->optimized(func));
 
-    profData()->setOptimized(ctx.funcId);
-    optimizeFunc(func);
+    profData()->setOptimized(func);
+    optimizeFunc(const_cast<Func*>(func));
   }
 
   void doAsyncRegionTranslation(AsyncRegionTranslationContext& rctx) {
@@ -791,7 +792,7 @@ void enqueueAsyncTranslateOptRequest(const Func* func) {
   if (!profData() || profData()->optimized(id)) return;
 
   if (!func->atomicFlags().set(Func::Flags::LockedForAsyncJit)) {
-    dispatcher().enqueue(AsyncOptimizeContext {id});
+    dispatcher().enqueue(AsyncOptimizeContext { func });
   }
 }
 

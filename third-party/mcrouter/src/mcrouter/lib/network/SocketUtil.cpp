@@ -37,8 +37,11 @@ std::string getSessionKey(const ConnectionOptions& opts) {
     service = opts.accessPoint->getServiceIdOverride().value();
   } else {
     const auto& svcIdentity = opts.securityOpts.sslServiceIdentity;
-    service = svcIdentity.empty() ? opts.accessPoint->toHostPortString()
-                                  : svcIdentity;
+    if (svcIdentity.empty()) {
+      service = opts.accessPoint->toHostPortString();
+    } else {
+      service = svcIdentity;
+    }
   }
   return fmt::format(
       "{}:{}:{}",

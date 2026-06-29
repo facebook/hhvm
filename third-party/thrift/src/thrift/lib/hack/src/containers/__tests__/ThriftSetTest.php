@@ -485,21 +485,6 @@ final class ThriftSetTest extends WWWTest {
     expect($set->toVec())->toHaveSameValuesInAnyOrderAs(vec[true, false]);
   }
 
-  public function testToVecRandomizesIterationOrder(): void {
-    $set = new ThriftSet<int>(TType::I32, shape('type' => TType::I32));
-    foreach (vec[0, 1, 2, 3, 4, 5, 6, 7] as $value) {
-      $set->add($value);
-    }
-
-    $orders = keyset[];
-    for ($i = 0; $i < 20; $i++) {
-      $orders[] =
-        Str\join(Vec\map($set->toVec(), $value ==> (string)$value), ',');
-    }
-
-    expect(C\count($orders))->toBeGreaterThan(1);
-  }
-
   public function testRepeatedAddsExposeAllEntriesInAnyOrder(): void {
     $set = $this->createSet();
     $insertion_order = vec[5, 1, 4, 2, 3];
@@ -509,24 +494,6 @@ final class ThriftSetTest extends WWWTest {
 
     $observed = Vec\map($set->toVec(), $e ==> $e->a_i32);
     expect($observed)->toHaveSameValuesInAnyOrderAs(vec[1, 2, 3, 4, 5]);
-  }
-
-  public function testIteratorRandomizesIterationOrder(): void {
-    $set = new ThriftSet<int>(TType::I32, shape('type' => TType::I32));
-    foreach (vec[0, 1, 2, 3, 4, 5, 6, 7] as $value) {
-      $set->add($value);
-    }
-
-    $orders = keyset[];
-    for ($i = 0; $i < 20; $i++) {
-      $values = vec[];
-      foreach ($set as $value) {
-        $values[] = (string)$value;
-      }
-      $orders[] = Str\join($values, ',');
-    }
-
-    expect(C\count($orders))->toBeGreaterThan(1);
   }
 
   public function testCopyIsMutationIsolated(): void {

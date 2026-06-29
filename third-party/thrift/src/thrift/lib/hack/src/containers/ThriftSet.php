@@ -7,15 +7,14 @@
  * identity cannot be represented directly by Hack arraykey equality. Elements
  * are stored internally as canonical serialized thrift bytes for lookup.
  *
- * Iteration order is intentionally randomized on each call. Do not depend on
+ * Iteration order is not defined. Do not depend on
  * traversal or `toVec()` returning a stable order.
  */
 final class ThriftSet<TElem> implements Countable, Iterable<TElem> {
   use StrictIterable<TElem>;
 
   // Entries are canonical compact-protocol bytes for the thrift element.
-  // Lookups are normal keyset membership checks; traversal order is intentionally
-  // random.
+  // Lookups are normal keyset membership checks; traversal order is undefined.
   private keyset<string> $entries = keyset[];
   private TType $elemType;
   private ThriftStructTypes::TGenericSpec $elemSpec;
@@ -68,15 +67,8 @@ final class ThriftSet<TElem> implements Countable, Iterable<TElem> {
     );
   }
 
-  private function randomizedSerializedEntries()[]: vec<string> {
-    return self::randomized(vec($this->entries));
-  }
-
-  private static function randomized<T>(vec<T> $values)[]: vec<T> {
-    return HH\Coeffects\fb\backdoor_from_pure__DO_NOT_USE(
-      ()[defaults] ==> Vec\shuffle($values),
-      'Object-key set traversal order is intentionally randomized to prevent callers from depending on serialized-key order.',
-    );
+  private function serializedEntries()[]: vec<string> {
+    return vec($this->entries);
   }
 
   public function add(TElem $element)[write_props]: this {
@@ -103,14 +95,14 @@ final class ThriftSet<TElem> implements Countable, Iterable<TElem> {
   }
 
   public function getIterator()[write_props]: Iterator<TElem> {
-    foreach ($this->randomizedSerializedEntries() as $entry) {
+    foreach ($this->serializedEntries() as $entry) {
       yield $this->deserializeElement($entry);
     }
   }
 
   public function toVec()[write_props]: vec<TElem> {
     return Vec\map(
-      $this->randomizedSerializedEntries(),
+      $this->serializedEntries(),
       $entry ==> $this->deserializeElement($entry),
     );
   }

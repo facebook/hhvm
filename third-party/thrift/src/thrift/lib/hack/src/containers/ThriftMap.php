@@ -7,7 +7,7 @@
  * identity cannot be represented directly by Hack arraykey equality. Keys are
  * stored internally as canonical serialized thrift bytes for lookup.
  *
- * Iteration order is intentionally randomized on each call. Do not depend on
+ * Iteration order is not defined. Do not depend on
  * traversal, `getKeys()`, `getValues()`, or `toShape()` returning a stable
  * order.
  */
@@ -16,7 +16,7 @@ final class ThriftMap<reify TKey, reify TValue>
   use StrictKeyedIterable<TKey, TValue>;
 
   // Entries are keyed by canonical compact-protocol bytes for the thrift key.
-  // Lookups are normal dict lookups; traversal order is intentionally random.
+  // Lookups are normal dict lookups; traversal order is not defined.
   private dict<string, TValue> $entries = dict[];
   private TType $keyType;
   private ThriftStructTypes::TGenericSpec $keySpec;
@@ -66,15 +66,8 @@ final class ThriftMap<reify TKey, reify TValue>
     );
   }
 
-  private function randomizedSerializedKeys()[]: vec<string> {
-    return self::randomized(Vec\keys($this->entries));
-  }
-
-  private static function randomized<T>(vec<T> $values)[]: vec<T> {
-    return HH\Coeffects\fb\backdoor_from_pure__DO_NOT_USE(
-      ()[defaults] ==> Vec\shuffle($values),
-      'Object-key map traversal order is intentionally randomized to prevent callers from depending on serialized-key order.',
-    );
+  private function serializedKeys()[]: vec<string> {
+    return Vec\keys($this->entries);
   }
 
   public function set(TKey $key, TValue $value)[write_props]: this {
@@ -118,7 +111,7 @@ final class ThriftMap<reify TKey, reify TValue>
 
   public function getIterator()[write_props]: KeyedIterator<TKey, TValue> {
     return new ThriftMapIterator(
-      $this->randomizedSerializedKeys(),
+      $this->serializedKeys(),
       $this->entries,
       $this->keyType,
       $this->keySpec,
@@ -126,30 +119,30 @@ final class ThriftMap<reify TKey, reify TValue>
   }
 
   /**
-   * Returns keys in a fresh randomized order. Do not correlate this vector with
+   * Returns keys in an undefined order. Do not correlate this vector with
    * `getValues()`; request pairs via iteration or `toShape()` instead.
    */
   public function getKeys()[write_props]: vec<TKey> {
     return Vec\map(
-      $this->randomizedSerializedKeys(),
+      $this->serializedKeys(),
       $serialized ==> $this->deserializeKey($serialized),
     );
   }
 
   /**
-   * Returns values in a fresh randomized order. Do not correlate this vector
+   * Returns values in an undefined order. Do not correlate this vector
    * with `getKeys()`; request pairs via iteration or `toShape()` instead.
    */
   public function getValues()[]: vec<TValue> {
     return Vec\map(
-      $this->randomizedSerializedKeys(),
+      $this->serializedKeys(),
       $serialized ==> $this->entries[$serialized],
     );
   }
 
   public function toShape()[write_props]: vec<(TKey, TValue)> {
     return Vec\map(
-      $this->randomizedSerializedKeys(),
+      $this->serializedKeys(),
       $serialized ==>
         tuple($this->deserializeKey($serialized), $this->entries[$serialized]),
     );

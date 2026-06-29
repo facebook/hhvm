@@ -31,6 +31,8 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -49,10 +51,19 @@ import reactor.util.retry.Retry;
  * track the current backend host set itself.
  */
 public final class PooledRpcClientManager extends AbstractRpcClientManager {
+  private static final Logger LOG = LoggerFactory.getLogger(PooledRpcClientManager.class);
+
   private static final AtomicIntegerFieldUpdater<PooledRpcClientManager> CURRENT_INDEX =
       AtomicIntegerFieldUpdater.newUpdater(PooledRpcClientManager.class, "currentIndex");
 
   private static final Duration POLL_RATE = Duration.ofMinutes(1L);
+
+  // Bounded retry burst for transient discovery ERRORS (proxy unreachable, timeout), mirroring
+  // ServiceRouter's SMC fetch retry budget. A successful-but-empty resolution is NOT retried here:
+  // it is treated as authoritative "no hosts right now" and applied immediately.
+  private static final long MAX_DISCOVERY_ERROR_RETRIES = 2L;
+  private static final Duration DISCOVERY_ERROR_MIN_BACKOFF = Duration.ofMillis(500L);
+  private static final Duration DISCOVERY_ERROR_MAX_BACKOFF = Duration.ofSeconds(2L);
 
   private final RpcClientManagerFactory delegateFactory;
   private final Function<String, Mono<List<SocketAddress>>> hostSelectFunction;
@@ -114,7 +125,7 @@ public final class PooledRpcClientManager extends AbstractRpcClientManager {
       return closedMono();
     }
     if (managers.isEmpty()) {
-      return Mono.error(new IllegalStateException("No rpc clients available for tier " + tierName));
+      return Mono.error(new IllegalStateException("No hosts available for tier " + tierName));
     }
     return select(managers, contextView).acquire();
   }
@@ -128,12 +139,48 @@ public final class PooledRpcClientManager extends AbstractRpcClientManager {
     return managers.get(selected);
   }
 
+  /**
+   * Re-resolves the tier's hosts and reconciles the pool.
+   *
+   * <p>A successful resolution is authoritative and applied immediately, <em>including an empty
+   * result</em>: that publishes an empty set so {@link #acquire()} fails fast with a clear "no
+   * hosts" error rather than continuing to dial hosts the discovery source has dropped. This
+   * matches ServiceRouter/SMC, which does not preserve a stale host set after an authoritative
+   * zero-host result.
+   *
+   * <p>Discovery <em>errors</em> (not empty results) are retried with a small bounded backoff. If
+   * they persist, the last-known-good pool is kept when one exists (ride out a transient discovery
+   * outage); only on a first-fetch failure -- when there is nothing to fall back to -- is an empty
+   * set published so callers fail fast instead of blocking until their request timeout.
+   *
+   * <p>A selector that completes without emitting is defensively treated as an empty result.
+   */
   private Mono<Void> refresh() {
     return hostSelectFunction
         .apply(tierName)
-        .filter(addresses -> !addresses.isEmpty())
+        .switchIfEmpty(Mono.just(Collections.<SocketAddress>emptyList()))
+        .retryWhen(
+            Retry.backoff(MAX_DISCOVERY_ERROR_RETRIES, DISCOVERY_ERROR_MIN_BACKOFF)
+                .maxBackoff(DISCOVERY_ERROR_MAX_BACKOFF))
         .doOnNext(this::replaceManagers)
+        .onErrorResume(this::onDiscoveryErrorExhausted)
         .then();
+  }
+
+  private Mono<List<SocketAddress>> onDiscoveryErrorExhausted(Throwable error) {
+    if (managersByAddress.get().isEmpty()) {
+      // First-fetch failure: nothing to fall back to, so publish an empty set to unblock acquire()
+      // with a fast "no hosts" error instead of hanging.
+      LOG.warn(
+          "Host discovery failed for tier {} with no last-known-good pool; failing fast",
+          tierName,
+          error);
+      replaceManagers(Collections.emptyList());
+    } else {
+      // Keep the last-known-good pool; the periodic refresh keeps retrying.
+      LOG.warn("Host discovery failed for tier {}; serving last-known-good pool", tierName, error);
+    }
+    return Mono.empty();
   }
 
   /**
@@ -142,6 +189,10 @@ public final class PooledRpcClientManager extends AbstractRpcClientManager {
    * their managers disposed, which cleanly shuts down the underlying transports.
    */
   private void replaceManagers(List<SocketAddress> addresses) {
+    if (isDisposed()) {
+      // A refresh lost the race with dispose(); don't resurrect managers.
+      return;
+    }
     Map<SocketAddress, RpcClientManager> previous = managersByAddress.get();
     Map<SocketAddress, RpcClientManager> next = new LinkedHashMap<>();
     int limit = Math.min(poolSize, addresses.size());

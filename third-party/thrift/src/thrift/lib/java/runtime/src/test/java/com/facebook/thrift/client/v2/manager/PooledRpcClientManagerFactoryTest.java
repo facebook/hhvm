@@ -25,6 +25,7 @@ import java.net.SocketAddress;
 import java.util.Collections;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 public class PooledRpcClientManagerFactoryTest {
 
@@ -47,6 +48,50 @@ public class PooledRpcClientManagerFactoryTest {
 
     assertTrue(foo1.isDisposed());
     assertTrue(bar.isDisposed());
+  }
+
+  @Test
+  public void testEmptyDiscoveryFailsFast() {
+    // An authoritative empty resolution makes acquire() fail fast rather than hang, and never
+    // pins a stale host set.
+    PooledRpcClientManager manager =
+        new PooledRpcClientManager(
+            socketAddress -> new NoopRpcClientManager(),
+            tier -> Mono.just(Collections.<SocketAddress>emptyList()),
+            "test.tier",
+            2);
+    try {
+      StepVerifier.create(manager.acquire())
+          .expectErrorMatches(
+              e ->
+                  e instanceof IllegalStateException
+                      && e.getMessage().contains("No hosts available for tier test.tier"))
+          .verify(java.time.Duration.ofSeconds(10));
+    } finally {
+      manager.dispose();
+    }
+  }
+
+  @Test
+  public void testDiscoveryErrorFailsFastWithNoPriorPool() {
+    // A persistent discovery error with no last-known-good pool surfaces a fast failure after the
+    // bounded retry burst instead of blocking until the request timeout.
+    PooledRpcClientManager manager =
+        new PooledRpcClientManager(
+            socketAddress -> new NoopRpcClientManager(),
+            tier -> Mono.error(new RuntimeException("discovery unavailable")),
+            "test.tier",
+            2);
+    try {
+      StepVerifier.create(manager.acquire())
+          .expectErrorMatches(
+              e ->
+                  e instanceof IllegalStateException
+                      && e.getMessage().contains("No hosts available for tier test.tier"))
+          .verify(java.time.Duration.ofSeconds(15));
+    } finally {
+      manager.dispose();
+    }
   }
 
   private static final class NoopRpcClientManager implements RpcClientManager {

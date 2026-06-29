@@ -163,6 +163,73 @@ def immutable_initialize() -> None:
 
 
 @cli.command()
+@click.option("--count", default=1000, help="Number of (struct triples) to build")
+def immutable_initialize_tracemalloc(count: int) -> None:
+    # Deterministic retained-memory measurement (no memray needed): the delta in
+    # tracemalloc's "current" between before/after building `count` struct triples
+    # isolates the per-instance internal-data footprint - in particular the isset
+    # `bytes` object that the isset-disabled layout drops. Compare base vs diff.
+    import tracemalloc
+
+    gc.collect()
+    tracemalloc.start()
+    before = tracemalloc.get_traced_memory()[0]
+    lst = []
+    for _ in range(count):
+        included, string_bucket, my_struct = _create_immutable()
+        lst.append(my_struct)
+        lst.append(string_bucket)
+        lst.append(included)
+    after = tracemalloc.get_traced_memory()[0]
+    tracemalloc.stop()
+    n = count * 3
+    print(
+        f"immutable retained: {(after - before) / 1024.0:.1f} KiB for {n} structs "
+        f"({(after - before) / n:.1f} B/struct)"
+    )
+
+
+@cli.command()
+@click.option("--count", default=50, help="Number of Root trees to build")
+def immutable_unique_tree_tracemalloc(count: int) -> None:
+    # Memory counterpart to `unique-nested-benchmark`: build the fanout-10,
+    # depth-3 tree of 1111 UNIQUE types (1 Root + 10 T + 100 M + 1000 L) so the
+    # isset savings are measured on the same workload as init/deserialize, rather
+    # than the `_create_immutable` triple. Reports both per-struct (over all 1111
+    # nodes) and per-root (the whole tree) so the savings can be read either way.
+    import tracemalloc
+
+    import thrift.benchmark.unique_struct.thrift_types as U
+
+    def build_root() -> object:
+        leaves = [getattr(U, f"L{i}")(val=i, str_val="x") for i in range(1000)]
+        mids = [
+            getattr(U, f"M{i}")(**{f"f{j + 1}": leaves[i * 10 + j] for j in range(10)})
+            for i in range(100)
+        ]
+        tops = [
+            getattr(U, f"T{i}")(**{f"f{j + 1}": mids[i * 10 + j] for j in range(10)})
+            for i in range(10)
+        ]
+        return U.Root(**{f"f{j + 1}": tops[j] for j in range(10)})
+
+    gc.collect()
+    tracemalloc.start()
+    before = tracemalloc.get_traced_memory()[0]
+    roots = [build_root() for _ in range(count)]
+    after = tracemalloc.get_traced_memory()[0]
+    tracemalloc.stop()
+    nodes = count * 1111
+    delta = after - before
+    print(
+        f"unique-tree retained: {delta / 1024.0:.1f} KiB for {count} roots "
+        f"({nodes} structs); {delta / nodes:.1f} B/struct, "
+        f"{delta / count:.1f} B/root"
+    )
+    assert len(roots) == count
+
+
+@cli.command()
 def mutable_default_initialize() -> None:
     lst = []
     for _ in range(1000):

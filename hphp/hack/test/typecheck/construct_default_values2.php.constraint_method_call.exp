@@ -1,3 +1,7 @@
+ERROR: File "construct_default_values2.php", line 11, characters 20-26:
+Expected constant expression for initializer (Parsing[1002])
+ERROR: File "construct_default_values2.php", line 12, characters 14-28:
+Expected constant expression for initializer (Parsing[1002])
 ERROR: File "construct_default_values2.php", line 12, characters 14-28:
 Typing error (Typing[4403])
   File "construct_default_values2.php", line 12, characters 9-10:

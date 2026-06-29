@@ -1,3 +1,5 @@
+ERROR: File "access_in_default_arg_write_props.bad.php", line 24, characters 35-70:
+Expected constant expression for initializer (Parsing[1002])
 ERROR: File "access_in_default_arg_write_props.bad.php", line 9, characters 18-31:
 Accessing an enum class constant requires the capability WriteProperty, which is not provided by the context. (Typing[4401])
   File "access_in_default_arg_write_props.bad.php", line 9, characters 11-14:

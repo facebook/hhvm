@@ -1,1 +1,2 @@
-No errors
+ERROR: File "default_function_arg.php", line 4, characters 52-76:
+Expected constant expression for initializer (Parsing[1002])

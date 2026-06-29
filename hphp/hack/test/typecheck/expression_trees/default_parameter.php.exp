@@ -1,1 +1,4 @@
-No errors
+ERROR: File "default_parameter.php", line 5, characters 50-62:
+Expected constant expression for initializer (Parsing[1002])
+ERROR: File "default_parameter.php", line 9, characters 40-52:
+Expected constant expression for initializer (Parsing[1002])

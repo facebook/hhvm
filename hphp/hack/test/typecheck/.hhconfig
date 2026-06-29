@@ -10,7 +10,6 @@ enable_strict_const_semantics = 4
 require_types_tco_require_types_class_consts = 1
 strict_wellformedness = 2
 disable_hh_ignore_error = 2
-const_default_func_args = true
 const_default_lambda_args = true
 disallow_direct_superglobals_refs = true
 allowed_files_for_module_declarations = *

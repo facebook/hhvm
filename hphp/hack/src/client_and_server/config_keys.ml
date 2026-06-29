@@ -30,8 +30,6 @@ module Hhconfig = struct
 
   let auto_namespace_map = key "auto_namespace_map"
 
-  let const_default_func_args = key "const_default_func_args"
-
   let const_default_lambda_args = key "const_default_lambda_args"
 
   let const_static_props = key "const_static_props"

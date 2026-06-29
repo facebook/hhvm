@@ -268,8 +268,7 @@ impl HhConfig {
             allowed_decl_fixme_codes: hhconfig
                 .get_int_set_or("allowed_decl_fixme_codes", default.allowed_decl_fixme_codes)?,
             const_static_props: default.const_static_props,
-            const_default_func_args: hhconfig
-                .get_bool_or("const_default_func_args", default.const_default_func_args)?,
+            const_default_func_args: default.const_default_func_args,
             const_default_lambda_args: hhconfig.get_bool_or(
                 "const_default_lambda_args",
                 default.const_default_lambda_args,

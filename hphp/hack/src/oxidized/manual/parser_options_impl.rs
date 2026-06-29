@@ -12,7 +12,7 @@ impl Default for ParserOptions {
         Self {
             disable_lval_as_an_expression: true,
             const_static_props: false,
-            const_default_func_args: false,
+            const_default_func_args: true,
             abstract_static_props: false,
             enable_xhp_class_modifier: false,
             disable_xhp_element_mangling: false,

@@ -1,2 +1,3 @@
 (4,19)-(4,31) `await` cannot be used in a parameter default value
 (4,19)-(4,31) Expected constant expression for initializer
+(4,19)-(4,31) Expected constant expression for initializer

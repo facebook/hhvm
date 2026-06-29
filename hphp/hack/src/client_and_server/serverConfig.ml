@@ -351,12 +351,10 @@ let load_config (config : Config_file_common.t) (options : GlobalOptions.t) :
         disable_lval_as_an_expression =
           bool_opt Config_keys.Hhconfig.disable_lval_as_an_expression config
           >?? po_opt.disable_lval_as_an_expression;
-        const_default_func_args =
-          bool_opt Config_keys.Hhconfig.const_default_func_args config
-          >?? po_opt.const_default_func_args;
         const_default_lambda_args =
           bool_opt Config_keys.Hhconfig.const_default_lambda_args config
           >?? po_opt.const_default_lambda_args;
+        const_default_func_args = po_opt.const_default_func_args;
         const_static_props =
           bool_opt Config_keys.Hhconfig.const_static_props config
           >?? po_opt.const_static_props;

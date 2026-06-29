@@ -491,6 +491,12 @@ func (s *rocketServerSocket) requestResponse(msg payload.Payload) mono.Mono {
 			s.interactionsMutex.Unlock()
 		}
 
+		// Run OnResponse interceptors.
+		respIntErr := s.runOnResponseInterceptors(ctx, respStruct)
+		if respIntErr != nil {
+			respStruct = maybeWrapApplicationException(respIntErr)
+		}
+
 		payload, err := s.makeResponsePayload(metadata, respStruct, true /* isFirstResponse */)
 		if err != nil {
 			s.observer.ConnDropped()
@@ -561,6 +567,16 @@ func (s *rocketServerSocket) fireAndForget(msg payload.Payload) {
 	if resErr != nil {
 		s.observer.ConnDropped()
 		s.log("server fireAndForget error: %v", resErr)
+	}
+
+	// Run OnResponse interceptors. Oneway requests send no response to the
+	// client, but the OnResponse callbacks must still fire to preserve the
+	// OnRequest/OnResponse symmetry that interceptors rely on (matching the C++
+	// runtime, which invokes onResponse with a void result for oneway methods).
+	// There is no response struct and no client to surface an error to, so any
+	// interceptor error is only logged.
+	if respIntErr := s.runOnResponseInterceptors(ctx, nil); respIntErr != nil {
+		s.log("server fireAndForget OnResponse interceptor error: %v", respIntErr)
 	}
 
 	// Track actual handler execution time

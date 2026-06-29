@@ -310,6 +310,12 @@ func (i *serverTestInterceptor) OnRequest(ctx context.Context, _ types.ReadableS
 	return ctx, i.failOn[method]
 }
 
+func (i *serverTestInterceptor) OnResponse(ctx context.Context, _ WritableStruct) error {
+	method := GetRequestContext(ctx).MethodName
+	i.recorder.record(method+":resp", i.name)
+	return nil
+}
+
 // TestServiceInterceptorServer exercises the wired OnRequest behavior end-to-end
 // against a single shared server, with the subtests running in parallel. Each
 // subtest uses a distinct RPC method so their recorded calls don't overlap.
@@ -342,5 +348,21 @@ func TestServiceInterceptorServer(t *testing.T) {
 		require.ErrorContains(t, err, "denied by interceptor")
 		// Every interceptor's OnRequest still ran, even though "a" errored.
 		require.Equal(t, []string{"a", "b"}, recorder.get("Ping"))
+	})
+
+	t.Run("OnResponse runs for oneway requests in reverse order", func(t *testing.T) {
+		t.Parallel()
+		// Oneway requests send no response to the client, but OnResponse must
+		// still fire to preserve the OnRequest/OnResponse symmetry (matching the
+		// C++ runtime). The client call returns before the server finishes, so
+		// poll until the OnResponse callbacks have been recorded.
+		err := client.OnewayRPC(context.Background(), "hello")
+		require.NoError(t, err)
+		require.Eventually(t, func() bool {
+			return len(recorder.get("OnewayRPC:resp")) == 2
+		}, 5*time.Second, 10*time.Millisecond)
+		// OnRequest runs in forward order; OnResponse runs in reverse order.
+		require.Equal(t, []string{"a", "b"}, recorder.get("OnewayRPC"))
+		require.Equal(t, []string{"b", "a"}, recorder.get("OnewayRPC:resp"))
 	})
 }

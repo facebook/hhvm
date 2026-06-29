@@ -214,8 +214,7 @@ enum COMPARISON_TYPE: int {
 function __cast_and_compare(mixed $l, mixed $r, COMPARISON_TYPE $ctype)[]: int {
   if ($r is bool && !(\HH\is_fun($l) || \HH\is_class_meth($l))) {
     if (!($l is AnyArray<_, _>)) {
-    /* HH_IGNORE[12005] suppress warning about casting to int */
-      $l = (bool)$l;
+      $l = \HH\legacy_is_truthy($l);
     } else if ($ctype === COMPARISON_TYPE::EQ) {
       $l = !C\is_empty($l);
     }
@@ -238,9 +237,9 @@ function __cast_and_compare(mixed $l, mixed $r, COMPARISON_TYPE $ctype)[]: int {
   } else if ($r is num) {
     if ($l is null) {
       $l = false;
-      $r = (bool)$r;
+      $r = \HH\legacy_is_truthy($r);
     } else if ($l is bool) {
-      $r = (bool)$r;
+      $r = \HH\legacy_is_truthy($r);
     } else if ($l is string) {
       $l = \HH\str_to_numeric($l) ?? 0;
     } else if (
@@ -263,7 +262,7 @@ function __cast_and_compare(mixed $l, mixed $r, COMPARISON_TYPE $ctype)[]: int {
     if ($l is null) {
       $l = '';
     } else if ($l is bool) {
-      $r = (bool)$r;
+      $r = \HH\legacy_is_truthy($r);
     } else if ($l is num) {
       $r = \HH\str_to_numeric($r) ?? 0;
       return __cast_and_compare($l, $r, $ctype);
@@ -294,8 +293,7 @@ function __cast_and_compare(mixed $l, mixed $r, COMPARISON_TYPE $ctype)[]: int {
       $l = false;
       $r = true;
     } else if ($l is bool) {
-      /* HH_IGNORE[12005] suppress warning about casting */
-      $r = (bool)$r;
+      $r = \HH\legacy_is_truthy($r);
     } else if ($l is num) {
       /* HH_IGNORE[12005] suppress warning about casting */
       $r = $l is int ? (int)$r : (float)$r;
@@ -383,8 +381,7 @@ function __cast_and_compare(mixed $l, mixed $r, COMPARISON_TYPE $ctype)[]: int {
       /* HH_IGNORE[12005] suppress warning about casting */
       $r = $l is int ? (int)$r : (float)$r;
     } else if ($l is bool) {
-      /* HH_IGNORE[12005] suppress warning about casting */
-      $r = (bool)$r;
+      $r = \HH\legacy_is_truthy($r);
     } else if (
       \is_object($l) &&
       !($l is \ConstCollection<_> || $r is \ConstCollection<_>) &&

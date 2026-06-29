@@ -47,7 +47,7 @@ function validate_offset_lower_bound(int $offset, int $length)[]: int {
 }
 
 function boolval(mixed $val)[]: bool {
-  return (bool)$val;
+  return \HH\legacy_is_truthy($val);
 }
 
 const string ALPHABET_ALPHANUMERIC =

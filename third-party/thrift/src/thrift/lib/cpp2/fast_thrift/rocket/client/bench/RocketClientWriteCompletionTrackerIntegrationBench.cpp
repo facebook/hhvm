@@ -131,8 +131,12 @@ struct FixtureT {
                    .template addNextOutbound<Batcher>(batching_tag)
                    .build();
 
-    // Real consumer callback — fires once per completed batch in the tracking
-    // pipeline; never invoked in the baseline (subscription compiled out).
+    // Real consumer callback — fires once per completed request write in the
+    // tracking pipeline; never invoked in the baseline (subscription compiled
+    // out). Note: this bench pipeline lacks the WriteCompletionHandler /
+    // StreamStateHandler routing layer, so RocketWriteComplete events are not
+    // produced and this callback is effectively inert — the bench isolates
+    // the batch-tracker (TransportWriteComplete → BatchWriteComplete) cost.
     appAdapter->setOnWriteComplete(
         [](const RocketWriteCompleteEvent&) noexcept {});
 

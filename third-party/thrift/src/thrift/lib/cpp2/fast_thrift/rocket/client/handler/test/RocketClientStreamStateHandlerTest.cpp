@@ -18,6 +18,7 @@
 
 #include <algorithm>
 #include <cstring>
+#include <utility>
 
 #include <folly/io/IOBuf.h>
 #include <thrift/lib/cpp/transport/TTransportException.h>
@@ -98,6 +99,13 @@ class MockStreamContext {
     exception_ = std::move(e);
   }
 
+  void fireEvent(
+      RocketClientStreamStateHandler::EventId ev,
+      apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox
+          box) noexcept {
+    firedEvents_.emplace_back(ev, std::move(box));
+  }
+
   void setReturnBackpressure(bool value) { returnBackpressure_ = value; }
 
   // Sets BOTH read and write error flags. Use the directional setters
@@ -123,9 +131,17 @@ class MockStreamContext {
   bool hasException() const { return static_cast<bool>(exception_); }
   const folly::exception_wrapper& exception() const { return exception_; }
 
+  std::vector<std::pair<
+      RocketClientStreamStateHandler::EventId,
+      apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox>>&
+  firedEvents() {
+    return firedEvents_;
+  }
+
   void reset() {
     readMessages_.clear();
     writeMessages_.clear();
+    firedEvents_.clear();
     exception_ = folly::exception_wrapper();
     returnBackpressure_ = false;
     readReturnError_ = false;
@@ -137,6 +153,10 @@ class MockStreamContext {
       readMessages_;
   std::vector<apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox>
       writeMessages_;
+  std::vector<std::pair<
+      RocketClientStreamStateHandler::EventId,
+      apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox>>
+      firedEvents_;
   folly::exception_wrapper exception_;
   bool returnBackpressure_{false};
   bool readReturnError_{false};
@@ -297,7 +317,8 @@ TEST_F(ClientStreamStateHandlerTest, MultipleWritesGenerateSequentialOddIds) {
 // =============================================================================
 
 TEST_F(ClientStreamStateHandlerTest, TerminalPayloadCleansUpStream) {
-  void* const kTestHandle = reinterpret_cast<void*>(0x42);
+  int testHook;
+  void* const kTestHandle = &testHook;
   auto request = makeClientRequest(
       folly::IOBuf::copyBuffer("request"),
       folly::IOBuf::copyBuffer("metadata"),
@@ -337,7 +358,8 @@ TEST_F(ClientStreamStateHandlerTest, TerminalPayloadCleansUpStream) {
 }
 
 TEST_F(ClientStreamStateHandlerTest, ErrorFrameIsAlwaysTerminal) {
-  void* const kTestHandle = reinterpret_cast<void*>(0x42);
+  int testHook;
+  void* const kTestHandle = &testHook;
   auto request = makeClientRequest(
       folly::IOBuf::copyBuffer("request"),
       folly::IOBuf::copyBuffer("metadata"),
@@ -368,7 +390,8 @@ TEST_F(ClientStreamStateHandlerTest, ErrorFrameIsAlwaysTerminal) {
 }
 
 TEST_F(ClientStreamStateHandlerTest, CancelFrameIsAlwaysTerminal) {
-  void* const kTestHandle = reinterpret_cast<void*>(0x42);
+  int testHook;
+  void* const kTestHandle = &testHook;
   auto request = makeClientRequest(
       folly::IOBuf::copyBuffer("request"),
       folly::IOBuf::copyBuffer("metadata"),
@@ -403,7 +426,8 @@ TEST_F(ClientStreamStateHandlerTest, CancelFrameIsAlwaysTerminal) {
 // =============================================================================
 
 TEST_F(ClientStreamStateHandlerTest, ResponseErrorRoutesViaStreamLookup) {
-  void* const kTestHandle = reinterpret_cast<void*>(0x99);
+  int testHook;
+  void* const kTestHandle = &testHook;
   auto request = makeClientRequest(
       folly::IOBuf::copyBuffer("request"),
       folly::IOBuf::copyBuffer("metadata"),
@@ -624,8 +648,9 @@ TEST_F(
   // resolve each handler with a real transport exception (not the
   // generic auto-detach error). Mirrors legacy
   // RocketClient::onConnectionClosed semantics.
-  void* const kHandle1 = reinterpret_cast<void*>(0x1);
-  void* const kHandle2 = reinterpret_cast<void*>(0x2);
+  int hook1, hook2;
+  void* const kHandle1 = &hook1;
+  void* const kHandle2 = &hook2;
   auto r1 = makeClientRequest(
       folly::IOBuf::copyBuffer("a"), folly::IOBuf::copyBuffer("m"), kHandle1);
   auto r2 = makeClientRequest(
@@ -672,10 +697,9 @@ TEST_F(ClientStreamStateHandlerTest, OnPipelineInactiveAfterOnExceptionIsNoOp) {
   // onException already drained the slot map; a follow-up
   // onPipelineInactive (e.g., from pipeline_->close()) finds nothing to
   // do.
+  int hook;
   auto request = makeClientRequest(
-      folly::IOBuf::copyBuffer("a"),
-      folly::IOBuf::copyBuffer("m"),
-      reinterpret_cast<void*>(0x1));
+      folly::IOBuf::copyBuffer("a"), folly::IOBuf::copyBuffer("m"), &hook);
   EXPECT_EQ(
       handler_.onWrite(ctx_, erase_and_box(std::move(request))),
       Result::Success);
@@ -703,8 +727,9 @@ TEST_F(
   // exception, not the generic auto-detach error). After the fan-out it
   // propagates the exception upstream so the AppAdapter can flip state
   // to Closed.
-  void* const kHandle1 = reinterpret_cast<void*>(0x1);
-  void* const kHandle2 = reinterpret_cast<void*>(0x2);
+  int hook1, hook2;
+  void* const kHandle1 = &hook1;
+  void* const kHandle2 = &hook2;
   auto r1 = makeClientRequest(
       folly::IOBuf::copyBuffer("a"), folly::IOBuf::copyBuffer("m"), kHandle1);
   auto r2 = makeClientRequest(
@@ -743,7 +768,8 @@ TEST_F(ClientStreamStateHandlerTest, OnWriteErrorRollbackEmitsNotOpen) {
   // error so the in-flight handler resolves with a real transport
   // exception (not the generic auto-detach). Mirrors legacy
   // RocketClient::failAllScheduledWrites.
-  void* const kHandle = reinterpret_cast<void*>(0x42);
+  int testHook;
+  void* const kHandle = &testHook;
   auto request = makeClientRequest(
       folly::IOBuf::copyBuffer("request"),
       folly::IOBuf::copyBuffer("metadata"),
@@ -837,7 +863,8 @@ TEST_F(ClientStreamStateHandlerTest, DownstreamErrorPropagatedOnRead) {
 // =============================================================================
 
 TEST_F(ClientStreamStateHandlerTest, RequestHandleReturnedInResponse) {
-  void* const kTestHandle = reinterpret_cast<void*>(0x42);
+  int testHook;
+  void* const kTestHandle = &testHook;
   auto request = makeClientRequest(
       folly::IOBuf::copyBuffer("request"),
       folly::IOBuf::copyBuffer("metadata"),
@@ -918,6 +945,65 @@ TEST_F(ClientStreamStateHandlerTest, ErrorFrameOnStreamZeroPassesThrough) {
               .get<apache::thrift::fast_thrift::frame::read::ParsedFrame>())
           .type(),
       apache::thrift::fast_thrift::frame::FrameType::ERROR);
+}
+
+// =============================================================================
+// Write Completion (onEvent: FrameWriteComplete -> RocketWriteComplete)
+// =============================================================================
+
+// A FrameWriteComplete for a live stream resolves the streamId to its request
+// context and fires RocketWriteComplete carrying that context and the status.
+TEST_F(
+    ClientStreamStateHandlerTest,
+    OnEventFiresRocketWriteCompleteForKnownStream) {
+  int testHook;
+  void* const kTestHandle = &testHook;
+  auto request = makeClientRequest(
+      folly::IOBuf::copyBuffer("request"),
+      folly::IOBuf::copyBuffer("metadata"),
+      kTestHandle);
+  ASSERT_EQ(
+      handler_.onWrite(ctx_, erase_and_box(std::move(request))),
+      Result::Success);
+  ASSERT_TRUE(handler_.hasActiveStream(1));
+
+  handler_.onEvent(
+      ctx_,
+      RocketClientStreamStateHandler::EventId::FrameWriteComplete,
+      apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox(
+          FrameWriteCompleteEvent{
+              .streamId = 1,
+              .status = apache::thrift::fast_thrift::transport::
+                  WriteCompletionStatus::Success,
+          }));
+
+  ASSERT_EQ(ctx_.firedEvents().size(), 1);
+  EXPECT_EQ(
+      ctx_.firedEvents()[0].first,
+      RocketClientStreamStateHandler::EventId::RocketWriteComplete);
+  auto& event = ctx_.firedEvents()[0].second.get<RocketWriteCompleteEvent>();
+  EXPECT_EQ(event.requestContext, kTestHandle);
+  EXPECT_EQ(
+      event.status,
+      apache::thrift::fast_thrift::transport::WriteCompletionStatus::Success);
+  // Write completion does not terminate the stream; the slot stays live.
+  EXPECT_TRUE(handler_.hasActiveStream(1));
+}
+
+// A FrameWriteComplete whose streamId has no live slot (already terminated or
+// never seen) is silently dropped — no RocketWriteComplete is fired.
+TEST_F(ClientStreamStateHandlerTest, OnEventForUnknownStreamFiresNothing) {
+  handler_.onEvent(
+      ctx_,
+      RocketClientStreamStateHandler::EventId::FrameWriteComplete,
+      apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox(
+          FrameWriteCompleteEvent{
+              .streamId = 999,
+              .status = apache::thrift::fast_thrift::transport::
+                  WriteCompletionStatus::Success,
+          }));
+
+  EXPECT_TRUE(ctx_.firedEvents().empty());
 }
 
 } // namespace apache::thrift::fast_thrift::rocket::client::handler

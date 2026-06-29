@@ -23,17 +23,17 @@
  *   TransportHandlerT<FrameEventFactory>
  *     -> LoopBatchingFrameHandlerT<
  *          WriteCompletionTrackerT<RocketClientEventFactory>>
- *     -> EventCapturingAppHandler  (subscribes to RocketWriteComplete via
+ *     -> EventCapturingAppHandler  (subscribes to BatchWriteComplete via
  * onEvent)
  *
  * Each test drives one or more outbound writes through the pipeline, lets the
  * loop callback flush, then triggers writeSuccess / writeErr on the mocked
- * AsyncTransport and verifies the RocketWriteCompleteEvent(s) the tracker fans
+ * AsyncTransport and verifies the BatchWriteCompleteEvent(s) the tracker fans
  * out carry the correct (status, frameCount, bytes).
  *
  * The tests also model the per-frame attribution a real upstream consumer
  * would perform: each test handler maintains its own per-outbound FIFO and
- * pops `frameCount` entries per RocketWriteCompleteEvent.
+ * pops `frameCount` entries per BatchWriteCompleteEvent.
  */
 
 #include <gtest/gtest.h>
@@ -70,7 +70,7 @@ using transport::WriteCompletionStatus;
 using namespace testing;
 
 // Two events per pipeline: TransportHandler fires TransportWriteComplete and
-// the tracker re-fires RocketWriteComplete after enriching with the
+// the tracker re-fires BatchWriteComplete after enriching with the
 // rocket-frame count.
 using TestTransportHandler =
     transport::TransportHandlerT<RocketClientEventFactory>;
@@ -79,7 +79,7 @@ using TestBatcher = fw::LoopBatchingFrameHandlerT<
 
 HANDLER_TAG(batching);
 
-// Tail app handler that captures RocketWriteCompleteEvents fired by the
+// Tail app handler that captures BatchWriteCompleteEvents fired by the
 // tracker. Records its own per-outbound FIFO (size in bytes) so each test can
 // model the per-frame attribution a real upstream consumer would do.
 class EventCapturingAppHandler {
@@ -96,24 +96,24 @@ class EventCapturingAppHandler {
   void onWriteReady() noexcept {}
 
   // --- Event subscription ---
-  // Subscribes only to the enriched RocketWriteComplete event the tracker
+  // Subscribes only to the enriched BatchWriteComplete event the tracker
   // fires; the raw TransportWriteComplete never reaches this handler.
   static constexpr std::array<RocketClientEventId, 1> kSubscribedEvents{
-      RocketClientEventId::RocketWriteComplete};
+      RocketClientEventId::BatchWriteComplete};
 
   void onEvent(
       RocketClientEventId /*ev*/, const cp::TypeErasedBox& box) noexcept {
-    events_.push_back(box.get<RocketWriteCompleteEvent>());
+    events_.push_back(box.get<BatchWriteCompleteEvent>());
   }
 
-  const std::vector<RocketWriteCompleteEvent>& events() const noexcept {
+  const std::vector<BatchWriteCompleteEvent>& events() const noexcept {
     return events_;
   }
 
   void clear() noexcept { events_.clear(); }
 
  private:
-  std::vector<RocketWriteCompleteEvent> events_;
+  std::vector<BatchWriteCompleteEvent> events_;
 };
 
 class RocketClientWriteCompletionIntegrationTest : public ::testing::Test {

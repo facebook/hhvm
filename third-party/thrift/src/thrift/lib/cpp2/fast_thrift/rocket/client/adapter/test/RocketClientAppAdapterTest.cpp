@@ -231,28 +231,25 @@ TEST(RocketClientAppAdapterTest, OnEventInvokesOnWriteCompleteCallback) {
   RocketClientAppAdapter::Ptr adapter(new RocketClientAppAdapter());
   int count = 0;
   transport::WriteCompletionStatus status{};
-  size_t frameCount = 0;
-  size_t bytes = 0;
+  void* ctx = nullptr;
   adapter->setOnWriteComplete([&](const RocketWriteCompleteEvent& e) noexcept {
     count++;
     status = e.status;
-    frameCount = e.frameCount;
-    bytes = e.bytes;
+    ctx = e.requestContext;
   });
 
+  int dummy = 42;
   adapter->onEvent(
       RocketClientEventId::RocketWriteComplete,
       TypeErasedBox(
           RocketWriteCompleteEvent{
+              .requestContext = &dummy,
               .status = transport::WriteCompletionStatus::Error,
-              .frameCount = 3,
-              .bytes = 128,
           }));
 
   EXPECT_EQ(count, 1);
   EXPECT_EQ(status, transport::WriteCompletionStatus::Error);
-  EXPECT_EQ(frameCount, 3u);
-  EXPECT_EQ(bytes, 128u);
+  EXPECT_EQ(ctx, &dummy);
 }
 
 TEST(RocketClientAppAdapterTest, OnEventNoOpWhenCallbackUnset) {
@@ -262,9 +259,8 @@ TEST(RocketClientAppAdapterTest, OnEventNoOpWhenCallbackUnset) {
       RocketClientEventId::RocketWriteComplete,
       TypeErasedBox(
           RocketWriteCompleteEvent{
+              .requestContext = nullptr,
               .status = transport::WriteCompletionStatus::Success,
-              .frameCount = 1,
-              .bytes = 0,
           }));
 }
 
@@ -279,9 +275,8 @@ TEST(RocketClientAppAdapterTest, HandlerRemovedClearsOnWriteCompleteCallback) {
       RocketClientEventId::RocketWriteComplete,
       TypeErasedBox(
           RocketWriteCompleteEvent{
+              .requestContext = nullptr,
               .status = transport::WriteCompletionStatus::Success,
-              .frameCount = 1,
-              .bytes = 0,
           }));
 
   EXPECT_EQ(count, 0);
@@ -363,10 +358,10 @@ TEST(RocketClientAppAdapterTest, RocketWriteCompleteDeliveredThroughPipeline) {
   RocketClientAppAdapter::Ptr adapter(new RocketClientAppAdapter());
 
   int count = 0;
-  size_t frameCount = 0;
+  void* receivedCtx = nullptr;
   adapter->setOnWriteComplete([&](const RocketWriteCompleteEvent& e) noexcept {
     count++;
-    frameCount = e.frameCount;
+    receivedCtx = e.requestContext;
   });
 
   // Built with RocketClientEventId so the adapter's subscription is wired; a
@@ -382,17 +377,17 @@ TEST(RocketClientAppAdapterTest, RocketWriteCompleteDeliveredThroughPipeline) {
                       .setAllocator(&allocator)
                       .build();
 
-  // The enriched event reaches the subscribed callback.
+  int dummy = 42;
+  // The per-request event reaches the subscribed callback.
   pipeline->fireEvent(
       RocketClientEventId::RocketWriteComplete,
       TypeErasedBox(
           RocketWriteCompleteEvent{
+              .requestContext = &dummy,
               .status = transport::WriteCompletionStatus::Success,
-              .frameCount = 4,
-              .bytes = 256,
           }));
   EXPECT_EQ(count, 1);
-  EXPECT_EQ(frameCount, 4u);
+  EXPECT_EQ(receivedCtx, &dummy);
 
   // The raw transport event is not delivered — the adapter subscribes only to
   // RocketWriteComplete.

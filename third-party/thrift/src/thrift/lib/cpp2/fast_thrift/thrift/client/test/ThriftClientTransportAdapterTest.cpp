@@ -573,23 +573,22 @@ TEST(
                             .build();
   bridge->setPipeline(thriftPipeline.get());
 
-  // Simulate the rocket pipeline delivering an enriched write-completion to
-  // the rocket app adapter; the bridge's callback relays it up as a thrift
-  // WriteComplete event.
+  // Simulate the rocket pipeline delivering a per-request write-completion
+  // to the rocket app adapter; the bridge's callback relays it up as a
+  // thrift WriteComplete event.
+  int dummy = 42;
   rocketAppAdapter->onEvent(
       rocket::client::RocketClientEventId::RocketWriteComplete,
       TypeErasedBox(
           rocket::client::RocketWriteCompleteEvent{
+              .requestContext = &dummy,
               .status = transport::WriteCompletionStatus::Success,
-              .frameCount = 4,
-              .bytes = 256,
           }));
 
   ASSERT_EQ(thriftTail.events.size(), 1u);
   EXPECT_EQ(
       thriftTail.events[0].status, transport::WriteCompletionStatus::Success);
-  EXPECT_EQ(thriftTail.events[0].frameCount, 4u);
-  EXPECT_EQ(thriftTail.events[0].bytes, 256u);
+  EXPECT_EQ(thriftTail.events[0].requestContext, &dummy);
 
   thriftPipeline->deactivate();
   thriftPipeline->close();

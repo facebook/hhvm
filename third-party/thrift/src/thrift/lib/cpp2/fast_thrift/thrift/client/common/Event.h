@@ -16,7 +16,6 @@
 
 #pragma once
 
-#include <cstddef>
 #include <cstdint>
 
 #include <thrift/lib/cpp2/fast_thrift/transport/WriteCompletion.h>
@@ -36,7 +35,7 @@ namespace apache::thrift::fast_thrift::thrift {
  * at compile time and must remain the last enumerator.
  */
 enum class ThriftClientEventType : std::uint32_t {
-  // Per-batch write completion relayed up from the rocket pipeline by
+  // Per-request write completion relayed up from the rocket pipeline by
   // ThriftClientTransportAdapter. Carries a ThriftClientWriteCompleteEvent.
   WriteComplete,
   // The transport is draining: the server sent a graceful close (rocket
@@ -53,13 +52,13 @@ enum class ThriftClientEventType : std::uint32_t {
 
 /**
  * Payload for ThriftClientEventType::WriteComplete — the completion of one
- * rocket-frame batch, relayed up from the rocket pipeline. `frameCount` is the
- * number of frames in the batch.
+ * individual request write, relayed up from the rocket pipeline.
+ * `requestContext` is a NON-OWNING borrow valid for the duration of the
+ * onEvent call; the owning layer static_casts it to the concrete context type.
  */
 struct ThriftClientWriteCompleteEvent {
+  void* requestContext;
   apache::thrift::fast_thrift::transport::WriteCompletionStatus status;
-  size_t frameCount;
-  size_t bytes;
 };
 
 } // namespace apache::thrift::fast_thrift::thrift

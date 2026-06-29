@@ -103,8 +103,8 @@ class ThriftClientTransportAdapter {
             channel_pipeline::TypeErasedBox{});
       }
     });
-    // Bridge rocket-pipeline write-completion notifications into the thrift
-    // pipeline.
+    // Bridge per-request write-completion notifications from the rocket
+    // pipeline into the thrift pipeline.
     connection_->appAdapter->setOnWriteComplete(
         [this](const rocket::client::RocketWriteCompleteEvent& e) noexcept {
           onWriteComplete(e);
@@ -213,20 +213,18 @@ class ThriftClientTransportAdapter {
     pipeline_->fireException(std::move(ew));
   }
 
-  // Called when the rocket pipeline reports a completed write batch. Relays it
-  // up the thrift pipeline as a ThriftClientEventType::WriteComplete event
-  // carrying the batch's status / frame count / bytes. Precondition: pipeline
-  // is wired (the rocket connection that fires this is torn down before
-  // pipeline_ is cleared).
+  // Called when the rocket pipeline reports a per-request write completion.
+  // Relays it up the thrift pipeline as ThriftClientEventType::WriteComplete.
+  // Precondition: pipeline is wired (the rocket connection that fires this is
+  // torn down before pipeline_ is cleared).
   void onWriteComplete(
       const rocket::client::RocketWriteCompleteEvent& event) noexcept {
     pipeline_->fireEvent(
         ThriftClientEventType::WriteComplete,
         channel_pipeline::TypeErasedBox(
             ThriftClientWriteCompleteEvent{
+                .requestContext = event.requestContext,
                 .status = event.status,
-                .frameCount = event.frameCount,
-                .bytes = event.bytes,
             }));
   }
 

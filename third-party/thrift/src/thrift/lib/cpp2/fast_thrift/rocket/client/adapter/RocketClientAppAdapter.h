@@ -96,10 +96,10 @@ class RocketClientAppAdapter : public folly::DelayedDestruction {
   // onWriteReady().
   using OnWriteReadyFn = folly::Function<void() noexcept>;
 
-  // Write-completion relay: invoked once per completed rocket-frame batch
-  // with the enriched RocketWriteCompleteEvent (status, frameCount, bytes).
-  // Only delivered when the pipeline is built with RocketClientEventId; for
-  // a default (NoEvent) pipeline the subscription compiles out entirely.
+  // Write-completion relay: invoked once per completed request write with
+  // the RocketWriteCompleteEvent (requestContext, status). Only delivered
+  // when the pipeline is built with RocketClientEventId; for a default
+  // (NoEvent) pipeline the subscription compiles out entirely.
   using OnWriteCompleteFn =
       folly::Function<void(const RocketWriteCompleteEvent&) noexcept>;
 
@@ -249,10 +249,10 @@ class RocketClientAppAdapter : public folly::DelayedDestruction {
   // === Event subscription ===
   //
   // The adapter relays two pipeline events to its owner: the graceful-drain
-  // ConnectionClose signal (no payload) and the enriched per-batch
-  // RocketWriteComplete (RocketWriteCompleteEvent). Both are wired only when
-  // the pipeline is built with RocketClientEventId; otherwise the framework
-  // compiles this out.
+  // ConnectionClose signal (no payload) and per-request RocketWriteComplete
+  // (RocketWriteCompleteEvent). Both are wired only when the pipeline is
+  // built with RocketClientEventId; otherwise the framework compiles this
+  // out.
   static constexpr std::array<RocketClientEventId, 2> kSubscribedEvents{
       RocketClientEventId::ConnectionClose,
       RocketClientEventId::RocketWriteComplete};

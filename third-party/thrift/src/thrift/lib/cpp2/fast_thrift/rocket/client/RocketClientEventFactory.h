@@ -33,11 +33,19 @@ namespace apache::thrift::fast_thrift::rocket::client {
  *
  * `makeRocketWriteComplete(status, frameCount, bytes)` is used by
  * WriteCompletionTrackerT to fire the enriched per-rocket-batch event
- * upstream after popping its frame-count FIFO.
+ * (BatchWriteComplete) upstream after popping its frame-count FIFO. (The method
+ * name is fixed by the shared tracker's factory contract; the event it produces
+ * is the batch-level one.)
  */
 struct RocketClientEventFactory {
   using EventId = RocketClientEventId;
   using TransportWriteCompleteEventType = TransportWriteCompleteEvent;
+
+  // Batch-level event consumed by FrameWriteCompletionHandlerT: the event it
+  // subscribes to, plus the message type carried.
+  using BatchWriteCompleteEventType = BatchWriteCompleteEvent;
+  static constexpr EventId kBatchWriteCompleteEvent =
+      EventId::BatchWriteComplete;
 
   static std::pair<
       EventId,
@@ -62,12 +70,29 @@ struct RocketClientEventFactory {
       size_t frameCount,
       size_t bytes) noexcept {
     return {
-        EventId::RocketWriteComplete,
+        EventId::BatchWriteComplete,
         apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox(
-            RocketWriteCompleteEvent{
+            BatchWriteCompleteEvent{
                 .status = status,
                 .frameCount = frameCount,
                 .bytes = bytes,
+            })};
+  }
+
+  // Per-frame event fired by FrameWriteCompletionHandlerT; StreamStateHandler
+  // resolves the streamId to the request context.
+  static std::pair<
+      EventId,
+      apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox>
+  makeFrameWriteComplete(
+      apache::thrift::fast_thrift::transport::WriteCompletionStatus status,
+      uint32_t streamId) noexcept {
+    return {
+        EventId::FrameWriteComplete,
+        apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox(
+            FrameWriteCompleteEvent{
+                .streamId = streamId,
+                .status = status,
             })};
   }
 };

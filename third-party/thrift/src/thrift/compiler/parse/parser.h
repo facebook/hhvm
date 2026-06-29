@@ -23,12 +23,14 @@
 #include <thrift/compiler/ast/t_enum_value.h>
 #include <thrift/compiler/ast/t_exception.h>
 #include <thrift/compiler/ast/t_function.h>
+#include <thrift/compiler/parse/token.h>
 #include <thrift/compiler/source_location.h>
 
 namespace apache::thrift::compiler {
 
 class diagnostics_engine;
 class lexer;
+class parser_token_sink;
 
 class t_primitive_type;
 class t_sink;
@@ -80,7 +82,46 @@ enum class sign { plus, minus };
 // An interface that receives notifications of parsed syntactic constructs.
 class parser_actions {
  public:
+  using attributes_type = std::unique_ptr<attributes>;
+  using comment_type = comment;
+  using const_value_type = std::unique_ptr<t_const_value>;
+  using deprecated_annotations_type = std::unique_ptr<deprecated_annotations>;
+  using enum_value_list_type = t_enum_value_list;
+  using enum_value_type = std::unique_ptr<t_enum_value>;
+  using field_list_type = t_field_list;
+  using field_type = std::unique_ptr<t_field>;
+  using function_list_type = node_list<t_function>;
+  using function_type = std::unique_ptr<t_function>;
+  using return_clause_type = return_clause;
+  using sink_type = std::unique_ptr<t_sink>;
+  using stream_type = std::unique_ptr<t_stream>;
+  using structured_annotation_list_type = node_list<t_const>;
+  using structured_annotation_type = std::unique_ptr<t_const>;
+  using throws_type = std::unique_ptr<t_throws>;
+  using type_ref_type = t_type_ref;
+  using type_throws_spec_type = type_throws_spec;
+
   virtual ~parser_actions() = 0;
+
+  attributes_type on_attributes(
+      source_location loc,
+      std::optional<comment_type> doc,
+      structured_annotation_list_type annotations);
+
+  deprecated_annotations_type on_deprecated_annotations(source_range range);
+
+  void set_deprecated_annotations(
+      attributes_type& attrs, deprecated_annotations_type annotations);
+
+  void set_const_value_src_range(
+      const_value_type& value, source_range range) const;
+
+  void add_list_value(const_value_type& list, const_value_type value) const;
+
+  void add_map_value(
+      const_value_type& map,
+      const_value_type key,
+      const_value_type value) const;
 
   virtual void on_program() = 0;
 
@@ -190,6 +231,9 @@ class parser_actions {
   virtual t_type_ref on_type(
       source_range range, const t_primitive_type& type) = 0;
 
+  virtual t_type_ref on_invalid_type(
+      source_range range, const t_primitive_type& type);
+
   virtual t_type_ref on_type(source_range range, std::string_view name) = 0;
 
   virtual void on_enum(
@@ -233,5 +277,20 @@ class parser_actions {
 // Parses a Thrift source from the lexer, invokes parser actions on
 // syntactic constructs and reports parse errors if any via diags.
 bool parse(lexer& lex, parser_actions& actions, diagnostics_engine& diags);
+
+bool parse(
+    lexer& lex,
+    parser_actions& actions,
+    diagnostics_engine& diags,
+    parser_token_sink& token_sink);
+
+// Receives non-EOF tokens consumed by the parser. The initial placeholder EOF
+// and the terminating source EOF are not reported. Implementations can use the
+// following token to attach trailing trivia to the consumed token.
+class parser_token_sink {
+ public:
+  virtual ~parser_token_sink() = default;
+  virtual void on_token(const token& consumed, const token& next) = 0;
+};
 
 } // namespace apache::thrift::compiler

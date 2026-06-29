@@ -758,6 +758,11 @@ class ast_builder : public parser_actions {
     return new_type_ref(type, range);
   }
 
+  t_type_ref on_invalid_type(
+      source_range range, const t_primitive_type& type) override {
+    return new_type_ref(type, range);
+  }
+
   t_type_ref on_type(source_range range, std::string_view name) override {
     return new_type_ref(fmt::to_string(name), range);
   }

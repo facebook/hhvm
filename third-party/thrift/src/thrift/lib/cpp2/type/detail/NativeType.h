@@ -55,14 +55,14 @@ struct NativeTypes {
 template <typename T, bool GuessStringTag>
 struct InferTag;
 
-// Resolves the concrete template type when paramaterizing the given template,
-// with the standard types of the give Tags.
+// Resolves the concrete template type when parameterizing the given template,
+// with the standard types of the given Tags.
 template <template <typename...> class TemplateT, typename... Tags>
 using standard_template_t =
     TemplateT<typename NativeTypes<Tags>::standard_type...>;
 
-// Resolves the concrete template type when paramaterizing the given template,
-// with the native types of the give Tags.
+// Resolves the concrete template type when parameterizing the given template,
+// with the native types of the given Tags.
 template <template <typename...> class TemplateT, typename... Tags>
 using native_template_t = TemplateT<typename NativeTypes<Tags>::native_type...>;
 template <template <typename...> class TemplateT, typename... Tags>

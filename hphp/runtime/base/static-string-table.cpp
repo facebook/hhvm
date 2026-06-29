@@ -207,11 +207,7 @@ void create_string_data_map() {
                           config);
 
   if (!precomputed_chars) {
-#ifdef USE_JEMALLOC
     insertStaticString(StringData::MakeEmpty());
-#else
-    makeStaticString("");
-#endif
     precomputed_chars = precompute_chars();
   }
 }

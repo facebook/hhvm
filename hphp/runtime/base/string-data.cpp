@@ -54,12 +54,14 @@ ALWAYS_INLINE StringData* allocFlat(size_t len) {
 //////////////////////////////////////////////////////////////////////
 
 #ifdef USE_JEMALLOC
-
 std::aligned_storage<
   kStringOverhead + sizeof(SymbolPrefix),
   alignof(StringData)
->::type s_theEmptyString;
+>::type s_theEmptyStringFixed;
+#endif
 
+#if !defined(USE_JEMALLOC) || !defined(NDEBUG)
+StringData* s_theEmptyStringDynamic = nullptr;
 #endif
 
 //////////////////////////////////////////////////////////////////////
@@ -192,14 +194,21 @@ StringData* StringData::MakeUncounted(folly::StringPiece sl) {
   return MakeShared<false>(sl);
 }
 
-#ifdef USE_JEMALLOC
-
 StringData* StringData::MakeEmpty() {
-  return MakeSharedAt<true>(folly::StringPiece{""},
-                            MemBlock{&s_theEmptyString, sizeof(s_theEmptyString)});
-}
-
+#ifdef USE_JEMALLOC
+#ifndef NDEBUG
+  if (uintptr_t(&s_theEmptyStringFixed) >= kMidArenaMaxAddr) {
+    s_theEmptyStringDynamic = MakeStatic(folly::StringPiece{""});
+    return s_theEmptyStringDynamic;
+  }
 #endif
+  return MakeSharedAt<true>(folly::StringPiece{""},
+                            MemBlock{&s_theEmptyStringFixed, sizeof(s_theEmptyStringFixed)});
+#else
+  s_theEmptyStringDynamic = MakeStatic(folly::StringPiece{""});
+  return s_theEmptyStringDynamic;
+#endif
+}
 
 void StringData::destructStatic() {
   assertx(checkSane() && isStatic());

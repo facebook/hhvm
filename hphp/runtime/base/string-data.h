@@ -146,15 +146,11 @@ struct StringData final : MaybeCountable,
    */
   static StringData* MakeUncounted(folly::StringPiece);
 
-#ifdef USE_JEMALLOC
-
   /*
    * Same as MakeStatic but initializes the empty string in aligned storage.
    * This should be called by the static string table initialization code.
    */
   static StringData* MakeEmpty();
-
-#endif
 
   /*
    * return estimated capacity for a string of the given size, due to
@@ -607,11 +603,15 @@ struct string_data_hash_tsame; // for type names
 //////////////////////////////////////////////////////////////////////
 
 #ifdef USE_JEMALLOC
-
 extern std::aligned_storage<
   kStringOverhead + sizeof(SymbolPrefix),
   alignof(StringData)
->::type s_theEmptyString;
+>::type s_theEmptyStringFixed;
+#endif
+
+#if !defined(USE_JEMALLOC) || !defined(NDEBUG)
+extern StringData* s_theEmptyStringDynamic;
+#endif
 
 /*
  * Return the "static empty string". This is a singleton StaticString
@@ -619,13 +619,20 @@ extern std::aligned_storage<
  * as lightweight a manner as possible.
  */
 ALWAYS_INLINE StringData* staticEmptyString() {
-  void* vp = &s_theEmptyString;
+#ifdef USE_JEMALLOC
+#ifndef NDEBUG
+  if (uintptr_t(&s_theEmptyStringFixed) >= kMidArenaMaxAddr) {
+    return s_theEmptyStringDynamic;
+  }
+#endif
+  void* vp = &s_theEmptyStringFixed;
   return reinterpret_cast<StringData*>(
     reinterpret_cast<uintptr_t>(vp) + sizeof(SymbolPrefix)
   );
-}
-
+#else
+return s_theEmptyStringDynamic;
 #endif
+}
 
 //////////////////////////////////////////////////////////////////////
 

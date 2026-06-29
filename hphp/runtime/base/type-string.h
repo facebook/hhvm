@@ -534,19 +534,6 @@ inline OptString& OptString::operator=(const StaticString& v) {
 
 extern const StaticString empty_string_ref;
 
-#ifndef USE_JEMALLOC
-
-/*
- * Return the "static empty string". This is a singleton StaticString
- * that can be used to return a StaticString for the empty string in
- * as lightweight a manner as possible.
- */
-ALWAYS_INLINE StringData* staticEmptyString() {
-  return empty_string_ref.get();
-}
-
-#endif
-
 ALWAYS_INLINE OptString empty_string() {
   return OptString::attach(staticEmptyString());
 }

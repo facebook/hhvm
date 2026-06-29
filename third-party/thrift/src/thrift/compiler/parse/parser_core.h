@@ -39,6 +39,9 @@ class parser_core {
   diagnostics_engine& diags_;
   parser_token_sink* token_sink_ = nullptr;
 
+  using thrift_token = ::apache::thrift::compiler::token;
+  using thrift_token_kind = ::apache::thrift::compiler::token_kind;
+
   using attributes_type = typename Actions::attributes_type;
   using comment_type = typename Actions::comment_type;
   using const_value_type = typename Actions::const_value_type;
@@ -63,7 +66,8 @@ class parser_core {
 
   struct parse_error : std::exception {};
 
-  token token_ = token(tok::eof, {}); // The current unconsumed token.
+  thrift_token token_ =
+      thrift_token(tok::eof, {}); // The current unconsumed token.
   bool has_token_ = false;
 
   // End of the last consumed token.
@@ -91,8 +95,8 @@ class parser_core {
     return range_tracker(token_.range.begin, end_);
   }
 
-  token consume_token() {
-    token t = token_;
+  thrift_token consume_token() {
+    thrift_token t = token_;
     end_ = t.range.end;
     if (!has_token_) {
       token_ = lexer_.get_next_token();
@@ -102,7 +106,7 @@ class parser_core {
       }
       return t;
     }
-    token next = lexer_.get_next_token();
+    thrift_token next = lexer_.get_next_token();
     if (token_sink_ != nullptr) {
       token_sink_->on_token(t, next);
     }
@@ -113,7 +117,7 @@ class parser_core {
     return t;
   }
 
-  bool try_consume_token(token_kind kind) {
+  bool try_consume_token(thrift_token_kind kind) {
     if (token_.kind != kind) {
       return false;
     }
@@ -121,7 +125,7 @@ class parser_core {
     return true;
   }
 
-  std::string lex_string_literal(token literal) {
+  std::string lex_string_literal(thrift_token literal) {
     auto str = lexer_.lex_string_literal(literal);
     if (!str) {
       actions_.on_error();
@@ -140,7 +144,7 @@ class parser_core {
     diags_.error(token_.range.begin, msg, std::forward<T>(args)...);
   }
 
-  source_range expect_and_consume(token_kind expected) {
+  source_range expect_and_consume(thrift_token_kind expected) {
     auto range = token_.range;
     if (token_.kind != expected) {
       report_expected(to_string(expected.value));
@@ -784,7 +788,7 @@ class parser_core {
     if (token_.kind == ',' || token_.kind == ';') {
       // Use to_tok instead of a token_kind ctor to work around an MSVC bug
       // (https://godbolt.org/z/8f6GE9545).
-      token_kind delimiter =
+      thrift_token_kind delimiter =
           kind == field_kind::field ? to_tok(';') : to_tok(',');
       if (token_.kind != delimiter) {
         diags_.warning(

@@ -195,6 +195,9 @@ module Find_my_tests = struct
 
   type selected_cldp_member = {
     member_name: string;
+    selected_after_secs: float;
+        (** Wall-clock seconds from the start of selection to when this CLDP test
+            member was first selected. *)
     reason_provenance_indices: int list option;
         (** Indices into [result_data.reason_provenance] for this CLDP test member.
             [None] when reason provenance is not requested. *)
@@ -203,6 +206,9 @@ module Find_my_tests = struct
 
   type selected_test_method = {
     method_name: string;
+    selected_after_secs: float;
+        (** Wall-clock seconds from the start of selection to when this test
+            method was first selected. *)
     uses_cldp: bool option; [@default None]
     cldp_members: selected_cldp_member list option; [@default None]
     reason_provenance_indices: int list option;
@@ -212,6 +218,9 @@ module Find_my_tests = struct
 
   type selected_test_class = {
     class_name: string;
+    selected_after_secs: float;
+        (** Wall-clock seconds from the start of selection to when this test
+            class was first selected. *)
     methods: selected_test_method list;
     reason_provenance_indices: int list option;
         (** Indices into [result_data.reason_provenance] for this test class. *)
@@ -221,6 +230,9 @@ module Find_my_tests = struct
   type selected_test_file = {
     file_path: string;
     distance: int;
+    selected_after_secs: float;
+        (** Wall-clock seconds from the start of selection to when this test was
+            first selected (i.e. when its node was first added to the graph). *)
     provenance: provenance option;
     test_classes: selected_test_class list option;
   }

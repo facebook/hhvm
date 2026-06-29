@@ -658,6 +658,76 @@ def benchmark_nested():
         print("\n")
 
 
+def benchmark_unique_nested():
+    # Companion to `benchmark_nested` that defeats the process-global
+    # default-value cache. `struct.thrift`'s Nested1110 reuses only 4 unique
+    # types, so `Nested1110()` reuses cached child defaults and freshly builds
+    # only the top node -- hiding per-struct internal-data init cost (e.g. the
+    # isset byte array). `unique_struct.thrift` is a fanout-10, depth-3 tree of
+    # 1111 UNIQUE types.
+    #
+    # immutable (thrift-python) only: this is the flavor whose internal-data
+    # layout changed; base-vs-diff is the comparison.
+    # Initialize measures only the Root struct construction: the 1110 children
+    # are built once in setup, so the timed statement isolates the kwargs ->
+    # internal-data path for one node rather than the Python iteration, f-string,
+    # and getattr overhead of materializing the whole tree.
+    # Deserialize builds all 1111 nodes fresh from the wire (no default-value
+    # cache shortcut), so it is directly comparable to `nested-benchmark`'s
+    # Nested1110 Deserialize column.
+    setup = "import thrift.benchmark.unique_struct.thrift_types as U"
+    # The 1110 children (and the Root's kwargs) are built once in setup; only the
+    # Root construction is timed for Initialize.
+    build_children = (
+        "leaves = [getattr(U, f'L{i}')(val=i, str_val='x') for i in range(1000)]\n"
+        "mids = [getattr(U, f'M{i}')(**{f'f{j+1}': leaves[i * 10 + j] for j in range(10)}) for i in range(100)]\n"
+        "tops = [getattr(U, f'T{i}')(**{f'f{j+1}': mids[i * 10 + j] for j in range(10)}) for i in range(10)]\n"
+        "root_kwargs = {f'f{j+1}': tops[j] for j in range(10)}"
+    )
+    build_root = "root = U.Root(**root_kwargs)"
+
+    def measure(stmt: str, stmt_setup: str) -> float:
+        timer = timeit.Timer(stmt=stmt, setup=stmt_setup)
+        number, _ = timer.autorange()
+        results = timer.repeat(repeat=5, number=number)
+        return min(results) * 1000.0 / number
+
+    init_ms = measure(build_root, f"{setup}\n{build_children}")
+
+    deser_setup = (
+        f"{setup}\n"
+        "from thrift.python.serializer import serialize, deserialize\n"
+        f"{build_children}\n"
+        f"{build_root}\n"
+        "serialized = serialize(root)"
+    )
+    deser_ms = measure("_ = deserialize(U.Root, serialized)", deser_setup)
+
+    print(
+        tabulate(
+            [
+                [
+                    "Initialize (Root only)",
+                    f"{init_ms * 1000.0:.4f} us",
+                    "(1 node)",
+                ],
+                [
+                    "Deserialize (1111-node tree)",
+                    f"{deser_ms:.4f} ms",
+                    f"{deser_ms * 1000.0 / 1111:.6f} us/node",
+                ],
+            ],
+            headers=[
+                "Unique nested (unique types)",
+                "time",
+                "per node",
+            ],
+            tablefmt="github",
+        )
+    )
+    print("\n")
+
+
 @click.group()
 def cli():
     pass
@@ -759,6 +829,11 @@ def nested_benchmark() -> None:
 
 
 @click.command()
+def unique_nested_benchmark() -> None:
+    benchmark_unique_nested()
+
+
+@click.command()
 @click.pass_context
 def run_all(ctx) -> None:
     # `run_all` runs the curated core subset. Specialized benchmarks
@@ -792,6 +867,7 @@ def main() -> None:
     cli.add_command(comparison_benchmark)
     cli.add_command(call_benchmark)
     cli.add_command(nested_benchmark)
+    cli.add_command(unique_nested_benchmark)
     cli()
 
 

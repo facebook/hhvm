@@ -65,7 +65,7 @@ fn do_textual_decl_derive(input: DeriveInput) -> Result<TokenStream> {
             for variant in e.variants {
                 let variant_name = &variant.ident;
                 let attr = extract_exactly_one_attr(&variant.ident, variant.attrs, "decl")?;
-                let decl: Decl = syn::parse2(attr.tokens)?;
+                let decl: Decl = attr.parse_args()?;
 
                 // Enforce sorted variant order.
                 let variant_name_str = format!("{variant_name}");
@@ -166,21 +166,21 @@ fn do_textual_decl_derive(input: DeriveInput) -> Result<TokenStream> {
 }
 
 fn extract_exactly_one_attr(ident: &Ident, attrs: Vec<Attribute>, name: &str) -> Result<Attribute> {
-    let mut attrs = attrs.into_iter().filter(|attr| attr.path.is_ident(name));
+    let mut attrs = attrs.into_iter().filter(|attr| attr.path().is_ident(name));
 
     let attr = if let Some(attr) = attrs.next() {
         attr
     } else {
         return Err(Error::new(
             ident.span(),
-            "variant is missing 'decl' attribute",
+            format!("variant is missing '{name}' attribute"),
         ));
     };
 
     if let Some(next) = attrs.next() {
         return Err(Error::new_spanned(
-            next.path,
-            "'decl' attribute may not be specified multiple times",
+            next.path(),
+            format!("'{name}' attribute may not be specified multiple times"),
         ));
     }
 
@@ -193,17 +193,14 @@ enum Decl {
 }
 
 impl Parse for Decl {
-    fn parse(wrapped_input: ParseStream<'_>) -> Result<Self> {
-        let input;
-        parenthesized!(input in wrapped_input);
-
+    fn parse(input: ParseStream<'_>) -> Result<Self> {
         let signature = if input.peek(Token![fn]) {
             let args;
             DeclSig {
                 fn_token: input.parse()?,
                 ident: input.parse()?,
                 paren_token: parenthesized!(args in input),
-                parameters: args.parse_terminated(DeclArg::parse)?,
+                parameters: args.parse_terminated(DeclArg::parse, Token![,])?,
                 arrow: input.parse()?,
                 ret: input.parse()?,
             }
@@ -245,19 +242,19 @@ impl Parse for Decl {
 
 struct DeclSig {
     #[allow(dead_code)]
-    fn_token: token::Fn,
+    fn_token: Token![fn],
     ident: Ident,
     #[allow(dead_code)]
     paren_token: token::Paren,
-    parameters: Punctuated<DeclArg, token::Comma>,
+    parameters: Punctuated<DeclArg, Token![,]>,
     #[allow(dead_code)]
-    arrow: token::RArrow,
+    arrow: Token![->],
     ret: DeclTy,
 }
 
 struct DeclArg {
     #[allow(dead_code)]
-    name: Option<(Ident, token::Colon)>,
+    name: Option<(Ident, Token![:])>,
     ty: DeclTy,
 }
 
@@ -265,7 +262,7 @@ impl Parse for DeclArg {
     fn parse(input: ParseStream<'_>) -> Result<Self> {
         let name = if input.peek2(Token![:]) {
             let name: Ident = input.parse()?;
-            let colon: token::Colon = input.parse()?;
+            let colon: Token![:] = input.parse()?;
             Some((name, colon))
         } else {
             None
@@ -280,7 +277,7 @@ impl Parse for DeclArg {
 #[derive(Debug)]
 enum DeclTy {
     #[allow(dead_code)]
-    Ellipsis(token::Dot3), // field `0` is never read
+    Ellipsis(Token![...]), // field `0` is never read
     #[allow(dead_code)]
     Float(Ident),
     #[allow(dead_code)]
@@ -288,7 +285,7 @@ enum DeclTy {
     #[allow(dead_code)]
     Noreturn(Ident),
     #[allow(dead_code)]
-    Ptr(token::Star, Box<DeclTy>),
+    Ptr(Token![*], Box<DeclTy>),
     #[allow(dead_code)]
     String(Ident),
     #[allow(dead_code)]

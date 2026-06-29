@@ -95,7 +95,7 @@ impl ItemConverter {
 
     fn convert_item_type(self, item: &syn::ItemType) -> Result<Def> {
         let name = TypeName(item.ident.to_string().to_case(Case::Snake));
-        let attrs = attr_parser::Attrs::from_type(item);
+        let attrs = attr_parser::Attrs::from_type(item)?;
         let ty = self.convert_type(&item.ty)?;
         Ok(Def::Alias {
             doc: attrs.doc,
@@ -109,7 +109,7 @@ impl ItemConverter {
 
     fn convert_item_struct(self, item: &syn::ItemStruct) -> Result<Def> {
         let name = TypeName(item.ident.to_string().to_case(Case::Snake));
-        let container_attrs = attr_parser::Attrs::from_struct(item);
+        let container_attrs = attr_parser::Attrs::from_struct(item)?;
         match &item.fields {
             syn::Fields::Unit => Ok(Def::Alias {
                 doc: container_attrs.doc,
@@ -139,7 +139,7 @@ impl ItemConverter {
             syn::Fields::Named(fields) => {
                 let fields = (fields.named.iter())
                     .map(|field| {
-                        let field_attrs = attr_parser::Attrs::from_field(field);
+                        let field_attrs = attr_parser::Attrs::from_field(field)?;
                         let name = if let Some(name) = field_attrs.name {
                             FieldName(name)
                         } else {
@@ -168,12 +168,12 @@ impl ItemConverter {
 
     fn convert_item_enum(self, item: &syn::ItemEnum) -> Result<Def> {
         let name = TypeName(item.ident.to_string().to_case(Case::Snake));
-        let container_attrs = attr_parser::Attrs::from_enum(item);
+        let container_attrs = attr_parser::Attrs::from_enum(item)?;
         let variants = item
             .variants
             .iter()
             .map(|variant| {
-                let variant_attrs = attr_parser::Attrs::from_variant(variant);
+                let variant_attrs = attr_parser::Attrs::from_variant(variant)?;
                 let name = if let Some(name) = variant_attrs.name {
                     VariantName(name)
                 } else {
@@ -217,7 +217,7 @@ impl ItemConverter {
                     syn::Fields::Named(fields) => Some(ir::VariantFields::Named(
                         (fields.named.iter())
                             .map(|field| {
-                                let field_attrs = attr_parser::Attrs::from_field(field);
+                                let field_attrs = attr_parser::Attrs::from_field(field)?;
                                 let name = if let Some(name) = field_attrs.name {
                                     FieldName(name)
                                 } else {

@@ -31,7 +31,7 @@ use syn::Result;
 use syn::Stmt;
 use syn::Token;
 use syn::parse::ParseStream;
-use syn::parse::Parser;
+use syn::parse::Parser as _;
 use syn::spanned::Spanned;
 
 /// This macro is used by the convert_opcode function to help it convert
@@ -100,8 +100,7 @@ fn parse_stmt(stmt: &mut Stmt, opcodes: &HashMap<String, &OpcodeData>) -> Result
             if has_bc_to_ir_attr(&mut local.attrs) {
                 local.attrs = Vec::new();
                 if let Some(init) = local.init.as_mut() {
-                    let expr = init.1.as_mut();
-                    match expr {
+                    match init.expr.as_mut() {
                         Expr::Match(m) => process_match(m, opcodes)?,
                         _ => {
                             panic!("Unable to use #[bc_to_ir] on non-match.");
@@ -112,7 +111,7 @@ fn parse_stmt(stmt: &mut Stmt, opcodes: &HashMap<String, &OpcodeData>) -> Result
                 }
             }
         }
-        Stmt::Item(..) | Stmt::Expr(..) | Stmt::Semi(..) => {}
+        Stmt::Item(..) | Stmt::Expr(..) | Stmt::Macro(..) => {}
     }
     Ok(())
 }
@@ -121,7 +120,7 @@ fn has_bc_to_ir_attr(attrs: &mut [Attribute]) -> bool {
     attrs
         .iter()
         .next()
-        .is_some_and(|attr| attr.path.is_ident("bc_to_ir"))
+        .is_some_and(|attr| attr.path().is_ident("bc_to_ir"))
 }
 
 fn expr_to_path(expr: Expr) -> Result<Path> {
@@ -393,7 +392,7 @@ fn build_match_pat(opcode: &Path, match_pats: Vec<TokenStream>) -> Result<Pat> {
     } else {
         quote!(#opcode ( #(#match_pats),* ))
     };
-    syn::parse2::<Pat>(toks)
+    Pat::parse_multi.parse2(toks)
 }
 
 fn split_path(path: &Path) -> Vec<String> {

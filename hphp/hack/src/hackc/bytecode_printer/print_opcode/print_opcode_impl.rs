@@ -12,16 +12,9 @@ use proc_macro2::TokenStream;
 use quote::ToTokens;
 use quote::quote;
 use syn::DeriveInput;
-use syn::Error;
-use syn::Lit;
 use syn::LitByteStr;
 use syn::LitStr;
-use syn::Meta;
-use syn::MetaList;
-use syn::MetaNameValue;
-use syn::NestedMeta;
 use syn::Result;
-use syn::spanned::Spanned;
 
 // ----------------------------------------------------------------------------
 
@@ -119,55 +112,6 @@ pub fn build_print_opcode(input: TokenStream, opcodes: &[OpcodeData]) -> Result<
     Ok(output)
 }
 
-trait MetaHelper {
-    fn expect_list(self) -> Result<MetaList>;
-    fn expect_name_value(self) -> Result<MetaNameValue>;
-}
-
-impl MetaHelper for Meta {
-    fn expect_list(self) -> Result<MetaList> {
-        match self {
-            Meta::Path(_) | Meta::NameValue(_) => Err(Error::new(self.span(), "Expected List")),
-            Meta::List(list) => Ok(list),
-        }
-    }
-
-    fn expect_name_value(self) -> Result<MetaNameValue> {
-        match self {
-            Meta::Path(_) | Meta::List(_) => {
-                Err(Error::new(self.span(), "Expected 'Name' = 'Value'"))
-            }
-            Meta::NameValue(nv) => Ok(nv),
-        }
-    }
-}
-
-trait NestedMetaHelper {
-    fn expect_meta(self) -> Result<Meta>;
-}
-
-impl NestedMetaHelper for NestedMeta {
-    fn expect_meta(self) -> Result<Meta> {
-        match self {
-            NestedMeta::Lit(lit) => Err(Error::new(lit.span(), "Unexpected literal")),
-            NestedMeta::Meta(meta) => Ok(meta),
-        }
-    }
-}
-
-trait LitHelper {
-    fn expect_str(self) -> Result<LitStr>;
-}
-
-impl LitHelper for Lit {
-    fn expect_str(self) -> Result<LitStr> {
-        match self {
-            Lit::Str(ls) => Ok(ls),
-            _ => Err(Error::new(self.span(), "Literal string expected")),
-        }
-    }
-}
-
 struct Attributes {
     overrides: HashSet<String>,
 }
@@ -179,22 +123,16 @@ impl Attributes {
         };
 
         for attr in &input.attrs {
-            if attr.path.is_ident("print_opcode") {
-                let args = attr.parse_meta()?.expect_list()?;
-
-                for nested in args.nested.into_iter() {
-                    let meta = nested.expect_meta()?;
-                    if meta.path().is_ident("override") {
-                        let nv = meta.expect_name_value()?;
-                        let ov = nv.lit.expect_str()?;
-                        result.overrides.insert(ov.value());
+            if attr.path().is_ident("print_opcode") {
+                attr.parse_nested_meta(|meta| {
+                    if meta.path.is_ident("override") {
+                        let lit: LitStr = meta.value()?.parse()?;
+                        result.overrides.insert(lit.value());
+                        Ok(())
                     } else {
-                        return Err(Error::new(
-                            meta.span(),
-                            format!("Unknown attribute '{:?}'", meta.path()),
-                        ));
+                        Err(meta.error("unknown attribute"))
                     }
-                }
+                })?;
             }
         }
 

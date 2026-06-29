@@ -115,7 +115,7 @@ pub fn assemble_imm_for_enum(tokens: proc_macro::TokenStream) -> proc_macro::Tok
             syn::bracketed!(variants_stream in input);
             input.parse::<syn::parse::Nothing>()?;
             let variants = variants_stream
-                .parse_terminated::<Path, Token![,]>(Path::parse)?
+                .parse_terminated(Path::parse, Token![,])?
                 .into_iter()
                 .collect_vec();
 

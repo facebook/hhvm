@@ -1,7 +1,5 @@
-#[rust_to_ocaml(name = "aa")] // ignored
 type A = X;
 
-#[rust_to_ocaml(name = "bb")] // ignored
 struct B {
     #[rust_to_ocaml(name = "bb_x")]
     foo: x,
@@ -9,7 +7,6 @@ struct B {
     bar: y,
 }
 
-#[rust_to_ocaml(name = "cc")] // ignored
 #[rust_to_ocaml(prefix = "C")]
 enum C {
     #[rust_to_ocaml(name = "C_foo")]

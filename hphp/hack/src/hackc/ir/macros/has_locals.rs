@@ -6,7 +6,6 @@
 use std::borrow::Cow;
 
 use proc_macro2::Ident;
-use proc_macro2::Span;
 use proc_macro2::TokenStream;
 use quote::quote;
 use syn::Attribute;
@@ -15,15 +14,19 @@ use syn::DataEnum;
 use syn::DataStruct;
 use syn::DeriveInput;
 use syn::Error;
-use syn::Lit;
-use syn::Meta;
-use syn::NestedMeta;
+use syn::LitInt;
+use syn::LitStr;
 use syn::Result;
 use syn::Variant;
+use syn::parse::ParseStream;
 use syn::spanned::Spanned;
 
 use crate::simple_type::SimpleType;
 use crate::util::InterestingFields;
+
+mod kw {
+    syn::custom_keyword!(none);
+}
 
 /// Builds a HasLocals impl.
 pub(crate) fn build_has_locals(input: TokenStream) -> Result<TokenStream> {
@@ -384,54 +387,42 @@ fn push_handler(
     variants.push(quote!(#enum_name::#variant_name #params => #reference));
 }
 
-#[allow(clippy::todo)]
 fn handle_has_locals_attr(attrs: &[Attribute]) -> Result<Option<Field<'_>>> {
-    for attr in attrs {
-        if attr.path.is_ident("has_locals") {
-            let meta = attr.parse_meta()?;
-            match meta {
-                Meta::Path(path) => {
-                    return Err(Error::new(path.span(), "Arguments expected"));
-                }
-                Meta::List(list) => {
-                    // locals(A, B, C)
-                    if list.nested.len() != 1 {
-                        return Err(Error::new(list.span(), "Only one argument expected"));
-                    }
+    let mut field = None;
 
-                    match &list.nested[0] {
-                        NestedMeta::Lit(Lit::Int(i)) => {
-                            return Ok(Some(Field {
-                                kind: FieldKind::Numbered(i.base10_parse()?),
-                                ty: SimpleType::Unknown,
-                            }));
-                        }
-                        NestedMeta::Lit(Lit::Str(n)) => {
-                            return Ok(Some(Field {
-                                kind: FieldKind::Named(Cow::Owned(Ident::new(
-                                    &n.value(),
-                                    Span::call_site(),
-                                ))),
-                                ty: SimpleType::Unknown,
-                            }));
-                        }
-                        NestedMeta::Meta(Meta::Path(meta)) if meta.is_ident("none") => {
-                            return Ok(Some(Field {
-                                kind: FieldKind::None,
-                                ty: SimpleType::Unknown,
-                            }));
-                        }
-                        i => {
-                            todo!("Unhandled: {:?}", i);
-                        }
-                    }
+    for attr in attrs {
+        if attr.path().is_ident("has_locals") {
+            let meta = attr.meta.require_list()?;
+            meta.parse_args_with(|input: ParseStream<'_>| {
+                let lookahead = input.lookahead1();
+                if lookahead.peek(LitInt) {
+                    let lit: LitInt = input.parse()?;
+                    let int_value = lit.base10_parse()?;
+                    field = Some(Field {
+                        kind: FieldKind::Numbered(int_value),
+                        ty: SimpleType::Unknown,
+                    });
+                    Ok(())
+                } else if lookahead.peek(LitStr) {
+                    let lit: LitStr = input.parse()?;
+                    field = Some(Field {
+                        kind: FieldKind::Named(Cow::Owned(Ident::new(&lit.value(), lit.span()))),
+                        ty: SimpleType::Unknown,
+                    });
+                    Ok(())
+                } else if lookahead.peek(kw::none) {
+                    input.parse::<kw::none>()?;
+                    field = Some(Field {
+                        kind: FieldKind::None,
+                        ty: SimpleType::Unknown,
+                    });
+                    Ok(())
+                } else {
+                    Err(lookahead.error())
                 }
-                Meta::NameValue(_) => {
-                    todo!();
-                }
-            }
+            })?;
         }
     }
 
-    Ok(None)
+    Ok(field)
 }

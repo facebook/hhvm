@@ -15,6 +15,7 @@
  */
 
 #include <string_view>
+#include <vector>
 
 #include <gtest/gtest.h>
 #include <thrift/compiler/diagnostic.h>
@@ -22,17 +23,32 @@
 
 using namespace apache::thrift::compiler;
 
+namespace {
+
+struct source_trivia {
+  trivia_kind kind;
+  source_range range;
+};
+
+} // namespace
+
 class LexerTest : public testing::Test {
  public:
   source_manager source_mgr;
   std::string_view doc_comment;
+  std::vector<source_trivia> trivia;
   diagnostics_engine diags;
 
-  lexer make_lexer(const std::string& source) {
-    return {
-        source_mgr.add_virtual_file("", source),
-        diags,
-        [this](std::string_view text, source_range) { doc_comment = text; }};
+  lexer make_lexer(const std::string& source, bool capture_trivia = false) {
+    auto on_doc_comment = [this](std::string_view text, source_range) {
+      doc_comment = text;
+    };
+    auto on_trivia = [this](trivia_kind kind, source_range range) {
+      trivia.push_back(source_trivia{kind, range});
+    };
+    auto src = source_mgr.add_virtual_file("", source);
+    return capture_trivia ? lexer(src, diags, on_doc_comment, on_trivia)
+                          : lexer(src, diags, on_doc_comment);
   }
 
   LexerTest() : diags(source_mgr, [](const diagnostic&) {}) {}
@@ -116,6 +132,60 @@ TEST_F(LexerTest, whitespace) {
   auto lexer = make_lexer("\t\r\n end");
   auto token = lexer.get_next_token();
   EXPECT_EQ(token.kind, tok::identifier);
+  EXPECT_TRUE(trivia.empty());
+}
+
+TEST_F(LexerTest, trivia) {
+  auto lexer = make_lexer(
+      R"(// leading
+struct /* mid */ S {
+  1: i32 field # trailing
+}
+)",
+      true);
+  while (lexer.get_next_token().kind != tok::eof) {
+  }
+
+  ASSERT_GE(trivia.size(), 5);
+  EXPECT_EQ(trivia[0].kind, trivia_kind::line_comment);
+  EXPECT_EQ(source_mgr.get_text_range(trivia[0].range), "// leading");
+  EXPECT_EQ(trivia[1].kind, trivia_kind::newline);
+  EXPECT_EQ(trivia[2].kind, trivia_kind::block_comment);
+  EXPECT_EQ(source_mgr.get_text_range(trivia[2].range), "/* mid */");
+  EXPECT_EQ(trivia[4].kind, trivia_kind::line_comment);
+  EXPECT_EQ(source_mgr.get_text_range(trivia[4].range), "# trailing");
+}
+
+TEST_F(LexerTest, line_doc_comment_trivia_excludes_trailing_whitespace) {
+  auto lexer = make_lexer(
+      R"(/// Multi-
+/// line
+
+struct S {}
+)",
+      true);
+  while (lexer.get_next_token().kind != tok::eof) {
+  }
+
+  ASSERT_GE(trivia.size(), 3);
+  EXPECT_EQ(trivia[0].kind, trivia_kind::doc_comment);
+  EXPECT_EQ(source_mgr.get_text_range(trivia[0].range), "/// Multi-\n/// line");
+  EXPECT_EQ(trivia[1].kind, trivia_kind::newline);
+  EXPECT_EQ(source_mgr.get_text_range(trivia[1].range), "\n");
+  EXPECT_EQ(trivia[2].kind, trivia_kind::newline);
+  EXPECT_EQ(source_mgr.get_text_range(trivia[2].range), "\n");
+  EXPECT_EQ(doc_comment, "/// Multi-\n/// line");
+}
+
+TEST_F(LexerTest, all_star_block_comment_trivia_is_not_doc_comment) {
+  auto lexer = make_lexer("/***/\n42", true);
+  auto token = lexer.get_next_token();
+  EXPECT_EQ(token.kind, tok::int_literal);
+
+  ASSERT_FALSE(trivia.empty());
+  EXPECT_EQ(trivia[0].kind, trivia_kind::block_comment);
+  EXPECT_EQ(source_mgr.get_text_range(trivia[0].range), "/***/");
+  EXPECT_TRUE(doc_comment.empty());
 }
 
 TEST_F(LexerTest, block_comment) {

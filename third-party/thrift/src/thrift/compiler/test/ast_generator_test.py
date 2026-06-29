@@ -262,8 +262,8 @@ class AstGeneratorTest(unittest.TestCase):
         self.assertEqual(docs.sourceRange.programId, 1)
         self.assertEqual(docs.sourceRange.beginLine, 6)
         self.assertEqual(docs.sourceRange.beginColumn, 18)
-        self.assertEqual(docs.sourceRange.endLine, 7)
-        self.assertEqual(docs.sourceRange.endColumn, 1)
+        self.assertEqual(docs.sourceRange.endLine, 6)
+        self.assertEqual(docs.sourceRange.endColumn, 59)
 
     def test_program(self):
         write_file(

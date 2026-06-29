@@ -28,7 +28,15 @@ namespace apache::thrift::compiler {
 
 class diagnostics_engine;
 
+enum class trivia_kind {
+  line_comment,
+  block_comment,
+  doc_comment,
+  newline,
+};
+
 using doc_comment_handler = std::function<void(std::string_view, source_range)>;
+using trivia_handler = std::function<void(trivia_kind, source_range)>;
 
 // A Thrift lexer.
 class lexer {
@@ -39,6 +47,7 @@ class lexer {
   const char* token_start_;
   diagnostics_engine* diags_;
   doc_comment_handler on_doc_comment_;
+  trivia_handler on_trivia_;
 
   const char* end() const { return source_.data() + source_.size() - 1; }
 
@@ -49,6 +58,10 @@ class lexer {
 
   source_range token_source_range() const {
     return {location(token_start_), location(ptr_)};
+  }
+
+  source_range source_range_from(const char* begin, const char* end) const {
+    return {location(begin), location(end)};
   }
 
   // Returns the string representation of the last token reported via
@@ -68,6 +81,7 @@ class lexer {
   template <typename... T>
   token report_error(fmt::format_string<T...> msg, T&&... args);
   token unexpected_token();
+  void emit_trivia(trivia_kind kind, source_range range) const;
 
   enum class comment_lex_result { skipped, doc_comment, unterminated };
 
@@ -80,14 +94,19 @@ class lexer {
   void check_utf8_literal(const char* begin, const char* end);
 
   static void ignore_comments(std::string_view, source_range) {}
+  static void ignore_trivia(trivia_kind, source_range) {}
 
  public:
   // on_doc_comment is invoked on a documentation comment such as
   // `/** ... */` or `/// ...`.
+  //
+  // on_trivia is invoked for skipped comments and newlines when callers opt in
+  // to trivia capture.
   lexer(
       source_view src,
       diagnostics_engine& diags,
-      doc_comment_handler on_doc_comment = ignore_comments);
+      doc_comment_handler on_doc_comment = ignore_comments,
+      trivia_handler on_trivia = ignore_trivia);
 
   // Lexes the content of a string literal and returns its value with escape
   // sequences translated or an empty optional on error.

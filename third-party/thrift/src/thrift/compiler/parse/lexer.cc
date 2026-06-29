@@ -177,11 +177,13 @@ const std::unordered_map<std::string_view, tok> keywords = {
 lexer::lexer(
     source_view src,
     diagnostics_engine& diags,
-    doc_comment_handler on_doc_comment)
+    doc_comment_handler on_doc_comment,
+    trivia_handler on_trivia)
     : source_(src.text),
       start_(src.start),
       diags_(&diags),
-      on_doc_comment_(std::move(on_doc_comment)) {
+      on_doc_comment_(std::move(on_doc_comment)),
+      on_trivia_(std::move(on_trivia)) {
   ptr_ = source_.data();
   token_start_ = ptr_;
 }
@@ -233,6 +235,10 @@ token lexer::unexpected_token() {
   return report_error("unexpected token in input: {}", token_text());
 }
 
+void lexer::emit_trivia(trivia_kind kind, source_range range) const {
+  on_trivia_(kind, range);
+}
+
 void lexer::skip_line_comment() {
   ptr_ = std::find(ptr_, end(), '\n');
 }
@@ -243,18 +249,31 @@ bool lexer::lex_doc_comment() {
   bool is_inline = ptr_[3] == '<';
   const char* prefix = ptr_;
   size_t prefix_size = is_inline ? 4 : 3;
+  const char* comment_end = ptr_;
   do {
     if (!is_inline && ptr_[3] == '/') {
       break;
     }
     ptr_ += prefix_size; // Skip "///" or "///<".
     skip_line_comment();
-    while (is_whitespace(*ptr_)) {
-      ++ptr_;
+    comment_end = ptr_;
+    const char* next = ptr_;
+    while (is_whitespace(*next)) {
+      ++next;
     }
-  } while (strncmp(ptr_, prefix, prefix_size) == 0);
+    if (strncmp(next, prefix, prefix_size) != 0) {
+      break;
+    }
+    ptr_ = next;
+  } while (true);
+  const source_range comment_range =
+      source_range_from(token_start_, comment_end);
+  emit_trivia(trivia_kind::doc_comment, comment_range);
   if (!is_inline) {
-    on_doc_comment_(token_text(), token_source_range());
+    on_doc_comment_(
+        std::string_view(
+            token_start_, static_cast<size_t>(comment_end - token_start_)),
+        comment_range);
   }
   return is_inline;
 }
@@ -273,14 +292,20 @@ lexer::comment_lex_result lexer::lex_block_comment() {
   ptr_ = p + 1; // Skip '/'.
   if (token_start_[2] == '*') {
     if (token_start_[3] == '<') {
+      emit_trivia(trivia_kind::doc_comment, token_source_range());
       return comment_lex_result::doc_comment;
     }
     // Ignore comments containing only '*'s.
     auto non_star = std::find_if(
         token_start_ + 2, ptr_ - 1, [](char c) { return c != '*'; });
     if (non_star != ptr_ - 1) {
+      emit_trivia(trivia_kind::doc_comment, token_source_range());
       on_doc_comment_(token_text(), token_source_range());
+    } else {
+      emit_trivia(trivia_kind::block_comment, token_source_range());
     }
+  } else {
+    emit_trivia(trivia_kind::block_comment, token_source_range());
   }
   return comment_lex_result::skipped;
 }
@@ -289,6 +314,9 @@ lexer::comment_lex_result lexer::lex_whitespace_or_comment() {
   for (;;) {
     switch (*ptr_) {
       case '\n':
+        emit_trivia(trivia_kind::newline, source_range_from(ptr_, ptr_ + 1));
+        ++ptr_;
+        break;
       case ' ':
       case '\t':
       case '\r':
@@ -302,8 +330,12 @@ lexer::comment_lex_result lexer::lex_whitespace_or_comment() {
             }
             continue;
           }
+          const char* comment_start = ptr_;
           ptr_ += 2; // Skip "//".
           skip_line_comment();
+          emit_trivia(
+              trivia_kind::line_comment,
+              source_range_from(comment_start, ptr_));
           break;
         }
         if (ptr_[1] == '*') {
@@ -314,10 +346,13 @@ lexer::comment_lex_result lexer::lex_whitespace_or_comment() {
           continue;
         }
         return comment_lex_result::skipped;
-      case '#':
+      case '#': {
+        const char* comment_start = ptr_;
         ++ptr_;
         skip_line_comment();
-        break;
+        emit_trivia(
+            trivia_kind::line_comment, source_range_from(comment_start, ptr_));
+      } break;
       default:
         return comment_lex_result::skipped;
     }

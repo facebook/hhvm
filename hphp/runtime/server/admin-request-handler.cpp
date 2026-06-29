@@ -1097,7 +1097,6 @@ bool AdminRequestHandler::handleCheckRequest(const std::string &cmd,
     appendStat("catch-traces", jit::numCatchTraces());
     appendStat("fixups", jit::FixupMap::size());
     appendStat("units", numLoadedUnits());
-    appendStat("funcs", Func::maxFuncIdNum());
     appendStat("named-entities", namedEntityTableSize());
     for (auto& pair : namedEntityStats()) {
       appendStat(folly::sformat("named-entities-{}", pair.first), pair.second);

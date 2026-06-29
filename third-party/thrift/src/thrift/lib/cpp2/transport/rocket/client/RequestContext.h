@@ -55,7 +55,7 @@ class RequestContext {
   };
 
   enum class State : uint8_t {
-    DEFERRED_INIT, /* still needs to be intialized with server version */
+    DEFERRED_INIT, /* still needs to be initialized with server version */
     WRITE_NOT_SCHEDULED,
     WRITE_SCHEDULED,
     WRITE_SENDING, /* AsyncSocket::writeChain() called, but WriteCallback has

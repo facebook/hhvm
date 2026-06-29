@@ -118,7 +118,7 @@ module Hhconfig : sig
 
   val disallow_discarded_nullable_awaitables : string
 
-  val disallow_duplicate_enum_values : string
+  val check_duplicate_enum_values : string
 
   val include_enum_member_values : string
 

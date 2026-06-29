@@ -111,8 +111,8 @@ let const_attribute t = t.GlobalOptions.tco_const_attribute
 let disallow_discarded_nullable_awaitables t =
   t.GlobalOptions.tco_disallow_discarded_nullable_awaitables
 
-let disallow_duplicate_enum_values t =
-  t.GlobalOptions.tco_disallow_duplicate_enum_values
+let check_duplicate_enum_values t =
+  t.GlobalOptions.tco_check_duplicate_enum_values
 
 let is_systemlib t = t.GlobalOptions.po.ParserOptions.is_systemlib
 

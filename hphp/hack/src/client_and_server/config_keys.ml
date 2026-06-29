@@ -128,7 +128,7 @@ module Hhconfig = struct
   let disallow_discarded_nullable_awaitables =
     key "disallow_discarded_nullable_awaitables"
 
-  let disallow_duplicate_enum_values = key "disallow_duplicate_enum_values"
+  let check_duplicate_enum_values = key "check_duplicate_enum_values"
 
   let include_enum_member_values = key "include_enum_member_values"
 

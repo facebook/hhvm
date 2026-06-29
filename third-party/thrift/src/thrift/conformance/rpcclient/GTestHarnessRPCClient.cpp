@@ -26,7 +26,7 @@
     __has_feature(thread_sanitizer) || defined(__SANITIZE_THREAD__)
 constexpr auto kClientTimeout = std::chrono::seconds(60);
 #else
-constexpr auto kClientTimeout = std::chrono::seconds(10);
+constexpr auto kClientTimeout = std::chrono::seconds(30);
 #endif
 
 #include <fmt/core.h>
@@ -588,6 +588,10 @@ class RPCClientConformanceTest : public testing::Test {
                   if (connectViaServer) {
                     std::ignore = update_server_props_(server);
                   }
+                  // Disable queue timeout for conformance tests. Test clients
+                  // (especially Erlang/BEAM VM) may be slow to start and should
+                  // never be rejected by load shedding in a test environment.
+                  server.setQueueTimeout(std::chrono::milliseconds(0));
                 })),
         connectViaServer_(connectViaServer) {
     try {

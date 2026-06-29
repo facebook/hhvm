@@ -25,6 +25,7 @@
 #include <optional>
 #include <string>
 #include <string_view>
+#include <system_error>
 #include <vector>
 
 namespace {
@@ -44,6 +45,40 @@ struct diagnostic {
   std::optional<int> character;
   std::string description;
 };
+
+bool add_filename_arg(
+    options& opts,
+    std::string_view arg,
+    std::string_view program,
+    int& exit_code) {
+  if (arg.rfind("@", 0) != 0) {
+    opts.paths.emplace_back(arg);
+    return true;
+  }
+
+  const std::filesystem::path paths_file(std::string(arg.substr(1)));
+  std::ifstream input(paths_file);
+  if (!input) {
+    fmt::print(
+        stderr,
+        "{}: error: failed to open paths file: {}\n",
+        program,
+        paths_file.string());
+    exit_code = 2;
+    return false;
+  }
+
+  std::string line;
+  while (std::getline(input, line)) {
+    if (!line.empty() && line.back() == '\r') {
+      line.pop_back();
+    }
+    if (!line.empty()) {
+      opts.paths.emplace_back(line);
+    }
+  }
+  return true;
+}
 
 void print_usage(FILE* stream, std::string_view program) {
   fmt::print(
@@ -93,7 +128,9 @@ std::optional<options> parse_args(
           exit_code = 2;
           return std::nullopt;
         }
-        opts.paths.emplace_back(argv[i]);
+        if (!add_filename_arg(opts, argv[i], program, exit_code)) {
+          return std::nullopt;
+        }
       }
       break;
     }
@@ -142,7 +179,9 @@ std::optional<options> parse_args(
       exit_code = 2;
       return std::nullopt;
     }
-    opts.paths.emplace_back(arg);
+    if (!add_filename_arg(opts, arg, program, exit_code)) {
+      return std::nullopt;
+    }
   }
   if (opts.paths.empty()) {
     fmt::print(
@@ -157,6 +196,16 @@ std::optional<options> parse_args(
 
 std::optional<std::string> read_file(
     const std::filesystem::path& path, std::string& error) {
+  std::error_code ec;
+  if (!std::filesystem::exists(path, ec)) {
+    error = "File does not exist";
+    return std::nullopt;
+  }
+  if (!std::filesystem::is_regular_file(path, ec)) {
+    error = "Not a file";
+    return std::nullopt;
+  }
+
   std::ifstream input(path, std::ios::binary);
   if (!input) {
     error = fmt::format("failed to open `{}` for reading", path.string());

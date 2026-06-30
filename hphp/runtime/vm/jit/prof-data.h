@@ -327,9 +327,9 @@ struct ProfData {
     }
   }
 
-  TransIDVec funcProfTransIDs(const Func* func) const {
+  TransIDVec funcProfTransIDs(FuncId funcId) const {
     std::shared_lock lock{m_funcProfTransLock};
-    auto it = m_funcProfTrans.find(func);
+    auto it = m_funcProfTrans.find(funcId);
     if (it == m_funcProfTrans.end()) return TransIDVec{};
 
     return it->second;
@@ -416,7 +416,6 @@ struct ProfData {
   bool optimized(const Func* func) const {
     return func->atomicFlags().check(Func::Flags::Optimized);
   }
-
   bool optimized(FuncId funcId) const {
     auto func = Func::fromFuncId(funcId);
     return optimized(func);
@@ -669,7 +668,7 @@ private:
    * Lists of profiling translations for each Func, and a lock to protect it.
    */
   mutable folly::SharedMutex m_funcProfTransLock;
-  jit::fast_map<const Func*, TransIDVec, pointer_hash<Func>> m_funcProfTrans;
+  jit::fast_map<FuncId, TransIDVec> m_funcProfTrans;
 
   /*
    * Map from jump addresses to the ID of the translation containing them.

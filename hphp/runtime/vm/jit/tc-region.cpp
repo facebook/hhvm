@@ -107,7 +107,8 @@ void invalidateSrcKey(SrcKey sk, SBInvOffset spOff) {
 
 void invalidateFuncProfSrcKeys(const Func* func) {
   assertx(profData());
-  for (auto tid : profData()->funcProfTransIDs(func)) {
+  auto const funcId = func->getFuncId();
+  for (auto tid : profData()->funcProfTransIDs(funcId)) {
     auto const transRec = profData()->transRec(tid);
     invalidateSrcKey(transRec->srcKey(), transRec->startSpOff());
   }

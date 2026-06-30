@@ -662,7 +662,7 @@ RegionDescPtr selectCalleeTracelet(SrcKey entry,
 TransIDSet findTransIDsForCallee(const ProfData* profData, SrcKey entry,
                                  Type ctxType, std::vector<Type>& inputTypes) {
   assertx(entry.nonTrivialFuncEntry());
-  auto const idvec = profData->funcProfTransIDs(entry.func());
+  auto const idvec = profData->funcProfTransIDs(entry.funcID());
 
   TransIDSet ret;
   FTRACE(2, "findTransIDForCallee: entry={}\n", showShort(entry));
@@ -722,7 +722,7 @@ RegionDescPtr selectCalleeCFG(SrcKey callerSk, SrcKey entry,
     return nullptr;
   }
 
-  TransCFG cfg(callee, profData, true /* inlining */);
+  TransCFG cfg(callee->getFuncId(), profData, true /* inlining */);
 
   HotTransContext ctx;
   ctx.entries = dvIDs;

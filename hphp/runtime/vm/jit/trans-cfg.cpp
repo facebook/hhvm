@@ -102,13 +102,13 @@ static bool inferredArcWeight(const TransCFG::ArcPtrVec& arcVec,
   return true;
 }
 
-TransCFG::TransCFG(const Func* func,
+TransCFG::TransCFG(FuncId funcId,
                    const ProfData* profData,
                    bool inlining /* = false */) {
   assertx(profData);
 
   // add nodes
-  for (auto const tid : profData->funcProfTransIDs(func)) {
+  for (auto const tid : profData->funcProfTransIDs(funcId)) {
     auto const rec = profData->transRec(tid);
     assertx(rec->region() != nullptr);
     // This will skip DV Funclets if they were already

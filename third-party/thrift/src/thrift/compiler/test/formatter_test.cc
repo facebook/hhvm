@@ -18,6 +18,7 @@
 #include <cstdlib>
 #include <filesystem>
 #include <fstream>
+#include <initializer_list>
 #include <iterator>
 #include <optional>
 #include <stdexcept>
@@ -134,7 +135,20 @@ void expect_format(std::string_view input, std::string_view expected) {
   EXPECT_EQ(format_thrift_source(input), expected);
 }
 
-TEST(FormatterTest, formats_basic_headers_and_definitions) {
+struct formatter_case {
+  std::string_view name;
+  std::string_view input;
+  std::string_view expected;
+};
+
+void expect_format_cases(std::initializer_list<formatter_case> cases) {
+  for (const auto& test_case : cases) {
+    SCOPED_TRACE(test_case.name);
+    expect_format(test_case.input, test_case.expected);
+  }
+}
+
+TEST(FormatterTest, formatsBasicHeadersAndDefinitions) {
   expect_format(
       R"(include    'foo'
   namespace    safe   bar
@@ -175,7 +189,7 @@ typedef list<i64> Ids
 )");
 }
 
-TEST(FormatterTest, formats_basic_types_and_services) {
+TEST(FormatterTest, formatsBasicTypesAndServices) {
   expect_format(
       R"(enum
   Color { RED,
@@ -220,7 +234,1034 @@ service Empty extends Base {
 )");
 }
 
-TEST(FormatterTest, preserves_comments_and_round_trips) {
+TEST(FormatterTest, formatsFunctionQualifiersAndContextualKeywords) {
+  expect_format_cases({
+      {
+          "can format function options",
+          R"THRIFT(
+      service Foo {
+        void  Fn1();
+        oneway void  Fn2();
+        readonly  void Fn3();
+        idempotent void Fn4 ();
+      }
+    )THRIFT",
+          R"THRIFT(service Foo {
+  void Fn1();
+  oneway void Fn2();
+  readonly void Fn3();
+  idempotent void Fn4();
+}
+)THRIFT",
+      },
+      {
+          "can format all function kinds",
+          R"THRIFT(
+      service Foo {
+        T  Fn1();
+        oneway void  Fn2();
+        stream<i32>  Fn3();
+        Foo, sink<Bar, Baz>  Fn4();
+        Interaction,  Struct  Fn5();
+        Interaction, Struct , stream<i32 >  Fn6();
+      }
+    )THRIFT",
+          R"THRIFT(service Foo {
+  T Fn1();
+  oneway void Fn2();
+  stream<i32> Fn3();
+  Foo, sink<Bar, Baz> Fn4();
+  Interaction, Struct Fn5();
+  Interaction, Struct, stream<i32> Fn6();
+}
+)THRIFT",
+      },
+      {
+          "can format contextual keywords as idents",
+          R"THRIFT(
+      namespace safe transient
+      struct permanent {
+        1: i32 stateful;
+      }
+      exception server {}
+      union client {}
+      service oneway {}
+    )THRIFT",
+          R"THRIFT(namespace safe transient
+struct permanent {
+  1: i32 stateful;
+}
+exception server {}
+union client {}
+service oneway {
+}
+)THRIFT",
+      },
+      {
+          "can format exception modifiers",
+          R"THRIFT(
+      safe
+      transient
+      server
+      exception Foo {}
+
+      permanent
+      client
+      exception Bar {}
+
+      stateful
+      exception Baz {}
+    )THRIFT",
+          R"THRIFT(safe transient server exception Foo {}
+
+permanent client exception Bar {}
+
+stateful exception Baz {}
+)THRIFT",
+      },
+  });
+}
+
+TEST(FormatterTest, formatsEmptyDocuments) {
+  expect_format("", "");
+}
+
+TEST(FormatterTest, formatsAnnotatedDefinitions) {
+  expect_format_cases({
+      {
+          "can format enum definitions",
+          R"THRIFT(
+      enum
+          foo {  NO_VALUE,
+                 WITH_VALUE =    2,
+          WITH_ANNOTATIONS (hs.a1 = 1)
+                     }
+                (hs.a2 = 2)
+    )THRIFT",
+          R"THRIFT(enum foo {
+  NO_VALUE,
+  WITH_VALUE = 2,
+  WITH_ANNOTATIONS (hs.a1 = 1),
+} (hs.a2 = 2)
+)THRIFT",
+      },
+      {
+          "can format struct definitions",
+          R"THRIFT(
+      struct foo {
+1: optional string (hs.a1 = 1) bar1
+2: required string (hs.a2 = 2) bar2;
+3: string (hs.a3 = 3) bar1
+            } (
+              hs.a4 =4)
+    )THRIFT",
+          R"THRIFT(struct foo {
+  1: optional string (hs.a1 = 1) bar1;
+  2: required string (hs.a2 = 2) bar2;
+  3: string (hs.a3 = 3) bar1;
+} (hs.a4 = 4)
+)THRIFT",
+      },
+      {
+          "can format union definitions",
+          R"THRIFT(
+      union foo {
+string bar;
+            }
+             ( hs.a1 =1)
+    )THRIFT",
+          R"THRIFT(union foo {
+  string bar;
+} (hs.a1 = 1)
+)THRIFT",
+      },
+      {
+          "can format interaction definitions",
+          R"THRIFT(
+      interaction X {
+        string Y();
+        string Z(
+              1: int arg1,
+              2: int arg2)
+      }
+    )THRIFT",
+          R"THRIFT(interaction X {
+  string Y();
+  string Z(1: int arg1, 2: int arg2);
+}
+)THRIFT",
+      },
+      {
+          "formats performs declarations inside services",
+          R"THRIFT(
+      service X {
+          performs Y;
+            // separator
+        performs      Z;
+      }
+    )THRIFT",
+          R"THRIFT(service X {
+  performs Y;
+  // separator
+  performs Z;
+}
+)THRIFT",
+      },
+      {
+          "can format exception definitions",
+          R"THRIFT(
+      exception foo {
+        string bar;
+            }
+             ( hs.a1 =1)
+    )THRIFT",
+          R"THRIFT(exception foo {
+  string bar;
+} (hs.a1 = 1)
+)THRIFT",
+      },
+  });
+}
+
+TEST(FormatterTest, formatsConstValuesAndLineBreaking) {
+  expect_format_cases({
+      {
+          "can format constant values",
+          R"THRIFT(
+      const int _integer = 1;
+        const hex  _hex = 0x51
+            const double _double = 1.5
+              const string _singleQuotedString = 'foo'
+    const string _doubleQuotedString = "foo";
+        const id _identifier = foo
+        const list<int> _list = [
+          1 ,2,
+              3
+        ]
+    const map<string, int
+              >     _map = { key1 : 1 , key2 :        2}
+    )THRIFT",
+          R"THRIFT(const int _integer = 1;
+const hex _hex = 0x51;
+const double _double = 1.5;
+const string _singleQuotedString = 'foo';
+const string _doubleQuotedString = "foo";
+const id _identifier = foo;
+const list<int> _list = [1, 2, 3];
+const map<string, int> _map = {key1: 1, key2: 2};
+)THRIFT",
+      },
+      {
+          "can collapse groups correctly",
+          R"THRIFT(
+    service s {
+      void short () throws ();
+      void very_looooooooooonng_method_name (type very_loooooooooonong_parameter) throws (1: yet_extremely_loooooooooonong_type_name e);
+    })THRIFT",
+          R"THRIFT(service s {
+  void short() throws ();
+  void very_looooooooooonng_method_name(
+    type very_loooooooooonong_parameter,
+  ) throws (1: yet_extremely_loooooooooonong_type_name e);
+}
+)THRIFT",
+      },
+  });
+}
+
+TEST(FormatterTest, formatsCommentsAndSeparators) {
+  expect_format_cases({
+      {
+          "can format comments",
+          R"THRIFT(
+// first line
+/*
+ * header
+ */
+
+
+
+
+
+// before
+service x {
+          // single line
+  void foo();
+}     // after block, single-line
+service y {
+  /*
+   * multiple lines
+   */
+  void foo();
+}       /* after block, multi-line
+ */
+
+
+
+
+/* at the end */     // after comment
+)THRIFT",
+          R"THRIFT(// first line
+/*
+ * header
+ */
+
+// before
+service x {
+  // single line
+  void foo();
+} // after block, single-line
+service y {
+  /*
+   * multiple lines
+   */
+  void foo();
+}
+/* after block, multi-line
+ */
+
+/* at the end */ // after comment
+)THRIFT",
+      },
+      {
+          "can correct invalid separators",
+          R"THRIFT(
+      // should be converted to a semicolon:
+      const string x = "value"
+      service z {
+      }       // should not add a separator
+      // inner fields should have commas
+      service a {
+        void func1(1: string arg1 ; 2: string arg2);
+      }
+      // outer fields should have semicolons
+      struct b {
+        string field1,
+      }
+
+    )THRIFT",
+          R"THRIFT(// should be converted to a semicolon:
+const string x = "value";
+service z {
+} // should not add a separator
+// inner fields should have commas
+service a {
+  void func1(1: string arg1, 2: string arg2);
+}
+// outer fields should have semicolons
+struct b {
+  string field1;
+}
+)THRIFT",
+      },
+      {
+          "preserves end of line comments, even if separator is updated",
+          R"THRIFT(
+enum SourceEnumType {
+  ONE = 1; // Generated and maintained by source one.
+  TWO = 2; // Generated and maintained by source two.
+  THREE = 3; // Generated and maintained by source three.
+}
+)THRIFT",
+          R"THRIFT(enum SourceEnumType {
+  ONE = 1, // Generated and maintained by source one.
+  TWO = 2, // Generated and maintained by source two.
+  THREE = 3, // Generated and maintained by source three.
+}
+)THRIFT",
+      },
+      {
+          "should append last separator only if it was going to break",
+          R"THRIFT(
+        service MyService {
+          void long (string long_paramter_1, string long_paramter_2,string long_paramter_3)
+          void short (
+            string s,
+          )
+        }
+)THRIFT",
+          R"THRIFT(service MyService {
+  void long(
+    string long_paramter_1,
+    string long_paramter_2,
+    string long_paramter_3,
+  );
+  void short(string s);
+}
+)THRIFT",
+      },
+      {
+          "should preserve blank lines between members",
+          R"THRIFT(
+        package 'hi'
+
+        include 'foo'
+
+        include 'preserve/line/before/this'
+
+        enum SourceEnumType {
+
+          ONE = 1, // Remove line before
+
+          TWO = 2, // Keep lines around
+
+          THREE = 3, // Remove line after
+
+      }
+    )THRIFT",
+          R"THRIFT(package 'hi'
+
+include 'foo'
+
+include 'preserve/line/before/this'
+
+enum SourceEnumType {
+  ONE = 1, // Remove line before
+
+  TWO = 2, // Keep lines around
+
+  THREE = 3, // Remove line after
+}
+)THRIFT",
+      },
+  });
+}
+
+TEST(FormatterTest, formatsContainerValues) {
+  expect_format_cases({
+      {
+          "should break lines between map entries correctly",
+          R"THRIFT(
+        const short short_map = { x: 1, y:   2,}
+
+        const map<StringType,i64>   REALLY_LONG_MAP = {
+          Record_Number_1 : 167367433327742,
+          Record_Number_2 : 60155386506,
+          Record_Number_3 : 157260040977786,      Record_Number_4 : 102559116480387,
+          Record_Number_5 : 394393211010,             Record_Number_6 : 147693381934060,
+          Record_Number_7 : 24065685075,
+
+
+          Record_Number_8 : 2374053504,
+        }
+    )THRIFT",
+          R"THRIFT(const short short_map = {x: 1, y: 2};
+
+const map<StringType, i64> REALLY_LONG_MAP = {
+  Record_Number_1: 167367433327742,
+  Record_Number_2: 60155386506,
+  Record_Number_3: 157260040977786,
+  Record_Number_4: 102559116480387,
+  Record_Number_5: 394393211010,
+  Record_Number_6: 147693381934060,
+  Record_Number_7: 24065685075,
+  Record_Number_8: 2374053504,
+};
+)THRIFT",
+      },
+      {
+          "should break lines between list values correctly",
+          R"THRIFT(
+        const short short_list = [1,2,   3,]
+
+        const list<StringType>   REALLY_LONG_LIST = [
+          RECORD_NUMBER_1,    RECORD_NUMBER_2,
+          RECORD_NUMBER_3,
+          RECORD_NUMBER_4,
+          RECORD_NUMBER_5,
+          RECORD_NUMBER_6,  RECORD_NUMBER_7,RECORD_NUMBER_8
+        ]
+    )THRIFT",
+          R"THRIFT(const short short_list = [1, 2, 3];
+
+const list<StringType> REALLY_LONG_LIST = [
+  RECORD_NUMBER_1,
+  RECORD_NUMBER_2,
+  RECORD_NUMBER_3,
+  RECORD_NUMBER_4,
+  RECORD_NUMBER_5,
+  RECORD_NUMBER_6,
+  RECORD_NUMBER_7,
+  RECORD_NUMBER_8,
+];
+)THRIFT",
+      },
+  });
+}
+
+TEST(FormatterTest, formatsAnnotations) {
+  expect_format_cases({
+      {
+          "can format annotations after enum declarations - multiple short ones",
+          R"THRIFT(
+    enum MyEnum {
+      } (hs.a1 = 1,    hs.a2=2,    hs.a3    =    3)
+    )THRIFT",
+          R"THRIFT(enum MyEnum {
+} (hs.a1 = 1, hs.a2 = 2, hs.a3 = 3)
+)THRIFT",
+      },
+      {
+          "can format annotations after enum declarations - one long attribute",
+          R"THRIFT(
+    enum MyEnum {
+      } (hs.attribute1 = "really looooooooooooooooooooooooooooooooooooooooooooooooong value")
+    )THRIFT",
+          R"THRIFT(enum MyEnum {
+} (
+  hs.attribute1 = "really looooooooooooooooooooooooooooooooooooooooooooooooong value",
+)
+)THRIFT",
+      },
+      {
+          "can format annotations after enum declarations - two long attributes",
+          R"THRIFT(
+      enum MyEnum {
+        } (hs.attribute1 = "really looooooooooooooooooooooooooooooooooooooooooooooooong value",    hs.attribute2 = "really looooooooooooooooooooooooooooooooooooooooooooooooong value")
+    )THRIFT",
+          R"THRIFT(enum MyEnum {
+} (
+  hs.attribute1 = "really looooooooooooooooooooooooooooooooooooooooooooooooong value",
+  hs.attribute2 = "really looooooooooooooooooooooooooooooooooooooooooooooooong value",
+)
+)THRIFT",
+      },
+  });
+}
+
+TEST(FormatterTest, formatsTypeReferencesAndInlineComments) {
+  expect_format_cases({
+      {
+          "can parse generic types - single",
+          R"THRIFT(
+service TService {
+    list<i32
+    > getList(
+    )
+}
+)THRIFT",
+          R"THRIFT(service TService {
+  list<i32> getList();
+}
+)THRIFT",
+      },
+      {
+          "can parse generic types - multiple",
+          R"THRIFT(
+service TService {
+    map<i32
+    , i64> getMap(
+    )
+}
+)THRIFT",
+          R"THRIFT(service TService {
+  map<i32, i64> getMap();
+}
+)THRIFT",
+      },
+      {
+          "can handle multiline comments inline with code",
+          R"THRIFT(
+typedef i64 /* (cpp.type = "std::uint64_t") */ unsigned64
+)THRIFT",
+          R"THRIFT(typedef i64 /* (cpp.type = "std::uint64_t") */ unsigned64
+)THRIFT",
+      },
+  });
+}
+
+TEST(FormatterTest, formatsAnnotationObjects) {
+  expect_format_cases({
+      {
+          "can handle annotation objects - no body",
+          R"THRIFT(
+  service TService {
+    @annotation
+    string getList()
+})THRIFT",
+          R"THRIFT(service TService {
+  @annotation
+  string getList();
+}
+)THRIFT",
+      },
+      {
+          "can handle annotation objects - empty body",
+          R"THRIFT(
+  service TService {
+    @annotation {    }
+    string getList()
+})THRIFT",
+          R"THRIFT(service TService {
+  @annotation{}
+  string getList();
+}
+)THRIFT",
+      },
+      {
+          "can handle annotation objects - full body",
+          R"THRIFT(
+  service TService {
+    @annotation{
+      a =1, b = 2,
+      }
+    string getList()
+})THRIFT",
+          R"THRIFT(service TService {
+  @annotation{a = 1, b = 2}
+  string getList();
+}
+)THRIFT",
+      },
+      {
+          "can handle annotation objects - break body",
+          R"THRIFT(
+  service TService {
+    @annotation{
+      reeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeally_long_a =1, reeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeally_long_b = 2,
+      }
+    string getList()
+})THRIFT",
+          R"THRIFT(service TService {
+  @annotation{
+    reeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeally_long_a = 1,
+    reeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeally_long_b = 2,
+  }
+  string getList();
+}
+)THRIFT",
+      },
+      {
+          "can handle annotation objects on headers",
+          R"THRIFT(
+      @annotation{
+        a =1, b = 2,
+        }
+    package 'foo'
+
+      @annotation{
+        a =1, b = 2,
+        }
+    package;
+)THRIFT",
+          R"THRIFT(@annotation{a = 1, b = 2}
+package 'foo'
+
+@annotation{a = 1, b = 2}
+package;
+)THRIFT",
+      },
+  });
+}
+
+TEST(FormatterTest, formatsObjectValuesAndGenericConstValues) {
+  expect_format_cases({
+      {
+          "can handle object values - no body",
+          R"THRIFT(
+    struct    Struct1
+    {
+      1: string id =    Struct2
+    })THRIFT",
+          R"THRIFT(struct Struct1 {
+  1: string id = Struct2;
+}
+)THRIFT",
+      },
+      {
+          "can handle object values - empty body",
+          R"THRIFT(
+    struct    Struct1
+    {
+      1: string id =    Struct2  {   }
+    })THRIFT",
+          R"THRIFT(struct Struct1 {
+  1: string id = Struct2{};
+}
+)THRIFT",
+      },
+      {
+          "can handle object values - full body",
+          R"THRIFT(
+    struct    Struct1
+    {
+      1: string id =    Struct2 { a= 1, b= 2}
+    })THRIFT",
+          R"THRIFT(struct Struct1 {
+  1: string id = Struct2{a = 1, b = 2};
+}
+)THRIFT",
+      },
+      {
+          "can handle single element generic types - single line",
+          R"THRIFT(
+    const    list  <
+    string   > foo = [];)THRIFT",
+          R"THRIFT(const list<string> foo = [];
+)THRIFT",
+      },
+      {
+          "can handle single element generic types - multi-line",
+          R"THRIFT(
+    const    list  <
+    long__________________________________________________string   > foo = [];)THRIFT",
+          R"THRIFT(const list<
+  long__________________________________________________string
+> foo = [];
+)THRIFT",
+      },
+      {
+          "can handle two elements generic types - single line",
+          R"THRIFT(
+    const    map  <  string,
+     string   > foo = {};)THRIFT",
+          R"THRIFT(const map<string, string> foo = {};
+)THRIFT",
+      },
+      {
+          "can handle two elements generic types - multi-line",
+          R"THRIFT(
+      const    map  <  long__________________________________________________string ,
+     long__________________________________________________string
+      > foo = {};)THRIFT",
+          R"THRIFT(const map<
+  long__________________________________________________string,
+  long__________________________________________________string
+> foo = {};
+)THRIFT",
+      },
+  });
+}
+
+TEST(FormatterTest, preservesFinalComments) {
+  expect_format_cases({
+      {
+          "maintains a blank line after the last comment - single line comment",
+          R"THRIFT(
+      const int x = 0;
+      // no new line after this)THRIFT",
+          R"THRIFT(const int x = 0;
+// no new line after this
+)THRIFT",
+      },
+      {
+          "maintains a blank line after the last comment - multi line comment",
+          R"THRIFT(
+      const int x = 0;
+      /* no new line after this */)THRIFT",
+          R"THRIFT(const int x = 0;
+/* no new line after this */
+)THRIFT",
+      },
+  });
+}
+
+TEST(FormatterTest, formatsStructuredAnnotations) {
+  expect_format_cases({
+      {
+          "format the new annotation syntax",
+          R"THRIFT(
+      @MyStructAnnotation{
+             count = 123,
+             nest = {
+                    'name': "'nested'",
+             }
+      }
+      struct MyStruct {
+      } (
+        hs.foo=    123
+      )
+      )THRIFT",
+          R"THRIFT(@MyStructAnnotation{count = 123, nest = {'name': "'nested'"}}
+struct MyStruct {} (hs.foo = 123)
+)THRIFT",
+      },
+      {
+          "format the structured annotation syntax",
+          R"THRIFT(
+      @A1@A2
+      @A3
+      struct MyStruct {
+        @A1
+        {a=4}@A2 @A3{}
+        1: int foo;
+      }
+      )THRIFT",
+          R"THRIFT(@A1
+@A2
+@A3
+struct MyStruct {
+  @A1{a = 4}
+  @A2
+  @A3{}
+  1: int foo;
+}
+)THRIFT",
+      },
+      {
+          "format multiple fields with the structured annotation syntax",
+          R"THRIFT(
+      @A1@A2
+      @A3
+      struct MyStruct {
+        1: int a;
+
+
+        @A1
+        {a=4}@A2 @A3{}
+        2: int b;
+
+
+        @A1
+        {a=4}@A2 @A3{}
+        3: int c;
+
+        4: int d;
+      }
+      )THRIFT",
+          R"THRIFT(@A1
+@A2
+@A3
+struct MyStruct {
+  1: int a;
+
+  @A1{a = 4}
+  @A2
+  @A3{}
+  2: int b;
+
+  @A1{a = 4}
+  @A2
+  @A3{}
+  3: int c;
+
+  4: int d;
+}
+)THRIFT",
+      },
+      {
+          "format multiple structs and services with the structured annotation syntax",
+          R"THRIFT(
+      @A1
+      struct MyStruct {
+        1: int a;
+      }
+
+      @A1
+      struct MyStruct2 {
+        1: int a;
+      }
+
+      @A2@A3
+      service MyService {
+        void A();
+      }
+
+
+      @A2
+      @A3
+      service MyService2 {
+        void A();
+      }
+      )THRIFT",
+          R"THRIFT(@A1
+struct MyStruct {
+  1: int a;
+}
+
+@A1
+struct MyStruct2 {
+  1: int a;
+}
+
+@A2
+@A3
+service MyService {
+  void A();
+}
+
+@A2
+@A3
+service MyService2 {
+  void A();
+}
+)THRIFT",
+      },
+      {
+          "format blank lines between enums and structs with and without the structured annotation syntax",
+          R"THRIFT(
+      enum MyEnum {
+        a = 0,
+        b = 1,
+      }
+
+      @A1
+      struct MyStruct {
+        1: int a;
+      }
+
+      struct MyStruct2 {
+        1: int a;
+      }
+
+
+      @A1
+      struct MyStruct3 {
+        1: int a;
+      }
+
+      struct MyStruct4 {
+        1: int a;
+      }
+      )THRIFT",
+          R"THRIFT(enum MyEnum {
+  a = 0,
+  b = 1,
+}
+
+@A1
+struct MyStruct {
+  1: int a;
+}
+
+struct MyStruct2 {
+  1: int a;
+}
+
+@A1
+struct MyStruct3 {
+  1: int a;
+}
+
+struct MyStruct4 {
+  1: int a;
+}
+)THRIFT",
+      },
+      {
+          "format structured annotations with embedded comments",
+          R"THRIFT(
+      @Annot {
+        foo = [
+          42, // comment
+        ]
+      }
+      struct Empty {}
+    )THRIFT",
+          R"THRIFT(@Annot{foo = [42]} // comment
+struct Empty {}
+)THRIFT",
+      },
+      {
+          "can format empty {} with comments",
+          R"THRIFT(
+      @Annot {}
+      struct Empty {}
+
+      @Annot {
+        // Hi
+      }
+      exception Foo {
+        // Hi
+      }
+
+      @Annot { // Hi
+      }
+      struct Bar { // Hi
+      }
+
+      @Annot {} // Hi
+      union Baz {} // Hi
+    )THRIFT",
+          R"THRIFT(@Annot{}
+struct Empty {}
+
+@Annot{// Hi
+}
+exception Foo {
+// Hi
+}
+
+@Annot{} // Hi
+struct Bar { // Hi
+}
+
+@Annot{} // Hi
+union Baz {} // Hi
+)THRIFT",
+      },
+  });
+}
+
+TEST(FormatterTest, preservesTrailingCommentsInStructuredDefinitions) {
+  for (std::string ty : {"struct", "union", "exception"}) {
+    SCOPED_TRACE(ty);
+    expect_format(
+        "\n       " + ty + R"( Foo {
+        1: i32 a; // comment A
+        2: double b; // comment B
+        // Comment C
+      }
+      )",
+        ty + R"( Foo {
+  1: i32 a; // comment A
+  2: double b; // comment B
+  // Comment C
+}
+)");
+    expect_format(
+        "\n      " + ty + R"( Foo {
+        1: i32 a; // comment A
+        2: double b; // comment B
+        // Comment C
+        // Comment D
+        // Comment E
+      }
+      )",
+        ty + R"( Foo {
+  1: i32 a; // comment A
+  2: double b; // comment B
+  // Comment C
+  // Comment D
+  // Comment E
+}
+)");
+    expect_format(
+        "\n      " + ty + R"( Foo {
+        1: i32 a; // comment A
+        2: double b; // comment B
+
+        // Comment C
+        // Comment D
+      }
+      )",
+        ty + R"( Foo {
+  1: i32 a; // comment A
+  2: double b; // comment B
+  // Comment C
+  // Comment D
+}
+)");
+    expect_format(
+        "\n      " + ty + R"( Foo {
+        1: i32 a; /* comment A */
+        2: double b;
+        /* comment B */
+        /* Comment C */
+      }
+      )",
+        ty + R"( Foo {
+  1: i32 a;
+  /* comment A */
+  2: double b;
+  /* comment B */
+  /* Comment C */
+}
+)");
+  }
+}
+
+TEST(FormatterTest, preservesCommentsAndRoundTrips) {
   const std::string source = R"(package "facebook.com/thrift/test"
 
 // leading
@@ -250,7 +1291,7 @@ struct S {
   EXPECT_EQ(formatted_again, formatted);
 }
 
-TEST(FormatterTest, retains_comments_around_concrete_tokens) {
+TEST(FormatterTest, retainsCommentsAroundConcreteTokens) {
   expect_comments_retained(R"(package "facebook.com/thrift/test"
 
 // before const
@@ -429,7 +1470,7 @@ TEST(FormatterTest, preservesBlockCommentsBeforeFieldSeparators) {
 )");
 }
 
-TEST(FormatterTest, preserves_source_with_missing_include_and_unresolved_type) {
+TEST(FormatterTest, preservesSourceWithMissingIncludeAndUnresolvedType) {
   const std::string source = R"(package "facebook.com/thrift/test"
 
 include "missing.thrift"
@@ -449,13 +1490,13 @@ struct S {
   EXPECT_EQ(formatted, source);
 }
 
-TEST(FormatterTest, rejects_parser_invalid_source) {
+TEST(FormatterTest, rejectsParserInvalidSource) {
   EXPECT_THROW(
       format_thrift_source(R"(struct S { 1: list<i32 field; })"),
       std::runtime_error);
 }
 
-TEST(FormatterTest, fixture_files_round_trip) {
+TEST(FormatterTest, fixtureFilesRoundTrip) {
   const auto fixtures_root = find_fixtures_root();
   if (!fixtures_root) {
     GTEST_SKIP() << "THRIFT_COMPILER_TEST_FIXTURES is not set";

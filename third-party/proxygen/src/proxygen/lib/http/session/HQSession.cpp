@@ -3500,36 +3500,10 @@ void HQSession::HQStreamTransportBase::onByteEventCanceled(
 }
 
 // Methods specific to StreamTransport subclasses
-void HQSession::HQStreamTransportBase::onPushMessageBegin(
-    HTTPCodec::StreamID pushID,
-    HTTPCodec::StreamID assocStreamID,
-    HTTPMessage* /* msg */) {
-  VLOG(4) << __func__ << " txn=" << txn_ << " streamID=" << getIngressStreamId()
-          << " assocStreamID=" << assocStreamID
-          << " ingressPushId=" << ingressPushId_.value_or(-1);
-
-  if (ingressPushId_) {
-    constexpr auto error =
-        "Received onPushMessageBegin in the middle of push promise";
-    LOG(ERROR) << error;
-    // TODO: Audit this error code
-    session_.dropConnectionAsync(
-        quic::QuicError(HTTP3::ErrorCode::HTTP_FRAME_ERROR, error),
-        kErrorDropped);
-    return;
-  }
-
-  if (session_.infoCallback_) {
-    session_.infoCallback_->onRequestBegin(session_);
-  }
-
-  // Notify the testing callbacks
-  if (session_.serverPushLifecycleCb_) {
-    session_.serverPushLifecycleCb_->onPushPromiseBegin(
-        assocStreamID, static_cast<hq::PushId>(pushID));
-  }
-
-  ingressPushId_ = static_cast<hq::PushId>(pushID);
+void HQSession::HQStreamTransportBase::onPushMessageBegin(HTTPCodec::StreamID,
+                                                          HTTPCodec::StreamID,
+                                                          HTTPMessage*) {
+  // http/3 push in proxygen/lib is not supported
 }
 
 HQSession::HQStreamTransportBase* HQSession::findWTSessionOrAbort(
@@ -3666,34 +3640,7 @@ HQSession::HQStreamTransport::newPushedTransaction(
 }
 
 void HQSession::HQStreamTransport::onPushPromiseHeadersComplete(
-    hq::PushId pushID,
-    HTTPCodec::StreamID assocStreamID,
-    std::unique_ptr<HTTPMessage> msg) {
-  VLOG(4) << "processing new Push Promise msg=" << msg.get()
-          << " streamID=" << assocStreamID << " maybePushID=" << pushID
-          << ", txn= " << txn_;
-
-  // Notify the testing callbacks
-  if (session_.serverPushLifecycleCb_) {
-    session_.serverPushLifecycleCb_->onPushPromise(
-        assocStreamID, pushID, msg.get());
-  }
-
-  // Create ingress push stream (will also create the transaction)
-  // If a corresponding nascent push stream is ready, it will be
-  // bound to the newly created stream.
-  // virtual function call into UpstreamSession.  This will crash if it happens
-  // downstream.
-  auto pushStream = session_.createIngressPushStream(assocStreamID, pushID);
-  CHECK(pushStream);
-
-  // Notify the *parent* transaction that the *pushed* transaction has been
-  // successfully created.
-  txn_.onPushedTransaction(&pushStream->txn_);
-
-  // Notify the *pushed* transaction on the push promise headers
-  // This has to be called AFTER "onPushedTransaction" upcall
-  pushStream->txn_.onIngressHeadersComplete(std::move(msg));
+    hq::PushId, HTTPCodec::StreamID, std::unique_ptr<HTTPMessage>) {
 }
 
 void HQSession::onDatagramsAvailable() noexcept {

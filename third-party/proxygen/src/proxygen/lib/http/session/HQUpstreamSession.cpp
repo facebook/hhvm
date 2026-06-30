@@ -287,55 +287,10 @@ uint32_t HQUpstreamSession::numberOfIngressPushStreams() const {
 }
 
 void HQUpstreamSession::dispatchPushStream(quic::StreamId pushStreamId,
-                                           hq::PushId pushId,
-                                           size_t toConsume) {
-  VLOG(4) << __func__ << " streamID=" << pushStreamId << " pushId=" << pushId;
-
-  // TODO: if/when we support client goaway, reject stream if
-  // pushId >= minUnseenIncomingPushId_ after the GOAWAY is sent
-  minUnseenIncomingPushId_ = std::max(minUnseenIncomingPushId_, pushId);
-  DCHECK_GT(toConsume, 0);
-
-  bool eom = false;
-  if (serverPushLifecycleCb_) {
-    serverPushLifecycleCb_->onNascentPushStreamBegin(pushStreamId, eom);
-  }
-
-  auto consumeRes = sock_->consume(pushStreamId, toConsume);
-  CHECK(!consumeRes.hasError())
-      << "Unexpected error " << consumeRes.error() << " while consuming "
-      << toConsume << " bytes from stream=" << pushStreamId
-      << " pushId=" << pushId;
-
-  // Replace the peek callback with a read callback and pause the read callback
-  sock_->setReadCallback(pushStreamId, this);
-  sock_->setPeekCallback(pushStreamId, nullptr);
-  sock_->pauseRead(pushStreamId);
-
-  // Increment the sequence no to account for the new transport-like stream
-  incrementSeqNo();
-
-  pushIdToStreamId_.emplace(pushId, pushStreamId);
-  streamIdToPushId_.emplace(pushStreamId, pushId);
-
-  VLOG(4) << __func__ << " assigned lookup from pushID=" << pushId
-          << " to streamID=" << pushStreamId;
-
-  // We have successfully read the push id. Notify the testing callbacks
-  if (serverPushLifecycleCb_) {
-    serverPushLifecycleCb_->onNascentPushStream(pushStreamId, pushId, eom);
-  }
-
-  // If the transaction for the incoming push stream has been created
-  // already, bind the new stream to the transaction
-  auto ingressPushStream = findIngressPushStreamByPushId(pushId);
-
-  if (ingressPushStream) {
-    auto bound =
-        tryBindIngressStreamToTxn(pushStreamId, pushId, ingressPushStream);
-    VLOG(4) << __func__ << " bound=" << bound << " pushID=" << pushId
-            << " pushStreamID=" << pushStreamId << " to txn ";
-  }
+                                           hq::PushId,
+                                           size_t) {
+  // http/3 push in proxygen/lib is not supported
+  rejectStream(pushStreamId);
 }
 
 void HQUpstreamSession::HQIngressPushStream::bindTo(quic::StreamId streamId) {

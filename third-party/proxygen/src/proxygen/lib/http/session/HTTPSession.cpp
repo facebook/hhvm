@@ -655,48 +655,11 @@ void HTTPSession::onMessageBegin(HTTPCodec::StreamID streamID,
 }
 
 void HTTPSession::onPushMessageBegin(HTTPCodec::StreamID streamID,
-                                     HTTPCodec::StreamID assocStreamID,
-                                     HTTPMessage* msg) {
-  VLOG(4) << "processing new push promise streamID=" << streamID
-          << " on assocStreamID=" << assocStreamID << " " << *this;
-  if (infoCallback_) {
-    infoCallback_->onRequestBegin(*this);
-  }
-  if (assocStreamID == 0) {
-    VLOG(2) << "push promise " << streamID << " should be associated with "
-            << "an active stream=" << assocStreamID << " " << *this;
-    invalidStream(streamID, ErrorCode::PROTOCOL_ERROR);
-    return;
-  }
-
-  if (isDownstream()) {
-    VLOG(2) << "push promise cannot be sent to upstream " << *this;
-    invalidStream(streamID, ErrorCode::PROTOCOL_ERROR);
-    return;
-  }
-
-  HTTPTransaction* assocTxn = findTransaction(assocStreamID);
-  if (!assocTxn || assocTxn->isIngressEOMSeen()) {
-    VLOG(2) << "cannot find the assocTxn=" << assocTxn
-            << ", or assoc stream is already closed by upstream" << *this;
-    invalidStream(streamID, ErrorCode::PROTOCOL_ERROR);
-    return;
-  }
-
-  auto txn = createTransaction(streamID, assocStreamID);
-  if (!txn) {
-    return; // This could happen if the socket is bad.
-  }
-
-  if (!assocTxn->onPushedTransaction(txn)) {
-    VLOG(1) << "Failed to add pushed txn " << streamID << " to assoc txn "
-            << assocStreamID << " on " << *this;
-    HTTPException ex(
-        HTTPException::Direction::INGRESS_AND_EGRESS,
-        folly::to<std::string>("Failed to add pushed transaction ", streamID));
-    ex.setCodecStatusCode(ErrorCode::REFUSED_STREAM);
-    onError(streamID, ex, true);
-  }
+                                     HTTPCodec::StreamID,
+                                     HTTPMessage*) {
+  // http/2 push in proxygen/lib is not supported
+  codec_->generateRstStream(writeBuf_, streamID, ErrorCode::REFUSED_STREAM);
+  scheduleWrite();
 }
 
 void HTTPSession::onHeadersComplete(HTTPCodec::StreamID streamID,

@@ -1148,7 +1148,11 @@ struct MyStruct4 {
       }
       struct Empty {}
     )THRIFT",
-          R"THRIFT(@Annot{foo = [42]} // comment
+          R"THRIFT(@Annot{
+  foo = [
+    42, // comment
+  ],
+}
 struct Empty {}
 )THRIFT",
       },
@@ -1467,6 +1471,78 @@ TEST(FormatterTest, preservesBlockCommentsBeforeFieldSeparators) {
   1: i32 field /* previous block */
   /* trailing block */;
 }
+)");
+}
+
+TEST(FormatterTest, preservesCommentsBeforeAnnotationAndObjectClose) {
+  expect_format(
+      R"(@foo.Annotation{
+  name = "value",
+//   sourceDimensions = [], please refer to https://fburl.com/ods3-source-dimensions for more details and a list of available options.
+}
+struct Foo {
+  1: string bar;
+}
+
+const AssetXidTypeEntry ASSET_XID_TYPE_COMMENT_TRAP_ENTRY =
+  AssetXidTypeEntry{
+    xid_type = "COMMENT_TRAP",
+// oncall_shortname = "old_oncall",
+  };
+)",
+      R"(@foo.Annotation{
+  name = "value",
+//   sourceDimensions = [], please refer to https://fburl.com/ods3-source-dimensions for more details and a list of available options.
+}
+struct Foo {
+  1: string bar;
+}
+
+const AssetXidTypeEntry ASSET_XID_TYPE_COMMENT_TRAP_ENTRY = AssetXidTypeEntry{
+  xid_type = "COMMENT_TRAP",
+// oncall_shortname = "old_oncall",
+};
+)");
+}
+
+TEST(FormatterTest, preservesValueSeparatorTrailingComments) {
+  expect_format(
+      R"(const currency.CurrencyAmount creditLimit = currency.CurrencyAmount{
+  currency = "USD",
+  amount = 1000000, // $10,000.00
+};
+
+const list<RestoreState> FailureRestoreStates = [
+  4,  // RestoreState.FAILED,
+  5,  // RestoreState.TIMEOUT,
+];
+)",
+      R"(const currency.CurrencyAmount creditLimit = currency.CurrencyAmount{
+  currency = "USD",
+  amount = 1000000, // $10,000.00
+};
+
+const list<RestoreState> FailureRestoreStates = [
+  4, // RestoreState.FAILED,
+  5, // RestoreState.TIMEOUT,
+];
+)");
+}
+
+TEST(FormatterTest, preservesNestedObjectSeparatorTrailingComments) {
+  expect_comments_retained(
+      R"(const Request request = Request{
+  steps = [
+    Step{
+      creditLineState = CreditLineState{
+        creditLimit = currency.CurrencyAmount{
+          currency = "USD",
+          amount = 1000000, // $10,000.00
+        },
+      },
+      },
+  ],
+};
 )");
 }
 

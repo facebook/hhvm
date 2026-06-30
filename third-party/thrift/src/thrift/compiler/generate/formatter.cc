@@ -2900,6 +2900,13 @@ class concrete_formatter {
       return true;
     }
     if (val.type == value::kind::list) {
+      for (const auto& separator : val.list_separators) {
+        if (separator &&
+            (!separator->leading_comments.empty() ||
+             separator->trailing_comment)) {
+          return true;
+        }
+      }
       return std::any_of(
           val.list_values.begin(),
           val.list_values.end(),
@@ -2924,7 +2931,50 @@ class concrete_formatter {
         }
       }
     }
+    if (val.type == value::kind::object && val.object_body) {
+      return annotation_body_has_comments(*val.object_body);
+    }
     return false;
+  }
+
+  bool annotation_body_has_comments(const annotation_body& body) const {
+    if (!body.left.leading_comments.empty() || body.left.trailing_comment ||
+        leading_comments_force_break(body.right.leading_comments, body.right) ||
+        body.right.trailing_comment) {
+      return true;
+    }
+    return std::any_of(
+        body.entries.begin(), body.entries.end(), [&](const auto& entry) {
+          return annotation_entry_has_comments(entry);
+        });
+  }
+
+  bool annotation_list_has_comments(const annotation_list& list) const {
+    if (!list.left.leading_comments.empty() || list.left.trailing_comment ||
+        leading_comments_force_break(list.right.leading_comments, list.right) ||
+        list.right.trailing_comment) {
+      return true;
+    }
+    return std::any_of(
+        list.entries.begin(), list.entries.end(), [&](const auto& entry) {
+          return annotation_entry_has_comments(entry);
+        });
+  }
+
+  bool annotation_entry_has_comments(const annotation_entry& entry) const {
+    if (!entry.key.leading_comments.empty() || entry.key.trailing_comment) {
+      return true;
+    }
+    if (entry.op &&
+        (!entry.op->leading_comments.empty() || entry.op->trailing_comment)) {
+      return true;
+    }
+    if (entry.separator &&
+        (!entry.separator->leading_comments.empty() ||
+         entry.separator->trailing_comment)) {
+      return true;
+    }
+    return entry.val && value_has_comments(*entry.val);
   }
 
   bool leading_comments_force_break(
@@ -3188,7 +3238,8 @@ class concrete_formatter {
       const size_t line_suffix_size = body.right.trailing_comment
           ? body.right.trailing_comment->text.size() + 1
           : 0;
-      if (current_column + inline_text.size() - line_suffix_size <=
+      if (!annotation_body_has_comments(body) &&
+          current_column + inline_text.size() - line_suffix_size <=
               kPrintWidth &&
           inline_text.find('\n') == std::string::npos) {
         inline_capture.commit();
@@ -3221,6 +3272,14 @@ class concrete_formatter {
           ",";
       if (entry.separator) {
         result += trailing_comment(*entry.separator);
+      }
+    }
+    if (!body.right.leading_comments.empty()) {
+      result += "\n" +
+          format_leading_comments(
+                    body.right.leading_comments, &body.right, indent);
+      if (!result.empty() && result.back() == '\n') {
+        result.pop_back();
       }
     }
     result += "\n" + spaces(indent) + "}";
@@ -3271,7 +3330,8 @@ class concrete_formatter {
     {
       auto inline_capture = capture_trivia_printing();
       inline_text = print_annotation_list_inline(list);
-      if (current_column + inline_text.size() <= kPrintWidth &&
+      if (!annotation_list_has_comments(list) &&
+          current_column + inline_text.size() <= kPrintWidth &&
           inline_text.size() <= 56) {
         inline_capture.commit();
         return inline_text;
@@ -3286,6 +3346,14 @@ class concrete_formatter {
           ",";
       if (entry.separator) {
         result += trailing_comment(*entry.separator);
+      }
+    }
+    if (!list.right.leading_comments.empty()) {
+      result += "\n" +
+          format_leading_comments(
+                    list.right.leading_comments, &list.right, indent);
+      if (!result.empty() && result.back() == '\n') {
+        result.pop_back();
       }
     }
     result += "\n" + spaces(indent) + ")";

@@ -439,3 +439,28 @@ class AsyncClientTests(IsolatedAsyncioTestCase):
                 # an exception before the request is sent
                 result = await client.add(1, 2)
                 self.assertEqual(3, result)
+
+    async def test_async_channel_bind_first_rpc_no_use_after_free(self) -> None:
+        """Regression: async get_client must bind the channel by move, not alias
+        the folly Future Core's storage.
+
+        async_client.pxd must declare `bind_client` by value, matching the
+        async_client.pyx definition. When the declaration used `&&`, the
+        cross-module requestchannel_callback (async_client_factory.pyx) passed a
+        reference to the channel unique_ptr -- which lives inside the folly
+        Future Core -- through an rvalue-ref vtable slot into a by-value body.
+        OmniClient::channel_ ended up pointing at the Core's storage instead of
+        the channel. The real channel was left in the Core and freed by ~Core, so
+        the first RPC's getChannelProtocolId() read freed memory: a
+        heap-use-after-free under libc++. Exercising the async connect + first
+        RPC over the asyncio bridge catches any regression of the signature
+        mismatch.
+        """
+        # pyre-fixme[16]: `AsyncContextManager` has no attribute `__aenter__`.
+        async with server_in_event_loop() as addr:
+            async with get_client(TestService, host=addr.ip, port=addr.port) as client:
+                # First RPC reads the freshly bound channel; a channel_ that
+                # dangled into a freed Core would fault here under libc++.
+                self.assertEqual(3, await client.add(1, 2))
+                # A second RPC confirms the channel stayed valid after binding.
+                self.assertEqual(5, await client.add(2, 3))

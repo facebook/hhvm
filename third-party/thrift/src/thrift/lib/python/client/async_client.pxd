@@ -29,6 +29,6 @@ cdef class AsyncClient:
     cdef unique_ptr[cOmniClient] _omni_client
     cdef unordered_map[string, string] _persistent_headers
     cdef vector[shared_ptr[cTProcessorEventHandler]] _deferred_event_handlers
-    cdef bind_client(self, cRequestChannel_ptr&& channel)
+    cdef bind_client(self, cRequestChannel_ptr channel)
     cdef bind_client_shared(self, shared_ptr[cRequestChannel] channel)
     cdef add_event_handler(self, const shared_ptr[cTProcessorEventHandler]& handler)

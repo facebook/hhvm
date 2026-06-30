@@ -73,10 +73,7 @@ using NativeFunction = void(*)(NativeArgs*);
 
 using StaticCoeffectNamesMap = CompactVector<PackedStringPtr>;
 
-using InheritedRetTypesMap = folly::ConcurrentHashMap<
-    const Func*,
-    TypeIntersectionConstraint,
-    pointer_hash<Func>>;
+using InheritedRetTypesMap = folly::ConcurrentHashMap<FuncId::Int, TypeIntersectionConstraint>;
 
 ///////////////////////////////////////////////////////////////////////////////
 // EH table.

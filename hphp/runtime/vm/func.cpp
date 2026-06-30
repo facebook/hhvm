@@ -142,7 +142,7 @@ void Func::finishDestroy() {
   NamedFunc::removeFunc(this);
 
   if (hasInheritedReturnTypes()) {
-    s_inheritedRetTypes.erase(this);
+    s_inheritedRetTypes.erase(getFuncId().toInt());
   }
 
   if (m_allFlags.m_registeredInDataMap) {
@@ -177,7 +177,7 @@ void Func::freeClone() {
 
   if (hasInheritedReturnTypes()) {
     m_attrs = static_cast<Attr>(m_attrs & ~AttrHasInheritedReturnTypes);
-    s_inheritedRetTypes.erase(this);
+    s_inheritedRetTypes.erase(getFuncId().toInt());
   }
 
   FuncToken::setInvalid(this);
@@ -1356,13 +1356,13 @@ void Func::recordCallNoCheck() const {
 
 const TypeIntersectionConstraint& Func::lookupInheritedReturnTypes() const {
   assertx(hasInheritedReturnTypes());
-  auto it = s_inheritedRetTypes.find(this);
+  auto it = s_inheritedRetTypes.find(getFuncId().toInt());
   always_assert(it != s_inheritedRetTypes.end());
   return it->second;
 }
 
 void Func::storeInheritedReturnTypes(TypeIntersectionConstraint&& tcs) {
-  always_assert(s_inheritedRetTypes.insert(this, std::move(tcs)).second);
+  always_assert(s_inheritedRetTypes.insert(getFuncId().toInt(), std::move(tcs)).second);
   m_attrs = m_attrs | AttrHasInheritedReturnTypes;
 }
 

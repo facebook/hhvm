@@ -1439,6 +1439,54 @@ Base {
 )");
 }
 
+TEST(FormatterTest, preservesThrowsFieldLeadingComments) {
+  expect_format(
+      R"(service Foo {
+  void lineComment(
+    1: Request request,
+  ) throws (
+    // Exceptions
+    1: Error error,
+  );
+  void docComment(
+    1: Request request,
+  ) throws (
+    /** Throws documentation. */
+    1: Error error,
+  );
+}
+)",
+      R"(service Foo {
+  void lineComment(1: Request request) throws (
+    // Exceptions
+    1: Error error,
+  );
+  void docComment(1: Request request) throws (
+    /** Throws documentation. */
+    1: Error error,
+  );
+}
+)");
+}
+
+TEST(FormatterTest, preservesTypedefTypeArgumentSeparatorComments) {
+  expect_format(
+      R"(typedef map<
+  i32, // productType
+  Stats
+> StatsMap
+
+typedef map<i64/* TreeIdx */ , InputLayout> InputBySourceTree
+)",
+      R"(typedef map<
+  i32, // productType
+  Stats
+> StatsMap
+
+typedef map<i64 /* TreeIdx */, InputLayout> InputBySourceTree
+)");
+}
+
 TEST(FormatterTest, preservesCommentsBeforeServiceExtends) {
   expect_format(
       R"(service Foo /* Hello there! */ extends Bar {

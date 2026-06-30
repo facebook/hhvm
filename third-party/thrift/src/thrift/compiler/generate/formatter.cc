@@ -2158,7 +2158,11 @@ class concrete_formatter {
     auto type = materialize_type(statement.type);
     const token id = token_at(statement.first_identifier.loc);
     auto trailing_annotations = deprecated_annotations(statement.attrs.get());
-    auto sep = last_separator(statement.range);
+    source_location separator_begin = id.range.end;
+    if (trailing_annotations) {
+      separator_begin = trailing_annotations->right.range.end;
+    }
+    auto sep = last_separator_after(separator_begin, statement.range);
 
     std::string result = prefixed_token(keyword, indent, suppress_prefix) +
         inline_separator_after(keyword);
@@ -2658,12 +2662,15 @@ class concrete_formatter {
     {
       auto inline_capture = capture_trivia_printing();
       inline_text = type_inline(ty, include_leading);
-      if (ty.args.empty() &&
+      const bool inline_contains_line_break =
+          inline_text.find('\n') != std::string::npos;
+      if (ty.args.empty() && !inline_contains_line_break &&
           (!ty.throws || current_column + inline_text.size() <= kPrintWidth)) {
         inline_capture.commit();
         return inline_text;
       }
-      if (!ty.args.empty() && !force_break &&
+      if (!ty.args.empty() && !force_break && !inline_contains_line_break &&
+          !type_has_line_trailing_comment(ty) &&
           current_column + inline_text.size() <= kPrintWidth &&
           (allow_long_inline || inline_text.size() <= 52)) {
         inline_capture.commit();
@@ -2676,8 +2683,11 @@ class concrete_formatter {
       if (ty.ampersand) {
         result += "&";
       }
-      result += " " +
-          print_throws(*ty.throws, indent, current_column + result.size() + 1);
+      if (ty.throws) {
+        result += " " +
+            print_throws(
+                      *ty.throws, indent, current_column + result.size() + 1);
+      }
       return result;
     }
 
@@ -2708,6 +2718,26 @@ class concrete_formatter {
   bool type_source_starts_multiline(const parsed_type& ty) const {
     return ty.left_angle && !ty.args.empty() &&
         ty.left_angle->end_line != ty.args.front().first.start_line;
+  }
+
+  bool type_has_line_trailing_comment(const parsed_type& ty) const {
+    if (ty.first.trailing_comment && ty.first.trailing_comment->line) {
+      return true;
+    }
+    if (ty.left_angle && ty.left_angle->trailing_comment &&
+        ty.left_angle->trailing_comment->line) {
+      return true;
+    }
+    for (const auto& separator : ty.arg_separators) {
+      if (separator && separator->trailing_comment &&
+          separator->trailing_comment->line) {
+        return true;
+      }
+    }
+    return std::any_of(
+        ty.args.begin(), ty.args.end(), [this](const parsed_type& arg) {
+          return type_has_line_trailing_comment(arg);
+        });
   }
 
   const token& last_type_token(const parsed_type& ty) const {
@@ -3910,13 +3940,15 @@ class concrete_formatter {
     {
       auto inline_capture = capture_trivia_printing();
       inline_text = throws_inline(throws);
+      const bool inline_contains_line_break =
+          inline_text.find('\n') != std::string::npos;
       const bool has_separator_comments = std::any_of(
           throws.fields.begin(), throws.fields.end(), [](const field& item) {
             return item.separator && item.separator->trailing_comment;
           });
-      if (throws.fields.empty() ||
-          (!throws.left.trailing_comment && !has_separator_comments &&
-           throws.right.leading_comments.empty() &&
+      if (!inline_contains_line_break && !throws.left.trailing_comment &&
+          !has_separator_comments && throws.right.leading_comments.empty() &&
+          (throws.fields.empty() ||
            current_column + inline_text.size() <= kPrintWidth)) {
         inline_capture.commit();
         return inline_text;

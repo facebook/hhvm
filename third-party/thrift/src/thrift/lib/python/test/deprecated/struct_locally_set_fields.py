@@ -18,14 +18,15 @@
 from __future__ import annotations
 
 import unittest
-from typing import Callable
+from typing import Any, Callable, cast as typing_cast
 
 import thrift.python.serializer as serializer
 import thrift.python.types
+from parameterized import parameterized
 from pyre_extensions import none_throws
 from testing.dependency.thrift_types import IncludedStruct
 from thrift.python.exceptions import GeneratedError
-from thrift.python.test.deprecated.isset_deprecated.thrift_types import (
+from thrift.python.test.deprecated.locally_set_fields_deprecated.thrift_types import (
     File,
     HasContainers,
     Integers,
@@ -35,9 +36,13 @@ from thrift.python.test.deprecated.isset_deprecated.thrift_types import (
     OptionalFile,
     Optionals,
     SimpleStruct,
+    StructWithAnnotatedChild,
+    StructWithIssetInspection,
+    StructWithoutIssetInspection,
+    StructWithUnannotatedChild,
     UnusedError,
 )
-from thrift.python.types import StructOrUnion
+from thrift.python.types import get_locally_set_fields, StructOrUnion
 
 # `isset_DEPRECATED` is intentionally excluded from `types.pyi`, so reference it
 # through the module to keep the suppression in a single place.
@@ -46,11 +51,238 @@ isset_DEPRECATED: Callable[[StructOrUnion | GeneratedError], dict[str, bool]] = 
 )
 
 
-class StructIssetDeprecatedTest(unittest.TestCase):
+class StructLocallySetFieldsTest(unittest.TestCase):
     """`isset_DEPRECATED()` only supports immutable structs, and only when the
     struct's thrift_library is compiled with the `enable_isset_deprecated_unsafe`
-    compiler option. `test_thrift` enables it; the `dependency` library does not.
+    compiler option. This library enables it; the `dependency` library does not.
     """
+
+    @parameterized.expand(
+        [
+            (
+                "all_fields",
+                {
+                    "int_field": 42,
+                    "opt_str_field": "hello",
+                    "bool_field": True,
+                    "opt_list_field": [1, 2, 3],
+                },
+                {"int_field", "opt_str_field", "bool_field", "opt_list_field"},
+            ),
+            ("int_field", {"int_field": 42}, {"int_field"}),
+            ("no_fields", {}, set()),
+            (
+                "falsey_values",
+                {"int_field": 0, "bool_field": False},
+                {"int_field", "bool_field"},
+            ),
+            ("explicit_none", {"int_field": 42, "opt_str_field": None}, {"int_field"}),
+        ]
+    )
+    def test_get_locally_set_fields_constructor(
+        self, _name: str, kwargs: dict[str, Any], expected: set[str]
+    ) -> None:
+        s = StructWithIssetInspection(**kwargs)
+        self.assertEqual(get_locally_set_fields(s), frozenset(expected))
+
+    @parameterized.expand(
+        [
+            (
+                "set_new_field",
+                {"int_field": 42},
+                {"bool_field": True},
+                {"int_field", "bool_field"},
+            ),
+            (
+                "clear_optional_field",
+                {"int_field": 42, "opt_str_field": "hello", "bool_field": True},
+                {"opt_str_field": None},
+                {"int_field", "bool_field"},
+            ),
+        ]
+    )
+    def test_get_locally_set_fields_call(
+        self,
+        _name: str,
+        init_kwargs: dict[str, Any],
+        call_kwargs: dict[str, Any],
+        expected: set[str],
+    ) -> None:
+        s = StructWithIssetInspection(**init_kwargs)
+        self.assertEqual(
+            get_locally_set_fields(s(**call_kwargs)),
+            frozenset(expected),
+        )
+
+    def test_get_locally_set_fields_call_preserves_original(self) -> None:
+        s = StructWithIssetInspection(int_field=42, opt_str_field="hello")
+        s2 = s(int_field=99)
+        self.assertEqual(
+            get_locally_set_fields(s), frozenset({"int_field", "opt_str_field"})
+        )
+        self.assertEqual(
+            get_locally_set_fields(s2), frozenset({"int_field", "opt_str_field"})
+        )
+
+    def test_get_locally_set_fields_uses_isset_bits(self) -> None:
+        s = StructWithIssetInspection(int_field=42, opt_str_field=None)
+        self.assertEqual(get_locally_set_fields(s), frozenset({"int_field"}))
+        self.assertEqual(
+            isset_DEPRECATED(s),
+            {
+                "int_field": True,
+                "opt_str_field": False,
+                "bool_field": False,
+                "opt_list_field": False,
+            },
+        )
+
+    @parameterized.expand(
+        [
+            (
+                "default_constructed",
+                lambda: StructWithUnannotatedChild(
+                    child=StructWithoutIssetInspection()
+                ),
+            ),
+            (
+                "constructed_with_kwargs",
+                lambda: StructWithUnannotatedChild(
+                    child=StructWithoutIssetInspection(
+                        int_field=42,
+                        opt_str_field="hello",
+                    )
+                ),
+            ),
+            (
+                "serialize_deserialized",
+                lambda: serializer.deserialize(
+                    StructWithUnannotatedChild,
+                    serializer.serialize_iobuf(
+                        StructWithUnannotatedChild(
+                            child=StructWithoutIssetInspection(
+                                int_field=42,
+                                opt_str_field="hello",
+                            )
+                        )
+                    ),
+                ),
+            ),
+        ]
+    )
+    def test_get_locally_set_fields_annotated_parent_with_unannotated_child(
+        self, _name: str, create_struct: Callable[[], StructWithUnannotatedChild]
+    ) -> None:
+        s = create_struct()
+
+        self.assertEqual(get_locally_set_fields(s), frozenset({"child"}))
+        with self.assertRaisesRegex(
+            AttributeError, "does not support locally set field inspection"
+        ):
+            get_locally_set_fields(s.child)
+
+    @parameterized.expand(
+        [
+            (
+                "default_constructed",
+                lambda: StructWithAnnotatedChild(child=StructWithIssetInspection()),
+                frozenset(),
+            ),
+            (
+                "constructed_with_kwargs",
+                lambda: StructWithAnnotatedChild(
+                    child=StructWithIssetInspection(
+                        int_field=42,
+                        opt_str_field="hello",
+                    )
+                ),
+                frozenset({"int_field", "opt_str_field"}),
+            ),
+            (
+                "serialize_deserialized",
+                lambda: serializer.deserialize(
+                    StructWithAnnotatedChild,
+                    serializer.serialize_iobuf(
+                        StructWithAnnotatedChild(
+                            child=StructWithIssetInspection(
+                                int_field=42,
+                                opt_str_field="hello",
+                            )
+                        )
+                    ),
+                ),
+                frozenset({"int_field", "opt_str_field", "bool_field"}),
+            ),
+        ]
+    )
+    def test_get_locally_set_fields_unannotated_parent_with_annotated_child(
+        self,
+        _name: str,
+        create_struct: Callable[[], StructWithAnnotatedChild],
+        expected: frozenset[str],
+    ) -> None:
+        s = create_struct()
+
+        with self.assertRaisesRegex(
+            AttributeError, "does not support locally set field inspection"
+        ):
+            get_locally_set_fields(s)
+        self.assertEqual(
+            get_locally_set_fields(s.child),
+            expected,
+        )
+
+    def test_get_locally_set_fields_generated_error_not_supported(self) -> None:
+        e = UnusedError(message="oops")
+        with self.assertRaisesRegex(
+            AttributeError, "does not support locally set field inspection"
+        ):
+            get_locally_set_fields(e)
+
+    def test_get_locally_set_fields_not_annotated_raises(self) -> None:
+        with self.assertRaisesRegex(
+            AttributeError, "does not support locally set field inspection"
+        ):
+            get_locally_set_fields(SimpleStruct(value=42))
+
+    def test_get_locally_set_fields_deserialized_uses_isset_bits(self) -> None:
+        s = StructWithIssetInspection(int_field=42, opt_str_field="hello")
+        serialized = serializer.serialize_iobuf(s)
+        deserialized = serializer.deserialize(StructWithIssetInspection, serialized)
+        self.assertEqual(
+            get_locally_set_fields(deserialized),
+            frozenset({"int_field", "opt_str_field", "bool_field"}),
+        )
+
+    def test_get_locally_set_fields_tracks_top_level_provenance(self) -> None:
+        local = StructWithIssetInspection(int_field=42)
+        serialized = serializer.serialize_iobuf(local)
+        deserialized = serializer.deserialize(StructWithIssetInspection, serialized)
+
+        self.assertTrue(typing_cast(Any, local)._fbthrift_is_locally_constructed)
+        self.assertTrue(
+            typing_cast(Any, local(bool_field=True))._fbthrift_is_locally_constructed
+        )
+        self.assertFalse(
+            typing_cast(Any, deserialized)._fbthrift_is_locally_constructed
+        )
+        self.assertFalse(
+            typing_cast(
+                Any, deserialized(bool_field=True)
+            )._fbthrift_is_locally_constructed
+        )
+
+    def test_get_locally_set_fields_call_from_deserialized_updates_isset_bits(
+        self,
+    ) -> None:
+        s = StructWithIssetInspection(int_field=42)
+        serialized = serializer.serialize_iobuf(s)
+        deserialized = serializer.deserialize(StructWithIssetInspection, serialized)
+        s2 = deserialized(bool_field=True)
+        self.assertEqual(
+            get_locally_set_fields(s2),
+            frozenset({"int_field", "bool_field"}),
+        )
 
     def test_isset_Struct(self) -> None:
         to_serialize = OptionalFile(name="/dev/null", type=8)

@@ -67,7 +67,6 @@ from test_thrift.thrift_types import (
     StrList2D,
     StructDisabledFieldCache,
     StructuredAnnotation,
-    StructWithIssetInspection,
     StructWithMap,
     UnusedError,
 )
@@ -80,7 +79,7 @@ from thrift.python.mutable_types import (
     to_thrift_set,
 )
 from thrift.python.protocol import Protocol
-from thrift.python.types import get_locally_set_fields, Struct, update_nested_field
+from thrift.python.types import Struct, update_nested_field
 
 ListT = TypeVar("ListT")
 SetT = TypeVar("SetT")
@@ -597,128 +596,6 @@ class StructTestsImmutable(unittest.TestCase):
             # our own property descriptor impl
             with self.assertRaisesRegex(AttributeError, field):
                 object.__setattr__(e, field, val)
-
-
-class GetLocallySetFieldsImmutableTests(unittest.TestCase):
-    @parameterized.expand(
-        [
-            (
-                "all_fields",
-                {
-                    "int_field": 42,
-                    "opt_str_field": "hello",
-                    "bool_field": True,
-                    "opt_list_field": [1, 2, 3],
-                },
-                {"int_field", "opt_str_field", "bool_field", "opt_list_field"},
-            ),
-            ("partial", {"int_field": 42}, {"int_field"}),
-            ("no_fields", {}, set()),
-            (
-                "explicit_defaults",
-                {"int_field": 0, "bool_field": False},
-                {"int_field", "bool_field"},
-            ),
-            (
-                "none_excluded",
-                {"int_field": 42, "opt_str_field": None},
-                {"int_field"},
-            ),
-        ]
-    )
-    def test_constructor(
-        # pyre-ignore[2]: intentional for parameterized test
-        self,
-        _name: str,
-        kwargs: dict[str, Any],
-        expected: set[str],
-    ) -> None:
-        s = StructWithIssetInspection(**kwargs)
-        self.assertEqual(get_locally_set_fields(s), frozenset(expected))
-
-    @parameterized.expand(
-        [
-            (
-                "adds_field",
-                {"int_field": 42},
-                {"bool_field": True},
-                {"int_field", "bool_field"},
-            ),
-            (
-                "none_removes_field",
-                {"int_field": 42, "opt_str_field": "hello", "bool_field": True},
-                {"opt_str_field": None},
-                {"int_field", "bool_field"},
-            ),
-        ]
-    )
-    def test_call(
-        self,
-        _name: str,
-        # pyre-ignore[2]: intentional for parameterized test
-        init_kwargs: dict[str, Any],
-        # pyre-ignore[2]: intentional for parameterized test
-        call_kwargs: dict[str, Any],
-        expected: set[str],
-    ) -> None:
-        s = StructWithIssetInspection(**init_kwargs)
-        s2 = s(**call_kwargs)
-        self.assertEqual(get_locally_set_fields(s2), frozenset(expected))
-
-    def test_call_preserves_original(self) -> None:
-        s = StructWithIssetInspection(int_field=42, opt_str_field="hello")
-        s2 = s(int_field=99)
-        self.assertEqual(
-            get_locally_set_fields(s), frozenset({"int_field", "opt_str_field"})
-        )
-        self.assertEqual(
-            get_locally_set_fields(s2), frozenset({"int_field", "opt_str_field"})
-        )
-
-    def test_generated_error_not_supported(self) -> None:
-        # exceptions do not support @python.EnableUnsafeIssetInspection
-        e = UnusedError(message="oops")
-        with self.assertRaisesRegex(
-            AttributeError, "does not support locally set field inspection"
-        ):
-            get_locally_set_fields(e)
-
-    def test_not_annotated_raises(self) -> None:
-        with self.assertRaisesRegex(
-            AttributeError, "does not support locally set field inspection"
-        ):
-            get_locally_set_fields(easy(val=42, name="test"))
-
-    def test_deserialized_falls_back(self) -> None:
-        s = StructWithIssetInspection(int_field=42, opt_str_field="hello")
-        serialized = immutable_serializer.serialize_iobuf(s)
-        deserialized = immutable_serializer.deserialize(
-            StructWithIssetInspection, serialized
-        )
-        # serialize-deserialize erases isset flags
-        # so we fallback to field value `is not None`
-        result = get_locally_set_fields(deserialized)
-        # Unqualified fields are always considered set
-        self.assertIn("int_field", result)
-        self.assertIn("bool_field", result)
-        # Optional fields are set if value is not None
-        self.assertIn("opt_str_field", result)
-        self.assertNotIn("opt_list_field", result)
-
-    def test_call_from_deserialized_falls_back(self) -> None:
-        s = StructWithIssetInspection(int_field=42)
-        serialized = immutable_serializer.serialize_iobuf(s)
-        deserialized = immutable_serializer.deserialize(
-            StructWithIssetInspection, serialized
-        )
-        s2 = deserialized(bool_field=True)
-        result = get_locally_set_fields(s2)
-        # Unqualified fields always considered set
-        self.assertIn("int_field", result)
-        self.assertIn("bool_field", result)
-        # Optional fields not set in the original are not included
-        self.assertNotIn("opt_str_field", result)
-        self.assertNotIn("opt_list_field", result)
 
 
 class StructTests(unittest.TestCase):

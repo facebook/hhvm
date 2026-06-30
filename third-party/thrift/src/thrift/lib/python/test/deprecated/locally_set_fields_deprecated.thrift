@@ -85,7 +85,30 @@ struct HasContainers {
   2: list<Nested> nested_list;
   3: map<i32, Nested> nested_map;
   // `set<struct>` is intentionally not tracked (no positional/key slot).
+  // @lint-ignore THRIFTCHECKS bad-key-type
   4: set<Nested> nested_set;
   5: list<list<Nested>> nested_list_of_lists;
   6: map<i32, list<Nested>> nested_map_of_lists;
+}
+
+@python.EnableUnsafeIssetInspection
+struct StructWithIssetInspection {
+  1: i32 int_field;
+  2: optional string opt_str_field;
+  3: bool bool_field;
+  4: optional list<i32> opt_list_field;
+}
+
+struct StructWithoutIssetInspection {
+  1: i32 int_field;
+  2: optional string opt_str_field;
+}
+
+@python.EnableUnsafeIssetInspection
+struct StructWithUnannotatedChild {
+  1: StructWithoutIssetInspection child;
+}
+
+struct StructWithAnnotatedChild {
+  1: StructWithIssetInspection child;
 }

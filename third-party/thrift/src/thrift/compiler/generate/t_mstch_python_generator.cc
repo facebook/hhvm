@@ -1017,8 +1017,9 @@ class t_mstch_python_prototypes_generator : public t_whisker_generator {
           return self.has_structured_annotation(
               kPythonEnableUnsafeIssetInspectionUri);
         });
-    def.property("enable_isset_deprecated?", [this](const t_structured&) {
-      return has_compiler_option("enable_isset_deprecated_unsafe");
+    def.property("enable_isset_deprecated?", [this](const t_structured& self) {
+      return has_compiler_option("enable_isset_deprecated_unsafe") ||
+          self.has_structured_annotation(kPythonEnableUnsafeIssetInspectionUri);
     });
     def.property("should_generate_patch?", [](const t_structured& self) {
       return should_generate_patch(&self);

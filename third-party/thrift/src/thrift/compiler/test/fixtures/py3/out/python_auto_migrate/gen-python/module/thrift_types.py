@@ -450,6 +450,7 @@ _fbthrift_Float32Struct = Float32Struct
 
 class IssetInspectionStruct(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_enable_get_locally_set_fields = True
+    _fbthrift_enable_isset_deprecated = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id

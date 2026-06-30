@@ -1421,27 +1421,18 @@ cdef class Struct(StructOrUnion):
         else:
             self._fbthrift_field_cache = PyTuple_New(len(struct_info.fields))
         if struct_info.enable_get_locally_set_fields:
-            object.__setattr__(self, '_fbthrift_locally_set_fields', None)
+            object.__setattr__(self, '_fbthrift_is_locally_constructed', True)
 
     def __init__(self, **kwargs):
         self._initStructTupleWithValues(kwargs)
-        cdef StructInfo struct_info = self._fbthrift_struct_info
-        if struct_info.enable_get_locally_set_fields:
-            object.__setattr__(self, '_fbthrift_locally_set_fields', frozenset(
-                k for k, v in kwargs.items() if v is not None
-            ))
 
     def __call__(self, **kwargs):
         if not kwargs:
             return self
         cdef StructInfo struct_info = self._fbthrift_struct_info
+        cdef bint is_local = False
         if struct_info.enable_get_locally_set_fields:
-            call_keys = frozenset(
-                k for k, v in kwargs.items() if v is not None
-            )
-            none_keys = frozenset(
-                k for k, v in kwargs.items() if v is None
-            )
+            is_local = self._fbthrift_is_locally_constructed
 
         cdef tuple old_data = self._fbthrift_data
         cdef int16_t num_fields = len(struct_info.fields)
@@ -1505,10 +1496,7 @@ cdef class Struct(StructOrUnion):
             )
 
         if struct_info.enable_get_locally_set_fields:
-            isset_fields = self._fbthrift_locally_set_fields
-            if isset_fields is not None:
-                updated = (isset_fields | (<frozenset>call_keys)) - (<frozenset>none_keys)
-                object.__setattr__(new_inst, '_fbthrift_locally_set_fields', updated)
+            object.__setattr__(new_inst, '_fbthrift_is_locally_constructed', is_local)
         return new_inst
 
     def __copy__(Struct self):
@@ -1568,6 +1556,8 @@ cdef class Struct(StructOrUnion):
         cdef uint32_t len = cdeserialize(
             deref(info.cpp_obj), buf._this, self._fbthrift_data, proto
         )
+        if info.enable_get_locally_set_fields:
+            object.__setattr__(self, '_fbthrift_is_locally_constructed', False)
         return len
 
     cdef _fbthrift_py_value_from_internal_data(self, int16_t index):
@@ -2225,7 +2215,7 @@ class StructMeta(type):
             slots.append(field_info.py_name)
 
         if enable_get_locally_set_fields:
-            slots.append('_fbthrift_locally_set_fields')
+            slots.append('_fbthrift_is_locally_constructed')
         dct["__slots__"] = slots
         all_bases = bases if bases else (Struct,)
         klass = super().__new__(cls, cls_name, all_bases, dct)
@@ -3024,42 +3014,29 @@ def isset_DEPRECATED(StructOrError struct):
     }
 
 
-cdef frozenset _get_set_fields_fallback(StructOrError struct):
-    cdef StructInfo info = struct._fbthrift_struct_info
-    fields = []
-    for field_info in info.fields:
-        if field_info.qualifier == FieldQualifier.Optional:
-            if getattr(struct, field_info.py_name) is not None:
-                fields.append(field_info.py_name)
-        else:
-            fields.append(field_info.py_name)
-    return frozenset(fields)
-
-
 def get_locally_set_fields(StructOrError struct):
-    """Return the frozenset of field names explicitly set in the constructor.
+    """Return the frozenset of field names explicitly set on the struct.
 
-    Only works on structs annotated with @python.EnableUnsafeIssetInspection
-    that were constructed locally (not deserialized from the wire).
-
-    For deserialized structs, logs an error and falls back to considering all
-    unqualified fields as set, and optional fields as set if their value is
-    not None.
+    Only works on locally constructed structs annotated with
+    @python.EnableUnsafeIssetInspection.
 
     Raises:
         AttributeError: if the struct is not annotated.
     """
-    try:
-        result = struct._fbthrift_locally_set_fields
-    except AttributeError:
+    cdef StructInfo info = struct._fbthrift_struct_info
+    if not info.enable_get_locally_set_fields:
         raise AttributeError(
             f"{type(struct).__name__} does not support locally set field inspection. "
             "Add @python.EnableUnsafeIssetInspection to the struct definition."
-        ) from None
-    if result is None:
+        )
+    if not struct._fbthrift_is_locally_constructed:
         logGetLocallySetFieldsCalledOnDeserializedStruct(type(struct).__name__.encode("utf-8"))
-        return _get_set_fields_fallback(struct)
-    return result
+    isset_bytes = struct._fbthrift_data[0]
+    return frozenset(
+        name
+        for name, index in info.name_to_index.items()
+        if isset_bytes[index]
+    )
 
 
 def update_nested_field(Struct obj, path_to_values):

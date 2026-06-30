@@ -69,6 +69,15 @@ class HQServer {
     server_->setTransportStatsCallbackFactory(std::move(statsFactory));
   }
 
+  // Forward a transport-settings override fn to the underlying QuicServer; it
+  // runs per-connection. Call before start(). Lets callers gate settings (e.g.
+  // behind a JustKnob) without HQServer depending on the gating system.
+  void setTransportSettingsOverrideFn(
+      quic::QuicServer::TransportSettingsOverrideFn fn) {
+    CHECK(server_);
+    server_->setTransportSettingsOverrideFn(std::move(fn));
+  }
+
   // Takeover runtime wrapper methods - forward to underlying QuicServer
   // Takeover part 1: Methods called on the old instance.
   void allowBeingTakenOver(const folly::SocketAddress& addr);

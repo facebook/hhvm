@@ -246,7 +246,7 @@ class LoadShedConfiguration {
    */
   void setNicSoftLimitRatio(double limit) {
     WANGLE_CHECK_GE(limit, 0.0);
-    WANGLE_CHECK_LE(limit, 1.0);
+    WANGLE_CHECK_LE(limit, 2.0);
     nicSoftLimitRatio_ = limit;
   }
   double getNicSoftLimitRatio() const {
@@ -259,7 +259,7 @@ class LoadShedConfiguration {
    */
   void setNicHardLimitRatio(double limit) {
     WANGLE_CHECK_GE(limit, 0.0);
-    WANGLE_CHECK_LE(limit, 1.0);
+    WANGLE_CHECK_LE(limit, 2.0);
     nicHardLimitRatio_ = limit;
   }
   double getNicHardLimitRatio() const {

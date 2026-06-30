@@ -169,6 +169,11 @@ class McRouteHandleProvider
       folly::F14FastSet<std::shared_ptr<const AccessPoint>>>
       accessPoints_;
 
+  // Dedup map for tw job strings shared across AccessPoints.
+  // Lifetime matches McRouteHandleProvider (config parsing phase).
+  folly::F14NodeMap<std::string, std::shared_ptr<const std::string>>
+      twJobStrings_;
+
   const RouteHandleFactoryMap routeMap_;
   const RouteHandleFactoryMapWithProxy routeMapWithProxy_;
   const RouteHandleFactoryMapForWrapper routeMapForWrapper_;

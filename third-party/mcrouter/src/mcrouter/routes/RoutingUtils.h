@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include <optional>
+
 #include <folly/json/dynamic.h>
 #include "mcrouter/McrouterFiberContext.h"
 #include "mcrouter/options.h"
@@ -146,6 +148,19 @@ folly::StringPiece routingKeyFiberLocal(const Request& req) {
 uint32_t getAdditionalFanout(
     const folly::dynamic& json,
     const McrouterOptions& opts);
+
+/**
+ * Extract the tw_job handle for a given server from a PoolRoute's `services`
+ * object (services[serverKey].props.tw_job).
+ *
+ * Returns nullopt when `jservices` is null or not an object, the server is
+ * absent, any level is not an object, or `tw_job` is missing, not a string, or
+ * empty. The returned StringPiece aliases `jservices`, so it is only valid
+ * while that dynamic is alive (i.e. for the duration of config parsing).
+ */
+std::optional<folly::StringPiece> getTwJobFromServices(
+    const folly::dynamic* jservices,
+    folly::StringPiece serverKey);
 
 } // namespace mcrouter
 } // namespace memcache

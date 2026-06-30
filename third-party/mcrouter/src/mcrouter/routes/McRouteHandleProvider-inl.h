@@ -320,6 +320,9 @@ McRouteHandleProvider<RouterInfo>::makePool(
       jWeights = nullptr;
     }
     folly::dynamic jNewWeights = folly::dynamic::array;
+    auto* jservices = json.get_ptr("services");
+    checkLogic(
+        !jservices || jservices->isObject(), "services is not an object");
     auto accessPointsIt = accessPoints_.end();
     for (size_t i = 0; i < jservers->size(); ++i) {
       const auto& server = jservers->at(i);
@@ -348,6 +351,15 @@ McRouteHandleProvider<RouterInfo>::makePool(
         proxy_.stats().increment(dest_with_no_failure_domain_count_stat);
       }
 
+      std::shared_ptr<const std::string> twJobPtr;
+      if (auto twJob = getTwJobFromServices(jservices, server.stringPiece())) {
+        auto [twIt, inserted] = twJobStrings_.try_emplace(twJob->str());
+        if (inserted) {
+          twIt->second = std::make_shared<const std::string>(twIt->first);
+        }
+        twJobPtr = twIt->second;
+      }
+
       if (accessPointsIt == accessPoints_.end()) {
         auto expectedSize = jservers->size() * (1 + additionalFanout);
         auto [it, inserted] = accessPoints_.try_emplace(name, expectedSize);
@@ -362,6 +374,10 @@ McRouteHandleProvider<RouterInfo>::makePool(
       for (uint32_t idx = 0; idx < (1 + additionalFanout); ++idx) {
         auto ap = createAccessPoint(
             server.stringPiece(), failureDomain, proxy_.router(), *apAttr);
+
+        if (twJobPtr) {
+          ap->setTwJob(twJobPtr);
+        }
 
         if (ap->getProtocol() == mc_thrift_protocol) {
           checkLogic(

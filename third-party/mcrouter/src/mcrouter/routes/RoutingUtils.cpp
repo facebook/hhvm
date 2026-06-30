@@ -47,6 +47,30 @@ uint32_t getAdditionalFanout(
   return additionalFanout;
 }
 
+std::optional<folly::StringPiece> getTwJobFromServices(
+    const folly::dynamic* jservices,
+    folly::StringPiece serverKey) {
+  if (!jservices || !jservices->isObject()) {
+    return std::nullopt;
+  }
+  const auto* jservice = jservices->get_ptr(serverKey);
+  if (!jservice || !jservice->isObject()) {
+    return std::nullopt;
+  }
+  const auto* jprops = jservice->get_ptr("props");
+  if (!jprops || !jprops->isObject()) {
+    return std::nullopt;
+  }
+  const auto* jTwJob = jprops->get_ptr("tw_job");
+  if (jTwJob && jTwJob->isString()) {
+    auto twJob = jTwJob->stringPiece();
+    if (!twJob.empty()) {
+      return twJob;
+    }
+  }
+  return std::nullopt;
+}
+
 } // namespace mcrouter
 } // namespace memcache
 } // namespace facebook

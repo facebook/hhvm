@@ -1211,6 +1211,32 @@ std::string trailing_comment_impl(
   return " " + tok.trailing_comment->text;
 }
 
+std::string inline_separator_after(const token& tok) {
+  return tok.trailing_comment && tok.trailing_comment->line
+      ? "\n" + spaces(kIndent)
+      : " ";
+}
+
+std::string line_comment_break_after(const token& tok) {
+  return tok.trailing_comment && tok.trailing_comment->line ? "\n" : "";
+}
+
+std::string line_comment_break_before_separator(
+    const token& tok,
+    const std::optional<token>& sep,
+    std::string_view corrected) {
+  if (!sep && corrected.empty()) {
+    return "";
+  }
+  return line_comment_break_after(tok);
+}
+
+std::string line_comment_continuation_after(const token& tok) {
+  return tok.trailing_comment && tok.trailing_comment->line
+      ? "\n" + spaces(kIndent)
+      : "";
+}
+
 std::string trailing_comment(const token& tok) {
   return trailing_comment_impl(tok, nullptr);
 }
@@ -1908,9 +1934,12 @@ class concrete_formatter {
         first_text_between("performs", item.range.begin, item.range.end)
             .value_or(synthetic_token("performs"));
     const token id = token_at(item.name.loc);
-    return leading_node_prefix(performs, indent, preserve_blank) + "performs " +
-        inline_token(id, indent) +
-        print_separator(last_separator(item.range), ";");
+    std::string result = leading_node_prefix(performs, indent, preserve_blank) +
+        "performs " + inline_token(id, indent);
+    auto sep = last_separator(item.range);
+    result += line_comment_break_before_separator(id, sep, ";");
+    result += print_separator(sep, ";");
+    return result;
   }
 
   std::string print_enum_value(
@@ -1926,18 +1955,26 @@ class concrete_formatter {
       result.push_back('\n');
     }
     result += leading_node_prefix(id, indent, preserve_blank) + token_text(id);
+    token last_token = id;
     if (item.value) {
       const token equal = symbol_between('=', id.range.end, item.range.end);
       const token val = first_token_after(equal.range.end, item.range.end);
-      result +=
-          " " + inline_token(equal, indent) + " " + inline_token(val, indent);
+      result += inline_separator_after(last_token);
+      result += inline_token(equal, indent);
+      last_token = equal;
+      result += inline_separator_after(last_token);
+      result += inline_token(val, indent);
+      last_token = val;
     }
     if (auto annotations = deprecated_annotations(item.attrs.get())) {
-      result += " " +
-          print_annotation_list(
-                    *annotations, indent, last_line_length(result) + 1);
+      result += inline_separator_after(last_token);
+      result += print_annotation_list(
+          *annotations, indent, last_line_length(result) + 1);
+      last_token = annotations->right;
     }
-    result += print_separator(last_separator(item.range), ",");
+    auto sep = last_separator(item.range);
+    result += line_comment_break_before_separator(last_token, sep, ",");
+    result += print_separator(sep, ",");
     return result;
   }
 
@@ -2000,7 +2037,9 @@ class concrete_formatter {
               return tok.kind != token_kind::eof && !tok.is_symbol(';');
             })) {
       result += " " + inline_token(*name, indent);
-      result += print_separator(last_separator(statement.range), "");
+      auto sep = last_separator(statement.range);
+      result += line_comment_break_before_separator(*name, sep, "");
+      result += print_separator(sep, "");
       return result;
     }
     result += print_separator(last_separator(statement.range), ";");
@@ -2015,6 +2054,7 @@ class concrete_formatter {
     const token path = token_at(statement.text_range.begin);
     std::string result = keyword_prefix(include, indent, suppress_prefix) +
         "include " + inline_token(path, indent);
+    token last_token = path;
     if (auto as_keyword =
             first_text_between("as", path.range.end, statement.range.end)) {
       if (auto alias = first_token_between(
@@ -2022,10 +2062,14 @@ class concrete_formatter {
                 return tok.kind != token_kind::eof && !tok.is_symbol(';') &&
                     !tok.is_symbol(',');
               })) {
-        result += " as " + inline_token(*alias, indent);
+        result += inline_separator_after(path);
+        result += "as " + inline_token(*alias, indent);
+        last_token = *alias;
       }
     }
-    result += print_separator(last_separator(statement.range), "");
+    auto sep = last_separator(statement.range);
+    result += line_comment_break_before_separator(last_token, sep, "");
+    result += print_separator(sep, "");
     return result;
   }
 
@@ -2038,7 +2082,9 @@ class concrete_formatter {
         first_token_after(include.range.end, statement.range.end);
     std::string result = keyword_prefix(include, indent, suppress_prefix) +
         include.text + " " + inline_token(path, indent);
-    result += print_separator(last_separator(statement.range), "");
+    auto sep = last_separator(statement.range);
+    result += line_comment_break_before_separator(path, sep, "");
+    result += print_separator(sep, "");
     return result;
   }
 
@@ -2051,9 +2097,12 @@ class concrete_formatter {
     const token value =
         first_token_after(language.range.end, statement.range.end);
     std::string result = keyword_prefix(ns, indent, suppress_prefix) +
-        "namespace " + inline_token(language, indent) + " " +
+        "namespace " + inline_token(language, indent) +
+        std::string(inline_separator_after(language)) +
         inline_token(value, indent);
-    result += print_separator(last_separator(statement.range), "");
+    auto sep = last_separator(statement.range);
+    result += line_comment_break_before_separator(value, sep, "");
+    result += print_separator(sep, "");
     return result;
   }
 
@@ -2094,22 +2143,31 @@ class concrete_formatter {
         force_type_break,
         /*allow_long_inline=*/type.type.args.size() > 1,
         /*include_leading=*/true);
+    token last_token = last_type_token(type.type);
     if (type.annotations) {
-      result +=
-          " " +
-          print_annotation_list(
-              *type.annotations, indent, indent + last_line_length(result) + 1);
+      result += inline_separator_after(last_token);
+      result += print_annotation_list(
+          *type.annotations, indent, indent + last_line_length(result) + 1);
+      last_token = type.annotations->right;
     }
-    result += " " + inline_token(id, indent) + " " +
-        inline_token(equal, indent) + " ";
+    result += inline_separator_after(last_token);
+    result += inline_token(id, indent);
+    last_token = id;
+    result += inline_separator_after(last_token);
+    result += inline_token(equal, indent);
+    last_token = equal;
+    result += inline_separator_after(last_token);
     result += print_value(val, indent, indent + last_line_length(result));
+    last_token = last_value_token(val);
     if (auto annotations = deprecated_annotations(statement.attrs.get())) {
-      result +=
-          " " +
-          print_annotation_list(
-              *annotations, indent, indent + last_line_length(result) + 1);
+      result += inline_separator_after(last_token);
+      result += print_annotation_list(
+          *annotations, indent, indent + last_line_length(result) + 1);
+      last_token = annotations->right;
     }
-    result += print_separator(last_separator(statement.range), ";");
+    auto sep = last_separator(statement.range);
+    result += line_comment_break_before_separator(last_token, sep, ";");
+    result += print_separator(sep, ";");
     return result;
   }
 
@@ -2150,18 +2208,23 @@ class concrete_formatter {
         force_type_break,
         /*allow_long_inline=*/true,
         /*include_leading=*/true);
+    token last_token = last_type_token(type.type);
     if (type.annotations) {
-      result += " " +
-          print_annotation_list(
-                    *type.annotations, indent, last_line_length(result) + 1);
+      result += inline_separator_after(last_token);
+      result += print_annotation_list(
+          *type.annotations, indent, last_line_length(result) + 1);
+      last_token = type.annotations->right;
     }
-    result += " " + inline_token(id, indent);
+    result += inline_separator_after(last_token);
+    result += inline_token(id, indent);
+    last_token = id;
     if (trailing_annotations) {
-      result +=
-          " " +
-          print_annotation_list(
-              *trailing_annotations, indent, last_line_length(result) + 1);
+      result += inline_separator_after(last_token);
+      result += print_annotation_list(
+          *trailing_annotations, indent, last_line_length(result) + 1);
+      last_token = trailing_annotations->right;
     }
+    result += line_comment_break_before_separator(last_token, sep, "");
     result += print_separator(sep, "");
     return result;
   }
@@ -2176,7 +2239,9 @@ class concrete_formatter {
     const token right =
         last_symbol_between('}', left.range.end, statement.range.end);
     std::string result = keyword_prefix(keyword, indent, suppress_prefix) +
-        "enum " + inline_token(id, indent) + " " + inline_token(left, indent);
+        "enum " + inline_token(id, indent);
+    result += inline_separator_after(id);
+    result += inline_token(left, indent);
     for (size_t i = 0; i < statement.enum_values.size(); ++i) {
       result += "\n" +
           indent_multiline(
@@ -2184,13 +2249,16 @@ class concrete_formatter {
                     indent + kIndent);
     }
     result += "\n" + spaces(indent) + inline_token(right, indent);
+    token last_token = right;
     if (auto annotations = deprecated_annotations(statement.attrs.get())) {
-      result += " " +
-          print_annotation_list(
-                    *annotations, indent, last_line_length(result) + 1);
+      result += inline_separator_after(last_token);
+      result += print_annotation_list(
+          *annotations, indent, last_line_length(result) + 1);
+      last_token = annotations->right;
     }
-    result += print_separator(
-        last_separator_after(right.range.end, statement.range), "");
+    auto sep = last_separator_after(right.range.end, statement.range);
+    result += line_comment_break_before_separator(last_token, sep, "");
+    result += print_separator(sep, "");
     return result;
   }
 
@@ -2209,15 +2277,19 @@ class concrete_formatter {
       fields.push_back(materialize_field(item));
     }
     std::string result = keyword_prefix(keyword, indent, suppress_prefix) +
-        keyword.text + " " + inline_token(id, indent) + " ";
+        keyword.text + " " + inline_token(id, indent);
+    result += inline_separator_after(id);
     result += print_fields(left, fields, right, indent);
+    token last_token = right;
     if (auto annotations = deprecated_annotations(statement.attrs.get())) {
-      result += " " +
-          print_annotation_list(
-                    *annotations, indent, last_line_length(result) + 1);
+      result += inline_separator_after(last_token);
+      result += print_annotation_list(
+          *annotations, indent, last_line_length(result) + 1);
+      last_token = annotations->right;
     }
-    result += print_separator(
-        last_separator_after(right.range.end, statement.range), "");
+    auto sep = last_separator_after(right.range.end, statement.range);
+    result += line_comment_break_before_separator(last_token, sep, "");
+    result += print_separator(sep, "");
     return result;
   }
 
@@ -2243,20 +2315,24 @@ class concrete_formatter {
                                          : leading_node_prefix(first, indent);
     for (const token& modifier :
          tokens_between(first.range.begin, keyword.range.begin)) {
-      result += (modifier.range.begin == first.range.begin
-                     ? token_text(modifier)
-                     : inline_token(modifier, indent)) +
-          " ";
+      result += (modifier.range.begin == first.range.begin)
+          ? token_text(modifier)
+          : inline_token(modifier, indent);
+      result += inline_separator_after(modifier);
     }
-    result += "exception " + inline_token(id, indent) + " ";
+    result += "exception " + inline_token(id, indent);
+    result += inline_separator_after(id);
     result += print_fields(left, fields, right, indent);
+    token last_token = right;
     if (auto annotations = deprecated_annotations(statement.attrs.get())) {
-      result += " " +
-          print_annotation_list(
-                    *annotations, indent, last_line_length(result) + 1);
+      result += inline_separator_after(last_token);
+      result += print_annotation_list(
+          *annotations, indent, last_line_length(result) + 1);
+      last_token = annotations->right;
     }
-    result += print_separator(
-        last_separator_after(right.range.end, statement.range), "");
+    auto sep = last_separator_after(right.range.end, statement.range);
+    result += line_comment_break_before_separator(last_token, sep, "");
+    result += print_separator(sep, "");
     return result;
   }
 
@@ -2271,11 +2347,15 @@ class concrete_formatter {
         last_symbol_between('}', left.range.end, statement.range.end);
     std::string result = keyword_prefix(keyword, indent, suppress_prefix) +
         keyword.text + " " + inline_token(id, indent);
+    token last_token = id;
     if (statement.second_identifier.loc != source_location{}) {
-      result += " extends " +
-          inline_token(token_at(statement.second_identifier.loc), indent);
+      const token base = token_at(statement.second_identifier.loc);
+      result += inline_separator_after(last_token);
+      result += "extends " + inline_token(base, indent);
+      last_token = base;
     }
-    result += " " + inline_token(left, indent);
+    result += inline_separator_after(last_token);
+    result += inline_token(left, indent);
     for (size_t i = 0; i < statement.functions.size(); ++i) {
       const auto& fn = statement.functions[i];
       std::string member = fn.performs
@@ -2284,13 +2364,16 @@ class concrete_formatter {
       result += "\n" + indent_multiline(member, indent + kIndent);
     }
     result += "\n" + spaces(indent) + inline_token(right, indent);
+    last_token = right;
     if (auto annotations = deprecated_annotations(statement.attrs.get())) {
-      result += " " +
-          print_annotation_list(
-                    *annotations, indent, last_line_length(result) + 1);
+      result += inline_separator_after(last_token);
+      result += print_annotation_list(
+          *annotations, indent, last_line_length(result) + 1);
+      last_token = annotations->right;
     }
-    result += print_separator(
-        last_separator_after(right.range.end, statement.range), "");
+    auto sep = last_separator_after(right.range.end, statement.range);
+    result += line_comment_break_before_separator(last_token, sep, "");
+    result += print_separator(sep, "");
     return result;
   }
 
@@ -2609,6 +2692,32 @@ class concrete_formatter {
   bool type_source_starts_multiline(const parsed_type& ty) const {
     return ty.left_angle && !ty.args.empty() &&
         ty.left_angle->end_line != ty.args.front().first.start_line;
+  }
+
+  const token& last_type_token(const parsed_type& ty) const {
+    if (ty.throws) {
+      return ty.throws->right;
+    }
+    if (ty.right_angle) {
+      return *ty.right_angle;
+    }
+    return ty.first;
+  }
+
+  const token& last_value_token(const value& val) const {
+    if (val.object_body) {
+      return val.object_body->right;
+    }
+    if (val.right) {
+      return *val.right;
+    }
+    if (!val.map_values.empty()) {
+      return last_value_token(val.map_values.back());
+    }
+    if (!val.list_values.empty()) {
+      return last_value_token(val.list_values.back());
+    }
+    return val.first;
   }
 
   std::string type_inline(
@@ -3223,12 +3332,16 @@ class concrete_formatter {
       size_t width_offset = 0) const {
     std::string result =
         inline_leading_prefix(entry.key, indent) + entry.key.text;
+    token last_token = entry.key;
     if (entry.op && entry.val) {
-      result += " " + entry.op->text + " " +
-          print_value(
-                    *entry.val,
-                    indent,
-                    width_offset + indent + last_line_length(result) + 4);
+      result += inline_separator_after(last_token);
+      result += entry.op->text;
+      last_token = *entry.op;
+      result += inline_separator_after(last_token);
+      result += print_value(
+          *entry.val,
+          indent,
+          width_offset + indent + last_line_length(result) + 4);
     }
     return result;
   }
@@ -3306,13 +3419,15 @@ class concrete_formatter {
     result += leading_node_prefix(
         first, indent, preserve_blank && item.leading_annotations.empty());
     if (item.index && item.colon) {
-      result +=
-          token_text(*item.index) + inline_token(*item.colon, indent) + " ";
+      result += token_text(*item.index);
+      result += line_comment_continuation_after(*item.index);
+      result += inline_token(*item.colon, indent);
+      result += inline_separator_after(*item.colon);
     }
     if (item.requirement) {
-      result += (item.index ? inline_token(*item.requirement, indent)
-                            : token_text(*item.requirement)) +
-          " ";
+      result += item.index ? inline_token(*item.requirement, indent)
+                           : token_text(*item.requirement);
+      result += inline_separator_after(*item.requirement);
     }
     size_t type_suffix = 0;
     size_t type_inline_size = 0;
@@ -3361,34 +3476,44 @@ class concrete_formatter {
         force_type_break,
         /*allow_long_inline=*/true,
         include_type_leading);
+    const token* last_token = &last_type_token(item.type);
+    const auto append_after_last_token = [&](std::string suffix) {
+      result += inline_separator_after(*last_token);
+      result += suffix;
+    };
     if (item.type_annotations) {
-      result +=
-          " " +
-          print_annotation_list(
-              *item.type_annotations, indent, last_line_length(result) + 1);
+      append_after_last_token(print_annotation_list(
+          *item.type_annotations, indent, last_line_length(result) + 1));
+      last_token = &item.type_annotations->right;
     }
     if (item.id) {
-      result += " " + inline_token(*item.id, indent);
+      append_after_last_token(inline_token(*item.id, indent));
+      last_token = &*item.id;
     }
     if (item.id_annotations) {
-      result += " " +
-          print_annotation_list(
-                    *item.id_annotations, indent, last_line_length(result) + 1);
+      append_after_last_token(print_annotation_list(
+          *item.id_annotations, indent, last_line_length(result) + 1));
+      last_token = &item.id_annotations->right;
     }
     if (item.default_value) {
-      result += " " + inline_token(item.default_value->equal, indent) + " ";
+      append_after_last_token(inline_token(item.default_value->equal, indent));
+      last_token = &item.default_value->equal;
+      result += inline_separator_after(*last_token);
       result += print_value(
           item.default_value->val,
           indent,
           effective_indent + last_line_length(result));
+      last_token = &last_value_token(item.default_value->val);
       if (item.default_value->annotations) {
-        result += " " +
-            print_annotation_list(
-                      *item.default_value->annotations,
-                      indent,
-                      last_line_length(result) + 1);
+        append_after_last_token(print_annotation_list(
+            *item.default_value->annotations,
+            indent,
+            last_line_length(result) + 1));
+        last_token = &item.default_value->annotations->right;
       }
     }
+    result +=
+        line_comment_break_before_separator(*last_token, item.separator, ";");
     result += print_separator(item.separator, ";");
     return result;
   }
@@ -3417,12 +3542,15 @@ class concrete_formatter {
                                           : fn.return_types.front().first));
     prefix += leading_node_prefix(first, indent, preserve_blank);
     if (fn.index && fn.colon) {
-      prefix += token_text(*fn.index) + inline_token(*fn.colon, indent) + " ";
+      prefix += token_text(*fn.index);
+      prefix += line_comment_continuation_after(*fn.index);
+      prefix += inline_token(*fn.colon, indent);
+      prefix += inline_separator_after(*fn.colon);
     }
     if (fn.modifier) {
-      prefix += (fn.index ? inline_token(*fn.modifier, indent)
-                          : token_text(*fn.modifier)) +
-          " ";
+      prefix += fn.index ? inline_token(*fn.modifier, indent)
+                         : token_text(*fn.modifier);
+      prefix += inline_separator_after(*fn.modifier);
     }
 
     const bool compact_params = has_compact_field_separators(fn.params);
@@ -3444,10 +3572,19 @@ class concrete_formatter {
     }
     const size_t effective_indent = indent + kIndent;
 
+    const token* last_return_token = nullptr;
     for (size_t i = 0; i < fn.return_types.size(); ++i) {
       if (i != 0) {
+        if (last_return_token != nullptr) {
+          prefix += line_comment_continuation_after(*last_return_token);
+        }
         prefix += print_separator(fn.return_type_separators.at(i - 1), ",");
-        prefix.push_back(' ');
+        if (fn.return_type_separators.at(i - 1)) {
+          prefix +=
+              inline_separator_after(*fn.return_type_separators.at(i - 1));
+        } else {
+          prefix.push_back(' ');
+        }
       }
       size_t remaining = 0;
       if (i + 1 == inline_returns.size()) {
@@ -3467,9 +3604,10 @@ class concrete_formatter {
           force_return_break,
           /*allow_long_inline=*/true,
           include_type_leading);
+      last_return_token = &last_type_token(fn.return_types.at(i));
     }
-    if (!fn.return_types.empty()) {
-      prefix.push_back(' ');
+    if (last_return_token != nullptr) {
+      prefix += inline_separator_after(*last_return_token);
     }
     prefix += inline_token(fn.name, indent);
 
@@ -3477,16 +3615,21 @@ class concrete_formatter {
       auto inline_capture = capture_trivia_printing();
       const std::string params_inline =
           fields_inline(fn.params, ',', compact_params, compact_params);
-      const std::string inline_result = prefix + inline_token(fn.left, indent) +
-          params_inline + inline_token(fn.right, indent);
+      const std::string inline_result = prefix +
+          line_comment_continuation_after(fn.name) +
+          inline_token(fn.left, indent) + params_inline +
+          inline_token(fn.right, indent);
       std::string suffix_inline;
       {
         auto measurement = capture_trivia_printing();
         if (fn.throws) {
-          suffix_inline += " " + throws_inline(*fn.throws);
+          suffix_inline += inline_separator_after(fn.right);
+          suffix_inline += throws_inline(*fn.throws);
         }
         if (fn.annotations) {
-          suffix_inline += " " + print_annotation_list_inline(*fn.annotations);
+          suffix_inline +=
+              inline_separator_after(fn.throws ? fn.throws->right : fn.right);
+          suffix_inline += print_annotation_list_inline(*fn.annotations);
         }
         suffix_inline += print_separator(fn.separator, ";");
       }
@@ -3498,19 +3641,20 @@ class concrete_formatter {
           !fn.left.trailing_comment) {
         std::string suffix;
         if (fn.throws) {
-          suffix += " " +
-              print_throws(
-                        *fn.throws,
-                        indent,
-                        effective_indent + last_line_length(inline_result) + 2);
+          suffix += inline_separator_after(fn.right);
+          suffix += print_throws(
+              *fn.throws,
+              indent,
+              effective_indent + last_line_length(inline_result) + 2);
         }
         if (fn.annotations) {
-          suffix += " " +
-              print_annotation_list(
-                        *fn.annotations,
-                        indent,
-                        effective_indent + last_line_length(inline_result) +
-                            suffix.size() + 1);
+          suffix +=
+              inline_separator_after(fn.throws ? fn.throws->right : fn.right);
+          suffix += print_annotation_list(
+              *fn.annotations,
+              indent,
+              effective_indent + last_line_length(inline_result) +
+                  suffix.size() + 1);
         }
         suffix += print_separator(fn.separator, ";");
         inline_capture.commit();
@@ -3524,19 +3668,20 @@ class concrete_formatter {
           (inline_full_column <= kPrintWidth || inline_params_column <= 71)) {
         std::string suffix;
         if (fn.throws) {
-          suffix += " " +
-              print_throws(
-                        *fn.throws,
-                        indent,
-                        effective_indent + last_line_length(inline_result) + 2);
+          suffix += inline_separator_after(fn.right);
+          suffix += print_throws(
+              *fn.throws,
+              indent,
+              effective_indent + last_line_length(inline_result) + 2);
         }
         if (fn.annotations) {
-          suffix += " " +
-              print_annotation_list(
-                        *fn.annotations,
-                        indent,
-                        effective_indent + last_line_length(inline_result) +
-                            suffix.size() + 1);
+          suffix +=
+              inline_separator_after(fn.throws ? fn.throws->right : fn.right);
+          suffix += print_annotation_list(
+              *fn.annotations,
+              indent,
+              effective_indent + last_line_length(inline_result) +
+                  suffix.size() + 1);
         }
         suffix += print_separator(fn.separator, ";");
         inline_capture.commit();
@@ -3544,7 +3689,9 @@ class concrete_formatter {
       }
     }
 
-    std::string result = prefix + inline_token(fn.left, indent);
+    std::string result = prefix;
+    result += line_comment_continuation_after(fn.name);
+    result += inline_token(fn.left, indent);
     for (const auto& param : fn.params) {
       result += "\n" +
           indent_multiline(
@@ -3562,20 +3709,23 @@ class concrete_formatter {
       }
     }
     result += "\n" + spaces(indent) + token_text(fn.right);
+    const token* last_token = &fn.right;
     if (fn.throws) {
-      result += " " +
-          print_throws(
-                    *fn.throws,
-                    indent,
-                    effective_indent + last_line_length(result) + 2);
+      result += inline_separator_after(*last_token);
+      result += print_throws(
+          *fn.throws, indent, effective_indent + last_line_length(result) + 2);
+      last_token = &fn.throws->right;
     }
     if (fn.annotations) {
-      result += " " +
-          print_annotation_list(
-                    *fn.annotations,
-                    indent,
-                    effective_indent + last_line_length(result) + 1);
+      result += inline_separator_after(*last_token);
+      result += print_annotation_list(
+          *fn.annotations,
+          indent,
+          effective_indent + last_line_length(result) + 1);
+      last_token = &fn.annotations->right;
     }
+    result +=
+        line_comment_break_before_separator(*last_token, fn.separator, ";");
     result += print_separator(fn.separator, ";");
     return result;
   }
@@ -3618,7 +3768,8 @@ class concrete_formatter {
   }
 
   std::string throws_inline(const throws_list& throws) const {
-    return inline_token(throws.throws_keyword, 0) + " " +
+    return inline_token(throws.throws_keyword, 0) +
+        std::string(inline_separator_after(throws.throws_keyword)) +
         inline_token(throws.left, 0) + fields_inline(throws.fields, ',') +
         inline_token(throws.right, 0);
   }
@@ -3631,25 +3782,40 @@ class concrete_formatter {
       result.push_back('\n');
     }
     if (item.index && item.colon) {
-      result += inline_token(*item.index, indent) +
-          inline_token(*item.colon, indent) + " ";
+      result += inline_token(*item.index, indent);
+      result += line_comment_continuation_after(*item.index);
+      result += inline_token(*item.colon, indent);
+      result += inline_separator_after(*item.colon);
     }
     if (item.requirement) {
-      result += inline_token(*item.requirement, indent) + " ";
+      result += inline_token(*item.requirement, indent);
+      result += inline_separator_after(*item.requirement);
     }
     result += type_inline(item.type, /*include_leading=*/true);
+    const token* last_token = &last_type_token(item.type);
+    const auto append_after_last_token = [&](std::string suffix) {
+      result += inline_separator_after(*last_token);
+      result += suffix;
+    };
     if (item.type_annotations) {
-      result += " " + print_annotation_list_inline(*item.type_annotations);
+      append_after_last_token(
+          print_annotation_list_inline(*item.type_annotations));
+      last_token = &item.type_annotations->right;
     }
     if (item.id) {
-      result += " " + inline_token(*item.id, indent);
+      append_after_last_token(inline_token(*item.id, indent));
+      last_token = &*item.id;
     }
     if (item.id_annotations) {
-      result += " " + print_annotation_list_inline(*item.id_annotations);
+      append_after_last_token(
+          print_annotation_list_inline(*item.id_annotations));
+      last_token = &item.id_annotations->right;
     }
     if (item.default_value) {
-      result += " " + inline_token(item.default_value->equal, indent) + " " +
-          value_inline(item.default_value->val);
+      append_after_last_token(inline_token(item.default_value->equal, indent));
+      last_token = &item.default_value->equal;
+      result += inline_separator_after(*last_token);
+      result += value_inline(item.default_value->val);
     }
     return result;
   }
@@ -3672,8 +3838,9 @@ class concrete_formatter {
         return inline_text;
       }
     }
-    std::string result = inline_token(throws.throws_keyword, 0) + " " +
-        inline_token(throws.left, 0);
+    std::string result = inline_token(throws.throws_keyword, 0);
+    result += inline_separator_after(throws.throws_keyword);
+    result += inline_token(throws.left, 0);
     for (const auto& field : throws.fields) {
       result += "\n" +
           indent_multiline(

@@ -291,15 +291,58 @@ service Service {
 )");
 }
 
-TEST(FormatterTest, currentBehaviorMergesFieldNameAfterTypeTrailingComment) {
+TEST(FormatterTest, preservesContentAfterTrailingLineComments) {
   expect_format(
       R"(struct Foo {
   1: Bar // This is a long bar comment
         bar;
+  2: list<i32> // after generic type
+        items;
+  3: i32 count // after field name
+        = // after equal
+        1;
 }
 )",
       R"(struct Foo {
-  1: Bar // This is a long bar comment bar;
+  1: Bar // This is a long bar comment
+    bar;
+  2: list<i32> // after generic type
+    items;
+  3: i32 count // after field name
+    = // after equal
+    1;
+}
+)");
+
+  expect_format(
+      R"(include "foo" // after include path
+  as Foo
+namespace cpp // after namespace language
+  foo.bar
+typedef list<i64> // after typedef type
+  Ids
+const i32 // after const type
+  answer = // after const equal
+  42
+service Foo // after service name
+  extends Bar {
+  i32 // after return type
+    get()
+}
+)",
+      R"(include "foo" // after include path
+  as Foo
+namespace cpp // after namespace language
+  foo.bar
+typedef list<i64> // after typedef type
+  Ids
+const i32 // after const type
+  answer = // after const equal
+  42;
+service Foo // after service name
+  extends Bar {
+  i32 // after return type
+    get();
 }
 )");
 }

@@ -22,7 +22,6 @@
 #include <folly/io/async/EventBase.h>
 #include <folly/portability/GTest.h>
 
-#include <array>
 #include <cstdint>
 #include <memory>
 #include <string>
@@ -52,7 +51,7 @@ struct Payload {
 template <Ev... Evs>
 class SubHandler {
  public:
-  static constexpr std::array<Ev, sizeof...(Evs)> kSubscribedEvents{Evs...};
+  static constexpr Subscriptions<Evs...> kSubscribedEvents{};
 
   void handlerAdded(detail::ContextImpl&) noexcept {}
   void handlerRemoved(detail::ContextImpl&) noexcept {}
@@ -85,7 +84,7 @@ class SubHandler {
 template <Ev... Evs>
 class SubHead {
  public:
-  static constexpr std::array<Ev, sizeof...(Evs)> kSubscribedEvents{Evs...};
+  static constexpr Subscriptions<Evs...> kSubscribedEvents{};
 
   Result onWrite(TypeErasedBox&&) noexcept { return Result::Success; }
   void onException(folly::exception_wrapper&&) noexcept {}
@@ -109,7 +108,7 @@ class SubHead {
 template <Ev... Evs>
 class SubTail {
  public:
-  static constexpr std::array<Ev, sizeof...(Evs)> kSubscribedEvents{Evs...};
+  static constexpr Subscriptions<Evs...> kSubscribedEvents{};
 
   Result onRead(TypeErasedBox&&) noexcept { return Result::Success; }
   void onException(folly::exception_wrapper&&) noexcept {}
@@ -132,7 +131,7 @@ class SubTail {
 // Subscriber that reads the typed payload off the event box.
 class PayloadHandler {
  public:
-  static constexpr std::array<Ev, 1> kSubscribedEvents{Ev::Alpha};
+  static constexpr Subscriptions<Ev::Alpha> kSubscribedEvents{};
   void handlerAdded(detail::ContextImpl&) noexcept {}
   void handlerRemoved(detail::ContextImpl&) noexcept {}
   void onPipelineActive(detail::ContextImpl&) noexcept {}
@@ -162,7 +161,7 @@ class PayloadHandler {
 // Used to verify per-event iteration order.
 class NamedHandler {
  public:
-  static constexpr std::array<Ev, 1> kSubscribedEvents{Ev::Alpha};
+  static constexpr Subscriptions<Ev::Alpha> kSubscribedEvents{};
   NamedHandler(std::string name, std::vector<std::string>& order) noexcept
       : name_(std::move(name)), order_(order) {}
 
@@ -214,6 +213,135 @@ class OrderTail : public SubTail<Ev::Alpha> {
  private:
   std::vector<std::string>& order_;
 };
+
+// Anchored layer enums: an upper layer continues the lower layer's id space, so
+// every layer shares one collision-free id space while staying its own type.
+enum class LTransportEvent : std::uint32_t { WriteComplete, Heartbeat, Count };
+enum class LRocketEvent : std::uint32_t {
+  ConnClose = static_cast<std::uint32_t>(LTransportEvent::Count), // 2
+  Count, // 3 (cumulative: the full id space)
+};
+
+// A common handler that subscribes in its OWN lower-layer enum and never names
+// the pipeline's top enum. Data-plane methods are pass-through.
+class LayeredTransportHandler {
+ public:
+  static constexpr Subscriptions<LTransportEvent::WriteComplete>
+      kSubscribedEvents{};
+
+  void handlerAdded(detail::ContextImpl&) noexcept {}
+  void handlerRemoved(detail::ContextImpl&) noexcept {}
+  void onPipelineActive(detail::ContextImpl&) noexcept {}
+  Result onRead(detail::ContextImpl& ctx, TypeErasedBox&& msg) noexcept {
+    return ctx.fireRead(std::move(msg));
+  }
+  void onReadReady(detail::ContextImpl&) noexcept {}
+  void onException(
+      detail::ContextImpl& ctx, folly::exception_wrapper&& e) noexcept {
+    ctx.fireException(std::move(e));
+  }
+  Result onWrite(detail::ContextImpl& ctx, TypeErasedBox&& msg) noexcept {
+    return ctx.fireWrite(std::move(msg));
+  }
+  void onWriteReady(detail::ContextImpl&) noexcept {}
+  void onPipelineInactive(detail::ContextImpl&) noexcept {}
+
+  void onEvent(
+      detail::ContextImpl&, LTransportEvent ev, const TypeErasedBox&) noexcept {
+    received_.push_back(ev);
+  }
+
+  const std::vector<LTransportEvent>& received() const noexcept {
+    return received_;
+  }
+
+ private:
+  std::vector<LTransportEvent> received_;
+};
+
+// A rocket-layer handler that subscribes to events from MULTIPLE layers at once
+// — its own (LRocketEvent) AND a lower one (LTransportEvent) — with a typed
+// onEvent overload per layer. This is the cross-layer listening requirement.
+class LayeredMultiHandler {
+ public:
+  static constexpr Subscriptions<
+      LTransportEvent::WriteComplete,
+      LRocketEvent::ConnClose>
+      kSubscribedEvents{};
+
+  void handlerAdded(detail::ContextImpl&) noexcept {}
+  void handlerRemoved(detail::ContextImpl&) noexcept {}
+  void onPipelineActive(detail::ContextImpl&) noexcept {}
+  Result onRead(detail::ContextImpl& ctx, TypeErasedBox&& msg) noexcept {
+    return ctx.fireRead(std::move(msg));
+  }
+  void onReadReady(detail::ContextImpl&) noexcept {}
+  void onException(
+      detail::ContextImpl& ctx, folly::exception_wrapper&& e) noexcept {
+    ctx.fireException(std::move(e));
+  }
+  Result onWrite(detail::ContextImpl& ctx, TypeErasedBox&& msg) noexcept {
+    return ctx.fireWrite(std::move(msg));
+  }
+  void onWriteReady(detail::ContextImpl&) noexcept {}
+  void onPipelineInactive(detail::ContextImpl&) noexcept {}
+
+  void onEvent(
+      detail::ContextImpl&, LTransportEvent ev, const TypeErasedBox&) noexcept {
+    transport_.push_back(ev);
+  }
+  void onEvent(
+      detail::ContextImpl&, LRocketEvent ev, const TypeErasedBox&) noexcept {
+    rocket_.push_back(ev);
+  }
+
+  const std::vector<LTransportEvent>& transport() const noexcept {
+    return transport_;
+  }
+  const std::vector<LRocketEvent>& rocket() const noexcept { return rocket_; }
+
+ private:
+  std::vector<LTransportEvent> transport_;
+  std::vector<LRocketEvent> rocket_;
+};
+
+// Layer enums that expose Base (the anchor) so the tiling check can read it.
+enum class VTransport : std::uint32_t { Base = 0, A = Base, B, Count }; // [0,2)
+enum class VFrame : std::uint32_t {
+  Base = kLayerBaseAfter<VTransport>,
+  C = Base,
+  Count
+}; // [2,3)
+enum class VRocket : std::uint32_t {
+  Base = kLayerBaseAfter<VFrame>,
+  D = Base,
+  Count
+}; // [3,4)
+
+// A correctly anchored stack tiles [0, VRocket::Count) with no gaps/overlaps.
+static_assert(kLayersTile<VTransport, VFrame, VRocket>);
+static_assert(kLayersTile<VTransport>); // single layer is trivially contiguous
+
+// Mis-anchorings are rejected at compile time.
+enum class WStart : std::uint32_t {
+  Base = 5,
+  X = Base,
+  Count
+}; // not anchored at 0
+static_assert(!kLayersTile<WStart>);
+enum class WGap : std::uint32_t {
+  Base = 99,
+  Y = Base,
+  Count
+}; // gap above VTransport
+static_assert(!kLayersTile<VTransport, WGap>);
+enum class WOverlap : std::uint32_t {
+  Base = 1,
+  Z = Base,
+  Count
+}; // overlaps VTransport
+static_assert(!kLayersTile<VTransport, WOverlap>);
+static_assert(!kLayersTile<VTransport, VRocket, VFrame>); // reordered layers
 
 HANDLER_TAG(a);
 HANDLER_TAG(b);
@@ -423,6 +551,87 @@ TEST(EventTest, EventsDisabledByDefaultDeliverNothing) {
 
   pipeline->fireEvent(Ev::Alpha, TypeErasedBox{});
   EXPECT_TRUE(hPtr->received().empty());
+}
+
+// =============================================================================
+// Layered (anchored) events: subscriber uses its own enum, pipeline sizes on
+// top
+// =============================================================================
+
+TEST(EventTest, SubscriberUsesOwnLayerEnumWhilePipelineSizesOnTopEnum) {
+  // The pipeline's event enum is the TOP layer (LRocketEvent, Count == 3). A
+  // common handler subscribes in its OWN lower-layer enum (LTransportEvent) and
+  // never names the top enum. Anchoring places both layers in one id space, so
+  // the subscribed value already carries the global id and dispatch lands on
+  // it.
+  folly::EventBase evb;
+  MockHeadHandler head;
+  MockTailHandler tail;
+  TestAllocator alloc;
+
+  auto h = std::make_unique<LayeredTransportHandler>();
+  auto* hPtr = h.get();
+
+  auto pipeline =
+      PipelineBuilder<
+          MockHeadHandler,
+          MockTailHandler,
+          TestAllocator,
+          LRocketEvent>()
+          .setEventBase(&evb)
+          .setHead(&head)
+          .setTail(&tail)
+          .setAllocator(&alloc)
+          .addNextDuplex<LayeredTransportHandler>(a_tag, std::move(h))
+          .build();
+
+  // A transport-layer event (the handler's own enum) is delivered, typed.
+  pipeline->fireEvent(LTransportEvent::WriteComplete, TypeErasedBox{});
+  EXPECT_EQ(
+      hPtr->received(),
+      std::vector<LTransportEvent>{LTransportEvent::WriteComplete});
+
+  // A top-layer event the handler didn't subscribe to is not delivered, even
+  // though it shares the same id space.
+  pipeline->fireEvent(LRocketEvent::ConnClose, TypeErasedBox{});
+  EXPECT_EQ(
+      hPtr->received(),
+      std::vector<LTransportEvent>{LTransportEvent::WriteComplete});
+}
+
+TEST(EventTest, HandlerListensToEventsFromOwnAndLowerLayers) {
+  // A rocket-layer handler subscribes to BOTH a transport-layer event and its
+  // own rocket-layer event. Each is delivered to the matching typed onEvent
+  // overload, proving a handler can listen to every layer <= its own.
+  folly::EventBase evb;
+  MockHeadHandler head;
+  MockTailHandler tail;
+  TestAllocator alloc;
+
+  auto h = std::make_unique<LayeredMultiHandler>();
+  auto* hPtr = h.get();
+
+  auto pipeline = PipelineBuilder<
+                      MockHeadHandler,
+                      MockTailHandler,
+                      TestAllocator,
+                      LRocketEvent>()
+                      .setEventBase(&evb)
+                      .setHead(&head)
+                      .setTail(&tail)
+                      .setAllocator(&alloc)
+                      .addNextDuplex<LayeredMultiHandler>(a_tag, std::move(h))
+                      .build();
+
+  pipeline->fireEvent(LTransportEvent::WriteComplete, TypeErasedBox{});
+  pipeline->fireEvent(LRocketEvent::ConnClose, TypeErasedBox{});
+  pipeline->fireEvent(
+      LTransportEvent::Heartbeat, TypeErasedBox{}); // unsubscribed
+
+  EXPECT_EQ(
+      hPtr->transport(),
+      std::vector<LTransportEvent>{LTransportEvent::WriteComplete});
+  EXPECT_EQ(hPtr->rocket(), std::vector<LRocketEvent>{LRocketEvent::ConnClose});
 }
 
 } // namespace apache::thrift::fast_thrift::channel_pipeline::test

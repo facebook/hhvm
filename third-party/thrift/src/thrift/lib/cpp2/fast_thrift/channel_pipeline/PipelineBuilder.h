@@ -290,18 +290,11 @@ class PipelineBuilder {
     // kSubscribedEvents and implementing `onEvent(E, const TypeErasedBox&)`.
     // linkEventLists() then links one hook per subscribed event.
     if constexpr (
-        kEventsEnabled<EventEnumT> &&
-        EndpointEventSubscriber<HeadHandler, EventEnumT>) {
-      pipeline->headOnEventFn_ = [](void* h,
-                                    detail::ContextImpl* /*ctx*/,
-                                    std::uint32_t ev,
-                                    const TypeErasedBox& evt) noexcept {
-        static_cast<HeadHandler*>(h)->onEvent(static_cast<EventEnumT>(ev), evt);
-      };
-      pipeline->headSubscribedEvents_ =
-          detail::kSubscribedEventIds<HeadHandler, EventEnumT>.data();
-      pipeline->headSubscribedEventCount_ =
-          detail::kSubscribedEventIds<HeadHandler, EventEnumT>.size();
+        kEventsEnabled<EventEnumT> && EndpointEventSubscriber<HeadHandler>) {
+      pipeline->headSubscriptions_ =
+          detail::kHandlerSubscriptions<HeadHandler, /*Endpoint=*/true>.data();
+      pipeline->headSubscriptionCount_ =
+          detail::kHandlerSubscriptions<HeadHandler, /*Endpoint=*/true>.size();
     }
 
     // Lifecycle methods
@@ -336,18 +329,11 @@ class PipelineBuilder {
     // kSubscribedEvents and implementing `onEvent(E, const TypeErasedBox&)`.
     // linkEventLists() then links one hook per subscribed event.
     if constexpr (
-        kEventsEnabled<EventEnumT> &&
-        EndpointEventSubscriber<TailHandler, EventEnumT>) {
-      pipeline->tailOnEventFn_ = [](void* t,
-                                    detail::ContextImpl* /*ctx*/,
-                                    std::uint32_t ev,
-                                    const TypeErasedBox& evt) noexcept {
-        static_cast<TailHandler*>(t)->onEvent(static_cast<EventEnumT>(ev), evt);
-      };
-      pipeline->tailSubscribedEvents_ =
-          detail::kSubscribedEventIds<TailHandler, EventEnumT>.data();
-      pipeline->tailSubscribedEventCount_ =
-          detail::kSubscribedEventIds<TailHandler, EventEnumT>.size();
+        kEventsEnabled<EventEnumT> && EndpointEventSubscriber<TailHandler>) {
+      pipeline->tailSubscriptions_ =
+          detail::kHandlerSubscriptions<TailHandler, /*Endpoint=*/true>.data();
+      pipeline->tailSubscriptionCount_ =
+          detail::kHandlerSubscriptions<TailHandler, /*Endpoint=*/true>.size();
     }
 
     // Lifecycle methods

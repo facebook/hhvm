@@ -16,7 +16,6 @@
 
 #pragma once
 
-#include <array>
 #include <memory>
 
 #include <folly/ExceptionWrapper.h>
@@ -250,8 +249,9 @@ class RocketServerAppAdapter : public folly::DelayedDestruction {
   // Subscribes to the enriched per-batch completion fired by the rocket
   // pipeline's WriteCompletionTracker. Wired only when the pipeline is built
   // with RocketServerEventId; otherwise the framework compiles this out.
-  static constexpr std::array<RocketServerEventId, 1> kSubscribedEvents{
-      RocketServerEventId::RocketWriteComplete};
+  static constexpr channel_pipeline::Subscriptions<
+      RocketServerEventId::RocketWriteComplete>
+      kSubscribedEvents{};
 
   void onEvent(
       RocketServerEventId /*ev*/,

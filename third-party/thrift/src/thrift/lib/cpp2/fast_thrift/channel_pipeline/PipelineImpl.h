@@ -374,12 +374,12 @@ class PipelineImpl : public folly::DelayedDestruction {
       nullptr};
   void (*tailOnWriteReadyFn_)(void*) noexcept {nullptr};
   // User-event subscription for the tail endpoint (see
-  // EndpointEventSubscriber). The dispatch thunk ignores the (null) context
-  // arg. Set by the builder; linkEventLists allocates tailEventHooks_ and
-  // links one hook per subscribed event into the per-event lists.
-  EventHook::DispatchFn tailOnEventFn_{nullptr};
-  const std::uint32_t* tailSubscribedEvents_{nullptr};
-  std::size_t tailSubscribedEventCount_{0};
+  // EndpointEventSubscriber). Each subscription carries its global id and a
+  // typed dispatch thunk (which ignores the null context). Set by the builder;
+  // linkEventLists allocates tailEventHooks_ and links one hook per
+  // subscription into the per-event lists.
+  const EventSubscription* tailSubscriptions_{nullptr};
+  std::size_t tailSubscriptionCount_{0};
   std::unique_ptr<EventHook[]> tailEventHooks_;
   // Tail handler lifecycle callbacks
   void (*tailOnPipelineActiveFn_)(void*) noexcept {nullptr};
@@ -392,9 +392,8 @@ class PipelineImpl : public folly::DelayedDestruction {
   void (*headOnReadReadyFn_)(void*) noexcept {nullptr};
   // User-event subscription for the head endpoint (see
   // EndpointEventSubscriber).
-  EventHook::DispatchFn headOnEventFn_{nullptr};
-  const std::uint32_t* headSubscribedEvents_{nullptr};
-  std::size_t headSubscribedEventCount_{0};
+  const EventSubscription* headSubscriptions_{nullptr};
+  std::size_t headSubscriptionCount_{0};
   std::unique_ptr<EventHook[]> headEventHooks_;
   // Head handler lifecycle callbacks
   void (*headOnPipelineActiveFn_)(void*) noexcept {nullptr};

@@ -16,7 +16,6 @@
 
 #pragma once
 
-#include <array>
 #include <functional>
 #include <memory>
 #include <string>
@@ -125,8 +124,9 @@ class ThriftServerAppAdapter : public folly::DelayedDestruction {
 
   // The single pipeline event this endpoint subscribes to: the inbound
   // ConnectionClosed emitted by ThriftServerConnectionCloseHandler.
-  static constexpr std::array<ThriftServerEventType, 1> kSubscribedEvents{
-      ThriftServerEventType::ConnectionClosed};
+  static constexpr channel_pipeline::Subscriptions<
+      ThriftServerEventType::ConnectionClosed>
+      kSubscribedEvents{};
 
   // Handles the ConnectionClosed event from the pipeline's
   // ThriftServerConnectionCloseHandler — the canonical "pipeline is done"

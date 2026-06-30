@@ -16,7 +16,6 @@
 
 #pragma once
 
-#include <array>
 #include <chrono>
 #include <cstdint>
 #include <memory>
@@ -215,8 +214,9 @@ class ThriftServerConnectionCloseHandler {
 
   // The single pipeline event this handler subscribes to: the outbound
   // CloseConnection emitted by the tail adapter's close().
-  static constexpr std::array<ThriftServerEventType, 1> kSubscribedEvents{
-      ThriftServerEventType::CloseConnection};
+  static constexpr channel_pipeline::Subscriptions<
+      ThriftServerEventType::CloseConnection>
+      kSubscribedEvents{};
 
   // Handles CloseConnection — kicks off the terminal drain/reap state
   // machine. The subscription means only CloseConnection reaches us; our own

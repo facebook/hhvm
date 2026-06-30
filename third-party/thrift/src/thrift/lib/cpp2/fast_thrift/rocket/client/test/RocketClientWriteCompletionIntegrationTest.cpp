@@ -98,8 +98,8 @@ class EventCapturingAppHandler {
   // --- Event subscription ---
   // Subscribes only to the enriched BatchWriteComplete event the tracker
   // fires; the raw TransportWriteComplete never reaches this handler.
-  static constexpr std::array<RocketClientEventId, 1> kSubscribedEvents{
-      RocketClientEventId::BatchWriteComplete};
+  static constexpr cp::Subscriptions<RocketClientEventId::BatchWriteComplete>
+      kSubscribedEvents{};
 
   void onEvent(
       RocketClientEventId /*ev*/, const cp::TypeErasedBox& box) noexcept {

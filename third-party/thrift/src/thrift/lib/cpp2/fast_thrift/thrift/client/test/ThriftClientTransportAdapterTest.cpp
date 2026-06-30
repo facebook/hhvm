@@ -24,8 +24,6 @@
 
 #include <gtest/gtest.h>
 
-#include <array>
-
 #include <folly/io/IOBuf.h>
 #include <folly/io/async/EventBase.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Common.h>
@@ -518,8 +516,9 @@ struct WriteCompleteCapturingTail {
   void onPipelineInactive() noexcept {}
   void onWriteReady() noexcept {}
 
-  static constexpr std::array<ThriftClientEventType, 1> kSubscribedEvents{
-      ThriftClientEventType::WriteComplete};
+  static constexpr channel_pipeline::Subscriptions<
+      ThriftClientEventType::WriteComplete>
+      kSubscribedEvents{};
 
   void onEvent(
       ThriftClientEventType /*ev*/, const TypeErasedBox& box) noexcept {

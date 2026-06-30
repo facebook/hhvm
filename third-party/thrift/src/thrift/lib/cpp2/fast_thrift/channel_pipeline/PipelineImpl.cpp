@@ -159,26 +159,26 @@ void PipelineImpl::linkEventLists() noexcept {
   }
   eventLists_ = std::make_unique<EventList[]>(eventListCount_);
 
-  // Links one hook per subscribed event for an endpoint. Endpoints take no
-  // context, so the hook's ctx is null and the dispatch thunk ignores it.
+  // Links one hook per subscription for an endpoint. Endpoints take no context,
+  // so the hook's ctx is null and the dispatch thunk ignores it. Each
+  // subscription carries its own typed thunk.
   auto linkEndpoint = [this](
                           void* target,
-                          EventHook::DispatchFn fn,
-                          const std::uint32_t* events,
+                          const EventSubscription* subs,
                           std::size_t count,
                           std::unique_ptr<EventHook[]>& hooks) noexcept {
-    if (!fn || count == 0) {
+    if (!subs || count == 0) {
       return;
     }
     hooks = std::make_unique<EventHook[]>(count);
     for (std::size_t j = 0; j < count; ++j) {
-      const std::uint32_t ev = events[j];
-      DCHECK_LT(ev, eventListCount_);
+      const EventSubscription& sub = subs[j];
+      DCHECK_LT(sub.id, eventListCount_);
       auto& hook = hooks[j];
-      hook.fn = fn;
+      hook.fn = sub.thunk;
       hook.target = target;
       hook.ctx = nullptr;
-      eventLists_[ev].push_back(hook);
+      eventLists_[sub.id].push_back(hook);
     }
   };
 
@@ -186,36 +186,34 @@ void PipelineImpl::linkEventLists() noexcept {
   // handlers tail→head (descending index), then head endpoint last.
   linkEndpoint(
       tailHandler_,
-      tailOnEventFn_,
-      tailSubscribedEvents_,
-      tailSubscribedEventCount_,
+      tailSubscriptions_,
+      tailSubscriptionCount_,
       tailEventHooks_);
 
   for (size_t i = handlers_.size(); i > 0; --i) {
     const size_t idx = i - 1;
     auto& node = handlers_[idx];
-    if (!node.onEventFn || node.subscribedEventCount == 0) {
+    if (!node.subscriptions || node.subscriptionCount == 0) {
       continue;
     }
     auto& ctx = contexts_[idx];
-    ctx.eventHooks_ = std::make_unique<EventHook[]>(node.subscribedEventCount);
-    ctx.eventHookCount_ = static_cast<std::uint32_t>(node.subscribedEventCount);
-    for (std::size_t j = 0; j < node.subscribedEventCount; ++j) {
-      const std::uint32_t ev = node.subscribedEvents[j];
-      DCHECK_LT(ev, eventListCount_);
+    ctx.eventHooks_ = std::make_unique<EventHook[]>(node.subscriptionCount);
+    ctx.eventHookCount_ = static_cast<std::uint32_t>(node.subscriptionCount);
+    for (std::size_t j = 0; j < node.subscriptionCount; ++j) {
+      const EventSubscription& sub = node.subscriptions[j];
+      DCHECK_LT(sub.id, eventListCount_);
       auto& hook = ctx.eventHooks_[j];
-      hook.fn = node.onEventFn;
+      hook.fn = sub.thunk;
       hook.target = node.handlerPtr;
       hook.ctx = &ctx;
-      eventLists_[ev].push_back(hook);
+      eventLists_[sub.id].push_back(hook);
     }
   }
 
   linkEndpoint(
       headHandler_,
-      headOnEventFn_,
-      headSubscribedEvents_,
-      headSubscribedEventCount_,
+      headSubscriptions_,
+      headSubscriptionCount_,
       headEventHooks_);
 }
 

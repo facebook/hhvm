@@ -16,7 +16,6 @@
 
 #pragma once
 
-#include <array>
 #include <cstdint>
 #include <deque>
 #include <utility>
@@ -75,8 +74,9 @@ class FrameWriteCompletionHandlerT {
   FrameWriteCompletionHandlerT() = default;
 
   using EventId = typename EventFactory::EventId;
-  static constexpr std::array<EventId, 1> kSubscribedEvents{
-      EventFactory::kBatchWriteCompleteEvent};
+  static constexpr apache::thrift::fast_thrift::channel_pipeline::Subscriptions<
+      EventFactory::kBatchWriteCompleteEvent>
+      kSubscribedEvents{};
 
   // === HandlerLifecycle ===
 

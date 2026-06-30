@@ -42,7 +42,6 @@
  * request (outbound) path; BenchAsyncTransport fires writeSuccess inline.
  */
 
-#include <array>
 #include <cstddef>
 #include <cstdint>
 #include <vector>
@@ -134,8 +133,9 @@ class BenchSerializer {
 class BenchWriteCompleteSubscriber {
  public:
   using EventId = RocketClientEventId;
-  static constexpr std::array<EventId, 1> kSubscribedEvents{
-      EventId::FrameWriteComplete};
+  static constexpr apache::thrift::fast_thrift::channel_pipeline::Subscriptions<
+      EventId::FrameWriteComplete>
+      kSubscribedEvents{};
 
   template <typename Context>
   void handlerAdded(Context& /*ctx*/) noexcept {}

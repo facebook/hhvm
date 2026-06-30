@@ -16,7 +16,6 @@
 
 #pragma once
 
-#include <array>
 #include <memory>
 
 #include <folly/ExceptionWrapper.h>
@@ -253,9 +252,10 @@ class RocketClientAppAdapter : public folly::DelayedDestruction {
   // (RocketWriteCompleteEvent). Both are wired only when the pipeline is
   // built with RocketClientEventId; otherwise the framework compiles this
   // out.
-  static constexpr std::array<RocketClientEventId, 2> kSubscribedEvents{
+  static constexpr channel_pipeline::Subscriptions<
       RocketClientEventId::ConnectionClose,
-      RocketClientEventId::RocketWriteComplete};
+      RocketClientEventId::RocketWriteComplete>
+      kSubscribedEvents{};
 
   void onEvent(
       RocketClientEventId ev,

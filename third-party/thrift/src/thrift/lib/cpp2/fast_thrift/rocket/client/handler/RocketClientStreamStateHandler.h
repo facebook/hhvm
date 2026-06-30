@@ -16,8 +16,6 @@
 
 #pragma once
 
-#include <array>
-
 #include <folly/ExceptionWrapper.h>
 #include <folly/lang/Assume.h>
 #include <folly/logging/xlog.h>
@@ -73,8 +71,9 @@ class RocketClientStreamStateHandler {
   RocketClientStreamStateHandler() = default;
 
   using EventId = client::RocketClientEventId;
-  static constexpr std::array<EventId, 1> kSubscribedEvents{
-      EventId::FrameWriteComplete};
+  static constexpr apache::thrift::fast_thrift::channel_pipeline::Subscriptions<
+      EventId::FrameWriteComplete>
+      kSubscribedEvents{};
 
   // === HandlerLifecycle ===
 
@@ -452,7 +451,6 @@ static_assert(
 static_assert(
     apache::thrift::fast_thrift::channel_pipeline::EventSubscriber<
         RocketClientStreamStateHandler,
-        client::RocketClientEventId,
         apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl>,
     "RocketClientStreamStateHandler must satisfy EventSubscriber concept");
 

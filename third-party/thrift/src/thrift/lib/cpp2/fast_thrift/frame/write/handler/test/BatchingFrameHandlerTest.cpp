@@ -25,7 +25,6 @@
 #include <folly/io/IOBuf.h>
 #include <folly/io/async/EventBase.h>
 
-#include <array>
 #include <cstdint>
 #include <cstring>
 #include <vector>
@@ -684,8 +683,9 @@ enum class CapturingEventId : std::uint32_t {
 // without unpacking the type.
 struct CapturingTracker {
   using EventId = CapturingEventId;
-  static constexpr std::array<EventId, 1> kSubscribedEvents{
-      EventId::WriteComplete};
+  static constexpr apache::thrift::fast_thrift::channel_pipeline::Subscriptions<
+      EventId::WriteComplete>
+      kSubscribedEvents{};
 
   size_t onWriteCount{0};
   size_t onFlushCount{0};

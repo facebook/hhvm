@@ -16,7 +16,6 @@
 
 #pragma once
 
-#include <array>
 #include <concepts>
 #include <cstddef>
 #include <cstdint>
@@ -56,7 +55,9 @@ concept FragmentCompletionTracker =
  */
 struct NoOpFragmentCompletionTracker {
   using EventId = apache::thrift::fast_thrift::channel_pipeline::NoEvent;
-  static constexpr std::array<EventId, 0> kSubscribedEvents{};
+  static constexpr apache::thrift::fast_thrift::channel_pipeline::
+      Subscriptions<>
+          kSubscribedEvents{};
 
   void onFragment(uint32_t, bool) noexcept {}
   void onFlush() noexcept {}
@@ -112,8 +113,9 @@ template <FrameWriteCompleteEventFactory EventFactory>
 class FragmentCompletionTrackerT {
  public:
   using EventId = typename EventFactory::EventId;
-  static constexpr std::array<EventId, 1> kSubscribedEvents{
-      EventId::BatchWriteComplete};
+  static constexpr apache::thrift::fast_thrift::channel_pipeline::Subscriptions<
+      EventId::BatchWriteComplete>
+      kSubscribedEvents{};
 
   void onFragment(uint32_t streamId, bool isLastFragment) noexcept {
     fragments_.push_back({streamId, isLastFragment});

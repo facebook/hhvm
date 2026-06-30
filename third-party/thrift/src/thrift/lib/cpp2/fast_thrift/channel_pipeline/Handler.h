@@ -16,8 +16,6 @@
 
 #pragma once
 
-#include <cstddef>
-
 #include <folly/ExceptionWrapper.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Common.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Event.h>
@@ -113,35 +111,45 @@ template <typename H, typename Ctx>
 concept DuplexHandler = InboundHandler<H, Ctx> && OutboundHandler<H, Ctx>;
 
 /**
- * EventSubscriber concept - an internal handler that registers for specific
- * user-event types.
- *
- * The handler declares which event types it cares about via a static
- * `kSubscribedEvents` (an array-like constexpr range of `E` values) and
- * implements `onEvent(ctx, E, const TypeErasedBox&)`. The framework links one
- * hook per subscribed event, so the handler is invoked only for those events.
+ * True iff H implements a typed onEvent for EVERY event in its subscription
+ * set. Each subscribed value carries its own (layer) enum type, so the
+ * overloads are checked per layer — a handler may subscribe to events from its
+ * own layer and any lower layer and must handle each typed.
  */
-template <typename H, typename E, typename Ctx>
-concept EventSubscriber =
-    requires(H h, Ctx& ctx, E ev, const TypeErasedBox& evt) {
-      { H::kSubscribedEvents.data() } -> std::convertible_to<const E*>;
-      { H::kSubscribedEvents.size() } -> std::convertible_to<std::size_t>;
-      { h.onEvent(ctx, ev, evt) } noexcept -> std::same_as<void>;
-    };
+template <typename H, typename Ctx, auto... Evs>
+constexpr bool subscriberHasOnEvent(Subscriptions<Evs...>) {
+  return (requires(H& h, Ctx& ctx, const TypeErasedBox& evt) {
+    { h.onEvent(ctx, Evs, evt) } noexcept -> std::same_as<void>;
+  } && ...);
+}
+
+template <typename H, auto... Evs>
+constexpr bool endpointHasOnEvent(Subscriptions<Evs...>) {
+  return (requires(H& h, const TypeErasedBox& evt) {
+    { h.onEvent(Evs, evt) } noexcept -> std::same_as<void>;
+  } && ...);
+}
 
 /**
- * EndpointEventSubscriber concept - a head/tail endpoint that registers for
- * specific user-event types.
+ * EventSubscriber concept - an internal handler that registers for user events.
+ *
+ * The handler declares its set via a static `kSubscribedEvents` of type
+ * `Subscriptions<...>` (values from its own layer and/or any lower layer) and
+ * implements a typed `onEvent(ctx, Ev, const TypeErasedBox&)` for each. The
+ * framework links one hook per subscribed event.
+ */
+template <typename H, typename Ctx>
+concept EventSubscriber = requires { H::kSubscribedEvents; } &&
+    subscriberHasOnEvent<H, Ctx>(H::kSubscribedEvents);
+
+/**
+ * EndpointEventSubscriber concept - a head/tail endpoint that subscribes.
  *
  * Identical to EventSubscriber except endpoints receive no Context: they
- * implement `onEvent(E, const TypeErasedBox&)`.
+ * implement `onEvent(Ev, const TypeErasedBox&)`.
  */
-template <typename H, typename E>
-concept EndpointEventSubscriber =
-    requires(H h, E ev, const TypeErasedBox& evt) {
-      { H::kSubscribedEvents.data() } -> std::convertible_to<const E*>;
-      { H::kSubscribedEvents.size() } -> std::convertible_to<std::size_t>;
-      { h.onEvent(ev, evt) } noexcept -> std::same_as<void>;
-    };
+template <typename H>
+concept EndpointEventSubscriber = requires { H::kSubscribedEvents; } &&
+    endpointHasOnEvent<H>(H::kSubscribedEvents);
 
 } // namespace apache::thrift::fast_thrift::channel_pipeline

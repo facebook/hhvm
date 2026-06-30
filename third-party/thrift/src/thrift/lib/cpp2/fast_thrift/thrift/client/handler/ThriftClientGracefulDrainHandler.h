@@ -16,7 +16,6 @@
 
 #pragma once
 
-#include <array>
 #include <cstdint>
 
 #include <folly/ExceptionWrapper.h>
@@ -129,8 +128,9 @@ class ThriftClientGracefulDrainHandler {
 
   // The single pipeline event this handler subscribes to: the
   // CloseConnection emitted by the transport adapter on graceful close.
-  static constexpr std::array<ThriftClientEventType, 1> kSubscribedEvents{
-      ThriftClientEventType::CloseConnection};
+  static constexpr channel_pipeline::Subscriptions<
+      ThriftClientEventType::CloseConnection>
+      kSubscribedEvents{};
 
   // Begin draining on CloseConnection. The subscription delivers only the
   // event types in kSubscribedEvents, so CloseConnection is the only one
@@ -243,7 +243,6 @@ static_assert(
 static_assert(
     apache::thrift::fast_thrift::channel_pipeline::EventSubscriber<
         ThriftClientGracefulDrainHandler,
-        ThriftClientEventType,
         apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl>,
     "ThriftClientGracefulDrainHandler must satisfy EventSubscriber concept "
     "so the pipeline links its CloseConnection event hook");

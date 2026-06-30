@@ -16,7 +16,6 @@
 
 #pragma once
 
-#include <array>
 #include <concepts>
 #include <cstddef>
 #include <deque>
@@ -60,7 +59,9 @@ struct NoOpWriteCompletionTracker {
   // these uniformly, so with this tracker it subscribes to nothing and the
   // whole event path compiles out.
   using EventId = apache::thrift::fast_thrift::channel_pipeline::NoEvent;
-  static constexpr std::array<EventId, 0> kSubscribedEvents{};
+  static constexpr apache::thrift::fast_thrift::channel_pipeline::
+      Subscriptions<>
+          kSubscribedEvents{};
 
   void onWrite() noexcept {}
   void onFlush() noexcept {}
@@ -125,8 +126,9 @@ class WriteCompletionTrackerT {
   // the concrete protocol enum. Subscribing only to TransportWriteComplete
   // means its own RocketWriteComplete re-fires are never routed back to it.
   using EventId = typename EventFactory::EventId;
-  static constexpr std::array<EventId, 1> kSubscribedEvents{
-      EventId::TransportWriteComplete};
+  static constexpr apache::thrift::fast_thrift::channel_pipeline::Subscriptions<
+      EventId::TransportWriteComplete>
+      kSubscribedEvents{};
 
   void onWrite() noexcept { ++framesInCurrentBatch_; }
 

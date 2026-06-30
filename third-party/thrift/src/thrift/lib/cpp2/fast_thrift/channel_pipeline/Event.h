@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <array>
 #include <concepts>
 #include <cstdint>
 #include <type_traits>
@@ -64,6 +65,57 @@ inline constexpr std::uint32_t kEventCount =
     static_cast<std::uint32_t>(E::Count);
 
 /**
+ * LayerEvent — an EventEnum that also exposes `Base`, the first (anchor) id of
+ * its range. Anchored layer enums set `Base` to the layer below's `Count` (or 0
+ * for the bottom layer) so all layers tile one contiguous id space. Required
+ * only to participate in the kLayersTile compile-time check.
+ */
+template <typename E>
+concept LayerEvent = EventEnum<E> && requires { E::Base; };
+
+/**
+ * Base id for a layer anchored directly above `Prev`: `Prev`'s `Count`. The
+ * bottom layer uses 0. Lets a layer enum anchor its `Base` without a
+ * hand-written cast: `enum class FrameEvent { Base =
+ * kLayerBaseAfter<Transport>,
+ * ... }`.
+ */
+template <EventEnum Prev>
+inline constexpr std::uint32_t kLayerBaseAfter =
+    static_cast<std::uint32_t>(Prev::Count);
+
+/**
+ * Whether the given layer enums, in order, tile [0, last::Count) with no gaps
+ * and no overlaps: the first layer's `Base` is 0 and each subsequent layer's
+ * `Base` equals the previous layer's `Count`. A mis-anchored, reordered, or
+ * forgotten-anchor layer makes this false, so `static_assert(kLayersTile<...>)`
+ * at the pipeline-assembly site turns a silent id collision into a compile
+ * error.
+ */
+template <LayerEvent... Layers>
+inline constexpr bool kLayersTile = [] {
+  constexpr auto n = sizeof...(Layers);
+  if constexpr (n == 0) {
+    return true;
+  } else {
+    constexpr std::array<std::uint32_t, n> bases = {
+        static_cast<std::uint32_t>(Layers::Base)...};
+    constexpr std::array<std::uint32_t, n> counts = {
+        static_cast<std::uint32_t>(Layers::Count)...};
+    if (bases[0] != 0) {
+      return false;
+    }
+    for (std::uint32_t i = 1; i < n; ++i) {
+      // No gap and no overlap: each layer starts exactly where the last ended.
+      if (bases[i] != counts[i - 1]) {
+        return false;
+      }
+    }
+    return true;
+  }
+}();
+
+/**
  * EventHook is the per-(subscriber, event-type) registration record.
  *
  * A subscriber owns one EventHook for each event type it subscribes to, and
@@ -95,5 +147,26 @@ struct EventHook {
  * event type and walks the relevant one on `fireEvent`.
  */
 using EventList = folly::IntrusiveList<EventHook, &EventHook::hook>;
+
+/**
+ * A single subscription: the global event id plus the typed dispatch thunk that
+ * casts the id back to the subscriber's layer enum and invokes its onEvent. The
+ * pipeline links one EventHook per subscription.
+ */
+struct EventSubscription {
+  std::uint32_t id{0};
+  EventHook::DispatchFn thunk{nullptr};
+};
+
+/**
+ * Subscriptions<Evs...> is the set of events a handler or endpoint subscribes
+ * to, declared as its static `kSubscribedEvents`. The values may come from
+ * several layer enums — a handler listens to its own layer and any lower layer
+ * — so each carries its own enum type and onEvent is dispatched typed per
+ * layer. Layer enums share one anchored id space, so each value is its global
+ * id.
+ */
+template <auto... Evs>
+struct Subscriptions {};
 
 } // namespace apache::thrift::fast_thrift::channel_pipeline

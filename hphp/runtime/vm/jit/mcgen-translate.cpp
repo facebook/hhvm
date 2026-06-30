@@ -33,7 +33,6 @@
 #include "hphp/runtime/vm/jit/vm-protect.h"
 #include "hphp/runtime/vm/jit/write-lease.h"
 
-#include "hphp/runtime/vm/func-token.h"
 #include "hphp/runtime/vm/property-profile.h"
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/type-profile.h"
@@ -119,7 +118,9 @@ CompactVector<Trace::BumpRelease> bumpTraceFunctions(const Func* func) {
   return opt();
 }
 
-void optimize(const Func* func, tc::FuncMetaInfo& info) {
+void optimize(tc::FuncMetaInfo& info) {
+  auto const func = info.func;
+
   assertx(!s_bumpers);
   SCOPE_EXIT { s_bumpers = nullptr; };
   auto const bumpers = bumpTraceFunctions(func);
@@ -130,7 +131,7 @@ void optimize(const Func* func, tc::FuncMetaInfo& info) {
   tracing::Block _{"optimize", [&] { return traceProps(func); }};
 
   // Regenerate the prologues before the actual function body.
-  regeneratePrologues(const_cast<Func*>(func), info);
+  regeneratePrologues(func, info);
 
   // Regionize func and translate all its regions.
   std::string transCFGAnnot;
@@ -196,20 +197,18 @@ struct TranslateWorker : JobQueueWorker<tc::FuncMetaInfo*, void*, true, true> {
       ProfileNonVMThread nonVM;
       HphpSession hps{Treadmill::SessionKind::TranslateWorker};
 
-      auto func = info->funcToken->getFunc();
-
       // Check if the func was treadmilled before the job started
-      if (func == nullptr) return;
+      if (!Func::isFuncIdValid(info->fid)) return;
 
-      always_assert(!profData()->optimized(func));
+      always_assert(!profData()->optimized(info->fid));
 
       VMProtect _;
-      optimize(func, *info);
+      optimize(*info);
 
       {
         std::unique_lock<std::mutex> lock{s_condVarMutex};
-        always_assert(!profData()->optimized(func));
-        profData()->setOptimized(func);
+        always_assert(!profData()->optimized(info->fid));
+        profData()->setOptimized(info->fid);
       }
       s_condVar.notify_one();
     } catch (std::exception& e) {
@@ -611,14 +610,14 @@ void retranslateAll(bool skipSerialize) {
 ////////////////////////////////////////////////////////////////////////////////
 }
 
-void waitForTranslate(const Func* func) {
-  if (profData()->optimized(func)) return;
+void waitForTranslate(const tc::FuncMetaInfo& info) {
+  if (profData()->optimized(info.fid)) return;
 
   std::unique_lock<std::mutex> lock{s_condVarMutex};
   s_condVar.wait(
     lock,
     [&] {
-      return profData()->optimized(func);
+      return profData()->optimized(info.fid);
     }
   );
 }
@@ -761,28 +760,29 @@ std::string debug_translate_live(SrcKey sk,
   }
 }
 
-bool retranslateOpt(const Func* func) {
+bool retranslateOpt(FuncId funcId) {
   VMProtect _;
 
   if (Cfg::Jit::DisabledByVSDebug && isDebuggerAttachedProcess()) {
     return false;
   }
 
+  auto const func = const_cast<Func*>(Func::fromFuncId(funcId));
   if (profData() == nullptr) return false;
-  if (profData()->optimized(func)) return true;
+  if (profData()->optimized(funcId)) return true;
 
   LeaseHolder writer(func, TransKind::Optimize, false);
   if (!writer) return false;
 
-  if (profData()->optimized(func)) return true;
-  profData()->setOptimized(func);
+  if (profData()->optimized(funcId)) return true;
+  profData()->setOptimized(funcId);
 
   tracing::Block _b{"retranslate-opt", [&] { return traceProps(func); }};
   tracing::Pause _p;
 
-  tc::FuncMetaInfo info(const_cast<Func*>(func), tc::LocalTCBuffer());
-  optimize(func, info);
-  tc::publishOptFunc(func, std::move(info));
+  tc::FuncMetaInfo info(func, tc::LocalTCBuffer());
+  optimize(info);
+  tc::publishOptFunc(std::move(info));
   tc::checkFreeProfData();
 
   return true;
@@ -790,8 +790,8 @@ bool retranslateOpt(const Func* func) {
 
 void optimizeFunc(Func* func) {
   tc::FuncMetaInfo info(func, tc::LocalTCBuffer());
-  optimize(func, info);
-  tc::publishOptFunc(func, std::move(info));
+  optimize(info);
+  tc::publishOptFunc(std::move(info));
   tc::checkFreeProfData();
 }
 

@@ -19,6 +19,7 @@
 #include <stdint.h>
 
 #include <chrono>
+#include <functional>
 #include <memory>
 #include <string>
 #include <utility>
@@ -143,7 +144,9 @@ class ThriftRequestCore : public ResponseChannelRequest {
         const std::optional<ResponseRpcError>& responseRpcError,
         const server::TServerObserver::CallTimestamps& timestamps,
         const ThriftRequestCore& thriftRequest,
-        MessageChannel::SendCallback* chainedCallback = nullptr);
+        MessageChannel::SendCallback* chainedCallback = nullptr,
+        std::function<void(RequestLoggingContext&)>
+            populateWriteEncryptionState = {});
 
     void sendQueued() override;
     void messageSent() override;
@@ -160,7 +163,7 @@ class ThriftRequestCore : public ResponseChannelRequest {
     const server::ServerConfigs& serverConfigs_;
     RequestLoggingContext requestLoggingContext_;
     MessageChannel::SendCallback* chainedCallback_;
-    Cpp2RequestContext* reqCtx_;
+    std::function<void(RequestLoggingContext&)> populateWriteEncryptionState_;
   };
 
   void sendReply(
@@ -535,7 +538,9 @@ class ThriftRequestCore : public ResponseChannelRequest {
   MessageChannel::SendCallbackPtr createRequestLoggingCallback(
       MessageChannel::SendCallbackPtr&& sendCallback,
       const ResponseRpcMetadata& metadata,
-      const std::optional<ResponseRpcError>& responseRpcError);
+      const std::optional<ResponseRpcError>& responseRpcError,
+      std::function<void(RequestLoggingContext&)> populateWriteEncryptionState =
+          {});
 
  private:
   static bool includeInRecentRequestsCount(const std::string_view);

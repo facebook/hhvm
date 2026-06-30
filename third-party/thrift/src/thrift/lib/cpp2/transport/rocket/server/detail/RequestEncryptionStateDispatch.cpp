@@ -86,13 +86,21 @@ void checkWriteEncryptionState(Cpp2RequestContext& reqContext) {
     return;
   }
 
+  reqContext.setWriteEncryptionState(getWriteEncryptionState(*connCtx));
+}
+
+RequestEncryptionState getWriteEncryptionState(const Cpp2ConnContext& connCtx) {
+  if (!THRIFT_FLAG(server_request_encryption_tracking_enabled)) {
+    return RequestEncryptionState::Plaintext;
+  }
+
   // StopTLSv2 case: encryption is per-record, check the write record layer's
   // sticky latch. If we can reach the record layer, set StoptlsEncrypted vs
   // StoptlsSkipped based on hasObservedPlaintext(). If the record layer is
   // unreachable for any reason, fail safe to StoptlsSkipped.
-  if (connCtx->getSecurityProtocol() == kSecurityProtocolStopTLSV2) {
+  if (connCtx.getSecurityProtocol() == kSecurityProtocolStopTLSV2) {
     // getUnderlyingTransport<T>() const overload returns const T*
-    const auto* transport = connCtx->getTransport();
+    const auto* transport = connCtx.getTransport();
     if (transport != nullptr) {
       const auto* fizz =
           transport->getUnderlyingTransport<fizz::server::AsyncFizzServer>();
@@ -103,24 +111,20 @@ void checkWriteEncryptionState(Cpp2RequestContext& reqContext) {
         const auto* provider =
             dynamic_cast<const StopTLSEncryptionStateProvider*>(layer);
         if (provider != nullptr && provider->isStopTLSNegotiated()) {
-          reqContext.setWriteEncryptionState(
-              provider->hasObservedPlaintext()
-                  ? RequestEncryptionState::StoptlsSkipped
-                  : RequestEncryptionState::StoptlsEncrypted);
-          return;
+          return provider->hasObservedPlaintext()
+              ? RequestEncryptionState::StoptlsSkipped
+              : RequestEncryptionState::StoptlsEncrypted;
         }
       }
     }
     // record layer unreachable / no implementer — fail safe to StoptlsSkipped
-    reqContext.setWriteEncryptionState(RequestEncryptionState::StoptlsSkipped);
-    return;
+    return RequestEncryptionState::StoptlsSkipped;
   }
 
   // All other connection types: encryption is per-connection. Use the
   // isTransportEncrypted() helper from D101058862.
-  reqContext.setWriteEncryptionState(
-      connCtx->isTransportEncrypted() ? RequestEncryptionState::Encrypted
-                                      : RequestEncryptionState::Plaintext);
+  return connCtx.isTransportEncrypted() ? RequestEncryptionState::Encrypted
+                                        : RequestEncryptionState::Plaintext;
 }
 
 } // namespace apache::thrift::rocket::context_utils

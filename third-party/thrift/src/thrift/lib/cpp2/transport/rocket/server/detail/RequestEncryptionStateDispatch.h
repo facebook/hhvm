@@ -17,7 +17,9 @@
 #pragma once
 
 namespace apache::thrift {
+class Cpp2ConnContext;
 class Cpp2RequestContext;
+enum class RequestEncryptionState;
 } // namespace apache::thrift
 
 namespace apache::thrift::rocket::context_utils {
@@ -46,8 +48,7 @@ namespace apache::thrift::rocket::context_utils {
 void checkRequestEncryptionState(Cpp2RequestContext& reqContext);
 
 /**
- * Inspects the response's connection state and sets
- * Cpp2RequestContext::setWriteEncryptionState() to one of:
+ * Inspects the response's connection state and returns one of:
  *   - RequestEncryptionState::Plaintext
  *   - RequestEncryptionState::Encrypted
  *   - RequestEncryptionState::StoptlsEncrypted
@@ -58,10 +59,18 @@ void checkRequestEncryptionState(Cpp2RequestContext& reqContext);
  * outbound response.
  *
  * Gated by THRIFT_FLAG(server_request_encryption_tracking_enabled). When
- * disabled, this is a no-op (the field stays at its default Plaintext).
+ * disabled, this returns the default Plaintext state.
  *
- * Must be called after the response has been sent (e.g., from
- * LogRequestSampleCallback destructor), before buildRequestLoggingContext().
+ * Must be called after the response has been sent, immediately before request
+ * event logging.
+ */
+RequestEncryptionState getWriteEncryptionState(const Cpp2ConnContext& connCtx);
+
+/**
+ * Inspects the response's connection state and sets
+ * Cpp2RequestContext::setWriteEncryptionState(). The request context must
+ * still be alive; response-write callbacks should use getWriteEncryptionState()
+ * with the longer-lived connection context instead.
  */
 void checkWriteEncryptionState(Cpp2RequestContext& reqContext);
 

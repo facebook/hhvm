@@ -16,6 +16,7 @@
 
 #include <thrift/lib/cpp2/transport/rocket/server/RocketThriftRequests.h>
 
+#include <functional>
 #include <memory>
 #include <utility>
 
@@ -43,6 +44,7 @@
 #include <thrift/lib/cpp2/transport/rocket/server/RocketServerUtil.h>
 #include <thrift/lib/cpp2/transport/rocket/server/RocketSinkClientCallback.h>
 #include <thrift/lib/cpp2/transport/rocket/server/RocketStreamClientCallback.h>
+#include <thrift/lib/cpp2/transport/rocket/server/detail/RequestEncryptionStateDispatch.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 #if __has_include(<thrift/lib/thrift/gen-cpp2/any_rep_types.h>)
 #include <thrift/lib/thrift/gen-cpp2/any_rep_types.h>
@@ -52,6 +54,19 @@
 namespace apache::thrift::rocket {
 
 namespace {
+std::function<void(RequestLoggingContext&)> makeWriteEncryptionStateCapture(
+    const Cpp2RequestContext* reqContext) {
+  auto* connCtx =
+      reqContext == nullptr ? nullptr : reqContext->getConnectionContext();
+  if (connCtx == nullptr) {
+    return {};
+  }
+  return [connCtx](RequestLoggingContext& requestLoggingContext) {
+    requestLoggingContext.writeEncryptionState =
+        context_utils::getWriteEncryptionState(*connCtx);
+  };
+}
+
 ResponseRpcError makeResponseRpcError(
     ResponseRpcErrorCode errorCode,
     folly::StringPiece message,
@@ -512,7 +527,11 @@ void ThriftServerRequestResponse::sendThriftResponse(
   }
 
   // Shared: create logging callback after metadata is populated.
-  cb = createRequestLoggingCallback(std::move(cb), metadata, responseRpcError);
+  cb = createRequestLoggingCallback(
+      std::move(cb),
+      metadata,
+      responseRpcError,
+      makeWriteEncryptionStateCapture(getRequestContext()));
 
   auto payloadSerializerPtr = context_.connection().getPayloadSerializer();
   if (responseRpcError) {

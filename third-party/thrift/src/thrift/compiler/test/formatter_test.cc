@@ -404,14 +404,27 @@ TEST(FormatterTest, preservesCommentsBeforeServiceExtends) {
 )");
 }
 
-TEST(FormatterTest, currentBehaviorMovesSpaceBeforeFieldSeparatorBlockComment) {
+TEST(FormatterTest, preservesBlockCommentsBeforeFieldSeparators) {
   expect_format(
       R"(struct Foo {
   1: i32 field /* trailing block */;
 }
 )",
       R"(struct Foo {
-  1: i32 field/* trailing block */ ;
+  1: i32 field /* trailing block */;
+}
+)");
+
+  expect_format(
+      R"(struct Foo {
+  1: i32 field
+    /* previous block */
+    /* trailing block */;
+}
+)",
+      R"(struct Foo {
+  1: i32 field /* previous block */
+  /* trailing block */;
 }
 )");
 }

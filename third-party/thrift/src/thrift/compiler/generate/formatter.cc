@@ -2615,7 +2615,17 @@ class concrete_formatter {
       const std::optional<token>& sep, std::string_view corrected) const {
     std::string result;
     if (sep) {
+      const bool inline_block_comment = !sep->leading_comments.empty() &&
+          !sep->leading_comments.back().line &&
+          sep->leading_comments.back().end_line == sep->start_line;
+      if (inline_block_comment) {
+        result.push_back(' ');
+      }
       result += format_leading_comments(sep->leading_comments, &*sep, 0);
+      if (inline_block_comment && !corrected.empty() && !result.empty() &&
+          result.back() == ' ') {
+        result.pop_back();
+      }
     }
     result += corrected;
     if (sep) {

@@ -23,6 +23,7 @@
 #include <folly/io/IOBuf.h>
 #include <folly/io/async/EventBase.h>
 
+#include <array>
 #include <cstring>
 #include <map>
 #include <stdexcept>
@@ -100,6 +101,40 @@ class MockContext {
   size_t fireExceptionCount_{0};
   folly::exception_wrapper lastException_;
 };
+
+// ============================================================================
+// Recording tracker — captures the handler's onFragment / onFlush hook calls so
+// handler-level tests can assert the doFlush wiring (per-fragment isLast flags,
+// onFlush only on the success path, no onFragment for a fragment that errored).
+// ============================================================================
+
+struct RecordingTracker {
+  using EventId = apache::thrift::fast_thrift::channel_pipeline::NoEvent;
+  static constexpr std::array<EventId, 0> kSubscribedEvents{};
+
+  struct FragmentCall {
+    uint32_t streamId;
+    bool isLastFragment;
+  };
+  std::vector<FragmentCall> fragments;
+  size_t flushCount{0};
+
+  void onFragment(uint32_t streamId, bool isLastFragment) noexcept {
+    fragments.push_back({streamId, isLastFragment});
+  }
+  void onFlush() noexcept { ++flushCount; }
+
+  template <typename Context>
+  void onEvent(
+      Context& /*ctx*/,
+      EventId /*ev*/,
+      const apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox&
+      /*box*/) noexcept {}
+};
+
+static_assert(
+    FragmentCompletionTracker<RecordingTracker>,
+    "RecordingTracker must satisfy FragmentCompletionTracker concept");
 
 // ============================================================================
 // Test Helpers
@@ -720,6 +755,97 @@ TEST_F(FrameFragmentationHandlerTest, SyncThresholdFlushDoesNotFireException) {
   EXPECT_EQ(
       result, apache::thrift::fast_thrift::channel_pipeline::Result::Error);
   EXPECT_EQ(ctx_->fireExceptionCount(), 0);
+}
+
+// ============================================================================
+// Tracker wiring — FrameFragmentationHandlerT drives the tracker from doFlush.
+// ============================================================================
+
+TEST_F(
+    FrameFragmentationHandlerTest, TrackerSeesEachFragmentWithFrameDoneFlag) {
+  FragmentationHandlerConfig config{.maxFragmentSize = 64 * 1024};
+  FrameFragmentationHandlerT<RecordingTracker> handler(config);
+  handler.handlerAdded(*ctx_);
+
+  // 192KB -> 3 fragments; only the last completes the original frame.
+  (void)handler.onWrite(*ctx_, makePayloadFrame(1, 192 * 1024));
+  runEventBaseLoop();
+
+  const auto& frags = handler.tracker().fragments;
+  ASSERT_EQ(frags.size(), 3u);
+  EXPECT_EQ(frags[0].streamId, 1u);
+  EXPECT_FALSE(frags[0].isLastFragment);
+  EXPECT_FALSE(frags[1].isLastFragment);
+  EXPECT_TRUE(frags[2].isLastFragment);
+  EXPECT_EQ(handler.tracker().flushCount, 1u);
+}
+
+TEST_F(
+    FrameFragmentationHandlerTest, TrackerSeesImmediateQueueFrameAsComplete) {
+  FragmentationHandlerConfig config{.maxFragmentSize = 64 * 1024};
+  FrameFragmentationHandlerT<RecordingTracker> handler(config);
+  handler.handlerAdded(*ctx_);
+
+  // Large frame parks a pending stream; the smaller frame lands in the
+  // immediate queue and drains first as a single complete frame (isLast=true).
+  (void)handler.onWrite(*ctx_, makePayloadFrame(10, 192 * 1024));
+  (void)handler.onWrite(*ctx_, makePayloadFrame(1, 32 * 1024));
+  ASSERT_EQ(handler.immediateQueueSize(), 1u);
+
+  runEventBaseLoop();
+
+  const auto& frags = handler.tracker().fragments;
+  ASSERT_EQ(frags.size(), 4u);
+  // Immediate queue drains first: one complete frame for stream 1.
+  EXPECT_EQ(frags[0].streamId, 1u);
+  EXPECT_TRUE(frags[0].isLastFragment);
+  // Then the 3 SRPT fragments of stream 10.
+  EXPECT_EQ(frags[1].streamId, 10u);
+  EXPECT_FALSE(frags[1].isLastFragment);
+  EXPECT_FALSE(frags[2].isLastFragment);
+  EXPECT_TRUE(frags[3].isLastFragment);
+  EXPECT_EQ(handler.tracker().flushCount, 1u);
+}
+
+TEST_F(
+    FrameFragmentationHandlerTest, TrackerSkipsErroredFragmentAndDoesNotFlush) {
+  FragmentationHandlerConfig config{.maxFragmentSize = 64 * 1024};
+  FrameFragmentationHandlerT<RecordingTracker> handler(config);
+  handler.handlerAdded(*ctx_);
+
+  // 192KB -> 3 fragments; downstream errors on the 3rd (frame-completing) one.
+  // onFragment must NOT record the errored fragment, and onFlush must not run
+  // on the error path.
+  (void)handler.onWrite(*ctx_, makePayloadFrame(1, 192 * 1024));
+  ctx_->setErrorAt(2);
+  runEventBaseLoop();
+
+  const auto& frags = handler.tracker().fragments;
+  ASSERT_EQ(frags.size(), 2u);
+  EXPECT_FALSE(frags[0].isLastFragment);
+  EXPECT_FALSE(frags[1].isLastFragment);
+  EXPECT_EQ(handler.tracker().flushCount, 0u);
+}
+
+TEST_F(
+    FrameFragmentationHandlerTest,
+    TrackerCountsBackpressuredFragmentButDoesNotFlush) {
+  FragmentationHandlerConfig config{.maxFragmentSize = 64 * 1024};
+  FrameFragmentationHandlerT<RecordingTracker> handler(config);
+  handler.handlerAdded(*ctx_);
+
+  // Backpressure on the 3rd write: the fragment was still handed downstream, so
+  // onFragment records it (isLast=true), but the flush paused — onFlush must
+  // not run. Contrast with the error path, which skips onFragment entirely.
+  (void)handler.onWrite(*ctx_, makePayloadFrame(1, 192 * 1024));
+  ctx_->setBackpressureAt(2);
+  runEventBaseLoop();
+
+  EXPECT_TRUE(ctx_->awaitWriteReadyCalled());
+  const auto& frags = handler.tracker().fragments;
+  ASSERT_EQ(frags.size(), 3u);
+  EXPECT_TRUE(frags[2].isLastFragment);
+  EXPECT_EQ(handler.tracker().flushCount, 0u);
 }
 
 } // namespace

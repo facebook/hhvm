@@ -78,12 +78,34 @@ static_assert(
     "NoOpWriteCompletionTracker must satisfy WriteCompletionTracker concept");
 
 /**
+ * Event factory contract for WriteCompletionTrackerT. Pins the member types the
+ * tracker reads off and the exact `(status, count, bytes)` argument order and
+ * `pair<EventId, TypeErasedBox>` result of the batch factory method, so a
+ * mismatched factory is rejected at the point of instantiation rather than deep
+ * inside the tracker body.
+ */
+template <typename T>
+concept RocketWriteCompleteEventFactory = requires(
+    typename T::TransportWriteCompleteEventType transportEvent,
+    size_t frameCount) {
+  typename T::EventId;
+  typename T::TransportWriteCompleteEventType;
+  {
+    T::makeRocketWriteComplete(
+        transportEvent.status, frameCount, transportEvent.bytes)
+  } noexcept -> std::same_as<std::pair<
+      typename T::EventId,
+      apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox>>;
+};
+
+/**
  * Concrete tracker — counts outbound frames per batch and, on each raw
  * TransportWriteComplete from transport, pops the front batch's frame count
  * and fires a RocketWriteComplete (enriched with frameCount) upstream
  * via `EventFactory::makeRocketWriteComplete(status, count, bytes)`.
  *
- * Templated on the pipeline's event factory; the factory must expose:
+ * Templated on the pipeline's event factory (see
+ * RocketWriteCompleteEventFactory). The factory must expose:
  *   - `using EventId = ...;` with `TransportWriteComplete` and
  *     `RocketWriteComplete` values.
  *   - `using TransportWriteCompleteEventType = ...;` — the message carried by
@@ -95,7 +117,7 @@ static_assert(
  * lockstep with the transport's writeSuccess/writeErr FIFO ordering
  * (per AsyncSocket's structural write-queue guarantee).
  */
-template <typename EventFactory>
+template <RocketWriteCompleteEventFactory EventFactory>
 class WriteCompletionTrackerT {
  public:
   // The tracker subscribes to the raw transport event and re-fires the

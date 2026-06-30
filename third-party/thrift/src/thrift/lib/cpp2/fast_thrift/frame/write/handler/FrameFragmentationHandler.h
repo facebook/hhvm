@@ -41,6 +41,7 @@
 #include <thrift/lib/cpp2/fast_thrift/frame/write/FragmentationHandlerConfig.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/PerStreamState.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/SrptHeap.h>
+#include <thrift/lib/cpp2/fast_thrift/frame/write/handler/FragmentCompletionTracker.h>
 
 #include <folly/ExceptionWrapper.h>
 #include <folly/io/IOBuf.h>
@@ -63,22 +64,29 @@ struct RemainingBytesFn {
 /**
  * Composable outbound handler for HOL mitigation. Consumes and emits
  * `ComposedFrame`.
+ *
+ * Templated on a `FragmentCompletionTracker`-satisfying type (see
+ * FragmentCompletionTracker.h). The default `NoOpFragmentCompletionTracker`
+ * makes the hook sites fully no-op and the compiler elides them. Pipelines
+ * that need per-frame write completion fire through a concrete tracker that
+ * maps fragments back to original frames.
  */
-class FrameFragmentationHandler : public folly::EventBase::LoopCallback {
+template <FragmentCompletionTracker Tracker = NoOpFragmentCompletionTracker>
+class FrameFragmentationHandlerT : public folly::EventBase::LoopCallback {
  public:
   apache::thrift::fast_thrift::channel_pipeline::WriteReadyHook writeReadyHook_;
 
-  explicit FrameFragmentationHandler(
+  explicit FrameFragmentationHandlerT(
       FragmentationHandlerConfig config = {}) noexcept
       : config_(config) {}
 
-  ~FrameFragmentationHandler() override { cancelLoopCallbackIfScheduled(); }
+  ~FrameFragmentationHandlerT() override { cancelLoopCallbackIfScheduled(); }
 
-  FrameFragmentationHandler(const FrameFragmentationHandler&) = delete;
-  FrameFragmentationHandler& operator=(const FrameFragmentationHandler&) =
+  FrameFragmentationHandlerT(const FrameFragmentationHandlerT&) = delete;
+  FrameFragmentationHandlerT& operator=(const FrameFragmentationHandlerT&) =
       delete;
-  FrameFragmentationHandler(FrameFragmentationHandler&&) = delete;
-  FrameFragmentationHandler& operator=(FrameFragmentationHandler&&) = delete;
+  FrameFragmentationHandlerT(FrameFragmentationHandlerT&&) = delete;
+  FrameFragmentationHandlerT& operator=(FrameFragmentationHandlerT&&) = delete;
 
   template <typename Context>
   void handlerAdded(Context& ctx) noexcept {
@@ -86,7 +94,7 @@ class FrameFragmentationHandler : public folly::EventBase::LoopCallback {
     ctxPtr_ = &ctx;
     // Type-erase the templated doFlush via a context-typed trampoline.
     // No std::function allocation; pure function pointer indirection.
-    flushTrampoline_ = +[](FrameFragmentationHandler* self, void* c) noexcept {
+    flushTrampoline_ = +[](FrameFragmentationHandlerT* self, void* c) noexcept {
       self->flushAndPropagateErrors(*static_cast<Context*>(c));
     };
   }
@@ -184,6 +192,20 @@ class FrameFragmentationHandler : public folly::EventBase::LoopCallback {
 
   bool hasPendingStream(uint32_t streamId) const noexcept {
     return streams_.contains(streamId);
+  }
+
+  Tracker& tracker() noexcept { return tracker_; }
+
+  using EventId = typename Tracker::EventId;
+  static constexpr auto kSubscribedEvents = Tracker::kSubscribedEvents;
+
+  template <typename Context>
+  void onEvent(
+      Context& ctx,
+      EventId ev,
+      const apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox&
+          box) noexcept {
+    tracker_.onEvent(ctx, ev, box);
   }
 
  private:
@@ -292,19 +314,21 @@ class FrameFragmentationHandler : public folly::EventBase::LoopCallback {
       immediateQueue_.pop_front();
       auto& f = box.get<ComposedFrame>();
       const size_t sz = f.data ? f.data->computeChainDataLength() : 0;
+      const uint32_t streamId = f.streamId;
       // Settle the pending accounting before handing the frame off — once
       // fireWrite() runs the frame is no longer ours to track, and a
       // re-entrant flush must see counters that already exclude it.
       decrPending(sz, 1);
       auto result = ctx.fireWrite(std::move(box));
       if (result ==
+          apache::thrift::fast_thrift::channel_pipeline::Result::Error) {
+        return result;
+      }
+      tracker_.onFragment(streamId, true);
+      if (result ==
           apache::thrift::fast_thrift::channel_pipeline::Result::Backpressure) {
         backpressured_ = true;
         ctx.awaitWriteReady();
-        return result;
-      }
-      if (result ==
-          apache::thrift::fast_thrift::channel_pipeline::Result::Error) {
         return result;
       }
     }
@@ -320,26 +344,28 @@ class FrameFragmentationHandler : public folly::EventBase::LoopCallback {
 
       const uint32_t curStreamId = state.streamId;
       auto frag = state.nextFragment(config_.maxFragmentSize);
+      const bool frameDone = frag.currentFrameDone;
 
       // Refresh heap priority after mutating remaining bytes.
       streams_.update(curStreamId);
 
       // Settle pending accounting before fireWrite() so a re-entrant flush
       // observes counters that already exclude this fragment.
-      decrPending(frag.payloadBytes, frag.currentFrameDone ? 1 : 0);
+      decrPending(frag.payloadBytes, frameDone ? 1 : 0);
 
       auto result = ctx.fireWrite(
           apache::thrift::fast_thrift::channel_pipeline::erase_and_box(
               std::move(frag.outFrame)));
 
       if (result ==
+          apache::thrift::fast_thrift::channel_pipeline::Result::Error) {
+        return result;
+      }
+      tracker_.onFragment(curStreamId, frameDone);
+      if (result ==
           apache::thrift::fast_thrift::channel_pipeline::Result::Backpressure) {
         backpressured_ = true;
         ctx.awaitWriteReady();
-        return result;
-      }
-      if (result ==
-          apache::thrift::fast_thrift::channel_pipeline::Result::Error) {
         return result;
       }
 
@@ -348,6 +374,7 @@ class FrameFragmentationHandler : public folly::EventBase::LoopCallback {
       }
     }
 
+    tracker_.onFlush();
     return apache::thrift::fast_thrift::channel_pipeline::Result::Success;
   }
 
@@ -357,7 +384,7 @@ class FrameFragmentationHandler : public folly::EventBase::LoopCallback {
   // Type-erased context dispatch for runLoopCallback. The trampoline
   // restores the original Context type captured in handlerAdded.
   void* ctxPtr_{nullptr};
-  void (*flushTrampoline_)(FrameFragmentationHandler*, void*) noexcept {
+  void (*flushTrampoline_)(FrameFragmentationHandlerT*, void*) noexcept {
       nullptr};
 
   bool isScheduled_{false};
@@ -370,6 +397,11 @@ class FrameFragmentationHandler : public folly::EventBase::LoopCallback {
       immediateQueue_;
   // SRPT min-heap: always flush the stream with least remaining bytes first.
   SrptHeap<PerStreamState, RemainingBytesFn> streams_;
+
+  [[no_unique_address]] Tracker tracker_{};
 };
+
+using FrameFragmentationHandler =
+    FrameFragmentationHandlerT<NoOpFragmentCompletionTracker>;
 
 } // namespace apache::thrift::fast_thrift::frame::write::handler

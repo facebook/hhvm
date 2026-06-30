@@ -17,6 +17,7 @@
 #pragma once
 
 #include <cstddef>
+#include <cstdint>
 #include <utility>
 
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/TypeErasedBox.h>

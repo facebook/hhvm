@@ -42,6 +42,10 @@ struct OverlayEntry {
   3: optional Hash hash;
   // Whether this entry is restricted by ACLs.
   4: bool isRestricted;
+  // The direct ACL-root state for this entry, using the numeric values from
+  // facebook::eden::AclRootState.
+  // Unset means this is legacy overlay data; synthesize from isRestricted.
+  5: optional i32 aclRootState;
 }
 
 struct OverlayDir {

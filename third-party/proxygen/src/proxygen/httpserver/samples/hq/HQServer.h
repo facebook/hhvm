@@ -200,13 +200,16 @@ class HQServerTransportFactory
   }
 
  private:
+  bool onQuicWriteCipherAvailable(
+      std::shared_ptr<quic::QuicSocket> quicSocket) override;
   void onQuicTransportReady(
       std::shared_ptr<quic::QuicSocket> quicSocket) override;
   void onConnectionSetupError(std::shared_ptr<quic::QuicSocket> quicSocket,
                               quic::QuicError code) override;
   wangle::ConnectionManager* getConnectionManager(folly::EventBase* evb);
   void handleHQAlpn(std::shared_ptr<quic::QuicSocket> quicSocket,
-                    wangle::ConnectionManager* connMgr);
+                    wangle::ConnectionManager* connMgr,
+                    bool calledFromWriteCipherPath = false);
 
   // Configuration params
   const HQServerParams& params_;

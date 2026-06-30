@@ -10,6 +10,11 @@
 
 namespace proxygen {
 
+void HQDownstreamSession::onWriteCipherAvailable() noexcept {
+  HQDownstreamSession::DestructorGuard dg(this);
+  onWriteCipherAvailableCommon();
+}
+
 void HQDownstreamSession::onTransportReady() noexcept {
   HQDownstreamSession::DestructorGuard dg(this);
   if (!onTransportReadyCommon()) {

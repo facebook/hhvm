@@ -2377,6 +2377,22 @@ TEST_P(HQDownstreamSessionBeforeTransportReadyTest, NotifyPendingShutdown) {
               ElementsAre(kMaxClientBidiStreamId, 0));
 }
 
+TEST_P(HQDownstreamSessionBeforeTransportReadyTest,
+       WriteCipherAvailableCreatesH3ControlStreams) {
+  hqSession_->onWriteCipherAvailable();
+  eventBase_.loopOnce();
+
+  const std::vector<quic::StreamId> expectedControlStreams = {3, 7, 11};
+  for (auto id : expectedControlStreams) {
+    EXPECT_NE(socketDriver_->streams_.find(id), socketDriver_->streams_.end());
+  }
+  EXPECT_GT(socketDriver_->getNumWriteChainInvocations(3), 0);
+
+  SetUpOnTransportReady();
+  hqSession_->closeWhenIdle();
+  eventBase_.loopOnce();
+}
+
 // NOTE: a failure for this test may cause an infinite loop in processReadData
 TEST_P(HQDownstreamSessionTest, ProcessReadDataOnDetachedStream) {
   auto id = sendRequest("/", 0, false);

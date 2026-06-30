@@ -209,6 +209,9 @@ class HQSession
               quic::BufPtr knobBlob) override;
 
   // returns false in case of failure
+  bool onWriteCipherAvailableCommon() noexcept;
+
+  // returns false in case of failure
   bool onTransportReadyCommon() noexcept;
 
   void onReplaySafe() noexcept override;
@@ -2002,6 +2005,8 @@ class HQSession
   // Default to false for now to match existing behavior
   bool strictValidation_{false};
   bool datagramEnabled_{false};
+  bool writeCipherAvailableNotified_{false};
+  bool writeCipherAvailableFailed_{false};
 
   /** Reads in the current loop iteration */
   uint16_t readsPerLoop_{0};

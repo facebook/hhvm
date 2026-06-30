@@ -234,6 +234,25 @@ void HQServerTransportFactory::onQuicTransportReady(
   }
 }
 
+bool HQServerTransportFactory::onQuicWriteCipherAvailable(
+    std::shared_ptr<quic::QuicSocket> quicSocket) {
+  auto alpn = quicSocket->getAppProtocol();
+  if (alpn && alpnHandlers_.find(*alpn) != alpnHandlers_.end()) {
+    return false;
+  }
+
+  auto qevb = quicSocket->getEventBase();
+  folly::EventBase* evb{nullptr};
+  if (qevb) {
+    evb = qevb->getTypedEventBase<quic::FollyQuicEventBase>()
+              ->getBackingEventBase();
+  }
+  handleHQAlpn(std::move(quicSocket),
+               getConnectionManager(evb),
+               /*calledFromWriteCipherPath=*/true);
+  return true;
+}
+
 void HQServerTransportFactory::onConnectionSetupError(
     std::shared_ptr<quic::QuicSocket>, quic::QuicError code) {
   LOG(ERROR) << "Failed to accept QUIC connection: " << code.message;
@@ -255,7 +274,8 @@ wangle::ConnectionManager* HQServerTransportFactory::getConnectionManager(
 
 void HQServerTransportFactory::handleHQAlpn(
     std::shared_ptr<quic::QuicSocket> quicSocket,
-    wangle::ConnectionManager* connMgr) {
+    wangle::ConnectionManager* connMgr,
+    bool calledFromWriteCipherPath) {
   wangle::TransportInfo tinfo;
   auto controller = new HQSessionController(
       params_, httpTransactionHandlerProvider_, onTransportReadyFn_);
@@ -267,7 +287,11 @@ void HQServerTransportFactory::handleHQAlpn(
   session->setEgressSettings(kH3EgressSettings);
 
   session->startNow();
-  session->onTransportReady();
+  if (calledFromWriteCipherPath) {
+    session->onWriteCipherAvailable();
+  } else {
+    session->onTransportReady();
+  }
 }
 
 HQServer::HQServer(

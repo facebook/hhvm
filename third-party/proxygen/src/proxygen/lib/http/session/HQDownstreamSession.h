@@ -25,6 +25,8 @@ class HQDownstreamSession : public HQSession {
                   sessionInfoCb) {
   }
 
+  void onWriteCipherAvailable() noexcept override;
+
   void onTransportReady() noexcept override;
 
   void onFullHandshakeDone() noexcept override;

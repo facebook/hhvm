@@ -334,20 +334,22 @@ const folly::SocketAddress& HQSession::getPeerAddress() const noexcept {
                                        cachedPeerAddr_);
 }
 
-bool HQSession::onTransportReadyCommon() noexcept {
+bool HQSession::onWriteCipherAvailableCommon() noexcept {
+  if (writeCipherAvailableNotified_) {
+    return !writeCipherAvailableFailed_;
+  }
+  writeCipherAvailableNotified_ = true;
+
   localAddr_ = quic::toFollySocketAddress(sock_->getLocalAddress());
   peerAddr_ = quic::toFollySocketAddress(sock_->getPeerAddress());
   initQuicProtocolInfo(*quicInfo_, *sock_);
   // NOTE: this can drop the connection if the next protocol is not supported
   if (!getAndCheckApplicationProtocol()) {
+    writeCipherAvailableFailed_ = true;
     return false;
   }
-  transportInfo_.acceptTime = getCurrentTime();
-  getCurrentTransportInfoWithoutUpdate(&transportInfo_);
-  transportInfo_.setupTime = millisecondsSince(transportStart_);
-  transportInfo_.connectLatency = millisecondsSince(transportStart_).count();
-  transportInfo_.protocolInfo = quicInfo_;
   if (!createEgressControlStreams()) {
+    writeCipherAvailableFailed_ = true;
     return false;
   }
   // Apply the default settings
@@ -361,12 +363,30 @@ bool HQSession::onTransportReadyCommon() noexcept {
   sock_->setPingCallback(this);
   if (earlyDataHandler_ && earlyDataHandler_->hasSettings()) {
     // Apply cached peer settings from 0-RTT session ticket.
-    // hasSettings() is true when validate() successfully parsed cached settings
-    // from the ticket. Old tickets without app params won't have settings.
+    // hasSettings() is true when validate() successfully parsed cached
+    // settings from the ticket. Old tickets without app params won't have
+    // settings.
     applySettings(earlyDataHandler_->getSettings().getAllSettings());
   } else {
     applySettings(defaultSettings);
   }
+
+  return true;
+}
+
+bool HQSession::onTransportReadyCommon() noexcept {
+  if (!onWriteCipherAvailableCommon()) {
+    return false;
+  }
+  // localAddr_/peerAddr_/quicInfo_ are populated by
+  // onWriteCipherAvailableCommon() above (inline here on the legacy/client
+  // path, or earlier at write-cipher availability on the retimed server
+  // path); don't re-fetch them.
+  transportInfo_.acceptTime = getCurrentTime();
+  getCurrentTransportInfoWithoutUpdate(&transportInfo_);
+  transportInfo_.setupTime = millisecondsSince(transportStart_);
+  transportInfo_.connectLatency = millisecondsSince(transportStart_).count();
+  transportInfo_.protocolInfo = quicInfo_;
   // notifyPendingShutdown may be invoked before onTransportReady,
   // so we need to address that here by kicking the GOAWAY logic if needed
   if (drainState_ == DrainState::PENDING) {

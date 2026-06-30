@@ -347,13 +347,61 @@ service Foo // after service name
 )");
 }
 
-TEST(FormatterTest, currentBehaviorDropsCommentBeforeServiceExtends) {
-  // The formatter throws rather than emitting output that would drop trivia.
-  EXPECT_THROW(
-      format_thrift_source(R"(service Foo /* Hello there! */ extends Bar {
+TEST(FormatterTest, preservesKeywordTrailingLineComments) {
+  expect_comments_retained(R"(package // package
+"facebook.com/thrift/test"
+
+include // include
+"foo.thrift" // path
+as // as
+foo
+
+namespace // namespace
+cpp2 // language
+foo
+
+const // const
+i32 answer = 42;
+
+typedef // typedef
+string Name
+
+enum // enum
+Color {
+  RED = 1,
 }
-)"),
-      std::runtime_error);
+
+struct // struct
+S {
+  1: optional // optional
+  string field;
+}
+
+safe // safe
+exception // exception
+E {
+}
+
+service // service
+Service extends // extends
+Base {
+  performs // performs
+  Interaction;
+  oneway // oneway
+  void f() throws // throws
+  ();
+}
+)");
+}
+
+TEST(FormatterTest, preservesCommentsBeforeServiceExtends) {
+  expect_format(
+      R"(service Foo /* Hello there! */ extends Bar {
+}
+)",
+      R"(service Foo /* Hello there! */ extends Bar {
+}
+)");
 }
 
 TEST(FormatterTest, currentBehaviorMovesSpaceBeforeFieldSeparatorBlockComment) {

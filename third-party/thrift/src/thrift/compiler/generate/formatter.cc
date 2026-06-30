@@ -1218,20 +1218,6 @@ std::string inline_separator_after(const token& tok) {
 }
 
 std::string line_comment_break_after(const token& tok) {
-  return tok.trailing_comment && tok.trailing_comment->line ? "\n" : "";
-}
-
-std::string line_comment_break_before_separator(
-    const token& tok,
-    const std::optional<token>& sep,
-    std::string_view corrected) {
-  if (!sep && corrected.empty()) {
-    return "";
-  }
-  return line_comment_break_after(tok);
-}
-
-std::string line_comment_continuation_after(const token& tok) {
   return tok.trailing_comment && tok.trailing_comment->line
       ? "\n" + spaces(kIndent)
       : "";
@@ -1934,11 +1920,10 @@ class concrete_formatter {
         first_text_between("performs", item.range.begin, item.range.end)
             .value_or(synthetic_token("performs"));
     const token id = token_at(item.name.loc);
-    std::string result = leading_node_prefix(performs, indent, preserve_blank) +
-        "performs " + inline_token(id, indent);
-    auto sep = last_separator(item.range);
-    result += line_comment_break_before_separator(id, sep, ";");
-    result += print_separator(sep, ";");
+    std::string result = leading_token(performs, indent, preserve_blank) +
+        inline_separator_after(performs) + inline_token(id, indent);
+    result +=
+        print_separator_after_line_comment(id, last_separator(item.range), ";");
     return result;
   }
 
@@ -1972,9 +1957,8 @@ class concrete_formatter {
           *annotations, indent, last_line_length(result) + 1);
       last_token = annotations->right;
     }
-    auto sep = last_separator(item.range);
-    result += line_comment_break_before_separator(last_token, sep, ",");
-    result += print_separator(sep, ",");
+    result += print_separator_after_line_comment(
+        last_token, last_separator(item.range), ",");
     return result;
   }
 
@@ -2030,16 +2014,14 @@ class concrete_formatter {
       size_t indent,
       bool suppress_prefix) const {
     const token keyword = first_code_token(statement);
-    std::string result =
-        keyword_prefix(keyword, indent, suppress_prefix) + "package";
+    std::string result = prefixed_token(keyword, indent, suppress_prefix);
     if (auto name = first_token_between(
             keyword.range.end, statement.range.end, [](const token& tok) {
               return tok.kind != token_kind::eof && !tok.is_symbol(';');
             })) {
-      result += " " + inline_token(*name, indent);
-      auto sep = last_separator(statement.range);
-      result += line_comment_break_before_separator(*name, sep, "");
-      result += print_separator(sep, "");
+      result += inline_separator_after(keyword) + inline_token(*name, indent);
+      result += print_separator_after_line_comment(
+          *name, last_separator(statement.range), "");
       return result;
     }
     result += print_separator(last_separator(statement.range), ";");
@@ -2052,8 +2034,8 @@ class concrete_formatter {
       bool suppress_prefix) const {
     const token include = first_code_token(statement);
     const token path = token_at(statement.text_range.begin);
-    std::string result = keyword_prefix(include, indent, suppress_prefix) +
-        "include " + inline_token(path, indent);
+    std::string result = prefixed_token(include, indent, suppress_prefix) +
+        inline_separator_after(include) + inline_token(path, indent);
     token last_token = path;
     if (auto as_keyword =
             first_text_between("as", path.range.end, statement.range.end)) {
@@ -2063,13 +2045,14 @@ class concrete_formatter {
                     !tok.is_symbol(',');
               })) {
         result += inline_separator_after(path);
-        result += "as " + inline_token(*alias, indent);
+        result += inline_token(*as_keyword, indent);
+        result += inline_separator_after(*as_keyword);
+        result += inline_token(*alias, indent);
         last_token = *alias;
       }
     }
-    auto sep = last_separator(statement.range);
-    result += line_comment_break_before_separator(last_token, sep, "");
-    result += print_separator(sep, "");
+    result += print_separator_after_line_comment(
+        last_token, last_separator(statement.range), "");
     return result;
   }
 
@@ -2080,11 +2063,10 @@ class concrete_formatter {
     const token include = first_code_token(statement);
     const token path =
         first_token_after(include.range.end, statement.range.end);
-    std::string result = keyword_prefix(include, indent, suppress_prefix) +
-        include.text + " " + inline_token(path, indent);
-    auto sep = last_separator(statement.range);
-    result += line_comment_break_before_separator(path, sep, "");
-    result += print_separator(sep, "");
+    std::string result = prefixed_token(include, indent, suppress_prefix) +
+        inline_separator_after(include) + inline_token(path, indent);
+    result += print_separator_after_line_comment(
+        path, last_separator(statement.range), "");
     return result;
   }
 
@@ -2096,13 +2078,11 @@ class concrete_formatter {
     const token language = token_at(statement.first_identifier.loc);
     const token value =
         first_token_after(language.range.end, statement.range.end);
-    std::string result = keyword_prefix(ns, indent, suppress_prefix) +
-        "namespace " + inline_token(language, indent) +
-        std::string(inline_separator_after(language)) +
-        inline_token(value, indent);
-    auto sep = last_separator(statement.range);
-    result += line_comment_break_before_separator(value, sep, "");
-    result += print_separator(sep, "");
+    std::string result = prefixed_token(ns, indent, suppress_prefix) +
+        inline_separator_after(ns) + inline_token(language, indent) +
+        inline_separator_after(language) + inline_token(value, indent);
+    result += print_separator_after_line_comment(
+        value, last_separator(statement.range), "");
     return result;
   }
 
@@ -2118,8 +2098,8 @@ class concrete_formatter {
     }
     const token equal = symbol_between('=', id.range.end, statement.range.end);
     value val = materialize_value(*statement.value);
-    std::string result =
-        keyword_prefix(keyword, indent, suppress_prefix) + "const ";
+    std::string result = prefixed_token(keyword, indent, suppress_prefix) +
+        inline_separator_after(keyword);
     std::string first_value_line;
     size_t type_inline_size = 0;
     {
@@ -2165,9 +2145,8 @@ class concrete_formatter {
           *annotations, indent, indent + last_line_length(result) + 1);
       last_token = annotations->right;
     }
-    auto sep = last_separator(statement.range);
-    result += line_comment_break_before_separator(last_token, sep, ";");
-    result += print_separator(sep, ";");
+    result += print_separator_after_line_comment(
+        last_token, last_separator(statement.range), ";");
     return result;
   }
 
@@ -2181,8 +2160,8 @@ class concrete_formatter {
     auto trailing_annotations = deprecated_annotations(statement.attrs.get());
     auto sep = last_separator(statement.range);
 
-    std::string result =
-        keyword_prefix(keyword, indent, suppress_prefix) + "typedef ";
+    std::string result = prefixed_token(keyword, indent, suppress_prefix) +
+        inline_separator_after(keyword);
     size_t type_suffix = 1 + id.text.size();
     size_t type_inline_size = 0;
     {
@@ -2224,8 +2203,7 @@ class concrete_formatter {
           *trailing_annotations, indent, last_line_length(result) + 1);
       last_token = trailing_annotations->right;
     }
-    result += line_comment_break_before_separator(last_token, sep, "");
-    result += print_separator(sep, "");
+    result += print_separator_after_line_comment(last_token, sep, "");
     return result;
   }
 
@@ -2238,8 +2216,8 @@ class concrete_formatter {
     const token left = symbol_between('{', id.range.end, statement.range.end);
     const token right =
         last_symbol_between('}', left.range.end, statement.range.end);
-    std::string result = keyword_prefix(keyword, indent, suppress_prefix) +
-        "enum " + inline_token(id, indent);
+    std::string result = prefixed_token(keyword, indent, suppress_prefix) +
+        inline_separator_after(keyword) + inline_token(id, indent);
     result += inline_separator_after(id);
     result += inline_token(left, indent);
     for (size_t i = 0; i < statement.enum_values.size(); ++i) {
@@ -2256,9 +2234,8 @@ class concrete_formatter {
           *annotations, indent, last_line_length(result) + 1);
       last_token = annotations->right;
     }
-    auto sep = last_separator_after(right.range.end, statement.range);
-    result += line_comment_break_before_separator(last_token, sep, "");
-    result += print_separator(sep, "");
+    result += print_separator_after_line_comment(
+        last_token, last_separator_after(right.range.end, statement.range), "");
     return result;
   }
 
@@ -2276,8 +2253,8 @@ class concrete_formatter {
     for (const auto& item : statement.fields) {
       fields.push_back(materialize_field(item));
     }
-    std::string result = keyword_prefix(keyword, indent, suppress_prefix) +
-        keyword.text + " " + inline_token(id, indent);
+    std::string result = prefixed_token(keyword, indent, suppress_prefix) +
+        inline_separator_after(keyword) + inline_token(id, indent);
     result += inline_separator_after(id);
     result += print_fields(left, fields, right, indent);
     token last_token = right;
@@ -2287,9 +2264,8 @@ class concrete_formatter {
           *annotations, indent, last_line_length(result) + 1);
       last_token = annotations->right;
     }
-    auto sep = last_separator_after(right.range.end, statement.range);
-    result += line_comment_break_before_separator(last_token, sep, "");
-    result += print_separator(sep, "");
+    result += print_separator_after_line_comment(
+        last_token, last_separator_after(right.range.end, statement.range), "");
     return result;
   }
 
@@ -2315,12 +2291,16 @@ class concrete_formatter {
                                          : leading_node_prefix(first, indent);
     for (const token& modifier :
          tokens_between(first.range.begin, keyword.range.begin)) {
-      result += (modifier.range.begin == first.range.begin)
+      result += modifier.range.begin == first.range.begin
           ? token_text(modifier)
           : inline_token(modifier, indent);
       result += inline_separator_after(modifier);
     }
-    result += "exception " + inline_token(id, indent);
+    result += keyword.range.begin == first.range.begin
+        ? token_text(keyword)
+        : inline_token(keyword, indent);
+    result += inline_separator_after(keyword);
+    result += inline_token(id, indent);
     result += inline_separator_after(id);
     result += print_fields(left, fields, right, indent);
     token last_token = right;
@@ -2330,9 +2310,8 @@ class concrete_formatter {
           *annotations, indent, last_line_length(result) + 1);
       last_token = annotations->right;
     }
-    auto sep = last_separator_after(right.range.end, statement.range);
-    result += line_comment_break_before_separator(last_token, sep, "");
-    result += print_separator(sep, "");
+    result += print_separator_after_line_comment(
+        last_token, last_separator_after(right.range.end, statement.range), "");
     return result;
   }
 
@@ -2345,16 +2324,21 @@ class concrete_formatter {
     const token left = symbol_between('{', id.range.end, statement.range.end);
     const token right =
         last_symbol_between('}', left.range.end, statement.range.end);
-    std::string result = keyword_prefix(keyword, indent, suppress_prefix) +
-        keyword.text + " " + inline_token(id, indent);
-    token last_token = id;
+    std::string result = prefixed_token(keyword, indent, suppress_prefix) +
+        inline_separator_after(keyword) + inline_token(id, indent);
+    token last_header_token = id;
     if (statement.second_identifier.loc != source_location{}) {
       const token base = token_at(statement.second_identifier.loc);
-      result += inline_separator_after(last_token);
-      result += "extends " + inline_token(base, indent);
-      last_token = base;
+      const token extends_keyword =
+          first_text_between("extends", id.range.end, base.range.begin)
+              .value_or(synthetic_token("extends"));
+      result += inline_separator_after(last_header_token);
+      result += inline_token(extends_keyword, indent);
+      result += inline_separator_after(extends_keyword);
+      result += inline_token(base, indent);
+      last_header_token = base;
     }
-    result += inline_separator_after(last_token);
+    result += inline_separator_after(last_header_token);
     result += inline_token(left, indent);
     for (size_t i = 0; i < statement.functions.size(); ++i) {
       const auto& fn = statement.functions[i];
@@ -2364,16 +2348,15 @@ class concrete_formatter {
       result += "\n" + indent_multiline(member, indent + kIndent);
     }
     result += "\n" + spaces(indent) + inline_token(right, indent);
-    last_token = right;
+    token last_token = right;
     if (auto annotations = deprecated_annotations(statement.attrs.get())) {
       result += inline_separator_after(last_token);
       result += print_annotation_list(
           *annotations, indent, last_line_length(result) + 1);
       last_token = annotations->right;
     }
-    auto sep = last_separator_after(right.range.end, statement.range);
-    result += line_comment_break_before_separator(last_token, sep, "");
-    result += print_separator(sep, "");
+    result += print_separator_after_line_comment(
+        last_token, last_separator_after(right.range.end, statement.range), "");
     return result;
   }
 
@@ -2609,6 +2592,16 @@ class concrete_formatter {
                            : leading_node_prefix(keyword, indent);
   }
 
+  std::string leading_token(
+      const token& tok, size_t indent, bool preserve_blank = true) const {
+    return leading_node_prefix(tok, indent, preserve_blank) + token_text(tok);
+  }
+
+  std::string prefixed_token(
+      const token& tok, size_t indent, bool suppress_prefix) const {
+    return keyword_prefix(tok, indent, suppress_prefix) + token_text(tok);
+  }
+
   std::string inline_token(const token& tok, size_t indent) const {
     return inline_leading_prefix(tok, indent) + tok.text +
         trailing_comment(tok);
@@ -2628,6 +2621,19 @@ class concrete_formatter {
     if (sep) {
       result += trailing_comment(*sep);
     }
+    return result;
+  }
+
+  std::string print_separator_after_line_comment(
+      const token& tok,
+      const std::optional<token>& sep,
+      std::string_view corrected) const {
+    std::string result;
+    if (tok.trailing_comment && tok.trailing_comment->line &&
+        (sep || !corrected.empty())) {
+      result += "\n" + spaces(kIndent);
+    }
+    result += print_separator(sep, corrected);
     return result;
   }
 
@@ -3420,7 +3426,7 @@ class concrete_formatter {
         first, indent, preserve_blank && item.leading_annotations.empty());
     if (item.index && item.colon) {
       result += token_text(*item.index);
-      result += line_comment_continuation_after(*item.index);
+      result += line_comment_break_after(*item.index);
       result += inline_token(*item.colon, indent);
       result += inline_separator_after(*item.colon);
     }
@@ -3513,8 +3519,7 @@ class concrete_formatter {
       }
     }
     result +=
-        line_comment_break_before_separator(*last_token, item.separator, ";");
-    result += print_separator(item.separator, ";");
+        print_separator_after_line_comment(*last_token, item.separator, ";");
     return result;
   }
 
@@ -3543,7 +3548,7 @@ class concrete_formatter {
     prefix += leading_node_prefix(first, indent, preserve_blank);
     if (fn.index && fn.colon) {
       prefix += token_text(*fn.index);
-      prefix += line_comment_continuation_after(*fn.index);
+      prefix += line_comment_break_after(*fn.index);
       prefix += inline_token(*fn.colon, indent);
       prefix += inline_separator_after(*fn.colon);
     }
@@ -3576,9 +3581,11 @@ class concrete_formatter {
     for (size_t i = 0; i < fn.return_types.size(); ++i) {
       if (i != 0) {
         if (last_return_token != nullptr) {
-          prefix += line_comment_continuation_after(*last_return_token);
+          prefix += print_separator_after_line_comment(
+              *last_return_token, fn.return_type_separators.at(i - 1), ",");
+        } else {
+          prefix += print_separator(fn.return_type_separators.at(i - 1), ",");
         }
-        prefix += print_separator(fn.return_type_separators.at(i - 1), ",");
         if (fn.return_type_separators.at(i - 1)) {
           prefix +=
               inline_separator_after(*fn.return_type_separators.at(i - 1));
@@ -3616,7 +3623,7 @@ class concrete_formatter {
       const std::string params_inline =
           fields_inline(fn.params, ',', compact_params, compact_params);
       const std::string inline_result = prefix +
-          line_comment_continuation_after(fn.name) +
+          std::string(line_comment_break_after(fn.name)) +
           inline_token(fn.left, indent) + params_inline +
           inline_token(fn.right, indent);
       std::string suffix_inline;
@@ -3690,7 +3697,7 @@ class concrete_formatter {
     }
 
     std::string result = prefix;
-    result += line_comment_continuation_after(fn.name);
+    result += line_comment_break_after(fn.name);
     result += inline_token(fn.left, indent);
     for (const auto& param : fn.params) {
       result += "\n" +
@@ -3725,8 +3732,7 @@ class concrete_formatter {
       last_token = &fn.annotations->right;
     }
     result +=
-        line_comment_break_before_separator(*last_token, fn.separator, ";");
-    result += print_separator(fn.separator, ";");
+        print_separator_after_line_comment(*last_token, fn.separator, ";");
     return result;
   }
 
@@ -3783,7 +3789,7 @@ class concrete_formatter {
     }
     if (item.index && item.colon) {
       result += inline_token(*item.index, indent);
-      result += line_comment_continuation_after(*item.index);
+      result += line_comment_break_after(*item.index);
       result += inline_token(*item.colon, indent);
       result += inline_separator_after(*item.colon);
     }

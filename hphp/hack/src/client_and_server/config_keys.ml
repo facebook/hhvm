@@ -34,8 +34,6 @@ module Hhconfig = struct
 
   let deregister_php_stdlib = key "deregister_php_stdlib"
 
-  let disable_hh_ignore_error = key "disable_hh_ignore_error"
-
   let disable_lval_as_an_expression = key "disable_lval_as_an_expression"
 
   let disable_xhp_children_declarations =

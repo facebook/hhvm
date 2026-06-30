@@ -107,7 +107,6 @@ let parse_options () =
         disable_xhp_children_declarations = false;
         enable_xhp_class_modifier = false;
         everything_sdt = sound_dynamic;
-        disable_hh_ignore_error = 0;
         allowed_decl_fixme_codes =
           Option.value !allowed_decl_fixme_codes ~default:ISet.empty;
         allow_unstable_features = true;
@@ -322,7 +321,6 @@ let main_hack ({ tcopt; _ } as opts) (sharedmem_config : SharedMem.config) :
               "disable_xhp_element_mangling=false";
               "disable_xhp_children_declarations=false";
               "enable_xhp_class_modifier=false";
-              "disable_hh_ignore_error=0";
             ]
             |> String.concat ~sep:"\n"
           in

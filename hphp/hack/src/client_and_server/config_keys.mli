@@ -36,8 +36,6 @@ module Hhconfig : sig
 
   val deregister_php_stdlib : string
 
-  val disable_hh_ignore_error : string
-
   val disable_lval_as_an_expression : string
 
   val disable_xhp_children_declarations : string

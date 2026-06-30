@@ -1,7 +1,3 @@
-ERROR: File "f.php", line 4, characters 3-29:
-`HH_IGNORE_ERROR` comments are disabled by configuration and will soon be treated like normal comments, so you cannot use them to suppress errors (Parsing[1008])
-ERROR: File "f.php", line 10, characters 3-29:
-`HH_IGNORE_ERROR` comments are disabled by configuration and will soon be treated like normal comments, so you cannot use them to suppress errors (Parsing[1008])
 ERROR: File "f.php", line 5, characters 3-7:
 You are trying to access an element of this container but the container could be `null`.  (Typing[4063])
   File "f.php", line 3, characters 14-18:

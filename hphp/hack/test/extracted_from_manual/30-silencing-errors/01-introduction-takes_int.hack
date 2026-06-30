@@ -21,11 +21,3 @@ async function example_snippet_wrapper1(): Awaitable<void> {
   /* HH_FIXME[4110] Your explanation here. */
   takes_int("foo");
 }
-
-async function example_snippet_wrapper2(): Awaitable<void> {
-  /* HH_FIXME[4110] An example fixme. */
-  takes_int("foo");
-  
-  /* HH_IGNORE_ERROR[4110] This is equivalent to the HH_FIXME above. */
-  takes_int("foo");
-}

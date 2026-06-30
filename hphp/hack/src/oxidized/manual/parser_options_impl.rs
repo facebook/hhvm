@@ -33,7 +33,6 @@ impl Default for ParserOptions {
             union_intersection_type_hints: false,
             unwrap_concurrent: false,
             no_parser_readonly_check: false,
-            disable_hh_ignore_error: 0,
             allowed_decl_fixme_codes: i_set::ISet::new(),
             use_legacy_experimental_feature_config: true,
             experimental_features: std::collections::BTreeMap::default(),

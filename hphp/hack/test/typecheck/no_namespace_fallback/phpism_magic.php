@@ -12,9 +12,9 @@
 namespace NS;
 
 function foo(mixed $in): void {
-  /* HH_IGNORE_ERROR[4016] isset() is unsafe, but still defined */
+  /* HH_FIXME[4016] isset() is unsafe, but still defined */
   \var_dump(isset($in));
-  /* HH_IGNORE_ERROR[4135] unsset() is also banned */
+  /* HH_FIXME[4135] unsset() is also banned */
   unset($in);
   exit(0);
 }

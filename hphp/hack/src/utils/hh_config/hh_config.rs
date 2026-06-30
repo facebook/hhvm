@@ -282,8 +282,6 @@ impl HhConfig {
                 "disable_xhp_children_declarations",
                 default.disable_xhp_children_declarations,
             )?,
-            disable_hh_ignore_error: hhconfig
-                .get_int_or("disable_hh_ignore_error", default.disable_hh_ignore_error)?,
             keep_user_attributes: default.keep_user_attributes,
             is_systemlib: default.is_systemlib,
             interpret_soft_types_as_like_types: hhconfig.get_bool_or(

@@ -1,7 +1,7 @@
 # Introduction
 
 Errors reported by the Hack typechecker can be silenced with
-`HH_FIXME` and `HH_IGNORE_ERROR` comments. Errors arising from type mismatches
+`HH_FIXME` comments. Errors arising from type mismatches
 on expressions may also be silenced using the `HH\FIXME\UNSAFE_CAST` function.
 
 ## Silencing Errors with `HH\FIXME\UNSAFE_CAST`
@@ -66,23 +66,6 @@ type.
 
 The behavior of badly typed code may change between HHVM
 releases. This will usually be noted in the changelog.
-
-### `HH_FIXME` versus `HH_IGNORE_ERROR`
-
-Both `HH_FIXME` and `HH_IGNORE_ERROR` have the same effect: they
-suppress an error.
-
-```hack file:takes_int.hack
-/* HH_FIXME[4110] An example fixme. */
-takes_int("foo");
-
-/* HH_IGNORE_ERROR[4110] This is equivalent to the HH_FIXME above. */
-takes_int("foo");
-```
-
-You should generally use `HH_FIXME`. `HH_IGNORE_ERROR` is intended to
-signal to the reader that the type checker is wrong and you are
-deliberately suppressing the error. This should be very rare.
 
 ### Error Codes
 

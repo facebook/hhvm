@@ -49,8 +49,6 @@ type t = {
   unwrap_concurrent: bool;
       (** Replace concurrent blocks with their bodies in the AST *)
   no_parser_readonly_check: bool;  (** Disable parser-based readonly checking *)
-  disable_hh_ignore_error: int;
-      (** Disable HH_IGNORE_ERROR comments, either raising an error if 1 or treating them as normal comments if 2. *)
   allowed_decl_fixme_codes: ISet.t;
       (** Set of error codes disallowed in decl positions *)
   use_legacy_experimental_feature_config: bool;

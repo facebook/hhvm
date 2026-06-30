@@ -397,9 +397,6 @@ let load_config (config : Config_file_common.t) (options : GlobalOptions.t) :
         allowed_decl_fixme_codes =
           prepare_allowed_decl_fixme_codes config
           >?? po_opt.allowed_decl_fixme_codes;
-        disable_hh_ignore_error =
-          int_opt Config_keys.Hhconfig.disable_hh_ignore_error config
-          >?? po_opt.disable_hh_ignore_error;
         experimental_features =
           experimental_features >?? po_opt.experimental_features;
         (* If there was no experimental features status list in configuration,

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<8a59b781e5534ff82a981432b4e90717>>
+// @generated SignedSource<<b7d28b0cc4a3e2b7ac63f2d5ad994eca>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -84,8 +84,6 @@ pub struct ParserOptions {
     pub unwrap_concurrent: bool,
     /// Disable parser-based readonly checking
     pub no_parser_readonly_check: bool,
-    /// Disable HH_IGNORE_ERROR comments, either raising an error if 1 or treating them as normal comments if 2.
-    pub disable_hh_ignore_error: isize,
     /// Set of error codes disallowed in decl positions
     pub allowed_decl_fixme_codes: i_set::ISet,
     /// Ignore the experimental_features and consider_unspecified_experimental_features_released config

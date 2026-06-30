@@ -9,7 +9,6 @@ explicit_consistent_constructors = 1
 enable_strict_const_semantics = 4
 require_types_tco_require_types_class_consts = 1
 strict_wellformedness = 2
-disable_hh_ignore_error = 2
 disallow_direct_superglobals_refs = true
 allowed_files_for_module_declarations = *
 everything_sdt = true

@@ -32,7 +32,6 @@ type t = {
   union_intersection_type_hints: bool;
   unwrap_concurrent: bool;
   no_parser_readonly_check: bool;
-  disable_hh_ignore_error: int;
   allowed_decl_fixme_codes: ISet.t;
   use_legacy_experimental_feature_config: bool;
   experimental_features: Experimental_features.feature_status SMap.t;
@@ -73,7 +72,6 @@ let default =
     union_intersection_type_hints = false;
     unwrap_concurrent = false;
     no_parser_readonly_check = false;
-    disable_hh_ignore_error = 0;
     allowed_decl_fixme_codes = ISet.empty;
     use_legacy_experimental_feature_config = true;
     experimental_features = SMap.empty;

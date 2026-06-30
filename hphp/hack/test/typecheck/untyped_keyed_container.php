@@ -1,6 +1,6 @@
 <?hh
 
-/* HH_IGNORE_ERROR[4101] */
+/* HH_FIXME[4101] */
 function foo(KeyedContainer $_): void {
   foo(vec[]);
   foo(vec[]);

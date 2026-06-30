@@ -515,7 +515,7 @@ void Class::destroy() {
 
   for (size_t i = 0; i < numMethods(); i++) {
     if (auto meth = getMethod(i)) {
-      if (meth->cls() == this) meth->startDestroy();
+      if (meth->cls() == this) meth->atomicFlags().set(Func::Flags::Zombie);
     }
   }
 
@@ -552,7 +552,7 @@ Class::~Class() {
       if (meth->isPreFunc()) {
         meth->freeClone();
       } else {
-        meth->finishDestroy();
+        Func::destroy(meth);
       }
     }
   }

@@ -205,8 +205,7 @@ struct Func final {
   /*
    * Destruct and free a Func*.
    */
-  void startDestroy();
-  void finishDestroy();
+  static void destroy(Func* func);
 
   /*
    * Address of the end of the Func's variable-length memory allocation.

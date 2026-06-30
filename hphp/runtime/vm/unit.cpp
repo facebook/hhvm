@@ -102,14 +102,14 @@ Unit::Unit()
   ++s_liveUnits;
 }
 
-void Unit::finishDestroy() {
+Unit::~Unit() {
   if (Cfg::Eval::EnableReverseDataMap &&
       m_mergeState.load(std::memory_order_acquire) != MergeState::Unmerged) {
     // Units are registered to data_map in Unit::initialMerge().
     data_map::deregister(this);
   }
 
-  for (auto const func : funcs()) func->finishDestroy();
+  for (auto const func : funcs()) Func::destroy(func);
 
   // ExecutionContext and the TC may retain references to Class'es, so
   // it is possible for Class'es to outlive their Unit.
@@ -125,12 +125,6 @@ void Unit::finishDestroy() {
   }
 
   --s_liveUnits;
-
-  if (m_extended) {
-    delete getExtended();
-  } else {
-    delete this;
-  }
 }
 
 void* Unit::operator new(size_t sz) {
@@ -142,27 +136,27 @@ void Unit::operator delete(void* p, size_t /*sz*/) {
   vm_free(p);
 }
 
-void Unit::startDestroy() {
-  for (auto const func : funcs()) func->startDestroy();
+void Unit::destroy() {
+  for (auto const func : funcs()) func->atomicFlags().set(Func::Flags::Zombie);
   for (auto const& pcls : m_preClasses) {
     Class* cls = pcls->namedType()->clsList();
     while (cls) {
       Class* cur = cls;
       cls = cls->m_next;
       if (cur->preClass() == pcls.get()) {
-        for (size_t i = 0; i < cur->numMethods(); i++) {
-          if (auto meth = cur->getMethod(i)) {
-            if (meth->cls() == cur) {
-              meth->startDestroy();
+      	for (size_t i = 0; i < cur->numMethods(); i++) {
+    			if (auto meth = cur->getMethod(i)) {
+      			if (meth->cls() == cur) {
+							meth->atomicFlags().set(Func::Flags::Zombie);
             }
-          }
-        }
+    			}
+  			}
       }
     }
   }
   Treadmill::enqueue(
     [this] {
-      finishDestroy();
+      delete this;
     }
   );
 }

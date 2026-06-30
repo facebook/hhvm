@@ -47,7 +47,7 @@ PreClass::PreClass(Unit* unit, int line1, int line2, const StringData* n,
 }
 
 PreClass::~PreClass() {
-  std::for_each(methods(), methods() + numMethods(), [](Func* f) { f->finishDestroy(); });
+  std::for_each(methods(), methods() + numMethods(), Func::destroy);
 }
 
 void PreClass::atomicRelease() {

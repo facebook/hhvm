@@ -259,6 +259,8 @@ class HTTPServer : public quic::QuicHandshakeSocketHolder::Callback {
   void createQuicServer(const std::vector<folly::EventBase*>& evbs);
   void configureFizzServerContext(
       std::shared_ptr<fizz::server::FizzServerContext> fizzCtx);
+  bool onQuicWriteCipherAvailable(
+      std::shared_ptr<quic::QuicSocket> quicSocket) override;
   void onQuicTransportReady(
       std::shared_ptr<quic::QuicSocket> quicSocket) override;
   void onConnectionSetupError(std::shared_ptr<quic::QuicSocket>,

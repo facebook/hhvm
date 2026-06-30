@@ -344,6 +344,13 @@ void HTTPServer::onQuicTransportReady(
   acceptor->onNewConnection(std::move(quicSocket), std::move(tinfo));
 }
 
+bool HTTPServer::onQuicWriteCipherAvailable(
+    std::shared_ptr<quic::QuicSocket> quicSocket) {
+  quicSocket->setConnectionSetupCallback(nullptr);
+  onQuicTransportReady(std::move(quicSocket));
+  return true;
+}
+
 void HTTPServer::drain() {
   XLOG(DBG4) << __func__;
   if (state_ == State::RUNNING) {

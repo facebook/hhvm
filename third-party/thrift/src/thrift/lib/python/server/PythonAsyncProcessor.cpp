@@ -146,8 +146,8 @@ folly::coro::Task<void> PythonTile::co_onTermination() {
   // Schedule the Python `onInteractionTermination` coro on the asyncio loop
   // (GIL held there) and resume once it completes, so the hook finishes before
   // teardown.
-  executor_->add([handler = handler_, promise = std::move(promise)]() mutable {
-    handleInteractionTermination(handler, std::move(promise));
+  executor_->add([handler = handler_, promise2 = std::move(promise)]() mutable {
+    handleInteractionTermination(handler, std::move(promise2));
   });
   // Await the Try and ignore it: if the fulfilling task is dropped (e.g. a hard
   // interpreter teardown racing this terminate) the future fails -- resume and

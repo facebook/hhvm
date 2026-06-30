@@ -51,7 +51,7 @@ bool add_filename_arg(
     std::string_view arg,
     std::string_view program,
     int& exit_code) {
-  if (arg.rfind("@", 0) != 0) {
+  if (arg.rfind('@', 0) != 0) {
     opts.paths.emplace_back(arg);
     return true;
   }

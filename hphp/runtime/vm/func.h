@@ -49,7 +49,6 @@ namespace HPHP {
 
 struct ActRec;
 struct Class;
-struct FuncToken;
 struct NamedFunc;
 struct PreClass;
 struct StringData;
@@ -261,8 +260,6 @@ struct Func final {
    * PreClasses) are not assigned an ID.
    */
   FuncId getFuncId() const;
-
-  std::shared_ptr<FuncToken> getFuncToken() const;
 
   /*
    * Get a function ID that is guaranteed not to be reused during the lifetime

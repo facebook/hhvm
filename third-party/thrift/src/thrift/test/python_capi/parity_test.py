@@ -68,6 +68,12 @@ class ParityTest(ParityFixture):
     def test_error_parity_set_optional(self) -> None:
         self.assert_error_optional(set_optional=True)
 
+    def test_marshal_error_isset_deprecated_layout(self) -> None:
+        error = parity.make_marshal_error(is_set=True)
+        self.assertEqual(error.msg, "oops")
+        self.assertEqual(error.os, "Optional")
+        self.assertEqual(error.rs, "Required")
+
     def test_unset_struct(self) -> None:
         serial = parity.make_unset_struct_serialized()
         marshal = parity.make_unset_struct_marshal()

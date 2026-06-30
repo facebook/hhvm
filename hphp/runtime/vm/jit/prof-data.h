@@ -680,7 +680,7 @@ private:
    * Cache for Func -> block end offsets. Values in this map cannot be modified
    * after insertion so no locking is necessary for lookups.
    */
-  folly::AtomicHashMap<const Func*, const jit::fast_set<Offset>, pointer_hash<Func>>
+  folly::AtomicHashMap<FuncId::Int, const jit::fast_set<Offset>>
     m_blockEndOffsets;
 
   mutable folly::SharedMutex m_targetProfilesLock;

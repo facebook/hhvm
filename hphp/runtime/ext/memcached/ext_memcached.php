@@ -495,7 +495,7 @@ class Memcached {
    *   operation.
    */
   <<__Native>>
-  public function getResultMessage(): string;
+  public function getResultMessage(): ?string;
 
   /**
    * Map a key to a server

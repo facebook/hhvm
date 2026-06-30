@@ -42,7 +42,7 @@ function curl_error(resource $ch)[]: mixed;
  * @return string - Returns a string description of a cURL error code
  */
 <<__Native>>
-function curl_strerror(int $errno): string;
+function curl_strerror(int $errno): ?string;
 
 /**
  * Perform a cURL session

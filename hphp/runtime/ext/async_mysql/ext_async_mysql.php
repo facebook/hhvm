@@ -482,7 +482,7 @@ final class AsyncMysqlConnection {
    * @return - The escaped string.
    */
   <<__Native>>
-  public function escapeString(string $data): string;
+  public function escapeString(string $data): ?string;
 
   /**
    * Close the current connection.
@@ -508,7 +508,7 @@ final class AsyncMysqlConnection {
    * @return - The server version as a `string`.
    */
   <<__Native>>
-  public function serverInfo(): string;
+  public function serverInfo(): ?string;
 
   /**
    * Returns whether or not the current connection reused the SSL session
@@ -548,7 +548,7 @@ final class AsyncMysqlConnection {
    * @return - The hostname as a `string`.
    */
   <<__Native>>
-  public function host(): string;
+  public function host(): ?string;
 
   /**
    * The port on which the MySQL instance is running.
@@ -620,7 +620,7 @@ final class AsyncMysqlConnection {
    *           certificate presented by MySQL.
    */
   <<__Native>>
-  public function getSslCertCn(): string;
+  public function getSslCertCn(): ?string;
 
   /**
    * Returns Server Alternative Names attribute of the TLS certificate
@@ -673,7 +673,7 @@ final class AsyncMysqlConnection {
    * @return - The TLS version or an empty string
    */
   <<__Native>>
-  public function getSslVersion(): string;
+  public function getSslVersion(): ?string;
 }
 
 /**
@@ -986,7 +986,7 @@ abstract class AsyncMysqlResult {
    *           certificate presented by MySQL.
    */
   <<__Native>>
-  public function getSslCertCn(): string;
+  public function getSslCertCn(): ?string;
 
   /**
    * Returns Server Alternative Names attribute of the TLS certificate
@@ -1040,7 +1040,7 @@ abstract class AsyncMysqlResult {
    * @return - The TLS version, or an empty string for non-SSL connections.
    */
   <<__Native>>
-  public function getSslVersion(): string;
+  public function getSslVersion(): ?string;
 
 }
 
@@ -1180,7 +1180,7 @@ class AsyncMysqlErrorResult extends AsyncMysqlResult {
    * @return - The error string.
    */
   <<__Native>>
-  public function mysql_error(): string;
+  public function mysql_error(): ?string;
 
   /**
    * The type of failure that produced this result.
@@ -1191,7 +1191,7 @@ class AsyncMysqlErrorResult extends AsyncMysqlResult {
    * @return - the type of failure, either `'TimedOut'` or `'Failed'`.
    */
   <<__Native>>
-  public function failureType(): string;
+  public function failureType(): ?string;
 }
 
 /**
@@ -1456,7 +1456,7 @@ final class AsyncMysqlQueryResult extends AsyncMysqlResult {
    * @return - The gtid of the current commit as a `string`.
    */
   <<__Native>>
-  public function recvGtid(): string;
+  public function recvGtid(): ?string;
 
   /**
    * The response attributes returned for the current query
@@ -1490,7 +1490,7 @@ final class AsyncMysqlQueryResult extends AsyncMysqlResult {
    * @return - The MySQL info string, or `null` if not available.
    */
   <<__Native>>
-  public function mysqlInfo(): string;
+  public function mysqlInfo(): ?string;
 
   /**
    * The number of rows matched by an UPDATE or DELETE statement.
@@ -1591,7 +1591,7 @@ final class AsyncMysqlRowBlock implements IteratorAggregate<mixed>, Countable {
    * @return - The `string` value of the field (column).
    */
   <<__Native>>
-  public function getFieldAsString(int $row, mixed $field): string;
+  public function getFieldAsString(int $row, mixed $field): ?string;
 
   /**
    * Returns whether a field (column) value is `null`.
@@ -1639,7 +1639,7 @@ final class AsyncMysqlRowBlock implements IteratorAggregate<mixed>, Countable {
    * @return - The name of the column as a `string`.
    */
   <<__Native>>
-  public function fieldName(int $field): string;
+  public function fieldName(int $field): ?string;
 
   /**
    * Returns whether there were any rows are returned in the current row block.
@@ -1817,7 +1817,8 @@ final class AsyncMysqlRow implements MysqlRow {
    * @return - The `string` value of the field (column).
    */
   <<__Native>>
-  public function getFieldAsString(mixed $field): string;
+  /* HH_FIXME[4341] override returns `?string` to match underlying OptString */
+  public function getFieldAsString(mixed $field): ?string;
 
   /**
    * Returns whether a field (column) value is `null`.
@@ -1901,7 +1902,8 @@ final class AsyncMysqlRowIterator implements HH\KeyedIterator<string, string> {
    *           position.
    */
   <<__Native>>
-  public function current(): string;
+  /* HH_FIXME[4341] override returns `?string` to match underlying OptString */
+  public function current(): ?string;
 
   /**
    * Get the current field (column) number.
@@ -1936,9 +1938,9 @@ namespace HH\Lib\SQL {
     <<__Native, \NoDoc>>
     public function toString__FOR_DEBUGGING_ONLY(
       \AsyncMysqlConnection $conn,
-    ): string;
+    ): ?string;
 
     <<__Native, \NoDoc>>
-    public function toUnescapedString__FOR_DEBUGGING_ONLY__UNSAFE(): string;
+    public function toUnescapedString__FOR_DEBUGGING_ONLY__UNSAFE(): ?string;
   }
 }

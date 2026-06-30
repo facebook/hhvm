@@ -250,4 +250,4 @@ function iconv(string $in_charset,
  */
 <<__Native>>
 function ob_iconv_handler(string $contents,
-                          int $status): string;
+                          int $status): ?string;

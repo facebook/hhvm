@@ -109,7 +109,7 @@ class Locale {
    * @return string - The current runtime locale
    */
   <<__Native>>
-  public static function getDefault(): string;
+  public static function getDefault(): ?string;
 
   /**
    * Returns an appropriately localized display name for language of the
@@ -124,7 +124,7 @@ class Locale {
    */
   <<__Native>>
   public static function getDisplayLanguage(string $locale,
-                                            string $in_locale): string;
+                                            string $in_locale): ?string;
 
   /**
    * Returns an appropriately localized display name for the input locale
@@ -137,7 +137,7 @@ class Locale {
    */
   <<__Native>>
   public static function getDisplayName(string $locale,
-                                        string $in_locale): string;
+                                        string $in_locale): ?string;
 
   /**
    * Returns an appropriately localized display name for region of the input
@@ -152,7 +152,7 @@ class Locale {
    */
   <<__Native>>
   public static function getDisplayRegion(string $locale,
-                                          string $in_locale): string;
+                                          string $in_locale): ?string;
 
   /**
    * Returns an appropriately localized display name for script of the input
@@ -167,7 +167,7 @@ class Locale {
    */
   <<__Native>>
   public static function getDisplayScript(string $locale,
-                                          string $in_locale): string;
+                                          string $in_locale): ?string;
 
   /**
    * Returns an appropriately localized display name for variants of the input
@@ -182,7 +182,7 @@ class Locale {
    */
   <<__Native>>
   public static function getDisplayVariant(string $locale,
-                                           string $in_locale): string;
+                                           string $in_locale): ?string;
 
   /**
    * Gets the keywords for the input locale
@@ -205,7 +205,7 @@ class Locale {
    *   NULL in case of error.
    */
   <<__Native>>
-  public static function getPrimaryLanguage(string $locale): string;
+  public static function getPrimaryLanguage(string $locale): ?string;
 
   /**
    * Gets the region for the input locale
@@ -247,7 +247,7 @@ class Locale {
   public static function lookup(varray $langtag,
                                 string $locale,
                                 bool $canonicalize = false,
-                                string $default = ""): string;
+                                string $default = ""): ?string;
 
   /**
    * Returns a key-value array of locale ID subtag elements.

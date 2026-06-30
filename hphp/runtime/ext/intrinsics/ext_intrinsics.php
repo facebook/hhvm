@@ -138,7 +138,7 @@ function builtin_io_no_fca(
  * serialize them as normal PHP arrays).
  */
 <<__IsFoldable, __Native>>
-function serialize_keep_dvarrays(mixed $value): string;
+function serialize_keep_dvarrays(mixed $value): ?string;
 
 /* dummy builtin written in hack for testing param coercion */
 function id_string(string $value): string {
@@ -146,7 +146,7 @@ function id_string(string $value): string {
 }
 
 <<__Native>>
-function serialize_with_format(mixed $thing, int $format): string;
+function serialize_with_format(mixed $thing, int $format): ?string;
 
 <<__Native>>
 function deserialize_with_format(string $str, int $format): mixed;
@@ -201,7 +201,7 @@ function drain_unit_prefetcher(): void;
  * function.
  */
 <<__Native>>
-function debug_get_bytecode(): string;
+function debug_get_bytecode(): ?string;
 
 /*
  * Return an array of recorded dependencies for the file in which this builtin

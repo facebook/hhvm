@@ -902,7 +902,7 @@ class ReflectionProperty implements Reflector {
   public function getDocComment()[]: mixed;
 
   <<__Native>>
-  public function getTypeText()[]: string;
+  public function getTypeText()[]: ?string;
 
   private function isAccessible()[] {
     return ($this->isPublic() || $this->forceAccessible);
@@ -1357,7 +1357,7 @@ namespace HH {
    */
   <<__Native("NoRecording"),NoDoc>>
   function type_structure_classname(mixed $cls_or_obj,
-                                    ?string $cns_name = null)[]: string;
+                                    ?string $cns_name = null)[]: ?string;
 
   /**
    * Retrieves the class pointed by a type constant.

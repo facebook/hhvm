@@ -566,10 +566,11 @@ struct TypeConstraint {
    * as a type within systemlib, specifically in the context of a `__Native`
    * function. For example:
    * - Nullable and soft types are always represented as `KindOfMixed`
+   *   - exception: ?string returns keep the legacy `KindOfString` representation
    * - Unresolved types are always represented as `KindOfObejct`
    * - Otherwise, grab the result of `underlyingDataType`
    */
-  MaybeDataType asSystemlibType() const;
+  MaybeDataType asSystemlibType(bool isReturn) const;
 
   /**
    * This function returns the suitable "memo-key constraint" if it
@@ -844,10 +845,11 @@ struct TypeIntersectionConstraint {
     return std::nullopt;
   }
 
-  MaybeDataType asSystemlibType() const {
+  MaybeDataType asSystemlibType(bool isReturn) const {
     for (auto const& tc : range()) {
-      if (tc.asSystemlibType() != std::nullopt) {
-        return tc.asSystemlibType();
+      auto const tyopt = tc.asSystemlibType(isReturn);
+      if (tyopt != std::nullopt) {
+        return tyopt;
       }
     }
     return std::nullopt;

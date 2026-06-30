@@ -109,5 +109,5 @@ namespace HH {
    * @return function name
    */
   <<__Native>>
-  function fun_get_function(mixed $fun)[]: string;
+  function fun_get_function(mixed $fun)[]: ?string;
 }

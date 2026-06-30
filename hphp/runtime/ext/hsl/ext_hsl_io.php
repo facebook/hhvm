@@ -35,5 +35,5 @@ namespace HH\Lib\_Private\_IO {
   <<__Native>>
   function response_flush(): void;
   <<__Native>>
-  function request_read(int $max_bytes): string;
+  function request_read(int $max_bytes): ?string;
 }

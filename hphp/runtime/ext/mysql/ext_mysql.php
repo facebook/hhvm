@@ -235,7 +235,7 @@ function mysql_error(?resource $link_identifier = NULL): mixed;
  * @return string - Returns the escaped string.
  */
 <<__Native>>
-function mysql_escape_string(string $unescaped_string)[]: string;
+function mysql_escape_string(string $unescaped_string)[]: ?string;
 
 /**
  * Fetch a result row as an associative array, a numeric array, or both
@@ -459,7 +459,7 @@ function mysql_free_result(resource $result): bool;
  * @return string - The MySQL client version.
  */
 <<__Native>>
-function mysql_get_client_info(): string;
+function mysql_get_client_info(): ?string;
 
 /**
  * Get MySQL host info

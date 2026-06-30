@@ -81,7 +81,7 @@ class ResourceBundle implements \HH\Iterator, \ArrayAccess, \Countable {
    *   call.
    */
   <<__Native>>
-  public function getErrorMessage(): string;
+  public function getErrorMessage(): ?string;
 
   /**
    * Get data from the bundle

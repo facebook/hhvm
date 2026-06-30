@@ -80,7 +80,7 @@ class UConverter implements IDisposable {
    * @return string - (null on error)
    */
   <<__Native>>
-  public function getDestinationEncoding(): string;
+  public function getDestinationEncoding(): ?string;
 
   /**
    * Get the destination converter type
@@ -104,7 +104,7 @@ class UConverter implements IDisposable {
    * @return string -
    */
   <<__Native>>
-  public function getErrorMessage(): string;
+  public function getErrorMessage(): ?string;
 
   /**
    * Get the source encoding
@@ -112,7 +112,7 @@ class UConverter implements IDisposable {
    * @return string - (null on error)
    */
   <<__Native>>
-  public function getSourceEncoding(): string;
+  public function getSourceEncoding(): ?string;
 
   /**
    * Get the source convertor type

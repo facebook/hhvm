@@ -56,6 +56,7 @@ class AsyncMysqlException extends Exception {
     $this->result = $result;
 
     $this->message =
+      /* HH_FIXME[4110] failureType() now `?string` */
       'Error executing AsyncMysql operation: '.$result->failureType();
 
     if  ($this->mysqlErrorCode() > 0) {
@@ -84,6 +85,7 @@ class AsyncMysqlException extends Exception {
    * @return - The error string.
    */
   public function mysqlErrorString(): string {
+    /* HH_FIXME[4110] mysql_error() now `?string` */
     return $this->result->mysql_error();
   }
 

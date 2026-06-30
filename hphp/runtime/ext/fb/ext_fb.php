@@ -200,7 +200,7 @@ function fb_utf8_decompose(string $input)[]: vec<string>;
 <<__Native, __IsFoldable>>
 function fb_utf8_substr(string $str,
                         int $start,
-                        int $length = PHP_INT_MAX)[]: string;
+                        int $length = PHP_INT_MAX)[]: ?string;
 
 /** Returns code coverage data collected so far. Turn on code coverage by
  * Eval.RecordCodeCoverage or by using fb_enable_code_coverage and call this

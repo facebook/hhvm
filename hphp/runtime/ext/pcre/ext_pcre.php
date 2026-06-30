@@ -212,7 +212,7 @@ function preg_match_with_matches_and_error(
 <<__Native>>
 function preg_get_error_message_if_invalid(
   string $pattern,
-)[]: string;
+)[]: ?string;
 
 /**
  * Quote regular expression characters
@@ -227,7 +227,7 @@ function preg_get_error_message_if_invalid(
  */
 <<__IsFoldable, __Native>>
 function preg_quote(string $str,
-                    ?string $delimiter = NULL)[]: string;
+                    ?string $delimiter = NULL)[]: ?string;
 
 /**
  * Perform a regular expression search and replace using a callback
@@ -498,7 +498,7 @@ function preg_split_with_error(
 <<__Native>>
 function ereg_replace(string $pattern,
                       string $replacement,
-                      string $string): string;
+                      string $string): ?string;
 
 /**
  * Replace regular expression case insensitive
@@ -518,7 +518,7 @@ function ereg_replace(string $pattern,
 <<__Native>>
 function eregi_replace(string $pattern,
                        string $replacement,
-                       string $string): string;
+                       string $string): ?string;
 
 /**
  * Split string into array by regular expression
@@ -590,4 +590,4 @@ function spliti(string $pattern,
  *   characters remain unchanged.
  */
 <<__Native>>
-function sql_regcase(string $string): string;
+function sql_regcase(string $string): ?string;

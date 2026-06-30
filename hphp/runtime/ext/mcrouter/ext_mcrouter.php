@@ -256,7 +256,7 @@ class MCRouter {
    * @return string - The name of the op
    */
   <<__Native>>
-  public static function getOpName(int $op): string;
+  public static function getOpName(int $op): ?string;
 
   /**
    * Translate an mc_res_* numeric code to something human-readable
@@ -266,5 +266,5 @@ class MCRouter {
    * @return string - The name of the result
    */
   <<__Native>>
-  public static function getResultName(int $op): string;
+  public static function getResultName(int $op): ?string;
 }

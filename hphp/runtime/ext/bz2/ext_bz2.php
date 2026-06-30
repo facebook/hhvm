@@ -149,7 +149,7 @@ class ChunkedBunzipper {
   public function eof(): bool;
 
   <<__Native>>
-  public function inflateChunk(string $chunk): string;
+  public function inflateChunk(string $chunk): ?string;
 
   <<__Native>>
   public function close(): void;

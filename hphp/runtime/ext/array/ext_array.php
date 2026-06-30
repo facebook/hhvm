@@ -1294,7 +1294,7 @@ function natsort(inout mixed $array)[]: bool;
 function natcasesort(inout mixed $array)[]: bool;
 
 <<__Native>>
-function i18n_loc_get_default(): string;
+function i18n_loc_get_default(): ?string;
 
 <<__Native>>
 function i18n_loc_set_default(string $locale): bool;

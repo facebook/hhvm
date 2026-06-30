@@ -351,7 +351,7 @@ class XMLWriter {
    * @return string - Returns the current buffer as a string.
    */
   <<__Native>>
-  public function outputMemory(?bool $flush = true): string;
+  public function outputMemory(?bool $flush = true): ?string;
 }
 
 /** Creates a new XMLWriter using memory for string output.
@@ -846,4 +846,4 @@ function xmlwriter_flush(resource $xmlwriter,
  */
 <<__Native>>
 function xmlwriter_output_memory(resource $xmlwriter,
-                                 ?bool $flush = true): string;
+                                 ?bool $flush = true): ?string;

@@ -97,7 +97,7 @@ class Transliterator {
    *   or on failure.
    */
   <<__Native>>
-  public function getErrorMessage(): string;
+  public function getErrorMessage(): ?string;
 
   /**
    * Fetch the transliterator's ID

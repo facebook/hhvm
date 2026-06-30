@@ -246,7 +246,7 @@ namespace HH {
  * @return class name
  */
 <<__Native>>
-function class_meth_get_class(readonly mixed $class_meth)[]: string;
+function class_meth_get_class(readonly mixed $class_meth)[]: ?string;
 
 /**
  * Get method name from class_meth
@@ -254,7 +254,7 @@ function class_meth_get_class(readonly mixed $class_meth)[]: string;
  * @return method name
  */
 <<__Native>>
-function class_meth_get_method(readonly mixed $class_meth)[]: string;
+function class_meth_get_method(readonly mixed $class_meth)[]: ?string;
 
 /**
  * Get class name from meth_caller
@@ -262,7 +262,7 @@ function class_meth_get_method(readonly mixed $class_meth)[]: string;
  * @return class name
  */
 <<__Native, __IsFoldable>>
-function meth_caller_get_class(readonly mixed $meth_caller)[]: string;
+function meth_caller_get_class(readonly mixed $meth_caller)[]: ?string;
 
 /**
  * Get method name from meth_caller
@@ -270,7 +270,7 @@ function meth_caller_get_class(readonly mixed $meth_caller)[]: string;
  * @return method name
  */
 <<__Native, __IsFoldable>>
-function meth_caller_get_method(readonly mixed $meth_caller)[]: string;
+function meth_caller_get_method(readonly mixed $meth_caller)[]: ?string;
 
 /**
  * Checks if the module exists

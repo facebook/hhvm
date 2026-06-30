@@ -40,7 +40,7 @@ const int CRYPT_SALT_LENGTH = 12;
  *
  */
 <<__IsFoldable, __Native>>
-function addcslashes(string $str, string $charlist)[]: string;
+function addcslashes(string $str, string $charlist)[]: ?string;
 
 /**
  * Returns a string with backslashes stripped off. Recognizes C-like \n, \r
@@ -52,7 +52,7 @@ function addcslashes(string $str, string $charlist)[]: string;
  *
  */
 <<__IsFoldable, __Native>>
-function stripcslashes(string $str)[]: string;
+function stripcslashes(string $str)[]: ?string;
 
 /**
  * Returns a string with backslashes before characters that need to be quoted
@@ -79,7 +79,7 @@ function stripcslashes(string $str)[]: string;
  *
  */
 <<__IsFoldable, __Native>>
-function addslashes(string $str)[]: string;
+function addslashes(string $str)[]: ?string;
 
 /**
  * Un-quotes a quoted string.  If magic_quotes_sybase is on, no backslashes
@@ -97,7 +97,7 @@ function addslashes(string $str)[]: string;
  *
  */
 <<__IsFoldable, __Native>>
-function stripslashes(string $str)[]: string;
+function stripslashes(string $str)[]: ?string;
 
 /**
  * Returns an ASCII string containing the hexadecimal representation of str.
@@ -110,7 +110,7 @@ function stripslashes(string $str)[]: string;
  *
  */
 <<__IsFoldable, __Native>>
-function bin2hex(string $str)[]: string;
+function bin2hex(string $str)[]: ?string;
 
 /**
  * Returns an ASCII string containing the binary representation of hexidecimal
@@ -135,7 +135,7 @@ function hex2bin(string $str)[]: mixed;
  *
  */
 <<__IsFoldable, __Native>>
-function nl2br(string $str, bool $is_xhtml = true)[]: string;
+function nl2br(string $str, bool $is_xhtml = true)[]: ?string;
 
 /**
  * Returns a version of str with a backslash character (\) before every
@@ -147,7 +147,7 @@ function nl2br(string $str, bool $is_xhtml = true)[]: string;
  *
  */
 <<__IsFoldable, __Native>>
-function quotemeta(string $str)[]: string;
+function quotemeta(string $str)[]: ?string;
 
 /**
  * @param string $str - The input string.
@@ -156,7 +156,7 @@ function quotemeta(string $str)[]: string;
  *
  */
 <<__Native>>
-function str_shuffle(string $str): string;
+function str_shuffle(string $str): ?string;
 
 /**
  * Returns string, reversed.
@@ -167,7 +167,7 @@ function str_shuffle(string $str): string;
  *
  */
 <<__IsFoldable, __Native>>
-function strrev(string $str)[]: string;
+function strrev(string $str)[]: ?string;
 
 /**
  * Returns string with all alphabetic characters converted to lowercase.  Note
@@ -181,7 +181,7 @@ function strrev(string $str)[]: string;
  *
  */
 <<__Native>>
-function strtolower(string $str)[]: string;
+function strtolower(string $str)[]: ?string;
 
 /**
  * Returns string with all alphabetic characters converted to uppercase.  Note
@@ -194,7 +194,7 @@ function strtolower(string $str)[]: string;
  *
  */
 <<__Native>>
-function strtoupper(string $str)[]: string;
+function strtoupper(string $str)[]: ?string;
 
 /**
  * Returns a string with the first character of str capitalized, if that
@@ -208,7 +208,7 @@ function strtoupper(string $str)[]: string;
  *
  */
 <<__Native>>
-function ucfirst(string $str): string;
+function ucfirst(string $str): ?string;
 
 /**
  * Returns a string with the first character of str , lowercased if that
@@ -222,7 +222,7 @@ function ucfirst(string $str): string;
  *
  */
 <<__Native>>
-function lcfirst(string $str): string;
+function lcfirst(string $str): ?string;
 
 /**
  * Returns a string with the first character of each word in str capitalized,
@@ -236,7 +236,7 @@ function lcfirst(string $str): string;
  *
  */
 <<__Native>>
-function ucwords(string $str, string $delimiters = " \t\r\n\f\v"): string;
+function ucwords(string $str, string $delimiters = " \t\r\n\f\v"): ?string;
 
 /**
  * This function tries to return a string with all NUL bytes, HTML and PHP
@@ -253,7 +253,7 @@ function ucwords(string $str, string $delimiters = " \t\r\n\f\v"): string;
  *
  */
 <<__Native>>
-function strip_tags(string $str, mixed $allowable_tags = ""): string;
+function strip_tags(string $str, mixed $allowable_tags = ""): ?string;
 
 /**
  * This function returns a string with whitespace stripped from the beginning
@@ -272,7 +272,7 @@ function strip_tags(string $str, mixed $allowable_tags = ""): string;
  *
  */
 <<__IsFoldable, __Native>>
-function trim(string $str, string $charlist = HPHP_TRIM_CHARLIST)[]: string;
+function trim(string $str, string $charlist = HPHP_TRIM_CHARLIST)[]: ?string;
 
 /**
  * Strip whitespace (or other characters) from the beginning of a string.
@@ -291,7 +291,7 @@ function trim(string $str, string $charlist = HPHP_TRIM_CHARLIST)[]: string;
  *
  */
 <<__IsFoldable, __Native>>
-function ltrim(string $str, string $charlist = HPHP_TRIM_CHARLIST)[]: string;
+function ltrim(string $str, string $charlist = HPHP_TRIM_CHARLIST)[]: ?string;
 
 /**
  * This function returns a string with whitespace stripped from the end of
@@ -310,10 +310,10 @@ function ltrim(string $str, string $charlist = HPHP_TRIM_CHARLIST)[]: string;
  *
  */
 <<__IsFoldable, __Native>>
-function rtrim(string $str, string $charlist = HPHP_TRIM_CHARLIST)[]: string;
+function rtrim(string $str, string $charlist = HPHP_TRIM_CHARLIST)[]: ?string;
 
 <<__IsFoldable, __Native>>
-function chop(string $str, string $charlist = HPHP_TRIM_CHARLIST)[]: string;
+function chop(string $str, string $charlist = HPHP_TRIM_CHARLIST)[]: ?string;
 
 /**
  * Returns an array of strings, each of which is a substring of string formed
@@ -360,14 +360,14 @@ function explode(string $delimiter,
  *
  */
 <<__IsFoldable, __Native>>
-function implode(readonly mixed $arg1, readonly mixed $arg2 = null)[]: string;
+function implode(readonly mixed $arg1, readonly mixed $arg2 = null)[]: ?string;
 
 /**
  * An alias for implode().
  *
  */
 <<__IsFoldable, __Native>>
-function join(mixed $arg1, mixed $arg2 = null)[]: string;
+function join(mixed $arg1, mixed $arg2 = null)[]: ?string;
 
 /**
  * Converts a string to an array.
@@ -577,7 +577,7 @@ function substr(string $str, int $start, int $length = 0x7FFFFFFF)[]: mixed;
 function str_pad(string $input,
                  int $pad_length,
                  string $pad_string = " ",
-                 int $pad_type = STR_PAD_RIGHT)[]: string;
+                 int $pad_type = STR_PAD_RIGHT)[]: ?string;
 
 /**
  * Returns input repeated multiplier times.
@@ -592,7 +592,7 @@ function str_pad(string $input,
  *
  */
 <<__IsFoldable, __Native>>
-function str_repeat(string $input, int $multiplier)[]: string;
+function str_repeat(string $input, int $multiplier)[]: ?string;
 
 /**
  * html_entity_decode() is the opposite of htmlentities() in that it converts
@@ -629,7 +629,7 @@ function str_repeat(string $input, int $multiplier)[]: string;
 <<__Native>>
 function html_entity_decode(string $str,
                             int $quote_style = ENT_COMPAT,
-                            string $charset = "UTF-8")[]: string;
+                            string $charset = "UTF-8")[]: ?string;
 
 /**
  * This function is identical to htmlspecialchars() in all ways, except with
@@ -672,7 +672,7 @@ function html_entity_decode(string $str,
 function htmlentities(string $str,
                       int $quote_style = ENT_COMPAT,
                       string $charset = "UTF-8",
-                      bool $double_encode = true)[]: string;
+                      bool $double_encode = true)[]: ?string;
 
 /**
  * This function is the opposite of htmlspecialchars(). It converts special
@@ -692,7 +692,7 @@ function htmlentities(string $str,
  */
 <<__Native>>
 function htmlspecialchars_decode(string $str,
-                                 int $quote_style = ENT_COMPAT)[]: string;
+                                 int $quote_style = ENT_COMPAT)[]: ?string;
 
 /**
  * Certain characters have special significance in HTML, and should be
@@ -744,7 +744,7 @@ function htmlspecialchars_decode(string $str,
 function htmlspecialchars(string $str,
                           int $quote_style = ENT_COMPAT,
                           string $charset = "UTF-8",
-                          bool $double_encode = true)[]: string;
+                          bool $double_encode = true)[]: ?string;
 
 /**
  * Certain characters have special significance in HTML, and should be
@@ -795,7 +795,7 @@ function htmlspecialchars(string $str,
 function fb_htmlspecialchars(string $str,
                              int $quote_style = ENT_COMPAT,
                              string $charset = "ISO-8859-1",
-                             mixed $extra = vec[]): string;
+                             mixed $extra = vec[]): ?string;
 
 /**
  * Returns a quoted printable string created according to  RFC2045, section
@@ -808,7 +808,7 @@ function fb_htmlspecialchars(string $str,
  *
  */
 <<__IsFoldable, __Native>>
-function quoted_printable_encode(string $str)[]: string;
+function quoted_printable_encode(string $str)[]: ?string;
 
 /**
  * This function returns an 8-bit binary string corresponding to the decoded
@@ -823,7 +823,7 @@ function quoted_printable_encode(string $str)[]: string;
  *
  */
 <<__IsFoldable, __Native>>
-function quoted_printable_decode(string $str)[]: string;
+function quoted_printable_decode(string $str)[]: ?string;
 
 /**
  * convert_uudecode() decodes a uuencoded string.
@@ -863,7 +863,7 @@ function convert_uuencode(string $data)[]: mixed;
  *
  */
 <<__IsFoldable, __Native>>
-function str_rot13(string $str)[]: string;
+function str_rot13(string $str)[]: ?string;
 
 /**
  * Generates the cyclic redundancy checksum polynomial of 32-bit lengths of
@@ -938,7 +938,7 @@ function crc32(string $str)[]: int;
  *
  */
 <<__Native>>
-function crypt(string $str, string $salt = ""): string;
+function crypt(string $str, string $salt = ""): ?string;
 
 /**
  * Calculates the MD5 hash of str using the RSA Data Security, Inc. MD5
@@ -953,7 +953,7 @@ function crypt(string $str, string $salt = ""): string;
  *
  */
 <<__IsFoldable, __Native>>
-function md5(string $str, bool $raw_output = false)[]: string;
+function md5(string $str, bool $raw_output = false)[]: ?string;
 
 /**
  * @param string $str - The input string.
@@ -999,7 +999,7 @@ function strtr(string $str, mixed $from, mixed $to = null)[]: mixed;
  *
  */
 <<__IsFoldable, __Native>>
-function convert_cyr_string(string $str, string $from, string $to)[]: string;
+function convert_cyr_string(string $str, string $from, string $to)[]: ?string;
 
 /**
  * get_html_translation_table() will return the translation table that is used
@@ -1042,7 +1042,7 @@ function get_html_translation_table(
  *
  */
 <<__Native>>
-function hebrev(string $hebrew_text, int $max_chars_per_line = 0): string;
+function hebrev(string $hebrew_text, int $max_chars_per_line = 0): ?string;
 
 /**
  * This function is similar to hebrev() with the difference that it converts
@@ -1057,7 +1057,7 @@ function hebrev(string $hebrew_text, int $max_chars_per_line = 0): string;
  *
  */
 <<__Native>>
-function hebrevc(string $hebrew_text, int $max_chars_per_line = 0): string;
+function hebrevc(string $hebrew_text, int $max_chars_per_line = 0): ?string;
 
 /**
  * Sets locale information. On Windows, setlocale(LC_ALL, '') sets the locale
@@ -1152,7 +1152,7 @@ function sscanf(string $str, string $format)[]: mixed;
  *
  */
 <<__IsFoldable, __Native>>
-function chr(mixed $ascii)[]: string;
+function chr(mixed $ascii)[]: ?string;
 
 /**
  * Returns the ASCII value of the first character of string.  This function
@@ -1210,7 +1210,7 @@ function money_format(string $format, float $number): mixed;
 function number_format(float $number,
                        int $decimals = 0,
                        mixed $dec_point = ".",
-                       mixed $thousands_sep = ",")[]: string;
+                       mixed $thousands_sep = ",")[]: ?string;
 
 /**
  * @param string $str1 - The first string.
@@ -1777,6 +1777,6 @@ function str_to_numeric(string $str)[]: ?num;
  * Implements PHP operator ^ (bitwise xor) operator on strings.
  */
 <<__IsFoldable, __Native>>
-function str_bitwise_xor(string $s1, string $s2)[]: string;
+function str_bitwise_xor(string $s1, string $s2)[]: ?string;
 
 }

@@ -30,9 +30,9 @@ final class Generator implements HH\KeyedIterator {
   public function raise(mixed $v)[/* gen $this */]: mixed;
 
   <<__Native>>
-  public function getOrigFuncName()[]: string;
+  public function getOrigFuncName()[]: ?string;
 
   <<__Native>>
-  public function getCalledClass()[]: string;
+  public function getCalledClass()[]: ?string;
 
 }

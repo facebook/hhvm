@@ -106,7 +106,7 @@ class MessageFormatter {
    * @return string - Description of the last error.
    */
   <<__Native>>
-  public function getErrorMessage(): string;
+  public function getErrorMessage(): ?string;
 
   /**
    * Get the locale for which the formatter was created.
@@ -114,7 +114,7 @@ class MessageFormatter {
    * @return string - The locale name
    */
   <<__Native>>
-  public function getLocale(): string;
+  public function getLocale(): ?string;
 
   /**
    * Get the pattern used by the formatter
@@ -122,7 +122,7 @@ class MessageFormatter {
    * @return string - The pattern string for this message formatter
    */
   <<__Native>>
-  public function getPattern(): string;
+  public function getPattern(): ?string;
 
   /**
    * Quick parse input string
@@ -241,7 +241,7 @@ function msgfmt_get_error_code(MessageFormatter $fmt): int {
  *
  * @return string - Description of the last error.
  */
-function msgfmt_get_error_message(MessageFormatter $fmt): string {
+function msgfmt_get_error_message(MessageFormatter $fmt): ?string {
   return $fmt->getErrorMessage();
 }
 
@@ -252,7 +252,7 @@ function msgfmt_get_error_message(MessageFormatter $fmt): string {
  *
  * @return string - The locale name
  */
-function msgfmt_get_locale(MessageFormatter $fmt): string {
+function msgfmt_get_locale(MessageFormatter $fmt): ?string {
   return $fmt->getLocale();
 }
 
@@ -263,7 +263,7 @@ function msgfmt_get_locale(MessageFormatter $fmt): string {
  *
  * @return string - The pattern string for this message formatter
  */
-function msgfmt_get_pattern(MessageFormatter $fmt): string {
+function msgfmt_get_pattern(MessageFormatter $fmt): ?string {
   return $fmt->getPattern();
 }
 

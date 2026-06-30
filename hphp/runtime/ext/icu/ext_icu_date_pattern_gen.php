@@ -93,7 +93,7 @@ class IntlDatePatternGenerator {
    * @return string - skeleton such as "MMMdd"
    */
   <<__Native>>
-  public function getSkeleton(string $pattern): string;
+  public function getSkeleton(string $pattern): ?string;
 
   /**
    * Utility to return a unique base skeleton from a given pattern.
@@ -109,7 +109,7 @@ class IntlDatePatternGenerator {
    * @return string - base skeleton, such as "Md"
    */
   <<__Native>>
-  public function getBaseSkeleton(string $pattern): string;
+  public function getBaseSkeleton(string $pattern): ?string;
 
   /**
    * Adds a pattern to the generator.
@@ -160,7 +160,7 @@ class IntlDatePatternGenerator {
    * @return string - Append item format for the given pattern field
    */
   <<__Native>>
-  public function getAppendItemFormat(int $field): string;
+  public function getAppendItemFormat(int $field): ?string;
 
   /**
    * Sets the name of a field, eg "era" in English for ERA.
@@ -184,7 +184,7 @@ class IntlDatePatternGenerator {
    * @return string - Append item name for the given pattern field
    */
   <<__Native>>
-  public function getAppendItemName(int $field): string;
+  public function getAppendItemName(int $field): ?string;
 
   /**
    * The date time format is a message format pattern used to compose date and
@@ -216,7 +216,7 @@ class IntlDatePatternGenerator {
    * @return string - The date time format, for example: "{0} {1}"
    */
   <<__Native>>
-  public function getDateTimeFormat(): string;
+  public function getDateTimeFormat(): ?string;
 
   /**
    * Returns the best pattern matching the input skeleton.
@@ -230,7 +230,7 @@ class IntlDatePatternGenerator {
    * @return string - The best pattern found for the given skeleton
    */
   <<__Native>>
-  public function getBestPattern(string $skeleton): string;
+  public function getBestPattern(string $skeleton): ?string;
 
   /**
    * Adjusts the field types (width and subtype) of a pattern to match what is
@@ -249,7 +249,7 @@ class IntlDatePatternGenerator {
    *   subtypes.
    */
   <<__Native>>
-  public function replaceFieldTypes(string $pattern, string $skeleton): string;
+  public function replaceFieldTypes(string $pattern, string $skeleton): ?string;
   /**
    * @throws Exception - If there is an error, an exception will be thrown.
    *
@@ -269,7 +269,7 @@ class IntlDatePatternGenerator {
    * @return string - pattern
    */
   <<__Native>>
-  public function getPatternForSkeleton(string $skeleton): string;
+  public function getPatternForSkeleton(string $skeleton): ?string;
 
   /**
    * @throws Exception - If there is an error, an exception will be thrown.
@@ -303,7 +303,7 @@ class IntlDatePatternGenerator {
    * @return string - The string representing the decimal (normally ".")
    */
   <<__Native>>
-  public function getDecimal(): string;
+  public function getDecimal(): ?string;
 
   /**
    * Get last error code on the object
@@ -322,6 +322,6 @@ class IntlDatePatternGenerator {
    *   the non-existence of an error.
    */
   <<__Native>>
-  public function getErrorMessage(): string;
+  public function getErrorMessage(): ?string;
 
 }

@@ -195,7 +195,7 @@ function rad2deg(float $number)[]: float {
  *
  */
 <<__IsFoldable, __Native>>
-function decbin(mixed $number)[]: string;
+function decbin(mixed $number)[]: ?string;
 
 /**
  * Returns a string containing a hexadecimal representation of the given
@@ -208,7 +208,7 @@ function decbin(mixed $number)[]: string;
  *
  */
 <<__IsFoldable, __Native>>
-function dechex(mixed $number)[]: string;
+function dechex(mixed $number)[]: ?string;
 
 /**
  * Returns a string containing an octal representation of the given number
@@ -221,7 +221,7 @@ function dechex(mixed $number)[]: string;
  *
  */
 <<__IsFoldable, __Native>>
-function decoct(mixed $number)[]: string;
+function decoct(mixed $number)[]: ?string;
 
 /**
  * Returns the decimal equivalent of the binary number represented by the

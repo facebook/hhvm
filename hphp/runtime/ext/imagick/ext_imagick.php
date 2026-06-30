@@ -898,7 +898,7 @@ class Imagick implements Countable, Iterator {
    *   Imagemagick and Magickwand C API.
    */
   <<__Native>>
-  public static function getCopyright(): string;
+  public static function getCopyright(): ?string;
 
   /**
    * The filename associated with an image sequence
@@ -906,7 +906,7 @@ class Imagick implements Countable, Iterator {
    * @return string - Returns a string on success.
    */
   <<__Native>>
-  public function getFilename(): string;
+  public function getFilename(): ?string;
 
   /**
    * Gets font
@@ -915,7 +915,7 @@ class Imagick implements Countable, Iterator {
    *   FALSE if not font is set.
    */
   <<__Native>>
-  public function getFont(): string;
+  public function getFont(): ?string;
 
   /**
    * Returns the format of the Imagick object
@@ -923,7 +923,7 @@ class Imagick implements Countable, Iterator {
    * @return string - Returns the format of the image.
    */
   <<__Native>>
-  public function getFormat(): string;
+  public function getFormat(): ?string;
 
   /**
    * Gets the gravity
@@ -940,7 +940,7 @@ class Imagick implements Countable, Iterator {
    * @return string - Returns a link to the imagemagick homepage.
    */
   <<__Native>>
-  public static function getHomeURL(): string;
+  public static function getHomeURL(): ?string;
 
   /**
    * Returns a new Imagick object
@@ -968,7 +968,7 @@ class Imagick implements Countable, Iterator {
    * @return string - Returns the artifact value on success.
    */
   <<__Native>>
-  public function getImageArtifact(string $artifact): string;
+  public function getImageArtifact(string $artifact): ?string;
 
   /**
    * Returns the image background color
@@ -985,7 +985,7 @@ class Imagick implements Countable, Iterator {
    * @return string - Returns a string containing the image.
    */
   <<__Native>>
-  public function getImageBlob(): string;
+  public function getImageBlob(): ?string;
 
   /**
    * Returns the chromaticy blue primary point
@@ -1209,7 +1209,7 @@ class Imagick implements Countable, Iterator {
    * @return string - Returns a string with the filename of the image.
    */
   <<__Native>>
-  public function getImageFilename(): string;
+  public function getImageFilename(): ?string;
 
   /**
    * Returns the format of a particular image in a sequence
@@ -1218,7 +1218,7 @@ class Imagick implements Countable, Iterator {
    *   success.
    */
   <<__Native>>
-  public function getImageFormat(): string;
+  public function getImageFormat(): ?string;
 
   /**
    * Gets the image gamma
@@ -1329,7 +1329,7 @@ class Imagick implements Countable, Iterator {
   public function getImageMatteColor(): ImagickPixel;
 
   <<__Native>>
-  public function getImageMimeType(): string;
+  public function getImageMimeType(): ?string;
 
   /**
    * Gets the image orientation
@@ -1369,7 +1369,7 @@ class Imagick implements Countable, Iterator {
    * @return string - Returns a string containing the image profile.
    */
   <<__Native>>
-  public function getImageProfile(string $name): string;
+  public function getImageProfile(string $name): ?string;
 
   /**
    * Returns the image profiles
@@ -1411,7 +1411,7 @@ class Imagick implements Countable, Iterator {
    *   false if a property with the given name does not exist.
    */
   <<__Native>>
-  public function getImageProperty(string $name): string;
+  public function getImageProperty(string $name): ?string;
 
   /**
    * Returns the chromaticity red primary point
@@ -1464,7 +1464,7 @@ class Imagick implements Countable, Iterator {
    *   throws ImagickException.
    */
   <<__Native>>
-  public function getImagesBlob(): string;
+  public function getImagesBlob(): ?string;
 
   /**
    * Gets the image scene
@@ -1481,7 +1481,7 @@ class Imagick implements Countable, Iterator {
    *   file.
    */
   <<__Native>>
-  public function getImageSignature(): string;
+  public function getImageSignature(): ?string;
 
   /**
    * Returns the image length in bytes
@@ -1589,7 +1589,7 @@ class Imagick implements Countable, Iterator {
    *   specified key.
    */
   <<__Native>>
-  public function getOption(string $key): string;
+  public function getOption(string $key): ?string;
 
   /**
    * Returns the ImageMagick package name
@@ -1597,7 +1597,7 @@ class Imagick implements Countable, Iterator {
    * @return string - Returns the ImageMagick package name as a string.
    */
   <<__Native>>
-  public static function getPackageName(): string;
+  public static function getPackageName(): ?string;
 
   /**
    * Returns the page geometry
@@ -1665,7 +1665,7 @@ class Imagick implements Countable, Iterator {
    * @return string - Returns the ImageMagick release date as a string.
    */
   <<__Native>>
-  public static function getReleaseDate(): string;
+  public static function getReleaseDate(): ?string;
 
   /**
    * Returns the specified resource's memory usage
@@ -2513,7 +2513,7 @@ class Imagick implements Countable, Iterator {
    *   image.
    */
   <<__Native>>
-  public function removeImageProfile(string $name): string;
+  public function removeImageProfile(string $name): ?string;
 
   /**
    * Resample image to desired resolution
@@ -3995,7 +3995,7 @@ class ImagickDraw {
    *   false if no clip path exists.
    */
   <<__Native>>
-  public function getClipPath(): string;
+  public function getClipPath(): ?string;
 
   /**
    * Returns the current polygon fill rule
@@ -4044,7 +4044,7 @@ class ImagickDraw {
    *   set.
    */
   <<__Native>>
-  public function getFont(): string;
+  public function getFont(): ?string;
 
   /**
    * Returns the font family
@@ -4053,7 +4053,7 @@ class ImagickDraw {
    *   if font family is not set.
    */
   <<__Native>>
-  public function getFontFamily(): string;
+  public function getFontFamily(): ?string;
 
   /**
    * Returns the font pointsize
@@ -4214,7 +4214,7 @@ class ImagickDraw {
    *   if text encoding is not set.
    */
   <<__Native>>
-  public function getTextEncoding(): string;
+  public function getTextEncoding(): ?string;
 
   /**
    * Returns the text under color
@@ -4231,7 +4231,7 @@ class ImagickDraw {
    * @return string - Returns a string containing the vector graphics.
    */
   <<__Native>>
-  public function getVectorGraphics(): string;
+  public function getVectorGraphics(): ?string;
 
   /**
    * Draws a line
@@ -5152,7 +5152,7 @@ class ImagickPixel {
    *   string.
    */
   <<__Native>>
-  public function getColorAsString(): string;
+  public function getColorAsString(): ?string;
 
   /**
    * Returns the color count associated with this color

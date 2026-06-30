@@ -210,7 +210,7 @@ function gethostbyaddr(string $ip_address): mixed;
  *   unmodified hostname on failure.
  */
 <<__Native>>
-function gethostbyname(string $hostname): string;
+function gethostbyname(string $hostname): ?string;
 
 /**
  * Get a list of IPv4 addresses corresponding to a given Internet host
@@ -408,7 +408,7 @@ function inet_ntop(string $in_addr)[]: mixed;
  * @return null|string - Returns a string representation of the address.
  */
 <<__IsFoldable, __Native>>
-function inet_ntop_nullable(string $in_addr)[]: string;
+function inet_ntop_nullable(string $in_addr)[]: ?string;
 
 /**
  * inet_ntop() using the folly library. Used for performance benchmarking.
@@ -416,7 +416,7 @@ function inet_ntop_nullable(string $in_addr)[]: string;
  * @return null|string - Returns a string representation of the address.
  */
 <<__IsFoldable, __Native>>
-function inet_ntop_folly(string $in_addr)[]: string;
+function inet_ntop_folly(string $in_addr)[]: ?string;
 
 /**
  * Converts a human readable IP address to its packed in_addr representation
@@ -452,7 +452,7 @@ function ip2long(string $ip_address)[]: mixed;
  * @return string - Returns the Internet IP address as a string.
  */
 <<__IsFoldable, __Native>>
-function long2ip(string $proper_address)[]: string;
+function long2ip(string $proper_address)[]: ?string;
 
 /**
  * Open connection to system logger

@@ -28,7 +28,7 @@ function intl_get_error_code(): int;
  * call.
  */
 <<__Native>>
-function intl_get_error_message(): string;
+function intl_get_error_message(): ?string;
 
 /**
  * Return ICU error code name.
@@ -38,7 +38,7 @@ function intl_get_error_message(): string;
  *                  error code constant.
  */
 <<__Native>>
-function intl_error_name(int $errorCode): string;
+function intl_error_name(int $errorCode): ?string;
 
 /**
  * @param int $errorCode - Value returned by intl_get_error_code()

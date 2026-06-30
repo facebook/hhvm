@@ -266,6 +266,7 @@ function hash_pbkdf2(string $algo, string $password, string $salt,
   $algo = strtolower($algo);
   if (!in_array($algo, hash_algos())) {
     error_log("\nWarning: hash_pbkdf2(): Unknown hashing algorithm: ".
+              /* HH_FIXME[4110] $algo is ?string after strtolower */
               $algo);
     return false;
   }
@@ -284,6 +285,7 @@ function hash_pbkdf2(string $algo, string $password, string $salt,
 
   $result = "";
   $hash_length = strlen(
+    /* HH_FIXME[4110] $algo is ?string after strtolower */
     HH\FIXME\UNSAFE_CAST<mixed, string>(hash($algo, "", true))
   );
   if ($length === 0) {
@@ -297,6 +299,7 @@ function hash_pbkdf2(string $algo, string $password, string $salt,
   for ($i = 1; $i <= $key_blocks; $i++) {
     // Note: $i encoded with most siginificant octet first.
     $xor = HH\FIXME\UNSAFE_CAST<mixed, string>(hash_hmac(
+      /* HH_FIXME[4110] $algo is ?string after strtolower */
       $algo,
       $salt.HH\FIXME\UNSAFE_CAST<mixed, string>(pack("N", $i)),
       $password,
@@ -305,16 +308,20 @@ function hash_pbkdf2(string $algo, string $password, string $salt,
     $prev = $xor;
     for ($j = 1; $j < $iterations; $j++) {
       $prev = HH\FIXME\UNSAFE_CAST<mixed, string>(
+        /* HH_FIXME[4110] $algo is ?string after strtolower */
         hash_hmac($algo, $prev, $password, true)
       );
+      /* HH_FIXME[4110] $xor / str_bitwise_xor result is ?string */
       $xor = \HH\str_bitwise_xor($xor, $prev);
     }
+    /* HH_FIXME[4110] $xor is ?string */
     $result .= $xor;
   }
 
   if ($raw_output) {
     return substr($result, 0, $length);
   } else {
+    /* HH_FIXME[4110] bin2hex() now `?string` */
     return substr(bin2hex($result), 0, $length);
   }
   return $result;

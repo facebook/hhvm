@@ -76,7 +76,7 @@ class IntlDateFormatter {
    *   FALSE.
    */
   <<__Native>>
-  public function format(mixed $value): string;
+  public function format(mixed $value): ?string;
 
   /**
    * Formats an object
@@ -90,7 +90,7 @@ class IntlDateFormatter {
   <<__Native>>
   public static function FormatObject(\HH\object $obj,
                                       mixed $format = NULL,
-                                      ?string $locale = NULL): string;
+                                      ?string $locale = NULL): ?string;
 
   /**
    * Get the calendar type used for the IntlDateFormatter
@@ -124,7 +124,7 @@ class IntlDateFormatter {
    * @return string - Description of the last error.
    */
   <<__Native>>
-  public function getErrorMessage(): string;
+  public function getErrorMessage(): ?string;
 
   /**
    * Get the locale used by formatter
@@ -134,7 +134,7 @@ class IntlDateFormatter {
    * @return string - the locale of this formatter or 'false' if error
    */
   <<__Native>>
-  public function getLocale(?int $which = null): string;
+  public function getLocale(?int $which = null): ?string;
 
   /**
    * Get the pattern used for the IntlDateFormatter
@@ -142,7 +142,7 @@ class IntlDateFormatter {
    * @return string - The pattern string being used to format/parse.
    */
   <<__Native>>
-  public function getPattern(): string;
+  public function getPattern(): ?string;
 
   /**
    * Get the timetype used for the IntlDateFormatter
@@ -159,7 +159,7 @@ class IntlDateFormatter {
    *   formatter.
    */
   <<__Native>>
-  public function getTimezoneId(): string;
+  public function getTimezoneId(): ?string;
 
   /**
    * Get copy of formatter's calendar object

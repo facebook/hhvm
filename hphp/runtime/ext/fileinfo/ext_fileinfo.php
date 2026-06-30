@@ -97,7 +97,7 @@ class finfo {
 function finfo_buffer(resource $finfo,
                       ?string $string = NULL,
                       int $options = FILEINFO_NONE,
-                      ?resource $context = NULL): string;
+                      ?resource $context = NULL): ?string;
 
 /**
  * Close fileinfo resource
@@ -124,7 +124,7 @@ function finfo_close(resource $finfo): bool;
 function finfo_file(resource $finfo,
                     ?string $file_name = NULL,
                     int $options = FILEINFO_NONE,
-                    ?resource $context = NULL): string;
+                    ?resource $context = NULL): ?string;
 
 /**
  * Create a new fileinfo resource
@@ -164,4 +164,4 @@ function finfo_set_flags(resource $finfo,
  *   text/plain or application/octet-stream.
  */
 <<__Native>>
-function mime_content_type(mixed $filename): string;
+function mime_content_type(mixed $filename): ?string;

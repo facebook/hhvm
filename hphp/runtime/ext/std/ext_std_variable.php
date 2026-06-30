@@ -83,12 +83,12 @@ function is_null(readonly mixed $var)[]: bool;
  * comparison. Instead, use the is_* functions.
  */
 <<__IsFoldable, __Native>>
-function gettype(readonly mixed $v)[]: string;
+function gettype(readonly mixed $v)[]: ?string;
 
 /* This function gets the type of the given resource.
  */
 <<__IsFoldable, __Native>>
-function get_resource_type(resource $handle)[]: string;
+function get_resource_type(resource $handle)[]: ?string;
 
 /* Returns the integer value of var, using the specified base for the
  * conversion (the default is base 10). intval() should not be used on
@@ -107,7 +107,7 @@ function floatval(mixed $var)[]: float;
 function doubleval(mixed $var)[]: float;
 
 <<__IsFoldable, __Native>>
-function strval(mixed $var)[]: string;
+function strval(mixed $var)[]: ?string;
 
 /* print_r() displays information about a variable in a way that's readable by
  * humans.  print_r(), var_dump() and var_export() will also show protected
@@ -172,7 +172,7 @@ function debugger_dump(mixed $variable): void;
  * code.
  */
 <<__IsFoldable, __Native>>
-function serialize(mixed $value): string;
+function serialize(mixed $value): ?string;
 
 /**
  * Pure variant of serialize.
@@ -180,7 +180,7 @@ function serialize(mixed $value): string;
  * result in coeffect violations.
  */
 <<__IsFoldable, __Native>>
-function serialize_pure(mixed $value)[]: string;
+function serialize_pure(mixed $value)[]: ?string;
 
 <<__Native>>
 function unserialize(
@@ -316,7 +316,7 @@ namespace HH {
   function serialize_with_options(
     mixed $value,
     dict<string, mixed> $options = dict[],
-  ): string;
+  ): ?string;
 
   /*
    * This function returns an array of an object's properties in the same manner

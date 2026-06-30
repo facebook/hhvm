@@ -21,7 +21,7 @@ function base64_decode(string $data, bool $strict = false)[]: mixed;
  * @return string - The encoded data, as a string.
  */
 <<__Native, __IsFoldable>>
-function base64_encode(string $data)[]: string;
+function base64_encode(string $data)[]: ?string;
 
 /**
  * Fetches all the headers sent by the server in response to a HTTP request

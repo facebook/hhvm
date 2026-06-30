@@ -12,7 +12,7 @@
  *
  */
 <<__Native>>
-function random_bytes(int $length)[leak_safe]: string;
+function random_bytes(int $length)[leak_safe]: ?string;
 
 /**
  * Generates cryptographic random integers that are suitable for use where

@@ -118,7 +118,7 @@ class SimpleXMLElement implements ArrayAccess<mixed, mixed>, Traversable<mixed>,
   /** @return string
    */
   <<__Native>>
-  public function getName(): string;
+  public function getName(): ?string;
 
   /** @param string $ns - An optional namespace for the retrieved attributes
    * @param bool $is_prefix - Default to FALSE
@@ -150,7 +150,8 @@ class SimpleXMLElement implements ArrayAccess<mixed, mixed>, Traversable<mixed>,
   /** @return string
    */
   <<__Native>>
-  public function __toString(): string;
+  /* HH_FIXME[3020] __toString returns `?string` to match underlying OptString */
+  public function __toString(): ?string;
 
 }
 
@@ -168,7 +169,7 @@ class SimpleXMLElementIterator implements Iterator<SimpleXMLElement> {
   /** @return mixed
    */
   <<__Native>>
-  public function key(): string;
+  public function key(): ?string;
 
   <<__Native>>
   public function next(): void;

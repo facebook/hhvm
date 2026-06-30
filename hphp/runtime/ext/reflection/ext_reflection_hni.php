@@ -247,7 +247,7 @@ abstract class ReflectionFunctionAbstract implements Reflector {
   private function getRetTypeInfo()[]: dict;
 
   <<__Native>>
-  private function getReturnTypeHint()[]: string;
+  private function getReturnTypeHint()[]: ?string;
 
   public function getReturnTypeText()[] {
     return $this->getReturnTypeHint() ?: false;
@@ -263,7 +263,7 @@ abstract class ReflectionFunctionAbstract implements Reflector {
    * Returns the module associated with the given function.
    */
   <<__Native>>
-  public function getModule()[]: string;
+  public function getModule()[]: ?string;
 
   <<__Native>>
   public function returnsReadonly()[]: bool;
@@ -633,7 +633,7 @@ class ReflectionFunction extends ReflectionFunctionAbstract {
   }
 
   <<__Native>>
-  private function getClosureScopeClassname(\HH\object $closure)[]: string;
+  private function getClosureScopeClassname(\HH\object $closure)[]: ?string;
 
   public function getClosureScopeClass(): ?ReflectionClass {
     if ($this->closure) {
@@ -1088,13 +1088,13 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
    * flattened. As such, in repo-mode this throws an exception instead.
    */
   <<__Native>>
-  public function getCanonicalClassname()[]: string;
+  public function getCanonicalClassname()[]: ?string;
 
   <<__Native>>
-  private function getDeclaringClassname()[]: string;
+  private function getDeclaringClassname()[]: ?string;
 
   <<__Native>>
-  private function getPrototypeClassname()[]: string; // ?string
+  private function getPrototypeClassname()[]: ?string; // ?string
 
   use ReflectionTypedAttribute;
 }
@@ -1647,7 +1647,7 @@ class ReflectionClass implements Reflector {
    *          string name of the class required by the require class statement
    */
   <<__Native>>
-  public function getRequiredClass()[]: string;
+  public function getRequiredClass()[]: ?string;
 
   /**
    * Gets the name of the required this as class for a trait.
@@ -1656,7 +1656,7 @@ class ReflectionClass implements Reflector {
    *          string name of the class required by the require class statement
    */
   <<__Native>>
-  public function getRequiredThisAsClass()[]: string;
+  public function getRequiredThisAsClass()[]: ?string;
 
   /**
    * ( excerpt from
@@ -1743,7 +1743,7 @@ class ReflectionClass implements Reflector {
    * @return     ?string  Returns the module name if the class is part of a module, null otherwise.
    */
   <<__Native>>
-  public function getModule()[]: string;
+  public function getModule()[]: ?string;
 
   /**
    * ( excerpt from http://php.net/manual/en/reflectionclass.istrait.php )
@@ -1770,7 +1770,7 @@ class ReflectionClass implements Reflector {
    * @return     string   the string representation of the underlying type.
    */
   <<__Native>>
-  public function getEnumUnderlyingType()[]: string;
+  public function getEnumUnderlyingType()[]: ?string;
 
 
   /**
@@ -1798,7 +1798,7 @@ class ReflectionClass implements Reflector {
   }
 
   <<__Native>>
-  private function getConstructorName()[]: string;
+  private function getConstructorName()[]: ?string;
 
   /**
    * ( excerpt from
@@ -2340,7 +2340,7 @@ class ReflectionTypeConstant implements Reflector {
    * @return     string   The name of the type constant.
    */
   <<__Native>>
-  public function getName()[]: string;
+  public function getName()[]: ?string;
 
   /**
    * Checks if the type constant is abstract
@@ -2389,7 +2389,7 @@ class ReflectionTypeConstant implements Reflector {
    * flattened. As such, in repo-mode this throws an exception instead.
    */
   <<__Native>>
-  public function getCanonicalClassname()[]: string;
+  public function getCanonicalClassname()[]: ?string;
 
   public function __toString()[] {
     $abstract = $this->isAbstract() ? 'abstract ' : '';
@@ -2420,10 +2420,10 @@ class ReflectionTypeConstant implements Reflector {
   private function __init(mixed $cls_or_obj, string $const)[]: bool;
 
   <<__Native>>
-  private function getAssignedTypeHint()[]: string;
+  private function getAssignedTypeHint()[]: ?string;
 
   <<__Native>>
-  private function getDeclaringClassname()[]: string;
+  private function getDeclaringClassname()[]: ?string;
 
   <<__Native>>
   private function getClassPtr()[]: class<mixed>;
@@ -2471,7 +2471,7 @@ class ReflectionTypeAlias implements Reflector {
 
   // helper for ctor
   <<__Native>>
-  private function __init(string $name)[write_this_props]: string;
+  private function __init(string $name)[write_this_props]: ?string;
 
   /**
    * Get the TypeStructure that contains the full type information of
@@ -2511,7 +2511,7 @@ class ReflectionTypeAlias implements Reflector {
    * @return    string The assigned type.
    */
   <<__Native>>
-  public function getAssignedTypeText()[]: string;
+  public function getAssignedTypeText()[]: ?string;
 
   /**
    * Get the name of the type alias.
@@ -2526,7 +2526,7 @@ class ReflectionTypeAlias implements Reflector {
    * Get the name of the file in which the type alias was defined.
    */
   <<__Native>>
-  public function getFileName()[]: string;
+  public function getFileName()[]: ?string;
 
   /**
    * Gets the declaring file for the reflected type alias.
@@ -2578,7 +2578,7 @@ final class ReflectionFile implements Reflector {
 
   // helper for ctor
   <<__Native>>
-  private function __init(string $name)[]: string;
+  private function __init(string $name)[]: ?string;
 
   /**
    * Gets all attributes
@@ -2620,7 +2620,7 @@ final class ReflectionFile implements Reflector {
    *                      membership statement, null otherwise.
    */
   <<__Native>>
-  public function getModule()[]: string;
+  public function getModule()[]: ?string;
 
 }
 

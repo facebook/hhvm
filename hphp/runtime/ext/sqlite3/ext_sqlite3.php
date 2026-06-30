@@ -119,7 +119,7 @@ class SQLite3 {
    *
    */
   <<__Native>>
-  public function lasterrormsg(): string;
+  public function lasterrormsg(): ?string;
 
   /**
    * Attempts to load an SQLite extension library.
@@ -158,7 +158,7 @@ class SQLite3 {
    *
    */
   <<__Native>>
-  public static function escapestring(string $sql): string;
+  public static function escapestring(string $sql): ?string;
 
   /**
    * Prepares an SQL statement for execution and returns an SQLite3Stmt
@@ -369,7 +369,7 @@ class SQLite3Result {
    *
    */
   <<__Native>>
-  public function columnname(int $column): string;
+  public function columnname(int $column): ?string;
 
   /**
    * Returns the type of the column identified by column_number.

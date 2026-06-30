@@ -70,7 +70,8 @@ class DateTime implements DateTimeInterface {
    *
    */
   <<__Native>>
-  public function format(mixed $format)[]: string;
+  /* HH_FIXME[4341] DateTime::format overrides interface with `?string` */
+  public function format(mixed $format)[]: ?string;
 
   /**
    * Returns the last errors encountered by the datetime extension
@@ -252,7 +253,7 @@ class DateTimeZone {
    *
    */
   <<__Native>>
-  public function getName()[]: string;
+  public function getName()[]: ?string;
 
   /**
    * This function returns the offset to GMT for the date/time specified in the
@@ -345,7 +346,7 @@ class DateInterval {
    *
    */
   <<__Native>>
-  public function format(string $format): string;
+  public function format(string $format): ?string;
 }
 
 /**
@@ -401,7 +402,7 @@ function date_date_set(DateTime $datetime,
  *
  */
 <<__Native>>
-function date_default_timezone_get(): string;
+function date_default_timezone_get(): ?string;
 
 /**
  * date_default_timezone_set() sets the default timezone used by all date/time
@@ -437,7 +438,7 @@ function date_interval_create_from_date_string(string $time): DateInterval {
 }
 
 function date_interval_format(DateInterval $interval,
-                              string $format_spec): string {
+                              string $format_spec): ?string {
   return $interval->format($format_spec);
 }
 
@@ -889,7 +890,7 @@ function timezone_name_from_abbr(string $abbr,
                                  int $gmtoffset = -1,
                                  int $isdst = 1): mixed;
 
-function timezone_name_get(DateTimeZone $timezone): string {
+function timezone_name_get(DateTimeZone $timezone): ?string {
   return $timezone->getName();
 }
 
@@ -912,4 +913,4 @@ function timezone_transitions_get(DateTimeZone $timezone,
 }
 
 <<__Native>>
-function timezone_version_get(): string;
+function timezone_version_get(): ?string;

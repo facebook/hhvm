@@ -333,7 +333,7 @@ namespace HH {
      * Get the hash of the current repo options config (that may affect parsing)
      */
     <<__Native>>
-    public static function getRepoOptionsHash()[]: string;
+    public static function getRepoOptionsHash()[]: ?string;
 
     /*
      * If there has been any error in parsing, the instance will throw
@@ -342,7 +342,7 @@ namespace HH {
      * @return string - the erroneous state or null if no errors
      */
     <<__Native>>
-    public function getError()[]: string;
+    public function getError()[]: ?string;
 
     /*
      * Checks the declaration for any class or typedef with the given name.
@@ -388,7 +388,7 @@ namespace HH {
      * @return string - the maybe-empty string for the API.
      */
     <<__Native>>
-    public function getPublicApiForClass(string $name)[]: string;
+    public function getPublicApiForClass(string $name)[]: ?string;
 
     /*
      * Query the content for all the top level file attributes.
@@ -466,7 +466,7 @@ namespace HH {
      *                   or null if file is not a member of a module.
      */
     <<__Native>>
-    public function getFileModuleMembership()[]: string;
+    public function getFileModuleMembership()[]: ?string;
 
     /*
      * Query the content for all the top level type definitions.

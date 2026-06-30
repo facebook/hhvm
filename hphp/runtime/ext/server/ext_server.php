@@ -75,7 +75,7 @@ function pagelet_server_task_result(
   <<__OutOnly>>
   inout int $code,
   int $timeout_ms = 0,
-): string;
+): ?string;
 
 /**
  * Return the number of pagelet tasks started during this request.

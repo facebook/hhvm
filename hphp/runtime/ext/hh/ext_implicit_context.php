@@ -150,7 +150,7 @@ enum State: string as string {
  * observing IC state when you normally should not. Use with caution.
  */
 <<__Native>>
-function get_state_unsafe()[zoned]: string /* State */;
+function get_state_unsafe()[zoned]: ?string /* State */;
 
 } // namespace ImplicitContext
 

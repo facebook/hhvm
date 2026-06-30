@@ -103,7 +103,7 @@ function spl_classes(): darray<classname<mixed>, classname<mixed>> {
  * and is always the same for each object.
  */
 <<__Native>>
-function spl_object_hash(readonly \HH\object $obj)[]: string;
+function spl_object_hash(readonly \HH\object $obj)[]: ?string;
 
 /** This function returns low level raw pointer the object. Used by closure and
  * internal purposes.
@@ -170,6 +170,7 @@ function iterator_apply(
   }
   $count = 0;
   foreach ($obj as $v) {
+    /* HH_IGNORE[12039] */
     if ($func(...$params) !== true) {
       break;
     }

@@ -67,7 +67,7 @@ class NumberFormatter {
    */
   <<__Native>>
   public function formatCurrency(float $value,
-                                 string $currency)[]: string;
+                                 string $currency)[]: ?string;
 
   /**
    * Format a number
@@ -108,7 +108,7 @@ class NumberFormatter {
    * @return string - Returns error message from last formatter call.
    */
   <<__Native>>
-  public function getErrorMessage()[]: string;
+  public function getErrorMessage()[]: ?string;
 
   /**
    * Get formatter locale
@@ -120,7 +120,7 @@ class NumberFormatter {
    * @return string - The locale name used to create the formatter.
    */
   <<__Native>>
-  public function getLocale(int $type = ULOC_ACTUAL_LOCALE)[]: string;
+  public function getLocale(int $type = ULOC_ACTUAL_LOCALE)[]: ?string;
 
   /**
    * Get formatter pattern
@@ -129,7 +129,7 @@ class NumberFormatter {
    *   FALSE if an error happens.
    */
   <<__Native>>
-  public function getPattern()[]: string;
+  public function getPattern()[]: ?string;
 
   /**
    * Get a symbol value
@@ -140,7 +140,7 @@ class NumberFormatter {
    * @return string - The symbol string or FALSE on error.
    */
   <<__Native>>
-  public function getSymbol(int $attr)[]: string;
+  public function getSymbol(int $attr)[]: ?string;
 
   /**
    * Get a text attribute
@@ -152,7 +152,7 @@ class NumberFormatter {
    *   error.
    */
   <<__Native>>
-  public function getTextAttribute(int $attr)[]: string;
+  public function getTextAttribute(int $attr)[]: ?string;
 
   /**
    * Parse a currency number

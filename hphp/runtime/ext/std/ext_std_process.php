@@ -34,7 +34,7 @@ function exec(string $command,
               <<__OutOnly>>
               inout vec<string> $output,
               <<__OutOnly>>
-              inout int $return_var): string;
+              inout int $return_var): ?string;
 
 /**
  * The passthru() function is similar to the exec() function in that it
@@ -76,7 +76,7 @@ function passthru(string $command,
 <<__Native>>
 function system(string $command,
                 <<__OutOnly>>
-                inout int $return_var): string;
+                inout int $return_var): ?string;
 
 /**
  * proc_open() is similar to popen() but provides a much greater degree of
@@ -204,7 +204,7 @@ function proc_nice(int $increment): bool;
  *
  */
 <<__Native>>
-function escapeshellarg(string $arg)[]: string;
+function escapeshellarg(string $arg)[]: ?string;
 
 /**
  * escapeshellcmd() escapes any characters in a string that might be used to
@@ -222,4 +222,4 @@ function escapeshellarg(string $arg)[]: string;
  *
  */
 <<__Native>>
-function escapeshellcmd(string $command): string;
+function escapeshellcmd(string $command): ?string;

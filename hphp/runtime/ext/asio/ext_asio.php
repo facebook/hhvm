@@ -63,7 +63,7 @@ namespace HH {
      * TODO: replace this with a HH\Asio equivalent
      */
     <<__Native>>
-    final public function getName()[]: string;
+    final public function getName()[]: ?string;
   }
 
   /** A wait handle that is always finished
@@ -346,7 +346,7 @@ namespace HH\Asio {
   /**
    * Get the name of the Awaitable
    */
-  function name<T>(Awaitable<T> $awaitable)[]: string {
+  function name<T>(Awaitable<T> $awaitable)[]: ?string {
     return $awaitable->getName();
   }
 

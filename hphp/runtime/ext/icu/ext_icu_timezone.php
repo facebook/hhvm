@@ -141,7 +141,7 @@ class IntlTimeZone {
    * @return string -
    */
   <<__Native>>
-  public function getErrorMessage(): string;
+  public function getErrorMessage(): ?string;
 
   /**
    * Create GMT (UTC) timezone

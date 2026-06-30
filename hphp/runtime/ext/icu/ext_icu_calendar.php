@@ -191,7 +191,7 @@ class IntlCalendar {
    *   the non-existence of an error.
    */
   <<__Native>>
-  public function getErrorMessage(): string;
+  public function getErrorMessage(): ?string;
 
   /**
    * Get the first day of the week for the calendar's locale

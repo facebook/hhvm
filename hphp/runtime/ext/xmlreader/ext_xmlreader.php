@@ -23,13 +23,13 @@ class XMLReader {
   public function next(?string $localname = null): bool;
 
   <<__Native>>
-  public function readString(): string;
+  public function readString(): ?string;
 
   <<__Native>>
-  public function readInnerXML(): string;
+  public function readInnerXML(): ?string;
 
   <<__Native>>
-  public function readOuterXML(): string;
+  public function readOuterXML(): ?string;
 
   <<__Native>>
   public function moveToNextAttribute(): bool;

@@ -818,7 +818,7 @@ function symlink(string $target, string $link): bool;
  *
  */
 <<__Native, __IsFoldable>>
-function basename(string $path, string $suffix = "")[]: string;
+function basename(string $path, string $suffix = "")[]: ?string;
 
 /**
  * fnmatch() checks if the passed string would match the given shell wildcard
@@ -1351,7 +1351,7 @@ function rmdir(string $dirname, mixed $context = null): bool;
  *
  */
 <<__Native, __IsFoldable>>
-function dirname(string $path)[]: string;
+function dirname(string $path)[]: ?string;
 
 /**
  * Gets the current working directory.

@@ -57,17 +57,17 @@ function is_cli_server_mode(): bool;
  * Throws InvalidOperationException if native autoloading is disabled.
  */
 <<__Native>>
-function autoload_type_to_path(string $type)[]: string;
+function autoload_type_to_path(string $type)[]: ?string;
 <<__Native>>
-function autoload_function_to_path(string $function)[]: string;
+function autoload_function_to_path(string $function)[]: ?string;
 <<__Native>>
-function autoload_constant_to_path(string $constant)[]: string;
+function autoload_constant_to_path(string $constant)[]: ?string;
 <<__Native>>
-function autoload_module_to_path(string $module)[]: string;
+function autoload_module_to_path(string $module)[]: ?string;
 <<__Native>>
-function autoload_type_alias_to_path(string $type_alias)[]: string;
+function autoload_type_alias_to_path(string $type_alias)[]: ?string;
 <<__Native>>
-function autoload_type_or_type_alias_to_path(string $type)[]: string;
+function autoload_type_or_type_alias_to_path(string $type)[]: ?string;
 
 /**
  * Get the types defined in the given path.
@@ -116,7 +116,7 @@ function serialize_memoize_param(mixed $param): arraykey;
 function clear_static_memoization(?string $cls, ?string $func = null) : bool;
 
 <<__Native>>
-function ffp_parse_string_native(string $program)[]: string;
+function ffp_parse_string_native(string $program)[]: ?string;
 
 newtype ParseTree = darray<arraykey, mixed>;
 
@@ -381,7 +381,7 @@ function mangle_unit_sha1(
   string $sha1 = '',
   string $ext = '.php',
   ?string $repo = null,
-): string;
+): ?string;
 
 function unit_schema(?string $repo = null): string {
   return mangle_unit_sha1('', '.php', $repo);
@@ -493,10 +493,10 @@ function get_opaque(dict<string, mixed> $ts): bool;
 function get_optional_shape_field(dict<string, mixed> $ts): bool;
 
 <<__Native>>
-function get_alias(dict<string, mixed> $ts): string;
+function get_alias(dict<string, mixed> $ts): ?string;
 
 <<__Native>>
-function get_typevars(dict<string, mixed> $ts): string;
+function get_typevars(dict<string, mixed> $ts): ?string;
 
 <<__Native>>
 function get_typevar_types(dict<string, mixed> $ts): dict<string, mixed>;
@@ -520,13 +520,13 @@ function get_return_type(dict<string, mixed> $ts): dict<string, mixed>;
 function get_variadic_type(dict<string, mixed> $ts): dict<string, mixed>;
 
 <<__Native>>
-function get_name(dict<string, mixed> $ts): string;
+function get_name(dict<string, mixed> $ts): ?string;
 
 <<__Native>>
 function get_generic_types(dict<string, mixed> $ts): vec<mixed>;
 
 <<__Native>>
-function get_classname(dict<string, mixed> $ts): string;
+function get_classname(dict<string, mixed> $ts): ?string;
 
 <<__Native>>
 function get_exact(dict<string, mixed> $ts): bool;
@@ -550,7 +550,7 @@ function check_dynamically_callable_inst_method(
 <<__Native>>
 function reflection_class_get_name(
     mixed $class,
-)[]: string;
+)[]: ?string;
 
 <<__Native>>
 function reflection_class_is_abstract(

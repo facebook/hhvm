@@ -62,7 +62,7 @@ function ldap_dn2ufn(string $db): mixed;
  *
  */
 <<__Native>>
-function ldap_err2str(int $errnum): string;
+function ldap_err2str(int $errnum): ?string;
 
 /**
  * Add entries in the LDAP directory.
@@ -764,4 +764,4 @@ function ldap_control_paged_result_response(resource $link,
 <<__Native>>
 function ldap_escape(string $value,
                      string $ignore = "",
-                     int $flags = 0): string;
+                     int $flags = 0): ?string;

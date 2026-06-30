@@ -486,13 +486,13 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
 
     if (ex->m_nativeFuncPtr) {
       if (info.sig.ret == Native::NativeSig::Type::MixedTV  ||
-          info.sig.ret == Native::NativeSig::Type::StringNN ||
+          info.sig.ret == Native::NativeSig::Type::String   ||
           info.sig.ret == Native::NativeSig::Type::ArrayNN  ||
           info.sig.ret == Native::NativeSig::Type::ObjectNN) {
         // the non null ref or mixed TV should be return by value
         ex->m_allFlags.m_returnByValue = true;
       }
-      if (info.sig.ret == Native::NativeSig::Type::String ||
+      if (info.sig.ret == Native::NativeSig::Type::OptString ||
           info.sig.ret == Native::NativeSig::Type::Array   ||
           info.sig.ret == Native::NativeSig::Type::Object  ||
           info.sig.ret == Native::NativeSig::Type::Resource ) {
@@ -512,7 +512,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
             case Native::NativeSig::Type::Class:
             case Native::NativeSig::Type::ClsMeth:
             case Native::NativeSig::Type::ObjectNN:
-            case Native::NativeSig::Type::StringNN:
+            case Native::NativeSig::Type::String:
             case Native::NativeSig::Type::ArrayNN:
             case Native::NativeSig::Type::ResourceArg:
             case Native::NativeSig::Type::This:
@@ -520,7 +520,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
             case Native::NativeSig::Type::Double:
               return Func::ParamInfo::BuiltinAbi::FPValue;
             case Native::NativeSig::Type::Object:
-            case Native::NativeSig::Type::String:
+            case Native::NativeSig::Type::OptString:
             case Native::NativeSig::Type::Array:
             case Native::NativeSig::Type::Resource:
               return Func::ParamInfo::BuiltinAbi::ValueByRef;

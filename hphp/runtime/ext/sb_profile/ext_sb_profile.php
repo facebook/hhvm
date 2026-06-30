@@ -22,7 +22,7 @@ enum SBWarmupFlag: int {
  * @return string - Status of the serialization attempt.
  */
 <<__Native>>
-function sb_profile_ser(string $sb_root, string $prof_path): string;
+function sb_profile_ser(string $sb_root, string $prof_path): ?string;
 /**
  * Deserializes sandbox profile. A profile can be deserialized only once for the
  * lifetime of the HHVM process.
@@ -38,4 +38,4 @@ function sb_profile_deser(
   string $sb_root,
   string $prof_path,
   /* SBWarmupFlag bitmask */ int $warmup = 7 /* SBWarmupFlag::ALL */,
-): string;
+): ?string;

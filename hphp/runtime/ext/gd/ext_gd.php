@@ -55,7 +55,7 @@ function image_type_to_extension(int $imagetype,
  * IMAGETYPE constant.
  */
 <<__Native>>
-function image_type_to_mime_type(int $imagetype): string;
+function image_type_to_mime_type(int $imagetype): ?string;
 
 /* image2wbmp() outputs or save a WBMP version of the given image.
  */

@@ -85,7 +85,7 @@ class Collator {
    *   Collator API function call.
    */
   <<__Native>>
-  public function getErrorMessage(): string;
+  public function getErrorMessage(): ?string;
 
   /**
    * Get the locale name of the collator
@@ -98,7 +98,7 @@ class Collator {
    *   occurred, returns boolean FALSE.
    */
   <<__Native>>
-  public function getLocale(int $type): string;
+  public function getLocale(int $type): ?string;
 
   /**
    * Get sorting key for a string

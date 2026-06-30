@@ -135,7 +135,7 @@ function openssl_csr_get_dns_names(mixed $csr): vec<string>;
  *  contain a UPN.
  */
 <<__Native>>
-function openssl_csr_get_upn(mixed $csr): string;
+function openssl_csr_get_upn(mixed $csr): ?string;
 
 /* openssl_error_string() returns the last error from the openSSL library.
  * Error messages are stacked, so this function should be called multiple
@@ -634,7 +634,7 @@ function openssl_x509_checkpurpose(mixed $x509cert,
  *  contain a valid UPN.
  */
 <<__Native>>
-function openssl_x509_get_upn(mixed $certificate): string;
+function openssl_x509_get_upn(mixed $certificate): ?string;
 
 /* openssl_x509_export_to_file() stores x509 into a file named by outfilename
  * in a PEM encoded format.

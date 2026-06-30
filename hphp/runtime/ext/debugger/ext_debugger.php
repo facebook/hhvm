@@ -22,14 +22,14 @@ namespace {
    * error.
    */
   <<__Native("NoFCallBuiltin")>>
-  function hphpd_auth_token(): string;
+  function hphpd_auth_token(): ?string;
 
   /**
    * Request signed session from the client. The serialized session is empty in
    * case of error;
    */
   <<__Native("NoFCallBuiltin")>>
-  function hphp_debug_session_auth(): string;
+  function hphp_debug_session_auth(): ?string;
 
   /**
    * Sets a hard breakpoint. When a debugger is running, this line of code will

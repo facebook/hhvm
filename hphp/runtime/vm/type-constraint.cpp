@@ -1859,7 +1859,13 @@ bool TypeConstraint::maybeStringCompatible() const {
     (isSubObject() && interface_supports_string(clsName()));
 }
 
-MaybeDataType TypeConstraint::asSystemlibType() const {
+MaybeDataType TypeConstraint::asSystemlibType(bool isReturn) const {
+  // Same gate as tcCheckNative(), select the 8-byte indirect ABI instead of
+  // the 16-byte Variant one, previously triggered by misleading non-nullable
+  // string return and manually null-checked in cgCallBuiltin/callFuncImpl
+  if (isReturn && isNullable()) {
+    if (isString()) return KindOfString;
+  }
   // Nullable and soft types are generally unknown: don't give an exact type.
   if (isNullable() || isSoft()) return std::nullopt;
   // TODO(T124220067) `noreturn` and `nothing` are their own non-"precise" types

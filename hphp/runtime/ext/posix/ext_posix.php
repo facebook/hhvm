@@ -28,7 +28,7 @@ function posix_access(string $file, int $mode = 0): bool;
  *
  */
 <<__Native>>
-function posix_ctermid(): string;
+function posix_ctermid(): ?string;
 
 /**
  * Retrieve the error number set by the last posix function that failed. The
@@ -64,7 +64,7 @@ function posix_errno(): int;
  *
  */
 <<__Native>>
-function posix_getcwd(): string;
+function posix_getcwd(): ?string;
 
 /**
  * Return the numeric effective group ID of the current process.
@@ -462,7 +462,7 @@ function posix_setuid(int $uid): bool;
  *
  */
 <<__Native>>
-function posix_strerror(int $errnum): string;
+function posix_strerror(int $errnum): ?string;
 
 /**
  * Gets information about the current CPU usage.

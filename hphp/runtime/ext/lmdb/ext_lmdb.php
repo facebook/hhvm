@@ -120,7 +120,7 @@ function mdb_env_set_maxdbs(/* MDB_env */ darray<string, dynamic> $env, int $dbs
 function mdb_env_stat(/* MDB_env */ darray<string, dynamic> $env): /* MDB_stat */ darray<string, dynamic>;
 
 <<__Native>>
-function mdb_env_get_path(/* MDB_env */ darray<string, dynamic> $env): string;
+function mdb_env_get_path(/* MDB_env */ darray<string, dynamic> $env): ?string;
 
 <<__Native>>
 function mdb_env_get_maxkeysize(/* MDB_env */ darray<string, dynamic> $env): int;

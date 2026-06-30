@@ -76,7 +76,7 @@ class EncodingMatch {
    * @return string - The name of the detected encoding
    */
   <<__Native>>
-  public function getEncoding(): string;
+  public function getEncoding(): ?string;
 
   /**
    * Gets the confidence number of the encoding match
@@ -93,7 +93,7 @@ class EncodingMatch {
    * @return string - A rough guess at the language of the encoded bytes
    */
   <<__Native>>
-  public function getLanguage(): string;
+  public function getLanguage(): ?string;
 
   /**
    * Gets the UTF-8 encoded version of the encoded byte array
@@ -102,5 +102,5 @@ class EncodingMatch {
    *                  with the detected encoding
    */
   <<__Native>>
-  public function getUTF8(): string;
+  public function getUTF8(): ?string;
 }

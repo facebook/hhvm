@@ -13,7 +13,7 @@ namespace HH {
  * the same result for subsequent requests.
  */
 <<__Native>>
-function server_warmup_status(): string;
+function server_warmup_status(): ?string;
 
 /**
  * Returns a good description of the warmup status of the server, based on
@@ -25,7 +25,7 @@ function server_warmup_status(): string;
  * i.e., once it returns empty string, it will keep returning empty string.
  */
 <<__Native>>
-function server_warmup_status_monotonic(): string;
+function server_warmup_status_monotonic(): ?string;
 
 <<__Native>>
 function set_endpoint_name(string $name): void;
@@ -41,7 +41,7 @@ function set_endpoint_name(string $name): void;
  * on an unnamed JobQueue within the server.
  */
 <<__Native>>
-function execution_context()[read_globals]: string;
+function execution_context()[read_globals]: ?string;
 
 <<__Native, __IsFoldable>>
 function array_mark_legacy(mixed $v, bool $recursive = false)[]: mixed;
@@ -67,7 +67,7 @@ namespace __internal {
  * Return the current hhvm runtime executable path
  */
 <<__Native>>
-function hhvm_binary(): string;
+function hhvm_binary(): ?string;
 }
 
 }
@@ -285,7 +285,7 @@ function time_sleep_until(float $timestamp): bool;
  */
 <<__Native>>
 function uniqid(string $prefix = "",
-                bool $more_entropy = false): string;
+                bool $more_entropy = false): ?string;
 
 /** Unpacks from a binary string into an array according to the given format.
  * unpack() works slightly different from Perl as the unpacked data is stored
@@ -314,7 +314,7 @@ function sys_getloadavg(): vec<float>;
  * @return string - The result of the string cast.
  */
 <<__Native, __IsFoldable>>
-function hphp_to_string(mixed $v)[]: string;
+function hphp_to_string(mixed $v)[]: ?string;
 
 }
 

@@ -198,6 +198,7 @@ trait BaseException {
     $lst = dict[];
     $ex = $throwable;
     while ($ex != null && !\array_key_exists(\spl_object_hash(HH\FIXME\UNSAFE_CAST<mixed,dynamic>($ex)), $lst)) {
+      /* HH_FIXME[4371] spl_object_hash() now `?string` */
       $lst[\spl_object_hash(HH\FIXME\UNSAFE_CAST<mixed,dynamic>($ex))] = $ex;
       $ex = $ex->getPrevious();
     }

@@ -553,7 +553,7 @@ function mb_language(?string $language = null)[leak_safe]: mixed;
  *
  */
 <<__Native>>
-function mb_output_handler(string $contents, int $status)[leak_safe]: string;
+function mb_output_handler(string $contents, int $status)[leak_safe]: ?string;
 
 /**
  * Parses GET/POST/COOKIE data and sets global variables. Since PHP does not
@@ -613,7 +613,7 @@ function mb_regex_encoding(?string $encoding = null)[leak_safe]: mixed;
  *
  */
 <<__Native>>
-function mb_regex_set_options(?string $options = null)[leak_safe]: string;
+function mb_regex_set_options(?string $options = null)[leak_safe]: ?string;
 
 /**
  * Sends email. Headers and messages are converted and encoded according to

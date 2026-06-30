@@ -16,8 +16,22 @@ FIXME_CODES: List[int] = [
     # be mutually recursive or referential in some form (e.g.: any class with
     # a `__Sealed` attribute).
     2049,
-    # Typing of idx($this, _) is broken
+    # `__toString` should return `string`: a handful of `<<__Native>>` methods
+    # are declared `?string` to match their underlying `OptString` C++ return,
+    # which Hack's structural rule for `__toString` won't accept without a
+    # FIXME at the decl site.
+    3020,
+    # Typing of idx($this, _) is broken; also covers `?string` flowing into
+    # `string`-typed call sites for `<<__Native>>` functions whose `.php` was
+    # tightened from `string` to `?string` to match an `OptString` C++ return.
     4110,
+    # Method override-incompatibility for `<<__Native>>` methods whose `.php`
+    # was tightened from `string` to `?string`; their interface/parent
+    # declarations still say `string` and haven't been migrated yet.
+    4341,
+    # `?string` used as a dict key after one of the tightened `<<__Native>>`
+    # functions started returning `?string` instead of `string`.
+    4371,
     # "Memoizing object parameters requires the capability AccessGlobals:" for
     # now, we're allowing this in some places like `create_opaque_value`
     4447,

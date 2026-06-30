@@ -6,10 +6,10 @@ final class SodiumException extends Exception {
 ///// utilities
 
 <<__Native>>
-function sodium_bin2hex(string $binary): string;
+function sodium_bin2hex(string $binary): ?string;
 
 <<__Native>>
-function sodium_hex2bin(string $hex, ?string $ignore = null): string;
+function sodium_hex2bin(string $hex, ?string $ignore = null): ?string;
 
 <<__Native>>
 function sodium_memzero(inout mixed $buffer): void;
@@ -27,7 +27,7 @@ function sodium_memcmp(string $a, string $b): int;
 function sodium_compare(string $a, string $b): int;
 
 <<__Native>>
-function sodium_crypto_scalarmult(string $n, string $p): string;
+function sodium_crypto_scalarmult(string $n, string $p): ?string;
 
 ///// Hashing (not for passwords or keys)
 
@@ -42,13 +42,13 @@ function sodium_crypto_generichash(
   string $msg,
   ?string $key = null,
   ?int $length = null,
-): string;
+): ?string;
 
 <<__Native>>
 function sodium_crypto_generichash_init(
   ?string $key = null,
   ?int $length = null
-): string;
+): ?string;
 
 <<__Native>>
 function sodium_crypto_generichash_update(
@@ -60,14 +60,14 @@ function sodium_crypto_generichash_update(
 function sodium_crypto_generichash_final(
   inout mixed $state,
   ?int $length = null,
-): string;
+): ?string;
 
 function sodium_crypto_shorthash_keygen(): string {
   return random_bytes(SODIUM_CRYPTO_SHORTHASH_KEYBYTES);
 }
 
 <<__Native>>
-function sodium_crypto_shorthash(string $message, string $key): string;
+function sodium_crypto_shorthash(string $message, string $key): ?string;
 
 ///// Key derivation
 
@@ -78,7 +78,7 @@ function sodium_crypto_pwhash(
   string $salt,
   int $opslimit,
   int $memlimit,
-): string;
+): ?string;
 
 <<__Native>>
 function sodium_crypto_pwhash_scryptsalsa208sha256(
@@ -87,7 +87,7 @@ function sodium_crypto_pwhash_scryptsalsa208sha256(
   string $salt,
   int $opslimit,
   int $memlimit,
-): string;
+): ?string;
 
 ///// Password hashing for storage
 
@@ -96,7 +96,7 @@ function sodium_crypto_pwhash_str(
   string $password,
   int $opslimit,
   int $memlimit,
-): string;
+): ?string;
 
 <<__Native>>
 function sodium_crypto_pwhash_str_verify(
@@ -109,7 +109,7 @@ function sodium_crypto_pwhash_scryptsalsa208sha256_str(
   string $password,
   int $opslimit,
   int $memlimit,
-): string;
+): ?string;
 
 <<__Native>>
 function sodium_crypto_pwhash_scryptsalsa208sha256_str_verify(
@@ -124,7 +124,7 @@ function sodium_crypto_auth_keygen(): string {
 }
 
 <<__Native>>
-function sodium_crypto_auth(string $message, string $key): string;
+function sodium_crypto_auth(string $message, string $key): ?string;
 
 <<__Native>>
 function sodium_crypto_auth_verify(
@@ -144,7 +144,7 @@ function sodium_crypto_secretbox(
   string $plaintext,
   string $nonce,
   string $key,
-): string;
+): ?string;
 
 <<__Native>>
 function sodium_crypto_secretbox_open(
@@ -156,10 +156,10 @@ function sodium_crypto_secretbox_open(
 ///// Asymetric (public-key) encryption key management
 
 <<__Native>>
-function sodium_crypto_box_keypair(): string;
+function sodium_crypto_box_keypair(): ?string;
 
 <<__Native>>
-function sodium_crypto_box_seed_keypair(string $seed): string;
+function sodium_crypto_box_seed_keypair(string $seed): ?string;
 
 function sodium_crypto_box_keypair_from_secretkey_and_publickey(
   string $secretkey,
@@ -209,16 +209,16 @@ function sodium_crypto_box_secretkey(string $keypair): string {
 }
 
 <<__Native>>
-function sodium_crypto_box_publickey_from_secretkey(string $key): string;
+function sodium_crypto_box_publickey_from_secretkey(string $key): ?string;
 
 <<__Native>>
-function sodium_crypto_scalarmult_base(string $key): string;
+function sodium_crypto_scalarmult_base(string $key): ?string;
 
 <<__Native>>
-function sodium_crypto_kx_keypair(): string;
+function sodium_crypto_kx_keypair(): ?string;
 
 <<__Native>>
-function sodium_crypto_kx_seed_keypair(string $seed): string;
+function sodium_crypto_kx_seed_keypair(string $seed): ?string;
 
 function sodium_crypto_kx_secretkey(string $keypair): string {
   if (strlen($keypair) !== SODIUM_CRYPTO_KX_KEYPAIRBYTES) {
@@ -265,14 +265,14 @@ function sodium_crypto_stream(
   int $length,
   string $nonce,
   string $key,
-): string;
+): ?string;
 
 <<__Native>>
 function sodium_crypto_stream_xor(
   string $message,
   string $nonce,
   string $key,
-): string;
+): ?string;
 
 ///// Asymetric (public-key) encryption
 
@@ -281,7 +281,7 @@ function sodium_crypto_box(
   string $plaintext,
   string $nonce,
   string $keypair,
-): string;
+): ?string;
 
 <<__Native>>
 function sodium_crypto_box_open(
@@ -294,7 +294,7 @@ function sodium_crypto_box_open(
 function sodium_crypto_box_seal(
   string $plaintext,
   string $publickey,
-): string;
+): ?string;
 
 <<__Native>>
 function sodium_crypto_box_seal_open(
@@ -305,13 +305,13 @@ function sodium_crypto_box_seal_open(
 ///// Asymetric (public key) signature key management
 
 <<__Native>>
-function sodium_crypto_sign_keypair(): string;
+function sodium_crypto_sign_keypair(): ?string;
 
 <<__Native>>
-function sodium_crypto_sign_seed_keypair(string $seed): string;
+function sodium_crypto_sign_seed_keypair(string $seed): ?string;
 
 <<__Native>>
-function sodium_crypto_sign_publickey_from_secretkey(string $secretkey): string;
+function sodium_crypto_sign_publickey_from_secretkey(string $secretkey): ?string;
 
 function sodium_crypto_sign_keypair_from_secretkey_and_publickey(
   string $secretkey,
@@ -358,9 +358,9 @@ function sodium_crypto_sign_secretkey(string $keypair): string {
 }
 
 <<__Native>>
-function sodium_crypto_sign_ed25519_pk_to_curve25519(string $eddsakey): string;
+function sodium_crypto_sign_ed25519_pk_to_curve25519(string $eddsakey): ?string;
 <<__Native>>
-function sodium_crypto_sign_ed25519_sk_to_curve25519(string $eddsakey): string;
+function sodium_crypto_sign_ed25519_sk_to_curve25519(string $eddsakey): ?string;
 
 ///// Asymetric (public key) signatures
 
@@ -368,7 +368,7 @@ function sodium_crypto_sign_ed25519_sk_to_curve25519(string $eddsakey): string;
 function sodium_crypto_sign(
   string $message,
   string $secretkey,
-): string;
+): ?string;
 
 <<__Native>>
 function sodium_crypto_sign_open(
@@ -380,7 +380,7 @@ function sodium_crypto_sign_open(
 function sodium_crypto_sign_detached(
   string $message,
   string $secretkey,
-): string;
+): ?string;
 
 <<__Native>>
 function sodium_crypto_sign_verify_detached(
@@ -412,7 +412,7 @@ function sodium_crypto_aead_aes256gcm_encrypt(
   string $ad,
   string $pnonce,
   string $key,
-): string;
+): ?string;
 
 function sodium_crypto_aead_chacha20poly1305_keygen(): string {
   return random_bytes(SODIUM_CRYPTO_AEAD_CHACHA20POLY1305_KEYBYTES);
@@ -432,7 +432,7 @@ function sodium_crypto_aead_chacha20poly1305_encrypt(
   string $ad,
   string $pnonce,
   string $key,
-): string;
+): ?string;
 
 function sodium_crypto_aead_chacha20poly1305_ietf_keygen(): string {
   return random_bytes(
@@ -454,7 +454,7 @@ function sodium_crypto_aead_chacha20poly1305_ietf_encrypt(
   string $ad,
   string $pnonce,
   string $key,
-): string;
+): ?string;
 
 function sodium_crypto_aead_xchacha20poly1305_ietf_keygen(): string {
   return random_bytes(
@@ -476,7 +476,7 @@ function sodium_crypto_aead_xchacha20poly1305_ietf_encrypt(
   string $ad,
   string $pnonce,
   string $key,
-): string;
+): ?string;
 
 ///// key deriviation functions (kdf)
 
@@ -490,37 +490,37 @@ function sodium_crypto_kdf_derive_from_key(
   int $subkey_id,
   string $context,
   string $key,
-): string;
+): ?string;
 
 <<__Native>>
 function sodium_crypto_core_hchacha20(
   string $in,
   string $k,
   ?string $c = null,
-): string;
+): ?string;
 
 ///// Ristretto
 
 <<__Native>>
-function sodium_crypto_core_ristretto255_add(string $p, string $q): string;
+function sodium_crypto_core_ristretto255_add(string $p, string $q): ?string;
 
 <<__Native>>
-function sodium_crypto_core_ristretto255_sub(string $p, string $q): string;
+function sodium_crypto_core_ristretto255_sub(string $p, string $q): ?string;
 
 <<__Native>>
 function sodium_crypto_core_ristretto255_is_valid_point(string $s): bool;
 
 <<__Native>>
-function sodium_crypto_core_ristretto255_random(): string;
+function sodium_crypto_core_ristretto255_random(): ?string;
 
 <<__Native>>
-function sodium_crypto_core_ristretto255_from_hash(string $r): string;
+function sodium_crypto_core_ristretto255_from_hash(string $r): ?string;
 
 <<__Native>>
-function sodium_crypto_scalarmult_ristretto255(string $n, string $p): string;
+function sodium_crypto_scalarmult_ristretto255(string $n, string $p): ?string;
 
 <<__Native>>
-function sodium_crypto_core_ristretto255_scalar_reduce(string $s): string;
+function sodium_crypto_core_ristretto255_scalar_reduce(string $s): ?string;
 
 // The range of outputs of random_bytes(SODIUM_CRYPTO_CORE_RISTRETTO255_SCALARBYTES)
 // is larger than that of crypto_core_ristretto255_scalar_random().
@@ -530,22 +530,22 @@ function sodium_crypto_core_ristretto255_scalar_random(): string {
 }
 
 <<__Native>>
-function sodium_crypto_core_ristretto255_scalar_invert(string $s): string;
+function sodium_crypto_core_ristretto255_scalar_invert(string $s): ?string;
 
 <<__Native>>
-function sodium_crypto_core_ristretto255_scalar_negate(string $s): string;
+function sodium_crypto_core_ristretto255_scalar_negate(string $s): ?string;
 
 <<__Native>>
-function sodium_crypto_core_ristretto255_scalar_complement(string $s): string;
+function sodium_crypto_core_ristretto255_scalar_complement(string $s): ?string;
 
 <<__Native>>
-function sodium_crypto_core_ristretto255_scalar_add(string $x, string $y): string;
+function sodium_crypto_core_ristretto255_scalar_add(string $x, string $y): ?string;
 
 <<__Native>>
-function sodium_crypto_core_ristretto255_scalar_sub(string $x, string $y): string;
+function sodium_crypto_core_ristretto255_scalar_sub(string $x, string $y): ?string;
 
 <<__Native>>
-function sodium_crypto_core_ristretto255_scalar_mul(string $x, string $y): string;
+function sodium_crypto_core_ristretto255_scalar_mul(string $x, string $y): ?string;
 
 ///// AEAD secretstream
 
@@ -553,7 +553,7 @@ function sodium_crypto_core_ristretto255_scalar_mul(string $x, string $y): strin
 // This function is not required. Any key of size
 // crypto_secretstream_xchacha20poly1305_KEYBYTES can be used in secretstream APIs.
 <<__Native>>
-function sodium_crypto_secretstream_xchacha20poly1305_keygen(): string;
+function sodium_crypto_secretstream_xchacha20poly1305_keygen(): ?string;
 
 // Initialize the state for encryption/push side secretstream.
 // Return the state string and the header string.
@@ -562,12 +562,12 @@ function sodium_crypto_secretstream_xchacha20poly1305_init_push(string $key): va
 
 // Encryption. Return the ciphertext.
 <<__Native>>
-function sodium_crypto_secretstream_xchacha20poly1305_push(inout mixed $state, string $plaintext, string $ad, int $tag): string;
+function sodium_crypto_secretstream_xchacha20poly1305_push(inout mixed $state, string $plaintext, string $ad, int $tag): ?string;
 
 // Initialize the state for decryption/pull side secretstream.
 // Return the state string.
 <<__Native>>
-function sodium_crypto_secretstream_xchacha20poly1305_init_pull(string $key, string $header): string;
+function sodium_crypto_secretstream_xchacha20poly1305_init_pull(string $key, string $header): ?string;
 
 // Decryption. Return the plaintext and the tag.
 <<__Native>>
@@ -583,25 +583,25 @@ function sodium_crypto_secretstream_xchacha20poly1305_rekey(inout mixed $state):
 function sodium_crypto_core_ed25519_is_valid_point(string $point): bool;
 
 <<__Native>>
-function sodium_crypto_core_ed25519_add(string $point_a, string $point_b): string;
+function sodium_crypto_core_ed25519_add(string $point_a, string $point_b): ?string;
 
 <<__Native>>
-function sodium_crypto_core_ed25519_sub(string $point_a, string $point_b): string;
+function sodium_crypto_core_ed25519_sub(string $point_a, string $point_b): ?string;
 
 <<__Native>>
-function sodium_crypto_scalarmult_ed25519_noclamp(string $scalar, string $point): string;
+function sodium_crypto_scalarmult_ed25519_noclamp(string $scalar, string $point): ?string;
 
 <<__Native>>
-function sodium_crypto_core_ed25519_scalar_reduce(string $scalar): string;
+function sodium_crypto_core_ed25519_scalar_reduce(string $scalar): ?string;
 
 <<__Native>>
-function sodium_crypto_core_ed25519_scalar_add(string $scalar_a, string $scalar_b): string;
+function sodium_crypto_core_ed25519_scalar_add(string $scalar_a, string $scalar_b): ?string;
 
 <<__Native>>
-function sodium_crypto_core_ed25519_scalar_mul(string $scalar_a, string $scalar_b): string;
+function sodium_crypto_core_ed25519_scalar_mul(string $scalar_a, string $scalar_b): ?string;
 
 <<__Native>>
-function sodium_crypto_scalarmult_ed25519_base(string $scalar): string;
+function sodium_crypto_scalarmult_ed25519_base(string $scalar): ?string;
 
 <<__Native>>
-function sodium_crypto_scalarmult_ed25519_base_noclamp(string $scalar): string;
+function sodium_crypto_scalarmult_ed25519_base_noclamp(string $scalar): ?string;

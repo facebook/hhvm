@@ -41,13 +41,13 @@ function open(string $path, int $flags, int $mode = 0): FileDescriptor;
 function mkostemps(string $template, int $suffixlen, int $flags): varray<mixed> /* (FileDescriptor, string) */;
 
 <<__Native>>
-function mkdtemp(string $template): string;
+function mkdtemp(string $template): ?string;
 
 <<__Native>>
 function read(
   FileDescriptor $fd,
   int $max_to_read,
-): string;
+): ?string;
 
 <<__Native>>
 function write(FileDescriptor $fd, string $data): int;
@@ -161,7 +161,7 @@ function fcntl(FileDescriptor $fd, int $cmd, mixed $arg = null): mixed;
 function isatty(FileDescriptor $fd): bool;
 
 <<__Native>>
-function ttyname(FileDescriptor $fd): string;
+function ttyname(FileDescriptor $fd): ?string;
 
 <<__Native>>
 function getsockopt_int(FileDescriptor $fd, int $level, int $option): int;

@@ -17,7 +17,7 @@ function thrift_protocol_write_binary_struct(\HH\object $transportobj,
 <<__Native>>
 function thrift_protocol_write_binary_struct_to_string(
   \HH\object $request_struct,
-): string;
+): ?string;
 
 <<__Native>>
 function thrift_protocol_read_binary(\HH\object $transportobj,
@@ -55,7 +55,7 @@ function thrift_protocol_write_compact_struct(\HH\object $transportobj,
 
 <<__Native>>
 function thrift_protocol_write_compact_struct_to_string(\HH\object $transportobj,
-                                                          int $version = 2): string;
+                                                          int $version = 2): ?string;
 
 <<__Native>>
 function thrift_protocol_read_compact(\HH\object $transportobj,
@@ -117,7 +117,9 @@ final class RpcOptions implements IPureStringishObject {
   public function setSerializedAuthProofs(string $serializedTokenData)[write_props]: RpcOptions;
 
   <<__Native>>
-  public function __toString()[]: string;
+  /* HH_FIXME[4341] override */
+  /* HH_FIXME[3020] __toString returns `?string` to match underlying OptString */
+  public function __toString()[]: ?string;
 }
 
 final class ThriftApplicationException extends Exception {

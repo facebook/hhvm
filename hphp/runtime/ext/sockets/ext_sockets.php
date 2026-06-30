@@ -608,7 +608,7 @@ function socket_close(resource $socket)[write_props]: void;
  *
  */
 <<__Native>>
-function socket_strerror(int $errnum)[]: string;
+function socket_strerror(int $errnum)[]: ?string;
 
 /**
  * If a socket resource is passed to this function, the last error which

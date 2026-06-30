@@ -179,7 +179,7 @@ void callFuncImpl(const Func* const func,
                   TypedValue& ret) {
   auto const f = func->nativeFuncPtr();
   auto const numArgs = func->numParams();
-  auto retType = func->returnTypeConstraints().asSystemlibType();
+  auto retType = func->returnTypeConstraints().asSystemlibType(true);
   auto regs = Registers{};
 
   if (ctx) pushInt(regs, (int64_t)ctx);
@@ -403,7 +403,8 @@ Optional<TypedValue> builtinInValue(const Func* builtin, uint32_t i) {
 
 //////////////////////////////////////////////////////////////////////////////
 
-static bool tcCheckNative(const TypeConstraint& tc, const NativeSig::Type ty) {
+static bool tcCheckNative(const TypeConstraint& tc, const NativeSig::Type ty,
+                          bool isReturn) {
   using T = NativeSig::Type;
 
   if (tc.typeName() && interface_supports_arrlike(tc.typeName())) {
@@ -412,6 +413,15 @@ static bool tcCheckNative(const TypeConstraint& tc, const NativeSig::Type ty) {
     // is _exactly_ one of the magic interfaces that supports array like things,
     // including Hack Collections.
     return ty == T::Mixed || ty == T::MixedTV;
+  }
+
+  // Beginning of stricter handling of nullable returns. For now, only
+  // ?strings require that the return is OptString. Nullable params still
+  // decay to Variant.
+  if (isReturn && tc.isNullable()) {
+    if (tc.isString()) {
+      return ty == T::OptString;
+    }
   }
 
   if (!tc.hasConstraint() || tc.isNullable() || tc.isCallable() ||
@@ -437,7 +447,9 @@ static bool tcCheckNative(const TypeConstraint& tc, const NativeSig::Type ty) {
     case KindOfBoolean:      return ty == T::Bool;
     case KindOfObject:       return ty == T::Object   || ty == T::ObjectNN;
     case KindOfPersistentString:
-    case KindOfString:       return ty == T::String   || ty == T::StringNN;
+    case KindOfString:
+      return isReturn ? ty == T::String
+                      : ty == T::String || ty == T::OptString;
     case KindOfPersistentVec:
     case KindOfVec:
     case KindOfPersistentDict:
@@ -541,15 +553,15 @@ const char* checkTypeFunc(const NativeSig& sig,
                           const FuncEmitter* func) {
   using T = NativeSig::Type;
 
-  auto const check = [](auto const& tcs, const T type) {
+  auto const check = [](auto const& tcs, const T type, bool isReturn) {
     return std::any_of(
       tcs.range().begin(),
       tcs.range().end(),
-      [&](auto const& tc) { return tcCheckNative(tc, type); }
+      [&](auto const& tc) { return tcCheckNative(tc, type, isReturn); }
     );
   };
 
-  if (!check(func->retTypeConstraints, sig.ret)) {
+  if (!check(func->retTypeConstraints, sig.ret, true)) {
     return kInvalidReturnTypeMessage;
   }
 
@@ -582,7 +594,7 @@ const char* checkTypeFunc(const NativeSig& sig,
       continue;
     }
 
-    if (!check(pInfo.typeConstraints, argTy)) {
+    if (!check(pInfo.typeConstraints, argTy, false)) {
       return kInvalidArgTypeMessage;
     }
   }
@@ -653,11 +665,11 @@ static std::string nativeTypeString(NativeSig::Type ty) {
   case T::Double:     return "double";
   case T::Bool:       return "bool";
   case T::Object:     return "object";
-  case T::String:     return "string";
+  case T::OptString:  return "?string";
   case T::Array:      return "array";
   case T::Resource:   return "resource";
   case T::ObjectNN:   return "object";
-  case T::StringNN:   return "string";
+  case T::String:     return "string";
   case T::ArrayNN:    return "array";
   case T::ResourceArg:return "resource";
   case T::Mixed:      return "mixed";

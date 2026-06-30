@@ -295,7 +295,7 @@ class DOMCharacterData extends DOMNode {
    *
    */
   <<__Native>>
-  public function substringData(int $offset, int $count): string;
+  public function substringData(int $offset, int $count): ?string;
 
   /**
    * @return array - var_dump() compat output helper.
@@ -879,7 +879,7 @@ class DOMElement extends DOMNode {
    *
    */
   <<__Native>>
-  public function getAttribute(string $name): string;
+  public function getAttribute(string $name): ?string;
 
   /**
    * Returns the attribute node with name name for the current element.
@@ -920,7 +920,7 @@ class DOMElement extends DOMNode {
    *
    */
   <<__Native>>
-  public function getAttributeNS(string $namespaceuri, string $localname): string;
+  public function getAttributeNS(string $namespaceuri, string $localname): ?string;
 
   /**
    * This function returns a new instance of the class DOMNodeList of all
@@ -1708,7 +1708,7 @@ function dom_namednodemap_get_named_item_ns(DOMNamedNodeMap $obj,
 
 function dom_characterdata_substring_data(DOMCharacterData $obj,
                                           int $offset,
-                                          int $count): string {
+                                          int $count): ?string {
   return $obj->substringData($offset, $count);
 }
 
@@ -1740,7 +1740,7 @@ function dom_attr_is_id(DOMAttr $obj): bool {
   return $obj->isId();
 }
 
-function dom_element_get_attribute(DOMElement $obj, string $name): string {
+function dom_element_get_attribute(DOMElement $obj, string $name): ?string {
   return $obj->getAttribute($name);
 }
 
@@ -1777,7 +1777,7 @@ function dom_element_get_elements_by_tag_name(
 
 function dom_element_get_attribute_ns(DOMElement $obj,
                                       string $namespaceuri,
-                                      string $localname): string {
+                                      string $localname): ?string {
   return $obj->getAttributeNS($namespaceuri, $localname);
 }
 

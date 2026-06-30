@@ -46,7 +46,7 @@ function get_extension_funcs(string $module_name)[read_globals]: mixed;
 function get_cfg_var(string $_option): mixed { return false; }
 
 <<__Native>>
-function get_current_user(): string;
+function get_current_user(): ?string;
 
 /* Returns the names and values of all the constants currently defined. This
  * includes those created by extensions.
@@ -55,7 +55,7 @@ function get_current_user(): string;
 function get_defined_constants(bool $categorize = false): darray<string, mixed>;
 
 <<__Native>>
-function get_include_path(): string;
+function get_include_path(): ?string;
 
 <<__Native>>
 function restore_include_path(): void;
@@ -63,7 +63,7 @@ function restore_include_path(): void;
 /* Sets the include_path configuration option for the duration of the script.
  */
 <<__Native>>
-function set_include_path(mixed $new_include_path): string;
+function set_include_path(mixed $new_include_path): ?string;
 
 /* Gets the names of all files that have been included using include(),
  * include_once(), require() or require_once().
@@ -195,7 +195,7 @@ function cpu_get_count()[read_globals]: int;
 /* Gets processor model.
  */
 <<__Native>>
-function cpu_get_model()[read_globals]: string;
+function cpu_get_model()[read_globals]: ?string;
 
 /* Returns the value of the configuration option on success.
  */
@@ -314,7 +314,7 @@ function php_ini_scanned_files(): mixed {
 }
 
 <<__Native>>
-function php_sapi_name()[read_globals]: string;
+function php_sapi_name()[read_globals]: ?string;
 
 /* php_uname() returns a description of the operating system PHP is running
  * on. This is the same string you see at the very top of the phpinfo()
@@ -388,7 +388,7 @@ function set_pre_timeout_handler(int $seconds, mixed $callback): void;
 /* Returns the path of the directory PHP stores temporary files in by default.
  */
 <<__Native>>
-function sys_get_temp_dir(): string;
+function sys_get_temp_dir(): ?string;
 
 /* version_compare() compares two "PHP-standardized" version number strings.
  * This is useful if you would like to write programs working only on some

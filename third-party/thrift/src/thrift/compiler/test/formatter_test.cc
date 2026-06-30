@@ -291,6 +291,40 @@ service Service {
 )");
 }
 
+TEST(FormatterTest, currentBehaviorMergesFieldNameAfterTypeTrailingComment) {
+  expect_format(
+      R"(struct Foo {
+  1: Bar // This is a long bar comment
+        bar;
+}
+)",
+      R"(struct Foo {
+  1: Bar // This is a long bar comment bar;
+}
+)");
+}
+
+TEST(FormatterTest, currentBehaviorDropsCommentBeforeServiceExtends) {
+  // The formatter throws rather than emitting output that would drop trivia.
+  EXPECT_THROW(
+      format_thrift_source(R"(service Foo /* Hello there! */ extends Bar {
+}
+)"),
+      std::runtime_error);
+}
+
+TEST(FormatterTest, currentBehaviorMovesSpaceBeforeFieldSeparatorBlockComment) {
+  expect_format(
+      R"(struct Foo {
+  1: i32 field /* trailing block */;
+}
+)",
+      R"(struct Foo {
+  1: i32 field/* trailing block */ ;
+}
+)");
+}
+
 TEST(FormatterTest, preserves_source_with_missing_include_and_unresolved_type) {
   const std::string source = R"(package "facebook.com/thrift/test"
 

@@ -348,6 +348,8 @@ cdef class GeneratedError(Error):
                 raise TypeError(f"__init__() got an unexpected keyword argument '{name}'")
             if value is None:
                 continue
+            # GeneratedError never enables isset_deprecated, so its data holder
+            # has no isset byte array: the field value lives at index `index`.
             set_struct_field(
                 self._fbthrift_data,
                 index,
@@ -386,8 +388,10 @@ cdef class GeneratedError(Error):
     cdef int _fbthrift_populate_field_values(self) except -1:
         cdef StructInfo info = self._fbthrift_struct_info
         args = []
+        # GeneratedError never enables isset_deprecated, so its data holder has
+        # no isset byte array: field values start at index 0.
         for index, type_info in enumerate(info.type_infos):
-            data = self._fbthrift_data[index + 1]
+            data = self._fbthrift_data[index]
             args.append(None if data is None else type_info.to_python_value(data))
         self.args = args
         return 0

@@ -23,10 +23,10 @@ bool ensure_module_imported() {
   return import();
 }
   static constexpr std::int16_t _fbthrift__MarshalStruct__tuple_pos[4] = {
-    1, 2, 3, 4
+    0, 1, 2, 3
   };
   static constexpr std::int16_t _fbthrift__MarshalError__tuple_pos[3] = {
-    1, 2, 3
+    0, 1, 2
   };
 } // namespace
 

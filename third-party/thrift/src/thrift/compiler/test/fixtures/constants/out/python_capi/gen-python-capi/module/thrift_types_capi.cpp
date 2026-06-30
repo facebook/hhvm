@@ -23,22 +23,22 @@ bool ensure_module_imported() {
   return import();
 }
   static constexpr std::int16_t _fbthrift__Internship__tuple_pos[5] = {
-    1, 2, 3, 4, 5
+    0, 1, 2, 3, 4
   };
   static constexpr std::int16_t _fbthrift__Range__tuple_pos[2] = {
-    1, 2
+    0, 1
   };
   static constexpr std::int16_t _fbthrift__struct1__tuple_pos[2] = {
-    1, 2
+    0, 1
   };
   static constexpr std::int16_t _fbthrift__struct2__tuple_pos[4] = {
-    1, 2, 3, 4
+    0, 1, 2, 3
   };
   static constexpr std::int16_t _fbthrift__struct3__tuple_pos[3] = {
-    1, 2, 3
+    0, 1, 2
   };
   static constexpr std::int16_t _fbthrift__struct4__tuple_pos[3] = {
-    1, 2, 3
+    0, 1, 2
   };
 } // namespace
 

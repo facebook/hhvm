@@ -23,16 +23,16 @@ bool ensure_module_imported() {
   return import();
 }
   static constexpr std::int16_t _fbthrift__MyStructWithCustomDefault__tuple_pos[1] = {
-    1
+    0
   };
   static constexpr std::int16_t _fbthrift__StructLevelTerseStruct__tuple_pos[15] = {
-    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15
+    0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14
   };
   static constexpr std::int16_t _fbthrift__FieldLevelTerseStruct__tuple_pos[30] = {
-    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 29, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 30
+    0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 28, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 29
   };
   static constexpr std::int16_t _fbthrift__TerseException__tuple_pos[1] = {
-    1
+    0
   };
 } // namespace
 

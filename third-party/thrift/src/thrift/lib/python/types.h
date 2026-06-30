@@ -76,19 +76,24 @@ PyObject* createUnionTuple();
 PyObject* createMutableUnionDataHolder();
 
 /***
- * Returns a new "struct tuple" whose field elements are uninitialized.
- *
- * The returned tuple has `numFields + 1` elements.
- *
- * The first element is a bytearray of `numFields` bytes, all of which are
- * initialized to 0. It is typically meant to be used as an array of isset
- * flags.
- *
- * The remaining `numFields` elements of the tuple are uninitialized.
+ * Returns a new "struct tuple" whose `numFields` field elements are
+ * uninitialized. This is the default immutable layout (no isset byte array):
+ * the tuple has exactly `numFields` elements, with field `i` at index `i`.
  *
  * See also: `createStructTupleWithDefaultValues()`.
  */
 PyObject* createStructTuple(int16_t numFields);
+
+/***
+ * Returns a new "struct tuple" in the deprecated isset layout, used only for
+ * structs compiled with `enable_isset_deprecated_unsafe`.
+ *
+ * The returned tuple has `numFields + 1` elements. The first element is a
+ * bytearray of `numFields` zero-initialized bytes (the isset flags); the
+ * remaining `numFields` elements (field `i` at index `i + 1`) are
+ * uninitialized.
+ */
+PyObject* createStructTupleWithDeprecatedIsset(int16_t numFields);
 
 /**
  * Returns a new "struct list" whose field elements are uninitialized.
@@ -106,13 +111,12 @@ PyObject* createStructList(int16_t numFields);
  * Returns a new "struct tuple" associated with an immutable Thrift struct,
  * all elements initialized with default values.
  *
- * As in `createStructTuple()`, the first element of the tuple is a
- * 0-initialized bytearray with `numFields` bytes (to be used as isset flags).
- *
- * However, the remaining elements (1 through `numFields + 1`) are initialized
- * with the appropriate default value for the corresponding field (see below).
- * The order corresponds to the order of fields in the given `structInfo` (i.e.,
- * the insertion order, NOT the field ids).
+ * The tuple layout is determined by `structInfo`: for the default immutable
+ * layout, the tuple has exactly `numFields` elements and field `i` lives at
+ * index `i`; for structs compiled with `enable_isset_deprecated_unsafe`,
+ * element 0 is a 0-initialized bytearray with `numFields` isset flags and field
+ * `i` lives at index `i + 1`. Field order corresponds to the order of fields in
+ * the given `structInfo` (i.e., the insertion order, NOT the field ids).
  *
  * The default value for optional fields is always `Py_None`. For other fields,
  * the default value is either specified by the user or the following "standard"
@@ -157,11 +161,12 @@ PyObject* createMutableStructListWithDefaultValues(
  * Sets the "isset" flag of the `index`-th field of the given struct tuple
  * `object` to the given `value`.
  *
- * @param structTuple Pointer to a "struct tuple" (see `createStructTuple()`
- *        above). This is assumed to be a `PyTupleObject`. The first element of
- *        the tuple contains the isset bytearray. If the bytearray is not
- *        properly initialized, or if the `index` is invalid (i.e., negative or
- *        greater than the number of fields), the behavior is undefined.
+ * @param structTuple Pointer to a deprecated-isset "struct tuple" (see
+ *        `createStructTupleWithDeprecatedIsset()` above). This is assumed to be
+ *        a `PyTupleObject` whose first element contains the isset bytearray. If
+ *        the bytearray is not properly initialized, or if the `index` is
+ * invalid (i.e., negative or greater than the number of fields), the behavior
+ * is undefined.
  *
  * @throws if unable to read a bytearray from the expected isset flags bytearray
  *         (see `object` param documentation above).
@@ -172,11 +177,10 @@ void setStructIsset(PyObject* structTuple, int16_t index, bool value);
  * Returns a new "struct tuple" with all its elements set to `None`
  * (i.e., `Py_None`).
  *
- * As in `createStructTuple()`, the first element of the tuple is a
- * 0-initialized bytearray with `numFields` bytes (to be used as isset flags).
- *
- * However, the remaining elements (1 through `numFields + 1`) are set to `None`
- *
+ * The tuple layout is determined by `structInfo`: default immutable structs
+ * have `numFields` field elements, all set to `None`; structs compiled with
+ * `enable_isset_deprecated_unsafe` also reserve element 0 for a 0-initialized
+ * isset bytearray, with field elements set to `None` starting at index 1.
  */
 PyObject* createStructTupleWithNones(
     const ::apache::thrift::detail::StructInfo& structInfo);
@@ -191,13 +195,14 @@ PyObject* createStructListWithNones(
     const ::apache::thrift::detail::StructInfo& structInfo);
 
 /**
- * Populates unset fields of a immutable Thrift struct's "struct tuple" with
+ * Populates unset fields of an immutable Thrift struct's "struct tuple" with
  * default values.
  *
- * The `object` should be a valid `tuple` created by `createStructTuple()`
+ * The `object` should be a valid tuple created with the layout described by
+ * `structInfo` (see `createImmutableStructTupleWithDefaultValues()`).
  *
- * Iterates through the elements (from 1 to `numFields + 1`). If a field
- * is unset, it gets populated with the corresponding default value.
+ * Iterates through the field elements in layout order. If a field is unset, it
+ * gets populated with the corresponding default value.
  *
  * Throws on error
  *
@@ -819,8 +824,16 @@ using FieldValueMap = folly::F14FastMap<int16_t, PyObject*>;
  */
 class DynamicStructInfo {
  public:
+  // `issetEnabled` applies only to immutable structs: when true, the data
+  // holder reserves element 0 for an isset byte array (fields start at index
+  // 1); when false, there is no isset header (fields start at index 0). Has no
+  // effect for mutable structs or unions.
   DynamicStructInfo(
-      const char* name, int16_t numFields, bool isUnion, bool isMutable);
+      const char* name,
+      int16_t numFields,
+      bool isUnion,
+      bool isMutable,
+      bool issetEnabled);
 
   // DynamicStructInfo is non-copyable
   DynamicStructInfo(const DynamicStructInfo&) = delete;
@@ -881,6 +894,14 @@ class DynamicStructInfo {
    * Name of this Thrift type (struct/union/exception).
    */
   std::string name_;
+
+  /**
+   * Whether the immutable data holder reserves element 0 for an isset byte
+   * array. Determines the field `memberOffset` computed in `addFieldInfo()`.
+   * Declared before `tableBasedSerializerStructInfo_` so it is initialized
+   * before the constructor's member-initializer list reads it.
+   */
+  bool issetDeprecatedEnabled_;
 
   /**
    * Default values (if any) for each field (indexed by field position in
@@ -1067,9 +1088,18 @@ PyObject* FOLLY_NULLABLE getThriftUnionFieldData(PyObject*);
 PyObject* FOLLY_NULLABLE getThriftExceptionFieldData(PyObject* generatedError);
 
 /**
- * Sets index + 1 field of struct_tuple to `value` and records that is set
- * in the isset array at field 0. Returns 0 on success and -1 on failure.
- * Only for use with fresh struct_tuple (i.e., no set field values)
+ * Sets the `index`-th tuple element of a deprecated-isset struct_tuple to
+ * `value` and records that it is set in the isset array at element 0 (so
+ * `index` is the 1-based tuple position). Returns 0 on success and -1 on
+ * failure. Only for use with fresh struct_tuple (i.e., no set field values).
+ */
+int setStructFieldIssetDeprecated(
+    PyObject* struct_tuple, int16_t index, PyObject* value);
+
+/**
+ * Sets the `index`-th tuple element of a default (no isset byte array)
+ * struct_tuple to `value`, where `index` is the 0-based tuple position. Returns
+ * 0 on success and -1 on failure. Only for use with a fresh struct_tuple.
  */
 int setStructField(PyObject* struct_tuple, int16_t index, PyObject* value);
 /**

@@ -23,6 +23,7 @@
 #include <vector>
 #include <fmt/format.h>
 
+#include <thrift/compiler/ast/t_exception.h>
 #include <thrift/compiler/ast/t_field.h>
 #include <thrift/compiler/ast/uri.h>
 #include <thrift/compiler/generate/common.h>
@@ -575,11 +576,11 @@ class t_mstch_python_capi_generator : public t_whisker_generator {
       return true;
     });
 
-    def.property("tuple_positions", [](const t_structured& self) {
+    def.property("tuple_positions", [this](const t_structured& self) {
       std::unordered_map<const t_field*, int64_t> field_tuple_indexes;
-      // Determine 1-based (0 is isset indicator) thrift-python tuple index for
-      // each field
-      int64_t tuple_index = 1;
+      // thrift-python reserves tuple element 0 for the isset byte array only
+      // when `enable_isset_deprecated_unsafe` is set for non-exceptions.
+      int64_t tuple_index = enable_isset_deprecated(self) ? 1 : 0;
       for (const t_field* f : self.fields_id_order()) {
         field_tuple_indexes[f] = tuple_index++;
       }
@@ -593,7 +594,19 @@ class t_mstch_python_capi_generator : public t_whisker_generator {
       return whisker::make::array(std::move(a));
     });
 
+    // Whether the thrift-python data holder reserves element 0 for an isset
+    // byte array. Mirrors the same property in the python generator and gates
+    // the capi constructor's tuple allocation and field-set helper.
+    def.property("enable_isset_deprecated?", [this](const t_structured& self) {
+      return enable_isset_deprecated(self);
+    });
+
     return std::move(def).make();
+  }
+
+  bool enable_isset_deprecated(const t_structured& self) const {
+    return has_compiler_option("enable_isset_deprecated_unsafe") &&
+        !self.is<t_exception>();
   }
 };
 

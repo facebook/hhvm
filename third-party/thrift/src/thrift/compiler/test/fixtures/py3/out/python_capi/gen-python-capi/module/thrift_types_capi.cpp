@@ -23,25 +23,25 @@ bool ensure_module_imported() {
   return import();
 }
   static constexpr std::int16_t _fbthrift__SimpleException__tuple_pos[1] = {
-    1
+    0
   };
   static constexpr std::int16_t _fbthrift__OptionalRefStruct__tuple_pos[1] = {
-    1
+    0
   };
   static constexpr std::int16_t _fbthrift__SimpleStruct__tuple_pos[12] = {
-    1, 2, 3, 4, 5, 6, 7, 9, 8, 10, 11, 12
+    0, 1, 2, 3, 4, 5, 6, 8, 7, 9, 10, 11
   };
   static constexpr std::int16_t _fbthrift__Float32Struct__tuple_pos[4] = {
-    1, 2, 3, 4
+    0, 1, 2, 3
   };
   static constexpr std::int16_t _fbthrift__IssetInspectionStruct__tuple_pos[3] = {
-    1, 2, 3
+    0, 1, 2
   };
   static constexpr std::int16_t _fbthrift__HiddenException__tuple_pos[1] = {
-    1
+    0
   };
   static constexpr std::int16_t _fbthrift__BinaryUnionStruct__tuple_pos[1] = {
-    1
+    0
   };
 } // namespace
 

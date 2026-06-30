@@ -23,10 +23,10 @@ bool ensure_module_imported() {
   return import();
 }
   static constexpr std::int16_t _fbthrift__Val__tuple_pos[3] = {
-    1, 2, 3
+    0, 1, 2
   };
   static constexpr std::int16_t _fbthrift__NonCopyableStruct__tuple_pos[1] = {
-    1
+    0
   };
 } // namespace
 

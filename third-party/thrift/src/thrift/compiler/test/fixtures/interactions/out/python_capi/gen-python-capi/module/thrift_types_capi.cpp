@@ -24,10 +24,10 @@ bool ensure_module_imported() {
   return import();
 }
   static constexpr std::int16_t _fbthrift__CustomException__tuple_pos[1] = {
-    1
+    0
   };
   static constexpr std::int16_t _fbthrift__ShouldBeBoxed__tuple_pos[1] = {
-    1
+    0
   };
 } // namespace
 

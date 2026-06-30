@@ -23,19 +23,19 @@ bool ensure_module_imported() {
   return import();
 }
   static constexpr std::int16_t _fbthrift__MyStruct__tuple_pos[9] = {
-    1, 2, 3, 4, 5, 6, 7, 8, 9
+    0, 1, 2, 3, 4, 5, 6, 7, 8
   };
   static constexpr std::int16_t _fbthrift__Containers__tuple_pos[3] = {
-    1, 2, 3
+    0, 1, 2
   };
   static constexpr std::int16_t _fbthrift__MyException__tuple_pos[4] = {
-    1, 2, 3, 4
+    0, 1, 2, 3
   };
   static constexpr std::int16_t _fbthrift__MyExceptionWithMessage__tuple_pos[4] = {
-    1, 2, 3, 4
+    0, 1, 2, 3
   };
   static constexpr std::int16_t _fbthrift__ReservedKeyword__tuple_pos[1] = {
-    1
+    0
   };
 } // namespace
 

@@ -572,21 +572,29 @@ cdef class StructInfo:
             Initialized by calling `_fill_struct_info()`.
     """
 
-    def __cinit__(self, name: str, fields):
+    def __cinit__(self, name: str, fields, bint enable_isset_deprecated=False):
         """
         Stores information for a Thrift Struct class with the given name.
 
         Args:
             name: Name of the Thrift Struct (as specified in IDL)
             fields (tuple[FieldInfo, ...]): Field spec tuples.
+            enable_isset_deprecated: whether the struct's thrift_library enabled
+                `isset_DEPRECATED`. When true, the immutable data holder reserves
+                element 0 for an isset byte array; otherwise it has no isset
+                header (and fields start at index 0). Must be known here because
+                it determines the C++ data-holder layout (field offsets).
         """
         self.fields = fields
+        self.enable_isset_deprecated = enable_isset_deprecated
+        self.field_start_index = 1 if enable_isset_deprecated else 0
         cdef int16_t num_fields = len(fields)
         self.cpp_obj = make_unique[cDynamicStructInfo](
             PyUnicode_AsUTF8(name),
             num_fields,
             False, # isUnion
             False, # isMutable
+            enable_isset_deprecated, # issetEnabled
         )
         self.type_infos = PyTuple_New(num_fields)
         self.name_to_index = {}
@@ -681,6 +689,8 @@ cdef class UnionInfo:
             len(field_infos),
             True, # isUnion
             False, # isMutable
+            True, # issetEnabled: preserve the existing union isset accessors;
+                  # union field offsets use the dedicated isUnion branch.
         )
         self.type_infos = {}
         self.id_to_adapter_info = {}
@@ -1227,25 +1237,25 @@ cdef class AdaptedTypeInfo(TypeInfoBase):
         return (AdaptedTypeInfo, (self._orig_type_info, self._adapter_class, self._transitive_annotation_factory))
 
 
-cdef void set_struct_field(tuple struct_tuple, int16_t index, value) except *:
+cdef void set_struct_field(tuple struct_tuple, int16_t pos, value) except *:
     """
-    Updates the given `struct_tuple` to have the given `value` for the field at
-    the given `index`.
+    Stores `value` (in "internal data" representation) at tuple position `pos`
+    of `struct_tuple`, releasing the value it replaces.
 
-    The "isset" byte for the corresponding field (i.e., the `index`-th byte of
-     the first element of `struct_tuple` is set to 1.
+    This is a mechanical positional setter with no branching. For the
+    deprecated-isset layout, marking the field as set in the isset byte array is
+    the caller's responsibility (see `set_struct_field_from_py_value`).
 
      Args:
         struct_tuple: see `createImmutableStructTupleWithDefaultValues()`
-        index: field index, as defined by its insertion order in the parent
-            `StructInfo` (this is not the field id).
+        pos: tuple index of the field value, i.e. the field's insertion-order
+            index plus the struct's `field_start_index`.
         value: new value for this field, in "internal data" represntation (as
             opposed to "Python value" representation - see `*TypeInfo` classes).
     """
-    setStructIsset(struct_tuple, index, 1)
-    old_value = struct_tuple[index + 1]
+    old_value = struct_tuple[pos]
     Py_INCREF(value)
-    PyTuple_SET_ITEM(struct_tuple, index + 1, value)
+    PyTuple_SET_ITEM(struct_tuple, pos, value)
     Py_DECREF(old_value)
 
 cdef tuple reset_struct_field_to_default(
@@ -1275,12 +1285,14 @@ cdef tuple reset_struct_field_to_default(
         default_data = createImmutableStructTupleWithDefaultValues(
             struct_info.cpp_obj.get().getStructInfo()
         )
-    default_value = default_data[index + 1]
-    old_value = struct_tuple[index + 1]
+    cdef Py_ssize_t pos = index + struct_info.field_start_index
+    default_value = default_data[pos]
+    old_value = struct_tuple[pos]
     Py_INCREF(default_value)
-    PyTuple_SET_ITEM(struct_tuple, index + 1, default_value)
+    PyTuple_SET_ITEM(struct_tuple, pos, default_value)
     Py_DECREF(old_value)
-    setStructIsset(struct_tuple, index, 0)
+    if struct_info.field_start_index:
+        setStructIsset(struct_tuple, index, 0)
     return default_data
 
 cdef void set_struct_field_from_py_value(
@@ -1316,9 +1328,11 @@ cdef void set_struct_field_from_py_value(
             )
         set_struct_field(
             struct_tuple,
-            index,
+            index + struct_info.field_start_index,
             (<TypeInfoBase>struct_info.type_infos[index]).to_internal_data(value),
         )
+        if struct_info.field_start_index:
+            setStructIsset(struct_tuple, index, 1)
     except Exception as exc:
         raise type(exc)(
             f"{type(instance)}: error initializing Thrift struct field "
@@ -1436,26 +1450,35 @@ cdef class Struct(StructOrUnion):
         # kwargs, which makes the common case of
         # updating only one or two fields fast regardless of struct size.
         #
-        # Element 0 (the "isset" flags) must be a *fresh*, uniquely-owned `bytes`
-        # buffer because it is mutated in place by `set_struct_field` /
-        # `setStructIsset`. Build it with a NULL pointer + `memcpy`;
-        # PyBytes_FromStringAndSize returns a shared interned singleton for 1-byte
-        # buffers for 1-field structs. The NULL forces a new allocation, not the
-        # singleton. The remaining elements are immutable "internal data" values
-        # that can be safely shared by reference.
-        cdef bytes old_isset = old_data[0]
-        cdef Py_ssize_t isset_size = PyBytes_GET_SIZE(old_isset)
-        cdef bytes new_isset = PyBytes_FromStringAndSize(NULL, isset_size)
-        memcpy(
-            PyBytes_AS_STRING(new_isset),
-            PyBytes_AS_STRING(old_isset),
-            isset_size,
-        )
-        cdef tuple new_data = PyTuple_New(num_fields + 1)
-        Py_INCREF(new_isset)
-        PyTuple_SET_ITEM(new_data, 0, new_isset)
-        cdef int16_t i
-        for i in range(1, num_fields + 1):
+        # For isset-enabled structs (`header_size == 1`), element 0 (the "isset"
+        # flags) must be a *fresh*, uniquely-owned `bytes` buffer because it is
+        # mutated in place by `set_struct_field` / `setStructIsset`. Build it with
+        # a NULL pointer + `memcpy`; PyBytes_FromStringAndSize returns a shared
+        # interned singleton for 1-byte buffers for 1-field structs. The NULL
+        # forces a new allocation, not the singleton. Disabled structs
+        # (`header_size == 0`) carry no isset element. The field values are
+        # immutable "internal data" that can be safely shared by reference.
+        cdef int16_t header_size = struct_info.field_start_index
+        cdef tuple new_data = PyTuple_New(num_fields + header_size)
+        cdef bytes old_isset
+        cdef Py_ssize_t isset_size
+        cdef bytes new_isset
+        if header_size:
+            old_isset = old_data[0]
+            isset_size = PyBytes_GET_SIZE(old_isset)
+            new_isset = PyBytes_FromStringAndSize(NULL, isset_size)
+            memcpy(
+                PyBytes_AS_STRING(new_isset),
+                PyBytes_AS_STRING(old_isset),
+                isset_size,
+            )
+            Py_INCREF(new_isset)
+            PyTuple_SET_ITEM(new_data, 0, new_isset)
+        # Copy the field values directly over their tuple indices, which skips
+        # element 0 for the deprecated-isset layout (handled above) and avoids a
+        # per-field offset addition.
+        cdef Py_ssize_t i
+        for i in range(header_size, num_fields + header_size):
             borrowed_value = old_data[i]
             Py_INCREF(borrowed_value)
             PyTuple_SET_ITEM(new_data, i, borrowed_value)
@@ -1552,7 +1575,7 @@ cdef class Struct(StructOrUnion):
         cdef FieldInfo field_info = struct_info.fields[index]
         cdef int field_id = field_info.id
         adapter_info = field_info.adapter_info
-        data = self._fbthrift_data[index + 1]
+        data = self._fbthrift_data[index + struct_info.field_start_index]
         if data is not None:
             py_value = (
                 (<TypeInfoBase>struct_info.type_infos[index]).to_python_value(data)
@@ -2112,8 +2135,10 @@ cdef class _StructPrimitiveField(_FieldDescriptorBase):
     """
     cdef int16_t _tuple_index
 
-    def __init__(self, int16_t field_index, str field_name):
-        self._tuple_index = field_index + 1
+    def __init__(self, int16_t field_index, str field_name, int16_t header_size):
+        # `header_size` is 1 when the data tuple reserves element 0 for the isset
+        # byte array (isset-enabled structs), else 0.
+        self._tuple_index = field_index + header_size
         super().__init__(field_name)
 
     def __get__(self, Struct obj, objtype):
@@ -2190,7 +2215,7 @@ class StructMeta(type):
 
         cdef bint enable_get_locally_set_fields = dct.pop('_fbthrift_enable_get_locally_set_fields', False)
         cdef bint enable_isset_deprecated = dct.pop('_fbthrift_enable_isset_deprecated', False)
-        cdef StructInfo struct_info = StructInfo(cls_name, fields)
+        cdef StructInfo struct_info = StructInfo(cls_name, fields, enable_isset_deprecated)
         struct_info.enable_get_locally_set_fields = enable_get_locally_set_fields
         struct_info.enable_isset_deprecated = enable_isset_deprecated
         dct["_fbthrift_struct_info"] = struct_info
@@ -2208,7 +2233,9 @@ class StructMeta(type):
         for field_index, field_info in enumerate(fields):
             field_name = field_info.py_name
             if _is_primitive_field(field_info):
-                descriptor = _StructPrimitiveField(field_index, field_name)
+                descriptor = _StructPrimitiveField(
+                    field_index, field_name, 1 if enable_isset_deprecated else 0
+                )
             else:
                 descriptor = _make_non_primitive_property(
                     klass,

@@ -23,25 +23,25 @@ bool ensure_module_imported() {
   return import();
 }
   static constexpr std::int16_t _fbthrift__TemplateLists__tuple_pos[5] = {
-    1, 2, 3, 4, 5
+    0, 1, 2, 3, 4
   };
   static constexpr std::int16_t _fbthrift__TemplateSets__tuple_pos[7] = {
-    1, 2, 3, 4, 5, 6, 7
+    0, 1, 2, 3, 4, 5, 6
   };
   static constexpr std::int16_t _fbthrift__TemplateMaps__tuple_pos[7] = {
-    1, 2, 3, 4, 5, 6, 7
+    0, 1, 2, 3, 4, 5, 6
   };
   static constexpr std::int16_t _fbthrift__TWrapped__tuple_pos[2] = {
-    1, 2
+    0, 1
   };
   static constexpr std::int16_t _fbthrift__IndirectionA__tuple_pos[1] = {
-    1
+    0
   };
   static constexpr std::int16_t _fbthrift__IndirectionB__tuple_pos[1] = {
-    1
+    0
   };
   static constexpr std::int16_t _fbthrift__IndirectionC__tuple_pos[1] = {
-    1
+    0
   };
 } // namespace
 

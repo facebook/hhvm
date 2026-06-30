@@ -24,70 +24,70 @@ bool ensure_module_imported() {
   return import();
 }
   static constexpr std::int16_t _fbthrift__decorated_struct__tuple_pos[1] = {
-    1
+    0
   };
   static constexpr std::int16_t _fbthrift__VirtualStruct__tuple_pos[1] = {
-    1
+    0
   };
   static constexpr std::int16_t _fbthrift__MyStructWithForwardRefEnum__tuple_pos[2] = {
-    1, 2
+    0, 1
   };
   static constexpr std::int16_t _fbthrift__TrivialNumeric__tuple_pos[2] = {
-    1, 2
+    0, 1
   };
   static constexpr std::int16_t _fbthrift__TrivialNestedWithDefault__tuple_pos[2] = {
-    1, 2
+    0, 1
   };
   static constexpr std::int16_t _fbthrift__ComplexString__tuple_pos[2] = {
-    1, 2
+    0, 1
   };
   static constexpr std::int16_t _fbthrift__ComplexNestedWithDefault__tuple_pos[2] = {
-    1, 2
+    0, 1
   };
   static constexpr std::int16_t _fbthrift__MinPadding__tuple_pos[5] = {
-    1, 2, 3, 4, 5
+    0, 1, 2, 3, 4
   };
   static constexpr std::int16_t _fbthrift__MyStruct__tuple_pos[4] = {
-    1, 2, 3, 4
+    0, 1, 2, 3
   };
   static constexpr std::int16_t _fbthrift__Renaming__tuple_pos[1] = {
-    1
+    0
   };
   static constexpr std::int16_t _fbthrift__AnnotatedTypes__tuple_pos[2] = {
-    1, 2
+    0, 1
   };
   static constexpr std::int16_t _fbthrift__ForwardUsageRoot__tuple_pos[2] = {
-    1, 2
+    0, 1
   };
   static constexpr std::int16_t _fbthrift__ForwardUsageStruct__tuple_pos[1] = {
-    1
+    0
   };
   static constexpr std::int16_t _fbthrift__ForwardUsageByRef__tuple_pos[1] = {
-    1
+    0
   };
   static constexpr std::int16_t _fbthrift__IncompleteMap__tuple_pos[1] = {
-    1
+    0
   };
   static constexpr std::int16_t _fbthrift__CompleteMap__tuple_pos[1] = {
-    1
+    0
   };
   static constexpr std::int16_t _fbthrift__CompleteList__tuple_pos[1] = {
-    1
+    0
   };
   static constexpr std::int16_t _fbthrift__AdaptedListDep__tuple_pos[1] = {
-    1
+    0
   };
   static constexpr std::int16_t _fbthrift__DependentAdaptedListDep__tuple_pos[1] = {
-    1
+    0
   };
   static constexpr std::int16_t _fbthrift__AllocatorAware__tuple_pos[7] = {
-    1, 2, 3, 4, 5, 6, 7
+    0, 1, 2, 3, 4, 5, 6
   };
   static constexpr std::int16_t _fbthrift__AllocatorAware2__tuple_pos[2] = {
-    1, 2
+    0, 1
   };
   static constexpr std::int16_t _fbthrift__StructWithDoubleUnderscores__tuple_pos[1] = {
-    1
+    0
   };
 } // namespace
 

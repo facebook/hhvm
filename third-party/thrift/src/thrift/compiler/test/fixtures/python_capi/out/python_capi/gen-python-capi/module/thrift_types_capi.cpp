@@ -27,34 +27,34 @@ bool ensure_module_imported() {
   return import();
 }
   static constexpr std::int16_t _fbthrift__MyStruct__tuple_pos[8] = {
-    1, 2, 3, 4, 5, 6, 7, 8
+    0, 1, 2, 3, 4, 5, 6, 7
   };
   static constexpr std::int16_t _fbthrift__MyDataItem__tuple_pos[1] = {
-    1
+    0
   };
   static constexpr std::int16_t _fbthrift__DoubledPair__tuple_pos[2] = {
-    1, 2
+    0, 1
   };
   static constexpr std::int16_t _fbthrift__StringPair__tuple_pos[2] = {
-    1, 2
+    0, 1
   };
   static constexpr std::int16_t _fbthrift__PrimitiveStruct__tuple_pos[16] = {
-    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16
+    0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15
   };
   static constexpr std::int16_t _fbthrift__AdaptedFields__tuple_pos[4] = {
-    1, 2, 3, 4
+    0, 1, 2, 3
   };
   static constexpr std::int16_t _fbthrift__ListStruct__tuple_pos[9] = {
-    1, 2, 3, 4, 5, 6, 7, 8, 9
+    0, 1, 2, 3, 4, 5, 6, 7, 8
   };
   static constexpr std::int16_t _fbthrift__SetStruct__tuple_pos[7] = {
-    1, 2, 3, 4, 5, 6, 7
+    0, 1, 2, 3, 4, 5, 6
   };
   static constexpr std::int16_t _fbthrift__MapStruct__tuple_pos[10] = {
-    1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+    0, 1, 2, 3, 4, 5, 6, 7, 8, 9
   };
   static constexpr std::int16_t _fbthrift__ComposeStruct__tuple_pos[10] = {
-    1, 2, 3, 4, 6, 5, 8, 7, 9, 10
+    0, 1, 2, 3, 5, 4, 7, 6, 8, 9
   };
 } // namespace
 

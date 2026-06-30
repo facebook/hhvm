@@ -23,40 +23,40 @@ bool ensure_module_imported() {
   return import();
 }
   static constexpr std::int16_t _fbthrift__MyStructFloatFieldThrowExp__tuple_pos[4] = {
-    1, 2, 3, 4
+    0, 1, 2, 3
   };
   static constexpr std::int16_t _fbthrift__MyStructMapFloatThrowExp__tuple_pos[2] = {
-    1, 2
+    0, 1
   };
   static constexpr std::int16_t _fbthrift__MyStruct__tuple_pos[28] = {
-    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28
+    0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27
   };
   static constexpr std::int16_t _fbthrift__SimpleStruct__tuple_pos[2] = {
-    1, 2
+    0, 1
   };
   static constexpr std::int16_t _fbthrift__defaultStruct__tuple_pos[22] = {
-    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22
+    0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21
   };
   static constexpr std::int16_t _fbthrift__MyStructTypeDef__tuple_pos[9] = {
-    1, 2, 3, 4, 5, 6, 7, 8, 9
+    0, 1, 2, 3, 4, 5, 6, 7, 8
   };
   static constexpr std::int16_t _fbthrift__ComplexNestedStruct__tuple_pos[18] = {
-    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18
+    0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17
   };
   static constexpr std::int16_t _fbthrift__TypeRemapped__tuple_pos[4] = {
-    1, 2, 3, 4
+    0, 1, 2, 3
   };
   static constexpr std::int16_t _fbthrift__reqXcep__tuple_pos[2] = {
-    1, 2
+    0, 1
   };
   static constexpr std::int16_t _fbthrift__optXcep__tuple_pos[2] = {
-    1, 2
+    0, 1
   };
   static constexpr std::int16_t _fbthrift__complexException__tuple_pos[6] = {
-    1, 2, 3, 4, 5, 6
+    0, 1, 2, 3, 4, 5
   };
   static constexpr std::int16_t _fbthrift__Containers__tuple_pos[37] = {
-    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37
+    0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36
   };
 } // namespace
 

@@ -23,10 +23,10 @@ bool ensure_module_imported() {
   return import();
 }
   static constexpr std::int16_t _fbthrift__AnnotationWithContainers__tuple_pos[2] = {
-    1, 2
+    0, 1
   };
   static constexpr std::int16_t _fbthrift__MyStruct__tuple_pos[1] = {
-    1
+    0
   };
 } // namespace
 

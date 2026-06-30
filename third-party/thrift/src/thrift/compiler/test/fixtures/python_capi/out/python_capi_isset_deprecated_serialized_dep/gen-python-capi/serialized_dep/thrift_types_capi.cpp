@@ -26,7 +26,7 @@ bool ensure_module_imported() {
     1, 2, 3, 4
   };
   static constexpr std::int16_t _fbthrift__MarshalError__tuple_pos[3] = {
-    1, 2, 3
+    0, 1, 2
   };
 } // namespace
 
@@ -349,12 +349,12 @@ PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::test::f
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::test::fixtures::python_capi::MarshalStruct, ::test__fixtures__python_capi__serialized_dep::NamespaceTag>>::operator()(
     [[maybe_unused]] const ::test::fixtures::python_capi::MarshalStruct& val) {
-  StrongRef fbthrift_data(createStructTuple(4));
+  StrongRef fbthrift_data(createStructTupleWithDeprecatedIsset(4));
   StrongRef _fbthrift__s(
     Constructor<::apache::thrift::python::capi::FallibleString>{}
     .constructFrom(val.s_ref()));
   if (!_fbthrift__s ||
-      setStructField(
+      setStructFieldIssetDeprecated(
           *fbthrift_data,
           _fbthrift__MarshalStruct__tuple_pos[0],
           *_fbthrift__s) == -1) {
@@ -364,7 +364,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     Constructor<int32_t>{}
     .constructFrom(val.i_ref()));
   if (!_fbthrift__i ||
-      setStructField(
+      setStructFieldIssetDeprecated(
           *fbthrift_data,
           _fbthrift__MarshalStruct__tuple_pos[1],
           *_fbthrift__i) == -1) {
@@ -381,7 +381,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
       Py_None);
   } else
   if (!_fbthrift__os ||
-      setStructField(
+      setStructFieldIssetDeprecated(
           *fbthrift_data,
           _fbthrift__MarshalStruct__tuple_pos[2],
           *_fbthrift__os) == -1) {
@@ -391,7 +391,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     Constructor<::apache::thrift::python::capi::FallibleString>{}
     .constructFrom(val.rs_ref()));
   if (!_fbthrift__rs ||
-      setStructField(
+      setStructFieldIssetDeprecated(
           *fbthrift_data,
           _fbthrift__MarshalStruct__tuple_pos[3],
           *_fbthrift__rs) == -1) {

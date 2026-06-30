@@ -60,7 +60,11 @@ cdef extern from "<thrift/lib/python/types.h>" namespace "::apache::thrift::pyth
 
     cdef cppclass cDynamicStructInfo "::apache::thrift::python::DynamicStructInfo":
         cDynamicStructInfo(
-            const char* name, int16_t numFields, bint isUnion, bint isMutable
+            const char* name,
+            int16_t numFields,
+            bint isUnion,
+            bint isMutable,
+            bint issetEnabled,
         )
         const cStructInfo& getStructInfo()
         void addFieldInfo(
@@ -212,6 +216,10 @@ cdef class StructInfo:
     cdef dict name_to_index
     cdef bint enable_get_locally_set_fields
     cdef bint enable_isset_deprecated
+    # Tuple index of the first field value: 1 when the data holder reserves
+    # element 0 for the isset byte array (enable_isset_deprecated), else 0.
+    # Precomputed once so field access/set is a branch-free `index + N`.
+    cdef int16_t field_start_index
     cdef void _fill_struct_info(self) except *
     cdef void _initialize_default_values(self) except *
 
@@ -346,7 +354,7 @@ cdef class Map(Container):
     cdef dict _fbthrift_get_elements(self)
     cdef _fbthrift_lazy_getitem(self, object)
 
-cdef void set_struct_field(tuple struct_tuple, int16_t index, value) except *
+cdef void set_struct_field(tuple struct_tuple, int16_t pos, value) except *
 
 cdef class ServiceInterface:
     pass

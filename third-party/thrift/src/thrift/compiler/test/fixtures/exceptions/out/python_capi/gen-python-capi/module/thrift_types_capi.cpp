@@ -23,22 +23,22 @@ bool ensure_module_imported() {
   return import();
 }
   static constexpr std::int16_t _fbthrift__Fiery__tuple_pos[1] = {
-    1
+    0
   };
   static constexpr std::int16_t _fbthrift__Serious__tuple_pos[1] = {
-    1
+    0
   };
   static constexpr std::int16_t _fbthrift__ComplexFieldNames__tuple_pos[2] = {
-    1, 2
+    0, 1
   };
   static constexpr std::int16_t _fbthrift__CustomFieldNames__tuple_pos[2] = {
-    1, 2
+    0, 1
   };
   static constexpr std::int16_t _fbthrift__ExceptionWithPrimitiveField__tuple_pos[2] = {
-    1, 2
+    0, 1
   };
   static constexpr std::int16_t _fbthrift__ExceptionWithStructuredAnnotation__tuple_pos[2] = {
-    1, 2
+    0, 1
   };
 } // namespace
 

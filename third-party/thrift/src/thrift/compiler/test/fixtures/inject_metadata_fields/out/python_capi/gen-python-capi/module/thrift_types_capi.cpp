@@ -24,19 +24,19 @@ bool ensure_module_imported() {
   return import();
 }
   static constexpr std::int16_t _fbthrift__Fields__tuple_pos[1] = {
-    1
+    0
   };
   static constexpr std::int16_t _fbthrift__FieldsInjectedToEmptyStruct__tuple_pos[1] = {
-    1
+    0
   };
   static constexpr std::int16_t _fbthrift__FieldsInjectedToStruct__tuple_pos[2] = {
-    2, 1
+    1, 0
   };
   static constexpr std::int16_t _fbthrift__FieldsInjectedWithIncludedStruct__tuple_pos[4] = {
-    4, 3, 2, 1
+    3, 2, 1, 0
   };
   static constexpr std::int16_t _fbthrift__FieldsInjectedWithFieldsWithIncludedStruct__tuple_pos[2] = {
-    2, 1
+    1, 0
   };
 } // namespace
 

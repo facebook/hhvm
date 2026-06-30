@@ -23,40 +23,40 @@ bool ensure_module_imported() {
   return import();
 }
   static constexpr std::int16_t _fbthrift__MyAnnotation__tuple_pos[2] = {
-    1, 2
+    0, 1
   };
   static constexpr std::int16_t _fbthrift__DirectlyAdapted__tuple_pos[1] = {
-    1
+    0
   };
   static constexpr std::int16_t _fbthrift__IndependentDirectlyAdapted__tuple_pos[1] = {
-    1
+    0
   };
   static constexpr std::int16_t _fbthrift__Config__tuple_pos[1] = {
-    1
+    0
   };
   static constexpr std::int16_t _fbthrift__AdaptTemplatedNestedTestStruct__tuple_pos[1] = {
-    1
+    0
   };
   static constexpr std::int16_t _fbthrift__AdaptedStruct__tuple_pos[1] = {
-    1
+    0
   };
   static constexpr std::int16_t _fbthrift__DirectlyAdaptedStruct__tuple_pos[1] = {
-    1
+    0
   };
   static constexpr std::int16_t _fbthrift__CircularAdaptee__tuple_pos[1] = {
-    1
+    0
   };
   static constexpr std::int16_t _fbthrift__RenamedStruct__tuple_pos[1] = {
-    1
+    0
   };
   static constexpr std::int16_t _fbthrift__SameNamespaceStruct__tuple_pos[1] = {
-    1
+    0
   };
   static constexpr std::int16_t _fbthrift__Person__tuple_pos[1] = {
-    1
+    0
   };
   static constexpr std::int16_t _fbthrift__Person2__tuple_pos[1] = {
-    1
+    0
   };
 } // namespace
 

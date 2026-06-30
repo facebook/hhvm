@@ -647,6 +647,7 @@ cdef class MutableStructInfo:
             num_fields,
             False, # isUnion
             True, # isMutable
+            False, # issetEnabled (irrelevant for mutable: no isset byte array)
         )
         self.type_infos = PyTuple_New(num_fields)
         self.name_to_index = {}
@@ -840,6 +841,7 @@ cdef class MutableUnionInfo:
             len(field_infos),
             True, # isUnion
             True, # isMutable
+            False, # issetEnabled (irrelevant for mutable: no isset byte array)
         )
         self.type_infos = {}
         self.id_to_adapter_info = {}

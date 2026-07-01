@@ -1938,8 +1938,6 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
   }
 
  private:
-  void configureIOUring();
-
   //! SSL context
   std::optional<folly::observer::Observer<wangle::SSLContextConfig>>
       sslContextObserver_;
@@ -1966,8 +1964,6 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
   bool allowCheckUnimplementedExtraInterfaces_ = true;
 
   bool preferIoUring_ = false;
-  bool useDefaultIoUringExecutor_ = false;
-  bool usingIoUring_ = false;
 
   std::weak_ptr<folly::ShutdownSocketSet> wShutdownSocketSet_;
 
@@ -2636,12 +2632,6 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
   void setPreferAsyncIoUringSocket(bool b) { preferIoUring_ = b; }
 
   bool preferAsyncIoUringSocket() const { return preferIoUring_; }
-
-  bool usingIoUring() const { return usingIoUring_; }
-
-  void setUseDefaultIoUringExecutor(bool b) { useDefaultIoUringExecutor_ = b; }
-
-  bool useDefaultIoUringExecutor() const { return useDefaultIoUringExecutor_; }
 
   /**
    * Tells the thrift server to update ticket seeds with the contents of the

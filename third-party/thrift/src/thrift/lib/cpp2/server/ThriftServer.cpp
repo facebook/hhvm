@@ -19,7 +19,6 @@
 #include <algorithm>
 
 #include <folly/io/async/AsyncServerSocket.h>
-#include <thrift/lib/cpp2/server/IOUringUtil.h>
 
 #include <thrift/lib/cpp2/server/ThriftServer.h>
 
@@ -485,35 +484,6 @@ void ThriftServer::touchRequestTimestamp() noexcept {
   }
 }
 
-void ThriftServer::configureIOUring() {
-#if FOLLY_HAS_LIBURING
-  if (preferIoUring_) {
-    XLOG_IF(INFO, infoLoggingEnabled_) << "Preferring io_uring";
-    auto b = io_uring_util::validateExecutorSupportsIOUring(ioThreadPool_);
-
-    if (!b) {
-      if (!useDefaultIoUringExecutor_) {
-        XLOG_IF(INFO, infoLoggingEnabled_)
-            << "Configured IOThreadPoolExecutor does not support io_uring, but default not selected. epoll will be used";
-        usingIoUring_ = false;
-        return;
-      }
-
-      XLOG_IF(INFO, infoLoggingEnabled_)
-          << "Configured IOThreadPoolExecutor does not support io_uring, "
-             "configuring default io_uring IOThreadPoolExecutor pool";
-      ioThreadPool_ = io_uring_util::getDefaultIOUringExecutor(
-          THRIFT_FLAG(enable_io_queue_lag_detection));
-      usingIoUring_ = true;
-    } else {
-      XLOG_IF(INFO, infoLoggingEnabled_)
-          << "Configured IOThreadPoolExecutor supports io_uring";
-      usingIoUring_ = true;
-    }
-  }
-#endif
-}
-
 class ThriftServer::ConnectionEventCallback
     : public folly::AsyncServerSocket::ConnectionEventCallback {
  public:
@@ -645,8 +615,6 @@ void ThriftServer::setup() {
     sigemptyset(&sa.sa_mask);
     sigaction(SIGPIPE, &sa, nullptr);
 #endif
-
-    configureIOUring();
 
     if (!getObserver() && server::observerFactory_) {
       setObserver(server::observerFactory_->getObserver());

@@ -79,8 +79,6 @@ std::shared_ptr<CommonAccessPointAttributes> getCommonAccessPointAttributes(
       protocol = mc_caret_protocol;
     } else if (equalStr("thrift", str, folly::AsciiCaseInsensitive())) {
       protocol = mc_thrift_protocol;
-    } else if (equalStr("xdp", str, folly::AsciiCaseInsensitive())) {
-      protocol = mc_xdp_protocol;
     } else {
       throwLogic("Unknown protocol '{}'", str);
     }

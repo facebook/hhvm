@@ -28,9 +28,6 @@
 #include "mcrouter/lib/network/FailureDomains.h"
 #include "mcrouter/lib/network/SecurityOptions.h"
 #include "mcrouter/lib/network/ThriftTransport.h"
-#if defined(__linux__) && !defined(ANDROID) && !defined(MCROUTER_OSS_BUILD)
-#include "mcrouter/lib/network/facebook/XdpTransport.h"
-#endif
 #include "mcrouter/lib/network/gen/MemcacheRouterInfo.h"
 #include "mcrouter/routes/AllFastestRouteFactory.h"
 #include "mcrouter/routes/AsynclogRoute.h"
@@ -408,25 +405,6 @@ McRouteHandleProvider<RouterInfo>::makePool(
               idx);
           accessPointsSet.insert(destResult.second);
           addDestination(std::move(destResult.first));
-#if defined(__linux__) && !defined(ANDROID) && !defined(MCROUTER_OSS_BUILD)
-        } else if (ap->getProtocol() == mc_xdp_protocol) {
-          using Transport = XdpTransport;
-          auto destResult = createDestinationRoute<Transport>(
-              std::move(ap),
-              timeout,
-              connectTimeout,
-              qosClass,
-              qosPath,
-              nameSp,
-              i,
-              poolStatIndex,
-              disableRequestDeadlineCheck,
-              poolTkoTracker,
-              keepRoutingPrefix,
-              idx);
-          accessPointsSet.insert(destResult.second);
-          addDestination(std::move(destResult.first));
-#endif
         } else {
           using Transport = AsyncMcClient;
           auto destResult = createDestinationRoute<Transport>(

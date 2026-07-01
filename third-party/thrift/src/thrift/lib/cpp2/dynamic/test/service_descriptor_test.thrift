@@ -20,6 +20,12 @@ exception TestException {
   1: string message;
 }
 
+struct AnnotationWithFields {
+  1: string label;
+  2: i32 number;
+  3: list<string> tags;
+}
+
 service ServiceDescriptorTestService {
   i32 add(1: i32 a, 2: i32 b);
   void ping();
@@ -27,4 +33,9 @@ service ServiceDescriptorTestService {
   i32, stream<string> streamNames(1: i32 count);
   sink<string, i32> collectStrings();
   sink<string>, stream<i32> bidiEcho();
+  # @lint-ignore THRIFTCHECKS avoid-oneway-method (needed to test oneway RpcKind)
+  oneway void fireAndForget();
+  /// Annotated function docblock.
+  @AnnotationWithFields{label = "hello", number = 7, tags = ["a", "b"]}
+  i32 annotated(1: i32 x);
 }

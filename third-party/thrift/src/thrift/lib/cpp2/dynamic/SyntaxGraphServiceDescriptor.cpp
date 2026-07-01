@@ -16,12 +16,46 @@
 
 #include <thrift/lib/cpp2/dynamic/SyntaxGraphServiceDescriptor.h>
 
+#include <thrift/lib/cpp2/dynamic/AnnotationValue.h>
+#include <thrift/lib/cpp2/dynamic/DynamicValue.h>
+
 namespace apache::thrift::dynamic {
 
 using apache::thrift::syntax_graph::SyntaxGraph;
 using apache::thrift::type_system::TypeSystem;
 
 namespace {
+
+FunctionQualifier convertQualifier(type::FunctionQualifier q) {
+  switch (q) {
+    case type::FunctionQualifier::Idempotent:
+      return FunctionQualifier::Idempotent;
+    case type::FunctionQualifier::ReadOnly:
+      return FunctionQualifier::ReadOnly;
+    // Oneway is captured as an RpcKind, not a qualifier.
+    case type::FunctionQualifier::OneWay:
+    case type::FunctionQualifier::Unspecified:
+      return FunctionQualifier::Unspecified;
+  }
+  return FunctionQualifier::Unspecified;
+}
+
+RpcKind determineRpcKind(const syntax_graph::FunctionNode& fn) {
+  if (fn.qualifier() == type::FunctionQualifier::OneWay) {
+    return RpcKind::OneWay;
+  }
+  const auto& response = fn.response();
+  if (response.bidirectionalStream() != nullptr) {
+    return RpcKind::BidirectionalStream;
+  }
+  if (response.stream() != nullptr) {
+    return RpcKind::Stream;
+  }
+  if (response.sink() != nullptr) {
+    return RpcKind::Sink;
+  }
+  return RpcKind::Unary;
+}
 
 ServiceDescriptor::Exception makeException(
     const syntax_graph::FunctionException& ex, const SyntaxGraph& syntaxGraph) {
@@ -102,6 +136,20 @@ ServiceDescriptor::Function makeFunction(
       sk.serverExceptions.push_back(makeException(ex, syntaxGraph));
     }
     function.sink = std::move(sk);
+  }
+
+  function.qualifier = convertQualifier(fn.qualifier());
+  function.rpcKind = determineRpcKind(fn);
+  function.createsInteraction = fn.response().interaction() != nullptr;
+  function.isPerforms = fn.isPerforms();
+
+  if (auto doc = fn.docBlock()) {
+    function.docBlock = std::string(*doc);
+  }
+
+  for (const auto& ann : fn.annotations()) {
+    function.annotations.push_back(toDynamicValue(
+        ann.value(), syntaxGraph.asTypeSystemTypeRef(ann.type())));
   }
 
   return function;

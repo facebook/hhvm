@@ -26,6 +26,20 @@
 
 namespace apache::thrift::dynamic {
 
+enum class FunctionQualifier {
+  Unspecified,
+  Idempotent,
+  ReadOnly,
+};
+
+enum class RpcKind {
+  Unary,
+  OneWay,
+  Stream,
+  Sink,
+  BidirectionalStream,
+};
+
 class ServiceDescriptor {
  public:
   struct Param {
@@ -60,6 +74,14 @@ class ServiceDescriptor {
     // Both stream and sink are set for bidirectional-streaming methods.
     std::optional<Stream> stream;
     std::optional<Sink> sink;
+    FunctionQualifier qualifier = FunctionQualifier::Unspecified;
+    RpcKind rpcKind = RpcKind::Unary;
+    bool createsInteraction = false;
+    bool isPerforms = false;
+    // Structured annotations as schema-typed values; each value's type() is the
+    // annotation's struct type.
+    std::vector<DynamicValue> annotations;
+    std::optional<std::string> docBlock;
   };
 
   virtual ~ServiceDescriptor() = default;

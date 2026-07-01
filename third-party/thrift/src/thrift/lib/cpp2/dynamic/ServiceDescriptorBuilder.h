@@ -36,6 +36,12 @@ class ServiceDescriptorBuilder {
     FunctionBuilder& setBidirectionalStream(
         type_system::TypeRef streamPayloadType,
         type_system::TypeRef sinkPayloadType);
+    FunctionBuilder& setOneWay();
+    FunctionBuilder& setQualifier(FunctionQualifier qualifier);
+    FunctionBuilder& setCreatesInteraction(bool creates);
+    FunctionBuilder& setIsPerforms(bool performs);
+    FunctionBuilder& addAnnotation(DynamicValue value);
+    FunctionBuilder& setDocBlock(std::string doc);
 
    private:
     friend class ServiceDescriptorBuilder;
@@ -47,6 +53,12 @@ class ServiceDescriptorBuilder {
     std::vector<ServiceDescriptor::Exception> exceptions_;
     std::optional<ServiceDescriptor::Stream> stream_;
     std::optional<ServiceDescriptor::Sink> sink_;
+    FunctionQualifier qualifier_ = FunctionQualifier::Unspecified;
+    RpcKind rpcKind_ = RpcKind::Unary;
+    bool createsInteraction_ = false;
+    bool isPerforms_ = false;
+    std::vector<DynamicValue> annotations_;
+    std::optional<std::string> docBlock_;
   };
 
   ServiceDescriptorBuilder(

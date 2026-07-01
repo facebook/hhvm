@@ -72,6 +72,10 @@ TEST_F(SyntaxGraphServiceDescriptorTest, BasicFunction) {
   EXPECT_TRUE(fn.exceptions.empty());
   EXPECT_FALSE(fn.stream.has_value());
   EXPECT_FALSE(fn.sink.has_value());
+  EXPECT_EQ(fn.qualifier, FunctionQualifier::Unspecified);
+  EXPECT_EQ(fn.rpcKind, RpcKind::Unary);
+  EXPECT_FALSE(fn.createsInteraction);
+  EXPECT_FALSE(fn.isPerforms);
 }
 
 TEST_F(SyntaxGraphServiceDescriptorTest, VoidFunction) {
@@ -93,6 +97,7 @@ TEST_F(SyntaxGraphServiceDescriptorTest, StreamFunction) {
   EXPECT_TRUE(fn.responseType.has_value());
   ASSERT_TRUE(fn.stream.has_value());
   EXPECT_TRUE(fn.stream->payloadType.isString());
+  EXPECT_EQ(fn.rpcKind, RpcKind::Stream);
 }
 
 TEST_F(SyntaxGraphServiceDescriptorTest, SinkFunction) {
@@ -101,6 +106,7 @@ TEST_F(SyntaxGraphServiceDescriptorTest, SinkFunction) {
   EXPECT_TRUE(fn.sink->payloadType.isString());
   EXPECT_TRUE(
       fn.sink->finalResponseType && fn.sink->finalResponseType->isI32());
+  EXPECT_EQ(fn.rpcKind, RpcKind::Sink);
 }
 
 TEST_F(SyntaxGraphServiceDescriptorTest, BidiFunction) {
@@ -110,6 +116,33 @@ TEST_F(SyntaxGraphServiceDescriptorTest, BidiFunction) {
   EXPECT_TRUE(fn.stream->payloadType.isI32());
   EXPECT_TRUE(fn.sink->payloadType.isString());
   EXPECT_FALSE(fn.sink->finalResponseType.has_value());
+  EXPECT_EQ(fn.rpcKind, RpcKind::BidirectionalStream);
+}
+
+TEST_F(SyntaxGraphServiceDescriptorTest, OneWayFunction) {
+  const auto& fn = catalog_->getFunction("fireAndForget");
+  EXPECT_EQ(fn.rpcKind, RpcKind::OneWay);
+  EXPECT_EQ(fn.qualifier, FunctionQualifier::Unspecified);
+  EXPECT_FALSE(fn.responseType.has_value());
+}
+
+TEST_F(SyntaxGraphServiceDescriptorTest, AnnotatedFunction) {
+  const auto& fn = catalog_->getFunction("annotated");
+  EXPECT_EQ(fn.rpcKind, RpcKind::Unary);
+
+  ASSERT_EQ(fn.annotations.size(), 1);
+  const auto& annotation = fn.annotations[0];
+  ASSERT_TRUE(annotation.type().isStruct());
+  const auto& fields = annotation.asStruct();
+  EXPECT_EQ(*fields.getField("label"), DynamicValue::makeString("hello"));
+  EXPECT_EQ(*fields.getField("number"), DynamicValue::makeI32(7));
+
+  auto tags = fields.getField("tags");
+  ASSERT_TRUE(tags.has_value());
+  const auto& tagList = tags->asList();
+  ASSERT_EQ(tagList.size(), 2);
+  EXPECT_EQ(tagList.at(0), DynamicValue::makeString("a"));
+  EXPECT_EQ(tagList.at(1), DynamicValue::makeString("b"));
 }
 
 TEST_F(SyntaxGraphServiceDescriptorTest, FunctionNotFound) {
@@ -125,7 +158,7 @@ TEST_F(SyntaxGraphServiceDescriptorTest, GetTypeSystem) {
 }
 
 TEST_F(SyntaxGraphServiceDescriptorTest, FunctionsCount) {
-  EXPECT_EQ(catalog_->functions().size(), 6);
+  EXPECT_EQ(catalog_->functions().size(), 8);
 }
 
 class ServiceDescriptorBuilderTest : public ::testing::Test {
@@ -181,6 +214,7 @@ TEST_F(ServiceDescriptorBuilderTest, BuildWithStreamAndSink) {
   const auto& streamFn = catalog->getFunction("streamInts");
   ASSERT_TRUE(streamFn.stream.has_value());
   EXPECT_TRUE(streamFn.stream->payloadType.isI32());
+  EXPECT_EQ(streamFn.rpcKind, RpcKind::Stream);
 
   const auto& sinkFn = catalog->getFunction("collectStrings");
   ASSERT_TRUE(sinkFn.sink.has_value());
@@ -188,6 +222,7 @@ TEST_F(ServiceDescriptorBuilderTest, BuildWithStreamAndSink) {
   EXPECT_TRUE(
       sinkFn.sink->finalResponseType &&
       sinkFn.sink->finalResponseType->isI32());
+  EXPECT_EQ(sinkFn.rpcKind, RpcKind::Sink);
 }
 
 TEST_F(ServiceDescriptorBuilderTest, BuildWithBidi) {
@@ -203,6 +238,46 @@ TEST_F(ServiceDescriptorBuilderTest, BuildWithBidi) {
   EXPECT_TRUE(fn.stream->payloadType.isI32());
   EXPECT_TRUE(fn.sink->payloadType.isString());
   EXPECT_FALSE(fn.sink->finalResponseType.has_value());
+  EXPECT_EQ(fn.rpcKind, RpcKind::BidirectionalStream);
+}
+
+TEST_F(ServiceDescriptorBuilderTest, BuildWithOneWay) {
+  ServiceDescriptorBuilder builder(typeSystem_, "OneWayService");
+  builder.addFunction("fire").setOneWay();
+
+  auto catalog = builder.build();
+  const auto& fn = catalog->getFunction("fire");
+  EXPECT_EQ(fn.rpcKind, RpcKind::OneWay);
+}
+
+TEST_F(ServiceDescriptorBuilderTest, BuildWithQualifier) {
+  ServiceDescriptorBuilder builder(typeSystem_, "QualService");
+  builder.addFunction("readOp")
+      .setQualifier(FunctionQualifier::ReadOnly)
+      .setResponseType(type_system::TypeSystem::I32());
+
+  auto catalog = builder.build();
+  const auto& fn = catalog->getFunction("readOp");
+  EXPECT_EQ(fn.qualifier, FunctionQualifier::ReadOnly);
+}
+
+TEST_F(ServiceDescriptorBuilderTest, BuildWithFunctionMetadata) {
+  ServiceDescriptorBuilder builder(typeSystem_, "MetaService");
+  builder.addFunction("doThing")
+      .setCreatesInteraction(true)
+      .setIsPerforms(true)
+      .setDocBlock("Performs the thing.")
+      .addAnnotation(DynamicValue::makeString("cpp.name"))
+      .setResponseType(type_system::TypeSystem::I32());
+
+  auto catalog = builder.build();
+  const auto& fn = catalog->getFunction("doThing");
+  EXPECT_TRUE(fn.createsInteraction);
+  EXPECT_TRUE(fn.isPerforms);
+  ASSERT_TRUE(fn.docBlock.has_value());
+  EXPECT_EQ(*fn.docBlock, "Performs the thing.");
+  ASSERT_EQ(fn.annotations.size(), 1);
+  EXPECT_EQ(fn.annotations[0], DynamicValue::makeString("cpp.name"));
 }
 
 TEST_F(ServiceDescriptorBuilderTest, GetTypeSystem) {

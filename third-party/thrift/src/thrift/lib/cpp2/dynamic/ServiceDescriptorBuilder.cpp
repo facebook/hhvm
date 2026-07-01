@@ -78,6 +78,7 @@ ServiceDescriptorBuilder::FunctionBuilder::setStream(
       .payloadType = payloadType,
       .exceptions = {},
   };
+  rpcKind_ = RpcKind::Stream;
   return *this;
 }
 
@@ -90,6 +91,7 @@ ServiceDescriptorBuilder::FunctionBuilder::setSink(
       .clientExceptions = {},
       .serverExceptions = {},
   };
+  rpcKind_ = RpcKind::Sink;
   return *this;
 }
 
@@ -107,6 +109,44 @@ ServiceDescriptorBuilder::FunctionBuilder::setBidirectionalStream(
       .clientExceptions = {},
       .serverExceptions = {},
   };
+  rpcKind_ = RpcKind::BidirectionalStream;
+  return *this;
+}
+
+ServiceDescriptorBuilder::FunctionBuilder&
+ServiceDescriptorBuilder::FunctionBuilder::setOneWay() {
+  rpcKind_ = RpcKind::OneWay;
+  return *this;
+}
+
+ServiceDescriptorBuilder::FunctionBuilder&
+ServiceDescriptorBuilder::FunctionBuilder::setQualifier(
+    FunctionQualifier qualifier) {
+  qualifier_ = qualifier;
+  return *this;
+}
+
+ServiceDescriptorBuilder::FunctionBuilder&
+ServiceDescriptorBuilder::FunctionBuilder::setCreatesInteraction(bool creates) {
+  createsInteraction_ = creates;
+  return *this;
+}
+
+ServiceDescriptorBuilder::FunctionBuilder&
+ServiceDescriptorBuilder::FunctionBuilder::setIsPerforms(bool performs) {
+  isPerforms_ = performs;
+  return *this;
+}
+
+ServiceDescriptorBuilder::FunctionBuilder&
+ServiceDescriptorBuilder::FunctionBuilder::addAnnotation(DynamicValue value) {
+  annotations_.push_back(std::move(value));
+  return *this;
+}
+
+ServiceDescriptorBuilder::FunctionBuilder&
+ServiceDescriptorBuilder::FunctionBuilder::setDocBlock(std::string doc) {
+  docBlock_ = std::move(doc);
   return *this;
 }
 
@@ -132,6 +172,12 @@ std::unique_ptr<ServiceDescriptor> ServiceDescriptorBuilder::build() {
     fn.exceptions = std::move(fb.exceptions_);
     fn.stream = std::move(fb.stream_);
     fn.sink = std::move(fb.sink_);
+    fn.qualifier = fb.qualifier_;
+    fn.rpcKind = fb.rpcKind_;
+    fn.createsInteraction = fb.createsInteraction_;
+    fn.isPerforms = fb.isPerforms_;
+    fn.annotations = std::move(fb.annotations_);
+    fn.docBlock = std::move(fb.docBlock_);
     functions.push_back(std::move(fn));
   }
   return std::make_unique<BuiltServiceDescriptor>(

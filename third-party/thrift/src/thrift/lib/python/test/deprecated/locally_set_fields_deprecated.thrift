@@ -69,6 +69,8 @@ struct mixed {
   9: optional i32 opt_int = 1;
 }
 
+// TODO: Make Nested `@thrift.Sealed` and remove the `set<Nested>` lint
+// suppression once recursive sealed structs are accepted by thrift2ast.
 struct Nested {
   1: i32 num;
   2: optional string label;

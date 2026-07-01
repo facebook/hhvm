@@ -1421,6 +1421,9 @@ cdef class Struct(StructOrUnion):
         else:
             self._fbthrift_field_cache = PyTuple_New(len(struct_info.fields))
         if struct_info.enable_get_locally_set_fields:
+            # This marker tracks only the top-level struct instance. Nested
+            # structs materialized from internal data still derive field set-ness
+            # from their own isset bits.
             object.__setattr__(self, '_fbthrift_is_locally_constructed', True)
 
     def __init__(self, **kwargs):
@@ -3017,8 +3020,13 @@ def isset_DEPRECATED(StructOrError struct):
 def get_locally_set_fields(StructOrError struct):
     """Return the frozenset of field names explicitly set on the struct.
 
-    Only works on locally constructed structs annotated with
-    @python.EnableUnsafeIssetInspection.
+    Only works on structs annotated with @python.EnableUnsafeIssetInspection.
+    Deserialized top-level structs log a warning and still return field
+    set-ness computed from their isset bits.
+
+    The locally-constructed provenance marker is maintained only for the
+    top-level struct instance. Nested annotated structs report field set-ness
+    from their own isset data, but do not inherit top-level provenance.
 
     Raises:
         AttributeError: if the struct is not annotated.
@@ -3037,7 +3045,6 @@ def get_locally_set_fields(StructOrError struct):
         for name, index in info.name_to_index.items()
         if isset_bytes[index]
     )
-
 
 def update_nested_field(Struct obj, path_to_values):
     # There is some optimization opportunity here for cases like this:

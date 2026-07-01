@@ -888,6 +888,16 @@ MCROUTER_OPTION_INTEGER(
     "Payloads >= thriftCompressionTreshold will be compressed "
     "iff thriftCompression is enabled.")
 
+MCROUTER_OPTION_INTEGER(
+    size_t,
+    xdp_tx_truncate_bytes,
+    3072,
+    "xdp-tx-truncate-bytes",
+    no_short,
+    "AF_XDP/XSK client: max request datagram payload in bytes before the "
+    "request is rejected with LOCAL_ERROR. 0 means no cap (clamp to the jumbo "
+    "buffer size). Default 3072 (3K).")
+
 MCROUTER_OPTION_TOGGLE(
     enable_axonlog,
     false,

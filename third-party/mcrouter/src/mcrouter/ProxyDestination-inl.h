@@ -303,6 +303,7 @@ void ProxyDestination<Transport>::initializeTransport() {
     options.qosPath = qosPath();
   }
   options.useJemallocNodumpAllocator = opts.jemalloc_nodump_buffers;
+  options.xdpTxTruncateBytes = opts.xdp_tx_truncate_bytes;
   if (accessPoint()->compressed()) {
     if (auto codecManager = proxy().router().getCodecManager()) {
       options.compressionCodecMap =

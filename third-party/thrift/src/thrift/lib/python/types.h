@@ -818,22 +818,23 @@ using MutableMapTypeInfo = MapTypeInfoImpl<MutableMapHandler, false>;
 
 using FieldValueMap = folly::F14FastMap<int16_t, PyObject*>;
 
+enum class InternalDataLayout : uint8_t {
+  kStruct,
+  kStructWithDeprecatedIsset,
+  kUnion,
+};
+
 /**
  * Holds the information required to (de)serialize a thrift-python structured
  * type (i.e., struct, union or exception).
  */
 class DynamicStructInfo {
  public:
-  // `issetEnabled` applies only to immutable structs: when true, the data
-  // holder reserves element 0 for an isset byte array (fields start at index
-  // 1); when false, there is no isset header (fields start at index 0). Has no
-  // effect for mutable structs or unions.
   DynamicStructInfo(
       const char* name,
       int16_t numFields,
-      bool isUnion,
       bool isMutable,
-      bool issetEnabled);
+      InternalDataLayout dataLayout);
 
   // DynamicStructInfo is non-copyable
   DynamicStructInfo(const DynamicStructInfo&) = delete;

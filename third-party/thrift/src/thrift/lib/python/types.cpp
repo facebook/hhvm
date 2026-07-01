@@ -994,10 +994,12 @@ getStructInfoUnionExt(bool isUnion, bool isMutable) {
 detail::StructInfo* newTableBasedSerializerStructInfo(
     const char* namePtr,
     int16_t numFields,
-    bool isUnion,
+    InternalDataLayout dataLayout,
     FieldValueMap& fieldValues,
-    bool isMutable,
-    bool issetEnabled) {
+    bool isMutable) {
+  const bool isUnion = dataLayout == InternalDataLayout::kUnion;
+  const bool hasDeprecatedIsset =
+      dataLayout == InternalDataLayout::kStructWithDeprecatedIsset;
   auto* structInfo = static_cast<detail::StructInfo*>(folly::operator_new(
       sizeof(detail::StructInfo) + sizeof(detail::FieldInfo) * numFields,
       std::align_val_t{alignof(detail::StructInfo)}));
@@ -1011,7 +1013,7 @@ detail::StructInfo* newTableBasedSerializerStructInfo(
   if (isMutable) {
     structInfo->getIsset = getMutableIsset;
     structInfo->setIsset = noOpSetIsset;
-  } else if (issetEnabled) {
+  } else if (hasDeprecatedIsset) {
     structInfo->getIsset = getImmutableIssetDeprecated;
     structInfo->setIsset = setStructIssetDeprecated;
   } else {
@@ -1500,6 +1502,8 @@ void setStructIsset(PyObject* structTuple, int16_t index, bool value) {
 }
 
 void setStructIsset(PyObject* structTuple, int16_t index, bool value) {
+  // Precondition: `structTuple` uses the deprecated-isset tuple layout created
+  // by `createStructTupleWithDeprecatedIsset()`.
   setStructIsset<IssetDeprecatedTupleContainer>(structTuple, index, value);
 }
 
@@ -1967,18 +1971,13 @@ void MutableMapHandler::consumeElem(
 DynamicStructInfo::DynamicStructInfo(
     const char* name,
     int16_t numFields,
-    bool isUnion,
     bool isMutable,
-    bool issetEnabled)
+    InternalDataLayout dataLayout)
     : name_{name},
-      issetDeprecatedEnabled_{issetEnabled},
+      issetDeprecatedEnabled_{
+          dataLayout == InternalDataLayout::kStructWithDeprecatedIsset},
       tableBasedSerializerStructInfo_{newTableBasedSerializerStructInfo(
-          name_.c_str(),
-          numFields,
-          isUnion,
-          fieldValues_,
-          isMutable,
-          issetEnabled)} {
+          name_.c_str(), numFields, dataLayout, fieldValues_, isMutable)} {
   // reserve vector as we are assigning const char* from the string in
   // vector
   fieldNames_.reserve(numFields);

@@ -592,9 +592,12 @@ cdef class StructInfo:
         self.cpp_obj = make_unique[cDynamicStructInfo](
             PyUnicode_AsUTF8(name),
             num_fields,
-            False, # isUnion
             False, # isMutable
-            enable_isset_deprecated, # issetEnabled
+            (
+                cInternalDataLayout.kStructWithDeprecatedIsset
+                if enable_isset_deprecated
+                else cInternalDataLayout.kStruct
+            ),
         )
         self.type_infos = PyTuple_New(num_fields)
         self.name_to_index = {}
@@ -687,10 +690,8 @@ cdef class UnionInfo:
         self.cpp_obj = make_unique[cDynamicStructInfo](
             PyUnicode_AsUTF8(name),
             len(field_infos),
-            True, # isUnion
             False, # isMutable
-            True, # issetEnabled: preserve the existing union isset accessors;
-                  # union field offsets use the dedicated isUnion branch.
+            cInternalDataLayout.kUnion,
         )
         self.type_infos = {}
         self.id_to_adapter_info = {}

@@ -39,6 +39,7 @@ from thrift.python.mutable_typeinfos cimport (
 )
 from thrift.python.types cimport (
     AdaptedTypeInfo,
+    cInternalDataLayout,
     FieldInfo,
     StringTypeInfo,
     TypeInfoBase,
@@ -645,9 +646,8 @@ cdef class MutableStructInfo:
         self.cpp_obj = make_unique[cDynamicStructInfo](
             PyUnicode_AsUTF8(name),
             num_fields,
-            False, # isUnion
             True, # isMutable
-            False, # issetEnabled (irrelevant for mutable: no isset byte array)
+            cInternalDataLayout.kStruct,
         )
         self.type_infos = PyTuple_New(num_fields)
         self.name_to_index = {}
@@ -839,9 +839,8 @@ cdef class MutableUnionInfo:
         self.cpp_obj = make_unique[cDynamicStructInfo](
             PyUnicode_AsUTF8(union_name),
             len(field_infos),
-            True, # isUnion
             True, # isMutable
-            False, # issetEnabled (irrelevant for mutable: no isset byte array)
+            cInternalDataLayout.kUnion,
         )
         self.type_infos = {}
         self.id_to_adapter_info = {}

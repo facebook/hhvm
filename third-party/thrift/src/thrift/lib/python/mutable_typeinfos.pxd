@@ -27,9 +27,17 @@ cdef extern from "<thrift/lib/cpp2/protocol/TableBasedSerializer.h>" namespace "
         Terse
 
 cdef extern from "<thrift/lib/python/types.h>" namespace "::apache::thrift::python":
+    cdef enum class cInternalDataLayout "::apache::thrift::python::InternalDataLayout":
+        kStruct
+        kStructWithDeprecatedIsset
+        kUnion
+
     cdef cppclass cDynamicStructInfo "::apache::thrift::python::DynamicStructInfo":
         cDynamicStructInfo(
-            const char* name, int16_t numFields, bint isUnion, bint isMutable
+            const char* name,
+            int16_t numFields,
+            bint isMutable,
+            cInternalDataLayout dataLayout,
         )
         const cStructInfo& getStructInfo()
         void addFieldInfo(

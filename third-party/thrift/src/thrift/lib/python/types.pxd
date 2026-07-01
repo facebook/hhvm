@@ -58,13 +58,17 @@ cdef extern from "<thrift/lib/python/types.h>" namespace "::apache::thrift::pyth
     void logGetLocallySetFieldsCalledOnDeserializedStruct(const char* structName)
     void logUnionFromValueTypeMismatch(const char* valueRepr, const char* valueType, const char* unionName)
 
+    cdef enum class cInternalDataLayout "::apache::thrift::python::InternalDataLayout":
+        kStruct
+        kStructWithDeprecatedIsset
+        kUnion
+
     cdef cppclass cDynamicStructInfo "::apache::thrift::python::DynamicStructInfo":
         cDynamicStructInfo(
             const char* name,
             int16_t numFields,
-            bint isUnion,
             bint isMutable,
-            bint issetEnabled,
+            cInternalDataLayout dataLayout,
         )
         const cStructInfo& getStructInfo()
         void addFieldInfo(

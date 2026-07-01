@@ -43,7 +43,7 @@ namespace fast_security = ::apache::thrift::fast_thrift::security;
  * Inner-pipeline middle handler that runs the Fizz TLS handshake on each
  * accepted socket. Wraps FizzHandshakeHelper; tracks in-flight helpers in
  * inFlight_ and cancels them on onPipelineInactive. Upgrades the
- * TLSPipelineMessage transport from AsyncSocket → AsyncFizzServer and
+ * TLSRequestMessage transport from AsyncSocket → AsyncFizzServer and
  * populates `extension` so downstream stages (StopTLSV1Handler etc.) can
  * query the negotiated parameters.
  *
@@ -74,17 +74,18 @@ class FizzHandshakeHandler {
     ctx_ = nullptr;
   }
 
-  // === Inbound ===
+  // === Outbound (work path) ===
 
   template <typename Context>
-  channel_pipeline::Result onRead(
+  channel_pipeline::Result onWrite(
       Context& ctx, channel_pipeline::TypeErasedBox&& msg) noexcept {
-    auto incoming = msg.take<TLSPipelineMessage>();
+    auto incoming = msg.take<TLSRequestMessage>();
 
     auto* asyncSocket =
         dynamic_cast<folly::AsyncSocket*>(incoming.transport.get());
     if (FOLLY_UNLIKELY(asyncSocket == nullptr)) {
-      return ctx.fireRead(channel_pipeline::erase_and_box(std::move(incoming)));
+      return ctx.fireWrite(
+          channel_pipeline::erase_and_box(std::move(incoming)));
     }
 
     (void)incoming.transport.release();
@@ -140,12 +141,12 @@ class FizzHandshakeHandler {
   template <typename Context>
   void onReadReady(Context& /*ctx*/) noexcept {}
 
-  // === Outbound (passthrough) ===
+  // === Inbound (passthrough) ===
 
   template <typename Context>
-  channel_pipeline::Result onWrite(
+  channel_pipeline::Result onRead(
       Context& ctx, channel_pipeline::TypeErasedBox&& msg) noexcept {
-    return ctx.fireWrite(std::move(msg));
+    return ctx.fireRead(std::move(msg));
   }
 
   template <typename Context>
@@ -176,14 +177,14 @@ class FizzHandshakeHandler {
     if (FOLLY_UNLIKELY(!ctx_)) {
       return;
     }
-    TLSPipelineMessage upgraded{
+    TLSRequestMessage upgraded{
         .transport = folly::AsyncTransport::UniquePtr(fizzServer.release()),
         .clientAddr = clientAddr,
         .tlsParams = std::move(tlsParams),
         .extension = std::move(extension),
     };
     auto result =
-        ctx_->fireRead(channel_pipeline::erase_and_box(std::move(upgraded)));
+        ctx_->fireWrite(channel_pipeline::erase_and_box(std::move(upgraded)));
     switch (result) {
       case channel_pipeline::Result::Success:
         return;

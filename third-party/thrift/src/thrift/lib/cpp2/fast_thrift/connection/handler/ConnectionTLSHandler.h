@@ -16,7 +16,6 @@
 
 #pragma once
 
-#include <memory>
 #include <utility>
 
 #include <folly/ExceptionWrapper.h>
@@ -35,6 +34,8 @@
 #include <thrift/lib/cpp2/fast_thrift/connection/security/handler/StopTLSV1Handler.h>
 #include <thrift/lib/cpp2/fast_thrift/connection/security/handler/TLSClassifier.h>
 #include <thrift/lib/cpp2/fast_thrift/connection/security/handler/TLSConfigHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/connection/security/handler/TLSConnectionAdapter.h>
+#include <thrift/lib/cpp2/fast_thrift/connection/security/handler/TLSFinalizer.h>
 #include <thrift/lib/cpp2/fast_thrift/security/FizzServerContextBuilder.h>
 #include <thrift/lib/cpp2/fast_thrift/security/SSLPolicy.h>
 
@@ -53,39 +54,42 @@ HANDLER_TAG(tls_inner_fizz_handshake);
 HANDLER_TAG(tls_inner_stoptls_v1);
 
 /**
- * Outer-pipeline handler that hides the entire TLS lifecycle behind a
- * single boundary. Owns an inner pipeline whose shape is fixed at
- * construction by sslPolicy:
+ * Outer-pipeline (connection acceptance) middle handler that hides the entire
+ * TLS lifecycle behind a single boundary. It owns the TLS pipeline and drives
+ * it, but is not itself a node in it.
+ *
+ * The TLS pipeline does its work on the write path: an accepted transport is
+ * submitted to the tail adapter as a write that flows through the stages and
+ * converges at the head, which returns the resolved transport on the read path
+ * back to the adapter. The pipeline shape is fixed at construction by
+ * sslPolicy (build order is head→tail, i.e. reverse of the work order):
  *
  *   DISABLED:  not installed in the outer pipeline (caller's choice).
- *   REQUIRED:  TLSConfigHandler → FizzHandshakeHandler → StopTLSV1Handler
- *   PERMITTED: TLSConfigHandler → TLSClassifier
- *                              → FizzHandshakeHandler → StopTLSV1Handler
+ *   REQUIRED:  TLSFinalizer → StopTLSV1Handler → FizzHandshakeHandler
+ *                           → TLSConfigHandler → TLSConnectionAdapter
+ *   PERMITTED: TLSFinalizer → StopTLSV1Handler → FizzHandshakeHandler
+ *                           → TLSClassifier → TLSConfigHandler
+ *                           → TLSConnectionAdapter
  *
- * StopTLSV1Handler is always present in the inner pipeline. It's a
- * passthrough for connections that didn't negotiate StopTLS V1, so the
- * extra stage is cheap; this also keeps the pipeline shape stable across
- * hot-reload changes to whether StopTLS is enabled.
+ * StopTLSV1Handler is always present. It's a passthrough for connections that
+ * didn't negotiate StopTLS V1, so the extra stage is cheap; this also keeps
+ * the pipeline shape stable across hot-reload changes to whether StopTLS is
+ * enabled.
  *
- * Plays three roles on a single class via overloaded methods:
- *   1. Middle handler in the outer (connection acceptance) pipeline. Takes
- *      ConnectionMessage in via onRead(Context&,...) and forwards to the
- *      inner pipeline as TLSPipelineMessage. Forwards writes through.
- *   2. Head endpoint of the inner pipeline. The TLS pipeline has no
- *      outbound traffic, so the head's onWrite is a sink.
- *   3. Tail endpoint of the inner pipeline. Receives the final
- *      TLSPipelineMessage and bridges it back out by firing on the outer
- *      context as a ConnectionMessage.
+ * On an accepted ConnectionMessage, onRead converts to a TLSRequestMessage
+ * and submits it to the tail adapter. When the adapter receives the resolved
+ * transport back, it invokes the handoff registered here, which fires it onto
+ * the outer pipeline as a ConnectionMessage. Exceptions raised inside the TLS
+ * pipeline are routed back here the same way and re-fired onto the outer
+ * pipeline so its teardown still observes inner failures.
  *
- * Hot-reload of TLS state is pull-based: the Observer passed at
- * construction is threaded into the inner pipeline and snapshotted there
- * per accepted connection.
+ * Hot-reload of TLS state is pull-based: the Observer passed at construction
+ * is threaded into the pipeline and snapshotted there per accepted connection.
  *
  * Lifecycle:
- *   - Inner pipeline is built once in the constructor; never null after.
- *   - onPipelineActive / onPipelineInactive on the outer middle handler
- *     cascade activate() / deactivate() into the inner pipeline so the
- *     inner handlers can drain their in-flight peek/handshake/StopTLS
+ *   - The pipeline and its endpoints are built once in the constructor.
+ *   - onPipelineActive / onPipelineInactive cascade activate() / deactivate()
+ *     into the pipeline so handlers can drain in-flight peek/handshake/StopTLS
  *     helpers on shutdown.
  */
 class ConnectionTLSHandler {
@@ -104,28 +108,45 @@ class ConnectionTLSHandler {
         << "ConnectionTLSHandler should not be installed for DISABLED policy";
 
     channel_pipeline::PipelineBuilder<
-        ConnectionTLSHandler,
-        ConnectionTLSHandler,
+        tls_handler::TLSFinalizer,
+        tls_handler::TLSConnectionAdapter,
         channel_pipeline::SimpleBufferAllocator>
         builder;
-    builder.setEventBase(&evb).setHead(this).setTail(this).setAllocator(
+    builder.setEventBase(&evb).setHead(&head_).setTail(&tail_).setAllocator(
         allocator);
 
-    // TLSConfigHandler stamps the current TLSParams snapshot onto every
-    // accepted message; downstream handlers read it via msg.tlsParams and
-    // don't carry the Observer themselves.
-    builder.template addNextDuplex<tls_handler::TLSConfigHandler>(
-        tls_inner_config_tag, std::move(tlsParamsObserver));
+    // Build order is head→tail, the reverse of the work (write) order. Work
+    // flows TLSConfigHandler → [TLSClassifier] → FizzHandshakeHandler →
+    // StopTLSV1Handler → TLSFinalizer.
+    builder.template addNextDuplex<tls_handler::StopTLSV1Handler>(
+        tls_inner_stoptls_v1_tag);
+    builder.template addNextDuplex<tls_handler::FizzHandshakeHandler>(
+        tls_inner_fizz_handshake_tag);
     if (sslPolicy == fast_security::SSLPolicy::PERMITTED) {
       builder.template addNextDuplex<tls_handler::TLSClassifier>(
           tls_inner_classifier_tag);
     }
-    builder.template addNextDuplex<tls_handler::FizzHandshakeHandler>(
-        tls_inner_fizz_handshake_tag);
-    builder.template addNextDuplex<tls_handler::StopTLSV1Handler>(
-        tls_inner_stoptls_v1_tag);
+    // TLSConfigHandler stamps the current TLSParams snapshot onto every
+    // accepted message; downstream stages read it via msg.tlsParams and
+    // don't carry the Observer themselves.
+    builder.template addNextDuplex<tls_handler::TLSConfigHandler>(
+        tls_inner_config_tag, std::move(tlsParamsObserver));
 
     innerPipeline_ = builder.build();
+    head_.setPipeline(innerPipeline_.get());
+    tail_.setPipeline(innerPipeline_.get());
+    tail_.setOwner(
+        this,
+        [](void* self,
+           folly::AsyncTransport::UniquePtr transport,
+           folly::SocketAddress clientAddr) noexcept {
+          return static_cast<ConnectionTLSHandler*>(self)->onResolved(
+              std::move(transport), std::move(clientAddr));
+        },
+        [](void* self, folly::exception_wrapper&& e) noexcept {
+          static_cast<ConnectionTLSHandler*>(self)->onInnerException(
+              std::move(e));
+        });
   }
 
   ~ConnectionTLSHandler() = default;
@@ -133,8 +154,6 @@ class ConnectionTLSHandler {
   ConnectionTLSHandler& operator=(const ConnectionTLSHandler&) = delete;
   ConnectionTLSHandler(ConnectionTLSHandler&&) = delete;
   ConnectionTLSHandler& operator=(ConnectionTLSHandler&&) = delete;
-
-  // === Outer pipeline: middle handler (Context overloads) ===
 
   template <typename Context>
   void handlerAdded(Context& ctx) noexcept {
@@ -150,14 +169,13 @@ class ConnectionTLSHandler {
   channel_pipeline::Result onRead(
       Context& /*ctx*/, channel_pipeline::TypeErasedBox&& msg) noexcept {
     auto incoming = msg.take<ConnectionMessage>();
-    tls_pipeline::TLSPipelineMessage tlsMsg{
+    tls_pipeline::TLSRequestMessage request{
         .transport = std::move(incoming.transport),
         .clientAddr = std::move(incoming.clientAddr),
         .tlsParams = nullptr,
         .extension = nullptr,
     };
-    return innerPipeline_->fireRead(
-        channel_pipeline::erase_and_box(std::move(tlsMsg)));
+    return tail_.submit(std::move(request));
   }
 
   template <typename Context>
@@ -187,49 +205,36 @@ class ConnectionTLSHandler {
   template <typename Context>
   void onWriteReady(Context& /*ctx*/) noexcept {}
 
-  // === Inner pipeline: tail endpoint (no Context) ===
-
-  // Final TLSPipelineMessage from the inner pipeline → ConnectionMessage on
-  // the outer pipeline.
-  channel_pipeline::Result onRead(
-      channel_pipeline::TypeErasedBox&& msg) noexcept {
-    auto m = msg.take<tls_pipeline::TLSPipelineMessage>();
+ private:
+  // Handoff registered on the tail adapter: the resolved transport returns
+  // here and is fired onto the outer pipeline as a ConnectionMessage.
+  channel_pipeline::Result onResolved(
+      folly::AsyncTransport::UniquePtr transport,
+      folly::SocketAddress clientAddr) noexcept {
     if (FOLLY_UNLIKELY(!outerCtx_)) {
       return channel_pipeline::Result::Success;
     }
     ConnectionMessage out{
-        .transport = std::move(m.transport),
-        .clientAddr = std::move(m.clientAddr),
+        .transport = std::move(transport),
+        .clientAddr = std::move(clientAddr),
     };
     return outerCtx_->fireRead(channel_pipeline::erase_and_box(std::move(out)));
   }
 
-  void onException(folly::exception_wrapper&& e) noexcept {
+  // Routed here by the tail adapter when the TLS pipeline raises an exception.
+  // Re-fire onto the outer pipeline so its teardown observes inner failures.
+  void onInnerException(folly::exception_wrapper&& e) noexcept {
     if (outerCtx_) {
       outerCtx_->fireException(std::move(e));
     }
   }
 
-  // === Inner pipeline: head endpoint (no Context) ===
-
-  // TLS pipeline has no outbound traffic — discard.
-  channel_pipeline::Result onWrite(
-      channel_pipeline::TypeErasedBox&& /*msg*/) noexcept {
-    return channel_pipeline::Result::Success;
-  }
-
-  // === Endpoint lifecycle methods (no Context, shared by head + tail) ===
-
-  void handlerAdded() noexcept {}
-  void handlerRemoved() noexcept {}
-  void onPipelineActive() noexcept {}
-  void onPipelineInactive() noexcept {}
-  void onReadReady() noexcept {}
-  void onWriteReady() noexcept {}
-
- private:
-  channel_pipeline::PipelineImpl::Ptr innerPipeline_;
+  tls_handler::TLSFinalizer head_;
+  tls_handler::TLSConnectionAdapter tail_;
   channel_pipeline::detail::ContextImpl* outerCtx_{nullptr};
+  // Declared last so it is destroyed first: PipelineImpl teardown calls
+  // handlerRemoved on head_/tail_, which must still be alive.
+  channel_pipeline::PipelineImpl::Ptr innerPipeline_;
 };
 
 } // namespace apache::thrift::fast_thrift::connection::handler

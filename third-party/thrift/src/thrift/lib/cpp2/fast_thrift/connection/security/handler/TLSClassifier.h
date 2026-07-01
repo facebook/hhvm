@@ -45,13 +45,12 @@ namespace fast_security = ::apache::thrift::fast_thrift::security;
  * the first 9 bytes of every accepted connection to classify it as TLS or
  * plaintext, then routes:
  *
- *   TLS-looking → ctx.fireRead(msg)
- *       Flows to the next inner handler (FizzHandshakeHandler).
+ *   TLS-looking → ctx.fireWrite(msg)
+ *       Flows to the next stage on the work path (FizzHandshakeHandler).
  *
- *   Plaintext   → ctx.pipeline()->fireReadToTailHandler(msg)
- *       Bypasses Fizz + StopTLS and lands directly at the inner pipeline's
- *       tail (ConnectionTLSHandler in its tail role), which forwards the
- *       raw socket back out to the outer pipeline.
+ *   Plaintext   → ctx.pipeline()->fireWriteToHeadHandler(msg)
+ *       Bypasses Fizz + StopTLS and lands directly at the head (TLSFinalizer),
+ *       which turns the raw socket around onto the read path for handoff.
  *
  * Before routing, setPreReceivedData() is called on the AsyncSocket so the
  * peeked bytes are replayed to whoever reads next (Fizz ClientHello parser
@@ -84,17 +83,18 @@ class TLSClassifier {
     ctx_ = nullptr;
   }
 
-  // === Inbound ===
+  // === Outbound (work path) ===
 
   template <typename Context>
-  channel_pipeline::Result onRead(
+  channel_pipeline::Result onWrite(
       Context& ctx, channel_pipeline::TypeErasedBox&& msg) noexcept {
-    auto incoming = msg.take<TLSPipelineMessage>();
+    auto incoming = msg.take<TLSRequestMessage>();
 
     auto* asyncSocket =
         dynamic_cast<folly::AsyncSocket*>(incoming.transport.get());
     if (FOLLY_UNLIKELY(asyncSocket == nullptr)) {
-      return ctx.fireRead(channel_pipeline::erase_and_box(std::move(incoming)));
+      return ctx.fireWrite(
+          channel_pipeline::erase_and_box(std::move(incoming)));
     }
 
     (void)incoming.transport.release();
@@ -142,12 +142,12 @@ class TLSClassifier {
   template <typename Context>
   void onReadReady(Context& /*ctx*/) noexcept {}
 
-  // === Outbound (passthrough) ===
+  // === Inbound (passthrough) ===
 
   template <typename Context>
-  channel_pipeline::Result onWrite(
+  channel_pipeline::Result onRead(
       Context& ctx, channel_pipeline::TypeErasedBox&& msg) noexcept {
-    return ctx.fireWrite(std::move(msg));
+    return ctx.fireRead(std::move(msg));
   }
 
   template <typename Context>
@@ -183,7 +183,7 @@ class TLSClassifier {
       socket->setPreReceivedData(std::move(peekedBytes));
     }
 
-    TLSPipelineMessage forwarded{
+    TLSRequestMessage forwarded{
         .transport = folly::AsyncTransport::UniquePtr(socket.release()),
         .clientAddr = clientAddr,
         .tlsParams = std::move(tlsParams),
@@ -191,8 +191,8 @@ class TLSClassifier {
     };
 
     auto result = looksLikeTLS
-        ? ctx_->fireRead(channel_pipeline::erase_and_box(std::move(forwarded)))
-        : ctx_->pipeline()->fireReadToTailHandler(
+        ? ctx_->fireWrite(channel_pipeline::erase_and_box(std::move(forwarded)))
+        : ctx_->pipeline()->fireWriteToHeadHandler(
               channel_pipeline::erase_and_box(std::move(forwarded)));
 
     switch (result) {

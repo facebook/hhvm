@@ -25,27 +25,37 @@
 
 namespace apache::thrift::fast_thrift::connection::security {
 
-// Single message type that flows through the TLS pipeline. Each accepted
-// socket enters the pipeline as one TLSPipelineMessage; each handler may
-// upgrade the transport in-place (AsyncSocket → AsyncFizzServer after
-// handshake → plaintext AsyncSocketTransport after StopTLS) and forward
-// the same message type. The tail (ConnectionTLSHandler in its tail role)
-// receives the final message and fires it back onto the outer pipeline
-// as a ConnectionMessage.
+// The TLS pipeline is request/response shaped: a TLSRequestMessage is driven
+// out along the work (write) path, and a TLSResponseMessage returns along the
+// read path once security is resolved.
+
+// Outbound (write/work path). One per accepted socket, submitted by the tail
+// adapter. Each stage upgrades `transport` in-place (AsyncSocket →
+// AsyncFizzServer after handshake → plaintext AsyncTransport after StopTLS)
+// and forwards the same type.
 //
-// `tlsParams` is stamped by the inner-pipeline head TLSConfigHandler on
-// entry, snapshotted from a folly::Observer so downstream stages see the
-// current params for this accept without each holding the Observer
-// themselves.
+// `tlsParams` is stamped by TLSConfigHandler, snapshotted from a
+// folly::Observer so stages see the current params for this accept without
+// each holding the Observer themselves; it is read by the classifier and the
+// handshake.
 //
-// `extension` is null until the fizz handshake completes; downstream
-// stages (StopTLSV1Handler etc.) query it to decide whether to act.
-struct TLSPipelineMessage {
+// `extension` is null until the fizz handshake completes, then read by
+// StopTLSV1Handler to decide whether to downgrade.
+struct TLSRequestMessage {
   folly::AsyncTransport::UniquePtr transport;
   folly::SocketAddress clientAddr;
   std::shared_ptr<const apache::thrift::fast_thrift::security::TLSParams>
       tlsParams;
   std::shared_ptr<apache::thrift::ThriftParametersServerExtension> extension;
+};
+
+// Inbound (read/return path). TLSFinalizer collapses a resolved
+// TLSRequestMessage down to this at the head; the stages pass it through
+// untouched to the tail adapter, which hands the resolved transport off.
+// Carries only what handoff needs — no negotiation state.
+struct TLSResponseMessage {
+  folly::AsyncTransport::UniquePtr transport;
+  folly::SocketAddress clientAddr;
 };
 
 } // namespace apache::thrift::fast_thrift::connection::security

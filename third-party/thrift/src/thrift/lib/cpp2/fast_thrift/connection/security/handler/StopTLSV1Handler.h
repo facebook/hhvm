@@ -37,9 +37,9 @@ namespace apache::thrift::fast_thrift::connection::security::handler {
  * Inner-pipeline middle handler that performs StopTLS V1 downgrade on
  * connections whose handshake negotiated it. Stateless apart from its
  * in-flight helper map: the per-connection decision lives entirely on the
- * incoming TLSPipelineMessage::extension.
+ * incoming TLSRequestMessage::extension.
  *
- * onRead:
+ * onWrite (work path):
  *   - `extension` null OR `getNegotiatedStopTLS()` false → passthrough.
  *   - Otherwise: take ownership of the AsyncFizzServer transport, spawn
  *     a StopTLSHelper, and on success refire the message with the
@@ -68,16 +68,17 @@ class StopTLSV1Handler {
     ctx_ = nullptr;
   }
 
-  // === Inbound ===
+  // === Outbound (work path) ===
 
   template <typename Context>
-  channel_pipeline::Result onRead(
+  channel_pipeline::Result onWrite(
       Context& ctx, channel_pipeline::TypeErasedBox&& msg) noexcept {
-    auto incoming = msg.take<TLSPipelineMessage>();
+    auto incoming = msg.take<TLSRequestMessage>();
 
     // No extension or StopTLS V1 not negotiated → passthrough.
     if (!incoming.extension || !incoming.extension->getNegotiatedStopTLS()) {
-      return ctx.fireRead(channel_pipeline::erase_and_box(std::move(incoming)));
+      return ctx.fireWrite(
+          channel_pipeline::erase_and_box(std::move(incoming)));
     }
 
     // Defensive: extension says V1 but transport isn't fizz. Forward as-is
@@ -90,7 +91,8 @@ class StopTLSV1Handler {
           << "StopTLS V1 negotiated but transport is not AsyncFizzServer "
              "for "
           << incoming.clientAddr.describe();
-      return ctx.fireRead(channel_pipeline::erase_and_box(std::move(incoming)));
+      return ctx.fireWrite(
+          channel_pipeline::erase_and_box(std::move(incoming)));
     }
 
     (void)incoming.transport.release();
@@ -125,12 +127,12 @@ class StopTLSV1Handler {
   template <typename Context>
   void onReadReady(Context& /*ctx*/) noexcept {}
 
-  // === Outbound (passthrough) ===
+  // === Inbound (passthrough) ===
 
   template <typename Context>
-  channel_pipeline::Result onWrite(
+  channel_pipeline::Result onRead(
       Context& ctx, channel_pipeline::TypeErasedBox&& msg) noexcept {
-    return ctx.fireWrite(std::move(msg));
+    return ctx.fireRead(std::move(msg));
   }
 
   template <typename Context>
@@ -160,14 +162,14 @@ class StopTLSV1Handler {
     if (FOLLY_UNLIKELY(!ctx_)) {
       return;
     }
-    TLSPipelineMessage downgraded{
+    TLSRequestMessage downgraded{
         .transport = std::move(plaintext),
         .clientAddr = clientAddr,
         .tlsParams = nullptr,
         .extension = std::move(extension),
     };
     auto result =
-        ctx_->fireRead(channel_pipeline::erase_and_box(std::move(downgraded)));
+        ctx_->fireWrite(channel_pipeline::erase_and_box(std::move(downgraded)));
     switch (result) {
       case channel_pipeline::Result::Success:
         return;

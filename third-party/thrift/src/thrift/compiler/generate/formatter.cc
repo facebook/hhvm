@@ -3321,14 +3321,13 @@ class concrete_formatter {
         item_without_leading_comments.first.leading_comments.clear();
         std::string printed_item = inline_leading_prefix(item.first, 0) +
             print_value(item_without_leading_comments, 0, item_column);
-        result += "\n" + indent_multiline(printed_item, indent + kIndent) + ",";
+        result += "\n" + indent_multiline(printed_item, indent + kIndent) +
+            print_value_separator(val.list_separators, i);
       } else {
         std::string printed_item =
             print_value(item, indent + kIndent, item_column);
-        result += "\n" + spaces(indent + kIndent) + printed_item + ",";
-      }
-      if (i < val.list_separators.size() && val.list_separators.at(i)) {
-        result += trailing_comment(*val.list_separators.at(i));
+        result += "\n" + spaces(indent + kIndent) + printed_item +
+            print_value_separator(val.list_separators, i);
       }
     }
     if (val.right && !val.right->leading_comments.empty()) {
@@ -3363,14 +3362,11 @@ class concrete_formatter {
                       key + separator +
                           print_value(val.map_values.at(i), 0, value_column),
                       indent + kIndent) +
-            ",";
+            print_value_separator(val.map_separators, i);
       } else {
         result += "\n" + spaces(indent + kIndent) + key + separator +
             print_value(val.map_values.at(i), indent + kIndent, value_column) +
-            ",";
-      }
-      if (i < val.map_separators.size() && val.map_separators.at(i)) {
-        result += trailing_comment(*val.map_separators.at(i));
+            print_value_separator(val.map_separators, i);
       }
     }
     if (val.right && !val.right->leading_comments.empty()) {
@@ -3384,6 +3380,14 @@ class concrete_formatter {
     result +=
         "\n" + spaces(indent) + (val.right ? token_text(*val.right) : "}");
     return result;
+  }
+
+  std::string print_value_separator(
+      const std::vector<std::optional<token>>& separators, size_t index) const {
+    if (index < separators.size()) {
+      return print_separator(separators.at(index), ",");
+    }
+    return ",";
   }
 
   std::string print_annotation_objects(

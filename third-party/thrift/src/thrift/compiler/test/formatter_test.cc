@@ -1657,6 +1657,26 @@ TEST(FormatterTest, preservesBlockCommentsBeforeFieldSeparators) {
 )");
 }
 
+TEST(FormatterTest, preservesBlockCommentsBeforeValueSeparators) {
+  expect_format(
+      R"(const map<string, Level> levels = {
+  "ClientAuthKey": Level.LEVEL5/* Biometric auth key */ ,
+};
+
+const list<Level> listLevels = [
+  Level.LEVEL5/* Biometric auth key */ ,
+];
+)",
+      R"(const map<string, Level> levels = {
+  "ClientAuthKey": Level.LEVEL5 /* Biometric auth key */,
+};
+
+const list<Level> listLevels = [
+  Level.LEVEL5 /* Biometric auth key */,
+];
+)");
+}
+
 TEST(FormatterTest, preservesCommentsBeforeAnnotationAndObjectClose) {
   expect_format(
       R"(@foo.Annotation{

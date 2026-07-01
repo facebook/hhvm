@@ -91,7 +91,9 @@ service Dummy {
     1: DummyException ex,
   );
   sink<i32>, stream<i32> BiDiWithStreamUndeclaredException();
-  sink<i32 throws (1: DummyException ex)>, stream<i32> BiDiWithSinkDeclaredException();
+  sink<i32 throws (1: DummyException ex)>, stream<
+    i32
+  > BiDiWithSinkDeclaredException();
   sink<i32>, stream<i32> BiDiWithMethodDeclaredException() throws (
     1: DummyException ex,
   );

@@ -24,7 +24,6 @@
 
 #include <folly/ExceptionWrapper.h>
 #include <folly/Range.h>
-#include <folly/ScopeGuard.h>
 #include <folly/io/IOBufQueue.h>
 #include <folly/io/async/AsyncSocket.h>
 #include <folly/io/async/EventBase.h>
@@ -344,8 +343,9 @@ void RocketSinkClientCallback::handleFrame(PayloadFrame&& payloadFrame) {
       if (payloadMetadataRef &&
           payloadMetadataRef->getType() ==
               PayloadMetadata::Type::exceptionMetadata) {
-        if (onSinkError(apache::thrift::detail::EncodedStreamError(
-                std::move(streamPayload.value())))) {
+        if (onSinkError(
+                apache::thrift::detail::EncodedStreamError(
+                    std::move(streamPayload.value())))) {
           // freeStream may destroy this callback, return immediately.
           connection.freeStream(streamId, true);
         }

@@ -16,24 +16,14 @@
 
 #pragma once
 
-#include <thrift/lib/cpp2/dynamic/DynamicServiceSchema.h>
+#include <thrift/lib/cpp2/dynamic/ServiceDescriptor.h>
 #include <thrift/lib/cpp2/schema/SyntaxGraph.h>
 
 namespace apache::thrift::dynamic {
 
-/**
- * A DynamicServiceSchema backed by a SyntaxGraph.
- *
- * String_views and TypeRefs reference the SyntaxGraph's internal storage,
- * which is kept alive by shared ownership.
- */
-class SyntaxGraphServiceSchema final : public DynamicServiceSchema {
+class SyntaxGraphServiceDescriptor final : public ServiceDescriptor {
  public:
-  /**
-   * Construct from a ServiceNode within a SyntaxGraph.
-   * Includes inherited functions from base services.
-   */
-  SyntaxGraphServiceSchema(
+  SyntaxGraphServiceDescriptor(
       std::shared_ptr<const syntax_graph::SyntaxGraph> syntaxGraph,
       const syntax_graph::ServiceNode& service);
 

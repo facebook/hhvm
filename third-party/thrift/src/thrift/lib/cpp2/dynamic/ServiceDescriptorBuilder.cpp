@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-#include <thrift/lib/cpp2/dynamic/DynamicServiceSchemaBuilder.h>
+#include <thrift/lib/cpp2/dynamic/ServiceDescriptorBuilder.h>
 
 namespace apache::thrift::dynamic {
 
 namespace {
 
-class BuiltServiceSchema final : public DynamicServiceSchema {
+class BuiltServiceDescriptor final : public ServiceDescriptor {
  public:
-  BuiltServiceSchema(
+  BuiltServiceDescriptor(
       std::shared_ptr<const type_system::TypeSystem> typeSystem,
       std::string serviceName,
       std::vector<Function> functions)
@@ -46,45 +46,45 @@ class BuiltServiceSchema final : public DynamicServiceSchema {
 
 } // namespace
 
-DynamicServiceSchemaBuilder::FunctionBuilder::FunctionBuilder(std::string name)
+ServiceDescriptorBuilder::FunctionBuilder::FunctionBuilder(std::string name)
     : name_(std::move(name)) {}
 
-DynamicServiceSchemaBuilder::FunctionBuilder&
-DynamicServiceSchemaBuilder::FunctionBuilder::addParam(
+ServiceDescriptorBuilder::FunctionBuilder&
+ServiceDescriptorBuilder::FunctionBuilder::addParam(
     std::string name, FieldId id, type_system::TypeRef type) {
-  params_.push_back(DynamicServiceSchema::Param{std::move(name), id, type});
+  params_.push_back(ServiceDescriptor::Param{std::move(name), id, type});
   return *this;
 }
 
-DynamicServiceSchemaBuilder::FunctionBuilder&
-DynamicServiceSchemaBuilder::FunctionBuilder::setResponseType(
+ServiceDescriptorBuilder::FunctionBuilder&
+ServiceDescriptorBuilder::FunctionBuilder::setResponseType(
     type_system::TypeRef type) {
   responseType_ = type;
   return *this;
 }
 
-DynamicServiceSchemaBuilder::FunctionBuilder&
-DynamicServiceSchemaBuilder::FunctionBuilder::addException(
+ServiceDescriptorBuilder::FunctionBuilder&
+ServiceDescriptorBuilder::FunctionBuilder::addException(
     std::string name, FieldId id, type_system::TypeRef type) {
   exceptions_.push_back(
-      DynamicServiceSchema::Exception{std::move(name), id, type});
+      ServiceDescriptor::Exception{std::move(name), id, type});
   return *this;
 }
 
-DynamicServiceSchemaBuilder::FunctionBuilder&
-DynamicServiceSchemaBuilder::FunctionBuilder::setStream(
+ServiceDescriptorBuilder::FunctionBuilder&
+ServiceDescriptorBuilder::FunctionBuilder::setStream(
     type_system::TypeRef payloadType) {
-  stream_ = DynamicServiceSchema::Stream{
+  stream_ = ServiceDescriptor::Stream{
       .payloadType = payloadType,
       .exceptions = {},
   };
   return *this;
 }
 
-DynamicServiceSchemaBuilder::FunctionBuilder&
-DynamicServiceSchemaBuilder::FunctionBuilder::setSink(
+ServiceDescriptorBuilder::FunctionBuilder&
+ServiceDescriptorBuilder::FunctionBuilder::setSink(
     type_system::TypeRef payloadType, type_system::TypeRef finalResponseType) {
-  sink_ = DynamicServiceSchema::Sink{
+  sink_ = ServiceDescriptor::Sink{
       .payloadType = payloadType,
       .finalResponseType = std::make_optional(finalResponseType),
       .clientExceptions = {},
@@ -93,15 +93,15 @@ DynamicServiceSchemaBuilder::FunctionBuilder::setSink(
   return *this;
 }
 
-DynamicServiceSchemaBuilder::FunctionBuilder&
-DynamicServiceSchemaBuilder::FunctionBuilder::setBidirectionalStream(
+ServiceDescriptorBuilder::FunctionBuilder&
+ServiceDescriptorBuilder::FunctionBuilder::setBidirectionalStream(
     type_system::TypeRef streamPayloadType,
     type_system::TypeRef sinkPayloadType) {
-  stream_ = DynamicServiceSchema::Stream{
+  stream_ = ServiceDescriptor::Stream{
       .payloadType = streamPayloadType,
       .exceptions = {},
   };
-  sink_ = DynamicServiceSchema::Sink{
+  sink_ = ServiceDescriptor::Sink{
       .payloadType = sinkPayloadType,
       .finalResponseType = std::nullopt,
       .clientExceptions = {},
@@ -110,22 +110,22 @@ DynamicServiceSchemaBuilder::FunctionBuilder::setBidirectionalStream(
   return *this;
 }
 
-DynamicServiceSchemaBuilder::DynamicServiceSchemaBuilder(
+ServiceDescriptorBuilder::ServiceDescriptorBuilder(
     std::shared_ptr<const type_system::TypeSystem> typeSystem,
     std::string serviceName)
     : typeSystem_(std::move(typeSystem)),
       serviceName_(std::move(serviceName)) {}
 
-DynamicServiceSchemaBuilder::FunctionBuilder&
-DynamicServiceSchemaBuilder::addFunction(std::string name) {
+ServiceDescriptorBuilder::FunctionBuilder&
+ServiceDescriptorBuilder::addFunction(std::string name) {
   functionBuilders_.emplace_back(FunctionBuilder(std::move(name)));
   return functionBuilders_.back();
 }
 
-std::unique_ptr<DynamicServiceSchema> DynamicServiceSchemaBuilder::build() {
-  std::vector<DynamicServiceSchema::Function> functions;
+std::unique_ptr<ServiceDescriptor> ServiceDescriptorBuilder::build() {
+  std::vector<ServiceDescriptor::Function> functions;
   for (auto& fb : functionBuilders_) {
-    DynamicServiceSchema::Function fn;
+    ServiceDescriptor::Function fn;
     fn.name = std::move(fb.name_);
     fn.params = std::move(fb.params_);
     fn.responseType = fb.responseType_;
@@ -134,7 +134,7 @@ std::unique_ptr<DynamicServiceSchema> DynamicServiceSchemaBuilder::build() {
     fn.sink = std::move(fb.sink_);
     functions.push_back(std::move(fn));
   }
-  return std::make_unique<BuiltServiceSchema>(
+  return std::make_unique<BuiltServiceDescriptor>(
       std::move(typeSystem_), std::move(serviceName_), std::move(functions));
 }
 

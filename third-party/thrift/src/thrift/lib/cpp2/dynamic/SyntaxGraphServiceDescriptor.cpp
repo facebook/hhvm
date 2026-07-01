@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include <thrift/lib/cpp2/dynamic/SyntaxGraphServiceSchema.h>
+#include <thrift/lib/cpp2/dynamic/SyntaxGraphServiceDescriptor.h>
 
 namespace apache::thrift::dynamic {
 
@@ -23,9 +23,9 @@ using apache::thrift::type_system::TypeSystem;
 
 namespace {
 
-DynamicServiceSchema::Exception makeException(
+ServiceDescriptor::Exception makeException(
     const syntax_graph::FunctionException& ex, const SyntaxGraph& syntaxGraph) {
-  return DynamicServiceSchema::Exception{
+  return ServiceDescriptor::Exception{
       .name = std::string(ex.name()),
       .id = ex.id(),
       .type = type_system::TypeRef(
@@ -35,14 +35,14 @@ DynamicServiceSchema::Exception makeException(
   };
 }
 
-DynamicServiceSchema::Function makeFunction(
+ServiceDescriptor::Function makeFunction(
     const syntax_graph::FunctionNode& fn, const SyntaxGraph& syntaxGraph) {
-  DynamicServiceSchema::Function function;
+  ServiceDescriptor::Function function;
   function.name = std::string(fn.name());
 
   for (const auto& param : fn.params()) {
     function.params.push_back(
-        DynamicServiceSchema::Param{
+        ServiceDescriptor::Param{
             .name = std::string(param.name()),
             .id = FieldId{static_cast<int16_t>(param.id())},
             .type = syntaxGraph.asTypeSystemTypeRef(param.type()),
@@ -59,7 +59,7 @@ DynamicServiceSchema::Function makeFunction(
   }
 
   if (const auto* bidi = fn.response().bidirectionalStream()) {
-    DynamicServiceSchema::Stream s{
+    ServiceDescriptor::Stream s{
         .payloadType =
             syntaxGraph.asTypeSystemTypeRef(bidi->streamPayloadType()),
         .exceptions = {},
@@ -68,7 +68,7 @@ DynamicServiceSchema::Function makeFunction(
       s.exceptions.push_back(makeException(ex, syntaxGraph));
     }
     function.stream = std::move(s);
-    DynamicServiceSchema::Sink sk{
+    ServiceDescriptor::Sink sk{
         .payloadType = syntaxGraph.asTypeSystemTypeRef(bidi->sinkPayloadType()),
         .finalResponseType = std::nullopt,
         .clientExceptions = {},
@@ -79,7 +79,7 @@ DynamicServiceSchema::Function makeFunction(
     }
     function.sink = std::move(sk);
   } else if (const auto* stream = fn.response().stream()) {
-    DynamicServiceSchema::Stream s{
+    ServiceDescriptor::Stream s{
         .payloadType = syntaxGraph.asTypeSystemTypeRef(stream->payloadType()),
         .exceptions = {},
     };
@@ -88,7 +88,7 @@ DynamicServiceSchema::Function makeFunction(
     }
     function.stream = std::move(s);
   } else if (const auto* sink = fn.response().sink()) {
-    DynamicServiceSchema::Sink sk{
+    ServiceDescriptor::Sink sk{
         .payloadType = syntaxGraph.asTypeSystemTypeRef(sink->payloadType()),
         .finalResponseType = std::make_optional(
             syntaxGraph.asTypeSystemTypeRef(sink->finalResponseType())),
@@ -110,7 +110,7 @@ DynamicServiceSchema::Function makeFunction(
 void collectFunctions(
     const syntax_graph::ServiceNode& service,
     const SyntaxGraph& syntaxGraph,
-    std::vector<DynamicServiceSchema::Function>& functions) {
+    std::vector<ServiceDescriptor::Function>& functions) {
   if (const auto* base = service.baseService()) {
     collectFunctions(*base, syntaxGraph, functions);
   }
@@ -121,7 +121,7 @@ void collectFunctions(
 
 } // namespace
 
-SyntaxGraphServiceSchema::SyntaxGraphServiceSchema(
+SyntaxGraphServiceDescriptor::SyntaxGraphServiceDescriptor(
     std::shared_ptr<const SyntaxGraph> syntaxGraph,
     const syntax_graph::ServiceNode& service)
     : syntaxGraph_(std::move(syntaxGraph)) {
@@ -129,16 +129,16 @@ SyntaxGraphServiceSchema::SyntaxGraphServiceSchema(
   collectFunctions(service, *syntaxGraph_, functions_);
 }
 
-std::string_view SyntaxGraphServiceSchema::serviceName() const {
+std::string_view SyntaxGraphServiceDescriptor::serviceName() const {
   return serviceName_;
 }
 
-folly::span<const DynamicServiceSchema::Function>
-SyntaxGraphServiceSchema::functions() const {
+folly::span<const ServiceDescriptor::Function>
+SyntaxGraphServiceDescriptor::functions() const {
   return functions_;
 }
 
-std::shared_ptr<const TypeSystem> SyntaxGraphServiceSchema::getTypeSystem()
+std::shared_ptr<const TypeSystem> SyntaxGraphServiceDescriptor::getTypeSystem()
     const {
   return std::shared_ptr<const TypeSystem>(
       syntaxGraph_, &syntaxGraph_->asTypeSystem());

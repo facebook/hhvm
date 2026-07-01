@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package "facebook.com/thrift/dynamic_service_schema_test"
+package "facebook.com/thrift/service_descriptor_test"
 
 exception TestException {
   1: string message;
 }
 
-service DynamicServiceSchemaTestService {
+service ServiceDescriptorTestService {
   i32 add(1: i32 a, 2: i32 b);
   void ping();
   string greet(1: string name) throws (1: TestException e);

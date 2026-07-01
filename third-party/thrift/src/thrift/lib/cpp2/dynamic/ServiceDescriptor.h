@@ -26,15 +26,7 @@
 
 namespace apache::thrift::dynamic {
 
-/**
- * A lightweight, pre-computed representation of a single Thrift service's
- * schema.
- *
- * Stores function signatures with TypeRef handles into a TypeSystem,
- * enabling efficient function lookup by name without re-traversing the
- * full schema on every RPC.
- */
-class DynamicServiceSchema {
+class ServiceDescriptor {
  public:
   struct Param {
     std::string name;
@@ -70,7 +62,7 @@ class DynamicServiceSchema {
     std::optional<Sink> sink;
   };
 
-  virtual ~DynamicServiceSchema() = default;
+  virtual ~ServiceDescriptor() = default;
 
   virtual std::string_view serviceName() const = 0;
   virtual folly::span<const Function> functions() const = 0;

@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-#include <thrift/lib/cpp2/dynamic/DynamicServiceSchema.h>
+#include <thrift/lib/cpp2/dynamic/ServiceDescriptor.h>
 
 namespace apache::thrift::dynamic {
 
-const DynamicServiceSchema::Function& DynamicServiceSchema::getFunction(
+const ServiceDescriptor::Function& ServiceDescriptor::getFunction(
     std::string_view name) const {
   for (const auto& fn : functions()) {
     if (fn.name == name) {

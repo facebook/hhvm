@@ -14,18 +14,17 @@
  * limitations under the License.
  */
 
-#include <thrift/lib/cpp2/dynamic/DynamicServiceSchemaBuilder.h>
-#include <thrift/lib/cpp2/dynamic/SyntaxGraphServiceSchema.h>
+#include <thrift/lib/cpp2/dynamic/ServiceDescriptorBuilder.h>
+#include <thrift/lib/cpp2/dynamic/SyntaxGraphServiceDescriptor.h>
 
 #include <gtest/gtest.h>
-#include <thrift/lib/cpp2/dynamic/test/gen-cpp2/DynamicServiceSchemaTestService.h>
+#include <thrift/lib/cpp2/dynamic/test/gen-cpp2/ServiceDescriptorTestService.h>
 
 namespace apache::thrift::dynamic {
 namespace {
 
 using Handler = apache::thrift::ServiceHandler<
-    facebook::thrift::dynamic_service_schema_test::
-        DynamicServiceSchemaTestService>;
+    facebook::thrift::service_descriptor_test::ServiceDescriptorTestService>;
 
 const syntax_graph::ServiceNode& findService(
     const syntax_graph::SyntaxGraph& graph, std::string_view name) {
@@ -40,7 +39,7 @@ const syntax_graph::ServiceNode& findService(
   throw std::invalid_argument("Service not found: " + std::string(name));
 }
 
-class SyntaxGraphServiceSchemaTest : public ::testing::Test {
+class SyntaxGraphServiceDescriptorTest : public ::testing::Test {
  protected:
   void SetUp() override {
     handler_ = std::make_shared<Handler>();
@@ -49,22 +48,22 @@ class SyntaxGraphServiceSchemaTest : public ::testing::Test {
     syntaxGraph_ = std::make_shared<syntax_graph::SyntaxGraph>(
         syntax_graph::SyntaxGraph::fromSchema(
             apache::thrift::type::Schema(definitionsSchema->schema)));
-    schema_ = std::make_unique<SyntaxGraphServiceSchema>(
+    catalog_ = std::make_unique<SyntaxGraphServiceDescriptor>(
         syntaxGraph_,
-        findService(*syntaxGraph_, "DynamicServiceSchemaTestService"));
+        findService(*syntaxGraph_, "ServiceDescriptorTestService"));
   }
 
   std::shared_ptr<Handler> handler_;
   std::shared_ptr<const syntax_graph::SyntaxGraph> syntaxGraph_;
-  std::unique_ptr<SyntaxGraphServiceSchema> schema_;
+  std::unique_ptr<SyntaxGraphServiceDescriptor> catalog_;
 };
 
-TEST_F(SyntaxGraphServiceSchemaTest, ServiceName) {
-  EXPECT_EQ(schema_->serviceName(), "DynamicServiceSchemaTestService");
+TEST_F(SyntaxGraphServiceDescriptorTest, ServiceName) {
+  EXPECT_EQ(catalog_->serviceName(), "ServiceDescriptorTestService");
 }
 
-TEST_F(SyntaxGraphServiceSchemaTest, BasicFunction) {
-  const auto& fn = schema_->getFunction("add");
+TEST_F(SyntaxGraphServiceDescriptorTest, BasicFunction) {
+  const auto& fn = catalog_->getFunction("add");
   EXPECT_EQ(fn.name, "add");
   ASSERT_EQ(fn.params.size(), 2);
   EXPECT_EQ(fn.params[0].name, "a");
@@ -75,37 +74,37 @@ TEST_F(SyntaxGraphServiceSchemaTest, BasicFunction) {
   EXPECT_FALSE(fn.sink.has_value());
 }
 
-TEST_F(SyntaxGraphServiceSchemaTest, VoidFunction) {
-  const auto& fn = schema_->getFunction("ping");
+TEST_F(SyntaxGraphServiceDescriptorTest, VoidFunction) {
+  const auto& fn = catalog_->getFunction("ping");
   EXPECT_FALSE(fn.responseType.has_value());
   EXPECT_TRUE(fn.params.empty());
 }
 
-TEST_F(SyntaxGraphServiceSchemaTest, FunctionWithException) {
-  const auto& fn = schema_->getFunction("greet");
+TEST_F(SyntaxGraphServiceDescriptorTest, FunctionWithException) {
+  const auto& fn = catalog_->getFunction("greet");
   ASSERT_EQ(fn.params.size(), 1);
   EXPECT_EQ(fn.params[0].name, "name");
   ASSERT_EQ(fn.exceptions.size(), 1);
   EXPECT_EQ(fn.exceptions[0].name, "e");
 }
 
-TEST_F(SyntaxGraphServiceSchemaTest, StreamFunction) {
-  const auto& fn = schema_->getFunction("streamNames");
+TEST_F(SyntaxGraphServiceDescriptorTest, StreamFunction) {
+  const auto& fn = catalog_->getFunction("streamNames");
   EXPECT_TRUE(fn.responseType.has_value());
   ASSERT_TRUE(fn.stream.has_value());
   EXPECT_TRUE(fn.stream->payloadType.isString());
 }
 
-TEST_F(SyntaxGraphServiceSchemaTest, SinkFunction) {
-  const auto& fn = schema_->getFunction("collectStrings");
+TEST_F(SyntaxGraphServiceDescriptorTest, SinkFunction) {
+  const auto& fn = catalog_->getFunction("collectStrings");
   ASSERT_TRUE(fn.sink.has_value());
   EXPECT_TRUE(fn.sink->payloadType.isString());
   EXPECT_TRUE(
       fn.sink->finalResponseType && fn.sink->finalResponseType->isI32());
 }
 
-TEST_F(SyntaxGraphServiceSchemaTest, BidiFunction) {
-  const auto& fn = schema_->getFunction("bidiEcho");
+TEST_F(SyntaxGraphServiceDescriptorTest, BidiFunction) {
+  const auto& fn = catalog_->getFunction("bidiEcho");
   ASSERT_TRUE(fn.stream.has_value());
   ASSERT_TRUE(fn.sink.has_value());
   EXPECT_TRUE(fn.stream->payloadType.isI32());
@@ -113,23 +112,23 @@ TEST_F(SyntaxGraphServiceSchemaTest, BidiFunction) {
   EXPECT_FALSE(fn.sink->finalResponseType.has_value());
 }
 
-TEST_F(SyntaxGraphServiceSchemaTest, FunctionNotFound) {
-  EXPECT_THROW(schema_->getFunction("nonexistent"), std::invalid_argument);
+TEST_F(SyntaxGraphServiceDescriptorTest, FunctionNotFound) {
+  EXPECT_THROW(catalog_->getFunction("nonexistent"), std::invalid_argument);
 }
 
-TEST_F(SyntaxGraphServiceSchemaTest, GetTypeSystem) {
-  auto ts = schema_->getTypeSystem();
+TEST_F(SyntaxGraphServiceDescriptorTest, GetTypeSystem) {
+  auto ts = catalog_->getTypeSystem();
   ASSERT_NE(ts, nullptr);
   auto knownUris = ts->getKnownUris();
   ASSERT_TRUE(knownUris.has_value());
   EXPECT_FALSE(knownUris->empty());
 }
 
-TEST_F(SyntaxGraphServiceSchemaTest, FunctionsCount) {
-  EXPECT_EQ(schema_->functions().size(), 6);
+TEST_F(SyntaxGraphServiceDescriptorTest, FunctionsCount) {
+  EXPECT_EQ(catalog_->functions().size(), 6);
 }
 
-class DynamicServiceSchemaBuilderTest : public ::testing::Test {
+class ServiceDescriptorBuilderTest : public ::testing::Test {
  protected:
   void SetUp() override {
     handler_ = std::make_shared<Handler>();
@@ -146,31 +145,31 @@ class DynamicServiceSchemaBuilderTest : public ::testing::Test {
   std::shared_ptr<const type_system::TypeSystem> typeSystem_;
 };
 
-TEST_F(DynamicServiceSchemaBuilderTest, BuildBasicSchema) {
-  DynamicServiceSchemaBuilder builder(typeSystem_, "TestService");
+TEST_F(ServiceDescriptorBuilderTest, BuildBasicSchema) {
+  ServiceDescriptorBuilder builder(typeSystem_, "TestService");
   builder.addFunction("ping");
   builder.addFunction("add")
       .addParam("a", FieldId{1}, type_system::TypeSystem::I32())
       .addParam("b", FieldId{2}, type_system::TypeSystem::I32())
       .setResponseType(type_system::TypeSystem::I32());
 
-  auto schema = builder.build();
-  EXPECT_EQ(schema->serviceName(), "TestService");
-  EXPECT_EQ(schema->functions().size(), 2);
+  auto catalog = builder.build();
+  EXPECT_EQ(catalog->serviceName(), "TestService");
+  EXPECT_EQ(catalog->functions().size(), 2);
 
-  const auto& ping = schema->getFunction("ping");
+  const auto& ping = catalog->getFunction("ping");
   EXPECT_TRUE(ping.params.empty());
   EXPECT_FALSE(ping.responseType.has_value());
 
-  const auto& add = schema->getFunction("add");
+  const auto& add = catalog->getFunction("add");
   ASSERT_EQ(add.params.size(), 2);
   EXPECT_EQ(add.params[0].name, "a");
   EXPECT_EQ(add.params[1].name, "b");
   EXPECT_TRUE(add.responseType.has_value());
 }
 
-TEST_F(DynamicServiceSchemaBuilderTest, BuildWithStreamAndSink) {
-  DynamicServiceSchemaBuilder builder(typeSystem_, "StreamService");
+TEST_F(ServiceDescriptorBuilderTest, BuildWithStreamAndSink) {
+  ServiceDescriptorBuilder builder(typeSystem_, "StreamService");
   builder.addFunction("streamInts")
       .setResponseType(type_system::TypeSystem::I32())
       .setStream(type_system::TypeSystem::I32());
@@ -178,12 +177,12 @@ TEST_F(DynamicServiceSchemaBuilderTest, BuildWithStreamAndSink) {
       .setSink(
           type_system::TypeSystem::String(), type_system::TypeSystem::I32());
 
-  auto schema = builder.build();
-  const auto& streamFn = schema->getFunction("streamInts");
+  auto catalog = builder.build();
+  const auto& streamFn = catalog->getFunction("streamInts");
   ASSERT_TRUE(streamFn.stream.has_value());
   EXPECT_TRUE(streamFn.stream->payloadType.isI32());
 
-  const auto& sinkFn = schema->getFunction("collectStrings");
+  const auto& sinkFn = catalog->getFunction("collectStrings");
   ASSERT_TRUE(sinkFn.sink.has_value());
   EXPECT_TRUE(sinkFn.sink->payloadType.isString());
   EXPECT_TRUE(
@@ -191,14 +190,14 @@ TEST_F(DynamicServiceSchemaBuilderTest, BuildWithStreamAndSink) {
       sinkFn.sink->finalResponseType->isI32());
 }
 
-TEST_F(DynamicServiceSchemaBuilderTest, BuildWithBidi) {
-  DynamicServiceSchemaBuilder builder(typeSystem_, "BidiService");
+TEST_F(ServiceDescriptorBuilderTest, BuildWithBidi) {
+  ServiceDescriptorBuilder builder(typeSystem_, "BidiService");
   builder.addFunction("bidiEcho")
       .setBidirectionalStream(
           type_system::TypeSystem::I32(), type_system::TypeSystem::String());
 
-  auto schema = builder.build();
-  const auto& fn = schema->getFunction("bidiEcho");
+  auto catalog = builder.build();
+  const auto& fn = catalog->getFunction("bidiEcho");
   ASSERT_TRUE(fn.stream.has_value());
   ASSERT_TRUE(fn.sink.has_value());
   EXPECT_TRUE(fn.stream->payloadType.isI32());
@@ -206,10 +205,10 @@ TEST_F(DynamicServiceSchemaBuilderTest, BuildWithBidi) {
   EXPECT_FALSE(fn.sink->finalResponseType.has_value());
 }
 
-TEST_F(DynamicServiceSchemaBuilderTest, GetTypeSystem) {
-  DynamicServiceSchemaBuilder builder(typeSystem_, "Svc");
-  auto schema = builder.build();
-  EXPECT_EQ(schema->getTypeSystem(), typeSystem_);
+TEST_F(ServiceDescriptorBuilderTest, GetTypeSystem) {
+  ServiceDescriptorBuilder builder(typeSystem_, "Svc");
+  auto catalog = builder.build();
+  EXPECT_EQ(catalog->getTypeSystem(), typeSystem_);
 }
 
 } // namespace

@@ -16,26 +16,11 @@
 
 #pragma once
 
-#include <thrift/lib/cpp2/dynamic/DynamicServiceSchema.h>
+#include <thrift/lib/cpp2/dynamic/ServiceDescriptor.h>
 
 namespace apache::thrift::dynamic {
 
-/**
- * Programmatic builder for a DynamicServiceSchema, analogous to
- * TypeSystemBuilder. Useful for constructing schemas in tests or from
- * non-SyntaxGraph sources.
- *
- * Example:
- *
- *     DynamicServiceSchemaBuilder builder(typeSystem, "MyService");
- *     builder.addFunction("ping");
- *     builder.addFunction("add")
- *         .addParam("a", FieldId{1}, typeSystem->I32())
- *         .addParam("b", FieldId{2}, typeSystem->I32())
- *         .setResponseType(typeSystem->I32());
- *     auto schema = builder.build();
- */
-class DynamicServiceSchemaBuilder {
+class ServiceDescriptorBuilder {
  public:
   class FunctionBuilder {
    public:
@@ -53,24 +38,24 @@ class DynamicServiceSchemaBuilder {
         type_system::TypeRef sinkPayloadType);
 
    private:
-    friend class DynamicServiceSchemaBuilder;
+    friend class ServiceDescriptorBuilder;
     explicit FunctionBuilder(std::string name);
 
     std::string name_;
-    std::vector<DynamicServiceSchema::Param> params_;
+    std::vector<ServiceDescriptor::Param> params_;
     std::optional<type_system::TypeRef> responseType_;
-    std::vector<DynamicServiceSchema::Exception> exceptions_;
-    std::optional<DynamicServiceSchema::Stream> stream_;
-    std::optional<DynamicServiceSchema::Sink> sink_;
+    std::vector<ServiceDescriptor::Exception> exceptions_;
+    std::optional<ServiceDescriptor::Stream> stream_;
+    std::optional<ServiceDescriptor::Sink> sink_;
   };
 
-  DynamicServiceSchemaBuilder(
+  ServiceDescriptorBuilder(
       std::shared_ptr<const type_system::TypeSystem> typeSystem,
       std::string serviceName);
 
   FunctionBuilder& addFunction(std::string name);
 
-  std::unique_ptr<DynamicServiceSchema> build();
+  std::unique_ptr<ServiceDescriptor> build();
 
  private:
   std::shared_ptr<const type_system::TypeSystem> typeSystem_;

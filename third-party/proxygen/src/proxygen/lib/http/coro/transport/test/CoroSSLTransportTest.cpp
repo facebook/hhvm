@@ -144,11 +144,10 @@ TEST_F(CoroSSLTransportTest, ConnectFailure) {
   folly::test::HandshakeErrorCallback handshakeErrorCallback(
       &handshakeCallback);
   folly::test::TestSSLServer badSrv(&handshakeErrorCallback);
+  acceptCallback.state = folly::test::STATE_SUCCEEDED;
   run([&]() -> Task<> {
     EXPECT_THROW(co_await connect(badSrv.getAddress()), AsyncSocketException);
   });
-  handshakeErrorCallback.state = folly::test::STATE_SUCCEEDED;
-  acceptCallback.state = folly::test::STATE_SUCCEEDED;
 }
 
 TEST_F(CoroSSLTransportTest, ConnectSuccess) {

@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <compare>
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 #include "thrift/compiler/test/fixtures/interactions/gen-cpp2/shared_types.h"
 
@@ -44,11 +45,6 @@ namespace apache::thrift::detail::qualifier {
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
 namespace cpp2 {
-using ::apache::thrift::detail::operator!=;
-using ::apache::thrift::detail::operator>;
-using ::apache::thrift::detail::operator<=;
-using ::apache::thrift::detail::operator>=;
-
 
 /** Glean {"file": "thrift/compiler/test/fixtures/interactions/src/module.thrift", "name": "CustomException", "kind": "exception" } */
 class FOLLY_EXPORT CustomException : public virtual apache::thrift::TException {
@@ -116,7 +112,7 @@ class FOLLY_EXPORT CustomException : public virtual apache::thrift::TException {
  public:
 
   bool operator==(const CustomException&) const;
-  bool operator<(const CustomException&) const;
+  std::partial_ordering operator<=>(const CustomException&) const;
 
   /** Glean { "field": "message" } */
   template <typename..., typename fbthrift_T = ::std::string>
@@ -263,7 +259,7 @@ class ShouldBeBoxed final  {
  public:
 
   bool operator==(const ShouldBeBoxed&) const;
-  bool operator<(const ShouldBeBoxed&) const;
+  std::partial_ordering operator<=>(const ShouldBeBoxed&) const;
 
   /** Glean { "field": "sessionId" } */
   template <typename..., typename fbthrift_T = ::std::string>

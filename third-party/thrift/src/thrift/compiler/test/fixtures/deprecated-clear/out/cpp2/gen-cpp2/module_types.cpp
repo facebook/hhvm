@@ -171,8 +171,8 @@ bool StructWithDefaultStruct::operator==([[maybe_unused]] const StructWithDefaul
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool StructWithDefaultStruct::operator<([[maybe_unused]] const StructWithDefaultStruct& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering StructWithDefaultStruct::operator<=>([[maybe_unused]] const StructWithDefaultStruct& rhs) const {
+  return ::apache::thrift::op::compare<StructWithDefaultStruct>(*this, rhs);
 }
 
 

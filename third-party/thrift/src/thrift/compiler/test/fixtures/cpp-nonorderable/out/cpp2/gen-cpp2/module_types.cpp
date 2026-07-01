@@ -262,8 +262,8 @@ bool OrderableStruct::operator==([[maybe_unused]] const OrderableStruct& rhs) co
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool OrderableStruct::operator<([[maybe_unused]] const OrderableStruct& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering OrderableStruct::operator<=>([[maybe_unused]] const OrderableStruct& rhs) const {
+  return ::apache::thrift::op::compare<OrderableStruct>(*this, rhs);
 }
 
 
@@ -378,8 +378,8 @@ bool OrderableUnion::operator==(const OrderableUnion& rhs) const {
   return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);
 }
 
-bool OrderableUnion::operator<([[maybe_unused]] const OrderableUnion& rhs) const {
-  return ::apache::thrift::op::detail::UnionLessThan{}(*this, rhs);
+std::partial_ordering OrderableUnion::operator<=>([[maybe_unused]] const OrderableUnion& rhs) const {
+  return ::apache::thrift::op::compare<OrderableUnion>(*this, rhs);
 }
 
 void swap(OrderableUnion& a, OrderableUnion& b) {

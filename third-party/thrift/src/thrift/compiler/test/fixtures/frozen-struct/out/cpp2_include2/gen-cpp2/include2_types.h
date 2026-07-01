@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <compare>
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 
 namespace apache::thrift {
@@ -42,11 +43,6 @@ namespace apache::thrift::detail::qualifier {
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
 namespace some::ns {
-using ::apache::thrift::detail::operator!=;
-using ::apache::thrift::detail::operator>;
-using ::apache::thrift::detail::operator<=;
-using ::apache::thrift::detail::operator>=;
-
 
 /** Glean {"file": "thrift/compiler/test/fixtures/frozen-struct/src/include2.thrift", "name": "IncludedB", "kind": "struct" } */
 class IncludedB final  {
@@ -112,7 +108,7 @@ class IncludedB final  {
  public:
 
   bool operator==(const IncludedB&) const;
-  bool operator<(const IncludedB&) const;
+  std::partial_ordering operator<=>(const IncludedB&) const;
 
   /** Glean { "field": "i32Field" } */
   template <typename..., typename fbthrift_T = ::std::int32_t>

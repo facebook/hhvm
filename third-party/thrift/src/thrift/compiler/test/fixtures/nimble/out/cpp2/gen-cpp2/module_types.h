@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <compare>
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 
 namespace apache::thrift {
@@ -52,11 +53,6 @@ namespace apache::thrift::detail::qualifier {
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
 namespace cpp2 {
-using ::apache::thrift::detail::operator!=;
-using ::apache::thrift::detail::operator>;
-using ::apache::thrift::detail::operator<=;
-using ::apache::thrift::detail::operator>=;
-
 
 /** Glean {"file": "thrift/compiler/test/fixtures/nimble/src/module.thrift", "name": "BasicTypes", "kind": "struct" } */
 class BasicTypes final  {
@@ -131,7 +127,7 @@ class BasicTypes final  {
  public:
 
   bool operator==(const BasicTypes&) const;
-  bool operator<(const BasicTypes&) const;
+  std::partial_ordering operator<=>(const BasicTypes&) const;
 
   /** Glean { "field": "first" } */
   template <typename..., typename fbthrift_T = ::std::int32_t>

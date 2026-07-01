@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <compare>
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 #include "thrift/compiler/test/fixtures/visitation/gen-cpp2/reflection_dep_B_types.h"
 #include "thrift/compiler/test/fixtures/visitation/gen-cpp2/reflection_dep_C_types.h"
@@ -1019,11 +1020,6 @@ namespace apache::thrift::detail::qualifier {
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
 namespace test_cpp2::cpp_reflection {
-using ::apache::thrift::detail::operator!=;
-using ::apache::thrift::detail::operator>;
-using ::apache::thrift::detail::operator<=;
-using ::apache::thrift::detail::operator>=;
-
 /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "name": "my_structA", "kind": "typedef" } */
 using my_structA = test_cpp_reflection::custom_structA;
 
@@ -1173,7 +1169,7 @@ class union1 final  {
   } ;
 
   bool operator==(const union1&) const;
-  bool operator<(const union1&) const;
+  std::partial_ordering operator<=>(const union1&) const;
 
   /** Glean { "field": "ui" } */
   template <typename... A> requires (sizeof...(A) == 0)
@@ -1622,7 +1618,7 @@ class union2 final  {
   } ;
 
   bool operator==(const union2&) const;
-  bool operator<(const union2&) const;
+  std::partial_ordering operator<=>(const union2&) const;
 
   /** Glean { "field": "ui_2" } */
   template <typename... A> requires (sizeof...(A) == 0)
@@ -2071,7 +2067,7 @@ class union3 final  {
   } ;
 
   bool operator==(const union3&) const;
-  bool operator<(const union3&) const;
+  std::partial_ordering operator<=>(const union3&) const;
 
   /** Glean { "field": "ui_3" } */
   template <typename... A> requires (sizeof...(A) == 0)
@@ -2438,7 +2434,7 @@ class structA final  {
  public:
 
   bool operator==(const structA&) const;
-  bool operator<(const structA&) const;
+  std::partial_ordering operator<=>(const structA&) const;
 
   /** Glean { "field": "a" } */
   template <typename..., typename fbthrift_T = ::std::int32_t>
@@ -2725,7 +2721,7 @@ class unionA final  {
   } ;
 
   bool operator==(const unionA&) const;
-  bool operator<(const unionA&) const;
+  std::partial_ordering operator<=>(const unionA&) const;
 
   /** Glean { "field": "i" } */
   template <typename... A> requires (sizeof...(A) == 0)
@@ -3172,7 +3168,7 @@ class structB final  {
  public:
 
   bool operator==(const structB&) const;
-  bool operator<(const structB&) const;
+  std::partial_ordering operator<=>(const structB&) const;
 
   /** Glean { "field": "c" } */
   template <typename..., typename fbthrift_T = double>
@@ -3463,7 +3459,7 @@ class structC final  {
  public:
 
   bool operator==(const structC&) const;
-  bool operator<(const structC&) const;
+  std::partial_ordering operator<=>(const structC&) const;
 
   /** Glean { "field": "a" } */
   template <typename..., typename fbthrift_T = ::std::int32_t>
@@ -5094,7 +5090,7 @@ class struct1 final  {
  public:
 
   bool operator==(const struct1&) const;
-  bool operator<(const struct1&) const;
+  std::partial_ordering operator<=>(const struct1&) const;
 
   /** Glean { "field": "field0" } */
   template <typename..., typename fbthrift_T = ::std::int32_t>
@@ -5497,7 +5493,7 @@ class struct2 final  {
  public:
 
   bool operator==(const struct2&) const;
-  bool operator<(const struct2&) const;
+  std::partial_ordering operator<=>(const struct2&) const;
 
   /** Glean { "field": "fieldA" } */
   template <typename..., typename fbthrift_T = ::std::int32_t>
@@ -5996,7 +5992,7 @@ class struct3 final  {
  public:
 
   bool operator==(const struct3&) const;
-  bool operator<(const struct3&) const;
+  std::partial_ordering operator<=>(const struct3&) const;
 
   /** Glean { "field": "fieldA" } */
   template <typename..., typename fbthrift_T = ::std::int32_t>
@@ -7011,7 +7007,7 @@ class struct4 final  {
  public:
 
   bool operator==(const struct4&) const;
-  bool operator<(const struct4&) const;
+  std::partial_ordering operator<=>(const struct4&) const;
 
   /** Glean { "field": "field0" } */
   template <typename..., typename fbthrift_T = ::std::int32_t>
@@ -7295,7 +7291,7 @@ class struct5 final  {
  public:
 
   bool operator==(const struct5&) const;
-  bool operator<(const struct5&) const;
+  std::partial_ordering operator<=>(const struct5&) const;
 
   /** Glean { "field": "field0" } */
   template <typename..., typename fbthrift_T = ::std::int32_t>
@@ -7628,7 +7624,7 @@ class struct_binary final  {
  public:
 
   bool operator==(const struct_binary&) const;
-  bool operator<(const struct_binary&) const;
+  std::partial_ordering operator<=>(const struct_binary&) const;
 
   /** Glean { "field": "bi" } */
   template <typename..., typename fbthrift_T = ::std::string>
@@ -7777,7 +7773,7 @@ class dep_A_struct final  {
  public:
 
   bool operator==(const dep_A_struct&) const;
-  bool operator<(const dep_A_struct&) const;
+  std::partial_ordering operator<=>(const dep_A_struct&) const;
 
   /** Glean { "field": "b" } */
   template <typename..., typename fbthrift_T = ::test_cpp2::cpp_reflection::dep_B_struct>
@@ -8018,7 +8014,7 @@ class dep_B_struct final  {
  public:
 
   bool operator==(const dep_B_struct&) const;
-  bool operator<(const dep_B_struct&) const;
+  std::partial_ordering operator<=>(const dep_B_struct&) const;
 
   /** Glean { "field": "b" } */
   template <typename..., typename fbthrift_T = ::test_cpp2::cpp_reflection::dep_B_struct>
@@ -8251,7 +8247,7 @@ class annotated final  {
  public:
 
   bool operator==(const annotated&) const;
-  bool operator<(const annotated&) const;
+  std::partial_ordering operator<=>(const annotated&) const;
 
   /** Glean { "field": "a" } */
   template <typename..., typename fbthrift_T = ::std::int32_t>
@@ -8801,7 +8797,7 @@ class union_with_special_names final  {
   } ;
 
   bool operator==(const union_with_special_names&) const;
-  bool operator<(const union_with_special_names&) const;
+  std::partial_ordering operator<=>(const union_with_special_names&) const;
 
   /** Glean { "field": "get" } */
   template <typename... A> requires (sizeof...(A) == 0)
@@ -10790,7 +10786,7 @@ class struct_with_special_names final  {
  public:
 
   bool operator==(const struct_with_special_names&) const;
-  bool operator<(const struct_with_special_names&) const;
+  std::partial_ordering operator<=>(const struct_with_special_names&) const;
 
   /** Glean { "field": "get" } */
   template <typename..., typename fbthrift_T = ::std::int32_t>

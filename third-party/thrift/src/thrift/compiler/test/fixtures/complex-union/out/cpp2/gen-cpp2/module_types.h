@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <compare>
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 
 namespace apache::thrift {
@@ -134,11 +135,6 @@ namespace apache::thrift::detail::qualifier {
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
 namespace cpp2 {
-using ::apache::thrift::detail::operator!=;
-using ::apache::thrift::detail::operator>;
-using ::apache::thrift::detail::operator<=;
-using ::apache::thrift::detail::operator>=;
-
 /** Glean {"file": "thrift/compiler/test/fixtures/complex-union/src/module.thrift", "name": "containerTypedef", "kind": "typedef" } */
 using containerTypedef = ::std::map<::std::int16_t, ::std::string>;
 
@@ -316,7 +312,7 @@ class ComplexUnion final  {
   } ;
 
   bool operator==(const ComplexUnion&) const;
-  bool operator<(const ComplexUnion&) const;
+  std::partial_ordering operator<=>(const ComplexUnion&) const;
 
   /** Glean { "field": "intValue" } */
   template <typename... A> requires (sizeof...(A) == 0)
@@ -943,7 +939,7 @@ class ListUnion final  {
   } ;
 
   bool operator==(const ListUnion&) const;
-  bool operator<(const ListUnion&) const;
+  std::partial_ordering operator<=>(const ListUnion&) const;
 
   /** Glean { "field": "intListValue" } */
   template <typename... A> requires (sizeof...(A) == 0)
@@ -1255,7 +1251,7 @@ class DataUnion final  {
   } ;
 
   bool operator==(const DataUnion&) const;
-  bool operator<(const DataUnion&) const;
+  std::partial_ordering operator<=>(const DataUnion&) const;
 
   /** Glean { "field": "binaryData" } */
   template <typename... A> requires (sizeof...(A) == 0)
@@ -1519,7 +1515,7 @@ class Val final  {
  public:
 
   bool operator==(const Val&) const;
-  bool operator<(const Val&) const;
+  std::partial_ordering operator<=>(const Val&) const;
 
   /** Glean { "field": "strVal" } */
   template <typename..., typename fbthrift_T = ::std::string>
@@ -1816,7 +1812,7 @@ class ValUnion final  {
   } ;
 
   bool operator==(const ValUnion&) const;
-  bool operator<(const ValUnion&) const;
+  std::partial_ordering operator<=>(const ValUnion&) const;
 
   /** Glean { "field": "v1" } */
   template <typename... A> requires (sizeof...(A) == 0)
@@ -2128,7 +2124,7 @@ class VirtualComplexUnion  {
   } ;
 
   bool operator==(const VirtualComplexUnion&) const;
-  bool operator<(const VirtualComplexUnion&) const;
+  std::partial_ordering operator<=>(const VirtualComplexUnion&) const;
 
   /** Glean { "field": "thingOne" } */
   template <typename... A> requires (sizeof...(A) == 0)
@@ -2380,7 +2376,7 @@ class NonCopyableStruct final  {
  public:
 
   bool operator==(const NonCopyableStruct&) const;
-  bool operator<(const NonCopyableStruct&) const;
+  std::partial_ordering operator<=>(const NonCopyableStruct&) const;
 
   /** Glean { "field": "num" } */
   template <typename..., typename fbthrift_T = ::std::int64_t>
@@ -2551,7 +2547,7 @@ class NonCopyableUnion final  {
   } ;
 
   bool operator==(const NonCopyableUnion&) const;
-  bool operator<(const NonCopyableUnion&) const;
+  std::partial_ordering operator<=>(const NonCopyableUnion&) const;
 
 
   /** Glean { "field": "s" } */

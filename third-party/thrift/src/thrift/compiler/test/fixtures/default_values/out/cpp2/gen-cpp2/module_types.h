@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <compare>
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 
 namespace apache::thrift {
@@ -151,11 +152,6 @@ namespace apache::thrift::detail::qualifier {
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
 namespace facebook::thrift::compiler::test::fixtures::default_values {
-using ::apache::thrift::detail::operator!=;
-using ::apache::thrift::detail::operator>;
-using ::apache::thrift::detail::operator<=;
-using ::apache::thrift::detail::operator>=;
-
 
 /** Glean {"file": "thrift/compiler/test/fixtures/default_values/src/module.thrift", "name": "TrivialStruct", "kind": "struct" } */
 class TrivialStruct final  {
@@ -216,7 +212,7 @@ class TrivialStruct final  {
  public:
 
   bool operator==(const TrivialStruct&) const;
-  bool operator<(const TrivialStruct&) const;
+  std::partial_ordering operator<=>(const TrivialStruct&) const;
 
   /** Glean { "field": "int_value" } */
   template <typename..., typename fbthrift_T = ::std::int32_t>
@@ -351,7 +347,7 @@ class TrivialStructWithDefault final  {
  public:
 
   bool operator==(const TrivialStructWithDefault&) const;
-  bool operator<(const TrivialStructWithDefault&) const;
+  std::partial_ordering operator<=>(const TrivialStructWithDefault&) const;
 
   /** Glean { "field": "int_value_1" } */
   template <typename..., typename fbthrift_T = ::std::int32_t>
@@ -547,7 +543,7 @@ class StructWithNoCustomDefaultValues final  {
  public:
 
   bool operator==(const StructWithNoCustomDefaultValues&) const;
-  bool operator<(const StructWithNoCustomDefaultValues&) const;
+  std::partial_ordering operator<=>(const StructWithNoCustomDefaultValues&) const;
 
   /** Glean { "field": "unqualified_integer" } */
   template <typename..., typename fbthrift_T = ::std::int32_t>
@@ -963,7 +959,7 @@ class StructWithCustomDefaultValues final  {
  public:
 
   bool operator==(const StructWithCustomDefaultValues&) const;
-  bool operator<(const StructWithCustomDefaultValues&) const;
+  std::partial_ordering operator<=>(const StructWithCustomDefaultValues&) const;
 
   /** Glean { "field": "unqualified_integer" } */
   template <typename..., typename fbthrift_T = ::std::int32_t>
@@ -1471,7 +1467,7 @@ class StructWithCollectionDefaultValues final  {
  public:
 
   bool operator==(const StructWithCollectionDefaultValues&) const;
-  bool operator<(const StructWithCollectionDefaultValues&) const;
+  std::partial_ordering operator<=>(const StructWithCollectionDefaultValues&) const;
 
   /** Glean { "field": "list_with_list_value" } */
   template <typename..., typename fbthrift_T = ::std::vector<::std::int32_t>>

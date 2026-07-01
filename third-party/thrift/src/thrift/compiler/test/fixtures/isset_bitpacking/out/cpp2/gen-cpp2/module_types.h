@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <compare>
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 
 namespace apache::thrift {
@@ -115,11 +116,6 @@ namespace apache::thrift::detail::qualifier {
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
 namespace cpp2 {
-using ::apache::thrift::detail::operator!=;
-using ::apache::thrift::detail::operator>;
-using ::apache::thrift::detail::operator<=;
-using ::apache::thrift::detail::operator>=;
-
 
 /** Glean {"file": "thrift/compiler/test/fixtures/isset_bitpacking/src/module.thrift", "name": "Default", "kind": "struct" } */
 class Default final  {
@@ -193,7 +189,7 @@ class Default final  {
  public:
 
   bool operator==(const Default&) const;
-  bool operator<(const Default&) const;
+  std::partial_ordering operator<=>(const Default&) const;
 
   /** Glean { "field": "field1" } */
   template <typename..., typename fbthrift_T = ::std::int32_t>
@@ -496,7 +492,7 @@ class NonAtomic final  {
  public:
 
   bool operator==(const NonAtomic&) const;
-  bool operator<(const NonAtomic&) const;
+  std::partial_ordering operator<=>(const NonAtomic&) const;
 
   /** Glean { "field": "field1" } */
   template <typename..., typename fbthrift_T = ::std::int32_t>
@@ -799,7 +795,7 @@ class Atomic final  {
  public:
 
   bool operator==(const Atomic&) const;
-  bool operator<(const Atomic&) const;
+  std::partial_ordering operator<=>(const Atomic&) const;
 
   /** Glean { "field": "field1" } */
   template <typename..., typename fbthrift_T = ::std::int32_t>
@@ -1102,7 +1098,7 @@ class AtomicFoo final  {
  public:
 
   bool operator==(const AtomicFoo&) const;
-  bool operator<(const AtomicFoo&) const;
+  std::partial_ordering operator<=>(const AtomicFoo&) const;
 
   /** Glean { "field": "field1" } */
   template <typename..., typename fbthrift_T = ::std::int32_t>

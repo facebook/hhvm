@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <compare>
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 #include "thrift/compiler/test/fixtures/frozen-struct/gen-cpp2/include1_types.h"
 #include "thrift/compiler/test/fixtures/frozen-struct/gen-cpp2/include2_types.h"
@@ -161,11 +162,6 @@ struct is_cpp_ref_field_optional<::some::ns::CppRef,::apache::thrift::type::fiel
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
 namespace some::ns {
-using ::apache::thrift::detail::operator!=;
-using ::apache::thrift::detail::operator>;
-using ::apache::thrift::detail::operator<=;
-using ::apache::thrift::detail::operator>=;
-
 
 /** Glean {"file": "thrift/compiler/test/fixtures/frozen-struct/src/module.thrift", "name": "ModuleA", "kind": "struct" } */
 class ModuleA final  {
@@ -247,7 +243,7 @@ class ModuleA final  {
  public:
 
   bool operator==(const ModuleA&) const;
-  bool operator<(const ModuleA&) const;
+  std::partial_ordering operator<=>(const ModuleA&) const;
 
   /** Glean { "field": "i32Field" } */
   template <typename..., typename fbthrift_T = ::std::int32_t>
@@ -645,7 +641,7 @@ class ModuleB final  {
  public:
 
   bool operator==(const ModuleB&) const;
-  bool operator<(const ModuleB&) const;
+  std::partial_ordering operator<=>(const ModuleB&) const;
 
   /** Glean { "field": "i32Field" } */
   template <typename..., typename fbthrift_T = ::std::int32_t>
@@ -819,7 +815,7 @@ class DirectlyAdapted final  {
  public:
 
   bool operator==(const DirectlyAdapted&) const;
-  bool operator<(const DirectlyAdapted&) const;
+  std::partial_ordering operator<=>(const DirectlyAdapted&) const;
 
   /** Glean { "field": "field" } */
   template <typename..., typename fbthrift_T = ::std::int32_t>
@@ -967,7 +963,7 @@ class CppRef final  {
  public:
 
   bool operator==(const CppRef&) const;
-  bool operator<(const CppRef&) const;
+  std::partial_ordering operator<=>(const CppRef&) const;
   /** Glean { "field": "shared_field" } */
   FOLLY_ERASE ::std::shared_ptr<::std::int32_t>& shared_field_ref() & {
     return __fbthrift_field_shared_field;

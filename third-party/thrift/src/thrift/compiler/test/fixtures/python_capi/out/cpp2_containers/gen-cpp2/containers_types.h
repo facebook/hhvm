@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <compare>
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 #include <deque>
 #include <unordered_map>
@@ -166,11 +167,6 @@ namespace apache::thrift::detail::qualifier {
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
 namespace test::fixtures::python_capi {
-using ::apache::thrift::detail::operator!=;
-using ::apache::thrift::detail::operator>;
-using ::apache::thrift::detail::operator<=;
-using ::apache::thrift::detail::operator>=;
-
 /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/containers.thrift", "name": "IOBuf", "kind": "typedef" } */
 using IOBuf = folly::IOBuf;
 /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/containers.thrift", "name": "small_vector_iobuf", "kind": "typedef" } */
@@ -634,7 +630,7 @@ class TemplateSets final  {
  public:
 
   bool operator==(const TemplateSets&) const;
-  bool operator<(const TemplateSets&) const;
+  std::partial_ordering operator<=>(const TemplateSets&) const;
 
   /** Glean { "field": "std_set" } */
   template <typename..., typename fbthrift_T = std::set<::std::string>>
@@ -1110,7 +1106,7 @@ class TemplateMaps final  {
  public:
 
   bool operator==(const TemplateMaps&) const;
-  bool operator<(const TemplateMaps&) const;
+  std::partial_ordering operator<=>(const TemplateMaps&) const;
 
   /** Glean { "field": "std_map" } */
   template <typename..., typename fbthrift_T = std::map<::std::string, ::std::string>>
@@ -1566,7 +1562,7 @@ class TWrapped final  {
  public:
 
   bool operator==(const TWrapped&) const;
-  bool operator<(const TWrapped&) const;
+  std::partial_ordering operator<=>(const TWrapped&) const;
 
   /** Glean { "field": "fieldA" } */
   template <typename..., typename fbthrift_T = ::std::string>
@@ -1766,7 +1762,7 @@ class IndirectionA final  {
  public:
 
   bool operator==(const IndirectionA&) const;
-  bool operator<(const IndirectionA&) const;
+  std::partial_ordering operator<=>(const IndirectionA&) const;
 
   /** Glean { "field": "lst" } */
   template <typename..., typename fbthrift_T = ::test::fixtures::python_capi::ListOfWrapped>
@@ -1906,7 +1902,7 @@ class IndirectionB final  {
  public:
 
   bool operator==(const IndirectionB&) const;
-  bool operator<(const IndirectionB&) const;
+  std::partial_ordering operator<=>(const IndirectionB&) const;
 
   /** Glean { "field": "lst" } */
   template <typename..., typename fbthrift_T = ::test::fixtures::python_capi::VecOfWrapped>
@@ -2046,7 +2042,7 @@ class IndirectionC final  {
  public:
 
   bool operator==(const IndirectionC&) const;
-  bool operator<(const IndirectionC&) const;
+  std::partial_ordering operator<=>(const IndirectionC&) const;
 
   /** Glean { "field": "lst" } */
   template <typename..., typename fbthrift_T = ::test::fixtures::python_capi::ListOfWrappedAlias>

@@ -70,8 +70,8 @@ bool Struct::operator==([[maybe_unused]] const Struct& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool Struct::operator<([[maybe_unused]] const Struct& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering Struct::operator<=>([[maybe_unused]] const Struct& rhs) const {
+  return ::apache::thrift::op::compare<Struct>(*this, rhs);
 }
 
 
@@ -162,8 +162,8 @@ bool BigStruct::operator==([[maybe_unused]] const BigStruct& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool BigStruct::operator<([[maybe_unused]] const BigStruct& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering BigStruct::operator<=>([[maybe_unused]] const BigStruct& rhs) const {
+  return ::apache::thrift::op::compare<BigStruct>(*this, rhs);
 }
 
 

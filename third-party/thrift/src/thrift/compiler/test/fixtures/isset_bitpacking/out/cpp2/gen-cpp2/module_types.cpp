@@ -98,8 +98,8 @@ bool Default::operator==([[maybe_unused]] const Default& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool Default::operator<([[maybe_unused]] const Default& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering Default::operator<=>([[maybe_unused]] const Default& rhs) const {
+  return ::apache::thrift::op::compare<Default>(*this, rhs);
 }
 
 
@@ -235,8 +235,8 @@ bool NonAtomic::operator==([[maybe_unused]] const NonAtomic& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool NonAtomic::operator<([[maybe_unused]] const NonAtomic& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering NonAtomic::operator<=>([[maybe_unused]] const NonAtomic& rhs) const {
+  return ::apache::thrift::op::compare<NonAtomic>(*this, rhs);
 }
 
 
@@ -372,8 +372,8 @@ bool Atomic::operator==([[maybe_unused]] const Atomic& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool Atomic::operator<([[maybe_unused]] const Atomic& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering Atomic::operator<=>([[maybe_unused]] const Atomic& rhs) const {
+  return ::apache::thrift::op::compare<Atomic>(*this, rhs);
 }
 
 
@@ -509,8 +509,8 @@ bool AtomicFoo::operator==([[maybe_unused]] const AtomicFoo& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool AtomicFoo::operator<([[maybe_unused]] const AtomicFoo& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering AtomicFoo::operator<=>([[maybe_unused]] const AtomicFoo& rhs) const {
+  return ::apache::thrift::op::compare<AtomicFoo>(*this, rhs);
 }
 
 

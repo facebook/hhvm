@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <compare>
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 
 namespace apache::thrift {
@@ -33,11 +34,6 @@ namespace apache::thrift::detail::qualifier {
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
 namespace cpp2 {
-using ::apache::thrift::detail::operator!=;
-using ::apache::thrift::detail::operator>;
-using ::apache::thrift::detail::operator<=;
-using ::apache::thrift::detail::operator>=;
-
 
 /** Glean {"file": "thrift/compiler/test/fixtures/empty-struct/src/module.thrift", "name": "Empty", "kind": "struct" } */
 class Empty final  {
@@ -90,7 +86,7 @@ class Empty final  {
  public:
 
   bool operator==(const Empty&) const;
-  bool operator<(const Empty&) const;
+  std::partial_ordering operator<=>(const Empty&) const;
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);
@@ -204,7 +200,7 @@ class Nada final  {
   } ;
 
   bool operator==(const Nada&) const;
-  bool operator<(const Nada&) const;
+  std::partial_ordering operator<=>(const Nada&) const;
 
   Type getType() const { return static_cast<Type>(fbthrift_type_); }
 

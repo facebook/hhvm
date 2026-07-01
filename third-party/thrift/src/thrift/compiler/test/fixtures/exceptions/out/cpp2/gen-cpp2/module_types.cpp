@@ -81,8 +81,8 @@ bool Fiery::operator==([[maybe_unused]] const Fiery& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool Fiery::operator<([[maybe_unused]] const Fiery& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering Fiery::operator<=>([[maybe_unused]] const Fiery& rhs) const {
+  return ::apache::thrift::op::compare<Fiery>(*this, rhs);
 }
 
 
@@ -153,8 +153,8 @@ bool Serious::operator==([[maybe_unused]] const Serious& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool Serious::operator<([[maybe_unused]] const Serious& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering Serious::operator<=>([[maybe_unused]] const Serious& rhs) const {
+  return ::apache::thrift::op::compare<Serious>(*this, rhs);
 }
 
 
@@ -234,8 +234,8 @@ bool ComplexFieldNames::operator==([[maybe_unused]] const ComplexFieldNames& rhs
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool ComplexFieldNames::operator<([[maybe_unused]] const ComplexFieldNames& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering ComplexFieldNames::operator<=>([[maybe_unused]] const ComplexFieldNames& rhs) const {
+  return ::apache::thrift::op::compare<ComplexFieldNames>(*this, rhs);
 }
 
 
@@ -308,8 +308,8 @@ bool CustomFieldNames::operator==([[maybe_unused]] const CustomFieldNames& rhs) 
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool CustomFieldNames::operator<([[maybe_unused]] const CustomFieldNames& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering CustomFieldNames::operator<=>([[maybe_unused]] const CustomFieldNames& rhs) const {
+  return ::apache::thrift::op::compare<CustomFieldNames>(*this, rhs);
 }
 
 
@@ -383,8 +383,8 @@ bool ExceptionWithPrimitiveField::operator==([[maybe_unused]] const ExceptionWit
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool ExceptionWithPrimitiveField::operator<([[maybe_unused]] const ExceptionWithPrimitiveField& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering ExceptionWithPrimitiveField::operator<=>([[maybe_unused]] const ExceptionWithPrimitiveField& rhs) const {
+  return ::apache::thrift::op::compare<ExceptionWithPrimitiveField>(*this, rhs);
 }
 
 
@@ -467,8 +467,8 @@ bool ExceptionWithStructuredAnnotation::operator==([[maybe_unused]] const Except
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool ExceptionWithStructuredAnnotation::operator<([[maybe_unused]] const ExceptionWithStructuredAnnotation& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering ExceptionWithStructuredAnnotation::operator<=>([[maybe_unused]] const ExceptionWithStructuredAnnotation& rhs) const {
+  return ::apache::thrift::op::compare<ExceptionWithStructuredAnnotation>(*this, rhs);
 }
 
 
@@ -530,8 +530,8 @@ bool Banal::operator==([[maybe_unused]] const Banal& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool Banal::operator<([[maybe_unused]] const Banal& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering Banal::operator<=>([[maybe_unused]] const Banal& rhs) const {
+  return ::apache::thrift::op::compare<Banal>(*this, rhs);
 }
 
 

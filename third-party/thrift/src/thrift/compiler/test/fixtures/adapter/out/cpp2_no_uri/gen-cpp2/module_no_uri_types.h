@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <compare>
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 #include "adapter_dependency.h"
 
@@ -38,11 +39,6 @@ namespace apache::thrift::detail::qualifier {
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
 namespace cpp2 {
-using ::apache::thrift::detail::operator!=;
-using ::apache::thrift::detail::operator>;
-using ::apache::thrift::detail::operator<=;
-using ::apache::thrift::detail::operator>=;
-
 
 /** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module_no_uri.thrift", "name": "RefUnion", "kind": "union" } */
 class RefUnion final  {
@@ -148,7 +144,7 @@ class RefUnion final  {
   } ;
 
   bool operator==(const RefUnion&) const;
-  bool operator<(const RefUnion&) const;
+  std::partial_ordering operator<=>(const RefUnion&) const;
 
   /** Glean { "field": "field1" } */
   template <typename... A> requires (sizeof...(A) == 0)

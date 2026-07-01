@@ -193,8 +193,8 @@ bool TrivialTypesStruct::operator==([[maybe_unused]] const TrivialTypesStruct& r
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool TrivialTypesStruct::operator<([[maybe_unused]] const TrivialTypesStruct& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering TrivialTypesStruct::operator<=>([[maybe_unused]] const TrivialTypesStruct& rhs) const {
+  return ::apache::thrift::op::compare<TrivialTypesStruct>(*this, rhs);
 }
 
 

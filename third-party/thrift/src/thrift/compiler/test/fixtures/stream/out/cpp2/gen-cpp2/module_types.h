@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <compare>
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 
 namespace apache::thrift {
@@ -34,11 +35,6 @@ namespace apache::thrift::detail::qualifier {
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
 namespace cpp2 {
-using ::apache::thrift::detail::operator!=;
-using ::apache::thrift::detail::operator>;
-using ::apache::thrift::detail::operator<=;
-using ::apache::thrift::detail::operator>=;
-
 
 /** Glean {"file": "thrift/compiler/test/fixtures/stream/src/module.thrift", "name": "FooStreamEx", "kind": "exception" } */
 class FOLLY_EXPORT FooStreamEx : public virtual apache::thrift::TException {
@@ -100,7 +96,7 @@ class FOLLY_EXPORT FooStreamEx : public virtual apache::thrift::TException {
  public:
 
   bool operator==(const FooStreamEx&) const;
-  bool operator<(const FooStreamEx&) const;
+  std::partial_ordering operator<=>(const FooStreamEx&) const;
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);
@@ -191,7 +187,7 @@ class FOLLY_EXPORT FooEx : public virtual apache::thrift::TException {
  public:
 
   bool operator==(const FooEx&) const;
-  bool operator<(const FooEx&) const;
+  std::partial_ordering operator<=>(const FooEx&) const;
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);
@@ -282,7 +278,7 @@ class FOLLY_EXPORT FooEx2 : public virtual apache::thrift::TException {
  public:
 
   bool operator==(const FooEx2&) const;
-  bool operator<(const FooEx2&) const;
+  std::partial_ordering operator<=>(const FooEx2&) const;
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);

@@ -184,6 +184,20 @@ TEST(CompareTest, StructWithFloat) {
   EXPECT_TRUE(identical(lhs, rhs)); // Should be false!
 }
 
+TEST(CompareTest, GeneratedRelationalOperatorsRespectUnordered) {
+  test::OneOfEach lhs;
+  test::OneOfEach rhs;
+
+  lhs.myDouble() = std::numeric_limits<double>::quiet_NaN();
+  rhs.myDouble() = 1.0;
+
+  EXPECT_EQ(lhs <=> rhs, std::partial_ordering::unordered);
+  EXPECT_FALSE(lhs < rhs);
+  EXPECT_FALSE(lhs <= rhs);
+  EXPECT_FALSE(lhs > rhs);
+  EXPECT_FALSE(lhs >= rhs);
+}
+
 TEST(CompareTest, ListWithDouble) {
   EqualTo<type::list<type::double_t>> equal;
   IdenticalTo<type::list<type::double_t>> identical;

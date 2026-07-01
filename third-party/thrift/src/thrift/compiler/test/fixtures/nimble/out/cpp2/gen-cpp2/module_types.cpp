@@ -58,8 +58,8 @@ bool BasicTypes::operator==([[maybe_unused]] const BasicTypes& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool BasicTypes::operator<([[maybe_unused]] const BasicTypes& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering BasicTypes::operator<=>([[maybe_unused]] const BasicTypes& rhs) const {
+  return ::apache::thrift::op::compare<BasicTypes>(*this, rhs);
 }
 
 

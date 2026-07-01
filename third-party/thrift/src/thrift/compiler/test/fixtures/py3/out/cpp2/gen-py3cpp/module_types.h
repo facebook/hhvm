@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <compare>
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 
 namespace apache::thrift {
@@ -498,11 +499,6 @@ namespace apache::thrift::detail::qualifier {
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
 namespace py3::simple {
-using ::apache::thrift::detail::operator!=;
-using ::apache::thrift::detail::operator>;
-using ::apache::thrift::detail::operator<=;
-using ::apache::thrift::detail::operator>=;
-
 /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "name": "IOBufPtr", "kind": "typedef" } */
 using IOBufPtr = std::unique_ptr<folly::IOBuf>;
 /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "name": "IOBuf", "kind": "typedef" } */
@@ -614,7 +610,7 @@ class SimpleStruct final  {
  public:
 
   bool operator==(const SimpleStruct&) const;
-  bool operator<(const SimpleStruct&) const;
+  std::partial_ordering operator<=>(const SimpleStruct&) const;
 
   /** Glean { "field": "is_on" } */
   template <typename..., typename fbthrift_T = bool>
@@ -1305,7 +1301,7 @@ class AdaptedUnion final  {
   } ;
 
   bool operator==(const AdaptedUnion&) const;
-  bool operator<(const AdaptedUnion&) const;
+  std::partial_ordering operator<=>(const AdaptedUnion&) const;
 
   /** Glean { "field": "best" } */
   template <typename... A> requires (sizeof...(A) == 0)
@@ -1509,7 +1505,7 @@ class FOLLY_EXPORT SimpleException : public virtual apache::thrift::TException {
  public:
 
   bool operator==(const SimpleException&) const;
-  bool operator<(const SimpleException&) const;
+  std::partial_ordering operator<=>(const SimpleException&) const;
 
   /** Glean { "field": "err_code" } */
   template <typename..., typename fbthrift_T = ::std::int16_t>
@@ -1644,7 +1640,7 @@ class OptionalRefStruct final  {
  public:
 
   bool operator==(const OptionalRefStruct&) const;
-  bool operator<(const OptionalRefStruct&) const;
+  std::partial_ordering operator<=>(const OptionalRefStruct&) const;
 
   /** Glean { "field": "optional_blob" } */
   template <typename..., typename fbthrift_T = ::py3::simple::IOBufPtr>
@@ -1797,7 +1793,7 @@ class Float32Struct final  {
  public:
 
   bool operator==(const Float32Struct&) const;
-  bool operator<(const Float32Struct&) const;
+  std::partial_ordering operator<=>(const Float32Struct&) const;
 
   /** Glean { "field": "float32" } */
   template <typename..., typename fbthrift_T = float>
@@ -2084,7 +2080,7 @@ class IssetInspectionStruct final  {
  public:
 
   bool operator==(const IssetInspectionStruct&) const;
-  bool operator<(const IssetInspectionStruct&) const;
+  std::partial_ordering operator<=>(const IssetInspectionStruct&) const;
 
   /** Glean { "field": "int_field" } */
   template <typename..., typename fbthrift_T = ::std::int32_t>
@@ -2321,7 +2317,7 @@ class HiddenTypeFieldsStruct final  {
  public:
 
   bool operator==(const HiddenTypeFieldsStruct&) const;
-  bool operator<(const HiddenTypeFieldsStruct&) const;
+  std::partial_ordering operator<=>(const HiddenTypeFieldsStruct&) const;
 
   /** Glean { "field": "field1" } */
   template <typename..., typename fbthrift_T = ::py3::simple::AdaptedTypeDef>
@@ -2554,7 +2550,7 @@ class FOLLY_EXPORT HiddenException : public virtual apache::thrift::TException {
  public:
 
   bool operator==(const HiddenException&) const;
-  bool operator<(const HiddenException&) const;
+  std::partial_ordering operator<=>(const HiddenException&) const;
 
   /** Glean { "field": "test" } */
   template <typename..., typename fbthrift_T = ::std::int16_t>
@@ -2721,7 +2717,7 @@ class ComplexStruct final  {
  public:
 
   bool operator==(const ComplexStruct&) const;
-  bool operator<(const ComplexStruct&) const;
+  std::partial_ordering operator<=>(const ComplexStruct&) const;
 
   /** Glean { "field": "structOne" } */
   template <typename..., typename fbthrift_T = ::py3::simple::SimpleStruct>
@@ -3660,7 +3656,7 @@ class CustomFields final  {
  public:
 
   bool operator==(const CustomFields&) const;
-  bool operator<(const CustomFields&) const;
+  std::partial_ordering operator<=>(const CustomFields&) const;
 
   /** Glean { "field": "bool_field" } */
   template <typename..., typename fbthrift_T = ::MyType>
@@ -4231,7 +4227,7 @@ class CustomTypedefFields final  {
  public:
 
   bool operator==(const CustomTypedefFields&) const;
-  bool operator<(const CustomTypedefFields&) const;
+  std::partial_ordering operator<=>(const CustomTypedefFields&) const;
 
   /** Glean { "field": "bool_field" } */
   template <typename..., typename fbthrift_T = ::py3::simple::CustomBool>
@@ -4802,7 +4798,7 @@ class AdaptedTypedefFields final  {
  public:
 
   bool operator==(const AdaptedTypedefFields&) const;
-  bool operator<(const AdaptedTypedefFields&) const;
+  std::partial_ordering operator<=>(const AdaptedTypedefFields&) const;
 
   /** Glean { "field": "bool_field" } */
   template <typename..., typename fbthrift_T = ::py3::simple::AdaptedBool>

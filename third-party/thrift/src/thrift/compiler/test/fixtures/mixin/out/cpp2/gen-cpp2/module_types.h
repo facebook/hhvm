@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <compare>
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 
 namespace apache::thrift {
@@ -70,11 +71,6 @@ namespace apache::thrift::detail::qualifier {
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
 namespace cpp2 {
-using ::apache::thrift::detail::operator!=;
-using ::apache::thrift::detail::operator>;
-using ::apache::thrift::detail::operator<=;
-using ::apache::thrift::detail::operator>=;
-
 /** Glean {"file": "thrift/compiler/test/fixtures/mixin/src/module.thrift", "name": "Mixin3", "kind": "typedef" } */
 using Mixin3 = ::cpp2::Mixin3Base;
 
@@ -138,7 +134,7 @@ class Mixin1 final  {
  public:
 
   bool operator==(const Mixin1&) const;
-  bool operator<(const Mixin1&) const;
+  std::partial_ordering operator<=>(const Mixin1&) const;
 
   /** Glean { "field": "field1" } */
   template <typename..., typename fbthrift_T = ::std::string>
@@ -285,7 +281,7 @@ class Mixin2 final  {
  public:
 
   bool operator==(const Mixin2&) const;
-  bool operator<(const Mixin2&) const;
+  std::partial_ordering operator<=>(const Mixin2&) const;
 
   /** Glean { "field": "m1" } */
   template <typename..., typename fbthrift_T = ::cpp2::Mixin1>
@@ -490,7 +486,7 @@ class Mixin3Base final  {
  public:
 
   bool operator==(const Mixin3Base&) const;
-  bool operator<(const Mixin3Base&) const;
+  std::partial_ordering operator<=>(const Mixin3Base&) const;
 
   /** Glean { "field": "field3" } */
   template <typename..., typename fbthrift_T = ::std::string>
@@ -641,7 +637,7 @@ class Foo final  {
  public:
 
   bool operator==(const Foo&) const;
-  bool operator<(const Foo&) const;
+  std::partial_ordering operator<=>(const Foo&) const;
 
   /** Glean { "field": "field4" } */
   template <typename..., typename fbthrift_T = ::std::string>

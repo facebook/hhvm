@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <compare>
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 
 namespace apache::thrift {
@@ -478,11 +479,6 @@ struct is_deprecated_terse_writes_with_custom_default_field<::facebook::thrift::
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
 namespace facebook::thrift::test::fixtures::terse_write::deprecated {
-using ::apache::thrift::detail::operator!=;
-using ::apache::thrift::detail::operator>;
-using ::apache::thrift::detail::operator<=;
-using ::apache::thrift::detail::operator>=;
-
 
 /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/deprecated_terse_write.thrift", "name": "MyStruct", "kind": "struct" } */
 class MyStruct final  {
@@ -536,7 +532,7 @@ class MyStruct final  {
  public:
 
   bool operator==(const MyStruct&) const;
-  bool operator<(const MyStruct&) const;
+  std::partial_ordering operator<=>(const MyStruct&) const;
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);
@@ -651,7 +647,7 @@ class MyUnion final  {
   } ;
 
   bool operator==(const MyUnion&) const;
-  bool operator<(const MyUnion&) const;
+  std::partial_ordering operator<=>(const MyUnion&) const;
 
   Type getType() const { return static_cast<Type>(fbthrift_type_); }
 
@@ -798,7 +794,7 @@ class StructLevelTerseStruct final  {
  public:
 
   bool operator==(const StructLevelTerseStruct&) const;
-  bool operator<(const StructLevelTerseStruct&) const;
+  std::partial_ordering operator<=>(const StructLevelTerseStruct&) const;
 
   /** Glean { "field": "bool_field" } */
   template <typename..., typename fbthrift_T = bool>
@@ -1542,7 +1538,7 @@ class FieldLevelTerseStruct final  {
  public:
 
   bool operator==(const FieldLevelTerseStruct&) const;
-  bool operator<(const FieldLevelTerseStruct&) const;
+  std::partial_ordering operator<=>(const FieldLevelTerseStruct&) const;
 
   /** Glean { "field": "terse_bool_field" } */
   template <typename..., typename fbthrift_T = bool>
@@ -2960,7 +2956,7 @@ class CppRefStructFields final  {
  public:
 
   bool operator==(const CppRefStructFields&) const;
-  bool operator<(const CppRefStructFields&) const;
+  std::partial_ordering operator<=>(const CppRefStructFields&) const;
   /** Glean { "field": "primitive_ref_field" } */
   FOLLY_ERASE ::std::unique_ptr<::std::int32_t>& primitive_ref_field_ref() & {
     return __fbthrift_field_primitive_ref_field;
@@ -3178,7 +3174,7 @@ class DeprecatedTerseWriteWithCustomDefault final  {
  public:
 
   bool operator==(const DeprecatedTerseWriteWithCustomDefault&) const;
-  bool operator<(const DeprecatedTerseWriteWithCustomDefault&) const;
+  std::partial_ordering operator<=>(const DeprecatedTerseWriteWithCustomDefault&) const;
 
   /** Glean { "field": "bool_field" } */
   template <typename..., typename fbthrift_T = bool>
@@ -3986,7 +3982,7 @@ class DeprecatedTerseWriteWithRedundantCustomDefault final  {
  public:
 
   bool operator==(const DeprecatedTerseWriteWithRedundantCustomDefault&) const;
-  bool operator<(const DeprecatedTerseWriteWithRedundantCustomDefault&) const;
+  std::partial_ordering operator<=>(const DeprecatedTerseWriteWithRedundantCustomDefault&) const;
 
   /** Glean { "field": "bool_field" } */
   template <typename..., typename fbthrift_T = bool>

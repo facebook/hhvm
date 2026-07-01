@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <compare>
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 
 namespace apache::thrift {
@@ -407,11 +408,6 @@ namespace apache::thrift::detail::qualifier {
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
 namespace facebook::thrift::test::fixtures::terse_write {
-using ::apache::thrift::detail::operator!=;
-using ::apache::thrift::detail::operator>;
-using ::apache::thrift::detail::operator<=;
-using ::apache::thrift::detail::operator>=;
-
 /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/terse_write.thrift", "name": "MyInteger", "kind": "typedef" } */
 using MyInteger = ::apache::thrift::adapt_detail::adapted_t<::my::Adapter, ::std::int32_t>;
 
@@ -467,7 +463,7 @@ class MyStruct final  {
  public:
 
   bool operator==(const MyStruct&) const;
-  bool operator<(const MyStruct&) const;
+  std::partial_ordering operator<=>(const MyStruct&) const;
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);
@@ -781,7 +777,7 @@ class MyUnion final  {
   } ;
 
   bool operator==(const MyUnion&) const;
-  bool operator<(const MyUnion&) const;
+  std::partial_ordering operator<=>(const MyUnion&) const;
 
   /** Glean { "field": "bool_field" } */
   template <typename... A> requires (sizeof...(A) == 0)
@@ -1864,7 +1860,7 @@ class MyStructWithCustomDefault final  {
  public:
 
   bool operator==(const MyStructWithCustomDefault&) const;
-  bool operator<(const MyStructWithCustomDefault&) const;
+  std::partial_ordering operator<=>(const MyStructWithCustomDefault&) const;
 
   /** Glean { "field": "field1" } */
   template <typename..., typename fbthrift_T = ::std::int64_t>
@@ -2050,7 +2046,7 @@ class StructLevelTerseStruct final  {
  public:
 
   bool operator==(const StructLevelTerseStruct&) const;
-  bool operator<(const StructLevelTerseStruct&) const;
+  std::partial_ordering operator<=>(const StructLevelTerseStruct&) const;
 
   /** Glean { "field": "bool_field" } */
   template <typename..., typename fbthrift_T = bool>
@@ -2794,7 +2790,7 @@ class FieldLevelTerseStruct final  {
  public:
 
   bool operator==(const FieldLevelTerseStruct&) const;
-  bool operator<(const FieldLevelTerseStruct&) const;
+  std::partial_ordering operator<=>(const FieldLevelTerseStruct&) const;
 
   /** Glean { "field": "terse_bool_field" } */
   template <typename..., typename fbthrift_T = bool>
@@ -4155,7 +4151,7 @@ class AdaptedFields final  {
  public:
 
   bool operator==(const AdaptedFields&) const;
-  bool operator<(const AdaptedFields&) const;
+  std::partial_ordering operator<=>(const AdaptedFields&) const;
 
   /** Glean { "field": "field1" } */
   template <typename..., typename fbthrift_T = ::facebook::thrift::test::fixtures::terse_write::MyInteger>
@@ -4356,7 +4352,7 @@ class FOLLY_EXPORT TerseException : public virtual apache::thrift::TException {
  public:
 
   bool operator==(const TerseException&) const;
-  bool operator<(const TerseException&) const;
+  std::partial_ordering operator<=>(const TerseException&) const;
 
   /** Glean { "field": "msg" } */
   template <typename..., typename fbthrift_T = ::std::string>

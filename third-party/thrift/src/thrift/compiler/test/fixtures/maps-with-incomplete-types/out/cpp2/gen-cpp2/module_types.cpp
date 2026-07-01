@@ -136,8 +136,8 @@ bool B::operator==([[maybe_unused]] const B& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool B::operator<([[maybe_unused]] const B& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering B::operator<=>([[maybe_unused]] const B& rhs) const {
+  return ::apache::thrift::op::compare<B>(*this, rhs);
 }
 
 

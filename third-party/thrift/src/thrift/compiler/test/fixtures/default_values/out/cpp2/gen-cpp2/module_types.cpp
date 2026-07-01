@@ -58,8 +58,8 @@ bool TrivialStruct::operator==([[maybe_unused]] const TrivialStruct& rhs) const 
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool TrivialStruct::operator<([[maybe_unused]] const TrivialStruct& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering TrivialStruct::operator<=>([[maybe_unused]] const TrivialStruct& rhs) const {
+  return ::apache::thrift::op::compare<TrivialStruct>(*this, rhs);
 }
 
 
@@ -115,8 +115,8 @@ bool TrivialStructWithDefault::operator==([[maybe_unused]] const TrivialStructWi
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool TrivialStructWithDefault::operator<([[maybe_unused]] const TrivialStructWithDefault& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering TrivialStructWithDefault::operator<=>([[maybe_unused]] const TrivialStructWithDefault& rhs) const {
+  return ::apache::thrift::op::compare<TrivialStructWithDefault>(*this, rhs);
 }
 
 
@@ -192,8 +192,8 @@ bool StructWithNoCustomDefaultValues::operator==([[maybe_unused]] const StructWi
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool StructWithNoCustomDefaultValues::operator<([[maybe_unused]] const StructWithNoCustomDefaultValues& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering StructWithNoCustomDefaultValues::operator<=>([[maybe_unused]] const StructWithNoCustomDefaultValues& rhs) const {
+  return ::apache::thrift::op::compare<StructWithNoCustomDefaultValues>(*this, rhs);
 }
 
 
@@ -334,8 +334,8 @@ bool StructWithCustomDefaultValues::operator==([[maybe_unused]] const StructWith
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool StructWithCustomDefaultValues::operator<([[maybe_unused]] const StructWithCustomDefaultValues& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering StructWithCustomDefaultValues::operator<=>([[maybe_unused]] const StructWithCustomDefaultValues& rhs) const {
+  return ::apache::thrift::op::compare<StructWithCustomDefaultValues>(*this, rhs);
 }
 
 
@@ -531,8 +531,8 @@ bool StructWithCollectionDefaultValues::operator==([[maybe_unused]] const Struct
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool StructWithCollectionDefaultValues::operator<([[maybe_unused]] const StructWithCollectionDefaultValues& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering StructWithCollectionDefaultValues::operator<=>([[maybe_unused]] const StructWithCollectionDefaultValues& rhs) const {
+  return ::apache::thrift::op::compare<StructWithCollectionDefaultValues>(*this, rhs);
 }
 
 

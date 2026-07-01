@@ -75,8 +75,8 @@ bool DoSomethingResult::operator==([[maybe_unused]] const DoSomethingResult& rhs
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool DoSomethingResult::operator<([[maybe_unused]] const DoSomethingResult& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering DoSomethingResult::operator<=>([[maybe_unused]] const DoSomethingResult& rhs) const {
+  return ::apache::thrift::op::compare<DoSomethingResult>(*this, rhs);
 }
 
 

@@ -92,8 +92,8 @@ bool Color::operator==([[maybe_unused]] const Color& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool Color::operator<([[maybe_unused]] const Color& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering Color::operator<=>([[maybe_unused]] const Color& rhs) const {
+  return ::apache::thrift::op::compare<Color>(*this, rhs);
 }
 
 
@@ -216,8 +216,8 @@ bool Vehicle::operator==([[maybe_unused]] const Vehicle& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool Vehicle::operator<([[maybe_unused]] const Vehicle& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering Vehicle::operator<=>([[maybe_unused]] const Vehicle& rhs) const {
+  return ::apache::thrift::op::compare<Vehicle>(*this, rhs);
 }
 
 
@@ -384,8 +384,8 @@ bool Person::operator==([[maybe_unused]] const Person& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool Person::operator<([[maybe_unused]] const Person& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering Person::operator<=>([[maybe_unused]] const Person& rhs) const {
+  return ::apache::thrift::op::compare<Person>(*this, rhs);
 }
 
 

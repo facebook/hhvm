@@ -94,8 +94,8 @@ bool SerializedStruct::operator==([[maybe_unused]] const SerializedStruct& rhs) 
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool SerializedStruct::operator<([[maybe_unused]] const SerializedStruct& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering SerializedStruct::operator<=>([[maybe_unused]] const SerializedStruct& rhs) const {
+  return ::apache::thrift::op::compare<SerializedStruct>(*this, rhs);
 }
 
 
@@ -220,8 +220,8 @@ bool SerializedUnion::operator==(const SerializedUnion& rhs) const {
   return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);
 }
 
-bool SerializedUnion::operator<([[maybe_unused]] const SerializedUnion& rhs) const {
-  return ::apache::thrift::op::detail::UnionLessThan{}(*this, rhs);
+std::partial_ordering SerializedUnion::operator<=>([[maybe_unused]] const SerializedUnion& rhs) const {
+  return ::apache::thrift::op::compare<SerializedUnion>(*this, rhs);
 }
 
 void swap(SerializedUnion& a, SerializedUnion& b) {
@@ -292,8 +292,8 @@ bool SerializedError::operator==([[maybe_unused]] const SerializedError& rhs) co
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool SerializedError::operator<([[maybe_unused]] const SerializedError& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering SerializedError::operator<=>([[maybe_unused]] const SerializedError& rhs) const {
+  return ::apache::thrift::op::compare<SerializedError>(*this, rhs);
 }
 
 
@@ -381,8 +381,8 @@ bool MarshalStruct::operator==([[maybe_unused]] const MarshalStruct& rhs) const 
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool MarshalStruct::operator<([[maybe_unused]] const MarshalStruct& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering MarshalStruct::operator<=>([[maybe_unused]] const MarshalStruct& rhs) const {
+  return ::apache::thrift::op::compare<MarshalStruct>(*this, rhs);
 }
 
 
@@ -507,8 +507,8 @@ bool MarshalUnion::operator==(const MarshalUnion& rhs) const {
   return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);
 }
 
-bool MarshalUnion::operator<([[maybe_unused]] const MarshalUnion& rhs) const {
-  return ::apache::thrift::op::detail::UnionLessThan{}(*this, rhs);
+std::partial_ordering MarshalUnion::operator<=>([[maybe_unused]] const MarshalUnion& rhs) const {
+  return ::apache::thrift::op::compare<MarshalUnion>(*this, rhs);
 }
 
 void swap(MarshalUnion& a, MarshalUnion& b) {
@@ -579,8 +579,8 @@ bool MarshalError::operator==([[maybe_unused]] const MarshalError& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool MarshalError::operator<([[maybe_unused]] const MarshalError& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering MarshalError::operator<=>([[maybe_unused]] const MarshalError& rhs) const {
+  return ::apache::thrift::op::compare<MarshalError>(*this, rhs);
 }
 
 

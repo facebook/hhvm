@@ -104,8 +104,8 @@ bool CustomException::operator==([[maybe_unused]] const CustomException& rhs) co
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool CustomException::operator<([[maybe_unused]] const CustomException& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering CustomException::operator<=>([[maybe_unused]] const CustomException& rhs) const {
+  return ::apache::thrift::op::compare<CustomException>(*this, rhs);
 }
 
 

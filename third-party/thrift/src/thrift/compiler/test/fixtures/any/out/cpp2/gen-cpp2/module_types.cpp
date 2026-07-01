@@ -74,8 +74,8 @@ bool MyStruct::operator==([[maybe_unused]] const MyStruct& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool MyStruct::operator<([[maybe_unused]] const MyStruct& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering MyStruct::operator<=>([[maybe_unused]] const MyStruct& rhs) const {
+  return ::apache::thrift::op::compare<MyStruct>(*this, rhs);
 }
 
 
@@ -172,8 +172,8 @@ bool MyUnion::operator==(const MyUnion& rhs) const {
   return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);
 }
 
-bool MyUnion::operator<([[maybe_unused]] const MyUnion& rhs) const {
-  return ::apache::thrift::op::detail::UnionLessThan{}(*this, rhs);
+std::partial_ordering MyUnion::operator<=>([[maybe_unused]] const MyUnion& rhs) const {
+  return ::apache::thrift::op::compare<MyUnion>(*this, rhs);
 }
 
 void swap(MyUnion& a, MyUnion& b) {
@@ -235,8 +235,8 @@ bool MyException::operator==([[maybe_unused]] const MyException& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool MyException::operator<([[maybe_unused]] const MyException& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering MyException::operator<=>([[maybe_unused]] const MyException& rhs) const {
+  return ::apache::thrift::op::compare<MyException>(*this, rhs);
 }
 
 

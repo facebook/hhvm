@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <compare>
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 
 namespace apache::thrift {
@@ -68,11 +69,6 @@ struct is_cpp_ref_field_optional<::facebook::thrift::test::fixtures::field_inter
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
 namespace facebook::thrift::test::fixtures::field_interceptor {
-using ::apache::thrift::detail::operator!=;
-using ::apache::thrift::detail::operator>;
-using ::apache::thrift::detail::operator<=;
-using ::apache::thrift::detail::operator>=;
-
 
 /** Glean {"file": "thrift/compiler/test/fixtures/field_interceptor/src/module.thrift", "name": "InterceptedFields", "kind": "struct" } */
 class InterceptedFields final  {
@@ -155,7 +151,7 @@ class InterceptedFields final  {
  public:
 
   bool operator==(const InterceptedFields&) const;
-  bool operator<(const InterceptedFields&) const;
+  std::partial_ordering operator<=>(const InterceptedFields&) const;
 
   /** Glean { "field": "access_field" } */
   template <typename..., typename fbthrift_T = ::std::int32_t>

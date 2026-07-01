@@ -106,8 +106,8 @@ bool MyStructNestedAnnotation::operator==([[maybe_unused]] const MyStructNestedA
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool MyStructNestedAnnotation::operator<([[maybe_unused]] const MyStructNestedAnnotation& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering MyStructNestedAnnotation::operator<=>([[maybe_unused]] const MyStructNestedAnnotation& rhs) const {
+  return ::apache::thrift::op::compare<MyStructNestedAnnotation>(*this, rhs);
 }
 
 
@@ -192,8 +192,8 @@ bool YourUnion::operator==(const YourUnion& rhs) const {
   return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);
 }
 
-bool YourUnion::operator<([[maybe_unused]] const YourUnion& rhs) const {
-  return ::apache::thrift::op::detail::UnionLessThan{}(*this, rhs);
+std::partial_ordering YourUnion::operator<=>([[maybe_unused]] const YourUnion& rhs) const {
+  return ::apache::thrift::op::compare<YourUnion>(*this, rhs);
 }
 
 void swap(YourUnion& a, YourUnion& b) {
@@ -246,8 +246,8 @@ bool YourException::operator==([[maybe_unused]] const YourException& rhs) const 
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool YourException::operator<([[maybe_unused]] const YourException& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering YourException::operator<=>([[maybe_unused]] const YourException& rhs) const {
+  return ::apache::thrift::op::compare<YourException>(*this, rhs);
 }
 
 
@@ -373,8 +373,8 @@ bool YourStruct::operator==([[maybe_unused]] const YourStruct& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool YourStruct::operator<([[maybe_unused]] const YourStruct& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering YourStruct::operator<=>([[maybe_unused]] const YourStruct& rhs) const {
+  return ::apache::thrift::op::compare<YourStruct>(*this, rhs);
 }
 
 
@@ -484,8 +484,8 @@ bool SecretStruct::operator==([[maybe_unused]] const SecretStruct& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool SecretStruct::operator<([[maybe_unused]] const SecretStruct& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering SecretStruct::operator<=>([[maybe_unused]] const SecretStruct& rhs) const {
+  return ::apache::thrift::op::compare<SecretStruct>(*this, rhs);
 }
 
 

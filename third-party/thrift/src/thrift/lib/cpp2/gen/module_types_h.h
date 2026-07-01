@@ -153,6 +153,9 @@ FOLLY_ERASE constexpr Struct make_structured_constant(
   return s;
 }
 
+// Compatibility for checked-in generated and fake headers that still import
+// these legacy helper names. New generated C++20 ordering should not depend on
+// them.
 template <typename T, std::enable_if_t<st::IsThriftClass<T>{}, int> = 0>
 constexpr bool operator!=(const T & lhs, const T & rhs) {
   return !(lhs == rhs);

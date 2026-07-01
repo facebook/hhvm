@@ -90,8 +90,8 @@ bool runtime_annotation::operator==([[maybe_unused]] const runtime_annotation& r
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool runtime_annotation::operator<([[maybe_unused]] const runtime_annotation& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering runtime_annotation::operator<=>([[maybe_unused]] const runtime_annotation& rhs) const {
+  return ::apache::thrift::op::compare<runtime_annotation>(*this, rhs);
 }
 
 
@@ -159,8 +159,8 @@ bool structured_annotation_inline::operator==([[maybe_unused]] const structured_
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool structured_annotation_inline::operator<([[maybe_unused]] const structured_annotation_inline& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering structured_annotation_inline::operator<=>([[maybe_unused]] const structured_annotation_inline& rhs) const {
+  return ::apache::thrift::op::compare<structured_annotation_inline>(*this, rhs);
 }
 
 
@@ -234,8 +234,8 @@ bool structured_annotation_with_default::operator==([[maybe_unused]] const struc
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool structured_annotation_with_default::operator<([[maybe_unused]] const structured_annotation_with_default& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering structured_annotation_with_default::operator<=>([[maybe_unused]] const structured_annotation_with_default& rhs) const {
+  return ::apache::thrift::op::compare<structured_annotation_with_default>(*this, rhs);
 }
 
 
@@ -320,8 +320,8 @@ bool structured_annotation_recursive::operator==([[maybe_unused]] const structur
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool structured_annotation_recursive::operator<([[maybe_unused]] const structured_annotation_recursive& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering structured_annotation_recursive::operator<=>([[maybe_unused]] const structured_annotation_recursive& rhs) const {
+  return ::apache::thrift::op::compare<structured_annotation_recursive>(*this, rhs);
 }
 
 
@@ -387,8 +387,8 @@ bool structured_annotation_forward::operator==([[maybe_unused]] const structured
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool structured_annotation_forward::operator<([[maybe_unused]] const structured_annotation_forward& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering structured_annotation_forward::operator<=>([[maybe_unused]] const structured_annotation_forward& rhs) const {
+  return ::apache::thrift::op::compare<structured_annotation_forward>(*this, rhs);
 }
 
 
@@ -465,8 +465,8 @@ bool structured_annotation_nested::operator==([[maybe_unused]] const structured_
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool structured_annotation_nested::operator<([[maybe_unused]] const structured_annotation_nested& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering structured_annotation_nested::operator<=>([[maybe_unused]] const structured_annotation_nested& rhs) const {
+  return ::apache::thrift::op::compare<structured_annotation_nested>(*this, rhs);
 }
 
 
@@ -561,8 +561,8 @@ bool MyStruct::operator==([[maybe_unused]] const MyStruct& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool MyStruct::operator<([[maybe_unused]] const MyStruct& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering MyStruct::operator<=>([[maybe_unused]] const MyStruct& rhs) const {
+  return ::apache::thrift::op::compare<MyStruct>(*this, rhs);
 }
 
 
@@ -646,8 +646,8 @@ bool MyException::operator==([[maybe_unused]] const MyException& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool MyException::operator<([[maybe_unused]] const MyException& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering MyException::operator<=>([[maybe_unused]] const MyException& rhs) const {
+  return ::apache::thrift::op::compare<MyException>(*this, rhs);
 }
 
 
@@ -752,8 +752,8 @@ bool MyUnion::operator==(const MyUnion& rhs) const {
   return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);
 }
 
-bool MyUnion::operator<([[maybe_unused]] const MyUnion& rhs) const {
-  return ::apache::thrift::op::detail::UnionLessThan{}(*this, rhs);
+std::partial_ordering MyUnion::operator<=>([[maybe_unused]] const MyUnion& rhs) const {
+  return ::apache::thrift::op::compare<MyUnion>(*this, rhs);
 }
 
 void swap(MyUnion& a, MyUnion& b) {

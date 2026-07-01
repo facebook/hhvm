@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <compare>
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 #include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/includes_types.h"
 #include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/includes_constants.h"
@@ -1080,11 +1081,6 @@ template<> struct equal_to<typename ::some::valid::ns::AnnotatedStruct> {
 } // std
 // END hash_and_equal_to
 namespace some::valid::ns {
-using ::apache::thrift::detail::operator!=;
-using ::apache::thrift::detail::operator>;
-using ::apache::thrift::detail::operator<=;
-using ::apache::thrift::detail::operator>=;
-
 /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "name": "AStruct", "kind": "typedef" } */
 using AStruct = ::a::different::ns::AStruct;
 /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "name": "IOBuf", "kind": "typedef" } */
@@ -1177,7 +1173,7 @@ class Empty final  {
  public:
 
   bool operator==(const Empty&) const;
-  bool operator<(const Empty&) const;
+  std::partial_ordering operator<=>(const Empty&) const;
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);
@@ -1263,6 +1259,15 @@ class ASimpleStruct final  {
 
   bool operator==(const ASimpleStruct&) const;
   bool operator<(const ASimpleStruct&) const;
+  bool operator>(const ASimpleStruct& rhs) const {
+    return rhs < *this;
+  }
+  bool operator<=(const ASimpleStruct& rhs) const {
+    return !(rhs < *this);
+  }
+  bool operator>=(const ASimpleStruct& rhs) const {
+    return !(*this < rhs);
+  }
 
   /** Glean { "field": "boolField" } */
   template <typename..., typename fbthrift_T = ::std::int64_t>
@@ -1391,7 +1396,7 @@ class ASimpleStructNoexcept final  {
  public:
 
   bool operator==(const ASimpleStructNoexcept&) const;
-  bool operator<(const ASimpleStructNoexcept&) const;
+  std::partial_ordering operator<=>(const ASimpleStructNoexcept&) const;
 
   /** Glean { "field": "boolField" } */
   template <typename..., typename fbthrift_T = ::std::int64_t>
@@ -1562,7 +1567,7 @@ class MyStruct final  {
  public:
 
   bool operator==(const MyStruct&) const;
-  bool operator<(const MyStruct&) const;
+  std::partial_ordering operator<=>(const MyStruct&) const;
 
   /** Glean { "field": "MyBoolField" } */
   template <typename..., typename fbthrift_T = bool>
@@ -2249,7 +2254,7 @@ class SimpleUnion  {
   } ;
 
   bool operator==(const SimpleUnion&) const;
-  bool operator<(const SimpleUnion&) const;
+  std::partial_ordering operator<=>(const SimpleUnion&) const;
 
   /** Glean { "field": "intValue" } */
   template <typename... A> requires (sizeof...(A) == 0)
@@ -2557,7 +2562,7 @@ class FOLLY_EXPORT AnException : public virtual apache::thrift::TException {
  public:
 
   bool operator==(const AnException&) const;
-  bool operator<(const AnException&) const;
+  std::partial_ordering operator<=>(const AnException&) const;
 
   /** Glean { "field": "code" } */
   template <typename..., typename fbthrift_T = ::std::int32_t>
@@ -3906,7 +3911,7 @@ class ComplexUnion final  {
   } ;
 
   bool operator==(const ComplexUnion&) const;
-  bool operator<(const ComplexUnion&) const;
+  std::partial_ordering operator<=>(const ComplexUnion&) const;
 
   /** Glean { "field": "intValue" } */
   template <typename... A> requires (sizeof...(A) == 0)
@@ -6123,7 +6128,7 @@ class FOLLY_EXPORT AnotherException : public virtual apache::thrift::TException 
  public:
 
   bool operator==(const AnotherException&) const;
-  bool operator<(const AnotherException&) const;
+  std::partial_ordering operator<=>(const AnotherException&) const;
 
   /** Glean { "field": "code" } */
   template <typename..., typename fbthrift_T = ::std::int32_t>
@@ -6528,7 +6533,7 @@ class ContainerStruct final  {
  public:
 
   bool operator==(const ContainerStruct&) const;
-  bool operator<(const ContainerStruct&) const;
+  std::partial_ordering operator<=>(const ContainerStruct&) const;
 
   /** Glean { "field": "fieldA" } */
   template <typename..., typename fbthrift_T = bool>
@@ -8853,7 +8858,7 @@ class MyIncludedStruct final  {
  public:
 
   bool operator==(const MyIncludedStruct&) const;
-  bool operator<(const MyIncludedStruct&) const;
+  std::partial_ordering operator<=>(const MyIncludedStruct&) const;
 
   /** Glean { "field": "MyIncludedInt" } */
   template <typename..., typename fbthrift_T = ::a::different::ns::IncludedInt64>
@@ -9269,7 +9274,7 @@ class AnnotatedStruct  {
  public:
 
   bool operator==(const AnnotatedStruct&) const;
-  bool operator<(const AnnotatedStruct&) const;
+  std::partial_ordering operator<=>(const AnnotatedStruct&) const;
 
   /** Glean { "field": "no_annotation" } */
   template <typename..., typename fbthrift_T = ::some::valid::ns::ContainerStruct>
@@ -11058,7 +11063,7 @@ class ComplexContainerStruct final  {
  public:
 
   bool operator==(const ComplexContainerStruct&) const;
-  bool operator<(const ComplexContainerStruct&) const;
+  std::partial_ordering operator<=>(const ComplexContainerStruct&) const;
 
   /** Glean { "field": "map_of_iobufs" } */
   template <typename..., typename fbthrift_T = ::std::map<::std::string, ::some::valid::ns::IOBuf>>
@@ -11252,7 +11257,7 @@ class FloatStruct final  {
  public:
 
   bool operator==(const FloatStruct&) const;
-  bool operator<(const FloatStruct&) const;
+  std::partial_ordering operator<=>(const FloatStruct&) const;
 
   /** Glean { "field": "floatField" } */
   template <typename..., typename fbthrift_T = float>
@@ -11482,7 +11487,7 @@ class FloatUnion final  {
   } ;
 
   bool operator==(const FloatUnion&) const;
-  bool operator<(const FloatUnion&) const;
+  std::partial_ordering operator<=>(const FloatUnion&) const;
 
   /** Glean { "field": "floatSide" } */
   template <typename... A> requires (sizeof...(A) == 0)
@@ -11696,7 +11701,7 @@ class AllRequiredNoExceptMoveCtrStruct final  {
  public:
 
   bool operator==(const AllRequiredNoExceptMoveCtrStruct&) const;
-  bool operator<(const AllRequiredNoExceptMoveCtrStruct&) const;
+  std::partial_ordering operator<=>(const AllRequiredNoExceptMoveCtrStruct&) const;
 
   /** Glean { "field": "intField" } */
   template <typename..., typename fbthrift_T = ::std::int64_t>

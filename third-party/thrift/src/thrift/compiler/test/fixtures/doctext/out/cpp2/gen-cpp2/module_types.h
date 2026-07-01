@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <compare>
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 
 namespace apache::thrift {
@@ -100,11 +101,6 @@ namespace apache::thrift::detail::qualifier {
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
 namespace cpp2 {
-using ::apache::thrift::detail::operator!=;
-using ::apache::thrift::detail::operator>;
-using ::apache::thrift::detail::operator<=;
-using ::apache::thrift::detail::operator>=;
-
 /** Glean {"file": "thrift/compiler/test/fixtures/doctext/src/module.thrift", "name": "lanyard", "kind": "typedef" } */
 using lanyard = ::std::string;
 /** Glean {"file": "thrift/compiler/test/fixtures/doctext/src/module.thrift", "name": "number", "kind": "typedef" } */
@@ -168,7 +164,7 @@ class A final  {
  public:
 
   bool operator==(const A&) const;
-  bool operator<(const A&) const;
+  std::partial_ordering operator<=>(const A&) const;
 
   /** Glean { "field": "useless_field" } */
   template <typename..., typename fbthrift_T = ::std::int32_t>
@@ -357,7 +353,7 @@ class U final  {
   } ;
 
   bool operator==(const U&) const;
-  bool operator<(const U&) const;
+  std::partial_ordering operator<=>(const U&) const;
 
   /** Glean { "field": "i" } */
   template <typename... A> requires (sizeof...(A) == 0)
@@ -600,7 +596,7 @@ class FOLLY_EXPORT Bang : public virtual apache::thrift::TException {
  public:
 
   bool operator==(const Bang&) const;
-  bool operator<(const Bang&) const;
+  std::partial_ordering operator<=>(const Bang&) const;
 
   /** Glean { "field": "message" } */
   template <typename..., typename fbthrift_T = ::std::string>

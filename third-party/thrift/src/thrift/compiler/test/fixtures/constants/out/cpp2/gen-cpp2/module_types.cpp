@@ -192,8 +192,8 @@ bool Internship::operator==([[maybe_unused]] const Internship& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool Internship::operator<([[maybe_unused]] const Internship& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering Internship::operator<=>([[maybe_unused]] const Internship& rhs) const {
+  return ::apache::thrift::op::compare<Internship>(*this, rhs);
 }
 
 
@@ -284,8 +284,8 @@ bool Range::operator==([[maybe_unused]] const Range& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool Range::operator<([[maybe_unused]] const Range& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering Range::operator<=>([[maybe_unused]] const Range& rhs) const {
+  return ::apache::thrift::op::compare<Range>(*this, rhs);
 }
 
 
@@ -373,8 +373,8 @@ bool struct1::operator==([[maybe_unused]] const struct1& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool struct1::operator<([[maybe_unused]] const struct1& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering struct1::operator<=>([[maybe_unused]] const struct1& rhs) const {
+  return ::apache::thrift::op::compare<struct1>(*this, rhs);
 }
 
 
@@ -463,8 +463,8 @@ bool struct2::operator==([[maybe_unused]] const struct2& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool struct2::operator<([[maybe_unused]] const struct2& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering struct2::operator<=>([[maybe_unused]] const struct2& rhs) const {
+  return ::apache::thrift::op::compare<struct2>(*this, rhs);
 }
 
 
@@ -572,8 +572,8 @@ bool struct3::operator==([[maybe_unused]] const struct3& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool struct3::operator<([[maybe_unused]] const struct3& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering struct3::operator<=>([[maybe_unused]] const struct3& rhs) const {
+  return ::apache::thrift::op::compare<struct3>(*this, rhs);
 }
 
 
@@ -665,8 +665,8 @@ bool struct4::operator==([[maybe_unused]] const struct4& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool struct4::operator<([[maybe_unused]] const struct4& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering struct4::operator<=>([[maybe_unused]] const struct4& rhs) const {
+  return ::apache::thrift::op::compare<struct4>(*this, rhs);
 }
 
 
@@ -805,8 +805,8 @@ bool union1::operator==(const union1& rhs) const {
   return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);
 }
 
-bool union1::operator<([[maybe_unused]] const union1& rhs) const {
-  return ::apache::thrift::op::detail::UnionLessThan{}(*this, rhs);
+std::partial_ordering union1::operator<=>([[maybe_unused]] const union1& rhs) const {
+  return ::apache::thrift::op::compare<union1>(*this, rhs);
 }
 
 void swap(union1& a, union1& b) {
@@ -928,8 +928,8 @@ bool union2::operator==(const union2& rhs) const {
   return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);
 }
 
-bool union2::operator<([[maybe_unused]] const union2& rhs) const {
-  return ::apache::thrift::op::detail::UnionLessThan{}(*this, rhs);
+std::partial_ordering union2::operator<=>([[maybe_unused]] const union2& rhs) const {
+  return ::apache::thrift::op::compare<union2>(*this, rhs);
 }
 
 void swap(union2& a, union2& b) {

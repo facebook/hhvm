@@ -73,8 +73,8 @@ bool Request::operator==([[maybe_unused]] const Request& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool Request::operator<([[maybe_unused]] const Request& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering Request::operator<=>([[maybe_unused]] const Request& rhs) const {
+  return ::apache::thrift::op::compare<Request>(*this, rhs);
 }
 
 
@@ -138,8 +138,8 @@ bool AdaptedRequest::operator==([[maybe_unused]] const AdaptedRequest& rhs) cons
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool AdaptedRequest::operator<([[maybe_unused]] const AdaptedRequest& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering AdaptedRequest::operator<=>([[maybe_unused]] const AdaptedRequest& rhs) const {
+  return ::apache::thrift::op::compare<AdaptedRequest>(*this, rhs);
 }
 
 
@@ -203,8 +203,8 @@ bool Response::operator==([[maybe_unused]] const Response& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool Response::operator<([[maybe_unused]] const Response& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering Response::operator<=>([[maybe_unused]] const Response& rhs) const {
+  return ::apache::thrift::op::compare<Response>(*this, rhs);
 }
 
 

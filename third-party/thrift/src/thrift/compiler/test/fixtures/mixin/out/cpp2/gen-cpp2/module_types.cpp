@@ -75,8 +75,8 @@ bool Mixin1::operator==([[maybe_unused]] const Mixin1& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool Mixin1::operator<([[maybe_unused]] const Mixin1& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering Mixin1::operator<=>([[maybe_unused]] const Mixin1& rhs) const {
+  return ::apache::thrift::op::compare<Mixin1>(*this, rhs);
 }
 
 
@@ -144,8 +144,8 @@ bool Mixin2::operator==([[maybe_unused]] const Mixin2& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool Mixin2::operator<([[maybe_unused]] const Mixin2& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering Mixin2::operator<=>([[maybe_unused]] const Mixin2& rhs) const {
+  return ::apache::thrift::op::compare<Mixin2>(*this, rhs);
 }
 
 
@@ -231,8 +231,8 @@ bool Mixin3Base::operator==([[maybe_unused]] const Mixin3Base& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool Mixin3Base::operator<([[maybe_unused]] const Mixin3Base& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering Mixin3Base::operator<=>([[maybe_unused]] const Mixin3Base& rhs) const {
+  return ::apache::thrift::op::compare<Mixin3Base>(*this, rhs);
 }
 
 
@@ -305,8 +305,8 @@ bool Foo::operator==([[maybe_unused]] const Foo& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool Foo::operator<([[maybe_unused]] const Foo& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering Foo::operator<=>([[maybe_unused]] const Foo& rhs) const {
+  return ::apache::thrift::op::compare<Foo>(*this, rhs);
 }
 
 

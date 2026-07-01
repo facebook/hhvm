@@ -75,8 +75,8 @@ bool IncludedB::operator==([[maybe_unused]] const IncludedB& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool IncludedB::operator<([[maybe_unused]] const IncludedB& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering IncludedB::operator<=>([[maybe_unused]] const IncludedB& rhs) const {
+  return ::apache::thrift::op::compare<IncludedB>(*this, rhs);
 }
 
 

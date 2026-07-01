@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <compare>
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 
 namespace apache::thrift {
@@ -116,11 +117,6 @@ namespace apache::thrift::detail::qualifier {
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
 namespace cpp2 {
-using ::apache::thrift::detail::operator!=;
-using ::apache::thrift::detail::operator>;
-using ::apache::thrift::detail::operator<=;
-using ::apache::thrift::detail::operator>=;
-
 
 /** Glean {"file": "thrift/compiler/test/fixtures/no_metadata/src/module.thrift", "name": "MyDataItem", "kind": "struct" } */
 class MyDataItem final  {
@@ -173,7 +169,7 @@ class MyDataItem final  {
  public:
 
   bool operator==(const MyDataItem&) const;
-  bool operator<(const MyDataItem&) const;
+  std::partial_ordering operator<=>(const MyDataItem&) const;
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);
@@ -272,7 +268,7 @@ class MyStruct final  {
  public:
 
   bool operator==(const MyStruct&) const;
-  bool operator<(const MyStruct&) const;
+  std::partial_ordering operator<=>(const MyStruct&) const;
 
   /** Glean { "field": "MyIntField" } */
   template <typename..., typename fbthrift_T = ::std::int64_t>
@@ -627,7 +623,7 @@ class MyUnion final  {
   } ;
 
   bool operator==(const MyUnion&) const;
-  bool operator<(const MyUnion&) const;
+  std::partial_ordering operator<=>(const MyUnion&) const;
 
   /** Glean { "field": "myEnum" } */
   template <typename... A> requires (sizeof...(A) == 0)

@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <compare>
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 #include "thrift/compiler/test/fixtures/python_capi/src/gen-cpp2/thrift_dep_types.h"
 #include "thrift/compiler/test/fixtures/python_capi/src/gen-cpp2/serialized_dep_types.h"
@@ -557,11 +558,6 @@ struct is_cpp_ref_field_optional<::test::fixtures::python_capi::MapStruct,::apac
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
 namespace test::fixtures::python_capi {
-using ::apache::thrift::detail::operator!=;
-using ::apache::thrift::detail::operator>;
-using ::apache::thrift::detail::operator<=;
-using ::apache::thrift::detail::operator>=;
-
 /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/module.thrift", "name": "uint64", "kind": "typedef" } */
 using uint64 = uint64_t;
 /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/module.thrift", "name": "ui64", "kind": "typedef" } */
@@ -636,7 +632,7 @@ class MyDataItem final  {
  public:
 
   bool operator==(const MyDataItem&) const;
-  bool operator<(const MyDataItem&) const;
+  std::partial_ordering operator<=>(const MyDataItem&) const;
 
   /** Glean { "field": "s" } */
   template <typename..., typename fbthrift_T = ::std::string>
@@ -808,7 +804,7 @@ class MyStruct final  {
  public:
 
   bool operator==(const MyStruct&) const;
-  bool operator<(const MyStruct&) const;
+  std::partial_ordering operator<=>(const MyStruct&) const;
 
   /** Glean { "field": "inty" } */
   template <typename..., typename fbthrift_T = ::std::int64_t>
@@ -1283,7 +1279,7 @@ class TransitiveDoubler final  {
  public:
 
   bool operator==(const TransitiveDoubler&) const;
-  bool operator<(const TransitiveDoubler&) const;
+  std::partial_ordering operator<=>(const TransitiveDoubler&) const;
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);
@@ -1376,7 +1372,7 @@ class DoubledPair final  {
  public:
 
   bool operator==(const DoubledPair&) const;
-  bool operator<(const DoubledPair&) const;
+  std::partial_ordering operator<=>(const DoubledPair&) const;
 
   /** Glean { "field": "s" } */
   template <typename..., typename fbthrift_T = ::std::string>
@@ -1571,7 +1567,7 @@ class StringPair final  {
  public:
 
   bool operator==(const StringPair&) const;
-  bool operator<(const StringPair&) const;
+  std::partial_ordering operator<=>(const StringPair&) const;
 
   /** Glean { "field": "normal" } */
   template <typename..., typename fbthrift_T = ::std::string>
@@ -1742,7 +1738,7 @@ class VapidStruct final  {
  public:
 
   bool operator==(const VapidStruct&) const;
-  bool operator<(const VapidStruct&) const;
+  std::partial_ordering operator<=>(const VapidStruct&) const;
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);
@@ -1890,7 +1886,7 @@ class PrimitiveStruct final  {
  public:
 
   bool operator==(const PrimitiveStruct&) const;
-  bool operator<(const PrimitiveStruct&) const;
+  std::partial_ordering operator<=>(const PrimitiveStruct&) const;
 
   /** Glean { "field": "booly" } */
   template <typename..., typename fbthrift_T = bool>
@@ -2754,7 +2750,7 @@ class AdaptedFields final  {
  public:
 
   bool operator==(const AdaptedFields&) const;
-  bool operator<(const AdaptedFields&) const;
+  std::partial_ordering operator<=>(const AdaptedFields&) const;
 
   /** Glean { "field": "adapted_int" } */
   template <typename..., typename fbthrift_T = ::apache::thrift::type::ProtocolId>
@@ -3048,7 +3044,7 @@ class ListStruct final  {
  public:
 
   bool operator==(const ListStruct&) const;
-  bool operator<(const ListStruct&) const;
+  std::partial_ordering operator<=>(const ListStruct&) const;
 
   /** Glean { "field": "boolz" } */
   template <typename..., typename fbthrift_T = ::std::vector<bool>>
@@ -3614,7 +3610,7 @@ class SetStruct final  {
  public:
 
   bool operator==(const SetStruct&) const;
-  bool operator<(const SetStruct&) const;
+  std::partial_ordering operator<=>(const SetStruct&) const;
 
   /** Glean { "field": "enumz" } */
   template <typename..., typename fbthrift_T = ::std::set<::test::fixtures::python_capi::MyEnum>>
@@ -4088,7 +4084,7 @@ class MapStruct final  {
  public:
 
   bool operator==(const MapStruct&) const;
-  bool operator<(const MapStruct&) const;
+  std::partial_ordering operator<=>(const MapStruct&) const;
 
   /** Glean { "field": "enumz" } */
   template <typename..., typename fbthrift_T = ::std::map<::test::fixtures::python_capi::MyEnum, ::std::string>>
@@ -4716,7 +4712,7 @@ class ComposeStruct final  {
  public:
 
   bool operator==(const ComposeStruct&) const;
-  bool operator<(const ComposeStruct&) const;
+  std::partial_ordering operator<=>(const ComposeStruct&) const;
 
   /** Glean { "field": "enum_" } */
   template <typename..., typename fbthrift_T = ::test::fixtures::python_capi::MyEnum>
@@ -5415,7 +5411,7 @@ class Shallot final  {
   } ;
 
   bool operator==(const Shallot&) const;
-  bool operator<(const Shallot&) const;
+  std::partial_ordering operator<=>(const Shallot&) const;
 
   /** Glean { "field": "myEnum" } */
   template <typename... A> requires (sizeof...(A) == 0)
@@ -6060,7 +6056,7 @@ class SomeBinary final  {
   } ;
 
   bool operator==(const SomeBinary&) const;
-  bool operator<(const SomeBinary&) const;
+  std::partial_ordering operator<=>(const SomeBinary&) const;
 
   /** Glean { "field": "iobuf" } */
   template <typename... A> requires (sizeof...(A) == 0)

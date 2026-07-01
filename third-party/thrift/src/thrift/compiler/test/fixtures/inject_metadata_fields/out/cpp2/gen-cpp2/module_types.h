@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <compare>
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 #include "thrift/compiler/test/fixtures/inject_metadata_fields/gen-cpp2/foo_types.h"
 
@@ -91,11 +92,6 @@ struct is_cpp_ref_field_optional<::cpp2::FieldsInjectedWithIncludedStruct,::apac
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
 namespace cpp2 {
-using ::apache::thrift::detail::operator!=;
-using ::apache::thrift::detail::operator>;
-using ::apache::thrift::detail::operator<=;
-using ::apache::thrift::detail::operator>=;
-
 
 /** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "Fields", "kind": "struct" } */
 class Fields final  {
@@ -157,7 +153,7 @@ class Fields final  {
  public:
 
   bool operator==(const Fields&) const;
-  bool operator<(const Fields&) const;
+  std::partial_ordering operator<=>(const Fields&) const;
 
   /** Glean { "field": "injected_field" } */
   template <typename..., typename fbthrift_T = ::std::string>
@@ -300,7 +296,7 @@ class FieldsInjectedToEmptyStruct final  {
  public:
 
   bool operator==(const FieldsInjectedToEmptyStruct&) const;
-  bool operator<(const FieldsInjectedToEmptyStruct&) const;
+  std::partial_ordering operator<=>(const FieldsInjectedToEmptyStruct&) const;
 
   /** Glean { "field": "injected_field" } */
   template <typename..., typename fbthrift_T = ::std::string>
@@ -447,7 +443,7 @@ class FieldsInjectedToStruct final  {
  public:
 
   bool operator==(const FieldsInjectedToStruct&) const;
-  bool operator<(const FieldsInjectedToStruct&) const;
+  std::partial_ordering operator<=>(const FieldsInjectedToStruct&) const;
 
   /** Glean { "field": "string_field" } */
   template <typename..., typename fbthrift_T = ::std::string>
@@ -658,7 +654,7 @@ class FieldsInjectedWithIncludedStruct final  {
  public:
 
   bool operator==(const FieldsInjectedWithIncludedStruct&) const;
-  bool operator<(const FieldsInjectedWithIncludedStruct&) const;
+  std::partial_ordering operator<=>(const FieldsInjectedWithIncludedStruct&) const;
 
   /** Glean { "field": "string_field" } */
   template <typename..., typename fbthrift_T = ::std::string>
@@ -933,7 +929,7 @@ class FieldsInjectedWithFieldsWithIncludedStruct final  {
  public:
 
   bool operator==(const FieldsInjectedWithFieldsWithIncludedStruct&) const;
-  bool operator<(const FieldsInjectedWithFieldsWithIncludedStruct&) const;
+  std::partial_ordering operator<=>(const FieldsInjectedWithFieldsWithIncludedStruct&) const;
 
   /** Glean { "field": "string_field" } */
   template <typename..., typename fbthrift_T = ::std::string>

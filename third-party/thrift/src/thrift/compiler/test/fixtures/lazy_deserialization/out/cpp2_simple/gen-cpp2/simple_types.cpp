@@ -100,8 +100,8 @@ bool Foo::operator==([[maybe_unused]] const Foo& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool Foo::operator<([[maybe_unused]] const Foo& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering Foo::operator<=>([[maybe_unused]] const Foo& rhs) const {
+  return ::apache::thrift::op::compare<Foo>(*this, rhs);
 }
 
 
@@ -271,8 +271,8 @@ bool LazyFoo::operator==([[maybe_unused]] const LazyFoo& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool LazyFoo::operator<([[maybe_unused]] const LazyFoo& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering LazyFoo::operator<=>([[maybe_unused]] const LazyFoo& rhs) const {
+  return ::apache::thrift::op::compare<LazyFoo>(*this, rhs);
 }
 
 
@@ -379,8 +379,8 @@ bool OptionalFoo::operator==([[maybe_unused]] const OptionalFoo& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool OptionalFoo::operator<([[maybe_unused]] const OptionalFoo& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering OptionalFoo::operator<=>([[maybe_unused]] const OptionalFoo& rhs) const {
+  return ::apache::thrift::op::compare<OptionalFoo>(*this, rhs);
 }
 
 
@@ -553,8 +553,8 @@ bool OptionalLazyFoo::operator==([[maybe_unused]] const OptionalLazyFoo& rhs) co
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool OptionalLazyFoo::operator<([[maybe_unused]] const OptionalLazyFoo& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering OptionalLazyFoo::operator<=>([[maybe_unused]] const OptionalLazyFoo& rhs) const {
+  return ::apache::thrift::op::compare<OptionalLazyFoo>(*this, rhs);
 }
 
 
@@ -717,8 +717,8 @@ bool OptionalBoxedLazyFoo::operator==([[maybe_unused]] const OptionalBoxedLazyFo
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool OptionalBoxedLazyFoo::operator<([[maybe_unused]] const OptionalBoxedLazyFoo& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering OptionalBoxedLazyFoo::operator<=>([[maybe_unused]] const OptionalBoxedLazyFoo& rhs) const {
+  return ::apache::thrift::op::compare<OptionalBoxedLazyFoo>(*this, rhs);
 }
 
 
@@ -883,8 +883,8 @@ bool LazyCppRef::operator==([[maybe_unused]] const LazyCppRef& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool LazyCppRef::operator<([[maybe_unused]] const LazyCppRef& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering LazyCppRef::operator<=>([[maybe_unused]] const LazyCppRef& rhs) const {
+  return ::apache::thrift::op::compare<LazyCppRef>(*this, rhs);
 }
 
 
@@ -982,8 +982,8 @@ bool IndexedFoo::operator==([[maybe_unused]] const IndexedFoo& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool IndexedFoo::operator<([[maybe_unused]] const IndexedFoo& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering IndexedFoo::operator<=>([[maybe_unused]] const IndexedFoo& rhs) const {
+  return ::apache::thrift::op::compare<IndexedFoo>(*this, rhs);
 }
 
 
@@ -1126,8 +1126,8 @@ bool OptionalIndexedFoo::operator==([[maybe_unused]] const OptionalIndexedFoo& r
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool OptionalIndexedFoo::operator<([[maybe_unused]] const OptionalIndexedFoo& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering OptionalIndexedFoo::operator<=>([[maybe_unused]] const OptionalIndexedFoo& rhs) const {
+  return ::apache::thrift::op::compare<OptionalIndexedFoo>(*this, rhs);
 }
 
 
@@ -1220,8 +1220,8 @@ bool Empty::operator==([[maybe_unused]] const Empty& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool Empty::operator<([[maybe_unused]] const Empty& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering Empty::operator<=>([[maybe_unused]] const Empty& rhs) const {
+  return ::apache::thrift::op::compare<Empty>(*this, rhs);
 }
 
 

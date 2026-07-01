@@ -81,8 +81,8 @@ bool InitialResponse::operator==([[maybe_unused]] const InitialResponse& rhs) co
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool InitialResponse::operator<([[maybe_unused]] const InitialResponse& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering InitialResponse::operator<=>([[maybe_unused]] const InitialResponse& rhs) const {
+  return ::apache::thrift::op::compare<InitialResponse>(*this, rhs);
 }
 
 
@@ -145,8 +145,8 @@ bool FinalResponse::operator==([[maybe_unused]] const FinalResponse& rhs) const 
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool FinalResponse::operator<([[maybe_unused]] const FinalResponse& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering FinalResponse::operator<=>([[maybe_unused]] const FinalResponse& rhs) const {
+  return ::apache::thrift::op::compare<FinalResponse>(*this, rhs);
 }
 
 
@@ -209,8 +209,8 @@ bool SinkPayload::operator==([[maybe_unused]] const SinkPayload& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool SinkPayload::operator<([[maybe_unused]] const SinkPayload& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering SinkPayload::operator<=>([[maybe_unused]] const SinkPayload& rhs) const {
+  return ::apache::thrift::op::compare<SinkPayload>(*this, rhs);
 }
 
 
@@ -273,8 +273,8 @@ bool CompatibleWithKeywordSink::operator==([[maybe_unused]] const CompatibleWith
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool CompatibleWithKeywordSink::operator<([[maybe_unused]] const CompatibleWithKeywordSink& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering CompatibleWithKeywordSink::operator<=>([[maybe_unused]] const CompatibleWithKeywordSink& rhs) const {
+  return ::apache::thrift::op::compare<CompatibleWithKeywordSink>(*this, rhs);
 }
 
 
@@ -337,8 +337,8 @@ bool InitialException::operator==([[maybe_unused]] const InitialException& rhs) 
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool InitialException::operator<([[maybe_unused]] const InitialException& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering InitialException::operator<=>([[maybe_unused]] const InitialException& rhs) const {
+  return ::apache::thrift::op::compare<InitialException>(*this, rhs);
 }
 
 
@@ -401,8 +401,8 @@ bool SinkException1::operator==([[maybe_unused]] const SinkException1& rhs) cons
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool SinkException1::operator<([[maybe_unused]] const SinkException1& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering SinkException1::operator<=>([[maybe_unused]] const SinkException1& rhs) const {
+  return ::apache::thrift::op::compare<SinkException1>(*this, rhs);
 }
 
 
@@ -466,8 +466,8 @@ bool SinkException2::operator==([[maybe_unused]] const SinkException2& rhs) cons
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool SinkException2::operator<([[maybe_unused]] const SinkException2& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering SinkException2::operator<=>([[maybe_unused]] const SinkException2& rhs) const {
+  return ::apache::thrift::op::compare<SinkException2>(*this, rhs);
 }
 
 

@@ -47,8 +47,8 @@ bool Empty::operator==([[maybe_unused]] const Empty& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool Empty::operator<([[maybe_unused]] const Empty& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering Empty::operator<=>([[maybe_unused]] const Empty& rhs) const {
+  return ::apache::thrift::op::compare<Empty>(*this, rhs);
 }
 
 
@@ -130,8 +130,8 @@ bool Nada::operator==(const Nada& rhs) const {
   return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);
 }
 
-bool Nada::operator<([[maybe_unused]] const Nada& rhs) const {
-  return ::apache::thrift::op::detail::UnionLessThan{}(*this, rhs);
+std::partial_ordering Nada::operator<=>([[maybe_unused]] const Nada& rhs) const {
+  return ::apache::thrift::op::compare<Nada>(*this, rhs);
 }
 
 void swap(Nada& a, Nada& b) {

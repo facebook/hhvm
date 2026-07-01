@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <compare>
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 #include "thrift/compiler/test/fixtures/qualified/gen-cpp2/module0_types.h"
 #include "thrift/compiler/test/fixtures/qualified/gen-cpp2/module1_types.h"
@@ -55,11 +56,6 @@ namespace apache::thrift::detail::qualifier {
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
 namespace module2 {
-using ::apache::thrift::detail::operator!=;
-using ::apache::thrift::detail::operator>;
-using ::apache::thrift::detail::operator<=;
-using ::apache::thrift::detail::operator>=;
-
 
 /** Glean {"file": "thrift/compiler/test/fixtures/qualified/src/module2.thrift", "name": "Struct", "kind": "struct" } */
 class Struct final  {
@@ -122,7 +118,7 @@ class Struct final  {
  public:
 
   bool operator==(const Struct&) const;
-  bool operator<(const Struct&) const;
+  std::partial_ordering operator<=>(const Struct&) const;
 
   /** Glean { "field": "first" } */
   template <typename..., typename fbthrift_T = ::module0::Struct>
@@ -315,7 +311,7 @@ class BigStruct final  {
  public:
 
   bool operator==(const BigStruct&) const;
-  bool operator<(const BigStruct&) const;
+  std::partial_ordering operator<=>(const BigStruct&) const;
 
   /** Glean { "field": "s" } */
   template <typename..., typename fbthrift_T = ::module2::Struct>

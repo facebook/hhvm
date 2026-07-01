@@ -62,8 +62,8 @@ bool FooStreamEx::operator==([[maybe_unused]] const FooStreamEx& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool FooStreamEx::operator<([[maybe_unused]] const FooStreamEx& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering FooStreamEx::operator<=>([[maybe_unused]] const FooStreamEx& rhs) const {
+  return ::apache::thrift::op::compare<FooStreamEx>(*this, rhs);
 }
 
 
@@ -113,8 +113,8 @@ bool FooEx::operator==([[maybe_unused]] const FooEx& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool FooEx::operator<([[maybe_unused]] const FooEx& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering FooEx::operator<=>([[maybe_unused]] const FooEx& rhs) const {
+  return ::apache::thrift::op::compare<FooEx>(*this, rhs);
 }
 
 
@@ -164,8 +164,8 @@ bool FooEx2::operator==([[maybe_unused]] const FooEx2& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool FooEx2::operator<([[maybe_unused]] const FooEx2& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering FooEx2::operator<=>([[maybe_unused]] const FooEx2& rhs) const {
+  return ::apache::thrift::op::compare<FooEx2>(*this, rhs);
 }
 
 

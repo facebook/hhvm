@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <compare>
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 
 namespace apache::thrift {
@@ -65,11 +66,6 @@ namespace apache::thrift::detail::qualifier {
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
 namespace cpp2_struct_footprint {
-using ::apache::thrift::detail::operator!=;
-using ::apache::thrift::detail::operator>;
-using ::apache::thrift::detail::operator<=;
-using ::apache::thrift::detail::operator>=;
-
 /** Glean {"file": "thrift/compiler/test/fixtures/cpp2-struct-footprint/src/module.thrift", "name": "I32Alias", "kind": "typedef" } */
 using I32Alias = SimpleStruct;
 /** Glean {"file": "thrift/compiler/test/fixtures/cpp2-struct-footprint/src/module.thrift", "name": "MyInt", "kind": "typedef" } */
@@ -145,7 +141,7 @@ class SimpleStruct final  {
  public:
 
   bool operator==(const SimpleStruct&) const;
-  bool operator<(const SimpleStruct&) const;
+  std::partial_ordering operator<=>(const SimpleStruct&) const;
 
   /** Glean { "field": "field" } */
   template <typename..., typename fbthrift_T = ::std::int32_t>
@@ -273,7 +269,7 @@ class ComplexStruct final  {
  public:
 
   bool operator==(const ComplexStruct&) const;
-  bool operator<(const ComplexStruct&) const;
+  std::partial_ordering operator<=>(const ComplexStruct&) const;
 
   /** Glean { "field": "nested" } */
   template <typename..., typename fbthrift_T = ::cpp2_struct_footprint::SimpleStruct>
@@ -403,7 +399,7 @@ class Struct1 final  {
  public:
 
   bool operator==(const Struct1&) const;
-  bool operator<(const Struct1&) const;
+  std::partial_ordering operator<=>(const Struct1&) const;
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);
@@ -481,7 +477,7 @@ class Struct2 final  {
  public:
 
   bool operator==(const Struct2&) const;
-  bool operator<(const Struct2&) const;
+  std::partial_ordering operator<=>(const Struct2&) const;
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);
@@ -559,7 +555,7 @@ class Struct3 final  {
  public:
 
   bool operator==(const Struct3&) const;
-  bool operator<(const Struct3&) const;
+  std::partial_ordering operator<=>(const Struct3&) const;
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);
@@ -637,7 +633,7 @@ class Struct4 final  {
  public:
 
   bool operator==(const Struct4&) const;
-  bool operator<(const Struct4&) const;
+  std::partial_ordering operator<=>(const Struct4&) const;
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);
@@ -715,7 +711,7 @@ class Struct5 final  {
  public:
 
   bool operator==(const Struct5&) const;
-  bool operator<(const Struct5&) const;
+  std::partial_ordering operator<=>(const Struct5&) const;
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);
@@ -808,7 +804,7 @@ class FOLLY_EXPORT ExStruct : public virtual apache::thrift::TException {
  public:
 
   bool operator==(const ExStruct&) const;
-  bool operator<(const ExStruct&) const;
+  std::partial_ordering operator<=>(const ExStruct&) const;
 
   /** Glean { "field": "message" } */
   template <typename..., typename fbthrift_T = ::std::string>
@@ -1013,7 +1009,7 @@ class TestUnion final  {
   } ;
 
   bool operator==(const TestUnion&) const;
-  bool operator<(const TestUnion&) const;
+  std::partial_ordering operator<=>(const TestUnion&) const;
 
   /** Glean { "field": "int_value" } */
   template <typename... A> requires (sizeof...(A) == 0)

@@ -80,8 +80,8 @@ bool MyStruct::operator==([[maybe_unused]] const MyStruct& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool MyStruct::operator<([[maybe_unused]] const MyStruct& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering MyStruct::operator<=>([[maybe_unused]] const MyStruct& rhs) const {
+  return ::apache::thrift::op::compare<MyStruct>(*this, rhs);
 }
 
 
@@ -219,8 +219,8 @@ bool EmptiableStruct::operator==([[maybe_unused]] const EmptiableStruct& rhs) co
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool EmptiableStruct::operator<([[maybe_unused]] const EmptiableStruct& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering EmptiableStruct::operator<=>([[maybe_unused]] const EmptiableStruct& rhs) const {
+  return ::apache::thrift::op::compare<EmptiableStruct>(*this, rhs);
 }
 
 
@@ -551,8 +551,8 @@ bool EmptiableTerseStruct::operator==([[maybe_unused]] const EmptiableTerseStruc
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool EmptiableTerseStruct::operator<([[maybe_unused]] const EmptiableTerseStruct& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering EmptiableTerseStruct::operator<=>([[maybe_unused]] const EmptiableTerseStruct& rhs) const {
+  return ::apache::thrift::op::compare<EmptiableTerseStruct>(*this, rhs);
 }
 
 
@@ -705,8 +705,8 @@ bool NotEmptiableStruct::operator==([[maybe_unused]] const NotEmptiableStruct& r
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool NotEmptiableStruct::operator<([[maybe_unused]] const NotEmptiableStruct& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering NotEmptiableStruct::operator<=>([[maybe_unused]] const NotEmptiableStruct& rhs) const {
+  return ::apache::thrift::op::compare<NotEmptiableStruct>(*this, rhs);
 }
 
 

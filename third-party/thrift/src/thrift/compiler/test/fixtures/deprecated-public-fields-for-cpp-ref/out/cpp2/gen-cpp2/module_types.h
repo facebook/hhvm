@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <compare>
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 
 namespace apache::thrift {
@@ -46,11 +47,6 @@ struct is_cpp_ref_field_optional<::cpp2::Foo,::apache::thrift::type::field_id<2>
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
 namespace cpp2 {
-using ::apache::thrift::detail::operator!=;
-using ::apache::thrift::detail::operator>;
-using ::apache::thrift::detail::operator<=;
-using ::apache::thrift::detail::operator>=;
-
 
 /** Glean {"file": "thrift/compiler/test/fixtures/deprecated-public-fields-for-cpp-ref/src/module.thrift", "name": "Foo", "kind": "struct" } */
 class Foo final  {
@@ -114,7 +110,7 @@ class Foo final  {
  public:
 
   bool operator==(const Foo&) const;
-  bool operator<(const Foo&) const;
+  std::partial_ordering operator<=>(const Foo&) const;
   /** Glean { "field": "foo" } */
   FOLLY_ERASE ::std::unique_ptr<::cpp2::Foo>& foo_ref() & {
     return __fbthrift_field_foo;

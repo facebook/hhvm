@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <compare>
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 
 namespace apache::thrift {
@@ -110,11 +111,6 @@ namespace apache::thrift::detail::qualifier {
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
 namespace facebook::thrift::test::fixtures::runtime_annotations {
-using ::apache::thrift::detail::operator!=;
-using ::apache::thrift::detail::operator>;
-using ::apache::thrift::detail::operator<=;
-using ::apache::thrift::detail::operator>=;
-
 
 /** Glean {"file": "thrift/compiler/test/fixtures/runtime-annotations/src/module.thrift", "name": "MyAnnotation", "kind": "struct" } */
 class MyAnnotation final  {
@@ -168,7 +164,7 @@ class MyAnnotation final  {
  public:
 
   bool operator==(const MyAnnotation&) const;
-  bool operator<(const MyAnnotation&) const;
+  std::partial_ordering operator<=>(const MyAnnotation&) const;
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);
@@ -265,7 +261,7 @@ class MyStruct final  {
  public:
 
   bool operator==(const MyStruct&) const;
-  bool operator<(const MyStruct&) const;
+  std::partial_ordering operator<=>(const MyStruct&) const;
 
   /** Glean { "field": "field" } */
   template <typename..., typename fbthrift_T = ::std::int32_t>
@@ -406,7 +402,7 @@ class MyUnion final  {
  public:
 
   bool operator==(const MyUnion&) const;
-  bool operator<(const MyUnion&) const;
+  std::partial_ordering operator<=>(const MyUnion&) const;
 
   /** Glean { "field": "field" } */
   template <typename..., typename fbthrift_T = ::std::int32_t>
@@ -555,7 +551,7 @@ class FOLLY_EXPORT MyException : public virtual apache::thrift::TException {
  public:
 
   bool operator==(const MyException&) const;
-  bool operator<(const MyException&) const;
+  std::partial_ordering operator<=>(const MyException&) const;
 
   /** Glean { "field": "field" } */
   template <typename..., typename fbthrift_T = ::std::int32_t>

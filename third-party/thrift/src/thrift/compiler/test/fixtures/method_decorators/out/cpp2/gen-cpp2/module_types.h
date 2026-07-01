@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <compare>
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 
 namespace apache::thrift {
@@ -51,11 +52,6 @@ namespace apache::thrift::detail::qualifier {
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
 namespace cpp2 {
-using ::apache::thrift::detail::operator!=;
-using ::apache::thrift::detail::operator>;
-using ::apache::thrift::detail::operator<=;
-using ::apache::thrift::detail::operator>=;
-
 
 /** Glean {"file": "thrift/compiler/test/fixtures/method_decorators/src/module.thrift", "name": "Request", "kind": "struct" } */
 class Request final  {
@@ -117,7 +113,7 @@ class Request final  {
  public:
 
   bool operator==(const Request&) const;
-  bool operator<(const Request&) const;
+  std::partial_ordering operator<=>(const Request&) const;
 
   /** Glean { "field": "id" } */
   template <typename..., typename fbthrift_T = ::std::string>
@@ -261,7 +257,7 @@ class AdaptedRequest final  {
  public:
 
   bool operator==(const AdaptedRequest&) const;
-  bool operator<(const AdaptedRequest&) const;
+  std::partial_ordering operator<=>(const AdaptedRequest&) const;
 
   /** Glean { "field": "id" } */
   template <typename..., typename fbthrift_T = ::std::string>
@@ -407,7 +403,7 @@ class Response final  {
  public:
 
   bool operator==(const Response&) const;
-  bool operator<(const Response&) const;
+  std::partial_ordering operator<=>(const Response&) const;
 
   /** Glean { "field": "text" } */
   template <typename..., typename fbthrift_T = ::std::string>

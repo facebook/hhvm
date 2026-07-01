@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <compare>
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 #include "thrift/compiler/test/fixtures/includes/gen-cpp2/includes_types.h"
 #include "thrift/compiler/test/fixtures/includes/gen-cpp2/includes_constants.h"
@@ -49,11 +50,6 @@ namespace apache::thrift::detail::qualifier {
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
 namespace cpp2 {
-using ::apache::thrift::detail::operator!=;
-using ::apache::thrift::detail::operator>;
-using ::apache::thrift::detail::operator<=;
-using ::apache::thrift::detail::operator>=;
-
 
 /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/module.thrift", "name": "MyStruct", "kind": "struct" } */
 class MyStruct final  {
@@ -122,7 +118,7 @@ class MyStruct final  {
  public:
 
   bool operator==(const MyStruct&) const;
-  bool operator<(const MyStruct&) const;
+  std::partial_ordering operator<=>(const MyStruct&) const;
 
   /** Glean { "field": "MyIncludedField" } */
   template <typename..., typename fbthrift_T = ::cpp2::Included>

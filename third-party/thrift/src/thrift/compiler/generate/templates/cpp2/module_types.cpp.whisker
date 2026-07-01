@@ -110,8 +110,9 @@ std::string_view {{struct.cpp_underlying_name}}::__fbthrift_get_class_name() {
 
 
           {{#if (not struct.cpp_nonorderable?)}}
-{{#partial module_types.union_operator_less struct=struct}}{{!
-          }}{{/if (not struct.cpp_nonorderable?)}}
+{{#partial module_types.union_operator_compare struct=struct}}{{!
+          }}
+          {{/if (not struct.cpp_nonorderable?)}}
         {{/if struct.is_struct_orderable?}}
       {{/if (not struct.cpp_noncomparable)}}
 
@@ -141,7 +142,8 @@ std::string_view {{struct.cpp_underlying_name}}::__fbthrift_get_class_name() {
 
 
           {{#if (not struct.cpp_nonorderable?)}}
-{{#partial module_types.struct_operator_less struct=struct}}
+{{#partial module_types.struct_operator_compare struct=struct}}{{!
+            }}
           {{/if (not struct.cpp_nonorderable?)}}
         {{/if struct.is_struct_orderable?}}
       {{/if (not struct.cpp_noncomparable)}}

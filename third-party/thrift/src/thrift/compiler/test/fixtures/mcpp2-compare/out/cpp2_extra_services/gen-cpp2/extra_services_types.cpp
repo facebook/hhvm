@@ -143,8 +143,8 @@ bool containerStruct2::operator==([[maybe_unused]] const containerStruct2& rhs) 
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool containerStruct2::operator<([[maybe_unused]] const containerStruct2& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering containerStruct2::operator<=>([[maybe_unused]] const containerStruct2& rhs) const {
+  return ::apache::thrift::op::compare<containerStruct2>(*this, rhs);
 }
 
 

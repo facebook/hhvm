@@ -233,8 +233,8 @@ bool TemplateSets::operator==([[maybe_unused]] const TemplateSets& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool TemplateSets::operator<([[maybe_unused]] const TemplateSets& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering TemplateSets::operator<=>([[maybe_unused]] const TemplateSets& rhs) const {
+  return ::apache::thrift::op::compare<TemplateSets>(*this, rhs);
 }
 
 
@@ -389,8 +389,8 @@ bool TemplateMaps::operator==([[maybe_unused]] const TemplateMaps& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool TemplateMaps::operator<([[maybe_unused]] const TemplateMaps& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering TemplateMaps::operator<=>([[maybe_unused]] const TemplateMaps& rhs) const {
+  return ::apache::thrift::op::compare<TemplateMaps>(*this, rhs);
 }
 
 
@@ -520,8 +520,8 @@ bool TWrapped::operator==([[maybe_unused]] const TWrapped& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool TWrapped::operator<([[maybe_unused]] const TWrapped& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering TWrapped::operator<=>([[maybe_unused]] const TWrapped& rhs) const {
+  return ::apache::thrift::op::compare<TWrapped>(*this, rhs);
 }
 
 
@@ -585,8 +585,8 @@ bool IndirectionA::operator==([[maybe_unused]] const IndirectionA& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool IndirectionA::operator<([[maybe_unused]] const IndirectionA& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering IndirectionA::operator<=>([[maybe_unused]] const IndirectionA& rhs) const {
+  return ::apache::thrift::op::compare<IndirectionA>(*this, rhs);
 }
 
 
@@ -663,8 +663,8 @@ bool IndirectionB::operator==([[maybe_unused]] const IndirectionB& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool IndirectionB::operator<([[maybe_unused]] const IndirectionB& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering IndirectionB::operator<=>([[maybe_unused]] const IndirectionB& rhs) const {
+  return ::apache::thrift::op::compare<IndirectionB>(*this, rhs);
 }
 
 
@@ -741,8 +741,8 @@ bool IndirectionC::operator==([[maybe_unused]] const IndirectionC& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool IndirectionC::operator<([[maybe_unused]] const IndirectionC& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering IndirectionC::operator<=>([[maybe_unused]] const IndirectionC& rhs) const {
+  return ::apache::thrift::op::compare<IndirectionC>(*this, rhs);
 }
 
 

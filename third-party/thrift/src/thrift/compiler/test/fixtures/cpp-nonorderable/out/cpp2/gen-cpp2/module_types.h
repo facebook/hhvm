@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <compare>
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 
 namespace apache::thrift {
@@ -75,11 +76,6 @@ namespace apache::thrift::detail::qualifier {
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
 namespace cpp2 {
-using ::apache::thrift::detail::operator!=;
-using ::apache::thrift::detail::operator>;
-using ::apache::thrift::detail::operator<=;
-using ::apache::thrift::detail::operator>=;
-
 
 /** Glean {"file": "thrift/compiler/test/fixtures/cpp-nonorderable/src/module.thrift", "name": "NonOrderableStruct", "kind": "struct" } */
 class NonOrderableStruct final  {
@@ -145,7 +141,7 @@ class NonOrderableStruct final  {
  public:
 
   bool operator==(const NonOrderableStruct&) const;
-  bool operator<(const NonOrderableStruct&) const = delete;
+  std::partial_ordering operator<=>(const NonOrderableStruct&) const = delete;
 
   /** Glean { "field": "field1" } */
   template <typename..., typename fbthrift_T = ::std::int32_t>
@@ -390,7 +386,7 @@ class NonOrderableUnion final  {
   } ;
 
   bool operator==(const NonOrderableUnion&) const;
-  bool operator<(const NonOrderableUnion&) const = delete;
+  std::partial_ordering operator<=>(const NonOrderableUnion&) const = delete;
 
   /** Glean { "field": "int_value" } */
   template <typename... A> requires (sizeof...(A) == 0)
@@ -631,7 +627,7 @@ class OrderableStruct final  {
  public:
 
   bool operator==(const OrderableStruct&) const;
-  bool operator<(const OrderableStruct&) const;
+  std::partial_ordering operator<=>(const OrderableStruct&) const;
 
   /** Glean { "field": "field1" } */
   template <typename..., typename fbthrift_T = ::std::int32_t>
@@ -876,7 +872,7 @@ class OrderableUnion final  {
   } ;
 
   bool operator==(const OrderableUnion&) const;
-  bool operator<(const OrderableUnion&) const;
+  std::partial_ordering operator<=>(const OrderableUnion&) const;
 
   /** Glean { "field": "int_value" } */
   template <typename... A> requires (sizeof...(A) == 0)

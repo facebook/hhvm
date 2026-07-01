@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <compare>
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 
 namespace apache::thrift {
@@ -454,11 +455,6 @@ struct is_cpp_ref_field_optional<::cpp2::StructWithRefTypeSharedConst,::apache::
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
 namespace cpp2 {
-using ::apache::thrift::detail::operator!=;
-using ::apache::thrift::detail::operator>;
-using ::apache::thrift::detail::operator<=;
-using ::apache::thrift::detail::operator>=;
-
 
 /** Glean {"file": "thrift/compiler/test/fixtures/refs/src/module.thrift", "name": "MyUnion", "kind": "union" } */
 class MyUnion final  {
@@ -578,7 +574,7 @@ class MyUnion final  {
   } ;
 
   bool operator==(const MyUnion&) const;
-  bool operator<(const MyUnion&) const;
+  std::partial_ordering operator<=>(const MyUnion&) const;
 
   /** Glean { "field": "anInteger" } */
   template <typename... A> requires (sizeof...(A) == 0)
@@ -873,7 +869,7 @@ class NonTriviallyDestructibleUnion final  {
   } ;
 
   bool operator==(const NonTriviallyDestructibleUnion&) const;
-  bool operator<(const NonTriviallyDestructibleUnion&) const;
+  std::partial_ordering operator<=>(const NonTriviallyDestructibleUnion&) const;
 
   /** Glean { "field": "int_field" } */
   template <typename... A> requires (sizeof...(A) == 0)
@@ -1065,7 +1061,7 @@ class MyField final  {
  public:
 
   bool operator==(const MyField&) const;
-  bool operator<(const MyField&) const;
+  std::partial_ordering operator<=>(const MyField&) const;
   /** Glean { "field": "opt_value" } */
   FOLLY_ERASE ::std::unique_ptr<::std::int64_t>& opt_value_ref() & {
     return __fbthrift_field_opt_value;
@@ -1509,7 +1505,7 @@ class MyStruct final  {
  public:
 
   bool operator==(const MyStruct&) const;
-  bool operator<(const MyStruct&) const;
+  std::partial_ordering operator<=>(const MyStruct&) const;
   /** Glean { "field": "opt_ref" } */
   FOLLY_ERASE ::std::unique_ptr<::cpp2::MyField>& opt_ref_ref() & {
     return __fbthrift_field_opt_ref;
@@ -1721,7 +1717,7 @@ class StructWithUnion final  {
  public:
 
   bool operator==(const StructWithUnion&) const;
-  bool operator<(const StructWithUnion&) const;
+  std::partial_ordering operator<=>(const StructWithUnion&) const;
   /** Glean { "field": "u" } */
   FOLLY_ERASE ::std::unique_ptr<::cpp2::MyUnion>& u_ref() & {
     return __fbthrift_field_u;
@@ -1938,7 +1934,7 @@ class RecursiveStruct final  {
  public:
 
   bool operator==(const RecursiveStruct&) const;
-  bool operator<(const RecursiveStruct&) const;
+  std::partial_ordering operator<=>(const RecursiveStruct&) const;
 
   /** Glean { "field": "mes" } */
   template <typename..., typename fbthrift_T = ::std::vector<::cpp2::RecursiveStruct>>
@@ -2097,7 +2093,7 @@ class StructWithContainers final  {
  public:
 
   bool operator==(const StructWithContainers&) const;
-  bool operator<(const StructWithContainers&) const;
+  std::partial_ordering operator<=>(const StructWithContainers&) const;
   /** Glean { "field": "list_ref" } */
   FOLLY_ERASE ::std::unique_ptr<::std::vector<::std::int32_t>>& list_ref_ref() & {
     return __fbthrift_field_list_ref;
@@ -2424,7 +2420,7 @@ class StructWithSharedConst final  {
  public:
 
   bool operator==(const StructWithSharedConst&) const;
-  bool operator<(const StructWithSharedConst&) const;
+  std::partial_ordering operator<=>(const StructWithSharedConst&) const;
   /** Glean { "field": "opt_shared_const" } */
   FOLLY_ERASE ::std::shared_ptr<const ::cpp2::MyField>& opt_shared_const_ref() & {
     return __fbthrift_field_opt_shared_const;
@@ -2619,7 +2615,7 @@ class Empty final  {
  public:
 
   bool operator==(const Empty&) const;
-  bool operator<(const Empty&) const;
+  std::partial_ordering operator<=>(const Empty&) const;
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);
@@ -2712,7 +2708,7 @@ class StructWithRef final  {
  public:
 
   bool operator==(const StructWithRef&) const;
-  bool operator<(const StructWithRef&) const;
+  std::partial_ordering operator<=>(const StructWithRef&) const;
   /** Glean { "field": "def_field" } */
   FOLLY_ERASE ::std::unique_ptr<::cpp2::Empty>& def_field_ref() & {
     return __fbthrift_field_def_field;
@@ -2922,7 +2918,7 @@ class StructWithBox final  {
  public:
 
   bool operator==(const StructWithBox&) const;
-  bool operator<(const StructWithBox&) const;
+  std::partial_ordering operator<=>(const StructWithBox&) const;
 
   /** Glean { "field": "a" } */
   template <typename..., typename fbthrift_T = ::apache::thrift::detail::boxed_value_ptr<::std::string>>
@@ -3121,7 +3117,7 @@ class StructWithInternBox final  {
  public:
 
   bool operator==(const StructWithInternBox&) const;
-  bool operator<(const StructWithInternBox&) const;
+  std::partial_ordering operator<=>(const StructWithInternBox&) const;
 
   /** Glean { "field": "field1" } */
   template <typename..., typename fbthrift_T = ::apache::thrift::detail::boxed_value<::cpp2::Empty>>
@@ -3282,7 +3278,7 @@ class StructWithTerseInternBox final  {
  public:
 
   bool operator==(const StructWithTerseInternBox&) const;
-  bool operator<(const StructWithTerseInternBox&) const;
+  std::partial_ordering operator<=>(const StructWithTerseInternBox&) const;
 
   /** Glean { "field": "field1" } */
   template <typename..., typename fbthrift_T = ::apache::thrift::detail::boxed_value<::cpp2::Empty>>
@@ -3445,7 +3441,7 @@ class AdaptedStructWithInternBox final  {
  public:
 
   bool operator==(const AdaptedStructWithInternBox&) const;
-  bool operator<(const AdaptedStructWithInternBox&) const;
+  std::partial_ordering operator<=>(const AdaptedStructWithInternBox&) const;
 
   /** Glean { "field": "field1" } */
   template <typename..., typename fbthrift_T = ::apache::thrift::detail::boxed_value<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::cpp2::Empty, AdaptedStructWithInternBox>>>
@@ -3606,7 +3602,7 @@ class AdaptedStructWithTerseInternBox final  {
  public:
 
   bool operator==(const AdaptedStructWithTerseInternBox&) const;
-  bool operator<(const AdaptedStructWithTerseInternBox&) const;
+  std::partial_ordering operator<=>(const AdaptedStructWithTerseInternBox&) const;
 
   /** Glean { "field": "field1" } */
   template <typename..., typename fbthrift_T = ::apache::thrift::detail::boxed_value<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::cpp2::Empty, AdaptedStructWithTerseInternBox>>>
@@ -3771,7 +3767,7 @@ class StructWithRefTypeUnique final  {
  public:
 
   bool operator==(const StructWithRefTypeUnique&) const;
-  bool operator<(const StructWithRefTypeUnique&) const;
+  std::partial_ordering operator<=>(const StructWithRefTypeUnique&) const;
   /** Glean { "field": "def_field" } */
   FOLLY_ERASE ::std::unique_ptr<::cpp2::Empty>& def_field_ref() & {
     return __fbthrift_field_def_field;
@@ -3981,7 +3977,7 @@ class StructWithRefTypeShared final  {
  public:
 
   bool operator==(const StructWithRefTypeShared&) const;
-  bool operator<(const StructWithRefTypeShared&) const;
+  std::partial_ordering operator<=>(const StructWithRefTypeShared&) const;
   /** Glean { "field": "def_field" } */
   FOLLY_ERASE ::std::shared_ptr<::cpp2::Empty>& def_field_ref() & {
     return __fbthrift_field_def_field;
@@ -4191,7 +4187,7 @@ class StructWithRefTypeSharedConst final  {
  public:
 
   bool operator==(const StructWithRefTypeSharedConst&) const;
-  bool operator<(const StructWithRefTypeSharedConst&) const;
+  std::partial_ordering operator<=>(const StructWithRefTypeSharedConst&) const;
   /** Glean { "field": "def_field" } */
   FOLLY_ERASE ::std::shared_ptr<const ::cpp2::Empty>& def_field_ref() & {
     return __fbthrift_field_def_field;
@@ -4393,7 +4389,7 @@ class StructWithRefAndAnnotCppNoexceptMoveCtor final  {
  public:
 
   bool operator==(const StructWithRefAndAnnotCppNoexceptMoveCtor&) const;
-  bool operator<(const StructWithRefAndAnnotCppNoexceptMoveCtor&) const;
+  std::partial_ordering operator<=>(const StructWithRefAndAnnotCppNoexceptMoveCtor&) const;
   /** Glean { "field": "def_field" } */
   FOLLY_ERASE ::std::unique_ptr<::cpp2::Empty>& def_field_ref() & {
     return __fbthrift_field_def_field;
@@ -4533,7 +4529,7 @@ class StructWithString final  {
  public:
 
   bool operator==(const StructWithString&) const;
-  bool operator<(const StructWithString&) const;
+  std::partial_ordering operator<=>(const StructWithString&) const;
   /** Glean { "field": "def_unique_string_ref" } */
   FOLLY_ERASE ::std::unique_ptr<::std::string>& def_unique_string_ref_ref() & {
     return __fbthrift_field_def_unique_string_ref;

@@ -130,8 +130,8 @@ bool ModuleA::operator==([[maybe_unused]] const ModuleA& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool ModuleA::operator<([[maybe_unused]] const ModuleA& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering ModuleA::operator<=>([[maybe_unused]] const ModuleA& rhs) const {
+  return ::apache::thrift::op::compare<ModuleA>(*this, rhs);
 }
 
 
@@ -236,8 +236,8 @@ bool ModuleB::operator==([[maybe_unused]] const ModuleB& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool ModuleB::operator<([[maybe_unused]] const ModuleB& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering ModuleB::operator<=>([[maybe_unused]] const ModuleB& rhs) const {
+  return ::apache::thrift::op::compare<ModuleB>(*this, rhs);
 }
 
 
@@ -301,8 +301,8 @@ bool DirectlyAdapted::operator==([[maybe_unused]] const DirectlyAdapted& rhs) co
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool DirectlyAdapted::operator<([[maybe_unused]] const DirectlyAdapted& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering DirectlyAdapted::operator<=>([[maybe_unused]] const DirectlyAdapted& rhs) const {
+  return ::apache::thrift::op::compare<DirectlyAdapted>(*this, rhs);
 }
 
 
@@ -389,8 +389,8 @@ bool CppRef::operator==([[maybe_unused]] const CppRef& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool CppRef::operator<([[maybe_unused]] const CppRef& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering CppRef::operator<=>([[maybe_unused]] const CppRef& rhs) const {
+  return ::apache::thrift::op::compare<CppRef>(*this, rhs);
 }
 
 

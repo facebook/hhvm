@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <compare>
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 
 namespace apache::thrift {
@@ -156,11 +157,6 @@ namespace apache::thrift::detail::qualifier {
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
 namespace test::fixtures::tablebased {
-using ::apache::thrift::detail::operator!=;
-using ::apache::thrift::detail::operator>;
-using ::apache::thrift::detail::operator<=;
-using ::apache::thrift::detail::operator>=;
-
 /** Glean {"file": "thrift/compiler/test/fixtures/tablebased/src/module.thrift", "name": "IOBufPtr", "kind": "typedef" } */
 using IOBufPtr = std::unique_ptr<folly::IOBuf>;
 
@@ -240,7 +236,7 @@ class TrivialTypesStruct final  {
  public:
 
   bool operator==(const TrivialTypesStruct&) const;
-  bool operator<(const TrivialTypesStruct&) const;
+  std::partial_ordering operator<=>(const TrivialTypesStruct&) const;
 
   /** Glean { "field": "fieldA" } */
   template <typename..., typename fbthrift_T = ::std::int32_t>
@@ -613,7 +609,7 @@ class ContainerStruct final  {
  public:
 
   bool operator==(const ContainerStruct&) const;
-  bool operator<(const ContainerStruct&) const;
+  std::partial_ordering operator<=>(const ContainerStruct&) const;
 
   /** Glean { "field": "fieldA" } */
   template <typename..., typename fbthrift_T = ::std::vector<::std::int32_t>>
@@ -1176,7 +1172,7 @@ class ExampleUnion final  {
   } ;
 
   bool operator==(const ExampleUnion&) const;
-  bool operator<(const ExampleUnion&) const;
+  std::partial_ordering operator<=>(const ExampleUnion&) const;
 
   /** Glean { "field": "fieldA" } */
   template <typename... A> requires (sizeof...(A) == 0)

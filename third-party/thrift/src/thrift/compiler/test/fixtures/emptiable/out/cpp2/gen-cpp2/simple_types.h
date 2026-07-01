@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <compare>
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 
 namespace apache::thrift {
@@ -292,11 +293,6 @@ namespace apache::thrift::detail::qualifier {
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
 namespace apache::thrift::test {
-using ::apache::thrift::detail::operator!=;
-using ::apache::thrift::detail::operator>;
-using ::apache::thrift::detail::operator<=;
-using ::apache::thrift::detail::operator>=;
-
 
 /** Glean {"file": "thrift/compiler/test/fixtures/emptiable/src/simple.thrift", "name": "MyStruct", "kind": "struct" } */
 class MyStruct final  {
@@ -349,7 +345,7 @@ class MyStruct final  {
  public:
 
   bool operator==(const MyStruct&) const;
-  bool operator<(const MyStruct&) const;
+  std::partial_ordering operator<=>(const MyStruct&) const;
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);
@@ -488,7 +484,7 @@ class EmptiableStruct final  {
  public:
 
   bool operator==(const EmptiableStruct&) const;
-  bool operator<(const EmptiableStruct&) const;
+  std::partial_ordering operator<=>(const EmptiableStruct&) const;
 
   /** Glean { "field": "bool_field" } */
   template <typename..., typename fbthrift_T = bool>
@@ -1349,7 +1345,7 @@ class EmptiableTerseStruct final  {
  public:
 
   bool operator==(const EmptiableTerseStruct&) const;
-  bool operator<(const EmptiableTerseStruct&) const;
+  std::partial_ordering operator<=>(const EmptiableTerseStruct&) const;
 
   /** Glean { "field": "bool_field" } */
   template <typename..., typename fbthrift_T = bool>
@@ -1992,7 +1988,7 @@ class NotEmptiableStruct final  {
  public:
 
   bool operator==(const NotEmptiableStruct&) const;
-  bool operator<(const NotEmptiableStruct&) const;
+  std::partial_ordering operator<=>(const NotEmptiableStruct&) const;
 
   /** Glean { "field": "bool_field" } */
   template <typename..., typename fbthrift_T = bool>

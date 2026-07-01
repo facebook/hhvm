@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <compare>
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 
 namespace apache::thrift {
@@ -49,11 +50,6 @@ namespace apache::thrift::detail::qualifier {
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
 namespace cpp2 {
-using ::apache::thrift::detail::operator!=;
-using ::apache::thrift::detail::operator>;
-using ::apache::thrift::detail::operator<=;
-using ::apache::thrift::detail::operator>=;
-
 
 /** Glean {"file": "thrift/compiler/test/fixtures/bidi/src/module.thrift", "name": "BiDiSinkException", "kind": "exception" } */
 class FOLLY_EXPORT BiDiSinkException : public virtual apache::thrift::TException {
@@ -121,7 +117,7 @@ class FOLLY_EXPORT BiDiSinkException : public virtual apache::thrift::TException
  public:
 
   bool operator==(const BiDiSinkException&) const;
-  bool operator<(const BiDiSinkException&) const;
+  std::partial_ordering operator<=>(const BiDiSinkException&) const;
 
   /** Glean { "field": "message" } */
   template <typename..., typename fbthrift_T = ::std::string>
@@ -274,7 +270,7 @@ class FOLLY_EXPORT BiDiStreamException : public virtual apache::thrift::TExcepti
  public:
 
   bool operator==(const BiDiStreamException&) const;
-  bool operator<(const BiDiStreamException&) const;
+  std::partial_ordering operator<=>(const BiDiStreamException&) const;
 
   /** Glean { "field": "message" } */
   template <typename..., typename fbthrift_T = ::std::string>
@@ -427,7 +423,7 @@ class FOLLY_EXPORT BiDiMethodException : public virtual apache::thrift::TExcepti
  public:
 
   bool operator==(const BiDiMethodException&) const;
-  bool operator<(const BiDiMethodException&) const;
+  std::partial_ordering operator<=>(const BiDiMethodException&) const;
 
   /** Glean { "field": "message" } */
   template <typename..., typename fbthrift_T = ::std::string>

@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <compare>
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 
 namespace apache::thrift {
@@ -82,11 +83,6 @@ namespace apache::thrift::detail::qualifier {
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
 namespace cpp2 {
-using ::apache::thrift::detail::operator!=;
-using ::apache::thrift::detail::operator>;
-using ::apache::thrift::detail::operator<=;
-using ::apache::thrift::detail::operator>=;
-
 
 /** Glean {"file": "thrift/compiler/test/fixtures/sync-methods-return-try/src/module.thrift", "name": "FooStreamEx", "kind": "exception" } */
 class FOLLY_EXPORT FooStreamEx : public virtual apache::thrift::TException {
@@ -148,7 +144,7 @@ class FOLLY_EXPORT FooStreamEx : public virtual apache::thrift::TException {
  public:
 
   bool operator==(const FooStreamEx&) const;
-  bool operator<(const FooStreamEx&) const;
+  std::partial_ordering operator<=>(const FooStreamEx&) const;
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);
@@ -239,7 +235,7 @@ class FOLLY_EXPORT FooEx : public virtual apache::thrift::TException {
  public:
 
   bool operator==(const FooEx&) const;
-  bool operator<(const FooEx&) const;
+  std::partial_ordering operator<=>(const FooEx&) const;
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);
@@ -330,7 +326,7 @@ class FOLLY_EXPORT FooEx2 : public virtual apache::thrift::TException {
  public:
 
   bool operator==(const FooEx2&) const;
-  bool operator<(const FooEx2&) const;
+  std::partial_ordering operator<=>(const FooEx2&) const;
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);
@@ -421,7 +417,7 @@ class InitialResponse final  {
  public:
 
   bool operator==(const InitialResponse&) const;
-  bool operator<(const InitialResponse&) const;
+  std::partial_ordering operator<=>(const InitialResponse&) const;
 
   /** Glean { "field": "content" } */
   template <typename..., typename fbthrift_T = ::std::string>
@@ -564,7 +560,7 @@ class FinalResponse final  {
  public:
 
   bool operator==(const FinalResponse&) const;
-  bool operator<(const FinalResponse&) const;
+  std::partial_ordering operator<=>(const FinalResponse&) const;
 
   /** Glean { "field": "content" } */
   template <typename..., typename fbthrift_T = ::std::string>
@@ -707,7 +703,7 @@ class SinkPayload final  {
  public:
 
   bool operator==(const SinkPayload&) const;
-  bool operator<(const SinkPayload&) const;
+  std::partial_ordering operator<=>(const SinkPayload&) const;
 
   /** Glean { "field": "content" } */
   template <typename..., typename fbthrift_T = ::std::string>
@@ -850,7 +846,7 @@ class CompatibleWithKeywordSink final  {
  public:
 
   bool operator==(const CompatibleWithKeywordSink&) const;
-  bool operator<(const CompatibleWithKeywordSink&) const;
+  std::partial_ordering operator<=>(const CompatibleWithKeywordSink&) const;
 
   /** Glean { "field": "sink" } */
   template <typename..., typename fbthrift_T = ::std::string>
@@ -999,7 +995,7 @@ class FOLLY_EXPORT InitialException : public virtual apache::thrift::TException 
  public:
 
   bool operator==(const InitialException&) const;
-  bool operator<(const InitialException&) const;
+  std::partial_ordering operator<=>(const InitialException&) const;
 
   /** Glean { "field": "reason" } */
   template <typename..., typename fbthrift_T = ::std::string>
@@ -1152,7 +1148,7 @@ class FOLLY_EXPORT SinkException1 : public virtual apache::thrift::TException {
  public:
 
   bool operator==(const SinkException1&) const;
-  bool operator<(const SinkException1&) const;
+  std::partial_ordering operator<=>(const SinkException1&) const;
 
   /** Glean { "field": "reason" } */
   template <typename..., typename fbthrift_T = ::std::string>
@@ -1305,7 +1301,7 @@ class FOLLY_EXPORT SinkException2 : public virtual apache::thrift::TException {
  public:
 
   bool operator==(const SinkException2&) const;
-  bool operator<(const SinkException2&) const;
+  std::partial_ordering operator<=>(const SinkException2&) const;
 
   /** Glean { "field": "reason" } */
   template <typename..., typename fbthrift_T = ::std::int64_t>
@@ -1440,7 +1436,7 @@ class StreamItem final  {
  public:
 
   bool operator==(const StreamItem&) const;
-  bool operator<(const StreamItem&) const;
+  std::partial_ordering operator<=>(const StreamItem&) const;
 
   /** Glean { "field": "content" } */
   template <typename..., typename fbthrift_T = ::std::string>

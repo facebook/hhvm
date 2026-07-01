@@ -98,8 +98,8 @@ bool Limits::operator==([[maybe_unused]] const Limits& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool Limits::operator<([[maybe_unused]] const Limits& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering Limits::operator<=>([[maybe_unused]] const Limits& rhs) const {
+  return ::apache::thrift::op::compare<Limits>(*this, rhs);
 }
 
 

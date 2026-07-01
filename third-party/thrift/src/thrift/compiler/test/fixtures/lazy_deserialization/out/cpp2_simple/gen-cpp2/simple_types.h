@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <compare>
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 
 namespace apache::thrift {
@@ -234,11 +235,6 @@ struct is_cpp_ref_field_optional<::apache::thrift::test::LazyCppRef,::apache::th
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
 namespace apache::thrift::test {
-using ::apache::thrift::detail::operator!=;
-using ::apache::thrift::detail::operator>;
-using ::apache::thrift::detail::operator<=;
-using ::apache::thrift::detail::operator>=;
-
 
 /** Glean {"file": "thrift/compiler/test/fixtures/lazy_deserialization/src/simple.thrift", "name": "Foo", "kind": "struct" } */
 class Foo final  {
@@ -312,7 +308,7 @@ class Foo final  {
  public:
 
   bool operator==(const Foo&) const;
-  bool operator<(const Foo&) const;
+  std::partial_ordering operator<=>(const Foo&) const;
 
   /** Glean { "field": "field1" } */
   template <typename..., typename fbthrift_T = ::std::vector<double>>
@@ -619,7 +615,7 @@ class LazyFoo final  {
  public:
 
   bool operator==(const LazyFoo&) const;
-  bool operator<(const LazyFoo&) const;
+  std::partial_ordering operator<=>(const LazyFoo&) const;
 
   /** Glean { "field": "field1" } */
   template <typename..., typename fbthrift_T = ::std::vector<double>>
@@ -942,7 +938,7 @@ class OptionalFoo final  {
  public:
 
   bool operator==(const OptionalFoo&) const;
-  bool operator<(const OptionalFoo&) const;
+  std::partial_ordering operator<=>(const OptionalFoo&) const;
 
   /** Glean { "field": "field1" } */
   template <typename..., typename fbthrift_T = ::std::vector<double>>
@@ -1257,7 +1253,7 @@ class OptionalLazyFoo final  {
  public:
 
   bool operator==(const OptionalLazyFoo&) const;
-  bool operator<(const OptionalLazyFoo&) const;
+  std::partial_ordering operator<=>(const OptionalLazyFoo&) const;
 
   /** Glean { "field": "field1" } */
   template <typename..., typename fbthrift_T = ::std::vector<double>>
@@ -1582,7 +1578,7 @@ class OptionalBoxedLazyFoo final  {
  public:
 
   bool operator==(const OptionalBoxedLazyFoo&) const;
-  bool operator<(const OptionalBoxedLazyFoo&) const;
+  std::partial_ordering operator<=>(const OptionalBoxedLazyFoo&) const;
 
   /** Glean { "field": "field1" } */
   template <typename..., typename fbthrift_T = ::apache::thrift::detail::boxed_value_ptr<::std::vector<double>>>
@@ -1871,7 +1867,7 @@ class LazyCppRef final  {
  public:
 
   bool operator==(const LazyCppRef&) const;
-  bool operator<(const LazyCppRef&) const;
+  std::partial_ordering operator<=>(const LazyCppRef&) const;
   /** Glean { "field": "field1" } */
   FOLLY_ERASE ::std::unique_ptr<::std::vector<::std::int32_t>>& field1_ref() & {
     return __fbthrift_read_field_field1();
@@ -2220,7 +2216,7 @@ class IndexedFoo final  {
  public:
 
   bool operator==(const IndexedFoo&) const;
-  bool operator<(const IndexedFoo&) const;
+  std::partial_ordering operator<=>(const IndexedFoo&) const;
 
   /** Glean { "field": "serialized_data_size" } */
   template <typename..., typename fbthrift_T = double>
@@ -2631,7 +2627,7 @@ class OptionalIndexedFoo final  {
  public:
 
   bool operator==(const OptionalIndexedFoo&) const;
-  bool operator<(const OptionalIndexedFoo&) const;
+  std::partial_ordering operator<=>(const OptionalIndexedFoo&) const;
 
   /** Glean { "field": "serialized_data_size" } */
   template <typename..., typename fbthrift_T = double>
@@ -3021,7 +3017,7 @@ class Empty final  {
  public:
 
   bool operator==(const Empty&) const;
-  bool operator<(const Empty&) const;
+  std::partial_ordering operator<=>(const Empty&) const;
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);

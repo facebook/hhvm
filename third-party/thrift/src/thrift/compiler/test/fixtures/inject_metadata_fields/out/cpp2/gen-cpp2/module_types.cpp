@@ -77,8 +77,8 @@ bool Fields::operator==([[maybe_unused]] const Fields& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool Fields::operator<([[maybe_unused]] const Fields& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering Fields::operator<=>([[maybe_unused]] const Fields& rhs) const {
+  return ::apache::thrift::op::compare<Fields>(*this, rhs);
 }
 
 
@@ -141,8 +141,8 @@ bool FieldsInjectedToEmptyStruct::operator==([[maybe_unused]] const FieldsInject
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool FieldsInjectedToEmptyStruct::operator<([[maybe_unused]] const FieldsInjectedToEmptyStruct& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering FieldsInjectedToEmptyStruct::operator<=>([[maybe_unused]] const FieldsInjectedToEmptyStruct& rhs) const {
+  return ::apache::thrift::op::compare<FieldsInjectedToEmptyStruct>(*this, rhs);
 }
 
 
@@ -210,8 +210,8 @@ bool FieldsInjectedToStruct::operator==([[maybe_unused]] const FieldsInjectedToS
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool FieldsInjectedToStruct::operator<([[maybe_unused]] const FieldsInjectedToStruct& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering FieldsInjectedToStruct::operator<=>([[maybe_unused]] const FieldsInjectedToStruct& rhs) const {
+  return ::apache::thrift::op::compare<FieldsInjectedToStruct>(*this, rhs);
 }
 
 
@@ -288,8 +288,8 @@ bool FieldsInjectedWithIncludedStruct::operator==([[maybe_unused]] const FieldsI
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool FieldsInjectedWithIncludedStruct::operator<([[maybe_unused]] const FieldsInjectedWithIncludedStruct& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering FieldsInjectedWithIncludedStruct::operator<=>([[maybe_unused]] const FieldsInjectedWithIncludedStruct& rhs) const {
+  return ::apache::thrift::op::compare<FieldsInjectedWithIncludedStruct>(*this, rhs);
 }
 
 
@@ -359,8 +359,8 @@ bool FieldsInjectedWithFieldsWithIncludedStruct::operator==([[maybe_unused]] con
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool FieldsInjectedWithFieldsWithIncludedStruct::operator<([[maybe_unused]] const FieldsInjectedWithFieldsWithIncludedStruct& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering FieldsInjectedWithFieldsWithIncludedStruct::operator<=>([[maybe_unused]] const FieldsInjectedWithFieldsWithIncludedStruct& rhs) const {
+  return ::apache::thrift::op::compare<FieldsInjectedWithFieldsWithIncludedStruct>(*this, rhs);
 }
 
 

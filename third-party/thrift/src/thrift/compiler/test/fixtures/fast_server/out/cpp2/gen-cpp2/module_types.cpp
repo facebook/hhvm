@@ -85,8 +85,8 @@ bool DataItem::operator==([[maybe_unused]] const DataItem& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool DataItem::operator<([[maybe_unused]] const DataItem& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering DataItem::operator<=>([[maybe_unused]] const DataItem& rhs) const {
+  return ::apache::thrift::op::compare<DataItem>(*this, rhs);
 }
 
 
@@ -175,8 +175,8 @@ bool NotFoundException::operator==([[maybe_unused]] const NotFoundException& rhs
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool NotFoundException::operator<([[maybe_unused]] const NotFoundException& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering NotFoundException::operator<=>([[maybe_unused]] const NotFoundException& rhs) const {
+  return ::apache::thrift::op::compare<NotFoundException>(*this, rhs);
 }
 
 
@@ -254,8 +254,8 @@ bool PermissionDeniedException::operator==([[maybe_unused]] const PermissionDeni
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool PermissionDeniedException::operator<([[maybe_unused]] const PermissionDeniedException& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering PermissionDeniedException::operator<=>([[maybe_unused]] const PermissionDeniedException& rhs) const {
+  return ::apache::thrift::op::compare<PermissionDeniedException>(*this, rhs);
 }
 
 

@@ -74,8 +74,8 @@ bool MyDataItem::operator==([[maybe_unused]] const MyDataItem& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool MyDataItem::operator<([[maybe_unused]] const MyDataItem& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering MyDataItem::operator<=>([[maybe_unused]] const MyDataItem& rhs) const {
+  return ::apache::thrift::op::compare<MyDataItem>(*this, rhs);
 }
 
 

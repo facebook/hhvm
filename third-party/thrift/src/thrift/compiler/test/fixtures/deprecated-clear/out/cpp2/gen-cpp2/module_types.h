@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <compare>
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 
 namespace apache::thrift {
@@ -144,11 +145,6 @@ namespace apache::thrift::detail::qualifier {
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
 namespace apache::thrift::test {
-using ::apache::thrift::detail::operator!=;
-using ::apache::thrift::detail::operator>;
-using ::apache::thrift::detail::operator<=;
-using ::apache::thrift::detail::operator>=;
-
 
 /** Glean {"file": "thrift/compiler/test/fixtures/deprecated-clear/src/module.thrift", "name": "StructWithDefaultStruct", "kind": "struct" } */
 class StructWithDefaultStruct final  {
@@ -258,7 +254,7 @@ class StructWithDefaultStruct final  {
  public:
 
   bool operator==(const StructWithDefaultStruct&) const;
-  bool operator<(const StructWithDefaultStruct&) const;
+  std::partial_ordering operator<=>(const StructWithDefaultStruct&) const;
 
   /** Glean { "field": "bool_field" } */
   template <typename..., typename fbthrift_T = bool>

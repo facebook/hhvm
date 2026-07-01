@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <compare>
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 
 namespace apache::thrift {
@@ -166,11 +167,6 @@ struct is_cpp_ref_field_optional<::facebook::thrift::test::fixtures::encode::OpE
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
 namespace facebook::thrift::test::fixtures::encode {
-using ::apache::thrift::detail::operator!=;
-using ::apache::thrift::detail::operator>;
-using ::apache::thrift::detail::operator<=;
-using ::apache::thrift::detail::operator>=;
-
 
 /** Glean {"file": "thrift/compiler/test/fixtures/encode/src/module.thrift", "name": "Foo", "kind": "struct" } */
 class Foo final  {
@@ -231,7 +227,7 @@ class Foo final  {
  public:
 
   bool operator==(const Foo&) const;
-  bool operator<(const Foo&) const;
+  std::partial_ordering operator<=>(const Foo&) const;
 
   /** Glean { "field": "field" } */
   template <typename..., typename fbthrift_T = ::std::int32_t>
@@ -365,7 +361,7 @@ class Bar final  {
  public:
 
   bool operator==(const Bar&) const;
-  bool operator<(const Bar&) const;
+  std::partial_ordering operator<=>(const Bar&) const;
 
   /** Glean { "field": "list_field" } */
   template <typename..., typename fbthrift_T = ::std::vector<::facebook::thrift::test::fixtures::encode::AdaptedFoo>>
@@ -509,7 +505,7 @@ class Baz final  {
  public:
 
   bool operator==(const Baz&) const;
-  bool operator<(const Baz&) const;
+  std::partial_ordering operator<=>(const Baz&) const;
 
   /** Glean { "field": "list_field" } */
   template <typename..., typename fbthrift_T = ::std::vector<::facebook::thrift::test::fixtures::encode::AdaptedFoo>>
@@ -745,7 +741,7 @@ class OpEncodeStruct final  {
  public:
 
   bool operator==(const OpEncodeStruct&) const;
-  bool operator<(const OpEncodeStruct&) const;
+  std::partial_ordering operator<=>(const OpEncodeStruct&) const;
 
   /** Glean { "field": "int_field" } */
   template <typename..., typename fbthrift_T = ::std::int32_t>

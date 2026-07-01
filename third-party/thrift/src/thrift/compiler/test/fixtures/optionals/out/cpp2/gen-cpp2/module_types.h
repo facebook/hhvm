@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <compare>
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 
 namespace apache::thrift {
@@ -177,11 +178,6 @@ namespace apache::thrift::detail::qualifier {
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
 namespace cpp2 {
-using ::apache::thrift::detail::operator!=;
-using ::apache::thrift::detail::operator>;
-using ::apache::thrift::detail::operator<=;
-using ::apache::thrift::detail::operator>=;
-
 /** Glean {"file": "thrift/compiler/test/fixtures/optionals/src/module.thrift", "name": "PersonID", "kind": "typedef" } */
 using PersonID = ::std::int64_t;
 
@@ -258,7 +254,7 @@ class Color final  {
  public:
 
   bool operator==(const Color&) const;
-  bool operator<(const Color&) const;
+  std::partial_ordering operator<=>(const Color&) const;
 
   /** Glean { "field": "red" } */
   template <typename..., typename fbthrift_T = double>
@@ -537,7 +533,7 @@ class Vehicle final  {
  public:
 
   bool operator==(const Vehicle&) const;
-  bool operator<(const Vehicle&) const;
+  std::partial_ordering operator<=>(const Vehicle&) const;
 
   /** Glean { "field": "color" } */
   template <typename..., typename fbthrift_T = ::cpp2::Color>
@@ -924,7 +920,7 @@ class Person final  {
  public:
 
   bool operator==(const Person&) const;
-  bool operator<(const Person&) const;
+  std::partial_ordering operator<=>(const Person&) const;
 
   /** Glean { "field": "id" } */
   template <typename..., typename fbthrift_T = ::cpp2::PersonID>

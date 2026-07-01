@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <compare>
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 #include "thrift/compiler/test/fixtures/includes/gen-cpp2/transitive_types.h"
 #include "thrift/compiler/test/fixtures/includes/gen-cpp2/transitive_constants.h"
@@ -44,11 +45,6 @@ namespace apache::thrift::detail::qualifier {
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
 namespace cpp2 {
-using ::apache::thrift::detail::operator!=;
-using ::apache::thrift::detail::operator>;
-using ::apache::thrift::detail::operator<=;
-using ::apache::thrift::detail::operator>=;
-
 /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/includes.thrift", "name": "IncludedInt64", "kind": "typedef" } */
 using IncludedInt64 = ::std::int64_t;
 /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/includes.thrift", "name": "TransitiveFoo", "kind": "typedef" } */
@@ -117,7 +113,7 @@ class Included final  {
  public:
 
   bool operator==(const Included&) const;
-  bool operator<(const Included&) const;
+  std::partial_ordering operator<=>(const Included&) const;
 
   /** Glean { "field": "MyIntField" } */
   template <typename..., typename fbthrift_T = ::std::int64_t>

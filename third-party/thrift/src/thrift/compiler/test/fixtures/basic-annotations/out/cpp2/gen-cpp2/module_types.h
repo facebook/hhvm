@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <compare>
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 
 namespace apache::thrift {
@@ -150,11 +151,6 @@ namespace apache::thrift::detail::qualifier {
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
 namespace cpp2 {
-using ::apache::thrift::detail::operator!=;
-using ::apache::thrift::detail::operator>;
-using ::apache::thrift::detail::operator<=;
-using ::apache::thrift::detail::operator>=;
-
 
 namespace detail {
 /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "name": "YourUnion", "kind": "union" } */
@@ -244,7 +240,7 @@ class YourUnion final  {
   } ;
 
   bool operator==(const YourUnion&) const;
-  bool operator<(const YourUnion&) const;
+  std::partial_ordering operator<=>(const YourUnion&) const;
 
   Type getType() const { return static_cast<Type>(fbthrift_type_); }
 
@@ -375,7 +371,7 @@ class YourStruct final  {
  public:
 
   bool operator==(const YourStruct&) const;
-  bool operator<(const YourStruct&) const;
+  std::partial_ordering operator<=>(const YourStruct&) const;
 
   /** Glean { "field": "majorVer" } */
   template <typename..., typename fbthrift_T = ::std::int64_t>
@@ -925,7 +921,7 @@ class MyStructNestedAnnotation final  {
  public:
 
   bool operator==(const MyStructNestedAnnotation&) const;
-  bool operator<(const MyStructNestedAnnotation&) const;
+  std::partial_ordering operator<=>(const MyStructNestedAnnotation&) const;
 
   /** Glean { "field": "name" } */
   template <typename..., typename fbthrift_T = ::std::string>
@@ -1069,7 +1065,7 @@ class FOLLY_EXPORT YourException : public virtual apache::thrift::TException {
  public:
 
   bool operator==(const YourException&) const;
-  bool operator<(const YourException&) const;
+  std::partial_ordering operator<=>(const YourException&) const;
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);
@@ -1167,7 +1163,7 @@ class SecretStruct final  {
  public:
 
   bool operator==(const SecretStruct&) const;
-  bool operator<(const SecretStruct&) const;
+  std::partial_ordering operator<=>(const SecretStruct&) const;
 
   /** Glean { "field": "id" } */
   template <typename..., typename fbthrift_T = ::std::int64_t>

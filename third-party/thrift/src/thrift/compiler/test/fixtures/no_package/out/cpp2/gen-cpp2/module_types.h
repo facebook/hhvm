@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <compare>
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 
 namespace apache::thrift {
@@ -255,11 +256,6 @@ namespace apache::thrift::detail::qualifier {
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
 namespace cpp2 {
-using ::apache::thrift::detail::operator!=;
-using ::apache::thrift::detail::operator>;
-using ::apache::thrift::detail::operator<=;
-using ::apache::thrift::detail::operator>=;
-
 /** Glean {"file": "thrift/compiler/test/fixtures/no_package/src/module.thrift", "name": "MyEnumAlias", "kind": "typedef" } */
 using MyEnumAlias = ::cpp2::MyEnum;
 /** Glean {"file": "thrift/compiler/test/fixtures/no_package/src/module.thrift", "name": "MyDataItemAlias", "kind": "typedef" } */
@@ -316,7 +312,7 @@ class MyDataItem final  {
  public:
 
   bool operator==(const MyDataItem&) const;
-  bool operator<(const MyDataItem&) const;
+  std::partial_ordering operator<=>(const MyDataItem&) const;
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);
@@ -435,7 +431,7 @@ class MyStruct final  {
  public:
 
   bool operator==(const MyStruct&) const;
-  bool operator<(const MyStruct&) const;
+  std::partial_ordering operator<=>(const MyStruct&) const;
 
   /** Glean { "field": "MyIntField" } */
   template <typename..., typename fbthrift_T = ::std::int64_t>
@@ -966,7 +962,7 @@ class Containers final  {
  public:
 
   bool operator==(const Containers&) const;
-  bool operator<(const Containers&) const;
+  std::partial_ordering operator<=>(const Containers&) const;
 
   /** Glean { "field": "I32List" } */
   template <typename..., typename fbthrift_T = ::std::vector<::std::int32_t>>
@@ -1295,7 +1291,7 @@ class MyUnion final  {
   } ;
 
   bool operator==(const MyUnion&) const;
-  bool operator<(const MyUnion&) const;
+  std::partial_ordering operator<=>(const MyUnion&) const;
 
   /** Glean { "field": "myEnum" } */
   template <typename... A> requires (sizeof...(A) == 0)
@@ -1711,7 +1707,7 @@ class FOLLY_EXPORT MyException : public virtual apache::thrift::TException {
  public:
 
   bool operator==(const MyException&) const;
-  bool operator<(const MyException&) const;
+  std::partial_ordering operator<=>(const MyException&) const;
 
   /** Glean { "field": "MyIntField" } */
   template <typename..., typename fbthrift_T = ::std::int64_t>
@@ -2025,7 +2021,7 @@ class FOLLY_EXPORT MyExceptionWithMessage : public virtual apache::thrift::TExce
  public:
 
   bool operator==(const MyExceptionWithMessage&) const;
-  bool operator<(const MyExceptionWithMessage&) const;
+  std::partial_ordering operator<=>(const MyExceptionWithMessage&) const;
 
   /** Glean { "field": "MyIntField" } */
   template <typename..., typename fbthrift_T = ::std::int64_t>
@@ -2318,7 +2314,7 @@ class ReservedKeyword final  {
  public:
 
   bool operator==(const ReservedKeyword&) const;
-  bool operator<(const ReservedKeyword&) const;
+  std::partial_ordering operator<=>(const ReservedKeyword&) const;
 
   /** Glean { "field": "reserved_field" } */
   template <typename..., typename fbthrift_T = ::std::int32_t>
@@ -2490,7 +2486,7 @@ class UnionToBeRenamed final  {
   } ;
 
   bool operator==(const UnionToBeRenamed&) const;
-  bool operator<(const UnionToBeRenamed&) const;
+  std::partial_ordering operator<=>(const UnionToBeRenamed&) const;
 
   /** Glean { "field": "reserved_field" } */
   template <typename... A> requires (sizeof...(A) == 0)

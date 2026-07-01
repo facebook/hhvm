@@ -92,8 +92,8 @@ bool InterceptedFields::operator==([[maybe_unused]] const InterceptedFields& rhs
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool InterceptedFields::operator<([[maybe_unused]] const InterceptedFields& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering InterceptedFields::operator<=>([[maybe_unused]] const InterceptedFields& rhs) const {
+  return ::apache::thrift::op::compare<InterceptedFields>(*this, rhs);
 }
 
 

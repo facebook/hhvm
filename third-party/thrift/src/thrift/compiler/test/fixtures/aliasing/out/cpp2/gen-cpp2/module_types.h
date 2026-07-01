@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <compare>
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 #include "other/gen-cpp2/module_types.h"
 #include "thrift/compiler/test/fixtures/aliasing/gen-cpp2/not_module_types.h"
@@ -44,11 +45,6 @@ namespace apache::thrift::detail::qualifier {
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
 namespace facebook::thrift::compiler::test::fixtures::aliasing {
-using ::apache::thrift::detail::operator!=;
-using ::apache::thrift::detail::operator>;
-using ::apache::thrift::detail::operator<=;
-using ::apache::thrift::detail::operator>=;
-
 
 /** Glean {"file": "thrift/compiler/test/fixtures/aliasing/src/module.thrift", "name": "Foo", "kind": "struct" } */
 class Foo final  {
@@ -112,7 +108,7 @@ class Foo final  {
  public:
 
   bool operator==(const Foo&) const;
-  bool operator<(const Foo&) const;
+  std::partial_ordering operator<=>(const Foo&) const;
 
   /** Glean { "field": "other_foo" } */
   template <typename..., typename fbthrift_T = ::facebook::thrift::compiler::test::fixtures::aliasing::other::Foo>

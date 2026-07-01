@@ -211,8 +211,8 @@ bool MyUnion::operator==(const MyUnion& rhs) const {
   return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);
 }
 
-bool MyUnion::operator<([[maybe_unused]] const MyUnion& rhs) const {
-  return ::apache::thrift::op::detail::UnionLessThan{}(*this, rhs);
+std::partial_ordering MyUnion::operator<=>([[maybe_unused]] const MyUnion& rhs) const {
+  return ::apache::thrift::op::compare<MyUnion>(*this, rhs);
 }
 
 void swap(MyUnion& a, MyUnion& b) {
@@ -307,8 +307,8 @@ bool NonTriviallyDestructibleUnion::operator==(const NonTriviallyDestructibleUni
   return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);
 }
 
-bool NonTriviallyDestructibleUnion::operator<([[maybe_unused]] const NonTriviallyDestructibleUnion& rhs) const {
-  return ::apache::thrift::op::detail::UnionLessThan{}(*this, rhs);
+std::partial_ordering NonTriviallyDestructibleUnion::operator<=>([[maybe_unused]] const NonTriviallyDestructibleUnion& rhs) const {
+  return ::apache::thrift::op::compare<NonTriviallyDestructibleUnion>(*this, rhs);
 }
 
 void swap(NonTriviallyDestructibleUnion& a, NonTriviallyDestructibleUnion& b) {
@@ -430,8 +430,8 @@ bool MyField::operator==([[maybe_unused]] const MyField& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool MyField::operator<([[maybe_unused]] const MyField& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering MyField::operator<=>([[maybe_unused]] const MyField& rhs) const {
+  return ::apache::thrift::op::compare<MyField>(*this, rhs);
 }
 
 
@@ -521,8 +521,8 @@ bool MyStruct::operator==([[maybe_unused]] const MyStruct& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool MyStruct::operator<([[maybe_unused]] const MyStruct& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering MyStruct::operator<=>([[maybe_unused]] const MyStruct& rhs) const {
+  return ::apache::thrift::op::compare<MyStruct>(*this, rhs);
 }
 
 
@@ -628,8 +628,8 @@ bool StructWithUnion::operator==([[maybe_unused]] const StructWithUnion& rhs) co
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool StructWithUnion::operator<([[maybe_unused]] const StructWithUnion& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering StructWithUnion::operator<=>([[maybe_unused]] const StructWithUnion& rhs) const {
+  return ::apache::thrift::op::compare<StructWithUnion>(*this, rhs);
 }
 
 
@@ -719,8 +719,8 @@ bool RecursiveStruct::operator==([[maybe_unused]] const RecursiveStruct& rhs) co
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool RecursiveStruct::operator<([[maybe_unused]] const RecursiveStruct& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering RecursiveStruct::operator<=>([[maybe_unused]] const RecursiveStruct& rhs) const {
+  return ::apache::thrift::op::compare<RecursiveStruct>(*this, rhs);
 }
 
 
@@ -837,8 +837,8 @@ bool StructWithContainers::operator==([[maybe_unused]] const StructWithContainer
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool StructWithContainers::operator<([[maybe_unused]] const StructWithContainers& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering StructWithContainers::operator<=>([[maybe_unused]] const StructWithContainers& rhs) const {
+  return ::apache::thrift::op::compare<StructWithContainers>(*this, rhs);
 }
 
 
@@ -911,8 +911,8 @@ bool StructWithSharedConst::operator==([[maybe_unused]] const StructWithSharedCo
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool StructWithSharedConst::operator<([[maybe_unused]] const StructWithSharedConst& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering StructWithSharedConst::operator<=>([[maybe_unused]] const StructWithSharedConst& rhs) const {
+  return ::apache::thrift::op::compare<StructWithSharedConst>(*this, rhs);
 }
 
 
@@ -970,8 +970,8 @@ bool Empty::operator==([[maybe_unused]] const Empty& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool Empty::operator<([[maybe_unused]] const Empty& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering Empty::operator<=>([[maybe_unused]] const Empty& rhs) const {
+  return ::apache::thrift::op::compare<Empty>(*this, rhs);
 }
 
 
@@ -1049,8 +1049,8 @@ bool StructWithRef::operator==([[maybe_unused]] const StructWithRef& rhs) const 
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool StructWithRef::operator<([[maybe_unused]] const StructWithRef& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering StructWithRef::operator<=>([[maybe_unused]] const StructWithRef& rhs) const {
+  return ::apache::thrift::op::compare<StructWithRef>(*this, rhs);
 }
 
 
@@ -1145,8 +1145,8 @@ bool StructWithBox::operator==([[maybe_unused]] const StructWithBox& rhs) const 
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool StructWithBox::operator<([[maybe_unused]] const StructWithBox& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering StructWithBox::operator<=>([[maybe_unused]] const StructWithBox& rhs) const {
+  return ::apache::thrift::op::compare<StructWithBox>(*this, rhs);
 }
 
 
@@ -1222,8 +1222,8 @@ bool StructWithInternBox::operator==([[maybe_unused]] const StructWithInternBox&
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool StructWithInternBox::operator<([[maybe_unused]] const StructWithInternBox& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering StructWithInternBox::operator<=>([[maybe_unused]] const StructWithInternBox& rhs) const {
+  return ::apache::thrift::op::compare<StructWithInternBox>(*this, rhs);
 }
 
 
@@ -1306,8 +1306,8 @@ bool StructWithTerseInternBox::operator==([[maybe_unused]] const StructWithTerse
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool StructWithTerseInternBox::operator<([[maybe_unused]] const StructWithTerseInternBox& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering StructWithTerseInternBox::operator<=>([[maybe_unused]] const StructWithTerseInternBox& rhs) const {
+  return ::apache::thrift::op::compare<StructWithTerseInternBox>(*this, rhs);
 }
 
 
@@ -1405,8 +1405,8 @@ bool AdaptedStructWithInternBox::operator==([[maybe_unused]] const AdaptedStruct
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool AdaptedStructWithInternBox::operator<([[maybe_unused]] const AdaptedStructWithInternBox& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering AdaptedStructWithInternBox::operator<=>([[maybe_unused]] const AdaptedStructWithInternBox& rhs) const {
+  return ::apache::thrift::op::compare<AdaptedStructWithInternBox>(*this, rhs);
 }
 
 
@@ -1505,8 +1505,8 @@ bool AdaptedStructWithTerseInternBox::operator==([[maybe_unused]] const AdaptedS
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool AdaptedStructWithTerseInternBox::operator<([[maybe_unused]] const AdaptedStructWithTerseInternBox& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering AdaptedStructWithTerseInternBox::operator<=>([[maybe_unused]] const AdaptedStructWithTerseInternBox& rhs) const {
+  return ::apache::thrift::op::compare<AdaptedStructWithTerseInternBox>(*this, rhs);
 }
 
 
@@ -1598,8 +1598,8 @@ bool StructWithRefTypeUnique::operator==([[maybe_unused]] const StructWithRefTyp
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool StructWithRefTypeUnique::operator<([[maybe_unused]] const StructWithRefTypeUnique& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering StructWithRefTypeUnique::operator<=>([[maybe_unused]] const StructWithRefTypeUnique& rhs) const {
+  return ::apache::thrift::op::compare<StructWithRefTypeUnique>(*this, rhs);
 }
 
 
@@ -1684,8 +1684,8 @@ bool StructWithRefTypeShared::operator==([[maybe_unused]] const StructWithRefTyp
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool StructWithRefTypeShared::operator<([[maybe_unused]] const StructWithRefTypeShared& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering StructWithRefTypeShared::operator<=>([[maybe_unused]] const StructWithRefTypeShared& rhs) const {
+  return ::apache::thrift::op::compare<StructWithRefTypeShared>(*this, rhs);
 }
 
 
@@ -1770,8 +1770,8 @@ bool StructWithRefTypeSharedConst::operator==([[maybe_unused]] const StructWithR
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool StructWithRefTypeSharedConst::operator<([[maybe_unused]] const StructWithRefTypeSharedConst& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering StructWithRefTypeSharedConst::operator<=>([[maybe_unused]] const StructWithRefTypeSharedConst& rhs) const {
+  return ::apache::thrift::op::compare<StructWithRefTypeSharedConst>(*this, rhs);
 }
 
 
@@ -1859,8 +1859,8 @@ bool StructWithRefAndAnnotCppNoexceptMoveCtor::operator==([[maybe_unused]] const
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool StructWithRefAndAnnotCppNoexceptMoveCtor::operator<([[maybe_unused]] const StructWithRefAndAnnotCppNoexceptMoveCtor& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering StructWithRefAndAnnotCppNoexceptMoveCtor::operator<=>([[maybe_unused]] const StructWithRefAndAnnotCppNoexceptMoveCtor& rhs) const {
+  return ::apache::thrift::op::compare<StructWithRefAndAnnotCppNoexceptMoveCtor>(*this, rhs);
 }
 
 
@@ -1960,8 +1960,8 @@ bool StructWithString::operator==([[maybe_unused]] const StructWithString& rhs) 
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool StructWithString::operator<([[maybe_unused]] const StructWithString& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering StructWithString::operator<=>([[maybe_unused]] const StructWithString& rhs) const {
+  return ::apache::thrift::op::compare<StructWithString>(*this, rhs);
 }
 
 

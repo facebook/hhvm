@@ -102,8 +102,8 @@ bool RefUnion::operator==(const RefUnion& rhs) const {
   return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);
 }
 
-bool RefUnion::operator<([[maybe_unused]] const RefUnion& rhs) const {
-  return ::apache::thrift::op::detail::UnionLessThan{}(*this, rhs);
+std::partial_ordering RefUnion::operator<=>([[maybe_unused]] const RefUnion& rhs) const {
+  return ::apache::thrift::op::compare<RefUnion>(*this, rhs);
 }
 
 void swap(RefUnion& a, RefUnion& b) {

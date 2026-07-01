@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <compare>
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 
 namespace apache::thrift {
@@ -88,11 +89,6 @@ namespace apache::thrift::detail::qualifier {
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
 namespace cpp2 {
-using ::apache::thrift::detail::operator!=;
-using ::apache::thrift::detail::operator>;
-using ::apache::thrift::detail::operator<=;
-using ::apache::thrift::detail::operator>=;
-
 
 /** Glean {"file": "thrift/compiler/test/fixtures/exceptions/src/module.thrift", "name": "Fiery", "kind": "exception" } */
 class FOLLY_EXPORT Fiery : public virtual apache::thrift::TException {
@@ -159,7 +155,7 @@ class FOLLY_EXPORT Fiery : public virtual apache::thrift::TException {
  public:
 
   bool operator==(const Fiery&) const;
-  bool operator<(const Fiery&) const;
+  std::partial_ordering operator<=>(const Fiery&) const;
 
   /** Glean { "field": "message" } */
   template <typename..., typename fbthrift_T = ::std::string>
@@ -313,7 +309,7 @@ class FOLLY_EXPORT Serious : public virtual apache::thrift::TException {
  public:
 
   bool operator==(const Serious&) const;
-  bool operator<(const Serious&) const;
+  std::partial_ordering operator<=>(const Serious&) const;
 
   /** Glean { "field": "sonnet" } */
   template <typename..., typename fbthrift_T = ::std::string>
@@ -469,7 +465,7 @@ class FOLLY_EXPORT ComplexFieldNames : public virtual apache::thrift::TException
  public:
 
   bool operator==(const ComplexFieldNames&) const;
-  bool operator<(const ComplexFieldNames&) const;
+  std::partial_ordering operator<=>(const ComplexFieldNames&) const;
 
   /** Glean { "field": "error_message" } */
   template <typename..., typename fbthrift_T = ::std::string>
@@ -683,7 +679,7 @@ class FOLLY_EXPORT CustomFieldNames : public virtual apache::thrift::TException 
  public:
 
   bool operator==(const CustomFieldNames&) const;
-  bool operator<(const CustomFieldNames&) const;
+  std::partial_ordering operator<=>(const CustomFieldNames&) const;
 
   /** Glean { "field": "error_message" } */
   template <typename..., typename fbthrift_T = ::std::string>
@@ -897,7 +893,7 @@ class FOLLY_EXPORT ExceptionWithPrimitiveField : public virtual apache::thrift::
  public:
 
   bool operator==(const ExceptionWithPrimitiveField&) const;
-  bool operator<(const ExceptionWithPrimitiveField&) const;
+  std::partial_ordering operator<=>(const ExceptionWithPrimitiveField&) const;
 
   /** Glean { "field": "message" } */
   template <typename..., typename fbthrift_T = ::std::string>
@@ -1099,7 +1095,7 @@ class FOLLY_EXPORT ExceptionWithStructuredAnnotation : public virtual apache::th
  public:
 
   bool operator==(const ExceptionWithStructuredAnnotation&) const;
-  bool operator<(const ExceptionWithStructuredAnnotation&) const;
+  std::partial_ordering operator<=>(const ExceptionWithStructuredAnnotation&) const;
 
   /** Glean { "field": "message_field" } */
   template <typename..., typename fbthrift_T = ::std::string>
@@ -1290,7 +1286,7 @@ class FOLLY_EXPORT Banal : public virtual apache::thrift::TException {
  public:
 
   bool operator==(const Banal&) const;
-  bool operator<(const Banal&) const;
+  std::partial_ordering operator<=>(const Banal&) const;
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);

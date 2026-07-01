@@ -86,8 +86,8 @@ bool MyStruct::operator==([[maybe_unused]] const MyStruct& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool MyStruct::operator<([[maybe_unused]] const MyStruct& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering MyStruct::operator<=>([[maybe_unused]] const MyStruct& rhs) const {
+  return ::apache::thrift::op::compare<MyStruct>(*this, rhs);
 }
 
 
@@ -169,8 +169,8 @@ bool MyUnion::operator==(const MyUnion& rhs) const {
   return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);
 }
 
-bool MyUnion::operator<([[maybe_unused]] const MyUnion& rhs) const {
-  return ::apache::thrift::op::detail::UnionLessThan{}(*this, rhs);
+std::partial_ordering MyUnion::operator<=>([[maybe_unused]] const MyUnion& rhs) const {
+  return ::apache::thrift::op::compare<MyUnion>(*this, rhs);
 }
 
 void swap(MyUnion& a, MyUnion& b) {
@@ -335,8 +335,8 @@ bool StructLevelTerseStruct::operator==([[maybe_unused]] const StructLevelTerseS
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool StructLevelTerseStruct::operator<([[maybe_unused]] const StructLevelTerseStruct& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering StructLevelTerseStruct::operator<=>([[maybe_unused]] const StructLevelTerseStruct& rhs) const {
+  return ::apache::thrift::op::compare<StructLevelTerseStruct>(*this, rhs);
 }
 
 
@@ -569,8 +569,8 @@ bool FieldLevelTerseStruct::operator==([[maybe_unused]] const FieldLevelTerseStr
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool FieldLevelTerseStruct::operator<([[maybe_unused]] const FieldLevelTerseStruct& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering FieldLevelTerseStruct::operator<=>([[maybe_unused]] const FieldLevelTerseStruct& rhs) const {
+  return ::apache::thrift::op::compare<FieldLevelTerseStruct>(*this, rhs);
 }
 
 
@@ -820,8 +820,8 @@ bool CppRefStructFields::operator==([[maybe_unused]] const CppRefStructFields& r
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool CppRefStructFields::operator<([[maybe_unused]] const CppRefStructFields& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering CppRefStructFields::operator<=>([[maybe_unused]] const CppRefStructFields& rhs) const {
+  return ::apache::thrift::op::compare<CppRefStructFields>(*this, rhs);
 }
 
 
@@ -1002,8 +1002,8 @@ bool DeprecatedTerseWriteWithCustomDefault::operator==([[maybe_unused]] const De
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool DeprecatedTerseWriteWithCustomDefault::operator<([[maybe_unused]] const DeprecatedTerseWriteWithCustomDefault& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering DeprecatedTerseWriteWithCustomDefault::operator<=>([[maybe_unused]] const DeprecatedTerseWriteWithCustomDefault& rhs) const {
+  return ::apache::thrift::op::compare<DeprecatedTerseWriteWithCustomDefault>(*this, rhs);
 }
 
 
@@ -1283,8 +1283,8 @@ bool DeprecatedTerseWriteWithRedundantCustomDefault::operator==([[maybe_unused]]
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool DeprecatedTerseWriteWithRedundantCustomDefault::operator<([[maybe_unused]] const DeprecatedTerseWriteWithRedundantCustomDefault& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering DeprecatedTerseWriteWithRedundantCustomDefault::operator<=>([[maybe_unused]] const DeprecatedTerseWriteWithRedundantCustomDefault& rhs) const {
+  return ::apache::thrift::op::compare<DeprecatedTerseWriteWithRedundantCustomDefault>(*this, rhs);
 }
 
 

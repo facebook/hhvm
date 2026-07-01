@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <compare>
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 #include "thrift/compiler/test/fixtures/types/gen-cpp2/included_types.h"
 
@@ -571,11 +572,6 @@ template<> struct equal_to<typename ::apache::thrift::fixtures::types::decorated
 // END hash_and_equal_to
 namespace apache::thrift::fixtures::types {
 using AdaptedListDep = detail::AdaptedListDep;
-using ::apache::thrift::detail::operator!=;
-using ::apache::thrift::detail::operator>;
-using ::apache::thrift::detail::operator<=;
-using ::apache::thrift::detail::operator>=;
-
 /** Glean {"file": "thrift/compiler/test/fixtures/types/src/module.thrift", "name": "TBinary", "kind": "typedef" } */
 using TBinary = ::std::string;
 /** Glean {"file": "thrift/compiler/test/fixtures/types/src/module.thrift", "name": "IntTypedef", "kind": "typedef" } */
@@ -653,7 +649,7 @@ class empty_struct final  {
  public:
 
   bool operator==(const empty_struct&) const;
-  bool operator<(const empty_struct&) const;
+  std::partial_ordering operator<=>(const empty_struct&) const;
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);
@@ -741,7 +737,7 @@ class decorated_struct final  {
  public:
 
   bool operator==(const decorated_struct&) const;
-  bool operator<(const decorated_struct&) const;
+  std::partial_ordering operator<=>(const decorated_struct&) const;
 
   /** Glean { "field": "field" } */
   template <typename..., typename fbthrift_T = ::std::string>
@@ -913,7 +909,7 @@ class ContainerStruct final  {
  public:
 
   bool operator==(const ContainerStruct&) const;
-  bool operator<(const ContainerStruct&) const;
+  std::partial_ordering operator<=>(const ContainerStruct&) const;
 
   /** Glean { "field": "fieldA" } */
   template <typename..., typename fbthrift_T = ::std::vector<::std::int32_t>>
@@ -1417,7 +1413,7 @@ class CppTypeStruct final  {
  public:
 
   bool operator==(const CppTypeStruct&) const;
-  bool operator<(const CppTypeStruct&) const;
+  std::partial_ordering operator<=>(const CppTypeStruct&) const;
 
   /** Glean { "field": "fieldA" } */
   template <typename..., typename fbthrift_T = std::list<int32_t>>
@@ -1558,7 +1554,7 @@ class VirtualStruct  {
  public:
 
   bool operator==(const VirtualStruct&) const;
-  bool operator<(const VirtualStruct&) const;
+  std::partial_ordering operator<=>(const VirtualStruct&) const;
 
   /** Glean { "field": "MyIntField" } */
   template <typename..., typename fbthrift_T = ::std::int64_t>
@@ -1693,7 +1689,7 @@ class MyStructWithForwardRefEnum final  {
  public:
 
   bool operator==(const MyStructWithForwardRefEnum&) const;
-  bool operator<(const MyStructWithForwardRefEnum&) const;
+  std::partial_ordering operator<=>(const MyStructWithForwardRefEnum&) const;
 
   /** Glean { "field": "a" } */
   template <typename..., typename fbthrift_T = ::apache::thrift::fixtures::types::MyForwardRefEnum>
@@ -1872,7 +1868,7 @@ class TrivialNumeric final  {
  public:
 
   bool operator==(const TrivialNumeric&) const;
-  bool operator<(const TrivialNumeric&) const;
+  std::partial_ordering operator<=>(const TrivialNumeric&) const;
 
   /** Glean { "field": "a" } */
   template <typename..., typename fbthrift_T = ::std::int32_t>
@@ -2051,7 +2047,7 @@ class TrivialNestedWithDefault final  {
  public:
 
   bool operator==(const TrivialNestedWithDefault&) const;
-  bool operator<(const TrivialNestedWithDefault&) const;
+  std::partial_ordering operator<=>(const TrivialNestedWithDefault&) const;
 
   /** Glean { "field": "z" } */
   template <typename..., typename fbthrift_T = ::std::int32_t>
@@ -2239,7 +2235,7 @@ class ComplexString final  {
  public:
 
   bool operator==(const ComplexString&) const;
-  bool operator<(const ComplexString&) const;
+  std::partial_ordering operator<=>(const ComplexString&) const;
 
   /** Glean { "field": "a" } */
   template <typename..., typename fbthrift_T = ::std::string>
@@ -2439,7 +2435,7 @@ class ComplexNestedWithDefault final  {
  public:
 
   bool operator==(const ComplexNestedWithDefault&) const;
-  bool operator<(const ComplexNestedWithDefault&) const;
+  std::partial_ordering operator<=>(const ComplexNestedWithDefault&) const;
 
   /** Glean { "field": "z" } */
   template <typename..., typename fbthrift_T = ::std::string>
@@ -2651,7 +2647,7 @@ class MinPadding final  {
  public:
 
   bool operator==(const MinPadding&) const;
-  bool operator<(const MinPadding&) const;
+  std::partial_ordering operator<=>(const MinPadding&) const;
 
   /** Glean { "field": "small" } */
   template <typename..., typename fbthrift_T = ::std::int8_t>
@@ -2976,7 +2972,7 @@ class MinPaddingWithCustomType final  {
  public:
 
   bool operator==(const MinPaddingWithCustomType&) const;
-  bool operator<(const MinPaddingWithCustomType&) const;
+  std::partial_ordering operator<=>(const MinPaddingWithCustomType&) const;
 
   /** Glean { "field": "small" } */
   template <typename..., typename fbthrift_T = ::std::int8_t>
@@ -3611,7 +3607,7 @@ class Renamed final  {
  public:
 
   bool operator==(const Renamed&) const;
-  bool operator<(const Renamed&) const;
+  std::partial_ordering operator<=>(const Renamed&) const;
 
   /** Glean { "field": "bar" } */
   template <typename..., typename fbthrift_T = ::std::int64_t>
@@ -3747,7 +3743,7 @@ class AnnotatedTypes final  {
  public:
 
   bool operator==(const AnnotatedTypes&) const;
-  bool operator<(const AnnotatedTypes&) const;
+  std::partial_ordering operator<=>(const AnnotatedTypes&) const;
 
   /** Glean { "field": "binary_field" } */
   template <typename..., typename fbthrift_T = ::apache::thrift::fixtures::types::TBinary_8623>
@@ -3941,7 +3937,7 @@ class ForwardUsageStruct final  {
  public:
 
   bool operator==(const ForwardUsageStruct&) const;
-  bool operator<(const ForwardUsageStruct&) const;
+  std::partial_ordering operator<=>(const ForwardUsageStruct&) const;
   /** Glean { "field": "foo" } */
   FOLLY_ERASE ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageRoot>& foo_ref() & {
     return __fbthrift_field_foo;
@@ -4072,7 +4068,7 @@ class ForwardUsageRoot final  {
  public:
 
   bool operator==(const ForwardUsageRoot&) const;
-  bool operator<(const ForwardUsageRoot&) const;
+  std::partial_ordering operator<=>(const ForwardUsageRoot&) const;
 
   /** Glean { "field": "ForwardUsageStruct" } */
   template <typename..., typename fbthrift_T = ::apache::thrift::fixtures::types::ForwardUsageStruct>
@@ -4251,7 +4247,7 @@ class ForwardUsageByRef final  {
  public:
 
   bool operator==(const ForwardUsageByRef&) const;
-  bool operator<(const ForwardUsageByRef&) const;
+  std::partial_ordering operator<=>(const ForwardUsageByRef&) const;
   /** Glean { "field": "foo" } */
   FOLLY_ERASE ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageRoot>& foo_ref() & {
     return __fbthrift_field_foo;
@@ -4378,7 +4374,7 @@ class IncompleteMap final  {
  public:
 
   bool operator==(const IncompleteMap&) const;
-  bool operator<(const IncompleteMap&) const;
+  std::partial_ordering operator<=>(const IncompleteMap&) const;
 
   /** Glean { "field": "field" } */
   template <typename..., typename fbthrift_T = ::std::map<::std::int32_t, ::apache::thrift::fixtures::types::IncompleteMapDep>>
@@ -4511,7 +4507,7 @@ class IncompleteMapDep final  {
  public:
 
   bool operator==(const IncompleteMapDep&) const;
-  bool operator<(const IncompleteMapDep&) const;
+  std::partial_ordering operator<=>(const IncompleteMapDep&) const;
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);
@@ -4590,7 +4586,7 @@ class CompleteMapDep final  {
  public:
 
   bool operator==(const CompleteMapDep&) const;
-  bool operator<(const CompleteMapDep&) const;
+  std::partial_ordering operator<=>(const CompleteMapDep&) const;
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);
@@ -4678,7 +4674,7 @@ class CompleteMap final  {
  public:
 
   bool operator==(const CompleteMap&) const;
-  bool operator<(const CompleteMap&) const;
+  std::partial_ordering operator<=>(const CompleteMap&) const;
 
   /** Glean { "field": "field" } */
   template <typename..., typename fbthrift_T = std::unordered_map<::std::int32_t, ::apache::thrift::fixtures::types::CompleteMapDep>>
@@ -4820,7 +4816,7 @@ class IncompleteList final  {
  public:
 
   bool operator==(const IncompleteList&) const;
-  bool operator<(const IncompleteList&) const;
+  std::partial_ordering operator<=>(const IncompleteList&) const;
 
   /** Glean { "field": "field" } */
   template <typename..., typename fbthrift_T = ::std::list<::apache::thrift::fixtures::types::IncompleteListDep>>
@@ -4953,7 +4949,7 @@ class IncompleteListDep final  {
  public:
 
   bool operator==(const IncompleteListDep&) const;
-  bool operator<(const IncompleteListDep&) const;
+  std::partial_ordering operator<=>(const IncompleteListDep&) const;
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);
@@ -5032,7 +5028,7 @@ class CompleteListDep final  {
  public:
 
   bool operator==(const CompleteListDep&) const;
-  bool operator<(const CompleteListDep&) const;
+  std::partial_ordering operator<=>(const CompleteListDep&) const;
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);
@@ -5120,7 +5116,7 @@ class CompleteList final  {
  public:
 
   bool operator==(const CompleteList&) const;
-  bool operator<(const CompleteList&) const;
+  std::partial_ordering operator<=>(const CompleteList&) const;
 
   /** Glean { "field": "field" } */
   template <typename..., typename fbthrift_T = folly::small_vector<::apache::thrift::fixtures::types::CompleteListDep>>
@@ -5262,7 +5258,7 @@ class AdaptedList final  {
  public:
 
   bool operator==(const AdaptedList&) const;
-  bool operator<(const AdaptedList&) const;
+  std::partial_ordering operator<=>(const AdaptedList&) const;
 
   /** Glean { "field": "field" } */
   template <typename..., typename fbthrift_T = ::std::vector<::apache::thrift::fixtures::types::AdaptedListDep>>
@@ -5402,7 +5398,7 @@ class AdaptedListDep final  {
  public:
 
   bool operator==(const AdaptedListDep&) const;
-  bool operator<(const AdaptedListDep&) const;
+  std::partial_ordering operator<=>(const AdaptedListDep&) const;
 
   /** Glean { "field": "field" } */
   template <typename..., typename fbthrift_T = ::apache::thrift::fixtures::types::AdaptedList>
@@ -5542,7 +5538,7 @@ class DependentAdaptedListDep final  {
  public:
 
   bool operator==(const DependentAdaptedListDep&) const;
-  bool operator<(const DependentAdaptedListDep&) const;
+  std::partial_ordering operator<=>(const DependentAdaptedListDep&) const;
 
   /** Glean { "field": "field" } */
   template <typename..., typename fbthrift_T = ::apache::thrift::detail::boxed_value_ptr<::std::int16_t>>
@@ -5669,7 +5665,7 @@ class DependentAdaptedList final  {
  public:
 
   bool operator==(const DependentAdaptedList&) const;
-  bool operator<(const DependentAdaptedList&) const;
+  std::partial_ordering operator<=>(const DependentAdaptedList&) const;
 
   /** Glean { "field": "field" } */
   template <typename..., typename fbthrift_T = ::std::vector<::apache::thrift::fixtures::types::DependentAdaptedListDep>>
@@ -5844,7 +5840,7 @@ class AllocatorAware final  {
  public:
 
   bool operator==(const AllocatorAware&) const;
-  bool operator<(const AllocatorAware&) const;
+  std::partial_ordering operator<=>(const AllocatorAware&) const;
 
   /** Glean { "field": "aa_list" } */
   template <typename..., typename fbthrift_T = ::apache::thrift::fixtures::types::list_i32_9187>
@@ -6279,7 +6275,7 @@ class AllocatorAware2 final  {
  public:
 
   bool operator==(const AllocatorAware2&) const;
-  bool operator<(const AllocatorAware2&) const;
+  std::partial_ordering operator<=>(const AllocatorAware2&) const;
 
   /** Glean { "field": "not_a_container" } */
   template <typename..., typename fbthrift_T = ::std::int32_t>
@@ -6455,7 +6451,7 @@ class TypedefStruct final  {
  public:
 
   bool operator==(const TypedefStruct&) const;
-  bool operator<(const TypedefStruct&) const;
+  std::partial_ordering operator<=>(const TypedefStruct&) const;
 
   /** Glean { "field": "i32_field" } */
   template <typename..., typename fbthrift_T = ::std::int32_t>
@@ -6673,7 +6669,7 @@ class StructWithDoubleUnderscores final  {
  public:
 
   bool operator==(const StructWithDoubleUnderscores&) const;
-  bool operator<(const StructWithDoubleUnderscores&) const;
+  std::partial_ordering operator<=>(const StructWithDoubleUnderscores&) const;
 
   /** Glean { "field": "__field" } */
   template <typename..., typename fbthrift_T = ::std::int32_t>

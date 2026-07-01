@@ -73,8 +73,8 @@ bool BiDiSinkException::operator==([[maybe_unused]] const BiDiSinkException& rhs
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool BiDiSinkException::operator<([[maybe_unused]] const BiDiSinkException& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering BiDiSinkException::operator<=>([[maybe_unused]] const BiDiSinkException& rhs) const {
+  return ::apache::thrift::op::compare<BiDiSinkException>(*this, rhs);
 }
 
 
@@ -137,8 +137,8 @@ bool BiDiStreamException::operator==([[maybe_unused]] const BiDiStreamException&
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool BiDiStreamException::operator<([[maybe_unused]] const BiDiStreamException& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering BiDiStreamException::operator<=>([[maybe_unused]] const BiDiStreamException& rhs) const {
+  return ::apache::thrift::op::compare<BiDiStreamException>(*this, rhs);
 }
 
 
@@ -201,8 +201,8 @@ bool BiDiMethodException::operator==([[maybe_unused]] const BiDiMethodException&
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool BiDiMethodException::operator<([[maybe_unused]] const BiDiMethodException& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering BiDiMethodException::operator<=>([[maybe_unused]] const BiDiMethodException& rhs) const {
+  return ::apache::thrift::op::compare<BiDiMethodException>(*this, rhs);
 }
 
 

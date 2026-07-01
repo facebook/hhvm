@@ -110,8 +110,8 @@ bool DataItem::operator==([[maybe_unused]] const DataItem& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool DataItem::operator<([[maybe_unused]] const DataItem& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering DataItem::operator<=>([[maybe_unused]] const DataItem& rhs) const {
+  return ::apache::thrift::op::compare<DataItem>(*this, rhs);
 }
 
 

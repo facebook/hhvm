@@ -1258,6 +1258,10 @@ class t_mstch_cpp2_generator : public t_whisker_generator {
           !strct.has_unstructured_annotation("no_default_comparators");
     });
     def.property(
+        "declare_legacy_operator_less?", [](const t_structured& strct) {
+          return strct.has_unstructured_annotation("no_default_comparators");
+        });
+    def.property(
         "nondefault_copy_ctor_and_assignment?", [](const t_structured& strct) {
           if (strct.has_unstructured_annotation("cpp.allocator")) {
             return true;

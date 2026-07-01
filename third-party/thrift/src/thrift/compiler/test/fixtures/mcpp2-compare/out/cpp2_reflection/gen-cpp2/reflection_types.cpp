@@ -50,8 +50,8 @@ bool ReflectionStruct::operator==([[maybe_unused]] const ReflectionStruct& rhs) 
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool ReflectionStruct::operator<([[maybe_unused]] const ReflectionStruct& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering ReflectionStruct::operator<=>([[maybe_unused]] const ReflectionStruct& rhs) const {
+  return ::apache::thrift::op::compare<ReflectionStruct>(*this, rhs);
 }
 
 

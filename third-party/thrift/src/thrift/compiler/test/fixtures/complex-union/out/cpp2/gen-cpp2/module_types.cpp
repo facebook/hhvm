@@ -163,8 +163,8 @@ bool ComplexUnion::operator==(const ComplexUnion& rhs) const {
   return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);
 }
 
-bool ComplexUnion::operator<([[maybe_unused]] const ComplexUnion& rhs) const {
-  return ::apache::thrift::op::detail::UnionLessThan{}(*this, rhs);
+std::partial_ordering ComplexUnion::operator<=>([[maybe_unused]] const ComplexUnion& rhs) const {
+  return ::apache::thrift::op::compare<ComplexUnion>(*this, rhs);
 }
 
 void swap(ComplexUnion& a, ComplexUnion& b) {
@@ -268,8 +268,8 @@ bool ListUnion::operator==(const ListUnion& rhs) const {
   return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);
 }
 
-bool ListUnion::operator<([[maybe_unused]] const ListUnion& rhs) const {
-  return ::apache::thrift::op::detail::UnionLessThan{}(*this, rhs);
+std::partial_ordering ListUnion::operator<=>([[maybe_unused]] const ListUnion& rhs) const {
+  return ::apache::thrift::op::compare<ListUnion>(*this, rhs);
 }
 
 void swap(ListUnion& a, ListUnion& b) {
@@ -373,8 +373,8 @@ bool DataUnion::operator==(const DataUnion& rhs) const {
   return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);
 }
 
-bool DataUnion::operator<([[maybe_unused]] const DataUnion& rhs) const {
-  return ::apache::thrift::op::detail::UnionLessThan{}(*this, rhs);
+std::partial_ordering DataUnion::operator<=>([[maybe_unused]] const DataUnion& rhs) const {
+  return ::apache::thrift::op::compare<DataUnion>(*this, rhs);
 }
 
 void swap(DataUnion& a, DataUnion& b) {
@@ -447,8 +447,8 @@ bool Val::operator==([[maybe_unused]] const Val& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool Val::operator<([[maybe_unused]] const Val& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering Val::operator<=>([[maybe_unused]] const Val& rhs) const {
+  return ::apache::thrift::op::compare<Val>(*this, rhs);
 }
 
 
@@ -572,8 +572,8 @@ bool ValUnion::operator==(const ValUnion& rhs) const {
   return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);
 }
 
-bool ValUnion::operator<([[maybe_unused]] const ValUnion& rhs) const {
-  return ::apache::thrift::op::detail::UnionLessThan{}(*this, rhs);
+std::partial_ordering ValUnion::operator<=>([[maybe_unused]] const ValUnion& rhs) const {
+  return ::apache::thrift::op::compare<ValUnion>(*this, rhs);
 }
 
 void swap(ValUnion& a, ValUnion& b) {
@@ -689,8 +689,8 @@ bool VirtualComplexUnion::operator==(const VirtualComplexUnion& rhs) const {
   return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);
 }
 
-bool VirtualComplexUnion::operator<([[maybe_unused]] const VirtualComplexUnion& rhs) const {
-  return ::apache::thrift::op::detail::UnionLessThan{}(*this, rhs);
+std::partial_ordering VirtualComplexUnion::operator<=>([[maybe_unused]] const VirtualComplexUnion& rhs) const {
+  return ::apache::thrift::op::compare<VirtualComplexUnion>(*this, rhs);
 }
 
 void swap(VirtualComplexUnion& a, VirtualComplexUnion& b) {
@@ -733,8 +733,8 @@ bool NonCopyableStruct::operator==([[maybe_unused]] const NonCopyableStruct& rhs
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool NonCopyableStruct::operator<([[maybe_unused]] const NonCopyableStruct& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering NonCopyableStruct::operator<=>([[maybe_unused]] const NonCopyableStruct& rhs) const {
+  return ::apache::thrift::op::compare<NonCopyableStruct>(*this, rhs);
 }
 
 
@@ -811,8 +811,8 @@ bool NonCopyableUnion::operator==(const NonCopyableUnion& rhs) const {
   return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);
 }
 
-bool NonCopyableUnion::operator<([[maybe_unused]] const NonCopyableUnion& rhs) const {
-  return ::apache::thrift::op::detail::UnionLessThan{}(*this, rhs);
+std::partial_ordering NonCopyableUnion::operator<=>([[maybe_unused]] const NonCopyableUnion& rhs) const {
+  return ::apache::thrift::op::compare<NonCopyableUnion>(*this, rhs);
 }
 
 void swap(NonCopyableUnion& a, NonCopyableUnion& b) {

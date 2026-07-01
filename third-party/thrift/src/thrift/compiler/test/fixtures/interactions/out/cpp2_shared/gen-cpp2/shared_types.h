@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <compare>
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 
 namespace apache::thrift {
@@ -42,11 +43,6 @@ namespace apache::thrift::detail::qualifier {
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
 namespace thrift::shared_interactions {
-using ::apache::thrift::detail::operator!=;
-using ::apache::thrift::detail::operator>;
-using ::apache::thrift::detail::operator<=;
-using ::apache::thrift::detail::operator>=;
-
 
 /** Glean {"file": "thrift/compiler/test/fixtures/interactions/src/shared.thrift", "name": "DoSomethingResult", "kind": "struct" } */
 class DoSomethingResult final  {
@@ -112,7 +108,7 @@ class DoSomethingResult final  {
  public:
 
   bool operator==(const DoSomethingResult&) const;
-  bool operator<(const DoSomethingResult&) const;
+  std::partial_ordering operator<=>(const DoSomethingResult&) const;
 
   /** Glean { "field": "s_res" } */
   template <typename..., typename fbthrift_T = ::std::string>

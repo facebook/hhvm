@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <compare>
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 #include "thrift/compiler/test/fixtures/basic-structured-annotations/gen-cpp2/included_types.h"
 #include "thrift/compiler/test/fixtures/basic-structured-annotations/gen-cpp2/namespaced_types.h"
@@ -177,11 +178,6 @@ struct is_cpp_ref_field_optional<::test::fixtures::basic_structured_annotations:
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
 namespace test::fixtures::basic_structured_annotations {
-using ::apache::thrift::detail::operator!=;
-using ::apache::thrift::detail::operator>;
-using ::apache::thrift::detail::operator<=;
-using ::apache::thrift::detail::operator>=;
-
 /** Glean {"file": "thrift/compiler/test/fixtures/basic-structured-annotations/src/module.thrift", "name": "annotated_with_default_string", "kind": "typedef" } */
 using annotated_with_default_string = ::std::string;
 /** Glean {"file": "thrift/compiler/test/fixtures/basic-structured-annotations/src/module.thrift", "name": "annotated_inline_string", "kind": "typedef" } */
@@ -241,7 +237,7 @@ class runtime_annotation final  {
  public:
 
   bool operator==(const runtime_annotation&) const;
-  bool operator<(const runtime_annotation&) const;
+  std::partial_ordering operator<=>(const runtime_annotation&) const;
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);
@@ -333,7 +329,7 @@ class structured_annotation_inline final  {
  public:
 
   bool operator==(const structured_annotation_inline&) const;
-  bool operator<(const structured_annotation_inline&) const;
+  std::partial_ordering operator<=>(const structured_annotation_inline&) const;
 
   /** Glean { "field": "count" } */
   template <typename..., typename fbthrift_T = ::std::int64_t>
@@ -521,7 +517,7 @@ class structured_annotation_with_default final  {
  public:
 
   bool operator==(const structured_annotation_with_default&) const;
-  bool operator<(const structured_annotation_with_default&) const;
+  std::partial_ordering operator<=>(const structured_annotation_with_default&) const;
 
   /** Glean { "field": "name" } */
   template <typename..., typename fbthrift_T = ::std::string>
@@ -663,7 +659,7 @@ class structured_annotation_forward final  {
  public:
 
   bool operator==(const structured_annotation_forward&) const;
-  bool operator<(const structured_annotation_forward&) const;
+  std::partial_ordering operator<=>(const structured_annotation_forward&) const;
 
   /** Glean { "field": "count" } */
   template <typename..., typename fbthrift_T = ::std::int64_t>
@@ -803,7 +799,7 @@ class structured_annotation_recursive final  {
  public:
 
   bool operator==(const structured_annotation_recursive&) const;
-  bool operator<(const structured_annotation_recursive&) const;
+  std::partial_ordering operator<=>(const structured_annotation_recursive&) const;
 
   /** Glean { "field": "name" } */
   template <typename..., typename fbthrift_T = ::std::string>
@@ -1042,7 +1038,7 @@ class structured_annotation_nested final  {
  public:
 
   bool operator==(const structured_annotation_nested&) const;
-  bool operator<(const structured_annotation_nested&) const;
+  std::partial_ordering operator<=>(const structured_annotation_nested&) const;
 
   /** Glean { "field": "name" } */
   template <typename..., typename fbthrift_T = ::std::string>
@@ -1261,7 +1257,7 @@ class MyStruct final  {
  public:
 
   bool operator==(const MyStruct&) const;
-  bool operator<(const MyStruct&) const;
+  std::partial_ordering operator<=>(const MyStruct&) const;
 
   /** Glean { "field": "annotated_field" } */
   template <typename..., typename fbthrift_T = ::std::int64_t>
@@ -1555,7 +1551,7 @@ class FOLLY_EXPORT MyException : public virtual apache::thrift::TException {
  public:
 
   bool operator==(const MyException&) const;
-  bool operator<(const MyException&) const;
+  std::partial_ordering operator<=>(const MyException&) const;
 
   /** Glean { "field": "context" } */
   template <typename..., typename fbthrift_T = ::std::string>
@@ -1761,7 +1757,7 @@ class MyUnion final  {
   } ;
 
   bool operator==(const MyUnion&) const;
-  bool operator<(const MyUnion&) const;
+  std::partial_ordering operator<=>(const MyUnion&) const;
 
   /** Glean { "field": "first" } */
   template <typename... A> requires (sizeof...(A) == 0)

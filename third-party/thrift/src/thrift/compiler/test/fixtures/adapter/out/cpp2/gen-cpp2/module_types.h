@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <compare>
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 #include "adapter_dependency.h"
 
@@ -662,11 +663,6 @@ struct is_cpp_ref_field_optional<::facebook::thrift::test::fixtures::adapter::Ci
 // END hash_and_equal_to
 namespace facebook::thrift::test::fixtures::adapter {
 using IndependentDirectlyAdapted = ::my::Type;
-using ::apache::thrift::detail::operator!=;
-using ::apache::thrift::detail::operator>;
-using ::apache::thrift::detail::operator<=;
-using ::apache::thrift::detail::operator>=;
-
 /** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "name": "SetWithAdapter", "kind": "typedef" } */
 using SetWithAdapter = ::apache::thrift::adapt_detail::adapted_t<::my::Adapter2, ::std::set<::std::string>>;
 /** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "name": "StringWithAdapter", "kind": "typedef" } */
@@ -807,7 +803,7 @@ class Foo final  {
  public:
 
   bool operator==(const Foo&) const;
-  bool operator<(const Foo&) const;
+  std::partial_ordering operator<=>(const Foo&) const;
 
   /** Glean { "field": "intField" } */
   template <typename..., typename fbthrift_T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::facebook::thrift::test::fixtures::adapter::i32_5137, Foo>>
@@ -1603,7 +1599,7 @@ class Baz final  {
   } ;
 
   bool operator==(const Baz&) const;
-  bool operator<(const Baz&) const;
+  std::partial_ordering operator<=>(const Baz&) const;
 
   /** Glean { "field": "intField" } */
   template <typename... A> requires (sizeof...(A) == 0)
@@ -2065,7 +2061,7 @@ class DirectlyAdapted final  {
  public:
 
   bool operator==(const DirectlyAdapted&) const;
-  bool operator<(const DirectlyAdapted&) const;
+  std::partial_ordering operator<=>(const DirectlyAdapted&) const;
 
   /** Glean { "field": "field" } */
   template <typename..., typename fbthrift_T = ::std::int32_t>
@@ -2236,7 +2232,7 @@ class Bar final  {
  public:
 
   bool operator==(const Bar&) const;
-  bool operator<(const Bar&) const;
+  std::partial_ordering operator<=>(const Bar&) const;
 
   /** Glean { "field": "structField" } */
   template <typename..., typename fbthrift_T = ::my::Cpp::Type1>
@@ -2657,7 +2653,7 @@ class A final  {
  public:
 
   bool operator==(const A&) const;
-  bool operator<(const A&) const;
+  std::partial_ordering operator<=>(const A&) const;
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);
@@ -2773,7 +2769,7 @@ class ThriftAdaptedStruct final  {
  public:
 
   bool operator==(const ThriftAdaptedStruct&) const;
-  bool operator<(const ThriftAdaptedStruct&) const;
+  std::partial_ordering operator<=>(const ThriftAdaptedStruct&) const;
 
   /** Glean { "field": "data" } */
   template <typename..., typename fbthrift_T = ::std::int64_t>
@@ -2906,7 +2902,7 @@ class DirectlyAdaptedStruct final  {
  public:
 
   bool operator==(const DirectlyAdaptedStruct&) const;
-  bool operator<(const DirectlyAdaptedStruct&) const;
+  std::partial_ordering operator<=>(const DirectlyAdaptedStruct&) const;
 
   /** Glean { "field": "data" } */
   template <typename..., typename fbthrift_T = ::std::int64_t>
@@ -3055,7 +3051,7 @@ class MyAnnotation final  {
  public:
 
   bool operator==(const MyAnnotation&) const;
-  bool operator<(const MyAnnotation&) const;
+  std::partial_ordering operator<=>(const MyAnnotation&) const;
 
   /** Glean { "field": "signature" } */
   template <typename..., typename fbthrift_T = ::std::string>
@@ -3242,7 +3238,7 @@ class IndependentDirectlyAdapted final  {
  public:
 
   bool operator==(const IndependentDirectlyAdapted&) const;
-  bool operator<(const IndependentDirectlyAdapted&) const;
+  std::partial_ordering operator<=>(const IndependentDirectlyAdapted&) const;
 
   /** Glean { "field": "field" } */
   template <typename..., typename fbthrift_T = ::std::int32_t>
@@ -3387,7 +3383,7 @@ class StructWithFieldAdapter final  {
  public:
 
   bool operator==(const StructWithFieldAdapter&) const;
-  bool operator<(const StructWithFieldAdapter&) const;
+  std::partial_ordering operator<=>(const StructWithFieldAdapter&) const;
 
   /** Glean { "field": "field" } */
   template <typename..., typename fbthrift_T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::int32_t, StructWithFieldAdapter>>
@@ -3631,7 +3627,7 @@ class TerseAdaptedFields final  {
  public:
 
   bool operator==(const TerseAdaptedFields&) const;
-  bool operator<(const TerseAdaptedFields&) const;
+  std::partial_ordering operator<=>(const TerseAdaptedFields&) const;
 
   /** Glean { "field": "int_field" } */
   template <typename..., typename fbthrift_T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::int32_t, TerseAdaptedFields>>
@@ -3825,7 +3821,7 @@ class B final  {
  public:
 
   bool operator==(const B&) const;
-  bool operator<(const B&) const;
+  std::partial_ordering operator<=>(const B&) const;
 
   /** Glean { "field": "a" } */
   template <typename..., typename fbthrift_T = ::facebook::thrift::test::fixtures::adapter::AdaptedA>
@@ -3949,7 +3945,7 @@ class Config final  {
  public:
 
   bool operator==(const Config&) const;
-  bool operator<(const Config&) const;
+  std::partial_ordering operator<=>(const Config&) const;
 
   /** Glean { "field": "path" } */
   template <typename..., typename fbthrift_T = ::std::string>
@@ -4097,7 +4093,7 @@ class MyStruct final  {
  public:
 
   bool operator==(const MyStruct&) const;
-  bool operator<(const MyStruct&) const;
+  std::partial_ordering operator<=>(const MyStruct&) const;
 
   /** Glean { "field": "field" } */
   template <typename..., typename fbthrift_T = ::std::int32_t>
@@ -4301,7 +4297,7 @@ class AdaptTestStruct final  {
  public:
 
   bool operator==(const AdaptTestStruct&) const;
-  bool operator<(const AdaptTestStruct&) const;
+  std::partial_ordering operator<=>(const AdaptTestStruct&) const;
 
   /** Glean { "field": "delay" } */
   template <typename..., typename fbthrift_T = ::facebook::thrift::test::fixtures::adapter::DurationMs>
@@ -4853,7 +4849,7 @@ class AdaptTemplatedTestStruct final  {
  public:
 
   bool operator==(const AdaptTemplatedTestStruct&) const;
-  bool operator<(const AdaptTemplatedTestStruct&) const;
+  std::partial_ordering operator<=>(const AdaptTemplatedTestStruct&) const;
 
   /** Glean { "field": "adaptedBool" } */
   template <typename..., typename fbthrift_T = ::facebook::thrift::test::fixtures::adapter::AdaptedBool>
@@ -5730,7 +5726,7 @@ class AdaptTemplatedNestedTestStruct final  {
  public:
 
   bool operator==(const AdaptTemplatedNestedTestStruct&) const;
-  bool operator<(const AdaptTemplatedNestedTestStruct&) const;
+  std::partial_ordering operator<=>(const AdaptTemplatedNestedTestStruct&) const;
 
   /** Glean { "field": "adaptedStruct" } */
   template <typename..., typename fbthrift_T = ::facebook::thrift::test::fixtures::adapter::AdaptTemplatedTestStruct>
@@ -5928,7 +5924,7 @@ class ThriftAdaptTestUnion final  {
   } ;
 
   bool operator==(const ThriftAdaptTestUnion&) const;
-  bool operator<(const ThriftAdaptTestUnion&) const;
+  std::partial_ordering operator<=>(const ThriftAdaptTestUnion&) const;
 
   /** Glean { "field": "delay" } */
   template <typename... A> requires (sizeof...(A) == 0)
@@ -6179,7 +6175,7 @@ class StructFieldAdaptedStruct final  {
  public:
 
   bool operator==(const StructFieldAdaptedStruct&) const;
-  bool operator<(const StructFieldAdaptedStruct&) const;
+  std::partial_ordering operator<=>(const StructFieldAdaptedStruct&) const;
 
   /** Glean { "field": "adaptedStruct" } */
   template <typename..., typename fbthrift_T = ::apache::thrift::adapt_detail::adapted_field_t<::apache::thrift::test::TemplatedTestAdapter, 1, ::facebook::thrift::test::fixtures::adapter::ThriftAdaptedStruct, StructFieldAdaptedStruct>>
@@ -6409,7 +6405,7 @@ class CircularStruct final  {
  public:
 
   bool operator==(const CircularStruct&) const;
-  bool operator<(const CircularStruct&) const;
+  std::partial_ordering operator<=>(const CircularStruct&) const;
   /** Glean { "field": "field" } */
   FOLLY_ERASE ::std::unique_ptr<::facebook::thrift::test::fixtures::adapter::AdaptedCircularAdaptee>& field_ref() & {
     return __fbthrift_field_field;
@@ -6533,7 +6529,7 @@ class CircularAdaptee final  {
  public:
 
   bool operator==(const CircularAdaptee&) const;
-  bool operator<(const CircularAdaptee&) const;
+  std::partial_ordering operator<=>(const CircularAdaptee&) const;
 
   /** Glean { "field": "field" } */
   template <typename..., typename fbthrift_T = ::facebook::thrift::test::fixtures::adapter::CircularStruct>
@@ -6665,7 +6661,7 @@ class DeclaredAfterStruct final  {
  public:
 
   bool operator==(const DeclaredAfterStruct&) const;
-  bool operator<(const DeclaredAfterStruct&) const;
+  std::partial_ordering operator<=>(const DeclaredAfterStruct&) const;
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);
@@ -6754,7 +6750,7 @@ class ReorderedStruct final  {
  public:
 
   bool operator==(const ReorderedStruct&) const;
-  bool operator<(const ReorderedStruct&) const;
+  std::partial_ordering operator<=>(const ReorderedStruct&) const;
   /** Glean { "field": "reordered_dependent_adapted" } */
   FOLLY_ERASE ::std::unique_ptr<::facebook::thrift::test::fixtures::adapter::DeclaredAfterStruct>& reordered_dependent_adapted_ref() & {
     return __fbthrift_field_reordered_dependent_adapted;
@@ -6879,7 +6875,7 @@ class UnderlyingRenamedStruct final  {
  public:
 
   bool operator==(const UnderlyingRenamedStruct&) const;
-  bool operator<(const UnderlyingRenamedStruct&) const;
+  std::partial_ordering operator<=>(const UnderlyingRenamedStruct&) const;
 
   /** Glean { "field": "data" } */
   template <typename..., typename fbthrift_T = ::std::int64_t>
@@ -7011,7 +7007,7 @@ class UnderlyingSameNamespaceStruct final  {
  public:
 
   bool operator==(const UnderlyingSameNamespaceStruct&) const;
-  bool operator<(const UnderlyingSameNamespaceStruct&) const;
+  std::partial_ordering operator<=>(const UnderlyingSameNamespaceStruct&) const;
 
   /** Glean { "field": "data" } */
   template <typename..., typename fbthrift_T = ::std::int64_t>
@@ -7137,7 +7133,7 @@ class HeapAllocated final  {
  public:
 
   bool operator==(const HeapAllocated&) const;
-  bool operator<(const HeapAllocated&) const;
+  std::partial_ordering operator<=>(const HeapAllocated&) const;
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);
@@ -7226,7 +7222,7 @@ class MoveOnly final  {
  public:
 
   bool operator==(const MoveOnly&) const;
-  bool operator<(const MoveOnly&) const;
+  std::partial_ordering operator<=>(const MoveOnly&) const;
 
   /** Glean { "field": "ptr" } */
   template <typename..., typename fbthrift_T = ::facebook::thrift::test::fixtures::adapter::HeapAllocated>
@@ -7349,7 +7345,7 @@ class AlsoMoveOnly final  {
  public:
 
   bool operator==(const AlsoMoveOnly&) const;
-  bool operator<(const AlsoMoveOnly&) const;
+  std::partial_ordering operator<=>(const AlsoMoveOnly&) const;
 
   /** Glean { "field": "ptr" } */
   template <typename..., typename fbthrift_T = ::apache::thrift::adapt_detail::adapted_field_t<::apache::thrift::test::MoveOnlyAdapter, 1, ::std::int64_t, AlsoMoveOnly>>
@@ -7464,7 +7460,7 @@ class ApplyAdapter final  {
  public:
 
   bool operator==(const ApplyAdapter&) const;
-  bool operator<(const ApplyAdapter&) const;
+  std::partial_ordering operator<=>(const ApplyAdapter&) const;
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);
@@ -7544,7 +7540,7 @@ class TransitiveAdapted final  {
  public:
 
   bool operator==(const TransitiveAdapted&) const;
-  bool operator<(const TransitiveAdapted&) const;
+  std::partial_ordering operator<=>(const TransitiveAdapted&) const;
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);
@@ -7643,7 +7639,7 @@ class CountingStruct final  {
  public:
 
   bool operator==(const CountingStruct&) const;
-  bool operator<(const CountingStruct&) const;
+  std::partial_ordering operator<=>(const CountingStruct&) const;
 
   /** Glean { "field": "regularInt" } */
   template <typename..., typename fbthrift_T = ::apache::thrift::adapt_detail::adapted_field_t<::apache::thrift::test::CountingAdapter<false, int>, 1, ::std::int64_t, CountingStruct>>
@@ -7839,7 +7835,7 @@ class Person final  {
  public:
 
   bool operator==(const Person&) const;
-  bool operator<(const Person&) const;
+  std::partial_ordering operator<=>(const Person&) const;
 
   /** Glean { "field": "name" } */
   template <typename..., typename fbthrift_T = ::std::string>
@@ -7983,7 +7979,7 @@ class Person2 final  {
  public:
 
   bool operator==(const Person2&) const;
-  bool operator<(const Person2&) const;
+  std::partial_ordering operator<=>(const Person2&) const;
 
   /** Glean { "field": "name" } */
   template <typename..., typename fbthrift_T = ::std::string>
@@ -8126,7 +8122,7 @@ class Renamed final  {
  public:
 
   bool operator==(const Renamed&) const;
-  bool operator<(const Renamed&) const;
+  std::partial_ordering operator<=>(const Renamed&) const;
 
   /** Glean { "field": "field" } */
   template <typename..., typename fbthrift_T = ::apache::thrift::adapt_detail::adapted_field_t<::apache::thrift::test::FieldAdapter, 1, ::std::int32_t, Renamed>>

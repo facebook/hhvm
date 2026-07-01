@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <compare>
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 
 namespace apache::thrift {
@@ -127,11 +128,6 @@ namespace apache::thrift::detail::qualifier {
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
 namespace test::fixtures::python_capi {
-using ::apache::thrift::detail::operator!=;
-using ::apache::thrift::detail::operator>;
-using ::apache::thrift::detail::operator<=;
-using ::apache::thrift::detail::operator>=;
-
 
 /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift", "name": "SerializedStruct", "kind": "struct" } */
 class SerializedStruct final  {
@@ -206,7 +202,7 @@ class SerializedStruct final  {
  public:
 
   bool operator==(const SerializedStruct&) const;
-  bool operator<(const SerializedStruct&) const;
+  std::partial_ordering operator<=>(const SerializedStruct&) const;
 
   /** Glean { "field": "s" } */
   template <typename..., typename fbthrift_T = ::std::string>
@@ -562,7 +558,7 @@ class SerializedUnion final  {
   } ;
 
   bool operator==(const SerializedUnion&) const;
-  bool operator<(const SerializedUnion&) const;
+  std::partial_ordering operator<=>(const SerializedUnion&) const;
 
   /** Glean { "field": "s" } */
   template <typename... A> requires (sizeof...(A) == 0)
@@ -814,7 +810,7 @@ class FOLLY_EXPORT SerializedError : public virtual apache::thrift::TException {
  public:
 
   bool operator==(const SerializedError&) const;
-  bool operator<(const SerializedError&) const;
+  std::partial_ordering operator<=>(const SerializedError&) const;
 
   /** Glean { "field": "msg" } */
   template <typename..., typename fbthrift_T = ::std::string>
@@ -1084,7 +1080,7 @@ class MarshalStruct final  {
  public:
 
   bool operator==(const MarshalStruct&) const;
-  bool operator<(const MarshalStruct&) const;
+  std::partial_ordering operator<=>(const MarshalStruct&) const;
 
   /** Glean { "field": "s" } */
   template <typename..., typename fbthrift_T = ::std::string>
@@ -1440,7 +1436,7 @@ class MarshalUnion final  {
   } ;
 
   bool operator==(const MarshalUnion&) const;
-  bool operator<(const MarshalUnion&) const;
+  std::partial_ordering operator<=>(const MarshalUnion&) const;
 
   /** Glean { "field": "s" } */
   template <typename... A> requires (sizeof...(A) == 0)
@@ -1692,7 +1688,7 @@ class FOLLY_EXPORT MarshalError : public virtual apache::thrift::TException {
  public:
 
   bool operator==(const MarshalError&) const;
-  bool operator<(const MarshalError&) const;
+  std::partial_ordering operator<=>(const MarshalError&) const;
 
   /** Glean { "field": "msg" } */
   template <typename..., typename fbthrift_T = ::std::string>

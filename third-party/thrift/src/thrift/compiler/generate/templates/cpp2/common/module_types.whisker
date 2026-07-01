@@ -124,6 +124,13 @@ bool {{struct.cpp_underlying_name}}::operator<([[maybe_unused]] const {{struct.c
 }}{{/let partial}}
 
 
+{{#let export partial struct_operator_compare |struct|}}
+std::partial_ordering {{struct.cpp_underlying_name}}::operator<=>([[maybe_unused]] const {{struct.cpp_underlying_name}}& rhs) const {
+  return ::apache::thrift::op::compare<{{struct.cpp_underlying_name}}>(*this, rhs);
+}{{!
+}}{{/let partial}}
+
+
 {{#let export partial union_eq_overload |struct|}}
 bool {{struct.cpp_underlying_name}}::operator==(const {{struct.cpp_underlying_name}}& rhs) const {
   return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);
@@ -134,6 +141,13 @@ bool {{struct.cpp_underlying_name}}::operator==(const {{struct.cpp_underlying_na
 {{#let export partial union_operator_less |struct|}}
 bool {{struct.cpp_underlying_name}}::operator<([[maybe_unused]] const {{struct.cpp_underlying_name}}& rhs) const {
   return ::apache::thrift::op::detail::UnionLessThan{}(*this, rhs);
+}{{!
+}}{{/let partial}}
+
+
+{{#let export partial union_operator_compare |struct|}}
+std::partial_ordering {{struct.cpp_underlying_name}}::operator<=>([[maybe_unused]] const {{struct.cpp_underlying_name}}& rhs) const {
+  return ::apache::thrift::op::compare<{{struct.cpp_underlying_name}}>(*this, rhs);
 }{{!
 }}{{/let partial}}
 

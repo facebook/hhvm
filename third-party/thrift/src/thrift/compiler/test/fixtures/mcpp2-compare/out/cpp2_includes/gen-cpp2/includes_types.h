@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <compare>
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 #include "folly/sorted_vector_types.h"
 
@@ -91,11 +92,6 @@ namespace apache::thrift::detail::qualifier {
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
 namespace a::different::ns {
-using ::apache::thrift::detail::operator!=;
-using ::apache::thrift::detail::operator>;
-using ::apache::thrift::detail::operator<=;
-using ::apache::thrift::detail::operator>=;
-
 /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/includes.thrift", "name": "IncludedInt64", "kind": "typedef" } */
 using IncludedInt64 = ::std::int64_t;
 
@@ -157,7 +153,7 @@ class AStruct final  {
  public:
 
   bool operator==(const AStruct&) const;
-  bool operator<(const AStruct&) const;
+  std::partial_ordering operator<=>(const AStruct&) const;
 
   /** Glean { "field": "FieldA" } */
   template <typename..., typename fbthrift_T = ::std::int32_t>
@@ -286,7 +282,7 @@ class AStructB final  {
  public:
 
   bool operator==(const AStructB&) const;
-  bool operator<(const AStructB&) const;
+  std::partial_ordering operator<=>(const AStructB&) const;
   /** Glean { "field": "FieldA" } */
   FOLLY_ERASE ::std::shared_ptr<const ::a::different::ns::AStruct>& FieldA_ref() & {
     return __fbthrift_field_FieldA;

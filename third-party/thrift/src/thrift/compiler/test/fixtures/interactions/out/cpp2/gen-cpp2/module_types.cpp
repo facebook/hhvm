@@ -71,8 +71,8 @@ bool CustomException::operator==([[maybe_unused]] const CustomException& rhs) co
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool CustomException::operator<([[maybe_unused]] const CustomException& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering CustomException::operator<=>([[maybe_unused]] const CustomException& rhs) const {
+  return ::apache::thrift::op::compare<CustomException>(*this, rhs);
 }
 
 
@@ -135,8 +135,8 @@ bool ShouldBeBoxed::operator==([[maybe_unused]] const ShouldBeBoxed& rhs) const 
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool ShouldBeBoxed::operator<([[maybe_unused]] const ShouldBeBoxed& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+std::partial_ordering ShouldBeBoxed::operator<=>([[maybe_unused]] const ShouldBeBoxed& rhs) const {
+  return ::apache::thrift::op::compare<ShouldBeBoxed>(*this, rhs);
 }
 
 

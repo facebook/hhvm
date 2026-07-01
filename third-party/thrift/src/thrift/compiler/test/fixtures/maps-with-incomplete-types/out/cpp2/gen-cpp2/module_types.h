@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <compare>
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 
 namespace apache::thrift {
@@ -43,11 +44,6 @@ namespace apache::thrift::detail::qualifier {
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
 namespace apache::thrift::test {
-using ::apache::thrift::detail::operator!=;
-using ::apache::thrift::detail::operator>;
-using ::apache::thrift::detail::operator<=;
-using ::apache::thrift::detail::operator>=;
-
 
 /** Glean {"file": "thrift/compiler/test/fixtures/maps-with-incomplete-types/src/module.thrift", "name": "B", "kind": "struct" } */
 class B final  {
@@ -107,7 +103,7 @@ class B final  {
  public:
 
   bool operator==(const B&) const;
-  bool operator<(const B&) const;
+  std::partial_ordering operator<=>(const B&) const;
 
   /** Glean { "field": "field" } */
   template <typename..., typename fbthrift_T = ::std::int32_t>
@@ -244,7 +240,7 @@ class A final  {
  public:
 
   bool operator==(const A&) const;
-  bool operator<(const A&) const;
+  std::partial_ordering operator<=>(const A&) const;
 
   /** Glean { "field": "some_map" } */
   template <typename..., typename fbthrift_T = std::unordered_map<::std::int32_t, ::apache::thrift::test::B>>

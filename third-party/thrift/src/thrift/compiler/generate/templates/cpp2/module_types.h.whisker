@@ -24,6 +24,7 @@
 
 #pragma once
 
+#include <compare>
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 {{#if (has_compiler_option? "frozen")}}
 #include <thrift/lib/cpp/Frozen.h>
@@ -105,11 +106,6 @@ namespace {{program.cpp_qualified_namespace}} {
 using {{struct.cpp_name}} = {{struct.cpp_underlying_type}};
     {{/if (and struct.is_directly_adapted? (not struct.dependent_direct_adapter?))}}
   {{/each}}
-using ::apache::thrift::detail::operator!=;
-using ::apache::thrift::detail::operator>;
-using ::apache::thrift::detail::operator<=;
-using ::apache::thrift::detail::operator>=;
-
   {{#each program.type_definitions_topological_order as |def|}}
     {{#if def.typedef?}}
 {{#partial glean.typedef_docblock def=def}}
@@ -218,7 +214,26 @@ class {{#if def.exception?}}FOLLY_EXPORT {{/if}}{{def.cpp_underlying_name}} {{!
         {{#if (not def.cpp_noncomparable)}}
 
   bool operator==(const {{def.cpp_underlying_name}}&) const;
+          {{#if def.declare_legacy_operator_less?}}
   bool operator<(const {{def.cpp_underlying_name}}&) const{{#if def.cpp_nonorderable?}} = delete{{/if}};
+            {{#if def.cpp_nonorderable?}}
+  bool operator>(const {{def.cpp_underlying_name}}&) const = delete;
+  bool operator<=(const {{def.cpp_underlying_name}}&) const = delete;
+  bool operator>=(const {{def.cpp_underlying_name}}&) const = delete;
+            {{#else}}
+  bool operator>(const {{def.cpp_underlying_name}}& rhs) const {
+    return rhs < *this;
+  }
+  bool operator<=(const {{def.cpp_underlying_name}}& rhs) const {
+    return !(rhs < *this);
+  }
+  bool operator>=(const {{def.cpp_underlying_name}}& rhs) const {
+    return !(*this < rhs);
+  }
+            {{/if def.cpp_nonorderable?}}
+          {{#else}}
+  std::partial_ordering operator<=>(const {{def.cpp_underlying_name}}&) const{{#if def.cpp_nonorderable?}} = delete{{/if}};
+          {{/if def.declare_legacy_operator_less?}}
         {{/if (not def.cpp_noncomparable)}}
 {{> module_types_h/union_setters}}
 
@@ -291,7 +306,26 @@ class {{#if def.exception?}}FOLLY_EXPORT {{/if}}{{def.cpp_underlying_name}} {{!
         {{#if (not def.cpp_noncomparable)}}
 
   bool operator==(const {{def.cpp_underlying_name}}&) const;
+          {{#if def.declare_legacy_operator_less?}}
   bool operator<(const {{def.cpp_underlying_name}}&) const{{#if def.cpp_nonorderable?}} = delete{{/if}};
+            {{#if def.cpp_nonorderable?}}
+  bool operator>(const {{def.cpp_underlying_name}}&) const = delete;
+  bool operator<=(const {{def.cpp_underlying_name}}&) const = delete;
+  bool operator>=(const {{def.cpp_underlying_name}}&) const = delete;
+            {{#else}}
+  bool operator>(const {{def.cpp_underlying_name}}& rhs) const {
+    return rhs < *this;
+  }
+  bool operator<=(const {{def.cpp_underlying_name}}& rhs) const {
+    return !(rhs < *this);
+  }
+  bool operator>=(const {{def.cpp_underlying_name}}& rhs) const {
+    return !(*this < rhs);
+  }
+            {{/if def.cpp_nonorderable?}}
+          {{#else}}
+  std::partial_ordering operator<=>(const {{def.cpp_underlying_name}}&) const{{#if def.cpp_nonorderable?}} = delete{{/if}};
+          {{/if def.declare_legacy_operator_less?}}
         {{/if (not def.cpp_noncomparable)}}
         {{#if def.fields?}}
 {{> module_types_h/field_ref}}

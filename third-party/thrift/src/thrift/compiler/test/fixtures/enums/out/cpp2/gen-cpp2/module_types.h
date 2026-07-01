@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <compare>
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 #include "thrift/compiler/test/fixtures/enums/gen-cpp2/included_enum_types.h"
 
@@ -446,11 +447,6 @@ namespace apache::thrift::detail::qualifier {
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
 namespace test::fixtures::enums {
-using ::apache::thrift::detail::operator!=;
-using ::apache::thrift::detail::operator>;
-using ::apache::thrift::detail::operator<=;
-using ::apache::thrift::detail::operator>=;
-
 /** Glean {"file": "thrift/compiler/test/fixtures/enums/src/module.thrift", "name": "IncludedEnumAlias", "kind": "typedef" } */
 using IncludedEnumAlias = ::test::fixtures::enums::IncludedEnum;
 
@@ -527,7 +523,7 @@ class SomeStruct final  {
  public:
 
   bool operator==(const SomeStruct&) const;
-  bool operator<(const SomeStruct&) const;
+  std::partial_ordering operator<=>(const SomeStruct&) const;
 
   /** Glean { "field": "reasonable" } */
   template <typename..., typename fbthrift_T = ::test::fixtures::enums::Metasyntactic>
@@ -812,7 +808,7 @@ class MyStruct final  {
  public:
 
   bool operator==(const MyStruct&) const;
-  bool operator<(const MyStruct&) const;
+  std::partial_ordering operator<=>(const MyStruct&) const;
 
   /** Glean { "field": "me2_3" } */
   template <typename..., typename fbthrift_T = ::test::fixtures::enums::MyEnum2>

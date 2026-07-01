@@ -4,7 +4,7 @@ class C {
   const string HELLO = "hi";
 }
 
-function f<T as C>(classname<T> $x): void {
+function f<T as C>(class<T> $x): void {
   hh_show($x::HELLO);
 }
 

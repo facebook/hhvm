@@ -4,7 +4,7 @@
 class E {}
 
 final class C<T2 as E> {
-  public function __construct(private classname<T2> $kls2) {}
+  public function __construct(private class<T2> $kls2) {}
 
   public function main(): int {
     $kls = $this->kls2;

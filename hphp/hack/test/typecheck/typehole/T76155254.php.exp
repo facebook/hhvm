@@ -1,1 +1,4 @@
-No errors
+ERROR: File "T76155254.php", line 12, characters 12-15:
+It is no longer allowed to use a `classname<Hgoldstein>` in this position. Please use a `class<Hgoldstein>` instead. (Typing[4482])
+  File "T76155254.php", line 11, characters 26-46:
+  Definition is here

@@ -281,17 +281,8 @@ let strict_consistent_construct t = t.GlobalOptions.strict_consistent_construct
 
 let allow_class_string_cast t = t.GlobalOptions.allow_class_string_cast
 
-let class_pointer_ban_classname_new t =
-  t.GlobalOptions.class_pointer_ban_classname_new
-
-let class_pointer_ban_classname_type_structure t =
-  t.GlobalOptions.class_pointer_ban_classname_type_structure
-
 let class_pointer_ban_classname_static_meth t =
   t.GlobalOptions.class_pointer_ban_classname_static_meth
-
-let class_pointer_ban_classname_class_const t =
-  t.GlobalOptions.class_pointer_ban_classname_class_const
 
 let class_pointer_ban_class_array_key t =
   t.GlobalOptions.class_pointer_ban_class_array_key

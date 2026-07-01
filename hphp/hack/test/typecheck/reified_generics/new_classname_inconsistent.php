@@ -3,6 +3,6 @@
 
 class A {}
 
-function f<T as A>(classname<T> $a): void {
+function f<T as A>(class<T> $a): void {
   new $a();
 }

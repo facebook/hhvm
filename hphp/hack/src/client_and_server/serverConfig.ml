@@ -602,19 +602,9 @@ let load_config (config : Config_file_common.t) (options : GlobalOptions.t) :
       (bool_opt Config_keys.Hhconfig.strict_consistent_construct config)
     ?allow_class_string_cast:
       (bool_opt Config_keys.Hhconfig.allow_class_string_cast config)
-    ?class_pointer_ban_classname_new:
-      (int_opt Config_keys.Hhconfig.class_pointer_ban_classname_new config)
-    ?class_pointer_ban_classname_type_structure:
-      (int_opt
-         Config_keys.Hhconfig.class_pointer_ban_classname_type_structure
-         config)
     ?class_pointer_ban_classname_static_meth:
       (int_opt
          Config_keys.Hhconfig.class_pointer_ban_classname_static_meth
-         config)
-    ?class_pointer_ban_classname_class_const:
-      (int_opt
-         Config_keys.Hhconfig.class_pointer_ban_classname_class_const
          config)
     ?class_pointer_ban_class_array_key:
       (bool_opt Config_keys.Hhconfig.class_pointer_ban_class_array_key config)

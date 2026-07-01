@@ -8,7 +8,7 @@ function test(): void {
   new $x();
 }
 
-function test2(classname<Foo<int>> $x): void {
+function test2(class<Foo<int>> $x): void {
   // There is no way to construct a classname to Foo<int>
   new $x();
 }

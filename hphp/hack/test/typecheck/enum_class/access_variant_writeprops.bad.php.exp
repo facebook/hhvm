@@ -1,8 +1,8 @@
 ERROR: File "access_variant_writeprops.bad.php", line 9, characters 3-13:
 Accessing an enum class constant requires the capability WriteProperty, which is not provided by the context. (Typing[4401])
-  File "access_variant_writeprops.bad.php", line 8, characters 33-34:
+  File "access_variant_writeprops.bad.php", line 8, characters 29-30:
   The local (enclosing) context provides the capability set {}
 ERROR: File "access_variant_writeprops.bad.php", line 10, characters 3-9:
 Accessing an enum class constant requires the capability WriteProperty, which is not provided by the context. (Typing[4401])
-  File "access_variant_writeprops.bad.php", line 8, characters 33-34:
+  File "access_variant_writeprops.bad.php", line 8, characters 29-30:
   The local (enclosing) context provides the capability set {}

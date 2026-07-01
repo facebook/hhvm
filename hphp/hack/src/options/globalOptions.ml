@@ -191,10 +191,7 @@ type t = {
   needs_concrete_override_check: bool;
   strict_consistent_construct: bool;
   allow_class_string_cast: bool;
-  class_pointer_ban_classname_new: int;
-  class_pointer_ban_classname_type_structure: int;
   class_pointer_ban_classname_static_meth: int;
-  class_pointer_ban_classname_class_const: int;
   class_pointer_ban_class_array_key: bool;
   tco_poly_function_pointers: bool;
   tco_permits_bypassing_visibility: string list;
@@ -306,10 +303,7 @@ let default =
     needs_concrete_override_check = false;
     strict_consistent_construct = false;
     allow_class_string_cast = true;
-    class_pointer_ban_classname_new = 0;
-    class_pointer_ban_classname_type_structure = 0;
     class_pointer_ban_classname_static_meth = 0;
-    class_pointer_ban_classname_class_const = 0;
     class_pointer_ban_class_array_key = false;
     tco_poly_function_pointers = true;
     tco_permits_bypassing_visibility = [];
@@ -418,10 +412,7 @@ let set
     ?needs_concrete_override_check
     ?strict_consistent_construct
     ?allow_class_string_cast
-    ?class_pointer_ban_classname_new
-    ?class_pointer_ban_classname_type_structure
     ?class_pointer_ban_classname_static_meth
-    ?class_pointer_ban_classname_class_const
     ?class_pointer_ban_class_array_key
     ?tco_poly_function_pointers
     ?tco_permits_bypassing_visibility
@@ -706,22 +697,10 @@ let set
       setting strict_consistent_construct options.strict_consistent_construct;
     allow_class_string_cast =
       setting allow_class_string_cast options.allow_class_string_cast;
-    class_pointer_ban_classname_new =
-      setting
-        class_pointer_ban_classname_new
-        options.class_pointer_ban_classname_new;
-    class_pointer_ban_classname_type_structure =
-      setting
-        class_pointer_ban_classname_type_structure
-        options.class_pointer_ban_classname_type_structure;
     class_pointer_ban_classname_static_meth =
       setting
         class_pointer_ban_classname_static_meth
         options.class_pointer_ban_classname_static_meth;
-    class_pointer_ban_classname_class_const =
-      setting
-        class_pointer_ban_classname_class_const
-        options.class_pointer_ban_classname_class_const;
     class_pointer_ban_class_array_key =
       setting
         class_pointer_ban_class_array_key

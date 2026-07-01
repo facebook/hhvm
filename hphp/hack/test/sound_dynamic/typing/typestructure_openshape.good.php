@@ -10,7 +10,7 @@ class C {
 function expectShape(supportdyn<shape(...)> $s): void { }
 
 <<__SupportDynamicType>>
-function getCN():~classname<C> {
+function getCN():~class<C> {
   throw new Exception("A");
 }
 

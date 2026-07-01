@@ -127,7 +127,7 @@ class C {
 }
 
 // Without reified generics
-function f<T as C>(classname<T> $x): void {
+function f<T as C>(class<T> $x): void {
   $x::class_const;
   $x::h<int>();
 }

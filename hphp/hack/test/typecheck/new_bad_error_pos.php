@@ -15,5 +15,5 @@ final class B<Ta as A> {
 }
 interface C {
   abstract const type Ta as A;
-  public function b(): classname<B<this::Ta>>;
+  public function b(): class<B<this::Ta>>;
 }

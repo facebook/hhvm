@@ -6,7 +6,7 @@ abstract class C<T> {
 }
 
 function factory_c<Targ, Tobj as C<Targ>>(
-  classname<Tobj> $klass,
+  class<Tobj> $klass,
   Targ $arg,
 ): Tobj {
   $inst = new $klass($arg);
@@ -14,7 +14,7 @@ function factory_c<Targ, Tobj as C<Targ>>(
   return $inst;
 }
 
-function test_factory(classname<C<int>> $klass) {
+function test_factory(class<C<int>> $klass) {
   hh_show(factory_c($klass, 10));
   hh_show(factory_c($klass, 'string'));
 }

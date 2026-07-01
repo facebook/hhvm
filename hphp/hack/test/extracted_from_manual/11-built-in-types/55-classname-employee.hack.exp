@@ -1,0 +1,4 @@
+ERROR: File "55-classname-employee.hack", line 9, characters 12-19:
+It is no longer allowed to use a `classname<Employee>` in this position. Please use a `class<Employee>` instead. (Typing[4482])
+  File "55-classname-employee.hack", line 8, characters 12-30:
+  Definition is here

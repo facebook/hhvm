@@ -4234,10 +4234,7 @@ end = struct
         env
         p
         ~under_type_structure:false
-        ~require_class_ptr:
-          (Class_id.classname_error
-             env
-             TypecheckerOptions.class_pointer_ban_classname_class_const)
+        ~require_class_ptr:Class_id.Error
         ~attribute_check_policy:ctxt.Context.attribute_check_policy
         (cid, mid)
     | Class_get (((_, _, cid_) as cid), mid, Is_prop)
@@ -5968,10 +5965,7 @@ end = struct
           class_const
             ~under_type_structure:true
             ~incl_tc:true
-            ~require_class_ptr:
-              (Class_id.classname_error
-                 env
-                 TypecheckerOptions.class_pointer_ban_classname_type_structure)
+            ~require_class_ptr:Class_id.Error
             env
             p
             (cid, (p, cst))
@@ -12204,10 +12198,7 @@ end = struct
         ~exact
         ~is_attribute
         ~is_catch
-        ~require_class_ptr:
-          (classname_error
-             env
-             TypecheckerOptions.class_pointer_ban_classname_new)
+        ~require_class_ptr:Class_id.Error
         env
         explicit_targs
         ((), p, cid)

@@ -5,7 +5,7 @@ enum class MyEnum: MyClass {
   MyClass AAA = new MyClass();
 }
 
-function f(classname<MyEnum> $m)[]: void {
+function f(class<MyEnum> $m)[]: void {
   MyEnum::AAA;
   $m::AAA;
 }

@@ -1,1 +1,4 @@
-No errors
+ERROR: File "T67329119.php", line 18, characters 7-8:
+It is no longer allowed to use a `classname<MyFooClass>` in this position. Please use a `class<MyFooClass>` instead. (Typing[4482])
+  File "T67329119.php", line 17, characters 17-37:
+  Definition is here

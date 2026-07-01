@@ -7,7 +7,7 @@ class Herp {}
 
 class Derp extends Herp {}
 
-function foo<T as Herp>(classname<T> $class): T {
+function foo<T as Herp>(class<T> $class): T {
   return new $class();
 }
 

@@ -25,11 +25,11 @@ function main(): void {
 
 The result is an object of the type specified.
 
-The `new` operator may also be used to allocate memory for an instance of a [classname](/hack/built-in-types/classname) type; for example:
+The `new` operator may also be used to allocate memory for an instance of a [class](/hack/built-in-types/class) type; for example:
 
 ```hack
 final class C {}
-function f(classname<C> $clsname): void {
+function f(class<C> $clsname): void {
   $w = new $clsname();
 }
 ```

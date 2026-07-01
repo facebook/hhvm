@@ -1,1 +1,4 @@
-No errors
+ERROR: File "T105808434.php", line 6, characters 9-14:
+It is no longer allowed to use a `classname<Tm>` in this position. Please use a `class<Tm>` instead. (Typing[4482])
+  File "T105808434.php", line 4, characters 39-51:
+  Definition is here

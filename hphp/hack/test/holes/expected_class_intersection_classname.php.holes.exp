@@ -1,6 +1,6 @@
 Errors:
   [6:11-22] Can't use `new` on `classname<C>`; `__construct` arguments are not guaranteed to be consistent in child classes
-  [5:58-59] This declaration is neither `final` nor uses the `<<__ConsistentConstruct>>` attribute
+  [5:54-55] This declaration is neither `final` nor uses the `<<__ConsistentConstruct>>` attribute
 [(Class
     { c_span = [3:1-11]; c_annotation = (); c_mode = Mstrict; c_final = false; 
       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
@@ -23,14 +23,13 @@ Errors:
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([5:10-37], "\\expected_class_intersection");
        fd_fun =
        { f_span = [5:1-7:2]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_tparams = []; f_ret = ((void), (Some ([5:77-81], (Hprim Tvoid))));
+         f_readonly_ret = None; f_tparams = []; f_ret = ((void), (Some ([5:73-77], (Hprim Tvoid))));
          f_params =
-         [{ param_annotation = (classname<C>);
+         [{ param_annotation = (class<C>);
             param_type_hint =
-            ((classname<C>),
-             (Some ([5:38-61],
-                    (Hintersection [([5:39-45], (Happly (([5:39-45], "\\HH\\string"), []))); ([5:48-60], (Happly (([5:48-57], "\\HH\\classname"), [([5:58-59], (Happly (([5:58-59], "\\C"), [])))])))]))));
-            param_pos = [5:62-73]; param_name = "$class_name"; param_info = Param_required; 
+            ((class<C>),
+             (Some ([5:38-57], (Hintersection [([5:39-45], (Happly (([5:39-45], "\\HH\\string"), []))); ([5:48-56], (Hclass_ptr (CKclass, ([5:54-55], (Happly (([5:54-55], "\\C"), []))))))]))));
+            param_pos = [5:58-69]; param_name = "$class_name"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
             param_named = None; param_user_attributes = []; param_visibility = None }
            ];
@@ -41,7 +40,7 @@ Errors:
              (Expr
                 ((<expr#2> as C), [6:2-24],
                  (Assign (((<expr#2> as C), [6:2-4], (Lvar ([6:2-4], $x))), None,
-                    ((<expr#2> as C), [6:7-24], (New (((C), [6:11-22], (CIexpr ((classname<C>), [6:11-22], (Lvar ([6:11-22], $class_name))))), [], [], None, ((function(): void))))))))))
+                    ((<expr#2> as C), [6:7-24], (New (((C), [6:11-22], (CIexpr ((class<C>), [6:11-22], (Lvar ([6:11-22], $class_name))))), [], [], None, ((function(): void))))))))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([5:10-37], "__SupportDynamicType"); ua_params = [] }]; 

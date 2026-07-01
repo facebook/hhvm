@@ -6,7 +6,7 @@ Invalid return type (Typing[4110])
   Expected `int`
   File "new_classname3.bad.php", line 5, characters 15-16:
   But got `D<TAux>`
-  File "new_classname3.bad.php", line 6, characters 49-50:
+  File "new_classname3.bad.php", line 6, characters 45-46:
     via this generic `T3`
   File "new_classname3.bad.php", line 5, characters 21-27:
     by the definition of `T3`
@@ -16,5 +16,5 @@ Invalid return type (Typing[4110])
   Expected `int`
   File "new_classname3.bad.php", line 5, characters 15-16:
   But got `T3 as D<TAux>`
-  File "new_classname3.bad.php", line 6, characters 49-50:
+  File "new_classname3.bad.php", line 6, characters 45-46:
     via this generic `T3`

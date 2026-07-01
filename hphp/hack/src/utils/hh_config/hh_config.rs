@@ -588,21 +588,9 @@ impl HhConfig {
             )?,
             allow_class_string_cast: hhconfig
                 .get_bool_or("allow_class_string_cast", default.allow_class_string_cast)?,
-            class_pointer_ban_classname_new: hhconfig.get_int_or(
-                "class_pointer_ban_classname_new",
-                default.class_pointer_ban_classname_new,
-            )?,
-            class_pointer_ban_classname_type_structure: hhconfig.get_int_or(
-                "class_pointer_ban_classname_type_structure",
-                default.class_pointer_ban_classname_type_structure,
-            )?,
             class_pointer_ban_classname_static_meth: hhconfig.get_int_or(
                 "class_pointer_ban_classname_static_meth",
                 default.class_pointer_ban_classname_static_meth,
-            )?,
-            class_pointer_ban_classname_class_const: hhconfig.get_int_or(
-                "class_pointer_ban_classname_class_const",
-                default.class_pointer_ban_classname_class_const,
             )?,
             class_pointer_ban_class_array_key: hhconfig.get_bool_or(
                 "class_pointer_ban_class_array_key",

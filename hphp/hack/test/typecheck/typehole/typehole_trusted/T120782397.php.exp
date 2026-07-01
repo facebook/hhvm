@@ -1,1 +1,4 @@
-No errors
+ERROR: File "T120782397.php", line 13, characters 14-15:
+It is no longer allowed to use a `classname<A<num>>` in this position. Please use a `class<A<num>>` instead. (Typing[4482])
+  File "T120782397.php", line 12, characters 21-37:
+  Definition is here

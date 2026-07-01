@@ -96,16 +96,8 @@ module Hhconfig = struct
   let class_pointer_ban_class_array_key =
     key "class_pointer_ban_class_array_key"
 
-  let class_pointer_ban_classname_class_const =
-    key "class_pointer_ban_classname_class_const"
-
-  let class_pointer_ban_classname_new = key "class_pointer_ban_classname_new"
-
   let class_pointer_ban_classname_static_meth =
     key "class_pointer_ban_classname_static_meth"
-
-  let class_pointer_ban_classname_type_structure =
-    key "class_pointer_ban_classname_type_structure"
 
   let class_sub_classname = key "class_sub_classname"
 

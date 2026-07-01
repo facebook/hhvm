@@ -2,6 +2,6 @@
 
 trait Foo {}
 
-function f(classname<Foo> $x): void {
+function f(class<Foo> $x): void {
   new $x();
 }

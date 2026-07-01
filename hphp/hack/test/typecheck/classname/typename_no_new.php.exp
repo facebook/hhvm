@@ -1,3 +1,7 @@
+ERROR: File "typename_no_new.php", line 9, characters 14-15:
+It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. (Typing[4482])
+  File "typename_no_new.php", line 8, characters 16-32:
+  Definition is here
 ERROR: File "typename_no_new.php", line 13, characters 10-17:
 Invalid return type (Typing[4110])
   File "typename_no_new.php", line 12, characters 42-47:

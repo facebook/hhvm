@@ -3,6 +3,6 @@
 
 class C {}
 
-function test<T>(classname<T> $c): C {
+function test<T>(class<T> $c): C {
   return new $c();
 }

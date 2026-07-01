@@ -2,7 +2,7 @@
 
 final class Foo<reify T>{}
 
-function test2(classname<Foo<nothing>> $x): void {
+function test2(class<Foo<nothing>> $x): void {
   new $x();
 }
 

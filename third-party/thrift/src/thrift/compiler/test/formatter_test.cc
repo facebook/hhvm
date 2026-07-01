@@ -1469,6 +1469,141 @@ TEST(FormatterTest, preservesThrowsFieldLeadingComments) {
 )");
 }
 
+TEST(FormatterTest, preservesInlineThrowsWhenParamsBreak) {
+  expect_format(
+      R"(service Foo {
+  GetNextTrialsSynchronouslyResponse get_next_batch_trials_synchronously(
+    1: GetNextBatchTrialsSynchronouslyRequest request,
+  ) throws (1: AxServiceInputException e, 2: AxServiceInternalError internal_e);
+}
+)",
+      R"(service Foo {
+  GetNextTrialsSynchronouslyResponse get_next_batch_trials_synchronously(
+    1: GetNextBatchTrialsSynchronouslyRequest request,
+  ) throws (1: AxServiceInputException e, 2: AxServiceInternalError internal_e);
+}
+)");
+}
+
+TEST(FormatterTest, preservesInlineAnnotationsWithMultilineStrings) {
+  expect_format(
+      R"(@thrift_explorer.Context{description = "
+Different ways of grouping racks
+"}
+enum RackGroupType {
+  MAJOR_RACK_TYPE = 0,
+}
+)",
+      R"(@thrift_explorer.Context{description = "
+Different ways of grouping racks
+"}
+enum RackGroupType {
+  MAJOR_RACK_TYPE = 0,
+}
+)");
+}
+
+TEST(FormatterTest, preservesExplicitOptionalFunctionParams) {
+  expect_format(
+      R"(service Foo {
+  void getSceneObjects(
+    1: string session_id,
+    2: optional ObjectQuery query,
+  ) throws (1: PerceptionException e);
+}
+)",
+      R"(service Foo {
+  void getSceneObjects(
+    1: string session_id,
+    2: optional ObjectQuery query,
+  ) throws (1: PerceptionException e);
+}
+)");
+}
+
+TEST(FormatterTest, preservesSourceInlineAnnotationValues) {
+  expect_format(
+      R"THRIFT(@hack.Attributes{
+  attributes = ["\GraphQLType('CanaryRelative', 'Related canary information')"],
+}
+struct CanaryRelative {
+  1: optional string job_id;
+}
+)THRIFT",
+      R"THRIFT(@hack.Attributes{
+  attributes = ["\GraphQLType('CanaryRelative', 'Related canary information')"],
+}
+struct CanaryRelative {
+  1: optional string job_id;
+}
+)THRIFT");
+}
+
+TEST(FormatterTest, preservesInlineAnnotationWithTrailingComment) {
+  expect_format(
+      R"(@cpp.Type{template = "facebook::admarket::MicroSet"} // Field not used; minimize inline memory cost.
+struct Foo {
+}
+)",
+      R"(@cpp.Type{template = "facebook::admarket::MicroSet"} // Field not used; minimize inline memory cost.
+struct Foo {}
+)");
+}
+
+TEST(FormatterTest, preservesSourceMultilineValues) {
+  expect_format(
+      R"(const Template value = Template{
+  address = Address{
+    countryCode = 'US',
+    state = 'HI',
+    zip = '96821',
+  },
+};
+)",
+      R"(const Template value = Template{
+  address = Address{
+    countryCode = 'US',
+    state = 'HI',
+    zip = '96821',
+  },
+};
+)");
+}
+
+TEST(FormatterTest, preservesSourceMultilineFieldTypes) {
+  expect_format(
+      R"(service Foo {
+  void pushPreemptionStatuses(
+    1: list<
+      TaskResourceWithPreemptionStatus
+    > taskResourceWithPreemptionStatuses,
+  );
+}
+)",
+      R"(service Foo {
+  void pushPreemptionStatuses(
+    1: list<
+      TaskResourceWithPreemptionStatus
+    > taskResourceWithPreemptionStatuses,
+  );
+}
+)");
+}
+
+TEST(FormatterTest, preservesSourceMultilineConstTypes) {
+  expect_format(
+      R"(const map<
+  env_config.CdEventAppIds,
+  CdZdbDisaggInfo
+> TestCdZdbDisaggInfoMap = {};
+)",
+      R"(const map<
+  env_config.CdEventAppIds,
+  CdZdbDisaggInfo
+> TestCdZdbDisaggInfoMap = {};
+)");
+}
+
 TEST(FormatterTest, preservesTypedefTypeArgumentSeparatorComments) {
   expect_format(
       R"(typedef map<

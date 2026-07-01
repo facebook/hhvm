@@ -1789,10 +1789,9 @@ class concrete_formatter {
             ':', result.index->range.end, item.type.range.begin);
       }
     }
-    if (item.qualifier == t_field_qualifier::optional) {
-      result.requirement =
-          first_text_between("optional", code_begin, item.type.range.begin);
-    } else if (item.qualifier == t_field_qualifier::required) {
+    result.requirement =
+        first_text_between("optional", code_begin, item.type.range.begin);
+    if (!result.requirement) {
       result.requirement =
           first_text_between("required", code_begin, item.type.range.begin);
     }
@@ -2112,10 +2111,11 @@ class concrete_formatter {
       }
       type_inline_size = type_inline(type.type).size();
     }
-    const bool force_type_break = !type.type.args.empty() &&
-        indent + last_line_length(result) + type_inline_size + 1 +
-                id.text.size() + 3 + first_value_line.size() >
-            kPrintWidth;
+    const bool force_type_break = type_source_is_block_formatted(type.type) ||
+        (!type.type.args.empty() &&
+         indent + last_line_length(result) + type_inline_size + 1 +
+                 id.text.size() + 3 + first_value_line.size() >
+             kPrintWidth);
     result += print_type(
         type.type,
         indent,
@@ -2181,9 +2181,10 @@ class concrete_formatter {
       type_suffix += print_separator(sep, "").size();
       type_inline_size = type_inline(type.type).size();
     }
-    const bool force_type_break = !type.type.args.empty() &&
-        indent + last_line_length(result) + type_inline_size + type_suffix >
-            kPrintWidth;
+    const bool force_type_break = type_source_is_block_formatted(type.type) ||
+        (!type.type.args.empty() &&
+         indent + last_line_length(result) + type_inline_size + type_suffix >
+             kPrintWidth);
     result += print_type(
         type.type,
         indent,
@@ -2664,15 +2665,19 @@ class concrete_formatter {
       inline_text = type_inline(ty, include_leading);
       const bool inline_contains_line_break =
           inline_text.find('\n') != std::string::npos;
+      const bool source_inline = type_source_is_single_line(ty);
       if (ty.args.empty() && !inline_contains_line_break &&
-          (!ty.throws || current_column + inline_text.size() <= kPrintWidth)) {
+          (source_inline || !ty.throws ||
+           current_column + inline_text.size() <= kPrintWidth)) {
         inline_capture.commit();
         return inline_text;
       }
-      if (!ty.args.empty() && !force_break && !inline_contains_line_break &&
+      if (!ty.args.empty() && !inline_contains_line_break &&
           !type_has_line_trailing_comment(ty) &&
-          current_column + inline_text.size() <= kPrintWidth &&
-          (allow_long_inline || inline_text.size() <= 52)) {
+          (source_inline ||
+           (!force_break &&
+            current_column + inline_text.size() <= kPrintWidth &&
+            (allow_long_inline || inline_text.size() <= 52)))) {
         inline_capture.commit();
         return inline_text;
       }
@@ -2720,6 +2725,30 @@ class concrete_formatter {
         ty.left_angle->end_line != ty.args.front().first.start_line;
   }
 
+  bool type_source_is_single_line(const parsed_type& ty) const {
+    const token& last_token = ty.throws
+        ? ty.throws->right
+        : (ty.right_angle ? *ty.right_angle : ty.first);
+    return ty.first.start_line == last_token.end_line;
+  }
+
+  bool type_source_is_block_formatted(const parsed_type& ty) const {
+    if (!ty.left_angle || ty.args.empty() || !ty.right_angle ||
+        !type_source_starts_multiline(ty)) {
+      return false;
+    }
+    const size_t arg_column = ty.right_angle->start_column + kIndent;
+    size_t previous_line = 0;
+    for (const auto& arg : ty.args) {
+      if (arg.first.start_column != arg_column ||
+          arg.first.start_line <= previous_line) {
+        return false;
+      }
+      previous_line = arg.first.start_line;
+    }
+    return true;
+  }
+
   bool type_has_line_trailing_comment(const parsed_type& ty) const {
     if (ty.first.trailing_comment && ty.first.trailing_comment->line) {
       return true;
@@ -2764,6 +2793,46 @@ class concrete_formatter {
       return last_value_token(val.list_values.back());
     }
     return val.first;
+  }
+
+  bool value_source_is_single_line(const value& val) const {
+    return val.first.start_line == last_value_token(val).end_line;
+  }
+
+  bool value_source_is_block_formatted(const value& val) const {
+    if (val.type == value::kind::object && val.object_body) {
+      return annotation_body_source_is_block_formatted(*val.object_body);
+    }
+    if (val.type == value::kind::list) {
+      if (val.list_values.empty() || !val.right ||
+          !value_source_starts_multiline(val)) {
+        return false;
+      }
+      return value_entries_source_is_block_formatted(
+          val.list_values, *val.right);
+    }
+    if (val.type == value::kind::map) {
+      if (val.map_keys.empty() || !val.right ||
+          !value_source_starts_multiline(val)) {
+        return false;
+      }
+      return value_entries_source_is_block_formatted(val.map_keys, *val.right);
+    }
+    return false;
+  }
+
+  bool value_entries_source_is_block_formatted(
+      const std::vector<value>& entries, const token& right) const {
+    const size_t entry_column = right.start_column + kIndent;
+    size_t previous_line = 0;
+    for (const auto& entry : entries) {
+      if (entry.first.start_column != entry_column ||
+          entry.first.start_line <= previous_line) {
+        return false;
+      }
+      previous_line = entry.first.start_line;
+    }
+    return true;
   }
 
   std::string type_inline(
@@ -2830,13 +2899,15 @@ class concrete_formatter {
       auto inline_capture = capture_trivia_printing();
       inline_text = value_inline(val);
       if (!value_has_comments(val) &&
-          (value_prefers_compact_inline(val) ||
+          (value_source_is_single_line(val) ||
+           value_prefers_compact_inline(val) ||
            (value_has_multiline_atom(val) && value_starts_inline(val)))) {
         inline_capture.commit();
         return inline_text;
       }
-      source_multiline_should_break = value_source_starts_multiline(val) &&
-          current_column + inline_text.size() > kPrintWidth - 12;
+      source_multiline_should_break = value_source_is_block_formatted(val) ||
+          (value_source_starts_multiline(val) &&
+           current_column + inline_text.size() > kPrintWidth - 12);
       if (!source_multiline_should_break && !value_has_comments(val) &&
           inline_text.find('\n') == std::string::npos &&
           current_column + inline_text.size() <= kPrintWidth) {
@@ -2977,6 +3048,82 @@ class concrete_formatter {
         body.entries.begin(), body.entries.end(), [&](const auto& entry) {
           return annotation_entry_has_comments(entry);
         });
+  }
+
+  bool annotation_body_has_only_right_trailing_comment(
+      const annotation_body& body) const {
+    if (!body.right.trailing_comment || !body.left.leading_comments.empty() ||
+        body.left.trailing_comment ||
+        leading_comments_force_break(body.right.leading_comments, body.right)) {
+      return false;
+    }
+    return std::none_of(
+        body.entries.begin(), body.entries.end(), [&](const auto& entry) {
+          return annotation_entry_has_comments(entry);
+        });
+  }
+
+  bool annotation_body_has_multiline_atom(const annotation_body& body) const {
+    return std::any_of(
+        body.entries.begin(), body.entries.end(), [&](const auto& entry) {
+          return entry.val && value_has_multiline_atom(*entry.val);
+        });
+  }
+
+  bool annotation_body_starts_inline(const annotation_body& body) const {
+    return !body.entries.empty() &&
+        body.left.end_line == body.entries.front().key.start_line;
+  }
+
+  bool annotation_body_starts_multiline(const annotation_body& body) const {
+    return !body.entries.empty() &&
+        body.left.end_line != body.entries.front().key.start_line;
+  }
+
+  bool annotation_body_source_is_block_formatted(
+      const annotation_body& body) const {
+    if (!annotation_body_starts_multiline(body)) {
+      return false;
+    }
+    const size_t entry_column = body.right.start_column + kIndent;
+    size_t previous_line = 0;
+    for (const auto& entry : body.entries) {
+      if (entry.key.start_column != entry_column ||
+          entry.key.start_line <= previous_line) {
+        return false;
+      }
+      previous_line = entry.key.start_line;
+    }
+    return true;
+  }
+
+  bool annotation_body_should_print_inline(
+      const annotation_body& body,
+      std::string_view inline_text,
+      size_t current_column) const {
+    const bool source_inline = annotation_body_starts_inline(body);
+    const bool safe_trailing_comment =
+        source_inline && annotation_body_has_only_right_trailing_comment(body);
+    if (annotation_body_has_comments(body) && !safe_trailing_comment) {
+      return false;
+    }
+    if (annotation_body_source_is_block_formatted(body)) {
+      return false;
+    }
+    if (annotation_body_has_multiline_atom(body) && source_inline) {
+      return true;
+    }
+    if (inline_text.find('\n') != std::string_view::npos) {
+      return false;
+    }
+    if (source_inline) {
+      return true;
+    }
+    const size_t line_suffix_size = body.right.trailing_comment
+        ? body.right.trailing_comment->text.size() + 1
+        : 0;
+    return current_column + inline_text.size() - line_suffix_size <=
+        kPrintWidth;
   }
 
   bool annotation_list_has_comments(const annotation_list& list) const {
@@ -3265,13 +3412,8 @@ class concrete_formatter {
     {
       auto inline_capture = capture_trivia_printing();
       inline_text = print_annotation_body_inline(body);
-      const size_t line_suffix_size = body.right.trailing_comment
-          ? body.right.trailing_comment->text.size() + 1
-          : 0;
-      if (!annotation_body_has_comments(body) &&
-          current_column + inline_text.size() - line_suffix_size <=
-              kPrintWidth &&
-          inline_text.find('\n') == std::string::npos) {
+      if (annotation_body_should_print_inline(
+              body, inline_text, current_column)) {
         inline_capture.commit();
         return inline_text;
       }
@@ -3905,7 +4047,13 @@ class concrete_formatter {
       result += inline_token(*item.requirement, indent);
       result += inline_separator_after(*item.requirement);
     }
-    result += type_inline(item.type, /*include_leading=*/true);
+    result += print_type(
+        item.type,
+        indent,
+        indent + last_line_length(result),
+        type_source_starts_multiline(item.type),
+        /*allow_long_inline=*/true,
+        /*include_leading=*/true);
     const token* last_token = &last_type_token(item.type);
     const auto append_after_last_token = [&](std::string suffix) {
       result += inline_separator_after(*last_token);
@@ -3946,9 +4094,11 @@ class concrete_formatter {
           throws.fields.begin(), throws.fields.end(), [](const field& item) {
             return item.separator && item.separator->trailing_comment;
           });
+      const bool source_throws_inline =
+          throws.throws_keyword.start_line == throws.right.end_line;
       if (!inline_contains_line_break && !throws.left.trailing_comment &&
           !has_separator_comments && throws.right.leading_comments.empty() &&
-          (throws.fields.empty() ||
+          (throws.fields.empty() || source_throws_inline ||
            current_column + inline_text.size() <= kPrintWidth)) {
         inline_capture.commit();
         return inline_text;

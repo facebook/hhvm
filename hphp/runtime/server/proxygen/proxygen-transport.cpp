@@ -279,7 +279,7 @@ void ProxygenTransport::onHeadersComplete(
   if (method == HTTPMethod::GET) {
     m_method = Transport::Method::GET;
   } else if (method == HTTPMethod::POST ||
-             s_post_methods.find(methodStr) != s_post_methods.end()) {
+             s_post_methods.contains(methodStr)) {
     m_method = Transport::Method::POST;
   } else if (method == HTTPMethod::HEAD) {
     m_method = Transport::Method::HEAD;
@@ -305,7 +305,7 @@ void ProxygenTransport::onHeadersComplete(
 
   if (Cfg::Server::AllowNonBlockingPosts &&
       m_method == Transport::Method::POST &&
-      m_requestHeaders.find("NonBlockingPost") != m_requestHeaders.end()) {
+      m_requestHeaders.contains("NonBlockingPost")) {
     m_streamTransport =
       std::make_shared<stream_transport::HttpStreamServerTransport>(this);
   }

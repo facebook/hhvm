@@ -67,7 +67,8 @@ void ReactiveToggleSource::set(bool on) {
   }
 
   // execute the callback once
-  auto& lCallbacks = *context_->callbacks.lock();
+  auto lockedCallbacks = context_->callbacks.lock();
+  auto& lCallbacks = *lockedCallbacks;
   for (auto& elem : lCallbacks) {
     elem.func(on);
   }

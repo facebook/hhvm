@@ -140,4 +140,11 @@ const folly::F14FastSet<type_system::Uri>& SchemaRegistry::getTypeSystemUris()
   });
 }
 
+const dynamic::ServiceCatalog& SchemaRegistry::asServiceCatalog() const {
+  for (const auto& [uri, _] : base_.rawSchemasByUri_) {
+    getSyntaxGraphDefinitionNodeByUri(uri);
+  }
+  return syntaxGraph_->asServiceCatalog();
+}
+
 } // namespace apache::thrift

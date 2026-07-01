@@ -48,6 +48,10 @@
 #include <thrift/lib/cpp2/dynamic/TypeSystem.h>
 #include <thrift/lib/cpp2/schema/gen-cpp2/syntax_graph_types.h>
 
+namespace apache::thrift::dynamic {
+class ServiceCatalog;
+} // namespace apache::thrift::dynamic
+
 namespace apache::thrift::syntax_graph {
 
 /**
@@ -1944,6 +1948,14 @@ class SyntaxGraph final : public detail::WithDebugPrinting<SyntaxGraph> {
    * lookup (which does not happen with any official Resolver implementations).
    */
   const type_system::TypeSystem& asTypeSystem() const;
+  std::shared_ptr<const type_system::TypeSystem> typeSystemPtr() const;
+
+  /**
+   * Provides a view of all services in the schema as a ServiceCatalog.
+   *
+   * This object must be kept alive for the lifetime of the returned object.
+   */
+  const dynamic::ServiceCatalog& asServiceCatalog() const;
 
   /**
    * Allows converting a SyntaxGraph node into its corresponding TypeSystem
@@ -1986,8 +1998,10 @@ class SyntaxGraph final : public detail::WithDebugPrinting<SyntaxGraph> {
 
  private:
   folly::not_null_unique_ptr<const detail::Resolver> resolver_;
-  mutable folly::Synchronized<std::unique_ptr<type_system::TypeSystem>>
+  mutable folly::Synchronized<std::shared_ptr<const type_system::TypeSystem>>
       typeSystemFacade_;
+  mutable folly::Synchronized<std::unique_ptr<dynamic::ServiceCatalog>>
+      serviceCatalogFacade_;
 
   friend const DefinitionNode& detail::lookUpDefinition(
       const SyntaxGraph&, const apache::thrift::type::DefinitionKey&);

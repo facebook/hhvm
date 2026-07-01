@@ -17,6 +17,9 @@
 #include <thrift/lib/cpp2/schema/SyntaxGraph.h>
 
 #include <thrift/lib/cpp/util/EnumUtils.h>
+#include <thrift/lib/cpp2/dynamic/AnnotationValue.h>
+#include <thrift/lib/cpp2/dynamic/ServiceCatalog.h>
+#include <thrift/lib/cpp2/dynamic/ServiceDescriptor.h>
 #include <thrift/lib/cpp2/dynamic/TypeSystem.h>
 #include <thrift/lib/cpp2/schema/detail/Resolver.h>
 #include <thrift/lib/cpp2/schema/detail/SchemaBackedResolver.h>
@@ -1339,6 +1342,212 @@ class TypeSystemFacade final : public type_system::TypeSystem {
       reverseCache_;
   mutable folly::SharedMutex cacheMutex_;
 };
+
+using dynamic::FunctionQualifier;
+using dynamic::RpcKind;
+using dynamic::ServiceDescriptor;
+
+FunctionQualifier convertFunctionQualifier(type::FunctionQualifier q) {
+  switch (q) {
+    case type::FunctionQualifier::Idempotent:
+      return FunctionQualifier::Idempotent;
+    case type::FunctionQualifier::ReadOnly:
+      return FunctionQualifier::ReadOnly;
+    // Oneway is captured as an RpcKind, not a qualifier.
+    case type::FunctionQualifier::OneWay:
+    case type::FunctionQualifier::Unspecified:
+      return FunctionQualifier::Unspecified;
+  }
+  return FunctionQualifier::Unspecified;
+}
+
+ServiceDescriptor::Exception makeSvcException(
+    const FunctionException& ex, const SyntaxGraph& syntaxGraph) {
+  return ServiceDescriptor::Exception{
+      .name = std::string(ex.name()),
+      .id = ex.id(),
+      .type = type_system::TypeRef(
+          syntaxGraph
+              .asTypeSystemDefinitionRef(ex.type().asException().definition())
+              .asStruct()),
+  };
+}
+
+ServiceDescriptor::Function makeSvcFunction(
+    const FunctionNode& fn, const SyntaxGraph& syntaxGraph) {
+  ServiceDescriptor::Function function;
+  function.name = std::string(fn.name());
+
+  for (const auto& param : fn.params()) {
+    function.params.push_back(
+        ServiceDescriptor::Param{
+            .name = std::string(param.name()),
+            .id = type::FieldId{static_cast<int16_t>(param.id())},
+            .type = syntaxGraph.asTypeSystemTypeRef(param.type()),
+        });
+  }
+
+  const auto* responseType = fn.response().type();
+  if (responseType != nullptr) {
+    function.responseType = syntaxGraph.asTypeSystemTypeRef(*responseType);
+  }
+
+  for (const auto& ex : fn.exceptions()) {
+    function.exceptions.push_back(makeSvcException(ex, syntaxGraph));
+  }
+
+  if (const auto* bidi = fn.response().bidirectionalStream()) {
+    ServiceDescriptor::Stream s{
+        .payloadType =
+            syntaxGraph.asTypeSystemTypeRef(bidi->streamPayloadType()),
+        .exceptions = {},
+    };
+    for (const auto& ex : bidi->streamExceptions()) {
+      s.exceptions.push_back(makeSvcException(ex, syntaxGraph));
+    }
+    function.stream = std::move(s);
+    ServiceDescriptor::Sink sk{
+        .payloadType = syntaxGraph.asTypeSystemTypeRef(bidi->sinkPayloadType()),
+        .finalResponseType = std::nullopt,
+        .clientExceptions = {},
+        .serverExceptions = {},
+    };
+    for (const auto& ex : bidi->sinkExceptions()) {
+      sk.clientExceptions.push_back(makeSvcException(ex, syntaxGraph));
+    }
+    function.sink = std::move(sk);
+    function.rpcKind = RpcKind::BidirectionalStream;
+  } else if (const auto* stream = fn.response().stream()) {
+    ServiceDescriptor::Stream s{
+        .payloadType = syntaxGraph.asTypeSystemTypeRef(stream->payloadType()),
+        .exceptions = {},
+    };
+    for (const auto& ex : stream->exceptions()) {
+      s.exceptions.push_back(makeSvcException(ex, syntaxGraph));
+    }
+    function.stream = std::move(s);
+    function.rpcKind = RpcKind::Stream;
+  } else if (const auto* sink = fn.response().sink()) {
+    ServiceDescriptor::Sink sk{
+        .payloadType = syntaxGraph.asTypeSystemTypeRef(sink->payloadType()),
+        .finalResponseType = std::make_optional(
+            syntaxGraph.asTypeSystemTypeRef(sink->finalResponseType())),
+        .clientExceptions = {},
+        .serverExceptions = {},
+    };
+    for (const auto& ex : sink->clientExceptions()) {
+      sk.clientExceptions.push_back(makeSvcException(ex, syntaxGraph));
+    }
+    for (const auto& ex : sink->serverExceptions()) {
+      sk.serverExceptions.push_back(makeSvcException(ex, syntaxGraph));
+    }
+    function.sink = std::move(sk);
+    function.rpcKind = RpcKind::Sink;
+  }
+
+  function.qualifier = convertFunctionQualifier(fn.qualifier());
+  if (fn.qualifier() == type::FunctionQualifier::OneWay) {
+    function.rpcKind = RpcKind::OneWay;
+  }
+  function.createsInteraction = fn.response().interaction() != nullptr;
+  function.isPerforms = fn.isPerforms();
+
+  if (auto doc = fn.docBlock()) {
+    function.docBlock = std::string(*doc);
+  }
+
+  for (const auto& ann : fn.annotations()) {
+    function.annotations.push_back(
+        dynamic::toDynamicValue(
+            ann.value(), syntaxGraph.asTypeSystemTypeRef(ann.type())));
+  }
+
+  return function;
+}
+
+void collectSvcFunctions(
+    const ServiceNode& service,
+    const SyntaxGraph& syntaxGraph,
+    std::vector<ServiceDescriptor::Function>& functions) {
+  if (const auto* base = service.baseService()) {
+    collectSvcFunctions(*base, syntaxGraph, functions);
+  }
+  for (const auto& fn : service.functions()) {
+    functions.push_back(makeSvcFunction(fn, syntaxGraph));
+  }
+}
+
+class ServiceDescriptorFacade final : public dynamic::ServiceDescriptor {
+ public:
+  ServiceDescriptorFacade(
+      const SyntaxGraph& graph,
+      const ServiceNode& service,
+      std::shared_ptr<const type_system::TypeSystem> typeSystem)
+      : typeSystem_(std::move(typeSystem)),
+        serviceName_(service.definition().name()),
+        serviceUri_(service.uri()) {
+    collectSvcFunctions(service, graph, functions_);
+  }
+
+  std::string_view serviceName() const override { return serviceName_; }
+  std::string_view serviceUri() const { return serviceUri_; }
+  folly::span<const Function> functions() const override { return functions_; }
+  std::shared_ptr<const type_system::TypeSystem> getTypeSystem()
+      const override {
+    return typeSystem_;
+  }
+
+ private:
+  std::shared_ptr<const type_system::TypeSystem> typeSystem_;
+  std::string serviceName_;
+  std::string serviceUri_;
+  std::vector<Function> functions_;
+};
+
+class ServiceCatalogFacade final : public dynamic::ServiceCatalog {
+ public:
+  explicit ServiceCatalogFacade(const SyntaxGraph& graph) {
+    auto typeSystem = graph.typeSystemPtr();
+    for (const auto program : graph.programs()) {
+      for (const auto definition : program->definitions()) {
+        if (!definition->isService()) {
+          continue;
+        }
+        const auto& svc = definition->asService();
+        // A service is keyed by its URI. One without a URI has no stable
+        // identity to look it up by, so it is skipped, the same way URI-less
+        // user-defined types are left out of URI indexing.
+        if (svc.uri().empty() || byUri_.contains(svc.uri())) {
+          continue;
+        }
+        auto desc =
+            std::make_unique<ServiceDescriptorFacade>(graph, svc, typeSystem);
+        byUri_.emplace(desc->serviceUri(), desc.get());
+        services_.push_back(std::move(desc));
+      }
+    }
+  }
+
+  const dynamic::ServiceDescriptor* getService(
+      std::string_view uri) const override {
+    auto it = byUri_.find(uri);
+    return it == byUri_.end() ? nullptr : it->second;
+  }
+
+  std::vector<std::string_view> serviceUris() const override {
+    std::vector<std::string_view> uris;
+    uris.reserve(byUri_.size());
+    for (const auto& [uri, _] : byUri_) {
+      uris.push_back(uri);
+    }
+    return uris;
+  }
+
+ private:
+  std::vector<std::unique_ptr<ServiceDescriptorFacade>> services_;
+  folly::F14FastMap<std::string_view, const ServiceDescriptorFacade*> byUri_;
+};
+
 } // namespace
 
 const type_system::TypeSystem& SyntaxGraph::asTypeSystem() const {
@@ -1356,13 +1565,30 @@ const type_system::TypeSystem& SyntaxGraph::asTypeSystem() const {
           resolver_.get().unwrap())) {
     auto facade = typeSystemFacade_.wlock();
     if (!*facade) {
-      *facade = std::make_unique<TypeSystemFacade>(*resolver);
+      *facade = std::make_shared<TypeSystemFacade>(*resolver);
     }
     const type_system::TypeSystem* ts = facade->get();
     return *ts;
   }
   folly::throw_exception<std::runtime_error>(
       "SyntaxGraph instance does not support URI-based lookup");
+}
+
+std::shared_ptr<const type_system::TypeSystem> SyntaxGraph::typeSystemPtr()
+    const {
+  asTypeSystem();
+  return *typeSystemFacade_.rlock();
+}
+
+const dynamic::ServiceCatalog& SyntaxGraph::asServiceCatalog() const {
+  if (auto facade = serviceCatalogFacade_.rlock(); *facade) {
+    return **facade;
+  }
+  auto facade = serviceCatalogFacade_.wlock();
+  if (!*facade) {
+    *facade = std::make_unique<ServiceCatalogFacade>(*this);
+  }
+  return **facade;
 }
 
 type_system::DefinitionRef SyntaxGraph::asTypeSystemDefinitionRef(

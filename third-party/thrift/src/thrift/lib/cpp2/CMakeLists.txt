@@ -78,10 +78,7 @@ add_library(
   dynamic/TypeSystemTraits.cpp
   runtime/BaseSchemaRegistry.cpp
   runtime/Init.cpp
-  runtime/SchemaRegistry.cpp
   schema/detail/Merge.cpp
-  schema/detail/SchemaBackedResolver.cpp
-  schema/SyntaxGraph.cpp
   ../thrift/detail/protocol.cpp
   ../thrift/detail/TypeIdAdapter.cpp
   ../thrift/detail/TypeSystemAdapter.cpp
@@ -164,6 +161,15 @@ add_library(
   dynamic/detail/ConcreteSet.cpp
   dynamic/detail/Datum.cpp
   dynamic/detail/DatumHash.cpp
+
+  # ServiceDescriptor and the SyntaxGraph-backed catalog that builds it use
+  # DynamicValue for annotations, so they layer above thriftmetadata here.
+  # Putting them in thriftmetadata would cycle with thrift_dynamic_value.
+  dynamic/AnnotationValue.cpp
+  dynamic/ServiceDescriptor.cpp
+  schema/detail/SchemaBackedResolver.cpp
+  schema/SyntaxGraph.cpp
+  runtime/SchemaRegistry.cpp
 )
 add_dependencies(thrift_dynamic_value thriftmetadata thriftprotocol thrift_path)
 target_link_libraries(

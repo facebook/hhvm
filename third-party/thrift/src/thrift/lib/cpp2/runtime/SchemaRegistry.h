@@ -164,6 +164,11 @@ class SchemaRegistry : public type_system::TypeSystem {
   }
 
   /**
+   * Provides a ServiceCatalog view of all services in the registry.
+   */
+  const dynamic::ServiceCatalog& asServiceCatalog() const;
+
+  /**
    * Gets TypeSystem node for given source identifier, or nullopt if not found.
    */
   std::optional<type_system::DefinitionRef>

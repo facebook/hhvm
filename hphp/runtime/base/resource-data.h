@@ -153,7 +153,6 @@ struct ResourceData : type_scan::MarkCollectable<ResourceData> {
   typename std::enable_if<std::is_same<ResourceData,T>::value, bool>::type
   instanceof() const { return true; }
 
-  bool o_toBoolean() const { return true; }
   int64_t o_toInt64() const { return hdr()->getId(); }
   double o_toDouble() const { return hdr()->getId(); }
   OptString o_toString() const;

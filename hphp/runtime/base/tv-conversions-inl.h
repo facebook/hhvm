@@ -54,7 +54,7 @@ inline bool tvToBool(TypedValue cell) {
     case KindOfPersistentKeyset:
     case KindOfKeyset:        return !cell.m_data.parr->empty();
     case KindOfObject:        return cell.m_data.pobj->toBoolean();
-    case KindOfResource:      return cell.m_data.pres->data()->o_toBoolean();
+    case KindOfResource:
     case KindOfEnumClassLabel:
     case KindOfRFunc:
     case KindOfFunc:

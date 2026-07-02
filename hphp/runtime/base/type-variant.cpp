@@ -465,7 +465,7 @@ bool Variant::toBooleanHelper() const {
     case KindOfPersistentKeyset:
     case KindOfKeyset:        return !m_data.parr->empty();
     case KindOfObject:        return m_data.pobj->toBoolean();
-    case KindOfResource:      return m_data.pres->data()->o_toBoolean();
+    case KindOfResource:
     case KindOfRFunc:
     case KindOfEnumClassLabel:
     case KindOfFunc:

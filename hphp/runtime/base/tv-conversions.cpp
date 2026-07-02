@@ -106,7 +106,7 @@ enable_if_lval_t<T, void> tvCastToBooleanInPlace(T tv) {
         continue;
 
       case KindOfResource:
-        b = val(tv).pres->data()->o_toBoolean();
+        b = true;
         tvDecRefRes(tv);
         continue;
 

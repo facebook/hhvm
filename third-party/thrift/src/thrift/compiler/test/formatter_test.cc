@@ -574,7 +574,7 @@ enum SourceEnumType {
           "should append last separator only if it was going to break",
           R"THRIFT(
         service MyService {
-          void long (string long_paramter_1, string long_paramter_2,string long_paramter_3)
+          void long (string long_parameter_1, string long_parameter_2,string long_parameter_3)
           void short (
             string s,
           )
@@ -582,9 +582,9 @@ enum SourceEnumType {
 )THRIFT",
           R"THRIFT(service MyService {
   void long(
-    string long_paramter_1,
-    string long_paramter_2,
-    string long_paramter_3,
+    string long_parameter_1,
+    string long_parameter_2,
+    string long_parameter_3,
   );
   void short(string s);
 }

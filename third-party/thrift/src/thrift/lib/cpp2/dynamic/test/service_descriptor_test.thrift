@@ -26,10 +26,18 @@ struct AnnotationWithFields {
   3: list<string> tags;
 }
 
+@AnnotationWithFields{label = "service", number = 100, tags = ["svc"]}
 service ServiceDescriptorTestService {
-  i32 add(1: i32 a, 2: i32 b);
+  i32 add(
+    @AnnotationWithFields{label = "param", number = 1, tags = ["p"]}
+    1: i32 a,
+    2: i32 b,
+  );
   void ping();
-  string greet(1: string name) throws (1: TestException e);
+  string greet(1: string name) throws (
+    @AnnotationWithFields{label = "exception", number = 2, tags = ["ex"]}
+    1: TestException e,
+  );
   i32, stream<string> streamNames(1: i32 count);
   sink<string, i32> collectStrings();
   sink<string>, stream<i32> bidiEcho();

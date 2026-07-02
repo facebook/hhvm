@@ -1361,6 +1361,18 @@ FunctionQualifier convertFunctionQualifier(type::FunctionQualifier q) {
   return FunctionQualifier::Unspecified;
 }
 
+std::vector<dynamic::DynamicValue> convertSvcAnnotations(
+    folly::span<const Annotation> annotations, const SyntaxGraph& syntaxGraph) {
+  std::vector<dynamic::DynamicValue> result;
+  result.reserve(annotations.size());
+  for (const auto& ann : annotations) {
+    result.push_back(
+        dynamic::toDynamicValue(
+            ann.value(), syntaxGraph.asTypeSystemTypeRef(ann.type())));
+  }
+  return result;
+}
+
 ServiceDescriptor::Exception makeSvcException(
     const FunctionException& ex, const SyntaxGraph& syntaxGraph) {
   return ServiceDescriptor::Exception{
@@ -1370,6 +1382,7 @@ ServiceDescriptor::Exception makeSvcException(
           syntaxGraph
               .asTypeSystemDefinitionRef(ex.type().asException().definition())
               .asStruct()),
+      .annotations = convertSvcAnnotations(ex.annotations(), syntaxGraph),
   };
 }
 
@@ -1384,6 +1397,8 @@ ServiceDescriptor::Function makeSvcFunction(
             .name = std::string(param.name()),
             .id = type::FieldId{static_cast<int16_t>(param.id())},
             .type = syntaxGraph.asTypeSystemTypeRef(param.type()),
+            .annotations =
+                convertSvcAnnotations(param.annotations(), syntaxGraph),
         });
   }
 
@@ -1456,11 +1471,7 @@ ServiceDescriptor::Function makeSvcFunction(
     function.docBlock = std::string(*doc);
   }
 
-  for (const auto& ann : fn.annotations()) {
-    function.annotations.push_back(
-        dynamic::toDynamicValue(
-            ann.value(), syntaxGraph.asTypeSystemTypeRef(ann.type())));
-  }
+  function.annotations = convertSvcAnnotations(fn.annotations(), syntaxGraph);
 
   return function;
 }
@@ -1485,7 +1496,9 @@ class ServiceDescriptorFacade final : public dynamic::ServiceDescriptor {
       std::shared_ptr<const type_system::TypeSystem> typeSystem)
       : typeSystem_(std::move(typeSystem)),
         serviceName_(service.definition().name()),
-        serviceUri_(service.uri()) {
+        serviceUri_(service.uri()),
+        annotations_(
+            convertSvcAnnotations(service.definition().annotations(), graph)) {
     collectSvcFunctions(service, graph, functions_);
   }
 
@@ -1496,12 +1509,16 @@ class ServiceDescriptorFacade final : public dynamic::ServiceDescriptor {
       const override {
     return typeSystem_;
   }
+  folly::span<const dynamic::DynamicValue> annotations() const override {
+    return annotations_;
+  }
 
  private:
   std::shared_ptr<const type_system::TypeSystem> typeSystem_;
   std::string serviceName_;
   std::string serviceUri_;
   std::vector<Function> functions_;
+  std::vector<dynamic::DynamicValue> annotations_;
 };
 
 class ServiceCatalogFacade final : public dynamic::ServiceCatalog {

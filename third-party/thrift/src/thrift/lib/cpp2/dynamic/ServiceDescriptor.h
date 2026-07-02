@@ -46,12 +46,18 @@ class ServiceDescriptor {
     std::string name;
     FieldId id;
     type_system::TypeRef type;
+    // Structured annotations as schema-typed values; each value's type() is the
+    // annotation's struct type.
+    std::vector<DynamicValue> annotations;
   };
 
   struct Exception {
     std::string name;
     FieldId id;
     type_system::TypeRef type;
+    // Structured annotations as schema-typed values; each value's type() is the
+    // annotation's struct type.
+    std::vector<DynamicValue> annotations;
   };
 
   struct Stream {
@@ -90,6 +96,8 @@ class ServiceDescriptor {
   virtual folly::span<const Function> functions() const = 0;
   virtual std::shared_ptr<const type_system::TypeSystem> getTypeSystem()
       const = 0;
+  // Structured annotations on the service definition itself.
+  virtual folly::span<const DynamicValue> annotations() const = 0;
 
   const Function& getFunction(std::string_view name) const;
 };

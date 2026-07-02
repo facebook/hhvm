@@ -25,10 +25,16 @@ class ServiceDescriptorBuilder {
   class FunctionBuilder {
    public:
     FunctionBuilder& addParam(
-        std::string name, FieldId id, type_system::TypeRef type);
+        std::string name,
+        FieldId id,
+        type_system::TypeRef type,
+        std::vector<DynamicValue> annotations = {});
     FunctionBuilder& setResponseType(type_system::TypeRef type);
     FunctionBuilder& addException(
-        std::string name, FieldId id, type_system::TypeRef type);
+        std::string name,
+        FieldId id,
+        type_system::TypeRef type,
+        std::vector<DynamicValue> annotations = {});
     FunctionBuilder& setStream(type_system::TypeRef payloadType);
     FunctionBuilder& setSink(
         type_system::TypeRef payloadType,
@@ -66,6 +72,7 @@ class ServiceDescriptorBuilder {
       std::string serviceName);
 
   FunctionBuilder& addFunction(std::string name);
+  ServiceDescriptorBuilder& addServiceAnnotation(DynamicValue value);
 
   std::unique_ptr<ServiceDescriptor> build();
 
@@ -73,6 +80,7 @@ class ServiceDescriptorBuilder {
   std::shared_ptr<const type_system::TypeSystem> typeSystem_;
   std::string serviceName_;
   std::vector<FunctionBuilder> functionBuilders_;
+  std::vector<DynamicValue> serviceAnnotations_;
 };
 
 } // namespace apache::thrift::dynamic

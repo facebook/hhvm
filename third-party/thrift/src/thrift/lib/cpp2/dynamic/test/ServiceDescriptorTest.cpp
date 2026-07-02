@@ -145,6 +145,32 @@ TEST_F(SyntaxGraphServiceDescriptorTest, AnnotatedFunction) {
   EXPECT_EQ(tagList.at(1), DynamicValue::makeString("b"));
 }
 
+TEST_F(SyntaxGraphServiceDescriptorTest, AnnotatedParam) {
+  const auto& fn = catalog_->getFunction("add");
+  ASSERT_EQ(fn.params.size(), 2);
+  ASSERT_EQ(fn.params[0].annotations.size(), 1);
+  const auto& fields = fn.params[0].annotations[0].asStruct();
+  EXPECT_EQ(*fields.getField("label"), DynamicValue::makeString("param"));
+  EXPECT_EQ(*fields.getField("number"), DynamicValue::makeI32(1));
+  EXPECT_TRUE(fn.params[1].annotations.empty());
+}
+
+TEST_F(SyntaxGraphServiceDescriptorTest, AnnotatedException) {
+  const auto& fn = catalog_->getFunction("greet");
+  ASSERT_EQ(fn.exceptions.size(), 1);
+  ASSERT_EQ(fn.exceptions[0].annotations.size(), 1);
+  const auto& fields = fn.exceptions[0].annotations[0].asStruct();
+  EXPECT_EQ(*fields.getField("label"), DynamicValue::makeString("exception"));
+  EXPECT_EQ(*fields.getField("number"), DynamicValue::makeI32(2));
+}
+
+TEST_F(SyntaxGraphServiceDescriptorTest, AnnotatedService) {
+  ASSERT_EQ(catalog_->annotations().size(), 1);
+  const auto& fields = catalog_->annotations()[0].asStruct();
+  EXPECT_EQ(*fields.getField("label"), DynamicValue::makeString("service"));
+  EXPECT_EQ(*fields.getField("number"), DynamicValue::makeI32(100));
+}
+
 TEST_F(SyntaxGraphServiceDescriptorTest, FunctionNotFound) {
   EXPECT_THROW(catalog_->getFunction("nonexistent"), std::invalid_argument);
 }
@@ -278,6 +304,37 @@ TEST_F(ServiceDescriptorBuilderTest, BuildWithFunctionMetadata) {
   EXPECT_EQ(*fn.docBlock, "Performs the thing.");
   ASSERT_EQ(fn.annotations.size(), 1);
   EXPECT_EQ(fn.annotations[0], DynamicValue::makeString("cpp.name"));
+}
+
+TEST_F(ServiceDescriptorBuilderTest, BuildWithAnnotations) {
+  ServiceDescriptorBuilder builder(typeSystem_, "AnnoService");
+  builder.addServiceAnnotation(DynamicValue::makeString("svc.anno"));
+  builder.addFunction("op")
+      .addParam(
+          "p",
+          FieldId{1},
+          type_system::TypeSystem::I32(),
+          {DynamicValue::makeString("param.anno")})
+      .addException(
+          "e",
+          FieldId{2},
+          type_system::TypeSystem::I32(),
+          {DynamicValue::makeString("ex.anno")})
+      .setResponseType(type_system::TypeSystem::I32());
+
+  auto catalog = builder.build();
+  ASSERT_EQ(catalog->annotations().size(), 1);
+  EXPECT_EQ(catalog->annotations()[0], DynamicValue::makeString("svc.anno"));
+
+  const auto& fn = catalog->getFunction("op");
+  ASSERT_EQ(fn.params.size(), 1);
+  ASSERT_EQ(fn.params[0].annotations.size(), 1);
+  EXPECT_EQ(
+      fn.params[0].annotations[0], DynamicValue::makeString("param.anno"));
+  ASSERT_EQ(fn.exceptions.size(), 1);
+  ASSERT_EQ(fn.exceptions[0].annotations.size(), 1);
+  EXPECT_EQ(
+      fn.exceptions[0].annotations[0], DynamicValue::makeString("ex.anno"));
 }
 
 TEST_F(ServiceDescriptorBuilderTest, GetTypeSystem) {

@@ -25,10 +25,12 @@ class BuiltServiceDescriptor final : public ServiceDescriptor {
   BuiltServiceDescriptor(
       std::shared_ptr<const type_system::TypeSystem> typeSystem,
       std::string serviceName,
-      std::vector<Function> functions)
+      std::vector<Function> functions,
+      std::vector<DynamicValue> annotations)
       : typeSystem_(std::move(typeSystem)),
         serviceName_(std::move(serviceName)),
-        functions_(std::move(functions)) {}
+        functions_(std::move(functions)),
+        annotations_(std::move(annotations)) {}
 
   std::string_view serviceName() const override { return serviceName_; }
   folly::span<const Function> functions() const override { return functions_; }
@@ -38,10 +40,15 @@ class BuiltServiceDescriptor final : public ServiceDescriptor {
     return typeSystem_;
   }
 
+  folly::span<const DynamicValue> annotations() const override {
+    return annotations_;
+  }
+
  private:
   std::shared_ptr<const type_system::TypeSystem> typeSystem_;
   std::string serviceName_;
   std::vector<Function> functions_;
+  std::vector<DynamicValue> annotations_;
 };
 
 } // namespace
@@ -51,8 +58,13 @@ ServiceDescriptorBuilder::FunctionBuilder::FunctionBuilder(std::string name)
 
 ServiceDescriptorBuilder::FunctionBuilder&
 ServiceDescriptorBuilder::FunctionBuilder::addParam(
-    std::string name, FieldId id, type_system::TypeRef type) {
-  params_.push_back(ServiceDescriptor::Param{std::move(name), id, type});
+    std::string name,
+    FieldId id,
+    type_system::TypeRef type,
+    std::vector<DynamicValue> annotations) {
+  params_.push_back(
+      ServiceDescriptor::Param{
+          std::move(name), id, type, std::move(annotations)});
   return *this;
 }
 
@@ -65,9 +77,13 @@ ServiceDescriptorBuilder::FunctionBuilder::setResponseType(
 
 ServiceDescriptorBuilder::FunctionBuilder&
 ServiceDescriptorBuilder::FunctionBuilder::addException(
-    std::string name, FieldId id, type_system::TypeRef type) {
+    std::string name,
+    FieldId id,
+    type_system::TypeRef type,
+    std::vector<DynamicValue> annotations) {
   exceptions_.push_back(
-      ServiceDescriptor::Exception{std::move(name), id, type});
+      ServiceDescriptor::Exception{
+          std::move(name), id, type, std::move(annotations)});
   return *this;
 }
 
@@ -162,6 +178,12 @@ ServiceDescriptorBuilder::addFunction(std::string name) {
   return functionBuilders_.back();
 }
 
+ServiceDescriptorBuilder& ServiceDescriptorBuilder::addServiceAnnotation(
+    DynamicValue value) {
+  serviceAnnotations_.push_back(std::move(value));
+  return *this;
+}
+
 std::unique_ptr<ServiceDescriptor> ServiceDescriptorBuilder::build() {
   std::vector<ServiceDescriptor::Function> functions;
   for (auto& fb : functionBuilders_) {
@@ -181,7 +203,10 @@ std::unique_ptr<ServiceDescriptor> ServiceDescriptorBuilder::build() {
     functions.push_back(std::move(fn));
   }
   return std::make_unique<BuiltServiceDescriptor>(
-      std::move(typeSystem_), std::move(serviceName_), std::move(functions));
+      std::move(typeSystem_),
+      std::move(serviceName_),
+      std::move(functions),
+      std::move(serviceAnnotations_));
 }
 
 } // namespace apache::thrift::dynamic

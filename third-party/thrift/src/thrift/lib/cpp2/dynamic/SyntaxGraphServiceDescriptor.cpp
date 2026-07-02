@@ -57,6 +57,18 @@ RpcKind determineRpcKind(const syntax_graph::FunctionNode& fn) {
   return RpcKind::Unary;
 }
 
+std::vector<DynamicValue> convertAnnotations(
+    folly::span<const syntax_graph::Annotation> annotations,
+    const SyntaxGraph& syntaxGraph) {
+  std::vector<DynamicValue> result;
+  result.reserve(annotations.size());
+  for (const auto& ann : annotations) {
+    result.push_back(toDynamicValue(
+        ann.value(), syntaxGraph.asTypeSystemTypeRef(ann.type())));
+  }
+  return result;
+}
+
 ServiceDescriptor::Exception makeException(
     const syntax_graph::FunctionException& ex, const SyntaxGraph& syntaxGraph) {
   return ServiceDescriptor::Exception{
@@ -66,6 +78,7 @@ ServiceDescriptor::Exception makeException(
           syntaxGraph
               .asTypeSystemDefinitionRef(ex.type().asException().definition())
               .asStruct()),
+      .annotations = convertAnnotations(ex.annotations(), syntaxGraph),
   };
 }
 
@@ -80,6 +93,7 @@ ServiceDescriptor::Function makeFunction(
             .name = std::string(param.name()),
             .id = FieldId{static_cast<int16_t>(param.id())},
             .type = syntaxGraph.asTypeSystemTypeRef(param.type()),
+            .annotations = convertAnnotations(param.annotations(), syntaxGraph),
         });
   }
 
@@ -147,10 +161,7 @@ ServiceDescriptor::Function makeFunction(
     function.docBlock = std::string(*doc);
   }
 
-  for (const auto& ann : fn.annotations()) {
-    function.annotations.push_back(toDynamicValue(
-        ann.value(), syntaxGraph.asTypeSystemTypeRef(ann.type())));
-  }
+  function.annotations = convertAnnotations(fn.annotations(), syntaxGraph);
 
   return function;
 }
@@ -174,6 +185,8 @@ SyntaxGraphServiceDescriptor::SyntaxGraphServiceDescriptor(
     const syntax_graph::ServiceNode& service)
     : syntaxGraph_(std::move(syntaxGraph)) {
   serviceName_ = std::string(service.definition().name());
+  annotations_ =
+      convertAnnotations(service.definition().annotations(), *syntaxGraph_);
   collectFunctions(service, *syntaxGraph_, functions_);
 }
 
@@ -184,6 +197,11 @@ std::string_view SyntaxGraphServiceDescriptor::serviceName() const {
 folly::span<const ServiceDescriptor::Function>
 SyntaxGraphServiceDescriptor::functions() const {
   return functions_;
+}
+
+folly::span<const DynamicValue> SyntaxGraphServiceDescriptor::annotations()
+    const {
+  return annotations_;
 }
 
 std::shared_ptr<const TypeSystem> SyntaxGraphServiceDescriptor::getTypeSystem()

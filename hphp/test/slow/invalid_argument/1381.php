@@ -110,6 +110,6 @@ function main(): void {
   }
   var_dump(wordwrap('', 75, '', true));
   var_dump(wordwrap('', 75, '', true));
-  var_dump(wordwrap('abc', 75, '', true));
-  var_dump(wordwrap('abc', 0, '', true));
+  $wrap(() ==> var_dump(wordwrap('abc', 75, '', true)));
+  $wrap(() ==> var_dump(wordwrap('abc', 0, '', true)));
 }

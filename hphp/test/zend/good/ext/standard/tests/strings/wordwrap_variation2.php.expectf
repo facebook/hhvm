@@ -9,7 +9,6 @@ string(39) "testing<br />\nwordwrap<br />\nfunction"
 string(39) "testing<br />\nwordwrap<br />\nfunction"
 
 Warning: Can't force cut when width is zero in %s/test/zend/good/ext/standard/tests/strings/wordwrap_variation2.php on line 49
-bool(false)
 -- Iteration 2 --
 string(25) "testing
 wordwrap

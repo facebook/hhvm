@@ -4,21 +4,15 @@
 -- Iteration 1 --
 
 Warning: Break string cannot be empty in %s/test/zend/good/ext/standard/tests/strings/wordwrap_variation3.php on line 36
-bool(false)
 
 Warning: Break string cannot be empty in %s/test/zend/good/ext/standard/tests/strings/wordwrap_variation3.php on line 40
-bool(false)
 
 Warning: Break string cannot be empty in %s/test/zend/good/ext/standard/tests/strings/wordwrap_variation3.php on line 44
-bool(false)
 -- Iteration 2 --
 
 Warning: Break string cannot be empty in %s/test/zend/good/ext/standard/tests/strings/wordwrap_variation3.php on line 36
-bool(false)
 
 Warning: Break string cannot be empty in %s/test/zend/good/ext/standard/tests/strings/wordwrap_variation3.php on line 40
-bool(false)
 
 Warning: Break string cannot be empty in %s/test/zend/good/ext/standard/tests/strings/wordwrap_variation3.php on line 44
-bool(false)
 Done

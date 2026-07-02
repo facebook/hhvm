@@ -153,8 +153,6 @@ string(31) "Invalid argument: pad_type: 100"
 string(0) ""
 string(0) ""
 
-Warning: Break string cannot be empty in %s/test/slow/invalid_argument/1381.php on line %d
-bool(false)
+Warning: Break string cannot be empty
 
-Warning: Break string cannot be empty in %s/test/slow/invalid_argument/1381.php on line %d
-bool(false)
+Warning: Break string cannot be empty

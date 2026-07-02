@@ -14,7 +14,6 @@ string(39) "testing<br />\nwordwrap<br />\nfunction"
 -- width = 0 & cut = true --
 
 Warning: Can't force cut when width is zero in %s/wordwrap_error.php on line 35
-bool(false)
 -- width = -10 & cut = false --
 string(39) "testing<br />\nwordwrap<br />\nfunction"
 -- width = -10 & cut = true --

@@ -35,12 +35,10 @@ Variant HHVM_FUNCTION(wordwrap, const OptString& str, int64_t linewidth /* = 75 
     return empty_string();
   }
   if (brklen == 0) {
-    raise_warning("Break string cannot be empty");
-    return false;
+    SystemLib::throwInvalidArgumentExceptionObject("Break string cannot be empty");
   }
   if (linewidth == 0 && cut) {
-    raise_warning("Can't force cut when width is zero");
-    return false;
+    SystemLib::throwInvalidArgumentExceptionObject("Can't force cut when width is zero");
   }
   size_t w = linewidth >= 0 ? linewidth : 0;
 

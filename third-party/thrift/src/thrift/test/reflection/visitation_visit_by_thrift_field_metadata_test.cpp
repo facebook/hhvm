@@ -20,8 +20,6 @@
 #include <gtest/gtest.h>
 #include <folly/Overload.h>
 
-#include <typeindex>
-
 namespace test_cpp2::cpp_reflection {
 namespace {
 

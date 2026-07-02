@@ -644,7 +644,11 @@ inline Status encodeHkdfLabel(
     Error& err,
     HkdfLabel&& label,
     folly::StringPiece hkdfLabelPrefix) {
-  size_t labelLen = hkdfLabelPrefix.size() + label.label.size();
+  auto labelBuf =
+      folly::IOBuf::wrapBuffer(hkdfLabelPrefix.data(), hkdfLabelPrefix.size());
+  labelBuf->appendToChain(
+      folly::IOBuf::wrapBuffer(label.label.data(), label.label.size()));
+  size_t labelLen = labelBuf->computeChainDataLength();
   size_t hashLen =
       label.hash_value ? label.hash_value->computeChainDataLength() : 0;
   auto buf = folly::IOBuf::create(
@@ -652,12 +656,7 @@ inline Status encodeHkdfLabel(
       hashLen);
   folly::io::Appender appender(buf.get(), 20);
   FIZZ_RETURN_ON_ERROR(detail::write(err, label.length, appender));
-  appender.writeBE<uint8_t>(folly::to<uint8_t>(labelLen));
-  appender.push(
-      reinterpret_cast<const uint8_t*>(hkdfLabelPrefix.data()),
-      hkdfLabelPrefix.size());
-  appender.push(
-      reinterpret_cast<const uint8_t*>(label.label.data()), label.label.size());
+  FIZZ_RETURN_ON_ERROR(detail::writeBuf<uint8_t>(err, labelBuf, appender));
   FIZZ_RETURN_ON_ERROR(
       detail::writeBuf<uint8_t>(err, label.hash_value, appender));
   ret = std::move(buf);

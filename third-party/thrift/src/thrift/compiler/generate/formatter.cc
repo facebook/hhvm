@@ -1698,7 +1698,11 @@ class concrete_formatter {
       return std::nullopt;
     }
     auto formatter = formatter_for_range(*attrs->deprecated_annotations);
-    return formatter.parse_annotation_list();
+    auto parsed = formatter.parse_annotation_list();
+    if (!annotation_list_has_printable_content(parsed)) {
+      return std::nullopt;
+    }
+    return parsed;
   }
 
   std::optional<annotation_list> annotation_list_after(
@@ -1719,7 +1723,11 @@ class concrete_formatter {
         if (depth == 0) {
           auto formatter =
               formatter_for_range({left->range.begin, tok.range.end});
-          return formatter.parse_annotation_list();
+          auto parsed = formatter.parse_annotation_list();
+          if (!annotation_list_has_printable_content(parsed)) {
+            return std::nullopt;
+          }
+          return parsed;
         }
       }
     }
@@ -3138,6 +3146,13 @@ class concrete_formatter {
         });
   }
 
+  bool annotation_list_has_printable_content(
+      const annotation_list& list) const {
+    return !list.entries.empty() || !list.left.leading_comments.empty() ||
+        list.left.trailing_comment || !list.right.leading_comments.empty() ||
+        list.right.trailing_comment;
+  }
+
   bool annotation_entry_has_comments(const annotation_entry& entry) const {
     if (!entry.key.leading_comments.empty() || entry.key.trailing_comment) {
       return true;
@@ -3502,6 +3517,9 @@ class concrete_formatter {
 
   std::string print_annotation_list(
       const annotation_list& list, size_t indent, size_t current_column) const {
+    if (list.entries.empty()) {
+      return print_empty_annotation_list_trivia(list, indent);
+    }
     std::string inline_text;
     {
       auto inline_capture = capture_trivia_printing();
@@ -3537,9 +3555,24 @@ class concrete_formatter {
     return result;
   }
 
+  std::string print_empty_annotation_list_trivia(
+      const annotation_list& list, size_t indent) const {
+    std::string result = inline_leading_prefix(list.left, indent);
+    result += trailing_comment(list.left);
+    if (!list.right.leading_comments.empty()) {
+      result += format_leading_comments(
+          list.right.leading_comments, &list.right, indent);
+      if (!result.empty() && result.back() == ' ') {
+        result.pop_back();
+      }
+    }
+    result += trailing_comment(list.right);
+    return result;
+  }
+
   std::string print_annotation_list_inline(const annotation_list& list) const {
     if (list.entries.empty()) {
-      return "()" + trailing_comment(list.right);
+      return print_empty_annotation_list_trivia(list, 0);
     }
     std::vector<std::string> entries;
     entries.reserve(list.entries.size());

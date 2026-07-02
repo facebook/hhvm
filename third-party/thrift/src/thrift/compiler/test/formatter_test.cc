@@ -1708,6 +1708,53 @@ const AssetXidTypeEntry ASSET_XID_TYPE_COMMENT_TRAP_ENTRY = AssetXidTypeEntry{
 )");
 }
 
+TEST(FormatterTest, movesTriviaOutOfEmptyAnnotationLists) {
+  expect_format(
+      R"(struct AnnotationListCases {
+  1: string (/* type annotation */) field (/* field annotation */);
+  2: i32 count = 0 (/* default annotation */);
+}
+
+struct CommitBuffersRequest {
+} (/* IOBufPtr is a unique_ptr */ )
+)",
+      R"(struct AnnotationListCases {
+  1: string /* type annotation */ field /* field annotation */;
+  2: i32 count = 0 /* default annotation */;
+}
+
+struct CommitBuffersRequest {} /* IOBufPtr is a unique_ptr */
+)");
+}
+
+TEST(FormatterTest, discardsEmptyAnnotationListsWithoutTrivia) {
+  expect_format(
+      R"(struct AnnotationListCases {
+  1: string () field ();
+  2: i32 count = 0 ();
+}
+
+service StabilitySvc {
+  IssueList get_issues_from_issue_type(-1: IssueType issue_type) throws (
+    1: StabilitySvcUserException u,
+    2: StabilitySvcTransientException t,
+  ) ();
+}
+)",
+      R"(struct AnnotationListCases {
+  1: string field;
+  2: i32 count = 0;
+}
+
+service StabilitySvc {
+  IssueList get_issues_from_issue_type(-1: IssueType issue_type) throws (
+    1: StabilitySvcUserException u,
+    2: StabilitySvcTransientException t,
+  );
+}
+)");
+}
+
 TEST(FormatterTest, preservesValueSeparatorTrailingComments) {
   expect_format(
       R"(const currency.CurrencyAmount creditLimit = currency.CurrencyAmount{

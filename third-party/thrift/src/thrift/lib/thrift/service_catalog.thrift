@@ -166,11 +166,20 @@ union SerializableRpcInterfaceDefinition {
 }
 
 /**
- * A self-contained schema for a set of Thrift RPC interfaces: every `TypeId`
- * and interface URI reachable from `interfaces` resolves within the embedded
- * `types`, so it can be shared and rebuilt without external lookups.
+ * A schema for a set of Thrift RPC interfaces. When `types` is present the
+ * catalog is self-contained: every `TypeId` and interface URI reachable from
+ * `interfaces` resolves within it, so it can be rebuilt without external
+ * lookups. When `types` is omitted, the type universe is distributed
+ * out-of-band and identified by `typesDigest`, which the consumer resolves and
+ * caches separately.
  */
 struct SerializableServiceCatalog {
-  1: type_system.SerializableTypeSystem types;
+  1: optional type_system.SerializableTypeSystem types;
   2: map<type_id.Uri, SerializableRpcInterfaceDefinition> interfaces;
+  /**
+   * The `TypeSystemDigest` of the type universe the interfaces resolve against,
+   * always set so a catalog shipped without inline `types` can still name the
+   * type system to fetch. Matches `types.digest()` when `types` is present.
+   */
+  3: binary typesDigest;
 }

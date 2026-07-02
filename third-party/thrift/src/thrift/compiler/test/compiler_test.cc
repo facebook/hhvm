@@ -4174,6 +4174,12 @@ TEST(CompilerTest, sealed_type) {
       1: MySealedStruct a;
     }
 
+    @thrift.Sealed
+    struct RecursiveSealedStruct {
+      1: list<RecursiveSealedStruct> children;
+      2: map<i32, RecursiveSealedStruct> children_by_id;
+      3: set<RecursiveSealedStruct> unique_children;
+    }
 
     // Even though it only contains sealed fields, NonSealedStruct is not
     // considered sealed because it does not have the @thrift.Sealed annotation.

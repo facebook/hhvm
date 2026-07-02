@@ -15,9 +15,16 @@
  */
 
 #include <algorithm>
+#include <cassert>
+#include <stack>
 #include <stdexcept>
+#include <unordered_set>
 
+#include <thrift/compiler/ast/t_list.h>
+#include <thrift/compiler/ast/t_map.h>
+#include <thrift/compiler/ast/t_set.h>
 #include <thrift/compiler/ast/t_structured.h>
+#include <thrift/compiler/ast/t_typedef.h>
 #include <thrift/compiler/ast/uri.h>
 
 namespace apache::thrift::compiler {
@@ -33,6 +40,83 @@ auto find_by_id(const C& fields_id_order, t_field_id id) {
       });
   return std::make_pair(
       lower, lower != fields_id_order.end() && (*lower)->id() == id);
+}
+
+struct sealedness_check_context {
+  std::unordered_set<const t_structured*> active;
+  std::stack<const t_structured*> active_stack;
+};
+
+class scoped_sealedness_check {
+ public:
+  scoped_sealedness_check(
+      sealedness_check_context& context, const t_structured& node)
+      : context_(context) {
+    context_.active.insert(&node);
+    context_.active_stack.push(&node);
+  }
+
+  scoped_sealedness_check(const scoped_sealedness_check&) = delete;
+  scoped_sealedness_check& operator=(const scoped_sealedness_check&) = delete;
+  scoped_sealedness_check(scoped_sealedness_check&&) = delete;
+  scoped_sealedness_check& operator=(scoped_sealedness_check&&) = delete;
+
+  ~scoped_sealedness_check() noexcept {
+    assert(!context_.active_stack.empty());
+    const t_structured* node = context_.active_stack.top();
+    context_.active_stack.pop();
+    context_.active.erase(node);
+  }
+
+ private:
+  sealedness_check_context& context_;
+};
+
+bool is_sealed_impl(const t_type& type, sealedness_check_context& context);
+
+bool is_sealed_impl(
+    const t_structured& structured, sealedness_check_context& context) {
+  // In Thrift IDL, a structured definition (struct, union, exception) is sealed
+  // iff:
+  //   1. It is annotated with `@thrift.Sealed`, and
+  //   2. All of its fields are sealed
+
+  if (!structured.has_structured_annotation(kSealedUri)) {
+    return false;
+  }
+
+  if (context.active.contains(&structured)) {
+    return true;
+  }
+  scoped_sealedness_check check(context, structured);
+
+  for (const t_field& field : structured.fields()) {
+    if (!is_sealed_impl(field.type().deref(), context)) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+bool is_sealed_impl(const t_type& type, sealedness_check_context& context) {
+  if (const auto* structured = type.try_as<t_structured>()) {
+    return is_sealed_impl(*structured, context);
+  }
+  if (const auto* list = type.try_as<t_list>()) {
+    return is_sealed_impl(list->elem_type().deref(), context);
+  }
+  if (const auto* set = type.try_as<t_set>()) {
+    return is_sealed_impl(set->elem_type().deref(), context);
+  }
+  if (const auto* map = type.try_as<t_map>()) {
+    return is_sealed_impl(map->key_type().deref(), context) &&
+        is_sealed_impl(map->val_type().deref(), context);
+  }
+  if (const auto* type_alias = type.try_as<t_typedef>()) {
+    return is_sealed_impl(type_alias->type().deref(), context);
+  }
+  return type.is_sealed();
 }
 
 } // namespace
@@ -67,22 +151,8 @@ const t_field* t_structured::get_field_by_id(t_field_id id) const {
 }
 
 bool t_structured::is_sealed() const {
-  // In Thrift IDL, a structured definition (struct, union, exception) is sealed
-  // iff:
-  //   1. It is annotated with `@thrift.Sealed`, and
-  //   2. All of its fields are sealed
-
-  if (!has_structured_annotation(kSealedUri)) {
-    return false;
-  }
-
-  for (const std::unique_ptr<t_field>& field : fields_) {
-    if (!field->type()->is_sealed()) {
-      return false;
-    }
-  }
-
-  return true;
+  sealedness_check_context context;
+  return is_sealed_impl(*this, context);
 }
 
 t_structured::~t_structured() = default;

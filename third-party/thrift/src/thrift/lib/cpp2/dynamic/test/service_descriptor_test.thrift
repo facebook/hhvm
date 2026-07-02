@@ -20,10 +20,18 @@ exception TestException {
   1: string message;
 }
 
+enum Color {
+  Unknown = 0,
+  Red = 1,
+  Blue = 2,
+}
+
 struct AnnotationWithFields {
   1: string label;
   2: i32 number;
   3: list<string> tags;
+  4: Color color;
+  5: map<string, i32> scores;
 }
 
 @AnnotationWithFields{label = "service", number = 100, tags = ["svc"]}
@@ -44,6 +52,12 @@ service ServiceDescriptorTestService {
   # @lint-ignore THRIFTCHECKS avoid-oneway-method (needed to test oneway RpcKind)
   oneway void fireAndForget();
   /// Annotated function docblock.
-  @AnnotationWithFields{label = "hello", number = 7, tags = ["a", "b"]}
+  @AnnotationWithFields{
+    label = "hello",
+    number = 7,
+    tags = ["a", "b"],
+    color = Color.Blue,
+    scores = {"x": 5},
+  }
   i32 annotated(1: i32 x);
 }

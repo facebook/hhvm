@@ -17,6 +17,7 @@
 #pragma once
 
 #include <thrift/lib/cpp2/dynamic/DynamicValue.h>
+#include <thrift/lib/cpp2/dynamic/SerializableRecord.h>
 
 namespace folly {
 struct dynamic;
@@ -31,5 +32,16 @@ namespace apache::thrift::dynamic {
 // a schema/dynamic dependency cycle.
 DynamicValue toDynamicValue(
     const folly::dynamic& value, const type_system::TypeRef& type);
+
+// Serialize a dynamic value (e.g. an annotation value) into its schema-agnostic
+// SerializableRecord form. The inverse of fromRecord: enums serialize as their
+// i32 datum, unions as a single-entry field set.
+type_system::SerializableRecord toSerializableRecord(DynamicConstRef value);
+
+// Reconstruct a dynamic value of the given type from its SerializableRecord
+// form. The inverse of toSerializableRecord.
+DynamicValue fromSerializableRecord(
+    const type_system::SerializableRecord& record,
+    const type_system::TypeRef& type);
 
 } // namespace apache::thrift::dynamic

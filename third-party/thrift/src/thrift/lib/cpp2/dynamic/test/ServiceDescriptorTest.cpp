@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
+#include <thrift/lib/cpp2/dynamic/AnnotationValue.h>
 #include <thrift/lib/cpp2/dynamic/ServiceDescriptorBuilder.h>
 #include <thrift/lib/cpp2/dynamic/SyntaxGraphServiceDescriptor.h>
 
 #include <gtest/gtest.h>
+#include <folly/io/IOBuf.h>
 #include <thrift/lib/cpp2/dynamic/test/gen-cpp2/ServiceDescriptorTestService.h>
 
 namespace apache::thrift::dynamic {
@@ -169,6 +171,47 @@ TEST_F(SyntaxGraphServiceDescriptorTest, AnnotatedService) {
   const auto& fields = catalog_->annotations()[0].asStruct();
   EXPECT_EQ(*fields.getField("label"), DynamicValue::makeString("service"));
   EXPECT_EQ(*fields.getField("number"), DynamicValue::makeI32(100));
+}
+
+TEST(ToSerializableRecordTest, Scalars) {
+  EXPECT_TRUE(toSerializableRecord(DynamicValue::makeBool(true)).asBool());
+  EXPECT_EQ(toSerializableRecord(DynamicValue::makeByte(7)).asInt8(), 7);
+  EXPECT_EQ(toSerializableRecord(DynamicValue::makeI16(300)).asInt16(), 300);
+  EXPECT_EQ(
+      toSerializableRecord(DynamicValue::makeI32(70000)).asInt32(), 70000);
+  EXPECT_EQ(
+      toSerializableRecord(DynamicValue::makeI64(int64_t{1} << 40)).asInt64(),
+      int64_t{1} << 40);
+  EXPECT_EQ(
+      toSerializableRecord(DynamicValue::makeFloat(1.5f)).asFloat32(), 1.5f);
+  EXPECT_EQ(
+      toSerializableRecord(DynamicValue::makeDouble(2.5)).asFloat64(), 2.5);
+  EXPECT_EQ(
+      toSerializableRecord(DynamicValue::makeString("hi")).asText(), "hi");
+  EXPECT_TRUE(
+      toSerializableRecord(
+          DynamicValue::makeBinary(folly::IOBuf::copyBuffer("bytes"))) ==
+      folly::IOBuf::copyBuffer("bytes"));
+}
+
+TEST_F(SyntaxGraphServiceDescriptorTest, ToSerializableRecordStruct) {
+  using type_system::SerializableRecord;
+  const auto& fn = catalog_->getFunction("annotated");
+  ASSERT_EQ(fn.annotations.size(), 1);
+  auto record = toSerializableRecord(fn.annotations[0]);
+  const auto& fields = record.asFieldSet();
+  EXPECT_EQ(fields.at(FieldId{1}).asText(), "hello");
+  EXPECT_EQ(fields.at(FieldId{2}).asInt32(), 7);
+  EXPECT_EQ(fields.at(FieldId{4}).asInt32(), 2); // Color.Blue
+  const auto& tags = fields.at(FieldId{3}).asList();
+  ASSERT_EQ(tags.size(), 2);
+  EXPECT_EQ(tags.at(0).asText(), "a");
+  EXPECT_EQ(tags.at(1).asText(), "b");
+  const auto& scores = fields.at(FieldId{5}).asMap();
+  ASSERT_EQ(scores.size(), 1);
+  EXPECT_EQ(
+      scores.at(SerializableRecord{SerializableRecord::Text("x")}).asInt32(),
+      5);
 }
 
 TEST_F(SyntaxGraphServiceDescriptorTest, FunctionNotFound) {

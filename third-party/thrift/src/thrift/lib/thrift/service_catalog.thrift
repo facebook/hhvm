@@ -16,8 +16,12 @@
 
 // WARNING: This code is highly experimental.
 // DO NOT USE for any production code.
+include "thrift/annotation/cpp.thrift"
+include "thrift/lib/thrift/record.thrift"
 include "thrift/lib/thrift/type_id.thrift"
 include "thrift/lib/thrift/type_system.thrift"
+
+cpp_include "folly/container/F14Map.h"
 
 package "facebook.com/thrift/type_system"
 
@@ -51,12 +55,24 @@ enum RpcKind {
 struct SerializableParameter {
   1: type_system.FieldIdentity identity;
   2: type_id.TypeId type;
+  /**
+   * The uri key must resolve to struct definition, and the record value must be
+   * valid for the specified uri key.
+   */
+  @cpp.Type{template = "folly::F14FastMap"}
+  3: map<type_id.Uri, record.SerializableRecord> annotations;
 }
 
 /** The identity is the exception's position in the throws clause. */
 struct SerializableException {
   1: type_system.FieldIdentity identity;
   2: type_id.TypeId type;
+  /**
+   * The uri key must resolve to struct definition, and the record value must be
+   * valid for the specified uri key.
+   */
+  @cpp.Type{template = "folly::F14FastMap"}
+  3: map<type_id.Uri, record.SerializableRecord> annotations;
 }
 
 /** A stream of values returned to the client after the initial response. */
@@ -110,12 +126,24 @@ struct SerializableFunction {
   4: SerializableFunctionResponse response;
   5: list<SerializableException> exceptions;
   6: RpcKind rpcKind;
+  /**
+   * The uri key must resolve to struct definition, and the record value must be
+   * valid for the specified uri key.
+   */
+  @cpp.Type{template = "folly::F14FastMap"}
+  7: map<type_id.Uri, record.SerializableRecord> annotations;
 }
 
 /** `baseService` is the URI of the service this one inherits from. */
 struct SerializableServiceDefinition {
   1: list<SerializableFunction> functions;
   2: optional type_id.Uri baseService;
+  /**
+   * The uri key must resolve to struct definition, and the record value must be
+   * valid for the specified uri key.
+   */
+  @cpp.Type{template = "folly::F14FastMap"}
+  3: map<type_id.Uri, record.SerializableRecord> annotations;
 }
 
 /**
@@ -124,6 +152,12 @@ struct SerializableServiceDefinition {
  */
 struct SerializableInteractionDefinition {
   1: list<SerializableFunction> functions;
+  /**
+   * The uri key must resolve to struct definition, and the record value must be
+   * valid for the specified uri key.
+   */
+  @cpp.Type{template = "folly::F14FastMap"}
+  2: map<type_id.Uri, record.SerializableRecord> annotations;
 }
 
 union SerializableRpcInterfaceDefinition {

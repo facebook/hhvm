@@ -87,7 +87,7 @@ static OptString wordwrap(const OptString& str, int width /* = 75 */,
 }
 
 struct DebuggerExtension final : Extension {
-  DebuggerExtension() : Extension("hhvm.debugger", NO_EXTENSION_VERSION_YET, "hphp_hphpi") {}
+  DebuggerExtension() : Extension("hhvm_debugger", NO_EXTENSION_VERSION_YET, "hphp_hphpi") {}
   std::vector<std::string> hackFiles() const override {
     return {};
   }

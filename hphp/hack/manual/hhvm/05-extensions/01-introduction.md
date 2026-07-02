@@ -36,8 +36,8 @@ For the most up-to-date function signatures, please refer to your version of the
 * [gd](https://www.php.net/manual/en/book.image.php)
 * [gmp](http://php.net/manual/en/book.gmp.php)
 * [hash](http://php.net/manual/en/book.hash.php)
-* hhvm.debugger
-* hhvm.ini
+* hhvm_debugger
+* hhvm_ini
 * hosthealthmonitor
 * hotprofiler
 * [iconv](http://php.net/manual/en/book.iconv.php)

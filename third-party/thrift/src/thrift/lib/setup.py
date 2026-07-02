@@ -203,6 +203,15 @@ else:
             **common_options,
         ),
         Extension(
+            "thrift.python.client.py_bridge.py_bridge_channel",
+            sources=[
+                "thrift/python/client/py_bridge/py_bridge_channel.pyx",
+                "thrift/python/client/py_bridge/PyBridgeRequestChannel.cpp",
+                "thrift/python/client/py_bridge/PySender.cpp",
+            ],
+            **common_options,
+        ),
+        Extension(
             "thrift.python.client.request_channel",
             sources=["thrift/python/client/request_channel.pyx"],
             **common_options,
@@ -537,6 +546,7 @@ else:
         "thrift.python.any",
         "thrift.python.reflection",
         "thrift.python.client",
+        "thrift.python.client.py_bridge",
         "thrift.python.conformance",
         "thrift.python.schema",
         "thrift.python.server_impl",

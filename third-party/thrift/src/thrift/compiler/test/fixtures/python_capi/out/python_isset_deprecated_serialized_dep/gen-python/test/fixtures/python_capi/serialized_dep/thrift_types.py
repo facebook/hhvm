@@ -17,6 +17,7 @@ import thrift.python.exceptions as _fbthrift_python_exceptions
 
 
 class SerializedStruct(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_enable_get_locally_set_fields = True
     _fbthrift_enable_isset_deprecated = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -119,6 +120,7 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.SerializedStruct, Serialized
 _fbthrift_SerializedStruct = SerializedStruct
 
 class SerializedUnion(metaclass=_fbthrift_python_types.UnionMeta):
+    _fbthrift_enable_get_locally_set_fields = True
     _fbthrift_enable_isset_deprecated = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -293,6 +295,7 @@ class SerializedError(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
 _fbthrift_SerializedError = SerializedError
 
 class MarshalStruct(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_enable_get_locally_set_fields = True
     _fbthrift_enable_isset_deprecated = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -395,6 +398,7 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.MarshalStruct, MarshalStruct
 _fbthrift_MarshalStruct = MarshalStruct
 
 class MarshalUnion(metaclass=_fbthrift_python_types.UnionMeta):
+    _fbthrift_enable_get_locally_set_fields = True
     _fbthrift_enable_isset_deprecated = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(

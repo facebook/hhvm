@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-// Minimal structs exercising `isset_DEPRECATED()`. The thrift_library compiling
+// Minimal structs exercising `get_locally_set_fields()`. The thrift_library compiling
 // this file passes `thrift_python_options = ["enable_isset_deprecated_unsafe"]`,
-// which enables `isset_DEPRECATED()` for every struct in the library.
+// which enables `get_locally_set_fields()` for every struct in the library.
 
 include "thrift/annotation/thrift.thrift"
 include "thrift/annotation/python.thrift"
@@ -69,15 +69,15 @@ struct mixed {
   9: optional i32 opt_int = 1;
 }
 
-// TODO: Make Nested `@thrift.Sealed` and remove the `set<Nested>` lint
-// suppression once recursive sealed structs are accepted by thrift2ast.
 struct Nested {
   1: i32 num;
   2: optional string label;
   // Optional containers of structs, nested recursively, to exercise the
-  // shadow walk when an optional list/map field is left unset (None).
+  // shadow walk when an optional list/map/set field is left unset (None).
   3: optional list<Nested> maybe_children;
   4: optional map<i32, Nested> maybe_map;
+  // @lint-ignore THRIFTCHECKS bad-key-type
+  5: optional set<Nested> maybe_set;
 }
 
 // Exercises isset tracking for structs reached through a nested field and
@@ -86,7 +86,6 @@ struct HasContainers {
   1: Nested nested;
   2: list<Nested> nested_list;
   3: map<i32, Nested> nested_map;
-  // `set<struct>` is intentionally not tracked (no positional/key slot).
   // @lint-ignore THRIFTCHECKS bad-key-type
   4: set<Nested> nested_set;
   5: list<list<Nested>> nested_list_of_lists;

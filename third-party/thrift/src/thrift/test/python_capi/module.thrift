@@ -17,6 +17,7 @@
 include "thrift/annotation/scope.thrift"
 include "thrift/annotation/cpp.thrift"
 include "thrift/annotation/thrift.thrift"
+include "thrift/annotation/python.thrift"
 include "thrift/test/python_capi/thrift_dep.thrift"
 include "thrift/test/python_capi/serialized_dep.thrift"
 include "thrift/lib/thrift/id.thrift"
@@ -231,4 +232,16 @@ struct Float32 {
   1: float scalar;
   2: list<float> vector;
   3: list<list<float>> matrix;
+}
+
+// This library is NOT compiled with `enable_isset_deprecated_unsafe`, so the
+// `@python.EnableUnsafeIssetInspection` annotation is the sole reason this
+// struct's thrift-python data holder reserves element 0 for the isset byte
+// array. Exercises the capi Constructor (C++ -> Python) for an annotation-only
+// isset struct.
+@python.EnableUnsafeIssetInspection
+struct CapiIssetInspectionStruct {
+  1: i32 first;
+  2: i32 second;
+  3: i32 third;
 }

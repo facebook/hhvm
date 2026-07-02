@@ -221,7 +221,7 @@ cdef class StructInfo:
     cdef bint enable_get_locally_set_fields
     cdef bint enable_isset_deprecated
     # Tuple index of the first field value: 1 when the data holder reserves
-    # element 0 for the isset byte array (enable_isset_deprecated), else 0.
+    # element 0 for the isset byte array (enable_get_locally_set_fields), else 0.
     # Precomputed once so field access/set is a branch-free `index + N`.
     cdef int16_t field_start_index
     cdef void _fill_struct_info(self) except *

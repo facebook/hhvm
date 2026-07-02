@@ -572,22 +572,22 @@ cdef class StructInfo:
             Initialized by calling `_fill_struct_info()`.
     """
 
-    def __cinit__(self, name: str, fields, bint enable_isset_deprecated=False):
+    def __cinit__(self, name: str, fields, bint enable_get_locally_set_fields=False):
         """
         Stores information for a Thrift Struct class with the given name.
 
         Args:
             name: Name of the Thrift Struct (as specified in IDL)
             fields (tuple[FieldInfo, ...]): Field spec tuples.
-            enable_isset_deprecated: whether the struct's thrift_library enabled
-                `isset_DEPRECATED`. When true, the immutable data holder reserves
-                element 0 for an isset byte array; otherwise it has no isset
-                header (and fields start at index 0). Must be known here because
-                it determines the C++ data-holder layout (field offsets).
+            enable_get_locally_set_fields: whether the struct supports
+                `get_locally_set_fields`. When true, the immutable data holder
+                reserves element 0 for an isset byte array; otherwise it has no
+                isset header (and fields start at index 0). Must be known here
+                because it determines the C++ data-holder layout (field offsets).
         """
         self.fields = fields
-        self.enable_isset_deprecated = enable_isset_deprecated
-        self.field_start_index = 1 if enable_isset_deprecated else 0
+        self.enable_get_locally_set_fields = enable_get_locally_set_fields
+        self.field_start_index = 1 if enable_get_locally_set_fields else 0
         cdef int16_t num_fields = len(fields)
         self.cpp_obj = make_unique[cDynamicStructInfo](
             PyUnicode_AsUTF8(name),
@@ -595,7 +595,7 @@ cdef class StructInfo:
             False, # isMutable
             (
                 cInternalDataLayout.kStructWithDeprecatedIsset
-                if enable_isset_deprecated
+                if enable_get_locally_set_fields
                 else cInternalDataLayout.kStruct
             ),
         )
@@ -2209,8 +2209,7 @@ class StructMeta(type):
 
         cdef bint enable_get_locally_set_fields = dct.pop('_fbthrift_enable_get_locally_set_fields', False)
         cdef bint enable_isset_deprecated = dct.pop('_fbthrift_enable_isset_deprecated', False)
-        cdef StructInfo struct_info = StructInfo(cls_name, fields, enable_isset_deprecated)
-        struct_info.enable_get_locally_set_fields = enable_get_locally_set_fields
+        cdef StructInfo struct_info = StructInfo(cls_name, fields, enable_get_locally_set_fields)
         struct_info.enable_isset_deprecated = enable_isset_deprecated
         dct["_fbthrift_struct_info"] = struct_info
 
@@ -2228,7 +2227,7 @@ class StructMeta(type):
             field_name = field_info.py_name
             if _is_primitive_field(field_info):
                 descriptor = _StructPrimitiveField(
-                    field_index, field_name, 1 if enable_isset_deprecated else 0
+                    field_index, field_name, 1 if enable_get_locally_set_fields else 0
                 )
             else:
                 descriptor = _make_non_primitive_property(

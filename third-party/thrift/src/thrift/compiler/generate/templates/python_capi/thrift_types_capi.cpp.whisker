@@ -210,12 +210,12 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         {{struct:cpp_name}}, {{> common/namespace_tag }}>>::operator()(
     [[maybe_unused]] const {{struct:cpp_name}}& val) {
   {{^struct:union?}}
-  {{#struct:enable_isset_deprecated?}}
+  {{#struct:enable_get_locally_set_fields?}}
   StrongRef fbthrift_data(createStructTupleWithDeprecatedIsset({{struct:num_fields}}));
-  {{/struct:enable_isset_deprecated?}}
-  {{^struct:enable_isset_deprecated?}}
+  {{/struct:enable_get_locally_set_fields?}}
+  {{^struct:enable_get_locally_set_fields?}}
   StrongRef fbthrift_data(createStructTuple({{struct:num_fields}}));
-  {{/struct:enable_isset_deprecated?}}
+  {{/struct:enable_get_locally_set_fields?}}
   {{#each (array.enumerate struct:fields) as |field_index field|}}
   StrongRef _fbthrift__{{field.name}}(
     Constructor<{{field.marshal_type}}>{}
@@ -230,7 +230,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
   } else
   {{/field.optional?}}
   if (!_fbthrift__{{field.name}} ||
-      {{#struct:enable_isset_deprecated?}}setStructFieldIssetDeprecated{{/struct:enable_isset_deprecated?}}{{^struct:enable_isset_deprecated?}}setStructField{{/struct:enable_isset_deprecated?}}(
+      {{#struct:enable_get_locally_set_fields?}}setStructFieldIssetDeprecated{{/struct:enable_get_locally_set_fields?}}{{^struct:enable_get_locally_set_fields?}}setStructField{{/struct:enable_get_locally_set_fields?}}(
           *fbthrift_data,
           _fbthrift__{{struct:py_name}}__tuple_pos[{{field_index}}],
           *_fbthrift__{{field.name}}) == -1) {

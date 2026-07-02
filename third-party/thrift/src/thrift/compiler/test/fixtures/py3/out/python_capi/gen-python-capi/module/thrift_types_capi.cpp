@@ -35,7 +35,7 @@ bool ensure_module_imported() {
     0, 1, 2, 3
   };
   static constexpr std::int16_t _fbthrift__IssetInspectionStruct__tuple_pos[3] = {
-    0, 1, 2
+    1, 2, 3
   };
   static constexpr std::int16_t _fbthrift__HiddenException__tuple_pos[1] = {
     0
@@ -657,12 +657,12 @@ PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::py3::si
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::py3::simple::IssetInspectionStruct, ::module::NamespaceTag>>::operator()(
     [[maybe_unused]] const ::py3::simple::IssetInspectionStruct& val) {
-  StrongRef fbthrift_data(createStructTuple(3));
+  StrongRef fbthrift_data(createStructTupleWithDeprecatedIsset(3));
   StrongRef _fbthrift__int_field(
     Constructor<int32_t>{}
     .constructFrom(val.int_field_ref()));
   if (!_fbthrift__int_field ||
-      setStructField(
+      setStructFieldIssetDeprecated(
           *fbthrift_data,
           _fbthrift__IssetInspectionStruct__tuple_pos[0],
           *_fbthrift__int_field) == -1) {
@@ -679,7 +679,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
       Py_None);
   } else
   if (!_fbthrift__opt_str_field ||
-      setStructField(
+      setStructFieldIssetDeprecated(
           *fbthrift_data,
           _fbthrift__IssetInspectionStruct__tuple_pos[1],
           *_fbthrift__opt_str_field) == -1) {
@@ -689,7 +689,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     Constructor<bool>{}
     .constructFrom(val.bool_field_ref()));
   if (!_fbthrift__bool_field ||
-      setStructField(
+      setStructFieldIssetDeprecated(
           *fbthrift_data,
           _fbthrift__IssetInspectionStruct__tuple_pos[2],
           *_fbthrift__bool_field) == -1) {

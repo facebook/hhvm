@@ -25,7 +25,11 @@ from folly.iobuf import IOBuf
 from parameterized import parameterized
 from thrift.python.exceptions import GeneratedError, ProtocolError
 from thrift.python.serializer import deserialize, Protocol, serialize, serialize_iobuf
-from thrift.python.types import Struct as PythonStruct, StructOrUnion
+from thrift.python.types import (
+    get_locally_set_fields,
+    Struct as PythonStruct,
+    StructOrUnion,
+)
 from thrift.test.python_capi.containers.thrift_types import (
     TemplateLists,
     TemplateMaps,
@@ -35,6 +39,7 @@ from thrift.test.python_capi.isset.thrift_types import IssetEmpty, IssetStruct
 from thrift.test.python_capi.module.thrift_types import (
     AdaptedFields,
     AnnoyingEnum,
+    CapiIssetInspectionStruct,
     ComposeStruct,
     DoubledPair,
     EmptyStruct,
@@ -284,67 +289,92 @@ class PythonCapiRoundtrip(PythonCapiFixture):
             # pyre-ignore[6]
             fixture.roundtrip_EmptyStruct(MyStruct())
 
+    def _assert_locally_set_fields(
+        self, struct: PythonStruct, expected: frozenset[str]
+    ) -> None:
+        # `get_locally_set_fields` and `isset_DEPRECATED` must agree: the True
+        # keys of the isset dict equal the locally-set-fields frozenset. This
+        # asserts the two APIs behave identically, aside from the return type.
+        self.assertEqual(get_locally_set_fields(struct), expected)
+        isset = isset_DEPRECATED(struct)
+        self.assertEqual(
+            frozenset(name for name, is_set in isset.items() if is_set),
+            expected,
+        )
+
     @parameterized.expand(
         [
-            # name, original, expected local isset, expected isset after C++ -> Python
+            # name, original, expected local fields, expected fields after C++ -> Python
             (
-                "all_set",
+                "all_present",
                 IssetStruct(unqualified_int=5, optional_int=7, optional_str="x"),
-                {"unqualified_int": True, "optional_int": True, "optional_str": True},
-                {"unqualified_int": True, "optional_int": True, "optional_str": True},
+                frozenset({"unqualified_int", "optional_int", "optional_str"}),
+                frozenset({"unqualified_int", "optional_int", "optional_str"}),
             ),
             (
-                "unqualified_set_optionals_unset",
+                "unqualified_present_optionals_absent",
                 IssetStruct(unqualified_int=5),
-                {"unqualified_int": True, "optional_int": False, "optional_str": False},
-                {"unqualified_int": True, "optional_int": False, "optional_str": False},
+                frozenset({"unqualified_int"}),
+                frozenset({"unqualified_int"}),
             ),
-            # The interesting case: an unqualified field left unset reads isset
-            # False locally, but the Constructor (C++ -> Python) always marks it
-            # set, to match deserialization behavior.
+            # The interesting case: an unqualified field left unset is absent
+            # locally, but the Constructor (C++ -> Python) always marks it
+            # present, to match deserialization behavior.
             (
-                "unqualified_unset_promoted_to_set",
+                "unqualified_absent_promoted_to_present",
                 IssetStruct(),
-                {
-                    "unqualified_int": False,
-                    "optional_int": False,
-                    "optional_str": False,
-                },
-                {"unqualified_int": True, "optional_int": False, "optional_str": False},
+                frozenset(),
+                frozenset({"unqualified_int"}),
             ),
             (
-                "optional_set_unqualified_unset_promoted",
+                "optional_present_unqualified_absent_promoted",
                 IssetStruct(optional_int=7),
-                {"unqualified_int": False, "optional_int": True, "optional_str": False},
-                {"unqualified_int": True, "optional_int": True, "optional_str": False},
+                frozenset({"optional_int"}),
+                frozenset({"unqualified_int", "optional_int"}),
             ),
         ]
     )
-    def test_roundtrip_isset_constructor(
+    def test_roundtrip_locally_set_fields_constructor(
         self,
         _name: str,
         original: IssetStruct,
-        expected_local_isset: typing.Dict[str, bool],
-        expected_roundtrip_isset: typing.Dict[str, bool],
+        expected_local_fields: frozenset[str],
+        expected_roundtrip_fields: frozenset[str],
     ) -> None:
         # `roundtrip_*` returns a value built by the C++ -> Python Constructor.
         # `IssetStruct` is compiled with `enable_isset_deprecated_unsafe`, so its
-        # isset state is readable via `isset_DEPRECATED()`. This is the only
-        # coverage of the isset-enabled capi Constructor (C++ -> Python) path.
-        self.assertEqual(isset_DEPRECATED(original), expected_local_isset)
+        # locally set fields reflect its generated presence state. This is the only
+        # coverage of the locally-set-fields capi Constructor (C++ -> Python) path.
+        self._assert_locally_set_fields(original, expected_local_fields)
 
         built = fixture.roundtrip_IssetStruct(original)
         # Field values survive the round-trip.
         self.assertEqual(built.unqualified_int, original.unqualified_int)
         self.assertEqual(built.optional_int, original.optional_int)
         self.assertEqual(built.optional_str, original.optional_str)
-        # isset reflects the Constructor's view of presence.
-        self.assertEqual(isset_DEPRECATED(built), expected_roundtrip_isset)
+        # Locally set fields reflect the Constructor's view of presence.
+        self._assert_locally_set_fields(built, expected_roundtrip_fields)
 
-    def test_roundtrip_isset_empty(self) -> None:
-        # An isset-enabled fieldless struct round-trips through the Constructor
-        # (the data holder is a single-element tuple holding only the isset array).
+    def test_roundtrip_locally_set_fields_empty(self) -> None:
+        # A locally-set-fields-enabled fieldless struct round-trips through the
+        # Constructor.
         self.assertEqual(IssetEmpty(), fixture.roundtrip_IssetEmpty(IssetEmpty()))
+
+    def test_roundtrip_annotation_only_isset_struct(self) -> None:
+        # `CapiIssetInspectionStruct` has `@python.EnableUnsafeIssetInspection`
+        # but its library is NOT compiled with `enable_isset_deprecated_unsafe`,
+        # so the annotation alone makes the thrift-python data holder reserve
+        # element 0 for the isset byte array. The capi Constructor (C++ -> Python)
+        # must therefore write field values at tuple positions 1..N, not 0..N-1.
+        # Regression test: before the capi generator keyed its tuple layout on
+        # `get_locally_set_fields` (option OR annotation) rather than the option
+        # only, this roundtrip corrupted the tuple.
+        original = CapiIssetInspectionStruct(first=1, second=2, third=3)
+        built = fixture.roundtrip_CapiIssetInspectionStruct(original)
+        self.assertEqual(built.first, 1)
+        self.assertEqual(built.second, 2)
+        self.assertEqual(built.third, 3)
+        self.assertEqual(built, original)
 
     def test_roundtrip_TypeError(self) -> None:
         with self.assertRaises(TypeError):

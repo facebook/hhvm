@@ -1013,9 +1013,10 @@ class t_mstch_python_prototypes_generator : public t_whisker_generator {
           self.has_structured_annotation(kPythonDisableFieldCacheUri);
     });
     def.property(
-        "enable_get_locally_set_fields?", [](const t_structured& self) {
-          return self.has_structured_annotation(
-              kPythonEnableUnsafeIssetInspectionUri);
+        "enable_get_locally_set_fields?", [this](const t_structured& self) {
+          return has_compiler_option("enable_isset_deprecated_unsafe") ||
+              self.has_structured_annotation(
+                  kPythonEnableUnsafeIssetInspectionUri);
         });
     def.property("enable_isset_deprecated?", [this](const t_structured& self) {
       return has_compiler_option("enable_isset_deprecated_unsafe") ||

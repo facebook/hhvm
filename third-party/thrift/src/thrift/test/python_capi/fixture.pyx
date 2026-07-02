@@ -36,6 +36,7 @@ cdef extern from "thrift/test/python_capi/gen-cpp2/module_types.h" namespace "th
     cppclass VapidStruct
     cppclass SomeBinary
     cppclass Float32
+    cppclass CapiIssetInspectionStruct
 
 cdef extern from "thrift/test/python_capi/gen-python-capi/containers/thrift_types_capi.h":
     cppclass TemplateNs "thrift__test__python_capi__containers::NamespaceTag" 
@@ -120,6 +121,9 @@ def roundtrip_SomeBinary(object x):
 
 def roundtrip_Float32(object x):
     return __shim__roundtrip[Float32, ModuleNs](x)
+
+def roundtrip_CapiIssetInspectionStruct(object x):
+    return __shim__roundtrip[CapiIssetInspectionStruct, ModuleNs](x)
 
 def roundtrip_IssetStruct(object x):
     return __shim__roundtrip[IssetStruct, IssetNs](x)

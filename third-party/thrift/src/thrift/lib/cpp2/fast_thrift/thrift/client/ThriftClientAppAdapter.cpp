@@ -91,7 +91,12 @@ ThriftClientAppAdapter::onRead(
       apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE)
       << "Unsupported frame type: " << static_cast<int>(response.streamType);
 
-  handler(handleRequestResponse(std::move(response), protocolId_));
+  // Read stats before `response` is consumed by handleRequestResponse.
+  const apache::thrift::RpcTransportStats rpcTransportStats =
+      response.rpcTransportStats;
+  handler(
+      handleRequestResponse(std::move(response), protocolId_),
+      rpcTransportStats);
   return apache::thrift::fast_thrift::channel_pipeline::Result::Success;
 }
 
@@ -166,7 +171,8 @@ void ThriftClientAppAdapter::handleMissingPipeline(
       folly::makeUnexpected(
           folly::make_exception_wrapper<apache::thrift::TApplicationException>(
               apache::thrift::TApplicationException::INTERNAL_ERROR,
-              "Pipeline not set")));
+              "Pipeline not set")),
+      apache::thrift::RpcTransportStats{});
 }
 
 void ThriftClientAppAdapter::handleNullContext() noexcept {
@@ -175,7 +181,9 @@ void ThriftClientAppAdapter::handleNullContext() noexcept {
 
 void ThriftClientAppAdapter::handleResponseError(
     RequestResponseHandler handler, folly::exception_wrapper ew) noexcept {
-  handler(folly::makeUnexpected(std::move(ew)));
+  handler(
+      folly::makeUnexpected(std::move(ew)),
+      apache::thrift::RpcTransportStats{});
 }
 
 void ThriftClientAppAdapter::handleNotOpen(ThriftRequestMessage msg) noexcept {
@@ -192,7 +200,8 @@ void ThriftClientAppAdapter::handleNotOpen(ThriftRequestMessage msg) noexcept {
                 lastError_ ? fmt::format(
                                  "Connection not open: {}",
                                  lastError_.what().toStdString())
-                           : "Connection not open")));
+                           : "Connection not open")),
+        apache::thrift::RpcTransportStats{});
   }
 }
 

@@ -24,6 +24,7 @@
 
 #include <folly/ExceptionWrapper.h>
 
+#include <chrono>
 #include <cstdint>
 #include <limits>
 
@@ -89,6 +90,25 @@ struct RocketResponseError {
 };
 
 /**
+ * RocketStats - Transport-level per-request stats observable at the rocket
+ * layer. Sizes are wire bytes (post-compression for data); latencies are
+ * measured at the transport boundary. The thrift layer translates these into
+ * an `apache::thrift::RpcTransportStats` at the pipeline bridge — rocket code
+ * carries no thrift types.
+ *
+ * Zero on any field means "not measured" for that field on this response.
+ */
+struct RocketStats {
+  uint32_t requestWireSizeBytes{0};
+  uint32_t requestMetadataAndPayloadSizeBytes{0};
+  uint32_t responseWireSizeBytes{0};
+  uint32_t responseMetadataAndPayloadSizeBytes{0};
+
+  std::chrono::nanoseconds requestWriteLatency{0};
+  std::chrono::nanoseconds responseRoundTripLatency{0};
+};
+
+/**
  * RocketResponseMessage - Inbound response message.
  *
  * `payload` is a CompactVariant of the parsed wire frame and an in-process
@@ -100,6 +120,10 @@ struct RocketResponseError {
  * this response belongs to. Stamped by StreamStateHandler from its per-
  * stream map; downstream per-pattern handlers (RequestResponse, Stream,
  * ...) use it as a stateless dispatch key.
+ *
+ * `stats` rides alongside the response, populated by RocketClientStatsHandler
+ * as the response travels inbound. The bridge reads it when converting to the
+ * thrift response message.
  */
 struct RocketResponseMessage {
   apache::thrift::fast_thrift::CompactVariant<
@@ -112,6 +136,8 @@ struct RocketResponseMessage {
   /// The originating REQUEST_* frame type for this response's stream.
   apache::thrift::fast_thrift::frame::FrameType streamType{
       apache::thrift::fast_thrift::frame::FrameType::RESERVED};
+
+  RocketStats stats{};
 };
 
 } // namespace apache::thrift::fast_thrift::rocket

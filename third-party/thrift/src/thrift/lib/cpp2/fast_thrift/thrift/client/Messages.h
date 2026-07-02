@@ -17,6 +17,7 @@
 #pragma once
 
 #include <folly/ExceptionWrapper.h>
+#include <thrift/lib/cpp2/async/RpcTransportStats.h>
 #include <thrift/lib/cpp2/fast_thrift/common/CompactVariant.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/FrameType.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/Messages.h>
@@ -99,6 +100,11 @@ struct ThriftResponseMessage {
   apache::thrift::fast_thrift::rocket::TypeErasedPtr requestContext;
   apache::thrift::fast_thrift::frame::FrameType streamType{
       apache::thrift::fast_thrift::frame::FrameType::RESERVED};
+
+  // Transport-level per-request stats, converted from the rocket layer's
+  // RocketStats at the pipeline bridge. The app adapter delivers it to the
+  // response handler.
+  apache::thrift::RpcTransportStats rpcTransportStats{};
 };
 #pragma pack(pop)
 

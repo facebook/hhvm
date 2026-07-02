@@ -24,6 +24,7 @@
 #include <folly/Function.h>
 #include <folly/io/IOBuf.h>
 #include <thrift/lib/cpp2/async/RpcOptions.h>
+#include <thrift/lib/cpp2/async/RpcTransportStats.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Common.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/EndpointAdapter.h>
 
@@ -36,13 +37,16 @@ namespace apache::thrift::fast_thrift::thrift::client {
  * error, undeclared exception, pipeline error, etc.) receives an
  * exception_wrapper. Always called on the adapter's EventBase thread.
  *
+ * The second argument carries the transport-level per-request stats. It is
+ * populated on the success path; on early-failure paths (no pipeline, write
+ * error, etc.) it is default-constructed (all fields zero).
+ *
  * Response metadata is consumed and discarded by the adapter — generated
- * code only ever sees the data IOBuf or an exception_wrapper.
+ * code only ever sees the data IOBuf (or an exception_wrapper) and the stats.
  */
-using RequestResponseHandler =
-    folly::Function<void(folly::Expected<
-                         std::unique_ptr<folly::IOBuf>,
-                         folly::exception_wrapper>&&) noexcept>;
+using RequestResponseHandler = folly::Function<void(
+    folly::Expected<std::unique_ptr<folly::IOBuf>, folly::exception_wrapper>&&,
+    const apache::thrift::RpcTransportStats&) noexcept>;
 
 /**
  * ClientInboundAppAdapter — client-side inbound endpoint concept.

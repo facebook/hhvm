@@ -211,8 +211,9 @@ TEST_F(ThriftClientAppAdapterTest, OnMessageRoutesToHandler) {
     sendBasicRequest(
         client.adapter(),
         [&](folly::Expected<
-            std::unique_ptr<folly::IOBuf>,
-            folly::exception_wrapper>&& result) noexcept {
+                std::unique_ptr<folly::IOBuf>,
+                folly::exception_wrapper>&& result,
+            const apache::thrift::RpcTransportStats&) noexcept {
           EXPECT_TRUE(result.hasValue());
           handlerCalled = true;
           if (result.value()) {
@@ -259,14 +260,16 @@ TEST_F(ThriftClientAppAdapterTest, EachRequestGetsUniqueUserContext) {
         return Result::Success;
       });
 
-  evb_->runInEventBaseThreadAndWait(
-      [&] { sendBasicRequest(client.adapter(), [](auto&&) noexcept {}); });
+  evb_->runInEventBaseThreadAndWait([&] {
+    sendBasicRequest(client.adapter(), [](auto&&, const auto&) noexcept {});
+  });
 
   ASSERT_EQ(capturedUserContexts.size(), 1u);
   EXPECT_NE(capturedUserContexts[0], nullptr);
 
-  evb_->runInEventBaseThreadAndWait(
-      [&] { sendBasicRequest(client.adapter(), [](auto&&) noexcept {}); });
+  evb_->runInEventBaseThreadAndWait([&] {
+    sendBasicRequest(client.adapter(), [](auto&&, const auto&) noexcept {});
+  });
 
   ASSERT_EQ(capturedUserContexts.size(), 2u);
   EXPECT_NE(capturedUserContexts[1], nullptr);
@@ -297,7 +300,7 @@ TEST_F(ThriftClientAppAdapterTest, OffEventBaseThreadSchedulesWrite) {
         return Result::Success;
       });
 
-  sendBasicRequest(client.adapter(), [](auto&&) noexcept {});
+  sendBasicRequest(client.adapter(), [](auto&&, const auto&) noexcept {});
 
   // Drain the EB to let the scheduled lambda run.
   evb_->runInEventBaseThreadAndWait([] {});
@@ -342,7 +345,7 @@ TEST_F(ThriftClientAppAdapterTest, SendRequestResponseBuildsRequestMessage) {
         std::string_view{"myMethod"},
         apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
         folly::IOBuf::copyBuffer("payload-data"),
-        [](auto&&) noexcept {});
+        [](auto&&, const auto&) noexcept {});
   });
 
   ASSERT_NE(capturedMetadata, nullptr);
@@ -382,8 +385,9 @@ TEST_F(
       apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
       folly::IOBuf::copyBuffer("data"),
       [&](folly::Expected<
-          std::unique_ptr<folly::IOBuf>,
-          folly::exception_wrapper>&& result) noexcept {
+              std::unique_ptr<folly::IOBuf>,
+              folly::exception_wrapper>&& result,
+          const apache::thrift::RpcTransportStats&) noexcept {
         ASSERT_TRUE(result.hasError());
         errorReceived = true;
         capturedError = std::move(result.error());

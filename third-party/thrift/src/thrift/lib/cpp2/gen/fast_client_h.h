@@ -70,7 +70,9 @@ class FastClientBase {
         [&baton, &response](
             folly::Expected<
                 std::unique_ptr<folly::IOBuf>,
-                folly::exception_wrapper>&& result) mutable noexcept {
+                folly::exception_wrapper>&& result,
+            const apache::thrift::
+                RpcTransportStats& /*rpcTransportStats*/) mutable noexcept {
           response = std::move(result);
           baton.post();
         });
@@ -121,9 +123,14 @@ class FastClientBase {
          protocolId = adapter_->getProtocolId()](
             folly::Expected<
                 std::unique_ptr<folly::IOBuf>,
-                folly::exception_wrapper>&& result) mutable noexcept {
+                folly::exception_wrapper>&& result,
+            const apache::thrift::RpcTransportStats&
+                rpcTransportStats) mutable noexcept {
           handleCallbackResponse(
-              std::move(clientCallback), protocolId, std::move(result));
+              std::move(clientCallback),
+              protocolId,
+              std::move(result),
+              rpcTransportStats);
         });
   }
 
@@ -134,7 +141,8 @@ class FastClientBase {
       apache::thrift::RequestClientCallback::Ptr callback,
       uint16_t protocolId,
       folly::Expected<std::unique_ptr<folly::IOBuf>, folly::exception_wrapper>&&
-          result) noexcept {
+          result,
+      const apache::thrift::RpcTransportStats& rpcTransportStats) noexcept {
     auto* raw = callback.release();
     if (result.hasError()) {
       raw->onResponseError(std::move(result.error()));
@@ -148,7 +156,7 @@ class FastClientBase {
             apache::thrift::SerializedResponse(std::move(result.value())),
             nullptr,
             nullptr,
-            {}));
+            rpcTransportStats));
   }
 };
 

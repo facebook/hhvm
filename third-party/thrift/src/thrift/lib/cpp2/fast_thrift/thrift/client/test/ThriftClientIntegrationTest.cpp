@@ -39,6 +39,7 @@
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientFrameCodecHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientRequestResponseHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientSetupFrameHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientStatsHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientStreamStateHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/Messages.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/ThriftClientAppAdapter.h>
@@ -74,6 +75,7 @@ HANDLER_TAG(rocket_client_frame_codec_handler);
 HANDLER_TAG(rocket_client_setup_handler);
 HANDLER_TAG(rocket_client_request_response_handler);
 HANDLER_TAG(rocket_client_connection_error_handler);
+HANDLER_TAG(rocket_client_stats_handler);
 HANDLER_TAG(rocket_client_stream_state_handler);
 HANDLER_TAG(thrift_client_metadata_push_handler);
 HANDLER_TAG(thrift_client_checksum_handler);
@@ -204,6 +206,9 @@ class ThriftClientChannelIntegrationTest : public ::testing::Test {
             .addNextInbound<apache::thrift::fast_thrift::rocket::client::
                                 handler::RocketClientConnectionErrorHandler>(
                 rocket_client_connection_error_handler_tag)
+            .addNextInbound<apache::thrift::fast_thrift::rocket::client::
+                                handler::RocketClientStatsHandler>(
+                rocket_client_stats_handler_tag)
             .addNextDuplex<apache::thrift::fast_thrift::rocket::client::
                                handler::RocketClientStreamStateHandler>(
                 rocket_client_stream_state_handler_tag)
@@ -1197,7 +1202,9 @@ class IntegrationTestClient {
         [promise = std::move(promise)](
             folly::Expected<
                 std::unique_ptr<folly::IOBuf>,
-                folly::exception_wrapper>&& result) mutable noexcept {
+                folly::exception_wrapper>&& result,
+            const apache::thrift::
+                RpcTransportStats& /*rpcTransportStats*/) mutable noexcept {
           if (result.hasError()) {
             promise.setException(std::move(result.error()));
           } else {
@@ -1283,6 +1290,9 @@ class ThriftClientAppAdapterIntegrationTest : public ::testing::Test {
             .addNextInbound<apache::thrift::fast_thrift::rocket::client::
                                 handler::RocketClientConnectionErrorHandler>(
                 rocket_client_connection_error_handler_tag)
+            .addNextInbound<apache::thrift::fast_thrift::rocket::client::
+                                handler::RocketClientStatsHandler>(
+                rocket_client_stats_handler_tag)
             .addNextDuplex<apache::thrift::fast_thrift::rocket::client::
                                handler::RocketClientStreamStateHandler>(
                 rocket_client_stream_state_handler_tag)
@@ -1449,6 +1459,59 @@ TEST_F(
   ASSERT_TRUE(future.isReady());
   auto response = std::move(future).value();
   ASSERT_NE(response, nullptr);
+}
+
+TEST_F(
+    ThriftClientAppAdapterIntegrationTest, ResponseStatsDeliveredToCallback) {
+  setupPipeline();
+
+  auto metadataBuf = serializeResponseMetadata(
+      createBasicResponseMetadata(),
+      apache::thrift::fast_thrift::rocket::server::MetadataProtocol::BINARY);
+  const uint32_t metadataLen =
+      static_cast<uint32_t>(metadataBuf->computeChainDataLength());
+  const std::string dataStr = "response payload";
+  const uint32_t dataLen = static_cast<uint32_t>(dataStr.size());
+
+  bool handlerCalled = false;
+  bool hadValue = false;
+  apache::thrift::RpcTransportStats capturedStats;
+
+  apache::thrift::RpcOptions options;
+  client_.adapter().sendRequestResponse(
+      options,
+      std::string_view{"method"},
+      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
+      folly::IOBuf::copyBuffer("request"),
+      [&](folly::Expected<
+              std::unique_ptr<folly::IOBuf>,
+              folly::exception_wrapper>&& result,
+          const apache::thrift::RpcTransportStats& stats) noexcept {
+        handlerCalled = true;
+        hadValue = result.hasValue();
+        capturedStats = stats;
+      });
+
+  evb_.loopOnce();
+
+  auto requestFrame = getWrittenFrame();
+  ASSERT_NE(requestFrame, nullptr);
+  auto parsedRequest = parseWrittenFrame(std::move(requestFrame));
+  const uint32_t streamId = parsedRequest.streamId();
+
+  injectFrame(createPayloadResponse(
+      streamId, std::move(metadataBuf), folly::IOBuf::copyBuffer(dataStr)));
+
+  evb_.loopOnce();
+  evb_.loopOnce();
+
+  ASSERT_TRUE(handlerCalled);
+  ASSERT_TRUE(hadValue);
+  // The rocket stats handler stamps the response wire sizes off the parsed
+  // frame; the bridge forwards them to the callback as RpcTransportStats.
+  EXPECT_EQ(capturedStats.responseWireSizeBytes, dataLen);
+  EXPECT_EQ(
+      capturedStats.responseMetadataAndPayloadSizeBytes, metadataLen + dataLen);
 }
 
 // =============================================================================

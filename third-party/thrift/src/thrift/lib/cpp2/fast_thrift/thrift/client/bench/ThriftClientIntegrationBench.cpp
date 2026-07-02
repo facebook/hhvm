@@ -377,7 +377,7 @@ class BenchAppAdapterClient {
         std::string_view{"method"},
         apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
         std::move(data),
-        [](auto&&) noexcept {});
+        [](auto&&, const auto&) noexcept {});
   }
 
  private:

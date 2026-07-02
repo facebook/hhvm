@@ -169,6 +169,7 @@ class ThriftClientTransportAdapter {
         .payload = {},
         .requestContext = std::move(response.requestContext),
         .streamType = response.streamType,
+        .rpcTransportStats = toRpcTransportStats(response.stats),
     };
 
     if (FOLLY_UNLIKELY(response.payload.is<rocket::RocketResponseError>())) {
@@ -263,6 +264,7 @@ class ThriftClientTransportAdapter {
                   .ew = folly::exception_wrapper(std::current_exception())},
           .requestContext = std::move(request.requestContext),
           .streamType = frame::FrameType::REQUEST_RESPONSE,
+          .rpcTransportStats = {},
       };
       return pipeline_->fireRead(
           channel_pipeline::erase_and_box(std::move(errMsg)));
@@ -315,6 +317,23 @@ class ThriftClientTransportAdapter {
   }
 
  private:
+  // Translate the rocket layer's transport stats into the thrift-layer
+  // RpcTransportStats. The uncompressed *SerializedSizeBytes fields are a
+  // thrift-layer concept the rocket layer cannot observe; they stay zero.
+  static apache::thrift::RpcTransportStats toRpcTransportStats(
+      const rocket::RocketStats& s) noexcept {
+    apache::thrift::RpcTransportStats out;
+    out.requestWireSizeBytes = s.requestWireSizeBytes;
+    out.requestMetadataAndPayloadSizeBytes =
+        s.requestMetadataAndPayloadSizeBytes;
+    out.responseWireSizeBytes = s.responseWireSizeBytes;
+    out.responseMetadataAndPayloadSizeBytes =
+        s.responseMetadataAndPayloadSizeBytes;
+    out.requestWriteLatency = s.requestWriteLatency;
+    out.responseRoundTripLatency = s.responseRoundTripLatency;
+    return out;
+  }
+
   // Connection came up — activate the thrift pipeline so handlers can
   // react. Idempotent in connected_; reactivate after disconnect works.
   void onConnect() noexcept {

@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include <memory>
+
 #include <thrift/lib/cpp2/dynamic/ServiceDescriptor.h>
 
 namespace apache::thrift::dynamic {

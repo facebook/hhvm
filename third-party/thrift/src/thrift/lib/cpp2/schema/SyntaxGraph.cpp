@@ -1490,11 +1490,8 @@ void collectSvcFunctions(
 
 class ServiceDescriptorFacade final : public dynamic::ServiceDescriptor {
  public:
-  ServiceDescriptorFacade(
-      const SyntaxGraph& graph,
-      const ServiceNode& service,
-      std::shared_ptr<const type_system::TypeSystem> typeSystem)
-      : typeSystem_(std::move(typeSystem)),
+  ServiceDescriptorFacade(const SyntaxGraph& graph, const ServiceNode& service)
+      : typeSystem_(graph.asTypeSystem()),
         serviceName_(service.definition().name()),
         serviceUri_(service.uri()),
         annotations_(
@@ -1505,16 +1502,16 @@ class ServiceDescriptorFacade final : public dynamic::ServiceDescriptor {
   std::string_view serviceName() const override { return serviceName_; }
   std::string_view serviceUri() const { return serviceUri_; }
   folly::span<const Function> functions() const override { return functions_; }
-  std::shared_ptr<const type_system::TypeSystem> getTypeSystem()
-      const override {
-    return typeSystem_;
-  }
   folly::span<const dynamic::DynamicValue> annotations() const override {
     return annotations_;
   }
 
  private:
-  std::shared_ptr<const type_system::TypeSystem> typeSystem_;
+  const type_system::TypeSystem& typeSystem() const override {
+    return typeSystem_;
+  }
+
+  const type_system::TypeSystem& typeSystem_;
   std::string serviceName_;
   std::string serviceUri_;
   std::vector<Function> functions_;
@@ -1524,7 +1521,10 @@ class ServiceDescriptorFacade final : public dynamic::ServiceDescriptor {
 class ServiceCatalogFacade final : public dynamic::ServiceCatalog {
  public:
   explicit ServiceCatalogFacade(const SyntaxGraph& graph) {
-    auto typeSystem = graph.typeSystemPtr();
+    // Ensure the TypeSystemFacade is initialized, so that it can be used to
+    // refer to types in the service definitions.
+    graph.asTypeSystem();
+
     for (const auto program : graph.programs()) {
       for (const auto definition : program->definitions()) {
         if (!definition->isService()) {
@@ -1537,8 +1537,7 @@ class ServiceCatalogFacade final : public dynamic::ServiceCatalog {
         if (svc.uri().empty() || byUri_.contains(svc.uri())) {
           continue;
         }
-        auto desc =
-            std::make_unique<ServiceDescriptorFacade>(graph, svc, typeSystem);
+        auto desc = std::make_unique<ServiceDescriptorFacade>(graph, svc);
         byUri_.emplace(desc->serviceUri(), desc.get());
         services_.push_back(std::move(desc));
       }
@@ -1582,19 +1581,13 @@ const type_system::TypeSystem& SyntaxGraph::asTypeSystem() const {
           resolver_.get().unwrap())) {
     auto facade = typeSystemFacade_.wlock();
     if (!*facade) {
-      *facade = std::make_shared<TypeSystemFacade>(*resolver);
+      *facade = std::make_unique<TypeSystemFacade>(*resolver);
     }
     const type_system::TypeSystem* ts = facade->get();
     return *ts;
   }
   folly::throw_exception<std::runtime_error>(
       "SyntaxGraph instance does not support URI-based lookup");
-}
-
-std::shared_ptr<const type_system::TypeSystem> SyntaxGraph::typeSystemPtr()
-    const {
-  asTypeSystem();
-  return *typeSystemFacade_.rlock();
 }
 
 const dynamic::ServiceCatalog& SyntaxGraph::asServiceCatalog() const {

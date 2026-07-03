@@ -228,14 +228,6 @@ TEST_F(SyntaxGraphServiceDescriptorTest, FunctionNotFound) {
   EXPECT_THROW(catalog_->getFunction("nonexistent"), std::invalid_argument);
 }
 
-TEST_F(SyntaxGraphServiceDescriptorTest, GetTypeSystem) {
-  auto ts = catalog_->getTypeSystem();
-  ASSERT_NE(ts, nullptr);
-  auto knownUris = ts->getKnownUris();
-  ASSERT_TRUE(knownUris.has_value());
-  EXPECT_FALSE(knownUris->empty());
-}
-
 TEST_F(SyntaxGraphServiceDescriptorTest, FunctionsCount) {
   EXPECT_EQ(catalog_->functions().size(), 8);
 }
@@ -388,12 +380,6 @@ TEST_F(ServiceDescriptorBuilderTest, BuildWithAnnotations) {
   ASSERT_EQ(fn.exceptions[0].annotations.size(), 1);
   EXPECT_EQ(
       fn.exceptions[0].annotations[0], DynamicValue::makeString("ex.anno"));
-}
-
-TEST_F(ServiceDescriptorBuilderTest, GetTypeSystem) {
-  ServiceDescriptorBuilder builder(typeSystem_, "Svc");
-  auto catalog = builder.build();
-  EXPECT_EQ(catalog->getTypeSystem(), typeSystem_);
 }
 
 } // namespace

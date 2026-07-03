@@ -24,6 +24,10 @@
 #include <folly/container/span.h>
 #include <thrift/lib/cpp2/dynamic/DynamicValue.h>
 
+namespace apache::thrift::type_system {
+class SerializableServiceCatalog;
+} // namespace apache::thrift::type_system
+
 namespace apache::thrift::dynamic {
 
 enum class FunctionQualifier {
@@ -94,12 +98,16 @@ class ServiceDescriptor {
 
   virtual std::string_view serviceName() const = 0;
   virtual folly::span<const Function> functions() const = 0;
-  virtual std::shared_ptr<const type_system::TypeSystem> getTypeSystem()
-      const = 0;
   // Structured annotations on the service definition itself.
   virtual folly::span<const DynamicValue> annotations() const = 0;
 
+  virtual const type_system::TypeSystem& typeSystem() const = 0;
+
   const Function& getFunction(std::string_view name) const;
+
+ private:
+  friend type_system::SerializableServiceCatalog toSerializable(
+      const ServiceDescriptor& descriptor, type_system::UriView serviceUri);
 };
 
 } // namespace apache::thrift::dynamic

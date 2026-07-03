@@ -201,17 +201,5 @@ TEST_F(ServiceDescriptorSerializationTest, ServiceNotFound) {
       std::invalid_argument);
 }
 
-TEST_F(ServiceDescriptorSerializationTest, TypeSystemAvailable) {
-  ServiceDescriptorBuilder builder(typeSystem_, "Svc");
-  builder.addFunction("f").setResponseType(type_system::TypeSystem::I32());
-
-  auto original = builder.build();
-  auto serialized = toSerializable(*original, "test.com/Svc");
-  auto deserialized = fromSerializable(std::move(serialized), "test.com/Svc");
-
-  auto ts = deserialized->getTypeSystem();
-  ASSERT_NE(ts, nullptr);
-}
-
 } // namespace
 } // namespace apache::thrift::dynamic

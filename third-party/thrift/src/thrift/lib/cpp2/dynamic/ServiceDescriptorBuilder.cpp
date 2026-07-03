@@ -35,16 +35,15 @@ class BuiltServiceDescriptor final : public ServiceDescriptor {
   std::string_view serviceName() const override { return serviceName_; }
   folly::span<const Function> functions() const override { return functions_; }
 
-  std::shared_ptr<const type_system::TypeSystem> getTypeSystem()
-      const override {
-    return typeSystem_;
-  }
-
   folly::span<const DynamicValue> annotations() const override {
     return annotations_;
   }
 
  private:
+  const type_system::TypeSystem& typeSystem() const override {
+    return *typeSystem_;
+  }
+
   std::shared_ptr<const type_system::TypeSystem> typeSystem_;
   std::string serviceName_;
   std::vector<Function> functions_;

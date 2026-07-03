@@ -204,10 +204,8 @@ folly::span<const DynamicValue> SyntaxGraphServiceDescriptor::annotations()
   return annotations_;
 }
 
-std::shared_ptr<const TypeSystem> SyntaxGraphServiceDescriptor::getTypeSystem()
-    const {
-  return std::shared_ptr<const TypeSystem>(
-      syntaxGraph_, &syntaxGraph_->asTypeSystem());
+const TypeSystem& SyntaxGraphServiceDescriptor::typeSystem() const {
+  return syntaxGraph_->asTypeSystem();
 }
 
 } // namespace apache::thrift::dynamic

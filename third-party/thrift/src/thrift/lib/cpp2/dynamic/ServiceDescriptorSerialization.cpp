@@ -43,15 +43,13 @@ class DeserializedServiceDescriptor final : public ServiceDescriptor {
   std::string_view serviceName() const override { return serviceName_; }
   folly::span<const Function> functions() const override { return functions_; }
 
-  std::shared_ptr<const TypeSystem> getTypeSystem() const override {
-    return typeSystem_;
-  }
-
   folly::span<const DynamicValue> annotations() const override {
     return annotations_;
   }
 
  private:
+  const TypeSystem& typeSystem() const override { return *typeSystem_; }
+
   std::shared_ptr<const TypeSystem> typeSystem_;
   std::string serviceName_;
   std::vector<Function> functions_;
@@ -412,7 +410,7 @@ std::string_view extractServiceName(type_system::UriView uri) {
 
 type_system::SerializableServiceCatalog toSerializable(
     const ServiceDescriptor& descriptor, type_system::UriView serviceUri) {
-  const auto& typeSystem = *descriptor.getTypeSystem();
+  const auto& typeSystem = descriptor.typeSystem();
 
   auto builder = SerializableTypeSystemBuilder::withoutSourceInfo(typeSystem);
   for (const auto& fn : descriptor.functions()) {

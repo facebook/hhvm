@@ -417,7 +417,22 @@ abstract class ThriftClientBase implements IThriftClient {
               // @lint-ignore-every AWAIT_IN_LOOP chunks are processed
               // sequentially from the stream
               await $handler->genBeforeStream($name);
-              $next = await $stream_gen->next();
+              // This wall time operation is required for low level IO calls or errors
+              // will be logged or possibly thrown. Do not put more than one statement in this try block
+              // TODO: this WTO (and the follow-up incrDuration) would ideally
+              // live in TServiceRouterChannel::genSendRequestStreamResponse
+              // (close to the raw I/O source), so the SR service name is
+              // available for dynostats attribution and non-SR channels (e.g.
+              // TFaasStatefulAsyncHandler::genWaitStream) don't pay for
+              // wrapping. Would require a www wrapper around
+              // TAsyncChannelStreamResponse whose gen() wraps each next() in a
+              // (SR)WallTimeOperation. See D110460989 review discussion.
+              $timer = WallTimeOperation::begin();
+              try {
+                $next = await $stream_gen->next();
+              } finally {
+                $timer->end();
+              }
               if ($next !== null) {
                 list($_, $chunk) = $next;
                 await $handler->genAfterStream<TStreamType>($name, $chunk);

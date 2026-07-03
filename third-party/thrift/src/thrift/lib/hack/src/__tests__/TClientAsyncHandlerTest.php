@@ -454,6 +454,39 @@ final class TClientAsyncHandlerIntegrationTest extends WWWTest {
     })->toThrow(example_StreamException::class, 'stream error');
   }
 
+  // Stream: verifies exception in stream payload propagates through the
+  // hooks-enabled closure (which wraps $stream_gen->next() in a
+  // WallTimeOperation try/finally)
+  public async function testStreamExceptionPropagationWithHooksEnabled(
+  ): Awaitable<void> {
+    MockJustKnobs::setBool('www/thrift:use_stream_async_handler_hooks', true);
+
+    $recv_protocol = new TCompactProtocolAccelerated(new TMemoryBuffer());
+    $send_protocol = new TCompactProtocolAccelerated(new TMemoryBuffer());
+
+    $handler = new TestStreamExceptionHandler(
+      $recv_protocol,
+      $send_protocol,
+      example_ResponseStruct::fromShape(shape('text' => 'ok')),
+    );
+
+    $client =
+      new ExampleStreamingServiceAsyncClient($recv_protocol, $send_protocol);
+    $client->setAsyncHandler($handler);
+
+    $response_and_stream = await $client->testStream(
+      example_RequestStruct::fromShape(shape('text' => 'req')),
+    );
+
+    expect($response_and_stream->response?->text)->toEqual('ok');
+
+    expect(async () ==> {
+      foreach ($response_and_stream->stream await as $_chunk) {
+        // Should throw on first iteration
+      }
+    })->toThrow(example_StreamException::class, 'stream error');
+  }
+
   // Sink: verifies client payloads reach handler and final response returns
   public async function testSinkIntegration(): Awaitable<void> {
     $recv_protocol = new TCompactProtocolAccelerated(new TMemoryBuffer());

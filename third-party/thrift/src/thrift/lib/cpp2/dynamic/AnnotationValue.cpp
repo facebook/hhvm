@@ -29,6 +29,7 @@
 #include <thrift/lib/cpp2/dynamic/Set.h>
 #include <thrift/lib/cpp2/dynamic/String.h>
 #include <thrift/lib/cpp2/dynamic/Struct.h>
+#include <thrift/lib/cpp2/dynamic/TypeSystem.h>
 #include <thrift/lib/cpp2/dynamic/Union.h>
 
 namespace apache::thrift::dynamic {
@@ -325,6 +326,36 @@ DynamicValue fromSerializableRecord(
       throw std::runtime_error("Any-typed annotation values are not supported");
   }
   throw std::runtime_error("Unsupported annotation value type");
+}
+
+folly::F14FastMap<std::string, type_system::SerializableRecordUnion>
+serializeAnnotations(folly::span<const DynamicValue> annotations) {
+  folly::F14FastMap<std::string, type_system::SerializableRecordUnion> result;
+  result.reserve(annotations.size());
+  for (const auto& annotation : annotations) {
+    const auto& uri = annotation.type().asStruct().uri();
+    if (uri.starts_with("facebook.com/thrift/annotation/")) {
+      continue;
+    }
+    result.emplace(
+        uri, SerializableRecord::toThrift(toSerializableRecord(annotation)));
+  }
+  return result;
+}
+
+std::vector<DynamicValue> deserializeAnnotations(
+    const folly::F14FastMap<std::string, type_system::SerializableRecordUnion>&
+        annotations,
+    const type_system::TypeSystem& typeSystem) {
+  std::vector<DynamicValue> result;
+  result.reserve(annotations.size());
+  for (const auto& [uri, record] : annotations) {
+    result.push_back(fromSerializableRecord(
+        SerializableRecord::fromThrift(
+            type_system::SerializableRecordUnion(record)),
+        typeSystem.UserDefined(uri)));
+  }
+  return result;
 }
 
 } // namespace apache::thrift::dynamic

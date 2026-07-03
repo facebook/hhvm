@@ -16,6 +16,11 @@
 
 #pragma once
 
+#include <vector>
+
+#include <folly/container/F14Map.h>
+#include <folly/container/span.h>
+
 #include <thrift/lib/cpp2/dynamic/DynamicValue.h>
 #include <thrift/lib/cpp2/dynamic/SerializableRecord.h>
 
@@ -43,5 +48,21 @@ type_system::SerializableRecord toSerializableRecord(DynamicConstRef value);
 DynamicValue fromSerializableRecord(
     const type_system::SerializableRecord& record,
     const type_system::TypeRef& type);
+
+// Serialize annotation values into the wire annotations map, keyed by each
+// value's annotation-struct URI. Annotations under
+// facebook.com/thrift/annotation/ are omitted, matching the type-system
+// serializer: their definitions are not bundled into the type universe, so the
+// keys would not resolve.
+folly::F14FastMap<std::string, type_system::SerializableRecordUnion>
+serializeAnnotations(folly::span<const DynamicValue> annotations);
+
+// Reconstruct annotation values from the wire annotations map produced by
+// serializeAnnotations: each URI key is resolved against typeSystem to type its
+// record, which is then rebuilt into a schema-typed DynamicValue.
+std::vector<DynamicValue> deserializeAnnotations(
+    const folly::F14FastMap<std::string, type_system::SerializableRecordUnion>&
+        annotations,
+    const type_system::TypeSystem& typeSystem);
 
 } // namespace apache::thrift::dynamic

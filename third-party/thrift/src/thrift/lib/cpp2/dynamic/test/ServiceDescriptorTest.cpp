@@ -214,6 +214,16 @@ TEST_F(SyntaxGraphServiceDescriptorTest, ToSerializableRecordStruct) {
       5);
 }
 
+TEST_F(SyntaxGraphServiceDescriptorTest, SerializeAnnotations) {
+  const auto& fn = catalog_->getFunction("annotated");
+  auto serialized = serializeAnnotations(fn.annotations);
+  const auto& uri = fn.annotations[0].type().asStruct().uri();
+  ASSERT_TRUE(serialized.contains(uri));
+  auto wire = serialized.at(uri);
+  auto record = type_system::SerializableRecord::fromThrift(std::move(wire));
+  EXPECT_EQ(record.asFieldSet().at(FieldId{1}).asText(), "hello");
+}
+
 TEST_F(SyntaxGraphServiceDescriptorTest, FunctionNotFound) {
   EXPECT_THROW(catalog_->getFunction("nonexistent"), std::invalid_argument);
 }

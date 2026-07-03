@@ -61,6 +61,15 @@ impl ::fbthrift::GetTypeNameType for self::Foo {
     }
 }
 
+impl ::fbthrift::ThriftStruct for self::Foo {
+    fn fields() -> &'static [::fbthrift::Field] {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("MyInt", ::fbthrift::TType::I64, 1),
+        ];
+        FIELDS
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::Foo
 where
     P: ::fbthrift::ProtocolWriter,

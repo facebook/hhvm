@@ -541,6 +541,17 @@ impl ::fbthrift::GetTypeNameType for self::Val {
     }
 }
 
+impl ::fbthrift::ThriftStruct for self::Val {
+    fn fields() -> &'static [::fbthrift::Field] {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("intVal", ::fbthrift::TType::I32, 2),
+            ::fbthrift::Field::new("strVal", ::fbthrift::TType::String, 1),
+            ::fbthrift::Field::new("typedefValue", ::fbthrift::TType::Map, 9),
+        ];
+        FIELDS
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::Val
 where
     P: ::fbthrift::ProtocolWriter,
@@ -945,6 +956,15 @@ impl ::fbthrift::GetTType for self::NonCopyableStruct {
 impl ::fbthrift::GetTypeNameType for self::NonCopyableStruct {
     fn type_name_type() -> fbthrift::TypeNameType {
         ::fbthrift::TypeNameType::StructType
+    }
+}
+
+impl ::fbthrift::ThriftStruct for self::NonCopyableStruct {
+    fn fields() -> &'static [::fbthrift::Field] {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("num", ::fbthrift::TType::I64, 1),
+        ];
+        FIELDS
     }
 }
 

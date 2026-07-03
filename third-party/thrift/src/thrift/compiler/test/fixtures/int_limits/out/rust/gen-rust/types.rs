@@ -78,6 +78,22 @@ impl ::fbthrift::GetTypeNameType for self::Limits {
     }
 }
 
+impl ::fbthrift::ThriftStruct for self::Limits {
+    fn fields() -> &'static [::fbthrift::Field] {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("max_byte_field", ::fbthrift::TType::Byte, 7),
+            ::fbthrift::Field::new("max_i16_field", ::fbthrift::TType::I16, 5),
+            ::fbthrift::Field::new("max_i32_field", ::fbthrift::TType::I32, 3),
+            ::fbthrift::Field::new("max_i64_field", ::fbthrift::TType::I64, 1),
+            ::fbthrift::Field::new("min_byte_field", ::fbthrift::TType::Byte, 8),
+            ::fbthrift::Field::new("min_i16_field", ::fbthrift::TType::I16, 6),
+            ::fbthrift::Field::new("min_i32_field", ::fbthrift::TType::I32, 4),
+            ::fbthrift::Field::new("min_i64_field", ::fbthrift::TType::I64, 2),
+        ];
+        FIELDS
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::Limits
 where
     P: ::fbthrift::ProtocolWriter,

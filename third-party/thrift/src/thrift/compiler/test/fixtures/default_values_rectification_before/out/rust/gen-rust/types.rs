@@ -74,6 +74,14 @@ impl ::fbthrift::GetTypeNameType for self::EmptyStruct {
     }
 }
 
+impl ::fbthrift::ThriftStruct for self::EmptyStruct {
+    fn fields() -> &'static [::fbthrift::Field] {
+        static FIELDS: &[::fbthrift::Field] = &[
+        ];
+        FIELDS
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::EmptyStruct
 where
     P: ::fbthrift::ProtocolWriter,
@@ -198,6 +206,22 @@ impl ::fbthrift::GetUri for self::TestStruct {
 impl ::fbthrift::GetTypeNameType for self::TestStruct {
     fn type_name_type() -> fbthrift::TypeNameType {
         ::fbthrift::TypeNameType::StructType
+    }
+}
+
+impl ::fbthrift::ThriftStruct for self::TestStruct {
+    fn fields() -> &'static [::fbthrift::Field] {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("optional_bool_field", ::fbthrift::TType::Bool, 6),
+            ::fbthrift::Field::new("optional_int_field", ::fbthrift::TType::I32, 5),
+            ::fbthrift::Field::new("optional_list_field", ::fbthrift::TType::List, 7),
+            ::fbthrift::Field::new("optional_struct_field", ::fbthrift::TType::Struct, 8),
+            ::fbthrift::Field::new("unqualified_bool_field", ::fbthrift::TType::Bool, 2),
+            ::fbthrift::Field::new("unqualified_int_field", ::fbthrift::TType::I32, 1),
+            ::fbthrift::Field::new("unqualified_list_field", ::fbthrift::TType::List, 3),
+            ::fbthrift::Field::new("unqualified_struct_field", ::fbthrift::TType::Struct, 4),
+        ];
+        FIELDS
     }
 }
 

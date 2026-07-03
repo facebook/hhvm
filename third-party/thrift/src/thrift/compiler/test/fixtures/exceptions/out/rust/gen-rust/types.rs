@@ -243,6 +243,15 @@ impl ::fbthrift::GetTypeNameType for self::Fiery {
     }
 }
 
+impl ::fbthrift::ThriftStruct for self::Fiery {
+    fn fields() -> &'static [::fbthrift::Field] {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("message", ::fbthrift::TType::String, 1),
+        ];
+        FIELDS
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::Fiery
 where
     P: ::fbthrift::ProtocolWriter,
@@ -379,6 +388,15 @@ impl ::fbthrift::GetTType for self::Serious {
 impl ::fbthrift::GetTypeNameType for self::Serious {
     fn type_name_type() -> fbthrift::TypeNameType {
         ::fbthrift::TypeNameType::StructType
+    }
+}
+
+impl ::fbthrift::ThriftStruct for self::Serious {
+    fn fields() -> &'static [::fbthrift::Field] {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("sonnet", ::fbthrift::TType::String, 1),
+        ];
+        FIELDS
     }
 }
 
@@ -531,6 +549,16 @@ impl ::fbthrift::GetTypeNameType for self::ComplexFieldNames {
     }
 }
 
+impl ::fbthrift::ThriftStruct for self::ComplexFieldNames {
+    fn fields() -> &'static [::fbthrift::Field] {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("error_message", ::fbthrift::TType::String, 1),
+            ::fbthrift::Field::new("internal_error_message", ::fbthrift::TType::String, 2),
+        ];
+        FIELDS
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::ComplexFieldNames
 where
     P: ::fbthrift::ProtocolWriter,
@@ -671,6 +699,16 @@ impl ::fbthrift::GetTType for self::CustomFieldNames {
 impl ::fbthrift::GetTypeNameType for self::CustomFieldNames {
     fn type_name_type() -> fbthrift::TypeNameType {
         ::fbthrift::TypeNameType::StructType
+    }
+}
+
+impl ::fbthrift::ThriftStruct for self::CustomFieldNames {
+    fn fields() -> &'static [::fbthrift::Field] {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("error_message", ::fbthrift::TType::String, 1),
+            ::fbthrift::Field::new("internal_error_message", ::fbthrift::TType::String, 2),
+        ];
+        FIELDS
     }
 }
 
@@ -843,6 +881,16 @@ impl ::fbthrift::GetTypeNameType for self::ExceptionWithPrimitiveField {
     }
 }
 
+impl ::fbthrift::ThriftStruct for self::ExceptionWithPrimitiveField {
+    fn fields() -> &'static [::fbthrift::Field] {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("error_code", ::fbthrift::TType::I32, 2),
+            ::fbthrift::Field::new("message", ::fbthrift::TType::String, 1),
+        ];
+        FIELDS
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::ExceptionWithPrimitiveField
 where
     P: ::fbthrift::ProtocolWriter,
@@ -986,6 +1034,16 @@ impl ::fbthrift::GetTypeNameType for self::ExceptionWithStructuredAnnotation {
     }
 }
 
+impl ::fbthrift::ThriftStruct for self::ExceptionWithStructuredAnnotation {
+    fn fields() -> &'static [::fbthrift::Field] {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("error_code", ::fbthrift::TType::I32, 2),
+            ::fbthrift::Field::new("message_field", ::fbthrift::TType::String, 1),
+        ];
+        FIELDS
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::ExceptionWithStructuredAnnotation
 where
     P: ::fbthrift::ProtocolWriter,
@@ -1122,6 +1180,14 @@ impl ::fbthrift::GetTType for self::Banal {
 impl ::fbthrift::GetTypeNameType for self::Banal {
     fn type_name_type() -> fbthrift::TypeNameType {
         ::fbthrift::TypeNameType::StructType
+    }
+}
+
+impl ::fbthrift::ThriftStruct for self::Banal {
+    fn fields() -> &'static [::fbthrift::Field] {
+        static FIELDS: &[::fbthrift::Field] = &[
+        ];
+        FIELDS
     }
 }
 

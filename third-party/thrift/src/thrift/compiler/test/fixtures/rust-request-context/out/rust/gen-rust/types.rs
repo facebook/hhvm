@@ -246,6 +246,18 @@ impl ::fbthrift::GetTypeNameType for self::MyStruct {
     }
 }
 
+impl ::fbthrift::ThriftStruct for self::MyStruct {
+    fn fields() -> &'static [::fbthrift::Field] {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("MyDataField", ::fbthrift::TType::Struct, 3),
+            ::fbthrift::Field::new("MyIntField", ::fbthrift::TType::I64, 1),
+            ::fbthrift::Field::new("MyStringField", ::fbthrift::TType::String, 2),
+            ::fbthrift::Field::new("myEnum", ::fbthrift::TType::I32, 4),
+        ];
+        FIELDS
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::MyStruct
 where
     P: ::fbthrift::ProtocolWriter,
@@ -394,6 +406,14 @@ impl ::fbthrift::GetTType for self::MyDataItem {
 impl ::fbthrift::GetTypeNameType for self::MyDataItem {
     fn type_name_type() -> fbthrift::TypeNameType {
         ::fbthrift::TypeNameType::StructType
+    }
+}
+
+impl ::fbthrift::ThriftStruct for self::MyDataItem {
+    fn fields() -> &'static [::fbthrift::Field] {
+        static FIELDS: &[::fbthrift::Field] = &[
+        ];
+        FIELDS
     }
 }
 
@@ -630,6 +650,14 @@ impl ::fbthrift::GetTType for self::MyException {
 impl ::fbthrift::GetTypeNameType for self::MyException {
     fn type_name_type() -> fbthrift::TypeNameType {
         ::fbthrift::TypeNameType::StructType
+    }
+}
+
+impl ::fbthrift::ThriftStruct for self::MyException {
+    fn fields() -> &'static [::fbthrift::Field] {
+        static FIELDS: &[::fbthrift::Field] = &[
+        ];
+        FIELDS
     }
 }
 

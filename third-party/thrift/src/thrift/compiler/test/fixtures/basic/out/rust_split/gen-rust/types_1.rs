@@ -207,6 +207,17 @@ impl ::fbthrift::GetTypeNameType for self::Containers {
     }
 }
 
+impl ::fbthrift::ThriftStruct for self::Containers {
+    fn fields() -> &'static [::fbthrift::Field] {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("I32List", ::fbthrift::TType::List, 1),
+            ::fbthrift::Field::new("StringSet", ::fbthrift::TType::Set, 2),
+            ::fbthrift::Field::new("StringToI64Map", ::fbthrift::TType::Map, 3),
+        ];
+        FIELDS
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::Containers
 where
     P: ::fbthrift::ProtocolWriter,

@@ -128,6 +128,15 @@ impl ::fbthrift::GetTypeNameType for self::BiDiSinkException {
     }
 }
 
+impl ::fbthrift::ThriftStruct for self::BiDiSinkException {
+    fn fields() -> &'static [::fbthrift::Field] {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("message", ::fbthrift::TType::String, 1),
+        ];
+        FIELDS
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::BiDiSinkException
 where
     P: ::fbthrift::ProtocolWriter,
@@ -245,6 +254,15 @@ impl ::fbthrift::GetTypeNameType for self::BiDiStreamException {
     }
 }
 
+impl ::fbthrift::ThriftStruct for self::BiDiStreamException {
+    fn fields() -> &'static [::fbthrift::Field] {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("message", ::fbthrift::TType::String, 1),
+        ];
+        FIELDS
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::BiDiStreamException
 where
     P: ::fbthrift::ProtocolWriter,
@@ -359,6 +377,15 @@ impl ::fbthrift::GetTType for self::BiDiMethodException {
 impl ::fbthrift::GetTypeNameType for self::BiDiMethodException {
     fn type_name_type() -> fbthrift::TypeNameType {
         ::fbthrift::TypeNameType::StructType
+    }
+}
+
+impl ::fbthrift::ThriftStruct for self::BiDiMethodException {
+    fn fields() -> &'static [::fbthrift::Field] {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("message", ::fbthrift::TType::String, 1),
+        ];
+        FIELDS
     }
 }
 

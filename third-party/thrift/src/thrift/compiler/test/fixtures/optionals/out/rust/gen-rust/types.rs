@@ -242,6 +242,18 @@ impl ::fbthrift::GetTypeNameType for self::Color {
     }
 }
 
+impl ::fbthrift::ThriftStruct for self::Color {
+    fn fields() -> &'static [::fbthrift::Field] {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("alpha", ::fbthrift::TType::Double, 4),
+            ::fbthrift::Field::new("blue", ::fbthrift::TType::Double, 3),
+            ::fbthrift::Field::new("green", ::fbthrift::TType::Double, 2),
+            ::fbthrift::Field::new("red", ::fbthrift::TType::Double, 1),
+        ];
+        FIELDS
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::Color
 where
     P: ::fbthrift::ProtocolWriter,
@@ -400,6 +412,19 @@ impl ::fbthrift::GetTType for self::Vehicle {
 impl ::fbthrift::GetTypeNameType for self::Vehicle {
     fn type_name_type() -> fbthrift::TypeNameType {
         ::fbthrift::TypeNameType::StructType
+    }
+}
+
+impl ::fbthrift::ThriftStruct for self::Vehicle {
+    fn fields() -> &'static [::fbthrift::Field] {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("color", ::fbthrift::TType::Struct, 1),
+            ::fbthrift::Field::new("description", ::fbthrift::TType::String, 3),
+            ::fbthrift::Field::new("hasAC", ::fbthrift::TType::Bool, 5),
+            ::fbthrift::Field::new("licensePlate", ::fbthrift::TType::String, 2),
+            ::fbthrift::Field::new("name", ::fbthrift::TType::String, 4),
+        ];
+        FIELDS
     }
 }
 
@@ -603,6 +628,24 @@ impl ::fbthrift::GetTType for self::Person {
 impl ::fbthrift::GetTypeNameType for self::Person {
     fn type_name_type() -> fbthrift::TypeNameType {
         ::fbthrift::TypeNameType::StructType
+    }
+}
+
+impl ::fbthrift::ThriftStruct for self::Person {
+    fn fields() -> &'static [::fbthrift::Field] {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("address", ::fbthrift::TType::String, 4),
+            ::fbthrift::Field::new("afraidOfAnimal", ::fbthrift::TType::I32, 9),
+            ::fbthrift::Field::new("age", ::fbthrift::TType::I16, 3),
+            ::fbthrift::Field::new("bestFriend", ::fbthrift::TType::I64, 7),
+            ::fbthrift::Field::new("favoriteColor", ::fbthrift::TType::Struct, 5),
+            ::fbthrift::Field::new("friends", ::fbthrift::TType::Set, 6),
+            ::fbthrift::Field::new("id", ::fbthrift::TType::I64, 1),
+            ::fbthrift::Field::new("name", ::fbthrift::TType::String, 2),
+            ::fbthrift::Field::new("petNames", ::fbthrift::TType::Map, 8),
+            ::fbthrift::Field::new("vehicles", ::fbthrift::TType::List, 10),
+        ];
+        FIELDS
     }
 }
 

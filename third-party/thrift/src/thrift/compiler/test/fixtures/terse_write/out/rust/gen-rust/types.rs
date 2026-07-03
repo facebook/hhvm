@@ -337,6 +337,14 @@ impl ::fbthrift::GetTypeNameType for self::MyStruct {
     }
 }
 
+impl ::fbthrift::ThriftStruct for self::MyStruct {
+    fn fields() -> &'static [::fbthrift::Field] {
+        static FIELDS: &[::fbthrift::Field] = &[
+        ];
+        FIELDS
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::MyStruct
 where
     P: ::fbthrift::ProtocolWriter,
@@ -719,6 +727,15 @@ impl ::fbthrift::GetTypeNameType for self::MyStructWithCustomDefault {
     }
 }
 
+impl ::fbthrift::ThriftStruct for self::MyStructWithCustomDefault {
+    fn fields() -> &'static [::fbthrift::Field] {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("field1", ::fbthrift::TType::I64, 1),
+        ];
+        FIELDS
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::MyStructWithCustomDefault
 where
     P: ::fbthrift::ProtocolWriter,
@@ -867,6 +884,29 @@ impl ::fbthrift::GetUri for self::StructLevelTerseStruct {
 impl ::fbthrift::GetTypeNameType for self::StructLevelTerseStruct {
     fn type_name_type() -> fbthrift::TypeNameType {
         ::fbthrift::TypeNameType::StructType
+    }
+}
+
+impl ::fbthrift::ThriftStruct for self::StructLevelTerseStruct {
+    fn fields() -> &'static [::fbthrift::Field] {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("binary_field", ::fbthrift::TType::String, 9),
+            ::fbthrift::Field::new("bool_field", ::fbthrift::TType::Bool, 1),
+            ::fbthrift::Field::new("byte_field", ::fbthrift::TType::Byte, 2),
+            ::fbthrift::Field::new("double_field", ::fbthrift::TType::Double, 7),
+            ::fbthrift::Field::new("enum_field", ::fbthrift::TType::I32, 10),
+            ::fbthrift::Field::new("float_field", ::fbthrift::TType::Float, 6),
+            ::fbthrift::Field::new("int_field", ::fbthrift::TType::I32, 4),
+            ::fbthrift::Field::new("list_field", ::fbthrift::TType::List, 11),
+            ::fbthrift::Field::new("long_field", ::fbthrift::TType::I64, 5),
+            ::fbthrift::Field::new("map_field", ::fbthrift::TType::Map, 13),
+            ::fbthrift::Field::new("set_field", ::fbthrift::TType::Set, 12),
+            ::fbthrift::Field::new("short_field", ::fbthrift::TType::I16, 3),
+            ::fbthrift::Field::new("string_field", ::fbthrift::TType::String, 8),
+            ::fbthrift::Field::new("struct_field", ::fbthrift::TType::Struct, 14),
+            ::fbthrift::Field::new("union_field", ::fbthrift::TType::Struct, 15),
+        ];
+        FIELDS
     }
 }
 
@@ -1225,6 +1265,44 @@ impl ::fbthrift::GetUri for self::FieldLevelTerseStruct {
 impl ::fbthrift::GetTypeNameType for self::FieldLevelTerseStruct {
     fn type_name_type() -> fbthrift::TypeNameType {
         ::fbthrift::TypeNameType::StructType
+    }
+}
+
+impl ::fbthrift::ThriftStruct for self::FieldLevelTerseStruct {
+    fn fields() -> &'static [::fbthrift::Field] {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("binary_field", ::fbthrift::TType::String, 23),
+            ::fbthrift::Field::new("bool_field", ::fbthrift::TType::Bool, 15),
+            ::fbthrift::Field::new("byte_field", ::fbthrift::TType::Byte, 16),
+            ::fbthrift::Field::new("double_field", ::fbthrift::TType::Double, 21),
+            ::fbthrift::Field::new("enum_field", ::fbthrift::TType::I32, 24),
+            ::fbthrift::Field::new("float_field", ::fbthrift::TType::Float, 20),
+            ::fbthrift::Field::new("int_field", ::fbthrift::TType::I32, 18),
+            ::fbthrift::Field::new("list_field", ::fbthrift::TType::List, 25),
+            ::fbthrift::Field::new("long_field", ::fbthrift::TType::I64, 19),
+            ::fbthrift::Field::new("map_field", ::fbthrift::TType::Map, 27),
+            ::fbthrift::Field::new("set_field", ::fbthrift::TType::Set, 26),
+            ::fbthrift::Field::new("short_field", ::fbthrift::TType::I16, 17),
+            ::fbthrift::Field::new("string_field", ::fbthrift::TType::String, 22),
+            ::fbthrift::Field::new("struct_field", ::fbthrift::TType::Struct, 28),
+            ::fbthrift::Field::new("terse_binary_field", ::fbthrift::TType::String, 9),
+            ::fbthrift::Field::new("terse_bool_field", ::fbthrift::TType::Bool, 1),
+            ::fbthrift::Field::new("terse_byte_field", ::fbthrift::TType::Byte, 2),
+            ::fbthrift::Field::new("terse_double_field", ::fbthrift::TType::Double, 7),
+            ::fbthrift::Field::new("terse_enum_field", ::fbthrift::TType::I32, 10),
+            ::fbthrift::Field::new("terse_float_field", ::fbthrift::TType::Float, 6),
+            ::fbthrift::Field::new("terse_int_field", ::fbthrift::TType::I32, 4),
+            ::fbthrift::Field::new("terse_list_field", ::fbthrift::TType::List, 11),
+            ::fbthrift::Field::new("terse_long_field", ::fbthrift::TType::I64, 5),
+            ::fbthrift::Field::new("terse_map_field", ::fbthrift::TType::Map, 13),
+            ::fbthrift::Field::new("terse_set_field", ::fbthrift::TType::Set, 12),
+            ::fbthrift::Field::new("terse_short_field", ::fbthrift::TType::I16, 3),
+            ::fbthrift::Field::new("terse_string_field", ::fbthrift::TType::String, 8),
+            ::fbthrift::Field::new("terse_struct_field", ::fbthrift::TType::Struct, 14),
+            ::fbthrift::Field::new("terse_union_field", ::fbthrift::TType::Struct, 29),
+            ::fbthrift::Field::new("union_field", ::fbthrift::TType::Struct, 30),
+        ];
+        FIELDS
     }
 }
 
@@ -1883,6 +1961,17 @@ impl ::fbthrift::GetTypeNameType for self::AdaptedFields {
     }
 }
 
+impl ::fbthrift::ThriftStruct for self::AdaptedFields {
+    fn fields() -> &'static [::fbthrift::Field] {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("field1", ::fbthrift::TType::I32, 1),
+            ::fbthrift::Field::new("field2", ::fbthrift::TType::I32, 2),
+            ::fbthrift::Field::new("field3", ::fbthrift::TType::I32, 3),
+        ];
+        FIELDS
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::AdaptedFields
 where
     P: ::fbthrift::ProtocolWriter,
@@ -2091,6 +2180,15 @@ impl ::fbthrift::GetUri for self::TerseException {
 impl ::fbthrift::GetTypeNameType for self::TerseException {
     fn type_name_type() -> fbthrift::TypeNameType {
         ::fbthrift::TypeNameType::StructType
+    }
+}
+
+impl ::fbthrift::ThriftStruct for self::TerseException {
+    fn fields() -> &'static [::fbthrift::Field] {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("msg", ::fbthrift::TType::String, 1),
+        ];
+        FIELDS
     }
 }
 

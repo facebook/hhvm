@@ -160,6 +160,21 @@ impl ::fbthrift::GetTypeNameType for self::MyStruct {
     }
 }
 
+impl ::fbthrift::ThriftStruct for self::MyStruct {
+    fn fields() -> &'static [::fbthrift::Field] {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("doublefloaty", ::fbthrift::TType::Double, 7),
+            ::fbthrift::Field::new("floaty", ::fbthrift::TType::Double, 6),
+            ::fbthrift::Field::new("inline_bin", ::fbthrift::TType::String, 3),
+            ::fbthrift::Field::new("inline_bytes", ::fbthrift::TType::String, 5),
+            ::fbthrift::Field::new("the_bin", ::fbthrift::TType::String, 2),
+            ::fbthrift::Field::new("the_bytes", ::fbthrift::TType::String, 4),
+            ::fbthrift::Field::new("the_map", ::fbthrift::TType::Map, 1),
+        ];
+        FIELDS
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::MyStruct
 where
     P: ::fbthrift::ProtocolWriter,

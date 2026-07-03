@@ -52,6 +52,15 @@ impl ::fbthrift::GetTypeNameType for self::ReservedKeyword {
     }
 }
 
+impl ::fbthrift::ThriftStruct for self::ReservedKeyword {
+    fn fields() -> &'static [::fbthrift::Field] {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("reserved_field", ::fbthrift::TType::I32, 1),
+        ];
+        FIELDS
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::ReservedKeyword
 where
     P: ::fbthrift::ProtocolWriter,

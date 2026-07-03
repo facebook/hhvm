@@ -474,6 +474,23 @@ impl ::fbthrift::GetTypeNameType for self::MyStruct {
     }
 }
 
+impl ::fbthrift::ThriftStruct for self::MyStruct {
+    fn fields() -> &'static [::fbthrift::Field] {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("MyDataField", ::fbthrift::TType::Struct, 3),
+            ::fbthrift::Field::new("MyIntField", ::fbthrift::TType::I64, 1),
+            ::fbthrift::Field::new("MyStringField", ::fbthrift::TType::String, 2),
+            ::fbthrift::Field::new("floatSet", ::fbthrift::TType::Set, 8),
+            ::fbthrift::Field::new("idempotent", ::fbthrift::TType::Bool, 7),
+            ::fbthrift::Field::new("myEnum", ::fbthrift::TType::I32, 4),
+            ::fbthrift::Field::new("no_hack_codegen_field", ::fbthrift::TType::String, 9),
+            ::fbthrift::Field::new("oneway", ::fbthrift::TType::Bool, 5),
+            ::fbthrift::Field::new("readonly", ::fbthrift::TType::Bool, 6),
+        ];
+        FIELDS
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::MyStruct
 where
     P: ::fbthrift::ProtocolWriter,
@@ -704,6 +721,17 @@ impl ::fbthrift::GetTypeNameType for self::Containers {
     }
 }
 
+impl ::fbthrift::ThriftStruct for self::Containers {
+    fn fields() -> &'static [::fbthrift::Field] {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("I32List", ::fbthrift::TType::List, 1),
+            ::fbthrift::Field::new("StringSet", ::fbthrift::TType::Set, 2),
+            ::fbthrift::Field::new("StringToI64Map", ::fbthrift::TType::Map, 3),
+        ];
+        FIELDS
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::Containers
 where
     P: ::fbthrift::ProtocolWriter,
@@ -840,6 +868,14 @@ impl ::fbthrift::GetTType for self::MyDataItem {
 impl ::fbthrift::GetTypeNameType for self::MyDataItem {
     fn type_name_type() -> fbthrift::TypeNameType {
         ::fbthrift::TypeNameType::StructType
+    }
+}
+
+impl ::fbthrift::ThriftStruct for self::MyDataItem {
+    fn fields() -> &'static [::fbthrift::Field] {
+        static FIELDS: &[::fbthrift::Field] = &[
+        ];
+        FIELDS
     }
 }
 
@@ -1099,6 +1135,18 @@ impl ::fbthrift::GetTypeNameType for self::MyException {
     }
 }
 
+impl ::fbthrift::ThriftStruct for self::MyException {
+    fn fields() -> &'static [::fbthrift::Field] {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("MyIntField", ::fbthrift::TType::I64, 1),
+            ::fbthrift::Field::new("MyStringField", ::fbthrift::TType::String, 2),
+            ::fbthrift::Field::new("myStruct", ::fbthrift::TType::Struct, 3),
+            ::fbthrift::Field::new("myUnion", ::fbthrift::TType::Struct, 4),
+        ];
+        FIELDS
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::MyException
 where
     P: ::fbthrift::ProtocolWriter,
@@ -1255,6 +1303,18 @@ impl ::fbthrift::GetTType for self::MyExceptionWithMessage {
 impl ::fbthrift::GetTypeNameType for self::MyExceptionWithMessage {
     fn type_name_type() -> fbthrift::TypeNameType {
         ::fbthrift::TypeNameType::StructType
+    }
+}
+
+impl ::fbthrift::ThriftStruct for self::MyExceptionWithMessage {
+    fn fields() -> &'static [::fbthrift::Field] {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("MyIntField", ::fbthrift::TType::I64, 1),
+            ::fbthrift::Field::new("MyStringField", ::fbthrift::TType::String, 2),
+            ::fbthrift::Field::new("myStruct", ::fbthrift::TType::Struct, 3),
+            ::fbthrift::Field::new("myUnion", ::fbthrift::TType::Struct, 4),
+        ];
+        FIELDS
     }
 }
 
@@ -1420,6 +1480,15 @@ impl ::fbthrift::GetTType for self::ReservedKeyword {
 impl ::fbthrift::GetTypeNameType for self::ReservedKeyword {
     fn type_name_type() -> fbthrift::TypeNameType {
         ::fbthrift::TypeNameType::StructType
+    }
+}
+
+impl ::fbthrift::ThriftStruct for self::ReservedKeyword {
+    fn fields() -> &'static [::fbthrift::Field] {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("reserved_field", ::fbthrift::TType::I32, 1),
+        ];
+        FIELDS
     }
 }
 

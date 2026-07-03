@@ -53,6 +53,15 @@ impl ::fbthrift::GetTypeNameType for self::WithCustomDerives {
     }
 }
 
+impl ::fbthrift::ThriftStruct for self::WithCustomDerives {
+    fn fields() -> &'static [::fbthrift::Field] {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("a", ::fbthrift::TType::Bool, 1),
+        ];
+        FIELDS
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::WithCustomDerives
 where
     P: ::fbthrift::ProtocolWriter,

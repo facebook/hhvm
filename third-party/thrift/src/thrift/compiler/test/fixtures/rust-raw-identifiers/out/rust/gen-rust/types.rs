@@ -58,6 +58,16 @@ impl ::fbthrift::GetTypeNameType for self::ThereAreNoPascalCaseKeywords {
     }
 }
 
+impl ::fbthrift::ThriftStruct for self::ThereAreNoPascalCaseKeywords {
+    fn fields() -> &'static [::fbthrift::Field] {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("return", ::fbthrift::TType::Bool, 1),
+            ::fbthrift::Field::new("super", ::fbthrift::TType::Bool, 2),
+        ];
+        FIELDS
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::ThereAreNoPascalCaseKeywords
 where
     P: ::fbthrift::ProtocolWriter,

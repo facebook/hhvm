@@ -86,6 +86,19 @@ impl ::fbthrift::GetTypeNameType for self::User {
     }
 }
 
+impl ::fbthrift::ThriftStruct for self::User {
+    fn fields() -> &'static [::fbthrift::Field] {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("email", ::fbthrift::TType::String, 4),
+            ::fbthrift::Field::new("email_address", ::fbthrift::TType::String, 5),
+            ::fbthrift::Field::new("full_name", ::fbthrift::TType::String, 3),
+            ::fbthrift::Field::new("id", ::fbthrift::TType::I64, 1),
+            ::fbthrift::Field::new("name", ::fbthrift::TType::String, 2),
+        ];
+        FIELDS
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::User
 where
     P: ::fbthrift::ProtocolWriter,

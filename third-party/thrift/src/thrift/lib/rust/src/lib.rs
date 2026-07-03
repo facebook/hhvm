@@ -120,6 +120,11 @@ pub use crate::type_name_type::GetTypeNameType;
 pub use crate::type_name_type::TypeNameType;
 pub use crate::uri::GetUri;
 
+pub trait ThriftStruct: Sized {
+    /// Returns the list of fields in this struct, in field-name order.
+    fn fields() -> &'static [Field];
+}
+
 pub trait ThriftEnum: Sized {
     fn enumerate() -> &'static [(Self, &'static str)];
 

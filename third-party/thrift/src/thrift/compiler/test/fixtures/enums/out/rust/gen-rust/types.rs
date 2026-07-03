@@ -1177,6 +1177,18 @@ impl ::fbthrift::GetTypeNameType for self::SomeStruct {
     }
 }
 
+impl ::fbthrift::ThriftStruct for self::SomeStruct {
+    fn fields() -> &'static [::fbthrift::Field] {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("fine", ::fbthrift::TType::I32, 2),
+            ::fbthrift::Field::new("questionable", ::fbthrift::TType::I32, 3),
+            ::fbthrift::Field::new("reasonable", ::fbthrift::TType::I32, 1),
+            ::fbthrift::Field::new("tags", ::fbthrift::TType::Set, 4),
+        ];
+        FIELDS
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::SomeStruct
 where
     P: ::fbthrift::ProtocolWriter,
@@ -1339,6 +1351,18 @@ impl ::fbthrift::GetUri for self::MyStruct {
 impl ::fbthrift::GetTypeNameType for self::MyStruct {
     fn type_name_type() -> fbthrift::TypeNameType {
         ::fbthrift::TypeNameType::StructType
+    }
+}
+
+impl ::fbthrift::ThriftStruct for self::MyStruct {
+    fn fields() -> &'static [::fbthrift::Field] {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("me1_t1", ::fbthrift::TType::I32, 4),
+            ::fbthrift::Field::new("me1_t2", ::fbthrift::TType::I32, 6),
+            ::fbthrift::Field::new("me2_3", ::fbthrift::TType::I32, 1),
+            ::fbthrift::Field::new("me3_n3", ::fbthrift::TType::I32, 2),
+        ];
+        FIELDS
     }
 }
 

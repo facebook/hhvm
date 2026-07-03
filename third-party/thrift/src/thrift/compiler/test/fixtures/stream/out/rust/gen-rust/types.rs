@@ -123,6 +123,14 @@ impl ::fbthrift::GetTypeNameType for self::FooStreamEx {
     }
 }
 
+impl ::fbthrift::ThriftStruct for self::FooStreamEx {
+    fn fields() -> &'static [::fbthrift::Field] {
+        static FIELDS: &[::fbthrift::Field] = &[
+        ];
+        FIELDS
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::FooStreamEx
 where
     P: ::fbthrift::ProtocolWriter,
@@ -226,6 +234,14 @@ impl ::fbthrift::GetTypeNameType for self::FooEx {
     }
 }
 
+impl ::fbthrift::ThriftStruct for self::FooEx {
+    fn fields() -> &'static [::fbthrift::Field] {
+        static FIELDS: &[::fbthrift::Field] = &[
+        ];
+        FIELDS
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::FooEx
 where
     P: ::fbthrift::ProtocolWriter,
@@ -326,6 +342,14 @@ impl ::fbthrift::GetTType for self::FooEx2 {
 impl ::fbthrift::GetTypeNameType for self::FooEx2 {
     fn type_name_type() -> fbthrift::TypeNameType {
         ::fbthrift::TypeNameType::StructType
+    }
+}
+
+impl ::fbthrift::ThriftStruct for self::FooEx2 {
+    fn fields() -> &'static [::fbthrift::Field] {
+        static FIELDS: &[::fbthrift::Field] = &[
+        ];
+        FIELDS
     }
 }
 

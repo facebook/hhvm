@@ -62,6 +62,18 @@ impl ::fbthrift::GetTypeNameType for self::Foo {
     }
 }
 
+impl ::fbthrift::ThriftStruct for self::Foo {
+    fn fields() -> &'static [::fbthrift::Field] {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("myBools", ::fbthrift::TType::List, 3),
+            ::fbthrift::Field::new("myInteger", ::fbthrift::TType::I32, 1),
+            ::fbthrift::Field::new("myNumbers", ::fbthrift::TType::List, 4),
+            ::fbthrift::Field::new("myString", ::fbthrift::TType::String, 2),
+        ];
+        FIELDS
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::Foo
 where
     P: ::fbthrift::ProtocolWriter,

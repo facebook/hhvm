@@ -172,6 +172,15 @@ impl ::fbthrift::GetTypeNameType for self::InitialResponse {
     }
 }
 
+impl ::fbthrift::ThriftStruct for self::InitialResponse {
+    fn fields() -> &'static [::fbthrift::Field] {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("content", ::fbthrift::TType::String, 1),
+        ];
+        FIELDS
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::InitialResponse
 where
     P: ::fbthrift::ProtocolWriter,
@@ -286,6 +295,15 @@ impl ::fbthrift::GetTType for self::FinalResponse {
 impl ::fbthrift::GetTypeNameType for self::FinalResponse {
     fn type_name_type() -> fbthrift::TypeNameType {
         ::fbthrift::TypeNameType::StructType
+    }
+}
+
+impl ::fbthrift::ThriftStruct for self::FinalResponse {
+    fn fields() -> &'static [::fbthrift::Field] {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("content", ::fbthrift::TType::String, 1),
+        ];
+        FIELDS
     }
 }
 
@@ -406,6 +424,15 @@ impl ::fbthrift::GetTypeNameType for self::SinkPayload {
     }
 }
 
+impl ::fbthrift::ThriftStruct for self::SinkPayload {
+    fn fields() -> &'static [::fbthrift::Field] {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("content", ::fbthrift::TType::String, 1),
+        ];
+        FIELDS
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::SinkPayload
 where
     P: ::fbthrift::ProtocolWriter,
@@ -520,6 +547,15 @@ impl ::fbthrift::GetTType for self::CompatibleWithKeywordSink {
 impl ::fbthrift::GetTypeNameType for self::CompatibleWithKeywordSink {
     fn type_name_type() -> fbthrift::TypeNameType {
         ::fbthrift::TypeNameType::StructType
+    }
+}
+
+impl ::fbthrift::ThriftStruct for self::CompatibleWithKeywordSink {
+    fn fields() -> &'static [::fbthrift::Field] {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("sink", ::fbthrift::TType::String, 1),
+        ];
+        FIELDS
     }
 }
 
@@ -640,6 +676,15 @@ impl ::fbthrift::GetTypeNameType for self::InitialException {
     }
 }
 
+impl ::fbthrift::ThriftStruct for self::InitialException {
+    fn fields() -> &'static [::fbthrift::Field] {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("reason", ::fbthrift::TType::String, 1),
+        ];
+        FIELDS
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::InitialException
 where
     P: ::fbthrift::ProtocolWriter,
@@ -757,6 +802,15 @@ impl ::fbthrift::GetTypeNameType for self::SinkException1 {
     }
 }
 
+impl ::fbthrift::ThriftStruct for self::SinkException1 {
+    fn fields() -> &'static [::fbthrift::Field] {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("reason", ::fbthrift::TType::String, 1),
+        ];
+        FIELDS
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::SinkException1
 where
     P: ::fbthrift::ProtocolWriter,
@@ -871,6 +925,15 @@ impl ::fbthrift::GetTType for self::SinkException2 {
 impl ::fbthrift::GetTypeNameType for self::SinkException2 {
     fn type_name_type() -> fbthrift::TypeNameType {
         ::fbthrift::TypeNameType::StructType
+    }
+}
+
+impl ::fbthrift::ThriftStruct for self::SinkException2 {
+    fn fields() -> &'static [::fbthrift::Field] {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("reason", ::fbthrift::TType::I64, 1),
+        ];
+        FIELDS
     }
 }
 

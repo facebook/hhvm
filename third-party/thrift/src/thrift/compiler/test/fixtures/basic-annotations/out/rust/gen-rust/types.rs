@@ -271,6 +271,15 @@ impl ::fbthrift::GetTypeNameType for self::MyStructNestedAnnotation {
     }
 }
 
+impl ::fbthrift::ThriftStruct for self::MyStructNestedAnnotation {
+    fn fields() -> &'static [::fbthrift::Field] {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("name", ::fbthrift::TType::String, 1),
+        ];
+        FIELDS
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::MyStructNestedAnnotation
 where
     P: ::fbthrift::ProtocolWriter,
@@ -515,6 +524,14 @@ impl ::fbthrift::GetTypeNameType for self::MyException {
     }
 }
 
+impl ::fbthrift::ThriftStruct for self::MyException {
+    fn fields() -> &'static [::fbthrift::Field] {
+        static FIELDS: &[::fbthrift::Field] = &[
+        ];
+        FIELDS
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::MyException
 where
     P: ::fbthrift::ProtocolWriter,
@@ -671,6 +688,23 @@ impl ::fbthrift::GetUri for self::MyStruct {
 impl ::fbthrift::GetTypeNameType for self::MyStruct {
     fn type_name_type() -> fbthrift::TypeNameType {
         ::fbthrift::TypeNameType::StructType
+    }
+}
+
+impl ::fbthrift::ThriftStruct for self::MyStruct {
+    fn fields() -> &'static [::fbthrift::Field] {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("abstract", ::fbthrift::TType::String, 1),
+            ::fbthrift::Field::new("annotation_with_quote", ::fbthrift::TType::String, 3),
+            ::fbthrift::Field::new("annotation_with_trailing_comma", ::fbthrift::TType::String, 5),
+            ::fbthrift::Field::new("class_", ::fbthrift::TType::String, 4),
+            ::fbthrift::Field::new("cpp_type_annotation", ::fbthrift::TType::List, 8),
+            ::fbthrift::Field::new("empty_annotations", ::fbthrift::TType::String, 6),
+            ::fbthrift::Field::new("major", ::fbthrift::TType::I64, 2),
+            ::fbthrift::Field::new("my_enum", ::fbthrift::TType::I32, 7),
+            ::fbthrift::Field::new("my_union", ::fbthrift::TType::Struct, 9),
+        ];
+        FIELDS
     }
 }
 
@@ -1134,6 +1168,16 @@ impl ::fbthrift::GetTType for self::SecretStruct {
 impl ::fbthrift::GetTypeNameType for self::SecretStruct {
     fn type_name_type() -> fbthrift::TypeNameType {
         ::fbthrift::TypeNameType::StructType
+    }
+}
+
+impl ::fbthrift::ThriftStruct for self::SecretStruct {
+    fn fields() -> &'static [::fbthrift::Field] {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("id", ::fbthrift::TType::I64, 1),
+            ::fbthrift::Field::new("password", ::fbthrift::TType::String, 2),
+        ];
+        FIELDS
     }
 }
 

@@ -102,6 +102,15 @@ impl ::fbthrift::GetTypeNameType for self::Fields {
     }
 }
 
+impl ::fbthrift::ThriftStruct for self::Fields {
+    fn fields() -> &'static [::fbthrift::Field] {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("injected_field", ::fbthrift::TType::String, 100),
+        ];
+        FIELDS
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::Fields
 where
     P: ::fbthrift::ProtocolWriter,
@@ -216,6 +225,15 @@ impl ::fbthrift::GetTType for self::FieldsInjectedToEmptyStruct {
 impl ::fbthrift::GetTypeNameType for self::FieldsInjectedToEmptyStruct {
     fn type_name_type() -> fbthrift::TypeNameType {
         ::fbthrift::TypeNameType::StructType
+    }
+}
+
+impl ::fbthrift::ThriftStruct for self::FieldsInjectedToEmptyStruct {
+    fn fields() -> &'static [::fbthrift::Field] {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("injected_field", ::fbthrift::TType::String, -1100),
+        ];
+        FIELDS
     }
 }
 
@@ -345,6 +363,16 @@ impl ::fbthrift::GetTType for self::FieldsInjectedToStruct {
 impl ::fbthrift::GetTypeNameType for self::FieldsInjectedToStruct {
     fn type_name_type() -> fbthrift::TypeNameType {
         ::fbthrift::TypeNameType::StructType
+    }
+}
+
+impl ::fbthrift::ThriftStruct for self::FieldsInjectedToStruct {
+    fn fields() -> &'static [::fbthrift::Field] {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("injected_field", ::fbthrift::TType::String, -1100),
+            ::fbthrift::Field::new("string_field", ::fbthrift::TType::String, 1),
+        ];
+        FIELDS
     }
 }
 
@@ -490,6 +518,18 @@ impl ::fbthrift::GetTType for self::FieldsInjectedWithIncludedStruct {
 impl ::fbthrift::GetTypeNameType for self::FieldsInjectedWithIncludedStruct {
     fn type_name_type() -> fbthrift::TypeNameType {
         ::fbthrift::TypeNameType::StructType
+    }
+}
+
+impl ::fbthrift::ThriftStruct for self::FieldsInjectedWithIncludedStruct {
+    fn fields() -> &'static [::fbthrift::Field] {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("injected_field", ::fbthrift::TType::String, -1100),
+            ::fbthrift::Field::new("injected_structured_annotation_field", ::fbthrift::TType::String, -1101),
+            ::fbthrift::Field::new("injected_unstructured_annotation_field", ::fbthrift::TType::String, -1102),
+            ::fbthrift::Field::new("string_field", ::fbthrift::TType::String, 1),
+        ];
+        FIELDS
     }
 }
 
@@ -683,6 +723,16 @@ impl ::fbthrift::GetTType for self::FieldsInjectedWithFieldsWithIncludedStruct {
 impl ::fbthrift::GetTypeNameType for self::FieldsInjectedWithFieldsWithIncludedStruct {
     fn type_name_type() -> fbthrift::TypeNameType {
         ::fbthrift::TypeNameType::StructType
+    }
+}
+
+impl ::fbthrift::ThriftStruct for self::FieldsInjectedWithFieldsWithIncludedStruct {
+    fn fields() -> &'static [::fbthrift::Field] {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("injected_field", ::fbthrift::TType::Struct, -1001),
+            ::fbthrift::Field::new("string_field", ::fbthrift::TType::String, 1),
+        ];
+        FIELDS
     }
 }
 

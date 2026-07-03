@@ -735,6 +735,15 @@ impl ::fbthrift::GetTypeNameType for self::T0 {
     }
 }
 
+impl ::fbthrift::ThriftStruct for self::T0 {
+    fn fields() -> &'static [::fbthrift::Field] {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("data", ::fbthrift::TType::Double, 1),
+        ];
+        FIELDS
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::T0
 where
     P: ::fbthrift::ProtocolWriter,
@@ -849,6 +858,15 @@ impl ::fbthrift::GetTType for self::T1 {
 impl ::fbthrift::GetTypeNameType for self::T1 {
     fn type_name_type() -> fbthrift::TypeNameType {
         ::fbthrift::TypeNameType::StructType
+    }
+}
+
+impl ::fbthrift::ThriftStruct for self::T1 {
+    fn fields() -> &'static [::fbthrift::Field] {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("data", ::fbthrift::TType::Double, 1),
+        ];
+        FIELDS
     }
 }
 
@@ -982,6 +1000,15 @@ impl ::fbthrift::GetTypeNameType for self::T2 {
     }
 }
 
+impl ::fbthrift::ThriftStruct for self::T2 {
+    fn fields() -> &'static [::fbthrift::Field] {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("data", ::fbthrift::TType::Map, 1),
+        ];
+        FIELDS
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::T2
 where
     P: ::fbthrift::ProtocolWriter,
@@ -1096,6 +1123,15 @@ impl ::fbthrift::GetTType for self::T3 {
 impl ::fbthrift::GetTypeNameType for self::T3 {
     fn type_name_type() -> fbthrift::TypeNameType {
         ::fbthrift::TypeNameType::StructType
+    }
+}
+
+impl ::fbthrift::ThriftStruct for self::T3 {
+    fn fields() -> &'static [::fbthrift::Field] {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("data", ::fbthrift::TType::Map, 1),
+        ];
+        FIELDS
     }
 }
 
@@ -1229,6 +1265,15 @@ impl ::fbthrift::GetTypeNameType for self::T4 {
     }
 }
 
+impl ::fbthrift::ThriftStruct for self::T4 {
+    fn fields() -> &'static [::fbthrift::Field] {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("data", ::fbthrift::TType::Map, 1),
+        ];
+        FIELDS
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::T4
 where
     P: ::fbthrift::ProtocolWriter,
@@ -1359,6 +1404,15 @@ impl ::fbthrift::GetTypeNameType for self::T5 {
     }
 }
 
+impl ::fbthrift::ThriftStruct for self::T5 {
+    fn fields() -> &'static [::fbthrift::Field] {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("data", ::fbthrift::TType::Map, 1),
+        ];
+        FIELDS
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::T5
 where
     P: ::fbthrift::ProtocolWriter,
@@ -1483,6 +1537,14 @@ impl ::fbthrift::GetTypeNameType for self::T6 {
     }
 }
 
+impl ::fbthrift::ThriftStruct for self::T6 {
+    fn fields() -> &'static [::fbthrift::Field] {
+        static FIELDS: &[::fbthrift::Field] = &[
+        ];
+        FIELDS
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::T6
 where
     P: ::fbthrift::ProtocolWriter,
@@ -1594,6 +1656,15 @@ impl ::fbthrift::GetTType for self::T7 {
 impl ::fbthrift::GetTypeNameType for self::T7 {
     fn type_name_type() -> fbthrift::TypeNameType {
         ::fbthrift::TypeNameType::StructType
+    }
+}
+
+impl ::fbthrift::ThriftStruct for self::T7 {
+    fn fields() -> &'static [::fbthrift::Field] {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("data", ::fbthrift::TType::I64, 1),
+        ];
+        FIELDS
     }
 }
 
@@ -1725,6 +1796,16 @@ impl ::fbthrift::GetTType for self::T8 {
 impl ::fbthrift::GetTypeNameType for self::T8 {
     fn type_name_type() -> fbthrift::TypeNameType {
         ::fbthrift::TypeNameType::StructType
+    }
+}
+
+impl ::fbthrift::ThriftStruct for self::T8 {
+    fn fields() -> &'static [::fbthrift::Field] {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("cppbox", ::fbthrift::TType::I64, 2),
+            ::fbthrift::Field::new("data", ::fbthrift::TType::I64, 1),
+        ];
+        FIELDS
     }
 }
 
@@ -1893,6 +1974,15 @@ impl ::fbthrift::GetTypeNameType for self::T9 {
     }
 }
 
+impl ::fbthrift::ThriftStruct for self::T9 {
+    fn fields() -> &'static [::fbthrift::Field] {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("data", ::fbthrift::TType::I64, 1),
+        ];
+        FIELDS
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::T9
 where
     P: ::fbthrift::ProtocolWriter,
@@ -2016,6 +2106,15 @@ impl ::fbthrift::GetTType for self::T12 {
 impl ::fbthrift::GetTypeNameType for self::T12 {
     fn type_name_type() -> fbthrift::TypeNameType {
         ::fbthrift::TypeNameType::StructType
+    }
+}
+
+impl ::fbthrift::ThriftStruct for self::T12 {
+    fn fields() -> &'static [::fbthrift::Field] {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("data", ::fbthrift::TType::I64, 1),
+        ];
+        FIELDS
     }
 }
 
@@ -2146,6 +2245,15 @@ impl ::fbthrift::GetTypeNameType for self::T13 {
     }
 }
 
+impl ::fbthrift::ThriftStruct for self::T13 {
+    fn fields() -> &'static [::fbthrift::Field] {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("data", ::fbthrift::TType::I64, 1),
+        ];
+        FIELDS
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::T13
 where
     P: ::fbthrift::ProtocolWriter,
@@ -2270,6 +2378,15 @@ impl ::fbthrift::GetTType for self::U10 {
 impl ::fbthrift::GetTypeNameType for self::U10 {
     fn type_name_type() -> fbthrift::TypeNameType {
         ::fbthrift::TypeNameType::StructType
+    }
+}
+
+impl ::fbthrift::ThriftStruct for self::U10 {
+    fn fields() -> &'static [::fbthrift::Field] {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("data", ::fbthrift::TType::String, 1),
+        ];
+        FIELDS
     }
 }
 
@@ -2606,6 +2723,14 @@ impl ::fbthrift::GetTypeNameType for self::TransitiveDerives {
     }
 }
 
+impl ::fbthrift::ThriftStruct for self::TransitiveDerives {
+    fn fields() -> &'static [::fbthrift::Field] {
+        static FIELDS: &[::fbthrift::Field] = &[
+        ];
+        FIELDS
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::TransitiveDerives
 where
     P: ::fbthrift::ProtocolWriter,
@@ -2745,6 +2870,14 @@ impl ::fbthrift::GetTypeNameType for self::StructWithTransitiveDerives {
     }
 }
 
+impl ::fbthrift::ThriftStruct for self::StructWithTransitiveDerives {
+    fn fields() -> &'static [::fbthrift::Field] {
+        static FIELDS: &[::fbthrift::Field] = &[
+        ];
+        FIELDS
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::StructWithTransitiveDerives
 where
     P: ::fbthrift::ProtocolWriter,
@@ -2858,6 +2991,14 @@ impl ::fbthrift::GetTType for self::SomeError {
 impl ::fbthrift::GetTypeNameType for self::SomeError {
     fn type_name_type() -> fbthrift::TypeNameType {
         ::fbthrift::TypeNameType::StructType
+    }
+}
+
+impl ::fbthrift::ThriftStruct for self::SomeError {
+    fn fields() -> &'static [::fbthrift::Field] {
+        static FIELDS: &[::fbthrift::Field] = &[
+        ];
+        FIELDS
     }
 }
 

@@ -68,6 +68,15 @@ impl ::fbthrift::GetTypeNameType for self::NoSerde {
     }
 }
 
+impl ::fbthrift::ThriftStruct for self::NoSerde {
+    fn fields() -> &'static [::fbthrift::Field] {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("a", ::fbthrift::TType::Bool, 1),
+        ];
+        FIELDS
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::NoSerde
 where
     P: ::fbthrift::ProtocolWriter,
@@ -192,6 +201,15 @@ impl ::fbthrift::GetTType for self::Serde {
 impl ::fbthrift::GetTypeNameType for self::Serde {
     fn type_name_type() -> fbthrift::TypeNameType {
         ::fbthrift::TypeNameType::StructType
+    }
+}
+
+impl ::fbthrift::ThriftStruct for self::Serde {
+    fn fields() -> &'static [::fbthrift::Field] {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("a", ::fbthrift::TType::Bool, 1),
+        ];
+        FIELDS
     }
 }
 

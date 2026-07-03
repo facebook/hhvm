@@ -120,6 +120,17 @@ impl ::fbthrift::GetTypeNameType for self::{{structured.rust_name}} {
     }
 }
 
+impl ::fbthrift::ThriftStruct for self::{{structured.rust_name}} {
+    fn fields() -> &'static [::fbthrift::Field] {
+        static FIELDS: &[::fbthrift::Field] = &[
+  {{#each structured.fields_by_name as |field|}}
+            ::fbthrift::Field::new("{{field.name}}", {{#partial types.protocol_ttype type=field.type}}, {{field.id}}),
+  {{/each}}
+        ];
+        FIELDS
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::{{structured.rust_name}}
 where
     P: ::fbthrift::ProtocolWriter,

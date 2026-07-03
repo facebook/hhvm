@@ -266,6 +266,15 @@ impl ::fbthrift::GetTypeNameType for self::A {
     }
 }
 
+impl ::fbthrift::ThriftStruct for self::A {
+    fn fields() -> &'static [::fbthrift::Field] {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("useless_field", ::fbthrift::TType::I32, 1),
+        ];
+        FIELDS
+    }
+}
+
 impl<P> ::fbthrift::Serialize<P> for self::A
 where
     P: ::fbthrift::ProtocolWriter,
@@ -501,6 +510,15 @@ impl ::fbthrift::GetTType for self::Bang {
 impl ::fbthrift::GetTypeNameType for self::Bang {
     fn type_name_type() -> fbthrift::TypeNameType {
         ::fbthrift::TypeNameType::StructType
+    }
+}
+
+impl ::fbthrift::ThriftStruct for self::Bang {
+    fn fields() -> &'static [::fbthrift::Field] {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("message", ::fbthrift::TType::String, 1),
+        ];
+        FIELDS
     }
 }
 

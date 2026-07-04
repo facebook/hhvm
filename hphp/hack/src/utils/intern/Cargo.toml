@@ -20,5 +20,5 @@ smallvec = { version = "1.15.2", features = ["serde", "union"] }
 
 [dev-dependencies]
 bincode = { version = "2", features = ["serde"] }
-rand = "0.10.1"
+rand = "0.10.2"
 serde_json = { version = "1.0.140", features = ["alloc", "float_roundtrip", "raw_value", "unbounded_depth"] }

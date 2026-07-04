@@ -15,5 +15,5 @@ bitflags = { version = "2.11.1", features = ["serde", "std"], default-features =
 maplit = "1.0"
 
 [build-dependencies]
-anyhow = "1.0.102"
+anyhow = "1.0.103"
 cc = "1.2.65"

@@ -12,7 +12,7 @@ path = "compiler_ffi.rs"
 crate-type = ["lib", "staticlib"]
 
 [dependencies]
-anyhow = "1.0.102"
+anyhow = "1.0.103"
 bincode = { version = "2", features = ["serde"] }
 compile = { version = "0.0.0", path = "../compile/cargo/compile" }
 cxx = "1.0.194"

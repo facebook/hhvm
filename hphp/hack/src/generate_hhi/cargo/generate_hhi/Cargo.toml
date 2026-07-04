@@ -12,6 +12,6 @@ name = "generate_hhi"
 path = "../../generate_hhi.rs"
 
 [dependencies]
-anyhow = "1.0.102"
+anyhow = "1.0.103"
 clap = { version = "4.6.0", features = ["derive", "env", "string", "unicode", "wrap_help"] }
 generate_hhi_lib = { version = "0.0.0", path = "../generate_hhi_lib" }

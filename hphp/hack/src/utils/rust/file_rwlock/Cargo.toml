@@ -11,7 +11,7 @@ license = "MIT"
 path = "../file_rwlock.rs"
 
 [dependencies]
-anyhow = "1.0.102"
+anyhow = "1.0.103"
 fs2 = "0.4"
 libc = "0.2.186"
 serde = { version = "1.0.219", features = ["derive", "rc"] }

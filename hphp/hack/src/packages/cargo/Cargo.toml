@@ -11,7 +11,7 @@ license = "MIT"
 path = "../packages.rs"
 
 [dependencies]
-anyhow = "1.0.102"
+anyhow = "1.0.103"
 hash = { version = "0.0.0", path = "../../utils/hash" }
 serde = { version = "1.0.219", features = ["derive", "rc"] }
 toml = { version = "1.1.2", features = ["preserve_order"] }

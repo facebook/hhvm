@@ -16,4 +16,4 @@ anyhow = "1.0.103"
 clap = { version = "4.6.0", features = ["derive", "env", "string", "unicode", "wrap_help"] }
 emit_opcodes = { version = "0.0.0", path = "../emit_opcodes" }
 hhbc-gen = { version = "0.0.0", path = "../../../../../../tools/hhbc-gen" }
-quote = "1.0.45"
+quote = "1.0.46"

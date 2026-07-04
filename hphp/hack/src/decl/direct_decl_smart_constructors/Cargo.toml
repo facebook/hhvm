@@ -13,7 +13,7 @@ test = false
 doctest = false
 
 [dependencies]
-bstr = { version = "1.10.0", features = ["serde", "std", "unicode"] }
+bstr = { version = "1.12.3", features = ["serde", "std", "unicode"] }
 escaper = { version = "0.0.0", path = "../../utils/escaper" }
 flatten_smart_constructors = { version = "0.0.0", path = "../../parser/cargo/flatten_smart_constructors" }
 hash = { version = "0.0.0", path = "../../utils/hash" }

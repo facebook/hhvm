@@ -15,7 +15,7 @@ doctest = false
 [dependencies]
 anyhow = "1.0.103"
 bincode = { version = "2", features = ["serde"] }
-bstr = { version = "1.10.0", features = ["serde", "std", "unicode"] }
+bstr = { version = "1.12.3", features = ["serde", "std", "unicode"] }
 datastore = { version = "0.0.0", path = "../../hackrs/datastore" }
 decl_parser = { version = "0.0.0", path = "../../hackrs/decl_parser/cargo/decl_parser" }
 deps_rust = { version = "0.0.0", path = "../../deps/cargo/deps_rust" }

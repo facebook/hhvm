@@ -11,4 +11,4 @@ license = "MIT"
 path = "../delta_log.rs"
 
 [dependencies]
-env_logger = { version = "0.11.10", features = ["color"] }
+env_logger = { version = "0.11.11", features = ["color"] }

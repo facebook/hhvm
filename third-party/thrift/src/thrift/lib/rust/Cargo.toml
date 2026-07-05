@@ -17,7 +17,7 @@ bufsize = "1.0.10"
 bytes = { version = "1.12.0", features = ["serde"] }
 clap = { version = "4.6.0", features = ["derive", "env", "string", "unicode", "wrap_help"] }
 futures = { version = "0.3.31", features = ["async-await", "compat"] }
-ghost = "0.1.21"
+ghost = "0.1.22"
 memchr = "2.8.2"
 num-derive = "0.4.2"
 num-traits = { version = "0.2.19", default-features = false }

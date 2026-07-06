@@ -30,6 +30,7 @@ import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.SslHandler;
 import io.netty.handler.ssl.util.SelfSignedCertificate;
+import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -112,12 +113,14 @@ public class OptionalSslHandlerTest {
    * apply).
    */
   @Test
-  public void timeoutClosesIdleChannel() throws Exception {
-    EmbeddedChannel channel = new EmbeddedChannel(new OptionalSslHandler(sslContext, 1L));
+  public void timeoutClosesIdleChannel() {
+    EmbeddedChannel channel =
+        new EmbeddedChannel(
+            new OptionalSslHandler(sslContext, OptionalSslHandler.PEEK_TIMEOUT_MILLIS));
 
     assertTrue(channel.isOpen(), "channel should be open before timeout");
 
-    Thread.sleep(5);
+    channel.advanceTimeBy(OptionalSslHandler.PEEK_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
     channel.runScheduledPendingTasks();
 
     assertFalse(channel.isOpen(), "channel should have been closed by the peek-phase timeout");
@@ -125,13 +128,15 @@ public class OptionalSslHandlerTest {
 
   /** The timeout is cancelled once the peeker decides on a branch. */
   @Test
-  public void timeoutDoesNotCloseAfterDecision() throws Exception {
-    EmbeddedChannel channel = new EmbeddedChannel(new OptionalSslHandler(sslContext, 1L));
+  public void timeoutDoesNotCloseAfterDecision() {
+    EmbeddedChannel channel =
+        new EmbeddedChannel(
+            new OptionalSslHandler(sslContext, OptionalSslHandler.PEEK_TIMEOUT_MILLIS));
 
     // Send TLS bytes immediately so the peeker decides before the timeout would fire.
     channel.writeInbound(Unpooled.wrappedBuffer(new byte[] {0x16, 0x03, 0x03, 0x00, 0x00}));
 
-    Thread.sleep(5);
+    channel.advanceTimeBy(OptionalSslHandler.PEEK_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
     channel.runScheduledPendingTasks();
 
     assertTrue(channel.isOpen(), "channel must remain open after a successful peek decision");

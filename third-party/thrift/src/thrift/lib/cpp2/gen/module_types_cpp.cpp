@@ -17,7 +17,6 @@
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
 #include <limits>
-#include <thrift/lib/cpp/protocol/TProtocolException.h>
 
 namespace apache::thrift::detail::st {
 

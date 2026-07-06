@@ -35,7 +35,7 @@ bool ensure_module_imported() {
     0, 1, 2, 3
   };
   static constexpr std::int16_t _fbthrift__IssetInspectionStruct__tuple_pos[3] = {
-    1, 2, 3
+    0, 1, 2
   };
   static constexpr std::int16_t _fbthrift__HiddenException__tuple_pos[1] = {
     0

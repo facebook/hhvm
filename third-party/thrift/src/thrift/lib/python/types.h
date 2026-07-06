@@ -88,10 +88,10 @@ PyObject* createStructTuple(int16_t numFields);
  * Returns a new "struct tuple" in the deprecated isset layout, used only for
  * structs compiled with `enable_isset_deprecated_unsafe`.
  *
- * The returned tuple has `numFields + 1` elements. The first element is a
- * bytearray of `numFields` zero-initialized bytes (the isset flags); the
- * remaining `numFields` elements (field `i` at index `i + 1`) are
- * uninitialized.
+ * The returned tuple has `numFields + 1` elements. The first `numFields`
+ * elements are uninitialized field values (field `i` at index `i`); the last
+ * element is a bytearray of `numFields` zero-initialized bytes (the isset
+ * flags).
  */
 PyObject* createStructTupleWithDeprecatedIsset(int16_t numFields);
 
@@ -113,10 +113,10 @@ PyObject* createStructList(int16_t numFields);
  *
  * The tuple layout is determined by `structInfo`: for the default immutable
  * layout, the tuple has exactly `numFields` elements and field `i` lives at
- * index `i`; for structs compiled with `enable_isset_deprecated_unsafe`,
- * element 0 is a 0-initialized bytearray with `numFields` isset flags and field
- * `i` lives at index `i + 1`. Field order corresponds to the order of fields in
- * the given `structInfo` (i.e., the insertion order, NOT the field ids).
+ * index `i`; for structs compiled with `enable_isset_deprecated_unsafe`, the
+ * tuple has one extra trailing element containing a 0-initialized bytearray
+ * with `numFields` isset flags. Field order corresponds to the order of fields
+ * in the given `structInfo` (i.e., the insertion order, NOT the field ids).
  *
  * The default value for optional fields is always `Py_None`. For other fields,
  * the default value is either specified by the user or the following "standard"
@@ -163,7 +163,7 @@ PyObject* createMutableStructListWithDefaultValues(
  *
  * @param structTuple Pointer to a deprecated-isset "struct tuple" (see
  *        `createStructTupleWithDeprecatedIsset()` above). This is assumed to be
- *        a `PyTupleObject` whose first element contains the isset bytearray. If
+ *        a `PyTupleObject` whose last element contains the isset bytearray. If
  *        the bytearray is not properly initialized, or if the `index` is
  * invalid (i.e., negative or greater than the number of fields), the behavior
  * is undefined.
@@ -179,8 +179,7 @@ void setStructIsset(PyObject* structTuple, int16_t index, bool value);
  *
  * The tuple layout is determined by `structInfo`: default immutable structs
  * have `numFields` field elements, all set to `None`; structs compiled with
- * `enable_isset_deprecated_unsafe` also reserve element 0 for a 0-initialized
- * isset bytearray, with field elements set to `None` starting at index 1.
+ * `enable_isset_deprecated_unsafe` also append a 0-initialized isset bytearray.
  */
 PyObject* createStructTupleWithNones(
     const ::apache::thrift::detail::StructInfo& structInfo);
@@ -897,14 +896,6 @@ class DynamicStructInfo {
   std::string name_;
 
   /**
-   * Whether the immutable data holder reserves element 0 for an isset byte
-   * array. Determines the field `memberOffset` computed in `addFieldInfo()`.
-   * Declared before `tableBasedSerializerStructInfo_` so it is initialized
-   * before the constructor's member-initializer list reads it.
-   */
-  bool issetDeprecatedEnabled_;
-
-  /**
    * Default values (if any) for each field (indexed by field position in
    * `fieldNames_`).
    *
@@ -1090,9 +1081,9 @@ PyObject* FOLLY_NULLABLE getThriftExceptionFieldData(PyObject* generatedError);
 
 /**
  * Sets the `index`-th tuple element of a deprecated-isset struct_tuple to
- * `value` and records that it is set in the isset array at element 0 (so
- * `index` is the 1-based tuple position). Returns 0 on success and -1 on
- * failure. Only for use with fresh struct_tuple (i.e., no set field values).
+ * `value` and records that it is set in the trailing isset array. Returns 0 on
+ * success and -1 on failure. Only for use with fresh struct_tuple (i.e., no set
+ * field values).
  */
 int setStructFieldIssetDeprecated(
     PyObject* struct_tuple, int16_t index, PyObject* value);

@@ -576,11 +576,9 @@ class t_mstch_python_capi_generator : public t_whisker_generator {
       return true;
     });
 
-    def.property("tuple_positions", [this](const t_structured& self) {
+    def.property("tuple_positions", [](const t_structured& self) {
       std::unordered_map<const t_field*, int64_t> field_tuple_indexes;
-      // thrift-python reserves tuple element 0 for the isset byte array only
-      // for non-exceptions that support `get_locally_set_fields`.
-      int64_t tuple_index = enable_get_locally_set_fields(self) ? 1 : 0;
+      int64_t tuple_index = 0;
       for (const t_field* f : self.fields_id_order()) {
         field_tuple_indexes[f] = tuple_index++;
       }

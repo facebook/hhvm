@@ -239,78 +239,13 @@ UniquePyObjectPtr getDefaultValueForMutableField(
 }
 
 /*
- * A policy for handling Python tuples.
- */
-struct IssetDeprecatedTupleContainer final {
-  // Data-holder index of the first field value. Immutable struct tuples reserve
-  // element 0 for the isset byte array, so fields start at index 1.
-  static constexpr Py_ssize_t kFieldStartIndex = 1;
-
-  /**
-   * Return a new tuple object of given size, or NULL on failure.
-   */
-  static PyObject* New(Py_ssize_t size) { return PyTuple_New(size); }
-
-  /**
-   * Returns a new "struct tuple" whose field elements are uninitialized, see
-   * `createStructTupleWithDeprecatedIsset()` function.
-   */
-  static PyObject* createStructContainer(int16_t numFields) {
-    return createStructTupleWithDeprecatedIsset(numFields);
-  }
-
-  /**
-   * Insert a reference to `object` at position `pos` of the `tuple`.
-   */
-  static void SET_ITEM(PyObject* tuple, Py_ssize_t pos, PyObject* object) {
-    PyTuple_SET_ITEM(tuple, pos, object);
-  }
-
-  /**
-   * Return the object at position `pos` in the `tuple`.
-   * The returned reference is borrowed from the `tuple` (that is: it is only
-   * valid as long as you hold a reference to `tuple`)
-   */
-  static PyObject* GET_ITEM(const PyObject* tuple, Py_ssize_t pos) {
-    return PyTuple_GET_ITEM(tuple, pos);
-  }
-
-  /**
-   * Return true if `p` is a tuple object or an instance of a subtype of the
-   * tuple type.
-   */
-  static bool Check(const PyObject* p) { return PyTuple_Check(p); }
-
-  static Py_ssize_t Size(PyObject* p) { return PyTuple_Size(p); }
-
-  static UniquePyObjectPtr getDefaultValueForField(
-      const detail::TypeInfo* typeInfo,
-      const FieldValueMap& userDefaultValues,
-      int16_t index) {
-    return getDefaultValueForImmutableField(typeInfo, userDefaultValues, index);
-  }
-};
-
-/*
  * A policy for handling Python lists.
  */
 struct ListContainer final {
-  // Data-holder index of the first field value. Mutable struct lists no longer
-  // carry an isset byte array, so fields start at index 0.
-  static constexpr Py_ssize_t kFieldStartIndex = 0;
-
   /**
    * Return a new list object of given size, or NULL on failure.
    */
   static PyObject* New(Py_ssize_t size) { return PyList_New(size); }
-
-  /**
-   * Returns a new "struct list" whose field elements are uninitialized, see
-   * `createStructList()` function.
-   */
-  static PyObject* createStructContainer(int16_t numFields) {
-    return createStructList(numFields);
-  }
 
   /**
    * Insert a reference to `object` at position `pos` of the `list`.
@@ -345,23 +280,18 @@ struct ListContainer final {
 };
 
 /*
- * A policy for immutable struct tuples that carry NO isset byte array.
+ * A policy for handling Python tuples (the immutable struct/union data holder).
  *
- * Used for structs whose thrift_library is compiled WITHOUT the
- * `enable_isset_deprecated_unsafe` option (the common case). The data holder is
- * still an immutable `tuple`, but - like the mutable `ListContainer` - it holds
- * only the `numFields` field values with no leading isset element, so fields
- * start at index 0. This removes the per-struct isset `bytes` object (the
- * dominant memory overhead) and the per-field isset writes on deserialization.
+ * Field values occupy indexes `[0, numFields)` with no leading isset element.
+ * Structs compiled with `enable_isset_deprecated_unsafe` additionally carry a
+ * trailing isset `bytes` element; that tail is an orthogonal option selected by
+ * the `WithIsset` template parameter on the `createStructContainer*` helpers,
+ * not a distinct container type. The common (no-isset) case avoids the
+ * per-struct isset `bytes` object (the dominant memory overhead) and the
+ * per-field isset writes on deserialization.
  */
 struct TupleContainer final {
-  static constexpr Py_ssize_t kFieldStartIndex = 0;
-
   static PyObject* New(Py_ssize_t size) { return PyTuple_New(size); }
-
-  static PyObject* createStructContainer(int16_t numFields) {
-    return PyTuple_New(numFields);
-  }
 
   static void SET_ITEM(PyObject* tuple, Py_ssize_t pos, PyObject* object) {
     PyTuple_SET_ITEM(tuple, pos, object);
@@ -383,30 +313,46 @@ struct TupleContainer final {
   }
 };
 
-/**
- * Returns pointer to a contiguous memory area of at least `numFields` bytes,
- * each one of which holds the "is set" flag of the corresponding field (in the
- * order of the corresponding `StructInfo.fieldInfos`).
- */
-template <typename Container>
-const char* getDataHolderIssetFlags(const PyObject* structDataHolder) {
-  PyObject* isset = Container::GET_ITEM(structDataHolder, 0);
-  const char* issetFlags = PyBytes_AsString(isset);
-  if (issetFlags == nullptr) {
-    THRIFT_PY3_CHECK_ERROR();
+// Returns a new, uninitialized "struct container" for `numFields` fields. When
+// `WithIsset` is true, a 0-initialized isset `bytes` element is appended after
+// the field slots (immutable deprecated-isset layout).
+template <typename Container, bool WithIsset = false>
+PyObject* createStructContainer(int16_t numFields) {
+  if constexpr (!WithIsset) {
+    return Container::New(numFields);
+  } else {
+    // Allocate and 0-initialize numFields bytes.
+    UniquePyObjectPtr issetArr{PyBytes_FromStringAndSize(nullptr, numFields)};
+    if (issetArr == nullptr) {
+      return nullptr;
+    }
+    char* flags = PyBytes_AsString(issetArr.get());
+    if (flags == nullptr) {
+      return nullptr;
+    }
+    for (Py_ssize_t i = 0; i < numFields; ++i) {
+      flags[i] = '\0';
+    }
+
+    // Create container, with isset byte array after `numFields` uninitialized
+    // field elements.
+    PyObject* container{Container::New(numFields + 1)};
+    if (container == nullptr) {
+      return nullptr;
+    }
+    Container::SET_ITEM(container, numFields, issetArr.release());
+    return container;
   }
-  return issetFlags;
 }
 
 /**
  * Returns a new "struct container" with all its elements initialized.
  *
- * As in `createStructContainer()`, the layout depends on the `Container`
- * policy: for `IssetDeprecatedTupleContainer` (immutable) the first element is
- * a 0-initialized isset bytearray and the `numFields` field values follow it,
- * while for `ListContainer` (mutable) there is no isset bytearray and the field
- * values occupy the whole container. The first field value lives at index
- * `Container::kFieldStartIndex` (1 for tuples, 0 for lists).
+ * As in `createStructContainer()`, the layout depends on `Container` and
+ * `WithIsset`: when `WithIsset` is true (immutable deprecated-isset structs) a
+ * 0-initialized isset bytearray is appended after the `numFields` field values;
+ * otherwise there is no isset bytearray. Field value indexes always match field
+ * order.
  *
  * Each field value is initialized with the appropriate default value for the
  * corresponding field (see below), in the order of fields in the given
@@ -421,11 +367,12 @@ const char* getDataHolderIssetFlags(const PyObject* structDataHolder) {
  * `getStandardMutableDefaultValueType()` functions, which are potential values
  * for the `getStandardDefaultValueForTypeFunc` parameter.
  */
-template <typename Container>
+template <typename Container, bool WithIsset = false>
 PyObject* createStructContainerWithDefaultValues(
     const detail::StructInfo& structInfo) {
   const int16_t numFields = structInfo.numFields;
-  UniquePyObjectPtr container{Container::createStructContainer(numFields)};
+  UniquePyObjectPtr container{
+      createStructContainer<Container, WithIsset>(numFields)};
   if (container == nullptr) {
     THRIFT_PY3_CHECK_ERROR();
   }
@@ -436,13 +383,12 @@ PyObject* createStructContainerWithDefaultValues(
   for (int fieldIndex = 0; fieldIndex < numFields; ++fieldIndex) {
     const detail::FieldInfo& fieldInfo = structInfo.fieldInfos[fieldIndex];
     if (fieldInfo.qualifier == detail::FieldQualifier::Optional) {
-      Container::SET_ITEM(
-          container.get(), fieldIndex + Container::kFieldStartIndex, Py_None);
+      Container::SET_ITEM(container.get(), fieldIndex, Py_None);
       Py_INCREF(Py_None);
     } else {
       Container::SET_ITEM(
           container.get(),
-          fieldIndex + Container::kFieldStartIndex,
+          fieldIndex,
           Container::getDefaultValueForField(
               fieldInfo.typeInfo, defaultValues, fieldIndex)
               .release());
@@ -463,18 +409,17 @@ PyObject* createStructListWithDefaultValues(
 }
 
 // Forward declarations for the per-type isset accessors (defined below). The
-// `StructInfo.setIsset` pointer also serves as the per-type "has isset header"
-// marker: an immutable struct carries an isset byte array at element 0 iff its
+// `StructInfo.setIsset` pointer also serves as the per-type "has isset"
+// marker: an immutable struct carries a trailing isset byte array iff its
 // `StructInfo.setIsset` is `setStructIssetDeprecated` (disabled structs use
 // `noOpSetIsset`).
-bool getImmutableIssetDeprecated(const void* object, ptrdiff_t offset);
 bool getImmutableIsset(const void* object, ptrdiff_t offset);
 bool getMutableIsset(const void* objectPtr, ptrdiff_t offset);
 void setStructIssetDeprecated(void* objectPtr, ptrdiff_t offset, bool value);
 void noOpSetIsset(void* objectPtr, ptrdiff_t offset, bool value);
 
 // True iff the immutable struct described by `structInfo` carries an isset byte
-// array at element 0 (i.e. its thrift_library enabled `isset_DEPRECATED`).
+// array (i.e. its thrift_library enabled `isset_DEPRECATED`).
 inline bool immutableStructInfoHasIsset(const detail::StructInfo& structInfo) {
   DCHECK_NE(structInfo.getIsset, getMutableIsset);
   return structInfo.setIsset == setStructIssetDeprecated;
@@ -484,14 +429,15 @@ inline bool immutableStructInfoHasIsset(const detail::StructInfo& structInfo) {
  * Returns a new "struct tuple" with all its elements initialized.
  *
  * Dispatches on whether `structInfo` carries an isset byte array: enabled
- * structs use the `numFields + 1` `IssetDeprecatedTupleContainer` layout, while
- * disabled structs use the header-less `numFields` `TupleContainer`.
+ * structs use the `numFields + 1` layout (trailing isset element), while
+ * disabled structs use the header-less `numFields` layout.
  */
 PyObject* createStructTupleWithDefaultValues(
     const detail::StructInfo& structInfo) {
   return immutableStructInfoHasIsset(structInfo)
-      ? createStructContainerWithDefaultValues<IssetDeprecatedTupleContainer>(
-            structInfo)
+      ? createStructContainerWithDefaultValues<
+            TupleContainer,
+            /*WithIsset=*/true>(structInfo)
       : createStructContainerWithDefaultValues<TupleContainer>(structInfo);
 }
 
@@ -656,17 +602,16 @@ UniquePyObjectPtr getStandardMutableDefaultValueForType(
  * The `container` parameter should be a valid Python object, created by the
  * `createStructContainer()`.
  *
- * Iterates through the `numFields` field values (which start at index
- * `Container::kFieldStartIndex` -- 1 for `IssetDeprecatedTupleContainer`, 0 for
- * `ListContainer`). If a field is unset, it is populated with the corresponding
- * default value. The mechanism for determining the default value is the same as
- * in the `createStructContainerWithDefaultValues()` function. Please see the
+ * Iterates through the `numFields` field values by direct field index. If a
+ * field is unset, it is populated with the corresponding default value. The
+ * mechanism for determining the default value is the same as in the
+ * `createStructContainerWithDefaultValues()` function. Please see the
  * documentation of `createStructContainerWithDefaultValues()` for details on
  * how the default value is identified.
  *
  * Throws on error
  */
-template <typename Container>
+template <typename Container, bool WithIsset = false>
 void populateStructContainerUnsetFieldsWithDefaultValues(
     PyObject* container, const detail::StructInfo& structInfo) {
   if (container == nullptr) {
@@ -675,13 +620,13 @@ void populateStructContainerUnsetFieldsWithDefaultValues(
 
   DCHECK(Container::Check(container));
   const int16_t numFields = structInfo.numFields;
-  DCHECK(Container::Size(container) == numFields + Container::kFieldStartIndex);
+  DCHECK(Container::Size(container) == numFields + (WithIsset ? 1 : 0));
 
   const FieldValueMap& defaultValues =
       *static_cast<const FieldValueMap*>(structInfo.customExt);
   for (int i = 0; i < numFields; ++i) {
     const detail::FieldInfo& fieldInfo = structInfo.fieldInfos[i];
-    const Py_ssize_t element = i + Container::kFieldStartIndex;
+    const Py_ssize_t element = i;
     PyObject* oldValue = Container::GET_ITEM(container, element);
 
     // If the field is already set, this implies that the constructor has
@@ -716,7 +661,8 @@ void populateStructTupleUnsetFieldsWithDefaultValues(
     PyObject* tuple, const detail::StructInfo& structInfo) {
   if (immutableStructInfoHasIsset(structInfo)) {
     populateStructContainerUnsetFieldsWithDefaultValues<
-        IssetDeprecatedTupleContainer>(tuple, structInfo);
+        TupleContainer,
+        /*WithIsset=*/true>(tuple, structInfo);
   } else {
     populateStructContainerUnsetFieldsWithDefaultValues<TupleContainer>(
         tuple, structInfo);
@@ -762,20 +708,10 @@ void* setImmutableUnion(
  * fields, for which the invariant "set iff value is not None" holds (unset
  * optionals are `None`).
  */
-bool getImmutableIssetDeprecated(const void* object, ptrdiff_t offset) {
-  // Field values follow element 0 (the isset flags), so field `offset` lives at
-  // tuple index `offset + 1`.
-  PyObject* value = IssetDeprecatedTupleContainer::GET_ITEM(
-      static_cast<const PyObject*>(object), offset + 1);
-  return value != Py_None;
-}
-
 /**
- * Isset accessor for immutable structs with NO isset byte array (i.e. compiled
- * without `enable_isset_deprecated_unsafe`). Field values occupy the whole
- * tuple with no leading element, so field `offset` lives at tuple index
- * `offset`. As with `getImmutableIssetDeprecated`, presence is derived from the
- * value being non-`None` (the serializer only calls this for optional fields).
+ * Isset accessor for immutable structs. Field values always start at tuple
+ * index 0; presence is derived from the value being non-`None` (the serializer
+ * only calls this for optional fields).
  */
 bool getImmutableIsset(const void* object, ptrdiff_t offset) {
   PyObject* value =
@@ -854,7 +790,7 @@ void clearUnionDataHolder(void* unionDataHolderObject) {
 }
 
 void clearImmutableUnion(void* object) {
-  clearUnionDataHolder<IssetDeprecatedTupleContainer>(object);
+  clearUnionDataHolder<TupleContainer>(object);
 }
 
 void clearMutableUnion(void* object) {
@@ -895,7 +831,7 @@ int getUnionDataHolderActiveFieldId(const void* unionDataHolderObject) {
 }
 
 int getImmutableUnionActiveFieldId(const void* object) {
-  return getUnionDataHolderActiveFieldId<IssetDeprecatedTupleContainer>(object);
+  return getUnionDataHolderActiveFieldId<TupleContainer>(object);
 }
 
 int getMutableUnionActiveFieldId(const void* object) {
@@ -930,8 +866,7 @@ void setUnionDataHolderActiveFieldId(void* unionDataHolderObject, int fieldId) {
 }
 
 void setImmutableUnionActiveFieldId(void* object, int fieldId) {
-  setUnionDataHolderActiveFieldId<IssetDeprecatedTupleContainer>(
-      object, fieldId);
+  setUnionDataHolderActiveFieldId<TupleContainer>(object, fieldId);
 }
 
 void setMutableUnionActiveFieldId(void* object, int fieldId) {
@@ -981,7 +916,9 @@ getStructInfoUnionExt(bool isUnion, bool isMutable) {
  * type-erased (i.e., `void*`) "target object".
  *
  * For immutable Thrift structs, the target object corresponds to the "data
- * holder" container, i.e. a PyTuple instance of size `numFields + 1`.
+ * holder" container, i.e. a PyTuple instance of size `numFields` (plus one
+ * extra trailing item for the isset byte array when the deprecated-isset layout
+ * is enabled).
  *
  * TODO: immutable Thrift unions? mutable structs? mutable unions?
  *
@@ -1006,15 +943,13 @@ detail::StructInfo* newTableBasedSerializerStructInfo(
   structInfo->numFields = numFields;
   structInfo->name = namePtr;
   structInfo->unionExt = getStructInfoUnionExt(isUnion, isMutable);
-  // For immutable structs, the isset accessors (and `memberOffset` in
-  // `addFieldInfo`) depend on whether an isset byte array is present at element
-  // 0. Disabled structs use the header-less layout: presence is read at index
-  // `offset` and there is nothing to write on the read path.
+  // Disabled immutable structs have no isset byte array; enabled ones append it
+  // after the field values. In both cases, fields live at index `offset`.
   if (isMutable) {
     structInfo->getIsset = getMutableIsset;
     structInfo->setIsset = noOpSetIsset;
   } else if (hasDeprecatedIsset) {
-    structInfo->getIsset = getImmutableIssetDeprecated;
+    structInfo->getIsset = getImmutableIsset;
     structInfo->setIsset = setStructIssetDeprecated;
   } else {
     structInfo->getIsset = getImmutableIsset;
@@ -1403,42 +1338,11 @@ void ImmutableInternalDict_SetUnicodeError(PyObject* map_obj) {
 // DO_BEFORE(aristidis,20240920): For consistency, rename method to
 // createImmutableUnionDataHolder() - and update references.
 PyObject* createUnionTuple() {
-  return createUnionDataHolder<IssetDeprecatedTupleContainer>();
+  return createUnionDataHolder<TupleContainer>();
 }
 
 PyObject* createMutableUnionDataHolder() {
   return createUnionDataHolder<ListContainer>();
-}
-
-template <typename Container>
-PyObject* createStructContainer(int16_t numFields) {
-  if constexpr (Container::kFieldStartIndex == 0) {
-    // Mutable struct lists carry no isset byte array; the container holds only
-    // the `numFields` (uninitialized) field elements.
-    return Container::New(numFields);
-  } else {
-    // Allocate and 0-initialize numFields bytes.
-    UniquePyObjectPtr issetArr{PyBytes_FromStringAndSize(nullptr, numFields)};
-    if (issetArr == nullptr) {
-      return nullptr;
-    }
-    char* flags = PyBytes_AsString(issetArr.get());
-    if (flags == nullptr) {
-      return nullptr;
-    }
-    for (Py_ssize_t i = 0; i < numFields; ++i) {
-      flags[i] = '\0';
-    }
-
-    // Create container, with isset byte array as first element (followed by
-    // `numFields` uninitialized elements).
-    PyObject* container{Container::New(numFields + 1)};
-    if (container == nullptr) {
-      return nullptr;
-    }
-    Container::SET_ITEM(container, 0, issetArr.release());
-    return container;
-  }
 }
 
 PyObject* createStructTuple(int16_t numFields) {
@@ -1446,7 +1350,7 @@ PyObject* createStructTuple(int16_t numFields) {
 }
 
 PyObject* createStructTupleWithDeprecatedIsset(int16_t numFields) {
-  return createStructContainer<IssetDeprecatedTupleContainer>(numFields);
+  return createStructContainer<TupleContainer, /*WithIsset=*/true>(numFields);
 }
 
 PyObject* createStructList(int16_t numFields) {
@@ -1463,18 +1367,18 @@ PyObject* createMutableStructListWithDefaultValues(
   return createStructListWithDefaultValues(structInfo);
 }
 
-template <typename Container>
+template <typename Container, bool WithIsset = false>
 PyObject* createStructContainerWithNones(const detail::StructInfo& structInfo) {
   const int16_t numFields = structInfo.numFields;
-  UniquePyObjectPtr container{Container::createStructContainer(numFields)};
+  UniquePyObjectPtr container{
+      createStructContainer<Container, WithIsset>(numFields)};
   if (container == nullptr) {
     return nullptr;
   }
 
   // Initialize the field elements with 'None'.
   for (int i = 0; i < numFields; ++i) {
-    Container::SET_ITEM(
-        container.get(), i + Container::kFieldStartIndex, Py_None);
+    Container::SET_ITEM(container.get(), i, Py_None);
     Py_INCREF(Py_None);
   }
   return container.release();
@@ -1482,7 +1386,7 @@ PyObject* createStructContainerWithNones(const detail::StructInfo& structInfo) {
 
 PyObject* createStructTupleWithNones(const detail::StructInfo& structInfo) {
   return immutableStructInfoHasIsset(structInfo)
-      ? createStructContainerWithNones<IssetDeprecatedTupleContainer>(
+      ? createStructContainerWithNones<TupleContainer, /*WithIsset=*/true>(
             structInfo)
       : createStructContainerWithNones<TupleContainer>(structInfo);
 }
@@ -1491,20 +1395,16 @@ PyObject* createStructListWithNones(const detail::StructInfo& structInfo) {
   return createStructContainerWithNones<ListContainer>(structInfo);
 }
 
-template <typename Container>
 void setStructIsset(PyObject* structTuple, int16_t index, bool value) {
-  PyObject* issetPyBytes = Container::GET_ITEM(structTuple, 0);
+  // Immutable-only: the isset `bytes` is the trailing tuple element; field
+  // values occupy [0, numFields).
+  PyObject* issetPyBytes =
+      PyTuple_GET_ITEM(structTuple, PyTuple_GET_SIZE(structTuple) - 1);
   char* flags = PyBytes_AsString(issetPyBytes);
   if (flags == nullptr) {
     THRIFT_PY3_CHECK_ERROR();
   }
   flags[index] = value;
-}
-
-void setStructIsset(PyObject* structTuple, int16_t index, bool value) {
-  // Precondition: `structTuple` uses the deprecated-isset tuple layout created
-  // by `createStructTupleWithDeprecatedIsset()`.
-  setStructIsset<IssetDeprecatedTupleContainer>(structTuple, index, value);
 }
 
 void populateImmutableStructTupleUnsetFieldsWithDefaultValues(
@@ -1839,7 +1739,7 @@ size_t writeMapSorted(
   }
 
   size_t written = 0;
-  const Py_ssize_t size = PyList_Size(itemList.get());
+  const Py_ssize_t size = PyList_GET_SIZE(itemList.get());
   for (std::uint32_t i = 0; i < size; ++i) {
     PyObject* pair = PyList_GET_ITEM(itemList.get(), i);
     PyObject* key = PyTuple_GET_ITEM(pair, 0);
@@ -1974,8 +1874,6 @@ DynamicStructInfo::DynamicStructInfo(
     bool isMutable,
     InternalDataLayout dataLayout)
     : name_{name},
-      issetDeprecatedEnabled_{
-          dataLayout == InternalDataLayout::kStructWithDeprecatedIsset},
       tableBasedSerializerStructInfo_{newTableBasedSerializerStructInfo(
           name_.c_str(), numFields, dataLayout, fieldValues_, isMutable)} {
   // reserve vector as we are assigning const char* from the string in
@@ -2004,10 +1902,10 @@ void DynamicStructInfo::addFieldInfo(
   int16_t idx = fieldNames_.size() - 1;
 
   // In immutable thrift-python, tuples are used as the internal representation
-  // of structs. The first member of the tuple contains the isset flags, while
-  // the remaining members represent each field. Since PyTupleObject utilizes
-  // C's flexible array member feature, its members are allocated contiguously
-  // at the end of the tuple struct, roughly laid out as follows:
+  // of structs. Field values occupy indexes 0..numFields-1; when enabled, the
+  // isset flags live in one extra trailing tuple item. Since PyTupleObject
+  // utilizes C's flexible array member feature, its members are allocated
+  // contiguously at the end of the tuple struct, roughly laid out as follows:
   //
   // +-----------------------------------+
   // |        PyTupleObject              |
@@ -2018,13 +1916,16 @@ void DynamicStructInfo::addFieldInfo(
   // +-----------------------------------+
   // |  ...                              |
   // +-----------------------------------+ -> kHeadOffset
-  // |  item[0] (PyObject*)(isset flags) |
+  // |  item[0] (PyObject*)              |
   // +-----------------------------------+
   // |  item[1] (PyObject*)              |
   // +-----------------------------------+
   // |  ...                              |
   // +-----------------------------------+
   // |  item[n-1] (PyObject*)            |
+  // +-----------------------------------+
+  // |  item[n] (isset flags, enabled    |
+  // |          layout only)             |
   // +-----------------------------------+
   //
   // CPython could add more fields before the "item" array; for example,
@@ -2034,22 +1935,19 @@ void DynamicStructInfo::addFieldInfo(
   // to be identified by their offset from the start address of the struct.
   // The following calculates the offset:
   //
-  // memberOffset = kHeadOffset + ((field-order + headerSize) *
-  // sizeof(PyObject*)) where headerSize is 1 when the tuple reserves element 0
-  // for the isset flags
-  // (`issetDeprecatedEnabled_`) and 0 otherwise. Unions always keep their
-  // single member at index 1 (the 2-element `(type_id, value)` holder).
-  const int16_t headerSize = issetDeprecatedEnabled_ ? 1 : 0;
+  // memberOffset = kHeadOffset + field-order * sizeof(PyObject*). Unions
+  // always keep their single member at index 1 (the 2-element `(type_id,
+  // value)` holder).
 
-  tableBasedSerializerStructInfo_->fieldInfos[idx] = detail::FieldInfo{
-      /* .id */ id,
-      /* .qualifier */ qualifier,
-      /* .name */ fieldName.c_str(),
-      /* .memberOffset */
-      static_cast<ptrdiff_t>(
-          kHeadOffset + kFieldOffset * (isUnion() ? 1 : idx + headerSize)),
-      /* .issetOffset */ isUnion() ? 0 : idx,
-      /* .typeInfo */ typeInfo};
+  tableBasedSerializerStructInfo_->fieldInfos[idx] =
+      detail::FieldInfo{/* .id */ id,
+                        /* .qualifier */ qualifier,
+                        /* .name */ fieldName.c_str(),
+                        /* .memberOffset */
+                        static_cast<ptrdiff_t>(
+                            kHeadOffset + kFieldOffset * (isUnion() ? 1 : idx)),
+                        /* .issetOffset */ isUnion() ? 0 : idx,
+                        /* .typeInfo */ typeInfo};
 }
 
 void DynamicStructInfo::addMutableFieldInfo(
@@ -2215,8 +2113,8 @@ PyObject* FOLLY_NULLABLE getThriftExceptionFieldData(PyObject* generatedError) {
 int setStructFieldIssetDeprecated(
     PyObject* struct_tuple, int16_t index, PyObject* value) {
   try {
-    DCHECK_GT(index, 0);
-    setStructIsset(struct_tuple, index - 1, 1);
+    DCHECK_GE(index, 0);
+    setStructIsset(struct_tuple, index, 1);
   } catch (std::runtime_error& e) {
     // In error case, folly::handlePythonError clears error indicator
     // and throws std::runtime_error with message fetched from PyErr.

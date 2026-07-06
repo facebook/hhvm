@@ -144,8 +144,21 @@ cdef class ThriftServer:
         def _serve():
             with nogil:
                 self.server.get().serve()
+        # Enter handler async context before serving. Every thrift handler
+        # is generated with __aenter__ and __aexit__ stubs, allowing async
+        # initialization in __aenter__ instead of __init__ and async cleanup
+        # in __aexit__ instead of __del__. This makes ThriftServer behave
+        # like modern SvcThriftServer/ServiceDecorator/CodeFrameworks versions.
+        # Handler may be stored in self.handler (thrift-python path) or
+        # self.factory (py3 path); both inherit AsyncProcessorFactory with
+        # async context manager protocol.
+        handler_cm = self.handler if self.handler is not None else self.factory
         try:
-            await self.loop.run_in_executor(None, _serve)
+            if handler_cm is not None:
+                async with handler_cm:
+                    await self.loop.run_in_executor(None, _serve)
+            else:
+                await self.loop.run_in_executor(None, _serve)
             self.address_future.cancel()
         except asyncio.CancelledError:
             try:

@@ -838,7 +838,16 @@ class formatter_parser_actions {
   }
 
   function_type on_performs(source_range range, const identifier& name) {
-    return {.range = range, .name = name, .performs = true};
+    return {
+        .range = range,
+        .attrs = nullptr,
+        .qualifier = t_function_qualifier::none,
+        .ret = {},
+        .name = name,
+        .params = {},
+        .throws = nullptr,
+        .performs = true,
+    };
   }
 
   throws_type on_throws(field_list_type exceptions) {
@@ -930,7 +939,7 @@ class formatter_parser_actions {
   }
 
   type_ref_type on_type(source_range range, const t_primitive_type& type) {
-    return {.range = range, .name = type.name()};
+    return {.range = range, .name = type.name(), .args = {}};
   }
 
   type_ref_type on_invalid_type(
@@ -939,7 +948,7 @@ class formatter_parser_actions {
   }
 
   type_ref_type on_type(source_range range, std::string_view name) {
-    return {.range = range, .name = std::string(name)};
+    return {.range = range, .name = std::string(name), .args = {}};
   }
 
   void on_enum(
@@ -988,44 +997,37 @@ class formatter_parser_actions {
   }
 
   const_value_type on_const_ref(const identifier&) {
-    return std::make_unique<formatter_const_value>(
-        formatter_const_value{.type = formatter_const_value::kind::atom});
+    return make_const_value(formatter_const_value::kind::atom);
   }
 
   const_value_type on_integer(int64_t) {
-    return std::make_unique<formatter_const_value>(
-        formatter_const_value{.type = formatter_const_value::kind::atom});
+    return make_const_value(formatter_const_value::kind::atom);
   }
 
   const_value_type on_float(double) {
-    return std::make_unique<formatter_const_value>(
-        formatter_const_value{.type = formatter_const_value::kind::atom});
+    return make_const_value(formatter_const_value::kind::atom);
   }
 
   const_value_type on_string_literal(std::string value) {
-    return std::make_unique<formatter_const_value>(formatter_const_value{
-        .type = formatter_const_value::kind::atom, .atom = std::move(value)});
+    return make_const_value(
+        formatter_const_value::kind::atom, std::move(value));
   }
 
   const_value_type on_bool_literal(bool) {
-    return std::make_unique<formatter_const_value>(
-        formatter_const_value{.type = formatter_const_value::kind::atom});
+    return make_const_value(formatter_const_value::kind::atom);
   }
 
   const_value_type on_list_initializer() {
-    return std::make_unique<formatter_const_value>(
-        formatter_const_value{.type = formatter_const_value::kind::list});
+    return make_const_value(formatter_const_value::kind::list);
   }
 
   const_value_type on_map_initializer() {
-    return std::make_unique<formatter_const_value>(
-        formatter_const_value{.type = formatter_const_value::kind::map});
+    return make_const_value(formatter_const_value::kind::map);
   }
 
   const_value_type on_struct_initializer(source_range, std::string_view name) {
-    return std::make_unique<formatter_const_value>(formatter_const_value{
-        .type = formatter_const_value::kind::object,
-        .atom = std::string(name)});
+    return make_const_value(
+        formatter_const_value::kind::object, std::string(name));
   }
 
   int64_t on_integer(source_range, sign s, uint64_t value) {
@@ -1047,6 +1049,17 @@ class formatter_parser_actions {
     std::vector<formatter_type_ref> result;
     result.push_back(std::move(type));
     return result;
+  }
+
+  static const_value_type make_const_value(
+      formatter_const_value::kind type, std::string atom = {}) {
+    return std::make_unique<formatter_const_value>(formatter_const_value{
+        .type = type,
+        .range = {},
+        .atom = std::move(atom),
+        .list_values = {},
+        .map_values = {},
+    });
   }
 
   void add_statement(formatter_statement statement) {

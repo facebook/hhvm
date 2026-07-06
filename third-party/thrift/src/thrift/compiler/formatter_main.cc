@@ -17,6 +17,7 @@
 #include <thrift/compiler/generate/formatter.h>
 
 #include <fmt/core.h>
+#include <folly/Unicode.h>
 
 #include <exception>
 #include <filesystem>
@@ -238,41 +239,59 @@ bool write_file(
   return true;
 }
 
+void append_json_ascii(std::string& result, unsigned char c) {
+  switch (c) {
+    case '"':
+      result += "\\\"";
+      break;
+    case '\\':
+      result += "\\\\";
+      break;
+    case '\b':
+      result += "\\b";
+      break;
+    case '\f':
+      result += "\\f";
+      break;
+    case '\n':
+      result += "\\n";
+      break;
+    case '\r':
+      result += "\\r";
+      break;
+    case '\t':
+      result += "\\t";
+      break;
+    default:
+      if (c < 0x20) {
+        result += fmt::format("\\u{:04x}", c);
+      } else {
+        result.push_back(static_cast<char>(c));
+      }
+      break;
+  }
+}
+
 std::string json_string(std::string_view value) {
   std::string result;
   result.reserve(value.size() + 2);
   result.push_back('"');
-  for (const unsigned char c : value) {
-    switch (c) {
-      case '"':
-        result += "\\\"";
-        break;
-      case '\\':
-        result += "\\\\";
-        break;
-      case '\b':
-        result += "\\b";
-        break;
-      case '\f':
-        result += "\\f";
-        break;
-      case '\n':
-        result += "\\n";
-        break;
-      case '\r':
-        result += "\\r";
-        break;
-      case '\t':
-        result += "\\t";
-        break;
-      default:
-        if (c < 0x20) {
-          result += fmt::format("\\u{:04x}", c);
-        } else {
-          result.push_back(static_cast<char>(c));
-        }
-        break;
+  auto* begin = reinterpret_cast<const unsigned char*>(value.data());
+  const auto* const end = begin + value.size();
+  while (begin < end) {
+    const auto c = *begin;
+    if (c < 0x80) {
+      append_json_ascii(result, c);
+      ++begin;
+      continue;
     }
+
+    const char32_t code_point = folly::utf8ToCodePoint(begin, end, true);
+    if (code_point == U'\ufffd') {
+      result += "\\ufffd";
+      continue;
+    }
+    folly::appendCodePointToUtf8(code_point, result);
   }
   result.push_back('"');
   return result;

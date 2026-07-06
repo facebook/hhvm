@@ -351,7 +351,6 @@ int main(int argc, char* argv[]) {
   }
   server->setInterface(handler);
   server->setPort(FLAGS_port);
-  server->setPreferIoUring(FLAGS_io_uring);
   server->setIOThreadPool(
       getIOThreadPool("thrift_eventbase", FLAGS_io_threads));
 

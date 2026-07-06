@@ -31,11 +31,11 @@ namespace apache::thrift {
  * processSerializedCompressedRequestWithMetadataImpl and executeRequestImpl
  * accordingly. These two functions are required to return the request struct.
  * If the asyncprocessor does not need to modify the default behavior, the
- * function may simple return passed in structs.
+ * function may simply return passed in structs.
  *
  * Optionally, derived class may choose to override inner() function to control
- * whether delegated processor should be excuted or not after executing logic in
- * impl. If inner() function returns nullptr, the inner processor will not be
+ * whether delegated processor should be executed or not after executing logic
+ * in impl. If inner() function returns nullptr, the inner processor will not be
  * executed.
  */
 class PreprocessingAsyncProcessorWrapper : public AsyncProcessor {

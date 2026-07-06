@@ -15,7 +15,7 @@
  */
 
 #include <cassert>
-#include <fmt/core.h>
+#include <fmt/format.h>
 
 #include <thrift/compiler/ast/scope_identifier.h>
 

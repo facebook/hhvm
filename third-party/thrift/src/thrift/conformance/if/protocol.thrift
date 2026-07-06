@@ -39,6 +39,7 @@ enum StandardProtocol {
   Compact = 2,
   Json = 3,
   SimpleJson = 4,
+  Json5 = 5,
 }
 
 // A struct representation of a protocol.

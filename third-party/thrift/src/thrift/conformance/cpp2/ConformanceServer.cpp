@@ -21,10 +21,17 @@
 #include <folly/init/Init.h>
 #include <thrift/conformance/cpp2/AnyRegistry.h>
 #include <thrift/conformance/cpp2/ConformanceHandler.h>
+#include <thrift/conformance/cpp2/internal/AnyRegistry.h>
+#include <thrift/conformance/data/Json5Registration.h>
 #include <thrift/lib/cpp2/server/ThriftServer.h>
 
 int main(int argc, char** argv) {
   const folly::Init init(&argc, &argv);
+
+  // The generated registry has no Json5 serializer; register it by hand.
+  apache::thrift::conformance::data::registerRoundTripJson5Serializers(
+      apache::thrift::conformance::detail::getGeneratedAnyRegistry());
+
   auto server = std::make_shared<apache::thrift::ThriftServer>();
   auto handler =
       std::make_shared<apache::thrift::conformance::ConformanceHandler>();

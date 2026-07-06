@@ -58,6 +58,14 @@ testing::AssertionResult runRoundTripTest(
       ? *roundTrip.expectedResponse().value_unchecked().value()
       : *roundTrip.request()->value();
 
+  // Json5 serialization is deterministic, so we can compare Anys directly.
+  if (res.value()->protocol() == StandardProtocol::Json5 ||
+      expectedAny.protocol() == StandardProtocol::Json5) {
+    return *res.value() == expectedAny
+        ? testing::AssertionSuccess()
+        : testing::AssertionFailure() << "\nJson5 round-trip mismatch.";
+  }
+
   auto parseAny = [](const Any& a) {
     switch (auto protocol = a.protocol().value_or(StandardProtocol::Compact)) {
       case StandardProtocol::Compact:

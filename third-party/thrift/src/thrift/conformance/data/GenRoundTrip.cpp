@@ -15,13 +15,26 @@
  */
 
 #include <folly/init/Init.h>
+#include <thrift/conformance/cpp2/internal/AnyRegistry.h>
+#include <thrift/conformance/data/Json5Registration.h>
 #include <thrift/conformance/data/TestGenerator.h>
 
+using apache::thrift::conformance::StandardProtocol;
 using apache::thrift::conformance::data::createRoundTripSuite;
 using apache::thrift::conformance::data::serializeToFile;
 
 int main(int argc, char** argv) {
   folly::Init init(&argc, &argv);
+
+  // The generated registry has no Json5 serializer; register it by hand.
+  apache::thrift::conformance::data::registerRoundTripJson5Serializers(
+      apache::thrift::conformance::detail::getGeneratedAnyRegistry());
+
+  // Json5 is not in kDefaultProtocols; request it explicitly.
   serializeToFile<apache::thrift::BinaryProtocolWriter>(
-      createRoundTripSuite(), stdout);
+      createRoundTripSuite(
+          {StandardProtocol::Binary,
+           StandardProtocol::Compact,
+           StandardProtocol::Json5}),
+      stdout);
 }

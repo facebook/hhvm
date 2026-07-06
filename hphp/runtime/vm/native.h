@@ -86,8 +86,16 @@ struct Extension;
  *
  */
 
+// Dispatcher used by REGISTER_NATIVE_FUNC to wrap every registered function
+// pointer in Native::AbiShim. For return types the runtime already handles
+// (StringRet, OptString, int64_t, Variant, ...) AbiShim's primary template is
+// the identity, so the registered pointer is byte-identical to `fp`. For
+// return types that need conversion (currently only HPHP::String → StringRet)
+// AbiShim's partial specialization registers a synthesized shim instead.
+#define HHVM_ABI_SHIM(fp) (Native::AbiShim<fp>::call)
+
 #define REGISTER_NATIVE_FUNC(functable, name, f) do { \
-  Native::registerNativeFunc(functable, name, f); \
+  Native::registerNativeFunc(functable, name, HHVM_ABI_SHIM(f)); \
 } while(0)
 
 #define HHVM_FN(fn) f_ ## fn
@@ -181,6 +189,34 @@ struct Extension;
     makeStaticString(#const_name), bool{const_value});
 
 namespace HPHP { namespace Native {
+//////////////////////////////////////////////////////////////////////////////
+
+// Dispatcher used by REGISTER_NATIVE_FUNC to wrap every registered function
+// pointer. The primary template is the identity: `call` is the function
+// pointer itself, so registration is byte-identical to passing the raw
+// pointer. Partial specializations on a specific user return type can
+// synthesize a shim that drains the user-facing RAII type into a POD ABI
+// return type without changing the call's runtime ABI.
+template<auto F>
+struct AbiShim {
+  static constexpr auto call = F;
+};
+
+// Specialization: when the user body returns HPHP::String (RAII non-null),
+// synthesize a shim that drains it into POD StringRet for the ABI. The drain
+// logic itself lives on String (see String::asRet in type-nonnull-ret.h);
+// this just calls it.
+template<typename... Args, HPHP::String(*F)(Args...)>
+struct AbiShim<F> {
+  // StringRet must remain register-returnable (POD 8B in %rax) for this shim
+  // to compile to a register-return ABI. If StringRet ever stops being
+  // trivially-copyable, this assert fires before the silent ABI breakage does.
+  static_assert(std::is_trivially_copyable_v<StringRet>);
+  static constexpr auto call = +[](Args... args) -> StringRet {
+    return F(args...).asRet();
+  };
+};
+
 //////////////////////////////////////////////////////////////////////////////
 
 // Maximum number of args for a native function call

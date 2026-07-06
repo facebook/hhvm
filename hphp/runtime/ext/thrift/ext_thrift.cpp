@@ -288,7 +288,7 @@ Object HHVM_METHOD(RpcOptions, setSerializedAuthProofs, const OptString& payload
   return Object(this_);
 }
 
-OptString HHVM_METHOD(RpcOptions, __toString) {
+String HHVM_METHOD(RpcOptions, __toString) {
   auto data = RpcOptions::GetDataOrThrowException(this_);
   std::string result("RpcOptions(");
   result += "chunkBufferSize: " +
@@ -314,7 +314,7 @@ OptString HHVM_METHOD(RpcOptions, __toString) {
   }
   result += "}";
   result += ")\n";
-  return result;
+  return String{result};
 }
 
 ///////////////////////////////////////////////////////////////////////////////

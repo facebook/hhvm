@@ -117,9 +117,7 @@ final class RpcOptions implements IPureStringishObject {
   public function setSerializedAuthProofs(string $serializedTokenData)[write_props]: RpcOptions;
 
   <<__Native>>
-  /* HH_FIXME[4341] override */
-  /* HH_FIXME[3020] __toString returns `?string` to match underlying OptString */
-  public function __toString()[]: ?string;
+  public function __toString()[]: string;
 }
 
 final class ThriftApplicationException extends Exception {

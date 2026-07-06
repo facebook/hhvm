@@ -27,6 +27,13 @@
 
 namespace HPHP {
 
+// Forward decl for `StringRet` (defined in type-nonnull-ret.h after this file).
+template<class T, class I> struct NonNullReturnType;
+
+namespace Native {
+template<auto> struct AbiShim;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 struct VarNR;
@@ -415,6 +422,36 @@ public:
 
 extern const OptString null_string;
 
+/**
+ * Represents non-null hack `string` values. This type must take care to ensure
+ * that no nulls make it into m_str e.g. when moving.
+ */
+struct String {
+public:
+  String() = delete;
+  String(const String&) = delete;
+  String(String&&) = delete;
+
+  explicit String(const std::string& s)
+    : m_str(StringData::Make(s.data(), s.size(), CopyString),
+            req::ptr<StringData>::NoIncRef{}) {}
+
+  // StaticString is expected to be non-null and persistent, so we can freely
+  // create a String from one.
+  /* implicit */ String(const StaticString& s);
+
+private:
+  using NoIncRef = req::ptr<StringData>::NoIncRef;
+  req::ptr<StringData> m_str;
+  
+  // Drain the underlying StringData* into the POD ABI return type. Only
+  // callable by Native::AbiShim — the friend grant below limits the
+  // can-leave-this-String-empty drain path to the registration shim machinery.
+  // Defined inline in type-nonnull-ret.h after `StringRet` is visible.
+  NonNullReturnType<StringData, OptString> asRet() &&;
+  template<auto> friend struct Native::AbiShim;
+};
+
 ///////////////////////////////////////////////////////////////////////////////
 // StrNR
 
@@ -529,6 +566,9 @@ inline OptString& OptString::operator=(const StaticString& v) {
   m_str = req::ptr<StringData>::attach(v.m_str.get());
   return *this;
 }
+
+inline String::String(const StaticString& s)
+  : m_str(s.get(), NoIncRef{}) {}
 
 //////////////////////////////////////////////////////////////////////
 

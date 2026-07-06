@@ -22,6 +22,8 @@
 #include "hphp/runtime/base/type-object.h"
 #include "hphp/runtime/base/type-resource.h"
 
+#include <type_traits>
+
 
 namespace HPHP {
 
@@ -48,3 +50,7 @@ using ArrayRet = HPHP::NonNullReturnType<HPHP::ArrayData, HPHP::Array>;
 using StringRet = HPHP::NonNullReturnType<HPHP::StringData, HPHP::OptString>;
 using ObjectRet = HPHP::NonNullReturnType<HPHP::ObjectData, HPHP::Object>;
 using ResourceRet = HPHP::NonNullReturnType<HPHP::ResourceData, HPHP::OptResource>;
+
+inline StringRet HPHP::String::asRet() && {
+  return StringRet::attach(m_str.detach());
+}

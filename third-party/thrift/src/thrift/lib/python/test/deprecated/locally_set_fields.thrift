@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+// @lint-ignore-every THRIFTURI
+
 // Minimal structs exercising `get_locally_set_fields()`. The thrift_library compiling
 // this file passes `thrift_python_options = ["enable_isset_deprecated_unsafe"]`,
 // which enables `get_locally_set_fields()` for every struct in the library.
@@ -69,6 +71,7 @@ struct mixed {
   9: optional i32 opt_int = 1;
 }
 
+@thrift.Sealed
 struct Nested {
   1: i32 num;
   2: optional string label;

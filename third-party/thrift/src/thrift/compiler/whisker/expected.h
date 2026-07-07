@@ -251,7 +251,6 @@ class expected {
       !std::is_same_v<std::remove_cvref_t<U>, expected> &&
       // operator=(const unexpected<G>&) has own overload
       !detail::is_specialization_v<std::remove_cvref_t<U>, unexpected> &&
-      std::is_constructible_v<T, U> && std::is_assignable_v<T&, U> &&
       // re-init rollback possible in case of exception
       (std::is_nothrow_constructible_v<T, U> ||
        std::is_nothrow_move_constructible_v<T> ||

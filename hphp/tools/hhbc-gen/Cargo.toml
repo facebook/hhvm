@@ -16,4 +16,4 @@ maplit = "1.0"
 
 [build-dependencies]
 anyhow = "1.0.103"
-cc = "1.2.65"
+cc = "1.2.66"

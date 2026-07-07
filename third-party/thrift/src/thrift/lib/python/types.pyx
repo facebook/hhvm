@@ -1521,8 +1521,12 @@ cdef class Struct(StructOrUnion):
         return _fbthrift_compare_struct_less(self, other, True)
 
     def __hash__(Struct self):
-        value_tuple = tuple(v for _, v in self)
-        return hash(value_tuple if value_tuple else type(self))
+        if (<StructInfo>self._fbthrift_struct_info).enable_isset_deprecated:
+            # Mirror __eq__: isset bits are in the tuple but not part of value
+            # equality, so hash materialized values instead.
+            value_tuple = tuple(v for _, v in self)
+            return hash(value_tuple if value_tuple else type(self))
+        return hash(self._fbthrift_data) if self._fbthrift_data else hash(type(self))
 
     def __iter__(self):
         cdef StructInfo info = self._fbthrift_struct_info

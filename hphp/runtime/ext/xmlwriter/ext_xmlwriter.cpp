@@ -530,7 +530,7 @@ struct XMLWriterData {
       }
       return ret;
     }
-    return empty_string();
+    return String::Empty();
   }
 
   OptString outputMemory(const Variant& flush /*= true*/) {

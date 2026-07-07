@@ -63,7 +63,7 @@ OptString StringBuffer::detach() {
     m_cap = 0;
     return str;
   }
-  return empty_string();
+  return String::Empty();
 }
 
 OptString StringBuffer::copy() const {

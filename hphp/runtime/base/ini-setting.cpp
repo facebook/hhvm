@@ -1302,7 +1302,7 @@ Array IniSetting::GetAll(const OptString& ext_name, bool details) {
 }
 
 std::string IniSetting::GetAllAsJSON() {
-  Array settings = GetAll(empty_string(), true);
+  Array settings = GetAll(String::Empty(), true);
   auto const opts = k_JSON_FB_FORCE_HACK_ARRAYS;
   OptString out = Variant::attach(HHVM_FN(json_encode)(settings, opts)).toString();
   return std::string(out.c_str());

@@ -452,7 +452,7 @@ struct ChunkedDecompressor {
   OptString inflateChunk(const OptString& chunk) {
     if (m_eof) {
       raise_warning("Tried to inflate after final chunk");
-      return empty_string();
+      return String::Empty();
     }
     m_zstream.next_in = (Bytef*) chunk.data();
     m_zstream.avail_in = chunk.length();

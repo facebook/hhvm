@@ -361,7 +361,7 @@ SSATmp* opt_hphp_debug_caller_info(IRGS& env, const ParamPrep& params) {
 SSATmp* opt_hphp_debug_caller_identifier(IRGS& env, const ParamPrep& params) {
   if (params.size() != 0) return nullptr;
 
-  OptString result = empty_string();
+  OptString result = String::Empty();
   auto skipped = false;
   auto found = false;
 

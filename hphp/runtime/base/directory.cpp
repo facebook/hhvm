@@ -118,7 +118,7 @@ bool ArrayDirectory::isEof() const {
 
 OptString ArrayDirectory::path() {
   if (!m_it) {
-    return empty_string();
+    return String::Empty();
   }
 
   auto entry = m_it.second();

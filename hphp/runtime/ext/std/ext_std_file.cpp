@@ -1326,7 +1326,7 @@ Variant HHVM_FUNCTION(pathinfo,
 
   if ((opt & PHP_PATHINFO_EXTENSION) == PHP_PATHINFO_EXTENSION) {
     int pos = basename.rfind('.');
-    OptString extension(empty_string());
+    OptString extension(String::Empty());
     if (pos >= 0) {
       extension = basename.substr(pos + 1);
       ret.set(s_extension, extension);
@@ -1338,7 +1338,7 @@ Variant HHVM_FUNCTION(pathinfo,
 
   if ((opt & PHP_PATHINFO_FILENAME) == PHP_PATHINFO_FILENAME) {
     int pos = basename.rfind('.');
-    OptString filename(empty_string());
+    OptString filename(String::Empty());
     if (pos >= 0) {
       filename = basename.substr(0, pos);
     } else {

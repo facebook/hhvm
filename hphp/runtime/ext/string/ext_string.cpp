@@ -787,7 +787,7 @@ static Variant substr_replace(const Variant& str, const Variant& replacement,
         repl = replIter.second().toString();
         ++replIter;
       } else {
-        repl = empty_string();
+        repl = String::Empty();
       }
       auto s2 = string_replace(str, nStart, nLength, repl);
       ret.append(s2);
@@ -903,7 +903,7 @@ OptString HHVM_FUNCTION(str_repeat,
   }
 
   if (multiplier == 0) {
-    return empty_string();
+    return String::Empty();
   }
 
   if (input.size() == 1) {

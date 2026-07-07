@@ -239,7 +239,7 @@ OptString HHVM_FUNCTION(long2ip, const OptString& proper_address) {
   try {
     return folly::IPAddress::fromLongHBO(ul).str();
   } catch (folly::IPAddressFormatException& ) {
-    return empty_string();
+    return String::Empty();
   }
 }
 

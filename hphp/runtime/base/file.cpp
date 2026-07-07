@@ -85,13 +85,13 @@ OptString File::TranslatePathKeepRelative(const char* filename, uint32_t size) {
 
     // disallow access with an absolute path
     if (FileUtil::isAbsolutePath(canonicalized.slice())) {
-      return empty_string();
+      return String::Empty();
     }
 
     // unresolvable paths are all considered as unsafe
     if (canonicalized.find("..") >= 0) {
       assertx(canonicalized.find("..") == 0);
-      return empty_string();
+      return String::Empty();
     }
   }
 
@@ -648,7 +648,7 @@ Variant File::readRecord(const OptString& delimiter, int64_t maxlen /* = 0 */) {
     return s;
   }
 
-  return empty_string();
+  return Variant{String::Empty()};
 }
 
 int64_t File::print() {

@@ -687,7 +687,7 @@ static TypedValue HHVM_FUNCTION(idate,
 template<bool gmt>
 static TypedValue date_impl(const OptString& format, TypedValue timestamp) {
   if (!gmt && format.empty()) {
-    return tvReturn(empty_string());
+    return tvReturn(String::Empty());
   }
 
   OptString ret = req::make<DateTime>(

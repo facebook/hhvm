@@ -97,7 +97,7 @@ OptString HHVM_FUNCTION(server_warmup_status) {
     return "JitSerdesMode is SerializeAndExit";
   }
 
-  return empty_string();
+  return String::Empty();
 }
 
 OptString HHVM_FUNCTION(server_warmup_status_monotonic) {

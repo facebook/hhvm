@@ -385,7 +385,7 @@ OptString FileUtil::relativePath(const std::string& fromDir,
   // Sanity checks
   if (!isAbsolutePath(fromDir) || !isAbsolutePath(toFile.slice()) ||
       !isDirSeparator(fromDir[fromDir.size() - 1])) {
-    return empty_string();
+    return String::Empty();
   }
 
   // Maybe we're lucky and this is an easy case

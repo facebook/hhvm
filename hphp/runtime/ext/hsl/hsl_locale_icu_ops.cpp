@@ -414,7 +414,7 @@ OptString HSLLocaleICUOps::slice(const OptString& str, int64_t offset, int64_t l
   if (length < 0) {
     length += char32_full_len;
     if (length <= 0) {
-      return empty_string();
+      return String::Empty();
     }
   }
 
@@ -593,7 +593,7 @@ OptString HSLLocaleICUOps::trim_impl(const OptString& str,
     }
   }
   if (end <= start) {
-    return empty_string();
+    return String::Empty();
   }
   std::string ret;
   ustr.tempSubStringBetween(start, end).toUTF8String(ret);

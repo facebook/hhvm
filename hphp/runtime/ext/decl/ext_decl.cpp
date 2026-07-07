@@ -687,13 +687,13 @@ struct FileDecls : SystemLib::ClassLoader<"HH\\FileDecls"> {
   ~FileDecls() {}
 
   void validateState() {
-    if (!this->declsHolder || this->error != empty_string()) {
+    if (!this->declsHolder || this->error != String::Empty()) {
       SystemLib::throwInvalidOperationExceptionObject(
           "FileDecls is in erroneous state");
     }
   }
 
-  OptString error = empty_string();
+  OptString error = String::Empty();
   std::shared_ptr<rust::Box<hackc::DeclsHolder>> declsHolder;
 
   void sweep() {

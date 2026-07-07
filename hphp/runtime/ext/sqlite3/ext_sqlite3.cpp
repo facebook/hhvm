@@ -340,7 +340,7 @@ OptString HHVM_STATIC_METHOD(SQLite3, escapestring,
       return sret;
     }
   }
-  return empty_string();
+  return String::Empty();
 }
 
 Variant HHVM_METHOD(SQLite3, prepare,

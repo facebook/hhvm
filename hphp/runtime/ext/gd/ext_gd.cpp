@@ -796,7 +796,7 @@ static int php_read_APP(const req::ptr<File>& stream,
   OptString buffer;
   if (length == 0) {
     // avoid stream reads of length 0, they trigger a notice
-    buffer = empty_string();
+    buffer = String::Empty();
   } else {
     buffer = stream->read(length);
   }
@@ -5511,7 +5511,7 @@ static OptString exif_get_sectionname(int section) {
   case SECTION_WINXP:     return s_WINXP;
   case SECTION_MAKERNOTE: return s_MAKERNOTE;
   }
-  return empty_string();
+  return String::Empty();
 }
 
 static tag_table_type exif_get_tag_table(int section) {

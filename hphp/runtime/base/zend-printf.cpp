@@ -322,7 +322,7 @@ OptString string_printf(const char *format, int len, const Array& args) {
   }
 
   if (len == 0) {
-    return empty_string();
+    return String::Empty();
   }
 
   int size = 256 - kStringOverhead;

@@ -336,7 +336,7 @@ OptString ExecutionContext::obCopyContents() {
       return oss.copy();
     }
   }
-  return empty_string();
+  return String::Empty();
 }
 
 OptString ExecutionContext::obDetachContents() {
@@ -346,7 +346,7 @@ OptString ExecutionContext::obDetachContents() {
       return oss.detach();
     }
   }
-  return empty_string();
+  return String::Empty();
 }
 
 int ExecutionContext::obGetContentLength() {
@@ -905,7 +905,7 @@ bool ExecutionContext::callUserErrorHandler(const Exception& e, int errnum,
   }
   if (!m_userErrorHandlers.empty() &&
       (m_userErrorHandlers.back().second & errnum) != 0) {
-    auto fileAndLine = std::make_pair(empty_string(), 0);
+    std::pair<OptString, int> fileAndLine{String::Empty(), 0};
     Variant backtrace;
     if (auto const ee = dynamic_cast<const ExtendedException*>(&e)) {
       fileAndLine = ee->getFileAndLine();
@@ -982,7 +982,7 @@ bool ExecutionContext::onFatalError(const Exception& e) {
   recordLastError(e, errnum);
 
   bool silenced = false;
-  auto fileAndLine = std::make_pair(empty_string(), 0);
+  std::pair<OptString, int> fileAndLine{String::Empty(), 0};
   if (auto const ee = dynamic_cast<const ExtendedException*>(&e)) {
     silenced = ee->isSilent();
     fileAndLine = ee->getFileAndLine();

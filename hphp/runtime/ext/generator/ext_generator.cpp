@@ -151,7 +151,7 @@ OptString HHVM_METHOD(Generator, getCalledClass) {
     return cls->nameStr();
   }
 
-  return empty_string();
+  return String::Empty();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

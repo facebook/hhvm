@@ -120,7 +120,7 @@ OptString StringUtil::Implode(const Variant& items, const OptString& delim,
     throw_param_is_not_container();
   }
   int size = getContainerSize(items);
-  if (size == 0) return empty_string();
+  if (size == 0) return String::Empty();
 
   req::vector<OptString> sitems;
   sitems.reserve(size);
@@ -218,7 +218,7 @@ OptString StringUtil::HtmlEncode(const OptString& input, const int64_t qsBitmask
   char *ret = string_html_encode(input.data(), len,
                                  qsBitmask, utf8, dEncode, htmlEnt);
   if (!ret) {
-    return empty_string();
+    return String::Empty();
   }
   return OptString(ret, len, AttachString);
 }

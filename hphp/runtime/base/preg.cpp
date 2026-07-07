@@ -1209,7 +1209,7 @@ static Variant preg_match_impl(StringData* pattern,
       : Variant(match);
   };
   auto const get_value_empty = [&](int i) {
-    auto const match = empty_string();
+    const OptString match = String::Empty();
     return offset_capture
       ? Variant(str_offset_pair(match, offsets[i<<1]))
       : Variant(match);
@@ -1306,7 +1306,7 @@ static Variant preg_match_impl(StringData* pattern,
             for (; i < num_subpats; i++) {
               auto& arr = asArrRef(match_sets.lval(i));
               assertx(arr->isVectorData());
-              arr.set(safe_cast<int64_t>(arr.size()), empty_string());
+              arr.set(safe_cast<int64_t>(arr.size()), Variant{String::Empty()});
             }
           } else {
             auto result_set = Array::CreateDict();

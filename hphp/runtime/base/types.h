@@ -38,7 +38,7 @@ struct Variant;
 extern const OptString null_string;
 extern const Array null_array;
 
-// Use empty_string() if you're returning String
+// Use String::Empty() if you're returning String
 // Use empty_string_tv() if you're returning TypedValue
 // Or use these if you need to pass by const reference:
 extern const StaticString empty_string_ref; // const StaticString&

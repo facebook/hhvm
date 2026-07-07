@@ -264,7 +264,7 @@ struct ChunkedBunzipper {
   OptString inflateChunk(const OptString& chunk) {
     if (m_eof) {
       raise_warning("Tried to inflate after final chunk");
-      return empty_string();
+      return String::Empty();
     }
     m_bzstream.next_in = (char *) chunk.data();
     m_bzstream.avail_in = chunk.length();

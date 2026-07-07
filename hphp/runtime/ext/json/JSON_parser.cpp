@@ -999,7 +999,7 @@ static int pop(json_parser *json, Mode mode) {
 }
 
 static OptString copy_and_clear(UncheckedBuffer &buf) {
-  auto ret = buf.size() > 0 ? buf.copy() : empty_string();
+  auto ret = buf.size() > 0 ? buf.copy() : String::Empty();
   buf.clear();
   return ret;
 }

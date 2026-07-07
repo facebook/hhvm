@@ -711,7 +711,7 @@ static inline OptString sxe_xmlNodeListGetString(xmlDocPtr doc, xmlNodePtr list,
     xmlFree(tmp);
     return ret;
   } else {
-    return empty_string();
+    return String::Empty();
   }
 }
 
@@ -1489,7 +1489,7 @@ static Array HHVM_METHOD(SimpleXMLElement, getDocNamespaces,
 }
 
 static Variant HHVM_METHOD(SimpleXMLElement, children,
-                           const OptString& ns = empty_string(),
+                           const OptString& ns = String::Empty(),
                            bool is_prefix = false) {
   auto data = Native::data<SimpleXMLElement>(this_);
   if (data->iter.type == SXE_ITER_ATTRLIST) {
@@ -1509,7 +1509,7 @@ static OptString HHVM_METHOD(SimpleXMLElement, getName) {
   if (node) {
     return OptString((char*)node->name);
   }
-  return empty_string();
+  return String::Empty();
 }
 
 static Variant HHVM_METHOD(SimpleXMLElement, attributes,

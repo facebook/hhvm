@@ -177,7 +177,7 @@ bool hphp_debug_caller_identifier_impl(
  * function that called the callee as the "caller".
  */
 OptString HHVM_FUNCTION(hphp_debug_caller_identifier) {
-  OptString result = empty_string();
+  OptString result = String::Empty();
   bool skipped = false;
   walkStack([&] (const BTFrame& frm) {
     return hphp_debug_caller_identifier_impl(

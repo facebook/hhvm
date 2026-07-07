@@ -1701,7 +1701,7 @@ OptString ObjectData::invokeToString() {
     );
     // If the user error handler decides to allow execution to continue,
     // we return the empty string.
-    return empty_string();
+    return String::Empty();
   }
   if (Cfg::Eval::NoticeOnImplicitInvokeToString) {
     raiseImplicitInvokeToString();
@@ -1720,7 +1720,7 @@ OptString ObjectData::invokeToString() {
       m_cls->preClass()->name()->data());
     // If the user error handler decides to allow execution to continue,
     // we return the empty string.
-    return empty_string();
+    return String::Empty();
   }
 
   if (tvIsString(tv)) return OptString::attach(val(tv).pstr);

@@ -288,7 +288,7 @@ static OptString intl_convert_str_utf8_to_utf16(const OptString& utf8_str,
                              utf8_str.data(), utf8_str.length(),
                              status);
   if (U_FAILURE(*status)) {
-    return empty_string();
+    return String::Empty();
   }
   return OptString((char*)ustr, UBYTES(ustr_len), AttachString);
 }

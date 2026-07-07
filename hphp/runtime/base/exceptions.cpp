@@ -109,7 +109,7 @@ Array ExtendedException::getBacktrace() const {
 }
 
 std::pair<OptString, int> ExtendedException::getFileAndLine() const {
-  OptString file = empty_string();
+  OptString file = String::Empty();
   int line = 0;
   Array bt = getBacktrace();
   if (!bt.empty()) {

@@ -199,7 +199,7 @@ Array HHVM_FUNCTION(hphp_get_extension_info, const OptString& name) {
   return make_dict_array(
     s_name,      name,
     s_version,   ext ? ext->getVersion() : "",
-    s_info,      empty_string(),
+    s_info,      String::Empty(),
     s_ini,       empty_dict_array(),
     s_constants, empty_dict_array(),
     s_functions, empty_dict_array(),
@@ -2296,7 +2296,7 @@ static OptString HHVM_METHOD(ReflectionProperty, getTypeText) {
       reflection_property_internal_error();
   }
   if (type == nullptr || type->empty()) {
-    return empty_string();
+    return String::Empty();
   } else {
     return StrNR(type);
   }
@@ -2387,7 +2387,7 @@ static OptString HHVM_METHOD(ReflectionTypeAlias, __init, const OptString& name)
   auto const typeAlias = TypeAlias::load(name.get());
 
   if (!typeAlias) {
-    return empty_string();
+    return String::Empty();
   }
 
   ReflectionTypeAliasHandle::Get(this_)->setTypeAlias(typeAlias);

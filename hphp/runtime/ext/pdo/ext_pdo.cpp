@@ -682,7 +682,7 @@ static bool do_fetch_class_prepare(sp_PDOStatement stmt) {
   if (clsname.empty()) {
     stmt->fetch.clsname = "stdClass";
   }
-  stmt->fetch.constructor = empty_string(); //NULL;
+  stmt->fetch.constructor = String::Empty(); //NULL;
   HPHP::Class* cls = HPHP::Class::load(clsname.get());
   if (cls) {
     const HPHP::Func* method = cls->getDeclaredCtor();

@@ -458,7 +458,7 @@ OptString CmdInfo::GetModifier(const Array& info, const OptString& name) {
   if (info[name].toBoolean()) {
     return name + " ";
   }
-  return empty_string();
+  return String::Empty();
 }
 
 OptString CmdInfo::FindSubSymbol(const Array& symbols, const std::string &symbol) {

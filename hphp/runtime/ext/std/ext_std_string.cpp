@@ -32,7 +32,7 @@ Variant HHVM_FUNCTION(wordwrap, const OptString& str, int64_t linewidth /* = 75 
   size_t brklen = brk.size();
 
   if (textlen == 0) {
-    return empty_string();
+    return Variant{String::Empty()};
   }
   if (brklen == 0) {
     SystemLib::throwInvalidArgumentExceptionObject("Break string cannot be empty");

@@ -119,7 +119,7 @@ static bool get_sockaddr(sockaddr *sa, socklen_t salen,
         const auto actual_path_len = ::strnlen(s_un->sun_path, max_path_len);
         address = OptString(s_un->sun_path, actual_path_len, CopyString);
       } else {
-        address = empty_string();
+        address = String::Empty();
       }
 #endif
     }
@@ -1101,7 +1101,7 @@ Variant socket_server_impl(
   const Variant& context /* = uninit_variant */
 ) {
   errnum = 0;
-  errstr = empty_string();
+  errstr = String::Empty();
   auto sock = create_new_socket(hosturl, errnum, errstr, context);
   if (!sock) {
     return false;
@@ -1483,7 +1483,7 @@ Variant sockopen_impl(const HostURL &hosturl, Variant& errnum,
                       Variant& errstr, double timeout, bool persistent,
                       const Variant& context) {
   errnum = 0;
-  errstr = empty_string();
+  errstr = String::Empty();
   std::string key;
   if (persistent) {
     key = hosturl.getHostURL() + ":" +
@@ -1562,7 +1562,7 @@ OptString ipaddr_convert(struct sockaddr *addr, int addrlen) {
 
   if (error) {
     raise_warning("%s", gai_strerror(error));
-    return empty_string();
+    return String::Empty();
   }
   return OptString(buffer, CopyString);
 }

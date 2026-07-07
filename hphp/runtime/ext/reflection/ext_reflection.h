@@ -129,7 +129,7 @@ struct ReflectionClassHandle : SystemLib::ClassLoader<"ReflectionClass"> {
   }
   OptString init(const OptString& name) {
     auto const cls = Class::load(name.get());
-    if (!cls) return empty_string();
+    if (!cls) return String::Empty();
     setClass(cls);
     return cls->nameStr();
   }
@@ -150,7 +150,7 @@ struct ReflectionClassHandle : SystemLib::ClassLoader<"ReflectionClass"> {
   }
 
   Variant sleep() const {
-    return m_cls ? OptString(m_cls->nameStr()) : empty_string();
+    return m_cls ? OptString(m_cls->nameStr()) : String::Empty();
   }
 
   void wakeup(const Variant& content, ObjectData* obj);

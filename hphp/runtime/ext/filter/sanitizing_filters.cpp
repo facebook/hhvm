@@ -33,7 +33,7 @@ static OptString php_filter_encode_html(const OptString& value,
   unsigned char *e = s + len;
 
   if (len == 0) {
-    return empty_string();
+    return String::Empty();
   }
   StringBuffer str(len);
 

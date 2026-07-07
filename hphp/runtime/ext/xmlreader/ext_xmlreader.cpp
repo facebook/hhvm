@@ -270,7 +270,7 @@ OptString XMLReader::read_string_func(xmlreader_read_char_t internal_function) {
     xmlFree(retchar);
     return ret;
   } else {
-    return empty_string();
+    return String::Empty();
   }
 }
 

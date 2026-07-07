@@ -204,7 +204,7 @@ OptString HHVM_FUNCTION(exec,
   checkExecAllowed(false);
   ShellExecContext ctx;
   FILE *fp = ctx.exec(command);
-  if (!fp) return empty_string();
+  if (!fp) return String::Empty();
   StringBuffer sbuf;
   sbuf.read(fp);
 
@@ -257,7 +257,7 @@ OptString HHVM_FUNCTION(system,
   checkExecAllowed(false);
   ShellExecContext ctx;
   FILE *fp = ctx.exec(command);
-  if (!fp) return empty_string();
+  if (!fp) return String::Empty();
   StringBuffer sbuf;
   if (fp) {
     sbuf.read(fp);

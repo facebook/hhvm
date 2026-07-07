@@ -30,6 +30,8 @@ namespace HPHP {
 // Forward decl for `StringRet` (defined in type-nonnull-ret.h after this file).
 template<class T, class I> struct NonNullReturnType;
 
+struct String;
+
 namespace Native {
 template<auto> struct AbiShim;
 }
@@ -137,6 +139,8 @@ public:
 
   // Move ctor
   /* implicit */ OptString(OptString&& str) noexcept : m_str(std::move(str.m_str)) {}
+
+  /* implicit */ OptString(String&& src) noexcept;
 
   // Move assign
   OptString& operator=(OptString&& src) {
@@ -440,16 +444,32 @@ public:
   // create a String from one.
   /* implicit */ String(const StaticString& s);
 
+  static String Empty() noexcept;
+
+  StringData* get() const { return m_str.get(); }
+
 private:
   using NoIncRef = req::ptr<StringData>::NoIncRef;
   req::ptr<StringData> m_str;
-  
+
   // Drain the underlying StringData* into the POD ABI return type. Only
   // callable by Native::AbiShim — the friend grant below limits the
   // can-leave-this-String-empty drain path to the registration shim machinery.
   // Defined inline in type-nonnull-ret.h after `StringRet` is visible.
   NonNullReturnType<StringData, OptString> asRet() &&;
   template<auto> friend struct Native::AbiShim;
+
+  // Helper for move ops. Unlike OptString, which gets a nullptr via
+  // req::ptr's move ctor, we swap in a "" for moved Strings to preserve
+  // correctness for the Hack `string` type.
+  req::ptr<StringData> detach() noexcept;
+
+  friend struct OptString;
+
+  // Unsafe utility constructor held private to avoid accidental nulls
+  explicit String(StringData* sd, NoIncRef) noexcept : m_str(sd, NoIncRef{}) {
+    assertx(sd);
+  }
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -574,13 +594,21 @@ inline String::String(const StaticString& s)
 
 extern const StaticString empty_string_ref;
 
-ALWAYS_INLINE OptString empty_string() {
-  return OptString::attach(staticEmptyString());
-}
-
 ALWAYS_INLINE TypedValue empty_string_tv() {
   return make_tv<KindOfPersistentString>(staticEmptyString());
 }
+
+inline String String::Empty() noexcept {
+  return String{staticEmptyString(), NoIncRef{}};
+}
+
+inline req::ptr<StringData> String::detach() noexcept {
+  auto old = std::move(m_str);
+  m_str = req::ptr<StringData>::attach(staticEmptyString());
+  return old;
+}
+
+inline OptString::OptString(String&& src) noexcept : m_str(src.detach()) {}
 
 //////////////////////////////////////////////////////////////////////
 

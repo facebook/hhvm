@@ -110,11 +110,11 @@ static OptString HHVM_FUNCTION(get_current_user) {
   passwd* pw;
   if (getpwuid_r(uid, &buf.ent, buf.data.get(), buf.size, &pw) != 0) {
     // Unable to lookup the current user.
-    return empty_string();
+    return String::Empty();
   }
   if (pw == nullptr) {
     // Current user does not exist.
-    return empty_string();
+    return String::Empty();
   }
 
   OptString ret(pw->pw_name, CopyString);

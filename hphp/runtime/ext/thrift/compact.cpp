@@ -1463,7 +1463,7 @@ struct CompactReader {
         return s;
       } else {
         transport.skip(size);
-        return empty_string();
+        return String::Empty();
       }
     }
 

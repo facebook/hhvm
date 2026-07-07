@@ -258,7 +258,7 @@ static Variant unserialize_if_serialized(const char *payload,
     );
   } else {
     if (payload_len == 0) {
-      ret = empty_string();
+      ret = String::Empty();
     } else {
       ret = OptString(payload, payload_len, CopyString);
     }

@@ -395,7 +395,7 @@ static int64_t HHVM_METHOD(UConverter, getErrorCode) {
 }
 
 static OptString HHVM_METHOD(UConverter, getErrorMessage) {
-  FETCH_CNV(data, this_, empty_string());
+  FETCH_CNV(data, this_, String::Empty());
   return data->getErrorMessage();
 }
 

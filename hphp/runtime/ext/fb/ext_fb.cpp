@@ -1192,7 +1192,7 @@ static OptString fb_utf8_substr_simple(const OptString& str,
   if (str.size() <= 0 ||
       str.size() > INT_MAX ||
       firstCodePoint >= srcLenBytes) {
-    return empty_string();
+    return String::Empty();
   }
 
   // Cannot be more code points than bytes in input.  This typically reduces
@@ -1213,7 +1213,7 @@ static OptString fb_utf8_substr_simple(const OptString& str,
                             (uint64_t)numDesiredCodePoints *
                             U8_LENGTH(SUBSTITUTION_CHARACTER));
   if (dstMaxLenBytes > INT_MAX) {
-    return empty_string(); // Too long.
+    return String::Empty(); // Too long.
   }
   OptString dstStr(dstMaxLenBytes, ReserveString);
   char* dstBuf = dstStr.mutableData();
@@ -1245,7 +1245,7 @@ static OptString fb_utf8_substr_simple(const OptString& str,
     dstStr.shrink(dstPosBytes);
     return dstStr;
   }
-  return empty_string();
+  return String::Empty();
 }
 
 OptString HHVM_FUNCTION(fb_utf8_substr, const OptString& str, int64_t start,
@@ -1271,7 +1271,7 @@ OptString HHVM_FUNCTION(fb_utf8_substr, const OptString& str, int64_t start,
     }
   }
   if (start < 0 || length <= 0) {
-    return empty_string(); // Empty result
+    return String::Empty(); // Empty result
   }
 
   return fb_utf8_substr_simple(str, start, length);

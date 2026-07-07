@@ -369,7 +369,7 @@ struct VariantControllerImpl {
     return createStaticString(str, len);
   }
   static StringType getStaticEmptyString() {
-    return empty_string();
+    return String::Empty();
   }
   static char* getMutablePtr(StringType& s) {
     return s.mutableData();

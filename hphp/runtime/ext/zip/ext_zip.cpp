@@ -230,7 +230,7 @@ struct ZipEntry : SweepableResourceData {
       sb.resize(n);
       return sb.detach();
     }
-    return empty_string();
+    return String::Empty();
   }
 
   uint64_t getCompressedSize() {

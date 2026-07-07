@@ -467,7 +467,7 @@ static Variant dom_canonicalization(xmlNodePtr nodep, const OptString& file,
       if (ret > 0) {
         retval = OptString((char *)xmlOutputBufferGetContent(buf), ret, CopyString);
       } else {
-        retval = empty_string();
+        retval = String::Empty();
       }
     }
   }
@@ -2944,7 +2944,7 @@ OptString HHVM_METHOD(DOMCharacterData, substringData,
     xmlFree(substring);
     return ret;
   }
-  return empty_string();
+  return String::Empty();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -4104,7 +4104,7 @@ OptString HHVM_METHOD(DOMElement, getAttribute,
   xmlNodePtr nodep = data->nodep();
   if (!nodep) {
     php_dom_throw_error(INVALID_STATE_ERR, 0);
-    return empty_string();
+    return String::Empty();
   }
   xmlChar *value = nullptr;
   xmlNodePtr attr;
@@ -4126,7 +4126,7 @@ OptString HHVM_METHOD(DOMElement, getAttribute,
     xmlFree(value);
     return ret;
   }
-  return empty_string();
+  return String::Empty();
 }
 
 Variant HHVM_METHOD(DOMElement, getAttributeNode,
@@ -4189,7 +4189,7 @@ OptString HHVM_METHOD(DOMElement, getAttributeNS,
   xmlNodePtr elemp = data->nodep();
   if (!elemp) {
     php_dom_throw_error(INVALID_STATE_ERR, 0);
-    return empty_string();
+    return String::Empty();
   }
   xmlNsPtr nsptr;
   xmlChar *strattr;
@@ -4208,7 +4208,7 @@ OptString HHVM_METHOD(DOMElement, getAttributeNS,
       }
     }
   }
-  return empty_string();
+  return String::Empty();
 }
 
 Object HHVM_METHOD(DOMElement, getElementsByTagName,

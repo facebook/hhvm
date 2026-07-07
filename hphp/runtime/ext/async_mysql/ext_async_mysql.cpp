@@ -1700,7 +1700,7 @@ Variant buildTypedValue(const am::RowFields* row_fields,
   // if it were actually NULL).
   OptString string_value =
       (row[field_num].data() == nullptr && row[field_num].size() == 0)
-          ? empty_string()
+          ? String::Empty()
           : OptString(row[field_num].data(), row[field_num].size(), CopyString);
 
   if (!typed_values) {
@@ -1991,7 +1991,7 @@ static OptString HHVM_METHOD(
   auto* data = Native::data<AsyncMysqlRowBlock>(this_);
   auto val = data->getFieldAs<folly::StringPiece>(row, field);
   if (val.empty()) {
-    return empty_string();
+    return String::Empty();
   }
   return OptString{val};
 }

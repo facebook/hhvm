@@ -283,7 +283,7 @@ Variant HHVM_STATIC_METHOD(IntlChar, getFC_NFKC_Closure, const Variant& arg) {
   UErrorCode error = U_ZERO_ERROR;
   auto closure_len = u_getFC_NFKC_Closure(cp, nullptr, 0, &error);
   if (closure_len == 0) {
-    return empty_string();
+    return Variant{String::Empty()};
   }
   icu::UnicodeString closure;
   auto out = closure.getBuffer(closure_len + 1);

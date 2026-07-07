@@ -245,7 +245,7 @@ static const StaticString
 // If no conclusive match can be found, leaves m_streamType
 // as its default value of empty_string_ref.
 void Socket::inferStreamType() {
-  if (empty_string() == getStreamType()) {
+  if (getStreamType().empty()) {
     int result, type;
     socklen_t len = sizeof(type);
     result = getsockopt(getFd(), SOL_SOCKET, SO_TYPE, &type, &len);

@@ -217,7 +217,7 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
   }
 
   if (shouldSetHttpRawPostData) {
-    php_global_set(s_HTTP_RAW_POST_DATA, empty_string());
+    php_global_set(s_HTTP_RAW_POST_DATA, Variant{String::Empty()});
   }
 
 #define X(name)                                       \
@@ -789,7 +789,7 @@ void HttpProtocol::DecodeParameters(Array& variables, const char *data,
       register_variable(variables, (char*)sname.data(), value);
     } else if (!post) {
       OptString sname = url_decode(s, p - s);
-      register_variable(variables, (char*)sname.data(), empty_string());
+      register_variable(variables, (char*)sname.data(), Variant{String::Empty()});
     }
     s = p + 1;
   }
@@ -825,7 +825,7 @@ void HttpProtocol::DecodeCookies(Array& variables, char *data) {
         OptString sname = url_decode(var, strlen(var));
 
         register_variable(variables, (char*)sname.data(),
-                          empty_string(), false);
+                          Variant{String::Empty()}, false);
       }
     }
 

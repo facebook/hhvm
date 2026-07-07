@@ -778,7 +778,7 @@ init_command_line_globals(
   {
     auto serverArr = Array::CreateDict();
     process_env_variables(serverArr, envp, envVariables);
-    OptString file = empty_string();
+    OptString file = String::Empty();
     if (argc > 0) {
       file = OptString::attach(StringData::Make(argv[0], CopyString));
     }

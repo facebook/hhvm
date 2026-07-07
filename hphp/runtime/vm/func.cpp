@@ -1360,7 +1360,7 @@ void Func::recordCall() const {
   if (isNoInjection() || isMethCaller()) return;
 
   auto const path = unit()->isSystemLib()
-    ? empty_string()
+    ? String::Empty()
     : StrNR{unit()->filepath()}.asString();
 
   tl_called_functions->set(fullNameStr().asString(), std::move(path), true);
@@ -1374,7 +1374,7 @@ void Func::recordCallNoCheck() const {
   assertx(!tl_called_functions->exists(fullNameStr().asString(), true));
 
   auto const path = unit()->isSystemLib()
-    ? empty_string()
+    ? String::Empty()
     : StrNR{unit()->filepath()}.asString();
 
   tl_called_functions->set(fullNameStr().asString(), std::move(path), true);

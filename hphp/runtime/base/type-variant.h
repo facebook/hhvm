@@ -337,6 +337,9 @@ struct Variant : private TypedValue {
   }
 
   /* implicit */ Variant(const OptString& v) noexcept : Variant(v.get()) {}
+  explicit Variant(const String& v) noexcept : Variant(v.get()) {
+    assertx(m_type != KindOfNull);
+  }
   /* implicit */ Variant(const Array& v) noexcept : Variant(v.get()) { }
   /* implicit */ Variant(const Object& v) noexcept : Variant(v.get()) {}
   /* implicit */ Variant(const OptResource& v) noexcept

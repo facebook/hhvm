@@ -1000,7 +1000,7 @@ OptString string_numeric_to_base(const Variant& value, int base) {
 
   assertx(string_validate_base(base));
   if ((!value.isInteger() && !value.isDouble())) {
-    return empty_string();
+    return String::Empty();
   }
 
   if (value.isDouble()) {
@@ -1011,7 +1011,7 @@ OptString string_numeric_to_base(const Variant& value, int base) {
     /* Don't try to convert +/- infinity */
     if (fvalue == HUGE_VAL || fvalue == -HUGE_VAL) {
       raise_warning("Number too large");
-      return empty_string();
+      return String::Empty();
     }
 
     end = ptr = buf + sizeof(buf) - 1;
@@ -1606,7 +1606,7 @@ OptString string_number_format(double d, int dec,
   // From the man page of snprintf, the return value is:
   // The number of characters that would have been written if n had been
   // sufficiently large, not counting the terminating null character.
-  if (tmplen < 0) return empty_string();
+  if (tmplen < 0) return String::Empty();
   if (tmplen < 64 && (tmpbuf == nullptr || !isdigit((int)tmpbuf[0]))) {
     tmpstr.setSize(tmplen);
     return tmpstr;
@@ -1617,7 +1617,7 @@ OptString string_number_format(double d, int dec,
     tmpstr = OptString(tmplen, ReserveString);
     tmpbuf = tmpstr.mutableData();
     tmplen = snprintf(tmpbuf, tmplen + 1, "%.*F", dec, d);
-    if (tmplen < 0) return empty_string();
+    if (tmplen < 0) return String::Empty();
     if (tmpbuf == nullptr || !isdigit((int)tmpbuf[0])) {
       tmpstr.setSize(tmplen);
       return tmpstr;

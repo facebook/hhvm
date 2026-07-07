@@ -376,7 +376,7 @@ void RaiserAsyncProcessor::throw_wrapped_doRaise(
       protoSeqId,
       apache::thrift::MessageType::T_REPLY,
       "doRaise");
-  payload.transform(reqCtx->getHeader()->getWriteTransforms());
+  payload.transform(reqCtx->getHeader()->getWriteTTransforms());
   return req->sendReply(std::move(payload));
 }
 //
@@ -742,7 +742,7 @@ void RaiserAsyncProcessor::throw_wrapped_get500(
       protoSeqId,
       apache::thrift::MessageType::T_REPLY,
       "get500");
-  payload.transform(reqCtx->getHeader()->getWriteTransforms());
+  payload.transform(reqCtx->getHeader()->getWriteTTransforms());
   return req->sendReply(std::move(payload));
 }
 //

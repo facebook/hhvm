@@ -606,7 +606,7 @@ void PubSubStreamingServiceAsyncProcessor::throw_wrapped_servicethrows(
       protoSeqId,
       apache::thrift::MessageType::T_REPLY,
       "servicethrows");
-  payload.transform(reqCtx->getHeader()->getWriteTransforms());
+  payload.transform(reqCtx->getHeader()->getWriteTTransforms());
   req->sendStreamReply(std::move(payload), apache::thrift::detail::ServerStreamFactory{nullptr});
 }
 //
@@ -803,7 +803,7 @@ void PubSubStreamingServiceAsyncProcessor::throw_wrapped_servicethrows2(
       protoSeqId,
       apache::thrift::MessageType::T_REPLY,
       "servicethrows2");
-  payload.transform(reqCtx->getHeader()->getWriteTransforms());
+  payload.transform(reqCtx->getHeader()->getWriteTTransforms());
   req->sendStreamReply(std::move(payload), apache::thrift::detail::ServerStreamFactory{nullptr});
 }
 //
@@ -1000,7 +1000,7 @@ void PubSubStreamingServiceAsyncProcessor::throw_wrapped_boththrows(
       protoSeqId,
       apache::thrift::MessageType::T_REPLY,
       "boththrows");
-  payload.transform(reqCtx->getHeader()->getWriteTransforms());
+  payload.transform(reqCtx->getHeader()->getWriteTTransforms());
   req->sendStreamReply(std::move(payload), apache::thrift::detail::ServerStreamFactory{nullptr});
 }
 //
@@ -1380,7 +1380,7 @@ void PubSubStreamingServiceAsyncProcessor::throw_wrapped_responseandstreamservic
       protoSeqId,
       apache::thrift::MessageType::T_REPLY,
       "responseandstreamservicethrows");
-  payload.transform(reqCtx->getHeader()->getWriteTransforms());
+  payload.transform(reqCtx->getHeader()->getWriteTTransforms());
   req->sendStreamReply(std::move(payload), apache::thrift::detail::ServerStreamFactory{nullptr});
 }
 //
@@ -1579,7 +1579,7 @@ void PubSubStreamingServiceAsyncProcessor::throw_wrapped_responseandstreambothth
       protoSeqId,
       apache::thrift::MessageType::T_REPLY,
       "responseandstreamboththrows");
-  payload.transform(reqCtx->getHeader()->getWriteTransforms());
+  payload.transform(reqCtx->getHeader()->getWriteTTransforms());
   req->sendStreamReply(std::move(payload), apache::thrift::detail::ServerStreamFactory{nullptr});
 }
 //

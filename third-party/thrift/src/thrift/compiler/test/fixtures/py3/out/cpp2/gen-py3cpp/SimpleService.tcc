@@ -2045,7 +2045,7 @@ void SimpleServiceAsyncProcessor::throw_wrapped_expected_exception(
       protoSeqId,
       apache::thrift::MessageType::T_REPLY,
       "expected_exception");
-  payload.transform(reqCtx->getHeader()->getWriteTransforms());
+  payload.transform(reqCtx->getHeader()->getWriteTTransforms());
   return req->sendReply(std::move(payload));
 }
 //

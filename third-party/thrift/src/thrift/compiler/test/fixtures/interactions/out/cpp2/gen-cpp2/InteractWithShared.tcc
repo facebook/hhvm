@@ -403,7 +403,7 @@ void InteractWithSharedAsyncProcessor::throw_wrapped_MyInteraction_frobnicate(
       protoSeqId,
       apache::thrift::MessageType::T_REPLY,
       "MyInteraction.frobnicate");
-  payload.transform(reqCtx->getHeader()->getWriteTransforms());
+  payload.transform(reqCtx->getHeader()->getWriteTTransforms());
   return req->sendReply(std::move(payload));
 }
 //

@@ -386,7 +386,7 @@ void PrimitivesServiceAsyncProcessor::throw_wrapped_method_that_throws(
       protoSeqId,
       apache::thrift::MessageType::T_REPLY,
       "method_that_throws");
-  payload.transform(reqCtx->getHeader()->getWriteTransforms());
+  payload.transform(reqCtx->getHeader()->getWriteTTransforms());
   return req->sendReply(std::move(payload));
 }
 //

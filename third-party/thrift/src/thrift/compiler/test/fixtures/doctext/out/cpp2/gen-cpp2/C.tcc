@@ -565,7 +565,7 @@ void CAsyncProcessor::throw_wrapped_thing(
       protoSeqId,
       apache::thrift::MessageType::T_REPLY,
       "thing");
-  payload.transform(reqCtx->getHeader()->getWriteTransforms());
+  payload.transform(reqCtx->getHeader()->getWriteTTransforms());
   return req->sendReply(std::move(payload));
 }
 //

@@ -386,7 +386,7 @@ void ExtraServiceAsyncProcessor::throw_wrapped_throws_function(
       protoSeqId,
       apache::thrift::MessageType::T_REPLY,
       "throws_function");
-  payload.transform(reqCtx->getHeader()->getWriteTransforms());
+  payload.transform(reqCtx->getHeader()->getWriteTTransforms());
   return req->sendReply(std::move(payload));
 }
 //
@@ -581,7 +581,7 @@ void ExtraServiceAsyncProcessor::throw_wrapped_throws_function2(
       protoSeqId,
       apache::thrift::MessageType::T_REPLY,
       "throws_function2");
-  payload.transform(reqCtx->getHeader()->getWriteTransforms());
+  payload.transform(reqCtx->getHeader()->getWriteTTransforms());
   return req->sendReply(std::move(payload));
 }
 //
@@ -779,7 +779,7 @@ void ExtraServiceAsyncProcessor::throw_wrapped_throws_function3(
       protoSeqId,
       apache::thrift::MessageType::T_REPLY,
       "throws_function3");
-  payload.transform(reqCtx->getHeader()->getWriteTransforms());
+  payload.transform(reqCtx->getHeader()->getWriteTTransforms());
   return req->sendReply(std::move(payload));
 }
 //

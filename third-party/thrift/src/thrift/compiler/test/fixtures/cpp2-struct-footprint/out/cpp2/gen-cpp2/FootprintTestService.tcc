@@ -2343,7 +2343,7 @@ void FootprintTestServiceAsyncProcessor::throw_wrapped_streamWithSinkException(
       protoSeqId,
       apache::thrift::MessageType::T_REPLY,
       "streamWithSinkException");
-  payload.transform(reqCtx->getHeader()->getWriteTransforms());
+  payload.transform(reqCtx->getHeader()->getWriteTTransforms());
   req->sendStreamReply(std::move(payload), apache::thrift::detail::ServerStreamFactory{nullptr});
 }
 //

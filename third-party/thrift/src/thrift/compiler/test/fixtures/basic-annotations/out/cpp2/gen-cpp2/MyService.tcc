@@ -210,7 +210,7 @@ void MyServiceAsyncProcessor::throw_wrapped_ping(
       protoSeqId,
       apache::thrift::MessageType::T_REPLY,
       "ping");
-  payload.transform(reqCtx->getHeader()->getWriteTransforms());
+  payload.transform(reqCtx->getHeader()->getWriteTTransforms());
   return req->sendReply(std::move(payload));
 }
 //

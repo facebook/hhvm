@@ -411,7 +411,7 @@ void {{service_cpp_name}}AsyncProcessor::throw_wrapped_{{function.prefixed_name}
       protoSeqId,
       apache::thrift::MessageType::T_REPLY,
       "{{#partial rpc.function_name service=interface function=function}}");
-  payload.transform(reqCtx->getHeader()->getWriteTransforms());
+  payload.transform(reqCtx->getHeader()->getWriteTTransforms());
           {{#if function.bidirectional_stream?}}
   req->sendBiDiReply(std::move(payload), apache::thrift::detail::ServerBiDiStreamFactory::makeNoopFactory());
           {{#else if function.stream?}}

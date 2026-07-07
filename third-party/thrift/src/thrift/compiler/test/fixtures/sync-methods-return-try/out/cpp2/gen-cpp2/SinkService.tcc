@@ -625,7 +625,7 @@ void SinkServiceAsyncProcessor::throw_wrapped_methodThrow(
       protoSeqId,
       apache::thrift::MessageType::T_REPLY,
       "methodThrow");
-  payload.transform(reqCtx->getHeader()->getWriteTransforms());
+  payload.transform(reqCtx->getHeader()->getWriteTTransforms());
   req->sendSinkReply(std::move(payload), apache::thrift::detail::ServerSinkFactory{});
 }
 //

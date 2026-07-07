@@ -65,8 +65,13 @@ TEST_F(SyntaxGraphServiceDescriptorTest, ServiceName) {
 }
 
 TEST_F(SyntaxGraphServiceDescriptorTest, BasicFunction) {
-  const auto& fn = catalog_->getFunction("add");
+  const auto& fn = catalog_->getFunctionByName("add");
   EXPECT_EQ(fn.name, "add");
+  EXPECT_EQ(
+      fn.uri,
+      "facebook.com/thrift/service_descriptor_test/"
+      "ServiceDescriptorTestService/add");
+  EXPECT_EQ(&catalog_->getFunction(fn.uri), &fn);
   ASSERT_EQ(fn.params.size(), 2);
   EXPECT_EQ(fn.params[0].name, "a");
   EXPECT_EQ(fn.params[1].name, "b");
@@ -81,13 +86,13 @@ TEST_F(SyntaxGraphServiceDescriptorTest, BasicFunction) {
 }
 
 TEST_F(SyntaxGraphServiceDescriptorTest, VoidFunction) {
-  const auto& fn = catalog_->getFunction("ping");
+  const auto& fn = catalog_->getFunctionByName("ping");
   EXPECT_FALSE(fn.responseType.has_value());
   EXPECT_TRUE(fn.params.empty());
 }
 
 TEST_F(SyntaxGraphServiceDescriptorTest, FunctionWithException) {
-  const auto& fn = catalog_->getFunction("greet");
+  const auto& fn = catalog_->getFunctionByName("greet");
   ASSERT_EQ(fn.params.size(), 1);
   EXPECT_EQ(fn.params[0].name, "name");
   ASSERT_EQ(fn.exceptions.size(), 1);
@@ -95,7 +100,7 @@ TEST_F(SyntaxGraphServiceDescriptorTest, FunctionWithException) {
 }
 
 TEST_F(SyntaxGraphServiceDescriptorTest, StreamFunction) {
-  const auto& fn = catalog_->getFunction("streamNames");
+  const auto& fn = catalog_->getFunctionByName("streamNames");
   EXPECT_TRUE(fn.responseType.has_value());
   ASSERT_TRUE(fn.stream.has_value());
   EXPECT_TRUE(fn.stream->payloadType.isString());
@@ -103,7 +108,7 @@ TEST_F(SyntaxGraphServiceDescriptorTest, StreamFunction) {
 }
 
 TEST_F(SyntaxGraphServiceDescriptorTest, SinkFunction) {
-  const auto& fn = catalog_->getFunction("collectStrings");
+  const auto& fn = catalog_->getFunctionByName("collectStrings");
   ASSERT_TRUE(fn.sink.has_value());
   EXPECT_TRUE(fn.sink->payloadType.isString());
   EXPECT_TRUE(
@@ -112,7 +117,7 @@ TEST_F(SyntaxGraphServiceDescriptorTest, SinkFunction) {
 }
 
 TEST_F(SyntaxGraphServiceDescriptorTest, BidiFunction) {
-  const auto& fn = catalog_->getFunction("bidiEcho");
+  const auto& fn = catalog_->getFunctionByName("bidiEcho");
   ASSERT_TRUE(fn.stream.has_value());
   ASSERT_TRUE(fn.sink.has_value());
   EXPECT_TRUE(fn.stream->payloadType.isI32());
@@ -122,14 +127,14 @@ TEST_F(SyntaxGraphServiceDescriptorTest, BidiFunction) {
 }
 
 TEST_F(SyntaxGraphServiceDescriptorTest, OneWayFunction) {
-  const auto& fn = catalog_->getFunction("fireAndForget");
+  const auto& fn = catalog_->getFunctionByName("fireAndForget");
   EXPECT_EQ(fn.rpcKind, RpcKind::OneWay);
   EXPECT_EQ(fn.qualifier, FunctionQualifier::Unspecified);
   EXPECT_FALSE(fn.responseType.has_value());
 }
 
 TEST_F(SyntaxGraphServiceDescriptorTest, AnnotatedFunction) {
-  const auto& fn = catalog_->getFunction("annotated");
+  const auto& fn = catalog_->getFunctionByName("annotated");
   EXPECT_EQ(fn.rpcKind, RpcKind::Unary);
 
   ASSERT_EQ(fn.annotations.size(), 1);
@@ -148,7 +153,7 @@ TEST_F(SyntaxGraphServiceDescriptorTest, AnnotatedFunction) {
 }
 
 TEST_F(SyntaxGraphServiceDescriptorTest, AnnotatedParam) {
-  const auto& fn = catalog_->getFunction("add");
+  const auto& fn = catalog_->getFunctionByName("add");
   ASSERT_EQ(fn.params.size(), 2);
   ASSERT_EQ(fn.params[0].annotations.size(), 1);
   const auto& fields = fn.params[0].annotations[0].asStruct();
@@ -158,7 +163,7 @@ TEST_F(SyntaxGraphServiceDescriptorTest, AnnotatedParam) {
 }
 
 TEST_F(SyntaxGraphServiceDescriptorTest, AnnotatedException) {
-  const auto& fn = catalog_->getFunction("greet");
+  const auto& fn = catalog_->getFunctionByName("greet");
   ASSERT_EQ(fn.exceptions.size(), 1);
   ASSERT_EQ(fn.exceptions[0].annotations.size(), 1);
   const auto& fields = fn.exceptions[0].annotations[0].asStruct();
@@ -196,7 +201,7 @@ TEST(ToSerializableRecordTest, Scalars) {
 
 TEST_F(SyntaxGraphServiceDescriptorTest, ToSerializableRecordStruct) {
   using type_system::SerializableRecord;
-  const auto& fn = catalog_->getFunction("annotated");
+  const auto& fn = catalog_->getFunctionByName("annotated");
   ASSERT_EQ(fn.annotations.size(), 1);
   auto record = toSerializableRecord(fn.annotations[0]);
   const auto& fields = record.asFieldSet();
@@ -215,7 +220,7 @@ TEST_F(SyntaxGraphServiceDescriptorTest, ToSerializableRecordStruct) {
 }
 
 TEST_F(SyntaxGraphServiceDescriptorTest, SerializeAnnotations) {
-  const auto& fn = catalog_->getFunction("annotated");
+  const auto& fn = catalog_->getFunctionByName("annotated");
   auto serialized = serializeAnnotations(fn.annotations);
   const auto& uri = fn.annotations[0].type().asStruct().uri();
   ASSERT_TRUE(serialized.contains(uri));
@@ -225,7 +230,8 @@ TEST_F(SyntaxGraphServiceDescriptorTest, SerializeAnnotations) {
 }
 
 TEST_F(SyntaxGraphServiceDescriptorTest, FunctionNotFound) {
-  EXPECT_THROW(catalog_->getFunction("nonexistent"), std::invalid_argument);
+  EXPECT_THROW(
+      catalog_->getFunctionByName("nonexistent"), std::invalid_argument);
 }
 
 TEST_F(SyntaxGraphServiceDescriptorTest, FunctionsCount) {
@@ -250,7 +256,8 @@ class ServiceDescriptorBuilderTest : public ::testing::Test {
 };
 
 TEST_F(ServiceDescriptorBuilderTest, BuildBasicSchema) {
-  ServiceDescriptorBuilder builder(typeSystem_, "TestService");
+  ServiceDescriptorBuilder builder(
+      typeSystem_, "TestService", "test.com/TestService");
   builder.addFunction("ping");
   builder.addFunction("add")
       .addParam("a", FieldId{1}, type_system::TypeSystem::I32())
@@ -261,11 +268,12 @@ TEST_F(ServiceDescriptorBuilderTest, BuildBasicSchema) {
   EXPECT_EQ(catalog->serviceName(), "TestService");
   EXPECT_EQ(catalog->functions().size(), 2);
 
-  const auto& ping = catalog->getFunction("ping");
+  const auto& ping = catalog->getFunctionByName("ping");
   EXPECT_TRUE(ping.params.empty());
   EXPECT_FALSE(ping.responseType.has_value());
 
-  const auto& add = catalog->getFunction("add");
+  const auto& add = catalog->getFunctionByName("add");
+  EXPECT_EQ(&catalog->getFunction("test.com/TestService/add"), &add);
   ASSERT_EQ(add.params.size(), 2);
   EXPECT_EQ(add.params[0].name, "a");
   EXPECT_EQ(add.params[1].name, "b");
@@ -282,12 +290,12 @@ TEST_F(ServiceDescriptorBuilderTest, BuildWithStreamAndSink) {
           type_system::TypeSystem::String(), type_system::TypeSystem::I32());
 
   auto catalog = builder.build();
-  const auto& streamFn = catalog->getFunction("streamInts");
+  const auto& streamFn = catalog->getFunctionByName("streamInts");
   ASSERT_TRUE(streamFn.stream.has_value());
   EXPECT_TRUE(streamFn.stream->payloadType.isI32());
   EXPECT_EQ(streamFn.rpcKind, RpcKind::Stream);
 
-  const auto& sinkFn = catalog->getFunction("collectStrings");
+  const auto& sinkFn = catalog->getFunctionByName("collectStrings");
   ASSERT_TRUE(sinkFn.sink.has_value());
   EXPECT_TRUE(sinkFn.sink->payloadType.isString());
   EXPECT_TRUE(
@@ -303,7 +311,7 @@ TEST_F(ServiceDescriptorBuilderTest, BuildWithBidi) {
           type_system::TypeSystem::I32(), type_system::TypeSystem::String());
 
   auto catalog = builder.build();
-  const auto& fn = catalog->getFunction("bidiEcho");
+  const auto& fn = catalog->getFunctionByName("bidiEcho");
   ASSERT_TRUE(fn.stream.has_value());
   ASSERT_TRUE(fn.sink.has_value());
   EXPECT_TRUE(fn.stream->payloadType.isI32());
@@ -317,7 +325,7 @@ TEST_F(ServiceDescriptorBuilderTest, BuildWithOneWay) {
   builder.addFunction("fire").setOneWay();
 
   auto catalog = builder.build();
-  const auto& fn = catalog->getFunction("fire");
+  const auto& fn = catalog->getFunctionByName("fire");
   EXPECT_EQ(fn.rpcKind, RpcKind::OneWay);
 }
 
@@ -328,7 +336,7 @@ TEST_F(ServiceDescriptorBuilderTest, BuildWithQualifier) {
       .setResponseType(type_system::TypeSystem::I32());
 
   auto catalog = builder.build();
-  const auto& fn = catalog->getFunction("readOp");
+  const auto& fn = catalog->getFunctionByName("readOp");
   EXPECT_EQ(fn.qualifier, FunctionQualifier::ReadOnly);
 }
 
@@ -342,7 +350,7 @@ TEST_F(ServiceDescriptorBuilderTest, BuildWithFunctionMetadata) {
       .setResponseType(type_system::TypeSystem::I32());
 
   auto catalog = builder.build();
-  const auto& fn = catalog->getFunction("doThing");
+  const auto& fn = catalog->getFunctionByName("doThing");
   EXPECT_TRUE(fn.createsInteraction);
   EXPECT_TRUE(fn.isPerforms);
   ASSERT_TRUE(fn.docBlock.has_value());
@@ -371,7 +379,7 @@ TEST_F(ServiceDescriptorBuilderTest, BuildWithAnnotations) {
   ASSERT_EQ(catalog->annotations().size(), 1);
   EXPECT_EQ(catalog->annotations()[0], DynamicValue::makeString("svc.anno"));
 
-  const auto& fn = catalog->getFunction("op");
+  const auto& fn = catalog->getFunctionByName("op");
   ASSERT_EQ(fn.params.size(), 1);
   ASSERT_EQ(fn.params[0].annotations.size(), 1);
   EXPECT_EQ(

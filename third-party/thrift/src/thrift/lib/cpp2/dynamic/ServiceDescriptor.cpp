@@ -19,6 +19,16 @@
 namespace apache::thrift::dynamic {
 
 const ServiceDescriptor::Function& ServiceDescriptor::getFunction(
+    std::string_view uri) const {
+  for (const auto& fn : functions()) {
+    if (fn.uri == uri) {
+      return fn;
+    }
+  }
+  throw std::invalid_argument("Function not found: " + std::string(uri));
+}
+
+const ServiceDescriptor::Function& ServiceDescriptor::getFunctionByName(
     std::string_view name) const {
   for (const auto& fn : functions()) {
     if (fn.name == name) {

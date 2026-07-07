@@ -1347,6 +1347,17 @@ using dynamic::FunctionQualifier;
 using dynamic::RpcKind;
 using dynamic::ServiceDescriptor;
 
+std::string makeSvcFunctionUri(
+    std::string_view interfaceUri, std::string_view name) {
+  if (interfaceUri.empty()) {
+    return std::string(name);
+  }
+  std::string result(interfaceUri);
+  result.push_back('/');
+  result.append(name);
+  return result;
+}
+
 FunctionQualifier convertFunctionQualifier(type::FunctionQualifier q) {
   switch (q) {
     case type::FunctionQualifier::Idempotent:
@@ -1387,9 +1398,12 @@ ServiceDescriptor::Exception makeSvcException(
 }
 
 ServiceDescriptor::Function makeSvcFunction(
-    const FunctionNode& fn, const SyntaxGraph& syntaxGraph) {
+    const FunctionNode& fn,
+    std::string_view interfaceUri,
+    const SyntaxGraph& syntaxGraph) {
   ServiceDescriptor::Function function;
   function.name = std::string(fn.name());
+  function.uri = makeSvcFunctionUri(interfaceUri, fn.name());
 
   for (const auto& param : fn.params()) {
     function.params.push_back(
@@ -1484,7 +1498,7 @@ void collectSvcFunctions(
     collectSvcFunctions(*base, syntaxGraph, functions);
   }
   for (const auto& fn : service.functions()) {
-    functions.push_back(makeSvcFunction(fn, syntaxGraph));
+    functions.push_back(makeSvcFunction(fn, service.uri(), syntaxGraph));
   }
 }
 

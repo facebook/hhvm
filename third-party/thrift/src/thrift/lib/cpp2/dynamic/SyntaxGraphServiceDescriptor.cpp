@@ -26,6 +26,17 @@ using apache::thrift::type_system::TypeSystem;
 
 namespace {
 
+std::string makeFunctionUri(
+    std::string_view interfaceUri, std::string_view name) {
+  if (interfaceUri.empty()) {
+    return std::string(name);
+  }
+  std::string result(interfaceUri);
+  result.push_back('/');
+  result.append(name);
+  return result;
+}
+
 FunctionQualifier convertQualifier(type::FunctionQualifier q) {
   switch (q) {
     case type::FunctionQualifier::Idempotent:
@@ -83,9 +94,12 @@ ServiceDescriptor::Exception makeException(
 }
 
 ServiceDescriptor::Function makeFunction(
-    const syntax_graph::FunctionNode& fn, const SyntaxGraph& syntaxGraph) {
+    const syntax_graph::FunctionNode& fn,
+    std::string_view interfaceUri,
+    const SyntaxGraph& syntaxGraph) {
   ServiceDescriptor::Function function;
   function.name = std::string(fn.name());
+  function.uri = makeFunctionUri(interfaceUri, fn.name());
 
   for (const auto& param : fn.params()) {
     function.params.push_back(
@@ -174,7 +188,7 @@ void collectFunctions(
     collectFunctions(*base, syntaxGraph, functions);
   }
   for (const auto& fn : service.functions()) {
-    functions.push_back(makeFunction(fn, syntaxGraph));
+    functions.push_back(makeFunction(fn, service.uri(), syntaxGraph));
   }
 }
 

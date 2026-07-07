@@ -206,6 +206,17 @@ RpcKind fromSerializableRpcKind(type_system::RpcKind kind) {
   return RpcKind::Unary;
 }
 
+std::string makeFunctionUri(
+    std::string_view interfaceUri, std::string_view name) {
+  if (interfaceUri.empty()) {
+    return std::string(name);
+  }
+  std::string result(interfaceUri);
+  result.push_back('/');
+  result.append(name);
+  return result;
+}
+
 type_system::SerializableParameter toSerializableParam(
     const ServiceDescriptor::Param& param) {
   type_system::SerializableParameter result;
@@ -302,9 +313,11 @@ ServiceDescriptor::Exception fromSerializableException(
 
 ServiceDescriptor::Function fromSerializableFunction(
     const type_system::SerializableFunction& serFn,
+    std::string_view interfaceUri,
     const TypeSystem& typeSystem) {
   ServiceDescriptor::Function fn;
   fn.name = *serFn.name();
+  fn.uri = makeFunctionUri(interfaceUri, fn.name);
   fn.qualifier = fromSerializableQualifier(*serFn.qualifier());
   fn.rpcKind = fromSerializableRpcKind(*serFn.rpcKind());
   fn.annotations = deserializeAnnotations(*serFn.annotations(), typeSystem);
@@ -465,7 +478,8 @@ std::unique_ptr<ServiceDescriptor> fromSerializable(
 
   std::vector<ServiceDescriptor::Function> functions;
   for (const auto& serFn : *serviceDef.functions()) {
-    functions.push_back(fromSerializableFunction(serFn, *typeSystem));
+    functions.push_back(
+        fromSerializableFunction(serFn, serviceUri, *typeSystem));
   }
 
   auto annotations =

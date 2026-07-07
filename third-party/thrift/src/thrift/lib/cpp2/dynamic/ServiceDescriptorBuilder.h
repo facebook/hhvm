@@ -71,7 +71,8 @@ class ServiceDescriptorBuilder {
 
   ServiceDescriptorBuilder(
       std::shared_ptr<const type_system::TypeSystem> typeSystem,
-      std::string serviceName);
+      std::string serviceName,
+      std::string serviceUri = {});
 
   FunctionBuilder& addFunction(std::string name);
   ServiceDescriptorBuilder& addServiceAnnotation(DynamicValue value);
@@ -79,8 +80,12 @@ class ServiceDescriptorBuilder {
   std::unique_ptr<ServiceDescriptor> build();
 
  private:
+  static std::string makeFunctionUri(
+      std::string_view interfaceUri, std::string_view name);
+
   std::shared_ptr<const type_system::TypeSystem> typeSystem_;
   std::string serviceName_;
+  std::string serviceUri_;
   std::vector<FunctionBuilder> functionBuilders_;
   std::vector<DynamicValue> serviceAnnotations_;
 };

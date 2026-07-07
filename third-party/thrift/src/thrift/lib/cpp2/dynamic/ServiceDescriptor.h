@@ -78,6 +78,7 @@ class ServiceDescriptor {
 
   struct Function {
     std::string name;
+    std::string uri;
     std::vector<Param> params;
     std::optional<type_system::TypeRef> responseType;
     std::vector<Exception> exceptions;
@@ -103,7 +104,8 @@ class ServiceDescriptor {
 
   virtual const type_system::TypeSystem& typeSystem() const = 0;
 
-  const Function& getFunction(std::string_view name) const;
+  const Function& getFunction(std::string_view uri) const;
+  const Function& getFunctionByName(std::string_view name) const;
 
  private:
   friend type_system::SerializableServiceCatalog toSerializable(

@@ -59,7 +59,8 @@ class ServiceDescriptorSerializationTest : public ::testing::Test {
 };
 
 TEST_F(ServiceDescriptorSerializationTest, BuilderRoundTrip) {
-  ServiceDescriptorBuilder builder(typeSystem_, "TestService");
+  ServiceDescriptorBuilder builder(
+      typeSystem_, "TestService", "test.com/TestService");
   builder.addFunction("ping");
   builder.addFunction("add")
       .addParam("a", FieldId{1}, type_system::TypeSystem::I32())
@@ -78,12 +79,13 @@ TEST_F(ServiceDescriptorSerializationTest, BuilderRoundTrip) {
   EXPECT_EQ(deserialized->serviceName(), "TestService");
   EXPECT_EQ(deserialized->functions().size(), 2);
 
-  const auto& ping = deserialized->getFunction("ping");
+  const auto& ping = deserialized->getFunctionByName("ping");
   EXPECT_TRUE(ping.params.empty());
   EXPECT_FALSE(ping.responseType.has_value());
   EXPECT_EQ(ping.rpcKind, RpcKind::Unary);
 
-  const auto& add = deserialized->getFunction("add");
+  const auto& add = deserialized->getFunctionByName("add");
+  EXPECT_EQ(&deserialized->getFunction("test.com/TestService/add"), &add);
   ASSERT_EQ(add.params.size(), 2);
   EXPECT_EQ(add.params[0].name, "a");
   EXPECT_EQ(add.params[1].name, "b");
@@ -103,7 +105,7 @@ TEST_F(ServiceDescriptorSerializationTest, StreamRoundTrip) {
   auto deserialized =
       fromSerializable(std::move(serialized), "test.com/StreamService");
 
-  const auto& fn = deserialized->getFunction("streamInts");
+  const auto& fn = deserialized->getFunctionByName("streamInts");
   ASSERT_TRUE(fn.stream.has_value());
   EXPECT_TRUE(fn.stream->payloadType.isI32());
   EXPECT_EQ(fn.rpcKind, RpcKind::Stream);
@@ -120,7 +122,7 @@ TEST_F(ServiceDescriptorSerializationTest, SinkRoundTrip) {
   auto deserialized =
       fromSerializable(std::move(serialized), "test.com/SinkService");
 
-  const auto& fn = deserialized->getFunction("collectStrings");
+  const auto& fn = deserialized->getFunctionByName("collectStrings");
   ASSERT_TRUE(fn.sink.has_value());
   EXPECT_TRUE(fn.sink->payloadType.isString());
   ASSERT_TRUE(fn.sink->finalResponseType.has_value());
@@ -139,7 +141,7 @@ TEST_F(ServiceDescriptorSerializationTest, BidiRoundTrip) {
   auto deserialized =
       fromSerializable(std::move(serialized), "test.com/BidiService");
 
-  const auto& fn = deserialized->getFunction("bidiEcho");
+  const auto& fn = deserialized->getFunctionByName("bidiEcho");
   ASSERT_TRUE(fn.stream.has_value());
   ASSERT_TRUE(fn.sink.has_value());
   EXPECT_TRUE(fn.stream->payloadType.isI32());
@@ -157,7 +159,7 @@ TEST_F(ServiceDescriptorSerializationTest, OneWayRoundTrip) {
   auto deserialized =
       fromSerializable(std::move(serialized), "test.com/OneWayService");
 
-  const auto& fn = deserialized->getFunction("fire");
+  const auto& fn = deserialized->getFunctionByName("fire");
   EXPECT_EQ(fn.rpcKind, RpcKind::OneWay);
 }
 
@@ -174,19 +176,19 @@ TEST_F(ServiceDescriptorSerializationTest, SyntaxGraphRoundTrip) {
   EXPECT_EQ(deserialized->serviceName(), "ServiceDescriptorTestService");
   EXPECT_EQ(deserialized->functions().size(), catalog->functions().size());
 
-  const auto& add = deserialized->getFunction("add");
+  const auto& add = deserialized->getFunctionByName("add");
   ASSERT_EQ(add.params.size(), 2);
   EXPECT_EQ(add.params[0].name, "a");
   EXPECT_TRUE(add.params[0].type.isI32());
   EXPECT_TRUE(add.responseType.has_value());
   EXPECT_TRUE(add.responseType->isI32());
 
-  const auto& greet = deserialized->getFunction("greet");
+  const auto& greet = deserialized->getFunctionByName("greet");
   ASSERT_EQ(greet.exceptions.size(), 1);
   EXPECT_EQ(greet.exceptions[0].name, "e");
   EXPECT_TRUE(greet.exceptions[0].type.isStruct());
 
-  const auto& streamFn = deserialized->getFunction("streamNames");
+  const auto& streamFn = deserialized->getFunctionByName("streamNames");
   ASSERT_TRUE(streamFn.stream.has_value());
   EXPECT_TRUE(streamFn.stream->payloadType.isString());
   EXPECT_EQ(streamFn.rpcKind, RpcKind::Stream);

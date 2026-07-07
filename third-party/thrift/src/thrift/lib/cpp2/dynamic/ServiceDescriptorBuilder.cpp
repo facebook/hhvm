@@ -52,6 +52,17 @@ class BuiltServiceDescriptor final : public ServiceDescriptor {
 
 } // namespace
 
+std::string ServiceDescriptorBuilder::makeFunctionUri(
+    std::string_view interfaceUri, std::string_view name) {
+  if (interfaceUri.empty()) {
+    return std::string(name);
+  }
+  std::string result(interfaceUri);
+  result.push_back('/');
+  result.append(name);
+  return result;
+}
+
 ServiceDescriptorBuilder::FunctionBuilder::FunctionBuilder(std::string name)
     : name_(std::move(name)) {}
 
@@ -167,9 +178,11 @@ ServiceDescriptorBuilder::FunctionBuilder::setDocBlock(std::string doc) {
 
 ServiceDescriptorBuilder::ServiceDescriptorBuilder(
     std::shared_ptr<const type_system::TypeSystem> typeSystem,
-    std::string serviceName)
+    std::string serviceName,
+    std::string serviceUri)
     : typeSystem_(std::move(typeSystem)),
-      serviceName_(std::move(serviceName)) {}
+      serviceName_(std::move(serviceName)),
+      serviceUri_(std::move(serviceUri)) {}
 
 ServiceDescriptorBuilder::FunctionBuilder&
 ServiceDescriptorBuilder::addFunction(std::string name) {
@@ -188,6 +201,7 @@ std::unique_ptr<ServiceDescriptor> ServiceDescriptorBuilder::build() {
   for (auto& fb : functionBuilders_) {
     ServiceDescriptor::Function fn;
     fn.name = std::move(fb.name_);
+    fn.uri = makeFunctionUri(serviceUri_, fn.name);
     fn.params = std::move(fb.params_);
     fn.responseType = fb.responseType_;
     fn.exceptions = std::move(fb.exceptions_);

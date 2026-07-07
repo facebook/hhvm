@@ -731,12 +731,12 @@ class parser {
   [[nodiscard]] bool is_standalone_whitespace(
       parser_scan_window::cursor pos) const {
     assert(pos->kind == tok::whitespace || pos->kind == tok::newline);
-    return standalone_markings_.find(pos) != standalone_markings_.end();
+    return standalone_markings_.contains(pos);
   }
 
   [[nodiscard]] bool is_tilde_stripped(parser_scan_window::cursor pos) const {
     assert(pos->kind == tok::whitespace || pos->kind == tok::newline);
-    return tilde_markings_.find(pos) != tilde_markings_.end();
+    return tilde_markings_.contains(pos);
   }
 
   std::optional<ast::text::whitespace> standalone_partial_indentation(
@@ -1946,7 +1946,7 @@ class parser {
       captures.emplace_back(make_identifier(*first_capture));
 
       while (const token* capture = try_consume_token(&scan, tok::identifier)) {
-        if (seen.find(capture->string_value()) != seen.end()) {
+        if (seen.contains(capture->string_value())) {
           report_fatal_error(
               scan,
               "duplicate capture '{}' in each-block",
@@ -2126,7 +2126,7 @@ class parser {
     if (try_consume_token(&scan, tok::kw_captures)) {
       expect_on_open(tok::pipe);
       const auto insert_capture = [&](ast::identifier capture) {
-        if (arguments.find(capture) != arguments.end()) {
+        if (arguments.contains(capture)) {
           report_fatal_error(
               scan,
               "capture '{}' conflicts with an argument in partial-block '{}'",

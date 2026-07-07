@@ -52,7 +52,9 @@ struct fixed_string {
     std::copy_n(str, N, data);
   }
 
-  constexpr operator std::string_view() const { return data; }
+  constexpr operator std::string_view() const {
+    return std::string_view(data, N - 1);
+  }
 };
 
 /**

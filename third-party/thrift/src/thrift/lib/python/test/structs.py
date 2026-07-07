@@ -68,6 +68,7 @@ from test_thrift.thrift_types import (
     StructDisabledFieldCache,
     StructuredAnnotation,
     StructWithMap,
+    StructWithMapKeyedContainers,
     UnusedError,
 )
 from thrift.python.mutable_types import (
@@ -640,23 +641,49 @@ class StructTests(unittest.TestCase):
 
     def test_struct_with_map_field_insertion_order(self) -> None:
         """
-        Test that demonstrates map field insertion order affects struct hash
-        but not equality. Maps with same content but different insertion order
-        should be equal but currently have different hash values.
-
-        This test documents the current behavior where insertion order affects
-        the hash value.
+        A map field's insertion order must not affect equality OR hashing:
+        maps with the same content but different insertion order are equal, so
+        they must hash equal (Map.__hash__ is order-independent). Structs
+        containing them therefore compare equal, hash equal, and collapse to a
+        single element in a set.
         """
         s1 = StructWithMap(data={"a": 1, "b": 2})
         s2 = StructWithMap(data={"b": 2, "a": 1})
 
         self.assertEqual(s1, s2)
-
-        # However, hash values are currently different (insertion order dependent)
-        self.assertNotEqual(hash(s1), hash(s2))
+        self.assertEqual(hash(s1), hash(s2))
 
         struct_set = {s1, s2}
-        self.assertEqual(len(struct_set), 2)
+        self.assertEqual(len(struct_set), 1)
+
+    def test_map_keyed_containers_insertion_order(self) -> None:
+        """
+        A map used as a set element or as a map key hashes in insertion order
+        (ImmutableInternalMap.__hash__ hashes tuple(self.items())) but compares
+        equal regardless of order. Two inner maps with identical content but
+        different insertion order are therefore equal Thrift maps that land in
+        different buckets of the hash-based frozenset/dict backing these
+        containers, so they fail to deduplicate.
+
+        This test asserts the CORRECT behavior: equal inner maps collapse to a
+        single entry. It fails while the hash is insertion-order dependent.
+        """
+        inner_a = {1: "x", 2: "y"}
+        inner_b = {2: "y", 1: "x"}  # same content, different insertion order
+
+        # set<map<i32, string>>: two equal inner maps must collapse to one.
+        s = StructWithMapKeyedContainers(set_field=[inner_a, inner_b])
+        self.assertEqual(len(s.set_field), 1)
+
+        # Obtain two immutable Map objects (equal, different insertion order)
+        # to use as keys for the map<map<i32, string>, i32> field.
+        (map_a,) = StructWithMapKeyedContainers(set_field=[inner_a]).set_field
+        (map_b,) = StructWithMapKeyedContainers(set_field=[inner_b]).set_field
+        self.assertEqual(map_a, map_b)
+
+        # map<map<i32, string>, i32>: two equal map keys must collapse to one.
+        m = StructWithMapKeyedContainers(map_field={map_a: 10, map_b: 20})
+        self.assertEqual(len(m.map_field), 1)
 
 
 @parameterized_class(

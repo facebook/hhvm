@@ -795,6 +795,11 @@ struct StructWithMap {
   1: map<string, i32> data;
 }
 
+struct StructWithMapKeyedContainers {
+  1: set<map<i32, string>> set_field;
+  2: map<map<i32, string>, i32> map_field;
+}
+
 @python.DisableFieldCache
 struct StructDisabledFieldCache {
   1: i32 int_field;

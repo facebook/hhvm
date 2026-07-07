@@ -2764,7 +2764,11 @@ cdef class ImmutableInternalMap(dict):
         self.update(dict_data)
 
     def __hash__(self):
-        return hash(tuple(self.items()))
+        # Order-independent so it agrees with dict equality: two maps with the
+        # same entries in different insertion order must hash equal, otherwise a
+        # map used as a set element / map key (e.g. set<map<..>>, map<map<..>,..>)
+        # fails to deduplicate.
+        return hash(frozenset(self.items()))
 
 cdef class Map(Container):
     """
@@ -2809,7 +2813,11 @@ cdef class Map(Container):
         return len(self._fbthrift_elements)
 
     def __hash__(self):
-        return hash(tuple(self.items()))
+        # Order-independent so it agrees with __eq__ below (which compares
+        # entries regardless of order): two maps that differ only in insertion
+        # order must hash equal, otherwise a map used as a set element / map key
+        # (e.g. set<map<..>>, map<map<..>,..>) fails to deduplicate.
+        return hash(frozenset(self.items()))
 
     def __eq__(Map self, other):
         if not isinstance(other, Mapping):

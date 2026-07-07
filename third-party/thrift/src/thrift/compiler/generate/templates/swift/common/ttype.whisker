@@ -1,0 +1,39 @@
+{{!
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}
+{{! Renders the neutral WireType enum-case literal for a Thrift type,
+    used in field and collection headers. Protocol-agnostic: the concrete
+    Compact/Binary codec maps this to its own on-wire ids. }}
+{{#let export partial swift_ttype |type|}}
+  {{#pragma ignore-newlines}}
+{{#if type.void?}}.stop
+{{#else if type.bool?}}.bool
+{{#else if type.byte?}}.byte
+{{#else if type.i16?}}.i16
+{{#else if type.i32?}}.i32
+{{#else if type.i64?}}.i64
+{{#else if type.float?}}.float
+{{#else if type.double?}}.double
+{{#else if type.string?}}.string
+{{#else if type.binary?}}.string
+{{#else if type.list?}}.list
+{{#else if type.set?}}.set
+{{#else if type.map?}}.map
+{{#else if type.enum?}}.i32
+{{#else if type.structured?}}.struct
+{{#else}}.stop
+{{/if type.void?}}
+{{/let partial}}

@@ -1,0 +1,51 @@
+{{!
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}
+{{! Renders the Swift type name for a given Thrift type. Container types recurse
+    to build the collection syntax. Typedefs use their alias name (all Thrift
+    typedefs get a Swift `typealias`). Cross-program (include) references are
+    module-qualified as `<Module>.<Name>` via `swift_qualified_name`. }}
+{{#let export partial swift_type |type|}}
+  {{#pragma ignore-newlines}}
+{{#if type.typedef?}}{{type.swift_qualified_name}}
+{{#else if type.void?}}Void
+{{#else if type.bool?}}Bool
+{{#else if type.byte?}}Int8
+{{#else if type.i16?}}Int16
+{{#else if type.i32?}}Int32
+{{#else if type.i64?}}Int64
+{{#else if type.float?}}Float
+{{#else if type.double?}}Double
+{{#else if type.string?}}String
+{{#else if type.binary?}}Data
+{{#else if type.enum?}}{{type.true_type.swift_qualified_name}}
+{{#else if type.structured?}}{{type.true_type.swift_qualified_name}}
+{{#else if type.list?}}
+{{#let elem_type = type.true_type.elem_type}}
+[{{#partial swift_type type=elem_type}}]
+{{#else if type.set?}}
+{{#let elem_type = type.true_type.elem_type}}
+Set<{{#partial swift_type type=elem_type}}>
+{{#else if type.map?}}
+{{#let map = type.true_type}}
+[{{#partial swift_type type=map.key_type}}: {{#partial swift_type type=map.val_type}}]
+{{#else}}
+{{! Unreachable for valid Thrift data types; emit an invalid token that fails
+    Swift compilation loudly (naming the Thrift type) rather than silently
+    emitting nothing if an unsupported type reaches here. }}
+UNSUPPORTED_SWIFT_TYPE /* {{type.full_name}} */
+{{/if type.typedef?}}
+{{/let partial}}

@@ -1,0 +1,41 @@
+{{!
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}
+{{! Renders the intrinsic Swift default value for a non-optional field with no
+    explicit Thrift default. Enums default to the case for raw value 0
+    (`.init(rawValue: 0)`), matching the Object Model's Int32(0) default; for an
+    enum with no declared 0 case this is `.unknown(0)`. Struct/list/set/map use
+    leading-dot / literal syntax that infers the annotated property type. }}
+{{#let export partial swift_default_value |type|}}
+  {{#pragma ignore-newlines}}
+{{#if type.typedef?}}{{#partial swift_default_value type=type.true_type}}
+{{#else if type.bool?}}false
+{{#else if type.byte?}}0
+{{#else if type.i16?}}0
+{{#else if type.i32?}}0
+{{#else if type.i64?}}0
+{{#else if type.float?}}0.0
+{{#else if type.double?}}0.0
+{{#else if type.string?}}""
+{{#else if type.binary?}}Data()
+{{#else if type.enum?}}.init(rawValue: 0)
+{{#else if type.list?}}[]
+{{#else if type.set?}}[]
+{{#else if type.map?}}[:]
+{{#else if type.structured?}}.init()
+{{#else}}.init()
+{{/if type.typedef?}}
+{{/let partial}}

@@ -156,6 +156,7 @@ add_library(
   generate/java/util.cc
   generate/python/util.cc
   generate/rust/util.cc
+  generate/swift/util.cc
 )
 target_link_libraries(
   compiler

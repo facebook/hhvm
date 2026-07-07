@@ -1,0 +1,76 @@
+{{!
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}
+{{#import "common/types" as types}}
+{{#import "common/ttype" as ttype}}
+
+{{! A Thrift union becomes a Swift sum type (enum with associated values) plus an
+    empty state (`_empty`), which is the default (guide 2.3.14). On the wire it is
+    a struct with at most one field set. Deserialization is tolerant: unknown
+    fields are skipped, zero fields leaves it empty, and if multiple fields are
+    present the last one wins (guide 2.3.15/2.3.16). }}
+{{#let export partial union_type |structured| captures |types ttype|}}
+/// Auto-generated union from {{structured.name}}
+public enum {{structured.swift_name}}: ThriftSerializable, Equatable {
+    /// No field set — the default state of a union (guide 2.3.14).
+{{! Leading `_` marks this as generator-synthesized and avoids collision with a
+    case from a user field named "empty"; a double underscore is avoided because
+    that prefix is reserved for the Swift compiler/stdlib. }}
+    case _empty
+{{#each structured.fields as |field|}}
+    case {{field.swift_property_name}}({{#partial types.swift_type type=field.type}})
+{{/each}}
+
+    public init() {
+        self = ._empty
+    }
+
+    public func write<W: ProtocolWriter>(to writer: W) {
+        switch self {
+        case ._empty:
+            break
+{{#each structured.fields as |field|}}
+        case .{{field.swift_property_name}}(let value):
+            writer.writeFieldBegin({{#partial ttype.swift_ttype type=field.type}}, {{field.id}})
+            value.thriftWrite(to: writer)
+{{/each}}
+        }
+        writer.writeFieldStop()
+    }
+
+    public init<R: ProtocolReader>(from reader: R) throws {
+        self = ._empty
+        while true {
+            let (fieldType, fieldId) = try reader.readFieldBegin()
+            if fieldType == .stop {
+                break
+            }
+            switch fieldId {
+{{#each structured.fields as |field|}}
+            case {{field.id}}:
+                if fieldType == {{#partial ttype.swift_ttype type=field.type}} {
+                    self = .{{field.swift_property_name}}(try {{#partial types.swift_type type=field.type}}.thriftRead(from: reader))
+                } else {
+                    try reader.skip(fieldType)
+                }
+{{/each}}
+            default:
+                try reader.skip(fieldType)
+            }
+        }
+    }
+}
+{{/let partial}}

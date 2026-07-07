@@ -1,0 +1,44 @@
+{{!
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}
+{{#import "common/types" as types}}
+{{#import "common/defaults" as defaults}}
+{{#import "common/constants" as constants}}
+{{#import "codec/write" as wr}}
+{{#import "codec/read" as rd}}
+
+{{! A Thrift struct/exception becomes a Swift value type. Equatable is
+    synthesized. Exceptions additionally conform to Error. }}
+{{#let export partial struct_type |structured| captures |types defaults constants wr rd|}}
+/// Auto-generated from {{structured.name}}
+public struct {{structured.swift_name}}: ThriftSerializable, Equatable{{#if structured.exception?}}, Error{{/if structured.exception?}} {
+{{#each structured.fields as |field|}}
+{{#if field.optional?}}
+    public var {{field.swift_property_name}}: {{#partial types.swift_type type=field.type}}?
+{{#else if (object.notnull? field.default_value)}}
+    public var {{field.swift_property_name}}: {{#partial types.swift_type type=field.type}} = {{#partial constants.swift_const_value value=field.default_value}}
+{{#else}}
+    public var {{field.swift_property_name}}: {{#partial types.swift_type type=field.type}} = {{#partial defaults.swift_default_value type=field.type}}
+{{/if field.optional?}}
+{{/each}}
+
+    public init() {}
+
+    {{#partial wr.struct_write structured=structured}}
+
+    {{#partial rd.struct_read structured=structured}}
+}
+{{/let partial}}

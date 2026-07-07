@@ -496,8 +496,9 @@ bool HQSession::getAndCheckApplicationProtocol() {
   if (!alpn || !version_) {
     // next protocol not specified or version not supported, close connection
     // with error
+    static const std::string kNoProtocol = "no protocol";
     LOG(ERROR) << "next protocol not supported: "
-               << (alpn ? *alpn : "no protocol") << " sess=" << *this;
+               << (alpn ? *alpn : kNoProtocol) << " sess=" << *this;
 
     onConnectionError(quic::QuicError(quic::LocalErrorCode::CONNECT_FAILED,
                                       "ALPN not supported"));

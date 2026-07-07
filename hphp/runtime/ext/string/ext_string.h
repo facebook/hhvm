@@ -107,7 +107,7 @@ OptString HHVM_FUNCTION(htmlentities,
 OptString HHVM_FUNCTION(md5,
                         const OptString& str,
                         bool raw_output = false);
-StringRet HHVM_FUNCTION(sha1,
+String HHVM_FUNCTION(sha1,
                      const OptString& str,
                      bool raw_output = false);
 Variant HHVM_FUNCTION(strtr,

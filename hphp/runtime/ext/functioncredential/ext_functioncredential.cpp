@@ -51,7 +51,7 @@ class FunctionCredentialAuthKey {
  public:
   explicit FunctionCredentialAuthKey(bool testMode = false);
 
-  OptString sign(const std::string& message) const;
+  String sign(const std::string& message) const;
   OptString verify(const OptString& signedMessage) const;
 
  private:
@@ -123,28 +123,28 @@ static OptString HHVM_METHOD(FunctionCredential, getClassName) {
              : OptString{};
 }
 
-static StringRet HHVM_METHOD(FunctionCredential, getFunctionName) {
+static String HHVM_METHOD(FunctionCredential, getFunctionName) {
   auto data = FunctionCredential::fromObject(this_);
-  return OptString{makeStaticString(data->func()->name())};
+  return String::assertNonNull(makeStaticString(data->func()->name()));
 }
 
-static StringRet HHVM_METHOD(FunctionCredential, getFilename) {
+static String HHVM_METHOD(FunctionCredential, getFilename) {
   auto data = FunctionCredential::fromObject(this_);
-  return OptString{makeStaticString(data->func()->filename())};
+  return String::assertNonNull(makeStaticString(data->func()->filename()));
 }
 
-static StringRet HHVM_METHOD(FunctionCredential, getMethodOrFunctionName) {
+static String HHVM_METHOD(FunctionCredential, getMethodOrFunctionName) {
   auto data = FunctionCredential::fromObject(this_);
   auto func = data->func();
   auto cls = func->cls();
   if (cls) {
-    return OptString(
-        fmt::format("{}::{}", cls->name()->data(), func->name()->data()));
+    return String{
+        fmt::format("{}::{}", cls->name()->data(), func->name()->data())};
   }
-  return OptString{makeStaticString(func->name())};
+  return String::assertNonNull(makeStaticString(func->name()));
 }
 
-static StringRet HHVM_METHOD(FunctionCredential, pack) {
+static String HHVM_METHOD(FunctionCredential, pack) {
   auto data = FunctionCredential::fromObject(this_);
   auto func = data->func();
 
@@ -234,7 +234,7 @@ FunctionCredentialAuthKey::FunctionCredentialAuthKey(bool testMode)
   }
 }
 
-OptString FunctionCredentialAuthKey::sign(const std::string& message) const {
+String FunctionCredentialAuthKey::sign(const std::string& message) const {
   std::array<unsigned char, crypto_auth_BYTES> tag;
   crypto_auth(
       tag.data(),
@@ -244,7 +244,7 @@ OptString FunctionCredentialAuthKey::sign(const std::string& message) const {
 
   // Hex-encode the tag and format as "message:hex_tag"
   auto hexTag = folly::hexlify(folly::ByteRange(tag.data(), tag.size()));
-  return OptString(fmt::format("{}:{}", message, hexTag));
+  return String{fmt::format("{}:{}", message, hexTag)};
 }
 
 OptString FunctionCredentialAuthKey::verify(const OptString& signedMessage) const {

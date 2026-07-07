@@ -827,10 +827,9 @@ static TypedValue HHVM_METHOD(ReflectionFunctionAbstract, getDocComment) {
   }
 }
 
-static StringRet HHVM_METHOD(ReflectionFunctionAbstract, getName) {
+static String HHVM_METHOD(ReflectionFunctionAbstract, getName) {
   auto const func = ReflectionFuncHandle::GetFuncFor(this_);
-  auto ret = const_cast<StringData*>(func->name());
-  return OptString(ret);
+  return String::assertNonNull(func->name());
 }
 
 static bool HHVM_METHOD(ReflectionFunctionAbstract, isHack) {
@@ -1335,18 +1334,18 @@ static Variant HHVM_METHOD(ReflectionFunction, getClosureThisObject,
 // class ReflectionClass
 
 // helper for __construct
-static StringRet HHVM_METHOD(ReflectionClass, __init, const OptString& name) {
+static String HHVM_METHOD(ReflectionClass, __init, const OptString& name) {
   return ReflectionClassHandle::Get(this_)->init(name);
 }
 
-static StringRet HHVM_METHOD(ReflectionClass, getName) {
+static String HHVM_METHOD(ReflectionClass, getName) {
   auto const cls = ReflectionClassHandle::GetClassFor(this_);
-  return OptString{cls->nameStr()};
+  return String::assertNonNull(cls->name());
 }
 
-static StringRet HHVM_METHOD(ReflectionClass, getParentName) {
+static String HHVM_METHOD(ReflectionClass, getParentName) {
   auto const cls = ReflectionClassHandle::GetClassFor(this_);
-  return OptString{cls->parentStr()};
+  return String::assertNonNull(cls->parentStr().get());
 }
 
 static bool HHVM_METHOD(ReflectionClass, isHack) {

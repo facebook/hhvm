@@ -440,6 +440,8 @@ public:
     : m_str(StringData::Make(s.data(), s.size(), CopyString),
             req::ptr<StringData>::NoIncRef{}) {}
 
+  using NoIncRef = req::ptr<StringData>::NoIncRef;
+
   // StaticString is expected to be non-null and persistent, so we can freely
   // create a String from one.
   /* implicit */ String(const StaticString& s);
@@ -448,8 +450,23 @@ public:
 
   StringData* get() const { return m_str.get(); }
 
+  // UNSAFE HELPERS:
+  //
+  // For migrating callers with existing StringData / OptString values.
+  // Where possible, prefer using the String type directly to represent non-null
+  // Hack strings.
+  //
+  static String assertNonNull(const StringData* sd) noexcept {
+    return String{const_cast<StringData*>(sd)};
+  }
+  static String assertNonNull(const StringData* sd, NoIncRef) noexcept {
+    return String{const_cast<StringData*>(sd), NoIncRef{}};
+  }
+  static String assertNonNull(OptString&& opt) noexcept {
+    return String{opt.detach(), NoIncRef{}};
+  }
+
 private:
-  using NoIncRef = req::ptr<StringData>::NoIncRef;
   req::ptr<StringData> m_str;
 
   // Drain the underlying StringData* into the POD ABI return type. Only
@@ -466,7 +483,8 @@ private:
 
   friend struct OptString;
 
-  // Unsafe utility constructor held private to avoid accidental nulls
+  // Unsafe utility constructors held private to avoid accidental nulls
+  explicit String(StringData* sd) noexcept : m_str(sd) { assertx(sd); }
   explicit String(StringData* sd, NoIncRef) noexcept : m_str(sd, NoIncRef{}) {
     assertx(sd);
   }

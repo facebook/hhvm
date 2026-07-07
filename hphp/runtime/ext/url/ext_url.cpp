@@ -295,20 +295,20 @@ Variant HHVM_FUNCTION(parse_url, const OptString& url,
   return ret.toVariant();
 }
 
-StringRet HHVM_FUNCTION(rawurldecode, const OptString& str) {
-  return StringUtil::UrlDecode(str, false);
+String HHVM_FUNCTION(rawurldecode, const OptString& str) {
+  return String::assertNonNull(StringUtil::UrlDecode(str, false));
 }
 
-StringRet HHVM_FUNCTION(rawurlencode, const OptString& str) {
-  return StringUtil::UrlEncode(str, false);
+String HHVM_FUNCTION(rawurlencode, const OptString& str) {
+  return String::assertNonNull(StringUtil::UrlEncode(str, false));
 }
 
-StringRet HHVM_FUNCTION(urldecode, const OptString& str) {
-  return StringUtil::UrlDecode(str, true);
+String HHVM_FUNCTION(urldecode, const OptString& str) {
+  return String::assertNonNull(StringUtil::UrlDecode(str, true));
 }
 
-StringRet HHVM_FUNCTION(urlencode, const OptString& str) {
-  return StringUtil::UrlEncode(str, true);
+String HHVM_FUNCTION(urlencode, const OptString& str) {
+  return String::assertNonNull(StringUtil::UrlEncode(str, true));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

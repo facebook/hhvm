@@ -1763,10 +1763,10 @@ OptString HHVM_FUNCTION(md5,
   return StringUtil::MD5(str, raw_output);
 }
 
-StringRet HHVM_FUNCTION(sha1,
-                        const OptString& str,
-                        bool raw_output /* = false */) {
-  return StringUtil::SHA1(str, raw_output);
+String HHVM_FUNCTION(sha1,
+                     const OptString& str,
+                     bool raw_output /* = false */) {
+  return String::assertNonNull(StringUtil::SHA1(str, raw_output));
 }
 
 // The WuManberReplacement class, related data structures and hash function

@@ -34,10 +34,10 @@ using namespace std::literals;
 
 namespace {
 [[nodiscard]] int usage() {
-  constexpr std::string_view kUsageMessage = R"(Usage: ast-dump [FILE])
+  constexpr std::string_view kUsageMessage = R"(Usage: ast-dump [FILE]
 Dump a human-readable representation of the AST for a Whisker template.
 
-With no FILE, of when FILE is -, read standard input.
+With no FILE, or when FILE is -, read standard input.
 
 Examples:
   ast-dump template.whisker

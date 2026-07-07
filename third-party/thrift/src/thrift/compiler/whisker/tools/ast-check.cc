@@ -28,7 +28,7 @@
 
 namespace {
 [[nodiscard]] int usage() {
-  constexpr std::string_view kUsageMessage = R"(Usage: ast-check [FILE]...)
+  constexpr std::string_view kUsageMessage = R"(Usage: ast-check [FILE]...
 Checks (pass or fail) that provided FILEs are syntactically valid Whisker templates.
 
 At least one FILE must be specified.

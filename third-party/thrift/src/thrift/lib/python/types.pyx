@@ -1502,12 +1502,17 @@ cdef class Struct(StructOrUnion):
     def __eq__(Struct self, other):
         if other is self:
             return True
-        if type(other) != type(self):
+        if type(other) is not type(self):
             return False
-        for name, value in self:
-            if value != getattr(other, name):
-                return False
-        return True
+        if (<StructInfo>self._fbthrift_struct_info).enable_isset_deprecated:
+            # isset bits are observable and part of the tuple, so equal values
+            # can still differ in isset; compare materialized values instead.
+            for name, value in self:
+                if value != getattr(other, name):
+                    return False
+            return True
+        # Same type => same layout; the internal-data tuples compare directly.
+        return self._fbthrift_data == (<Struct>other)._fbthrift_data
 
     def __lt__(self, other):
         return _fbthrift_compare_struct_less(self, other, False)
@@ -2769,6 +2774,17 @@ cdef class ImmutableInternalMap(dict):
         # map used as a set element / map key (e.g. set<map<..>>, map<map<..>,..>)
         # fails to deduplicate.
         return hash(frozenset(self.items()))
+
+    def __eq__(self, other):
+        # A bare cdef class does not inherit dict's value comparison, so restore
+        # it explicitly: two maps with equal entries are equal regardless of
+        # insertion order. Struct.__eq__ compares the internal-data tuples
+        # directly, so this must be value-based (matching Map.__eq__) rather than
+        # identity-based.
+        return dict.__eq__(self, other)
+
+    def __ne__(self, other):
+        return dict.__ne__(self, other)
 
 cdef class Map(Container):
     """

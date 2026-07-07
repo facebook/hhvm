@@ -381,6 +381,21 @@ class StructLocallySetFieldsTest(unittest.TestCase):
         )
         self.assertEqual(self._locally_set_fields(s2), frozenset({"city"}))
 
+    def test_isset_deprecated_equality_uses_value_comparison(self) -> None:
+        # Fields explicitly set to their defaults vs left unset: equal by value
+        # but differing in isset. __eq__ must compare values, not the raw
+        # isset-bearing internal tuple.
+        a = StructWithIssetInspection(int_field=0, bool_field=False)
+        b = StructWithIssetInspection()
+
+        self.assertEqual(a, b)
+        self.assertEqual(hash(a), hash(b))
+        self.assertEqual(len({a, b}), 1)
+        self.assertEqual(
+            self._locally_set_fields(a), frozenset({"int_field", "bool_field"})
+        )
+        self.assertEqual(self._locally_set_fields(b), frozenset())
+
     def test_nested_and_container_structs(self) -> None:
         c = HasContainers(nested_list=[Nested(num=1), Nested(num=2, label="x")])
         self.assertIn("num", self._locally_set_fields(c.nested_list[0]))

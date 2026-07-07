@@ -317,15 +317,25 @@ lex_result lex_i64_literal(
       scan);
 }
 
-const std::unordered_map<char, char> escaped_characters = {
-    // https://en.wikipedia.org/wiki/Escape_sequences_in_C#Table_of_escape_sequences
-    {'n', '\n'},
-    {'r', '\r'},
-    {'t', '\t'},
-    {'\\', '\\'},
-    {'\'', '\''},
-    {'"', '\"'},
-};
+// https://en.wikipedia.org/wiki/Escape_sequences_in_C#Table_of_escape_sequences
+constexpr std::optional<char> unescape_char(char c) {
+  switch (c) {
+    case 'n':
+      return '\n';
+    case 'r':
+      return '\r';
+    case 't':
+      return '\t';
+    case '\\':
+      return '\\';
+    case '\'':
+      return '\'';
+    case '"':
+      return '"';
+    default:
+      return std::nullopt;
+  }
+}
 
 lex_result lex_string_literal(
     detail::lexer_scan_window scan, lexer::diagnoser diagnoser) {
@@ -337,10 +347,9 @@ lex_result lex_string_literal(
   while (scan.can_advance()) {
     c = scan.advance();
     if (c == '\\') {
-      if (auto escaped = escaped_characters.find(scan.peek());
-          escaped != escaped_characters.end()) {
+      if (auto escaped = unescape_char(scan.peek())) {
         scan.advance();
-        value.push_back(escaped->second);
+        value.push_back(*escaped);
         continue;
       } else {
         return lex_result(

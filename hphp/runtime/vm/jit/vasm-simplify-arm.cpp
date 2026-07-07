@@ -310,19 +310,54 @@ bool foldTestJcc(Env& env, const testop& inst, Vlabel b, size_t i) {
   if (inst.s0 != inst.s1 || env.use_counts[inst.sf] != 1) {
     return false;
   }
-  return if_inst<Vinstr::jcc>(env, b, i + 1, [&] (const jcc& jcci) {
-    if (jcci.sf != inst.sf || (jcci.cc != CC_E && jcci.cc != CC_NE)) {
-      return false;
+
+  // A jcc always terminates its block, and the test's sf has exactly one use,
+  // so that consumer is the terminator jcc -- but it need not be adjacent to
+  // the test. cbz/cbnz re-read the register at the branch (not the flags the
+  // test computed), so the fold is only valid if the tested register is not
+  // redefined or clobbered between the test and the jcc.
+  auto const& code = env.unit.blocks[b].code;
+  if (code.empty()) {
+    return false;
+  }
+  auto const j = code.size() - 1;
+  if (code[j].op != Vinstr::jcc) {
+    return false;
+  }
+  auto const& jcci = code[j].jcc_;
+  if (jcci.sf != inst.sf || (jcci.cc != CC_E && jcci.cc != CC_NE)) {
+    return false;
+  }
+  if (phys_source_clobbered(env, b, inst.s0, i + 1, j)) {
+    return false;
+  }
+
+  // Capture before mutating -- simplify_impl invalidates `inst` and `jcci`.
+  // emit(test{b,l,q}) already tests the full W/X register (a Vreg8 bool is
+  // byte-clean on ARM), so rewriting test+jcc as a full-register cbz/cbnz is an
+  // exact substitution. Route through Vreg since a narrower Vreg8 (testb) does
+  // not convert directly to cbzl's Vreg32.
+  Vreg const s = inst.s0;
+  auto const cc = jcci.cc;
+  auto const t0 = jcci.targets[0];
+  auto const t1 = jcci.targets[1];
+
+  // Replace the terminator jcc with the compare-branch, then drop the now-dead
+  // test. Do the jcc (a 1->1 rewrite) first so index `i` stays valid.
+  simplify_impl(env, b, j, [&] (Vout& v) {
+    if (cc == CC_E) {
+      v << cmpbrz{s, {t0, t1}};
+    } else {
+      v << cmpbrnz{s, {t0, t1}};
     }
-    return simplify_impl(env, b, i, [&] (Vout& v) {
-      if (jcci.cc == CC_E) {
-        v << cmpbrz{inst.s0, {jcci.targets[0], jcci.targets[1]}};
-      } else {
-        v << cmpbrnz{inst.s0, {jcci.targets[0], jcci.targets[1]}};
-      }
-      return 2;
-    });
+    return 1;
   });
+  simplify_impl(env, b, i, [&] (Vout&) { return 1; });
+  return true;
+}
+
+bool simplify(Env& env, const testb& inst, Vlabel b, size_t i) {
+  return foldTestJcc<cbzl, cbnzl>(env, inst, b, i);
 }
 
 bool simplify(Env& env, const testl& inst, Vlabel b, size_t i) {
@@ -330,9 +365,13 @@ bool simplify(Env& env, const testl& inst, Vlabel b, size_t i) {
 }
 
 bool simplify(Env& env, const testq& inst, Vlabel b, size_t i) {
-  if (foldTestJcc<cbzq, cbnzq>(env, inst, b, i)) return true;
+  if (foldTestJcc<cbzq, cbnzq>(env, inst, b, i)) {
+    return true;
+  }
 
-  if (env.use_counts[inst.sf] != 1) return false;
+  if (env.use_counts[inst.sf] != 1) {
+    return false;
+  }
 
   uint64_t Val;
   if (!get_const_int(env, inst.s0, Val) || Val != 0x8000000000000000ull) {
@@ -340,7 +379,9 @@ bool simplify(Env& env, const testq& inst, Vlabel b, size_t i) {
   }
 
   return if_inst<Vinstr::jcc>(env, b, i + 1, [&] (const jcc& jcci) {
-    if (jcci.sf != inst.sf || jcci.cc != CC_E) return false;
+    if (jcci.sf != inst.sf || jcci.cc != CC_E) {
+      return false;
+    }
     return simplify_impl(env, b, i, [&] (Vout& v) {
       auto const sf = v.makeReg();
       v << cmpqi{0, inst.s1, sf, inst.fl};

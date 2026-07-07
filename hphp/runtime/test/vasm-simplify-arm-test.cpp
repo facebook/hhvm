@@ -1018,6 +1018,40 @@ void testArmFoldTestlEqToCbzl() {
   EXPECT_EQ(code[0].cbzl_.targets[1], next);
 }
 
+// The testb -> cbzl fold is the boolean-branch case: emit(testb) tests the full
+// W register, so folding a byte self-compare to a 32-bit cbzl is exact.
+void testArmFoldTestbEqToCbzl() {
+  Vunit unit;
+  Vlabel taken, next;
+  auto const r = Vreg8{Vreg{Reg64{0}}};
+  runTestJccFold(unit, CC_E,
+                 [&] (Vout& v, Vreg sf) { v << testb{r, r, sf, Vflags{}}; },
+                 taken, next);
+
+  auto const& code = unit.blocks[unit.entry].code;
+  ASSERT_EQ(code.size(), 1) << stripWhitespace(show(unit));
+  ASSERT_EQ(code[0].op, Vinstr::cbzl);
+  EXPECT_EQ(Vreg{code[0].cbzl_.s}, Vreg{r});
+  EXPECT_EQ(code[0].cbzl_.targets[0], taken);
+  EXPECT_EQ(code[0].cbzl_.targets[1], next);
+}
+
+void testArmFoldTestbNeToCbnzl() {
+  Vunit unit;
+  Vlabel taken, next;
+  auto const r = Vreg8{Vreg{Reg64{0}}};
+  runTestJccFold(unit, CC_NE,
+                 [&] (Vout& v, Vreg sf) { v << testb{r, r, sf, Vflags{}}; },
+                 taken, next);
+
+  auto const& code = unit.blocks[unit.entry].code;
+  ASSERT_EQ(code.size(), 1) << stripWhitespace(show(unit));
+  ASSERT_EQ(code[0].op, Vinstr::cbnzl);
+  EXPECT_EQ(Vreg{code[0].cbnzl_.s}, Vreg{r});
+  EXPECT_EQ(code[0].cbnzl_.targets[0], taken);
+  EXPECT_EQ(code[0].cbnzl_.targets[1], next);
+}
+
 // A non-self-compare (s0 != s1) tests two distinct registers, which cbz/cbnz
 // cannot express; it must be left as test + jcc.
 void testArmFoldTestJccRejectsNonSelfCompare() {
@@ -1049,6 +1083,74 @@ void testArmFoldTestJccRejectsNonEqualCC() {
   ASSERT_EQ(code.size(), 2) << stripWhitespace(show(unit));
   EXPECT_EQ(code[0].op, Vinstr::testq);
   EXPECT_EQ(code[1].op, Vinstr::jcc);
+}
+
+// The test and the terminator jcc need not be adjacent: a pure instruction
+// that does not redefine the tested register may sit between them. The fold
+// still applies, branching on the register the test examined.
+void testArmFoldTestJccNonAdjacent() {
+  Vunit unit;
+  unit.entry = unit.makeBlock(AreaIndex::Main, 1);
+  auto const taken = unit.makeBlock(AreaIndex::Main, 1);
+  auto const next = unit.makeBlock(AreaIndex::Main, 1);
+  Vout v(unit, unit.entry);
+  Vout vt(unit, taken);
+  Vout vn(unit, next);
+
+  auto const r = Vreg64{Reg64{0}};
+  auto const side = Vreg64{v.makeReg()};
+  auto const sf = v.makeReg();
+
+  v << testq{r, r, sf, Vflags{}};
+  // Pure, sits between the test and the jcc, leaves r intact.
+  v << copy{r, side};
+  v << jcc{CC_E, sf, {taken, next}, StringTag{}};
+  vt << ret{};
+  vn << ret{};
+
+  annotateSFUses(unit);
+  simplify(unit);
+
+  auto const& code = unit.blocks[unit.entry].code;
+  for (auto const& in : code) {
+    EXPECT_NE(in.op, Vinstr::testq) << stripWhitespace(show(unit));
+  }
+  ASSERT_FALSE(code.empty());
+  ASSERT_EQ(code.back().op, Vinstr::cbzq) << stripWhitespace(show(unit));
+  EXPECT_EQ(Vreg{code.back().cbzq_.s}, Vreg{r});
+  EXPECT_EQ(code.back().cbzq_.targets[0], taken);
+  EXPECT_EQ(code.back().cbzq_.targets[1], next);
+}
+
+// If the tested register is redefined between the test and the jcc, folding to
+// cbz/cbnz would branch on the wrong (post-clobber) value, so the fold must be
+// rejected. A physical register makes the redefinition an observable clobber.
+void testArmFoldTestJccNonAdjacentRejectsClobber() {
+  Vunit unit;
+  unit.entry = unit.makeBlock(AreaIndex::Main, 1);
+  auto const taken = unit.makeBlock(AreaIndex::Main, 1);
+  auto const next = unit.makeBlock(AreaIndex::Main, 1);
+  Vout v(unit, unit.entry);
+  Vout vt(unit, taken);
+  Vout vn(unit, next);
+
+  auto const r = Vreg64{Reg64{0}};
+  auto const sf = v.makeReg();
+
+  v << testq{r, r, sf, Vflags{}};
+  v << ldimmq{uintptr_t(7), r};   // clobbers r before the branch
+  v << jcc{CC_E, sf, {taken, next}, StringTag{}};
+  vt << ret{};
+  vn << ret{};
+
+  annotateSFUses(unit);
+  simplify(unit);
+
+  auto const& code = unit.blocks[unit.entry].code;
+  ASSERT_EQ(code.size(), 3) << stripWhitespace(show(unit));
+  EXPECT_EQ(code[0].op, Vinstr::testq);
+  EXPECT_EQ(code[1].op, Vinstr::ldimmq);
+  EXPECT_EQ(code[2].op, Vinstr::jcc);
 }
 
 }
@@ -1125,12 +1227,28 @@ TEST(Vasm, ArmFoldTestlEqToCbzl) {
   testArmFoldTestlEqToCbzl();
 }
 
+TEST(Vasm, ArmFoldTestbEqToCbzl) {
+  testArmFoldTestbEqToCbzl();
+}
+
+TEST(Vasm, ArmFoldTestbNeToCbnzl) {
+  testArmFoldTestbNeToCbnzl();
+}
+
 TEST(Vasm, ArmFoldTestJccRejectsNonSelfCompare) {
   testArmFoldTestJccRejectsNonSelfCompare();
 }
 
 TEST(Vasm, ArmFoldTestJccRejectsNonEqualCC) {
   testArmFoldTestJccRejectsNonEqualCC();
+}
+
+TEST(Vasm, ArmFoldTestJccNonAdjacent) {
+  testArmFoldTestJccNonAdjacent();
+}
+
+TEST(Vasm, ArmFoldTestJccNonAdjacentRejectsClobber) {
+  testArmFoldTestJccNonAdjacentRejectsClobber();
 }
 
 }

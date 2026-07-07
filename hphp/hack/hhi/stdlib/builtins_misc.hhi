@@ -76,10 +76,6 @@ namespace {
   <<__PHPStdLib>>
   function sys_getloadavg(): \HH\FIXME\MISSING_RETURN_TYPE;
   <<__PHPStdLib>>
-  function hphp_process_abort(
-    HH\FIXME\MISSING_PARAM_TYPE $magic,
-  ): \HH\FIXME\MISSING_RETURN_TYPE;
-  <<__PHPStdLib>>
   function hphp_to_string(
     HH\FIXME\MISSING_PARAM_TYPE $v,
   )[]: \HH\FIXME\MISSING_RETURN_TYPE;

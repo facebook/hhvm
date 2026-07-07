@@ -127,7 +127,7 @@ struct lexer_scan_window {
 
   std::string_view text() const {
     assert(start <= head);
-    return {&*start, static_cast<std::size_t>(std::distance(start, head))};
+    return std::string_view(start, head);
   }
 
   source_location start_location() const { return location(*src, start); }

@@ -26,55 +26,15 @@
 #include <type_traits>
 #include <vector>
 
-// std::experimental::is_detected
-//   https://en.cppreference.com/w/cpp/experimental/is_detected
+// Detects whether `t.emplace(args...)` is well-formed for an lvalue `t`.
 namespace {
-namespace detail {
-struct nonesuch {
-  ~nonesuch() = delete;
-  nonesuch(nonesuch const&) = delete;
-  void operator=(nonesuch const&) = delete;
-};
-template <
-    typename Default,
-    typename AlwaysVoid,
-    template <typename...> typename Op,
-    typename... Args>
-struct detector {
-  using value_t = std::false_type;
-  using type = Default;
-};
-template <
-    typename Default,
-    template <typename...> typename Op,
-    typename... Args>
-struct detector<Default, std::void_t<Op<Args...>>, Op, Args...> {
-  using value_t = std::true_type;
-  using type = Op<Args...>;
-};
-template <template <typename...> typename Op, typename... Args>
-using is_detected = typename detector<nonesuch, void, Op, Args...>::value_t;
-template <template <typename...> typename Op, typename... Args>
-using detected_t = typename detector<nonesuch, void, Op, Args...>::type;
-template <
-    typename Default,
-    template <typename...> typename Op,
-    typename... Args>
-using detected_or = detector<Default, void, Op, Args...>;
-template <template <typename...> typename Detector, typename = void>
-struct is_valid_expression : std::false_type {};
-} // namespace detail
-template <template <typename...> typename Op, typename... Args>
-constexpr inline bool is_detected_v = detail::is_detected<Op, Args...>::value;
+template <typename T, typename... Args>
+concept can_emplace = requires(T& t, Args&&... args) { t.emplace(args...); };
 } // namespace
 
 namespace whisker {
 
 namespace {
-
-template <typename T, typename... Args>
-using call_emplace =
-    decltype(std::declval<T>().emplace(std::declval<Args>()...));
 
 struct move_only {
   move_only() = default;
@@ -277,7 +237,7 @@ TEST(ExpectedTest, emplace_never_empty) {
   EXPECT_EQ(e.error(), 1);
 
   // Requires nothrow constructible
-  EXPECT_FALSE((is_detected_v<call_emplace, decltype(e)>));
+  EXPECT_FALSE(can_emplace<decltype(e)>);
 }
 
 TEST(ExpectedTest, emplace_initializer_list) {

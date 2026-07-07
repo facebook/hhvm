@@ -20,6 +20,7 @@
 #include <string_view>
 #include <type_traits>
 #include <unordered_set>
+#include <vector>
 
 #include <folly/MapUtil.h>
 #include <folly/Utility.h>
@@ -43,18 +44,21 @@ bool containsId(const T& t, Id id) {
   }
 }
 
-template <typename T, typename Id>
-void clear_impl(MaskRef ref, T& obj, Id id, Value& value) {
+// Applies the mask's clear semantics to `value` and returns whether the
+// enclosing entry should be erased from its container. Erasing is deferred to
+// the caller (after iteration) because erasing mid-iteration invalidates the
+// container iterator (e.g. a folly F14 map), which is a use-after-free.
+[[nodiscard]] bool clearEntry(MaskRef ref, Value& value) {
   // Id doesn't exist in mask, skip.
   if (ref.isNoneMask()) {
-    return;
+    return false;
   }
   // Id that we want to clear.
   if (ref.isAllMask()) {
-    obj.erase(id);
-    return;
+    return true;
   }
   ref.clear(value);
+  return false;
 }
 
 template <typename T, typename Id>
@@ -409,20 +413,36 @@ void MaskRef::clear(protocol::Object& obj) const {
     return;
   }
   throwIfNotFieldMask();
+  // Collect ids to erase and erase after iterating: erasing during iteration
+  // would invalidate the iterator into obj's underlying F14 map.
+  std::vector<FieldId> idsToErase;
   for (auto& [id, value] : obj) {
     MaskRef ref = get(FieldId{id});
-    clear_impl(ref, obj, FieldId{id}, value);
+    if (clearEntry(ref, value)) {
+      idsToErase.push_back(FieldId{id});
+    }
+  }
+  for (FieldId id : idsToErase) {
+    obj.erase(id);
   }
 }
 
 void MaskRef::clear(folly::F14FastMap<Value, Value>& map) const {
   throwIfNotMapMask();
+  // Collect keys to erase and erase after iterating to avoid invalidating the
+  // iterator into the F14 map mid-loop.
+  std::vector<Value> keysToErase;
   for (auto& [key, value] : map) {
     MaskRef ref =
         (detail::getArrayKeyFromValue(key) == detail::ArrayKey::Integer)
         ? get(detail::getMapIdFromValue(key))
         : get(detail::getStringFromValue(key));
-    clear_impl(ref, map, key, value);
+    if (clearEntry(ref, value)) {
+      keysToErase.push_back(key);
+    }
+  }
+  for (const auto& key : keysToErase) {
+    map.erase(key);
   }
 }
 

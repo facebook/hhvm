@@ -21,7 +21,6 @@ import unittest
 from typing import Any, Callable, cast as typing_cast
 
 import thrift.python.serializer as serializer
-import thrift.python.types
 from parameterized import parameterized
 from pyre_extensions import none_throws
 from testing.dependency.thrift_types import IncludedStruct
@@ -44,46 +43,13 @@ from thrift.python.test.deprecated.locally_set_fields_annotation.thrift_types im
     UnannotatedStructWithAnnotatedChild,
     UnannotatedStructWithoutIssetInspection,
 )
-from thrift.python.types import get_locally_set_fields, Struct as PythonStruct
-
-# `isset_DEPRECATED` is intentionally excluded from `types.pyi`, so reference it
-# through the module to keep the suppression in a single place.
-isset_DEPRECATED: Callable[[Any], dict[str, bool]] = (
-    thrift.python.types.isset_DEPRECATED  # pyre-ignore[16]: not declared in types.pyi
-)
+from thrift.python.types import get_locally_set_fields
 
 
 class StructLocallySetFieldsTest(unittest.TestCase):
     """The `enable_isset_deprecated_unsafe` compiler option enables
     `get_locally_set_fields()` for all non-exception structs in this library.
-
-    Every `get_locally_set_fields()` call routes through `_locally_set_fields()`
-    (and every unsupported case through `_assert_unsupported()`), which also
-    exercises `isset_DEPRECATED()` and asserts the two agree. This guarantees
-    the two APIs behave identically, aside from the `frozenset[str]` vs
-    `dict[str, bool]` return-type difference.
     """
-
-    def _locally_set_fields(self, struct: PythonStruct) -> frozenset[str]:
-        """Return `get_locally_set_fields(struct)`, asserting `isset_DEPRECATED`
-        reports the identical set of fields (its True-valued keys)."""
-        locally_set = get_locally_set_fields(struct)
-        isset = isset_DEPRECATED(struct)
-        self.assertEqual(
-            frozenset(name for name, is_set in isset.items() if is_set),
-            locally_set,
-        )
-        return locally_set
-
-    def _assert_unsupported(self, struct: Any) -> None:
-        """Both `get_locally_set_fields` and `isset_DEPRECATED` must reject
-        `struct` with `AttributeError`."""
-        with self.assertRaisesRegex(
-            AttributeError, "does not support locally set field inspection"
-        ):
-            get_locally_set_fields(struct)
-        with self.assertRaises(AttributeError):
-            isset_DEPRECATED(struct)
 
     @parameterized.expand(
         [
@@ -117,7 +83,7 @@ class StructLocallySetFieldsTest(unittest.TestCase):
         self, _name: str, kwargs: dict[str, Any], expected: frozenset[str]
     ) -> None:
         s = StructWithIssetInspection(**kwargs)
-        self.assertEqual(self._locally_set_fields(s), expected)
+        self.assertEqual(get_locally_set_fields(s), expected)
 
     @parameterized.expand(
         [
@@ -144,7 +110,7 @@ class StructLocallySetFieldsTest(unittest.TestCase):
     ) -> None:
         s = StructWithIssetInspection(**init_kwargs)
         self.assertEqual(
-            self._locally_set_fields(s(**call_kwargs)),
+            get_locally_set_fields(s(**call_kwargs)),
             expected,
         )
 
@@ -152,10 +118,10 @@ class StructLocallySetFieldsTest(unittest.TestCase):
         s = StructWithIssetInspection(int_field=42, opt_str_field="hello")
         s2 = s(int_field=99)
         self.assertEqual(
-            self._locally_set_fields(s), frozenset({"int_field", "opt_str_field"})
+            get_locally_set_fields(s), frozenset({"int_field", "opt_str_field"})
         )
         self.assertEqual(
-            self._locally_set_fields(s2), frozenset({"int_field", "opt_str_field"})
+            get_locally_set_fields(s2), frozenset({"int_field", "opt_str_field"})
         )
 
     @parameterized.expand(
@@ -198,8 +164,11 @@ class StructLocallySetFieldsTest(unittest.TestCase):
     ) -> None:
         s = create_struct()
 
-        self.assertEqual(self._locally_set_fields(s), frozenset({"child"}))
-        self._assert_unsupported(s.child)
+        self.assertEqual(get_locally_set_fields(s), frozenset({"child"}))
+        with self.assertRaisesRegex(
+            AttributeError, "does not support locally set field inspection"
+        ):
+            get_locally_set_fields(s.child)
 
     @parameterized.expand(
         [
@@ -245,22 +214,28 @@ class StructLocallySetFieldsTest(unittest.TestCase):
     ) -> None:
         s = create_struct()
 
-        self._assert_unsupported(s)
+        with self.assertRaisesRegex(
+            AttributeError, "does not support locally set field inspection"
+        ):
+            get_locally_set_fields(s)
         self.assertEqual(
-            self._locally_set_fields(s.child),
+            get_locally_set_fields(s.child),
             expected,
         )
 
     def test_get_locally_set_fields_generated_error_not_supported(self) -> None:
         e = UnusedError(message="oops")
-        self._assert_unsupported(e)
+        with self.assertRaisesRegex(
+            AttributeError, "does not support locally set field inspection"
+        ):
+            get_locally_set_fields(e)
 
     def test_get_locally_set_fields_deserialized_tracks_present_fields(self) -> None:
         s = StructWithIssetInspection(int_field=42, opt_str_field="hello")
         serialized = serializer.serialize_iobuf(s)
         deserialized = serializer.deserialize(StructWithIssetInspection, serialized)
         self.assertEqual(
-            self._locally_set_fields(deserialized),
+            get_locally_set_fields(deserialized),
             frozenset({"int_field", "opt_str_field", "bool_field"}),
         )
 
@@ -290,37 +265,35 @@ class StructLocallySetFieldsTest(unittest.TestCase):
         deserialized = serializer.deserialize(StructWithIssetInspection, serialized)
         s2 = deserialized(bool_field=True)
         self.assertEqual(
-            self._locally_set_fields(s2),
+            get_locally_set_fields(s2),
             frozenset({"int_field", "bool_field"}),
         )
 
     def test_compiler_option_enables_unannotated_structs(self) -> None:
         s = SimpleStruct(value=42)
-        self.assertEqual(self._locally_set_fields(s), frozenset({"value"}))
+        self.assertEqual(get_locally_set_fields(s), frozenset({"value"}))
 
     def test_deserialized_optional_fields(self) -> None:
         to_serialize = OptionalFile(name="/dev/null", type=8)
         serialized = serializer.serialize_iobuf(to_serialize)
         file = serializer.deserialize(File, serialized)
-        self.assertIn("type", self._locally_set_fields(file))
-        self.assertNotIn("permissions", self._locally_set_fields(file))
+        self.assertIn("type", get_locally_set_fields(file))
+        self.assertNotIn("permissions", get_locally_set_fields(file))
 
         to_serialize = OptionalFile(name="/dev/null")
         serialized = serializer.serialize_iobuf(to_serialize)
         file = serializer.deserialize(File, serialized)
         self.assertEqual(file.type, Kind.REGULAR)
-        self.assertNotIn("type", self._locally_set_fields(file))
+        self.assertNotIn("type", get_locally_set_fields(file))
 
     def test_union_not_supported(self) -> None:
         i = Integers(large=2)
         with self.assertRaises(TypeError):
             get_locally_set_fields(typing_cast(Any, i))
-        with self.assertRaises(TypeError):
-            isset_DEPRECATED(typing_cast(Any, i))
 
     def test_defaulted_optional_fields_absent(self) -> None:
         def assert_optional_fields_absent(m: mixed) -> None:
-            locally_set_fields = self._locally_set_fields(m)
+            locally_set_fields = get_locally_set_fields(m)
             for fld_name, _ in mixed:
                 if not fld_name.startswith("opt_"):
                     continue
@@ -336,13 +309,13 @@ class StructLocallySetFieldsTest(unittest.TestCase):
         assert_optional_fields_absent(m)
 
         m = mixed(opt_field=None)
-        self.assertNotIn("opt_field", self._locally_set_fields(m))
+        self.assertNotIn("opt_field", get_locally_set_fields(m))
 
         m = m(opt_field=None)
-        self.assertNotIn("opt_field", self._locally_set_fields(m))
+        self.assertNotIn("opt_field", get_locally_set_fields(m))
 
         m = serializer.deserialize(mixed, serializer.serialize(m))
-        self.assertNotIn("opt_field", self._locally_set_fields(m))
+        self.assertNotIn("opt_field", get_locally_set_fields(m))
 
     def test_single_field_struct_copy_preserves_locally_set_fields(self) -> None:
         # Regression test for the copy-then-update `Struct.__call__`
@@ -363,7 +336,7 @@ class StructLocallySetFieldsTest(unittest.TestCase):
         # Clearing the field on a sibling copy must not disturb `with_values`.
         _ = base(values=None)
 
-        self.assertIn("values", self._locally_set_fields(with_values))
+        self.assertIn("values", get_locally_set_fields(with_values))
         serialized = serializer.serialize_iobuf(with_values)
         roundtrip = serializer.deserialize(Optionals, serialized)
         self.assertIsNotNone(roundtrip.values)
@@ -377,9 +350,9 @@ class StructLocallySetFieldsTest(unittest.TestCase):
         self.assertEqual(hash(s1), hash(s2))
         self.assertEqual(len({s1, s2}), 1)
         self.assertEqual(
-            self._locally_set_fields(s1), frozenset({"name", "value", "city"})
+            get_locally_set_fields(s1), frozenset({"name", "value", "city"})
         )
-        self.assertEqual(self._locally_set_fields(s2), frozenset({"city"}))
+        self.assertEqual(get_locally_set_fields(s2), frozenset({"city"}))
 
     def test_isset_deprecated_equality_uses_value_comparison(self) -> None:
         # Fields explicitly set to their defaults vs left unset: equal by value
@@ -398,36 +371,36 @@ class StructLocallySetFieldsTest(unittest.TestCase):
 
     def test_nested_and_container_structs(self) -> None:
         c = HasContainers(nested_list=[Nested(num=1), Nested(num=2, label="x")])
-        self.assertIn("num", self._locally_set_fields(c.nested_list[0]))
-        self.assertNotIn("label", self._locally_set_fields(c.nested_list[0]))
-        self.assertIn("label", self._locally_set_fields(c.nested_list[1]))
+        self.assertIn("num", get_locally_set_fields(c.nested_list[0]))
+        self.assertNotIn("label", get_locally_set_fields(c.nested_list[0]))
+        self.assertIn("label", get_locally_set_fields(c.nested_list[1]))
 
         c = HasContainers(nested_map={5: Nested(num=1), 6: Nested(num=2, label="x")})
-        self.assertIn("num", self._locally_set_fields(c.nested_map[5]))
-        self.assertNotIn("label", self._locally_set_fields(c.nested_map[5]))
-        self.assertIn("label", self._locally_set_fields(c.nested_map[6]))
+        self.assertIn("num", get_locally_set_fields(c.nested_map[5]))
+        self.assertNotIn("label", get_locally_set_fields(c.nested_map[5]))
+        self.assertIn("label", get_locally_set_fields(c.nested_map[6]))
 
         c = HasContainers(
             nested=Nested(num=1),
             nested_list_of_lists=[[Nested(num=1, label="x")]],
             nested_map_of_lists={9: [Nested(num=2)]},
         )
-        self.assertIn("num", self._locally_set_fields(c.nested))
-        self.assertIn("label", self._locally_set_fields(c.nested_list_of_lists[0][0]))
-        self.assertNotIn("label", self._locally_set_fields(c.nested_map_of_lists[9][0]))
+        self.assertIn("num", get_locally_set_fields(c.nested))
+        self.assertIn("label", get_locally_set_fields(c.nested_list_of_lists[0][0]))
+        self.assertNotIn("label", get_locally_set_fields(c.nested_map_of_lists[9][0]))
 
     def test_call_preserves_container_locally_set_fields(self) -> None:
         c = HasContainers(nested_list=[Nested(num=1)])
         c2 = c(nested=Nested(num=2, label="y"))
-        self.assertIn("label", self._locally_set_fields(c2.nested))
-        self.assertIn("num", self._locally_set_fields(c2.nested_list[0]))
-        self.assertNotIn("label", self._locally_set_fields(c2.nested_list[0]))
+        self.assertIn("label", get_locally_set_fields(c2.nested))
+        self.assertIn("num", get_locally_set_fields(c2.nested_list[0]))
+        self.assertNotIn("label", get_locally_set_fields(c2.nested_list[0]))
 
     def test_optional_container_fields_none(self) -> None:
         # Optional list/map struct fields left unset (None), including deeply
         # nested in a sub-struct, must not break locally-set field tracking.
         c = HasContainers(nested=Nested(num=1))
-        locally_set_fields = self._locally_set_fields(c.nested)
+        locally_set_fields = get_locally_set_fields(c.nested)
         self.assertIn("num", locally_set_fields)
         self.assertNotIn("maybe_children", locally_set_fields)
         self.assertNotIn("maybe_map", locally_set_fields)
@@ -441,42 +414,43 @@ class StructLocallySetFieldsTest(unittest.TestCase):
                 maybe_map={5: Nested(num=4)},
             )
         )
-        self.assertIn("maybe_children", self._locally_set_fields(c2.nested))
+        self.assertIn("maybe_children", get_locally_set_fields(c2.nested))
         maybe_children = none_throws(c2.nested.maybe_children)
-        self.assertIn("num", self._locally_set_fields(maybe_children[0]))
-        self.assertNotIn("maybe_children", self._locally_set_fields(maybe_children[0]))
+        self.assertIn("num", get_locally_set_fields(maybe_children[0]))
+        self.assertNotIn("maybe_children", get_locally_set_fields(maybe_children[0]))
         maybe_map = none_throws(c2.nested.maybe_map)
-        self.assertIn("num", self._locally_set_fields(maybe_map[5]))
-        self.assertNotIn("maybe_map", self._locally_set_fields(maybe_map[5]))
+        self.assertIn("num", get_locally_set_fields(maybe_map[5]))
+        self.assertNotIn("maybe_map", get_locally_set_fields(maybe_map[5]))
 
     def test_unsupported_without_compiler_option(self) -> None:
         # `IncludedStruct` comes from the `dependency` library, which is NOT
         # compiled with the `enable_isset_deprecated_unsafe` compiler option, so
         # `get_locally_set_fields()` is unsupported for it.
-        self._assert_unsupported(IncludedStruct())
+        with self.assertRaises(AttributeError):
+            get_locally_set_fields(IncludedStruct())
 
     def test_set_of_structs(self) -> None:
         # A struct reached through a `set<struct>` container tracks its own
         # locally set fields, just like list/map elements.
         c = HasContainers(nested_set={Nested(num=1, label="x")})
         (elem,) = tuple(c.nested_set)
-        locally_set = self._locally_set_fields(elem)
+        locally_set = get_locally_set_fields(elem)
         self.assertIn("num", locally_set)
         self.assertIn("label", locally_set)
 
         # Optional `set<struct>` left unset (None) is reported as absent, and a
         # populated optional set is reported as present; its element tracks its
         # own fields.
-        self.assertNotIn("maybe_set", self._locally_set_fields(Nested(num=2)))
+        self.assertNotIn("maybe_set", get_locally_set_fields(Nested(num=2)))
 
         parent = HasContainers(nested=Nested(num=3, maybe_set={Nested(num=4)}))
-        self.assertIn("maybe_set", self._locally_set_fields(parent.nested))
+        self.assertIn("maybe_set", get_locally_set_fields(parent.nested))
         maybe_set = none_throws(parent.nested.maybe_set)
         (child,) = tuple(maybe_set)
-        self.assertIn("num", self._locally_set_fields(child))
+        self.assertIn("num", get_locally_set_fields(child))
 
         # Tracking survives a serialize/deserialize round trip too.
         rt = serializer.deserialize(HasContainers, serializer.serialize_iobuf(c))
         (rt_elem,) = tuple(rt.nested_set)
-        self.assertIn("num", self._locally_set_fields(rt_elem))
-        self.assertIn("label", self._locally_set_fields(rt_elem))
+        self.assertIn("num", get_locally_set_fields(rt_elem))
+        self.assertIn("label", get_locally_set_fields(rt_elem))

@@ -3015,23 +3015,11 @@ def fill_specs(*structured_thrift_classes):
             cls._fbthrift_store_field_values()
 
 
-def isset_DEPRECATED(StructOrError struct):
-    cdef StructInfo info = struct._fbthrift_struct_info
-    if not info.enable_isset_deprecated:
-        raise AttributeError(
-            f"{type(struct).__name__} does not support isset inspection."
-        )
-    isset_bytes = struct._fbthrift_data[-1]
-    return {
-        name: bool(isset_bytes[index])
-        for name, index in info.name_to_index.items()
-    }
-
-
 def get_locally_set_fields(StructOrError struct):
     """Return the frozenset of field names explicitly set on the struct.
 
-    Only works on structs annotated with @python.EnableUnsafeIssetInspection.
+    Only works on structs annotated with @python.EnableUnsafeIssetInspection or
+    generated with `enable_isset_deprecated_unsafe`.
     Deserialized top-level structs log a warning and still return field
     set-ness computed from their isset bits.
 
@@ -3040,13 +3028,14 @@ def get_locally_set_fields(StructOrError struct):
     from their own isset data, but do not inherit top-level provenance.
 
     Raises:
-        AttributeError: if the struct is not annotated.
+        AttributeError: if the struct is not supported.
     """
     cdef StructInfo info = struct._fbthrift_struct_info
     if not info.enable_get_locally_set_fields:
         raise AttributeError(
             f"{type(struct).__name__} does not support locally set field inspection. "
-            "Add @python.EnableUnsafeIssetInspection to the struct definition."
+            "Add @python.EnableUnsafeIssetInspection to the struct definition "
+            "or enable the thrift-python `enable_isset_deprecated_unsafe` option."
         )
     if not struct._fbthrift_is_locally_constructed:
         logGetLocallySetFieldsCalledOnDeserializedStruct(type(struct).__name__.encode("utf-8"))

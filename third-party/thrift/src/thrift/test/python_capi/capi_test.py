@@ -19,7 +19,6 @@ import typing
 import unittest
 from sys import getrefcount
 
-import thrift.python.types
 import thrift.python_capi.fixture as fixture
 from folly.iobuf import IOBuf
 from parameterized import parameterized
@@ -67,10 +66,6 @@ from thrift.test.python_capi.thrift_dep.thrift_types import (
 )
 
 sT = typing.TypeVar("sT", bound=typing.Union[StructOrUnion, GeneratedError])
-
-# `isset_DEPRECATED` is intentionally excluded from `types.pyi`, so reference it
-# through the module.
-isset_DEPRECATED = thrift.python.types.isset_DEPRECATED  # pyre-ignore[16]
 
 
 class PythonCapiFixture(unittest.TestCase):
@@ -277,7 +272,7 @@ class PythonCapiRoundtrip(PythonCapiFixture):
     def test_roundtrip_field_adapted(self) -> None:
         a, b = ("TacosSalad", "DaLassoCat")
         s = StringPair(normal=a, doubled=b)
-        (self.assertEqual(s, fixture.roundtrip_StringPair(s)),)
+        self.assertEqual(s, fixture.roundtrip_StringPair(s))
 
     def test_roundtrip_type_adapted(self) -> None:
         s = DoubledPair(s="TacosSalad", x=42)
@@ -288,19 +283,6 @@ class PythonCapiRoundtrip(PythonCapiFixture):
         with self.assertRaises(TypeError):
             # pyre-ignore[6]
             fixture.roundtrip_EmptyStruct(MyStruct())
-
-    def _assert_locally_set_fields(
-        self, struct: PythonStruct, expected: frozenset[str]
-    ) -> None:
-        # `get_locally_set_fields` and `isset_DEPRECATED` must agree: the True
-        # keys of the isset dict equal the locally-set-fields frozenset. This
-        # asserts the two APIs behave identically, aside from the return type.
-        self.assertEqual(get_locally_set_fields(struct), expected)
-        isset = isset_DEPRECATED(struct)
-        self.assertEqual(
-            frozenset(name for name, is_set in isset.items() if is_set),
-            expected,
-        )
 
     @parameterized.expand(
         [
@@ -345,7 +327,10 @@ class PythonCapiRoundtrip(PythonCapiFixture):
         # `IssetStruct` is compiled with `enable_isset_deprecated_unsafe`, so its
         # locally set fields reflect its generated presence state. This is the only
         # coverage of the locally-set-fields capi Constructor (C++ -> Python) path.
-        self._assert_locally_set_fields(original, expected_local_fields)
+        self.assertEqual(
+            get_locally_set_fields(original),
+            expected_local_fields,
+        )
 
         built = fixture.roundtrip_IssetStruct(original)
         # Field values survive the round-trip.
@@ -353,7 +338,10 @@ class PythonCapiRoundtrip(PythonCapiFixture):
         self.assertEqual(built.optional_int, original.optional_int)
         self.assertEqual(built.optional_str, original.optional_str)
         # Locally set fields reflect the Constructor's view of presence.
-        self._assert_locally_set_fields(built, expected_roundtrip_fields)
+        self.assertEqual(
+            get_locally_set_fields(built),
+            expected_roundtrip_fields,
+        )
 
     def test_roundtrip_locally_set_fields_empty(self) -> None:
         # A locally-set-fields-enabled fieldless struct round-trips through the

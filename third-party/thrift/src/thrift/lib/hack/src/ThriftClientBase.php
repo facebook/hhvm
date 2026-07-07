@@ -432,6 +432,10 @@ abstract class ThriftClientBase implements IThriftClient {
                 $next = await $stream_gen->next();
               } finally {
                 $timer->end();
+                ProfilingCounters::incrDuration(
+                  ProfilingCounterDuration::THRIFT_READ_DURATION,
+                  $timer->getOldestRunningIODuration(),
+                );
               }
               if ($next !== null) {
                 list($_, $chunk) = $next;

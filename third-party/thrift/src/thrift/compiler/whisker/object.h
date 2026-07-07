@@ -737,9 +737,6 @@ class object final : private detail::object_base {
   friend bool operator==(const object& lhs, null) noexcept {
     return lhs.is_null();
   }
-  friend bool operator==(null, const object& rhs) noexcept {
-    return rhs.is_null();
-  }
 
   /**
    * Produces a textual representation of the data type contained within this
@@ -747,35 +744,26 @@ class object final : private detail::object_base {
    */
   std::string describe_type() const;
 
+  // Comparisons against the object's alternative types. C++20 synthesizes the
+  // reversed forms (e.g. `5 == obj`) from these forward operators, so no
+  // hand-written reversed overloads are needed.
+
   // Prevent implicit conversion from const char* to bool
   friend bool operator==(
       const object& lhs, std::same_as<boolean> auto rhs) noexcept {
     return lhs.is_boolean() && lhs.as_boolean() == rhs;
   }
-  friend bool operator==(
-      std::same_as<boolean> auto lhs, const object& rhs) noexcept {
-    return rhs == lhs;
-  }
 
   friend bool operator==(const object& lhs, i64 rhs) noexcept {
     return lhs.is_i64() && lhs.as_i64() == rhs;
-  }
-  friend bool operator==(i64 lhs, const object& rhs) noexcept {
-    return rhs == lhs;
   }
 
   friend bool operator==(const object& lhs, f64 rhs) noexcept {
     return lhs.is_f64() && lhs.as_f64() == rhs;
   }
-  friend bool operator==(f64 lhs, const object& rhs) noexcept {
-    return rhs == lhs;
-  }
 
   friend bool operator==(const object& lhs, std::string_view rhs) noexcept {
     return lhs.is_string() && lhs.as_string() == rhs;
-  }
-  friend bool operator==(std::string_view lhs, const object& rhs) noexcept {
-    return rhs == lhs;
   }
 
   friend bool operator==(const object&, std::nullptr_t) = delete;
@@ -786,18 +774,10 @@ class object final : private detail::object_base {
     return lhs.is_native_function() && rhs != nullptr &&
         lhs.as_native_function() == rhs;
   }
-  friend bool operator==(
-      const native_function::ptr& lhs, const object& rhs) noexcept {
-    return rhs == lhs;
-  }
 
   friend bool operator==(
       const object& lhs, const native_handle<>& rhs) noexcept {
     return lhs.is_native_handle() && lhs.as_native_handle() == rhs;
-  }
-  friend bool operator==(
-      const native_handle<>& lhs, const object& rhs) noexcept {
-    return rhs == lhs;
   }
 
   friend bool operator==(const object& lhs, const array::ptr& rhs) noexcept {
@@ -806,18 +786,12 @@ class object final : private detail::object_base {
     }
     return false;
   }
-  friend bool operator==(const array::ptr& lhs, const object& rhs) noexcept {
-    return rhs == lhs;
-  }
 
   friend bool operator==(const object& lhs, const map::ptr& rhs) noexcept {
     if (lhs.is_map() && rhs != nullptr) {
       return *lhs.as_map() == *rhs;
     }
     return false;
-  }
-  friend bool operator==(const map::ptr& lhs, const object& rhs) noexcept {
-    return rhs == lhs;
   }
 
   friend bool operator==(const object& lhs, const object& rhs) noexcept {

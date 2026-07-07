@@ -18,8 +18,10 @@
 
 #include <memory>
 #include <string_view>
+#include <utility>
 
 #include <folly/ExceptionWrapper.h>
+#include <folly/Function.h>
 #include <folly/Portability.h>
 #include <folly/io/IOBuf.h>
 #include <folly/io/async/DelayedDestruction.h>
@@ -53,6 +55,7 @@ class ThriftClientAppAdapter : public folly::DelayedDestruction,
  public:
   using RequestResponseHandler =
       apache::thrift::fast_thrift::thrift::client::RequestResponseHandler;
+  using CloseCallback = folly::Function<void() noexcept>;
 
   using Ptr = std::unique_ptr<ThriftClientAppAdapter, Destructor>;
 
@@ -90,6 +93,10 @@ class ThriftClientAppAdapter : public folly::DelayedDestruction,
 
   void setProtocolId(uint16_t protocolId) noexcept { protocolId_ = protocolId; }
 
+  void setCloseCallback(CloseCallback closeCallback) noexcept {
+    closeCallback_ = std::move(closeCallback);
+  }
+
   /**
    * Issue a request-response RPC.
    *
@@ -107,7 +114,10 @@ class ThriftClientAppAdapter : public folly::DelayedDestruction,
 
   // === TailEndpointHandler lifecycle ===
   void handlerAdded() noexcept {}
-  void handlerRemoved() noexcept { state_ = State::Closed; }
+  void handlerRemoved() noexcept {
+    state_ = State::Closed;
+    closeCallback_ = {};
+  }
   void onPipelineActive() noexcept;
   void onPipelineInactive() noexcept;
   void onWriteReady() noexcept {}
@@ -140,6 +150,7 @@ class ThriftClientAppAdapter : public folly::DelayedDestruction,
   apache::thrift::fast_thrift::channel_pipeline::PipelineImpl* pipeline_{
       nullptr};
   std::unique_ptr<folly::DelayedDestruction::DestructorGuard> pipelineGuard_;
+  CloseCallback closeCallback_;
   uint16_t protocolId_{0};
   State state_{State::Open};
   folly::exception_wrapper lastError_;

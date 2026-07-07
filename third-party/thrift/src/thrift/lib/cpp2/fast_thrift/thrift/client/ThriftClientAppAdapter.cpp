@@ -110,6 +110,9 @@ void ThriftClientAppAdapter::onPipelineInactive() noexcept {
   // edge. Whether we got here via a graceful close or a hard error, the
   // state machine ends up Closed.
   state_ = State::Closed;
+  if (closeCallback_) {
+    closeCallback_();
+  }
 }
 
 void ThriftClientAppAdapter::onException(

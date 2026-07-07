@@ -12,4 +12,5 @@ json: json src/module.thrift
 python: mstch_python src/module.thrift
 python_capi: mstch_python_capi src/module.thrift
 csharp: csharp_EXPERIMENTAL src/module.thrift
+swift: swift_EXPERIMENTAL src/module.thrift
 starlark: starlark src/module.thrift

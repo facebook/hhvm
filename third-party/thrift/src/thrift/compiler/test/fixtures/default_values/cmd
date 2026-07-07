@@ -1,5 +1,6 @@
 cpp2: mstch_cpp2 src/module.thrift
 csharp: csharp_EXPERIMENTAL src/module.thrift
+swift: swift_EXPERIMENTAL src/module.thrift
 go: mstch_go src/module.thrift
 hack: hack:hack_collections=1 src/module.thrift
 hack_legacy_default_values: hack:hack_collections=1,legacy_default_values=1 src/module.thrift

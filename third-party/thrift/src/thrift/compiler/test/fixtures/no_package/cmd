@@ -1,5 +1,6 @@
 android: android src/module.thrift
 csharp: csharp_EXPERIMENTAL src/module.thrift
+swift: swift_EXPERIMENTAL src/module.thrift
 hack: hack:json,server=1,shapes=1,shapes_allow_unknown_fields=1,hack_collections=1 src/module.thrift
 hack_split: hack:split_types,server=1 src/module.thrift
 java_deprecated: java_deprecated src/module.thrift

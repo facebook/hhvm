@@ -1,6 +1,7 @@
 android: android src/module.thrift
 cpp2: mstch_cpp2 src/module.thrift
 csharp: csharp_EXPERIMENTAL src/module.thrift
+swift: swift_EXPERIMENTAL src/module.thrift
 go: mstch_go src/module.thrift
 hack: hack:json,server=1,shapes=1,shapes_allow_unknown_fields=1,hack_collections=1 src/module.thrift
 java: mstch_java src/module.thrift

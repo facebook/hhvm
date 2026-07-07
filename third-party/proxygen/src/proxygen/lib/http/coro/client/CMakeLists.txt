@@ -21,6 +21,19 @@ proxygen_add_library(proxygen_http_coro_client_dns_resolver
     Folly::folly_network_address
 )
 
+proxygen_add_library(proxygen_cert_verifier
+  SRCS
+    ProxygenCertVerifier.cpp
+  DEPS
+    Folly::folly_portability_openssl
+    Folly::folly_ssl_openssl_cert_utils
+    Folly::folly_string
+    fmt::fmt
+  EXPORTED_DEPS
+    fizz::fizz
+    Folly::folly_network_address
+)
+
 proxygen_add_library(proxygen_http_coro_client_http_connector
   SRCS
     HTTPCoroConnector.cpp

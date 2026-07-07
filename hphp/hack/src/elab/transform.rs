@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<a5ac9c7fbc5a8986e1e2df9d4c5579be>>
+// @generated SignedSource<<520f3bb60394331b359bde5a30e128e8>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -2632,8 +2632,9 @@ impl Transform for HintFun {
                 param_tys: ref mut __binding_2,
                 param_info: ref mut __binding_3,
                 variadic_ty: ref mut __binding_4,
-                ctxs: ref mut __binding_5,
-                return_ty: ref mut __binding_6,
+                named_variadic_ty: ref mut __binding_5,
+                ctxs: ref mut __binding_6,
+                return_ty: ref mut __binding_7,
                 ..
             } => {
                 {
@@ -2652,15 +2653,18 @@ impl Transform for HintFun {
                     __binding_5.transform(env, &mut pass.clone())
                 }
                 {
+                    __binding_6.transform(env, &mut pass.clone())
+                }
+                {
                     {
                         let pass = &mut pass.clone();
                         let mut in_pass = pass.clone();
-                        if let Break(..) = pass.on_fld_hint_fun_return_ty_top_down(env, __binding_6)
+                        if let Break(..) = pass.on_fld_hint_fun_return_ty_top_down(env, __binding_7)
                         {
                             return;
                         }
-                        __binding_6.transform(env, &mut pass.clone());
-                        let _ = in_pass.on_fld_hint_fun_return_ty_bottom_up(env, __binding_6);
+                        __binding_7.transform(env, &mut pass.clone());
+                        let _ = in_pass.on_fld_hint_fun_return_ty_bottom_up(env, __binding_7);
                     }
                 }
             }

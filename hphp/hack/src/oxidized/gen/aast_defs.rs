@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ad7d709b0be5a2da2abd08213ec36add>>
+// @generated SignedSource<<55bb370a47ef2cd55d7edb08d05e533e>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -2912,6 +2912,7 @@ pub struct HintFun {
     pub param_tys: Vec<Hint>,
     pub param_info: Vec<Option<HfParamInfo>>,
     pub variadic_ty: VariadicHint,
+    pub named_variadic_ty: VariadicHint,
     pub ctxs: Option<Contexts>,
     #[rust_to_ocaml(attr = "transform.explicit")]
     pub return_ty: Hint,

@@ -52,8 +52,8 @@ Errors:
                             { hf_is_readonly = None; hf_tparams = []; 
                               hf_param_tys = [([7:30-33], (Hprim Tint))];
                               hf_param_info = [(Some { hfparam_kind = Pnormal; hfparam_readonlyness = None; hfparam_optional = None; hfparam_splat = None; hfparam_named = None })];
-                              hf_variadic_ty = None; hf_ctxs = None; 
-                              hf_return_ty = ([7:35-41], (Hlike ([7:35-41], (Happly (([7:35-41], "\\HH\\string"), []))))); 
+                              hf_variadic_ty = None; hf_named_variadic_ty = None; 
+                              hf_ctxs = None; hf_return_ty = ([7:35-41], (Hlike ([7:35-41], (Happly (([7:35-41], "\\HH\\string"), []))))); 
                               hf_is_readonly_return = None }))
                          ]
                        )))));
@@ -105,8 +105,8 @@ Errors:
                          (Hfun
                             { hf_is_readonly = None; hf_tparams = []; 
                               hf_param_tys = []; hf_param_info = []; 
-                              hf_variadic_ty = None; hf_ctxs = None; 
-                              hf_return_ty = ([9:29-35], (Hlike ([9:29-35], (Happly (([9:29-35], "\\HH\\string"), []))))); 
+                              hf_variadic_ty = None; hf_named_variadic_ty = None; 
+                              hf_ctxs = None; hf_return_ty = ([9:29-35], (Hlike ([9:29-35], (Happly (([9:29-35], "\\HH\\string"), []))))); 
                               hf_is_readonly_return = None }))
                          ]
                        )))));
@@ -125,8 +125,8 @@ Errors:
                                hf_param_info =
                                [(Some { hfparam_kind = Pnormal; hfparam_readonlyness = None; hfparam_optional = None; hfparam_splat = None; hfparam_named = None });
                                  (Some { hfparam_kind = Pnormal; hfparam_readonlyness = None; hfparam_optional = None; hfparam_splat = None; hfparam_named = None })];
-                               hf_variadic_ty = None; hf_ctxs = None; 
-                               hf_return_ty = ([9:61-67], (Hlike ([9:61-67], (Happly (([9:61-67], "\\HH\\string"), []))))); 
+                               hf_variadic_ty = None; hf_named_variadic_ty = None; 
+                               hf_ctxs = None; hf_return_ty = ([9:61-67], (Hlike ([9:61-67], (Happly (([9:61-67], "\\HH\\string"), []))))); 
                                hf_is_readonly_return = None }))
                           ]
                         )))));
@@ -265,8 +265,8 @@ Errors:
                             { hf_is_readonly = None; hf_tparams = []; 
                               hf_param_tys = [([7:30-33], (Hprim Tint))];
                               hf_param_info = [(Some { hfparam_kind = Pnormal; hfparam_readonlyness = None; hfparam_optional = None; hfparam_splat = None; hfparam_named = None })];
-                              hf_variadic_ty = None; hf_ctxs = None; 
-                              hf_return_ty = ([7:35-41], (Hlike ([7:35-41], (Happly (([7:35-41], "\\HH\\string"), []))))); 
+                              hf_variadic_ty = None; hf_named_variadic_ty = None; 
+                              hf_ctxs = None; hf_return_ty = ([7:35-41], (Hlike ([7:35-41], (Happly (([7:35-41], "\\HH\\string"), []))))); 
                               hf_is_readonly_return = None }))
                          ]
                        )))));

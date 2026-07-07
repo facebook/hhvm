@@ -292,6 +292,7 @@ module Full = struct
       support_dynamic_type = _;
       is_memoized = _;
       variadic = _;
+      named_variadic = _;
     } =
       Typing_defs_flags.Fun.as_record ft_flags
     in
@@ -309,10 +310,38 @@ module Full = struct
     in
     let (fuel, params) =
       let param_count = List.length ft_params in
+      let variadic_idx =
+        if get_ft_variadic ft then
+          Some
+            (param_count
+            -
+            if get_ft_named_variadic ft then
+              2
+            else
+              1)
+        else
+          None
+      in
+      let named_variadic_idx =
+        if get_ft_named_variadic ft then
+          Some (param_count - 1)
+        else
+          None
+      in
       List.fold_mapi ft_params ~init:fuel ~f:(fun i fuel p ->
           let (fuel, d) = fun_param ~fuel ~ty to_doc st penv ~verbose p in
+          let is_variadic =
+            match variadic_idx with
+            | Some idx -> i = idx
+            | None -> false
+          in
+          let is_named_variadic =
+            match named_variadic_idx with
+            | Some idx -> i = idx
+            | None -> false
+          in
           ( fuel,
-            if get_ft_variadic ft && i + 1 = param_count then
+            if is_variadic || is_named_variadic then
               Concat [d; text "..."]
             else
               d ))

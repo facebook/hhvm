@@ -40,6 +40,7 @@ module Fun = struct
     support_dynamic_type: bool;
     is_memoized: bool;
     variadic: bool;
+    named_variadic: bool;
   }
   [@@deriving show]
 
@@ -111,6 +112,12 @@ module Fun = struct
 
   let set_variadic = set_bit variadic_mask
 
+  let named_variadic_mask = 1 lsl 15
+
+  let named_variadic = is_set named_variadic_mask
+
+  let set_named_variadic = set_bit named_variadic_mask
+
   let make
       kind
       ~return_disposable
@@ -118,7 +125,8 @@ module Fun = struct
       ~readonly_this
       ~support_dynamic_type
       ~is_memoized
-      ~variadic =
+      ~variadic
+      ~named_variadic =
     fun_kind_to_flags kind
     |> set_return_disposable return_disposable
     |> set_returns_readonly returns_readonly
@@ -126,6 +134,7 @@ module Fun = struct
     |> set_support_dynamic_type support_dynamic_type
     |> set_is_memoized is_memoized
     |> set_variadic variadic
+    |> set_named_variadic named_variadic
 
   let default = 0
 
@@ -141,6 +150,7 @@ module Fun = struct
       support_dynamic_type = support_dynamic_type t;
       is_memoized = is_memoized t;
       variadic = variadic t;
+      named_variadic = named_variadic t;
     }
 
   let pp fmt t = pp_record fmt (as_record t)

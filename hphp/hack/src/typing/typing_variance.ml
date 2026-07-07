@@ -666,6 +666,7 @@ let rec hint : Env.t -> variance -> Aast_defs.hint -> unit =
       hf_param_tys;
       hf_param_info;
       hf_variadic_ty;
+      hf_named_variadic_ty;
       hf_return_ty;
       hf_ctxs = _;
       hf_is_readonly_return = _;
@@ -674,6 +675,7 @@ let rec hint : Env.t -> variance -> Aast_defs.hint -> unit =
     in
     List.iter2_exn hf_param_info hf_param_tys ~f:(hfun_param env variance);
     fun_arity env variance hf_variadic_ty;
+    fun_arity env variance hf_named_variadic_ty;
     fun_ret env variance hf_return_ty
   | Happly (_, []) -> ()
   | Happly (name, hl) ->

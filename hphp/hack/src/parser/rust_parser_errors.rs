@@ -483,7 +483,7 @@ fn is_splat_expression(node: S<'_>) -> bool {
 fn is_variadic_parameter_declaration(node: S<'_>) -> bool {
     match &node.children {
         ParameterDeclaration(x) => x.ellipsis.is_ellipsis(),
-        ClosureParameterTypeSpecifier(x) => x.ellipsis.is_ellipsis(),
+        ClosureParameterTypeSpecifier(x) => x.ellipsis.is_ellipsis() && x.named.is_missing(),
         _ => false,
     }
 }
@@ -508,8 +508,33 @@ fn is_splat_parameter_declaration(node: S<'_>) -> bool {
         _ => false,
     }
 }
-fn misplaced_variadic_param<'a>(param: S<'a>) -> Option<S<'a>> {
-    assert_last_in_list(is_variadic_parameter_declaration, param)
+fn misplaced_variadic_param<'a>(params: S<'a>) -> Option<S<'a>> {
+    // For closure type specifiers, allow named parameters after a positional variadic parameter.
+    // Only flag if an UNNAMED variadic parameter is followed by an UNNAMED parameter.
+    let param_list: Vec<S<'a>> = syntax_to_list_no_separators(params).collect();
+    for (i, param) in param_list.iter().enumerate() {
+        if is_variadic_parameter_declaration(*param) {
+            // Check if there's any UNNAMED parameter after this variadic param
+            for later_param in param_list.iter().skip(i + 1) {
+                // If later_param is NOT named, then variadic is misplaced
+                let is_named = match &later_param.children {
+                    ClosureParameterTypeSpecifier(x) => !x.named.is_missing(),
+                    ParameterDeclaration(_) => {
+                        // For function declarations, we don't have named variadic support yet,
+                        // so treat all params as unnamed for this check
+                        false
+                    }
+                    _ => false,
+                };
+                if !is_named {
+                    // Found an unnamed param after variadic param -> error
+                    return Some(*param);
+                }
+                // If param is named, continue checking - named params are allowed after variadic
+            }
+        }
+    }
+    None
 }
 fn misplaced_splat_param<'a>(param: S<'a>) -> Option<S<'a>> {
     assert_last_in_list(is_splat_parameter_declaration, param)

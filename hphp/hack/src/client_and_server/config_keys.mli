@@ -194,6 +194,8 @@ module Hhconfig : sig
 
   val typed_open_shapes : string
 
+  val named_variadic_type : string
+
   val strict_consistent_construct : string
 
   val symbol_write_exclude_out : string

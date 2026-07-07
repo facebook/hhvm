@@ -228,6 +228,7 @@ and hint_ ~in_signature env p h_ =
         hf_param_tys = hl;
         hf_param_info;
         hf_variadic_ty = variadic_hint;
+        hf_named_variadic_ty = named_variadic_hint;
         hf_ctxs;
         hf_return_ty = h;
         hf_is_readonly_return = _;
@@ -247,6 +248,7 @@ and hint_ ~in_signature env p h_ =
     @ splat_err
     @ hint env h
     @ hint_opt env variadic_hint
+    @ hint_opt env named_variadic_hint
     @ contexts_opt env hf_ctxs
     @ List.concat_map hf_tparams ~f:(fun Aast_defs.{ htp_constraints; _ } ->
           List.concat_map htp_constraints ~f:(fun (_, h) -> hint env h))

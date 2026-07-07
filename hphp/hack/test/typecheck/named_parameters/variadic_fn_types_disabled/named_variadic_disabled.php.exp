@@ -1,0 +1,4 @@
+ERROR: File "named_variadic_disabled.php", line 6, characters 46-48:
+Named variadic parameters in function types (e.g. `(function(named int...): void)`) are not enabled. (Naming[2133])
+ERROR: File "named_variadic_disabled.php", line 8, characters 53-56:
+Named variadic parameters in function types (e.g. `(function(named int...): void)`) are not enabled. (Naming[2133])

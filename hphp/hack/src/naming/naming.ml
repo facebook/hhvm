@@ -65,7 +65,8 @@ let mk_env filename tcopt =
   and soft_as_like = TypecheckerOptions.interpret_soft_types_as_like_types tcopt
   and consistent_ctor_level =
     TypecheckerOptions.explicit_consistent_constructors tcopt
-  and typed_open_shapes = TypecheckerOptions.typed_open_shapes tcopt in
+  and typed_open_shapes = TypecheckerOptions.typed_open_shapes tcopt
+  and named_variadic_type = TypecheckerOptions.named_variadic_type tcopt in
   Env.
     {
       empty with
@@ -78,6 +79,7 @@ let mk_env filename tcopt =
       soft_as_like;
       allow_ignore_readonly;
       typed_open_shapes;
+      named_variadic_type;
     }
 
 let passes =
@@ -169,6 +171,9 @@ let passes =
     (* Reject `shape(..., T...)` typed open shapes unless tco_typed_open_shapes
        is enabled *)
     Naming_validate_typed_open_shape.pass on_error;
+    (* Reject named variadic parameters in function type hints unless
+       tco_named_variadic_type is enabled *)
+    Naming_validate_named_variadic_type.pass on_error;
     (* Validate that return type of __clone is void *)
     Naming_validate_clone_return_hint.pass on_error;
   ]

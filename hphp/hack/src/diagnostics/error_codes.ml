@@ -171,6 +171,7 @@ module Naming = struct
     | AttributeOutsideAllowedFiles [@value 2130]
     | HhiAttributeRestriction [@value 2131]
     | TypedOpenShapeDisallowed [@value 2132]
+    | NamedVariadicTypeDisallowed [@value 2133]
   (* Add new Naming codes here! Comment out when deprecating. *)
   [@@deriving enum, show { with_path = false }]
 

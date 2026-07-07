@@ -435,6 +435,8 @@ impl HhConfig {
             )?,
             tco_typed_open_shapes: hhconfig
                 .get_bool_or("typed_open_shapes", default.tco_typed_open_shapes)?,
+            tco_named_variadic_type: hhconfig
+                .get_bool_or("named_variadic_type", default.tco_named_variadic_type)?,
             tco_global_access_check_enabled: hhconfig.get_bool_or(
                 "tco_global_access_check_enabled",
                 default.tco_global_access_check_enabled,

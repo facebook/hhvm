@@ -408,6 +408,8 @@ module Flags = struct
 
   let get_ft_variadic ft = Fun.variadic ft.ft_flags
 
+  let get_ft_named_variadic ft = Fun.named_variadic ft.ft_flags
+
   let get_ft_fun_kind ft = Fun.fun_kind ft.ft_flags
 
   let get_fp_readonly fp = FunParam.readonly fp.fp_flags

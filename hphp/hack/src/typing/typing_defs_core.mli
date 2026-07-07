@@ -526,6 +526,8 @@ module Flags : sig
 
   val get_ft_variadic : 'a fun_type -> bool
 
+  val get_ft_named_variadic : 'a fun_type -> bool
+
   val get_fp_readonly : 'a fun_param -> bool
 
   val get_fp_splat : 'a fun_param -> bool

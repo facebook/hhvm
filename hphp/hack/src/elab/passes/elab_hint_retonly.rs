@@ -122,9 +122,11 @@ mod tests {
         let mut pass = ElabHintRetonlyPass::default();
         let mut elem = HintFun {
             is_readonly: Default::default(),
+            tparams: Default::default(),
             param_tys: Default::default(),
             param_info: Default::default(),
             variadic_ty: Default::default(),
+            named_variadic_ty: Default::default(),
             ctxs: Default::default(),
             return_ty: Hint(Pos::default(), Box::new(Hint_::Hprim(Tprim::Tvoid))),
             is_readonly_return: Default::default(),

@@ -79,6 +79,7 @@ let hint_to_string_and_symbols ~is_ctx (hint : Aast.hint) =
           hf_param_tys;
           hf_param_info;
           hf_variadic_ty;
+          hf_named_variadic_ty = _;
           hf_return_ty;
           hf_ctxs;
           _;

@@ -135,6 +135,7 @@ let rec check_hint env (pos, hint) =
           hf_param_info = _;
           (* TODO: shouldn't we be checking this hint as well? *)
           hf_variadic_ty = _;
+          hf_named_variadic_ty = _;
           hf_ctxs = _;
           hf_return_ty = h;
           hf_is_readonly_return = _;

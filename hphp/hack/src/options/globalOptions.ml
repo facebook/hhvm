@@ -144,6 +144,7 @@ type t = {
   tco_enable_no_auto_dynamic: bool;
   tco_skip_check_under_dynamic: bool;
   tco_typed_open_shapes: bool;
+  tco_named_variadic_type: bool;
   tco_global_access_check_enabled: bool;
   tco_ignore_unsafe_cast: bool;
   tco_enable_expression_trees: bool;
@@ -255,6 +256,7 @@ let default =
     tco_enable_no_auto_dynamic = false;
     tco_skip_check_under_dynamic = false;
     tco_typed_open_shapes = false;
+    tco_named_variadic_type = false;
     tco_global_access_check_enabled = false;
     tco_ignore_unsafe_cast = false;
     tco_enable_expression_trees = false;
@@ -365,6 +367,7 @@ let set
     ?tco_enable_no_auto_dynamic
     ?tco_skip_check_under_dynamic
     ?tco_typed_open_shapes
+    ?tco_named_variadic_type
     ?tco_global_access_check_enabled
     ?tco_ignore_unsafe_cast
     ?tco_enable_expression_trees
@@ -562,6 +565,8 @@ let set
       setting tco_skip_check_under_dynamic options.tco_skip_check_under_dynamic;
     tco_typed_open_shapes =
       setting tco_typed_open_shapes options.tco_typed_open_shapes;
+    tco_named_variadic_type =
+      setting tco_named_variadic_type options.tco_named_variadic_type;
     tco_global_access_check_enabled =
       setting
         tco_global_access_check_enabled

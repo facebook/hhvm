@@ -132,6 +132,7 @@ and hint_ p env = function
         hf_param_tys = hl;
         hf_param_info = pil;
         hf_variadic_ty = vh;
+        hf_named_variadic_ty = nvh;
         hf_ctxs = ctxs;
         hf_return_ty = h;
         hf_is_readonly_return = readonly_ret;
@@ -190,9 +191,26 @@ and hint_ p env = function
       { capability }
     in
     let ret = hint env h in
+    (* Handle positional variadic *)
     let (variadic, paraml) =
       match vh with
       | Some t -> (true, paraml @ [make_param t None])
+      | None -> (false, paraml)
+    in
+    (* Handle named variadic - create a param with named=true *)
+    let named_variadic_param_info =
+      Some
+        {
+          Aast.hfparam_kind = Ast_defs.Pnormal;
+          hfparam_readonlyness = None;
+          hfparam_optional = None;
+          hfparam_splat = None;
+          hfparam_named = Some "...";
+        }
+    in
+    let (named_variadic, paraml) =
+      match nvh with
+      | Some t -> (true, paraml @ [make_param t named_variadic_param_info])
       | None -> (false, paraml)
     in
     let everything_sdt =
@@ -265,7 +283,8 @@ and hint_ p env = function
             ~readonly_this:(readonly_opt ro)
             ~support_dynamic_type:false
             ~is_memoized:false
-            ~variadic;
+            ~variadic
+            ~named_variadic;
         ft_instantiated = List.is_empty ft_tparams;
       }
   | Happly (id, argl) ->

@@ -1359,6 +1359,7 @@ and hint_fun = {
      but in practice we shouldn't lower to that, since it wastes CPU/space *)
   hf_param_info: hf_param_info option list;
   hf_variadic_ty: variadic_hint;
+  hf_named_variadic_ty: variadic_hint;
   hf_ctxs: contexts option;
   hf_return_ty: hint; [@transform.explicit]
   hf_is_readonly_return: Ast_defs.readonly_kind option; [@transform.opaque]

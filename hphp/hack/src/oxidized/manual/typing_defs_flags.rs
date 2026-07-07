@@ -26,6 +26,7 @@ bitflags! {
         const SUPPORT_DYNAMIC_TYPE   = 1 << 12;
         const IS_MEMOIZED            = 1 << 13;
         const VARIADIC               = 1 << 14;
+        const NAMED_VARIADIC         = 1 << 15;
     }
 }
 
@@ -302,6 +303,9 @@ impl FunTypeFlags {
     }
     pub fn variadic(&self) -> bool {
         self.contains(Self::VARIADIC)
+    }
+    pub fn named_variadic(&self) -> bool {
+        self.contains(Self::NAMED_VARIADIC)
     }
 }
 

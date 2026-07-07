@@ -7131,7 +7131,8 @@ end = struct
                         ~readonly_this:false
                         ~support_dynamic_type:false
                         ~is_memoized:false
-                        ~variadic:false;
+                        ~variadic:false
+                        ~named_variadic:false;
                     ft_instantiated = false;
                   }
               in
@@ -7231,7 +7232,8 @@ end = struct
                             ~readonly_this:false
                             ~support_dynamic_type:false
                             ~is_memoized:false
-                            ~variadic:false;
+                            ~variadic:false
+                            ~named_variadic:false;
                         ft_instantiated = false;
                       }
                   in

@@ -1177,7 +1177,7 @@ fn p_hint_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Hint_> {
         ClosureTypeSpecifier(c) => {
             let tparams = p_hint_tparam_l(&c.type_parameters, env)?;
 
-            let (param_list, variadic_hints): (Vec<S<'a>>, Vec<S<'a>>) = c
+            let (param_list, variadic_nodes): (Vec<S<'a>>, Vec<S<'a>>) = c
                 .parameter_list
                 .syntax_node_to_list_skip_separator()
                 .partition(|n| match &n.children {
@@ -1190,27 +1190,45 @@ fn p_hint_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Hint_> {
                 .collect::<Result<Vec<_>, _>>()?
                 .into_iter()
                 .unzip();
-            let variadic_hints = variadic_hints
-                .iter()
-                .map(|v| match &v.children {
+            // Partition variadic parameters into named and unnamed
+            let mut unnamed_variadic_hints = Vec::new();
+            let mut named_variadic_hints = Vec::new();
+            for v in variadic_nodes.iter() {
+                match &v.children {
                     ClosureParameterTypeSpecifier(c) => {
                         if !c.ellipsis.is_missing() && c.type_.is_missing() {
                             raise_parsing_error(v, env, "Cannot use ... without a typehint");
                         }
-                        Ok(Some(p_hint(&c.type_, env)?))
+                        let hint = Some(p_hint(&c.type_, env)?);
+                        if c.named.is_missing() {
+                            unnamed_variadic_hints.push(hint);
+                        } else {
+                            named_variadic_hints.push(hint);
+                        }
                     }
                     _ => panic!("expect variadic parameter"),
-                })
-                .collect::<Result<Vec<_>, _>>()?;
-            if variadic_hints.len() > 1 {
+                }
+            }
+            if unnamed_variadic_hints.len() > 1 {
                 return parsing_error(
                     format!(
-                        "{} variadic parameters found. There should be no more than one.",
-                        variadic_hints.len()
+                        "{} unnamed variadic parameters found. There should be no more than one.",
+                        unnamed_variadic_hints.len()
                     ),
                     p_pos(&c.parameter_list, env),
                 );
             }
+            if named_variadic_hints.len() > 1 {
+                return parsing_error(
+                    format!(
+                        "{} named variadic parameters found. There should be no more than one.",
+                        named_variadic_hints.len()
+                    ),
+                    p_pos(&c.parameter_list, env),
+                );
+            }
+            let variadic_ty = unnamed_variadic_hints.into_iter().next().unwrap_or(None);
+            let named_variadic_ty = named_variadic_hints.into_iter().next().unwrap_or(None);
             let ctxs = p_contexts(
                 &c.contexts,
                 env,
@@ -1224,7 +1242,8 @@ fn p_hint_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Hint_> {
                 param_tys: type_hints,
                 tparams,
                 param_info: info,
-                variadic_ty: variadic_hints.into_iter().next().unwrap_or(None),
+                variadic_ty,
+                named_variadic_ty,
                 ctxs,
                 return_ty: p_hint(&c.return_type, env)?,
                 is_readonly_return: map_optional(&c.readonly_return, env, p_readonly)?,

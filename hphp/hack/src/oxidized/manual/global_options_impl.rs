@@ -95,6 +95,7 @@ impl Default for GlobalOptions {
             tco_enable_no_auto_dynamic: false,
             tco_skip_check_under_dynamic: false,
             tco_typed_open_shapes: false,
+            tco_named_variadic_type: false,
             tco_global_access_check_enabled: false,
             tco_ignore_unsafe_cast: false,
             tco_enable_expression_trees: false,

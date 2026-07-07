@@ -213,6 +213,8 @@ module Hhconfig = struct
 
   let typed_open_shapes = key "typed_open_shapes"
 
+  let named_variadic_type = key "named_variadic_type"
+
   let strict_consistent_construct = key "strict_consistent_construct"
 
   let symbol_write_exclude_out = key "symbol_write_exclude_out"

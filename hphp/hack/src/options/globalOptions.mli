@@ -178,6 +178,9 @@ type t = {
       (** Skip second check of method under dynamic assumptions *)
   tco_typed_open_shapes: bool;
       (** Allow `shape(..., T...)` syntax that constrains unknown-field types *)
+  tco_named_variadic_type: bool;
+      (** Allow named variadic parameters in function types, e.g.
+          `(function(named int...): void)` *)
   tco_global_access_check_enabled: bool;
   tco_ignore_unsafe_cast: bool;
       (** Ignores unsafe_cast and retains the original type of the expression *)
@@ -347,6 +350,7 @@ val set :
   ?tco_enable_no_auto_dynamic:bool ->
   ?tco_skip_check_under_dynamic:bool ->
   ?tco_typed_open_shapes:bool ->
+  ?tco_named_variadic_type:bool ->
   ?tco_global_access_check_enabled:bool ->
   ?tco_ignore_unsafe_cast:bool ->
   ?tco_enable_expression_trees:bool ->

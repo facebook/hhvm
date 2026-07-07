@@ -29,6 +29,7 @@ module Fun : sig
     support_dynamic_type: bool;
     is_memoized: bool;
     variadic: bool;
+    named_variadic: bool;
   }
 
   val return_disposable : t -> bool
@@ -72,6 +73,10 @@ module Fun : sig
 
   val set_variadic : bool -> t -> t
 
+  val named_variadic : t -> bool
+
+  val set_named_variadic : bool -> t -> t
+
   val fun_kind : t -> Ast_defs.fun_kind
 
   val make :
@@ -82,6 +87,7 @@ module Fun : sig
     support_dynamic_type:bool ->
     is_memoized:bool ->
     variadic:bool ->
+    named_variadic:bool ->
     t
 
   val default : t

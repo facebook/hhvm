@@ -311,7 +311,8 @@ let default_construct (type ph) r : ph ty =
               ~readonly_this:false
               ~support_dynamic_type:false
               ~is_memoized:false
-              ~variadic:false;
+              ~variadic:false
+              ~named_variadic:false;
           ft_ret = void r;
           ft_instantiated = true;
         } )
@@ -350,7 +351,8 @@ let make_dynamic_tfun r : locl_ty =
               ~readonly_this:false
               ~support_dynamic_type:false
               ~is_memoized:false
-              ~variadic:true;
+              ~variadic:true
+              ~named_variadic:false;
           ft_ret = dynamic r;
           ft_instantiated = true;
         } )

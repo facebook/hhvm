@@ -363,6 +363,14 @@ let typed_open_shape_disallowed pos =
     )
     []
 
+let named_variadic_type_disallowed pos =
+  User_diagnostic.make_err
+    Error_code.(to_enum NamedVariadicTypeDisallowed)
+    ( pos,
+      "Named variadic parameters in function types (e.g. `(function(named int...): void)`) are not enabled."
+    )
+    []
+
 let primitive_top_level pos =
   User_diagnostic.make_err
     Error_code.(to_enum PrimitiveToplevel)
@@ -891,6 +899,7 @@ let to_user_diagnostic t custom_err_config =
       unexpected_typedef pos expected_kind decl_pos
     | Field_name_already_bound pos -> field_name_already_bound pos
     | Typed_open_shape_disallowed pos -> typed_open_shape_disallowed pos
+    | Named_variadic_type_disallowed pos -> named_variadic_type_disallowed pos
     | Primitive_top_level pos -> primitive_top_level pos
     | Primitive_invalid_alias { pos; ty_name_used; ty_name_canon } ->
       primitive_invalid_alias pos ty_name_used ty_name_canon

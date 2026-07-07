@@ -165,6 +165,7 @@ type t = {
   allow_module_def: bool;
   allow_ignore_readonly: bool;
   typed_open_shapes: bool;
+  named_variadic_type: bool;
 }
 
 let empty =
@@ -191,4 +192,5 @@ let empty =
     allow_module_def = false;
     allow_ignore_readonly = false;
     typed_open_shapes = false;
+    named_variadic_type = false;
   }

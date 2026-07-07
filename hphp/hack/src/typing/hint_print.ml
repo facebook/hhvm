@@ -129,6 +129,7 @@ let rec pp_hint ~is_ctx ppf (pos, hint_) =
           hf_param_tys;
           hf_param_info;
           hf_variadic_ty;
+          hf_named_variadic_ty;
           hf_return_ty;
           hf_ctxs;
           _;
@@ -147,18 +148,28 @@ let rec pp_hint ~is_ctx ppf (pos, hint_) =
         ppf
         kp
     in
-    let pp_fun_params ppf (ps, v) =
-      Fmt.(
-        parens
-        @@ pair
-             ~sep:nop
-             (list ~sep:comma pp_typed_param)
-             (option @@ surround ", " "..." @@ pp_hint ~is_ctx:false))
-        ppf
-        (ps, v)
+    let pp_fun_params ppf (ps, v, nv) =
+      Fmt.string ppf "(";
+      Fmt.(list ~sep:comma pp_typed_param) ppf ps;
+      (match v with
+      | None -> ()
+      | Some h ->
+        if not (List.is_empty ps) then Fmt.string ppf ", ";
+        pp_hint ~is_ctx:false ppf h;
+        Fmt.string ppf "...");
+      (match nv with
+      | None -> ()
+      | Some h ->
+        if (not (List.is_empty ps)) || Option.is_some v then Fmt.string ppf ", ";
+        Fmt.string ppf "named ";
+        pp_hint ~is_ctx:false ppf h;
+        Fmt.string ppf "...");
+      Fmt.string ppf ")"
     in
     let all_params =
-      (List.zip_exn hf_param_kinds hf_param_tys, hf_variadic_ty)
+      ( List.zip_exn hf_param_kinds hf_param_tys,
+        hf_variadic_ty,
+        hf_named_variadic_ty )
     in
     Fmt.(
       parens

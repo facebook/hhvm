@@ -18,7 +18,8 @@
                            { hf_is_readonly = None; hf_tparams = []; 
                              hf_param_tys = [([3:31-34], (Hprim Tint))];
                              hf_param_info = [(Some { hfparam_kind = Pnormal; hfparam_readonlyness = None; hfparam_optional = None; hfparam_splat = None; hfparam_named = None })];
-                             hf_variadic_ty = None; hf_ctxs = None; hf_return_ty = ([3:37-40], (Hlike ([3:37-40], (Hprim Tnum)))); 
+                             hf_variadic_ty = None; hf_named_variadic_ty = None; 
+                             hf_ctxs = None; hf_return_ty = ([3:37-40], (Hlike ([3:37-40], (Hprim Tnum)))); 
                              hf_is_readonly_return = None }))
                         ]
                       )))));
@@ -98,8 +99,8 @@
                             { hf_is_readonly = None; hf_tparams = []; 
                               hf_param_tys = [([3:31-34], (Hprim Tint))];
                               hf_param_info = [(Some { hfparam_kind = Pnormal; hfparam_readonlyness = None; hfparam_optional = None; hfparam_splat = None; hfparam_named = None })];
-                              hf_variadic_ty = None; hf_ctxs = None; 
-                              hf_return_ty = ([3:37-40], (Hlike ([3:37-40], (Hprim Tnum)))); 
+                              hf_variadic_ty = None; hf_named_variadic_ty = None; 
+                              hf_ctxs = None; hf_return_ty = ([3:37-40], (Hlike ([3:37-40], (Hprim Tnum)))); 
                               hf_is_readonly_return = None }))
                          ]
                        )))));

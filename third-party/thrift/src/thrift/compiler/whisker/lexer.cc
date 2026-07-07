@@ -543,7 +543,7 @@ class lexer::state_comment : public lexer::state_base {
         // We've found the close token. Finish off the current text token.
         std::vector<token> tokens;
         if (!text.empty()) {
-          tokens.push_back(token::make_text(text, scan.range()));
+          tokens.push_back(token::make_text(std::move(text), scan.range()));
         }
         tokens.push_back(std::move(close).advance_to_token(&scan));
         return {std::move(tokens), std::make_unique<lexer::state_text>()};
@@ -566,7 +566,7 @@ class lexer::state_comment : public lexer::state_base {
           // Right tilde found: ~}}
           std::vector<token> tokens;
           if (!text.empty()) {
-            tokens.push_back(token::make_text(text, scan.range()));
+            tokens.push_back(token::make_text(std::move(text), scan.range()));
           }
           scan = scan.make_fresh(); // start at '~'
           scan.advance(); // consume '~'
@@ -580,7 +580,7 @@ class lexer::state_comment : public lexer::state_base {
           auto& [tilde_lexed, close_lexed] = *result;
           std::vector<token> tokens;
           if (!text.empty()) {
-            tokens.push_back(token::make_text(text, scan.range()));
+            tokens.push_back(token::make_text(std::move(text), scan.range()));
           }
           tokens.push_back(std::move(tilde_lexed).advance_to_token(&scan));
           tokens.push_back(std::move(close_lexed).advance_to_token(&scan));

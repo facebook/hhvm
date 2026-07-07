@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <concepts>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
@@ -56,8 +57,8 @@
  *         return obj;
  *       });
  *   EXPECT_EQ(*obj->i, 10);
- *   EXPECT_EQ(*obj->arr[0], 42);
- *   EXPECT_EQ(*obj->arr[1], 24);
+ *   EXPECT_EQ(obj->arr[0], 42);
+ *   EXPECT_EQ(obj->arr[1], 24);
  *   EXPECT_EQ(obj->str, "hello");
  *
  * This roughly resembles the following structure:
@@ -148,7 +149,7 @@
  *         make(std::move(s), "hi");
  *       });
  *   auto cursor = AllocationColocator<void>::unsafeCursor(ptr.get());
- *   EXPECT_EQ(cursor.object<int>(), 42);
+ *   EXPECT_EQ(*cursor.object<int>(), 42);
  *   EXPECT_EQ(cursor.string(2), "hi");
  *
  * A few important details to keep in mind when using this API:
@@ -193,9 +194,21 @@ struct LocatorBase {
   LocatorBase& operator=(LocatorBase&& other) noexcept = default;
 };
 
+// A type produced by any of the reservation methods (object/array/string).
+template <typename L>
+concept AnyLocator = std::derived_from<L, LocatorBase>;
+
+// An element type whose array can be filled without a generator: laid out as
+// uninitialized storage and reinterpreted in place.
 template <typename T>
-static constexpr bool IsTrivialColocatedArrayType =
+concept TriviallyColocatable =
     std::is_trivially_constructible_v<T> && std::is_trivially_destructible_v<T>;
+
+// A nullary callable whose result can initialize an array element of type T,
+// matching the direct-initialization performed during construction.
+template <typename G, typename T>
+concept ElementGenerator =
+    std::invocable<G&> && std::constructible_from<T, std::invoke_result_t<G&>>;
 
 template <bool kIsConst>
 class UnsafeCursorBase {
@@ -240,15 +253,6 @@ constexpr std::size_t sizeof_voidIs0() {
     return 0;
   } else {
     return sizeof(T);
-  }
-}
-
-template <typename T>
-constexpr std::size_t alignof_voidIs0() {
-  if constexpr (std::is_void_v<T>) {
-    return 0;
-  } else {
-    return alignof(T);
   }
 }
 
@@ -333,23 +337,20 @@ class AllocationColocator<detail::AllocationColocatorInternals> {
 
   class Builder {
    public:
-    template <typename Locator>
-      requires std::is_base_of_v<detail::LocatorBase, Locator>
+    template <detail::AnyLocator Locator>
     std::byte* uninitialized(Locator locator) const noexcept {
       return buffer_ + locator.offset;
     }
 
-    template <
-        typename T,
-        typename = std::enable_if_t<detail::IsTrivialColocatedArrayType<T>>>
+    template <typename T>
+      requires detail::TriviallyColocatable<T>
     T* array(ArrayLocator<T> locator) const noexcept {
       return reinterpret_cast<T*>(this->uninitialized(std::move(locator)));
     }
 
-    template <
-        typename T,
-        typename GeneratorFunc,
-        typename = std::enable_if_t<!detail::IsTrivialColocatedArrayType<T>>>
+    template <typename T, typename GeneratorFunc>
+      requires(!detail::TriviallyColocatable<T>) &&
+        detail::ElementGenerator<GeneratorFunc, T>
     AllocationColocator<>::ArrayPtr<T> array(
         ArrayLocator<T> locator, GeneratorFunc&& generator) const {
       static_assert(std::is_nothrow_destructible_v<T>);
@@ -376,18 +377,16 @@ class AllocationColocator<detail::AllocationColocatorInternals> {
     template <typename T, typename... Args>
       requires std::is_trivially_destructible_v<T>
     T* object(ObjectLocator<T>&& locator, Args&&... args) const
-        noexcept(noexcept(std::is_nothrow_constructible_v<T, Args...>)) {
+        noexcept(std::is_nothrow_constructible_v<T, Args...>) {
       return new (this->uninitialized(std::move(locator)))
           T(std::forward<Args>(args)...);
     }
 
-    template <
-        typename T,
-        typename... Args,
-        typename = std::enable_if_t<!std::is_trivially_destructible_v<T>>>
+    template <typename T, typename... Args>
+      requires(!std::is_trivially_destructible_v<T>)
     AllocationColocator<>::Ptr<T> object(
         ObjectLocator<T>&& locator, Args&&... args) const
-        noexcept(noexcept(std::is_nothrow_constructible_v<T, Args...>)) {
+        noexcept(std::is_nothrow_constructible_v<T, Args...>) {
       T* value = new (this->uninitialized(std::move(locator)))
           T(std::forward<Args>(args)...);
       return AllocationColocator<>::Ptr<T>(value, {});
@@ -398,8 +397,13 @@ class AllocationColocator<detail::AllocationColocatorInternals> {
       FOLLY_SAFE_CHECK(
           value.size() <= locator.length,
           "String value length exceeds requested buffer length");
-      char* str = static_cast<char*>(std::memcpy(
-          this->uninitialized(std::move(locator)), value.data(), value.size()));
+      char* str =
+          reinterpret_cast<char*>(this->uninitialized(std::move(locator)));
+      // std::memcpy requires non-null pointers even when the size is 0, but an
+      // empty string_view may carry a null data() pointer.
+      if (!value.empty()) {
+        std::memcpy(str, value.data(), value.size());
+      }
       str[value.size()] = '\0';
       return {str, value.size()};
     }
@@ -461,7 +465,7 @@ class AllocationColocator<detail::AllocationColocatorInternals> {
 };
 
 template <typename Root>
-class AllocationColocator {
+class AllocationColocator final {
  public:
   template <typename T>
   using ObjectLocator = AllocationColocator<>::ObjectLocator<T>;
@@ -519,7 +523,7 @@ class AllocationColocator {
   static_assert(sizeof(Ptr) == sizeof(Root*));
 
   template <typename F, typename TRoot = Root>
-    requires std::is_void_v<TRoot>
+    requires std::is_void_v<TRoot> && std::invocable<F&, Builder>
   Ptr allocate(F&& build) const {
     auto buffer = new std::byte[bytes_];
     FOLLY_SAFE_DCHECK(
@@ -535,11 +539,16 @@ class AllocationColocator {
     }
   }
 
-  template <
-      typename F,
-      typename TRoot = Root,
-      std::enable_if_t<!std::is_void_v<TRoot>, int> = 0>
+  template <typename F, typename TRoot = Root>
+    requires(!std::is_void_v<TRoot>) && std::invocable<F&, Builder>
   Ptr allocate(F&& build) const {
+    // The root object is placed at the start of the buffer, which is only
+    // guaranteed to be aligned to the default new alignment. Colocated types
+    // are checked individually in arrayImpl().
+    static_assert(
+        alignof(Root) <= __STDCPP_DEFAULT_NEW_ALIGNMENT__,
+        "AllocationColocator does not support a Root type with alignment "
+        "greater than unaligned operator new()");
     auto buffer = new std::byte[bytes_];
     FOLLY_SAFE_DCHECK(
         (std::uintptr_t(buffer) % __STDCPP_DEFAULT_NEW_ALIGNMENT__) == 0,
@@ -554,18 +563,20 @@ class AllocationColocator {
     }
   }
 
-  static AllocationColocator<>::UnsafeCursor unsafeCursor(Root* root) {
+  [[nodiscard]] static AllocationColocator<>::UnsafeCursor unsafeCursor(
+      Root* root) {
     auto colocationBegin =
         reinterpret_cast<std::byte*>(root) + detail::sizeof_voidIs0<Root>();
     return AllocationColocator<>::UnsafeCursor(colocationBegin);
   }
-  static AllocationColocator<>::ConstUnsafeCursor unsafeCursor(
+  [[nodiscard]] static AllocationColocator<>::ConstUnsafeCursor unsafeCursor(
       const Root* root) {
     auto colocationBegin = reinterpret_cast<const std::byte*>(root) +
         detail::sizeof_voidIs0<Root>();
     return AllocationColocator<>::ConstUnsafeCursor(colocationBegin);
   }
-  static AllocationColocator<>::UnsafeCursor unsafeCursor(const Ptr& root) {
+  [[nodiscard]] static AllocationColocator<>::UnsafeCursor unsafeCursor(
+      const Ptr& root) {
     return unsafeCursor(root.get());
   }
 
@@ -579,7 +590,7 @@ namespace detail {
 class AllocationColocatorInternals {
  public:
   template <typename Root>
-  static std::size_t getNumBytesForAllocation(
+  [[nodiscard]] static std::size_t getNumBytesForAllocation(
       const AllocationColocator<Root>& alloc) noexcept {
     return alloc.bytes_;
   }

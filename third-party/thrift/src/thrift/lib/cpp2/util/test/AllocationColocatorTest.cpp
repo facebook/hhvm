@@ -16,7 +16,9 @@
 
 #include <gtest/gtest.h>
 
+#include <stdexcept>
 #include <string_view>
+#include <utility>
 
 #include <thrift/lib/cpp2/util/AllocationColocator.h>
 
@@ -145,6 +147,60 @@ TEST(AllocationColocatorTest, NoExcept) {
   foo->b[1] = 3;
   EXPECT_EQ(*foo->a, 1);
   EXPECT_EQ(foo->c, kStr);
+}
+
+TEST(AllocationColocatorTest, EmptyString) {
+  struct Foo {
+    std::string_view str;
+  };
+
+  AllocationColocator<Foo> alloc;
+  auto foo = alloc.allocate([str = alloc.string(0)](auto make) mutable -> Foo {
+    Foo foo;
+    // A default-constructed string_view has a null data() pointer; copying it
+    // must not invoke memcpy with a null source (caught by UBSan otherwise).
+    foo.str = make(std::move(str), std::string_view{});
+    return foo;
+  });
+
+  EXPECT_TRUE(foo->str.empty());
+}
+
+TEST(AllocationColocatorTest, ThrowingConstructorObject) {
+  struct Foo {
+    struct Throwing {
+      // Trivially destructible, so object<>() returns a raw Throwing* via the
+      // trivial overload.
+      explicit Throwing(bool shouldThrow) {
+        if (shouldThrow) {
+          throw std::runtime_error("constructor threw");
+        }
+      }
+    };
+    Throwing* value;
+  };
+
+  using Builder = AllocationColocator<Foo>::Builder;
+  // object()'s noexcept specification must reflect whether the constructor can
+  // throw rather than being unconditionally noexcept (which would turn a
+  // throwing constructor into a std::terminate).
+  static_assert(!noexcept(std::declval<Builder>().object(
+      std::declval<AllocationColocator<>::ObjectLocator<Foo::Throwing>>(),
+      true)));
+  static_assert(noexcept(std::declval<Builder>().object(
+      std::declval<AllocationColocator<>::ObjectLocator<int>>(), 1)));
+
+  // A throwing constructor must propagate out of allocate() (and the buffer be
+  // freed) instead of terminating the process.
+  AllocationColocator<Foo> alloc;
+  auto value = alloc.object<Foo::Throwing>();
+  EXPECT_THROW(
+      alloc.allocate([value = std::move(value)](auto make) mutable -> Foo {
+        Foo foo{};
+        foo.value = make(std::move(value), /* shouldThrow */ true);
+        return foo;
+      }),
+      std::runtime_error);
 }
 
 TEST(AllocationColocatorTest, Alignment) {

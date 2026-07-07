@@ -31,6 +31,10 @@ namespace HPHP::jit {
 folly::Range<Vlabel*> succs(Vinstr& inst) {
   switch (inst.op) {
     case Vinstr::contenter:    return {inst.contenter_.targets, 2};
+    case Vinstr::cbzl:         return {inst.cbzl_.targets, 2};
+    case Vinstr::cbnzl:        return {inst.cbnzl_.targets, 2};
+    case Vinstr::cbzq:         return {inst.cbzq_.targets, 2};
+    case Vinstr::cbnzq:        return {inst.cbnzq_.targets, 2};
     case Vinstr::jcc:          return {inst.jcc_.targets, 2};
     case Vinstr::interceptjcc: return {inst.interceptjcc_.targets, 2};
     case Vinstr::jmp:          return {&inst.jmp_.target, 1};

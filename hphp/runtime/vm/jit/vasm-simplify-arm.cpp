@@ -305,7 +305,33 @@ bool simplify(Env& env, const testqi64& inst, Vlabel b, size_t i) {
   return simplify_shifted_bit_test(env, inst, b, i);
 }
 
+template <typename cmpbrz, typename cmpbrnz, typename testop>
+bool foldTestJcc(Env& env, const testop& inst, Vlabel b, size_t i) {
+  if (inst.s0 != inst.s1 || env.use_counts[inst.sf] != 1) {
+    return false;
+  }
+  return if_inst<Vinstr::jcc>(env, b, i + 1, [&] (const jcc& jcci) {
+    if (jcci.sf != inst.sf || (jcci.cc != CC_E && jcci.cc != CC_NE)) {
+      return false;
+    }
+    return simplify_impl(env, b, i, [&] (Vout& v) {
+      if (jcci.cc == CC_E) {
+        v << cmpbrz{inst.s0, {jcci.targets[0], jcci.targets[1]}};
+      } else {
+        v << cmpbrnz{inst.s0, {jcci.targets[0], jcci.targets[1]}};
+      }
+      return 2;
+    });
+  });
+}
+
+bool simplify(Env& env, const testl& inst, Vlabel b, size_t i) {
+  return foldTestJcc<cbzl, cbnzl>(env, inst, b, i);
+}
+
 bool simplify(Env& env, const testq& inst, Vlabel b, size_t i) {
+  if (foldTestJcc<cbzq, cbnzq>(env, inst, b, i)) return true;
+
   if (env.use_counts[inst.sf] != 1) return false;
 
   uint64_t Val;

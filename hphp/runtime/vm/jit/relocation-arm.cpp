@@ -163,7 +163,7 @@ size_t decodePossibleMovSequence(Instruction* instr,
   }
   size_t length = 1;  // We already decoded the first instruction above.
   rd = instr->Rd();
-  regSize = instr->SixtyFourBits() ? 64 : 32;
+  regSize = instr->SixtyFourBits() ? kXRegSize : kWRegSize;
   auto next = instr->GetNextInstruction();
   while ((next < end && next->IsMovk() && (next->Rd() == rd)) ||
          (next < end && next->IsNop())) {
@@ -440,7 +440,7 @@ InstrSet findLiterals(Instruction* start, Instruction* end,
           Instruction::Cast(load.literalAddress(actualToLogical(instr)))
         );
       addLiteral(la);
-      if (load.width() == 64) {
+      if (load.width() == kXRegSize) {
         addLiteral(la->GetNextInstruction());
       }
     }
@@ -477,8 +477,8 @@ TCA farJmpTarget32(Env& env, TCA literalAddr) {
 }
 
 // Instruction counts of the far JMP (ADRP + LDR + BR) and far JCC
-// (B.!cc + ADRP + LDR + BR) sequences. Used by optimizeFarJmp/optimizeFarJcc to
-// reason about the rewritten source range.
+// (B.!cc + ADRP + LDR + BR) sequences. Used by optimizeFarJmp and
+// optimizeFarCondBranch to reason about the rewritten source range.
 constexpr size_t kFarJmpInstrs = 3;
 constexpr size_t kFarJccInstrs = kFarJmpInstrs + 1;
 
@@ -495,8 +495,8 @@ constexpr size_t kFarJccInstrs = kFarJmpInstrs + 1;
  *
  * The literal holds a 32-bit target address.
  */
-bool isFarJcc(const Instruction* b, const Instruction* end) {
-  if (!b->IsCondBranchImm()) return false;
+bool isFarCondBranch(const Instruction* b, const Instruction* end) {
+  if (!b->IsCondBranchImm() && !b->IsCompareBranch()) return false;
 
   auto const loadStart = b->GetNextInstruction();
   if (loadStart >= end) return false;
@@ -519,7 +519,6 @@ ConditionCode farJccCond(TCA inst) {
   assertx(b->IsCondBranchImm());
   return arm::convertCC(InvertCondition(static_cast<Condition>(b->Bits(3, 0))));
 }
-
 
 /*
  * Try to shrink a far JCC after relocation has made its target close enough
@@ -546,8 +545,8 @@ ConditionCode farJccCond(TCA inst) {
  * shortened output, rewritten source instructions are marked, and the pooled
  * literal is scheduled for removal.
  */
-bool optimizeFarJcc(Env& env, TCA srcAddr, TCA destAddr,
-                    size_t& srcCount, size_t& destCount) {
+bool optimizeFarCondBranch(Env& env, TCA srcAddr, TCA destAddr,
+                           size_t& srcCount, size_t& destCount) {
   auto const srcFrom = Instruction::Cast(srcAddr);
   auto const srcAddrActual = env.srcBlock.toDestAddress(srcAddr);
   auto const src = Instruction::Cast(srcAddrActual);
@@ -555,7 +554,7 @@ bool optimizeFarJcc(Env& env, TCA srcAddr, TCA destAddr,
   if (env.meta.smashableLocations.contains(srcAddr)) return false;
   if (env.far.contains(src)) return false;
 
-  if (!isFarJcc(src, env.srcEndActual)) return false;
+  if (!isFarCondBranch(src, env.srcEndActual)) return false;
 
   auto const litAddr =
     farJmpLiteralAddress(src->GetNextInstruction(),
@@ -582,32 +581,65 @@ bool optimizeFarJcc(Env& env, TCA srcAddr, TCA destAddr,
   // case, which handles int26, uses imm-1 because of the extra instruction that
   // it requires.
   if (!is_int26(imm - 1)) return false;
-  if (env.start <= adjusted && adjusted < env.end) {
-    env.rewriteAdjust.emplace_back(Patch {
-      destAddr,
-      adjusted,
-      src
-    });
-  }
 
   env.literalsToRemove.insert(Instruction::Cast(litAddr));
 
   vixl::MacroAssembler a { env.destBlock };
   env.destBlock.setFrontier(destAddr);
+  TCA destAddrToRewrite = destAddr;
 
-  // This inverts the condition code for us.
-  auto const cc = arm::convertCC(farJccCond(srcAddrActual));
+  auto const b = Instruction::Cast(srcAddrActual);
+  if (b->IsCondBranchImm()) {
+    // This inverts the condition code for us.
+    auto const cc = arm::convertCC(farJccCond(srcAddrActual));
 
-  if (is_int19(imm)) {
-    a.b(imm, cc);
+    if (is_int19(imm)) {
+      a.b(imm, cc);
+    } else {
+      // Branch over the next instruction.
+      const int nextImm = 2;
+      a.b(nextImm, vixl::InvertCondition(cc));
+      // NB: the imm offset was computed relative to destAddr, but we emitted an
+      // extra branch above, thus the -1 here.
+      a.b(imm - 1);
+      destAddrToRewrite += kInstructionSize;
+      destCount++;
+    }
   } else {
-    // Branch over the next instruction.
-    const int nextImm = 2;
-    a.b(nextImm, vixl::InvertCondition(cc));
-    // NB: the imm offset was computed relative to destAddr, but we emitted an
-    // extra branch above, thus the -1 here.
-    a.b(imm - 1);
-    destCount++;
+    assertx(b->IsCompareBranch());
+    auto const details =
+      getCompareAndBranchDetails(Instruction::Cast(srcAddrActual));
+
+    if (is_int19(imm)) {
+      // Emit the original compare-branch polarity. The far-branch head was
+      // inverted to skip the out-of-line jump.
+      if (details.isCbnz) {
+        a.cbz(details.reg, imm);
+      } else {
+        a.cbnz(details.reg, imm);
+      }
+    } else {
+      // Branch over the next instruction.
+      const int nextImm = 2;
+      if (details.isCbnz) {
+        a.cbnz(details.reg, nextImm);
+      } else {
+        a.cbz(details.reg, nextImm);
+      }
+      // NB: the imm offset was computed relative to destAddr, but we emitted an
+      // extra branch above, thus the -1 here.
+      a.b(imm - 1);
+      destAddrToRewrite += kInstructionSize;
+      destCount++;
+    }
+  }
+
+  if (env.start <= adjusted && adjusted < env.end) {
+    env.rewriteAdjust.emplace_back(Patch {
+      destAddrToRewrite,
+      adjusted,
+      src
+    });
   }
 
   srcCount = kFarJccInstrs;
@@ -828,7 +860,7 @@ bool relocatePCRelative(Env& env,
         destCount--;
 
         vixl::MacroAssembler a { env.destBlock };
-        auto const dst = vixl::Register(src->Rd(), 64);
+        auto const dst = vixl::Register(src->Rd(), kXRegSize);
         a.Mov(dst, reinterpret_cast<uint64_t>(target));
 
         destCount += (env.destBlock.frontier() - destAddr)
@@ -891,13 +923,14 @@ bool relocatePCRelative(Env& env,
 
         vixl::MacroAssembler a { env.destBlock };
         vixl::Label end;
-        auto const rt = vixl::Register(src->Rt(), 64);
+        auto const cb = getCompareAndBranchDetails(src);
         auto const tmp = rVixlScratch0;
         a.SetScratchRegisters(vixl::NoReg, vixl::NoReg);
-        if (src->Mask(CompareBranchMask) == CBZ_x) {
-          a.Cbnz(rt, &end);
+        // Emit the inverted compare-branch to skip over the far jump.
+        if (cb.isCbnz) {
+          a.Cbz(cb.reg, &end);
         } else {
-          a.Cbz(rt, &end);
+          a.Cbnz(cb.reg, &end);
         }
         a.Mov(tmp, reinterpret_cast<uint64_t>(src->GetImmPCOffsetTarget(srcFrom)));
         a.Br(tmp);
@@ -916,7 +949,7 @@ bool relocatePCRelative(Env& env,
         vixl::MacroAssembler a { env.destBlock };
         vixl::Label end;
         auto const bit_pos = src->ImmTestBranchBit40();
-        auto const rt = vixl::Register(src->Rt(), 64);
+        auto const rt = vixl::Register(src->Rt(), kXRegSize);
         auto const tmp = rVixlScratch0;
         a.SetScratchRegisters(vixl::NoReg, vixl::NoReg);
         if (src->Mask(TestBranchMask) == TBZ) {
@@ -1014,14 +1047,14 @@ bool relocateImmediate(Env& env, TCA srcAddr, TCA destAddr,
     // Only transform if the MOV/MOVK sequence def'd a vixl scratch or Vasm
     // scratch register. Otherwise we run the risk of not def'ing a live
     // register.
-    auto const tmp = vixl::Register(rd, 64);
+    auto const tmp = vixl::Register(rd, kXRegSize);
     if (tmp.Is(rVixlScratch0) || tmp.Is(rVixlScratch1) || tmp.Is(rAsm)) {
       env.destBlock.setFrontier(destAddr);
       destCount--;
 
       vixl::MacroAssembler a { env.destBlock };
       vixl::Label target;
-      auto const dst = vixl::Register(next->Rd(), 64);
+      auto const dst = vixl::Register(next->Rd(), kXRegSize);
       a.Ldr(dst, &target);
 
       auto savedFrontier = env.destBlock.frontier();
@@ -1046,7 +1079,7 @@ bool relocateImmediate(Env& env, TCA srcAddr, TCA destAddr,
     // Only transform if the MOV/MOVK sequence def'd a vixl scratch or Vasm
     // scratch register. Otherwise we run the risk of not def'ing a live
     // register.
-    auto const dst = vixl::Register(rd, 64);
+    auto const dst = vixl::Register(rd, kXRegSize);
     if (dst.Is(rVixlScratch0) || dst.Is(rVixlScratch1) || dst.Is(rAsm)) {
       if (is_int26(imm)) {
         env.destBlock.setFrontier(destAddr);
@@ -1080,7 +1113,7 @@ bool relocateImmediate(Env& env, TCA srcAddr, TCA destAddr,
       destCount--;
 
       vixl::MacroAssembler a { env.destBlock };
-      auto const dst = vixl::Register(rd, 64);
+      auto const dst = vixl::Register(rd, kXRegSize);
       a.adr(dst, imm);
 
       destCount += (env.destBlock.frontier() - destAddr)
@@ -1102,7 +1135,7 @@ bool relocateImmediate(Env& env, TCA srcAddr, TCA destAddr,
       destCount--;
 
       vixl::MacroAssembler a { env.destBlock };
-      auto const dst = vixl::Register(rd, 64);
+      auto const dst = vixl::Register(rd, kXRegSize);
       a.Mov(dst, reinterpret_cast<uint64_t>(adjusted));
 
       destCount += (env.destBlock.frontier() - destAddr)
@@ -1219,7 +1252,7 @@ size_t relocateImpl(Env& env) {
         // Relocate functions are needed for correctness, while optimize
         // functions will attempt to improve instruction sequences.
         auto const relocated =
-          optimizeFarJcc(env, srcAddr, destAddr, srcCount, destCount) ||
+          optimizeFarCondBranch(env, srcAddr, destAddr, srcCount, destCount) ||
           optimizeFarJmp(env, srcAddr, destAddr, srcCount, destCount) ||
           relocatePCRelative(
             env,

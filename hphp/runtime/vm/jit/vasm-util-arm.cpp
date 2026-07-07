@@ -22,6 +22,9 @@ namespace HPHP::jit::arm {
 
 using vixl::is_int21;
 using vixl::aarch64::Assembler;
+using vixl::aarch64::CBNZ_w;
+using vixl::aarch64::CBNZ_x;
+using vixl::aarch64::CompareBranchMask;
 using vixl::aarch64::Instruction;
 using vixl::aarch64::LDR_w_lit;
 using vixl::aarch64::LDR_x_lit;
@@ -29,9 +32,12 @@ using vixl::aarch64::LDR_w_unsigned;
 using vixl::aarch64::LDR_x_unsigned;
 using vixl::aarch64::LoadLiteralMask;
 using vixl::aarch64::LoadStoreUnsignedOffsetMask;
+using vixl::aarch64::Register;
 using vixl::aarch64::Rt_mask;
 using vixl::aarch64::kInstructionSize;
 using vixl::aarch64::kPageSize;
+using vixl::aarch64::kWRegSize;
+using vixl::aarch64::kXRegSize;
 
 static_assert(kPageSize == (1u << 12),
               "ADRP/LDR page-offset encoding assumes 4KB pages");
@@ -70,6 +76,14 @@ uint32_t ldrReg(const Instruction* ldr) {
   return ldr->Rt();
 }
 
+}
+
+CompareAndBranchDetails getCompareAndBranchDetails(const Instruction* cb) {
+  assertx(cb->IsCompareBranch());
+  auto const reg =
+    Register(cb->Rt(), cb->GetSixtyFourBits() ? kXRegSize : kWRegSize);
+  auto const op = cb->Mask(CompareBranchMask);
+  return {reg, op == CBNZ_w || op == CBNZ_x};
 }
 
 LoadLiteral LoadLiteral::at(Instruction* start, const Instruction* end) {

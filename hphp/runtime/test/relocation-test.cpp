@@ -250,6 +250,371 @@ TEST(Relocation, RelocateCbz2MovzMovkCbnzReg) {
   EXPECT_EQ(cbnz->ImmPCOffsetTarget(), br->GetNextInstruction());
 }
 
+uint32_t compareBranchEncoding(bool is64, bool isCbnz) {
+  return is64 ? (isCbnz ? CBNZ_x : CBZ_x) : (isCbnz ? CBNZ_w : CBZ_w);
+}
+
+uint32_t invertedCompareBranchEncoding(bool is64, bool isCbnz) {
+  return compareBranchEncoding(is64, !isCbnz);
+}
+
+template<class EmitBranch>
+TCA emitFarConditionalBranchSequence(MacroAssembler& a,
+                                     CodeBlock& main,
+                                     CGMeta& meta,
+                                     EmitBranch emitBranch) {
+  vixl::Label fallthrough;
+  emitBranch(fallthrough);
+
+  auto const farJump = main.frontier();
+  meta.addressImmediates.insert(farJump);
+  a.adrp(x17, int64_t{0});
+  a.ldr(w17, MemOperand(x17, 0));
+  a.Br(x17);
+
+  a.bind(&fallthrough);
+  return farJump;
+}
+
+TCA emitFarBccSequence(MacroAssembler& a,
+                       CodeBlock& main,
+                       CGMeta& meta,
+                       Condition cond) {
+  return emitFarConditionalBranchSequence(
+    a,
+    main,
+    meta,
+    [&] (vixl::Label& fallthrough) { a.b(&fallthrough, cond); }
+  );
+}
+
+TCA emitFarCompareBranchSequence(MacroAssembler& a,
+                                 CodeBlock& main,
+                                 CGMeta& meta,
+                                 const Register& rt,
+                                 bool isCbnz) {
+  return emitFarConditionalBranchSequence(
+    a,
+    main,
+    meta,
+    [&] (vixl::Label& fallthrough) {
+      if (isCbnz) {
+        a.cbz(rt, &fallthrough);
+      } else {
+        a.cbnz(rt, &fallthrough);
+      }
+    }
+  );
+}
+
+void patchFarJumpLiteral(CodeBlock& main, TCA farJump, TCA literal) {
+  auto const logicalAdrp = Instruction::Cast(farJump);
+  auto const adrp = Instruction::Cast(main.toDestAddress(farJump));
+  patchAdrpLiteralLoadTarget(
+    adrp, adrp->GetNextInstruction(), logicalAdrp, literal
+  );
+}
+
+void emitNonNopPaddingPastCompareBranchRange(MacroAssembler& a) {
+  constexpr auto kPaddingInstrs =
+    (1024 * 1024) / kInstructionSize + 1024;
+  for (auto i = 0; i < kPaddingInstrs; ++i) {
+    a.brk(0);
+  }
+}
+
+/*
+ * Relocate a compare-branch whose target is at the imm19 minimum, forcing the
+ * far-branch veneer, and verify the veneer's head is an inverted compare-branch
+ * of the SAME operand width (W for cbzl/cbnzl, X for cbzq/cbnzq) and register,
+ * followed by the movz/movk <target>; br <tmp> jump. Guards the width-sensitive
+ * veneer emission (a W branch must not be widened to an X branch, and vice
+ * versa).
+ */
+void checkFarCompareBranchVeneer(const Register& rt, bool is64, bool isCbnz) {
+  CodeBlock main;
+  DataBlock data;
+  initBlocks(4096, main, data);
+  SCOPE_EXIT { freeBlocks(); };
+
+  CGMeta meta;
+
+  auto start = main.frontier();
+  MacroAssembler a { main };
+  meta.addressImmediates.insert(main.frontier());
+  if (isCbnz) {
+    a.cbnz(rt, -0x40000);  // imm19 min -> forced far on relocate
+  } else {
+    a.cbz(rt, -0x40000);   // imm19 min -> forced far on relocate
+  }
+  auto cbOrig = Instruction::Cast(start);
+
+  auto end = main.frontier();
+
+  RelocationInfo rel;
+  AreaIndex ai = AreaIndex::Main;
+  const Instruction* instr = Instruction::Cast(end);
+  relocate(rel, main, start, end, main, meta, nullptr, ai);
+
+  // Head: inverted compare-branch of the same width and register as the
+  // original compare-branch.
+  auto cb = instr;
+  ASSERT_TRUE(cb->IsCompareBranch());
+  EXPECT_EQ(
+    cb->Mask(CompareBranchMask),
+    invertedCompareBranchEncoding(is64, isCbnz)
+  );
+  EXPECT_EQ(cb->GetSixtyFourBits(), is64 ? 1 : 0);
+  EXPECT_EQ(cb->Rt(), cbOrig->Rt());
+
+  auto movz = cb->GetNextInstruction();
+  EXPECT_TRUE(movz->IsMovz());
+  const auto rd = movz->Rd();
+  uint64_t target = (uint64_t)movz->ImmMoveWide() << (16 * movz->ShiftMoveWide());
+  instr = movz->GetNextInstruction();
+  while (instr->IsMovk()) {
+    EXPECT_EQ(instr->Rd(), rd);
+    target |= (uint64_t)instr->ImmMoveWide() << (16 * instr->ShiftMoveWide());
+    instr = instr->GetNextInstruction();
+  }
+  EXPECT_EQ(Instruction::Cast(target), cbOrig->ImmPCOffsetTarget());
+
+  auto br = instr;
+  EXPECT_TRUE(br->IsUncondBranchReg());
+  EXPECT_EQ(br->Rn(), rd);
+  EXPECT_EQ(cb->ImmPCOffsetTarget(), br->GetNextInstruction());
+}
+
+TEST(Relocation, RelocateFarCbzlToCbnzlVeneer) {
+  checkFarCompareBranchVeneer(w0, false, false);  // 32-bit cbzl
+}
+
+TEST(Relocation, RelocateFarCbzqToCbnzqVeneer) {
+  checkFarCompareBranchVeneer(x0, true, false);   // 64-bit cbzq
+}
+
+TEST(Relocation, RelocateFarCbnzlToCbzlVeneer) {
+  checkFarCompareBranchVeneer(w0, false, true);   // 32-bit cbnzl
+}
+
+TEST(Relocation, RelocateFarCbnzqToCbzqVeneer) {
+  checkFarCompareBranchVeneer(x0, true, true);    // 64-bit cbnzq
+}
+
+/*
+ * Relocate an emitted far compare-branch sequence whose target becomes near in
+ * the relocated block, and verify optimizeFarCondBranch shrinks it back to the
+ * original direct compare-branch.
+ *
+ *     cb!op $rt, fallthrough
+ *     adrp/ldr/br target
+ *   fallthrough:
+ *
+ * to
+ *
+ *     cbop $rt, target
+ */
+void checkOptimizeFarCompareBranchToDirect(const Register& rt,
+                                           bool is64,
+                                           bool isCbnz) {
+  CodeBlock main;
+  DataBlock data;
+  auto const logicalStart = reinterpret_cast<uint8_t*>(0x10000000);
+  initBlocks(4 * 1024 * 1024, main, data, logicalStart);
+  SCOPE_EXIT { freeBlocks(); };
+
+  CGMeta meta;
+
+  auto const start = main.frontier();
+  MacroAssembler a { main };
+
+  auto const farJump = emitFarCompareBranchSequence(a, main, meta, rt, isCbnz);
+  a.brk(0);
+  auto const target = main.frontier();
+  a.brk(1);
+
+  for (auto i = 0; i < (1024 * 1024) / kInstructionSize + 1024; ++i) {
+    a.nop();
+  }
+  auto const literal = main.frontier();
+  main.dword(makeTarget32(target));
+  auto const end = main.frontier();
+
+  patchFarJumpLiteral(main, farJump, literal);
+
+  RelocationInfo rel;
+  AreaIndex ai = AreaIndex::Main;
+  auto const relocated = Instruction::Cast(main.toDestAddress(end));
+  relocate(rel, main, start, end, main, meta, nullptr, ai);
+
+  ASSERT_TRUE(relocated->IsCompareBranch());
+  EXPECT_EQ(relocated->Mask(CompareBranchMask),
+            compareBranchEncoding(is64, isCbnz));
+  EXPECT_EQ(relocated->GetSixtyFourBits(), is64 ? 1 : 0);
+  EXPECT_EQ(relocated->Rt(), rt.code());
+  EXPECT_EQ(
+    relocated->ImmPCOffsetTarget(),
+    Instruction::CastConst(main.toDestAddress(rel.adjustedAddressAfter(target)))
+  );
+}
+
+/*
+ * Relocate an emitted far compare-branch sequence whose forward target remains
+ * outside the compare-branch range but inside the unconditional branch range.
+ * The optimizer can still remove the far jump, but must patch the second
+ * instruction after the target's relocated address becomes known.
+ *
+ *     cb!op $rt, fallthrough
+ *     adrp/ldr/br target
+ *   fallthrough:
+ *     ...
+ *   target:
+ *
+ * to
+ *
+ *     cb!op $rt, fallthrough
+ *     b target
+ *   fallthrough:
+ */
+void checkOptimizeFarCompareBranchToCompareBranchAndB(
+  const Register& rt,
+  bool is64,
+  bool isCbnz) {
+  CodeBlock main;
+  DataBlock data;
+  auto const logicalStart = reinterpret_cast<uint8_t*>(0x10000000);
+  initBlocks(4 * 1024 * 1024, main, data, logicalStart);
+  SCOPE_EXIT { freeBlocks(); };
+
+  CGMeta meta;
+
+  auto const start = main.frontier();
+  MacroAssembler a { main };
+
+  auto const farJump = emitFarCompareBranchSequence(a, main, meta, rt, isCbnz);
+  emitNonNopPaddingPastCompareBranchRange(a);
+  auto const target = main.frontier();
+  a.brk(1);
+
+  auto const literal = main.frontier();
+  main.dword(makeTarget32(target));
+  auto const end = main.frontier();
+
+  patchFarJumpLiteral(main, farJump, literal);
+
+  RelocationInfo rel;
+  AreaIndex ai = AreaIndex::Main;
+  auto const relocated = Instruction::Cast(main.toDestAddress(end));
+  relocate(rel, main, start, end, main, meta, nullptr, ai);
+
+  ASSERT_TRUE(relocated->IsCompareBranch());
+  EXPECT_EQ(
+    relocated->Mask(CompareBranchMask),
+    invertedCompareBranchEncoding(is64, isCbnz)
+  );
+  EXPECT_EQ(relocated->GetSixtyFourBits(), is64 ? 1 : 0);
+  EXPECT_EQ(relocated->Rt(), rt.code());
+
+  auto const branch = relocated->GetNextInstruction();
+  EXPECT_EQ(relocated->ImmPCOffsetTarget(), branch->GetNextInstruction());
+
+  ASSERT_TRUE(branch->IsUncondBranchImm());
+  EXPECT_EQ(branch->Mask(UnconditionalBranchMask), B);
+  auto const relocatedTarget = rel.adjustedAddressAfter(target);
+  ASSERT_NE(relocatedTarget, nullptr);
+  EXPECT_EQ(
+    branch->GetImmPCOffsetTarget(),
+    Instruction::CastConst(main.toDestAddress(relocatedTarget))
+  );
+}
+
+/*
+ * Covers the far B.cond path for a forward target that remains outside the
+ * conditional-branch range but fits an unconditional branch. This mirrors the
+ * compare-branch helper above, but exercises optimizeFarCondBranch()'s
+ * IsCondBranchImm arm and verifies the deferred rewrite patches the generated
+ * B target, not the conditional skip branch.
+ */
+void checkOptimizeFarBccToBccAndB(Condition cond) {
+  CodeBlock main;
+  DataBlock data;
+  auto const logicalStart = reinterpret_cast<uint8_t*>(0x10000000);
+  initBlocks(4 * 1024 * 1024, main, data, logicalStart);
+  SCOPE_EXIT { freeBlocks(); };
+
+  CGMeta meta;
+
+  auto const start = main.frontier();
+  MacroAssembler a { main };
+
+  auto const farJump = emitFarBccSequence(a, main, meta, cond);
+  emitNonNopPaddingPastCompareBranchRange(a);
+  auto const target = main.frontier();
+  a.brk(1);
+
+  auto const literal = main.frontier();
+  main.dword(makeTarget32(target));
+  auto const end = main.frontier();
+
+  patchFarJumpLiteral(main, farJump, literal);
+
+  RelocationInfo rel;
+  AreaIndex ai = AreaIndex::Main;
+  auto const relocated = Instruction::Cast(main.toDestAddress(end));
+  relocate(rel, main, start, end, main, meta, nullptr, ai);
+
+  ASSERT_TRUE(relocated->IsCondBranchImm());
+  EXPECT_EQ(static_cast<Condition>(relocated->ConditionBranch()), cond);
+
+  auto const branch = relocated->GetNextInstruction();
+  EXPECT_EQ(relocated->ImmPCOffsetTarget(), branch->GetNextInstruction());
+
+  ASSERT_TRUE(branch->IsUncondBranchImm());
+  EXPECT_EQ(branch->Mask(UnconditionalBranchMask), B);
+  auto const relocatedTarget = rel.adjustedAddressAfter(target);
+  ASSERT_NE(relocatedTarget, nullptr);
+  EXPECT_EQ(
+    branch->GetImmPCOffsetTarget(),
+    Instruction::CastConst(main.toDestAddress(relocatedTarget))
+  );
+}
+
+TEST(Relocation, OptimizeFarCbzlToDirectCbzl) {
+  checkOptimizeFarCompareBranchToDirect(w0, false, false);
+}
+
+TEST(Relocation, OptimizeFarCbzqToDirectCbzq) {
+  checkOptimizeFarCompareBranchToDirect(x0, true, false);
+}
+
+TEST(Relocation, OptimizeFarCbnzlToDirectCbnzl) {
+  checkOptimizeFarCompareBranchToDirect(w0, false, true);
+}
+
+TEST(Relocation, OptimizeFarCbnzqToDirectCbnzq) {
+  checkOptimizeFarCompareBranchToDirect(x0, true, true);
+}
+
+TEST(Relocation, OptimizeFarCbzlToCbzlBWithForwardTarget) {
+  checkOptimizeFarCompareBranchToCompareBranchAndB(w0, false, false);
+}
+
+TEST(Relocation, OptimizeFarCbzqToCbzqBWithForwardTarget) {
+  checkOptimizeFarCompareBranchToCompareBranchAndB(x0, true, false);
+}
+
+TEST(Relocation, OptimizeFarCbnzlToCbnzlBWithForwardTarget) {
+  checkOptimizeFarCompareBranchToCompareBranchAndB(w0, false, true);
+}
+
+TEST(Relocation, OptimizeFarCbnzqToCbnzqBWithForwardTarget) {
+  checkOptimizeFarCompareBranchToCompareBranchAndB(x0, true, true);
+}
+
+TEST(Relocation, OptimizeFarBccToBccBWithForwardTarget) {
+  checkOptimizeFarBccToBccAndB(lt);
+}
+
 /*
  * Tests relocating PC relative test bit and branch
  * to a sequence of a test bit and branch and an absolute

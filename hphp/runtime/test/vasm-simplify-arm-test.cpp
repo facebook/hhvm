@@ -946,6 +946,111 @@ void testArmWritebackPairUps() {
   });
 }
 
+// Emits `<test>; jcc{cc} -> {taken, next}` into the entry block, annotates SF
+// uses (so foldTestJcc observes a single flags consumer, use_counts == 1), and
+// runs the ARM simplify pass. `emitTest` emits the test op against `sf`.
+template <typename EmitTest>
+void runTestJccFold(Vunit& unit, ConditionCode cc, EmitTest emitTest,
+                    Vlabel& taken, Vlabel& next) {
+  unit.entry = unit.makeBlock(AreaIndex::Main, 1);
+  taken = unit.makeBlock(AreaIndex::Main, 1);
+  next = unit.makeBlock(AreaIndex::Main, 1);
+
+  Vout v(unit, unit.entry);
+  Vout vt(unit, taken);
+  Vout vn(unit, next);
+
+  auto const sf = v.makeReg();
+  emitTest(v, sf);
+  v << jcc{cc, sf, {taken, next}, StringTag{}};
+  vt << ret{};
+  vn << ret{};
+
+  annotateSFUses(unit);
+  simplify(unit);
+}
+
+void testArmFoldTestqEqToCbzq() {
+  Vunit unit;
+  Vlabel taken, next;
+  auto const r = Vreg64{Reg64{0}};
+  runTestJccFold(unit, CC_E,
+                 [&] (Vout& v, Vreg sf) { v << testq{r, r, sf, Vflags{}}; },
+                 taken, next);
+
+  auto const& code = unit.blocks[unit.entry].code;
+  ASSERT_EQ(code.size(), 1) << stripWhitespace(show(unit));
+  ASSERT_EQ(code[0].op, Vinstr::cbzq);
+  EXPECT_EQ(Vreg{code[0].cbzq_.s}, Vreg{r});
+  EXPECT_EQ(code[0].cbzq_.targets[0], taken);
+  EXPECT_EQ(code[0].cbzq_.targets[1], next);
+}
+
+void testArmFoldTestqNeToCbnzq() {
+  Vunit unit;
+  Vlabel taken, next;
+  auto const r = Vreg64{Reg64{0}};
+  runTestJccFold(unit, CC_NE,
+                 [&] (Vout& v, Vreg sf) { v << testq{r, r, sf, Vflags{}}; },
+                 taken, next);
+
+  auto const& code = unit.blocks[unit.entry].code;
+  ASSERT_EQ(code.size(), 1) << stripWhitespace(show(unit));
+  ASSERT_EQ(code[0].op, Vinstr::cbnzq);
+  EXPECT_EQ(Vreg{code[0].cbnzq_.s}, Vreg{r});
+  EXPECT_EQ(code[0].cbnzq_.targets[0], taken);
+  EXPECT_EQ(code[0].cbnzq_.targets[1], next);
+}
+
+void testArmFoldTestlEqToCbzl() {
+  Vunit unit;
+  Vlabel taken, next;
+  auto const r = Vreg32{Vreg{Reg64{0}}};
+  runTestJccFold(unit, CC_E,
+                 [&] (Vout& v, Vreg sf) { v << testl{r, r, sf, Vflags{}}; },
+                 taken, next);
+
+  auto const& code = unit.blocks[unit.entry].code;
+  ASSERT_EQ(code.size(), 1) << stripWhitespace(show(unit));
+  ASSERT_EQ(code[0].op, Vinstr::cbzl);
+  EXPECT_EQ(Vreg{code[0].cbzl_.s}, Vreg{r});
+  EXPECT_EQ(code[0].cbzl_.targets[0], taken);
+  EXPECT_EQ(code[0].cbzl_.targets[1], next);
+}
+
+// A non-self-compare (s0 != s1) tests two distinct registers, which cbz/cbnz
+// cannot express; it must be left as test + jcc.
+void testArmFoldTestJccRejectsNonSelfCompare() {
+  Vunit unit;
+  Vlabel taken, next;
+  auto const r0 = Vreg64{Reg64{0}};
+  auto const r1 = Vreg64{Reg64{1}};
+  runTestJccFold(unit, CC_E,
+                 [&] (Vout& v, Vreg sf) { v << testq{r0, r1, sf, Vflags{}}; },
+                 taken, next);
+
+  auto const& code = unit.blocks[unit.entry].code;
+  ASSERT_EQ(code.size(), 2) << stripWhitespace(show(unit));
+  EXPECT_EQ(code[0].op, Vinstr::testq);
+  EXPECT_EQ(code[1].op, Vinstr::jcc);
+}
+
+// cbz/cbnz only implement branch-on-(non)zero, so a branch on any other
+// condition (here CC_S) must not be folded.
+void testArmFoldTestJccRejectsNonEqualCC() {
+  Vunit unit;
+  Vlabel taken, next;
+  auto const r = Vreg64{Reg64{0}};
+  runTestJccFold(unit, CC_S,
+                 [&] (Vout& v, Vreg sf) { v << testq{r, r, sf, Vflags{}}; },
+                 taken, next);
+
+  auto const& code = unit.blocks[unit.entry].code;
+  ASSERT_EQ(code.size(), 2) << stripWhitespace(show(unit));
+  EXPECT_EQ(code[0].op, Vinstr::testq);
+  EXPECT_EQ(code[1].op, Vinstr::jcc);
+}
+
 }
 
 TEST(Vasm, ArmLeaLowering) {
@@ -1006,6 +1111,26 @@ TEST(Vasm, ArmWritebackBaseOverlap) {
 
 TEST(Vasm, ArmWritebackPairUps) {
   testArmWritebackPairUps();
+}
+
+TEST(Vasm, ArmFoldTestqEqToCbzq) {
+  testArmFoldTestqEqToCbzq();
+}
+
+TEST(Vasm, ArmFoldTestqNeToCbnzq) {
+  testArmFoldTestqNeToCbnzq();
+}
+
+TEST(Vasm, ArmFoldTestlEqToCbzl) {
+  testArmFoldTestlEqToCbzl();
+}
+
+TEST(Vasm, ArmFoldTestJccRejectsNonSelfCompare) {
+  testArmFoldTestJccRejectsNonSelfCompare();
+}
+
+TEST(Vasm, ArmFoldTestJccRejectsNonEqualCC) {
+  testArmFoldTestJccRejectsNonEqualCC();
 }
 
 }

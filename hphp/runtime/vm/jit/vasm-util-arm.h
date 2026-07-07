@@ -23,7 +23,7 @@
 
 #include "hphp/util/assertions.h"
 
-namespace vixl::aarch64 { class Instruction; }
+#include "hphp/vixl/hphp-compat.h"
 
 namespace HPHP::jit::arm {
 
@@ -56,6 +56,21 @@ inline bool encodablePair32(const Vptr& ptr) {
 inline bool encodablePair128(const Vptr& ptr) {
   return encodablePair(ptr, 16);
 }
+
+///////////////////////////////////////////////////////////////////////////////
+
+/*
+ * A decoded ARM compare-and-branch (cbz/cbnz). Shared by the emitter's veneer
+ * generation and the relocator's far-branch expand/shrink paths so they agree
+ * on operand width and condition. `reg` is sized W (cbzl/cbnzl) or X
+ * (cbzq/cbnzq) per the instruction's sf bit; `isCbnz` is true for cbnz.
+ */
+struct CompareAndBranchDetails {
+  vixl::aarch64::Register reg;
+  bool isCbnz;
+};
+CompareAndBranchDetails getCompareAndBranchDetails(
+  const vixl::aarch64::Instruction* cb);
 
 ///////////////////////////////////////////////////////////////////////////////
 

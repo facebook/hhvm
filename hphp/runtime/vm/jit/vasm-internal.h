@@ -67,7 +67,7 @@ struct Venv {
   jit::vector<CodeAddress> addrs;
   jit::vector<CodeAddress> vaddrs;
   jit::vector<AddrPatch> leas;
-  jit::vector<LabelPatch> jmps, jccs;
+  jit::vector<LabelPatch> jmps, jccs, cmpbrs;
   jit::vector<LabelPatch> catches;
   jit::vector<LabelPatch> vveneers;
   jit::vector<LdBindRetAddrPatch> ldbindretaddrs;

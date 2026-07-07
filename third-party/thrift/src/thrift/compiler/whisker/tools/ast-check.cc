@@ -26,8 +26,6 @@
 
 #include <fmt/core.h>
 
-using namespace std::literals;
-
 namespace {
 [[nodiscard]] int usage() {
   constexpr std::string_view kUsageMessage = R"(Usage: ast-check [FILE]...)

@@ -801,6 +801,29 @@ class set_flag : public dsl::function {
   bool& flag_;
 };
 
+/**
+ * A function that throws std::runtime_error to simulate unexpected C++
+ * exception from native code.
+ */
+class throws_std_exception : public dsl::function {
+  object invoke(context ctx) override {
+    ctx.declare_arity(0);
+    ctx.declare_named_arguments({});
+    throw std::runtime_error("boom from std");
+  }
+};
+
+/**
+ * A function that throws non-std exception to simulate unknown error.
+ */
+class throws_unknown : public dsl::function {
+  object invoke(context ctx) override {
+    ctx.declare_arity(0);
+    ctx.declare_named_arguments({});
+    throw 42;
+  }
+};
+
 } // namespace functions
 } // namespace
 
@@ -925,6 +948,45 @@ TEST_F(RenderTest, user_defined_function_named_argument_error) {
           "Unknown named argument(s) provided: foo, unknown.",
           path_to_file,
           1)));
+}
+
+TEST_F(RenderTest, user_defined_function_std_exception) {
+  show_source_backtrace_on_failure(true);
+  auto result = render(
+      "{{ (boom) }}\n",
+      w::map({
+          {"boom", w::make_native_function<functions::throws_std_exception>()},
+      }));
+  EXPECT_FALSE(result.has_value());
+  EXPECT_THAT(
+      diagnostics(),
+      testing::ElementsAre(
+          diagnostic(
+              diagnostic_level::error,
+              "Function 'boom' raised an unexpected internal error:\n"
+              "boom from std",
+              path_to_file,
+              1),
+          error_backtrace("#0 path/to/test.whisker <line:1, col:5>\n")));
+}
+
+TEST_F(RenderTest, user_defined_function_unknown_exception) {
+  show_source_backtrace_on_failure(true);
+  auto result = render(
+      "{{ (boom) }}\n",
+      w::map({
+          {"boom", w::make_native_function<functions::throws_unknown>()},
+      }));
+  EXPECT_FALSE(result.has_value());
+  EXPECT_THAT(
+      diagnostics(),
+      testing::ElementsAre(
+          diagnostic(
+              diagnostic_level::error,
+              "Function 'boom' raised an unknown internal error",
+              path_to_file,
+              1),
+          error_backtrace("#0 path/to/test.whisker <line:1, col:5>\n")));
 }
 
 TEST_F(RenderTest, user_defined_function_nested) {

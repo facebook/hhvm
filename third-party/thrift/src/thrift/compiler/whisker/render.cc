@@ -724,6 +724,21 @@ class virtual_machine {
                       "Function '{}' threw an error:\n{}",
                       name.chain_string(),
                       err.what());
+                } catch (const render_error&) {
+                  // Propagate an in-progress render abort (e.g. from nested
+                  // rendering) without rewrapping its diagnostic/backtrace.
+                  throw;
+                } catch (const std::exception& err) {
+                  diags_.report_fatal_error(
+                      name.loc.begin,
+                      "Function '{}' raised an unexpected internal error:\n{}",
+                      name.chain_string(),
+                      err.what());
+                } catch (...) {
+                  diags_.report_fatal_error(
+                      name.loc.begin,
+                      "Function '{}' raised an unknown internal error",
+                      name.chain_string());
                 }
               });
         });

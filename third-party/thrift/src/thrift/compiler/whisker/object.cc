@@ -190,7 +190,7 @@ void map::print_to(
 }
 
 std::string map::describe_type() const {
-  return fmt::format("map [custom]='{}'>", demangle(typeid(*this)));
+  return fmt::format("<map [custom] type='{}'>", demangle(typeid(*this)));
 }
 
 bool operator==(const map& lhs, const map& rhs) {
@@ -269,7 +269,7 @@ void array::print_to(
 }
 
 std::string array::describe_type() const {
-  return fmt::format("array [custom]='{}'", demangle(typeid(*this)));
+  return fmt::format("<array [custom] type='{}'>", demangle(typeid(*this)));
 }
 
 bool operator==(const array& lhs, const array& rhs) {

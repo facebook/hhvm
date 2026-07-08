@@ -440,6 +440,10 @@ public:
     : m_str(StringData::Make(s.data(), s.size(), CopyString),
             req::ptr<StringData>::NoIncRef{}) {}
 
+  explicit String(const folly::fbstring& s)
+    : m_str(StringData::Make(s.data(), s.size(), CopyString),
+            req::ptr<StringData>::NoIncRef{}) {}
+
   using NoIncRef = req::ptr<StringData>::NoIncRef;
 
   // StaticString is expected to be non-null and persistent, so we can freely

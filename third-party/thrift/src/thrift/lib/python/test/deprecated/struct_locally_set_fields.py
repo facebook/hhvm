@@ -47,8 +47,9 @@ from thrift.python.types import get_locally_set_fields
 
 
 class StructLocallySetFieldsTest(unittest.TestCase):
-    """The `enable_isset_deprecated_unsafe` compiler option enables
-    `get_locally_set_fields()` for all non-exception structs in this library.
+    """Each struct in this library is annotated with
+    `@python.EnableUnsafeIssetInspection`, enabling `get_locally_set_fields()`
+    for it.
     """
 
     @parameterized.expand(

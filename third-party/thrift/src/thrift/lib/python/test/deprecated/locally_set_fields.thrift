@@ -16,9 +16,8 @@
 
 // @lint-ignore-every THRIFTURI
 
-// Minimal structs exercising `get_locally_set_fields()`. The thrift_library compiling
-// this file passes `thrift_python_options = ["enable_isset_deprecated_unsafe"]`,
-// which enables `get_locally_set_fields()` for every struct in the library.
+// Minimal structs exercising `get_locally_set_fields()`. Each struct that needs
+// field set-ness tracking is annotated with `@python.EnableUnsafeIssetInspection`.
 
 include "thrift/annotation/thrift.thrift"
 include "thrift/annotation/python.thrift"
@@ -32,12 +31,14 @@ enum Kind {
   REGULAR = 8,
 }
 
+@python.EnableUnsafeIssetInspection
 struct File {
   1: string name;
   2: i32 permissions;
   3: Kind type = Kind.REGULAR;
 }
 
+@python.EnableUnsafeIssetInspection
 struct OptionalFile {
   1: optional string name;
   3: optional i32 type;
@@ -51,16 +52,19 @@ union Integers {
   4: i64 large;
 }
 
+@python.EnableUnsafeIssetInspection
 struct Optionals {
   1: optional list<string> values;
 }
 
+@python.EnableUnsafeIssetInspection
 struct SimpleStruct {
   1: string name;
   2: i32 value;
   3: string city;
 }
 
+@python.EnableUnsafeIssetInspection
 struct mixed {
   @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional string opt_field = "optional";
@@ -71,6 +75,7 @@ struct mixed {
   9: optional i32 opt_int = 1;
 }
 
+@python.EnableUnsafeIssetInspection
 @thrift.Sealed
 struct Nested {
   1: i32 num;
@@ -85,6 +90,7 @@ struct Nested {
 
 // Exercises isset tracking for structs reached through a nested field and
 // through `list`/`map`/`set` containers, including nested containers.
+@python.EnableUnsafeIssetInspection
 struct HasContainers {
   1: Nested nested;
   2: list<Nested> nested_list;

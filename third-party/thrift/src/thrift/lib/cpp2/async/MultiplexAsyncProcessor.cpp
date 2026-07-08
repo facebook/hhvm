@@ -26,7 +26,6 @@
 #include <thrift/lib/cpp2/async/AsyncProcessorHelper.h>
 #include <thrift/lib/cpp2/async/processor/ServerRequestHelper.h>
 #include <thrift/lib/cpp2/schema/detail/Merge.h>
-#include <thrift/lib/cpp2/server/ServerFlags.h>
 
 namespace apache::thrift {
 

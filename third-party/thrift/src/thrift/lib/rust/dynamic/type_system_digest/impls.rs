@@ -161,12 +161,11 @@ impl TypeSystemDigest for SerializableRecord {
     }
 }
 
-/// BTreeMap is already sorted by key, matching C++ `forEachSortedByKey`.
 fn hash_field_set(field_set: &BTreeMap<id::FieldId, SerializableRecord>, h: &mut Hasher) {
-    for (field_id, record) in field_set {
-        h.hash(field_id);
-        h.hash(record);
-    }
+    h.hash_in_key_order(field_set, |sub_h, field_id, record| {
+        sub_h.hash(field_id);
+        sub_h.hash(record);
+    });
 }
 
 fn hash_annotations(annotations: &BTreeMap<String, SerializableRecord>, h: &mut Hasher) {
@@ -197,11 +196,13 @@ impl TypeSystemDigest for SerializableFieldDefinition {
 
 impl TypeSystemDigest for SerializableStructDefinition {
     fn hash_into(&self, h: &mut Hasher) {
-        let mut sorted_fields: Vec<_> = self.fields.iter().collect();
-        sorted_fields.sort_by_key(|f| f.identity.id);
-        for field in sorted_fields {
-            h.hash(field);
-        }
+        h.hash_ordered_by_key(
+            self.fields.iter(),
+            |field| field.identity.id,
+            |sub_h, _, field| {
+                sub_h.hash(*field);
+            },
+        );
 
         h.hash(&self.isSealed);
         hash_annotations(&self.annotations, h);
@@ -210,11 +211,13 @@ impl TypeSystemDigest for SerializableStructDefinition {
 
 impl TypeSystemDigest for SerializableUnionDefinition {
     fn hash_into(&self, h: &mut Hasher) {
-        let mut sorted_fields: Vec<_> = self.fields.iter().collect();
-        sorted_fields.sort_by_key(|f| f.identity.id);
-        for field in sorted_fields {
-            h.hash(field);
-        }
+        h.hash_ordered_by_key(
+            self.fields.iter(),
+            |field| field.identity.id,
+            |sub_h, _, field| {
+                sub_h.hash(*field);
+            },
+        );
 
         h.hash(&self.isSealed);
         hash_annotations(&self.annotations, h);
@@ -223,13 +226,15 @@ impl TypeSystemDigest for SerializableUnionDefinition {
 
 impl TypeSystemDigest for SerializableEnumDefinition {
     fn hash_into(&self, h: &mut Hasher) {
-        let mut sorted_values: Vec<_> = self.values.iter().collect();
-        sorted_values.sort_by_key(|v| v.datum);
-        for value in sorted_values {
-            h.hash(value.name.as_str());
-            h.hash(&value.datum);
-            hash_annotations(&value.annotations, h);
-        }
+        h.hash_ordered_by_key(
+            self.values.iter(),
+            |value| value.datum,
+            |sub_h, _, value| {
+                sub_h.hash(value.name.as_str());
+                sub_h.hash(&value.datum);
+                hash_annotations(&value.annotations, sub_h);
+            },
+        );
 
         hash_annotations(&self.annotations, h);
     }
@@ -260,11 +265,10 @@ impl TypeSystemDigest for SerializableTypeSystem {
     fn hash_into(&self, h: &mut Hasher) {
         h.hash(&TYPE_SYSTEM_DIGEST_VERSION);
 
-        // BTreeMap is already sorted by key (URI string)
-        for (uri, entry) in &self.types {
-            h.hash(uri.as_str());
-            h.hash(&entry.definition);
-        }
+        h.hash_in_key_order(&self.types, |sub_h, uri, entry| {
+            sub_h.hash(uri.as_str());
+            sub_h.hash(&entry.definition);
+        });
     }
 }
 

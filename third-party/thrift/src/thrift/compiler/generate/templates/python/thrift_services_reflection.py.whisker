@@ -74,6 +74,24 @@ _fbthrift_{{function.name}}_arg_{{#if (int.lt? field.id 0)}}minus{{(int.neg fiel
 _fbthrift_{{function.name}}_return_type
 {{/let partial}}
 
+{{! Local variable name for an anonymous container typedef for a stream element type }}
+{{#let partial stream_elem_container_var |function|}}
+{{#pragma ignore-newlines}}
+_fbthrift_{{function.name}}_stream_elem_type
+{{/let partial}}
+
+{{! Local variable name for an anonymous container typedef for a sink payload type }}
+{{#let partial sink_payload_container_var |function|}}
+{{#pragma ignore-newlines}}
+_fbthrift_{{function.name}}_sink_payload_type
+{{/let partial}}
+
+{{! Local variable name for an anonymous container typedef for a sink final response type }}
+{{#let partial sink_final_resp_container_var |function|}}
+{{#pragma ignore-newlines}}
+_fbthrift_{{function.name}}_sink_final_resp_type
+{{/let partial}}
+
 {{#partial m_common.auto_generated_py}}
 
 
@@ -87,6 +105,8 @@ try:
         ExceptionSpec as _ExceptionSpec,
         FunctionSpec as _FunctionSpec,
         ServiceSpec as _ServiceSpec,
+        SinkSpec as _SinkSpec,
+        StreamSpec as _StreamSpec,
     )
     from thrift.python.reflection_enums import (
         FunctionQualifier as _FunctionQualifier,
@@ -201,6 +221,87 @@ def get_reflection__{{service.name}}():
         _fbthrift_map_val_type_info = {{#partial m_types.typeinfo type=function.return_type.true_type.val_type}}
       {{/if function.return_type.list?}}
     {{/if (and (not function.return_type.void?) function.return_type.container? (not function.return_type.typedef?))}}
+    {{#if function.stream?}}
+      {{#if (and function.stream.elem_type.container? (not function.stream.elem_type.typedef?))}}
+        {{#if function.stream.elem_type.list?}}
+    class {{#partial stream_elem_container_var function=function}}(_fbthrift_python_container_typedefs._ListTypedefBase):
+        __slots__ = ()
+        __name__ = "List__{{service.name}}_{{function.name}}_stream_elem"
+        __qualname__ = "List__{{service.name}}_{{function.name}}_stream_elem"
+        __module__ = "{{program.module_path}}.thrift_types"
+        _fbthrift_list_type_info = {{#partial m_types.typeinfo type=function.stream.elem_type.true_type.elem_type}}
+        {{#else if function.stream.elem_type.set?}}
+    class {{#partial stream_elem_container_var function=function}}(_fbthrift_python_container_typedefs._SetTypedefBase):
+        __slots__ = ()
+        __name__ = "Set__{{service.name}}_{{function.name}}_stream_elem"
+        __qualname__ = "Set__{{service.name}}_{{function.name}}_stream_elem"
+        __module__ = "{{program.module_path}}.thrift_types"
+        _fbthrift_set_type_info = {{#partial m_types.typeinfo type=function.stream.elem_type.true_type.elem_type}}
+        {{#else if function.stream.elem_type.map?}}
+    class {{#partial stream_elem_container_var function=function}}(_fbthrift_python_container_typedefs._MapTypedefBase):
+        __slots__ = ()
+        __name__ = "Map__{{service.name}}_{{function.name}}_stream_elem"
+        __qualname__ = "Map__{{service.name}}_{{function.name}}_stream_elem"
+        __module__ = "{{program.module_path}}.thrift_types"
+        _fbthrift_map_key_type_info = {{#partial m_types.typeinfo type=function.stream.elem_type.true_type.key_type}}
+        _fbthrift_map_val_type_info = {{#partial m_types.typeinfo type=function.stream.elem_type.true_type.val_type}}
+        {{/if function.stream.elem_type.list?}}
+      {{/if (and function.stream.elem_type.container? (not function.stream.elem_type.typedef?))}}
+    {{/if function.stream?}}
+    {{#if function.sink?}}
+      {{#if (and function.sink.elem_type.container? (not function.sink.elem_type.typedef?))}}
+        {{#if function.sink.elem_type.list?}}
+    class {{#partial sink_payload_container_var function=function}}(_fbthrift_python_container_typedefs._ListTypedefBase):
+        __slots__ = ()
+        __name__ = "List__{{service.name}}_{{function.name}}_sink_payload"
+        __qualname__ = "List__{{service.name}}_{{function.name}}_sink_payload"
+        __module__ = "{{program.module_path}}.thrift_types"
+        _fbthrift_list_type_info = {{#partial m_types.typeinfo type=function.sink.elem_type.true_type.elem_type}}
+        {{#else if function.sink.elem_type.set?}}
+    class {{#partial sink_payload_container_var function=function}}(_fbthrift_python_container_typedefs._SetTypedefBase):
+        __slots__ = ()
+        __name__ = "Set__{{service.name}}_{{function.name}}_sink_payload"
+        __qualname__ = "Set__{{service.name}}_{{function.name}}_sink_payload"
+        __module__ = "{{program.module_path}}.thrift_types"
+        _fbthrift_set_type_info = {{#partial m_types.typeinfo type=function.sink.elem_type.true_type.elem_type}}
+        {{#else if function.sink.elem_type.map?}}
+    class {{#partial sink_payload_container_var function=function}}(_fbthrift_python_container_typedefs._MapTypedefBase):
+        __slots__ = ()
+        __name__ = "Map__{{service.name}}_{{function.name}}_sink_payload"
+        __qualname__ = "Map__{{service.name}}_{{function.name}}_sink_payload"
+        __module__ = "{{program.module_path}}.thrift_types"
+        _fbthrift_map_key_type_info = {{#partial m_types.typeinfo type=function.sink.elem_type.true_type.key_type}}
+        _fbthrift_map_val_type_info = {{#partial m_types.typeinfo type=function.sink.elem_type.true_type.val_type}}
+        {{/if function.sink.elem_type.list?}}
+      {{/if (and function.sink.elem_type.container? (not function.sink.elem_type.typedef?))}}
+      {{#if (not function.bidirectional_stream?)}}
+        {{#if (and function.sink.final_response_type.container? (not function.sink.final_response_type.typedef?))}}
+          {{#if function.sink.final_response_type.list?}}
+    class {{#partial sink_final_resp_container_var function=function}}(_fbthrift_python_container_typedefs._ListTypedefBase):
+        __slots__ = ()
+        __name__ = "List__{{service.name}}_{{function.name}}_sink_final_resp"
+        __qualname__ = "List__{{service.name}}_{{function.name}}_sink_final_resp"
+        __module__ = "{{program.module_path}}.thrift_types"
+        _fbthrift_list_type_info = {{#partial m_types.typeinfo type=function.sink.final_response_type.true_type.elem_type}}
+          {{#else if function.sink.final_response_type.set?}}
+    class {{#partial sink_final_resp_container_var function=function}}(_fbthrift_python_container_typedefs._SetTypedefBase):
+        __slots__ = ()
+        __name__ = "Set__{{service.name}}_{{function.name}}_sink_final_resp"
+        __qualname__ = "Set__{{service.name}}_{{function.name}}_sink_final_resp"
+        __module__ = "{{program.module_path}}.thrift_types"
+        _fbthrift_set_type_info = {{#partial m_types.typeinfo type=function.sink.final_response_type.true_type.elem_type}}
+          {{#else if function.sink.final_response_type.map?}}
+    class {{#partial sink_final_resp_container_var function=function}}(_fbthrift_python_container_typedefs._MapTypedefBase):
+        __slots__ = ()
+        __name__ = "Map__{{service.name}}_{{function.name}}_sink_final_resp"
+        __qualname__ = "Map__{{service.name}}_{{function.name}}_sink_final_resp"
+        __module__ = "{{program.module_path}}.thrift_types"
+        _fbthrift_map_key_type_info = {{#partial m_types.typeinfo type=function.sink.final_response_type.true_type.key_type}}
+        _fbthrift_map_val_type_info = {{#partial m_types.typeinfo type=function.sink.final_response_type.true_type.val_type}}
+          {{/if function.sink.final_response_type.list?}}
+        {{/if (and function.sink.final_response_type.container? (not function.sink.final_response_type.typedef?))}}
+      {{/if (not function.bidirectional_stream?)}}
+    {{/if function.sink?}}
   {{/each}}
     functions = {}
   {{#each service.supported_functions as |function|}}
@@ -263,6 +364,77 @@ def get_reflection__{{service.name}}():
   {{/if function.return_type.void?}}
         qualifier=_QUALIFIER_MAP["{{function.qualifier}}"],
         exceptions=_fbthrift_exceptions,
+  {{#if function.stream?}}
+        stream=_StreamSpec(
+            elem_type={{!
+                }}{{#if (and function.stream.elem_type.container? (not function.stream.elem_type.typedef?))}}{{!
+                    }}{{#partial stream_elem_container_var function=function}}{{!
+                }}{{#else}}{{!
+                    }}{{#partial python_type_class type=function.stream.elem_type}}{{!
+                }}{{/if (and function.stream.elem_type.container? (not function.stream.elem_type.typedef?))}},
+            elem_thrift_type={{#partial thrift_type_name type=function.stream.elem_type}},
+    {{#if function.stream_exceptions?}}
+            exceptions=[
+      {{#each function.stream.exceptions as |field|}}
+                _ExceptionSpec(
+                    id={{field.id}},
+                    name="{{field.name}}",
+                    py_name="{{field.py_name}}",
+                    type={{#partial python_type_class type=field.type}},
+                    thrift_type={{#partial thrift_type_name type=field.type}},
+                    qualifier=_Qualifier.UNQUALIFIED,
+                    structured_annotations={},
+                ),
+      {{/each}}
+            ],
+    {{/if function.stream_exceptions?}}
+        ),
+  {{/if function.stream?}}
+  {{#if function.sink?}}
+        sink=_SinkSpec(
+            payload_type={{!
+                }}{{#if (and function.sink.elem_type.container? (not function.sink.elem_type.typedef?))}}{{!
+                    }}{{#partial sink_payload_container_var function=function}}{{!
+                }}{{#else}}{{!
+                    }}{{#partial python_type_class type=function.sink.elem_type}}{{!
+                }}{{/if (and function.sink.elem_type.container? (not function.sink.elem_type.typedef?))}},
+            payload_thrift_type={{#partial thrift_type_name type=function.sink.elem_type}},
+    {{#if function.sink_exceptions?}}
+            payload_exceptions=[
+      {{#each function.sink.exceptions as |field|}}
+                _ExceptionSpec(
+                    id={{field.id}},
+                    name="{{field.name}}",
+                    py_name="{{field.py_name}}",
+                    type={{#partial python_type_class type=field.type}},
+                    thrift_type={{#partial thrift_type_name type=field.type}},
+                    qualifier=_Qualifier.UNQUALIFIED,
+                    structured_annotations={},
+                ),
+      {{/each}}
+            ],
+    {{/if function.sink_exceptions?}}
+    {{#if (not function.bidirectional_stream?)}}
+            final_response_type={{#partial python_type_class type=function.sink.final_response_type}},
+            final_response_thrift_type={{#partial thrift_type_name type=function.sink.final_response_type}},
+      {{#if function.sink_final_response_exceptions?}}
+            final_response_exceptions=[
+        {{#each function.sink.final_response_exceptions as |field|}}
+                _ExceptionSpec(
+                    id={{field.id}},
+                    name="{{field.name}}",
+                    py_name="{{field.py_name}}",
+                    type={{#partial python_type_class type=field.type}},
+                    thrift_type={{#partial thrift_type_name type=field.type}},
+                    qualifier=_Qualifier.UNQUALIFIED,
+                    structured_annotations={},
+                ),
+        {{/each}}
+            ],
+      {{/if function.sink_final_response_exceptions?}}
+    {{/if (not function.bidirectional_stream?)}}
+        ),
+  {{/if function.sink?}}
         structured_annotations={
             {{#each function.structured_annotations as |annotation|}}
               {{#if annotation.type.structured?}}

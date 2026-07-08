@@ -32,6 +32,14 @@ from test_thrift.thrift_types import (
     SetI32,
     SimpleError,
 )
+from thrift.python.bidi_service.thrift_services import TestBidiServiceInterface
+from thrift.python.bidi_service.thrift_types import (
+    MethodException,
+    SinkChunk,
+    SinkException,
+    StreamChunk,
+    StreamException,
+)
 from thrift.python.reflection import inspect, inspectable
 from thrift.python.reflection.constants_reflection import ThriftType
 from thrift.python.reflection.services_reflection import (
@@ -39,9 +47,12 @@ from thrift.python.reflection.services_reflection import (
     ExceptionSpec,
     FunctionSpec,
     ServiceSpec,
+    SinkSpec,
+    StreamSpec,
 )
 from thrift.python.reflection.types_reflection import ListSpec, MapSpec, SetSpec
 from thrift.python.reflection_enums import FunctionQualifier
+from thrift.python.sink_service.thrift_services import TestSinkServiceInterface
 from thrift.python.types import Map as _fbthrift_Map, Set as _fbthrift_Set
 
 
@@ -349,6 +360,214 @@ class ContainerTypeInspectabilityTest(unittest.TestCase):
         self.assertIsInstance(spec, SetSpec)
         assert isinstance(spec, SetSpec)
         self.assertEqual(spec.value, str)
+
+
+class StreamReflectionTest(unittest.TestCase):
+    def _get_child_spec(self) -> ServiceSpec:
+        spec = inspect(TestingServiceChildInterface)
+        assert isinstance(spec, ServiceSpec)
+        return spec
+
+    def _get_child_func(self, name: str) -> FunctionSpec:
+        func = self._get_child_spec().get_function(name)
+        assert func is not None, f"function {name!r} not found"
+        return func
+
+    def test_stream_return_type_is_void(self) -> None:
+        func = self._get_child_func("stream_func")
+        self.assertIsNone(func.return_type)
+        self.assertEqual(func.return_thrift_type, ThriftType.VOID)
+
+    def test_stream_func_has_stream_spec(self) -> None:
+        func = self._get_child_func("stream_func")
+        self.assertIsNotNone(func.stream)
+        self.assertIsNone(func.sink)
+
+    def test_stream_elem_type(self) -> None:
+        func = self._get_child_func("stream_func")
+        stream = func.stream
+        assert stream is not None
+        self.assertIsInstance(stream, StreamSpec)
+        self.assertEqual(stream.elem_type, int)
+        self.assertEqual(stream.elem_thrift_type, ThriftType.I32)
+
+    def test_stream_no_exceptions(self) -> None:
+        func = self._get_child_func("stream_func")
+        stream = func.stream
+        assert stream is not None
+        self.assertEqual(len(stream.exceptions), 0)
+
+    def test_stream_is_streaming(self) -> None:
+        func = self._get_child_func("stream_func")
+        self.assertTrue(func.is_streaming)
+        self.assertFalse(func.is_bidi)
+
+    def test_non_streaming_func(self) -> None:
+        func = _get_func("getName")
+        self.assertIsNone(func.stream)
+        self.assertIsNone(func.sink)
+        self.assertFalse(func.is_streaming)
+        self.assertFalse(func.is_bidi)
+
+
+class SinkReflectionTest(unittest.TestCase):
+    def _get_sink_spec(self) -> ServiceSpec:
+        spec = inspect(TestSinkServiceInterface)
+        assert isinstance(spec, ServiceSpec)
+        return spec
+
+    def _get_sink_func(self, name: str) -> FunctionSpec:
+        func = self._get_sink_spec().get_function(name)
+        assert func is not None, f"function {name!r} not found"
+        return func
+
+    def test_sink_return_type_is_void(self) -> None:
+        func = self._get_sink_func("range_")
+        self.assertIsNone(func.return_type)
+        self.assertEqual(func.return_thrift_type, ThriftType.VOID)
+
+    def test_basic_sink(self) -> None:
+        func = self._get_sink_func("range_")
+        self.assertIsNotNone(func.sink)
+        self.assertIsNone(func.stream)
+        self.assertTrue(func.is_streaming)
+        self.assertFalse(func.is_bidi)
+
+    def test_sink_payload_type(self) -> None:
+        func = self._get_sink_func("range_")
+        sink = func.sink
+        assert sink is not None
+        self.assertIsInstance(sink, SinkSpec)
+        self.assertEqual(sink.payload_type, int)
+        self.assertEqual(sink.payload_thrift_type, ThriftType.I32)
+
+    def test_sink_final_response_type(self) -> None:
+        func = self._get_sink_func("range_")
+        sink = func.sink
+        assert sink is not None
+        self.assertEqual(sink.final_response_type, int)
+        self.assertEqual(sink.final_response_thrift_type, ThriftType.I32)
+
+    def test_sink_with_initial_response(self) -> None:
+        func = self._get_sink_func("initialThrow")
+        self.assertEqual(func.return_type, bool)
+        self.assertEqual(func.return_thrift_type, ThriftType.BOOL)
+        sink = func.sink
+        assert sink is not None
+        self.assertEqual(sink.payload_type, int)
+        self.assertEqual(sink.final_response_type, bool)
+
+    def test_sink_payload_exceptions(self) -> None:
+        func = self._get_sink_func("sinkThrow")
+        sink = func.sink
+        assert sink is not None
+        self.assertEqual(len(sink.payload_exceptions), 1)
+        self.assertIsInstance(sink.payload_exceptions[0], ExceptionSpec)
+
+    def test_sink_final_response_exceptions(self) -> None:
+        func = self._get_sink_func("sinkFinalThrow")
+        sink = func.sink
+        assert sink is not None
+        self.assertEqual(len(sink.final_response_exceptions), 1)
+        self.assertIsInstance(sink.final_response_exceptions[0], ExceptionSpec)
+
+    def test_sink_no_exceptions(self) -> None:
+        func = self._get_sink_func("range_")
+        sink = func.sink
+        assert sink is not None
+        self.assertEqual(len(sink.payload_exceptions), 0)
+        self.assertEqual(len(sink.final_response_exceptions), 0)
+
+
+class BidiReflectionTest(unittest.TestCase):
+    def _get_bidi_spec(self) -> ServiceSpec:
+        spec = inspect(TestBidiServiceInterface)
+        assert isinstance(spec, ServiceSpec)
+        return spec
+
+    def _get_bidi_func(self, name: str) -> FunctionSpec:
+        func = self._get_bidi_spec().get_function(name)
+        assert func is not None, f"function {name!r} not found"
+        return func
+
+    def test_bidi_return_type_is_void(self) -> None:
+        func = self._get_bidi_func("echo")
+        self.assertIsNone(func.return_type)
+        self.assertEqual(func.return_thrift_type, ThriftType.VOID)
+
+    def test_bidi_has_both_stream_and_sink(self) -> None:
+        func = self._get_bidi_func("echo")
+        self.assertIsNotNone(func.stream)
+        self.assertIsNotNone(func.sink)
+        self.assertTrue(func.is_streaming)
+        self.assertTrue(func.is_bidi)
+
+    def test_bidi_stream_elem_type(self) -> None:
+        func = self._get_bidi_func("echo")
+        stream = func.stream
+        assert stream is not None
+        self.assertEqual(stream.elem_type, str)
+        self.assertEqual(stream.elem_thrift_type, ThriftType.STRING)
+
+    def test_bidi_sink_payload_type(self) -> None:
+        func = self._get_bidi_func("echo")
+        sink = func.sink
+        assert sink is not None
+        self.assertEqual(sink.payload_type, str)
+        self.assertEqual(sink.payload_thrift_type, ThriftType.STRING)
+
+    def test_bidi_sink_no_final_response(self) -> None:
+        func = self._get_bidi_func("echo")
+        sink = func.sink
+        assert sink is not None
+        self.assertIsNone(sink.final_response_type)
+        self.assertEqual(sink.final_response_thrift_type, ThriftType.VOID)
+
+    def test_bidi_with_initial_response(self) -> None:
+        func = self._get_bidi_func("echoWithResponse")
+        self.assertEqual(func.return_type, str)
+        self.assertEqual(func.return_thrift_type, ThriftType.STRING)
+        self.assertIsNotNone(func.stream)
+        self.assertIsNotNone(func.sink)
+
+    def test_bidi_different_types(self) -> None:
+        func = self._get_bidi_func("intStream")
+        stream = func.stream
+        sink = func.sink
+        assert stream is not None
+        assert sink is not None
+        self.assertEqual(stream.elem_type, int)
+        self.assertEqual(stream.elem_thrift_type, ThriftType.I32)
+        self.assertEqual(sink.payload_type, str)
+        self.assertEqual(sink.payload_thrift_type, ThriftType.STRING)
+
+    def test_bidi_struct_types(self) -> None:
+        func = self._get_bidi_func("structBidi")
+        sink = func.sink
+        stream = func.stream
+        assert sink is not None
+        assert stream is not None
+        self.assertEqual(sink.payload_type, SinkChunk)
+        self.assertEqual(sink.payload_thrift_type, ThriftType.STRUCT)
+        self.assertEqual(stream.elem_type, StreamChunk)
+        self.assertEqual(stream.elem_thrift_type, ThriftType.STRUCT)
+
+    def test_bidi_with_exceptions(self) -> None:
+        func = self._get_bidi_func("canThrow")
+        stream = func.stream
+        sink = func.sink
+        assert stream is not None
+        assert sink is not None
+        self.assertEqual(stream.elem_type, int)
+        self.assertEqual(stream.elem_thrift_type, ThriftType.I64)
+        self.assertEqual(sink.payload_type, int)
+        self.assertEqual(sink.payload_thrift_type, ThriftType.I64)
+        self.assertEqual(len(func.exceptions), 1)
+        self.assertIs(func.exceptions[0].type, MethodException)
+        self.assertEqual(len(sink.payload_exceptions), 1)
+        self.assertIs(sink.payload_exceptions[0].type, SinkException)
+        self.assertEqual(len(stream.exceptions), 1)
+        self.assertIs(stream.exceptions[0].type, StreamException)
 
 
 class AnnotationsTest(unittest.TestCase):

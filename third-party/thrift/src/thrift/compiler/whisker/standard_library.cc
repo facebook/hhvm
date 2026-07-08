@@ -232,8 +232,12 @@ map::raw::value_type create_map_functions() {
           object at(std::size_t index) const final {
             const std::string& property_name = keys_.at(index);
             auto value = map_->lookup_property(property_name);
-            // The name is guaranteed to exist because it was enumerated
-            assert(value.has_value());
+            if (!value.has_value()) {
+              throw eval_error(
+                  fmt::format(
+                      "map key '{}' was enumerated but did not exist upon lookup",
+                      property_name));
+            }
             return w::map({
                 {"key", w::string(property_name)},
                 {"value", std::move(*value)},

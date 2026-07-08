@@ -21,9 +21,11 @@
 #include <thrift/compiler/whisker/lexer.h>
 
 #include <array>
+#include <charconv>
 #include <cstdlib>
 #include <iterator>
 #include <optional>
+#include <system_error>
 #include <unordered_map>
 #include <utility>
 
@@ -293,12 +295,12 @@ lex_result lex_i64_literal(
     return no_lex_result();
   }
 
-  char* end = nullptr;
   constexpr auto i64_max = 9223372036854775807ull; //  2^63-1
   constexpr auto i64_min = 9223372036854775808ull; // -2^63
-  unsigned long long value = std::strtoull(text.data(), &end, 10 /* base */);
-  if (errno == ERANGE) {
-    errno = 0;
+  unsigned long long value = 0;
+  const auto [ptr, ec] =
+      std::from_chars(text.data(), text.data() + text.size(), value);
+  if (ec == std::errc::result_out_of_range) {
     return report_out_of_range(scan);
   }
   if (is_negative && value > i64_min) {
@@ -307,8 +309,9 @@ lex_result lex_i64_literal(
   if (!is_negative && value > i64_max) {
     return report_out_of_range(scan);
   }
-  // We should be parsing all the digits
-  assert(end == text.data() + text.size());
+  // We should have parsed all the digits without error
+  assert(ec == std::errc());
+  assert(ptr == text.data() + text.size());
 
   auto i64_value = static_cast<std::int64_t>(is_negative ? -value : value);
   return lex_result(

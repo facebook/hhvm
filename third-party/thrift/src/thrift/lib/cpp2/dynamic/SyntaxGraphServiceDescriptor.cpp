@@ -168,7 +168,9 @@ ServiceDescriptor::Function makeFunction(
 
   function.qualifier = convertQualifier(fn.qualifier());
   function.rpcKind = determineRpcKind(fn);
-  function.createsInteraction = fn.response().interaction() != nullptr;
+  if (const auto* interaction = fn.response().interaction()) {
+    function.createdInteractionUri = std::string(interaction->uri());
+  }
   function.isPerforms = fn.isPerforms();
 
   if (auto doc = fn.docBlock()) {
@@ -192,6 +194,69 @@ void collectFunctions(
   }
 }
 
+bool hasInteractionUri(
+    const std::vector<ServiceDescriptor::Interaction>& interactions,
+    std::string_view uri) {
+  for (const auto& interaction : interactions) {
+    if (interaction.uri == uri) {
+      return true;
+    }
+  }
+  return false;
+}
+
+void collectCreatedInteractions(
+    const syntax_graph::FunctionNode& fn,
+    const SyntaxGraph& syntaxGraph,
+    std::vector<ServiceDescriptor::Interaction>& interactions);
+
+void collectInteraction(
+    const syntax_graph::InteractionNode& interaction,
+    const SyntaxGraph& syntaxGraph,
+    std::vector<ServiceDescriptor::Interaction>& interactions) {
+  if (hasInteractionUri(interactions, interaction.uri())) {
+    return;
+  }
+
+  ServiceDescriptor::Interaction result{
+      .name = std::string(interaction.definition().name()),
+      .uri = std::string(interaction.uri()),
+      .functions = {},
+      .annotations = convertAnnotations(
+          interaction.definition().annotations(), syntaxGraph),
+  };
+  for (const auto& fn : interaction.functions()) {
+    result.functions.push_back(
+        makeFunction(fn, interaction.uri(), syntaxGraph));
+  }
+  interactions.push_back(std::move(result));
+
+  for (const auto& fn : interaction.functions()) {
+    collectCreatedInteractions(fn, syntaxGraph, interactions);
+  }
+}
+
+void collectCreatedInteractions(
+    const syntax_graph::FunctionNode& fn,
+    const SyntaxGraph& syntaxGraph,
+    std::vector<ServiceDescriptor::Interaction>& interactions) {
+  if (const auto* interaction = fn.response().interaction()) {
+    collectInteraction(*interaction, syntaxGraph, interactions);
+  }
+}
+
+void collectInteractions(
+    const syntax_graph::ServiceNode& service,
+    const SyntaxGraph& syntaxGraph,
+    std::vector<ServiceDescriptor::Interaction>& interactions) {
+  if (const auto* base = service.baseService()) {
+    collectInteractions(*base, syntaxGraph, interactions);
+  }
+  for (const auto& fn : service.functions()) {
+    collectCreatedInteractions(fn, syntaxGraph, interactions);
+  }
+}
+
 } // namespace
 
 SyntaxGraphServiceDescriptor::SyntaxGraphServiceDescriptor(
@@ -202,6 +267,7 @@ SyntaxGraphServiceDescriptor::SyntaxGraphServiceDescriptor(
   annotations_ =
       convertAnnotations(service.definition().annotations(), *syntaxGraph_);
   collectFunctions(service, *syntaxGraph_, functions_);
+  collectInteractions(service, *syntaxGraph_, interactions_);
 }
 
 std::string_view SyntaxGraphServiceDescriptor::serviceName() const {
@@ -211,6 +277,11 @@ std::string_view SyntaxGraphServiceDescriptor::serviceName() const {
 folly::span<const ServiceDescriptor::Function>
 SyntaxGraphServiceDescriptor::functions() const {
   return functions_;
+}
+
+folly::span<const ServiceDescriptor::Interaction>
+SyntaxGraphServiceDescriptor::interactions() const {
+  return interactions_;
 }
 
 folly::span<const DynamicValue> SyntaxGraphServiceDescriptor::annotations()

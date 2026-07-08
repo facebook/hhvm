@@ -1478,7 +1478,9 @@ ServiceDescriptor::Function makeSvcFunction(
   if (fn.qualifier() == type::FunctionQualifier::OneWay) {
     function.rpcKind = RpcKind::OneWay;
   }
-  function.createsInteraction = fn.response().interaction() != nullptr;
+  if (const auto* interaction = fn.response().interaction()) {
+    function.createdInteractionUri = std::string(interaction->uri());
+  }
   function.isPerforms = fn.isPerforms();
 
   if (auto doc = fn.docBlock()) {
@@ -1502,6 +1504,69 @@ void collectSvcFunctions(
   }
 }
 
+bool hasSvcInteractionUri(
+    const std::vector<ServiceDescriptor::Interaction>& interactions,
+    std::string_view uri) {
+  for (const auto& interaction : interactions) {
+    if (interaction.uri == uri) {
+      return true;
+    }
+  }
+  return false;
+}
+
+void collectCreatedSvcInteractions(
+    const FunctionNode& fn,
+    const SyntaxGraph& syntaxGraph,
+    std::vector<ServiceDescriptor::Interaction>& interactions);
+
+void collectSvcInteraction(
+    const InteractionNode& interaction,
+    const SyntaxGraph& syntaxGraph,
+    std::vector<ServiceDescriptor::Interaction>& interactions) {
+  if (hasSvcInteractionUri(interactions, interaction.uri())) {
+    return;
+  }
+
+  ServiceDescriptor::Interaction result{
+      .name = std::string(interaction.definition().name()),
+      .uri = std::string(interaction.uri()),
+      .functions = {},
+      .annotations = convertSvcAnnotations(
+          interaction.definition().annotations(), syntaxGraph),
+  };
+  for (const auto& fn : interaction.functions()) {
+    result.functions.push_back(
+        makeSvcFunction(fn, interaction.uri(), syntaxGraph));
+  }
+  interactions.push_back(std::move(result));
+
+  for (const auto& fn : interaction.functions()) {
+    collectCreatedSvcInteractions(fn, syntaxGraph, interactions);
+  }
+}
+
+void collectCreatedSvcInteractions(
+    const FunctionNode& fn,
+    const SyntaxGraph& syntaxGraph,
+    std::vector<ServiceDescriptor::Interaction>& interactions) {
+  if (const auto* interaction = fn.response().interaction()) {
+    collectSvcInteraction(*interaction, syntaxGraph, interactions);
+  }
+}
+
+void collectSvcInteractions(
+    const ServiceNode& service,
+    const SyntaxGraph& syntaxGraph,
+    std::vector<ServiceDescriptor::Interaction>& interactions) {
+  if (const auto* base = service.baseService()) {
+    collectSvcInteractions(*base, syntaxGraph, interactions);
+  }
+  for (const auto& fn : service.functions()) {
+    collectCreatedSvcInteractions(fn, syntaxGraph, interactions);
+  }
+}
+
 class ServiceDescriptorFacade final : public dynamic::ServiceDescriptor {
  public:
   ServiceDescriptorFacade(const SyntaxGraph& graph, const ServiceNode& service)
@@ -1511,11 +1576,15 @@ class ServiceDescriptorFacade final : public dynamic::ServiceDescriptor {
         annotations_(
             convertSvcAnnotations(service.definition().annotations(), graph)) {
     collectSvcFunctions(service, graph, functions_);
+    collectSvcInteractions(service, graph, interactions_);
   }
 
   std::string_view serviceName() const override { return serviceName_; }
   std::string_view serviceUri() const { return serviceUri_; }
   folly::span<const Function> functions() const override { return functions_; }
+  folly::span<const Interaction> interactions() const override {
+    return interactions_;
+  }
   folly::span<const dynamic::DynamicValue> annotations() const override {
     return annotations_;
   }
@@ -1529,6 +1598,7 @@ class ServiceDescriptorFacade final : public dynamic::ServiceDescriptor {
   std::string serviceName_;
   std::string serviceUri_;
   std::vector<Function> functions_;
+  std::vector<Interaction> interactions_;
   std::vector<dynamic::DynamicValue> annotations_;
 };
 

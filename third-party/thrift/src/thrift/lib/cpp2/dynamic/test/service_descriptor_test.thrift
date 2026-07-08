@@ -34,6 +34,10 @@ struct AnnotationWithFields {
   5: map<string, i32> scores;
 }
 
+interaction TestInteraction {
+  i32 getValue();
+}
+
 @AnnotationWithFields{label = "service", number = 100, tags = ["svc"]}
 service ServiceDescriptorTestService {
   i32 add(
@@ -49,6 +53,7 @@ service ServiceDescriptorTestService {
   i32, stream<string> streamNames(1: i32 count);
   sink<string, i32> collectStrings();
   sink<string>, stream<i32> bidiEcho();
+  TestInteraction createInteraction();
   # @lint-ignore THRIFTCHECKS avoid-oneway-method (needed to test oneway RpcKind)
   oneway void fireAndForget();
   /// Annotated function docblock.

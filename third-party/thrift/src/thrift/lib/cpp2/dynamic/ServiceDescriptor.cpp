@@ -38,4 +38,37 @@ const ServiceDescriptor::Function& ServiceDescriptor::getFunctionByName(
   throw std::invalid_argument("Function not found: " + std::string(name));
 }
 
+const ServiceDescriptor::Interaction& ServiceDescriptor::getInteraction(
+    std::string_view uri) const {
+  for (const auto& interaction : interactions()) {
+    if (interaction.uri == uri) {
+      return interaction;
+    }
+  }
+  throw std::invalid_argument("Interaction not found: " + std::string(uri));
+}
+
+const ServiceDescriptor::Function& ServiceDescriptor::Interaction::getFunction(
+    std::string_view functionUri) const {
+  for (const auto& fn : functions) {
+    if (fn.uri == functionUri) {
+      return fn;
+    }
+  }
+  throw std::invalid_argument(
+      "Function not found: " + std::string(functionUri));
+}
+
+const ServiceDescriptor::Function&
+ServiceDescriptor::Interaction::getFunctionByName(
+    std::string_view functionName) const {
+  for (const auto& fn : functions) {
+    if (fn.name == functionName) {
+      return fn;
+    }
+  }
+  throw std::invalid_argument(
+      "Function not found: " + std::string(functionName));
+}
+
 } // namespace apache::thrift::dynamic

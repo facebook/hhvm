@@ -26,14 +26,19 @@ class BuiltServiceDescriptor final : public ServiceDescriptor {
       std::shared_ptr<const type_system::TypeSystem> typeSystem,
       std::string serviceName,
       std::vector<Function> functions,
+      std::vector<Interaction> interactions,
       std::vector<DynamicValue> annotations)
       : typeSystem_(std::move(typeSystem)),
         serviceName_(std::move(serviceName)),
         functions_(std::move(functions)),
+        interactions_(std::move(interactions)),
         annotations_(std::move(annotations)) {}
 
   std::string_view serviceName() const override { return serviceName_; }
   folly::span<const Function> functions() const override { return functions_; }
+  folly::span<const Interaction> interactions() const override {
+    return interactions_;
+  }
 
   folly::span<const DynamicValue> annotations() const override {
     return annotations_;
@@ -47,6 +52,7 @@ class BuiltServiceDescriptor final : public ServiceDescriptor {
   std::shared_ptr<const type_system::TypeSystem> typeSystem_;
   std::string serviceName_;
   std::vector<Function> functions_;
+  std::vector<Interaction> interactions_;
   std::vector<DynamicValue> annotations_;
 };
 
@@ -153,8 +159,9 @@ ServiceDescriptorBuilder::FunctionBuilder::setQualifier(
 }
 
 ServiceDescriptorBuilder::FunctionBuilder&
-ServiceDescriptorBuilder::FunctionBuilder::setCreatesInteraction(bool creates) {
-  createsInteraction_ = creates;
+ServiceDescriptorBuilder::FunctionBuilder::setCreatedInteractionUri(
+    std::string interactionUri) {
+  createdInteractionUri_ = std::move(interactionUri);
   return *this;
 }
 
@@ -176,6 +183,23 @@ ServiceDescriptorBuilder::FunctionBuilder::setDocBlock(std::string doc) {
   return *this;
 }
 
+ServiceDescriptorBuilder::InteractionBuilder::InteractionBuilder(
+    std::string name, std::string uri)
+    : name_(std::move(name)), uri_(std::move(uri)) {}
+
+ServiceDescriptorBuilder::FunctionBuilder&
+ServiceDescriptorBuilder::InteractionBuilder::addFunction(std::string name) {
+  functionBuilders_.emplace_back(FunctionBuilder(std::move(name)));
+  return functionBuilders_.back();
+}
+
+ServiceDescriptorBuilder::InteractionBuilder&
+ServiceDescriptorBuilder::InteractionBuilder::addAnnotation(
+    DynamicValue value) {
+  annotations_.push_back(std::move(value));
+  return *this;
+}
+
 ServiceDescriptorBuilder::ServiceDescriptorBuilder(
     std::shared_ptr<const type_system::TypeSystem> typeSystem,
     std::string serviceName,
@@ -190,35 +214,62 @@ ServiceDescriptorBuilder::addFunction(std::string name) {
   return functionBuilders_.back();
 }
 
+ServiceDescriptorBuilder::InteractionBuilder&
+ServiceDescriptorBuilder::addInteraction(std::string name, std::string uri) {
+  interactionBuilders_.emplace_back(
+      InteractionBuilder(std::move(name), std::move(uri)));
+  return interactionBuilders_.back();
+}
+
 ServiceDescriptorBuilder& ServiceDescriptorBuilder::addServiceAnnotation(
     DynamicValue value) {
   serviceAnnotations_.push_back(std::move(value));
   return *this;
 }
 
+ServiceDescriptor::Function ServiceDescriptorBuilder::buildFunction(
+    FunctionBuilder& fb, std::string_view interfaceUri) {
+  ServiceDescriptor::Function fn;
+  fn.name = std::move(fb.name_);
+  fn.uri = makeFunctionUri(interfaceUri, fn.name);
+  fn.params = std::move(fb.params_);
+  fn.responseType = fb.responseType_;
+  fn.exceptions = std::move(fb.exceptions_);
+  fn.stream = std::move(fb.stream_);
+  fn.sink = std::move(fb.sink_);
+  fn.qualifier = fb.qualifier_;
+  fn.rpcKind = fb.rpcKind_;
+  fn.createdInteractionUri = std::move(fb.createdInteractionUri_);
+  fn.isPerforms = fb.isPerforms_;
+  fn.annotations = std::move(fb.annotations_);
+  fn.docBlock = std::move(fb.docBlock_);
+  return fn;
+}
+
 std::unique_ptr<ServiceDescriptor> ServiceDescriptorBuilder::build() {
   std::vector<ServiceDescriptor::Function> functions;
+  functions.reserve(functionBuilders_.size());
   for (auto& fb : functionBuilders_) {
-    ServiceDescriptor::Function fn;
-    fn.name = std::move(fb.name_);
-    fn.uri = makeFunctionUri(serviceUri_, fn.name);
-    fn.params = std::move(fb.params_);
-    fn.responseType = fb.responseType_;
-    fn.exceptions = std::move(fb.exceptions_);
-    fn.stream = std::move(fb.stream_);
-    fn.sink = std::move(fb.sink_);
-    fn.qualifier = fb.qualifier_;
-    fn.rpcKind = fb.rpcKind_;
-    fn.createsInteraction = fb.createsInteraction_;
-    fn.isPerforms = fb.isPerforms_;
-    fn.annotations = std::move(fb.annotations_);
-    fn.docBlock = std::move(fb.docBlock_);
-    functions.push_back(std::move(fn));
+    functions.push_back(buildFunction(fb, serviceUri_));
+  }
+  std::vector<ServiceDescriptor::Interaction> interactions;
+  interactions.reserve(interactionBuilders_.size());
+  for (auto& ib : interactionBuilders_) {
+    ServiceDescriptor::Interaction interaction;
+    interaction.name = std::move(ib.name_);
+    interaction.uri = std::move(ib.uri_);
+    interaction.functions.reserve(ib.functionBuilders_.size());
+    for (auto& fb : ib.functionBuilders_) {
+      interaction.functions.push_back(buildFunction(fb, interaction.uri));
+    }
+    interaction.annotations = std::move(ib.annotations_);
+    interactions.push_back(std::move(interaction));
   }
   return std::make_unique<BuiltServiceDescriptor>(
       std::move(typeSystem_),
       std::move(serviceName_),
       std::move(functions),
+      std::move(interactions),
       std::move(serviceAnnotations_));
 }
 

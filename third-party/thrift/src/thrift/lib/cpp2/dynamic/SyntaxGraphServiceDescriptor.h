@@ -31,6 +31,7 @@ class SyntaxGraphServiceDescriptor final : public ServiceDescriptor {
 
   std::string_view serviceName() const override;
   folly::span<const Function> functions() const override;
+  folly::span<const Interaction> interactions() const override;
   folly::span<const DynamicValue> annotations() const override;
 
  private:
@@ -39,6 +40,7 @@ class SyntaxGraphServiceDescriptor final : public ServiceDescriptor {
   std::shared_ptr<const syntax_graph::SyntaxGraph> syntaxGraph_;
   std::string serviceName_;
   std::vector<Function> functions_;
+  std::vector<Interaction> interactions_;
   std::vector<DynamicValue> annotations_;
 };
 

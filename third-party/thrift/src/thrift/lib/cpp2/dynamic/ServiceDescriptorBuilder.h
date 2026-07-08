@@ -46,7 +46,7 @@ class ServiceDescriptorBuilder {
         type_system::TypeRef sinkPayloadType);
     FunctionBuilder& setOneWay();
     FunctionBuilder& setQualifier(FunctionQualifier qualifier);
-    FunctionBuilder& setCreatesInteraction(bool creates);
+    FunctionBuilder& setCreatedInteractionUri(std::string interactionUri);
     FunctionBuilder& setIsPerforms(bool performs);
     FunctionBuilder& addAnnotation(DynamicValue value);
     FunctionBuilder& setDocBlock(std::string doc);
@@ -63,10 +63,25 @@ class ServiceDescriptorBuilder {
     std::optional<ServiceDescriptor::Sink> sink_;
     FunctionQualifier qualifier_ = FunctionQualifier::Unspecified;
     RpcKind rpcKind_ = RpcKind::Unary;
-    bool createsInteraction_ = false;
+    std::optional<std::string> createdInteractionUri_;
     bool isPerforms_ = false;
     std::vector<DynamicValue> annotations_;
     std::optional<std::string> docBlock_;
+  };
+
+  class InteractionBuilder {
+   public:
+    FunctionBuilder& addFunction(std::string name);
+    InteractionBuilder& addAnnotation(DynamicValue value);
+
+   private:
+    friend class ServiceDescriptorBuilder;
+    InteractionBuilder(std::string name, std::string uri);
+
+    std::string name_;
+    std::string uri_;
+    std::vector<FunctionBuilder> functionBuilders_;
+    std::vector<DynamicValue> annotations_;
   };
 
   ServiceDescriptorBuilder(
@@ -75,6 +90,7 @@ class ServiceDescriptorBuilder {
       std::string serviceUri = {});
 
   FunctionBuilder& addFunction(std::string name);
+  InteractionBuilder& addInteraction(std::string name, std::string uri);
   ServiceDescriptorBuilder& addServiceAnnotation(DynamicValue value);
 
   std::unique_ptr<ServiceDescriptor> build();
@@ -82,11 +98,14 @@ class ServiceDescriptorBuilder {
  private:
   static std::string makeFunctionUri(
       std::string_view interfaceUri, std::string_view name);
+  static ServiceDescriptor::Function buildFunction(
+      FunctionBuilder& fb, std::string_view interfaceUri);
 
   std::shared_ptr<const type_system::TypeSystem> typeSystem_;
   std::string serviceName_;
   std::string serviceUri_;
   std::vector<FunctionBuilder> functionBuilders_;
+  std::vector<InteractionBuilder> interactionBuilders_;
   std::vector<DynamicValue> serviceAnnotations_;
 };
 

@@ -87,7 +87,7 @@ class ServiceDescriptor {
     std::optional<Sink> sink;
     FunctionQualifier qualifier = FunctionQualifier::Unspecified;
     RpcKind rpcKind = RpcKind::Unary;
-    bool createsInteraction = false;
+    std::optional<std::string> createdInteractionUri;
     bool isPerforms = false;
     // Structured annotations as schema-typed values; each value's type() is the
     // annotation's struct type.
@@ -95,10 +95,21 @@ class ServiceDescriptor {
     std::optional<std::string> docBlock;
   };
 
+  struct Interaction {
+    std::string name;
+    std::string uri;
+    std::vector<Function> functions;
+    std::vector<DynamicValue> annotations;
+
+    const Function& getFunction(std::string_view uri) const;
+    const Function& getFunctionByName(std::string_view name) const;
+  };
+
   virtual ~ServiceDescriptor() = default;
 
   virtual std::string_view serviceName() const = 0;
   virtual folly::span<const Function> functions() const = 0;
+  virtual folly::span<const Interaction> interactions() const { return {}; }
   // Structured annotations on the service definition itself.
   virtual folly::span<const DynamicValue> annotations() const = 0;
 
@@ -106,6 +117,7 @@ class ServiceDescriptor {
 
   const Function& getFunction(std::string_view uri) const;
   const Function& getFunctionByName(std::string_view name) const;
+  const Interaction& getInteraction(std::string_view uri) const;
 
  private:
   friend type_system::SerializableServiceCatalog toSerializable(

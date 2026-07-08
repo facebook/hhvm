@@ -81,7 +81,7 @@ TEST_F(SyntaxGraphServiceDescriptorTest, BasicFunction) {
   EXPECT_FALSE(fn.sink.has_value());
   EXPECT_EQ(fn.qualifier, FunctionQualifier::Unspecified);
   EXPECT_EQ(fn.rpcKind, RpcKind::Unary);
-  EXPECT_FALSE(fn.createsInteraction);
+  EXPECT_FALSE(fn.createdInteractionUri.has_value());
   EXPECT_FALSE(fn.isPerforms);
 }
 
@@ -131,6 +131,26 @@ TEST_F(SyntaxGraphServiceDescriptorTest, OneWayFunction) {
   EXPECT_EQ(fn.rpcKind, RpcKind::OneWay);
   EXPECT_EQ(fn.qualifier, FunctionQualifier::Unspecified);
   EXPECT_FALSE(fn.responseType.has_value());
+}
+
+TEST_F(SyntaxGraphServiceDescriptorTest, CreatedInteraction) {
+  const auto& fn = catalog_->getFunctionByName("createInteraction");
+  ASSERT_TRUE(fn.createdInteractionUri.has_value());
+  EXPECT_EQ(
+      *fn.createdInteractionUri,
+      "facebook.com/thrift/service_descriptor_test/TestInteraction");
+
+  const auto& interaction = catalog_->getInteraction(*fn.createdInteractionUri);
+  EXPECT_EQ(interaction.name, "TestInteraction");
+  EXPECT_EQ(
+      interaction.uri,
+      "facebook.com/thrift/service_descriptor_test/TestInteraction");
+  ASSERT_EQ(interaction.functions.size(), 1);
+  const auto& getValue = interaction.getFunction(
+      "facebook.com/thrift/service_descriptor_test/TestInteraction/getValue");
+  EXPECT_EQ(&interaction.getFunctionByName("getValue"), &getValue);
+  EXPECT_TRUE(getValue.responseType.has_value());
+  EXPECT_TRUE(getValue.responseType->isI32());
 }
 
 TEST_F(SyntaxGraphServiceDescriptorTest, AnnotatedFunction) {
@@ -235,7 +255,7 @@ TEST_F(SyntaxGraphServiceDescriptorTest, FunctionNotFound) {
 }
 
 TEST_F(SyntaxGraphServiceDescriptorTest, FunctionsCount) {
-  EXPECT_EQ(catalog_->functions().size(), 8);
+  EXPECT_EQ(catalog_->functions().size(), 9);
 }
 
 class ServiceDescriptorBuilderTest : public ::testing::Test {
@@ -343,15 +363,28 @@ TEST_F(ServiceDescriptorBuilderTest, BuildWithQualifier) {
 TEST_F(ServiceDescriptorBuilderTest, BuildWithFunctionMetadata) {
   ServiceDescriptorBuilder builder(typeSystem_, "MetaService");
   builder.addFunction("doThing")
-      .setCreatesInteraction(true)
+      .setCreatedInteractionUri("test.com/TestInteraction")
       .setIsPerforms(true)
       .setDocBlock("Performs the thing.")
       .addAnnotation(DynamicValue::makeString("cpp.name"))
       .setResponseType(type_system::TypeSystem::I32());
+  builder.addInteraction("TestInteraction", "test.com/TestInteraction")
+      .addFunction("getValue")
+      .setResponseType(type_system::TypeSystem::I32());
 
   auto catalog = builder.build();
   const auto& fn = catalog->getFunctionByName("doThing");
-  EXPECT_TRUE(fn.createsInteraction);
+  ASSERT_TRUE(fn.createdInteractionUri.has_value());
+  EXPECT_EQ(*fn.createdInteractionUri, "test.com/TestInteraction");
+  const auto& interaction = catalog->getInteraction(*fn.createdInteractionUri);
+  EXPECT_EQ(interaction.name, "TestInteraction");
+  EXPECT_EQ(interaction.uri, "test.com/TestInteraction");
+  ASSERT_EQ(interaction.functions.size(), 1);
+  const auto& getValue =
+      interaction.getFunction("test.com/TestInteraction/getValue");
+  EXPECT_EQ(&interaction.getFunctionByName("getValue"), &getValue);
+  EXPECT_TRUE(getValue.responseType.has_value());
+  EXPECT_TRUE(getValue.responseType->isI32());
   EXPECT_TRUE(fn.isPerforms);
   ASSERT_TRUE(fn.docBlock.has_value());
   EXPECT_EQ(*fn.docBlock, "Performs the thing.");

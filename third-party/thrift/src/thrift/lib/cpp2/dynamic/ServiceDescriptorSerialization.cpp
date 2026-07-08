@@ -34,14 +34,19 @@ class DeserializedServiceDescriptor final : public ServiceDescriptor {
       std::shared_ptr<const TypeSystem> typeSystem,
       std::string serviceName,
       std::vector<Function> functions,
+      std::vector<Interaction> interactions,
       std::vector<DynamicValue> annotations)
       : typeSystem_(std::move(typeSystem)),
         serviceName_(std::move(serviceName)),
         functions_(std::move(functions)),
+        interactions_(std::move(interactions)),
         annotations_(std::move(annotations)) {}
 
   std::string_view serviceName() const override { return serviceName_; }
   folly::span<const Function> functions() const override { return functions_; }
+  folly::span<const Interaction> interactions() const override {
+    return interactions_;
+  }
 
   folly::span<const DynamicValue> annotations() const override {
     return annotations_;
@@ -53,6 +58,7 @@ class DeserializedServiceDescriptor final : public ServiceDescriptor {
   std::shared_ptr<const TypeSystem> typeSystem_;
   std::string serviceName_;
   std::vector<Function> functions_;
+  std::vector<Interaction> interactions_;
   std::vector<DynamicValue> annotations_;
 };
 
@@ -251,6 +257,9 @@ type_system::SerializableFunction toSerializableFunction(
   if (fn.responseType) {
     response.initialResponseType() = fn.responseType->id();
   }
+  if (fn.createdInteractionUri.has_value()) {
+    response.createsInteraction() = *fn.createdInteractionUri;
+  }
 
   if (fn.stream && fn.sink) {
     type_system::SerializableBidirectionalStream bidi;
@@ -405,7 +414,7 @@ ServiceDescriptor::Function fromSerializableFunction(
   }
 
   if (response.createsInteraction().has_value()) {
-    fn.createsInteraction = true;
+    fn.createdInteractionUri = std::string(*response.createsInteraction());
   }
 
   return fn;
@@ -419,15 +428,60 @@ std::string_view extractServiceName(type_system::UriView uri) {
   return uri;
 }
 
+bool containsInteractionUri(
+    folly::span<const ServiceDescriptor::Interaction> interactions,
+    std::string_view uri) {
+  for (const auto& interaction : interactions) {
+    if (interaction.uri == uri) {
+      return true;
+    }
+  }
+  return false;
+}
+
+void validateCreatedInteractions(
+    folly::span<const ServiceDescriptor::Function> functions,
+    folly::span<const ServiceDescriptor::Interaction> interactions) {
+  for (const auto& fn : functions) {
+    if (fn.createdInteractionUri.has_value() &&
+        !containsInteractionUri(interactions, *fn.createdInteractionUri)) {
+      throw std::invalid_argument(
+          "Function creates an interaction that is not in the catalog: " +
+          fn.name);
+    }
+  }
+}
+
+type_system::SerializableInteractionDefinition toSerializableInteraction(
+    const ServiceDescriptor::Interaction& interaction) {
+  type_system::SerializableInteractionDefinition result;
+  for (const auto& fn : interaction.functions) {
+    result.functions()->push_back(toSerializableFunction(fn));
+  }
+  result.annotations() = serializeAnnotations(interaction.annotations);
+  return result;
+}
+
 } // namespace
 
 type_system::SerializableServiceCatalog toSerializable(
     const ServiceDescriptor& descriptor, type_system::UriView serviceUri) {
   const auto& typeSystem = descriptor.typeSystem();
+  auto interactions = descriptor.interactions();
+  validateCreatedInteractions(descriptor.functions(), interactions);
+  for (const auto& interaction : interactions) {
+    validateCreatedInteractions(interaction.functions, interactions);
+  }
 
   auto builder = SerializableTypeSystemBuilder::withoutSourceInfo(typeSystem);
   for (const auto& fn : descriptor.functions()) {
     addFunctionTypeDefinitions(fn, builder);
+  }
+  for (const auto& interaction : interactions) {
+    for (const auto& fn : interaction.functions) {
+      addFunctionTypeDefinitions(fn, builder);
+    }
+    addAnnotationTypeDefinitions(interaction.annotations, builder);
   }
   addAnnotationTypeDefinitions(descriptor.annotations(), builder);
 
@@ -443,6 +497,13 @@ type_system::SerializableServiceCatalog toSerializable(
   type_system::SerializableRpcInterfaceDefinition interfaceDef;
   interfaceDef.serviceDef_ref() = std::move(serviceDef);
   result.interfaces()[std::string(serviceUri)] = std::move(interfaceDef);
+
+  for (const auto& interaction : interactions) {
+    type_system::SerializableRpcInterfaceDefinition interactionInterfaceDef;
+    interactionInterfaceDef.interactionDef_ref() =
+        toSerializableInteraction(interaction);
+    result.interfaces()[interaction.uri] = std::move(interactionInterfaceDef);
+  }
 
   return result;
 }
@@ -482,6 +543,27 @@ std::unique_ptr<ServiceDescriptor> fromSerializable(
         fromSerializableFunction(serFn, serviceUri, *typeSystem));
   }
 
+  std::vector<ServiceDescriptor::Interaction> interactions;
+  for (const auto& [uri, def] : *serialized.interfaces()) {
+    if (def.getType() !=
+        type_system::SerializableRpcInterfaceDefinition::Type::interactionDef) {
+      continue;
+    }
+    const auto& interactionDef = *def.interactionDef_ref();
+    ServiceDescriptor::Interaction interaction{
+        .name = std::string(extractServiceName(uri)),
+        .uri = uri,
+        .functions = {},
+        .annotations =
+            deserializeAnnotations(*interactionDef.annotations(), *typeSystem),
+    };
+    for (const auto& serFn : *interactionDef.functions()) {
+      interaction.functions.push_back(
+          fromSerializableFunction(serFn, uri, *typeSystem));
+    }
+    interactions.push_back(std::move(interaction));
+  }
+
   auto annotations =
       deserializeAnnotations(*serviceDef.annotations(), *typeSystem);
 
@@ -489,6 +571,7 @@ std::unique_ptr<ServiceDescriptor> fromSerializable(
       std::shared_ptr<const TypeSystem>(std::move(typeSystem)),
       std::string(extractServiceName(serviceUri)),
       std::move(functions),
+      std::move(interactions),
       std::move(annotations));
 }
 

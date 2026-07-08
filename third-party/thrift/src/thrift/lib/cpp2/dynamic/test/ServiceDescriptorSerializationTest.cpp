@@ -67,17 +67,29 @@ TEST_F(ServiceDescriptorSerializationTest, BuilderRoundTrip) {
       .addParam("b", FieldId{2}, type_system::TypeSystem::I32())
       .setResponseType(type_system::TypeSystem::I32())
       .setQualifier(FunctionQualifier::Idempotent);
+  builder.addFunction("makeInteraction")
+      .setCreatedInteractionUri("test.com/TestInteraction");
+  builder.addInteraction("TestInteraction", "test.com/TestInteraction")
+      .addFunction("getValue")
+      .setResponseType(type_system::TypeSystem::I32());
 
   auto original = builder.build();
 
   auto serialized = toSerializable(*original, "test.com/TestService");
-  ASSERT_EQ(serialized.interfaces()->size(), 1);
+  ASSERT_EQ(serialized.interfaces()->size(), 2);
   ASSERT_TRUE(serialized.interfaces()->count("test.com/TestService"));
+  ASSERT_TRUE(serialized.interfaces()->count("test.com/TestInteraction"));
+  const auto& serviceDef =
+      *serialized.interfaces()->at("test.com/TestService").serviceDef_ref();
+  const auto& makeInteraction =
+      serviceDef.functions()->at(2).response()->createsInteraction();
+  ASSERT_TRUE(makeInteraction.has_value());
+  EXPECT_EQ(*makeInteraction, "test.com/TestInteraction");
 
   auto deserialized =
       fromSerializable(std::move(serialized), "test.com/TestService");
   EXPECT_EQ(deserialized->serviceName(), "TestService");
-  EXPECT_EQ(deserialized->functions().size(), 2);
+  EXPECT_EQ(deserialized->functions().size(), 3);
 
   const auto& ping = deserialized->getFunctionByName("ping");
   EXPECT_TRUE(ping.params.empty());
@@ -92,6 +104,23 @@ TEST_F(ServiceDescriptorSerializationTest, BuilderRoundTrip) {
   EXPECT_TRUE(add.responseType.has_value());
   EXPECT_TRUE(add.responseType->isI32());
   EXPECT_EQ(add.qualifier, FunctionQualifier::Idempotent);
+
+  const auto& interactionCtor =
+      deserialized->getFunctionByName("makeInteraction");
+  ASSERT_TRUE(interactionCtor.createdInteractionUri.has_value());
+  EXPECT_EQ(*interactionCtor.createdInteractionUri, "test.com/TestInteraction");
+
+  ASSERT_EQ(deserialized->interactions().size(), 1);
+  const auto& interaction =
+      deserialized->getInteraction(*interactionCtor.createdInteractionUri);
+  EXPECT_EQ(interaction.name, "TestInteraction");
+  EXPECT_EQ(interaction.uri, "test.com/TestInteraction");
+  ASSERT_EQ(interaction.functions.size(), 1);
+  const auto& getValue =
+      interaction.getFunction("test.com/TestInteraction/getValue");
+  EXPECT_EQ(&interaction.getFunctionByName("getValue"), &getValue);
+  EXPECT_TRUE(getValue.responseType.has_value());
+  EXPECT_TRUE(getValue.responseType->isI32());
 }
 
 TEST_F(ServiceDescriptorSerializationTest, StreamRoundTrip) {
@@ -163,6 +192,17 @@ TEST_F(ServiceDescriptorSerializationTest, OneWayRoundTrip) {
   EXPECT_EQ(fn.rpcKind, RpcKind::OneWay);
 }
 
+TEST_F(ServiceDescriptorSerializationTest, MissingInteractionDefinitionThrows) {
+  ServiceDescriptorBuilder builder(
+      typeSystem_, "TestService", "test.com/TestService");
+  builder.addFunction("makeInteraction")
+      .setCreatedInteractionUri("test.com/TestInteraction");
+
+  auto catalog = builder.build();
+  EXPECT_THROW(
+      toSerializable(*catalog, "test.com/TestService"), std::invalid_argument);
+}
+
 TEST_F(ServiceDescriptorSerializationTest, SyntaxGraphRoundTrip) {
   auto catalog = std::make_unique<SyntaxGraphServiceDescriptor>(
       syntaxGraph_, findService(*syntaxGraph_, "ServiceDescriptorTestService"));
@@ -192,6 +232,25 @@ TEST_F(ServiceDescriptorSerializationTest, SyntaxGraphRoundTrip) {
   ASSERT_TRUE(streamFn.stream.has_value());
   EXPECT_TRUE(streamFn.stream->payloadType.isString());
   EXPECT_EQ(streamFn.rpcKind, RpcKind::Stream);
+
+  const auto& createInteraction =
+      deserialized->getFunctionByName("createInteraction");
+  ASSERT_TRUE(createInteraction.createdInteractionUri.has_value());
+  EXPECT_EQ(
+      *createInteraction.createdInteractionUri,
+      "facebook.com/thrift/service_descriptor_test/TestInteraction");
+
+  const auto& interaction =
+      deserialized->getInteraction(*createInteraction.createdInteractionUri);
+  EXPECT_EQ(interaction.name, "TestInteraction");
+  EXPECT_EQ(
+      interaction.uri,
+      "facebook.com/thrift/service_descriptor_test/TestInteraction");
+  const auto& getValue = interaction.getFunction(
+      "facebook.com/thrift/service_descriptor_test/TestInteraction/getValue");
+  EXPECT_EQ(&interaction.getFunctionByName("getValue"), &getValue);
+  EXPECT_TRUE(getValue.responseType.has_value());
+  EXPECT_TRUE(getValue.responseType->isI32());
 }
 
 TEST_F(ServiceDescriptorSerializationTest, ServiceNotFound) {

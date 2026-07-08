@@ -17,26 +17,19 @@
 #include <thrift/lib/cpp2/dynamic/TypeSystemDigest.h>
 
 #include <algorithm>
-#include <cstring>
 #include <map>
+#include <stdexcept>
+#include <vector>
+#include <glog/logging.h>
 
-#include <folly/io/IOBuf.h>
 #include <folly/lang/Assume.h>
-#include <folly/lang/Bits.h>
-#include <folly/ssl/OpenSSLHash.h>
+#include <thrift/lib/cpp2/dynamic/detail/DigestHasher.h>
 #include <thrift/lib/thrift/gen-cpp2/record_types.h>
 #include <thrift/lib/thrift/gen-cpp2/type_id_types.h>
 
 namespace apache::thrift::type_system {
 
 namespace {
-
-// Helper to write integers in little-endian format (portable across platforms)
-template <typename T>
-  requires(std::is_integral_v<T> && !std::is_same_v<T, bool>)
-constexpr T toLittleEndian(T value) {
-  return folly::Endian::little(value);
-}
 
 // Iterates over a range in sorted order by key extracted via keyFn.
 template <typename Range, typename KeyFn, typename Fn>
@@ -64,79 +57,21 @@ struct DigestContext {
   }
 };
 
-class Hasher {
+class Hasher
+    : private ::apache::thrift::detail::Sha256DigestHasher<TypeSystemDigest> {
  public:
-  explicit Hasher(DigestContext ctx = {}) : ctx_(ctx) {
-    digest_.hash_init(EVP_sha256());
-  }
+  using Base = ::apache::thrift::detail::Sha256DigestHasher<TypeSystemDigest>;
 
-  // Hash bool as a single byte (0 or 1)
-  void hash(bool v) {
-    std::uint8_t byte = v ? 1 : 0;
-    digest_.hash_update(folly::ByteRange(&byte, 1));
-  }
+  explicit Hasher(DigestContext ctx = {}) : Base(), ctx_(ctx) {}
 
-  // Hash integral types using little-endian encoding for cross-platform
-  // portability
-  template <typename T>
-    requires(std::is_integral_v<T> && !std::is_same_v<T, bool>)
-  void hash(T v) {
-    auto le = toLittleEndian(v);
-    digest_.hash_update(
-        folly::ByteRange(
-            reinterpret_cast<const std::uint8_t*>(&le), sizeof(le)));
-  }
-
-  // Hash enum types by casting to their underlying i32 value
-  // Note: this assumes all enums are thrift-related & should be mapped
-  // to i32 values.
-  template <typename T>
-    requires std::is_enum_v<T>
-  void hash(T v) {
-    hash(static_cast<std::int32_t>(v));
-  }
-
-  // Hash floating-point types using IEEE 754 representation in little-endian.
-  //
-  // This hashes the raw bit pattern, so distinct NaN representations would
-  // produce different digests. This is safe because SerializableRecord rejects
-  // NaN and negative zero at construction time (see ensureValidFloatOrThrow).
-  void hash(float v) {
-    static_assert(sizeof(float) == 4, "float must be 4 bytes");
-    std::uint32_t bits;
-    std::memcpy(&bits, &v, sizeof(bits));
-    hash(bits);
-  }
-
-  void hash(double v) {
-    static_assert(sizeof(double) == 8, "double must be 8 bytes");
-    std::uint64_t bits;
-    std::memcpy(&bits, &v, sizeof(bits));
-    hash(bits);
-  }
+  using Base::finalize;
+  using Base::hash;
+  using Base::hashDigest;
 
   // Hash PrimitiveDatum wrapper by unwrapping and hashing the underlying value
   template <typename T>
   void hash(detail::PrimitiveDatum<T> v) {
     hash(static_cast<T>(v));
-  }
-
-  // Strings are hashed as size-prefixed envelopes
-  void hash(std::string_view s) {
-    hash(static_cast<std::uint32_t>(s.size()));
-    digest_.hash_update(folly::ByteRange(s));
-  }
-
-  // Byte arrays are hashed as size-prefixed envelopes
-  void hash(folly::ByteRange b) {
-    hash(static_cast<std::uint32_t>(b.size()));
-    digest_.hash_update(b);
-  }
-
-  // Byte arrays are hashed as size-prefixed envelopes
-  void hash(const folly::IOBuf& buf) {
-    hash(static_cast<std::uint32_t>(buf.computeChainDataLength()));
-    digest_.hash_update(buf);
   }
 
   void hash(const TypeId& typeId);
@@ -181,9 +116,7 @@ class Hasher {
     std::sort(digests.begin(), digests.end());
 
     for (const auto& d : digests) {
-      digest_.hash_update(
-          folly::ByteRange(
-              reinterpret_cast<const std::uint8_t*>(d.data()), d.size()));
+      hashDigest(d);
     }
   }
 
@@ -223,16 +156,7 @@ class Hasher {
         std::forward<EntryHashFn>(entryHashFn));
   }
 
-  TypeSystemDigest finalize() {
-    TypeSystemDigest result;
-    digest_.hash_final(
-        folly::MutableByteRange(
-            reinterpret_cast<std::uint8_t*>(result.data()), result.size()));
-    return result;
-  }
-
  private:
-  folly::ssl::OpenSSLHash::Digest digest_;
   DigestContext ctx_;
 };
 
@@ -553,7 +477,10 @@ void Hasher::hash(const SerializableRecord& record) {
   record.visit(
       [this]<typename T>(detail::PrimitiveDatum<T> v) { hash(v); },
       [this](const SerializableRecord::Text& v) { hash(std::string_view{v}); },
-      [this](const SerializableRecord::ByteArray& v) { hash(*v); },
+      [this](const SerializableRecord::ByteArray& v) {
+        const auto& byteArray = *CHECK_NOTNULL(v.get());
+        hash(byteArray);
+      },
       [this](const SerializableRecord::FieldSet& v) {
         forEachSortedByKey(
             v,

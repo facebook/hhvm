@@ -75,6 +75,7 @@ add_library(
   dynamic/TypeId.cpp
   dynamic/TypeSystem.cpp
   dynamic/TypeSystemBuilder.cpp
+  dynamic/TypeSystemDigest.cpp
   dynamic/TypeSystemTraits.cpp
   runtime/BaseSchemaRegistry.cpp
   runtime/Init.cpp

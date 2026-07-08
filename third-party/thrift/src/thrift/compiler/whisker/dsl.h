@@ -118,21 +118,20 @@ struct polymorphic_native_handle {
       return std::move(*converted);
     }
     std::optional<native_handle<Base>> result;
-    (
-        [&] {
-          if (result.has_value()) {
-            // match already found
-            return;
-          }
-          if (std::optional<native_handle<SubClass>> converted =
-                  handle.try_as<SubClass>()) {
-            managed_ptr<Base> upcasted =
-                std::static_pointer_cast<const Base>(converted->ptr());
-            result = native_handle<Base>(
-                std::move(upcasted), std::move(*converted).proto());
-          }
-        }(),
-        ...);
+    // Try each SubClass in order, stopping at the first match (the || fold
+    // short-circuits).
+    const auto try_one = [&]<typename Sub>() -> bool {
+      std::optional<native_handle<Sub>> converted = handle.try_as<Sub>();
+      if (!converted) {
+        return false;
+      }
+      managed_ptr<Base> upcasted =
+          std::static_pointer_cast<const Base>(converted->ptr());
+      result = native_handle<Base>(
+          std::move(upcasted), std::move(*converted).proto());
+      return true;
+    };
+    (void)(try_one.template operator()<SubClass>() || ...);
     return result;
   }
 };

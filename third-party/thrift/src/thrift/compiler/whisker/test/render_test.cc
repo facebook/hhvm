@@ -122,6 +122,41 @@ TEST_F(RenderTest, variable_throws_on_property_lookup) {
           1)));
 }
 
+TEST_F(RenderTest, variable_throws_on_scope_lookup_non_strict) {
+  strict_undefined_variables(diagnostic_level::info);
+  auto result = render("{{foo}}", w::make_map<throws_on_lookup>());
+  EXPECT_FALSE(result.has_value());
+  EXPECT_THAT(
+      diagnostics(),
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "Name 'foo' was not found in the current scope.\n"
+          "Cause: I always throw!\n"
+          "Tried to search through the following scopes:\n"
+          "#0 map [custom] (not enumerable)\n"
+          "\n"
+          "#1 <global scope> (size=0)\n",
+          path_to_file,
+          1)));
+}
+
+TEST_F(RenderTest, variable_throws_on_property_lookup_non_strict) {
+  strict_undefined_variables(diagnostic_level::info);
+  auto result =
+      render("{{foo.bar}}", w::map({{"foo", w::make_map<throws_on_lookup>()}}));
+  EXPECT_FALSE(result.has_value());
+  EXPECT_THAT(
+      diagnostics(),
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "Object 'foo' has no property named 'bar'.\n"
+          "Cause: I always throw!\n"
+          "The object with the missing property is:\n"
+          "map [custom] (not enumerable)\n",
+          path_to_file,
+          1)));
+}
+
 TEST_F(RenderTest, section_block_array) {
   auto result = render(
       "The factorial function looks like:{{#factorials}}\n"

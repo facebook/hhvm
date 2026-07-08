@@ -529,7 +529,13 @@ class virtual_machine {
         current_frame().context.look_up_object(variable_lookup),
         [](const lookup_result& value) -> lookup_result { return value; },
         [&](const eval_scope_lookup_error& err) -> lookup_result {
-          diags_.maybe_report(variable_lookup.loc, undefined_diag_level, [&] {
+          // A non-empty cause means a native getter threw eval_error, which is
+          // always fatal (unlike a genuinely absent name, which is governed by
+          // strict_undefined_variables).
+          const diagnostic_level level = err.cause().empty()
+              ? undefined_diag_level
+              : diagnostic_level::error;
+          diags_.maybe_report(variable_lookup.loc, level, [&] {
             std::string message;
             auto out = std::back_inserter(message);
             fmt::format_to(
@@ -555,7 +561,7 @@ class virtual_machine {
             }
             return message;
           });
-          if (undefined_diag_level == diagnostic_level::error) {
+          if (level == diagnostic_level::error) {
             // Fail rendering in strict mode
             diags_.abort_rendering(variable_lookup.loc.begin);
           }
@@ -572,7 +578,13 @@ class virtual_machine {
                 // Move to the start of the identifier that failed to resolve
                 return chain[err.success_path().size()].loc;
               });
-          diags_.maybe_report(src_range, undefined_diag_level, [&] {
+          // A non-empty cause means a native getter threw eval_error, which is
+          // always fatal (unlike a genuinely absent property, which is governed
+          // by strict_undefined_variables).
+          const diagnostic_level level = err.cause().empty()
+              ? undefined_diag_level
+              : diagnostic_level::error;
+          diags_.maybe_report(src_range, level, [&] {
             object_print_options print_opts;
             print_opts.max_depth = 1;
             return fmt::format(
@@ -585,7 +597,7 @@ class virtual_machine {
                                     : fmt::format("Cause: {}\n", err.cause()),
                 to_string(err.missing_from(), print_opts));
           });
-          if (undefined_diag_level == diagnostic_level::error) {
+          if (level == diagnostic_level::error) {
             // Fail rendering in strict mode
             diags_.abort_rendering(variable_lookup.loc.begin);
           }

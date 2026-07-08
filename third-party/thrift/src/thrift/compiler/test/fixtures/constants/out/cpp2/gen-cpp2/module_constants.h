@@ -478,9 +478,9 @@ namespace module_constants {
   /** Glean {"constant": "set_map_initializer"} */
   ::std::set<::std::int32_t> const& set_map_initializer();
 
-  FOLLY_EXPORT ::std::string_view _fbthrift_schema_b3ff6e93a0ce7f99();
-  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_b3ff6e93a0ce7f99_includes();
-  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_b3ff6e93a0ce7f99_uris();
+  FOLLY_EXPORT ::std::string_view _fbthrift_schema_90a8533ad7e2f4a6();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_90a8533ad7e2f4a6_includes();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_90a8533ad7e2f4a6_uris();
 
 } // namespace module_constants
 } // namespace cpp2

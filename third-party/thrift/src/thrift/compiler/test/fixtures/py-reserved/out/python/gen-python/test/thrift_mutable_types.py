@@ -159,7 +159,7 @@ class def_(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
 
     @staticmethod
     def __get_thrift_definition_key__() -> bytes:
-        return b"\x37\xab\x8b\x79\x09\xab\x1f\xfd\x54\x95\x6b\x69\x52\x66\x46\x94"
+        return b"\x43\xa6\x15\x95\xe6\x9c\xba\x54\xc4\x28\x75\xe4\x6c\x10\x2d\x8d"
 
     @staticmethod
     def __get_metadata__():

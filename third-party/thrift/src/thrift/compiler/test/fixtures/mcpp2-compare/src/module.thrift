@@ -513,10 +513,7 @@ service ParamService {
     17: folly_map typedef_map_template,
     18: IOBuf iobuf_type_val = "value",
     19: IOBufPtr iobuf_ptr_val = "value2",
-    20: ContainerStruct struct_struct = {
-      "fieldD": "some string",
-      "fieldI": false,
-    },
+    20: ContainerStruct struct_struct = {"fieldD": "some string", "fieldI": false},
   );
 }
 

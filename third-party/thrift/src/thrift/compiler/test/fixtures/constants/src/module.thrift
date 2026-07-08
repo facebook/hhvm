@@ -16,7 +16,6 @@
 
 include "thrift/annotation/thrift.thrift"
 
-
 @thrift.AllowLegacyMissingUris
 package;
 
@@ -299,7 +298,7 @@ const map<i32, bool> I2B = {
   0: false,
   1: true,
   2: true,
-  3: false
+  3: false,
 };
 const map<i32, bool> I2B_REF = I2B;
 

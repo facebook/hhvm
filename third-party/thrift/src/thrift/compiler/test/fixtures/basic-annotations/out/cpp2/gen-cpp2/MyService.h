@@ -162,8 +162,8 @@ class ServiceHandler<::cpp2::MyService> : public apache::thrift::ServerInterface
 namespace detail {
 template <> struct TSchemaAssociation<::cpp2::MyService, false> {
   static ::folly::Range<const ::std::string_view*> bundle();
-  static constexpr int64_t programId = -4116547458330118069;
-  static constexpr ::std::string_view definitionKey = {"\x67\x52\xff\xe8\x5f\x2e\xf2\x9f\x40\x52\x45\x2a\x5e\xef\x4b\x03", 16};
+  static constexpr int64_t programId = -824545073307667281;
+  static constexpr ::std::string_view definitionKey = {"\xba\xd6\xe4\x17\x8a\x07\x12\x1f\x5c\x3f\x42\x72\x6c\x08\x36\xe3", 16};
 };
 }
 } // namespace apache::thrift

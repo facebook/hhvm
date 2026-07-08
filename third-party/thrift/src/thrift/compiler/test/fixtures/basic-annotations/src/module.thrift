@@ -75,7 +75,7 @@ struct MyStruct {
   4: string class_;
   @thrift.DeprecatedUnvalidatedAnnotations{items = {"custom": "test"}}
   5: string annotation_with_trailing_comma;
-  6: string empty_annotations ();
+  6: string empty_annotations;
   7: MyEnum my_enum;
   8: list_string_6884 cpp_type_annotation;
   9: MyUnion my_union;

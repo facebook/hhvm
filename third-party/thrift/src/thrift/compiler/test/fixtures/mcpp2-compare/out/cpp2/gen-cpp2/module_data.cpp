@@ -794,104 +794,104 @@ THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 1> TStructDataStorage<:
 namespace detail {
 
 ::folly::Range<const ::std::string_view*> TSchemaAssociation<::some::valid::ns::Empty, false>::bundle() {
-    return ::some::valid::ns::module_constants::_fbthrift_schema_8cdf804324301929_includes();
+    return ::some::valid::ns::module_constants::_fbthrift_schema_77a1cb57b359abc0_includes();
 }
 
 ::folly::Range<const ::std::string_view*> TSchemaAssociation<::some::valid::ns::ASimpleStruct, false>::bundle() {
-    return ::some::valid::ns::module_constants::_fbthrift_schema_8cdf804324301929_includes();
+    return ::some::valid::ns::module_constants::_fbthrift_schema_77a1cb57b359abc0_includes();
 }
 
 ::folly::Range<const ::std::string_view*> TSchemaAssociation<::some::valid::ns::ASimpleStructNoexcept, false>::bundle() {
-    return ::some::valid::ns::module_constants::_fbthrift_schema_8cdf804324301929_includes();
+    return ::some::valid::ns::module_constants::_fbthrift_schema_77a1cb57b359abc0_includes();
 }
 
 ::folly::Range<const ::std::string_view*> TSchemaAssociation<::some::valid::ns::MyStruct, false>::bundle() {
-    return ::some::valid::ns::module_constants::_fbthrift_schema_8cdf804324301929_includes();
+    return ::some::valid::ns::module_constants::_fbthrift_schema_77a1cb57b359abc0_includes();
 }
 
 ::folly::Range<const ::std::string_view*> TSchemaAssociation<::some::valid::ns::SimpleUnion, false>::bundle() {
-    return ::some::valid::ns::module_constants::_fbthrift_schema_8cdf804324301929_includes();
+    return ::some::valid::ns::module_constants::_fbthrift_schema_77a1cb57b359abc0_includes();
 }
 
 ::folly::Range<const ::std::string_view*> TSchemaAssociation<::some::valid::ns::ComplexUnion, false>::bundle() {
-    return ::some::valid::ns::module_constants::_fbthrift_schema_8cdf804324301929_includes();
+    return ::some::valid::ns::module_constants::_fbthrift_schema_77a1cb57b359abc0_includes();
 }
 
 ::folly::Range<const ::std::string_view*> TSchemaAssociation<::some::valid::ns::AnException, false>::bundle() {
-    return ::some::valid::ns::module_constants::_fbthrift_schema_8cdf804324301929_includes();
+    return ::some::valid::ns::module_constants::_fbthrift_schema_77a1cb57b359abc0_includes();
 }
 
 ::folly::Range<const ::std::string_view*> TSchemaAssociation<::some::valid::ns::AnotherException, false>::bundle() {
-    return ::some::valid::ns::module_constants::_fbthrift_schema_8cdf804324301929_includes();
+    return ::some::valid::ns::module_constants::_fbthrift_schema_77a1cb57b359abc0_includes();
 }
 
 ::folly::Range<const ::std::string_view*> TSchemaAssociation<::some::valid::ns::ContainerStruct, false>::bundle() {
-    return ::some::valid::ns::module_constants::_fbthrift_schema_8cdf804324301929_includes();
+    return ::some::valid::ns::module_constants::_fbthrift_schema_77a1cb57b359abc0_includes();
 }
 
 ::folly::Range<const ::std::string_view*> TSchemaAssociation<::some::valid::ns::MyIncludedStruct, false>::bundle() {
-    return ::some::valid::ns::module_constants::_fbthrift_schema_8cdf804324301929_includes();
+    return ::some::valid::ns::module_constants::_fbthrift_schema_77a1cb57b359abc0_includes();
 }
 
 ::folly::Range<const ::std::string_view*> TSchemaAssociation<::some::valid::ns::AnnotatedStruct, false>::bundle() {
-    return ::some::valid::ns::module_constants::_fbthrift_schema_8cdf804324301929_includes();
+    return ::some::valid::ns::module_constants::_fbthrift_schema_77a1cb57b359abc0_includes();
 }
 
 ::folly::Range<const ::std::string_view*> TSchemaAssociation<::some::valid::ns::ComplexContainerStruct, false>::bundle() {
-    return ::some::valid::ns::module_constants::_fbthrift_schema_8cdf804324301929_includes();
+    return ::some::valid::ns::module_constants::_fbthrift_schema_77a1cb57b359abc0_includes();
 }
 
 ::folly::Range<const ::std::string_view*> TSchemaAssociation<::some::valid::ns::FloatStruct, false>::bundle() {
-    return ::some::valid::ns::module_constants::_fbthrift_schema_8cdf804324301929_includes();
+    return ::some::valid::ns::module_constants::_fbthrift_schema_77a1cb57b359abc0_includes();
 }
 
 ::folly::Range<const ::std::string_view*> TSchemaAssociation<::some::valid::ns::FloatUnion, false>::bundle() {
-    return ::some::valid::ns::module_constants::_fbthrift_schema_8cdf804324301929_includes();
+    return ::some::valid::ns::module_constants::_fbthrift_schema_77a1cb57b359abc0_includes();
 }
 
 ::folly::Range<const ::std::string_view*> TSchemaAssociation<::some::valid::ns::AllRequiredNoExceptMoveCtrStruct, false>::bundle() {
-    return ::some::valid::ns::module_constants::_fbthrift_schema_8cdf804324301929_includes();
+    return ::some::valid::ns::module_constants::_fbthrift_schema_77a1cb57b359abc0_includes();
 }
 
 ::folly::Range<const ::std::string_view*> TSchemaAssociation<::some::valid::ns::MyEnumA, true>::bundle() {
-    return ::some::valid::ns::module_constants::_fbthrift_schema_8cdf804324301929_includes();
+    return ::some::valid::ns::module_constants::_fbthrift_schema_77a1cb57b359abc0_includes();
 }
 
 ::folly::Range<const ::std::string_view*> TSchemaAssociation<::some::valid::ns::AnnotatedEnum, true>::bundle() {
-    return ::some::valid::ns::module_constants::_fbthrift_schema_8cdf804324301929_includes();
+    return ::some::valid::ns::module_constants::_fbthrift_schema_77a1cb57b359abc0_includes();
 }
 
 ::folly::Range<const ::std::string_view*> TSchemaAssociation<::some::valid::ns::AnnotatedEnum2, true>::bundle() {
-    return ::some::valid::ns::module_constants::_fbthrift_schema_8cdf804324301929_includes();
+    return ::some::valid::ns::module_constants::_fbthrift_schema_77a1cb57b359abc0_includes();
 }
 
 ::folly::Range<const ::std::string_view*> TSchemaAssociation<::some::valid::ns::MyEnumB, true>::bundle() {
-    return ::some::valid::ns::module_constants::_fbthrift_schema_8cdf804324301929_includes();
+    return ::some::valid::ns::module_constants::_fbthrift_schema_77a1cb57b359abc0_includes();
 }
 
 template <> struct TSchemaAssociation<::some::valid::ns::EmptyService, false> {
   static ::folly::Range<const ::std::string_view*> bundle();
-  static constexpr int64_t programId = -8295770962734868183;
-  static constexpr ::std::string_view definitionKey = {"\x6b\x38\x4e\x70\xd4\xd6\x94\xda\x14\x68\x30\x61\xf2\x49\x24\x67", 16};
+  static constexpr int64_t programId = 8620394739295431616;
+  static constexpr ::std::string_view definitionKey = {"\x11\x8c\xe0\xa3\x4b\x8c\x56\x37\x6c\xad\xf9\xd4\xed\x63\xc0\x0b", 16};
 };
 ::folly::Range<const ::std::string_view*> TSchemaAssociation<::some::valid::ns::EmptyService, false>::bundle() {
-    return ::some::valid::ns::module_constants::_fbthrift_schema_8cdf804324301929_includes();
+    return ::some::valid::ns::module_constants::_fbthrift_schema_77a1cb57b359abc0_includes();
 }
 template <> struct TSchemaAssociation<::some::valid::ns::ReturnService, false> {
   static ::folly::Range<const ::std::string_view*> bundle();
-  static constexpr int64_t programId = -8295770962734868183;
-  static constexpr ::std::string_view definitionKey = {"\x70\xd1\xdf\x7b\x90\xed\xf0\x3e\x52\x46\x6f\xd6\x42\x89\x1b\x11", 16};
+  static constexpr int64_t programId = 8620394739295431616;
+  static constexpr ::std::string_view definitionKey = {"\x53\x90\x1c\x83\x83\x5e\x53\x40\x46\x5b\x9a\xa3\x43\x4e\xd7\xb5", 16};
 };
 ::folly::Range<const ::std::string_view*> TSchemaAssociation<::some::valid::ns::ReturnService, false>::bundle() {
-    return ::some::valid::ns::module_constants::_fbthrift_schema_8cdf804324301929_includes();
+    return ::some::valid::ns::module_constants::_fbthrift_schema_77a1cb57b359abc0_includes();
 }
 template <> struct TSchemaAssociation<::some::valid::ns::ParamService, false> {
   static ::folly::Range<const ::std::string_view*> bundle();
-  static constexpr int64_t programId = -8295770962734868183;
-  static constexpr ::std::string_view definitionKey = {"\x14\xd6\x49\x63\x32\x40\xc4\xdf\x44\x4e\xd4\xb0\x69\xfb\x41\x3d", 16};
+  static constexpr int64_t programId = 8620394739295431616;
+  static constexpr ::std::string_view definitionKey = {"\x00\xc5\xdb\x1b\x17\x8d\x4c\x91\x17\xc9\xe8\xa2\x80\xb3\x50\xaf", 16};
 };
 ::folly::Range<const ::std::string_view*> TSchemaAssociation<::some::valid::ns::ParamService, false>::bundle() {
-    return ::some::valid::ns::module_constants::_fbthrift_schema_8cdf804324301929_includes();
+    return ::some::valid::ns::module_constants::_fbthrift_schema_77a1cb57b359abc0_includes();
 }
 } // namespace detail
 } // namespace apache::thrift

@@ -99,7 +99,7 @@ class Internship(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
 
     @staticmethod
     def __get_thrift_definition_key__() -> bytes:
-        return b"\x30\x84\x24\xb2\x75\x35\xd6\xf0\x80\xde\xe3\xf6\x75\xdb\x8f\x46"
+        return b"\x27\x51\xab\xdc\xa6\x04\xa0\x58\x4a\x50\xa0\x23\xcd\xfb\xca\x8d"
 
     @staticmethod
     def __get_metadata__():
@@ -167,7 +167,7 @@ class Range(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
 
     @staticmethod
     def __get_thrift_definition_key__() -> bytes:
-        return b"\x0b\x4c\x06\xe4\x90\xc5\xe4\x5e\xe3\x73\x1d\x3a\x0d\x28\x4a\x98"
+        return b"\x3e\x78\x0d\x1c\x7d\xb6\x59\x7e\x39\xb5\x9c\x2c\xae\xd8\x3a\x36"
 
     @staticmethod
     def __get_metadata__():
@@ -235,7 +235,7 @@ class struct1(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
 
     @staticmethod
     def __get_thrift_definition_key__() -> bytes:
-        return b"\x28\xe0\x8e\xa3\xee\xd0\x18\x9c\xb6\xe9\x57\xb8\xc2\x0c\x3d\x00"
+        return b"\x9a\x4a\x9b\xd7\x34\x29\x13\xdb\x66\x71\x6d\x0e\xaf\x8b\x82\xb9"
 
     @staticmethod
     def __get_metadata__():
@@ -325,7 +325,7 @@ class struct2(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
 
     @staticmethod
     def __get_thrift_definition_key__() -> bytes:
-        return b"\xcf\xdc\x84\xab\x59\x86\xe6\x0e\x32\xc3\x67\x18\x8e\x1d\x8f\xba"
+        return b"\xce\x70\xa3\xc3\xaf\xe8\xf4\x5d\x79\x62\x25\x9b\x3e\x15\x2b\x08"
 
     @staticmethod
     def __get_metadata__():
@@ -404,7 +404,7 @@ class struct3(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
 
     @staticmethod
     def __get_thrift_definition_key__() -> bytes:
-        return b"\xcd\x46\x29\xeb\xfb\xfd\xe0\x26\x65\x08\xd5\x73\xec\x8a\xd6\x3b"
+        return b"\xd1\x2f\x18\x51\xf3\xbd\xeb\x85\x04\x6c\xce\x38\x52\x63\x3b\x47"
 
     @staticmethod
     def __get_metadata__():
@@ -483,7 +483,7 @@ class struct4(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
 
     @staticmethod
     def __get_thrift_definition_key__() -> bytes:
-        return b"\xeb\x6f\x33\x34\x38\x96\xeb\x4b\x26\xbc\x2a\x5a\x34\xf7\xbd\xa1"
+        return b"\x99\x67\x46\x8f\x21\xa4\xee\x71\x65\x8a\x26\xfe\x5c\x1f\xef\xdf"
 
     @staticmethod
     def __get_metadata__():
@@ -554,7 +554,7 @@ class union1(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
 
     @staticmethod
     def __get_thrift_definition_key__() -> bytes:
-        return b"\x78\xe3\x24\x4c\xff\xfe\x6c\x78\x22\x6e\xdb\x59\xc2\xc3\x47\x01"
+        return b"\xbb\x3c\xb0\xe1\x4a\xce\x9c\xb5\x1e\x3e\x05\x14\x4e\xe9\x7e\xcf"
 
     @staticmethod
     def __get_metadata__():
@@ -647,7 +647,7 @@ class union2(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
 
     @staticmethod
     def __get_thrift_definition_key__() -> bytes:
-        return b"\x3b\xfb\x32\x3f\x90\xd1\xda\x6a\xec\xa7\xdb\x23\x4c\x6c\xae\x18"
+        return b"\x5a\x76\xb5\x43\xa6\x4d\x77\x63\x7d\x43\x9d\x1c\xe1\x5d\x5a\xe1"
 
     @staticmethod
     def __get_metadata__():

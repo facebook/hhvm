@@ -25,7 +25,7 @@ class EmptyEnum(_fbthrift_python_types.Enum, int):
 
     @staticmethod
     def __get_thrift_definition_key__() -> builtins.bytes:
-        return b"\xf4\xc3\xd5\xc9\xa8\x52\x85\x08\x8a\x2e\xd7\x45\x48\xe1\xcb\x0f"
+        return b"\x81\x9c\x72\x39\x54\x36\x40\x74\x1e\x03\xa8\xa6\x73\x14\x3e\x0d"
 
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
@@ -59,7 +59,7 @@ class City(_fbthrift_python_types.Enum, int):
 
     @staticmethod
     def __get_thrift_definition_key__() -> builtins.bytes:
-        return b"\xa1\x8e\x81\x03\xa4\xcf\x95\x75\x32\xb6\x01\x99\xde\xe9\xa0\xfa"
+        return b"\x56\x03\x45\xfd\x68\xfa\xab\x73\xe2\xc0\x8e\x93\xdb\x84\x1d\x4e"
 
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
@@ -94,7 +94,7 @@ class Company(_fbthrift_python_types.Enum, int):
 
     @staticmethod
     def __get_thrift_definition_key__() -> builtins.bytes:
-        return b"\xe9\xe1\x0f\xbf\x98\xf7\x92\xc3\x87\x79\x67\xe9\x26\xf9\x0e\xf6"
+        return b"\x7b\x23\x74\x23\xbd\xf9\xf7\x13\x96\x7e\x50\x25\x84\x12\xa8\x6b"
 
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:

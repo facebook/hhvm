@@ -1036,7 +1036,16 @@ t_whisker_generator::cached_render_state& t_whisker_generator::render_state() {
     define_prototypes(*prototypes);
 
     whisker::load_standard_library(options.globals);
-    options.globals.merge(globals(*prototypes));
+    auto generator_globals = globals(*prototypes);
+    for (auto& [name, val] : generator_globals) {
+      if (!options.globals.emplace(name, std::move(val)).second) {
+        throw std::runtime_error(
+            fmt::format(
+                "Generator global '{}' collides with a Whisker "
+                "standard-library name; rename the generator global.",
+                name));
+      }
+    }
 
     cached_render_state_ = cached_render_state{
         whisker::diagnostics_engine(

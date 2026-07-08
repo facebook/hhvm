@@ -837,6 +837,9 @@ template <>
 struct function_argument_result<string> : by_value<string> {};
 
 template <>
+struct function_argument_result<null> : by_value<null> {};
+
+template <>
 struct function_argument_result<array> : by_managed_ptr<array> {};
 
 template <>

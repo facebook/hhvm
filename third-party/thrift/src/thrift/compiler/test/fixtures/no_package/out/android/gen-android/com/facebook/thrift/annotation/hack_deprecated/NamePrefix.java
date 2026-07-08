@@ -23,18 +23,19 @@ import com.facebook.thrift.server.*;
 import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
+/**
+ * Prepend a prefix to names of definitions in the generated code
+ */
 @SuppressWarnings({ "unused", "serial" })
 public class NamePrefix implements TBase, java.io.Serializable, Cloneable {
   private static final TStruct STRUCT_DESC = new TStruct("NamePrefix");
   private static final TField PREFIX_FIELD_DESC = new TField("prefix", TType.STRING, (short)1);
   private static final TField APPLY_ON_GET_NAME_FIELD_DESC = new TField("apply_on_getName", TType.BOOL, (short)2);
   private static final TField SKIP_SERVICES_FIELD_DESC = new TField("skip_services", TType.BOOL, (short)3);
+  private static final TField APPLY_TO_SERVICES_FIELD_DESC = new TField("apply_to_services", TType.BOOL, (short)4);
 
   /**
-   * Prepends a prefix to generated Hack type names.
-   * When both program-level and definition-level NamePrefix are present,
-   * the definition-level prefix wins instead of stacking with the
-   * program-level prefix.
+   * Prefix to apply to names within the module.
    */
   public final String prefix;
   /**
@@ -48,17 +49,25 @@ public class NamePrefix implements TBase, java.io.Serializable, Cloneable {
    * are prefixed.
    */
   public final Boolean skip_services;
+  /**
+   * When true, the prefix will be applied to types generated for services
+   * (processor, client, helpers, etc).
+   */
+  public final Boolean apply_to_services;
   public static final int PREFIX = 1;
   public static final int APPLY_ON_GETNAME = 2;
   public static final int SKIP_SERVICES = 3;
+  public static final int APPLY_TO_SERVICES = 4;
 
   public NamePrefix(
       String prefix,
       Boolean apply_on_getName,
-      Boolean skip_services) {
+      Boolean skip_services,
+      Boolean apply_to_services) {
     this.prefix = prefix;
     this.apply_on_getName = apply_on_getName;
     this.skip_services = skip_services;
+    this.apply_to_services = apply_to_services;
   }
 
   /**
@@ -80,6 +89,11 @@ public class NamePrefix implements TBase, java.io.Serializable, Cloneable {
     } else {
       this.skip_services = null;
     }
+    if (other.isSetApply_to_services()) {
+      this.apply_to_services = TBaseHelper.deepCopy(other.apply_to_services);
+    } else {
+      this.apply_to_services = null;
+    }
   }
 
   public NamePrefix deepCopy() {
@@ -87,10 +101,7 @@ public class NamePrefix implements TBase, java.io.Serializable, Cloneable {
   }
 
   /**
-   * Prepends a prefix to generated Hack type names.
-   * When both program-level and definition-level NamePrefix are present,
-   * the definition-level prefix wins instead of stacking with the
-   * program-level prefix.
+   * Prefix to apply to names within the module.
    */
   public String getPrefix() {
     return this.prefix;
@@ -128,6 +139,19 @@ public class NamePrefix implements TBase, java.io.Serializable, Cloneable {
     return this.skip_services != null;
   }
 
+  /**
+   * When true, the prefix will be applied to types generated for services
+   * (processor, client, helpers, etc).
+   */
+  public Boolean isApply_to_services() {
+    return this.apply_to_services;
+  }
+
+  // Returns true if field apply_to_services is set (has been assigned a value) and false otherwise
+  public boolean isSetApply_to_services() {
+    return this.apply_to_services != null;
+  }
+
   @Override
   public boolean equals(Object _that) {
     if (_that == null)
@@ -144,12 +168,14 @@ public class NamePrefix implements TBase, java.io.Serializable, Cloneable {
 
     if (!TBaseHelper.equalsNobinary(this.isSetSkip_services(), that.isSetSkip_services(), this.skip_services, that.skip_services)) { return false; }
 
+    if (!TBaseHelper.equalsNobinary(this.isSetApply_to_services(), that.isSetApply_to_services(), this.apply_to_services, that.apply_to_services)) { return false; }
+
     return true;
   }
 
   @Override
   public int hashCode() {
-    return Arrays.deepHashCode(new Object[] {prefix, apply_on_getName, skip_services});
+    return Arrays.deepHashCode(new Object[] {prefix, apply_on_getName, skip_services, apply_to_services});
   }
 
   // This is required to satisfy the TBase interface, but can't be implemented on immutable struture.
@@ -161,6 +187,7 @@ public class NamePrefix implements TBase, java.io.Serializable, Cloneable {
     String tmp_prefix = null;
     Boolean tmp_apply_on_getName = null;
     Boolean tmp_skip_services = null;
+    Boolean tmp_apply_to_services = null;
     TField __field;
     iprot.readStructBegin();
     while (true)
@@ -192,6 +219,13 @@ public class NamePrefix implements TBase, java.io.Serializable, Cloneable {
             TProtocolUtil.skip(iprot, __field.type);
           }
           break;
+        case APPLY_TO_SERVICES:
+          if (__field.type == TType.BOOL) {
+            tmp_apply_to_services = iprot.readBool();
+          } else {
+            TProtocolUtil.skip(iprot, __field.type);
+          }
+          break;
         default:
           TProtocolUtil.skip(iprot, __field.type);
           break;
@@ -205,6 +239,7 @@ public class NamePrefix implements TBase, java.io.Serializable, Cloneable {
       tmp_prefix
       ,tmp_apply_on_getName
       ,tmp_skip_services
+      ,tmp_apply_to_services
     );
     _that.validate();
     return _that;
@@ -227,6 +262,11 @@ public class NamePrefix implements TBase, java.io.Serializable, Cloneable {
     if (this.skip_services != null) {
       oprot.writeFieldBegin(SKIP_SERVICES_FIELD_DESC);
       oprot.writeBool(this.skip_services);
+      oprot.writeFieldEnd();
+    }
+    if (this.apply_to_services != null) {
+      oprot.writeFieldBegin(APPLY_TO_SERVICES_FIELD_DESC);
+      oprot.writeBool(this.apply_to_services);
       oprot.writeFieldEnd();
     }
     oprot.writeFieldStop();

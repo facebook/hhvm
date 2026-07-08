@@ -157,6 +157,19 @@ bool has_object_key_type(const t_type* type) {
   return false;
 }
 
+bool legacy_omit_prefix_in_name_string(const t_structured* tstruct) {
+  return tstruct->has_structured_annotation(kLegacyOmitPrefixInNameStringUri) ||
+      tstruct->program()->has_structured_annotation(
+          kLegacyOmitPrefixInNameStringUri);
+}
+
+bool legacy_always_include_name_prefix_in_processor(const t_interface* svc) {
+  return svc->has_structured_annotation(
+             kLegacyAlwaysIncludeNamePrefixInProcessor) ||
+      svc->program()->has_structured_annotation(
+          kLegacyAlwaysIncludeNamePrefixInProcessor);
+}
+
 /**
  * Hack code generator.
  */
@@ -917,26 +930,37 @@ class t_hack_generator : public t_concat_generator {
   struct hack_name_prefix_info {
     std::string prefix;
     bool apply_on_getName = true;
-    bool skip_services = false;
+    bool apply_to_services = false;
   };
 
   std::optional<hack_name_prefix_info> find_hack_name_prefix(
-      const t_named* node) const {
+      const t_type* t) const {
+    const t_program* prog = t->program();
+
     if (const auto* annotation =
-            node->find_structured_annotation_or_null(kHackNamePrefixUri)) {
+            prog->find_structured_annotation_or_null(kHackNamePrefixUri)) {
       hack_name_prefix_info info;
       info.prefix = annotation->get_value_from_structured_annotation("prefix")
                         .get_string();
+
       if (const auto* apply_on_get_name =
               annotation->get_value_from_structured_annotation_or_null(
                   "apply_on_getName")) {
         info.apply_on_getName = apply_on_get_name->get_bool();
       }
+
       if (const auto* skip_services =
               annotation->get_value_from_structured_annotation_or_null(
                   "skip_services")) {
-        info.skip_services = skip_services->get_bool();
+        info.apply_to_services = !skip_services->get_bool();
       }
+
+      if (const auto* apply_to_services =
+              annotation->get_value_from_structured_annotation_or_null(
+                  "apply_to_services")) {
+        info.apply_to_services = apply_to_services->get_bool();
+      }
+
       return info;
     }
     return {};
@@ -973,48 +997,25 @@ class t_hack_generator : public t_concat_generator {
     return default_name;
   }
 
-  // Returns the relevant hack name prefix info for a type, considering
-  // type-level annotation first, then program-level fallback.
-  std::optional<hack_name_prefix_info> get_hack_type_prefix_info(
-      const t_type* type) const {
-    if (auto type_prefix = find_hack_name_prefix(type)) {
-      return type_prefix;
+  std::string get_hack_type_prefix(const t_type* type) const {
+    if (const auto prefix = find_hack_name_prefix(type)) {
+      return prefix->prefix;
     }
-    return find_hack_name_prefix(type->program());
+    return "";
   }
 
-  std::string get_hack_type_prefix(
-      const t_type* type, bool for_get_name) const {
-    if (auto prefix = get_hack_type_prefix_info(type)) {
-      if (!for_get_name || prefix->apply_on_getName) {
+  std::string get_hack_service_prefix(
+      const t_interface* svc, bool force_apply = false) const {
+    if (const auto prefix = find_hack_name_prefix(svc)) {
+      if (prefix->apply_to_services || force_apply) {
         return prefix->prefix;
       }
     }
     return "";
   }
 
-  std::string get_hack_service_prefix(const t_interface* svc) const {
-    // Check service-level NamePrefix first (definition-level wins)
-    if (const auto svc_prefix = find_hack_name_prefix(svc)) {
-      return svc_prefix->prefix;
-    }
-    // Check program-level NamePrefix
-    if (const auto program_prefix = find_hack_name_prefix(svc->program())) {
-      if (!program_prefix->skip_services) {
-        return program_prefix->prefix;
-      }
-    }
-    return "";
-  }
-
   std::string find_hack_type_name(const t_type* type) const {
-    return get_hack_type_prefix(type, /*for_get_name=*/false) +
-        find_hack_name(type);
-  }
-
-  std::string find_hack_type_name_for_getName(const t_type* type) const {
-    return get_hack_type_prefix(type, /*for_get_name=*/true) +
-        find_hack_name(type);
+    return find_hack_name(type);
   }
 
   std::string get_constants_class_name() const {
@@ -1200,18 +1201,25 @@ class t_hack_generator : public t_concat_generator {
   }
 
   std::string hack_name(const t_type* t, bool decl = false) {
+    return hack_name_with_prefix(t, get_hack_type_prefix(t), decl);
+  }
+
+  std::string hack_service_name(const t_interface* svc, bool decl = false) {
+    return hack_name_with_prefix(
+        svc,
+        get_hack_service_prefix(
+            svc, legacy_always_include_name_prefix_in_processor(svc)),
+        decl);
+  }
+
+  std::string hack_name_with_prefix(
+      const t_type* t, std::string prefix, bool decl = false) {
     const t_program* program = t->program();
     if (const auto* params = t->try_as<t_paramlist>()) {
       program = get_paramlist_program(*params);
     }
-    return hack_name(find_hack_type_name(t), program, decl);
-  }
 
-  std::string hack_service_name(
-      const t_interface* tservice, bool decl = false) {
-    std::string prefix = get_hack_service_prefix(tservice);
-    return hack_name(
-        prefix + find_hack_name(tservice), tservice->program(), decl);
+    return hack_name(prefix + find_hack_type_name(t), program, decl);
   }
 
   std::string hack_wrapped_type_name(
@@ -5297,24 +5305,27 @@ void t_hack_generator::generate_php_struct_definition(
     const std::string& name) {
   const bool is_service_generated_type =
       type == ThriftStructType::ARGS || type == ThriftStructType::RESULT;
-  std::string actual_name;
-  std::string get_name;
+  std::string type_name;
+  std::string name_string;
   if (!name.empty()) {
-    actual_name = name;
-    get_name = name;
+    type_name = name;
+    name_string = name;
   } else if (is_service_generated_type) {
-    actual_name = find_hack_name(tstruct);
-    get_name = actual_name;
+    type_name = find_hack_name(tstruct);
+    name_string = type_name;
   } else {
     const std::string& base_name = find_hack_name(tstruct);
     // If a NamePrefix annotation applies, prepend the prefix to the actual name
-    if (auto prefix_info = get_hack_type_prefix_info(tstruct)) {
-      actual_name = prefix_info->prefix + base_name;
-      get_name = prefix_info->apply_on_getName ? actual_name : base_name;
+    if (const auto prefix_info = find_hack_name_prefix(tstruct)) {
+      type_name = prefix_info->prefix + base_name;
+      name_string = prefix_info->apply_on_getName &&
+              !legacy_omit_prefix_in_name_string(tstruct)
+          ? type_name
+          : base_name;
     } else {
       // No NamePrefix annotation
-      actual_name = base_name;
-      get_name = base_name;
+      type_name = base_name;
+      name_string = base_name;
     }
   }
   bool gen_shapes = shapes_ && !tstruct->generated() &&
@@ -5324,9 +5335,9 @@ void t_hack_generator::generate_php_struct_definition(
   }
   if (tstruct->is<t_union>()) {
     // Generate enum for union before the actual class
-    generate_php_union_enum(out, tstruct, actual_name);
+    generate_php_union_enum(out, tstruct, type_name);
   }
-  _generate_php_struct_definition(out, tstruct, type, actual_name, get_name);
+  _generate_php_struct_definition(out, tstruct, type, type_name, name_string);
 }
 
 void t_hack_generator::generate_php_union_methods(
@@ -6473,7 +6484,7 @@ void t_hack_generator::_generate_php_struct_definition(
     const t_structured* tstruct,
     ThriftStructType type,
     const std::string& name,
-    const std::string& get_name) {
+    const std::string& name_string) {
   bool generateAsTrait = has_hack_struct_as_trait(tstruct);
 
   if (type != ThriftStructType::ARGS && type != ThriftStructType::RESULT &&
@@ -6619,7 +6630,7 @@ void t_hack_generator::_generate_php_struct_definition(
       out,
       tstruct,
       type,
-      get_name,
+      name_string,
       is_async,
       is_async_shapish,
       add_clear_terse_fields_interface,

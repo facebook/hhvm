@@ -16,7 +16,7 @@
 
 include "thrift/annotation/hack.thrift"
 
-@hack.NamePrefix{prefix = "Beeble_"}
+@hack.NamePrefix{prefix = "Beeble_", apply_to_services = true}
 package;
 
 service Brox {

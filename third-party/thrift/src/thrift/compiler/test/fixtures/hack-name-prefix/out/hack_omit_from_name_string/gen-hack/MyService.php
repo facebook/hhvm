@@ -6,13 +6,13 @@
  *  @generated
  */
 
-namespace test\fixtures\name_prefix_skip_services;
+namespace test\fixtures\hack_name_prefix_omit_from_name_string;
 
 /**
  * Original thrift service:-
  * MyService
  */
-<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/fixtures/hack_name_prefix_skip_services/MyService'))>>
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/fixtures/hack_name_prefix_omit_from_name_string/MyService'))>>
 interface MyServiceAsyncIf extends \IThriftAsyncIf {
   /**
    * Original thrift definition:-
@@ -20,7 +20,7 @@ interface MyServiceAsyncIf extends \IThriftAsyncIf {
    *   getStruct(1: i32 id)
    *   throws (1: MyException ex);
    */
-  public function getStruct(int $id): Awaitable<\test\fixtures\name_prefix_skip_services\TMyPrefix_MyStruct>;
+  public function getStruct(int $id): Awaitable<\test\fixtures\hack_name_prefix_omit_from_name_string\TMyPrefix_MyStruct>;
 
   /**
    * Original thrift definition:-
@@ -34,7 +34,7 @@ interface MyServiceAsyncIf extends \IThriftAsyncIf {
  * Original thrift service:-
  * MyService
  */
-<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/fixtures/hack_name_prefix_skip_services/MyService'))>>
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/fixtures/hack_name_prefix_omit_from_name_string/MyService'))>>
 interface MyServiceAsyncClientIf extends MyServiceAsyncIf {
 }
 
@@ -42,7 +42,7 @@ interface MyServiceAsyncClientIf extends MyServiceAsyncIf {
  * Original thrift service:-
  * MyService
  */
-<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/fixtures/hack_name_prefix_skip_services/MyService'))>>
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/fixtures/hack_name_prefix_omit_from_name_string/MyService'))>>
 interface MyServiceClientIf extends \IThriftSyncIf {
   /**
    * Original thrift definition:-
@@ -50,7 +50,7 @@ interface MyServiceClientIf extends \IThriftSyncIf {
    *   getStruct(1: i32 id)
    *   throws (1: MyException ex);
    */
-  public function getStruct(int $id): Awaitable<\test\fixtures\name_prefix_skip_services\TMyPrefix_MyStruct>;
+  public function getStruct(int $id): Awaitable<\test\fixtures\hack_name_prefix_omit_from_name_string\TMyPrefix_MyStruct>;
 
   /**
    * Original thrift definition:-
@@ -73,7 +73,7 @@ trait MyServiceClientBase {
    *   getStruct(1: i32 id)
    *   throws (1: MyException ex);
    */
-  public async function getStruct(int $id): Awaitable<\test\fixtures\name_prefix_skip_services\TMyPrefix_MyStruct> {
+  public async function getStruct(int $id): Awaitable<\test\fixtures\hack_name_prefix_omit_from_name_string\TMyPrefix_MyStruct> {
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = MyService_getStruct_args::fromShape(shape(
       'id' => $id,
@@ -124,7 +124,7 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
     $result = MyService_getStruct_result::withDefaultValues();
     try {
       $args = $this->readHelper(MyService_getStruct_args::class, $input, 'getStruct', $handler_ctx);
-      $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\name_prefix_skip_services\MyService', 'getStruct', $args);
+      $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\hack_name_prefix_omit_from_name_string\MyService', 'getStruct', $args);
       $result->success = await $this->handler->getStruct($args->id);
       $this->eventHandler_->postExec($handler_ctx, 'getStruct', $result);
     } catch (\Exception $ex) {
@@ -144,7 +144,7 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
     $result = MyService_ping_result::withDefaultValues();
     try {
       $args = $this->readHelper(MyService_ping_args::class, $input, 'ping', $handler_ctx);
-      $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\name_prefix_skip_services\MyService', 'ping', $args);
+      $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\hack_name_prefix_omit_from_name_string\MyService', 'ping', $args);
       await $this->handler->ping();
       $this->eventHandler_->postExec($handler_ctx, 'ping', $result);
     } catch (\Exception $ex) {
@@ -237,7 +237,7 @@ class MyService_getStruct_args implements \IThriftSyncStruct, \IThriftStructMeta
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return \tmeta_ThriftStruct::fromShape(
       shape(
-        "name" => "skip_services.getStruct_args",
+        "name" => "omit_from_name_string.getStruct_args",
         "fields" => vec[
           \tmeta_ThriftField::fromShape(
             shape(
@@ -273,18 +273,18 @@ class MyService_getStruct_args implements \IThriftSyncStruct, \IThriftStructMeta
 class MyService_getStruct_result extends \ThriftSyncStructWithResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const type TResult = \test\fixtures\name_prefix_skip_services\TMyPrefix_MyStruct;
+  const type TResult = \test\fixtures\hack_name_prefix_omit_from_name_string\TMyPrefix_MyStruct;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
     0 => shape(
       'var' => 'success',
       'type' => \TType::STRUCT,
-      'class' => \test\fixtures\name_prefix_skip_services\TMyPrefix_MyStruct::class,
+      'class' => \test\fixtures\hack_name_prefix_omit_from_name_string\TMyPrefix_MyStruct::class,
     ),
     1 => shape(
       'var' => 'ex',
       'type' => \TType::STRUCT,
-      'class' => \test\fixtures\name_prefix_skip_services\TMyPrefix_MyException::class,
+      'class' => \test\fixtures\hack_name_prefix_omit_from_name_string\TMyPrefix_MyException::class,
     ),
   ];
   const dict<string, int> FIELDMAP = dict[
@@ -294,14 +294,14 @@ class MyService_getStruct_result extends \ThriftSyncStructWithResult implements 
 
   const type TConstructorShape = shape(
     ?'success' => ?this::TResult,
-    ?'ex' => ?\test\fixtures\name_prefix_skip_services\TMyPrefix_MyException,
+    ?'ex' => ?\test\fixtures\hack_name_prefix_omit_from_name_string\TMyPrefix_MyException,
   );
 
   const int STRUCTURAL_ID = 4878113598427568341;
   public ?this::TResult $success;
-  public ?\test\fixtures\name_prefix_skip_services\TMyPrefix_MyException $ex;
+  public ?\test\fixtures\hack_name_prefix_omit_from_name_string\TMyPrefix_MyException $ex;
 
-  public function __construct(?this::TResult $success = null, ?\test\fixtures\name_prefix_skip_services\TMyPrefix_MyException $ex = null)[] {
+  public function __construct(?this::TResult $success = null, ?\test\fixtures\hack_name_prefix_omit_from_name_string\TMyPrefix_MyException $ex = null)[] {
     $this->success = $success;
     $this->ex = $ex;
   }
@@ -324,7 +324,7 @@ class MyService_getStruct_result extends \ThriftSyncStructWithResult implements 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return \tmeta_ThriftStruct::fromShape(
       shape(
-        "name" => "skip_services.MyService_getStruct_result",
+        "name" => "omit_from_name_string.MyService_getStruct_result",
         "fields" => vec[
           \tmeta_ThriftField::fromShape(
             shape(
@@ -333,7 +333,7 @@ class MyService_getStruct_result extends \ThriftSyncStructWithResult implements 
                 shape(
                   "t_struct" => \tmeta_ThriftStructType::fromShape(
                     shape(
-                      "name" => "skip_services.MyStruct",
+                      "name" => "omit_from_name_string.MyStruct",
                     )
                   ),
                 )
@@ -348,7 +348,7 @@ class MyService_getStruct_result extends \ThriftSyncStructWithResult implements 
                 shape(
                   "t_struct" => \tmeta_ThriftStructType::fromShape(
                     shape(
-                      "name" => "skip_services.MyException",
+                      "name" => "omit_from_name_string.MyException",
                     )
                   ),
                 )
@@ -382,7 +382,7 @@ class MyService_getStruct_result extends \ThriftSyncStructWithResult implements 
   }
   
   public function setException(\Exception $e): bool {
-    if ($e is \test\fixtures\name_prefix_skip_services\TMyPrefix_MyException) {
+    if ($e is \test\fixtures\hack_name_prefix_omit_from_name_string\TMyPrefix_MyException) {
       $this->ex = $e;
       return true;
     }
@@ -422,7 +422,7 @@ class MyService_ping_args implements \IThriftSyncStruct, \IThriftStructMetadata 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return \tmeta_ThriftStruct::fromShape(
       shape(
-        "name" => "skip_services.ping_args",
+        "name" => "omit_from_name_string.ping_args",
         "is_union" => false,
       )
     );
@@ -474,7 +474,7 @@ class MyService_ping_result extends \ThriftSyncStructWithoutResult implements \I
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return \tmeta_ThriftStruct::fromShape(
       shape(
-        "name" => "skip_services.MyService_ping_result",
+        "name" => "omit_from_name_string.MyService_ping_result",
         "is_union" => false,
       )
     );
@@ -500,7 +500,7 @@ class MyServiceStaticMetadata implements \IThriftServiceStaticMetadata {
   public static function getServiceMetadata()[]: \tmeta_ThriftService {
     return \tmeta_ThriftService::fromShape(
       shape(
-        "name" => "skip_services.MyService",
+        "name" => "omit_from_name_string.MyService",
         "functions" => vec[
           \tmeta_ThriftFunction::fromShape(
             shape(
@@ -509,7 +509,7 @@ class MyServiceStaticMetadata implements \IThriftServiceStaticMetadata {
                 shape(
                   "t_struct" => \tmeta_ThriftStructType::fromShape(
                     shape(
-                      "name" => "skip_services.MyStruct",
+                      "name" => "omit_from_name_string.MyStruct",
                     )
                   ),
                 )
@@ -535,7 +535,7 @@ class MyServiceStaticMetadata implements \IThriftServiceStaticMetadata {
                       shape(
                         "t_struct" => \tmeta_ThriftStructType::fromShape(
                           shape(
-                            "name" => "skip_services.MyException",
+                            "name" => "omit_from_name_string.MyException",
                           )
                         ),
                       )
@@ -569,7 +569,7 @@ class MyServiceStaticMetadata implements \IThriftServiceStaticMetadata {
             'service_info' => self::getServiceMetadata(),
             'module' => \tmeta_ThriftModuleContext::fromShape(
               shape(
-                'name' => 'skip_services',
+                'name' => 'omit_from_name_string',
               )
             ),
           )
@@ -579,10 +579,10 @@ class MyServiceStaticMetadata implements \IThriftServiceStaticMetadata {
             'enums' => dict[
             ],
             'structs' => dict[
-              'skip_services.MyStruct' => \test\fixtures\name_prefix_skip_services\TMyPrefix_MyStruct::getStructMetadata(),
+              'omit_from_name_string.MyStruct' => \test\fixtures\hack_name_prefix_omit_from_name_string\TMyPrefix_MyStruct::getStructMetadata(),
             ],
             'exceptions' => dict[
-              'skip_services.MyException' => \test\fixtures\name_prefix_skip_services\TMyPrefix_MyException::getExceptionMetadata(),
+              'omit_from_name_string.MyException' => \test\fixtures\hack_name_prefix_omit_from_name_string\TMyPrefix_MyException::getExceptionMetadata(),
             ],
             'services' => dict[
             ],

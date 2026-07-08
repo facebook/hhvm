@@ -22,6 +22,6 @@ except ImportError:
         pass
 
 
-from .ttypes import UTF8STRINGS, FieldWrapper, Wrapper, Adapter, SkipCodegen, Name, NamePrefix, ConstantsClass, UnionEnumAttributes, StructTrait, Attributes, StructAsTrait, ModuleInternal, GenerateClientMethodsWithHeaders, MigrationBlockingAllowInheritance, MigrationBlockingLegacyJSONSerialization, FixmeWrongType, UnsafeArray
+from .ttypes import UTF8STRINGS, FieldWrapper, Wrapper, Adapter, SkipCodegen, Name, NamePrefix, LegacyOmitPrefixInNameString, LegacyAlwaysIncludeNamePrefixInProcessor, ConstantsClass, UnionEnumAttributes, StructTrait, Attributes, StructAsTrait, ModuleInternal, GenerateClientMethodsWithHeaders, MigrationBlockingAllowInheritance, MigrationBlockingLegacyJSONSerialization, FixmeWrongType, UnsafeArray
 warn_thrift_py_deprecated(__name__)
 

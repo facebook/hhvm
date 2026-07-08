@@ -9,6 +9,8 @@
 namespace facebook\thrift\annotation\hack;
 
 /**
+ * Prepend a prefix to names of definitions in the generated code
+ *
  * Original thrift struct:-
  * NamePrefix
  */
@@ -29,25 +31,28 @@ class NamePrefix implements \IThriftSyncStruct, \IThriftStructMetadata {
       'var' => 'skip_services',
       'type' => \TType::BOOL,
     ),
+    4 => shape(
+      'var' => 'apply_to_services',
+      'type' => \TType::BOOL,
+    ),
   ];
   const dict<string, int> FIELDMAP = dict[
     'prefix' => 1,
     'apply_on_getName' => 2,
     'skip_services' => 3,
+    'apply_to_services' => 4,
   ];
 
   const type TConstructorShape = shape(
     ?'prefix' => ?string,
     ?'apply_on_getName' => ?bool,
     ?'skip_services' => ?bool,
+    ?'apply_to_services' => ?bool,
   );
 
-  const int STRUCTURAL_ID = 8004865893644835251;
+  const int STRUCTURAL_ID = 4447979253020581803;
   /**
-   * Prepends a prefix to generated Hack type names.
-   * When both program-level and definition-level NamePrefix are present,
-   * the definition-level prefix wins instead of stacking with the
-   * program-level prefix.
+   * Prefix to apply to names within the module.
    * 
    * Original thrift field:-
    * 1: string prefix
@@ -70,11 +75,20 @@ class NamePrefix implements \IThriftSyncStruct, \IThriftStructMetadata {
    * 3: bool skip_services
    */
   public bool $skip_services;
+  /**
+   * When true, the prefix will be applied to types generated for services
+   * (processor, client, helpers, etc).
+   * 
+   * Original thrift field:-
+   * 4: bool apply_to_services
+   */
+  public bool $apply_to_services;
 
-  public function __construct(?string $prefix = null, ?bool $apply_on_getName = null, ?bool $skip_services = null)[] {
+  public function __construct(?string $prefix = null, ?bool $apply_on_getName = null, ?bool $skip_services = null, ?bool $apply_to_services = null)[] {
     $this->prefix = $prefix ?? '';
     $this->apply_on_getName = $apply_on_getName ?? true;
     $this->skip_services = $skip_services ?? false;
+    $this->apply_to_services = $apply_to_services ?? false;
   }
 
   public static function withDefaultValues()[]: this {
@@ -86,6 +100,7 @@ class NamePrefix implements \IThriftSyncStruct, \IThriftStructMetadata {
       Shapes::idx($shape, 'prefix'),
       Shapes::idx($shape, 'apply_on_getName'),
       Shapes::idx($shape, 'skip_services'),
+      Shapes::idx($shape, 'apply_to_services'),
     );
   }
 
@@ -131,6 +146,17 @@ class NamePrefix implements \IThriftSyncStruct, \IThriftStructMetadata {
               "name" => "skip_services",
             )
           ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 4,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_BOOL_TYPE,
+                )
+              ),
+              "name" => "apply_to_services",
+            )
+          ),
         ],
         "is_union" => false,
       )
@@ -141,11 +167,6 @@ class NamePrefix implements \IThriftSyncStruct, \IThriftStructMetadata {
     return shape(
       'struct' => dict[
         '\facebook\thrift\annotation\Program' => \facebook\thrift\annotation\Program::withDefaultValues(),
-        '\facebook\thrift\annotation\Structured' => \facebook\thrift\annotation\Structured::withDefaultValues(),
-        '\facebook\thrift\annotation\Typedef' => \facebook\thrift\annotation\Typedef::withDefaultValues(),
-        '\facebook\thrift\annotation\Enum' => \facebook\thrift\annotation\Enum::withDefaultValues(),
-        '\facebook\thrift\annotation\TConst' => \facebook\thrift\annotation\TConst::withDefaultValues(),
-        '\facebook\thrift\annotation\Service' => \facebook\thrift\annotation\Service::withDefaultValues(),
       ],
       'fields' => dict[
       ],

@@ -91,6 +91,23 @@ inline void reset_field<::facebook::thrift::annotation::hack::NamePrefix>(
     case 2:
       obj.skip_services_ref().copy_from(default_inst<::facebook::thrift::annotation::hack::NamePrefix>().skip_services_ref());
       return;
+    case 3:
+      obj.apply_to_services_ref().copy_from(default_inst<::facebook::thrift::annotation::hack::NamePrefix>().apply_to_services_ref());
+      return;
+  }
+}
+
+template<>
+inline void reset_field<::facebook::thrift::annotation::hack::LegacyOmitPrefixInNameString>(
+    ::facebook::thrift::annotation::hack::LegacyOmitPrefixInNameString& obj, uint16_t index) {
+  switch (index) {
+  }
+}
+
+template<>
+inline void reset_field<::facebook::thrift::annotation::hack::LegacyAlwaysIncludeNamePrefixInProcessor>(
+    ::facebook::thrift::annotation::hack::LegacyAlwaysIncludeNamePrefixInProcessor& obj, uint16_t index) {
+  switch (index) {
   }
 }
 
@@ -236,6 +253,26 @@ inline const std::unordered_map<std::string_view, std::string_view>& PyStructTra
 template<>
 inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::facebook::thrift::annotation::hack::NamePrefix>::namesmap() {
+  static const folly::Indestructible<NamesMap> map {
+    {
+    }
+  };
+  return *map;
+}
+
+template<>
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+    ::facebook::thrift::annotation::hack::LegacyOmitPrefixInNameString>::namesmap() {
+  static const folly::Indestructible<NamesMap> map {
+    {
+    }
+  };
+  return *map;
+}
+
+template<>
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+    ::facebook::thrift::annotation::hack::LegacyAlwaysIncludeNamePrefixInProcessor>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
     }

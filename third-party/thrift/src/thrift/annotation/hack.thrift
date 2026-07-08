@@ -119,17 +119,10 @@ struct Name {
   2: string reason;
 }
 
+/// Prepend a prefix to names of definitions in the generated code
 @scope.Program
-@scope.Structured
-@scope.Typedef
-@scope.Enum
-@scope.Const
-@scope.Service
 struct NamePrefix {
-  /// Prepends a prefix to generated Hack type names.
-  /// When both program-level and definition-level NamePrefix are present,
-  /// the definition-level prefix wins instead of stacking with the
-  /// program-level prefix.
+  /// Prefix to apply to names within the module.
   1: string prefix;
   /// Set to false when you want getName() to keep returning the IDL name.
   2: bool apply_on_getName = true;
@@ -138,7 +131,31 @@ struct NamePrefix {
   /// When false (default), all types including service-generated types
   /// are prefixed.
   3: bool skip_services = false;
+  /// When true, the prefix will be applied to types generated for services
+  /// (processor, client, helpers, etc).
+  4: bool apply_to_services = false;
 }
+
+/// Omit module-wide name prefix from the name string returned by `getName()`
+///
+/// This is intended to grandfather the legacy behavior where PHP namespace was not
+/// materialized in `getName()`
+///
+/// When specified at program level this annotation is automatically applied to all
+/// structured definitions in the Thrift file.
+@scope.Program
+struct LegacyOmitPrefixInNameString {}
+
+/// Always include module-wide name prefix in the service names used by the method
+/// processor, even when not applied to services
+///
+/// This is intended to grandfather the legacy behavior where PHP namespace was materialized
+/// in these names even with service mangling disabled
+///
+/// When specified at program level this annotation is automatically applied to all
+/// services in the Thrift file.
+@scope.Program
+struct LegacyAlwaysIncludeNamePrefixInProcessor {}
 
 @scope.Program
 struct ConstantsClass {

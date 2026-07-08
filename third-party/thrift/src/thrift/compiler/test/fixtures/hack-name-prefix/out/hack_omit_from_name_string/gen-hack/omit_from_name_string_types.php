@@ -6,13 +6,13 @@
  *  @generated
  */
 
-namespace test\fixtures\name_prefix_skip_services;
+namespace test\fixtures\hack_name_prefix_omit_from_name_string;
 
 /**
  * Original thrift enum:-
  * Status
  */
-<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/fixtures/hack_name_prefix_skip_services/Status'))>>
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/fixtures/hack_name_prefix_omit_from_name_string/Status'))>>
 enum TMyPrefix_Status: int {
   Unknown = 0;
   Active = 1;
@@ -22,7 +22,7 @@ class TMyPrefix_Status_TEnumStaticMetadata implements \IThriftEnumStaticMetadata
   public static function getEnumMetadata()[]: \tmeta_ThriftEnum {
     return \tmeta_ThriftEnum::fromShape(
       shape(
-        "name" => "skip_services.Status",
+        "name" => "omit_from_name_string.Status",
         "elements" => dict[
           0 => "Unknown",
           1 => "Active",
@@ -44,7 +44,7 @@ class TMyPrefix_Status_TEnumStaticMetadata implements \IThriftEnumStaticMetadata
  * Original thrift struct:-
  * MyStruct
  */
-<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/fixtures/hack_name_prefix_skip_services/MyStruct'))>>
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/fixtures/hack_name_prefix_omit_from_name_string/MyStruct'))>>
 class TMyPrefix_MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
@@ -97,13 +97,13 @@ class TMyPrefix_MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
   }
 
   public function getName()[]: string {
-    return 'TMyPrefix_MyStruct';
+    return 'MyStruct';
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return \tmeta_ThriftStruct::fromShape(
       shape(
-        "name" => "skip_services.MyStruct",
+        "name" => "omit_from_name_string.MyStruct",
         "fields" => vec[
           \tmeta_ThriftField::fromShape(
             shape(
@@ -151,7 +151,7 @@ class TMyPrefix_MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
  * Original thrift exception:-
  * MyException
  */
-<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/fixtures/hack_name_prefix_skip_services/MyException'))>>
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/fixtures/hack_name_prefix_omit_from_name_string/MyException'))>>
 class TMyPrefix_MyException extends \TException implements \IThriftSyncStruct, \IThriftExceptionMetadata {
   use \ThriftSerializationTrait;
 
@@ -192,13 +192,13 @@ class TMyPrefix_MyException extends \TException implements \IThriftSyncStruct, \
   }
 
   public function getName()[]: string {
-    return 'TMyPrefix_MyException';
+    return 'MyException';
   }
 
   public static function getExceptionMetadata()[]: \tmeta_ThriftException {
     return \tmeta_ThriftException::fromShape(
       shape(
-        "name" => "skip_services.MyException",
+        "name" => "omit_from_name_string.MyException",
         "fields" => vec[
           \tmeta_ThriftField::fromShape(
             shape(

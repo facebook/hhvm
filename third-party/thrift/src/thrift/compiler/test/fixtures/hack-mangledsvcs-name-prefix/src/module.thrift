@@ -21,7 +21,7 @@ include "thrift/annotation/hack.thrift"
 // nothing for `mangledsvcs` to do. `@hack.NamePrefix` (if present) is still
 // applied to the generated class names just as it would be without
 // `mangledsvcs`.
-@hack.NamePrefix{prefix = "Beeble_"}
+@hack.NamePrefix{prefix = "Beeble_", apply_to_services = true}
 package "facebook.com/thrift/test/fixtures/hack_mangledsvcs_name_prefix"
 
 namespace hack ""

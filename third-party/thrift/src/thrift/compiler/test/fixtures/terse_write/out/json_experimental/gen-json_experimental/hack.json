@@ -225,54 +225,15 @@
             "path" : "thrift/annotation/scope.thrift"
           },
             "value" : {}
-          },
-          "scope.Structured" : {
-            "type" : {
-            "type" : "struct",
-            "name" : "Structured",
-            "path" : "thrift/annotation/scope.thrift"
-          },
-            "value" : {}
-          },
-          "scope.Typedef" : {
-            "type" : {
-            "type" : "struct",
-            "name" : "Typedef",
-            "path" : "thrift/annotation/scope.thrift"
-          },
-            "value" : {}
-          },
-          "scope.Enum" : {
-            "type" : {
-            "type" : "struct",
-            "name" : "Enum",
-            "path" : "thrift/annotation/scope.thrift"
-          },
-            "value" : {}
-          },
-          "scope.Const" : {
-            "type" : {
-            "type" : "struct",
-            "name" : "Const",
-            "path" : "thrift/annotation/scope.thrift"
-          },
-            "value" : {}
-          },
-          "scope.Service" : {
-            "type" : {
-            "type" : "struct",
-            "name" : "Service",
-            "path" : "thrift/annotation/scope.thrift"
-          },
-            "value" : {}
           }
         },
+        "docstring" : "Prepend a prefix to names of definitions in the generated code\n",
         "fields" : {
           "prefix" : {
             "name" : "prefix",
-            "docstring" : "Prepends a prefix to generated Hack type names.\nWhen both program-level and definition-level NamePrefix are present,\nthe definition-level prefix wins instead of stacking with the\nprogram-level prefix.\n",
+            "docstring" : "Prefix to apply to names within the module.\n",
             "key" : 1,
-            "lineno" : 133,
+            "lineno" : 126,
             "required" : "opt-in-req-out",
             "type" : "string"
                   },
@@ -281,7 +242,7 @@
             "default_value" : 1,
             "docstring" : "Set to false when you want getName() to keep returning the IDL name.\n",
             "key" : 2,
-            "lineno" : 135,
+            "lineno" : 128,
             "required" : "opt-in-req-out",
             "type" : "bool"
                   },
@@ -290,14 +251,57 @@
             "default_value" : 0,
             "docstring" : "When true, types generated from services (interfaces, clients,\nprocessors, helper structs like args/result) are not prefixed.\nWhen false (default), all types including service-generated types\nare prefixed.\n",
             "key" : 3,
-            "lineno" : 140,
+            "lineno" : 133,
+            "required" : "opt-in-req-out",
+            "type" : "bool"
+                  },
+          "apply_to_services" : {
+            "name" : "apply_to_services",
+            "default_value" : 0,
+            "docstring" : "When true, the prefix will be applied to types generated for services\n(processor, client, helpers, etc).\n",
+            "key" : 4,
+            "lineno" : 136,
             "required" : "opt-in-req-out",
             "type" : "bool"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 122
+        "lineno" : 123
+      },
+      "LegacyOmitPrefixInNameString" : {
+        "name" : "LegacyOmitPrefixInNameString",
+        "structured_annotations": {
+          "scope.Program" : {
+            "type" : {
+            "type" : "struct",
+            "name" : "Program",
+            "path" : "thrift/annotation/scope.thrift"
+          },
+            "value" : {}
+          }
+        },
+        "docstring" : "Omit module-wide name prefix from the name string returned by `getName()`\n\nThis is intended to grandfather the legacy behavior where PHP namespace was not\nmaterialized in `getName()`\n\nWhen specified at program level this annotation is automatically applied to all\nstructured definitions in the Thrift file.\n",
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 146
+      },
+      "LegacyAlwaysIncludeNamePrefixInProcessor" : {
+        "name" : "LegacyAlwaysIncludeNamePrefixInProcessor",
+        "structured_annotations": {
+          "scope.Program" : {
+            "type" : {
+            "type" : "struct",
+            "name" : "Program",
+            "path" : "thrift/annotation/scope.thrift"
+          },
+            "value" : {}
+          }
+        },
+        "docstring" : "Always include module-wide name prefix in the service names used by the method\nprocessor, even when not applied to services\n\nThis is intended to grandfather the legacy behavior where PHP namespace was materialized\nin these names even with service mangling disabled\n\nWhen specified at program level this annotation is automatically applied to all\nservices in the Thrift file.\n",
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 157
       },
       "ConstantsClass" : {
         "name" : "ConstantsClass",
@@ -315,14 +319,14 @@
           "name" : {
             "name" : "name",
             "key" : 1,
-            "lineno" : 145,
+            "lineno" : 162,
             "required" : "opt-in-req-out",
             "type" : "string"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 143
+        "lineno" : 160
       },
       "UnionEnumAttributes" : {
         "name" : "UnionEnumAttributes",
@@ -341,7 +345,7 @@
           "attributes" : {
             "name" : "attributes",
             "key" : 1,
-            "lineno" : 151,
+            "lineno" : 168,
             "required" : "opt-in-req-out",
             "type" : {
       "type" : "list",
@@ -351,7 +355,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 149
+        "lineno" : 166
       },
       "StructTrait" : {
         "name" : "StructTrait",
@@ -386,14 +390,14 @@
           "name" : {
             "name" : "name",
             "key" : 1,
-            "lineno" : 159,
+            "lineno" : 176,
             "required" : "opt-in-req-out",
             "type" : "string"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 155
+        "lineno" : 172
       },
       "Attributes" : {
         "name" : "Attributes",
@@ -476,7 +480,7 @@
           "attributes" : {
             "name" : "attributes",
             "key" : 1,
-            "lineno" : 211,
+            "lineno" : 228,
             "required" : "opt-in-req-out",
             "type" : {
       "type" : "list",
@@ -486,7 +490,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 201
+        "lineno" : 218
       },
       "StructAsTrait" : {
         "name" : "StructAsTrait",
@@ -518,7 +522,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 214
+        "lineno" : 231
       },
       "ModuleInternal" : {
         "name" : "ModuleInternal",
@@ -583,7 +587,7 @@
         "docstring" : "This annotation is to generate an entity as internal\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 220
+        "lineno" : 237
       },
       "GenerateClientMethodsWithHeaders" : {
         "name" : "GenerateClientMethodsWithHeaders",
@@ -608,7 +612,7 @@
         "docstring" : "Given either of the following Thrift service definitions:\n\n    @hack.GenerateClientMethodsWithHeaders\n    service Foo {\n      FooResponse bar();\n    }\n\n    service Foo {\n      @hack.GenerateClientMethodsWithHeaders\n      FooResponse bar();\n    }\n\nThis annotation instructs the compiler to generate the following client method that returns both the response and headers in addition to the bar() method:\n  - (FooResponse, ?dict<string, string>) header_bar()\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 245
+        "lineno" : 262
       },
       "MigrationBlockingAllowInheritance" : {
         "name" : "MigrationBlockingAllowInheritance",
@@ -625,7 +629,7 @@
         "docstring" : "Generated Hack types are being changed to `final` by default.\n\nFor existing thrift types that are inherited from and cannot be easily migrated,\nuse this annotation to make the generated class non-final.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 255
+        "lineno" : 272
       },
       "MigrationBlockingLegacyJSONSerialization" : {
         "name" : "MigrationBlockingLegacyJSONSerialization",
@@ -642,7 +646,7 @@
         "docstring" : "Hack Unions without the `protected` compiler option may rely on `fb_json_serialize` for JSON serialization.\nAdding this annotation will implement the JSONSerializable Hack interface allowing `fb_json_serialize` to continue being used.\n\nNote: This should only be used for migration purposes. Use `JSONThriftSerializer` instead.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 264
+        "lineno" : 281
       },
       "FixmeWrongType" : {
         "name" : "FixmeWrongType",
@@ -683,7 +687,7 @@
         "docstring" : "Wraps the field type with \\HH_FIXME\\WRONG_TYPE<Type> in generated Hack code\nto suppress type-checking errors.\n\nWhen applied to a struct, wraps all field types in the struct.\n\nExample:\n  struct MyStruct {\n    @hack.FixmeWrongType\n    1: i64 my_field;\n  }\n\nGenerates: public \\HH_FIXME\\WRONG_TYPE<int> $my_field;\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 281
+        "lineno" : 298
       },
       "UnsafeArray" : {
         "name" : "UnsafeArray",
@@ -700,7 +704,7 @@
         "docstring" : "Replaces array/collection types with unsafe semi-statically-typed equivalents:\n  - vec<T> becomes varrayish_UNSAFE<T>\n  - dict<K, V> becomes darrayish_UNSAFE<K, V>\n\nExample:\n  struct MyStruct {\n    @hack.UnsafeArray\n    1: list<i64> my_list;\n  }\n\nGenerates: public varrayish_UNSAFE<int> $my_list;\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 300
+        "lineno" : 317
       }
   },
   "source_path" : "thrift/annotation/hack",

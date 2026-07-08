@@ -16,12 +16,14 @@
 
 include "thrift/annotation/hack.thrift"
 
-// Program-level prefix with skip_services=true.
-// Non-service types should be prefixed, service-generated types should NOT.
-@hack.NamePrefix{prefix = "TMyPrefix_", skip_services = true}
-package "facebook.com/thrift/test/fixtures/hack_name_prefix_skip_services"
+// Program-level prefix with apply_on_getName=false and skip_services=true.
+// Non-service generated class names are prefixed, but getName() returns the
+// unprefixed base name. Service-generated types are not prefixed at all.
+@hack.NamePrefix{prefix = "TMyPrefix_", apply_on_getName = false}
+@hack.LegacyOmitPrefixInNameString
+package "facebook.com/thrift/test/fixtures/hack_name_prefix_omit_from_name_string"
 
-namespace hack test.fixtures.name_prefix_skip_services
+namespace hack test.fixtures.hack_name_prefix_omit_from_name_string
 
 enum Status {
   Unknown = 0,

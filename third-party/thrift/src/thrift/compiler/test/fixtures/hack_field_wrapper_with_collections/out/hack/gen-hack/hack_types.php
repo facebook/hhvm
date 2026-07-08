@@ -746,6 +746,8 @@ class Name implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapis
 }
 
 /**
+ * Prepend a prefix to names of definitions in the generated code
+ *
  * Original thrift struct:-
  * NamePrefix
  */
@@ -766,30 +768,34 @@ class NamePrefix implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrift
       'var' => 'skip_services',
       'type' => \TType::BOOL,
     ),
+    4 => shape(
+      'var' => 'apply_to_services',
+      'type' => \TType::BOOL,
+    ),
   ];
   const dict<string, int> FIELDMAP = dict[
     'prefix' => 1,
     'apply_on_getName' => 2,
     'skip_services' => 3,
+    'apply_to_services' => 4,
   ];
 
   const type TConstructorShape = shape(
     ?'prefix' => ?string,
     ?'apply_on_getName' => ?bool,
     ?'skip_services' => ?bool,
+    ?'apply_to_services' => ?bool,
   );
 
   const type TShape = shape(
     'prefix' => string,
     'apply_on_getName' => bool,
     'skip_services' => bool,
+    'apply_to_services' => bool,
   );
-  const int STRUCTURAL_ID = 8004865893644835251;
+  const int STRUCTURAL_ID = 4447979253020581803;
   /**
-   * Prepends a prefix to generated Hack type names.
-   * When both program-level and definition-level NamePrefix are present,
-   * the definition-level prefix wins instead of stacking with the
-   * program-level prefix.
+   * Prefix to apply to names within the module.
    * 
    * Original thrift field:-
    * 1: string prefix
@@ -812,11 +818,20 @@ class NamePrefix implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrift
    * 3: bool skip_services
    */
   public bool $skip_services;
+  /**
+   * When true, the prefix will be applied to types generated for services
+   * (processor, client, helpers, etc).
+   * 
+   * Original thrift field:-
+   * 4: bool apply_to_services
+   */
+  public bool $apply_to_services;
 
-  public function __construct(?string $prefix = null, ?bool $apply_on_getName = null, ?bool $skip_services = null)[] {
+  public function __construct(?string $prefix = null, ?bool $apply_on_getName = null, ?bool $skip_services = null, ?bool $apply_to_services = null)[] {
     $this->prefix = $prefix ?? '';
     $this->apply_on_getName = $apply_on_getName ?? true;
     $this->skip_services = $skip_services ?? false;
+    $this->apply_to_services = $apply_to_services ?? false;
   }
 
   public static function withDefaultValues()[]: this {
@@ -828,6 +843,7 @@ class NamePrefix implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrift
       Shapes::idx($shape, 'prefix'),
       Shapes::idx($shape, 'apply_on_getName'),
       Shapes::idx($shape, 'skip_services'),
+      Shapes::idx($shape, 'apply_to_services'),
     );
   }
 
@@ -873,6 +889,17 @@ class NamePrefix implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrift
               "name" => "skip_services",
             )
           ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 4,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_BOOL_TYPE,
+                )
+              ),
+              "name" => "apply_to_services",
+            )
+          ),
         ],
         "is_union" => false,
       )
@@ -883,11 +910,6 @@ class NamePrefix implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrift
     return shape(
       'struct' => dict[
         '\facebook\thrift\annotation\Program' => \facebook\thrift\annotation\Program::withDefaultValues(),
-        '\facebook\thrift\annotation\Structured' => \facebook\thrift\annotation\Structured::withDefaultValues(),
-        '\facebook\thrift\annotation\Typedef' => \facebook\thrift\annotation\Typedef::withDefaultValues(),
-        '\facebook\thrift\annotation\Enum' => \facebook\thrift\annotation\Enum::withDefaultValues(),
-        '\facebook\thrift\annotation\TConst' => \facebook\thrift\annotation\TConst::withDefaultValues(),
-        '\facebook\thrift\annotation\Service' => \facebook\thrift\annotation\Service::withDefaultValues(),
       ],
       'fields' => dict[
       ],
@@ -903,6 +925,7 @@ class NamePrefix implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrift
       $shape['prefix'],
       $shape['apply_on_getName'],
       $shape['skip_services'],
+      $shape['apply_to_services'],
     );
   }
 
@@ -911,6 +934,7 @@ class NamePrefix implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrift
       'prefix' => $this->prefix,
       'apply_on_getName' => $this->apply_on_getName,
       'skip_services' => $this->skip_services,
+      'apply_to_services' => $this->apply_to_services,
     );
   }
   public function getInstanceKey()[write_props]: string {
@@ -933,6 +957,192 @@ class NamePrefix implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrift
     if (idx($parsed, 'skip_services') !== null) {
       $this->skip_services = HH\FIXME\UNSAFE_CAST<mixed, bool>($parsed['skip_services']);
     }
+    if (idx($parsed, 'apply_to_services') !== null) {
+      $this->apply_to_services = HH\FIXME\UNSAFE_CAST<mixed, bool>($parsed['apply_to_services']);
+    }
+  }
+
+}
+
+/**
+ * Omit module-wide name prefix from the name string returned by `getName()`
+ * 
+ * This is intended to grandfather the legacy behavior where PHP namespace was not
+ * materialized in `getName()`
+ * 
+ * When specified at program level this annotation is automatically applied to all
+ * structured definitions in the Thrift file.
+ *
+ * Original thrift struct:-
+ * LegacyOmitPrefixInNameString
+ */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/annotation/hack/LegacyOmitPrefixInNameString'))>>
+class LegacyOmitPrefixInNameString implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
+  use \ThriftSerializationTrait;
+
+  const \ThriftStructTypes::TSpec SPEC = dict[
+  ];
+  const dict<string, int> FIELDMAP = dict[
+  ];
+
+  const type TConstructorShape = shape(
+  );
+
+  const type TShape = shape(
+  );
+  const int STRUCTURAL_ID = 957977401221134810;
+
+  public function __construct()[] {
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+    );
+  }
+
+  public function getName()[]: string {
+    return 'LegacyOmitPrefixInNameString';
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "hack.LegacyOmitPrefixInNameString",
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[
+        '\facebook\thrift\annotation\Program' => \facebook\thrift\annotation\Program::withDefaultValues(),
+      ],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public static function __stringifyMapKeys<T>(dict<arraykey, T> $m)[]: dict<string, T> {
+    return Dict\map_keys($m, $key ==> (string)$key);
+  }
+
+  public static function __fromShape(self::TShape $shape)[]: this {
+    return new static(
+    );
+  }
+
+  public function __toShape()[]: self::TShape {
+    return shape(
+    );
+  }
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function readFromJson(string $jsonText): void {
+    $parsed = PHP\json_decode($jsonText, true);
+
+    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
+      throw new \TProtocolException("Cannot parse the given json string.");
+    }
+
+  }
+
+}
+
+/**
+ * Always include module-wide name prefix in the service names used by the method
+ * processor, even when not applied to services
+ * 
+ * This is intended to grandfather the legacy behavior where PHP namespace was materialized
+ * in these names even with service mangling disabled
+ * 
+ * When specified at program level this annotation is automatically applied to all
+ * services in the Thrift file.
+ *
+ * Original thrift struct:-
+ * LegacyAlwaysIncludeNamePrefixInProcessor
+ */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/annotation/hack/LegacyAlwaysIncludeNamePrefixInProcessor'))>>
+class LegacyAlwaysIncludeNamePrefixInProcessor implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
+  use \ThriftSerializationTrait;
+
+  const \ThriftStructTypes::TSpec SPEC = dict[
+  ];
+  const dict<string, int> FIELDMAP = dict[
+  ];
+
+  const type TConstructorShape = shape(
+  );
+
+  const type TShape = shape(
+  );
+  const int STRUCTURAL_ID = 957977401221134810;
+
+  public function __construct()[] {
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+    );
+  }
+
+  public function getName()[]: string {
+    return 'LegacyAlwaysIncludeNamePrefixInProcessor';
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "hack.LegacyAlwaysIncludeNamePrefixInProcessor",
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[
+        '\facebook\thrift\annotation\Program' => \facebook\thrift\annotation\Program::withDefaultValues(),
+      ],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public static function __stringifyMapKeys<T>(dict<arraykey, T> $m)[]: dict<string, T> {
+    return Dict\map_keys($m, $key ==> (string)$key);
+  }
+
+  public static function __fromShape(self::TShape $shape)[]: this {
+    return new static(
+    );
+  }
+
+  public function __toShape()[]: self::TShape {
+    return shape(
+    );
+  }
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function readFromJson(string $jsonText): void {
+    $parsed = PHP\json_decode($jsonText, true);
+
+    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
+      throw new \TProtocolException("Cannot parse the given json string.");
+    }
+
   }
 
 }

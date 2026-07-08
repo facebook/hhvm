@@ -59,7 +59,7 @@ class GlobalFBStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
     3 => shape(
       'var' => 'struct_value',
       'type' => \TType::STRUCT,
-      'class' => \test\foo\php\ns\Double_Prefixed_::class,
+      'class' => \test\foo\php\ns\ProgramPrefixedTestStruct::class,
     ),
   ];
   const dict<string, int> FIELDMAP = dict[
@@ -71,7 +71,7 @@ class GlobalFBStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
   const type TConstructorShape = shape(
     ?'str_value' => ?string,
     ?'enum_value' => ?\test\foo\php\ns\ProgramPrefixedStatus,
-    ?'struct_value' => ?\test\foo\php\ns\Double_Prefixed_,
+    ?'struct_value' => ?\test\foo\php\ns\ProgramPrefixedTestStruct,
   );
 
   const int STRUCTURAL_ID = 3310738380971623822;
@@ -89,9 +89,9 @@ class GlobalFBStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
    * Original thrift field:-
    * 3: module.TestStruct struct_value
    */
-  public ?\test\foo\php\ns\Double_Prefixed_ $struct_value;
+  public ?\test\foo\php\ns\ProgramPrefixedTestStruct $struct_value;
 
-  public function __construct(?string $str_value = null, ?\test\foo\php\ns\ProgramPrefixedStatus $enum_value = null, ?\test\foo\php\ns\Double_Prefixed_ $struct_value = null)[] {
+  public function __construct(?string $str_value = null, ?\test\foo\php\ns\ProgramPrefixedStatus $enum_value = null, ?\test\foo\php\ns\ProgramPrefixedTestStruct $struct_value = null)[] {
     $this->str_value = $str_value ?? '';
     $this->enum_value = $enum_value;
     $this->struct_value = $struct_value;
@@ -169,22 +169,6 @@ class GlobalFBStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
     return shape(
       'struct' => dict[],
       'fields' => dict[
-        'struct_value' => shape(
-          'field' => dict[],
-          'type' => dict[
-            '\facebook\thrift\annotation\hack\NamePrefix' => \facebook\thrift\annotation\hack\NamePrefix::fromShape(
-              shape(
-                "prefix" => "Double_",
-                "apply_on_getName" => false,
-              )
-            ),
-            '\facebook\thrift\annotation\hack\Name' => \facebook\thrift\annotation\hack\Name::fromShape(
-              shape(
-                "name" => "Prefixed_",
-              )
-            ),
-          ],
-        ),
       ],
     );
   }

@@ -13,7 +13,7 @@ namespace hack_ns2;
  * TestService
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/fixtures/php_hack_ns/TestService'))>>
-interface GlobalTestServiceAsyncIf extends \test\foo\php\ns\Deprecated_FooHackServiceAsyncIf {
+interface TestServiceAsyncIf extends \test\foo\php\ns\FooHackServiceAsyncIf {
   /**
    * Original thrift definition:-
    * FBStruct
@@ -27,7 +27,7 @@ interface GlobalTestServiceAsyncIf extends \test\foo\php\ns\Deprecated_FooHackSe
  * TestService
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/fixtures/php_hack_ns/TestService'))>>
-interface GlobalTestServiceAsyncClientIf extends GlobalTestServiceAsyncIf, \test\foo\php\ns\Deprecated_FooHackServiceAsyncClientIf {
+interface TestServiceAsyncClientIf extends TestServiceAsyncIf, \test\foo\php\ns\FooHackServiceAsyncClientIf {
 }
 
 /**
@@ -35,7 +35,7 @@ interface GlobalTestServiceAsyncClientIf extends GlobalTestServiceAsyncIf, \test
  * TestService
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/fixtures/php_hack_ns/TestService'))>>
-interface GlobalTestServiceClientIf extends \test\foo\php\ns\Deprecated_FooHackServiceClientIf {
+interface TestServiceClientIf extends \test\foo\php\ns\FooHackServiceClientIf {
   /**
    * Original thrift definition:-
    * FBStruct
@@ -48,7 +48,7 @@ interface GlobalTestServiceClientIf extends \test\foo\php\ns\Deprecated_FooHackS
  * Original thrift service:-
  * TestService
  */
-trait GlobalTestServiceClientBase {
+trait TestServiceClientBase {
   require extends \ThriftClientBase;
 
   /**
@@ -58,33 +58,33 @@ trait GlobalTestServiceClientBase {
    */
   public async function pong(string $str_arg): Awaitable<\hack_ns2\GlobalFBStruct> {
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = GlobalTestService_pong_args::fromShape(shape(
+    $args = TestService_pong_args::fromShape(shape(
       'str_arg' => $str_arg,
     ));
-    await $this->asyncHandler_->genBefore(GlobalTestServiceStaticMetadata::THRIFT_SVC_NAME, "pong", $args);
-    $currentseqid = $this->sendImplHelper($args, "pong", false, GlobalTestServiceStaticMetadata::THRIFT_SVC_NAME );
-    return (await $this->genAwaitResponse(GlobalTestService_pong_result::class, "pong", false, $currentseqid, $rpc_options))[0];
+    await $this->asyncHandler_->genBefore(TestServiceStaticMetadata::THRIFT_SVC_NAME, "pong", $args);
+    $currentseqid = $this->sendImplHelper($args, "pong", false, TestServiceStaticMetadata::THRIFT_SVC_NAME );
+    return (await $this->genAwaitResponse(TestService_pong_result::class, "pong", false, $currentseqid, $rpc_options))[0];
   }
 
 }
 
-class GlobalTestServiceAsyncClient extends \test\foo\php\ns\Deprecated_FooHackServiceAsyncClient implements GlobalTestServiceAsyncClientIf {
-  use GlobalTestServiceClientBase;
+class TestServiceAsyncClient extends \test\foo\php\ns\FooHackServiceAsyncClient implements TestServiceAsyncClientIf {
+  use TestServiceClientBase;
 
-  const string THRIFT_SVC_NAME = GlobalTestServiceStaticMetadata::THRIFT_SVC_NAME;
+  const string THRIFT_SVC_NAME = TestServiceStaticMetadata::THRIFT_SVC_NAME;
 
 }
 
-class GlobalTestServiceClient extends \test\foo\php\ns\Deprecated_FooHackServiceClient implements GlobalTestServiceClientIf {
-  use GlobalTestServiceClientBase;
+class TestServiceClient extends \test\foo\php\ns\FooHackServiceClient implements TestServiceClientIf {
+  use TestServiceClientBase;
 
-  const string THRIFT_SVC_NAME = GlobalTestServiceStaticMetadata::THRIFT_SVC_NAME;
+  const string THRIFT_SVC_NAME = TestServiceStaticMetadata::THRIFT_SVC_NAME;
 
 }
 
 // HELPER FUNCTIONS AND STRUCTURES
 
-class GlobalTestService_pong_args implements \IThriftSyncStruct, \IThriftStructMetadata {
+class TestService_pong_args implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
@@ -119,7 +119,7 @@ class GlobalTestService_pong_args implements \IThriftSyncStruct, \IThriftStructM
   }
 
   public function getName()[]: string {
-    return 'GlobalTestService_pong_args';
+    return 'TestService_pong_args';
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -158,7 +158,7 @@ class GlobalTestService_pong_args implements \IThriftSyncStruct, \IThriftStructM
 
 }
 
-class GlobalTestService_pong_result extends \ThriftSyncStructWithResult implements \IThriftStructMetadata {
+class TestService_pong_result extends \ThriftSyncStructWithResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const type TResult = \hack_ns2\GlobalFBStruct;
@@ -196,13 +196,13 @@ class GlobalTestService_pong_result extends \ThriftSyncStructWithResult implemen
   }
 
   public function getName()[]: string {
-    return 'GlobalTestService_pong_result';
+    return 'TestService_pong_result';
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return \tmeta_ThriftStruct::fromShape(
       shape(
-        "name" => "module2.GlobalTestService_pong_result",
+        "name" => "module2.TestService_pong_result",
         "fields" => vec[
           \tmeta_ThriftField::fromShape(
             shape(
@@ -239,7 +239,7 @@ class GlobalTestService_pong_result extends \ThriftSyncStructWithResult implemen
 
 }
 
-class GlobalTestServiceStaticMetadata implements \IThriftServiceStaticMetadata {
+class TestServiceStaticMetadata implements \IThriftServiceStaticMetadata {
   const string THRIFT_SVC_NAME = 'TestService';
 
   public static function getServiceMetadata()[]: \tmeta_ThriftService {
@@ -300,14 +300,12 @@ class GlobalTestServiceStaticMetadata implements \IThriftServiceStaticMetadata {
             ],
             'structs' => dict[
               'module2.FBStruct' => \hack_ns2\GlobalFBStruct::getStructMetadata(),
-              'module.TestStruct' => \test\foo\php\ns\Double_Prefixed_::getStructMetadata(),
-              'module.TestUnion' => \test\foo\php\ns\PrefixedTestUnion::getStructMetadata(),
+              'module.TestStruct' => \test\foo\php\ns\ProgramPrefixedTestStruct::getStructMetadata(),
             ],
             'exceptions' => dict[
-              'module.TestException' => \test\foo\php\ns\PrefixedTestException::getExceptionMetadata(),
             ],
             'services' => dict[
-              'module.FooHackService' => \test\foo\php\ns\Deprecated_FooHackServiceStaticMetadata::getServiceMetadata(),
+              'module.FooHackService' => \test\foo\php\ns\FooHackServiceStaticMetadata::getServiceMetadata(),
             ],
           )
         ),

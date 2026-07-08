@@ -23,18 +23,19 @@ import com.facebook.thrift.server.*;
 import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
+/**
+ * Prepend a prefix to names of definitions in the generated code
+ */
 @SuppressWarnings({ "unused", "serial" })
 public class NamePrefix implements TBase, java.io.Serializable, Cloneable, Comparable<NamePrefix> {
   private static final TStruct STRUCT_DESC = new TStruct("NamePrefix");
   private static final TField PREFIX_FIELD_DESC = new TField("prefix", TType.STRING, (short)1);
   private static final TField APPLY_ON_GET_NAME_FIELD_DESC = new TField("apply_on_getName", TType.BOOL, (short)2);
   private static final TField SKIP_SERVICES_FIELD_DESC = new TField("skip_services", TType.BOOL, (short)3);
+  private static final TField APPLY_TO_SERVICES_FIELD_DESC = new TField("apply_to_services", TType.BOOL, (short)4);
 
   /**
-   * Prepends a prefix to generated Hack type names.
-   * When both program-level and definition-level NamePrefix are present,
-   * the definition-level prefix wins instead of stacking with the
-   * program-level prefix.
+   * Prefix to apply to names within the module.
    */
   public String prefix;
   /**
@@ -48,14 +49,21 @@ public class NamePrefix implements TBase, java.io.Serializable, Cloneable, Compa
    * are prefixed.
    */
   public boolean skip_services;
+  /**
+   * When true, the prefix will be applied to types generated for services
+   * (processor, client, helpers, etc).
+   */
+  public boolean apply_to_services;
   public static final int PREFIX = 1;
   public static final int APPLY_ON_GETNAME = 2;
   public static final int SKIP_SERVICES = 3;
+  public static final int APPLY_TO_SERVICES = 4;
 
   // isset id assignments
   private static final int __APPLY_ON_GETNAME_ISSET_ID = 0;
   private static final int __SKIP_SERVICES_ISSET_ID = 1;
-  private BitSet __isset_bit_vector = new BitSet(2);
+  private static final int __APPLY_TO_SERVICES_ISSET_ID = 2;
+  private BitSet __isset_bit_vector = new BitSet(3);
 
   public static final Map<Integer, FieldMetaData> metaDataMap;
 
@@ -66,6 +74,8 @@ public class NamePrefix implements TBase, java.io.Serializable, Cloneable, Compa
     tmpMetaDataMap.put(APPLY_ON_GETNAME, new FieldMetaData("apply_on_getName", TFieldRequirementType.DEFAULT, 
         new FieldValueMetaData(TType.BOOL)));
     tmpMetaDataMap.put(SKIP_SERVICES, new FieldMetaData("skip_services", TFieldRequirementType.DEFAULT, 
+        new FieldValueMetaData(TType.BOOL)));
+    tmpMetaDataMap.put(APPLY_TO_SERVICES, new FieldMetaData("apply_to_services", TFieldRequirementType.DEFAULT, 
         new FieldValueMetaData(TType.BOOL)));
     metaDataMap = Collections.unmodifiableMap(tmpMetaDataMap);
   }
@@ -79,26 +89,32 @@ public class NamePrefix implements TBase, java.io.Serializable, Cloneable, Compa
 
     this.skip_services = false;
 
+    this.apply_to_services = false;
+
   }
 
   public NamePrefix(
       String prefix,
       boolean apply_on_getName,
-      boolean skip_services) {
+      boolean skip_services,
+      boolean apply_to_services) {
     this();
     this.prefix = prefix;
     this.apply_on_getName = apply_on_getName;
     setApply_on_getNameIsSet(true);
     this.skip_services = skip_services;
     setSkip_servicesIsSet(true);
+    this.apply_to_services = apply_to_services;
+    setApply_to_servicesIsSet(true);
   }
 
   public static class Builder {
     private String prefix;
     private boolean apply_on_getName;
     private boolean skip_services;
+    private boolean apply_to_services;
 
-    BitSet __optional_isset = new BitSet(2);
+    BitSet __optional_isset = new BitSet(3);
 
     public Builder() {
     }
@@ -120,6 +136,12 @@ public class NamePrefix implements TBase, java.io.Serializable, Cloneable, Compa
       return this;
     }
 
+    public Builder setApply_to_services(final boolean apply_to_services) {
+      this.apply_to_services = apply_to_services;
+      __optional_isset.set(__APPLY_TO_SERVICES_ISSET_ID, true);
+      return this;
+    }
+
     public NamePrefix build() {
       NamePrefix result = new NamePrefix();
       result.setPrefix(this.prefix);
@@ -128,6 +150,9 @@ public class NamePrefix implements TBase, java.io.Serializable, Cloneable, Compa
       }
       if (__optional_isset.get(__SKIP_SERVICES_ISSET_ID)) {
         result.setSkip_services(this.skip_services);
+      }
+      if (__optional_isset.get(__APPLY_TO_SERVICES_ISSET_ID)) {
+        result.setApply_to_services(this.apply_to_services);
       }
       return result;
     }
@@ -148,6 +173,7 @@ public class NamePrefix implements TBase, java.io.Serializable, Cloneable, Compa
     }
     this.apply_on_getName = TBaseHelper.deepCopy(other.apply_on_getName);
     this.skip_services = TBaseHelper.deepCopy(other.skip_services);
+    this.apply_to_services = TBaseHelper.deepCopy(other.apply_to_services);
   }
 
   public NamePrefix deepCopy() {
@@ -155,20 +181,14 @@ public class NamePrefix implements TBase, java.io.Serializable, Cloneable, Compa
   }
 
   /**
-   * Prepends a prefix to generated Hack type names.
-   * When both program-level and definition-level NamePrefix are present,
-   * the definition-level prefix wins instead of stacking with the
-   * program-level prefix.
+   * Prefix to apply to names within the module.
    */
   public String getPrefix() {
     return this.prefix;
   }
 
   /**
-   * Prepends a prefix to generated Hack type names.
-   * When both program-level and definition-level NamePrefix are present,
-   * the definition-level prefix wins instead of stacking with the
-   * program-level prefix.
+   * Prefix to apply to names within the module.
    */
   public NamePrefix setPrefix(String prefix) {
     this.prefix = prefix;
@@ -254,6 +274,37 @@ public class NamePrefix implements TBase, java.io.Serializable, Cloneable, Compa
     __isset_bit_vector.set(__SKIP_SERVICES_ISSET_ID, __value);
   }
 
+  /**
+   * When true, the prefix will be applied to types generated for services
+   * (processor, client, helpers, etc).
+   */
+  public boolean isApply_to_services() {
+    return this.apply_to_services;
+  }
+
+  /**
+   * When true, the prefix will be applied to types generated for services
+   * (processor, client, helpers, etc).
+   */
+  public NamePrefix setApply_to_services(boolean apply_to_services) {
+    this.apply_to_services = apply_to_services;
+    setApply_to_servicesIsSet(true);
+    return this;
+  }
+
+  public void unsetApply_to_services() {
+    __isset_bit_vector.clear(__APPLY_TO_SERVICES_ISSET_ID);
+  }
+
+  // Returns true if field apply_to_services is set (has been assigned a value) and false otherwise
+  public boolean isSetApply_to_services() {
+    return __isset_bit_vector.get(__APPLY_TO_SERVICES_ISSET_ID);
+  }
+
+  public void setApply_to_servicesIsSet(boolean __value) {
+    __isset_bit_vector.set(__APPLY_TO_SERVICES_ISSET_ID, __value);
+  }
+
   public void setFieldValue(int fieldID, Object __value) {
     switch (fieldID) {
     case PREFIX:
@@ -280,6 +331,14 @@ public class NamePrefix implements TBase, java.io.Serializable, Cloneable, Compa
       }
       break;
 
+    case APPLY_TO_SERVICES:
+      if (__value == null) {
+        unsetApply_to_services();
+      } else {
+        setApply_to_services((Boolean)__value);
+      }
+      break;
+
     default:
       throw new IllegalArgumentException("Field " + fieldID + " doesn't exist!");
     }
@@ -295,6 +354,9 @@ public class NamePrefix implements TBase, java.io.Serializable, Cloneable, Compa
 
     case SKIP_SERVICES:
       return new Boolean(isSkip_services());
+
+    case APPLY_TO_SERVICES:
+      return new Boolean(isApply_to_services());
 
     default:
       throw new IllegalArgumentException("Field " + fieldID + " doesn't exist!");
@@ -317,12 +379,14 @@ public class NamePrefix implements TBase, java.io.Serializable, Cloneable, Compa
 
     if (!TBaseHelper.equalsNobinary(this.skip_services, that.skip_services)) { return false; }
 
+    if (!TBaseHelper.equalsNobinary(this.apply_to_services, that.apply_to_services)) { return false; }
+
     return true;
   }
 
   @Override
   public int hashCode() {
-    return Arrays.deepHashCode(new Object[] {prefix, apply_on_getName, skip_services});
+    return Arrays.deepHashCode(new Object[] {prefix, apply_on_getName, skip_services, apply_to_services});
   }
 
   @Override
@@ -358,6 +422,14 @@ public class NamePrefix implements TBase, java.io.Serializable, Cloneable, Compa
       return lastComparison;
     }
     lastComparison = TBaseHelper.compareTo(skip_services, other.skip_services);
+    if (lastComparison != 0) { 
+      return lastComparison;
+    }
+    lastComparison = Boolean.valueOf(isSetApply_to_services()).compareTo(other.isSetApply_to_services());
+    if (lastComparison != 0) {
+      return lastComparison;
+    }
+    lastComparison = TBaseHelper.compareTo(apply_to_services, other.apply_to_services);
     if (lastComparison != 0) { 
       return lastComparison;
     }
@@ -398,6 +470,14 @@ public class NamePrefix implements TBase, java.io.Serializable, Cloneable, Compa
             TProtocolUtil.skip(iprot, __field.type);
           }
           break;
+        case APPLY_TO_SERVICES:
+          if (__field.type == TType.BOOL) {
+            this.apply_to_services = iprot.readBool();
+            setApply_to_servicesIsSet(true);
+          } else {
+            TProtocolUtil.skip(iprot, __field.type);
+          }
+          break;
         default:
           TProtocolUtil.skip(iprot, __field.type);
           break;
@@ -425,6 +505,9 @@ public class NamePrefix implements TBase, java.io.Serializable, Cloneable, Compa
     oprot.writeFieldEnd();
     oprot.writeFieldBegin(SKIP_SERVICES_FIELD_DESC);
     oprot.writeBool(this.skip_services);
+    oprot.writeFieldEnd();
+    oprot.writeFieldBegin(APPLY_TO_SERVICES_FIELD_DESC);
+    oprot.writeBool(this.apply_to_services);
     oprot.writeFieldEnd();
     oprot.writeFieldStop();
     oprot.writeStructEnd();
@@ -469,6 +552,13 @@ public class NamePrefix implements TBase, java.io.Serializable, Cloneable, Compa
     sb.append(space);
     sb.append(":").append(space);
     sb.append(TBaseHelper.toString(this.isSkip_services(), indent + 1, prettyPrint));
+    first = false;
+    if (!first) sb.append("," + newLine);
+    sb.append(indentStr);
+    sb.append("apply_to_services");
+    sb.append(space);
+    sb.append(":").append(space);
+    sb.append(TBaseHelper.toString(this.isApply_to_services(), indent + 1, prettyPrint));
     first = false;
     sb.append(newLine + TBaseHelper.reduceIndent(indentStr));
     sb.append(")");

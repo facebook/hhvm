@@ -1,1 +1,2 @@
 hack: hack:mangledsvcs=1,hack_collections=1 src/module.thrift
+hack_processor_with_prefix: hack:mangledsvcs=1,hack_collections=1,server=1 src/processor_with_prefix.thrift

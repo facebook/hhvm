@@ -671,11 +671,15 @@ namespace facebook.thrift.annotation.hack
         /// <summary>Gets or sets the skip_services field.</summary>
         public bool @skip_services { get; set; } = false;
 
+        /// <summary>Gets or sets the apply_to_services field.</summary>
+        public bool @apply_to_services { get; set; } = false;
+
         public @NamePrefix()
         {
             @prefix = string.Empty;
             @apply_on_getName = true;
             @skip_services = false;
+            @apply_to_services = false;
         }
 
         public void __fbthrift_clear()
@@ -683,6 +687,7 @@ namespace facebook.thrift.annotation.hack
             @prefix = string.Empty;
             @apply_on_getName = default;
             @skip_services = default;
+            @apply_to_services = default;
         }
 
         public bool __fbthrift_is_empty()
@@ -690,6 +695,7 @@ namespace facebook.thrift.annotation.hack
             if (@prefix != null && @prefix.Length != 0) { return false; }
             if (@apply_on_getName != default) { return false; }
             if (@skip_services != default) { return false; }
+            if (@apply_to_services != default) { return false; }
             return true;
         }
 
@@ -704,6 +710,9 @@ namespace facebook.thrift.annotation.hack
             // Field 3: skip_services (bool)
             writer.WriteFieldBegin(ThriftWireType.Bool, 3);
             writer.WriteBool(@skip_services);
+            // Field 4: apply_to_services (bool)
+            writer.WriteFieldBegin(ThriftWireType.Bool, 4);
+            writer.WriteBool(@apply_to_services);
             writer.WriteFieldStop();
         }
 
@@ -749,6 +758,16 @@ namespace facebook.thrift.annotation.hack
                             reader.Skip(fieldType);
                         }
                         break;
+                    case 4: // apply_to_services
+                        if (fieldType == ThriftWireType.Bool)
+                        {
+                            @apply_to_services = reader.ReadBool();
+                        }
+                        else
+                        {
+                            reader.Skip(fieldType);
+                        }
+                        break;
                     default:
                         reader.Skip(fieldType);
                         break;
@@ -774,6 +793,10 @@ namespace facebook.thrift.annotation.hack
             {
                 return false;
             }
+            if (!Equals(@apply_to_services, other.@apply_to_services))
+            {
+                return false;
+            }
             return true;
         }
 
@@ -783,6 +806,7 @@ namespace facebook.thrift.annotation.hack
             hashCode.Add(@prefix);
             hashCode.Add(@apply_on_getName);
             hashCode.Add(@skip_services);
+            hashCode.Add(@apply_to_services);
             return hashCode.ToHashCode();
         }
 
@@ -798,6 +822,145 @@ namespace facebook.thrift.annotation.hack
             sb.Append(", ");
             sb.Append("skip_services=");
             sb.Append(@skip_services);
+            sb.Append(", ");
+            sb.Append("apply_to_services=");
+            sb.Append(@apply_to_services);
+            sb.Append(")");
+            return sb.ToString();
+        }
+    }
+
+    /// <summary>
+    /// Auto-generated from LegacyOmitPrefixInNameString
+    /// </summary>
+    public class @LegacyOmitPrefixInNameString : IThriftSerializable
+    {
+        /// <summary>The Thrift URI for this type, used for type registration.</summary>
+        public static readonly string __fbthrift_uri = "facebook.com/thrift/annotation/hack/LegacyOmitPrefixInNameString";
+        public @LegacyOmitPrefixInNameString()
+        {
+        }
+
+        public void __fbthrift_clear()
+        {
+        }
+
+        public bool __fbthrift_is_empty()
+        {
+            return true;
+        }
+
+        public void __fbthrift_write(IThriftProtocolWriter writer)
+        {
+            writer.WriteFieldStop();
+        }
+
+        public void __fbthrift_read(IThriftProtocolReader reader)
+        {
+            while (true)
+            {
+                var (fieldType, fieldId) = reader.ReadFieldBegin();
+                if (fieldType == ThriftWireType.Stop)
+                {
+                    break;
+                }
+
+                switch (fieldId)
+                {
+                    default:
+                        reader.Skip(fieldType);
+                        break;
+                }
+            }
+        }
+
+        public override bool Equals(object? obj)
+        {
+            if (obj is not @LegacyOmitPrefixInNameString other)
+            {
+                return false;
+            }
+            return true;
+        }
+
+        public override int GetHashCode()
+        {
+            var hashCode = new HashCode();
+            return hashCode.ToHashCode();
+        }
+
+        public override string ToString()
+        {
+            var sb = new System.Text.StringBuilder();
+            sb.Append("LegacyOmitPrefixInNameString(");
+            sb.Append(")");
+            return sb.ToString();
+        }
+    }
+
+    /// <summary>
+    /// Auto-generated from LegacyAlwaysIncludeNamePrefixInProcessor
+    /// </summary>
+    public class @LegacyAlwaysIncludeNamePrefixInProcessor : IThriftSerializable
+    {
+        /// <summary>The Thrift URI for this type, used for type registration.</summary>
+        public static readonly string __fbthrift_uri = "facebook.com/thrift/annotation/hack/LegacyAlwaysIncludeNamePrefixInProcessor";
+        public @LegacyAlwaysIncludeNamePrefixInProcessor()
+        {
+        }
+
+        public void __fbthrift_clear()
+        {
+        }
+
+        public bool __fbthrift_is_empty()
+        {
+            return true;
+        }
+
+        public void __fbthrift_write(IThriftProtocolWriter writer)
+        {
+            writer.WriteFieldStop();
+        }
+
+        public void __fbthrift_read(IThriftProtocolReader reader)
+        {
+            while (true)
+            {
+                var (fieldType, fieldId) = reader.ReadFieldBegin();
+                if (fieldType == ThriftWireType.Stop)
+                {
+                    break;
+                }
+
+                switch (fieldId)
+                {
+                    default:
+                        reader.Skip(fieldType);
+                        break;
+                }
+            }
+        }
+
+        public override bool Equals(object? obj)
+        {
+            if (obj is not @LegacyAlwaysIncludeNamePrefixInProcessor other)
+            {
+                return false;
+            }
+            return true;
+        }
+
+        public override int GetHashCode()
+        {
+            var hashCode = new HashCode();
+            return hashCode.ToHashCode();
+        }
+
+        public override string ToString()
+        {
+            var sb = new System.Text.StringBuilder();
+            sb.Append("LegacyAlwaysIncludeNamePrefixInProcessor(");
             sb.Append(")");
             return sb.ToString();
         }
@@ -1732,6 +1895,8 @@ namespace facebook.thrift.annotation.hack
             register("facebook.com/thrift/annotation/hack/SkipCodegen", () => new @SkipCodegen());
             register("facebook.com/thrift/annotation/hack/Name", () => new @Name());
             register("facebook.com/thrift/annotation/hack/NamePrefix", () => new @NamePrefix());
+            register("facebook.com/thrift/annotation/hack/LegacyOmitPrefixInNameString", () => new @LegacyOmitPrefixInNameString());
+            register("facebook.com/thrift/annotation/hack/LegacyAlwaysIncludeNamePrefixInProcessor", () => new @LegacyAlwaysIncludeNamePrefixInProcessor());
             register("facebook.com/thrift/annotation/hack/ConstantsClass", () => new @ConstantsClass());
             register("facebook.com/thrift/annotation/hack/UnionEnumAttributes", () => new @UnionEnumAttributes());
             register("facebook.com/thrift/annotation/hack/StructTrait", () => new @StructTrait());

@@ -19,6 +19,8 @@ namespace facebook::thrift::annotation::hack {
   ::apache::thrift::detail::md::StructMetadata<SkipCodegen>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<Name>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<NamePrefix>::gen(metadata);
+  ::apache::thrift::detail::md::StructMetadata<LegacyOmitPrefixInNameString>::gen(metadata);
+  ::apache::thrift::detail::md::StructMetadata<LegacyAlwaysIncludeNamePrefixInProcessor>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<ConstantsClass>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<UnionEnumAttributes>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<StructTrait>::gen(metadata);

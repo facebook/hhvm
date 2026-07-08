@@ -227,6 +227,10 @@ inline constexpr auto kHackFixmeWrongTypeUri =
     "facebook.com/thrift/annotation/hack/FixmeWrongType";
 inline constexpr auto kHackUnsafeArrayUri =
     "facebook.com/thrift/annotation/hack/UnsafeArray";
+inline constexpr auto kLegacyOmitPrefixInNameStringUri =
+    "facebook.com/thrift/annotation/hack/LegacyOmitPrefixInNameString";
+inline constexpr auto kLegacyAlwaysIncludeNamePrefixInProcessor =
+    "facebook.com/thrift/annotation/hack/LegacyAlwaysIncludeNamePrefixInProcessor";
 
 // Go:
 inline constexpr auto kGoNameUri = "facebook.com/thrift/annotation/go/Name";

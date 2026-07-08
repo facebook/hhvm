@@ -1837,13 +1837,14 @@ TEST(FormatterTest, fixtureFilesRoundTrip) {
     folly::test::TemporaryDirectory dir;
     const auto scratch_file =
         std::filesystem::path(dir.path().string()) / fixture_file.filename();
-    write_file(scratch_file, read_file(fixture_file));
-    const std::vector<std::string> source_comments =
-        comment_texts(read_file(scratch_file));
+    const std::string source = read_file(fixture_file);
+    write_file(scratch_file, source);
+    const std::vector<std::string> source_comments = comment_texts(source);
     format_file_in_place(scratch_file);
 
     const std::string formatted = read_file(scratch_file);
     EXPECT_EQ(comment_texts(formatted), source_comments);
+    EXPECT_EQ(formatted, source);
     EXPECT_EQ(format_thrift_source(formatted), formatted);
   }
 }

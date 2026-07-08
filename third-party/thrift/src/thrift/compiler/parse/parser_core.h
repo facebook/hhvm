@@ -178,7 +178,7 @@ class parser_core {
   attributes_type parse_package_and_directives() {
     while (token_.kind != tok::eof) {
       auto begin = token_.range.begin;
-      switch (token_.kind) {
+      switch (token_.kind.value) {
         case tok::kw_include:
         case tok::kw_cpp_include:
         case tok::kw_hs_include:
@@ -214,7 +214,7 @@ class parser_core {
     auto str = lex_string_literal(token_);
     auto str_range = token_.range;
     consume_token();
-    switch (kind) {
+    switch (kind.value) {
       case tok::kw_include: {
         auto alias = try_parse_include_alias();
         actions_.on_include(range, str, alias, str_range);
@@ -242,7 +242,7 @@ class parser_core {
     auto range = range_tracker(loc, end_);
     consume_token();
     std::string name;
-    switch (token_.kind) {
+    switch (token_.kind.value) {
       case tok::string_literal:
         name = lex_string_literal(token_);
         consume_token();
@@ -285,7 +285,7 @@ class parser_core {
   //   | enum
   //   | const
   void parse_definition(source_location loc, attributes_type attrs) {
-    switch (token_.kind) {
+    switch (token_.kind.value) {
       case tok::kw_service:
         parse_service(loc, std::move(attrs));
         break;
@@ -472,7 +472,7 @@ class parser_core {
 
     // Parse a function qualifier.
     auto qual = t_function_qualifier();
-    switch (token_.kind) {
+    switch (token_.kind.value) {
       case tok::kw_oneway:
         qual = t_function_qualifier::oneway;
         consume_token();
@@ -532,7 +532,7 @@ class parser_core {
       }
     }
     bool is_void = false;
-    switch (token_.kind) {
+    switch (token_.kind.value) {
       case tok::kw_void:
         is_void = true;
         ret.type = actions_.on_type(token_.range, t_primitive_type::t_void());
@@ -554,7 +554,7 @@ class parser_core {
     if (is_void) {
       report_error("cannot use 'void' as an initial response type");
     }
-    switch (token_.kind) {
+    switch (token_.kind.value) {
       case tok::kw_sink:
         if (ret.stream) {
           report_expected("'sink' before 'stream'");
@@ -576,7 +576,7 @@ class parser_core {
     if (!try_consume_token(',')) {
       return ret;
     }
-    switch (token_.kind) {
+    switch (token_.kind.value) {
       case tok::kw_stream:
         if (ret.stream) {
           report_error("duplicate 'stream'");
@@ -681,7 +681,7 @@ class parser_core {
     auto safety = try_consume_token(tok::kw_safe) ? t_error_safety::safe
                                                   : t_error_safety::unspecified;
     auto kind = t_error_kind::unspecified;
-    switch (token_.kind) {
+    switch (token_.kind.value) {
       case tok::kw_transient:
         kind = t_error_kind::transient;
         consume_token();
@@ -828,7 +828,7 @@ class parser_core {
       try_parse_deprecated_annotations();
       return actions_.on_type(range, *type);
     }
-    switch (token_.kind) {
+    switch (token_.kind.value) {
       case tok::identifier: {
         auto name = consume_token().string_value();
         try_parse_deprecated_annotations();
@@ -873,7 +873,7 @@ class parser_core {
   //            "string" | "binary"
   const t_primitive_type* try_parse_base_type() {
     auto get_base_type = [this]() -> const t_primitive_type* {
-      switch (token_.kind) {
+      switch (token_.kind.value) {
         case tok::kw_bool:
           return &t_primitive_type::t_bool();
         case tok::kw_byte:
@@ -968,7 +968,7 @@ class parser_core {
 
   const_value_type parse_initializer_const_value() {
     auto s = sign::plus;
-    switch (token_.kind) {
+    switch (token_.kind.value) {
       case tok::bool_literal:
         return actions_.on_bool_literal(consume_token().bool_value());
       case to_tok('-'):
@@ -1070,7 +1070,7 @@ class parser_core {
   // integer: ["+" | "-"] int_literal
   std::optional<int64_t> try_parse_integer(sign s = sign::plus) {
     auto range = track_range();
-    switch (token_.kind) {
+    switch (token_.kind.value) {
       case to_tok('-'):
         s = sign::minus;
         FMT_FALLTHROUGH;
@@ -1098,7 +1098,7 @@ class parser_core {
 
   // float: ["+" | "-"] float_literal
   double parse_float(sign s = sign::plus) {
-    switch (token_.kind) {
+    switch (token_.kind.value) {
       case to_tok('-'):
         s = sign::minus;
         FMT_FALLTHROUGH;
@@ -1133,7 +1133,7 @@ class parser_core {
   //   | "client"
   std::optional<identifier> try_parse_identifier() {
     range_tracker range = track_range();
-    switch (token_.kind) {
+    switch (token_.kind.value) {
       case tok::identifier:
         return identifier{consume_token().string_value(), range};
       // Context-sensitive keywords allowed in identifiers:

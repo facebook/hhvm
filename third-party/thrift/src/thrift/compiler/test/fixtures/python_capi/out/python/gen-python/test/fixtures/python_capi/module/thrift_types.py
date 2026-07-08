@@ -36,6 +36,7 @@ from test.fixtures.python_capi.module.thrift_enums import (
 
 
 class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -181,6 +182,7 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.MyStruct, MyStruct)
 _fbthrift_MyStruct = MyStruct
 
 class MyDataItem(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -249,6 +251,7 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.MyDataItem, MyDataItem)
 _fbthrift_MyDataItem = MyDataItem
 
 class TransitiveDoubler(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
     )
 
@@ -306,6 +309,7 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.TransitiveDoubler, Transitiv
 _fbthrift_TransitiveDoubler = TransitiveDoubler
 
 class DoubledPair(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -385,6 +389,7 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.DoubledPair, DoubledPair)
 _fbthrift_DoubledPair = DoubledPair
 
 class StringPair(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -464,6 +469,7 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.StringPair, StringPair)
 _fbthrift_StringPair = StringPair
 
 class EmptyStruct(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
     )
 
@@ -521,6 +527,7 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.EmptyStruct, EmptyStruct)
 _fbthrift_EmptyStruct = EmptyStruct
 
 class PrimitiveStruct(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -754,6 +761,7 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.PrimitiveStruct, PrimitiveSt
 _fbthrift_PrimitiveStruct = PrimitiveStruct
 
 class AdaptedFields(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -855,6 +863,7 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.AdaptedFields, AdaptedFields
 _fbthrift_AdaptedFields = AdaptedFields
 
 class ListStruct(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -1011,6 +1020,7 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.ListStruct, ListStruct)
 _fbthrift_ListStruct = ListStruct
 
 class SetStruct(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -1145,6 +1155,7 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.SetStruct, SetStruct)
 _fbthrift_SetStruct = SetStruct
 
 class MapStruct(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -1312,6 +1323,7 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.MapStruct, MapStruct)
 _fbthrift_MapStruct = MapStruct
 
 class ComposeStruct(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id

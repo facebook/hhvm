@@ -59,7 +59,8 @@ cdef extern from "<thrift/lib/python/types.h>" namespace "::apache::thrift::pyth
     void logUnionFromValueTypeMismatch(const char* valueRepr, const char* valueType, const char* unionName)
 
     cdef enum class cInternalDataLayout "::apache::thrift::python::InternalDataLayout":
-        kStruct
+        kStructFastComparable
+        kStructSlowComparable
         kStructWithDeprecatedIsset
         kUnion
 
@@ -218,8 +219,7 @@ cdef class StructInfo:
     cdef tuple type_infos
     cdef tuple[FieldInfo] fields
     cdef dict name_to_index
-    cdef bint enable_get_locally_set_fields
-    cdef bint enable_isset_deprecated
+    cdef cInternalDataLayout layout
     cdef void _fill_struct_info(self) except *
     cdef void _initialize_default_values(self) except *
 

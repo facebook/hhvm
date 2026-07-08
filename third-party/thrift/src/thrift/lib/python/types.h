@@ -817,8 +817,20 @@ using MutableMapTypeInfo = MapTypeInfoImpl<MutableMapHandler, false>;
 
 using FieldValueMap = folly::F14FastMap<int16_t, PyObject*>;
 
+// Selects both the internal-data layout of an immutable thrift-python struct
+// and how it implements __eq__/__hash__. Consumed by the Cython runtime
+// (StructInfo) and DynamicStructInfo; the compiler computes it (see the python
+// generator's `internal_data_layout`).
 enum class InternalDataLayout : uint8_t {
-  kStruct,
+  // Plain struct layout; neither this struct nor any transitively reachable
+  // field type tracks isset bits, so __eq__/__hash__ compare the internal-data
+  // tuples directly.
+  kStructFastComparable,
+  // Plain struct layout, but a transitively reachable struct tracks isset bits,
+  // so __eq__/__hash__ compare materialized field values.
+  kStructSlowComparable,
+  // Struct with a trailing isset byte array (backs get_locally_set_fields);
+  // __eq__/__hash__ compare materialized field values.
   kStructWithDeprecatedIsset,
   kUnion,
 };

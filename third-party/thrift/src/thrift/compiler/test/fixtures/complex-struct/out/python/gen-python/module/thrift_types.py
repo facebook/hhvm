@@ -26,6 +26,7 @@ from module.thrift_enums import (
 
 
 class MyStructFloatFieldThrowExp(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -127,6 +128,7 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.MyStructFloatFieldThrowExp, 
 _fbthrift_MyStructFloatFieldThrowExp = MyStructFloatFieldThrowExp
 
 class MyStructMapFloatThrowExp(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -206,6 +208,7 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.MyStructMapFloatThrowExp, My
 _fbthrift_MyStructMapFloatThrowExp = MyStructMapFloatThrowExp
 
 class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -571,6 +574,7 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.MyStruct, MyStruct)
 _fbthrift_MyStruct = MyStruct
 
 class SimpleStruct(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -650,6 +654,7 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.SimpleStruct, SimpleStruct)
 _fbthrift_SimpleStruct = SimpleStruct
 
 class defaultStruct(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -949,6 +954,7 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.defaultStruct, defaultStruct
 _fbthrift_defaultStruct = defaultStruct
 
 class MyStructTypeDef(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -1105,6 +1111,7 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.MyStructTypeDef, MyStructTyp
 _fbthrift_MyStructTypeDef = MyStructTypeDef
 
 class MyDataItem(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
     )
 
@@ -1392,6 +1399,7 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.MyUnionFloatFieldThrowExp, M
 _fbthrift_MyUnionFloatFieldThrowExp = MyUnionFloatFieldThrowExp
 
 class ComplexNestedStruct(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -1647,6 +1655,7 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.ComplexNestedStruct, Complex
 _fbthrift_ComplexNestedStruct = ComplexNestedStruct
 
 class TypeRemapped(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -2090,6 +2099,7 @@ class complexException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta)
 _fbthrift_complexException = complexException
 
 class Containers(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id

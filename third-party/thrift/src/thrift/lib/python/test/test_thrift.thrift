@@ -83,6 +83,8 @@ typedef map<string, i64> StrIntMap
 @thrift.AllowLegacyTypedefUri
 typedef map<string, string> StrStrMap
 @thrift.AllowLegacyTypedefUri
+typedef map<i32, string> I32StrMap
+@thrift.AllowLegacyTypedefUri
 typedef map<string, I32List> StrI32ListMap
 @thrift.AllowLegacyTypedefUri
 typedef map<string, StrI32ListMap> StrStrIntListMapMap

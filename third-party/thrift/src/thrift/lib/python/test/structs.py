@@ -48,6 +48,7 @@ from test_thrift.thrift_types import (
     easy,
     EmptyStruct,
     File,
+    I32StrMap,
     Integers,
     IOBufListStruct,
     Kind,
@@ -668,30 +669,23 @@ class StructTests(unittest.TestCase):
         This test asserts the CORRECT behavior: equal inner maps collapse to a
         single entry. It fails while the hash is insertion-order dependent.
         """
-        inner_a = {1: "x", 2: "y"}
-        inner_b = {2: "y", 1: "x"}  # same content, different insertion order
+        # I32StrMap is a `typedef map<i32, string>`; constructing it yields a
+        # hashable immutable Thrift map that can be used as a set element and as
+        # a map key directly.
+        inner_a = I32StrMap({1: "x", 2: "y"})
+        inner_b = I32StrMap({2: "y", 1: "x"})  # same content, different order
+        self.assertEqual(inner_a, inner_b)
 
         # set<map<i32, string>>: two equal inner maps must collapse to one.
+        # A list is passed so the Thrift set container performs the dedup.
         s = StructWithMapKeyedContainers(
             # pyre-ignore[6]: TODO: Thrift-Container init
             set_field=[inner_a, inner_b]
         )
         self.assertEqual(len(s.set_field), 1)
 
-        # Obtain two immutable Map objects (equal, different insertion order)
-        # to use as keys for the map<map<i32, string>, i32> field.
-        (map_a,) = StructWithMapKeyedContainers(
-            # pyre-ignore[6]: TODO: Thrift-Container init
-            set_field=[inner_a]
-        ).set_field
-        (map_b,) = StructWithMapKeyedContainers(
-            # pyre-ignore[6]: TODO: Thrift-Container init
-            set_field=[inner_b]
-        ).set_field
-        self.assertEqual(map_a, map_b)
-
         # map<map<i32, string>, i32>: two equal map keys must collapse to one.
-        m = StructWithMapKeyedContainers(map_field={map_a: 10, map_b: 20})
+        m = StructWithMapKeyedContainers(map_field={inner_a: 10, inner_b: 20})
         self.assertEqual(len(m.map_field), 1)
 
 

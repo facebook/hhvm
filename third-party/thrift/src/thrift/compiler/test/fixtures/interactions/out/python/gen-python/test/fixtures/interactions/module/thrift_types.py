@@ -95,6 +95,7 @@ class CustomException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
 _fbthrift_CustomException = CustomException
 
 class ShouldBeBoxed(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id

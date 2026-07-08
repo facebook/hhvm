@@ -17,7 +17,7 @@ from enum import Enum, Flag
 
 from cython.operator cimport dereference as deref
 from thrift.python.serializer cimport cserialize, cdeserialize
-from thrift.python.types cimport StructInfo, createImmutableStructTupleWithDefaultValues, set_struct_field
+from thrift.python.types cimport cInternalDataLayout, StructInfo, createImmutableStructTupleWithDefaultValues, set_struct_field
 from libcpp.vector cimport vector
 from libcpp.utility cimport move as cmove
 
@@ -308,7 +308,12 @@ class GeneratedErrorMeta(type):
             )
         fields = dct.pop('_fbthrift_SPEC', ())
         num_fields = len(fields)
-        dct["_fbthrift_struct_info"] = StructInfo(name, fields)
+        # Plain struct layout; GeneratedError has its own field-by-field __eq__.
+        dct["_fbthrift_struct_info"] = StructInfo(
+            name,
+            fields,
+            <int>cInternalDataLayout.kStructFastComparable
+        )
         for i, f in enumerate(fields):
             dct[f.py_name] = make_fget_error(i)
         all_bases = bases if bases else (GeneratedError,)

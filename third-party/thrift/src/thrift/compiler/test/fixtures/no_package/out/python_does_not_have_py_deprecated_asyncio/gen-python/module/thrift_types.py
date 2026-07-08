@@ -26,6 +26,7 @@ from module.thrift_enums import (
 
 
 class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -178,6 +179,7 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.MyStruct, MyStruct)
 _fbthrift_MyStruct = MyStruct
 
 class Containers(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -264,6 +266,7 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.Containers, Containers)
 _fbthrift_Containers = Containers
 
 class MyDataItem(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
     )
 
@@ -620,6 +623,7 @@ class MyExceptionWithMessage(metaclass=_fbthrift_python_exceptions.GeneratedErro
 _fbthrift_MyExceptionWithMessage = MyExceptionWithMessage
 
 class ReservedKeyword(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id

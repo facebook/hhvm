@@ -365,9 +365,32 @@ class StructLocallySetFieldsTest(unittest.TestCase):
         self.assertEqual(hash(a), hash(b))
         self.assertEqual(len({a, b}), 1)
         self.assertEqual(
-            self._locally_set_fields(a), frozenset({"int_field", "bool_field"})
+            get_locally_set_fields(a), frozenset({"int_field", "bool_field"})
         )
-        self.assertEqual(self._locally_set_fields(b), frozenset())
+        self.assertEqual(get_locally_set_fields(b), frozenset())
+
+    def test_unannotated_parent_with_annotated_child_uses_value_comparison(
+        self,
+    ) -> None:
+        # The parent isn't isset-tracking itself but transitively contains an
+        # isset-tracking struct, so it must compare by value, not by raw tuple:
+        # children equal by value but differing in isset must still be equal.
+        a = UnannotatedStructWithAnnotatedChild(
+            child=AnnotatedStructWithIssetInspection(int_field=0)
+        )
+        b = UnannotatedStructWithAnnotatedChild(
+            child=AnnotatedStructWithIssetInspection()
+        )
+
+        # Children are equal by value but differ in isset.
+        self.assertEqual(a.child, b.child)
+        self.assertEqual(get_locally_set_fields(a.child), frozenset({"int_field"}))
+        self.assertEqual(get_locally_set_fields(b.child), frozenset())
+
+        # ... so the parents must compare equal (and hash/dedup consistently).
+        self.assertEqual(a, b)
+        self.assertEqual(hash(a), hash(b))
+        self.assertEqual(len({a, b}), 1)
 
     def test_nested_and_container_structs(self) -> None:
         c = HasContainers(nested_list=[Nested(num=1), Nested(num=2, label="x")])

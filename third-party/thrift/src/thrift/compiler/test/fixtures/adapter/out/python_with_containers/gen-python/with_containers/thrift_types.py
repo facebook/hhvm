@@ -18,6 +18,7 @@ import my
 
 
 class _fbthrift_unadapted_AnnotationWithContainers(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -100,6 +101,7 @@ AnnotationWithContainers = my.AdaptedType[_fbthrift_unadapted_AnnotationWithCont
 _fbthrift_AnnotationWithContainers = AnnotationWithContainers
 
 class _fbthrift_unadapted_MyStruct(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id

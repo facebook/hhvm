@@ -39,6 +39,7 @@ from test.fixtures.enums.module.thrift_enums import (
 
 
 class SomeStruct(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -140,6 +141,7 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.SomeStruct, SomeStruct)
 _fbthrift_SomeStruct = SomeStruct
 
 class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id

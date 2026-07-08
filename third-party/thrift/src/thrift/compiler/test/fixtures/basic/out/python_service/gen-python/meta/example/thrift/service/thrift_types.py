@@ -20,6 +20,7 @@ import test.fixtures.basic.module.thrift_types as _fbthrift__test__fixtures__bas
 
 
 class EchoRequest(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -88,6 +89,7 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.EchoRequest, EchoRequest)
 _fbthrift_EchoRequest = EchoRequest
 
 class EchoResponse(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id

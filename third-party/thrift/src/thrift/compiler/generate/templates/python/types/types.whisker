@@ -81,12 +81,9 @@ class {{#partial m_types.unadapted_name type=struct}}{{!
     {{#if struct.disable_field_caching?}}
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     {{/if struct.disable_field_caching?}}
-    {{#if (and struct.enable_get_locally_set_fields? python.generate_immutable_types? (not struct.exception?))}}
-    _fbthrift_enable_get_locally_set_fields = True
-    {{/if (and struct.enable_get_locally_set_fields? python.generate_immutable_types? (not struct.exception?))}}
-    {{#if (and struct.enable_isset_deprecated? python.generate_immutable_types? (not struct.exception?))}}
-    _fbthrift_enable_isset_deprecated = True
-    {{/if (and struct.enable_isset_deprecated? python.generate_immutable_types? (not struct.exception?))}}
+    {{#if (and python.generate_immutable_types? (not struct.union?) (not struct.exception?))}}
+    _fbthrift_internal_data_layout = {{struct.internal_data_layout}}  # InternalDataLayout.{{struct.internal_data_layout_name}}
+    {{/if (and python.generate_immutable_types? (not struct.union?) (not struct.exception?))}}
     _fbthrift_SPEC = (
         {{#each struct.fields_ordered_by_id as |field|}}
         _fbthrift_python_types.FieldInfo(

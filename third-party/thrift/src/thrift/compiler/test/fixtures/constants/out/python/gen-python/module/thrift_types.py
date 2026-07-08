@@ -32,6 +32,7 @@ from module.thrift_enums import (
 
 
 class Internship(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -144,6 +145,7 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.Internship, Internship)
 _fbthrift_Internship = Internship
 
 class Range(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -223,6 +225,7 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.Range, Range)
 _fbthrift_Range = Range
 
 class struct1(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -302,6 +305,7 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.struct1, struct1)
 _fbthrift_struct1 = struct1
 
 class struct2(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -403,6 +407,7 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.struct2, struct2)
 _fbthrift_struct2 = struct2
 
 class struct3(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -493,6 +498,7 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.struct3, struct3)
 _fbthrift_struct3 = struct3
 
 class struct4(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id

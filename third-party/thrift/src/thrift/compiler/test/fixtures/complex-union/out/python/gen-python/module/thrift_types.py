@@ -311,6 +311,7 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.DataUnion, DataUnion)
 _fbthrift_DataUnion = DataUnion
 
 class Val(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -565,6 +566,7 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.VirtualComplexUnion, Virtual
 _fbthrift_VirtualComplexUnion = VirtualComplexUnion
 
 class NonCopyableStruct(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id

@@ -23,6 +23,7 @@ import injected_field.thrift_types as _fbthrift__injected_field__thrift_types
 
 
 class Fields(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             100,  # id
@@ -91,6 +92,7 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.Fields, Fields)
 _fbthrift_Fields = Fields
 
 class FieldsInjectedToEmptyStruct(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             -1100,  # id
@@ -159,6 +161,7 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.FieldsInjectedToEmptyStruct,
 _fbthrift_FieldsInjectedToEmptyStruct = FieldsInjectedToEmptyStruct
 
 class FieldsInjectedToStruct(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             -1100,  # id
@@ -238,6 +241,7 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.FieldsInjectedToStruct, Fiel
 _fbthrift_FieldsInjectedToStruct = FieldsInjectedToStruct
 
 class FieldsInjectedWithIncludedStruct(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             -1102,  # id
@@ -339,6 +343,7 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.FieldsInjectedWithIncludedSt
 _fbthrift_FieldsInjectedWithIncludedStruct = FieldsInjectedWithIncludedStruct
 
 class FieldsInjectedWithFieldsWithIncludedStruct(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             -1001,  # id

@@ -28,6 +28,7 @@ from test.fixtures.basic_structured_annotations.module.thrift_enums import (
 
 
 class runtime_annotation(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
     )
 
@@ -85,6 +86,7 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.runtime_annotation, runtime_
 _fbthrift_runtime_annotation = runtime_annotation
 
 class structured_annotation_inline(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -164,6 +166,7 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.structured_annotation_inline
 _fbthrift_structured_annotation_inline = structured_annotation_inline
 
 class structured_annotation_with_default(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -232,6 +235,7 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.structured_annotation_with_d
 _fbthrift_structured_annotation_with_default = structured_annotation_with_default
 
 class structured_annotation_recursive(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -322,6 +326,7 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.structured_annotation_recurs
 _fbthrift_structured_annotation_recursive = structured_annotation_recursive
 
 class structured_annotation_forward(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -390,6 +395,7 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.structured_annotation_forwar
 _fbthrift_structured_annotation_forward = structured_annotation_forward
 
 class structured_annotation_nested(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -469,6 +475,7 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.structured_annotation_nested
 _fbthrift_structured_annotation_nested = structured_annotation_nested
 
 class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id

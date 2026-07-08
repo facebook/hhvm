@@ -572,30 +572,26 @@ cdef class StructInfo:
             Initialized by calling `_fill_struct_info()`.
     """
 
-    def __cinit__(self, name: str, fields, bint enable_get_locally_set_fields=False):
+    def __cinit__(self, name: str, fields, layout):
         """
         Stores information for a Thrift Struct class with the given name.
 
         Args:
             name: Name of the Thrift Struct (as specified in IDL)
             fields (tuple[FieldInfo, ...]): Field spec tuples.
-            enable_get_locally_set_fields: whether the struct supports
-                `get_locally_set_fields`. When true, the immutable data holder
-                appends an isset byte array after the field values; otherwise it
-                has no isset element.
+            layout: an `InternalDataLayout` value (as an int) selecting the
+                data-holder layout and how `__eq__`/`__hash__` behave (see
+                `InternalDataLayout` in types.h). `StructMeta` defaults it to
+                `kStructFastComparable` for the rare class that omits it.
         """
         self.fields = fields
-        self.enable_get_locally_set_fields = enable_get_locally_set_fields
+        self.layout = <cInternalDataLayout><int>layout
         cdef int16_t num_fields = len(fields)
         self.cpp_obj = make_unique[cDynamicStructInfo](
             PyUnicode_AsUTF8(name),
             num_fields,
             False, # isMutable
-            (
-                cInternalDataLayout.kStructWithDeprecatedIsset
-                if enable_get_locally_set_fields
-                else cInternalDataLayout.kStruct
-            ),
+            self.layout,
         )
         self.type_infos = PyTuple_New(num_fields)
         self.name_to_index = {}
@@ -1290,7 +1286,7 @@ cdef tuple reset_struct_field_to_default(
     Py_INCREF(default_value)
     PyTuple_SET_ITEM(struct_tuple, pos, default_value)
     Py_DECREF(old_value)
-    if struct_info.enable_isset_deprecated:
+    if struct_info.layout == cInternalDataLayout.kStructWithDeprecatedIsset:
         setStructIsset(struct_tuple, index, 0)
     return default_data
 
@@ -1330,7 +1326,7 @@ cdef void set_struct_field_from_py_value(
             index,
             (<TypeInfoBase>struct_info.type_infos[index]).to_internal_data(value),
         )
-        if struct_info.enable_isset_deprecated:
+        if struct_info.layout == cInternalDataLayout.kStructWithDeprecatedIsset:
             setStructIsset(struct_tuple, index, 1)
     except Exception as exc:
         raise type(exc)(
@@ -1419,7 +1415,7 @@ cdef class Struct(StructOrUnion):
             self._fbthrift_field_cache = None
         else:
             self._fbthrift_field_cache = PyTuple_New(len(struct_info.fields))
-        if struct_info.enable_get_locally_set_fields:
+        if struct_info.layout == cInternalDataLayout.kStructWithDeprecatedIsset:
             # This marker tracks only the top-level struct instance. Nested
             # structs materialized from internal data still derive field set-ness
             # from their own isset bits.
@@ -1433,7 +1429,7 @@ cdef class Struct(StructOrUnion):
             return self
         cdef StructInfo struct_info = self._fbthrift_struct_info
         cdef bint is_local = False
-        if struct_info.enable_get_locally_set_fields:
+        if struct_info.layout == cInternalDataLayout.kStructWithDeprecatedIsset:
             is_local = self._fbthrift_is_locally_constructed
 
         cdef tuple old_data = self._fbthrift_data
@@ -1442,7 +1438,7 @@ cdef class Struct(StructOrUnion):
         # Unconditionally copy the internal data tuple, then apply the kwargs,
         # which makes the common case of updating only one or two fields fast
         # regardless of struct size.
-        cdef bint has_isset = struct_info.enable_isset_deprecated
+        cdef bint has_isset = struct_info.layout == cInternalDataLayout.kStructWithDeprecatedIsset
         cdef tuple new_data = PyTuple_New(num_fields + (1 if has_isset else 0))
         cdef bytes old_isset
         cdef Py_ssize_t isset_size
@@ -1486,7 +1482,7 @@ cdef class Struct(StructOrUnion):
                 new_data, struct_info, field_index, self, value
             )
 
-        if struct_info.enable_get_locally_set_fields:
+        if struct_info.layout == cInternalDataLayout.kStructWithDeprecatedIsset:
             object.__setattr__(new_inst, '_fbthrift_is_locally_constructed', is_local)
         return new_inst
 
@@ -1504,15 +1500,15 @@ cdef class Struct(StructOrUnion):
             return True
         if type(other) is not type(self):
             return False
-        if (<StructInfo>self._fbthrift_struct_info).enable_isset_deprecated:
-            # isset bits are observable and part of the tuple, so equal values
-            # can still differ in isset; compare materialized values instead.
-            for name, value in self:
-                if value != getattr(other, name):
-                    return False
-            return True
-        # Same type => same layout; the internal-data tuples compare directly.
-        return self._fbthrift_data == (<Struct>other)._fbthrift_data
+        if (<StructInfo>self._fbthrift_struct_info).layout == cInternalDataLayout.kStructFastComparable:
+            # No reachable field tracks isset, so the tuples compare directly.
+            return self._fbthrift_data == (<Struct>other)._fbthrift_data
+        # A reachable struct tracks isset bits (in the tuple, but not part of
+        # value equality), so compare materialized values.
+        for name, value in self:
+            if value != getattr(other, name):
+                return False
+        return True
 
     def __lt__(self, other):
         return _fbthrift_compare_struct_less(self, other, False)
@@ -1521,12 +1517,11 @@ cdef class Struct(StructOrUnion):
         return _fbthrift_compare_struct_less(self, other, True)
 
     def __hash__(Struct self):
-        if (<StructInfo>self._fbthrift_struct_info).enable_isset_deprecated:
-            # Mirror __eq__: isset bits are in the tuple but not part of value
-            # equality, so hash materialized values instead.
-            value_tuple = tuple(v for _, v in self)
-            return hash(value_tuple if value_tuple else type(self))
-        return hash(self._fbthrift_data) if self._fbthrift_data else hash(type(self))
+        if (<StructInfo>self._fbthrift_struct_info).layout == cInternalDataLayout.kStructFastComparable:
+            return hash(self._fbthrift_data) if self._fbthrift_data else hash(type(self))
+        # Mirror __eq__: hash materialized values, not the isset-bearing tuple.
+        value_tuple = tuple(v for _, v in self)
+        return hash(value_tuple if value_tuple else type(self))
 
     def __iter__(self):
         cdef StructInfo info = self._fbthrift_struct_info
@@ -1556,7 +1551,7 @@ cdef class Struct(StructOrUnion):
         cdef uint32_t len = cdeserialize(
             deref(info.cpp_obj), buf._this, self._fbthrift_data, proto
         )
-        if info.enable_get_locally_set_fields:
+        if info.layout == cInternalDataLayout.kStructWithDeprecatedIsset:
             object.__setattr__(self, '_fbthrift_is_locally_constructed', False)
         return len
 
@@ -2201,17 +2196,15 @@ class StructMeta(type):
         # contents of the field spec tuples.
         fields = dct.pop('_fbthrift_SPEC', ())
 
-        cdef bint enable_get_locally_set_fields = dct.pop('_fbthrift_enable_get_locally_set_fields', False)
-        cdef bint enable_isset_deprecated = dct.pop('_fbthrift_enable_isset_deprecated', False)
-        cdef StructInfo struct_info = StructInfo(cls_name, fields, enable_get_locally_set_fields)
-        struct_info.enable_isset_deprecated = enable_isset_deprecated
+        layout = dct.pop('_fbthrift_internal_data_layout', <int>cInternalDataLayout.kStructFastComparable)
+        cdef StructInfo struct_info = StructInfo(cls_name, fields, layout)
         dct["_fbthrift_struct_info"] = struct_info
 
         cdef list slots = []
         for i, field_info in enumerate(fields):
             slots.append(field_info.py_name)
 
-        if enable_get_locally_set_fields:
+        if struct_info.layout == cInternalDataLayout.kStructWithDeprecatedIsset:
             slots.append('_fbthrift_is_locally_constructed')
         dct["__slots__"] = slots
         all_bases = bases if bases else (Struct,)
@@ -3018,8 +3011,7 @@ def fill_specs(*structured_thrift_classes):
 def get_locally_set_fields(StructOrError struct):
     """Return the frozenset of field names explicitly set on the struct.
 
-    Only works on structs annotated with @python.EnableUnsafeIssetInspection or
-    generated with `enable_isset_deprecated_unsafe`.
+    Only works on structs annotated with @python.EnableUnsafeIssetInspection
     Deserialized top-level structs log a warning and still return field
     set-ness computed from their isset bits.
 
@@ -3031,11 +3023,10 @@ def get_locally_set_fields(StructOrError struct):
         AttributeError: if the struct is not supported.
     """
     cdef StructInfo info = struct._fbthrift_struct_info
-    if not info.enable_get_locally_set_fields:
+    if info.layout != cInternalDataLayout.kStructWithDeprecatedIsset:
         raise AttributeError(
             f"{type(struct).__name__} does not support locally set field inspection. "
-            "Add @python.EnableUnsafeIssetInspection to the struct definition "
-            "or enable the thrift-python `enable_isset_deprecated_unsafe` option."
+            "Add @python.EnableUnsafeIssetInspection to the struct definition."
         )
     if not struct._fbthrift_is_locally_constructed:
         logGetLocallySetFieldsCalledOnDeserializedStruct(type(struct).__name__.encode("utf-8"))

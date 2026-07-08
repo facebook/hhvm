@@ -99,6 +99,7 @@ class SimpleException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
 _fbthrift_SimpleException = SimpleException
 
 class OptionalRefStruct(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -167,6 +168,7 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.OptionalRefStruct, OptionalR
 _fbthrift_OptionalRefStruct = OptionalRefStruct
 
 class SimpleStruct(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -356,6 +358,7 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.SimpleStruct, SimpleStruct)
 _fbthrift_SimpleStruct = SimpleStruct
 
 class Float32Struct(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -457,8 +460,7 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.Float32Struct, Float32Struct
 _fbthrift_Float32Struct = Float32Struct
 
 class IssetInspectionStruct(metaclass=_fbthrift_python_types.StructMeta):
-    _fbthrift_enable_get_locally_set_fields = True
-    _fbthrift_enable_isset_deprecated = True
+    _fbthrift_internal_data_layout = 2  # InternalDataLayout.kStructWithDeprecatedIsset
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -549,6 +551,7 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.IssetInspectionStruct, Isset
 _fbthrift_IssetInspectionStruct = IssetInspectionStruct
 
 class HiddenTypeFieldsStruct(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -779,6 +782,7 @@ class HiddenException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
 _fbthrift_HiddenException = HiddenException
 
 class ComplexStruct(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -1006,6 +1010,7 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.BinaryUnion, BinaryUnion)
 _fbthrift_BinaryUnion = BinaryUnion
 
 class BinaryUnionStruct(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -1074,6 +1079,7 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.BinaryUnionStruct, BinaryUni
 _fbthrift_BinaryUnionStruct = BinaryUnionStruct
 
 class CustomFields(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -1230,6 +1236,7 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.CustomFields, CustomFields)
 _fbthrift_CustomFields = CustomFields
 
 class CustomTypedefFields(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -1386,6 +1393,7 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.CustomTypedefFields, CustomT
 _fbthrift_CustomTypedefFields = CustomTypedefFields
 
 class AdaptedTypedefFields(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id

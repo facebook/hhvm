@@ -21,6 +21,7 @@ import thrift.python.exceptions as _fbthrift_python_exceptions
 
 
 class TemplateLists(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -133,6 +134,7 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.TemplateLists, TemplateLists
 _fbthrift_TemplateLists = TemplateLists
 
 class TemplateSets(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -267,6 +269,7 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.TemplateSets, TemplateSets)
 _fbthrift_TemplateSets = TemplateSets
 
 class TemplateMaps(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -401,6 +404,7 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.TemplateMaps, TemplateMaps)
 _fbthrift_TemplateMaps = TemplateMaps
 
 class TWrapped(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -480,6 +484,7 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.TWrapped, TWrapped)
 _fbthrift_TWrapped = TWrapped
 
 class IndirectionA(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -548,6 +553,7 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.IndirectionA, IndirectionA)
 _fbthrift_IndirectionA = IndirectionA
 
 class IndirectionB(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -616,6 +622,7 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.IndirectionB, IndirectionB)
 _fbthrift_IndirectionB = IndirectionB
 
 class IndirectionC(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id

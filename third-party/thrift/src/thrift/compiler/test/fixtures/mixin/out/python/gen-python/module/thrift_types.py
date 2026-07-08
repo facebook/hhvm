@@ -17,6 +17,7 @@ import thrift.python.exceptions as _fbthrift_python_exceptions
 
 
 class Mixin1(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -85,6 +86,7 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.Mixin1, Mixin1)
 _fbthrift_Mixin1 = Mixin1
 
 class Mixin2(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -164,6 +166,7 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.Mixin2, Mixin2)
 _fbthrift_Mixin2 = Mixin2
 
 class Mixin3Base(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -232,6 +235,7 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.Mixin3Base, Mixin3Base)
 _fbthrift_Mixin3Base = Mixin3Base
 
 class Foo(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id

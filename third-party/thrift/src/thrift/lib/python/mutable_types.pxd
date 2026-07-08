@@ -52,7 +52,8 @@ cdef extern from "<thrift/lib/cpp2/type/BaseType.h>" namespace "::apache::thrift
 
 cdef extern from "<thrift/lib/python/types.h>" namespace "::apache::thrift::python":
     cdef enum class cInternalDataLayout "::apache::thrift::python::InternalDataLayout":
-        kStruct
+        kStructFastComparable
+        kStructSlowComparable
         kStructWithDeprecatedIsset
         kUnion
 

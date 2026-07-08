@@ -28,7 +28,8 @@ cdef extern from "<thrift/lib/cpp2/protocol/TableBasedSerializer.h>" namespace "
 
 cdef extern from "<thrift/lib/python/types.h>" namespace "::apache::thrift::python":
     cdef enum class cInternalDataLayout "::apache::thrift::python::InternalDataLayout":
-        kStruct
+        kStructFastComparable
+        kStructSlowComparable
         kStructWithDeprecatedIsset
         kUnion
 

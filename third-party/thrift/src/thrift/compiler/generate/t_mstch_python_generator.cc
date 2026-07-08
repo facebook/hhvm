@@ -27,9 +27,11 @@
 #include <boost/algorithm/string.hpp>
 
 #include <thrift/common/BaseType.h>
+#include <thrift/compiler/ast/t_exception.h>
 #include <thrift/compiler/ast/t_field.h>
 #include <thrift/compiler/ast/t_interface.h>
 #include <thrift/compiler/ast/t_service.h>
+#include <thrift/compiler/ast/t_union.h>
 #include <thrift/compiler/ast/uri.h>
 #include <thrift/compiler/generate/common.h>
 #include <thrift/compiler/generate/python/util.h>
@@ -990,6 +992,70 @@ class t_mstch_python_prototypes_generator : public t_whisker_generator {
     return std::move(def).make();
   }
 
+  // Whether the struct stores an isset byte array in its internal data tuple.
+  // Only non-exception, non-union structs do (matches the gate in
+  // types.whisker).
+  bool tracks_isset(const t_structured& s) const {
+    return (has_compiler_option("enable_isset_deprecated_unsafe") ||
+            s.has_structured_annotation(
+                kPythonEnableUnsafeIssetInspectionUri)) &&
+        !s.is<t_exception>() && !s.is<t_union>();
+  }
+
+  // False iff some transitively reachable struct tracks isset bits (which a
+  // position-wise tuple comparison would misjudge). `visited` breaks cycles.
+  bool type_enables_fast_comparisons(
+      const t_type& type, std::unordered_set<const t_type*>& visited) const {
+    const t_type& true_type = *type.get_true_type();
+    if (const t_list* list = true_type.try_as<t_list>()) {
+      return type_enables_fast_comparisons(*list->elem_type(), visited);
+    }
+    if (const t_set* set = true_type.try_as<t_set>()) {
+      return type_enables_fast_comparisons(*set->elem_type(), visited);
+    }
+    if (const t_map* map = true_type.try_as<t_map>()) {
+      return type_enables_fast_comparisons(*map->key_type(), visited) &&
+          type_enables_fast_comparisons(*map->val_type(), visited);
+    }
+    if (const t_structured* structured = true_type.try_as<t_structured>()) {
+      if (!visited.insert(&true_type).second) {
+        return true; // recursive type: already checked on first visit
+      }
+      if (tracks_isset(*structured)) {
+        return false;
+      }
+      for (const t_field& field : structured->fields()) {
+        if (!type_enables_fast_comparisons(*field.type(), visited)) {
+          return false;
+        }
+      }
+      return true;
+    }
+    return true; // primitives, enums, etc.
+  }
+
+  // Runtime `InternalDataLayout` enum value (thrift/lib/python/types.h).
+  int internal_data_layout_kind(const t_structured& self) const {
+    if (tracks_isset(self)) {
+      return 2; // kStructWithDeprecatedIsset
+    }
+    std::unordered_set<const t_type*> visited;
+    return type_enables_fast_comparisons(self, visited)
+        ? 0 // kStructFastComparable
+        : 1; // kStructSlowComparable
+  }
+
+  static std::string_view internal_data_layout_name(int kind) {
+    switch (kind) {
+      case 0:
+        return "kStructFastComparable";
+      case 1:
+        return "kStructSlowComparable";
+      default:
+        return "kStructWithDeprecatedIsset";
+    }
+  }
+
   prototype<t_structured>::ptr make_prototype_for_structured(
       const prototype_database& proto) const override {
     auto base = t_whisker_generator::make_prototype_for_structured(proto);
@@ -1012,15 +1078,13 @@ class t_mstch_python_prototypes_generator : public t_whisker_generator {
       return has_compiler_option("disable_field_cache") ||
           self.has_structured_annotation(kPythonDisableFieldCacheUri);
     });
-    def.property(
-        "enable_get_locally_set_fields?", [this](const t_structured& self) {
-          return has_compiler_option("enable_isset_deprecated_unsafe") ||
-              self.has_structured_annotation(
-                  kPythonEnableUnsafeIssetInspectionUri);
-        });
-    def.property("enable_isset_deprecated?", [this](const t_structured& self) {
-      return has_compiler_option("enable_isset_deprecated_unsafe") ||
-          self.has_structured_annotation(kPythonEnableUnsafeIssetInspectionUri);
+    def.property("internal_data_layout", [this](const t_structured& self) {
+      return whisker::make::i64(internal_data_layout_kind(self));
+    });
+    def.property("internal_data_layout_name", [this](const t_structured& self) {
+      return whisker::make::string(
+          std::string(
+              internal_data_layout_name(internal_data_layout_kind(self))));
     });
     def.property("should_generate_patch?", [](const t_structured& self) {
       return should_generate_patch(&self);

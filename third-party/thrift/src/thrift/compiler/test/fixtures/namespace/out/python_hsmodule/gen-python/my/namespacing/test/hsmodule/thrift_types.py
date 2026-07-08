@@ -17,6 +17,7 @@ import thrift.python.exceptions as _fbthrift_python_exceptions
 
 
 class HsFoo(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id

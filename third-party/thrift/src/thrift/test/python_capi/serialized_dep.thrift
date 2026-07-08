@@ -20,6 +20,7 @@ include "thrift/annotation/python.thrift"
 include "thrift/annotation/thrift.thrift"
 
 @python.UseCAPI{serialize = true}
+@python.EnableUnsafeIssetInspection
 struct SerializedStruct {
   1: string s;
   2: i32 i;
@@ -44,6 +45,7 @@ safe exception SerializedError {
 }
 
 @python.UseCAPI{}
+@python.EnableUnsafeIssetInspection
 struct MarshalStruct {
   1: string s;
   2: i32 i;

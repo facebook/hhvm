@@ -20,6 +20,7 @@ import transitive.thrift_types as _fbthrift__transitive__thrift_types
 
 
 class Included(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id

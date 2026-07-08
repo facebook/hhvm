@@ -798,11 +798,6 @@ extern "C" {
 #if USE_JEMALLOC
   // MALLOC_CONF
   const char* malloc_conf = "narenas:8,lg_tcache_max:16"
-#if (JEMALLOC_VERSION_MAJOR == 5 && JEMALLOC_VERSION_MINOR == 3 && JEMALLOC_VERSION_NREV >= 211) || \
-    (JEMALLOC_VERSION_MAJOR == 5 && JEMALLOC_VERSION_MINOR > 3) || \
-    (JEMALLOC_VERSION_MAJOR > 5)
-    ",experimental_tcache_gc:false"
-#endif
     ",metadata_thp:disabled,bin_shards:1-256:16|320-14336:4|4096-4096:16"
     ;
 #endif

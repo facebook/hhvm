@@ -351,6 +351,10 @@ async def serverCallback_coro(object callFunc, str funcName, Promise_Py promise,
     else:
         promise.complete(val)
 
+# Strong refs to in-flight lifecycle tasks so they aren't GC'd before running
+# during shutdown (which would break the promise). See _inflight_termination_tasks.
+_inflight_lifecycle_tasks = set()
+
 async def lifecycle_coro(object func, str funcName, Promise_Py promise):
     try:
         if func is None:
@@ -375,12 +379,11 @@ async def lifecycle_coro(object func, str funcName, Promise_Py promise):
         promise.error_ta(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
         ))
-    except asyncio.CancelledError as ex:
-        print(f"Coroutine was cancelled in service handler {funcName}:", file=sys.stderr)
-        traceback.print_exc()
-        promise.error_ta(cTApplicationException(
-            cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
-        ))
+    except asyncio.CancelledError:
+        # A lifecycle hook is cancelled only when the server/event loop is tearing
+        # down; complete (not error) the promise so the C++ onStopRequested
+        # collector does not XLOG(FATAL) on shutdown. Mirrors termination_coro.
+        promise.complete(c_unit)
     else:
         promise.complete(c_unit)
 
@@ -418,7 +421,19 @@ cdef int combinedHandler(
 
 cdef api void handleLifecycleCallback(object func, string funcName, cFollyPromise[cFollyUnit] cPromise):
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit.create(cmove(cPromise))
-    asyncio.get_event_loop().create_task(lifecycle_coro(func, funcName.decode('UTF-8'), __promise))
+    cdef object task
+    try:
+        task = asyncio.get_event_loop().create_task(
+            lifecycle_coro(func, funcName.decode('UTF-8'), __promise)
+        )
+    except Exception:
+        # Loop already gone (typically shutdown). Complete the promise so the C++
+        # onStopRequested collector does not see a BrokenPromise and XLOG(FATAL).
+        # Mirrors _schedule_termination.
+        __promise.complete(c_unit)
+        return
+    _inflight_lifecycle_tasks.add(task)
+    task.add_done_callback(_inflight_lifecycle_tasks.discard)
 
 cdef api int handleServerCallback(
     object func,

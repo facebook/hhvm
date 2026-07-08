@@ -105,6 +105,20 @@ class Handler(TestingServiceInterface):
         return ret
 
 
+class CancelOnStopRequestedHandler(Handler):
+    # onStopRequested cancels its own lifecycle task, the way the asyncio loop
+    # cancels pending tasks during server/loop teardown. The C++
+    # ThriftServer::callOnStopRequested collector XLOG(FATAL)s (aborting the
+    # process) if the lifecycle promise resolves to an exception, so cancellation
+    # here must still complete the promise.
+    async def onStopRequested(self) -> None:
+        self.on_stop_requested = True
+        current = asyncio.current_task()
+        assert current is not None
+        current.cancel()
+        await asyncio.sleep(0)
+
+
 class ServicesTests(unittest.TestCase):
     def test_handler_acontext(self) -> None:
         async def inner() -> None:
@@ -182,6 +196,11 @@ class ServicesTests(unittest.TestCase):
         handler = Handler()
         asyncio.run(self.get_address(handler))
         self.assertTrue(handler.on_start_serving)
+        self.assertTrue(handler.on_stop_requested)
+
+    def test_on_stop_requested_cancellation_does_not_crash(self) -> None:
+        handler = CancelOnStopRequestedHandler()
+        asyncio.run(self.get_address(handler))
         self.assertTrue(handler.on_stop_requested)
 
     def test_threaded_destruction(self) -> None:

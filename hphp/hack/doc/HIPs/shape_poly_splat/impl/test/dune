@@ -1,0 +1,5 @@
+(test
+ (name test_splat)
+ (libraries splat alcotest qcheck-core qcheck-alcotest)
+ (flags
+  (:standard -alert -deprecated)))

@@ -1,0 +1,4 @@
+(library
+ (name splat)
+ (wrapped false)
+ (libraries fmt))

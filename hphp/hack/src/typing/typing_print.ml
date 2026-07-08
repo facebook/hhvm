@@ -1301,6 +1301,7 @@ module Full = struct
             list ~fuel "<" g generics ">"
         in
         (fuel, to_doc s ^^ targs_doc)
+      | EnumTag s -> (fuel, to_doc s)
     in
     let rec predicate_doc fuel predicate =
       Fuel.provide fuel (fun ~fuel ->
@@ -1801,6 +1802,7 @@ module ErrorString = struct
         | ResourceTag -> "a resource"
         | NullTag -> "null"
         | ClassTag (s, _) -> "a " ^ strip_ns s
+        | EnumTag s -> "a " ^ strip_ns s
       in
       let rec str predicate =
         match predicate with

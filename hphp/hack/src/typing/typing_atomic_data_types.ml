@@ -58,6 +58,7 @@ let of_tag ~safe_for_are_disjoint env tag : env * DataType.t =
   | ClassTag (name, args) ->
     DataType.Class.to_datatypes ~safe_for_are_disjoint env name
     @@ Tag.generics_for_class_and_tag_generic_l env name args
+  | EnumTag id -> (env, DataType.enum_to_datatypes id)
 
 let empty = DataType.Set.empty
 

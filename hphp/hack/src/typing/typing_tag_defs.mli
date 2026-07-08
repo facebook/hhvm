@@ -41,6 +41,7 @@ type t =
     }
   | LabelData
   | BuiltInData
+  | EnumData of string
 
 val equal : t -> t -> bool
 

@@ -148,6 +148,8 @@ module Make (S : SET) : sig
 
   val label_to_datatypes : trail:DataTypeReason.trail -> t
 
+  val enum_to_datatypes : trail:DataTypeReason.trail -> string -> t
+
   val prim_to_datatypes : trail:DataTypeReason.trail -> Ast_defs.tprim -> t
 
   val mixed : reason:DataTypeReason.subreason * DataTypeReason.trail -> S.t
@@ -182,6 +184,8 @@ module DataType : sig
   val shape_to_datatypes : t
 
   val label_to_datatypes : t
+
+  val enum_to_datatypes : string -> t
 
   val prim_to_datatypes : Ast_defs.tprim -> t
 

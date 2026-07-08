@@ -63,6 +63,7 @@ type t =
       (** Catch all for data types that are built into the runtime but not
           exposed in the type system. Used primarily for soundly representing
           the mixed type *)
+  | EnumData of string  (** An enum value of the given enum *)
 [@@deriving eq]
 
 (* Pad with Erased because for Foo<T>, Foo and Foo<_> should be the same;

@@ -1,0 +1,14 @@
+File "enum_variant_gadt.php", line 22, characters 5-19:
+  (ColorOrInt<T> & ((dynamic & int) | Color))
+File "enum_variant_gadt.php", line 26, characters 5-19:
+  (int & not Color)
+File "enum_variant_gadt.php", line 33, characters 5-19:
+  Color
+File "enum_variant_gadt.php", line 36, characters 5-19:
+  bool
+ERROR: File "enum_variant_gadt.php", line 24, characters 7-23:
+Invalid return type (Typing[4110])
+  File "enum_variant_gadt.php", line 20, characters 59-59:
+  Expected `T`
+  File "enum_variant_gadt.php", line 24, characters 11-21:
+  But got `ColorResult`

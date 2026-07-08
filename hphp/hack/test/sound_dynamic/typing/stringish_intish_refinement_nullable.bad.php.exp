@@ -8,8 +8,8 @@ ERROR: File "stringish_intish_refinement_nullable.bad.php", line 12, characters 
 Invalid argument (Typing[4110])
   File "stringish_intish_refinement_nullable.bad.php", line 7, characters 19-19:
   Expected `E`
-  File "stringish_intish_refinement_nullable.bad.php", line 11, characters 7-14:
-  But got `(~E & int)` from this `is` expression test
+  File "stringish_intish_refinement_nullable.bad.php", line 11, characters 13-14:
+  But got `(int & ~E)` from this `is` expression test
 ERROR: File "stringish_intish_refinement_nullable.bad.php", line 12, characters 13-14:
 Invalid argument (Typing[4110])
   File "stringish_intish_refinement_nullable.bad.php", line 7, characters 19-19:
@@ -26,8 +26,8 @@ ERROR: File "stringish_intish_refinement_nullable.bad.php", line 17, characters 
 Invalid argument (Typing[4110])
   File "stringish_intish_refinement_nullable.bad.php", line 7, characters 19-19:
   Expected `E`
-  File "stringish_intish_refinement_nullable.bad.php", line 16, characters 7-14:
-  But got `(~E & string)` from this `is` expression test
+  File "stringish_intish_refinement_nullable.bad.php", line 16, characters 13-14:
+  But got `(string & ~E)` from this `is` expression test
 ERROR: File "stringish_intish_refinement_nullable.bad.php", line 17, characters 13-14:
 Invalid argument (Typing[4110])
   File "stringish_intish_refinement_nullable.bad.php", line 7, characters 19-19:
@@ -80,8 +80,8 @@ ERROR: File "stringish_intish_refinement_nullable.bad.php", line 38, characters 
 Invalid argument (Typing[4110])
   File "stringish_intish_refinement_nullable.bad.php", line 33, characters 19-19:
   Expected `F`
-  File "stringish_intish_refinement_nullable.bad.php", line 37, characters 7-14:
-  But got `(~F & int)` from this `is` expression test
+  File "stringish_intish_refinement_nullable.bad.php", line 37, characters 13-14:
+  But got `(int & dynamic)` from this `is` expression test
 ERROR: File "stringish_intish_refinement_nullable.bad.php", line 38, characters 13-14:
 Invalid argument (Typing[4110])
   File "stringish_intish_refinement_nullable.bad.php", line 33, characters 19-19:
@@ -98,8 +98,8 @@ ERROR: File "stringish_intish_refinement_nullable.bad.php", line 43, characters 
 Invalid argument (Typing[4110])
   File "stringish_intish_refinement_nullable.bad.php", line 33, characters 19-19:
   Expected `F`
-  File "stringish_intish_refinement_nullable.bad.php", line 42, characters 7-14:
-  But got `(string & dynamic)` from this `is` expression test
+  File "stringish_intish_refinement_nullable.bad.php", line 42, characters 13-14:
+  But got `(dynamic & string)` from this `is` expression test
 ERROR: File "stringish_intish_refinement_nullable.bad.php", line 43, characters 13-14:
 Invalid argument (Typing[4110])
   File "stringish_intish_refinement_nullable.bad.php", line 33, characters 19-19:

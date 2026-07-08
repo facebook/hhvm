@@ -1,0 +1,7 @@
+File "is_not_enum_and_is_int.php", line 9, characters 5-15:
+  (arraykey & not MyEnum)
+File "is_not_enum_and_is_int.php", line 11, characters 7-17:
+  (int & not MyEnum)
+File "is_not_enum_and_is_int.php", line 13, characters 7-17:
+  (string & not MyEnum)
+No errors

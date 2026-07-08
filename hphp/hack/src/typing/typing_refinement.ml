@@ -26,6 +26,29 @@ let list_to_list_of_e_and_others xs =
   in
   helper [] xs
 
+(* Under pessimise_builtins, the hint Enum is localized as ~Enum & arraykey
+   to account for intish string cast. This function matches this intersection
+   to extract the Enum *)
+let match_pessimized_enum_intersection env tys =
+  let enum_name ty =
+    match get_node ty with
+    | Tnewtype (name, [], _)
+      when Typing_env.is_enum env name
+           && not (Typing_env.is_enum_class env name) ->
+      Some name
+    | _ -> None
+  in
+  let enum_name_from_like ty =
+    match get_node ty with
+    | Tunion [dyn; enum] when is_dynamic dyn -> enum_name enum
+    | Tunion [enum; dyn] when is_dynamic dyn -> enum_name enum
+    | _ -> None
+  in
+  match tys with
+  | [t1; t2] when is_arraykey t1 -> enum_name_from_like t2
+  | [t1; t2] when is_arraykey t2 -> enum_name_from_like t1
+  | _ -> None
+
 module TyPredicate = struct
   let rec of_ty env next_wildcard_id (ty : locl_ty) :
       (int * type_predicate, string) Result.t =
@@ -165,7 +188,11 @@ module TyPredicate = struct
       | Result.Ok (next_wildcard_id, predicates) ->
         Result.Ok (next_wildcard_id, IsUnionOf (List.rev predicates))
     end
-    | Tintersection _ -> Result.Error "intersection"
+    | Tintersection tys -> begin
+      match match_pessimized_enum_intersection env tys with
+      | Some name -> Result.Ok (next_wildcard_id, IsTag (EnumTag name))
+      | None -> Result.Error "intersection"
+    end
     | Tvec_or_dict (tk, tv) ->
       let r = get_reason ty in
       of_ty env next_wildcard_id
@@ -176,6 +203,9 @@ module TyPredicate = struct
              (next_wildcard_id, predicate_))
     | Taccess _ -> Result.Error "access"
     | Tvar _ -> Result.Error "tvar"
+    | Tnewtype (name, [], _)
+      when Env.is_enum env name && not (Env.is_enum_class env name) ->
+      Result.Ok (next_wildcard_id, IsTag (EnumTag name))
     | Tnewtype (s, _, _) -> Result.Error ("newtype-" ^ s)
     | Tdependent _ -> Result.Error "dependent"
     | Tneg _ -> Result.Error "neg"
@@ -194,7 +224,8 @@ module TyPredicate = struct
     | FloatTag
     | NumTag
     | ResourceTag
-    | NullTag ->
+    | NullTag
+    | EnumTag _ ->
       (env, IMap.empty)
     | ClassTag (id, generics) ->
       let (env, new_tparams) =
@@ -317,7 +348,7 @@ module TyPredicate = struct
       (env, List.fold new_tparams ~init:IMap.empty ~f:IMap.union)
     | (_reason, IsNot inner) -> instantiate_wildcards_for_predicate env inner p
 
-  let rec to_ty lookup_wildcard predicate =
+  let rec to_ty env lookup_wildcard predicate =
     let tag_to_ty reason tag =
       match tag with
       | BoolTag -> Typing_make_type.bool reason
@@ -335,6 +366,19 @@ module TyPredicate = struct
               | Wildcard key -> lookup_wildcard key)
         in
         Typing_make_type.class_type reason id tyargs
+      | EnumTag id ->
+        let (_env, cstr) = Typing_utils.get_newtype_super env reason id [] in
+        let enum_ty = mk (reason, Tnewtype (id, [], cstr)) in
+        if TypecheckerOptions.pessimise_builtins (Typing_env.get_tcopt env) then
+          (* Mirror localization of E to ~E & arraykey *)
+          Typing_make_type.intersection
+            reason
+            [
+              Typing_make_type.locl_like reason enum_ty;
+              Typing_make_type.arraykey reason;
+            ]
+        else
+          enum_ty
     in
     match predicate with
     | (reason, IsTag tag) -> tag_to_ty reason tag
@@ -343,7 +387,7 @@ module TyPredicate = struct
         ( reason,
           Ttuple
             {
-              t_required = List.map tp_required ~f:(to_ty lookup_wildcard);
+              t_required = List.map tp_required ~f:(to_ty env lookup_wildcard);
               t_optional = [];
               t_extra = Tvariadic (Typing_make_type.nothing reason);
             } )
@@ -353,7 +397,7 @@ module TyPredicate = struct
           (fun { sfp_predicate; sfp_optional } ->
             {
               sft_optional = sfp_optional;
-              sft_ty = to_ty lookup_wildcard sfp_predicate;
+              sft_ty = to_ty env lookup_wildcard sfp_predicate;
             })
           sp_fields
       in
@@ -374,25 +418,26 @@ module TyPredicate = struct
             | _ -> false)
       with
       | (_ :: _, [other]) ->
-        Typing_make_type.nullable reason (to_ty lookup_wildcard other)
+        Typing_make_type.nullable reason (to_ty env lookup_wildcard other)
       | (_ :: _, others) ->
         Typing_make_type.nullable reason
         @@ Typing_make_type.union reason
-        @@ List.map others ~f:(to_ty lookup_wildcard)
+        @@ List.map others ~f:(to_ty env lookup_wildcard)
       | ([], _) ->
         Typing_make_type.union reason
-        @@ List.map predicates ~f:(to_ty lookup_wildcard)
+        @@ List.map predicates ~f:(to_ty env lookup_wildcard)
     end
     | (reason, IsNot inner) -> Typing_make_type.neg reason inner
 
   exception FoundWildcard
 
-  let to_ty_without_instantiation_opt predicate =
-    try Some (to_ty (fun _key -> raise FoundWildcard) predicate) with
+  let to_ty_without_instantiation_opt env predicate =
+    try Some (to_ty env (fun _key -> raise FoundWildcard) predicate) with
     | FoundWildcard -> None
 
-  let to_ty instantiation_map p predicate =
+  let to_ty env instantiation_map p predicate =
     to_ty
+      env
       (fun key ->
         match IMap.find_opt key instantiation_map with
         | Some ty -> ty
@@ -473,7 +518,7 @@ module Uninstantiated_typing_logic = struct
       in
       Nonexact { cr_consts }
 
-  let rec instantiate_prop map pos = function
+  let rec instantiate_prop env map pos = function
     | Valid -> TL.valid
     | Invalid -> TL.invalid ~fail:None
     | IsSubtypeSpecialClass
@@ -488,6 +533,7 @@ module Uninstantiated_typing_logic = struct
         } ->
       let sub_ty =
         TyPredicate.to_ty
+          env
           map
           pos
           (sub_reason, IsTag (ClassTag (sub_id, sub_args)))
@@ -512,12 +558,14 @@ module Uninstantiated_typing_logic = struct
           Typing_defs_constraints.LoclType sub_ty,
           Typing_defs_constraints.LoclType super_ty )
     | Conj (p1, p2) ->
-      TL.conj (instantiate_prop map pos p1) (instantiate_prop map pos p2)
+      TL.conj
+        (instantiate_prop env map pos p1)
+        (instantiate_prop env map pos p2)
     | Disj (p1, p2) ->
       TL.disj
         ~fail:None
-        (instantiate_prop map pos p1)
-        (instantiate_prop map pos p2)
+        (instantiate_prop env map pos p1)
+        (instantiate_prop env map pos p2)
     | Instantiated prop -> prop
 
   let print_prop env prop =
@@ -1117,6 +1165,11 @@ and split_ty
        * predicate splits RepresentableAs<T> exactly as it splits T. *)
       let expansions = SSet.add name expansions in
       split_ty ~other_intersected_tys ~expansions ~predicate env ty_arg
+    | Tnewtype (name, _, _)
+      when match snd predicate with
+           | IsTag (EnumTag pred_name) -> String.equal name pred_name
+           | _ -> false ->
+      (env, TyPartition.mk_left ~env ~predicate ty)
     | Tnewtype (name, tyl, _) ->
       let (env, as_ty) =
         Typing_utils.get_newtype_super env (get_reason ty) name tyl

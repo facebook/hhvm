@@ -8273,7 +8273,7 @@ end = struct
           instantiated_tparams
       in
       let predicate_ty =
-        Typing_refinement.TyPredicate.to_ty generics_map p predicate
+        Typing_refinement.TyPredicate.to_ty env generics_map p predicate
       in
       (env, predicate_ty)
     in
@@ -8488,6 +8488,7 @@ end = struct
                      ~f:(fun { true_assumptions; _ } ->
                        Typing_refinement.Uninstantiated_typing_logic
                        .instantiate_prop
+                         env
                          generics_map
                          p
                          true_assumptions))
@@ -8536,6 +8537,7 @@ end = struct
                      ~f:(fun { false_assumptions; _ } ->
                        Typing_refinement.Uninstantiated_typing_logic
                        .instantiate_prop
+                         env
                          generics_map
                          p
                          false_assumptions))

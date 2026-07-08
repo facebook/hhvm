@@ -244,6 +244,7 @@ and type_tag =
   | ResourceTag
   | NullTag
   | ClassTag of Ast_defs.id_ * type_tag_generic list
+  | EnumTag of Ast_defs.id_
 [@@oxidize.exclude]
 
 and shape_field_predicate = {
@@ -779,6 +780,10 @@ module Pp = struct
       Format.fprintf fmt ",@ ";
       pp_list pp_type_tag_generic fmt args;
       Format.fprintf fmt "@,))@]"
+    | EnumTag id ->
+      Format.fprintf fmt "(@[<2>EnumTag@ ";
+      Format.pp_print_string fmt id;
+      Format.fprintf fmt "@])"
 
   and pp_type_predicate fmt predicate = pp_type_predicate_ fmt (snd predicate)
 
@@ -869,6 +874,7 @@ let type_tag_con_ordinal type_tag =
   | ResourceTag -> 6
   | NullTag -> 7
   | ClassTag _ -> 8
+  | EnumTag _ -> 9
 
 let chain_compare comp cont =
   match comp with
@@ -1175,6 +1181,7 @@ and compare_type_tag tag1 tag2 =
   | (ClassTag (id1, args1), ClassTag (id2, args2)) ->
     chain_compare (String.compare id1 id2) (fun _ ->
         List.compare compare_type_tag_generic args1 args2)
+  | (EnumTag id1, EnumTag id2) -> String.compare id1 id2
   | _ -> type_tag_con_ordinal tag1 - type_tag_con_ordinal tag2
 
 and compare_tuple_predicate tp1 tp2 =

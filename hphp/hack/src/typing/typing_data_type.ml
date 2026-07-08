@@ -96,6 +96,7 @@ module Tag = struct
       Printf.sprintf "instances of the interface %s" @@ strip_ns name
     | LabelData -> "enum class labels"
     | BuiltInData -> "built-in values"
+    | EnumData name -> Printf.sprintf "values of the enum %s" @@ strip_ns name
 
   (* Given [(T1a, T1b), (T2a, T2b)...],
      what is the relationship between Foo<T1a, T2a, ...> and Foo<T1b, T2b, ...>
@@ -147,6 +148,17 @@ module Tag = struct
     | (VecData, TupleData)
     | (TupleData, VecData) ->
       SetRelation.none
+    (* Enums share runtime representation with arraykeys; same-name enums are
+       equivalent, different enums may share values and so are uncertain. *)
+    | (EnumData e1, EnumData e2) when String.equal e1 e2 ->
+      SetRelation.equivalent
+    | (EnumData _, EnumData _) -> SetRelation.none
+    | (EnumData _, (IntData | StringData))
+    | ((IntData | StringData), EnumData _) ->
+      SetRelation.none
+    | (EnumData _, _)
+    | (_, EnumData _) ->
+      SetRelation.disjoint
     | (tag1, tag2) when equal tag1 tag2 -> SetRelation.equivalent
     | (ObjectData, InstanceOf _) -> SetRelation.superset
     | (InstanceOf _, ObjectData) -> SetRelation.subset
@@ -455,6 +467,11 @@ module Make (Set : SET) = struct
   let label_to_datatypes ~trail : t =
     Set.singleton ~reason:DataTypeReason.(make NoSubreason trail) Tag.LabelData
 
+  let enum_to_datatypes ~trail name : t =
+    Set.singleton
+      ~reason:DataTypeReason.(make NoSubreason trail)
+      (Tag.EnumData name)
+
   module Class : sig
     val to_datatypes :
       safe_for_are_disjoint:bool ->
@@ -716,6 +733,13 @@ module Make (Set : SET) = struct
       | ClassTag (id, args) ->
         let generics = Tag.generics_for_class_and_tag_generic_l env id args in
         Class.to_datatypes ~safe_for_are_disjoint ~trail env id generics
+      | EnumTag id ->
+        (* The enum's runtime representation is captured by [Tag.EnumData id],
+           which relates as "uncertain" with arraykey tags via [Tag.relation].
+           Because [EnumData] is excluded from [all_tags], [complement] of the
+           result yields [mixed] — the safe over-approximation needed by the
+           [Tneg]-based [fromTy] path. *)
+        (env, enum_to_datatypes ~trail id)
     in
     match snd predicate with
     | IsTag tag -> from_tag tag
@@ -947,6 +971,8 @@ module DataType = struct
   let shape_to_datatypes = shape_to_datatypes ~trail
 
   let label_to_datatypes = label_to_datatypes ~trail
+
+  let enum_to_datatypes name = enum_to_datatypes ~trail name
 
   let mixed = mixed ~reason:DataTypeReason.(make NoSubreason trail)
 

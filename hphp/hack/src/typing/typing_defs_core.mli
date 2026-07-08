@@ -226,6 +226,7 @@ and type_tag =
   | ResourceTag
   | NullTag
   | ClassTag of Ast_defs.id_ * type_tag_generic list
+  | EnumTag of Ast_defs.id_
 
 and shape_field_predicate = {
   sfp_optional: bool;

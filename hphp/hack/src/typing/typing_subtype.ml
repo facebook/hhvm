@@ -632,12 +632,17 @@ module Subtype_negation = struct
           None
         else
           Typing_refinement.TyPredicate.to_ty_without_instantiation_opt
+            env
             predicate
       | _ -> None
     in
     (env, neg_ty)
 
   let find_type_with_exact_negation env tyl =
+    (* Prefer to negate [Tneg _] components first. Negating a [Tneg P]
+       gives the predicate-as-type [P]; the resulting union [C | P] is much
+       more useful for closing out the subtype check than the [C | Tneg X]
+       we'd get from negating, e.g., an [arraykey] component. *)
     let rec find env tyl acc_tyl =
       match tyl with
       | [] -> (env, None, acc_tyl)
@@ -647,7 +652,8 @@ module Subtype_negation = struct
         | None -> find env tyl' (ty :: acc_tyl)
         | Some neg_ty -> (env, Some neg_ty, tyl' @ acc_tyl))
     in
-    find env tyl []
+    let (tneg_tys, other_tys) = List.partition_tf tyl ~f:is_neg in
+    find env (tneg_tys @ other_tys) []
 end
 
 let get_tyvar_opt t =

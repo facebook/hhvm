@@ -92,7 +92,9 @@ let negate_type env r ty ~approx =
     (env, MkType.class_type r c [])
   | Tneg predicate ->
     ( env,
-      Typing_refinement.TyPredicate.to_ty_without_instantiation_opt predicate
+      Typing_refinement.TyPredicate.to_ty_without_instantiation_opt
+        env
+        predicate
       |> Option.value ~default:approximated )
   | Tnonnull -> (env, MkType.null r)
   | Tclass ((_, c), Nonexact _, args) ->

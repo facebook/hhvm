@@ -41,9 +41,6 @@ function union_negation((IntEnumAB | IntEnumCD) $x): void {
     return;
   }
 
-  // Ideally this would be allowed, but the type simplification does not
-  // support this and supporting it in the strict switch implementation
-  // would require restructuring it.
   switch ($x) {
     case IntEnumAB::A:
       return;

@@ -5,12 +5,6 @@ Errors:
 {
   "refinement_counter": {
     "legacy_refinements": {
-      "intersection": {
-        "count": 1,
-        "positions": [
-          "File \"refinement_test1.php\", line 25, characters 20-20:"
-        ]
-      },
       "union-dynamic": {
         "count": 1,
         "positions": [
@@ -18,7 +12,7 @@ Errors:
         ]
       }
     },
-    "new_refinements": 6,
+    "new_refinements": 7,
     "total_refinements": 8
   }
 }

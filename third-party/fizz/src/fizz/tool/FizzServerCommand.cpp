@@ -953,7 +953,7 @@ int fizzServerCommand(const std::vector<std::string>& args) {
       try {
         Error err;
         if (getExtension<fizz::extensions::DelegatedCredential>(
-                cred, err, std::move(credVec)) == Status::Fail) {
+                cred, err, credVec) == Status::Fail) {
           FIZZ_LOG(ERROR) << "Credential parsing failed: " << err.msg();
           return 1;
         }

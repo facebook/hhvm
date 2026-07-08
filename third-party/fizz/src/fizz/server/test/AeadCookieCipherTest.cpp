@@ -53,7 +53,7 @@ class AeadCookieCipherTest : public Test {
 
     auto s = toIOBuf(secret);
     std::vector<folly::ByteRange> cookieSecrets{{s->coalesce()}};
-    EXPECT_TRUE(cipher_->setCookieSecrets(std::move(cookieSecrets)));
+    EXPECT_TRUE(cipher_->setCookieSecrets(cookieSecrets));
   }
 
  protected:
@@ -166,7 +166,7 @@ TEST_F(AeadCookieCipherTest, TestDecryptMultipleSecrets) {
   auto s2 = RandomGenerator<32>().generateRandom();
   std::vector<folly::ByteRange> cookieSecrets{
       {folly::range(s1), folly::range(s2), s->coalesce()}};
-  EXPECT_TRUE(cipher_->setCookieSecrets(std::move(cookieSecrets)));
+  EXPECT_TRUE(cipher_->setCookieSecrets(cookieSecrets));
 
   auto state = cipher_->decrypt(toIOBuf(testCookie));
   EXPECT_TRUE(state.has_value());
@@ -180,7 +180,7 @@ TEST_F(AeadCookieCipherTest, TestDecryptFailed) {
   auto s2 = RandomGenerator<32>().generateRandom();
   std::vector<folly::ByteRange> cookieSecrets{
       {folly::range(s1), folly::range(s2)}};
-  EXPECT_TRUE(cipher_->setCookieSecrets(std::move(cookieSecrets)));
+  EXPECT_TRUE(cipher_->setCookieSecrets(cookieSecrets));
 
   auto state = cipher_->decrypt(toIOBuf(testCookie));
   EXPECT_FALSE(state.has_value());

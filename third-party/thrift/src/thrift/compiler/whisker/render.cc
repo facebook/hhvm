@@ -454,6 +454,18 @@ class diagnoser {
     abort_rendering(loc);
   }
 
+  // Maybe reports a diagnostic at `loc` and aborts rendering at loc.begin when
+  // the level is fatal (error). Consolidates the common strict-mode
+  // "maybe-report then maybe-abort" pattern.
+  template <typename ReportFunc>
+  void maybe_report_and_abort(
+      source_range loc, diagnostic_level level, ReportFunc&& report) {
+    maybe_report(loc, level, std::forward<ReportFunc>(report));
+    if (level == diagnostic_level::error) {
+      abort_rendering(loc.begin);
+    }
+  }
+
  private:
   diagnostics_engine& diags_;
   source_stack& source_stack_;
@@ -535,7 +547,7 @@ class virtual_machine {
           const diagnostic_level level = err.cause().empty()
               ? undefined_diag_level
               : diagnostic_level::error;
-          diags_.maybe_report(variable_lookup.loc, level, [&] {
+          diags_.maybe_report_and_abort(variable_lookup.loc, level, [&] {
             std::string message;
             auto out = std::back_inserter(message);
             fmt::format_to(
@@ -561,10 +573,6 @@ class virtual_machine {
             }
             return message;
           });
-          if (level == diagnostic_level::error) {
-            // Fail rendering in strict mode
-            diags_.abort_rendering(variable_lookup.loc.begin);
-          }
           return lookup_result::without_parent(whisker::make::null);
         },
         [&](const eval_property_lookup_error& err) -> lookup_result {
@@ -612,16 +620,12 @@ class virtual_machine {
   void maybe_report_boolean_coercion(
       const ast::expression& expr, const object& value) {
     auto diag_level = opts_.strict_boolean_conditional;
-    diags_.maybe_report(expr.loc, diag_level, [&] {
+    diags_.maybe_report_and_abort(expr.loc, diag_level, [&] {
       return fmt::format(
           "Condition '{}' is not a boolean. The encountered value is:\n{}",
           expr.to_string(),
           to_string(value));
     });
-    if (diag_level == diagnostic_level::error) {
-      // Fail rendering in strict mode
-      diags_.abort_rendering(expr.loc.begin);
-    }
   }
   bool evaluate_as_bool(const ast::expression& expr) {
     object result = evaluate(expr);

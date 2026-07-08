@@ -138,6 +138,7 @@ get_filename_component(_cybld "${CMAKE_CURRENT_BINARY_DIR}/../cybld" ABSOLUTE)
 set(_cybld_dirs
   "thrift/python"
   "thrift/python/client"
+  "thrift/python/client/py_bridge"
   "thrift/python/server"
   "thrift/python/server/flagged"
   "thrift/python/server/interceptor"
@@ -413,6 +414,7 @@ set(CYTHON_GENERATED_API_HEADERS
   ${_cybld}/thrift/python/streaming/sink_api.h
   ${_cybld}/thrift/python/streaming/bidistream_api.h
   ${_cybld}/thrift/python/streaming/py_promise_api.h
+  ${_cybld}/thrift/python/client/py_bridge/py_bridge_channel_api.h
 )
 
 log_debug(
@@ -491,6 +493,8 @@ ${_cybld}/thrift/lib/python/streaming/sink_api.h"
 ${_cybld}/thrift/lib/python/streaming/bidistream_api.h"
   "${_cybld}/thrift/python/streaming/py_promise_api.h|\
 ${_cybld}/thrift/lib/python/streaming/py_promise_api.h"
+  "${_cybld}/thrift/python/client/py_bridge/py_bridge_channel_api.h|\
+${_cybld}/thrift/lib/python/client/py_bridge/py_bridge_channel_api.h"
 )
 
 # Generate symlink commands from mappings
@@ -509,6 +513,7 @@ file(MAKE_DIRECTORY "${_cybld}/thrift/lib/python/")
 file(MAKE_DIRECTORY "${_cybld}/thrift/lib/python/server")
 file(MAKE_DIRECTORY "${_cybld}/thrift/lib/python/server/interceptor")
 file(MAKE_DIRECTORY "${_cybld}/thrift/lib/python/streaming")
+file(MAKE_DIRECTORY "${_cybld}/thrift/lib/python/client/py_bridge")
 file(MAKE_DIRECTORY "${_cybld}/thrift/lib/py3/")
 
 # Create all symlinks

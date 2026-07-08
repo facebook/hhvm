@@ -128,6 +128,15 @@ if "--api-only" in sys.argv:
         cplus=True,
         language_level=3,
     )
+    # Compile py_bridge module to generate py_bridge_channel_api.h; PySender.cpp
+    # includes it, so the header must exist before build_ext compiles the .cpp.
+    Cython.Compiler.Main.compile(
+        "thrift/python/client/py_bridge/py_bridge_channel.pyx",
+        options=compilation_options,
+        full_module_name="thrift.python.client.py_bridge.py_bridge_channel",
+        cplus=True,
+        language_level=3,
+    )
 
 else:
     python_lib_idx = sys.argv.index("--libpython")

@@ -19,6 +19,7 @@
 #include <thrift/lib/cpp2/dynamic/AnnotationValue.h>
 #include <thrift/lib/cpp2/dynamic/SerializableTypeSystemBuilder.h>
 #include <thrift/lib/cpp2/dynamic/TypeSystemBuilder.h>
+#include <thrift/lib/cpp2/dynamic/TypeSystemDigest.h>
 
 namespace apache::thrift::dynamic {
 
@@ -221,6 +222,11 @@ std::string makeFunctionUri(
   result.push_back('/');
   result.append(name);
   return result;
+}
+
+std::string toDigestBytes(const type_system::TypeSystemDigest& digest) {
+  return std::string(
+      reinterpret_cast<const char*>(digest.data()), digest.size());
 }
 
 type_system::SerializableParameter toSerializableParam(
@@ -487,6 +493,8 @@ type_system::SerializableServiceCatalog toSerializable(
 
   type_system::SerializableServiceCatalog result;
   result.types() = std::move(*std::move(builder).build());
+  result.typesDigest() =
+      toDigestBytes(type_system::TypeSystemHasher{}(*result.types()));
 
   type_system::SerializableServiceDefinition serviceDef;
   for (const auto& fn : descriptor.functions()) {

@@ -286,6 +286,11 @@ class FakeSharedWebTransport : public WebTransport {
     return handle.get();
   }
   folly::Expected<BidiStreamHandle, ErrorCode> createBidiStream() override {
+    if (nextCreateBidiStreamError_) {
+      auto error = *nextCreateBidiStreamError_;
+      nextCreateBidiStreamError_.reset();
+      return folly::makeUnexpected(error);
+    }
     if (maxLocalBidiStreams_ &&
         localBidiStreams_.size() >= *maxLocalBidiStreams_) {
       return folly::makeUnexpected(ErrorCode::STREAM_CREATION_ERROR);
@@ -334,6 +339,9 @@ class FakeSharedWebTransport : public WebTransport {
   void setMaxLocalBidiStreams(uint64_t n) {
     maxLocalBidiStreams_ = n;
     notifyBidiCreditAvailable();
+  }
+  void setNextCreateBidiStreamError(ErrorCode error) {
+    nextCreateBidiStreamError_ = error;
   }
   void releaseBidiCredit(uint64_t id) {
     if (localBidiStreams_.erase(id)) {
@@ -554,6 +562,7 @@ class FakeSharedWebTransport : public WebTransport {
   folly::F14FastSet<uint64_t> localUniStreams_;
   std::deque<folly::Promise<folly::Unit>> pendingBidiCreditPromises_;
   std::deque<folly::Promise<folly::Unit>> pendingUniCreditPromises_;
+  folly::Optional<ErrorCode> nextCreateBidiStreamError_;
 };
 
 } // namespace proxygen::test

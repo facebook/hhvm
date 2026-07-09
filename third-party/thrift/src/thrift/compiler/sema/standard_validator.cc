@@ -363,6 +363,26 @@ std::optional<std::string_view> find_hack_wrapper_type_name(
   return std::nullopt;
 }
 
+void validate_hack_prefix_present_for_dependent_annotations(
+    sema_context& ctx, const t_program& prog) {
+  if (prog.has_structured_annotation(kHackNamePrefixUri)) {
+    return;
+  }
+
+  if (prog.has_structured_annotation(kLegacyOmitPrefixInNameStringUri)) {
+    ctx.error(
+        prog,
+        "@hack.LegacyOmitPrefixInNameString must be used with @hack.NamePrefix");
+  }
+
+  if (prog.has_structured_annotation(
+          kLegacyAlwaysIncludeNamePrefixInProcessor)) {
+    ctx.error(
+        prog,
+        "@hack.LegacyAlwaysIncludeNamePrefixInProcessor must be used with @hack.NamePrefix");
+  }
+}
+
 void validate_hack_object_key_wrapper(
     sema_context& ctx,
     const t_container& container,
@@ -2596,6 +2616,8 @@ ast_validator standard_validator() {
   validator.add_const_visitor(ValidateAnnotationPositions());
   validator.add_program_visitor(&validate_uri_uniqueness);
   validator.add_program_visitor(&validate_missing_uris);
+  validator.add_program_visitor(
+      &validate_hack_prefix_present_for_dependent_annotations);
 
   validator.add_field_visitor(&validate_cursor_serialization_adapter_on_field);
   validator.add_function_visitor(

@@ -18,7 +18,7 @@ import Foundation
 import FBThrift
 
 /// Auto-generated from FieldWrapper
-public struct FieldWrapper: ThriftSerializable, Equatable {
+public struct FieldWrapper: ThriftSerializable, Hashable {
     public var name: String = ""
 
     public init() {}
@@ -51,7 +51,7 @@ public struct FieldWrapper: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from Wrapper
-public struct Wrapper: ThriftSerializable, Equatable {
+public struct Wrapper: ThriftSerializable, Hashable {
     public var name: String = ""
     public var underlyingName: String = ""
     public var extraNamespace: String = "thrift_adapted_types"
@@ -102,7 +102,7 @@ public struct Wrapper: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from Adapter
-public struct Adapter: ThriftSerializable, Equatable {
+public struct Adapter: ThriftSerializable, Hashable {
     public var name: String = ""
 
     public init() {}
@@ -135,7 +135,7 @@ public struct Adapter: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from SkipCodegen
-public struct SkipCodegen: ThriftSerializable, Equatable {
+public struct SkipCodegen: ThriftSerializable, Hashable {
     public var reason: String = ""
 
     public init() {}
@@ -168,7 +168,7 @@ public struct SkipCodegen: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from Name
-public struct Name: ThriftSerializable, Equatable {
+public struct Name: ThriftSerializable, Hashable {
     public var name: String = ""
     public var reason: String = ""
 
@@ -210,7 +210,7 @@ public struct Name: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from NamePrefix
-public struct NamePrefix: ThriftSerializable, Equatable {
+public struct NamePrefix: ThriftSerializable, Hashable {
     public var prefix: String = ""
     public var apply_on_getName: Bool = true
     public var skip_services: Bool = false
@@ -318,7 +318,7 @@ public struct LegacyAlwaysIncludeNamePrefixInProcessor: ThriftSerializable, Equa
 }
 
 /// Auto-generated from ConstantsClass
-public struct ConstantsClass: ThriftSerializable, Equatable {
+public struct ConstantsClass: ThriftSerializable, Hashable {
     public var name: String = ""
 
     public init() {}
@@ -351,7 +351,7 @@ public struct ConstantsClass: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from UnionEnumAttributes
-public struct UnionEnumAttributes: ThriftSerializable, Equatable {
+public struct UnionEnumAttributes: ThriftSerializable, Hashable {
     public var attributes: [String] = []
 
     public init() {}
@@ -384,7 +384,7 @@ public struct UnionEnumAttributes: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from StructTrait
-public struct StructTrait: ThriftSerializable, Equatable {
+public struct StructTrait: ThriftSerializable, Hashable {
     public var name: String = ""
 
     public init() {}
@@ -417,7 +417,7 @@ public struct StructTrait: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from Attributes
-public struct Attributes: ThriftSerializable, Equatable {
+public struct Attributes: ThriftSerializable, Hashable {
     public var attributes: [String] = []
 
     public init() {}
@@ -450,7 +450,7 @@ public struct Attributes: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from StructAsTrait
-public struct StructAsTrait: ThriftSerializable, Equatable {
+public struct StructAsTrait: ThriftSerializable, Hashable {
 
     public init() {}
 
@@ -474,7 +474,7 @@ public struct StructAsTrait: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from ModuleInternal
-public struct ModuleInternal: ThriftSerializable, Equatable {
+public struct ModuleInternal: ThriftSerializable, Hashable {
 
     public init() {}
 
@@ -498,7 +498,7 @@ public struct ModuleInternal: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from GenerateClientMethodsWithHeaders
-public struct GenerateClientMethodsWithHeaders: ThriftSerializable, Equatable {
+public struct GenerateClientMethodsWithHeaders: ThriftSerializable, Hashable {
 
     public init() {}
 
@@ -522,7 +522,7 @@ public struct GenerateClientMethodsWithHeaders: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from MigrationBlockingAllowInheritance
-public struct MigrationBlockingAllowInheritance: ThriftSerializable, Equatable {
+public struct MigrationBlockingAllowInheritance: ThriftSerializable, Hashable {
 
     public init() {}
 
@@ -546,7 +546,7 @@ public struct MigrationBlockingAllowInheritance: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from MigrationBlockingLegacyJSONSerialization
-public struct MigrationBlockingLegacyJSONSerialization: ThriftSerializable, Equatable {
+public struct MigrationBlockingLegacyJSONSerialization: ThriftSerializable, Hashable {
 
     public init() {}
 
@@ -570,7 +570,7 @@ public struct MigrationBlockingLegacyJSONSerialization: ThriftSerializable, Equa
 }
 
 /// Auto-generated from FixmeWrongType
-public struct FixmeWrongType: ThriftSerializable, Equatable {
+public struct FixmeWrongType: ThriftSerializable, Hashable {
 
     public init() {}
 
@@ -594,7 +594,7 @@ public struct FixmeWrongType: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from UnsafeArray
-public struct UnsafeArray: ThriftSerializable, Equatable {
+public struct UnsafeArray: ThriftSerializable, Hashable {
 
     public init() {}
 

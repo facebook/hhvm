@@ -20,11 +20,12 @@
 {{#import "codec/write" as wr}}
 {{#import "codec/read" as rd}}
 
-{{! A Thrift struct/exception becomes a Swift value type. Equatable is
-    synthesized. Exceptions additionally conform to Error. }}
+{{! A Thrift struct/exception becomes a Swift value type. Hashable is
+    synthesized (and refines Equatable, so `==` is available too). Exceptions
+    additionally conform to Error. }}
 {{#let export partial struct_type |structured| captures |types defaults constants wr rd|}}
 /// Auto-generated from {{structured.name}}
-public struct {{structured.swift_name}}: ThriftSerializable, Equatable{{#if structured.exception?}}, Error{{/if structured.exception?}} {
+public struct {{structured.swift_name}}: ThriftSerializable, Hashable{{#if structured.exception?}}, Error{{/if structured.exception?}} {
 {{#each structured.fields as |field|}}
 {{#if field.optional?}}
     public var {{field.swift_property_name}}: {{#partial types.swift_type type=field.type}}?

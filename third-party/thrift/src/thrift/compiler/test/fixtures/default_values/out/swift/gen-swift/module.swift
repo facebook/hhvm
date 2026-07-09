@@ -18,7 +18,7 @@ import Foundation
 import FBThrift
 
 /// Auto-generated from TrivialStruct
-public struct TrivialStruct: ThriftSerializable, Equatable {
+public struct TrivialStruct: ThriftSerializable, Hashable {
     public var int_value: Int32 = 0
 
     public init() {}
@@ -51,7 +51,7 @@ public struct TrivialStruct: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from TrivialStructWithDefault
-public struct TrivialStructWithDefault: ThriftSerializable, Equatable {
+public struct TrivialStructWithDefault: ThriftSerializable, Hashable {
     public var int_value_1: Int32 = 0
     public var int_value_2: Int32 = 42
 
@@ -93,7 +93,7 @@ public struct TrivialStructWithDefault: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from StructWithNoCustomDefaultValues
-public struct StructWithNoCustomDefaultValues: ThriftSerializable, Equatable {
+public struct StructWithNoCustomDefaultValues: ThriftSerializable, Hashable {
     public var unqualified_integer: Int32 = 0
     public var optional_integer: Int32?
     public var required_integer: Int32 = 0
@@ -175,7 +175,7 @@ public struct StructWithNoCustomDefaultValues: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from StructWithCustomDefaultValues
-public struct StructWithCustomDefaultValues: ThriftSerializable, Equatable {
+public struct StructWithCustomDefaultValues: ThriftSerializable, Hashable {
     public var unqualified_integer: Int32 = 42
     public var optional_integer: Int32?
     public var required_integer: Int32 = 44
@@ -275,7 +275,7 @@ public struct StructWithCustomDefaultValues: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from StructWithCollectionDefaultValues
-public struct StructWithCollectionDefaultValues: ThriftSerializable, Equatable {
+public struct StructWithCollectionDefaultValues: ThriftSerializable, Hashable {
     public var list_with_list_value: [Int32] = []
     public var set_with_list_value: Set<Int32> = []
     public var map_with_map_value: [Int32: Int32] = [:]

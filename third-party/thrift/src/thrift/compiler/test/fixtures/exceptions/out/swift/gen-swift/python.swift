@@ -70,7 +70,7 @@ public enum ConstraintLevel: ThriftEnum {
 }
 
 /// Auto-generated from Py3Hidden
-public struct Py3Hidden: ThriftSerializable, Equatable {
+public struct Py3Hidden: ThriftSerializable, Hashable {
 
     public init() {}
 
@@ -94,7 +94,7 @@ public struct Py3Hidden: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from PyDeprecatedHidden
-public struct PyDeprecatedHidden: ThriftSerializable, Equatable {
+public struct PyDeprecatedHidden: ThriftSerializable, Hashable {
     public var reason: String = ""
 
     public init() {}
@@ -127,7 +127,7 @@ public struct PyDeprecatedHidden: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from Flags
-public struct Flags: ThriftSerializable, Equatable {
+public struct Flags: ThriftSerializable, Hashable {
 
     public init() {}
 
@@ -151,7 +151,7 @@ public struct Flags: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from EnumFormatAsInt
-public struct EnumFormatAsInt: ThriftSerializable, Equatable {
+public struct EnumFormatAsInt: ThriftSerializable, Hashable {
 
     public init() {}
 
@@ -175,7 +175,7 @@ public struct EnumFormatAsInt: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from Name
-public struct Name: ThriftSerializable, Equatable {
+public struct Name: ThriftSerializable, Hashable {
     public var name: String = ""
 
     public init() {}
@@ -208,7 +208,7 @@ public struct Name: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from Adapter
-public struct Adapter: ThriftSerializable, Equatable {
+public struct Adapter: ThriftSerializable, Hashable {
     public var name: String = ""
     public var typeHint: String = ""
 
@@ -250,7 +250,7 @@ public struct Adapter: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from UseCAPI
-public struct UseCAPI: ThriftSerializable, Equatable {
+public struct UseCAPI: ThriftSerializable, Hashable {
     public var serialize: Bool = false
 
     public init() {}
@@ -283,7 +283,7 @@ public struct UseCAPI: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from Py3EnableCppAdapter
-public struct Py3EnableCppAdapter: ThriftSerializable, Equatable {
+public struct Py3EnableCppAdapter: ThriftSerializable, Hashable {
 
     public init() {}
 
@@ -307,7 +307,7 @@ public struct Py3EnableCppAdapter: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from MigrationBlockingAllowInheritance
-public struct MigrationBlockingAllowInheritance: ThriftSerializable, Equatable {
+public struct MigrationBlockingAllowInheritance: ThriftSerializable, Hashable {
 
     public init() {}
 
@@ -331,7 +331,7 @@ public struct MigrationBlockingAllowInheritance: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from DeprecatedSortSetOnSerialize
-public struct DeprecatedSortSetOnSerialize: ThriftSerializable, Equatable {
+public struct DeprecatedSortSetOnSerialize: ThriftSerializable, Hashable {
 
     public init() {}
 
@@ -355,7 +355,7 @@ public struct DeprecatedSortSetOnSerialize: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from DeprecatedKeySortMapOnSerialize
-public struct DeprecatedKeySortMapOnSerialize: ThriftSerializable, Equatable {
+public struct DeprecatedKeySortMapOnSerialize: ThriftSerializable, Hashable {
 
     public init() {}
 
@@ -379,7 +379,7 @@ public struct DeprecatedKeySortMapOnSerialize: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from DisableFieldCache
-public struct DisableFieldCache: ThriftSerializable, Equatable {
+public struct DisableFieldCache: ThriftSerializable, Hashable {
 
     public init() {}
 
@@ -403,7 +403,7 @@ public struct DisableFieldCache: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from ConstrainedFloat32
-public struct ConstrainedFloat32: ThriftSerializable, Equatable {
+public struct ConstrainedFloat32: ThriftSerializable, Hashable {
     public var precision_loss: ConstraintLevel = .init(rawValue: 0)
     public var inf_overflow: ConstraintLevel = .init(rawValue: 0)
     public var not_a_number: ConstraintLevel = .init(rawValue: 0)
@@ -454,7 +454,7 @@ public struct ConstrainedFloat32: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from EnableUnsafeIssetInspection
-public struct EnableUnsafeIssetInspection: ThriftSerializable, Equatable {
+public struct EnableUnsafeIssetInspection: ThriftSerializable, Hashable {
 
     public init() {}
 

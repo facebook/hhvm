@@ -24,7 +24,7 @@
     present the last one wins (guide 2.3.15/2.3.16). }}
 {{#let export partial union_type |structured| captures |types ttype|}}
 /// Auto-generated union from {{structured.name}}
-public enum {{structured.swift_name}}: ThriftSerializable, Equatable {
+public enum {{structured.swift_name}}: ThriftSerializable, Hashable {
     /// No field set — the default state of a union (guide 2.3.14).
 {{! Leading `_` marks this as generator-synthesized and avoids collision with a
     case from a user field named "empty"; a double underscore is avoided because

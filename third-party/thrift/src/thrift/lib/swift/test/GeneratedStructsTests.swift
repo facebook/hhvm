@@ -94,6 +94,30 @@ struct GeneratedStructsTests {
     #expect(decoded.optional_struct == nil)
   }
 
+  @Test func hashableAsSetElementAndDictionaryKey() {
+    // Guide 2.4.26: structs are Hashable, so they work as Set elements and
+    // dictionary keys.
+    var a = MyStruct()
+    a.my_int_field = 1
+    a.my_string_field = "a"
+    var b = MyStruct()
+    b.my_int_field = 2
+    b.my_string_field = "b"
+    let aCopy = a
+
+    let set: Set<MyStruct> = [a, b, aCopy]
+    #expect(set.count == 2)
+    #expect(set.contains(a))
+    #expect(set.contains(b))
+
+    var counts: [MyStruct: Int] = [:]
+    counts[a, default: 0] += 1
+    counts[aCopy, default: 0] += 1
+    counts[b, default: 0] += 1
+    #expect(counts[a] == 2)
+    #expect(counts[b] == 1)
+  }
+
   @Test func exceptionRoundTrip() throws {
     var e = MyException()
     e.my_int_field = -1

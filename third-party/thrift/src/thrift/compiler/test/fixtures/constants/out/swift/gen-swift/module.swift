@@ -164,7 +164,7 @@ public enum Company: ThriftEnum {
 }
 
 /// Auto-generated from Internship
-public struct Internship: ThriftSerializable, Equatable {
+public struct Internship: ThriftSerializable, Hashable {
     public var weeks: Int32 = 0
     public var title: String = ""
     public var employer: Company?
@@ -239,7 +239,7 @@ public struct Internship: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from Range
-public struct Range: ThriftSerializable, Equatable {
+public struct Range: ThriftSerializable, Hashable {
     public var min: Int32 = 0
     public var max: Int32 = 0
 
@@ -281,7 +281,7 @@ public struct Range: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from struct1
-public struct struct1: ThriftSerializable, Equatable {
+public struct struct1: ThriftSerializable, Hashable {
     public var a: Int32 = 1234567
     public var b: String = "<uninitialized>"
 
@@ -323,7 +323,7 @@ public struct struct1: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from struct2
-public struct struct2: ThriftSerializable, Equatable {
+public struct struct2: ThriftSerializable, Hashable {
     public var a: Int32 = 0
     public var b: String = ""
     public var c: struct1 = .init()
@@ -383,7 +383,7 @@ public struct struct2: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from struct3
-public struct struct3: ThriftSerializable, Equatable {
+public struct struct3: ThriftSerializable, Hashable {
     public var a: String = ""
     public var b: Int32 = 0
     public var c: struct2 = .init()
@@ -434,7 +434,7 @@ public struct struct3: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from struct4
-public struct struct4: ThriftSerializable, Equatable {
+public struct struct4: ThriftSerializable, Hashable {
     public var a: Int32 = 0
     public var b: Double?
     public var c: Int8?
@@ -489,7 +489,7 @@ public struct struct4: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated union from union1
-public enum union1: ThriftSerializable, Equatable {
+public enum union1: ThriftSerializable, Hashable {
     /// No field set — the default state of a union (guide 2.3.14).
     case _empty
     case i(Int32)
@@ -541,7 +541,7 @@ public enum union1: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated union from union2
-public enum union2: ThriftSerializable, Equatable {
+public enum union2: ThriftSerializable, Hashable {
     /// No field set — the default state of a union (guide 2.3.14).
     case _empty
     case i(Int32)

@@ -104,7 +104,7 @@ public enum HackEnum: ThriftEnum {
 }
 
 /// Auto-generated from MyStruct
-public struct MyStruct: ThriftSerializable, Equatable {
+public struct MyStruct: ThriftSerializable, Hashable {
     public var MyIntField: Int64 = 0
     public var MyStringField: String = ""
     public var MyDataField: MyDataItemAlias = .init()
@@ -209,7 +209,7 @@ public struct MyStruct: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from Containers
-public struct Containers: ThriftSerializable, Equatable {
+public struct Containers: ThriftSerializable, Hashable {
     public var I32List: [Int32] = []
     public var StringSet: Set<String> = []
     public var StringToI64Map: [String: Int64] = [:]
@@ -260,7 +260,7 @@ public struct Containers: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from MyDataItem
-public struct MyDataItem: ThriftSerializable, Equatable {
+public struct MyDataItem: ThriftSerializable, Hashable {
 
     public init() {}
 
@@ -284,7 +284,7 @@ public struct MyDataItem: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated union from MyUnion
-public enum MyUnion: ThriftSerializable, Equatable {
+public enum MyUnion: ThriftSerializable, Hashable {
     /// No field set — the default state of a union (guide 2.3.14).
     case _empty
     case myEnum(MyEnumAlias)
@@ -356,7 +356,7 @@ public enum MyUnion: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from MyException
-public struct MyException: ThriftSerializable, Equatable, Error {
+public struct MyException: ThriftSerializable, Hashable, Error {
     public var MyIntField: Int64 = 0
     public var MyStringField: String = ""
     public var myStruct: MyStruct = .init()
@@ -416,7 +416,7 @@ public struct MyException: ThriftSerializable, Equatable, Error {
 }
 
 /// Auto-generated from MyExceptionWithMessage
-public struct MyExceptionWithMessage: ThriftSerializable, Equatable, Error {
+public struct MyExceptionWithMessage: ThriftSerializable, Hashable, Error {
     public var MyIntField: Int64 = 0
     public var MyStringField: String = ""
     public var myStruct: MyStruct = .init()
@@ -476,7 +476,7 @@ public struct MyExceptionWithMessage: ThriftSerializable, Equatable, Error {
 }
 
 /// Auto-generated from ReservedKeyword
-public struct ReservedKeyword: ThriftSerializable, Equatable {
+public struct ReservedKeyword: ThriftSerializable, Hashable {
     public var reserved_field: Int32 = 0
 
     public init() {}
@@ -509,7 +509,7 @@ public struct ReservedKeyword: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated union from UnionToBeRenamed
-public enum UnionToBeRenamed: ThriftSerializable, Equatable {
+public enum UnionToBeRenamed: ThriftSerializable, Hashable {
     /// No field set — the default state of a union (guide 2.3.14).
     case _empty
     case reserved_field(Int32)

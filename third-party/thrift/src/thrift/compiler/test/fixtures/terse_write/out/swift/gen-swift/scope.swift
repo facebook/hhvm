@@ -18,7 +18,7 @@ import Foundation
 import FBThrift
 
 /// Auto-generated from Transitive
-public struct Transitive: ThriftSerializable, Equatable {
+public struct Transitive: ThriftSerializable, Hashable {
 
     public init() {}
 
@@ -42,7 +42,7 @@ public struct Transitive: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from Program
-public struct Program: ThriftSerializable, Equatable {
+public struct Program: ThriftSerializable, Hashable {
 
     public init() {}
 
@@ -66,7 +66,7 @@ public struct Program: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from Struct
-public struct Struct: ThriftSerializable, Equatable {
+public struct Struct: ThriftSerializable, Hashable {
 
     public init() {}
 
@@ -90,7 +90,7 @@ public struct Struct: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from Union
-public struct Union: ThriftSerializable, Equatable {
+public struct Union: ThriftSerializable, Hashable {
 
     public init() {}
 
@@ -114,7 +114,7 @@ public struct Union: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from Exception
-public struct Exception: ThriftSerializable, Equatable {
+public struct Exception: ThriftSerializable, Hashable {
 
     public init() {}
 
@@ -138,7 +138,7 @@ public struct Exception: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from ThrownException
-public struct ThrownException: ThriftSerializable, Equatable {
+public struct ThrownException: ThriftSerializable, Hashable {
 
     public init() {}
 
@@ -162,7 +162,7 @@ public struct ThrownException: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from Field
-public struct Field: ThriftSerializable, Equatable {
+public struct Field: ThriftSerializable, Hashable {
 
     public init() {}
 
@@ -186,7 +186,7 @@ public struct Field: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from Typedef
-public struct Typedef: ThriftSerializable, Equatable {
+public struct Typedef: ThriftSerializable, Hashable {
 
     public init() {}
 
@@ -210,7 +210,7 @@ public struct Typedef: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from Service
-public struct Service: ThriftSerializable, Equatable {
+public struct Service: ThriftSerializable, Hashable {
 
     public init() {}
 
@@ -234,7 +234,7 @@ public struct Service: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from Interaction
-public struct Interaction: ThriftSerializable, Equatable {
+public struct Interaction: ThriftSerializable, Hashable {
 
     public init() {}
 
@@ -258,7 +258,7 @@ public struct Interaction: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from Function
-public struct Function: ThriftSerializable, Equatable {
+public struct Function: ThriftSerializable, Hashable {
 
     public init() {}
 
@@ -282,7 +282,7 @@ public struct Function: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from FunctionParameter
-public struct FunctionParameter: ThriftSerializable, Equatable {
+public struct FunctionParameter: ThriftSerializable, Hashable {
 
     public init() {}
 
@@ -306,7 +306,7 @@ public struct FunctionParameter: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from EnumValue
-public struct EnumValue: ThriftSerializable, Equatable {
+public struct EnumValue: ThriftSerializable, Hashable {
 
     public init() {}
 
@@ -330,7 +330,7 @@ public struct EnumValue: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from Const
-public struct Const: ThriftSerializable, Equatable {
+public struct Const: ThriftSerializable, Hashable {
 
     public init() {}
 
@@ -354,7 +354,7 @@ public struct Const: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from Enum
-public struct Enum: ThriftSerializable, Equatable {
+public struct Enum: ThriftSerializable, Hashable {
 
     public init() {}
 
@@ -378,7 +378,7 @@ public struct Enum: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from Structured
-public struct Structured: ThriftSerializable, Equatable {
+public struct Structured: ThriftSerializable, Hashable {
 
     public init() {}
 
@@ -402,7 +402,7 @@ public struct Structured: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from Interface
-public struct Interface: ThriftSerializable, Equatable {
+public struct Interface: ThriftSerializable, Hashable {
 
     public init() {}
 
@@ -426,7 +426,7 @@ public struct Interface: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from RootDefinition
-public struct RootDefinition: ThriftSerializable, Equatable {
+public struct RootDefinition: ThriftSerializable, Hashable {
 
     public init() {}
 
@@ -450,7 +450,7 @@ public struct RootDefinition: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from Definition
-public struct Definition: ThriftSerializable, Equatable {
+public struct Definition: ThriftSerializable, Hashable {
 
     public init() {}
 
@@ -474,7 +474,7 @@ public struct Definition: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from DisableSchemaConst
-public struct DisableSchemaConst: ThriftSerializable, Equatable {
+public struct DisableSchemaConst: ThriftSerializable, Hashable {
 
     public init() {}
 

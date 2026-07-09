@@ -75,7 +75,7 @@ public enum RpcPriority: ThriftEnum {
 }
 
 /// Auto-generated from Experimental
-public struct Experimental: ThriftSerializable, Equatable {
+public struct Experimental: ThriftSerializable, Hashable {
 
     public init() {}
 
@@ -99,7 +99,7 @@ public struct Experimental: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from ReserveIds
-public struct ReserveIds: ThriftSerializable, Equatable {
+public struct ReserveIds: ThriftSerializable, Hashable {
     public var ids: [Int32] = []
     public var id_ranges: [Int32: Int32] = [:]
 
@@ -141,7 +141,7 @@ public struct ReserveIds: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from RequiresBackwardCompatibility
-public struct RequiresBackwardCompatibility: ThriftSerializable, Equatable {
+public struct RequiresBackwardCompatibility: ThriftSerializable, Hashable {
     public var field_name: Bool = false
 
     public init() {}
@@ -174,7 +174,7 @@ public struct RequiresBackwardCompatibility: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from TerseWrite
-public struct TerseWrite: ThriftSerializable, Equatable {
+public struct TerseWrite: ThriftSerializable, Hashable {
 
     public init() {}
 
@@ -198,7 +198,7 @@ public struct TerseWrite: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from Box
-public struct Box: ThriftSerializable, Equatable {
+public struct Box: ThriftSerializable, Hashable {
 
     public init() {}
 
@@ -222,7 +222,7 @@ public struct Box: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from Mixin
-public struct Mixin: ThriftSerializable, Equatable {
+public struct Mixin: ThriftSerializable, Hashable {
 
     public init() {}
 
@@ -246,7 +246,7 @@ public struct Mixin: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from SerializeInFieldIdOrder
-public struct SerializeInFieldIdOrder: ThriftSerializable, Equatable {
+public struct SerializeInFieldIdOrder: ThriftSerializable, Hashable {
 
     public init() {}
 
@@ -270,7 +270,7 @@ public struct SerializeInFieldIdOrder: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from BitmaskEnum
-public struct BitmaskEnum: ThriftSerializable, Equatable {
+public struct BitmaskEnum: ThriftSerializable, Hashable {
 
     public init() {}
 
@@ -294,7 +294,7 @@ public struct BitmaskEnum: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from ExceptionMessage
-public struct ExceptionMessage: ThriftSerializable, Equatable {
+public struct ExceptionMessage: ThriftSerializable, Hashable {
 
     public init() {}
 
@@ -318,7 +318,7 @@ public struct ExceptionMessage: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from InternBox
-public struct InternBox: ThriftSerializable, Equatable {
+public struct InternBox: ThriftSerializable, Hashable {
 
     public init() {}
 
@@ -342,7 +342,7 @@ public struct InternBox: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from Serial
-public struct Serial: ThriftSerializable, Equatable {
+public struct Serial: ThriftSerializable, Hashable {
 
     public init() {}
 
@@ -366,7 +366,7 @@ public struct Serial: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from Uri
-public struct Uri: ThriftSerializable, Equatable {
+public struct Uri: ThriftSerializable, Hashable {
     public var value: String = ""
 
     public init() {}
@@ -399,7 +399,7 @@ public struct Uri: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from Priority
-public struct Priority: ThriftSerializable, Equatable {
+public struct Priority: ThriftSerializable, Hashable {
     public var level: RpcPriority = .init(rawValue: 0)
 
     public init() {}
@@ -432,7 +432,7 @@ public struct Priority: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from Sealed
-public struct Sealed: ThriftSerializable, Equatable {
+public struct Sealed: ThriftSerializable, Hashable {
 
     public init() {}
 
@@ -456,7 +456,7 @@ public struct Sealed: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from DeprecatedUnvalidatedAnnotations
-public struct DeprecatedUnvalidatedAnnotations: ThriftSerializable, Equatable {
+public struct DeprecatedUnvalidatedAnnotations: ThriftSerializable, Hashable {
     public var items: [String: String] = [:]
 
     public init() {}
@@ -489,7 +489,7 @@ public struct DeprecatedUnvalidatedAnnotations: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from AllowReservedIdentifier
-public struct AllowReservedIdentifier: ThriftSerializable, Equatable {
+public struct AllowReservedIdentifier: ThriftSerializable, Hashable {
 
     public init() {}
 
@@ -513,7 +513,7 @@ public struct AllowReservedIdentifier: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from AllowReservedFilename
-public struct AllowReservedFilename: ThriftSerializable, Equatable {
+public struct AllowReservedFilename: ThriftSerializable, Hashable {
 
     public init() {}
 
@@ -537,7 +537,7 @@ public struct AllowReservedFilename: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from RuntimeAnnotation
-public struct RuntimeAnnotation: ThriftSerializable, Equatable {
+public struct RuntimeAnnotation: ThriftSerializable, Hashable {
 
     public init() {}
 
@@ -561,7 +561,7 @@ public struct RuntimeAnnotation: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from AllowLegacyTypedefUri
-public struct AllowLegacyTypedefUri: ThriftSerializable, Equatable {
+public struct AllowLegacyTypedefUri: ThriftSerializable, Hashable {
 
     public init() {}
 
@@ -585,7 +585,7 @@ public struct AllowLegacyTypedefUri: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from AllowUnsafeOptionalCustomDefaultValue
-public struct AllowUnsafeOptionalCustomDefaultValue: ThriftSerializable, Equatable {
+public struct AllowUnsafeOptionalCustomDefaultValue: ThriftSerializable, Hashable {
 
     public init() {}
 
@@ -609,7 +609,7 @@ public struct AllowUnsafeOptionalCustomDefaultValue: ThriftSerializable, Equatab
 }
 
 /// Auto-generated from AllowUnsafeUnionFieldCustomDefaultValue
-public struct AllowUnsafeUnionFieldCustomDefaultValue: ThriftSerializable, Equatable {
+public struct AllowUnsafeUnionFieldCustomDefaultValue: ThriftSerializable, Hashable {
 
     public init() {}
 
@@ -633,7 +633,7 @@ public struct AllowUnsafeUnionFieldCustomDefaultValue: ThriftSerializable, Equat
 }
 
 /// Auto-generated from AllowUnsafeRequiredFieldQualifier
-public struct AllowUnsafeRequiredFieldQualifier: ThriftSerializable, Equatable {
+public struct AllowUnsafeRequiredFieldQualifier: ThriftSerializable, Hashable {
 
     public init() {}
 
@@ -657,7 +657,7 @@ public struct AllowUnsafeRequiredFieldQualifier: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from AllowLegacyMissingUris
-public struct AllowLegacyMissingUris: ThriftSerializable, Equatable {
+public struct AllowLegacyMissingUris: ThriftSerializable, Hashable {
 
     public init() {}
 
@@ -681,7 +681,7 @@ public struct AllowLegacyMissingUris: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from AllowUnsafeNonSealedKeyType
-public struct AllowUnsafeNonSealedKeyType: ThriftSerializable, Equatable {
+public struct AllowUnsafeNonSealedKeyType: ThriftSerializable, Hashable {
 
     public init() {}
 
@@ -705,7 +705,7 @@ public struct AllowUnsafeNonSealedKeyType: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from Deprecated
-public struct Deprecated: ThriftSerializable, Equatable {
+public struct Deprecated: ThriftSerializable, Hashable {
     public var message: String = ""
 
     public init() {}

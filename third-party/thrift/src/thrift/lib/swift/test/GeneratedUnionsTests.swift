@@ -65,4 +65,24 @@ struct GeneratedUnionsTests {
     #expect(
       try CompactSerializer.deserialize(MyUnion.self, from: data) == ._empty)
   }
+
+  @Test func hashableAsSetElementAndDictionaryKey() {
+    // Guide 2.4.26: unions are Hashable, so they work as Set elements and
+    // dictionary keys.
+    let a = MyUnion.my_enum(.MyValue1)
+    let b = MyUnion.my_enum(.MyValue2)
+    let aCopy = MyUnion.my_enum(.MyValue1)
+
+    let set: Set<MyUnion> = [a, b, aCopy, ._empty]
+    #expect(set.count == 3)
+    #expect(set.contains(a))
+    #expect(set.contains(._empty))
+
+    var byUnion: [MyUnion: String] = [:]
+    byUnion[a] = "first"
+    byUnion[aCopy] = "second"
+    byUnion[b] = "third"
+    #expect(byUnion[a] == "second")
+    #expect(byUnion.count == 2)
+  }
 }

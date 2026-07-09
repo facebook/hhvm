@@ -122,7 +122,7 @@ public enum EnumUnderlyingType: ThriftEnum {
 }
 
 /// Auto-generated from Name
-public struct Name: ThriftSerializable, Equatable {
+public struct Name: ThriftSerializable, Hashable {
     public var value: String = ""
 
     public init() {}
@@ -155,7 +155,7 @@ public struct Name: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from Type
-public struct `Type`: ThriftSerializable, Equatable {
+public struct `Type`: ThriftSerializable, Hashable {
     public var name: String = ""
     public var template: String = ""
 
@@ -197,7 +197,7 @@ public struct `Type`: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from Ref
-public struct Ref: ThriftSerializable, Equatable {
+public struct Ref: ThriftSerializable, Hashable {
     public var type: RefType = .init(rawValue: 0)
 
     public init() {}
@@ -230,7 +230,7 @@ public struct Ref: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from Lazy
-public struct Lazy: ThriftSerializable, Equatable {
+public struct Lazy: ThriftSerializable, Hashable {
     public var ref: Bool = false
 
     public init() {}
@@ -263,7 +263,7 @@ public struct Lazy: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from DisableLazyChecksum
-public struct DisableLazyChecksum: ThriftSerializable, Equatable {
+public struct DisableLazyChecksum: ThriftSerializable, Hashable {
 
     public init() {}
 
@@ -287,7 +287,7 @@ public struct DisableLazyChecksum: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from Adapter
-public struct Adapter: ThriftSerializable, Equatable {
+public struct Adapter: ThriftSerializable, Hashable {
     public var name: String = ""
     public var adaptedType: String = ""
     public var underlyingName: String = ""
@@ -356,7 +356,7 @@ public struct Adapter: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from PackIsset
-public struct PackIsset: ThriftSerializable, Equatable {
+public struct PackIsset: ThriftSerializable, Hashable {
     public var atomic: Bool = true
 
     public init() {}
@@ -389,7 +389,7 @@ public struct PackIsset: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from MinimizePadding
-public struct MinimizePadding: ThriftSerializable, Equatable {
+public struct MinimizePadding: ThriftSerializable, Hashable {
 
     public init() {}
 
@@ -413,7 +413,7 @@ public struct MinimizePadding: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from ScopedEnumAsUnionType
-public struct ScopedEnumAsUnionType: ThriftSerializable, Equatable {
+public struct ScopedEnumAsUnionType: ThriftSerializable, Hashable {
 
     public init() {}
 
@@ -437,7 +437,7 @@ public struct ScopedEnumAsUnionType: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from FieldInterceptor
-public struct FieldInterceptor: ThriftSerializable, Equatable {
+public struct FieldInterceptor: ThriftSerializable, Hashable {
     public var name: String = ""
     public var noinline: Bool = false
 
@@ -479,7 +479,7 @@ public struct FieldInterceptor: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from UseOpEncode
-public struct UseOpEncode: ThriftSerializable, Equatable {
+public struct UseOpEncode: ThriftSerializable, Hashable {
 
     public init() {}
 
@@ -503,7 +503,7 @@ public struct UseOpEncode: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from EnumType
-public struct EnumType: ThriftSerializable, Equatable {
+public struct EnumType: ThriftSerializable, Hashable {
     public var type: EnumUnderlyingType = .init(rawValue: 0)
 
     public init() {}
@@ -536,7 +536,7 @@ public struct EnumType: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from Frozen2Exclude
-public struct Frozen2Exclude: ThriftSerializable, Equatable {
+public struct Frozen2Exclude: ThriftSerializable, Hashable {
 
     public init() {}
 
@@ -560,7 +560,7 @@ public struct Frozen2Exclude: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from Frozen2RequiresCompleteContainerParams
-public struct Frozen2RequiresCompleteContainerParams: ThriftSerializable, Equatable {
+public struct Frozen2RequiresCompleteContainerParams: ThriftSerializable, Hashable {
 
     public init() {}
 
@@ -584,7 +584,7 @@ public struct Frozen2RequiresCompleteContainerParams: ThriftSerializable, Equata
 }
 
 /// Auto-generated from ProcessInEbThreadUnsafe
-public struct ProcessInEbThreadUnsafe: ThriftSerializable, Equatable {
+public struct ProcessInEbThreadUnsafe: ThriftSerializable, Hashable {
 
     public init() {}
 
@@ -608,7 +608,7 @@ public struct ProcessInEbThreadUnsafe: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from UseCursorSerialization
-public struct UseCursorSerialization: ThriftSerializable, Equatable {
+public struct UseCursorSerialization: ThriftSerializable, Hashable {
 
     public init() {}
 
@@ -632,7 +632,7 @@ public struct UseCursorSerialization: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from GenerateDeprecatedHeaderClientMethods
-public struct GenerateDeprecatedHeaderClientMethods: ThriftSerializable, Equatable {
+public struct GenerateDeprecatedHeaderClientMethods: ThriftSerializable, Hashable {
 
     public init() {}
 
@@ -656,7 +656,7 @@ public struct GenerateDeprecatedHeaderClientMethods: ThriftSerializable, Equatab
 }
 
 /// Auto-generated from AllowLegacyNonOptionalRef
-public struct AllowLegacyNonOptionalRef: ThriftSerializable, Equatable {
+public struct AllowLegacyNonOptionalRef: ThriftSerializable, Hashable {
 
     public init() {}
 
@@ -680,7 +680,7 @@ public struct AllowLegacyNonOptionalRef: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from DeprecatedTerseWrite
-public struct DeprecatedTerseWrite: ThriftSerializable, Equatable {
+public struct DeprecatedTerseWrite: ThriftSerializable, Hashable {
 
     public init() {}
 
@@ -704,7 +704,7 @@ public struct DeprecatedTerseWrite: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from AllowLegacyDeprecatedTerseWritesRef
-public struct AllowLegacyDeprecatedTerseWritesRef: ThriftSerializable, Equatable {
+public struct AllowLegacyDeprecatedTerseWritesRef: ThriftSerializable, Hashable {
 
     public init() {}
 
@@ -728,7 +728,7 @@ public struct AllowLegacyDeprecatedTerseWritesRef: ThriftSerializable, Equatable
 }
 
 /// Auto-generated from EnableCustomTypeOrdering
-public struct EnableCustomTypeOrdering: ThriftSerializable, Equatable {
+public struct EnableCustomTypeOrdering: ThriftSerializable, Hashable {
 
     public init() {}
 
@@ -752,7 +752,7 @@ public struct EnableCustomTypeOrdering: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from GenerateServiceMethodDecorator
-public struct GenerateServiceMethodDecorator: ThriftSerializable, Equatable {
+public struct GenerateServiceMethodDecorator: ThriftSerializable, Hashable {
 
     public init() {}
 
@@ -776,7 +776,7 @@ public struct GenerateServiceMethodDecorator: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from FastClient
-public struct FastClient: ThriftSerializable, Equatable {
+public struct FastClient: ThriftSerializable, Hashable {
 
     public init() {}
 
@@ -800,7 +800,7 @@ public struct FastClient: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from FastServer
-public struct FastServer: ThriftSerializable, Equatable {
+public struct FastServer: ThriftSerializable, Hashable {
 
     public init() {}
 
@@ -824,7 +824,7 @@ public struct FastServer: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from NonOrderable
-public struct NonOrderable: ThriftSerializable, Equatable {
+public struct NonOrderable: ThriftSerializable, Hashable {
 
     public init() {}
 
@@ -848,7 +848,7 @@ public struct NonOrderable: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from DeclareHashSpecialization
-public struct DeclareHashSpecialization: ThriftSerializable, Equatable {
+public struct DeclareHashSpecialization: ThriftSerializable, Hashable {
 
     public init() {}
 
@@ -872,7 +872,7 @@ public struct DeclareHashSpecialization: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from DeclareEqualToSpecialization
-public struct DeclareEqualToSpecialization: ThriftSerializable, Equatable {
+public struct DeclareEqualToSpecialization: ThriftSerializable, Hashable {
 
     public init() {}
 

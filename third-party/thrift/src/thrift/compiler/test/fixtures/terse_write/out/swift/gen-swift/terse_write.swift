@@ -61,7 +61,7 @@ public enum MyEnum: ThriftEnum {
 }
 
 /// Auto-generated from MyStruct
-public struct MyStruct: ThriftSerializable, Equatable {
+public struct MyStruct: ThriftSerializable, Hashable {
 
     public init() {}
 
@@ -85,7 +85,7 @@ public struct MyStruct: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated union from MyUnion
-public enum MyUnion: ThriftSerializable, Equatable {
+public enum MyUnion: ThriftSerializable, Hashable {
     /// No field set — the default state of a union (guide 2.3.14).
     case _empty
     case bool_field(Bool)
@@ -257,7 +257,7 @@ public enum MyUnion: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from MyStructWithCustomDefault
-public struct MyStructWithCustomDefault: ThriftSerializable, Equatable {
+public struct MyStructWithCustomDefault: ThriftSerializable, Hashable {
     public var field1: Int64 = 1
 
     public init() {}
@@ -290,7 +290,7 @@ public struct MyStructWithCustomDefault: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from StructLevelTerseStruct
-public struct StructLevelTerseStruct: ThriftSerializable, Equatable {
+public struct StructLevelTerseStruct: ThriftSerializable, Hashable {
     public var bool_field: Bool = false
     public var byte_field: Int8 = 0
     public var short_field: Int16 = 0
@@ -449,7 +449,7 @@ public struct StructLevelTerseStruct: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from FieldLevelTerseStruct
-public struct FieldLevelTerseStruct: ThriftSerializable, Equatable {
+public struct FieldLevelTerseStruct: ThriftSerializable, Hashable {
     public var terse_bool_field: Bool = false
     public var terse_byte_field: Int8 = 0
     public var terse_short_field: Int16 = 0
@@ -743,7 +743,7 @@ public struct FieldLevelTerseStruct: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from AdaptedFields
-public struct AdaptedFields: ThriftSerializable, Equatable {
+public struct AdaptedFields: ThriftSerializable, Hashable {
     public var field1: MyInteger = 0
     public var field2: Int32 = 0
     public var field3: MyInteger = 0
@@ -794,7 +794,7 @@ public struct AdaptedFields: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from TerseException
-public struct TerseException: ThriftSerializable, Equatable, Error {
+public struct TerseException: ThriftSerializable, Hashable, Error {
     public var msg: String = ""
 
     public init() {}

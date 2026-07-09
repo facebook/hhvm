@@ -389,7 +389,7 @@ public enum MyBitmaskEnum2: ThriftEnum {
 }
 
 /// Auto-generated from SomeStruct
-public struct SomeStruct: ThriftSerializable, Equatable {
+public struct SomeStruct: ThriftSerializable, Hashable {
     public var reasonable: Metasyntactic = .FOO
     public var fine: Metasyntactic = .BAR
     public var questionable: Metasyntactic = Metasyntactic(rawValue: -1)
@@ -449,7 +449,7 @@ public struct SomeStruct: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from MyStruct
-public struct MyStruct: ThriftSerializable, Equatable {
+public struct MyStruct: ThriftSerializable, Hashable {
     public var me2_3: MyEnum2 = MyEnum2(rawValue: 3)
     public var me3_n3: MyEnum3 = MyEnum3(rawValue: -3)
     public var me1_t1: MyEnum1 = .ME1_1

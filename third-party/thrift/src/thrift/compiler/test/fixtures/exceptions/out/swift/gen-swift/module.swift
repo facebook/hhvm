@@ -18,7 +18,7 @@ import Foundation
 import FBThrift
 
 /// Auto-generated from Fiery
-public struct Fiery: ThriftSerializable, Equatable, Error {
+public struct Fiery: ThriftSerializable, Hashable, Error {
     public var message: String = ""
 
     public init() {}
@@ -51,7 +51,7 @@ public struct Fiery: ThriftSerializable, Equatable, Error {
 }
 
 /// Auto-generated from Serious
-public struct Serious: ThriftSerializable, Equatable, Error {
+public struct Serious: ThriftSerializable, Hashable, Error {
     public var sonnet: String?
 
     public init() {}
@@ -86,7 +86,7 @@ public struct Serious: ThriftSerializable, Equatable, Error {
 }
 
 /// Auto-generated from ComplexFieldNames
-public struct ComplexFieldNames: ThriftSerializable, Equatable, Error {
+public struct ComplexFieldNames: ThriftSerializable, Hashable, Error {
     public var error_message: String = ""
     public var internal_error_message: String = ""
 
@@ -128,7 +128,7 @@ public struct ComplexFieldNames: ThriftSerializable, Equatable, Error {
 }
 
 /// Auto-generated from CustomFieldNames
-public struct CustomFieldNames: ThriftSerializable, Equatable, Error {
+public struct CustomFieldNames: ThriftSerializable, Hashable, Error {
     public var error_message: String = ""
     public var internal_error_message: String = ""
 
@@ -170,7 +170,7 @@ public struct CustomFieldNames: ThriftSerializable, Equatable, Error {
 }
 
 /// Auto-generated from ExceptionWithPrimitiveField
-public struct ExceptionWithPrimitiveField: ThriftSerializable, Equatable, Error {
+public struct ExceptionWithPrimitiveField: ThriftSerializable, Hashable, Error {
     public var message: String = ""
     public var error_code: Int32 = 0
 
@@ -212,7 +212,7 @@ public struct ExceptionWithPrimitiveField: ThriftSerializable, Equatable, Error 
 }
 
 /// Auto-generated from ExceptionWithStructuredAnnotation
-public struct ExceptionWithStructuredAnnotation: ThriftSerializable, Equatable, Error {
+public struct ExceptionWithStructuredAnnotation: ThriftSerializable, Hashable, Error {
     public var message_field: String = ""
     public var error_code: Int32 = 0
 
@@ -254,7 +254,7 @@ public struct ExceptionWithStructuredAnnotation: ThriftSerializable, Equatable, 
 }
 
 /// Auto-generated from Banal
-public struct Banal: ThriftSerializable, Equatable, Error {
+public struct Banal: ThriftSerializable, Hashable, Error {
 
     public init() {}
 

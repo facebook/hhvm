@@ -18,8 +18,9 @@ import FBThrift
 import Foundation
 import Testing
 
-/// A minimal hand-written ThriftSerializable used to exercise the runtime
-/// without depending on generated code (mirrors what the generator emits).
+/// A minimal hand-written ThriftSerializable used to exercise the binary
+/// runtime without depending on generated code (mirrors what the generator
+/// emits, and matches the type used in the Compact tests).
 private struct Point: ThriftSerializable, Equatable {
   var x: Int32 = 0
   var y: Int32 = 0
@@ -44,9 +45,17 @@ private struct Point: ThriftSerializable, Equatable {
       if fieldType == .stop { break }
       switch fieldId {
       case 1:
-        if fieldType == .i32 { x = try Int32.thriftRead(from: reader) } else { try reader.skip(fieldType) }
+        if fieldType == .i32 {
+          x = try Int32.thriftRead(from: reader)
+        } else {
+          try reader.skip(fieldType)
+        }
       case 2:
-        if fieldType == .i32 { y = try Int32.thriftRead(from: reader) } else { try reader.skip(fieldType) }
+        if fieldType == .i32 {
+          y = try Int32.thriftRead(from: reader)
+        } else {
+          try reader.skip(fieldType)
+        }
       case 3:
         if fieldType == .string {
           label = try String.thriftRead(from: reader)
@@ -153,14 +162,14 @@ private final class Nested: ThriftSerializable {
   }
 }
 
-struct ThriftCompactProtocolTests {
+struct ThriftBinaryProtocolTests {
   private func roundTrip<T: ThriftSerializable & Equatable>(
     _ value: T
   ) throws
     -> T
   {
-    let data = CompactSerializer.serialize(value)
-    return try CompactSerializer.deserialize(T.self, from: data)
+    let data = BinarySerializer.serialize(value)
+    return try BinarySerializer.deserialize(T.self, from: data)
   }
 
   @Test func structRoundTrip() throws {
@@ -203,59 +212,120 @@ struct ThriftCompactProtocolTests {
     #expect(try roundTrip(a) == a)
   }
 
-  // MARK: - Malformed input
-
   @Test func unknownFieldIsSkipped() {
     // Encode AllTheThings, decode as Point: Point only knows fields 1-3,
     // everything else must be skipped without error.
     var a = AllTheThings()
     a.i64Field = 123
     a.names = ["skip", "me"]
-    let data = CompactSerializer.serialize(a)
+    let data = BinarySerializer.serialize(a)
     #expect(throws: Never.self) {
-      try CompactSerializer.deserialize(Point.self, from: data)
+      try BinarySerializer.deserialize(Point.self, from: data)
     }
   }
+
+  // MARK: - Malformed input
 
   @Test func truncatedBufferThrows() {
     var p = Point()
     p.label = "abc"
-    var data = CompactSerializer.serialize(p)
+    var data = BinarySerializer.serialize(p)
     data.removeLast()
     #expect(throws: (any Error).self) {
-      try CompactSerializer.deserialize(Point.self, from: data)
+      try BinarySerializer.deserialize(Point.self, from: data)
     }
   }
 
-  @Test func varintOverflowThrows() {
-    // A varint32 whose 5th byte carries value bits beyond the 32-bit range must
-    // be rejected, not silently truncated.
-    let reader = CompactReader(data: Data([0xFF, 0xFF, 0xFF, 0xFF, 0xFF]))
+  @Test func unknownWireTypeThrows() {
+    // A field header carrying a wire type outside the known set must be
+    // rejected rather than silently mishandled.
+    let reader = BinaryReader(data: Data([0x7F, 0x00, 0x01]))
     #expect(throws: (any Error).self) {
-      try reader.readI32()
+      try reader.readFieldBegin()
     }
   }
 
-  @Test func collectionSizeExceedingBufferThrows() {
-    // A list header claiming far more elements than the buffer can hold must
-    // throw rather than attempt a huge allocation. Header 0xF5 = (size marker
-    // 0xF, i32 element type 0x5); the following varint decodes to a large size
-    // with no element bytes after it.
-    let reader = CompactReader(
-      data: Data([0xF5, 0xFF, 0xFF, 0xFF, 0xFF, 0x0F]))
+  @Test func negativeCollectionSizeThrows() {
+    // Binary encodes collection counts as a signed 4-byte big-endian i32, so a
+    // negative count is malformed and must be rejected. Header: i32 element
+    // type (0x08) followed by a count of 0xFFFFFFFF (-1).
+    let reader = BinaryReader(data: Data([0x08, 0xFF, 0xFF, 0xFF, 0xFF]))
     #expect(throws: (any Error).self) {
       try reader.readListBegin()
     }
   }
 
+  @Test func collectionSizeExceedingBufferThrows() {
+    // A list header claiming far more elements than the buffer can hold must
+    // throw rather than attempt a huge allocation. Header: i32 element type
+    // (0x08) then a 4-byte big-endian count of 0x7FFFFFFF, with no elements.
+    let reader = BinaryReader(data: Data([0x08, 0x7F, 0xFF, 0xFF, 0xFF]))
+    #expect(throws: (any Error).self) {
+      try reader.readListBegin()
+    }
+  }
+
+  @Test func listCountExceedsPerElementCapacityThrows() {
+    // The header claims 5 i64 elements (8 bytes each) but only 5 payload bytes
+    // follow. The per-element minimum (8) must reject the header up front, even
+    // though 5 single-byte elements would nominally fit in the remaining bytes.
+    // Header: i64 element type (0x0A) + count 5, then 5 stray bytes.
+    let reader = BinaryReader(
+      data: Data([0x0A, 0x00, 0x00, 0x00, 0x05, 0, 0, 0, 0, 0]))
+    #expect(throws: (any Error).self) {
+      try reader.readListBegin()
+    }
+  }
+
+  @Test func mapPairCountExceedsPerElementCapacityThrows() {
+    // The header claims 3 i32->i64 pairs (12 bytes each) but only 6 payload
+    // bytes follow. The per-pair minimum (4 + 8) must reject the header up
+    // front. Header: i32 key (0x08) + i64 value (0x0A) + count 3, then 6 bytes.
+    let reader = BinaryReader(
+      data: Data([0x08, 0x0A, 0x00, 0x00, 0x00, 0x03, 0, 0, 0, 0, 0, 0]))
+    #expect(throws: (any Error).self) {
+      try reader.readMapBegin()
+    }
+  }
+
+  @Test func unknownListElementTypeThrows() {
+    // A list header whose element type is outside the known wire-type set must
+    // be rejected. Header: element type 0x7F (unknown) + count 0.
+    let reader = BinaryReader(data: Data([0x7F, 0x00, 0x00, 0x00, 0x00]))
+    #expect(throws: (any Error).self) {
+      try reader.readListBegin()
+    }
+  }
+
+  @Test func unknownMapKeyOrValueTypeThrows() {
+    // A map header whose key or value type is unknown must be rejected before
+    // the count is trusted. Header: key type 0x7F (unknown) + value type i64
+    // (0x0A) + count 0.
+    let reader = BinaryReader(data: Data([0x7F, 0x0A, 0x00, 0x00, 0x00, 0x00]))
+    #expect(throws: (any Error).self) {
+      try reader.readMapBegin()
+    }
+  }
+
+  @Test func wellFormedCollectionHeaderAtCapacitySucceeds() throws {
+    // Guard against over-tightening: a list of two i32s with exactly eight
+    // payload bytes available must pass header validation.
+    let reader = BinaryReader(
+      data: Data([0x08, 0x00, 0x00, 0x00, 0x02, 0, 0, 0, 0, 0, 0, 0, 0]))
+    let (elemType, size) = try reader.readListBegin()
+    #expect(elemType == .i32)
+    #expect(size == 2)
+  }
+
   @Test func deeplyNestedStructSkipThrows() {
     // Skipping a struct nested past the reader's depth limit must throw
-    // depthLimitExceeded rather than recurse without bound. Each 0x1C byte is a
-    // field header (id delta 1, compact type struct), so a run of them is an
-    // unbounded chain of nested structs.
-    let nested = [UInt8](
-      repeating: 0x1C, count: CompactReader.defaultMaxDepth + 4)
-    let reader = CompactReader(data: Data(nested))
+    // depthLimitExceeded rather than recurse without bound. Each 3-byte group
+    // (struct wire type + big-endian field id 1) opens another nested struct.
+    let level: [UInt8] = [WireType.struct.rawValue, 0x00, 0x01]
+    let nested = Array(
+      repeating: level, count: BinaryReader.defaultMaxDepth + 4
+    ).flatMap { $0 }
+    let reader = BinaryReader(data: Data(nested))
     do {
       try reader.skip(.struct)
       Issue.record("Expected skip to throw depthLimitExceeded")
@@ -269,11 +339,13 @@ struct ThriftCompactProtocolTests {
   @Test func deeplyNestedStructReadThrows() {
     // Reading (not just skipping) a struct nested past the depth limit must
     // throw depthLimitExceeded instead of recursing until the stack overflows.
-    // Each 0x1C byte is a field header (id delta 1, compact type struct), so a
-    // run of them is an unbounded chain of nested structs.
-    let nested = [UInt8](
-      repeating: 0x1C, count: CompactReader.defaultMaxDepth + 4)
-    let reader = CompactReader(data: Data(nested))
+    // Each 3-byte group (struct wire type + big-endian field id 1) opens
+    // another nested struct.
+    let level: [UInt8] = [WireType.struct.rawValue, 0x00, 0x01]
+    let nested = Array(
+      repeating: level, count: BinaryReader.defaultMaxDepth + 4
+    ).flatMap { $0 }
+    let reader = BinaryReader(data: Data(nested))
     do {
       let _: Nested = try reader.readStruct()
       Issue.record("Expected read to throw depthLimitExceeded")
@@ -284,10 +356,15 @@ struct ThriftCompactProtocolTests {
     }
   }
 
+  @Test func readBoolAcceptsCanonicalEncodings() throws {
+    #expect(try BinaryReader(data: Data([0x00])).readBool() == false)
+    #expect(try BinaryReader(data: Data([0x01])).readBool() == true)
+  }
+
   @Test func readBoolRejectsOutOfRangeValue() {
-    // Compact encodes a standalone bool as CT_BOOLEAN_TRUE (1) or
-    // CT_BOOLEAN_FALSE (2); any other byte is malformed and must be rejected.
-    let reader = CompactReader(data: Data([0x03]))
+    // Matches the C++ BinaryProtocol reader: any byte >= 2 is not a valid bool
+    // encoding and must be rejected rather than coerced to true.
+    let reader = BinaryReader(data: Data([0x02]))
     do {
       _ = try reader.readBool()
       Issue.record("Expected readBool to throw invalidData")
@@ -298,31 +375,29 @@ struct ThriftCompactProtocolTests {
     }
   }
 
-  @Test func nestedStructWithinDepthLimitRoundTrips() throws {
-    // Symmetry check for the writer/reader depth counters: a chain safely under
-    // the limit must serialize and deserialize without tripping either guard,
-    // and the defer-based decrement must keep the counters balanced.
-    func makeChain(depth: Int) -> Nested {
-      let root = Nested()
-      var tip = root
-      for _ in 1..<depth {
-        let next = Nested()
-        tip.child = next
-        tip = next
-      }
-      return root
-    }
-    func chainDepth(_ node: Nested) -> Int {
-      var count = 1
-      var cur = node
-      while let next = cur.child {
-        count += 1
-        cur = next
-      }
-      return count
-    }
-    let data = CompactSerializer.serialize(makeChain(depth: 8))
-    let decoded = try CompactSerializer.deserialize(Nested.self, from: data)
-    #expect(chainDepth(decoded) == 8)
+  @Test func binaryFieldHeaderLayout() {
+    // Binary field header is type(1 byte) + field id(2 bytes, big-endian);
+    // WireType raw values are the on-wire binary TType ids.
+    var p = Point()
+    p.x = 1
+    let bytes = [UInt8](BinarySerializer.serialize(p))
+    // First field: i32 (raw 8), id 1 -> [0x08, 0x00, 0x01, 0x00,0x00,0x00,0x01]
+    #expect(bytes[0] == WireType.i32.rawValue)
+    #expect(bytes[1] == 0x00)
+    #expect(bytes[2] == 0x01)
+    #expect(Array(bytes[3..<7]) == [0x00, 0x00, 0x00, 0x01])
+  }
+
+  @Test func distinctFromCompactButSameValue() throws {
+    // Binary and Compact are different encodings of the same value; both must
+    // round-trip, and (for a non-trivial value) produce different bytes.
+    var a = AllTheThings()
+    a.i64Field = 1_000_000
+    a.names = ["a", "b"]
+    let binary = BinarySerializer.serialize(a)
+    let compact = CompactSerializer.serialize(a)
+    #expect(binary != compact)
+    #expect(try BinarySerializer.deserialize(AllTheThings.self, from: binary) == a)
+    #expect(try CompactSerializer.deserialize(AllTheThings.self, from: compact) == a)
   }
 }

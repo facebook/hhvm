@@ -22,8 +22,8 @@ import Foundation
 /// delta-encoded field IDs, and compressed collection headers. Reads from an
 /// in-memory buffer.
 public final class CompactReader: ProtocolReader {
-  /// Default maximum nesting depth for skip operations. Matches Rust's
-  /// DEFAULT_RECURSION_DEPTH.
+  /// Default maximum nesting depth for skip and struct-read operations. Matches
+  /// Rust's DEFAULT_RECURSION_DEPTH.
   public static let defaultMaxDepth = 64
 
   private let buffer: [UInt8]
@@ -32,6 +32,11 @@ public final class CompactReader: ProtocolReader {
   private var currentFieldId: Int16?
   private var pendingBoolValue = false
   private var hasPendingBool = false
+
+  /// Current struct-read nesting depth. Bounded by `defaultMaxDepth` so a
+  /// maliciously deep chain of nested structs cannot overflow the stack while
+  /// being deserialized (the read-side mirror of the `skip` depth guard).
+  private var depth = 0
 
   /// Maximum allowed size for string and binary reads. When 0 (default), no
   /// configurable limit is enforced, but reads are still validated against
@@ -112,7 +117,17 @@ public final class CompactReader: ProtocolReader {
       hasPendingBool = false
       return pendingBoolValue
     }
-    return try readRawByte() == CompactType.boolTrue.rawValue
+    // Reject out-of-range standalone bool encodings: compact encodes a bare
+    // bool (e.g. an element inside a collection) as CT_BOOLEAN_TRUE (1) or
+    // CT_BOOLEAN_FALSE (2). Anything else is malformed.
+    let byte = try readRawByte()
+    switch byte {
+    case CompactType.boolTrue.rawValue: return true
+    case CompactType.boolFalse.rawValue: return false
+    default:
+      throw ProtocolError.invalidData(
+        "Invalid bool value \(byte)\(errorContext)")
+    }
   }
 
   public func readByte() throws -> Int8 {
@@ -222,6 +237,13 @@ public final class CompactReader: ProtocolReader {
   }
 
   public func readStruct<T: ThriftSerializable>() throws -> T {
+    depth += 1
+    defer { depth -= 1 }
+    if depth > CompactReader.defaultMaxDepth {
+      throw ProtocolError.depthLimitExceeded(
+        "Maximum nesting depth (\(CompactReader.defaultMaxDepth)) "
+          + "exceeded while reading struct")
+    }
     // Field-id delta and any pending bool header are per-struct state; save and
     // reset them so a nested struct read starts clean and cannot observe the
     // outer struct's stale pending bool.

@@ -22,10 +22,20 @@ import Foundation
 /// delta-encoded field IDs, and compressed collection headers. Output is
 /// accumulated into an in-memory buffer available via `bytes`/`data`.
 public final class CompactWriter: ProtocolWriter {
+  /// Default maximum nesting depth for struct-write operations. Matches the
+  /// reader's `defaultMaxDepth` (and Rust's DEFAULT_RECURSION_DEPTH), so a
+  /// pathologically deep in-memory object graph fails with a clear diagnostic
+  /// rather than overflowing the stack mid-serialization.
+  public static let defaultMaxDepth = 64
+
   private var buffer: [UInt8] = []
   private var lastFieldId: Int16 = 0
   private var pendingBool = false
   private var pendingFieldId: Int16 = 0
+
+  /// Current struct-write nesting depth. Bounded by `defaultMaxDepth` (the
+  /// write-side mirror of the reader's struct-read depth guard).
+  private var depth = 0
 
   public init() {}
 
@@ -144,6 +154,16 @@ public final class CompactWriter: ProtocolWriter {
   }
 
   public func writeStruct<T: ThriftSerializable>(_ value: T) {
+    depth += 1
+    defer { depth -= 1 }
+    // `precondition` (unlike `assert`) also fires in release builds, mirroring
+    // the reader's depth guard: the write side traps rather than throws because
+    // the whole write API is non-throwing and the input is a trusted in-memory
+    // object, so exceeding this is a programming error, not malformed input.
+    precondition(
+      depth <= CompactWriter.defaultMaxDepth,
+      "Maximum nesting depth (\(CompactWriter.defaultMaxDepth)) "
+        + "exceeded while writing struct")
     let savedFieldId = lastFieldId
     lastFieldId = 0
     defer { lastFieldId = savedFieldId }

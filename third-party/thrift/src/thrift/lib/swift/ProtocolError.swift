@@ -21,7 +21,8 @@ public enum ProtocolError: Error, CustomStringConvertible, Equatable {
   case invalidData(String)
   /// The stream ended before the expected number of bytes could be read.
   case endOfBuffer(String)
-  /// A nested structure exceeded the maximum allowed depth while skipping.
+  /// A nested structure exceeded the maximum allowed depth while skipping or
+  /// reading.
   case depthLimitExceeded(String)
 
   public var description: String {

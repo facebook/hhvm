@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from folly cimport cFollyFuture
-from libc.stdint cimport uint16_t, uint32_t
+from libc.stdint cimport int32_t, uint16_t, uint32_t
 from libcpp.memory cimport shared_ptr
 from libcpp.optional cimport optional
 from libcpp.string cimport string
@@ -62,6 +62,7 @@ cdef extern from "thrift/lib/python/client/RequestChannel.h" namespace "::apache
             ClientType,
             cProtocol,
             const string& endpoint,
+            int32_t keep_alive_timeout_ms,
         )
 
         cRequestChannel_ptr sync_createThriftChannelTCP(
@@ -72,6 +73,7 @@ cdef extern from "thrift/lib/python/client/RequestChannel.h" namespace "::apache
             ClientType,
             cProtocol,
             const string& endpoint,
+            int32_t keep_alive_timeout_ms,
         ) except +
 
         cFollyFuture[cRequestChannel_ptr] createThriftChannelUnix(
@@ -80,6 +82,7 @@ cdef extern from "thrift/lib/python/client/RequestChannel.h" namespace "::apache
             optional[uint32_t] channel_timeout,
             ClientType,
             cProtocol,
+            int32_t keep_alive_timeout_ms,
         )
 
         cRequestChannel_ptr sync_createThriftChannelUnix(
@@ -88,6 +91,7 @@ cdef extern from "thrift/lib/python/client/RequestChannel.h" namespace "::apache
             optional[uint32_t] channel_timeout,
             ClientType,
             cProtocol,
+            int32_t keep_alive_timeout_ms,
         ) except +
 
         cFollyFuture[cRequestChannel_ptr] createThriftChannelSSL(
@@ -100,6 +104,7 @@ cdef extern from "thrift/lib/python/client/RequestChannel.h" namespace "::apache
             ClientType,
             cProtocol,
             const string& endpoint,
+            int32_t keep_alive_timeout_ms,
         )
 
         cRequestChannel_ptr sync_createThriftChannelSSL(
@@ -112,6 +117,7 @@ cdef extern from "thrift/lib/python/client/RequestChannel.h" namespace "::apache
             ClientType,
             cProtocol,
             const string& endpoint,
+            int32_t keep_alive_timeout_ms,
         ) except +
 
     cdef cppclass DefaultChannelFactory "::apache::thrift::python::client::DefaultChannelFactory" (ChannelFactory):

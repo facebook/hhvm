@@ -22,7 +22,6 @@
 #include <thrift/lib/cpp/transport/THeader.h>
 #include <thrift/lib/cpp2/async/HeaderClientChannel.h>
 #include <thrift/lib/cpp2/async/RequestChannel.h>
-#include <thrift/lib/cpp2/async/RocketClientChannel.h>
 #include <thrift/lib/python/client/ssl.h>
 #ifndef THRIFT_NO_HTTP_CLIENT_CHANNEL
 #include <thrift/lib/cpp2/async/HTTPClientChannel.h>
@@ -40,19 +39,16 @@ DefaultChannelFactory::createThriftChannelTCP(
     std::optional<uint32_t> channel_timeout,
     CLIENT_TYPE client_t,
     apache::thrift::protocol::PROTOCOL_TYPES proto,
-    const std::string& endpoint) {
+    const std::string& endpoint,
+    int32_t keep_alive_timeout_ms) {
   auto eb = folly::getGlobalIOExecutor()->getEventBase();
   auto future = folly::via(eb, [=]() -> RequestChannel::Ptr {
     auto socket =
         folly::AsyncSocket::newSocket(eb, host, port, connect_timeout);
 
     if (client_t == THRIFT_ROCKET_CLIENT_TYPE) {
-      auto chan = RocketClientChannel::newChannel(std::move(socket));
-      chan->setProtocolId(proto);
-      if (channel_timeout) {
-        chan->setTimeout(*channel_timeout);
-      }
-      return chan;
+      return createRocketChannel(
+          std::move(socket), proto, channel_timeout, keep_alive_timeout_ms);
     } else if (client_t == THRIFT_HTTP2_CLIENT_TYPE) {
 #ifndef THRIFT_NO_HTTP_CLIENT_CHANNEL
       auto chan = HTTPClientChannel::newHTTP2Channel(std::move(socket));
@@ -78,9 +74,17 @@ RequestChannel::Ptr ChannelFactory::sync_createThriftChannelTCP(
     std::optional<uint32_t> channel_timeout,
     CLIENT_TYPE client_t,
     apache::thrift::protocol::PROTOCOL_TYPES proto,
-    const std::string& endpoint) {
+    const std::string& endpoint,
+    int32_t keep_alive_timeout_ms) {
   auto future = createThriftChannelTCP(
-      host, port, connect_timeout, channel_timeout, client_t, proto, endpoint);
+      host,
+      port,
+      connect_timeout,
+      channel_timeout,
+      client_t,
+      proto,
+      endpoint,
+      keep_alive_timeout_ms);
   return std::move(future.wait().value());
 }
 
@@ -123,7 +127,8 @@ DefaultChannelFactory::createThriftChannelUnix(
     uint32_t connect_timeout,
     std::optional<uint32_t> channel_timeout,
     CLIENT_TYPE client_t,
-    apache::thrift::protocol::PROTOCOL_TYPES proto) {
+    apache::thrift::protocol::PROTOCOL_TYPES proto,
+    int32_t keep_alive_timeout_ms) {
   auto eb = folly::getGlobalIOExecutor()->getEventBase();
   return folly::via(
              eb,
@@ -136,13 +141,11 @@ DefaultChannelFactory::createThriftChannelUnix(
       .thenValue(
           [=](folly::AsyncSocket::UniquePtr socket) -> RequestChannel::Ptr {
             if (client_t == THRIFT_ROCKET_CLIENT_TYPE) {
-              auto chan = apache::thrift::RocketClientChannel::newChannel(
-                  std::move(socket));
-              chan->setProtocolId(proto);
-              if (channel_timeout) {
-                chan->setTimeout(*channel_timeout);
-              }
-              return chan;
+              return createRocketChannel(
+                  std::move(socket),
+                  proto,
+                  channel_timeout,
+                  keep_alive_timeout_ms);
             }
             return createHeaderChannel(std::move(socket), client_t, proto);
           });
@@ -153,9 +156,15 @@ RequestChannel::Ptr ChannelFactory::sync_createThriftChannelUnix(
     uint32_t connect_timeout,
     std::optional<uint32_t> channel_timeout,
     CLIENT_TYPE client_t,
-    apache::thrift::protocol::PROTOCOL_TYPES proto) {
+    apache::thrift::protocol::PROTOCOL_TYPES proto,
+    int32_t keep_alive_timeout_ms) {
   auto future = createThriftChannelUnix(
-      path, connect_timeout, channel_timeout, client_t, proto);
+      path,
+      connect_timeout,
+      channel_timeout,
+      client_t,
+      proto,
+      keep_alive_timeout_ms);
   return std::move(future.wait().value());
 }
 
@@ -169,7 +178,8 @@ DefaultChannelFactory::createThriftChannelSSL(
     const std::optional<uint32_t> channel_timeout,
     CLIENT_TYPE client_t,
     apache::thrift::protocol::PROTOCOL_TYPES proto,
-    const std::string& endpoint) {
+    const std::string& endpoint,
+    int32_t keep_alive_timeout_ms) {
   auto eb = folly::getGlobalIOExecutor()->getEventBase();
   return folly::via(
       eb,
@@ -191,7 +201,8 @@ DefaultChannelFactory::createThriftChannelSSL(
             channel_timeout,
             client_t,
             proto,
-            endpoint)};
+            endpoint,
+            keep_alive_timeout_ms)};
 
         if (client_t == CLIENT_TYPE::THRIFT_ROCKET_CLIENT_TYPE) {
           handler->setSupportedApplicationProtocols({"rs"});
@@ -213,7 +224,8 @@ apache::thrift::RequestChannel::Ptr ChannelFactory::sync_createThriftChannelSSL(
     const std::optional<uint32_t> channel_timeout,
     CLIENT_TYPE client_t,
     apache::thrift::protocol::PROTOCOL_TYPES proto,
-    const std::string& endpoint) {
+    const std::string& endpoint,
+    int32_t keep_alive_timeout_ms) {
   auto future = createThriftChannelSSL(
       ctx,
       host,
@@ -223,7 +235,8 @@ apache::thrift::RequestChannel::Ptr ChannelFactory::sync_createThriftChannelSSL(
       channel_timeout,
       client_t,
       proto,
-      endpoint);
+      endpoint,
+      keep_alive_timeout_ms);
   return std::move(future.wait().value());
 }
 

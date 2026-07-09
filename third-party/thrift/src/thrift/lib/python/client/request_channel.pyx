@@ -15,6 +15,11 @@
 from libcpp.utility cimport move as cmove
 
 
+# Sentinel for "no RSocket KeepAlive timeout configured"; matches the C++
+# ChannelFactory default and leaves KeepAlive disabled on the channel.
+UNSPECIFIED_KEEP_ALIVE_TIMEOUT = 0
+
+
 cdef class RequestChannel:
     @staticmethod
     cdef RequestChannel create(cRequestChannel_ptr channel):

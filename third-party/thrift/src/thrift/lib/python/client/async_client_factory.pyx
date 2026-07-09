@@ -24,7 +24,7 @@ import folly.executor
 
 from cython.operator cimport dereference as deref
 from folly.futures cimport bridgeFutureWith
-from libc.stdint cimport uint32_t
+from libc.stdint cimport int32_t, uint32_t
 from libcpp.memory cimport make_shared, static_pointer_cast
 from libcpp.optional cimport optional
 from thrift.python.exceptions cimport create_py_exception
@@ -60,6 +60,7 @@ def get_client(
     thrift_ssl.SSLContext ssl_context=None,
     double ssl_timeout=1,
     channel_timeout=None,
+    int32_t keep_alive_timeout_ms=0,
 ):
     return get_client_with_channel_factory(
         clientKlass,
@@ -75,6 +76,7 @@ def get_client(
         ssl_context=ssl_context,
         ssl_timeout=ssl_timeout,
         channel_timeout=channel_timeout,
+        keep_alive_timeout_ms=keep_alive_timeout_ms,
     )
 
 
@@ -90,6 +92,7 @@ cdef object get_client_with_channel_factory(
     thrift_ssl.SSLContext ssl_context=None,
     double ssl_timeout=1,
     channel_timeout=None,
+    int32_t keep_alive_timeout_ms=0,
 ):
     if not issubclass(clientKlass, Client):
         raise TypeError(f"{clientKlass} is not a thrift python client class")
@@ -131,6 +134,7 @@ cdef object get_client_with_channel_factory(
                     ssl_context=ssl_context,
                     ssl_timeout=ssl_timeout,
                     channel_timeout=channel_timeout,
+                    keep_alive_timeout_ms=keep_alive_timeout_ms,
                 )
         else:
             host = str(host)
@@ -150,6 +154,7 @@ cdef object get_client_with_channel_factory(
                     client_type,
                     protocol,
                     endpoint,
+                    keep_alive_timeout_ms,
                 ),
                 requestchannel_callback,
                 <PyObject *>client,
@@ -158,7 +163,7 @@ cdef object get_client_with_channel_factory(
             bridgeFutureWith[cRequestChannel_ptr](
                 (<AsyncClient>client)._executor,
                 deref(channel_factory).createThriftChannelTCP(
-                    host, port, _timeout_ms, _channel_timeout_ms, client_type, protocol, endpoint
+                    host, port, _timeout_ms, _channel_timeout_ms, client_type, protocol, endpoint, keep_alive_timeout_ms
                 ),
                 requestchannel_callback,
                 <PyObject *>client,
@@ -168,7 +173,7 @@ cdef object get_client_with_channel_factory(
         bridgeFutureWith[cRequestChannel_ptr](
             (<AsyncClient>client)._executor,
             deref(channel_factory).createThriftChannelUnix(
-                cmove[string](fspath), _timeout_ms, _channel_timeout_ms, client_type, protocol
+                cmove[string](fspath), _timeout_ms, _channel_timeout_ms, client_type, protocol, keep_alive_timeout_ms
             ),
             requestchannel_callback,
             <PyObject *>client,
@@ -200,6 +205,7 @@ cdef class _AsyncResolveCtxManager:
     cdef thrift_ssl.SSLContext ssl_context
     cdef double ssl_timeout
     cdef object channel_timeout
+    cdef int32_t keep_alive_timeout_ms
 
     @staticmethod
     cdef _AsyncResolveCtxManager create(
@@ -214,6 +220,7 @@ cdef class _AsyncResolveCtxManager:
         thrift_ssl.SSLContext ssl_context=None,
         double ssl_timeout=1,
         channel_timeout=None,
+        int32_t keep_alive_timeout_ms=0,
     ):
         cdef _AsyncResolveCtxManager ctx_manager = _AsyncResolveCtxManager.__new__(_AsyncResolveCtxManager)
         ctx_manager.clientKlass = clientKlass
@@ -227,6 +234,7 @@ cdef class _AsyncResolveCtxManager:
         ctx_manager.ssl_context = ssl_context
         ctx_manager.ssl_timeout = ssl_timeout
         ctx_manager.channel_timeout = channel_timeout
+        ctx_manager.keep_alive_timeout_ms = keep_alive_timeout_ms
         return ctx_manager
 
     async def __aenter__(self):
@@ -249,6 +257,7 @@ cdef class _AsyncResolveCtxManager:
             ssl_context=self.ssl_context,
             ssl_timeout=self.ssl_timeout,
             channel_timeout=self.channel_timeout,
+            keep_alive_timeout_ms=self.keep_alive_timeout_ms,
         )
         return await self.ctx.__aenter__()
 

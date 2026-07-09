@@ -23,6 +23,7 @@ from thrift.py.client.sync_client import SyncClient
 
 from thrift.python.client cimport ssl as thrift_ssl
 from thrift.python.client.request_channel cimport ClientType as cClientType
+from thrift.python.client.request_channel import UNSPECIFIED_KEEP_ALIVE_TIMEOUT
 from thrift.python.client.sync_channel_factory cimport create_channel
 from thrift.python.protocol cimport Protocol as cProtocol
 from thrift.transport.TTransport import TTransportException
@@ -42,7 +43,7 @@ def get_client(
 ):
     try:
         channel = create_channel(
-            host, port, path, timeout, client_type, protocol, ssl_context, ssl_timeout, channel_timeout
+            host, port, path, timeout, client_type, protocol, ssl_context, ssl_timeout, channel_timeout, UNSPECIFIED_KEEP_ALIVE_TIMEOUT
         )
         return clientKlass(cpp_transport=SyncClient(channel))
     except RuntimeError as re:

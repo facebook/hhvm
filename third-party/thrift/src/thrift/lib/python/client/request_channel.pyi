@@ -16,6 +16,8 @@
 
 import enum
 
+UNSPECIFIED_KEEP_ALIVE_TIMEOUT: int
+
 class RequestChannel: ...
 
 class ClientType(enum.Enum):

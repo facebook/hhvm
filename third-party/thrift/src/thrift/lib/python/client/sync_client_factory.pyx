@@ -14,6 +14,7 @@
 
 # cython: c_string_type=unicode, c_string_encoding=utf8
 
+from libc.stdint cimport int32_t
 from thrift.python.client cimport ssl as thrift_ssl
 from thrift.python.client.request_channel cimport ClientType as cClientType
 from thrift.python.client.request_channel import ClientType
@@ -34,10 +35,11 @@ def get_client(
     thrift_ssl.SSLContext ssl_context=None,
     double ssl_timeout=1,
     channel_timeout=None,
+    int32_t keep_alive_timeout_ms=0,
 ):
     try:
         channel = create_channel(
-            host, port, path, timeout, client_type, protocol, ssl_context, ssl_timeout, channel_timeout
+            host, port, path, timeout, client_type, protocol, ssl_context, ssl_timeout, channel_timeout, keep_alive_timeout_ms
         )
         return clientKlass.Sync(channel)
     except RuntimeError as re:

@@ -166,6 +166,18 @@ class AsyncClientTests(IsolatedAsyncioTestCase):
                 self.assertIsNone(res)
                 await asyncio.sleep(1)  # wait for server to clear the queue
 
+    async def test_keep_alive_timeout_ms_with_rocket(self) -> None:
+        # pyre-fixme[16]: `AsyncContextManager` has no attribute `__aenter__`.
+        async with server_in_event_loop() as addr:
+            async with get_client(
+                TestService,
+                host=addr.ip,
+                port=addr.port,
+                client_type=ClientType.THRIFT_ROCKET_CLIENT_TYPE,
+                keep_alive_timeout_ms=5000,
+            ) as client:
+                self.assertEqual(3, await client.add(1, 2))
+
     async def test_unexpected_exception(self) -> None:
         # pyre-fixme[16]: `AsyncContextManager` has no attribute `__aenter__`.
         async with server_in_event_loop() as addr:

@@ -13,6 +13,7 @@
 # limitations under the License.
 
 from cpython.ref cimport PyObject
+from libc.stdint cimport int32_t
 from libcpp.memory cimport shared_ptr
 from folly cimport cFollyTry
 from thrift.python.client cimport ssl as thrift_ssl
@@ -43,4 +44,5 @@ cdef object get_client_with_channel_factory(
     thrift_ssl.SSLContext ssl_context = ?,
     double ssl_timeout = ?,
     channel_timeout = ?,
+    int32_t keep_alive_timeout_ms = ?,
 )

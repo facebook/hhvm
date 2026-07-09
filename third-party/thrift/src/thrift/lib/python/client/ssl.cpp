@@ -18,6 +18,7 @@
 
 #include <thrift/lib/cpp2/async/HeaderClientChannel.h>
 #include <thrift/lib/cpp2/async/RocketClientChannel.h>
+#include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
 namespace apache::thrift::python::client {
 
@@ -38,6 +39,27 @@ apache::thrift::RequestChannel::Ptr createHeaderChannel(
       std::move(sock), std::move(options));
 }
 
+apache::thrift::RequestChannel::Ptr createRocketChannel(
+    folly::AsyncTransport::UniquePtr sock,
+    apache::thrift::protocol::PROTOCOL_TYPES proto,
+    std::optional<uint32_t> channel_timeout,
+    int32_t keep_alive_timeout_ms) {
+  apache::thrift::RocketClientChannel::Ptr chan;
+  if (keep_alive_timeout_ms > 0) {
+    apache::thrift::RequestSetupMetadata meta;
+    meta.keepAliveTimeoutMs() = keep_alive_timeout_ms;
+    chan = apache::thrift::RocketClientChannel::newChannelWithMetadata(
+        std::move(sock), std::move(meta));
+  } else {
+    chan = apache::thrift::RocketClientChannel::newChannel(std::move(sock));
+  }
+  chan->setProtocolId(proto);
+  if (channel_timeout) {
+    chan->setTimeout(*channel_timeout);
+  }
+  return chan;
+}
+
 ConnectHandler::ConnectHandler(
     const std::shared_ptr<folly::SSLContext>& ctx,
     folly::EventBase* evb,
@@ -48,7 +70,8 @@ ConnectHandler::ConnectHandler(
     const std::optional<uint32_t> channel_timeout,
     CLIENT_TYPE client_t,
     apache::thrift::protocol::PROTOCOL_TYPES proto,
-    const std::string& endpoint)
+    const std::string& endpoint,
+    int32_t keep_alive_timeout_ms)
     : socket_{folly::AsyncSSLSocket::newSocket(ctx, evb)},
       host_(host),
       port_(port),
@@ -57,7 +80,8 @@ ConnectHandler::ConnectHandler(
       channel_timeout_(channel_timeout),
       client_t_(client_t),
       proto_(proto),
-      endpoint_(endpoint) {}
+      endpoint_(endpoint),
+      keep_alive_timeout_ms_(keep_alive_timeout_ms) {}
 
 folly::Future<apache::thrift::RequestChannel::Ptr> ConnectHandler::connect() {
   folly::DelayedDestruction::DestructorGuard dg(this);
@@ -78,13 +102,8 @@ void ConnectHandler::connectSuccess() noexcept {
   UniquePtr p(this);
   promise_.setValue([this]() mutable -> apache::thrift::RequestChannel::Ptr {
     if (client_t_ == CLIENT_TYPE::THRIFT_ROCKET_CLIENT_TYPE) {
-      auto chan =
-          apache::thrift::RocketClientChannel::newChannel(std::move(socket_));
-      chan->setProtocolId(proto_);
-      if (channel_timeout_) {
-        chan->setTimeout(*channel_timeout_);
-      }
-      return chan;
+      return createRocketChannel(
+          std::move(socket_), proto_, channel_timeout_, keep_alive_timeout_ms_);
     }
     return createHeaderChannel(
         std::move(socket_), client_t_, proto_, host_, endpoint_);

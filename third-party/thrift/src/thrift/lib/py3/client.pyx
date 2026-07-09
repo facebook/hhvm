@@ -18,6 +18,7 @@ from thrift.python.exceptions cimport create_py_exception
 from libcpp.optional cimport optional
 from thrift.python.common import Protocol
 from thrift.python.client.request_channel import ClientType
+from thrift.python.client.request_channel import UNSPECIFIED_KEEP_ALIVE_TIMEOUT
 from thrift.python.client.request_channel cimport DefaultChannelFactory, ChannelFactory
 cimport thrift.python.client.ssl as thrift_ssl
 from libcpp.string cimport string
@@ -287,7 +288,7 @@ def get_client(
         fspath = os.fsencode(path)
         bridgeFutureWith[cRequestChannel_ptr](
             (<Client>client)._executor,
-            channel_factory.createThriftChannelUnix(move[string](fspath), _timeout_ms, _channel_timeout_ms, client_type, protocol),
+            channel_factory.createThriftChannelUnix(move[string](fspath), _timeout_ms, _channel_timeout_ms, client_type, protocol, UNSPECIFIED_KEEP_ALIVE_TIMEOUT),
             requestchannel_callback,
             <PyObject *> client
         )
@@ -304,7 +305,8 @@ def get_client(
                 _channel_timeout_ms,
                 client_type,
                 protocol,
-                move[string](endpoint)
+                move[string](endpoint),
+                UNSPECIFIED_KEEP_ALIVE_TIMEOUT,
             ),
             requestchannel_callback,
             <PyObject *> client
@@ -320,7 +322,8 @@ def get_client(
                 _channel_timeout_ms,
                 client_type,
                 protocol,
-                move[string](endpoint)
+                move[string](endpoint),
+                UNSPECIFIED_KEEP_ALIVE_TIMEOUT,
             ),
             requestchannel_callback,
             <PyObject *> client

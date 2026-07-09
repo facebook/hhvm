@@ -18,7 +18,7 @@ import ipaddress
 import os
 import socket
 
-from libc.stdint cimport uint32_t
+from libc.stdint cimport int32_t, uint32_t
 from libcpp.optional cimport optional
 from libcpp.utility cimport move as cmove
 from libcpp.string cimport string
@@ -38,6 +38,7 @@ cdef RequestChannel create_channel(
     thrift_ssl.SSLContext ssl_context,
     double ssl_timeout,
     channel_timeout,
+    int32_t keep_alive_timeout_ms,
 ):
     endpoint = b''
     if client_type in (ClientType.THRIFT_HTTP_CLIENT_TYPE, ClientType.THRIFT_HTTP2_CLIENT_TYPE):
@@ -78,15 +79,16 @@ cdef RequestChannel create_channel(
                 client_type,
                 protocol,
                 endpoint,
+                keep_alive_timeout_ms,
             ))
         else:
             return RequestChannel.create(channel_factory.sync_createThriftChannelTCP(
-                host, port, _timeout_ms, _channel_timeout_ms, client_type, protocol, endpoint
+                host, port, _timeout_ms, _channel_timeout_ms, client_type, protocol, endpoint, keep_alive_timeout_ms
             ))
     elif path is not None:
         fspath = os.fsencode(path)
         return RequestChannel.create(channel_factory.sync_createThriftChannelUnix(
-            cmove[string](fspath), _timeout_ms, _channel_timeout_ms, client_type, protocol
+            cmove[string](fspath), _timeout_ms, _channel_timeout_ms, client_type, protocol, keep_alive_timeout_ms
         ))
     else:
         raise ValueError("Must set path or host/port")

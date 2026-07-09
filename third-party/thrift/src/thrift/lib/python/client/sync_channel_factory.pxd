@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from libc.stdint cimport int32_t
 from thrift.python.client cimport ssl as thrift_ssl
 from thrift.python.client.request_channel cimport (
     ClientType as cClientType,
@@ -29,4 +30,5 @@ cdef RequestChannel create_channel(
     thrift_ssl.SSLContext ssl_context,
     double ssl_timeout,
     object channel_timeout,
+    int32_t keep_alive_timeout_ms,
 )

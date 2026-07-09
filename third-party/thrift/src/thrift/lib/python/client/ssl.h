@@ -45,7 +45,8 @@ class ConnectHandler : public folly::AsyncSocket::ConnectCallback,
       std::optional<uint32_t> channel_timeout,
       CLIENT_TYPE client_t,
       apache::thrift::protocol::PROTOCOL_TYPES proto,
-      const std::string& endpoint);
+      const std::string& endpoint,
+      int32_t keep_alive_timeout_ms = 0);
 
   folly::Future<apache::thrift::RequestChannel::Ptr> connect();
   void setSupportedApplicationProtocols(
@@ -64,6 +65,7 @@ class ConnectHandler : public folly::AsyncSocket::ConnectCallback,
   CLIENT_TYPE client_t_;
   apache::thrift::protocol::PROTOCOL_TYPES proto_;
   std::string endpoint_;
+  int32_t keep_alive_timeout_ms_;
 };
 
 apache::thrift::RequestChannel::Ptr createHeaderChannel(
@@ -72,5 +74,11 @@ apache::thrift::RequestChannel::Ptr createHeaderChannel(
     apache::thrift::protocol::PROTOCOL_TYPES proto,
     folly::Optional<std::string> host = folly::none,
     folly::Optional<std::string> endpoint = folly::none);
+
+apache::thrift::RequestChannel::Ptr createRocketChannel(
+    folly::AsyncTransport::UniquePtr sock,
+    apache::thrift::protocol::PROTOCOL_TYPES proto,
+    std::optional<uint32_t> channel_timeout,
+    int32_t keep_alive_timeout_ms = 0);
 
 } // namespace apache::thrift::python::client

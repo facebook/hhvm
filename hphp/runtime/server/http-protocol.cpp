@@ -123,7 +123,6 @@ const StaticString
   s__POST("_POST"),
   s__REQUEST("_REQUEST"),
   s__ENV("_ENV"),
-  s__COOKIE("_COOKIE"),
   s_HTTP_RAW_POST_DATA("HTTP_RAW_POST_DATA"),
   s__FILES("_FILES"),
   s_GATEWAY_INTERFACE("GATEWAY_INTERFACE"),
@@ -202,9 +201,6 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
     php_global_set(s__REQUEST, emptyArr);
   }
   php_global_set(s__ENV, emptyArr);
-  if (!Cfg::Eval::DisableParsedCookies) {
-    php_global_set(s__COOKIE, emptyArr);
-  }
 
   // according to doc if content type is multipart/form-data
   // $HTTP_RAW_POST_DATA should always not available
@@ -240,13 +236,9 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
   };
 
   auto REQUESTarr = empty_dict_array();
-  auto COOKIEarr = empty_dict_array();
   SCOPE_EXIT {
     if (!Cfg::Eval::DisableRequestSuperglobal) {
       php_global_set(s__REQUEST, REQUESTarr);
-    }
-    if (!Cfg::Eval::DisableParsedCookies) {
-      php_global_set(s__COOKIE, COOKIEarr);
     }
   };
 
@@ -262,11 +254,6 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
   PreparePostVariables(POSTarr, HTTP_RAW_POST_DATA,
                         FILESarr, transport, r);
 
-  // Cookie
-  if (!Cfg::Eval::DisableParsedCookies) {
-    PrepareCookieVariable(COOKIEarr, transport);
-  }
-
   // Server
   init_server_request_time(SERVERarr);
   PrepareServerVariable(SERVERarr, transport, r, vhost);
@@ -275,20 +262,16 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
     // Request
     PrepareRequestVariables(REQUESTarr,
                             GETarr,
-                            POSTarr,
-                            COOKIEarr);
+                            POSTarr);
   }
 }
 
 void HttpProtocol::PrepareRequestVariables(Array& request,
                                            const Array& get,
-                                           const Array& post,
-                                           const Array& cookie) {
+                                           const Array& post) {
 
   CopyParams(request, get);
   CopyParams(request, post);
-  // if Cfg::Eval::DisableParsedCookies is set this is just a no-op
-  CopyParams(request, cookie);
 }
 
 void HttpProtocol::PrepareGetVariable(Array& get,
@@ -404,20 +387,6 @@ void HttpProtocol::PreparePostVariables(Array& post,
         raw_post = string_data;
       }
     }
-  }
-}
-
-bool HttpProtocol::PrepareCookieVariable(Array& cookie,
-                                         Transport *transport) {
-
-  std::string cookie_data = transport->getHeader("Cookie");
-  if (!cookie_data.empty()) {
-    StringBuffer sb;
-    sb.append(cookie_data);
-    DecodeCookies(cookie, (char*)sb.data());
-    return true;
-  } else {
-    return false;
   }
 }
 

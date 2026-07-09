@@ -33,8 +33,7 @@ struct HttpProtocol {
                                      const RequestURI &r);
   static void PrepareRequestVariables(Array& request,
                                       const Array& get,
-                                      const Array& post,
-                                      const Array& cookie);
+                                      const Array& post);
   static void PrepareGetVariable(Array& get,
                                  const RequestURI &r);
   static void PreparePostVariables(Array& post,
@@ -42,8 +41,6 @@ struct HttpProtocol {
                                    Array& files,
                                    Transport* transport,
                                    const RequestURI& r);
-  static bool PrepareCookieVariable(Array& cookie,
-                                    Transport *transport);
   static void PrepareServerVariable(Array& server,
                                     Transport *transport,
                                     const RequestURI &r,

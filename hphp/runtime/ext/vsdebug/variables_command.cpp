@@ -517,7 +517,6 @@ const auto globalKeys = {
   StaticString{"_SERVER"},
   StaticString{"_GET"},
   StaticString{"_POST"},
-  StaticString{"_COOKIE"},
   StaticString{"_FILES"},
   StaticString{"_ENV"},
   StaticString{"_REQUEST"},

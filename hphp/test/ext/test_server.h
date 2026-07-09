@@ -41,7 +41,6 @@ struct TestServer : TestBase {
   bool TestGet();
   bool TestPost();
   bool TestExpectContinue();
-  bool TestCookie();
 
   // test transport related extension functions
   bool TestResponseHeader();

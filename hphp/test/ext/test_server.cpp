@@ -285,7 +285,6 @@ bool TestServer::RunTests(const std::string &which) {
   RUN_TEST(TestGet);
   RUN_TEST(TestPost);
   RUN_TEST(TestExpectContinue);
-  RUN_TEST(TestCookie);
   RUN_TEST(TestResponseHeader);
   RUN_TEST(TestSetCookie);
   //RUN_TEST(TestRequestHandling);
@@ -417,16 +416,6 @@ bool TestServer::TestExpectContinue() {
 
   VSRX("<?hh print \\HH\\global_get('_POST')['name'];",
        "value", "string", "POST", "Expect: 100-continue", params);
-
-  return true;
-}
-
-bool TestServer::TestCookie() {
-  VSRX("<?hh print \\HH\\global_get('_COOKIE')['name'];",
-       "value", "string", "GET", "Cookie: name=value;", nullptr);
-
-  VSRX("<?hh print \\HH\\global_get('_COOKIE')['name2'];",
-       "value2", "string", "GET", "Cookie: n=v;name2=value2;n3=v3", nullptr);
 
   return true;
 }

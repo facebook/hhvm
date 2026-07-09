@@ -86,7 +86,7 @@ require(__DIR__ . '/common.inc');
           ],
           dict[
             'name' => 'Superglobals',
-            'namedVariables' => 7,
+            'namedVariables' => 6,
             'variablesReference' => 3,
           ],
           dict[
@@ -141,11 +141,6 @@ require(__DIR__ . '/common.inc');
       'success' => true,
       'body' => dict[
         'variables' => vec[
-          dict[
-            'name' => '$_COOKIE',
-            'type' => 'dict',
-            'namedVariables' => 0,
-          ],
           dict[
             'name' => '$_ENV',
             'type' => 'dict',
@@ -378,7 +373,7 @@ require(__DIR__ . '/common.inc');
           ],
           dict[
             'name' => 'Superglobals',
-            'namedVariables' => 7,
+            'namedVariables' => 6,
             'variablesReference' => 3,
           ],
           dict[

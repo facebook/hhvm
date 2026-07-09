@@ -4,7 +4,6 @@
 <<__EntryPoint>>
 function main() :mixed{
   $dicts = vec[
-    tuple("cookie", \HH\global_get('_COOKIE')),
     tuple("env", \HH\global_get('_ENV')),
     tuple("files", \HH\global_get('_FILES')),
     tuple("get", \HH\global_get('_GET')),

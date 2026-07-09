@@ -1,7 +1,3 @@
-cookie:
-	HH\is_php_array: false
-	HH\is_darray: true
-	HH\is_dict: true
 env:
 	HH\is_php_array: false
 	HH\is_darray: true

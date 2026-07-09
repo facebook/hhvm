@@ -1694,12 +1694,6 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
   Whether we should dump the request headers into $_SERVER
 
-- bool Eval.DisableParsedCookies = false, UNKNOWN
-
-  Whether we should stop parsing cookies out of the headers and
-  setting it into a few super globals - including fully removing
-  the existence of the $_COOKIE superglobal
-
 - bool Eval.DisableRequestSuperglobal = false, UNKNOWN
 
   Whether to remove the existence of the REQUEST superglobal

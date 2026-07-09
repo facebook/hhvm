@@ -267,7 +267,6 @@ const StaticString
   s__SERVER("_SERVER"),
   s__GET("_GET"),
   s__POST("_POST"),
-  s__COOKIE("_COOKIE"),
   s__FILES("_FILES"),
   s__ENV("_ENV"),
   s__REQUEST("_REQUEST"),
@@ -284,9 +283,6 @@ void createGlobalNVTable() {
   nvTable->set(s__SERVER.get(),            arr.asTypedValue());
   nvTable->set(s__GET.get(),               arr.asTypedValue());
   nvTable->set(s__POST.get(),              arr.asTypedValue());
-  if (!Cfg::Eval::DisableParsedCookies) {
-    nvTable->set(s__COOKIE.get(),          arr.asTypedValue());
-  }
   nvTable->set(s__FILES.get(),             arr.asTypedValue());
   nvTable->set(s__ENV.get(),               arr.asTypedValue());
   if (!Cfg::Eval::DisableRequestSuperglobal) {

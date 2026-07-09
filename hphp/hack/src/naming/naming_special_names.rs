@@ -1110,7 +1110,6 @@ pub mod superglobals {
         "$_GET",
         "$_POST",
         "$_FILES",
-        "$_COOKIE",
         "$_REQUEST",
         "$_ENV",
     ];

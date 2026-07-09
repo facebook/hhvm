@@ -214,6 +214,7 @@ public struct NamePrefix: ThriftSerializable, Equatable {
     public var prefix: String = ""
     public var apply_on_getName: Bool = true
     public var skip_services: Bool = false
+    public var apply_to_services: Bool = false
 
     public init() {}
 
@@ -224,6 +225,8 @@ public struct NamePrefix: ThriftSerializable, Equatable {
         self.apply_on_getName.thriftWrite(to: writer)
         writer.writeFieldBegin(.bool, 3)
         self.skip_services.thriftWrite(to: writer)
+        writer.writeFieldBegin(.bool, 4)
+        self.apply_to_services.thriftWrite(to: writer)
         writer.writeFieldStop()
     }
 
@@ -253,6 +256,60 @@ public struct NamePrefix: ThriftSerializable, Equatable {
                 } else {
                     try reader.skip(fieldType)
                 }
+            case 4:
+                if fieldType == .bool {
+                    self.apply_to_services = try Bool.thriftRead(from: reader)
+                } else {
+                    try reader.skip(fieldType)
+                }
+            default:
+                try reader.skip(fieldType)
+            }
+        }
+    }
+}
+
+/// Auto-generated from LegacyOmitPrefixInNameString
+public struct LegacyOmitPrefixInNameString: ThriftSerializable, Equatable {
+
+    public init() {}
+
+    public func write<W: ProtocolWriter>(to writer: W) {
+        writer.writeFieldStop()
+    }
+
+    public init<R: ProtocolReader>(from reader: R) throws {
+        self.init()
+        while true {
+            let (fieldType, fieldId) = try reader.readFieldBegin()
+            if fieldType == .stop {
+                break
+            }
+            switch fieldId {
+            default:
+                try reader.skip(fieldType)
+            }
+        }
+    }
+}
+
+/// Auto-generated from LegacyAlwaysIncludeNamePrefixInProcessor
+public struct LegacyAlwaysIncludeNamePrefixInProcessor: ThriftSerializable, Equatable {
+
+    public init() {}
+
+    public func write<W: ProtocolWriter>(to writer: W) {
+        writer.writeFieldStop()
+    }
+
+    public init<R: ProtocolReader>(from reader: R) throws {
+        self.init()
+        while true {
+            let (fieldType, fieldId) = try reader.readFieldBegin()
+            if fieldType == .stop {
+                break
+            }
+            switch fieldId {
             default:
                 try reader.skip(fieldType)
             }

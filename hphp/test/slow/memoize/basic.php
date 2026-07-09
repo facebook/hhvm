@@ -1,23 +1,23 @@
 <?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-<<__Memoize>> function freeFunc1() :mixed{
+<<__Memoize, __DynamicallyCallable>> function freeFunc1() :mixed{
   echo "freeFunc1()\n";
   return 123;
 }
-<<__Memoize>> function freeFunc2($a) :mixed{
+<<__Memoize, __DynamicallyCallable>> function freeFunc2($a) :mixed{
   echo "freeFunc2()\n";
   return $a;
 }
-<<__Memoize>> function freeFunc3($a, $b, $c) :mixed{
+<<__Memoize, __DynamicallyCallable>> function freeFunc3($a, $b, $c) :mixed{
   echo "freeFunc3()\n";
   return (string)$a . ' ' . (string)$b . ' ' . (string)$c;
 }
-<<__Memoize>> function freeFunc4() :mixed{
+<<__Memoize, __DynamicallyCallable>> function freeFunc4() :mixed{
   echo "freeFunc4()\n";
   return null;
 }
-<<__Memoize>> function freeFunc5($a) :mixed{
+<<__Memoize, __DynamicallyCallable>> function freeFunc5($a) :mixed{
   echo "freeFunc5()\n";
   return null;
 }

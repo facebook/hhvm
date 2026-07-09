@@ -896,15 +896,9 @@ TypedValue dynamicFun(const StringData* fun) {
     }
   }
   if (!func->isDynamicallyCallable() && DA == DynamicAttr::Require) {
-    auto const level = Cfg::Eval::DynamicFunLevel;
-    if (level == 2) {
-      SystemLib::throwInvalidArgumentExceptionObject(
-        fmt::format("Function {} not marked dynamic", fun->data())
-      );
-    }
-    if (level == 1) {
-      raise_warning("Function %s not marked dynamic", fun->data());
-    }
+    SystemLib::throwInvalidArgumentExceptionObject(
+      fmt::format("Function {} not marked dynamic", fun->data())
+    );
   }
   return tvReturn(func);
 }

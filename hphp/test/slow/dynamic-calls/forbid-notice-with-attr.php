@@ -52,7 +52,7 @@ function test() :mixed{
 
   echo "======== Not marked dynamic ========\n\n";
 
-  HH\dynamic_fun($corge)();
+  try { HH\dynamic_fun($corge)(); } catch (Exception $e) { wrap($e); }
   HH\dynamic_class_meth($a1, $flob)();
 }
 

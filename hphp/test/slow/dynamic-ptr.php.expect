@@ -1,5 +1,5 @@
 dyn
-no_dyn
+Caught: Function no_dyn not marked dynamic
 Cls::static_dyn
 Cls::static_no_dyn
 Caught: Method Cls::inst_dyn is not static

@@ -1,6 +1,5 @@
 dyn
-Warning: Function no_dyn not marked dynamic
-no_dyn
+Caught: Function no_dyn not marked dynamic
 Cls::static_dyn
 Warning: Method Cls::static_no_dyn not marked dynamic
 Cls::static_no_dyn

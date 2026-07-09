@@ -18,7 +18,6 @@ Exception: 'A1::flob' called dynamically but is not __DynamicallyCallable
 Exception: 'A1::corge' called dynamically but is not __DynamicallyCallable
 ======== Not marked dynamic ========
 
-
-Warning: Function corge not marked dynamic in %s/forbid-notice-with-attr.php on line 55
+Exception: Function corge not marked dynamic
 
 Warning: Method A1::flob not marked dynamic in %s/forbid-notice-with-attr.php on line 56

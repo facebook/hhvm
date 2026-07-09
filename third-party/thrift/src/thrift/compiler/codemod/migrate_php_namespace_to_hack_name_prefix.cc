@@ -66,19 +66,15 @@ class MigratePhpNamespaceToHackNamePrefix final {
       return;
     }
 
-    if (remove_only_) {
-      // For thrift files that are not consumed by Hack codegen (e.g. fbsource
-      // or configerator files that are not synced to www), strip the now-unused
-      // `namespace php` declaration without inserting any Hack-specific
-      // annotations or scaffolding.
-      remove_php_namespace();
-      fm_.apply_replacements();
-      return;
+    // Avoid inserting new content into the file in remove-only mode
+    if (!remove_only_) {
+      const std::optional<size_t> maybe_new_include_offset =
+          maybe_add_include();
+      add_program_annotations(maybe_new_include_offset);
+      add_empty_hack_namespace_for_named_package();
     }
 
-    const std::optional<size_t> maybe_new_include_offset = maybe_add_include();
-    add_program_annotations(maybe_new_include_offset);
-    add_empty_hack_namespace_for_named_package();
+    // Regardless, always remove the PHP namespace from the file
     remove_php_namespace();
     fm_.apply_replacements();
   }
@@ -139,33 +135,44 @@ class MigratePhpNamespaceToHackNamePrefix final {
 
   void add_program_annotations(std::optional<size_t> maybe_new_include_offset) {
     const std::string php_prefix = get_php_namespace_prefix(program_);
-    // Only emit `skip_services` when the program actually defines services;
-    // otherwise the field is meaningless and just clutters the annotation.
-    std::string annotations;
-    if (program_.services().empty()) {
-      annotations = fmt::format(
-          "@hack.NamePrefix{{prefix = \"{}\", apply_on_getName = false}}\n",
-          php_prefix);
+    std::vector<std::string> annotations;
+
+    if (program_.services().empty() || !mangled_services_) {
+      annotations.emplace_back(
+          fmt::format("@hack.NamePrefix{{prefix = \"{}\"}}", php_prefix));
+
+      if (!program_.services().empty()) {
+        annotations.emplace_back(
+            "@hack.LegacyAlwaysIncludeNamePrefixInProcessor");
+      }
     } else {
-      annotations = fmt::format(
-          "@hack.NamePrefix{{prefix = \"{}\", apply_on_getName = false, "
-          "skip_services = {}}}\n",
-          php_prefix,
-          mangled_services_ ? "false" : "true");
+      annotations.emplace_back(
+          fmt::format(
+              "@hack.NamePrefix{{prefix = \"{}\", apply_to_services = true}}",
+              php_prefix));
+    }
+
+    if (!program_.structured_definitions().empty()) {
+      annotations.emplace_back("@hack.LegacyOmitPrefixInNameString");
     }
 
     if (!program_.consts().empty() &&
         !program_.find_structured_annotation_or_null(kHackConstantsClassUri)) {
-      annotations =
+      annotations.emplace_back(
           fmt::format(
-              "@hack.ConstantsClass{{name = \"{}CONSTANTS\"}}\n", php_prefix) +
-          annotations;
+              "@hack.ConstantsClass{{name = \"{}CONSTANTS\"}}", php_prefix));
+    }
+
+    std::string content;
+
+    for (const auto& annotation : annotations) {
+      content = fmt::format("{}{}\n", content, annotation);
     }
 
     const t_package& package = program_.package();
     if (package.is_explicit()) {
       const size_t offset = package.src_range().begin.offset();
-      fm_.add({offset, offset, annotations});
+      fm_.add({offset, offset, content});
       return;
     }
 
@@ -178,11 +185,11 @@ class MigratePhpNamespaceToHackNamePrefix final {
       offset = fm_.get_namespace_offset();
     }
 
-    std::string new_content = annotations + "package;\n\n";
+    content = content + "package;\n\n";
     if (!maybe_new_include_offset.has_value() && !program_.includes().empty()) {
-      new_content = "\n" + new_content;
+      content = "\n" + content;
     }
-    fm_.add({offset, offset, new_content});
+    fm_.add({offset, offset, content});
   }
 
   void add_empty_hack_namespace_for_named_package() {

@@ -74,8 +74,9 @@ class MigratePhpNamespaceToHackNamePrefixTest(unittest.TestCase):
                 """\
                 include "thrift/annotation/hack.thrift"
 
+                @hack.NamePrefix{prefix = "foo_php_ns_", apply_to_services = true}
+                @hack.LegacyOmitPrefixInNameString
                 @hack.ConstantsClass{name = "foo_php_ns_CONSTANTS"}
-                @hack.NamePrefix{prefix = "foo_php_ns_", apply_on_getName = false, skip_services = false}
                 package "meta.com/foo"
 
                 namespace hack ""
@@ -119,7 +120,9 @@ class MigratePhpNamespaceToHackNamePrefixTest(unittest.TestCase):
                 """\
                 include "thrift/annotation/hack.thrift"
 
-                @hack.NamePrefix{prefix = "Foo_Bar_", apply_on_getName = false, skip_services = true}
+                @hack.NamePrefix{prefix = "Foo_Bar_"}
+                @hack.LegacyAlwaysIncludeNamePrefixInProcessor
+                @hack.LegacyOmitPrefixInNameString
                 package;
 
                 struct S {
@@ -155,7 +158,8 @@ class MigratePhpNamespaceToHackNamePrefixTest(unittest.TestCase):
                 """\
                 include "thrift/annotation/hack.thrift"
 
-                @hack.NamePrefix{prefix = "Foo_Bar_", apply_on_getName = false}
+                @hack.NamePrefix{prefix = "Foo_Bar_"}
+                @hack.LegacyOmitPrefixInNameString
                 package;
 
                 struct S {

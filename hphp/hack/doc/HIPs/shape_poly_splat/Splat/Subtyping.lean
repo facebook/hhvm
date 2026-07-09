@@ -47,7 +47,6 @@ mutual
     | bot         : SubBase .bot t
     | union_left  : SubBase t (.union t u)
     | union_right : SubBase u (.union t u)
-    | union_comm  : SubBase (.union t u) (.union u t)
     | union_sub   : SubBase t v → SubBase u v → SubBase (.union t u) v
     | trans       : SubBase t u → SubBase u v → SubBase t v
     | shape_sub   : SubField_row r p →
@@ -116,6 +115,11 @@ theorem SubField_row.trans {r r' r'' : SimpleRow}
 /- ---------------------------------------------------------------------------------------------- -/
 /- ## Monotonicity of `mergeField`                                                                -/
 /- ---------------------------------------------------------------------------------------------- -/
+
+/-- Commutativity of `union`: `t ∪ u <: u ∪ t`.  Derivable even though the constructor
+    `union_comm` is deliberately omitted — `union_sub` reduces the goal to the two injections. -/
+theorem subBase_union_comm (t u : Base) : SubBase (.union t u) (.union u t) :=
+  .union_sub .union_right .union_left
 
 /-- `union` is monotone in both arguments: given `asub <: asup` and `bsub <: bsup` we have
  `(asub|bsub) <: (asup|bsup)` -/

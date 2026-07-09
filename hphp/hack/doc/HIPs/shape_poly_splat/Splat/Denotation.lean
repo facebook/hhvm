@@ -135,14 +135,13 @@ theorem denBase_sound (η : ValEnv) :
       (motive_1 := fun a b _ => ∀ v, denBase (m+1) η a v → denBase (m+1) η b v)
       (motive_2 := fun d e _ => ∀ ov, denField (m+1) η d ov → denField (m+1) η e ov)
       (motive_3 := fun r p _ => ∀ fs, denRow (m+1) η r fs → denRow (m+1) η p fs)
-      ?refl ?top ?bot ?union_left ?union_right ?union_comm ?union_sub ?trans ?shape_sub
+      ?refl ?top ?bot ?union_left ?union_right ?union_sub ?trans ?shape_sub
       ?req_req ?opt_opt ?req_opt ?mk h
     case refl => intro t v hv; exact hv
     case top => intro t v _; simp only [denBase]
     case bot => intro t v hv; simp only [denBase] at hv
     case union_left => intro t u v hv; simp only [denBase]; exact Or.inl hv
     case union_right => intro t u v hv; simp only [denBase]; exact Or.inr hv
-    case union_comm => intro t u v hv; simp only [denBase] at hv ⊢; exact Or.symm hv
     case union_sub =>
       intro t u w _ _ ih1 ih2 v hv
       simp only [denBase] at hv

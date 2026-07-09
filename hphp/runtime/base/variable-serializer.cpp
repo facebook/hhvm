@@ -2331,15 +2331,8 @@ void VariableSerializer::serializeObjectImpl(const ObjectData* obj) {
       return;
     }
     if (type == VariableSerializer::Type::APCSerialize) {
-      if (cls == SystemLib::getMethCallerHelperClass()) {
-        if (Cfg::Eval::ForbidMethCallerAPCSerialize == 1) {
-          raise_warning("Storing meth_caller in APC");
-        } else if (Cfg::Eval::ForbidMethCallerAPCSerialize > 1) {
-          SystemLib::throwInvalidOperationExceptionObject(
-            VarNR{s_invalidMethCallerAPC.get()}
-          );
-        }
-      } else if (cls == SystemLib::getDynMethCallerHelperClass()) {
+      if (cls == SystemLib::getMethCallerHelperClass() ||
+          cls == SystemLib::getDynMethCallerHelperClass()) {
         SystemLib::throwInvalidOperationExceptionObject(
           VarNR{s_invalidMethCallerAPC.get()}
         );

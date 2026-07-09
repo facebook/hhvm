@@ -190,7 +190,7 @@ Options:
 
                 deprecated_cpp_methods=none|warn|error
                   Action to take on deprecated cpp.methods annotations.
-                  Default: none
+                  Default: error
 
                 sealed_annotation_on_non_sealed_type=none|warn|error
                   Action to take on (structured) types that are marked as

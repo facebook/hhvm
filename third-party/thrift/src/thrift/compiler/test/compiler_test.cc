@@ -1764,8 +1764,7 @@ TEST(CompilerTest, cpp_methods_validation) {
       # expected-error@-1: cpp.methods is not supported
     struct Foo {
     }
-  )",
-      {"--extra-validation", "deprecated_cpp_methods=error"});
+  )");
 }
 
 TEST(CompilerTest, lazy_struct_compatibility) {

@@ -63,3 +63,11 @@ exception MyException {
   1: i64 my_int_field;
   2: string my_string_field;
 }
+
+// Fields with custom IDL defaults, so clear() (which resets to intrinsic zero
+// values) can be distinguished from init() (which honors the IDL defaults).
+struct StructWithDefaults {
+  1: i64 int_with_default = 42;
+  2: string string_with_default = "hello";
+  3: list<i32> list_with_default = [1, 2, 3];
+}

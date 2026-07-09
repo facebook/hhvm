@@ -117,6 +117,21 @@ public struct MyStruct: ThriftSerializable, Hashable {
 
     public init() {}
 
+    /// Resets every field to its intrinsic (standard) default, per the Object
+    /// Model `clear()` (guide 2.1.22). Unlike `init()`, this ignores custom
+    /// IDL defaults: optional fields become nil, others their type's zero value.
+    public mutating func clear() {
+        self.MyIntField = 0
+        self.MyStringField = ""
+        self.MyDataField = .init()
+        self.myEnum = .init(rawValue: 0)
+        self.oneway = false
+        self.readonly = false
+        self.idempotent = false
+        self.floatSet = []
+        self.no_hack_codegen_field = ""
+    }
+
     public func write<W: ProtocolWriter>(to writer: W) {
         writer.writeFieldBegin(.i64, 1)
         self.MyIntField.thriftWrite(to: writer)
@@ -216,6 +231,15 @@ public struct Containers: ThriftSerializable, Hashable {
 
     public init() {}
 
+    /// Resets every field to its intrinsic (standard) default, per the Object
+    /// Model `clear()` (guide 2.1.22). Unlike `init()`, this ignores custom
+    /// IDL defaults: optional fields become nil, others their type's zero value.
+    public mutating func clear() {
+        self.I32List = []
+        self.StringSet = []
+        self.StringToI64Map = [:]
+    }
+
     public func write<W: ProtocolWriter>(to writer: W) {
         writer.writeFieldBegin(.list, 1)
         self.I32List.thriftWrite(to: writer)
@@ -263,6 +287,12 @@ public struct Containers: ThriftSerializable, Hashable {
 public struct MyDataItem: ThriftSerializable, Hashable {
 
     public init() {}
+
+    /// Resets every field to its intrinsic (standard) default, per the Object
+    /// Model `clear()` (guide 2.1.22). Unlike `init()`, this ignores custom
+    /// IDL defaults: optional fields become nil, others their type's zero value.
+    public mutating func clear() {
+    }
 
     public func write<W: ProtocolWriter>(to writer: W) {
         writer.writeFieldStop()
@@ -364,6 +394,16 @@ public struct MyException: ThriftSerializable, Hashable, Error {
 
     public init() {}
 
+    /// Resets every field to its intrinsic (standard) default, per the Object
+    /// Model `clear()` (guide 2.1.22). Unlike `init()`, this ignores custom
+    /// IDL defaults: optional fields become nil, others their type's zero value.
+    public mutating func clear() {
+        self.MyIntField = 0
+        self.MyStringField = ""
+        self.myStruct = .init()
+        self.myUnion = .init()
+    }
+
     public func write<W: ProtocolWriter>(to writer: W) {
         writer.writeFieldBegin(.i64, 1)
         self.MyIntField.thriftWrite(to: writer)
@@ -424,6 +464,16 @@ public struct MyExceptionWithMessage: ThriftSerializable, Hashable, Error {
 
     public init() {}
 
+    /// Resets every field to its intrinsic (standard) default, per the Object
+    /// Model `clear()` (guide 2.1.22). Unlike `init()`, this ignores custom
+    /// IDL defaults: optional fields become nil, others their type's zero value.
+    public mutating func clear() {
+        self.MyIntField = 0
+        self.MyStringField = ""
+        self.myStruct = .init()
+        self.myUnion = .init()
+    }
+
     public func write<W: ProtocolWriter>(to writer: W) {
         writer.writeFieldBegin(.i64, 1)
         self.MyIntField.thriftWrite(to: writer)
@@ -480,6 +530,13 @@ public struct ReservedKeyword: ThriftSerializable, Hashable {
     public var reserved_field: Int32 = 0
 
     public init() {}
+
+    /// Resets every field to its intrinsic (standard) default, per the Object
+    /// Model `clear()` (guide 2.1.22). Unlike `init()`, this ignores custom
+    /// IDL defaults: optional fields become nil, others their type's zero value.
+    public mutating func clear() {
+        self.reserved_field = 0
+    }
 
     public func write<W: ProtocolWriter>(to writer: W) {
         writer.writeFieldBegin(.i32, 1)

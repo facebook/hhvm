@@ -397,6 +397,16 @@ public struct SomeStruct: ThriftSerializable, Hashable {
 
     public init() {}
 
+    /// Resets every field to its intrinsic (standard) default, per the Object
+    /// Model `clear()` (guide 2.1.22). Unlike `init()`, this ignores custom
+    /// IDL defaults: optional fields become nil, others their type's zero value.
+    public mutating func clear() {
+        self.reasonable = .init(rawValue: 0)
+        self.fine = .init(rawValue: 0)
+        self.questionable = .init(rawValue: 0)
+        self.tags = []
+    }
+
     public func write<W: ProtocolWriter>(to writer: W) {
         writer.writeFieldBegin(.i32, 1)
         self.reasonable.thriftWrite(to: writer)
@@ -456,6 +466,16 @@ public struct MyStruct: ThriftSerializable, Hashable {
     public var me1_t2: MyEnum1 = .ME1_1
 
     public init() {}
+
+    /// Resets every field to its intrinsic (standard) default, per the Object
+    /// Model `clear()` (guide 2.1.22). Unlike `init()`, this ignores custom
+    /// IDL defaults: optional fields become nil, others their type's zero value.
+    public mutating func clear() {
+        self.me2_3 = .init(rawValue: 0)
+        self.me3_n3 = .init(rawValue: 0)
+        self.me1_t1 = .init(rawValue: 0)
+        self.me1_t2 = .init(rawValue: 0)
+    }
 
     public func write<W: ProtocolWriter>(to writer: W) {
         writer.writeFieldBegin(.i32, 1)

@@ -129,4 +129,29 @@ struct GeneratedStructsTests {
     let asError: Error = e
     #expect(asError is MyException)
   }
+
+  @Test func clearIgnoresCustomDefaults() {
+    // init() honors the IDL defaults (emitted as Swift property initializers).
+    var s = StructWithDefaults()
+    #expect(s.int_with_default == 42)
+    #expect(s.string_with_default == "hello")
+    #expect(s.list_with_default == [1, 2, 3])
+    // clear() resets every field to its type's intrinsic zero value, ignoring
+    // the IDL defaults (guide 2.1.22).
+    s.int_with_default = 7
+    s.clear()
+    #expect(s.int_with_default == 0)
+    #expect(s.string_with_default == "")
+    #expect(s.list_with_default == [])
+  }
+
+  @Test func clearResetsOptionalsToNil() {
+    var s = OptionalFieldsStruct()
+    s.optional_string = "present"
+    s.optional_list = [1, 2]
+    s.clear()
+    #expect(s.optional_string == nil)
+    #expect(s.optional_list == nil)
+    #expect(s.optional_struct == nil)
+  }
 }

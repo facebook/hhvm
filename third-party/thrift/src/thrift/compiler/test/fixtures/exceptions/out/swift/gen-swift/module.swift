@@ -23,6 +23,13 @@ public struct Fiery: ThriftSerializable, Hashable, Error {
 
     public init() {}
 
+    /// Resets every field to its intrinsic (standard) default, per the Object
+    /// Model `clear()` (guide 2.1.22). Unlike `init()`, this ignores custom
+    /// IDL defaults: optional fields become nil, others their type's zero value.
+    public mutating func clear() {
+        self.message = ""
+    }
+
     public func write<W: ProtocolWriter>(to writer: W) {
         writer.writeFieldBegin(.string, 1)
         self.message.thriftWrite(to: writer)
@@ -55,6 +62,13 @@ public struct Serious: ThriftSerializable, Hashable, Error {
     public var sonnet: String?
 
     public init() {}
+
+    /// Resets every field to its intrinsic (standard) default, per the Object
+    /// Model `clear()` (guide 2.1.22). Unlike `init()`, this ignores custom
+    /// IDL defaults: optional fields become nil, others their type's zero value.
+    public mutating func clear() {
+        self.sonnet = nil
+    }
 
     public func write<W: ProtocolWriter>(to writer: W) {
         if let value = self.sonnet {
@@ -91,6 +105,14 @@ public struct ComplexFieldNames: ThriftSerializable, Hashable, Error {
     public var internal_error_message: String = ""
 
     public init() {}
+
+    /// Resets every field to its intrinsic (standard) default, per the Object
+    /// Model `clear()` (guide 2.1.22). Unlike `init()`, this ignores custom
+    /// IDL defaults: optional fields become nil, others their type's zero value.
+    public mutating func clear() {
+        self.error_message = ""
+        self.internal_error_message = ""
+    }
 
     public func write<W: ProtocolWriter>(to writer: W) {
         writer.writeFieldBegin(.string, 1)
@@ -134,6 +156,14 @@ public struct CustomFieldNames: ThriftSerializable, Hashable, Error {
 
     public init() {}
 
+    /// Resets every field to its intrinsic (standard) default, per the Object
+    /// Model `clear()` (guide 2.1.22). Unlike `init()`, this ignores custom
+    /// IDL defaults: optional fields become nil, others their type's zero value.
+    public mutating func clear() {
+        self.error_message = ""
+        self.internal_error_message = ""
+    }
+
     public func write<W: ProtocolWriter>(to writer: W) {
         writer.writeFieldBegin(.string, 1)
         self.error_message.thriftWrite(to: writer)
@@ -175,6 +205,14 @@ public struct ExceptionWithPrimitiveField: ThriftSerializable, Hashable, Error {
     public var error_code: Int32 = 0
 
     public init() {}
+
+    /// Resets every field to its intrinsic (standard) default, per the Object
+    /// Model `clear()` (guide 2.1.22). Unlike `init()`, this ignores custom
+    /// IDL defaults: optional fields become nil, others their type's zero value.
+    public mutating func clear() {
+        self.message = ""
+        self.error_code = 0
+    }
 
     public func write<W: ProtocolWriter>(to writer: W) {
         writer.writeFieldBegin(.string, 1)
@@ -218,6 +256,14 @@ public struct ExceptionWithStructuredAnnotation: ThriftSerializable, Hashable, E
 
     public init() {}
 
+    /// Resets every field to its intrinsic (standard) default, per the Object
+    /// Model `clear()` (guide 2.1.22). Unlike `init()`, this ignores custom
+    /// IDL defaults: optional fields become nil, others their type's zero value.
+    public mutating func clear() {
+        self.message_field = ""
+        self.error_code = 0
+    }
+
     public func write<W: ProtocolWriter>(to writer: W) {
         writer.writeFieldBegin(.string, 1)
         self.message_field.thriftWrite(to: writer)
@@ -257,6 +303,12 @@ public struct ExceptionWithStructuredAnnotation: ThriftSerializable, Hashable, E
 public struct Banal: ThriftSerializable, Hashable, Error {
 
     public init() {}
+
+    /// Resets every field to its intrinsic (standard) default, per the Object
+    /// Model `clear()` (guide 2.1.22). Unlike `init()`, this ignores custom
+    /// IDL defaults: optional fields become nil, others their type's zero value.
+    public mutating func clear() {
+    }
 
     public func write<W: ProtocolWriter>(to writer: W) {
         writer.writeFieldStop()

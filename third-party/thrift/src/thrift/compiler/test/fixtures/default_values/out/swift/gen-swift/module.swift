@@ -23,6 +23,13 @@ public struct TrivialStruct: ThriftSerializable, Hashable {
 
     public init() {}
 
+    /// Resets every field to its intrinsic (standard) default, per the Object
+    /// Model `clear()` (guide 2.1.22). Unlike `init()`, this ignores custom
+    /// IDL defaults: optional fields become nil, others their type's zero value.
+    public mutating func clear() {
+        self.int_value = 0
+    }
+
     public func write<W: ProtocolWriter>(to writer: W) {
         writer.writeFieldBegin(.i32, 1)
         self.int_value.thriftWrite(to: writer)
@@ -56,6 +63,14 @@ public struct TrivialStructWithDefault: ThriftSerializable, Hashable {
     public var int_value_2: Int32 = 42
 
     public init() {}
+
+    /// Resets every field to its intrinsic (standard) default, per the Object
+    /// Model `clear()` (guide 2.1.22). Unlike `init()`, this ignores custom
+    /// IDL defaults: optional fields become nil, others their type's zero value.
+    public mutating func clear() {
+        self.int_value_1 = 0
+        self.int_value_2 = 0
+    }
 
     public func write<W: ProtocolWriter>(to writer: W) {
         writer.writeFieldBegin(.i32, 1)
@@ -102,6 +117,18 @@ public struct StructWithNoCustomDefaultValues: ThriftSerializable, Hashable {
     public var required_struct: TrivialStruct = .init()
 
     public init() {}
+
+    /// Resets every field to its intrinsic (standard) default, per the Object
+    /// Model `clear()` (guide 2.1.22). Unlike `init()`, this ignores custom
+    /// IDL defaults: optional fields become nil, others their type's zero value.
+    public mutating func clear() {
+        self.unqualified_integer = 0
+        self.optional_integer = nil
+        self.required_integer = 0
+        self.unqualified_struct = .init()
+        self.optional_struct = nil
+        self.required_struct = .init()
+    }
 
     public func write<W: ProtocolWriter>(to writer: W) {
         writer.writeFieldBegin(.i32, 1)
@@ -186,6 +213,20 @@ public struct StructWithCustomDefaultValues: ThriftSerializable, Hashable {
     public var struct_with_default_specified: TrivialStructWithDefault = TrivialStructWithDefault()
 
     public init() {}
+
+    /// Resets every field to its intrinsic (standard) default, per the Object
+    /// Model `clear()` (guide 2.1.22). Unlike `init()`, this ignores custom
+    /// IDL defaults: optional fields become nil, others their type's zero value.
+    public mutating func clear() {
+        self.unqualified_integer = 0
+        self.optional_integer = nil
+        self.required_integer = 0
+        self.unqualified_struct = .init()
+        self.optional_struct = nil
+        self.required_struct = .init()
+        self.struct_with_default_unspecified = .init()
+        self.struct_with_default_specified = .init()
+    }
 
     public func write<W: ProtocolWriter>(to writer: W) {
         writer.writeFieldBegin(.i32, 1)
@@ -284,6 +325,18 @@ public struct StructWithCollectionDefaultValues: ThriftSerializable, Hashable {
     public var map_with_list_value: [Int32: Int32] = [:]
 
     public init() {}
+
+    /// Resets every field to its intrinsic (standard) default, per the Object
+    /// Model `clear()` (guide 2.1.22). Unlike `init()`, this ignores custom
+    /// IDL defaults: optional fields become nil, others their type's zero value.
+    public mutating func clear() {
+        self.list_with_list_value = []
+        self.set_with_list_value = []
+        self.map_with_map_value = [:]
+        self.list_with_map_value = []
+        self.set_with_map_value = []
+        self.map_with_list_value = [:]
+    }
 
     public func write<W: ProtocolWriter>(to writer: W) {
         writer.writeFieldBegin(.list, 1)

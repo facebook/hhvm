@@ -38,6 +38,19 @@ public struct {{structured.swift_name}}: ThriftSerializable, Hashable{{#if struc
 
     public init() {}
 
+    /// Resets every field to its intrinsic (standard) default, per the Object
+    /// Model `clear()` (guide 2.1.22). Unlike `init()`, this ignores custom
+    /// IDL defaults: optional fields become nil, others their type's zero value.
+    public mutating func clear() {
+{{#each structured.fields as |field|}}
+{{#if field.optional?}}
+        self.{{field.swift_property_name}} = nil
+{{#else}}
+        self.{{field.swift_property_name}} = {{#partial defaults.swift_default_value type=field.type}}
+{{/if field.optional?}}
+{{/each}}
+    }
+
     {{#partial wr.struct_write structured=structured}}
 
     {{#partial rd.struct_read structured=structured}}

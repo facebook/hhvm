@@ -54,8 +54,9 @@ inline constexpr bool kProtocolSupportsDynamicPatch =
 ///
 /// If the assign only patch is deserialized from a dynamic patch, it might have
 /// other operations besides assign operation.
-template <typename Patch>
-class AssignPatch : public BaseAssignPatch<Patch, AssignPatch<Patch>> {
+template <typename Patch, bool DynamicMerge>
+class AssignPatch
+    : public BaseAssignPatch<Patch, AssignPatch<Patch, DynamicMerge>> {
   using Base = BaseAssignPatch<Patch, AssignPatch>;
   using T = typename Base::value_type;
   using Tag = get_type_tag<Patch, ident::assign>;
@@ -151,17 +152,19 @@ namespace protocol::detail {
 // When converting protocol::Object to AssignPatch, we need special logic here
 // to handle the case when protocol::Object is a dynamic patch and it might
 // contain operations other than assign.
-template <typename PatchStruct>
+template <typename PatchStruct, bool DynamicMerge>
 struct ProtocolValueToThriftValue<type::adapted<
-    InlineAdapter<op::detail::AssignPatch<PatchStruct>>,
+    InlineAdapter<op::detail::AssignPatch<PatchStruct, DynamicMerge>>,
     type::struct_t<PatchStruct>>> {
   bool operator()(
-      const Object& obj, op::detail::AssignPatch<PatchStruct>& patch) {
+      const Object& obj,
+      op::detail::AssignPatch<PatchStruct, DynamicMerge>& patch) {
     patch.createFromObject(obj);
     return true;
   }
   bool operator()(
-      const Value& obj, op::detail::AssignPatch<PatchStruct>& patch) {
+      const Value& obj,
+      op::detail::AssignPatch<PatchStruct, DynamicMerge>& patch) {
     if (auto p = obj.if_object()) {
       operator()(*p, patch);
       return true;

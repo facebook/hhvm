@@ -70,7 +70,9 @@ struct GeneratePatchNew {}
 
 @scope.Field
 @scope.Structured
-struct AssignOnlyPatch {}
+struct AssignOnlyPatch {
+  1: bool dynamic_merge;
+}
 
 /**
  * Do not use.

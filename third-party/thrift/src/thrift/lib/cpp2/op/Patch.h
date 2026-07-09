@@ -125,8 +125,9 @@ using patch_type = typename detail::PatchType<type::infer_tag<T>>::type;
 
 template <typename T>
 inline constexpr bool is_assign_only_patch_v = false;
-template <typename T>
-inline constexpr bool is_assign_only_patch_v<detail::AssignPatch<T>> = true;
+template <typename T, bool DynamicMerge>
+inline constexpr bool
+    is_assign_only_patch_v<detail::AssignPatch<T, DynamicMerge>> = true;
 
 template <typename T>
 constexpr static bool is_safe_patch_v =

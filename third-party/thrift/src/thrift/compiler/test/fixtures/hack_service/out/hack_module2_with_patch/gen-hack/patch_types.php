@@ -141,20 +141,33 @@ class GeneratePatchNew implements \IThriftSyncStruct, \IThriftStructMetadata {
  * AssignOnlyPatch
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/op/AssignOnlyPatch'))>>
-class AssignOnlyPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
+class AssignOnlyPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftStructWithClearTerseFields {
   use \ThriftSerializationTrait;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
+    1 => shape(
+      'var' => 'dynamic_merge',
+      'is_terse' => true,
+      'type' => \TType::BOOL,
+    ),
   ];
   const dict<string, int> FIELDMAP = dict[
+    'dynamic_merge' => 1,
   ];
 
   const type TConstructorShape = shape(
+    ?'dynamic_merge' => ?bool,
   );
 
-  const int STRUCTURAL_ID = 957977401221134810;
+  const int STRUCTURAL_ID = 4370826741990886058;
+  /**
+   * Original thrift field:-
+   * 1: bool dynamic_merge
+   */
+  public bool $dynamic_merge;
 
-  public function __construct()[] {
+  public function __construct(?bool $dynamic_merge = null)[] {
+    $this->dynamic_merge = $dynamic_merge ?? false;
   }
 
   public static function withDefaultValues()[]: this {
@@ -163,6 +176,7 @@ class AssignOnlyPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
 
   public static function fromShape(self::TConstructorShape $shape)[]: this {
     return new static(
+      Shapes::idx($shape, 'dynamic_merge'),
     );
   }
 
@@ -170,10 +184,27 @@ class AssignOnlyPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
     return 'AssignOnlyPatch';
   }
 
+  public function clearTerseFields()[write_props]: void {
+    $this->dynamic_merge = false;
+  }
+
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return \tmeta_ThriftStruct::fromShape(
       shape(
         "name" => "patch.AssignOnlyPatch",
+        "fields" => vec[
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 1,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_BOOL_TYPE,
+                )
+              ),
+              "name" => "dynamic_merge",
+            )
+          ),
+        ],
         "is_union" => false,
       )
     );

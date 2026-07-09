@@ -20,8 +20,8 @@
 
 namespace apache::thrift::op::detail {
 
-template <typename Patch>
-void AssignPatch<Patch>::apply(T& val) const {
+template <typename Patch, bool DynamicMerge>
+void AssignPatch<Patch, DynamicMerge>::apply(T& val) const {
   if (dynPatch_) {
     auto value = protocol::asValueStruct<Tag>(val);
     dynPatch_->apply(value);
@@ -31,22 +31,27 @@ void AssignPatch<Patch>::apply(T& val) const {
   }
 }
 
-template <typename Patch>
-void AssignPatch<Patch>::merge(AssignPatch other) {
+template <typename Patch, bool DynamicMerge>
+void AssignPatch<Patch, DynamicMerge>::merge(AssignPatch other) {
   if (dynPatch_ && other.dynPatch_) {
-    XLOG_EVERY_MS(CRITICAL, 10000)
-        << "Merging dynamic patch is not implemented. "
-           "The merged result will be incorrect.\n"
-           "First Patch = "
-        << folly::toPrettyJson(
-               apache::thrift::protocol::toDynamic(dynPatch_->toObject()))
-        << "\nSecond Patch = "
-        << folly::toPrettyJson(
-               apache::thrift::protocol::toDynamic(
-                   other.dynPatch_->toObject()));
+    if constexpr (DynamicMerge) {
+      dynPatch_->merge(std::move(*other.dynPatch_));
+      return;
+    } else {
+      XLOG_EVERY_MS(CRITICAL, 10000)
+          << "Merging dynamic patch is not implemented. "
+             "The merged result will be incorrect.\n"
+             "First Patch = "
+          << folly::toPrettyJson(
+                 apache::thrift::protocol::toDynamic(dynPatch_->toObject()))
+          << "\nSecond Patch = "
+          << folly::toPrettyJson(
+                 apache::thrift::protocol::toDynamic(
+                     other.dynPatch_->toObject()));
 
-    // Do nothing, which is the old behavior
-    return;
+      // Do nothing, which is the old behavior
+      return;
+    }
   }
 
   if (!other.dynPatch_) {

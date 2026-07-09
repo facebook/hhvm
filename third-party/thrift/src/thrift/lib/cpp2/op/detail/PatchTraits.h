@@ -41,7 +41,7 @@ class StringPatch;
 template <class>
 class BinaryPatch;
 
-template <class>
+template <class, bool = false>
 class AssignPatch;
 
 template <class>
@@ -70,8 +70,8 @@ class MapPatch;
 inline constexpr int32_t kThriftStaticPatchVersion = 2;
 
 // Adapter for all base types.
-template <typename T>
-using AssignPatchAdapter = InlineAdapter<AssignPatch<T>>;
+template <typename T, bool DynamicMerge = false>
+using AssignPatchAdapter = InlineAdapter<AssignPatch<T, DynamicMerge>>;
 template <typename T>
 using BoolPatchAdapter = InlineAdapter<BoolPatch<T>>;
 template <typename T>
@@ -129,8 +129,9 @@ template <class Patch>
 constexpr inline bool is_any_patch_v<AnyPatch<Patch>> = true;
 template <class>
 constexpr inline bool is_assign_patch_v = false;
-template <class Patch>
-constexpr inline bool is_assign_patch_v<AssignPatch<Patch>> = true;
+template <class Patch, bool DynamicMerge>
+constexpr inline bool is_assign_patch_v<AssignPatch<Patch, DynamicMerge>> =
+    true;
 
 class MinSafePatchVersionVisitor {
  public:

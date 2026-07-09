@@ -263,6 +263,7 @@ public struct NamePrefix: ThriftSerializable, Hashable {
         self.prefix = ""
         self.apply_on_getName = false
         self.skip_services = false
+        self.apply_to_services = false
     }
 
     public func write<W: ProtocolWriter>(to writer: W) {
@@ -317,9 +318,15 @@ public struct NamePrefix: ThriftSerializable, Hashable {
 }
 
 /// Auto-generated from LegacyOmitPrefixInNameString
-public struct LegacyOmitPrefixInNameString: ThriftSerializable, Equatable {
+public struct LegacyOmitPrefixInNameString: ThriftSerializable, Hashable {
 
     public init() {}
+
+    /// Resets every field to its intrinsic (standard) default, per the Object
+    /// Model `clear()` (guide 2.1.22). Unlike `init()`, this ignores custom
+    /// IDL defaults: optional fields become nil, others their type's zero value.
+    public mutating func clear() {
+    }
 
     public func write<W: ProtocolWriter>(to writer: W) {
         writer.writeFieldStop()
@@ -341,9 +348,15 @@ public struct LegacyOmitPrefixInNameString: ThriftSerializable, Equatable {
 }
 
 /// Auto-generated from LegacyAlwaysIncludeNamePrefixInProcessor
-public struct LegacyAlwaysIncludeNamePrefixInProcessor: ThriftSerializable, Equatable {
+public struct LegacyAlwaysIncludeNamePrefixInProcessor: ThriftSerializable, Hashable {
 
     public init() {}
+
+    /// Resets every field to its intrinsic (standard) default, per the Object
+    /// Model `clear()` (guide 2.1.22). Unlike `init()`, this ignores custom
+    /// IDL defaults: optional fields become nil, others their type's zero value.
+    public mutating func clear() {
+    }
 
     public func write<W: ProtocolWriter>(to writer: W) {
         writer.writeFieldStop()

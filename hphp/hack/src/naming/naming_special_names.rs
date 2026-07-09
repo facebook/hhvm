@@ -1105,14 +1105,7 @@ pub mod superglobals {
 
     pub const GLOBALS: &str = "$GLOBALS";
 
-    pub static SUPERGLOBALS: &[&str] = &[
-        "$_SERVER",
-        "$_GET",
-        "$_POST",
-        "$_FILES",
-        "$_REQUEST",
-        "$_ENV",
-    ];
+    pub static SUPERGLOBALS: &[&str] = &["$_SERVER", "$_GET", "$_POST", "$_FILES", "$_ENV"];
 
     static SUPERGLOBALS_SET: LazyLock<HashSet<&str>> =
         LazyLock::new(|| SUPERGLOBALS.iter().copied().collect());

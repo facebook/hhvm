@@ -1,5 +1,5 @@
 <?hh
 
 function foo() {
-  foreach(vec[] as $_GET) {}
+  list($_ENV, $x) = tuple(1, 2);
 }

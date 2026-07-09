@@ -1,5 +1,7 @@
 <?hh
 
 function foo() {
-  $_ = readonly $_ENV;
+  bar(inout $_SERVER);
 }
+
+function bar(inout mixed $x) {}

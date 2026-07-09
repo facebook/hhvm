@@ -86,7 +86,7 @@ require(__DIR__ . '/common.inc');
           ],
           dict[
             'name' => 'Superglobals',
-            'namedVariables' => 6,
+            'namedVariables' => 5,
             'variablesReference' => 3,
           ],
           dict[
@@ -158,11 +158,6 @@ require(__DIR__ . '/common.inc');
           ],
           dict[
             'name' => '$_POST',
-            'type' => 'dict',
-            'namedVariables' => 0,
-          ],
-          dict[
-            'name' => '$_REQUEST',
             'type' => 'dict',
             'namedVariables' => 0,
           ],
@@ -373,7 +368,7 @@ require(__DIR__ . '/common.inc');
           ],
           dict[
             'name' => 'Superglobals',
-            'namedVariables' => 6,
+            'namedVariables' => 5,
             'variablesReference' => 3,
           ],
           dict[

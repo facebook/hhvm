@@ -390,9 +390,6 @@ bool TestServer::TestGet() {
         "}\n",
         "string?names[]=foo&names[]=bar");
 
-  VSGET("<?hh print \\HH\\global_get('_REQUEST')['name'];",
-        "value", "string?name=value");
-
   return true;
 }
 
@@ -400,9 +397,6 @@ bool TestServer::TestPost() {
   const char *params = "name=value";
 
   VSPOST("<?hh print \\HH\\global_get('_POST')['name'];",
-         "value", "string", params);
-
-  VSPOST("<?hh print \\HH\\global_get('_REQUEST')['name'];",
          "value", "string", params);
 
   VSPOST("<?hh print $HTTP_RAW_POST_DATA;",

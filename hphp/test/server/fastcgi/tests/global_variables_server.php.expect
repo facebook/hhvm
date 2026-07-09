@@ -10,12 +10,6 @@ dict(2) {
 dict(0) {
 }
 bool(true)
-dict(2) {
-  ["var"]=>
-  string(3) "GET"
-  ["get"]=>
-  string(1) "1"
-}
 ------------ -dalways_populate_raw_post_data=1 --------
 string(15) "var=POST&post=2"
 bool(true)
@@ -32,14 +26,6 @@ dict(2) {
   string(1) "2"
 }
 bool(true)
-dict(3) {
-  ["var"]=>
-  string(4) "POST"
-  ["get"]=>
-  string(1) "1"
-  ["post"]=>
-  string(1) "2"
-}
 ------------  --------
 NULL
 bool(true)
@@ -56,11 +42,3 @@ dict(2) {
   string(1) "2"
 }
 bool(true)
-dict(3) {
-  ["var"]=>
-  string(4) "POST"
-  ["get"]=>
-  string(1) "1"
-  ["post"]=>
-  string(1) "2"
-}

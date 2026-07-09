@@ -7,5 +7,4 @@ function global_variables_entrypoint() :mixed{
   var_dump(\HH\global_get('_GET'));
   var_dump(\HH\global_get('_POST'));
   var_dump(count(\HH\global_get('_SERVER')) > 0);
-  var_dump(\HH\global_get('_REQUEST'));
 }

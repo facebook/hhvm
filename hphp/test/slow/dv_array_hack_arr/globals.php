@@ -8,7 +8,6 @@ function main() :mixed{
     tuple("files", \HH\global_get('_FILES')),
     tuple("get", \HH\global_get('_GET')),
     tuple("post", \HH\global_get('_POST')),
-    tuple("request", \HH\global_get('_REQUEST')),
     tuple("server", \HH\global_get('_SERVER')),
   ];
   $dfuncs = vec[

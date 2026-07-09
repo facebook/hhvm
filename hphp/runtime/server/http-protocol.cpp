@@ -71,17 +71,6 @@ static bool read_all_post_data(Transport *transport,
   return false;
 }
 
-static void CopyParams(Array& dest, const Array& src) {
-  IterateKV(
-    src.get(),
-    [&](TypedValue k, TypedValue v) {
-      const auto arraykey =
-        dest.convertKey<IntishCast::Cast>(k);
-      dest.set(arraykey, v, true);
-    }
-  );
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 const VirtualHost *HttpProtocol::GetVirtualHost(Transport *transport) {
@@ -121,7 +110,6 @@ const StaticString
   s__SERVER("_SERVER"),
   s__GET("_GET"),
   s__POST("_POST"),
-  s__REQUEST("_REQUEST"),
   s__ENV("_ENV"),
   s_HTTP_RAW_POST_DATA("HTTP_RAW_POST_DATA"),
   s__FILES("_FILES"),
@@ -184,11 +172,6 @@ static void PrepareEnv(Array& env, Transport *transport) {
   }
 }
 
-/**
- * PHP has "EGPCS" processing order of these global variables, and this
- * order is important in preparing $_REQUEST that needs to know which to
- * overwrite what when name happens to be the same.
- */
 void HttpProtocol::PrepareSystemVariables(Transport *transport,
                                           const RequestURI &r) {
   auto const vhost = VirtualHost::GetCurrent();
@@ -197,9 +180,6 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
   php_global_set(s__GET, emptyArr);
   php_global_set(s__POST, emptyArr);
   php_global_set(s__FILES, emptyArr);
-  if (!Cfg::Eval::DisableRequestSuperglobal) {
-    php_global_set(s__REQUEST, emptyArr);
-  }
   php_global_set(s__ENV, emptyArr);
 
   // according to doc if content type is multipart/form-data
@@ -235,13 +215,6 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
     }
   };
 
-  auto REQUESTarr = empty_dict_array();
-  SCOPE_EXIT {
-    if (!Cfg::Eval::DisableRequestSuperglobal) {
-      php_global_set(s__REQUEST, REQUESTarr);
-    }
-  };
-
   // Env
   PrepareEnv(ENVarr, transport);
 
@@ -257,21 +230,6 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
   // Server
   init_server_request_time(SERVERarr);
   PrepareServerVariable(SERVERarr, transport, r, vhost);
-
-  if (!Cfg::Eval::DisableRequestSuperglobal) {
-    // Request
-    PrepareRequestVariables(REQUESTarr,
-                            GETarr,
-                            POSTarr);
-  }
-}
-
-void HttpProtocol::PrepareRequestVariables(Array& request,
-                                           const Array& get,
-                                           const Array& post) {
-
-  CopyParams(request, get);
-  CopyParams(request, post);
 }
 
 void HttpProtocol::PrepareGetVariable(Array& get,

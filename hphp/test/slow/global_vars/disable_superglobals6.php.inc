@@ -1,7 +1,5 @@
 <?hh
 
 function foo() {
-  bar(inout $_SERVER);
+  foreach(vec[] as $_GET) {}
 }
-
-function bar(inout mixed $x) {}

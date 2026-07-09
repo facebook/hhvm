@@ -519,7 +519,6 @@ const auto globalKeys = {
   StaticString{"_POST"},
   StaticString{"_FILES"},
   StaticString{"_ENV"},
-  StaticString{"_REQUEST"},
   StaticString{"GLOBALS"}
 };
 

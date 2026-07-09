@@ -1694,10 +1694,6 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
   Whether we should dump the request headers into $_SERVER
 
-- bool Eval.DisableRequestSuperglobal = false, UNKNOWN
-
-  Whether to remove the existence of the REQUEST superglobal
-
 - bool Eval.FastMethodIntercept = false, fzn, postprocess
 
   Enables the non-surprise flag based implementation of

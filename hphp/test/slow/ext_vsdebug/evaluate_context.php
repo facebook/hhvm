@@ -87,7 +87,7 @@ checkObjEqualRecursively($msg, dict[
         "name" => "Locals",
       ],
       dict[
-        "namedVariables" => 6,
+        "namedVariables" => 5,
         "name" => "Superglobals",
       ],
       dict[

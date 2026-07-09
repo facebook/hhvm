@@ -31,9 +31,6 @@ struct HttpProtocol {
   static const VirtualHost *GetVirtualHost(Transport *transport);
   static void PrepareSystemVariables(Transport *transport,
                                      const RequestURI &r);
-  static void PrepareRequestVariables(Array& request,
-                                      const Array& get,
-                                      const Array& post);
   static void PrepareGetVariable(Array& get,
                                  const RequestURI &r);
   static void PreparePostVariables(Array& post,

@@ -8,6 +8,7 @@
 
 #include <proxygen/lib/utils/Logging.h>
 
+#include <array>
 #include <fmt/core.h>
 #include <folly/Singleton.h>
 #include <folly/String.h>
@@ -53,10 +54,10 @@ string HexFollyPrinter::print(const IOBuf* buf) {
 string Hex16Printer::print(const IOBuf* buf) {
   stringstream out;
   const uint8_t* data = buf->data();
-  char tmp[24];
+  std::array<char, 24> tmp{};
   for (size_t i = 0; i < buf->length(); i++) {
-    snprintf(tmp, 3, "%02x", data[i]);
-    out << tmp;
+    snprintf(tmp.data(), 3, "%02x", data[i]);
+    out << tmp.data();
     if ((i + 1) % 2 == 0) {
       out << ' ';
     }

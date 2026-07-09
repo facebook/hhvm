@@ -422,8 +422,15 @@ if os.name == "posix":
     passthru("ps -ef | grep watchman", shell=True)
     print
 
-# We do these last, as they depend on watchman being able to respond:
-if os.name != "posix" or (os.getuid() != 0 or not os.environ.get("SUDO_UID")):
+# We do these last, as they depend on watchman being able to respond.
+# Skip when running as root under sudo, to avoid touching root-owned state.
+# os.getuid is POSIX-only; keep it inside the os.name guard so the type checker
+# doesn't flag it against the Windows typeshed.
+safe_to_run = True
+if os.name == "posix":
+    if os.getuid() == 0 and os.environ.get("SUDO_UID"):
+        safe_to_run = False
+if safe_to_run:
     # Safe to run watchman commands
     print("Watchman service information:")
     watchman = pywatchman.client(timeout=600)

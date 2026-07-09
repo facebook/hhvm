@@ -24,7 +24,13 @@ class TestSince(WatchmanTestCase.WatchmanTestCase):
 
         client.query("version")
 
-        pid = os.fork()
+        # os.fork is POSIX-only and absent from the Windows typeshed; resolve it
+        # via getattr (and skip if unavailable) so the type checker doesn't flag
+        # the attribute access on Windows.
+        fork = getattr(os, "fork", None)
+        if fork is None:
+            self.skipTest("no fork on this system")
+        pid = fork()
         if pid == 0:
             # I am the new process
             try:

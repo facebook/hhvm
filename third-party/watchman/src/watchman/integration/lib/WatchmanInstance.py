@@ -104,9 +104,16 @@ class InitWithDirMixin:
         # will.
         # pyre-fixme[16]: `InitWithDirMixin` has no attribute `cli_log_file_name`.
         self.cli_log_file_name = os.path.join(self.base_dir, "cli-log")
-        # This doesn't work on Windows, but we don't expect to be hitting this
-        # codepath on Windows anyway
-        username = pwd.getpwuid(os.getuid())[0]
+        # pwd/os.getuid are POSIX-only. This mixin isn't expected to run on
+        # Windows anyway, so gate the POSIX path on os.name and fail loudly
+        # otherwise. Keeping the calls inside the guard also hides them from the
+        # Windows type checker (which lacks pwd/os.getuid in its typeshed).
+        if os.name == "posix":
+            username = pwd.getpwuid(os.getuid())[0]
+        else:
+            raise RuntimeError(
+                "InitWithDirMixin state dirs are only supported on POSIX"
+            )
         # pyre-fixme[16]: `InitWithDirMixin` has no attribute `user_dir`.
         self.user_dir = os.path.join(self.base_dir, "%s-state" % username)
         # pyre-fixme[16]: `InitWithDirMixin` has no attribute `log_file_name`.

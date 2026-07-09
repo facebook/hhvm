@@ -271,6 +271,7 @@ void FastThriftServer::start() {
       .metadataResponse = metadataResponse_,
       .zeroCopyThreshold = config_.zeroCopyThreshold,
       .enableRequestContext = config_.enableRequestContext,
+      .enableRequestHeaders = config_.enableRequestHeaders,
       .enableWriteBufferBackpressure = config_.enableWriteBufferBackpressure,
       .batchingConfig = config_.batchingConfig,
       .drainTimeout = config_.drainTimeout,

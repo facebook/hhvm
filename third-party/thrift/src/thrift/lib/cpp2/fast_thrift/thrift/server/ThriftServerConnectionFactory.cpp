@@ -38,6 +38,7 @@
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/handler/ThriftServerConnectionCloseHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/handler/ThriftServerConnectionContextHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/handler/ThriftServerRequestContextHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/handler/ThriftServerRequestHeadersHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/handler/WriteBufferBackpressureHandler.h>
 
 namespace apache::thrift::fast_thrift::thrift::server {
@@ -59,6 +60,7 @@ HANDLER_TAG(server_request_response_frame_handler);
 HANDLER_TAG(server_stream_state_handler);
 HANDLER_TAG(thrift_server_request_context_handler);
 HANDLER_TAG(thrift_server_connection_context_handler);
+HANDLER_TAG(thrift_server_request_headers_handler);
 HANDLER_TAG(thrift_server_connection_close_handler);
 HANDLER_TAG(write_buffer_backpressure_handler);
 } // namespace
@@ -219,6 +221,8 @@ ThriftServerConnection ThriftServerConnectionFactory::buildConnectionImpl(
       ThriftServerRequestContextHandler<channel_pipeline::detail::ContextImpl>;
   using ConnCtxHandler = ThriftServerConnectionContextHandler<
       channel_pipeline::detail::ContextImpl>;
+  using ReqHeadersHandler =
+      ThriftServerRequestHeadersHandler<channel_pipeline::detail::ContextImpl>;
   using CloseHandler =
       ThriftServerConnectionCloseHandler<channel_pipeline::detail::ContextImpl>;
   using WriteBufferHandler =
@@ -233,6 +237,9 @@ ThriftServerConnection ThriftServerConnectionFactory::buildConnectionImpl(
       .setHead(transportAdapterPtr)
       .setTail(tailAdapter)
       .setAllocator(&conn.thriftAllocator);
+  DCHECK(!config_.enableRequestHeaders || config_.enableRequestContext)
+      << "enableRequestHeaders requires enableRequestContext; the request "
+         "headers handler is skipped while enableRequestContext is off";
   if (config_.enableRequestContext) {
     thriftPipelineBuilder
         .template addNextInbound<ReqCtxHandler>(
@@ -240,6 +247,13 @@ ThriftServerConnection ThriftServerConnectionFactory::buildConnectionImpl(
         .template addNextInbound<ConnCtxHandler>(
             thrift_server_connection_context_handler_tag,
             std::move(connContext));
+    // Stamps RequestRpcMetadata.otherMetadata onto each request's
+    // ThriftRequestContext. Requires the context handlers above, so it is
+    // nested under enableRequestContext.
+    if (config_.enableRequestHeaders) {
+      thriftPipelineBuilder.template addNextInbound<ReqHeadersHandler>(
+          thrift_server_request_headers_handler_tag);
+    }
   }
   // Connection-close handler sits immediately upstream of the tail.
   // ThriftServerConnection::close() fires

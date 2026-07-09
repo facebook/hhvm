@@ -55,6 +55,12 @@ struct FastThriftServerConfig {
   // ThriftConnContext (or nullptr when this flag is off).
   bool enableRequestContext{false};
 
+  // When true, populate each request's ThriftRequestContext with the inbound
+  // custom headers (RequestRpcMetadata.otherMetadata) so handlers can read
+  // them via getHeaders()/getHeader(). Requires enableRequestContext; ignored
+  // when that flag is off. Only takes effect on FastThriftServer.
+  bool enableRequestHeaders{false};
+
   // When true, insert WriteBufferBackpressureHandler into the thrift
   // pipeline. The handler buffers outbound responses when the downstream
   // pipeline returns Result::Backpressure (e.g. transport write buffer

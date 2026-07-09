@@ -62,6 +62,11 @@ struct ThriftServerConnectionFactoryConfig {
   // request's ThriftRequestContext is populated with the ThriftConnContext.
   bool enableRequestContext{false};
 
+  // When true, insert ThriftServerRequestHeadersHandler so each request's
+  // ThriftRequestContext is populated with the inbound custom headers
+  // (RequestRpcMetadata.otherMetadata). Requires enableRequestContext.
+  bool enableRequestHeaders{false};
+
   // When true, insert WriteBufferBackpressureHandler into the thrift
   // pipeline to absorb outbound Backpressure: responses queue in a FIFO
   // when downstream is saturated and drain on onWriteReady; inbound reads

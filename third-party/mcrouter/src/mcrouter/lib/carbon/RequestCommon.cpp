@@ -17,13 +17,12 @@ namespace carbon {
 RequestCommon::RequestCommon() = default;
 
 RequestCommon::RequestCommon(const RequestCommon& other)
-    : uniqueId_{other.uniqueId_} {
+    : uniqueId_{other.uniqueId_}, kcbIdentity_{other.kcbIdentity_} {
   traceContext_ = other.traceContext_;
   cryptoAuthToken_ = other.cryptoAuthToken_;
   replyBitMask_ = other.replyBitMask_;
   clientIdentifier_ = other.clientIdentifier_;
   privacyLibAgenticContext_ = other.privacyLibAgenticContext_;
-  kcbIdentity_ = other.kcbIdentity_;
 }
 
 RequestCommon& RequestCommon::operator=(const RequestCommon& other) {

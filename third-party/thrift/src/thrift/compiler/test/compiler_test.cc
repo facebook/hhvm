@@ -1761,22 +1761,8 @@ TEST(CompilerTest, cpp_methods_validation) {
     include "thrift/annotation/thrift.thrift"
 
     @thrift.DeprecatedUnvalidatedAnnotations{items = {"cpp.methods": ""}}
-      # expected-error@-1: cpp.methods is not supported
+      # expected-error@-1: invalid annotation cpp.methods
     struct Foo {
-    }
-  )");
-}
-
-TEST(CompilerTest, lazy_struct_compatibility) {
-  check_compile(R"(
-    package "facebook.com/thrift/test"
-    include "thrift/annotation/cpp.thrift"
-    include "thrift/annotation/thrift.thrift"
-    @thrift.DeprecatedUnvalidatedAnnotations{items = {"cpp.methods": ""}}
-      # expected-error@-1: cpp.methods is incompatible with lazy deserialization in struct `Foo`
-    struct Foo {
-      @cpp.Lazy
-      1: list<i32> field;
     }
   )");
 }

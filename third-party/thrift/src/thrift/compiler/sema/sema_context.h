@@ -168,9 +168,6 @@ struct sema_params {
   // annotation.
   validation_level unnecessary_allow_missing_uris = validation_level::error;
 
-  // Action to take on deprecated cpp.methods annotations.
-  validation_level deprecated_cpp_methods = validation_level::error;
-
   // Action to take on (structured) types that are marked as @thrift.Sealed, but
   // do not meet the necessary criteria.
   validation_level sealed_annotation_on_non_sealed_type =

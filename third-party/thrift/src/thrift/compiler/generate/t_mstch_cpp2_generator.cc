@@ -201,11 +201,6 @@ std::string mangle_field_name(const std::string& name) {
   return fmt::format("__fbthrift_field_{}", name);
 }
 
-bool should_mangle_field_storage_name_in_struct(const t_structured& s) {
-  // We don't mangle field name if cpp.methods exist
-  return !s.has_unstructured_annotation("cpp.methods");
-}
-
 bool resolves_to_container_or_struct(const t_type* type) {
   return type->is<t_container>() || type->is<t_structured>();
 }
@@ -764,10 +759,6 @@ bool is_field_eligible_for_storage_name_mangling(
     return false;
   }
 
-  if (!should_mangle_field_storage_name_in_struct(strct)) {
-    return false;
-  }
-
   return is_field_private(field, deprecated_public_required_fields);
 }
 
@@ -1290,9 +1281,6 @@ class t_mstch_cpp2_generator : public t_whisker_generator {
               !adapter->get_value_from_structured_annotation_or_null(
                   "adaptedType");
         });
-    def.property("cpp_methods", [](const t_structured& strct) {
-      return strct.get_unstructured_annotation({"cpp.methods"});
-    });
     def.property("cpp_declare_hash", [](const t_structured& strct) {
       return strct.has_unstructured_annotation(
                  {"cpp.declare_hash", "cpp2.declare_hash"}) ||
@@ -1339,8 +1327,7 @@ class t_mstch_cpp2_generator : public t_whisker_generator {
     });
     def.property(
         "is_eligible_for_constexpr?", [this](const t_structured& strct) {
-          return is_eligible_for_constexpr_(&strct) ||
-              strct.has_unstructured_annotation("cpp.methods");
+          return is_eligible_for_constexpr_(&strct);
         });
     def.property("virtual", [](const t_structured& strct) {
       return strct.has_unstructured_annotation({"cpp.virtual", "cpp2.virtual"});

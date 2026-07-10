@@ -349,10 +349,6 @@ class {{#if def.exception?}}FOLLY_EXPORT {{/if}}{{def.cpp_underlying_name}} {{!
   }
         {{/if def.exception?}}
       {{/if def.union?}}
-      {{#if (not (string.empty? def.cpp_methods))}}
-  // user defined code (cpp.methods = ...)
-  {{def.cpp_methods}}
-      {{/if (not (string.empty? def.cpp_methods))}}
 
  private:
 {{> module_types_h/lazy_deserialization}}

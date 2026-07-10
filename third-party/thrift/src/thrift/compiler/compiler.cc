@@ -188,10 +188,6 @@ Options:
                   @thrift.AllowLegacyMissingUris annotation.
                   Default: error
 
-                deprecated_cpp_methods=none|warn|error
-                  Action to take on deprecated cpp.methods annotations.
-                  Default: error
-
                 sealed_annotation_on_non_sealed_type=none|warn|error
                   Action to take on (structured) types that are marked as
                   @thrift.Sealed, but do not meet the necessary criteria.
@@ -1017,13 +1013,6 @@ std::string parse_args(
                   /*flag=*/validator,
                   /*prefix=*/"unnecessary_allow_missing_uris",
                   &sparams.unnecessary_allow_missing_uris)) {
-            continue;
-          }
-
-          if (maybe_parse_validation_level_flag(
-                  /*flag=*/validator,
-                  /*prefix=*/"deprecated_cpp_methods",
-                  &sparams.deprecated_cpp_methods)) {
             continue;
           }
 

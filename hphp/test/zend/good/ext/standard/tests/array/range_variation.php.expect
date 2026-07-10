@@ -1,3 +1,4 @@
+
 *** Testing range() with various low and high values ***
 -- creating an array with low = 'ABCD' and high = 'ABCD' --
 vec(1) {

@@ -21,9 +21,10 @@ async function g(int $x): Awaitable<int> {
 }
 
 async function h(?int $x): Awaitable<?int> {
-  echo "start h($x)\n";
+  $s = $x ?? '';
+  echo "start h($s)\n";
   await RescheduleWaitHandle::create(0, 0);
-  echo "end h($x)\n";
+  echo "end h($s)\n";
   return $x;
 }
 

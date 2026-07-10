@@ -16,7 +16,7 @@ function test() :mixed{
   unlink($f1);
   clearstatcache(true);
 
-  echo file_get_contents($f1)."\n";
+  echo (string)file_get_contents($f1)."\n";
 
   unlink($f1);
   unlink($f2);

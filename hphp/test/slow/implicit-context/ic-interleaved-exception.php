@@ -10,7 +10,7 @@ function printMSIC(): void {
 }
 
 function printMAIC()[leak_safe]: void {
-  echo MemoAgnosticIntCtx::getContext()."\n";
+  echo (MemoAgnosticIntCtx::getContext() ?? '')."\n";
 }
 
 

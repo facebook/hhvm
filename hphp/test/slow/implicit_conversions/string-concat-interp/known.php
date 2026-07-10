@@ -1,5 +1,14 @@
 <?hh
 
+// Coercion for concat/interp always throws; run() observes each case without
+// aborting the rest of the test.
+function run((function(): void) $f): void {
+  try {
+    $f();
+  } catch (InvalidOperationException $e) {
+    echo "[throw] " . $e->getMessage() . "\n";
+  }
+}
 
 <<__EntryPoint>>
 function main(): void {
@@ -20,14 +29,10 @@ function main(): void {
     "string",
   ];
   foreach($vals as $i) {
-    "$i "; // this should generate a notice as applicable
-    echo '' . $i;
-    echo $i . '';
-    echo "\n";
+    run(() ==> { echo '' . $i; echo $i . ''; echo "\n"; });
     foreach($vals as $j) {
-      echo "<$i $j>\n";
-      $i_ = $i;
-      var_dump($i_ .= $j);
+      run(() ==> { echo "<$i $j>\n"; });
+      run(() ==> { $i_ = $i; var_dump($i_ .= $j); });
     }
   }
 }

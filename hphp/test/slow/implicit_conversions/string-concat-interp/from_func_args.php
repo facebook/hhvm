@@ -1,20 +1,28 @@
 <?hh
 
+function run((function(): void) $f): void {
+  try {
+    $f();
+  } catch (InvalidOperationException $e) {
+    echo "[throw] " . $e->getMessage() . "\n";
+  }
+}
+
 <<__EntryPoint>>
 function main(): void {
-  i(__hhvm_intrinsics\launder_value(42));
-  b(__hhvm_intrinsics\launder_value(true));
-  d(__hhvm_intrinsics\launder_value(1.234));
-  n(__hhvm_intrinsics\launder_value(null));
-  r(__hhvm_intrinsics\launder_value(HH\stdin()));
-  m(__hhvm_intrinsics\launder_value(1.234));
+  run(() ==> i(__hhvm_intrinsics\launder_value(42)));
+  run(() ==> b(__hhvm_intrinsics\launder_value(true)));
+  run(() ==> d(__hhvm_intrinsics\launder_value(1.234)));
+  run(() ==> n(__hhvm_intrinsics\launder_value(null)));
+  run(() ==> r(__hhvm_intrinsics\launder_value(HH\stdin())));
+  run(() ==> m(__hhvm_intrinsics\launder_value(1.234)));
 
-  i(42);
-  b(true);
-  d(1.234);
-  n(null);
-  r(HH\stdin());
-  m(1.234);
+  run(() ==> i(42));
+  run(() ==> b(true));
+  run(() ==> d(1.234));
+  run(() ==> n(null));
+  run(() ==> r(HH\stdin()));
+  run(() ==> m(1.234));
 }
 
 function i(int $i): void { echo "int <$i>\n"; }

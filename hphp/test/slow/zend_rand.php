@@ -7,8 +7,8 @@ function check_mt_srand(): void {
   mt_srand(1);
   $got = vec[mt_rand(), mt_rand(), mt_rand()];
 
-  print("srand sequences repeat: ".($expected == $got)."\n");
-  print("srand sequences are variable: ".($got[0] != $got[1] || $got[0] != $got[2])."\n");
+  print("srand sequences repeat: ".(int)($expected == $got)."\n");
+  print("srand sequences are variable: ".(int)($got[0] != $got[1] || $got[0] != $got[2])."\n");
 }
 
 function check_mt_rand(): void {
@@ -32,8 +32,8 @@ function check_mt_rand(): void {
 
   // The probability that NONE of the values land in a given 10% interval are
   // (90%)^1000, or 1.75e-46.
-  print("rand min is okay: ".($min < 0.1 * \HH\Lib\Math\INT32_MAX)."\n");
-  print("rand max is okay: ".($max > 0.9 * \HH\Lib\Math\INT32_MAX)."\n");
+  print("rand min is okay: ".(int)($min < 0.1 * \HH\Lib\Math\INT32_MAX)."\n");
+  print("rand max is okay: ".(int)($max > 0.9 * \HH\Lib\Math\INT32_MAX)."\n");
 
   // The variance is (range^2 - 1)/count, or 2.306e+18. Using the central limit theorem,
   // the statistic sqrt(n) * (X - mu) has a distribution of Norm(0, 2.306e+18). The
@@ -43,7 +43,7 @@ function check_mt_rand(): void {
   if ($mean_is_believable) {
     print("Mean is believable.\n");
   } else {
-    print("Mean is excessive -- mean: ".($total/$num_trials).", statistic: ".$statistic."\n");
+    print("Mean is excessive -- mean: ".(string)($total/$num_trials).", statistic: ".(string)$statistic."\n");
   }
 }
 

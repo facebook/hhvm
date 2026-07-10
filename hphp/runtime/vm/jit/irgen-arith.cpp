@@ -489,12 +489,10 @@ template<class PreDecRef> void implConcat(
   auto cast =
     [&] (SSATmp* s, DecRefProfileId locId) {
       if (s->isA(TStr)) return s;
-      const ConvNoticeLevel notice_level =
-        flagToConvNoticeLevel(Cfg::Eval::NoticeOnCoerceForStrConcat);
       auto const ret = gen(
         env,
         ConvTVToStr,
-        ConvNoticeData{notice_level, s_ConvNoticeReasonConcat.get()},
+        ConvNoticeData{ConvNoticeLevel::Throw, s_ConvNoticeReasonConcat.get()},
         s);
       decRef(env, s, locId);
       return ret;
@@ -562,9 +560,8 @@ void emitConcatN(IRGS& env, uint32_t n) {
   auto const t3 = popC(env);
   auto const t4 = n == 4 ? popC(env) : nullptr;
 
-  const ConvNoticeLevel level =
-    flagToConvNoticeLevel(Cfg::Eval::NoticeOnCoerceForStrConcat);
-  const auto convData = ConvNoticeData{level, s_ConvNoticeReasonConcat.get()};
+  const auto convData =
+    ConvNoticeData{ConvNoticeLevel::Throw, s_ConvNoticeReasonConcat.get()};
   auto const s4 = !t4 || t4->isA(TStr) ? t4 : gen(env, ConvTVToStr, convData, t4);
   auto const s3 = t3->isA(TStr) ? t3 : gen(env, ConvTVToStr, convData, t3);
   auto const s2 = t2->isA(TStr) ? t2 : gen(env, ConvTVToStr, convData, t2);

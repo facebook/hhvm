@@ -5,7 +5,7 @@
 function printAndReturnMSIC(): ?int {
   echo "MSIC: ";
   $c = MemoSensitiveIntCtx::getContext();
-  var_dump ($c ? $c->getPayload() : 'NULL')."\n";
+  var_dump($c ? $c->getPayload() : 'NULL');
   return $c ? $c->getPayload() : null;
 }
 

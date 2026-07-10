@@ -3,7 +3,8 @@
 <<__Memoize, __DynamicallyCallable>>
 function memo_normal() :mixed{
   $hash = HH\ImplicitContext\_Private\get_implicit_context_debug_info();
-  echo var_dump($hash) . "\n";
+  var_dump($hash);
+  echo "\n";
 }
 
 <<__Memoize(#KeyedByIC), __DynamicallyCallable>>
@@ -11,7 +12,8 @@ function memo_keyed() :mixed{
   $hash = HH\ImplicitContext\_Private\get_implicit_context_debug_info();
   if ($hash != null) {
     $str_hash = HH\Lib\Str\join($hash, ', '); // can't do var_dump due to keyedByIC
-    echo var_dump($str_hash) . "\n";
+    var_dump($str_hash);
+    echo "\n";
   }
 
 }
@@ -19,7 +21,8 @@ function memo_keyed() :mixed{
 <<__Memoize(#MakeICInaccessible), __DynamicallyCallable>>
 function memo_ic_inaccessible() :mixed{
   $hash = HH\ImplicitContext\_Private\get_implicit_context_debug_info();
-  echo var_dump($hash) . "\n";
+  var_dump($hash);
+  echo "\n";
 }
 
 function f(bool $has_ctx) :mixed{

@@ -57,6 +57,6 @@ bool(true)
 Arg value<string>
 bool(true)
 
-Arg value<Resource id %s>
+Arg value<Resource id #5>
 bool(true)
 Done

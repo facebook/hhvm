@@ -4,7 +4,7 @@ const T_2 = 1 / 2;
 const T_3 = 1.5 + 1.5;
 const T_4 = "foo" . "bar";
 const T_5 = (1.5 + 1.5) * 2;
-const T_6 = "foo" . 2 . 3 . 4.0;
+const T_6 = "foo" . 2 . 3 . 4;
 const T_7 = __LINE__;
 const T_8 = <<<ENDOFSTRING
 This is a test string

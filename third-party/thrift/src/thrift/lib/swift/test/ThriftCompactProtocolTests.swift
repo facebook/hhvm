@@ -106,18 +106,32 @@ private struct AllTheThings: ThriftSerializable, Equatable {
     while true {
       let (fieldType, fieldId) = try reader.readFieldBegin()
       if fieldType == .stop { break }
+      // Validate the wire type of each known field and skip on mismatch, so a
+      // payload with an unexpected type for a known id is skipped rather than
+      // misread (mirrors Point.init(from:)).
       switch fieldId {
-      case 1: flag = try Bool.thriftRead(from: reader)
-      case 2: byteField = try Int8.thriftRead(from: reader)
-      case 3: i16Field = try Int16.thriftRead(from: reader)
-      case 4: i64Field = try Int64.thriftRead(from: reader)
-      case 5: floatField = try Float.thriftRead(from: reader)
-      case 6: doubleField = try Double.thriftRead(from: reader)
-      case 7: blob = try Data.thriftRead(from: reader)
-      case 8: ints = try [Int32].thriftRead(from: reader)
-      case 9: names = try Set<String>.thriftRead(from: reader)
-      case 10: lookup = try [String: Int64].thriftRead(from: reader)
-      case 11: point = try Point.thriftRead(from: reader)
+      case 1:
+        if fieldType == .bool { flag = try Bool.thriftRead(from: reader) } else { try reader.skip(fieldType) }
+      case 2:
+        if fieldType == .byte { byteField = try Int8.thriftRead(from: reader) } else { try reader.skip(fieldType) }
+      case 3:
+        if fieldType == .i16 { i16Field = try Int16.thriftRead(from: reader) } else { try reader.skip(fieldType) }
+      case 4:
+        if fieldType == .i64 { i64Field = try Int64.thriftRead(from: reader) } else { try reader.skip(fieldType) }
+      case 5:
+        if fieldType == .float { floatField = try Float.thriftRead(from: reader) } else { try reader.skip(fieldType) }
+      case 6:
+        if fieldType == .double { doubleField = try Double.thriftRead(from: reader) } else { try reader.skip(fieldType) }
+      case 7:
+        if fieldType == .string { blob = try Data.thriftRead(from: reader) } else { try reader.skip(fieldType) }
+      case 8:
+        if fieldType == .list { ints = try [Int32].thriftRead(from: reader) } else { try reader.skip(fieldType) }
+      case 9:
+        if fieldType == .set { names = try Set<String>.thriftRead(from: reader) } else { try reader.skip(fieldType) }
+      case 10:
+        if fieldType == .map { lookup = try [String: Int64].thriftRead(from: reader) } else { try reader.skip(fieldType) }
+      case 11:
+        if fieldType == .struct { point = try Point.thriftRead(from: reader) } else { try reader.skip(fieldType) }
       default: try reader.skip(fieldType)
       }
     }
@@ -229,8 +243,10 @@ struct ThriftCompactProtocolTests {
 
   @Test func varintOverflowThrows() {
     // A varint32 whose 5th byte carries value bits beyond the 32-bit range must
-    // be rejected, not silently truncated.
-    let reader = CompactReader(data: Data([0xFF, 0xFF, 0xFF, 0xFF, 0xFF]))
+    // be rejected, not silently truncated. The 5th byte clears the continuation
+    // bit (so no 6th byte is implied) but sets bits above bit 31 (0x10), which
+    // must trip the overflow check specifically, not a truncation check.
+    let reader = CompactReader(data: Data([0xFF, 0xFF, 0xFF, 0xFF, 0x10]))
     #expect(throws: (any Error).self) {
       try reader.readI32()
     }
@@ -324,5 +340,56 @@ struct ThriftCompactProtocolTests {
     let data = CompactSerializer.serialize(makeChain(depth: 8))
     let decoded = try CompactSerializer.deserialize(Nested.self, from: data)
     #expect(chainDepth(decoded) == 8)
+  }
+
+  @Test func varint64TooLongThrows() {
+    // A varint64 that never clears its continuation bit must be rejected once it
+    // runs past the 64-bit limit rather than looping unbounded. Ten 0x80 bytes
+    // keep signalling "more to come" past what a 64-bit value can hold.
+    let reader = CompactReader(data: Data(repeating: 0x80, count: 10))
+    #expect(throws: (any Error).self) {
+      try reader.readI64()
+    }
+  }
+
+  @Test func nestedStructFieldIdStack() throws {
+    // Skipping a nested struct must save and restore the field-id delta state so
+    // the field after the struct decodes relative to the outer struct's last
+    // field id, not the inner struct's. Without a restore, field 3 below would
+    // be misread as id 2. Encodes: field 1 (i32=100), field 2 (struct { field 1
+    // (i32=200) }), field 3 (i32=300), stop.
+    let bytes: [UInt8] = [
+      0x15,  // field 1: delta 1, i32 (compact 5)
+      0xC8, 0x01,  // zigzag(100) = 200
+      0x1C,  // field 2: delta 1, struct (compact 12)
+      0x15,  // inner field 1: delta 1 from reset 0, i32
+      0x90, 0x03,  // zigzag(200) = 400
+      0x00,  // inner stop
+      0x15,  // field 3: delta 1 from restored 2, i32
+      0xD8, 0x04,  // zigzag(300) = 600
+      0x00,  // outer stop
+    ]
+    let reader = CompactReader(bytes: bytes)
+
+    let (t1, id1) = try reader.readFieldBegin()
+    #expect(t1 == .i32)
+    #expect(id1 == 1)
+    #expect(try reader.readI32() == 100)
+
+    let (t2, id2) = try reader.readFieldBegin()
+    #expect(t2 == .struct)
+    #expect(id2 == 2)
+
+    // Skipping the inner struct must push/pop the field-id state.
+    try reader.skip(.struct)
+
+    // Field 3 must be id 3 (delta 1 from restored outer field 2), not id 2.
+    let (t3, id3) = try reader.readFieldBegin()
+    #expect(t3 == .i32)
+    #expect(id3 == 3)
+    #expect(try reader.readI32() == 300)
+
+    let (stop, _) = try reader.readFieldBegin()
+    #expect(stop == .stop)
   }
 }

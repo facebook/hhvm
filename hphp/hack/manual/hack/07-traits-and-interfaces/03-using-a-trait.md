@@ -160,10 +160,6 @@ function main() : void {
 }
 ```
 
-```.ini
-hhvm.diamond_trait_methods=1
-```
-
 Since the `<<__EnableMethodTraitDiamond>>` attribute is specified on the class `C`, the example is accepted by Hack and HHVM.
 
 _Remark_: a diamond trait cannot define properties if it is used by a class via the `<<__EnableMethodTraitDiamond>>` attribute.

@@ -16,8 +16,6 @@
 
 #include "hphp/runtime/vm/unit-util.h"
 
-#include "hphp/util/configs/eval.h"
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -89,7 +87,7 @@ TraitMethodImportData<TraitMethod, Ops>
       nameData.second.methodOriginsWithDuplicates.push_back(Ops::clsName(method.trait));
     }
 
-    if (Cfg::Eval::DiamondTraitMethods && enableMethodTraitDiamond) {
+    if (enableMethodTraitDiamond) {
       std::set<typename TraitMethod::origin_type> origins;
       methods.erase(
         std::remove_if(methods.begin(), methods.end(),

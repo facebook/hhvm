@@ -702,11 +702,6 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
   Is VerifyTypeTS bytecode enabled?
 
-- bool Eval.DiamondTraitMethods = false, UNKNOWN, globaldata|unitcacheflag
-
-  Enable a method defined in a trait to be imported multiple times
-  along trait use paths
-
 - bool Eval.EmitBespokeTypeStructures = false, UNKNOWN, globaldata
 
   Whether bespoke type structures should be used

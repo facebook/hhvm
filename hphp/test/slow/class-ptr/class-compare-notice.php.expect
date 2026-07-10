@@ -3,16 +3,16 @@
 | VAR        | <    | <=   | >    | >=   | ==   | ===  |
 +============+======+======+======+======+======+======+
 | $va        | F*   | T*   | F*   | T*   | T*   | T*   |
-| $oa        | F*   | T*   | F*   | T*   | T*   | F    |
+| $oa        | E    | E    | E    | E    | E    | F    |
 | $fa        | F*   | T*   | F*   | T*   | T    | T    |
 | WRAPA($va) | F*   | T*   | F*   | T*   | T*   | T*   |
-| WRAPA($oa) | F*   | T*   | F*   | T*   | T*   | F    |
+| WRAPA($oa) | E    | E    | E    | E    | E    | F    |
 | WRAPA($fa) | F*   | T*   | F*   | T*   | T    | T    |
 | WRAPO($va) | F*   | T*   | F*   | T*   | T*   | F    |
-| WRAPO($oa) | F*   | T*   | F*   | T*   | T*   | F    |
+| WRAPO($oa) | E    | E    | E    | E    | E    | F    |
 | WRAPO($fa) | F*   | T*   | F*   | T*   | T    | F    |
 | WRAPD($va) | F*   | T*   | F*   | T*   | T*   | F    |
-| WRAPD($oa) | F*   | T*   | F*   | T*   | T*   | F    |
+| WRAPD($oa) | E    | E    | E    | E    | E    | F    |
 | WRAPD($fa) | F*   | T*   | F*   | T*   | T    | F    |
 +------------+------+------+------+------+------+------+
 
@@ -21,16 +21,16 @@
 | VAR        | <    | <=   | >    | >=   | ==   | ===  |
 +============+======+======+======+======+======+======+
 | $va        | F*   | T*   | F*   | T*   | T*   | T*   |
-| $oa        | F*   | T*   | F*   | T*   | T*   | F    |
+| $oa        | E    | E    | E    | E    | E    | F    |
 | $fa        | F*   | T*   | F*   | T*   | T    | T    |
 | WRAPA($va) | F*   | T*   | F*   | T*   | T*   | T*   |
-| WRAPA($oa) | F*   | T*   | F*   | T*   | T*   | F    |
+| WRAPA($oa) | E    | E    | E    | E    | E    | F    |
 | WRAPA($fa) | F*   | T*   | F*   | T*   | T    | T    |
 | WRAPO($va) | F*   | T*   | F*   | T*   | T*   | F    |
-| WRAPO($oa) | F*   | T*   | F*   | T*   | T*   | F    |
+| WRAPO($oa) | E    | E    | E    | E    | E    | F    |
 | WRAPO($fa) | F*   | T*   | F*   | T*   | T    | F    |
 | WRAPD($va) | F*   | T*   | F*   | T*   | T*   | F    |
-| WRAPD($oa) | F*   | T*   | F*   | T*   | T*   | F    |
+| WRAPD($oa) | E    | E    | E    | E    | E    | F    |
 | WRAPD($fa) | F*   | T*   | F*   | T*   | T    | F    |
 +------------+------+------+------+------+------+------+
 
@@ -39,16 +39,16 @@
 | VAR        | <    | <=   | >    | >=   | ==   | ===  |
 +============+======+======+======+======+======+======+
 | $va        | F*   | T*   | F*   | T*   | T*   | T*   |
-| $oa        | F*   | T*   | F*   | T*   | T*   | F    |
+| $oa        | E    | E    | E    | E    | E    | F    |
 | $fa        | F*   | T*   | F*   | T*   | T    | T    |
 | WRAPA($va) | F*   | T*   | F*   | T*   | T*   | T*   |
-| WRAPA($oa) | F*   | T*   | F*   | T*   | T*   | F    |
+| WRAPA($oa) | E    | E    | E    | E    | E    | F    |
 | WRAPA($fa) | F*   | T*   | F*   | T*   | T    | T    |
 | WRAPO($va) | F*   | T*   | F*   | T*   | T*   | F    |
-| WRAPO($oa) | F*   | T*   | F*   | T*   | T*   | F    |
+| WRAPO($oa) | E    | E    | E    | E    | E    | F    |
 | WRAPO($fa) | F*   | T*   | F*   | T*   | T    | F    |
 | WRAPD($va) | F*   | T*   | F*   | T*   | T*   | F    |
-| WRAPD($oa) | F*   | T*   | F*   | T*   | T*   | F    |
+| WRAPD($oa) | E    | E    | E    | E    | E    | F    |
 | WRAPD($fa) | F*   | T*   | F*   | T*   | T    | F    |
 +------------+------+------+------+------+------+------+
 
@@ -57,15 +57,16 @@
 | VAR        | <    | <=   | >    | >=   | ==   | ===  |
 +============+======+======+======+======+======+======+
 | $va        | F*   | T*   | F*   | T*   | T*   | T*   |
-| $oa        | F*   | T*   | F*   | T*   | T*   | F    |
+| $oa        | E    | E    | E    | E    | E    | F    |
 | $fa        | F*   | T*   | F*   | T*   | T    | T    |
 | WRAPA($va) | F*   | T*   | F*   | T*   | T*   | T*   |
-| WRAPA($oa) | F*   | T*   | F*   | T*   | T*   | F    |
+| WRAPA($oa) | E    | E    | E    | E    | E    | F    |
 | WRAPA($fa) | F*   | T*   | F*   | T*   | T    | T    |
 | WRAPO($va) | F*   | T*   | F*   | T*   | T*   | F    |
-| WRAPO($oa) | F*   | T*   | F*   | T*   | T*   | F    |
+| WRAPO($oa) | E    | E    | E    | E    | E    | F    |
 | WRAPO($fa) | F*   | T*   | F*   | T*   | T    | F    |
 | WRAPD($va) | F*   | T*   | F*   | T*   | T*   | F    |
-| WRAPD($oa) | F*   | T*   | F*   | T*   | T*   | F    |
+| WRAPD($oa) | E    | E    | E    | E    | E    | F    |
 | WRAPD($fa) | F*   | T*   | F*   | T*   | T    | F    |
 +------------+------+------+------+------+------+------+
+

@@ -10,5 +10,5 @@ $node = simplexml_load_string(<<<EOF
 EOF
 );
 
-echo $node->hello . "\n";
+echo $node->hello->__toString() . "\n";
 }

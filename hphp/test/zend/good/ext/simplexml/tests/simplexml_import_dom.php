@@ -8,6 +8,6 @@ if(!$dom) {
 $s = simplexml_import_dom($dom);
 $books = $s->book;
 foreach ($books as $book) {
-    echo "{$book->title} was written by {$book->author}\n";
+    echo ($book->title)->__toString()." was written by ".($book->author)->__toString()."\n";
 }
 }

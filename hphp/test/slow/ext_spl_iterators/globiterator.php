@@ -11,6 +11,6 @@ var_dump($iter->getPathname());
 var_dump($iter->getFilename());
 
 foreach ($iter as $file) {
-  echo "$file\n";
+  echo $file->__toString()."\n";
 }
 }

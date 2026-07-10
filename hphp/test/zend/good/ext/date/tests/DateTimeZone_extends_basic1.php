@@ -19,7 +19,7 @@ function main_entry(): void {
   $d = new DateTimeZoneExt("America/Los_Angeles");
 
   echo "\n-- Invoke __toString --\n";
-  echo $d . "\n";
+  echo $d->__toString() . "\n";
 
   echo "===DONE===\n";
 }

@@ -544,7 +544,6 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
   void throwUndefPropException(const StringData*) const;
   void raiseCreateDynamicProp(const StringData*) const;
   void raiseReadDynamicProp(const StringData*) const;
-  void raiseImplicitInvokeToString() const;
 
   static constexpr ptrdiff_t getVMClassOffset() {
     return offsetof(ObjectData, m_cls);

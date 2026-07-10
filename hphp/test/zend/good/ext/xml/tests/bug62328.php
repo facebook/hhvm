@@ -7,6 +7,5 @@ class UberSimpleXML extends SimpleXMLElement {
 <<__EntryPoint>> function main(): void {
 $xml = new UberSimpleXML('<xml/>');
 
-var_dump((string) $xml);
 var_dump($xml->__toString());
 }

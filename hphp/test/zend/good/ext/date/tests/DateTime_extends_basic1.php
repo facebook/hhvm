@@ -22,14 +22,14 @@ function main_entry(): void {
   $d = new DateTimeExt("1967-05-01 22:30:41");
 
   echo "\n-- Invoke __toString --\n";
-  echo $d . "\n";
+  echo $d->__toString() . "\n";
 
   echo "\n -- modify date and time --\n";
   $d->setDate(1963, 7, 2); 
   $d->setTime(10, 45, 30); 
 
   echo "\n-- Invoke __toString again --\n";
-  echo $d . "\n";
+  echo $d->__toString() . "\n";
 
   echo "===DONE===\n";
 }

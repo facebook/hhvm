@@ -1,7 +1,0 @@
-garbanzo beans
-Fatal error: Uncaught exception 'Exception' with message 'chickpeas' in %s:%d
-Stack trace:
-#0 (): Chickpea->__toString()
-#%A %s/handler_retval_throw.php(17): ob_end_flush()
-#%d (): main()
-#%d {main}

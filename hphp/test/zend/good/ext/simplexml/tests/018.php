@@ -4,7 +4,7 @@ function traverse_xml($pad,$xml) :mixed{
   foreach($xml->children() as $name => $node) {
     echo $pad."<$name";
     foreach($node->attributes() as $attr => $value) {
-      echo " $attr=\"$value\"";
+      echo " $attr=\"".$value->__toString()."\"";
     }
     echo ">\n";
     traverse_xml($pad."  ",$node);

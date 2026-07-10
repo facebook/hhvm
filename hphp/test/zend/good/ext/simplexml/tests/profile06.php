@@ -7,6 +7,6 @@ $root = simplexml_load_string('<?xml version="1.0"?>
 ');
 
 $attr = $root->child->attributes('reserved-ns');
-echo $attr->offsetGet('attribute');
+echo $attr->offsetGet('attribute')->__toString();
 echo "\n---Done---\n";
 }

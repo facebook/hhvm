@@ -3,8 +3,8 @@
 function book_from_xml($xml) :mixed{
 	$sxe = simplexml_load_string($xml);
 	$obj = new book;
-	$obj->a = (string)$sxe->a;
-	$obj->b = (string)$sxe->b;
+	$obj->a = ($sxe->a)->__toString();
+	$obj->b = ($sxe->b)->__toString();
 	return $obj;
 }
 

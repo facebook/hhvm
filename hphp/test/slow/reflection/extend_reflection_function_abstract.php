@@ -9,5 +9,5 @@ class MyReflectionFunction extends ReflectionFunctionAbstract {
 
 <<__EntryPoint>>
 function main_extend_reflection_function_abstract() :mixed{
-echo new MyReflectionFunction;
+echo (new MyReflectionFunction)->__toString();
 }

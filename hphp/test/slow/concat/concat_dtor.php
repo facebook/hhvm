@@ -1,7 +1,7 @@
 <?hh
 
 function foo($x, $y) :mixed{
-  return $x.$y;
+  return $x->__toString().$y->__toString();
 }
 
 class dtor {

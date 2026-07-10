@@ -24,7 +24,8 @@ trait T {
   public function unary($la) :mixed{
     for ($i = 0; $i < 3; $i++) {
       foreach($la as $l) {
-        $text = HH\is_any_array($l) ? 'Array' : $l;
+        // Implicit object->string coercion throws; call __toString() explicitly.
+        $text = HH\is_any_array($l) ? 'Array' : (is_object($l) ? $l->__toString() : $l);
         if (is_int($l)) echo (string)$text." is_int\n";
         if (is_string($l)) echo (string)$text." is_string\n";
         if (is_double($l)) echo (string)$text." is_double\n";

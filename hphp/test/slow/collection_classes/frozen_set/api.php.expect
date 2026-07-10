@@ -1,3 +1,4 @@
+
 empty...
 bool(false)
 bool(true)
@@ -111,9 +112,6 @@ object(HH\Set) (3) {
   int(2)
   int(3)
 }
-
-__toString...
-ImmSet
 
 __get...
 Cannot access a property on a collection

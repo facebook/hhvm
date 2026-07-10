@@ -36,5 +36,5 @@ echo "=== ReflectionClass::getConstant('X') ===" . PHP_EOL;
 var_dump($rc->getConstant('X'));
 
 echo "=== ReflectionClass::getTypeConstants ===" . PHP_EOL;
-var_dump(array_map(strval<>, $rc->getTypeConstants()));
+var_dump(array_map($x ==> $x->__toString(), $rc->getTypeConstants()));
 }

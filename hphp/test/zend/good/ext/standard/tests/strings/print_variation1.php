@@ -6,12 +6,6 @@
  * Test based on php.net manual example.
 */
 
-//defining a class
-class sample  {
-  public function __toString() :mixed{
-    return "sample object";
-  }
-}
 <<__EntryPoint>> function main(): void {
 echo "*** Testing print() function: with unexpected inputs for 'arg' argument ***\n";
 
@@ -49,11 +43,8 @@ $inputs =  vec[
 /*16*/      NULL,
           null,
 
-          // objects
-/*18*/      new sample(),
-
           // resource
-/*19*/      $file_handle,
+/*18*/      $file_handle,
 ];
 
 // loop through with each element of the $inputs array to test print() function

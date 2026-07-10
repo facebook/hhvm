@@ -109,7 +109,7 @@ function main_entry(): void {
 
   eval('function eval_point() { return ' . $v . ';}');
   $z = eval_point();
-  echo "Point \$z is $z\n";
+  echo "Point \$z is " . $z->__toString() . "\n";
 
   unset($p, $v, $z);
 

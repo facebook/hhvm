@@ -6,7 +6,7 @@ function ReflectionParameterTest($test, $test2 = null) :mixed{
 $reflect = new ReflectionFunction('ReflectionParameterTest');
 $params = $reflect->getParameters();
 foreach($params as $key => $value) {
-    echo $value->getDeclaringFunction() . "\n";
+    echo ($value->getDeclaringFunction())->__toString() . "\n";
 }
 echo "==DONE==";
 }

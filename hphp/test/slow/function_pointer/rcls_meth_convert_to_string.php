@@ -11,6 +11,6 @@ function main(): void {
     $g = (string)$f;
     var_dump($g);
   } catch (Exception $e) {
-    echo $e."\n";
+    echo $e->__toString()."\n";
   } finally {}
 }

@@ -22,7 +22,7 @@ class Circle
 
 	public function __toString()
 	{
-		return '[' . (string)($this->center) . ':' . (string)($this->radius) . ']';
+		return '[' . $this->center->__toString() . ':' . (string)($this->radius) . ']';
 	}
 }
 

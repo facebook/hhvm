@@ -5,12 +5,12 @@
 
     echo 'explicit conversion' . PHP_EOL;
     for ($i = 0; $i < 100000; $i++) {
-        md5(strval($x->x));
+        md5(($x->x)->__toString());
     }
 
     echo 'no conversion' . PHP_EOL;
     for ($i = 0; $i < 100000; $i++) {
-        md5((string)$x->x);
+        md5(($x->x)->__toString());
     }
     echo "===DONE===\n";
 }

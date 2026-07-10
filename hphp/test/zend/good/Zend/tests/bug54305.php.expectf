@@ -1,5 +1,5 @@
 Method [ <user> public method methodWithArgs ] {
-  @@ %sbug54305.php %d - %d
+  @@ %s/Zend/tests/bug54305.php %d - %d
 
   - Parameters [2] {
     Parameter #0 [ <required> $a ]

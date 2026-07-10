@@ -5,20 +5,6 @@
  *  Returns an array containing all the values from
  *  the specified "column" in a two-dimensional array.
  */
-class Foo
-{
-    public function __toString()
-:mixed    {
-        return 'last_name';
-    }
-}
-class Bar
-{
-    public function __toString()
-:mixed    {
-        return 'first_name';
-    }
-}
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_column() : basic functionality ***\n";
 /* Array representing a possible record set returned from a database */
@@ -124,12 +110,6 @@ var_dump(array_column($mismatchedColumns, 'a', 'd'));
 var_dump(array_column($mismatchedColumns, 'a', 'e'));
 var_dump(array_column($mismatchedColumns, 'b'));
 var_dump(array_column($mismatchedColumns, 'b', 'a'));
-
-echo "\n*** Testing use of object converted to string ***\n";
-$f = new Foo();
-$b = new Bar();
-var_dump(array_column($records, $f));
-var_dump(array_column($records, $f, $b));
 
 echo "Done\n";
 }

@@ -1,0 +1,25 @@
+= reflection_class =
+TypecastException: Object of class ReflectionClass could not be converted to string
+bool(true)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+dict(2) {
+  ["FOO"]=>
+  int(2)
+  ["BAR"]=>
+  int(1)
+}
+= reflection_funcs =
+bool(true)
+bool(true)
+bool(false)
+bool(false)
+dict(2) {
+  ["FOO"]=>
+  int(2)
+  ["BAR"]=>
+  int(1)
+}

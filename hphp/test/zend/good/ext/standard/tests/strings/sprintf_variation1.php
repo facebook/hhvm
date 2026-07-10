@@ -8,13 +8,6 @@
 * Testing sprintf() : with different unexpected values for format argument other than the strings
 */
 
-// declaring class
-class sample
-{
-  public function __toString() :mixed{
-    return "Object";
-  }
-}
 <<__EntryPoint>> function main(): void {
 echo "*** Testing sprintf() : with unexpected values for format argument ***\n";
 
@@ -62,11 +55,6 @@ $values = vec[
       // empty data
       "",
       '',
-
-      // object data
-      new sample(),
-
-
 
       // resource data
       $file_handle

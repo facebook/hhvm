@@ -22,8 +22,8 @@ var_dump((int)$foo);
 var_dump((int)$people);
 var_dump((float)$foo);
 var_dump((float)$people);
-var_dump((string)$foo);
-var_dump((string)$people);
+var_dump($foo->__toString());
+var_dump($people->__toString());
 
 echo "===DONE===\n";
 }

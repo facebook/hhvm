@@ -45,16 +45,16 @@ function main_entry(): void {
   error_reporting(-1);
 
   $p = new Point;
-  echo $p . "\n";
+  echo $p->__toString() . "\n";
 
   $p = new Point();
-  echo $p . "\n";
+  echo $p->__toString() . "\n";
 
   $p = new Point(100);
-  echo $p . "\n";
+  echo $p->__toString() . "\n";
 
   $p = new Point(1000, 2000);
-  echo $p . "\n";
+  echo $p->__toString() . "\n";
   //*/
 
   echo "--------------------\n";

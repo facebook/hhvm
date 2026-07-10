@@ -4,13 +4,6 @@
  * Source code: ext/standard/formatted_print.c
  */
 
-// declaring class
-class sample
-{
-  public function __toString() :mixed{
-    return "Object";
-  }
-}
 <<__EntryPoint>> function main(): void {
 error_reporting(E_ALL & ~E_NOTICE);
 
@@ -65,13 +58,8 @@ $values = vec[
 /*23*/    "string",
           'string',
 
-          // object data
-/*25*/    new sample(),
-
-
-
           // resource data
-/*28*/    $file_handle
+/*25*/    $file_handle
 ];
 
 // loop through each element of the array for arg1

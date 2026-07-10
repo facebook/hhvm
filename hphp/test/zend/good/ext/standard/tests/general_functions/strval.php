@@ -3,13 +3,6 @@
  * Description: Returns the string value of var
  */
 
-// non_scalar values, objects, arrays, resources and boolean
-class foo
-{
-  function __toString() :mixed{
-    return "Object";
-  }
-}
 <<__EntryPoint>> function main(): void {
 echo "*** Testing str_val() with scalar values***\n";
 $heredoc_string = <<<EOD
@@ -113,7 +106,6 @@ $dfp = opendir( dirname(__FILE__) );
 
 
 $not_scalars = vec[
-  new foo, //object
   $fp,  // resource
   $dfp,
   NULL,  // nulls

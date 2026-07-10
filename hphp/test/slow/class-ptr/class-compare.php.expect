@@ -5,22 +5,22 @@
 | $lcl       | F    | T    | F    | T    | T    | T    |
 | $str       | F    | T    | F    | T    | T    | T    |
 | $cls       | F    | T    | F    | T    | T    | T    |
-| $obj       | F    | T    | F    | T    | T    | F    |
+| $obj       | E    | E    | E    | E    | E    | F    |
 +------------+------+------+------+------+------+------+
 | v($lcl)    | F    | T    | F    | T    | T    | T    |
 | v($str)    | F    | T    | F    | T    | T    | T    |
 | v($cls)    | F    | T    | F    | T    | T    | T    |
-| v($obj)    | F    | T    | F    | T    | T    | F    |
+| v($obj)    | E    | E    | E    | E    | E    | F    |
 +------------+------+------+------+------+------+------+
 | w($lcl)    | F    | T    | F    | T    | T    | T    |
 | w($str)    | F    | T    | F    | T    | T    | F    |
 | w($cls)    | F    | T    | F    | T    | T    | F    |
-| w($obj)    | F    | T    | F    | T    | T    | F    |
+| w($obj)    | E    | E    | E    | E    | E    | F    |
 +------------+------+------+------+------+------+------+
 | p($lcl)    | F    | T    | F    | T    | T    | T    |
 | p($str)    | F    | T    | F    | T    | T    | F    |
 | p($cls)    | F    | T    | F    | T    | T    | F    |
-| p($obj)    | F    | T    | F    | T    | T    | F    |
+| p($obj)    | E    | E    | E    | E    | E    | F    |
 +------------+------+------+------+------+------+------+
 
 [static] VAR ? $lcl
@@ -30,22 +30,22 @@
 | $lcl       | F    | T    | F    | T    | T    | T    |
 | $str       | F    | T    | F    | T    | T    | T    |
 | $cls       | F    | T    | F    | T    | T    | T    |
-| $obj       | F    | T    | F    | T    | T    | F    |
+| $obj       | E    | E    | E    | E    | E    | F    |
 +------------+------+------+------+------+------+------+
 | v($lcl)    | F    | T    | F    | T    | T    | T    |
 | v($str)    | F    | T    | F    | T    | T    | T    |
 | v($cls)    | F    | T    | F    | T    | T    | T    |
-| v($obj)    | F    | T    | F    | T    | T    | F    |
+| v($obj)    | E    | E    | E    | E    | E    | F    |
 +------------+------+------+------+------+------+------+
 | w($lcl)    | F    | T    | F    | T    | T    | T    |
 | w($str)    | F    | T    | F    | T    | T    | F    |
 | w($cls)    | F    | T    | F    | T    | T    | F    |
-| w($obj)    | F    | T    | F    | T    | T    | F    |
+| w($obj)    | E    | E    | E    | E    | E    | F    |
 +------------+------+------+------+------+------+------+
 | p($lcl)    | F    | T    | F    | T    | T    | T    |
 | p($str)    | F    | T    | F    | T    | T    | F    |
 | p($cls)    | F    | T    | F    | T    | T    | F    |
-| p($obj)    | F    | T    | F    | T    | T    | F    |
+| p($obj)    | E    | E    | E    | E    | E    | F    |
 +------------+------+------+------+------+------+------+
 
 [static] $cls ? VAR
@@ -55,22 +55,22 @@
 | $lcl       | F    | T    | F    | T    | T    | T    |
 | $str       | F    | T    | F    | T    | T    | T    |
 | $cls       | F    | T    | F    | T    | T    | T    |
-| $obj       | F    | T    | F    | T    | T    | F    |
+| $obj       | E    | E    | E    | E    | E    | F    |
 +------------+------+------+------+------+------+------+
 | v($lcl)    | F    | T    | F    | T    | T    | T    |
 | v($str)    | F    | T    | F    | T    | T    | T    |
 | v($cls)    | F    | T    | F    | T    | T    | T    |
-| v($obj)    | F    | T    | F    | T    | T    | F    |
+| v($obj)    | E    | E    | E    | E    | E    | F    |
 +------------+------+------+------+------+------+------+
 | w($lcl)    | F    | T    | F    | T    | T    | F    |
 | w($str)    | F    | T    | F    | T    | T    | F    |
 | w($cls)    | F    | T    | F    | T    | T    | T    |
-| w($obj)    | F    | T    | F    | T    | T    | F    |
+| w($obj)    | E    | E    | E    | E    | E    | F    |
 +------------+------+------+------+------+------+------+
 | p($lcl)    | F    | T    | F    | T    | T    | F    |
 | p($str)    | F    | T    | F    | T    | T    | F    |
 | p($cls)    | F    | T    | F    | T    | T    | T    |
-| p($obj)    | F    | T    | F    | T    | T    | F    |
+| p($obj)    | E    | E    | E    | E    | E    | F    |
 +------------+------+------+------+------+------+------+
 
 [static] VAR ? $cls
@@ -80,22 +80,22 @@
 | $lcl       | F    | T    | F    | T    | T    | T    |
 | $str       | F    | T    | F    | T    | T    | T    |
 | $cls       | F    | T    | F    | T    | T    | T    |
-| $obj       | F    | T    | F    | T    | T    | F    |
+| $obj       | E    | E    | E    | E    | E    | F    |
 +------------+------+------+------+------+------+------+
 | v($lcl)    | F    | T    | F    | T    | T    | T    |
 | v($str)    | F    | T    | F    | T    | T    | T    |
 | v($cls)    | F    | T    | F    | T    | T    | T    |
-| v($obj)    | F    | T    | F    | T    | T    | F    |
+| v($obj)    | E    | E    | E    | E    | E    | F    |
 +------------+------+------+------+------+------+------+
 | w($lcl)    | F    | T    | F    | T    | T    | F    |
 | w($str)    | F    | T    | F    | T    | T    | F    |
 | w($cls)    | F    | T    | F    | T    | T    | T    |
-| w($obj)    | F    | T    | F    | T    | T    | F    |
+| w($obj)    | E    | E    | E    | E    | E    | F    |
 +------------+------+------+------+------+------+------+
 | p($lcl)    | F    | T    | F    | T    | T    | F    |
 | p($str)    | F    | T    | F    | T    | T    | F    |
 | p($cls)    | F    | T    | F    | T    | T    | T    |
-| p($obj)    | F    | T    | F    | T    | T    | F    |
+| p($obj)    | E    | E    | E    | E    | E    | F    |
 +------------+------+------+------+------+------+------+
 
 [dynamic] $lcl ? VAR
@@ -105,22 +105,22 @@
 | $lcl       | F    | T    | F    | T    | T    | T    |
 | $str       | F    | T    | F    | T    | T    | T    |
 | $cls       | F    | T    | F    | T    | T    | T    |
-| $obj       | F    | T    | F    | T    | T    | F    |
+| $obj       | E    | E    | E    | E    | E    | F    |
 +------------+------+------+------+------+------+------+
 | v($lcl)    | F    | T    | F    | T    | T    | T    |
 | v($str)    | F    | T    | F    | T    | T    | T    |
 | v($cls)    | F    | T    | F    | T    | T    | T    |
-| v($obj)    | F    | T    | F    | T    | T    | F    |
+| v($obj)    | E    | E    | E    | E    | E    | F    |
 +------------+------+------+------+------+------+------+
 | w($lcl)    | F    | T    | F    | T    | T    | T    |
 | w($str)    | F    | T    | F    | T    | T    | F    |
 | w($cls)    | F    | T    | F    | T    | T    | F    |
-| w($obj)    | F    | T    | F    | T    | T    | F    |
+| w($obj)    | E    | E    | E    | E    | E    | F    |
 +------------+------+------+------+------+------+------+
 | p($lcl)    | F    | T    | F    | T    | T    | T    |
 | p($str)    | F    | T    | F    | T    | T    | F    |
 | p($cls)    | F    | T    | F    | T    | T    | F    |
-| p($obj)    | F    | T    | F    | T    | T    | F    |
+| p($obj)    | E    | E    | E    | E    | E    | F    |
 +------------+------+------+------+------+------+------+
 
 [dynamic] VAR ? $lcl
@@ -130,22 +130,22 @@
 | $lcl       | F    | T    | F    | T    | T    | T    |
 | $str       | F    | T    | F    | T    | T    | T    |
 | $cls       | F    | T    | F    | T    | T    | T    |
-| $obj       | F    | T    | F    | T    | T    | F    |
+| $obj       | E    | E    | E    | E    | E    | F    |
 +------------+------+------+------+------+------+------+
 | v($lcl)    | F    | T    | F    | T    | T    | T    |
 | v($str)    | F    | T    | F    | T    | T    | T    |
 | v($cls)    | F    | T    | F    | T    | T    | T    |
-| v($obj)    | F    | T    | F    | T    | T    | F    |
+| v($obj)    | E    | E    | E    | E    | E    | F    |
 +------------+------+------+------+------+------+------+
 | w($lcl)    | F    | T    | F    | T    | T    | T    |
 | w($str)    | F    | T    | F    | T    | T    | F    |
 | w($cls)    | F    | T    | F    | T    | T    | F    |
-| w($obj)    | F    | T    | F    | T    | T    | F    |
+| w($obj)    | E    | E    | E    | E    | E    | F    |
 +------------+------+------+------+------+------+------+
 | p($lcl)    | F    | T    | F    | T    | T    | T    |
 | p($str)    | F    | T    | F    | T    | T    | F    |
 | p($cls)    | F    | T    | F    | T    | T    | F    |
-| p($obj)    | F    | T    | F    | T    | T    | F    |
+| p($obj)    | E    | E    | E    | E    | E    | F    |
 +------------+------+------+------+------+------+------+
 
 [dynamic] $cls ? VAR
@@ -155,22 +155,22 @@
 | $lcl       | F    | T    | F    | T    | T    | T    |
 | $str       | F    | T    | F    | T    | T    | T    |
 | $cls       | F    | T    | F    | T    | T    | T    |
-| $obj       | F    | T    | F    | T    | T    | F    |
+| $obj       | E    | E    | E    | E    | E    | F    |
 +------------+------+------+------+------+------+------+
 | v($lcl)    | F    | T    | F    | T    | T    | T    |
 | v($str)    | F    | T    | F    | T    | T    | T    |
 | v($cls)    | F    | T    | F    | T    | T    | T    |
-| v($obj)    | F    | T    | F    | T    | T    | F    |
+| v($obj)    | E    | E    | E    | E    | E    | F    |
 +------------+------+------+------+------+------+------+
 | w($lcl)    | F    | T    | F    | T    | T    | F    |
 | w($str)    | F    | T    | F    | T    | T    | F    |
 | w($cls)    | F    | T    | F    | T    | T    | T    |
-| w($obj)    | F    | T    | F    | T    | T    | F    |
+| w($obj)    | E    | E    | E    | E    | E    | F    |
 +------------+------+------+------+------+------+------+
 | p($lcl)    | F    | T    | F    | T    | T    | F    |
 | p($str)    | F    | T    | F    | T    | T    | F    |
 | p($cls)    | F    | T    | F    | T    | T    | T    |
-| p($obj)    | F    | T    | F    | T    | T    | F    |
+| p($obj)    | E    | E    | E    | E    | E    | F    |
 +------------+------+------+------+------+------+------+
 
 [dynamic] VAR ? $cls
@@ -180,21 +180,21 @@
 | $lcl       | F    | T    | F    | T    | T    | T    |
 | $str       | F    | T    | F    | T    | T    | T    |
 | $cls       | F    | T    | F    | T    | T    | T    |
-| $obj       | F    | T    | F    | T    | T    | F    |
+| $obj       | E    | E    | E    | E    | E    | F    |
 +------------+------+------+------+------+------+------+
 | v($lcl)    | F    | T    | F    | T    | T    | T    |
 | v($str)    | F    | T    | F    | T    | T    | T    |
 | v($cls)    | F    | T    | F    | T    | T    | T    |
-| v($obj)    | F    | T    | F    | T    | T    | F    |
+| v($obj)    | E    | E    | E    | E    | E    | F    |
 +------------+------+------+------+------+------+------+
 | w($lcl)    | F    | T    | F    | T    | T    | F    |
 | w($str)    | F    | T    | F    | T    | T    | F    |
 | w($cls)    | F    | T    | F    | T    | T    | T    |
-| w($obj)    | F    | T    | F    | T    | T    | F    |
+| w($obj)    | E    | E    | E    | E    | E    | F    |
 +------------+------+------+------+------+------+------+
 | p($lcl)    | F    | T    | F    | T    | T    | F    |
 | p($str)    | F    | T    | F    | T    | T    | F    |
 | p($cls)    | F    | T    | F    | T    | T    | T    |
-| p($obj)    | F    | T    | F    | T    | T    | F    |
+| p($obj)    | E    | E    | E    | E    | E    | F    |
 +------------+------+------+------+------+------+------+
 

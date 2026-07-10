@@ -97,10 +97,6 @@ string(6) "string"
 string(6) "string"
 
 -- Iteration 25 --
-string(6) "Object"
-string(6) "Object"
-
--- Iteration 26 --
 string(%d) "Resource id #%d"
 string(%d) "Resource id #%d"
 Done

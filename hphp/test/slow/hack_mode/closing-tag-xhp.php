@@ -9,5 +9,6 @@ class :script {
 
 <<__EntryPoint>>
 function main_closing_tag_xhp() :mixed{
-echo <script></script>;
+$x = <script></script>;
+echo $x->__toString();
 }

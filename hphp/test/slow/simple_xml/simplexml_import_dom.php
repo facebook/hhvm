@@ -19,6 +19,6 @@ $xml = simplexml_import_dom($doc);
 $xml->registerXPathNamespace('atom', "http://www.w3.org/2005/Atom");
 $nodes = $xml->xpath('//atom:entry/atom:published/text()');
 foreach ($nodes as $node) {
-  print $node;
+  print $node->__toString();
 }
 }

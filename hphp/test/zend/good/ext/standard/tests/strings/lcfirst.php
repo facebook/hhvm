@@ -1,12 +1,6 @@
 <?hh
 /* Make a string's first character uppercase */
 
-class mystring {
-  function __toString() :mixed{
-    return "Hello world";
-  }
-}
-
 <<__EntryPoint>> function main(): void {
 echo "#### Basic and Various operations ####\n";
 $str_array = vec[
@@ -42,14 +36,6 @@ foreach ($str_array as $string) {
 
 
 echo "\n#### Testing Miscelleneous inputs ####\n";
-
-echo "\n--- Testing objects ---\n";
-/* we get "Catchable fatal error: saying Object of class could not be converted
- * to string" by default when an object is passed instead of string, but that
- * error can be avoided by defining a __toString magix method (see "mystring").
- */
-$obj_string = new mystring;
-var_dump(lcfirst("$obj_string"));
 
 echo "\n--- Testing Resources ---\n";
 $filename1 = sys_get_temp_dir().'/'."dummy-lcfirst.txt";

@@ -30,28 +30,28 @@ EOF
 
 foreach($sxe as $name => $data) {
 	var_dump($name);
-	var_dump(trim((string)$data));
+	var_dump(trim($data->__toString()));
 }
 
 echo "===CLONE===\n";
 
 foreach(clone $sxe as $name => $data) {
 	var_dump($name);
-	var_dump(trim((string)$data));
+	var_dump(trim($data->__toString()));
 }
 
 echo "===ELEMENT===\n";
 
 foreach($sxe->elem11 as $name => $data) {
 	var_dump($name);
-	var_dump(trim((string)$data));
+	var_dump(trim($data->__toString()));
 }
 
 echo "===COMMENT===\n";
 
 foreach($sxe->elem1 as $name => $data) {
 	var_dump($name);
-	var_dump(trim((string)$data));
+	var_dump(trim($data->__toString()));
 }
 
 echo "===DONE===\n";

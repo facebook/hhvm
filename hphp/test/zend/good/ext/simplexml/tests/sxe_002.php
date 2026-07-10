@@ -32,13 +32,13 @@ $sxe = simplexml_load_string((string)$xml, 'SimpleXMLIterator');
 foreach(new RecursiveIteratorIterator($sxe, 1) as $name => $data) {
 	var_dump($name);
 	var_dump(get_class($data));
-	var_dump(trim((string)$data));
+	var_dump(trim($data->__toString()));
 }
 
 echo "===DUMP===\n";
 
 var_dump(get_class($sxe));
-var_dump(trim((string)$sxe->elem1));
+var_dump(trim(($sxe->elem1)->__toString()));
 
 echo "===DONE===\n";
 }

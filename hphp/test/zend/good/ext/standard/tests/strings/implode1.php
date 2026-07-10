@@ -4,13 +4,6 @@
                 array elements in the same order, with the glue string between each element.
 */
 
-class foo
-{
-  function __toString() :mixed{
-    return "Object";
-  }
-}
-
 <<__EntryPoint>> function main(): void {
 echo "*** Testing implode() for basic opeartions ***\n";
 $arrays = vec[
@@ -63,13 +56,6 @@ foreach($glues as $glue) {
 /* empty string */
 echo "\n*** Testing implode() on empty string ***\n";
 var_dump( implode("") );
-
-echo "\n*** Testing implode() on objects ***\n";
-/* checking on objects */
-$obj = new foo(); //creating new object
-$arr = vec[$obj, $obj];
-var_dump( implode(",", $arr) );
-var_dump($arr);
 
 /* Checking on resource types */
 echo "\n*** Testing end() on resource type ***\n";

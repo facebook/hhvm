@@ -18,7 +18,7 @@ foreach ($iters as $iter) {
   var_dump($iter->getFilename());
 
   foreach ($iter as $file) {
-    echo "$file\n";
+    echo $file->__toString()."\n";
   }
 }
 }

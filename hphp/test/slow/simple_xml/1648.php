@@ -2,7 +2,7 @@
 function convert_simplexml_to_array($sxml) :mixed{
   if ($sxml) {
     foreach ($sxml as $k => $v) {
-      var_dump($k, (string)$v);
+      var_dump($k, $v->__toString());
       convert_simplexml_to_array($v);
     }
   }

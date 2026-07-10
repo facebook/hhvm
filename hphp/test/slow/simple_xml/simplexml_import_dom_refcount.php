@@ -11,7 +11,7 @@ END;
   $dom->loadXML($string);
   $s = simplexml_import_dom($dom);
   $dom = null;
-  var_dump((string) $s->b);
+  var_dump($s->b->__toString());
 }
 
 

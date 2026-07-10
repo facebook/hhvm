@@ -17,7 +17,7 @@ function entrypoint_015(): void {
   var_dump(openssl_public_encrypt($data, inout $encrypted, $pubkey));
   var_dump(openssl_public_encrypt($data, inout $encrypted_bad, $privkey));
   var_dump(openssl_public_encrypt($data, inout $encrypted_bad, $wrong));
-  var_dump(openssl_public_encrypt($data, inout $encrypted_bad, $obj));
+  var_dump(openssl_public_encrypt($data, inout $encrypted_bad, $obj->__toString()));
   $output = null;
   openssl_private_decrypt($encrypted, inout $output, $privkey);
   var_dump($output);

@@ -109,29 +109,27 @@ string(4) "true"
 -- Iteration 54 --
 string(4) "true"
 -- Iteration 55 --
-string(5%d) "This is a multiline heredoc
+string(54) "This is a multiline heredoc
 string. Numeric = 1232455."
 -- Iteration 56 --
-string(1%d) "12345
+string(10) "12345
 2345"
 -- Iteration 57 --
 string(0) ""
 
 *** Testing strval() with non_scalar values ***
 -- Iteration 1 --
-string(6) "Object"
+string(%d) "Resource id #%d"
 -- Iteration 2 --
-string(14) "Resource id #%d"
+string(%d) "Resource id #%d"
 -- Iteration 3 --
-string(14) "Resource id #%d"
--- Iteration 4 --
 string(0) ""
--- Iteration 5 --
+-- Iteration 4 --
 string(0) ""
 
 *** Testing error conditions ***
 
-Warning: strval() expects exactly 1 positional parameter, 0 given in %s/strval.php on line %d
+Warning: strval() expects exactly 1 positional parameter, 0 given in %s on line %d
 
-Warning: strval() expects exactly 1 positional parameter, 2 given in %s/strval.php on line %d
+Warning: strval() expects exactly 1 positional parameter, 2 given in %s on line %d
 Done

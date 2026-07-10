@@ -8,7 +8,7 @@ $root = simplexml_load_string('<?xml version="1.0"?>
 ');
 
 foreach (new IteratorIterator($root->child) as $child) {
-	echo $child."\n";
+	echo $child->__toString()."\n";
 }
 echo "===DONE===\n";
 }

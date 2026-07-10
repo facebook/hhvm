@@ -91,9 +91,6 @@ function materialization_methods() :mixed{
 }
 
 function magic_methods() :mixed{
-  echo "\n__toString...\n";
-  echo (new ImmSet(Vector {1, 2, 3})) . "\n";
-
   $cfail = function($f) {
     try {
       $f();

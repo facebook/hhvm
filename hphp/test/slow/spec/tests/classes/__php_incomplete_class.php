@@ -10,7 +10,7 @@ class Point
         $this->x = $x;
         $this->y = $y;
 
-        echo "\nInside " . __METHOD__ . ", $this\n\n";
+        echo "\nInside " . __METHOD__ . ", " . $this->__toString() . "\n\n";
     }
 
     public function __toString()
@@ -25,7 +25,7 @@ function main_entry(): void {
   echo "---------------- create, serialize, and unserialize a Point -------------------\n";
 
   $p = new Point(2, 5);
-  echo "Point \$p = $p\n";
+  echo "Point \$p = " . $p->__toString() . "\n";
 
   $s = serialize($p);     // all instance properties get serialized
   var_dump($s);

@@ -3,7 +3,6 @@
 function foo($v) :mixed{
   return (string)$v;
 }
-class C { public function __toString() :mixed{ return "a C"; } }
 
 function bar($i) :mixed{
   $v1 = "undefined";
@@ -26,7 +25,6 @@ function bar($i) :mixed{
     $v6 = 0.0;
     $v7 = 1.1;
     $v8 = "abc";
-    $v9 = new C();
   }
   var_dump((string)$v1);
   var_dump((string)$v2);
@@ -36,10 +34,8 @@ function bar($i) :mixed{
   var_dump((string)$v6);
   var_dump((string)$v7);
   var_dump((string)$v8);
-  var_dump((string)$v9);
 }
 
-class D { }
 <<__EntryPoint>>
 function entrypoint_cnvStr(): void {
   var_dump(foo(null));
@@ -48,8 +44,6 @@ function entrypoint_cnvStr(): void {
   var_dump(foo(1));
   var_dump(foo(1.1));
   var_dump(foo("abc"));
-  var_dump(foo(new C));
 
   bar(1);
-  var_dump(foo(new D));
 }

@@ -11,5 +11,5 @@ class :foo {
 function main_coalesce() :mixed{
 $a = null;
 $b = $a ?? <foo />;
-var_dump((string) $b);
+var_dump($b->__toString());
 }

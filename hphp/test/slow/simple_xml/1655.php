@@ -7,7 +7,7 @@ function printElement($el, $indent='') :mixed{
   }
   print $indent.$el->getName()."\n";
   foreach ($el->attributes() as $k => $v) {
-    print $indent.$k.' => '.$v."\n";
+    print $indent.$k.' => '.$v->__toString()."\n";
   }
   foreach ($el->children() as $child) {
     printElement($child, $indent.'  ');

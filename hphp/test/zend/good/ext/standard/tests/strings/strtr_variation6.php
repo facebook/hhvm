@@ -9,12 +9,6 @@
  *  and expected type for 'str' & 'to' arguments
 */
 
-//defining a class
-class sample  {
-  public function __toString() :mixed{
-    return "sample object";
-  }
-}
 <<__EntryPoint>> function main(): void {
 echo "*** Testing strtr() function: with unexpected inputs for 'from' ***\n";
 
@@ -53,11 +47,8 @@ $from_arr =  vec[
 /*14*/      NULL,
           null,
 
-          // objects
-/*16*/      new sample(),
-
           // resource
-/*17*/      $file_handle,
+/*16*/      $file_handle,
 
 
 ];

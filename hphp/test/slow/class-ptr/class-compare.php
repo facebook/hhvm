@@ -27,6 +27,10 @@ function pLV($x) :mixed{ $r = new stdClass; $r->x = $x; return LV($r); }
 <<__NEVER_INLINE>> function C(bool $v) :mixed{
   printf(" %s    |", $v ? 'T' : 'F');
 }
+// Object coercions in comparisons now throw; render such cells as 'E'.
+<<__NEVER_INLINE>> function CE((function(): bool) $f) :mixed{
+  try { C($f()); } catch (TypecastException $e) { printf(" %s    |", 'E'); }
+}
 <<__NEVER_INLINE>> function print_divider() :mixed{
   echo "\n+------------+------+------+------+------+------+------+";
 }
@@ -72,7 +76,7 @@ function pLV($x) :mixed{ $r = new stdClass; $r->x = $x; return LV($r); }
   begin_row('cls');
     C($lcl<$cls);C($lcl<=$cls);C($lcl>$cls);C($lcl>=$cls);C($lcl==$cls);C($lcl===$cls);
   begin_row('obj');
-    C(HH\Lib\Legacy_FIXME\lt($lcl, $obj));C(HH\Lib\Legacy_FIXME\lte($lcl, $obj));C(HH\Lib\Legacy_FIXME\gt($lcl, $obj));C(HH\Lib\Legacy_FIXME\gte($lcl, $obj));C(HH\Lib\Legacy_FIXME\eq($lcl, $obj));C($lcl===$obj);
+    CE(() ==> HH\Lib\Legacy_FIXME\lt($lcl, $obj));CE(() ==> HH\Lib\Legacy_FIXME\lte($lcl, $obj));CE(() ==> HH\Lib\Legacy_FIXME\gt($lcl, $obj));CE(() ==> HH\Lib\Legacy_FIXME\gte($lcl, $obj));CE(() ==> HH\Lib\Legacy_FIXME\eq($lcl, $obj));C($lcl===$obj);
   print_divider();
 
   begin_row('lcl', 'v');
@@ -82,7 +86,7 @@ function pLV($x) :mixed{ $r = new stdClass; $r->x = $x; return LV($r); }
   begin_row('cls', 'v');
     C($vlcl<$vcls);C($vlcl<=$vcls);C($vlcl>$vcls);C($vlcl>=$vcls);C($vlcl==$vcls);C($vlcl===$vcls);
   begin_row('obj', 'v');
-    C(HH\Lib\Legacy_FIXME\lt($vlcl, $vobj));C(HH\Lib\Legacy_FIXME\lte($vlcl, $vobj));C(HH\Lib\Legacy_FIXME\gt($vlcl, $vobj));C(HH\Lib\Legacy_FIXME\gte($vlcl, $vobj));C(HH\Lib\Legacy_FIXME\eq($vlcl, $vobj));C($vlcl===$vobj);
+    CE(() ==> HH\Lib\Legacy_FIXME\lt($vlcl, $vobj));CE(() ==> HH\Lib\Legacy_FIXME\lte($vlcl, $vobj));CE(() ==> HH\Lib\Legacy_FIXME\gt($vlcl, $vobj));CE(() ==> HH\Lib\Legacy_FIXME\gte($vlcl, $vobj));CE(() ==> HH\Lib\Legacy_FIXME\eq($vlcl, $vobj));C($vlcl===$vobj);
   print_divider();
 
   begin_row('lcl', 'w');
@@ -92,7 +96,7 @@ function pLV($x) :mixed{ $r = new stdClass; $r->x = $x; return LV($r); }
   begin_row('cls', 'w');
     C($wlcl<$wcls);C($wlcl<=$wcls);C($wlcl>$wcls);C($wlcl>=$wcls);C($wlcl==$wcls);C($wlcl===$wcls);
   begin_row('obj', 'w');
-    C(HH\Lib\Legacy_FIXME\lt($wlcl, $wobj));C(HH\Lib\Legacy_FIXME\lte($wlcl, $wobj));C(HH\Lib\Legacy_FIXME\gt($wlcl, $wobj));C(HH\Lib\Legacy_FIXME\gte($wlcl, $wobj));C(HH\Lib\Legacy_FIXME\eq($wlcl, $wobj));C($wlcl===$wobj);
+    CE(() ==> HH\Lib\Legacy_FIXME\lt($wlcl, $wobj));CE(() ==> HH\Lib\Legacy_FIXME\lte($wlcl, $wobj));CE(() ==> HH\Lib\Legacy_FIXME\gt($wlcl, $wobj));CE(() ==> HH\Lib\Legacy_FIXME\gte($wlcl, $wobj));CE(() ==> HH\Lib\Legacy_FIXME\eq($wlcl, $wobj));C($wlcl===$wobj);
   print_divider();
 
   begin_row('lcl', 'p');
@@ -102,7 +106,7 @@ function pLV($x) :mixed{ $r = new stdClass; $r->x = $x; return LV($r); }
   begin_row('cls', 'p');
     C($plcl<$pcls);C($plcl<=$pcls);C($plcl>$pcls);C($plcl>=$pcls);C($plcl==$pcls);C($plcl===$pcls);
   begin_row('obj', 'p');
-    C(HH\Lib\Legacy_FIXME\lt($plcl, $pobj));C(HH\Lib\Legacy_FIXME\lte($plcl, $pobj));C(HH\Lib\Legacy_FIXME\gt($plcl, $pobj));C(HH\Lib\Legacy_FIXME\gte($plcl, $pobj));C(HH\Lib\Legacy_FIXME\eq($plcl, $pobj));C($plcl===$pobj);
+    CE(() ==> HH\Lib\Legacy_FIXME\lt($plcl, $pobj));CE(() ==> HH\Lib\Legacy_FIXME\lte($plcl, $pobj));CE(() ==> HH\Lib\Legacy_FIXME\gt($plcl, $pobj));CE(() ==> HH\Lib\Legacy_FIXME\gte($plcl, $pobj));CE(() ==> HH\Lib\Legacy_FIXME\eq($plcl, $pobj));C($plcl===$pobj);
   print_footer();
 
   print_header('[static] VAR ? $lcl');
@@ -113,7 +117,7 @@ function pLV($x) :mixed{ $r = new stdClass; $r->x = $x; return LV($r); }
   begin_row('cls');
     C($cls<$lcl);C($cls<=$lcl);C($cls>$lcl);C($cls>=$lcl);C($cls==$lcl);C($cls===$lcl);
   begin_row('obj');
-    C(HH\Lib\Legacy_FIXME\lt($obj, $lcl));C(HH\Lib\Legacy_FIXME\lte($obj, $lcl));C(HH\Lib\Legacy_FIXME\gt($obj, $lcl));C(HH\Lib\Legacy_FIXME\gte($obj, $lcl));C(HH\Lib\Legacy_FIXME\eq($obj, $lcl));C($obj===$lcl);
+    CE(() ==> HH\Lib\Legacy_FIXME\lt($obj, $lcl));CE(() ==> HH\Lib\Legacy_FIXME\lte($obj, $lcl));CE(() ==> HH\Lib\Legacy_FIXME\gt($obj, $lcl));CE(() ==> HH\Lib\Legacy_FIXME\gte($obj, $lcl));CE(() ==> HH\Lib\Legacy_FIXME\eq($obj, $lcl));C($obj===$lcl);
   print_divider();
 
   begin_row('lcl', 'v');
@@ -123,7 +127,7 @@ function pLV($x) :mixed{ $r = new stdClass; $r->x = $x; return LV($r); }
   begin_row('cls', 'v');
     C($vcls<$vlcl);C($vcls<=$vlcl);C($vcls>$vlcl);C($vcls>=$vlcl);C($vcls==$vlcl);C($vcls===$vlcl);
   begin_row('obj', 'v');
-    C(HH\Lib\Legacy_FIXME\lt($vobj, $vlcl));C(HH\Lib\Legacy_FIXME\lte($vobj, $vlcl));C(HH\Lib\Legacy_FIXME\gt($vobj, $vlcl));C(HH\Lib\Legacy_FIXME\gte($vobj, $vlcl));C(HH\Lib\Legacy_FIXME\eq($vobj, $vlcl));C($vobj===$vlcl);
+    CE(() ==> HH\Lib\Legacy_FIXME\lt($vobj, $vlcl));CE(() ==> HH\Lib\Legacy_FIXME\lte($vobj, $vlcl));CE(() ==> HH\Lib\Legacy_FIXME\gt($vobj, $vlcl));CE(() ==> HH\Lib\Legacy_FIXME\gte($vobj, $vlcl));CE(() ==> HH\Lib\Legacy_FIXME\eq($vobj, $vlcl));C($vobj===$vlcl);
   print_divider();
 
   begin_row('lcl', 'w');
@@ -133,7 +137,7 @@ function pLV($x) :mixed{ $r = new stdClass; $r->x = $x; return LV($r); }
   begin_row('cls', 'w');
     C($wcls<$wlcl);C($wcls<=$wlcl);C($wcls>$wlcl);C($wcls>=$wlcl);C($wcls==$wlcl);C($wcls===$wlcl);
   begin_row('obj', 'w');
-    C(HH\Lib\Legacy_FIXME\lt($wobj, $wlcl));C(HH\Lib\Legacy_FIXME\lte($wobj, $wlcl));C(HH\Lib\Legacy_FIXME\gt($wobj, $wlcl));C(HH\Lib\Legacy_FIXME\gte($wobj, $wlcl));C(HH\Lib\Legacy_FIXME\eq($wobj, $wlcl));C($wobj===$wlcl);
+    CE(() ==> HH\Lib\Legacy_FIXME\lt($wobj, $wlcl));CE(() ==> HH\Lib\Legacy_FIXME\lte($wobj, $wlcl));CE(() ==> HH\Lib\Legacy_FIXME\gt($wobj, $wlcl));CE(() ==> HH\Lib\Legacy_FIXME\gte($wobj, $wlcl));CE(() ==> HH\Lib\Legacy_FIXME\eq($wobj, $wlcl));C($wobj===$wlcl);
   print_divider();
 
   begin_row('lcl', 'p');
@@ -143,7 +147,7 @@ function pLV($x) :mixed{ $r = new stdClass; $r->x = $x; return LV($r); }
   begin_row('cls', 'p');
     C($pcls<$plcl);C($pcls<=$plcl);C($pcls>$plcl);C($pcls>=$plcl);C($pcls==$plcl);C($pcls===$plcl);
   begin_row('obj', 'p');
-    C(HH\Lib\Legacy_FIXME\lt($pobj, $plcl));C(HH\Lib\Legacy_FIXME\lte($pobj, $plcl));C(HH\Lib\Legacy_FIXME\gt($pobj, $plcl));C(HH\Lib\Legacy_FIXME\gte($pobj, $plcl));C(HH\Lib\Legacy_FIXME\eq($pobj, $plcl));C($pobj===$plcl);
+    CE(() ==> HH\Lib\Legacy_FIXME\lt($pobj, $plcl));CE(() ==> HH\Lib\Legacy_FIXME\lte($pobj, $plcl));CE(() ==> HH\Lib\Legacy_FIXME\gt($pobj, $plcl));CE(() ==> HH\Lib\Legacy_FIXME\gte($pobj, $plcl));CE(() ==> HH\Lib\Legacy_FIXME\eq($pobj, $plcl));C($pobj===$plcl);
   print_footer();
 
   //// $cls
@@ -156,7 +160,7 @@ function pLV($x) :mixed{ $r = new stdClass; $r->x = $x; return LV($r); }
   begin_row('cls');
     C($cls<$cls);C($cls<=$cls);C($cls>$cls);C($cls>=$cls);C($cls==$cls);C($cls===$cls);
   begin_row('obj');
-    C(HH\Lib\Legacy_FIXME\lt($cls, $obj));C(HH\Lib\Legacy_FIXME\lte($cls, $obj));C(HH\Lib\Legacy_FIXME\gt($cls, $obj));C(HH\Lib\Legacy_FIXME\gte($cls, $obj));C(HH\Lib\Legacy_FIXME\eq($cls, $obj));C($cls===$obj);
+    CE(() ==> HH\Lib\Legacy_FIXME\lt($cls, $obj));CE(() ==> HH\Lib\Legacy_FIXME\lte($cls, $obj));CE(() ==> HH\Lib\Legacy_FIXME\gt($cls, $obj));CE(() ==> HH\Lib\Legacy_FIXME\gte($cls, $obj));CE(() ==> HH\Lib\Legacy_FIXME\eq($cls, $obj));C($cls===$obj);
   print_divider();
 
   begin_row('lcl', 'v');
@@ -166,7 +170,7 @@ function pLV($x) :mixed{ $r = new stdClass; $r->x = $x; return LV($r); }
   begin_row('cls', 'v');
     C($vcls<$vcls);C($vcls<=$vcls);C($vcls>$vcls);C($vcls>=$vcls);C($vcls==$vcls);C($vcls===$vcls);
   begin_row('obj', 'v');
-    C(HH\Lib\Legacy_FIXME\lt($vcls, $vobj));C(HH\Lib\Legacy_FIXME\lte($vcls, $vobj));C(HH\Lib\Legacy_FIXME\gt($vcls, $vobj));C(HH\Lib\Legacy_FIXME\gte($vcls, $vobj));C(HH\Lib\Legacy_FIXME\eq($vcls, $vobj));C($vcls===$vobj);
+    CE(() ==> HH\Lib\Legacy_FIXME\lt($vcls, $vobj));CE(() ==> HH\Lib\Legacy_FIXME\lte($vcls, $vobj));CE(() ==> HH\Lib\Legacy_FIXME\gt($vcls, $vobj));CE(() ==> HH\Lib\Legacy_FIXME\gte($vcls, $vobj));CE(() ==> HH\Lib\Legacy_FIXME\eq($vcls, $vobj));C($vcls===$vobj);
   print_divider();
 
   begin_row('lcl', 'w');
@@ -176,7 +180,7 @@ function pLV($x) :mixed{ $r = new stdClass; $r->x = $x; return LV($r); }
   begin_row('cls', 'w');
     C($wcls<$wcls);C($wcls<=$wcls);C($wcls>$wcls);C($wcls>=$wcls);C($wcls==$wcls);C($wcls===$wcls);
   begin_row('obj', 'w');
-    C(HH\Lib\Legacy_FIXME\lt($wcls, $wobj));C(HH\Lib\Legacy_FIXME\lte($wcls, $wobj));C(HH\Lib\Legacy_FIXME\gt($wcls, $wobj));C(HH\Lib\Legacy_FIXME\gte($wcls, $wobj));C(HH\Lib\Legacy_FIXME\eq($wcls, $wobj));C($wcls===$wobj);
+    CE(() ==> HH\Lib\Legacy_FIXME\lt($wcls, $wobj));CE(() ==> HH\Lib\Legacy_FIXME\lte($wcls, $wobj));CE(() ==> HH\Lib\Legacy_FIXME\gt($wcls, $wobj));CE(() ==> HH\Lib\Legacy_FIXME\gte($wcls, $wobj));CE(() ==> HH\Lib\Legacy_FIXME\eq($wcls, $wobj));C($wcls===$wobj);
   print_divider();
 
   begin_row('lcl', 'p');
@@ -186,7 +190,7 @@ function pLV($x) :mixed{ $r = new stdClass; $r->x = $x; return LV($r); }
   begin_row('cls', 'p');
     C($pcls<$pcls);C($pcls<=$pcls);C($pcls>$pcls);C($pcls>=$pcls);C($pcls==$pcls);C($pcls===$pcls);
   begin_row('obj', 'p');
-    C(HH\Lib\Legacy_FIXME\lt($pcls, $pobj));C(HH\Lib\Legacy_FIXME\lte($pcls, $pobj));C(HH\Lib\Legacy_FIXME\gt($pcls, $pobj));C(HH\Lib\Legacy_FIXME\gte($pcls, $pobj));C(HH\Lib\Legacy_FIXME\eq($pcls, $pobj));C($pcls===$pobj);
+    CE(() ==> HH\Lib\Legacy_FIXME\lt($pcls, $pobj));CE(() ==> HH\Lib\Legacy_FIXME\lte($pcls, $pobj));CE(() ==> HH\Lib\Legacy_FIXME\gt($pcls, $pobj));CE(() ==> HH\Lib\Legacy_FIXME\gte($pcls, $pobj));CE(() ==> HH\Lib\Legacy_FIXME\eq($pcls, $pobj));C($pcls===$pobj);
   print_footer();
 
   print_header('[static] VAR ? $cls');
@@ -197,7 +201,7 @@ function pLV($x) :mixed{ $r = new stdClass; $r->x = $x; return LV($r); }
   begin_row('cls');
     C($cls<$cls);C($cls<=$cls);C($cls>$cls);C($cls>=$cls);C($cls==$cls);C($cls===$cls);
   begin_row('obj');
-    C(HH\Lib\Legacy_FIXME\lt($obj, $cls));C(HH\Lib\Legacy_FIXME\lte($obj, $cls));C(HH\Lib\Legacy_FIXME\gt($obj, $cls));C(HH\Lib\Legacy_FIXME\gte($obj, $cls));C(HH\Lib\Legacy_FIXME\eq($obj, $cls));C($obj===$cls);
+    CE(() ==> HH\Lib\Legacy_FIXME\lt($obj, $cls));CE(() ==> HH\Lib\Legacy_FIXME\lte($obj, $cls));CE(() ==> HH\Lib\Legacy_FIXME\gt($obj, $cls));CE(() ==> HH\Lib\Legacy_FIXME\gte($obj, $cls));CE(() ==> HH\Lib\Legacy_FIXME\eq($obj, $cls));C($obj===$cls);
   print_divider();
 
   begin_row('lcl', 'v');
@@ -207,7 +211,7 @@ function pLV($x) :mixed{ $r = new stdClass; $r->x = $x; return LV($r); }
   begin_row('cls', 'v');
     C($vcls<$vcls);C($vcls<=$vcls);C($vcls>$vcls);C($vcls>=$vcls);C($vcls==$vcls);C($vcls===$vcls);
   begin_row('obj', 'v');
-    C(HH\Lib\Legacy_FIXME\lt($vobj, $vcls));C(HH\Lib\Legacy_FIXME\lte($vobj, $vcls));C(HH\Lib\Legacy_FIXME\gt($vobj, $vcls));C(HH\Lib\Legacy_FIXME\gte($vobj, $vcls));C(HH\Lib\Legacy_FIXME\eq($vobj, $vcls));C($vobj===$vcls);
+    CE(() ==> HH\Lib\Legacy_FIXME\lt($vobj, $vcls));CE(() ==> HH\Lib\Legacy_FIXME\lte($vobj, $vcls));CE(() ==> HH\Lib\Legacy_FIXME\gt($vobj, $vcls));CE(() ==> HH\Lib\Legacy_FIXME\gte($vobj, $vcls));CE(() ==> HH\Lib\Legacy_FIXME\eq($vobj, $vcls));C($vobj===$vcls);
   print_divider();
 
   begin_row('lcl', 'w');
@@ -217,7 +221,7 @@ function pLV($x) :mixed{ $r = new stdClass; $r->x = $x; return LV($r); }
   begin_row('cls', 'w');
     C($wcls<$wcls);C($wcls<=$wcls);C($wcls>$wcls);C($wcls>=$wcls);C($wcls==$wcls);C($wcls===$wcls);
   begin_row('obj', 'w');
-    C(HH\Lib\Legacy_FIXME\lt($wobj, $wcls));C(HH\Lib\Legacy_FIXME\lte($wobj, $wcls));C(HH\Lib\Legacy_FIXME\gt($wobj, $wcls));C(HH\Lib\Legacy_FIXME\gte($wobj, $wcls));C(HH\Lib\Legacy_FIXME\eq($wobj, $wcls));C($wobj===$wcls);
+    CE(() ==> HH\Lib\Legacy_FIXME\lt($wobj, $wcls));CE(() ==> HH\Lib\Legacy_FIXME\lte($wobj, $wcls));CE(() ==> HH\Lib\Legacy_FIXME\gt($wobj, $wcls));CE(() ==> HH\Lib\Legacy_FIXME\gte($wobj, $wcls));CE(() ==> HH\Lib\Legacy_FIXME\eq($wobj, $wcls));C($wobj===$wcls);
   print_divider();
 
   begin_row('lcl', 'p');
@@ -227,7 +231,7 @@ function pLV($x) :mixed{ $r = new stdClass; $r->x = $x; return LV($r); }
   begin_row('cls', 'p');
     C($pcls<$pcls);C($pcls<=$pcls);C($pcls>$pcls);C($pcls>=$pcls);C($pcls==$pcls);C($pcls===$pcls);
   begin_row('obj', 'p');
-    C(HH\Lib\Legacy_FIXME\lt($pobj, $pcls));C(HH\Lib\Legacy_FIXME\lte($pobj, $pcls));C(HH\Lib\Legacy_FIXME\gt($pobj, $pcls));C(HH\Lib\Legacy_FIXME\gte($pobj, $pcls));C(HH\Lib\Legacy_FIXME\eq($pobj, $pcls));C($pobj===$pcls);
+    CE(() ==> HH\Lib\Legacy_FIXME\lt($pobj, $pcls));CE(() ==> HH\Lib\Legacy_FIXME\lte($pobj, $pcls));CE(() ==> HH\Lib\Legacy_FIXME\gt($pobj, $pcls));CE(() ==> HH\Lib\Legacy_FIXME\gte($pobj, $pcls));CE(() ==> HH\Lib\Legacy_FIXME\eq($pobj, $pcls));C($pobj===$pcls);
   print_footer();
 }
 
@@ -262,7 +266,7 @@ function pLV($x) :mixed{ $r = new stdClass; $r->x = $x; return LV($r); }
   begin_row('cls');
     C($lcl<$cls);C($lcl<=$cls);C($lcl>$cls);C($lcl>=$cls);C($lcl==$cls);C($lcl===$cls);
   begin_row('obj');
-    C(HH\Lib\Legacy_FIXME\lt($lcl, $obj));C(HH\Lib\Legacy_FIXME\lte($lcl, $obj));C(HH\Lib\Legacy_FIXME\gt($lcl, $obj));C(HH\Lib\Legacy_FIXME\gte($lcl, $obj));C(HH\Lib\Legacy_FIXME\eq($lcl, $obj));C($lcl===$obj);
+    CE(() ==> HH\Lib\Legacy_FIXME\lt($lcl, $obj));CE(() ==> HH\Lib\Legacy_FIXME\lte($lcl, $obj));CE(() ==> HH\Lib\Legacy_FIXME\gt($lcl, $obj));CE(() ==> HH\Lib\Legacy_FIXME\gte($lcl, $obj));CE(() ==> HH\Lib\Legacy_FIXME\eq($lcl, $obj));C($lcl===$obj);
   print_divider();
 
   begin_row('lcl', 'v');
@@ -272,7 +276,7 @@ function pLV($x) :mixed{ $r = new stdClass; $r->x = $x; return LV($r); }
   begin_row('cls', 'v');
     C($vlcl<$vcls);C($vlcl<=$vcls);C($vlcl>$vcls);C($vlcl>=$vcls);C($vlcl==$vcls);C($vlcl===$vcls);
   begin_row('obj', 'v');
-    C(HH\Lib\Legacy_FIXME\lt($vlcl, $vobj));C(HH\Lib\Legacy_FIXME\lte($vlcl, $vobj));C(HH\Lib\Legacy_FIXME\gt($vlcl, $vobj));C(HH\Lib\Legacy_FIXME\gte($vlcl, $vobj));C(HH\Lib\Legacy_FIXME\eq($vlcl, $vobj));C($vlcl===$vobj);
+    CE(() ==> HH\Lib\Legacy_FIXME\lt($vlcl, $vobj));CE(() ==> HH\Lib\Legacy_FIXME\lte($vlcl, $vobj));CE(() ==> HH\Lib\Legacy_FIXME\gt($vlcl, $vobj));CE(() ==> HH\Lib\Legacy_FIXME\gte($vlcl, $vobj));CE(() ==> HH\Lib\Legacy_FIXME\eq($vlcl, $vobj));C($vlcl===$vobj);
   print_divider();
 
   begin_row('lcl', 'w');
@@ -282,7 +286,7 @@ function pLV($x) :mixed{ $r = new stdClass; $r->x = $x; return LV($r); }
   begin_row('cls', 'w');
     C($wlcl<$wcls);C($wlcl<=$wcls);C($wlcl>$wcls);C($wlcl>=$wcls);C($wlcl==$wcls);C($wlcl===$wcls);
   begin_row('obj', 'w');
-    C(HH\Lib\Legacy_FIXME\lt($wlcl, $wobj));C(HH\Lib\Legacy_FIXME\lte($wlcl, $wobj));C(HH\Lib\Legacy_FIXME\gt($wlcl, $wobj));C(HH\Lib\Legacy_FIXME\gte($wlcl, $wobj));C(HH\Lib\Legacy_FIXME\eq($wlcl, $wobj));C($wlcl===$wobj);
+    CE(() ==> HH\Lib\Legacy_FIXME\lt($wlcl, $wobj));CE(() ==> HH\Lib\Legacy_FIXME\lte($wlcl, $wobj));CE(() ==> HH\Lib\Legacy_FIXME\gt($wlcl, $wobj));CE(() ==> HH\Lib\Legacy_FIXME\gte($wlcl, $wobj));CE(() ==> HH\Lib\Legacy_FIXME\eq($wlcl, $wobj));C($wlcl===$wobj);
   print_divider();
 
   begin_row('lcl', 'p');
@@ -292,7 +296,7 @@ function pLV($x) :mixed{ $r = new stdClass; $r->x = $x; return LV($r); }
   begin_row('cls', 'p');
     C($plcl<$pcls);C($plcl<=$pcls);C($plcl>$pcls);C($plcl>=$pcls);C($plcl==$pcls);C($plcl===$pcls);
   begin_row('obj', 'p');
-    C(HH\Lib\Legacy_FIXME\lt($plcl, $pobj));C(HH\Lib\Legacy_FIXME\lte($plcl, $pobj));C(HH\Lib\Legacy_FIXME\gt($plcl, $pobj));C(HH\Lib\Legacy_FIXME\gte($plcl, $pobj));C(HH\Lib\Legacy_FIXME\eq($plcl, $pobj));C($plcl===$pobj);
+    CE(() ==> HH\Lib\Legacy_FIXME\lt($plcl, $pobj));CE(() ==> HH\Lib\Legacy_FIXME\lte($plcl, $pobj));CE(() ==> HH\Lib\Legacy_FIXME\gt($plcl, $pobj));CE(() ==> HH\Lib\Legacy_FIXME\gte($plcl, $pobj));CE(() ==> HH\Lib\Legacy_FIXME\eq($plcl, $pobj));C($plcl===$pobj);
   print_footer();
 
   print_header('[dynamic] VAR ? $lcl');
@@ -303,7 +307,7 @@ function pLV($x) :mixed{ $r = new stdClass; $r->x = $x; return LV($r); }
   begin_row('cls');
     C($cls<$lcl);C($cls<=$lcl);C($cls>$lcl);C($cls>=$lcl);C($cls==$lcl);C($cls===$lcl);
   begin_row('obj');
-    C(HH\Lib\Legacy_FIXME\lt($obj, $lcl));C(HH\Lib\Legacy_FIXME\lte($obj, $lcl));C(HH\Lib\Legacy_FIXME\gt($obj, $lcl));C(HH\Lib\Legacy_FIXME\gte($obj, $lcl));C(HH\Lib\Legacy_FIXME\eq($obj, $lcl));C($obj===$lcl);
+    CE(() ==> HH\Lib\Legacy_FIXME\lt($obj, $lcl));CE(() ==> HH\Lib\Legacy_FIXME\lte($obj, $lcl));CE(() ==> HH\Lib\Legacy_FIXME\gt($obj, $lcl));CE(() ==> HH\Lib\Legacy_FIXME\gte($obj, $lcl));CE(() ==> HH\Lib\Legacy_FIXME\eq($obj, $lcl));C($obj===$lcl);
   print_divider();
 
   begin_row('lcl', 'v');
@@ -313,7 +317,7 @@ function pLV($x) :mixed{ $r = new stdClass; $r->x = $x; return LV($r); }
   begin_row('cls', 'v');
     C($vcls<$vlcl);C($vcls<=$vlcl);C($vcls>$vlcl);C($vcls>=$vlcl);C($vcls==$vlcl);C($vcls===$vlcl);
   begin_row('obj', 'v');
-    C(HH\Lib\Legacy_FIXME\lt($vobj, $vlcl));C(HH\Lib\Legacy_FIXME\lte($vobj, $vlcl));C(HH\Lib\Legacy_FIXME\gt($vobj, $vlcl));C(HH\Lib\Legacy_FIXME\gte($vobj, $vlcl));C(HH\Lib\Legacy_FIXME\eq($vobj, $vlcl));C($vobj===$vlcl);
+    CE(() ==> HH\Lib\Legacy_FIXME\lt($vobj, $vlcl));CE(() ==> HH\Lib\Legacy_FIXME\lte($vobj, $vlcl));CE(() ==> HH\Lib\Legacy_FIXME\gt($vobj, $vlcl));CE(() ==> HH\Lib\Legacy_FIXME\gte($vobj, $vlcl));CE(() ==> HH\Lib\Legacy_FIXME\eq($vobj, $vlcl));C($vobj===$vlcl);
   print_divider();
 
   begin_row('lcl', 'w');
@@ -323,7 +327,7 @@ function pLV($x) :mixed{ $r = new stdClass; $r->x = $x; return LV($r); }
   begin_row('cls', 'w');
     C($wcls<$wlcl);C($wcls<=$wlcl);C($wcls>$wlcl);C($wcls>=$wlcl);C($wcls==$wlcl);C($wcls===$wlcl);
   begin_row('obj', 'w');
-    C(HH\Lib\Legacy_FIXME\lt($wobj, $wlcl));C(HH\Lib\Legacy_FIXME\lte($wobj, $wlcl));C(HH\Lib\Legacy_FIXME\gt($wobj, $wlcl));C(HH\Lib\Legacy_FIXME\gte($wobj, $wlcl));C(HH\Lib\Legacy_FIXME\eq($wobj, $wlcl));C($wobj===$wlcl);
+    CE(() ==> HH\Lib\Legacy_FIXME\lt($wobj, $wlcl));CE(() ==> HH\Lib\Legacy_FIXME\lte($wobj, $wlcl));CE(() ==> HH\Lib\Legacy_FIXME\gt($wobj, $wlcl));CE(() ==> HH\Lib\Legacy_FIXME\gte($wobj, $wlcl));CE(() ==> HH\Lib\Legacy_FIXME\eq($wobj, $wlcl));C($wobj===$wlcl);
   print_divider();
 
   begin_row('lcl', 'p');
@@ -333,7 +337,7 @@ function pLV($x) :mixed{ $r = new stdClass; $r->x = $x; return LV($r); }
   begin_row('cls', 'p');
     C($pcls<$plcl);C($pcls<=$plcl);C($pcls>$plcl);C($pcls>=$plcl);C($pcls==$plcl);C($pcls===$plcl);
   begin_row('obj', 'p');
-    C(HH\Lib\Legacy_FIXME\lt($pobj, $plcl));C(HH\Lib\Legacy_FIXME\lte($pobj, $plcl));C(HH\Lib\Legacy_FIXME\gt($pobj, $plcl));C(HH\Lib\Legacy_FIXME\gte($pobj, $plcl));C(HH\Lib\Legacy_FIXME\eq($pobj, $plcl));C($pobj===$plcl);
+    CE(() ==> HH\Lib\Legacy_FIXME\lt($pobj, $plcl));CE(() ==> HH\Lib\Legacy_FIXME\lte($pobj, $plcl));CE(() ==> HH\Lib\Legacy_FIXME\gt($pobj, $plcl));CE(() ==> HH\Lib\Legacy_FIXME\gte($pobj, $plcl));CE(() ==> HH\Lib\Legacy_FIXME\eq($pobj, $plcl));C($pobj===$plcl);
   print_footer();
 
   //// $cls
@@ -346,7 +350,7 @@ function pLV($x) :mixed{ $r = new stdClass; $r->x = $x; return LV($r); }
   begin_row('cls');
     C($cls<$cls);C($cls<=$cls);C($cls>$cls);C($cls>=$cls);C($cls==$cls);C($cls===$cls);
   begin_row('obj');
-    C(HH\Lib\Legacy_FIXME\lt($cls, $obj));C(HH\Lib\Legacy_FIXME\lte($cls, $obj));C(HH\Lib\Legacy_FIXME\gt($cls, $obj));C(HH\Lib\Legacy_FIXME\gte($cls, $obj));C(HH\Lib\Legacy_FIXME\eq($cls, $obj));C($cls===$obj);
+    CE(() ==> HH\Lib\Legacy_FIXME\lt($cls, $obj));CE(() ==> HH\Lib\Legacy_FIXME\lte($cls, $obj));CE(() ==> HH\Lib\Legacy_FIXME\gt($cls, $obj));CE(() ==> HH\Lib\Legacy_FIXME\gte($cls, $obj));CE(() ==> HH\Lib\Legacy_FIXME\eq($cls, $obj));C($cls===$obj);
   print_divider();
 
   begin_row('lcl', 'v');
@@ -356,7 +360,7 @@ function pLV($x) :mixed{ $r = new stdClass; $r->x = $x; return LV($r); }
   begin_row('cls', 'v');
     C($vcls<$vcls);C($vcls<=$vcls);C($vcls>$vcls);C($vcls>=$vcls);C($vcls==$vcls);C($vcls===$vcls);
   begin_row('obj', 'v');
-    C(HH\Lib\Legacy_FIXME\lt($vcls, $vobj));C(HH\Lib\Legacy_FIXME\lte($vcls, $vobj));C(HH\Lib\Legacy_FIXME\gt($vcls, $vobj));C(HH\Lib\Legacy_FIXME\gte($vcls, $vobj));C(HH\Lib\Legacy_FIXME\eq($vcls, $vobj));C($vcls===$vobj);
+    CE(() ==> HH\Lib\Legacy_FIXME\lt($vcls, $vobj));CE(() ==> HH\Lib\Legacy_FIXME\lte($vcls, $vobj));CE(() ==> HH\Lib\Legacy_FIXME\gt($vcls, $vobj));CE(() ==> HH\Lib\Legacy_FIXME\gte($vcls, $vobj));CE(() ==> HH\Lib\Legacy_FIXME\eq($vcls, $vobj));C($vcls===$vobj);
   print_divider();
 
   begin_row('lcl', 'w');
@@ -366,7 +370,7 @@ function pLV($x) :mixed{ $r = new stdClass; $r->x = $x; return LV($r); }
   begin_row('cls', 'w');
     C($wcls<$wcls);C($wcls<=$wcls);C($wcls>$wcls);C($wcls>=$wcls);C($wcls==$wcls);C($wcls===$wcls);
   begin_row('obj', 'w');
-    C(HH\Lib\Legacy_FIXME\lt($wcls, $wobj));C(HH\Lib\Legacy_FIXME\lte($wcls, $wobj));C(HH\Lib\Legacy_FIXME\gt($wcls, $wobj));C(HH\Lib\Legacy_FIXME\gte($wcls, $wobj));C(HH\Lib\Legacy_FIXME\eq($wcls, $wobj));C($wcls===$wobj);
+    CE(() ==> HH\Lib\Legacy_FIXME\lt($wcls, $wobj));CE(() ==> HH\Lib\Legacy_FIXME\lte($wcls, $wobj));CE(() ==> HH\Lib\Legacy_FIXME\gt($wcls, $wobj));CE(() ==> HH\Lib\Legacy_FIXME\gte($wcls, $wobj));CE(() ==> HH\Lib\Legacy_FIXME\eq($wcls, $wobj));C($wcls===$wobj);
   print_divider();
 
   begin_row('lcl', 'p');
@@ -376,7 +380,7 @@ function pLV($x) :mixed{ $r = new stdClass; $r->x = $x; return LV($r); }
   begin_row('cls', 'p');
     C($pcls<$pcls);C($pcls<=$pcls);C($pcls>$pcls);C($pcls>=$pcls);C($pcls==$pcls);C($pcls===$pcls);
   begin_row('obj', 'p');
-    C(HH\Lib\Legacy_FIXME\lt($pcls, $pobj));C(HH\Lib\Legacy_FIXME\lte($pcls, $pobj));C(HH\Lib\Legacy_FIXME\gt($pcls, $pobj));C(HH\Lib\Legacy_FIXME\gte($pcls, $pobj));C(HH\Lib\Legacy_FIXME\eq($pcls, $pobj));C($pcls===$pobj);
+    CE(() ==> HH\Lib\Legacy_FIXME\lt($pcls, $pobj));CE(() ==> HH\Lib\Legacy_FIXME\lte($pcls, $pobj));CE(() ==> HH\Lib\Legacy_FIXME\gt($pcls, $pobj));CE(() ==> HH\Lib\Legacy_FIXME\gte($pcls, $pobj));CE(() ==> HH\Lib\Legacy_FIXME\eq($pcls, $pobj));C($pcls===$pobj);
   print_footer();
 
   print_header('[dynamic] VAR ? $cls');
@@ -387,7 +391,7 @@ function pLV($x) :mixed{ $r = new stdClass; $r->x = $x; return LV($r); }
   begin_row('cls');
     C($cls<$cls);C($cls<=$cls);C($cls>$cls);C($cls>=$cls);C($cls==$cls);C($cls===$cls);
   begin_row('obj');
-    C(HH\Lib\Legacy_FIXME\lt($obj, $cls));C(HH\Lib\Legacy_FIXME\lte($obj, $cls));C(HH\Lib\Legacy_FIXME\gt($obj, $cls));C(HH\Lib\Legacy_FIXME\gte($obj, $cls));C(HH\Lib\Legacy_FIXME\eq($obj, $cls));C($obj===$cls);
+    CE(() ==> HH\Lib\Legacy_FIXME\lt($obj, $cls));CE(() ==> HH\Lib\Legacy_FIXME\lte($obj, $cls));CE(() ==> HH\Lib\Legacy_FIXME\gt($obj, $cls));CE(() ==> HH\Lib\Legacy_FIXME\gte($obj, $cls));CE(() ==> HH\Lib\Legacy_FIXME\eq($obj, $cls));C($obj===$cls);
   print_divider();
 
   begin_row('lcl', 'v');
@@ -397,7 +401,7 @@ function pLV($x) :mixed{ $r = new stdClass; $r->x = $x; return LV($r); }
   begin_row('cls', 'v');
     C($vcls<$vcls);C($vcls<=$vcls);C($vcls>$vcls);C($vcls>=$vcls);C($vcls==$vcls);C($vcls===$vcls);
   begin_row('obj', 'v');
-    C(HH\Lib\Legacy_FIXME\lt($vobj, $vcls));C(HH\Lib\Legacy_FIXME\lte($vobj, $vcls));C(HH\Lib\Legacy_FIXME\gt($vobj, $vcls));C(HH\Lib\Legacy_FIXME\gte($vobj, $vcls));C(HH\Lib\Legacy_FIXME\eq($vobj, $vcls));C($vobj===$vcls);
+    CE(() ==> HH\Lib\Legacy_FIXME\lt($vobj, $vcls));CE(() ==> HH\Lib\Legacy_FIXME\lte($vobj, $vcls));CE(() ==> HH\Lib\Legacy_FIXME\gt($vobj, $vcls));CE(() ==> HH\Lib\Legacy_FIXME\gte($vobj, $vcls));CE(() ==> HH\Lib\Legacy_FIXME\eq($vobj, $vcls));C($vobj===$vcls);
   print_divider();
 
   begin_row('lcl', 'w');
@@ -407,7 +411,7 @@ function pLV($x) :mixed{ $r = new stdClass; $r->x = $x; return LV($r); }
   begin_row('cls', 'w');
     C($wcls<$wcls);C($wcls<=$wcls);C($wcls>$wcls);C($wcls>=$wcls);C($wcls==$wcls);C($wcls===$wcls);
   begin_row('obj', 'w');
-    C(HH\Lib\Legacy_FIXME\lt($wobj, $wcls));C(HH\Lib\Legacy_FIXME\lte($wobj, $wcls));C(HH\Lib\Legacy_FIXME\gt($wobj, $wcls));C(HH\Lib\Legacy_FIXME\gte($wobj, $wcls));C(HH\Lib\Legacy_FIXME\eq($wobj, $wcls));C($wobj===$wcls);
+    CE(() ==> HH\Lib\Legacy_FIXME\lt($wobj, $wcls));CE(() ==> HH\Lib\Legacy_FIXME\lte($wobj, $wcls));CE(() ==> HH\Lib\Legacy_FIXME\gt($wobj, $wcls));CE(() ==> HH\Lib\Legacy_FIXME\gte($wobj, $wcls));CE(() ==> HH\Lib\Legacy_FIXME\eq($wobj, $wcls));C($wobj===$wcls);
   print_divider();
 
   begin_row('lcl', 'p');
@@ -417,7 +421,7 @@ function pLV($x) :mixed{ $r = new stdClass; $r->x = $x; return LV($r); }
   begin_row('cls', 'p');
     C($pcls<$pcls);C($pcls<=$pcls);C($pcls>$pcls);C($pcls>=$pcls);C($pcls==$pcls);C($pcls===$pcls);
   begin_row('obj', 'p');
-    C(HH\Lib\Legacy_FIXME\lt($pobj, $pcls));C(HH\Lib\Legacy_FIXME\lte($pobj, $pcls));C(HH\Lib\Legacy_FIXME\gt($pobj, $pcls));C(HH\Lib\Legacy_FIXME\gte($pobj, $pcls));C(HH\Lib\Legacy_FIXME\eq($pobj, $pcls));C($pobj===$pcls);
+    CE(() ==> HH\Lib\Legacy_FIXME\lt($pobj, $pcls));CE(() ==> HH\Lib\Legacy_FIXME\lte($pobj, $pcls));CE(() ==> HH\Lib\Legacy_FIXME\gt($pobj, $pcls));CE(() ==> HH\Lib\Legacy_FIXME\gte($pobj, $pcls));CE(() ==> HH\Lib\Legacy_FIXME\eq($pobj, $pcls));C($pobj===$pcls);
   print_footer();
 }
 

@@ -26,14 +26,14 @@ function testMeta() :mixed{
 
 function testGetBasicProperty() :mixed{
   $s = new SimpleXMLIterator(basicXML());
-  echo "Node root/b has contents: {$s->b}\n";
+  echo "Node root/b has contents: ".$s->b->__toString()."\n";
 }
 
 function testFlatIteration() :mixed{
   $s = new SimpleXMLIterator(basicXML());
   echo "Iteration of elements: ";
   foreach ($s as $e) {
-    echo "$e, ";
+    echo $e->__toString().", ";
   }
   echo "\n";
 }
@@ -60,7 +60,7 @@ function testRecursiveIteration() :mixed{
   $s = new RecursiveIteratorIterator(new SimpleXMLIterator(basicXML()));
   echo "Leaves:\n";
   foreach ($s as $i => $e) {
-    echo "$e, ";
+    echo $e->__toString().", ";
   }
   echo "\n";
 }

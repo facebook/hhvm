@@ -130,7 +130,7 @@ function testConvToInt() : void {
       __hhvm_intrinsics\launder_value(E#A)
     );
   } catch (Exception $e) {
-    echo $e."\n";
+    echo $e->__toString()."\n";
   } finally {}
 
   // objects
@@ -141,7 +141,7 @@ function testConvToInt() : void {
       __hhvm_intrinsics\launder_value(new A(1))
     );
   } catch (Exception $e) {
-    echo $e."\n";
+    echo $e->__toString()."\n";
   } finally {}
 
   // functions
@@ -152,7 +152,7 @@ function testConvToInt() : void {
       __hhvm_intrinsics\launder_value(foo<>)
     );
   } catch (Exception $e) {
-    echo $e."\n";
+    echo $e->__toString()."\n";
   } finally {}
 
   // class
@@ -185,7 +185,7 @@ function testConvToInt() : void {
       __hhvm_intrinsics\launder_value(A::bar<>)
     );
   } catch (Exception $e) {
-    echo $e."\n";
+    echo $e->__toString()."\n";
   } finally {}
 
   // reified generics
@@ -196,7 +196,7 @@ function testConvToInt() : void {
       __hhvm_intrinsics\launder_value(C::rclsmeth<int>)
     );
   } catch (Exception $e) {
-    echo $e."\n";
+    echo $e->__toString()."\n";
   } finally {}
 
   try {
@@ -206,7 +206,7 @@ function testConvToInt() : void {
       __hhvm_intrinsics\launder_value(rfunc<int>)
     );
   } catch (Exception $e) {
-    echo $e."\n";
+    echo $e->__toString()."\n";
   } finally {}
 
   // Done
@@ -304,7 +304,7 @@ function testConvToDbl() : void {
       __hhvm_intrinsics\launder_value(E#A)
     );
   } catch (Exception $e) {
-    echo $e."\n";
+    echo $e->__toString()."\n";
   } finally {}
 
   // objects
@@ -315,7 +315,7 @@ function testConvToDbl() : void {
       __hhvm_intrinsics\launder_value(new A(1))
     );
   } catch (Exception $e) {
-    echo $e."\n";
+    echo $e->__toString()."\n";
   } finally {}
 
   // functions
@@ -326,7 +326,7 @@ function testConvToDbl() : void {
       __hhvm_intrinsics\launder_value(foo<>)
     );
   } catch (Exception $e) {
-    echo $e."\n";
+    echo $e->__toString()."\n";
   } finally {}
 
   // class
@@ -359,7 +359,7 @@ function testConvToDbl() : void {
       __hhvm_intrinsics\launder_value(A::bar<>)
     );
   } catch (Exception $e) {
-    echo $e."\n";
+    echo $e->__toString()."\n";
   } finally {}
 
   // reified generics
@@ -370,7 +370,7 @@ function testConvToDbl() : void {
       __hhvm_intrinsics\launder_value(C::rclsmeth<int>)
     );
   } catch (Exception $e) {
-    echo $e."\n";
+    echo $e->__toString()."\n";
   } finally {}
 
   try {
@@ -380,7 +380,7 @@ function testConvToDbl() : void {
       __hhvm_intrinsics\launder_value(rfunc<int>)
     );
   } catch (Exception $e) {
-    echo $e."\n";
+    echo $e->__toString()."\n";
   } finally {}
 
   // Done

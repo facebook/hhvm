@@ -6,7 +6,7 @@ function convert_simplexml_to_array($sxml) :mixed{
     foreach ($sxml as $k => $v) {
       if ($sxml->offsetGet('list')) {
         if ($v->offsetExists('key') && $v->offsetGet('key') is nonnull) {
-          $arr[(string)$v->offsetGet('key')] = convert_simplexml_to_array($v);
+          $arr[$v->offsetGet('key')->__toString()] = convert_simplexml_to_array($v);
         }
  else {
           $arr[] = convert_simplexml_to_array($v);
@@ -21,7 +21,7 @@ function convert_simplexml_to_array($sxml) :mixed{
     return $arr;
   }
  else {
-    return (string)$sxml;
+    return $sxml->__toString();
   }
 }
 

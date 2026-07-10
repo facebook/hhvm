@@ -1,8 +1,5 @@
 <?hh
 
-class Evil {
-  public function __toString()[] :mixed{ return "Evil"; }
-}
 function f_1($x) :mixed{
   switch (HH\Lib\Legacy_FIXME\string_cast_for_switch($x, "123", "0", "0", dict[
   "123" => 123,
@@ -17,8 +14,6 @@ function f_1($x) :mixed{
   case "0": print '"0"' . "";
  break;
   case "": print '""' . "";
- break;
-  case "Evil": print '"Evil"' . "";
  break;
   default: print "default";
  break;
@@ -110,7 +105,6 @@ f_1(false);
 f_1("4abc");
 f_1(4);
 f_1("4.0");
-f_1(new Evil());
 f_2(1);
 f_2(2);
 f_2(2.0);

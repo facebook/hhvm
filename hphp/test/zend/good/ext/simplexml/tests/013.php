@@ -7,7 +7,7 @@ EOF;
 
 $sxe = simplexml_load_string($xml);
 
-var_dump((string)$sxe);
+var_dump($sxe->__toString());
 
 echo "===DONE===\n";
 }

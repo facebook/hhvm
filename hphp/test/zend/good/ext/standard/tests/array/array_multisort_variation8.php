@@ -6,12 +6,6 @@
  */
 
 // define some classes
-class classWithToString {
-    public function __toString() :mixed{
-        return "Class A object";
-    }
-}
-
 class classWithoutToString { }
 
 // Define error handler
@@ -31,7 +25,6 @@ $inputs = dict[
       'lowercase true' => true,
       'empty string DQ' => "",
       'string DQ' => "string",
-      'instance of classWithToString' => new classWithToString(),
       'instance of classWithoutToString' => new classWithoutToString()
 ];
 

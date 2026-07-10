@@ -60,7 +60,7 @@ $students->add(new Student('00000014', 'Bob'));
 $students->add(new Student('00000014', 'Foo'));
 
 foreach ($students as $student) {
-    echo $student, "\n";
+    echo $student->__toString(), "\n";
 }
 echo "===DONE===\n";
 }

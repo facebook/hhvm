@@ -1656,10 +1656,6 @@ void ObjectData::raiseReadDynamicProp(const StringData* key) const {
   }
 }
 
-void ObjectData::raiseImplicitInvokeToString() const {
-  raise_notice("Implicitly invoked %s::__toString", m_cls->name()->data());
-}
-
 Variant ObjectData::InvokeSimple(ObjectData* obj, const StaticString& name,
                                  RuntimeCoeffects providedCoeffects) {
   auto const meth = obj->methodNamed(name.get());
@@ -1703,33 +1699,9 @@ OptString ObjectData::invokeToString() {
     // we return the empty string.
     return String::Empty();
   }
-  if (Cfg::Eval::NoticeOnImplicitInvokeToString) {
-    raiseImplicitInvokeToString();
-  }
-  CoeffectsAutoGuard _;
-  auto const tv = g_context->invokeMethod(this, method, InvokeArgs{},
-                                          nullptr, RuntimeCoeffects::automatic());
-  if (!isStringType(tv.m_type) &&
-      !isClassType(tv.m_type) &&
-      !isLazyClassType(tv.m_type)) {
-    // Discard the value returned by the __toString() method and raise
-    // a recoverable error
-    tvDecRefGen(tv);
-    raise_recoverable_error(
-      "Method %s::__toString() must return a string value",
-      m_cls->preClass()->name()->data());
-    // If the user error handler decides to allow execution to continue,
-    // we return the empty string.
-    return String::Empty();
-  }
-
-  if (tvIsString(tv)) return OptString::attach(val(tv).pstr);
-  auto const op = "__toString()";
-  if (tvIsLazyClass(tv)) {
-    return StrNR{lazyClassToStringHelper(tv.m_data.plazyclass, op)};
-  }
-  assertx(isClassType(type(tv)));
-  return StrNR(classToStringHelper(tv.m_data.pclass, op));
+  // Implicit object-to-string coercion is disallowed: throw rather than invoke __toString().
+  SystemLib::throwTypecastExceptionObject(folly::sformat(
+    "Object of class {} could not be converted to string", classname_cstr()));
 }
 
 bool ObjectData::hasToString() {

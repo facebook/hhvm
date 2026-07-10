@@ -10,13 +10,12 @@ function main_entry(): void {
   $v3 = 20.3E2;
   $v4 = NULL;
   $v5 = "Hello";
-  $v6 = new Point(3, 5);
 
   print '>>' . (string)($v1) . '|' . $v2 . "<<\n";
   print ('>>' . (string)($v1) . '|' . $v2 . "<<\n");
   print (('>>') . (string)($v1) . ('|') . (string)($v2) . ("<<\n"));// outer parens are part of optional syntax
                                                                     // inner ones are redundant grouping parens
-  print '>>' . (string)($v3) . '|' . (string)($v4) . '|' . $v5 . '|' . (string)($v6) . "<<\n";
+  print '>>' . (string)($v3) . '|' . (string)($v4) . '|' . $v5 . "<<\n";
 
   $v3 = "qqq{$v2}zzz";
   var_dump($v3);

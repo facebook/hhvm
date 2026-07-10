@@ -344,7 +344,7 @@ function print_validation(): void {
     HH\Facts\validate();
   }
   catch(UnexpectedValueException $e){
-    print "\n$e \n";
+    print "\n".$e->__toString()." \n";
     print "UnexpectedValueException thrown as expected\n";
   }
 

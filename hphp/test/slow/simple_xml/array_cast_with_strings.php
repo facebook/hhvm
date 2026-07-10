@@ -17,6 +17,6 @@ EOF
 $node->addChild('test', 'best');
 $nodes = darray($node);
 var_dump($nodes);
-$arr = dict[(string)$nodes['hello'] => 1];
+$arr = dict[$nodes['hello']->__toString() => 1];
 var_dump($arr);
 }

@@ -71,24 +71,18 @@ dict(2) {
   string(11) "Hello world"
 }
 -- Iteration 10 --
-dict(2) {
-  ["Class A object"]=>
-  object(classA) (0) {
-  }
-  ["Resource id #4"]=>
-  resource(4) of type (stream)
+dict(1) {
+  ["Resource id #%d"]=>
+  resource(%d) of type (stream)
 }
 -- Iteration 11 --
-dict(7) {
+dict(6) {
   ["hello"]=>
   string(5) "hello"
-  ["Class A object"]=>
-  object(classA) (0) {
-  }
   ["fruit"]=>
   string(5) "fruit"
-  ["Resource id #4"]=>
-  resource(4) of type (stream)
+  ["Resource id #%d"]=>
+  resource(%d) of type (stream)
   [133]=>
   int(133)
   ["444.432"]=>

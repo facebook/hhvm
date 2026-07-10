@@ -9,8 +9,8 @@ $root = simplexml_load_string('<?xml version="1.0"?>
 
 var_dump($root->children('reserved-ns')->child);
 var_dump($root->children('special-ns')->child);
-var_dump((string)$root->children('reserved-ns')->child);
-var_dump((string)$root->children('special-ns')->child);
+var_dump(($root->children('reserved-ns')->child)->__toString());
+var_dump(($root->children('special-ns')->child)->__toString());
 var_dump($root->child);
 echo "===DONE===\n";
 }

@@ -3,9 +3,6 @@
 // Test that ImmMap correctly handled magic methods.
 
 function main() :mixed{
-  echo "\n__toString...\n";
-  echo (new ImmMap(Vector {1, 2, 3})) . "\n";
-
   $cfail = function($f) {
     try {
       $f();

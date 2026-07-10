@@ -9,14 +9,6 @@
  * testing join() by passing different unexpected value for glue argument
 */
 
-// define a class
-class test {
-  public $t = 10;
-  function __toString() :mixed{
-    return  "testObject";
-  }
-}
-
 <<__EntryPoint>>
 function main(): void {
   echo "*** Testing join() : usage variations ***\n";
@@ -47,9 +39,6 @@ function main(): void {
     false,
     TRUE,
     FALSE,
-
-    // objects
-    new test(),
 
     // empty string
     "",

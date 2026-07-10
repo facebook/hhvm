@@ -14,7 +14,7 @@ class Point implements Serializable
         $this->y = $y;
         $this->id = self::$nextId++;
 
-        echo "\nInside " . __METHOD__ . ", $this\n\n";
+        echo "\nInside " . __METHOD__ . ", " . $this->__toString() . "\n\n";
     }
 
     public function __toString()
@@ -24,7 +24,7 @@ class Point implements Serializable
 
     public function serialize()
 :mixed    {
-        echo "\nInside " . __METHOD__ . ", $this\n\n";
+        echo "\nInside " . __METHOD__ . ", " . $this->__toString() . "\n\n";
 
         return serialize(dict['y' => $this->y, 'x' => $this->x]);
     }
@@ -36,7 +36,7 @@ class Point implements Serializable
         $this->y = $data['y'];
         $this->id = self::$nextId++;
 
-        echo "\nInside " . __METHOD__ . ", $this\n\n";
+        echo "\nInside " . __METHOD__ . ", " . $this->__toString() . "\n\n";
     }
 }
 
@@ -52,7 +52,7 @@ class ColoredPoint extends Point implements Serializable
         parent::__construct($x, $y);
         $this->color = $color;
 
-        echo "\nInside " . __METHOD__ . ", $this\n\n";
+        echo "\nInside " . __METHOD__ . ", " . $this->__toString() . "\n\n";
     }
 
     public function __toString()
@@ -62,7 +62,7 @@ class ColoredPoint extends Point implements Serializable
 
     public function serialize()
 :mixed    {
-        echo "\nInside " . __METHOD__ . ", $this\n\n";
+        echo "\nInside " . __METHOD__ . ", " . $this->__toString() . "\n\n";
 
         return serialize(dict[
             'color' => $this->color,
@@ -76,7 +76,7 @@ class ColoredPoint extends Point implements Serializable
         $this->color = $data['color'];
         parent::unserialize($data['baseData']);
 
-        echo "\nInside " . __METHOD__ . ", $this\n\n";
+        echo "\nInside " . __METHOD__ . ", " . $this->__toString() . "\n\n";
     }
 }
 <<__EntryPoint>>
@@ -86,7 +86,7 @@ function main_entry(): void {
   echo "---------------- create, serialize, and unserialize a Point -------------------\n";
 
   $p = new Point(2, 5);
-  echo "Point \$p = $p\n";
+  echo "Point \$p = " . $p->__toString() . "\n";
 
   $s = serialize($p);
   var_dump($s);
@@ -101,7 +101,7 @@ function main_entry(): void {
   echo "---------------- Serialize ColoredPoint -------------------\n";
 
   $cp = new ColoredPoint(9, 8, ColoredPoint::BLUE);
-  echo "ColoredPoint \$cp = $cp\n";
+  echo "ColoredPoint \$cp = " . $cp->__toString() . "\n";
 
   $s = serialize($cp);
   var_dump($s);

@@ -1,5 +1,5 @@
 Function [ <user> function foo ] {
-  @@ %s/ReflectionFunction_toString_001.php 3 - 3
+  @@ %s/test/slow/reflection/ReflectionFunction_toString_001.php %d - %d
 
   - Parameters [2] {
     Parameter #0 [ <required> $bar ]

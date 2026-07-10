@@ -70,22 +70,6 @@ function single_compare($a, $b) :mixed{
   }
 }
 
-class ToString {
-  public $str;
-  function __construct($str) {
-    $this->str = $str;
-  }
-  function __toString()[] :mixed{
-    return $this->str;
-  }
-}
-
-class Thrower {
-  function __toString()[] :mixed{
-    throw new Exception("Compare exception");
-  }
-}
-
 function compare($a, $b) :mixed{
   single_compare($a, $b);
   single_compare($b, $a);
@@ -104,9 +88,6 @@ function compare($a, $b) :mixed{
   compare(vec[12345], vec["12345"]);
 
   single_compare(vec[new stdClass], vec[new stdClass]);
-  compare(vec[new ToString('foobaz')], vec['foobaz']);
-  compare(vec[new Thrower], vec['foobaz']);
-  compare(vec[1, new Thrower], vec[2, 'foobaz']);
 
   compare(vec[], null);
   compare(vec[], false);

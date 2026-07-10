@@ -111,11 +111,6 @@ string(0) ""
 string(0) ""
 
 -- Iteration 23 --
-string(6) "Object"
-string(6) "Object"
-string(6) "Object"
-
--- Iteration 24 --
 string(%d) "Resource id #%d"
 string(%d) "Resource id #%d"
 string(%d) "Resource id #%d"

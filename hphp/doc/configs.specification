@@ -1454,8 +1454,6 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
 - bool Eval.NoticeOnReadDynamicProp = false, UNKNOWN
 
-- bool Eval.NoticeOnImplicitInvokeToString = false, UNKNOWN
-
 - bool Eval.FatalOnConvertObjectToString = false, UNKNOWN
 
 - bool Eval.ClassAsStringVarDump = true, UNKNOWN

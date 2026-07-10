@@ -10,7 +10,6 @@ function main_entry(): void {
   $v3 = 20.3E2;
   $v4 = NULL;
   $v5 = "Hello";
-  $v6 = new Point(3, 5);
 
   echo '>>' . (string)($v1) . '|' . $v2 . "<<\n";
   echo '>>' , $v1 , '|' , $v2 , "<<\n";
@@ -19,8 +18,8 @@ function main_entry(): void {
                                                                    // inner ones are redundant grouping parens
   //echo ('>>' , $v1 , '|' , $v2 , "<<\n");   // parens no allowed with commas
 
-  echo '>>' . (string)($v3) . '|' . (string)($v4) . '|' . $v5 . '|' . (string)($v6) . "<<\n";
-  echo '>>' , $v3 , '|' , $v4 , '|' , $v5 , '|' , $v6 , "<<\n";
+  echo '>>' . (string)($v3) . '|' . (string)($v4) . '|' . $v5 . "<<\n";
+  echo '>>' , $v3 , '|' , $v4 , '|' , $v5 , "<<\n";
 
   $v3 = "qqq{$v2}zzz";
   var_dump($v3);

@@ -5,7 +5,7 @@ function gen() :AsyncGenerator<mixed,mixed,void>{
   try {
     yield;
   } catch (RuntimeException $e) {
-    echo 'Caught: ', $e, "\n\n";
+    echo 'Caught: ', $e->__toString(), "\n\n";
 
     throw new LogicException('new throw');
   }

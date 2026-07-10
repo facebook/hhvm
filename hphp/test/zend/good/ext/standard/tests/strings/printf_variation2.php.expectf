@@ -145,12 +145,6 @@ string
 int(6)
 
 -- Iteration 25 --
-Object
-int(6)
-Object
-int(6)
-
--- Iteration 26 --
 Resource id #%d
 int(%d)
 Resource id #%d

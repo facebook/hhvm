@@ -8,7 +8,8 @@ class :node {
   public function __toString() :mixed{
     $o = '';
     foreach ($this->children as $child) {
-      $o .= (string)$child;
+      // Implicit object->string coercion throws; call __toString() explicitly.
+      $o .= is_object($child) ? $child->__toString() : (string)$child;
     }
     $o .= count($this->children);
     return $o;
@@ -37,7 +38,7 @@ $n2 =
   </node>;
 
 echo
-  (string)$n1.
-  (string)$n2.
+  $n1->__toString().
+  $n2->__toString().
   "\n";
 }

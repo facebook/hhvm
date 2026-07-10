@@ -4,12 +4,6 @@
  * Source code: ext/standard/string.c
  */
 
-class MyClass
-{
-  function __toString() :mixed{
-    return "MyClass";
-  }
-}
 <<__EntryPoint>> function main(): void {
 echo "*** Testing strval() : usage variations ***\n";
 
@@ -64,11 +58,8 @@ $values = vec[
 /*26*/    "",
           '',
 
-          // object data
-/*28*/    new MyClass(),
-
           // resource
-/*29*/    $file_handle,
+/*28*/    $file_handle,
 
 
 ];

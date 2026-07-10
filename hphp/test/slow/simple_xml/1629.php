@@ -1,7 +1,7 @@
 <?hh
 
 function addChildNode(SimpleXMLElement $parent, SimpleXMLElement $node) :mixed{
-  $newchild = $parent->addChild($node->getName(), (string)$node);
+  $newchild = $parent->addChild($node->getName(), $node->__toString());
   foreach ($node->attributes() as $name => $value) {
     $newchild->addAttribute($name, $value);
   }

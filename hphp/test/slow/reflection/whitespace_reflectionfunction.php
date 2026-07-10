@@ -6,6 +6,6 @@ function foo($bar, $baz) :mixed{}
 
 <<__EntryPoint>>
 function main_whitespace_reflectionfunction() :mixed{
-var_dump((string) (new ReflectionFunction('herp')));
-var_dump((string) (new ReflectionFunction('foo')));
+var_dump((new ReflectionFunction('herp'))->__toString());
+var_dump((new ReflectionFunction('foo'))->__toString());
 }

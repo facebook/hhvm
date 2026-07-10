@@ -1,5 +1,5 @@
 Function [ <user> function ReflectionParameterTest ] {
-  @@ %s.php %d - %d
+  @@ %s/ext/reflection/tests/ReflectionParameter_getDeclaringFunction_basic.php %d - %d
 
   - Parameters [2] {
     Parameter #0 [ <required> $test ]
@@ -8,7 +8,7 @@ Function [ <user> function ReflectionParameterTest ] {
 }
 
 Function [ <user> function ReflectionParameterTest ] {
-  @@ %s.php %d - %d
+  @@ %s/ext/reflection/tests/ReflectionParameter_getDeclaringFunction_basic.php %d - %d
 
   - Parameters [2] {
     Parameter #0 [ <required> $test ]

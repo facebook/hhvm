@@ -18,7 +18,7 @@ class A
 :mixed    {
         echo '===' . __CLASS__ . "===\n";
         foreach($props as $p2) {
-            echo $oc, '::$' , $p2, "\n";
+            echo (is_object($oc) ? $oc->__toString() : $oc), '::$' , $p2, "\n";
             var_dump(property_exists($oc, $p2));
         }
     }
@@ -32,7 +32,7 @@ class B extends A
 :mixed    {
         echo '===' . __CLASS__ . "===\n";
         foreach($props as $p2) {
-            echo $oc, '::$' , $p2, "\n";
+            echo (is_object($oc) ? $oc->__toString() : $oc), '::$' , $p2, "\n";
             var_dump(property_exists($oc, $p2));
         }
     }
@@ -46,7 +46,7 @@ class C extends B
 :mixed    {
         echo '===' . __CLASS__ . "===\n";
         foreach($props as $p2) {
-            echo $oc, '::$' , $p2, "\n";
+            echo (is_object($oc) ? $oc->__toString() : $oc), '::$' , $p2, "\n";
             var_dump(property_exists($oc, $p2));
         }
     }
@@ -69,7 +69,7 @@ foreach($pc as $p1) {
     }
     echo "===GLOBAL===\n";
     foreach($pr as $p2) {
-        echo $p1, '::$' , $p2, "\n";
+        echo (is_object($p1) ? $p1->__toString() : $p1), '::$' , $p2, "\n";
         var_dump(property_exists($p1, $p2));
     }
 }

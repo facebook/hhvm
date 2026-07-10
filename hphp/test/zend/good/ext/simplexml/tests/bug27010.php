@@ -12,11 +12,11 @@ EOF;
 $sxe = simplexml_load_string($xml);
 
 foreach ($sxe as $element_name => $element) {
-    print "$element_name is $element->name\n";
+    print "$element_name is ".($element->name)->__toString()."\n";
 }
 
 foreach ($sxe->children('http://www.example.com/hot') as $element_name => $element) {
-    print "$element_name is $element->name\n";
+    print "$element_name is ".($element->name)->__toString()."\n";
 }
 
 echo "===DONE===\n";

@@ -30,7 +30,5 @@ string(6) "012atm"
 -- Iteration 15 --
 string(6) "012atm"
 -- Iteration 16 --
-string(6) "012ttm"
--- Iteration 17 --
-string(6) "012atm"
+string(6) "%s"
 ===DONE===

@@ -6,6 +6,6 @@ $root = simplexml_load_string('<?xml version="1.0"?>
 </root>
 ');
 
-echo $root->children('reserved')->child;
+echo $root->children('reserved')->child->__toString();
 echo "\n---Done---\n";
 }

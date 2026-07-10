@@ -10,6 +10,6 @@ $rsattr = $root->child->attributes('reserved');
 $myattr = $root->child->attributes('reserved-ns');
 
 echo $rsattr->offsetGet('attribute');
-echo $myattr->offsetGet('attribute');
+echo $myattr->offsetGet('attribute')->__toString();
 echo "\n---Done---\n";
 }

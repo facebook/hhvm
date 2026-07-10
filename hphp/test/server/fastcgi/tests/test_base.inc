@@ -19,7 +19,7 @@ function runTest($testController, $customArgs = '') {
     $testController($serverPort);
     stopServer($adminPort, $serverProc);
   } catch (Exception $e) {
-    error_log("Caught exception, test failed, pid=$pid, exn=\n".(string)$e);
+    error_log("Caught exception, test failed, pid=$pid, exn=\n".$e->__toString());
     killChildren($pid);
     if ($serverProc) proc_close($serverProc);
     error_log('test failed');
@@ -68,7 +68,7 @@ function fastcgi_request($host, $port, $path, $post = dict[], $headers = dict[],
     }
     return trim($result);
   } catch (Exception $e) {
-    tlog("request exception:\n" . (string)$e);
+    tlog("request exception:\n" . $e->__toString());
     return "";
   }
 }

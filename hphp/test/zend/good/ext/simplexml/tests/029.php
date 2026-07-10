@@ -15,7 +15,7 @@ $people = simplexml_load_string($xml);
 
 foreach($people as $person)
 {
-    var_dump((string)$person->offsetGet('name'));
+    var_dump(($person->offsetGet('name'))->__toString());
     var_dump(count($people));
     var_dump(count($person));
 }

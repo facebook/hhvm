@@ -17,5 +17,5 @@ function main() :mixed{
 
    echo "======\n";
 
-   echo "\$re = >$re<\n";
+   echo "\$re = >" . $re->__toString() . "<\n";
 }

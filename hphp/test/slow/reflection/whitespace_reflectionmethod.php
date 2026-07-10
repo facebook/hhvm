@@ -8,6 +8,6 @@ class Example {
 
 <<__EntryPoint>>
 function main_whitespace_reflectionmethod() :mixed{
-var_dump((string) (new ReflectionMethod('Example::herp')));
-var_dump((string) (new ReflectionMethod('Example::foo')));
+var_dump((new ReflectionMethod('Example::herp'))->__toString());
+var_dump((new ReflectionMethod('Example::foo'))->__toString());
 }

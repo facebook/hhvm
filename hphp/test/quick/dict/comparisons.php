@@ -70,22 +70,6 @@ function single_compare($a, $b) :mixed{
   }
 }
 
-class ToString {
-  public $str;
-  function __construct($str) {
-    $this->str = $str;
-  }
-  function __toString()[] :mixed{
-    return $this->str;
-  }
-}
-
-class Thrower {
-  function __toString()[] :mixed{
-    throw new Exception("Compare exception");
-  }
-}
-
 function compare($a, $b) :mixed{
   single_compare($a, $b);
   single_compare($b, $a);
@@ -115,14 +99,6 @@ function compare($a, $b) :mixed{
 
   single_compare(dict[0 => new stdClass],
                  dict[0 => new stdClass]);
-  compare(dict[0 => new ToString('foobaz')],
-          dict[0 => 'foobaz']);
-  compare(dict["key" => new Thrower],
-          dict["key" => 'foobaz']);
-  compare(dict[0 => new Thrower],
-          dict[1 => 'foobaz']);
-  compare(dict['a' => 1, 'b' => new Thrower],
-          dict['a' => 2, 'b' => 'foobaz']);
 
   compare(dict[], null);
   compare(dict[], false);

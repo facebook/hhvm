@@ -5,5 +5,5 @@
 function main_1657() :mixed{
 $a = new SimpleXMLElement('<?xml version="1.0" encoding="utf-8"?><node><subnode><subsubnode>test</subsubnode></subnode></node>');
 var_dump($a->subnode->subsubnode);
-var_dump((string)($a->subnode->subsubnode));
+var_dump($a->subnode->subsubnode->__toString());
 }

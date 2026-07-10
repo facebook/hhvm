@@ -1,8 +1,6 @@
 <?hh
 
 function f(mixed $x) :mixed{
-  $x__str = (string)($x);
-  echo "\$x is $x__str\n";
   try {
     $x as string;
   } catch (Exception $e) {

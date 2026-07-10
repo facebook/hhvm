@@ -8,8 +8,8 @@ function main() :mixed{
     var_dump($child->offsetExists(0) && $child->offsetGet(0) !== null);
     var_dump($child->offsetExists(1) && $child->offsetGet(1) !== null);
 
-    var_dump((string) $child->offsetGet(0));
-    var_dump((string) $child->offsetGet(0)->c);
+    var_dump($child->offsetGet(0)->__toString());
+    var_dump($child->offsetGet(0)->c->__toString());
   }
 }
 

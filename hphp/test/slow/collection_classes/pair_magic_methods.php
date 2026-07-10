@@ -20,10 +20,6 @@ function main() :mixed{
 
   $functions = ImmVector {
     function ($pp) {
-      // __toString()
-      return (string)$pp;
-    },
-    function ($pp) {
       // __get()
       $p = $pp->nonExistentProperty; // should throw
       return "SomethingWentWrong";

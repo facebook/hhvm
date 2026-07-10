@@ -73,7 +73,7 @@ EOF;
 
   foreach($rit as $data) {
   	var_dump(get_class($data));
-  	var_dump(trim((string)$data));
+  	var_dump(trim($data->__toString()));
   }
 
   echo "===DONE===\n";

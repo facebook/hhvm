@@ -9,13 +9,6 @@
  * Test how array_diff_assoc() compares indexed arrays containing different data types
  */
 
-// get a class
-class classA
-{
-  public function __toString() :mixed{
-    return "Class A object";
-  }
-}
 <<__EntryPoint>> function main(): void {
 echo "\n*** Testing array_diff_assoc() : usage variations ***\n";
 
@@ -78,12 +71,7 @@ $inputs = dict[
 /*7*/
 'binary' => vec[
        "binary",
-       (string)"binary"],
-
-       // object data
-/*8*/
-'object' => vec[
-      new classA()]
+       (string)"binary"]
 ];
 
 // loop through each element of $inputs to check the behavior of array_diff_assoc

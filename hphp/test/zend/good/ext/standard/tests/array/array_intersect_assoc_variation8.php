@@ -11,13 +11,6 @@
  * The $arr1 argument passed is a fixed array.
 */
 
-// get a class
-class classA
-{
-  public function __toString():mixed{
-    return "Class A object";
-  }
-}
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_intersect_assoc() : assoc array with diff values to \$arr2 argument ***\n";
 
@@ -50,11 +43,11 @@ $arrays = vec[
        dict[111 => '\tHello', "red" => 'col\tor', 2 => '\v\fworld', 3 =>  'pen\n'],
        dict[1 => "hello", "heredoc" => $heredoc],
 
-       // array with object and resource variable
-/*10*/ dict[11 => new classA(), "resource" => $fp],
+       // array with resource variable
+/*10*/ dict["resource" => $fp],
 
        // array with mixed values
-/*11*/ dict[1 => 'hello', 2 => new classA(), 222 => "fruit",
+/*11*/ dict[1 => 'hello', 222 => "fruit",
              'resource' => $fp, "int" => 133, "float" => 444.432,
              "heredoc" => $heredoc]
 ];
@@ -62,7 +55,7 @@ $arrays = vec[
 // array to be passsed to $arr1 argument
 $arr1 = dict[0 => "0", 1 => 1, "two" => 2, "float" => 2.3333, "f1" => 1.2,
               "f4" => 33333333.333, 111 => "\tHello", 3 => 'pen\n', 33333334 => '\v\fworld',
-              "heredoc" => "Hello world", 11 => new classA(), "resource" => $fp,
+              "heredoc" => "Hello world", "resource" => $fp,
               "int" => 133, 222 => "fruit"];
 
 // loop through each sub-array within $arrrays to check the behavior of array_intersect_assoc()

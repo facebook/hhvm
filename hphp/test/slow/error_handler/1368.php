@@ -1,6 +1,6 @@
 <?hh
 function handler($e) :mixed{
-  var_dump(strpos((string)$e, 'bomb') !== false);
+  var_dump(strpos($e->__toString(), 'bomb') !== false);
   return true;
 }
 function a() :mixed{

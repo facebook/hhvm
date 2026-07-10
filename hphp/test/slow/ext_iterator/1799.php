@@ -8,7 +8,7 @@ $files = vec[];
  // order changes per machine
 while($dir->valid()) {
   if(!$dir->isDot()) {
-    $files[] = $dir->current()."\n";
+    $files[] = $dir->current()->__toString()."\n";
   }
   $dir->next();
 }

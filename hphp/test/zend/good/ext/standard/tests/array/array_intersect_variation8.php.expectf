@@ -81,49 +81,37 @@ dict(2) {
   string(11) "Hello world"
 }
 -- Iterator 10 --
-dict(2) {
+dict(1) {
   [6]=>
-  resource(4) of type (stream)
-  [9]=>
-  object(classA) (0) {
-  }
+  resource(%d) of type (stream)
 }
-dict(2) {
+dict(1) {
   [6]=>
-  resource(4) of type (stream)
-  [9]=>
-  object(classA) (0) {
-  }
+  resource(%d) of type (stream)
 }
 -- Iterator 11 --
-dict(6) {
+dict(5) {
   [6]=>
-  resource(4) of type (stream)
+  resource(%d) of type (stream)
   [7]=>
   string(11) "Hello world"
   [8]=>
   string(11) "Hello world"
   [9]=>
-  object(classA) (0) {
-  }
-  [10]=>
   float(444.432)
-  [11]=>
+  [10]=>
   string(5) "fruit"
 }
-dict(6) {
+dict(5) {
   [6]=>
-  resource(4) of type (stream)
+  resource(%d) of type (stream)
   [7]=>
   string(11) "Hello world"
   [8]=>
   string(11) "Hello world"
   [9]=>
-  object(classA) (0) {
-  }
-  [10]=>
   float(444.432)
-  [11]=>
+  [10]=>
   string(5) "fruit"
 }
 Done

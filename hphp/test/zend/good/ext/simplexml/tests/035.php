@@ -9,8 +9,8 @@ $string = '<?xml version="1.0"?>
 ';
 $foo = simplexml_load_string($string);
 $p = $foo->bar->p;
-echo $p."\n";
 echo $p->__toString()."\n";
-echo $p."\n";
+echo $p->__toString()."\n";
+echo $p->__toString()."\n";
 echo "==Done==";
 }

@@ -1,5 +1,4 @@
 <?hh
-class mystring { function __toString() :mixed{ return "hello, world"; } }
 <<__EntryPoint>> function main(): void {
 /* Make a string's first character uppercase */
 echo "#### Basic and Various operations ####\n";
@@ -35,16 +34,6 @@ foreach ($str_array as $string) {
 
 
 echo "\n#### Testing Miscelleneous inputs ####\n";
-
-echo "\n--- Testing objects ---\n";
-// we get "Catchable fatal error: saying Object of class could not be converted
-// to string" by default when an object is passed instead of string:
-// The error can be  avoided by choosing the __toString magix method as follows:
-
-$obj_string = new mystring;
-
-var_dump(ucfirst("$obj_string"));
-
 
 echo "\n--- Testing Resources ---\n";
 $filename1 = sys_get_temp_dir().'/'."dummy-ucfirst.txt";

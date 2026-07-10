@@ -2,7 +2,7 @@
 
 class MyElement extends SimpleXMLElement {
   public function asUcWordString() :mixed{
-    return ucwords((string)$this);
+    return ucwords($this->__toString());
   }
 }
 

@@ -10,5 +10,5 @@ $element = simplexml_load_string(<<<EOF
 EOF
 );
 
-var_dump((string)$element->children()->offsetGet(0));
+var_dump($element->children()->offsetGet(0)->__toString());
 }

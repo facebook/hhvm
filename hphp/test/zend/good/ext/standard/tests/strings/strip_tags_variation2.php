@@ -8,12 +8,6 @@
  * testing functionality of strip_tags() by giving unexpected values for $allowable_tags argument
 */
 
-//get a class
-class classA{
-   public function __toString():mixed{
-     return "Class A Object";
-   }
-}
 <<__EntryPoint>> function main(): void {
 echo "*** Testing strip_tags() : usage variations ***\n";
 
@@ -60,11 +54,6 @@ $values = vec[
       // empty data
       "",
       '',
-
-      // object data
-      new classA(),
-
-
 
       // resource variable
       $fp

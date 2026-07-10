@@ -30,12 +30,12 @@ function main_entry(): void {
 
   $p1->setX(-3);
   $p1->setY(10);
-  echo $p1 . "\n";        // implicit call to __toString()
+  echo $p1->__toString() . "\n";      // explicit call to __toString()
   echo $p1->__toString() . "\n";      // explicit call to __toString()
 
   $p1->move(-5, 7);
-  echo $p1 . "\n";
+  echo $p1->__toString() . "\n";
 
   $p1->translate(1, 1);
-  echo $p1 . "\n";
+  echo $p1->__toString() . "\n";
 }

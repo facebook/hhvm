@@ -11,13 +11,6 @@
 * associative arrays having different possible values to $values argument.
 */
 
-// get a class
-class classA
-{
-  public function __toString():mixed{
-    return "Class A object";
-  }
-}
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_combine() : assoc array with diff values to both \$keys and \$values argument ***\n";
 
@@ -50,11 +43,11 @@ $arrays = vec[
        dict[111 => '\tHello', "red" => 'col\tor', 2 => '\v\fworld', 3 =>  'pen\n'],
        dict[1 => "hello", "heredoc" => $heredoc],
 
-       // array with object and resource variable
-/*10*/ dict[11 => new classA(), "resource" => $fp],
+       // array with resource variable
+/*10*/ dict["resource" => $fp],
 
        // array with mixed values
-/*11*/ dict[1 => 'hello', 2 => new classA(), 222 => "fruit",
+/*11*/ dict[1 => 'hello', 222 => "fruit",
              'resource' => $fp, "int" => 133, "float" => 444.432,
              "heredoc" => $heredoc]
 ];

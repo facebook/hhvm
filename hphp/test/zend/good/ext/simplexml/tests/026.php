@@ -6,9 +6,9 @@ function traverse_xml($xml, $pad = '')
   echo "$pad<$name";
   foreach($xml->attributes() as $attr => $value)
   {
-    echo " $attr=\"$value\"";
+    echo " $attr=\"".$value->__toString()."\"";
   }
-  echo ">" . trim((string)$xml) . "\n";
+  echo ">" . trim($xml->__toString()) . "\n";
   foreach($xml->children() as $node)
   {
     traverse_xml($node, $pad.'  ');

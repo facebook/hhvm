@@ -31,7 +31,7 @@ foreach (vec[
     if ($ra) {
       var_dump($ra->allowsNull());
       var_dump($ra->isBuiltin());
-      var_dump((string)$ra);
+      var_dump($ra->__toString());
     }
   }
 }
@@ -47,7 +47,7 @@ foreach (vec[
     if ($ra) {
       var_dump($ra->allowsNull());
       var_dump($ra->isBuiltin());
-      var_dump((string)$ra);
+      var_dump($ra->__toString());
     }
   }
 }
@@ -65,7 +65,7 @@ foreach (vec[
   if ($ra) {
     var_dump($ra->allowsNull());
     var_dump($ra->isBuiltin());
-    var_dump((string)$ra);
+    var_dump($ra->__toString());
   }
 }
 }

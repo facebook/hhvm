@@ -51,11 +51,8 @@ dict(2) {
   string(11) "Hello world"
 }
 -- Iteration 8 --
-dict(2) {
-  [11]=>
-  object(classA) (0) {
-  }
+dict(1) {
   ["resource"]=>
-  resource(4) of type (stream)
+  resource(%d) of type (stream)
 }
 Done

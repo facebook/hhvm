@@ -56,7 +56,7 @@ class P extends O {
         echo "P\n";
     }
     public function call($cb) :mixed{
-        echo join('|', $cb) . "\n";
+        echo join('|', array_map($x ==> $x is P ? $x->__toString() : $x, $cb)) . "\n";
         $cb();
     }
     public function test() :mixed{

@@ -24,7 +24,7 @@ foreach ($xml->children() as $parent_name => $xml_ele) {
   var_dump($parent_name);
 
   foreach ($xml_ele->children() as $key => $value) {
-    var_dump((string)$key, (string)$value);
+    var_dump((string)$key, $value->__toString());
   }
 }
 }

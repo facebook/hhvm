@@ -9,13 +9,6 @@
  * Test array_diff() with associative arrays containing different data types as values
  */
 
-// get a class
-class classA
-{
-  public function __toString() :mixed{
-     return "Class A object";
-  }
-}
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_diff() : usage variations ***\n";
 
@@ -45,8 +38,8 @@ $inputs = vec[
        dict[111 => '\tHello', "red" => 'col\tor', 2 => '\v\fworld', 3 =>  '\tHello'],
        dict[1 => "hello", "heredoc" => $heredoc, 2 => $heredoc],
 
-       // array with object, unset variable and resource variable
-/*8*/ dict[11 => new classA(), "resource" => $fp, 12 => new classA(), 13 => $fp],
+       // array with resource variable
+/*8*/ dict["resource" => $fp, 13 => $fp],
 ];
 
 // loop through each sub-array of $inputs to check the behavior of array_unique()

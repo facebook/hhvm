@@ -15,5 +15,5 @@ $a = new A;
  $b->a = 'b';
  $arr = vec[$a, $b];
  sort(inout $arr, SORT_REGULAR);
- print ((string)$arr[0]);
+ print ($arr[0]->__toString());
 }

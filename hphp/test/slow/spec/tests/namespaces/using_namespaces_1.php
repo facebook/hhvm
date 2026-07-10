@@ -21,22 +21,22 @@ function entrypoint_using_namespaces_1(): void {
   include_once 'Circle.inc';
 
   $p1 = new \Graphics\D2\Point(3, 5);     // works with/without use clause
-  echo "\$p1 = $p1\n";
+  echo "\$p1 = " . $p1->__toString() . "\n";
   $p1 = new Graphics\D2\Point(4, 6);      // works with/without use clause
-  echo "\$p1 = $p1\n";
+  echo "\$p1 = " . $p1->__toString() . "\n";
   $p1 = new Point(-3, 8);
-  echo "\$p1 = $p1\n";
+  echo "\$p1 = " . $p1->__toString() . "\n";
 
   $c1 = new \Graphics\D2\Circle(2, 4, 3.6);
-  echo "\$c1 = $c1\n";
+  echo "\$c1 = " . $c1->__toString() . "\n";
   $c1 = new Graphics\D2\Circle(3, 5, 4.7);
-  echo "\$c1 = $c1\n";
+  echo "\$c1 = " . $c1->__toString() . "\n";
   $c2 = new Circle(1, -2, 1.4);
-  echo "\$c2 = $c2\n";
+  echo "\$c2 = " . $c2->__toString() . "\n";
   $p1 = new P(-3, 8);
-  echo "\$p1 = $p1\n";
+  echo "\$p1 = " . $p1->__toString() . "\n";
   $c2 = new C(1, -2, 1.4);
-  echo "\$c2 = $c2\n";
+  echo "\$c2 = " . $c2->__toString() . "\n";
 
   echo "PHP_INT_MAX = " . PHP_INT_MAX . "\n";
   echo "PHP_INT_MAX = " . \PHP_INT_MAX . "\n";

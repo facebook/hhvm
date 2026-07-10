@@ -17,10 +17,10 @@ function main_reflect_type_constant2() :mixed{
 $rc = new ReflectionClass(C::class);
 
 echo "=== ReflectionClass::getTypeConstant('T') ===" . PHP_EOL;
-var_dump((string)$rc->getTypeConstant('T'));
+var_dump($rc->getTypeConstant('T')->__toString());
 
 echo "=== ReflectionClass::getTypeConstant('X') ===" . PHP_EOL;
-var_dump((string)$rc->getTypeConstant('X'));
+var_dump($rc->getTypeConstant('X')->__toString());
 
 echo "=== ReflectionClass::hasTypeConstant('TypeAbsI') ===" . PHP_EOL;
 var_dump($rc->hasTypeConstant('TypeAbsI'));

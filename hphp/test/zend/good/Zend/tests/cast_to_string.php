@@ -1,14 +1,7 @@
 <?hh
 
-class test {
-    function  __toString() :mixed{
-        return "10";
-    }
-}
 <<__EntryPoint>> function main(): void {
 $r = fopen(__FILE__, "r");
-
-$o = new test;
 
 $vars = vec[
     "string",
@@ -22,8 +15,7 @@ $vars = vec[
     false,
     true,
     NULL,
-    $r,
-    $o
+    $r
 ];
 
 foreach ($vars as $var) {

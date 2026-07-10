@@ -5,7 +5,7 @@ function main() :mixed{
   var_dump($a->unknown);
   var_dump((bool) $a->unknown);
   var_dump((int) $a->unknown);
-  var_dump((string) $a->unknown);
+  var_dump($a->unknown->__toString());
   var_dump((float)$a->unknown);
   var_dump(darray($a->unknown));
   var_dump($a->unknown == null);

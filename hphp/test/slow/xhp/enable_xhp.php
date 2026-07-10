@@ -10,5 +10,5 @@ class :foo {
 <<__EntryPoint>>
 function main_enable_xhp() :mixed{
 var_dump(ini_get('hhvm.enable_xhp'));
-var_dump((string) <foo />);
+var_dump((<foo />)->__toString());
 }

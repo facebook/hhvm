@@ -30,8 +30,6 @@ function test_sleep() :mixed{
 function test_stringify() :mixed{
   echo "=============== test_stringify =====================\n";
   $x = new A();
-  (string)$x;
-
   $x->__toString();
 }
 

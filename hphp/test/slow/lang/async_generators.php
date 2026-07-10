@@ -40,27 +40,27 @@ async function bar() :Awaitable<mixed>{
 async function gen($exit_type) :AsyncGenerator<mixed,mixed,void>{
   echo "step 1\n";
   $val = yield Value::create(1);
-  echo "step 2: got $val\n";
+  echo "step 2: got ".($val?->__toString() ?? '')."\n";
   $val = null;
   $val = yield Key::create(2) => Value::create(3);
-  echo "step 3: got $val\n";
+  echo "step 3: got ".($val?->__toString() ?? '')."\n";
   $val = null;
   $x = await foo();
   echo "got foo $x\n";
   $val = yield Value::create($x);
-  echo "step 4: got $val\n";
+  echo "step 4: got ".($val?->__toString() ?? '')."\n";
   $val = null;
   $x = await bar();
   echo "got bar $x\n";
   $val = yield Value::create($x);
-  echo "step 5: got $val\n";
+  echo "step 5: got ".($val?->__toString() ?? '')."\n";
   $val = null;
   $x = await bar();
   echo "got bar $x\n";
   $y = await bar();
   echo "got bar $y\n";
   $val = yield Key::create($x) => Value::create($y);
-  echo "step 6: got $val\n";
+  echo "step 6: got ".($val?->__toString() ?? '')."\n";
   switch ($exit_type) {
     case 0: return;
     case 1: {
@@ -92,8 +92,8 @@ async function main($exit_type) :Awaitable<mixed>{
     if ($res === null) {
       echo "result: EOF\n";
     } else {
-      $temp_str_40874 = (string)($res[0]);
-      $temp_str_40888 = (string)($res[1]);
+      $temp_str_40874 = $res[0]?->__toString() ?? '';
+      $temp_str_40888 = $res[1]?->__toString() ?? '';
       echo "result: {$temp_str_40874} => {$temp_str_40888}\n";
     }
     $res = (bool)$res;

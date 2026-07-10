@@ -8,13 +8,6 @@
 * Testing printf() : with different unexpected values for format argument other than the strings
 */
 
-// declaring class
-class sample
-{
-  public function __toString() :mixed{
-    return "Object";
-  }
-}
 <<__EntryPoint>> function main(): void {
 echo "*** Testing printf() : with unexpected values for format argument ***\n";
 
@@ -63,13 +56,8 @@ $values = vec[
 /*21*/    "",
           '',
 
-          // object data
-/*23*/    new sample(),
-
-
-
           // resource data
-/*26*/    $file_handle
+/*23*/    $file_handle
 ];
 
 // loop through each element of the array for format

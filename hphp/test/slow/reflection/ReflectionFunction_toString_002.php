@@ -3,5 +3,5 @@
 
 <<__EntryPoint>>
 function main_reflection_function_to_string_002() :mixed{
-echo (string)(new ReflectionFunction('trim'));
+echo (new ReflectionFunction('trim'))->__toString();
 }

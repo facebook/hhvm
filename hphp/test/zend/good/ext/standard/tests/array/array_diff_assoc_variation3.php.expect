@@ -1,3 +1,4 @@
+
 *** Testing array_diff_assoc() : usage variations ***
 
 -- Iteration 1 --
@@ -68,12 +69,5 @@ dict(2) {
   string(6) "binary"
   [1]=>
   string(6) "binary"
-}
-
--- Iteration 8 --
-dict(1) {
-  [0]=>
-  object(classA) (0) {
-  }
 }
 Done

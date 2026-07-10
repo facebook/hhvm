@@ -26,7 +26,7 @@ EOF
 foreach($sxe->children() as $name=>$val) {
     var_dump($name);
     var_dump(get_class($val));
-    var_dump(trim((string)$val));
+    var_dump(trim($val->__toString()));
 }
 echo "===DONE===\n";
 }

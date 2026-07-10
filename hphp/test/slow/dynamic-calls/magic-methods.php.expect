@@ -7,7 +7,6 @@ A::__wakeup
 =============== test_stringify =====================
 A::__construct
 A::__toString
-A::__toString
 =============== test_invoke ========================
 A::__construct
 A::__invoke

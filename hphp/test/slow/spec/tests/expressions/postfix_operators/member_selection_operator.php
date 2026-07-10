@@ -73,14 +73,14 @@ function entrypoint_member_selection_operator(): void {
   error_reporting(-1);
 
   $p1 = new Point;
-  echo "\$p1 is >$p1<\n";
+  echo "\$p1 is >" . $p1->__toString() . "<\n";
   ///*
   $p1->move(3, 9);
-  echo "\$p1 is >$p1<\n";
+  echo "\$p1 is >" . $p1->__toString() . "<\n";
 
   $n = "move";
   $p1->$n(-2, 4);
-  echo "\$p1 is >$p1<\n";
+  echo "\$p1 is >" . $p1->__toString() . "<\n";
 
   $p1->color = "red"; // turned into $p1->__set("color", "red");
   var_dump($p1);

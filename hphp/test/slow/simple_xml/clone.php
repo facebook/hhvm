@@ -11,11 +11,11 @@ EOF
 );
 $clone = clone $node;
 
-var_dump((string)$clone->hello);
+var_dump($clone->hello->__toString());
 var_dump(count($clone->children()));
 var_dump(count($clone->attributes()));
 
 $clone->hello = 'test';
-var_dump((string)$clone->hello);
-var_dump((string)$node->hello);
+var_dump($clone->hello->__toString());
+var_dump($node->hello->__toString());
 }

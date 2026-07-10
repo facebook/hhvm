@@ -9,7 +9,7 @@ function getFiles($rdi,$depth=0) :mixed{
     if ($rdi->isDir() || $rdi->isFile()) {
       $indent = '';
       for ($i = 0; $i<=$depth; ++$i) $indent .= " ";
-      $files[] = $indent.$rdi->current()."\n";
+      $files[] = $indent.$rdi->current()->__toString()."\n";
       if ($rdi->hasChildren()) {
         $children = $rdi->getChildren();
         getFiles($children, 1+$depth);

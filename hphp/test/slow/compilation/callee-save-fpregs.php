@@ -36,8 +36,8 @@ function entrypoint_calleesavefpregs(): void {
 
   CompilationCalleeSaveFpregs::$g = vec[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
-  $x = vec[new X];
   for ($i = 0; $i < 5; $i++) {
+    $x = vec[(new X())->__toString()];
     var_dump(test(vec["78"], $x));
   }
 }

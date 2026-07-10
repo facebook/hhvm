@@ -167,22 +167,4 @@ dict(2) {
   ["eee"]=>
   string(3) "fff"
 }
-
-*** Testing use of object converted to string ***
-dict(3) {
-  [0]=>
-  string(3) "Doe"
-  [1]=>
-  string(5) "Smith"
-  [2]=>
-  string(5) "Jones"
-}
-dict(3) {
-  ["John"]=>
-  string(3) "Doe"
-  ["Sally"]=>
-  string(5) "Smith"
-  ["Jane"]=>
-  string(5) "Jones"
-}
 Done

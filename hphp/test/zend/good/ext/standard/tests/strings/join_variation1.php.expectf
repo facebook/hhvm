@@ -28,7 +28,7 @@ string(17) "element11element2"
 -- Iteration 13 --
 string(16) "element1element2"
 -- Iteration 14 --
-string(26) "element1testObjectelement2"
+string(16) "element1element2"
 -- Iteration 15 --
 string(16) "element1element2"
 -- Iteration 16 --
@@ -36,7 +36,5 @@ string(16) "element1element2"
 -- Iteration 17 --
 string(16) "element1element2"
 -- Iteration 18 --
-string(16) "element1element2"
--- Iteration 19 --
 string(%d) "element1Resource id #%delement2"
 Done

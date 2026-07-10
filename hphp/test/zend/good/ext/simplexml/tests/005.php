@@ -21,9 +21,9 @@ $sxe = simplexml_load_string(<<<EOF
 EOF
 );
 
-var_dump(trim((string)$sxe->elem1->elem2));
-var_dump(trim((string)$sxe->elem1->elem2->elem3));
-var_dump(trim((string)$sxe->elem1->elem2->elem3->elem4));
+var_dump(trim(($sxe->elem1->elem2)->__toString()));
+var_dump(trim(($sxe->elem1->elem2->elem3)->__toString()));
+var_dump(trim(($sxe->elem1->elem2->elem3->elem4)->__toString()));
 
 echo "---Done---\n";
 }

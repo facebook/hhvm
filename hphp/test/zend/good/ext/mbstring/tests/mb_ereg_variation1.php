@@ -8,13 +8,6 @@
  * Pass different data types to $pattern argument
  */
 
-// get a class
-class classA
-{
-    public function __toString()[] :mixed{
-        return "Class A object";
-    }
-}
 <<__EntryPoint>> function main(): void {
 echo "*** Testing mb_ereg() : usage variations ***\n";
 
@@ -55,11 +48,8 @@ $inputs = vec[
        'string',
        $heredoc,
 
-// object data
-/*15*/ new classA(),
-
 // resource variable
-/*16*/ $fp
+/*15*/ $fp
 ];
 
 // loop through each element of $inputs to check the behavior of mb_ereg()

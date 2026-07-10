@@ -11,6 +11,6 @@ function main(): void {
     $g = (int)$f;
     echo $g;
   } catch (Exception $e) {
-    echo $e."\n";
+    echo $e->__toString()."\n";
   } finally {}
 }

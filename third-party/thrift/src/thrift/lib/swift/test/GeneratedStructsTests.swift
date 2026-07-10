@@ -130,6 +130,32 @@ struct GeneratedStructsTests {
     #expect(asError is MyException)
   }
 
+  @Test func exceptionMessageSurfacedAsErrorDescription() {
+    // An exception with a @thrift.ExceptionMessage field conforms to
+    // LocalizedError and surfaces that field as errorDescription (guide
+    // 2.5.32). localizedDescription bridges to errorDescription for a
+    // LocalizedError.
+    var e = MessageException()
+    e.error_code = 42
+    e.user_message = "something broke"
+    #expect(e.errorDescription == "something broke")
+
+    let asLocalized: LocalizedError = e
+    #expect(asLocalized.errorDescription == "something broke")
+
+    let asError: Error = e
+    #expect(asError.localizedDescription == "something broke")
+  }
+
+  @Test func optionalExceptionMessageIsNilWhenUnset() {
+    // When the designated message field is optional and unset, errorDescription
+    // is nil; once set, it surfaces the field value.
+    var e = OptionalMessageException()
+    #expect(e.errorDescription == nil)
+    e.user_message = "now set"
+    #expect(e.errorDescription == "now set")
+  }
+
   @Test func clearIgnoresCustomDefaults() {
     // init() honors the IDL defaults (emitted as Swift property initializers).
     var s = StructWithDefaults()

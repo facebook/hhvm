@@ -456,11 +456,15 @@ public struct MyException: ThriftSerializable, Hashable, Error {
 }
 
 /// Auto-generated from MyExceptionWithMessage
-public struct MyExceptionWithMessage: ThriftSerializable, Hashable, Error {
+public struct MyExceptionWithMessage: ThriftSerializable, Hashable, LocalizedError {
     public var MyIntField: Int64 = 0
     public var MyStringField: String = ""
     public var myStruct: MyStruct = .init()
     public var myUnion: MyUnion = .init()
+
+    /// The field designated by @thrift.ExceptionMessage, surfaced as the Error's
+    /// localized description (guide 2.5.32).
+    public var errorDescription: String? { self.MyStringField }
 
     public init() {}
 

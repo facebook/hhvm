@@ -18,6 +18,8 @@ package "test.dev/swift/tests/structs"
 
 namespace swift FBThriftTestsStructs
 
+include "thrift/annotation/thrift.thrift"
+
 enum MyEnum {
   MyValue1 = 0,
   MyValue2 = 1,
@@ -62,6 +64,21 @@ struct OptionalFieldsStruct {
 exception MyException {
   1: i64 my_int_field;
   2: string my_string_field;
+}
+
+// Exception with a designated @thrift.ExceptionMessage field. The generated
+// Swift conforms to LocalizedError and surfaces this field as errorDescription.
+exception MessageException {
+  1: i64 error_code;
+  @thrift.ExceptionMessage
+  2: string user_message;
+}
+
+// The designated message field is optional, so errorDescription is nil when the
+// field is unset.
+exception OptionalMessageException {
+  @thrift.ExceptionMessage
+  1: optional string user_message;
 }
 
 // Fields with custom IDL defaults, so clear() (which resets to intrinsic zero

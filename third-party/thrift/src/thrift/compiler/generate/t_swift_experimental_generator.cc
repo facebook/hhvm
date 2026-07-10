@@ -73,12 +73,22 @@ class t_swift_EXPERIMENTAL_generator : public t_whisker_generator {
   //     overload cleanly with payload-carrying cases)
   //   - struct/exception: the `write(to:)` method (a stored property with the
   //     same base name conflicts; `init`/`init(from:)` are initializers)
+  //   - exception with a @thrift.ExceptionMessage field: the `errorDescription`
+  //     property required by LocalizedError (a field named `errorDescription`
+  //     would duplicate it, or make it recurse into itself)
   // At file scope, a `Constants` enum is synthesized when the program declares
   // constants, so a user type named `Constants` would also collide.
   // Only the root program is emitted; included types are referenced by
   // qualified name, so checking the root program suffices.
   static void validate_no_synthesized_name_collisions(
       const t_program& program) {
+    validate_no_enum_value_collisions(program);
+    validate_no_field_collisions(program);
+    validate_no_constants_type_collision(program);
+  }
+
+  // enum: the `unknown(Int32)` case + the `name`/`rawValue` properties.
+  static void validate_no_enum_value_collisions(const t_program& program) {
     for (const t_enum* e : program.enums()) {
       for (const t_enum_value& value : e->values()) {
         const std::string_view name = value.name();
@@ -92,10 +102,23 @@ class t_swift_EXPERIMENTAL_generator : public t_whisker_generator {
         }
       }
     }
+  }
+
+  // union: the `_empty` case; struct/exception: the `write(to:)` method;
+  // exception with a @thrift.ExceptionMessage field: the `errorDescription`
+  // property required by LocalizedError.
+  static void validate_no_field_collisions(const t_program& program) {
     for (const t_structured* s : program.structured_definitions()) {
       const bool is_union = s->is<t_union>();
+      const auto* exception = dynamic_cast<const t_exception*>(s);
+      const bool has_message_field =
+          exception != nullptr && exception->get_message_field() != nullptr;
       for (const t_field& field : s->fields()) {
-        const std::string_view name = field.name();
+        // Compare against the field's resolved Swift property name (what the
+        // templates actually emit), not the raw IDL name, so the guard tracks
+        // the real Swift-level collision.
+        const std::string name =
+            swift::get_swift_property_name(std::string(field.name()));
         if (is_union && name == "_empty") {
           throw std::runtime_error(
               "swift: union '" + std::string(s->name()) +
@@ -110,26 +133,39 @@ class t_swift_EXPERIMENTAL_generator : public t_whisker_generator {
               "' declares a field named 'write', which collides with the "
               "synthesized 'write(to:)' method; rename the field.");
         }
+        if (has_message_field && name == "errorDescription") {
+          throw std::runtime_error(
+              "swift: exception '" + std::string(s->name()) +
+              "' declares a field named 'errorDescription', which collides "
+              "with the synthesized 'errorDescription' property generated for "
+              "its @thrift.ExceptionMessage field; rename the field.");
+        }
       }
     }
-    if (!program.consts().empty()) {
-      auto check_type_name = [](const t_named& type) {
-        if (type.name() == "Constants") {
-          throw std::runtime_error(
-              "swift: type 'Constants' collides with the synthesized "
-              "'Constants' enum that holds the program's constants; rename the "
-              "type or move it to a program without constants.");
-        }
-      };
-      for (const t_typedef* td : program.typedefs()) {
-        check_type_name(*td);
+  }
+
+  // At file scope, a `Constants` enum is synthesized when the program declares
+  // constants, so a user type named `Constants` would also collide.
+  static void validate_no_constants_type_collision(const t_program& program) {
+    if (program.consts().empty()) {
+      return;
+    }
+    auto check_type_name = [](const t_named& type) {
+      if (type.name() == "Constants") {
+        throw std::runtime_error(
+            "swift: type 'Constants' collides with the synthesized "
+            "'Constants' enum that holds the program's constants; rename the "
+            "type or move it to a program without constants.");
       }
-      for (const t_enum* e : program.enums()) {
-        check_type_name(*e);
-      }
-      for (const t_structured* s : program.structured_definitions()) {
-        check_type_name(*s);
-      }
+    };
+    for (const t_typedef* td : program.typedefs()) {
+      check_type_name(*td);
+    }
+    for (const t_enum* e : program.enums()) {
+      check_type_name(*e);
+    }
+    for (const t_structured* s : program.structured_definitions()) {
+      check_type_name(*s);
     }
   }
 

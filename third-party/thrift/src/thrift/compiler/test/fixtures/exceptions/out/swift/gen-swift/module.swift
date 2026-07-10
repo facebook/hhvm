@@ -18,8 +18,12 @@ import Foundation
 import FBThrift
 
 /// Auto-generated from Fiery
-public struct Fiery: ThriftSerializable, Hashable, Error {
+public struct Fiery: ThriftSerializable, Hashable, LocalizedError {
     public var message: String = ""
+
+    /// The field designated by @thrift.ExceptionMessage, surfaced as the Error's
+    /// localized description (guide 2.5.32).
+    public var errorDescription: String? { self.message }
 
     public init() {}
 
@@ -58,8 +62,12 @@ public struct Fiery: ThriftSerializable, Hashable, Error {
 }
 
 /// Auto-generated from Serious
-public struct Serious: ThriftSerializable, Hashable, Error {
+public struct Serious: ThriftSerializable, Hashable, LocalizedError {
     public var sonnet: String?
+
+    /// The field designated by @thrift.ExceptionMessage, surfaced as the Error's
+    /// localized description (guide 2.5.32).
+    public var errorDescription: String? { self.sonnet }
 
     public init() {}
 
@@ -100,9 +108,13 @@ public struct Serious: ThriftSerializable, Hashable, Error {
 }
 
 /// Auto-generated from ComplexFieldNames
-public struct ComplexFieldNames: ThriftSerializable, Hashable, Error {
+public struct ComplexFieldNames: ThriftSerializable, Hashable, LocalizedError {
     public var error_message: String = ""
     public var internal_error_message: String = ""
+
+    /// The field designated by @thrift.ExceptionMessage, surfaced as the Error's
+    /// localized description (guide 2.5.32).
+    public var errorDescription: String? { self.internal_error_message }
 
     public init() {}
 
@@ -150,9 +162,13 @@ public struct ComplexFieldNames: ThriftSerializable, Hashable, Error {
 }
 
 /// Auto-generated from CustomFieldNames
-public struct CustomFieldNames: ThriftSerializable, Hashable, Error {
+public struct CustomFieldNames: ThriftSerializable, Hashable, LocalizedError {
     public var error_message: String = ""
     public var internal_error_message: String = ""
+
+    /// The field designated by @thrift.ExceptionMessage, surfaced as the Error's
+    /// localized description (guide 2.5.32).
+    public var errorDescription: String? { self.internal_error_message }
 
     public init() {}
 
@@ -200,9 +216,13 @@ public struct CustomFieldNames: ThriftSerializable, Hashable, Error {
 }
 
 /// Auto-generated from ExceptionWithPrimitiveField
-public struct ExceptionWithPrimitiveField: ThriftSerializable, Hashable, Error {
+public struct ExceptionWithPrimitiveField: ThriftSerializable, Hashable, LocalizedError {
     public var message: String = ""
     public var error_code: Int32 = 0
+
+    /// The field designated by @thrift.ExceptionMessage, surfaced as the Error's
+    /// localized description (guide 2.5.32).
+    public var errorDescription: String? { self.message }
 
     public init() {}
 
@@ -250,9 +270,13 @@ public struct ExceptionWithPrimitiveField: ThriftSerializable, Hashable, Error {
 }
 
 /// Auto-generated from ExceptionWithStructuredAnnotation
-public struct ExceptionWithStructuredAnnotation: ThriftSerializable, Hashable, Error {
+public struct ExceptionWithStructuredAnnotation: ThriftSerializable, Hashable, LocalizedError {
     public var message_field: String = ""
     public var error_code: Int32 = 0
+
+    /// The field designated by @thrift.ExceptionMessage, surfaced as the Error's
+    /// localized description (guide 2.5.32).
+    public var errorDescription: String? { self.message_field }
 
     public init() {}
 

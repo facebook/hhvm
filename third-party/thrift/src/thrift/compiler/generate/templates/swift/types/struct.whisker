@@ -22,10 +22,11 @@
 
 {{! A Thrift struct/exception becomes a Swift value type. Hashable is
     synthesized (and refines Equatable, so `==` is available too). Exceptions
-    additionally conform to Error. }}
+    conform to Error, or to LocalizedError when they have a designated
+    @thrift.ExceptionMessage field. }}
 {{#let export partial struct_type |structured| captures |types defaults constants wr rd|}}
 /// Auto-generated from {{structured.name}}
-public struct {{structured.swift_name}}: ThriftSerializable, Hashable{{#if structured.exception?}}, Error{{/if structured.exception?}} {
+public struct {{structured.swift_name}}: ThriftSerializable, Hashable{{#if structured.exception?}}{{#if (object.notnull? structured.message_field)}}, LocalizedError{{#else}}, Error{{/if (object.notnull? structured.message_field)}}{{/if structured.exception?}} {
 {{#each structured.fields as |field|}}
 {{#if field.optional?}}
     public var {{field.swift_property_name}}: {{#partial types.swift_type type=field.type}}?
@@ -35,6 +36,12 @@ public struct {{structured.swift_name}}: ThriftSerializable, Hashable{{#if struc
     public var {{field.swift_property_name}}: {{#partial types.swift_type type=field.type}} = {{#partial defaults.swift_default_value type=field.type}}
 {{/if field.optional?}}
 {{/each}}
+{{#if (and structured.exception? (object.notnull? structured.message_field))}}
+
+    /// The field designated by @thrift.ExceptionMessage, surfaced as the Error's
+    /// localized description (guide 2.5.32).
+    public var errorDescription: String? { self.{{structured.message_field.swift_property_name}} }
+{{/if (and structured.exception? (object.notnull? structured.message_field))}}
 
     public init() {}
 

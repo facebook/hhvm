@@ -873,8 +873,12 @@ public struct AdaptedFields: ThriftSerializable, Hashable {
 }
 
 /// Auto-generated from TerseException
-public struct TerseException: ThriftSerializable, Hashable, Error {
+public struct TerseException: ThriftSerializable, Hashable, LocalizedError {
     public var msg: String = ""
+
+    /// The field designated by @thrift.ExceptionMessage, surfaced as the Error's
+    /// localized description (guide 2.5.32).
+    public var errorDescription: String? { self.msg }
 
     public init() {}
 

@@ -174,7 +174,61 @@ Function [ <user> function g ] {
 "
 
 --- export() ---
-TypecastException: Object of class ReflectionClass could not be converted to string
+string(%d) "/**
+ * This is B's doc comment.
+ */
+Class [ <user> class B extends A implements I, K, H, J ] {
+  @@ %s/test/slow/lang/reflection.php %d-%d
+
+  - Constants [2] {
+    Constant [ string C0 {B::C0} ]
+    Constant [ string C1 {B::C1} ]
+  }
+
+  - Static properties [3] {
+    Property [ public static $s0 ]
+    Property [ public static $s1 ]
+    Property [ public static $s2 ]
+  }
+
+  - Static methods [2] {
+    Method [ <user> static public method smethB0 ] {
+      @@ %s/test/slow/lang/reflection.php %d - %d
+    }
+    Method [ <user> static private method smethB1 ] {
+      @@ %s/test/slow/lang/reflection.php %d - %d
+    }
+  }
+
+  - Properties [4] {
+    Property [ <default> private $p0 ]
+    Property [ <default> protected $p1 ]
+    Property [ <default> public $p2 ]
+    Property [ <default> public $p3 ]
+  }
+
+  - Methods [6] {
+    Method [ <user, implements I> public method methI ] {
+      @@ %s/test/slow/lang/reflection.php %d - %d
+    }
+    Method [ <user, implements J> public method methJ ] {
+      @@ %s/test/slow/lang/reflection.php %d - %d
+    }
+    Method [ <user, implements K> public method methK ] {
+      @@ %s/test/slow/lang/reflection.php %d - %d
+    }
+    Method [ <user> private method methB ] {
+      @@ %s/test/slow/lang/reflection.php %d - %d
+    }
+    Method [ <user, inherits A> public method methH ] {
+      @@ %s/test/slow/lang/reflection.php %d - %d
+    }
+    Method [ <user, inherits A> protected method methA ] {
+      @@ %s/test/slow/lang/reflection.php %d - %d
+    }
+  }
+}
+"
 
 --- getConstant() ---
 string(5) "B::C0"

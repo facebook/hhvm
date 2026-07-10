@@ -1,6 +1,21 @@
+Class [ <user> class bar extends foo ] {
+  @@ %s/bug38942.php %d-%d
 
-Fatal error: Uncaught exception 'TypecastException' with message 'Object of class ReflectionClass could not be converted to string' in %s:%d
-Stack trace:
-#0 %s(%d): ReflectionClass::export()
-#1 (): main()
-#2 {main}
+  - Constants [0] {
+  }
+
+  - Static properties [0] {
+  }
+
+  - Static methods [0] {
+  }
+
+  - Properties [0] {
+  }
+
+  - Methods [1] {
+    Method [ <user, inherits foo, ctor> public method __construct ] {
+      @@ %s/bug38942.php %d - %d
+    }
+  }
+}

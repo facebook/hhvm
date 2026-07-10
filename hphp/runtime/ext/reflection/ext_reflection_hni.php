@@ -1242,7 +1242,7 @@ class ReflectionClass implements Reflector {
     $ret .= "\n  - Static properties [{$numStaticProps}] {\n  ";
     foreach ($props as $prop) {
       if (!$prop->isStatic()) { continue;}
-      $ret .= '  ' . str_replace("\n", "\n  ", (string)$prop);
+      $ret .= '  ' . str_replace("\n", "\n  ", $prop->__toString());
     }
     $ret .= "}\n";
 
@@ -1256,7 +1256,7 @@ class ReflectionClass implements Reflector {
     foreach ($funcs as $func) {
       if (!$func->isStatic()) continue;
       $ret .= '    ' . str_replace("\n", "\n    ",
-                                   rtrim((string)$func, "\n")) . "\n";
+                                   rtrim($func->__toString(), "\n")) . "\n";
     }
     $ret .= "  }\n";
 
@@ -1266,7 +1266,7 @@ class ReflectionClass implements Reflector {
     foreach ($props as $prop) {
       if ($prop->isStatic()) continue;
       if (!$prop->isDefault()) continue;
-      $ret .= '  ' . str_replace("\n", "\n  ", (string)$prop);
+      $ret .= '  ' . str_replace("\n", "\n  ", $prop->__toString());
     }
     $ret .= "}\n";
 
@@ -1276,7 +1276,7 @@ class ReflectionClass implements Reflector {
       foreach ($props as $prop) {
         if ($prop->isStatic()) continue;
         if ($prop->isDefault()) continue;
-        $ret .= '  ' . str_replace("\n", "\n  ", (string)$prop);
+        $ret .= '  ' . str_replace("\n", "\n  ", $prop->__toString());
       }
       $ret .= "}\n";
     }
@@ -1287,7 +1287,7 @@ class ReflectionClass implements Reflector {
     foreach ($funcs as $func) {
       if ($func->isStatic()) continue;
       $ret .= '    ' . str_replace("\n", "\n    ",
-                                   rtrim((string)$func, "\n")) . "\n";
+                                   rtrim($func->__toString(), "\n")) . "\n";
     }
     $ret .= "  }\n";
 

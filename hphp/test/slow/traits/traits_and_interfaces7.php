@@ -31,11 +31,6 @@ function reflect() :mixed{
   $rc = new ReflectionClass("C");
   print_r($rc->getInterfaceNames());
   print_r($rc->getConstants());
-  try {
-    print_r(get_class_constants((string)$rc));
-  } catch (TypecastException $e) {
-    echo "TypecastException: ".$e->getMessage()."\n";
-  }
 }
 
 

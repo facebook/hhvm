@@ -8,11 +8,7 @@ enum TestEnum : int {
 function reflection_class() :mixed{
   echo '= ', __FUNCTION__, ' =', "\n";
   $rc = new ReflectionClass(TestEnum::class);
-  try {
-    echo (string) $rc, "\n";
-  } catch (TypecastException $e) {
-    echo "TypecastException: ".$e->getMessage()."\n";
-  }
+  echo $rc->__toString(), "\n";
   var_dump($rc->isEnum());
   var_dump($rc->isInstantiable());
   var_dump($rc->isAbstract());

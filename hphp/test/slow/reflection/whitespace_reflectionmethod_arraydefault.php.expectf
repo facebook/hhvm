@@ -1,0 +1,30 @@
+string(%d) "Class [ <user> class Herp ] {
+  @@ %s/whitespace_reflectionmethod_arraydefault.php %d-%d
+
+  - Constants [0] {
+  }
+
+  - Static properties [0] {
+  }
+
+  - Static methods [0] {
+  }
+
+  - Properties [0] {
+  }
+
+  - Methods [1] {
+    Method [ <user> public method derp ] {
+      @@ %s/whitespace_reflectionmethod_arraydefault.php %d - %d
+
+      - Parameters [1] {
+        Parameter #0 [ <optional> $derp = vec [
+        1,
+        2,
+        3,
+      ] ]
+      }
+    }
+  }
+}
+"

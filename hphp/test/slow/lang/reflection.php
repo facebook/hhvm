@@ -142,11 +142,7 @@ function entrypoint_reflection(): void {
   $rb = new ReflectionClass("B");
 
   print "--- export() ---\n";
-  try {
-    var_dump(ReflectionClass::export('B', true));
-  } catch (TypecastException $e) {
-    echo "TypecastException: ".$e->getMessage()."\n";
-  }
+  var_dump((new ReflectionClass('B'))->__toString());
   print "\n";
 
   print "--- getConstant() ---\n";

@@ -7,9 +7,5 @@ class Herp {
 
 <<__EntryPoint>>
 function main_whitespace_reflectionmethod_arraydefault() :mixed{
-try {
-  var_dump((string) (new ReflectionClass('Herp')));
-} catch (TypecastException $e) {
-  echo "TypecastException: ".$e->getMessage()."\n";
-}
+  var_dump((new ReflectionClass('Herp'))->__toString());
 }

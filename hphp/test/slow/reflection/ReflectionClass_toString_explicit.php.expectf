@@ -1,0 +1,36 @@
+Class [ <user> class ToStringSubject ] {
+  @@ %s/ReflectionClass_toString_explicit.php %d-%d
+
+  - Constants [0] {
+  }
+
+  - Static properties [2] {
+    Property [ public static $spub ]
+    Property [ protected static $sprot ]
+  }
+
+  - Static methods [1] {
+    Method [ <user> static public method sm ] {
+      @@ %s/ReflectionClass_toString_explicit.php %d - %d
+    }
+  }
+
+  - Properties [3] {
+    Property [ <default> public $pub ]
+    Property [ <default> protected $prot ]
+    Property [ <default> private $priv ]
+  }
+
+  - Methods [2] {
+    Method [ <user> public method m ] {
+      @@ %s/ReflectionClass_toString_explicit.php %d - %d
+
+      - Parameters [1] {
+        Parameter #0 [ <required> HH\int $a ]
+      }
+    }
+    Method [ <user> private method pm ] {
+      @@ %s/ReflectionClass_toString_explicit.php %d - %d
+    }
+  }
+}

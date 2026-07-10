@@ -13,4 +13,3 @@ Dict
     [ABC] => const from J
     [XYZ] => const from I
 )
-TypecastException: Object of class ReflectionClass could not be converted to string

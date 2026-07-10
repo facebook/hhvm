@@ -6,5 +6,5 @@ class foo {
 class bar extends foo {
 }
 <<__EntryPoint>> function main(): void {
-ReflectionClass::export("bar");
+echo (new ReflectionClass("bar"))->__toString();
 }

@@ -1422,6 +1422,24 @@ void validate_cpp_deprecated_terse_write_annotation(
   return;
 }
 
+void validate_assign_only_patch_field(sema_context& ctx, const t_field& field) {
+  if (field.find_structured_annotation_or_null(kAssignOnlyPatchUri) ==
+      nullptr) {
+    return;
+  }
+  const t_type* type = field.type()->get_true_type();
+  if (type->is<t_map>()) {
+    return;
+  }
+  ctx.warning(
+      field,
+      "Field-level `@patch.AssignOnlyPatch` on `{}` has no effect: it is only "
+      "honored on `map` fields and is silently ignored on any other type. To "
+      "make an entire struct or union assign-only, annotate its definition "
+      "instead.",
+      field.name());
+}
+
 void validate_cpp_field_interceptor_annotation(
     sema_context& ctx, const t_field& field) {
   if (const t_const* annot =
@@ -2567,6 +2585,7 @@ ast_validator standard_validator() {
   validator.add_field_visitor(&validate_java_field_adapter_annotation);
   validator.add_field_visitor(&validate_cpp_field_interceptor_annotation);
   validator.add_field_visitor(&validate_cpp_deprecated_terse_write_annotation);
+  validator.add_field_visitor(&validate_assign_only_patch_field);
   validator.add_field_visitor(&validate_required_field);
   validator.add_field_visitor(&validate_cpp_type_annotation<t_field>);
   validator.add_field_visitor(&validate_cpp_type_integer_width<t_field>);

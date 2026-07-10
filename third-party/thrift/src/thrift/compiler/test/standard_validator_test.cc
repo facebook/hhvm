@@ -443,3 +443,62 @@ TEST(StandardValidatorTest, CppTypeNonIntegerSkipped) {
     }
   )");
 }
+
+TEST(StandardValidatorTest, FieldLevelAssignOnlyPatchOnlyEffectiveOnMap) {
+  check_compile(R"(
+    package "facebook.com/thrift/test"
+    include "thrift/annotation/scope.thrift"
+    include "thrift/annotation/thrift.thrift"
+
+    @scope.Field
+    @scope.Structured
+    @thrift.Uri{value = "facebook.com/thrift/op/AssignOnlyPatch"}
+    struct AssignOnlyPatch {}
+
+    enum MyEnum {
+      UNKNOWN = 0,
+    }
+
+    struct MyStruct {}
+
+    union MyUnion {
+      1: i32 a;
+    }
+
+    // Definition-level annotation on a struct is the intended use: no warning.
+    @AssignOnlyPatch
+    struct DefLevelOk {
+      1: i32 x;
+    }
+
+    struct Fields {
+      @AssignOnlyPatch
+      1: i32 prim;
+      # expected-warning@-2: Field-level `@patch.AssignOnlyPatch` on `prim` has no effect: it is only honored on `map` fields and is silently ignored on any other type. To make an entire struct or union assign-only, annotate its definition instead.
+
+      @AssignOnlyPatch
+      2: MyStruct st;
+      # expected-warning@-2: Field-level `@patch.AssignOnlyPatch` on `st` has no effect: it is only honored on `map` fields and is silently ignored on any other type. To make an entire struct or union assign-only, annotate its definition instead.
+
+      @AssignOnlyPatch
+      3: MyUnion un;
+      # expected-warning@-2: Field-level `@patch.AssignOnlyPatch` on `un` has no effect: it is only honored on `map` fields and is silently ignored on any other type. To make an entire struct or union assign-only, annotate its definition instead.
+
+      @AssignOnlyPatch
+      4: MyEnum en;
+      # expected-warning@-2: Field-level `@patch.AssignOnlyPatch` on `en` has no effect: it is only honored on `map` fields and is silently ignored on any other type. To make an entire struct or union assign-only, annotate its definition instead.
+
+      @AssignOnlyPatch
+      5: list<i32> li;
+      # expected-warning@-2: Field-level `@patch.AssignOnlyPatch` on `li` has no effect: it is only honored on `map` fields and is silently ignored on any other type. To make an entire struct or union assign-only, annotate its definition instead.
+
+      @AssignOnlyPatch
+      6: set<i32> se;
+      # expected-warning@-2: Field-level `@patch.AssignOnlyPatch` on `se` has no effect: it is only honored on `map` fields and is silently ignored on any other type. To make an entire struct or union assign-only, annotate its definition instead.
+
+      // Map field is the one type where the annotation is honored: no warning.
+      @AssignOnlyPatch
+      7: map<i32, string> mp;
+    }
+  )");
+}

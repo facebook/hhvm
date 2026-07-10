@@ -81,7 +81,7 @@ def get_reflection__SomeService():
             id=1,
             name="m",
             py_name="m",
-            type=_fbthrift__apache__thrift__fixtures__types__module__thrift_types.SomeMap,
+            type=_fbthrift__apache__thrift__fixtures__types__included__thrift_types.SomeMap,
             thrift_type=_ThriftType.MAP,
             qualifier=_Qualifier.UNQUALIFIED,
             structured_annotations={
@@ -92,7 +92,7 @@ def get_reflection__SomeService():
     functions["bounce_map"] = _FunctionSpec(
         name="bounce_map",
         arguments=_fbthrift_args,
-        return_type=_fbthrift__apache__thrift__fixtures__types__module__thrift_types.SomeMap,
+        return_type=_fbthrift__apache__thrift__fixtures__types__included__thrift_types.SomeMap,
         return_thrift_type=_ThriftType.MAP,
         qualifier=_QUALIFIER_MAP["Unspecified"],
         exceptions=_fbthrift_exceptions,

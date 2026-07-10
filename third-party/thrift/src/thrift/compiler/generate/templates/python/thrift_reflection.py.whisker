@@ -63,7 +63,7 @@ _fbthrift_field_{{#if (int.lt? field.id 0)}}minus{{(int.neg field.id)}}{{#else}}
 {{#else if type.binary?}}bytes
 {{#else if type.enum?}}{{type.module_mangle}}.{{type.true_type.py_name}}
 {{#else if type.structured?}}{{type.module_mangle}}.{{#partial m_types.unadapted_name type=type.true_type}}
-{{#else if (and type.typedef? type.container?)}}{{type.module_mangle}}.{{type.py_name}}
+{{#else if (and type.typedef? type.container?)}}{{#if type.owning_need_module_path?}}{{type.owning_module_mangle}}.{{/if}}{{type.py_name}}
 {{/if type.bool?}}
 {{/let partial}}
 

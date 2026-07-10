@@ -215,10 +215,10 @@ def get_reflection__ContainerStruct():
             id=8,
             name="fieldH",
             py_name="fieldH",
-            type=_fbthrift__apache__thrift__fixtures__types__module__thrift_types.SomeMap,
+            type=_fbthrift__apache__thrift__fixtures__types__included__thrift_types.SomeMap,
             thrift_type=_ThriftType.MAP,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=_fbthrift__apache__thrift__fixtures__types__module__thrift_types.SomeMap(),
+            default=_fbthrift__apache__thrift__fixtures__types__included__thrift_types.SomeMap(),
             structured_annotations={
             },
         ),

@@ -598,10 +598,10 @@ def get_reflection__AdaptedFields():
             id=3,
             name="set_adapted_int",
             py_name="set_adapted_int",
-            type=_fbthrift__test__fixtures__python_capi__module__thrift_types.AnnotationIds,
+            type=_fbthrift__apache__thrift__type__schema__thrift_types.AnnotationIds,
             thrift_type=_ThriftType.SET,
             qualifier=_Qualifier.UNQUALIFIED,
-            default=_fbthrift__test__fixtures__python_capi__module__thrift_types.AnnotationIds(),
+            default=_fbthrift__apache__thrift__type__schema__thrift_types.AnnotationIds(),
             structured_annotations={
             },
         ),

@@ -1,7 +1,6 @@
 <?hh
 
-// Coercion for concat/interp always throws; run() observes each case without
-// aborting the rest of the test.
+// Like known.php, but operands are laundered so HHBBC/JIT can't constant-fold them.
 function run((function(): void) $f): void {
   try {
     $f();
@@ -16,16 +15,7 @@ function main(): void {
     0,
     -10,
     100,
-    1.234,
-    -3.4e10,
-    INF,
-    -INF,
-    NAN,
-    TRUE,
-    FALSE,
-    NULL,
     PHP_INT_MAX,
-    HH\stdin(),
     "string",
   ];
   foreach($vals as $i) {

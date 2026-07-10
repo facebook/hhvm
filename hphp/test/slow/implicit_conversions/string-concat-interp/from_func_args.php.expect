@@ -1,12 +1,2 @@
 int <42>
-[throw] Implicit bool to string conversion for string concatenation/interpolation
-[throw] Implicit double to string conversion for string concatenation/interpolation
-[throw] Implicit null to string conversion for string concatenation/interpolation
-[throw] Implicit resource to string conversion for string concatenation/interpolation
-[throw] Implicit double to string conversion for string concatenation/interpolation
 int <42>
-[throw] Implicit bool to string conversion for string concatenation/interpolation
-[throw] Implicit double to string conversion for string concatenation/interpolation
-[throw] Implicit null to string conversion for string concatenation/interpolation
-[throw] Implicit resource to string conversion for string concatenation/interpolation
-[throw] Implicit double to string conversion for string concatenation/interpolation

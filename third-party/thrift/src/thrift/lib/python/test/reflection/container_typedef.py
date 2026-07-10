@@ -16,7 +16,6 @@
 # pyre-strict
 
 import unittest
-from typing import cast, Type
 
 from python_test.reflection.container_typedef.thrift_clients import (
     ReflectionReproService,
@@ -26,7 +25,6 @@ from python_test.reflection.container_typedef.thrift_services import (
 )
 from thrift.python.reflection.inspect_impl import inspect
 from thrift.python.reflection.services_reflection import ServiceSpec
-from thrift.python.types import ServiceInterface
 
 
 class ReflectionReproTest(unittest.TestCase):
@@ -40,21 +38,21 @@ class ReflectionReproTest(unittest.TestCase):
     """
 
     def test_inspect_client_is_not_none(self) -> None:
-        spec = inspect(cast(Type[ServiceInterface], ReflectionReproService))
+        spec = inspect(ReflectionReproService)
         self.assertIsNotNone(
             spec, "inspect() returned None -- reflection module failed to build"
         )
         self.assertIsInstance(spec, ServiceSpec)
 
     def test_all_functions_present(self) -> None:
-        spec = inspect(cast(Type[ServiceInterface], ReflectionReproService))
+        spec = inspect(ReflectionReproService)
         assert spec is not None
         self.assertIn("echo_map", spec.functions)
         self.assertIn("echo_same", spec.functions)
         self.assertIn("echo_hidden", spec.functions)
 
     def test_cross_file_typedef_arg_and_return(self) -> None:
-        spec = inspect(cast(Type[ServiceInterface], ReflectionReproService))
+        spec = inspect(ReflectionReproService)
         assert spec is not None
         echo_map = spec.get_function("echo_map")
         self.assertIsNotNone(echo_map)
@@ -65,7 +63,7 @@ class ReflectionReproTest(unittest.TestCase):
         self.assertIsNotNone(echo_map.arguments[0].type)
 
     def test_same_file_typedef_still_works(self) -> None:
-        spec = inspect(cast(Type[ServiceInterface], ReflectionReproService))
+        spec = inspect(ReflectionReproService)
         assert spec is not None
         echo_same = spec.get_function("echo_same")
         self.assertIsNotNone(echo_same)
@@ -73,7 +71,7 @@ class ReflectionReproTest(unittest.TestCase):
         self.assertIsNotNone(echo_same.return_type)
 
     def test_py3hidden_typedef(self) -> None:
-        spec = inspect(cast(Type[ServiceInterface], ReflectionReproService))
+        spec = inspect(ReflectionReproService)
         assert spec is not None
         echo_hidden = spec.get_function("echo_hidden")
         self.assertIsNotNone(echo_hidden)
@@ -81,7 +79,7 @@ class ReflectionReproTest(unittest.TestCase):
         self.assertIsNotNone(echo_hidden.return_type)
 
     def test_interface_and_client_agree(self) -> None:
-        client_spec = inspect(cast(Type[ServiceInterface], ReflectionReproService))
+        client_spec = inspect(ReflectionReproService)
         iface_spec = inspect(ReproInterface)
         self.assertIsNotNone(iface_spec)
         assert client_spec is not None and iface_spec is not None

@@ -20,6 +20,7 @@ import threading
 from functools import wraps
 from typing import Any, Callable, overload, Type, TypeVar, Union
 
+from thrift.python.client.client_wrapper import Client
 from thrift.python.exceptions import GeneratedError
 from thrift.python.reflection.services_reflection import ServiceSpec
 from thrift.python.reflection.types_reflection import (
@@ -95,6 +96,12 @@ def inspect(
 @overload
 def inspect(
     cls_or_instance: Union[ServiceInterface, Type[ServiceInterface]],
+) -> ServiceSpec | None: ...
+
+
+@overload
+def inspect(
+    cls_or_instance: Union[Client[Any, Any], Type[Client[Any, Any]]],
 ) -> ServiceSpec | None: ...
 
 

@@ -15,7 +15,6 @@
 
 #include <folly/portability/GTest.h>
 #include <limits>
-#include <proxygen/lib/http/HTTPHeaderSize.h>
 #include <proxygen/lib/http/codec/HQControlCodec.h>
 #include <proxygen/lib/http/codec/HQStreamCodec.h>
 #include <proxygen/lib/http/codec/HQUnidirectionalCodec.h>

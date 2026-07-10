@@ -22,6 +22,7 @@
 #include <thrift/compiler/ast/t_structured.h>
 #include <thrift/compiler/ast/t_typedef.h>
 #include <thrift/compiler/ast/t_union.h>
+#include <thrift/compiler/ast/uri.h>
 #include <thrift/compiler/generate/swift/util.h>
 #include <thrift/compiler/generate/t_whisker_generator.h>
 #include <thrift/compiler/generate/templates.h>
@@ -233,6 +234,13 @@ class t_swift_EXPERIMENTAL_generator : public t_whisker_generator {
 
     def.property("swift_property_name", [](const t_field& self) {
       return swift::get_swift_property_name(std::string(self.name()));
+    });
+
+    // A @thrift.Box field needs heap indirection in Swift (value-type structs
+    // cannot be directly self-referential); the template wraps it with
+    // @Indirect (guide 2.1.24).
+    def.property("swift_boxed?", [](const t_field& self) {
+      return self.has_structured_annotation(kBoxUri);
     });
 
     return std::move(def).make();

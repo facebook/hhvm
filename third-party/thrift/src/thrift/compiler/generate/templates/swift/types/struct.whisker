@@ -29,7 +29,11 @@
 public struct {{structured.swift_name}}: ThriftSerializable, Hashable{{#if structured.exception?}}{{#if (object.notnull? structured.message_field)}}, LocalizedError{{#else}}, Error{{/if (object.notnull? structured.message_field)}}{{/if structured.exception?}} {
 {{#each structured.fields as |field|}}
 {{#if field.optional?}}
+{{#if field.swift_boxed?}}
+    @Indirect public var {{field.swift_property_name}}: {{#partial types.swift_type type=field.type}}? = nil
+{{#else}}
     public var {{field.swift_property_name}}: {{#partial types.swift_type type=field.type}}?
+{{/if field.swift_boxed?}}
 {{#else if (object.notnull? field.default_value)}}
     public var {{field.swift_property_name}}: {{#partial types.swift_type type=field.type}} = {{#partial constants.swift_const_value value=field.default_value}}
 {{#else}}

@@ -37,6 +37,11 @@ class HeaderChannel {
     compressionConfig_ = compressionConfig;
   }
 
+  const folly::Optional<CompressionConfig>& getDesiredCompressionConfig()
+      const {
+    return compressionConfig_;
+  }
+
   void setLoggingContext(LoggingContext loggingContext) {
     loggingContext_ = std::move(loggingContext);
   }

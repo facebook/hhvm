@@ -16,6 +16,9 @@
 
 include "thrift/annotation/thrift.thrift"
 
+@thrift.AllowLegacyMissingUris
+package;
+
 namespace swift FBThriftTestsRecursive
 
 // Directly self-referential struct: `next` requires heap indirection in Swift

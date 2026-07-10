@@ -19,7 +19,6 @@ package rocket
 import (
 	"fmt"
 
-	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 	"github.com/facebook/fbthrift/thrift/lib/thrift/rpcmetadata"
 	"github.com/rsocket/rsocket-go/payload"
 )
@@ -56,32 +55,4 @@ func DecodeStreamPayload(msg payload.Payload) (*streamPayload, error) {
 		}
 	}
 	return result, nil
-}
-
-// EncodeStreamPayload encodes a stream payload.
-func EncodeStreamPayload(
-	name string,
-	messageType types.MessageType,
-	headers map[string]string,
-	compression rpcmetadata.CompressionAlgorithm,
-	dataBytes []byte,
-) (payload.Payload, error) {
-	payloadMetadata := rpcmetadata.NewPayloadMetadata()
-	if messageType == types.EXCEPTION {
-		exceptionMetadata := newUnknownPayloadExceptionMetadataBase(name, string(dataBytes))
-		payloadMetadata.SetExceptionMetadata(exceptionMetadata)
-	} else {
-		responseMetadata := rpcmetadata.NewPayloadResponseMetadata()
-		payloadMetadata.SetResponseMetadata(responseMetadata)
-	}
-
-	metadata := rpcmetadata.NewStreamPayloadMetadata().
-		SetOtherMetadata(headers).
-		SetCompression(&compression).
-		SetPayloadMetadata(payloadMetadata)
-
-	if messageType == types.EXCEPTION {
-		return EncodePayloadMetadataAndData(metadata, nil /* dataBytes */, compression)
-	}
-	return EncodePayloadMetadataAndData(metadata, dataBytes, compression)
 }

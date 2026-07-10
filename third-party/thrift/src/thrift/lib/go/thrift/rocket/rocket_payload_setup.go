@@ -95,13 +95,3 @@ func NewRequestSetupPayloadVersion8() (payload.Payload, error) {
 	}
 	return payload.New(nil, metadata), nil
 }
-
-// If connection establishment was successful, the server MUST respond with a SetupResponse control message.
-func newSetupResponseVersion8() *rpcmetadata.SetupResponse {
-	version := int32(8)
-	zstdSupported := true
-	res := rpcmetadata.NewSetupResponse().
-		SetVersion(&version).
-		SetZstdSupported(&zstdSupported)
-	return res
-}

@@ -117,17 +117,6 @@ func newRocketException(exception *rpcmetadata.PayloadExceptionMetadataBase) *Ro
 	return result
 }
 
-func newUnknownPayloadExceptionMetadataBase(name string, what string) *rpcmetadata.PayloadExceptionMetadataBase {
-	return newPayloadExceptionMetadataBaseV1(
-		name,
-		what,
-		RocketExceptionUnknown,
-		rpcmetadata.ErrorKind_TRANSIENT,
-		rpcmetadata.ErrorBlame_SERVER,
-		rpcmetadata.ErrorSafety_SAFE,
-	)
-}
-
 // newPayloadExceptionMetadataBaseV1 creates a new PayloadExceptionMetadataBase.
 func newPayloadExceptionMetadataBaseV1(
 	name string,

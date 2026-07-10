@@ -12050,15 +12050,13 @@ private:
       : orig.cls->name;
     cloned->originalModuleName = orig.originalModuleName;
 
-    // If the "module level traits" semantics is enabled, whenever HHBBC
-    // inlines a method from a trait defined in module A into a trait/class
-    // defined in module B, it sets the requiresFromOriginalModule flag of the
-    // method to true. This flag causes the originalModuleName field to be
-    // copied in the HHVM extendedSharedData section of the method, so that
+    // Whenever HHBBC inlines a method from a trait defined in module A into a
+    // trait/class defined in module B, it sets the requiresFromOriginalModule
+    // flag of the method to true. This flag causes the originalModuleName field
+    // to be copied in the HHVM extendedSharedData section of the method, so that
     // HHVM is able to resolve correctly the original module of the method.
-    // Preserving the original module of a method is also needed when a
-    // method is defined in an internal trait that is used by a module level
-    // trait.
+    // Preserving the original module of a method is also needed when a method
+    // is defined in an internal trait that is used by a module level trait.
     const bool requiresFromOriginalModule = [&] () {
       bool copyFromModuleLevelTrait =
         orig.fromModuleLevelTrait && !orig.requiresFromOriginalModule &&
@@ -12067,8 +12065,7 @@ private:
         (orig.cls->attrs & AttrInternal)
         && dstCls.userAttributes.contains(s___ModuleLevelTrait.get());
 
-      if (Cfg::Eval::ModuleLevelTraits &&
-          (copyFromModuleLevelTrait || copyFromInternal)) {
+      if (copyFromModuleLevelTrait || copyFromInternal) {
         return true;
       } else {
         return orig.requiresFromOriginalModule;

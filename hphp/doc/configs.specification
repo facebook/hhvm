@@ -706,12 +706,6 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
   Whether bespoke type structures should be used
 
-- bool Eval.ModuleLevelTraits = false, UNKNOWN, globaldata|unitcacheflag
-
-  Enable the "Module level traits" semantics: methods defined in a trait
-  that belongs to module A, are considered as belonging to module A
-  even if the trait is used by a class that lives in module B.
-
 - bool Eval.TraitConstantInterfaceBehavior = false, UNKNOWN, globaldata|unitcacheflag
 
   Constants from traits behave like constants from interfaces (error on conflict)

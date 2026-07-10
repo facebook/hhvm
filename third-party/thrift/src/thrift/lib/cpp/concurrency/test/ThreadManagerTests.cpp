@@ -26,6 +26,7 @@
 #include <fmt/chrono.h>
 #include <gtest/gtest.h>
 #include <folly/CPortability.h>
+#include <folly/Portability.h>
 #include <folly/Synchronized.h>
 #include <folly/executors/Codel.h>
 #include <folly/lang/Keep.h>
@@ -210,7 +211,9 @@ static void loadTest(
       overheadPct * 100);
 
   // Fail if the test took 10% more time than the ideal time.
-  EXPECT_LT(overheadPct, 0.10);
+  if (!folly::kIsSanitize) {
+    EXPECT_LT(overheadPct, 0.10);
+  }
 }
 
 TEST_F(ThreadManagerTest, LoadTest) {

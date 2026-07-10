@@ -98,7 +98,7 @@ func EncodeResponseApplicationErrorPayload(
 	compression rpcmetadata.CompressionAlgorithm,
 	loadMetric *int64,
 ) (payload.Payload, error) {
-	exceptionMetadata := NewPayloadExceptionMetadataBase(
+	exceptionMetadata := newPayloadExceptionMetadataBaseV1(
 		"ApplicationException",
 		appException.Error(),
 		RocketExceptionAppUnknown,

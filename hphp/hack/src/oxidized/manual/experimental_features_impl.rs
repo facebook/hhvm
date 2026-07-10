@@ -22,7 +22,7 @@ impl FeatureName {
             ModuleReferences => Unstable,
             ContextAliasDeclaration => Unstable,
             ContextAliasDeclarationShort => Preview,
-            TypeConstMultipleBounds => Preview,
+            TypeConstMultipleBounds => OngoingRelease,
             TypeConstSuperBound => OngoingRelease,
             ClassConstDefault => Migration,
             UpcastExpression => Unstable,

@@ -1,0 +1,12 @@
+ERROR: File "override_bad.php", line 20, characters 23-24:
+The constraint on this type constant is inconsistent with its parent (Typing[4110])
+  File "override_bad.php", line 15, characters 35-36:
+  Expected `UB`
+  File "override_bad.php", line 20, characters 29-30:
+  But got `UA`
+ERROR: File "override_bad.php", line 25, characters 23-24:
+The constraint on this type constant is inconsistent with its parent (Typing[4110])
+  File "override_bad.php", line 25, characters 57-59:
+  Expected `Lo2`
+  File "override_bad.php", line 15, characters 44-45:
+  But got `Lo`

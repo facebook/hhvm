@@ -1,0 +1,6 @@
+ERROR: File "concrete_bad_as.php", line 15, characters 14-15:
+Unable to satisfy constraint on this type constant (Typing[4110])
+  File "concrete_bad_as.php", line 10, characters 35-36:
+  Expected `UB`
+  File "concrete_bad_as.php", line 15, characters 19-23:
+  But got `OnlyA`

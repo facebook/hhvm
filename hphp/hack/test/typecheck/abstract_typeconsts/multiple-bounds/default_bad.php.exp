@@ -1,0 +1,12 @@
+ERROR: File "default_bad.php", line 14, characters 23-28:
+Unable to satisfy constraint on this type constant (Typing[4110])
+  File "default_bad.php", line 14, characters 39-40:
+  Expected `UB`
+  File "default_bad.php", line 14, characters 55-59:
+  But got `OnlyA`
+ERROR: File "default_bad.php", line 17, characters 23-31:
+Unable to satisfy constraint on this type constant (Typing[4110])
+  File "default_bad.php", line 17, characters 56-59:
+  Expected `Both`
+  File "default_bad.php", line 17, characters 51-52:
+  But got `Hi`

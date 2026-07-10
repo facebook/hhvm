@@ -1,0 +1,269 @@
+--- ocaml
++++ rupro
+@@ -1,263 +1,257 @@
+ FoldedClass {
+     name: "\\UA",
+     pos: Pos(root|multiple-bounds_sdt.php, 10:11-13),
+     kind: Cinterface,
+-    support_dynamic_type: true,
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|multiple-bounds_sdt.php, 10:11-13),
+             ty: class<this>,
+             origin: "\\UA",
+             refs: [],
+         },
+     },
+ }
+ FoldedClass {
+     name: "\\UB",
+     pos: Pos(root|multiple-bounds_sdt.php, 11:11-13),
+     kind: Cinterface,
+-    support_dynamic_type: true,
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|multiple-bounds_sdt.php, 11:11-13),
+             ty: class<this>,
+             origin: "\\UB",
+             refs: [],
+         },
+     },
+ }
+ FoldedClass {
+     name: "\\Both",
+     pos: Pos(root|multiple-bounds_sdt.php, 12:7-11),
+     kind: Cclass(
+         Concrete,
+     ),
+-    support_dynamic_type: true,
+     ancestors: {
+         "\\UA": UA,
+         "\\UB": UB,
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|multiple-bounds_sdt.php, 12:7-11),
+             ty: class<this>,
+             origin: "\\Both",
+             refs: [],
+         },
+     },
+ }
+ FoldedClass {
+     name: "\\C",
+     pos: Pos(root|multiple-bounds_sdt.php, 14:16-17),
+     kind: Cclass(
+         Abstract,
+     ),
+-    support_dynamic_type: true,
+     methods: {
+         "take": FoldedElement {
+             flags: ClassEltFlags(
+-                256,
++                0,
+             ),
+             origin: "\\C",
+             visibility: Public,
+             deprecated: None,
+             sealed_allowlist: None,
+             overlapping_tparams: None,
+             package_requirement: Some(
+                 RPNormal,
+             ),
+         },
+     },
+     consts: {
+         "TA": ClassConst {
+             is_synthesized: true,
+             kind: CCAbstract(
+                 false,
+             ),
+             pos: Pos(root|multiple-bounds_sdt.php, 15:23-25),
+             ty: HH\TypeStructure<this::TA>,
+             origin: "\\C",
+             refs: [],
+         },
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|multiple-bounds_sdt.php, 14:16-17),
+             ty: class<this>,
+             origin: "\\C",
+             refs: [],
+         },
+     },
+     type_consts: {
+         "TA": TypeConst {
+             is_synthesized: false,
+             name: (
+                 Pos(root|multiple-bounds_sdt.php, 15:23-25),
+                 "TA",
+             ),
+             kind: AbstractTypeconst {
+                 as_constraint: Some(
+                     (UA & UB),
+                 ),
+                 super_constraint: Some(
+                     Both,
+                 ),
+                 default: None,
+             },
+             origin: "\\C",
+             enforceable: Enforceable(
+                 None,
+             ),
+             reifiable: None,
+             is_concretized: false,
+             is_ctx: false,
+         },
+     },
+ }
+ FoldedClass {
+     name: "\\Impl",
+     pos: Pos(root|multiple-bounds_sdt.php, 20:7-11),
+     kind: Cclass(
+         Concrete,
+     ),
+-    support_dynamic_type: true,
+     substs: {
+         "\\C": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\Impl",
+             from_req_extends: false,
+         },
+     },
+     ancestors: {
+         "\\C": C,
+     },
+     methods: {
+         "take": FoldedElement {
+             flags: ClassEltFlags(
+-                256,
++                0,
+             ),
+             origin: "\\C",
+             visibility: Public,
+             deprecated: None,
+             sealed_allowlist: None,
+             overlapping_tparams: None,
+             package_requirement: Some(
+                 RPNormal,
+             ),
+         },
+     },
+     consts: {
+         "TA": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|multiple-bounds_sdt.php, 21:14-16),
+             ty: HH\TypeStructure<this::TA>,
+             origin: "\\Impl",
+             refs: [],
+         },
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|multiple-bounds_sdt.php, 20:7-11),
+             ty: class<this>,
+             origin: "\\Impl",
+             refs: [],
+         },
+     },
+     type_consts: {
+         "TA": TypeConst {
+             is_synthesized: false,
+             name: (
+                 Pos(root|multiple-bounds_sdt.php, 21:14-16),
+                 "TA",
+             ),
+             kind: ConcreteTypeconst {
+                 ty: Both,
+             },
+             origin: "\\Impl",
+             enforceable: Enforceable(
+                 None,
+             ),
+             reifiable: None,
+             is_concretized: false,
+             is_ctx: false,
+         },
+     },
+     extends: {
+         "\\C",
+     },
+ }
+ FoldedClass {
+     name: "\\SelfRef",
+     pos: Pos(root|multiple-bounds_sdt.php, 30:16-23),
+     kind: Cclass(
+         Abstract,
+     ),
+-    support_dynamic_type: true,
+     methods: {
+         "take": FoldedElement {
+             flags: ClassEltFlags(
+-                256,
++                0,
+             ),
+             origin: "\\SelfRef",
+             visibility: Public,
+             deprecated: None,
+             sealed_allowlist: None,
+             overlapping_tparams: None,
+             package_requirement: Some(
+                 RPNormal,
+             ),
+         },
+     },
+     consts: {
+         "TA": ClassConst {
+             is_synthesized: true,
+             kind: CCAbstract(
+                 false,
+             ),
+             pos: Pos(root|multiple-bounds_sdt.php, 31:23-25),
+             ty: HH\TypeStructure<this::TA>,
+             origin: "\\SelfRef",
+             refs: [],
+         },
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|multiple-bounds_sdt.php, 30:16-23),
+             ty: class<this>,
+             origin: "\\SelfRef",
+             refs: [],
+         },
+     },
+     type_consts: {
+         "TA": TypeConst {
+             is_synthesized: false,
+             name: (
+                 Pos(root|multiple-bounds_sdt.php, 31:23-25),
+                 "TA",
+             ),
+             kind: AbstractTypeconst {
+                 as_constraint: Some(
+                     (UA & this::TA),
+                 ),
+                 super_constraint: None,
+                 default: None,
+             },
+             origin: "\\SelfRef",
+             enforceable: Enforceable(
+                 None,
+             ),
+             reifiable: None,
+             is_concretized: false,
+             is_ctx: false,
+         },
+     },
+ }

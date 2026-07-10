@@ -1,0 +1,6 @@
+ERROR: File "nested-access_bad.php", line 13, characters 21-32:
+Invalid type hint (Typing[4062])
+  File "nested-access_bad.php", line 13, characters 31-32:
+  You are trying to access the type constant `TB` but this is an object of type NoTB1 and an object of type NoTB2
+  File "nested-access_bad.php", line 10, characters 29-33:
+  Definition is here

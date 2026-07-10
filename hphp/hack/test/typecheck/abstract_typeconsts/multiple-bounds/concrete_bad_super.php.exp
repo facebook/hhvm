@@ -1,0 +1,6 @@
+ERROR: File "concrete_bad_super.php", line 15, characters 14-15:
+Unable to satisfy constraint on this type constant (Typing[4110])
+  File "concrete_bad_super.php", line 15, characters 19-20:
+  Expected `W1`
+  File "concrete_bad_super.php", line 10, characters 47-48:
+  But got `W2`

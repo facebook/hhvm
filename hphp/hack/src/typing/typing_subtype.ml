@@ -4749,7 +4749,12 @@ end = struct
           in
           (* Replace all quantifiers with fresh type variables adding any declared
              bounds *)
-          Instantiate.instantiate_fun_type pos ft_sub rank ~env
+          Instantiate.instantiate_fun_type
+            ?on_error:subtype_env.Subtype_env.on_error
+            pos
+            ft_sub
+            rank
+            ~env
       in
       (* Handle any error - we can fail to instantiate if the function type has
          unsatisfiable bounds *)
@@ -10557,6 +10562,7 @@ and Instantiate : sig
     Typing_env_types.env * Type_parameter_env.t
 
   val instantiate_fun_type :
+    ?on_error:Typing_error.Reasons_callback.t ->
     Pos.t ->
     Typing_defs.locl_fun_type ->
     int ->
@@ -10684,8 +10690,17 @@ end = struct
     in
     (env, fun_ty)
 
-  let add_constraint (env, err_opts) pos (ty_subj, constraint_kind, ty_cstr) =
-    let callback = Some (Typing_error.Reasons_callback.unify_error_at pos) in
+  let add_constraint
+      ~on_error (env, err_opts) pos (ty_subj, constraint_kind, ty_cstr) =
+    (* Prefer the use-site callback (e.g. the subtyping goal that triggered this
+       instantiation) so that an unsatisfiable-bounds error is anchored at the
+       use site rather than at the decl position of [pos], which may live in a
+       different definition and produce an "incomplete position" error. *)
+    let callback =
+      match on_error with
+      | Some _ -> on_error
+      | None -> Some (Typing_error.Reasons_callback.unify_error_at pos)
+    in
     match constraint_kind with
     | Ast_defs.Constraint_as ->
       let (env, err) = Subtype_tell.sub_type env ty_subj ty_cstr callback in
@@ -10702,7 +10717,7 @@ end = struct
 
   (** Instantiate a polymorphic function type with fresh type variables and
     assert subtype constraints from type parameter bounds and where constraints*)
-  let instantiate_fun_type pos fun_ty rank ~env =
+  let instantiate_fun_type ?on_error pos fun_ty rank ~env =
     (* We need to build the substitution before generating constraints because
        type parameters may appear as upper / lower bounds of other type
        parameters, e.g.
@@ -10738,12 +10753,12 @@ end = struct
               tp_constraints
               ~init:(env, err_opts)
               ~f:(fun acc (cstr_kind, ty_cstr) ->
-                add_constraint acc pos (ty_subj, cstr_kind, ty_cstr)))
+                add_constraint ~on_error acc pos (ty_subj, cstr_kind, ty_cstr)))
       in
       List.fold_left
         fun_ty.ft_where_constraints
         ~init:acc
-        ~f:(fun acc where_cstr -> add_constraint acc pos where_cstr)
+        ~f:(fun acc where_cstr -> add_constraint ~on_error acc pos where_cstr)
     in
     let err_opt = Typing_error.multiple_opt @@ List.filter_opt err_opts in
     ((env, err_opt), { fun_ty with ft_instantiated = true })

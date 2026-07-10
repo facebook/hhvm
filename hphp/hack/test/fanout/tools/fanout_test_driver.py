@@ -55,6 +55,7 @@ class Binaries:
     hh_client: str
     hh_server: str
     hh_single_type_check: str
+    hh_single_fanout: str
     hh_distc: str
     hh_distc_worker: str
 
@@ -63,6 +64,7 @@ class Binaries:
         hh_client: str,
         hh_server: str,
         hh_single_type_check: str,
+        hh_single_fanout: str,
         hh_distc: str,
         hh_distc_worker: str,
     ) -> "Binaries":
@@ -75,6 +77,7 @@ class Binaries:
             hh_client=wrapped_hh_client,
             hh_server=wrapped_hh_server,
             hh_single_type_check=hh_single_type_check,
+            hh_single_fanout=hh_single_fanout,
             hh_distc=hh_distc,
             hh_distc_worker=hh_distc_worker,
         )
@@ -116,6 +119,11 @@ class Binaries:
         self, args: List[str], **kwargs: Any
     ) -> subprocess.CompletedProcess[str]:
         return _exec([self.hh_single_type_check] + args, **kwargs)
+
+    def exec_hh_single_fanout(
+        self, input_file: str
+    ) -> subprocess.CompletedProcess[str]:
+        return _exec([self.hh_single_fanout, input_file])
 
 
 @attr.s(auto_attribs=True)
@@ -395,6 +403,7 @@ def _format_result(
     symbols.sort()
     for s in symbols:
         print(s)
+    print("--")
 
 
 def run_scenario_saved_state_init(bins: Binaries, test: FanoutTest) -> None:
@@ -412,8 +421,6 @@ def run_scenario_saved_state_init(bins: Binaries, test: FanoutTest) -> None:
     repo_root = _prepare_repo_root(test)
     saved_state_dir: Optional[SavedStateDir] = None
     try:
-        fanout_hash_map = _build_fanout_hash_map(bins, test)
-
         (hh_result_base, saved_state_dir) = _create_saved_state(bins, repo_root, test)
         changed_files = _make_repo_change(repo_root, test)
         _launch_hh_from_saved_state(
@@ -424,14 +431,10 @@ def run_scenario_saved_state_init(bins: Binaries, test: FanoutTest) -> None:
         )
 
         server_log_file = _get_server_log_file(bins, repo_root)
-        fanout_information = _wait_for_fanout_information(
-            server_log_file, tags=["saved_state_init_fanout"]
-        )
+        _wait_for_fanout_information(server_log_file, tags=["saved_state_init_fanout"])
 
-        _format_result(
-            fanout_information=fanout_information,
-            fanout_hash_map=fanout_hash_map,
-        )
+        fanout_result = bins.exec_hh_single_fanout(test.filename)
+        print(fanout_result.stdout, end="")
     finally:
         _stop_hh_best_effort(bins, repo_root)
         repo_root.cleanup()

@@ -39,6 +39,7 @@ class Opts:
     hh_client: str
     hh_server: str
     hh_single_type_check: str
+    hh_single_fanout: str
     hh_distc: str
     hh_distc_worker: str
     debug: bool
@@ -50,6 +51,7 @@ class Opts:
             hh_client=self.hh_client,
             hh_server=self.hh_server,
             hh_single_type_check=self.hh_single_type_check,
+            hh_single_fanout=self.hh_single_fanout,
             hh_distc=self.hh_distc,
             hh_distc_worker=self.hh_distc_worker,
         )
@@ -64,6 +66,7 @@ def go(opts: Opts) -> None:
     logging.debug("hh_client: %s", opts.hh_client)
     logging.debug("hh_server: %s", opts.hh_server)
     logging.debug("hh_single_type_check: %s", opts.hh_single_type_check)
+    logging.debug("hh_single_fanout: %s", opts.hh_single_fanout)
     logging.debug("mode: %s", opts.mode)
     logging.debug("input_file: %s", opts.input_file)
 
@@ -83,6 +86,7 @@ def main() -> None:
     parser.add_argument("--hh-client", type=os.path.abspath)
     parser.add_argument("--hh-server", type=os.path.abspath)
     parser.add_argument("--hh-single-type-check", type=os.path.abspath)
+    parser.add_argument("--hh-single-fanout", type=os.path.abspath)
     parser.add_argument("--hh-distc", type=os.path.abspath)
     parser.add_argument("--hh-distc-worker", type=os.path.abspath)
     parser.add_argument("--debug", action="store_true")

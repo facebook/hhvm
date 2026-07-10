@@ -1,4 +1,6 @@
-Type :gchild
-Type :element
 Fun xhp_simple_attribute
 Type :child
+Type :element
+Type :gchild
+a.php
+--

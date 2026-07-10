@@ -16,6 +16,8 @@
 
 #include <folly/ExceptionWrapper.h>
 #include <folly/Executor.h>
+#include <folly/Try.h>
+#include <folly/coro/Traits.h>
 #include <folly/executors/GlobalExecutor.h>
 #include <folly/stop_watch.h>
 #include <thrift/lib/cpp/TApplicationException.h>
@@ -566,7 +568,7 @@ HandlerCallbackBase::processServiceInterceptorsOnRequest(
   DCHECK(server);
   const std::vector<std::shared_ptr<ServiceInterceptorBase>>&
       serviceInterceptors = server->getServiceInterceptors();
-  std::vector<std::pair<std::size_t, std::exception_ptr>> exceptions;
+  std::vector<std::pair<std::size_t, folly::exception_wrapper>> exceptions;
 
   // Construct LazyDynamicArguments if schema is available
   std::optional<LazyDynamicArguments> lazyArgs;
@@ -600,11 +602,16 @@ HandlerCallbackBase::processServiceInterceptorsOnRequest(
         .serializedRequestBuffer = serializedRequest.buffer.get(),
         .dynamicArguments = lazyArgs.has_value() ? &*lazyArgs : nullptr,
     };
-    try {
-      co_await serviceInterceptors[i]->internal_onRequest(
-          connectionInfo, requestInfo, server->getInterceptorMetricCallback());
-    } catch (...) {
-      exceptions.emplace_back(i, folly::current_exception());
+    // Use co_awaitTry so that an interceptor which reports failure via
+    // `co_yield co_error(...)` is delivered here as a Try without ever
+    // materializing a C++ throw at this await point.
+    folly::Try<void> result = co_await folly::coro::co_awaitTry(
+        serviceInterceptors[i]->internal_onRequest(
+            connectionInfo,
+            requestInfo,
+            server->getInterceptorMetricCallback()));
+    if (result.hasException()) {
+      exceptions.emplace_back(i, std::move(result).exception());
     }
   }
   server->getInterceptorMetricCallback().onRequestTotalComplete(
@@ -635,7 +642,7 @@ HandlerCallbackBase::processServiceInterceptorsOnResponse(
   DCHECK(server);
   const std::vector<std::shared_ptr<ServiceInterceptorBase>>&
       serviceInterceptors = server->getServiceInterceptors();
-  std::vector<std::pair<std::size_t, std::exception_ptr>> exceptions;
+  std::vector<std::pair<std::size_t, folly::exception_wrapper>> exceptions;
 
   folly::stop_watch<std::chrono::microseconds> totalTimer;
   for (auto i = std::ptrdiff_t(serviceInterceptors.size()) - 1; i >= 0; --i) {
@@ -653,13 +660,16 @@ HandlerCallbackBase::processServiceInterceptorsOnResponse(
         methodNameInfo_.methodName,
         methodNameInfo_.qualifiedMethodName,
         &decoratorData};
-    try {
-      co_await serviceInterceptors[i]->internal_onResponse(
-          connectionInfo,
-          std::move(responseInfo),
-          server->getInterceptorMetricCallback());
-    } catch (...) {
-      exceptions.emplace_back(i, folly::current_exception());
+    // Use co_awaitTry so that an interceptor which reports failure via
+    // `co_yield co_error(...)` is delivered here as a Try without ever
+    // materializing a C++ throw at this await point.
+    folly::Try<void> result = co_await folly::coro::co_awaitTry(
+        serviceInterceptors[i]->internal_onResponse(
+            connectionInfo,
+            std::move(responseInfo),
+            server->getInterceptorMetricCallback()));
+    if (result.hasException()) {
+      exceptions.emplace_back(i, std::move(result).exception());
     }
   }
   server->getInterceptorMetricCallback().onResponseTotalComplete(

@@ -322,6 +322,7 @@ Let `namespace_path` denote `path` where every `/` is replaced with `.` and `rev
 * Python (`python`, `py3`): The namespace is a concatenation of `reverse(domain_prefix)` and `namespace_path` with the last path component (and preceding `.`) removed if it is equal to the Thrift file name without extension. The domain prefix and the path are separated by a period.
 * Hack: The namespace is the value of `namespace_path`.
 * Java (`java.swift`): The namespace is a concatenation of `reverse(domain)` and `namespace_path` separated by a period.
+* Swift (`swift`, experimental): The module name is formed by joining the components of `domain_prefix` and `path` with underscores (`_`), flattening the `.`-separated domain and `/`-separated path into a single identifier. Since package segments are already lowercase alphanumeric (path segments may also contain `_`), no further character rewriting is needed; only a leading digit or a name matching a reserved Swift keyword is prefixed with `_`. Unlike Python, the file-name path component is retained. An explicit `namespace swift` directive overrides this derivation.
 
 Other Thrift implementations must define their own mappings from package names to namespaces.
 
@@ -340,6 +341,7 @@ This gives the following default namespaces:
 | Python      | `python`, `py3` | `meta.search`           |
 | Hack        | `hack`          | `meta.search.query`     |
 | Java        | `java.swift`    | `com.meta.search.query` |
+| Swift       | `swift`         | `meta_search_query`     |
 
 Here is an example with the package name not containing the file name component:
 
@@ -354,6 +356,7 @@ package "meta.com/search"
 | Python      | `python`, `py3` | `meta.search`     |
 | Hack        | `hack`          | `meta.search`     |
 | Java        | `java.swift`    | `com.meta.search` |
+| Swift       | `swift`         | `meta_search`     |
 
 In both cases the Python namespaces don't include the file name component.
 

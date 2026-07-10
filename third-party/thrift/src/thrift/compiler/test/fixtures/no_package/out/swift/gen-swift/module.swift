@@ -326,6 +326,11 @@ public enum MyUnion: ThriftSerializable, Hashable {
         self = ._empty
     }
 
+    /// Resets to the empty state (no field set), the union's intrinsic default.
+    public mutating func clear() {
+        self = ._empty
+    }
+
     public func write<W: ProtocolWriter>(to writer: W) {
         switch self {
         case ._empty:
@@ -576,6 +581,11 @@ public enum UnionToBeRenamed: ThriftSerializable, Hashable {
     case reserved_field(Int32)
 
     public init() {
+        self = ._empty
+    }
+
+    /// Resets to the empty state (no field set), the union's intrinsic default.
+    public mutating func clear() {
         self = ._empty
     }
 

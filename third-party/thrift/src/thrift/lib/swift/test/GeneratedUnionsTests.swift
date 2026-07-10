@@ -66,6 +66,13 @@ struct GeneratedUnionsTests {
       try CompactSerializer.deserialize(MyUnion.self, from: data) == ._empty)
   }
 
+  @Test func clearResetsToEmpty() {
+    // clear() resets a union to its intrinsic default (the empty state).
+    var u = MyUnion.my_enum(.MyValue2)
+    u.clear()
+    #expect(u == ._empty)
+  }
+
   @Test func hashableAsSetElementAndDictionaryKey() {
     // Guide 2.4.26: unions are Hashable, so they work as Set elements and
     // dictionary keys.

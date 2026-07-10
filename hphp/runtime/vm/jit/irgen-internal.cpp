@@ -161,15 +161,10 @@ void handleConvNoticeLevel(
   const char* const to) {
   if (LIKELY(notice_data.level == ConvNoticeLevel::None)) return;
 
-  assertx(notice_data.reason != nullptr);
   const auto str = makeStaticString(folly::sformat(
-    "Implicit {} to {} conversion for {}", from, to, notice_data.reason));
-  if (notice_data.level == ConvNoticeLevel::Throw) {
-    gen(env, ThrowInvalidOperation, cns(env, str));
-  }
-  if (notice_data.level == ConvNoticeLevel::Log) {
-    gen(env, RaiseNotice, SampleRateData {}, cns(env, str));
-  }
+    "Implicit {} to {} conversion for {}", from, to,
+    s_ConvNoticeReasonConcat.get()));
+  gen(env, ThrowInvalidOperation, cns(env, str));
 }
 
 void genStVMReturnAddr(IRGS& env) {

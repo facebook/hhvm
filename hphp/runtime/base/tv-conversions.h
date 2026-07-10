@@ -61,7 +61,7 @@ X(Resource)
 #undef X
 
 template<typename T> enable_if_lval_t<T, void> tvCastToStringInPlace(
-  T tv, const ConvNoticeLevel, const StringData* notice_reason);
+  T tv, const ConvNoticeLevel);
 void tvSetLegacyArrayInPlace(tv_lval tv, bool isLegacy);
 
 /*
@@ -76,7 +76,7 @@ Array tvCastToArrayLike(TypedValue tv);
 
 StringData* tvCastToStringData(TypedValue tv);
 StringData* tvCastToStringData(
-   TypedValue tv, const ConvNoticeLevel, const StringData* notice_reason);
+   TypedValue tv, const ConvNoticeLevel);
 template <IntishCast IC /* = IntishCast::None */>
 ArrayData* tvCastToArrayLikeData(TypedValue tv);
 ObjectData* tvCastToObjectData(TypedValue tv);

@@ -85,10 +85,9 @@ public:
   auto toBoolean() const { return tvCastToBoolean(*m_val); }
   auto toInt64()   const { return tvCastToInt64(*m_val); }
   auto toDouble()  const { return tvCastToDouble(*m_val); }
-  auto toString(ConvNoticeLevel level = ConvNoticeLevel::None,
-                const StringData* notice_reason = nullptr) const {
+  auto toString(ConvNoticeLevel level = ConvNoticeLevel::None) const {
     if (isStringType(type(m_val))) return OptString{val(m_val).pstr};
-    return OptString::attach(tvCastToStringData(*m_val, level, notice_reason));
+    return OptString::attach(tvCastToStringData(*m_val, level));
   }
   auto toArray() const {
     if (isArrayLikeType(type(m_val))) return Array{val(m_val).parr};
@@ -961,19 +960,17 @@ struct Variant : private TypedValue {
     return tvCastToDouble(*asTypedValue());
   }
 
-  OptString toString(ConvNoticeLevel level = ConvNoticeLevel::None,
-                     const StringData* notice_reason = nullptr) const& {
+  OptString toString(ConvNoticeLevel level = ConvNoticeLevel::None) const& {
     if (isStringType(m_type)) return OptString{m_data.pstr};
-    return OptString::attach(tvCastToStringData(*this, level, notice_reason));
+    return OptString::attach(tvCastToStringData(*this, level));
   }
 
-  OptString toString(ConvNoticeLevel level = ConvNoticeLevel::None,
-                     const StringData* notice_reason = nullptr) && {
+  OptString toString(ConvNoticeLevel level = ConvNoticeLevel::None) && {
     if (isStringType(m_type)) {
       m_type = KindOfNull;
       return OptString::attach(m_data.pstr);
     }
-    return toString(level, notice_reason);
+    return toString(level);
   }
 
   // Convert a non-array-like type to a PHP array, leaving PHP arrays and Hack
@@ -1516,8 +1513,7 @@ inline void concat_assign(Variant &v1, const char* s2) = delete;
 
 inline void concat_assign(tv_lval lhs, const OptString& s2) {
   if (!tvIsString(lhs)) {
-    tvCastToStringInPlace(
-      lhs, ConvNoticeLevel::Throw, s_ConvNoticeReasonConcat.get());
+    tvCastToStringInPlace(lhs, ConvNoticeLevel::Throw);
   }
   asStrRef(lhs) += s2;
 }

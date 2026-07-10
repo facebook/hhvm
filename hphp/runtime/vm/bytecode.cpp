@@ -1349,7 +1349,7 @@ OPTBLD_INLINE void iopClsCnsL(tv_lval local) {
 }
 
 OptString toStringWithNotice(const Variant& c) {
-  return c.toString(ConvNoticeLevel::Throw, s_ConvNoticeReasonConcat.get());
+  return c.toString(ConvNoticeLevel::Throw);
 }
 
 OPTBLD_INLINE void iopConcat() {

@@ -385,7 +385,7 @@ const StaticString
   s_enumClassLabel("EnumClassLabel");
 
 template<typename T> enable_if_lval_t<T, void> tvCastToStringInPlace(
-  T tv, const ConvNoticeLevel notice_level, const StringData* notice_reason) {
+  T tv, const ConvNoticeLevel notice_level) {
   assertx(tvIsPlausible(*tv));
 
   auto string = [&](StringData* s) {
@@ -402,18 +402,18 @@ template<typename T> enable_if_lval_t<T, void> tvCastToStringInPlace(
   switch (type(tv)) {
     case KindOfUninit:
     case KindOfNull:
-      handleConvNoticeLevel(notice_level, "null", "string", notice_reason);
+      handleConvNoticeLevel(notice_level, "null", "string");
       return persistentString(staticEmptyString());
 
     case KindOfBoolean:
-      handleConvNoticeLevel(notice_level, "bool", "string", notice_reason);
+      handleConvNoticeLevel(notice_level, "bool", "string");
       return persistentString(val(tv).num ? s_1.get() : staticEmptyString());
 
     case KindOfInt64:
       return string(buildStringData(val(tv).num));
 
     case KindOfDouble:
-      handleConvNoticeLevel(notice_level, "double", "string", notice_reason);
+      handleConvNoticeLevel(notice_level, "double", "string");
       return string(buildStringData(val(tv).dbl));
 
     case KindOfPersistentString:
@@ -446,7 +446,7 @@ template<typename T> enable_if_lval_t<T, void> tvCastToStringInPlace(
       return;
 
     case KindOfResource:
-      handleConvNoticeLevel(notice_level, "resource", "string", notice_reason);
+      handleConvNoticeLevel(notice_level, "resource", "string");
       tvMove(
         make_tv<KindOfString>(val(tv).pres->data()->o_toString().detach()),
         tv
@@ -483,7 +483,7 @@ template<typename T> enable_if_lval_t<T, void> tvCastToStringInPlace(
 }
 
 template<typename T> enable_if_lval_t<T, void> tvCastToStringInPlace(T tv) {
-  tvCastToStringInPlace(tv, ConvNoticeLevel::None, nullptr);
+  tvCastToStringInPlace(tv, ConvNoticeLevel::None);
 }
 
 void tvSetLegacyArrayInPlace(tv_lval tv, bool isLegacy) {
@@ -501,26 +501,25 @@ void tvSetLegacyArrayInPlace(tv_lval tv, bool isLegacy) {
 
 StringData* tvCastToStringData(
   TypedValue tv,
-  const ConvNoticeLevel notice_level,
-  const StringData* notice_reason) {
+  const ConvNoticeLevel notice_level) {
   assertx(tvIsPlausible(tv));
 
   auto const op = "string conversion";
   switch (tv.m_type) {
     case KindOfUninit:
     case KindOfNull:
-      handleConvNoticeLevel(notice_level, "null", "string", notice_reason);
+      handleConvNoticeLevel(notice_level, "null", "string");
       return staticEmptyString();
 
     case KindOfBoolean:
-      handleConvNoticeLevel(notice_level, "bool", "string", notice_reason);
+      handleConvNoticeLevel(notice_level, "bool", "string");
       return tv.m_data.num ? s_1.get() : staticEmptyString();
 
     case KindOfInt64:
       return buildStringData(tv.m_data.num);
 
     case KindOfDouble:
-      handleConvNoticeLevel(notice_level, "double", "string", notice_reason);
+      handleConvNoticeLevel(notice_level, "double", "string");
       return buildStringData(tv.m_data.dbl);
 
     case KindOfPersistentString:
@@ -556,7 +555,7 @@ StringData* tvCastToStringData(
       return tv.m_data.pobj->invokeToString().detach();
 
     case KindOfResource:
-      handleConvNoticeLevel(notice_level, "resource", "string", notice_reason);
+      handleConvNoticeLevel(notice_level, "resource", "string");
       return tv.m_data.pres->data()->o_toString().detach();
 
     case KindOfRFunc:
@@ -589,7 +588,7 @@ StringData* tvCastToStringData(
 }
 
 StringData* tvCastToStringData(TypedValue tv) {
-  return tvCastToStringData(tv, ConvNoticeLevel::None, nullptr);
+  return tvCastToStringData(tv, ConvNoticeLevel::None);
 }
 
 OptString tvCastToString(TypedValue tv) {
@@ -1111,7 +1110,7 @@ enable_if_lval_t<T, void> tvCastToResourceInPlace(T tv) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-char const *conv_notice_level_names[] = { "None", "Log", "Throw" };
+char const *conv_notice_level_names[] = { "None", "Throw" };
 
 const char* convOpToName(ConvNoticeLevel level) {
   return conv_notice_level_names[
@@ -1122,17 +1121,12 @@ const char* convOpToName(ConvNoticeLevel level) {
 void handleConvNoticeLevel(
   ConvNoticeLevel level,
   const char* const from,
-  const char* const to,
-  const StringData* reason) {
+  const char* const to) {
   if (level == ConvNoticeLevel::None) return;
-  assertx(reason != nullptr);
-  const auto str =
-    folly::sformat("Implicit {} to {} conversion for {}", from, to, reason);
-  if (level == ConvNoticeLevel::Throw) {
-    SystemLib::throwInvalidOperationExceptionObject(str);
-  } else if (level == ConvNoticeLevel::Log) {
-    raise_notice(str);
-  }
+  const auto str = folly::sformat(
+    "Implicit {} to {} conversion for {}", from, to,
+    s_ConvNoticeReasonConcat.get());
+  SystemLib::throwInvalidOperationExceptionObject(str);
 }
 
 const StaticString s_ConvNoticeReasonConcat("string concatenation/interpolation");
@@ -1198,7 +1192,7 @@ X(Resource)
 #undef X
 
 #define X(kind) template void \
-  tvCastToStringInPlace<kind>(kind, const ConvNoticeLevel, const StringData*);
+  tvCastToStringInPlace<kind>(kind, const ConvNoticeLevel);
 X(TypedValue*)
 X(tv_lval)
 X(arr_lval)

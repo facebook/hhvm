@@ -22,15 +22,14 @@ namespace HPHP {
 
 struct StringData;
 
-enum class ConvNoticeLevel: uint8_t { None, Log, Throw,};
+enum class ConvNoticeLevel: uint8_t { None, Throw };
 
 const char* convOpToName(ConvNoticeLevel level);
 
 void handleConvNoticeLevel(
    ConvNoticeLevel Level,
    const char* const from,
-   const char* const to,
-   const StringData* reason);
+   const char* const to);
 
 void throwBitOpBadTypesException(tv_rval t1, tv_rval t2);
 void throwIncDecBadTypeException(const char* t);
@@ -39,6 +38,5 @@ void throwCmpBadTypesException(tv_rval t1, tv_rval t2);
 void throwCmpBadTypesException(tv_rval t1, DataType t2);
 
 extern const StaticString s_ConvNoticeReasonConcat;
-extern const StaticString s_ConvNoticeReasonMath;
 
 }

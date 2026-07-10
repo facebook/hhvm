@@ -3006,29 +3006,19 @@ struct BespokeGetData : IRExtraData {
 };
 
 struct ConvNoticeData : IRExtraData {
-  explicit ConvNoticeData(ConvNoticeLevel l = ConvNoticeLevel::None,
-                          const StringData* r = nullptr)
-                          : level(l), reason(r) {}
-  std::string show() const {
-    assertx(level == ConvNoticeLevel::None || (reason != nullptr && reason->isStatic()));
-    const auto reason_str = reason ? folly::format(" for {}", reason).str() : "";
-    return folly::format("{}{}", convOpToName(level), reason_str).str();
-  }
+  explicit ConvNoticeData(ConvNoticeLevel l = ConvNoticeLevel::None)
+                          : level(l) {}
+  std::string show() const { return convOpToName(level); }
 
   size_t stableHash() const {
-    return folly::hash::hash_combine(
-      std::hash<ConvNoticeLevel>()(level),
-      std::hash<const StringData*>()(reason)
-    );
+    return std::hash<ConvNoticeLevel>()(level);
   }
 
   bool equals(const ConvNoticeData& o) const {
-    // can use pointer equality bc reason is always a StaticString
-    return level == o.level && reason == o.reason;
+    return level == o.level;
   }
 
   ConvNoticeLevel level;
-  union { const StringData* reason; int64_t reasonIntVal; };
 };
 
 struct AliasClassData : IRExtraData {

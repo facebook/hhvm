@@ -2352,22 +2352,12 @@ bool handleConvNoticeLevel(
   const ConvNoticeData* notice_data,
   const char* const from,
   const char* const to) {
-  // do this check here because if notice level is none, reason may be nullptr
   if (notice_data->level == ConvNoticeLevel::None) return false;
-  assertx(notice_data->reason != nullptr);
   const auto str = cns(env, makeStaticString(folly::sformat(
-    "Implicit {} to {} conversion for {}", from, to, notice_data->reason)));
-  switch(notice_data->level) {
-    case ConvNoticeLevel::Throw:
-      gen(env, ThrowInvalidOperation, trace, str);
-      return true;
-    case ConvNoticeLevel::Log:
-      gen(env, RaiseNotice, SampleRateData {}, trace, str);
-    [[fallthrough]];
-    case ConvNoticeLevel::None:
-      return false;
-  }
-  not_reached();
+    "Implicit {} to {} conversion for {}", from, to,
+    s_ConvNoticeReasonConcat.get())));
+  gen(env, ThrowInvalidOperation, trace, str);
+  return true;
 }
 
 SSATmp* simplifyConvTVToStr(State& env, const IRInstruction* inst) {

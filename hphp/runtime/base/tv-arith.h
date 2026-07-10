@@ -167,8 +167,7 @@ inline void tvConcatEq(tv_lval lhs, TypedValue rhs) {
   // if this is a regression work harder on pushing it into the jit
   concat_assign(
       lhs,
-      tvAsCVarRef(rhs).toString(
-          ConvNoticeLevel::Throw, s_ConvNoticeReasonConcat.get()));
+      tvAsCVarRef(rhs).toString(ConvNoticeLevel::Throw));
 }
 
 //////////////////////////////////////////////////////////////////////

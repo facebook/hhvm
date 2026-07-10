@@ -15,18 +15,26 @@
 
 }}
 {{#import "common/ttype" as ttype}}
+{{#import "common/defaults" as defaults}}
 
 {{! Struct serialization. Each value is written via its ThriftWritable
     conformance (`thriftWrite`), which keeps the generated code protocol- and
-    container-agnostic. Optional fields are only written when present;
-    non-optional fields are always written. }}
-{{#let export partial struct_write |structured| captures |ttype|}}
+    container-agnostic. Optional fields are written only when present; terse
+    fields only when they differ from the intrinsic default; plain (unqualified)
+    fields are always written. }}
+{{#let export partial struct_write |structured| captures |ttype defaults|}}
 public func write<W: ProtocolWriter>(to writer: W) {
 {{#each structured.fields as |field|}}
 {{#if field.optional?}}
     if let value = self.{{field.swift_property_name}} {
         writer.writeFieldBegin({{#partial ttype.swift_ttype type=field.type}}, {{field.id}})
         value.thriftWrite(to: writer)
+    }
+{{#else if field.terse?}}
+    // Terse: written only when the value differs from its intrinsic default.
+    if self.{{field.swift_property_name}} != {{#partial defaults.swift_default_value type=field.type}} {
+        writer.writeFieldBegin({{#partial ttype.swift_ttype type=field.type}}, {{field.id}})
+        self.{{field.swift_property_name}}.thriftWrite(to: writer)
     }
 {{#else}}
     writer.writeFieldBegin({{#partial ttype.swift_ttype type=field.type}}, {{field.id}})

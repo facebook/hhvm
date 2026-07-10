@@ -344,36 +344,81 @@ public struct StructLevelTerseStruct: ThriftSerializable, Hashable {
     }
 
     public func write<W: ProtocolWriter>(to writer: W) {
-        writer.writeFieldBegin(.bool, 1)
-        self.bool_field.thriftWrite(to: writer)
-        writer.writeFieldBegin(.byte, 2)
-        self.byte_field.thriftWrite(to: writer)
-        writer.writeFieldBegin(.i16, 3)
-        self.short_field.thriftWrite(to: writer)
-        writer.writeFieldBegin(.i32, 4)
-        self.int_field.thriftWrite(to: writer)
-        writer.writeFieldBegin(.i64, 5)
-        self.long_field.thriftWrite(to: writer)
-        writer.writeFieldBegin(.float, 6)
-        self.float_field.thriftWrite(to: writer)
-        writer.writeFieldBegin(.double, 7)
-        self.double_field.thriftWrite(to: writer)
-        writer.writeFieldBegin(.string, 8)
-        self.string_field.thriftWrite(to: writer)
-        writer.writeFieldBegin(.string, 9)
-        self.binary_field.thriftWrite(to: writer)
-        writer.writeFieldBegin(.i32, 10)
-        self.enum_field.thriftWrite(to: writer)
-        writer.writeFieldBegin(.list, 11)
-        self.list_field.thriftWrite(to: writer)
-        writer.writeFieldBegin(.set, 12)
-        self.set_field.thriftWrite(to: writer)
-        writer.writeFieldBegin(.map, 13)
-        self.map_field.thriftWrite(to: writer)
-        writer.writeFieldBegin(.struct, 14)
-        self.struct_field.thriftWrite(to: writer)
-        writer.writeFieldBegin(.struct, 15)
-        self.union_field.thriftWrite(to: writer)
+        // Terse: written only when the value differs from its intrinsic default.
+        if self.bool_field != false {
+            writer.writeFieldBegin(.bool, 1)
+            self.bool_field.thriftWrite(to: writer)
+        }
+        // Terse: written only when the value differs from its intrinsic default.
+        if self.byte_field != 0 {
+            writer.writeFieldBegin(.byte, 2)
+            self.byte_field.thriftWrite(to: writer)
+        }
+        // Terse: written only when the value differs from its intrinsic default.
+        if self.short_field != 0 {
+            writer.writeFieldBegin(.i16, 3)
+            self.short_field.thriftWrite(to: writer)
+        }
+        // Terse: written only when the value differs from its intrinsic default.
+        if self.int_field != 0 {
+            writer.writeFieldBegin(.i32, 4)
+            self.int_field.thriftWrite(to: writer)
+        }
+        // Terse: written only when the value differs from its intrinsic default.
+        if self.long_field != 0 {
+            writer.writeFieldBegin(.i64, 5)
+            self.long_field.thriftWrite(to: writer)
+        }
+        // Terse: written only when the value differs from its intrinsic default.
+        if self.float_field != 0.0 {
+            writer.writeFieldBegin(.float, 6)
+            self.float_field.thriftWrite(to: writer)
+        }
+        // Terse: written only when the value differs from its intrinsic default.
+        if self.double_field != 0.0 {
+            writer.writeFieldBegin(.double, 7)
+            self.double_field.thriftWrite(to: writer)
+        }
+        // Terse: written only when the value differs from its intrinsic default.
+        if self.string_field != "" {
+            writer.writeFieldBegin(.string, 8)
+            self.string_field.thriftWrite(to: writer)
+        }
+        // Terse: written only when the value differs from its intrinsic default.
+        if self.binary_field != Data() {
+            writer.writeFieldBegin(.string, 9)
+            self.binary_field.thriftWrite(to: writer)
+        }
+        // Terse: written only when the value differs from its intrinsic default.
+        if self.enum_field != .init(rawValue: 0) {
+            writer.writeFieldBegin(.i32, 10)
+            self.enum_field.thriftWrite(to: writer)
+        }
+        // Terse: written only when the value differs from its intrinsic default.
+        if self.list_field != [] {
+            writer.writeFieldBegin(.list, 11)
+            self.list_field.thriftWrite(to: writer)
+        }
+        // Terse: written only when the value differs from its intrinsic default.
+        if self.set_field != [] {
+            writer.writeFieldBegin(.set, 12)
+            self.set_field.thriftWrite(to: writer)
+        }
+        // Terse: written only when the value differs from its intrinsic default.
+        if self.map_field != [:] {
+            writer.writeFieldBegin(.map, 13)
+            self.map_field.thriftWrite(to: writer)
+        }
+        // Terse: written only when the value differs from its intrinsic default.
+        if self.struct_field != .init() {
+            writer.writeFieldBegin(.struct, 14)
+            self.struct_field.thriftWrite(to: writer)
+        }
+        // Terse: written only when the value differs from its intrinsic default.
+        if self.union_field != .init() {
+            writer.writeFieldBegin(.struct, 15)
+            self.union_field.thriftWrite(to: writer)
+        }
         writer.writeFieldStop()
     }
 
@@ -554,36 +599,81 @@ public struct FieldLevelTerseStruct: ThriftSerializable, Hashable {
     }
 
     public func write<W: ProtocolWriter>(to writer: W) {
-        writer.writeFieldBegin(.bool, 1)
-        self.terse_bool_field.thriftWrite(to: writer)
-        writer.writeFieldBegin(.byte, 2)
-        self.terse_byte_field.thriftWrite(to: writer)
-        writer.writeFieldBegin(.i16, 3)
-        self.terse_short_field.thriftWrite(to: writer)
-        writer.writeFieldBegin(.i32, 4)
-        self.terse_int_field.thriftWrite(to: writer)
-        writer.writeFieldBegin(.i64, 5)
-        self.terse_long_field.thriftWrite(to: writer)
-        writer.writeFieldBegin(.float, 6)
-        self.terse_float_field.thriftWrite(to: writer)
-        writer.writeFieldBegin(.double, 7)
-        self.terse_double_field.thriftWrite(to: writer)
-        writer.writeFieldBegin(.string, 8)
-        self.terse_string_field.thriftWrite(to: writer)
-        writer.writeFieldBegin(.string, 9)
-        self.terse_binary_field.thriftWrite(to: writer)
-        writer.writeFieldBegin(.i32, 10)
-        self.terse_enum_field.thriftWrite(to: writer)
-        writer.writeFieldBegin(.list, 11)
-        self.terse_list_field.thriftWrite(to: writer)
-        writer.writeFieldBegin(.set, 12)
-        self.terse_set_field.thriftWrite(to: writer)
-        writer.writeFieldBegin(.map, 13)
-        self.terse_map_field.thriftWrite(to: writer)
-        writer.writeFieldBegin(.struct, 14)
-        self.terse_struct_field.thriftWrite(to: writer)
-        writer.writeFieldBegin(.struct, 29)
-        self.terse_union_field.thriftWrite(to: writer)
+        // Terse: written only when the value differs from its intrinsic default.
+        if self.terse_bool_field != false {
+            writer.writeFieldBegin(.bool, 1)
+            self.terse_bool_field.thriftWrite(to: writer)
+        }
+        // Terse: written only when the value differs from its intrinsic default.
+        if self.terse_byte_field != 0 {
+            writer.writeFieldBegin(.byte, 2)
+            self.terse_byte_field.thriftWrite(to: writer)
+        }
+        // Terse: written only when the value differs from its intrinsic default.
+        if self.terse_short_field != 0 {
+            writer.writeFieldBegin(.i16, 3)
+            self.terse_short_field.thriftWrite(to: writer)
+        }
+        // Terse: written only when the value differs from its intrinsic default.
+        if self.terse_int_field != 0 {
+            writer.writeFieldBegin(.i32, 4)
+            self.terse_int_field.thriftWrite(to: writer)
+        }
+        // Terse: written only when the value differs from its intrinsic default.
+        if self.terse_long_field != 0 {
+            writer.writeFieldBegin(.i64, 5)
+            self.terse_long_field.thriftWrite(to: writer)
+        }
+        // Terse: written only when the value differs from its intrinsic default.
+        if self.terse_float_field != 0.0 {
+            writer.writeFieldBegin(.float, 6)
+            self.terse_float_field.thriftWrite(to: writer)
+        }
+        // Terse: written only when the value differs from its intrinsic default.
+        if self.terse_double_field != 0.0 {
+            writer.writeFieldBegin(.double, 7)
+            self.terse_double_field.thriftWrite(to: writer)
+        }
+        // Terse: written only when the value differs from its intrinsic default.
+        if self.terse_string_field != "" {
+            writer.writeFieldBegin(.string, 8)
+            self.terse_string_field.thriftWrite(to: writer)
+        }
+        // Terse: written only when the value differs from its intrinsic default.
+        if self.terse_binary_field != Data() {
+            writer.writeFieldBegin(.string, 9)
+            self.terse_binary_field.thriftWrite(to: writer)
+        }
+        // Terse: written only when the value differs from its intrinsic default.
+        if self.terse_enum_field != .init(rawValue: 0) {
+            writer.writeFieldBegin(.i32, 10)
+            self.terse_enum_field.thriftWrite(to: writer)
+        }
+        // Terse: written only when the value differs from its intrinsic default.
+        if self.terse_list_field != [] {
+            writer.writeFieldBegin(.list, 11)
+            self.terse_list_field.thriftWrite(to: writer)
+        }
+        // Terse: written only when the value differs from its intrinsic default.
+        if self.terse_set_field != [] {
+            writer.writeFieldBegin(.set, 12)
+            self.terse_set_field.thriftWrite(to: writer)
+        }
+        // Terse: written only when the value differs from its intrinsic default.
+        if self.terse_map_field != [:] {
+            writer.writeFieldBegin(.map, 13)
+            self.terse_map_field.thriftWrite(to: writer)
+        }
+        // Terse: written only when the value differs from its intrinsic default.
+        if self.terse_struct_field != .init() {
+            writer.writeFieldBegin(.struct, 14)
+            self.terse_struct_field.thriftWrite(to: writer)
+        }
+        // Terse: written only when the value differs from its intrinsic default.
+        if self.terse_union_field != .init() {
+            writer.writeFieldBegin(.struct, 29)
+            self.terse_union_field.thriftWrite(to: writer)
+        }
         writer.writeFieldBegin(.bool, 15)
         self.bool_field.thriftWrite(to: writer)
         writer.writeFieldBegin(.byte, 16)
@@ -830,12 +920,21 @@ public struct AdaptedFields: ThriftSerializable, Hashable {
     }
 
     public func write<W: ProtocolWriter>(to writer: W) {
-        writer.writeFieldBegin(.i32, 1)
-        self.field1.thriftWrite(to: writer)
-        writer.writeFieldBegin(.i32, 2)
-        self.field2.thriftWrite(to: writer)
-        writer.writeFieldBegin(.i32, 3)
-        self.field3.thriftWrite(to: writer)
+        // Terse: written only when the value differs from its intrinsic default.
+        if self.field1 != 0 {
+            writer.writeFieldBegin(.i32, 1)
+            self.field1.thriftWrite(to: writer)
+        }
+        // Terse: written only when the value differs from its intrinsic default.
+        if self.field2 != 0 {
+            writer.writeFieldBegin(.i32, 2)
+            self.field2.thriftWrite(to: writer)
+        }
+        // Terse: written only when the value differs from its intrinsic default.
+        if self.field3 != 0 {
+            writer.writeFieldBegin(.i32, 3)
+            self.field3.thriftWrite(to: writer)
+        }
         writer.writeFieldStop()
     }
 
@@ -890,8 +989,11 @@ public struct TerseException: ThriftSerializable, Hashable, LocalizedError {
     }
 
     public func write<W: ProtocolWriter>(to writer: W) {
-        writer.writeFieldBegin(.string, 1)
-        self.msg.thriftWrite(to: writer)
+        // Terse: written only when the value differs from its intrinsic default.
+        if self.msg != "" {
+            writer.writeFieldBegin(.string, 1)
+            self.msg.thriftWrite(to: writer)
+        }
         writer.writeFieldStop()
     }
 

@@ -448,6 +448,18 @@ struct HTTPCoroSession::StreamState {
 
 using quic::HTTPPriorityQueue;
 
+CoroSessionHandle::CoroSessionHandle(HTTPCoroSession* session) noexcept
+    : ctx_(session ? session->acquireKeepAlive() : HTTPSessionContextPtr{}) {
+}
+
+HTTPCoroSession* CoroSessionHandle::get() noexcept {
+  return static_cast<HTTPCoroSession*>(ctx_.get());
+}
+
+const HTTPCoroSession* CoroSessionHandle::get() const noexcept {
+  return static_cast<const HTTPCoroSession*>(ctx_.get());
+}
+
 HTTPCoroSession::HTTPCoroSession(folly::EventBase* eventBase,
                                  folly::SocketAddress localAddr,
                                  folly::SocketAddress peerAddr,

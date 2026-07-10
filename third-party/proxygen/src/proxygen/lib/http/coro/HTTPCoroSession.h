@@ -164,6 +164,38 @@ class LifecycleObserver {
 };
 
 /**
+ * Owning handle to an HTTPCoroSession. It holds a KeepAlive token that blocks
+ * the session's destruction while the handle is alive, and offers pointer-like
+ * access to the underlying HTTPCoroSession. Prefer returning this over a raw
+ * HTTPCoroSession* so callers cannot outlive the session.
+ *
+ */
+struct CoroSessionHandle {
+  CoroSessionHandle() noexcept = default;
+  explicit CoroSessionHandle(HTTPCoroSession* session) noexcept;
+
+  HTTPCoroSession* get() noexcept;
+  const HTTPCoroSession* get() const noexcept;
+  HTTPCoroSession* operator->() noexcept {
+    return get();
+  }
+  const HTTPCoroSession* operator->() const noexcept {
+    return get();
+  }
+
+  explicit operator bool() const noexcept {
+    return bool(ctx_);
+  }
+
+  void reset() noexcept {
+    ctx_.reset();
+  }
+
+ private:
+  HTTPSessionContextPtr ctx_;
+};
+
+/**
  * Class for managing an HTTP/1.x or HTTP/2 connection.
  *
  * At its core, it runs two coroutines, a read loop and a write loop.

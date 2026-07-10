@@ -235,6 +235,9 @@ module Prop : Member_S with type t = shallow_prop = struct
     else if
       (not (Aast.equal_visibility p1.sp_visibility p2.sp_visibility))
       || Bool.( <> ) (sp_abstract p1) (sp_abstract p2)
+      || Bool.( <> )
+           (sp_tests_bypass_visibility p1)
+           (sp_tests_bypass_visibility p2)
     then
       Some Changed_inheritance
     else
@@ -265,6 +268,9 @@ module Method : Member_S with type t = shallow_method = struct
     else if
       (not (Aast.equal_visibility m1.sm_visibility m2.sm_visibility))
       || Bool.( <> ) (sm_abstract m1) (sm_abstract m2)
+      || Bool.( <> )
+           (sm_tests_bypass_visibility m1)
+           (sm_tests_bypass_visibility m2)
     then
       Some Changed_inheritance
     else

@@ -20,7 +20,8 @@
                async = false; generator = true; fun_kind = FGenerator;
                is_function_pointer = false; returns_readonly = false;
                readonly_this = false; support_dynamic_type = false;
-               is_memoized = false; variadic = false };
+               is_memoized = false; variadic = false; named_variadic = false
+               };
              ft_instantiated = true }));
        fe_pos = [3:10-11]; fe_php_std_lib = false;
        fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
@@ -41,7 +42,8 @@
                 async = false; generator = false; fun_kind = FSync;
                 is_function_pointer = false; returns_readonly = false;
                 readonly_this = false; support_dynamic_type = false;
-                is_memoized = false; variadic = false };
+                is_memoized = false; variadic = false; named_variadic = false
+                };
               ft_instantiated = true }));
         fe_pos = [7:10-11]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
@@ -62,7 +64,8 @@
                 async = false; generator = false; fun_kind = FSync;
                 is_function_pointer = false; returns_readonly = false;
                 readonly_this = false; support_dynamic_type = false;
-                is_memoized = false; variadic = false };
+                is_memoized = false; variadic = false; named_variadic = false
+                };
               ft_instantiated = true }));
         fe_pos = [13:10-11]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
@@ -86,7 +89,8 @@
                 async = true; generator = false; fun_kind = FAsync;
                 is_function_pointer = false; returns_readonly = false;
                 readonly_this = false; support_dynamic_type = false;
-                is_memoized = false; variadic = false };
+                is_memoized = false; variadic = false; named_variadic = false
+                };
               ft_instantiated = true }));
         fe_pos = [19:16-17]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
@@ -113,7 +117,8 @@
                 async = true; generator = true; fun_kind = FAsyncGenerator;
                 is_function_pointer = false; returns_readonly = false;
                 readonly_this = false; support_dynamic_type = false;
-                is_memoized = false; variadic = false };
+                is_memoized = false; variadic = false; named_variadic = false
+                };
               ft_instantiated = true }));
         fe_pos = [26:16-17]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;

@@ -42,7 +42,8 @@
                   async = false; generator = false; fun_kind = FSync;
                   is_function_pointer = false; returns_readonly = false;
                   readonly_this = false; support_dynamic_type = false;
-                  is_memoized = false; variadic = false };
+                  is_memoized = false; variadic = false;
+                  named_variadic = false };
                 ft_instantiated = true }));
           sm_visibility = Public; sm_deprecated = None;
           sm_flags =
@@ -68,7 +69,8 @@
                    async = false; generator = false; fun_kind = FSync;
                    is_function_pointer = false; returns_readonly = false;
                    readonly_this = false; support_dynamic_type = false;
-                   is_memoized = false; variadic = false };
+                   is_memoized = false; variadic = false;
+                   named_variadic = false };
                  ft_instantiated = true }));
            sm_visibility = Public; sm_deprecated = None;
            sm_flags =
@@ -139,7 +141,8 @@
                    async = false; generator = false; fun_kind = FSync;
                    is_function_pointer = false; returns_readonly = false;
                    readonly_this = false; support_dynamic_type = false;
-                   is_memoized = false; variadic = false };
+                   is_memoized = false; variadic = false;
+                   named_variadic = false };
                  ft_instantiated = true }));
            sm_visibility = Public; sm_deprecated = None;
            sm_flags =

@@ -1,6 +1,6 @@
 <?hh
 
-class C { public static $storage; }
+class C { public static $storage = ''; }
 
 <<__EntryPoint>>
 function bug60768() :mixed{

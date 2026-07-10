@@ -525,7 +525,8 @@ class Client
                 if ($resp['type'] == self::STDERR) {
                     $this->_requests[$resp['requestId']]['state'] = self::REQ_STATE_ERR;
                 }
-                $this->_requests[$resp['requestId']]['response'] .= $resp['content'];
+                $this->_requests[$resp['requestId']]['response'] =
+                    ($this->_requests[$resp['requestId']]['response'] ?? '') . $resp['content'];
             }
             if ($resp['type'] == self::END_REQUEST) {
                 $this->_requests[$resp['requestId']]['state'] = self::REQ_STATE_OK;

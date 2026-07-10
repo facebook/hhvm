@@ -16,12 +16,15 @@ function error_boundary(inout $x, $fn) :mixed{
 print "Test begin\n";
 
 $o = new C;
+$o->a = '';
 $o->a .= "<a>";
+$o->b = '';
 $o->b .= "<b>";
 $o->b .= "<b>";
 $o->p += 1;
 $o->q ??= 0;
 $o->q += 1;
+$o->r = '';
 $o->r .= "hello";
 print_r($o);
 

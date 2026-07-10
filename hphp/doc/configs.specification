@@ -1630,10 +1630,6 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
   Don't reap total Units below threshold
 
-- int32_t Eval.NoticeOnCoerceForStrConcat2 = 0, UNKNOWN
-
-  0 nothing, 1 notice, 2 error
-
 - int32_t Eval.SampleRequestTearing = 0, UNKNOWN
 
 - int32_t Eval.RequestTearingSkewMicros = 1500, UNKNOWN

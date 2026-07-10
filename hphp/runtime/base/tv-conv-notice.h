@@ -26,12 +26,6 @@ enum class ConvNoticeLevel: uint8_t { None, Log, Throw,};
 
 const char* convOpToName(ConvNoticeLevel level);
 
-template <typename T> ConvNoticeLevel flagToConvNoticeLevel(T flag) {
-  return static_cast<ConvNoticeLevel>(
-     flag + static_cast<uint8_t>(ConvNoticeLevel::None)
-  );
-}
-
 void handleConvNoticeLevel(
    ConvNoticeLevel Level,
    const char* const from,

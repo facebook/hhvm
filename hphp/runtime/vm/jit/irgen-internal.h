@@ -1020,11 +1020,11 @@ void genStVMReturnAddr(IRGS& env);
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Determines correct course of action based on notice_data and acts upon it.
+ * Determines correct course of action based on data and acts upon it.
  */
-void handleConvNoticeLevel(
+void handleConvThrowMode(
   IRGS& env,
-  const ConvNoticeData& notice_data,
+  const ConvThrowData& data,
   const char* const from,
   const char* const to);
 

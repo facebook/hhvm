@@ -21,7 +21,7 @@
 #include "hphp/runtime/base/resource-data.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/string-data.h"
-#include "hphp/runtime/base/tv-conv-notice.h"
+#include "hphp/runtime/base/tv-conv-throw.h"
 #include "hphp/runtime/base/tv-mutate.h"
 #include "hphp/runtime/base/tv-type.h"
 #include "hphp/runtime/base/typed-value.h"

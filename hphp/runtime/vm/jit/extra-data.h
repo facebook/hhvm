@@ -3005,20 +3005,20 @@ struct BespokeGetData : IRExtraData {
   KeyState state;
 };
 
-struct ConvNoticeData : IRExtraData {
-  explicit ConvNoticeData(ConvNoticeLevel l = ConvNoticeLevel::None)
-                          : level(l) {}
-  std::string show() const { return convOpToName(level); }
+struct ConvThrowData : IRExtraData {
+  explicit ConvThrowData(ConvThrowMode m = ConvThrowMode::None)
+                          : mode(m) {}
+  std::string show() const { return convThrowModeToName(mode); }
 
   size_t stableHash() const {
-    return std::hash<ConvNoticeLevel>()(level);
+    return std::hash<ConvThrowMode>()(mode);
   }
 
-  bool equals(const ConvNoticeData& o) const {
-    return level == o.level;
+  bool equals(const ConvThrowData& o) const {
+    return mode == o.mode;
   }
 
-  ConvNoticeLevel level;
+  ConvThrowMode mode;
 };
 
 struct AliasClassData : IRExtraData {
@@ -3420,7 +3420,7 @@ X(FuncHasAttr,                  AttrData);
 X(ClassHasAttr,                 AttrData);
 X(LdMethCallerName,             MethCallerData);
 X(LdUnitPerRequestFilepath,     RDSHandleData);
-X(ConvTVToStr,                  ConvNoticeData);
+X(ConvTVToStr,                  ConvThrowData);
 X(CheckFuncNeedsCoverage,       FuncData);
 X(RecordFuncCall,               FuncData);
 X(LdClsPropAddrOrNull,          ReadonlyData);

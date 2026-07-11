@@ -22,7 +22,7 @@
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/opaque-resource.h"
 #include "hphp/runtime/base/tv-conversions.h"
-#include "hphp/runtime/base/tv-conv-notice.h"
+#include "hphp/runtime/base/tv-conv-throw.h"
 #include "hphp/runtime/base/vanilla-dict.h"
 #include "hphp/runtime/base/vanilla-keyset.h"
 #include "hphp/runtime/base/vanilla-vec.h"

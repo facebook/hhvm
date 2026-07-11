@@ -165,8 +165,8 @@ static CallMap s_callMap {
                            {{SSA, 0}}},
     {ConvTVToStr,        static_cast<StringData* (*)(
                              TypedValue,
-                             const ConvNoticeLevel)>(tvCastToStringData), DSSA, SSync,
-                           {{TV, 0}, extra(&ConvNoticeData::level)}},
+                             const ConvThrowMode)>(tvCastToStringData), DSSA, SSync,
+                           {{TV, 0}, extra(&ConvThrowData::mode)}},
 
     {ConcatStrStr,       concat_ss, DSSA, SSync, {{SSA, 0}, {SSA, 1}}},
     {ConcatStrInt,       concat_si, DSSA, SSync, {{SSA, 0}, {SSA, 1}}},

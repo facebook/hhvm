@@ -20,7 +20,7 @@
 #include "hphp/runtime/base/countable.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/req-ptr.h"
-#include "hphp/runtime/base/tv-conv-notice.h"
+#include "hphp/runtime/base/tv-conv-throw.h"
 #include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/base/weakref-data.h"
 

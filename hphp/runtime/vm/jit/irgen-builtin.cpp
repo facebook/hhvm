@@ -86,12 +86,12 @@ bool type_converts_to_number(Type ty) {
 SSATmp* convToStr(IRGS& env, SSATmp* tmp, char c) {
 	switch (c) {
 		case 's':
-			return gen(env, ConvTVToStr, ConvNoticeData{}, tmp);
+			return gen(env, ConvTVToStr, ConvThrowData{}, tmp);
 		case 'd':
 			return gen(
         env,
         ConvTVToStr,
-        ConvNoticeData{},
+        ConvThrowData{},
         gen(env, ConvTVToInt, tmp)
 			);
 		default:

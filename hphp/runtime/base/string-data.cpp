@@ -19,7 +19,7 @@
 #include <cmath>
 #include <utility>
 
-#include "hphp/runtime/base/tv-conv-notice.h"
+#include "hphp/runtime/base/tv-conv-throw.h"
 #include "hphp/util/alloc.h"
 
 #include "hphp/runtime/base/runtime-error.h"

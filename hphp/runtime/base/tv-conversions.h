@@ -18,7 +18,7 @@
 
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/req-root.h"
-#include "hphp/runtime/base/tv-conv-notice.h"
+#include "hphp/runtime/base/tv-conv-throw.h"
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/type-object.h"
 #include "hphp/runtime/base/type-string.h"
@@ -61,7 +61,7 @@ X(Resource)
 #undef X
 
 template<typename T> enable_if_lval_t<T, void> tvCastToStringInPlace(
-  T tv, const ConvNoticeLevel);
+  T tv, const ConvThrowMode);
 void tvSetLegacyArrayInPlace(tv_lval tv, bool isLegacy);
 
 /*
@@ -76,7 +76,7 @@ Array tvCastToArrayLike(TypedValue tv);
 
 StringData* tvCastToStringData(TypedValue tv);
 StringData* tvCastToStringData(
-   TypedValue tv, const ConvNoticeLevel);
+   TypedValue tv, const ConvThrowMode);
 template <IntishCast IC /* = IntishCast::None */>
 ArrayData* tvCastToArrayLikeData(TypedValue tv);
 ObjectData* tvCastToObjectData(TypedValue tv);

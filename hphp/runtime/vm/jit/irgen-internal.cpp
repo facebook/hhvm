@@ -154,16 +154,16 @@ void defineFrameAndStack(IRGS& env, SBInvOffset bcSPOff) {
   }
 }
 
-void handleConvNoticeLevel(
+void handleConvThrowMode(
     IRGS& env,
-    const ConvNoticeData& notice_data,
+    const ConvThrowData& data,
     const char* const from,
   const char* const to) {
-  if (LIKELY(notice_data.level == ConvNoticeLevel::None)) return;
+  if (LIKELY(data.mode == ConvThrowMode::None)) return;
 
   const auto str = makeStaticString(folly::sformat(
     "Implicit {} to {} conversion for {}", from, to,
-    s_ConvNoticeReasonConcat.get()));
+    s_ConvThrowReasonConcat.get()));
   gen(env, ThrowInvalidOperation, cns(env, str));
 }
 

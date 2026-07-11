@@ -19,7 +19,7 @@
 #endif
 
 #include "hphp/runtime/base/exceptions.h"
-#include "hphp/runtime/base/tv-conv-notice.h"
+#include "hphp/runtime/base/tv-conv-throw.h"
 #include "hphp/runtime/vm/reified-generics.h"
 #include "hphp/system/systemlib.h"
 #include "hphp/util/configs/eval.h"

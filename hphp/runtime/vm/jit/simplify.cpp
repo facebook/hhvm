@@ -2346,16 +2346,16 @@ SSATmp* simplifyConvTVToBool(State& env, const IRInstruction* inst) {
 }
 
 // return true if throws
-bool handleConvNoticeLevel(
+bool handleConvThrowMode(
   State& env,
   Block* trace,
-  const ConvNoticeData* notice_data,
+  const ConvThrowData* data,
   const char* const from,
   const char* const to) {
-  if (notice_data->level == ConvNoticeLevel::None) return false;
+  if (data->mode == ConvThrowMode::None) return false;
   const auto str = cns(env, makeStaticString(folly::sformat(
     "Implicit {} to {} conversion for {}", from, to,
-    s_ConvNoticeReasonConcat.get())));
+    s_ConvThrowReasonConcat.get())));
   gen(env, ThrowInvalidOperation, trace, str);
   return true;
 }
@@ -2364,7 +2364,7 @@ SSATmp* simplifyConvTVToStr(State& env, const IRInstruction* inst) {
   auto const src           = inst->src(0);
   auto const srcType       = src->type();
   auto const catchTrace    = inst->taken();
-  auto const notice_data   = inst->extra<ConvNoticeData>();
+  auto const data   = inst->extra<ConvThrowData>();
 
   if (srcType <= TBool) {
     const auto tmp = gen(
@@ -2374,13 +2374,13 @@ SSATmp* simplifyConvTVToStr(State& env, const IRInstruction* inst) {
       cns(env, s_1.get()),
       cns(env, staticEmptyString())
     );
-    auto throws = handleConvNoticeLevel(
-      env, catchTrace, notice_data, "bool", "string");
+    auto throws = handleConvThrowMode(
+      env, catchTrace, data, "bool", "string");
     return throws ? cns(env, TBottom) : tmp ;
   }
   if (srcType <= TNull) {
-    auto throws = handleConvNoticeLevel(
-      env, catchTrace, notice_data, "null", "string");
+    auto throws = handleConvThrowMode(
+      env, catchTrace, data, "null", "string");
     return throws ? cns(env, TBottom) : cns(env, staticEmptyString());
   }
   if (srcType <= TVec) {
@@ -2399,8 +2399,8 @@ SSATmp* simplifyConvTVToStr(State& env, const IRInstruction* inst) {
 
   if (srcType <= TDbl) {
     const auto tmp = gen(env, ConvDblToStr, src);
-    auto throws = handleConvNoticeLevel(
-      env, catchTrace, notice_data, "double", "string");
+    auto throws = handleConvThrowMode(
+      env, catchTrace, data, "double", "string");
     return throws ? cns(env, TBottom) : tmp;
   }
   if (srcType <= TInt)    return gen(env, ConvIntToStr, src);

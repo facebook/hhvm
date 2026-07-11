@@ -15,13 +15,25 @@
  */
 
 #include <folly/init/Init.h>
+#include <thrift/conformance/cpp2/internal/AnyRegistry.h>
+#include <thrift/conformance/data/Json5Registration.h>
 #include <thrift/conformance/data/TestGenerator.h>
 
+using apache::thrift::conformance::StandardProtocol;
 using apache::thrift::conformance::data::createRoundTripSuite;
 using apache::thrift::conformance::data::serializeToFile;
 
+// Json5 is only wired into the C++ conformance server, so its round-trip cases
+// live in a dedicated generator referenced solely by the C++ test. Other
+// languages use `gen-round-trip` (Binary/Compact) and would otherwise fail on
+// Json5 cases their servers cannot handle.
 int main(int argc, char** argv) {
   folly::Init init(&argc, &argv);
+
+  // The generated registry has no Json5 serializer; register it by hand.
+  apache::thrift::conformance::data::registerRoundTripJson5Serializers(
+      apache::thrift::conformance::detail::getGeneratedAnyRegistry());
+
   serializeToFile<apache::thrift::BinaryProtocolWriter>(
-      createRoundTripSuite(), stdout);
+      createRoundTripSuite({StandardProtocol::Json5}), stdout);
 }

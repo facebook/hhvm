@@ -1675,14 +1675,23 @@ const type_system::TypeSystem& SyntaxGraph::asTypeSystem() const {
 }
 
 const dynamic::ServiceCatalog& SyntaxGraph::asServiceCatalog() const {
+  // The facade is owned by the unique_ptr stored in serviceCatalogFacade_ and,
+  // once created, lives for the lifetime of this SyntaxGraph (it is never
+  // reset). It therefore safely outlives the lock guard, so we capture a raw
+  // pointer to the owned object while holding the lock and return through it.
+  // Returning `**facade` directly would tie the returned reference's lifetime
+  // to the LockedPtr temporary and trip lifetimebound annotation, even though
+  // the pointee outlives the call. This mirrors asTypeSystem() pattern.
   if (auto facade = serviceCatalogFacade_.rlock(); *facade) {
-    return **facade;
+    const dynamic::ServiceCatalog* catalog = facade->get();
+    return *catalog;
   }
   auto facade = serviceCatalogFacade_.wlock();
   if (!*facade) {
     *facade = std::make_unique<ServiceCatalogFacade>(*this);
   }
-  return **facade;
+  const dynamic::ServiceCatalog* catalog = facade->get();
+  return *catalog;
 }
 
 type_system::DefinitionRef SyntaxGraph::asTypeSystemDefinitionRef(

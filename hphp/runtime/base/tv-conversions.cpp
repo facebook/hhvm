@@ -1124,7 +1124,7 @@ void handleConvThrowMode(
   const char* const to) {
   if (mode == ConvThrowMode::None) return;
   const auto str = folly::sformat(
-    "Implicit {} to {} conversion for {}", from, to,
+    "Attempted {} to {} conversion for {}", from, to,
     s_ConvThrowReasonConcat.get());
   SystemLib::throwInvalidOperationExceptionObject(str);
 }

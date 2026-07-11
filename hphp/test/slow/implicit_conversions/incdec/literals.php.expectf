@@ -19,15 +19,15 @@ Resource id #1
 postinc<
 Cannot perform pre/post inc/dec on null
 
-Implicit bool to string conversion for string concatenation/interpolation
+Attempted bool to string conversion for string concatenation/interpolation
 1
-Implicit bool to string conversion for string concatenation/interpolation
+Attempted bool to string conversion for string concatenation/interpolation
 0
 1
 42
 43
 1.234
-Implicit double to string conversion for string concatenation/interpolation
+Attempted double to string conversion for string concatenation/interpolation
 
 Notice: Increment on string 'foobar' in %s/literals.php on line 107
 foobar
@@ -39,7 +39,7 @@ Cannot perform pre/post inc/dec on numeric string
 
 Cannot perform pre/post inc/dec on numeric string
 Resource id #1
-Implicit resource to string conversion for string concatenation/interpolation
+Attempted resource to string conversion for string concatenation/interpolation
 >
 predec<
 
@@ -59,17 +59,17 @@ Cannot perform pre/post inc/dec on numeric string
 Resource id #1
 >
 postdec<
-Implicit null to string conversion for string concatenation/interpolation
+Attempted null to string conversion for string concatenation/interpolation
 
-Implicit bool to string conversion for string concatenation/interpolation
+Attempted bool to string conversion for string concatenation/interpolation
 1
-Implicit bool to string conversion for string concatenation/interpolation
+Attempted bool to string conversion for string concatenation/interpolation
 0
 -1
 42
 41
 1.234
-Implicit double to string conversion for string concatenation/interpolation
+Attempted double to string conversion for string concatenation/interpolation
 
 Notice: Decrement on string 'foobar' in %s/literals.php on line 219
 foobar
@@ -81,5 +81,5 @@ Cannot perform pre/post inc/dec on numeric string
 
 Cannot perform pre/post inc/dec on numeric string
 Resource id #1
-Implicit resource to string conversion for string concatenation/interpolation
+Attempted resource to string conversion for string concatenation/interpolation
 >

@@ -162,7 +162,7 @@ void handleConvThrowMode(
   if (LIKELY(data.mode == ConvThrowMode::None)) return;
 
   const auto str = makeStaticString(folly::sformat(
-    "Implicit {} to {} conversion for {}", from, to,
+    "Attempted {} to {} conversion for {}", from, to,
     s_ConvThrowReasonConcat.get()));
   gen(env, ThrowInvalidOperation, cns(env, str));
 }

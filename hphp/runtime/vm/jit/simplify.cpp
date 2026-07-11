@@ -2354,7 +2354,7 @@ bool handleConvThrowMode(
   const char* const to) {
   if (data->mode == ConvThrowMode::None) return false;
   const auto str = cns(env, makeStaticString(folly::sformat(
-    "Implicit {} to {} conversion for {}", from, to,
+    "Attempted {} to {} conversion for {}", from, to,
     s_ConvThrowReasonConcat.get())));
   gen(env, ThrowInvalidOperation, trace, str);
   return true;

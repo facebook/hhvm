@@ -149,24 +149,8 @@ import {{include.included_module_path}}.thrift_services_reflection as {{include.
 def get_reflection__{{service.name}}():
     if not _HAS_REFLECTION:
         return None
-  {{#each service.structured_annotations as |annotation|}}
-    {{#if annotation.type.structured?}}
-    import {{annotation.type.module_name}} as {{annotation.type.module_mangle}}  # noqa: F811
-    {{/if annotation.type.structured?}}
-  {{/each}}
-  {{#each service.supported_functions as |function|}}
-    {{#each function.structured_annotations as |annotation|}}
-      {{#if annotation.type.structured?}}
-    import {{annotation.type.module_name}} as {{annotation.type.module_mangle}}  # noqa: F811
-      {{/if annotation.type.structured?}}
-    {{/each}}
-    {{#each function.params.fields as |field|}}
-      {{#each field.structured_annotations as |annotation|}}
-        {{#if annotation.type.structured?}}
-    import {{annotation.type.module_name}} as {{annotation.type.module_mangle}}  # noqa: F811
-        {{/if annotation.type.structured?}}
-      {{/each}}
-    {{/each}}
+  {{#each service.reflection_import_types as |type|}}
+    import {{type.module_name}} as {{type.module_mangle}}  # noqa: F811
   {{/each}}
   {{#each service.supported_functions as |function|}}
     {{#each function.params.fields as |field|}}

@@ -96,6 +96,39 @@ const t_const* get_transitive_annotation_of_adapter_or_null(
   return nullptr;
 }
 
+// Collects the distinct types (one per defining program) referenced by
+// struct/union/enum literals within a constant value tree, so the reflection
+// output can import the modules it emits qualified references to.
+void collect_annotation_value_types(
+    const t_const_value& value,
+    std::vector<const t_type*>& out,
+    std::unordered_set<const t_program*>& seen) {
+  if (const t_type_ref& type_ref = value.type(); type_ref.resolved()) {
+    const t_type& true_type = *type_ref->get_true_type();
+    if (true_type.is<t_structured>() || true_type.is<t_enum>()) {
+      if (const t_program* prog = true_type.program();
+          prog != nullptr && seen.insert(prog).second) {
+        out.push_back(&true_type);
+      }
+    }
+  }
+  switch (value.kind()) {
+    case t_const_value::CV_LIST:
+      for (const t_const_value* elem : value.get_list()) {
+        collect_annotation_value_types(*elem, out, seen);
+      }
+      break;
+    case t_const_value::CV_MAP:
+      for (const auto& [key, val] : value.get_map()) {
+        collect_annotation_value_types(*key, out, seen);
+        collect_annotation_value_types(*val, out, seen);
+      }
+      break;
+    default:
+      break;
+  }
+}
+
 std::string mangle_program_path(
     const t_program* program, const std::string& root_module_prefix) {
   std::string prefix =
@@ -710,7 +743,6 @@ class t_mstch_python_prototypes_generator : public t_whisker_generator {
                     self.get_string()))
           : whisker::make::null;
     });
-
     return std::move(def).make();
   }
 
@@ -975,6 +1007,35 @@ class t_mstch_python_prototypes_generator : public t_whisker_generator {
       }
       return to_array(functions, proto.of<t_function>());
     });
+    // Deduplicated types (one per defining program) whose modules the service
+    // reflection must import for the structured annotations it renders -- on
+    // the service, its functions, and their parameters -- including types
+    // nested in annotation values. Excludes the root program, which is imported
+    // at the top of the file.
+    def.property(
+        "reflection_import_types", [this, &proto](const t_interface& self) {
+          std::vector<const t_type*> types;
+          std::unordered_set<const t_program*> seen;
+          seen.insert(get_program());
+          auto collect = [&](const t_named& node) {
+            for (const t_const& annotation : node.structured_annotations()) {
+              if (const t_const_value* value = annotation.value()) {
+                collect_annotation_value_types(*value, types, seen);
+              }
+            }
+          };
+          collect(self);
+          for (const t_function& func : self.functions()) {
+            if (func.is_interaction_constructor()) {
+              continue;
+            }
+            collect(func);
+            for (const t_field& param : func.params().fields()) {
+              collect(param);
+            }
+          }
+          return to_type_array(proto, types.begin(), types.end());
+        });
     // True when the interaction has at least one function emitted as an
     // abstract method on its interface, i.e. request/response, oneway, or
     // server-stream (sink/bidi are not yet implemented). When none exist the

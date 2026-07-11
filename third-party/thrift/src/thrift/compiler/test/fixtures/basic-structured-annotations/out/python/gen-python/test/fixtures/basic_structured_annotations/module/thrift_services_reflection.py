@@ -62,10 +62,6 @@ import namespaced.thrift_types as _fbthrift__namespaced__thrift_types
 def get_reflection__MyService():
     if not _HAS_REFLECTION:
         return None
-    import test.fixtures.basic_structured_annotations.module.thrift_types as _fbthrift__test__fixtures__basic_structured_annotations__module__thrift_types  # noqa: F811
-    import test.fixtures.basic_structured_annotations.module.thrift_types as _fbthrift__test__fixtures__basic_structured_annotations__module__thrift_types  # noqa: F811
-    import test.fixtures.basic_structured_annotations.module.thrift_types as _fbthrift__test__fixtures__basic_structured_annotations__module__thrift_types  # noqa: F811
-    import test.fixtures.basic_structured_annotations.module.thrift_types as _fbthrift__test__fixtures__basic_structured_annotations__module__thrift_types  # noqa: F811
     functions = {}
     _fbthrift_args = []
     _fbthrift_exceptions = []

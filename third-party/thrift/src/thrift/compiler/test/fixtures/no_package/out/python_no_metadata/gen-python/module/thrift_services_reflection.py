@@ -87,7 +87,6 @@ def get_reflection__FB303Service():
     if not _HAS_REFLECTION:
         return None
     import facebook.thrift.annotation.hack.thrift_types as _fbthrift__facebook__thrift__annotation__hack__thrift_types  # noqa: F811
-    import facebook.thrift.annotation.hack.thrift_types as _fbthrift__facebook__thrift__annotation__hack__thrift_types  # noqa: F811
     functions = {}
     _fbthrift_args = []
     _fbthrift_args.append(

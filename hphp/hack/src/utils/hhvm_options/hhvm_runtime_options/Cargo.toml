@@ -18,7 +18,7 @@ cxx = "1.0.194"
 hdf = { version = "0.0.0", path = "../../hdf" }
 log = { version = "0.4.33", features = ["kv_unstable", "kv_unstable_std"] }
 md-5 = "0.10"
-regex = "1.12.4"
+regex = "1.13.0"
 
 [build-dependencies]
 cxx-build = "1.0.194"

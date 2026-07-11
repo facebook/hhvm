@@ -14,5 +14,5 @@ path = "../signed_source.rs"
 bstr = { version = "1.12.3", features = ["serde", "std", "unicode"] }
 hex = { version = "0.4.3", features = ["alloc"] }
 md-5 = "0.10"
-regex = "1.12.4"
+regex = "1.13.0"
 thiserror = "2.0.18"

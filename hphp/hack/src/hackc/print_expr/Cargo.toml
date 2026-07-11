@@ -22,6 +22,6 @@ hhbc = { version = "0.0.0", path = "../hhbc/cargo/hhbc" }
 hhbc_string_utils = { version = "0.0.0", path = "../utils/cargo/hhbc_string_utils" }
 naming_special_names_rust = { version = "0.0.0", path = "../../naming" }
 oxidized = { version = "0.0.0", path = "../../oxidized" }
-regex = "1.12.4"
+regex = "1.13.0"
 thiserror = "2.0.18"
 write_bytes = { version = "0.0.0", path = "../../utils/write_bytes/write_bytes" }

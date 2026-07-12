@@ -18,4 +18,4 @@ oxidized = { version = "0.0.0", path = "../../../oxidized" }
 packages = { version = "0.0.0", path = "../../../packages/cargo" }
 serde = { version = "1.0.219", features = ["derive", "rc"] }
 serde_json = { version = "1.0.140", features = ["alloc", "float_roundtrip", "raw_value", "unbounded_depth"] }
-sha1 = "0.10.5"
+sha1 = "0.10.7"

@@ -51,6 +51,7 @@ class AnyRegistryTest(unittest.TestCase):
             StandardProtocol.Binary,
             StandardProtocol.Compact,
             StandardProtocol.SimpleJson,
+            StandardProtocol.Json5,
         ):
             _test_for_protocol(prot)
 

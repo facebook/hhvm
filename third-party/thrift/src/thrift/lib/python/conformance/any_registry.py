@@ -27,7 +27,13 @@ from thrift.python.conformance.universal_name import (
     get_universal_hash_prefix,
     UniversalHashAlgorithm,
 )
-from thrift.python.serializer import deserialize, Protocol, serialize_iobuf
+from thrift.python.serializer import (
+    deserialize,
+    Json5ProtocolWriterOptions,
+    JsonWriterOptions,
+    Protocol,
+    serialize_iobuf,
+)
 from thrift.python.types import StructOrUnion
 
 
@@ -40,6 +46,8 @@ def _to_serializer_protocol(protocol: typing.Optional[StandardProtocol]) -> Prot
         return Protocol.COMPACT
     if protocol == StandardProtocol.SimpleJson:
         return Protocol.JSON
+    if protocol == StandardProtocol.Json5:
+        return Protocol.JSON5
     raise ValueError(f"Unsupported protocol: {protocol}")
 
 
@@ -73,11 +81,20 @@ class AnyRegistry:
         hash = get_universal_hash(UniversalHashAlgorithm.Sha2_256, uri)
         hash_prefix = get_universal_hash_prefix(hash, 16)
         serializer_protocol = _to_serializer_protocol(protocol)
+        if serializer_protocol == Protocol.JSON5:
+            data = serialize_iobuf(
+                obj,
+                protocol=serializer_protocol,
+                options=Json5ProtocolWriterOptions(
+                    writer=JsonWriterOptions(indent_width=0)
+                ),
+            )
+        else:
+            data = serialize_iobuf(obj, protocol=serializer_protocol)
         return Any(
-            type=uri,
             typeHashPrefixSha2_256=hash_prefix,
             protocol=protocol,
-            data=serialize_iobuf(obj, protocol=serializer_protocol),
+            data=data,
         )
 
     def load(self, obj: Any) -> StructOrUnion:

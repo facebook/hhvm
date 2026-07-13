@@ -20,10 +20,9 @@ package "thrift.com/python/test/reflection/annotation_value_def"
 
 namespace py3 python_test.reflection
 
-// Structured annotation whose value field type is defined in a *different*
-// included program. Consumers apply this annotation (and reference the constant
-// below) without needing to include that program directly, so the value type is
-// only reachable transitively -- mirroring `@acl.Action`/`action.Value`.
+// Annotation whose value field type lives in another program. Consumers apply
+// it (via the constant below) without including that program, so the value type
+// is only transitively reachable -- mirroring `@acl.Action`/`action.Value`.
 struct WithNestedAnnotationValue {
   1: included_annotation_value_type.AnnotationValueStruct value;
 }

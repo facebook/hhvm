@@ -56,7 +56,6 @@ def get_reflection__decorated_struct():
     if not _HAS_REFLECTION:
         return None
     import facebook.thrift.annotation.cpp.thrift_types as _fbthrift__facebook__thrift__annotation__cpp__thrift_types  # noqa: F811
-    import facebook.thrift.annotation.cpp.thrift_types as _fbthrift__facebook__thrift__annotation__cpp__thrift_types  # noqa: F811
     spec = _StructSpec(
         name="decorated_struct",
         kind=_StructType.STRUCT,
@@ -84,11 +83,6 @@ def get_reflection__decorated_struct():
 def get_reflection__ContainerStruct():
     if not _HAS_REFLECTION:
         return None
-    import facebook.thrift.annotation.cpp.thrift_types as _fbthrift__facebook__thrift__annotation__cpp__thrift_types  # noqa: F811
-    import facebook.thrift.annotation.cpp.thrift_types as _fbthrift__facebook__thrift__annotation__cpp__thrift_types  # noqa: F811
-    import facebook.thrift.annotation.cpp.thrift_types as _fbthrift__facebook__thrift__annotation__cpp__thrift_types  # noqa: F811
-    import facebook.thrift.annotation.cpp.thrift_types as _fbthrift__facebook__thrift__annotation__cpp__thrift_types  # noqa: F811
-    import facebook.thrift.annotation.cpp.thrift_types as _fbthrift__facebook__thrift__annotation__cpp__thrift_types  # noqa: F811
     import facebook.thrift.annotation.cpp.thrift_types as _fbthrift__facebook__thrift__annotation__cpp__thrift_types  # noqa: F811
     class _fbthrift_field_2_type(_fbthrift_python_container_typedefs._ListTypedefBase):
         __slots__ = ()
@@ -501,10 +495,6 @@ def get_reflection__MinPadding():
         return None
     import facebook.thrift.annotation.cpp.thrift_types as _fbthrift__facebook__thrift__annotation__cpp__thrift_types  # noqa: F811
     import facebook.thrift.annotation.thrift.thrift_types as _fbthrift__facebook__thrift__annotation__thrift__thrift_types  # noqa: F811
-    import facebook.thrift.annotation.thrift.thrift_types as _fbthrift__facebook__thrift__annotation__thrift__thrift_types  # noqa: F811
-    import facebook.thrift.annotation.thrift.thrift_types as _fbthrift__facebook__thrift__annotation__thrift__thrift_types  # noqa: F811
-    import facebook.thrift.annotation.thrift.thrift_types as _fbthrift__facebook__thrift__annotation__thrift__thrift_types  # noqa: F811
-    import facebook.thrift.annotation.thrift.thrift_types as _fbthrift__facebook__thrift__annotation__thrift__thrift_types  # noqa: F811
     spec = _StructSpec(
         name="MinPadding",
         kind=_StructType.STRUCT,
@@ -588,8 +578,6 @@ def get_reflection__MinPadding():
 def get_reflection__MinPaddingWithCustomType():
     if not _HAS_REFLECTION:
         return None
-    import facebook.thrift.annotation.thrift.thrift_types as _fbthrift__facebook__thrift__annotation__thrift__thrift_types  # noqa: F811
-    import facebook.thrift.annotation.cpp.thrift_types as _fbthrift__facebook__thrift__annotation__cpp__thrift_types  # noqa: F811
     import facebook.thrift.annotation.thrift.thrift_types as _fbthrift__facebook__thrift__annotation__thrift__thrift_types  # noqa: F811
     import facebook.thrift.annotation.cpp.thrift_types as _fbthrift__facebook__thrift__annotation__cpp__thrift_types  # noqa: F811
     spec = _StructSpec(
@@ -753,7 +741,6 @@ def get_reflection__MyDataItem():
 def get_reflection__Renaming():
     if not _HAS_REFLECTION:
         return None
-    import facebook.thrift.annotation.cpp.thrift_types as _fbthrift__facebook__thrift__annotation__cpp__thrift_types  # noqa: F811
     import facebook.thrift.annotation.cpp.thrift_types as _fbthrift__facebook__thrift__annotation__cpp__thrift_types  # noqa: F811
     spec = _StructSpec(
         name="Renaming",
@@ -960,7 +947,6 @@ def get_reflection__IncompleteMapDep():
 def get_reflection__CompleteMap():
     if not _HAS_REFLECTION:
         return None
-    import facebook.thrift.annotation.cpp.thrift_types as _fbthrift__facebook__thrift__annotation__cpp__thrift_types  # noqa: F811
     import facebook.thrift.annotation.cpp.thrift_types as _fbthrift__facebook__thrift__annotation__cpp__thrift_types  # noqa: F811
     class _fbthrift_field_1_type(_fbthrift_python_container_typedefs._MapTypedefBase):
         __slots__ = ()
@@ -1218,9 +1204,6 @@ def get_reflection__AllocatorAware():
         return None
     import facebook.thrift.annotation.thrift.thrift_types as _fbthrift__facebook__thrift__annotation__thrift__thrift_types  # noqa: F811
     import facebook.thrift.annotation.cpp.thrift_types as _fbthrift__facebook__thrift__annotation__cpp__thrift_types  # noqa: F811
-    import facebook.thrift.annotation.cpp.thrift_types as _fbthrift__facebook__thrift__annotation__cpp__thrift_types  # noqa: F811
-    import facebook.thrift.annotation.cpp.thrift_types as _fbthrift__facebook__thrift__annotation__cpp__thrift_types  # noqa: F811
-    import facebook.thrift.annotation.cpp.thrift_types as _fbthrift__facebook__thrift__annotation__cpp__thrift_types  # noqa: F811
     spec = _StructSpec(
         name="AllocatorAware",
         kind=_StructType.STRUCT,
@@ -1329,7 +1312,6 @@ def get_reflection__AllocatorAware():
 def get_reflection__AllocatorAware2():
     if not _HAS_REFLECTION:
         return None
-    import facebook.thrift.annotation.thrift.thrift_types as _fbthrift__facebook__thrift__annotation__thrift__thrift_types  # noqa: F811
     import facebook.thrift.annotation.thrift.thrift_types as _fbthrift__facebook__thrift__annotation__thrift__thrift_types  # noqa: F811
     spec = _StructSpec(
         name="AllocatorAware2",

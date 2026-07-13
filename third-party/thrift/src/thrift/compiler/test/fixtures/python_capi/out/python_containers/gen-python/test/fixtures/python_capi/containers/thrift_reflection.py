@@ -44,9 +44,6 @@ def get_reflection__TemplateLists():
         return None
     import facebook.thrift.annotation.thrift.thrift_types as _fbthrift__facebook__thrift__annotation__thrift__thrift_types  # noqa: F811
     import facebook.thrift.annotation.cpp.thrift_types as _fbthrift__facebook__thrift__annotation__cpp__thrift_types  # noqa: F811
-    import facebook.thrift.annotation.cpp.thrift_types as _fbthrift__facebook__thrift__annotation__cpp__thrift_types  # noqa: F811
-    import facebook.thrift.annotation.cpp.thrift_types as _fbthrift__facebook__thrift__annotation__cpp__thrift_types  # noqa: F811
-    import facebook.thrift.annotation.cpp.thrift_types as _fbthrift__facebook__thrift__annotation__cpp__thrift_types  # noqa: F811
     class _fbthrift_field_1_type(_fbthrift_python_container_typedefs._ListTypedefBase):
         __slots__ = ()
         __name__ = "List__TemplateLists_std_string"
@@ -153,13 +150,6 @@ def get_reflection__TemplateLists():
 def get_reflection__TemplateSets():
     if not _HAS_REFLECTION:
         return None
-    import facebook.thrift.annotation.cpp.thrift_types as _fbthrift__facebook__thrift__annotation__cpp__thrift_types  # noqa: F811
-    import facebook.thrift.annotation.cpp.thrift_types as _fbthrift__facebook__thrift__annotation__cpp__thrift_types  # noqa: F811
-    import facebook.thrift.annotation.cpp.thrift_types as _fbthrift__facebook__thrift__annotation__cpp__thrift_types  # noqa: F811
-    import facebook.thrift.annotation.cpp.thrift_types as _fbthrift__facebook__thrift__annotation__cpp__thrift_types  # noqa: F811
-    import facebook.thrift.annotation.cpp.thrift_types as _fbthrift__facebook__thrift__annotation__cpp__thrift_types  # noqa: F811
-    import facebook.thrift.annotation.cpp.thrift_types as _fbthrift__facebook__thrift__annotation__cpp__thrift_types  # noqa: F811
-    import facebook.thrift.annotation.cpp.thrift_types as _fbthrift__facebook__thrift__annotation__cpp__thrift_types  # noqa: F811
     import facebook.thrift.annotation.cpp.thrift_types as _fbthrift__facebook__thrift__annotation__cpp__thrift_types  # noqa: F811
     class _fbthrift_field_1_type(_fbthrift_python_container_typedefs._SetTypedefBase):
         __slots__ = ()
@@ -314,13 +304,6 @@ def get_reflection__TemplateSets():
 def get_reflection__TemplateMaps():
     if not _HAS_REFLECTION:
         return None
-    import facebook.thrift.annotation.cpp.thrift_types as _fbthrift__facebook__thrift__annotation__cpp__thrift_types  # noqa: F811
-    import facebook.thrift.annotation.cpp.thrift_types as _fbthrift__facebook__thrift__annotation__cpp__thrift_types  # noqa: F811
-    import facebook.thrift.annotation.cpp.thrift_types as _fbthrift__facebook__thrift__annotation__cpp__thrift_types  # noqa: F811
-    import facebook.thrift.annotation.cpp.thrift_types as _fbthrift__facebook__thrift__annotation__cpp__thrift_types  # noqa: F811
-    import facebook.thrift.annotation.cpp.thrift_types as _fbthrift__facebook__thrift__annotation__cpp__thrift_types  # noqa: F811
-    import facebook.thrift.annotation.cpp.thrift_types as _fbthrift__facebook__thrift__annotation__cpp__thrift_types  # noqa: F811
-    import facebook.thrift.annotation.cpp.thrift_types as _fbthrift__facebook__thrift__annotation__cpp__thrift_types  # noqa: F811
     import facebook.thrift.annotation.cpp.thrift_types as _fbthrift__facebook__thrift__annotation__cpp__thrift_types  # noqa: F811
     class _fbthrift_field_1_type(_fbthrift_python_container_typedefs._MapTypedefBase):
         __slots__ = ()

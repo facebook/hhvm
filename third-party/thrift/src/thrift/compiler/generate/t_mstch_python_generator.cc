@@ -96,9 +96,8 @@ const t_const* get_transitive_annotation_of_adapter_or_null(
   return nullptr;
 }
 
-// Collects the distinct types (one per defining program) referenced by
-// struct/union/enum literals within a constant value tree, so the reflection
-// output can import the modules it emits qualified references to.
+// One type per defining program for the struct/union/enum literals in a const
+// value tree, so reflection can import the modules it references.
 void collect_annotation_value_types(
     const t_const_value& value,
     std::vector<const t_type*>& out,
@@ -127,6 +126,26 @@ void collect_annotation_value_types(
     default:
       break;
   }
+}
+
+// One type per defining program (excluding root_program) referenced by the
+// structured annotations on the nodes enumerate_nodes walks. Shared by the
+// service- and struct-reflection `reflection_import_types` properties.
+template <typename EnumerateNodes>
+std::vector<const t_type*> collect_reflection_import_types(
+    const t_program* root_program, const EnumerateNodes& enumerate_nodes) {
+  std::vector<const t_type*> types;
+  std::unordered_set<const t_program*> seen;
+  seen.insert(root_program);
+  auto collect = [&](const t_named& node) {
+    for (const t_const& annotation : node.structured_annotations()) {
+      if (const t_const_value* value = annotation.value()) {
+        collect_annotation_value_types(*value, types, seen);
+      }
+    }
+  };
+  enumerate_nodes(collect);
+  return types;
 }
 
 std::string mangle_program_path(
@@ -1007,33 +1026,23 @@ class t_mstch_python_prototypes_generator : public t_whisker_generator {
       }
       return to_array(functions, proto.of<t_function>());
     });
-    // Deduplicated types (one per defining program) whose modules the service
-    // reflection must import for the structured annotations it renders -- on
-    // the service, its functions, and their parameters -- including types
-    // nested in annotation values. Excludes the root program, which is imported
-    // at the top of the file.
+    // Annotation-value type modules to import for the service, its functions,
+    // and their parameters.
     def.property(
         "reflection_import_types", [this, &proto](const t_interface& self) {
-          std::vector<const t_type*> types;
-          std::unordered_set<const t_program*> seen;
-          seen.insert(get_program());
-          auto collect = [&](const t_named& node) {
-            for (const t_const& annotation : node.structured_annotations()) {
-              if (const t_const_value* value = annotation.value()) {
-                collect_annotation_value_types(*value, types, seen);
-              }
-            }
-          };
-          collect(self);
-          for (const t_function& func : self.functions()) {
-            if (func.is_interaction_constructor()) {
-              continue;
-            }
-            collect(func);
-            for (const t_field& param : func.params().fields()) {
-              collect(param);
-            }
-          }
+          std::vector<const t_type*> types = collect_reflection_import_types(
+              get_program(), [&](const auto& collect) {
+                collect(self);
+                for (const t_function& func : self.functions()) {
+                  if (func.is_interaction_constructor()) {
+                    continue;
+                  }
+                  collect(func);
+                  for (const t_field& param : func.params().fields()) {
+                    collect(param);
+                  }
+                }
+              });
           return to_type_array(proto, types.begin(), types.end());
         });
     // True when the interaction has at least one function emitted as an
@@ -1156,6 +1165,18 @@ class t_mstch_python_prototypes_generator : public t_whisker_generator {
     def.property("fields_ordered_by_id", [&proto](const t_structured& self) {
       return to_array(self.fields_id_order(), proto.of<t_field>());
     });
+    // Annotation-value type modules to import for the struct and its fields.
+    def.property(
+        "reflection_import_types", [this, &proto](const t_structured& self) {
+          std::vector<const t_type*> types = collect_reflection_import_types(
+              get_program(), [&](const auto& collect) {
+                collect(self);
+                for (const t_field& field : self.fields()) {
+                  collect(field);
+                }
+              });
+          return to_type_array(proto, types.begin(), types.end());
+        });
 
     return std::move(def).make();
   }

@@ -138,7 +138,6 @@ def get_reflection__FieldsInjectedWithIncludedStruct():
         return None
     import facebook.thrift.annotation.internal.thrift_types as _fbthrift__facebook__thrift__annotation__internal__thrift_types  # noqa: F811
     import facebook.thrift.annotation.thrift.thrift_types as _fbthrift__facebook__thrift__annotation__thrift__thrift_types  # noqa: F811
-    import facebook.thrift.annotation.thrift.thrift_types as _fbthrift__facebook__thrift__annotation__thrift__thrift_types  # noqa: F811
     spec = _StructSpec(
         name="FieldsInjectedWithIncludedStruct",
         kind=_StructType.STRUCT,

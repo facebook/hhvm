@@ -16,17 +16,21 @@
 
 include "thrift/lib/python/test/reflection/annotation_value_def.thrift"
 
-package "thrift.com/python/test/reflection/annotation_value_reflection"
+package "thrift.com/python/test/reflection/annotation_value_struct_reflection"
 
 namespace py3 python_test.reflection
 
 // The annotation value's type lives in included_annotation_value_type.thrift,
 // which this file does not include directly. Before the fix, the generated
-// thrift_services_reflection.py referenced that module without importing it,
-// raising NameError when inspect() materialized the service reflection.
+// thrift_reflection.py referenced that module without importing it, raising
+// NameError in inspect(). Applied to both the struct and a field to cover both
+// collection sites.
 @annotation_value_def.WithNestedAnnotationValue{
   value = annotation_value_def.kAnnotationValue,
 }
-service AnnotationValueReflectionService {
-  i32 ping();
+struct AnnotationValueReflectionStruct {
+  @annotation_value_def.WithNestedAnnotationValue{
+    value = annotation_value_def.kAnnotationValue,
+  }
+  1: i32 annotated_field;
 }

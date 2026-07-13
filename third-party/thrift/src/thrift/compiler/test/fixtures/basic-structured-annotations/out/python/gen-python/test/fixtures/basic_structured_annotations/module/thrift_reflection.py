@@ -237,16 +237,8 @@ def get_reflection__structured_annotation_nested():
 def get_reflection__MyStruct():
     if not _HAS_REFLECTION:
         return None
-    import test.fixtures.basic_structured_annotations.module.thrift_types as _fbthrift__test__fixtures__basic_structured_annotations__module__thrift_types  # noqa: F811
-    import test.fixtures.basic_structured_annotations.module.thrift_types as _fbthrift__test__fixtures__basic_structured_annotations__module__thrift_types  # noqa: F811
-    import test.fixtures.basic_structured_annotations.module.thrift_types as _fbthrift__test__fixtures__basic_structured_annotations__module__thrift_types  # noqa: F811
     import included.thrift_types as _fbthrift__included__thrift_types  # noqa: F811
     import namespaced.thrift_types as _fbthrift__namespaced__thrift_types  # noqa: F811
-    import test.fixtures.basic_structured_annotations.module.thrift_types as _fbthrift__test__fixtures__basic_structured_annotations__module__thrift_types  # noqa: F811
-    import test.fixtures.basic_structured_annotations.module.thrift_types as _fbthrift__test__fixtures__basic_structured_annotations__module__thrift_types  # noqa: F811
-    import test.fixtures.basic_structured_annotations.module.thrift_types as _fbthrift__test__fixtures__basic_structured_annotations__module__thrift_types  # noqa: F811
-    import test.fixtures.basic_structured_annotations.module.thrift_types as _fbthrift__test__fixtures__basic_structured_annotations__module__thrift_types  # noqa: F811
-    import test.fixtures.basic_structured_annotations.module.thrift_types as _fbthrift__test__fixtures__basic_structured_annotations__module__thrift_types  # noqa: F811
     spec = _StructSpec(
         name="MyStruct",
         kind=_StructType.STRUCT,
@@ -321,8 +313,6 @@ def get_reflection__MyStruct():
 def get_reflection__MyException():
     if not _HAS_REFLECTION:
         return None
-    import test.fixtures.basic_structured_annotations.module.thrift_types as _fbthrift__test__fixtures__basic_structured_annotations__module__thrift_types  # noqa: F811
-    import test.fixtures.basic_structured_annotations.module.thrift_types as _fbthrift__test__fixtures__basic_structured_annotations__module__thrift_types  # noqa: F811
     spec = _StructSpec(
         name="MyException",
         kind=_StructType.EXCEPTION,
@@ -350,9 +340,6 @@ def get_reflection__MyException():
 def get_reflection__MyUnion():
     if not _HAS_REFLECTION:
         return None
-    import test.fixtures.basic_structured_annotations.module.thrift_types as _fbthrift__test__fixtures__basic_structured_annotations__module__thrift_types  # noqa: F811
-    import test.fixtures.basic_structured_annotations.module.thrift_types as _fbthrift__test__fixtures__basic_structured_annotations__module__thrift_types  # noqa: F811
-    import test.fixtures.basic_structured_annotations.module.thrift_types as _fbthrift__test__fixtures__basic_structured_annotations__module__thrift_types  # noqa: F811
     spec = _StructSpec(
         name="MyUnion",
         kind=_StructType.UNION,

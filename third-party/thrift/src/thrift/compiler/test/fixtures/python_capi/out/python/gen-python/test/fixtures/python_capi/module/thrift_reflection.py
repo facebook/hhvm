@@ -224,7 +224,6 @@ def get_reflection__TransitiveDoubler():
 def get_reflection__DoubledPair():
     if not _HAS_REFLECTION:
         return None
-    import test.fixtures.python_capi.module.thrift_types as _fbthrift__test__fixtures__python_capi__module__thrift_types  # noqa: F811
     spec = _StructSpec(
         name="DoubledPair",
         kind=_StructType.STRUCT,
@@ -319,13 +318,7 @@ def get_reflection__PrimitiveStruct():
     if not _HAS_REFLECTION:
         return None
     import facebook.thrift.annotation.cpp.thrift_types as _fbthrift__facebook__thrift__annotation__cpp__thrift_types  # noqa: F811
-    import facebook.thrift.annotation.cpp.thrift_types as _fbthrift__facebook__thrift__annotation__cpp__thrift_types  # noqa: F811
-    import facebook.thrift.annotation.cpp.thrift_types as _fbthrift__facebook__thrift__annotation__cpp__thrift_types  # noqa: F811
     import facebook.thrift.annotation.thrift.thrift_types as _fbthrift__facebook__thrift__annotation__thrift__thrift_types  # noqa: F811
-    import facebook.thrift.annotation.cpp.thrift_types as _fbthrift__facebook__thrift__annotation__cpp__thrift_types  # noqa: F811
-    import facebook.thrift.annotation.cpp.thrift_types as _fbthrift__facebook__thrift__annotation__cpp__thrift_types  # noqa: F811
-    import facebook.thrift.annotation.cpp.thrift_types as _fbthrift__facebook__thrift__annotation__cpp__thrift_types  # noqa: F811
-    import facebook.thrift.annotation.cpp.thrift_types as _fbthrift__facebook__thrift__annotation__cpp__thrift_types  # noqa: F811
     spec = _StructSpec(
         name="PrimitiveStruct",
         kind=_StructType.STRUCT,
@@ -627,10 +620,6 @@ def get_reflection__ListStruct():
     if not _HAS_REFLECTION:
         return None
     import facebook.thrift.annotation.thrift.thrift_types as _fbthrift__facebook__thrift__annotation__thrift__thrift_types  # noqa: F811
-    import facebook.thrift.annotation.thrift.thrift_types as _fbthrift__facebook__thrift__annotation__thrift__thrift_types  # noqa: F811
-    import facebook.thrift.annotation.cpp.thrift_types as _fbthrift__facebook__thrift__annotation__cpp__thrift_types  # noqa: F811
-    import facebook.thrift.annotation.cpp.thrift_types as _fbthrift__facebook__thrift__annotation__cpp__thrift_types  # noqa: F811
-    import facebook.thrift.annotation.cpp.thrift_types as _fbthrift__facebook__thrift__annotation__cpp__thrift_types  # noqa: F811
     import facebook.thrift.annotation.cpp.thrift_types as _fbthrift__facebook__thrift__annotation__cpp__thrift_types  # noqa: F811
     class _fbthrift_field_1_type(_fbthrift_python_container_typedefs._ListTypedefBase):
         __slots__ = ()
@@ -823,9 +812,6 @@ def get_reflection__SetStruct():
         return None
     import facebook.thrift.annotation.cpp.thrift_types as _fbthrift__facebook__thrift__annotation__cpp__thrift_types  # noqa: F811
     import facebook.thrift.annotation.thrift.thrift_types as _fbthrift__facebook__thrift__annotation__thrift__thrift_types  # noqa: F811
-    import facebook.thrift.annotation.cpp.thrift_types as _fbthrift__facebook__thrift__annotation__cpp__thrift_types  # noqa: F811
-    import facebook.thrift.annotation.cpp.thrift_types as _fbthrift__facebook__thrift__annotation__cpp__thrift_types  # noqa: F811
-    import facebook.thrift.annotation.cpp.thrift_types as _fbthrift__facebook__thrift__annotation__cpp__thrift_types  # noqa: F811
     class _fbthrift_field_1_type(_fbthrift_python_container_typedefs._SetTypedefBase):
         __slots__ = ()
         __name__ = "Set__SetStruct_enumz"
@@ -978,9 +964,6 @@ def get_reflection__MapStruct():
         return None
     import facebook.thrift.annotation.cpp.thrift_types as _fbthrift__facebook__thrift__annotation__cpp__thrift_types  # noqa: F811
     import facebook.thrift.annotation.thrift.thrift_types as _fbthrift__facebook__thrift__annotation__thrift__thrift_types  # noqa: F811
-    import facebook.thrift.annotation.cpp.thrift_types as _fbthrift__facebook__thrift__annotation__cpp__thrift_types  # noqa: F811
-    import facebook.thrift.annotation.cpp.thrift_types as _fbthrift__facebook__thrift__annotation__cpp__thrift_types  # noqa: F811
-    import facebook.thrift.annotation.cpp.thrift_types as _fbthrift__facebook__thrift__annotation__cpp__thrift_types  # noqa: F811
     class _fbthrift_field_1_type(_fbthrift_python_container_typedefs._MapTypedefBase):
         __slots__ = ()
         __name__ = "Map__MapStruct_enumz"
@@ -1199,7 +1182,6 @@ def get_reflection__ComposeStruct():
         return None
     import facebook.thrift.annotation.thrift.thrift_types as _fbthrift__facebook__thrift__annotation__thrift__thrift_types  # noqa: F811
     import facebook.thrift.annotation.cpp.thrift_types as _fbthrift__facebook__thrift__annotation__cpp__thrift_types  # noqa: F811
-    import facebook.thrift.annotation.cpp.thrift_types as _fbthrift__facebook__thrift__annotation__cpp__thrift_types  # noqa: F811
     class _fbthrift_field_7_type(_fbthrift_python_container_typedefs._ListTypedefBase):
         __slots__ = ()
         __name__ = "List__ComposeStruct_friends"
@@ -1353,10 +1335,6 @@ def get_reflection__Onion():
         return None
     import facebook.thrift.annotation.cpp.thrift_types as _fbthrift__facebook__thrift__annotation__cpp__thrift_types  # noqa: F811
     import facebook.thrift.annotation.thrift.thrift_types as _fbthrift__facebook__thrift__annotation__thrift__thrift_types  # noqa: F811
-    import facebook.thrift.annotation.cpp.thrift_types as _fbthrift__facebook__thrift__annotation__cpp__thrift_types  # noqa: F811
-    import facebook.thrift.annotation.cpp.thrift_types as _fbthrift__facebook__thrift__annotation__cpp__thrift_types  # noqa: F811
-    import facebook.thrift.annotation.cpp.thrift_types as _fbthrift__facebook__thrift__annotation__cpp__thrift_types  # noqa: F811
-    import facebook.thrift.annotation.cpp.thrift_types as _fbthrift__facebook__thrift__annotation__cpp__thrift_types  # noqa: F811
     class _fbthrift_field_6_type(_fbthrift_python_container_typedefs._SetTypedefBase):
         __slots__ = ()
         __name__ = "Set__Onion_intSet"
@@ -1485,7 +1463,6 @@ def get_reflection__Onion():
 def get_reflection__SomeBinary():
     if not _HAS_REFLECTION:
         return None
-    import facebook.thrift.annotation.cpp.thrift_types as _fbthrift__facebook__thrift__annotation__cpp__thrift_types  # noqa: F811
     import facebook.thrift.annotation.cpp.thrift_types as _fbthrift__facebook__thrift__annotation__cpp__thrift_types  # noqa: F811
     spec = _StructSpec(
         name="SomeBinary",

@@ -107,17 +107,8 @@ import {{include.included_module_path}}.thrift_types as {{include.included_modul
 def get_reflection__{{struct.py_name}}():
     if not _HAS_REFLECTION:
         return None
-  {{#each struct.structured_annotations as |annotation|}}
-    {{#if annotation.type.structured?}}
-    import {{annotation.type.module_name}} as {{annotation.type.module_mangle}}  # noqa: F811
-    {{/if annotation.type.structured?}}
-  {{/each}}
-  {{#each struct.fields_ordered_by_id as |field|}}
-    {{#each field.structured_annotations as |annotation|}}
-      {{#if annotation.type.structured?}}
-    import {{annotation.type.module_name}} as {{annotation.type.module_mangle}}  # noqa: F811
-      {{/if annotation.type.structured?}}
-    {{/each}}
+  {{#each struct.reflection_import_types as |type|}}
+    import {{type.module_name}} as {{type.module_mangle}}  # noqa: F811
   {{/each}}
   {{#each struct.fields_ordered_by_id as |field|}}
     {{#if (and field.type.container? (not field.type.typedef?))}}

@@ -18,9 +18,8 @@ package "thrift.com/python/test/reflection/included_annotation_value_type"
 
 namespace py3 python_test.reflection
 
-// The type used as an annotation's value. It lives in its own program so that a
-// service applying the annotation only reaches it transitively, mirroring the
-// real `action.Value` inside `@acl.Action{value = action.Value{...}}`.
+// An annotation value's type, in its own program so consumers reach it only
+// transitively -- mirroring `action.Value` in `@acl.Action{value = ...}`.
 struct AnnotationValueStruct {
   1: string name;
 }

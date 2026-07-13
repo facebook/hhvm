@@ -106,7 +106,6 @@ def get_reflection__InvariantTypes():
     if not _HAS_REFLECTION:
         return None
     import facebook.thrift.annotation.thrift.thrift_types as _fbthrift__facebook__thrift__annotation__thrift__thrift_types  # noqa: F811
-    import facebook.thrift.annotation.thrift.thrift_types as _fbthrift__facebook__thrift__annotation__thrift__thrift_types  # noqa: F811
     class _fbthrift_field_1_type(_fbthrift_python_container_typedefs._MapTypedefBase):
         __slots__ = ()
         __name__ = "Map__InvariantTypes_struct_map"

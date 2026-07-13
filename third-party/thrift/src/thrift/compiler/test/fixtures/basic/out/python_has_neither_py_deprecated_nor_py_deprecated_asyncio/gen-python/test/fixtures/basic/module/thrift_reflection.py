@@ -462,7 +462,6 @@ def get_reflection__ReservedKeyword():
     if not _HAS_REFLECTION:
         return None
     import facebook.thrift.annotation.hack.thrift_types as _fbthrift__facebook__thrift__annotation__hack__thrift_types  # noqa: F811
-    import facebook.thrift.annotation.hack.thrift_types as _fbthrift__facebook__thrift__annotation__hack__thrift_types  # noqa: F811
     spec = _StructSpec(
         name="ReservedKeyword",
         kind=_StructType.STRUCT,
@@ -490,7 +489,6 @@ def get_reflection__ReservedKeyword():
 def get_reflection__UnionToBeRenamed():
     if not _HAS_REFLECTION:
         return None
-    import facebook.thrift.annotation.hack.thrift_types as _fbthrift__facebook__thrift__annotation__hack__thrift_types  # noqa: F811
     import facebook.thrift.annotation.hack.thrift_types as _fbthrift__facebook__thrift__annotation__hack__thrift_types  # noqa: F811
     spec = _StructSpec(
         name="UnionToBeRenamed",

@@ -97,8 +97,6 @@ def get_reflection__AnnotationWithContainers():
 def get_reflection__MyStruct():
     if not _HAS_REFLECTION:
         return None
-    import with_containers.thrift_types as _fbthrift__with_containers__thrift_types  # noqa: F811
-    import with_containers.thrift_types as _fbthrift__with_containers__thrift_types  # noqa: F811
     spec = _StructSpec(
         name="MyStruct",
         kind=_StructType.STRUCT,

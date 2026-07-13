@@ -44,7 +44,6 @@ def get_reflection__Fields():
     if not _HAS_REFLECTION:
         return None
     import facebook.thrift.annotation.thrift.thrift_types as _fbthrift__facebook__thrift__annotation__thrift__thrift_types  # noqa: F811
-    import facebook.thrift.annotation.thrift.thrift_types as _fbthrift__facebook__thrift__annotation__thrift__thrift_types  # noqa: F811
     spec = _StructSpec(
         name="Fields",
         kind=_StructType.STRUCT,

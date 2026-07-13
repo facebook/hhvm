@@ -31,21 +31,16 @@ from thrift.python.types import ServiceInterface
 
 
 class AnnotationValueReflectionTest(unittest.TestCase):
-    """Regression test for the reflection-codegen annotation-value import bug.
+    """Regression test for the services-reflection annotation-value import bug.
 
-    A structured annotation on the service (`@annotation_value_def.
-    WithNestedAnnotationValue{value = ...}`) carries a value whose type lives in
-    `included_annotation_value_type.thrift` -- a program the service file only
-    includes transitively. The generated thrift_services_reflection.py emitted a
-    qualified `_fbthrift__..._thrift_types.AnnotationValueStruct` reference for
-    that value without importing the module, so calling get_reflection__<svc>()
-    (via inspect()) raised NameError. inspect() must instead return a full
-    ServiceSpec exposing the annotation.
+    The service annotation's value has a type from a transitively-included
+    program. The generated thrift_services_reflection.py referenced that
+    module without importing it, so inspect() raised NameError instead of
+    returning a ServiceSpec.
     """
 
     def test_inspect_does_not_raise_and_returns_spec(self) -> None:
-        # Before the fix this raised NameError while building the annotation
-        # value references inside get_reflection__<svc>().
+        # Raised NameError before the fix.
         spec = inspect(cast(Type[ServiceInterface], AnnotationValueReflectionService))
         self.assertIsNotNone(
             spec, "inspect() returned None -- reflection module failed to build"
@@ -66,8 +61,7 @@ class AnnotationValueReflectionTest(unittest.TestCase):
         annotation = spec.structured_annotations[
             "annotation_value_def.WithNestedAnnotationValue"
         ]
-        # The outer annotation struct and its nested value (whose type is only
-        # transitively included) must both resolve to real classes.
+        # Outer annotation and its transitively-typed nested value must resolve.
         outer = annotation.value
         assert isinstance(outer, ConstantStructSpec)
         nested = outer.fields["value"].value

@@ -18,7 +18,6 @@ package thrift
 
 import (
 	"context"
-	"errors"
 
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
@@ -97,8 +96,10 @@ func (pf *interceptorProcessorFunction) RunContext(ctx context.Context, args typ
 
 // Wraps error into ApplicationException (if it's not one already)
 func maybeWrapApplicationException(err error) *types.ApplicationException {
-	var appException *types.ApplicationException
-	if errors.As(err, &appException) {
+	// Type assertion is intentional (vs. `errors.As`)
+	// We care about the immediate (outermost) error,
+	// and not intermediate errors within the chain.
+	if appException, ok := err.(*types.ApplicationException); ok {
 		return appException
 	}
 	return types.NewApplicationException(types.UNKNOWN_APPLICATION_EXCEPTION, err.Error())

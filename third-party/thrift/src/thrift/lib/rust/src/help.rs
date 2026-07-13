@@ -115,6 +115,21 @@ where
             assert_eq!(exn.exn_is_declared(), res_type == ResultType::Error);
             ctx_stack.on_error(exn.exn_is_declared(), &exn.exn_value())?;
             rctxt.set_user_exception_header(exn.exn_name(), &exn.exn_value())?;
+            // Propagate error classification for declared exceptions so the
+            // caller (e.g. ServiceRouter) can distinguish client- vs
+            // server-blamed exceptions. Skip when fully unspecified to avoid
+            // adding wire metadata for unannotated exceptions.
+            if exn.exn_is_declared() {
+                let blame = exn.exn_blame();
+                let kind = exn.exn_kind();
+                let safety = exn.exn_safety();
+                if blame != crate::ExceptionBlame::Unspecified
+                    || kind != crate::ExceptionKind::Unspecified
+                    || safety != crate::ExceptionSafety::Unspecified
+                {
+                    rctxt.set_error_classification(blame, kind, safety)?;
+                }
+            }
             res_type
         }
     };

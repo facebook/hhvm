@@ -37,6 +37,18 @@ pub trait RequestContext {
     ) -> Result<Self::ContextStack, Error>;
 
     fn set_user_exception_header(&self, ex_type: &str, ex_reason: &str) -> Result<(), Error>;
+
+    /// Attach error classification (blame/kind/safety) for a declared exception
+    /// so it can be propagated to the caller on the wire. Defaults to a no-op;
+    /// server request contexts that support it (e.g. srserver) override this.
+    fn set_error_classification(
+        &self,
+        _blame: crate::exceptions::ExceptionBlame,
+        _kind: crate::exceptions::ExceptionKind,
+        _safety: crate::exceptions::ExceptionSafety,
+    ) -> Result<(), Error> {
+        Ok(())
+    }
 }
 
 pub struct DummyRequestContext<Name: ?Sized, Frame> {

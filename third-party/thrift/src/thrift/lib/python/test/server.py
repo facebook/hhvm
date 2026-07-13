@@ -30,6 +30,16 @@ from test_thrift.thrift_types import Color, easy
 from thrift.py3.server import SocketAddress
 from thrift.python.server import ThriftServer
 
+# White-box: the runtime holds strong refs to in-flight onStopRequested lifecycle
+# tasks here so asyncio's weak task bookkeeping can't GC them before they run.
+# pyre-ignore[21]: Cython module has no type stub for pyre.
+from thrift.python.server_impl import python_async_processor
+
+# Typed alias for the same runtime set object (the Cython module has no stub).
+_inflight_lifecycle_tasks: set[asyncio.Task[object]] = (
+    python_async_processor._inflight_lifecycle_tasks  # pyre-ignore[16]
+)
+
 
 @contextmanager
 def event_loop() -> Iterator[asyncio.AbstractEventLoop]:
@@ -119,6 +129,26 @@ class CancelOnStopRequestedHandler(Handler):
         await asyncio.sleep(0)
 
 
+class BlockingOnStopRequestedHandler(Handler):
+    # onStopRequested suspends mid-flight, modelling a hook still running as the
+    # server tears down, so a test can observe the in-flight lifecycle task.
+    def __init__(self) -> None:
+        super().__init__()
+        self.hook_started: asyncio.Event = asyncio.Event()
+        self.release_hook: asyncio.Event = asyncio.Event()
+        self.lifecycle_task: asyncio.Task[object] | None = None
+
+    async def onStopRequested(self) -> None:
+        # onStopRequested is awaited inside the runtime's `lifecycle_coro`, not
+        # wrapped in a new task, so the currently running task IS the exact
+        # lifecycle task the runtime tracks. Capturing it here lets the test
+        # assert on that specific task rather than on shared set state.
+        self.lifecycle_task = asyncio.current_task()
+        self.hook_started.set()
+        await self.release_hook.wait()
+        self.on_stop_requested = True
+
+
 class ServicesTests(unittest.TestCase):
     def test_handler_acontext(self) -> None:
         async def inner() -> None:
@@ -201,6 +231,40 @@ class ServicesTests(unittest.TestCase):
     def test_on_stop_requested_cancellation_does_not_crash(self) -> None:
         handler = CancelOnStopRequestedHandler()
         asyncio.run(self.get_address(handler))
+        self.assertTrue(handler.on_stop_requested)
+
+    def test_on_stop_requested_task_is_strongly_referenced(self) -> None:
+        # Regression for the shutdown BrokenPromise crash: while an
+        # onStopRequested hook is in flight, the runtime must keep a strong
+        # reference to its lifecycle task so asyncio's weak bookkeeping cannot
+        # GC it before it completes (which would break the C++ promise and
+        # FATAL-abort the worker). Mirrors _inflight_termination_tasks.
+        handler: BlockingOnStopRequestedHandler = BlockingOnStopRequestedHandler()
+
+        async def inner() -> None:
+            loop = asyncio.get_running_loop()
+            server = ThriftServer(handler, port=0)
+            serve_task = loop.create_task(server.serve())
+            await server.get_address()
+            server.stop()
+            # Let the stop path schedule onStopRequested and run it up to its
+            # suspension point, then grab the exact task the runtime tracks.
+            await asyncio.wait_for(handler.hook_started.wait(), timeout=5)
+            task = handler.lifecycle_task
+            assert task is not None
+            # The runtime strongly references the in-flight lifecycle task...
+            self.assertIn(task, _inflight_lifecycle_tasks)
+            self.assertFalse(task.done())
+            # ...so it survives a GC pass while suspended.
+            gc.collect()
+            self.assertIn(task, _inflight_lifecycle_tasks)
+            handler.release_hook.set()
+            await serve_task
+            # Once settled, the done-callback discards exactly this task.
+            await asyncio.sleep(0)
+            self.assertNotIn(task, _inflight_lifecycle_tasks)
+
+        asyncio.run(inner())
         self.assertTrue(handler.on_stop_requested)
 
     def test_threaded_destruction(self) -> None:

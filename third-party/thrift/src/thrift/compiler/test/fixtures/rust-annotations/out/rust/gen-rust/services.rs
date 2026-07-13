@@ -56,6 +56,24 @@ pub mod service1 {
                 Self::ApplicationException(aexn) => aexn.exn_is_declared(),
             }
         }
+
+        fn exn_blame(&self) -> ::fbthrift::ExceptionBlame {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_blame(),
+            }
+        }
+
+        fn exn_kind(&self) -> ::fbthrift::ExceptionKind {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_kind(),
+            }
+        }
+
+        fn exn_safety(&self) -> ::fbthrift::ExceptionSafety {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_safety(),
+            }
+        }
     }
 
     impl ::fbthrift::ResultInfo for RExn {
@@ -145,6 +163,24 @@ pub mod s2_proxy {
         fn exn_is_declared(&self) -> bool {
             match self {
                 Self::ApplicationException(aexn) => aexn.exn_is_declared(),
+            }
+        }
+
+        fn exn_blame(&self) -> ::fbthrift::ExceptionBlame {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_blame(),
+            }
+        }
+
+        fn exn_kind(&self) -> ::fbthrift::ExceptionKind {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_kind(),
+            }
+        }
+
+        fn exn_safety(&self) -> ::fbthrift::ExceptionSafety {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_safety(),
             }
         }
     }
@@ -249,6 +285,24 @@ pub mod all_methods {
                 Self::ApplicationException(aexn) => aexn.exn_is_declared(),
             }
         }
+
+        fn exn_blame(&self) -> ::fbthrift::ExceptionBlame {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_blame(),
+            }
+        }
+
+        fn exn_kind(&self) -> ::fbthrift::ExceptionKind {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_kind(),
+            }
+        }
+
+        fn exn_safety(&self) -> ::fbthrift::ExceptionSafety {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_safety(),
+            }
+        }
     }
 
     impl ::fbthrift::ResultInfo for FooExn {
@@ -337,6 +391,27 @@ pub mod all_methods {
             match self {
                 Self::ApplicationException(aexn) => aexn.exn_is_declared(),
                 Self::se(exn) => exn.exn_is_declared(),
+            }
+        }
+
+        fn exn_blame(&self) -> ::fbthrift::ExceptionBlame {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_blame(),
+                Self::se(exn) => exn.exn_blame(),
+            }
+        }
+
+        fn exn_kind(&self) -> ::fbthrift::ExceptionKind {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_kind(),
+                Self::se(exn) => exn.exn_kind(),
+            }
+        }
+
+        fn exn_safety(&self) -> ::fbthrift::ExceptionSafety {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_safety(),
+                Self::se(exn) => exn.exn_safety(),
             }
         }
     }
@@ -451,6 +526,24 @@ pub mod one_method {
                 Self::ApplicationException(aexn) => aexn.exn_is_declared(),
             }
         }
+
+        fn exn_blame(&self) -> ::fbthrift::ExceptionBlame {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_blame(),
+            }
+        }
+
+        fn exn_kind(&self) -> ::fbthrift::ExceptionKind {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_kind(),
+            }
+        }
+
+        fn exn_safety(&self) -> ::fbthrift::ExceptionSafety {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_safety(),
+            }
+        }
     }
 
     impl ::fbthrift::ResultInfo for FooExn {
@@ -528,6 +621,27 @@ pub mod one_method {
             match self {
                 Self::ApplicationException(aexn) => aexn.exn_is_declared(),
                 Self::se(exn) => exn.exn_is_declared(),
+            }
+        }
+
+        fn exn_blame(&self) -> ::fbthrift::ExceptionBlame {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_blame(),
+                Self::se(exn) => exn.exn_blame(),
+            }
+        }
+
+        fn exn_kind(&self) -> ::fbthrift::ExceptionKind {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_kind(),
+                Self::se(exn) => exn.exn_kind(),
+            }
+        }
+
+        fn exn_safety(&self) -> ::fbthrift::ExceptionSafety {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_safety(),
+                Self::se(exn) => exn.exn_safety(),
             }
         }
     }
@@ -642,6 +756,24 @@ pub mod one_method_opt_out {
                 Self::ApplicationException(aexn) => aexn.exn_is_declared(),
             }
         }
+
+        fn exn_blame(&self) -> ::fbthrift::ExceptionBlame {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_blame(),
+            }
+        }
+
+        fn exn_kind(&self) -> ::fbthrift::ExceptionKind {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_kind(),
+            }
+        }
+
+        fn exn_safety(&self) -> ::fbthrift::ExceptionSafety {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_safety(),
+            }
+        }
     }
 
     impl ::fbthrift::ResultInfo for FooExn {
@@ -719,6 +851,27 @@ pub mod one_method_opt_out {
             match self {
                 Self::ApplicationException(aexn) => aexn.exn_is_declared(),
                 Self::se(exn) => exn.exn_is_declared(),
+            }
+        }
+
+        fn exn_blame(&self) -> ::fbthrift::ExceptionBlame {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_blame(),
+                Self::se(exn) => exn.exn_blame(),
+            }
+        }
+
+        fn exn_kind(&self) -> ::fbthrift::ExceptionKind {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_kind(),
+                Self::se(exn) => exn.exn_kind(),
+            }
+        }
+
+        fn exn_safety(&self) -> ::fbthrift::ExceptionSafety {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_safety(),
+                Self::se(exn) => exn.exn_safety(),
             }
         }
     }

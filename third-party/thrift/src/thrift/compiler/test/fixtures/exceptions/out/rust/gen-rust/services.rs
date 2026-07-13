@@ -56,6 +56,24 @@ pub mod raiser {
                 Self::ApplicationException(aexn) => aexn.exn_is_declared(),
             }
         }
+
+        fn exn_blame(&self) -> ::fbthrift::ExceptionBlame {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_blame(),
+            }
+        }
+
+        fn exn_kind(&self) -> ::fbthrift::ExceptionKind {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_kind(),
+            }
+        }
+
+        fn exn_safety(&self) -> ::fbthrift::ExceptionSafety {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_safety(),
+            }
+        }
     }
 
     impl ::fbthrift::ResultInfo for DoBlandExn {
@@ -153,6 +171,33 @@ pub mod raiser {
                 Self::b(exn) => exn.exn_is_declared(),
                 Self::f(exn) => exn.exn_is_declared(),
                 Self::s(exn) => exn.exn_is_declared(),
+            }
+        }
+
+        fn exn_blame(&self) -> ::fbthrift::ExceptionBlame {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_blame(),
+                Self::b(exn) => exn.exn_blame(),
+                Self::f(exn) => exn.exn_blame(),
+                Self::s(exn) => exn.exn_blame(),
+            }
+        }
+
+        fn exn_kind(&self) -> ::fbthrift::ExceptionKind {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_kind(),
+                Self::b(exn) => exn.exn_kind(),
+                Self::f(exn) => exn.exn_kind(),
+                Self::s(exn) => exn.exn_kind(),
+            }
+        }
+
+        fn exn_safety(&self) -> ::fbthrift::ExceptionSafety {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_safety(),
+                Self::b(exn) => exn.exn_safety(),
+                Self::f(exn) => exn.exn_safety(),
+                Self::s(exn) => exn.exn_safety(),
             }
         }
     }
@@ -273,6 +318,24 @@ pub mod raiser {
                 Self::ApplicationException(aexn) => aexn.exn_is_declared(),
             }
         }
+
+        fn exn_blame(&self) -> ::fbthrift::ExceptionBlame {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_blame(),
+            }
+        }
+
+        fn exn_kind(&self) -> ::fbthrift::ExceptionKind {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_kind(),
+            }
+        }
+
+        fn exn_safety(&self) -> ::fbthrift::ExceptionSafety {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_safety(),
+            }
+        }
     }
 
     impl ::fbthrift::ResultInfo for Get200Exn {
@@ -370,6 +433,33 @@ pub mod raiser {
                 Self::f(exn) => exn.exn_is_declared(),
                 Self::b(exn) => exn.exn_is_declared(),
                 Self::s(exn) => exn.exn_is_declared(),
+            }
+        }
+
+        fn exn_blame(&self) -> ::fbthrift::ExceptionBlame {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_blame(),
+                Self::f(exn) => exn.exn_blame(),
+                Self::b(exn) => exn.exn_blame(),
+                Self::s(exn) => exn.exn_blame(),
+            }
+        }
+
+        fn exn_kind(&self) -> ::fbthrift::ExceptionKind {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_kind(),
+                Self::f(exn) => exn.exn_kind(),
+                Self::b(exn) => exn.exn_kind(),
+                Self::s(exn) => exn.exn_kind(),
+            }
+        }
+
+        fn exn_safety(&self) -> ::fbthrift::ExceptionSafety {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_safety(),
+                Self::f(exn) => exn.exn_safety(),
+                Self::b(exn) => exn.exn_safety(),
+                Self::s(exn) => exn.exn_safety(),
             }
         }
     }

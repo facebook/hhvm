@@ -88,6 +88,15 @@ impl ::fbthrift::ExceptionInfo for {{structured.rust_name}} {
 
     #[inline]
     fn exn_is_declared(&self) -> bool { true }
+
+    #[inline]
+    fn exn_blame(&self) -> ::fbthrift::ExceptionBlame { ::fbthrift::ExceptionBlame::{{structured.rust_exn_blame}} }
+
+    #[inline]
+    fn exn_kind(&self) -> ::fbthrift::ExceptionKind { ::fbthrift::ExceptionKind::{{structured.rust_exn_kind}} }
+
+    #[inline]
+    fn exn_safety(&self) -> ::fbthrift::ExceptionSafety { ::fbthrift::ExceptionSafety::{{structured.rust_exn_safety}} }
 }
 
 impl ::std::error::Error for {{structured.rust_name}} {}

@@ -27,6 +27,15 @@ impl ::fbthrift::ExceptionInfo for Fiery {
 
     #[inline]
     fn exn_is_declared(&self) -> bool { true }
+
+    #[inline]
+    fn exn_blame(&self) -> ::fbthrift::ExceptionBlame { ::fbthrift::ExceptionBlame::Server }
+
+    #[inline]
+    fn exn_kind(&self) -> ::fbthrift::ExceptionKind { ::fbthrift::ExceptionKind::Transient }
+
+    #[inline]
+    fn exn_safety(&self) -> ::fbthrift::ExceptionSafety { ::fbthrift::ExceptionSafety::Unspecified }
 }
 
 impl ::std::error::Error for Fiery {}
@@ -55,6 +64,15 @@ impl ::fbthrift::ExceptionInfo for Serious {
 
     #[inline]
     fn exn_is_declared(&self) -> bool { true }
+
+    #[inline]
+    fn exn_blame(&self) -> ::fbthrift::ExceptionBlame { ::fbthrift::ExceptionBlame::Unspecified }
+
+    #[inline]
+    fn exn_kind(&self) -> ::fbthrift::ExceptionKind { ::fbthrift::ExceptionKind::Stateful }
+
+    #[inline]
+    fn exn_safety(&self) -> ::fbthrift::ExceptionSafety { ::fbthrift::ExceptionSafety::Safe }
 }
 
 impl ::std::error::Error for Serious {}
@@ -84,6 +102,15 @@ impl ::fbthrift::ExceptionInfo for ComplexFieldNames {
 
     #[inline]
     fn exn_is_declared(&self) -> bool { true }
+
+    #[inline]
+    fn exn_blame(&self) -> ::fbthrift::ExceptionBlame { ::fbthrift::ExceptionBlame::Client }
+
+    #[inline]
+    fn exn_kind(&self) -> ::fbthrift::ExceptionKind { ::fbthrift::ExceptionKind::Unspecified }
+
+    #[inline]
+    fn exn_safety(&self) -> ::fbthrift::ExceptionSafety { ::fbthrift::ExceptionSafety::Unspecified }
 }
 
 impl ::std::error::Error for ComplexFieldNames {}
@@ -113,6 +140,15 @@ impl ::fbthrift::ExceptionInfo for CustomFieldNames {
 
     #[inline]
     fn exn_is_declared(&self) -> bool { true }
+
+    #[inline]
+    fn exn_blame(&self) -> ::fbthrift::ExceptionBlame { ::fbthrift::ExceptionBlame::Unspecified }
+
+    #[inline]
+    fn exn_kind(&self) -> ::fbthrift::ExceptionKind { ::fbthrift::ExceptionKind::Unspecified }
+
+    #[inline]
+    fn exn_safety(&self) -> ::fbthrift::ExceptionSafety { ::fbthrift::ExceptionSafety::Unspecified }
 }
 
 impl ::std::error::Error for CustomFieldNames {}
@@ -142,6 +178,15 @@ impl ::fbthrift::ExceptionInfo for ExceptionWithPrimitiveField {
 
     #[inline]
     fn exn_is_declared(&self) -> bool { true }
+
+    #[inline]
+    fn exn_blame(&self) -> ::fbthrift::ExceptionBlame { ::fbthrift::ExceptionBlame::Unspecified }
+
+    #[inline]
+    fn exn_kind(&self) -> ::fbthrift::ExceptionKind { ::fbthrift::ExceptionKind::Unspecified }
+
+    #[inline]
+    fn exn_safety(&self) -> ::fbthrift::ExceptionSafety { ::fbthrift::ExceptionSafety::Unspecified }
 }
 
 impl ::std::error::Error for ExceptionWithPrimitiveField {}
@@ -171,6 +216,15 @@ impl ::fbthrift::ExceptionInfo for ExceptionWithStructuredAnnotation {
 
     #[inline]
     fn exn_is_declared(&self) -> bool { true }
+
+    #[inline]
+    fn exn_blame(&self) -> ::fbthrift::ExceptionBlame { ::fbthrift::ExceptionBlame::Unspecified }
+
+    #[inline]
+    fn exn_kind(&self) -> ::fbthrift::ExceptionKind { ::fbthrift::ExceptionKind::Unspecified }
+
+    #[inline]
+    fn exn_safety(&self) -> ::fbthrift::ExceptionSafety { ::fbthrift::ExceptionSafety::Unspecified }
 }
 
 impl ::std::error::Error for ExceptionWithStructuredAnnotation {}
@@ -198,6 +252,15 @@ impl ::fbthrift::ExceptionInfo for Banal {
 
     #[inline]
     fn exn_is_declared(&self) -> bool { true }
+
+    #[inline]
+    fn exn_blame(&self) -> ::fbthrift::ExceptionBlame { ::fbthrift::ExceptionBlame::Client }
+
+    #[inline]
+    fn exn_kind(&self) -> ::fbthrift::ExceptionKind { ::fbthrift::ExceptionKind::Permanent }
+
+    #[inline]
+    fn exn_safety(&self) -> ::fbthrift::ExceptionSafety { ::fbthrift::ExceptionSafety::Safe }
 }
 
 impl ::std::error::Error for Banal {}

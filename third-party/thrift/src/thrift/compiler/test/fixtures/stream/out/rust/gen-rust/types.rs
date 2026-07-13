@@ -26,6 +26,15 @@ impl ::fbthrift::ExceptionInfo for FooStreamEx {
 
     #[inline]
     fn exn_is_declared(&self) -> bool { true }
+
+    #[inline]
+    fn exn_blame(&self) -> ::fbthrift::ExceptionBlame { ::fbthrift::ExceptionBlame::Server }
+
+    #[inline]
+    fn exn_kind(&self) -> ::fbthrift::ExceptionKind { ::fbthrift::ExceptionKind::Unspecified }
+
+    #[inline]
+    fn exn_safety(&self) -> ::fbthrift::ExceptionSafety { ::fbthrift::ExceptionSafety::Safe }
 }
 
 impl ::std::error::Error for FooStreamEx {}
@@ -53,6 +62,15 @@ impl ::fbthrift::ExceptionInfo for FooEx {
 
     #[inline]
     fn exn_is_declared(&self) -> bool { true }
+
+    #[inline]
+    fn exn_blame(&self) -> ::fbthrift::ExceptionBlame { ::fbthrift::ExceptionBlame::Server }
+
+    #[inline]
+    fn exn_kind(&self) -> ::fbthrift::ExceptionKind { ::fbthrift::ExceptionKind::Unspecified }
+
+    #[inline]
+    fn exn_safety(&self) -> ::fbthrift::ExceptionSafety { ::fbthrift::ExceptionSafety::Safe }
 }
 
 impl ::std::error::Error for FooEx {}
@@ -80,6 +98,15 @@ impl ::fbthrift::ExceptionInfo for FooEx2 {
 
     #[inline]
     fn exn_is_declared(&self) -> bool { true }
+
+    #[inline]
+    fn exn_blame(&self) -> ::fbthrift::ExceptionBlame { ::fbthrift::ExceptionBlame::Server }
+
+    #[inline]
+    fn exn_kind(&self) -> ::fbthrift::ExceptionKind { ::fbthrift::ExceptionKind::Unspecified }
+
+    #[inline]
+    fn exn_safety(&self) -> ::fbthrift::ExceptionSafety { ::fbthrift::ExceptionSafety::Safe }
 }
 
 impl ::std::error::Error for FooEx2 {}

@@ -25,6 +25,7 @@
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/algorithm/string/split.hpp>
 
+#include <thrift/compiler/ast/t_exception.h>
 #include <thrift/compiler/ast/t_struct.h>
 #include <thrift/compiler/ast/uri.h>
 #include <thrift/compiler/generate/common.h>
@@ -1331,6 +1332,51 @@ class t_mstch_rust_generator : public t_whisker_generator {
       });
       return to_array(fields, proto.of<t_field>());
     });
+    // Error classification (from the IDL exception `client`/`server`,
+    // `transient`/`stateful`/`permanent`, and `safe` qualifiers), rendered as
+    // the corresponding `::fbthrift::Exception{Blame,Kind,Safety}` variant.
+    // Non- exception structs report `Unspecified`; only exception templates
+    // consume these.
+    def.property("rust_exn_blame", [](const t_structured& self) -> std::string {
+      if (const auto* ex = dynamic_cast<const t_exception*>(&self)) {
+        switch (ex->blame()) {
+          case t_error_blame::server:
+            return "Server";
+          case t_error_blame::client:
+            return "Client";
+          default:
+            return "Unspecified";
+        }
+      }
+      return "Unspecified";
+    });
+    def.property("rust_exn_kind", [](const t_structured& self) -> std::string {
+      if (const auto* ex = dynamic_cast<const t_exception*>(&self)) {
+        switch (ex->kind()) {
+          case t_error_kind::transient:
+            return "Transient";
+          case t_error_kind::stateful:
+            return "Stateful";
+          case t_error_kind::permanent:
+            return "Permanent";
+          default:
+            return "Unspecified";
+        }
+      }
+      return "Unspecified";
+    });
+    def.property(
+        "rust_exn_safety", [](const t_structured& self) -> std::string {
+          if (const auto* ex = dynamic_cast<const t_exception*>(&self)) {
+            switch (ex->safety()) {
+              case t_error_safety::safe:
+                return "Safe";
+              default:
+                return "Unspecified";
+            }
+          }
+          return "Unspecified";
+        });
     return std::move(def).make();
   }
 

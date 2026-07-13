@@ -59,6 +59,33 @@ pub mod {{interface.snake}} {
         {{/each}}
             }
         }
+
+        fn exn_blame(&self) -> ::fbthrift::ExceptionBlame {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_blame(),
+        {{#each function.stream.exceptions as |field|}}
+                Self::{{field.rust_name}}(exn) => exn.exn_blame(),
+        {{/each}}
+            }
+        }
+
+        fn exn_kind(&self) -> ::fbthrift::ExceptionKind {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_kind(),
+        {{#each function.stream.exceptions as |field|}}
+                Self::{{field.rust_name}}(exn) => exn.exn_kind(),
+        {{/each}}
+            }
+        }
+
+        fn exn_safety(&self) -> ::fbthrift::ExceptionSafety {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_safety(),
+        {{#each function.stream.exceptions as |field|}}
+                Self::{{field.rust_name}}(exn) => exn.exn_safety(),
+        {{/each}}
+            }
+        }
     }
 
     impl ::fbthrift::ResultInfo for {{function.upcamel}}StreamExn {
@@ -224,6 +251,33 @@ pub mod {{interface.snake}} {
                 Self::ApplicationException(aexn) => aexn.exn_is_declared(),
         {{#each function.sink.exceptions as |field|}}
                 Self::{{field.rust_name}}(exn) => exn.exn_is_declared(),
+        {{/each}}
+            }
+        }
+
+        fn exn_blame(&self) -> ::fbthrift::ExceptionBlame {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_blame(),
+        {{#each function.sink.exceptions as |field|}}
+                Self::{{field.rust_name}}(exn) => exn.exn_blame(),
+        {{/each}}
+            }
+        }
+
+        fn exn_kind(&self) -> ::fbthrift::ExceptionKind {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_kind(),
+        {{#each function.sink.exceptions as |field|}}
+                Self::{{field.rust_name}}(exn) => exn.exn_kind(),
+        {{/each}}
+            }
+        }
+
+        fn exn_safety(&self) -> ::fbthrift::ExceptionSafety {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_safety(),
+        {{#each function.sink.exceptions as |field|}}
+                Self::{{field.rust_name}}(exn) => exn.exn_safety(),
         {{/each}}
             }
         }
@@ -408,6 +462,33 @@ pub mod {{interface.snake}} {
       {{/each}}
             }
         }
+
+        fn exn_blame(&self) -> ::fbthrift::ExceptionBlame {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_blame(),
+      {{#each function.sink.final_response_exceptions as |field|}}
+                Self::{{field.rust_name}}(exn) => exn.exn_blame(),
+      {{/each}}
+            }
+        }
+
+        fn exn_kind(&self) -> ::fbthrift::ExceptionKind {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_kind(),
+      {{#each function.sink.final_response_exceptions as |field|}}
+                Self::{{field.rust_name}}(exn) => exn.exn_kind(),
+      {{/each}}
+            }
+        }
+
+        fn exn_safety(&self) -> ::fbthrift::ExceptionSafety {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_safety(),
+      {{#each function.sink.final_response_exceptions as |field|}}
+                Self::{{field.rust_name}}(exn) => exn.exn_safety(),
+      {{/each}}
+            }
+        }
     }
 
     impl ::fbthrift::ResultInfo for {{function.upcamel}}SinkFinalExn {
@@ -575,6 +656,33 @@ pub mod {{interface.snake}} {
                 Self::ApplicationException(aexn) => aexn.exn_is_declared(),
       {{#each function.exceptions as |field|}}
                 Self::{{field.rust_name}}(exn) => exn.exn_is_declared(),
+      {{/each}}
+            }
+        }
+
+        fn exn_blame(&self) -> ::fbthrift::ExceptionBlame {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_blame(),
+      {{#each function.exceptions as |field|}}
+                Self::{{field.rust_name}}(exn) => exn.exn_blame(),
+      {{/each}}
+            }
+        }
+
+        fn exn_kind(&self) -> ::fbthrift::ExceptionKind {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_kind(),
+      {{#each function.exceptions as |field|}}
+                Self::{{field.rust_name}}(exn) => exn.exn_kind(),
+      {{/each}}
+            }
+        }
+
+        fn exn_safety(&self) -> ::fbthrift::ExceptionSafety {
+            match self {
+                Self::ApplicationException(aexn) => aexn.exn_safety(),
+      {{#each function.exceptions as |field|}}
+                Self::{{field.rust_name}}(exn) => exn.exn_safety(),
       {{/each}}
             }
         }

@@ -52,6 +52,15 @@ impl ::fbthrift::ExceptionInfo for MyException {
 
     #[inline]
     fn exn_is_declared(&self) -> bool { true }
+
+    #[inline]
+    fn exn_blame(&self) -> ::fbthrift::ExceptionBlame { ::fbthrift::ExceptionBlame::Unspecified }
+
+    #[inline]
+    fn exn_kind(&self) -> ::fbthrift::ExceptionKind { ::fbthrift::ExceptionKind::Unspecified }
+
+    #[inline]
+    fn exn_safety(&self) -> ::fbthrift::ExceptionSafety { ::fbthrift::ExceptionSafety::Safe }
 }
 
 impl ::std::error::Error for MyException {}

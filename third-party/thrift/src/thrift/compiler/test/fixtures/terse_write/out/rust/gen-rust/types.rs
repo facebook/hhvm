@@ -145,6 +145,15 @@ impl ::fbthrift::ExceptionInfo for TerseException {
 
     #[inline]
     fn exn_is_declared(&self) -> bool { true }
+
+    #[inline]
+    fn exn_blame(&self) -> ::fbthrift::ExceptionBlame { ::fbthrift::ExceptionBlame::Unspecified }
+
+    #[inline]
+    fn exn_kind(&self) -> ::fbthrift::ExceptionKind { ::fbthrift::ExceptionKind::Unspecified }
+
+    #[inline]
+    fn exn_safety(&self) -> ::fbthrift::ExceptionSafety { ::fbthrift::ExceptionSafety::Unspecified }
 }
 
 impl ::std::error::Error for TerseException {}

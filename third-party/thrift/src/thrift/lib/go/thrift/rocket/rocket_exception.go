@@ -117,46 +117,6 @@ func newRocketException(exception *rpcmetadata.PayloadExceptionMetadataBase) *Ro
 	return result
 }
 
-// newPayloadExceptionMetadataBaseV1 creates a new PayloadExceptionMetadataBase.
-func newPayloadExceptionMetadataBaseV1(
-	name string,
-	what string,
-	exType RocketExceptionType,
-	kind rpcmetadata.ErrorKind,
-	blame rpcmetadata.ErrorBlame,
-	safety rpcmetadata.ErrorSafety,
-) *rpcmetadata.PayloadExceptionMetadataBase {
-	classification := rpcmetadata.NewErrorClassification().
-		SetKind(&kind).
-		SetBlame(&blame).
-		SetSafety(&safety)
-
-	metadata := rpcmetadata.NewPayloadExceptionMetadata()
-	switch exType {
-	case RocketExceptionDeclared:
-		declared := rpcmetadata.NewPayloadDeclaredExceptionMetadata().
-			SetErrorClassification(classification)
-		metadata.SetDeclaredException(declared)
-	case RocketExceptionAppUnknown:
-		appUnknown := rpcmetadata.NewPayloadAppUnknownExceptionMetdata().
-			SetErrorClassification(classification)
-		metadata.SetAppUnknownException(appUnknown)
-	case RocketExceptionAny:
-		metadata.SetAnyException(rpcmetadata.NewPayloadAnyExceptionMetadata())
-	case RocketExceptionDeprecatedProxy:
-		metadata.SetDEPRECATEDProxyException(rpcmetadata.NewPayloadProxyExceptionMetadata())
-	case RocketExceptionUnknown:
-	default:
-		panic("unreachable")
-	}
-
-	base := rpcmetadata.NewPayloadExceptionMetadataBase().
-		SetNameUTF8(&name).
-		SetWhatUTF8(&what).
-		SetMetadata(metadata)
-	return base
-}
-
 // NewPayloadExceptionMetadataBaseV2 creates a new PayloadExceptionMetadataBase
 // from an error, deriving the name, exception type, and error-classification
 // (kind/blame/safety) from the error type's entry in the error registry.
@@ -182,14 +142,35 @@ func NewPayloadExceptionMetadataBaseV2(err error) *rpcmetadata.PayloadExceptionM
 		safety = toRPCMetadataErrorSafety(spec.Safety)
 	}
 
-	return newPayloadExceptionMetadataBaseV1(
-		name,
-		err.Error(),
-		exType,
-		kind,
-		blame,
-		safety,
-	)
+	classification := rpcmetadata.NewErrorClassification().
+		SetKind(&kind).
+		SetBlame(&blame).
+		SetSafety(&safety)
+
+	metadata := rpcmetadata.NewPayloadExceptionMetadata()
+	switch exType {
+	case RocketExceptionDeclared:
+		declared := rpcmetadata.NewPayloadDeclaredExceptionMetadata().
+			SetErrorClassification(classification)
+		metadata.SetDeclaredException(declared)
+	case RocketExceptionAppUnknown:
+		appUnknown := rpcmetadata.NewPayloadAppUnknownExceptionMetdata().
+			SetErrorClassification(classification)
+		metadata.SetAppUnknownException(appUnknown)
+	case RocketExceptionAny:
+		metadata.SetAnyException(rpcmetadata.NewPayloadAnyExceptionMetadata())
+	case RocketExceptionDeprecatedProxy:
+		metadata.SetDEPRECATEDProxyException(rpcmetadata.NewPayloadProxyExceptionMetadata())
+	case RocketExceptionUnknown:
+	default:
+		panic("unreachable")
+	}
+
+	what := err.Error()
+	return rpcmetadata.NewPayloadExceptionMetadataBase().
+		SetNameUTF8(&name).
+		SetWhatUTF8(&what).
+		SetMetadata(metadata)
 }
 
 func toRPCMetadataErrorKind(k types.ErrorKind) rpcmetadata.ErrorKind {

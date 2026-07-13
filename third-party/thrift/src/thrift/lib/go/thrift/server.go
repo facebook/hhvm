@@ -988,20 +988,19 @@ func (s *rocketServerSocket) makeResponsePayload(
 			headers["uex"] = errorType(exceptionErr)
 			headers["uexw"] = exceptionErr.Error()
 		}
-		if appException, ok := respStruct.(*types.ApplicationException); ok {
-			return rocket.EncodeResponseApplicationErrorPayload(
-				appException,
-				headers,
-				compression,
-				loadMetricPtr,
-			)
+
+		payloadMetadata := rpcmetadata.NewPayloadMetadata()
+		if exceptionMetadata != nil {
+			payloadMetadata.SetExceptionMetadata(exceptionMetadata)
+		} else {
+			payloadMetadata.SetResponseMetadata(rpcmetadata.NewPayloadResponseMetadata())
 		}
-		return rocket.EncodeResponsePayload(
-			headers,
-			compression,
-			loadMetricPtr,
-			dataBytes,
-		)
+		responseMetadata := rpcmetadata.NewResponseRpcMetadata().
+			SetOtherMetadata(headers).
+			SetCompression(&compression).
+			SetPayloadMetadata(payloadMetadata).
+			SetLoad(loadMetricPtr)
+		return rocket.EncodePayloadMetadataAndData(responseMetadata, dataBytes, compression)
 	}
 
 	// Subsequent stream-element encoding.

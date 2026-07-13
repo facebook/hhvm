@@ -7,7 +7,9 @@ function f1($x) :mixed{
 }
 function f2($x) :mixed{
   $i = 3;
-  while ($x[0] && $i--) {
+  while (true) {
+    if (!($x[0])) break;
+    $t = $i; $i--; if (!$t) break;
     var_dump($x[0]);
   }
 }

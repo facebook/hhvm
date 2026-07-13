@@ -10,7 +10,8 @@ $array = vec[
 ];
 
 foreach ($array as $ip) {
-	var_dump($long = ip2long($ip));
+	$long = ip2long($ip);
+	var_dump($long);
 	var_dump(long2ip((string)$long));
 }
 

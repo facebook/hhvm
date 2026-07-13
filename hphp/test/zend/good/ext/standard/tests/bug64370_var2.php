@@ -1,7 +1,10 @@
 <?hh
 <<__EntryPoint>> function main(): void {
 $i = 0;
-while(100000 > $i++) {
+while(true) {
+	$t = $i;
+	$i++;
+	if (!(100000 > $t)) break;
 	$m0 = microtime(true);
 	$m1 = microtime(true);
 	$d = $m1 - $m0;

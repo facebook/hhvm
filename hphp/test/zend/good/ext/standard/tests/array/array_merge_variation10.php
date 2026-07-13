@@ -16,6 +16,7 @@ $arr2 = vec['zero', 'un', 'deux'];
 $arr3 = vec['null', 'eins', 'zwei'];
 
 echo "\n-- Call array_merge() --\n";
-var_dump($result = array_merge($arr1, $arr2, $arr3));
+$result = array_merge($arr1, $arr2, $arr3);
+var_dump($result);
 echo "Done";
 }

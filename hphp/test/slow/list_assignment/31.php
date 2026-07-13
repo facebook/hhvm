@@ -4,6 +4,6 @@
 <<__EntryPoint>>
 function main_31() :mixed{
 $a = 'old';
- var_dump(list($a) = 'test');
+ list($a) = 'test'; var_dump('test');
  var_dump($a);
 }

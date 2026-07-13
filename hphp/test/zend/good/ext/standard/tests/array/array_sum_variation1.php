@@ -21,6 +21,7 @@ echo "*** Testing array_sum() : unexpected values for 'input' ***\n";
 
 
 // different scalar/non scalar values for 'input' argument
+$fp = fopen(__FILE__,'r');
 $input_values = vec[
 
          // int data
@@ -58,7 +59,7 @@ $input_values = vec[
 /*20*/   new MyClass(),
 
          // resource data
-/*21*/   $fp = fopen(__FILE__,'r'),
+/*21*/   $fp,
 
 
 ];

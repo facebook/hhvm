@@ -31,5 +31,6 @@ var_dump(foo(inout $ex));
 
 do {
   var_dump($ex->getMessage());
-} while ($ex = $ex->getPrevious());
+  $ex = $ex->getPrevious();
+} while ($ex);
 }

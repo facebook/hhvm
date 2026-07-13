@@ -9,7 +9,8 @@ function cyclic_prop_declared_props() :mixed{
   $a->x0 = new x;
   $a->x0->y1 = $a->x0;
   var_dump($a);
-  var_dump($a->x0->y1 = "ok");
+  $a->x0->y1 = "ok";
+  var_dump($a->x0->y1);
 }
 
 function cyclic_prop_nondeclared_props() :mixed{
@@ -20,7 +21,8 @@ function cyclic_prop_nondeclared_props() :mixed{
   $a->x0->y2 = $a->x0;
   $a->x0->y0 = 'b';
   var_dump($a);
-  var_dump($a->x0->y1 = "ok");
+  $a->x0->y1 = "ok";
+  var_dump($a->x0->y1);
 }
 <<__EntryPoint>> function main(): void {
 cyclic_prop_declared_props();

@@ -29,14 +29,18 @@ function main() :mixed{
   $x = get_arr();
   $i = 1;
   $t = 'alpha';
+  // Hoist arg side effects strictly left-to-right (launder calls, inc/dec, assigns).
+  $k_a = launder('alpha'); --$i; $ix_a = $i;
+  $k_b = $t; ++$i; $ix_b = $i;
+  $k_c = $t.launder(''); ++$i; $ix_c = $i;
+  $i *= 2;
+  $t = 'red';
   foo(
     0,
-    inout $x[launder('alpha')][--$i]['beta']['one'],
-    inout $x[$t][++$i],
+    inout $x[$k_a][$ix_a]['beta']['one'],
+    inout $x[$k_b][$ix_b],
     0,
-    inout $x[$t.launder('')][++$i],
-    $i *= 2,
-    $t = 'red',
+    inout $x[$k_c][$ix_c],
   );
   var_dump($x);
 

@@ -22,14 +22,14 @@ function main_entry(): void {
 
   print "--- C ---\n";
   $o = new C;
-  var_dump(++$o->preInc);
-  var_dump(--$o->preDec);
-  var_dump($o->postInc++);
-  var_dump($o->postDec--);
-  error_boundary(inout $o, (inout $o) ==> var_dump(++$o->p));
-  error_boundary(inout $o, (inout $o) ==> var_dump(--$o->q));
-  error_boundary(inout $o, (inout $o) ==> var_dump($o->r++));
-  error_boundary(inout $o, (inout $o) ==> var_dump($o->s--));
+  ++$o->preInc; var_dump($o->preInc);
+  --$o->preDec; var_dump($o->preDec);
+  $t = $o->postInc; $o->postInc++; var_dump($t);
+  $t = $o->postDec; $o->postDec--; var_dump($t);
+  error_boundary(inout $o, (inout $o) ==> { ++$o->p; var_dump($o->p); });
+  error_boundary(inout $o, (inout $o) ==> { --$o->q; var_dump($o->q); });
+  error_boundary(inout $o, (inout $o) ==> { $o->r++; var_dump($o->r); });
+  error_boundary(inout $o, (inout $o) ==> { $o->s--; var_dump($o->s); });
   var_dump($o);
 
   print "Test end\n";

@@ -143,8 +143,8 @@ function test_typehint_enforcement() :mixed{
   }
   $c = new C();
   foreach (vec[vec[], dict[], $clsmeth] as $input) {
-    run(() ==> $c->v = $input);
-    run(() ==> $c->d = $input);
+    run(() ==> { $c->v = $input; return $input; });
+    run(() ==> { $c->d = $input; return $input; });
   }
   run(() ==> new D());
 }

@@ -2,7 +2,8 @@
 
 
 function main($o) :mixed{
-  $o = $o->circle = $o;
+  $o->circle = $o;
+  $o = $o->circle;
   $o->foo();
 }
 <<__EntryPoint>> function main_entry(): void {

@@ -32,8 +32,8 @@ class D {
   }
 
   function incdecprop() :mixed{
-    error_boundary(() ==> $this->x++);
-    error_boundary(() ==> $this->y++);
+    error_boundary(() ==> { $this->x++; });
+    error_boundary(() ==> { $this->y++; });
     var_dump($this);
   }
 }

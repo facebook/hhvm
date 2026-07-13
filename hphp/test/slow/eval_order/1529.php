@@ -1,7 +1,10 @@
 <?hh
 
 function test($x) :mixed{
-  $a = dict[$a => $x[$a = 'foo']];
+  $a = 'foo';
+  $v = $x[$a];
+  $k = $a;
+  $a = dict[$k => $v];
   return $a;
 }
 

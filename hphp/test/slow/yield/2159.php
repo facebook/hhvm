@@ -1,7 +1,9 @@
 <?hh
 
 function f($x) :AsyncGenerator<mixed,mixed,void>{
-  switch ($x++ + ++$x) {
+  $t1 = $x; $x++;
+  ++$x; $t2 = $x;
+  switch ($t1 + $t2) {
   case 1:
     yield 1;
   case 2:

@@ -43,7 +43,8 @@ $args_array = vec[
 
 /* creating dumping file */
 $data_file = sys_get_temp_dir().'/'.'vfprintf_variation3.txt';
-if (!($fp = fopen($data_file, 'wt')))
+$fp = fopen($data_file, 'wt');
+if (!$fp)
    return;
 
 $counter = 1;

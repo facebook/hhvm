@@ -6,7 +6,7 @@ class X {
 class Y {
 }
 function test($x) :mixed{
-  return new $x($x = 'Y');
+  $cls = $x; $x = 'Y'; return new $cls($x);
 }
 
 <<__EntryPoint>>

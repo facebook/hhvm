@@ -29,12 +29,12 @@ $o->r .= "hello";
 print_r($o);
 
 $o = null;
-error_boundary(inout $o, (inout $o) ==> $o->a .= "<a>");
-error_boundary(inout $o, (inout $o) ==> $o->a .= "<b>");
-error_boundary(inout $o, (inout $o) ==> $o->a .= "<b>");
-error_boundary(inout $o, (inout $o) ==> $o->a += 1);
-error_boundary(inout $o, (inout $o) ==> $o->a += 1);
-error_boundary(inout $o, (inout $o) ==> $o->a .= "hello");
+error_boundary(inout $o, (inout $o) ==> { $o->a .= "<a>"; });
+error_boundary(inout $o, (inout $o) ==> { $o->a .= "<b>"; });
+error_boundary(inout $o, (inout $o) ==> { $o->a .= "<b>"; });
+error_boundary(inout $o, (inout $o) ==> { $o->a += 1; });
+error_boundary(inout $o, (inout $o) ==> { $o->a += 1; });
+error_boundary(inout $o, (inout $o) ==> { $o->a .= "hello"; });
 print_r($o);
 
 $o = 42;

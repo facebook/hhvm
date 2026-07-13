@@ -2,7 +2,7 @@
 
 function f() :mixed{
   $a = 0;
-  try { array_chunk($a = 1); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+  try { $a = 1; array_chunk($a); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
   var_dump($a);
 }
 

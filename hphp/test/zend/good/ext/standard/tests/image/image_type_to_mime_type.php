@@ -1,13 +1,16 @@
 <?hh
 <<__EntryPoint>> function main(): void {
 // Note: SWC requires zlib
-($dir = opendir(dirname(__FILE__))) || exit('cannot open directory: '.dirname(__FILE__));
+$dir = opendir(dirname(__FILE__));
+$dir || exit('cannot open directory: '.dirname(__FILE__));
 $result = dict[];
 $files  = vec[];
-while (($file = readdir($dir)) !== FALSE) {
+$file = readdir($dir);
+while ($file !== FALSE) {
     if (preg_match('/^test.+pix\./',$file) && $file != "test13pix.swf") {
         $files[] = $file;
     }
+    $file = readdir($dir);
 }
 closedir($dir);
 sort(inout $files);

@@ -1,10 +1,12 @@
 <?hh
 
 function cmp($a, $b) :mixed{
-    is_array ($a)
-        && ($a = array_sum ($a));
-    is_array ($b)
-        && ($b = array_sum ($b));
+    if (is_array ($a)) {
+        $a = array_sum ($a);
+    }
+    if (is_array ($b)) {
+        $b = array_sum ($b);
+    }
     return strcmp ((string)$a, (string)$b);
 }
 

@@ -4,9 +4,9 @@ trait T {
 
   private static $genX =0;
   public static function gen() :AsyncGenerator<mixed,mixed,void>{
-    yield ++self::$genX;
+    ++self::$genX; yield self::$genX;
     yield 2;
-    yield ++self::$genX;
+    ++self::$genX; yield self::$genX;
   }
 }
 class X {

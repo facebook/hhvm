@@ -1,8 +1,8 @@
 <?hh
 function f($arg1, inout $arg2)
 :mixed{
-    var_dump($arg1++);
-    var_dump($arg2++);
+    $__t1 = $arg1; $arg1++; var_dump($__t1);
+    $__t2 = $arg2; $arg2++; var_dump($__t2);
 }
 <<__EntryPoint>> function main(): void {
 $a = 7;

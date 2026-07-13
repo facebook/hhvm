@@ -32,7 +32,7 @@ var_dump(openssl_x509_export_to_file($d, $outfilename));      // read cert from 
 var_dump(openssl_x509_export_to_file($e, $outfilename));      // read an array, fails
 echo "---\n";
 
-var_dump($exists = file_exists($outfilename));
+$exists = file_exists($outfilename); var_dump($exists);
 if ($exists) {
         unlink($outfilename);
 }

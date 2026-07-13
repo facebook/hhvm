@@ -23,7 +23,13 @@ function main_entry(): void {
   error_reporting(-1);
 
   $i = 0;
-  f($i, ++$i, $i, $i = 12, --$i);     // arguments are evaluated L->R
+  // arguments are evaluated L->R
+  $a1 = $i;
+  ++$i; $a2 = $i;
+  $a3 = $i;
+  $i = 12; $a4 = $i;
+  --$i; $a5 = $i;
+  f($a1, $a2, $a3, $a4, $a5);
 
   // Create a table of function designators
 
@@ -41,5 +47,13 @@ function main_entry(): void {
   // that compared with the argument list expressions.
 
   $i = 1;
-  HH\dynamic_fun($funcTable[$i++])($i, ++$i, $i, $i = 12, --$i);  // function designator side effect done first
+  // function designator side effect done first
+  $fidx = $i; $i++;
+  $fn = HH\dynamic_fun($funcTable[$fidx]);
+  $a1 = $i;
+  ++$i; $a2 = $i;
+  $a3 = $i;
+  $i = 12; $a4 = $i;
+  --$i; $a5 = $i;
+  $fn($a1, $a2, $a3, $a4, $a5);
 }

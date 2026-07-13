@@ -7,7 +7,7 @@ class Ref {
 function new_closure_gen() :mixed{
   $ref = new Ref(0);
   return function() use ($ref) {
-    yield ++$ref->val;
+    ++$ref->val; yield $ref->val;
   };
 }
 <<__EntryPoint>> function main(): void {

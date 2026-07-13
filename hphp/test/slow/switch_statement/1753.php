@@ -1,9 +1,11 @@
 <?hh
 
+function preinc(inout $x):mixed{ ++$x; return $x; }
+
 function test() :mixed{
   $a = 2;
   switch ($a) {
-    case ++$a: var_dump('ok');
+    case preinc(inout $a): var_dump('ok');
  break;
     case 2: var_dump('broken');
  break;
@@ -18,7 +20,7 @@ function test() :mixed{
 function main_1753() :mixed{
 $a = 2;
 switch ($a) {
-  case ++$a: var_dump('ok');
+  case preinc(inout $a): var_dump('ok');
  break;
   case 2: var_dump('broken');
  break;

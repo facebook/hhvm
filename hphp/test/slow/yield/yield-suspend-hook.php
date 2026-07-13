@@ -3,8 +3,8 @@
 function doh($x, $y) :mixed{
   if ($y === 'hey') {
     if ($x === 'exit') {
-
-      if ((YieldYieldSuspendHook::$counter++ % 2) == 1) {
+      $t = YieldYieldSuspendHook::$counter; YieldYieldSuspendHook::$counter++;
+      if (($t % 2) == 1) {
         throw new Exception('x');
       }
     }

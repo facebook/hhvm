@@ -35,7 +35,8 @@ $pos =0;
 
 foreach ($it as $v) {
     var_dump($v);
-    if ($pos++ > 5) {
+    $t = $pos; $pos++;
+    if ($t > 5) {
         break;
     }
 }

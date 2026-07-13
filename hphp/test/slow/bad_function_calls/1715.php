@@ -5,7 +5,7 @@ function f() :mixed{
   $b = 0;
   $c = 0;
   $d = 0;
-  try { array_chunk($a = 1, $b = 2, $c = 3, $d = 4); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+  try { $a = 1; $b = 2; $c = 3; $d = 4; array_chunk($a, $b, $c, $d); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
   var_dump($a, $b, $c, $d);
 }
 

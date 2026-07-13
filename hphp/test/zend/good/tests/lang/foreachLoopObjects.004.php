@@ -22,7 +22,8 @@ function entrypoint_foreachLoopObjects_004(): void {
       var_dump($e->getMessage());
     }
     var_dump($v);
-    if (++$count > 10) {
+    ++$count;
+    if ($count > 10) {
       echo "Loop detected.\n";
       break;
     }

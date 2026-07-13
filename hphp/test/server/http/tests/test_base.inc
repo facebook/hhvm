@@ -8,7 +8,9 @@ function init() {
 function runTest($testController, $customArgs = '', $repoArgs = '') {
   $pid = posix_getpid();
   try {
-    $serverProc = $serverPort = $adminPort = null;
+    $serverProc = null;
+    $serverPort = null;
+    $adminPort = null;
     $debugPort = false;
     $serverProc = startServer(inout $serverPort, inout $adminPort, inout $debugPort,
                               __DIR__.'/..', __DIR__.'/../server_root',

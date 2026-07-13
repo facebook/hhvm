@@ -16,11 +16,12 @@ $matches = dict[];
   var_dump(count($matches));
 var_dump(utf8_decode($matches[0]));
 
+  $flags = PREG_OFFSET_CAPTURE;
   var_dump(preg_match_with_matches(
     "%bcd%",
     "abcdbcdef",
     inout $matches,
-    $flags = PREG_OFFSET_CAPTURE,
+    $flags,
   ));
   var_dump(utf8_decode($matches[0][0]));
 var_dump($matches[0][1]);

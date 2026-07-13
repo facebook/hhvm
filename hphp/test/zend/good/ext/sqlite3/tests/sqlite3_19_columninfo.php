@@ -14,11 +14,13 @@ function main_entry(): void {
 
   echo "SELECTING results\n";
   $result = $db->query("SELECT * FROM test ORDER BY id ASC");
-  while ($row = $result->fetcharray(SQLITE3_NUM)) {
+  $row = $result->fetcharray(SQLITE3_NUM);
+  while ($row) {
   	$totalColumns = $result->numcolumns();
   	for ($i = 0; $i < $totalColumns; $i++) {
   		echo "Name: " . $result->columnname($i) . " - Type: " . $result->columntype($i) . "\n";
   	}
+  	$row = $result->fetcharray(SQLITE3_NUM);
   }
   $result->finalize();
 

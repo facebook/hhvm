@@ -132,10 +132,10 @@ function main() :mixed{
   C::$h += 42;
   print "C::\$h: ".C::$h."\n";
 
-  print "C::\$h: ".++C::$h."\n";
-  print "C::\$h: ".C::$h++."\n";
-  print "C::\$h: ".C::$h--."\n";
-  print "C::\$h: ".--C::$h."\n";
+  ++C::$h; print "C::\$h: ".C::$h."\n";
+  $t = C::$h; C::$h++; print "C::\$h: ".$t."\n";
+  $t = C::$h; C::$h--; print "C::\$h: ".$t."\n";
+  --C::$h; print "C::\$h: ".C::$h."\n";
 
   C::$h = vec[0, 1, 2];
   $y = C::$h[1];
@@ -174,10 +174,10 @@ class D {
     C::$h += 42;
     print "C::\$h: ".C::$h."\n";
 
-    print "C::\$h: ".++C::$h."\n";
-    print "C::\$h: ".C::$h++."\n";
-    print "C::\$h: ".C::$h--."\n";
-    print "C::\$h: ".--C::$h."\n";
+    ++C::$h; print "C::\$h: ".C::$h."\n";
+    $t = C::$h; C::$h++; print "C::\$h: ".$t."\n";
+    $t = C::$h; C::$h--; print "C::\$h: ".$t."\n";
+    --C::$h; print "C::\$h: ".C::$h."\n";
 
     C::$h = vec[0, 1, 2];
     $y = C::$h[1];

@@ -5,7 +5,7 @@ class Logger implements IDisposable, IAsyncDisposable {
   private $id;
 
   function __construct($throw = false) {
-    $this->id = self::$count++;
+    $this->id = self::$count; self::$count++;
     if ($throw) {
       throw new Exception("Logger id ".$this->id);
     }

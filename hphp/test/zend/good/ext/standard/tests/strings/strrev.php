@@ -3,7 +3,8 @@ $i = 0;
 $str = '';
 
 while ($i<256) {
-    $str .= chr($i++);
+    $str .= chr($i);
+    $i++;
 }
 
 var_dump(md5(strrev($str)));

@@ -36,7 +36,7 @@ function bigLoopAdder($a, $b) {
 
 function bigLoop($a) {
   $b = 0;
-  while (--$a) {
+  while (true) { --$a; if (!$a) break;
     $b += bigLoopAdder($a, $b);
   }
   return $b;

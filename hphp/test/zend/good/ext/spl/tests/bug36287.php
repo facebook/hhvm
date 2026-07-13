@@ -9,7 +9,8 @@ foreach($it as $file)
 	var_dump($file->getFilename());
 	echo "Second\n";
 	var_dump($file->getFilename());
-	if (++$idx > 1)
+	++$idx;
+	if ($idx > 1)
 	{
 		break;
 	}

@@ -25,7 +25,8 @@ $xpath->registerNamespace("php", "http://php.net/xpath");
 
 $xpath->registerNamespace("def", "urn::default");
 $nodelist = $xpath->query("//def:child");
-if ($node = $nodelist->item(0)) {
+$node = $nodelist->item(0);
+if ($node) {
     print $node->textContent."\n";
 }
 

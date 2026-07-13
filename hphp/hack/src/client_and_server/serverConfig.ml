@@ -348,9 +348,6 @@ let load_config (config : Config_file_common.t) (options : GlobalOptions.t) :
         is_systemlib =
           bool_opt Config_keys.Hhconfig.is_systemlib config
           >?? po_opt.is_systemlib;
-        disable_lval_as_an_expression =
-          bool_opt Config_keys.Hhconfig.disable_lval_as_an_expression config
-          >?? po_opt.disable_lval_as_an_expression;
         const_default_func_args = po_opt.const_default_func_args;
         const_static_props =
           bool_opt Config_keys.Hhconfig.const_static_props config

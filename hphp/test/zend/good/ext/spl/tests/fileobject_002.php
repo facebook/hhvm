@@ -7,9 +7,11 @@ function test($name)
     $o = new SplFileObject(dirname(__FILE__) . '/' . $name);
 
     var_dump($o->key());
-    while(($c = $o->fgetc()) !== false)
+    $c = $o->fgetc();
+    while($c !== false)
     {
         var_dump($o->key(), $c, $o->eof());
+        $c = $o->fgetc();
     }
     echo "===EOF?===\n";
     var_dump($o->eof());

@@ -5,7 +5,7 @@ class Logger implements IDisposable {
   private $id;
 
   function __construct() {
-    $this->id = self::$nextId++;
+    $this->id = self::$nextId; self::$nextId++;
     printf("Logger %d constructing\n", $this->id);
   }
   function __dispose() :mixed{

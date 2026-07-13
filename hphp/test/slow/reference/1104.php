@@ -1,8 +1,9 @@
 <?hh
+function postinc_val(inout $x):mixed{ $r=$x; $x++; return $r; }
 <<__DynamicallyCallable>>
 function test($a) :mixed{
   try {
-    return $a++;
+    return postinc_val(inout $a);
   } catch (Exception $e) {
     print("Error: ".$e->getMessage()."\n");
     return null;

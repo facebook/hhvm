@@ -4,7 +4,8 @@ class logger {
   public static $x = 0;
   private $idx;
   function __construct() {
-    $this->idx = self::$x++;
+    $this->idx = self::$x;
+    self::$x++;
     printf("logger %d constructing\n", $this->idx);
   }
 }

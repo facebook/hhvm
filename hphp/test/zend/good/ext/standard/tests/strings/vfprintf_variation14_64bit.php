@@ -62,7 +62,8 @@ $args_array = vec[
 
 /* creating dumping file */
 $data_file = sys_get_temp_dir().'/'.'vfprintf_variation14_64bit.txt';
-if (!($fp = fopen($data_file, 'wt')))
+$fp = fopen($data_file, 'wt');
+if (!$fp)
    return;
 
 // looping to test vfprintf() with different hexa formats from the above $format array

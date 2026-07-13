@@ -2,7 +2,10 @@
 $i = 0;
 $a = vec[];
 $b = vec[];
-while ($i++ < 1000) {
+while (true) {
+    $t = $i;
+    $i++;
+    if (!($t < 1000)) break;
     $a[] = $i;
     $b[] = (string)$i;
 }
@@ -13,7 +16,10 @@ var_dump($s1, $s2);
 $j = 0;
 $c = vec[];
 $d = vec[];
-while ($j++ < 100000) {
+while (true) {
+    $t = $j;
+    $j++;
+    if (!($t < 100000)) break;
     $c[] = $j;
     $d[] = (string) $j;
 }

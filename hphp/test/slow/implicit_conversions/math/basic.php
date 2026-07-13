@@ -52,41 +52,41 @@ function with_exn($fn): mixed {
 function plus(mixed $i, mixed $j): void {
   echo 'plus<';
   with_exn(() ==> { $i + $j; }); // this should generate a notice as applicable
-  with_exn(() ==> print($i += $j));
+  with_exn(() ==> { $i += $j; print($i); });
   echo ">\n";
 }
 
 function minus(mixed $i, mixed $j): void {
   echo 'minus<';
   with_exn(() ==> { $i - $j; }); // this should generate a notice as applicable
-  with_exn(() ==> print($i -= $j));
+  with_exn(() ==> { $i -= $j; print($i); });
   echo ">\n";
 }
 
 function div(mixed $i, mixed $j): void {
   echo 'div<';
   with_exn(() ==> { $i / $j; }); // this should generate a notice as applicable
-  with_exn(() ==> print($i /= $j));
+  with_exn(() ==> { $i /= $j; print($i); });
   echo ">\n";
 }
 
 function mul(mixed $i, mixed $j): void {
   echo 'mul<';
   with_exn(() ==> { $i * $j; }); // this should generate a notice as applicable
-  with_exn(() ==> print($i *= $j));
+  with_exn(() ==> { $i *= $j; print($i); });
   echo ">\n";
 }
 
 function mod(mixed $i, mixed $j): void {
   echo 'mod<';
   with_exn(() ==> { $i % $j; }); // this should generate a notice as applicable
-  with_exn(() ==> print($i %= $j));
+  with_exn(() ==> { $i %= $j; print($i); });
   echo ">\n";
 }
 
 function pow_(mixed $i, mixed $j): void {
   echo 'pow<';
   with_exn(() ==> { $i ** $j; }); // this should generate a notice as applicable
-  with_exn(() ==> print($i **= $j));
+  with_exn(() ==> { $i **= $j; print($i); });
   echo ">\n";
 }

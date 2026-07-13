@@ -78,13 +78,9 @@
   (glob_files
    %{project_root}/hack/test/full_fidelity/cases/lval_as_an_expression/*.errors.exp)
   (glob_files
-   %{project_root}/hack/test/full_fidelity/cases/lval_as_an_expression/HH_FLAGS)
-  (glob_files
    %{project_root}/hack/test/full_fidelity/cases/lval_as_an_expression/error/*.php)
   (glob_files
    %{project_root}/hack/test/full_fidelity/cases/lval_as_an_expression/error/*.errors.exp)
-  (glob_files
-   %{project_root}/hack/test/full_fidelity/cases/lval_as_an_expression/error/HH_FLAGS)
   (glob_files %{project_root}/hack/test/full_fidelity/cases/modes/*.php)
   (glob_files %{project_root}/hack/test/full_fidelity/cases/modes/*.errors.exp)
   (glob_files
@@ -105,7 +101,6 @@
    %{exe:../../../src/hh_parse.exe}
    --flags
    --full-fidelity-errors
-   --disable-lval-as-an-expression
    --allow-unstable-features)))
 
 (rule
@@ -187,13 +182,9 @@
   (glob_files
    %{project_root}/hack/test/full_fidelity/cases/lval_as_an_expression/*.json.exp)
   (glob_files
-   %{project_root}/hack/test/full_fidelity/cases/lval_as_an_expression/HH_FLAGS)
-  (glob_files
    %{project_root}/hack/test/full_fidelity/cases/lval_as_an_expression/error/*.php)
   (glob_files
    %{project_root}/hack/test/full_fidelity/cases/lval_as_an_expression/error/*.json.exp)
-  (glob_files
-   %{project_root}/hack/test/full_fidelity/cases/lval_as_an_expression/error/HH_FLAGS)
   (glob_files %{project_root}/hack/test/full_fidelity/cases/modes/*.php)
   (glob_files %{project_root}/hack/test/full_fidelity/cases/modes/*.json.exp)
   (glob_files
@@ -216,7 +207,6 @@
    --full-fidelity-json-parse-tree
    --pretty-print-json
    --allow-unstable-features
-   --disable-lval-as-an-expression
    --ignore-missing-json)))
 
 (alias

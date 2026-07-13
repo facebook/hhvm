@@ -9,18 +9,19 @@ async function testCycleBackTrace(): Awaitable<void> {
   Exception::setTraceOptions(DEBUG_BACKTRACE_IGNORE_ARGS);
 
   $ref = new Ref();
+  $afwh = async {
+    await RescheduleWaitHandle::create(0, 0);
+    $bt = debug_backtrace();
+    var_dump(HH\Lib\Vec\map($bt, $frame ==> $frame['function']));
+    // Form a cycle: await parent
+    await $ref->value;
+  };
   $ref->value = AwaitAllWaitHandle::fromVec(vec[
     async {
       // asio checks first unfinished child
       await RescheduleWaitHandle::create(0, 3);
     },
-    $afwh = async {
-      await RescheduleWaitHandle::create(0, 0);
-      $bt = debug_backtrace();
-      var_dump(HH\Lib\Vec\map($bt, $frame ==> $frame['function']));
-      // Form a cycle: await parent
-      await $ref->value;
-    },
+    $afwh,
     async {
       await RescheduleWaitHandle::create(0, 2);
       // Backtracing while having cycle

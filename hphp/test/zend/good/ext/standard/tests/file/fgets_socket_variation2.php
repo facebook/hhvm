@@ -48,11 +48,13 @@ var_dump(fwrite($socket, $data));
 fclose($socket);
 
 echo "\nRead lines from the client\n";
-while ($line = fgets($client,256)) {
+$line = fgets($client,256);
+while ($line) {
     if (strcmp($line, LINE_OF_DATA) != 0) {
         echo "Error - $line does not match " . LINE_OF_DATA;
         break;
     }
+    $line = fgets($client,256);
 }
 
 echo "\nClose the server side socket and read the remaining data from the client\n";

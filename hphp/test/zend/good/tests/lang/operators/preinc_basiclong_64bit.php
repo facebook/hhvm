@@ -14,7 +14,8 @@ $longVals = vec[
 
 foreach ($longVals as $longVal) {
    echo "--- testing: $longVal ---\n";
-   var_dump(++$longVal);
+   ++$longVal;
+   var_dump($longVal);
 }
 
 echo "===DONE===\n";

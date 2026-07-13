@@ -40,9 +40,11 @@ echo '$list = ';var_export($res);echo ";\n";
 
 $fp = fopen($file, "r");
 $res = vec[];
-while($l=fgetcsv($fp))
+$l=fgetcsv($fp);
+while($l)
 {
 	$res[] = join(',',$l);
+	$l=fgetcsv($fp);
 }
 fclose($fp);
 

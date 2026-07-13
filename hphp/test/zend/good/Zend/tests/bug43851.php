@@ -2,7 +2,7 @@
 
 <<__EntryPoint>>
 function foo() :mixed{
-	(ZendGoodZendTestsBug43851::$LAST = HH\Lib\Legacy_FIXME\cast_for_arithmetic(ZendGoodZendTestsBug43851::$LAST) + 0) * 1;
+	ZendGoodZendTestsBug43851::$LAST = HH\Lib\Legacy_FIXME\cast_for_arithmetic(ZendGoodZendTestsBug43851::$LAST) + 0;
 	echo "ok\n";
 }
 

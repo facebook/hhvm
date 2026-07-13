@@ -6,7 +6,7 @@ class A {
 
 <<__EntryPoint>>
 function main() :mixed{
-  foreach(($a=new A()) as $v);
+  $a=new A(); foreach($a as $v);
   $a->num = 1;
   print($a->num);
 }

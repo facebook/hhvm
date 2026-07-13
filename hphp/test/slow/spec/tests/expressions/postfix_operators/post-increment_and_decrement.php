@@ -20,13 +20,13 @@ function incdec($a)
     echo "--------------------------------------- start incdec ---\n";
     echo '$a = '.(string)($a)." <---> "; var_dump($a);
 
-    error_boundary(inout $a, (inout $o) ==> $o--);
+    error_boundary(inout $a, (inout $o) ==> { $r = $o; $o--; return $r; });
     echo '$a = '.(string)($a)." <---> "; var_dump($a);
 
-    error_boundary(inout $a, (inout $o) ==> $o++);
+    error_boundary(inout $a, (inout $o) ==> { $r = $o; $o++; return $r; });
     echo '$a = '.(string)($a)." <---> "; var_dump($a);
 
-    echo '$a = '.(string)(error_boundary(inout $a, (inout $o) ==> $o++))."\n";
+    echo '$a = '.(string)(error_boundary(inout $a, (inout $o) ==> { $r = $o; $o++; return $r; }))."\n";
     echo '$a = '.(string)($a)." <---> "; var_dump($a);
     echo "--------------------------------------- end incdec ---\n";
 }
@@ -36,13 +36,13 @@ function incdecrev($a)
     echo "--------------------------------------- start incdecrev ---\n";
     echo '$a = '.(string)($a)." <---> "; var_dump($a);
 
-    error_boundary(inout $a, (inout $o) ==> $o++);
+    error_boundary(inout $a, (inout $o) ==> { $r = $o; $o++; return $r; });
     echo '$a = '.(string)($a)." <---> "; var_dump($a);
 
-    error_boundary(inout $a, (inout $o) ==> $o--);
+    error_boundary(inout $a, (inout $o) ==> { $r = $o; $o--; return $r; });
     echo '$a = '.(string)($a)." <---> "; var_dump($a);
 
-    echo '$a = '.(string)(error_boundary(inout $a, (inout $o) ==> $o--))."\n";
+    echo '$a = '.(string)(error_boundary(inout $a, (inout $o) ==> { $r = $o; $o--; return $r; }))."\n";
     echo '$a = '.(string)($a)." <---> "; var_dump($a);
     echo "--------------------------------------- end incdecrev ---\n";
 }

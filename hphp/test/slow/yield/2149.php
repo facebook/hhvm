@@ -2,7 +2,7 @@
 
 function nums() :AsyncGenerator<mixed,mixed,void>{
  $i = 0;
- do yield $i++;
+ do { $t = $i; $i++; yield $t; }
  while ($i < 3);
 }
 

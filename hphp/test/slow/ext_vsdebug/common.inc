@@ -84,7 +84,8 @@ function checkObjEqualRecursively($msg, $expected) {
 
 function sendVsCommand($commandMsg) {
   $client = Data::$client;
-  $commandMsg['seq'] = ++Data::$seq;
+  ++Data::$seq;
+  $commandMsg['seq'] = Data::$seq;
   fwrite($client, json_encode($commandMsg));
   fwrite($client, chr(0));
   return $commandMsg['seq'];
@@ -213,7 +214,8 @@ function setBreakpoints($breakpoints, $verify = true) {
     $responseLines = dict[];
     foreach ($bpsForFile['breakpoints'] as $bp) {
       $setBreakpointsCommand['arguments']['breakpoints'][] = dict["line" => $bp['line'], "condition" => $bp['condition']];
-      $responseBps[] = dict["id" => ++ExtVsdebugCommonInc::$bpId, "verified" => true];
+      ++ExtVsdebugCommonInc::$bpId;
+      $responseBps[] = dict["id" => ExtVsdebugCommonInc::$bpId, "verified" => true];
       $responseLines[ExtVsdebugCommonInc::$bpId] = $bp['calibratedLine'];
     }
 

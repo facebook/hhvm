@@ -13,7 +13,8 @@ echo "*** Testing array_values() : usage variations ***\n";
 $input = dict['one' => 'un', 'two' => 'deux', 'three' => 'trois'];
 
 echo "\n-- Call array_values() --\n";
-var_dump($result = array_values($input));
+$result = array_values($input);
+var_dump($result);
 
 echo "Done";
 }

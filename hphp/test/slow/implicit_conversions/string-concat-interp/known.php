@@ -23,7 +23,7 @@ function main(): void {
     run(() ==> { echo '' . $i; echo $i . ''; echo "\n"; });
     foreach($vals as $j) {
       run(() ==> { echo "<$i $j>\n"; });
-      run(() ==> { $i_ = $i; var_dump($i_ .= $j); });
+      run(() ==> { $i_ = $i; $i_ .= $j; var_dump($i_); });
     }
   }
 }

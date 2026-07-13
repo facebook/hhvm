@@ -38,8 +38,10 @@ var_dump(str_ireplace(dict["t"=>"tt", "y"=>"y"], dict["a"=>"aaa", "b"=>"bbb"], d
 $Data = "Change tracking and management software designed to watch
 	for abnormal system behavior.\nSuggest features, report bugs, or ask
 	questions here.";
-var_dump($Data = str_ireplace("\r\n", "<br>", $Data));
-var_dump($Data = str_ireplace("\n", "<br>", $Data));
+$Data = str_ireplace("\r\n", "<br>", $Data);
+var_dump($Data);
+$Data = str_ireplace("\n", "<br>", $Data);
+var_dump($Data);
 
 
 echo "Done\n";

@@ -1,11 +1,11 @@
 vec(3) {
-  string(28) "Closure$testCycleBackTrace#3"
+  string(28) "Closure$testCycleBackTrace#2"
   string(12) "HH\Asio\join"
   string(35) "__SystemLib\enter_async_entry_point"
 }
 vec(4) {
   string(28) "Closure$testCycleBackTrace#5"
-  string(28) "Closure$testCycleBackTrace#3"
+  string(28) "Closure$testCycleBackTrace#2"
   string(12) "HH\Asio\join"
   string(35) "__SystemLib\enter_async_entry_point"
 }
@@ -21,11 +21,11 @@ vec(4) {
     ["file"]=>
     string(%d) "%s"
     ["line"]=>
-    int(22)
+    int(17)
   }
   dict(1) {
     ["function"]=>
-    string(28) "Closure$testCycleBackTrace#3"
+    string(28) "Closure$testCycleBackTrace#2"
   }
   dict(1) {
     ["function"]=>
@@ -48,11 +48,11 @@ vec(4) {
     ["file"]=>
     string(%d) "%s"
     ["line"]=>
-    int(22)
+    int(17)
   }
   dict(1) {
     ["function"]=>
-    string(28) "Closure$testCycleBackTrace#3"
+    string(28) "Closure$testCycleBackTrace#2"
   }
   dict(1) {
     ["function"]=>

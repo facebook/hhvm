@@ -51,9 +51,9 @@ function main() :mixed{
   var_dump(baz(), is_string(baz()), baz() is string, baz() as string);
   var_dump(buz(), is_string(buz()), buz() is string, buz() as string);
 
-  $f1 = () ==> (new Props)->a = buz();
+  $f1 = () ==> { (new Props)->a = buz(); };
   $f1();
-  $f2 = () ==> Props::$b = buz();
+  $f2 = () ==> { Props::$b = buz(); };
   $f2();
 
   $x = HH\classname_to_class('foo');             var_dump(io(inout $x, inout $x));

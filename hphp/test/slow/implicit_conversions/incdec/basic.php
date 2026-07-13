@@ -30,17 +30,17 @@ function main(): void {
     var_dump($i);
     echo "preinc<";
     $l = $i;
-    with_exn(inout $l, (inout $o) ==> ++$o);
+    with_exn(inout $l, (inout $o) ==> { ++$o; return $o; });
     echo "> postinc<";
     $l = $i;
-    with_exn(inout $l, (inout $o) ==> $o++);
+    with_exn(inout $l, (inout $o) ==> { $t = $o; $o++; return $t; });
     echo $l;
     echo "> predec<";
     $l = $i;
-    with_exn(inout $l, (inout $o) ==> --$o);
+    with_exn(inout $l, (inout $o) ==> { --$o; return $o; });
     echo "> postdec<";
     $l = $i;
-    with_exn(inout $l, (inout $o) ==> $o--);
+    with_exn(inout $l, (inout $o) ==> { $t = $o; $o--; return $t; });
     echo $l;
     echo ">\n";
   }

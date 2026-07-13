@@ -5,7 +5,7 @@ class Small {
   public $name;
   public $num;
   function __construct() {
-    $n = self::$nc++;
+    $n = self::$nc; self::$nc++;
     $this->name = 'foo'.$n;
     $this->num = 3*$n;
   }

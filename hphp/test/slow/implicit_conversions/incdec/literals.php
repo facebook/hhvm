@@ -24,47 +24,47 @@ function preinc(): void {
 
   with_exn(() ==> {
     $l = null;
-    echo ++$l;
+    ++$l; echo $l;
   });
   with_exn(() ==> {
     $l = false;
-    echo ++$l;
+    ++$l; echo $l;
   });
   with_exn(() ==> {
     $l = true;
-    echo ++$l;
+    ++$l; echo $l;
   });
   with_exn(() ==> {
     $l = 0;
-    echo ++$l;
+    ++$l; echo $l;
   });
   with_exn(() ==> {
     $l = 42;
-    echo ++$l;
+    ++$l; echo $l;
   });
   with_exn(() ==> {
     $l = 1.234;
-    echo ++$l;
+    ++$l; echo $l;
   });
   with_exn(() ==> {
     $l = 'foobar';
-    echo ++$l;
+    ++$l; echo $l;
   });
   with_exn(() ==> {
     $l = '';
-    echo ++$l;
+    ++$l; echo $l;
   });
   with_exn(() ==> {
     $l = '1234';
-    echo ++$l;
+    ++$l; echo $l;
   });
   with_exn(() ==> {
     $l = '1.234';
-    echo ++$l;
+    ++$l; echo $l;
   });
   with_exn(() ==> {
     $l = HH\stdin();
-    echo ++$l;
+    ++$l; echo $l;
   });
   echo ">\n";
 }
@@ -74,57 +74,57 @@ function postinc(): void {
 
   with_exn(() ==> {
     $l = null;
-    echo $l++;
+    $t = $l; $l++; echo $t;
     echo "\n$l";
   });
   with_exn(() ==> {
     $l = false;
-    echo $l++;
+    $t = $l; $l++; echo $t;
     echo "\n$l";
   });
   with_exn(() ==> {
     $l = true;
-    echo $l++;
+    $t = $l; $l++; echo $t;
     echo "\n$l";
   });
   with_exn(() ==> {
     $l = 0;
-    echo $l++;
+    $t = $l; $l++; echo $t;
     echo "\n$l";
   });
   with_exn(() ==> {
     $l = 42;
-    echo $l++;
+    $t = $l; $l++; echo $t;
     echo "\n$l";
   });
   with_exn(() ==> {
     $l = 1.234;
-    echo $l++;
+    $t = $l; $l++; echo $t;
     echo "\n$l";
   });
   with_exn(() ==> {
     $l = 'foobar';
-    echo $l++;
+    $t = $l; $l++; echo $t;
     echo "\n$l";
   });
   with_exn(() ==> {
     $l = '';
-    echo $l++;
+    $t = $l; $l++; echo $t;
     echo "\n$l";
   });
   with_exn(() ==> {
     $l = '1234';
-    echo $l++;
+    $t = $l; $l++; echo $t;
     echo "\n$l";
   });
   with_exn(() ==> {
     $l = '1.234';
-    echo $l++;
+    $t = $l; $l++; echo $t;
     echo "\n$l";
   });
   with_exn(() ==> {
     $l = HH\stdin();
-    echo $l++;
+    $t = $l; $l++; echo $t;
     echo "\n$l";
   });
   echo ">\n";
@@ -136,47 +136,47 @@ function predec(): void {
 
   with_exn(() ==> {
     $l = null;
-    echo --$l;
+    --$l; echo $l;
   });
   with_exn(() ==> {
     $l = false;
-    echo --$l;
+    --$l; echo $l;
   });
   with_exn(() ==> {
     $l = true;
-    echo --$l;
+    --$l; echo $l;
   });
   with_exn(() ==> {
     $l = 0;
-    echo --$l;
+    --$l; echo $l;
   });
   with_exn(() ==> {
     $l = 42;
-    echo --$l;
+    --$l; echo $l;
   });
   with_exn(() ==> {
     $l = 1.234;
-    echo --$l;
+    --$l; echo $l;
   });
   with_exn(() ==> {
     $l = 'foobar';
-    echo --$l;
+    --$l; echo $l;
   });
   with_exn(() ==> {
     $l = '';
-    echo --$l;
+    --$l; echo $l;
   });
   with_exn(() ==> {
     $l = '1234';
-    echo --$l;
+    --$l; echo $l;
   });
   with_exn(() ==> {
     $l = '1.234';
-    echo --$l;
+    --$l; echo $l;
   });
   with_exn(() ==> {
     $l = HH\stdin();
-    echo --$l;
+    --$l; echo $l;
   });
   echo ">\n";
 }
@@ -186,57 +186,57 @@ function postdec(): void {
 
   with_exn(() ==> {
     $l = null;
-    echo $l--;
+    $t = $l; $l--; echo $t;
     echo "\n$l";
   });
   with_exn(() ==> {
     $l = false;
-    echo $l--;
+    $t = $l; $l--; echo $t;
     echo "\n$l";
   });
   with_exn(() ==> {
     $l = true;
-    echo $l--;
+    $t = $l; $l--; echo $t;
     echo "\n$l";
   });
   with_exn(() ==> {
     $l = 0;
-    echo $l--;
+    $t = $l; $l--; echo $t;
     echo "\n$l";
   });
   with_exn(() ==> {
     $l = 42;
-    echo $l--;
+    $t = $l; $l--; echo $t;
     echo "\n$l";
   });
   with_exn(() ==> {
     $l = 1.234;
-    echo $l--;
+    $t = $l; $l--; echo $t;
     echo "\n$l";
   });
   with_exn(() ==> {
     $l = 'foobar';
-    echo $l--;
+    $t = $l; $l--; echo $t;
     echo "\n$l";
   });
   with_exn(() ==> {
     $l = '';
-    echo $l--;
+    $t = $l; $l--; echo $t;
     echo "\n$l";
   });
   with_exn(() ==> {
     $l = '1234';
-    echo $l--;
+    $t = $l; $l--; echo $t;
     echo "\n$l";
   });
   with_exn(() ==> {
     $l = '1.234';
-    echo $l--;
+    $t = $l; $l--; echo $t;
     echo "\n$l";
   });
   with_exn(() ==> {
     $l = HH\stdin();
-    echo $l--;
+    $t = $l; $l--; echo $t;
     echo "\n$l";
   });
 

@@ -5,7 +5,8 @@ class X {
 }
 
 function test($a) :mixed{
-  var_dump($a[-1] = new X);
+  $a[-1] = new X; // illegal string offset write evaluates to null
+  var_dump(null);
   var_dump($a);
 }
 

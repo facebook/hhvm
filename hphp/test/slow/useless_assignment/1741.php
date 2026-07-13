@@ -11,7 +11,7 @@ function test($a) :mixed{
   $a || out('||a');
   $c = 0;
   $b = $c;
-  $a || (($b = 5) + ($c = 6));
+  if (!$a) { $b = 5; $c = 6; }
   out($b);
  out($c);
 }

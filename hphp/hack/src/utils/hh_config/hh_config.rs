@@ -260,7 +260,6 @@ impl HhConfig {
             allow_unstable_features: hh_conf
                 .bool_if_min_version("allow_unstable_features", version)
                 .unwrap_or(Ok(default.allow_unstable_features))?,
-            disable_lval_as_an_expression: default.disable_lval_as_an_expression,
             union_intersection_type_hints: hhconfig.get_bool_or(
                 "union_intersection_type_hints",
                 default.union_intersection_type_hints,

@@ -77,7 +77,8 @@ $it = new NoRewindIteratorEx(new ArrayIteratorEx(range(0,3)));
 echo "===2===\n";
 foreach ($it as $v) {
     var_dump($v);
-    if ($pos++ > 1) {
+    $t = $pos; $pos++;
+    if ($t > 1) {
         break;
     }
 }

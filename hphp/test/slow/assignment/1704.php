@@ -6,11 +6,11 @@ function f($a) :mixed{
 class ClassA {
   public static $val = 1;
   function foo() :mixed{
-    f($val = 'val');
-    f($this->$val = 2);
+    $val = 'val'; f($val);
+    $this->$val = 2; f($this->$val);
   }
   function foo2() :mixed{
-    f($this->val = 3);
+    $this->val = 3; f($this->val);
   }
   function bar() :mixed{
     try {

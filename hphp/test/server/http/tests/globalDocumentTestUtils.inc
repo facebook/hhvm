@@ -4,7 +4,9 @@ function runTestWith404HealthCheck($testController, $customArgs = '', $repoArgs 
                                    $expect404 = false) {
   $pid = posix_getpid();
   try {
-    $serverProc = $serverPort = $adminPort = null;
+    $serverProc = null;
+    $serverPort = null;
+    $adminPort = null;
     $debugPort = false;
     $serverProc = startServer(inout $serverPort, inout $adminPort, inout $debugPort,
                               __DIR__.'/..', __DIR__.'/../server_root',

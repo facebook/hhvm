@@ -48,11 +48,6 @@ pub fn parser_options(config: &HhvmConfig) -> Result<ParserOptions> {
     // Only hdf version found in use
     init(&mut flags.const_static_props, "Hack.Lang.ConstStaticProps")?;
 
-    init(
-        &mut flags.disable_lval_as_an_expression,
-        "Hack.Lang.DisableLvalAsAnExpression",
-    )?;
-
     // Both ini and hdf variants in use
     init(
         &mut flags.disable_xhp_element_mangling,

@@ -72,7 +72,8 @@ $values = vec[
 
 /* creating dumping file */
 $data_file = sys_get_temp_dir().'/'.'vfprintf_variation21.txt';
-if (!($fp = fopen($data_file, 'wt')))
+$fp = fopen($data_file, 'wt');
+if (!$fp)
    return;
 
 fprintf($fp, "\n*** Testing vprintf() with unexpected values for args argument ***\n");

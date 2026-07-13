@@ -69,10 +69,13 @@ class TestWebRoot implements IDisposable {
 
     $file = null;
     for ($i = 0; $i < count($matches); $i++) {
-      if (($f = sscanf($matches[$i], 'FILE: %s')) === null) continue;
+      $f = sscanf($matches[$i], 'FILE: %s');
+      if ($f === null) continue;
       $file = $f[0];
 
-      if (($f = sscanf($matches[++$i], 'VERSION: %d')) !== null) {
+      ++$i;
+      $f = sscanf($matches[$i], 'VERSION: %d');
+      if ($f !== null) {
         $vers = $f[0];
         $i++;
       } else $vers = 0;
@@ -240,7 +243,8 @@ class TestWebServer implements IDisposable {
   }
 
   private function startServer(string $customArgs, string $repoArgs): void {
-    $serverPort = $adminPort = null;
+    $serverPort = null;
+    $adminPort = null;
     $debugPort = false;
     $args = implode($this->serverOptions(), ' ')." $customArgs";
 

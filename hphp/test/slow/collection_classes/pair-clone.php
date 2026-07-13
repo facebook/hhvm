@@ -2,7 +2,7 @@
 
 function main($n) :mixed{
   $p = Pair{vec[$n], "foobar"};
-  while (--$n > 0) $p2 = clone $p;
+  while (true) { --$n; if (!($n > 0)) break; $p2 = clone $p; }
 }
 
 

@@ -3,6 +3,7 @@
 
 <<__EntryPoint>>
 function main_1255() :mixed{
-if (!$a = true) {
+$a = true;
+if (!$a) {
 }
 }

@@ -5,10 +5,10 @@ class A {
 
   public async function genthings() :Awaitable<mixed>{
     return () ==> () ==> () ==> () ==> () ==> () ==> {
-      yield () ==> $this->foo = "2";
-      yield () ==> $this->foo = "3";
-      yield () ==> $this->foo = "4";
-      yield () ==> $this->foo = "5";
+      yield () ==> { $this->foo = "2"; };
+      yield () ==> { $this->foo = "3"; };
+      yield () ==> { $this->foo = "4"; };
+      yield () ==> { $this->foo = "5"; };
     };
   }
 

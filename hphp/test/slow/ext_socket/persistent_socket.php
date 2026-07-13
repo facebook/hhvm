@@ -7,7 +7,10 @@ function read_all_data( $conn, $bytes ) :mixed{
 
   // Loop until we read all the bytes we expected or we hit an error.
   stream_set_timeout($conn, 1);
-  while( $bytes > 0 && $data = fread($conn, $bytes) ) {
+  while (true) {
+    if (!($bytes > 0)) break;
+    $data = fread($conn, $bytes);
+    if (!$data) break;
     $bytes -= strlen($data);
     $all_data .= $data;
   }
@@ -19,7 +22,8 @@ function test_server($server) :mixed{
   // The server only accepts once, but the client will call
   // stream_socket_client multiple times with the persistent flag.
   $peername = null;
-  if( $conn = stream_socket_accept($server, -1.0, inout $peername) ) {
+  $conn = stream_socket_accept($server, -1.0, inout $peername);
+  if( $conn ) {
     $requests_remaining = 3;
     while( $requests_remaining > 0 ) {
       $requests_remaining--;

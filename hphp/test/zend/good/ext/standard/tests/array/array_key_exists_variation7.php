@@ -14,7 +14,8 @@ echo "*** Testing array_key_exists() : usage variations ***\n";
 $input = dict['one' => 'un', 'two' => 'deux', 'three' => 'trois'];
 
 echo "\n-- Call array_key_exists() --\n";
-var_dump($result = array_key_exists('one', $input));
+$result = array_key_exists('one', $input);
+var_dump($result);
 
 echo "Done";
 }

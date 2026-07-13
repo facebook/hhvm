@@ -11,7 +11,7 @@
 echo "*** Testing readdir() : usage variations ***\n";
 
 // get a resource variable
-var_dump($fp = fopen(__FILE__, "r"));
+$fp = fopen(__FILE__, "r"); var_dump($fp);
 var_dump( readdir($fp) );
 
 echo "===DONE===\n";

@@ -26,7 +26,7 @@ function test3($a, $b) :mixed{
   foreach ($a as $v) {
     $buf .= $v . ';';
     foreach ($b as $w) {
-      echo ($buf .= $w);
+      $buf .= $w; echo $buf;
     }
   }
   var_dump($buf);

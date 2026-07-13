@@ -4,7 +4,8 @@ $int_numbers = vec[ 0, 1, -1, 2.7, -2.7, 23333333, -23333333, "1234" ];
 
 /* creating dumping file */
 $data_file = sys_get_temp_dir().'/'.'fprintf_variation_006_64bit.phpt.txt';
-if (!($fp = fopen($data_file, 'wt')))
+$fp = fopen($data_file, 'wt');
+if (!$fp)
    return;
 
 /* unsigned int type variation */

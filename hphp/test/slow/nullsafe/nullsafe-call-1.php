@@ -39,7 +39,7 @@ function test4(C $c): void {
 }
 function test5(?C $c): int {
   $x = null;
-  $c?->yar($x = 123);
+  $x = 123; $c?->yar($x);
   return $x;
 }
 function main() :mixed{

@@ -10,9 +10,11 @@ function main_entry(): void {
 
   echo "SELECTING results\n";
   $results = $db->query("SELECT * FROM test ORDER BY id ASC");
-  while ($result = $results->fetcharray(SQLITE3_NUM))
+  $result = $results->fetcharray(SQLITE3_NUM);
+  while ($result)
   {
   	var_dump($result);
+  	$result = $results->fetcharray(SQLITE3_NUM);
   }
   $results->finalize();
 

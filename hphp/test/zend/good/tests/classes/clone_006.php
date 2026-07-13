@@ -4,12 +4,14 @@ class MyCloneable {
   public static $id = 0;
 
   function __construct() {
-    $this->id = self::$id++;
+    $this->id = self::$id;
+    self::$id++;
   }
 
   function __clone() :mixed{
     $this->address = "New York";
-    $this->id = self::$id++;
+    $this->id = self::$id;
+    self::$id++;
   }
 }
 

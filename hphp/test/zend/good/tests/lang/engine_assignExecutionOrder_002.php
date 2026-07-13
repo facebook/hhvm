@@ -19,7 +19,7 @@ echo "A=$a B=$b\n";
 // i++ evaluated first, so $d[0] is 10
 $d = vec[0,10];
 $i = 0;
-$d[$i++] = $i*10;
+$__idx = $i; $i++; $d[$__idx] = $i*10;
 // expected array is 10,10
 var_dump($d);
 
@@ -30,7 +30,7 @@ $g1 = vec[10,10];
 $g2 = vec[20,20];
 $g3 = vec[30,30];
 $g = vec[$g1,$g2,$g3];
-list($e[$f++],$e[$f++]) = $g[$f];
+$__f1=$f; $f++; $__f2=$f; $f++; list($e[$__f1],$e[$__f2]) = $g[$f];
 // expect 30,30
 var_dump($e);
 
@@ -43,7 +43,7 @@ $i = vec[$i1,$i2,$i3,$i4];
 $j = vec[0,0,0];
 $h = 0;
 // a list of lists
-list(list($j[$h++],$j[$h++]),$j[$h++]) = $i[$h];
+$__h1=$h; $h++; $__h2=$h; $h++; $__h3=$h; $h++; list(list($j[$__h1],$j[$__h2]),$j[$__h3]) = $i[$h];
 var_dump($j);
 
 

@@ -14,6 +14,7 @@ $stack = dict['one' => 'un', 'two' => 'deux'];
 $var0 = 'zero';
 
 echo "\n-- Call array_push() --\n";
-var_dump($result = array_push(inout $stack, $var0));
+$result = array_push(inout $stack, $var0);
+var_dump($result);
 echo "Done";
 }

@@ -4,7 +4,8 @@ trait Singleton {
   protected static $instances=dict[];
   abstract protected function __construct($config);
   public static function getInstance($config) :mixed{
-    if (!isset(self::$instances[$serialize = serialize($config)])) {
+    $serialize = serialize($config);
+    if (!isset(self::$instances[$serialize])) {
       self::$instances[$serialize] = new self($config);
     }
     return self::$instances[$serialize];

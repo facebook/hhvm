@@ -102,7 +102,8 @@ function ut_main()
     $res_str = '';
     foreach($loc_parts_arr as $key => $value ){
         $res_str .= "\n------------";
-        $res_str .= "\nInput Array name is : loc".(++$cnt) ;
+        ++$cnt;
+        $res_str .= "\nInput Array name is : loc".$cnt ;
 /*
         foreach($value as $valKey => $valValue ){
             $res_str .=  $valKey ."->".$valValue."  " ;

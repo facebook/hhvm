@@ -6,14 +6,15 @@ function test($input, $compressed, $decompressor) :mixed{
   $i = $j;
   $chunks = str_split($compressed, 512 /* bytes */);
   while (!$decompressor->eof()) {
-    $chunk = $j < count($chunks) ? $chunks[$j++] : "";
+    if ($j < count($chunks)) { $chunk = $chunks[$j]; $j++; } else { $chunk = ""; }
     $this_chunk = $decompressor->inflateChunk($chunk);
     printf(
       "Chunk %d: produced %d; eof: %s\n",
-      $i++,
+      $i,
       strlen($this_chunk),
       $decompressor->eof() ? 'true' : 'false'
     );
+    $i++;
     $output .= $this_chunk;
   }
 
@@ -33,7 +34,7 @@ function test_potential_exception($input, $compressed, $decompressor) :mixed{
   $chunks = str_split($compressed, 16384);
   $errs = 0;
   while (!$decompressor->eof()) {
-    $chunk = $j < count($chunks) ? $chunks[$j++] : "";
+    if ($j < count($chunks)) { $chunk = $chunks[$j]; $j++; } else { $chunk = ""; }
     try {
       $this_chunk = $decompressor->inflateChunk($chunk);
     } catch (Exception $e) {

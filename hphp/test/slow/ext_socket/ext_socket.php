@@ -27,7 +27,8 @@ function create_listen_random_port(inout $sock) :mixed{
   for ($i = 0; $i < 100; $i++) {
     $port = get_random_port();
     error_reporting(0);
-    if ($sock = socket_create_listen($port)) return $port;
+    $sock = socket_create_listen($port);
+    if ($sock) return $port;
     error_reporting(E_ALL);
   }
   return 0;

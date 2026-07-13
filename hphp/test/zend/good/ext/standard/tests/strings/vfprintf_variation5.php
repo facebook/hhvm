@@ -40,7 +40,8 @@ $args_array = vec[
 
 /* creating dumping file */
 $data_file = sys_get_temp_dir().'/'.'vfprintf_variation5.txt';
-if (!($fp = fopen($data_file, 'wt')))
+$fp = fopen($data_file, 'wt');
+if (!$fp)
    return;
 
 // looping to test vprintf() with different float formats from the above $format array

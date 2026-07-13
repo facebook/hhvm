@@ -7,7 +7,9 @@ abstract final class BlahStatics {
 function blah()
 :mixed{
 
-  echo "hey=".BlahStatics::$hey++.", ",BlahStatics::$yo--."\n";
+  $__hey = BlahStatics::$hey; BlahStatics::$hey++;
+  $__yo = BlahStatics::$yo; BlahStatics::$yo--;
+  echo "hey=".$__hey.", ",$__yo."\n";
 }
 <<__EntryPoint>> function main(): void {
 blah();

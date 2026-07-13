@@ -13,13 +13,13 @@ function stringFunc() :mixed{
   $prefix = 'foo.browser';
 
   if ($results[0]) {
-    $groups[] = ($prefix .= '.'.$results[0]);
+    $prefix .= '.'.$results[0]; $groups[] = $prefix;
 
     if ($results[1]) {
-      $groups[] = ($prefix .= '.'.$results[1]);
+      $prefix .= '.'.$results[1]; $groups[] = $prefix;
 
       if ($results[2]) {
-        $groups[] = ($prefix .= '-'.$results[2]);
+        $prefix .= '-'.$results[2]; $groups[] = $prefix;
       }
     }
   }
@@ -36,13 +36,13 @@ function intFunc() :mixed{
   $prefix = 1;
 
   if ($results[0]) {
-    $groups[] = ($prefix += HH\Lib\Legacy_FIXME\cast_for_arithmetic($results[0]));
+    $prefix += HH\Lib\Legacy_FIXME\cast_for_arithmetic($results[0]); $groups[] = $prefix;
 
     if ($results[1]) {
-      $groups[] = ($prefix += HH\Lib\Legacy_FIXME\cast_for_arithmetic($results[1]));
+      $prefix += HH\Lib\Legacy_FIXME\cast_for_arithmetic($results[1]); $groups[] = $prefix;
 
       if ($results[2]) {
-        $groups[] = ($prefix += HH\Lib\Legacy_FIXME\cast_for_arithmetic($results[2]));
+        $prefix += HH\Lib\Legacy_FIXME\cast_for_arithmetic($results[2]); $groups[] = $prefix;
       }
     }
   }

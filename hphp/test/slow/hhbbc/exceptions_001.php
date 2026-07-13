@@ -7,7 +7,9 @@ abstract final class HehStatics {
 function heh() :mixed{
   $x = HehStatics::$x;
   echo "ok $x\n";
-  if (HehStatics::$x++ == 0) {
+  $t = HehStatics::$x;
+  HehStatics::$x++;
+  if ($t == 0) {
     throw new Exception('a');
   }
 }

@@ -64,7 +64,7 @@ bool(true)
 2147483648
 1
 
-Warning: gmp_pow(): Exponent must not be negative in %s/mostInOne.php on line 174
+Warning: gmp_pow(): Exponent must not be negative in %s/mostInOne.php on line 176
 0
 2147483648
 0

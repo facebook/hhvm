@@ -55,12 +55,12 @@ function main_1506() :mixed{
   rt(inout $a, id(10));
   var_dump($a);
   try {
-    dump($v++, $v++);
+    $t1 = $v; $v++; $t2 = $v; $v++; dump($t1, $t2);
   } catch (UndefinedVariableException $e) {
     var_dump($e->getMessage());
   }
   $v = 10;
-  dump($v, $v = 0);
+  $a = $v; $v = 0; dump($a, $v);
   echo "nest
 ";
   x(p(1), x(p(2), p(3), p(4), p(5)), p(6), x(p(7), p(8), p(9), p(10)));

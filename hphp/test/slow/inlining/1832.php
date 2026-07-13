@@ -5,7 +5,10 @@ function f($name, $unique_id=false, $id=null) :mixed{
   return $id;
   }
 function test($a, $b, $c) :mixed{
-  return f($name = 'status', $unique_id = true, $id = 'status_active');
+  $name = 'status';
+  $unique_id = true;
+  $id = 'status_active';
+  return f($name, $unique_id, $id);
   }
 
 <<__EntryPoint>>

@@ -22,27 +22,35 @@ function main_entry(): void {
 
   print "--- C ---\n";
   $o = new C;
-  var_dump(++$o->preInc);
-  var_dump(--$o->preDec);
-  var_dump($o->postInc++);
-  var_dump($o->postDec--);
-  error_boundary(inout $o, (inout $o) ==> ++$o->p);
-  error_boundary(inout $o, (inout $o) ==> --$o->q);
-  error_boundary(inout $o, (inout $o) ==> $o->r++);
-  error_boundary(inout $o, (inout $o) ==> $o->s--);
+  ++$o->preInc;
+  var_dump($o->preInc);
+  --$o->preDec;
+  var_dump($o->preDec);
+  $t = $o->postInc;
+  $o->postInc++;
+  var_dump($t);
+  $t = $o->postDec;
+  $o->postDec--;
+  var_dump($t);
+  error_boundary(inout $o, (inout $o) ==> { ++$o->p; });
+  error_boundary(inout $o, (inout $o) ==> { --$o->q; });
+  error_boundary(inout $o, (inout $o) ==> { $o->r++; });
+  error_boundary(inout $o, (inout $o) ==> { $o->s--; });
   var_dump($o);
 
   print "--- null ---\n";
   $o = null;
-  error_boundary(inout $o, (inout $o) ==> ++$o->preInc);
-  error_boundary(inout $o, (inout $o) ==> --$o->preDec);
-  error_boundary(inout $o, (inout $o) ==> $o->postInc++);
-  error_boundary(inout $o, (inout $o) ==> $o->postDec--);
+  error_boundary(inout $o, (inout $o) ==> { ++$o->preInc; });
+  error_boundary(inout $o, (inout $o) ==> { --$o->preDec; });
+  error_boundary(inout $o, (inout $o) ==> { $o->postInc++; });
+  error_boundary(inout $o, (inout $o) ==> { $o->postDec--; });
   var_dump($o);
 
   print "--- 42 ---\n";
   $o = 42;
-  var_dump(++$o->preInc);
+  // Pre-increment of a property on a non-object warns and evaluates to null.
+  ++$o->preInc;
+  var_dump(null);
   print_r($o);
   print "\n";
 

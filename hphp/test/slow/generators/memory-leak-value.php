@@ -3,8 +3,10 @@
 class C {}
 
 function generator($n) :AsyncGenerator<mixed,mixed,void>{
-  while (--$n > 0) {
+  --$n;
+  while ($n > 0) {
     yield new C();
+    --$n;
   }
 }
 

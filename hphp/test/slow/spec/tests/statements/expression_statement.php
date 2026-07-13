@@ -33,14 +33,18 @@ function main_entry(): void {
   34.5 * 12.6 + 11.987;
   TRUE;
 
-  while ($i-- > 0)
+  $t = $i; $i--;
+  while ($t > 0)
   {
       ;       // null statement
+      $t = $i; $i--;
   }
 
   $i = 10;
-  while ($i-- > 0)
+  $t = $i; $i--;
+  while ($t > 0)
   {
+      $t = $i; $i--;
       continue;   // in this context, equivalent to using a null statement
   }
 

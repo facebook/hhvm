@@ -2,7 +2,7 @@
 
 class S1 { public static $v = 0; }
 function test_1() :mixed{
-    $v = ++S1::$v;
+    ++S1::$v; $v = S1::$v;
     echo "Outer function increments \$v to $v\n";
     $f = function() use($v) {
         echo "Inner function reckons \$v is $v\n";
@@ -16,7 +16,7 @@ function test_2() :mixed{
     $f = function() use($v) {
         echo "Inner function reckons \$v is $v\n";
     };
-    $v = ++S2::$v;
+    ++S2::$v; $v = S2::$v;
     echo "Outer function increments \$v to $v\n";
     return $f;
 }

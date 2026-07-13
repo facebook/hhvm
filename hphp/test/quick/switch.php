@@ -1,9 +1,15 @@
 <?hh
 
+// Pre-increments by reference so case labels keep the old `case ++$a` semantics.
+function preinc(inout $x) :mixed{
+  ++$x;
+  return $x;
+}
+
 function main() :mixed{
   $a = 2;
   switch ($a) {
-    case ++$a:
+    case preinc(inout $a):
       echo "correct!\n";
       break;
     case 2:
@@ -16,7 +22,7 @@ function main() :mixed{
 
   $a = vec[2];
   switch ($a[0]) {
-    case ++$a[0]:
+    case preinc(inout $a[0]):
       echo "nope: pre-inc\n";
       break;
     case 2:

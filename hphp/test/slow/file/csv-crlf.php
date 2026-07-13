@@ -6,7 +6,9 @@ $fh = tmpfile();
 fwrite($fh, str_repeat('x', 8191) . "\r\ny");
 fseek($fh, 0);
 $i = 0;
-while($f = fgetcsv($fh)) {
-    echo $i++,"\n";
+$f = fgetcsv($fh);
+while($f) {
+    echo $i,"\n"; $i++;
+    $f = fgetcsv($fh);
 }
 }

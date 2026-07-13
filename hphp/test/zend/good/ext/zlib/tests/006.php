@@ -11,8 +11,8 @@ $string = "Answer me, it can't be so hard
 Cry to relieve what's in your heart
 Desolation, grief and agony";
 
-var_dump($data1 = gzdeflate($string));
-var_dump($data2 = gzdeflate($string, 9));
+$data1 = gzdeflate($string); var_dump($data1);
+$data2 = gzdeflate($string, 9); var_dump($data2);
 
 try { var_dump(gzinflate()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 var_dump(gzinflate(""));

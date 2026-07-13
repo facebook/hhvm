@@ -12,7 +12,9 @@ foreach ($arr as $val) {
 }
 $i = 0;
 $valid = true;
-while ($valid && ++$i) {
+while (true) {
+    if (!$valid) break;
+    ++$i; if (!$i) break;
     switch ($i) {
     case 5:
       echo "At 5\n";

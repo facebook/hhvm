@@ -6,14 +6,14 @@ function f($a) :mixed{
 class ClassA {
   public $val;
   function foo() :mixed{
-    f($val = 1);
+    $val = 1; f($val);
   }
   function bar() :mixed{
-    f($this->val = 1);
+    $this->val = 1; f($this->val);
   }
   function goo() :mixed{
-    f($val = 'val');
-    f($this->$val = 2);
+    $val = 'val'; f($val);
+    $this->$val = 2; f($this->$val);
   }
   function zoo() :mixed{
     try {
@@ -25,7 +25,7 @@ class ClassA {
   }
 }
 function foo() :mixed{
-  f($val2 = 1);
+  $val2 = 1; f($val2);
 }
 
 <<__EntryPoint>>

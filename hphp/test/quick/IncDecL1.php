@@ -10,19 +10,21 @@ function error_boundary($fn) :mixed{
 }
 
 function postInc($x) :mixed{
-  return error_boundary(() ==> $x++);
+  // launder $x so repo-mode HHBBC keeps the (possibly-throwing) ++ live
+  return error_boundary(() ==> { $r = $x; $x++; __hhvm_intrinsics\launder_value($x); return $r; });
 }
 
 function preInc($x) :mixed{
-  return error_boundary(() ==> ++$x);
+  return error_boundary(() ==> { ++$x; return $x; });
 }
 
 function postDec($x) :mixed{
-  return error_boundary(() ==> $x--);
+  // launder $x so repo-mode HHBBC keeps the (possibly-throwing) -- live
+  return error_boundary(() ==> { $r = $x; $x--; __hhvm_intrinsics\launder_value($x); return $r; });
 }
 
 function preDec($x) :mixed{
-  return error_boundary(() ==> --$x);
+  return error_boundary(() ==> { --$x; return $x; });
 }
 <<__EntryPoint>> function main(): void {
 var_dump(postInc(2));

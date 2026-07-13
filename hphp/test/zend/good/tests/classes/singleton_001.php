@@ -4,7 +4,8 @@ class Counter {
     private $counter = 0;
 
     function increment_and_print() :mixed{
-        echo ++$this->counter;
+        ++$this->counter;
+        echo $this->counter;
         echo "\n";
     }
 }

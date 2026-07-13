@@ -11,8 +11,8 @@ function y($y) :mixed{
  var_dump($y);
  }
 function test($x, $y) :mixed{
-  $x->foo($x = null);
-  $y($y = null);
+  $recv = $x; $x = null; $recv->foo($x);
+  $fn = $y; $y = null; $fn($y);
 }
 
 <<__EntryPoint>>

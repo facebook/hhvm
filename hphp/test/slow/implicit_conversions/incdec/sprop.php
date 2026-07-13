@@ -35,17 +35,17 @@ function main(): void {
     var_dump($i);
     echo "preinc<";
     Foo::$preInc = $i;
-    with_exn(() ==> ++Foo::$preInc);
+    with_exn(() ==> { ++Foo::$preInc; return Foo::$preInc; });
     echo "> postinc<";
     Foo::$postInc = $i;
-    with_exn(() ==> Foo::$postInc++);
+    with_exn(() ==> { $t = Foo::$postInc; Foo::$postInc++; return $t; });
     echo Foo::$postInc;
     echo "> predec<";
     Foo::$preDec = $i;
-    with_exn(() ==> --Foo::$preDec);
+    with_exn(() ==> { --Foo::$preDec; return Foo::$preDec; });
     echo "> postdec<";
     Foo::$postDec = $i;
-    with_exn(() ==> Foo::$postDec--);
+    with_exn(() ==> { $t = Foo::$postDec; Foo::$postDec--; return $t; });
     echo Foo::$postDec;
     echo ">\n";
   }

@@ -9,20 +9,25 @@ function error_boundary($fn) :mixed{
   }
 }
 
+// inout helpers keep the inc/dec observable so its side effects (warnings) are
+// preserved even when the post-inc/dec result is the only value that escapes.
+function postinc_val(inout $x) :mixed{ $r = $x; $x++; return $r; }
+function postdec_val(inout $x) :mixed{ $r = $x; $x--; return $r; }
+
 function postInc($x) :mixed{
-  return error_boundary(() ==> $x++);
+  return error_boundary(() ==> postinc_val(inout $x));
 }
 
 function preInc($x) :mixed{
-  return error_boundary(() ==> ++$x);
+  return error_boundary(() ==> { ++$x; return $x; });
 }
 
 function postDec($x) :mixed{
-  return error_boundary(() ==> $x--);
+  return error_boundary(() ==> postdec_val(inout $x));
 }
 
 function preDec($x) :mixed{
-  return error_boundary(() ==> --$x);
+  return error_boundary(() ==> { --$x; return $x; });
 }
 <<__EntryPoint>> function main(): void {
 var_dump(postInc(2));

@@ -48,13 +48,15 @@ $iterator = 1;
 foreach($inputs as $key => $input) {
     echo "\n-- Iteration $iterator --\n";
     $handle = "fp{$iterator}";
-    var_dump( $handle = fopen($dir_path . (string)$input . ".tmp", 'w') );
+    $handle = fopen($dir_path . (string)$input . ".tmp", 'w');
+    var_dump( $handle );
     fclose($handle);
     $iterator++;
 };
 
 echo "\n-- Call to scandir() --\n";
-var_dump($content = scandir($dir_path));
+$content = scandir($dir_path);
+var_dump($content);
 
 // remove all files in directory so can remove directory in CLEAN section
 foreach ($content as $file_name) {

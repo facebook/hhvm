@@ -14,23 +14,23 @@ function incdec($a)
     echo '$a = '.(string)($a)." <---> "; var_dump($a);
 //  echo '$b = '.$b." <---> "; var_dump($b);
 
-    error_boundary(inout $a, (inout $o) ==> --$o);
+    error_boundary(inout $a, (inout $o) ==> { --$o; return $o; });
     echo '$a = '.(string)($a)." <---> "; var_dump($a);
     $b = HH\Lib\Legacy_FIXME\cast_for_arithmetic($b);
     $b -= 1;
 //  echo '$b = '.$b." <---> "; var_dump($b);
 
-    error_boundary(inout $a, (inout $o) ==> --$o);
+    error_boundary(inout $a, (inout $o) ==> { --$o; return $o; });
     echo '$a = '.(string)($a)." <---> "; var_dump($a);
     $b -= 1;
 //  echo '$b = '.$b." <---> "; var_dump($b);
 
-    error_boundary(inout $a, (inout $o) ==> ++$o);
+    error_boundary(inout $a, (inout $o) ==> { ++$o; return $o; });
     echo '$a = '.(string)($a)." <---> "; var_dump($a);
     $b += 1;
 //  echo '$b = '.$b." <---> "; var_dump($b);
 
-    echo '$a = '.(string)(error_boundary(inout $a, (inout $o) ==> ++$o))."\n";
+    echo '$a = '.(string)(error_boundary(inout $a, (inout $o) ==> { ++$o; return $o; }))."\n";
     echo '$a = '.(string)($a)." <---> "; var_dump($a);
     echo "--------------------------------------- end incdec ---\n";
 }
@@ -43,23 +43,23 @@ function incdecrev($a)
     echo '$a = '.(string)($a)." <---> "; var_dump($a);
 //  echo '$b = '.$b." <---> "; var_dump($b);
 
-    error_boundary(inout $a, (inout $o) ==> ++$o);
+    error_boundary(inout $a, (inout $o) ==> { ++$o; return $o; });
     echo '$a = '.(string)($a)." <---> "; var_dump($a);
     $b = HH\Lib\Legacy_FIXME\cast_for_arithmetic($b);
     $b += 1;
 //  echo '$b = '.$b." <---> "; var_dump($b);
 
-    error_boundary(inout $a, (inout $o) ==> ++$o);
+    error_boundary(inout $a, (inout $o) ==> { ++$o; return $o; });
     echo '$a = '.(string)($a)." <---> "; var_dump($a);
     $b += 1;
 //  echo '$b = '.$b." <---> "; var_dump($b);
 
-    error_boundary(inout $a, (inout $o) ==> --$o);
+    error_boundary(inout $a, (inout $o) ==> { --$o; return $o; });
     echo '$a = '.(string)($a)." <---> "; var_dump($a);
     $b -= 1;
 //  echo '$b = '.$b." <---> "; var_dump($b);
 
-    echo '$a = '.(string)(error_boundary(inout $a, (inout $o) ==> ++$o))."\n";
+    echo '$a = '.(string)(error_boundary(inout $a, (inout $o) ==> { ++$o; return $o; }))."\n";
     echo '$a = '.(string)($a)." <---> "; var_dump($a);
     echo "--------------------------------------- end incdecrev ---\n";
 }

@@ -6,7 +6,7 @@ namespace Bar {
     use \Foo\TN;
     public static $j = 30;
     <<__Memoize>>public function test($a = 0) {
-      return $a + self::$j++;
+      $t = self::$j; self::$j++; return $a + $t;
     }
   }
 }

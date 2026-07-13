@@ -24,12 +24,14 @@ function getTextFileLines($filename)
 
     try
     {
-        while ($textLine = fgets($infile))  // while not EOF
+        $textLine = fgets($infile);
+        while ($textLine)  // while not EOF
         {
 //          echo "len before rtrim: " . + strlen($textLine) . "\n";
             $textLine = rtrim($textLine, "\r\n");   // strip off line terminator
 //          echo "len after rtrim:  " . + strlen($textLine) . "\n";
             yield $textLine;
+            $textLine = fgets($infile);
         }
     }
     finally

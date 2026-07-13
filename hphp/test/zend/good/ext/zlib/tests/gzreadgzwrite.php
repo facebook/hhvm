@@ -11,8 +11,10 @@ fclose($fp);
 $fp = gzopen($filename, "rb");
 
 $data = '';
-while ($buf = gzread($fp, 8092)) {
+$buf = gzread($fp, 8092);
+while ($buf) {
     $data .= $buf;
+    $buf = gzread($fp, 8092);
 }
 
 if ($data == $original) {

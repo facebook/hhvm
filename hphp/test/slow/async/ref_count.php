@@ -19,7 +19,8 @@ async function foo($uid) :Awaitable<mixed>{
 <<__EntryPoint>>
 function main_ref_count() :mixed{
 $i = 0;
-while ($i++ < 15) {
+while (true) {
+  $t = $i; $i++; if (!($t < 15)) break;
   HH\Asio\join(foo(0));
 }
 }

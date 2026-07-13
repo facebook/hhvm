@@ -116,7 +116,8 @@ function fcn($x) :mixed{
  return 'bar';
  }
 function st($x) :mixed{
-  switch ($y = $x) {
+  $y = $x;
+  switch ($y) {
   case 0:
     print '0';
   default: break;
@@ -131,7 +132,8 @@ function st($x) :mixed{
     break;
   default: break;
   }
-  switch (++$x) {
+  ++$x;
+  switch ($x) {
   case 1:
     print '1';
   default: break;

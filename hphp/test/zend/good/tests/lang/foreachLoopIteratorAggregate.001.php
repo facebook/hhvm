@@ -103,7 +103,8 @@ class EuropeanMeals implements IteratorAggregate {
         $indent = ForeachLoopIteratorAggregate::$indent;
         $indent__str = (string)($indent);
         echo "$indent__str--> " . __METHOD__  . "\n";
-        if (self::$getIteratorI++%2 == 0) {
+        $__gi = self::$getIteratorI; self::$getIteratorI++;
+        if ($__gi%2 == 0) {
             return $this->storedEnglishMealIterator;
         } else {
             return $this->storedFrenchMealIterator;
@@ -129,7 +130,8 @@ ForeachLoopIteratorAggregate::$indent = " ";
 echo "\n\n\n-----( Nested iteration: )-----\n";
 $count=1;
 foreach ($f as $k=>$v) {
-    echo "\nTop level "  .  $count++ . ": \n";
+    $__count = $count; $count++;
+    echo "\nTop level "  .  $__count . ": \n";
     echo "$k => $v\n";
   ForeachLoopIteratorAggregate::$indent = "     ";
     foreach ($f as $k=>$v) {

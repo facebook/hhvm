@@ -12,7 +12,8 @@ $str2 = $str;
 sodium_increment(inout $str);
 var_dump($str, $str2);
 
-$str = "ab" . ($x = "c");
+$x = "c";
+$str = "ab" . $x;
 $str2 = $str;
 sodium_increment(inout $str);
 var_dump($str, $str2);
@@ -31,7 +32,8 @@ $str2 = $str;
 sodium_add(inout $str, $addStr);
 var_dump($str, $str2);
 
-$str = "ab" . ($x = "c");
+$x = "c";
+$str = "ab" . $x;
 $str2 = $str;
 sodium_add(inout $str, $addStr);
 var_dump($str, $str2);

@@ -3,7 +3,7 @@
 
 <<__EntryPoint>>
 function main_38() :mixed{
-var_dump(list($a,$b) = vec[1,2,3]);
+$rhs = vec[1,2,3]; list($a,$b) = $rhs; var_dump($rhs);
  var_dump($a);
  var_dump($b);
 }

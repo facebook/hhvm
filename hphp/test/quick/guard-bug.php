@@ -12,10 +12,12 @@ function k() :mixed{
 
 <<__EntryPoint>>
 function main(): void {
-  while ($line = fgets(k())) {
+  $line = fgets(k());
+  while ($line) {
       $parts = explode(' ', $line);
       $file = $parts[0];
 
       echo "$file -\n";
+      $line = fgets(k());
   }
 }

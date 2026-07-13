@@ -36,17 +36,17 @@ function main(): void {
     var_dump($i);
     echo "preinc<";
     $o->preInc = __hhvm_intrinsics\launder_value($i);
-    with_exn(() ==> ++$o->preInc);
+    with_exn(() ==> { ++$o->preInc; return $o->preInc; });
     echo "> postinc<";
     $o->postInc = __hhvm_intrinsics\launder_value($i);
-    with_exn(() ==> $o->postInc++);
+    with_exn(() ==> { $t = $o->postInc; $o->postInc++; return $t; });
     echo $o->postInc;
     echo "> predec<";
     $o->preDec = __hhvm_intrinsics\launder_value($i);
-    with_exn(() ==> --$o->preDec);
+    with_exn(() ==> { --$o->preDec; return $o->preDec; });
     echo "> postdec<";
     $o->postDec = __hhvm_intrinsics\launder_value($i);
-    with_exn(() ==> $o->postDec--);
+    with_exn(() ==> { $t = $o->postDec; $o->postDec--; return $t; });
     echo $o->postDec;
     echo ">\n";
   }

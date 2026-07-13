@@ -9,9 +9,9 @@ trait Yoyo {
   function cl($k) :mixed{
     $ref = new Ref(42);
     return function() use ($k, $ref) {
-      yield $ref->val++ . "2\n";
-      yield $ref->val++ . "2\n";
-      yield $ref->val++ . "2\n";
+      $t=$ref->val; $ref->val++; yield $t . "2\n";
+      $t=$ref->val; $ref->val++; yield $t . "2\n";
+      $t=$ref->val; $ref->val++; yield $t . "2\n";
     };
   }
 }

@@ -49,6 +49,7 @@ for ($i=0; $i<200; $i++) {
 
 $dafna = new dafna_class();
 
-print $name=call_user_func(vec[$dafna,"GetMyName"]);
+$name=call_user_func(vec[$dafna,"GetMyName"]);
+print $name;
 print "\n";
 }

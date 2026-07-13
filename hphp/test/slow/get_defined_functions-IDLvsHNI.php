@@ -14,7 +14,8 @@ $foundhni = false;
 foreach(get_defined_functions()['internal'] as $f) {
   $ishni = false;
   $rf = new ReflectionFunction($f);
-  if ($attrs = $rf->getAttributes()) {
+  $attrs = $rf->getAttributes();
+  if ($attrs) {
     foreach ($attrs as $name => $attr) {
       if (!strcasecmp($name, '__Native')) {
         $ishni = true;

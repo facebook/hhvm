@@ -13,7 +13,8 @@ echo "*** Testing array_change_key_case() : usage variations ***\n";
 $input = dict['one' => 'un', 'two' => 'deux', 'three' => 'trois'];
 
 echo "\n-- Call array_change_key_case() --\n";
-var_dump($result = array_change_key_case($input, CASE_UPPER));
+$result = array_change_key_case($input, CASE_UPPER);
+var_dump($result);
 
 echo "Done";
 }

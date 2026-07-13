@@ -19,8 +19,10 @@ $dir_handle = opendir($path);
 
 echo "\n-- Pass an empty directory to readdir() --\n";
 $entries = vec[];
-while(FALSE !== ($file = readdir($dir_handle))){
+$file = readdir($dir_handle);
+while(FALSE !== $file){
     $entries[] = $file;
+    $file = readdir($dir_handle);
 }
 
 closedir($dir_handle);

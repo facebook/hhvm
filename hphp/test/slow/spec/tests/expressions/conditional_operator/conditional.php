@@ -32,25 +32,25 @@ var_dump($a);
 // put a side effect in the 1st operand
 
 $i = 5;
-$a = $i++ ? : "red";
+$t = $i; $i++; $a = $t ? : "red";
 var_dump($a);
 $i = 5;
-$a = ++$i ? : "red";
+++$i; $a = $i ? : "red";
 var_dump($a);
 
 $i = PHP_INT_MAX;
-$a = $i++ ? : "red";
+$t = $i; $i++; $a = $t ? : "red";
 var_dump($a);
 $i = PHP_INT_MAX;
-$a = ++$i ? : "red";
+++$i; $a = $i ? : "red";
 var_dump($a);
 
 // sequence point
 
 $i = 5;
-$i++ ? f($i) : f(++$i);
+$t = $i; $i++; if ($t) { f($i); } else { ++$i; f($i); }
 $i = 0;
-$i++ ? f($i) : f(++$i);
+$t = $i; $i++; if ($t) { f($i); } else { ++$i; f($i); }
 
 // Test all kinds of scalar values to see which are ints or can be implicitly converted
 

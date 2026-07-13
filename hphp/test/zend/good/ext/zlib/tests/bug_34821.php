@@ -15,7 +15,8 @@ $i = 0;
 foreach ($b as $size) {
     do {
         $s .= chr(rand(0,255));
-    } while (++$i < $size);
+        ++$i;
+    } while ($i < $size);
     var_dump($s === gzinflate(gzdeflate($s)));
     var_dump($s === gzuncompress(gzcompress($s)));
     var_dump($s === gzinflate(substr(gzencode($s), 10, -8)));

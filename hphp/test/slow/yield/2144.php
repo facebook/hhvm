@@ -3,7 +3,7 @@
 function fruit() :AsyncGenerator<mixed,mixed,void>{
  $a = 123;
  yield $a;
- yield ++$a;
+ ++$a; yield $a;
 }
 
 

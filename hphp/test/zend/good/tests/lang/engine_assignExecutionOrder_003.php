@@ -52,7 +52,8 @@ LangEngineAssignexecutionorder003::$a = vec[$a1,$a2,$a3];
 
 $i = 0;
 
-(LangEngineAssignexecutionorder003::$a[$i=1][++$i])();
+$i=1; $__x=$i; ++$i; $__y=$i;
+(LangEngineAssignexecutionorder003::$a[$__x][$__y])();
 
 LangEngineAssignexecutionorder003::$a = -1;
 

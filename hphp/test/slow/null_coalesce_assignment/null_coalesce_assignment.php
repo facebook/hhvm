@@ -57,25 +57,25 @@ function test_basic(): void {
   echo("test_basic()\n");
 
   $x0 ??= 42;
-  VS($x0 ??= 43, 42);
+  $x0 ??= 43; VS($x0, 42);
   VS($x0, 42);
 
   $x1 = null;
-  VS($x1 ??= 43, 43);
+  $x1 ??= 43; VS($x1, 43);
   VS($x1, 43);
 
   $x2 = f0();
-  VS($x2 ??= 44, 44);
+  $x2 ??= 44; VS($x2, 44);
   VS($x2, 44);
 
-  VS($x_global ??= 72, 72);
+  $x_global ??= 72; VS($x_global, 72);
   VS($x_global, 72);
 
   $x_string = "forty_seven";
-  VS($x_string ??= 73, "forty_seven");
+  $x_string ??= 73; VS($x_string, "forty_seven");
   VS($x_string, "forty_seven");
 
-  VS($forty_seven ??= 48, 48);
+  $forty_seven ??= 48; VS($forty_seven, 48);
   VS($forty_seven, 48);
 }
 
@@ -83,15 +83,15 @@ function test_falsey(): void {
   echo("test_falsey()\n");
 
   $x0 = 0;
-  VS($x0 ??= 71, 0);
+  $x0 ??= 71; VS($x0, 0);
   VS($x0, 0);
 
   $x1 = false;
-  VS($x1 ??= 72, false);
+  $x1 ??= 72; VS($x1, false);
   VS($x1, false);
 
   $x2 = '';
-  VS($x2 ??= 73, '');
+  $x2 ??= 73; VS($x2, '');
   VS($x2, '');
 }
 
@@ -100,30 +100,30 @@ function test_array_get(): void {
 
   $arr = dict[];
   $i = -1;
-  VS($arr[++$i] ??= 42, 42); // Evaluates $i once
+  ++$i; $arr[$i] ??= 42; VS($arr[$i], 42); // Evaluates $i once
   VS($i, 0);
 
   $arr[1] = 71;
-  $arr[++$i] = $arr[++$i] ?? 43; // Evaluates $i twice
+  ++$i; $lhs = $i; ++$i; $arr[$lhs] = $arr[$i] ?? 43; // Evaluates $i twice
   VS($i, 2);
 
   $arr[2] ??= 44;
   $arr[3] ??= 45;
-  VS($arr[++$i] ??= 72, 45); // Evaluates $i once
+  ++$i; $arr[$i] ??= 72; VS($arr[$i], 45); // Evaluates $i once
   VS($i, 3);
 
   $arr[4] = 46;
   $i = 4;
-  VS($arr[++$i] ??= fortyseven(), 47); // Evaluates $i once
+  ++$i; $arr[$i] ??= fortyseven(); VS($arr[$i], 47); // Evaluates $i once
   VS($i, 5);
 
   $i = 6;
-  VS($arr[$i] ??= ++$i, 7); // Sets $arr at 6 to 7 (++ does not affect LHS)
+  $k = $i; if (($arr[$k] ?? null) === null) { ++$i; $arr[$k] = $i; } VS($arr[$k], 7); // ++ does not affect LHS
   VS($i, 7);
 
   $carr = new CounterArray;
   $carr->counter = 99;
-  VS($arr[$carr->incrementCounter()] ??= 48, 48);
+  $k = $carr->incrementCounter(); $arr[$k] ??= 48; VS($arr[$k], 48);
   VS($carr->counter, 100);
 
   // Check that the right lvalues were set to the right things
@@ -138,12 +138,12 @@ function test_object_get(): void {
   /* Play with CounterArray */
 
   $obj = new CounterArray;
-  VS($obj->addme ??= "added", "added");
-  VS($obj->counter ??= "don't add me", 0);
+  $obj->addme ??= "added"; VS($obj->addme, "added");
+  $obj->counter ??= "don't add me"; VS($obj->counter, 0);
 
   $obj->addmetoo ??= () ==> print("add me too");
   $fortytwo = 42;
-  VS($obj->$fortytwo ??= "addmethree", "addmethree");
+  $obj->$fortytwo ??= "addmethree"; VS($obj->$fortytwo, "addmethree");
 
   // Check that the right lvalues were set to the right things
   echo('test_object_get() CounterArray $obj:');
@@ -156,7 +156,7 @@ function test_associativity(): void {
   echo("test_associativity()\n");
 
   $x2 = 42;
-  VS($x0 ??= $x1 ??= $x2 ??= 71, 42);
+  $x2 ??= 71; $x1 ??= $x2; $x0 ??= $x1; VS($x0, 42);
   VS($x0, 42);
 }
 
@@ -172,32 +172,32 @@ function test_multi_dim_basic(): void {
   $z = 2;
   $q = 0;
 
-  VS($arr[$x + $y][$z + $q][Foo::bar] ??= 42, 42);
+  $arr[$x + $y][$z + $q][Foo::bar] ??= 42; VS($arr[$x + $y][$z + $q][Foo::bar], 42);
   n_dump($arr); // Sets $arr[4][2] to 42 at 'I am a constant'
 
   $obj = new Foo;
-  VS($obj->foo2->vbar ??= 71, 'Who am I'); // Doesn't set to 71
+  $obj->foo2->vbar ??= 71; VS($obj->foo2->vbar, 'Who am I'); // Doesn't set to 71
   n_dump($obj);
 
   $obj = new Foo;
-  VS($obj->foo2->vbar2 ??= 43, 43); // Does set vbar2 to 42
+  $obj->foo2->vbar2 ??= 43; VS($obj->foo2->vbar2, 43); // Does set vbar2 to 42
   n_dump($obj);
 
   $obj = new Foo;
   // Strangely enough, this sets $bar2 (bar2 without the `$` is a constant)
-  VS($obj->foo2->bar2 ??= 42, 42);
+  $obj->foo2->bar2 ??= 42; VS($obj->foo2->bar2, 42);
   n_dump($obj);
 }
 
 function test_null_base(): void {
   echo("test_null_base()\n");
   $arr = dict[]; $arreq = dict[];
-  VS($arr[1] ??= 'hello', 'hello');
-  VS($arreq[1] = 'hello', 'hello'); // Consistent with plain ol' equals
+  $arr[1] ??= 'hello'; VS($arr[1], 'hello');
+  $arreq[1] = 'hello'; VS($arreq[1], 'hello'); // Consistent with plain ol' equals
   VS($arr, $arreq); // $arr and $arreq get set consistently by `??=` and `=`
   $obj = new stdClass(); $objeq = new stdClass();
-  VS($obj->foo ??= 'hello', 'hello'); // Also warns but doesn't fatal
-  VS($objeq->foo = 'hello', 'hello'); // Also consistent
+  $obj->foo ??= 'hello'; VS($obj->foo, 'hello'); // Also warns but doesn't fatal
+  $objeq->foo = 'hello'; VS($objeq->foo, 'hello'); // Also consistent
   n_dump($obj == $objeq);
 }
 
@@ -213,28 +213,28 @@ function test_multi_dim_lvars(): void {
   $q = 0;
   $w = 1;
 
-  VS($arr[$x][$z][$q] ??= ($x = 2), 2);
+  $ix=$x; $iz=$z; $iq=$q; if (($arr[$ix][$iz][$iq] ?? null) === null) { $x = 2; $arr[$ix][$iz][$iq] = $x; } VS($arr[$ix][$iz][$iq], 2);
   n_dump($arr);
-  $arr[$x] = dict[$z => dict[]]; VS($arr[$x][$z][$w] ??= ($w = 3), 3);
+  $arr[$x] = dict[$z => dict[]]; $ix=$x; $iz=$z; $iw=$w; if (($arr[$ix][$iz][$iw] ?? null) === null) { $w = 3; $arr[$ix][$iz][$iw] = $w; } VS($arr[$ix][$iz][$iw], 3);
   n_dump($arr);
   $arr[$x][$z][$w] ??= 5;
-  VS($arr[$x][$z][$w] ??= ($w = 'Not me'), 5);
+  $ix=$x; $iz=$z; $iw=$w; if (($arr[$ix][$iz][$iw] ?? null) === null) { $w = 'Not me'; $arr[$ix][$iz][$iw] = $w; } VS($arr[$ix][$iz][$iw], 5);
   n_dump($arr);
-  VS($arr[$x][$z][Foo::bar] ??= 'Yay!', 'Yay!');
+  $arr[$x][$z][Foo::bar] ??= 'Yay!'; VS($arr[$x][$z][Foo::bar], 'Yay!');
   n_dump($arr);
-  VS($arr[$x][$z][Foo::bar2] ??= ($x = 3), 3);
+  $ix=$x; $iz=$z; if (($arr[$ix][$iz][Foo::bar2] ?? null) === null) { $x = 3; $arr[$ix][$iz][Foo::bar2] = $x; } VS($arr[$ix][$iz][Foo::bar2], 3);
   n_dump($arr);
 
   $a = "foo2";
   $b = "vbar2";
   $obj = new Foo;
-  VS($obj->$a->$b ??= ($a = "Don't at me"), "Don't at me");
+  $ia=$a; $ib=$b; if (($obj->$ia->$ib ?? null) === null) { $a = "Don't at me"; $obj->$ia->$ib = $a; } VS($obj->$ia->$ib, "Don't at me");
   n_dump($obj);
 
   $a = "foo2";
   $b = "vbar2";
   $obj = new Foo;
-  VS($obj->$a->$b ??= ($b = "Don't at me"), "Don't at me");
+  $ia=$a; $ib=$b; if (($obj->$ia->$ib ?? null) === null) { $b = "Don't at me"; $obj->$ia->$ib = $b; } VS($obj->$ia->$ib, "Don't at me");
   n_dump($obj);
 }
 
@@ -253,7 +253,7 @@ function test_multi_dim_side_effects(): void {
   $obj = new Shoo;
   $x = dict['a' => $obj];
 
-  VS($x[speak('a')]->b[speak('c')] ??= 42, 42);
+  $ka = speak('a'); $kc = speak('c'); $x[$ka]->b[$kc] ??= 42; VS($x[$ka]->b[$kc], 42);
   n_dump($x);
 }
 <<__EntryPoint>>

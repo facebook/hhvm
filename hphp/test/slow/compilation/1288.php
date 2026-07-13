@@ -1,7 +1,8 @@
 <?hh
 
 function bug1($a, $b) :mixed{
-foreach ($b[$a++ + $a++] as $x) {
+$t1 = $a; $a++; $t2 = $a; $a++;
+foreach ($b[$t1 + $t2] as $x) {
  echo $x;
  }
 }

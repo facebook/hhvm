@@ -123,11 +123,12 @@ function heapsort_r($n, inout $ra) :mixed{
 
   while (1) {
     if ($l > 1) {
-      $rra = $ra[--$l];
+      --$l; $rra = $ra[$l];
     } else {
       $rra = $ra[$ir];
       $ra[$ir] = $ra[1];
-      if (--$ir == 1) {
+      --$ir;
+      if ($ir == 1) {
         $ra[1] = $rra;
         return null;
       }
@@ -140,7 +141,7 @@ function heapsort_r($n, inout $ra) :mixed{
       }
       if ($rra < $ra[$j]) {
         $ra[$i] = $ra[$j];
-        $j += ($i = $j);
+        $i = $j; $j += $i;
       } else {
         $j = $ir + 1;
       }
@@ -164,7 +165,7 @@ function mkmatrix ($rows, $cols) :mixed{
   for ($i=0; $i<$rows; $i++) {
     for ($j=0; $j<$cols; $j++) {
       if (!array_key_exists($i, $mx)) $mx[$i] = dict[];
-      $mx[$i][$j] = $count++;
+      $t = $count; $count++; $mx[$i][$j] = $t;
     }
   }
   return($mx);
@@ -189,7 +190,8 @@ function matrix($n = 20) :mixed{
   $SIZE = 5;
   $m1 = mkmatrix($SIZE, $SIZE);
   $m2 = mkmatrix($SIZE, $SIZE);
-  while ($n--) {
+  while (true) {
+    $t = $n; $n--; if (!$t) break;
     $mm = mmult($SIZE, $SIZE, $m1, $m2);
   }
   print "{$mm[0][0]} {$mm[2][3]} {$mm[3][2]} {$mm[4][4]}\n";
@@ -209,7 +211,8 @@ function nestedloop($n = 12) :mixed{
 
 function sieve($n = 30) :mixed{
   $count = 0;
-  while ($n-- > 0) {
+  while (true) {
+    $t = $n; $n--; if (!($t > 0)) break;
     $count = 0;
     $flags = range (0,8192);
     for ($i=2; $i<8193; $i++) {
@@ -226,7 +229,8 @@ function sieve($n = 30) :mixed{
 
 function strcat($n = 200000) :mixed{
   $str = "";
-  while ($n-- > 0) {
+  while (true) {
+    $t = $n; $n--; if (!($t > 0)) break;
     $str .= "hello\n";
   }
   $len = strlen($str);
@@ -327,7 +331,8 @@ function Fannkuch_run($n):mixed{
          for($i=0; $i<$n; $i++) $perm[$i] = $perm1[$i];
          $flipsCount = 0;
 
-         while ( !(($k=$perm[0]) == 0) ) {
+         while (true) {
+            $k=$perm[0]; if ($k == 0) break;
             $k2 = ($k+1) >> 1;
             for($i=0; $i<$k2; $i++) {
                $temp = $perm[$i]; $perm[$i] = $perm[$k-$i]; $perm[$k-$i] = $temp;

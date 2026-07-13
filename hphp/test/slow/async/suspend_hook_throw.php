@@ -2,7 +2,9 @@
 function throw_one_time($why, $what) :mixed{
 
   if ($what === 'a' && $why == 'exit') {
-    if (AsyncSuspendHookThrow::$counter++ == 1) {
+    $t = AsyncSuspendHookThrow::$counter;
+    AsyncSuspendHookThrow::$counter++;
+    if ($t == 1) {
       echo "throwing\n";
       throw new Exception('x');
     }

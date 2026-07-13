@@ -17,7 +17,8 @@ function main(): void {
 
   $count = 0;
   while (TRUE) {
-    if (++$count == 5)
+    ++$count;
+    if ($count == 5)
       $done = TRUE;
     echo $count."\n";
     try {

@@ -1,5 +1,5 @@
 <?hh
-function foo(inout $a) :mixed{ var_dump($a++); }
+function foo(inout $a) :mixed{ $t = $a; $a++; var_dump($t); }
 function test($cuf, $f) :mixed{
   $a = vec[1];
   try {

@@ -105,8 +105,10 @@ echo gmp_hamdist($ham1, $ham2) . "\n";
 echo gmp_popcount(gmp_xor($ham1, $ham2)) . "\n";
 
 // gmp_init (although that's probably tested well by now)
-var_dump($a = gmp_init(123456));
-var_dump($b = gmp_init("0xFFFFDEBACDFEDF7200"));
+$a = gmp_init(123456);
+var_dump($a);
+$b = gmp_init("0xFFFFDEBACDFEDF7200");
+var_dump($b);
 
 // gmp_intval
 echo gmp_intval(PHP_INT_MAX) . "\n";

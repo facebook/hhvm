@@ -3,7 +3,7 @@
 trait T1 {
   private static $incX =1;
     public function inc() :mixed{
-        echo self::$incX++ . "\n";
+        echo self::$incX . "\n"; self::$incX++;
     }
 }
 

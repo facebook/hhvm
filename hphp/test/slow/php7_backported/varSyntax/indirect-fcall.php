@@ -18,9 +18,11 @@ HH\dynamic_fun(HH\dynamic_fun(HH\dynamic_fun(HH\dynamic_fun(HH\dynamic_fun(HH\dy
 $id = function($x) { return $x; };
 HH\dynamic_fun($id($id)('var_dump'))(7);
 HH\dynamic_fun(HH\dynamic_fun((function($x) { return $x; })('id'))('var_dump'))(8);
-HH\dynamic_fun((Test::$f = function($x = null) {
+Test::$f = function($x = null) {
     return $x ?: Test::$f;
-})()()()('var_dump'))(9);
+};
+$f9 = Test::$f;
+HH\dynamic_fun($f9()()()('var_dump'))(9);
 $obj = new Test;
 HH\dynamic_fun(HH\dynamic_fun(vec[$obj, 'id']()('id'))($id)('var_dump'))(10);
 HH\dynamic_fun(vec['Test', 'id']()()('var_dump'))(11);

@@ -10,9 +10,11 @@ $a = vec[
 ];
 
 foreach ($a as $str) {
-	var_dump($val1 = sha1($str));
+	$val1 = sha1($str);
+	var_dump($val1);
 	file_put_contents($filename, $str);
-	var_dump($val2 = sha1_file($filename));
+	$val2 = sha1_file($filename);
+	var_dump($val2);
 	var_dump($val1 === $val2);
 }
 

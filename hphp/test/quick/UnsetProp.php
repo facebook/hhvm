@@ -28,7 +28,9 @@ function u() :mixed{
   echo "------------------------\n";
   $obj = new F;
   try {
-    $obj->foo = $y++;
+    $t = $y;
+    $y++;
+    $obj->foo = $t;
   } catch (UndefinedVariableException $e) {
     var_dump($e->getMessage());
   }

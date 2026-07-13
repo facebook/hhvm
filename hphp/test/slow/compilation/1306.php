@@ -7,6 +7,6 @@ function foo($x) :mixed{
   echo $x;
   unset($a);
   $a = bar(1);
-  bar($a++);
+  $t = $a; $a++; bar($t);
 }
 <<__EntryPoint>> function main(): void { echo "Done.\n"; }

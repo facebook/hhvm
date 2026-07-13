@@ -16,7 +16,7 @@ class E4 extends D4 {
   public static function __invoke($a0, $a1) :mixed{
     var_dump('E4');
     var_dump($a0, $a1);
-    var_dump(static::$__invokeX ++);
+    $t = static::$__invokeX; static::$__invokeX ++; var_dump($t);
   }
 }
 class C5 {
@@ -24,7 +24,7 @@ class C5 {
   <<__LSB>>
   private static $__invokeX = 0;
   public static function __invoke() :mixed{
-    var_dump(static::$__invokeX ++);
+    $t = static::$__invokeX; static::$__invokeX ++; var_dump($t);
   }
 }
 class D5 extends C5 {

@@ -16,8 +16,10 @@ function main_sqlite3_no_double_step(): void {
   echo "=== Test 1: query() + fetcharray loop ===\n";
   $res = $db->query("SELECT v FROM t");
   $rows = vec[];
-  while ($row = $res->fetcharray(SQLITE3_ASSOC)) {
+  $row = $res->fetcharray(SQLITE3_ASSOC);
+  while ($row) {
     $rows[] = $row['v'];
+    $row = $res->fetcharray(SQLITE3_ASSOC);
   }
   $res->finalize();
   echo "rows: " . implode(', ', $rows) . "\n";

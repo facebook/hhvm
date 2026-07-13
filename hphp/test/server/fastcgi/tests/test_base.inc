@@ -12,7 +12,9 @@ function init() {
 function runTest($testController, $customArgs = '') {
   $pid = posix_getpid();
   try {
-    $serverProc = $serverPort = $adminPort = null;
+    $serverProc = null;
+    $serverPort = null;
+    $adminPort = null;
     $debugPort = false;
     $serverProc = startServer(inout $serverPort, inout $adminPort, inout $debugPort,
                               dirname(__DIR__), ServerUtilServerTests::$DOC_ROOT, $customArgs);

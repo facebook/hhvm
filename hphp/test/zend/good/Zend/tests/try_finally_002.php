@@ -12,6 +12,7 @@ try {
 } catch (Exception $e) {
   do {
     var_dump($e->getMessage());
-  } while ($e = $e->getPrevious());
+    $e = $e->getPrevious();
+  } while ($e);
 }
 }

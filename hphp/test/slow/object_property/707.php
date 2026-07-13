@@ -1,7 +1,7 @@
 <?hh
 
 function test($x, $v) :mixed{
- var_dump($x->$v++);
+ $r = is_object($x) ? $x->$v : null; $x->$v++; var_dump($r);
  }
 
 <<__EntryPoint>>

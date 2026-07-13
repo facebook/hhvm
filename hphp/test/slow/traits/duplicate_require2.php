@@ -4,7 +4,7 @@
 function main_duplicate_require2() :mixed{
   $n = __hhvm_intrinsics\apc_fetch_no_check('foo');
   if (!$n) $n = 0;
-  apc_store('foo', ++$n);
+  ++$n; apc_store('foo', $n);
 
   echo "Iteration: $n\n";
 

@@ -1,7 +1,7 @@
 <?hh
 
 function add_cssclass($add, $class) :mixed{
-  $class = (!($class ?? false)) ? $add : $class .= ' ' . $add;
+  if (!($class ?? false)) { $class = $add; } else { $class .= ' ' . $add; }
   return $class;
 }
 <<__EntryPoint>> function main(): void {

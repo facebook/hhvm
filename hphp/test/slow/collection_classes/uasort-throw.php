@@ -9,7 +9,7 @@ function main() :mixed{
   try {
     uasort(inout $m, ($a, $b) ==> {
       echo "in callback\n";
-      if (++$calls->v == 2) throw new Exception("lol");
+      ++$calls->v; if ($calls->v == 2) throw new Exception("lol");
       return $a <=> $b;
     });
   } catch (Exception $e) {

@@ -10,7 +10,9 @@ function main($a, $b, $c) :mixed{
   if ($i & 1) {
     $t = 2;
   }
-  while (++$i < $a) {
+  while (true) {
+    ++$i;
+    if (!($i < $a)) break;
     if ($i & 1) {
       $t = 2;
     }

@@ -15,9 +15,10 @@ function f(): void {
     $arreq = $arr;
     $x = 4;
 
+    $arr[$x][(string)$z][Foo::bar] ??= 'Yay!'; // $z warns
     var_dump(
-      ($arr[$x][(string)$z][Foo::bar] ??= 'Yay!') === 'Yay!',
-    ); // $z warns
+      $arr[$x][(string)$z][Foo::bar] === 'Yay!',
+    );
     var_dump($z === NULL); // $z doesn't get set
     $arreq[$x][(string)$z][Foo::bar] = 'Yay!'; // Note the `=`
     var_dump($z === NULL); // $z doesn't get set
@@ -27,7 +28,8 @@ function f(): void {
     var_dump($e->getMessage());
   }
   $obj = new Foo;
-  var_dump(($obj->foo ??= 42) === 42); // Warns but sets intermediates
+  $obj->foo ??= 42; // Warns but sets intermediates
+  var_dump($obj->foo === 42);
   var_dump($obj);
   $objeq = new Foo;
   $objeq->foo = 42; // Consistent with equals

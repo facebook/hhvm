@@ -19,7 +19,7 @@ function populateArray($max) :mixed{
 
 <<__EntryPoint>> function main(): void {
   $a = f();
-  echo "writing: "; echo ($a[1] = 66); echo "\n";
+  echo "writing: "; $a[1] = 66; echo $a[1]; echo "\n";
   echo "reading: "; echo $a[1]; echo "\n";
 
   populateArray(1000);

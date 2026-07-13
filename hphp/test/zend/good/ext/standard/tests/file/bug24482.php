@@ -8,10 +8,12 @@ $globdirs = glob(__DIR__."/../../../../../../sample_dir/*", GLOB_ONLYDIR);
 
 $dirs = vec[];
 $dh = opendir(__DIR__."/../../../../../../sample_dir/");
-while (is_string($file = readdir($dh))) {
-    if ($file[0] === ".") continue;
-    if (!is_dir(__DIR__."/../../../../../../sample_dir/".$file)) continue;
+$file = readdir($dh);
+while (is_string($file)) {
+    if ($file[0] === ".") { $file = readdir($dh); continue; }
+    if (!is_dir(__DIR__."/../../../../../../sample_dir/".$file)) { $file = readdir($dh); continue; }
     $dirs[] = $file;
+    $file = readdir($dh);
 }
 closedir($dh);
 

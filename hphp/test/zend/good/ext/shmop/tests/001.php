@@ -11,7 +11,8 @@ if (!$shm_id) {
   echo "ok\n";
 }
 
-echo "shm size is: " . ($shm_size = shmop_size($shm_id)) . "\n";
+$shm_size = shmop_size($shm_id);
+echo "shm size is: " . $shm_size . "\n";
 
 echo "shm write test #1: ";
 $written = shmop_write($shm_id, $write_d1, 0);

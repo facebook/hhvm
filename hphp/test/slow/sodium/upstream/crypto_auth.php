@@ -21,7 +21,8 @@ var_dump(sodium_crypto_auth_verify($mac, $badmsg, $key));
 
 // Let's flip a bit pseudo-randomly
 $badmsg = $msg;
-$badmsg[$i=mt_rand(0, 999)] = \chr(
+$i = mt_rand(0, 999);
+$badmsg[$i] = \chr(
     \ord($msg[$i]) ^ (
         1 << mt_rand(0, 7)
     )

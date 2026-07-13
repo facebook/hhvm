@@ -11,6 +11,7 @@ function buz($x,$y) :mixed{
  if ($y) return $x;
  return 1;
  }
+function postinc(inout $x) :mixed{ $t = $x; $x++; return $t; }
 
 
 <<__EntryPoint>>
@@ -21,7 +22,7 @@ foreach ($a as $s[3]) {
   var_dump($s);
 }
 $i = 0;
-foreach ($a as          $a[bar($i++, $i++, $i++)] => $a[foo($i++, $i++, $i++)]) {
+foreach ($a as          $a[bar(postinc(inout $i), postinc(inout $i), postinc(inout $i))] => $a[foo(postinc(inout $i), postinc(inout $i), postinc(inout $i))]) {
   var_dump($a[1],$a[2]);
 }
 }

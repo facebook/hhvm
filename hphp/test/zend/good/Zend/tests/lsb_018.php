@@ -9,7 +9,7 @@ abstract class Singleton
         $caller = static::class;
         if (!isset(self::$instances[$caller])) {
             self::$instances[$caller] = new $caller;
-            self::$instances[$caller]->instanceId = self::$nextInstanceId++;
+            self::$instances[$caller]->instanceId = self::$nextInstanceId; self::$nextInstanceId++;
         }
         return self::$instances[$caller];
     }

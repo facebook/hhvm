@@ -16,6 +16,6 @@ function main() :mixed{
   $c->foo = darray(vec[42]);
   $c->bar ??= 0;
   $c->bar += 42;
-  error_boundary(inout $c, (inout $o) ==> $o->baz++);
+  error_boundary(inout $c, (inout $o) ==> { $o->baz++; });
   var_dump($c);
 }

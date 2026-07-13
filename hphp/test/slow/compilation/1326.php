@@ -2,7 +2,8 @@
 
 class C {
   public function loadAllWithIDs($ids) :mixed{
-    if (!count($ids = array_filter($ids))) {
+    $ids = array_filter($ids);
+    if (!count($ids)) {
       return vec[];
     }
     var_dump('muy malo', $ids);

@@ -6,7 +6,7 @@ function test($thing) :mixed{
   $propname = __hhvm_intrinsics\launder_value("dynprop") . "2";
   $thing->$propname ??= 0;
   $thing->$propname += 2;
-  error_boundary(inout $thing, (inout $o) ==> $o->dynprop3++);
+  error_boundary(inout $thing, (inout $o) ==> { $o->dynprop3++; });
   var_dump($thing);
   var_dump(unserialize(serialize($thing)));
   apc_store('dynamic', $thing);

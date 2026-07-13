@@ -13,6 +13,7 @@ echo "*** Testing array_shift() : usage variations ***\n";
 $stack = dict['one' => 'un', 'two' => 'deux'];
 
 echo "\n-- Call array_shift() --\n";
-var_dump($result = array_shift(inout $stack));
+$result = array_shift(inout $stack);
+var_dump($result);
 echo "Done";
 }

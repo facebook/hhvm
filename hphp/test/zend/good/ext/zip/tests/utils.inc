@@ -8,8 +8,10 @@ function dump_entries_name($z) {
 }
 /* recursively remove a directoryy */
 function rmdir_rf($dir) {
-	if ($handle = opendir($dir)) {
-		while (false !== ($item = readdir($handle))) {
+	$handle = opendir($dir);
+	if ($handle) {
+		$item = readdir($handle);
+		while (false !== $item) {
 			if ($item != "." && $item != "..") {
 				if (is_dir($dir . '/' . $item)) {
 					rmdir_rf($dir . '/' . $item);
@@ -17,6 +19,7 @@ function rmdir_rf($dir) {
 					unlink($dir . '/' . $item);
 				}
 			}
+			$item = readdir($handle);
 		}
 		closedir($handle);
 		rmdir($dir);

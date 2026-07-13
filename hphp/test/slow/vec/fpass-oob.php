@@ -1,6 +1,6 @@
 <?hh
 <<__DynamicallyCallable>>
-function ref(inout $x, $i, $j) :mixed{ echo ++$x[$i][$j], "\n"; }
+function ref(inout $x, $i, $j) :mixed{ ++$x[$i][$j]; echo $x[$i][$j], "\n"; }
 <<__DynamicallyCallable>>
 function non($x) :mixed{ echo $x, "\n"; }
 function foo($f, $ref) :mixed{

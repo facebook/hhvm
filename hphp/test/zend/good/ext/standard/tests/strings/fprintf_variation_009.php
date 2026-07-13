@@ -5,7 +5,8 @@ $strings = vec[ NULL, "abc", 'aaa' ];
 
 /* creating dumping file */
 $data_file = sys_get_temp_dir().'/'.'fprintf_variation_009.phpt.txt';
-if (!($fp = fopen($data_file, 'wt')))
+$fp = fopen($data_file, 'wt');
+if (!$fp)
    return;
 
 $counter = 1;

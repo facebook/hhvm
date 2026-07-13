@@ -3,10 +3,16 @@
 
 function jmpfuse($str) :mixed{
   $pos = 0;
-  while (strlen($str) > $pos + 2 &&
-         $str[$pos] == '/' &&
-         $str[$pos + 1] == '*' &&
-         ($pos = strpos($str, '*/', $pos + 2)) !== false) {
+  while (true) {
+    if (!(strlen($str) > $pos + 2 &&
+          $str[$pos] == '/' &&
+          $str[$pos + 1] == '*')) {
+      break;
+    }
+    $pos = strpos($str, '*/', $pos + 2);
+    if ($pos === false) {
+      break;
+    }
     $pos += 2;
   }
   return true;

@@ -18,31 +18,36 @@ foreach ($lefts as $left) {
     echo "  + ";
     $a = $left;
     $a = HH\Lib\Legacy_FIXME\cast_for_arithmetic($a);
-    var_dump($a += HH\Lib\Legacy_FIXME\cast_for_arithmetic($right));
+    $a += HH\Lib\Legacy_FIXME\cast_for_arithmetic($right);
+    var_dump($a);
     var_dump($a);
 
     echo "  - ";
     $a = $left;
     $a = HH\Lib\Legacy_FIXME\cast_for_arithmetic($a);
-    var_dump($a -= HH\Lib\Legacy_FIXME\cast_for_arithmetic($right));
+    $a -= HH\Lib\Legacy_FIXME\cast_for_arithmetic($right);
+    var_dump($a);
     var_dump($a);
 
     echo "  * ";
     $a = $left;
     $a = HH\Lib\Legacy_FIXME\cast_for_arithmetic($a);
-    var_dump($a *= HH\Lib\Legacy_FIXME\cast_for_arithmetic($right));
+    $a *= HH\Lib\Legacy_FIXME\cast_for_arithmetic($right);
+    var_dump($a);
     var_dump($a);
 
     echo "  . ";
     $a = (string)$left;
-    var_dump($a .= (string)($right));
+    $a .= (string)($right);
+    var_dump($a);
     var_dump($a);
 
     echo "  / ";
     $a = $left;
     try {
       $a = HH\Lib\Legacy_FIXME\cast_for_arithmetic($a);
-      var_dump($a /= HH\Lib\Legacy_FIXME\cast_for_arithmetic($right));
+      $a /= HH\Lib\Legacy_FIXME\cast_for_arithmetic($right);
+      var_dump($a);
       var_dump($a);
     } catch (DivisionByZeroException $e) {
       echo "\n", $e->getMessage(), "\n";
@@ -52,7 +57,8 @@ foreach ($lefts as $left) {
     $a = $left;
     try {
       $a = (int)($a);
-      var_dump($a %= (int)($right));
+      $a %= (int)($right);
+      var_dump($a);
       var_dump($a);
     } catch (DivisionByZeroException $e) {
       echo "\n", $e->getMessage(), "\n";
@@ -67,17 +73,20 @@ foreach ($lefts as $left) {
 
     echo "  & ";
     $a = $l;
-    var_dump($a &= $right);
+    $a &= $right;
+    var_dump($a);
     var_dump($a);
 
     echo "  | ";
     $a = $l;
-    var_dump($a |= $right);
+    $a |= $right;
+    var_dump($a);
     var_dump($a);
 
     echo "  ^ ";
     $a = $l;
-    var_dump($a ^= $right);
+    $a ^= $right;
+    var_dump($a);
     var_dump($a);
 
     $l = (int)$left;
@@ -85,12 +94,14 @@ foreach ($lefts as $left) {
 
     echo "  << ";
     $a = $l;
-    var_dump($a <<= $right);
+    $a <<= $right;
+    var_dump($a);
     var_dump($a);
 
     echo "  >> ";
     $a = $l;
-    var_dump($a >>= $right);
+    $a >>= $right;
+    var_dump($a);
     var_dump($a);
   }
 }

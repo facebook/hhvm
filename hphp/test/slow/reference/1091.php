@@ -14,13 +14,13 @@ function run(inout $var, inout $some_ref) :mixed{
   $var = null;
   test(inout $var);
   var_dump($some_ref, $var);
-  test2($some_ref = 1);
+  $some_ref = 1; test2($some_ref);
   var_dump($some_ref);
   $var = null;
   test2($var);
   var_dump($var);
   $var = null;
-  test2($some_ref = $var);
+  $some_ref = $var; test2($some_ref);
   var_dump($some_ref, $var);
 }
 

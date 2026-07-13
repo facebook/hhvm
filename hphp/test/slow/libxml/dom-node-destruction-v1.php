@@ -6,7 +6,7 @@ class MyElement extends DOMElement {
   public static $next = 0;
 
   function init() :mixed{
-    $this->id = MyElement::$next++;
+    $this->id = MyElement::$next; MyElement::$next++;
     echo "Initializing DOMElement #" . $this->id . ": "  . $this->tagName . "\n";
 
     return $this;

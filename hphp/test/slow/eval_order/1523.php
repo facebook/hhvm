@@ -57,16 +57,16 @@ $a = new stdClass;
 $a->prop = 2;
 var_dump(($a->prop . '') . k($a));
 $i = 0;
-var_dump($i . ++$i);
+++$i; var_dump($i . $i);
 $i = 0;
-var_dump(($i . '') . ++$i);
+$l = $i . ''; ++$i; var_dump($l . $i);
 f(inout $a, 'test');
-var_dump(($a . 'x') . foo($a = ''));
+$l = $a . 'x'; $a = ''; var_dump($l . foo($a));
 $a = new stdClass;
 $a->foo = 42;
-var_dump($a->{
-$a = 'foo'}
-);
+$a = 'foo';
+$t = $a->foo;
+var_dump($t);
 var_dump($a);
 $b = new stdClass;
 $a = null;
@@ -75,11 +75,11 @@ f(inout $a,$b)}
  = 5;
 var_dump($a, $b);
 f(inout $a, 'foo');
-dump($a, $a = 'bar');
+$t = $a; $a = 'bar'; dump($t, $a);
 $a = 'foo';
-dump($a, $a = 'bar');
+$t = $a; $a = 'bar'; dump($t, $a);
 f(inout $a, 'foo');
-dump($a.'', $a = 'bar');
+$t = $a.''; $a = 'bar'; dump($t, $a);
 f(inout $a, 'foo');
-dump($a.$a, $a = 'bar');
+$t = $a.$a; $a = 'bar'; dump($t, $a);
 }

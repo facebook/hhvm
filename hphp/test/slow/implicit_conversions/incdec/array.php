@@ -31,14 +31,14 @@ function main(): void {
   foreach ($vals as $i => $val) {
     var_dump($val);
     echo "preinc<";
-    with_exn(inout $preinc[$i], (inout $o) ==> ++$o);
+    with_exn(inout $preinc[$i], (inout $o) ==> { ++$o; return $o; });
     echo "> postinc<";
-    with_exn(inout $postinc[$i], (inout $o) ==> $o++);
+    with_exn(inout $postinc[$i], (inout $o) ==> { $t = $o; $o++; return $t; });
     echo $postinc[$i];
     echo "> predec<";
-    with_exn(inout $predec[$i], (inout $o) ==> --$o);
+    with_exn(inout $predec[$i], (inout $o) ==> { --$o; return $o; });
     echo "> postdec<";
-    with_exn(inout $postdec[$i], (inout $o) ==> $o--);
+    with_exn(inout $postdec[$i], (inout $o) ==> { $t = $o; $o--; return $t; });
     echo $postdec[$i];
     echo ">\n";
   }

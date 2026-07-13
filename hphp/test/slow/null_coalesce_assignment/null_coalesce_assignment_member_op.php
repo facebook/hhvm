@@ -98,9 +98,9 @@ function main() :mixed{
   // Short-circuit
   $i = 0;
   $arr = dict[];
-  VS($arr[$i] ??= ++$i, 1);
+  $idx = $i; if (($arr[$idx] ?? null) === null) { ++$i; $arr[$idx] = $i; } VS($arr[$idx], 1);
   VS($i, 1);
-  VS($arr[0] ??= ++$i, 1);
+  if (($arr[0] ?? null) === null) { ++$i; $arr[0] = $i; } VS($arr[0], 1);
   VS($i, 1);
 
   $k = 10;

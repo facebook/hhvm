@@ -7,7 +7,8 @@ abstract final class ThingStatics {
   public static $s = 0;
 }
 function thing() :mixed{
-  if (!(ThingStatics::$s++ % 100)) return new X;
+  $t = ThingStatics::$s; ThingStatics::$s++;
+  if (!($t % 100)) return new X;
   return 42;
 }
 

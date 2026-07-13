@@ -69,15 +69,19 @@ function main_entry(): void {
   	$current->setIDAttributeNS('urn::dummyns', 'idatt', TRUE);
   }
 
-  echo 'Element Name: '.(($elem = $dom->getElementById('n1'))?$elem->localName:'Not Found')."\n";
+  $elem = $dom->getElementById('n1');
+  echo 'Element Name: '.($elem?$elem->localName:'Not Found')."\n";
   $idatt = $node->getAttributeNode('idatt');
   $node->setIDAttributeNode($idatt, FALSE);
-  echo 'Element Name: '.(($elem = $dom->getElementById('n1'))?$elem->localName:'Not Found')."\n";
+  $elem = $dom->getElementById('n1');
+  echo 'Element Name: '.($elem?$elem->localName:'Not Found')."\n";
 
-  echo 'Element Name: '.(($elem = $dom->getElementById('n3'))?$elem->nodeName:'Not Found')."\n";
+  $elem = $dom->getElementById('n3');
+  echo 'Element Name: '.($elem?$elem->nodeName:'Not Found')."\n";
   for ($x = 0; $x < $mylen; $x++) {
   	$node = $myelements->item($x);
   	$node->setIDAttributeNS('urn::dummyns', 'idatt', FALSE);
   }
-  echo 'Element Name: '.(($elem = $dom->getElementById('n3'))?$elem->nodeName:'Not Found')."\n";
+  $elem = $dom->getElementById('n3');
+  echo 'Element Name: '.($elem?$elem->nodeName:'Not Found')."\n";
 }

@@ -5,7 +5,9 @@ $i = 5;
 $max = getrandmax();
 $max_2 = $max / 2;
 
-while($i--) {
+while(true) {
+    $t = $i; $i--;
+    if (!$t) break;
     $new_tm = rand(1, $max);
     if ($new_tm > $max_2)
         $new_tm *= -1;

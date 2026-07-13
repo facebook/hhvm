@@ -1,1 +1,1 @@
-Fatal error: You cannot use this syntax with `inout`. in %s/bad-call-1.php on line 6
+Fatal error: Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. in %s/bad-call-1.php on line 6

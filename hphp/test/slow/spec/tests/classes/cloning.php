@@ -86,9 +86,9 @@ function main_entry(): void {
   $p2 = clone $p1;
   var_dump($p2);
 
-  var_dump($p3 = clone $p1);
+  $p3 = clone $p1; var_dump($p3);
 
-  var_dump($p4 = clone $p1);
+  $p4 = clone $p1; var_dump($p4);
 
   echo "================= use chained cloning in a class hierarchy =================\n";
 

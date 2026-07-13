@@ -18,7 +18,8 @@ $arg3 = vec[1000,2000,3000];
 
 /* creating dumping file */
 $data_file = sys_get_temp_dir().'/'.'vfprintf_basic6.txt';
-if (!($fp = fopen($data_file, 'wt')))
+$fp = fopen($data_file, 'wt');
+if (!$fp)
    return;
    
 vfprintf($fp, $format1,$arg1);

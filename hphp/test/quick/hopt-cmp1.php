@@ -2,7 +2,8 @@
 
 function main($x, $y) :mixed{
   while ($x < $y) {
-    echo $x++ . "\n";
+    echo $x . "\n";
+    $x++;
   }
 }
 <<__EntryPoint>> function main_entry(): void {

@@ -366,12 +366,15 @@ class Client
      */
     private function readPacket()
 :mixed    {
-        if ($packet = \fread($this->_sock, self::HEADER_LEN)) {
+        $packet = \fread($this->_sock, self::HEADER_LEN);
+        if ($packet) {
             $resp = $this->decodePacketHeader($packet);
             $resp['content'] = '';
             if ($resp['contentLength']) {
                 $len  = $resp['contentLength'];
-                while ($len && $buf=\fread($this->_sock, $len)) {
+                while ($len) {
+                    $buf = \fread($this->_sock, $len);
+                    if (!$buf) break;
                     $len -= \strlen($buf);
                     $resp['content'] .= $buf;
                 }

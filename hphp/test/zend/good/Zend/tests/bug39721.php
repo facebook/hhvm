@@ -4,7 +4,7 @@ class test2 {
 	public $instance;
 
 	public function __construct() {
-		$this->instance = ++self::$instances;
+		++self::$instances; $this->instance = self::$instances;
 	}
 
 }

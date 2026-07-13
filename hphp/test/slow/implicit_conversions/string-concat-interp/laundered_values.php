@@ -24,7 +24,7 @@ function main(): void {
     foreach($vals as $j) {
       $j_ = __hhvm_intrinsics\launder_value($j);
       run(() ==> { echo '<'.$i_.' '.$j_.">\n"; });
-      run(() ==> { $i__ = $i_; var_dump($i__ .= $j_); });
+      run(() ==> { $i__ = $i_; $i__ .= $j_; var_dump($i__); });
     }
   }
 }

@@ -18,8 +18,8 @@ function test_auth_digest_entrypoint() :mixed{
 
 
     // analyze the PHP_AUTH_DIGEST variable
-    if (!($data = http_digest_parse(\HH\global_get('_SERVER')['PHP_AUTH_DIGEST'])) ||
-        !isset($users[$data['username']]))
+    $data = http_digest_parse(\HH\global_get('_SERVER')['PHP_AUTH_DIGEST']);
+    if (!$data || !isset($users[$data['username']]))
         exit('Wrong Credentials!');
 
 

@@ -59,19 +59,19 @@ function error_boundary(inout $x, $fn) :mixed{
   // inc/dec
   foreach ($unary as $val) {
     $x = $val;
-    error_boundary(inout $x, (inout $o) ==> var_dump(++$o));
+    error_boundary(inout $x, (inout $o) ==> { ++$o; var_dump($o); });
     var_dump($x);
 
     $x = $val;
-    error_boundary(inout $x, (inout $o) ==> var_dump($o++));
+    error_boundary(inout $x, (inout $o) ==> { $t = $o; $o++; var_dump($t); });
     var_dump($x);
 
     $x = $val;
-    error_boundary(inout $x, (inout $o) ==> var_dump(--$o));
+    error_boundary(inout $x, (inout $o) ==> { --$o; var_dump($o); });
     var_dump($x);
 
     $x = $val;
-    error_boundary(inout $x, (inout $o) ==> var_dump($o--));
+    error_boundary(inout $x, (inout $o) ==> { $t = $o; $o--; var_dump($t); });
     var_dump($x);
   }
 
@@ -79,28 +79,28 @@ function error_boundary(inout $x, $fn) :mixed{
   $array = $unary;
   for ($i = 0; $i < count($array); ++$i) {
     var_dump($array[$i]);
-    error_boundary(inout $array[$i], (inout $o) ==> var_dump($o++));
+    error_boundary(inout $array[$i], (inout $o) ==> { $t = $o; $o++; var_dump($t); });
     var_dump($array[$i]);
   }
 
   $array = $unary;
   for ($i = 0; $i < count($array); ++$i) {
     var_dump($array[$i]);
-    error_boundary(inout $array[$i], (inout $o) ==> var_dump(++$o));
+    error_boundary(inout $array[$i], (inout $o) ==> { ++$o; var_dump($o); });
     var_dump($array[$i]);
   }
 
   $array = $unary;
   for ($i = 0; $i < count($array); ++$i) {
     var_dump($array[$i]);
-    error_boundary(inout $array[$i], (inout $o) ==> var_dump($o--));
+    error_boundary(inout $array[$i], (inout $o) ==> { $t = $o; $o--; var_dump($t); });
     var_dump($array[$i]);
   }
 
   $array = $unary;
   for ($i = 0; $i < count($array); ++$i) {
     var_dump($array[$i]);
-    error_boundary(inout $array[$i], (inout $o) ==> var_dump(--$o));
+    error_boundary(inout $array[$i], (inout $o) ==> { --$o; var_dump($o); });
     var_dump($array[$i]);
   }
 
@@ -108,21 +108,27 @@ function error_boundary(inout $x, $fn) :mixed{
 
   $c = new C;
   var_dump($c->max);
-  var_dump($c->max++);
+  $t = $c->max;
+  $c->max++;
+  var_dump($t);
   var_dump($c->max);
 
   $c = new C;
   var_dump($c->max);
-  var_dump(++$c->max);
+  ++$c->max;
+  var_dump($c->max);
   var_dump($c->max);
 
   $c = new C;
   var_dump($c->max);
-  var_dump($c->max--);
+  $t = $c->max;
+  $c->max--;
+  var_dump($t);
   var_dump($c->max);
 
   $c = new C;
   var_dump($c->max);
-  var_dump(--$c->max);
+  --$c->max;
+  var_dump($c->max);
   var_dump($c->max);
 }

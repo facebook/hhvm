@@ -12,7 +12,7 @@ class Point implements Serializable
     {
         $this->x = $x;
         $this->y = $y;
-        $this->id = self::$nextId++;
+        $this->id = self::$nextId; self::$nextId++;
 
         echo "\nInside " . __METHOD__ . ", " . $this->__toString() . "\n\n";
     }
@@ -34,7 +34,7 @@ class Point implements Serializable
         $data = unserialize($data);
         $this->x = $data['x'];
         $this->y = $data['y'];
-        $this->id = self::$nextId++;
+        $this->id = self::$nextId; self::$nextId++;
 
         echo "\nInside " . __METHOD__ . ", " . $this->__toString() . "\n\n";
     }

@@ -5,7 +5,7 @@ class Foo {
  }
  <<__LSB>> public static $i = 0;
  public static function test() :mixed{
-  var_dump(++static::$i);
+  ++static::$i; var_dump(static::$i);
  }
 }
 <<__EntryPoint>> function main(): void {

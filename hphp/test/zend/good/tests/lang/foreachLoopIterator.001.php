@@ -54,7 +54,8 @@ MealIterator::$indent = " ";
 echo "\n\n\n-----( Nested iteration: )-----\n";
 $count=1;
 foreach ($f as $k=>$v) {
-    echo "\nTop level "  .  $count++ . ":\n";
+    $__count = $count; $count++;
+    echo "\nTop level "  .  $__count . ":\n";
     echo "$k => $v\n";
   MealIterator::$indent = "     ";
     foreach ($f as $k=>$v) {

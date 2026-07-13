@@ -66,7 +66,7 @@ f2(10, 20, 30); // pass 3 (> 2)
 // some simple examples of function calls
 
 echo "5 squared = ".square(5)."\n";
-var_dump($funct = 'square');
+$funct = 'square'; var_dump($funct);
 var_dump(HH\dynamic_fun($funct)(-2.3));
 
 echo strlen("abcedfg")."\n";

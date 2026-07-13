@@ -8,12 +8,12 @@ function foo($a) :mixed{
 <<__EntryPoint>>
 function main_1452() :mixed{
 $x = true;
-($x = $x) && foo(false);
+$x = $x; if ($x) { foo(false); }
 var_dump($x);
 $x = $x && foo(false);
 var_dump($x);
 $x = false;
-($x = $x) || foo(true);
+$x = $x; if (!$x) { foo(true); }
 var_dump($x);
 $x = $x || foo(true);
 var_dump($x);

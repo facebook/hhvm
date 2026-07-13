@@ -3,5 +3,5 @@
 
 <<__EntryPoint>>
 function main_1517() :mixed{
-var_dump($v, $v = 0);
+$a = $v; $v = 0; var_dump($a, $v);
 }

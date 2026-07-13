@@ -91,12 +91,14 @@ echo "================= specify keys in arbitrary order, initial values of runti
 
 $i = 6;
 $j = 12;
-$v = dict[7 => 123, 3 => $i, 6 => ++$j];
+++$j;
+$v = dict[7 => 123, 3 => $i, 6 => $j];
 var_dump($v);
 
 $i = 6;
 $j = 12;
-$v = dict[7 => 123, 3 => $i, 6 => ++$j];
+++$j;
+$v = dict[7 => 123, 3 => $i, 6 => $j];
 var_dump($v);
 
 foreach($v as $e)   // only has 3 elements ([3], [6], and [7]), not 8 ([0]-[7])

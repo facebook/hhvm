@@ -47,15 +47,17 @@ function runTest($testName, $testController) {
     $serverProc = null;
     $clientProcessId = 0;
 
-    $serverPort = $adminPort = $debugPort = null;
+    $serverPort = null;
+    $adminPort = null;
+    $debugPort = null;
     $serverProc = startServer(inout $serverPort, inout $adminPort, inout $debugPort,
                               __DIR__.'/..', __DIR__.'/../debugger',
                               '-vHack.Lang.OptimizeLocalLifetimes=0');
     $pipes = null;
     startDebuggerClient($debugPort, "/debugger/$testName.in", inout $pipes);
     $clientProcessId = getClientProcessId($pipes[1]);
-    if (!$clientProcessId ||
-        ($clientProcessId = intval($clientProcessId)) <= 0) {
+    $clientProcessId = intval($clientProcessId);
+    if ($clientProcessId <= 0) {
       tlog('Failed to communicate with the debugger client process');
       dumpLogFilesToStdoutAndDie();
     }
@@ -97,7 +99,8 @@ function waitForClientToOutput($pipe, $string1, $retryCount = 20) {
     tlog($clientOutput);
     if (strpos($clientOutput,
         ".....Debugger client still waiting for server response.....") === 0) {
-      if (--$rc > 0) continue;
+      --$rc;
+      if ($rc > 0) continue;
       dumpLogFilesToStdoutAndDie();
     }
     echo $clientOutput;

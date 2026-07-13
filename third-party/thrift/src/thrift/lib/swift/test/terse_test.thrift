@@ -16,6 +16,9 @@
 
 include "thrift/annotation/thrift.thrift"
 
+@thrift.AllowLegacyMissingUris
+package;
+
 namespace swift FBThriftTestsTerse
 
 struct TerseFields {

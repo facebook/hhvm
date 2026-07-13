@@ -120,6 +120,24 @@ safe stateful server exception TestExceptionMsgOverrideOptional {
   1: optional string message;
 }
 
+// Client-attributed, permanent (will not succeed on retry); no safety qualifier.
+// Used to validate error-classification codegen for the client-blame case.
+permanent client exception TestClientException {
+  1: string message;
+}
+
+// No error-classification qualifiers: blame/kind/safety default to Unspecified.
+exception TestUnclassifiedException {
+  1: string message;
+}
+
+// Exercises per-method {Method}Exn classification delegation for the client and
+// unspecified blame cases (declared after the exceptions they throw).
+service TestClassifiedService {
+  void clientMethod(1: string req) throws (1: TestClientException ex);
+  void unclassifiedMethod(1: string req) throws (1: TestUnclassifiedException ex);
+}
+
 const SubStruct DEFAULT_SUBSTRUCT = {};
 
 const SubStruct CUSTOM_SUBSTRUCT = {

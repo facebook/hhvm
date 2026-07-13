@@ -18,6 +18,7 @@ approx = "0.5.1"
 fbthrift = { version = "0.0.1", path = "../.." }
 fbthrift_test_if = { version = "0.0.1", path = "cargo_thrift" }
 fbthrift_test_if_clients = { version = "0.0.1", path = "cargo_thrift/clients" }
+fbthrift_test_if_services = { version = "0.0.1", path = "cargo_thrift/services" }
 proptest = "1.11.0"
 rstest = { version = "0.26.1", features = ["async-timeout"], default-features = false }
 serde_json = { version = "1.0.140", features = ["alloc", "float_roundtrip", "raw_value", "unbounded_depth"] }

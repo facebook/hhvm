@@ -977,6 +977,13 @@ func (s *rocketServerSocket) makeResponsePayload(
 		s.observer.DeclaredExceptionForFunction(rpcFuncName)
 	}
 
+	payloadMetadata := rpcmetadata.NewPayloadMetadata()
+	if exceptionMetadata != nil {
+		payloadMetadata.SetExceptionMetadata(exceptionMetadata)
+	} else {
+		payloadMetadata.SetResponseMetadata(rpcmetadata.NewPayloadResponseMetadata())
+	}
+
 	if isFirstResponse {
 		loadMetric := s.loadFn()
 		loadMetricPtr := (*int64)(nil)
@@ -989,12 +996,6 @@ func (s *rocketServerSocket) makeResponsePayload(
 			headers["uexw"] = exceptionErr.Error()
 		}
 
-		payloadMetadata := rpcmetadata.NewPayloadMetadata()
-		if exceptionMetadata != nil {
-			payloadMetadata.SetExceptionMetadata(exceptionMetadata)
-		} else {
-			payloadMetadata.SetResponseMetadata(rpcmetadata.NewPayloadResponseMetadata())
-		}
 		responseMetadata := rpcmetadata.NewResponseRpcMetadata().
 			SetOtherMetadata(headers).
 			SetCompression(&compression).
@@ -1004,13 +1005,6 @@ func (s *rocketServerSocket) makeResponsePayload(
 	}
 
 	// Subsequent stream-element encoding.
-	payloadMetadata := rpcmetadata.NewPayloadMetadata()
-	if exceptionMetadata != nil {
-		payloadMetadata.SetExceptionMetadata(exceptionMetadata)
-	} else {
-		payloadMetadata.SetResponseMetadata(rpcmetadata.NewPayloadResponseMetadata())
-	}
-
 	streamMetadata := rpcmetadata.NewStreamPayloadMetadata().
 		SetOtherMetadata(headers).
 		SetCompression(&compression).

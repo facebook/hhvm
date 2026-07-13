@@ -611,8 +611,13 @@ let all_hhconf_keys = !registered_hhconf_keys
 
 let all_keys = SSet.union all_hhconfig_keys all_hhconf_keys
 
+let all_hhconfig_keys_list = lazy (SSet.elements all_hhconfig_keys)
+
+let all_hhconf_keys_list = lazy (SSet.elements all_hhconf_keys)
+
+let all_keys_list = lazy (SSet.elements all_keys)
+
 let validate_hhconfig_key ~(config_key : string) : (unit, did_you_mean) result =
-  let all_keys_list = lazy (SSet.elements all_hhconfig_keys) in
   if SSet.mem config_key all_hhconfig_keys then
     Ok ()
   else
@@ -620,13 +625,12 @@ let validate_hhconfig_key ~(config_key : string) : (unit, did_you_mean) result =
       String_utils.most_similar
         ~max_edit_distance:3
         config_key
-        (Lazy.force all_keys_list)
+        (Lazy.force all_hhconfig_keys_list)
         Fun.id
     in
     Error (Did_you_mean suggestion)
 
 let validate_hhconf_key ~(config_key : string) : (unit, did_you_mean) result =
-  let all_keys_list = lazy (SSet.elements all_hhconf_keys) in
   if SSet.mem config_key all_hhconf_keys then
     Ok ()
   else
@@ -634,13 +638,12 @@ let validate_hhconf_key ~(config_key : string) : (unit, did_you_mean) result =
       String_utils.most_similar
         ~max_edit_distance:3
         config_key
-        (Lazy.force all_keys_list)
+        (Lazy.force all_hhconf_keys_list)
         Fun.id
     in
     Error (Did_you_mean suggestion)
 
 let validate ~(config_key : string) : (unit, did_you_mean) result =
-  let all_keys_list = lazy (SSet.elements all_keys) in
   if SSet.mem config_key all_keys then
     Ok ()
   else

@@ -959,8 +959,6 @@ func (s *rocketServerSocket) makeResponsePayload(
 		s.observer.TimeWriteUsForFunction(rpcFuncName, time.Since(writeStartTime))
 	}()
 
-	headers := map[string]string{}
-
 	// Build exception metadata if applicable, reporting both undeclared and
 	// declared exceptions to the observer.
 	var exceptionMetadata *rpcmetadata.PayloadExceptionMetadataBase
@@ -985,6 +983,7 @@ func (s *rocketServerSocket) makeResponsePayload(
 	}
 
 	if isFirstResponse {
+		headers := map[string]string{}
 		loadMetric := s.loadFn()
 		loadMetricPtr := (*int64)(nil)
 		if metadata.IsSetLoadMetric() {
@@ -1006,7 +1005,6 @@ func (s *rocketServerSocket) makeResponsePayload(
 
 	// Subsequent stream-element encoding.
 	streamMetadata := rpcmetadata.NewStreamPayloadMetadata().
-		SetOtherMetadata(headers).
 		SetCompression(&compression).
 		SetPayloadMetadata(payloadMetadata)
 

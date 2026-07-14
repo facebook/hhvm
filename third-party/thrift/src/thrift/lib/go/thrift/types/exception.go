@@ -25,7 +25,7 @@ func PrependError(prepend string, err error) error {
 	if t, ok := err.(TransportException); ok {
 		return NewTransportException(t.TypeID(), prepend+t.Error())
 	}
-	if t, ok := err.(ProtocolException); ok {
+	if t, ok := err.(*ProtocolException); ok {
 		return NewProtocolExceptionWithType(t.TypeID(), errors.New(prepend+err.Error()))
 	}
 	var appError *ApplicationException

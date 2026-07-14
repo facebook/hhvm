@@ -33,7 +33,7 @@ func TestPrependError(t *testing.T) {
 
 	err3 := NewProtocolExceptionWithType(INVALID_DATA, errors.New("original error"))
 	err4 := PrependError("Prepend: ", err3)
-	var protErr *protocolException
+	var protErr *ProtocolException
 	require.ErrorAs(t, err4, &protErr)
 	require.Equal(t, "Prepend: original error", protErr.Error())
 	require.EqualValues(t, INVALID_DATA, protErr.TypeID())

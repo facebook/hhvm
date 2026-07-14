@@ -20,12 +20,6 @@ import (
 	"encoding/base64"
 )
 
-// ProtocolException is the thrift protocol exception
-type ProtocolException interface {
-	error
-	TypeID() int
-}
-
 const (
 	UNKNOWN_PROTOCOL_EXCEPTION = 0
 	INVALID_DATA               = 1
@@ -36,41 +30,41 @@ const (
 	DEPTH_LIMIT                = 6
 )
 
-type protocolException struct {
+type ProtocolException struct {
 	typeID  int
 	message string
 }
 
-func (p *protocolException) TypeID() int {
+func (p *ProtocolException) TypeID() int {
 	return p.typeID
 }
 
-func (p *protocolException) String() string {
+func (p *ProtocolException) String() string {
 	return p.message
 }
 
-func (p *protocolException) Error() string {
+func (p *ProtocolException) Error() string {
 	return p.message
 }
 
 // NewProtocolException creates a new ProtocolException
-func NewProtocolException(err error) ProtocolException {
+func NewProtocolException(err error) error {
 	if err == nil {
 		return nil
 	}
-	if e, ok := err.(ProtocolException); ok {
-		return e
+	if protoEx, ok := err.(*ProtocolException); ok {
+		return protoEx
 	}
 	if _, ok := err.(base64.CorruptInputError); ok {
-		return &protocolException{INVALID_DATA, err.Error()}
+		return &ProtocolException{INVALID_DATA, err.Error()}
 	}
-	return &protocolException{UNKNOWN_PROTOCOL_EXCEPTION, err.Error()}
+	return &ProtocolException{UNKNOWN_PROTOCOL_EXCEPTION, err.Error()}
 }
 
 // NewProtocolExceptionWithType create a new ProtocolException with an error type
-func NewProtocolExceptionWithType(errType int, err error) ProtocolException {
+func NewProtocolExceptionWithType(errType int, err error) error {
 	if err == nil {
 		return nil
 	}
-	return &protocolException{errType, err.Error()}
+	return &ProtocolException{errType, err.Error()}
 }

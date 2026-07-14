@@ -96,9 +96,9 @@
 !@#$%codegentest:basicStringSwitch 51
 'default'
 !@#$%codegentest:basicStringSwitch 52
-'default'
+Object of class SimpleXMLElement could not be converted to string
 !@#$%codegentest:basicStringSwitch 53
-'default'
+Object of class SimpleXMLElement could not be converted to string
 !@#$%codegentest:basicStringSwitch 54
 'default'
 !@#$%codegentest:basicStringSwitch 55
@@ -486,9 +486,9 @@ Object of class stdClass could not be converted to int
 !@#$%codegentest:stringSwitch1 51
 'default'
 !@#$%codegentest:stringSwitch1 52
-'{empty str}'
+Object of class SimpleXMLElement could not be converted to string
 !@#$%codegentest:stringSwitch1 53
-'default'
+Object of class SimpleXMLElement could not be converted to string
 !@#$%codegentest:stringSwitch1 54
 'default'
 !@#$%codegentest:stringSwitch1 55
@@ -616,9 +616,9 @@ Object of class stdClass could not be converted to int
 !@#$%codegentest:stringSwitch2 51
 'default'
 !@#$%codegentest:stringSwitch2 52
-'{empty str}'
+Object of class SimpleXMLElement could not be converted to string
 !@#$%codegentest:stringSwitch2 53
-'default'
+Object of class SimpleXMLElement could not be converted to string
 !@#$%codegentest:stringSwitch2 54
 'default'
 !@#$%codegentest:stringSwitch2 55
@@ -746,9 +746,9 @@ Object of class stdClass could not be converted to int
 !@#$%codegentest:stringSwitch3 51
 'default'
 !@#$%codegentest:stringSwitch3 52
-'{empty str}'
+Object of class SimpleXMLElement could not be converted to string
 !@#$%codegentest:stringSwitch3 53
-'default'
+Object of class SimpleXMLElement could not be converted to string
 !@#$%codegentest:stringSwitch3 54
 'default'
 !@#$%codegentest:stringSwitch3 55
@@ -876,9 +876,9 @@ Object of class stdClass could not be converted to int
 !@#$%codegentest:stringSwitch4 51
 'default'
 !@#$%codegentest:stringSwitch4 52
-'default'
+Object of class SimpleXMLElement could not be converted to string
 !@#$%codegentest:stringSwitch4 53
-'default'
+Object of class SimpleXMLElement could not be converted to string
 !@#$%codegentest:stringSwitch4 54
 'default'
 !@#$%codegentest:stringSwitch4 55
@@ -1006,9 +1006,9 @@ Object of class stdClass could not be converted to int
 !@#$%codegentest:stringSwitch5 51
 'default'
 !@#$%codegentest:stringSwitch5 52
-'default'
+Object of class SimpleXMLElement could not be converted to string
 !@#$%codegentest:stringSwitch5 53
-'default'
+Object of class SimpleXMLElement could not be converted to string
 !@#$%codegentest:stringSwitch5 54
 'default'
 !@#$%codegentest:stringSwitch5 55

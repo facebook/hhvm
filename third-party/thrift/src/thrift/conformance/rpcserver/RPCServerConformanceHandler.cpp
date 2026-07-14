@@ -228,6 +228,34 @@ RPCServerConformanceHandler::sinkUndeclaredException(
                                  ->bufferSize())};
 }
 
+apache::thrift::SinkConsumer<Request, Response>
+RPCServerConformanceHandler::sinkInitialDeclaredException(
+    std::unique_ptr<Request> req) {
+  result_.sinkInitialDeclaredException().emplace().request() = *req;
+  throw *testCase_->serverInstruction()
+      ->sinkInitialDeclaredException()
+      ->userException();
+}
+
+apache::thrift::SinkConsumer<Request, Response>
+RPCServerConformanceHandler::sinkServerDeclaredException(
+    std::unique_ptr<Request> req) {
+  result_.sinkServerDeclaredException().emplace().request() = *req;
+  return {
+      [&](folly::coro::AsyncGenerator<Request&&> gen)
+          -> folly::coro::Task<Response> {
+        while (co_await gen.next()) {
+          // Drain sink payloads before returning the declared sink exception.
+        }
+        throw *testCase_->serverInstruction()
+            ->sinkServerDeclaredException()
+            ->userException();
+      },
+      static_cast<uint64_t>(*testCase_->serverInstruction()
+                                 ->sinkServerDeclaredException()
+                                 ->bufferSize())};
+}
+
 // =================== BiDi Streaming ===================
 folly::coro::Task<apache::thrift::StreamTransformation<Request, Response>>
 RPCServerConformanceHandler::co_bidiBasic(std::unique_ptr<Request> req) {

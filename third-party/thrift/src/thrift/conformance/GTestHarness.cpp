@@ -380,6 +380,38 @@ SinkUndeclaredExceptionClientTestResult runSinkUndeclaredException(
       }());
 }
 
+template <typename ClientType>
+SinkInitialDeclaredExceptionClientTestResult runSinkInitialDeclaredException(
+    ClientType& client, const RPCRequestParam<ClientType>& request) {
+  return folly::coro::blockingWait(
+      [&]() -> folly::coro::Task<SinkInitialDeclaredExceptionClientTestResult> {
+        SinkInitialDeclaredExceptionClientTestResult result;
+        try {
+          co_await client.co_sinkInitialDeclaredException(request);
+        } catch (...) {
+          result.sinkThrew() = true;
+        }
+        co_return result;
+      }());
+}
+
+template <typename ClientType>
+SinkServerDeclaredExceptionClientTestResult runSinkServerDeclaredException(
+    ClientType& client, const RPCRequestParam<ClientType>& request) {
+  return folly::coro::blockingWait(
+      [&]() -> folly::coro::Task<SinkServerDeclaredExceptionClientTestResult> {
+        SinkServerDeclaredExceptionClientTestResult result;
+        try {
+          auto sink = co_await client.co_sinkServerDeclaredException(request);
+          co_await sink.sink(
+              []() -> folly::coro::AsyncGenerator<Request&&> { co_return; }());
+        } catch (...) {
+          result.sinkThrew() = true;
+        }
+        co_return result;
+      }());
+}
+
 // =================== BiDi Streaming ===================
 template <typename ClientType>
 BidiBasicClientTestResult runBidiBasic(
@@ -760,6 +792,18 @@ ClientTestResult runClientSteps(
           client, instruction, *instruction.request());
       break;
     }
+    case ClientInstruction::Type::sinkInitialDeclaredException: {
+      auto instruction = *clientInstruction.sinkInitialDeclaredException();
+      result.sinkInitialDeclaredException() =
+          runSinkInitialDeclaredException(client, *instruction.request());
+      break;
+    }
+    case ClientInstruction::Type::sinkServerDeclaredException: {
+      auto instruction = *clientInstruction.sinkServerDeclaredException();
+      result.sinkServerDeclaredException() =
+          runSinkServerDeclaredException(client, *instruction.request());
+      break;
+    }
     case ClientInstruction::Type::bidiBasic: {
       auto instruction = *clientInstruction.bidiBasic();
       result.bidiBasic() =
@@ -964,6 +1008,16 @@ testing::AssertionResult runStatelessRpcTest(
         auto instruction = *clientInstruction.sinkUndeclaredException();
         result.sinkUndeclaredException() =
             runSinkUndeclaredException(client, instruction, serverInstruction);
+        break;
+      }
+      case ClientInstruction::Type::sinkInitialDeclaredException: {
+        result.sinkInitialDeclaredException() =
+            runSinkInitialDeclaredException(client, serverInstruction);
+        break;
+      }
+      case ClientInstruction::Type::sinkServerDeclaredException: {
+        result.sinkServerDeclaredException() =
+            runSinkServerDeclaredException(client, serverInstruction);
         break;
       }
       case ClientInstruction::Type::bidiBasic: {

@@ -72,6 +72,12 @@ class RPCServerConformanceHandler
   apache::thrift::SinkConsumer<Request, Response> sinkUndeclaredException(
       std::unique_ptr<Request> req) override;
 
+  apache::thrift::SinkConsumer<Request, Response> sinkInitialDeclaredException(
+      std::unique_ptr<Request> req) override;
+
+  apache::thrift::SinkConsumer<Request, Response> sinkServerDeclaredException(
+      std::unique_ptr<Request> req) override;
+
   // =================== BiDi Streaming ===================
   folly::coro::Task<apache::thrift::StreamTransformation<Request, Response>>
   co_bidiBasic(std::unique_ptr<Request> req) override;

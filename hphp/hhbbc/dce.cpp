@@ -1481,8 +1481,10 @@ void dce(Env& env, const bc::UnsetL& op) {
 void dce(Env& env, const bc::IncDecL& op) {
   addLocNameUse(env, op.nloc1);
   auto const oldTy   = locRaw(env, op.nloc1.id);
+  // A dead IncDec still throws on non-numeric operands (e.g. ++ on null).
   auto const effects = readCouldHaveSideEffects(oldTy) ||
-                       isLocVolatile(env, op.nloc1.id);
+                       isLocVolatile(env, op.nloc1.id) ||
+                       !oldTy.subtypeOf(BNum);
   stack_ops(env, [&] (const UseInfo& ui) {
       scheduleGenLoc(env, op.nloc1.id);
       if (!isLocLive(env, op.nloc1.id) && !effects && allUnused(ui)) {

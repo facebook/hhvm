@@ -35,7 +35,7 @@ func (t *timeout) Error() string {
 
 func TestExceptionTimeout(t *testing.T) {
 	timeout := &timeout{true}
-	exception := NewTransportExceptionFromError(timeout)
+	exception := NewTransportExceptionFromError(timeout).(*TransportException)
 	if timeout.Error() != exception.Error() {
 		t.Fatalf("Error did not match: expected %q, got %q", timeout.Error(), exception.Error())
 	}
@@ -46,7 +46,7 @@ func TestExceptionTimeout(t *testing.T) {
 }
 
 func TestExceptionEOF(t *testing.T) {
-	exception := NewTransportExceptionFromError(io.EOF)
+	exception := NewTransportExceptionFromError(io.EOF).(*TransportException)
 	if io.EOF.Error() != exception.Error() {
 		t.Fatalf("Error did not match: expected %q, got %q", io.EOF.Error(), exception.Error())
 	}
@@ -58,7 +58,7 @@ func TestExceptionEOF(t *testing.T) {
 
 func TestTransportExceptionUnwrap(t *testing.T) {
 	origErr := errors.New("unit-test")
-	exception := &transportException{
+	exception := &TransportException{
 		err: origErr,
 	}
 	if !errors.Is(exception, origErr) {

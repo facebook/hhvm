@@ -89,6 +89,8 @@ var FormatIDSimpleJSON types.ProtocolID = types.ProtocolIDSimpleJSON
 
 var NewApplicationException = types.NewApplicationException
 
+var NewTransportException = types.NewTransportException
+
 var INTERNAL_ERROR int32 = types.INTERNAL_ERROR
 var UNKNOWN_METHOD int32 = types.UNKNOWN_METHOD
 var WRONG_METHOD_NAME int32 = types.WRONG_METHOD_NAME

@@ -22,7 +22,7 @@ import (
 
 // PrependError prepends additional information to an error without losing the thrift exception interface
 func PrependError(prepend string, err error) error {
-	if t, ok := err.(TransportException); ok {
+	if t, ok := err.(*TransportException); ok {
 		return NewTransportException(t.TypeID(), prepend+t.Error())
 	}
 	if t, ok := err.(*ProtocolException); ok {

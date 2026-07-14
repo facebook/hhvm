@@ -40,7 +40,7 @@ func TestPrependError(t *testing.T) {
 
 	err5 := NewTransportException(TIMED_OUT, "original error")
 	err6 := PrependError("Prepend: ", err5)
-	var transErr *transportException
+	var transErr *TransportException
 	require.ErrorAs(t, err6, &transErr)
 	require.Equal(t, "Prepend: original error", transErr.Error())
 	require.EqualValues(t, TIMED_OUT, transErr.TypeID())

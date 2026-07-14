@@ -25,13 +25,6 @@ type timeoutable interface {
 	Timeout() bool
 }
 
-// TransportException is the interface for transport exceptions
-type TransportException interface {
-	error
-	TypeID() int
-	Err() error
-}
-
 const (
 	UNKNOWN_TRANSPORT_EXCEPTION = 0
 	NOT_OPEN                    = 1
@@ -50,55 +43,56 @@ const (
 	INVALID_HEADERS_TYPE        = 16
 )
 
-type transportException struct {
+// TransportException is a thrift transport exception
+type TransportException struct {
 	typeID int
 	err    error
 }
 
-func (p *transportException) TypeID() int {
+func (p *TransportException) TypeID() int {
 	return p.typeID
 }
 
-func (p *transportException) Error() string {
+func (p *TransportException) Error() string {
 	return p.err.Error()
 }
 
 // Unwrap is used for errors.Unwrap.
-func (p *transportException) Unwrap() error {
+func (p *TransportException) Unwrap() error {
 	return p.err
 }
 
-func (p *transportException) Err() error {
+func (p *TransportException) Err() error {
 	return p.err
 }
 
 // NewTransportException creates a new TransportException
-func NewTransportException(t int, e string) TransportException {
-	return &transportException{typeID: t, err: errors.New(e)}
+func NewTransportException(t int, e string) error {
+	return &TransportException{typeID: t, err: errors.New(e)}
 }
 
 // NewTransportExceptionFromError creates a TransportException from an error
-func NewTransportExceptionFromError(e error) TransportException {
-	if e == nil {
+func NewTransportExceptionFromError(err error) error {
+	if err == nil {
 		return nil
 	}
 
-	if t, ok := e.(TransportException); ok {
+	if t, ok := err.(*TransportException); ok {
 		return t
 	}
 
-	switch v := e.(type) {
-	case TransportException:
+	switch v := err.(type) {
+	case *TransportException:
 		return v
 	case timeoutable:
 		if v.Timeout() {
-			return &transportException{typeID: TIMED_OUT, err: e}
+			return &TransportException{typeID: TIMED_OUT, err: err}
 		}
 	}
 
-	if e == io.EOF {
-		return &transportException{typeID: END_OF_FILE, err: e}
+	if err == io.EOF {
+		return &TransportException{typeID: END_OF_FILE, err: err}
 	}
 
-	return &transportException{typeID: UNKNOWN_TRANSPORT_EXCEPTION, err: e}
+	return &TransportException{typeID: UNKNOWN_TRANSPORT_EXCEPTION, err: err}
 }

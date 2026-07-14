@@ -125,7 +125,7 @@ func (x *{{struct.go_name}}) Write(p thrift.Encoder) error {
     }
     {{/if struct.union?}}
     if err := p.WriteStructBegin("{{struct.name}}"); err != nil {
-        return thrift.PrependError("{{struct.go_name}} write struct begin error: ", err)
+        return fmt.Errorf("{{struct.go_name}} write struct begin error: %w", err)
     }
 
     {{#each struct.fields_sorted as |field|}}
@@ -135,11 +135,11 @@ func (x *{{struct.go_name}}) Write(p thrift.Encoder) error {
     {{/each}}
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("{{struct.go_name}} write field stop error: ", err)
+        return fmt.Errorf("{{struct.go_name}} write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("{{struct.go_name}} write struct end error: ", err)
+        return fmt.Errorf("{{struct.go_name}} write struct end error: %w", err)
     }
     return nil
 }
@@ -149,13 +149,13 @@ func (x *{{struct.go_name}}) Write(p thrift.Encoder) error {
 {{#let export partial read |struct| captures |codec|}}
 func (x *{{struct.go_name}}) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("{{struct.go_name}} read error: ", err)
+        return fmt.Errorf("{{struct.go_name}} read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("{{struct.go_name}} field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("{{struct.go_name}} field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -183,7 +183,7 @@ func (x *{{struct.go_name}}) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("{{struct.go_name}} read struct end error: ", err)
+        return fmt.Errorf("{{struct.go_name}} read struct end error: %w", err)
     }
 
     return nil

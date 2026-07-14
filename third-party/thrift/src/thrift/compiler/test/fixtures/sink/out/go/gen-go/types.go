@@ -46,7 +46,7 @@ func (x *InitialResponse) SetContent(value string) *InitialResponse {
 
 func (x *InitialResponse) writeField1(p thrift.Encoder) error {  // Content
     if err := p.WriteFieldBegin("content", thrift.STRING, 1); err != nil {
-        return thrift.PrependError("InitialResponse write field begin error: ", err)
+        return fmt.Errorf("InitialResponse write field begin error: %w", err)
     }
 
     item := x.Content
@@ -55,7 +55,7 @@ func (x *InitialResponse) writeField1(p thrift.Encoder) error {  // Content
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("InitialResponse write field end error: ", err)
+        return fmt.Errorf("InitialResponse write field end error: %w", err)
     }
     return nil
 }
@@ -75,7 +75,7 @@ func (x *InitialResponse) readField1(p thrift.Decoder) error {  // Content
 
 func (x *InitialResponse) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("InitialResponse"); err != nil {
-        return thrift.PrependError("InitialResponse write struct begin error: ", err)
+        return fmt.Errorf("InitialResponse write struct begin error: %w", err)
     }
 
     if err := x.writeField1(p); err != nil {
@@ -83,24 +83,24 @@ func (x *InitialResponse) Write(p thrift.Encoder) error {
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("InitialResponse write field stop error: ", err)
+        return fmt.Errorf("InitialResponse write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("InitialResponse write struct end error: ", err)
+        return fmt.Errorf("InitialResponse write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *InitialResponse) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("InitialResponse read error: ", err)
+        return fmt.Errorf("InitialResponse read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("InitialResponse field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("InitialResponse field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -125,7 +125,7 @@ func (x *InitialResponse) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("InitialResponse read struct end error: ", err)
+        return fmt.Errorf("InitialResponse read struct end error: %w", err)
     }
 
     return nil
@@ -171,7 +171,7 @@ func (x *FinalResponse) SetContent(value string) *FinalResponse {
 
 func (x *FinalResponse) writeField1(p thrift.Encoder) error {  // Content
     if err := p.WriteFieldBegin("content", thrift.STRING, 1); err != nil {
-        return thrift.PrependError("FinalResponse write field begin error: ", err)
+        return fmt.Errorf("FinalResponse write field begin error: %w", err)
     }
 
     item := x.Content
@@ -180,7 +180,7 @@ func (x *FinalResponse) writeField1(p thrift.Encoder) error {  // Content
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("FinalResponse write field end error: ", err)
+        return fmt.Errorf("FinalResponse write field end error: %w", err)
     }
     return nil
 }
@@ -200,7 +200,7 @@ func (x *FinalResponse) readField1(p thrift.Decoder) error {  // Content
 
 func (x *FinalResponse) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("FinalResponse"); err != nil {
-        return thrift.PrependError("FinalResponse write struct begin error: ", err)
+        return fmt.Errorf("FinalResponse write struct begin error: %w", err)
     }
 
     if err := x.writeField1(p); err != nil {
@@ -208,24 +208,24 @@ func (x *FinalResponse) Write(p thrift.Encoder) error {
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("FinalResponse write field stop error: ", err)
+        return fmt.Errorf("FinalResponse write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("FinalResponse write struct end error: ", err)
+        return fmt.Errorf("FinalResponse write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *FinalResponse) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("FinalResponse read error: ", err)
+        return fmt.Errorf("FinalResponse read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("FinalResponse field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("FinalResponse field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -250,7 +250,7 @@ func (x *FinalResponse) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("FinalResponse read struct end error: ", err)
+        return fmt.Errorf("FinalResponse read struct end error: %w", err)
     }
 
     return nil
@@ -296,7 +296,7 @@ func (x *SinkPayload) SetContent(value string) *SinkPayload {
 
 func (x *SinkPayload) writeField1(p thrift.Encoder) error {  // Content
     if err := p.WriteFieldBegin("content", thrift.STRING, 1); err != nil {
-        return thrift.PrependError("SinkPayload write field begin error: ", err)
+        return fmt.Errorf("SinkPayload write field begin error: %w", err)
     }
 
     item := x.Content
@@ -305,7 +305,7 @@ func (x *SinkPayload) writeField1(p thrift.Encoder) error {  // Content
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("SinkPayload write field end error: ", err)
+        return fmt.Errorf("SinkPayload write field end error: %w", err)
     }
     return nil
 }
@@ -325,7 +325,7 @@ func (x *SinkPayload) readField1(p thrift.Decoder) error {  // Content
 
 func (x *SinkPayload) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("SinkPayload"); err != nil {
-        return thrift.PrependError("SinkPayload write struct begin error: ", err)
+        return fmt.Errorf("SinkPayload write struct begin error: %w", err)
     }
 
     if err := x.writeField1(p); err != nil {
@@ -333,24 +333,24 @@ func (x *SinkPayload) Write(p thrift.Encoder) error {
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("SinkPayload write field stop error: ", err)
+        return fmt.Errorf("SinkPayload write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("SinkPayload write struct end error: ", err)
+        return fmt.Errorf("SinkPayload write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *SinkPayload) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("SinkPayload read error: ", err)
+        return fmt.Errorf("SinkPayload read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("SinkPayload field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("SinkPayload field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -375,7 +375,7 @@ func (x *SinkPayload) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("SinkPayload read struct end error: ", err)
+        return fmt.Errorf("SinkPayload read struct end error: %w", err)
     }
 
     return nil
@@ -421,7 +421,7 @@ func (x *CompatibleWithKeywordSink) SetSink(value string) *CompatibleWithKeyword
 
 func (x *CompatibleWithKeywordSink) writeField1(p thrift.Encoder) error {  // Sink
     if err := p.WriteFieldBegin("sink", thrift.STRING, 1); err != nil {
-        return thrift.PrependError("CompatibleWithKeywordSink write field begin error: ", err)
+        return fmt.Errorf("CompatibleWithKeywordSink write field begin error: %w", err)
     }
 
     item := x.Sink
@@ -430,7 +430,7 @@ func (x *CompatibleWithKeywordSink) writeField1(p thrift.Encoder) error {  // Si
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("CompatibleWithKeywordSink write field end error: ", err)
+        return fmt.Errorf("CompatibleWithKeywordSink write field end error: %w", err)
     }
     return nil
 }
@@ -450,7 +450,7 @@ func (x *CompatibleWithKeywordSink) readField1(p thrift.Decoder) error {  // Sin
 
 func (x *CompatibleWithKeywordSink) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("CompatibleWithKeywordSink"); err != nil {
-        return thrift.PrependError("CompatibleWithKeywordSink write struct begin error: ", err)
+        return fmt.Errorf("CompatibleWithKeywordSink write struct begin error: %w", err)
     }
 
     if err := x.writeField1(p); err != nil {
@@ -458,24 +458,24 @@ func (x *CompatibleWithKeywordSink) Write(p thrift.Encoder) error {
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("CompatibleWithKeywordSink write field stop error: ", err)
+        return fmt.Errorf("CompatibleWithKeywordSink write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("CompatibleWithKeywordSink write struct end error: ", err)
+        return fmt.Errorf("CompatibleWithKeywordSink write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *CompatibleWithKeywordSink) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("CompatibleWithKeywordSink read error: ", err)
+        return fmt.Errorf("CompatibleWithKeywordSink read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("CompatibleWithKeywordSink field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("CompatibleWithKeywordSink field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -500,7 +500,7 @@ func (x *CompatibleWithKeywordSink) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("CompatibleWithKeywordSink read struct end error: ", err)
+        return fmt.Errorf("CompatibleWithKeywordSink read struct end error: %w", err)
     }
 
     return nil
@@ -547,7 +547,7 @@ func (x *InitialException) SetReason(value string) *InitialException {
 
 func (x *InitialException) writeField1(p thrift.Encoder) error {  // Reason
     if err := p.WriteFieldBegin("reason", thrift.STRING, 1); err != nil {
-        return thrift.PrependError("InitialException write field begin error: ", err)
+        return fmt.Errorf("InitialException write field begin error: %w", err)
     }
 
     item := x.Reason
@@ -556,7 +556,7 @@ func (x *InitialException) writeField1(p thrift.Encoder) error {  // Reason
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("InitialException write field end error: ", err)
+        return fmt.Errorf("InitialException write field end error: %w", err)
     }
     return nil
 }
@@ -576,7 +576,7 @@ func (x *InitialException) readField1(p thrift.Decoder) error {  // Reason
 
 func (x *InitialException) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("InitialException"); err != nil {
-        return thrift.PrependError("InitialException write struct begin error: ", err)
+        return fmt.Errorf("InitialException write struct begin error: %w", err)
     }
 
     if err := x.writeField1(p); err != nil {
@@ -584,24 +584,24 @@ func (x *InitialException) Write(p thrift.Encoder) error {
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("InitialException write field stop error: ", err)
+        return fmt.Errorf("InitialException write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("InitialException write struct end error: ", err)
+        return fmt.Errorf("InitialException write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *InitialException) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("InitialException read error: ", err)
+        return fmt.Errorf("InitialException read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("InitialException field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("InitialException field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -626,7 +626,7 @@ func (x *InitialException) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("InitialException read struct end error: ", err)
+        return fmt.Errorf("InitialException read struct end error: %w", err)
     }
 
     return nil
@@ -677,7 +677,7 @@ func (x *SinkException1) SetReason(value string) *SinkException1 {
 
 func (x *SinkException1) writeField1(p thrift.Encoder) error {  // Reason
     if err := p.WriteFieldBegin("reason", thrift.STRING, 1); err != nil {
-        return thrift.PrependError("SinkException1 write field begin error: ", err)
+        return fmt.Errorf("SinkException1 write field begin error: %w", err)
     }
 
     item := x.Reason
@@ -686,7 +686,7 @@ func (x *SinkException1) writeField1(p thrift.Encoder) error {  // Reason
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("SinkException1 write field end error: ", err)
+        return fmt.Errorf("SinkException1 write field end error: %w", err)
     }
     return nil
 }
@@ -706,7 +706,7 @@ func (x *SinkException1) readField1(p thrift.Decoder) error {  // Reason
 
 func (x *SinkException1) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("SinkException1"); err != nil {
-        return thrift.PrependError("SinkException1 write struct begin error: ", err)
+        return fmt.Errorf("SinkException1 write struct begin error: %w", err)
     }
 
     if err := x.writeField1(p); err != nil {
@@ -714,24 +714,24 @@ func (x *SinkException1) Write(p thrift.Encoder) error {
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("SinkException1 write field stop error: ", err)
+        return fmt.Errorf("SinkException1 write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("SinkException1 write struct end error: ", err)
+        return fmt.Errorf("SinkException1 write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *SinkException1) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("SinkException1 read error: ", err)
+        return fmt.Errorf("SinkException1 read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("SinkException1 field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("SinkException1 field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -756,7 +756,7 @@ func (x *SinkException1) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("SinkException1 read struct end error: ", err)
+        return fmt.Errorf("SinkException1 read struct end error: %w", err)
     }
 
     return nil
@@ -807,7 +807,7 @@ func (x *SinkException2) SetReason(value int64) *SinkException2 {
 
 func (x *SinkException2) writeField1(p thrift.Encoder) error {  // Reason
     if err := p.WriteFieldBegin("reason", thrift.I64, 1); err != nil {
-        return thrift.PrependError("SinkException2 write field begin error: ", err)
+        return fmt.Errorf("SinkException2 write field begin error: %w", err)
     }
 
     item := x.Reason
@@ -816,7 +816,7 @@ func (x *SinkException2) writeField1(p thrift.Encoder) error {  // Reason
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("SinkException2 write field end error: ", err)
+        return fmt.Errorf("SinkException2 write field end error: %w", err)
     }
     return nil
 }
@@ -836,7 +836,7 @@ func (x *SinkException2) readField1(p thrift.Decoder) error {  // Reason
 
 func (x *SinkException2) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("SinkException2"); err != nil {
-        return thrift.PrependError("SinkException2 write struct begin error: ", err)
+        return fmt.Errorf("SinkException2 write struct begin error: %w", err)
     }
 
     if err := x.writeField1(p); err != nil {
@@ -844,24 +844,24 @@ func (x *SinkException2) Write(p thrift.Encoder) error {
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("SinkException2 write field stop error: ", err)
+        return fmt.Errorf("SinkException2 write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("SinkException2 write struct end error: ", err)
+        return fmt.Errorf("SinkException2 write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *SinkException2) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("SinkException2 read error: ", err)
+        return fmt.Errorf("SinkException2 read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("SinkException2 field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("SinkException2 field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -886,7 +886,7 @@ func (x *SinkException2) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("SinkException2 read struct end error: ", err)
+        return fmt.Errorf("SinkException2 read struct end error: %w", err)
     }
 
     return nil
@@ -926,29 +926,29 @@ func newReqSinkServiceMethod() *reqSinkServiceMethod {
 
 func (x *reqSinkServiceMethod) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqSinkServiceMethod"); err != nil {
-        return thrift.PrependError("reqSinkServiceMethod write struct begin error: ", err)
+        return fmt.Errorf("reqSinkServiceMethod write struct begin error: %w", err)
     }
 
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("reqSinkServiceMethod write field stop error: ", err)
+        return fmt.Errorf("reqSinkServiceMethod write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("reqSinkServiceMethod write struct end error: ", err)
+        return fmt.Errorf("reqSinkServiceMethod write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *reqSinkServiceMethod) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("reqSinkServiceMethod read error: ", err)
+        return fmt.Errorf("reqSinkServiceMethod read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("reqSinkServiceMethod field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("reqSinkServiceMethod field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -971,7 +971,7 @@ func (x *reqSinkServiceMethod) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("reqSinkServiceMethod read struct end error: ", err)
+        return fmt.Errorf("reqSinkServiceMethod read struct end error: %w", err)
     }
 
     return nil
@@ -1007,29 +1007,29 @@ func (x *respSinkServiceMethod) Exception() thrift.WritableException {
 
 func (x *respSinkServiceMethod) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respSinkServiceMethod"); err != nil {
-        return thrift.PrependError("respSinkServiceMethod write struct begin error: ", err)
+        return fmt.Errorf("respSinkServiceMethod write struct begin error: %w", err)
     }
 
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("respSinkServiceMethod write field stop error: ", err)
+        return fmt.Errorf("respSinkServiceMethod write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("respSinkServiceMethod write struct end error: ", err)
+        return fmt.Errorf("respSinkServiceMethod write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *respSinkServiceMethod) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("respSinkServiceMethod read error: ", err)
+        return fmt.Errorf("respSinkServiceMethod read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("respSinkServiceMethod field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("respSinkServiceMethod field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -1052,7 +1052,7 @@ func (x *respSinkServiceMethod) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("respSinkServiceMethod read struct end error: ", err)
+        return fmt.Errorf("respSinkServiceMethod read struct end error: %w", err)
     }
 
     return nil
@@ -1107,7 +1107,7 @@ func (x *sinkSinkServiceMethod) writeField0(p thrift.Encoder) error {  // Succes
     }
 
     if err := p.WriteFieldBegin("success", thrift.STRUCT, 0); err != nil {
-        return thrift.PrependError("sinkSinkServiceMethod write field begin error: ", err)
+        return fmt.Errorf("sinkSinkServiceMethod write field begin error: %w", err)
     }
 
     item := x.Success
@@ -1116,7 +1116,7 @@ func (x *sinkSinkServiceMethod) writeField0(p thrift.Encoder) error {  // Succes
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("sinkSinkServiceMethod write field end error: ", err)
+        return fmt.Errorf("sinkSinkServiceMethod write field end error: %w", err)
     }
     return nil
 }
@@ -1141,7 +1141,7 @@ func (x *sinkSinkServiceMethod) Exception() thrift.WritableException {
 
 func (x *sinkSinkServiceMethod) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("sinkSinkServiceMethod"); err != nil {
-        return thrift.PrependError("sinkSinkServiceMethod write struct begin error: ", err)
+        return fmt.Errorf("sinkSinkServiceMethod write struct begin error: %w", err)
     }
 
     if err := x.writeField0(p); err != nil {
@@ -1149,24 +1149,24 @@ func (x *sinkSinkServiceMethod) Write(p thrift.Encoder) error {
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("sinkSinkServiceMethod write field stop error: ", err)
+        return fmt.Errorf("sinkSinkServiceMethod write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("sinkSinkServiceMethod write struct end error: ", err)
+        return fmt.Errorf("sinkSinkServiceMethod write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *sinkSinkServiceMethod) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("sinkSinkServiceMethod read error: ", err)
+        return fmt.Errorf("sinkSinkServiceMethod read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("sinkSinkServiceMethod field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("sinkSinkServiceMethod field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -1191,7 +1191,7 @@ func (x *sinkSinkServiceMethod) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("sinkSinkServiceMethod read struct end error: ", err)
+        return fmt.Errorf("sinkSinkServiceMethod read struct end error: %w", err)
     }
 
     return nil
@@ -1246,7 +1246,7 @@ func (x *respFinalSinkServiceMethod) writeField0(p thrift.Encoder) error {  // S
     }
 
     if err := p.WriteFieldBegin("success", thrift.STRUCT, 0); err != nil {
-        return thrift.PrependError("respFinalSinkServiceMethod write field begin error: ", err)
+        return fmt.Errorf("respFinalSinkServiceMethod write field begin error: %w", err)
     }
 
     item := x.Success
@@ -1255,7 +1255,7 @@ func (x *respFinalSinkServiceMethod) writeField0(p thrift.Encoder) error {  // S
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("respFinalSinkServiceMethod write field end error: ", err)
+        return fmt.Errorf("respFinalSinkServiceMethod write field end error: %w", err)
     }
     return nil
 }
@@ -1280,7 +1280,7 @@ func (x *respFinalSinkServiceMethod) Exception() thrift.WritableException {
 
 func (x *respFinalSinkServiceMethod) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respFinalSinkServiceMethod"); err != nil {
-        return thrift.PrependError("respFinalSinkServiceMethod write struct begin error: ", err)
+        return fmt.Errorf("respFinalSinkServiceMethod write struct begin error: %w", err)
     }
 
     if err := x.writeField0(p); err != nil {
@@ -1288,24 +1288,24 @@ func (x *respFinalSinkServiceMethod) Write(p thrift.Encoder) error {
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("respFinalSinkServiceMethod write field stop error: ", err)
+        return fmt.Errorf("respFinalSinkServiceMethod write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("respFinalSinkServiceMethod write struct end error: ", err)
+        return fmt.Errorf("respFinalSinkServiceMethod write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *respFinalSinkServiceMethod) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("respFinalSinkServiceMethod read error: ", err)
+        return fmt.Errorf("respFinalSinkServiceMethod read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("respFinalSinkServiceMethod field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("respFinalSinkServiceMethod field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -1330,7 +1330,7 @@ func (x *respFinalSinkServiceMethod) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("respFinalSinkServiceMethod read struct end error: ", err)
+        return fmt.Errorf("respFinalSinkServiceMethod read struct end error: %w", err)
     }
 
     return nil
@@ -1361,29 +1361,29 @@ func newReqSinkServiceMethodAndReponse() *reqSinkServiceMethodAndReponse {
 
 func (x *reqSinkServiceMethodAndReponse) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqSinkServiceMethodAndReponse"); err != nil {
-        return thrift.PrependError("reqSinkServiceMethodAndReponse write struct begin error: ", err)
+        return fmt.Errorf("reqSinkServiceMethodAndReponse write struct begin error: %w", err)
     }
 
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("reqSinkServiceMethodAndReponse write field stop error: ", err)
+        return fmt.Errorf("reqSinkServiceMethodAndReponse write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("reqSinkServiceMethodAndReponse write struct end error: ", err)
+        return fmt.Errorf("reqSinkServiceMethodAndReponse write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *reqSinkServiceMethodAndReponse) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("reqSinkServiceMethodAndReponse read error: ", err)
+        return fmt.Errorf("reqSinkServiceMethodAndReponse read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("reqSinkServiceMethodAndReponse field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("reqSinkServiceMethodAndReponse field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -1406,7 +1406,7 @@ func (x *reqSinkServiceMethodAndReponse) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("reqSinkServiceMethodAndReponse read struct end error: ", err)
+        return fmt.Errorf("reqSinkServiceMethodAndReponse read struct end error: %w", err)
     }
 
     return nil
@@ -1461,7 +1461,7 @@ func (x *respSinkServiceMethodAndReponse) writeField0(p thrift.Encoder) error { 
     }
 
     if err := p.WriteFieldBegin("success", thrift.STRUCT, 0); err != nil {
-        return thrift.PrependError("respSinkServiceMethodAndReponse write field begin error: ", err)
+        return fmt.Errorf("respSinkServiceMethodAndReponse write field begin error: %w", err)
     }
 
     item := x.Success
@@ -1470,7 +1470,7 @@ func (x *respSinkServiceMethodAndReponse) writeField0(p thrift.Encoder) error { 
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("respSinkServiceMethodAndReponse write field end error: ", err)
+        return fmt.Errorf("respSinkServiceMethodAndReponse write field end error: %w", err)
     }
     return nil
 }
@@ -1495,7 +1495,7 @@ func (x *respSinkServiceMethodAndReponse) Exception() thrift.WritableException {
 
 func (x *respSinkServiceMethodAndReponse) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respSinkServiceMethodAndReponse"); err != nil {
-        return thrift.PrependError("respSinkServiceMethodAndReponse write struct begin error: ", err)
+        return fmt.Errorf("respSinkServiceMethodAndReponse write struct begin error: %w", err)
     }
 
     if err := x.writeField0(p); err != nil {
@@ -1503,24 +1503,24 @@ func (x *respSinkServiceMethodAndReponse) Write(p thrift.Encoder) error {
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("respSinkServiceMethodAndReponse write field stop error: ", err)
+        return fmt.Errorf("respSinkServiceMethodAndReponse write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("respSinkServiceMethodAndReponse write struct end error: ", err)
+        return fmt.Errorf("respSinkServiceMethodAndReponse write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *respSinkServiceMethodAndReponse) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("respSinkServiceMethodAndReponse read error: ", err)
+        return fmt.Errorf("respSinkServiceMethodAndReponse read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("respSinkServiceMethodAndReponse field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("respSinkServiceMethodAndReponse field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -1545,7 +1545,7 @@ func (x *respSinkServiceMethodAndReponse) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("respSinkServiceMethodAndReponse read struct end error: ", err)
+        return fmt.Errorf("respSinkServiceMethodAndReponse read struct end error: %w", err)
     }
 
     return nil
@@ -1600,7 +1600,7 @@ func (x *sinkSinkServiceMethodAndReponse) writeField0(p thrift.Encoder) error { 
     }
 
     if err := p.WriteFieldBegin("success", thrift.STRUCT, 0); err != nil {
-        return thrift.PrependError("sinkSinkServiceMethodAndReponse write field begin error: ", err)
+        return fmt.Errorf("sinkSinkServiceMethodAndReponse write field begin error: %w", err)
     }
 
     item := x.Success
@@ -1609,7 +1609,7 @@ func (x *sinkSinkServiceMethodAndReponse) writeField0(p thrift.Encoder) error { 
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("sinkSinkServiceMethodAndReponse write field end error: ", err)
+        return fmt.Errorf("sinkSinkServiceMethodAndReponse write field end error: %w", err)
     }
     return nil
 }
@@ -1634,7 +1634,7 @@ func (x *sinkSinkServiceMethodAndReponse) Exception() thrift.WritableException {
 
 func (x *sinkSinkServiceMethodAndReponse) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("sinkSinkServiceMethodAndReponse"); err != nil {
-        return thrift.PrependError("sinkSinkServiceMethodAndReponse write struct begin error: ", err)
+        return fmt.Errorf("sinkSinkServiceMethodAndReponse write struct begin error: %w", err)
     }
 
     if err := x.writeField0(p); err != nil {
@@ -1642,24 +1642,24 @@ func (x *sinkSinkServiceMethodAndReponse) Write(p thrift.Encoder) error {
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("sinkSinkServiceMethodAndReponse write field stop error: ", err)
+        return fmt.Errorf("sinkSinkServiceMethodAndReponse write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("sinkSinkServiceMethodAndReponse write struct end error: ", err)
+        return fmt.Errorf("sinkSinkServiceMethodAndReponse write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *sinkSinkServiceMethodAndReponse) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("sinkSinkServiceMethodAndReponse read error: ", err)
+        return fmt.Errorf("sinkSinkServiceMethodAndReponse read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("sinkSinkServiceMethodAndReponse field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("sinkSinkServiceMethodAndReponse field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -1684,7 +1684,7 @@ func (x *sinkSinkServiceMethodAndReponse) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("sinkSinkServiceMethodAndReponse read struct end error: ", err)
+        return fmt.Errorf("sinkSinkServiceMethodAndReponse read struct end error: %w", err)
     }
 
     return nil
@@ -1739,7 +1739,7 @@ func (x *respFinalSinkServiceMethodAndReponse) writeField0(p thrift.Encoder) err
     }
 
     if err := p.WriteFieldBegin("success", thrift.STRUCT, 0); err != nil {
-        return thrift.PrependError("respFinalSinkServiceMethodAndReponse write field begin error: ", err)
+        return fmt.Errorf("respFinalSinkServiceMethodAndReponse write field begin error: %w", err)
     }
 
     item := x.Success
@@ -1748,7 +1748,7 @@ func (x *respFinalSinkServiceMethodAndReponse) writeField0(p thrift.Encoder) err
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("respFinalSinkServiceMethodAndReponse write field end error: ", err)
+        return fmt.Errorf("respFinalSinkServiceMethodAndReponse write field end error: %w", err)
     }
     return nil
 }
@@ -1773,7 +1773,7 @@ func (x *respFinalSinkServiceMethodAndReponse) Exception() thrift.WritableExcept
 
 func (x *respFinalSinkServiceMethodAndReponse) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respFinalSinkServiceMethodAndReponse"); err != nil {
-        return thrift.PrependError("respFinalSinkServiceMethodAndReponse write struct begin error: ", err)
+        return fmt.Errorf("respFinalSinkServiceMethodAndReponse write struct begin error: %w", err)
     }
 
     if err := x.writeField0(p); err != nil {
@@ -1781,24 +1781,24 @@ func (x *respFinalSinkServiceMethodAndReponse) Write(p thrift.Encoder) error {
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("respFinalSinkServiceMethodAndReponse write field stop error: ", err)
+        return fmt.Errorf("respFinalSinkServiceMethodAndReponse write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("respFinalSinkServiceMethodAndReponse write struct end error: ", err)
+        return fmt.Errorf("respFinalSinkServiceMethodAndReponse write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *respFinalSinkServiceMethodAndReponse) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("respFinalSinkServiceMethodAndReponse read error: ", err)
+        return fmt.Errorf("respFinalSinkServiceMethodAndReponse read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("respFinalSinkServiceMethodAndReponse field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("respFinalSinkServiceMethodAndReponse field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -1823,7 +1823,7 @@ func (x *respFinalSinkServiceMethodAndReponse) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("respFinalSinkServiceMethodAndReponse read struct end error: ", err)
+        return fmt.Errorf("respFinalSinkServiceMethodAndReponse read struct end error: %w", err)
     }
 
     return nil
@@ -1854,29 +1854,29 @@ func newReqSinkServiceMethodThrow() *reqSinkServiceMethodThrow {
 
 func (x *reqSinkServiceMethodThrow) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqSinkServiceMethodThrow"); err != nil {
-        return thrift.PrependError("reqSinkServiceMethodThrow write struct begin error: ", err)
+        return fmt.Errorf("reqSinkServiceMethodThrow write struct begin error: %w", err)
     }
 
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("reqSinkServiceMethodThrow write field stop error: ", err)
+        return fmt.Errorf("reqSinkServiceMethodThrow write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("reqSinkServiceMethodThrow write struct end error: ", err)
+        return fmt.Errorf("reqSinkServiceMethodThrow write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *reqSinkServiceMethodThrow) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("reqSinkServiceMethodThrow read error: ", err)
+        return fmt.Errorf("reqSinkServiceMethodThrow read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("reqSinkServiceMethodThrow field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("reqSinkServiceMethodThrow field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -1899,7 +1899,7 @@ func (x *reqSinkServiceMethodThrow) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("reqSinkServiceMethodThrow read struct end error: ", err)
+        return fmt.Errorf("reqSinkServiceMethodThrow read struct end error: %w", err)
     }
 
     return nil
@@ -1954,7 +1954,7 @@ func (x *respSinkServiceMethodThrow) writeField1(p thrift.Encoder) error {  // E
     }
 
     if err := p.WriteFieldBegin("ex", thrift.STRUCT, 1); err != nil {
-        return thrift.PrependError("respSinkServiceMethodThrow write field begin error: ", err)
+        return fmt.Errorf("respSinkServiceMethodThrow write field begin error: %w", err)
     }
 
     item := x.Ex
@@ -1963,7 +1963,7 @@ func (x *respSinkServiceMethodThrow) writeField1(p thrift.Encoder) error {  // E
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("respSinkServiceMethodThrow write field end error: ", err)
+        return fmt.Errorf("respSinkServiceMethodThrow write field end error: %w", err)
     }
     return nil
 }
@@ -1991,7 +1991,7 @@ func (x *respSinkServiceMethodThrow) Exception() thrift.WritableException {
 
 func (x *respSinkServiceMethodThrow) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respSinkServiceMethodThrow"); err != nil {
-        return thrift.PrependError("respSinkServiceMethodThrow write struct begin error: ", err)
+        return fmt.Errorf("respSinkServiceMethodThrow write struct begin error: %w", err)
     }
 
     if err := x.writeField1(p); err != nil {
@@ -1999,24 +1999,24 @@ func (x *respSinkServiceMethodThrow) Write(p thrift.Encoder) error {
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("respSinkServiceMethodThrow write field stop error: ", err)
+        return fmt.Errorf("respSinkServiceMethodThrow write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("respSinkServiceMethodThrow write struct end error: ", err)
+        return fmt.Errorf("respSinkServiceMethodThrow write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *respSinkServiceMethodThrow) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("respSinkServiceMethodThrow read error: ", err)
+        return fmt.Errorf("respSinkServiceMethodThrow read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("respSinkServiceMethodThrow field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("respSinkServiceMethodThrow field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -2041,7 +2041,7 @@ func (x *respSinkServiceMethodThrow) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("respSinkServiceMethodThrow read struct end error: ", err)
+        return fmt.Errorf("respSinkServiceMethodThrow read struct end error: %w", err)
     }
 
     return nil
@@ -2096,7 +2096,7 @@ func (x *sinkSinkServiceMethodThrow) writeField0(p thrift.Encoder) error {  // S
     }
 
     if err := p.WriteFieldBegin("success", thrift.STRUCT, 0); err != nil {
-        return thrift.PrependError("sinkSinkServiceMethodThrow write field begin error: ", err)
+        return fmt.Errorf("sinkSinkServiceMethodThrow write field begin error: %w", err)
     }
 
     item := x.Success
@@ -2105,7 +2105,7 @@ func (x *sinkSinkServiceMethodThrow) writeField0(p thrift.Encoder) error {  // S
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("sinkSinkServiceMethodThrow write field end error: ", err)
+        return fmt.Errorf("sinkSinkServiceMethodThrow write field end error: %w", err)
     }
     return nil
 }
@@ -2130,7 +2130,7 @@ func (x *sinkSinkServiceMethodThrow) Exception() thrift.WritableException {
 
 func (x *sinkSinkServiceMethodThrow) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("sinkSinkServiceMethodThrow"); err != nil {
-        return thrift.PrependError("sinkSinkServiceMethodThrow write struct begin error: ", err)
+        return fmt.Errorf("sinkSinkServiceMethodThrow write struct begin error: %w", err)
     }
 
     if err := x.writeField0(p); err != nil {
@@ -2138,24 +2138,24 @@ func (x *sinkSinkServiceMethodThrow) Write(p thrift.Encoder) error {
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("sinkSinkServiceMethodThrow write field stop error: ", err)
+        return fmt.Errorf("sinkSinkServiceMethodThrow write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("sinkSinkServiceMethodThrow write struct end error: ", err)
+        return fmt.Errorf("sinkSinkServiceMethodThrow write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *sinkSinkServiceMethodThrow) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("sinkSinkServiceMethodThrow read error: ", err)
+        return fmt.Errorf("sinkSinkServiceMethodThrow read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("sinkSinkServiceMethodThrow field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("sinkSinkServiceMethodThrow field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -2180,7 +2180,7 @@ func (x *sinkSinkServiceMethodThrow) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("sinkSinkServiceMethodThrow read struct end error: ", err)
+        return fmt.Errorf("sinkSinkServiceMethodThrow read struct end error: %w", err)
     }
 
     return nil
@@ -2235,7 +2235,7 @@ func (x *respFinalSinkServiceMethodThrow) writeField0(p thrift.Encoder) error { 
     }
 
     if err := p.WriteFieldBegin("success", thrift.STRUCT, 0); err != nil {
-        return thrift.PrependError("respFinalSinkServiceMethodThrow write field begin error: ", err)
+        return fmt.Errorf("respFinalSinkServiceMethodThrow write field begin error: %w", err)
     }
 
     item := x.Success
@@ -2244,7 +2244,7 @@ func (x *respFinalSinkServiceMethodThrow) writeField0(p thrift.Encoder) error { 
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("respFinalSinkServiceMethodThrow write field end error: ", err)
+        return fmt.Errorf("respFinalSinkServiceMethodThrow write field end error: %w", err)
     }
     return nil
 }
@@ -2269,7 +2269,7 @@ func (x *respFinalSinkServiceMethodThrow) Exception() thrift.WritableException {
 
 func (x *respFinalSinkServiceMethodThrow) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respFinalSinkServiceMethodThrow"); err != nil {
-        return thrift.PrependError("respFinalSinkServiceMethodThrow write struct begin error: ", err)
+        return fmt.Errorf("respFinalSinkServiceMethodThrow write struct begin error: %w", err)
     }
 
     if err := x.writeField0(p); err != nil {
@@ -2277,24 +2277,24 @@ func (x *respFinalSinkServiceMethodThrow) Write(p thrift.Encoder) error {
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("respFinalSinkServiceMethodThrow write field stop error: ", err)
+        return fmt.Errorf("respFinalSinkServiceMethodThrow write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("respFinalSinkServiceMethodThrow write struct end error: ", err)
+        return fmt.Errorf("respFinalSinkServiceMethodThrow write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *respFinalSinkServiceMethodThrow) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("respFinalSinkServiceMethodThrow read error: ", err)
+        return fmt.Errorf("respFinalSinkServiceMethodThrow read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("respFinalSinkServiceMethodThrow field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("respFinalSinkServiceMethodThrow field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -2319,7 +2319,7 @@ func (x *respFinalSinkServiceMethodThrow) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("respFinalSinkServiceMethodThrow read struct end error: ", err)
+        return fmt.Errorf("respFinalSinkServiceMethodThrow read struct end error: %w", err)
     }
 
     return nil
@@ -2350,29 +2350,29 @@ func newReqSinkServiceMethodSinkThrow() *reqSinkServiceMethodSinkThrow {
 
 func (x *reqSinkServiceMethodSinkThrow) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqSinkServiceMethodSinkThrow"); err != nil {
-        return thrift.PrependError("reqSinkServiceMethodSinkThrow write struct begin error: ", err)
+        return fmt.Errorf("reqSinkServiceMethodSinkThrow write struct begin error: %w", err)
     }
 
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("reqSinkServiceMethodSinkThrow write field stop error: ", err)
+        return fmt.Errorf("reqSinkServiceMethodSinkThrow write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("reqSinkServiceMethodSinkThrow write struct end error: ", err)
+        return fmt.Errorf("reqSinkServiceMethodSinkThrow write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *reqSinkServiceMethodSinkThrow) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("reqSinkServiceMethodSinkThrow read error: ", err)
+        return fmt.Errorf("reqSinkServiceMethodSinkThrow read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("reqSinkServiceMethodSinkThrow field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("reqSinkServiceMethodSinkThrow field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -2395,7 +2395,7 @@ func (x *reqSinkServiceMethodSinkThrow) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("reqSinkServiceMethodSinkThrow read struct end error: ", err)
+        return fmt.Errorf("reqSinkServiceMethodSinkThrow read struct end error: %w", err)
     }
 
     return nil
@@ -2431,29 +2431,29 @@ func (x *respSinkServiceMethodSinkThrow) Exception() thrift.WritableException {
 
 func (x *respSinkServiceMethodSinkThrow) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respSinkServiceMethodSinkThrow"); err != nil {
-        return thrift.PrependError("respSinkServiceMethodSinkThrow write struct begin error: ", err)
+        return fmt.Errorf("respSinkServiceMethodSinkThrow write struct begin error: %w", err)
     }
 
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("respSinkServiceMethodSinkThrow write field stop error: ", err)
+        return fmt.Errorf("respSinkServiceMethodSinkThrow write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("respSinkServiceMethodSinkThrow write struct end error: ", err)
+        return fmt.Errorf("respSinkServiceMethodSinkThrow write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *respSinkServiceMethodSinkThrow) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("respSinkServiceMethodSinkThrow read error: ", err)
+        return fmt.Errorf("respSinkServiceMethodSinkThrow read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("respSinkServiceMethodSinkThrow field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("respSinkServiceMethodSinkThrow field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -2476,7 +2476,7 @@ func (x *respSinkServiceMethodSinkThrow) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("respSinkServiceMethodSinkThrow read struct end error: ", err)
+        return fmt.Errorf("respSinkServiceMethodSinkThrow read struct end error: %w", err)
     }
 
     return nil
@@ -2532,7 +2532,7 @@ func (x *sinkSinkServiceMethodSinkThrow) writeField0(p thrift.Encoder) error {  
     }
 
     if err := p.WriteFieldBegin("success", thrift.STRUCT, 0); err != nil {
-        return thrift.PrependError("sinkSinkServiceMethodSinkThrow write field begin error: ", err)
+        return fmt.Errorf("sinkSinkServiceMethodSinkThrow write field begin error: %w", err)
     }
 
     item := x.Success
@@ -2541,7 +2541,7 @@ func (x *sinkSinkServiceMethodSinkThrow) writeField0(p thrift.Encoder) error {  
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("sinkSinkServiceMethodSinkThrow write field end error: ", err)
+        return fmt.Errorf("sinkSinkServiceMethodSinkThrow write field end error: %w", err)
     }
     return nil
 }
@@ -2584,7 +2584,7 @@ func (x *sinkSinkServiceMethodSinkThrow) writeField1(p thrift.Encoder) error {  
     }
 
     if err := p.WriteFieldBegin("ex", thrift.STRUCT, 1); err != nil {
-        return thrift.PrependError("sinkSinkServiceMethodSinkThrow write field begin error: ", err)
+        return fmt.Errorf("sinkSinkServiceMethodSinkThrow write field begin error: %w", err)
     }
 
     item := x.Ex
@@ -2593,7 +2593,7 @@ func (x *sinkSinkServiceMethodSinkThrow) writeField1(p thrift.Encoder) error {  
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("sinkSinkServiceMethodSinkThrow write field end error: ", err)
+        return fmt.Errorf("sinkSinkServiceMethodSinkThrow write field end error: %w", err)
     }
     return nil
 }
@@ -2621,7 +2621,7 @@ func (x *sinkSinkServiceMethodSinkThrow) Exception() thrift.WritableException {
 
 func (x *sinkSinkServiceMethodSinkThrow) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("sinkSinkServiceMethodSinkThrow"); err != nil {
-        return thrift.PrependError("sinkSinkServiceMethodSinkThrow write struct begin error: ", err)
+        return fmt.Errorf("sinkSinkServiceMethodSinkThrow write struct begin error: %w", err)
     }
 
     if err := x.writeField0(p); err != nil {
@@ -2632,24 +2632,24 @@ func (x *sinkSinkServiceMethodSinkThrow) Write(p thrift.Encoder) error {
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("sinkSinkServiceMethodSinkThrow write field stop error: ", err)
+        return fmt.Errorf("sinkSinkServiceMethodSinkThrow write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("sinkSinkServiceMethodSinkThrow write struct end error: ", err)
+        return fmt.Errorf("sinkSinkServiceMethodSinkThrow write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *sinkSinkServiceMethodSinkThrow) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("sinkSinkServiceMethodSinkThrow read error: ", err)
+        return fmt.Errorf("sinkSinkServiceMethodSinkThrow read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("sinkSinkServiceMethodSinkThrow field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("sinkSinkServiceMethodSinkThrow field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -2676,7 +2676,7 @@ func (x *sinkSinkServiceMethodSinkThrow) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("sinkSinkServiceMethodSinkThrow read struct end error: ", err)
+        return fmt.Errorf("sinkSinkServiceMethodSinkThrow read struct end error: %w", err)
     }
 
     return nil
@@ -2731,7 +2731,7 @@ func (x *respFinalSinkServiceMethodSinkThrow) writeField0(p thrift.Encoder) erro
     }
 
     if err := p.WriteFieldBegin("success", thrift.STRUCT, 0); err != nil {
-        return thrift.PrependError("respFinalSinkServiceMethodSinkThrow write field begin error: ", err)
+        return fmt.Errorf("respFinalSinkServiceMethodSinkThrow write field begin error: %w", err)
     }
 
     item := x.Success
@@ -2740,7 +2740,7 @@ func (x *respFinalSinkServiceMethodSinkThrow) writeField0(p thrift.Encoder) erro
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("respFinalSinkServiceMethodSinkThrow write field end error: ", err)
+        return fmt.Errorf("respFinalSinkServiceMethodSinkThrow write field end error: %w", err)
     }
     return nil
 }
@@ -2765,7 +2765,7 @@ func (x *respFinalSinkServiceMethodSinkThrow) Exception() thrift.WritableExcepti
 
 func (x *respFinalSinkServiceMethodSinkThrow) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respFinalSinkServiceMethodSinkThrow"); err != nil {
-        return thrift.PrependError("respFinalSinkServiceMethodSinkThrow write struct begin error: ", err)
+        return fmt.Errorf("respFinalSinkServiceMethodSinkThrow write struct begin error: %w", err)
     }
 
     if err := x.writeField0(p); err != nil {
@@ -2773,24 +2773,24 @@ func (x *respFinalSinkServiceMethodSinkThrow) Write(p thrift.Encoder) error {
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("respFinalSinkServiceMethodSinkThrow write field stop error: ", err)
+        return fmt.Errorf("respFinalSinkServiceMethodSinkThrow write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("respFinalSinkServiceMethodSinkThrow write struct end error: ", err)
+        return fmt.Errorf("respFinalSinkServiceMethodSinkThrow write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *respFinalSinkServiceMethodSinkThrow) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("respFinalSinkServiceMethodSinkThrow read error: ", err)
+        return fmt.Errorf("respFinalSinkServiceMethodSinkThrow read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("respFinalSinkServiceMethodSinkThrow field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("respFinalSinkServiceMethodSinkThrow field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -2815,7 +2815,7 @@ func (x *respFinalSinkServiceMethodSinkThrow) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("respFinalSinkServiceMethodSinkThrow read struct end error: ", err)
+        return fmt.Errorf("respFinalSinkServiceMethodSinkThrow read struct end error: %w", err)
     }
 
     return nil
@@ -2846,29 +2846,29 @@ func newReqSinkServiceMethodFinalThrow() *reqSinkServiceMethodFinalThrow {
 
 func (x *reqSinkServiceMethodFinalThrow) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqSinkServiceMethodFinalThrow"); err != nil {
-        return thrift.PrependError("reqSinkServiceMethodFinalThrow write struct begin error: ", err)
+        return fmt.Errorf("reqSinkServiceMethodFinalThrow write struct begin error: %w", err)
     }
 
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("reqSinkServiceMethodFinalThrow write field stop error: ", err)
+        return fmt.Errorf("reqSinkServiceMethodFinalThrow write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("reqSinkServiceMethodFinalThrow write struct end error: ", err)
+        return fmt.Errorf("reqSinkServiceMethodFinalThrow write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *reqSinkServiceMethodFinalThrow) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("reqSinkServiceMethodFinalThrow read error: ", err)
+        return fmt.Errorf("reqSinkServiceMethodFinalThrow read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("reqSinkServiceMethodFinalThrow field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("reqSinkServiceMethodFinalThrow field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -2891,7 +2891,7 @@ func (x *reqSinkServiceMethodFinalThrow) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("reqSinkServiceMethodFinalThrow read struct end error: ", err)
+        return fmt.Errorf("reqSinkServiceMethodFinalThrow read struct end error: %w", err)
     }
 
     return nil
@@ -2927,29 +2927,29 @@ func (x *respSinkServiceMethodFinalThrow) Exception() thrift.WritableException {
 
 func (x *respSinkServiceMethodFinalThrow) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respSinkServiceMethodFinalThrow"); err != nil {
-        return thrift.PrependError("respSinkServiceMethodFinalThrow write struct begin error: ", err)
+        return fmt.Errorf("respSinkServiceMethodFinalThrow write struct begin error: %w", err)
     }
 
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("respSinkServiceMethodFinalThrow write field stop error: ", err)
+        return fmt.Errorf("respSinkServiceMethodFinalThrow write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("respSinkServiceMethodFinalThrow write struct end error: ", err)
+        return fmt.Errorf("respSinkServiceMethodFinalThrow write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *respSinkServiceMethodFinalThrow) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("respSinkServiceMethodFinalThrow read error: ", err)
+        return fmt.Errorf("respSinkServiceMethodFinalThrow read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("respSinkServiceMethodFinalThrow field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("respSinkServiceMethodFinalThrow field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -2972,7 +2972,7 @@ func (x *respSinkServiceMethodFinalThrow) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("respSinkServiceMethodFinalThrow read struct end error: ", err)
+        return fmt.Errorf("respSinkServiceMethodFinalThrow read struct end error: %w", err)
     }
 
     return nil
@@ -3027,7 +3027,7 @@ func (x *sinkSinkServiceMethodFinalThrow) writeField0(p thrift.Encoder) error { 
     }
 
     if err := p.WriteFieldBegin("success", thrift.STRUCT, 0); err != nil {
-        return thrift.PrependError("sinkSinkServiceMethodFinalThrow write field begin error: ", err)
+        return fmt.Errorf("sinkSinkServiceMethodFinalThrow write field begin error: %w", err)
     }
 
     item := x.Success
@@ -3036,7 +3036,7 @@ func (x *sinkSinkServiceMethodFinalThrow) writeField0(p thrift.Encoder) error { 
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("sinkSinkServiceMethodFinalThrow write field end error: ", err)
+        return fmt.Errorf("sinkSinkServiceMethodFinalThrow write field end error: %w", err)
     }
     return nil
 }
@@ -3061,7 +3061,7 @@ func (x *sinkSinkServiceMethodFinalThrow) Exception() thrift.WritableException {
 
 func (x *sinkSinkServiceMethodFinalThrow) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("sinkSinkServiceMethodFinalThrow"); err != nil {
-        return thrift.PrependError("sinkSinkServiceMethodFinalThrow write struct begin error: ", err)
+        return fmt.Errorf("sinkSinkServiceMethodFinalThrow write struct begin error: %w", err)
     }
 
     if err := x.writeField0(p); err != nil {
@@ -3069,24 +3069,24 @@ func (x *sinkSinkServiceMethodFinalThrow) Write(p thrift.Encoder) error {
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("sinkSinkServiceMethodFinalThrow write field stop error: ", err)
+        return fmt.Errorf("sinkSinkServiceMethodFinalThrow write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("sinkSinkServiceMethodFinalThrow write struct end error: ", err)
+        return fmt.Errorf("sinkSinkServiceMethodFinalThrow write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *sinkSinkServiceMethodFinalThrow) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("sinkSinkServiceMethodFinalThrow read error: ", err)
+        return fmt.Errorf("sinkSinkServiceMethodFinalThrow read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("sinkSinkServiceMethodFinalThrow field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("sinkSinkServiceMethodFinalThrow field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -3111,7 +3111,7 @@ func (x *sinkSinkServiceMethodFinalThrow) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("sinkSinkServiceMethodFinalThrow read struct end error: ", err)
+        return fmt.Errorf("sinkSinkServiceMethodFinalThrow read struct end error: %w", err)
     }
 
     return nil
@@ -3167,7 +3167,7 @@ func (x *respFinalSinkServiceMethodFinalThrow) writeField0(p thrift.Encoder) err
     }
 
     if err := p.WriteFieldBegin("success", thrift.STRUCT, 0); err != nil {
-        return thrift.PrependError("respFinalSinkServiceMethodFinalThrow write field begin error: ", err)
+        return fmt.Errorf("respFinalSinkServiceMethodFinalThrow write field begin error: %w", err)
     }
 
     item := x.Success
@@ -3176,7 +3176,7 @@ func (x *respFinalSinkServiceMethodFinalThrow) writeField0(p thrift.Encoder) err
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("respFinalSinkServiceMethodFinalThrow write field end error: ", err)
+        return fmt.Errorf("respFinalSinkServiceMethodFinalThrow write field end error: %w", err)
     }
     return nil
 }
@@ -3219,7 +3219,7 @@ func (x *respFinalSinkServiceMethodFinalThrow) writeField1(p thrift.Encoder) err
     }
 
     if err := p.WriteFieldBegin("ex", thrift.STRUCT, 1); err != nil {
-        return thrift.PrependError("respFinalSinkServiceMethodFinalThrow write field begin error: ", err)
+        return fmt.Errorf("respFinalSinkServiceMethodFinalThrow write field begin error: %w", err)
     }
 
     item := x.Ex
@@ -3228,7 +3228,7 @@ func (x *respFinalSinkServiceMethodFinalThrow) writeField1(p thrift.Encoder) err
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("respFinalSinkServiceMethodFinalThrow write field end error: ", err)
+        return fmt.Errorf("respFinalSinkServiceMethodFinalThrow write field end error: %w", err)
     }
     return nil
 }
@@ -3256,7 +3256,7 @@ func (x *respFinalSinkServiceMethodFinalThrow) Exception() thrift.WritableExcept
 
 func (x *respFinalSinkServiceMethodFinalThrow) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respFinalSinkServiceMethodFinalThrow"); err != nil {
-        return thrift.PrependError("respFinalSinkServiceMethodFinalThrow write struct begin error: ", err)
+        return fmt.Errorf("respFinalSinkServiceMethodFinalThrow write struct begin error: %w", err)
     }
 
     if err := x.writeField0(p); err != nil {
@@ -3267,24 +3267,24 @@ func (x *respFinalSinkServiceMethodFinalThrow) Write(p thrift.Encoder) error {
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("respFinalSinkServiceMethodFinalThrow write field stop error: ", err)
+        return fmt.Errorf("respFinalSinkServiceMethodFinalThrow write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("respFinalSinkServiceMethodFinalThrow write struct end error: ", err)
+        return fmt.Errorf("respFinalSinkServiceMethodFinalThrow write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *respFinalSinkServiceMethodFinalThrow) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("respFinalSinkServiceMethodFinalThrow read error: ", err)
+        return fmt.Errorf("respFinalSinkServiceMethodFinalThrow read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("respFinalSinkServiceMethodFinalThrow field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("respFinalSinkServiceMethodFinalThrow field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -3311,7 +3311,7 @@ func (x *respFinalSinkServiceMethodFinalThrow) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("respFinalSinkServiceMethodFinalThrow read struct end error: ", err)
+        return fmt.Errorf("respFinalSinkServiceMethodFinalThrow read struct end error: %w", err)
     }
 
     return nil
@@ -3342,29 +3342,29 @@ func newReqSinkServiceMethodBothThrow() *reqSinkServiceMethodBothThrow {
 
 func (x *reqSinkServiceMethodBothThrow) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqSinkServiceMethodBothThrow"); err != nil {
-        return thrift.PrependError("reqSinkServiceMethodBothThrow write struct begin error: ", err)
+        return fmt.Errorf("reqSinkServiceMethodBothThrow write struct begin error: %w", err)
     }
 
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("reqSinkServiceMethodBothThrow write field stop error: ", err)
+        return fmt.Errorf("reqSinkServiceMethodBothThrow write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("reqSinkServiceMethodBothThrow write struct end error: ", err)
+        return fmt.Errorf("reqSinkServiceMethodBothThrow write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *reqSinkServiceMethodBothThrow) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("reqSinkServiceMethodBothThrow read error: ", err)
+        return fmt.Errorf("reqSinkServiceMethodBothThrow read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("reqSinkServiceMethodBothThrow field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("reqSinkServiceMethodBothThrow field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -3387,7 +3387,7 @@ func (x *reqSinkServiceMethodBothThrow) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("reqSinkServiceMethodBothThrow read struct end error: ", err)
+        return fmt.Errorf("reqSinkServiceMethodBothThrow read struct end error: %w", err)
     }
 
     return nil
@@ -3423,29 +3423,29 @@ func (x *respSinkServiceMethodBothThrow) Exception() thrift.WritableException {
 
 func (x *respSinkServiceMethodBothThrow) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respSinkServiceMethodBothThrow"); err != nil {
-        return thrift.PrependError("respSinkServiceMethodBothThrow write struct begin error: ", err)
+        return fmt.Errorf("respSinkServiceMethodBothThrow write struct begin error: %w", err)
     }
 
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("respSinkServiceMethodBothThrow write field stop error: ", err)
+        return fmt.Errorf("respSinkServiceMethodBothThrow write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("respSinkServiceMethodBothThrow write struct end error: ", err)
+        return fmt.Errorf("respSinkServiceMethodBothThrow write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *respSinkServiceMethodBothThrow) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("respSinkServiceMethodBothThrow read error: ", err)
+        return fmt.Errorf("respSinkServiceMethodBothThrow read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("respSinkServiceMethodBothThrow field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("respSinkServiceMethodBothThrow field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -3468,7 +3468,7 @@ func (x *respSinkServiceMethodBothThrow) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("respSinkServiceMethodBothThrow read struct end error: ", err)
+        return fmt.Errorf("respSinkServiceMethodBothThrow read struct end error: %w", err)
     }
 
     return nil
@@ -3524,7 +3524,7 @@ func (x *sinkSinkServiceMethodBothThrow) writeField0(p thrift.Encoder) error {  
     }
 
     if err := p.WriteFieldBegin("success", thrift.STRUCT, 0); err != nil {
-        return thrift.PrependError("sinkSinkServiceMethodBothThrow write field begin error: ", err)
+        return fmt.Errorf("sinkSinkServiceMethodBothThrow write field begin error: %w", err)
     }
 
     item := x.Success
@@ -3533,7 +3533,7 @@ func (x *sinkSinkServiceMethodBothThrow) writeField0(p thrift.Encoder) error {  
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("sinkSinkServiceMethodBothThrow write field end error: ", err)
+        return fmt.Errorf("sinkSinkServiceMethodBothThrow write field end error: %w", err)
     }
     return nil
 }
@@ -3576,7 +3576,7 @@ func (x *sinkSinkServiceMethodBothThrow) writeField1(p thrift.Encoder) error {  
     }
 
     if err := p.WriteFieldBegin("ex", thrift.STRUCT, 1); err != nil {
-        return thrift.PrependError("sinkSinkServiceMethodBothThrow write field begin error: ", err)
+        return fmt.Errorf("sinkSinkServiceMethodBothThrow write field begin error: %w", err)
     }
 
     item := x.Ex
@@ -3585,7 +3585,7 @@ func (x *sinkSinkServiceMethodBothThrow) writeField1(p thrift.Encoder) error {  
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("sinkSinkServiceMethodBothThrow write field end error: ", err)
+        return fmt.Errorf("sinkSinkServiceMethodBothThrow write field end error: %w", err)
     }
     return nil
 }
@@ -3613,7 +3613,7 @@ func (x *sinkSinkServiceMethodBothThrow) Exception() thrift.WritableException {
 
 func (x *sinkSinkServiceMethodBothThrow) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("sinkSinkServiceMethodBothThrow"); err != nil {
-        return thrift.PrependError("sinkSinkServiceMethodBothThrow write struct begin error: ", err)
+        return fmt.Errorf("sinkSinkServiceMethodBothThrow write struct begin error: %w", err)
     }
 
     if err := x.writeField0(p); err != nil {
@@ -3624,24 +3624,24 @@ func (x *sinkSinkServiceMethodBothThrow) Write(p thrift.Encoder) error {
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("sinkSinkServiceMethodBothThrow write field stop error: ", err)
+        return fmt.Errorf("sinkSinkServiceMethodBothThrow write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("sinkSinkServiceMethodBothThrow write struct end error: ", err)
+        return fmt.Errorf("sinkSinkServiceMethodBothThrow write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *sinkSinkServiceMethodBothThrow) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("sinkSinkServiceMethodBothThrow read error: ", err)
+        return fmt.Errorf("sinkSinkServiceMethodBothThrow read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("sinkSinkServiceMethodBothThrow field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("sinkSinkServiceMethodBothThrow field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -3668,7 +3668,7 @@ func (x *sinkSinkServiceMethodBothThrow) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("sinkSinkServiceMethodBothThrow read struct end error: ", err)
+        return fmt.Errorf("sinkSinkServiceMethodBothThrow read struct end error: %w", err)
     }
 
     return nil
@@ -3724,7 +3724,7 @@ func (x *respFinalSinkServiceMethodBothThrow) writeField0(p thrift.Encoder) erro
     }
 
     if err := p.WriteFieldBegin("success", thrift.STRUCT, 0); err != nil {
-        return thrift.PrependError("respFinalSinkServiceMethodBothThrow write field begin error: ", err)
+        return fmt.Errorf("respFinalSinkServiceMethodBothThrow write field begin error: %w", err)
     }
 
     item := x.Success
@@ -3733,7 +3733,7 @@ func (x *respFinalSinkServiceMethodBothThrow) writeField0(p thrift.Encoder) erro
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("respFinalSinkServiceMethodBothThrow write field end error: ", err)
+        return fmt.Errorf("respFinalSinkServiceMethodBothThrow write field end error: %w", err)
     }
     return nil
 }
@@ -3776,7 +3776,7 @@ func (x *respFinalSinkServiceMethodBothThrow) writeField1(p thrift.Encoder) erro
     }
 
     if err := p.WriteFieldBegin("ex", thrift.STRUCT, 1); err != nil {
-        return thrift.PrependError("respFinalSinkServiceMethodBothThrow write field begin error: ", err)
+        return fmt.Errorf("respFinalSinkServiceMethodBothThrow write field begin error: %w", err)
     }
 
     item := x.Ex
@@ -3785,7 +3785,7 @@ func (x *respFinalSinkServiceMethodBothThrow) writeField1(p thrift.Encoder) erro
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("respFinalSinkServiceMethodBothThrow write field end error: ", err)
+        return fmt.Errorf("respFinalSinkServiceMethodBothThrow write field end error: %w", err)
     }
     return nil
 }
@@ -3813,7 +3813,7 @@ func (x *respFinalSinkServiceMethodBothThrow) Exception() thrift.WritableExcepti
 
 func (x *respFinalSinkServiceMethodBothThrow) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respFinalSinkServiceMethodBothThrow"); err != nil {
-        return thrift.PrependError("respFinalSinkServiceMethodBothThrow write struct begin error: ", err)
+        return fmt.Errorf("respFinalSinkServiceMethodBothThrow write struct begin error: %w", err)
     }
 
     if err := x.writeField0(p); err != nil {
@@ -3824,24 +3824,24 @@ func (x *respFinalSinkServiceMethodBothThrow) Write(p thrift.Encoder) error {
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("respFinalSinkServiceMethodBothThrow write field stop error: ", err)
+        return fmt.Errorf("respFinalSinkServiceMethodBothThrow write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("respFinalSinkServiceMethodBothThrow write struct end error: ", err)
+        return fmt.Errorf("respFinalSinkServiceMethodBothThrow write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *respFinalSinkServiceMethodBothThrow) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("respFinalSinkServiceMethodBothThrow read error: ", err)
+        return fmt.Errorf("respFinalSinkServiceMethodBothThrow read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("respFinalSinkServiceMethodBothThrow field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("respFinalSinkServiceMethodBothThrow field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -3868,7 +3868,7 @@ func (x *respFinalSinkServiceMethodBothThrow) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("respFinalSinkServiceMethodBothThrow read struct end error: ", err)
+        return fmt.Errorf("respFinalSinkServiceMethodBothThrow read struct end error: %w", err)
     }
 
     return nil
@@ -3899,29 +3899,29 @@ func newReqSinkServiceMethodFast() *reqSinkServiceMethodFast {
 
 func (x *reqSinkServiceMethodFast) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqSinkServiceMethodFast"); err != nil {
-        return thrift.PrependError("reqSinkServiceMethodFast write struct begin error: ", err)
+        return fmt.Errorf("reqSinkServiceMethodFast write struct begin error: %w", err)
     }
 
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("reqSinkServiceMethodFast write field stop error: ", err)
+        return fmt.Errorf("reqSinkServiceMethodFast write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("reqSinkServiceMethodFast write struct end error: ", err)
+        return fmt.Errorf("reqSinkServiceMethodFast write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *reqSinkServiceMethodFast) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("reqSinkServiceMethodFast read error: ", err)
+        return fmt.Errorf("reqSinkServiceMethodFast read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("reqSinkServiceMethodFast field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("reqSinkServiceMethodFast field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -3944,7 +3944,7 @@ func (x *reqSinkServiceMethodFast) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("reqSinkServiceMethodFast read struct end error: ", err)
+        return fmt.Errorf("reqSinkServiceMethodFast read struct end error: %w", err)
     }
 
     return nil
@@ -3980,29 +3980,29 @@ func (x *respSinkServiceMethodFast) Exception() thrift.WritableException {
 
 func (x *respSinkServiceMethodFast) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respSinkServiceMethodFast"); err != nil {
-        return thrift.PrependError("respSinkServiceMethodFast write struct begin error: ", err)
+        return fmt.Errorf("respSinkServiceMethodFast write struct begin error: %w", err)
     }
 
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("respSinkServiceMethodFast write field stop error: ", err)
+        return fmt.Errorf("respSinkServiceMethodFast write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("respSinkServiceMethodFast write struct end error: ", err)
+        return fmt.Errorf("respSinkServiceMethodFast write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *respSinkServiceMethodFast) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("respSinkServiceMethodFast read error: ", err)
+        return fmt.Errorf("respSinkServiceMethodFast read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("respSinkServiceMethodFast field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("respSinkServiceMethodFast field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -4025,7 +4025,7 @@ func (x *respSinkServiceMethodFast) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("respSinkServiceMethodFast read struct end error: ", err)
+        return fmt.Errorf("respSinkServiceMethodFast read struct end error: %w", err)
     }
 
     return nil
@@ -4080,7 +4080,7 @@ func (x *sinkSinkServiceMethodFast) writeField0(p thrift.Encoder) error {  // Su
     }
 
     if err := p.WriteFieldBegin("success", thrift.STRUCT, 0); err != nil {
-        return thrift.PrependError("sinkSinkServiceMethodFast write field begin error: ", err)
+        return fmt.Errorf("sinkSinkServiceMethodFast write field begin error: %w", err)
     }
 
     item := x.Success
@@ -4089,7 +4089,7 @@ func (x *sinkSinkServiceMethodFast) writeField0(p thrift.Encoder) error {  // Su
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("sinkSinkServiceMethodFast write field end error: ", err)
+        return fmt.Errorf("sinkSinkServiceMethodFast write field end error: %w", err)
     }
     return nil
 }
@@ -4114,7 +4114,7 @@ func (x *sinkSinkServiceMethodFast) Exception() thrift.WritableException {
 
 func (x *sinkSinkServiceMethodFast) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("sinkSinkServiceMethodFast"); err != nil {
-        return thrift.PrependError("sinkSinkServiceMethodFast write struct begin error: ", err)
+        return fmt.Errorf("sinkSinkServiceMethodFast write struct begin error: %w", err)
     }
 
     if err := x.writeField0(p); err != nil {
@@ -4122,24 +4122,24 @@ func (x *sinkSinkServiceMethodFast) Write(p thrift.Encoder) error {
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("sinkSinkServiceMethodFast write field stop error: ", err)
+        return fmt.Errorf("sinkSinkServiceMethodFast write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("sinkSinkServiceMethodFast write struct end error: ", err)
+        return fmt.Errorf("sinkSinkServiceMethodFast write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *sinkSinkServiceMethodFast) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("sinkSinkServiceMethodFast read error: ", err)
+        return fmt.Errorf("sinkSinkServiceMethodFast read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("sinkSinkServiceMethodFast field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("sinkSinkServiceMethodFast field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -4164,7 +4164,7 @@ func (x *sinkSinkServiceMethodFast) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("sinkSinkServiceMethodFast read struct end error: ", err)
+        return fmt.Errorf("sinkSinkServiceMethodFast read struct end error: %w", err)
     }
 
     return nil
@@ -4219,7 +4219,7 @@ func (x *respFinalSinkServiceMethodFast) writeField0(p thrift.Encoder) error {  
     }
 
     if err := p.WriteFieldBegin("success", thrift.STRUCT, 0); err != nil {
-        return thrift.PrependError("respFinalSinkServiceMethodFast write field begin error: ", err)
+        return fmt.Errorf("respFinalSinkServiceMethodFast write field begin error: %w", err)
     }
 
     item := x.Success
@@ -4228,7 +4228,7 @@ func (x *respFinalSinkServiceMethodFast) writeField0(p thrift.Encoder) error {  
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("respFinalSinkServiceMethodFast write field end error: ", err)
+        return fmt.Errorf("respFinalSinkServiceMethodFast write field end error: %w", err)
     }
     return nil
 }
@@ -4253,7 +4253,7 @@ func (x *respFinalSinkServiceMethodFast) Exception() thrift.WritableException {
 
 func (x *respFinalSinkServiceMethodFast) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respFinalSinkServiceMethodFast"); err != nil {
-        return thrift.PrependError("respFinalSinkServiceMethodFast write struct begin error: ", err)
+        return fmt.Errorf("respFinalSinkServiceMethodFast write struct begin error: %w", err)
     }
 
     if err := x.writeField0(p); err != nil {
@@ -4261,24 +4261,24 @@ func (x *respFinalSinkServiceMethodFast) Write(p thrift.Encoder) error {
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("respFinalSinkServiceMethodFast write field stop error: ", err)
+        return fmt.Errorf("respFinalSinkServiceMethodFast write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("respFinalSinkServiceMethodFast write struct end error: ", err)
+        return fmt.Errorf("respFinalSinkServiceMethodFast write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *respFinalSinkServiceMethodFast) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("respFinalSinkServiceMethodFast read error: ", err)
+        return fmt.Errorf("respFinalSinkServiceMethodFast read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("respFinalSinkServiceMethodFast field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("respFinalSinkServiceMethodFast field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -4303,7 +4303,7 @@ func (x *respFinalSinkServiceMethodFast) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("respFinalSinkServiceMethodFast read struct end error: ", err)
+        return fmt.Errorf("respFinalSinkServiceMethodFast read struct end error: %w", err)
     }
 
     return nil

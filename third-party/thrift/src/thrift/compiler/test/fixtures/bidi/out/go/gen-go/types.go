@@ -47,7 +47,7 @@ func (x *BiDiSinkException) SetMessage(value string) *BiDiSinkException {
 
 func (x *BiDiSinkException) writeField1(p thrift.Encoder) error {  // Message
     if err := p.WriteFieldBegin("message", thrift.STRING, 1); err != nil {
-        return thrift.PrependError("BiDiSinkException write field begin error: ", err)
+        return fmt.Errorf("BiDiSinkException write field begin error: %w", err)
     }
 
     item := x.Message
@@ -56,7 +56,7 @@ func (x *BiDiSinkException) writeField1(p thrift.Encoder) error {  // Message
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("BiDiSinkException write field end error: ", err)
+        return fmt.Errorf("BiDiSinkException write field end error: %w", err)
     }
     return nil
 }
@@ -76,7 +76,7 @@ func (x *BiDiSinkException) readField1(p thrift.Decoder) error {  // Message
 
 func (x *BiDiSinkException) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("BiDiSinkException"); err != nil {
-        return thrift.PrependError("BiDiSinkException write struct begin error: ", err)
+        return fmt.Errorf("BiDiSinkException write struct begin error: %w", err)
     }
 
     if err := x.writeField1(p); err != nil {
@@ -84,24 +84,24 @@ func (x *BiDiSinkException) Write(p thrift.Encoder) error {
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("BiDiSinkException write field stop error: ", err)
+        return fmt.Errorf("BiDiSinkException write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("BiDiSinkException write struct end error: ", err)
+        return fmt.Errorf("BiDiSinkException write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *BiDiSinkException) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("BiDiSinkException read error: ", err)
+        return fmt.Errorf("BiDiSinkException read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("BiDiSinkException field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("BiDiSinkException field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -126,7 +126,7 @@ func (x *BiDiSinkException) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("BiDiSinkException read struct end error: ", err)
+        return fmt.Errorf("BiDiSinkException read struct end error: %w", err)
     }
 
     return nil
@@ -177,7 +177,7 @@ func (x *BiDiStreamException) SetMessage(value string) *BiDiStreamException {
 
 func (x *BiDiStreamException) writeField1(p thrift.Encoder) error {  // Message
     if err := p.WriteFieldBegin("message", thrift.STRING, 1); err != nil {
-        return thrift.PrependError("BiDiStreamException write field begin error: ", err)
+        return fmt.Errorf("BiDiStreamException write field begin error: %w", err)
     }
 
     item := x.Message
@@ -186,7 +186,7 @@ func (x *BiDiStreamException) writeField1(p thrift.Encoder) error {  // Message
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("BiDiStreamException write field end error: ", err)
+        return fmt.Errorf("BiDiStreamException write field end error: %w", err)
     }
     return nil
 }
@@ -206,7 +206,7 @@ func (x *BiDiStreamException) readField1(p thrift.Decoder) error {  // Message
 
 func (x *BiDiStreamException) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("BiDiStreamException"); err != nil {
-        return thrift.PrependError("BiDiStreamException write struct begin error: ", err)
+        return fmt.Errorf("BiDiStreamException write struct begin error: %w", err)
     }
 
     if err := x.writeField1(p); err != nil {
@@ -214,24 +214,24 @@ func (x *BiDiStreamException) Write(p thrift.Encoder) error {
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("BiDiStreamException write field stop error: ", err)
+        return fmt.Errorf("BiDiStreamException write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("BiDiStreamException write struct end error: ", err)
+        return fmt.Errorf("BiDiStreamException write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *BiDiStreamException) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("BiDiStreamException read error: ", err)
+        return fmt.Errorf("BiDiStreamException read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("BiDiStreamException field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("BiDiStreamException field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -256,7 +256,7 @@ func (x *BiDiStreamException) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("BiDiStreamException read struct end error: ", err)
+        return fmt.Errorf("BiDiStreamException read struct end error: %w", err)
     }
 
     return nil
@@ -307,7 +307,7 @@ func (x *BiDiMethodException) SetMessage(value string) *BiDiMethodException {
 
 func (x *BiDiMethodException) writeField1(p thrift.Encoder) error {  // Message
     if err := p.WriteFieldBegin("message", thrift.STRING, 1); err != nil {
-        return thrift.PrependError("BiDiMethodException write field begin error: ", err)
+        return fmt.Errorf("BiDiMethodException write field begin error: %w", err)
     }
 
     item := x.Message
@@ -316,7 +316,7 @@ func (x *BiDiMethodException) writeField1(p thrift.Encoder) error {  // Message
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("BiDiMethodException write field end error: ", err)
+        return fmt.Errorf("BiDiMethodException write field end error: %w", err)
     }
     return nil
 }
@@ -336,7 +336,7 @@ func (x *BiDiMethodException) readField1(p thrift.Decoder) error {  // Message
 
 func (x *BiDiMethodException) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("BiDiMethodException"); err != nil {
-        return thrift.PrependError("BiDiMethodException write struct begin error: ", err)
+        return fmt.Errorf("BiDiMethodException write struct begin error: %w", err)
     }
 
     if err := x.writeField1(p); err != nil {
@@ -344,24 +344,24 @@ func (x *BiDiMethodException) Write(p thrift.Encoder) error {
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("BiDiMethodException write field stop error: ", err)
+        return fmt.Errorf("BiDiMethodException write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("BiDiMethodException write struct end error: ", err)
+        return fmt.Errorf("BiDiMethodException write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *BiDiMethodException) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("BiDiMethodException read error: ", err)
+        return fmt.Errorf("BiDiMethodException read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("BiDiMethodException field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("BiDiMethodException field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -386,7 +386,7 @@ func (x *BiDiMethodException) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("BiDiMethodException read struct end error: ", err)
+        return fmt.Errorf("BiDiMethodException read struct end error: %w", err)
     }
 
     return nil
@@ -426,29 +426,29 @@ func newReqBiDiServiceSimple() *reqBiDiServiceSimple {
 
 func (x *reqBiDiServiceSimple) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqBiDiServiceSimple"); err != nil {
-        return thrift.PrependError("reqBiDiServiceSimple write struct begin error: ", err)
+        return fmt.Errorf("reqBiDiServiceSimple write struct begin error: %w", err)
     }
 
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("reqBiDiServiceSimple write field stop error: ", err)
+        return fmt.Errorf("reqBiDiServiceSimple write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("reqBiDiServiceSimple write struct end error: ", err)
+        return fmt.Errorf("reqBiDiServiceSimple write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *reqBiDiServiceSimple) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("reqBiDiServiceSimple read error: ", err)
+        return fmt.Errorf("reqBiDiServiceSimple read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("reqBiDiServiceSimple field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("reqBiDiServiceSimple field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -471,7 +471,7 @@ func (x *reqBiDiServiceSimple) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("reqBiDiServiceSimple read struct end error: ", err)
+        return fmt.Errorf("reqBiDiServiceSimple read struct end error: %w", err)
     }
 
     return nil
@@ -507,29 +507,29 @@ func (x *respBiDiServiceSimple) Exception() thrift.WritableException {
 
 func (x *respBiDiServiceSimple) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respBiDiServiceSimple"); err != nil {
-        return thrift.PrependError("respBiDiServiceSimple write struct begin error: ", err)
+        return fmt.Errorf("respBiDiServiceSimple write struct begin error: %w", err)
     }
 
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("respBiDiServiceSimple write field stop error: ", err)
+        return fmt.Errorf("respBiDiServiceSimple write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("respBiDiServiceSimple write struct end error: ", err)
+        return fmt.Errorf("respBiDiServiceSimple write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *respBiDiServiceSimple) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("respBiDiServiceSimple read error: ", err)
+        return fmt.Errorf("respBiDiServiceSimple read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("respBiDiServiceSimple field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("respBiDiServiceSimple field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -552,7 +552,7 @@ func (x *respBiDiServiceSimple) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("respBiDiServiceSimple read struct end error: ", err)
+        return fmt.Errorf("respBiDiServiceSimple read struct end error: %w", err)
     }
 
     return nil
@@ -607,7 +607,7 @@ func (x *streamBiDiServiceSimple) writeField0(p thrift.Encoder) error {  // Succ
     }
 
     if err := p.WriteFieldBegin("success", thrift.I16, 0); err != nil {
-        return thrift.PrependError("streamBiDiServiceSimple write field begin error: ", err)
+        return fmt.Errorf("streamBiDiServiceSimple write field begin error: %w", err)
     }
 
     item := *x.Success
@@ -616,7 +616,7 @@ func (x *streamBiDiServiceSimple) writeField0(p thrift.Encoder) error {  // Succ
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("streamBiDiServiceSimple write field end error: ", err)
+        return fmt.Errorf("streamBiDiServiceSimple write field end error: %w", err)
     }
     return nil
 }
@@ -640,7 +640,7 @@ func (x *streamBiDiServiceSimple) Exception() thrift.WritableException {
 
 func (x *streamBiDiServiceSimple) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("streamBiDiServiceSimple"); err != nil {
-        return thrift.PrependError("streamBiDiServiceSimple write struct begin error: ", err)
+        return fmt.Errorf("streamBiDiServiceSimple write struct begin error: %w", err)
     }
 
     if err := x.writeField0(p); err != nil {
@@ -648,24 +648,24 @@ func (x *streamBiDiServiceSimple) Write(p thrift.Encoder) error {
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("streamBiDiServiceSimple write field stop error: ", err)
+        return fmt.Errorf("streamBiDiServiceSimple write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("streamBiDiServiceSimple write struct end error: ", err)
+        return fmt.Errorf("streamBiDiServiceSimple write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *streamBiDiServiceSimple) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("streamBiDiServiceSimple read error: ", err)
+        return fmt.Errorf("streamBiDiServiceSimple read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("streamBiDiServiceSimple field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("streamBiDiServiceSimple field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -690,7 +690,7 @@ func (x *streamBiDiServiceSimple) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("streamBiDiServiceSimple read struct end error: ", err)
+        return fmt.Errorf("streamBiDiServiceSimple read struct end error: %w", err)
     }
 
     return nil
@@ -745,7 +745,7 @@ func (x *sinkBiDiServiceSimple) writeField0(p thrift.Encoder) error {  // Succes
     }
 
     if err := p.WriteFieldBegin("success", thrift.I32, 0); err != nil {
-        return thrift.PrependError("sinkBiDiServiceSimple write field begin error: ", err)
+        return fmt.Errorf("sinkBiDiServiceSimple write field begin error: %w", err)
     }
 
     item := *x.Success
@@ -754,7 +754,7 @@ func (x *sinkBiDiServiceSimple) writeField0(p thrift.Encoder) error {  // Succes
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("sinkBiDiServiceSimple write field end error: ", err)
+        return fmt.Errorf("sinkBiDiServiceSimple write field end error: %w", err)
     }
     return nil
 }
@@ -778,7 +778,7 @@ func (x *sinkBiDiServiceSimple) Exception() thrift.WritableException {
 
 func (x *sinkBiDiServiceSimple) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("sinkBiDiServiceSimple"); err != nil {
-        return thrift.PrependError("sinkBiDiServiceSimple write struct begin error: ", err)
+        return fmt.Errorf("sinkBiDiServiceSimple write struct begin error: %w", err)
     }
 
     if err := x.writeField0(p); err != nil {
@@ -786,24 +786,24 @@ func (x *sinkBiDiServiceSimple) Write(p thrift.Encoder) error {
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("sinkBiDiServiceSimple write field stop error: ", err)
+        return fmt.Errorf("sinkBiDiServiceSimple write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("sinkBiDiServiceSimple write struct end error: ", err)
+        return fmt.Errorf("sinkBiDiServiceSimple write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *sinkBiDiServiceSimple) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("sinkBiDiServiceSimple read error: ", err)
+        return fmt.Errorf("sinkBiDiServiceSimple read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("sinkBiDiServiceSimple field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("sinkBiDiServiceSimple field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -828,7 +828,7 @@ func (x *sinkBiDiServiceSimple) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("sinkBiDiServiceSimple read struct end error: ", err)
+        return fmt.Errorf("sinkBiDiServiceSimple read struct end error: %w", err)
     }
 
     return nil
@@ -859,29 +859,29 @@ func newReqBiDiServiceResponse() *reqBiDiServiceResponse {
 
 func (x *reqBiDiServiceResponse) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqBiDiServiceResponse"); err != nil {
-        return thrift.PrependError("reqBiDiServiceResponse write struct begin error: ", err)
+        return fmt.Errorf("reqBiDiServiceResponse write struct begin error: %w", err)
     }
 
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("reqBiDiServiceResponse write field stop error: ", err)
+        return fmt.Errorf("reqBiDiServiceResponse write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("reqBiDiServiceResponse write struct end error: ", err)
+        return fmt.Errorf("reqBiDiServiceResponse write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *reqBiDiServiceResponse) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("reqBiDiServiceResponse read error: ", err)
+        return fmt.Errorf("reqBiDiServiceResponse read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("reqBiDiServiceResponse field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("reqBiDiServiceResponse field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -904,7 +904,7 @@ func (x *reqBiDiServiceResponse) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("reqBiDiServiceResponse read struct end error: ", err)
+        return fmt.Errorf("reqBiDiServiceResponse read struct end error: %w", err)
     }
 
     return nil
@@ -959,7 +959,7 @@ func (x *respBiDiServiceResponse) writeField0(p thrift.Encoder) error {  // Succ
     }
 
     if err := p.WriteFieldBegin("success", thrift.STRING, 0); err != nil {
-        return thrift.PrependError("respBiDiServiceResponse write field begin error: ", err)
+        return fmt.Errorf("respBiDiServiceResponse write field begin error: %w", err)
     }
 
     item := *x.Success
@@ -968,7 +968,7 @@ func (x *respBiDiServiceResponse) writeField0(p thrift.Encoder) error {  // Succ
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("respBiDiServiceResponse write field end error: ", err)
+        return fmt.Errorf("respBiDiServiceResponse write field end error: %w", err)
     }
     return nil
 }
@@ -992,7 +992,7 @@ func (x *respBiDiServiceResponse) Exception() thrift.WritableException {
 
 func (x *respBiDiServiceResponse) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respBiDiServiceResponse"); err != nil {
-        return thrift.PrependError("respBiDiServiceResponse write struct begin error: ", err)
+        return fmt.Errorf("respBiDiServiceResponse write struct begin error: %w", err)
     }
 
     if err := x.writeField0(p); err != nil {
@@ -1000,24 +1000,24 @@ func (x *respBiDiServiceResponse) Write(p thrift.Encoder) error {
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("respBiDiServiceResponse write field stop error: ", err)
+        return fmt.Errorf("respBiDiServiceResponse write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("respBiDiServiceResponse write struct end error: ", err)
+        return fmt.Errorf("respBiDiServiceResponse write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *respBiDiServiceResponse) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("respBiDiServiceResponse read error: ", err)
+        return fmt.Errorf("respBiDiServiceResponse read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("respBiDiServiceResponse field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("respBiDiServiceResponse field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -1042,7 +1042,7 @@ func (x *respBiDiServiceResponse) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("respBiDiServiceResponse read struct end error: ", err)
+        return fmt.Errorf("respBiDiServiceResponse read struct end error: %w", err)
     }
 
     return nil
@@ -1097,7 +1097,7 @@ func (x *streamBiDiServiceResponse) writeField0(p thrift.Encoder) error {  // Su
     }
 
     if err := p.WriteFieldBegin("success", thrift.I16, 0); err != nil {
-        return thrift.PrependError("streamBiDiServiceResponse write field begin error: ", err)
+        return fmt.Errorf("streamBiDiServiceResponse write field begin error: %w", err)
     }
 
     item := *x.Success
@@ -1106,7 +1106,7 @@ func (x *streamBiDiServiceResponse) writeField0(p thrift.Encoder) error {  // Su
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("streamBiDiServiceResponse write field end error: ", err)
+        return fmt.Errorf("streamBiDiServiceResponse write field end error: %w", err)
     }
     return nil
 }
@@ -1130,7 +1130,7 @@ func (x *streamBiDiServiceResponse) Exception() thrift.WritableException {
 
 func (x *streamBiDiServiceResponse) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("streamBiDiServiceResponse"); err != nil {
-        return thrift.PrependError("streamBiDiServiceResponse write struct begin error: ", err)
+        return fmt.Errorf("streamBiDiServiceResponse write struct begin error: %w", err)
     }
 
     if err := x.writeField0(p); err != nil {
@@ -1138,24 +1138,24 @@ func (x *streamBiDiServiceResponse) Write(p thrift.Encoder) error {
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("streamBiDiServiceResponse write field stop error: ", err)
+        return fmt.Errorf("streamBiDiServiceResponse write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("streamBiDiServiceResponse write struct end error: ", err)
+        return fmt.Errorf("streamBiDiServiceResponse write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *streamBiDiServiceResponse) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("streamBiDiServiceResponse read error: ", err)
+        return fmt.Errorf("streamBiDiServiceResponse read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("streamBiDiServiceResponse field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("streamBiDiServiceResponse field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -1180,7 +1180,7 @@ func (x *streamBiDiServiceResponse) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("streamBiDiServiceResponse read struct end error: ", err)
+        return fmt.Errorf("streamBiDiServiceResponse read struct end error: %w", err)
     }
 
     return nil
@@ -1235,7 +1235,7 @@ func (x *sinkBiDiServiceResponse) writeField0(p thrift.Encoder) error {  // Succ
     }
 
     if err := p.WriteFieldBegin("success", thrift.I32, 0); err != nil {
-        return thrift.PrependError("sinkBiDiServiceResponse write field begin error: ", err)
+        return fmt.Errorf("sinkBiDiServiceResponse write field begin error: %w", err)
     }
 
     item := *x.Success
@@ -1244,7 +1244,7 @@ func (x *sinkBiDiServiceResponse) writeField0(p thrift.Encoder) error {  // Succ
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("sinkBiDiServiceResponse write field end error: ", err)
+        return fmt.Errorf("sinkBiDiServiceResponse write field end error: %w", err)
     }
     return nil
 }
@@ -1268,7 +1268,7 @@ func (x *sinkBiDiServiceResponse) Exception() thrift.WritableException {
 
 func (x *sinkBiDiServiceResponse) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("sinkBiDiServiceResponse"); err != nil {
-        return thrift.PrependError("sinkBiDiServiceResponse write struct begin error: ", err)
+        return fmt.Errorf("sinkBiDiServiceResponse write struct begin error: %w", err)
     }
 
     if err := x.writeField0(p); err != nil {
@@ -1276,24 +1276,24 @@ func (x *sinkBiDiServiceResponse) Write(p thrift.Encoder) error {
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("sinkBiDiServiceResponse write field stop error: ", err)
+        return fmt.Errorf("sinkBiDiServiceResponse write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("sinkBiDiServiceResponse write struct end error: ", err)
+        return fmt.Errorf("sinkBiDiServiceResponse write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *sinkBiDiServiceResponse) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("sinkBiDiServiceResponse read error: ", err)
+        return fmt.Errorf("sinkBiDiServiceResponse read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("sinkBiDiServiceResponse field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("sinkBiDiServiceResponse field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -1318,7 +1318,7 @@ func (x *sinkBiDiServiceResponse) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("sinkBiDiServiceResponse read struct end error: ", err)
+        return fmt.Errorf("sinkBiDiServiceResponse read struct end error: %w", err)
     }
 
     return nil
@@ -1349,29 +1349,29 @@ func newReqBiDiServiceCanThrow() *reqBiDiServiceCanThrow {
 
 func (x *reqBiDiServiceCanThrow) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqBiDiServiceCanThrow"); err != nil {
-        return thrift.PrependError("reqBiDiServiceCanThrow write struct begin error: ", err)
+        return fmt.Errorf("reqBiDiServiceCanThrow write struct begin error: %w", err)
     }
 
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("reqBiDiServiceCanThrow write field stop error: ", err)
+        return fmt.Errorf("reqBiDiServiceCanThrow write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("reqBiDiServiceCanThrow write struct end error: ", err)
+        return fmt.Errorf("reqBiDiServiceCanThrow write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *reqBiDiServiceCanThrow) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("reqBiDiServiceCanThrow read error: ", err)
+        return fmt.Errorf("reqBiDiServiceCanThrow read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("reqBiDiServiceCanThrow field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("reqBiDiServiceCanThrow field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -1394,7 +1394,7 @@ func (x *reqBiDiServiceCanThrow) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("reqBiDiServiceCanThrow read struct end error: ", err)
+        return fmt.Errorf("reqBiDiServiceCanThrow read struct end error: %w", err)
     }
 
     return nil
@@ -1449,7 +1449,7 @@ func (x *respBiDiServiceCanThrow) writeField1(p thrift.Encoder) error {  // Ex
     }
 
     if err := p.WriteFieldBegin("ex", thrift.STRUCT, 1); err != nil {
-        return thrift.PrependError("respBiDiServiceCanThrow write field begin error: ", err)
+        return fmt.Errorf("respBiDiServiceCanThrow write field begin error: %w", err)
     }
 
     item := x.Ex
@@ -1458,7 +1458,7 @@ func (x *respBiDiServiceCanThrow) writeField1(p thrift.Encoder) error {  // Ex
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("respBiDiServiceCanThrow write field end error: ", err)
+        return fmt.Errorf("respBiDiServiceCanThrow write field end error: %w", err)
     }
     return nil
 }
@@ -1486,7 +1486,7 @@ func (x *respBiDiServiceCanThrow) Exception() thrift.WritableException {
 
 func (x *respBiDiServiceCanThrow) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respBiDiServiceCanThrow"); err != nil {
-        return thrift.PrependError("respBiDiServiceCanThrow write struct begin error: ", err)
+        return fmt.Errorf("respBiDiServiceCanThrow write struct begin error: %w", err)
     }
 
     if err := x.writeField1(p); err != nil {
@@ -1494,24 +1494,24 @@ func (x *respBiDiServiceCanThrow) Write(p thrift.Encoder) error {
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("respBiDiServiceCanThrow write field stop error: ", err)
+        return fmt.Errorf("respBiDiServiceCanThrow write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("respBiDiServiceCanThrow write struct end error: ", err)
+        return fmt.Errorf("respBiDiServiceCanThrow write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *respBiDiServiceCanThrow) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("respBiDiServiceCanThrow read error: ", err)
+        return fmt.Errorf("respBiDiServiceCanThrow read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("respBiDiServiceCanThrow field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("respBiDiServiceCanThrow field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -1536,7 +1536,7 @@ func (x *respBiDiServiceCanThrow) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("respBiDiServiceCanThrow read struct end error: ", err)
+        return fmt.Errorf("respBiDiServiceCanThrow read struct end error: %w", err)
     }
 
     return nil
@@ -1592,7 +1592,7 @@ func (x *streamBiDiServiceCanThrow) writeField0(p thrift.Encoder) error {  // Su
     }
 
     if err := p.WriteFieldBegin("success", thrift.I64, 0); err != nil {
-        return thrift.PrependError("streamBiDiServiceCanThrow write field begin error: ", err)
+        return fmt.Errorf("streamBiDiServiceCanThrow write field begin error: %w", err)
     }
 
     item := *x.Success
@@ -1601,7 +1601,7 @@ func (x *streamBiDiServiceCanThrow) writeField0(p thrift.Encoder) error {  // Su
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("streamBiDiServiceCanThrow write field end error: ", err)
+        return fmt.Errorf("streamBiDiServiceCanThrow write field end error: %w", err)
     }
     return nil
 }
@@ -1643,7 +1643,7 @@ func (x *streamBiDiServiceCanThrow) writeField1(p thrift.Encoder) error {  // Ex
     }
 
     if err := p.WriteFieldBegin("ex", thrift.STRUCT, 1); err != nil {
-        return thrift.PrependError("streamBiDiServiceCanThrow write field begin error: ", err)
+        return fmt.Errorf("streamBiDiServiceCanThrow write field begin error: %w", err)
     }
 
     item := x.Ex
@@ -1652,7 +1652,7 @@ func (x *streamBiDiServiceCanThrow) writeField1(p thrift.Encoder) error {  // Ex
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("streamBiDiServiceCanThrow write field end error: ", err)
+        return fmt.Errorf("streamBiDiServiceCanThrow write field end error: %w", err)
     }
     return nil
 }
@@ -1680,7 +1680,7 @@ func (x *streamBiDiServiceCanThrow) Exception() thrift.WritableException {
 
 func (x *streamBiDiServiceCanThrow) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("streamBiDiServiceCanThrow"); err != nil {
-        return thrift.PrependError("streamBiDiServiceCanThrow write struct begin error: ", err)
+        return fmt.Errorf("streamBiDiServiceCanThrow write struct begin error: %w", err)
     }
 
     if err := x.writeField0(p); err != nil {
@@ -1691,24 +1691,24 @@ func (x *streamBiDiServiceCanThrow) Write(p thrift.Encoder) error {
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("streamBiDiServiceCanThrow write field stop error: ", err)
+        return fmt.Errorf("streamBiDiServiceCanThrow write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("streamBiDiServiceCanThrow write struct end error: ", err)
+        return fmt.Errorf("streamBiDiServiceCanThrow write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *streamBiDiServiceCanThrow) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("streamBiDiServiceCanThrow read error: ", err)
+        return fmt.Errorf("streamBiDiServiceCanThrow read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("streamBiDiServiceCanThrow field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("streamBiDiServiceCanThrow field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -1735,7 +1735,7 @@ func (x *streamBiDiServiceCanThrow) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("streamBiDiServiceCanThrow read struct end error: ", err)
+        return fmt.Errorf("streamBiDiServiceCanThrow read struct end error: %w", err)
     }
 
     return nil
@@ -1791,7 +1791,7 @@ func (x *sinkBiDiServiceCanThrow) writeField0(p thrift.Encoder) error {  // Succ
     }
 
     if err := p.WriteFieldBegin("success", thrift.I64, 0); err != nil {
-        return thrift.PrependError("sinkBiDiServiceCanThrow write field begin error: ", err)
+        return fmt.Errorf("sinkBiDiServiceCanThrow write field begin error: %w", err)
     }
 
     item := *x.Success
@@ -1800,7 +1800,7 @@ func (x *sinkBiDiServiceCanThrow) writeField0(p thrift.Encoder) error {  // Succ
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("sinkBiDiServiceCanThrow write field end error: ", err)
+        return fmt.Errorf("sinkBiDiServiceCanThrow write field end error: %w", err)
     }
     return nil
 }
@@ -1842,7 +1842,7 @@ func (x *sinkBiDiServiceCanThrow) writeField1(p thrift.Encoder) error {  // Ex
     }
 
     if err := p.WriteFieldBegin("ex", thrift.STRUCT, 1); err != nil {
-        return thrift.PrependError("sinkBiDiServiceCanThrow write field begin error: ", err)
+        return fmt.Errorf("sinkBiDiServiceCanThrow write field begin error: %w", err)
     }
 
     item := x.Ex
@@ -1851,7 +1851,7 @@ func (x *sinkBiDiServiceCanThrow) writeField1(p thrift.Encoder) error {  // Ex
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("sinkBiDiServiceCanThrow write field end error: ", err)
+        return fmt.Errorf("sinkBiDiServiceCanThrow write field end error: %w", err)
     }
     return nil
 }
@@ -1879,7 +1879,7 @@ func (x *sinkBiDiServiceCanThrow) Exception() thrift.WritableException {
 
 func (x *sinkBiDiServiceCanThrow) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("sinkBiDiServiceCanThrow"); err != nil {
-        return thrift.PrependError("sinkBiDiServiceCanThrow write struct begin error: ", err)
+        return fmt.Errorf("sinkBiDiServiceCanThrow write struct begin error: %w", err)
     }
 
     if err := x.writeField0(p); err != nil {
@@ -1890,24 +1890,24 @@ func (x *sinkBiDiServiceCanThrow) Write(p thrift.Encoder) error {
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("sinkBiDiServiceCanThrow write field stop error: ", err)
+        return fmt.Errorf("sinkBiDiServiceCanThrow write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("sinkBiDiServiceCanThrow write struct end error: ", err)
+        return fmt.Errorf("sinkBiDiServiceCanThrow write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *sinkBiDiServiceCanThrow) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("sinkBiDiServiceCanThrow read error: ", err)
+        return fmt.Errorf("sinkBiDiServiceCanThrow read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("sinkBiDiServiceCanThrow field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("sinkBiDiServiceCanThrow field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -1934,7 +1934,7 @@ func (x *sinkBiDiServiceCanThrow) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("sinkBiDiServiceCanThrow read struct end error: ", err)
+        return fmt.Errorf("sinkBiDiServiceCanThrow read struct end error: %w", err)
     }
 
     return nil

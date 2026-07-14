@@ -34,29 +34,29 @@ func NewFooStreamEx() *FooStreamEx {
 
 func (x *FooStreamEx) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("FooStreamEx"); err != nil {
-        return thrift.PrependError("FooStreamEx write struct begin error: ", err)
+        return fmt.Errorf("FooStreamEx write struct begin error: %w", err)
     }
 
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("FooStreamEx write field stop error: ", err)
+        return fmt.Errorf("FooStreamEx write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("FooStreamEx write struct end error: ", err)
+        return fmt.Errorf("FooStreamEx write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *FooStreamEx) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("FooStreamEx read error: ", err)
+        return fmt.Errorf("FooStreamEx read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("FooStreamEx field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("FooStreamEx field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -79,7 +79,7 @@ func (x *FooStreamEx) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("FooStreamEx read struct end error: ", err)
+        return fmt.Errorf("FooStreamEx read struct end error: %w", err)
     }
 
     return nil
@@ -116,29 +116,29 @@ func NewFooEx() *FooEx {
 
 func (x *FooEx) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("FooEx"); err != nil {
-        return thrift.PrependError("FooEx write struct begin error: ", err)
+        return fmt.Errorf("FooEx write struct begin error: %w", err)
     }
 
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("FooEx write field stop error: ", err)
+        return fmt.Errorf("FooEx write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("FooEx write struct end error: ", err)
+        return fmt.Errorf("FooEx write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *FooEx) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("FooEx read error: ", err)
+        return fmt.Errorf("FooEx read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("FooEx field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("FooEx field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -161,7 +161,7 @@ func (x *FooEx) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("FooEx read struct end error: ", err)
+        return fmt.Errorf("FooEx read struct end error: %w", err)
     }
 
     return nil
@@ -198,29 +198,29 @@ func NewFooEx2() *FooEx2 {
 
 func (x *FooEx2) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("FooEx2"); err != nil {
-        return thrift.PrependError("FooEx2 write struct begin error: ", err)
+        return fmt.Errorf("FooEx2 write struct begin error: %w", err)
     }
 
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("FooEx2 write field stop error: ", err)
+        return fmt.Errorf("FooEx2 write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("FooEx2 write struct end error: ", err)
+        return fmt.Errorf("FooEx2 write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *FooEx2) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("FooEx2 read error: ", err)
+        return fmt.Errorf("FooEx2 read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("FooEx2 field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("FooEx2 field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -243,7 +243,7 @@ func (x *FooEx2) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("FooEx2 read struct end error: ", err)
+        return fmt.Errorf("FooEx2 read struct end error: %w", err)
     }
 
     return nil
@@ -296,7 +296,7 @@ func (x *reqPubSubStreamingServiceReturnstream) SetI32From(value int32) *reqPubS
 
 func (x *reqPubSubStreamingServiceReturnstream) writeField1(p thrift.Encoder) error {  // I32From
     if err := p.WriteFieldBegin("i32_from", thrift.I32, 1); err != nil {
-        return thrift.PrependError("reqPubSubStreamingServiceReturnstream write field begin error: ", err)
+        return fmt.Errorf("reqPubSubStreamingServiceReturnstream write field begin error: %w", err)
     }
 
     item := x.I32From
@@ -305,7 +305,7 @@ func (x *reqPubSubStreamingServiceReturnstream) writeField1(p thrift.Encoder) er
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("reqPubSubStreamingServiceReturnstream write field end error: ", err)
+        return fmt.Errorf("reqPubSubStreamingServiceReturnstream write field end error: %w", err)
     }
     return nil
 }
@@ -337,7 +337,7 @@ func (x *reqPubSubStreamingServiceReturnstream) SetI32To(value int32) *reqPubSub
 
 func (x *reqPubSubStreamingServiceReturnstream) writeField2(p thrift.Encoder) error {  // I32To
     if err := p.WriteFieldBegin("i32_to", thrift.I32, 2); err != nil {
-        return thrift.PrependError("reqPubSubStreamingServiceReturnstream write field begin error: ", err)
+        return fmt.Errorf("reqPubSubStreamingServiceReturnstream write field begin error: %w", err)
     }
 
     item := x.I32To
@@ -346,7 +346,7 @@ func (x *reqPubSubStreamingServiceReturnstream) writeField2(p thrift.Encoder) er
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("reqPubSubStreamingServiceReturnstream write field end error: ", err)
+        return fmt.Errorf("reqPubSubStreamingServiceReturnstream write field end error: %w", err)
     }
     return nil
 }
@@ -366,7 +366,7 @@ func (x *reqPubSubStreamingServiceReturnstream) readField2(p thrift.Decoder) err
 
 func (x *reqPubSubStreamingServiceReturnstream) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqPubSubStreamingServiceReturnstream"); err != nil {
-        return thrift.PrependError("reqPubSubStreamingServiceReturnstream write struct begin error: ", err)
+        return fmt.Errorf("reqPubSubStreamingServiceReturnstream write struct begin error: %w", err)
     }
 
     if err := x.writeField1(p); err != nil {
@@ -377,24 +377,24 @@ func (x *reqPubSubStreamingServiceReturnstream) Write(p thrift.Encoder) error {
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("reqPubSubStreamingServiceReturnstream write field stop error: ", err)
+        return fmt.Errorf("reqPubSubStreamingServiceReturnstream write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("reqPubSubStreamingServiceReturnstream write struct end error: ", err)
+        return fmt.Errorf("reqPubSubStreamingServiceReturnstream write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *reqPubSubStreamingServiceReturnstream) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("reqPubSubStreamingServiceReturnstream read error: ", err)
+        return fmt.Errorf("reqPubSubStreamingServiceReturnstream read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("reqPubSubStreamingServiceReturnstream field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("reqPubSubStreamingServiceReturnstream field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -421,7 +421,7 @@ func (x *reqPubSubStreamingServiceReturnstream) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("reqPubSubStreamingServiceReturnstream read struct end error: ", err)
+        return fmt.Errorf("reqPubSubStreamingServiceReturnstream read struct end error: %w", err)
     }
 
     return nil
@@ -459,29 +459,29 @@ func (x *respPubSubStreamingServiceReturnstream) Exception() thrift.WritableExce
 
 func (x *respPubSubStreamingServiceReturnstream) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respPubSubStreamingServiceReturnstream"); err != nil {
-        return thrift.PrependError("respPubSubStreamingServiceReturnstream write struct begin error: ", err)
+        return fmt.Errorf("respPubSubStreamingServiceReturnstream write struct begin error: %w", err)
     }
 
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("respPubSubStreamingServiceReturnstream write field stop error: ", err)
+        return fmt.Errorf("respPubSubStreamingServiceReturnstream write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("respPubSubStreamingServiceReturnstream write struct end error: ", err)
+        return fmt.Errorf("respPubSubStreamingServiceReturnstream write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *respPubSubStreamingServiceReturnstream) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("respPubSubStreamingServiceReturnstream read error: ", err)
+        return fmt.Errorf("respPubSubStreamingServiceReturnstream read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("respPubSubStreamingServiceReturnstream field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("respPubSubStreamingServiceReturnstream field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -504,7 +504,7 @@ func (x *respPubSubStreamingServiceReturnstream) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("respPubSubStreamingServiceReturnstream read struct end error: ", err)
+        return fmt.Errorf("respPubSubStreamingServiceReturnstream read struct end error: %w", err)
     }
 
     return nil
@@ -559,7 +559,7 @@ func (x *streamPubSubStreamingServiceReturnstream) writeField0(p thrift.Encoder)
     }
 
     if err := p.WriteFieldBegin("success", thrift.I32, 0); err != nil {
-        return thrift.PrependError("streamPubSubStreamingServiceReturnstream write field begin error: ", err)
+        return fmt.Errorf("streamPubSubStreamingServiceReturnstream write field begin error: %w", err)
     }
 
     item := *x.Success
@@ -568,7 +568,7 @@ func (x *streamPubSubStreamingServiceReturnstream) writeField0(p thrift.Encoder)
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("streamPubSubStreamingServiceReturnstream write field end error: ", err)
+        return fmt.Errorf("streamPubSubStreamingServiceReturnstream write field end error: %w", err)
     }
     return nil
 }
@@ -592,7 +592,7 @@ func (x *streamPubSubStreamingServiceReturnstream) Exception() thrift.WritableEx
 
 func (x *streamPubSubStreamingServiceReturnstream) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("streamPubSubStreamingServiceReturnstream"); err != nil {
-        return thrift.PrependError("streamPubSubStreamingServiceReturnstream write struct begin error: ", err)
+        return fmt.Errorf("streamPubSubStreamingServiceReturnstream write struct begin error: %w", err)
     }
 
     if err := x.writeField0(p); err != nil {
@@ -600,24 +600,24 @@ func (x *streamPubSubStreamingServiceReturnstream) Write(p thrift.Encoder) error
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("streamPubSubStreamingServiceReturnstream write field stop error: ", err)
+        return fmt.Errorf("streamPubSubStreamingServiceReturnstream write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("streamPubSubStreamingServiceReturnstream write struct end error: ", err)
+        return fmt.Errorf("streamPubSubStreamingServiceReturnstream write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *streamPubSubStreamingServiceReturnstream) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("streamPubSubStreamingServiceReturnstream read error: ", err)
+        return fmt.Errorf("streamPubSubStreamingServiceReturnstream read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("streamPubSubStreamingServiceReturnstream field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("streamPubSubStreamingServiceReturnstream field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -642,7 +642,7 @@ func (x *streamPubSubStreamingServiceReturnstream) Read(p thrift.Decoder) error 
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("streamPubSubStreamingServiceReturnstream read struct end error: ", err)
+        return fmt.Errorf("streamPubSubStreamingServiceReturnstream read struct end error: %w", err)
     }
 
     return nil
@@ -686,7 +686,7 @@ func (x *reqPubSubStreamingServiceStreamthrows) SetFoo(value int32) *reqPubSubSt
 
 func (x *reqPubSubStreamingServiceStreamthrows) writeField1(p thrift.Encoder) error {  // Foo
     if err := p.WriteFieldBegin("foo", thrift.I32, 1); err != nil {
-        return thrift.PrependError("reqPubSubStreamingServiceStreamthrows write field begin error: ", err)
+        return fmt.Errorf("reqPubSubStreamingServiceStreamthrows write field begin error: %w", err)
     }
 
     item := x.Foo
@@ -695,7 +695,7 @@ func (x *reqPubSubStreamingServiceStreamthrows) writeField1(p thrift.Encoder) er
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("reqPubSubStreamingServiceStreamthrows write field end error: ", err)
+        return fmt.Errorf("reqPubSubStreamingServiceStreamthrows write field end error: %w", err)
     }
     return nil
 }
@@ -715,7 +715,7 @@ func (x *reqPubSubStreamingServiceStreamthrows) readField1(p thrift.Decoder) err
 
 func (x *reqPubSubStreamingServiceStreamthrows) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqPubSubStreamingServiceStreamthrows"); err != nil {
-        return thrift.PrependError("reqPubSubStreamingServiceStreamthrows write struct begin error: ", err)
+        return fmt.Errorf("reqPubSubStreamingServiceStreamthrows write struct begin error: %w", err)
     }
 
     if err := x.writeField1(p); err != nil {
@@ -723,24 +723,24 @@ func (x *reqPubSubStreamingServiceStreamthrows) Write(p thrift.Encoder) error {
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("reqPubSubStreamingServiceStreamthrows write field stop error: ", err)
+        return fmt.Errorf("reqPubSubStreamingServiceStreamthrows write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("reqPubSubStreamingServiceStreamthrows write struct end error: ", err)
+        return fmt.Errorf("reqPubSubStreamingServiceStreamthrows write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *reqPubSubStreamingServiceStreamthrows) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("reqPubSubStreamingServiceStreamthrows read error: ", err)
+        return fmt.Errorf("reqPubSubStreamingServiceStreamthrows read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("reqPubSubStreamingServiceStreamthrows field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("reqPubSubStreamingServiceStreamthrows field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -765,7 +765,7 @@ func (x *reqPubSubStreamingServiceStreamthrows) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("reqPubSubStreamingServiceStreamthrows read struct end error: ", err)
+        return fmt.Errorf("reqPubSubStreamingServiceStreamthrows read struct end error: %w", err)
     }
 
     return nil
@@ -802,29 +802,29 @@ func (x *respPubSubStreamingServiceStreamthrows) Exception() thrift.WritableExce
 
 func (x *respPubSubStreamingServiceStreamthrows) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respPubSubStreamingServiceStreamthrows"); err != nil {
-        return thrift.PrependError("respPubSubStreamingServiceStreamthrows write struct begin error: ", err)
+        return fmt.Errorf("respPubSubStreamingServiceStreamthrows write struct begin error: %w", err)
     }
 
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("respPubSubStreamingServiceStreamthrows write field stop error: ", err)
+        return fmt.Errorf("respPubSubStreamingServiceStreamthrows write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("respPubSubStreamingServiceStreamthrows write struct end error: ", err)
+        return fmt.Errorf("respPubSubStreamingServiceStreamthrows write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *respPubSubStreamingServiceStreamthrows) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("respPubSubStreamingServiceStreamthrows read error: ", err)
+        return fmt.Errorf("respPubSubStreamingServiceStreamthrows read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("respPubSubStreamingServiceStreamthrows field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("respPubSubStreamingServiceStreamthrows field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -847,7 +847,7 @@ func (x *respPubSubStreamingServiceStreamthrows) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("respPubSubStreamingServiceStreamthrows read struct end error: ", err)
+        return fmt.Errorf("respPubSubStreamingServiceStreamthrows read struct end error: %w", err)
     }
 
     return nil
@@ -903,7 +903,7 @@ func (x *streamPubSubStreamingServiceStreamthrows) writeField0(p thrift.Encoder)
     }
 
     if err := p.WriteFieldBegin("success", thrift.I32, 0); err != nil {
-        return thrift.PrependError("streamPubSubStreamingServiceStreamthrows write field begin error: ", err)
+        return fmt.Errorf("streamPubSubStreamingServiceStreamthrows write field begin error: %w", err)
     }
 
     item := *x.Success
@@ -912,7 +912,7 @@ func (x *streamPubSubStreamingServiceStreamthrows) writeField0(p thrift.Encoder)
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("streamPubSubStreamingServiceStreamthrows write field end error: ", err)
+        return fmt.Errorf("streamPubSubStreamingServiceStreamthrows write field end error: %w", err)
     }
     return nil
 }
@@ -954,7 +954,7 @@ func (x *streamPubSubStreamingServiceStreamthrows) writeField1(p thrift.Encoder)
     }
 
     if err := p.WriteFieldBegin("e", thrift.STRUCT, 1); err != nil {
-        return thrift.PrependError("streamPubSubStreamingServiceStreamthrows write field begin error: ", err)
+        return fmt.Errorf("streamPubSubStreamingServiceStreamthrows write field begin error: %w", err)
     }
 
     item := x.E
@@ -963,7 +963,7 @@ func (x *streamPubSubStreamingServiceStreamthrows) writeField1(p thrift.Encoder)
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("streamPubSubStreamingServiceStreamthrows write field end error: ", err)
+        return fmt.Errorf("streamPubSubStreamingServiceStreamthrows write field end error: %w", err)
     }
     return nil
 }
@@ -991,7 +991,7 @@ func (x *streamPubSubStreamingServiceStreamthrows) Exception() thrift.WritableEx
 
 func (x *streamPubSubStreamingServiceStreamthrows) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("streamPubSubStreamingServiceStreamthrows"); err != nil {
-        return thrift.PrependError("streamPubSubStreamingServiceStreamthrows write struct begin error: ", err)
+        return fmt.Errorf("streamPubSubStreamingServiceStreamthrows write struct begin error: %w", err)
     }
 
     if err := x.writeField0(p); err != nil {
@@ -1002,24 +1002,24 @@ func (x *streamPubSubStreamingServiceStreamthrows) Write(p thrift.Encoder) error
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("streamPubSubStreamingServiceStreamthrows write field stop error: ", err)
+        return fmt.Errorf("streamPubSubStreamingServiceStreamthrows write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("streamPubSubStreamingServiceStreamthrows write struct end error: ", err)
+        return fmt.Errorf("streamPubSubStreamingServiceStreamthrows write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *streamPubSubStreamingServiceStreamthrows) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("streamPubSubStreamingServiceStreamthrows read error: ", err)
+        return fmt.Errorf("streamPubSubStreamingServiceStreamthrows read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("streamPubSubStreamingServiceStreamthrows field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("streamPubSubStreamingServiceStreamthrows field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -1046,7 +1046,7 @@ func (x *streamPubSubStreamingServiceStreamthrows) Read(p thrift.Decoder) error 
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("streamPubSubStreamingServiceStreamthrows read struct end error: ", err)
+        return fmt.Errorf("streamPubSubStreamingServiceStreamthrows read struct end error: %w", err)
     }
 
     return nil
@@ -1090,7 +1090,7 @@ func (x *reqPubSubStreamingServiceServicethrows) SetFoo(value int32) *reqPubSubS
 
 func (x *reqPubSubStreamingServiceServicethrows) writeField1(p thrift.Encoder) error {  // Foo
     if err := p.WriteFieldBegin("foo", thrift.I32, 1); err != nil {
-        return thrift.PrependError("reqPubSubStreamingServiceServicethrows write field begin error: ", err)
+        return fmt.Errorf("reqPubSubStreamingServiceServicethrows write field begin error: %w", err)
     }
 
     item := x.Foo
@@ -1099,7 +1099,7 @@ func (x *reqPubSubStreamingServiceServicethrows) writeField1(p thrift.Encoder) e
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("reqPubSubStreamingServiceServicethrows write field end error: ", err)
+        return fmt.Errorf("reqPubSubStreamingServiceServicethrows write field end error: %w", err)
     }
     return nil
 }
@@ -1119,7 +1119,7 @@ func (x *reqPubSubStreamingServiceServicethrows) readField1(p thrift.Decoder) er
 
 func (x *reqPubSubStreamingServiceServicethrows) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqPubSubStreamingServiceServicethrows"); err != nil {
-        return thrift.PrependError("reqPubSubStreamingServiceServicethrows write struct begin error: ", err)
+        return fmt.Errorf("reqPubSubStreamingServiceServicethrows write struct begin error: %w", err)
     }
 
     if err := x.writeField1(p); err != nil {
@@ -1127,24 +1127,24 @@ func (x *reqPubSubStreamingServiceServicethrows) Write(p thrift.Encoder) error {
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("reqPubSubStreamingServiceServicethrows write field stop error: ", err)
+        return fmt.Errorf("reqPubSubStreamingServiceServicethrows write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("reqPubSubStreamingServiceServicethrows write struct end error: ", err)
+        return fmt.Errorf("reqPubSubStreamingServiceServicethrows write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *reqPubSubStreamingServiceServicethrows) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("reqPubSubStreamingServiceServicethrows read error: ", err)
+        return fmt.Errorf("reqPubSubStreamingServiceServicethrows read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("reqPubSubStreamingServiceServicethrows field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("reqPubSubStreamingServiceServicethrows field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -1169,7 +1169,7 @@ func (x *reqPubSubStreamingServiceServicethrows) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("reqPubSubStreamingServiceServicethrows read struct end error: ", err)
+        return fmt.Errorf("reqPubSubStreamingServiceServicethrows read struct end error: %w", err)
     }
 
     return nil
@@ -1225,7 +1225,7 @@ func (x *respPubSubStreamingServiceServicethrows) writeField1(p thrift.Encoder) 
     }
 
     if err := p.WriteFieldBegin("e", thrift.STRUCT, 1); err != nil {
-        return thrift.PrependError("respPubSubStreamingServiceServicethrows write field begin error: ", err)
+        return fmt.Errorf("respPubSubStreamingServiceServicethrows write field begin error: %w", err)
     }
 
     item := x.E
@@ -1234,7 +1234,7 @@ func (x *respPubSubStreamingServiceServicethrows) writeField1(p thrift.Encoder) 
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("respPubSubStreamingServiceServicethrows write field end error: ", err)
+        return fmt.Errorf("respPubSubStreamingServiceServicethrows write field end error: %w", err)
     }
     return nil
 }
@@ -1262,7 +1262,7 @@ func (x *respPubSubStreamingServiceServicethrows) Exception() thrift.WritableExc
 
 func (x *respPubSubStreamingServiceServicethrows) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respPubSubStreamingServiceServicethrows"); err != nil {
-        return thrift.PrependError("respPubSubStreamingServiceServicethrows write struct begin error: ", err)
+        return fmt.Errorf("respPubSubStreamingServiceServicethrows write struct begin error: %w", err)
     }
 
     if err := x.writeField1(p); err != nil {
@@ -1270,24 +1270,24 @@ func (x *respPubSubStreamingServiceServicethrows) Write(p thrift.Encoder) error 
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("respPubSubStreamingServiceServicethrows write field stop error: ", err)
+        return fmt.Errorf("respPubSubStreamingServiceServicethrows write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("respPubSubStreamingServiceServicethrows write struct end error: ", err)
+        return fmt.Errorf("respPubSubStreamingServiceServicethrows write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *respPubSubStreamingServiceServicethrows) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("respPubSubStreamingServiceServicethrows read error: ", err)
+        return fmt.Errorf("respPubSubStreamingServiceServicethrows read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("respPubSubStreamingServiceServicethrows field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("respPubSubStreamingServiceServicethrows field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -1312,7 +1312,7 @@ func (x *respPubSubStreamingServiceServicethrows) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("respPubSubStreamingServiceServicethrows read struct end error: ", err)
+        return fmt.Errorf("respPubSubStreamingServiceServicethrows read struct end error: %w", err)
     }
 
     return nil
@@ -1367,7 +1367,7 @@ func (x *streamPubSubStreamingServiceServicethrows) writeField0(p thrift.Encoder
     }
 
     if err := p.WriteFieldBegin("success", thrift.I32, 0); err != nil {
-        return thrift.PrependError("streamPubSubStreamingServiceServicethrows write field begin error: ", err)
+        return fmt.Errorf("streamPubSubStreamingServiceServicethrows write field begin error: %w", err)
     }
 
     item := *x.Success
@@ -1376,7 +1376,7 @@ func (x *streamPubSubStreamingServiceServicethrows) writeField0(p thrift.Encoder
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("streamPubSubStreamingServiceServicethrows write field end error: ", err)
+        return fmt.Errorf("streamPubSubStreamingServiceServicethrows write field end error: %w", err)
     }
     return nil
 }
@@ -1400,7 +1400,7 @@ func (x *streamPubSubStreamingServiceServicethrows) Exception() thrift.WritableE
 
 func (x *streamPubSubStreamingServiceServicethrows) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("streamPubSubStreamingServiceServicethrows"); err != nil {
-        return thrift.PrependError("streamPubSubStreamingServiceServicethrows write struct begin error: ", err)
+        return fmt.Errorf("streamPubSubStreamingServiceServicethrows write struct begin error: %w", err)
     }
 
     if err := x.writeField0(p); err != nil {
@@ -1408,24 +1408,24 @@ func (x *streamPubSubStreamingServiceServicethrows) Write(p thrift.Encoder) erro
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("streamPubSubStreamingServiceServicethrows write field stop error: ", err)
+        return fmt.Errorf("streamPubSubStreamingServiceServicethrows write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("streamPubSubStreamingServiceServicethrows write struct end error: ", err)
+        return fmt.Errorf("streamPubSubStreamingServiceServicethrows write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *streamPubSubStreamingServiceServicethrows) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("streamPubSubStreamingServiceServicethrows read error: ", err)
+        return fmt.Errorf("streamPubSubStreamingServiceServicethrows read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("streamPubSubStreamingServiceServicethrows field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("streamPubSubStreamingServiceServicethrows field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -1450,7 +1450,7 @@ func (x *streamPubSubStreamingServiceServicethrows) Read(p thrift.Decoder) error
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("streamPubSubStreamingServiceServicethrows read struct end error: ", err)
+        return fmt.Errorf("streamPubSubStreamingServiceServicethrows read struct end error: %w", err)
     }
 
     return nil
@@ -1494,7 +1494,7 @@ func (x *reqPubSubStreamingServiceServicethrows2) SetFoo(value int32) *reqPubSub
 
 func (x *reqPubSubStreamingServiceServicethrows2) writeField1(p thrift.Encoder) error {  // Foo
     if err := p.WriteFieldBegin("foo", thrift.I32, 1); err != nil {
-        return thrift.PrependError("reqPubSubStreamingServiceServicethrows2 write field begin error: ", err)
+        return fmt.Errorf("reqPubSubStreamingServiceServicethrows2 write field begin error: %w", err)
     }
 
     item := x.Foo
@@ -1503,7 +1503,7 @@ func (x *reqPubSubStreamingServiceServicethrows2) writeField1(p thrift.Encoder) 
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("reqPubSubStreamingServiceServicethrows2 write field end error: ", err)
+        return fmt.Errorf("reqPubSubStreamingServiceServicethrows2 write field end error: %w", err)
     }
     return nil
 }
@@ -1523,7 +1523,7 @@ func (x *reqPubSubStreamingServiceServicethrows2) readField1(p thrift.Decoder) e
 
 func (x *reqPubSubStreamingServiceServicethrows2) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqPubSubStreamingServiceServicethrows2"); err != nil {
-        return thrift.PrependError("reqPubSubStreamingServiceServicethrows2 write struct begin error: ", err)
+        return fmt.Errorf("reqPubSubStreamingServiceServicethrows2 write struct begin error: %w", err)
     }
 
     if err := x.writeField1(p); err != nil {
@@ -1531,24 +1531,24 @@ func (x *reqPubSubStreamingServiceServicethrows2) Write(p thrift.Encoder) error 
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("reqPubSubStreamingServiceServicethrows2 write field stop error: ", err)
+        return fmt.Errorf("reqPubSubStreamingServiceServicethrows2 write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("reqPubSubStreamingServiceServicethrows2 write struct end error: ", err)
+        return fmt.Errorf("reqPubSubStreamingServiceServicethrows2 write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *reqPubSubStreamingServiceServicethrows2) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("reqPubSubStreamingServiceServicethrows2 read error: ", err)
+        return fmt.Errorf("reqPubSubStreamingServiceServicethrows2 read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("reqPubSubStreamingServiceServicethrows2 field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("reqPubSubStreamingServiceServicethrows2 field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -1573,7 +1573,7 @@ func (x *reqPubSubStreamingServiceServicethrows2) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("reqPubSubStreamingServiceServicethrows2 read struct end error: ", err)
+        return fmt.Errorf("reqPubSubStreamingServiceServicethrows2 read struct end error: %w", err)
     }
 
     return nil
@@ -1630,7 +1630,7 @@ func (x *respPubSubStreamingServiceServicethrows2) writeField1(p thrift.Encoder)
     }
 
     if err := p.WriteFieldBegin("e1", thrift.STRUCT, 1); err != nil {
-        return thrift.PrependError("respPubSubStreamingServiceServicethrows2 write field begin error: ", err)
+        return fmt.Errorf("respPubSubStreamingServiceServicethrows2 write field begin error: %w", err)
     }
 
     item := x.E1
@@ -1639,7 +1639,7 @@ func (x *respPubSubStreamingServiceServicethrows2) writeField1(p thrift.Encoder)
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("respPubSubStreamingServiceServicethrows2 write field end error: ", err)
+        return fmt.Errorf("respPubSubStreamingServiceServicethrows2 write field end error: %w", err)
     }
     return nil
 }
@@ -1682,7 +1682,7 @@ func (x *respPubSubStreamingServiceServicethrows2) writeField2(p thrift.Encoder)
     }
 
     if err := p.WriteFieldBegin("e2", thrift.STRUCT, 2); err != nil {
-        return thrift.PrependError("respPubSubStreamingServiceServicethrows2 write field begin error: ", err)
+        return fmt.Errorf("respPubSubStreamingServiceServicethrows2 write field begin error: %w", err)
     }
 
     item := x.E2
@@ -1691,7 +1691,7 @@ func (x *respPubSubStreamingServiceServicethrows2) writeField2(p thrift.Encoder)
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("respPubSubStreamingServiceServicethrows2 write field end error: ", err)
+        return fmt.Errorf("respPubSubStreamingServiceServicethrows2 write field end error: %w", err)
     }
     return nil
 }
@@ -1722,7 +1722,7 @@ func (x *respPubSubStreamingServiceServicethrows2) Exception() thrift.WritableEx
 
 func (x *respPubSubStreamingServiceServicethrows2) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respPubSubStreamingServiceServicethrows2"); err != nil {
-        return thrift.PrependError("respPubSubStreamingServiceServicethrows2 write struct begin error: ", err)
+        return fmt.Errorf("respPubSubStreamingServiceServicethrows2 write struct begin error: %w", err)
     }
 
     if err := x.writeField1(p); err != nil {
@@ -1733,24 +1733,24 @@ func (x *respPubSubStreamingServiceServicethrows2) Write(p thrift.Encoder) error
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("respPubSubStreamingServiceServicethrows2 write field stop error: ", err)
+        return fmt.Errorf("respPubSubStreamingServiceServicethrows2 write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("respPubSubStreamingServiceServicethrows2 write struct end error: ", err)
+        return fmt.Errorf("respPubSubStreamingServiceServicethrows2 write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *respPubSubStreamingServiceServicethrows2) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("respPubSubStreamingServiceServicethrows2 read error: ", err)
+        return fmt.Errorf("respPubSubStreamingServiceServicethrows2 read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("respPubSubStreamingServiceServicethrows2 field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("respPubSubStreamingServiceServicethrows2 field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -1777,7 +1777,7 @@ func (x *respPubSubStreamingServiceServicethrows2) Read(p thrift.Decoder) error 
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("respPubSubStreamingServiceServicethrows2 read struct end error: ", err)
+        return fmt.Errorf("respPubSubStreamingServiceServicethrows2 read struct end error: %w", err)
     }
 
     return nil
@@ -1832,7 +1832,7 @@ func (x *streamPubSubStreamingServiceServicethrows2) writeField0(p thrift.Encode
     }
 
     if err := p.WriteFieldBegin("success", thrift.I32, 0); err != nil {
-        return thrift.PrependError("streamPubSubStreamingServiceServicethrows2 write field begin error: ", err)
+        return fmt.Errorf("streamPubSubStreamingServiceServicethrows2 write field begin error: %w", err)
     }
 
     item := *x.Success
@@ -1841,7 +1841,7 @@ func (x *streamPubSubStreamingServiceServicethrows2) writeField0(p thrift.Encode
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("streamPubSubStreamingServiceServicethrows2 write field end error: ", err)
+        return fmt.Errorf("streamPubSubStreamingServiceServicethrows2 write field end error: %w", err)
     }
     return nil
 }
@@ -1865,7 +1865,7 @@ func (x *streamPubSubStreamingServiceServicethrows2) Exception() thrift.Writable
 
 func (x *streamPubSubStreamingServiceServicethrows2) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("streamPubSubStreamingServiceServicethrows2"); err != nil {
-        return thrift.PrependError("streamPubSubStreamingServiceServicethrows2 write struct begin error: ", err)
+        return fmt.Errorf("streamPubSubStreamingServiceServicethrows2 write struct begin error: %w", err)
     }
 
     if err := x.writeField0(p); err != nil {
@@ -1873,24 +1873,24 @@ func (x *streamPubSubStreamingServiceServicethrows2) Write(p thrift.Encoder) err
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("streamPubSubStreamingServiceServicethrows2 write field stop error: ", err)
+        return fmt.Errorf("streamPubSubStreamingServiceServicethrows2 write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("streamPubSubStreamingServiceServicethrows2 write struct end error: ", err)
+        return fmt.Errorf("streamPubSubStreamingServiceServicethrows2 write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *streamPubSubStreamingServiceServicethrows2) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("streamPubSubStreamingServiceServicethrows2 read error: ", err)
+        return fmt.Errorf("streamPubSubStreamingServiceServicethrows2 read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("streamPubSubStreamingServiceServicethrows2 field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("streamPubSubStreamingServiceServicethrows2 field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -1915,7 +1915,7 @@ func (x *streamPubSubStreamingServiceServicethrows2) Read(p thrift.Decoder) erro
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("streamPubSubStreamingServiceServicethrows2 read struct end error: ", err)
+        return fmt.Errorf("streamPubSubStreamingServiceServicethrows2 read struct end error: %w", err)
     }
 
     return nil
@@ -1959,7 +1959,7 @@ func (x *reqPubSubStreamingServiceBoththrows) SetFoo(value int32) *reqPubSubStre
 
 func (x *reqPubSubStreamingServiceBoththrows) writeField1(p thrift.Encoder) error {  // Foo
     if err := p.WriteFieldBegin("foo", thrift.I32, 1); err != nil {
-        return thrift.PrependError("reqPubSubStreamingServiceBoththrows write field begin error: ", err)
+        return fmt.Errorf("reqPubSubStreamingServiceBoththrows write field begin error: %w", err)
     }
 
     item := x.Foo
@@ -1968,7 +1968,7 @@ func (x *reqPubSubStreamingServiceBoththrows) writeField1(p thrift.Encoder) erro
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("reqPubSubStreamingServiceBoththrows write field end error: ", err)
+        return fmt.Errorf("reqPubSubStreamingServiceBoththrows write field end error: %w", err)
     }
     return nil
 }
@@ -1988,7 +1988,7 @@ func (x *reqPubSubStreamingServiceBoththrows) readField1(p thrift.Decoder) error
 
 func (x *reqPubSubStreamingServiceBoththrows) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqPubSubStreamingServiceBoththrows"); err != nil {
-        return thrift.PrependError("reqPubSubStreamingServiceBoththrows write struct begin error: ", err)
+        return fmt.Errorf("reqPubSubStreamingServiceBoththrows write struct begin error: %w", err)
     }
 
     if err := x.writeField1(p); err != nil {
@@ -1996,24 +1996,24 @@ func (x *reqPubSubStreamingServiceBoththrows) Write(p thrift.Encoder) error {
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("reqPubSubStreamingServiceBoththrows write field stop error: ", err)
+        return fmt.Errorf("reqPubSubStreamingServiceBoththrows write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("reqPubSubStreamingServiceBoththrows write struct end error: ", err)
+        return fmt.Errorf("reqPubSubStreamingServiceBoththrows write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *reqPubSubStreamingServiceBoththrows) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("reqPubSubStreamingServiceBoththrows read error: ", err)
+        return fmt.Errorf("reqPubSubStreamingServiceBoththrows read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("reqPubSubStreamingServiceBoththrows field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("reqPubSubStreamingServiceBoththrows field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -2038,7 +2038,7 @@ func (x *reqPubSubStreamingServiceBoththrows) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("reqPubSubStreamingServiceBoththrows read struct end error: ", err)
+        return fmt.Errorf("reqPubSubStreamingServiceBoththrows read struct end error: %w", err)
     }
 
     return nil
@@ -2094,7 +2094,7 @@ func (x *respPubSubStreamingServiceBoththrows) writeField1(p thrift.Encoder) err
     }
 
     if err := p.WriteFieldBegin("e", thrift.STRUCT, 1); err != nil {
-        return thrift.PrependError("respPubSubStreamingServiceBoththrows write field begin error: ", err)
+        return fmt.Errorf("respPubSubStreamingServiceBoththrows write field begin error: %w", err)
     }
 
     item := x.E
@@ -2103,7 +2103,7 @@ func (x *respPubSubStreamingServiceBoththrows) writeField1(p thrift.Encoder) err
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("respPubSubStreamingServiceBoththrows write field end error: ", err)
+        return fmt.Errorf("respPubSubStreamingServiceBoththrows write field end error: %w", err)
     }
     return nil
 }
@@ -2131,7 +2131,7 @@ func (x *respPubSubStreamingServiceBoththrows) Exception() thrift.WritableExcept
 
 func (x *respPubSubStreamingServiceBoththrows) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respPubSubStreamingServiceBoththrows"); err != nil {
-        return thrift.PrependError("respPubSubStreamingServiceBoththrows write struct begin error: ", err)
+        return fmt.Errorf("respPubSubStreamingServiceBoththrows write struct begin error: %w", err)
     }
 
     if err := x.writeField1(p); err != nil {
@@ -2139,24 +2139,24 @@ func (x *respPubSubStreamingServiceBoththrows) Write(p thrift.Encoder) error {
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("respPubSubStreamingServiceBoththrows write field stop error: ", err)
+        return fmt.Errorf("respPubSubStreamingServiceBoththrows write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("respPubSubStreamingServiceBoththrows write struct end error: ", err)
+        return fmt.Errorf("respPubSubStreamingServiceBoththrows write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *respPubSubStreamingServiceBoththrows) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("respPubSubStreamingServiceBoththrows read error: ", err)
+        return fmt.Errorf("respPubSubStreamingServiceBoththrows read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("respPubSubStreamingServiceBoththrows field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("respPubSubStreamingServiceBoththrows field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -2181,7 +2181,7 @@ func (x *respPubSubStreamingServiceBoththrows) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("respPubSubStreamingServiceBoththrows read struct end error: ", err)
+        return fmt.Errorf("respPubSubStreamingServiceBoththrows read struct end error: %w", err)
     }
 
     return nil
@@ -2237,7 +2237,7 @@ func (x *streamPubSubStreamingServiceBoththrows) writeField0(p thrift.Encoder) e
     }
 
     if err := p.WriteFieldBegin("success", thrift.I32, 0); err != nil {
-        return thrift.PrependError("streamPubSubStreamingServiceBoththrows write field begin error: ", err)
+        return fmt.Errorf("streamPubSubStreamingServiceBoththrows write field begin error: %w", err)
     }
 
     item := *x.Success
@@ -2246,7 +2246,7 @@ func (x *streamPubSubStreamingServiceBoththrows) writeField0(p thrift.Encoder) e
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("streamPubSubStreamingServiceBoththrows write field end error: ", err)
+        return fmt.Errorf("streamPubSubStreamingServiceBoththrows write field end error: %w", err)
     }
     return nil
 }
@@ -2288,7 +2288,7 @@ func (x *streamPubSubStreamingServiceBoththrows) writeField1(p thrift.Encoder) e
     }
 
     if err := p.WriteFieldBegin("e", thrift.STRUCT, 1); err != nil {
-        return thrift.PrependError("streamPubSubStreamingServiceBoththrows write field begin error: ", err)
+        return fmt.Errorf("streamPubSubStreamingServiceBoththrows write field begin error: %w", err)
     }
 
     item := x.E
@@ -2297,7 +2297,7 @@ func (x *streamPubSubStreamingServiceBoththrows) writeField1(p thrift.Encoder) e
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("streamPubSubStreamingServiceBoththrows write field end error: ", err)
+        return fmt.Errorf("streamPubSubStreamingServiceBoththrows write field end error: %w", err)
     }
     return nil
 }
@@ -2325,7 +2325,7 @@ func (x *streamPubSubStreamingServiceBoththrows) Exception() thrift.WritableExce
 
 func (x *streamPubSubStreamingServiceBoththrows) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("streamPubSubStreamingServiceBoththrows"); err != nil {
-        return thrift.PrependError("streamPubSubStreamingServiceBoththrows write struct begin error: ", err)
+        return fmt.Errorf("streamPubSubStreamingServiceBoththrows write struct begin error: %w", err)
     }
 
     if err := x.writeField0(p); err != nil {
@@ -2336,24 +2336,24 @@ func (x *streamPubSubStreamingServiceBoththrows) Write(p thrift.Encoder) error {
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("streamPubSubStreamingServiceBoththrows write field stop error: ", err)
+        return fmt.Errorf("streamPubSubStreamingServiceBoththrows write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("streamPubSubStreamingServiceBoththrows write struct end error: ", err)
+        return fmt.Errorf("streamPubSubStreamingServiceBoththrows write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *streamPubSubStreamingServiceBoththrows) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("streamPubSubStreamingServiceBoththrows read error: ", err)
+        return fmt.Errorf("streamPubSubStreamingServiceBoththrows read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("streamPubSubStreamingServiceBoththrows field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("streamPubSubStreamingServiceBoththrows field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -2380,7 +2380,7 @@ func (x *streamPubSubStreamingServiceBoththrows) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("streamPubSubStreamingServiceBoththrows read struct end error: ", err)
+        return fmt.Errorf("streamPubSubStreamingServiceBoththrows read struct end error: %w", err)
     }
 
     return nil
@@ -2424,7 +2424,7 @@ func (x *reqPubSubStreamingServiceResponseandstreamstreamthrows) SetFoo(value in
 
 func (x *reqPubSubStreamingServiceResponseandstreamstreamthrows) writeField1(p thrift.Encoder) error {  // Foo
     if err := p.WriteFieldBegin("foo", thrift.I32, 1); err != nil {
-        return thrift.PrependError("reqPubSubStreamingServiceResponseandstreamstreamthrows write field begin error: ", err)
+        return fmt.Errorf("reqPubSubStreamingServiceResponseandstreamstreamthrows write field begin error: %w", err)
     }
 
     item := x.Foo
@@ -2433,7 +2433,7 @@ func (x *reqPubSubStreamingServiceResponseandstreamstreamthrows) writeField1(p t
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("reqPubSubStreamingServiceResponseandstreamstreamthrows write field end error: ", err)
+        return fmt.Errorf("reqPubSubStreamingServiceResponseandstreamstreamthrows write field end error: %w", err)
     }
     return nil
 }
@@ -2453,7 +2453,7 @@ func (x *reqPubSubStreamingServiceResponseandstreamstreamthrows) readField1(p th
 
 func (x *reqPubSubStreamingServiceResponseandstreamstreamthrows) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqPubSubStreamingServiceResponseandstreamstreamthrows"); err != nil {
-        return thrift.PrependError("reqPubSubStreamingServiceResponseandstreamstreamthrows write struct begin error: ", err)
+        return fmt.Errorf("reqPubSubStreamingServiceResponseandstreamstreamthrows write struct begin error: %w", err)
     }
 
     if err := x.writeField1(p); err != nil {
@@ -2461,24 +2461,24 @@ func (x *reqPubSubStreamingServiceResponseandstreamstreamthrows) Write(p thrift.
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("reqPubSubStreamingServiceResponseandstreamstreamthrows write field stop error: ", err)
+        return fmt.Errorf("reqPubSubStreamingServiceResponseandstreamstreamthrows write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("reqPubSubStreamingServiceResponseandstreamstreamthrows write struct end error: ", err)
+        return fmt.Errorf("reqPubSubStreamingServiceResponseandstreamstreamthrows write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *reqPubSubStreamingServiceResponseandstreamstreamthrows) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("reqPubSubStreamingServiceResponseandstreamstreamthrows read error: ", err)
+        return fmt.Errorf("reqPubSubStreamingServiceResponseandstreamstreamthrows read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("reqPubSubStreamingServiceResponseandstreamstreamthrows field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("reqPubSubStreamingServiceResponseandstreamstreamthrows field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -2503,7 +2503,7 @@ func (x *reqPubSubStreamingServiceResponseandstreamstreamthrows) Read(p thrift.D
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("reqPubSubStreamingServiceResponseandstreamstreamthrows read struct end error: ", err)
+        return fmt.Errorf("reqPubSubStreamingServiceResponseandstreamstreamthrows read struct end error: %w", err)
     }
 
     return nil
@@ -2559,7 +2559,7 @@ func (x *respPubSubStreamingServiceResponseandstreamstreamthrows) writeField0(p 
     }
 
     if err := p.WriteFieldBegin("success", thrift.I32, 0); err != nil {
-        return thrift.PrependError("respPubSubStreamingServiceResponseandstreamstreamthrows write field begin error: ", err)
+        return fmt.Errorf("respPubSubStreamingServiceResponseandstreamstreamthrows write field begin error: %w", err)
     }
 
     item := *x.Success
@@ -2568,7 +2568,7 @@ func (x *respPubSubStreamingServiceResponseandstreamstreamthrows) writeField0(p 
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("respPubSubStreamingServiceResponseandstreamstreamthrows write field end error: ", err)
+        return fmt.Errorf("respPubSubStreamingServiceResponseandstreamstreamthrows write field end error: %w", err)
     }
     return nil
 }
@@ -2592,7 +2592,7 @@ func (x *respPubSubStreamingServiceResponseandstreamstreamthrows) Exception() th
 
 func (x *respPubSubStreamingServiceResponseandstreamstreamthrows) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respPubSubStreamingServiceResponseandstreamstreamthrows"); err != nil {
-        return thrift.PrependError("respPubSubStreamingServiceResponseandstreamstreamthrows write struct begin error: ", err)
+        return fmt.Errorf("respPubSubStreamingServiceResponseandstreamstreamthrows write struct begin error: %w", err)
     }
 
     if err := x.writeField0(p); err != nil {
@@ -2600,24 +2600,24 @@ func (x *respPubSubStreamingServiceResponseandstreamstreamthrows) Write(p thrift
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("respPubSubStreamingServiceResponseandstreamstreamthrows write field stop error: ", err)
+        return fmt.Errorf("respPubSubStreamingServiceResponseandstreamstreamthrows write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("respPubSubStreamingServiceResponseandstreamstreamthrows write struct end error: ", err)
+        return fmt.Errorf("respPubSubStreamingServiceResponseandstreamstreamthrows write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *respPubSubStreamingServiceResponseandstreamstreamthrows) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("respPubSubStreamingServiceResponseandstreamstreamthrows read error: ", err)
+        return fmt.Errorf("respPubSubStreamingServiceResponseandstreamstreamthrows read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("respPubSubStreamingServiceResponseandstreamstreamthrows field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("respPubSubStreamingServiceResponseandstreamstreamthrows field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -2642,7 +2642,7 @@ func (x *respPubSubStreamingServiceResponseandstreamstreamthrows) Read(p thrift.
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("respPubSubStreamingServiceResponseandstreamstreamthrows read struct end error: ", err)
+        return fmt.Errorf("respPubSubStreamingServiceResponseandstreamstreamthrows read struct end error: %w", err)
     }
 
     return nil
@@ -2698,7 +2698,7 @@ func (x *streamPubSubStreamingServiceResponseandstreamstreamthrows) writeField0(
     }
 
     if err := p.WriteFieldBegin("success", thrift.I32, 0); err != nil {
-        return thrift.PrependError("streamPubSubStreamingServiceResponseandstreamstreamthrows write field begin error: ", err)
+        return fmt.Errorf("streamPubSubStreamingServiceResponseandstreamstreamthrows write field begin error: %w", err)
     }
 
     item := *x.Success
@@ -2707,7 +2707,7 @@ func (x *streamPubSubStreamingServiceResponseandstreamstreamthrows) writeField0(
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("streamPubSubStreamingServiceResponseandstreamstreamthrows write field end error: ", err)
+        return fmt.Errorf("streamPubSubStreamingServiceResponseandstreamstreamthrows write field end error: %w", err)
     }
     return nil
 }
@@ -2749,7 +2749,7 @@ func (x *streamPubSubStreamingServiceResponseandstreamstreamthrows) writeField1(
     }
 
     if err := p.WriteFieldBegin("e", thrift.STRUCT, 1); err != nil {
-        return thrift.PrependError("streamPubSubStreamingServiceResponseandstreamstreamthrows write field begin error: ", err)
+        return fmt.Errorf("streamPubSubStreamingServiceResponseandstreamstreamthrows write field begin error: %w", err)
     }
 
     item := x.E
@@ -2758,7 +2758,7 @@ func (x *streamPubSubStreamingServiceResponseandstreamstreamthrows) writeField1(
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("streamPubSubStreamingServiceResponseandstreamstreamthrows write field end error: ", err)
+        return fmt.Errorf("streamPubSubStreamingServiceResponseandstreamstreamthrows write field end error: %w", err)
     }
     return nil
 }
@@ -2786,7 +2786,7 @@ func (x *streamPubSubStreamingServiceResponseandstreamstreamthrows) Exception() 
 
 func (x *streamPubSubStreamingServiceResponseandstreamstreamthrows) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("streamPubSubStreamingServiceResponseandstreamstreamthrows"); err != nil {
-        return thrift.PrependError("streamPubSubStreamingServiceResponseandstreamstreamthrows write struct begin error: ", err)
+        return fmt.Errorf("streamPubSubStreamingServiceResponseandstreamstreamthrows write struct begin error: %w", err)
     }
 
     if err := x.writeField0(p); err != nil {
@@ -2797,24 +2797,24 @@ func (x *streamPubSubStreamingServiceResponseandstreamstreamthrows) Write(p thri
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("streamPubSubStreamingServiceResponseandstreamstreamthrows write field stop error: ", err)
+        return fmt.Errorf("streamPubSubStreamingServiceResponseandstreamstreamthrows write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("streamPubSubStreamingServiceResponseandstreamstreamthrows write struct end error: ", err)
+        return fmt.Errorf("streamPubSubStreamingServiceResponseandstreamstreamthrows write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *streamPubSubStreamingServiceResponseandstreamstreamthrows) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("streamPubSubStreamingServiceResponseandstreamstreamthrows read error: ", err)
+        return fmt.Errorf("streamPubSubStreamingServiceResponseandstreamstreamthrows read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("streamPubSubStreamingServiceResponseandstreamstreamthrows field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("streamPubSubStreamingServiceResponseandstreamstreamthrows field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -2841,7 +2841,7 @@ func (x *streamPubSubStreamingServiceResponseandstreamstreamthrows) Read(p thrif
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("streamPubSubStreamingServiceResponseandstreamstreamthrows read struct end error: ", err)
+        return fmt.Errorf("streamPubSubStreamingServiceResponseandstreamstreamthrows read struct end error: %w", err)
     }
 
     return nil
@@ -2885,7 +2885,7 @@ func (x *reqPubSubStreamingServiceResponseandstreamservicethrows) SetFoo(value i
 
 func (x *reqPubSubStreamingServiceResponseandstreamservicethrows) writeField1(p thrift.Encoder) error {  // Foo
     if err := p.WriteFieldBegin("foo", thrift.I32, 1); err != nil {
-        return thrift.PrependError("reqPubSubStreamingServiceResponseandstreamservicethrows write field begin error: ", err)
+        return fmt.Errorf("reqPubSubStreamingServiceResponseandstreamservicethrows write field begin error: %w", err)
     }
 
     item := x.Foo
@@ -2894,7 +2894,7 @@ func (x *reqPubSubStreamingServiceResponseandstreamservicethrows) writeField1(p 
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("reqPubSubStreamingServiceResponseandstreamservicethrows write field end error: ", err)
+        return fmt.Errorf("reqPubSubStreamingServiceResponseandstreamservicethrows write field end error: %w", err)
     }
     return nil
 }
@@ -2914,7 +2914,7 @@ func (x *reqPubSubStreamingServiceResponseandstreamservicethrows) readField1(p t
 
 func (x *reqPubSubStreamingServiceResponseandstreamservicethrows) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqPubSubStreamingServiceResponseandstreamservicethrows"); err != nil {
-        return thrift.PrependError("reqPubSubStreamingServiceResponseandstreamservicethrows write struct begin error: ", err)
+        return fmt.Errorf("reqPubSubStreamingServiceResponseandstreamservicethrows write struct begin error: %w", err)
     }
 
     if err := x.writeField1(p); err != nil {
@@ -2922,24 +2922,24 @@ func (x *reqPubSubStreamingServiceResponseandstreamservicethrows) Write(p thrift
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("reqPubSubStreamingServiceResponseandstreamservicethrows write field stop error: ", err)
+        return fmt.Errorf("reqPubSubStreamingServiceResponseandstreamservicethrows write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("reqPubSubStreamingServiceResponseandstreamservicethrows write struct end error: ", err)
+        return fmt.Errorf("reqPubSubStreamingServiceResponseandstreamservicethrows write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *reqPubSubStreamingServiceResponseandstreamservicethrows) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("reqPubSubStreamingServiceResponseandstreamservicethrows read error: ", err)
+        return fmt.Errorf("reqPubSubStreamingServiceResponseandstreamservicethrows read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("reqPubSubStreamingServiceResponseandstreamservicethrows field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("reqPubSubStreamingServiceResponseandstreamservicethrows field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -2964,7 +2964,7 @@ func (x *reqPubSubStreamingServiceResponseandstreamservicethrows) Read(p thrift.
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("reqPubSubStreamingServiceResponseandstreamservicethrows read struct end error: ", err)
+        return fmt.Errorf("reqPubSubStreamingServiceResponseandstreamservicethrows read struct end error: %w", err)
     }
 
     return nil
@@ -3021,7 +3021,7 @@ func (x *respPubSubStreamingServiceResponseandstreamservicethrows) writeField0(p
     }
 
     if err := p.WriteFieldBegin("success", thrift.I32, 0); err != nil {
-        return thrift.PrependError("respPubSubStreamingServiceResponseandstreamservicethrows write field begin error: ", err)
+        return fmt.Errorf("respPubSubStreamingServiceResponseandstreamservicethrows write field begin error: %w", err)
     }
 
     item := *x.Success
@@ -3030,7 +3030,7 @@ func (x *respPubSubStreamingServiceResponseandstreamservicethrows) writeField0(p
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("respPubSubStreamingServiceResponseandstreamservicethrows write field end error: ", err)
+        return fmt.Errorf("respPubSubStreamingServiceResponseandstreamservicethrows write field end error: %w", err)
     }
     return nil
 }
@@ -3072,7 +3072,7 @@ func (x *respPubSubStreamingServiceResponseandstreamservicethrows) writeField1(p
     }
 
     if err := p.WriteFieldBegin("e", thrift.STRUCT, 1); err != nil {
-        return thrift.PrependError("respPubSubStreamingServiceResponseandstreamservicethrows write field begin error: ", err)
+        return fmt.Errorf("respPubSubStreamingServiceResponseandstreamservicethrows write field begin error: %w", err)
     }
 
     item := x.E
@@ -3081,7 +3081,7 @@ func (x *respPubSubStreamingServiceResponseandstreamservicethrows) writeField1(p
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("respPubSubStreamingServiceResponseandstreamservicethrows write field end error: ", err)
+        return fmt.Errorf("respPubSubStreamingServiceResponseandstreamservicethrows write field end error: %w", err)
     }
     return nil
 }
@@ -3109,7 +3109,7 @@ func (x *respPubSubStreamingServiceResponseandstreamservicethrows) Exception() t
 
 func (x *respPubSubStreamingServiceResponseandstreamservicethrows) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respPubSubStreamingServiceResponseandstreamservicethrows"); err != nil {
-        return thrift.PrependError("respPubSubStreamingServiceResponseandstreamservicethrows write struct begin error: ", err)
+        return fmt.Errorf("respPubSubStreamingServiceResponseandstreamservicethrows write struct begin error: %w", err)
     }
 
     if err := x.writeField0(p); err != nil {
@@ -3120,24 +3120,24 @@ func (x *respPubSubStreamingServiceResponseandstreamservicethrows) Write(p thrif
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("respPubSubStreamingServiceResponseandstreamservicethrows write field stop error: ", err)
+        return fmt.Errorf("respPubSubStreamingServiceResponseandstreamservicethrows write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("respPubSubStreamingServiceResponseandstreamservicethrows write struct end error: ", err)
+        return fmt.Errorf("respPubSubStreamingServiceResponseandstreamservicethrows write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *respPubSubStreamingServiceResponseandstreamservicethrows) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("respPubSubStreamingServiceResponseandstreamservicethrows read error: ", err)
+        return fmt.Errorf("respPubSubStreamingServiceResponseandstreamservicethrows read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("respPubSubStreamingServiceResponseandstreamservicethrows field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("respPubSubStreamingServiceResponseandstreamservicethrows field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -3164,7 +3164,7 @@ func (x *respPubSubStreamingServiceResponseandstreamservicethrows) Read(p thrift
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("respPubSubStreamingServiceResponseandstreamservicethrows read struct end error: ", err)
+        return fmt.Errorf("respPubSubStreamingServiceResponseandstreamservicethrows read struct end error: %w", err)
     }
 
     return nil
@@ -3219,7 +3219,7 @@ func (x *streamPubSubStreamingServiceResponseandstreamservicethrows) writeField0
     }
 
     if err := p.WriteFieldBegin("success", thrift.I32, 0); err != nil {
-        return thrift.PrependError("streamPubSubStreamingServiceResponseandstreamservicethrows write field begin error: ", err)
+        return fmt.Errorf("streamPubSubStreamingServiceResponseandstreamservicethrows write field begin error: %w", err)
     }
 
     item := *x.Success
@@ -3228,7 +3228,7 @@ func (x *streamPubSubStreamingServiceResponseandstreamservicethrows) writeField0
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("streamPubSubStreamingServiceResponseandstreamservicethrows write field end error: ", err)
+        return fmt.Errorf("streamPubSubStreamingServiceResponseandstreamservicethrows write field end error: %w", err)
     }
     return nil
 }
@@ -3252,7 +3252,7 @@ func (x *streamPubSubStreamingServiceResponseandstreamservicethrows) Exception()
 
 func (x *streamPubSubStreamingServiceResponseandstreamservicethrows) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("streamPubSubStreamingServiceResponseandstreamservicethrows"); err != nil {
-        return thrift.PrependError("streamPubSubStreamingServiceResponseandstreamservicethrows write struct begin error: ", err)
+        return fmt.Errorf("streamPubSubStreamingServiceResponseandstreamservicethrows write struct begin error: %w", err)
     }
 
     if err := x.writeField0(p); err != nil {
@@ -3260,24 +3260,24 @@ func (x *streamPubSubStreamingServiceResponseandstreamservicethrows) Write(p thr
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("streamPubSubStreamingServiceResponseandstreamservicethrows write field stop error: ", err)
+        return fmt.Errorf("streamPubSubStreamingServiceResponseandstreamservicethrows write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("streamPubSubStreamingServiceResponseandstreamservicethrows write struct end error: ", err)
+        return fmt.Errorf("streamPubSubStreamingServiceResponseandstreamservicethrows write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *streamPubSubStreamingServiceResponseandstreamservicethrows) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("streamPubSubStreamingServiceResponseandstreamservicethrows read error: ", err)
+        return fmt.Errorf("streamPubSubStreamingServiceResponseandstreamservicethrows read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("streamPubSubStreamingServiceResponseandstreamservicethrows field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("streamPubSubStreamingServiceResponseandstreamservicethrows field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -3302,7 +3302,7 @@ func (x *streamPubSubStreamingServiceResponseandstreamservicethrows) Read(p thri
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("streamPubSubStreamingServiceResponseandstreamservicethrows read struct end error: ", err)
+        return fmt.Errorf("streamPubSubStreamingServiceResponseandstreamservicethrows read struct end error: %w", err)
     }
 
     return nil
@@ -3346,7 +3346,7 @@ func (x *reqPubSubStreamingServiceResponseandstreamboththrows) SetFoo(value int3
 
 func (x *reqPubSubStreamingServiceResponseandstreamboththrows) writeField1(p thrift.Encoder) error {  // Foo
     if err := p.WriteFieldBegin("foo", thrift.I32, 1); err != nil {
-        return thrift.PrependError("reqPubSubStreamingServiceResponseandstreamboththrows write field begin error: ", err)
+        return fmt.Errorf("reqPubSubStreamingServiceResponseandstreamboththrows write field begin error: %w", err)
     }
 
     item := x.Foo
@@ -3355,7 +3355,7 @@ func (x *reqPubSubStreamingServiceResponseandstreamboththrows) writeField1(p thr
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("reqPubSubStreamingServiceResponseandstreamboththrows write field end error: ", err)
+        return fmt.Errorf("reqPubSubStreamingServiceResponseandstreamboththrows write field end error: %w", err)
     }
     return nil
 }
@@ -3375,7 +3375,7 @@ func (x *reqPubSubStreamingServiceResponseandstreamboththrows) readField1(p thri
 
 func (x *reqPubSubStreamingServiceResponseandstreamboththrows) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqPubSubStreamingServiceResponseandstreamboththrows"); err != nil {
-        return thrift.PrependError("reqPubSubStreamingServiceResponseandstreamboththrows write struct begin error: ", err)
+        return fmt.Errorf("reqPubSubStreamingServiceResponseandstreamboththrows write struct begin error: %w", err)
     }
 
     if err := x.writeField1(p); err != nil {
@@ -3383,24 +3383,24 @@ func (x *reqPubSubStreamingServiceResponseandstreamboththrows) Write(p thrift.En
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("reqPubSubStreamingServiceResponseandstreamboththrows write field stop error: ", err)
+        return fmt.Errorf("reqPubSubStreamingServiceResponseandstreamboththrows write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("reqPubSubStreamingServiceResponseandstreamboththrows write struct end error: ", err)
+        return fmt.Errorf("reqPubSubStreamingServiceResponseandstreamboththrows write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *reqPubSubStreamingServiceResponseandstreamboththrows) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("reqPubSubStreamingServiceResponseandstreamboththrows read error: ", err)
+        return fmt.Errorf("reqPubSubStreamingServiceResponseandstreamboththrows read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("reqPubSubStreamingServiceResponseandstreamboththrows field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("reqPubSubStreamingServiceResponseandstreamboththrows field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -3425,7 +3425,7 @@ func (x *reqPubSubStreamingServiceResponseandstreamboththrows) Read(p thrift.Dec
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("reqPubSubStreamingServiceResponseandstreamboththrows read struct end error: ", err)
+        return fmt.Errorf("reqPubSubStreamingServiceResponseandstreamboththrows read struct end error: %w", err)
     }
 
     return nil
@@ -3482,7 +3482,7 @@ func (x *respPubSubStreamingServiceResponseandstreamboththrows) writeField0(p th
     }
 
     if err := p.WriteFieldBegin("success", thrift.I32, 0); err != nil {
-        return thrift.PrependError("respPubSubStreamingServiceResponseandstreamboththrows write field begin error: ", err)
+        return fmt.Errorf("respPubSubStreamingServiceResponseandstreamboththrows write field begin error: %w", err)
     }
 
     item := *x.Success
@@ -3491,7 +3491,7 @@ func (x *respPubSubStreamingServiceResponseandstreamboththrows) writeField0(p th
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("respPubSubStreamingServiceResponseandstreamboththrows write field end error: ", err)
+        return fmt.Errorf("respPubSubStreamingServiceResponseandstreamboththrows write field end error: %w", err)
     }
     return nil
 }
@@ -3533,7 +3533,7 @@ func (x *respPubSubStreamingServiceResponseandstreamboththrows) writeField1(p th
     }
 
     if err := p.WriteFieldBegin("e", thrift.STRUCT, 1); err != nil {
-        return thrift.PrependError("respPubSubStreamingServiceResponseandstreamboththrows write field begin error: ", err)
+        return fmt.Errorf("respPubSubStreamingServiceResponseandstreamboththrows write field begin error: %w", err)
     }
 
     item := x.E
@@ -3542,7 +3542,7 @@ func (x *respPubSubStreamingServiceResponseandstreamboththrows) writeField1(p th
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("respPubSubStreamingServiceResponseandstreamboththrows write field end error: ", err)
+        return fmt.Errorf("respPubSubStreamingServiceResponseandstreamboththrows write field end error: %w", err)
     }
     return nil
 }
@@ -3570,7 +3570,7 @@ func (x *respPubSubStreamingServiceResponseandstreamboththrows) Exception() thri
 
 func (x *respPubSubStreamingServiceResponseandstreamboththrows) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respPubSubStreamingServiceResponseandstreamboththrows"); err != nil {
-        return thrift.PrependError("respPubSubStreamingServiceResponseandstreamboththrows write struct begin error: ", err)
+        return fmt.Errorf("respPubSubStreamingServiceResponseandstreamboththrows write struct begin error: %w", err)
     }
 
     if err := x.writeField0(p); err != nil {
@@ -3581,24 +3581,24 @@ func (x *respPubSubStreamingServiceResponseandstreamboththrows) Write(p thrift.E
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("respPubSubStreamingServiceResponseandstreamboththrows write field stop error: ", err)
+        return fmt.Errorf("respPubSubStreamingServiceResponseandstreamboththrows write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("respPubSubStreamingServiceResponseandstreamboththrows write struct end error: ", err)
+        return fmt.Errorf("respPubSubStreamingServiceResponseandstreamboththrows write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *respPubSubStreamingServiceResponseandstreamboththrows) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("respPubSubStreamingServiceResponseandstreamboththrows read error: ", err)
+        return fmt.Errorf("respPubSubStreamingServiceResponseandstreamboththrows read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("respPubSubStreamingServiceResponseandstreamboththrows field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("respPubSubStreamingServiceResponseandstreamboththrows field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -3625,7 +3625,7 @@ func (x *respPubSubStreamingServiceResponseandstreamboththrows) Read(p thrift.De
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("respPubSubStreamingServiceResponseandstreamboththrows read struct end error: ", err)
+        return fmt.Errorf("respPubSubStreamingServiceResponseandstreamboththrows read struct end error: %w", err)
     }
 
     return nil
@@ -3681,7 +3681,7 @@ func (x *streamPubSubStreamingServiceResponseandstreamboththrows) writeField0(p 
     }
 
     if err := p.WriteFieldBegin("success", thrift.I32, 0); err != nil {
-        return thrift.PrependError("streamPubSubStreamingServiceResponseandstreamboththrows write field begin error: ", err)
+        return fmt.Errorf("streamPubSubStreamingServiceResponseandstreamboththrows write field begin error: %w", err)
     }
 
     item := *x.Success
@@ -3690,7 +3690,7 @@ func (x *streamPubSubStreamingServiceResponseandstreamboththrows) writeField0(p 
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("streamPubSubStreamingServiceResponseandstreamboththrows write field end error: ", err)
+        return fmt.Errorf("streamPubSubStreamingServiceResponseandstreamboththrows write field end error: %w", err)
     }
     return nil
 }
@@ -3732,7 +3732,7 @@ func (x *streamPubSubStreamingServiceResponseandstreamboththrows) writeField1(p 
     }
 
     if err := p.WriteFieldBegin("e", thrift.STRUCT, 1); err != nil {
-        return thrift.PrependError("streamPubSubStreamingServiceResponseandstreamboththrows write field begin error: ", err)
+        return fmt.Errorf("streamPubSubStreamingServiceResponseandstreamboththrows write field begin error: %w", err)
     }
 
     item := x.E
@@ -3741,7 +3741,7 @@ func (x *streamPubSubStreamingServiceResponseandstreamboththrows) writeField1(p 
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("streamPubSubStreamingServiceResponseandstreamboththrows write field end error: ", err)
+        return fmt.Errorf("streamPubSubStreamingServiceResponseandstreamboththrows write field end error: %w", err)
     }
     return nil
 }
@@ -3769,7 +3769,7 @@ func (x *streamPubSubStreamingServiceResponseandstreamboththrows) Exception() th
 
 func (x *streamPubSubStreamingServiceResponseandstreamboththrows) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("streamPubSubStreamingServiceResponseandstreamboththrows"); err != nil {
-        return thrift.PrependError("streamPubSubStreamingServiceResponseandstreamboththrows write struct begin error: ", err)
+        return fmt.Errorf("streamPubSubStreamingServiceResponseandstreamboththrows write struct begin error: %w", err)
     }
 
     if err := x.writeField0(p); err != nil {
@@ -3780,24 +3780,24 @@ func (x *streamPubSubStreamingServiceResponseandstreamboththrows) Write(p thrift
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("streamPubSubStreamingServiceResponseandstreamboththrows write field stop error: ", err)
+        return fmt.Errorf("streamPubSubStreamingServiceResponseandstreamboththrows write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("streamPubSubStreamingServiceResponseandstreamboththrows write struct end error: ", err)
+        return fmt.Errorf("streamPubSubStreamingServiceResponseandstreamboththrows write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *streamPubSubStreamingServiceResponseandstreamboththrows) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("streamPubSubStreamingServiceResponseandstreamboththrows read error: ", err)
+        return fmt.Errorf("streamPubSubStreamingServiceResponseandstreamboththrows read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("streamPubSubStreamingServiceResponseandstreamboththrows field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("streamPubSubStreamingServiceResponseandstreamboththrows field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -3824,7 +3824,7 @@ func (x *streamPubSubStreamingServiceResponseandstreamboththrows) Read(p thrift.
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("streamPubSubStreamingServiceResponseandstreamboththrows read struct end error: ", err)
+        return fmt.Errorf("streamPubSubStreamingServiceResponseandstreamboththrows read struct end error: %w", err)
     }
 
     return nil
@@ -3869,7 +3869,7 @@ func (x *reqPubSubStreamingServiceReturnstreamFast) SetI32From(value int32) *req
 
 func (x *reqPubSubStreamingServiceReturnstreamFast) writeField1(p thrift.Encoder) error {  // I32From
     if err := p.WriteFieldBegin("i32_from", thrift.I32, 1); err != nil {
-        return thrift.PrependError("reqPubSubStreamingServiceReturnstreamFast write field begin error: ", err)
+        return fmt.Errorf("reqPubSubStreamingServiceReturnstreamFast write field begin error: %w", err)
     }
 
     item := x.I32From
@@ -3878,7 +3878,7 @@ func (x *reqPubSubStreamingServiceReturnstreamFast) writeField1(p thrift.Encoder
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("reqPubSubStreamingServiceReturnstreamFast write field end error: ", err)
+        return fmt.Errorf("reqPubSubStreamingServiceReturnstreamFast write field end error: %w", err)
     }
     return nil
 }
@@ -3910,7 +3910,7 @@ func (x *reqPubSubStreamingServiceReturnstreamFast) SetI32To(value int32) *reqPu
 
 func (x *reqPubSubStreamingServiceReturnstreamFast) writeField2(p thrift.Encoder) error {  // I32To
     if err := p.WriteFieldBegin("i32_to", thrift.I32, 2); err != nil {
-        return thrift.PrependError("reqPubSubStreamingServiceReturnstreamFast write field begin error: ", err)
+        return fmt.Errorf("reqPubSubStreamingServiceReturnstreamFast write field begin error: %w", err)
     }
 
     item := x.I32To
@@ -3919,7 +3919,7 @@ func (x *reqPubSubStreamingServiceReturnstreamFast) writeField2(p thrift.Encoder
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("reqPubSubStreamingServiceReturnstreamFast write field end error: ", err)
+        return fmt.Errorf("reqPubSubStreamingServiceReturnstreamFast write field end error: %w", err)
     }
     return nil
 }
@@ -3939,7 +3939,7 @@ func (x *reqPubSubStreamingServiceReturnstreamFast) readField2(p thrift.Decoder)
 
 func (x *reqPubSubStreamingServiceReturnstreamFast) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqPubSubStreamingServiceReturnstreamFast"); err != nil {
-        return thrift.PrependError("reqPubSubStreamingServiceReturnstreamFast write struct begin error: ", err)
+        return fmt.Errorf("reqPubSubStreamingServiceReturnstreamFast write struct begin error: %w", err)
     }
 
     if err := x.writeField1(p); err != nil {
@@ -3950,24 +3950,24 @@ func (x *reqPubSubStreamingServiceReturnstreamFast) Write(p thrift.Encoder) erro
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("reqPubSubStreamingServiceReturnstreamFast write field stop error: ", err)
+        return fmt.Errorf("reqPubSubStreamingServiceReturnstreamFast write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("reqPubSubStreamingServiceReturnstreamFast write struct end error: ", err)
+        return fmt.Errorf("reqPubSubStreamingServiceReturnstreamFast write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *reqPubSubStreamingServiceReturnstreamFast) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("reqPubSubStreamingServiceReturnstreamFast read error: ", err)
+        return fmt.Errorf("reqPubSubStreamingServiceReturnstreamFast read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("reqPubSubStreamingServiceReturnstreamFast field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("reqPubSubStreamingServiceReturnstreamFast field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -3994,7 +3994,7 @@ func (x *reqPubSubStreamingServiceReturnstreamFast) Read(p thrift.Decoder) error
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("reqPubSubStreamingServiceReturnstreamFast read struct end error: ", err)
+        return fmt.Errorf("reqPubSubStreamingServiceReturnstreamFast read struct end error: %w", err)
     }
 
     return nil
@@ -4032,29 +4032,29 @@ func (x *respPubSubStreamingServiceReturnstreamFast) Exception() thrift.Writable
 
 func (x *respPubSubStreamingServiceReturnstreamFast) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respPubSubStreamingServiceReturnstreamFast"); err != nil {
-        return thrift.PrependError("respPubSubStreamingServiceReturnstreamFast write struct begin error: ", err)
+        return fmt.Errorf("respPubSubStreamingServiceReturnstreamFast write struct begin error: %w", err)
     }
 
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("respPubSubStreamingServiceReturnstreamFast write field stop error: ", err)
+        return fmt.Errorf("respPubSubStreamingServiceReturnstreamFast write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("respPubSubStreamingServiceReturnstreamFast write struct end error: ", err)
+        return fmt.Errorf("respPubSubStreamingServiceReturnstreamFast write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *respPubSubStreamingServiceReturnstreamFast) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("respPubSubStreamingServiceReturnstreamFast read error: ", err)
+        return fmt.Errorf("respPubSubStreamingServiceReturnstreamFast read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("respPubSubStreamingServiceReturnstreamFast field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("respPubSubStreamingServiceReturnstreamFast field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -4077,7 +4077,7 @@ func (x *respPubSubStreamingServiceReturnstreamFast) Read(p thrift.Decoder) erro
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("respPubSubStreamingServiceReturnstreamFast read struct end error: ", err)
+        return fmt.Errorf("respPubSubStreamingServiceReturnstreamFast read struct end error: %w", err)
     }
 
     return nil
@@ -4132,7 +4132,7 @@ func (x *streamPubSubStreamingServiceReturnstreamFast) writeField0(p thrift.Enco
     }
 
     if err := p.WriteFieldBegin("success", thrift.I32, 0); err != nil {
-        return thrift.PrependError("streamPubSubStreamingServiceReturnstreamFast write field begin error: ", err)
+        return fmt.Errorf("streamPubSubStreamingServiceReturnstreamFast write field begin error: %w", err)
     }
 
     item := *x.Success
@@ -4141,7 +4141,7 @@ func (x *streamPubSubStreamingServiceReturnstreamFast) writeField0(p thrift.Enco
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("streamPubSubStreamingServiceReturnstreamFast write field end error: ", err)
+        return fmt.Errorf("streamPubSubStreamingServiceReturnstreamFast write field end error: %w", err)
     }
     return nil
 }
@@ -4165,7 +4165,7 @@ func (x *streamPubSubStreamingServiceReturnstreamFast) Exception() thrift.Writab
 
 func (x *streamPubSubStreamingServiceReturnstreamFast) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("streamPubSubStreamingServiceReturnstreamFast"); err != nil {
-        return thrift.PrependError("streamPubSubStreamingServiceReturnstreamFast write struct begin error: ", err)
+        return fmt.Errorf("streamPubSubStreamingServiceReturnstreamFast write struct begin error: %w", err)
     }
 
     if err := x.writeField0(p); err != nil {
@@ -4173,24 +4173,24 @@ func (x *streamPubSubStreamingServiceReturnstreamFast) Write(p thrift.Encoder) e
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("streamPubSubStreamingServiceReturnstreamFast write field stop error: ", err)
+        return fmt.Errorf("streamPubSubStreamingServiceReturnstreamFast write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("streamPubSubStreamingServiceReturnstreamFast write struct end error: ", err)
+        return fmt.Errorf("streamPubSubStreamingServiceReturnstreamFast write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *streamPubSubStreamingServiceReturnstreamFast) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("streamPubSubStreamingServiceReturnstreamFast read error: ", err)
+        return fmt.Errorf("streamPubSubStreamingServiceReturnstreamFast read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("streamPubSubStreamingServiceReturnstreamFast field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("streamPubSubStreamingServiceReturnstreamFast field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -4215,7 +4215,7 @@ func (x *streamPubSubStreamingServiceReturnstreamFast) Read(p thrift.Decoder) er
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("streamPubSubStreamingServiceReturnstreamFast read struct end error: ", err)
+        return fmt.Errorf("streamPubSubStreamingServiceReturnstreamFast read struct end error: %w", err)
     }
 
     return nil

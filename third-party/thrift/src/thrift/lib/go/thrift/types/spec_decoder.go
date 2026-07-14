@@ -30,13 +30,13 @@ func ReadStructSpec(d Decoder, dstStruct Struct, spec *StructSpec) error {
 	structReflectType := dstConcreteValue.Type()
 
 	if _, err := d.ReadStructBegin(); err != nil {
-		return PrependError(fmt.Sprintf("%s read error: ", structReflectType.Name()), err)
+		return fmt.Errorf("%s read error: %w", structReflectType.Name(), err)
 	}
 
 	for {
 		fieldName, wireType, fieldID, err := d.ReadFieldBegin()
 		if err != nil {
-			return PrependError(fmt.Sprintf("%s field %d ('%s') read error: ", structReflectType.Name(), fieldID, fieldName), err)
+			return fmt.Errorf("%s field %d ('%s') read error: %w", structReflectType.Name(), fieldID, fieldName, err)
 		}
 
 		if wireType == STOP {
@@ -69,7 +69,7 @@ func ReadStructSpec(d Decoder, dstStruct Struct, spec *StructSpec) error {
 	}
 
 	if err := d.ReadStructEnd(); err != nil {
-		return PrependError(fmt.Sprintf("%s read struct end error: ", structReflectType.Name()), err)
+		return fmt.Errorf("%s read struct end error: %w", structReflectType.Name(), err)
 	}
 
 	return nil
@@ -161,7 +161,7 @@ func readCodecEnumSpec(d Decoder, dstValue reflect.Value, _ *CodecEnumSpec) erro
 func readCodecSetSpec(d Decoder, dstValue reflect.Value, spec *CodecSetSpec) error {
 	_ /* elemType */, size, err := d.ReadSetBegin()
 	if err != nil {
-		return PrependError("error reading set begin: ", err)
+		return fmt.Errorf("error reading set begin: %w", err)
 	}
 
 	// NOTE: the 'dstValue' slice may not be empty, because of
@@ -189,7 +189,7 @@ func readCodecSetSpec(d Decoder, dstValue reflect.Value, spec *CodecSetSpec) err
 	dstValue.Set(dstSlice)
 
 	if err := d.ReadSetEnd(); err != nil {
-		return PrependError("error reading set end: ", err)
+		return fmt.Errorf("error reading set end: %w", err)
 	}
 
 	return nil
@@ -198,7 +198,7 @@ func readCodecSetSpec(d Decoder, dstValue reflect.Value, spec *CodecSetSpec) err
 func readCodecListSpec(d Decoder, dstValue reflect.Value, spec *CodecListSpec) error {
 	_ /* elemType */, size, err := d.ReadListBegin()
 	if err != nil {
-		return PrependError("error reading list begin: ", err)
+		return fmt.Errorf("error reading list begin: %w", err)
 	}
 
 	// NOTE: the 'dstValue' slice may not be empty, because of
@@ -226,7 +226,7 @@ func readCodecListSpec(d Decoder, dstValue reflect.Value, spec *CodecListSpec) e
 	dstValue.Set(dstSlice)
 
 	if err := d.ReadListEnd(); err != nil {
-		return PrependError("error reading list end: ", err)
+		return fmt.Errorf("error reading list end: %w", err)
 	}
 
 	return nil
@@ -235,7 +235,7 @@ func readCodecListSpec(d Decoder, dstValue reflect.Value, spec *CodecListSpec) e
 func readCodecMapSpec(d Decoder, dstValue reflect.Value, spec *CodecMapSpec) error {
 	_ /* keyType */, _ /* valueType */, size, err := d.ReadMapBegin()
 	if err != nil {
-		return PrependError("error reading map begin: ", err)
+		return fmt.Errorf("error reading map begin: %w", err)
 	}
 
 	// NOTE: the 'dstValue' map might not be empty, because of
@@ -329,7 +329,7 @@ func readCodecMapSpec(d Decoder, dstValue reflect.Value, spec *CodecMapSpec) err
 	}
 
 	if err := d.ReadMapEnd(); err != nil {
-		return PrependError("error reading map end: ", err)
+		return fmt.Errorf("error reading map end: %w", err)
 	}
 
 	return nil

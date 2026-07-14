@@ -118,7 +118,7 @@ func (x *reqMyServiceQuery) writeField1(p thrift.Encoder) error {  // S
     }
 
     if err := p.WriteFieldBegin("s", thrift.STRUCT, 1); err != nil {
-        return thrift.PrependError("reqMyServiceQuery write field begin error: ", err)
+        return fmt.Errorf("reqMyServiceQuery write field begin error: %w", err)
     }
 
     item := x.S
@@ -127,7 +127,7 @@ func (x *reqMyServiceQuery) writeField1(p thrift.Encoder) error {  // S
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("reqMyServiceQuery write field end error: ", err)
+        return fmt.Errorf("reqMyServiceQuery write field end error: %w", err)
     }
     return nil
 }
@@ -170,7 +170,7 @@ func (x *reqMyServiceQuery) writeField2(p thrift.Encoder) error {  // I
     }
 
     if err := p.WriteFieldBegin("i", thrift.STRUCT, 2); err != nil {
-        return thrift.PrependError("reqMyServiceQuery write field begin error: ", err)
+        return fmt.Errorf("reqMyServiceQuery write field begin error: %w", err)
     }
 
     item := x.I
@@ -179,7 +179,7 @@ func (x *reqMyServiceQuery) writeField2(p thrift.Encoder) error {  // I
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("reqMyServiceQuery write field end error: ", err)
+        return fmt.Errorf("reqMyServiceQuery write field end error: %w", err)
     }
     return nil
 }
@@ -200,7 +200,7 @@ func (x *reqMyServiceQuery) readField2(p thrift.Decoder) error {  // I
 
 func (x *reqMyServiceQuery) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqMyServiceQuery"); err != nil {
-        return thrift.PrependError("reqMyServiceQuery write struct begin error: ", err)
+        return fmt.Errorf("reqMyServiceQuery write struct begin error: %w", err)
     }
 
     if err := x.writeField1(p); err != nil {
@@ -211,24 +211,24 @@ func (x *reqMyServiceQuery) Write(p thrift.Encoder) error {
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("reqMyServiceQuery write field stop error: ", err)
+        return fmt.Errorf("reqMyServiceQuery write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("reqMyServiceQuery write struct end error: ", err)
+        return fmt.Errorf("reqMyServiceQuery write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *reqMyServiceQuery) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("reqMyServiceQuery read error: ", err)
+        return fmt.Errorf("reqMyServiceQuery read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("reqMyServiceQuery field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("reqMyServiceQuery field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -255,7 +255,7 @@ func (x *reqMyServiceQuery) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("reqMyServiceQuery read struct end error: ", err)
+        return fmt.Errorf("reqMyServiceQuery read struct end error: %w", err)
     }
 
     return nil
@@ -293,29 +293,29 @@ func (x *respMyServiceQuery) Exception() thrift.WritableException {
 
 func (x *respMyServiceQuery) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respMyServiceQuery"); err != nil {
-        return thrift.PrependError("respMyServiceQuery write struct begin error: ", err)
+        return fmt.Errorf("respMyServiceQuery write struct begin error: %w", err)
     }
 
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("respMyServiceQuery write field stop error: ", err)
+        return fmt.Errorf("respMyServiceQuery write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("respMyServiceQuery write struct end error: ", err)
+        return fmt.Errorf("respMyServiceQuery write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *respMyServiceQuery) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("respMyServiceQuery read error: ", err)
+        return fmt.Errorf("respMyServiceQuery read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("respMyServiceQuery field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("respMyServiceQuery field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -338,7 +338,7 @@ func (x *respMyServiceQuery) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("respMyServiceQuery read struct end error: ", err)
+        return fmt.Errorf("respMyServiceQuery read struct end error: %w", err)
     }
 
     return nil
@@ -393,7 +393,7 @@ func (x *reqMyServiceHasArgDocs) writeField1(p thrift.Encoder) error {  // S
     }
 
     if err := p.WriteFieldBegin("s", thrift.STRUCT, 1); err != nil {
-        return thrift.PrependError("reqMyServiceHasArgDocs write field begin error: ", err)
+        return fmt.Errorf("reqMyServiceHasArgDocs write field begin error: %w", err)
     }
 
     item := x.S
@@ -402,7 +402,7 @@ func (x *reqMyServiceHasArgDocs) writeField1(p thrift.Encoder) error {  // S
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("reqMyServiceHasArgDocs write field end error: ", err)
+        return fmt.Errorf("reqMyServiceHasArgDocs write field end error: %w", err)
     }
     return nil
 }
@@ -445,7 +445,7 @@ func (x *reqMyServiceHasArgDocs) writeField2(p thrift.Encoder) error {  // I
     }
 
     if err := p.WriteFieldBegin("i", thrift.STRUCT, 2); err != nil {
-        return thrift.PrependError("reqMyServiceHasArgDocs write field begin error: ", err)
+        return fmt.Errorf("reqMyServiceHasArgDocs write field begin error: %w", err)
     }
 
     item := x.I
@@ -454,7 +454,7 @@ func (x *reqMyServiceHasArgDocs) writeField2(p thrift.Encoder) error {  // I
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("reqMyServiceHasArgDocs write field end error: ", err)
+        return fmt.Errorf("reqMyServiceHasArgDocs write field end error: %w", err)
     }
     return nil
 }
@@ -475,7 +475,7 @@ func (x *reqMyServiceHasArgDocs) readField2(p thrift.Decoder) error {  // I
 
 func (x *reqMyServiceHasArgDocs) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqMyServiceHasArgDocs"); err != nil {
-        return thrift.PrependError("reqMyServiceHasArgDocs write struct begin error: ", err)
+        return fmt.Errorf("reqMyServiceHasArgDocs write struct begin error: %w", err)
     }
 
     if err := x.writeField1(p); err != nil {
@@ -486,24 +486,24 @@ func (x *reqMyServiceHasArgDocs) Write(p thrift.Encoder) error {
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("reqMyServiceHasArgDocs write field stop error: ", err)
+        return fmt.Errorf("reqMyServiceHasArgDocs write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("reqMyServiceHasArgDocs write struct end error: ", err)
+        return fmt.Errorf("reqMyServiceHasArgDocs write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *reqMyServiceHasArgDocs) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("reqMyServiceHasArgDocs read error: ", err)
+        return fmt.Errorf("reqMyServiceHasArgDocs read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("reqMyServiceHasArgDocs field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("reqMyServiceHasArgDocs field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -530,7 +530,7 @@ func (x *reqMyServiceHasArgDocs) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("reqMyServiceHasArgDocs read struct end error: ", err)
+        return fmt.Errorf("reqMyServiceHasArgDocs read struct end error: %w", err)
     }
 
     return nil
@@ -568,29 +568,29 @@ func (x *respMyServiceHasArgDocs) Exception() thrift.WritableException {
 
 func (x *respMyServiceHasArgDocs) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respMyServiceHasArgDocs"); err != nil {
-        return thrift.PrependError("respMyServiceHasArgDocs write struct begin error: ", err)
+        return fmt.Errorf("respMyServiceHasArgDocs write struct begin error: %w", err)
     }
 
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("respMyServiceHasArgDocs write field stop error: ", err)
+        return fmt.Errorf("respMyServiceHasArgDocs write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("respMyServiceHasArgDocs write struct end error: ", err)
+        return fmt.Errorf("respMyServiceHasArgDocs write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *respMyServiceHasArgDocs) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("respMyServiceHasArgDocs read error: ", err)
+        return fmt.Errorf("respMyServiceHasArgDocs read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("respMyServiceHasArgDocs field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("respMyServiceHasArgDocs field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -613,7 +613,7 @@ func (x *respMyServiceHasArgDocs) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("respMyServiceHasArgDocs read struct end error: ", err)
+        return fmt.Errorf("respMyServiceHasArgDocs read struct end error: %w", err)
     }
 
     return nil

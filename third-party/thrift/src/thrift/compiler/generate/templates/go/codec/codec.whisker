@@ -109,7 +109,7 @@ if err != nil {
 {{#let partial decode_list |type| captures |types decode|}}
 _ /* elemType */, size, err := p.ReadListBegin()
 if err != nil {
-    return thrift.PrependError("error reading list begin: ", err)
+    return fmt.Errorf("error reading list begin: %w", err)
 }
 
 listResult := make({{#partial types.go_type type=type}}, 0, size)
@@ -124,14 +124,14 @@ for i := 0; i < size; i++ {
 }
 
 if err := p.ReadListEnd(); err != nil {
-    return thrift.PrependError("error reading list end: ", err)
+    return fmt.Errorf("error reading list end: %w", err)
 }
 result := listResult
 {{/let partial}}
 {{#let partial decode_set |type| captures |types decode|}}
 _ /* elemType */, size, err := p.ReadSetBegin()
 if err != nil {
-    return thrift.PrependError("error reading set begin: ", err)
+    return fmt.Errorf("error reading set begin: %w", err)
 }
 
 setResult := make({{#partial types.go_type type=type}}, 0, size)
@@ -146,14 +146,14 @@ for i := 0; i < size; i++ {
 }
 
 if err := p.ReadSetEnd(); err != nil {
-    return thrift.PrependError("error reading set end: ", err)
+    return fmt.Errorf("error reading set end: %w", err)
 }
 result := setResult
 {{/let partial}}
 {{#let partial decode_map |type| captures |types decode|}}
 _ /* keyType */, _ /* valueType */, size, err := p.ReadMapBegin()
 if err != nil {
-    return thrift.PrependError("error reading map begin: ", err)
+    return fmt.Errorf("error reading map begin: %w", err)
 }
 
 mapResult := make({{#partial types.go_type type=type}}, size)
@@ -179,7 +179,7 @@ for i := 0; i < size; i++ {
 }
 
 if err := p.ReadMapEnd(); err != nil {
-    return thrift.PrependError("error reading map end: ", err)
+    return fmt.Errorf("error reading map end: %w", err)
 }
 result := mapResult
 {{/let partial}}
@@ -234,7 +234,7 @@ if err != nil {
 if err := p.WriteListBegin(
     {{~ #partial ttype type=type.elem_type ~}}
     , len(item)); err != nil {
-    return thrift.PrependError("error writing list begin: ", err)
+    return fmt.Errorf("error writing list begin: %w", err)
 }
 for _, v := range item {
     {{! Use scope to avoid multiple 'item' variable collisions }}
@@ -244,14 +244,14 @@ for _, v := range item {
     }
 }
 if err := p.WriteListEnd(); err != nil {
-    return thrift.PrependError("error writing list end: ", err)
+    return fmt.Errorf("error writing list end: %w", err)
 }
 {{/let partial}}
 {{#let partial encode_set |type| captures |ttype encode|}}
 if err := p.WriteSetBegin(
     {{~ #partial ttype type=type.elem_type ~}}
     , len(item)); err != nil {
-    return thrift.PrependError("error writing set begin: ", err)
+    return fmt.Errorf("error writing set begin: %w", err)
 }
 for _, v := range item {
     {{! Use scope to avoid multiple 'item' variable collisions }}
@@ -261,7 +261,7 @@ for _, v := range item {
     }
 }
 if err := p.WriteSetEnd(); err != nil {
-    return thrift.PrependError("error writing set end: ", err)
+    return fmt.Errorf("error writing set end: %w", err)
 }
 {{/let partial}}
 {{#let partial encode_map |type| captures |ttype encode|}}
@@ -269,7 +269,7 @@ if err := p.WriteMapBegin(
     {{~ #partial ttype type=type.key_type ~}}
     , {{#partial ttype type=type.val_type ~}}
     , len(item)); err != nil {
-    return thrift.PrependError("error writing map begin: ", err)
+    return fmt.Errorf("error writing map begin: %w", err)
 }
 for k, v := range item {
     {{#if (not type.key_type.go_comparable?)}}
@@ -290,7 +290,7 @@ for k, v := range item {
     }
 }
 if err := p.WriteMapEnd(); err != nil {
-    return thrift.PrependError("error writing map end: ", err)
+    return fmt.Errorf("error writing map end: %w", err)
 }
 {{/let partial}}
 {{! ACTUAL "encode" PARTIAL BELOW: }}

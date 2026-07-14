@@ -36,29 +36,29 @@ func newReqMyRootDoRoot() *reqMyRootDoRoot {
 
 func (x *reqMyRootDoRoot) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqMyRootDoRoot"); err != nil {
-        return thrift.PrependError("reqMyRootDoRoot write struct begin error: ", err)
+        return fmt.Errorf("reqMyRootDoRoot write struct begin error: %w", err)
     }
 
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("reqMyRootDoRoot write field stop error: ", err)
+        return fmt.Errorf("reqMyRootDoRoot write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("reqMyRootDoRoot write struct end error: ", err)
+        return fmt.Errorf("reqMyRootDoRoot write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *reqMyRootDoRoot) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("reqMyRootDoRoot read error: ", err)
+        return fmt.Errorf("reqMyRootDoRoot read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("reqMyRootDoRoot field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("reqMyRootDoRoot field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -81,7 +81,7 @@ func (x *reqMyRootDoRoot) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("reqMyRootDoRoot read struct end error: ", err)
+        return fmt.Errorf("reqMyRootDoRoot read struct end error: %w", err)
     }
 
     return nil
@@ -117,29 +117,29 @@ func (x *respMyRootDoRoot) Exception() thrift.WritableException {
 
 func (x *respMyRootDoRoot) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respMyRootDoRoot"); err != nil {
-        return thrift.PrependError("respMyRootDoRoot write struct begin error: ", err)
+        return fmt.Errorf("respMyRootDoRoot write struct begin error: %w", err)
     }
 
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("respMyRootDoRoot write field stop error: ", err)
+        return fmt.Errorf("respMyRootDoRoot write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("respMyRootDoRoot write struct end error: ", err)
+        return fmt.Errorf("respMyRootDoRoot write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *respMyRootDoRoot) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("respMyRootDoRoot read error: ", err)
+        return fmt.Errorf("respMyRootDoRoot read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("respMyRootDoRoot field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("respMyRootDoRoot field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -162,7 +162,7 @@ func (x *respMyRootDoRoot) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("respMyRootDoRoot read struct end error: ", err)
+        return fmt.Errorf("respMyRootDoRoot read struct end error: %w", err)
     }
 
     return nil
@@ -193,29 +193,29 @@ func newReqMyNodeDoMid() *reqMyNodeDoMid {
 
 func (x *reqMyNodeDoMid) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqMyNodeDoMid"); err != nil {
-        return thrift.PrependError("reqMyNodeDoMid write struct begin error: ", err)
+        return fmt.Errorf("reqMyNodeDoMid write struct begin error: %w", err)
     }
 
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("reqMyNodeDoMid write field stop error: ", err)
+        return fmt.Errorf("reqMyNodeDoMid write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("reqMyNodeDoMid write struct end error: ", err)
+        return fmt.Errorf("reqMyNodeDoMid write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *reqMyNodeDoMid) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("reqMyNodeDoMid read error: ", err)
+        return fmt.Errorf("reqMyNodeDoMid read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("reqMyNodeDoMid field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("reqMyNodeDoMid field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -238,7 +238,7 @@ func (x *reqMyNodeDoMid) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("reqMyNodeDoMid read struct end error: ", err)
+        return fmt.Errorf("reqMyNodeDoMid read struct end error: %w", err)
     }
 
     return nil
@@ -274,29 +274,29 @@ func (x *respMyNodeDoMid) Exception() thrift.WritableException {
 
 func (x *respMyNodeDoMid) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respMyNodeDoMid"); err != nil {
-        return thrift.PrependError("respMyNodeDoMid write struct begin error: ", err)
+        return fmt.Errorf("respMyNodeDoMid write struct begin error: %w", err)
     }
 
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("respMyNodeDoMid write field stop error: ", err)
+        return fmt.Errorf("respMyNodeDoMid write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("respMyNodeDoMid write struct end error: ", err)
+        return fmt.Errorf("respMyNodeDoMid write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *respMyNodeDoMid) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("respMyNodeDoMid read error: ", err)
+        return fmt.Errorf("respMyNodeDoMid read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("respMyNodeDoMid field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("respMyNodeDoMid field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -319,7 +319,7 @@ func (x *respMyNodeDoMid) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("respMyNodeDoMid read struct end error: ", err)
+        return fmt.Errorf("respMyNodeDoMid read struct end error: %w", err)
     }
 
     return nil
@@ -350,29 +350,29 @@ func newReqMyLeafDoLeaf() *reqMyLeafDoLeaf {
 
 func (x *reqMyLeafDoLeaf) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqMyLeafDoLeaf"); err != nil {
-        return thrift.PrependError("reqMyLeafDoLeaf write struct begin error: ", err)
+        return fmt.Errorf("reqMyLeafDoLeaf write struct begin error: %w", err)
     }
 
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("reqMyLeafDoLeaf write field stop error: ", err)
+        return fmt.Errorf("reqMyLeafDoLeaf write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("reqMyLeafDoLeaf write struct end error: ", err)
+        return fmt.Errorf("reqMyLeafDoLeaf write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *reqMyLeafDoLeaf) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("reqMyLeafDoLeaf read error: ", err)
+        return fmt.Errorf("reqMyLeafDoLeaf read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("reqMyLeafDoLeaf field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("reqMyLeafDoLeaf field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -395,7 +395,7 @@ func (x *reqMyLeafDoLeaf) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("reqMyLeafDoLeaf read struct end error: ", err)
+        return fmt.Errorf("reqMyLeafDoLeaf read struct end error: %w", err)
     }
 
     return nil
@@ -431,29 +431,29 @@ func (x *respMyLeafDoLeaf) Exception() thrift.WritableException {
 
 func (x *respMyLeafDoLeaf) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respMyLeafDoLeaf"); err != nil {
-        return thrift.PrependError("respMyLeafDoLeaf write struct begin error: ", err)
+        return fmt.Errorf("respMyLeafDoLeaf write struct begin error: %w", err)
     }
 
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("respMyLeafDoLeaf write field stop error: ", err)
+        return fmt.Errorf("respMyLeafDoLeaf write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("respMyLeafDoLeaf write struct end error: ", err)
+        return fmt.Errorf("respMyLeafDoLeaf write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *respMyLeafDoLeaf) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("respMyLeafDoLeaf read error: ", err)
+        return fmt.Errorf("respMyLeafDoLeaf read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("respMyLeafDoLeaf field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("respMyLeafDoLeaf field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -476,7 +476,7 @@ func (x *respMyLeafDoLeaf) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("respMyLeafDoLeaf read struct end error: ", err)
+        return fmt.Errorf("respMyLeafDoLeaf read struct end error: %w", err)
     }
 
     return nil

@@ -33,29 +33,29 @@ func NewEmpty() *Empty {
 
 func (x *Empty) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("Empty"); err != nil {
-        return thrift.PrependError("Empty write struct begin error: ", err)
+        return fmt.Errorf("Empty write struct begin error: %w", err)
     }
 
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("Empty write field stop error: ", err)
+        return fmt.Errorf("Empty write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("Empty write struct end error: ", err)
+        return fmt.Errorf("Empty write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *Empty) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("Empty read error: ", err)
+        return fmt.Errorf("Empty read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("Empty field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("Empty field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -78,7 +78,7 @@ func (x *Empty) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("Empty read struct end error: ", err)
+        return fmt.Errorf("Empty read struct end error: %w", err)
     }
 
     return nil
@@ -117,29 +117,29 @@ func (x *Nada) Write(p thrift.Encoder) error {
         return fmt.Errorf("Nada write union: no more than one field must be set (%d set).", countSet)
     }
     if err := p.WriteStructBegin("Nada"); err != nil {
-        return thrift.PrependError("Nada write struct begin error: ", err)
+        return fmt.Errorf("Nada write struct begin error: %w", err)
     }
 
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("Nada write field stop error: ", err)
+        return fmt.Errorf("Nada write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("Nada write struct end error: ", err)
+        return fmt.Errorf("Nada write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *Nada) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("Nada read error: ", err)
+        return fmt.Errorf("Nada read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("Nada field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("Nada field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -162,7 +162,7 @@ func (x *Nada) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("Nada read struct end error: ", err)
+        return fmt.Errorf("Nada read struct end error: %w", err)
     }
 
     return nil

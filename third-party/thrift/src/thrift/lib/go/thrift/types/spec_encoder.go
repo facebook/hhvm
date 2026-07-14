@@ -30,7 +30,7 @@ func WriteStructSpec(d Encoder, srcStruct Struct, spec *StructSpec) error {
 	structReflectType := srcConcreteValue.Type()
 
 	if err := d.WriteStructBegin(spec.Name); err != nil {
-		return PrependError(fmt.Sprintf("%s write error: ", structReflectType.Name()), err)
+		return fmt.Errorf("%s write error: %w", structReflectType.Name(), err)
 	}
 
 	for _, fieldSpec := range spec.FieldSpecs {
@@ -42,7 +42,7 @@ func WriteStructSpec(d Encoder, srcStruct Struct, spec *StructSpec) error {
 
 		err := d.WriteFieldBegin(fieldSpec.Name, fieldSpec.WireType, fieldSpec.ID)
 		if err != nil {
-			return PrependError(fmt.Sprintf("%s field %d write error: ", structReflectType.Name(), fieldSpec.ID), err)
+			return fmt.Errorf("%s field %d write error: %w", structReflectType.Name(), fieldSpec.ID, err)
 		}
 
 		fieldWriteErr := writeFieldSpec(d, fieldSrcValue, &fieldSpec)
@@ -56,11 +56,11 @@ func WriteStructSpec(d Encoder, srcStruct Struct, spec *StructSpec) error {
 	}
 
 	if err := d.WriteFieldStop(); err != nil {
-		return PrependError(fmt.Sprintf("%T write field stop error: ", structReflectType.Name()), err)
+		return fmt.Errorf("%T write field stop error: %w", structReflectType.Name(), err)
 	}
 
 	if err := d.WriteStructEnd(); err != nil {
-		return PrependError(fmt.Sprintf("%s write struct end error: ", structReflectType.Name()), err)
+		return fmt.Errorf("%s write struct end error: %w", structReflectType.Name(), err)
 	}
 
 	return nil
@@ -136,7 +136,7 @@ func writeCodecEnumSpec(d Encoder, srcValue reflect.Value, _ *CodecEnumSpec) err
 func writeCodecSetSpec(d Encoder, srcValue reflect.Value, spec *CodecSetSpec) error {
 	err := d.WriteSetBegin(spec.ElementWireType, srcValue.Len())
 	if err != nil {
-		return PrependError("error writing set begin: ", err)
+		return fmt.Errorf("error writing set begin: %w", err)
 	}
 
 	for i := range srcValue.Len() {
@@ -147,7 +147,7 @@ func writeCodecSetSpec(d Encoder, srcValue reflect.Value, spec *CodecSetSpec) er
 	}
 
 	if err := d.WriteSetEnd(); err != nil {
-		return PrependError("error writing set end: ", err)
+		return fmt.Errorf("error writing set end: %w", err)
 	}
 
 	return nil
@@ -156,7 +156,7 @@ func writeCodecSetSpec(d Encoder, srcValue reflect.Value, spec *CodecSetSpec) er
 func writeCodecListSpec(d Encoder, srcValue reflect.Value, spec *CodecListSpec) error {
 	err := d.WriteListBegin(spec.ElementWireType, srcValue.Len())
 	if err != nil {
-		return PrependError("error writing list begin: ", err)
+		return fmt.Errorf("error writing list begin: %w", err)
 	}
 
 	for i := range srcValue.Len() {
@@ -167,7 +167,7 @@ func writeCodecListSpec(d Encoder, srcValue reflect.Value, spec *CodecListSpec) 
 	}
 
 	if err := d.WriteListEnd(); err != nil {
-		return PrependError("error writing list end: ", err)
+		return fmt.Errorf("error writing list end: %w", err)
 	}
 
 	return nil
@@ -176,7 +176,7 @@ func writeCodecListSpec(d Encoder, srcValue reflect.Value, spec *CodecListSpec) 
 func writeCodecMapSpec(d Encoder, srcValue reflect.Value, spec *CodecMapSpec) error {
 	err := d.WriteMapBegin(spec.KeyWireType, spec.ValueWireType, srcValue.Len())
 	if err != nil {
-		return PrependError("error writing map begin: ", err)
+		return fmt.Errorf("error writing map begin: %w", err)
 	}
 
 	keyReflectType := srcValue.Type().Key()
@@ -219,7 +219,7 @@ func writeCodecMapSpec(d Encoder, srcValue reflect.Value, spec *CodecMapSpec) er
 	}
 
 	if err := d.WriteMapEnd(); err != nil {
-		return PrependError("error writing map end: ", err)
+		return fmt.Errorf("error writing map end: %w", err)
 	}
 
 	return nil

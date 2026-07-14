@@ -61,7 +61,7 @@ func (x *reqExtendTestServiceCheck) writeField1(p thrift.Encoder) error {  // St
     }
 
     if err := p.WriteFieldBegin("struct1", thrift.STRUCT, 1); err != nil {
-        return thrift.PrependError("reqExtendTestServiceCheck write field begin error: ", err)
+        return fmt.Errorf("reqExtendTestServiceCheck write field begin error: %w", err)
     }
 
     item := x.Struct1
@@ -70,7 +70,7 @@ func (x *reqExtendTestServiceCheck) writeField1(p thrift.Encoder) error {  // St
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("reqExtendTestServiceCheck write field end error: ", err)
+        return fmt.Errorf("reqExtendTestServiceCheck write field end error: %w", err)
     }
     return nil
 }
@@ -91,7 +91,7 @@ func (x *reqExtendTestServiceCheck) readField1(p thrift.Decoder) error {  // Str
 
 func (x *reqExtendTestServiceCheck) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqExtendTestServiceCheck"); err != nil {
-        return thrift.PrependError("reqExtendTestServiceCheck write struct begin error: ", err)
+        return fmt.Errorf("reqExtendTestServiceCheck write struct begin error: %w", err)
     }
 
     if err := x.writeField1(p); err != nil {
@@ -99,24 +99,24 @@ func (x *reqExtendTestServiceCheck) Write(p thrift.Encoder) error {
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("reqExtendTestServiceCheck write field stop error: ", err)
+        return fmt.Errorf("reqExtendTestServiceCheck write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("reqExtendTestServiceCheck write struct end error: ", err)
+        return fmt.Errorf("reqExtendTestServiceCheck write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *reqExtendTestServiceCheck) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("reqExtendTestServiceCheck read error: ", err)
+        return fmt.Errorf("reqExtendTestServiceCheck read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("reqExtendTestServiceCheck field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("reqExtendTestServiceCheck field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -141,7 +141,7 @@ func (x *reqExtendTestServiceCheck) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("reqExtendTestServiceCheck read struct end error: ", err)
+        return fmt.Errorf("reqExtendTestServiceCheck read struct end error: %w", err)
     }
 
     return nil
@@ -197,7 +197,7 @@ func (x *respExtendTestServiceCheck) writeField0(p thrift.Encoder) error {  // S
     }
 
     if err := p.WriteFieldBegin("success", thrift.BOOL, 0); err != nil {
-        return thrift.PrependError("respExtendTestServiceCheck write field begin error: ", err)
+        return fmt.Errorf("respExtendTestServiceCheck write field begin error: %w", err)
     }
 
     item := *x.Success
@@ -206,7 +206,7 @@ func (x *respExtendTestServiceCheck) writeField0(p thrift.Encoder) error {  // S
     }
 
     if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("respExtendTestServiceCheck write field end error: ", err)
+        return fmt.Errorf("respExtendTestServiceCheck write field end error: %w", err)
     }
     return nil
 }
@@ -230,7 +230,7 @@ func (x *respExtendTestServiceCheck) Exception() thrift.WritableException {
 
 func (x *respExtendTestServiceCheck) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("respExtendTestServiceCheck"); err != nil {
-        return thrift.PrependError("respExtendTestServiceCheck write struct begin error: ", err)
+        return fmt.Errorf("respExtendTestServiceCheck write struct begin error: %w", err)
     }
 
     if err := x.writeField0(p); err != nil {
@@ -238,24 +238,24 @@ func (x *respExtendTestServiceCheck) Write(p thrift.Encoder) error {
     }
 
     if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError("respExtendTestServiceCheck write field stop error: ", err)
+        return fmt.Errorf("respExtendTestServiceCheck write field stop error: %w", err)
     }
 
     if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError("respExtendTestServiceCheck write struct end error: ", err)
+        return fmt.Errorf("respExtendTestServiceCheck write struct end error: %w", err)
     }
     return nil
 }
 
 func (x *respExtendTestServiceCheck) Read(p thrift.Decoder) error {
     if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError("respExtendTestServiceCheck read error: ", err)
+        return fmt.Errorf("respExtendTestServiceCheck read error: %w", err)
     }
 
     for {
         fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("respExtendTestServiceCheck field %d ('%s') read error: ", id, fieldName), err)
+            return fmt.Errorf("respExtendTestServiceCheck field %d ('%s') read error: %w", id, fieldName, err)
         }
 
         if wireType == thrift.STOP {
@@ -280,7 +280,7 @@ func (x *respExtendTestServiceCheck) Read(p thrift.Decoder) error {
     }
 
     if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError("respExtendTestServiceCheck read struct end error: ", err)
+        return fmt.Errorf("respExtendTestServiceCheck read struct end error: %w", err)
     }
 
     return nil

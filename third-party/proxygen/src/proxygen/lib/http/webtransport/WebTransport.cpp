@@ -52,11 +52,12 @@ void WebTransport::StreamReadHandle::awaitNextRead(
   if (timeout) {
     fut = std::move(fut).within(*timeout);
   }
-  std::move(fut).via(exec).thenTry(
-      [this, id, cb = std::move(readCb)](auto streamData) {
+  folly::futures::detachOn(
+      exec,
+      std::move(fut).defer([this, id, cb = std::move(readCb)](auto streamData) {
         auto* handle = isTerminalEv(streamData) ? nullptr : this;
         cb(handle, id, std::move(streamData));
-      });
+      }));
 }
 
 } // namespace proxygen

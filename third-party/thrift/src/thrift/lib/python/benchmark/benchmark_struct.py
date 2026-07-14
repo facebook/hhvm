@@ -118,6 +118,46 @@ def benchmark_import():
     )
 
 
+# Number of unique struct types in `unique_struct.thrift` (fanout-10, depth-3:
+# 1000 leaves + 100 mids + 10 tops + 1 root).
+UNIQUE_STRUCT_TYPE_COUNT = 1111
+
+
+def benchmark_class_creation(namespace: str, desc: str) -> None:
+    # Measures import-time CLASS creation -- the metaclass `__new__` that runs for
+    # every `class X(metaclass=...)` statement -- NOT instance creation.
+    # Reloading `unique_struct` (1111 unique types) re-runs the metaclass 1111
+    # times per iteration, giving a per-field signal that the small `struct`
+    # module used by `import-benchmark` cannot.
+    timer = timeit.Timer(
+        stmt="importlib.reload(mm)",
+        setup=(
+            f"import thrift.benchmark.unique_struct.{namespace} as mm\nimport importlib"
+        ),
+    )
+    number, _ = timer.autorange()
+    results = timer.repeat(repeat=5, number=number)
+    min_ms = min(results) * 1000.0 / number
+    print(
+        tabulate(
+            [
+                [
+                    desc,
+                    f"{min_ms:.4f} ms",
+                    f"{min_ms * 1000.0 / UNIQUE_STRUCT_TYPE_COUNT:.4f} us/class",
+                ]
+            ],
+            headers=[
+                f"Class creation ({UNIQUE_STRUCT_TYPE_COUNT} unique types)",
+                "time",
+                "per class",
+            ],
+            tablefmt="github",
+        )
+    )
+    print("\n")
+
+
 def benchmark_init(init_statement: str, desc: str):
     def benchmark_single(flavor) -> str:
         timer = timeit.Timer(stmt=init_statement, setup=get_import(flavor))
@@ -739,6 +779,16 @@ def import_benchmark() -> None:
 
 
 @click.command()
+def class_creation_benchmark() -> None:
+    benchmark_class_creation("thrift_types", "immutable python")
+
+
+@click.command()
+def mutable_class_creation_benchmark() -> None:
+    benchmark_class_creation("thrift_mutable_types", "mutable python")
+
+
+@click.command()
 def init_benchmark() -> None:
     for size in [1, 100, 1000]:
         val_list = list(range(size))
@@ -856,6 +906,8 @@ def run_all(ctx) -> None:
 def main() -> None:
     cli.add_command(run_all)
     cli.add_command(import_benchmark)
+    cli.add_command(class_creation_benchmark)
+    cli.add_command(mutable_class_creation_benchmark)
     cli.add_command(init_benchmark)
     cli.add_command(init_string_benchmark)
     cli.add_command(field_access_benchmark)

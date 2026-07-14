@@ -166,6 +166,6 @@ cdef class MutableUnion(MutableStructOrUnion):
     cdef object _fbthrift_current_field_enum(self)
 
 cdef object _mutable_struct_meta_new(
-    object cls, object cls_name, object bases, object dct
+    object cls, object cls_name, tuple bases, dict dct
 )
 cdef void set_mutable_struct_field(list struct_list, int16_t index, value) except *

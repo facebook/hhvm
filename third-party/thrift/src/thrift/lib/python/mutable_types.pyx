@@ -722,7 +722,7 @@ cdef inline _is_primitive_field(FieldInfo field_info) noexcept:
     return field_info.is_primitive and field_info.adapter_info is None \
         and not isinstance(field_info.type_info, AdaptedTypeInfo)
 
-cdef object _mutable_struct_meta_new(cls, cls_name, bases, dct):
+cdef object _mutable_struct_meta_new(cls, cls_name, tuple bases, dict dct):
     """
     See the `MutableStructMeta.__new__()` method for documentation.
     """
@@ -731,35 +731,27 @@ cdef object _mutable_struct_meta_new(cls, cls_name, bases, dct):
     cdef tuple fields = dct.pop('_fbthrift_SPEC')
     dct["_fbthrift_mutable_struct_info"] = MutableStructInfo(cls_name, fields)
 
-    cdef list field_descriptors = []
-
+    # Field values live in `_fbthrift_data`, so field-name __slots__ would be
+    # dead storage. Only `_fbthrift_field_cache` is a real slot.
     cdef list slots = ['_fbthrift_field_cache']
+    cdef Py_ssize_t field_index
+    cdef FieldInfo field_info
+    # Descriptors don't reference the class, so install them in `dct`
+    # pre-creation to avoid a `type.__setattr__` per field.
     for field_index, field_info in enumerate(fields):
-        slots.append(field_info.py_name)
-
         # if field has an adapter or is not primitive type, consider
         # as "non-primitive"
         if _is_primitive_field(field_info):
             descriptor_kls = _MutablePrimitiveField
         else:
             descriptor_kls = _MutableStructCachedField
-        is_optional = field_info.qualifier == FieldQualifier.Optional
-        field_descriptors.append((
-            field_info.py_name,
-            descriptor_kls(field_index, is_optional)
-        ))
+        is_optional = <int>field_info.qualifier == <int>FieldQualifier.Optional
+        dct[field_info.py_name] = descriptor_kls(field_index, is_optional)
 
     dct["__slots__"] = slots
     if "_fbthrift_abstract_base_class" in dct:
         bases += (dct.pop("_fbthrift_abstract_base_class"),)
     klass = type.__new__(cls, cls_name, bases, dct)
-
-    for field_name, descriptor in field_descriptors:
-        type.__setattr__(
-            klass,
-            field_name,
-            descriptor,
-        )
 
     return klass
 
@@ -1304,17 +1296,17 @@ class MutableUnionMeta(type):
                 else enum.Enum(f"{union_name}", _gen_mutable_union_field_enum_members(field_infos))
         )
 
-        slots = [field_info.py_name for field_info in field_infos]
-        union_class_namespace["__slots__"] = slots
+        # Field values live in the union's internal storage, so field-name
+        # __slots__ would be dead storage. Keep it empty (but present) to
+        # suppress a per-instance __dict__.
+        union_class_namespace["__slots__"] = []
+
+        # Descriptors don't reference the class, so install them pre-creation to
+        # avoid a `type.__setattr__` per field.
+        for field_info in field_infos:
+            union_class_namespace[field_info.py_name] = _MutableUnionFieldDescriptor(field_info)
 
         type_obj = super().__new__(cls, union_name, (MutableUnion,), union_class_namespace)
-
-        for field_info in field_infos:
-            type.__setattr__(
-                type_obj,
-                field_info.py_name,
-                _MutableUnionFieldDescriptor(field_info),
-            )
 
         return type_obj
 

@@ -2161,6 +2161,10 @@ cdef inline _is_primitive_field(FieldInfo field_info) noexcept:
         and not isinstance(field_info.type_info, AdaptedTypeInfo)
 
 
+cdef inline _wrap_if_deprecated(descriptor, FieldInfo field_info):
+    return descriptor if field_info.deprecation_message is None else _DeprecatedFieldWrapper(descriptor, field_info.deprecation_message)
+
+
 class StructMeta(type):
     """Metaclass for all generated (immutable) thrift-python Struct types."""
 
@@ -2194,15 +2198,31 @@ class StructMeta(type):
             )
         # Set[Tuple (field spec)]. See `StructInfo` class docstring for the
         # contents of the field spec tuples.
-        fields = dct.pop('_fbthrift_SPEC', ())
+        cdef tuple fields = dct.pop('_fbthrift_SPEC', ())
 
         layout = dct.pop('_fbthrift_internal_data_layout', <int>cInternalDataLayout.kStructFastComparable)
         cdef StructInfo struct_info = StructInfo(cls_name, fields, layout)
         dct["_fbthrift_struct_info"] = struct_info
 
         cdef list slots = []
-        for i, field_info in enumerate(fields):
-            slots.append(field_info.py_name)
+        cdef Py_ssize_t field_index
+        cdef FieldInfo field_info
+        # Field values live in `_fbthrift_data`, so field-name __slots__ would be
+        # dead storage — except under Cinder, where non-primitive fields cache on
+        # the slot descriptor (see `_make_non_primitive_property`).
+        if _fbthrift_is_cinder_runtime:
+            for field_info in fields:
+                if not _is_primitive_field(field_info):
+                    slots.append(field_info.py_name)
+
+        # Primitive descriptors don't reference the class, so install them in
+        # `dct` pre-creation to avoid a cache-invalidating `type.__setattr__` per
+        # field. Non-primitives need the class (Cinder cache) — set below.
+        for field_index, field_info in enumerate(fields):
+            if not _is_primitive_field(field_info):
+                continue
+            descriptor = _wrap_if_deprecated(_StructPrimitiveField(field_index, field_info.py_name), field_info)
+            dct[field_info.py_name] = descriptor
 
         if struct_info.layout == cInternalDataLayout.kStructWithDeprecatedIsset:
             slots.append('_fbthrift_is_locally_constructed')
@@ -2211,19 +2231,13 @@ class StructMeta(type):
         klass = super().__new__(cls, cls_name, all_bases, dct)
 
         for field_index, field_info in enumerate(fields):
-            field_name = field_info.py_name
             if _is_primitive_field(field_info):
-                descriptor = _StructPrimitiveField(field_index, field_name)
-            else:
-                descriptor = _make_non_primitive_property(
-                    klass,
-                    field_index,
-                    field_name,
-                )
-
-            if field_info.deprecation_message is not None:
-                descriptor = _DeprecatedFieldWrapper(descriptor, field_info.deprecation_message)
-
+                continue
+            field_name = field_info.py_name
+            descriptor = _wrap_if_deprecated(
+                _make_non_primitive_property(klass, field_index, field_name),
+                field_info,
+            )
             type.__setattr__(klass, field_name, descriptor)
 
         klass.__setattr__, klass.__delattr__ = _make_readonly_mutate_attr()
@@ -2323,17 +2337,17 @@ class UnionMeta(type):
         union_class_namespace["_fbthrift_struct_info"] = UnionInfo(
             union_name, field_infos
         )
-        cdef list slots = []
+        # Field values live in the union's internal storage, so field-name
+        # __slots__ would be dead storage. Keep it empty (but present) to
+        # suppress a per-instance __dict__.
+        union_class_namespace["__slots__"] = []
+        # Properties don't reference the class, so install them pre-creation to
+        # avoid a `type.__setattr__` per field.
         for field_info in field_infos:
-            slots.append(field_info.py_name)
-        union_class_namespace["__slots__"] = slots
-        klass = super().__new__(cls, union_name, (Union,), union_class_namespace)
-        for field_info in field_infos:
-            type.__setattr__(
-                klass,
-                field_info.py_name,
-                _make_fget_union(field_info.id, field_info.adapter_info),
+            union_class_namespace[field_info.py_name] = _make_fget_union(
+                field_info.id, field_info.adapter_info
             )
+        klass = super().__new__(cls, union_name, (Union,), union_class_namespace)
 
         FbThriftUnionFieldEnum = (
             union_class_namespace.pop('_fbthrift_abstract_base_class').FbThriftUnionFieldEnum

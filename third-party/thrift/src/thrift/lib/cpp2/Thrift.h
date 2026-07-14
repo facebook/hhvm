@@ -318,7 +318,10 @@ constexpr bool is_thrift_service_tag_v = //
         apache::thrift::Client<T>> ||
     folly::is_detected_v<
         detail::st::detect_complete,
-        apache::thrift::ServiceHandler<T>>;
+        apache::thrift::ServiceHandler<T>> ||
+    folly::is_detected_v<
+        detail::st::detect_complete,
+        apache::thrift::FastServiceHandler<T>>;
 
 template <typename T, typename Fallback>
 using type_class_of_thrift_class_or_t = //

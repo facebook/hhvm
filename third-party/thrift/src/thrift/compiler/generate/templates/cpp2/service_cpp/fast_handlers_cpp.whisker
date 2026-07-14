@@ -40,6 +40,22 @@ void FastServiceHandler<{{service.qualified_name}}>::getServiceMetadata(
     ::apache::thrift::metadata::ThriftServiceMetadataResponse& response) {
   ::apache::thrift::detail::md::ServiceMetadata<::apache::thrift::ServiceHandler<{{service.qualified_name}}>>::gen(response);
 }
+  {{#if service.program.has_schema_const?}}
+
+std::optional<::apache::thrift::schema::DefinitionsSchema>
+FastServiceHandler<{{service.qualified_name}}>::getServiceSchema() {
+  std::optional<::apache::thrift::schema::DefinitionsSchema> ret =
+      ::apache::thrift::schema::DefinitionsSchema{};
+  ret->schema = ::apache::thrift::schema::detail::loadBundledSchema(::{{service.cpp_qualified_namespace}}::{{service.program.name}}_constants::{{service.program.schema_const_name}}_includes());
+  ret->definitions = { {"{{service.definition_key.buffer}}", {{service.definition_key.length}}} };
+  return ret;
+}
+
+std::vector<folly::not_null<const ::apache::thrift::syntax_graph::ServiceNode*>>
+FastServiceHandler<{{service.qualified_name}}>::getServiceSchemaNodes() {
+  return {&::apache::thrift::SchemaRegistry::get().getNode<{{service.qualified_name}}>()};
+}
+  {{/if service.program.has_schema_const?}}
 
 } // namespace apache::thrift
 

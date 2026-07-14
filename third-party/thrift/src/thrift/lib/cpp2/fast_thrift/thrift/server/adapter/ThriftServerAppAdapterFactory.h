@@ -17,11 +17,19 @@
 #pragma once
 
 #include <memory>
+#include <optional>
+#include <vector>
 
 #include <folly/io/async/DelayedDestruction.h>
+#include <folly/memory/not_null.h>
 
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/adapter/ThriftServerAppAdapter.h>
+#include <thrift/lib/cpp2/schema/SchemaV1.h>
 #include <thrift/lib/thrift/gen-cpp2/metadata_types.h>
+
+namespace apache::thrift::syntax_graph {
+class ServiceNode;
+} // namespace apache::thrift::syntax_graph
 
 namespace apache::thrift::fast_thrift::thrift {
 
@@ -55,6 +63,23 @@ class ThriftServerAppAdapterFactory {
   // Default no-op so non-generated factories don't need to participate.
   virtual void getServiceMetadata(
       apache::thrift::metadata::ThriftServiceMetadataResponse& /*response*/) {}
+
+  // Reflect the service's runtime schema. Generated FastServiceHandler<S>
+  // overrides these (only when the schema is statically bundled) to return the
+  // same data as the legacy ServiceHandler<S>, keyed on the service tag.
+  // Consumed at start-serving by schema-driven interceptors (e.g.
+  // authorization). Default empty so non-generated factories need not
+  // participate.
+  virtual std::optional<::apache::thrift::schema::DefinitionsSchema>
+  getServiceSchema() {
+    return {};
+  }
+
+  virtual std::vector<
+      folly::not_null<const ::apache::thrift::syntax_graph::ServiceNode*>>
+  getServiceSchemaNodes() {
+    return {};
+  }
 };
 
 } // namespace apache::thrift::fast_thrift::thrift

@@ -59,6 +59,17 @@ class FastServiceHandler<{{service.qualified_name}}>
   // truth as <Service>AsyncProcessor::getServiceMetadata.
   void getServiceMetadata(
       ::apache::thrift::metadata::ThriftServiceMetadataResponse& response) override;
+  {{#if service.program.has_schema_const?}}
+
+  // Reflect the runtime schema for {{service.qualified_name}}. Same data as the
+  // legacy ServiceHandler<S>; emitted only when the schema is statically
+  // bundled. Consumed by schema-driven interceptors (e.g. authorization).
+  std::optional<::apache::thrift::schema::DefinitionsSchema> getServiceSchema()
+      override;
+  std::vector<
+      folly::not_null<const ::apache::thrift::syntax_graph::ServiceNode*>>
+  getServiceSchemaNodes() override;
+  {{/if service.program.has_schema_const?}}
 
   {{#each service.functions as |function|}}
   {{#if (and (not function.starts_interaction?) (not function.stream?) (not function.sink?) (not function.oneway?))}}

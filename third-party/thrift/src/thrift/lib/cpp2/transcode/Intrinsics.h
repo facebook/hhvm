@@ -19,5 +19,6 @@
 // Extern "C" intrinsics resolved by JIT-compiled kernels and called by the
 // interpreter.
 
+#include <thrift/lib/cpp2/transcode/BinaryIntrinsics.h>
 #include <thrift/lib/cpp2/transcode/Cursor.h>
 #include <thrift/lib/cpp2/transcode/IntrinsicsCommon.h>

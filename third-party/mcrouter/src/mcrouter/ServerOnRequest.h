@@ -84,6 +84,23 @@ inline std::optional<std::string> nonLookasideKcbIdentity(
   }
   return std::nullopt;
 }
+
+// Returns the `kcb_identity` header value iff present and non-empty. No CAT
+// verification -- verbatim passthrough, leaving the check to the backend.
+inline std::optional<std::string> rawKcbIdentityHeader(
+    const apache::thrift::Cpp2RequestContext& ctx) {
+  const auto* header = ctx.getHeader();
+  if (!header) {
+    return std::nullopt;
+  }
+  const auto& headers = header->getHeaders();
+  const auto it =
+      headers.find(std::string(carbon::MessageCommon::kKcbIdentityHeader));
+  if (it == headers.end() || it->second.empty()) {
+    return std::nullopt;
+  }
+  return it->second;
+}
 } // namespace detail
 #endif
 
@@ -277,6 +294,13 @@ class ServerOnRequest {
               getUnverifiedSerializedTokensFromHeader(*thriftCtx);
       if (serializedCat.has_value()) {
         reqRef.setCryptoAuthToken(std::string{serializedCat.value()});
+      }
+
+      // Forward the client's `kcb_identity` header verbatim; the branches above
+      // only set `client_identifier`, so the backend's non-lookaside path needs
+      // this to see the header at all. The vouching CAT is forwarded above.
+      if (auto rawKcbIdentity = detail::rawKcbIdentityHeader(*thriftCtx)) {
+        reqRef.setKcbIdentity(*rawKcbIdentity);
       }
     }
 #endif

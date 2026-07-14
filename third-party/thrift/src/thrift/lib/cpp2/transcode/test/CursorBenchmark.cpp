@@ -104,11 +104,11 @@ FOLLY_NOINLINE void benchmarkEnsureWriteOne(TranscodeCursor* cursor) {
 }
 
 FOLLY_NOINLINE void benchmarkWriteByte(TranscodeCursor* cursor) {
-  thrift_transcode_write_byte(cursor, 0x5a);
+  thrift_transcode_write_byte_checked(cursor, 0x5a);
 }
 
 FOLLY_NOINLINE void benchmarkWriteFixed32BE(TranscodeCursor* cursor) {
-  thrift_transcode_write_fixed32_be(cursor, 0x12345678);
+  thrift_transcode_write_fixed32_be_checked(cursor, 0x12345678);
 }
 
 FOLLY_NOINLINE void benchmarkWriteVarint(TranscodeCursor* cursor) {
@@ -117,7 +117,7 @@ FOLLY_NOINLINE void benchmarkWriteVarint(TranscodeCursor* cursor) {
 
 FOLLY_NOINLINE void benchmarkWriteRawBytes(
     TranscodeCursor* cursor, const uint8_t* data, size_t len) {
-  thrift_transcode_write_raw_bytes(cursor, data, len);
+  thrift_transcode_write_raw_bytes_checked(cursor, data, len);
 }
 
 FOLLY_NOINLINE void benchmarkFlush(TranscodeCursor* cursor) {

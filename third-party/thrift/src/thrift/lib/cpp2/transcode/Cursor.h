@@ -236,8 +236,11 @@ void thrift_transcode_cursor_patch_i32_be(
 
 namespace apache::thrift::transcode::detail {
 
-// Latch the first error onto the cursor; once set, every read/write becomes a
-// no-op so failures propagate without per-call branching in the codegen.
+// Latch the first cursor error. Hot intrinsics validate the bytes needed for
+// their own read or write, but they are not cancellation points for an error
+// that was already latched by an earlier intrinsic. The execution engine must
+// check `cursor->error` at its dispatch boundaries and stop before issuing
+// another protocol operation.
 inline void setError(TranscodeCursor* cursor, int64_t code) {
   if (cursor->error == 0) {
     cursor->error = code;

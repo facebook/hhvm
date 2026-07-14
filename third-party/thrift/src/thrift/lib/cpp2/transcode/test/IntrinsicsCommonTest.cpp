@@ -89,17 +89,6 @@ TEST(IntrinsicsCommonTest, UnsignedVarintRoundTrip) {
   }
 }
 
-TEST(IntrinsicsCommonTest, UnsignedVarintReadIsNoopAfterError) {
-  const std::vector<uint8_t> data = {0x01};
-  auto cursor = makeReader(data);
-  const uint8_t* initialReadPos = cursor.readPos;
-  cursor.error = 7;
-
-  EXPECT_EQ(thrift_transcode_read_unsigned_varint(&cursor), 0);
-  EXPECT_EQ(cursor.readPos, initialReadPos);
-  EXPECT_EQ(cursor.error, 7);
-}
-
 TEST(IntrinsicsCommonTest, UnsignedVarintRejectsOverflowingTenthByte) {
   std::vector<uint8_t> data(9, 0xff);
   data.push_back(0x02);
@@ -135,21 +124,20 @@ TEST(IntrinsicsCommonTest, UnsignedVarintWriteUsesEncodedSizeTailroom) {
   EXPECT_EQ(output[0], 1);
 }
 
-TEST(IntrinsicsCommonTest, UnsignedVarintWriteIsNoopAfterError) {
+TEST(IntrinsicsCommonTest, UnsignedVarintWriteStopsAfterEnsureWriteFailure) {
   std::array<uint8_t, 1> output{};
   TranscodeCursor cursor{};
   thrift_transcode_cursor_init(
       &cursor,
       /*input=*/{nullptr, nullptr},
-      {output.data(), output.data() + output.size()},
+      {output.data(), output.data()},
       /*extendFn=*/nullptr,
       /*flushFn=*/nullptr,
       /*userData=*/nullptr);
-  cursor.error = 7;
 
   thrift_transcode_write_unsigned_varint(&cursor, 1);
 
-  EXPECT_EQ(cursor.error, 7);
+  EXPECT_NE(cursor.error, 0);
   EXPECT_EQ(cursor.writePos, output.data());
   EXPECT_EQ(output[0], 0);
 }
@@ -176,48 +164,86 @@ TEST(IntrinsicsCommonTest, ZigzagVarintRoundTrip) {
 TEST(IntrinsicsCommonTest, ByteRoundTrip) {
   RoundTrip rt;
   auto w = rt.writer();
-  thrift_transcode_write_byte(&w, 0xAB);
+  thrift_transcode_write_byte_checked(&w, 0xAB);
   ASSERT_EQ(w.error, 0);
   auto r = rt.reader(w);
-  EXPECT_EQ(thrift_transcode_read_byte(&r), 0xAB);
+  EXPECT_EQ(thrift_transcode_read_byte_checked(&r), 0xAB);
   EXPECT_EQ(r.error, 0);
 }
 
 TEST(IntrinsicsCommonTest, Fixed16BeRoundTrip) {
   RoundTrip rt;
   auto w = rt.writer();
-  thrift_transcode_write_fixed16_be(&w, 0x1234);
+  thrift_transcode_write_fixed16_be_checked(&w, 0x1234);
   ASSERT_EQ(w.error, 0);
   auto r = rt.reader(w);
-  EXPECT_EQ(thrift_transcode_read_fixed16_be(&r), 0x1234);
+  EXPECT_EQ(thrift_transcode_read_fixed16_be_checked(&r), 0x1234);
 }
 
 TEST(IntrinsicsCommonTest, Fixed32RoundTrip) {
   RoundTrip beRt;
   auto beW = beRt.writer();
-  thrift_transcode_write_fixed32_be(&beW, 0x12345678u);
+  thrift_transcode_write_fixed32_be_checked(&beW, 0x12345678u);
   auto beR = beRt.reader(beW);
-  EXPECT_EQ(thrift_transcode_read_fixed32_be(&beR), 0x12345678u);
+  EXPECT_EQ(thrift_transcode_read_fixed32_be_checked(&beR), 0x12345678u);
 
   RoundTrip leRt;
   auto leW = leRt.writer();
-  thrift_transcode_write_fixed32_le(&leW, 0x12345678u);
+  thrift_transcode_write_fixed32_le_checked(&leW, 0x12345678u);
   auto leR = leRt.reader(leW);
-  EXPECT_EQ(thrift_transcode_read_fixed32_le(&leR), 0x12345678u);
+  EXPECT_EQ(thrift_transcode_read_fixed32_le_checked(&leR), 0x12345678u);
 }
 
 TEST(IntrinsicsCommonTest, Fixed64RoundTrip) {
   RoundTrip beRt;
   auto beW = beRt.writer();
-  thrift_transcode_write_fixed64_be(&beW, 0x1122334455667788ull);
+  thrift_transcode_write_fixed64_be_checked(&beW, 0x1122334455667788ull);
   auto beR = beRt.reader(beW);
-  EXPECT_EQ(thrift_transcode_read_fixed64_be(&beR), 0x1122334455667788ull);
+  EXPECT_EQ(
+      thrift_transcode_read_fixed64_be_checked(&beR), 0x1122334455667788ull);
 
   RoundTrip leRt;
   auto leW = leRt.writer();
-  thrift_transcode_write_fixed64_le(&leW, 0x1122334455667788ull);
+  thrift_transcode_write_fixed64_le_checked(&leW, 0x1122334455667788ull);
   auto leR = leRt.reader(leW);
-  EXPECT_EQ(thrift_transcode_read_fixed64_le(&leR), 0x1122334455667788ull);
+  EXPECT_EQ(
+      thrift_transcode_read_fixed64_le_checked(&leR), 0x1122334455667788ull);
+}
+
+TEST(IntrinsicsCommonTest, UncheckedFixedOperationsUseCallerProvidedSpace) {
+  std::array<uint8_t, 15> output{};
+  TranscodeCursor writer{};
+  thrift_transcode_cursor_init(
+      &writer,
+      /*input=*/{nullptr, nullptr},
+      {output.data(), output.data() + output.size()},
+      /*extendFn=*/nullptr,
+      /*flushFn=*/nullptr,
+      /*userData=*/nullptr);
+
+  thrift_transcode_write_byte_unchecked(&writer, 0xAB);
+  thrift_transcode_write_fixed16_be_unchecked(&writer, 0x1234);
+  thrift_transcode_write_fixed32_be_unchecked(&writer, 0x56789ABCu);
+  thrift_transcode_write_fixed64_le_unchecked(&writer, 0x1122334455667788ull);
+
+  TranscodeCursor reader{};
+  thrift_transcode_cursor_init(
+      &reader,
+      {output.data(), writer.writePos},
+      {output.data(), output.data() + output.size()},
+      /*extendFn=*/nullptr,
+      /*flushFn=*/nullptr,
+      /*userData=*/nullptr);
+
+  EXPECT_EQ(thrift_transcode_read_byte_unchecked(&reader), 0xAB);
+  EXPECT_EQ(thrift_transcode_read_fixed16_be_unchecked(&reader), 0x1234);
+  EXPECT_EQ(thrift_transcode_read_fixed32_be_unchecked(&reader), 0x56789ABCu);
+  EXPECT_EQ(
+      thrift_transcode_read_fixed64_le_unchecked(&reader),
+      0x1122334455667788ull);
+  EXPECT_EQ(reader.readPos, writer.writePos);
+  EXPECT_EQ(writer.error, 0);
+  EXPECT_EQ(reader.error, 0);
 }
 
 template <typename Value, typename WriteFn>
@@ -240,15 +266,15 @@ void expectFixedWriteFailsWithNoTailroom(WriteFn writeFn, Value value) {
 
 TEST(IntrinsicsCommonTest, FixedWritersStopAfterEnsureWriteFailure) {
   expectFixedWriteFailsWithNoTailroom(
-      thrift_transcode_write_fixed16_be, uint16_t{0x1234});
+      thrift_transcode_write_fixed16_be_checked, uint16_t{0x1234});
   expectFixedWriteFailsWithNoTailroom(
-      thrift_transcode_write_fixed32_be, uint32_t{0x12345678});
+      thrift_transcode_write_fixed32_be_checked, uint32_t{0x12345678});
   expectFixedWriteFailsWithNoTailroom(
-      thrift_transcode_write_fixed64_be, uint64_t{0x1122334455667788});
+      thrift_transcode_write_fixed64_be_checked, uint64_t{0x1122334455667788});
   expectFixedWriteFailsWithNoTailroom(
-      thrift_transcode_write_fixed32_le, uint32_t{0x12345678});
+      thrift_transcode_write_fixed32_le_checked, uint32_t{0x12345678});
   expectFixedWriteFailsWithNoTailroom(
-      thrift_transcode_write_fixed64_le, uint64_t{0x1122334455667788});
+      thrift_transcode_write_fixed64_le_checked, uint64_t{0x1122334455667788});
 }
 
 // Big-endian and little-endian must lay the same value out in opposite byte
@@ -256,17 +282,17 @@ TEST(IntrinsicsCommonTest, FixedWritersStopAfterEnsureWriteFailure) {
 TEST(IntrinsicsCommonTest, BigEndianDiffersFromLittleEndian) {
   RoundTrip beRt;
   auto beW = beRt.writer();
-  thrift_transcode_write_fixed32_be(&beW, 0x12345678u);
+  thrift_transcode_write_fixed32_be_checked(&beW, 0x12345678u);
   auto beR = beRt.reader(beW);
 
   RoundTrip leRt;
   auto leW = leRt.writer();
-  thrift_transcode_write_fixed32_le(&leW, 0x12345678u);
+  thrift_transcode_write_fixed32_le_checked(&leW, 0x12345678u);
   auto leR = leRt.reader(leW);
 
   // First emitted byte is the high byte for BE, the low byte for LE.
-  EXPECT_EQ(thrift_transcode_read_byte(&beR), 0x12);
-  EXPECT_EQ(thrift_transcode_read_byte(&leR), 0x78);
+  EXPECT_EQ(thrift_transcode_read_byte_checked(&beR), 0x12);
+  EXPECT_EQ(thrift_transcode_read_byte_checked(&leR), 0x78);
 }
 
 TEST(IntrinsicsCommonTest, I32PrefixedWriteRejectsSignedOverflowLength) {

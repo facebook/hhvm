@@ -671,8 +671,11 @@ TypeParserImpl::interpretLocAddress(const DWARFContextManager& dwarfContext,
 
   llvm::DataExtractor extractor(
     *attr.Value.getAsBlock(),
-    dwarfContext.getDWARFContext()->isLittleEndian(),
+    dwarfContext.getDWARFContext()->isLittleEndian()
+#if LLVM_VERSION_MAJOR < 23
+    ,
     dieContext.die.getDwarfUnit()->getAddressByteSize()
+#endif
   );
 
   if (extractor.size() != 1) return std::nullopt;

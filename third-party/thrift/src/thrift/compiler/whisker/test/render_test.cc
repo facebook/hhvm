@@ -1581,11 +1581,24 @@ TEST_F(RenderTest, with_not_map) {
       diagnostics(),
       testing::ElementsAre(diagnostic(
           diagnostic_level::error,
-          "Expression 'news' does not evaluate to a map. The encountered value is:\n"
+          "Expression 'news' does not evaluate to a map or native object. The encountered value is:\n"
           "array (size=1)\n"
           "╰─ [0] i64(0)\n",
           path_to_file,
           1)));
+}
+
+TEST_F(RenderTest, with_null) {
+  // A null operand renders nothing (the block is skipped), even in strict mode.
+  auto result = render(
+      "before\n"
+      "{{#with maybe}}\n"
+      "{{name}}\n"
+      "{{/with}}\n"
+      "after\n",
+      w::map({{"maybe", w::null}}));
+  EXPECT_THAT(diagnostics(), testing::IsEmpty());
+  EXPECT_EQ(*result, "before\nafter\n");
 }
 
 TEST_F(RenderTest, with_custom_map) {
@@ -1602,6 +1615,29 @@ TEST_F(RenderTest, with_custom_map) {
       *result,
       "foofoo barbar\n"
       "bazbaz\n");
+}
+
+TEST_F(RenderTest, with_native_handle) {
+  class SomeCppObject {
+   public:
+    int get() const { return 7; }
+  };
+  SomeCppObject cpp_object;
+
+  using handle_type = dsl::named_native_handle<"proto", SomeCppObject>;
+  const auto proto = dsl::make_prototype<handle_type>([](auto&& def) {
+    def.property("name", [](const SomeCppObject&) { return w::string("obj"); });
+    def.property(
+        "value", [](const SomeCppObject& self) { return w::i64(self.get()); });
+  });
+
+  auto result = render(
+      "{{#with foo}}\n"
+      "{{name}}={{value}}\n"
+      "{{/with}}\n",
+      w::map({{"foo", w::native_handle(manage_as_static(cpp_object), proto)}}));
+  EXPECT_THAT(diagnostics(), testing::IsEmpty());
+  EXPECT_EQ(*result, "obj=7\n");
 }
 
 TEST_F(RenderTest, each_block_array) {

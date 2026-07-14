@@ -1286,17 +1286,21 @@ class render_engine {
   void visit(const ast::with_block& with_block) {
     const ast::expression& expr = with_block.value;
     object result = vm_.evaluate(expr);
-    result.visit(
-        [&](const map::ptr&) {
-          // maps can be de-structured.
-        },
-        [&](auto&&) {
-          vm_.diags().report_fatal_error(
-              expr.loc.begin,
-              "Expression '{}' does not evaluate to a map. The encountered value is:\n{}",
-              expr.to_string(),
-              to_string(result));
-        });
+    if (result.is_null()) {
+      // A null operand renders nothing — the block is skipped. This mirrors the
+      // Mustache section behavior for an absent object and lets templates use
+      // {{#with}} on optional maps without a guarding conditional.
+      return;
+    }
+    if (!result.is_map() && !result.is_native_handle()) {
+      // A map or a native object (both provide map-like property access) can be
+      // de-structured; anything else is an error.
+      vm_.diags().report_fatal_error(
+          expr.loc.begin,
+          "Expression '{}' does not evaluate to a map or native object. The encountered value is:\n{}",
+          expr.to_string(),
+          to_string(result));
+    }
     eval_ctx().push_scope(std::move(result));
     visit(with_block.body_elements);
     eval_ctx().pop_scope();

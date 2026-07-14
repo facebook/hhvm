@@ -631,6 +631,12 @@ class virtual_machine {
     object result = evaluate(expr);
     return result.visit(
         [&](boolean value) { return value; },
+        [&](null) {
+          // null is always falsy and is accepted even in strict mode, so an
+          // absent/optional value can be used directly as a condition without
+          // a coercion diagnostic.
+          return false;
+        },
         [&](const auto& value) {
           maybe_report_boolean_coercion(expr, result);
           return coerce_to_boolean(value);

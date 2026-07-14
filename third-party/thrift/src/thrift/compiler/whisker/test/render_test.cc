@@ -534,6 +534,15 @@ TEST_F(RenderTest, if_block) {
   }
 }
 
+TEST_F(RenderTest, if_null_is_falsy) {
+  // A null condition is falsy and accepted even in strict mode (no coercion
+  // diagnostic), so an optional value can be used directly as a condition.
+  auto result = render(
+      "{{#if maybe}}yes{{#else}}no{{/if maybe}}", w::map({{"maybe", w::null}}));
+  EXPECT_THAT(diagnostics(), testing::IsEmpty());
+  EXPECT_EQ(*result, "no");
+}
+
 TEST_F(RenderTest, unless_block) {
   {
     auto result = render(

@@ -340,6 +340,10 @@ template <typename S> struct Key {
     : storage{header}
   { proxy.initStorage(storage); }
 
+  template <typename P>
+  explicit Key(std::tuple<Header, P> k)
+    : Key(std::get<0>(k), std::get<1>(k)) {}
+
   Key(Key&&) = default;
   Key(const Key&) = delete;
   Key& operator=(const Key&) = delete;
@@ -835,10 +839,9 @@ void setImpl(MemoCacheBase*& base,
   assertx(val.m_type != KindOfUninit);
   if (!base) base = req::make_raw<MemoCache<K>>();
   auto& cache = getCache<MemoCache<K>>(base);
-  auto [it, inserted] = cache.emplace(
-    std::piecewise_construct,
-    std::forward_as_tuple(header, keys),
-    std::forward_as_tuple(val)
+  auto [it, inserted] = cache.try_emplace(
+    std::make_tuple(header, keys),
+    val
   );
   // www relies on the behavior of last set winning
   if (!inserted) {

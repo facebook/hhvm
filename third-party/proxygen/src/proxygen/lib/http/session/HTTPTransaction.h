@@ -1675,6 +1675,18 @@ class HTTPTransaction
     HttpWtClientCallbackPtr upstreamWtCb_;
   } wtCtx_;
 
+  // Whether the stream has been upgraded to some other protocol
+  enum class UpgradeStatus : uint8_t { None, Pending, Upgraded };
+  UpgradeStatus getUpgradeStatus() const {
+    return upgraded_;
+  }
+  bool isUpgradePending() const {
+    return upgraded_ == UpgradeStatus::Pending;
+  }
+  bool isUpgradeComplete() const {
+    return upgraded_ == UpgradeStatus::Upgraded;
+  }
+
  private:
   HTTPTransaction(const HTTPTransaction&) = delete;
   HTTPTransaction& operator=(const HTTPTransaction&) = delete;
@@ -1795,10 +1807,7 @@ class HTTPTransaction
   // and returns the number of bytes written to the transport
   size_t maybeSendDeferredNoError();
 
-  // Whether the stream has been upgraded to some other protocol
-  bool isUpgraded() const {
-    return upgraded_ || wtConnectStream_;
-  }
+  void checkForUpgrade(const HTTPMessage& msg) noexcept;
 
   // Whether we have bytes event observers
   bool hasBytesEventObservers();
@@ -1982,9 +1991,6 @@ class HTTPTransaction
   // headers have been delivered.
   bool egressHeadersDelivered_ : 1;
 
-  // Whether the HTTPTransaction has sent out a 1xx response HTTPMessage.
-  bool has1xxResponse_ : 1;
-
   /**
    * If set, the transaction will flush a RST_STREAM/NO_ERROR (h2) or
    * STOP_SENDING/NO_ERROR (h3) after eom. This is only set if ::abort() is
@@ -1993,7 +1999,7 @@ class HTTPTransaction
    */
   bool deferredNoError_ : 1;
 
-  bool upgraded_ : 1;
+  UpgradeStatus upgraded_;
 
   /**
    * If this transaction represents a request (ie, it is backed by an

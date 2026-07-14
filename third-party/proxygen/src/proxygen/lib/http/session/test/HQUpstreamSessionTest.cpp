@@ -38,6 +38,14 @@ using namespace std::chrono;
 namespace {
 constexpr quic::StreamId kQPACKEncoderIngressStreamId = 7;
 constexpr quic::StreamId kQPACKDecoderEgressStreamId = 10;
+
+HTTPMessage makeConnectUdpReq() {
+  HTTPMessage msg;
+  msg.setMethod(HTTPMethod::CONNECT);
+  msg.setUpgradeProtocol("connect-udp");
+  return msg;
+}
+
 } // namespace
 
 std::pair<HTTPCodec::StreamID, std::unique_ptr<HTTPCodec>>
@@ -1366,7 +1374,7 @@ TEST_P(HQUpstreamSessionTestDatagram, TestReceiveDatagram) {
   MockHTTPTransactionTransportCallback transportCallback_;
   handler->txn_->setTransportCallback(&transportCallback_);
   EXPECT_CALL(transportCallback_, datagramBytesReceived(::testing::_)).Times(1);
-  handler->txn_->sendHeaders(getGetRequest());
+  handler->txn_->sendHeaders(makeConnectUdpReq());
   handler->txn_->sendEOM();
   auto resp = makeResponse(200, 0);
   sendResponse(id, *std::get<0>(resp), std::move(std::get<1>(resp)), false);
@@ -1391,8 +1399,9 @@ TEST_P(HQUpstreamSessionTestDatagram, TestReceiveEarlyDatagramsSingleStream) {
   auto handler = openTransaction();
   auto id = handler->txn_->getID();
   EXPECT_GT(handler->txn_->getDatagramSizeLimit(), 0);
-  handler->txn_->sendHeaders(getGetRequest());
+  handler->txn_->sendHeaders(makeConnectUdpReq());
   handler->txn_->sendEOM();
+  EXPECT_TRUE(handler->txn_->isUpgradePending());
   for (auto i = 0; i < kDefaultMaxBufferedDatagrams * 2; ++i) {
     auto h3Datagram =
         getH3Datagram(id, folly::IOBuf::wrapBuffer("testtest", 8));
@@ -1405,6 +1414,7 @@ TEST_P(HQUpstreamSessionTestDatagram, TestReceiveEarlyDatagramsSingleStream) {
   EXPECT_CALL(*handler, _onDatagram(testing::_))
       .Times(kDefaultMaxBufferedDatagrams);
   flushAndLoopN(1);
+  EXPECT_TRUE(handler->txn_->isUpgradeComplete());
   auto it = streams_.find(id);
   CHECK(it != streams_.end());
   auto& stream = it->second;
@@ -1425,7 +1435,7 @@ TEST_P(HQUpstreamSessionTestDatagram, TestReceiveEarlyDatagramsMultiStream) {
     auto handler = handlers.back().get();
     auto id = handler->txn_->getID();
     EXPECT_GT(handler->txn_->getDatagramSizeLimit(), 0);
-    handler->txn_->sendHeaders(getGetRequest());
+    handler->txn_->sendHeaders(makeConnectUdpReq());
     handler->txn_->sendEOM();
     auto h3Datagram =
         getH3Datagram(id, folly::IOBuf::wrapBuffer("testtest", 8));

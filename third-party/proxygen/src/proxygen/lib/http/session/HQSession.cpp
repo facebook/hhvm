@@ -2631,7 +2631,8 @@ void HQSession::HQStreamTransportBase::onHeadersComplete(
 
   // Inform observers when request headers (i.e. ingress, from downstream
   // client) are processed.
-  if (isDownstream(session_.direction_)) {
+  const bool downstream = isDownstream(session_.direction_);
+  if (downstream) {
     if (msg.get()) {
       const auto event =
           HTTPSessionObserverInterface::RequestStartedEvent::Builder()
@@ -2709,6 +2710,7 @@ void HQSession::HQStreamTransportBase::onHeadersComplete(
   // the current transaction (no push promise) or to a freshly created
   // pushed transaction. The latter is done via "onPushPromiseHeadersComplete"
   // callback
+  const bool isResp = msg->isResponse();
   if (ingressPushId_) {
     onPushPromiseHeadersComplete(*ingressPushId_, streamID, std::move(msg));
     ingressPushId_ = folly::none;
@@ -2720,17 +2722,8 @@ void HQSession::HQStreamTransportBase::onHeadersComplete(
     httpSessionActivityTracker->reportActivity();
   }
 
-  // The stream can now receive datagrams: check for any pending datagram and
-  // deliver it to the handler
-  if (session_.datagramEnabled_ && !session_.datagramsBuffer_.empty()) {
-    auto itr = session_.datagramsBuffer_.find(streamId);
-    if (itr != session_.datagramsBuffer_.end()) {
-      auto& vec = itr->second;
-      for (auto& datagram : vec) {
-        txn_.onDatagram(std::move(datagram));
-      }
-      session_.datagramsBuffer_.erase(itr);
-    }
+  if (!downstream && isResp) {
+    onResponse();
   }
 }
 
@@ -2961,6 +2954,9 @@ void HQSession::HQStreamTransportBase::sendHeaders(HTTPTransaction* txn,
   }
 
   tryWtSession(*txn, headers, includeEOM);
+  if (!upstream && headers.isResponse()) {
+    onResponse();
+  }
 }
 
 size_t HQSession::HQStreamTransportBase::sendEOM(
@@ -3647,15 +3643,13 @@ void HQSession::HQStreamTransport::onPushPromiseHeadersComplete(
 void HQSession::onDatagramsAvailable() noexcept {
   auto result = sock_->readDatagramBufs();
   if (result.hasError()) {
-    LOG(ERROR) << "Got error while reading datagrams: error="
-               << toString(result.error());
+    LOG(ERROR) << "::readDatagramBufs err=" << toString(result.error());
     dropConnectionAsync(quic::QuicError(HTTP3::ErrorCode::HTTP_INTERNAL_ERROR,
                                         "H3_DATAGRAM: internal error "),
                         kErrorConnection);
     return;
   }
-  VLOG(4) << "Received " << result.value().size()
-          << " datagrams. sess=" << *this;
+  VLOG(4) << "nDatagrams=" << result.value().size() << " sess=" << *this;
   for (auto& datagram : result.value()) {
     folly::io::Cursor cursor(datagram.get());
     auto quarterStreamId = quic::follyutils::decodeQuicInteger(cursor);
@@ -3666,26 +3660,20 @@ void HQSession::onDatagramsAvailable() noexcept {
           kErrorConnection);
       break;
     }
-    auto streamId = quarterStreamId->first * 4;
-    auto stream = findNonDetachedStream(streamId);
-    quic::Optional<std::pair<uint64_t, size_t>> ctxId;
-    if (!stream || (!stream->txn_.isWebTransportConnectStream() &&
-                    !stream->txn_.isConnectUdpStream())) {
-      // TODO: draft 8 and rfc don't include context ID
-      ctxId = quic::follyutils::decodeQuicInteger(cursor);
-      if (!ctxId) {
-        dropConnectionAsync(
-            quic::QuicError(HTTP3::ErrorCode::HTTP_GENERAL_PROTOCOL_ERROR,
-                            "H3_DATAGRAM: error decoding context-id"),
-            kErrorConnection);
-      }
-    }
-    quic::BufQueue datagramQ;
-    datagramQ.append(std::move(datagram));
-    datagramQ.trimStart(quarterStreamId->second + (ctxId ? ctxId->second : 0));
+    const uint64_t streamId = quarterStreamId->first * 4;
+    auto* stream = findNonDetachedStream(streamId);
+    quic::BufQueue datagramQ{std::move(datagram)};
+    datagramQ.trimStart(quarterStreamId->second);
 
-    if (!stream || !stream->hasHeaders_) {
-      VLOG(4) << "Stream cannot receive datagrams yet. streamId=" << streamId
+    /**
+     * we should buffer if any of the following hold:
+     *  - stream doesn't exist
+     *  - upstream txn hasn't received 2xx headers yet
+     *  - downstream txn hasn't sent 2xx headers yet
+     */
+    const bool shouldBuffer = !stream || stream->txn_.isUpgradePending();
+    if (shouldBuffer) {
+      VLOG(4) << "buffering dgram streamId=" << streamId
               << " len=" << datagramQ.chainLength() << " sess=" << *this;
       // TODO: a possible optimization would be to discard datagrams destined
       // to streams that were already closed
@@ -3703,14 +3691,9 @@ void HQSession::onDatagramsAvailable() noexcept {
       continue;
     }
 
-    VLOG(4) << "Received datagram for streamId=" << streamId << " ctx="
-            << (ctxId ? folly::to<std::string>(ctxId->first) : std::string())
-            << " len=" << datagramQ.chainLength() << " sess=" << *this;
-    if (stream->wtSess_) {
-      // refresh ingress timeout
-      stream->txn_.refreshTimeout();
-      stream->wtSess_->onDatagram(datagramQ.move());
-    } else {
+    if (stream->txn_.isUpgradeComplete()) {
+      VLOG(4) << "Received datagram for streamId=" << streamId
+              << " len=" << datagramQ.chainLength() << " sess=" << *this;
       stream->txn_.onDatagram(datagramQ.move());
     }
   }
@@ -3970,6 +3953,41 @@ bool HQSession::HQStreamTransportBase::tryWtSession(HTTPTransaction& txn,
   // alias shared_ptr
   wtSess_ = std::shared_ptr<H3WtSession>(wtSess, &wtSess->getH3WtSession());
   return true;
+}
+
+void HQSession::HQStreamTransportBase::onResponse() noexcept {
+  /**
+   * If upgradeCompleted (i.e. a downstream txn sends 2xx or an upstream txn
+   * receives 2xx) and there are pending datagrams, attempt to deliver them to
+   * the handler. This is done in the next evb loop since this may be invoked in
+   * the egress path (i.e. downstream ::sendHeaders) and we shouldn't be
+   * invoking ingress callbacks inline from the egress path.
+   */
+  auto& datagrams = session_.datagramsBuffer_;
+  VLOG(4) << "nDatagrams=" << datagrams.size()
+          << "; upgradeStatus=" << int(txn_.getUpgradeStatus());
+  if (datagrams.empty()) { // nothing to do
+    return;
+  }
+  using UpgradeStatus = HTTPTransaction::UpgradeStatus;
+  if (txn_.isUpgradeComplete()) { // successfully upgraded
+    datagramScheduler_.schedule(session_.getEventBase());
+  } else if (txn_.getUpgradeStatus() == UpgradeStatus::None) {
+    datagrams.erase(getStreamId());
+  } // else: upgrade pending
+}
+
+void HQSession::HQStreamTransportBase::DatagramScheduler::
+    deliverBufferedDatagrams() noexcept {
+  auto& datagramsBuffer = stream.session_.datagramsBuffer_;
+  auto it = datagramsBuffer.find(stream.getStreamId());
+  if (it != datagramsBuffer.end()) {
+    auto datagrams = std::move(it->second);
+    for (auto& datagram : datagrams) {
+      stream.txn_.onDatagram(std::move(datagram));
+    }
+    datagramsBuffer.erase(it);
+  }
 }
 
 std::ostream& operator<<(std::ostream& os, const HQSession& session) {

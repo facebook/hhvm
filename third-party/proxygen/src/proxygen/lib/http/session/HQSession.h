@@ -1763,6 +1763,11 @@ class HQSession
     void handleBodyEvent(uint64_t streamOffset, quic::ByteEvent::Type type);
     void handleBodyEventCancelled(uint64_t streamOffset,
                                   quic::ByteEvent::Type type);
+    /**
+     * ::onResponse is invoked when either a downstream session egresses or an
+     * upstream ingresses http response headers
+     */
+    void onResponse() noexcept;
     uint64_t bodyBytesEgressed_{0};
     folly::Optional<uint64_t> egressHeadersAckOffset_;
     struct BodyByteOffset {
@@ -1784,6 +1789,25 @@ class HQSession
     //  - "onPushMessageBegin" (which may be abandonned / duplicate message id)
     //  - "onHeadersComplete" (not pending anymore)
     folly::Optional<hq::PushId> ingressPushId_;
+    /**
+     * We asynchronously deliver datagrams to the HttpTxnHandler after upstream
+     * txn receives 2xx or downstream txn sends a 2xx.
+     */
+    struct DatagramScheduler : private folly::EventBase::LoopCallback {
+      explicit DatagramScheduler(HQStreamTransportBase& stream)
+          : stream(stream) {
+      }
+      void schedule(folly::EventBase* evb) {
+        evb->runInLoop(this);
+      }
+
+     private:
+      HQStreamTransportBase& stream;
+      void runLoopCallback() noexcept override {
+        deliverBufferedDatagrams();
+      }
+      void deliverBufferedDatagrams() noexcept;
+    } datagramScheduler_{*this};
   }; // HQStreamTransportBase
 
   void dispatchUniWTStream(quic::StreamId /* streamId */,

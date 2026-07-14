@@ -126,9 +126,8 @@ HTTPTransaction::HTTPTransaction(
       enableLastByteFlushedTracking_(false),
       wtConnectStream_(false),
       egressHeadersDelivered_(false),
-      has1xxResponse_(false),
       deferredNoError_(false),
-      upgraded_(false),
+      upgraded_(UpgradeStatus::None),
       idleTimeout_(defaultIdleTimeout),
       timer_(timer),
       setIngressTimeoutAfterEom_(setIngressTimeoutAfterEom),
@@ -216,14 +215,8 @@ void HTTPTransaction::onIngressHeadersComplete(
               : IngressSmEvent::onNonFinalHeaders)) {
     return;
   }
-  if (msg->isRequest()) {
-    auto method = msg->getMethod();
-    headRequest_ = (method == HTTPMethod::HEAD);
-    upgraded_ = (method == HTTPMethod::CONNECT);
-    wtConnectStream_ = HTTPWebTransport::isConnectMessage(*msg);
-    connectUdpStream_ = msg->isConnectUdpReq();
-  }
-
+  checkForUpgrade(*msg);
+  headRequest_ |= (msg->isRequest() && msg->getMethod() == HTTPMethod::HEAD);
   if ((msg->isRequest() && msg->getMethod() != HTTPMethod::CONNECT) ||
       (msg->isResponse() && !headRequest_ &&
        !RFC2616::responseBodyMustBeEmpty(msg->getStatusCode()))) {
@@ -485,7 +478,7 @@ void HTTPTransaction::onIngressUpgrade(UpgradeProtocol protocol) {
   if (!validateIngressStateTransition(IngressSmEvent::onUpgrade)) {
     return;
   }
-  upgraded_ = true;
+  upgraded_ = UpgradeStatus::Upgraded;
   if (mustQueueIngress()) {
     checkCreateDeferredIngress();
     deferredIngress_->emplace(id_, HTTPEvent::Type::UPGRADE, protocol);
@@ -1003,15 +996,9 @@ void HTTPTransaction::sendHeadersWithOptionalEOM(const HTTPMessage& headers,
   if (!headers.isRequest() && !isPushed()) {
     lastResponseStatus_ = headers.getStatusCode();
   }
-
-  if (headers.isRequest()) {
-    headRequest_ = (headers.getMethod() == HTTPMethod::HEAD);
-    wtConnectStream_ = HTTPWebTransport::isConnectMessage(headers);
-    connectUdpStream_ = headers.isConnectUdpReq();
-  } else {
-    has1xxResponse_ = headers.is1xxResponse();
-  }
-
+  checkForUpgrade(headers);
+  headRequest_ |=
+      (headers.isRequest() && headers.getMethod() == HTTPMethod::HEAD);
   if (headers.isResponse() && !headRequest_) {
     const auto& contentLen =
         headers.getHeaders().getSingleOrEmpty(HTTP_HEADER_CONTENT_LENGTH);
@@ -1282,7 +1269,8 @@ size_t HTTPTransaction::sendEOMNow() {
   updateReadTimeout();
   // rst_stream/no_error if downstream egresses eom before ingress eom seen
   deferredNoError_ = transport_.serverEarlyResponseEnabled() &&
-                     isDownstream() && !isIngressEOMSeen() && !isUpgraded();
+                     isDownstream() && !isIngressEOMSeen() &&
+                     !isUpgradeComplete();
 
   nbytes += maybeSendDeferredNoError();
 
@@ -1874,6 +1862,19 @@ void HTTPTransaction::sendCloseWebTransportSessionCapsule(
   if (capsuleData && capsuleData->computeChainDataLength() > 0) {
     sendBody(std::move(capsuleData));
   }
+}
+
+void HTTPTransaction::checkForUpgrade(const HTTPMessage& msg) noexcept {
+  if (msg.isRequest()) {
+    upgraded_ = msg.getMethod() == HTTPMethod::CONNECT ? UpgradeStatus::Pending
+                                                       : UpgradeStatus::None;
+    wtConnectStream_ = HTTPWebTransport::isConnectMessage(msg);
+    connectUdpStream_ = msg.isConnectUdpReq();
+  } else if (upgraded_ == UpgradeStatus::Pending && msg.isFinal()) {
+    upgraded_ =
+        msg.is2xxResponse() ? UpgradeStatus::Upgraded : UpgradeStatus::None;
+  }
+  VLOG(4) << __func__ << "; upgraded=" << int(upgraded_);
 }
 
 bool HTTPTransaction::hasBytesEventObservers() {

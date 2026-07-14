@@ -37,6 +37,8 @@ using HQDownstreamSessionTestDeliveryAck = HQDownstreamSessionTest;
 
 // Use this test class for h3 server push tests
 using HQDownstreamSessionTestPush = HQDownstreamSessionTest;
+// Use this test class for h3 downstream datagram tests
+using HQDownstreamSessionTestDatagram = HQDownstreamSessionTest;
 
 namespace {
 HTTPMessage getProgressiveGetRequest() {
@@ -2028,6 +2030,74 @@ TEST_P(HQDownstreamSessionTest, ConnectUDP) {
   hqSession_->closeWhenIdle();
 }
 
+TEST_P(HQDownstreamSessionTestDatagram, BufferedDatagramDeliveredAfter2xx) {
+  CHECK(httpCallbacks_.datagramEnabled);
+  auto handler = addSimpleStrictHandler();
+  HTTPMessage req;
+  req.setURL("/");
+  req.setMethod(HTTPMethod::CONNECT);
+  req.setUpgradeProtocol("connect-udp");
+  handler->expectHeaders();
+  auto id = sendRequest(req, /*eom=*/false);
+  flushRequestsAndLoopN(1);
+
+  // datagrams received prior to sending 2xx are buffered
+  EXPECT_TRUE(handler->txn_->isUpgradePending());
+  EXPECT_GT(handler->txn_->getDatagramSizeLimit(), 0);
+  socketDriver_->addDatagram(
+      getH3Datagram(id, folly::IOBuf::copyBuffer("testtest")));
+  socketDriver_->addDatagramsAvailableReadEvent();
+  flushRequestsAndLoopN(1);
+
+  // non-final headers => still buffered
+  EXPECT_CALL(*handler, _onDatagram(_)).Times(0);
+  handler->sendHeaders(100, 0);
+  flushRequestsAndLoopN(1);
+  EXPECT_TRUE(handler->txn_->isUpgradePending());
+
+  // 2xx final headers => deliver buffered datagrams
+  EXPECT_CALL(*handler, _onDatagram(_)).WillOnce(Invoke([](auto dg) {
+    dg->trimStart(1); // ignore ctx-id
+    EXPECT_EQ(dg->toString(), "testtest");
+  }));
+  handler->sendHeaders(200, 0);
+  EXPECT_TRUE(handler->txn_->isUpgradeComplete());
+  flushRequestsAndLoopN(1);
+
+  handler->sendEOM();
+  handler->expectError();
+  handler->expectDetachTransaction();
+  hqSession_->dropConnection();
+}
+
+TEST_P(HQDownstreamSessionTestDatagram, BufferedDatagramDroppedOnNon2xx) {
+  CHECK(httpCallbacks_.datagramEnabled);
+  auto handler = addSimpleStrictHandler();
+
+  HTTPMessage req;
+  req.setURL("/");
+  req.setMethod(HTTPMethod::CONNECT);
+  req.setUpgradeProtocol("connect-udp");
+  handler->expectHeaders();
+  auto id = sendRequest(req, /*eom=*/false);
+  flushRequestsAndLoopN(1);
+
+  EXPECT_GT(handler->txn_->getDatagramSizeLimit(), 0);
+  socketDriver_->addDatagram(
+      getH3Datagram(id, folly::IOBuf::copyBuffer("testtest")));
+  socketDriver_->addDatagramsAvailableReadEvent();
+  flushRequestsAndLoopN(1);
+
+  EXPECT_CALL(*handler, _onDatagram(_)).Times(0);
+  handler->sendHeaders(400, 0);
+  flushRequestsAndLoopN(1);
+
+  handler->sendEOM();
+  handler->expectError();
+  handler->expectDetachTransaction();
+  hqSession_->dropConnection();
+}
+
 // Just open a stream and send nothing
 TEST_P(HQDownstreamSessionTest, zeroBytes) {
   auto id = nextStreamId();
@@ -2976,6 +3046,16 @@ INSTANTIATE_TEST_SUITE_P(HQDownstreamSessionTest,
                          Values([] {
                            TestParams tp;
                            tp.alpn_ = "h3";
+                           return tp;
+                         }()),
+                         paramsToTestName);
+
+INSTANTIATE_TEST_SUITE_P(HQDownstreamSessionTest,
+                         HQDownstreamSessionTestDatagram,
+                         Values([] {
+                           TestParams tp;
+                           tp.alpn_ = "h3";
+                           tp.datagrams_ = true;
                            return tp;
                          }()),
                          paramsToTestName);

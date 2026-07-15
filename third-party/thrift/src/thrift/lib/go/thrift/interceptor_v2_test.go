@@ -75,7 +75,7 @@ func (i *recordingInterceptor) OnRequest(ctx context.Context, _ types.ReadableSt
 	return ctx, i.onRequestErr
 }
 
-func (i *recordingInterceptor) OnResponse(ctx context.Context, _ types.WritableStruct) error {
+func (i *recordingInterceptor) OnResponse(ctx context.Context, _ InterceptorResult) error {
 	*i.log = append(*i.log, "resp:"+i.name)
 	i.gotReqState = ctx.Value(recordingStateKey(i.name))
 	return i.onResponseErr
@@ -310,7 +310,7 @@ func (i *serverTestInterceptor) OnRequest(ctx context.Context, _ types.ReadableS
 	return ctx, i.failOn[method]
 }
 
-func (i *serverTestInterceptor) OnResponse(ctx context.Context, _ WritableStruct) error {
+func (i *serverTestInterceptor) OnResponse(ctx context.Context, _ InterceptorResult) error {
 	method := GetRequestContext(ctx).MethodName
 	i.recorder.record(method+":resp", i.name)
 	return nil

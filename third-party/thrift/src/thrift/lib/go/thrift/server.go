@@ -352,9 +352,10 @@ func (s *server) runOnRequestInterceptors(ctx context.Context, req ReadableStruc
 // interceptor, matching the C++ behavior where an OnResponse exception overwrites
 // any currently-active exception.
 func (s *server) runOnResponseInterceptors(ctx context.Context, resp WritableStruct) error {
+	result := InterceptorResult{Response: resp}
 	var respErr error
 	for _, interceptor := range slices.Backward(s.interceptors) {
-		err := interceptor.OnResponse(ctx, resp)
+		err := interceptor.OnResponse(ctx, result)
 		if err != nil {
 			respErr = err
 		}

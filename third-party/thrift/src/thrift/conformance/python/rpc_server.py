@@ -27,6 +27,8 @@ from thrift.conformance.rpc.thrift_types import (
     Response,
     RpcTestCase,
     ServerTestResult,
+    SinkInitialDeclaredExceptionServerTestResult,
+    SinkServerDeclaredExceptionServerTestResult,
     UserException,
 )
 from thrift.python.server import ThriftServer
@@ -69,6 +71,28 @@ class Handler(RPCConformanceServiceInterface):
         self.result = ServerTestResult.fromValue(
             RequestResponseNoArgVoidResponseServerTestResult()
         )
+
+    async def sinkInitialDeclaredException(self, req: Request):
+        self.result = ServerTestResult.fromValue(
+            SinkInitialDeclaredExceptionServerTestResult(request=req)
+        )
+        raise UserException(
+            msg=self.instruction.sinkInitialDeclaredException.userException.msg
+        )
+
+    async def sinkServerDeclaredException(self, req: Request):
+        self.result = ServerTestResult.fromValue(
+            SinkServerDeclaredExceptionServerTestResult(request=req)
+        )
+
+        async def callback(agen):
+            async for _ in agen:
+                pass
+            raise UserException(
+                msg=self.instruction.sinkServerDeclaredException.userException.msg
+            )
+
+        return callback
 
 
 async def main():

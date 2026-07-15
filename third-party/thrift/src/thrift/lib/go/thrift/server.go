@@ -940,11 +940,8 @@ func (s *rocketServerSocket) makeResponsePayload(
 	var exceptionMetadata *rpcmetadata.PayloadExceptionMetadataBase
 	var exceptionErr error
 	if respErr != nil {
-		// Undeclared exception: wrap it into an ApplicationException. No response
-		// body is sent; the exception is carried entirely in the metadata.
-		appEx := maybeWrapApplicationException(respErr)
-		exceptionMetadata = rocket.NewPayloadExceptionMetadataBaseV2(appEx)
-		exceptionErr = appEx
+		exceptionMetadata = rocket.NewPayloadExceptionMetadataBaseV2(respErr)
+		exceptionErr = respErr
 		s.observer.UndeclaredExceptionForFunction(rpcFuncName)
 	} else {
 		// Normal response or a result carrying a declared exception: encode the

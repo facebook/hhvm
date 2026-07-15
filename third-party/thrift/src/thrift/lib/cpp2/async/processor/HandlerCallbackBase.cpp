@@ -699,17 +699,18 @@ bool shouldProcessServiceInterceptorsOnRequest(
   return callback.shouldProcessServiceInterceptorsOnRequest();
 }
 
-folly::coro::Task<void> processServiceInterceptorsOnRequest(
+folly::coro::Task<bool> processServiceInterceptorsOnRequest(
     HandlerCallbackBase& callback,
     detail::ServiceInterceptorOnRequestArguments arguments,
     const SerializedRequest& serializedRequest) {
-  try {
-    co_await callback.processServiceInterceptorsOnRequest(
-        std::move(arguments), serializedRequest);
-  } catch (...) {
-    callback.exception(folly::current_exception());
-    throw;
+  folly::Try<void> result = co_await folly::coro::co_awaitTry(
+      callback.processServiceInterceptorsOnRequest(
+          std::move(arguments), serializedRequest));
+  if (result.hasException()) {
+    callback.exception(result.exception().to_exception_ptr());
+    co_return false;
   }
+  co_return true;
 }
 #endif // FOLLY_HAS_COROUTINES
 } // namespace detail

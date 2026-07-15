@@ -745,12 +745,12 @@ folly::SemiFuture<folly::Unit> PythonAsyncProcessor::dispatchRequestOneway(
               callback = std::move(
                   callback)]() mutable -> folly::coro::Task<folly::Unit> {
                if (shouldProcessServiceInterceptorsOnRequest(*callback)) {
-                 // see discussion below about why we don't handle exception
-                 // here.
-                 co_await processServiceInterceptorsOnRequest(
-                     *callback,
-                     emptyInterceptorsArguments(),
-                     serializedRequest);
+                 if (!co_await processServiceInterceptorsOnRequest(
+                         *callback,
+                         emptyInterceptorsArguments(),
+                         serializedRequest)) {
+                   co_return folly::unit;
+                 }
                }
                co_return co_await handlePythonServerCallbackOneway(
                    protocol,
@@ -779,12 +779,12 @@ folly::SemiFuture<folly::Unit> PythonAsyncProcessor::dispatchRequestStreaming(
               callback = std::move(
                   callback)]() mutable -> folly::coro::Task<folly::Unit> {
                if (shouldProcessServiceInterceptorsOnRequest(*callback)) {
-                 // see discussion below about why we don't handle exception
-                 // here.
-                 co_await processServiceInterceptorsOnRequest(
-                     *callback,
-                     emptyInterceptorsArguments(),
-                     serializedRequest);
+                 if (!co_await processServiceInterceptorsOnRequest(
+                         *callback,
+                         emptyInterceptorsArguments(),
+                         serializedRequest)) {
+                   co_return folly::unit;
+                 }
                }
                co_return co_await handlePythonServerCallbackStreaming(
                    protocol,
@@ -814,12 +814,12 @@ folly::SemiFuture<folly::Unit> PythonAsyncProcessor::dispatchRequestSink(
               callback = std::move(
                   callback)]() mutable -> folly::coro::Task<folly::Unit> {
                if (shouldProcessServiceInterceptorsOnRequest(*callback)) {
-                 // see discussion below about why we don't handle exception
-                 // here.
-                 co_await processServiceInterceptorsOnRequest(
-                     *callback,
-                     emptyInterceptorsArguments(),
-                     serializedRequest);
+                 if (!co_await processServiceInterceptorsOnRequest(
+                         *callback,
+                         emptyInterceptorsArguments(),
+                         serializedRequest)) {
+                   co_return folly::unit;
+                 }
                }
                co_return co_await handlePythonServerCallbackSink(
                    protocol,
@@ -850,12 +850,12 @@ folly::SemiFuture<folly::Unit> PythonAsyncProcessor::dispatchRequestBidi(
               callback = std::move(
                   callback)]() mutable -> folly::coro::Task<folly::Unit> {
                if (shouldProcessServiceInterceptorsOnRequest(*callback)) {
-                 // see discussion below about why we don't handle exception
-                 // here.
-                 co_await processServiceInterceptorsOnRequest(
-                     *callback,
-                     emptyInterceptorsArguments(),
-                     serializedRequest);
+                 if (!co_await processServiceInterceptorsOnRequest(
+                         *callback,
+                         emptyInterceptorsArguments(),
+                         serializedRequest)) {
+                   co_return folly::unit;
+                 }
                }
                co_return co_await handlePythonServerCallbackBidi(
                    protocol,
@@ -882,16 +882,16 @@ folly::SemiFuture<folly::Unit> PythonAsyncProcessor::dispatchRequestResponse(
               callback = std::move(
                   callback)]() mutable -> folly::coro::Task<folly::Unit> {
                if (shouldProcessServiceInterceptorsOnRequest(*callback)) {
-                 // It may appear that we're discarding exception result of
-                 // onRequest interceptor, but it's actually caught via
-                 // throw_wrapped, which invokes sendException to report the
-                 // callback completed with exception, thereby invoking the
-                 // onResponse interceptor. Explicitly handling it here results
-                 // in double invocation.
-                 co_await processServiceInterceptorsOnRequest(
-                     *callback,
-                     emptyInterceptorsArguments(),
-                     serializedRequest);
+                 // On rejection the wrapper has already reported the exception
+                 // (sending the error reply and driving onResponse) so we must
+                 // not run the handler; running it here would double-invoke
+                 // onResponse.
+                 if (!co_await processServiceInterceptorsOnRequest(
+                         *callback,
+                         emptyInterceptorsArguments(),
+                         serializedRequest)) {
+                   co_return folly::unit;
+                 }
                }
                co_return co_await handlePythonServerCallback(
                    protocol,

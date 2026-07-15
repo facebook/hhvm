@@ -37,7 +37,11 @@ namespace detail {
 #if FOLLY_HAS_COROUTINES
 bool shouldProcessServiceInterceptorsOnRequest(HandlerCallbackBase&) noexcept;
 
-folly::coro::Task<void> processServiceInterceptorsOnRequest(
+// Returns true if the request handler should run, false if a
+// ServiceInterceptor rejected the request (in which case the error reply and
+// onResponse chain have already been driven via
+// HandlerCallbackBase::exception).
+folly::coro::Task<bool> processServiceInterceptorsOnRequest(
     HandlerCallbackBase&,
     detail::ServiceInterceptorOnRequestArguments arguments,
     const SerializedRequest& serializedRequest);
@@ -427,7 +431,7 @@ class HandlerCallbackBase {
   folly::coro::Task<void> processServiceInterceptorsOnResponse(
       detail::ServiceInterceptorOnResponseResult resultOrActiveException);
 
-  friend folly::coro::Task<void> detail::processServiceInterceptorsOnRequest(
+  friend folly::coro::Task<bool> detail::processServiceInterceptorsOnRequest(
       HandlerCallbackBase&,
       detail::ServiceInterceptorOnRequestArguments arguments,
       const SerializedRequest& serializedRequest);

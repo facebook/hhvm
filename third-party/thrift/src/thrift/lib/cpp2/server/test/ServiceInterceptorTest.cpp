@@ -23,6 +23,7 @@
 
 #include <folly/Synchronized.h>
 #include <folly/coro/Baton.h>
+#include <folly/coro/Error.h>
 #include <folly/coro/GtestHelpers.h>
 #include <folly/coro/Sleep.h>
 #include <thrift/lib/cpp2/async/HTTPClientChannel.h>
@@ -188,6 +189,16 @@ struct TestHandler
   folly::coro::Task<void> co_fireAndForget(std::int32_t) override { co_return; }
 };
 
+struct CountingEchoHandler : TestHandler {
+  folly::coro::Task<std::unique_ptr<std::string>> co_echo(
+      std::unique_ptr<std::string> str) override {
+    echoCount++;
+    co_return std::move(str);
+  }
+
+  std::atomic<int> echoCount{0};
+};
+
 using InterceptorList = std::vector<std::shared_ptr<ServiceInterceptorBase>>;
 
 class TestModule : public apache::thrift::ServerModule {
@@ -265,6 +276,29 @@ struct ServiceInterceptorThrowOnRequest
     throw std::runtime_error(
         "Exception from ServiceInterceptorThrowOnRequest::onRequest");
     co_return std::nullopt;
+  }
+
+  folly::coro::Task<void> onResponse(
+      folly::Unit*, folly::Unit*, ResponseInfo) override {
+    onResponseCount++;
+    co_return;
+  }
+
+  int onRequestCount = 0;
+  int onResponseCount = 0;
+};
+
+struct ServiceInterceptorCoErrorOnRequest
+    : public NamedServiceInterceptor<folly::Unit> {
+ public:
+  using NamedServiceInterceptor::NamedServiceInterceptor;
+
+  folly::coro::Task<std::optional<folly::Unit>> onRequest(
+      folly::Unit*, RequestInfo) override {
+    onRequestCount++;
+    co_yield folly::coro::co_error(
+        std::runtime_error(
+            "Exception from ServiceInterceptorCoErrorOnRequest::onRequest"));
   }
 
   folly::coro::Task<void> onResponse(
@@ -977,6 +1011,69 @@ CO_TEST_P(ServiceInterceptorTestP, OnRequestException) {
   EXPECT_EQ(interceptor2->onResponseCount, 1);
   EXPECT_EQ(interceptor3->onRequestCount, 1);
   EXPECT_EQ(interceptor3->onResponseCount, 1);
+}
+
+// When onRequest rejects via `co_yield co_error` (the zero-throw path), the
+// request handler must be skipped, the client must still receive the aggregated
+// TApplicationException, and onResponse must run exactly once per interceptor.
+CO_TEST_P(ServiceInterceptorTestP, OnRequestCoErrorSkipsHandler) {
+  auto interceptor1 =
+      std::make_shared<ServiceInterceptorCoErrorOnRequest>("Interceptor1");
+  auto interceptor2 =
+      std::make_shared<ServiceInterceptorCountWithRequestState>("Interceptor2");
+  auto handler = std::make_shared<CountingEchoHandler>();
+  auto runner = makeServer(handler, [&](ThriftServer& server) {
+    server.addModule(
+        std::make_unique<TestModule>(
+            InterceptorList{interceptor1, interceptor2}));
+  });
+
+  auto client =
+      makeClient<apache::thrift::Client<test::ServiceInterceptorTest>>(*runner);
+  EXPECT_THROW(
+      {
+        try {
+          co_await client->co_echo("");
+        } catch (const apache::thrift::TApplicationException& ex) {
+          EXPECT_THAT(
+              std::string(ex.what()),
+              HasSubstr("ServiceInterceptor::onRequest threw exceptions"));
+          EXPECT_THAT(
+              std::string(ex.what()),
+              HasSubstr(
+                  "Exception from "
+                  "ServiceInterceptorCoErrorOnRequest::onRequest"));
+          EXPECT_THAT(
+              std::string(ex.what()), HasSubstr("[TestModule.Interceptor1]"));
+          throw;
+        }
+      },
+      apache::thrift::TApplicationException);
+  EXPECT_EQ(handler->echoCount, 0);
+  EXPECT_EQ(interceptor1->onRequestCount, 1);
+  EXPECT_EQ(interceptor1->onResponseCount, 1);
+  EXPECT_EQ(interceptor2->onRequestCount, 1);
+  EXPECT_EQ(interceptor2->onResponseCount, 1);
+}
+
+// Same guarantees when onRequest rejects by throwing a raw C++ exception, which
+// co_awaitTry captures identically to co_error.
+CO_TEST_P(ServiceInterceptorTestP, OnRequestExceptionSkipsHandler) {
+  auto interceptor1 =
+      std::make_shared<ServiceInterceptorThrowOnRequest>("Interceptor1");
+  auto handler = std::make_shared<CountingEchoHandler>();
+  auto runner = makeServer(handler, [&](ThriftServer& server) {
+    server.addModule(
+        std::make_unique<TestModule>(InterceptorList{interceptor1}));
+  });
+
+  auto client =
+      makeClient<apache::thrift::Client<test::ServiceInterceptorTest>>(*runner);
+  EXPECT_THROW(
+      co_await client->co_echo("hello"), apache::thrift::TApplicationException);
+  EXPECT_EQ(handler->echoCount, 0);
+  EXPECT_EQ(interceptor1->onRequestCount, 1);
+  EXPECT_EQ(interceptor1->onResponseCount, 1);
 }
 
 CO_TEST_P(

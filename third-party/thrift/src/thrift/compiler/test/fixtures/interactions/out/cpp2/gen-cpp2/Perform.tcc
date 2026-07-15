@@ -140,11 +140,15 @@ void PerformAsyncProcessor::executeRequest_foo(
         apache::thrift::SerializedRequest serializedRequest
     ) -> folly::coro::Task<void> {
       auto argRefs = args.asTupleOfRefs();
-      co_await apache::thrift::detail::processServiceInterceptorsOnRequest(
-          *callback,
-          apache::thrift::detail::ServiceInterceptorOnRequestArguments(argRefs),
-          serializedRequest);
-      executeHandler(std::move(callback), std::move(args));
+      const bool shouldExecuteHandler =
+          co_await apache::thrift::detail::processServiceInterceptorsOnRequest(
+              *callback,
+              apache::thrift::detail::ServiceInterceptorOnRequestArguments(
+                  argRefs),
+              serializedRequest);
+      if (shouldExecuteHandler) {
+        executeHandler(std::move(callback), std::move(args));
+      }
     }(
         std::move(callback),
         makeExecuteHandler(),
@@ -338,11 +342,15 @@ void PerformAsyncProcessor::executeRequest_MyInteraction_frobnicate(
         apache::thrift::SerializedRequest serializedRequest
     ) -> folly::coro::Task<void> {
       auto argRefs = args.asTupleOfRefs();
-      co_await apache::thrift::detail::processServiceInterceptorsOnRequest(
-          *callback,
-          apache::thrift::detail::ServiceInterceptorOnRequestArguments(argRefs),
-          serializedRequest);
-      executeHandler(std::move(callback), std::move(args));
+      const bool shouldExecuteHandler =
+          co_await apache::thrift::detail::processServiceInterceptorsOnRequest(
+              *callback,
+              apache::thrift::detail::ServiceInterceptorOnRequestArguments(
+                  argRefs),
+              serializedRequest);
+      if (shouldExecuteHandler) {
+        executeHandler(std::move(callback), std::move(args));
+      }
     }(
         std::move(callback),
         makeExecuteHandler(),
@@ -525,11 +533,15 @@ void PerformAsyncProcessor::executeRequest_MyInteraction_ping(
         apache::thrift::SerializedRequest serializedRequest
     ) -> folly::coro::Task<void> {
       auto argRefs = args.asTupleOfRefs();
-      co_await apache::thrift::detail::processServiceInterceptorsOnRequest(
-          *callback,
-          apache::thrift::detail::ServiceInterceptorOnRequestArguments(argRefs),
-          serializedRequest);
-      executeHandler(std::move(callback), std::move(args));
+      const bool shouldExecuteHandler =
+          co_await apache::thrift::detail::processServiceInterceptorsOnRequest(
+              *callback,
+              apache::thrift::detail::ServiceInterceptorOnRequestArguments(
+                  argRefs),
+              serializedRequest);
+      if (shouldExecuteHandler) {
+        executeHandler(std::move(callback), std::move(args));
+      }
     }(
         std::move(callback),
         makeExecuteHandler(),
@@ -677,11 +689,15 @@ void PerformAsyncProcessor::executeRequest_MyInteraction_truthify(
         apache::thrift::SerializedRequest serializedRequest
     ) -> folly::coro::Task<void> {
       auto argRefs = args.asTupleOfRefs();
-      co_await apache::thrift::detail::processServiceInterceptorsOnRequest(
-          *callback,
-          apache::thrift::detail::ServiceInterceptorOnRequestArguments(argRefs),
-          serializedRequest);
-      executeHandler(std::move(callback), std::move(args));
+      const bool shouldExecuteHandler =
+          co_await apache::thrift::detail::processServiceInterceptorsOnRequest(
+              *callback,
+              apache::thrift::detail::ServiceInterceptorOnRequestArguments(
+                  argRefs),
+              serializedRequest);
+      if (shouldExecuteHandler) {
+        executeHandler(std::move(callback), std::move(args));
+      }
     }(
         std::move(callback),
         makeExecuteHandler(),
@@ -858,11 +874,15 @@ void PerformAsyncProcessor::executeRequest_MyInteraction_encode(
         apache::thrift::SerializedRequest serializedRequest
     ) -> folly::coro::Task<void> {
       auto argRefs = args.asTupleOfRefs();
-      co_await apache::thrift::detail::processServiceInterceptorsOnRequest(
-          *callback,
-          apache::thrift::detail::ServiceInterceptorOnRequestArguments(argRefs),
-          serializedRequest);
-      executeHandler(std::move(callback), std::move(args));
+      const bool shouldExecuteHandler =
+          co_await apache::thrift::detail::processServiceInterceptorsOnRequest(
+              *callback,
+              apache::thrift::detail::ServiceInterceptorOnRequestArguments(
+                  argRefs),
+              serializedRequest);
+      if (shouldExecuteHandler) {
+        executeHandler(std::move(callback), std::move(args));
+      }
     }(
         std::move(callback),
         makeExecuteHandler(),
@@ -1068,11 +1088,15 @@ void PerformAsyncProcessor::executeRequest_MyInteractionFast_frobnicate(
         apache::thrift::SerializedRequest serializedRequest
     ) -> folly::coro::Task<void> {
       auto argRefs = args.asTupleOfRefs();
-      co_await apache::thrift::detail::processServiceInterceptorsOnRequest(
-          *callback,
-          apache::thrift::detail::ServiceInterceptorOnRequestArguments(argRefs),
-          serializedRequest);
-      executeHandler(std::move(callback), std::move(args));
+      const bool shouldExecuteHandler =
+          co_await apache::thrift::detail::processServiceInterceptorsOnRequest(
+              *callback,
+              apache::thrift::detail::ServiceInterceptorOnRequestArguments(
+                  argRefs),
+              serializedRequest);
+      if (shouldExecuteHandler) {
+        executeHandler(std::move(callback), std::move(args));
+      }
     }(
         std::move(callback),
         makeExecuteHandler(),
@@ -1234,11 +1258,15 @@ void PerformAsyncProcessor::executeRequest_MyInteractionFast_ping(
         apache::thrift::SerializedRequest serializedRequest
     ) -> folly::coro::Task<void> {
       auto argRefs = args.asTupleOfRefs();
-      co_await apache::thrift::detail::processServiceInterceptorsOnRequest(
-          *callback,
-          apache::thrift::detail::ServiceInterceptorOnRequestArguments(argRefs),
-          serializedRequest);
-      executeHandler(std::move(callback), std::move(args));
+      const bool shouldExecuteHandler =
+          co_await apache::thrift::detail::processServiceInterceptorsOnRequest(
+              *callback,
+              apache::thrift::detail::ServiceInterceptorOnRequestArguments(
+                  argRefs),
+              serializedRequest);
+      if (shouldExecuteHandler) {
+        executeHandler(std::move(callback), std::move(args));
+      }
     }(
         std::move(callback),
         makeExecuteHandler(),
@@ -1383,11 +1411,15 @@ void PerformAsyncProcessor::executeRequest_MyInteractionFast_truthify(
         apache::thrift::SerializedRequest serializedRequest
     ) -> folly::coro::Task<void> {
       auto argRefs = args.asTupleOfRefs();
-      co_await apache::thrift::detail::processServiceInterceptorsOnRequest(
-          *callback,
-          apache::thrift::detail::ServiceInterceptorOnRequestArguments(argRefs),
-          serializedRequest);
-      executeHandler(std::move(callback), std::move(args));
+      const bool shouldExecuteHandler =
+          co_await apache::thrift::detail::processServiceInterceptorsOnRequest(
+              *callback,
+              apache::thrift::detail::ServiceInterceptorOnRequestArguments(
+                  argRefs),
+              serializedRequest);
+      if (shouldExecuteHandler) {
+        executeHandler(std::move(callback), std::move(args));
+      }
     }(
         std::move(callback),
         makeExecuteHandler(),
@@ -1561,11 +1593,15 @@ void PerformAsyncProcessor::executeRequest_MyInteractionFast_encode(
         apache::thrift::SerializedRequest serializedRequest
     ) -> folly::coro::Task<void> {
       auto argRefs = args.asTupleOfRefs();
-      co_await apache::thrift::detail::processServiceInterceptorsOnRequest(
-          *callback,
-          apache::thrift::detail::ServiceInterceptorOnRequestArguments(argRefs),
-          serializedRequest);
-      executeHandler(std::move(callback), std::move(args));
+      const bool shouldExecuteHandler =
+          co_await apache::thrift::detail::processServiceInterceptorsOnRequest(
+              *callback,
+              apache::thrift::detail::ServiceInterceptorOnRequestArguments(
+                  argRefs),
+              serializedRequest);
+      if (shouldExecuteHandler) {
+        executeHandler(std::move(callback), std::move(args));
+      }
     }(
         std::move(callback),
         makeExecuteHandler(),
@@ -1762,11 +1798,15 @@ void PerformAsyncProcessor::executeRequest_SerialInteraction_frobnicate(
         apache::thrift::SerializedRequest serializedRequest
     ) -> folly::coro::Task<void> {
       auto argRefs = args.asTupleOfRefs();
-      co_await apache::thrift::detail::processServiceInterceptorsOnRequest(
-          *callback,
-          apache::thrift::detail::ServiceInterceptorOnRequestArguments(argRefs),
-          serializedRequest);
-      executeHandler(std::move(callback), std::move(args));
+      const bool shouldExecuteHandler =
+          co_await apache::thrift::detail::processServiceInterceptorsOnRequest(
+              *callback,
+              apache::thrift::detail::ServiceInterceptorOnRequestArguments(
+                  argRefs),
+              serializedRequest);
+      if (shouldExecuteHandler) {
+        executeHandler(std::move(callback), std::move(args));
+      }
     }(
         std::move(callback),
         makeExecuteHandler(),

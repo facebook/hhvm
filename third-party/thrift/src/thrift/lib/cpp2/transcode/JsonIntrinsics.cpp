@@ -31,6 +31,7 @@
 #include <folly/Range.h>
 #include <folly/Unicode.h>
 #include <folly/base64.h>
+#include <folly/codec/hex.h>
 
 using apache::thrift::transcode::cursorCanRead;
 using apache::thrift::transcode::setCursorError;
@@ -65,17 +66,11 @@ bool parse_hex4(const uint8_t* p, const uint8_t* end, char16_t& out) {
   }
   uint16_t value = 0;
   for (int i = 0; i < 4; ++i) {
-    uint8_t c = p[i];
-    uint8_t digit;
-    if (c >= '0' && c <= '9') {
-      digit = c - '0';
-    } else if (c >= 'a' && c <= 'f') {
-      digit = c - 'a' + 10;
-    } else if (c >= 'A' && c <= 'F') {
-      digit = c - 'A' + 10;
-    } else {
+    uint8_t digit = folly::hex_decode_digit(static_cast<char>(p[i]));
+    if (digit > 0x0f) {
       return false;
     }
+
     value = static_cast<uint16_t>((value << 4) | digit);
   }
   out = static_cast<char16_t>(value);

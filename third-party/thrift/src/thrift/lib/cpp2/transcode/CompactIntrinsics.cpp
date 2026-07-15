@@ -225,6 +225,11 @@ uint8_t thrift_transcode_compact_read_field_header(
   int16_t delta = (byte >> 4) & 0x0F;
 
   if (delta != 0) {
+    if (ttype == wire::kCompactStop) {
+      setCursorError(cursor, kMalformedCompact);
+      *fieldId = 0;
+      return 0;
+    }
     if (!setFieldId(
             cursor, fieldId, static_cast<int32_t>(prevFieldId) + delta)) {
       return 0;

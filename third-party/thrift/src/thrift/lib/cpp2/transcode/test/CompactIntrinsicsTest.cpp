@@ -151,6 +151,18 @@ TEST(CompactIntrinsicsTest, StopMarker) {
   EXPECT_EQ(fieldId, 0);
 }
 
+TEST(CompactIntrinsicsTest, FieldHeaderRejectsDeltaStopType) {
+  for (uint8_t delta = 1; delta <= 15; ++delta) {
+    const std::vector<uint8_t> data = {static_cast<uint8_t>(delta << 4)};
+    auto r = makeReader(data);
+
+    int16_t fieldId = -1;
+    EXPECT_EQ(thrift_transcode_compact_read_field_header(&r, &fieldId, 0), 0);
+    EXPECT_EQ(fieldId, 0);
+    EXPECT_NE(r.error, 0);
+  }
+}
+
 TEST(CompactIntrinsicsTest, TruncatedFieldHeaderSetsError) {
   const std::vector<uint8_t> data;
   auto r = makeReader(data);
@@ -291,6 +303,15 @@ TEST(CompactIntrinsicsTest, SkipStructField) {
   thrift_transcode_compact_skip_field(&r, wire::kCompactStruct);
   ASSERT_EQ(r.error, 0);
   EXPECT_EQ(thrift_transcode_read_byte_checked(&r), 0x7F);
+}
+
+TEST(CompactIntrinsicsTest, SkipStructFieldRejectsDeltaStopType) {
+  const std::vector<uint8_t> data = {0x10, 0x7F};
+  auto r = makeReader(data);
+
+  thrift_transcode_compact_skip_field(&r, wire::kCompactStruct);
+  EXPECT_NE(r.error, 0);
+  EXPECT_LE(r.readPos, r.readEnd);
 }
 
 TEST(CompactIntrinsicsTest, SkipListField) {

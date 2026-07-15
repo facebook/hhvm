@@ -445,7 +445,7 @@ folly::coro::Task<HTTPCoroSession*> connectQuic(
 
   auto hostname = connParams.serverName.empty() ? connectAddr.getAddressStr()
                                                 : connParams.serverName;
-  quicClient->setHostname(std::move(hostname));
+  quicClient->setHostname(hostname);
   quicClient->addNewPeerAddress(
       quic::fromFollySocketAddress<quic::SocketAddress>(connectAddr));
   if (connParams.bindAddr != folly::AsyncSocket::anyAddress()) {

@@ -41,6 +41,7 @@ using apache::thrift::transcode::setCursorError;
 namespace {
 
 constexpr int64_t kJsonError = 1;
+constexpr size_t kMaxJsonSkipDepth = 64;
 
 void set_json_error(TranscodeCursor* cursor) {
   setCursorError(cursor, kJsonError);
@@ -579,6 +580,115 @@ bool prepare_json_base64_token_input(
   }
 }
 
+void skip_json_value(TranscodeCursor* cursor, size_t depth) {
+  skip_whitespace(cursor);
+  if (cursor->readPos >= cursor->readEnd) {
+    set_json_error(cursor);
+    return;
+  }
+
+  uint8_t c = *cursor->readPos;
+
+  if (c == '"') {
+    if (!skip_json_string_token(cursor)) {
+      return;
+    }
+    is_json_value_terminator(cursor);
+  } else if (c == '{') {
+    if (depth >= kMaxJsonSkipDepth) {
+      set_json_error(cursor);
+      return;
+    }
+    ++cursor->readPos;
+    skip_whitespace(cursor);
+    if (cursor->readPos < cursor->readEnd && *cursor->readPos == '}') {
+      ++cursor->readPos;
+      is_json_value_terminator(cursor);
+      return;
+    }
+    while (cursor->readPos < cursor->readEnd) {
+      if (!skip_json_string_token(cursor)) {
+        return;
+      }
+      skip_whitespace(cursor);
+      if (cursor->readPos >= cursor->readEnd || *cursor->readPos != ':') {
+        set_json_error(cursor);
+        return;
+      }
+      ++cursor->readPos;
+      skip_json_value(cursor, depth + 1);
+      if (cursor->error) {
+        return;
+      }
+      skip_whitespace(cursor);
+      if (cursor->readPos < cursor->readEnd && *cursor->readPos == ',') {
+        ++cursor->readPos;
+        skip_whitespace(cursor);
+      } else {
+        break;
+      }
+    }
+    skip_whitespace(cursor);
+    if (cursor->readPos < cursor->readEnd && *cursor->readPos == '}') {
+      ++cursor->readPos;
+      is_json_value_terminator(cursor);
+    } else {
+      set_json_error(cursor);
+    }
+  } else if (c == '[') {
+    if (depth >= kMaxJsonSkipDepth) {
+      set_json_error(cursor);
+      return;
+    }
+    ++cursor->readPos;
+    skip_whitespace(cursor);
+    if (cursor->readPos < cursor->readEnd && *cursor->readPos == ']') {
+      ++cursor->readPos;
+      is_json_value_terminator(cursor);
+      return;
+    }
+    while (cursor->readPos < cursor->readEnd) {
+      skip_json_value(cursor, depth + 1);
+      if (cursor->error) {
+        return;
+      }
+      skip_whitespace(cursor);
+      if (cursor->readPos < cursor->readEnd && *cursor->readPos == ',') {
+        ++cursor->readPos;
+        skip_whitespace(cursor);
+      } else {
+        break;
+      }
+    }
+    skip_whitespace(cursor);
+    if (cursor->readPos < cursor->readEnd && *cursor->readPos == ']') {
+      ++cursor->readPos;
+      is_json_value_terminator(cursor);
+    } else {
+      set_json_error(cursor);
+    }
+  } else if (c == 't') {
+    if (consume_json_literal(cursor, "true")) {
+      is_json_value_terminator(cursor);
+    }
+  } else if (c == 'f') {
+    if (consume_json_literal(cursor, "false")) {
+      is_json_value_terminator(cursor);
+    }
+  } else if (c == 'n') {
+    if (consume_json_literal(cursor, "null")) {
+      is_json_value_terminator(cursor);
+    }
+  } else if (c == '-' || (c >= '0' && c <= '9')) {
+    if (!parse_json_number_token(cursor, true)) {
+      set_json_error(cursor);
+      return;
+    }
+    is_json_value_terminator(cursor);
+  } else {
+    set_json_error(cursor);
+  }
+}
 } // namespace
 
 extern "C" {
@@ -916,105 +1026,7 @@ void thrift_transcode_format_base64_string(
 }
 
 void thrift_transcode_skip_json_value(TranscodeCursor* cursor) {
-  skip_whitespace(cursor);
-  if (cursor->readPos >= cursor->readEnd) {
-    set_json_error(cursor);
-    return;
-  }
-
-  uint8_t c = *cursor->readPos;
-
-  if (c == '"') {
-    if (!skip_json_string_token(cursor)) {
-      return;
-    }
-    is_json_value_terminator(cursor);
-  } else if (c == '{') {
-    ++cursor->readPos;
-    skip_whitespace(cursor);
-    if (cursor->readPos < cursor->readEnd && *cursor->readPos == '}') {
-      ++cursor->readPos;
-      is_json_value_terminator(cursor);
-      return;
-    }
-    while (cursor->readPos < cursor->readEnd) {
-      if (!skip_json_string_token(cursor)) {
-        return;
-      }
-      skip_whitespace(cursor);
-      if (cursor->readPos >= cursor->readEnd || *cursor->readPos != ':') {
-        set_json_error(cursor);
-        return;
-      }
-      ++cursor->readPos;
-      thrift_transcode_skip_json_value(cursor);
-      if (cursor->error) {
-        return;
-      }
-      skip_whitespace(cursor);
-      if (cursor->readPos < cursor->readEnd && *cursor->readPos == ',') {
-        ++cursor->readPos;
-        skip_whitespace(cursor);
-      } else {
-        break;
-      }
-    }
-    skip_whitespace(cursor);
-    if (cursor->readPos < cursor->readEnd && *cursor->readPos == '}') {
-      ++cursor->readPos;
-      is_json_value_terminator(cursor);
-    } else {
-      set_json_error(cursor);
-    }
-  } else if (c == '[') {
-    ++cursor->readPos;
-    skip_whitespace(cursor);
-    if (cursor->readPos < cursor->readEnd && *cursor->readPos == ']') {
-      ++cursor->readPos;
-      is_json_value_terminator(cursor);
-      return;
-    }
-    while (cursor->readPos < cursor->readEnd) {
-      thrift_transcode_skip_json_value(cursor);
-      if (cursor->error) {
-        return;
-      }
-      skip_whitespace(cursor);
-      if (cursor->readPos < cursor->readEnd && *cursor->readPos == ',') {
-        ++cursor->readPos;
-        skip_whitespace(cursor);
-      } else {
-        break;
-      }
-    }
-    skip_whitespace(cursor);
-    if (cursor->readPos < cursor->readEnd && *cursor->readPos == ']') {
-      ++cursor->readPos;
-      is_json_value_terminator(cursor);
-    } else {
-      set_json_error(cursor);
-    }
-  } else if (c == 't') {
-    if (consume_json_literal(cursor, "true")) {
-      is_json_value_terminator(cursor);
-    }
-  } else if (c == 'f') {
-    if (consume_json_literal(cursor, "false")) {
-      is_json_value_terminator(cursor);
-    }
-  } else if (c == 'n') {
-    if (consume_json_literal(cursor, "null")) {
-      is_json_value_terminator(cursor);
-    }
-  } else if (c == '-' || (c >= '0' && c <= '9')) {
-    if (!parse_json_number_token(cursor, true)) {
-      set_json_error(cursor);
-      return;
-    }
-    is_json_value_terminator(cursor);
-  } else {
-    set_json_error(cursor);
-  }
+  skip_json_value(cursor, 0);
 }
 
 } // extern "C"

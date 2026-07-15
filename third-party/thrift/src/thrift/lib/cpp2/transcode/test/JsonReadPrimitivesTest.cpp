@@ -353,6 +353,25 @@ TEST(JsonReadPrimitivesTest, SkipJsonValue_InvalidFormsLatchError) {
   }
 }
 
+TEST(JsonReadPrimitivesTest, SkipJsonValue_ExcessiveDepthLatchesError) {
+  std::string arrays(70, '[');
+  arrays.append(70, ']');
+
+  std::string objects;
+  objects.reserve(70 * 5 + 4 + 70);
+  for (int i = 0; i < 70; ++i) {
+    objects.append(R"({"a":)");
+  }
+  objects.append("null");
+  objects.append(70, '}');
+
+  for (const std::string& input : {arrays, objects}) {
+    CursorFixture fx(input);
+    thrift_transcode_skip_json_value(&fx.cursor());
+    EXPECT_TRUE(fx.errored()) << input;
+  }
+}
+
 TEST(JsonReadPrimitivesTest, FormatBase64String_EncodesBytes) {
   CursorFixture fx("");
   const std::vector<uint8_t> data = {1, 2, 3, 255};

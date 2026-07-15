@@ -473,8 +473,8 @@ func (p *procFuncSinkServiceMethod) NewSinkElem() thrift.ReadableResult {
 func (p *procFuncSinkServiceMethod) RunSinkContext(
     ctx context.Context,
     reqStruct thrift.ReadableStruct,
-    onFirstResponse func(thrift.WritableStruct),
-    onFinalResponse func(thrift.WritableStruct),
+    onFirstResponse func(thrift.WritableResult, error),
+    onFinalResponse func(thrift.WritableResult, error),
     onSinkError func(error),
     sinkSeq iter.Seq2[thrift.ReadableStruct, error],
 ) {
@@ -482,12 +482,11 @@ func (p *procFuncSinkServiceMethod) RunSinkContext(
     elemConsumerFunc, initialErr := p.handler.Method(ctx)
     if initialErr != nil {
         internalErr := fmt.Errorf("Internal error processing method: %w", initialErr)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        onFirstResponse(x)
+        onFirstResponse(nil, internalErr)
         return
     }
 
-    onFirstResponse(firstResponse)
+    onFirstResponse(firstResponse, nil)
 
     fbthriftTypedSeq := func(yield func(*SinkPayload, error) bool) {
         for elem, err := range sinkSeq {
@@ -507,13 +506,12 @@ func (p *procFuncSinkServiceMethod) RunSinkContext(
     finalResponse := newRespFinalSinkServiceMethod()
     if finalErr != nil {
         internalErr := fmt.Errorf("Internal sink handler error method: %w", finalErr)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        onFinalResponse(x)
+        onFinalResponse(nil, internalErr)
         return
     }
 
     finalResponse.Success = finalResult
-    onFinalResponse(finalResponse)
+    onFinalResponse(finalResponse, nil)
 }
 
 type procFuncSinkServiceMethodAndReponse struct {
@@ -537,8 +535,8 @@ func (p *procFuncSinkServiceMethodAndReponse) NewSinkElem() thrift.ReadableResul
 func (p *procFuncSinkServiceMethodAndReponse) RunSinkContext(
     ctx context.Context,
     reqStruct thrift.ReadableStruct,
-    onFirstResponse func(thrift.WritableStruct),
-    onFinalResponse func(thrift.WritableStruct),
+    onFirstResponse func(thrift.WritableResult, error),
+    onFinalResponse func(thrift.WritableResult, error),
     onSinkError func(error),
     sinkSeq iter.Seq2[thrift.ReadableStruct, error],
 ) {
@@ -546,13 +544,12 @@ func (p *procFuncSinkServiceMethodAndReponse) RunSinkContext(
     retval, elemConsumerFunc, initialErr := p.handler.MethodAndReponse(ctx)
     if initialErr != nil {
         internalErr := fmt.Errorf("Internal error processing methodAndReponse: %w", initialErr)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        onFirstResponse(x)
+        onFirstResponse(nil, internalErr)
         return
     }
 
     firstResponse.Success = retval
-    onFirstResponse(firstResponse)
+    onFirstResponse(firstResponse, nil)
 
     fbthriftTypedSeq := func(yield func(*SinkPayload, error) bool) {
         for elem, err := range sinkSeq {
@@ -572,13 +569,12 @@ func (p *procFuncSinkServiceMethodAndReponse) RunSinkContext(
     finalResponse := newRespFinalSinkServiceMethodAndReponse()
     if finalErr != nil {
         internalErr := fmt.Errorf("Internal sink handler error methodAndReponse: %w", finalErr)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        onFinalResponse(x)
+        onFinalResponse(nil, internalErr)
         return
     }
 
     finalResponse.Success = finalResult
-    onFinalResponse(finalResponse)
+    onFinalResponse(finalResponse, nil)
 }
 
 type procFuncSinkServiceMethodThrow struct {
@@ -602,8 +598,8 @@ func (p *procFuncSinkServiceMethodThrow) NewSinkElem() thrift.ReadableResult {
 func (p *procFuncSinkServiceMethodThrow) RunSinkContext(
     ctx context.Context,
     reqStruct thrift.ReadableStruct,
-    onFirstResponse func(thrift.WritableStruct),
-    onFinalResponse func(thrift.WritableStruct),
+    onFirstResponse func(thrift.WritableResult, error),
+    onFinalResponse func(thrift.WritableResult, error),
     onSinkError func(error),
     sinkSeq iter.Seq2[thrift.ReadableStruct, error],
 ) {
@@ -613,16 +609,15 @@ func (p *procFuncSinkServiceMethodThrow) RunSinkContext(
         switch v := initialErr.(type) {
         case *InitialException:
             firstResponse.Ex = v
-            onFirstResponse(firstResponse)
+            onFirstResponse(firstResponse, nil)
         default:
             internalErr := fmt.Errorf("Internal error processing methodThrow: %w", initialErr)
-            x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-            onFirstResponse(x)
+            onFirstResponse(nil, internalErr)
         }
         return
     }
 
-    onFirstResponse(firstResponse)
+    onFirstResponse(firstResponse, nil)
 
     fbthriftTypedSeq := func(yield func(*SinkPayload, error) bool) {
         for elem, err := range sinkSeq {
@@ -642,13 +637,12 @@ func (p *procFuncSinkServiceMethodThrow) RunSinkContext(
     finalResponse := newRespFinalSinkServiceMethodThrow()
     if finalErr != nil {
         internalErr := fmt.Errorf("Internal sink handler error methodThrow: %w", finalErr)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        onFinalResponse(x)
+        onFinalResponse(nil, internalErr)
         return
     }
 
     finalResponse.Success = finalResult
-    onFinalResponse(finalResponse)
+    onFinalResponse(finalResponse, nil)
 }
 
 type procFuncSinkServiceMethodSinkThrow struct {
@@ -672,8 +666,8 @@ func (p *procFuncSinkServiceMethodSinkThrow) NewSinkElem() thrift.ReadableResult
 func (p *procFuncSinkServiceMethodSinkThrow) RunSinkContext(
     ctx context.Context,
     reqStruct thrift.ReadableStruct,
-    onFirstResponse func(thrift.WritableStruct),
-    onFinalResponse func(thrift.WritableStruct),
+    onFirstResponse func(thrift.WritableResult, error),
+    onFinalResponse func(thrift.WritableResult, error),
     onSinkError func(error),
     sinkSeq iter.Seq2[thrift.ReadableStruct, error],
 ) {
@@ -681,12 +675,11 @@ func (p *procFuncSinkServiceMethodSinkThrow) RunSinkContext(
     elemConsumerFunc, initialErr := p.handler.MethodSinkThrow(ctx)
     if initialErr != nil {
         internalErr := fmt.Errorf("Internal error processing methodSinkThrow: %w", initialErr)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        onFirstResponse(x)
+        onFirstResponse(nil, internalErr)
         return
     }
 
-    onFirstResponse(firstResponse)
+    onFirstResponse(firstResponse, nil)
 
     fbthriftTypedSeq := func(yield func(*SinkPayload, error) bool) {
         for elem, err := range sinkSeq {
@@ -706,13 +699,12 @@ func (p *procFuncSinkServiceMethodSinkThrow) RunSinkContext(
     finalResponse := newRespFinalSinkServiceMethodSinkThrow()
     if finalErr != nil {
         internalErr := fmt.Errorf("Internal sink handler error methodSinkThrow: %w", finalErr)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        onFinalResponse(x)
+        onFinalResponse(nil, internalErr)
         return
     }
 
     finalResponse.Success = finalResult
-    onFinalResponse(finalResponse)
+    onFinalResponse(finalResponse, nil)
 }
 
 type procFuncSinkServiceMethodFinalThrow struct {
@@ -736,8 +728,8 @@ func (p *procFuncSinkServiceMethodFinalThrow) NewSinkElem() thrift.ReadableResul
 func (p *procFuncSinkServiceMethodFinalThrow) RunSinkContext(
     ctx context.Context,
     reqStruct thrift.ReadableStruct,
-    onFirstResponse func(thrift.WritableStruct),
-    onFinalResponse func(thrift.WritableStruct),
+    onFirstResponse func(thrift.WritableResult, error),
+    onFinalResponse func(thrift.WritableResult, error),
     onSinkError func(error),
     sinkSeq iter.Seq2[thrift.ReadableStruct, error],
 ) {
@@ -745,12 +737,11 @@ func (p *procFuncSinkServiceMethodFinalThrow) RunSinkContext(
     elemConsumerFunc, initialErr := p.handler.MethodFinalThrow(ctx)
     if initialErr != nil {
         internalErr := fmt.Errorf("Internal error processing methodFinalThrow: %w", initialErr)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        onFirstResponse(x)
+        onFirstResponse(nil, internalErr)
         return
     }
 
-    onFirstResponse(firstResponse)
+    onFirstResponse(firstResponse, nil)
 
     fbthriftTypedSeq := func(yield func(*SinkPayload, error) bool) {
         for elem, err := range sinkSeq {
@@ -772,17 +763,16 @@ func (p *procFuncSinkServiceMethodFinalThrow) RunSinkContext(
         switch v := finalErr.(type) {
         case *SinkException2:
             finalResponse.Ex = v
-            onFinalResponse(finalResponse)
+            onFinalResponse(finalResponse, nil)
         default:
             internalErr := fmt.Errorf("Internal sink handler error methodFinalThrow: %w", finalErr)
-            x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-            onFinalResponse(x)
+            onFinalResponse(nil, internalErr)
         }
         return
     }
 
     finalResponse.Success = finalResult
-    onFinalResponse(finalResponse)
+    onFinalResponse(finalResponse, nil)
 }
 
 type procFuncSinkServiceMethodBothThrow struct {
@@ -806,8 +796,8 @@ func (p *procFuncSinkServiceMethodBothThrow) NewSinkElem() thrift.ReadableResult
 func (p *procFuncSinkServiceMethodBothThrow) RunSinkContext(
     ctx context.Context,
     reqStruct thrift.ReadableStruct,
-    onFirstResponse func(thrift.WritableStruct),
-    onFinalResponse func(thrift.WritableStruct),
+    onFirstResponse func(thrift.WritableResult, error),
+    onFinalResponse func(thrift.WritableResult, error),
     onSinkError func(error),
     sinkSeq iter.Seq2[thrift.ReadableStruct, error],
 ) {
@@ -815,12 +805,11 @@ func (p *procFuncSinkServiceMethodBothThrow) RunSinkContext(
     elemConsumerFunc, initialErr := p.handler.MethodBothThrow(ctx)
     if initialErr != nil {
         internalErr := fmt.Errorf("Internal error processing methodBothThrow: %w", initialErr)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        onFirstResponse(x)
+        onFirstResponse(nil, internalErr)
         return
     }
 
-    onFirstResponse(firstResponse)
+    onFirstResponse(firstResponse, nil)
 
     fbthriftTypedSeq := func(yield func(*SinkPayload, error) bool) {
         for elem, err := range sinkSeq {
@@ -842,17 +831,16 @@ func (p *procFuncSinkServiceMethodBothThrow) RunSinkContext(
         switch v := finalErr.(type) {
         case *SinkException2:
             finalResponse.Ex = v
-            onFinalResponse(finalResponse)
+            onFinalResponse(finalResponse, nil)
         default:
             internalErr := fmt.Errorf("Internal sink handler error methodBothThrow: %w", finalErr)
-            x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-            onFinalResponse(x)
+            onFinalResponse(nil, internalErr)
         }
         return
     }
 
     finalResponse.Success = finalResult
-    onFinalResponse(finalResponse)
+    onFinalResponse(finalResponse, nil)
 }
 
 type procFuncSinkServiceMethodFast struct {
@@ -876,8 +864,8 @@ func (p *procFuncSinkServiceMethodFast) NewSinkElem() thrift.ReadableResult {
 func (p *procFuncSinkServiceMethodFast) RunSinkContext(
     ctx context.Context,
     reqStruct thrift.ReadableStruct,
-    onFirstResponse func(thrift.WritableStruct),
-    onFinalResponse func(thrift.WritableStruct),
+    onFirstResponse func(thrift.WritableResult, error),
+    onFinalResponse func(thrift.WritableResult, error),
     onSinkError func(error),
     sinkSeq iter.Seq2[thrift.ReadableStruct, error],
 ) {
@@ -885,12 +873,11 @@ func (p *procFuncSinkServiceMethodFast) RunSinkContext(
     elemConsumerFunc, initialErr := p.handler.MethodFast(ctx)
     if initialErr != nil {
         internalErr := fmt.Errorf("Internal error processing methodFast: %w", initialErr)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        onFirstResponse(x)
+        onFirstResponse(nil, internalErr)
         return
     }
 
-    onFirstResponse(firstResponse)
+    onFirstResponse(firstResponse, nil)
 
     fbthriftTypedSeq := func(yield func(*SinkPayload, error) bool) {
         for elem, err := range sinkSeq {
@@ -910,13 +897,12 @@ func (p *procFuncSinkServiceMethodFast) RunSinkContext(
     finalResponse := newRespFinalSinkServiceMethodFast()
     if finalErr != nil {
         internalErr := fmt.Errorf("Internal sink handler error methodFast: %w", finalErr)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        onFinalResponse(x)
+        onFinalResponse(nil, internalErr)
         return
     }
 
     finalResponse.Success = finalResult
-    onFinalResponse(finalResponse)
+    onFinalResponse(finalResponse, nil)
 }
 
 

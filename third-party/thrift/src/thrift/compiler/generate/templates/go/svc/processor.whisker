@@ -29,8 +29,8 @@
 func (p *procFunc{{svc.go_name}}{{func.go_name}}) RunStreamContext(
     ctx context.Context,
     reqStruct thrift.ReadableStruct,
-    onFirstResponse func(thrift.WritableStruct),
-    onStreamNext func(thrift.WritableStruct),
+    onFirstResponse func(thrift.WritableResult, error),
+    onStreamNext func(thrift.WritableResult, error),
     onStreamComplete func(),
 ) {
     {{#if func.params.fields?}}
@@ -48,18 +48,16 @@ func (p *procFunc{{svc.go_name}}{{func.go_name}}) RunStreamContext(
         {{#each func.exceptions as |ex|}}
         case *{{#partial types.go_type type=ex.type}}:
             firstResponse.{{ex.go_name}} = v
-            onFirstResponse(firstResponse)
+            onFirstResponse(firstResponse, nil)
         {{/each}}
         default:
             internalErr := fmt.Errorf("Internal error processing {{func.name}}: %w", initialErr)
-            x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-            onFirstResponse(x)
+            onFirstResponse(nil, internalErr)
         }
         {{/if func.exceptions?}}
         {{#if (not func.exceptions?)}}
         internalErr := fmt.Errorf("Internal error processing {{func.name}}: %w", initialErr)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        onFirstResponse(x)
+        onFirstResponse(nil, internalErr)
         {{/if (not func.exceptions?)}}
         onStreamComplete()
         return
@@ -71,7 +69,7 @@ func (p *procFunc{{svc.go_name}}{{func.go_name}}) RunStreamContext(
     {{#if func.stream_has_first_response?}}
     firstResponse.{{func.retval_field_name}} = {{#if (not func.return_type.nilable?)}}&{{/if (not func.return_type.nilable?)}}retval
     {{/if func.stream_has_first_response?}}
-    onFirstResponse(firstResponse)
+    onFirstResponse(firstResponse, nil)
 
     fbthriftElemChan := make(chan {{#if func.stream.elem_type.structured?}}*{{/if func.stream.elem_type.structured?}}{{#partial types.go_type type=func.stream.elem_type}}, thrift.DefaultStreamBufferSize)
     var senderWg sync.WaitGroup
@@ -82,7 +80,7 @@ func (p *procFunc{{svc.go_name}}{{func.go_name}}) RunStreamContext(
         for elem := range fbthriftElemChan {
             streamWrapStruct := newStream{{svc.go_name}}{{func.go_name}}()
             streamWrapStruct.{{func.retval_field_name}} = {{#if (not func.stream.elem_type.nilable?)}}&{{/if (not func.stream.elem_type.nilable?)}}elem
-            onStreamNext(streamWrapStruct)
+            onStreamNext(streamWrapStruct, nil)
         }
     }()
 
@@ -97,18 +95,16 @@ func (p *procFunc{{svc.go_name}}{{func.go_name}}) RunStreamContext(
         {{#each func.stream.exceptions as |ex|}}
         case *{{#partial types.go_type type=ex.type}}:
             streamWrapStruct.{{ex.go_name}} = v
-            onStreamNext(streamWrapStruct)
+            onStreamNext(streamWrapStruct, nil)
         {{/each}}
         default:
             internalErr := fmt.Errorf("Internal stream handler error {{func.name}}: %w", streamErr)
-            x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-            onStreamNext(x)
+            onStreamNext(nil, internalErr)
         }
         {{/if func.stream_exceptions?}}
         {{#if (not func.stream_exceptions?)}}
         internalErr := fmt.Errorf("Internal stream handler error {{func.name}}: %w", streamErr)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        onStreamNext(x)
+        onStreamNext(nil, internalErr)
         {{/if (not func.stream_exceptions?)}}
     }
     onStreamComplete()
@@ -177,8 +173,8 @@ func (p *procFunc{{svc.go_name}}{{func.go_name}}) NewSinkElem() thrift.ReadableR
 func (p *procFunc{{svc.go_name}}{{func.go_name}}) RunSinkContext(
     ctx context.Context,
     reqStruct thrift.ReadableStruct,
-    onFirstResponse func(thrift.WritableStruct),
-    onFinalResponse func(thrift.WritableStruct),
+    onFirstResponse func(thrift.WritableResult, error),
+    onFinalResponse func(thrift.WritableResult, error),
     onSinkError func(error),
     sinkSeq iter.Seq2[thrift.ReadableStruct, error],
 ) {
@@ -197,18 +193,16 @@ func (p *procFunc{{svc.go_name}}{{func.go_name}}) RunSinkContext(
         {{#each func.exceptions as |ex|}}
         case *{{#partial types.go_type type=ex.type}}:
             firstResponse.{{ex.go_name}} = v
-            onFirstResponse(firstResponse)
+            onFirstResponse(firstResponse, nil)
         {{/each}}
         default:
             internalErr := fmt.Errorf("Internal error processing {{func.name}}: %w", initialErr)
-            x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-            onFirstResponse(x)
+            onFirstResponse(nil, internalErr)
         }
         {{/if func.exceptions?}}
         {{#if (not func.exceptions?)}}
         internalErr := fmt.Errorf("Internal error processing {{func.name}}: %w", initialErr)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        onFirstResponse(x)
+        onFirstResponse(nil, internalErr)
         {{/if (not func.exceptions?)}}
         return
     }
@@ -219,7 +213,7 @@ func (p *procFunc{{svc.go_name}}{{func.go_name}}) RunSinkContext(
     {{#if func.sink_has_first_response?}}
     firstResponse.{{func.retval_field_name}} = {{#if (not func.return_type.nilable?)}}&{{/if (not func.return_type.nilable?)}}retval
     {{/if func.sink_has_first_response?}}
-    onFirstResponse(firstResponse)
+    onFirstResponse(firstResponse, nil)
 
     fbthriftTypedSeq := func(yield func({{#if func.sink.elem_type.structured?}}*{{/if func.sink.elem_type.structured?}}{{#partial types.go_type type=func.sink.elem_type}}, error) bool) {
         for elem, err := range sinkSeq {
@@ -243,18 +237,16 @@ func (p *procFunc{{svc.go_name}}{{func.go_name}}) RunSinkContext(
         {{#each func.sink.final_response_exceptions as |ex|}}
         case *{{#partial types.go_type type=ex.type}}:
             finalResponse.{{ex.go_name}} = v
-            onFinalResponse(finalResponse)
+            onFinalResponse(finalResponse, nil)
         {{/each}}
         default:
             internalErr := fmt.Errorf("Internal sink handler error {{func.name}}: %w", finalErr)
-            x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-            onFinalResponse(x)
+            onFinalResponse(nil, internalErr)
         }
         {{/if func.sink_final_response_exceptions?}}
         {{#if (not func.sink_final_response_exceptions?)}}
         internalErr := fmt.Errorf("Internal sink handler error {{func.name}}: %w", finalErr)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        onFinalResponse(x)
+        onFinalResponse(nil, internalErr)
         {{/if (not func.sink_final_response_exceptions?)}}
         return
     }
@@ -262,7 +254,7 @@ func (p *procFunc{{svc.go_name}}{{func.go_name}}) RunSinkContext(
     {{#if func.sink.final_response_type}}
     finalResponse.{{func.retval_field_name}} = {{#if (not func.sink.final_response_type.nilable?)}}&{{/if (not func.sink.final_response_type.nilable?)}}finalResult
     {{/if func.sink.final_response_type}}
-    onFinalResponse(finalResponse)
+    onFinalResponse(finalResponse, nil)
 }
 {{/let partial}}
 
@@ -274,8 +266,8 @@ func (p *procFunc{{svc.go_name}}{{func.go_name}}) NewSinkElem() thrift.ReadableR
 func (p *procFunc{{svc.go_name}}{{func.go_name}}) RunBiDiContext(
     ctx context.Context,
     reqStruct thrift.ReadableStruct,
-    onFirstResponse func(thrift.WritableStruct),
-    onStreamNext func(thrift.WritableStruct),
+    onFirstResponse func(thrift.WritableResult, error),
+    onStreamNext func(thrift.WritableResult, error),
     onStreamComplete func(),
     sinkSeq iter.Seq2[thrift.ReadableStruct, error],
 ) {
@@ -294,18 +286,16 @@ func (p *procFunc{{svc.go_name}}{{func.go_name}}) RunBiDiContext(
         {{#each func.exceptions as |ex|}}
         case *{{#partial types.go_type type=ex.type}}:
             firstResponse.{{ex.go_name}} = v
-            onFirstResponse(firstResponse)
+            onFirstResponse(firstResponse, nil)
         {{/each}}
         default:
             internalErr := fmt.Errorf("Internal error processing {{func.name}}: %w", initialErr)
-            x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-            onFirstResponse(x)
+            onFirstResponse(nil, internalErr)
         }
         {{/if func.exceptions?}}
         {{#if (not func.exceptions?)}}
         internalErr := fmt.Errorf("Internal error processing {{func.name}}: %w", initialErr)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        onFirstResponse(x)
+        onFirstResponse(nil, internalErr)
         {{/if (not func.exceptions?)}}
         onStreamComplete()
         return
@@ -317,7 +307,7 @@ func (p *procFunc{{svc.go_name}}{{func.go_name}}) RunBiDiContext(
     {{#if func.stream_has_first_response?}}
     firstResponse.{{func.retval_field_name}} = {{#if (not func.return_type.nilable?)}}&{{/if (not func.return_type.nilable?)}}retval
     {{/if func.stream_has_first_response?}}
-    onFirstResponse(firstResponse)
+    onFirstResponse(firstResponse, nil)
 
     fbthriftTypedSinkSeq := func(yield func({{#if func.sink.elem_type.structured?}}*{{/if func.sink.elem_type.structured?}}{{#partial types.go_type type=func.sink.elem_type}}, error) bool) {
         for elem, err := range sinkSeq {
@@ -340,7 +330,7 @@ func (p *procFunc{{svc.go_name}}{{func.go_name}}) RunBiDiContext(
         for elem := range fbthriftStreamChan {
             streamWrapStruct := newStream{{svc.go_name}}{{func.go_name}}()
             streamWrapStruct.{{func.retval_field_name}} = {{#if (not func.stream.elem_type.nilable?)}}&{{/if (not func.stream.elem_type.nilable?)}}elem
-            onStreamNext(streamWrapStruct)
+            onStreamNext(streamWrapStruct, nil)
         }
     }()
 
@@ -363,18 +353,16 @@ func (p *procFunc{{svc.go_name}}{{func.go_name}}) RunBiDiContext(
         {{#each func.stream.exceptions as |ex|}}
         case *{{#partial types.go_type type=ex.type}}:
             streamWrapStruct.{{ex.go_name}} = v
-            onStreamNext(streamWrapStruct)
+            onStreamNext(streamWrapStruct, nil)
         {{/each}}
         default:
             internalErr := fmt.Errorf("Internal stream handler error {{func.name}}: %w", streamErr)
-            x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-            onStreamNext(x)
+            onStreamNext(nil, internalErr)
         }
         {{/if func.stream_exceptions?}}
         {{#if (not func.stream_exceptions?)}}
         internalErr := fmt.Errorf("Internal stream handler error {{func.name}}: %w", streamErr)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        onStreamNext(x)
+        onStreamNext(nil, internalErr)
         {{/if (not func.stream_exceptions?)}}
     }
     // Wait for sink consumer to finish before completing the stream.

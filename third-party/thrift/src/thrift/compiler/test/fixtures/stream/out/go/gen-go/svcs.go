@@ -557,8 +557,8 @@ func (p *procFuncPubSubStreamingServiceReturnstream) RunContext(ctx context.Cont
 func (p *procFuncPubSubStreamingServiceReturnstream) RunStreamContext(
     ctx context.Context,
     reqStruct thrift.ReadableStruct,
-    onFirstResponse func(thrift.WritableStruct),
-    onStreamNext func(thrift.WritableStruct),
+    onFirstResponse func(thrift.WritableResult, error),
+    onStreamNext func(thrift.WritableResult, error),
     onStreamComplete func(),
 ) {
     args := reqStruct.(*reqPubSubStreamingServiceReturnstream)
@@ -566,13 +566,12 @@ func (p *procFuncPubSubStreamingServiceReturnstream) RunStreamContext(
     elemProducerFunc, initialErr := p.handler.Returnstream(ctx, args.I32From, args.I32To)
     if initialErr != nil {
         internalErr := fmt.Errorf("Internal error processing returnstream: %w", initialErr)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        onFirstResponse(x)
+        onFirstResponse(nil, internalErr)
         onStreamComplete()
         return
     }
 
-    onFirstResponse(firstResponse)
+    onFirstResponse(firstResponse, nil)
 
     fbthriftElemChan := make(chan int32, thrift.DefaultStreamBufferSize)
     var senderWg sync.WaitGroup
@@ -583,7 +582,7 @@ func (p *procFuncPubSubStreamingServiceReturnstream) RunStreamContext(
         for elem := range fbthriftElemChan {
             streamWrapStruct := newStreamPubSubStreamingServiceReturnstream()
             streamWrapStruct.Success = &elem
-            onStreamNext(streamWrapStruct)
+            onStreamNext(streamWrapStruct, nil)
         }
     }()
 
@@ -593,8 +592,7 @@ func (p *procFuncPubSubStreamingServiceReturnstream) RunStreamContext(
     senderWg.Wait()
     if streamErr != nil {
         internalErr := fmt.Errorf("Internal stream handler error returnstream: %w", streamErr)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        onStreamNext(x)
+        onStreamNext(nil, internalErr)
     }
     onStreamComplete()
 }
@@ -616,8 +614,8 @@ func (p *procFuncPubSubStreamingServiceStreamthrows) RunContext(ctx context.Cont
 func (p *procFuncPubSubStreamingServiceStreamthrows) RunStreamContext(
     ctx context.Context,
     reqStruct thrift.ReadableStruct,
-    onFirstResponse func(thrift.WritableStruct),
-    onStreamNext func(thrift.WritableStruct),
+    onFirstResponse func(thrift.WritableResult, error),
+    onStreamNext func(thrift.WritableResult, error),
     onStreamComplete func(),
 ) {
     args := reqStruct.(*reqPubSubStreamingServiceStreamthrows)
@@ -625,13 +623,12 @@ func (p *procFuncPubSubStreamingServiceStreamthrows) RunStreamContext(
     elemProducerFunc, initialErr := p.handler.Streamthrows(ctx, args.Foo)
     if initialErr != nil {
         internalErr := fmt.Errorf("Internal error processing streamthrows: %w", initialErr)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        onFirstResponse(x)
+        onFirstResponse(nil, internalErr)
         onStreamComplete()
         return
     }
 
-    onFirstResponse(firstResponse)
+    onFirstResponse(firstResponse, nil)
 
     fbthriftElemChan := make(chan int32, thrift.DefaultStreamBufferSize)
     var senderWg sync.WaitGroup
@@ -642,7 +639,7 @@ func (p *procFuncPubSubStreamingServiceStreamthrows) RunStreamContext(
         for elem := range fbthriftElemChan {
             streamWrapStruct := newStreamPubSubStreamingServiceStreamthrows()
             streamWrapStruct.Success = &elem
-            onStreamNext(streamWrapStruct)
+            onStreamNext(streamWrapStruct, nil)
         }
     }()
 
@@ -655,11 +652,10 @@ func (p *procFuncPubSubStreamingServiceStreamthrows) RunStreamContext(
         switch v := streamErr.(type) {
         case *FooStreamEx:
             streamWrapStruct.E = v
-            onStreamNext(streamWrapStruct)
+            onStreamNext(streamWrapStruct, nil)
         default:
             internalErr := fmt.Errorf("Internal stream handler error streamthrows: %w", streamErr)
-            x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-            onStreamNext(x)
+            onStreamNext(nil, internalErr)
         }
     }
     onStreamComplete()
@@ -682,8 +678,8 @@ func (p *procFuncPubSubStreamingServiceServicethrows) RunContext(ctx context.Con
 func (p *procFuncPubSubStreamingServiceServicethrows) RunStreamContext(
     ctx context.Context,
     reqStruct thrift.ReadableStruct,
-    onFirstResponse func(thrift.WritableStruct),
-    onStreamNext func(thrift.WritableStruct),
+    onFirstResponse func(thrift.WritableResult, error),
+    onStreamNext func(thrift.WritableResult, error),
     onStreamComplete func(),
 ) {
     args := reqStruct.(*reqPubSubStreamingServiceServicethrows)
@@ -693,17 +689,16 @@ func (p *procFuncPubSubStreamingServiceServicethrows) RunStreamContext(
         switch v := initialErr.(type) {
         case *FooEx:
             firstResponse.E = v
-            onFirstResponse(firstResponse)
+            onFirstResponse(firstResponse, nil)
         default:
             internalErr := fmt.Errorf("Internal error processing servicethrows: %w", initialErr)
-            x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-            onFirstResponse(x)
+            onFirstResponse(nil, internalErr)
         }
         onStreamComplete()
         return
     }
 
-    onFirstResponse(firstResponse)
+    onFirstResponse(firstResponse, nil)
 
     fbthriftElemChan := make(chan int32, thrift.DefaultStreamBufferSize)
     var senderWg sync.WaitGroup
@@ -714,7 +709,7 @@ func (p *procFuncPubSubStreamingServiceServicethrows) RunStreamContext(
         for elem := range fbthriftElemChan {
             streamWrapStruct := newStreamPubSubStreamingServiceServicethrows()
             streamWrapStruct.Success = &elem
-            onStreamNext(streamWrapStruct)
+            onStreamNext(streamWrapStruct, nil)
         }
     }()
 
@@ -724,8 +719,7 @@ func (p *procFuncPubSubStreamingServiceServicethrows) RunStreamContext(
     senderWg.Wait()
     if streamErr != nil {
         internalErr := fmt.Errorf("Internal stream handler error servicethrows: %w", streamErr)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        onStreamNext(x)
+        onStreamNext(nil, internalErr)
     }
     onStreamComplete()
 }
@@ -747,8 +741,8 @@ func (p *procFuncPubSubStreamingServiceServicethrows2) RunContext(ctx context.Co
 func (p *procFuncPubSubStreamingServiceServicethrows2) RunStreamContext(
     ctx context.Context,
     reqStruct thrift.ReadableStruct,
-    onFirstResponse func(thrift.WritableStruct),
-    onStreamNext func(thrift.WritableStruct),
+    onFirstResponse func(thrift.WritableResult, error),
+    onStreamNext func(thrift.WritableResult, error),
     onStreamComplete func(),
 ) {
     args := reqStruct.(*reqPubSubStreamingServiceServicethrows2)
@@ -758,20 +752,19 @@ func (p *procFuncPubSubStreamingServiceServicethrows2) RunStreamContext(
         switch v := initialErr.(type) {
         case *FooEx:
             firstResponse.E1 = v
-            onFirstResponse(firstResponse)
+            onFirstResponse(firstResponse, nil)
         case *FooEx2:
             firstResponse.E2 = v
-            onFirstResponse(firstResponse)
+            onFirstResponse(firstResponse, nil)
         default:
             internalErr := fmt.Errorf("Internal error processing servicethrows2: %w", initialErr)
-            x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-            onFirstResponse(x)
+            onFirstResponse(nil, internalErr)
         }
         onStreamComplete()
         return
     }
 
-    onFirstResponse(firstResponse)
+    onFirstResponse(firstResponse, nil)
 
     fbthriftElemChan := make(chan int32, thrift.DefaultStreamBufferSize)
     var senderWg sync.WaitGroup
@@ -782,7 +775,7 @@ func (p *procFuncPubSubStreamingServiceServicethrows2) RunStreamContext(
         for elem := range fbthriftElemChan {
             streamWrapStruct := newStreamPubSubStreamingServiceServicethrows2()
             streamWrapStruct.Success = &elem
-            onStreamNext(streamWrapStruct)
+            onStreamNext(streamWrapStruct, nil)
         }
     }()
 
@@ -792,8 +785,7 @@ func (p *procFuncPubSubStreamingServiceServicethrows2) RunStreamContext(
     senderWg.Wait()
     if streamErr != nil {
         internalErr := fmt.Errorf("Internal stream handler error servicethrows2: %w", streamErr)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        onStreamNext(x)
+        onStreamNext(nil, internalErr)
     }
     onStreamComplete()
 }
@@ -815,8 +807,8 @@ func (p *procFuncPubSubStreamingServiceBoththrows) RunContext(ctx context.Contex
 func (p *procFuncPubSubStreamingServiceBoththrows) RunStreamContext(
     ctx context.Context,
     reqStruct thrift.ReadableStruct,
-    onFirstResponse func(thrift.WritableStruct),
-    onStreamNext func(thrift.WritableStruct),
+    onFirstResponse func(thrift.WritableResult, error),
+    onStreamNext func(thrift.WritableResult, error),
     onStreamComplete func(),
 ) {
     args := reqStruct.(*reqPubSubStreamingServiceBoththrows)
@@ -826,17 +818,16 @@ func (p *procFuncPubSubStreamingServiceBoththrows) RunStreamContext(
         switch v := initialErr.(type) {
         case *FooEx:
             firstResponse.E = v
-            onFirstResponse(firstResponse)
+            onFirstResponse(firstResponse, nil)
         default:
             internalErr := fmt.Errorf("Internal error processing boththrows: %w", initialErr)
-            x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-            onFirstResponse(x)
+            onFirstResponse(nil, internalErr)
         }
         onStreamComplete()
         return
     }
 
-    onFirstResponse(firstResponse)
+    onFirstResponse(firstResponse, nil)
 
     fbthriftElemChan := make(chan int32, thrift.DefaultStreamBufferSize)
     var senderWg sync.WaitGroup
@@ -847,7 +838,7 @@ func (p *procFuncPubSubStreamingServiceBoththrows) RunStreamContext(
         for elem := range fbthriftElemChan {
             streamWrapStruct := newStreamPubSubStreamingServiceBoththrows()
             streamWrapStruct.Success = &elem
-            onStreamNext(streamWrapStruct)
+            onStreamNext(streamWrapStruct, nil)
         }
     }()
 
@@ -860,11 +851,10 @@ func (p *procFuncPubSubStreamingServiceBoththrows) RunStreamContext(
         switch v := streamErr.(type) {
         case *FooStreamEx:
             streamWrapStruct.E = v
-            onStreamNext(streamWrapStruct)
+            onStreamNext(streamWrapStruct, nil)
         default:
             internalErr := fmt.Errorf("Internal stream handler error boththrows: %w", streamErr)
-            x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-            onStreamNext(x)
+            onStreamNext(nil, internalErr)
         }
     }
     onStreamComplete()
@@ -887,8 +877,8 @@ func (p *procFuncPubSubStreamingServiceResponseandstreamstreamthrows) RunContext
 func (p *procFuncPubSubStreamingServiceResponseandstreamstreamthrows) RunStreamContext(
     ctx context.Context,
     reqStruct thrift.ReadableStruct,
-    onFirstResponse func(thrift.WritableStruct),
-    onStreamNext func(thrift.WritableStruct),
+    onFirstResponse func(thrift.WritableResult, error),
+    onStreamNext func(thrift.WritableResult, error),
     onStreamComplete func(),
 ) {
     args := reqStruct.(*reqPubSubStreamingServiceResponseandstreamstreamthrows)
@@ -896,14 +886,13 @@ func (p *procFuncPubSubStreamingServiceResponseandstreamstreamthrows) RunStreamC
     retval, elemProducerFunc, initialErr := p.handler.Responseandstreamstreamthrows(ctx, args.Foo)
     if initialErr != nil {
         internalErr := fmt.Errorf("Internal error processing responseandstreamstreamthrows: %w", initialErr)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        onFirstResponse(x)
+        onFirstResponse(nil, internalErr)
         onStreamComplete()
         return
     }
 
     firstResponse.Success = &retval
-    onFirstResponse(firstResponse)
+    onFirstResponse(firstResponse, nil)
 
     fbthriftElemChan := make(chan int32, thrift.DefaultStreamBufferSize)
     var senderWg sync.WaitGroup
@@ -914,7 +903,7 @@ func (p *procFuncPubSubStreamingServiceResponseandstreamstreamthrows) RunStreamC
         for elem := range fbthriftElemChan {
             streamWrapStruct := newStreamPubSubStreamingServiceResponseandstreamstreamthrows()
             streamWrapStruct.Success = &elem
-            onStreamNext(streamWrapStruct)
+            onStreamNext(streamWrapStruct, nil)
         }
     }()
 
@@ -927,11 +916,10 @@ func (p *procFuncPubSubStreamingServiceResponseandstreamstreamthrows) RunStreamC
         switch v := streamErr.(type) {
         case *FooStreamEx:
             streamWrapStruct.E = v
-            onStreamNext(streamWrapStruct)
+            onStreamNext(streamWrapStruct, nil)
         default:
             internalErr := fmt.Errorf("Internal stream handler error responseandstreamstreamthrows: %w", streamErr)
-            x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-            onStreamNext(x)
+            onStreamNext(nil, internalErr)
         }
     }
     onStreamComplete()
@@ -954,8 +942,8 @@ func (p *procFuncPubSubStreamingServiceResponseandstreamservicethrows) RunContex
 func (p *procFuncPubSubStreamingServiceResponseandstreamservicethrows) RunStreamContext(
     ctx context.Context,
     reqStruct thrift.ReadableStruct,
-    onFirstResponse func(thrift.WritableStruct),
-    onStreamNext func(thrift.WritableStruct),
+    onFirstResponse func(thrift.WritableResult, error),
+    onStreamNext func(thrift.WritableResult, error),
     onStreamComplete func(),
 ) {
     args := reqStruct.(*reqPubSubStreamingServiceResponseandstreamservicethrows)
@@ -965,18 +953,17 @@ func (p *procFuncPubSubStreamingServiceResponseandstreamservicethrows) RunStream
         switch v := initialErr.(type) {
         case *FooEx:
             firstResponse.E = v
-            onFirstResponse(firstResponse)
+            onFirstResponse(firstResponse, nil)
         default:
             internalErr := fmt.Errorf("Internal error processing responseandstreamservicethrows: %w", initialErr)
-            x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-            onFirstResponse(x)
+            onFirstResponse(nil, internalErr)
         }
         onStreamComplete()
         return
     }
 
     firstResponse.Success = &retval
-    onFirstResponse(firstResponse)
+    onFirstResponse(firstResponse, nil)
 
     fbthriftElemChan := make(chan int32, thrift.DefaultStreamBufferSize)
     var senderWg sync.WaitGroup
@@ -987,7 +974,7 @@ func (p *procFuncPubSubStreamingServiceResponseandstreamservicethrows) RunStream
         for elem := range fbthriftElemChan {
             streamWrapStruct := newStreamPubSubStreamingServiceResponseandstreamservicethrows()
             streamWrapStruct.Success = &elem
-            onStreamNext(streamWrapStruct)
+            onStreamNext(streamWrapStruct, nil)
         }
     }()
 
@@ -997,8 +984,7 @@ func (p *procFuncPubSubStreamingServiceResponseandstreamservicethrows) RunStream
     senderWg.Wait()
     if streamErr != nil {
         internalErr := fmt.Errorf("Internal stream handler error responseandstreamservicethrows: %w", streamErr)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        onStreamNext(x)
+        onStreamNext(nil, internalErr)
     }
     onStreamComplete()
 }
@@ -1020,8 +1006,8 @@ func (p *procFuncPubSubStreamingServiceResponseandstreamboththrows) RunContext(c
 func (p *procFuncPubSubStreamingServiceResponseandstreamboththrows) RunStreamContext(
     ctx context.Context,
     reqStruct thrift.ReadableStruct,
-    onFirstResponse func(thrift.WritableStruct),
-    onStreamNext func(thrift.WritableStruct),
+    onFirstResponse func(thrift.WritableResult, error),
+    onStreamNext func(thrift.WritableResult, error),
     onStreamComplete func(),
 ) {
     args := reqStruct.(*reqPubSubStreamingServiceResponseandstreamboththrows)
@@ -1031,18 +1017,17 @@ func (p *procFuncPubSubStreamingServiceResponseandstreamboththrows) RunStreamCon
         switch v := initialErr.(type) {
         case *FooEx:
             firstResponse.E = v
-            onFirstResponse(firstResponse)
+            onFirstResponse(firstResponse, nil)
         default:
             internalErr := fmt.Errorf("Internal error processing responseandstreamboththrows: %w", initialErr)
-            x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-            onFirstResponse(x)
+            onFirstResponse(nil, internalErr)
         }
         onStreamComplete()
         return
     }
 
     firstResponse.Success = &retval
-    onFirstResponse(firstResponse)
+    onFirstResponse(firstResponse, nil)
 
     fbthriftElemChan := make(chan int32, thrift.DefaultStreamBufferSize)
     var senderWg sync.WaitGroup
@@ -1053,7 +1038,7 @@ func (p *procFuncPubSubStreamingServiceResponseandstreamboththrows) RunStreamCon
         for elem := range fbthriftElemChan {
             streamWrapStruct := newStreamPubSubStreamingServiceResponseandstreamboththrows()
             streamWrapStruct.Success = &elem
-            onStreamNext(streamWrapStruct)
+            onStreamNext(streamWrapStruct, nil)
         }
     }()
 
@@ -1066,11 +1051,10 @@ func (p *procFuncPubSubStreamingServiceResponseandstreamboththrows) RunStreamCon
         switch v := streamErr.(type) {
         case *FooStreamEx:
             streamWrapStruct.E = v
-            onStreamNext(streamWrapStruct)
+            onStreamNext(streamWrapStruct, nil)
         default:
             internalErr := fmt.Errorf("Internal stream handler error responseandstreamboththrows: %w", streamErr)
-            x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-            onStreamNext(x)
+            onStreamNext(nil, internalErr)
         }
     }
     onStreamComplete()
@@ -1093,8 +1077,8 @@ func (p *procFuncPubSubStreamingServiceReturnstreamFast) RunContext(ctx context.
 func (p *procFuncPubSubStreamingServiceReturnstreamFast) RunStreamContext(
     ctx context.Context,
     reqStruct thrift.ReadableStruct,
-    onFirstResponse func(thrift.WritableStruct),
-    onStreamNext func(thrift.WritableStruct),
+    onFirstResponse func(thrift.WritableResult, error),
+    onStreamNext func(thrift.WritableResult, error),
     onStreamComplete func(),
 ) {
     args := reqStruct.(*reqPubSubStreamingServiceReturnstreamFast)
@@ -1102,13 +1086,12 @@ func (p *procFuncPubSubStreamingServiceReturnstreamFast) RunStreamContext(
     elemProducerFunc, initialErr := p.handler.ReturnstreamFast(ctx, args.I32From, args.I32To)
     if initialErr != nil {
         internalErr := fmt.Errorf("Internal error processing returnstreamFast: %w", initialErr)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        onFirstResponse(x)
+        onFirstResponse(nil, internalErr)
         onStreamComplete()
         return
     }
 
-    onFirstResponse(firstResponse)
+    onFirstResponse(firstResponse, nil)
 
     fbthriftElemChan := make(chan int32, thrift.DefaultStreamBufferSize)
     var senderWg sync.WaitGroup
@@ -1119,7 +1102,7 @@ func (p *procFuncPubSubStreamingServiceReturnstreamFast) RunStreamContext(
         for elem := range fbthriftElemChan {
             streamWrapStruct := newStreamPubSubStreamingServiceReturnstreamFast()
             streamWrapStruct.Success = &elem
-            onStreamNext(streamWrapStruct)
+            onStreamNext(streamWrapStruct, nil)
         }
     }()
 
@@ -1129,8 +1112,7 @@ func (p *procFuncPubSubStreamingServiceReturnstreamFast) RunStreamContext(
     senderWg.Wait()
     if streamErr != nil {
         internalErr := fmt.Errorf("Internal stream handler error returnstreamFast: %w", streamErr)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        onStreamNext(x)
+        onStreamNext(nil, internalErr)
     }
     onStreamComplete()
 }

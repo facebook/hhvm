@@ -296,21 +296,20 @@ func (p *procFuncMyInteractionTruthify) RunContext(ctx context.Context, reqStruc
 func (p *procFuncMyInteractionTruthify) RunStreamContext(
     ctx context.Context,
     reqStruct thrift.ReadableStruct,
-    onFirstResponse func(thrift.WritableStruct),
-    onStreamNext func(thrift.WritableStruct),
+    onFirstResponse func(thrift.WritableResult, error),
+    onStreamNext func(thrift.WritableResult, error),
     onStreamComplete func(),
 ) {
     firstResponse := newRespMyInteractionTruthify()
     elemProducerFunc, initialErr := p.handler.Truthify(ctx)
     if initialErr != nil {
         internalErr := fmt.Errorf("Internal error processing truthify: %w", initialErr)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        onFirstResponse(x)
+        onFirstResponse(nil, internalErr)
         onStreamComplete()
         return
     }
 
-    onFirstResponse(firstResponse)
+    onFirstResponse(firstResponse, nil)
 
     fbthriftElemChan := make(chan bool, thrift.DefaultStreamBufferSize)
     var senderWg sync.WaitGroup
@@ -321,7 +320,7 @@ func (p *procFuncMyInteractionTruthify) RunStreamContext(
         for elem := range fbthriftElemChan {
             streamWrapStruct := newStreamMyInteractionTruthify()
             streamWrapStruct.Success = &elem
-            onStreamNext(streamWrapStruct)
+            onStreamNext(streamWrapStruct, nil)
         }
     }()
 
@@ -331,8 +330,7 @@ func (p *procFuncMyInteractionTruthify) RunStreamContext(
     senderWg.Wait()
     if streamErr != nil {
         internalErr := fmt.Errorf("Internal stream handler error truthify: %w", streamErr)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        onStreamNext(x)
+        onStreamNext(nil, internalErr)
     }
     onStreamComplete()
 }
@@ -358,8 +356,8 @@ func (p *procFuncMyInteractionEncode) NewSinkElem() thrift.ReadableResult {
 func (p *procFuncMyInteractionEncode) RunSinkContext(
     ctx context.Context,
     reqStruct thrift.ReadableStruct,
-    onFirstResponse func(thrift.WritableStruct),
-    onFinalResponse func(thrift.WritableStruct),
+    onFirstResponse func(thrift.WritableResult, error),
+    onFinalResponse func(thrift.WritableResult, error),
     onSinkError func(error),
     sinkSeq iter.Seq2[thrift.ReadableStruct, error],
 ) {
@@ -367,13 +365,12 @@ func (p *procFuncMyInteractionEncode) RunSinkContext(
     retval, elemConsumerFunc, initialErr := p.handler.Encode(ctx)
     if initialErr != nil {
         internalErr := fmt.Errorf("Internal error processing encode: %w", initialErr)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        onFirstResponse(x)
+        onFirstResponse(nil, internalErr)
         return
     }
 
     firstResponse.Success = retval
-    onFirstResponse(firstResponse)
+    onFirstResponse(firstResponse, nil)
 
     fbthriftTypedSeq := func(yield func(string, error) bool) {
         for elem, err := range sinkSeq {
@@ -393,13 +390,12 @@ func (p *procFuncMyInteractionEncode) RunSinkContext(
     finalResponse := newRespFinalMyInteractionEncode()
     if finalErr != nil {
         internalErr := fmt.Errorf("Internal sink handler error encode: %w", finalErr)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        onFinalResponse(x)
+        onFinalResponse(nil, internalErr)
         return
     }
 
     finalResponse.Success = finalResult
-    onFinalResponse(finalResponse)
+    onFinalResponse(finalResponse, nil)
 }
 
 
@@ -669,21 +665,20 @@ func (p *procFuncMyInteractionFastTruthify) RunContext(ctx context.Context, reqS
 func (p *procFuncMyInteractionFastTruthify) RunStreamContext(
     ctx context.Context,
     reqStruct thrift.ReadableStruct,
-    onFirstResponse func(thrift.WritableStruct),
-    onStreamNext func(thrift.WritableStruct),
+    onFirstResponse func(thrift.WritableResult, error),
+    onStreamNext func(thrift.WritableResult, error),
     onStreamComplete func(),
 ) {
     firstResponse := newRespMyInteractionFastTruthify()
     elemProducerFunc, initialErr := p.handler.Truthify(ctx)
     if initialErr != nil {
         internalErr := fmt.Errorf("Internal error processing truthify: %w", initialErr)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        onFirstResponse(x)
+        onFirstResponse(nil, internalErr)
         onStreamComplete()
         return
     }
 
-    onFirstResponse(firstResponse)
+    onFirstResponse(firstResponse, nil)
 
     fbthriftElemChan := make(chan bool, thrift.DefaultStreamBufferSize)
     var senderWg sync.WaitGroup
@@ -694,7 +689,7 @@ func (p *procFuncMyInteractionFastTruthify) RunStreamContext(
         for elem := range fbthriftElemChan {
             streamWrapStruct := newStreamMyInteractionFastTruthify()
             streamWrapStruct.Success = &elem
-            onStreamNext(streamWrapStruct)
+            onStreamNext(streamWrapStruct, nil)
         }
     }()
 
@@ -704,8 +699,7 @@ func (p *procFuncMyInteractionFastTruthify) RunStreamContext(
     senderWg.Wait()
     if streamErr != nil {
         internalErr := fmt.Errorf("Internal stream handler error truthify: %w", streamErr)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        onStreamNext(x)
+        onStreamNext(nil, internalErr)
     }
     onStreamComplete()
 }
@@ -731,8 +725,8 @@ func (p *procFuncMyInteractionFastEncode) NewSinkElem() thrift.ReadableResult {
 func (p *procFuncMyInteractionFastEncode) RunSinkContext(
     ctx context.Context,
     reqStruct thrift.ReadableStruct,
-    onFirstResponse func(thrift.WritableStruct),
-    onFinalResponse func(thrift.WritableStruct),
+    onFirstResponse func(thrift.WritableResult, error),
+    onFinalResponse func(thrift.WritableResult, error),
     onSinkError func(error),
     sinkSeq iter.Seq2[thrift.ReadableStruct, error],
 ) {
@@ -740,13 +734,12 @@ func (p *procFuncMyInteractionFastEncode) RunSinkContext(
     retval, elemConsumerFunc, initialErr := p.handler.Encode(ctx)
     if initialErr != nil {
         internalErr := fmt.Errorf("Internal error processing encode: %w", initialErr)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        onFirstResponse(x)
+        onFirstResponse(nil, internalErr)
         return
     }
 
     firstResponse.Success = retval
-    onFirstResponse(firstResponse)
+    onFirstResponse(firstResponse, nil)
 
     fbthriftTypedSeq := func(yield func(string, error) bool) {
         for elem, err := range sinkSeq {
@@ -766,13 +759,12 @@ func (p *procFuncMyInteractionFastEncode) RunSinkContext(
     finalResponse := newRespFinalMyInteractionFastEncode()
     if finalErr != nil {
         internalErr := fmt.Errorf("Internal sink handler error encode: %w", finalErr)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        onFinalResponse(x)
+        onFinalResponse(nil, internalErr)
         return
     }
 
     finalResponse.Success = finalResult
-    onFinalResponse(finalResponse)
+    onFinalResponse(finalResponse, nil)
 }
 
 
@@ -1307,23 +1299,22 @@ func (p *procFuncMyServiceSerialize) RunContext(ctx context.Context, reqStruct t
 func (p *procFuncMyServiceSerialize) RunStreamContext(
     ctx context.Context,
     reqStruct thrift.ReadableStruct,
-    onFirstResponse func(thrift.WritableStruct),
-    onStreamNext func(thrift.WritableStruct),
+    onFirstResponse func(thrift.WritableResult, error),
+    onStreamNext func(thrift.WritableResult, error),
     onStreamComplete func(),
 ) {
     firstResponse := newRespMyServiceSerialize()
     fbthriftInteraction, retval, elemProducerFunc, initialErr := p.handler.Serialize(ctx)
     if initialErr != nil {
         internalErr := fmt.Errorf("Internal error processing serialize: %w", initialErr)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        onFirstResponse(x)
+        onFirstResponse(nil, internalErr)
         onStreamComplete()
         return
     }
 
     thrift.SetInteractionCreateProcessor(ctx, fbthriftInteraction)
     firstResponse.Success = &retval
-    onFirstResponse(firstResponse)
+    onFirstResponse(firstResponse, nil)
 
     fbthriftElemChan := make(chan int32, thrift.DefaultStreamBufferSize)
     var senderWg sync.WaitGroup
@@ -1334,7 +1325,7 @@ func (p *procFuncMyServiceSerialize) RunStreamContext(
         for elem := range fbthriftElemChan {
             streamWrapStruct := newStreamMyServiceSerialize()
             streamWrapStruct.Success = &elem
-            onStreamNext(streamWrapStruct)
+            onStreamNext(streamWrapStruct, nil)
         }
     }()
 
@@ -1344,8 +1335,7 @@ func (p *procFuncMyServiceSerialize) RunStreamContext(
     senderWg.Wait()
     if streamErr != nil {
         internalErr := fmt.Errorf("Internal stream handler error serialize: %w", streamErr)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        onStreamNext(x)
+        onStreamNext(nil, internalErr)
     }
     onStreamComplete()
 }
@@ -1627,23 +1617,22 @@ func (p *procFuncFactoriesSerialize) RunContext(ctx context.Context, reqStruct t
 func (p *procFuncFactoriesSerialize) RunStreamContext(
     ctx context.Context,
     reqStruct thrift.ReadableStruct,
-    onFirstResponse func(thrift.WritableStruct),
-    onStreamNext func(thrift.WritableStruct),
+    onFirstResponse func(thrift.WritableResult, error),
+    onStreamNext func(thrift.WritableResult, error),
     onStreamComplete func(),
 ) {
     firstResponse := newRespFactoriesSerialize()
     fbthriftInteraction, retval, elemProducerFunc, initialErr := p.handler.Serialize(ctx)
     if initialErr != nil {
         internalErr := fmt.Errorf("Internal error processing serialize: %w", initialErr)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        onFirstResponse(x)
+        onFirstResponse(nil, internalErr)
         onStreamComplete()
         return
     }
 
     thrift.SetInteractionCreateProcessor(ctx, fbthriftInteraction)
     firstResponse.Success = &retval
-    onFirstResponse(firstResponse)
+    onFirstResponse(firstResponse, nil)
 
     fbthriftElemChan := make(chan int32, thrift.DefaultStreamBufferSize)
     var senderWg sync.WaitGroup
@@ -1654,7 +1643,7 @@ func (p *procFuncFactoriesSerialize) RunStreamContext(
         for elem := range fbthriftElemChan {
             streamWrapStruct := newStreamFactoriesSerialize()
             streamWrapStruct.Success = &elem
-            onStreamNext(streamWrapStruct)
+            onStreamNext(streamWrapStruct, nil)
         }
     }()
 
@@ -1664,8 +1653,7 @@ func (p *procFuncFactoriesSerialize) RunStreamContext(
     senderWg.Wait()
     if streamErr != nil {
         internalErr := fmt.Errorf("Internal stream handler error serialize: %w", streamErr)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        onStreamNext(x)
+        onStreamNext(nil, internalErr)
     }
     onStreamComplete()
 }

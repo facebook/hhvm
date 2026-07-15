@@ -305,8 +305,8 @@ func (p *procFuncBiDiServiceSimple) NewSinkElem() thrift.ReadableResult {
 func (p *procFuncBiDiServiceSimple) RunBiDiContext(
     ctx context.Context,
     reqStruct thrift.ReadableStruct,
-    onFirstResponse func(thrift.WritableStruct),
-    onStreamNext func(thrift.WritableStruct),
+    onFirstResponse func(thrift.WritableResult, error),
+    onStreamNext func(thrift.WritableResult, error),
     onStreamComplete func(),
     sinkSeq iter.Seq2[thrift.ReadableStruct, error],
 ) {
@@ -314,13 +314,12 @@ func (p *procFuncBiDiServiceSimple) RunBiDiContext(
     sinkConsumerFunc, streamProducerFunc, initialErr := p.handler.Simple(ctx)
     if initialErr != nil {
         internalErr := fmt.Errorf("Internal error processing simple: %w", initialErr)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        onFirstResponse(x)
+        onFirstResponse(nil, internalErr)
         onStreamComplete()
         return
     }
 
-    onFirstResponse(firstResponse)
+    onFirstResponse(firstResponse, nil)
 
     fbthriftTypedSinkSeq := func(yield func(int32, error) bool) {
         for elem, err := range sinkSeq {
@@ -343,7 +342,7 @@ func (p *procFuncBiDiServiceSimple) RunBiDiContext(
         for elem := range fbthriftStreamChan {
             streamWrapStruct := newStreamBiDiServiceSimple()
             streamWrapStruct.Success = &elem
-            onStreamNext(streamWrapStruct)
+            onStreamNext(streamWrapStruct, nil)
         }
     }()
 
@@ -361,8 +360,7 @@ func (p *procFuncBiDiServiceSimple) RunBiDiContext(
     senderWg.Wait()
     if streamErr != nil {
         internalErr := fmt.Errorf("Internal stream handler error simple: %w", streamErr)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        onStreamNext(x)
+        onStreamNext(nil, internalErr)
     }
     // Wait for sink consumer to finish before completing the stream.
     sinkWg.Wait()
@@ -390,8 +388,8 @@ func (p *procFuncBiDiServiceResponse) NewSinkElem() thrift.ReadableResult {
 func (p *procFuncBiDiServiceResponse) RunBiDiContext(
     ctx context.Context,
     reqStruct thrift.ReadableStruct,
-    onFirstResponse func(thrift.WritableStruct),
-    onStreamNext func(thrift.WritableStruct),
+    onFirstResponse func(thrift.WritableResult, error),
+    onStreamNext func(thrift.WritableResult, error),
     onStreamComplete func(),
     sinkSeq iter.Seq2[thrift.ReadableStruct, error],
 ) {
@@ -399,14 +397,13 @@ func (p *procFuncBiDiServiceResponse) RunBiDiContext(
     retval, sinkConsumerFunc, streamProducerFunc, initialErr := p.handler.Response(ctx)
     if initialErr != nil {
         internalErr := fmt.Errorf("Internal error processing response: %w", initialErr)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        onFirstResponse(x)
+        onFirstResponse(nil, internalErr)
         onStreamComplete()
         return
     }
 
     firstResponse.Success = &retval
-    onFirstResponse(firstResponse)
+    onFirstResponse(firstResponse, nil)
 
     fbthriftTypedSinkSeq := func(yield func(int32, error) bool) {
         for elem, err := range sinkSeq {
@@ -429,7 +426,7 @@ func (p *procFuncBiDiServiceResponse) RunBiDiContext(
         for elem := range fbthriftStreamChan {
             streamWrapStruct := newStreamBiDiServiceResponse()
             streamWrapStruct.Success = &elem
-            onStreamNext(streamWrapStruct)
+            onStreamNext(streamWrapStruct, nil)
         }
     }()
 
@@ -447,8 +444,7 @@ func (p *procFuncBiDiServiceResponse) RunBiDiContext(
     senderWg.Wait()
     if streamErr != nil {
         internalErr := fmt.Errorf("Internal stream handler error response: %w", streamErr)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        onStreamNext(x)
+        onStreamNext(nil, internalErr)
     }
     // Wait for sink consumer to finish before completing the stream.
     sinkWg.Wait()
@@ -476,8 +472,8 @@ func (p *procFuncBiDiServiceCanThrow) NewSinkElem() thrift.ReadableResult {
 func (p *procFuncBiDiServiceCanThrow) RunBiDiContext(
     ctx context.Context,
     reqStruct thrift.ReadableStruct,
-    onFirstResponse func(thrift.WritableStruct),
-    onStreamNext func(thrift.WritableStruct),
+    onFirstResponse func(thrift.WritableResult, error),
+    onStreamNext func(thrift.WritableResult, error),
     onStreamComplete func(),
     sinkSeq iter.Seq2[thrift.ReadableStruct, error],
 ) {
@@ -487,17 +483,16 @@ func (p *procFuncBiDiServiceCanThrow) RunBiDiContext(
         switch v := initialErr.(type) {
         case *BiDiMethodException:
             firstResponse.Ex = v
-            onFirstResponse(firstResponse)
+            onFirstResponse(firstResponse, nil)
         default:
             internalErr := fmt.Errorf("Internal error processing canThrow: %w", initialErr)
-            x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-            onFirstResponse(x)
+            onFirstResponse(nil, internalErr)
         }
         onStreamComplete()
         return
     }
 
-    onFirstResponse(firstResponse)
+    onFirstResponse(firstResponse, nil)
 
     fbthriftTypedSinkSeq := func(yield func(int64, error) bool) {
         for elem, err := range sinkSeq {
@@ -520,7 +515,7 @@ func (p *procFuncBiDiServiceCanThrow) RunBiDiContext(
         for elem := range fbthriftStreamChan {
             streamWrapStruct := newStreamBiDiServiceCanThrow()
             streamWrapStruct.Success = &elem
-            onStreamNext(streamWrapStruct)
+            onStreamNext(streamWrapStruct, nil)
         }
     }()
 
@@ -541,11 +536,10 @@ func (p *procFuncBiDiServiceCanThrow) RunBiDiContext(
         switch v := streamErr.(type) {
         case *BiDiStreamException:
             streamWrapStruct.Ex = v
-            onStreamNext(streamWrapStruct)
+            onStreamNext(streamWrapStruct, nil)
         default:
             internalErr := fmt.Errorf("Internal stream handler error canThrow: %w", streamErr)
-            x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-            onStreamNext(x)
+            onStreamNext(nil, internalErr)
         }
     }
     // Wait for sink consumer to finish before completing the stream.

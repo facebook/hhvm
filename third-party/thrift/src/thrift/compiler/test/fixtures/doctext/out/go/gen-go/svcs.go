@@ -235,21 +235,20 @@ func (p *procFuncCNumbers) RunContext(ctx context.Context, reqStruct thrift.Read
 func (p *procFuncCNumbers) RunStreamContext(
     ctx context.Context,
     reqStruct thrift.ReadableStruct,
-    onFirstResponse func(thrift.WritableStruct),
-    onStreamNext func(thrift.WritableStruct),
+    onFirstResponse func(thrift.WritableResult, error),
+    onStreamNext func(thrift.WritableResult, error),
     onStreamComplete func(),
 ) {
     firstResponse := newRespCNumbers()
     elemProducerFunc, initialErr := p.handler.Numbers(ctx)
     if initialErr != nil {
         internalErr := fmt.Errorf("Internal error processing numbers: %w", initialErr)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        onFirstResponse(x)
+        onFirstResponse(nil, internalErr)
         onStreamComplete()
         return
     }
 
-    onFirstResponse(firstResponse)
+    onFirstResponse(firstResponse, nil)
 
     fbthriftElemChan := make(chan Number, thrift.DefaultStreamBufferSize)
     var senderWg sync.WaitGroup
@@ -260,7 +259,7 @@ func (p *procFuncCNumbers) RunStreamContext(
         for elem := range fbthriftElemChan {
             streamWrapStruct := newStreamCNumbers()
             streamWrapStruct.Success = &elem
-            onStreamNext(streamWrapStruct)
+            onStreamNext(streamWrapStruct, nil)
         }
     }()
 
@@ -270,8 +269,7 @@ func (p *procFuncCNumbers) RunStreamContext(
     senderWg.Wait()
     if streamErr != nil {
         internalErr := fmt.Errorf("Internal stream handler error numbers: %w", streamErr)
-        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
-        onStreamNext(x)
+        onStreamNext(nil, internalErr)
     }
     onStreamComplete()
 }

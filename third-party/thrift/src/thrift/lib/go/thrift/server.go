@@ -46,8 +46,8 @@ type processorFunctionStream interface {
 	RunStreamContext(
 		ctx context.Context,
 		args ReadableStruct,
-		onFirstResponse func(WritableStruct),
-		onStreamNext func(WritableStruct),
+		onFirstResponse func(WritableResult, error),
+		onStreamNext func(WritableResult, error),
 		onStreamComplete func(),
 	)
 }
@@ -56,8 +56,8 @@ type processorFunctionSink interface {
 	RunSinkContext(
 		ctx context.Context,
 		reqStruct ReadableStruct,
-		onFirstResponse func(WritableStruct),
-		onFinalResponse func(WritableStruct),
+		onFirstResponse func(WritableResult, error),
+		onFinalResponse func(WritableResult, error),
 		onSinkError func(error),
 		sinkSeq iter.Seq2[ReadableStruct, error],
 	)
@@ -68,8 +68,8 @@ type processorFunctionBiDi interface {
 	RunBiDiContext(
 		ctx context.Context,
 		reqStruct ReadableStruct,
-		onFirstResponse func(WritableStruct),
-		onStreamNext func(WritableStruct),
+		onFirstResponse func(WritableResult, error),
+		onStreamNext func(WritableResult, error),
 		onStreamComplete func(),
 		sinkSeq iter.Seq2[ReadableStruct, error],
 	)
@@ -601,7 +601,8 @@ func (s *rocketServerSocket) requestStream(msg payload.Payload) flux.Flux {
 		func(ctx context.Context, sink flux.Sink) {
 			ctx = WithRequestContext(ctx, reqCtx)
 
-			onFirstResponse := func(respStruct WritableStruct) {
+			onFirstResponse := func(respRes WritableResult, respErr error) {
+				respStruct := writableStructShim(respRes, respErr)
 				respPayload, err := s.makeResponsePayload(metadata, respStruct, true /* isFirstResponse */)
 				if err != nil {
 					s.log("server requestStream makeResponsePayload error: %v", err)
@@ -609,7 +610,8 @@ func (s *rocketServerSocket) requestStream(msg payload.Payload) flux.Flux {
 				}
 				sink.Next(respPayload)
 			}
-			onStreamNext := func(streamStruct WritableStruct) {
+			onStreamNext := func(respRes WritableResult, respErr error) {
+				streamStruct := writableStructShim(respRes, respErr)
 				streamPayload, err := s.makeResponsePayload(metadata, streamStruct, false /* isFirstResponse */)
 				if err != nil {
 					s.log("server requestStream makeResponsePayload error: %v", err)
@@ -624,7 +626,7 @@ func (s *rocketServerSocket) requestStream(msg payload.Payload) flux.Flux {
 			// Run OnRequest interceptors before the handler.
 			ctx, reqIntErr := s.runOnRequestInterceptors(ctx, argStruct)
 			if reqIntErr != nil {
-				onFirstResponse(maybeWrapApplicationException(reqIntErr))
+				onFirstResponse(nil, maybeWrapApplicationException(reqIntErr))
 				onStreamComplete()
 				return
 			}
@@ -680,7 +682,8 @@ func (s *rocketServerSocket) requestChannelSink(
 		ctx = WithRequestContext(ctx, reqCtx)
 		firstResponseQueued := make(chan struct{})
 
-		onFirstResponse := func(respStruct WritableStruct) {
+		onFirstResponse := func(respRes WritableResult, respErr error) {
+			respStruct := writableStructShim(respRes, respErr)
 			respPayload, err := s.makeResponsePayload(metadata, respStruct, true /* isFirstResponse */)
 			if err != nil {
 				s.log("server requestChannel makeResponsePayload error: %v", err)
@@ -690,7 +693,8 @@ func (s *rocketServerSocket) requestChannelSink(
 			close(firstResponseQueued)
 		}
 
-		onFinalResponse := func(respStruct WritableStruct) {
+		onFinalResponse := func(respRes WritableResult, respErr error) {
+			respStruct := writableStructShim(respRes, respErr)
 			finalPayload, err := s.makeResponsePayload(metadata, respStruct, false /* isFirstResponse */)
 			if err != nil {
 				s.log("server requestChannel makeResponsePayload error: %v", err)
@@ -705,7 +709,7 @@ func (s *rocketServerSocket) requestChannelSink(
 		// Run OnRequest interceptors before the handler.
 		ctx, reqIntErr := s.runOnRequestInterceptors(ctx, argStruct)
 		if reqIntErr != nil {
-			onFirstResponse(maybeWrapApplicationException(reqIntErr))
+			onFirstResponse(nil, maybeWrapApplicationException(reqIntErr))
 			sink.Complete()
 			return
 		}
@@ -822,7 +826,8 @@ func (s *rocketServerSocket) requestChannelBiDi(
 		ctx = WithRequestContext(ctx, reqCtx)
 		firstResponseQueued := make(chan struct{})
 
-		onFirstResponse := func(respStruct WritableStruct) {
+		onFirstResponse := func(respRes WritableResult, respErr error) {
+			respStruct := writableStructShim(respRes, respErr)
 			respPayload, err := s.makeResponsePayload(metadata, respStruct, true /* isFirstResponse */)
 			if err != nil {
 				s.log("server requestChannel makeResponsePayload error: %v", err)
@@ -832,7 +837,8 @@ func (s *rocketServerSocket) requestChannelBiDi(
 			close(firstResponseQueued)
 		}
 
-		onStreamNext := func(respStruct WritableStruct) {
+		onStreamNext := func(respRes WritableResult, respErr error) {
+			respStruct := writableStructShim(respRes, respErr)
 			streamPayload, err := s.makeResponsePayload(metadata, respStruct, false /* isFirstResponse */)
 			if err != nil {
 				s.log("server requestChannel makeResponsePayload error: %v", err)
@@ -848,7 +854,7 @@ func (s *rocketServerSocket) requestChannelBiDi(
 		// Run OnRequest interceptors before the handler.
 		ctx, reqIntErr := s.runOnRequestInterceptors(ctx, argStruct)
 		if reqIntErr != nil {
-			onFirstResponse(maybeWrapApplicationException(reqIntErr))
+			onFirstResponse(nil, maybeWrapApplicationException(reqIntErr))
 			onStreamComplete()
 			return
 		}
@@ -1095,4 +1101,11 @@ func (s *rocketServerSocket) preprocessRequest(msg payload.Payload) (
 	reqCtx.SetReadHeaders(reqHeaders)
 
 	return metadata, pfunc, argStruct, reqCtx, nil
+}
+
+func writableStructShim(respRes WritableResult, respErr error) WritableStruct {
+	if respErr != nil {
+		return NewApplicationException(INTERNAL_ERROR, respErr.Error())
+	}
+	return respRes
 }

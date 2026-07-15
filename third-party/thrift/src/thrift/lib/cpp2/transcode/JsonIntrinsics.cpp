@@ -16,6 +16,8 @@
 
 #include <thrift/lib/cpp2/transcode/JsonIntrinsics.h>
 
+#include <thrift/lib/cpp2/transcode/IntrinsicsCommon.h>
+
 #include <array>
 #include <cmath>
 #include <cstdio>
@@ -33,23 +35,18 @@
 using apache::thrift::transcode::cursorCanRead;
 using apache::thrift::transcode::setCursorError;
 
-// ─────────────────────────────────────────────────────────────────────────
-// JSON intrinsics — complex operations only
-// ─────────────────────────────────────────────────────────────────────────
-// Simple JSON operations (whitespace skip, structural chars, field-name
-// matching) are generated inline by KernelCodegen. The JIT also inlines a
-// permissive bool-keyword check; the strict validating reader below is used by
-// the interpreter for untrusted wire→wire JSON.
+// These helpers back the C ABI intrinsics below. Generated kernels still inline
+// the trivial structural JSON operations.
 
 namespace {
 
 constexpr int64_t kJsonError = 1;
 
-void setJsonError(TranscodeCursor* cursor) {
+void set_json_error(TranscodeCursor* cursor) {
   setCursorError(cursor, kJsonError);
 }
 
-void skipWhitespace(TranscodeCursor* cursor) {
+void skip_whitespace(TranscodeCursor* cursor) {
   while (cursor->readPos < cursor->readEnd) {
     uint8_t c = *cursor->readPos;
     if (c != ' ' && c != '\t' && c != '\n' && c != '\r') {
@@ -61,7 +58,7 @@ void skipWhitespace(TranscodeCursor* cursor) {
 
 // Decode exactly four hex digits at `p` into a 16-bit code unit. Returns false
 // (leaving `out` untouched) if fewer than four bytes remain or any is non-hex.
-bool parseHex4(const uint8_t* p, const uint8_t* end, char16_t& out) {
+bool parse_hex4(const uint8_t* p, const uint8_t* end, char16_t& out) {
   if (end - p < 4) {
     return false;
   }
@@ -84,19 +81,19 @@ bool parseHex4(const uint8_t* p, const uint8_t* end, char16_t& out) {
   return true;
 }
 
-bool consumeJsonLiteral(TranscodeCursor* cursor, std::string_view literal) {
+bool consume_json_literal(TranscodeCursor* cursor, std::string_view literal) {
   if (!cursorCanRead(cursor, literal.size())) {
     return false;
   }
   if (memcmp(cursor->readPos, literal.data(), literal.size()) != 0) {
-    setJsonError(cursor);
+    set_json_error(cursor);
     return false;
   }
   cursor->readPos += literal.size();
   return true;
 }
 
-bool isJsonValueTerminator(TranscodeCursor* cursor) {
+bool is_json_value_terminator(TranscodeCursor* cursor) {
   if (cursor->readPos >= cursor->readEnd) {
     return true;
   }
@@ -110,32 +107,41 @@ bool isJsonValueTerminator(TranscodeCursor* cursor) {
     case '}':
       return true;
     default:
-      setJsonError(cursor);
+      set_json_error(cursor);
       return false;
   }
 }
 
-bool skipJsonStringToken(TranscodeCursor* cursor) {
+bool read_json_string_token(
+    TranscodeCursor* cursor, TranscodeJsonStringToken* token) {
+  skip_whitespace(cursor);
+  *token = {nullptr, nullptr, 0};
   if (cursor->readPos >= cursor->readEnd || *cursor->readPos != '"') {
-    setJsonError(cursor);
+    set_json_error(cursor);
     return false;
   }
   ++cursor->readPos;
 
+  const uint8_t* begin = cursor->readPos;
+  bool hasEscapes = false;
   while (cursor->readPos < cursor->readEnd) {
     uint8_t c = *cursor->readPos++;
     if (c == '"') {
+      token->begin = begin;
+      token->end = cursor->readPos - 1;
+      token->hasEscapes = hasEscapes ? 1 : 0;
       return true;
     }
     if (c < 0x20) {
-      setJsonError(cursor);
+      set_json_error(cursor);
       return false;
     }
     if (c != '\\') {
       continue;
     }
+    hasEscapes = true;
     if (cursor->readPos >= cursor->readEnd) {
-      setJsonError(cursor);
+      set_json_error(cursor);
       return false;
     }
     uint8_t escaped = *cursor->readPos++;
@@ -151,8 +157,8 @@ bool skipJsonStringToken(TranscodeCursor* cursor) {
         break;
       case 'u': {
         char16_t hi = 0;
-        if (!parseHex4(cursor->readPos, cursor->readEnd, hi)) {
-          setJsonError(cursor);
+        if (!parse_hex4(cursor->readPos, cursor->readEnd, hi)) {
+          set_json_error(cursor);
           return false;
         }
         cursor->readPos += 4;
@@ -160,29 +166,34 @@ bool skipJsonStringToken(TranscodeCursor* cursor) {
           char16_t lo = 0;
           if (cursor->readEnd - cursor->readPos < 6 ||
               cursor->readPos[0] != '\\' || cursor->readPos[1] != 'u' ||
-              !parseHex4(cursor->readPos + 2, cursor->readEnd, lo) ||
+              !parse_hex4(cursor->readPos + 2, cursor->readEnd, lo) ||
               !folly::utf16_code_unit_is_low_surrogate(lo)) {
-            setJsonError(cursor);
+            set_json_error(cursor);
             return false;
           }
           cursor->readPos += 6;
         } else if (folly::utf16_code_unit_is_low_surrogate(hi)) {
-          setJsonError(cursor);
+          set_json_error(cursor);
           return false;
         }
         break;
       }
       default:
-        setJsonError(cursor);
+        set_json_error(cursor);
         return false;
     }
   }
 
-  setJsonError(cursor);
+  set_json_error(cursor);
   return false;
 }
 
-bool parseJsonNumberToken(TranscodeCursor* cursor, bool allowFraction) {
+bool skip_json_string_token(TranscodeCursor* cursor) {
+  TranscodeJsonStringToken token{};
+  return read_json_string_token(cursor, &token);
+}
+
+bool parse_json_number_token(TranscodeCursor* cursor, bool allowFraction) {
   const uint8_t* p = cursor->readPos;
   const uint8_t* end = cursor->readEnd;
   if (p < end && *p == '-') {
@@ -242,6 +253,332 @@ bool parseJsonNumberToken(TranscodeCursor* cursor, bool allowFraction) {
   return true;
 }
 
+bool append_bytes(
+    const uint8_t* data,
+    size_t len,
+    const uint8_t* expected,
+    size_t expectedLen,
+    size_t& matched) {
+  if (matched > expectedLen || len > expectedLen - matched ||
+      memcmp(expected + matched, data, len) != 0) {
+    return false;
+  }
+  matched += len;
+  return true;
+}
+
+uint8_t escaped_byte(uint8_t escaped) {
+  switch (escaped) {
+    case '"':
+    case '\\':
+    case '/':
+      return escaped;
+    case 'n':
+      return '\n';
+    case 't':
+      return '\t';
+    case 'r':
+      return '\r';
+    case 'b':
+      return '\b';
+    case 'f':
+      return '\f';
+    default:
+      return 0;
+  }
+}
+
+bool json_string_token_decoded_size(
+    const TranscodeJsonStringToken* token, size_t* len) {
+  if (token->hasEscapes == 0) {
+    *len = static_cast<size_t>(token->end - token->begin);
+    return true;
+  }
+
+  size_t out = 0;
+  const uint8_t* p = token->begin;
+  while (p < token->end) {
+    uint8_t c = *p++;
+    if (c != '\\') {
+      ++out;
+      continue;
+    }
+    if (p >= token->end) {
+      return false;
+    }
+    uint8_t escaped = *p++;
+    if (escaped != 'u') {
+      if (escaped_byte(escaped) == 0) {
+        return false;
+      }
+      ++out;
+      continue;
+    }
+
+    char16_t hi = 0;
+    if (!parse_hex4(p, token->end, hi)) {
+      return false;
+    }
+    p += 4;
+    char32_t cp = 0;
+    if (folly::utf16_code_unit_is_high_surrogate(hi)) {
+      char16_t lo = 0;
+      if (token->end - p < 6 || p[0] != '\\' || p[1] != 'u' ||
+          !parse_hex4(p + 2, token->end, lo) ||
+          !folly::utf16_code_unit_is_low_surrogate(lo)) {
+        return false;
+      }
+      cp = folly::unicode_code_point_from_utf16_surrogate_pair(hi, lo);
+      p += 6;
+    } else if (folly::utf16_code_unit_is_low_surrogate(hi)) {
+      return false;
+    } else {
+      cp = static_cast<char32_t>(hi);
+    }
+    out += folly::unicode_code_point_to_utf8(cp).size;
+  }
+  *len = out;
+  return true;
+}
+
+bool write_decoded_json_string_token(
+    TranscodeCursor* cursor,
+    const TranscodeJsonStringToken* token,
+    size_t* len) {
+  *len = 0;
+  const size_t maxLen = static_cast<size_t>(token->end - token->begin);
+  thrift_transcode_cursor_ensure_write(cursor, maxLen);
+  if (cursor->error != 0) {
+    return false;
+  }
+
+  if (token->hasEscapes == 0) {
+    memcpy(cursor->writePos, token->begin, maxLen);
+    cursor->writePos += maxLen;
+    *len = maxLen;
+    return true;
+  }
+
+  uint8_t* out = cursor->writePos;
+  const uint8_t* p = token->begin;
+  while (p < token->end) {
+    uint8_t c = *p++;
+    if (c != '\\') {
+      *out++ = c;
+      continue;
+    }
+
+    if (p >= token->end) {
+      return false;
+    }
+    uint8_t escaped = *p++;
+    if (escaped != 'u') {
+      uint8_t decoded = escaped_byte(escaped);
+      if (decoded == 0) {
+        return false;
+      }
+      *out++ = decoded;
+      continue;
+    }
+
+    char16_t hi = 0;
+    if (!parse_hex4(p, token->end, hi)) {
+      return false;
+    }
+    p += 4;
+    char32_t cp = 0;
+    if (folly::utf16_code_unit_is_high_surrogate(hi)) {
+      char16_t lo = 0;
+      if (token->end - p < 6 || p[0] != '\\' || p[1] != 'u' ||
+          !parse_hex4(p + 2, token->end, lo) ||
+          !folly::utf16_code_unit_is_low_surrogate(lo)) {
+        return false;
+      }
+      cp = folly::unicode_code_point_from_utf16_surrogate_pair(hi, lo);
+      p += 6;
+    } else if (folly::utf16_code_unit_is_low_surrogate(hi)) {
+      return false;
+    } else {
+      cp = static_cast<char32_t>(hi);
+    }
+
+    folly::unicode_code_point_utf8 utf8 = folly::unicode_code_point_to_utf8(cp);
+    memcpy(out, utf8.data, utf8.size);
+    out += utf8.size;
+  }
+
+  *len = static_cast<size_t>(out - cursor->writePos);
+  cursor->writePos = out;
+  return true;
+}
+
+bool append_decoded_json_string_token(
+    const TranscodeJsonStringToken* token, std::string& output) {
+  if (token->hasEscapes == 0) {
+    output.append(
+        reinterpret_cast<const char*>(token->begin),
+        static_cast<size_t>(token->end - token->begin));
+    return true;
+  }
+
+  const uint8_t* p = token->begin;
+  while (p < token->end) {
+    uint8_t c = *p++;
+    if (c != '\\') {
+      output.push_back(static_cast<char>(c));
+      continue;
+    }
+
+    if (p >= token->end) {
+      return false;
+    }
+    uint8_t escaped = *p++;
+    if (escaped != 'u') {
+      uint8_t decoded = escaped_byte(escaped);
+      if (decoded == 0) {
+        return false;
+      }
+      output.push_back(static_cast<char>(decoded));
+      continue;
+    }
+
+    char16_t hi = 0;
+    if (!parse_hex4(p, token->end, hi)) {
+      return false;
+    }
+    p += 4;
+    char32_t cp = 0;
+    if (folly::utf16_code_unit_is_high_surrogate(hi)) {
+      char16_t lo = 0;
+      if (token->end - p < 6 || p[0] != '\\' || p[1] != 'u' ||
+          !parse_hex4(p + 2, token->end, lo) ||
+          !folly::utf16_code_unit_is_low_surrogate(lo)) {
+        return false;
+      }
+      cp = folly::unicode_code_point_from_utf16_surrogate_pair(hi, lo);
+      p += 6;
+    } else if (folly::utf16_code_unit_is_low_surrogate(hi)) {
+      return false;
+    } else {
+      cp = static_cast<char32_t>(hi);
+    }
+
+    folly::unicode_code_point_utf8 utf8 = folly::unicode_code_point_to_utf8(cp);
+    output.append(reinterpret_cast<const char*>(utf8.data), utf8.size);
+  }
+  return true;
+}
+
+bool json_string_token_equals_decoded_bytes(
+    const TranscodeJsonStringToken* token, const uint8_t* data, size_t len) {
+  if (token->hasEscapes == 0) {
+    size_t tokenLen = static_cast<size_t>(token->end - token->begin);
+    return tokenLen == len && memcmp(token->begin, data, len) == 0;
+  }
+
+  size_t matched = 0;
+  const uint8_t* p = token->begin;
+  while (p < token->end) {
+    const uint8_t* plainStart = p;
+    while (p < token->end && *p != '\\') {
+      ++p;
+    }
+    if (p != plainStart &&
+        !append_bytes(
+            plainStart,
+            static_cast<size_t>(p - plainStart),
+            data,
+            len,
+            matched)) {
+      return false;
+    }
+    if (p == token->end) {
+      break;
+    }
+
+    ++p;
+    if (p >= token->end) {
+      return false;
+    }
+    uint8_t escaped = *p++;
+    if (escaped != 'u') {
+      uint8_t decoded = escaped_byte(escaped);
+      if (decoded == 0 || !append_bytes(&decoded, 1, data, len, matched)) {
+        return false;
+      }
+      continue;
+    }
+
+    char16_t hi = 0;
+    if (!parse_hex4(p, token->end, hi)) {
+      return false;
+    }
+    p += 4;
+    char32_t cp = 0;
+    if (folly::utf16_code_unit_is_high_surrogate(hi)) {
+      char16_t lo = 0;
+      if (token->end - p < 6 || p[0] != '\\' || p[1] != 'u' ||
+          !parse_hex4(p + 2, token->end, lo) ||
+          !folly::utf16_code_unit_is_low_surrogate(lo)) {
+        return false;
+      }
+      cp = folly::unicode_code_point_from_utf16_surrogate_pair(hi, lo);
+      p += 6;
+    } else if (folly::utf16_code_unit_is_low_surrogate(hi)) {
+      return false;
+    } else {
+      cp = static_cast<char32_t>(hi);
+    }
+
+    folly::unicode_code_point_utf8 utf8 = folly::unicode_code_point_to_utf8(cp);
+    if (!append_bytes(utf8.data, utf8.size, data, len, matched)) {
+      return false;
+    }
+  }
+  return matched == len;
+}
+
+struct Base64Input {
+  std::string scratch;
+  std::string_view text;
+};
+
+bool prepare_json_base64_token_input(
+    const TranscodeJsonStringToken* token, Base64Input& input) {
+  input = {};
+
+  if (token->hasEscapes == 0) {
+    input.text = std::string_view(
+        reinterpret_cast<const char*>(token->begin),
+        static_cast<size_t>(token->end - token->begin));
+  } else if (append_decoded_json_string_token(token, input.scratch)) {
+    input.text = input.scratch;
+  } else {
+    return false;
+  }
+
+  switch (input.text.size() % 4) {
+    case 0:
+      return true;
+    case 2:
+      if (input.text.data() != input.scratch.data()) {
+        input.scratch.assign(input.text);
+      }
+      input.scratch += "==";
+      input.text = input.scratch;
+      return true;
+    case 3:
+      if (input.text.data() != input.scratch.data()) {
+        input.scratch.assign(input.text);
+      }
+      input.scratch += "=";
+      input.text = input.scratch;
+      return true;
+    default:
+      return false;
+  }
+}
+
 } // namespace
 
 extern "C" {
@@ -256,10 +593,10 @@ extern "C" {
 // header tree.)
 
 int64_t thrift_transcode_parse_decimal_int(TranscodeCursor* cursor) {
-  skipWhitespace(cursor);
+  skip_whitespace(cursor);
 
   const uint8_t* tokenStart = cursor->readPos;
-  if (!parseJsonNumberToken(cursor, false)) {
+  if (!parse_json_number_token(cursor, false)) {
     // TODO(D4a): use canonical TranscodeErrc codes here once the intrinsic
     // codes are renumbered.
     cursor->error = 1;
@@ -279,22 +616,23 @@ int64_t thrift_transcode_parse_decimal_int(TranscodeCursor* cursor) {
 }
 
 double thrift_transcode_parse_decimal_float(TranscodeCursor* cursor) {
-  skipWhitespace(cursor);
+  skip_whitespace(cursor);
 
   if (cursor->readPos < cursor->readEnd && *cursor->readPos == '"') {
-    size_t len = 0;
-    const uint8_t* s = thrift_transcode_parse_escaped_string(cursor, &len);
-    if (cursor->error != 0) {
+    TranscodeJsonStringToken token{};
+    if (!read_json_string_token(cursor, &token)) {
       return 0.0;
     }
-    std::string_view token(reinterpret_cast<const char*>(s), len);
-    if (token == "NaN") {
+    if (json_string_token_equals_decoded_bytes(
+            &token, reinterpret_cast<const uint8_t*>("NaN"), 3)) {
       return std::numeric_limits<double>::quiet_NaN();
     }
-    if (token == "Infinity") {
+    if (json_string_token_equals_decoded_bytes(
+            &token, reinterpret_cast<const uint8_t*>("Infinity"), 8)) {
       return std::numeric_limits<double>::infinity();
     }
-    if (token == "-Infinity") {
+    if (json_string_token_equals_decoded_bytes(
+            &token, reinterpret_cast<const uint8_t*>("-Infinity"), 9)) {
       return -std::numeric_limits<double>::infinity();
     }
     cursor->error = 1;
@@ -302,7 +640,7 @@ double thrift_transcode_parse_decimal_float(TranscodeCursor* cursor) {
   }
 
   const uint8_t* start = cursor->readPos;
-  if (!parseJsonNumberToken(cursor, true)) {
+  if (!parse_json_number_token(cursor, true)) {
     // TODO(D4a): use canonical TranscodeErrc codes here once the intrinsic
     // codes are renumbered.
     cursor->error = 1;
@@ -322,7 +660,7 @@ double thrift_transcode_parse_decimal_float(TranscodeCursor* cursor) {
 }
 
 int64_t thrift_transcode_parse_bool_keyword(TranscodeCursor* cursor) {
-  skipWhitespace(cursor);
+  skip_whitespace(cursor);
   if (cursor->readPos < cursor->readEnd) {
     if (*cursor->readPos == 't') {
       if (cursor->readEnd - cursor->readPos >= 4 &&
@@ -344,206 +682,119 @@ int64_t thrift_transcode_parse_bool_keyword(TranscodeCursor* cursor) {
   return 0;
 }
 
-const uint8_t* FOLLY_NULLABLE
-thrift_transcode_parse_escaped_string(TranscodeCursor* cursor, size_t* len) {
-  skipWhitespace(cursor);
-  if (cursor->readPos >= cursor->readEnd || *cursor->readPos != '"') {
-    cursor->error = 1;
-    *len = 0;
-    return nullptr;
-  }
-  ++cursor->readPos;
-
-  const uint8_t* start = cursor->readPos;
-  bool hasEscapes = false;
-  while (cursor->readPos < cursor->readEnd) {
-    uint8_t c = *cursor->readPos;
-    if (c == '"') {
-      break;
-    }
-    if (c < 0x20) {
-      cursor->error = 1;
-      *len = 0;
-      return nullptr;
-    }
-    if (c == '\\') {
-      hasEscapes = true;
-      ++cursor->readPos;
-      if (cursor->readPos >= cursor->readEnd) {
-        cursor->error = 1;
-        *len = 0;
-        return nullptr;
-      }
-    }
-    ++cursor->readPos;
-  }
-
-  if (cursor->readPos >= cursor->readEnd) {
-    cursor->error = 1;
-    *len = 0;
-    return nullptr;
-  }
-
-  if (!hasEscapes) {
-    *len = cursor->readPos - start;
-    ++cursor->readPos;
-    return start;
-  }
-
-  // Slow path: unescape into scratch space.
-  // TODO(D7/D8): this aliases the cursor's write buffer as scratch; the
-  // hardening pass should give the unescaper a bounded dedicated scratch region
-  // instead of borrowing writePos.
-  cursor->readPos = start;
-  size_t maxLen = cursor->readEnd - cursor->readPos;
-  thrift_transcode_cursor_ensure_write(cursor, maxLen);
-  uint8_t* out = cursor->writePos;
-  const uint8_t* outStart = out;
-
-  while (cursor->readPos < cursor->readEnd) {
-    uint8_t c = *cursor->readPos;
-    if (c == '"') {
-      break;
-    }
-    if (c == '\\') {
-      ++cursor->readPos;
-      if (cursor->readPos >= cursor->readEnd) {
-        cursor->error = 1;
-        *len = 0;
-        return nullptr;
-      }
-      c = *cursor->readPos;
-      switch (c) {
-        case '"':
-        case '\\':
-        case '/':
-          *out++ = c;
-          break;
-        case 'n':
-          *out++ = '\n';
-          break;
-        case 't':
-          *out++ = '\t';
-          break;
-        case 'r':
-          *out++ = '\r';
-          break;
-        case 'b':
-          *out++ = '\b';
-          break;
-        case 'f':
-          *out++ = '\f';
-          break;
-        case 'u': {
-          char16_t hi = 0;
-          if (!parseHex4(cursor->readPos + 1, cursor->readEnd, hi)) {
-            // TODO(D4a): use canonical TranscodeErrc codes here once the
-            // intrinsic codes are renumbered.
-            cursor->error = 1;
-            break;
-          }
-          cursor->readPos += 4;
-          char32_t cp = 0;
-          if (folly::utf16_code_unit_is_high_surrogate(hi)) {
-            char16_t lo = 0;
-            const uint8_t* pair = cursor->readPos + 1;
-            if (pair + 1 >= cursor->readEnd || pair[0] != '\\' ||
-                pair[1] != 'u' || !parseHex4(pair + 2, cursor->readEnd, lo) ||
-                !folly::utf16_code_unit_is_low_surrogate(lo)) {
-              // TODO(D4a): use canonical TranscodeErrc codes here once the
-              // intrinsic codes are renumbered.
-              cursor->error = 1;
-              break;
-            }
-            cp = folly::unicode_code_point_from_utf16_surrogate_pair(hi, lo);
-            cursor->readPos += 6;
-          } else if (folly::utf16_code_unit_is_low_surrogate(hi)) {
-            // TODO(D4a): use canonical TranscodeErrc codes here once the
-            // intrinsic codes are renumbered.
-            cursor->error = 1;
-            break;
-          } else {
-            cp = static_cast<char32_t>(hi);
-          }
-          folly::unicode_code_point_utf8 utf8 =
-              folly::unicode_code_point_to_utf8(cp);
-          memcpy(out, utf8.data, utf8.size);
-          out += utf8.size;
-          break;
-        }
-        default:
-          cursor->error = 1;
-          break;
-      }
-      if (cursor->error != 0) {
-        *len = 0;
-        return nullptr;
-      }
-    } else {
-      if (c < 0x20) {
-        cursor->error = 1;
-        *len = 0;
-        return nullptr;
-      }
-      *out++ = c;
-    }
-    ++cursor->readPos;
-  }
-
-  if (cursor->readPos >= cursor->readEnd || *cursor->readPos != '"') {
-    cursor->error = 1;
-    *len = 0;
-    return nullptr;
-  }
-
-  *len = out - outStart;
-  ++cursor->readPos;
-  return outStart;
+uint8_t thrift_transcode_read_json_string_token(
+    TranscodeCursor* cursor, TranscodeJsonStringToken* token) {
+  return read_json_string_token(cursor, token) ? 1 : 0;
 }
 
-const uint8_t* FOLLY_NULLABLE
-thrift_transcode_parse_base64_string(TranscodeCursor* cursor, size_t* len) {
-  size_t encodedLen = 0;
-  const uint8_t* encoded =
-      thrift_transcode_parse_escaped_string(cursor, &encodedLen);
-  if (cursor->error != 0) {
-    *len = 0;
-    return nullptr;
-  }
+uint8_t thrift_transcode_json_string_token_equals(
+    const TranscodeJsonStringToken* token, const uint8_t* data, size_t len) {
+  return json_string_token_equals_decoded_bytes(token, data, len) ? 1 : 0;
+}
 
-  std::string encodedScratch(
-      reinterpret_cast<const char*>(encoded), encodedLen);
-  switch (encodedScratch.size() % 4) {
-    case 0:
-      break;
-    case 2:
-      encodedScratch += "==";
-      break;
-    case 3:
-      encodedScratch += "=";
-      break;
-    default:
-      cursor->error = 1;
-      *len = 0;
-      return nullptr;
+size_t thrift_transcode_write_json_string_token(
+    TranscodeCursor* cursor, const TranscodeJsonStringToken* token) {
+  size_t len = 0;
+  if (!write_decoded_json_string_token(cursor, token, &len)) {
+    set_json_error(cursor);
+    return 0;
   }
-  size_t decodedCap = folly::base64DecodedSize(encodedScratch);
-  thrift_transcode_cursor_ensure_write(cursor, decodedCap);
+  return len;
+}
+
+void thrift_transcode_write_json_string_token_i32_prefixed(
+    TranscodeCursor* cursor, const TranscodeJsonStringToken* token) {
+  size_t decodedLen = 0;
+  if (!json_string_token_decoded_size(token, &decodedLen) ||
+      decodedLen > static_cast<size_t>(std::numeric_limits<int32_t>::max())) {
+    set_json_error(cursor);
+    return;
+  }
+  thrift_transcode_write_fixed32_be_checked(
+      cursor, static_cast<uint32_t>(decodedLen));
   if (cursor->error != 0) {
-    *len = 0;
-    return nullptr;
+    return;
+  }
+  size_t written = thrift_transcode_write_json_string_token(cursor, token);
+  if (cursor->error == 0 && written != decodedLen) {
+    set_json_error(cursor);
+  }
+}
+
+void thrift_transcode_write_json_string_token_varint_prefixed(
+    TranscodeCursor* cursor, const TranscodeJsonStringToken* token) {
+  size_t decodedLen = 0;
+  if (!json_string_token_decoded_size(token, &decodedLen)) {
+    set_json_error(cursor);
+    return;
+  }
+  thrift_transcode_write_unsigned_varint(
+      cursor, static_cast<uint64_t>(decodedLen));
+  if (cursor->error != 0) {
+    return;
+  }
+  size_t written = thrift_transcode_write_json_string_token(cursor, token);
+  if (cursor->error == 0 && written != decodedLen) {
+    set_json_error(cursor);
+  }
+}
+
+void thrift_transcode_write_json_base64_token_i32_prefixed(
+    TranscodeCursor* cursor, const TranscodeJsonStringToken* token) {
+  Base64Input input;
+  if (!prepare_json_base64_token_input(token, input)) {
+    set_json_error(cursor);
+    return;
+  }
+  size_t decodedLen = folly::base64DecodedSize(input.text);
+  if (decodedLen > static_cast<size_t>(std::numeric_limits<int32_t>::max())) {
+    set_json_error(cursor);
+    return;
+  }
+  thrift_transcode_write_fixed32_be_checked(
+      cursor, static_cast<uint32_t>(decodedLen));
+  if (cursor->error != 0) {
+    return;
+  }
+  thrift_transcode_cursor_ensure_write(cursor, decodedLen);
+  if (cursor->error != 0) {
+    return;
   }
 
   char* out = reinterpret_cast<char*>(cursor->writePos);
-  auto decoded = folly::base64DecodeRuntime(
-      std::string_view(encodedScratch.data(), encodedScratch.size()), out);
+  auto decoded = folly::base64DecodeRuntime(input.text, out);
   if (!decoded.is_success) {
-    cursor->error = 1;
-    *len = 0;
-    return nullptr;
+    set_json_error(cursor);
+    return;
   }
-  *len = static_cast<size_t>(decoded.o - out);
-  return reinterpret_cast<const uint8_t*>(out);
+  cursor->writePos = reinterpret_cast<uint8_t*>(decoded.o);
+}
+
+void thrift_transcode_write_json_base64_token_varint_prefixed(
+    TranscodeCursor* cursor, const TranscodeJsonStringToken* token) {
+  Base64Input input;
+  if (!prepare_json_base64_token_input(token, input)) {
+    set_json_error(cursor);
+    return;
+  }
+  size_t decodedLen = folly::base64DecodedSize(input.text);
+  thrift_transcode_write_unsigned_varint(
+      cursor, static_cast<uint64_t>(decodedLen));
+  if (cursor->error != 0) {
+    return;
+  }
+  thrift_transcode_cursor_ensure_write(cursor, decodedLen);
+  if (cursor->error != 0) {
+    return;
+  }
+
+  char* out = reinterpret_cast<char*>(cursor->writePos);
+  auto decoded = folly::base64DecodeRuntime(input.text, out);
+  if (!decoded.is_success) {
+    set_json_error(cursor);
+    return;
+  }
+  cursor->writePos = reinterpret_cast<uint8_t*>(decoded.o);
 }
 
 void thrift_transcode_format_decimal_int(
@@ -556,7 +807,7 @@ void thrift_transcode_format_decimal_int(
   int len =
       snprintf(buf.data(), buf.size(), "%lld", static_cast<long long>(value));
   if (len <= 0) {
-    setJsonError(cursor);
+    set_json_error(cursor);
     return;
   }
   memcpy(cursor->writePos, buf.data(), static_cast<size_t>(len));
@@ -589,7 +840,7 @@ void thrift_transcode_format_decimal_float(
   std::array<char, 32> buf{};
   int len = snprintf(buf.data(), buf.size(), "%.17g", value);
   if (len <= 0) {
-    setJsonError(cursor);
+    set_json_error(cursor);
     return;
   }
   memcpy(cursor->writePos, buf.data(), static_cast<size_t>(len));
@@ -665,34 +916,34 @@ void thrift_transcode_format_base64_string(
 }
 
 void thrift_transcode_skip_json_value(TranscodeCursor* cursor) {
-  skipWhitespace(cursor);
+  skip_whitespace(cursor);
   if (cursor->readPos >= cursor->readEnd) {
-    setJsonError(cursor);
+    set_json_error(cursor);
     return;
   }
 
   uint8_t c = *cursor->readPos;
 
   if (c == '"') {
-    if (!skipJsonStringToken(cursor)) {
+    if (!skip_json_string_token(cursor)) {
       return;
     }
-    isJsonValueTerminator(cursor);
+    is_json_value_terminator(cursor);
   } else if (c == '{') {
     ++cursor->readPos;
-    skipWhitespace(cursor);
+    skip_whitespace(cursor);
     if (cursor->readPos < cursor->readEnd && *cursor->readPos == '}') {
       ++cursor->readPos;
-      isJsonValueTerminator(cursor);
+      is_json_value_terminator(cursor);
       return;
     }
     while (cursor->readPos < cursor->readEnd) {
-      if (!skipJsonStringToken(cursor)) {
+      if (!skip_json_string_token(cursor)) {
         return;
       }
-      skipWhitespace(cursor);
+      skip_whitespace(cursor);
       if (cursor->readPos >= cursor->readEnd || *cursor->readPos != ':') {
-        setJsonError(cursor);
+        set_json_error(cursor);
         return;
       }
       ++cursor->readPos;
@@ -700,27 +951,27 @@ void thrift_transcode_skip_json_value(TranscodeCursor* cursor) {
       if (cursor->error) {
         return;
       }
-      skipWhitespace(cursor);
+      skip_whitespace(cursor);
       if (cursor->readPos < cursor->readEnd && *cursor->readPos == ',') {
         ++cursor->readPos;
-        skipWhitespace(cursor);
+        skip_whitespace(cursor);
       } else {
         break;
       }
     }
-    skipWhitespace(cursor);
+    skip_whitespace(cursor);
     if (cursor->readPos < cursor->readEnd && *cursor->readPos == '}') {
       ++cursor->readPos;
-      isJsonValueTerminator(cursor);
+      is_json_value_terminator(cursor);
     } else {
-      setJsonError(cursor);
+      set_json_error(cursor);
     }
   } else if (c == '[') {
     ++cursor->readPos;
-    skipWhitespace(cursor);
+    skip_whitespace(cursor);
     if (cursor->readPos < cursor->readEnd && *cursor->readPos == ']') {
       ++cursor->readPos;
-      isJsonValueTerminator(cursor);
+      is_json_value_terminator(cursor);
       return;
     }
     while (cursor->readPos < cursor->readEnd) {
@@ -728,41 +979,41 @@ void thrift_transcode_skip_json_value(TranscodeCursor* cursor) {
       if (cursor->error) {
         return;
       }
-      skipWhitespace(cursor);
+      skip_whitespace(cursor);
       if (cursor->readPos < cursor->readEnd && *cursor->readPos == ',') {
         ++cursor->readPos;
-        skipWhitespace(cursor);
+        skip_whitespace(cursor);
       } else {
         break;
       }
     }
-    skipWhitespace(cursor);
+    skip_whitespace(cursor);
     if (cursor->readPos < cursor->readEnd && *cursor->readPos == ']') {
       ++cursor->readPos;
-      isJsonValueTerminator(cursor);
+      is_json_value_terminator(cursor);
     } else {
-      setJsonError(cursor);
+      set_json_error(cursor);
     }
   } else if (c == 't') {
-    if (consumeJsonLiteral(cursor, "true")) {
-      isJsonValueTerminator(cursor);
+    if (consume_json_literal(cursor, "true")) {
+      is_json_value_terminator(cursor);
     }
   } else if (c == 'f') {
-    if (consumeJsonLiteral(cursor, "false")) {
-      isJsonValueTerminator(cursor);
+    if (consume_json_literal(cursor, "false")) {
+      is_json_value_terminator(cursor);
     }
   } else if (c == 'n') {
-    if (consumeJsonLiteral(cursor, "null")) {
-      isJsonValueTerminator(cursor);
+    if (consume_json_literal(cursor, "null")) {
+      is_json_value_terminator(cursor);
     }
   } else if (c == '-' || (c >= '0' && c <= '9')) {
-    if (!parseJsonNumberToken(cursor, true)) {
-      setJsonError(cursor);
+    if (!parse_json_number_token(cursor, true)) {
+      set_json_error(cursor);
       return;
     }
-    isJsonValueTerminator(cursor);
+    is_json_value_terminator(cursor);
   } else {
-    setJsonError(cursor);
+    set_json_error(cursor);
   }
 }
 

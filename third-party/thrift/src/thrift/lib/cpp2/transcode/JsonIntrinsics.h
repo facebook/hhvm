@@ -21,61 +21,76 @@
 
 #include <thrift/lib/cpp2/transcode/Cursor.h>
 
-// JSON protocol intrinsics — the complex operations only. Whitespace skip,
-// structural chars, and field-name matching are generated inline by the
-// codegen. Decimal int/float parse+format, string escape handling, and
-// recursive value skipping are intrinsics because inlining them would bloat
-// generated IR. The strict `true`/`false` reader is also an intrinsic: the JIT
-// inlines a permissive first-byte check for its trusted (schema-fused)
-// producer, but wire→wire JSON is untrusted, so the interpreter calls this
-// validating parse.
-
 extern "C" {
 
-// ── Complex scalar reads ──
+// JSON intrinsics are called directly by JIT-compiled kernels. Boolean results
+// use uint8_t 0/1 values so the ABI does not depend on C++ bool representation.
 
-// Parse decimal integer from current position. Stops at non-digit.
+struct TranscodeJsonStringToken {
+  // Unquoted bytes in the input buffer. When `hasEscapes` is 0, this span is
+  // also the decoded value.
+  const uint8_t* begin;
+  const uint8_t* end;
+  // Non-zero when escaped bytes must be decoded before comparison or output.
+  uint8_t hasEscapes;
+};
+
+// Reads a JSON integer token from the cursor and returns its int64 value.
 int64_t thrift_transcode_parse_decimal_int(TranscodeCursor* cursor);
 
-// Parse decimal float from current position (handles ., e, E, +, -).
+// Reads a JSON float token, including quoted NaN and infinity spellings.
 double thrift_transcode_parse_decimal_float(TranscodeCursor* cursor);
 
-// Parse a JSON `true`/`false` keyword, validating the whole token. Returns 1/0;
-// latches an error on any other token or a short read. (The JIT inlines a
-// permissive first-byte variant instead of calling this.)
+// Reads a JSON true/false keyword and returns 1 or 0.
 int64_t thrift_transcode_parse_bool_keyword(TranscodeCursor* cursor);
 
-// Parse a quoted string with escape handling (\n, \t, \", \\, \uXXXX).
-// Writes the unescaped bytes into the write buffer area as scratch space
-// and returns pointer + length. Cursor readPos advances past closing quote.
-const uint8_t* thrift_transcode_parse_escaped_string(
-    TranscodeCursor* cursor, size_t* len);
+// Reads one JSON string, validates its escapes, and leaves decoded bytes
+// materialized only when a later intrinsic asks for them.
+uint8_t thrift_transcode_read_json_string_token(
+    TranscodeCursor* cursor, TranscodeJsonStringToken* token);
 
-const uint8_t* thrift_transcode_parse_base64_string(
-    TranscodeCursor* cursor, size_t* len);
+// Compares a token's decoded bytes with `data[0..len)`.
+uint8_t thrift_transcode_json_string_token_equals(
+    const TranscodeJsonStringToken* token, const uint8_t* data, size_t len);
 
-// ── Complex scalar writes ──
-
-// Write int64 as decimal text.
+// Writes `value` as JSON decimal text.
 void thrift_transcode_format_decimal_int(
     TranscodeCursor* cursor, int64_t value);
 
-// Write double as decimal text.
+// Writes `value` as JSON decimal text, or a quoted non-finite spelling.
 void thrift_transcode_format_decimal_float(
     TranscodeCursor* cursor, double value);
 
-// Write a string with JSON escape handling (quotes + escapes). This preserves
-// the input bytes as-is and does not validate UTF-8.
+// Writes bytes as a quoted JSON string, escaping control bytes and quotes.
 void thrift_transcode_format_escaped_string(
     TranscodeCursor* cursor, const uint8_t* data, size_t len);
 
+// Writes bytes as quoted base64 JSON text.
 void thrift_transcode_format_base64_string(
     TranscodeCursor* cursor, const uint8_t* data, size_t len);
 
-// ── Structural ──
+// Writes the decoded bytes of a previously-read JSON string token.
+size_t thrift_transcode_write_json_string_token(
+    TranscodeCursor* cursor, const TranscodeJsonStringToken* token);
 
-// Recursively skip one JSON value (object, array, string, number, bool, null).
-// Used for unknown fields. This is complex because it handles nesting.
+// Writes the decoded token bytes with a Thrift Binary string length prefix.
+void thrift_transcode_write_json_string_token_i32_prefixed(
+    TranscodeCursor* cursor, const TranscodeJsonStringToken* token);
+
+// Writes the decoded token bytes with a varint string length prefix.
+void thrift_transcode_write_json_string_token_varint_prefixed(
+    TranscodeCursor* cursor, const TranscodeJsonStringToken* token);
+
+// Decodes the token as base64 and writes a Thrift Binary string length prefix.
+void thrift_transcode_write_json_base64_token_i32_prefixed(
+    TranscodeCursor* cursor, const TranscodeJsonStringToken* token);
+
+// Decodes the token as base64 and writes a varint string length prefix.
+void thrift_transcode_write_json_base64_token_varint_prefixed(
+    TranscodeCursor* cursor, const TranscodeJsonStringToken* token);
+
+// Recursively skips one JSON value. This is for trusted JSON only until the
+// strict scanner is added.
 void thrift_transcode_skip_json_value(TranscodeCursor* cursor);
 
 } // extern "C"

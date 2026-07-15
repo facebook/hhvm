@@ -27,8 +27,8 @@
 
 namespace {
 
-// Drives a read intrinsic over a fixed input string, with a scratch write
-// buffer large enough that the string unescaper never needs to reallocate.
+// Drives a read intrinsic over a fixed input string with a small output buffer
+// for writer intrinsics.
 class CursorFixture {
  public:
   explicit CursorFixture(std::string input) : input_(std::move(input)) {
@@ -48,6 +48,10 @@ class CursorFixture {
     return std::string(
         reinterpret_cast<const char*>(scratch_.data()),
         static_cast<size_t>(cursor_.writePos - scratch_.data()));
+  }
+  std::vector<uint8_t> outputBytes() const {
+    const auto* end = scratch_.data() + (cursor_.writePos - scratch_.data());
+    return std::vector<uint8_t>(scratch_.data(), end);
   }
 
   // Bytes remaining before the current read position, i.e. how far the token
@@ -181,129 +185,132 @@ TEST(JsonReadPrimitivesTest, ParseFloat_NonNumericLatchesError) {
   EXPECT_TRUE(fx.errored());
 }
 
-TEST(JsonReadPrimitivesTest, ParseString_FastPathPointsIntoInput) {
+TEST(JsonReadPrimitivesTest, ReadJsonStringToken_NoEscapesPointsIntoInput) {
   CursorFixture fx("\"hello\"");
-  size_t len = 0;
-  const uint8_t* p = thrift_transcode_parse_escaped_string(&fx.cursor(), &len);
+  TranscodeJsonStringToken token{};
+  ASSERT_TRUE(thrift_transcode_read_json_string_token(&fx.cursor(), &token));
   ASSERT_FALSE(fx.errored());
-  ASSERT_NE(p, nullptr);
-  EXPECT_EQ(std::string(reinterpret_cast<const char*>(p), len), "hello");
-  // No escapes means no scratch: the result aliases the input buffer.
-  EXPECT_TRUE(fx.pointsIntoInput(p));
+  EXPECT_EQ(
+      std::string(
+          reinterpret_cast<const char*>(token.begin),
+          static_cast<size_t>(token.end - token.begin)),
+      "hello");
+  EXPECT_EQ(token.hasEscapes, 0);
+  EXPECT_TRUE(fx.pointsIntoInput(token.begin));
 }
 
-TEST(JsonReadPrimitivesTest, ParseString_EscapedNewline) {
+TEST(JsonReadPrimitivesTest, JsonStringTokenEquals_EscapedNewline) {
   CursorFixture fx(R"("a\nb")");
-  size_t len = 0;
-  const uint8_t* p = thrift_transcode_parse_escaped_string(&fx.cursor(), &len);
+  TranscodeJsonStringToken token{};
+  ASSERT_TRUE(thrift_transcode_read_json_string_token(&fx.cursor(), &token));
   ASSERT_FALSE(fx.errored());
-  ASSERT_NE(p, nullptr);
   const std::string expected = "a\nb";
-  EXPECT_EQ(std::string(reinterpret_cast<const char*>(p), len), expected);
+  EXPECT_TRUE(thrift_transcode_json_string_token_equals(
+      &token,
+      reinterpret_cast<const uint8_t*>(expected.data()),
+      expected.size()));
+  EXPECT_EQ(token.hasEscapes, 1);
 }
 
-TEST(JsonReadPrimitivesTest, ParseString_BmpUnicodeEscape) {
-  // A is 'A'.
+TEST(JsonReadPrimitivesTest, WriteJsonStringToken_EscapedNewline) {
+  CursorFixture fx(R"("a\nb")");
+  TranscodeJsonStringToken token{};
+  ASSERT_TRUE(thrift_transcode_read_json_string_token(&fx.cursor(), &token));
+  EXPECT_EQ(thrift_transcode_write_json_string_token(&fx.cursor(), &token), 3u);
+  ASSERT_FALSE(fx.errored());
+  EXPECT_EQ(fx.output(), "a\nb");
+}
+
+TEST(JsonReadPrimitivesTest, WriteJsonStringToken_BmpUnicodeEscape) {
   CursorFixture fx(R"("\u0041")");
-  size_t len = 0;
-  const uint8_t* p = thrift_transcode_parse_escaped_string(&fx.cursor(), &len);
+  TranscodeJsonStringToken token{};
+  ASSERT_TRUE(thrift_transcode_read_json_string_token(&fx.cursor(), &token));
+  EXPECT_EQ(thrift_transcode_write_json_string_token(&fx.cursor(), &token), 1u);
   ASSERT_FALSE(fx.errored());
-  ASSERT_NE(p, nullptr);
-  EXPECT_EQ(std::string(reinterpret_cast<const char*>(p), len), "A");
+  EXPECT_EQ(fx.output(), "A");
 }
 
-TEST(JsonReadPrimitivesTest, ParseString_SurrogatePairEmoji) {
-  // U+1F600 (grinning face) is encoded in JSON as the surrogate pair
-  // 😀 and in UTF-8 as F0 9F 98 80.
+TEST(JsonReadPrimitivesTest, WriteJsonStringToken_SurrogatePairEmoji) {
   CursorFixture fx(R"("\uD83D\uDE00")");
-  size_t len = 0;
-  const uint8_t* p = thrift_transcode_parse_escaped_string(&fx.cursor(), &len);
+  TranscodeJsonStringToken token{};
+  ASSERT_TRUE(thrift_transcode_read_json_string_token(&fx.cursor(), &token));
+  EXPECT_EQ(thrift_transcode_write_json_string_token(&fx.cursor(), &token), 4u);
   ASSERT_FALSE(fx.errored());
-  ASSERT_NE(p, nullptr);
-  const std::string bytes(reinterpret_cast<const char*>(p), len);
   const std::vector<uint8_t> expected = {0xF0, 0x9F, 0x98, 0x80};
-  const std::vector<uint8_t> actual(bytes.begin(), bytes.end());
-  EXPECT_EQ(actual, expected);
+  EXPECT_EQ(fx.outputBytes(), expected);
 }
 
-TEST(JsonReadPrimitivesTest, ParseString_LoneHighSurrogateLatchesError) {
+TEST(
+    JsonReadPrimitivesTest, ReadJsonStringToken_LoneHighSurrogateLatchesError) {
   CursorFixture fx(R"("\uD800")");
-  size_t len = 0;
-  const uint8_t* p = thrift_transcode_parse_escaped_string(&fx.cursor(), &len);
+  TranscodeJsonStringToken token{};
+  EXPECT_FALSE(thrift_transcode_read_json_string_token(&fx.cursor(), &token));
   EXPECT_TRUE(fx.errored());
-  EXPECT_EQ(p, nullptr);
 }
 
-TEST(JsonReadPrimitivesTest, ParseString_BadHexLatchesError) {
+TEST(JsonReadPrimitivesTest, ReadJsonStringToken_BadHexLatchesError) {
   CursorFixture fx(R"("\uZZ12")");
-  size_t len = 0;
-  const uint8_t* p = thrift_transcode_parse_escaped_string(&fx.cursor(), &len);
+  TranscodeJsonStringToken token{};
+  EXPECT_FALSE(thrift_transcode_read_json_string_token(&fx.cursor(), &token));
   EXPECT_TRUE(fx.errored());
-  EXPECT_EQ(p, nullptr);
 }
 
-TEST(JsonReadPrimitivesTest, ParseString_UnterminatedLatchesError) {
+TEST(JsonReadPrimitivesTest, ReadJsonStringToken_UnterminatedLatchesError) {
   CursorFixture fx("\"abc");
-  size_t len = 0;
-  const uint8_t* p = thrift_transcode_parse_escaped_string(&fx.cursor(), &len);
+  TranscodeJsonStringToken token{};
+  EXPECT_FALSE(thrift_transcode_read_json_string_token(&fx.cursor(), &token));
   EXPECT_TRUE(fx.errored());
-  EXPECT_EQ(p, nullptr);
 }
 
-TEST(JsonReadPrimitivesTest, ParseString_TrailingEscapeLatchesError) {
+TEST(JsonReadPrimitivesTest, ReadJsonStringToken_TrailingEscapeLatchesError) {
   CursorFixture fx("\"abc\\");
-  size_t len = 0;
-  const uint8_t* p = thrift_transcode_parse_escaped_string(&fx.cursor(), &len);
+  TranscodeJsonStringToken token{};
+  EXPECT_FALSE(thrift_transcode_read_json_string_token(&fx.cursor(), &token));
   EXPECT_TRUE(fx.errored());
-  EXPECT_EQ(p, nullptr);
-  EXPECT_EQ(len, 0u);
 }
 
-TEST(JsonReadPrimitivesTest, ParseString_UnknownEscapeLatchesError) {
+TEST(JsonReadPrimitivesTest, ReadJsonStringToken_UnknownEscapeLatchesError) {
   CursorFixture fx(R"("a\q")");
-  size_t len = 0;
-  const uint8_t* p = thrift_transcode_parse_escaped_string(&fx.cursor(), &len);
+  TranscodeJsonStringToken token{};
+  EXPECT_FALSE(thrift_transcode_read_json_string_token(&fx.cursor(), &token));
   EXPECT_TRUE(fx.errored());
-  EXPECT_EQ(p, nullptr);
-  EXPECT_EQ(len, 0u);
 }
 
-TEST(JsonReadPrimitivesTest, ParseString_BareControlCharLatchesError) {
+TEST(JsonReadPrimitivesTest, ReadJsonStringToken_BareControlCharLatchesError) {
   CursorFixture fx("\"a\nb\"");
-  size_t len = 0;
-  const uint8_t* p = thrift_transcode_parse_escaped_string(&fx.cursor(), &len);
+  TranscodeJsonStringToken token{};
+  EXPECT_FALSE(thrift_transcode_read_json_string_token(&fx.cursor(), &token));
   EXPECT_TRUE(fx.errored());
-  EXPECT_EQ(p, nullptr);
-  EXPECT_EQ(len, 0u);
 }
 
-TEST(JsonReadPrimitivesTest, ParseBase64String_DecodesBytes) {
+TEST(JsonReadPrimitivesTest, WriteJsonBase64TokenI32Prefixed_DecodesBytes) {
   CursorFixture fx(R"("AQID/w==")");
-  size_t len = 0;
-  const uint8_t* p = thrift_transcode_parse_base64_string(&fx.cursor(), &len);
+  TranscodeJsonStringToken token{};
+  ASSERT_TRUE(thrift_transcode_read_json_string_token(&fx.cursor(), &token));
+  thrift_transcode_write_json_base64_token_i32_prefixed(&fx.cursor(), &token);
   ASSERT_FALSE(fx.errored());
-  ASSERT_NE(p, nullptr);
-  EXPECT_EQ(
-      std::vector<uint8_t>(p, p + len), (std::vector<uint8_t>{1, 2, 3, 255}));
+  EXPECT_EQ(fx.outputBytes(), (std::vector<uint8_t>{0, 0, 0, 4, 1, 2, 3, 255}));
 }
 
-TEST(JsonReadPrimitivesTest, ParseBase64String_DecodesUnpaddedBytes) {
+TEST(
+    JsonReadPrimitivesTest,
+    WriteJsonBase64TokenI32Prefixed_DecodesUnpaddedBytes) {
   CursorFixture fx(R"("AQID/w")");
-  size_t len = 0;
-  const uint8_t* p = thrift_transcode_parse_base64_string(&fx.cursor(), &len);
+  TranscodeJsonStringToken token{};
+  ASSERT_TRUE(thrift_transcode_read_json_string_token(&fx.cursor(), &token));
+  thrift_transcode_write_json_base64_token_i32_prefixed(&fx.cursor(), &token);
   ASSERT_FALSE(fx.errored());
-  ASSERT_NE(p, nullptr);
-  EXPECT_EQ(
-      std::vector<uint8_t>(p, p + len), (std::vector<uint8_t>{1, 2, 3, 255}));
+  EXPECT_EQ(fx.outputBytes(), (std::vector<uint8_t>{0, 0, 0, 4, 1, 2, 3, 255}));
 }
 
-TEST(JsonReadPrimitivesTest, ParseBase64String_InvalidInputLatchesError) {
+TEST(
+    JsonReadPrimitivesTest,
+    WriteJsonBase64TokenI32Prefixed_InvalidInputLatchesError) {
   CursorFixture fx(R"("***")");
-  size_t len = 0;
-  const uint8_t* p = thrift_transcode_parse_base64_string(&fx.cursor(), &len);
+  TranscodeJsonStringToken token{};
+  ASSERT_TRUE(thrift_transcode_read_json_string_token(&fx.cursor(), &token));
+  thrift_transcode_write_json_base64_token_i32_prefixed(&fx.cursor(), &token);
   EXPECT_TRUE(fx.errored());
-  EXPECT_EQ(p, nullptr);
-  EXPECT_EQ(len, 0u);
 }
 
 TEST(JsonReadPrimitivesTest, FormatDecimalInt_Int64Max) {

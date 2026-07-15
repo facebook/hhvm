@@ -348,6 +348,54 @@ TEST_F(ParserTest, basic_if) {
       "   ╰─ newline <line:2:30, line:3:1> '\\n'\n");
 }
 
+TEST_F(ParserTest, basic_unless) {
+  auto ast = parse_ast(
+      "{{#unless news.has-update?}}\n"
+      "  Stuff is {{foo}} happening!\n"
+      "{{/unless news.has-update?}}");
+  EXPECT_EQ(
+      to_string(ast),
+      "root [path/to/test-1.whisker]\n"
+      "╰─ unless-block <line:1:1, line:3:29>\n"
+      "   ├─ expression <line:1:11, col:27> 'news.has-update?'\n"
+      "   ├─ text <line:2:1, col:12> '  Stuff is '\n"
+      "   ├─ interpolation <line:2:12, col:19> 'foo'\n"
+      "   ├─ text <line:2:19, col:30> ' happening!'\n"
+      "   ╰─ newline <line:2:30, line:3:1> '\\n'\n");
+}
+
+TEST_F(ParserTest, unless_block_rejects_else_if) {
+  parse_ast_should_fail(
+      "{{#unless news.has-update?}}\n"
+      "  Stuff is happening!\n"
+      "{{#else if news.is-important?}}\n"
+      "  Important stuff is happening!\n"
+      "{{/unless news.has-update?}}");
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "expected `/` to close unless-block 'news.has-update?' but found `#`",
+          path_to_file(1),
+          3)));
+}
+
+TEST_F(ParserTest, unless_block_rejects_else) {
+  parse_ast_should_fail(
+      "{{#unless news.has-update?}}\n"
+      "  Stuff is happening!\n"
+      "{{#else}}\n"
+      "  Nothing is happening!\n"
+      "{{/unless news.has-update?}}");
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "expected `/` to close unless-block 'news.has-update?' but found `#`",
+          path_to_file(1),
+          3)));
+}
+
 TEST_F(ParserTest, basic_if_else) {
   auto ast = parse_ast(
       "{{#if news.has-update?}}\n"
@@ -369,7 +417,7 @@ TEST_F(ParserTest, basic_if_else) {
       "      ╰─ newline <line:4:24, line:5:1> '\\n'\n");
 }
 
-TEST_F(ParserTest, unless_block_repeated_else) {
+TEST_F(ParserTest, if_block_repeated_else) {
   parse_ast_should_fail(
       "{{#if (not news.has-update?)}}\n"
       "  Stuff is {{foo}} happening!\n"

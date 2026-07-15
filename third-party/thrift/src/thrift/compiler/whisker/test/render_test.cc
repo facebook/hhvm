@@ -546,9 +546,9 @@ TEST_F(RenderTest, if_null_is_falsy) {
 TEST_F(RenderTest, unless_block) {
   {
     auto result = render(
-        "{{#if (not news.has-update?)}}\n"
+        "{{#unless news.has-update?}}\n"
         "Stuff is {{foo}} happening!\n"
-        "{{/if (not news.has-update?)}}\n",
+        "{{/unless news.has-update?}}\n",
         w::map(
             {{"news", w::map({{"has-update?", w::false_value}})},
              {"foo", w::string("now")}}));
@@ -556,10 +556,25 @@ TEST_F(RenderTest, unless_block) {
   }
   {
     auto result = render(
-        "{{#if (not news.has-update?)}}Stuff is {{foo}} happening!{{/if (not news.has-update?)}}",
+        "{{#unless news.has-update?}}Stuff is {{foo}} happening!{{/unless news.has-update?}}",
         w::map({{"news", w::map({{"has-update?", w::true_value}})}}));
     EXPECT_EQ(*result, "");
   }
+  {
+    // Same-line blocks may omit the condition on the closing tag.
+    auto result = render(
+        "{{#unless done?}}pending{{/unless}}",
+        w::map({{"done?", w::false_value}}));
+    EXPECT_EQ(*result, "pending");
+  }
+}
+
+TEST_F(RenderTest, unless_block_no_else) {
+  // {{#unless}} intentionally does not support {{#else}}.
+  auto result = render(
+      "{{#unless cond}}a{{#else}}b{{/unless cond}}",
+      w::map({{"cond", w::false_value}}));
+  EXPECT_FALSE(result.has_value());
 }
 
 TEST_F(RenderTest, if_else_block) {

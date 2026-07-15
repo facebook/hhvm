@@ -1279,7 +1279,11 @@ class render_engine {
       return false;
     };
 
-    const bool condition = vm_.evaluate_as_bool(conditional_block.condition);
+    bool condition = vm_.evaluate_as_bool(conditional_block.condition);
+    if (conditional_block.inverted) {
+      // {{#unless}} negates the head condition (and has no else-if/else).
+      condition = !condition;
+    }
     if (condition) {
       do_visit(conditional_block.body_elements);
     } else if (visit_else_if(conditional_block)) {

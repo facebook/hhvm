@@ -1732,18 +1732,23 @@ class parser {
         scan};
   }
 
-  // conditional-block →
-  //   { cond-block-open ~ body* ~ else-if-block* ~ else-block? ~
-  //     cond-block-close }
-  // cond-block-open →
+  // conditional-block → { if-block | unless-block }
+  // if-block →
+  //   { if-block-open ~ body* ~ else-if-block* ~ else-block? ~ if-block-close }
+  // if-block-open →
   //   { "{{" ~ "~"? ~ "#" ~ "if" ~ expression ~ "~"? ~ "}}" }
   // else-if-block →
   //   { "{{" ~ "~"? ~ "#" ~ "else" ~ " " ~ "if" ~ expression ~
   //     "~"? ~ "}}" ~ body* }
-  // cond-block-close →
+  // if-block-close →
   //   { "{{" ~ "~"? ~ "/" ~ "if" ~ expression? ~ "~"? ~ "}}" }
   //
-  // NOTE: the expression must match between open and close
+  // unless-block →
+  //   { "{{" ~ "~"? ~ "#" ~ "unless" ~ expression ~ "~"? ~ "}}" ~ body* ~
+  //     "{{" ~ "~"? ~ "/" ~ "unless" ~ expression? ~ "~"? ~ "}}" }
+  //
+  // {{#unless}} is an inverted {{#if}}: it has no else-if / else clauses.
+  // NOTE: the expression must match between open and close.
   parse_result<ast::conditional_block> parse_conditional_block(
       parser_scan_window scan) {
     assert(scan.empty());
@@ -1754,41 +1759,60 @@ class parser {
     }
     ast::strip_whitespace_rule open_strip;
     open_strip.left = try_consume_token(&scan, tok::tilde) != nullptr;
-    if (!try_consume_tokens(&scan, {tok::pound, tok::kw_if})) {
+    if (!try_consume_token(&scan, tok::pound)) {
       return no_parse_result();
     }
+
+    tok keyword;
+    bool inverted;
+    if (try_consume_token(&scan, tok::kw_if)) {
+      keyword = tok::kw_if;
+      inverted = false;
+    } else if (try_consume_token(&scan, tok::kw_unless)) {
+      keyword = tok::kw_unless;
+      inverted = true;
+    } else {
+      return no_parse_result();
+    }
+
+    // Noun used in most diagnostics; the open/close-mismatch diagnostic uses
+    // "conditional-block" for {{#if}} but "unless-block" for {{#unless}}.
+    const std::string_view noun = inverted ? "unless-block" : "if-block";
     scan = scan.make_fresh();
 
     parse_result condition = parse_expression(scan);
     if (!condition.has_value()) {
-      report_fatal_expected(scan, "expression to open if-block");
+      report_fatal_expected(scan, "expression to open {}", noun);
     }
     ast::expression open = std::move(condition).consume_and_advance(&scan);
     open_strip.right = try_consume_token(&scan, tok::tilde) != nullptr;
     if (!try_consume_token(&scan, tok::close)) {
-      report_fatal_expected(scan, "{} to open if-block", tok::close);
+      report_fatal_expected(scan, "{} to open {}", tok::close, noun);
     }
     scan = scan.make_fresh();
 
     ast::bodies bodies = parse_bodies(scan).consume_and_advance(&scan);
 
     std::vector<ast::conditional_block::else_if_block> else_if_blocks;
-    while (parse_result else_if = parse_else_if_block(scan)) {
-      else_if_blocks.push_back(std::move(else_if).consume_and_advance(&scan));
-    }
-
-    auto else_block = std::invoke([&]() -> std::optional<ast::else_block> {
-      if (parse_result e = parse_else_block(scan)) {
-        return std::move(e).consume_and_advance(&scan);
-      } else {
-        return std::nullopt;
+    std::optional<ast::else_block> else_block;
+    if (!inverted) {
+      while (parse_result else_if = parse_else_if_block(scan)) {
+        else_if_blocks.push_back(std::move(else_if).consume_and_advance(&scan));
       }
-    });
+
+      else_block = std::invoke([&]() -> std::optional<ast::else_block> {
+        if (parse_result e = parse_else_block(scan)) {
+          return std::move(e).consume_and_advance(&scan);
+        } else {
+          return std::nullopt;
+        }
+      });
+    }
 
     const auto expect_on_close = [&](tok kind) {
       if (!try_consume_token(&scan, kind)) {
         report_fatal_expected(
-            scan, "{} to close if-block '{}'", kind, open.to_string());
+            scan, "{} to close {} '{}'", kind, noun, open.to_string());
       }
     };
 
@@ -1796,25 +1820,26 @@ class parser {
     ast::strip_whitespace_rule close_strip;
     close_strip.left = try_consume_token(&scan, tok::tilde) != nullptr;
     expect_on_close(tok::slash);
-    expect_on_close(tok::kw_if);
+    expect_on_close(keyword);
     condition = parse_expression(scan.make_fresh());
     if (!condition.has_value()) {
-      // Note that this call moves the scan forward to the end of {{/if}} which
-      // affects the line number check below.
+      // Note that this call moves the scan forward to the end of the
+      // block-close tag, which affects the line number check below.
       close_strip.right = try_consume_token(&scan, tok::tilde) != nullptr;
       expect_on_close(tok::close);
       const bool requires_close_condition =
           line_number_of(*scan_start) != line_number_of(scan.peek());
       if (requires_close_condition) {
         report_fatal_expected(
-            scan.prev(), "expression to close if-block '{}'", open.to_string());
+            scan.prev(), "expression to close {} '{}'", noun, open.to_string());
       }
     } else {
       ast::expression close = {std::move(condition).consume_and_advance(&scan)};
       if (close != open) {
         report_error(
             scan,
-            "conditional-block opening '{}' does not match closing '{}'",
+            "{} opening '{}' does not match closing '{}'",
+            inverted ? "unless-block" : "conditional-block",
             open.to_string(),
             close.to_string());
       }
@@ -1831,6 +1856,7 @@ class parser {
             std::move(bodies),
             std::move(else_if_blocks),
             std::move(else_block),
+            inverted,
         },
         scan};
   }

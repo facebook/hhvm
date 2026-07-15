@@ -365,6 +365,32 @@ The `expression`s in `if-block-open` and `if-block-close` **must** be the same.
 
 Whisker `{{#if}}` blocks are based on [EmberJS `{{#if}}`](https://guides.emberjs.com/release/components/conditional-content/) and [Handlebars `{{#if}}`](https://handlebarsjs.com/guide/builtin-helpers.html#if).
 
+### Unless Blocks
+
+Whisker supports `{{#unless}}`, an inverted `{{#if}}`. Its body is rendered when the condition is **false**:
+
+```whisker
+{{#unless person.hasName}}
+I don't know who you are.
+{{/unless person.hasName}}
+```
+
+The condition **must** evaluate to a `boolean` (or [`null`](#data-model), which is treated as `false`). Unlike `{{#if}}`, an `{{#unless}}` block has no `{{#else}}` or `{{#else if}}` clauses — use `{{#if}}` when you need those.
+
+As with `{{#if}}`, the closing `expression` must replicate the opening `expression`. The closing `expression` may be omitted if and only if both `{{#unless}}` and `{{/unless}}` are on the same line.
+
+<Grammar>
+
+```
+unless-block       → { unless-block-open ~ body* ~ unless-block-close }
+unless-block-open  → { "{{" ~ "#" ~ "unless" ~ expression ~ "}}" }
+unless-block-close → { "{{" ~ "/" ~ "unless" ~ expression? ~ "}}" }
+```
+
+The `expression`s in `unless-block-open` and `unless-block-close` **must** be the same.
+
+</Grammar>
+
 ### Each Blocks
 
 Whisker supports a block type for repeated rendering: `{{#each}}`. A typical repetition block might look like:

@@ -532,6 +532,11 @@ struct conditional_block {
   std::vector<else_if_block> else_if_clauses;
 
   std::optional<else_block> else_clause;
+
+  // When true, this is an {{#unless}} block: the head condition is negated and
+  // there are no else-if / else clauses. Modeled as an inverted conditional so
+  // it shares all downstream handling with {{#if}}.
+  bool inverted = false;
 };
 
 /**

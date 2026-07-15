@@ -89,7 +89,8 @@ struct ast_visitor {
       const ast::conditional_block& conditional_block,
       tree_printer::scope& scope) const {
     scope.print(
-        "if-block{} {}",
+        "{}{} {}",
+        conditional_block.inverted ? "unless-block" : "if-block",
         tilde_strip(conditional_block.open_strip_whitespace),
         location(conditional_block.loc));
     visit(conditional_block.condition, scope.make_child());

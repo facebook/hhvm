@@ -697,7 +697,7 @@ TEST_F(ServerProtocolTest, TestClientHelloFullHandshakeFlow) {
       .WillOnce(Invoke(
           [](unsigned char* out, size_t count) { memset(out, 0x44, count); }));
   EXPECT_CALL(*mockWrite_, _write(_, _))
-      .WillOnce(Invoke([&](TLSMessage& msg, Aead::AeadOptions) {
+      .WillOnce([&](TLSMessage& msg, Aead::AeadOptions) {
         TLSContent content;
         content.contentType = msg.type;
         content.encryptionLevel = mockWrite_->getEncryptionLevel();
@@ -711,7 +711,7 @@ TEST_F(ServerProtocolTest, TestClientHelloFullHandshakeFlow) {
         EXPECT_TRUE(folly::IOBufEqualTo()(msg.fragment, expectedServerHello));
         content.data = folly::IOBuf::copyBuffer("writtenshlo");
         return content;
-      }));
+      });
   EXPECT_CALL(
       *mockKeyScheduler_,
       _getSecret(

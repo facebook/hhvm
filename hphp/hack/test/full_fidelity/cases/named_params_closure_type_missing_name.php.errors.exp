@@ -1,0 +1,3 @@
+(6,25)-(6,30) Each `named` parameter in a function type must have a parameter name. For example: `(function(named int $x, named int $y): void)`.
+(8,39)-(8,44) Each `named` parameter in a function type must have a parameter name. For example: `(function(named int $x, named int $y): void)`.
+(10,34)-(10,39) Each `named` parameter in a function type must have a parameter name. For example: `(function(named int $x, named int $y): void)`.

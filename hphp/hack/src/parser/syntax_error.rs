@@ -651,6 +651,10 @@ pub const splat_readonly_param: Error = Cow::Borrowed("Splat parameters cannot b
 pub const named_param_without_named_keyword: Error =
     Cow::Borrowed("Unexpected parameter name. Only `named` parameters can have names.");
 
+pub const named_param_missing_name: Error = Cow::Borrowed(
+    "Each `named` parameter in a function type must have a parameter name. For example: `(function(named int $x, named int $y): void)`.",
+);
+
 pub const reassign_this: Error = Cow::Borrowed("Cannot re-assign `$this`");
 
 pub fn not_allowed_in_write(what: &str) -> Error {

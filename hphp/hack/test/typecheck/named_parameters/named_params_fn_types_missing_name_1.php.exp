@@ -1,0 +1,2 @@
+ERROR: File "named_params_fn_types_missing_name_1.php", line 5, characters 25-29:
+Each `named` parameter in a function type must have a parameter name. For example: `(function(named int $x, named int $y): void)`. (Parsing[1002])

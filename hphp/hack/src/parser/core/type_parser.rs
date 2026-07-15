@@ -616,6 +616,11 @@ where
     fn parse_closure_param_type_or_ellipsis(&mut self) -> S::Output {
         let optional = self.parse_optional_opt();
         let callconv = self.parse_call_convention_opt();
+        let named_offsets = if self.peek_token_kind() == TokenKind::Named {
+            Some(self.error_offsets(/* on_whole_token */ true))
+        } else {
+            None
+        };
         let named = self.parse_named_opt();
         let readonly = self.parse_readonly_opt();
 
@@ -655,6 +660,18 @@ where
 
             self.sc_mut().make_token(token_node)
         } else {
+            // `named` without a `$name`. Allow only the variadic form `named T...`.
+            if !named.is_missing() && self.peek_token_kind() != TokenKind::DotDotDot {
+                if let Some((start_offset, end_offset)) = named_offsets {
+                    let error = SyntaxError::make(
+                        start_offset,
+                        end_offset,
+                        Errors::named_param_missing_name,
+                        vec![],
+                    );
+                    self.add_error(error);
+                }
+            }
             let pos = self.pos();
             self.sc_mut().make_missing(pos)
         };

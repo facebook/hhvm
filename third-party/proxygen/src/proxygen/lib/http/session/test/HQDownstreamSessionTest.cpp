@@ -1819,7 +1819,12 @@ TEST_P(HQDownstreamSessionTest, TransportInfo) {
   EXPECT_CALL(*socketDriver_->getSocket(), getTransportInfo())
       .Times(3)
       .WillRepeatedly(Return(quicInfo));
+  quic::Handshake::TLSSummary tlsSummary;
+  tlsSummary.version = 0x0304;
+  EXPECT_CALL(*socketDriver_->getSocket(), getTLSSummary())
+      .WillRepeatedly(Return(tlsSummary));
   hqSession_->getCurrentTransportInfoWithoutUpdate(&transInfo);
+  EXPECT_EQ(0x0304, transInfo.sslVersion);
   EXPECT_EQ(135, transInfo.rtt.count());
   EXPECT_EQ(246, transInfo.rtt_var);
   EXPECT_EQ(5, transInfo.cwnd);

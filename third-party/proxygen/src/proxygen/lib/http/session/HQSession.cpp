@@ -636,9 +636,12 @@ bool HQSession::getCurrentTransportInfoWithoutUpdate(
 
     // Populate key exchange algorithm if available
     auto tlsSummary = sock_->getTLSSummary();
-    if (tlsSummary && !tlsSummary->namedGroup.empty()) {
-      tinfo->keyExchange =
-          std::make_shared<std::string>(tlsSummary->namedGroup);
+    if (tlsSummary) {
+      tinfo->sslVersion = tlsSummary->version;
+      if (!tlsSummary->namedGroup.empty()) {
+        tinfo->keyExchange =
+            std::make_shared<std::string>(tlsSummary->namedGroup);
+      }
     }
   }
   // TODO: fill up other properties.

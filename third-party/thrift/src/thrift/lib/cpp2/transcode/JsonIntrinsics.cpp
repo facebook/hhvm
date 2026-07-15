@@ -773,15 +773,15 @@ int64_t thrift_transcode_parse_bool_keyword(TranscodeCursor* cursor) {
   skip_whitespace(cursor);
   if (cursor->readPos < cursor->readEnd) {
     if (*cursor->readPos == 't') {
-      if (cursor->readEnd - cursor->readPos >= 4 &&
-          memcmp(cursor->readPos, "true", 4) == 0) {
-        cursor->readPos += 4;
-        return 1;
+      if (consume_json_literal(cursor, "true")) {
+        if (is_json_value_terminator(cursor)) {
+          return 1;
+        }
+        return 0;
       }
     } else if (*cursor->readPos == 'f') {
-      if (cursor->readEnd - cursor->readPos >= 5 &&
-          memcmp(cursor->readPos, "false", 5) == 0) {
-        cursor->readPos += 5;
+      if (consume_json_literal(cursor, "false")) {
+        is_json_value_terminator(cursor);
         return 0;
       }
     }

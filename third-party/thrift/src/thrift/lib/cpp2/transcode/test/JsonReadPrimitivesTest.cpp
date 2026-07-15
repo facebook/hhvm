@@ -185,6 +185,30 @@ TEST(JsonReadPrimitivesTest, ParseFloat_NonNumericLatchesError) {
   EXPECT_TRUE(fx.errored());
 }
 
+TEST(JsonReadPrimitivesTest, ParseBoolKeyword_ValidTokens) {
+  {
+    CursorFixture fx(" true ");
+    EXPECT_EQ(thrift_transcode_parse_bool_keyword(&fx.cursor()), 1);
+    EXPECT_FALSE(fx.errored());
+    EXPECT_EQ(fx.consumed(), 5u);
+  }
+  {
+    CursorFixture fx("false]");
+    EXPECT_EQ(thrift_transcode_parse_bool_keyword(&fx.cursor()), 0);
+    EXPECT_FALSE(fx.errored());
+    EXPECT_EQ(fx.consumed(), 5u);
+  }
+}
+
+TEST(JsonReadPrimitivesTest, ParseBoolKeyword_TrailingGarbageLatchesError) {
+  for (const std::string input : {"trueX", "false1"}) {
+    CursorFixture fx(input);
+    EXPECT_EQ(thrift_transcode_parse_bool_keyword(&fx.cursor()), 0);
+    EXPECT_TRUE(fx.errored());
+    EXPECT_LE(fx.consumed(), fx.inputSize());
+  }
+}
+
 TEST(JsonReadPrimitivesTest, ReadJsonStringToken_NoEscapesPointsIntoInput) {
   CursorFixture fx("\"hello\"");
   TranscodeJsonStringToken token{};

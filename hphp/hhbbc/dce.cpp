@@ -1513,10 +1513,17 @@ bool setOpLSideEffects(const bc::SetOpL& op, const Type& lhs, const Type& rhs) {
     case SetOpOp::PlusEqual:
     case SetOpOp::MinusEqual:
     case SetOpOp::MulEqual:
-    case SetOpOp::DivEqual:
-    case SetOpOp::ModEqual:
     case SetOpOp::PowEqual:
-      return lhs.subtypeOf(BStr) || rhs.subtypeOf(BStr);
+      return !lhs.subtypeOf(BNum) || !rhs.subtypeOf(BNum);
+
+    case SetOpOp::DivEqual:
+    case SetOpOp::ModEqual: {
+      if (!lhs.subtypeOf(BNum) || !rhs.subtypeOf(BNum)) return true;
+      // Numeric operands: only divide-by-zero remains. A non-zero double
+      // divisor isn't safe either, since % truncates it to int (0.5 -> 0).
+      auto const rhsV = tv(rhs);
+      return !(rhsV && isIntType(rhsV->m_type) && rhsV->m_data.num != 0);
+    }
   }
   not_reached();
 }

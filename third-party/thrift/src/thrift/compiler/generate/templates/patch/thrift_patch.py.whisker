@@ -52,8 +52,12 @@ from common.thrift.patch.detail.py_bindings.DynamicPatch import (
 
 import thrift.python.types as _fbthrift_python_types
 import folly.iobuf as _fbthrift_iobuf
+{{#if python.generate_mutable_types?}}
+import thrift.python.mutable_containers as _fbthrift_python_mutable_containers
+import thrift.python.mutable_typeinfos as _fbthrift_python_mutable_typeinfos
+{{/if python.generate_mutable_types?}}
 
-import {{program.module_path}}.thrift_types as {{program.module_mangle}}__thrift_types
+import {{program.module_path}}.{{#partial m_types.import_path}} as {{program.module_mangle}}__{{#partial m_types.import_path}}
 {{#if (not program.safe_patch?)}}
 import {{program.safe_patch_module_path}}.thrift_types as _fbthrift_safe_patch_types
 {{/if (not program.safe_patch?)}}
@@ -70,7 +74,7 @@ import {{include.included_module_path}}.thrift_patch
 {{#if structured.should_generate_patch?}}
 
 class {{structured.py_name}}Patch(
-    Base{{#if structured.union?}}Union{{#else}}Struct{{/if}}Patch[{{program.module_mangle}}__thrift_types.{{structured.py_name}}]
+    Base{{#if structured.union?}}Union{{#else}}Struct{{/if}}Patch[{{program.module_mangle}}__{{#partial m_types.import_path}}.{{structured.py_name}}]
 ):
     pass
     {{#if (not structured.assign_only_patch?)}}

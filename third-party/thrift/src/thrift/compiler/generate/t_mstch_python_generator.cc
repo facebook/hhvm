@@ -1577,7 +1577,9 @@ class t_python_patch_generator : public t_mstch_python_prototypes_generator {
     python_context_ = std::make_shared<python_generator_context>(
         program_,
         /*is_patch_file=*/true,
-        type_kind::immutable);
+        has_compiler_option("use_mutable_types_for_patch")
+            ? type_kind::mutable_
+            : type_kind::immutable);
     t_mstch_python_prototypes_generator::initialize_context(visitor);
   }
 };
@@ -1595,7 +1597,11 @@ does_not_have_py_deprecated_asyncio:
 
 namespace patch {
 THRIFT_REGISTER_GENERATOR(
-    python_patch, "Python patch", "Python patch generator");
+    python_patch,
+    "Python patch",
+    R"(use_mutable_types_for_patch:
+  Generate patch classes that depend on thrift-python mutable types
+  (thrift_mutable_types) instead of immutable types (thrift_types).)");
 }
 
 } // namespace apache::thrift::compiler

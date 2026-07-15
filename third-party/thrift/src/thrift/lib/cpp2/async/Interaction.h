@@ -126,8 +126,6 @@ class Tile {
 
   virtual bool runsInEventBase() { return false; }
 
-  virtual void onRequestFinished(InteractionReleaseEvent) {}
-
   void incRef(folly::EventBase& eb) {
     eb.dcheckIsInEventBaseThread();
     lastActivityTime_ = std::chrono::steady_clock::now();

@@ -1742,10 +1742,9 @@ fn p_expr_lit<'a>(
                 | (_, Some(TK::OctalLiteral))
                 | (_, Some(TK::HexadecimalLiteral))
                 | (_, Some(TK::BinaryLiteral)) => {
-                    let s = s.replace('_', "");
-                    match parse_int(&s) {
+                    match parse_int(s) {
                         Err(ParseIntError::OutOfRange) => {
-                            raise_parsing_error(expr, env, &syntax_error::out_of_int_range(&s));
+                            raise_parsing_error(expr, env, &syntax_error::out_of_int_range(s));
                         }
                         Err(ParseIntError::InvalidDigit(int_kind)) => {
                             raise_parsing_error(
@@ -1760,16 +1759,15 @@ fn p_expr_lit<'a>(
                         }
                         Ok(_) => {}
                     }
-                    Ok(Expr_::Int(s))
+                    Ok(Expr_::Int(s.into()))
                 }
                 (_, Some(TK::FloatingLiteral)) => {
                     // f64::from_str accepts more string than Hacklang, invalid Hack float literal
                     // is caught in lexer.
-                    let s = s.replace('_', "");
-                    if f64::from_str(&s).is_err() {
-                        raise_parsing_error(expr, env, &syntax_error::out_of_float_range(&s))
+                    if f64::from_str(s).is_err() {
+                        raise_parsing_error(expr, env, &syntax_error::out_of_float_range(s))
                     }
-                    Ok(Expr_::Float(s))
+                    Ok(Expr_::Float(s.into()))
                 }
                 (_, Some(TK::SingleQuotedStringLiteral)) => {
                     Ok(Expr_::String(mk_str(expr, env, s, unescape_single)))

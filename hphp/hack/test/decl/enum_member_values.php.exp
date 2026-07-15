@@ -137,12 +137,8 @@
             scc_type = (Rwitness_from_decl ([29:9-12]), (Tprim Tint));
             scc_refs = []; scc_value = None };
           { Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
-            scc_name = ([30:3-8], "Under");
-            scc_type = (Rwitness_from_decl ([30:11-14]), (Tprim Tint));
-            scc_refs = []; scc_value = None };
-          { Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
-            scc_name = ([31:3-6], "Neg");
-            scc_type = (Rwitness_from_decl ([31:9-11]), (Tprim Tint));
+            scc_name = ([30:3-6], "Neg");
+            scc_type = (Rwitness_from_decl ([30:9-11]), (Tprim Tint));
             scc_refs = []; scc_value = None }
           ];
         sc_typeconsts = []; sc_props = []; sc_sprops = [];
@@ -157,7 +153,7 @@
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
         sc_abstract = false; sc_is_xhp = false; sc_internal = false;
         sc_has_xhp_keyword = false; sc_kind = (Cclass Concrete);
-        sc_module = None; sc_name = ([34:7-8], "\\C"); sc_tparams = [];
+        sc_module = None; sc_name = ([33:7-8], "\\C"); sc_tparams = [];
         sc_extends = []; sc_uses = []; sc_xhp_attr_uses = [];
         sc_xhp_enum_values = {}; sc_xhp_marked_empty = false;
         sc_req_extends = []; sc_req_implements = []; sc_req_constraints = [];
@@ -171,11 +167,11 @@
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
         sc_abstract = false; sc_is_xhp = false; sc_internal = false;
         sc_has_xhp_keyword = false; sc_kind = Cenum; sc_module = None;
-        sc_name = ([37:6-14], "\\StrForms"); sc_tparams = [];
+        sc_name = ([36:6-14], "\\StrForms"); sc_tparams = [];
         sc_extends =
-        [(Rhint ([37:6-14]),
-          (Tapply (([37:6-14], "\\HH\\BuiltinEnum"),
-             [(Rhint ([37:6-14]), (Tapply (([37:6-14], "\\StrForms"), [])))]
+        [(Rhint ([36:6-14]),
+          (Tapply (([36:6-14], "\\HH\\BuiltinEnum"),
+             [(Rhint ([36:6-14]), (Tapply (([36:6-14], "\\StrForms"), [])))]
              )))
           ];
         sc_uses = []; sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
@@ -184,14 +180,14 @@
         sc_support_dynamic_type = false;
         sc_consts =
         [{ Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
-           scc_name = ([38:3-8], "Plain");
+           scc_name = ([37:3-8], "Plain");
            scc_type =
-           (Rwitness_from_decl ([38:11-15]),
-            (Tapply (([38:11-15], "\\HH\\string"), [])));
+           (Rwitness_from_decl ([37:11-15]),
+            (Tapply (([37:11-15], "\\HH\\string"), [])));
            scc_refs = []; scc_value = None };
           { Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
-            scc_name = ([39:3-8], "Named");
-            scc_type = (Rwitness_from_decl ([39:3-8]), Tany); scc_refs = [];
+            scc_name = ([38:3-8], "Named");
+            scc_type = (Rwitness_from_decl ([38:3-8]), Tany); scc_refs = [];
             scc_value = None }
           ];
         sc_typeconsts = []; sc_props = []; sc_sprops = [];
@@ -199,25 +195,25 @@
         sc_user_attributes = [];
         sc_enum_type =
         (Some { Typing_defs.te_base =
-                (Rhint ([37:16-22]),
-                 (Tapply (([37:16-22], "\\HH\\string"), [])));
+                (Rhint ([36:16-22]),
+                 (Tapply (([36:16-22], "\\HH\\string"), [])));
                 te_constraint = None; te_includes = [] });
         sc_docs_url = None; sc_package = None }));
   ("\\GLOBAL_FIVE",
    (Shallow_decl_defs.Const
-      { Typing_defs.cd_pos = [43:1-27];
-        cd_type = (Rhint ([43:7-10]), (Tprim Tint)); cd_value = None;
+      { Typing_defs.cd_pos = [42:1-27];
+        cd_type = (Rhint ([42:7-10]), (Tprim Tint)); cd_value = None;
         cd_package = None }));
   ("\\Computed",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
         sc_abstract = false; sc_is_xhp = false; sc_internal = false;
         sc_has_xhp_keyword = false; sc_kind = Cenum; sc_module = None;
-        sc_name = ([45:6-14], "\\Computed"); sc_tparams = [];
+        sc_name = ([44:6-14], "\\Computed"); sc_tparams = [];
         sc_extends =
-        [(Rhint ([45:6-14]),
-          (Tapply (([45:6-14], "\\HH\\BuiltinEnum"),
-             [(Rhint ([45:6-14]), (Tapply (([45:6-14], "\\Computed"), [])))]
+        [(Rhint ([44:6-14]),
+          (Tapply (([44:6-14], "\\HH\\BuiltinEnum"),
+             [(Rhint ([44:6-14]), (Tapply (([44:6-14], "\\Computed"), [])))]
              )))
           ];
         sc_uses = []; sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
@@ -226,19 +222,19 @@
         sc_support_dynamic_type = false;
         sc_consts =
         [{ Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
-           scc_name = ([46:3-12], "FromConst");
-           scc_type = (Rwitness_from_decl ([46:3-12]), Tany); scc_refs = [];
+           scc_name = ([45:3-12], "FromConst");
+           scc_type = (Rwitness_from_decl ([45:3-12]), Tany); scc_refs = [];
            scc_value = None };
           { Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
-            scc_name = ([47:3-11], "FromExpr");
-            scc_type = (Rwitness_from_decl ([47:3-11]), Tany); scc_refs = [];
+            scc_name = ([46:3-11], "FromExpr");
+            scc_type = (Rwitness_from_decl ([46:3-11]), Tany); scc_refs = [];
             scc_value = None }
           ];
         sc_typeconsts = []; sc_props = []; sc_sprops = [];
         sc_constructor = None; sc_static_methods = []; sc_methods = [];
         sc_user_attributes = [];
         sc_enum_type =
-        (Some { Typing_defs.te_base = (Rhint ([45:16-19]), (Tprim Tint));
+        (Some { Typing_defs.te_base = (Rhint ([44:16-19]), (Tprim Tint));
                 te_constraint = None; te_includes = [] });
         sc_docs_url = None; sc_package = None }))
   ]

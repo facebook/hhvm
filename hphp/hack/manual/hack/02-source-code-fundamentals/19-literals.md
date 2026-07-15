@@ -23,15 +23,6 @@ $count = 10;      // decimal 10
 0XAf << 012;      // hexadecimal Af and octal 12
 ```
 
-Integer literals can also contain underscores as digit separators. They function only as visual aids, they have no
-actual meaning. For example:
-
-```hack
-$amount = 394_493_392; // completely equivalent to 394493392
-$address = 0x49AD_DF30;
-$permission = 012_212_001;
-```
-
 ## Floating-Point Literals
 
 Floating-point literals typically have an integer part, a decimal point, and a fractional part. They may also have an
@@ -42,12 +33,6 @@ exponent part. They are written using decimal digits.  The type of a floating-po
 ```
 
 The predefined constants `INF` and `NAN` provide access to the floating- point values for infinity and Not-a-Number, respectively.
-
-Floating-point literals may also contain underscores as digit separators in the integer part, the fractional part, and the exponent part. For example:
-
-```hack
-123_456.49_30e-30_30;
-```
 
 ## String Literals
 

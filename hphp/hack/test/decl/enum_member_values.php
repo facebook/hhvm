@@ -27,7 +27,6 @@ enum IntForms: int {
   Hex = 0x10;
   Bin = 0b10000;
   Oct = 020;
-  Under = 1_6;
   Neg = -5;
 }
 

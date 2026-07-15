@@ -1618,9 +1618,33 @@ struct PrefetchParams {
   8: bool returnPrefetchedFiles = false;
 }
 
+struct PrefetchStats {
+  1: i64 treesFromMemoryCache;
+  2: i64 treesFromDiskCache;
+  3: i64 treesFromNetwork;
+  4: i64 blobsFromMemoryCache;
+  5: i64 blobsFromDiskCache;
+  6: i64 blobsFromNetwork;
+
+  7: i64 treeBytesFromMemoryCache;
+  8: i64 treeBytesFromDiskCache;
+  9: i64 treeBytesFromNetwork;
+  10: i64 blobBytesFromMemoryCache;
+  11: i64 blobBytesFromDiskCache;
+  12: i64 blobBytesFromNetwork;
+
+  13: i64 totalDurationMs;
+
+  14: double cacheHitRate;
+
+  16: i64 filesPrefetched;
+  17: i64 filesFailed;
+}
+
 /** Result for prefetchFiles(). */
 struct PrefetchResult {
   1: optional Glob prefetchedFiles;
+  2: optional PrefetchStats stats;
 }
 
 /** Params for globFiles(). */

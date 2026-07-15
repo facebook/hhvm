@@ -468,14 +468,6 @@ func (s *rocketServerSocket) requestResponse(msg payload.Payload) mono.Mono {
 			s.observer.TimeProcessUsForFunction(rpcFuncName, time.Since(pfuncStartTime))
 		}()
 
-		// Select the response struct: an undeclared error (from OnRequest or the
-		// handler) becomes an ApplicationException; otherwise the handler result
-		// (which may carry a declared exception).
-		var respStruct WritableStruct = result
-		if resErr != nil {
-			respStruct = maybeWrapApplicationException(resErr)
-		}
-
 		// Only register the interaction if the factory call succeeded. A failed
 		// factory (undeclared error or declared exception) must not create an
 		// interaction; the client treats it as a creation failure
@@ -495,10 +487,11 @@ func (s *rocketServerSocket) requestResponse(msg payload.Payload) mono.Mono {
 		// Run OnResponse interceptors.
 		respIntErr := s.runOnResponseInterceptors(ctx, result, resErr)
 		if respIntErr != nil {
-			respStruct = maybeWrapApplicationException(respIntErr)
+			result = nil
+			resErr = respIntErr
 		}
 
-		payload, err := s.makeResponsePayload(metadata, respStruct, true /* isFirstResponse */)
+		payload, err := s.makeResponsePayload(metadata, result, resErr, true /* isFirstResponse */)
 		if err != nil {
 			s.observer.ConnDropped()
 			return nil, err
@@ -602,8 +595,7 @@ func (s *rocketServerSocket) requestStream(msg payload.Payload) flux.Flux {
 			ctx = WithRequestContext(ctx, reqCtx)
 
 			onFirstResponse := func(respRes WritableResult, respErr error) {
-				respStruct := writableStructShim(respRes, respErr)
-				respPayload, err := s.makeResponsePayload(metadata, respStruct, true /* isFirstResponse */)
+				respPayload, err := s.makeResponsePayload(metadata, respRes, respErr, true /* isFirstResponse */)
 				if err != nil {
 					s.log("server requestStream makeResponsePayload error: %v", err)
 					return
@@ -611,8 +603,7 @@ func (s *rocketServerSocket) requestStream(msg payload.Payload) flux.Flux {
 				sink.Next(respPayload)
 			}
 			onStreamNext := func(respRes WritableResult, respErr error) {
-				streamStruct := writableStructShim(respRes, respErr)
-				streamPayload, err := s.makeResponsePayload(metadata, streamStruct, false /* isFirstResponse */)
+				streamPayload, err := s.makeResponsePayload(metadata, respRes, respErr, false /* isFirstResponse */)
 				if err != nil {
 					s.log("server requestStream makeResponsePayload error: %v", err)
 					return
@@ -626,7 +617,7 @@ func (s *rocketServerSocket) requestStream(msg payload.Payload) flux.Flux {
 			// Run OnRequest interceptors before the handler.
 			ctx, reqIntErr := s.runOnRequestInterceptors(ctx, argStruct)
 			if reqIntErr != nil {
-				onFirstResponse(nil, maybeWrapApplicationException(reqIntErr))
+				onFirstResponse(nil, reqIntErr)
 				onStreamComplete()
 				return
 			}
@@ -683,8 +674,7 @@ func (s *rocketServerSocket) requestChannelSink(
 		firstResponseQueued := make(chan struct{})
 
 		onFirstResponse := func(respRes WritableResult, respErr error) {
-			respStruct := writableStructShim(respRes, respErr)
-			respPayload, err := s.makeResponsePayload(metadata, respStruct, true /* isFirstResponse */)
+			respPayload, err := s.makeResponsePayload(metadata, respRes, respErr, true /* isFirstResponse */)
 			if err != nil {
 				s.log("server requestChannel makeResponsePayload error: %v", err)
 				return
@@ -694,8 +684,7 @@ func (s *rocketServerSocket) requestChannelSink(
 		}
 
 		onFinalResponse := func(respRes WritableResult, respErr error) {
-			respStruct := writableStructShim(respRes, respErr)
-			finalPayload, err := s.makeResponsePayload(metadata, respStruct, false /* isFirstResponse */)
+			finalPayload, err := s.makeResponsePayload(metadata, respRes, respErr, false /* isFirstResponse */)
 			if err != nil {
 				s.log("server requestChannel makeResponsePayload error: %v", err)
 				return
@@ -709,7 +698,7 @@ func (s *rocketServerSocket) requestChannelSink(
 		// Run OnRequest interceptors before the handler.
 		ctx, reqIntErr := s.runOnRequestInterceptors(ctx, argStruct)
 		if reqIntErr != nil {
-			onFirstResponse(nil, maybeWrapApplicationException(reqIntErr))
+			onFirstResponse(nil, reqIntErr)
 			sink.Complete()
 			return
 		}
@@ -827,8 +816,7 @@ func (s *rocketServerSocket) requestChannelBiDi(
 		firstResponseQueued := make(chan struct{})
 
 		onFirstResponse := func(respRes WritableResult, respErr error) {
-			respStruct := writableStructShim(respRes, respErr)
-			respPayload, err := s.makeResponsePayload(metadata, respStruct, true /* isFirstResponse */)
+			respPayload, err := s.makeResponsePayload(metadata, respRes, respErr, true /* isFirstResponse */)
 			if err != nil {
 				s.log("server requestChannel makeResponsePayload error: %v", err)
 				return
@@ -838,8 +826,7 @@ func (s *rocketServerSocket) requestChannelBiDi(
 		}
 
 		onStreamNext := func(respRes WritableResult, respErr error) {
-			respStruct := writableStructShim(respRes, respErr)
-			streamPayload, err := s.makeResponsePayload(metadata, respStruct, false /* isFirstResponse */)
+			streamPayload, err := s.makeResponsePayload(metadata, respRes, respErr, false /* isFirstResponse */)
 			if err != nil {
 				s.log("server requestChannel makeResponsePayload error: %v", err)
 				return
@@ -854,7 +841,7 @@ func (s *rocketServerSocket) requestChannelBiDi(
 		// Run OnRequest interceptors before the handler.
 		ctx, reqIntErr := s.runOnRequestInterceptors(ctx, argStruct)
 		if reqIntErr != nil {
-			onFirstResponse(nil, maybeWrapApplicationException(reqIntErr))
+			onFirstResponse(nil, reqIntErr)
 			onStreamComplete()
 			return
 		}
@@ -937,7 +924,8 @@ func (s *rocketServerSocket) requestChannelBiDi(
 // paths (stream, sink, bidi).
 func (s *rocketServerSocket) makeResponsePayload(
 	metadata *rpcmetadata.RequestRpcMetadata,
-	respStruct WritableStruct,
+	respRes WritableResult,
+	respErr error,
 	isFirstResponse bool,
 ) (payload.Payload, error) {
 	rpcFuncName := metadata.GetName()
@@ -947,17 +935,38 @@ func (s *rocketServerSocket) makeResponsePayload(
 	writeStartTime := time.Now()
 
 	var dataBytes []byte
-	var err error
-	switch protoID {
-	case rpcmetadata.ProtocolId_BINARY:
-		dataBytes, err = format.EncodeBinary(respStruct)
-	case rpcmetadata.ProtocolId_COMPACT:
-		dataBytes, err = format.EncodeCompact(respStruct)
-	default:
-		return nil, types.NewProtocolException(fmt.Errorf("unknown protocol id: %d", protoID))
-	}
-	if err != nil {
-		return nil, err
+	// Build exception metadata if applicable, reporting both undeclared and
+	// declared exceptions to the observer.
+	var exceptionMetadata *rpcmetadata.PayloadExceptionMetadataBase
+	var exceptionErr error
+	if respErr != nil {
+		// Undeclared exception: wrap it into an ApplicationException. No response
+		// body is sent; the exception is carried entirely in the metadata.
+		appEx := maybeWrapApplicationException(respErr)
+		exceptionMetadata = rocket.NewPayloadExceptionMetadataBaseV2(appEx)
+		exceptionErr = appEx
+		s.observer.UndeclaredExceptionForFunction(rpcFuncName)
+	} else {
+		// Normal response or a result carrying a declared exception: encode the
+		// response struct into the payload body.
+		var err error
+		switch protoID {
+		case rpcmetadata.ProtocolId_BINARY:
+			dataBytes, err = format.EncodeBinary(respRes)
+		case rpcmetadata.ProtocolId_COMPACT:
+			dataBytes, err = format.EncodeCompact(respRes)
+		default:
+			return nil, types.NewProtocolException(fmt.Errorf("unknown protocol id: %d", protoID))
+		}
+		if err != nil {
+			return nil, err
+		}
+
+		if declaredErr := respRes.Exception(); declaredErr != nil {
+			exceptionMetadata = rocket.NewPayloadExceptionMetadataBaseV2(declaredErr)
+			exceptionErr = declaredErr
+			s.observer.DeclaredExceptionForFunction(rpcFuncName)
+		}
 	}
 
 	// Wrapped in a closure so time.Since is evaluated at return, not eagerly at
@@ -965,22 +974,6 @@ func (s *rocketServerSocket) makeResponsePayload(
 	defer func() {
 		s.observer.TimeWriteUsForFunction(rpcFuncName, time.Since(writeStartTime))
 	}()
-
-	// Build exception metadata if applicable, reporting both undeclared and
-	// declared exceptions to the observer.
-	var exceptionMetadata *rpcmetadata.PayloadExceptionMetadataBase
-	var exceptionErr error
-	if appEx, ok := respStruct.(*types.ApplicationException); ok {
-		exceptionMetadata = rocket.NewPayloadExceptionMetadataBaseV2(appEx)
-		exceptionErr = appEx
-		dataBytes = nil
-		s.observer.UndeclaredExceptionForFunction(rpcFuncName)
-	} else if streamResult, ok := respStruct.(types.WritableResult); ok && streamResult.Exception() != nil {
-		declaredErr := streamResult.Exception()
-		exceptionMetadata = rocket.NewPayloadExceptionMetadataBaseV2(declaredErr)
-		exceptionErr = declaredErr
-		s.observer.DeclaredExceptionForFunction(rpcFuncName)
-	}
 
 	payloadMetadata := rpcmetadata.NewPayloadMetadata()
 	if exceptionMetadata != nil {
@@ -1101,11 +1094,4 @@ func (s *rocketServerSocket) preprocessRequest(msg payload.Payload) (
 	reqCtx.SetReadHeaders(reqHeaders)
 
 	return metadata, pfunc, argStruct, reqCtx, nil
-}
-
-func writableStructShim(respRes WritableResult, respErr error) WritableStruct {
-	if respErr != nil {
-		return NewApplicationException(INTERNAL_ERROR, respErr.Error())
-	}
-	return respRes
 }

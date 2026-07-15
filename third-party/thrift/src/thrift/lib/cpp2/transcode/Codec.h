@@ -101,6 +101,7 @@ enum class ReadFn : uint8_t {
   ParseEnumNameOrDecimalText, // quoted enum name or decimal integer
   ParseDecimalFloat, // decimal text → f64
   ParseQuotedString, // quoted string with escape handling
+  ParseBase64String, // quoted base64 string → bytes
   ParseBoolKeyword, // "true"/"false" keyword
 
   // Escape hatch
@@ -139,6 +140,7 @@ enum class WriteFn : uint8_t {
   EnumNameOrDecimalText,
   FloatToDecimalText,
   WriteQuotedString,
+  WriteBase64String,
   BoolToKeyword,
 
   // Struct memory target

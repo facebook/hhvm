@@ -588,7 +588,7 @@ module Typing = struct
     (* | IgnoredResultOfFreezeDEPRECATED [@value 4289] *)
     (* | IgnoredResultOfMoveDEPRECATED [@value 4290] *)
     | UnexpectedTy [@value 4291]
-    | UnserializableType [@value 4292]
+    (* | UnserializableType [@value 4292] *)
     (* | InconsistentMutabilityDEPRECATED [@value 4293] *)
     (* | InvalidMutabilityFlavorInAssignmentDEPRECATED [@value 4294] *)
     (* | OptionNullDEPRECATED [@value 4295] *)

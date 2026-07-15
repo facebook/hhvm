@@ -3148,15 +3148,6 @@ end = struct
     in
     create ~code:Error_code.AmbiguousObjectAccess ~claim ~reasons ()
 
-  let unserializable_type pos message =
-    let claim =
-      lazy
-        ( pos,
-          "Unserializable type (could not be converted to JSON and back again): "
-          ^ message )
-    in
-    create ~code:Error_code.UnserializableType ~claim ()
-
   let invalid_arraykey_constraint pos t =
     let claim =
       lazy
@@ -5166,7 +5157,6 @@ end = struct
         subclass_pos
         class_self
         class_subclass
-    | Unserializable_type { pos; message } -> unserializable_type pos message
     | Invalid_arraykey_constraint { pos; ty_name } ->
       invalid_arraykey_constraint pos @@ Lazy.force ty_name
     | Redundant_generic { pos; variance; msg; suggest } ->

@@ -924,10 +924,6 @@ module Primary = struct
         class_self: string;
         class_subclass: string;
       }
-    | Unserializable_type of {
-        pos: Pos.t;
-        message: string;
-      }
     | Invalid_arraykey_constraint of {
         pos: Pos.t;
         ty_name: string Lazy.t;

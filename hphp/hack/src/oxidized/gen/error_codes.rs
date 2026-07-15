@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<f581015714f28e15caae203dcc30142a>>
+// @generated SignedSource<<8685e1092f8e3baef9640fed71f51bf6>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -409,7 +409,6 @@ pub enum Typing {
     OverrideLSB = 4284,
     MultipleConcreteDefs = 4285,
     UnexpectedTy = 4291,
-    UnserializableType = 4292,
     UnknownObjectMember = 4296,
     UnknownType = 4297,
     RedeclaringMissingMethod = 4301,

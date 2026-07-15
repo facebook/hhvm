@@ -17,6 +17,7 @@
 package rocket
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
@@ -58,4 +59,46 @@ func TestNewRocketException(t *testing.T) {
 	err = newRocketException(appUnknownException2)
 	require.NotNil(t, err)
 	require.Contains(t, err.Error(), "AppUnknownException")
+}
+
+// TestNewPayloadExceptionMetadataBaseV2Blame verifies that the AppClientException
+// and AppServerException marker types are encoded as undeclared (AppUnknown)
+// application exceptions whose error classification carries the corresponding
+// blame, while ordinary errors default to unspecified blame.
+func TestNewPayloadExceptionMetadataBaseV2Blame(t *testing.T) {
+	tests := []struct {
+		name      string
+		err       error
+		wantBlame rpcmetadata.ErrorBlame
+	}{
+		{
+			name:      "AppClientException maps to CLIENT blame",
+			err:       types.NewAppClientException("MyClientError", "client boom", nil),
+			wantBlame: rpcmetadata.ErrorBlame_CLIENT,
+		},
+		{
+			name:      "AppServerException maps to SERVER blame",
+			err:       types.NewAppServerException("MyServerError", "server boom", nil),
+			wantBlame: rpcmetadata.ErrorBlame_SERVER,
+		},
+		{
+			name:      "plain error defaults to unspecified blame",
+			err:       errors.New("plain boom"),
+			wantBlame: rpcmetadata.ErrorBlame_UNSPECIFIED,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			base := NewPayloadExceptionMetadataBaseV2(tt.err)
+			require.NotNil(t, base)
+			// Unregistered errors are encoded as AppUnknown "ApplicationException".
+			require.Equal(t, "ApplicationException", *base.NameUTF8)
+			require.Equal(t, tt.err.Error(), *base.WhatUTF8)
+
+			// Parse the metadata back to confirm the classification round-trips.
+			rex := newRocketException(base)
+			require.Equal(t, RocketExceptionAppUnknown, rex.ExceptionType)
+			require.Equal(t, tt.wantBlame, rex.Blame)
+		})
+	}
 }

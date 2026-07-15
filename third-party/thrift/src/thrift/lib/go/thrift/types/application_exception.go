@@ -158,3 +158,89 @@ func (e *ApplicationException) Write(prot Encoder) error {
 	}
 	return prot.WriteStructEnd()
 }
+
+// AppClientException is a marker exception type that signals the error is the
+// client's fault (ErrorBlame::CLIENT). It is intended to be sent on the wire
+// as an undeclared application exception; the server runtime is responsible
+// for translating the type into the appropriate ErrorClassification on the
+// response metadata.
+//
+// Mirrors C++ apache::thrift::AppClientException.
+type AppClientException struct {
+	name    string
+	message string
+	cause   error
+}
+
+var _ error = (*AppClientException)(nil)
+
+// NewAppClientException creates a new AppClientException with the given name and
+// message, optionally wrapping an underlying cause (which may be nil).
+func NewAppClientException(name, message string, cause error) *AppClientException {
+	return &AppClientException{
+		name:    name,
+		message: message,
+		cause:   cause,
+	}
+}
+
+// Name returns the symbolic name of the exception.
+func (e *AppClientException) Name() string {
+	return e.name
+}
+
+// Error returns the error message, appending the wrapped cause if present.
+func (e *AppClientException) Error() string {
+	if e.cause != nil {
+		return e.message + ": " + e.cause.Error()
+	}
+	return e.message
+}
+
+// Unwrap returns the wrapped cause, enabling errors.Is/errors.As traversal.
+func (e *AppClientException) Unwrap() error {
+	return e.cause
+}
+
+// AppServerException is a marker exception type that signals the error is the
+// server's fault (ErrorBlame::SERVER). It is intended to be sent on the wire
+// as an undeclared application exception; the server runtime is responsible
+// for translating the type into the appropriate ErrorClassification on the
+// response metadata.
+//
+// Mirrors C++ apache::thrift::AppServerException.
+type AppServerException struct {
+	name    string
+	message string
+	cause   error
+}
+
+var _ error = (*AppServerException)(nil)
+
+// NewAppServerException creates a new AppServerException with the given name and
+// message, optionally wrapping an underlying cause (which may be nil).
+func NewAppServerException(name, message string, cause error) *AppServerException {
+	return &AppServerException{
+		name:    name,
+		message: message,
+		cause:   cause,
+	}
+}
+
+// Name returns the symbolic name of the exception.
+func (e *AppServerException) Name() string {
+	return e.name
+}
+
+// Error returns the error message, appending the wrapped cause if present.
+func (e *AppServerException) Error() string {
+	if e.cause != nil {
+		return e.message + ": " + e.cause.Error()
+	}
+	return e.message
+}
+
+// Unwrap returns the wrapped cause, enabling errors.Is/errors.As traversal.
+func (e *AppServerException) Unwrap() error {
+	return e.cause
+}

@@ -142,6 +142,16 @@ func NewPayloadExceptionMetadataBaseV2(err error) *rpcmetadata.PayloadExceptionM
 		safety = toRPCMetadataErrorSafety(spec.Safety)
 	}
 
+	// AppClientException / AppServerException are marker types sent as undeclared
+	// application exceptions; the runtime translates the marker into the blame on
+	// the response metadata's error classification.
+	switch err.(type) {
+	case *types.AppClientException:
+		blame = rpcmetadata.ErrorBlame_CLIENT
+	case *types.AppServerException:
+		blame = rpcmetadata.ErrorBlame_SERVER
+	}
+
 	classification := rpcmetadata.NewErrorClassification().
 		SetKind(&kind).
 		SetBlame(&blame).

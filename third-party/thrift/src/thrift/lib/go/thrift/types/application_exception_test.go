@@ -17,7 +17,10 @@
 package types
 
 import (
+	"errors"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestApplicationException(t *testing.T) {
@@ -35,4 +38,34 @@ func TestApplicationException(t *testing.T) {
 	if exc.TypeID() != WRONG_METHOD_NAME {
 		t.Fatalf("Expected type WRONG_METHOD_NAME for exception but found '%d'", exc.TypeID())
 	}
+}
+
+func TestAppClientExceptionUnwrap(t *testing.T) {
+	cause := errors.New("root cause")
+	exc := NewAppClientException("MyError", "unable to do X", cause)
+
+	require.Equal(t, "MyError", exc.Name())
+	require.Equal(t, "unable to do X: root cause", exc.Error())
+	require.Equal(t, cause, exc.Unwrap())
+	require.ErrorIs(t, exc, cause)
+
+	// Without a cause, Error() is just the message and Unwrap() is nil.
+	bare := NewAppClientException("MyError", "unable to do X", nil)
+	require.Equal(t, "unable to do X", bare.Error())
+	require.NoError(t, bare.Unwrap())
+}
+
+func TestAppServerExceptionUnwrap(t *testing.T) {
+	cause := errors.New("root cause")
+	exc := NewAppServerException("MyError", "unable to do X", cause)
+
+	require.Equal(t, "MyError", exc.Name())
+	require.Equal(t, "unable to do X: root cause", exc.Error())
+	require.Equal(t, cause, exc.Unwrap())
+	require.ErrorIs(t, exc, cause)
+
+	// Without a cause, Error() is just the message and Unwrap() is nil.
+	bare := NewAppServerException("MyError", "unable to do X", nil)
+	require.Equal(t, "unable to do X", bare.Error())
+	require.NoError(t, bare.Unwrap())
 }

@@ -108,7 +108,7 @@ func TestRunOnResponseInterceptorsReverseOrder(t *testing.T) {
 	c := &recordingInterceptor{name: "c", log: &log}
 	s := newTestServer(a, b, c)
 
-	err := s.runOnResponseInterceptors(context.Background(), nil)
+	err := s.runOnResponseInterceptors(context.Background(), nil, nil)
 	require.NoError(t, err)
 	require.Equal(t, []string{"resp:c", "resp:b", "resp:a"}, log)
 }
@@ -124,7 +124,7 @@ func TestRunInterceptorsThreadsRequestState(t *testing.T) {
 	ctx, err := s.runOnRequestInterceptors(context.Background(), nil)
 	require.NoError(t, err)
 
-	err = s.runOnResponseInterceptors(ctx, nil)
+	err = s.runOnResponseInterceptors(ctx, nil, nil)
 	require.NoError(t, err)
 
 	// Each interceptor's OnResponse receives exactly the state its OnRequest returned.
@@ -151,7 +151,7 @@ func TestRunOnRequestInterceptorsDiscardsInvalidContext(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, ctx)
 
-	err = s.runOnResponseInterceptors(ctx, nil)
+	err = s.runOnResponseInterceptors(ctx, nil, nil)
 	require.NoError(t, err)
 
 	// a's and d's state survived despite b and c returning invalid contexts that
@@ -186,7 +186,7 @@ func TestRunOnRequestInterceptorsThreadsStateDespiteError(t *testing.T) {
 	ctx, err := s.runOnRequestInterceptors(context.Background(), nil)
 	require.Error(t, err)
 
-	err = s.runOnResponseInterceptors(ctx, nil)
+	err = s.runOnResponseInterceptors(ctx, nil, nil)
 	require.NoError(t, err)
 	require.Equal(t, "stateA", a.gotReqState)
 	require.Equal(t, "stateB", b.gotReqState)
@@ -203,7 +203,7 @@ func TestRunOnResponseInterceptorsKeepsLastError(t *testing.T) {
 	c := &recordingInterceptor{name: "c", log: &log, onResponseErr: errC}
 	s := newTestServer(a, b, c)
 
-	err := s.runOnResponseInterceptors(context.Background(), nil)
+	err := s.runOnResponseInterceptors(context.Background(), nil, nil)
 	require.ErrorIs(t, err, errA)
 	require.Equal(t, []string{"resp:c", "resp:b", "resp:a"}, log)
 }
@@ -215,7 +215,7 @@ func TestRunInterceptorsNoInterceptors(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, context.Background(), ctx)
 
-	require.NoError(t, s.runOnResponseInterceptors(context.Background(), nil))
+	require.NoError(t, s.runOnResponseInterceptors(context.Background(), nil, nil))
 }
 
 // --- End-to-end server tests ---

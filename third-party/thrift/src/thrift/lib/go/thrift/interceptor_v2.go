@@ -38,11 +38,13 @@ type InitParams struct {
 	ServiceMetadata *metadata.ThriftMetadata
 }
 
-// InterceptorResult holds the outgoing response passed to
-// ServiceInterceptor.OnResponse. Response is the response struct being sent back
-// to the client, or nil for oneway methods.
+// InterceptorResult holds the outcome passed to ServiceInterceptor.OnResponse.
+// At most one of Response or Err is non-nil: Response carries a normal response
+// (which may itself hold a declared exception), while Err carries an undeclared
+// exception from OnRequest or the handler. For oneway methods both are nil.
 type InterceptorResult struct {
-	Response types.WritableStruct
+	Response types.WritableResult
+	Err      error
 }
 
 // ServiceInterceptor allows introspecting incoming connections, requests, and
@@ -87,6 +89,11 @@ type ServiceInterceptor interface {
 	// outgoing response is serialized. The ctx is the one returned by the
 	// request-path interceptors, so any state an interceptor stored in the
 	// context during OnRequest can be read back here.
+	//
+	// At most one of result.Response or result.Err is non-nil: Response carries a
+	// normal response (which may itself hold a declared exception), while Err
+	// carries an undeclared exception from OnRequest or the handler. For oneway
+	// methods both are nil.
 	OnResponse(ctx context.Context, result InterceptorResult) error
 
 	// OnConnectionAttempted is called when a client makes a new connection

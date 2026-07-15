@@ -351,16 +351,16 @@ func (s *server) runOnRequestInterceptors(ctx context.Context, req ReadableStruc
 // Because iteration is in reverse, that is the error from the earliest-registered
 // interceptor, matching the C++ behavior where an OnResponse exception overwrites
 // any currently-active exception.
-func (s *server) runOnResponseInterceptors(ctx context.Context, resp WritableStruct) error {
-	result := InterceptorResult{Response: resp}
-	var respErr error
+func (s *server) runOnResponseInterceptors(ctx context.Context, respRes WritableResult, respErr error) error {
+	result := InterceptorResult{Response: respRes, Err: respErr}
+	var lastErr error
 	for _, interceptor := range slices.Backward(s.interceptors) {
 		err := interceptor.OnResponse(ctx, result)
 		if err != nil {
-			respErr = err
+			lastErr = err
 		}
 	}
-	return respErr
+	return lastErr
 }
 
 type rocketServerSocket struct {
@@ -493,7 +493,7 @@ func (s *rocketServerSocket) requestResponse(msg payload.Payload) mono.Mono {
 		}
 
 		// Run OnResponse interceptors.
-		respIntErr := s.runOnResponseInterceptors(ctx, respStruct)
+		respIntErr := s.runOnResponseInterceptors(ctx, result, resErr)
 		if respIntErr != nil {
 			respStruct = maybeWrapApplicationException(respIntErr)
 		}
@@ -576,7 +576,7 @@ func (s *rocketServerSocket) fireAndForget(msg payload.Payload) {
 	// runtime, which invokes onResponse with a void result for oneway methods).
 	// There is no response struct and no client to surface an error to, so any
 	// interceptor error is only logged.
-	if respIntErr := s.runOnResponseInterceptors(ctx, nil); respIntErr != nil {
+	if respIntErr := s.runOnResponseInterceptors(ctx, nil, nil); respIntErr != nil {
 		s.log("server fireAndForget OnResponse interceptor error: %v", respIntErr)
 	}
 

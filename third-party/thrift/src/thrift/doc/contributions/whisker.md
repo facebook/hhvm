@@ -311,7 +311,7 @@ I don't know who you are.
 
 `{{#if}}` blocks **may** include any number of `{{# else if ...}}` statements followed by one optional `{{#else}}` statement. The body of the first condition to obtain will be rendered, otherwise the body following the `{{#else}}` statement if provided, otherwise an empty block.
 
-In this example, `person.hasName` is the *condition*. The condition **must** be an `expression` that evaluates to a `boolean`.
+In this example, `person.hasName` is the *condition*. The condition **must** be an `expression` that evaluates to a `boolean` (or [`null`](#data-model), which is treated as `false`).
 
 The closing tag must exactly replicate the `expression` of the matching opening tag. This serves to improve readability of complex nested conditions.
 The closing `expression` may be omitted if and only if both `{{#if}}` and `{{/if}}` are on the same line.
@@ -721,7 +721,7 @@ The name's {{lastName}}... {{firstName}} {{lastName}}.
 {{/with}}
 ```
 
-The `expression` being de-structured (`person`) **must** evaluate to a `map`, or a `native_object` that supports `map`-like property access.
+The `expression` being de-structured (`person`) **must** evaluate to a `map`, or a `native_handle` that supports `map`-like property access (or [`null`](#data-model), which will skip the block).
 
 The body will be rendered exactly once. The result of the expression (`person`) will become the [*implicit context* `object`](#scopes) within the block, meaning it can be accessed using `{{ . }}`. All its properties can be accessed without the `person.` prefix.
 
@@ -1380,7 +1380,7 @@ A Whisker `object` is one of the following types:
 * `array` — An ordered list of `object` (note the recursion). An `array` can be traversed using [`{{#each}}`](#each-blocks).
 * `map` — An unordered set of key-value pairs. Keys are valid *identifiers* represented as `string`s. Values are any `object` (note the recursion). A `map` can be *unpacked* using [`{{#with}}`](#with-blocks) or accessed through [variable interpolation](#interpolations--expressions).
 * `native_function` — An implementation-defined type that can be invoked in [Whisker templates](#interpolations--expressions). A value of this type can only be created by the native runtime (e.g. C++).
-* `native_handle` — An opaque reference to an implementation-defined type that Whisker can only interact with through a *prototype*. A value of this type without a *prototype* is meaningful only to the native runtime (e.g. C++) in conjunction with `native_function`.
+* `native_handle` — An opaque reference to an implementation-defined type that Whisker can only interact with through a *prototype*. A value of this type without a *prototype* is meaningful only to the native runtime (e.g. C++) in conjunction with `native_function`. The prototype, if present, allows `map`-like access to the native handle's properties.
 
 The following types are *printable*: `i64`, `string`.
 
@@ -1476,7 +1476,7 @@ An evaluation context consists of three key elements:
 
 The *global scope* is always the bottom of the stack and cannot be popped.
 
-Whisker uses scopes to describe how top-level names are resolved. This process answers the question: what does `foo` in `{{foo.bar.baz}}` refer to? By contrast, `bar` and `baz` represent *property* resolutions, which are straightforward lookups into a `map` or `map`-like `native_object`.
+Whisker uses scopes to describe how top-level names are resolved. This process answers the question: what does `foo` in `{{foo.bar.baz}}` refer to? By contrast, `bar` and `baz` represent *property* resolutions, which are straightforward lookups into a `map` or `native_handle`.
 
 When resolving an *identifier* like `name`, the process works as follows:
 1. Start with the *current* scope (at the top of the stack).

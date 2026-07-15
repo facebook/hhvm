@@ -14,7 +14,7 @@ path = "../packages.rs"
 anyhow = "1.0.103"
 hash = { version = "0.0.0", path = "../../utils/hash" }
 serde = { version = "1.0.219", features = ["derive", "rc"] }
-toml = { version = "1.1.2", features = ["preserve_order"] }
+toml = { version = "1.1.3", features = ["preserve_order"] }
 
 [dev-dependencies]
 regex = "1.13.0"

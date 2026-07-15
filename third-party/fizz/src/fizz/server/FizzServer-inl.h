@@ -84,10 +84,11 @@ void FizzServer<ActionMoveVisitor, SM>::startActions(AsyncActions actions) {
             this->processActions(result.value());
           }
         } else {
-          std::move(futureActions)
-              .via(this->state_.executor())
-              .thenValueInline(
-                  [this](Actions&& a) { this->processActions(a); });
+          folly::futures::detachOn(
+              this->state_.executor(),
+              std::move(futureActions).deferValue([this](Actions&& a) {
+                this->processActions(a);
+              }));
         }
       },
       [this](Actions& immediateActions) {

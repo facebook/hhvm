@@ -23,9 +23,9 @@ Generates external type annotations for legacy Thrift files.
 {{#partial common.auto_generated_header}}
 import typing as __T
 
-{{#program:importModules}}
-import {{.}}
-{{/program:importModules}}
+{{#each program:importModules as |module|}}
+import {{module}}
+{{/each}}
 from {{program:pyNamespace}}ttypes import *
 
   {{#each program:consts as |const|}}

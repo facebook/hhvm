@@ -32,6 +32,13 @@
 #include <thrift/lib/cpp2/transport/rocket/compression/CompressionManager.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
+// Controls the rollout of defaulting the CUSTOM compression fallback to zstd.
+// When enabled, a CUSTOM codec that has not yet been negotiated falls back to
+// zstd; when disabled, it falls back to zlib (the legacy behavior, which is
+// then upgraded to zstd only once serverZstdSupported is known).
+THRIFT_FLAG_DEFINE_bool(
+    thrift_client_custom_compression_fallback_to_zstd, true);
+
 namespace apache::thrift::detail {
 
 RequestRpcMetadata makeRequestRpcMetadata(
@@ -70,12 +77,21 @@ RequestRpcMetadata makeRequestRpcMetadata(
   // add user specified compression settings to metadata
   if (auto compressionConfig = header.getDesiredCompressionConfig()) {
     if (auto codec = compressionConfig->codecConfig()) {
-      // If custom codec cannot be used (yet), fall back to zlib, which
-      // will be auto-updated to zstd if server supports it
-      // (see logic right below).
+      // Custom codec cannot be used until negotiation completes (e.g. the first
+      // request on a connection). Fall back to zstd: custom compression is
+      // Rocket-only and every Rocket server unconditionally supports zstd
+      // decompression (setup response always has zstdSupported=true), so zstd
+      // is safe even before serverZstdSupported is known on this side. The
+      // legacy zlib fallback (auto-upgraded to zstd only once
+      // serverZstdSupported is known) is kept behind a flag to allow rolling
+      // back the zstd default.
       if (codec->getType() == CodecConfig::Type::customConfig &&
           !customCompressionEnabled) {
-        codec->zlibConfig().emplace();
+        if (THRIFT_FLAG(thrift_client_custom_compression_fallback_to_zstd)) {
+          codec->zstdConfig().emplace();
+        } else {
+          codec->zlibConfig().emplace();
+        }
       }
 
       if (codec->getType() == CodecConfig::Type::zlibConfig &&

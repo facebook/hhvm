@@ -17,13 +17,17 @@
 #include <thrift/lib/cpp2/transport/core/RpcMetadataUtil.h>
 
 #include <gtest/gtest.h>
+#include <folly/ScopeGuard.h>
 #include <thrift/lib/cpp/protocol/TProtocolTypes.h>
+#include <thrift/lib/cpp2/Flags.h>
 #include <thrift/lib/cpp2/PluggableFunction.h>
 #include <thrift/lib/cpp2/async/RpcOptions.h>
 #include <thrift/lib/cpp2/transport/core/RpcMetadataPlugins.h>
 
 using namespace apache::thrift;
 using namespace apache::thrift::detail;
+
+THRIFT_FLAG_DECLARE_bool(thrift_client_custom_compression_fallback_to_zstd);
 
 namespace apache::thrift::detail {
 THRIFT_PLUGGABLE_FUNC_SET_TEST(
@@ -130,15 +134,16 @@ TEST(RpcMetadataUtil, CustomCompressionFallback) {
         folly::IOBuf::copyBuffer(std::string("")),
         /*customCompressionEnabled=*/false);
 
-    // use zlib if server does not support zstd and custom compression is not
-    // supported
+    // custom compression not yet negotiated: fall back to zstd even when
+    // serverZstdSupported is not known on this side (all Rocket servers support
+    // zstd decompression), rather than the pessimal zlib.
     EXPECT_TRUE(requestRpcMetadata.compressionConfig()
                     .value()
                     .codecConfig()
-                    ->zlibConfig()
+                    ->zstdConfig()
                     .has_value());
     EXPECT_EQ(
-        requestRpcMetadata.compression().value(), CompressionAlgorithm::ZLIB);
+        requestRpcMetadata.compression().value(), CompressionAlgorithm::ZSTD);
   }
 
   {
@@ -230,6 +235,55 @@ TEST(RpcMetadataUtil, CustomCompressionFallback) {
     EXPECT_EQ(
         requestRpcMetadata.compression().value(), CompressionAlgorithm::ZSTD);
   }
+}
+
+TEST(RpcMetadataUtil, CustomCompressionFallbackToZlibWhenFlagDisabled) {
+  THRIFT_FLAG_SET_MOCK(
+      thrift_client_custom_compression_fallback_to_zstd, false);
+  SCOPE_EXIT {
+    THRIFT_FLAG_UNMOCK(thrift_client_custom_compression_fallback_to_zstd);
+  };
+
+  RpcOptions rpcOptions;
+  auto kind = RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE;
+  std::string methodName = "foo";
+  std::string serviceName = "bar";
+  std::chrono::milliseconds timeout(100);
+  std::variant<InteractionCreate, int64_t, std::monostate> interactionHandle =
+      std::monostate{};
+
+  transport::THeader header;
+  header.setProtocolId(protocol::T_COMPACT_PROTOCOL);
+
+  CompressionConfig compressionConfig;
+  compressionConfig.codecConfig().ensure().customConfig().emplace();
+  header.setDesiredCompressionConfig(std::move(compressionConfig));
+
+  MethodMetadata methodMetadata(
+      MethodMetadata::Data(
+          methodName, FunctionQualifier::Unspecified, serviceName));
+  auto requestRpcMetadata = makeRequestRpcMetadata(
+      rpcOptions,
+      kind,
+      std::move(methodMetadata),
+      timeout,
+      interactionHandle,
+      /*serverZstdSupported=*/false,
+      3000,
+      header,
+      folly::IOBuf::copyBuffer(std::string("")),
+      /*customCompressionEnabled=*/false);
+
+  // Flag disabled restores the legacy behavior: custom compression not yet
+  // negotiated falls back to zlib, and with serverZstdSupported=false there is
+  // no subsequent zlib -> zstd upgrade.
+  EXPECT_TRUE(requestRpcMetadata.compressionConfig()
+                  .value()
+                  .codecConfig()
+                  ->zlibConfig()
+                  .has_value());
+  EXPECT_EQ(
+      requestRpcMetadata.compression().value(), CompressionAlgorithm::ZLIB);
 }
 
 // A normal-sized exception message is copied through unchanged.

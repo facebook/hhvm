@@ -67,113 +67,6 @@ namespace HPHP {
 ServiceData::ExportedTimeSeries* ProxygenTransport::s_requestErrorCount;
 ServiceData::ExportedTimeSeries* ProxygenTransport::s_requestNonErrorCount;
 
-/**
- * The server side push handler is just here to catch errors and
- * egress state changes.
- */
-struct PushTxnHandler : proxygen::HTTPPushTransactionHandler {
-  PushTxnHandler(uint64_t pushId,
-                 const std::shared_ptr<ProxygenTransport>& transport,
-                 const char *host, const char *path,
-                 uint8_t priority, const Array &promiseHeaders,
-                 const Array &responseHeaders,
-                 bool isSecure)
-      : m_pushId(pushId),
-        m_transport(transport) {
-    createPushPromise(host, path, priority, promiseHeaders, isSecure);
-    m_response.setStatusCode(200);
-    addHeadersToMessage(m_response, responseHeaders);
-  }
-
-  proxygen::HTTPTransaction *getOrCreateTransaction(
-    proxygen::HTTPTransaction *clientTxn, HTTPMessage** msg, bool newPushOk) {
-    if (!m_pushTxn && newPushOk) {
-      if (!clientTxn) {
-        *msg = nullptr;
-        return nullptr;
-      }
-      m_pushTxn = clientTxn->newPushedTransaction(this);
-      *msg = &m_pushPromise;
-    } else {
-      if (m_egressError) {
-        *msg = nullptr;
-        return nullptr;
-      }
-      *msg = &m_response;
-    }
-    return m_pushTxn;
-  }
-
-  proxygen::HTTPTransaction *getTransaction() const {
-    return m_pushTxn;
-  }
-
-  // HTTPPushTransactionHandler interface
-  void setTransaction(proxygen::HTTPTransaction* txn)
-    noexcept override {
-    m_pushTxn = txn;
-  }
-
-  void detachTransaction() noexcept override {
-    VLOG(5) << "detachTransaction PushTxnHandler=" << (uint64_t) this;
-    m_pushTxn = nullptr;
-    m_transport->removePushTxn(m_pushId);
-    delete this;
-  }
-
-  void onError(const proxygen::HTTPException& error)
-    noexcept override {
-    Logger::Error("HPHP push txn transport error: %s",
-                  error.describe().c_str());
-    // Pushed transactions can't really have ingress errors
-    m_egressError = true;
-  }
-
-  void onEgressPaused() noexcept override {}
-
-  void onEgressResumed() noexcept override {}
-
- private:
-  void createPushPromise(const char *host, const char *path,
-                         uint8_t priority, const Array &headers,
-                         bool isSecure) {
-    m_pushPromise.setMethod(HTTPMethod::GET);
-    m_pushPromise.setSecure(isSecure);
-    m_pushPromise.setURL(path);
-    m_pushPromise.setIsChunked(true); // implicitly chunked
-    m_pushPromise.setPriority(priority);
-
-    addHeadersToMessage(m_pushPromise, headers);
-    m_pushPromise.getHeaders().set(HTTP_HEADER_HOST, host);
-  }
-
-  void addHeadersToMessage(HTTPMessage& message, const Array &headers) {
-    for (ArrayIter iter(headers); iter; ++iter) {
-      Variant key = iter.first();
-      auto header = iter.second().toString();
-      if (key.isString() && !key.toString().empty()) {
-        message.getHeaders().add(key.toString().data(), header.data());
-      } else {
-        int pos = header.find(": ");
-        if (pos >= 0) {
-          std::string name = header.substr(0, pos).data();
-          std::string value = header.substr(pos + 2).data();
-          message.getHeaders().add(name, value);
-        } else {
-          Logger::Error("throwing away bad header: %s", header.data());
-        }
-      }
-    }
-  }
-
-  uint64_t m_pushId;
-  std::shared_ptr<ProxygenTransport> m_transport;
-  proxygen::HTTPTransaction *m_pushTxn{nullptr};
-  proxygen::HTTPMessage m_pushPromise;
-  proxygen::HTTPMessage m_response;
-  bool m_egressError{false};
-};
-
 ///////////////////////////////////////////////////////////////////////////////
 
 ProxygenTransport::ProxygenTransport(ProxygenServer *server,
@@ -187,10 +80,6 @@ ProxygenTransport::~ProxygenTransport() {
   VLOG(5) << "destroying ProxygenTransport " << (uint64_t) this;
   if (m_enqueued) {
     m_server->decrementEnqueuedCount();
-  }
-  {
-    Lock lock(this);
-    CHECK(m_pushHandlers.empty());
   }
   m_worker->removePendingTransport(*this);
 }
@@ -694,8 +583,7 @@ void ProxygenTransport::finish(shared_ptr<ProxygenTransport> &&transport) {
 }
 
 HTTPTransaction *ProxygenTransport::getTransaction(uint64_t id,
-                                                   HTTPMessage **msg,
-                                                   bool newPushOk) {
+                                                   HTTPMessage **msg) {
   if (id == 0) {
     if (m_egressError) {
       *msg = nullptr;
@@ -704,16 +592,7 @@ HTTPTransaction *ProxygenTransport::getTransaction(uint64_t id,
     *msg = &m_response;
     return m_clientTxn;
   }
-  Lock lock(this);
-  auto it = m_pushHandlers.find(id);
-  if (it == m_pushHandlers.end()) {
-    *msg = nullptr;
-    return nullptr;
-  }
-  // If the current transaction has already terminated in error, don't allow
-  // a new push, but additional egress on an already created txn is OK.
-  return it->second->getOrCreateTransaction(m_clientTxn, msg,
-                                            newPushOk && !m_egressError);
+  return nullptr;
 }
 
 void ProxygenTransport::messageAvailable(ResponseMessage&& message) noexcept {
@@ -722,8 +601,7 @@ void ProxygenTransport::messageAvailable(ResponseMessage&& message) noexcept {
   }
 
   HTTPMessage *msg = nullptr;
-  bool newPushOk = (message.m_type == ResponseMessage::Type::HEADERS);
-  HTTPTransaction *txn = getTransaction(message.m_pushId, &msg, newPushOk);
+  HTTPTransaction *txn = getTransaction(message.m_pushId, &msg);
   if (!txn) {
     // client is gone, just eat the msg
     VLOG(4) << "client is gone, eating the msg";
@@ -757,27 +635,6 @@ void ProxygenTransport::messageAvailable(ResponseMessage&& message) noexcept {
       txn->sendEOM();
       break;
     case ResponseMessage::Type::FINISH:
-      // need to make sure the last reference is deleted in this thread
-
-      // The VM thread is done, any outstanding push txns need aborts.
-      // It's possible that we could drive pushes from somewhere other
-      // than the VM thread, in which case we'll need a different saftey
-      // mechanism
-      {
-        Lock lock(this);
-        // Note that pushTxn->sendAbort() can remove pushTxn from
-        // m_pushHandlers, so we need to be careful about how we
-        // iterate m_pushHandlers.
-        for (auto it = m_pushHandlers.begin(); it != m_pushHandlers.end(); ) {
-          auto pushTxn = it++->second->getTransaction();
-          if (pushTxn && !pushTxn->isEgressEOMSeen()) {
-            std::ostringstream oss;
-            oss << *pushTxn;
-            Logger::Error("Aborting unfinished push txn=" + oss.str());
-            pushTxn->sendAbort();
-          }
-        }
-      }
       break;
     case ResponseMessage::Type::RESUME_INGRESS:
       txn->resumeIngress();
@@ -872,13 +729,7 @@ void ProxygenTransport::onSendEndImpl() {
 }
 
 bool ProxygenTransport::supportsServerPush() {
-  Lock lock(this);
-  return (m_clientTxn &&
-          m_clientTxn->supportsPushTransactions() &&
-          isHTTP2CodecProtocol(
-            m_clientTxn->getTransport().getCodec().getProtocol()) &&
-          !m_sendEnded &&
-          !isStreamTransport());
+  return false;
 }
 
 int64_t ProxygenTransport::pushResource(const char *host, const char *path,
@@ -887,40 +738,12 @@ int64_t ProxygenTransport::pushResource(const char *host, const char *path,
                                         const Array &responseHeaders,
                                         const void *data, int size,
                                         bool eom) {
-  if (!supportsServerPush()) {
     return 0;
-  }
-
-  int64_t pushId = m_nextPushId++;
-  PushTxnHandler *handler = new PushTxnHandler(
-    pushId, shared_from_this(),
-    host, path, priority, promiseHeaders, responseHeaders,
-    m_request && m_request->isSecure());
-  {
-    Lock lock(this);
-    m_pushHandlers[pushId] = handler;
-  }
-
-  // Push Promise
-  m_worker->putResponseMessage(
-    ResponseMessage(shared_from_this(), ResponseMessage::Type::HEADERS,
-                    pushId));
-
-  m_worker->putResponseMessage(
-    ResponseMessage(shared_from_this(),
-                    ResponseMessage::Type::HEADERS,
-                    pushId, false, data, size, eom));
-  return pushId;
 }
 
 void ProxygenTransport::pushResourceBody(int64_t id, const void *data,
                                          int size, bool eom) {
-  if (id == 0 || (size <= 0 && !eom)) {
-    return;
-  }
-  m_worker->putResponseMessage(
-    ResponseMessage(shared_from_this(), ResponseMessage::Type::BODY,
-                    id, false, data, size, eom));
+  return;
 }
 
 void ProxygenTransport::beginPartialPostEcho() {

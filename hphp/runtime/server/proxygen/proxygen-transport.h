@@ -82,8 +82,6 @@ struct ResponseMessage {
   bool m_eom{false};
 };
 
-struct PushTxnHandler;
-
 namespace stream_transport {
 struct HttpStreamServerTransport;
 }
@@ -325,11 +323,6 @@ struct ProxygenTransport final
    */
   void abort();
 
-  void removePushTxn(uint64_t id) {
-    Lock lock(this);
-    m_pushHandlers.erase(id);
-  }
-
   void setEnqueued() {
     m_enqueued = true;
     unlink();
@@ -368,7 +361,7 @@ struct ProxygenTransport final
   bool handlePOST(const proxygen::HTTPHeaders& headers);
 
   proxygen::HTTPTransaction* getTransaction(
-    uint64_t id, proxygen::HTTPMessage **msg, bool newPushOk);
+    uint64_t id, proxygen::HTTPMessage **msg);
 
   // Tracks HTTPTransaction's reference to this object
   std::shared_ptr<ProxygenTransport> m_transactionReference;
@@ -409,7 +402,6 @@ struct ProxygenTransport final
   std::string m_localAddr;
   uint16_t m_localPort{0};
   int64_t m_nextPushId{1};
-  std::map<uint64_t, PushTxnHandler*> m_pushHandlers; // locked
   int64_t m_maxPost{-1};
   const proxygen::HTTPHeaders* m_proxygenHeaders = nullptr;
   std::shared_ptr<stream_transport::HttpStreamServerTransport>

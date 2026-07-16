@@ -15,7 +15,6 @@ using proxygen::HTTP_HEADER_CONTENT_LENGTH;
 using proxygen::HTTPMessage;
 using proxygen::HTTPMethod;
 using proxygen::HTTPTransaction;
-using proxygen::HTTPPushTransactionHandler;
 using proxygen::MockHTTPTransaction;
 using proxygen::TransportDirection;
 using proxygen::WheelTimerInstance;
@@ -146,44 +145,6 @@ struct ProxygenTransportTest : ProxygenTransportBasicTest {
     m_worker.deliverMessages();
     EXPECT_CALL(m_server, decrementEnqueuedCount());
     transport->detachTransaction();
-  }
-
-  uint64_t pushResource(Array& promiseHeaders, Array& responseHeaders,
-                        uint8_t pri, bool eom = false) {
-    m_txn.enablePush();
-    m_txn.setupCodec(proxygen::CodecProtocol::HTTP_2);
-    EXPECT_TRUE(m_transport->supportsServerPush());
-    auto id = m_transport->pushResource("foo", "/bar", pri, promiseHeaders,
-                                        responseHeaders,  nullptr, 0, eom);
-    EXPECT_GT(id, 0);
-    EXPECT_EQ(m_worker.m_messageQueue.size(), 2);
-    return id;
-  }
-
-  void expectPushPromiseAndHeaders(
-    MockHTTPTransaction& pushTxn, uint8_t pri,
-    HTTPPushTransactionHandler**pushHandlerPtr) {
-#ifdef HHVM_FACEBOOK
-    EXPECT_CALL(m_txn, newPushedTransaction(_,_))
-      .WillOnce(DoAll(SaveArg<0>(pushHandlerPtr),
-                      Return(&pushTxn)));
-#else
-    EXPECT_CALL(m_txn, newPushedTransaction(_))
-        .WillOnce(DoAll(SaveArg<0>(pushHandlerPtr),
-                        Return(&pushTxn)));
-#endif
-    EXPECT_CALL(pushTxn, sendHeaders(_))
-      .WillOnce(Invoke([pri] (const HTTPMessage& promise) {
-            EXPECT_TRUE(promise.isRequest());
-            EXPECT_EQ(promise.getPriority(), pri);
-            EXPECT_EQ(promise.getHeaders().getSingleOrEmpty("hello"),
-                      std::string("world"));
-          }))
-      .WillOnce(Invoke([] (const HTTPMessage& response) {
-            EXPECT_TRUE(response.isResponse());
-            EXPECT_EQ(response.getHeaders().getSingleOrEmpty("foo"),
-                      std::string("bar"));
-          }));
   }
 
   void sendResponse(const std::string& body) {
@@ -349,124 +310,6 @@ TEST_F(ProxygenTransportBasicTest, overlarge_body) {
   m_transport->onBody(folly::IOBuf::copyBuffer("More than 10 bytes"));
   // Give it multiple bodies since realistically this can happen.
   m_transport->onBody(folly::IOBuf::copyBuffer("Even more than 10 bytes"));
-}
-
-TEST_F(ProxygenTransportTest, push) {
-  // Push a resource
-  Array promiseHeaders;
-  Array responseHeaders;
-  uint8_t pri = 1;
-
-  promiseHeaders.append("hello: world"); // vec serialization path
-  responseHeaders.append("foo: bar");
-  auto id = pushResource(promiseHeaders, responseHeaders, pri);
-
-  // And some body bytes
-  std::string body("12345");
-  m_transport->pushResourceBody(id, body.data(), body.length(), false);
-  EXPECT_EQ(m_worker.m_messageQueue.size(), 3);
-
-  // Creates a new transaction and sends headers/body
-  MockHTTPTransaction pushTxn(TransportDirection::DOWNSTREAM,
-                              HTTPCodec::StreamID(2), 1, m_egressQueue,
-                              WheelTimerInstance(m_timeouts.get()));
-  HTTPPushTransactionHandler* pushHandler = nullptr;
-  expectPushPromiseAndHeaders(pushTxn, pri, &pushHandler);
-  EXPECT_CALL(pushTxn, sendBody(_));
-  m_worker.deliverMessages();
-
-  // Send Push EOM
-  m_transport->pushResourceBody(id, nullptr, 0, true);
-  EXPECT_EQ(m_worker.m_messageQueue.size(), 1);
-  EXPECT_CALL(pushTxn, sendEOM());
-  m_worker.deliverMessages();
-  pushHandler->detachTransaction();
-  // Send response
-  sendResponse("12345");
-}
-
-TEST_F(ProxygenTransportTest, push_empty_body) {
-  // Push a resource
-  Array promiseHeaders;
-  Array responseHeaders;
-  uint8_t pri = 1;
-
-  promiseHeaders.set(OptString("hello"),
-                     OptString("world"));  // dict serializtion path
-  responseHeaders.set(OptString("foo"), OptString("bar"));  // dict serializtion path
-  pushResource(promiseHeaders, responseHeaders, pri, true /* eom, no body */);
-
-  // Creates a new transaction and sends headers and an empty body
-  MockHTTPTransaction pushTxn(TransportDirection::DOWNSTREAM,
-                              HTTPCodec::StreamID(2), 1, m_egressQueue,
-                              WheelTimerInstance(m_timeouts.get()));
-  HTTPPushTransactionHandler* pushHandler = nullptr;
-  expectPushPromiseAndHeaders(pushTxn, pri, &pushHandler);
-  EXPECT_CALL(pushTxn, sendEOM());
-  m_worker.deliverMessages();
-
-  pushHandler->detachTransaction();
-  // Send response
-  sendResponse("12345");
-}
-
-TEST_F(ProxygenTransportTest, push_abort_incomplete) {
-  // Push a resource
-  Array promiseHeaders;
-  Array responseHeaders;
-  uint8_t pri = 1;
-
-  promiseHeaders.set(OptString("hello"),
-                     OptString("world"));  // dict serializtion path
-  responseHeaders.set(OptString("foo"), OptString("bar"));  // dict serializtion path
-  pushResource(promiseHeaders, responseHeaders, pri);
-
-  // Creates a new transaction and sends headers, but not body
-  MockHTTPTransaction pushTxn(TransportDirection::DOWNSTREAM,
-                              HTTPCodec::StreamID(2), 1, m_egressQueue,
-                              WheelTimerInstance(m_timeouts.get()));
-  HTTPPushTransactionHandler* pushHandler = nullptr;
-  expectPushPromiseAndHeaders(pushTxn, pri, &pushHandler);
-  m_worker.deliverMessages();
-  sendResponse("12345");
-
-  EXPECT_CALL(pushTxn, sendAbort(_))
-    .WillOnce(Invoke([pushHandler] {
-          pushHandler->detachTransaction();
-        }));
-  // Simulate termination of the VM thread while there is an incomplete push
-  // This aborts the incomplete push
-  TearDown();
-}
-
-TEST_F(ProxygenTransportTest, push_abort) {
-  // Push a resource
-  Array promiseHeaders;
-  Array responseHeaders;
-  uint8_t pri = 1;
-
-  promiseHeaders.set(OptString("hello"),
-                     OptString("world"));  // dict serializtion path
-  responseHeaders.set(OptString("foo"), OptString("bar"));  // dict serializtion path
-  auto id = pushResource(promiseHeaders, responseHeaders, pri);
-
-  // Creates a new transaction and sends headers, but not body
-  MockHTTPTransaction pushTxn(TransportDirection::DOWNSTREAM,
-                              HTTPCodec::StreamID(2), 1, m_egressQueue,
-                              WheelTimerInstance(m_timeouts.get()));
-  HTTPPushTransactionHandler* pushHandler = nullptr;
-  expectPushPromiseAndHeaders(pushTxn, pri, &pushHandler);
-  m_worker.deliverMessages();
-
-  HTTPException ex(HTTPException::Direction::INGRESS_AND_EGRESS,
-                   "Stream aborted, streamID");
-  ex.setProxygenError(proxygen::kErrorStreamAbort);
-  ex.setCodecStatusCode(proxygen::ErrorCode::CANCEL);
-  pushTxn.onError(ex);
-  pushHandler->detachTransaction();
-  m_transport->pushResourceBody(id, nullptr, 0, true);
-  m_worker.deliverMessages();
-  sendResponse("12345");
 }
 
 TEST_F(ProxygenTransportTest, client_timeout) {

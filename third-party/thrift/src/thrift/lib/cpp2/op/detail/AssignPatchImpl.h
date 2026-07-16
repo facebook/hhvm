@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <folly/lang/Pretty.h>
 #include <thrift/lib/cpp2/op/detail/AssignPatch.h>
 
 namespace apache::thrift::op::detail {
@@ -41,7 +42,8 @@ void AssignPatch<Patch, DynamicMerge>::merge(AssignPatch other) {
       XLOG_EVERY_MS(CRITICAL, 10000)
           << "Merging dynamic patch is not implemented. "
              "The merged result will be incorrect.\n"
-             "First Patch = "
+             "Thrift struct = "
+          << folly::pretty_name<T>() << "\nFirst Patch = "
           << folly::toPrettyJson(
                  apache::thrift::protocol::toDynamic(dynPatch_->toObject()))
           << "\nSecond Patch = "

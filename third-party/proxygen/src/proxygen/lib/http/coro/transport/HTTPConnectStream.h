@@ -52,6 +52,16 @@ class HTTPConnectStream
       RequestHeaderMap connectHeaders = RequestHeaderMap(),
       size_t egressBufferSize = 256 * 1024);
 
+  /* Same as above, but takes a CoroSessionHandle (which holds a keepalive on
+   * the session for the duration of the connect). */
+  static folly::coro::Task<std::unique_ptr<HTTPConnectStream>> connect(
+      CoroSessionHandle session,
+      HTTPCoroSession::RequestReservation reservation,
+      std::string authority,
+      std::chrono::milliseconds timeout,
+      RequestHeaderMap connectHeaders = RequestHeaderMap(),
+      size_t egressBufferSize = 256 * 1024);
+
   /* Establish a CONNECT tunnel on the session to the given authority.
    * Takes ownership of the session and initiate closure when the close is
    * called.

@@ -55,6 +55,21 @@ HTTPConnectStream::connect(HTTPCoroSession* session,
 }
 
 folly::coro::Task<std::unique_ptr<HTTPConnectStream>>
+HTTPConnectStream::connect(CoroSessionHandle session,
+                           HTTPCoroSession::RequestReservation reservation,
+                           std::string authority,
+                           std::chrono::milliseconds timeout,
+                           RequestHeaderMap connectHeaders,
+                           size_t egressBufferSize) {
+  co_return co_await connect(session.get(),
+                             std::move(reservation),
+                             std::move(authority),
+                             timeout,
+                             std::move(connectHeaders),
+                             egressBufferSize);
+}
+
+folly::coro::Task<std::unique_ptr<HTTPConnectStream>>
 HTTPConnectStream::connectUnique(
     HTTPCoroSession* session,
     HTTPCoroSession::RequestReservation reservation,

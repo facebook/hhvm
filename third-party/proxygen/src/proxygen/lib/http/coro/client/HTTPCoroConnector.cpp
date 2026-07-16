@@ -680,6 +680,23 @@ folly::coro::Task<HTTPCoroSession*> HTTPCoroConnector::proxyConnect(
                                             sessionParams));
 }
 
+folly::coro::Task<HTTPCoroSession*> HTTPCoroConnector::proxyConnect(
+    CoroSessionHandle proxySession,
+    HTTPCoroSession::RequestReservation reservation,
+    std::string authority,
+    bool connectUnique,
+    std::chrono::milliseconds timeout,
+    const ConnectionParams& connParams,
+    const SessionParams& sessionParams) {
+  co_return co_await proxyConnect(proxySession.get(),
+                                  std::move(reservation),
+                                  std::move(authority),
+                                  connectUnique,
+                                  timeout,
+                                  connParams,
+                                  sessionParams);
+}
+
 folly::coro::Task<HTTPCoroSession*> HTTPCoroConnector::connect(
     folly::EventBase* evb,
     folly::SocketAddress serverAddr,

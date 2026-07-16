@@ -187,6 +187,17 @@ class HTTPCoroConnector {
       const ConnectionParams& connParams = defaultConnectionParams(),
       const SessionParams& sessionParams = defaultSessionParams());
 
+  // Same as above, but takes a CoroSessionHandle (which holds a keepalive on
+  // the proxy session for the duration of the connect).
+  static folly::coro::Task<HTTPCoroSession*> proxyConnect(
+      CoroSessionHandle proxySession,
+      HTTPCoroSession::RequestReservation reservation,
+      std::string authority,
+      bool connectUnique,
+      std::chrono::milliseconds timeout,
+      const ConnectionParams& connParams = defaultConnectionParams(),
+      const SessionParams& sessionParams = defaultSessionParams());
+
   static folly::coro::Task<HTTPCoroSession*> connect(
       folly::EventBase* evb,
       folly::SocketAddress serverAddr,

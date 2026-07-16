@@ -69,10 +69,23 @@ class HTTPClient {
       std::chrono::milliseconds timeout = std::chrono::milliseconds(0),
       RequestHeaderMap requestHeaders = RequestHeaderMap());
 
+  static folly::coro::Task<Response> get(
+      CoroSessionHandle session,
+      URL url,
+      std::chrono::milliseconds timeout = std::chrono::milliseconds(0),
+      RequestHeaderMap requestHeaders = RequestHeaderMap());
+
   // Same as above, but takes an existing session and reservation.
   // timeout=0 defaults to the session timeout
   static folly::coro::Task<Response> get(
       HTTPCoroSession* session,
+      HTTPCoroSession::RequestReservation reservation,
+      URL url,
+      std::chrono::milliseconds timeout = std::chrono::milliseconds(0),
+      RequestHeaderMap requestHeaders = RequestHeaderMap());
+
+  static folly::coro::Task<Response> get(
+      CoroSessionHandle session,
       HTTPCoroSession::RequestReservation reservation,
       URL url,
       std::chrono::milliseconds timeout = std::chrono::milliseconds(0),
@@ -96,10 +109,25 @@ class HTTPClient {
       std::chrono::milliseconds timeout = std::chrono::milliseconds(0),
       RequestHeaderMap requestHeaders = RequestHeaderMap());
 
+  static folly::coro::Task<void> get(
+      CoroSessionHandle session,
+      URL url,
+      HTTPSourceReader reader,
+      std::chrono::milliseconds timeout = std::chrono::milliseconds(0),
+      RequestHeaderMap requestHeaders = RequestHeaderMap());
+
   // Same as above, but takes an existing session and reservation.
   // timeout=0 defaults to the session timeout
   static folly::coro::Task<void> get(
       HTTPCoroSession* session,
+      HTTPCoroSession::RequestReservation reservation,
+      URL url,
+      HTTPSourceReader reader,
+      std::chrono::milliseconds timeout = std::chrono::milliseconds(0),
+      RequestHeaderMap requestHeaders = RequestHeaderMap());
+
+  static folly::coro::Task<void> get(
+      CoroSessionHandle session,
       HTTPCoroSession::RequestReservation reservation,
       URL url,
       HTTPSourceReader reader,
@@ -119,6 +147,13 @@ class HTTPClient {
   // session timeout
   static folly::coro::Task<Response> post(
       HTTPCoroSession* session,
+      URL url,
+      std::string body,
+      std::chrono::milliseconds timeout = std::chrono::milliseconds(0),
+      RequestHeaderMap requestHeaders = RequestHeaderMap());
+
+  static folly::coro::Task<Response> post(
+      CoroSessionHandle session,
       URL url,
       std::string body,
       std::chrono::milliseconds timeout = std::chrono::milliseconds(0),
@@ -144,6 +179,14 @@ class HTTPClient {
       std::chrono::milliseconds timeout = std::chrono::milliseconds(0),
       RequestHeaderMap requestHeaders = RequestHeaderMap());
 
+  static folly::coro::Task<void> post(
+      CoroSessionHandle session,
+      URL url,
+      std::string body,
+      HTTPSourceReader reader,
+      std::chrono::milliseconds timeout = std::chrono::milliseconds(0),
+      RequestHeaderMap requestHeaders = RequestHeaderMap());
+
   static folly::coro::Task<void> request(
       HTTPCoroSession* session,
       HTTPCoroSession::RequestReservation reservation,
@@ -153,7 +196,26 @@ class HTTPClient {
       Logger::SampledLoggerPtr logger = nullptr);
 
   static folly::coro::Task<void> request(
+      CoroSessionHandle session,
+      HTTPCoroSession::RequestReservation reservation,
+      HTTPSourceHolder reqSource,
+      HTTPSourceReader reader,
+      std::chrono::milliseconds timeout = std::chrono::milliseconds(0),
+      Logger::SampledLoggerPtr logger = nullptr);
+
+  static folly::coro::Task<void> request(
       HTTPCoroSession* session,
+      HTTPCoroSession::RequestReservation reservation,
+      HTTPMethod method,
+      const URL& url,
+      RequestHeaderMap requestHeaders,
+      HTTPSourceReader reader,
+      std::optional<std::string> body = std::nullopt,
+      std::chrono::milliseconds timeout = std::chrono::milliseconds(0),
+      Logger::SampledLoggerPtr logger = nullptr);
+
+  static folly::coro::Task<void> request(
+      CoroSessionHandle session,
       HTTPCoroSession::RequestReservation reservation,
       HTTPMethod method,
       const URL& url,

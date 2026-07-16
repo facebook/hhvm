@@ -23,6 +23,7 @@ import thrift.python.exceptions as _fbthrift_python_exceptions
 
 
 class BiDiSinkException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -92,6 +93,7 @@ class BiDiSinkException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta
 _fbthrift_BiDiSinkException = BiDiSinkException
 
 class BiDiStreamException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -161,6 +163,7 @@ class BiDiStreamException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMe
 _fbthrift_BiDiStreamException = BiDiStreamException
 
 class BiDiMethodException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id

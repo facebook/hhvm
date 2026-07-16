@@ -308,12 +308,8 @@ class GeneratedErrorMeta(type):
             )
         fields = dct.pop('_fbthrift_SPEC', ())
         num_fields = len(fields)
-        # Plain struct layout; GeneratedError has its own field-by-field __eq__.
-        dct["_fbthrift_struct_info"] = StructInfo(
-            name,
-            fields,
-            <int>cInternalDataLayout.kStructFastComparable
-        )
+        layout = dct.pop('_fbthrift_internal_data_layout', <int>cInternalDataLayout.kStructFastComparable)
+        dct["_fbthrift_struct_info"] = StructInfo(name, fields, layout)
         for i, f in enumerate(fields):
             dct[f.py_name] = make_fget_error(i)
         all_bases = bases if bases else (GeneratedError,)
@@ -432,14 +428,21 @@ cdef class GeneratedError(Error):
         return True
 
     def __eq__(GeneratedError self, other):
+        if other is self:
+            return True
         if type(other) != type(self):
             return False
+        if (<StructInfo>self._fbthrift_struct_info).layout == cInternalDataLayout.kStructFastComparable:
+            # No reachable field tracks isset, so the tuples compare directly.
+            return self._fbthrift_data == (<GeneratedError>other)._fbthrift_data
         for name, value in self:
             if value != getattr(other, name):
                 return False
         return True
 
     def __hash__(GeneratedError self):
+        if (<StructInfo>self._fbthrift_struct_info).layout == cInternalDataLayout.kStructFastComparable:
+            return hash(self._fbthrift_data) if self._fbthrift_data else hash(type(self))
         value_tuple = tuple(v for _, v in self)
         return hash(value_tuple if value_tuple else type(self))
 

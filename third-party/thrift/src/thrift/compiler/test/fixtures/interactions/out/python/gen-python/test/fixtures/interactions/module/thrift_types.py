@@ -26,6 +26,7 @@ import test.fixtures.another_interactions.shared.thrift_types as _fbthrift__test
 
 
 class CustomException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id

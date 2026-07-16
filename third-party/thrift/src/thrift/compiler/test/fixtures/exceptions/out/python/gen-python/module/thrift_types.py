@@ -17,6 +17,7 @@ import thrift.python.exceptions as _fbthrift_python_exceptions
 
 
 class Fiery(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -93,6 +94,7 @@ class Fiery(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
 _fbthrift_Fiery = Fiery
 
 class Serious(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -169,6 +171,7 @@ class Serious(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
 _fbthrift_Serious = Serious
 
 class ComplexFieldNames(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -256,6 +259,7 @@ class ComplexFieldNames(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta
 _fbthrift_ComplexFieldNames = ComplexFieldNames
 
 class CustomFieldNames(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -343,6 +347,7 @@ class CustomFieldNames(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta)
 _fbthrift_CustomFieldNames = CustomFieldNames
 
 class ExceptionWithPrimitiveField(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -430,6 +435,7 @@ class ExceptionWithPrimitiveField(metaclass=_fbthrift_python_exceptions.Generate
 _fbthrift_ExceptionWithPrimitiveField = ExceptionWithPrimitiveField
 
 class ExceptionWithStructuredAnnotation(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -517,6 +523,7 @@ class ExceptionWithStructuredAnnotation(metaclass=_fbthrift_python_exceptions.Ge
 _fbthrift_ExceptionWithStructuredAnnotation = ExceptionWithStructuredAnnotation
 
 class Banal(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
     )
 

@@ -299,6 +299,7 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.CompatibleWithKeywordSink, C
 _fbthrift_CompatibleWithKeywordSink = CompatibleWithKeywordSink
 
 class InitialException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -368,6 +369,7 @@ class InitialException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta)
 _fbthrift_InitialException = InitialException
 
 class SinkException1(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -437,6 +439,7 @@ class SinkException1(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
 _fbthrift_SinkException1 = SinkException1
 
 class SinkException2(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id

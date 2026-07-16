@@ -158,6 +158,7 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.EchoResponse, EchoResponse)
 _fbthrift_EchoResponse = EchoResponse
 
 class WhisperException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id

@@ -1757,6 +1757,7 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.TypeRemapped, TypeRemapped)
 _fbthrift_TypeRemapped = TypeRemapped
 
 class emptyXcep(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
     )
 
@@ -1815,6 +1816,7 @@ class emptyXcep(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
 _fbthrift_emptyXcep = emptyXcep
 
 class reqXcep(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -1895,6 +1897,7 @@ class reqXcep(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
 _fbthrift_reqXcep = reqXcep
 
 class optXcep(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -1975,6 +1978,7 @@ class optXcep(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
 _fbthrift_optXcep = optXcep
 
 class complexException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id

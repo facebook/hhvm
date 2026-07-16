@@ -39,3 +39,9 @@ struct AnnotatedStructWithUnannotatedChild {
 struct UnannotatedStructWithAnnotatedChild {
   1: AnnotatedStructWithIssetInspection child;
 }
+
+// Not itself isset-tracking, but transitively reaches an isset-tracking struct,
+// so its GeneratedError base must compare by value (kStructSlowComparable).
+exception UnannotatedErrorWithAnnotatedChild {
+  1: AnnotatedStructWithIssetInspection child;
+}

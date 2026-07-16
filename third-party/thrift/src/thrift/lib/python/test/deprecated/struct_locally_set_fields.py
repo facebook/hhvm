@@ -40,6 +40,7 @@ from thrift.python.test.deprecated.locally_set_fields.thrift_types import (
 from thrift.python.test.deprecated.locally_set_fields_annotation.thrift_types import (
     AnnotatedStructWithIssetInspection,
     AnnotatedStructWithUnannotatedChild,
+    UnannotatedErrorWithAnnotatedChild,
     UnannotatedStructWithAnnotatedChild,
     UnannotatedStructWithoutIssetInspection,
 )
@@ -389,6 +390,22 @@ class StructLocallySetFieldsTest(unittest.TestCase):
         self.assertEqual(get_locally_set_fields(b.child), frozenset())
 
         # ... so the parents must compare equal (and hash/dedup consistently).
+        self.assertEqual(a, b)
+        self.assertEqual(hash(a), hash(b))
+        self.assertEqual(len({a, b}), 1)
+
+    def test_exception_with_annotated_child_uses_value_comparison(self) -> None:
+        # Same as above for the GeneratedError base: an exception reaching an
+        # isset-tracking struct must compare by value, not by raw tuple.
+        a = UnannotatedErrorWithAnnotatedChild(
+            child=AnnotatedStructWithIssetInspection(int_field=0)
+        )
+        b = UnannotatedErrorWithAnnotatedChild(
+            child=AnnotatedStructWithIssetInspection()
+        )
+
+        self.assertEqual(get_locally_set_fields(a.child), frozenset({"int_field"}))
+        self.assertEqual(get_locally_set_fields(b.child), frozenset())
         self.assertEqual(a, b)
         self.assertEqual(hash(a), hash(b))
         self.assertEqual(len({a, b}), 1)

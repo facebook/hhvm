@@ -86,6 +86,7 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.C, C)
 _fbthrift_C = C
 
 class E(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
     )
 

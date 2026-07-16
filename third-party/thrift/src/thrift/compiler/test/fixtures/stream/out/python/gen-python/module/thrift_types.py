@@ -18,6 +18,7 @@ import thrift.python.exceptions as _fbthrift_python_exceptions
 
 
 class FooStreamEx(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
     )
 
@@ -76,6 +77,7 @@ class FooStreamEx(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
 _fbthrift_FooStreamEx = FooStreamEx
 
 class FooEx(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
     )
 
@@ -134,6 +136,7 @@ class FooEx(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
 _fbthrift_FooEx = FooEx
 
 class FooEx2(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
     )
 

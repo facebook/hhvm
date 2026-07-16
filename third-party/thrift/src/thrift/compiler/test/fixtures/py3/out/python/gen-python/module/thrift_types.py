@@ -30,6 +30,7 @@ from module.thrift_enums import (
 
 
 class SimpleException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -713,6 +714,7 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.AdaptedUnion, AdaptedUnion)
 _fbthrift_AdaptedUnion = AdaptedUnion
 
 class HiddenException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
+    _fbthrift_internal_data_layout = 0  # InternalDataLayout.kStructFastComparable
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id

@@ -287,8 +287,7 @@ func (h *rpcConformanceServiceHandler) SinkServerDeclaredException(ctx context.C
 				return nil, err
 			}
 		}
-		requestValue.ExceptionMessage = thrift.Pointerize("test")
-		return nil, rpc.NewUserException().SetMsg("test")
+		return nil, h.instruction.SinkServerDeclaredException.UserException
 	}
 	return elemConsumerFunc, nil
 }

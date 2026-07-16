@@ -16,17 +16,17 @@
 
 }}{{!
 `__init__()` and `__call__()` arguments and their types
-}}{{#python.generate_immutable_types?}}{{!
+}}{{#if python.generate_immutable_types?}}{{!
         }},
         {{field.py_name}}: _typing.Optional[{{!
         }}{{#if (and field.is_type_iobuf? (not field.has_adapter?) (not field.type.has_adapter?))}}_fbthrift_iobuf.IOBuf{{!
         }}{{#else}}{{#partial m_fields.aliased_or_adapted_type_pyi type=field.type adapter=field.adapter}}{{/if (and field.is_type_iobuf? (not field.has_adapter?) (not field.type.has_adapter?))}}]=...{{!
-        }}{{/python.generate_immutable_types?}}{{!
-        }}{{#python.generate_mutable_types?}}{{!
+        }}{{/if python.generate_immutable_types?}}{{!
+        }}{{#if python.generate_mutable_types?}}{{!
         }},
         {{field.py_name}}: _typing.Optional[{{!
         }}{{#if (and field.is_type_iobuf? (not field.has_adapter?) (not field.type.has_adapter?))}}_fbthrift_iobuf.IOBuf{{!
         }}{{#else}}{{#partial m_fields.aliased_or_adapted_type_pyi type=field.type adapter=field.adapter}}{{!
         }}{{#partial m_types.add_wrapper_if_container field=field}}{{/if (and field.is_type_iobuf? (not field.has_adapter?) (not field.type.has_adapter?))}}{{!
         }}]=...{{!
-        }}{{/python.generate_mutable_types?}}
+        }}{{/if python.generate_mutable_types?}}

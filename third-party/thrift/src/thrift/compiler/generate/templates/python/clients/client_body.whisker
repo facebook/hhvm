@@ -123,11 +123,11 @@ class Async({{#if extends_service?}}{{#service.extends}}{{!
             {{/if service.interaction?}}
             uri_or_name="{{#if (string.empty? service.uri)}}{{service.name}}{{#else}}{{service.uri}}{{/if}}",
             rpc_options=rpc_options,{{!
-}}{{#python.generate_mutable_types?}}
+}}{{#if python.generate_mutable_types?}}
             is_mutable_types=True,{{!
-}}{{/python.generate_mutable_types?}}
+}}{{/if python.generate_mutable_types?}}
         )
-        {{#function.sink_or_stream?}}
+        {{#if function.sink_or_stream?}}
         _fbthrift_resp, _fbthrift_sink_or_stream = _fbthrift_resp
         {{! isinstance check narrows union type (ClientSink | BidirectionalStream) for Pyre.
             Order matters: bidirectional_stream? must be checked FIRST because sink? returns
@@ -137,13 +137,13 @@ class Async({{#if extends_service?}}{{#service.extends}}{{!
         {{#else if function.sink?}}
         assert isinstance(_fbthrift_sink_or_stream, _fbthrift_ClientSink)
         {{/if function.bidirectional_stream?}}
-        {{/function.sink_or_stream?}}
-        {{#function.early_client_return?}}
+        {{/if function.sink_or_stream?}}
+        {{#if function.early_client_return?}}
         # shortcut to success path for non-void returns
         if _fbthrift_resp.success is not None:
             return {{#if function.creates_interaction?}}_fbthrift_interaction, {{/if}}{{!
-          }}_fbthrift_resp.success{{#function.sink_or_stream?}}, _fbthrift_sink_or_stream{{/function.sink_or_stream?}}
-        {{/function.early_client_return?}}
+          }}_fbthrift_resp.success{{#if function.sink_or_stream?}}, _fbthrift_sink_or_stream{{/if}}
+        {{/if function.early_client_return?}}
         {{#each (array.enumerate function.exceptions) as |index field|}}
         # pyre-ignore[16]: `type(_fbthrift_resp)` has no attribute `{{#partial m_fields.exception_field_name field=field index=index}}`{{!This is an intentionally mangled name.}}
         if (_fbthrift_ex := _fbthrift_resp.{{#partial m_fields.exception_field_name field=field index=index}}) is not None:

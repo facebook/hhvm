@@ -32,7 +32,7 @@ Generated Cpp2 <-> Python converters for Thrift types
 
 namespace apache::thrift::python::capi {
 namespace {
-{{#program:generate_capi?}}
+{{#if program:generate_capi?}}
 bool ensure_module_imported() {
   static ::folly::python::import_cache_nocapture import((
       ::import_{{program:capi_module_prefix}}__thrift_types_capi));
@@ -41,11 +41,11 @@ bool ensure_module_imported() {
 {{#program:structured_definitions}}
 {{> common/tuple_position }}
 {{/program:structured_definitions}}
-{{/program:generate_capi?}}
+{{/if program:generate_capi?}}
 } // namespace
 
 {{#program:structured_definitions}}
-{{#struct:marshal_capi?}}
+{{#if struct:marshal_capi?}}
 ExtractorResult<{{struct:cpp_name}}>
 Extractor<{{> common/wrapped_struct }}>::operator()(PyObject* obj) {
   int tCheckResult = typeCheck(obj);
@@ -56,18 +56,16 @@ Extractor<{{> common/wrapped_struct }}>::operator()(PyObject* obj) {
       return extractorError<{{struct:cpp_name}}>(
           "Marshal error: {{struct:py_name}}");
   }
-  {{#struct:fields?}}
+  {{#if struct:fields?}}
   {{! getThriftData increments tuple struct refcnt}}
   StrongRef fbThriftData({{> common/get_thrift_data }}(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       {{struct:cpp_name}}, {{> common/namespace_tag}}>>{}(*fbThriftData);
-  {{/struct:fields?}}
-  {{^struct:fields?}}
+  {{#else}}
   return {{struct:cpp_name}}{};
-  {{/struct:fields?}}
+  {{/if struct:fields?}}
 }
-{{/struct:marshal_capi?}}
-{{^struct:marshal_capi?}}
+{{#else}}
 ExtractorResult<{{struct:cpp_name}}>
 Extractor<{{> common/wrapped_struct }}>::operator()(PyObject* obj) {
   if (!ensure_module_imported()) {
@@ -90,24 +88,24 @@ Extractor<{{> common/wrapped_struct }}>::operator()(PyObject* obj) {
   return detail::deserialize_iobuf<{{struct:cpp_name}}>(std::move(val));
   {{/if (object.notnull? struct:cpp_adapter_name)}}
 }
-{{/struct:marshal_capi?}}
 
-{{#struct:marshal_capi?}}
+{{/if struct:marshal_capi?}}
+
+{{#if struct:marshal_capi?}}
 ExtractorResult<{{struct:cpp_name}}>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
     {{struct:cpp_name}}, {{> common/namespace_tag}}>>::operator()(PyObject* fbThriftData) {
   {{struct:cpp_name}} cpp;
-{{#struct:fields?}}
+{{#if struct:fields?}}
   std::optional<std::string_view> error;
-  {{^struct:union?}}
+  {{#if (not struct:union?)}}
   {{#each (array.enumerate struct:fields) as |field_index field|}}
   Extractor<{{field.marshal_type}}>{}.extractInto(
       cpp.{{field.cpp_name}}_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__{{struct:py_name}}__tuple_pos[{{field_index}}]),
       error);
   {{/each}}
-  {{/struct:union?}}
-  {{#struct:union?}}
+  {{#else}}
   auto type_tag = Extractor<int64_t>{}(PyTuple_GET_ITEM(fbThriftData, 0));
   if (type_tag.hasError()) {
     return folly::makeUnexpected(type_tag.error());
@@ -124,19 +122,17 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
     default:
       break;
   }
-  {{/struct:union?}}
+  {{/if (not struct:union?)}}
   if (error) {
     return folly::makeUnexpected(*error);
   }
-{{/struct:fields?}}
-{{^struct:fields?}}
+{{#else}}
   (void)fbThriftData;
-{{/struct:fields?}}
+{{/if struct:fields?}}
   return cpp;
 }
-{{/struct:marshal_capi?}}
 
-{{^struct:marshal_capi?}}
+{{#else}}
 ExtractorResult<{{struct:cpp_name}}>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
     {{struct:cpp_name}}, {{> common/namespace_tag }}>>::operator()(PyObject* fbthrift_data) {
@@ -152,7 +148,7 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
   }
   return Extractor<{{> common/wrapped_struct }}>{}(*obj);
 }
-{{/struct:marshal_capi?}}
+{{/if struct:marshal_capi?}}
 
 int Extractor<{{> common/wrapped_struct }}>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
@@ -175,7 +171,7 @@ PyObject* Constructor<{{> common/wrapped_struct }}>::operator()(
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
-  {{#struct:marshal_capi?}}
+  {{#if struct:marshal_capi?}}
   Constructor<::apache::thrift::python::capi::ComposedStruct<
         {{struct:cpp_name}}, {{> common/namespace_tag }}>> ctor;
   StrongRef fbthrift_data(ctor(val));
@@ -183,8 +179,7 @@ PyObject* Constructor<{{> common/wrapped_struct }}>::operator()(
     return nullptr;
   }
   return init__{{program:capi_module_prefix}}__{{struct:py_name}}(*fbthrift_data);
-  {{/struct:marshal_capi?}}
-  {{^struct:marshal_capi?}}
+  {{#else}}
   ::std::unique_ptr<::folly::IOBuf> serialized;
   try {
   {{#if (object.notnull? struct:cpp_adapter_name)}}
@@ -202,25 +197,24 @@ PyObject* Constructor<{{> common/wrapped_struct }}>::operator()(
     CHECK(PyErr_Occurred());
   }
   return ptr;
-  {{/struct:marshal_capi?}}
+  {{/if struct:marshal_capi?}}
 }
 
-{{#struct:marshal_capi?}}
+{{#if struct:marshal_capi?}}
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         {{struct:cpp_name}}, {{> common/namespace_tag }}>>::operator()(
     [[maybe_unused]] const {{struct:cpp_name}}& val) {
-  {{^struct:union?}}
-  {{#struct:enable_get_locally_set_fields?}}
+  {{#if (not struct:union?)}}
+  {{#if struct:enable_get_locally_set_fields?}}
   StrongRef fbthrift_data(createStructTupleWithDeprecatedIsset({{struct:num_fields}}));
-  {{/struct:enable_get_locally_set_fields?}}
-  {{^struct:enable_get_locally_set_fields?}}
+  {{#else}}
   StrongRef fbthrift_data(createStructTuple({{struct:num_fields}}));
-  {{/struct:enable_get_locally_set_fields?}}
+  {{/if struct:enable_get_locally_set_fields?}}
   {{#each (array.enumerate struct:fields) as |field_index field|}}
   StrongRef _fbthrift__{{field.name}}(
     Constructor<{{field.marshal_type}}>{}
     .constructFrom(val.{{field.cpp_name}}_ref()));
-  {{#field.optional?}}
+  {{#if field.optional?}}
   if (_fbthrift__{{field.name}}.isNone()) {
     Py_INCREF(Py_None);
     PyTuple_SET_ITEM(
@@ -228,9 +222,9 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
       _fbthrift__{{struct:py_name}}__tuple_pos[{{field_index}}],
       Py_None);
   } else
-  {{/field.optional?}}
+  {{/if field.optional?}}
   if (!_fbthrift__{{field.name}} ||
-      {{#struct:enable_get_locally_set_fields?}}setStructFieldIssetDeprecated{{/struct:enable_get_locally_set_fields?}}{{^struct:enable_get_locally_set_fields?}}setStructField{{/struct:enable_get_locally_set_fields?}}(
+      {{#if struct:enable_get_locally_set_fields?}}setStructFieldIssetDeprecated{{#else}}setStructField{{/if}}(
           *fbthrift_data,
           _fbthrift__{{struct:py_name}}__tuple_pos[{{field_index}}],
           *_fbthrift__{{field.name}}) == -1) {
@@ -239,8 +233,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
   }
   {{/each}}
   return std::move(fbthrift_data).release();
-  {{/struct:union?}}
-  {{#struct:union?}}
+  {{#else}}
   int64_t type_key = static_cast<int64_t>(val.getType());
   StrongRef py_val;
   switch (type_key) {
@@ -262,11 +255,11 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     return nullptr;
   }
   return unionTupleFromValue(type_key, *py_val);
-  {{/struct:union?}}
+  {{/if (not struct:union?)}}
 }
-{{/struct:marshal_capi?}}
 
-{{^struct:marshal_capi?}}
+{{#else}}
+
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         {{struct:cpp_name}}, {{> common/namespace_tag }}>>::operator()(
     const {{struct:cpp_name}}& val) {
@@ -276,7 +269,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
   }
   return {{> common/get_thrift_data}}(*obj);
 }
-{{/struct:marshal_capi?}}
+{{/if struct:marshal_capi?}}
 
 {{/program:structured_definitions}}
 {{#program:enums}}

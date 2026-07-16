@@ -63,8 +63,8 @@ import {{module_path}}
 {{#each program.services as |service|}}
 class {{service.name}}Interface(
   {{#if (object.notnull? service.extends)}}
-      {{#service.extends}}{{#service:external_program?}}
-    {{service:program.module_path}}.{{> services/service_import_path}}.{{/service:external_program?}}{{service:name}}Interface,
+      {{#service.extends}}{{#if service:external_program?}}
+    {{service:program.module_path}}.{{> services/service_import_path}}.{{/if service:external_program?}}{{service:name}}Interface,
       {{/service.extends}}
     {{#else}}
     _fbthrift_ServiceInterface,

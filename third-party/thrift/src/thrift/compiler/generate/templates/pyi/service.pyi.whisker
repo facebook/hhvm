@@ -49,7 +49,7 @@ class Iface
     # You can cast the result of a Client if you need Future
     {{/if (has_compiler_option? "asyncio")}}
     {{#service:functions}}
-    {{#function:isSupported?}}
+    {{#if function:isSupported?}}
     def {{function:name}}(self{{#each function:params.fields as |param|}}, {{!
     }}{{param.py_name}}: {{#partial common.type_name type=param.type}}{{!
     }}{{/each}}) -> {{!
@@ -57,7 +57,7 @@ class Iface
     }}{{#partial common.type_name type=function:return_type}}{{!
     }}{{#if (has_compiler_option? "asyncio")}}]{{/if}}{{!
     }}: ...
-    {{/function:isSupported?}}
+    {{/if function:isSupported?}}
     {{/service:functions}}
 
 class Client(Iface, __T.ContextManager[Client]):  # {{service:name}}
@@ -73,7 +73,7 @@ class Client(Iface, __T.ContextManager[Client]):  # {{service:name}}
     def get_last_response_headers(self) -> __T.Mapping[str, str]: ...
     def set_max_frame_size(self, size: int) -> None: ...
     {{#service:functions}}
-    {{#function:isSupported?}}
+    {{#if function:isSupported?}}
     def send_{{function:name}}(self{{#each function:params.fields as |param|}}, {{!
     }}{{param.py_name}}: {{#partial common.optional_field_type field=param}} = ...{{!
     }}{{/each}}) -> None: ...
@@ -83,7 +83,7 @@ class Client(Iface, __T.ContextManager[Client]):  # {{service:name}}
     }}{{#partial common.type_name type=function:return_type}}{{!
     }}{{/if (has_compiler_option? "asyncio")}}{{!
     }}: ...
-    {{/function:isSupported?}}
+    {{/if function:isSupported?}}
     {{/service:functions}}
 
 class Processor(Iface, Thrift.TProcessor):  # {{service:name}}
@@ -93,16 +93,16 @@ class Processor(Iface, Thrift.TProcessor):  # {{service:name}}
         self._processMap: __T.Dict[str, __T.Callable]
 
     {{#service:functions}}
-    {{#function:isSupported?}}
+    {{#if function:isSupported?}}
     def process_{{function:name}}(self, seqid: int, iprot: TProtocolBase, oprot: TProtocolBase, server_ctx: __T.Any = ...) ->
       {{~ #if (has_compiler_option? "asyncio")}} asyncio.Future{{#else}} None{{/if}}: ...
-    {{/function:isSupported?}}
+    {{/if function:isSupported?}}
     {{/service:functions}}
     def process_main(self, iprot: TProtocolBase, oprot: TProtocolBase, server_ctx: __T.Any = ...) ->
       {{~ #if (has_compiler_option? "asyncio")}} asyncio.Future{{#else}} __T.Optional[bool]{{/if}}: ...
     def onewayMethods(self) -> __T.Tuple[__T.Callable]: ...
 {{#service:functions}}
-{{#function:isSupported?}}
+{{#if function:isSupported?}}
 
 class {{function:name}}_args:
     thrift_spec: __T.Tuple[__T.Optional[__T.Tuple[int, int, str, __T.Any, __T.Optional[int], int]]]
@@ -140,5 +140,5 @@ class {{function:name}}_result:
     def write(self, oprot: TProtocolBase) -> None: ...
     def __eq__(self, other: __T.Any) -> bool: ...
     def __ne__(self, other: __T.Any) -> bool: ...
-{{/function:isSupported?}}
+{{/if function:isSupported?}}
 {{/service:functions}}

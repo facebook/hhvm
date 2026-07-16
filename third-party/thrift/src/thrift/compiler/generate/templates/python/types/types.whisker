@@ -107,14 +107,12 @@ class {{#partial m_types.unadapted_name type=struct}}{{!
         ),
         {{/each}}
     ){{!
-    }}{{#python.enable_abstract_types?}}{{!
-    }}{{#if (or struct.union? struct.exception?)}}{{!
+    }}{{#if (and python.enable_abstract_types? (or struct.union? struct.exception?))}}{{!
     }}
 
     _fbthrift_abstract_base_class = _fbthrift_abstract_types.{{struct.py_name}}
     {{!
-    }}{{/if (or struct.union? struct.exception?)}}{{!
-    }}{{/python.enable_abstract_types?}}
+    }}{{/if (and python.enable_abstract_types? (or struct.union? struct.exception?))}}
 
 
     @staticmethod

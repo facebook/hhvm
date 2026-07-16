@@ -66,11 +66,11 @@ func (x *{{struct.go_name}}) Error() string {
 {{#let export partial exception |struct|}}
 func (x *{{struct.go_name}}) Exception() thrift.WritableException {
     {{#each struct.fields_sorted as |field|}}
-    {{^field.retval?}}
+    {{#unless field.retval?}}
     if x.{{field.go_name}} != nil {
         return x.{{field.go_name}}
     }
-    {{/field.retval?}}
+    {{/unless field.retval?}}
     {{/each}}
     return nil
 }
@@ -107,11 +107,11 @@ func (x *{{struct.go_name}}) String() string {
 {{! Write() (v2) }}
 {{#let export partial write_v2 |struct|}}
 func (x *{{struct.go_name}}) Write(p thrift.Encoder) error {
-    {{#struct.union?}}
+    {{#if struct.union?}}
     if countSet := x.CountSetFields(); countSet > 1 {
         return fmt.Errorf("{{struct.go_name}} write union: no more than one field must be set (%d set).", countSet)
     }
-    {{/struct.union?}}
+    {{/if struct.union?}}
     return thrift.WriteStructSpec(p, x, x.getStructSpec())
 }
 {{/let partial}}

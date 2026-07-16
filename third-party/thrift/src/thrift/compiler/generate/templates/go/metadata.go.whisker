@@ -86,9 +86,9 @@ var premadeThriftTypesMap = func() map[string]*{{root_program.metadata_qualifier
 var structMetadatas = func() []*{{root_program.metadata_qualifier}}ThriftStruct {
     fbthriftResults := make([]*{{root_program.metadata_qualifier}}ThriftStruct, 0)
     {{#each root_program.structured_definitions as |s|}}
-    {{^s.exception?}}
+    {{#unless s.exception?}}
     fbthriftResults = append(fbthriftResults, {{s.struct_metadata_name}})
-    {{/s.exception?}}
+    {{/unless s.exception?}}
     {{/each}}
     return fbthriftResults
 }()

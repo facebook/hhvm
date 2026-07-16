@@ -50,18 +50,18 @@ class {{enum:name}}(int):
 {{#program:structured_definitions}}
 
 
-class {{struct:name}}{{#struct:exception?}}(Thrift.TException){{/struct:exception?}}:
+class {{struct:name}}{{#if struct:exception?}}(Thrift.TException){{/if}}:
     thrift_spec: __T.Tuple[__T.Optional[__T.Tuple[int, int, str, __T.Any, __T.Optional[int], int]]]
     thrift_field_annotations: __T.Dict[int, __T.Dict[str, str]]
     thrift_struct_annotations: __T.Dict[str, str]
 
     def __init__(
-        self{{^program:enablePosArgs?}}{{^struct:union?}}{{#struct:fields?}}, *{{/struct:fields?}}{{/struct:union?}}{{/program:enablePosArgs?}}{{#each struct:fields as |field|}},
+        self{{#if (and (not program:enablePosArgs?) (not struct:union?) struct:fields?)}}, *{{/if}}{{#each struct:fields as |field|}},
         {{field.py_name}}: {{#partial common.optional_field_type field=field}} = ...{{/each}}
     ) -> None:
         ...
 
-    {{^struct:union?}}
+    {{#if (not struct:union?)}}
     {{#each struct:fields as |field|}}
     @__property__
     def {{field.py_name}}(self) -> {{#if field.optional?}}__T.Optional[{{/if}}
@@ -69,9 +69,9 @@ class {{struct:name}}{{#struct:exception?}}(Thrift.TException){{/struct:exceptio
     @{{field.py_name}}.setter
     def {{field.py_name}}(self, value: {{#partial common.optional_field_type field=field}}) -> None: ...
     {{/each}}
-    {{/struct:union?}}
 
-    {{#struct:union?}}
+    {{#else}}
+
     def getType(self) -> int: ...
 
     {{#struct:fields}}
@@ -85,7 +85,7 @@ class {{struct:name}}{{#struct:exception?}}(Thrift.TException){{/struct:exceptio
     {{field:capitalizedName}}: int = ...
     {{/field:type}}
     {{/struct:fields}}
-    {{/struct:union?}}
+    {{/if (not struct:union?)}}
 
     def isUnion(self) -> bool: ...
     def checkRequired(self) -> None: ...

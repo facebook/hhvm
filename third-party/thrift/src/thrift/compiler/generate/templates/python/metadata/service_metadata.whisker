@@ -84,13 +84,11 @@ new_struct = {{#if parent.external_program?}}{{parent.program.module_mangle}}__t
       {{/each}}
 
       {{#function.return_type}}
-{{#if (not function.sink_or_stream?)}}{{> metadata/recursive_call }}{{/if}}{{!
-}}{{#function.stream?}}{{#function.stream.elem_type}}{{> metadata/recursive_call }}{{/function.stream.elem_type}} # elem
-{{#if function.stream_has_first_response?}}{{> metadata/recursive_call }}{{/if}} # response {{/function.stream?}}{{!
-}}{{#function.sink?}}{{#function.sink.elem_type}}{{> metadata/recursive_call }}{{/function.sink.elem_type}} # elem
+{{#if (not function.sink_or_stream?)}}{{> metadata/recursive_call }}{{/if ~}}
+{{#if function.stream?}}{{#function.stream.elem_type}}{{> metadata/recursive_call }}{{/function.stream.elem_type}} # elem
+{{#if function.stream_has_first_response?}}{{> metadata/recursive_call }}{{/if}} # response {{/if function.stream?}}{{#if function.sink?}}{{#function.sink.elem_type}}{{> metadata/recursive_call }}{{/function.sink.elem_type}} # elem
 {{#function.sink.final_response_type}}{{> metadata/recursive_call }}{{/function.sink.final_response_type}} # final response
-{{#if function.sink_has_first_response?}}{{> metadata/recursive_call }}{{/if}} # first response {{/function.sink?}}{{!
-}} # return value
+{{#if function.sink_has_first_response?}}{{> metadata/recursive_call }}{{/if}} # first response {{/if function.sink?}} # return value
       {{/function.return_type}}
 
     {{/if (not function.starts_interaction?)}}

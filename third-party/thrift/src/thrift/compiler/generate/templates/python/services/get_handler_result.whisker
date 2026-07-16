@@ -16,7 +16,7 @@
 
 }}
   {{#if (not function.bidirectional_stream?)}}
-value = {{^function.stream?}}await {{/function.stream?}}self.{{function.name}}({{#function.params.fields}}args_struct.{{field:py_name}},{{/function.params.fields}})
+value = {{#unless function.stream?}}await {{/unless}}self.{{function.name}}({{#function.params.fields}}args_struct.{{field:py_name}},{{/function.params.fields}})
     {{#if (and function.creates_interaction? function.returns_tuple?)}}
       {{#if (and (not function.stream?) (not function.sink?))}}
 {{! Factory-with-initial-response (request/response only): the handler returns

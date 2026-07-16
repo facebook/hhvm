@@ -29,11 +29,11 @@ from folly.iobuf cimport cIOBuf as __cIOBuf
 {{#program:structured_definitions}}
 cdef api int can_extract__{{program:capi_module_prefix}}__{{struct:py_name}}(object) except -1
 
-{{^struct:marshal_capi?}}
+{{#unless struct:marshal_capi?}}
 cdef api __cIOBuf* extract__{{program:capi_module_prefix}}__{{struct:py_name}}(object) except NULL
 
 cdef api object construct__{{program:capi_module_prefix}}__{{struct:py_name}}(__unique_ptr[__cIOBuf])
-{{/struct:marshal_capi?}}
+{{/unless struct:marshal_capi?}}
 
 cdef api object init__{{program:capi_module_prefix}}__{{struct:py_name}}(object data)
 

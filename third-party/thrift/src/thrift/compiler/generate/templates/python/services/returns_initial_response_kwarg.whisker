@@ -25,10 +25,6 @@
   function set as the current context (inside a #function section).
 }}
 {{#pragma ignore-newlines}}
-{{#function:returns_tuple?}}
-  {{^function:stream?}}
-    {{^function:sink?}}
+{{#if (and function:returns_tuple? (not function:stream?) (not function:sink?))}}
 , returns_initial_response=True
-    {{/function:sink?}}
-  {{/function:stream?}}
-{{/function:returns_tuple?}}
+{{/if (and function:returns_tuple? (not function:stream?) (not function:sink?))}}

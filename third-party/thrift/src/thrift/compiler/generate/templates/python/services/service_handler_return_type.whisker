@@ -18,18 +18,14 @@
 The internal return type of a service handler
 }}
 {{#pragma ignore-newlines}}
-{{#function.oneway?}}None{{/function.oneway?}}
-{{^function.oneway?}}
-  {{^function.bidirectional_stream?}}
-    {{#function.stream?}}
-_typing.Tuple[_fbthrift_iobuf.IOBuf, _typing.AsyncIterator[_fbthrift_iobuf.IOBuf]]
-    {{/function.stream?}}
-    {{#function.sink?}}
-_typing.Tuple[_fbthrift_iobuf.IOBuf, _typing.Callable[[_typing.Callable[[], _typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None]]], _typing.Awaitable[_fbthrift_iobuf.IOBuf]]]
-    {{/function.sink?}}
-{{^function.sink_or_stream?}}_fbthrift_iobuf.IOBuf{{/function.sink_or_stream?}}
-  {{/function.bidirectional_stream?}}
-  {{#function.bidirectional_stream?}}
+{{#if function.oneway?}}
+None
+{{#else if function.bidirectional_stream?}}
 _typing.Tuple[_fbthrift_iobuf.IOBuf, _typing.Callable[[_typing.Callable[[], _typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None]]], _typing.Awaitable[_typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None]]]]
-  {{/function.bidirectional_stream?}}
-{{/function.oneway?}}
+{{#else if function.stream?}}
+_typing.Tuple[_fbthrift_iobuf.IOBuf, _typing.AsyncIterator[_fbthrift_iobuf.IOBuf]]
+{{#else if function.sink?}}
+_typing.Tuple[_fbthrift_iobuf.IOBuf, _typing.Callable[[_typing.Callable[[], _typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None]]], _typing.Awaitable[_fbthrift_iobuf.IOBuf]]]
+{{#else}}
+_fbthrift_iobuf.IOBuf
+{{/if function.oneway?}}

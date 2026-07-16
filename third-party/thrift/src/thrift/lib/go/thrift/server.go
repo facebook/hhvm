@@ -595,6 +595,13 @@ func (s *rocketServerSocket) requestStream(msg payload.Payload) flux.Flux {
 			ctx = WithRequestContext(ctx, reqCtx)
 
 			onFirstResponse := func(respRes WritableResult, respErr error) {
+				// NOTE: we do not yet honor OnResponse interceptor errors here:
+				// an error returned by an interceptor should short-circuit and
+				// prevent the rest of the streaming response from executing, but
+				// that is not wired up yet, so the error is intentionally
+				// ignored. This is sufficient for logging-style interceptors
+				// that only inspect the result struct and/or error.
+				_ = s.runOnResponseInterceptors(ctx, respRes, respErr)
 				respPayload, err := s.makeResponsePayload(metadata, respRes, respErr, true /* isFirstResponse */)
 				if err != nil {
 					s.log("server requestStream makeResponsePayload error: %v", err)

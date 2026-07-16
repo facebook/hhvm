@@ -379,6 +379,20 @@ let list_files_with_errors env =
   in
   SSet.elements acc
 
+let prechecked_files_ready_for_diagnostics = function
+  | Prechecked_files_disabled -> true
+  | Initial_typechecking _ -> false
+  | Prechecked_files_ready dirty_deps ->
+    Typing_deps.DepSet.is_empty dirty_deps.dirty_master_deps
+
+let are_diagnostics_complete env ~uses_partial_typecheck =
+  (not uses_partial_typecheck)
+  && is_full_check_done env.full_check_status
+  && Relative_path.Set.is_empty env.disk_needs_parsing
+  && Relative_path.Set.is_empty env.needs_phase2_redecl
+  && Relative_path.Set.is_empty env.needs_recheck
+  && prechecked_files_ready_for_diagnostics env.prechecked_files
+
 let add_changed_files env changed_files =
   {
     env with

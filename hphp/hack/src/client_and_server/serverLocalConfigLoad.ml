@@ -94,6 +94,7 @@ let default =
     edenfs_file_watcher = EdenfsFileWatcher.default;
     workload_quantile = None;
     rollout_group = None;
+    status_single_use_cached_diagnostics = false;
     specify_manifold_api_key = false;
     cache_remote_decls = false;
     use_compressed_dep_graph = true;
@@ -801,6 +802,12 @@ let load_
     | _ -> None
   in
   let rollout_group = string_opt Config_keys.Hhconf.rollout_group config in
+  let status_single_use_cached_diagnostics =
+    bool_
+      Config_keys.Hhconf.status_single_use_cached_diagnostics
+      ~default:default.status_single_use_cached_diagnostics
+      config
+  in
   let specify_manifold_api_key =
     bool_if_min_version
       Config_keys.Hhconf.specify_manifold_api_key
@@ -1126,6 +1133,7 @@ let load_
     edenfs_file_watcher;
     workload_quantile;
     rollout_group;
+    status_single_use_cached_diagnostics;
     specify_manifold_api_key;
     cache_remote_decls;
     use_compressed_dep_graph;
@@ -1208,6 +1216,8 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
       enable_fanout_aware_distc = options.enable_fanout_aware_distc;
       use_compressed_dep_graph = options.use_compressed_dep_graph;
       consume_streaming_errors = options.consume_streaming_errors;
+      status_single_use_cached_diagnostics =
+        options.status_single_use_cached_diagnostics;
       hh_distc_fanout_threshold = options.hh_distc_fanout_threshold;
       hh_distc_fanout_full_init_threshold =
         options.hh_distc_fanout_full_init_threshold;

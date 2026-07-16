@@ -259,6 +259,10 @@ val is_full_check_started : full_check_status -> bool
 
 val list_files_with_errors : env -> string list
 
+(** True when [env.diagnostics] is complete enough for callers to filter and serve
+    without recomputing diagnostics. *)
+val are_diagnostics_complete : env -> uses_partial_typecheck:bool -> bool
+
 val add_changed_files : env -> Relative_path.Set.t -> env
 
 val show_clock : ServerNotifier.clock option -> string

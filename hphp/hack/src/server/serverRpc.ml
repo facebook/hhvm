@@ -86,20 +86,48 @@ let handle :
         preexisting_warnings;
         return_expanded_tast;
       } ->
-    let ctx = Provider_utils.ctx_from_server_env env in
+    let error_filter =
+      {
+        Tast_provider.ErrorFilter.error_filter;
+        warnings_saved_state =
+          ServerEnv.(env.init_env.mergebase_warning_hashes)
+          >>= Option.some_if (not preexisting_warnings);
+      }
+    in
+    let ctx = lazy (Provider_utils.ctx_from_server_env env) in
     let (errors, tasts) =
-      ServerStatusSingle.go
-        genv.ServerEnv.workers
-        file_names
-        ctx
-        ~return_expanded_tast
-        ~error_filter:
-          {
-            Tast_provider.ErrorFilter.error_filter;
-            warnings_saved_state =
-              ServerEnv.(env.init_env.mergebase_warning_hashes)
-              >>= Option.some_if (not preexisting_warnings);
-          }
+      let use_cached_diagnostics =
+        genv.ServerEnv.local_config
+          .ServerLocalConfig.status_single_use_cached_diagnostics
+      in
+      let uses_partial_typecheck =
+        genv.ServerEnv.local_config
+          .ServerLocalConfig.enable_type_check_filter_files
+        || Option.is_some
+             genv.ServerEnv.local_config.ServerLocalConfig.workload_quantile
+      in
+      let cached_result =
+        if use_cached_diagnostics then
+          ServerStatusSingle.go_from_cached_diagnostics
+            env
+            file_names
+            ~return_expanded_tast
+            ~preexisting_warnings
+            ~is_stale
+            ~uses_partial_typecheck
+            ~error_filter
+        else
+          None
+      in
+      match cached_result with
+      | Some result -> result
+      | None ->
+        ServerStatusSingle.go
+          genv.ServerEnv.workers
+          file_names
+          (Lazy.force ctx)
+          ~return_expanded_tast
+          ~error_filter
     in
     let errors =
       errors |> Diagnostics.sort_and_finalize |> take_max_errors max_errors
@@ -113,7 +141,7 @@ let handle :
              ~f:
                (Tast_with_dynamic.map ~f:(fun tast ->
                     tast
-                    |> Tast_expand.expand_program ctx
+                    |> Tast_expand.expand_program (Lazy.force ctx)
                     |> Tast.force_lazy_values)))
       else
         None

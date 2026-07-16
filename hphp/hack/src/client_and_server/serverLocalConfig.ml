@@ -336,6 +336,9 @@ type t = {
        into here, [t], it was first used as a lookup in ServerLocalConfigKnobs.
        Intended meaning: what class of user is running hh_server, hence what experiments
        should they be subject to. *)
+  status_single_use_cached_diagnostics: bool;
+      (** Reuse already-computed global diagnostics for hh --single when the server
+          has completed typechecking. *)
   specify_manifold_api_key: bool;
   cache_remote_decls: bool;
       (** Configure whether fetch and cache remote decls *)

@@ -417,6 +417,9 @@ module Hhconf = struct
 
   let rollout_group = hhconf_key "rollout_group"
 
+  let status_single_use_cached_diagnostics =
+    hhconf_key "status_single_use_cached_diagnostics"
+
   let workload_quantile = hhconf_key "workload_quantile"
 
   let zstd_decompress_by_file = hhconf_key "zstd_decompress_by_file"

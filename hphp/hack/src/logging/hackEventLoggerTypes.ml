@@ -102,6 +102,8 @@ type rollout_flags = {
       (** POC: @fzn, use fanout-aware hh_distc if hh_distc_fanout_threshold <= fanout < hh_distc_fanout_full_init_threshold *)
   consume_streaming_errors: bool;
       (** POC: @ljw, hh_client should read errors from errors.bin *)
+  status_single_use_cached_diagnostics: bool;
+      (** Whether hh --single may reuse cached server diagnostics. *)
   hh_distc_fanout_threshold: int;
       (** POC: @bobren - fanout threshold where we trigger hh_distc *)
   hh_distc_fanout_full_init_threshold: int;

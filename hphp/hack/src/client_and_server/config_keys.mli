@@ -379,6 +379,8 @@ module Hhconf : sig
 
   val rollout_group : string
 
+  val status_single_use_cached_diagnostics : string
+
   val workload_quantile : string
 
   val zstd_decompress_by_file : string

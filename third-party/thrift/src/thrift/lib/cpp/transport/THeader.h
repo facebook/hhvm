@@ -377,6 +377,21 @@ class THeader final {
     return c_.preCompressedAlgorithm_;
   }
 
+  // Marks that this request is an SR Proxy compression-passthrough forward (the
+  // origin's pre-compressed payload is forwarded opaquely). Local-only, never
+  // serialized to the wire; consumed solely by proxy per-request Scuba logging
+  // (ProxyDispatcher::setPerfSampleEx). This is intentionally distinct from
+  // preCompressedAlgorithm_, which is generic compression state also set by
+  // caller-thread compression, so the logged signal cannot be confused with
+  // other (current or future) compression features.
+  void setSrProxyCompressionPassthrough(bool value) {
+    c_.srProxyCompressionPassthrough_ = value;
+  }
+
+  bool getSrProxyCompressionPassthrough() const {
+    return c_.srProxyCompressionPassthrough_;
+  }
+
   void setResponseCompressionAlgorithm(CompressionAlgorithm algorithm) {
     c_.responseCompressionAlgorithm_ = algorithm;
   }
@@ -608,6 +623,13 @@ class THeader final {
     // Pre-compressed request state: set by compressRequest() on the caller
     // thread, consumed by sendThriftRequest() to skip re-compression.
     CompressionAlgorithm preCompressedAlgorithm_{CompressionAlgorithm::NONE};
+
+    // Set by SR Proxy (ServiceRouterProcessor) on the outbound forwarded
+    // request when the hop is a compression-passthrough forward. Local-only
+    // (never sent on the wire); consumed only by proxy Scuba logging. Kept
+    // separate from preCompressedAlgorithm_ so the logged signal is
+    // passthrough-specific.
+    bool srProxyCompressionPassthrough_{false};
 
     // Response compression state: set by the transport when skipping
     // decompression, consumed by decompressResponse() on the caller thread.

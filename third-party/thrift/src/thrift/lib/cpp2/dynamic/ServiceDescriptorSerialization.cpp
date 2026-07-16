@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <span>
 #include <thrift/lib/cpp2/dynamic/ServiceDescriptorSerialization.h>
 
 #include <thrift/lib/cpp2/dynamic/AnnotationValue.h>
@@ -44,12 +45,12 @@ class DeserializedServiceDescriptor final : public ServiceDescriptor {
         annotations_(std::move(annotations)) {}
 
   std::string_view serviceName() const override { return serviceName_; }
-  folly::span<const Function> functions() const override { return functions_; }
-  folly::span<const Interaction> interactions() const override {
+  std::span<const Function> functions() const override { return functions_; }
+  std::span<const Interaction> interactions() const override {
     return interactions_;
   }
 
-  folly::span<const DynamicValue> annotations() const override {
+  std::span<const DynamicValue> annotations() const override {
     return annotations_;
   }
 
@@ -108,7 +109,7 @@ void addTypeRefDefinitions(
 // it. Mirrors serializeAnnotations by skipping facebook.com/thrift/annotation/
 // definitions, which are intentionally not bundled.
 void addAnnotationTypeDefinitions(
-    folly::span<const DynamicValue> annotations,
+    std::span<const DynamicValue> annotations,
     SerializableTypeSystemBuilder& builder) {
   for (const auto& annotation : annotations) {
     const auto& uri = annotation.type().asStruct().uri();
@@ -435,7 +436,7 @@ std::string_view extractServiceName(type_system::UriView uri) {
 }
 
 bool containsInteractionUri(
-    folly::span<const ServiceDescriptor::Interaction> interactions,
+    std::span<const ServiceDescriptor::Interaction> interactions,
     std::string_view uri) {
   for (const auto& interaction : interactions) {
     if (interaction.uri == uri) {
@@ -446,8 +447,8 @@ bool containsInteractionUri(
 }
 
 void validateCreatedInteractions(
-    folly::span<const ServiceDescriptor::Function> functions,
-    folly::span<const ServiceDescriptor::Interaction> interactions) {
+    std::span<const ServiceDescriptor::Function> functions,
+    std::span<const ServiceDescriptor::Interaction> interactions) {
   for (const auto& fn : functions) {
     if (fn.createdInteractionUri.has_value() &&
         !containsInteractionUri(interactions, *fn.createdInteractionUri)) {

@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <span>
 #include <folly/Utility.h>
 #include <folly/algorithm/simd/find_first_of.h>
 #include <folly/codec/hex.h>
@@ -819,7 +820,7 @@ template <typename StrType>
 FOLLY_NOINLINE inline void
 JSONProtocolReaderCommon::readJSONStringEscapeSequence(StrType& val) {
   auto const seq = readJSONEscapeSequence();
-  auto const utf8 = folly::span{seq.data, seq.size};
+  auto const utf8 = std::span{seq.data, seq.size};
   auto const utf8c = folly::reinterpret_span_cast<char const>(utf8);
   val += std::string_view(utf8c.data(), utf8c.size());
 }

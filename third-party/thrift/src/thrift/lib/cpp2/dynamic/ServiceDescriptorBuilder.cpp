@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <span>
 #include <thrift/lib/cpp2/dynamic/ServiceDescriptorBuilder.h>
 
 namespace apache::thrift::dynamic {
@@ -35,12 +36,12 @@ class BuiltServiceDescriptor final : public ServiceDescriptor {
         annotations_(std::move(annotations)) {}
 
   std::string_view serviceName() const override { return serviceName_; }
-  folly::span<const Function> functions() const override { return functions_; }
-  folly::span<const Interaction> interactions() const override {
+  std::span<const Function> functions() const override { return functions_; }
+  std::span<const Interaction> interactions() const override {
     return interactions_;
   }
 
-  folly::span<const DynamicValue> annotations() const override {
+  std::span<const DynamicValue> annotations() const override {
     return annotations_;
   }
 

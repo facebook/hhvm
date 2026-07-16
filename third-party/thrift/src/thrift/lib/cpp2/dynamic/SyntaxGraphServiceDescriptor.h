@@ -17,6 +17,7 @@
 #pragma once
 
 #include <memory>
+#include <span>
 
 #include <thrift/lib/cpp2/dynamic/ServiceDescriptor.h>
 #include <thrift/lib/cpp2/schema/SyntaxGraph.h>
@@ -30,9 +31,9 @@ class SyntaxGraphServiceDescriptor final : public ServiceDescriptor {
       const syntax_graph::ServiceNode& service);
 
   std::string_view serviceName() const override;
-  folly::span<const Function> functions() const override;
-  folly::span<const Interaction> interactions() const override;
-  folly::span<const DynamicValue> annotations() const override;
+  std::span<const Function> functions() const override;
+  std::span<const Interaction> interactions() const override;
+  std::span<const DynamicValue> annotations() const override;
 
  private:
   const type_system::TypeSystem& typeSystem() const override;

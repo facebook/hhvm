@@ -17,6 +17,7 @@
 #pragma once
 
 #include <optional>
+#include <span>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -108,10 +109,10 @@ class ServiceDescriptor {
   virtual ~ServiceDescriptor() = default;
 
   virtual std::string_view serviceName() const = 0;
-  virtual folly::span<const Function> functions() const = 0;
-  virtual folly::span<const Interaction> interactions() const { return {}; }
+  virtual std::span<const Function> functions() const = 0;
+  virtual std::span<const Interaction> interactions() const { return {}; }
   // Structured annotations on the service definition itself.
-  virtual folly::span<const DynamicValue> annotations() const = 0;
+  virtual std::span<const DynamicValue> annotations() const = 0;
 
   virtual const type_system::TypeSystem& typeSystem() const = 0;
 

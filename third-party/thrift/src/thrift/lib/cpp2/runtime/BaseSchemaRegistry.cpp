@@ -17,16 +17,17 @@
 #include <thrift/lib/cpp2/runtime/BaseSchemaRegistry.h>
 
 #include <mutex>
+#include <span>
 #include <folly/Indestructible.h>
 
 namespace apache::thrift {
 
 void BaseSchemaRegistry::registerSchema(
     std::string_view name,
-    folly::span<const std::string_view> data,
+    std::span<const std::string_view> data,
     std::string_view path,
     int64_t programId,
-    folly::span<const std::string_view> uris) {
+    std::span<const std::string_view> uris) {
   std::lock_guard lock(mutex_);
   if (auto it = rawSchemas_.find(name); it != rawSchemas_.end()) {
     if (it->second.path != path) { // Needed to support dynamic linking

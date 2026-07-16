@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <span>
 #include <thrift/lib/cpp2/dynamic/SyntaxGraphServiceDescriptor.h>
 
 #include <thrift/lib/cpp2/dynamic/AnnotationValue.h>
@@ -69,7 +70,7 @@ RpcKind determineRpcKind(const syntax_graph::FunctionNode& fn) {
 }
 
 std::vector<DynamicValue> convertAnnotations(
-    folly::span<const syntax_graph::Annotation> annotations,
+    std::span<const syntax_graph::Annotation> annotations,
     const SyntaxGraph& syntaxGraph) {
   std::vector<DynamicValue> result;
   result.reserve(annotations.size());
@@ -274,17 +275,17 @@ std::string_view SyntaxGraphServiceDescriptor::serviceName() const {
   return serviceName_;
 }
 
-folly::span<const ServiceDescriptor::Function>
+std::span<const ServiceDescriptor::Function>
 SyntaxGraphServiceDescriptor::functions() const {
   return functions_;
 }
 
-folly::span<const ServiceDescriptor::Interaction>
+std::span<const ServiceDescriptor::Interaction>
 SyntaxGraphServiceDescriptor::interactions() const {
   return interactions_;
 }
 
-folly::span<const DynamicValue> SyntaxGraphServiceDescriptor::annotations()
+std::span<const DynamicValue> SyntaxGraphServiceDescriptor::annotations()
     const {
   return annotations_;
 }

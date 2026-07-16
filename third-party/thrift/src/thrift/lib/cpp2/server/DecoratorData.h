@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <span>
 #include <stdexcept>
 #include <folly/container/span.h>
 #include <thrift/lib/cpp2/server/DecoratorDataHandle.h>
@@ -66,7 +67,7 @@ class DecoratorData {
   explicit DecoratorData(DecoratorDataStorage& storage);
   explicit DecoratorData(const DecoratorDataStorage& storage);
 
-  folly::span<DecoratorDataEntry> decoratorData_;
+  std::span<DecoratorDataEntry> decoratorData_;
 };
 
 } // namespace apache::thrift::server

@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <span>
 #include <string_view>
 
 #include <folly/Function.h>
@@ -32,16 +33,16 @@ class BaseSchemaRegistry {
 
   void registerSchema(
       std::string_view name,
-      folly::span<const std::string_view> data,
+      std::span<const std::string_view> data,
       std::string_view path,
       int64_t programId,
-      folly::span<const std::string_view> uris);
+      std::span<const std::string_view> uris);
 
   using Callback = folly::Function<void(std::string_view) const>;
 
  private:
   struct RawSchema {
-    folly::span<const std::string_view> data;
+    std::span<const std::string_view> data;
     std::string_view path;
     int64_t programId{};
   };

@@ -34,6 +34,7 @@
 #include <iosfwd>
 #include <memory>
 #include <optional>
+#include <span>
 #include <stdexcept>
 #include <string>
 #include <string_view>
@@ -455,7 +456,7 @@ class WithDefinition : public WithResolver {
  */
 class WithAnnotations {
  protected:
-  folly::span<const Annotation> annotations() const;
+  std::span<const Annotation> annotations() const;
 
   explicit WithAnnotations(std::vector<Annotation>&& annotations);
   ~WithAnnotations() noexcept;
@@ -694,7 +695,7 @@ class StructuredNode : detail::WithDefinition, detail::WithUri {
  public:
   using detail::WithDefinition::definition;
   using detail::WithUri::uri;
-  folly::span<const FieldNode> fields() const { return fields_; }
+  std::span<const FieldNode> fields() const { return fields_; }
 
   /**
    * Looks up a field by ID.
@@ -874,7 +875,7 @@ class EnumNode final : folly::MoveOnly,
 
   using detail::WithDefinition::definition;
   using detail::WithUri::uri;
-  folly::span<const Value> values() const { return values_; }
+  std::span<const Value> values() const { return values_; }
 
   EnumNode(
       const detail::Resolver& resolver,
@@ -1064,7 +1065,7 @@ class FunctionStream final : folly::MoveOnly,
   // A Thrift stream in IDL takes the form:
   //     stream<{payloadType} throws (... {exceptions} ...)>
   const TypeRef& payloadType() const { return *payloadType_; }
-  folly::span<const FunctionException> exceptions() const;
+  std::span<const FunctionException> exceptions() const;
 
   FunctionStream(
       TypeRef&& payloadType, std::vector<FunctionException>&& exceptions);
@@ -1303,8 +1304,8 @@ class FunctionSink final : folly::MoveOnly,
   //          {finalResponseType} throws (... {serverExceptions} ...)>
   const TypeRef& payloadType() const { return *payloadType_; }
   const TypeRef& finalResponseType() const { return *finalResponseType_; }
-  folly::span<const FunctionException> clientExceptions() const;
-  folly::span<const FunctionException> serverExceptions() const;
+  std::span<const FunctionException> clientExceptions() const;
+  std::span<const FunctionException> serverExceptions() const;
 
   FunctionSink(
       TypeRef&& payloadType,
@@ -1330,8 +1331,8 @@ class FunctionBidirectionalStream final
  public:
   const TypeRef& streamPayloadType() const { return *streamPayloadType_; }
   const TypeRef& sinkPayloadType() const { return *sinkPayloadType_; }
-  folly::span<const FunctionException> streamExceptions() const;
-  folly::span<const FunctionException> sinkExceptions() const;
+  std::span<const FunctionException> streamExceptions() const;
+  std::span<const FunctionException> sinkExceptions() const;
 
   FunctionBidirectionalStream(
       TypeRef&& streamPayloadType,
@@ -1479,8 +1480,8 @@ class FunctionNode final : folly::MoveOnly,
   using Exception = FunctionException;
 
   const Response& response() const { return response_; }
-  folly::span<const Param> params() const { return params_; }
-  folly::span<const Exception> exceptions() const;
+  std::span<const Param> params() const { return params_; }
+  std::span<const Exception> exceptions() const;
 
   /**
    * Whether this function is an interaction constructor created by performs
@@ -1519,7 +1520,7 @@ class RpcInterfaceNode : detail::WithDefinition, detail::WithUri {
  public:
   using detail::WithDefinition::definition;
   using detail::WithUri::uri;
-  folly::span<const FunctionNode> functions() const { return functions_; }
+  std::span<const FunctionNode> functions() const { return functions_; }
 
   // We outline this destructor because `FunctionNode` is incomplete at the
   // time of declaration.

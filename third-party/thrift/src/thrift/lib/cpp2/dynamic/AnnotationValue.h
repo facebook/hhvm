@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <span>
 #include <vector>
 
 #include <folly/container/F14Map.h>
@@ -55,7 +56,7 @@ DynamicValue fromSerializableRecord(
 // serializer: their definitions are not bundled into the type universe, so the
 // keys would not resolve.
 folly::F14FastMap<std::string, type_system::SerializableRecordUnion>
-serializeAnnotations(folly::span<const DynamicValue> annotations);
+serializeAnnotations(std::span<const DynamicValue> annotations);
 
 // Reconstruct annotation values from the wire annotations map produced by
 // serializeAnnotations: each URI key is resolved against typeSystem to type its

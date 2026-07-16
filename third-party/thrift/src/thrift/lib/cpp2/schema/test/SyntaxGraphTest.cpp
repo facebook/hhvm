@@ -35,6 +35,7 @@
 #include <fmt/core.h>
 
 #include <algorithm>
+#include <span>
 
 namespace type = apache::thrift::type;
 
@@ -43,7 +44,7 @@ namespace apache::thrift::syntax_graph {
 namespace {
 
 const Annotation& findAnnotationOrThrow(
-    folly::span<const Annotation> annotations, std::string_view name) {
+    std::span<const Annotation> annotations, std::string_view name) {
   for (auto& i : annotations) {
     if (i.type().asStruct().definition().name() == name) {
       return i;
@@ -731,7 +732,7 @@ TEST_F(ServiceSchemaTest, StructuredAnnotationWhichIsATypedef) {
 
   const ServiceNode& testService =
       program.definitionsByName().at("TestService")->asService();
-  folly::span<const FunctionNode> functions = testService.functions();
+  std::span<const FunctionNode> functions = testService.functions();
   const FunctionNode& foo = *std::find_if(
       functions.begin(), functions.end(), [](const FunctionNode& f) {
         return f.name() == "foo";
@@ -755,7 +756,7 @@ TEST_F(ServiceSchemaTest, StructuredAnnotationOnField) {
 
   const ExceptionNode& testException =
       program.definitionsByName().at("TestException")->asException();
-  folly::span<const Annotation> annotations =
+  std::span<const Annotation> annotations =
       testException.fields()[0].annotations();
   EXPECT_EQ(annotations.size(), 1);
 

@@ -30,6 +30,7 @@
 #include <fmt/core.h>
 
 #include <queue>
+#include <span>
 #include <stdexcept>
 
 namespace type = apache::thrift::type;
@@ -260,7 +261,7 @@ FunctionStream::FunctionStream(
     : payloadType_(folly::copy_to_unique_ptr(std::move(payloadType))),
       exceptions_(std::move(exceptions)) {}
 
-folly::span<const FunctionNode::Exception> FunctionStream::exceptions() const {
+std::span<const FunctionNode::Exception> FunctionStream::exceptions() const {
   return exceptions_;
 }
 
@@ -275,12 +276,12 @@ FunctionSink::FunctionSink(
       clientExceptions_(std::move(clientExceptions)),
       serverExceptions_(std::move(serverExceptions)) {}
 
-folly::span<const FunctionNode::Exception> FunctionSink::clientExceptions()
+std::span<const FunctionNode::Exception> FunctionSink::clientExceptions()
     const {
   return clientExceptions_;
 }
 
-folly::span<const FunctionNode::Exception> FunctionSink::serverExceptions()
+std::span<const FunctionNode::Exception> FunctionSink::serverExceptions()
     const {
   return serverExceptions_;
 }
@@ -296,12 +297,12 @@ FunctionBidirectionalStream::FunctionBidirectionalStream(
       streamExceptions_(std::move(streamExceptions)),
       sinkExceptions_(std::move(sinkExceptions)) {}
 
-folly::span<const FunctionNode::Exception>
+std::span<const FunctionNode::Exception>
 FunctionBidirectionalStream::streamExceptions() const {
   return streamExceptions_;
 }
 
-folly::span<const FunctionNode::Exception>
+std::span<const FunctionNode::Exception>
 FunctionBidirectionalStream::sinkExceptions() const {
   return sinkExceptions_;
 }
@@ -311,7 +312,7 @@ void FunctionNode::BidirectionalStream::printTo(
   scope.print("FunctionNode::BidirectionalStream");
   streamPayloadType().printTo(
       scope.make_child("streamPayloadType = "), visited);
-  if (folly::span<const FunctionNode::Exception> excepts = streamExceptions();
+  if (std::span<const FunctionNode::Exception> excepts = streamExceptions();
       !excepts.empty()) {
     tree_printer::scope& s = scope.make_child("streamExceptions");
     for (const FunctionNode::Exception& e : excepts) {
@@ -319,7 +320,7 @@ void FunctionNode::BidirectionalStream::printTo(
     }
   }
   sinkPayloadType().printTo(scope.make_child("sinkPayloadType = "), visited);
-  if (folly::span<const FunctionNode::Exception> excepts = sinkExceptions();
+  if (std::span<const FunctionNode::Exception> excepts = sinkExceptions();
       !excepts.empty()) {
     tree_printer::scope& s = scope.make_child("sinkExceptions");
     for (const FunctionNode::Exception& e : excepts) {
@@ -364,7 +365,7 @@ const RpcInterfaceNode& FunctionNode::parent() const {
   return detail::lazyResolve(resolver(), parent_).asRpcInterface();
 }
 
-folly::span<const FunctionNode::Exception> FunctionNode::exceptions() const {
+std::span<const FunctionNode::Exception> FunctionNode::exceptions() const {
   return exceptions_;
 }
 
@@ -548,7 +549,7 @@ namespace detail {
 WithAnnotations::WithAnnotations(std::vector<Annotation>&& annotations)
     : annotations_(std::move(annotations)) {}
 
-folly::span<const Annotation> WithAnnotations::annotations() const {
+std::span<const Annotation> WithAnnotations::annotations() const {
   return annotations_;
 }
 
@@ -683,7 +684,7 @@ void FunctionNode::Stream::printTo(
   //     stream<{payloadType} throws (... {exceptions} ...)>
 
   payloadType().printTo(scope.make_child("payloadType = "), visited);
-  if (folly::span<const FunctionNode::Exception> excepts = exceptions();
+  if (std::span<const FunctionNode::Exception> excepts = exceptions();
       !excepts.empty()) {
     tree_printer::scope& exceptionsScope = scope.make_child("exceptions");
     for (const FunctionNode::Exception& e : excepts) {
@@ -701,8 +702,7 @@ void FunctionNode::Sink::printTo(
   //          {finalResponseType} throws (... {serverExceptions} ...)>
 
   payloadType().printTo(scope.make_child("payloadType = "), visited);
-  if (folly::span<const FunctionNode::Exception> exceptions =
-          clientExceptions();
+  if (std::span<const FunctionNode::Exception> exceptions = clientExceptions();
       !exceptions.empty()) {
     tree_printer::scope& clientExceptionsScope =
         scope.make_child("clientExceptions");
@@ -713,8 +713,7 @@ void FunctionNode::Sink::printTo(
 
   finalResponseType().printTo(
       scope.make_child("finalResponseType = "), visited);
-  if (folly::span<const FunctionNode::Exception> exceptions =
-          serverExceptions();
+  if (std::span<const FunctionNode::Exception> exceptions = serverExceptions();
       !exceptions.empty()) {
     tree_printer::scope& serverExceptionsScope =
         scope.make_child("serverExceptions");
@@ -771,7 +770,7 @@ void FunctionNode::printTo(
   scope.print("FunctionNode (name='{}')", name());
   response().printTo(scope.make_child(), visited);
 
-  if (folly::span<const FunctionNode::Param> paramList = params();
+  if (std::span<const FunctionNode::Param> paramList = params();
       !paramList.empty()) {
     tree_printer::scope& paramsScope = scope.make_child("params");
     for (const FunctionNode::Param& p : paramList) {
@@ -779,7 +778,7 @@ void FunctionNode::printTo(
     }
   }
 
-  if (folly::span<const FunctionNode::Exception> exceptionsList = exceptions();
+  if (std::span<const FunctionNode::Exception> exceptionsList = exceptions();
       !exceptionsList.empty()) {
     tree_printer::scope& exceptionsScope = scope.make_child("exceptions");
     for (const FunctionNode::Exception& e : exceptionsList) {
@@ -799,7 +798,7 @@ void ServiceNode::printTo(
     base->printTo(scope.make_child("baseService = "), visited);
   }
 
-  if (folly::span<const FunctionNode> funcs = functions(); !funcs.empty()) {
+  if (std::span<const FunctionNode> funcs = functions(); !funcs.empty()) {
     tree_printer::scope& functionsScope = scope.make_child("functions");
     for (const FunctionNode& f : funcs) {
       f.printTo(functionsScope.make_child(), visited);
@@ -814,7 +813,7 @@ void InteractionNode::printTo(
     return;
   }
 
-  if (folly::span<const FunctionNode> funcs = functions(); !funcs.empty()) {
+  if (std::span<const FunctionNode> funcs = functions(); !funcs.empty()) {
     tree_printer::scope& functionsScope = scope.make_child("functions");
     for (const FunctionNode& f : funcs) {
       f.printTo(functionsScope.make_child(), visited);
@@ -969,7 +968,7 @@ bool isCompilerConsumedAnnotation(const Annotation& annotation) {
 }
 
 type_system::AnnotationsMap toTypeSystemAnnotations(
-    folly::span<const Annotation> annotations) {
+    std::span<const Annotation> annotations) {
   type_system::AnnotationsMap annotationsMap;
   // TODO(dokwon): only preserve annotations with @thrift.RuntimeAnnotation
   for (const Annotation& annotation : annotations) {
@@ -1373,7 +1372,7 @@ FunctionQualifier convertFunctionQualifier(type::FunctionQualifier q) {
 }
 
 std::vector<dynamic::DynamicValue> convertSvcAnnotations(
-    folly::span<const Annotation> annotations, const SyntaxGraph& syntaxGraph) {
+    std::span<const Annotation> annotations, const SyntaxGraph& syntaxGraph) {
   std::vector<dynamic::DynamicValue> result;
   result.reserve(annotations.size());
   for (const auto& ann : annotations) {
@@ -1581,11 +1580,11 @@ class ServiceDescriptorFacade final : public dynamic::ServiceDescriptor {
 
   std::string_view serviceName() const override { return serviceName_; }
   std::string_view serviceUri() const { return serviceUri_; }
-  folly::span<const Function> functions() const override { return functions_; }
-  folly::span<const Interaction> interactions() const override {
+  std::span<const Function> functions() const override { return functions_; }
+  std::span<const Interaction> interactions() const override {
     return interactions_;
   }
-  folly::span<const dynamic::DynamicValue> annotations() const override {
+  std::span<const dynamic::DynamicValue> annotations() const override {
     return annotations_;
   }
 

@@ -19,6 +19,7 @@
 #include <thrift/lib/cpp2/schema/SyntaxGraph.h>
 #include <thrift/lib/cpp2/schema/detail/Merge.h>
 
+#include <span>
 #include <folly/String.h>
 
 namespace apache::thrift::syntax_graph::detail {
@@ -870,7 +871,7 @@ FunctionNode SchemaIndex::createFunction(
   }();
 
   const auto collectExceptions =
-      [this, &schema](folly::span<const type::Field> exceptions) {
+      [this, &schema](std::span<const type::Field> exceptions) {
         std::vector<FunctionNode::Exception> result;
         for (const type::Field& ex : exceptions) {
           result.emplace_back(
@@ -1076,7 +1077,7 @@ ProgramNode::IncludesList IncrementalResolver::programs() const {
 
 void IncrementalResolver::readSchema(
     folly::Synchronized<type::Schema>::LockedPtr& schema,
-    folly::span<const std::string_view> bundle) const {
+    std::span<const std::string_view> bundle) const {
   auto src = schema::detail::mergeSchemas(bundle);
   auto& dst = *schema;
 
@@ -1192,7 +1193,7 @@ IncrementalResolver::getSourceIdentifierByDefinitionRef(
 const DefinitionNode* IncrementalResolver::getDefinitionNodeByUri(
     const std::string_view uri,
     type::ProgramId programId,
-    folly::span<const std::string_view> bundle) const {
+    std::span<const std::string_view> bundle) const {
   {
     auto schemaReadGuard = schema_.rlock();
     if (auto* def = index_->definitionForUri(uri)) {

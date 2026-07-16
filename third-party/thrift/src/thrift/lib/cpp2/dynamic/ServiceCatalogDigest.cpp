@@ -22,6 +22,7 @@
 #include <cstring>
 #include <iterator>
 #include <map>
+#include <span>
 #include <stdexcept>
 #include <string_view>
 #include <type_traits>
@@ -104,7 +105,7 @@ void addTypeRefDefinitions(
 }
 
 void addAnnotationTypeDefinitions(
-    folly::span<const DynamicValue> annotations,
+    std::span<const DynamicValue> annotations,
     type_system::SerializableTypeSystemBuilder& builder) {
   for (const auto& annotation : annotations) {
     const auto& uri = annotation.type().asStruct().uri();
@@ -154,7 +155,7 @@ void addFunctionTypeDefinitions(
 }
 
 bool containsInteractionUri(
-    folly::span<const ServiceDescriptor::Interaction> interactions,
+    std::span<const ServiceDescriptor::Interaction> interactions,
     std::string_view uri) {
   for (const auto& interaction : interactions) {
     if (interaction.uri == uri) {
@@ -165,8 +166,8 @@ bool containsInteractionUri(
 }
 
 void validateCreatedInteractions(
-    folly::span<const ServiceDescriptor::Function> functions,
-    folly::span<const ServiceDescriptor::Interaction> interactions) {
+    std::span<const ServiceDescriptor::Function> functions,
+    std::span<const ServiceDescriptor::Interaction> interactions) {
   for (const auto& fn : functions) {
     if (fn.createdInteractionUri.has_value() &&
         !containsInteractionUri(interactions, *fn.createdInteractionUri)) {
@@ -300,7 +301,7 @@ class Hasher : private ::apache::thrift::detail::Sha256DigestHasher<
   void hash(const ServiceDescriptor::Function& fn);
   void hashServiceDefinition(const ServiceDescriptor& descriptor);
   void hash(const ServiceDescriptor::Interaction& interaction);
-  void hashAnnotations(folly::span<const DynamicValue> annotations);
+  void hashAnnotations(std::span<const DynamicValue> annotations);
   void hashRecord(DynamicConstRef value);
 
   template <typename Range, typename HashFn>
@@ -536,7 +537,7 @@ void Hasher::hash(
   });
 }
 
-void Hasher::hashAnnotations(folly::span<const DynamicValue> annotations) {
+void Hasher::hashAnnotations(std::span<const DynamicValue> annotations) {
   if (!ctx_.includeAnnotationsAndDefaults()) {
     return;
   }

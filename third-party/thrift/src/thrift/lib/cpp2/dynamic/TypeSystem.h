@@ -37,6 +37,7 @@
 
 #include <memory>
 #include <optional>
+#include <span>
 #include <stdexcept>
 #include <string>
 #include <tuple>
@@ -998,7 +999,7 @@ class DefinitionNode {
 
 class StructuredNode : public DefinitionNode {
  public:
-  folly::span<const FieldDefinition> fields() const noexcept { return fields_; }
+  std::span<const FieldDefinition> fields() const noexcept { return fields_; }
   bool isSealed() const noexcept { return isSealed_; }
 
   /**
@@ -1131,7 +1132,7 @@ class EnumNode final : folly::MoveOnly, public DefinitionNode {
     }
   };
 
-  folly::span<const Value> values() const noexcept { return values_; }
+  std::span<const Value> values() const noexcept { return values_; }
 
   const AnnotationsMap& annotations() const noexcept { return annotations_; }
 

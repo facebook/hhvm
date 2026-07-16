@@ -34,6 +34,7 @@
 #include <functional>
 #include <memory>
 #include <optional>
+#include <span>
 #include <string>
 #include <utility>
 #include <variant>
@@ -62,7 +63,7 @@ struct DefinitionEntry {
  * For structured types, both field ids AND names must be unique.
  */
 inline void validateIdentitiesAreUnique(
-    UriView uri, folly::span<const SerializableFieldDefinition> fields) {
+    UriView uri, std::span<const SerializableFieldDefinition> fields) {
   folly::F14FastSet<FieldId> seenIds;
   folly::F14FastSet<FieldName> seenNames;
 

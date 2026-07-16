@@ -16,6 +16,7 @@
 
 #include <thrift/lib/cpp2/dynamic/AnnotationValue.h>
 
+#include <span>
 #include <stdexcept>
 
 #include <folly/io/Cursor.h>
@@ -329,7 +330,7 @@ DynamicValue fromSerializableRecord(
 }
 
 folly::F14FastMap<std::string, type_system::SerializableRecordUnion>
-serializeAnnotations(folly::span<const DynamicValue> annotations) {
+serializeAnnotations(std::span<const DynamicValue> annotations) {
   folly::F14FastMap<std::string, type_system::SerializableRecordUnion> result;
   result.reserve(annotations.size());
   for (const auto& annotation : annotations) {

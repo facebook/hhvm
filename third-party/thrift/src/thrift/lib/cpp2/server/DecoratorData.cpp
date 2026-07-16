@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <span>
 #include <thrift/lib/cpp2/server/DecoratorData.h>
 
 namespace apache::thrift::server {
@@ -29,9 +30,9 @@ namespace apache::thrift::server {
 }
 
 DecoratorData::DecoratorData(DecoratorDataStorage& storage)
-    : decoratorData_{folly::span(storage.decoratorData.get(), storage.count)} {}
+    : decoratorData_{std::span(storage.decoratorData.get(), storage.count)} {}
 
 DecoratorData::DecoratorData(const DecoratorDataStorage& storage)
-    : decoratorData_{folly::span(storage.decoratorData.get(), storage.count)} {}
+    : decoratorData_{std::span(storage.decoratorData.get(), storage.count)} {}
 
 } // namespace apache::thrift::server

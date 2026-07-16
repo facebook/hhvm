@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <span>
 #include <gtest/gtest.h>
 #include <thrift/lib/cpp2/gen/module_metadata_h.h>
 #include <thrift/lib/cpp2/runtime/SchemaRegistry.h>
@@ -28,7 +29,7 @@ using namespace apache::thrift::detail::md;
 using namespace apache::thrift::metadata;
 
 std::vector<syntax_graph::TypeRef> getAnnotationTypes(
-    folly::span<const syntax_graph::Annotation> annotations);
+    std::span<const syntax_graph::Annotation> annotations);
 
 template <class T>
 auto getAnnotationTypes() {
@@ -46,7 +47,7 @@ auto getFieldAnnotationTypes(size_t position, std::int16_t id) {
 }
 
 std::vector<syntax_graph::TypeRef> getAnnotationTypes(
-    folly::span<const syntax_graph::Annotation> annotations) {
+    std::span<const syntax_graph::Annotation> annotations) {
   std::vector<syntax_graph::TypeRef> ret;
   ret.reserve(annotations.size());
   for (auto& annotation : annotations) {

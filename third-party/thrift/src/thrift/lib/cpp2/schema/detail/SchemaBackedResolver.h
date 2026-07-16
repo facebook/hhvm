@@ -20,6 +20,7 @@
 #include <thrift/lib/cpp2/schema/SchemaV1.h>
 #include <thrift/lib/cpp2/schema/detail/Resolver.h>
 
+#include <span>
 #include <folly/Synchronized.h>
 
 namespace apache::thrift::syntax_graph::detail {
@@ -82,7 +83,7 @@ class IncrementalResolver : public SchemaBackedResolver {
   const DefinitionNode* getDefinitionNodeByUri(
       std::string_view uri,
       type::ProgramId programId,
-      folly::span<const std::string_view> bundle) const;
+      std::span<const std::string_view> bundle) const;
 
   const DefinitionNode* getDefinitionNodeBySourceIdentifier(
       type_system::SourceIdentifierView sourceIdentifier) const override;
@@ -109,7 +110,7 @@ class IncrementalResolver : public SchemaBackedResolver {
       ::folly::Range<const ::std::string_view*> (*bundle)()) const;
   void readSchema(
       folly::Synchronized<type::Schema>::LockedPtr& schema,
-      folly::span<const std::string_view> bundle) const;
+      std::span<const std::string_view> bundle) const;
 
   mutable folly::Synchronized<type::Schema> schema_;
   mutable std::thread::id disableReadLockOnProgramOfMethodForAGivenThread_;

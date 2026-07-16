@@ -1,7 +1,7 @@
 <?hh
 
 async function test_cancel_pending(): Awaitable<void> {
-  $wh = SleepWaitHandle::create(5_000_000); // 5 seconds
+  $wh = SleepWaitHandle::create(5000000); // 5 seconds
 
   $result = HH\Asio\cancel_sleep_nothrow($wh);
   echo "cancel pending: ".($result ? "true" : "false")."\n";

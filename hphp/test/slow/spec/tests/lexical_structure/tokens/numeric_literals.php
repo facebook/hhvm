@@ -1,6 +1,6 @@
 <?hh
 
-function add_value(int $x, int $y = 123_456): int {
+function add_value(int $x, int $y = 123456): int {
   return $x + $y;
 }
 
@@ -11,16 +11,16 @@ echo "================= xxx =================\n";
 
 // numeric literals with underscores
 
-var_dump(1_234_567_890);
-var_dump(0xff_cc_123_4);
-var_dump(0b11_00_11_00);
-var_dump(0666_555_444);
-var_dump(1_2_3.4_5_6);
-var_dump(1_2_3e-4_5_6);
-var_dump(.1_2_3e-4_5_6);
-var_dump(0.1_2_3_4e+2_5);
-var_dump(0e-1_5);
-var_dump(03_41.51_36);
+var_dump(1234567890);
+var_dump(0xffcc1234);
+var_dump(0b11001100);
+var_dump(0666555444);
+var_dump(123.456);
+var_dump(123e-456);
+var_dump(.123e-456);
+var_dump(0.1234e+25);
+var_dump(0e-15);
+var_dump(0341.5136);
 var_dump(add_value(1));
 
 $refFunction = new ReflectionFunction('add_value');

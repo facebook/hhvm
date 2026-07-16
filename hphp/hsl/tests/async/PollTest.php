@@ -148,7 +148,7 @@ final class PollTest extends HackTest {
   * fail due to stack overflow.
   */
   public async function testLongChain(): Awaitable<void> {
-    $iterations = 70_000;
+    $iterations = 70000;
     $poll = Async\Poll::create();
 
     $count = new Ref(0);
@@ -183,7 +183,7 @@ final class PollTest extends HackTest {
   * Same as testLongChain, but using `addMulti` instead.
   */
   public async function testLongChainMulti(): Awaitable<void> {
-    $iterations = 70_000;
+    $iterations = 70000;
     $poll = Async\Poll::create();
 
     $count = new Ref(0);

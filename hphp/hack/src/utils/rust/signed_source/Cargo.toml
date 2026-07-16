@@ -11,7 +11,7 @@ license = "MIT"
 path = "../signed_source.rs"
 
 [dependencies]
-bstr = { version = "1.12.3", features = ["serde", "std", "unicode"] }
+bstr = { version = "1.13.0", features = ["serde", "std", "unicode"] }
 hex = { version = "0.4.3", features = ["alloc"] }
 md-5 = "0.10"
 regex = "1.13.0"

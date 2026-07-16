@@ -14,7 +14,7 @@ path = "../../compile.rs"
 aast_parser = { version = "0.0.0", path = "../../../../parser/cargo/aast_parser" }
 anyhow = "1.0.103"
 bc_to_ir = { version = "0.0.0", path = "../../../ir/conversions/bc_to_ir" }
-bstr = { version = "1.12.3", features = ["serde", "std", "unicode"] }
+bstr = { version = "1.13.0", features = ["serde", "std", "unicode"] }
 bytecode_printer = { version = "0.0.0", path = "../../../bytecode_printer" }
 clap = { version = "4.6.0", features = ["derive", "env", "string", "unicode", "wrap_help"] }
 decl_provider = { version = "0.0.0", path = "../../../decl_provider" }

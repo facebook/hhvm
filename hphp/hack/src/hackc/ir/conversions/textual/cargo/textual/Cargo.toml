@@ -13,7 +13,7 @@ path = "../../lib.rs"
 [dependencies]
 anyhow = "1.0.103"
 ascii = "1.1.0"
-bstr = { version = "1.12.3", features = ["serde", "std", "unicode"] }
+bstr = { version = "1.13.0", features = ["serde", "std", "unicode"] }
 escaper = { version = "0.0.0", path = "../../../../../../utils/escaper" }
 hash = { version = "0.0.0", path = "../../../../../../utils/hash" }
 hhbc = { version = "0.0.0", path = "../../../../../hhbc/cargo/hhbc" }

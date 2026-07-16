@@ -229,8 +229,17 @@ folly::AsyncSocketTransport::UniquePtr toFDSocket(
     } else
 #endif
     {
-      ret.reset(populate(new FDTransport<folly::AsyncSocket>(
-          eb, fd, zcId, selfCert, peerCert)));
+      auto* newSock =
+          new FDTransport<folly::AsyncSocket>(eb, fd, zcId, selfCert, peerCert);
+      if (hadZeroCopy) {
+        // detachNetworkSocket() above carried over only the zeroCopyBufId_
+        // counter, not the outstanding id->buffer maps. The fd may still have
+        // in-flight MSG_ZEROCOPY completions issued on the old socket; move
+        // their bookkeeping so the new fd owner reaps them instead of aborting
+        // in AsyncSocket::releaseZeroCopyBuf.
+        newSock->moveZeroCopyStateFrom(*sock);
+      }
+      ret.reset(populate(newSock));
     }
   }
 

@@ -21,7 +21,7 @@
 #include <folly/portability/GTest.h>
 
 namespace {
-constexpr char kAuthority[] = "example.com:443";
+constexpr const char* kAuthority = "example.com:443";
 }
 
 namespace proxygen::coro {

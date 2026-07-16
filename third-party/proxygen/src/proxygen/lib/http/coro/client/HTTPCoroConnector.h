@@ -102,8 +102,15 @@ class HTTPCoroConnector {
     folly::SocketOptionMap socketOptions{folly::emptySocketOptionMap};
     folly::SocketAddress bindAddr{folly::AsyncSocket::anyAddress()};
 
-    // TLS Params
-    std::string serverName; // SNI
+    /**
+     * `serverName` indicates the DNS hostname associated with this connection.
+     *
+     * A non-empty `serverName` sends this as the server_name extension for
+     * TLS.
+     *
+     * If the original URL hostname is an IP address, this should not be set.
+     */
+    std::string serverName;
 
     // TLS connections must supply either an sslContext or a fizzContext
     FizzContextAndVerifier fizzContextAndVerifier;

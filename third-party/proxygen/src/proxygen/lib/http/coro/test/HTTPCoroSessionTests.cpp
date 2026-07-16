@@ -98,10 +98,13 @@ void HTTPCoroSessionTest::setUp(std::shared_ptr<HTTPHandler> handler) {
           HTTPCoroSession::makeDownstreamCoroSession(muxTransport_->getSocket(),
                                                      handler,
                                                      std::move(codec),
-                                                     std::move(tinfo));
+                                                     std::move(tinfo))
+              .get();
     } else {
-      session_ = HTTPCoroSession::makeUpstreamCoroSession(
-          muxTransport_->getSocket(), std::move(codec), std::move(tinfo));
+      session_ =
+          HTTPCoroSession::makeUpstreamCoroSession(
+              muxTransport_->getSocket(), std::move(codec), std::move(tinfo))
+              .get();
     }
   } else {
     auto transport =
@@ -112,11 +115,14 @@ void HTTPCoroSessionTest::setUp(std::shared_ptr<HTTPHandler> handler) {
     codec_ = codec.get();
     initSelfCodec_(*codec_);
     if (handler) {
-      session_ = HTTPCoroSession::makeDownstreamCoroSession(
-          std::move(transport), handler, std::move(codec), std::move(tinfo));
+      session_ =
+          HTTPCoroSession::makeDownstreamCoroSession(
+              std::move(transport), handler, std::move(codec), std::move(tinfo))
+              .get();
     } else {
       session_ = HTTPCoroSession::makeUpstreamCoroSession(
-          std::move(transport), std::move(codec), std::move(tinfo));
+                     std::move(transport), std::move(codec), std::move(tinfo))
+                     .get();
     }
   }
   peerCodec_->generateConnectionPreface(writeBuf_);

@@ -409,7 +409,8 @@ class QuicConnectCB
     tinfo_.sslSetupTime = millisecondsSince(startTime_);
     // TODO: pass replaySafe_
     session = HTTPCoroSession::makeUpstreamCoroSession(
-        std::move(quicClient_), std::move(codec), std::move(tinfo_));
+                  std::move(quicClient_), std::move(codec), std::move(tinfo_))
+                  .get();
     setupSession(session, sessionParams_);
     static_cast<HTTPQuicCoroSession*>(session)->setEarlyDataHandler(
         std::move(earlyDataHandler_));
@@ -569,8 +570,8 @@ folly::coro::Task<HTTPCoroSession*> connectImpl(
   }
   auto session = HTTPCoroSession::makeUpstreamCoroSession(
       std::move(*socket), std::move(codec), std::move(tinfo));
-  setupSession(session, sessionParams);
-  co_return session;
+  setupSession(session.get(), sessionParams);
+  co_return session.get();
 }
 
 } // namespace

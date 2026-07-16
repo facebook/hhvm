@@ -112,8 +112,10 @@ HTTPCoroSession* HTTPCoroDownstreamSessionFactory::makeUniplexSession(
   auto eventBase = transport->getEventBase();
   auto coroTransport =
       std::make_unique<folly::coro::Transport>(eventBase, std::move(transport));
-  HTTPCoroSession* session = HTTPCoroSession::makeDownstreamCoroSession(
-      std::move(coroTransport), std::move(handler), std::move(codec), tinfo);
+  HTTPCoroSession* session =
+      HTTPCoroSession::makeDownstreamCoroSession(
+          std::move(coroTransport), std::move(handler), std::move(codec), tinfo)
+          .get();
   applySettingsToSession(*session);
   // readBufferLimit is only read for http/1.1 sessions
   session->setReadBufferLimit(accConfig_->receiveStreamWindowSize);
@@ -136,7 +138,8 @@ HTTPCoroSession* HTTPCoroDownstreamSessionFactory::makeQuicSession(
       HTTPCoroSession::makeDownstreamCoroSession(std::move(quicSocket),
                                                  std::move(handler),
                                                  std::move(codec),
-                                                 std::move(tinfo));
+                                                 std::move(tinfo))
+          .get();
   applySettingsToSession(*session);
   session->setReadBufferLimit(accConfig_->receiveStreamWindowSize);
   return session;

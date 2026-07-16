@@ -1693,8 +1693,10 @@ CO_TEST_P_X(HQUpstreamSessionTest, CreateControlStreamFail) {
   muxTransport.socketDriver_.setMaxUniStreams(0);
   auto codec = std::make_unique<hq::HQMultiCodec>(direction_);
   wangle::TransportInfo tinfo;
-  auto session = HTTPCoroSession::makeUpstreamCoroSession(
-      muxTransport.getSocket(), std::move(codec), std::move(tinfo));
+  auto session =
+      HTTPCoroSession::makeUpstreamCoroSession(
+          muxTransport.getSocket(), std::move(codec), std::move(tinfo))
+          .get();
   NiceMock<MockLifecycleObserver> infoCb;
   session->addLifecycleObserver(&infoCb);
   folly::coro::co_withCancellation(cancellationSource_.getToken(),

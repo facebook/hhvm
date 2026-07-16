@@ -243,23 +243,23 @@ class HTTPCoroSession
   struct StreamState;
 
  public:
-  static HTTPCoroSession* makeUpstreamCoroSession(
+  static CoroSessionHandle makeUpstreamCoroSession(
       std::unique_ptr<folly::coro::TransportIf> coroTransport,
       std::unique_ptr<HTTPCodec> codec,
       wangle::TransportInfo tinfo);
 
-  static HTTPCoroSession* makeDownstreamCoroSession(
+  static CoroSessionHandle makeDownstreamCoroSession(
       std::unique_ptr<folly::coro::TransportIf> coroTransport,
       std::shared_ptr<HTTPHandler> handler,
       std::unique_ptr<HTTPCodec> codec,
       wangle::TransportInfo tinfo);
 
-  static HTTPCoroSession* makeUpstreamCoroSession(
+  static CoroSessionHandle makeUpstreamCoroSession(
       std::shared_ptr<quic::QuicSocket> sock,
       std::unique_ptr<hq::HQMultiCodec> codec,
       wangle::TransportInfo tinfo);
 
-  static HTTPCoroSession* makeDownstreamCoroSession(
+  static CoroSessionHandle makeDownstreamCoroSession(
       std::shared_ptr<quic::QuicSocket> sock,
       std::shared_ptr<HTTPHandler> handler,
       std::unique_ptr<hq::HQMultiCodec> codec,

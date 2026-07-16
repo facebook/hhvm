@@ -521,44 +521,45 @@ void HTTPQuicCoroSession::setEarlyDataHandler(
   earlyDataHandler_ = std::move(handler);
 }
 
-HTTPCoroSession* HTTPCoroSession::makeUpstreamCoroSession(
+CoroSessionHandle HTTPCoroSession::makeUpstreamCoroSession(
     std::unique_ptr<folly::coro::TransportIf> coroTransport,
     std::unique_ptr<HTTPCodec> codec,
     wangle::TransportInfo tinfo) {
   XCHECK(proxygen::isUpstream(codec->getTransportDirection()));
-  return new HTTPUniplexTransportSession(
-      std::move(coroTransport), std::move(codec), std::move(tinfo));
+  return CoroSessionHandle(new HTTPUniplexTransportSession(
+      std::move(coroTransport), std::move(codec), std::move(tinfo)));
 }
 
-HTTPCoroSession* HTTPCoroSession::makeDownstreamCoroSession(
+CoroSessionHandle HTTPCoroSession::makeDownstreamCoroSession(
     std::unique_ptr<folly::coro::TransportIf> coroTransport,
     std::shared_ptr<HTTPHandler> handler,
     std::unique_ptr<HTTPCodec> codec,
     wangle::TransportInfo tinfo) {
   XCHECK(proxygen::isDownstream(codec->getTransportDirection()));
-  return new HTTPUniplexTransportSession(std::move(coroTransport),
-                                         std::move(codec),
-                                         std::move(tinfo),
-                                         std::move(handler));
+  return CoroSessionHandle(
+      new HTTPUniplexTransportSession(std::move(coroTransport),
+                                      std::move(codec),
+                                      std::move(tinfo),
+                                      std::move(handler)));
 }
 
-HTTPCoroSession* HTTPCoroSession::makeUpstreamCoroSession(
+CoroSessionHandle HTTPCoroSession::makeUpstreamCoroSession(
     std::shared_ptr<quic::QuicSocket> sock,
     std::unique_ptr<hq::HQMultiCodec> codec,
     wangle::TransportInfo tinfo) {
   XCHECK(proxygen::isUpstream(codec->getTransportDirection()));
-  return new HTTPQuicCoroSession(
-      std::move(sock), std::move(codec), std::move(tinfo));
+  return CoroSessionHandle(new HTTPQuicCoroSession(
+      std::move(sock), std::move(codec), std::move(tinfo)));
 }
 
-HTTPCoroSession* HTTPCoroSession::makeDownstreamCoroSession(
+CoroSessionHandle HTTPCoroSession::makeDownstreamCoroSession(
     std::shared_ptr<quic::QuicSocket> sock,
     std::shared_ptr<HTTPHandler> handler,
     std::unique_ptr<hq::HQMultiCodec> codec,
     wangle::TransportInfo tinfo) {
   XCHECK(proxygen::isDownstream(codec->getTransportDirection()));
-  return new HTTPQuicCoroSession(
-      std::move(sock), std::move(codec), std::move(tinfo), std::move(handler));
+  return CoroSessionHandle(new HTTPQuicCoroSession(
+      std::move(sock), std::move(codec), std::move(tinfo), std::move(handler)));
 }
 
 void HTTPUniplexTransportSession::start() {

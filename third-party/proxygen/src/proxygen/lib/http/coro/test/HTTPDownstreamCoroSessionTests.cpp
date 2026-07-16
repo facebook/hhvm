@@ -3543,8 +3543,12 @@ TEST_P(HQDownstreamSessionTest, CreateControlStreamFail) {
   muxTransport.socketDriver_.setMaxUniStreams(0);
   auto codec = std::make_unique<hq::HQMultiCodec>(direction_);
   wangle::TransportInfo tinfo;
-  auto session = HTTPCoroSession::makeDownstreamCoroSession(
-      muxTransport.getSocket(), handler_, std::move(codec), std::move(tinfo));
+  auto session =
+      HTTPCoroSession::makeDownstreamCoroSession(muxTransport.getSocket(),
+                                                 handler_,
+                                                 std::move(codec),
+                                                 std::move(tinfo))
+          .get();
   NiceMock<MockLifecycleObserver> lifecycleCb;
   session->addLifecycleObserver(&lifecycleCb);
   folly::coro::co_withCancellation(cancellationSource_.getToken(),
@@ -4067,8 +4071,12 @@ TEST_P(HQDownstreamSessionTest, DatagramNotSupportedTransport) {
   transport_ = &muxTransport;
   auto codec = std::make_unique<hq::HQMultiCodec>(direction_);
   wangle::TransportInfo tinfo;
-  auto session = HTTPCoroSession::makeDownstreamCoroSession(
-      muxTransport.getSocket(), handler_, std::move(codec), std::move(tinfo));
+  auto session =
+      HTTPCoroSession::makeDownstreamCoroSession(muxTransport.getSocket(),
+                                                 handler_,
+                                                 std::move(codec),
+                                                 std::move(tinfo))
+          .get();
   folly::coro::co_withCancellation(cancellationSource_.getToken(),
                                    session->run())
       .start();

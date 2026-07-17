@@ -34,6 +34,39 @@ final class ThriftTypeUriHashPrefixCache
 
   <<__Override>>
   protected static function getDataImpl()[SBC]: this::TReturn {
+    return Vec\fb\flat_map_with_key(
+      ThriftTypeUriHashInnerCache::getData(),
+      ($classname, $uri_hashes) ==>
+        Vec\map($uri_hashes, $uri_hash ==> tuple($uri_hash, $classname)),
+    )
+      |> Vec\sort_by($$, $entry ==> $entry[0], Str\compare<>);
+  }
+}
+
+<<Oncalls('thrift')>>
+final class ThriftTypeUriHashInnerCache
+  extends SandboxCachedPureDataWithLazyKeys
+  implements
+    ISandboxCacheThatMayProduceDifferentResultsInInternAndProd,
+    ISandboxCacheOnlyShipToTheseEnvironments {
+  const type TKey = classname<mixed>;
+  const type TKeyReturn = vec<string>; // URI hashes
+
+  const int NUM_SHARDS = 50;
+
+  const keyset<SandboxCacheEnvironmentType> ENVIRONMENTS = keyset[
+    SandboxCacheEnvironmentType::INTERN,
+    SandboxCacheEnvironmentType::PROD,
+  ];
+
+  // This cache is only used inside another SandboxCache, so it doesn't need
+  // to be shipped. If it gets called outside of SandboxCache data fetches,
+  // this needs to be removed.
+  const keyset<WWWBuildVaultBuildMode> ENVIRONMENT_OVERRIDE = keyset[];
+
+  <<__Override>>
+  protected static function getKeyConfig(
+  )[SBC]: SandboxCacheKeyConfigBuilder<this::TKey> {
     $facts = SandboxCachedPureDataFacts::get(shape(
       'include_abstract' => false,
       'include_test' => false,
@@ -41,22 +74,19 @@ final class ThriftTypeUriHashPrefixCache
     ));
 
     $subtypes = $facts->getTypesOfWithAttributeFilters(ThriftTypeInfo::class);
+    return SandboxCacheKeyConfigBuilder::fromKeys($subtypes);
+  }
 
-    return Vec\fb\flat_map(
-      $subtypes,
-      $classname ==> {
-        $klass = new ReflectionClass($classname);
-        $params = $klass->getAttributeClass(ThriftTypeInfo::class)?->params
-          as nonnull;
-        $all_uris =
-          Keyset\union(keyset[$params['uri']], $params['altUris'] ?? keyset[]);
+  <<__Override>>
+  protected static function getDataForKeyImpl(
+    this::TKey $classname,
+  )[SBC]: this::TKeyReturn {
+    $klass = new ReflectionClass($classname);
+    $params = $klass->getAttributeClass(ThriftTypeInfo::class)?->params
+      as nonnull;
+    $all_uris =
+      Keyset\union(keyset[$params['uri']], $params['altUris'] ?? keyset[]);
 
-        return Vec\map(
-          $all_uris,
-          $uri ==> tuple(ThriftUniversalName::getUriHash($uri), $classname),
-        );
-      },
-    )
-      |> Vec\sort_by($$, $entry ==> $entry[0], Str\compare<>);
+    return Vec\map($all_uris, $uri ==> ThriftUniversalName::getUriHash($uri));
   }
 }

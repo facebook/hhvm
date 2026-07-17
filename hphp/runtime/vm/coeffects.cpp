@@ -14,6 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
+#include <fmt/format.h>
+
 #include "hphp/runtime/vm/coeffects.h"
 
 #include "hphp/runtime/base/coeffects-config.h"
@@ -173,7 +175,7 @@ RuntimeCoeffects emitCCParam(const Func* f,
   auto const tv = vmStack().indC(index);
   if (tvIsNull(tv)) return RuntimeCoeffects::none();
   if (!tvIsObject(tv)) {
-    raise_error(folly::sformat("Coeffect rule requires parameter at "
+    raise_error(fmt::format("Coeffect rule requires parameter at "
                                "position {} to be an object or null",
                                 paramIdx + 1));
   }
@@ -440,15 +442,15 @@ std::string CoeffectRule::getDirectiveString() const {
   };
   switch (m_type) {
     case Type::FunParam:
-      return folly::sformat(".coeffects_fun_param {};", m_index);
+      return fmt::format(".coeffects_fun_param {};", m_index);
     case Type::CCParam:
-      return folly::sformat(".coeffects_cc_param {} {};", m_index,
+      return fmt::format(".coeffects_cc_param {} {};", m_index,
                             folly::cEscape<std::string>(
                               m_name->toCppString()));
     case Type::CCThis:
-      return folly::sformat(".coeffects_cc_this {};", typesToString());
+      return fmt::format(".coeffects_cc_this {};", typesToString());
     case Type::CCReified:
-      return folly::sformat(".coeffects_cc_reified {}{} {};",
+      return fmt::format(".coeffects_cc_reified {}{} {};",
                             (m_isClass ? "isClass " : ""),
                             m_index,
                             typesToString());

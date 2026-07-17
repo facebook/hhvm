@@ -1447,7 +1447,7 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
     if (!invalidRows.empty()) {
       std::string joined = std::accumulate(
           invalidRows.begin(), invalidRows.end(), std::string(" "));
-      std::string exception_str = folly::sformat(
+      std::string exception_str = fmt::format(
           "Native Facts DB has duplicate entries!\n"
 #ifdef HHVM_FACEBOOK
           "You may be able to fix this by running 'arc fix facts'\n"

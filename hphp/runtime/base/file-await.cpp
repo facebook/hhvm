@@ -4,6 +4,7 @@
 
 #include "hphp/util/compatibility.h"
 
+#include <fmt/format.h>
 #include <folly/Chrono.h>
 
 #include <fcntl.h>
@@ -121,7 +122,7 @@ Object File::await(uint16_t events, double timeout) {
 
   if (!isAsyncableFd) {
     SystemLib::throwInvalidOperationExceptionObject(
-      folly::sformat(
+      fmt::format(
         "File descriptor {} is not awaitable - real file?",
         fd()
       )

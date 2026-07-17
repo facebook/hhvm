@@ -39,6 +39,7 @@
 #include "hphp/system/systemlib.h"
 #include "hphp/util/configs/php7.h"
 
+#include <fmt/format.h>
 #include <usdt/usdt.h>
 
 namespace HPHP {
@@ -318,7 +319,7 @@ inline TypedValue ElemClsMethPre(ClsMethDataRef base, int64_t key) {
   }
   if (mode == MOpMode::Warn || mode == MOpMode::InOut) {
     SystemLib::throwOutOfBoundsExceptionObject(
-      folly::sformat("Out of bounds clsmeth access: invalid index {}", key));
+      fmt::format("Out of bounds clsmeth access: invalid index {}", key));
   }
   return make_tv<KindOfNull>();
 }
@@ -380,7 +381,7 @@ inline int64_t ElemStringPre(TypedValue key) {
     return key.m_data.pstr->toInt64(10);
   }
   SystemLib::throwInvalidArgumentExceptionObject(
-    folly::sformat(
+    fmt::format(
       "Invalid string key: expected a key of type int or string, {} given",
       describe_actual_type(&key)
     )

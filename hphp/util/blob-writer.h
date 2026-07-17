@@ -21,6 +21,7 @@
 #include "hphp/util/build-info.h"
 #include "hphp/util/htonll.h"
 
+#include <fmt/format.h>
 #include <folly/FileUtil.h>
 #include <folly/system/MemoryMapping.h>
 #include <magic_enum/magic_enum.hpp>
@@ -297,7 +298,7 @@ struct Writer {
   SizeHeader<Chunk, Index> sizes;
 
   void header(const std::string& path, const Magic& magic, Version version) {
-    sourceFilename = folly::sformat("{}.part", path);
+    sourceFilename = fmt::format("{}.part", path);
     destFilename = path;
     fd = Blob::FD{
       sourceFilename,

@@ -22,6 +22,7 @@
 #include <list>
 #include <utility>
 
+#include <fmt/format.h>
 #include <folly/MapUtil.h>
 #include <folly/Format.h>
 #include <folly/Likely.h>
@@ -747,7 +748,7 @@ bool ExecutionContext::errorNeedsHandling(int errnum,
                                           bool callUserHandler,
                                           ErrorThrowMode mode) {
   if (UNLIKELY(m_throwAllErrors)) {
-    throw Exception(folly::sformat("throwAllErrors: {}", errnum));
+    throw Exception(fmt::format("throwAllErrors: {}", errnum));
   }
   if (mode != ErrorThrowMode::Never || errorNeedsLogging(errnum)) {
     return true;

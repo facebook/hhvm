@@ -20,6 +20,7 @@
 #include <cstdio>
 #include <string>
 
+#include <fmt/format.h>
 #include <folly/Format.h>
 
 #include "hphp/util/assertions.h"
@@ -230,7 +231,7 @@ DATATYPES
 #undef DT
     default: {
       if (t == kInvalidDataType) return "Invalid";
-      return folly::sformat("Unknown:{}", static_cast<int>(t));
+      return fmt::format("Unknown:{}", static_cast<int>(t));
     }
   }
 }

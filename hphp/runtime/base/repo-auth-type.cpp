@@ -13,6 +13,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#include <fmt/format.h>
+
 #include "hphp/runtime/base/repo-auth-type.h"
 
 #include <vector>
@@ -447,7 +449,7 @@ std::string show(RepoAuthType rat) {
   if (auto const n = rat.name()) {
     return folly::sformat("{}{}", base, n);
   } else if (auto const a = rat.array()) {
-    return folly::sformat("{}{}", base, show(*a));
+    return fmt::format("{}{}", base, show(*a));
   }
   return base;
 }

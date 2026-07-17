@@ -14,6 +14,8 @@
   +----------------------------------------------------------------------+
 */
 
+#include <fmt/format.h>
+
 #include "hphp/runtime/base/bespoke/struct-dict.h"
 
 #include "hphp/runtime/base/bespoke/escalation-logging.h"
@@ -70,7 +72,7 @@ std::string describeStructLayout(const StructLayout::FieldVector& fv) {
   auto const isBigStruct = fv.size() > 0xff;
   if (isBigStruct) ss << ", ...";
   auto const type = isBigStruct ? 'B' : 'S';
-  return folly::sformat("StructDict<{},{}><{}>", type, fv.size(), ss.str());
+  return fmt::format("StructDict<{},{}><{}>", type, fv.size(), ss.str());
 }
 
 constexpr uint16_t indexRaw(uint16_t idx) {

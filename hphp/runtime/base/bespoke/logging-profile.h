@@ -24,6 +24,7 @@
 #include "hphp/runtime/vm/srckey.h"
 #include "hphp/runtime/vm/jit/array-layout.h"
 
+#include <fmt/format.h>
 #include <folly/String.h>
 
 #include <folly/container/F14Map.h>
@@ -167,7 +168,7 @@ struct LoggingProfileKey {
   std::string toString() const {
     switch (locationType) {
       case LocationType::APCKey:
-        return folly::sformat("APC:{:08x}", ak.hash);
+        return fmt::format("APC:{:08x}", ak.hash);
       case LocationType::SrcKey:
         return sk.getSymbol();
       case LocationType::InstanceProperty: {

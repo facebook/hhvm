@@ -19,6 +19,7 @@
 #include <limits>
 #include <algorithm>
 
+#include <fmt/format.h>
 #include <usdt/usdt.h>
 
 #include "hphp/runtime/base/array-data-defs.h"
@@ -46,7 +47,7 @@ void throw_bad_array_operand(const ArrayData* ad) {
     always_assert(false);
   }();
   SystemLib::throwInvalidOperationExceptionObject(
-    folly::sformat(
+    fmt::format(
       "Invalid operand type was used: "
       "cannot perform this operation with {}", type
     )

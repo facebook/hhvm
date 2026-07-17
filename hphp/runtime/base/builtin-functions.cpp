@@ -41,6 +41,7 @@
 #include "hphp/util/string-vsnprintf.h"
 #include "hphp/util/text-util.h"
 
+#include <fmt/format.h>
 #include <folly/Format.h>
 
 #include <algorithm>
@@ -374,7 +375,7 @@ const Func* vm_decode_func_from_name(
 bool checkMethCallerTarget(const Func* meth, const Class* ctx, bool error) {
   if (meth->isStaticInPrologue()) {
     if (!error) return false;
-    SystemLib::throwInvalidArgumentExceptionObject(folly::sformat(
+    SystemLib::throwInvalidArgumentExceptionObject(fmt::format(
       "meth_caller(): method {} is static",
       meth->fullName()->data()
     ));
@@ -398,7 +399,7 @@ bool checkMethCallerTarget(const Func* meth, const Class* ctx, bool error) {
   if (canTestsBypassVisibility(meth->userAttributes(), ctx)) return true;
 
   if (error) {
-    SystemLib::throwInvalidArgumentExceptionObject(folly::sformat(
+    SystemLib::throwInvalidArgumentExceptionObject(fmt::format(
       "meth_caller(): method {} cannot be called from this context",
       meth->fullName()->data()
     ));
@@ -409,13 +410,13 @@ bool checkMethCallerTarget(const Func* meth, const Class* ctx, bool error) {
 void checkMethCaller(const Func* func, const Class* ctx) {
   auto const cls = Class::load(func->methCallerClsName());
   if (!cls) {
-    SystemLib::throwInvalidArgumentExceptionObject(folly::sformat(
+    SystemLib::throwInvalidArgumentExceptionObject(fmt::format(
       "meth_caller(): class {} not found", func->methCallerClsName()->data()
     ));
   }
 
   if (isTrait(cls)) {
-    SystemLib::throwInvalidArgumentExceptionObject(folly::sformat(
+    SystemLib::throwInvalidArgumentExceptionObject(fmt::format(
       "meth_caller(): class {} is a trait", func->methCallerClsName()->data()
     ));
   }
@@ -428,7 +429,7 @@ void checkMethCaller(const Func* func, const Class* ctx) {
     return nullptr;
   }();
   if (!meth) {
-    SystemLib::throwInvalidArgumentExceptionObject(folly::sformat(
+    SystemLib::throwInvalidArgumentExceptionObject(fmt::format(
       "meth_caller(): method {}::{} not found",
       func->methCallerClsName()->data(),
       func->methCallerMethName()->data()
@@ -724,7 +725,7 @@ void o_invoke_failed(const char *cls, const char *meth,
 }
 
 void throw_has_this_need_static(const Func* f) {
-  auto const msg = folly::sformat(
+  auto const msg = fmt::format(
     "Static method {}() cannot be called on instance",
     f->fullName()->data()
   );
@@ -732,7 +733,7 @@ void throw_has_this_need_static(const Func* f) {
 }
 
 void throw_missing_this(const Func* f) {
-  auto const msg = folly::sformat(
+  auto const msg = fmt::format(
     "Non-static method {}() cannot be called statically",
     f->fullName()->data()
   );
@@ -751,7 +752,7 @@ void throw_instance_method_fatal(const char *name) {
 }
 
 void throw_call_reified_func_without_generics(const Func* f) {
-  auto const msg = folly::sformat(
+  auto const msg = fmt::format(
     "Cannot call the reified function '{}' without the reified generics",
     f->fullName()->data()
   );
@@ -838,7 +839,7 @@ void throw_invalid_inout_base() {
 }
 
 void throw_cannot_modify_immutable_object(const char* className) {
-  auto msg = folly::sformat(
+  auto msg = fmt::format(
     "Cannot modify immutable object of type {}",
     className
   );
@@ -846,7 +847,7 @@ void throw_cannot_modify_immutable_object(const char* className) {
 }
 
 void throw_cannot_modify_const_object(const char* className) {
-  auto msg = folly::sformat(
+  auto msg = fmt::format(
     "Cannot modify const object of type {}",
     className
   );
@@ -854,7 +855,7 @@ void throw_cannot_modify_const_object(const char* className) {
 }
 
 void throw_object_forbids_dynamic_props(const char* className) {
-  auto msg = folly::sformat(
+  auto msg = fmt::format(
     "Class {} does not allow use of dynamic (non-declared) properties",
     className
   );
@@ -864,7 +865,7 @@ void throw_object_forbids_dynamic_props(const char* className) {
 void throw_cannot_modify_const_prop(const char* className,
                                     const char* propName)
 {
-  auto msg = folly::sformat(
+  auto msg = fmt::format(
     "Cannot modify const property {} of class {} after construction",
     propName, className
   );
@@ -874,7 +875,7 @@ void throw_cannot_modify_const_prop(const char* className,
 void throw_cannot_modify_static_const_prop(const char* className,
                                            const char* propName)
 {
-  auto msg = folly::sformat(
+  auto msg = fmt::format(
     "Cannot modify static const property {} of class {}.",
     propName, className
   );
@@ -883,7 +884,7 @@ void throw_cannot_modify_static_const_prop(const char* className,
 
 void throw_local_must_be_value_type(const char* locName)
 {
-  auto const msg = folly::sformat("Local {} must be a value type.", locName);
+  auto const msg = fmt::format("Local {} must be a value type.", locName);
   SystemLib::throwReadonlyViolationExceptionObject(msg);
 }
 
@@ -1032,7 +1033,7 @@ bool is_constructor_name(const char* fn) {
 }
 
 void throw_missing_arguments_nr(const char *fn, int expected, int got) {
-  SystemLib::throwRuntimeExceptionObject(folly::sformat(
+  SystemLib::throwRuntimeExceptionObject(fmt::format(
     "{}() expects exactly {} positional parameter{}, {} given",
     fn,
     expected,

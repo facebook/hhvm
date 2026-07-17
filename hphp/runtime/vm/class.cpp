@@ -52,6 +52,7 @@
 #include "hphp/util/configs/server.h"
 #include "hphp/util/logger.h"
 
+#include <fmt/format.h>
 #include <folly/Bits.h>
 #include <folly/synchronization/EventCount.h>
 
@@ -2045,13 +2046,13 @@ inline void checkRefCompat(const char* kind, const Func* self,
         if (smode) {
           auto const idecl =
             i >= inherit->numNonVariadicParams() ? "" : "inout ";
-          return folly::sformat(
+          return fmt::format(
             "Parameter {} on function {} was declared inout but is not "
             "declared {}on {} function {}", i + 1, sname, idecl,
             kind, iname);
         } else {
           auto const sdecl = i >= self->numNonVariadicParams() ? "" : "inout ";
-          return folly::sformat(
+          return fmt::format(
             "Parameter {} on function {} was not declared {}but is "
             "declared inout on {} function {}", i + 1, sname, sdecl,
             kind, iname);

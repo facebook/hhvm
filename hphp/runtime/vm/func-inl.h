@@ -18,6 +18,8 @@
 #error "func-inl.h should only be included by func.h"
 #endif
 
+#include <fmt/format.h>
+
 #include "hphp/runtime/vm/unit-util.h"
 
 #include "hphp/util/configs/eval.h"
@@ -206,7 +208,7 @@ inline StrNR Func::fullNameStr() const {
 }
 
 inline void invalidFuncConversion(const char* type) {
-  SystemLib::throwInvalidOperationExceptionObject(folly::sformat(
+  SystemLib::throwInvalidOperationExceptionObject(fmt::format(
     "Cannot convert function to {}", type
   ));
 }

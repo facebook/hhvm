@@ -15,6 +15,8 @@
   +----------------------------------------------------------------------+
 */
 
+#include <fmt/format.h>
+
 #include "hphp/runtime/base/bespoke/monotype-vec.h"
 
 #include "hphp/runtime/base/array-init.h"
@@ -902,7 +904,7 @@ LayoutIndex EmptyMonotypeVecLayout::Index() {
 MonotypeVecLayout::MonotypeVecLayout(DataType type)
   : ConcreteLayout(
       Index(type),
-      folly::sformat("MonotypeVec<{}>", tname(type)),
+      fmt::format("MonotypeVec<{}>", tname(type)),
       getMonotypeParentLayouts(type),
       monotypeVecVtable())
   , m_fixedType(type)

@@ -29,6 +29,7 @@
 #include "hphp/util/struct-log.h"
 #include "hphp/util/timer.h"
 
+#include <fmt/format.h>
 #include <folly/Range.h>
 #include <folly/Format.h>
 #include <folly/Memory.h>
@@ -87,7 +88,7 @@ void InternalWarmupWorker::doJob(WarmupJob job) {
   folly::StringPiece f(job.hdfFile);
   auto const pos = f.rfind('/');
   auto const str = (pos == f.npos) ? f : f.subpiece(pos + 1);
-  BootStats::Block timer(folly::sformat("warmup:{}:{}", str, job.index),
+  BootStats::Block timer(fmt::format("warmup:{}:{}", str, job.index),
                          Cfg::Server::Mode);
   try {
     HttpRequestHandler handler(0);

@@ -35,6 +35,7 @@
 #include "hphp/util/ringbuffer.h"
 #include "hphp/util/safe-cast.h"
 
+#include <fmt/format.h>
 #include <folly/Conv.h>
 #include <folly/Hash.h>
 #include <folly/gen/Base.h>
@@ -139,7 +140,7 @@ struct ClassIdData : IRExtraData {
   }
 
   std::string show() const {
-    return folly::sformat("{},{}",
+    return fmt::format("{},{}",
       cls->name()->data(),
       cls->classId().id()
     );
@@ -254,7 +255,7 @@ struct ResolveTypeStructData : IRExtraData {
   {}
 
   std::string show() const {
-    return folly::sformat("{},{},{},{},{}",
+    return fmt::format("{},{},{},{},{}",
                           cls ? cls->name()->data() : "nullptr",
                           suppress ? "suppress" : "no-suppress",
                           offset.offset,
@@ -334,7 +335,7 @@ struct InstanceOfData : IRExtraData {
     : canCheckVtable(canCheckVtable) {}
 
   std::string show() const {
-    return folly::sformat("canCheckVtable={}", canCheckVtable);
+    return fmt::format("canCheckVtable={}", canCheckVtable);
   }
   bool equals(const InstanceOfData& o) const {
     return canCheckVtable == o.canCheckVtable;
@@ -439,7 +440,7 @@ struct IfaceMethodData : IRExtraData {
   {}
 
   std::string show() const {
-    return folly::sformat("{}, {}", vtableIdx, methodIdx);
+    return fmt::format("{}, {}", vtableIdx, methodIdx);
   }
 
   bool equals(const IfaceMethodData& o) const {
@@ -750,7 +751,7 @@ struct RDSHandlePairData : RDSHandleData {
 
   std::string show() const {
     if (extra == rds::kUninitHandle) return RDSHandleData::show();
-    return folly::sformat("{},{}",handle,extra);
+    return fmt::format("{},{}",handle,extra);
   }
 
   bool equals(const RDSHandlePairData& o) const {
@@ -853,7 +854,7 @@ struct DefStackData : IRExtraData {
   {}
 
   std::string show() const {
-    return folly::sformat("irSPOff={}, bcSPOff={}",
+    return fmt::format("irSPOff={}, bcSPOff={}",
                           irSPOff.offset, bcSPOff.offset);
   }
 
@@ -958,7 +959,7 @@ struct LdBindAddrData : IRExtraData {
   }
 
   std::string show() const {
-    return folly::sformat("{}, SBInv {}", showShort(sk), bcSPOff.offset);
+    return fmt::format("{}, SBInv {}", showShort(sk), bcSPOff.offset);
   }
 
   size_t stableHash() const {
@@ -1041,7 +1042,7 @@ struct ProfileSwitchData : IRExtraData {
   {}
 
   std::string show() const {
-    return folly::sformat("handle {}, {} cases, base {}", handle, cases, base);
+    return fmt::format("handle {}, {} cases, base {}", handle, cases, base);
   }
 
   size_t stableHash() const {
@@ -1073,7 +1074,7 @@ struct LdSwitchData : IRExtraData {
   }
 
   std::string show() const {
-    return folly::sformat("{} cases", cases);
+    return fmt::format("{} cases", cases);
   }
 
   size_t stableHash() const {
@@ -1105,7 +1106,7 @@ struct LdTVAuxData : IRExtraData {
   explicit LdTVAuxData(int32_t v = -1) : valid(v) {}
 
   std::string show() const {
-    return folly::sformat("{:x}", valid);
+    return fmt::format("{:x}", valid);
   }
 
   size_t stableHash() const {
@@ -1133,7 +1134,7 @@ struct ReqBindJmpData : IRExtraData {
   }
 
   std::string show() const {
-    return folly::sformat(
+    return fmt::format(
       "{}, SBInv {}, IRSP {}{}",
       showShort(target), invSPOff.offset, irSPOff.offset,
       popFrame ? ", popFrame" : ""
@@ -1259,7 +1260,7 @@ struct CallData : IRExtraData {
       spOffset.offset, ',', numPosArgs, ',', numOut, ',', callOffset,
       namedArgNames != nullptr ? ",namedArgs" : "",
       hasGenerics
-        ? folly::sformat(",hasGenerics({})", genericsBitmap)
+        ? fmt::format(",hasGenerics({})", genericsBitmap)
         : std::string{},
       hasUnpack ? ",unpack" : "",
       skipRepack ? ",skipRepack" : "",
@@ -1352,7 +1353,7 @@ struct CallFuncEntryData : IRExtraData {
   {}
 
   std::string show() const {
-    return folly::sformat(
+    return fmt::format(
       "{}, IRSP {}, numInitPositionals {}, arFlags {}{}{}",
       calleePrototype->fullName()->data(), spOffset.offset, numInitPositionals, arFlags,
       formingRegion ? ",formingRegion" : "",
@@ -1402,7 +1403,7 @@ struct InlineSideExitData : IRExtraData {
   {}
 
   std::string show() const {
-    return folly::sformat(
+    return fmt::format(
       "{}, callBCOff {}",
       callee->fullName()->data(),
       callBCOff
@@ -1703,7 +1704,7 @@ struct InterpOneData : IRExtraData {
   }
 
   std::string show() const {
-    auto ret = folly::sformat(
+    auto ret = fmt::format(
       "{}: spOff:{}, bcOff:{}, popped:{}, pushed:{}",
       opcodeToName(opcode),
       spOffset.offset,
@@ -1732,7 +1733,7 @@ struct RBEntryData : IRExtraData {
   {}
 
   std::string show() const {
-    return folly::sformat("{}: {}", ringbufferName(type), showShort(sk));
+    return fmt::format("{}: {}", ringbufferName(type), showShort(sk));
   }
 
   size_t stableHash() const {
@@ -1757,7 +1758,7 @@ struct RBMsgData : IRExtraData {
   }
 
   std::string show() const {
-    return folly::sformat("{}: {}", ringbufferName(type), msg->data());
+    return fmt::format("{}: {}", ringbufferName(type), msg->data());
   }
 
   size_t stableHash() const {
@@ -2062,7 +2063,7 @@ struct MemoValueStaticData : IRExtraData {
     , asyncEager{asyncEager}
     , loadAux{loadAux} {}
   std::string show() const {
-    return folly::sformat(
+    return fmt::format(
       "{},{},{}",
       func->fullName()->toCppString(),
       asyncEager ? folly::to<std::string>(*asyncEager) : "-",
@@ -2154,7 +2155,7 @@ struct MemoCacheStaticData : IRExtraData {
       ret += ",<";
       for (auto i = 0; i < keys.count; ++i) {
         if (i > 0) ret += ",";
-        ret += folly::sformat("{}", types[i] ? "string" : "int");
+        ret += fmt::format("{}", types[i] ? "string" : "int");
       }
       ret += ">";
     }
@@ -2501,7 +2502,7 @@ struct StackRange : IRExtraData {
   {}
 
   std::string show() const {
-    return folly::sformat("[{}, {})", start.offset, start.offset + count);
+    return fmt::format("[{}, {})", start.offset, start.offset + count);
   }
 
   size_t stableHash() const {
@@ -2889,7 +2890,7 @@ struct LoggingProfileData : IRExtraData {
 
   std::string show() const {
     // profile->source is already printed in the instruction's marker.
-    return folly::sformat("{}", reinterpret_cast<void*>(profile));
+    return fmt::format("{}", reinterpret_cast<void*>(profile));
   }
 
   size_t stableHash() const;
@@ -2920,7 +2921,7 @@ struct LoggingSpeculateData : IRExtraData {
     auto const clsStr = clsName ? clsName->data() : "[no cls]";
     auto const ctxStr = ctxName ? ctxName->data() : "[no context]";
     auto const methStr = methName ? methName->data() : "[no meth]";
-    return folly::sformat(
+    return fmt::format(
       "Logging {} for speculation {}::{} in {} for op {} with id {}",
       success ? "true" : "false",
       clsStr,
@@ -2965,7 +2966,7 @@ struct SinkProfileData : IRExtraData {
 
   std::string show() const {
     // profile->sink is already printed in the instruction's marker.
-    return folly::sformat("{}", reinterpret_cast<void*>(profile));
+    return fmt::format("{}", reinterpret_cast<void*>(profile));
   }
 
   size_t stableHash() const;
@@ -3069,7 +3070,7 @@ struct CheckFunNamedArgsMismatchData : IRExtraData {
 
 
   std::string show() const {
-    return folly::sformat("{}, {}, {}", callee->fullName()->data(),
+    return fmt::format("{}, {}, {}", callee->fullName()->data(),
                           posArgc, lastArgOffset);
   }
   size_t stableHash() const {
@@ -3098,7 +3099,7 @@ struct GenericsWithNamedArgsData: IRExtraData {
 
 
   std::string show() const {
-    return folly::sformat("{}, {}", callee->fullName()->data(), lastArgOffset);
+    return fmt::format("{}, {}", callee->fullName()->data(), lastArgOffset);
   }
   size_t stableHash() const {
     return folly::hash::hash_combine(
@@ -3118,7 +3119,7 @@ struct GenericsWithNamedArgsData: IRExtraData {
 struct SampleRateData : IRExtraData {
   explicit SampleRateData(uint32_t sampleRate = 1) : sampleRate(sampleRate) {}
 
-  std::string show() const { return folly::sformat("{}", sampleRate); }
+  std::string show() const { return fmt::format("{}", sampleRate); }
   size_t hash() const { return std::hash<uint32_t>()(sampleRate); }
   size_t stableHash() const { return std::hash<uint32_t>()(sampleRate); }
 

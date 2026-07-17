@@ -19,6 +19,7 @@
 #include <map>
 #include <set>
 
+#include <fmt/format.h>
 #include <folly/Format.h>
 
 #include "hphp/util/alloc.h"
@@ -197,10 +198,10 @@ NEVER_INLINE void* stack_top_ptr_conservative() {
 static Exception* generate_request_timeout_exception(c_WaitableWaitHandle* wh) {
   auto timeout = RID().getTimeout();
   auto exceptionMsg = is_any_cli_mode()
-    ? folly::sformat(
+    ? fmt::format(
         "Maximum execution time of {} seconds exceeded",
         timeout)
-    : folly::sformat(
+    : fmt::format(
         "entire web request took longer than {} seconds and timed out",
         timeout);
   auto exceptionStack = createBacktrace(BacktraceArgs()
@@ -214,7 +215,7 @@ static Exception* generate_request_timeout_exception(c_WaitableWaitHandle* wh) {
 static Exception* generate_request_cpu_timeout_exception(
   c_WaitableWaitHandle* wh
 ) {
-  auto exceptionMsg = folly::sformat(
+  auto exceptionMsg = fmt::format(
     "Maximum CPU time of {} seconds exceeded",
     RID().getCPUTimeout()
   );
@@ -228,7 +229,7 @@ static Exception* generate_request_cpu_timeout_exception(
 }
 
 static Exception* generate_memory_exceeded_exception(c_WaitableWaitHandle* wh) {
-  auto exceptionMsg = folly::sformat(
+  auto exceptionMsg = fmt::format(
     "request has exceeded memory limit {} of {} used",
     tl_heap->getStatsCopy().usage(),
     RID().getMemoryLimitNumeric());

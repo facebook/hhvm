@@ -27,6 +27,7 @@
 #include "hphp/util/trace.h"
 #include "hphp/util/user-info.h"
 
+#include <fmt/format.h>
 #include <folly/concurrency/ConcurrentHashMap.h>
 #include <folly/Format.h>
 #include <folly/Singleton.h>
@@ -62,7 +63,7 @@ std::string format_watchman_socket(
   }
 
   if (!user) {
-    throw std::runtime_error{folly::sformat(
+    throw std::runtime_error{fmt::format(
       "We could not find a valid Unix username to expand {} to a path",
       watchmanSocket)};
   }

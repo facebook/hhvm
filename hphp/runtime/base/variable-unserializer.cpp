@@ -19,6 +19,7 @@
 #include <new>
 #include <utility>
 
+#include <fmt/format.h>
 #include <folly/Conv.h>
 #include <folly/Range.h>
 
@@ -206,7 +207,7 @@ void throwInvalidClassName() {
 
 void warnOrThrowUnknownClass(const OptString& clsName) {
   if (Cfg::Eval::ForbidUnserializeIncompleteClass) {
-    auto const msg = folly::sformat(
+    auto const msg = fmt::format(
       "Attempted to unserialize class named '{}' but it doesn't exist",
       clsName.toCppString()
     );
@@ -339,7 +340,7 @@ Variant VariableUnserializer::unserialize() {
   unserializeVariant(v.asTypedValue());
   if (UNLIKELY(StructuredLog::coinflip(Cfg::Eval::SerDesSampleRate))) {
     OptString ser(m_begin, m_end - m_begin, CopyString);
-    auto const fmt = folly::sformat("VU{}", (int)m_type);
+    auto const fmt = fmt::format("VU{}", (int)m_type);
     StructuredLog::logSerDes(fmt.c_str(), "des", ser, v);
   }
 

@@ -25,6 +25,7 @@
 #include <cinttypes>
 #include <filesystem>
 
+#include <fmt/format.h>
 #include <folly/Random.h>
 #include <folly/String.h>
 #include <folly/portability/SysMman.h>
@@ -2406,7 +2407,7 @@ static void raise_undefined_local(ActRec* fp, LocalName pind) {
     );
   }
   SystemLib::throwUndefinedVariableExceptionObject(
-    folly::sformat("Undefined variable: {}",
+    fmt::format("Undefined variable: {}",
                    fp->func()->localVarName(pind)->data()));
 }
 
@@ -3959,7 +3960,7 @@ JitResumeAddr fcallObjMethodImpl(PC origpc, PC& pc, const FCallArgs& fca,
 
 static void raise_resolve_non_object(const char* methodName,
                                      const char* typeName = nullptr) {
-  auto const msg = folly::sformat(
+  auto const msg = fmt::format(
     "Cannot resolve a member function {}() on a non-object ({})",
     methodName, typeName
   );
@@ -4610,7 +4611,7 @@ OPTBLD_INLINE void iopVerifyParamTypeTS(local_var param) {
         param.lval, cell->m_data.parr, frameStaticClass(vmfp()), vmfp()->func(),
         isTypeVar, warn)) {
     raise_reified_typehint_error(
-      folly::sformat(
+      fmt::format(
         "Argument {} passed to {}() must be an instance of {}, {} given",
         param.index + 1,
         vmfp()->func()->fullName()->data(),
@@ -4647,7 +4648,7 @@ OPTBLD_INLINE void iopVerifyRetTypeTS() {
         cell, ts->m_data.parr, frameStaticClass(vmfp()), vmfp()->func(),
         isTypeVar, warn)) {
     raise_reified_typehint_error(
-      folly::sformat(
+      fmt::format(
         "Value returned from function {}() must be of type {}, {} given",
         vmfp()->func()->fullName()->data(),
         TypeStructure::toString(ArrNR(ts->m_data.parr),

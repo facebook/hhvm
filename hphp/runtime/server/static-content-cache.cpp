@@ -14,6 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
+#include <fmt/format.h>
+
 #include "hphp/runtime/server/static-content-cache.h"
 
 #include "hphp/runtime/base/backtrace.h"
@@ -57,7 +59,7 @@ void StaticContentCache::load() {
               if (f.exists(s_file)) {
                 auto s = tvCastToString(f.lookup(s_file)).toCppString();
                 if (f.exists(s_line)) {
-                  s += folly::sformat(":{}", tvCastToInt64(f.lookup(s_line)));
+                  s += fmt::format(":{}", tvCastToInt64(f.lookup(s_line)));
                 }
                 frameStrings.emplace_back(std::move(s));
                 frames.push_back(frameStrings.back());

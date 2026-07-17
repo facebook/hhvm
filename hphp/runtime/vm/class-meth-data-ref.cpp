@@ -13,6 +13,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#include <fmt/format.h>
+
 #include "hphp/runtime/vm/class-meth-data-ref.h"
 
 #include "hphp/runtime/base/array-init.h"
@@ -65,7 +67,7 @@ void raiseClsMethClsMethRelCompareWarning() {
 }
 
 void throwInvalidClsMethToType(const char* ty) {
-  SystemLib::throwInvalidOperationExceptionObject(folly::sformat(
+  SystemLib::throwInvalidOperationExceptionObject(fmt::format(
     "Cannot convert class method to {}", ty
   ));
 }

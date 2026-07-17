@@ -24,6 +24,7 @@
 
 #include "hphp/util/configs/eval.h"
 
+#include <fmt/format.h>
 #include <re2/re2.h>
 #include "hphp/util/rds-local.h"
 
@@ -98,7 +99,7 @@ PackageInfo PackageInfo::fromFile(const std::filesystem::path& path) {
       for (auto& error : info.errors) {
         packageConfigErrors.push_back(error.c_str());
       }
-      auto const packageConfigError = folly::sformat(
+      auto const packageConfigError = fmt::format(
         "Error parsing {}: {}",
         path.c_str(),
         folly::join("\n", packageConfigErrors)

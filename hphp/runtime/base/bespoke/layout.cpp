@@ -14,6 +14,8 @@
   +----------------------------------------------------------------------+
 */
 
+#include <fmt/format.h>
+
 #include "hphp/runtime/base/bespoke/layout.h"
 
 #include "hphp/runtime/base/bespoke/logging-array.h"
@@ -86,13 +88,13 @@ Optional<LayoutTest> compute2ByteTest(
 std::string show(LayoutTest test) {
   switch (test.mode) {
     case LayoutTest::And1Byte:
-      return folly::sformat("AND {:02x}xx", test.imm & 0xff);
+      return fmt::format("AND {:02x}xx", test.imm & 0xff);
     case LayoutTest::And2Byte:
-      return folly::sformat("AND {:04x}", test.imm);
+      return fmt::format("AND {:04x}", test.imm);
     case LayoutTest::Cmp1Byte:
-      return folly::sformat("CMP {:02x}xx", test.imm & 0xff);
+      return fmt::format("CMP {:02x}xx", test.imm & 0xff);
     case LayoutTest::Cmp2Byte:
-      return folly::sformat("CMP {:04x}", test.imm);
+      return fmt::format("CMP {:04x}", test.imm);
   }
   always_assert(false);
 }
@@ -427,17 +429,17 @@ LayoutTest Layout::computeLayoutTest() const {
   deadVec.push_back(ArrayData::kVanillaLayoutIndex.raw);
 
   SCOPE_ASSERT_DETAIL("bespoke::Layout::computeLayoutTest") {
-    std::string ret = folly::sformat("{:04x}: {}\n", m_index.raw, describe());
-    ret += folly::sformat("  Live:\n");
+    std::string ret = fmt::format("{:04x}: {}\n", m_index.raw, describe());
+    ret += fmt::format("  Live:\n");
     for (auto const live : liveVec) {
       auto const layout = s_layoutTable[live]->describe();
-      ret += folly::sformat("  - {:04x}: {}\n", live, layout);
+      ret += fmt::format("  - {:04x}: {}\n", live, layout);
     }
-    ret += folly::sformat("  Dead:\n");
+    ret += fmt::format("  Dead:\n");
     for (auto const dead : deadVec) {
       auto const layout = dead == ArrayData::kVanillaLayoutIndex.raw
         ? "Vanilla" : s_layoutTable[dead]->describe();
-      ret += folly::sformat("  - {:04x}: {}\n", dead, layout);
+      ret += fmt::format("  - {:04x}: {}\n", dead, layout);
     }
     return ret;
   };

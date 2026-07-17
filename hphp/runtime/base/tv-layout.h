@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include <fmt/format.h>
+
 #include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/unaligned-typed-value.h"
@@ -321,7 +323,7 @@ struct Tv7Up : public LayoutBase<Tv7Up,
 
       type += rem;
       SCOPE_ASSERT_DETAIL("type bytes") {
-        return folly::sformat("{:08x}", *last_type_byte);
+        return fmt::format("{:08x}", *last_type_byte);
       };
 
       switch (rem) {

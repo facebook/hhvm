@@ -46,6 +46,7 @@
 #include "hphp/util/sync-signal.h"
 #include "hphp/util/user-info.h"
 
+#include <fmt/format.h>
 #include <folly/Conv.h>
 #include <folly/FileUtil.h>
 #include <folly/Format.h>
@@ -411,7 +412,7 @@ void HttpServer::runOrExitProcess() {
     InitFiniNode::ServerInit();
   } catch (std::exception& e) {
     startupFailure(
-      folly::sformat("Exception in InitFiniNode::ServerInit(): {}",
+      fmt::format("Exception in InitFiniNode::ServerInit(): {}",
                      e.what()));
   }
 
@@ -664,12 +665,12 @@ static bool sendAdminCommand(const char* cmd) {
   do {
     std::string url;
     if (passwordIter != passwords.end()) {
-      url = folly::sformat("http://{}:{}/{}?auth={}", host,
+      url = fmt::format("http://{}:{}/{}?auth={}", host,
                            Cfg::AdminServer::Port,
                            cmd, *passwordIter);
       ++passwordIter;
     } else {
-      url = folly::sformat("http://{}:{}/{}", host,
+      url = fmt::format("http://{}:{}/{}", host,
                            Cfg::AdminServer::Port, cmd);
     }
     if (CURL* curl = curl_easy_init()) {
@@ -805,22 +806,22 @@ void HttpServer::LogShutdownStats() {
   for (size_t i = 0; i < ShutdownStats.size(); ++i) {
     const auto& stat = ShutdownStats[i];
     auto const eventName = stat.eventName();
-    entry.setInt(folly::sformat("{}_rss", eventName), stat.rss);
-    entry.setInt(folly::sformat("{}_free", eventName),
+    entry.setInt(fmt::format("{}_rss", eventName), stat.rss);
+    entry.setInt(fmt::format("{}_free", eventName),
                  stat.memUsage.freeMb);
-    entry.setInt(folly::sformat("{}_cached", eventName),
+    entry.setInt(fmt::format("{}_cached", eventName),
                  stat.memUsage.cachedMb);
-    entry.setInt(folly::sformat("{}_buffers", eventName),
+    entry.setInt(fmt::format("{}_buffers", eventName),
                  stat.memUsage.buffersMb);
     // Log the difference since last event, if available
     if (i > 0) {
       const auto& last = ShutdownStats[i - 1];
       auto const lastEvent = last.eventName();
-      entry.setInt(folly::sformat("{}_duration", lastEvent),
+      entry.setInt(fmt::format("{}_duration", lastEvent),
                    stat.time - last.time);
-      entry.setInt(folly::sformat("{}_requests", lastEvent),
+      entry.setInt(fmt::format("{}_requests", lastEvent),
                    stat.requestsServed - last.requestsServed);
-      entry.setInt(folly::sformat("{}_rss_delta", lastEvent),
+      entry.setInt(fmt::format("{}_rss_delta", lastEvent),
                    stat.rss - last.rss);
     }
   }

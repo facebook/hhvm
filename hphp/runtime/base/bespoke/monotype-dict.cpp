@@ -15,6 +15,8 @@
   +----------------------------------------------------------------------+
 */
 
+#include <fmt/format.h>
+
 #include "hphp/runtime/base/bespoke/monotype-dict.h"
 
 #include "hphp/runtime/base/bespoke-array.h"
@@ -1634,7 +1636,7 @@ DATATYPES
 
 TopMonotypeDictLayout::TopMonotypeDictLayout(KeyTypes kt)
   : AbstractLayout(
-      Index(kt), folly::sformat("MonotypeDict<{},Top>", show(kt)),
+      Index(kt), fmt::format("MonotypeDict<{},Top>", show(kt)),
       getTopMonotypeDictParents(kt), getVtableForKeyTypes(kt))
   , m_keyType(kt)
 {}
@@ -1657,7 +1659,7 @@ LayoutIndex EmptyMonotypeDictLayout::Index() {
 MonotypeDictLayout::MonotypeDictLayout(KeyTypes kt, DataType type)
   : ConcreteLayout(
       Index(kt, type),
-      folly::sformat("MonotypeDict<{},{}>", show(kt), tname(type)),
+      fmt::format("MonotypeDict<{},{}>", show(kt), tname(type)),
       getMonotypeParentLayouts(kt, type),
       getVtableForKeyTypes(kt))
   , m_keyType(kt)

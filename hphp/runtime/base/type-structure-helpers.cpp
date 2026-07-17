@@ -17,6 +17,7 @@
 #include "hphp/runtime/base/type-structure-helpers.h"
 #include "hphp/runtime/base/type-structure-helpers-defs.h"
 
+#include <fmt/format.h>
 #include <folly/Random.h>
 
 #include "hphp/runtime/base/array-data.h"
@@ -654,7 +655,7 @@ bool checkTypeStructureMatchesTVImpl(
 ) {
   auto const errOnLen = [&givenType](auto cell, auto len) {
     if (!gen_error) return;
-    givenType = folly::sformat("{} of length {}",
+    givenType = fmt::format("{} of length {}",
       describe_actual_type(&cell), len);
   };
 
@@ -662,13 +663,13 @@ bool checkTypeStructureMatchesTVImpl(
     if (!gen_error) return;
     auto const escapedKey = [key] {
       if (isStringType(type(key))) {
-        return folly::sformat("\"{}\"",
+        return fmt::format("\"{}\"",
           folly::cEscape<std::string>(val(key).pstr->toCppString()));
       }
       assertx(isIntType(type(key)));
       return std::to_string(val(key).num);
     }();
-    errorKey = folly::sformat("[{}]{}", escapedKey, errorKey);
+    errorKey = fmt::format("[{}]{}", escapedKey, errorKey);
   };
 
   auto const type = c1.m_type;
@@ -1261,13 +1262,13 @@ void throwTypeStructureDoesNotMatchTVException(
   assertx(!expectedType.empty());
   std::string error;
   if (errorKey.empty()) {
-    error = folly::sformat("Expected {}, got {}", expectedType, givenType);
+    error = fmt::format("Expected {}, got {}", expectedType, givenType);
   } else {
-    error = folly::sformat("Expected {} at {}, got {}",
+    error = fmt::format("Expected {} at {}, got {}",
       expectedType, errorKey, givenType);
   }
   if (raiseError) {
-    std::string full_error = folly::sformat("Typed local assignment: {}", error);
+    std::string full_error = fmt::format("Typed local assignment: {}", error);
     raise_typehint_error(full_error);
   } else {
     SystemLib::throwTypeAssertionExceptionObject(error);

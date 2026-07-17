@@ -138,7 +138,7 @@ class FormatValue<HPHP::Facts::Clock> {
   template <typename Callback>
   void format(FormatArg& arg, Callback& cb) const {
     format_value::formatString(
-        folly::sformat("\"{}|{}\"", m_val.m_clock, m_val.m_mergebase), arg, cb);
+        fmt::format("\"{}|{}\"", m_val.m_clock, m_val.m_mergebase), arg, cb);
   }
 
  private:

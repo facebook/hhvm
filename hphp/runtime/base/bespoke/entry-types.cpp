@@ -14,6 +14,8 @@
   +----------------------------------------------------------------------+
 */
 
+#include <fmt/format.h>
+
 #include "hphp/runtime/base/bespoke/entry-types.h"
 
 #include "hphp/runtime/base/array-data-defs.h"
@@ -156,17 +158,17 @@ bool EntryTypes::isMonotypeState() const {
 std::string EntryTypes::toString() const {
   auto const valueSt = [&] {
     switch (valueTypes) {
-      case ValueTypes::Empty: return folly::sformat("Empty");
+      case ValueTypes::Empty: return fmt::format("Empty");
       case ValueTypes::Monotype:
-        return folly::sformat("Monotype ({})", tname(valueDatatype));
+        return fmt::format("Monotype ({})", tname(valueDatatype));
       case ValueTypes::MonotypeNullable:
-        return folly::sformat("MonotypeNullable ({})", tname(valueDatatype));
-      case ValueTypes::Any: return folly::sformat("Any");
+        return fmt::format("MonotypeNullable ({})", tname(valueDatatype));
+      case ValueTypes::Any: return fmt::format("Any");
     }
     not_reached();
   }();
 
-  return folly::sformat("<{}, {}>", show(keyTypes), valueSt);
+  return fmt::format("<{}, {}>", show(keyTypes), valueSt);
 }
 
 const char* show(KeyTypes kt) {

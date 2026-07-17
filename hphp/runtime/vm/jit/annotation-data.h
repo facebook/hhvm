@@ -19,6 +19,7 @@
 
 #include <string>
 
+#include <fmt/format.h>
 #include <folly/json/dynamic.h>
 
 #include "hphp/runtime/vm/func.h"
@@ -49,7 +50,7 @@ struct AnnotationData {
     std::string getAnnotationStr() const {
       auto const callerName = caller ? caller->fullName()->data() : "(unknown)";
       auto const calleeName = callee ? callee->fullName()->data() : "(unknown)";
-      return folly::sformat("BC {}: {} -> {}: {}\n",
+      return fmt::format("BC {}: {} -> {}: {}\n",
                             offset, callerName, calleeName, reason);
     }
 

@@ -3333,7 +3333,7 @@ static struct SetThreadInitFini {
       // TCB
       Debug::DebugInfo::recordDataMap(
         tcbBase, stackEnd,
-        folly::sformat("Thread-{}", static_cast<void*>(tcbBase)));
+        fmt::format("Thread-{}", static_cast<void*>(tcbBase)));
       // TLS
       auto const tlsRange = getCppTdata();
       auto const tlsSize = (tlsRange.second + 15) / 16 * 16;
@@ -3341,12 +3341,12 @@ static struct SetThreadInitFini {
       if (tlsSize) {
         Debug::DebugInfo::recordDataMap(
           stackEnd, tcbBase,
-          folly::sformat("TLS-{}", static_cast<void*>(tcbBase)));
+          fmt::format("TLS-{}", static_cast<void*>(tcbBase)));
       }
     }
     Debug::DebugInfo::recordDataMap(
       stackAddr, stackEnd,
-      folly::sformat("Stack-{}", static_cast<void*>(tcbBase)));
+      fmt::format("Stack-{}", static_cast<void*>(tcbBase)));
   }
   template <class ThreadT>
   static typename std::enable_if<!std::is_integral<ThreadT>::value &&
@@ -3359,10 +3359,10 @@ static struct SetThreadInitFini {
     auto const tlsBaseAddr = reinterpret_cast<char*>(tlsBase());
     Debug::DebugInfo::recordDataMap(
       tlsBaseAddr, tlsBaseAddr + tlsSize,
-      folly::sformat("TLS-{}", static_cast<void*>(stackAddr)));
+      fmt::format("TLS-{}", static_cast<void*>(stackAddr)));
     Debug::DebugInfo::recordDataMap(
       stackAddr, stackAddr + stackSize,
-      folly::sformat("Stack-{}", static_cast<void*>(stackAddr)));
+      fmt::format("Stack-{}", static_cast<void*>(stackAddr)));
   }
 
   SetThreadInitFini() {

@@ -73,6 +73,7 @@
 
 #include <boost/algorithm/string.hpp>
 #include <boost/bind.hpp>
+#include <fmt/format.h>
 
 #include <folly/Conv.h>
 #include <folly/MapUtil.h>
@@ -105,7 +106,7 @@ namespace HPHP {
 
 AssemblerError::AssemblerError(int where, const std::string& what)
   : std::runtime_error(
-      folly::sformat("Assembler Error: line {}: {}", where, what))
+      fmt::format("Assembler Error: line {}: {}", where, what))
 {}
 
 
@@ -158,7 +159,7 @@ struct Input {
 
   void expect(int c) {
     if (getc() != c) {
-      error(folly::sformat("expected character `{}'", char(c)));
+      error(fmt::format("expected character `{}'", char(c)));
     }
   }
 
@@ -172,7 +173,7 @@ struct Input {
     skipWhitespace();
     if (getc() != c) {
       throw AssemblerError(currentLine,
-        folly::sformat("expected character `{}'", char(c)));
+        fmt::format("expected character `{}'", char(c)));
     }
   }
 
@@ -1304,7 +1305,7 @@ NamedLocal read_named_local(AsmState& as) {
   auto const sd = makeStaticString(name.data());
   if (!as.fe->hasVar(sd)) {
     auto const escaped = folly::cEscape<std::string>(name);
-    as.error(folly::sformat("unknown NamedLocal name: \"{}\"", escaped));
+    as.error(fmt::format("unknown NamedLocal name: \"{}\"", escaped));
   }
   return NamedLocal { .name = as.fe->lookupVarId(sd), .id = id };
 }
@@ -1655,7 +1656,7 @@ Variant parse_php_serialized(folly::StringPiece str) {
     throw;
   } catch (const std::exception& e) {
     auto const msg =
-      folly::sformat("AssemblerUnserializationError: {}", e.what());
+      fmt::format("AssemblerUnserializationError: {}", e.what());
     throw AssemblerUnserializationError(msg);
   }
 }
@@ -1680,7 +1681,7 @@ Variant parse_maybe_php_serialized(AsmState& as) {
       throw;
     } catch (const std::exception& e) {
       auto const msg =
-        folly::sformat("AssemblerUnserializationError: {}", e.what());
+        fmt::format("AssemblerUnserializationError: {}", e.what());
       throw AssemblerUnserializationError(msg);
     }
   }
@@ -3326,7 +3327,7 @@ std::unique_ptr<UnitEmitter> assemble_string(
   } catch (const std::exception& e) {
     if (!swallowErrors) {
       // assembler should throw only AssemblerErrors and FatalErrorExceptions
-      throw AssemblerError(folly::sformat("AssemblerError: {}", e.what()));
+      throw AssemblerError(fmt::format("AssemblerError: {}", e.what()));
     }
     ue = createFatalUnit(sd, sha1, FatalOp::Runtime, e.what());
   }

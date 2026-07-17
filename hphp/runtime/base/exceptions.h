@@ -20,6 +20,7 @@
 #include <atomic>
 #include <utility>
 
+#include <fmt/format.h>
 #include <folly/String.h>
 
 #include "hphp/util/portability.h"
@@ -140,7 +141,7 @@ struct RequestMemoryExceededException : ResourceExceededException {
 struct RequestOOMKilledException : ResourceExceededException {
   explicit RequestOOMKilledException(size_t usedBytes)
     : ResourceExceededException(
-        folly::sformat("request aborted due to memory pressure, "
+        fmt::format("request aborted due to memory pressure, "
                        "used {} bytes", usedBytes),
         empty_vec_array())
     , m_usedBytes(usedBytes)

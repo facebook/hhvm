@@ -22,6 +22,7 @@
 #include <onigposix.h>
 #include <utility>
 
+#include <fmt/format.h>
 #include <folly/AtomicHashArray.h>
 
 #include "hphp/runtime/base/array-init.h"
@@ -769,7 +770,7 @@ pcre_get_compiled_regex_cache(PCRECache::Accessor& accessor,
       pp++;
     }
     if (*pp == 0) {
-      std::string msg = folly::sformat("No ending delimiter '{}' found: [{}]",
+      std::string msg = fmt::format("No ending delimiter '{}' found: [{}]",
                                        delimiter, regex->data());
       raise_warning_or_create_error_message(warn, error_message, msg);
       return false;
@@ -791,7 +792,7 @@ pcre_get_compiled_regex_cache(PCRECache::Accessor& accessor,
       pp++;
     }
     if (*pp == 0) {
-      std::string msg = folly::sformat("No ending matching delimiter '{}' found: [{}]",
+      std::string msg = fmt::format("No ending matching delimiter '{}' found: [{}]",
                                        end_delimiter, regex->data());
       raise_warning_or_create_error_message(warn, error_message, msg);
       return false;
@@ -842,7 +843,7 @@ pcre_get_compiled_regex_cache(PCRECache::Accessor& accessor,
       break;
 
     default:
-      std::string msg = folly::sformat("Unknown modifier '{}': [{}]",
+      std::string msg = fmt::format("Unknown modifier '{}': [{}]",
                                        pp[-1], regex->data());
       raise_warning_or_create_error_message(warn, error_message, msg);
       return false;
@@ -898,7 +899,7 @@ pcre_get_compiled_regex_cache(PCRECache::Accessor& accessor,
   int erroffset;
   pcre *re = pcre_compile(pattern, coptions, &error, &erroffset, 0);
   if (re == nullptr) {
-    std::string msg = folly::sformat("Compilation failed: {} at offset {}",
+    std::string msg = fmt::format("Compilation failed: {} at offset {}",
                                      error, erroffset);
     raise_warning_or_create_error_message(warn, error_message, msg);
     return false;
@@ -936,7 +937,7 @@ pcre_get_compiled_regex_cache(PCRECache::Accessor& accessor,
 
         TCA start = *(TCA *)(extra->executable_jit);
         TCA end = start + size;
-        std::string name = folly::sformat("HHVM::pcre_jit::{}", pattern);
+        std::string name = fmt::format("HHVM::pcre_jit::{}", pattern);
 
         if (!Cfg::Jit::NoGdb && jit::mcgen::initialized()) {
           Debug::DebugInfo::Get()->recordStub(Debug::TCRange(start, end, false),

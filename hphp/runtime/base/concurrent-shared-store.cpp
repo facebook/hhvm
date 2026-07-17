@@ -30,6 +30,7 @@
 #include <string>
 #include <vector>
 
+#include <fmt/format.h>
 #include <folly/Format.h>
 #include <folly/Random.h>
 
@@ -47,7 +48,7 @@ namespace {
 
 #ifdef HPHP_TRACE
 std::string show(const StoreValue& sval) {
-  return folly::sformat("size {} kind {}", sval.dataSize, (int)sval.getKind());
+  return fmt::format("size {} kind {}", sval.dataSize, (int)sval.getKind());
 }
 #endif
 

@@ -14,6 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
+#include <fmt/format.h>
+
 #include "hphp/runtime/server/pagelet-server.h"
 
 #include "hphp/runtime/server/transport.h"
@@ -69,7 +71,7 @@ PageletTransport::PageletTransport(
           header.data()
         );
       } else if (Cfg::PageletServer::HeaderCheck == 2) {
-        SystemLib::throwInvalidArgumentExceptionObject(folly::sformat(
+        SystemLib::throwInvalidArgumentExceptionObject(fmt::format(
           "Specifying Pagelet headers using \"key: value\" syntax "
           "is disabled: {}",
           header.data()
@@ -82,7 +84,7 @@ PageletTransport::PageletTransport(
 
         if (Cfg::PageletServer::HeaderCollide > 0 &&
             headers->exists(OptString(name))) {
-          auto const msg = folly::sformat(
+          auto const msg = fmt::format(
             "Detected Pagelet header specified using both \"key: value\" "
             "and key => \"value\" syntax: {}",
             name

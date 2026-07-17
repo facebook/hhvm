@@ -23,6 +23,7 @@
 #include <mutex>
 #include <vector>
 
+#include <fmt/format.h>
 #include <folly/Bits.h>
 #include <folly/container/FBVector.h>
 #include <folly/portability/SysMman.h>
@@ -1252,7 +1253,7 @@ void recordRds(Handle h, size_t size,
     Debug::DebugInfo::recordDataMap(
       (char*)(intptr_t)h,
       (char*)(intptr_t)h + size,
-      folly::sformat("rds+{}-{}", type, msg));
+      fmt::format("rds+{}-{}", type, msg));
   }
 }
 

@@ -28,6 +28,7 @@
 #include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/util/hash-map.h"
 
+#include <fmt/format.h>
 #include <folly/SharedMutex.h>
 #include <folly/String.h>
 
@@ -273,21 +274,21 @@ std::string EventKey::toString() const {
       assertx(spec == Spec::Int8 || spec == Spec::Str32);
       if (spec == Spec::Int8) {
         auto const i = safe_cast<int8_t>(safe_cast<int16_t>(m_key) + kInt8Min);
-        return folly::sformat(" key=[i8:{}]", i);
+        return fmt::format(" key=[i8:{}]", i);
       } else {
         auto const s = ((StringData*)safe_cast<uintptr_t>(m_key))->data();
-        return folly::sformat(" key=[s32:\"{}\"]", folly::cEscape<std::string>(s));
+        return fmt::format(" key=[s32:\"{}\"]", folly::cEscape<std::string>(s));
       }
     }
-    return folly::sformat(" key=[{}]", specToStr(spec));
+    return fmt::format(" key=[{}]", specToStr(spec));
   }();
   auto const val = [&]() -> std::string {
     if (m_val_type == kInvalidDataType) return "";
     auto const spec = m_val_spec;
-    return spec == Spec::None ? folly::sformat(" val=[{}]", tname(m_val_type))
-                              : folly::sformat(" val=[{}]", specToStr(spec));
+    return spec == Spec::None ? fmt::format(" val=[{}]", tname(m_val_type))
+                              : fmt::format(" val=[{}]", specToStr(spec));
   }();
-  return folly::sformat("{}{}{}", op, key, val);
+  return fmt::format("{}{}{}", op, key, val);
 }
 
 //////////////////////////////////////////////////////////////////////////////

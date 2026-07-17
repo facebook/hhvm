@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <fmt/format.h>
 #include <folly/AtomicHashMap.h>
 #include <folly/MapUtil.h>
 #include <folly/portability/SysTime.h>
@@ -304,7 +305,7 @@ void visit_ranges(const Trace& t, F&& fun) {
   for (auto& s : t.scopes()) {
     if (s.events().empty()) {
       fun(Range(
-        folly::sformat("{}_BEGIN to {}_END", s.name(), s.name()),
+        fmt::format("{}_BEGIN to {}_END", s.name(), s.name()),
         s.startMicro(),
         s.stopMicro(),
         s,
@@ -313,7 +314,7 @@ void visit_ranges(const Trace& t, F&& fun) {
       continue;
     }
     fun(Range(
-      folly::sformat("{}_BEGIN to {}", s.name(), s.events().front().name()),
+      fmt::format("{}_BEGIN to {}", s.name(), s.events().front().name()),
       s.startMicro(),
       s.events().front().startMicro(),
       s,
@@ -323,7 +324,7 @@ void visit_ranges(const Trace& t, F&& fun) {
       auto const& start = s.events()[i];
       auto const& end = s.events()[i];
       fun(Range(
-        folly::sformat("{} to {}", start.name(), end.name()),
+        fmt::format("{} to {}", start.name(), end.name()),
         start.startMicro(),
         start.stopMicro(),
         s,
@@ -331,7 +332,7 @@ void visit_ranges(const Trace& t, F&& fun) {
       ));
     }
     fun(
-      folly::sformat("{} to {}_END", s.events().back().name(), s.name()),
+      fmt::format("{} to {}_END", s.events().back().name(), s.name()),
       s.events().back().startMicro(),
       s.stopMicro(),
       s,

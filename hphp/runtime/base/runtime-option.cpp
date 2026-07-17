@@ -81,6 +81,7 @@
 #include <vector>
 
 #include <boost/algorithm/string/predicate.hpp>
+#include <fmt/format.h>
 #include <folly/Conv.h>
 #include <folly/json/DynamicConverter.h>
 #include <folly/FileUtil.h>
@@ -459,7 +460,7 @@ std::string getCacheBreakerSchemaHash(std::string_view root,
       ? flags.cacheKeySha1().toString()
       : flags.getFactsCacheBreaker();
 
-  auto const logStr = folly::sformat(
+  auto const logStr = fmt::format(
     "Native Facts DB cache breaker:\n"
     " Version: {}\n"
     " Root: {}\n"
@@ -743,7 +744,7 @@ bool RuntimeOption::ReadPerUserSettings(const std::filesystem::path& confFileNam
 }
 
 std::string RuntimeOption::getTraceOutputFile() {
-  return folly::sformat("{}/hphp.{}.log",
+  return fmt::format("{}/hphp.{}.log",
                         Cfg::Debug::RemoteTraceOutputDir, (int64_t)getpid());
 }
 
@@ -844,7 +845,7 @@ static bool matchShard(
     Config::GetInt64(ini, hdfPattern, "ShardCount", 100, false);
 
   if (shard < 0 || shard >= nshards) {
-    messages.push_back(folly::sformat("Invalid value for Shard: {}", shard));
+    messages.push_back(fmt::format("Invalid value for Shard: {}", shard));
     return true;
   }
 
@@ -862,7 +863,7 @@ static bool matchShard(
   //   seed = Digest::MD5.hexdigest(seed_input)[0...7].to_i(16)
   seed = ntohl(seed) >> 4;
 
-  messages.push_back(folly::sformat(
+  messages.push_back(fmt::format(
     "Checking Shard = {}; Input = {}; Seed = {}; ShardCount = {}; Value = {}",
     shard, input, seed, nshards, seed % nshards
   ));
@@ -914,7 +915,7 @@ static bool matchExperiment(
   auto const hash = murmur_hash_64A(name.data(), name.size(), num);
   auto const res  = hash % rate == 0;
 
-  messages.push_back(folly::sformat(
+  messages.push_back(fmt::format(
     "Checking Experiment `{}'; hostname = {}; Seed = {}; Hash = {}; Flip = {}",
     name, hostname, num, hash, flip ? "true" : "false"
   ));
@@ -1000,7 +1001,7 @@ static std::vector<std::string> getTierOverwrites(
     for (Hdf hdf = config["Tiers"].firstChild(); hdf.exists();
          hdf = hdf.next()) {
       if (messages.empty()) {
-        messages.emplace_back(folly::sformat(
+        messages.emplace_back(fmt::format(
                                 "Matching tiers using: "
                                 "machine='{}', tier='{}', task='{}', "
                                 "cpu='{}', tiers='{}', tags='{}'",
@@ -1013,7 +1014,7 @@ static std::vector<std::string> getTierOverwrites(
         enableShards, hostname, ini, hdf, messages
       );
       if (matches && matches_exp) {
-        messages.emplace_back(folly::sformat(
+        messages.emplace_back(fmt::format(
                                 "Matched tier: {}", hdf.getName()));
         if (enableShards && hdf["DisableShards"].configGetBool()) {
           messages.emplace_back("Sharding is disabled.");
@@ -1144,7 +1145,7 @@ void RuntimeOption::Load(
                                   InactiveExperiments);
       if (messages) *messages = std::move(m2);
       if (s_RelativeConfigs != original) {
-        relConfigsError = folly::sformat(
+        relConfigsError = fmt::format(
           "RelativeConfigs node was modified while loading configs from [{}] "
           "to [{}]",
           folly::join(", ", original),

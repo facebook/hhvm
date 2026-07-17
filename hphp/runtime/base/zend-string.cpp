@@ -38,6 +38,7 @@
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/string-util.h"
 
+#include <fmt/format.h>
 #include <folly/lang/CString.h>
 #include <folly/portability/String.h>
 
@@ -142,7 +143,7 @@ OptString string_pad(const char *input, int len, int pad_length,
     break;
   default:
     SystemLib::throwRuntimeExceptionObject(
-      folly::sformat("Invalid argument: pad_type: {}", pad_type));
+      fmt::format("Invalid argument: pad_type: {}", pad_type));
   }
 
   /* First we pad on the left. */

@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include <fmt/format.h>
+
 #include "hphp/runtime/base/backtrace.h"
 
 #include "hphp/runtime/vm/prologue-id.h"
@@ -248,7 +250,7 @@ public:
 
   template<typename Callback>
   void format(FormatArg& arg, Callback& cb) const {
-    auto str = folly::sformat(
+    auto str = fmt::format(
       "IFrame{{func = {}, callOff = {}, parent = {}}}",
       m_ifr.func->fullName()->data(),
       m_ifr.callOff,

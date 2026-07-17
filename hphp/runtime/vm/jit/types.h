@@ -18,6 +18,8 @@
 
 #include <vector>
 
+#include <fmt/format.h>
+
 #include "hphp/runtime/base/types.h"
 
 #include "hphp/runtime/vm/jit/containers.h"
@@ -343,7 +345,7 @@ struct Reason {
 };
 
 inline std::string show(const Reason &r) {
-  return folly::sformat("{}:{}", r.file, r.line);
+  return fmt::format("{}:{}", r.file, r.line);
 }
 
 #define LDCLS_FALLBACKS                    \

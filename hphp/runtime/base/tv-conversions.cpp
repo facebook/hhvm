@@ -14,6 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
+#include <fmt/format.h>
+
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/collections.h"
@@ -1132,23 +1134,23 @@ void handleConvThrowMode(
 const StaticString s_ConvThrowReasonConcat("string concatenation/interpolation");
 
 void throwBitOpBadTypesException(tv_rval t1, tv_rval t2) {
-  SystemLib::throwInvalidOperationExceptionObject(folly::sformat(
+  SystemLib::throwInvalidOperationExceptionObject(fmt::format(
     "Cannot perform a bitwise operation on {} and {}",
     describe_actual_type(t1), describe_actual_type(t2)));
 }
 void throwIncDecBadTypeException(const char* t) {
-  SystemLib::throwInvalidOperationExceptionObject(folly::sformat(
+  SystemLib::throwInvalidOperationExceptionObject(fmt::format(
     "Cannot perform pre/post inc/dec on {}", t));
 }
 void throwMathBadTypesException(tv_rval t1, tv_rval t2) {
-  SystemLib::throwInvalidOperationExceptionObject(folly::sformat(
+  SystemLib::throwInvalidOperationExceptionObject(fmt::format(
     "Cannot perform mathematical operation on {} and {}",
     describe_actual_type(t1), describe_actual_type(t2)));
 }
 
 namespace {
 void throwCmpBadTypesExceptionImpl(tv_rval t1, const char* t2) {
-  SystemLib::throwInvalidOperationExceptionObject(folly::sformat(
+  SystemLib::throwInvalidOperationExceptionObject(fmt::format(
     "Cannot compare {} and {} using a relational operator",
     describe_actual_type(t1), t2));
 }

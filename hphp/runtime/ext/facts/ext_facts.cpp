@@ -652,7 +652,7 @@ OptString HHVM_FUNCTION(facts_db_path, const OptString& rootStr) {
   } catch (const Facts::RepoOptionsParseExc& e) {
     rareSboxEvent(
         "ext_facts",
-        folly::sformat("facts_db_path {}", rootStr.slice()),
+        fmt::format("facts_db_path {}", rootStr.slice()),
         e.what());
     throw_invalid_operation_exception(makeStaticString(e.what()));
   }

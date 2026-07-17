@@ -74,6 +74,7 @@
 #include "hphp/runtime/ext/mysql/mysql_stats.h"
 #endif
 
+#include <fmt/format.h>
 #include <folly/Conv.h>
 #include <folly/File.h>
 #include <folly/FileUtil.h>
@@ -280,7 +281,7 @@ struct DumpFile {
 };
 
 Optional<DumpFile> dump_file(const char* name) {
-  auto const path = folly::sformat("{}/{}", Cfg::AdminServer::DumpPath, name);
+  auto const path = fmt::format("{}/{}", Cfg::AdminServer::DumpPath, name);
 
   // mkdir -p the directory prefix of `path`
   if (FileUtil::mkdir(path) != 0) return std::nullopt;
@@ -563,7 +564,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
       if (purge_all(&errStr)) {
         const auto after = Process::GetMemUsageMb();
         transport->sendString(
-          folly::sformat("Purged {} -> {} MB RSS", before, after).c_str());
+          fmt::format("Purged {} -> {} MB RSS", before, after).c_str());
       } else {
         transport->sendString(errStr.c_str(), 500);
       }
@@ -679,7 +680,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         HttpServer::Server->getPageServer()->setMaxThreadCount(maxThreads);
 
         // New value may not be equal to `maxThreads` due to dispatcher logic
-        transport->sendString(folly::sformat(
+        transport->sendString(fmt::format(
             "Server threads updated to {}\n",
             HttpServer::Server->getPageServer()->getMaxThreadCount()));
       } catch (...) {
@@ -688,7 +689,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
       break;
     }
     if (cmd == "get-server-threads") {
-      transport->sendString(folly::sformat(
+      transport->sendString(fmt::format(
           "Server threads currently set to to {}\n",
           HttpServer::Server->getPageServer()->getMaxThreadCount()));
       break;
@@ -763,7 +764,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
     if (strncmp(cmd.c_str(), "hugepage", 9) == 0) {
 #if USE_JEMALLOC
       std::string msg =
-        folly::sformat("{} 1G huge pages active\n", num_1g_pages());
+        fmt::format("{} 1G huge pages active\n", num_1g_pages());
       if (auto a = alloc::lowArena()) {
         msg += a->reportStats();
       }
@@ -781,7 +782,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         transport->sendString("", 200);
         break;
       }
-      auto msg = folly::sformat("{}:{}",
+      auto msg = fmt::format("{}:{}",
                                 jit::ProfData::buildHost()->slice(),
                                 jit::ProfData::buildTime());
       transport->sendString(msg, 200);
@@ -794,7 +795,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
     if (strncmp(cmd.c_str(), "dump-static-strings", 19) == 0) {
       if (auto file = dump_file("static_strings")) {
         handleDumpStaticStringsRequest(file->file);
-        transport->sendString(folly::sformat("dumped to {}\n", file->path));
+        transport->sendString(fmt::format("dumped to {}\n", file->path));
       } else {
         transport->sendString("Unable to mkdir or file already exists.\n");
       }
@@ -807,7 +808,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
     if (strncmp(cmd.c_str(), "dump-units", 10) == 0) {
       if (auto file = dump_file("loaded_units")) {
         if (handleDumpUnitsRequest(file->file)) {
-          transport->sendString(folly::sformat("dumped to {}\n", file->path));
+          transport->sendString(fmt::format("dumped to {}\n", file->path));
         }
       } else {
         transport->sendString("Unable to mkdir or file already exists.\n");
@@ -829,7 +830,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
     if (cmd == "dump-pcre-cache") {
       if (auto file = dump_file("pcre_cache")) {
         pcre_dump_cache(file->file);
-        transport->sendString(folly::sformat("dumped to {}\n", file->path));
+        transport->sendString(fmt::format("dumped to {}\n", file->path));
       } else {
         transport->sendString("Unable to mkdir or file already exists.\n");
       }
@@ -866,7 +867,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         break;
       }
       HttpServer::LoadFactor.store(factor, std::memory_order_release);
-      transport->sendString(folly::sformat("Load factor updated to {}\n",
+      transport->sendString(fmt::format("Load factor updated to {}\n",
                                            factor));
       Logger::Info("Load factor updated to %lf", factor);
       break;
@@ -887,7 +888,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
       }
       HttpServer::QueueDiscount.store(queue_discount,
         std::memory_order_release);
-      transport->sendString(folly::sformat("Queue Discount updated to {}\n",
+      transport->sendString(fmt::format("Queue Discount updated to {}\n",
         queue_discount));
       Logger::Info("Queue Discount updated to %d", queue_discount);
       break;
@@ -1100,7 +1101,7 @@ bool AdminRequestHandler::handleCheckRequest(const std::string &cmd,
     appendStat("funcs", Func::maxFuncIdNum());
     appendStat("named-entities", namedEntityTableSize());
     for (auto& pair : namedEntityStats()) {
-      appendStat(folly::sformat("named-entities-{}", pair.first), pair.second);
+      appendStat(fmt::format("named-entities-{}", pair.first), pair.second);
     }
     appendStat("static-strings", makeStaticStringCount());
     appendStat("request-count", requestCount());
@@ -1200,7 +1201,7 @@ bool AdminRequestHandler::handleInvalidateUnitRequest(const std::string &cmd,
     invalidated += translatedPath.c_str();
   }
 
-  auto msg = folly::sformat("Invalidated {} path(s): {}\n",
+  auto msg = fmt::format("Invalidated {} path(s): {}\n",
                             paths.size(), invalidated);
   transport->sendString(msg);
   return true;
@@ -1361,7 +1362,7 @@ bool AdminRequestHandler::handleStaticStringsRequest(const std::string& cmd,
 }
 
 std::string formatStaticString(StringData* str) {
-  return folly::sformat(
+  return fmt::format(
       "----\n{} bytes\n{}\n", str->size(), str->toCppString());
 }
 

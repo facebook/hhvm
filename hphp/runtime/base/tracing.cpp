@@ -14,6 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
+#include <fmt/format.h>
+
 #include "hphp/runtime/base/tracing.h"
 
 #include "hphp/runtime/base/init-fini-node.h"
@@ -333,7 +335,7 @@ void setFactory(std::unique_ptr<RequestImplFactory> f) {
 static InitFiniNode initTracingTagIdCounter([] {
   if (Cfg::Eval::TracingTagId.empty()) return;
   auto counter = ServiceData::createCounter(
-    folly::sformat("vm.tracing_tag_id.{}", Cfg::Eval::TracingTagId)
+    fmt::format("vm.tracing_tag_id.{}", Cfg::Eval::TracingTagId)
   );
   counter->setValue(1);
 }, InitFiniNode::When::PostRuntimeOptions);

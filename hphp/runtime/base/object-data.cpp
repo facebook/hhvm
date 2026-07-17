@@ -50,6 +50,7 @@
 
 #include "hphp/util/configs/eval.h"
 
+#include <fmt/format.h>
 #include <folly/Hash.h>
 #include <folly/ScopeGuard.h>
 
@@ -428,7 +429,7 @@ Variant ObjectData::o_get(const OptString& propName, bool error /* = true */,
 
   if (error) {
     SystemLib::throwUndefinedPropertyExceptionObject(
-       folly::sformat("Undefined property: {}::${}",
+       fmt::format("Undefined property: {}::${}",
                       getClassName().data(),
                       propName.data()));
   }
@@ -1601,12 +1602,12 @@ void ObjectData::unsetProp(const MemberLookupContext& ctx, const StringData* key
 }
 
 void ObjectData::throwObjToIntException(const char* clsName) {
-  SystemLib::throwTypecastExceptionObject(folly::sformat(
+  SystemLib::throwTypecastExceptionObject(fmt::format(
     "Object of class {} could not be converted to int", clsName));
 }
 
 void ObjectData::throwObjToDoubleException(const char* clsName) {
-  SystemLib::throwTypecastExceptionObject(folly::sformat(
+  SystemLib::throwTypecastExceptionObject(fmt::format(
     "Object of class {} could not be converted to float", clsName));
 }
 
@@ -1621,7 +1622,7 @@ void ObjectData::raiseAbstractClassError(Class* cls) {
 
 void ObjectData::throwUndefPropException(const StringData* key) const {
   SystemLib::throwUndefinedPropertyExceptionObject(
-    folly::sformat("Undefined property: {}::${}",
+    fmt::format("Undefined property: {}::${}",
                    m_cls->name()->data(),
                    key->data()));
 }
@@ -1700,7 +1701,7 @@ OptString ObjectData::invokeToString() {
     return String::Empty();
   }
   // Implicit object-to-string coercion is disallowed: throw rather than invoke __toString().
-  SystemLib::throwTypecastExceptionObject(folly::sformat(
+  SystemLib::throwTypecastExceptionObject(fmt::format(
     "Object of class {} could not be converted to string", classname_cstr()));
 }
 

@@ -26,6 +26,7 @@
 #include "hphp/util/random.h"
 #include "hphp/util/string-vsnprintf.h"
 
+#include <fmt/format.h>
 #include <folly/Random.h>
 #include <folly/logging/RateLimiter.h>
 #include <folly/Range.h>
@@ -113,9 +114,9 @@ void raise_reified_typehint_error(const std::string& msg, bool warn) {
 void raise_inline_typehint_error(std::string& givenType, std::string& expectedType, std::string& errorKey) {
   std::string msg;
   if (errorKey.empty()) {
-    msg = folly::sformat("Runtime type-check: Expected {}, got {}", expectedType, givenType);
+    msg = fmt::format("Runtime type-check: Expected {}, got {}", expectedType, givenType);
   } else {
-    msg = folly::sformat("Runtime type-check: Expected {} at {}, got {}",
+    msg = fmt::format("Runtime type-check: Expected {} at {}, got {}",
       expectedType, errorKey, givenType);
   }
   if (Cfg::ErrorHandling::ThrowExceptionOnInlineTypeError) return raise_typehint_error(msg);
@@ -168,19 +169,19 @@ void raise_convert_object_to_string(const char* cls_name) {
 
 void throw_convert_rfunc_to_type(const char* typeName) {
   SystemLib::throwInvalidOperationExceptionObject(
-    folly::sformat("Cannot convert reified function to {}", typeName)
+    fmt::format("Cannot convert reified function to {}", typeName)
   );
 }
 
 void throw_convert_rcls_meth_to_type(const char* typeName) {
   SystemLib::throwInvalidOperationExceptionObject(
-    folly::sformat("Cannot convert reified class method to {}", typeName)
+    fmt::format("Cannot convert reified class method to {}", typeName)
   );
 }
 
 void throw_convert_ecl_to_type(const char* typeName) {
   SystemLib::throwInvalidOperationExceptionObject(
-    folly::sformat("Cannot convert enum class label to {}", typeName)
+    fmt::format("Cannot convert enum class label to {}", typeName)
   );
 }
 
@@ -434,7 +435,7 @@ std::string param_type_error_message(
   auto const isLegacy =
     isArrayLikeType(type(actual_value)) &&
     val(actual_value).parr->isLegacyArray();
-  return folly::sformat(
+  return fmt::format(
     "{}() expects parameter {} to be {}, {} given",
     func_name,
     param_num,

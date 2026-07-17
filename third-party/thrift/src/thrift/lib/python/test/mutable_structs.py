@@ -45,6 +45,8 @@ from thrift.test.thrift_python.struct_test.thrift_mutable_types import (
     TestStructBool as TestStructBoolMutable,
     TestStructContainerAssignment as TestStructContainerAssignmentMutable,
     TestStructNested_0 as TestStructNested_0_Mutable,
+    TestStructNested_1 as TestStructNested_1_Mutable,
+    TestStructNested_2 as TestStructNested_2_Mutable,
     TestStructWithDefaultValues as TestStructWithDefaultValuesMutable,
     TestStructWithExceptionField as TestStructWithExceptionFieldMutable,
     TestStructWithFloatingPoint as TestStructWithFloatingPointMutable,
@@ -560,6 +562,38 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         self.assertEqual(42, s_mutable.i32_field)
         self.assertEqual(41, s_mutable.nested_1.i32_field)
         self.assertEqual(40, s_mutable.nested_1.nested_2.i32_field)
+
+    def test_fbthrift_copy_from(self) -> None:
+        """
+        struct TestStructNested_2 { 1: i32 i32_field; }
+        struct TestStructNested_1 { 1: i32 i32_field; 2: TestStructNested_2 nested_2; }
+        struct TestStructNested_0 { 1: i32 i32_field; 2: TestStructNested_1 nested_1; }
+        """
+        src = TestStructNested_0_Mutable(
+            i32_field=42,
+            nested_1=TestStructNested_1_Mutable(
+                i32_field=41,
+                nested_2=TestStructNested_2_Mutable(i32_field=40),
+            ),
+        )
+        dst = TestStructNested_0_Mutable(i32_field=1)
+
+        dst.fbthrift_copy_from(src)
+
+        self.assertEqual(42, dst.i32_field)
+        self.assertEqual(41, dst.nested_1.i32_field)
+        self.assertEqual(40, dst.nested_1.nested_2.i32_field)
+        self.assertEqual(src, dst)
+
+        # `fbthrift_copy_from` is a shallow copy: the nested struct field is
+        # shared by reference, so mutating it through `src` is visible through
+        # `dst`.
+        src.nested_1.i32_field = 100
+        self.assertEqual(100, dst.nested_1.i32_field)
+
+        # Copying from a different type raises.
+        with self.assertRaisesRegex(TypeError, "Cannot copy from"):
+            dst.fbthrift_copy_from(TestStruct(unqualified_string="x"))
 
     def test_conversion_nested_containers(self) -> None:
         s = TestStructWithNestedContainersImmutable(

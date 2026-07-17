@@ -24,3 +24,4 @@
 #include <thrift/lib/cpp2/transcode/Cursor.h>
 #include <thrift/lib/cpp2/transcode/IntrinsicsCommon.h>
 #include <thrift/lib/cpp2/transcode/JsonIntrinsics.h>
+#include <thrift/lib/cpp2/transcode/ProtobufIntrinsics.h>

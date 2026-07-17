@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include <folly/functional/Partial.h>
+#include <functional>
 
 #include <thrift/compiler/ast/ast_visitor.h>
 #include <thrift/compiler/ast/t_program_bundle.h>
@@ -82,7 +82,7 @@ int main(int argc, char** argv) {
 
         const_ast_visitor visitor;
         visitor.add_field_visitor(
-            folly::partial(cppref_to_structured, std::ref(fm)));
+            std::bind_front(cppref_to_structured, std::ref(fm)));
         visitor(program);
 
         fm.apply_replacements();

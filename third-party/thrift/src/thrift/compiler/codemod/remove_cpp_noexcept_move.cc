@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include <folly/functional/Partial.h>
+#include <functional>
 
 #include <thrift/compiler/ast/ast_visitor.h>
 #include <thrift/compiler/ast/t_structured.h>
@@ -41,9 +41,9 @@ int main(int argc, char** argv) {
 
         const_ast_visitor visitor;
         visitor.add_struct_visitor(
-            folly::partial(remove_cpp_noexcept_move, std::ref(fm)));
+            std::bind_front(remove_cpp_noexcept_move, std::ref(fm)));
         visitor.add_union_visitor(
-            folly::partial(remove_cpp_noexcept_move, std::ref(fm)));
+            std::bind_front(remove_cpp_noexcept_move, std::ref(fm)));
         visitor(program);
 
         fm.apply_replacements();

@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include <folly/coro/Nothrow.h>
+#include <folly/coro/Task.h>
 #include <thrift/lib/cpp2/server/ServiceInterceptorBase.h>
 #include <thrift/lib/cpp2/server/ServiceInterceptorControl.h>
 #include <thrift/lib/cpp2/server/ServiceInterceptorStorage.h>
@@ -169,8 +171,9 @@ class ServiceInterceptor : public ServiceInterceptorBase {
     auto* connectionState =
         getValueAsType<ConnectionState>(*connectionInfo.storage);
     auto* storage = requestInfo.storage;
-    if (auto value =
-            co_await onRequest(connectionState, std::move(requestInfo))) {
+    auto value = co_await folly::coro::co_nothrow(
+        onRequest(connectionState, std::move(requestInfo)));
+    if (value) {
       storage->emplace<RequestState>(std::move(*value));
     }
     interceptorMetricCallback.onRequestComplete(

@@ -1334,18 +1334,22 @@ static Variant HHVM_METHOD(ReflectionFunction, getClosureThisObject,
 // class ReflectionClass
 
 // helper for __construct
-static String HHVM_METHOD(ReflectionClass, __init, const OptString& name) {
-  return ReflectionClassHandle::Get(this_)->init(name);
+static TypedValue HHVM_METHOD(ReflectionClass, __init, const OptString& name) {
+  auto const cls = ReflectionClassHandle::Get(this_)->init(name);
+  if (!cls) return make_tv<KindOfNull>();
+  return make_tv<KindOfClass>(const_cast<Class*>(cls));
 }
 
-static String HHVM_METHOD(ReflectionClass, getName) {
+static TypedValue HHVM_METHOD(ReflectionClass, get) {
   auto const cls = ReflectionClassHandle::GetClassFor(this_);
-  return String::assertNonNull(cls->name());
+  return make_tv<KindOfClass>(const_cast<Class*>(cls));
 }
 
-static String HHVM_METHOD(ReflectionClass, getParentName) {
+static TypedValue HHVM_METHOD(ReflectionClass, getParent) {
   auto const cls = ReflectionClassHandle::GetClassFor(this_);
-  return String::assertNonNull(cls->parentStr().get());
+  auto const parent = cls->parent();
+  if (!parent) return make_tv<KindOfNull>();
+  return make_tv<KindOfClass>(parent);
 }
 
 static bool HHVM_METHOD(ReflectionClass, isHack) {
@@ -1949,8 +1953,8 @@ void ReflectionClassHandle::wakeup(const Variant& content, ObjectData* obj) {
   }
 
   OptString clsName = content.toString();
-  OptString result = init(clsName);
-  if (result.empty()) {
+  auto const cls = init(clsName);
+  if (!cls) {
     auto msg = fmt::format("Class {} does not exist", clsName.c_str());
     Reflection::ThrowReflectionExceptionObject(OptString(msg));
   }
@@ -1958,7 +1962,7 @@ void ReflectionClassHandle::wakeup(const Variant& content, ObjectData* obj) {
   // It is possible that $name does not get serialized. If a class derives
   // from ReflectionClass and the return value of its __sleep() function does
   // not contain 'name', $name gets ignored. So, we restore $name here.
-  obj->setProp(nullctx, s_name.get(), result.asTypedValue());
+  obj->setProp(nullctx, s_name.get(), make_tv<KindOfPersistentString>(cls->name()));
 }
 
 namespace {
@@ -2533,8 +2537,8 @@ struct ReflectionExtension final : Extension {
     HHVM_ME(ReflectionTypeAlias, getFileName);
 
     HHVM_ME(ReflectionClass, __init);
-    HHVM_ME(ReflectionClass, getName);
-    HHVM_ME(ReflectionClass, getParentName);
+    HHVM_ME(ReflectionClass, get);
+    HHVM_ME(ReflectionClass, getParent);
     HHVM_ME(ReflectionClass, isHack);
     HHVM_ME(ReflectionClass, isInternal);
     HHVM_ME(ReflectionClass, isInstantiable);

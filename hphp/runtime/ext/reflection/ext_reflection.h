@@ -127,11 +127,11 @@ struct ReflectionClassHandle : SystemLib::ClassLoader<"ReflectionClass"> {
     m_cls = that_.m_cls;
     return *this;
   }
-  String init(const OptString& name) {
+  const Class* init(const OptString& name) {
     auto const cls = Class::load(name.get());
-    if (!cls) return String::Empty();
+    if (!cls) return nullptr;
     setClass(cls);
-    return String::assertNonNull(cls->name());
+    return cls;
   }
 
   static ReflectionClassHandle* Get(ObjectData* obj) {

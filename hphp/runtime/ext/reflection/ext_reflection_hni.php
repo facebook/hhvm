@@ -1135,15 +1135,15 @@ class ReflectionClass implements Reflector {
     if (HH\is_class($classname)) {
       $classname = HH\class_to_classname($classname);
     }
-    $name = $this->__init($classname);
-    if (!$name) {
+    $cls = $this->__init($classname);
+    if ($cls is null) {
       throw new ReflectionException("Class $classname does not exist");
     }
-    $this->name = $name;
+    $this->name = HH\class_to_classname($cls);
   }
 
   <<__Native("NoRecording")>>
-  private function __init(string $name)[]: string;
+  private function __init(string $name)[]: ?class<mixed>;
 
   /**
    * ( excerpt from http://php.net/manual/en/reflectionclass.tostring.php )
@@ -1196,9 +1196,9 @@ class ReflectionClass implements Reflector {
       $ret .= 'class ';
     }
     $ret .= $this->getName();
-    $parent = $this->getParentName();
-    if ($parent) {
-      $ret .= " extends $parent";
+    $parent = $this->getParent();
+    if ($parent !== null) {
+      $ret .= " extends ".HH\class_to_classname($parent);
     }
     $ifaces = $this->getInterfaceNames();
     if ($ifaces) {
@@ -1326,10 +1326,14 @@ class ReflectionClass implements Reflector {
   }
 
   <<__Native>>
-  public function getName()[]: string;
+  private function get()[]: class<mixed>;
+
+  public function getName()[]: string {
+    return HH\class_to_classname($this->get());
+  }
 
   <<__Native>>
-  private function getParentName()[]: string;
+  private function getParent()[]: ?class<mixed>;
 
   /**
    * ( excerpt from http://php.net/manual/en/reflectionclass.innamespace.php
@@ -2142,8 +2146,8 @@ class ReflectionClass implements Reflector {
    * @return     mixed   A ReflectionClass, or false.
    */
   public function getParentClass()[]: mixed {
-    $parent = $this->getParentName();
-    return $parent ? new ReflectionClass($parent) : false;
+    $parent = $this->getParent();
+    return $parent !== null ? new ReflectionClass($parent) : false;
   }
 
   /**

@@ -13,7 +13,6 @@
 #include <gtest/gtest.h>
 
 #include "mcrouter/McReqUtil.h"
-#include "mcrouter/lib/network/gen/MemcacheMessages.h"
 #include "mcrouter/lib/network/test/gen/CarbonTestMessages.h"
 
 using namespace facebook::memcache;

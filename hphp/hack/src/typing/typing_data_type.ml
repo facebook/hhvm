@@ -94,6 +94,7 @@ module Tag = struct
         (describe_generics env generics)
     | InstanceOf { name; kind = Interface } ->
       Printf.sprintf "instances of the interface %s" @@ strip_ns name
+    | ClassData -> "class pointers"
     | LabelData -> "enum class labels"
     | BuiltInData -> "built-in values"
     | EnumData name -> Printf.sprintf "values of the enum %s" @@ strip_ns name
@@ -935,10 +936,10 @@ module Make (Set : SET) = struct
       in
       (env, Set.diff (mixed ~reason) right)
     | Tclass_ptr _ ->
-      (* TODO(T199606542) This likely needs a new DataType to represent
-       * class pointers but should also take care to model the tri-state
-       * while the types are still on logging enforcement *)
-      (env, mixed ~reason)
+      (* StringData: during the migration a class<T> value can still be a string
+       * at runtime. The inner type is dropped: the runtime doesn't enforce it,
+       * so distinct class<_> are indistinguishable. See T199606542. *)
+      (env, Set.of_list ~reason [Tag.ClassData; Tag.StringData])
 
   let fromHint ~safe_for_are_disjoint env hint =
     let decl_ty = Decl_hint.hint env.decl_env hint in

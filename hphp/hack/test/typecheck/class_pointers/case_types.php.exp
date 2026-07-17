@@ -1,34 +1,48 @@
-ERROR: File "case_types.php", line 5, characters 11-11:
+ERROR: File "case_types.php", line 7, characters 11-11:
 Invalid case type declaration. More than one variant of `X` could contain values with the same runtime tag (Typing[4475])
-  File "case_types.php", line 5, characters 15-20:
+  File "case_types.php", line 7, characters 15-20:
   This is the type `string`, which includes **strings**
-  File "case_types.php", line 5, characters 24-35:
+  File "case_types.php", line 7, characters 24-35:
   It overlaps with `classname<C>`, which also includes **strings**
   File "classname.hhi", line 21, characters 28-38:
     via the constraint on the newtype `classname`
   File "classname.hhi", line 14, characters 27-32:
     via the constraint on the newtype `typename`
-ERROR: File "case_types.php", line 8, characters 11-11:
+ERROR: File "case_types.php", line 10, characters 11-11:
 Invalid case type declaration. More than one variant of `Y` could contain values with the same runtime tag (Typing[4475])
-  File "case_types.php", line 8, characters 15-20:
+  File "case_types.php", line 10, characters 15-20:
   This is the type `string`, which includes **strings**
-  File "case_types.php", line 8, characters 24-31:
+  File "case_types.php", line 10, characters 24-31:
   It overlaps with `class<C>`, which also includes **strings**
-ERROR: File "case_types.php", line 9, characters 11-11:
+ERROR: File "case_types.php", line 11, characters 11-11:
 Invalid case type declaration. More than one variant of `Z` could contain values with the same runtime tag (Typing[4475])
-  File "case_types.php", line 9, characters 15-22:
+  File "case_types.php", line 11, characters 15-22:
   This is the type `class<C>`, which includes **strings**
-  File "case_types.php", line 9, characters 26-37:
+  File "case_types.php", line 11, characters 26-37:
   It overlaps with `classname<C>`, which also includes **strings**
   File "classname.hhi", line 21, characters 28-38:
     via the constraint on the newtype `classname`
   File "classname.hhi", line 14, characters 27-32:
     via the constraint on the newtype `typename`
-ERROR: File "case_types.php", line 13, characters 11-11:
-Invalid case type declaration. More than one variant of `O` could contain values with the same runtime tag (Typing[4475])
-  File "case_types.php", line 13, characters 15-15:
-  This is the type `C`, which includes **instances of the class C**
-  File "case_types.php", line 13, characters 19-26:
-  It overlaps with `class<C>`, which includes **objects**
-  File "case_types.php", line 13, characters 11-11:
-  Because **instances of the class C** are also **objects**, `C` and `class<C>` cannot be in the same case type
+ERROR: File "case_types.php", line 21, characters 11-20:
+Invalid case type declaration. More than one variant of `TwoClasses` could contain values with the same runtime tag (Typing[4475])
+  File "case_types.php", line 21, characters 24-31:
+  This is the type `class<C>`, which includes **class pointers**
+  File "case_types.php", line 21, characters 35-42:
+  It overlaps with `class<D>`, which also includes **class pointers**
+ERROR: File "case_types.php", line 24, characters 11-22:
+Invalid case type declaration. More than one variant of `WithArraykey` could contain values with the same runtime tag (Typing[4475])
+  File "case_types.php", line 24, characters 26-33:
+  This is the type `arraykey`, which includes **strings** because arraykeys are ints or strings
+  File "case_types.php", line 24, characters 37-44:
+  It overlaps with `class<C>`, which also includes **strings**
+ERROR: File "case_types.php", line 29, characters 11-18:
+Invalid case type declaration. More than one variant of `CoCClass` could contain values with the same runtime tag (Typing[4475])
+  File "case_types.php", line 29, characters 22-29:
+  This is the type `class<C>`, which includes **strings**
+  File "case_types.php", line 29, characters 33-53:
+  It overlaps with `HH\class_or_classname<C>`, which also includes **strings**
+  File "classname.hhi", line 21, characters 28-38:
+    via the constraint on the newtype `classname`
+  File "classname.hhi", line 14, characters 27-32:
+    via the constraint on the newtype `typename`

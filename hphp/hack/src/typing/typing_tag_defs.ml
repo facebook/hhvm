@@ -58,6 +58,8 @@ type t =
       name: string;
       kind: class_kind;
     }
+  | ClassData
+      (** Corresponds to class pointers: KindOfClass / KindOfLazyClass *)
   | LabelData  (** Corresponds to EnumClassLabel *)
   | BuiltInData
       (** Catch all for data types that are built into the runtime but not
@@ -103,6 +105,7 @@ let all_nonnull_tags =
     IntData;
     FloatData;
     ObjectData;
+    ClassData;
     LabelData;
     BuiltInData;
   ]

@@ -39,6 +39,7 @@ type t =
       name: string;
       kind: class_kind;
     }
+  | ClassData
   | LabelData
   | BuiltInData
   | EnumData of string

@@ -1,13 +1,13 @@
 File "open_shape_is_open_shape.php", line 5, characters 5-15:
-  shape('a' => int, 'b' => int, _ => supportdyn<mixed>)
+  shape('a' => int, 'b' => int, supportdyn<mixed>...)
 File "open_shape_is_open_shape.php", line 7, characters 5-15:
   (shape('a' => int, ...) & not shape('b' => int, ...))
 File "open_shape_is_open_shape.php", line 13, characters 5-15:
-  shape('a' => int, ?'b' => int, _ => supportdyn<mixed>)
+  shape('a' => int, ?'b' => int, supportdyn<mixed>...)
 File "open_shape_is_open_shape.php", line 15, characters 5-15:
   (shape('a' => int, ...) & not shape(?'b' => int, ...))
 File "open_shape_is_open_shape.php", line 21, characters 5-15:
-  shape('a' => int, _ => supportdyn<mixed>)
+  shape('a' => int, supportdyn<mixed>...)
 File "open_shape_is_open_shape.php", line 23, characters 5-15:
   (shape(?'a' => int, ...) & not shape('a' => int, ...))
 No errors

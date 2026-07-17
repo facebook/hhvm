@@ -602,8 +602,7 @@ module Full = struct
           (fuel, fields_doc @ [text "..."])
         else
           let (fuel, ty_doc) = k ~fuel shape_kind in
-          ( fuel,
-            fields_doc @ [Concat [text "_"; Space; text "=>"; Space; ty_doc]] )
+          (fuel, fields_doc @ [Concat [ty_doc; text "..."]])
       end
     in
     list ~fuel "shape(" id fields_doc ")"

@@ -27,7 +27,7 @@ Invalid argument (Typing[4110])
   File "representable_as_shape.php", line 4, characters 79-97:
   Expected `dict<arraykey, int>`
   File "representable_as_shape.php", line 58, characters 50-76:
-  But got `shape('a' => int, _ => float)`
+  But got `shape('a' => int, float...)`
 ERROR: File "representable_as_shape.php", line 94, characters 42-43:
 Invalid argument (Typing[4110])
   File "representable_as_shape.php", line 7, characters 82-87:

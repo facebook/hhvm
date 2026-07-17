@@ -1,4 +1,4 @@
-warning: Warn[12040] Indexing into a value of type (dynamic & shape('b' => supportdyn<mixed>, _ => supportdyn<mixed>)) [1]
+warning: Warn[12040] Indexing into a value of type (dynamic & shape('b' => supportdyn<mixed>, supportdyn<mixed>...)) [1]
 -> This expression has type dynamic [2]
 
 shape_key_exists.good.php:16:10
@@ -14,7 +14,7 @@ shape_key_exists.good.php:16:10
     17 |   }
     18 |   if (Shapes::keyExists($x, 'c')) {
 
-warning: Warn[12040] Indexing into a value of type (dynamic & shape('c' => supportdyn<mixed>, _ => supportdyn<mixed>)) [1]
+warning: Warn[12040] Indexing into a value of type (dynamic & shape('c' => supportdyn<mixed>, supportdyn<mixed>...)) [1]
 -> This expression has type dynamic [2]
 
 shape_key_exists.good.php:19:10

@@ -59,6 +59,23 @@ struct DefinitionEntry {
   std::optional<SerializableThriftSourceInfo> sourceInfo;
 };
 
+inline TSDefinition makeUninitializedDefinition(
+    const Uri& uri, SerializableTypeDefinition::Type definitionType) {
+  switch (definitionType) {
+    case SerializableTypeDefinition::Type::structDef:
+      return StructNode{uri, {}, {}, {}, {}};
+    case SerializableTypeDefinition::Type::unionDef:
+      return UnionNode{uri, {}, {}, {}, {}};
+    case SerializableTypeDefinition::Type::enumDef:
+      return EnumNode{uri, {}, {}, {}};
+    case SerializableTypeDefinition::Type::opaqueAliasDef:
+      return OpaqueAliasNode{uri, TypeRef{TypeRef::Bool{}}, {}, {}};
+    case SerializableTypeDefinition::Type::__EMPTY__:
+      break;
+  }
+  folly::assume_unreachable();
+}
+
 /**
  * For structured types, both field ids AND names must be unique.
  */
@@ -394,21 +411,8 @@ class TypeSystemImpl final : public TypeSystem {
       // A stub of the correct alternative only; its fields (including the debug
       // name) are overwritten in phase 2, so no strings are copied into it
       // here.
-      auto uninitDef = std::invoke([&]() -> TSDefinition {
-        switch (entry.definition.getType()) {
-          case SerializableTypeDefinition::Type::structDef:
-            return StructNode{uri, {}, {}, {}, {}};
-          case SerializableTypeDefinition::Type::unionDef:
-            return UnionNode{uri, {}, {}, {}, {}};
-          case SerializableTypeDefinition::Type::enumDef:
-            return EnumNode{uri, {}, {}, {}};
-          case SerializableTypeDefinition::Type::opaqueAliasDef:
-            return OpaqueAliasNode{uri, TypeRef{TypeRef::Bool{}}, {}, {}};
-          case SerializableTypeDefinition::Type::__EMPTY__:
-            break;
-        }
-        folly::assume_unreachable();
-      });
+      auto uninitDef =
+          makeUninitializedDefinition(uri, entry.definition.getType());
       definitions_.emplace(uri, std::move(uninitDef));
     }
 

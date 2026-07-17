@@ -620,24 +620,35 @@ TEST_F(ConnectionManagerTest, testDropIdleConnectionsBasedOnIdleTimeDropAll) {
     cm_->onDeactivated(*conns_[i]);
   }
 
-  InSequence enforceOrder;
-
-  // Expect every connection to be dropped
-  for (size_t i = 0; i < conns_.size(); i++) {
-    EXPECT_CALL(*conns_[i], dropConnection(_))
-        .WillOnce(Invoke([this, i](const std::string&) {
-          cm_->removeConnection(conns_[i].get());
-        }));
+  size_t notified = 0;
+  size_t closed = 0;
+  for (const auto& conn : conns_) {
+    // A graceful shed must never reset a connection.
+    EXPECT_CALL(*conn, dropConnection(_)).Times(0);
+    EXPECT_CALL(*conn, notifyPendingShutdown()).WillOnce([&] { notified++; });
+    EXPECT_CALL(*conn, closeWhenIdle()).WillOnce([&] { closed++; });
   }
 
+  // A single call warns every idle connection (first GOAWAY) and schedules its
+  // graceful close (second GOAWAY + drain) onto the event loop.
   bool callbackCalled{false};
-  cm_->dropIdleConnectionsBasedOnTimeout(
+  size_t shed = cm_->dropIdleConnectionsBasedOnTimeout(
       std::chrono::milliseconds(99),
       [this, &callbackCalled](size_t numConnectionsDropped) {
         EXPECT_EQ(numConnectionsDropped, conns_.size());
         callbackCalled = true;
       });
+  EXPECT_EQ(shed, conns_.size());
+  EXPECT_EQ(notified, conns_.size());
+  EXPECT_EQ(closed, 0); // close is deferred to the event loop
   EXPECT_TRUE(callbackCalled);
+
+  eventBase_.loop();
+  EXPECT_EQ(closed, conns_.size());
+
+  // A second call is a no-op: every connection is already being shed.
+  EXPECT_EQ(
+      cm_->dropIdleConnectionsBasedOnTimeout(std::chrono::milliseconds(99)), 0);
 }
 
 TEST_F(ConnectionManagerTest, testDropIdleConnectionsBasedOnIdleTimeDropNone) {
@@ -652,11 +663,11 @@ TEST_F(ConnectionManagerTest, testDropIdleConnectionsBasedOnIdleTimeDropNone) {
     cm_->onDeactivated(*conns_[i]);
   }
 
-  InSequence enforceOrder;
-
-  // Expect no connection to be dropped
+  // Nothing is idle beyond the threshold, so nothing is shed.
   for (size_t i = 0; i < conns_.size(); i++) {
     EXPECT_CALL(*conns_[i], dropConnection(_)).Times(0);
+    EXPECT_CALL(*conns_[i], notifyPendingShutdown()).Times(0);
+    EXPECT_CALL(*conns_[i], closeWhenIdle()).Times(0);
   }
 
   cm_->dropIdleConnectionsBasedOnTimeout(
@@ -681,14 +692,11 @@ TEST_F(ConnectionManagerTest, testDropIdleConnectionsBasedOnIdleTimeDropHalf) {
   // remove the first idle conn
   cm_->removeConnection(conns_[1].get());
 
-  InSequence enforceOrder;
-
-  // Expect the remaining idle conns to drop
+  // Nothing is reset; the remaining idle conns are shed gracefully.
   for (size_t i = 2; i < conns_.size() / 2; i++) {
-    EXPECT_CALL(*conns_.at(i), dropConnection(_))
-        .WillOnce(Invoke([this, i](const std::string&) {
-          cm_->removeConnection(conns_.at(i).get());
-        }));
+    EXPECT_CALL(*conns_.at(i), dropConnection(_)).Times(0);
+    EXPECT_CALL(*conns_.at(i), notifyPendingShutdown());
+    EXPECT_CALL(*conns_.at(i), closeWhenIdle());
   }
 
   bool callbackCalled{false};
@@ -699,6 +707,7 @@ TEST_F(ConnectionManagerTest, testDropIdleConnectionsBasedOnIdleTimeDropHalf) {
         callbackCalled = true;
       });
   EXPECT_TRUE(callbackCalled);
+  eventBase_.loop();
 }
 
 TEST_F(ConnectionManagerTest, testDropIdleConnectionsBasedOnIdleTimeEarlyStop) {
@@ -719,24 +728,26 @@ TEST_F(ConnectionManagerTest, testDropIdleConnectionsBasedOnIdleTimeEarlyStop) {
     cm_->onDeactivated(*conns_[i]);
   }
 
-  InSequence enforceOrder;
-
-  // Expect the remaining idle conns to drop
+  // Nothing is reset; only connections past the threshold are shed (warned +
+  // closed), and shedding stops early at the first connection within the
+  // threshold.
+  for (size_t i = 0; i < conns_.size(); i++) {
+    EXPECT_CALL(*conns_.at(i), dropConnection(_)).Times(0);
+  }
   for (size_t i = 0; i < halfConnectionsSize; i++) {
-    EXPECT_CALL(*conns_.at(i), dropConnection(_))
-        .WillOnce(Invoke([this, i](const std::string&) {
-          cm_->removeConnection(conns_.at(i).get());
-        }));
+    EXPECT_CALL(*conns_.at(i), notifyPendingShutdown());
+    EXPECT_CALL(*conns_.at(i), closeWhenIdle());
   }
 
   bool callbackCalled{false};
   cm_->dropIdleConnectionsBasedOnTimeout(
       std::chrono::milliseconds(99),
-      [halfConnectionsSize, &callbackCalled](size_t numConnectionsDropped) {
-        EXPECT_EQ(numConnectionsDropped, halfConnectionsSize);
+      [halfConnectionsSize, &callbackCalled](size_t numConnectionsShed) {
+        EXPECT_EQ(numConnectionsShed, halfConnectionsSize);
         callbackCalled = true;
       });
   EXPECT_TRUE(callbackCalled);
+  eventBase_.loop();
 }
 
 TEST_F(ConnectionManagerTest, testAddDuringShutdown) {

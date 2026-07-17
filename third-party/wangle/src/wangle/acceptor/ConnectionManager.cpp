@@ -563,22 +563,55 @@ size_t ConnectionManager::dropIdleConnectionsBasedOnTimeout(
     std::chrono::milliseconds targetIdleTimeMs,
     const std::function<void(size_t)>& droppedConnectionsCB) {
   WANGLE_VLOG(4)
-      << "attempt to drop all the connections for which idle time is greater or equal to "
+      << "attempt to gracefully drop connections whose idle time is greater than "
       << targetIdleTimeMs.count();
 
-  // Idle connection are sorted in decreasing order from left to right.
+  DestructorGuard g(this);
+
+  // Idle connections are sorted in decreasing idle-time order starting at
+  // idleIterator_, so we stop at the first connection within the threshold.
+  //
+  // We walk a local copy and intentionally leave idleIterator_ in place: shed
+  // connections stay linked and idle while they drain, so they still belong to
+  // the idle range [idleIterator_, end). idleIterator_ advances only when each
+  // drained connection is finally erased in removeConnection(). Advancing it
+  // here would push the busy/idle boundary into still-idle connections.
   size_t count = 0;
-  while (idleIterator_ != conns_.end()) {
-    auto idleTimeMs = idleIterator_->getIdleTime();
+  auto it = idleIterator_;
+  while (it != conns_.end()) {
+    auto idleTimeMs = it->getIdleTime();
     if (idleTimeMs <= targetIdleTimeMs) {
       WANGLE_VLOG(4) << "conn's idletime: " << idleTimeMs.count()
                      << ", in-activity threshold: " << targetIdleTimeMs.count()
-                     << ", dropped " << count << "/" << count;
+                     << ", drop " << count;
       break;
     }
-    ManagedConnection& conn = *idleIterator_;
-    idleIterator_++;
-    conn.dropConnection();
+    // Only the first GOAWAY is sent here; the actual teardown is deferred to
+    // closeWhenIdle() below, so conn stays valid for the rest of this
+    // iteration.
+    ManagedConnection& conn = *it++;
+    // Skip connections already being drained, so repeat calls are idempotent
+    // (no duplicate GOAWAYs, no re-drop).
+    if (conn.getDrainState() != ManagedConnection::DrainState::NONE) {
+      continue;
+    }
+    // Drop gracefully instead of with an abortive reset: an idle connection may
+    // still be pooled by the peer, which can dispatch a request onto it in the
+    // window before we read/parse the new HEADERS; an abortive reset there
+    // surfaces as ConnectionReset/EOF.
+    // Warn the peer (first GOAWAY) so it stops reusing the connection, then
+    // close it (second GOAWAY + drain). closeWhenIdle() can destroy the
+    // connection, so defer it under guards and re-check linkage, as what
+    // addConnection() does.
+    conn.fireNotifyPendingShutdown();
+    ManagedConnection* connPtr = &conn;
+    eventBase_->runInLoop([connPtr,
+                           cmDg = DestructorGuard(this),
+                           connDg = DestructorGuard(connPtr)] {
+      if (connPtr->listHook_.is_linked()) {
+        connPtr->fireCloseWhenIdle();
+      }
+    });
     count++;
   }
   droppedConnectionsCB(count);

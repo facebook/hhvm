@@ -238,7 +238,17 @@ class ConnectionManager : public folly::DelayedDestruction,
   size_t dropIdleConnections(size_t num);
 
   /**
-   * Drop connections based on idle timeout.
+   * Drop connections whose idle time exceeds a target timeout.
+   *
+   * Connections are shed gracefully (GOAWAY + drain) instead of with an
+   * abortive reset, so a peer that still has the connection pooled stops
+   * reusing it and any in-flight/raced request completes or is safely retried
+   * (an abortive reset would surface upstream as a 502).
+   *
+   * Each selected connection is warned (first GOAWAY) and then closed when idle
+   * (second GOAWAY + drain); the close is deferred onto the event loop because
+   * it can destroy the connection. Connections already being shed are skipped,
+   * so repeat calls are idempotent.
    *
    * @param targetIdleTimeMS The target idle timeout for all connections.
    * @param droppedConnectionsCB Callback will be called at the end of the

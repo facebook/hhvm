@@ -182,16 +182,24 @@ class ManagedConnection : public folly::HHWheelTimer::Callback,
     return activationState_;
   }
 
- protected:
-  ~ManagedConnection() override;
-
- private:
+  /**
+   * Graceful-drain phase of this connection, advanced from NONE by
+   * fireNotifyPendingShutdown() and then by fireCloseWhenIdle().
+   */
   enum class DrainState {
     NONE,
     SENT_NOTIFY_PENDING_SHUTDOWN,
     SENT_CLOSE_WHEN_IDLE,
   };
 
+  DrainState getDrainState() const {
+    return state_;
+  }
+
+ protected:
+  ~ManagedConnection() override;
+
+ private:
   DrainState state_{DrainState::NONE};
 
   friend class ConnectionManager;

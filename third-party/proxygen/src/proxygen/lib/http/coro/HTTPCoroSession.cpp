@@ -16,6 +16,8 @@
 #include <proxygen/lib/http/session/HTTPSessionStats.h>
 #include <proxygen/lib/http/webtransport/HTTPWebTransport.h>
 
+#include <functional>
+
 #include <folly/logging/xlog.h>
 #include <quic/common/address/QuicSocketAddressBridge.h>
 #include <quic/priority/HTTPPriorityQueue.h>
@@ -60,10 +62,10 @@ HTTPErrorCode sourceCompleteErr2ErrorCode(HTTPErrorCode ec) {
   }
 }
 
-#define SESS_STATS(method, ...)                                             \
-  if (sessionStats_) {                                                      \
-    folly::invoke(&HTTPSessionStats::method, sessionStats_, ##__VA_ARGS__); \
-  }                                                                         \
+#define SESS_STATS(method, ...)                                           \
+  if (sessionStats_) {                                                    \
+    std::invoke(&HTTPSessionStats::method, sessionStats_, ##__VA_ARGS__); \
+  }                                                                       \
   static_assert(true, "semicolon required")
 
 void setSecureMsg(HTTPMessage& msg,

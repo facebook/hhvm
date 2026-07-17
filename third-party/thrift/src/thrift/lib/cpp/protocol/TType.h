@@ -19,6 +19,7 @@
 #include <stdint.h>
 #include <string>
 #include <fmt/core.h>
+#include <fmt/format.h>
 
 namespace apache::thrift::protocol {
 

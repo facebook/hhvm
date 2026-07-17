@@ -25,6 +25,7 @@
 #include <vector>
 
 #include <fmt/format.h>
+#include <fmt/ranges.h>
 
 // Input:
 //   A directory containing ".thrift" files. All files (recursively) in the

@@ -40,6 +40,7 @@
 #include <span>
 #include <stdexcept>
 #include <string>
+#include <string_view>
 #include <tuple>
 #include <variant>
 #include <vector>
@@ -477,6 +478,45 @@ class TypeRef final {
     ENUM = detail::IndexOf<Alternative, EnumPtr>,
     OPAQUE_ALIAS = detail::IndexOf<Alternative, OpaqueAliasPtr>,
   };
+  static std::string_view kindName(Kind kind) {
+    switch (kind) {
+      case Kind::BOOL:
+        return "BOOL";
+      case Kind::BYTE:
+        return "BYTE";
+      case Kind::I16:
+        return "I16";
+      case Kind::I32:
+        return "I32";
+      case Kind::I64:
+        return "I64";
+      case Kind::FLOAT:
+        return "FLOAT";
+      case Kind::DOUBLE:
+        return "DOUBLE";
+      case Kind::STRING:
+        return "STRING";
+      case Kind::BINARY:
+        return "BINARY";
+      case Kind::ANY:
+        return "ANY";
+      case Kind::LIST:
+        return "LIST";
+      case Kind::SET:
+        return "SET";
+      case Kind::MAP:
+        return "MAP";
+      case Kind::STRUCT:
+        return "STRUCT";
+      case Kind::UNION:
+        return "UNION";
+      case Kind::ENUM:
+        return "ENUM";
+      case Kind::OPAQUE_ALIAS:
+        return "OPAQUE_ALIAS";
+    }
+    folly::assume_unreachable();
+  }
   Kind kind() const { return static_cast<Kind>(type_.index()); }
 
   bool isBool() const { return kind() == Kind::BOOL; }

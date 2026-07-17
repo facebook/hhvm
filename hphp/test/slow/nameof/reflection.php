@@ -7,11 +7,6 @@ class C extends A {
     string $t1 = C::class,
     string $s2 = nameof self,
     string $t2 = self::class,
-    string $s4 = nameof parent,
-    string $t4 = parent::class,
-    string $s3 = nameof static,
-    // TODO: this case is buggy but unused
-    string $t3 = static::class,
   ): void {}
 }
 
@@ -19,7 +14,7 @@ class C extends A {
 function main(): void {
   $c = new ReflectionClass("C");
   $m = $c->getMethod("f");
-  foreach($m->getParameters() as $p) {
+  foreach ($m->getParameters() as $p) {
     echo $p->getName();
     echo " => ";
     echo $p->getDefaultValueText();

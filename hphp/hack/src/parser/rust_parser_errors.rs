@@ -5498,16 +5498,14 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 },
                 _ => {}
             }
-            if self.env.parser_options.const_default_func_args {
-                self.check_constant_expression(
-                    &x.default_value,
-                    // `static` in constant
-                    !self
-                        .env
-                        .parser_options
-                        .disallow_static_constants_in_default_func_args,
-                )
-            }
+            self.check_constant_expression(
+                &x.default_value,
+                // `static` in constant
+                !self
+                    .env
+                    .parser_options
+                    .disallow_static_constants_in_default_func_args,
+            )
         }
     }
 

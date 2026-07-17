@@ -39,12 +39,6 @@ pub fn parser_options(config: &HhvmConfig) -> Result<ParserOptions> {
         "Hack.Lang.AllowUnstableFeatures",
     )?;
 
-    // TODO: could not find examples of const_default_func_args, kill it in options_cli.rs
-    init(
-        &mut flags.const_default_func_args,
-        "Hack.Lang.ConstDefaultFuncArgs",
-    )?;
-
     // Only hdf version found in use
     init(&mut flags.const_static_props, "Hack.Lang.ConstStaticProps")?;
 

@@ -1,7 +1,7 @@
 <?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-function test_eval() :mixed{
+function test_eval(): mixed {
   echo "============ test_eval =======================================\n";
 
   eval('function f1() { return vec[1, 2, 3]; }');
@@ -33,15 +33,17 @@ function test_eval() :mixed{
   f8($d);
   f9($k);
 }
-function wrap($arr, $v) :mixed{
-  $arr[] = $v;
-  return $v;
+function test_func(
+  ?vec<mixed> $v = null,
+  ?dict<arraykey, mixed> $d = null,
+  ?keyset<arraykey> $k = null,
+): mixed {
+  $v ??= vec[1, 2];
+  $d ??= dict[100 => 'a', 200 => 'b'];
+  $k ??= keyset['a', 'b'];
 }
-function test_func($v = wrap(vec[], vec[1, 2]),
-                   $d = wrap(vec[], dict[100 => 'a', 200 => 'b']),
-                   $k = wrap(vec[], keyset['a', 'b'])) :mixed{}
 
-function test_default_value() :mixed{
+function test_default_value(): mixed {
   echo "============ test_default_value ==============================\n";
   $r = new ReflectionFunction('test_func');
   var_dump($r->getParameters()[0]->getDefaultValue());
@@ -49,9 +51,8 @@ function test_default_value() :mixed{
   var_dump($r->getParameters()[2]->getDefaultValue());
 }
 
-
 <<__EntryPoint>>
-function main_hack_arrays_eval() :mixed{
-test_eval();
-test_default_value();
+function main_hack_arrays_eval(): mixed {
+  test_eval();
+  test_default_value();
 }

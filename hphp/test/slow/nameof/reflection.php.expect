@@ -1,0 +1,4 @@
+s1 => "C" = string(1) "C"
+t1 => "C" = string(1) "C"
+s2 => "C" = string(1) "C"
+t2 => \C::class = string(1) "C"

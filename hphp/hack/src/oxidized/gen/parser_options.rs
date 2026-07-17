@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<96efbdaa3013420c19d6e7886acc9b44>>
+// @generated SignedSource<<9de11d856ac07af2637217ff0394b0c0>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -38,8 +38,6 @@ use crate::*;
 pub struct ParserOptions {
     /// Enable const static properties
     pub const_static_props: bool,
-    /// Statically check default function arguments
-    pub const_default_func_args: bool,
     /// Static properties can be abstract
     pub abstract_static_props: bool,
     /// Enable the new style xhp class.
@@ -134,7 +132,6 @@ pub struct ParserOptions {
 )]
 #[repr(C)]
 pub struct FfiT(
-    pub bool,
     pub bool,
     pub bool,
     pub bool,

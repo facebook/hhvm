@@ -9,7 +9,6 @@
 type t = {
   (* These options are set in both hhvm and hh config *)
   const_static_props: bool;
-  const_default_func_args: bool;
   abstract_static_props: bool;
   enable_xhp_class_modifier: bool;
   disable_xhp_element_mangling: bool;
@@ -49,7 +48,6 @@ type t = {
 let default =
   {
     const_static_props = false;
-    const_default_func_args = true;
     abstract_static_props = false;
     enable_xhp_class_modifier = false;
     disable_xhp_element_mangling = false;
@@ -99,7 +97,6 @@ type ffi_t =
   * bool
   * bool
   * bool
-  * bool
   * Experimental_features.feature_status SMap.t
   * bool
   * bool
@@ -111,7 +108,6 @@ let to_rust_ffi_t po =
     po.hhi_mode,
     po.codegen,
     po.const_static_props,
-    po.const_default_func_args,
     po.abstract_static_props,
     po.enable_xhp_class_modifier,
     po.disable_xhp_element_mangling,

@@ -98,6 +98,8 @@ async fn get_client(
         SocketAddr::new(std::net::Ipv6Addr::LOCALHOST.into(), port),
     )?
     .with_secure(false)
+    .with_conn_timeout(30_000)
+    .with_recv_timeout(30_000)
     .build_channel()?;
 
     match channel.protocol_id() {

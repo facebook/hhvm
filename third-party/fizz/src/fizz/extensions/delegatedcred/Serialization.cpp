@@ -139,7 +139,7 @@ Status loadDCFromPEM(
     credVec.emplace_back(
         Extension{
             ExtensionType::delegated_credential,
-            folly::IOBuf::copyBuffer(std::move(credData))});
+            folly::IOBuf::fromString(std::move(credData))});
     FIZZ_RETURN_ON_ERROR(getExtension<DelegatedCredential>(cred, err, credVec));
   } catch (const std::exception& e) {
     return err.error(

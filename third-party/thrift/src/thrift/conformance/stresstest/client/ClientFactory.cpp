@@ -497,6 +497,14 @@ THRIFT_PLUGGABLE_FUNC_REGISTER(
   return clients;
 }
 
+THRIFT_PLUGGABLE_FUNC_REGISTER(
+    std::unique_ptr<ClientThreadDriver>,
+    createClientThreadDriver,
+    size_t /* index */,
+    const ClientConfig& /* cfg */) {
+  return nullptr;
+}
+
 /* static */ void ClientFactory::useCustomSslContext(
     std::function<std::shared_ptr<folly::SSLContext>()> fn) {
   customSslContextFn = std::move(fn);

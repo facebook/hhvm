@@ -51,4 +51,23 @@ THRIFT_PLUGGABLE_FUNC_DECLARE(
     const ClientConfig&,
     ClientRpcStats&);
 
+class ClientThreadDriver {
+ public:
+  virtual ~ClientThreadDriver() = default;
+
+  virtual std::vector<std::unique_ptr<StressTestClient>> createClients(
+      folly::EventBase* evb,
+      const ClientConfig& cfg,
+      ClientRpcStats& stats) = 0;
+
+  virtual void progress() = 0;
+  virtual void shutdown() = 0;
+};
+
+THRIFT_PLUGGABLE_FUNC_DECLARE(
+    std::unique_ptr<ClientThreadDriver>,
+    createClientThreadDriver,
+    size_t /* client thread index */,
+    const ClientConfig&);
+
 } // namespace apache::thrift::stress

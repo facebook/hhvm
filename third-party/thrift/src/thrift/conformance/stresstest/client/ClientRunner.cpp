@@ -16,7 +16,12 @@
 
 #include <thrift/conformance/stresstest/client/ClientRunner.h>
 
+#include <thread>
+
 #include <folly/coro/BlockingWait.h>
+#include <folly/io/async/ScopedEventBaseThread.h>
+#include <folly/synchronization/RelaxedAtomic.h>
+#include <folly/system/ThreadName.h>
 #include <thrift/conformance/stresstest/common/TimeoutCallbacks.h>
 #include <thrift/conformance/stresstest/util/Util.h>
 #include <thrift/lib/cpp2/transport/rocket/client/RocketClient.h>
@@ -51,54 +56,26 @@ std::unique_ptr<folly::EventBaseBackendBase> getDefaultBackend() {
 
 class ClientThread : public folly::HHWheelTimer::Callback {
  public:
-  explicit ClientThread(
-      const ClientConfig& cfg,
-      size_t index,
-      BaseLoadGenerator& loadGenerator,
-      bool useLoadGenerator)
-      : memoryHistogram_(50, 0, 1024 * 1024 * 1024 /* 1GB */),
-        continuous_(cfg.continuous),
-        numRunsPerClient_(cfg.numRunsPerClient),
-        useLoadGenerator_(useLoadGenerator),
-        loadGenerator_(loadGenerator) {
-    auto ebm = folly::EventBaseManager::get();
-    warmupDoneTimeout_ = std::make_unique<WarmupDoneTimeout>(rpcStats_);
-    testDoneTimeout_ = std::make_unique<TestDoneTimeout>(testDone_);
-    auto factoryFunction = cfg.connConfig.ioUring
-        ? folly::EventBaseBackendBase::FactoryFunc(getIOUringBackend)
-        : folly::EventBaseBackendBase::FactoryFunc(getDefaultBackend);
-    auto threadName = fmt::format("client-runner-thread-{}", index);
-    thread_ = std::make_unique<folly::ScopedEventBaseThread>(
-        folly::EventBase::Options().setBackendFactory(factoryFunction),
-        ebm,
-        threadName);
-  }
+  ~ClientThread() override = default;
+
+  virtual folly::EventBase* getEventBase() = 0;
+
+  virtual std::vector<std::unique_ptr<StressTestClient>> buildClients(
+      const ClientConfig& cfg, ClientRpcStats& stats) = 0;
 
   void initClients(const ClientConfig& cfg) {
-    auto* evb = thread_->getEventBase();
-    // create clients in event base thread
-    evb->runInEventBaseThreadAndWait([&]() {
-      // capture baseline memory usage
+    auto* evb = getEventBase();
+    evb->runInEventBaseThreadAndWait([&] {
       memoryStats_.threadStart = getThreadMemoryUsage();
-      clients_ = createClients(evb, cfg, rpcStats_);
-      // capture memory usage after connections are established
+      clients_ = buildClients(cfg, rpcStats_);
       memoryStats_.connectionsEstablished = getThreadMemoryUsage();
-      // start memory monitoring
       evb->timer().scheduleTimeout(this, std::chrono::seconds(1));
     });
   }
 
-  ~ClientThread() override {
-    // destroy clients in event base thread
-    thread_->getEventBase()->runInEventBaseThreadAndWait(
-        [clients = std::move(clients_),
-         warmupDoneTimeout = std::move(warmupDoneTimeout_),
-         testDoneTimeout = std::move(testDoneTimeout_)]() {});
-  }
-
   void checkIsContinuous() {
     if (!continuous_ && numRunsPerClient_ == 0) {
-      thread_->getEventBase()->timer().scheduleTimeout(
+      getEventBase()->timer().scheduleTimeout(
           testDoneTimeout_.get(),
           std::chrono::seconds(FLAGS_warmup_s + FLAGS_runtime_s));
     }
@@ -106,7 +83,7 @@ class ClientThread : public folly::HHWheelTimer::Callback {
 
   void warmup() {
     if (FLAGS_warmup_s >= 0) {
-      thread_->getEventBase()->timer().scheduleTimeout(
+      getEventBase()->timer().scheduleTimeout(
           warmupDoneTimeout_.get(), std::chrono::seconds(FLAGS_warmup_s));
     }
   }
@@ -114,15 +91,14 @@ class ClientThread : public folly::HHWheelTimer::Callback {
   void concurrentRun(const StressTestBase* test) {
     for (auto& client : clients_) {
       scope_.add(co_withExecutor(
-          thread_->getEventBase(), runConcurrentInternal(client.get(), test)));
+          getEventBase(), runConcurrentInternal(client.get(), test)));
     }
   }
 
   void loadGeneratedRun(const StressTestBase* test) {
     for (auto& client : clients_) {
       scope_.add(co_withExecutor(
-          thread_->getEventBase(),
-          runLoadGeneratorInternal(client.get(), test)));
+          getEventBase(), runLoadGeneratorInternal(client.get(), test)));
     }
   }
 
@@ -140,7 +116,7 @@ class ClientThread : public folly::HHWheelTimer::Callback {
 
     return scope_.joinAsync()
         .semi()
-        .via(thread_->getEventBase())
+        .via(getEventBase())
         .thenValue([&](auto&&) -> folly::Unit {
           // cancel memory monitoring timeout and capture residual memory usage
           cancelTimeout();
@@ -157,8 +133,7 @@ class ClientThread : public folly::HHWheelTimer::Callback {
   void timeoutExpired() noexcept override {
     memoryHistogram_.addValue(getThreadMemoryUsage());
     // reschedule the timeout
-    thread_->getEventBase()->timer().scheduleTimeout(
-        this, std::chrono::seconds(1));
+    getEventBase()->timer().scheduleTimeout(this, std::chrono::seconds(1));
   }
 
   const ClientRpcStats& getRpcStats() const { return rpcStats_; }
@@ -168,8 +143,6 @@ class ClientThread : public folly::HHWheelTimer::Callback {
     rpcStats_.numFailure = 0;
     rpcStats_.numSuccess = 0;
   }
-
-  folly::EventBase* getEventBase() { return thread_->getEventBase(); }
 
   void addClient(std::unique_ptr<StressTestClient> client) {
     clients_.push_back(std::move(client));
@@ -196,6 +169,34 @@ class ClientThread : public folly::HHWheelTimer::Callback {
     return removedClients;
   }
 
+ protected:
+  ClientThread(
+      const ClientConfig& cfg,
+      size_t /* index */,
+      BaseLoadGenerator& loadGenerator,
+      bool useLoadGenerator)
+      : memoryHistogram_(50, 0, 1024 * 1024 * 1024 /* 1GB */),
+        continuous_(cfg.continuous),
+        numRunsPerClient_(cfg.numRunsPerClient),
+        useLoadGenerator_(useLoadGenerator),
+        loadGenerator_(loadGenerator) {
+    warmupDoneTimeout_ = std::make_unique<WarmupDoneTimeout>(rpcStats_);
+    testDoneTimeout_ = std::make_unique<TestDoneTimeout>(testDone_);
+  }
+
+  ClientRpcStats rpcStats_;
+  ClientThreadMemoryStats memoryStats_;
+  folly::Histogram<size_t> memoryHistogram_;
+  folly::coro::AsyncScope scope_;
+  std::vector<std::unique_ptr<StressTestClient>> clients_;
+  bool continuous_{false};
+  uint64_t numRunsPerClient_{0};
+  bool useLoadGenerator_{false};
+  bool testDone_{false};
+  std::unique_ptr<TestDoneTimeout> testDoneTimeout_;
+  std::unique_ptr<WarmupDoneTimeout> warmupDoneTimeout_;
+  BaseLoadGenerator& loadGenerator_;
+
  private:
   folly::coro::Task<void> runConcurrentInternal(
       StressTestClient* client, const StressTestBase* test) {
@@ -219,24 +220,99 @@ class ClientThread : public folly::HHWheelTimer::Callback {
 
       auto v = *s;
       while (v-- > 0) {
-        test->runWorkload(client).semi().via(thread_->getEventBase());
+        test->runWorkload(client).semi().via(getEventBase());
       }
     }
   }
+};
 
-  ClientRpcStats rpcStats_;
-  ClientThreadMemoryStats memoryStats_;
-  folly::Histogram<size_t> memoryHistogram_;
-  folly::coro::AsyncScope scope_;
-  std::vector<std::unique_ptr<StressTestClient>> clients_;
-  std::unique_ptr<folly::ScopedEventBaseThread> thread_;
-  bool continuous_{false};
-  uint64_t numRunsPerClient_{0};
-  bool useLoadGenerator_{false};
-  bool testDone_{false};
-  std::unique_ptr<TestDoneTimeout> testDoneTimeout_;
-  std::unique_ptr<WarmupDoneTimeout> warmupDoneTimeout_;
-  BaseLoadGenerator& loadGenerator_;
+class RocketClientThread final : public ClientThread {
+ public:
+  RocketClientThread(
+      const ClientConfig& cfg,
+      size_t index,
+      BaseLoadGenerator& loadGenerator,
+      bool useLoadGenerator)
+      : ClientThread(cfg, index, loadGenerator, useLoadGenerator),
+        thread_(
+            folly::EventBase::Options().setBackendFactory(
+                cfg.connConfig.ioUring
+                    ? folly::EventBaseBackendBase::FactoryFunc(
+                          getIOUringBackend)
+                    : folly::EventBaseBackendBase::FactoryFunc(
+                          getDefaultBackend)),
+            folly::EventBaseManager::get(),
+            fmt::format("client-runner-thread-{}", index)) {}
+
+  ~RocketClientThread() override {
+    thread_.getEventBase()->runInEventBaseThreadAndWait([this] {
+      clients_.clear();
+      warmupDoneTimeout_.reset();
+      testDoneTimeout_.reset();
+    });
+  }
+
+  folly::EventBase* getEventBase() override { return thread_.getEventBase(); }
+
+  std::vector<std::unique_ptr<StressTestClient>> buildClients(
+      const ClientConfig& cfg, ClientRpcStats& stats) override {
+    return createClients(thread_.getEventBase(), cfg, stats);
+  }
+
+ private:
+  folly::ScopedEventBaseThread thread_;
+};
+
+class BusyPollClientThread final : public ClientThread {
+ public:
+  BusyPollClientThread(
+      const ClientConfig& cfg,
+      size_t index,
+      BaseLoadGenerator& loadGenerator,
+      bool useLoadGenerator,
+      std::unique_ptr<ClientThreadDriver> driver)
+      : ClientThread(cfg, index, loadGenerator, useLoadGenerator),
+        driver_(std::move(driver)) {
+    thread_ = std::thread(
+        [this, name = fmt::format("client-runner-thread-{}", index)]() {
+          folly::setThreadName(name);
+          run();
+        });
+  }
+
+  ~BusyPollClientThread() override {
+    stop_.store(true);
+    if (thread_.joinable()) {
+      thread_.join();
+    }
+  }
+
+  folly::EventBase* getEventBase() override { return &evb_; }
+
+  std::vector<std::unique_ptr<StressTestClient>> buildClients(
+      const ClientConfig& cfg, ClientRpcStats& stats) override {
+    return driver_->createClients(&evb_, cfg, stats);
+  }
+
+ private:
+  void run() {
+    while (!stop_.load()) {
+      driver_->progress();
+      evb_.loopOnce(EVLOOP_NONBLOCK);
+    }
+    // Final drain so any last replies / continuations complete.
+    driver_->progress();
+    evb_.loopOnce(EVLOOP_NONBLOCK);
+
+    clients_.clear();
+    driver_->shutdown();
+    driver_.reset();
+  }
+
+  folly::EventBase evb_;
+  std::unique_ptr<ClientThreadDriver> driver_;
+  folly::relaxed_atomic<bool> stop_{false};
+  std::thread thread_;
 };
 
 ClientRunner::ClientRunner(const ClientConfig& config)
@@ -256,9 +332,20 @@ ClientRunner::ClientRunner(const ClientConfig& config)
     loadGenerator_.emplace_back(
         std::make_unique<PoissonLoadGenerator>(
             targetQpsPerClient, config.gen_load_interval));
-    clientThreads_.emplace_back(
-        std::make_unique<ClientThread>(
-            configCopy, i, *loadGenerator_[i], config.useLoadGenerator));
+    auto driver = createClientThreadDriver(i, configCopy);
+    if (driver) {
+      clientThreads_.emplace_back(
+          std::make_unique<BusyPollClientThread>(
+              configCopy,
+              i,
+              *loadGenerator_[i],
+              config.useLoadGenerator,
+              std::move(driver)));
+    } else {
+      clientThreads_.emplace_back(
+          std::make_unique<RocketClientThread>(
+              configCopy, i, *loadGenerator_[i], config.useLoadGenerator));
+    }
   }
 
   if (config.connConfig.ioUringZcrx && FLAGS_io_zcrx_hw_queues > 0) {

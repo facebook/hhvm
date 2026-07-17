@@ -24,6 +24,10 @@
 #include <variant>
 #include <vector>
 
+namespace apache::thrift::type_system {
+class TypeRef;
+} // namespace apache::thrift::type_system
+
 namespace apache::thrift::transcode {
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -156,7 +160,7 @@ enum class WriteFn : uint8_t {
  */
 enum class CoerceOp : uint8_t {
   None,
-  WidenI32ToI64,
+  WidenSignedInt,
   WidenF32ToF64,
 };
 
@@ -210,9 +214,9 @@ struct EnumNames {
  * Read one scalar, coerce, write it.
  */
 struct ScalarOp {
-  ValueKind valueKind;
-  ReadFn readFn;
-  WriteFn writeFn;
+  ValueKind valueKind{};
+  ReadFn readFn{};
+  WriteFn writeFn{};
   CoerceOp coerce = CoerceOp::None;
 
   // Only used when readFn/writeFn == Custom
@@ -263,8 +267,8 @@ enum class LoopKind : uint8_t {
  * Container framing is emitted inline by the codegen.
  */
 struct SeqOp {
-  ContainerFraming readFraming;
-  ContainerFraming writeFraming;
+  ContainerFraming readFraming{};
+  ContainerFraming writeFraming{};
 
   // How the read loop terminates.
   LoopKind readLoopKind = LoopKind::ByCount;
@@ -287,8 +291,8 @@ struct SeqOp {
  * codegen to wrap/unwrap entries with submessage framing.
  */
 struct MapOp {
-  ContainerFraming readFraming;
-  ContainerFraming writeFraming;
+  ContainerFraming readFraming{};
+  ContainerFraming writeFraming{};
 
   // Compact/Binary: key and value types for framing headers.
   uint8_t readKeyType = 0;
@@ -320,12 +324,14 @@ struct MapOp {
  * on the target side. The command describes how to process ONE element.
  */
 struct FieldEntry {
-  int16_t fieldId;
+  int16_t fieldId{};
   std::string fieldName; // for name-based framing (JSON)
   uint8_t readTypeInfo = 0; // expected source type byte (for ttype validation)
   uint8_t writeTypeInfo = 0; // protocol-specific type byte for write header
   bool isRepeated = false; // protobuf: same fieldId appears multiple times
+  bool optional = false;
   bool required = false; // schema presence == UNQUALIFIED (for dynamic->wire)
+  bool hasCustomDefault = false;
   std::unique_ptr<Command> command;
 };
 
@@ -342,7 +348,7 @@ enum class FieldIdent : uint8_t {
  * commands.
  */
 struct StructOp {
-  FieldIdent fieldIdent;
+  FieldIdent fieldIdent{};
 
   // Write-side field identity. The read side uses `fieldIdent`; the two differ
   // for cross-protocol transcodes to/from JSON (e.g. Compact `ById` read →
@@ -365,6 +371,7 @@ struct StructOp {
   //   Write: mark → skip(5) → fields → patch varint length
   bool readLengthDelimited = false;
   bool writeLengthDelimited = false;
+  std::shared_ptr<const type_system::TypeRef> schemaType;
 
   // Per-field commands, sorted by fieldId
   std::vector<FieldEntry> fields;

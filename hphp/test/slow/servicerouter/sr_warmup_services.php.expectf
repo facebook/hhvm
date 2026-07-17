@@ -1,0 +1,6 @@
+%Abool(true)
+bool(true)
+vec(2) {
+  string(13) "servicerouter"
+  string(13) "token.service"
+}

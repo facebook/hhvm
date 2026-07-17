@@ -17,6 +17,7 @@
 #ifndef THRIFT2_PROTOCOL_TBINARYPROTOCOL_TCC_
 #define THRIFT2_PROTOCOL_TBINARYPROTOCOL_TCC_ 1
 
+#include <bit>
 #include <limits>
 #include <string>
 
@@ -145,7 +146,7 @@ inline uint32_t BinaryProtocolWriter::writeDouble(double dub) {
   static_assert(sizeof(double) == sizeof(uint64_t));
   static_assert(std::numeric_limits<double>::is_iec559);
 
-  uint64_t bits = folly::bit_cast<uint64_t>(dub);
+  uint64_t bits = std::bit_cast<uint64_t>(dub);
   out_.writeBE<uint64_t>(bits);
   return sizeof(bits);
 }
@@ -154,7 +155,7 @@ inline uint32_t BinaryProtocolWriter::writeFloat(float flt) {
   static_assert(sizeof(float) == sizeof(uint32_t));
   static_assert(std::numeric_limits<float>::is_iec559);
 
-  uint32_t bits = folly::bit_cast<uint32_t>(flt);
+  uint32_t bits = std::bit_cast<uint32_t>(flt);
   out_.writeBE<uint32_t>(bits);
   return sizeof(bits);
 }
@@ -222,7 +223,7 @@ inline uint32_t BinaryProtocolWriter::writeBinaryImpl(
 
 inline void BinaryProtocolWriter::rewriteDouble(double dub, int64_t offset) {
   auto cursor = out_.tail<folly::io::CursorAccess::PRIVATE>(offset);
-  cursor.writeBE<uint64_t>(folly::bit_cast<uint64_t>(dub));
+  cursor.writeBE<uint64_t>(std::bit_cast<uint64_t>(dub));
 }
 
 inline folly::io::Cursor BinaryProtocolWriter::tail(size_t n) {
@@ -520,7 +521,7 @@ inline void BinaryProtocolReader::readDouble(double& dub) {
   static_assert(std::numeric_limits<double>::is_iec559);
 
   uint64_t bits = in_.readBE<int64_t>();
-  dub = folly::bit_cast<double>(bits);
+  dub = std::bit_cast<double>(bits);
 }
 
 inline void BinaryProtocolReader::readFloat(float& flt) {
@@ -528,7 +529,7 @@ inline void BinaryProtocolReader::readFloat(float& flt) {
   static_assert(std::numeric_limits<double>::is_iec559);
 
   uint32_t bits = in_.readBE<int32_t>();
-  flt = folly::bit_cast<float>(bits);
+  flt = std::bit_cast<float>(bits);
 }
 
 inline void BinaryProtocolReader::checkStringSize(int32_t size) {

@@ -17,6 +17,7 @@
 #pragma once
 
 #include <algorithm>
+#include <bit>
 #include <compare>
 #include <concepts>
 #include <functional>
@@ -197,7 +198,7 @@ struct FloatIdenticalTo {
     // NOTE: Thrift specifies that all NaN variations are considered
     // 'identical'; however, we do not implement that here for performance
     // reasons.
-    return folly::bit_cast<I>(lhs) == folly::bit_cast<I>(rhs);
+    return std::bit_cast<I>(lhs) == std::bit_cast<I>(rhs);
   }
 };
 template <>

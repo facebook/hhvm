@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <bit>
 #include <memory>
 #include <folly/io/IOBuf.h>
 #include <folly/memory/MemoryResource.h>
@@ -129,7 +130,7 @@ class AllocatingParserStrategy {
           stagingBuffer,
           stagingBufferSize,
           &deallocate,
-          folly::bit_cast<void*>(allocAndSize));
+          std::bit_cast<void*>(allocAndSize));
       frame->trimStart(Serializer::kBytesForFrameOrMetadataLength);
       frame->trimEnd(trimEnd);
       owner_.handleFrame(std::move(frame));
@@ -179,7 +180,7 @@ class AllocatingParserStrategy {
     DCHECK_GE(
         currentBufferSize_ - offset,
         Serializer::kBytesForFrameOrMetadataLength);
-    auto bytes = folly::bit_cast<
+    auto bytes = std::bit_cast<
         std::array<std::uint8_t, Serializer::kBytesForFrameOrMetadataLength>*>(
         buffer_ + offset);
     size_t frameSize = readFrameOrMetadataSize(*bytes);
@@ -202,7 +203,7 @@ class AllocatingParserStrategy {
   static void deallocate(void* buf, void* userData) {
     auto* bufferPtr = static_cast<ElemType*>(buf);
     auto* allocAndSize =
-        folly::bit_cast<std::pair<Allocator&, size_t>*>(userData);
+        std::bit_cast<std::pair<Allocator&, size_t>*>(userData);
     Traits::deallocate(allocAndSize->first, bufferPtr, allocAndSize->second);
     delete allocAndSize;
   }

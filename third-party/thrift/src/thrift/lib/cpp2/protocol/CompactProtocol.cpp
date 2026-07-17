@@ -22,6 +22,7 @@
 
 #include <arm_neon.h>
 #include <arm_sve.h>
+#include <bit>
 
 #include <arm_neon_sve_bridge.h> // @manual
 
@@ -566,10 +567,10 @@ static inline void readUnencodedArithmeticVector(
     if (i < numElements) {
       if constexpr (sizeof(T) == 8) {
         uint64_t bits = c.template readBE<int64_t>();
-        outputPtr[i] = folly::bit_cast<double>(bits);
+        outputPtr[i] = std::bit_cast<double>(bits);
       } else if constexpr (sizeof(T) == 4) {
         uint32_t bits = c.template readBE<int32_t>();
-        outputPtr[i] = folly::bit_cast<float>(bits);
+        outputPtr[i] = std::bit_cast<float>(bits);
       } else {
         outputPtr[i] = c.template read<int8_t>();
       }

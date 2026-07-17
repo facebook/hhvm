@@ -40,6 +40,7 @@
 #include "hphp/util/fixed-vector.h"
 #include "hphp/util/rds-local.h"
 
+#include <bit>
 #include <cstdint>
 #include <folly/Bits.h>
 #include <fmt/core.h>
@@ -501,7 +502,7 @@ struct CompactWriter {
 
         case T_DOUBLE: {
             double d = value.toDouble();
-            uint64_t bits = folly::bit_cast<uint64_t>(d);
+            uint64_t bits = std::bit_cast<uint64_t>(d);
             if (version >= VERSION_DOUBLE_BE) {
               bits = htonll(bits);
             } else {
@@ -514,7 +515,7 @@ struct CompactWriter {
 
         case T_FLOAT: {
             float d = (float)value.toDouble();
-            uint32_t bits = htonl(folly::bit_cast<uint32_t>(d));
+            uint32_t bits = htonl(std::bit_cast<uint32_t>(d));
             transport.push((uint8_t *)&bits, 4);
           }
           break;
@@ -971,14 +972,14 @@ struct CompactReader {
             } else {
               i = letohll(i);
             }
-            return folly::bit_cast<double>(i);
+            return std::bit_cast<double>(i);
           }
 
         case T_FLOAT: {
             uint32_t i;
             transport.pull(&i, 4);
             i = ntohl(i);
-            return folly::bit_cast<float>(i);
+            return std::bit_cast<float>(i);
           }
 
         case T_UTF8:

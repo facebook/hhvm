@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <bit>
 #include <stdexcept>
 #include <type_traits>
 #include <fmt/core.h>
@@ -82,7 +83,7 @@ class AlignedPtr {
   /* implicit */ constexpr AlignedPtr(
       T* ptr, std::uintptr_t tagBits = {}) noexcept
       : ptr_(
-            (folly::bit_cast<std::uintptr_t>(ptr) & kPointerMask) |
+            (std::bit_cast<std::uintptr_t>(ptr) & kPointerMask) |
             (tagBits & ~kPointerMask)) {
     maybeCheckPtrBits(ptr);
     checkTagBits(tagBits);
@@ -164,7 +165,7 @@ class AlignedPtr {
       // This branch runs additional tests to ensure the given `ptr` does not
       // use any of the reserved tag bits.
 
-      if ((folly::bit_cast<std::uintptr_t>(ptr) & ~kPointerMask) != 0) {
+      if ((std::bit_cast<std::uintptr_t>(ptr) & ~kPointerMask) != 0) {
         folly::terminate_with<std::invalid_argument>(fmt::format(
             "Cannot initialize AlignPtr: ptr uses lower ({}) tag bits: {}",
             TagBits,

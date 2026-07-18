@@ -16,7 +16,7 @@ escaper = { version = "0.0.0", path = "../../../../utils/escaper" }
 libc = "0.2.186"
 naming_special_names_rust = { version = "0.0.0", path = "../../../../naming" }
 ocaml_helper = { version = "0.0.0", path = "../../../../utils/ocaml_helper" }
-regex = "1.13.0"
+regex = "1.13.1"
 
 [dev-dependencies]
 pretty_assertions = { version = "1.4.1", features = ["alloc"], default-features = false }

@@ -13,6 +13,6 @@ path = "config_file.rs"
 [dependencies]
 bstr = { version = "1.13.0", features = ["serde", "std", "unicode"] }
 oxidized = { version = "0.0.0", path = "../../../oxidized" }
-regex = "1.13.0"
+regex = "1.13.1"
 serde_json = { version = "1.0.140", features = ["alloc", "float_roundtrip", "raw_value", "unbounded_depth"] }
 sha1 = "0.10.7"

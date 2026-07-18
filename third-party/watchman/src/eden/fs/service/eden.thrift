@@ -1616,6 +1616,8 @@ struct PrefetchParams {
   7: optional PredictiveFetch predictiveGlob;
   // When true, returns list of prefetched files.
   8: bool returnPrefetchedFiles = false;
+  // When true, return PrefetchStats in PrefetchResult.
+  9: bool returnStats = false;
 }
 
 struct PrefetchStats {

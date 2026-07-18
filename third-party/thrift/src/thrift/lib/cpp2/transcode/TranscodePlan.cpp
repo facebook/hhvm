@@ -111,6 +111,8 @@ folly::Expected<Command, CompileError> fuseStructOps(
   StructOp fused;
   fused.fieldIdent = source.fieldIdent;
   fused.writeFieldIdent = target.writeFieldIdent;
+  fused.readFieldProto = source.readFieldProto;
+  fused.writeFieldProto = target.writeFieldProto;
   fused.readFieldHeader = source.readFieldHeader;
   fused.writeFieldHeader = target.writeFieldHeader;
   fused.readEnd = source.readEnd;

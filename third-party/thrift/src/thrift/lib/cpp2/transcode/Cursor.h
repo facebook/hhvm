@@ -103,6 +103,8 @@ struct TranscodeExtendResult {
 /**
  * Called when the active segment lacks `request->minWritable` bytes at
  * `request->writePoint`.
+ * The cursor passes non-null request and result pointers. userData is the
+ * opaque pointer supplied to thrift_transcode_cursor_init and may be null.
  * Returning false latches an output error. Returning true requires a
  * result segment with enough tailroom at the resumed write point.
  * Every unflushed segment returned by the provider must stay alive and
@@ -115,6 +117,8 @@ using TranscodeExtendFn = bool (*)(
 /**
  * Called by `thrift_transcode_cursor_flush` after the cursor advances the
  * flushed watermark to `request->flushPoint`.
+ * The cursor passes non-null request and result pointers. userData is the
+ * opaque pointer supplied to thrift_transcode_cursor_init and may be null.
  * Returning false latches an output error.
  * Returning NewSegment with `{request->flushPoint, request->segment.end}`
  * reuses the old segment tailroom as a logical next segment.

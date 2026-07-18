@@ -343,6 +343,13 @@ enum class FieldIdent : uint8_t {
   ByName, // field identity is a string key (JSON)
 };
 
+enum class FieldProto : uint8_t {
+  Compact,
+  Binary,
+  Protobuf,
+  Unsupported,
+};
+
 /**
  * Transcode a struct: read field headers → dispatch by ID/name → per-field
  * commands.
@@ -355,6 +362,8 @@ struct StructOp {
   // JSON `ByName` write), where the target's framing must be selected
   // independently of the source's.
   FieldIdent writeFieldIdent = FieldIdent::ById;
+  FieldProto readFieldProto = FieldProto::Unsupported;
+  FieldProto writeFieldProto = FieldProto::Unsupported;
 
   // Framing intrinsics
   std::string readFieldHeader; // returns (fieldId, type) or (name)

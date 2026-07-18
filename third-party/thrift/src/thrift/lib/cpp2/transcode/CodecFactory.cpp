@@ -454,6 +454,7 @@ struct ProtocolOps {
   ScalarFn scalarFn;
   TypeInfoFn typeInfoFn;
   FieldIdent fieldIdent;
+  FieldProto fieldProto;
 
   // Struct framing
   std::string readFieldHeader;
@@ -477,6 +478,8 @@ StructOp makeStructOp(const Structured& node, const ProtocolOps& ops) {
   StructOp op;
   op.fieldIdent = ops.fieldIdent;
   op.writeFieldIdent = ops.fieldIdent;
+  op.readFieldProto = ops.fieldProto;
+  op.writeFieldProto = ops.fieldProto;
   op.readFieldHeader = ops.readFieldHeader;
   op.writeFieldHeader = ops.writeFieldHeader;
   op.readEnd = ops.readStructEnd;
@@ -658,6 +661,7 @@ const ProtocolOps kCompactOps{
     .scalarFn = compactScalarOp,
     .typeInfoFn = compactTypeInfo,
     .fieldIdent = FieldIdent::ById,
+    .fieldProto = FieldProto::Compact,
     .readFieldHeader = "thrift_transcode_compact_read_field_header",
     .writeFieldHeader = "thrift_transcode_compact_write_field_header",
     .readStructEnd = "",
@@ -670,6 +674,7 @@ const ProtocolOps kProtobufOps{
     .scalarFn = protobufScalarOp,
     .typeInfoFn = protoTypeInfo,
     .fieldIdent = FieldIdent::ById,
+    .fieldProto = FieldProto::Protobuf,
     .readFieldHeader = "thrift_transcode_proto_read_field_header",
     .writeFieldHeader = "thrift_transcode_proto_write_field_header",
     .readStructEnd = "",
@@ -682,6 +687,7 @@ const ProtocolOps kBinaryOps{
     .scalarFn = binaryScalarOp,
     .typeInfoFn = binaryTypeInfo,
     .fieldIdent = FieldIdent::ById,
+    .fieldProto = FieldProto::Binary,
     .readFieldHeader = "thrift_transcode_binary_read_field_header",
     .writeFieldHeader = "thrift_transcode_binary_write_field_header",
     .readStructEnd = "",
@@ -694,6 +700,7 @@ const ProtocolOps kJsonOps{
     .scalarFn = jsonScalarOp,
     .typeInfoFn = compactTypeInfo, // unused for JSON — no type bytes
     .fieldIdent = FieldIdent::ByName,
+    .fieldProto = FieldProto::Unsupported,
     .readFieldHeader = "", // inlined
     .writeFieldHeader = "", // inlined
     .readStructEnd = "", // inlined

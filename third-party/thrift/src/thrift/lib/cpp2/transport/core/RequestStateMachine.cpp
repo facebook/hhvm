@@ -38,7 +38,8 @@ RequestStateMachine::RequestStateMachine(
 }
 
 RequestStateMachine::~RequestStateMachine() {
-  if (includeInRecentRequests_ && getStartedProcessing()) {
+  if (includeInRecentRequests_ && getStartedProcessing() &&
+      adaptiveConcurrencyController_.enabled()) {
     adaptiveConcurrencyController_.requestFinished(
         started(), std::chrono::steady_clock::now());
   }

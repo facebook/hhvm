@@ -198,6 +198,17 @@ cdef class RpcOptions:
         """Set QueueTimeout in seconds"""
         self._cpp_obj.setQueueTimeout(milliseconds(<int64_t>(seconds * 1000)))
 
+    @property
+    def routing_key(self):
+        """Get routingKey (e.g. the consistent-hashing seed used for routing)"""
+        cdef bytes routing_key = self._cpp_obj.getRoutingKey()
+        return routing_key.decode('utf-8')
+
+    @routing_key.setter
+    def routing_key(self, str routing_key not None):
+        """Set routingKey for (e.g. consistent-hashing based) routing"""
+        self._cpp_obj.setRoutingKey(routing_key.encode('utf-8'))
+
     def set_header(self, str key not None, str value not None):
         self._cpp_obj.setWriteHeader(key.encode('utf-8'), value.encode('utf-8'))
 

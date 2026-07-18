@@ -582,3 +582,18 @@ class ClientStackServerTests(unittest.IsolatedAsyncioTestCase):
                 # currently unsupported by cpp backend:
                 # self.assertEqual(b'xyz', (await client.get_iobuf_ptr()))
                 await client.take_iobuf_ptr(IOBuf(b"zyx"))
+
+
+class RpcOptionsPropertyTest(unittest.TestCase):
+    def test_routing_key_defaults_to_empty(self) -> None:
+        self.assertEqual(RpcOptions().routing_key, "")
+
+    def test_routing_key_round_trips(self) -> None:
+        options = RpcOptions()
+        options.routing_key = "user-42"
+        self.assertEqual(options.routing_key, "user-42")
+
+    def test_routing_key_rejects_none(self) -> None:
+        with self.assertRaises(TypeError):
+            # pyre-ignore[8]: intentionally passing None to check the guard
+            RpcOptions().routing_key = None

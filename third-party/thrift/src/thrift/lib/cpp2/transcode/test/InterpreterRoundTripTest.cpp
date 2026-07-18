@@ -158,6 +158,31 @@ std::vector<uint8_t> sampleBinaryMessage() {
   return b;
 }
 
+std::vector<uint8_t> sampleBinaryMessageOutOfOrder() {
+  std::vector<uint8_t> b;
+
+  b.push_back(kTList); // field 3: list<i32> [10, 20, 30]
+  putI16BE(b, 3);
+  b.push_back(kTI32);
+  putI32BE(b, 3);
+  putI32BE(b, 10);
+  putI32BE(b, 20);
+  putI32BE(b, 30);
+
+  b.push_back(kTI32); // field 1: i32
+  putI16BE(b, 1);
+  putI32BE(b, 7);
+
+  b.push_back(kTString); // field 2: string "hi"
+  putI16BE(b, 2);
+  putI32BE(b, 2);
+  b.push_back('h');
+  b.push_back('i');
+
+  b.push_back(kTStop);
+  return b;
+}
+
 std::vector<uint8_t> scalarBinaryMessage() {
   std::vector<uint8_t> b;
 
@@ -293,6 +318,25 @@ TEST_F(InterpreterRoundTripTest, CompactBinaryRoundTripIsIdentity) {
   auto compact1 = binaryToCompact.transcode(**binary1);
   ASSERT_FALSE(compact1.hasError()) << compact1.error().message;
   EXPECT_EQ(toBytes(**compact1), toBytes(**compact0));
+}
+
+TEST_F(InterpreterRoundTripTest, DispatchesFieldsByIdWhenWireOrderDiffers) {
+  auto compact = makeThriftCompactCodec(sampleNode());
+  auto binary = makeThriftBinaryCodec(sampleNode());
+
+  TranscodeInterpreter binaryToCompact{fuse(binary, compact)};
+  TranscodeInterpreter compactToBinary{fuse(compact, binary)};
+
+  const std::vector<uint8_t> binary0 = sampleBinaryMessageOutOfOrder();
+  auto binary0Buf =
+      folly::IOBuf::wrapBufferAsValue(binary0.data(), binary0.size());
+
+  auto compact0 = binaryToCompact.transcode(binary0Buf);
+  ASSERT_FALSE(compact0.hasError()) << compact0.error().message;
+
+  auto binary1 = compactToBinary.transcode(**compact0);
+  ASSERT_FALSE(binary1.hasError()) << binary1.error().message;
+  EXPECT_EQ(toBytes(**binary1), binary0);
 }
 
 TEST_F(InterpreterRoundTripTest, TruncatedInputYieldsError) {

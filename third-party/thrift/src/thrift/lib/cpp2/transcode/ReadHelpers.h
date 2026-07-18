@@ -22,6 +22,7 @@
 #include <folly/CPortability.h>
 #include <folly/lang/Assume.h>
 
+#include <algorithm>
 #include <cstring>
 #include <limits>
 
@@ -289,12 +290,15 @@ FOLLY_ALWAYS_INLINE uint32_t readMapCount(
 }
 
 inline const FieldEntry* findField(const StructOp& op, int16_t fieldId) {
-  for (const auto& f : op.fields) {
-    if (f.fieldId == fieldId) {
-      return &f;
-    }
+  auto it = std::lower_bound(
+      op.fields.begin(),
+      op.fields.end(),
+      fieldId,
+      [](const FieldEntry& field, int16_t id) { return field.fieldId < id; });
+  if (it == op.fields.end() || it->fieldId != fieldId) {
+    return nullptr;
   }
-  return nullptr;
+  return &*it;
 }
 
 } // namespace apache::thrift::transcode

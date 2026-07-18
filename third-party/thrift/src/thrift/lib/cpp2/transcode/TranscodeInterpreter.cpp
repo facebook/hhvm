@@ -67,7 +67,7 @@ bool checkedAdd(size_t lhs, size_t rhs, size_t& out) {
   return true;
 }
 
-bool mallocExtend(
+TranscodeStatus mallocExtend(
     const TranscodeExtendRequest* request,
     TranscodeExtendResult* result,
     void* userData) {
@@ -76,7 +76,7 @@ bool mallocExtend(
       static_cast<size_t>(request->writePoint - request->segment.begin);
   size_t requested = 0;
   if (!checkedAdd(written, request->minWritable, requested)) {
-    return false;
+    return TranscodeStatus::Error;
   }
   const size_t doubled =
       output.capacity > std::numeric_limits<size_t>::max() / 2
@@ -85,7 +85,7 @@ bool mallocExtend(
   const size_t newCapacity = std::max(doubled, requested);
   auto* next = static_cast<uint8_t*>(realloc(output.buffer, newCapacity));
   if (next == nullptr) {
-    return false;
+    return TranscodeStatus::Error;
   }
   result->kind = next == request->segment.begin
       ? TranscodeExtendKind::InPlaceExtension
@@ -93,14 +93,14 @@ bool mallocExtend(
   result->segment = {next, next + newCapacity};
   output.buffer = next;
   output.capacity = newCapacity;
-  return true;
+  return TranscodeStatus::Ok;
 }
 
-bool fixedOutputExtend(
+TranscodeStatus fixedOutputExtend(
     const TranscodeExtendRequest* /*request*/,
     TranscodeExtendResult* /*result*/,
     void* /*userData*/) {
-  return false;
+  return TranscodeStatus::Error;
 }
 
 uint64_t doubleToBits(double d) {

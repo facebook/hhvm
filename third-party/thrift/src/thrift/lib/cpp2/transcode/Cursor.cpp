@@ -23,6 +23,8 @@
 #include <cassert>
 #include <cstring>
 
+using apache::thrift::transcode::cursorStatus;
+using apache::thrift::transcode::setCursorBlocked;
 using apache::thrift::transcode::setCursorError;
 
 namespace {
@@ -41,17 +43,22 @@ size_t rangeSize(TranscodeMutableByteRange range) {
   return static_cast<size_t>(range.end - range.begin);
 }
 
+uint8_t* FOLLY_NONNULL currentWritePos(TranscodeCursor* FOLLY_NONNULL cursor) {
+  assert(cursor->writePos != nullptr);
+  return cursor->writePos;
+}
+
 bool validRange(TranscodeMutableByteRange range, size_t minWritable) {
   return range.begin != nullptr && range.end != nullptr &&
       range.end >= range.begin && rangeSize(range) >= minWritable;
 }
 
-size_t bytesWrittenInSegment(const TranscodeCursor* cursor) {
+size_t bytesWrittenInSegment(const TranscodeCursor* FOLLY_NONNULL cursor) {
   return static_cast<size_t>(cursor->writePos - cursor->writeSegmentBegin);
 }
 
 TranscodeSegmentRecord* FOLLY_NULLABLE
-currentSegmentRecord(TranscodeCursor* cursor) {
+currentSegmentRecord(TranscodeCursor* FOLLY_NONNULL cursor) {
   if (cursor->segmentCount == 0) {
     return nullptr;
   }
@@ -64,7 +71,7 @@ currentSegmentRecord(TranscodeCursor* cursor) {
 }
 
 const TranscodeSegmentRecord* FOLLY_NULLABLE
-findSegmentRecord(const TranscodeCursor* cursor, uint32_t id) {
+findSegmentRecord(const TranscodeCursor* FOLLY_NONNULL cursor, uint32_t id) {
   for (size_t i = 0; i < cursor->segmentCount; ++i) {
     if (cursor->segmentRecords[i].id == id) {
       return &cursor->segmentRecords[i];
@@ -74,7 +81,7 @@ findSegmentRecord(const TranscodeCursor* cursor, uint32_t id) {
 }
 
 void updateCurrentSegmentRecord(
-    TranscodeCursor* cursor, uint8_t* begin, uint8_t* end) {
+    TranscodeCursor* FOLLY_NONNULL cursor, uint8_t* begin, uint8_t* end) {
   auto* record = currentSegmentRecord(cursor);
   if (record == nullptr) {
     return;
@@ -90,7 +97,7 @@ bool segmentFullyFlushed(
 }
 
 void dropInactiveSegmentRecords(
-    TranscodeCursor* cursor, uint32_t currentSegmentId) {
+    TranscodeCursor* FOLLY_NONNULL cursor, uint32_t currentSegmentId) {
   size_t writeIndex = 0;
   for (size_t readIndex = 0; readIndex < cursor->segmentCount; ++readIndex) {
     const auto& record = cursor->segmentRecords[readIndex];
@@ -107,12 +114,12 @@ void dropInactiveSegmentRecords(
   cursor->segmentCount = writeIndex;
 }
 
-void dropInactiveSegmentRecords(TranscodeCursor* cursor) {
+void dropInactiveSegmentRecords(TranscodeCursor* FOLLY_NONNULL cursor) {
   dropInactiveSegmentRecords(cursor, cursor->currentSegmentId);
 }
 
 bool appendSegmentRecord(
-    TranscodeCursor* cursor, uint8_t* begin, uint8_t* end) {
+    TranscodeCursor* FOLLY_NONNULL cursor, uint8_t* begin, uint8_t* end) {
   dropInactiveSegmentRecords(cursor);
   if (cursor->segmentCount == THRIFT_TRANSCODE_MAX_SEGMENT_RECORDS) {
     setCursorError(cursor, kSegmentRecordLimit);
@@ -128,7 +135,10 @@ bool appendSegmentRecord(
 }
 
 void setActiveSegment(
-    TranscodeCursor* cursor, uint8_t* begin, uint8_t* pos, uint8_t* end) {
+    TranscodeCursor* FOLLY_NONNULL cursor,
+    uint8_t* begin,
+    uint8_t* pos,
+    uint8_t* end) {
   cursor->writeSegmentBegin = begin;
   cursor->writeBuf = begin;
   cursor->writePos = pos;
@@ -142,7 +152,7 @@ void setActiveSegment(
 }
 
 bool applyExtendResult(
-    TranscodeCursor* cursor,
+    TranscodeCursor* FOLLY_NONNULL cursor,
     const TranscodeExtendResult& result,
     size_t needed) {
   const size_t writtenInSegment = bytesWrittenInSegment(cursor);
@@ -202,8 +212,10 @@ bool applyExtendResult(
 }
 
 uint8_t* FOLLY_NULLABLE resolvePatchPoint(
-    TranscodeCursor* cursor, TranscodePatchPoint mark, size_t size) {
-  if (cursor->error != 0) {
+    TranscodeCursor* FOLLY_NONNULL cursor,
+    TranscodePatchPoint mark,
+    size_t size) {
+  if (cursorStatus(cursor) != TranscodeStatus::Ok) {
     return nullptr;
   }
   assert(
@@ -241,7 +253,7 @@ extern "C" {
 // ─────────────────────────────────────────────────────────────────────────
 
 void thrift_transcode_cursor_init(
-    TranscodeCursor* cursor,
+    TranscodeCursor* FOLLY_NONNULL cursor,
     TranscodeByteRange input,
     TranscodeMutableByteRange output,
     TranscodeExtendFn extendFn,
@@ -268,14 +280,14 @@ void thrift_transcode_cursor_init(
   cursor->userData = userData;
 }
 
-void thrift_transcode_cursor_ensure_write(
-    TranscodeCursor* cursor, size_t needed) {
+TranscodeStatus thrift_transcode_cursor_ensure_write(
+    TranscodeCursor* FOLLY_NONNULL cursor, size_t needed) {
   if (cursor->error != 0) {
-    return;
+    return cursorStatus(cursor);
   }
   size_t available = static_cast<size_t>(cursor->writeEnd - cursor->writePos);
   if (available >= needed) {
-    return;
+    return TranscodeStatus::Ok;
   }
   if (cursor->extendFn) {
     TranscodeExtendRequest request{
@@ -284,20 +296,27 @@ void thrift_transcode_cursor_ensure_write(
         needed,
     };
     TranscodeExtendResult result{};
-    if (!cursor->extendFn(&request, &result, cursor->userData)) {
+    const TranscodeStatus callbackStatus =
+        cursor->extendFn(&request, &result, cursor->userData);
+    if (callbackStatus == TranscodeStatus::Blocked) {
+      setCursorBlocked(cursor);
+      return TranscodeStatus::Blocked;
+    }
+    if (callbackStatus != TranscodeStatus::Ok) {
       setCursorError(cursor, kOutputError);
-      return;
+      return TranscodeStatus::Error;
     }
     applyExtendResult(cursor, result, needed);
-    return;
+    return cursorStatus(cursor);
   }
   setCursorError(cursor, kOutputError);
+  return TranscodeStatus::Error;
 }
 
-void thrift_transcode_cursor_flush(
-    TranscodeCursor* cursor, size_t minWritable) {
+TranscodeStatus thrift_transcode_cursor_flush(
+    TranscodeCursor* FOLLY_NONNULL cursor, size_t minWritable) {
   if (cursor->error != 0) {
-    return;
+    return cursorStatus(cursor);
   }
   const size_t flushOffset = thrift_transcode_cursor_bytes_written(cursor);
   assert(flushOffset >= cursor->flushedBytes);
@@ -306,9 +325,9 @@ void thrift_transcode_cursor_flush(
   size_t available = static_cast<size_t>(cursor->writeEnd - cursor->writePos);
   if (!cursor->flushFn) {
     if (available < minWritable) {
-      thrift_transcode_cursor_ensure_write(cursor, minWritable);
+      return thrift_transcode_cursor_ensure_write(cursor, minWritable);
     }
-    return;
+    return TranscodeStatus::Ok;
   }
   TranscodeFlushRequest request{
       {cursor->writeSegmentBegin, cursor->writeEnd},
@@ -316,14 +335,35 @@ void thrift_transcode_cursor_flush(
       minWritable,
   };
   TranscodeExtendResult result{};
-  if (!cursor->flushFn(&request, &result, cursor->userData)) {
+  const TranscodeStatus callbackStatus =
+      cursor->flushFn(&request, &result, cursor->userData);
+  if (callbackStatus == TranscodeStatus::Blocked) {
+    setCursorBlocked(cursor);
+    return TranscodeStatus::Blocked;
+  }
+  if (callbackStatus != TranscodeStatus::Ok) {
     setCursorError(cursor, kOutputError);
-    return;
+    return TranscodeStatus::Error;
   }
   applyExtendResult(cursor, result, minWritable);
+  return cursorStatus(cursor);
 }
 
-size_t thrift_transcode_cursor_bytes_written(const TranscodeCursor* cursor) {
+TranscodeStatus thrift_transcode_cursor_status(
+    const TranscodeCursor* FOLLY_NONNULL cursor) {
+  return cursorStatus(cursor);
+}
+
+TranscodeStatus thrift_transcode_cursor_resume(
+    TranscodeCursor* FOLLY_NONNULL cursor) {
+  if (cursorStatus(cursor) == TranscodeStatus::Blocked) {
+    cursor->error = 0;
+  }
+  return cursorStatus(cursor);
+}
+
+size_t thrift_transcode_cursor_bytes_written(
+    const TranscodeCursor* FOLLY_NONNULL cursor) {
   return cursor->totalBytesWrittenBeforeSegment + bytesWrittenInSegment(cursor);
 }
 
@@ -331,8 +371,9 @@ size_t thrift_transcode_cursor_bytes_written(const TranscodeCursor* cursor) {
 // Cursor mark/patch
 // ─────────────────────────────────────────────────────────────────────────
 
-TranscodePatchPoint thrift_transcode_cursor_mark(TranscodeCursor* cursor) {
-  if (cursor->error) {
+TranscodePatchPoint thrift_transcode_cursor_mark(
+    TranscodeCursor* FOLLY_NONNULL cursor) {
+  if (cursorStatus(cursor) != TranscodeStatus::Ok) {
     return {};
   }
   const size_t offsetInSegment = bytesWrittenInSegment(cursor);
@@ -360,25 +401,28 @@ TranscodePatchPoint thrift_transcode_cursor_offset_patch_point(
 }
 
 size_t thrift_transcode_cursor_bytes_since_mark(
-    const TranscodeCursor* cursor, TranscodePatchPoint mark) {
+    const TranscodeCursor* FOLLY_NONNULL cursor, TranscodePatchPoint mark) {
   return thrift_transcode_cursor_bytes_written(cursor) - mark.streamOffset;
 }
 
-void thrift_transcode_cursor_skip(TranscodeCursor* cursor, size_t n) {
+void thrift_transcode_cursor_skip(
+    TranscodeCursor* FOLLY_NONNULL cursor, size_t n) {
   if (cursor->error) {
     return;
   }
-  thrift_transcode_cursor_ensure_write(cursor, n);
-  if (cursor->error) {
+  if (thrift_transcode_cursor_ensure_write(cursor, n) != TranscodeStatus::Ok) {
     return;
   }
   // Zero-fill the reserved space
-  memset(cursor->writePos, 0, n);
-  cursor->writePos += n;
+  uint8_t* FOLLY_NONNULL pos = currentWritePos(cursor);
+  memset(pos, 0, n);
+  cursor->writePos = pos + n;
 }
 
 void thrift_transcode_cursor_patch_byte(
-    TranscodeCursor* cursor, TranscodePatchPoint mark, uint8_t value) {
+    TranscodeCursor* FOLLY_NONNULL cursor,
+    TranscodePatchPoint mark,
+    uint8_t value) {
   auto* p = resolvePatchPoint(cursor, mark, 1);
   if (p == nullptr) {
     return;
@@ -387,11 +431,11 @@ void thrift_transcode_cursor_patch_byte(
 }
 
 bool thrift_transcode_cursor_patch_varint(
-    TranscodeCursor* cursor,
+    TranscodeCursor* FOLLY_NONNULL cursor,
     TranscodePatchPoint mark,
     uint64_t value,
     size_t reservedBytes) {
-  if (cursor->error) {
+  if (cursorStatus(cursor) != TranscodeStatus::Ok) {
     return false;
   }
   if (reservedBytes == 0 || reservedBytes > 10) {
@@ -417,7 +461,9 @@ bool thrift_transcode_cursor_patch_varint(
 }
 
 void thrift_transcode_cursor_patch_i32_be(
-    TranscodeCursor* cursor, TranscodePatchPoint mark, int32_t value) {
+    TranscodeCursor* FOLLY_NONNULL cursor,
+    TranscodePatchPoint mark,
+    int32_t value) {
   auto* p = resolvePatchPoint(cursor, mark, 4);
   if (p == nullptr) {
     return;

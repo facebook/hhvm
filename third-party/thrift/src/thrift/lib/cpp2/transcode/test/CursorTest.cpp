@@ -45,6 +45,8 @@ struct SegmentOutput {
   size_t nextSegment = 1;
   bool failExtend = false;
   bool failFlush = false;
+  bool blockExtend = false;
+  bool blockFlush = false;
   bool invalidExtend = false;
   bool invalidFlush = false;
 };
@@ -56,7 +58,7 @@ struct MallocOutput {
   size_t capacity = 0;
 };
 
-bool relocateMalloc(
+TranscodeStatus relocateMalloc(
     const TranscodeExtendRequest* request,
     TranscodeExtendResult* result,
     void* userData) {
@@ -67,7 +69,7 @@ bool relocateMalloc(
   const size_t newCapacity = std::max(output.capacity * 2, requested);
   auto* next = static_cast<uint8_t*>(malloc(newCapacity));
   if (next == nullptr) {
-    return false;
+    return TranscodeStatus::Error;
   }
   memcpy(next, request->segment.begin, written);
   free(output.buffer);
@@ -75,46 +77,49 @@ bool relocateMalloc(
   output.capacity = newCapacity;
   result->kind = TranscodeExtendKind::RelocatedContiguous;
   result->segment = {next, next + newCapacity};
-  return true;
+  return TranscodeStatus::Ok;
 }
 
-bool nextSegment(
+TranscodeStatus nextSegment(
     const TranscodeExtendRequest* /*request*/,
     TranscodeExtendResult* result,
     void* userData) {
   auto& output = *static_cast<SegmentOutput*>(userData);
   if (output.failExtend) {
-    return false;
+    return TranscodeStatus::Error;
+  }
+  if (output.blockExtend) {
+    return TranscodeStatus::Blocked;
   }
   if (output.invalidExtend) {
     result->kind = TranscodeExtendKind::NewSegment;
     result->segment = {output.segments[0].data(), output.segments[0].data()};
-    return true;
+    return TranscodeStatus::Ok;
   }
   if (output.nextSegment >= output.segments.size()) {
-    return false;
+    return TranscodeStatus::Error;
   }
   auto& bytes = output.segments[output.nextSegment++];
   result->kind = TranscodeExtendKind::NewSegment;
   result->segment = {bytes.data(), bytes.data() + bytes.size()};
-  return true;
+  return TranscodeStatus::Ok;
 }
 
-bool nextSingleByteSegment(
+TranscodeStatus nextSingleByteSegment(
     const TranscodeExtendRequest* /*request*/,
     TranscodeExtendResult* result,
     void* userData) {
   auto& output = *static_cast<SegmentOutput*>(userData);
   if (output.nextSegment >= output.segments.size()) {
-    return false;
+    return TranscodeStatus::Error;
   }
   auto& bytes = output.segments[output.nextSegment++];
   result->kind = TranscodeExtendKind::NewSegment;
   result->segment = {bytes.data(), bytes.data() + 1};
-  return true;
+  return TranscodeStatus::Ok;
 }
 
-bool relocateContiguous(
+TranscodeStatus relocateContiguous(
     const TranscodeExtendRequest* request,
     TranscodeExtendResult* result,
     void* userData) {
@@ -126,39 +131,42 @@ bool relocateContiguous(
       static_cast<size_t>(request->writePoint - request->segment.begin));
   result->kind = TranscodeExtendKind::RelocatedContiguous;
   result->segment = {bytes.data(), bytes.data() + bytes.size()};
-  return true;
+  return TranscodeStatus::Ok;
 }
 
-bool reuseTailroomOnFlush(
+TranscodeStatus reuseTailroomOnFlush(
     const TranscodeFlushRequest* request,
     TranscodeExtendResult* result,
     void* userData) {
   auto& output = *static_cast<SegmentOutput*>(userData);
   if (output.failFlush) {
-    return false;
+    return TranscodeStatus::Error;
+  }
+  if (output.blockFlush) {
+    return TranscodeStatus::Blocked;
   }
   if (output.invalidFlush) {
     result->kind = TranscodeExtendKind::NewSegment;
     result->segment = {output.segments[0].data(), output.segments[0].data()};
-    return true;
+    return TranscodeStatus::Ok;
   }
   result->kind = TranscodeExtendKind::NewSegment;
   result->segment = {request->flushPoint, request->segment.end};
-  return true;
+  return TranscodeStatus::Ok;
 }
 
-bool rotateOnFlush(
+TranscodeStatus rotateOnFlush(
     const TranscodeFlushRequest* /*request*/,
     TranscodeExtendResult* result,
     void* userData) {
   auto& output = *static_cast<SegmentOutput*>(userData);
   if (output.failFlush) {
-    return false;
+    return TranscodeStatus::Error;
   }
   auto& bytes = output.segments[1];
   result->kind = TranscodeExtendKind::NewSegment;
   result->segment = {bytes.data(), bytes.data() + bytes.size()};
-  return true;
+  return TranscodeStatus::Ok;
 }
 
 TEST(CursorTest, ProviderRelocationKeepsPatchPointsValid) {
@@ -396,6 +404,75 @@ TEST(CursorTest, InvalidCallbackSegmentsLatchError) {
   thrift_transcode_cursor_flush(&cursor, 1);
 
   EXPECT_NE(cursor.error, 0);
+}
+
+TEST(CursorTest, BlockedExtendSticksUntilResume) {
+  SegmentOutput output;
+  output.blockExtend = true;
+
+  TranscodeCursor cursor{};
+  thrift_transcode_cursor_init(
+      &cursor,
+      {nullptr, nullptr},
+      segment(output.segments[0], 1),
+      nextSegment,
+      nullptr,
+      &output);
+
+  writeByte(cursor, 1);
+  writeByte(cursor, 2);
+
+  EXPECT_EQ(thrift_transcode_cursor_status(&cursor), TranscodeStatus::Blocked);
+  EXPECT_EQ(thrift_transcode_cursor_bytes_written(&cursor), 1);
+
+  output.blockExtend = false;
+  writeByte(cursor, 2);
+  EXPECT_EQ(thrift_transcode_cursor_status(&cursor), TranscodeStatus::Blocked);
+  EXPECT_EQ(thrift_transcode_cursor_bytes_written(&cursor), 1);
+
+  EXPECT_EQ(thrift_transcode_cursor_resume(&cursor), TranscodeStatus::Ok);
+  writeByte(cursor, 2);
+
+  ASSERT_EQ(thrift_transcode_cursor_status(&cursor), TranscodeStatus::Ok);
+  ASSERT_EQ(cursor.error, 0);
+  EXPECT_EQ(thrift_transcode_cursor_bytes_written(&cursor), 2);
+  EXPECT_EQ(output.segments[0][0], 1);
+  EXPECT_EQ(output.segments[1][0], 2);
+}
+
+TEST(CursorTest, BlockedFlushSticksUntilResume) {
+  SegmentOutput output;
+  output.blockFlush = true;
+
+  TranscodeCursor cursor{};
+  thrift_transcode_cursor_init(
+      &cursor,
+      {nullptr, nullptr},
+      segment(output.segments[0], 8),
+      nextSegment,
+      reuseTailroomOnFlush,
+      &output);
+
+  writeByte(cursor, 1);
+  EXPECT_EQ(
+      thrift_transcode_cursor_flush(&cursor, 1), TranscodeStatus::Blocked);
+
+  EXPECT_EQ(thrift_transcode_cursor_status(&cursor), TranscodeStatus::Blocked);
+  EXPECT_EQ(thrift_transcode_cursor_bytes_written(&cursor), 1);
+
+  output.blockFlush = false;
+  EXPECT_EQ(
+      thrift_transcode_cursor_flush(&cursor, 1), TranscodeStatus::Blocked);
+
+  EXPECT_EQ(thrift_transcode_cursor_resume(&cursor), TranscodeStatus::Ok);
+  EXPECT_EQ(thrift_transcode_cursor_flush(&cursor, 1), TranscodeStatus::Ok);
+  writeByte(cursor, 2);
+
+  ASSERT_EQ(thrift_transcode_cursor_status(&cursor), TranscodeStatus::Ok);
+  ASSERT_EQ(cursor.error, 0);
+  EXPECT_EQ(thrift_transcode_cursor_bytes_written(&cursor), 2);
+  EXPECT_EQ(output.segments[0][0], 1);
+  EXPECT_EQ(output.segments[0][1], 2);
 }
 
 } // namespace

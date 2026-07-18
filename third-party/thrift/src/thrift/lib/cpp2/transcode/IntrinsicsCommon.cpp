@@ -19,6 +19,7 @@
 #include <folly/CppAttributes.h>
 #include <folly/lang/Bits.h>
 
+#include <cassert>
 #include <cstring>
 #include <limits>
 
@@ -31,6 +32,17 @@ constexpr int64_t kReadOverrun = 1;
 constexpr int64_t kVarintTooLong = 3;
 constexpr int64_t kLengthOverflow = 4;
 
+const uint8_t* FOLLY_NONNULL
+currentReadPos(TranscodeCursor* FOLLY_NONNULL cursor) {
+  assert(cursor->readPos != nullptr);
+  return cursor->readPos;
+}
+
+uint8_t* FOLLY_NONNULL currentWritePos(TranscodeCursor* FOLLY_NONNULL cursor) {
+  assert(cursor->writePos != nullptr);
+  return cursor->writePos;
+}
+
 size_t unsignedVarintSize(uint64_t value) {
   size_t size = 1;
   while (value >= 0x80) {
@@ -40,7 +52,10 @@ size_t unsignedVarintSize(uint64_t value) {
   return size;
 }
 
-bool wireLengthToSize(TranscodeCursor* cursor, uint64_t wireLen, size_t* len) {
+bool wireLengthToSize(
+    TranscodeCursor* FOLLY_NONNULL cursor,
+    uint64_t wireLen,
+    size_t* FOLLY_NONNULL len) {
   if constexpr (
       std::numeric_limits<size_t>::digits <
       std::numeric_limits<uint64_t>::digits) {
@@ -54,7 +69,10 @@ bool wireLengthToSize(TranscodeCursor* cursor, uint64_t wireLen, size_t* len) {
   return true;
 }
 
-bool sizeToWireLength(TranscodeCursor* cursor, size_t len, uint64_t* wireLen) {
+bool sizeToWireLength(
+    TranscodeCursor* FOLLY_NONNULL cursor,
+    size_t len,
+    uint64_t* FOLLY_NONNULL wireLen) {
   if constexpr (
       std::numeric_limits<size_t>::digits >
       std::numeric_limits<uint64_t>::digits) {
@@ -68,7 +86,8 @@ bool sizeToWireLength(TranscodeCursor* cursor, size_t len, uint64_t* wireLen) {
   return true;
 }
 
-bool FOLLY_NOINLINE canReadSlow(TranscodeCursor* cursor, size_t needed) {
+bool FOLLY_NOINLINE
+canReadSlow(TranscodeCursor* FOLLY_NONNULL cursor, size_t needed) {
   return cursorCanRead(cursor, needed);
 }
 
@@ -79,19 +98,20 @@ bool FOLLY_NOINLINE canReadSlow(TranscodeCursor* cursor, size_t needed) {
 // Fast helpers only prove that the current operation has local bytes or
 // tailroom. They may ignore an already-latched cursor error. Slow helpers
 // check the latched error and may call the output provider.
-bool canReadFast(TranscodeCursor* cursor, size_t needed) {
+bool canReadFast(TranscodeCursor* FOLLY_NONNULL cursor, size_t needed) {
   if (static_cast<size_t>(cursor->readEnd - cursor->readPos) >= needed) {
     return true;
   }
   return canReadSlow(cursor, needed);
 }
 
-bool FOLLY_NOINLINE ensureWriteSlow(TranscodeCursor* cursor, size_t needed) {
-  thrift_transcode_cursor_ensure_write(cursor, needed);
-  return cursor->error == 0;
+bool FOLLY_NOINLINE
+ensureWriteSlow(TranscodeCursor* FOLLY_NONNULL cursor, size_t needed) {
+  return thrift_transcode_cursor_ensure_write(cursor, needed) ==
+      TranscodeStatus::Ok;
 }
 
-bool ensureWrite(TranscodeCursor* cursor, size_t needed) {
+bool ensureWrite(TranscodeCursor* FOLLY_NONNULL cursor, size_t needed) {
   if (static_cast<size_t>(cursor->writeEnd - cursor->writePos) >= needed) {
     return true;
   }
@@ -102,11 +122,17 @@ bool ensureWrite(TranscodeCursor* cursor, size_t needed) {
 
 extern "C" {
 
-uint64_t thrift_transcode_read_unsigned_varint(TranscodeCursor* cursor) {
+uint64_t thrift_transcode_read_unsigned_varint(
+    TranscodeCursor* FOLLY_NONNULL cursor) {
+  if (cursor->error != 0) {
+    return 0;
+  }
   uint64_t result = 0;
   int shift = 0;
   while (cursor->readPos < cursor->readEnd) {
-    uint8_t b = *cursor->readPos++;
+    const uint8_t* FOLLY_NONNULL pos = currentReadPos(cursor);
+    uint8_t b = *pos++;
+    cursor->readPos = pos;
     if (shift == 63 && (b & 0xFE) != 0) {
       setCursorError(cursor, kVarintTooLong);
       return 0;
@@ -125,35 +151,43 @@ uint64_t thrift_transcode_read_unsigned_varint(TranscodeCursor* cursor) {
   return 0;
 }
 
-int64_t thrift_transcode_read_zigzag_varint(TranscodeCursor* cursor) {
+int64_t thrift_transcode_read_zigzag_varint(
+    TranscodeCursor* FOLLY_NONNULL cursor) {
   uint64_t n = thrift_transcode_read_unsigned_varint(cursor);
   return static_cast<int64_t>((n >> 1) ^ -(n & 1));
 }
 
 void thrift_transcode_write_unsigned_varint(
-    TranscodeCursor* cursor, uint64_t value) {
+    TranscodeCursor* FOLLY_NONNULL cursor, uint64_t value) {
   if (!ensureWrite(cursor, unsignedVarintSize(value))) {
     return;
   }
+  uint8_t* FOLLY_NONNULL pos = currentWritePos(cursor);
   while (value >= 0x80) {
-    *cursor->writePos++ = static_cast<uint8_t>((value & 0x7F) | 0x80);
+    *pos++ = static_cast<uint8_t>((value & 0x7F) | 0x80);
     value >>= 7;
   }
-  *cursor->writePos++ = static_cast<uint8_t>(value);
+  *pos++ = static_cast<uint8_t>(value);
+  cursor->writePos = pos;
 }
 
 void thrift_transcode_write_zigzag_varint(
-    TranscodeCursor* cursor, int64_t value) {
+    TranscodeCursor* FOLLY_NONNULL cursor, int64_t value) {
   uint64_t n = (static_cast<uint64_t>(value) << 1) ^
       (static_cast<uint64_t>(value >> 63));
   thrift_transcode_write_unsigned_varint(cursor, n);
 }
 
-uint8_t thrift_transcode_read_byte_unchecked(TranscodeCursor* cursor) {
-  return *cursor->readPos++;
+uint8_t thrift_transcode_read_byte_unchecked(
+    TranscodeCursor* FOLLY_NONNULL cursor) {
+  const uint8_t* FOLLY_NONNULL pos = currentReadPos(cursor);
+  uint8_t value = *pos++;
+  cursor->readPos = pos;
+  return value;
 }
 
-uint8_t thrift_transcode_read_byte_checked(TranscodeCursor* cursor) {
+uint8_t thrift_transcode_read_byte_checked(
+    TranscodeCursor* FOLLY_NONNULL cursor) {
   if (!canReadFast(cursor, 1)) {
     return 0;
   }
@@ -161,40 +195,48 @@ uint8_t thrift_transcode_read_byte_checked(TranscodeCursor* cursor) {
 }
 
 void thrift_transcode_write_byte_unchecked(
-    TranscodeCursor* cursor, uint8_t value) {
-  *cursor->writePos++ = value;
+    TranscodeCursor* FOLLY_NONNULL cursor, uint8_t value) {
+  uint8_t* FOLLY_NONNULL pos = currentWritePos(cursor);
+  *pos++ = value;
+  cursor->writePos = pos;
 }
 
 void thrift_transcode_write_byte_checked(
-    TranscodeCursor* cursor, uint8_t value) {
+    TranscodeCursor* FOLLY_NONNULL cursor, uint8_t value) {
   if (!ensureWrite(cursor, 1)) {
     return;
   }
   thrift_transcode_write_byte_unchecked(cursor, value);
 }
 
-uint32_t thrift_transcode_read_fixed32_le_unchecked(TranscodeCursor* cursor) {
+uint32_t thrift_transcode_read_fixed32_le_unchecked(
+    TranscodeCursor* FOLLY_NONNULL cursor) {
   uint32_t val;
-  memcpy(&val, cursor->readPos, 4);
-  cursor->readPos += 4;
+  const uint8_t* FOLLY_NONNULL pos = currentReadPos(cursor);
+  memcpy(&val, pos, 4);
+  cursor->readPos = pos + 4;
   return folly::Endian::little(val);
 }
 
-uint32_t thrift_transcode_read_fixed32_le_checked(TranscodeCursor* cursor) {
+uint32_t thrift_transcode_read_fixed32_le_checked(
+    TranscodeCursor* FOLLY_NONNULL cursor) {
   if (!canReadFast(cursor, 4)) {
     return 0;
   }
   return thrift_transcode_read_fixed32_le_unchecked(cursor);
 }
 
-uint64_t thrift_transcode_read_fixed64_le_unchecked(TranscodeCursor* cursor) {
+uint64_t thrift_transcode_read_fixed64_le_unchecked(
+    TranscodeCursor* FOLLY_NONNULL cursor) {
   uint64_t val;
-  memcpy(&val, cursor->readPos, 8);
-  cursor->readPos += 8;
+  const uint8_t* FOLLY_NONNULL pos = currentReadPos(cursor);
+  memcpy(&val, pos, 8);
+  cursor->readPos = pos + 8;
   return folly::Endian::little(val);
 }
 
-uint64_t thrift_transcode_read_fixed64_le_checked(TranscodeCursor* cursor) {
+uint64_t thrift_transcode_read_fixed64_le_checked(
+    TranscodeCursor* FOLLY_NONNULL cursor) {
   if (!canReadFast(cursor, 8)) {
     return 0;
   }
@@ -202,14 +244,15 @@ uint64_t thrift_transcode_read_fixed64_le_checked(TranscodeCursor* cursor) {
 }
 
 void thrift_transcode_write_fixed32_le_unchecked(
-    TranscodeCursor* cursor, uint32_t value) {
+    TranscodeCursor* FOLLY_NONNULL cursor, uint32_t value) {
   value = folly::Endian::little(value);
-  memcpy(cursor->writePos, &value, 4);
-  cursor->writePos += 4;
+  uint8_t* FOLLY_NONNULL pos = currentWritePos(cursor);
+  memcpy(pos, &value, 4);
+  cursor->writePos = pos + 4;
 }
 
 void thrift_transcode_write_fixed32_le_checked(
-    TranscodeCursor* cursor, uint32_t value) {
+    TranscodeCursor* FOLLY_NONNULL cursor, uint32_t value) {
   if (!ensureWrite(cursor, 4)) {
     return;
   }
@@ -217,56 +260,66 @@ void thrift_transcode_write_fixed32_le_checked(
 }
 
 void thrift_transcode_write_fixed64_le_unchecked(
-    TranscodeCursor* cursor, uint64_t value) {
+    TranscodeCursor* FOLLY_NONNULL cursor, uint64_t value) {
   value = folly::Endian::little(value);
-  memcpy(cursor->writePos, &value, 8);
-  cursor->writePos += 8;
+  uint8_t* FOLLY_NONNULL pos = currentWritePos(cursor);
+  memcpy(pos, &value, 8);
+  cursor->writePos = pos + 8;
 }
 
 void thrift_transcode_write_fixed64_le_checked(
-    TranscodeCursor* cursor, uint64_t value) {
+    TranscodeCursor* FOLLY_NONNULL cursor, uint64_t value) {
   if (!ensureWrite(cursor, 8)) {
     return;
   }
   thrift_transcode_write_fixed64_le_unchecked(cursor, value);
 }
 
-uint16_t thrift_transcode_read_fixed16_be_unchecked(TranscodeCursor* cursor) {
+uint16_t thrift_transcode_read_fixed16_be_unchecked(
+    TranscodeCursor* FOLLY_NONNULL cursor) {
   uint16_t val;
-  memcpy(&val, cursor->readPos, 2);
-  cursor->readPos += 2;
+  const uint8_t* FOLLY_NONNULL pos = currentReadPos(cursor);
+  memcpy(&val, pos, 2);
+  cursor->readPos = pos + 2;
   return folly::Endian::big(val);
 }
 
-uint16_t thrift_transcode_read_fixed16_be_checked(TranscodeCursor* cursor) {
+uint16_t thrift_transcode_read_fixed16_be_checked(
+    TranscodeCursor* FOLLY_NONNULL cursor) {
   if (!canReadFast(cursor, 2)) {
     return 0;
   }
   return thrift_transcode_read_fixed16_be_unchecked(cursor);
 }
 
-uint32_t thrift_transcode_read_fixed32_be_unchecked(TranscodeCursor* cursor) {
+uint32_t thrift_transcode_read_fixed32_be_unchecked(
+    TranscodeCursor* FOLLY_NONNULL cursor) {
   uint32_t val;
-  memcpy(&val, cursor->readPos, 4);
-  cursor->readPos += 4;
+  const uint8_t* FOLLY_NONNULL pos = currentReadPos(cursor);
+  memcpy(&val, pos, 4);
+  cursor->readPos = pos + 4;
   return folly::Endian::big(val);
 }
 
-uint32_t thrift_transcode_read_fixed32_be_checked(TranscodeCursor* cursor) {
+uint32_t thrift_transcode_read_fixed32_be_checked(
+    TranscodeCursor* FOLLY_NONNULL cursor) {
   if (!canReadFast(cursor, 4)) {
     return 0;
   }
   return thrift_transcode_read_fixed32_be_unchecked(cursor);
 }
 
-uint64_t thrift_transcode_read_fixed64_be_unchecked(TranscodeCursor* cursor) {
+uint64_t thrift_transcode_read_fixed64_be_unchecked(
+    TranscodeCursor* FOLLY_NONNULL cursor) {
   uint64_t val;
-  memcpy(&val, cursor->readPos, 8);
-  cursor->readPos += 8;
+  const uint8_t* FOLLY_NONNULL pos = currentReadPos(cursor);
+  memcpy(&val, pos, 8);
+  cursor->readPos = pos + 8;
   return folly::Endian::big(val);
 }
 
-uint64_t thrift_transcode_read_fixed64_be_checked(TranscodeCursor* cursor) {
+uint64_t thrift_transcode_read_fixed64_be_checked(
+    TranscodeCursor* FOLLY_NONNULL cursor) {
   if (!canReadFast(cursor, 8)) {
     return 0;
   }
@@ -274,14 +327,15 @@ uint64_t thrift_transcode_read_fixed64_be_checked(TranscodeCursor* cursor) {
 }
 
 void thrift_transcode_write_fixed16_be_unchecked(
-    TranscodeCursor* cursor, uint16_t value) {
+    TranscodeCursor* FOLLY_NONNULL cursor, uint16_t value) {
   value = folly::Endian::big(value);
-  memcpy(cursor->writePos, &value, 2);
-  cursor->writePos += 2;
+  uint8_t* FOLLY_NONNULL pos = currentWritePos(cursor);
+  memcpy(pos, &value, 2);
+  cursor->writePos = pos + 2;
 }
 
 void thrift_transcode_write_fixed16_be_checked(
-    TranscodeCursor* cursor, uint16_t value) {
+    TranscodeCursor* FOLLY_NONNULL cursor, uint16_t value) {
   if (!ensureWrite(cursor, 2)) {
     return;
   }
@@ -289,14 +343,15 @@ void thrift_transcode_write_fixed16_be_checked(
 }
 
 void thrift_transcode_write_fixed32_be_unchecked(
-    TranscodeCursor* cursor, uint32_t value) {
+    TranscodeCursor* FOLLY_NONNULL cursor, uint32_t value) {
   value = folly::Endian::big(value);
-  memcpy(cursor->writePos, &value, 4);
-  cursor->writePos += 4;
+  uint8_t* FOLLY_NONNULL pos = currentWritePos(cursor);
+  memcpy(pos, &value, 4);
+  cursor->writePos = pos + 4;
 }
 
 void thrift_transcode_write_fixed32_be_checked(
-    TranscodeCursor* cursor, uint32_t value) {
+    TranscodeCursor* FOLLY_NONNULL cursor, uint32_t value) {
   if (!ensureWrite(cursor, 4)) {
     return;
   }
@@ -304,22 +359,23 @@ void thrift_transcode_write_fixed32_be_checked(
 }
 
 void thrift_transcode_write_fixed64_be_unchecked(
-    TranscodeCursor* cursor, uint64_t value) {
+    TranscodeCursor* FOLLY_NONNULL cursor, uint64_t value) {
   value = folly::Endian::big(value);
-  memcpy(cursor->writePos, &value, 8);
-  cursor->writePos += 8;
+  uint8_t* FOLLY_NONNULL pos = currentWritePos(cursor);
+  memcpy(pos, &value, 8);
+  cursor->writePos = pos + 8;
 }
 
 void thrift_transcode_write_fixed64_be_checked(
-    TranscodeCursor* cursor, uint64_t value) {
+    TranscodeCursor* FOLLY_NONNULL cursor, uint64_t value) {
   if (!ensureWrite(cursor, 8)) {
     return;
   }
   thrift_transcode_write_fixed64_be_unchecked(cursor, value);
 }
 
-const uint8_t* thrift_transcode_read_varint_prefixed(
-    TranscodeCursor* cursor, size_t* len) {
+const uint8_t* FOLLY_NULLABLE thrift_transcode_read_varint_prefixed(
+    TranscodeCursor* FOLLY_NONNULL cursor, size_t* FOLLY_NONNULL len) {
   uint64_t wireLen = thrift_transcode_read_unsigned_varint(cursor);
   if (cursor->error != 0) {
     *len = 0;
@@ -337,8 +393,8 @@ const uint8_t* thrift_transcode_read_varint_prefixed(
   return ptr;
 }
 
-const uint8_t* thrift_transcode_read_i32_prefixed(
-    TranscodeCursor* cursor, size_t* len) {
+const uint8_t* FOLLY_NULLABLE thrift_transcode_read_i32_prefixed(
+    TranscodeCursor* FOLLY_NONNULL cursor, size_t* FOLLY_NONNULL len) {
   uint32_t rawLen = thrift_transcode_read_fixed32_be_checked(cursor);
   if (cursor->error != 0) {
     *len = 0;
@@ -360,7 +416,9 @@ const uint8_t* thrift_transcode_read_i32_prefixed(
 }
 
 void thrift_transcode_write_varint_prefixed(
-    TranscodeCursor* cursor, const uint8_t* data, size_t len) {
+    TranscodeCursor* FOLLY_NONNULL cursor,
+    const uint8_t* FOLLY_NONNULL data,
+    size_t len) {
   uint64_t wireLen = 0;
   if (!sizeToWireLength(cursor, len, &wireLen)) {
     return;
@@ -369,12 +427,15 @@ void thrift_transcode_write_varint_prefixed(
   if (cursor->error != 0 || !ensureWrite(cursor, len)) {
     return;
   }
-  memcpy(cursor->writePos, data, len);
-  cursor->writePos += len;
+  uint8_t* FOLLY_NONNULL pos = currentWritePos(cursor);
+  memcpy(pos, data, len);
+  cursor->writePos = pos + len;
 }
 
 void thrift_transcode_write_i32_prefixed(
-    TranscodeCursor* cursor, const uint8_t* data, size_t len) {
+    TranscodeCursor* FOLLY_NONNULL cursor,
+    const uint8_t* FOLLY_NONNULL data,
+    size_t len) {
   if (len > static_cast<size_t>(std::numeric_limits<int32_t>::max())) {
     setCursorError(cursor, kLengthOverflow);
     return;
@@ -383,18 +444,24 @@ void thrift_transcode_write_i32_prefixed(
   if (cursor->error != 0 || !ensureWrite(cursor, len)) {
     return;
   }
-  memcpy(cursor->writePos, data, len);
-  cursor->writePos += len;
+  uint8_t* FOLLY_NONNULL pos = currentWritePos(cursor);
+  memcpy(pos, data, len);
+  cursor->writePos = pos + len;
 }
 
 void thrift_transcode_write_raw_bytes_unchecked(
-    TranscodeCursor* cursor, const uint8_t* data, size_t len) {
-  memcpy(cursor->writePos, data, len);
-  cursor->writePos += len;
+    TranscodeCursor* FOLLY_NONNULL cursor,
+    const uint8_t* FOLLY_NONNULL data,
+    size_t len) {
+  uint8_t* FOLLY_NONNULL pos = currentWritePos(cursor);
+  memcpy(pos, data, len);
+  cursor->writePos = pos + len;
 }
 
 void thrift_transcode_write_raw_bytes_checked(
-    TranscodeCursor* cursor, const uint8_t* data, size_t len) {
+    TranscodeCursor* FOLLY_NONNULL cursor,
+    const uint8_t* FOLLY_NONNULL data,
+    size_t len) {
   if (!ensureWrite(cursor, len)) {
     return;
   }

@@ -19,6 +19,8 @@
 #include <cstddef>
 #include <cstdint>
 
+#include <folly/CppAttributes.h>
+
 // Segment records cover the active segment plus older segments that received a
 // patch mark.
 #define THRIFT_TRANSCODE_MAX_SEGMENT_RECORDS 8
@@ -67,6 +69,15 @@ enum class TranscodeExtendKind : uint8_t {
   NewSegment,
 };
 
+// Result of a resumable cursor operation.
+enum class TranscodeStatus : uint8_t {
+  Ok,
+  // The provider cannot make progress now. The driver must stop, wait for the
+  // provider, call `thrift_transcode_cursor_resume`, and retry.
+  Blocked,
+  Error,
+};
+
 /**
  * Request to extend the current output segment by at least `minWritable` bytes.
  * The callback may return a new segment or extend the current one in-place, see
@@ -105,28 +116,32 @@ struct TranscodeExtendResult {
  * `request->writePoint`.
  * The cursor passes non-null request and result pointers. userData is the
  * opaque pointer supplied to thrift_transcode_cursor_init and may be null.
- * Returning false latches an output error. Returning true requires a
- * result segment with enough tailroom at the resumed write point.
- * Every unflushed segment returned by the provider must stay alive and
- * mutable because open patch points are resolved by segment id and offset.
+ * `Ok` requires a result segment with enough tailroom at the resumed write
+ * point. `Blocked` leaves the cursor at the request write point. `Error`
+ * latches an output error. Every unflushed segment returned by the provider
+ * must stay alive and mutable because open patch points are resolved by segment
+ * id and offset.
  */
-using TranscodeExtendFn = bool (*)(
-    const TranscodeExtendRequest* request,
-    TranscodeExtendResult* result,
-    void* userData);
+using TranscodeExtendFn = TranscodeStatus (*)(
+    const TranscodeExtendRequest* FOLLY_NONNULL request,
+    TranscodeExtendResult* FOLLY_NONNULL result,
+    void* FOLLY_NULLABLE userData);
 /**
  * Called by `thrift_transcode_cursor_flush` after the cursor advances the
  * flushed watermark to `request->flushPoint`.
  * The cursor passes non-null request and result pointers. userData is the
  * opaque pointer supplied to thrift_transcode_cursor_init and may be null.
- * Returning false latches an output error.
- * Returning NewSegment with `{request->flushPoint, request->segment.end}`
- * reuses the old segment tailroom as a logical next segment.
+ * `Ok` follows the same result validation rules as `TranscodeExtendFn`.
+ * `Blocked` leaves the flushed watermark advanced; callers must not patch
+ * before that watermark while waiting to resume. `Error` latches an output
+ * error. Returning NewSegment with `{request->flushPoint,
+ * request->segment.end}` reuses the old segment tailroom as a logical next
+ * segment.
  */
-using TranscodeFlushFn = bool (*)(
-    const TranscodeFlushRequest* request,
-    TranscodeExtendResult* result,
-    void* userData);
+using TranscodeFlushFn = TranscodeStatus (*)(
+    const TranscodeFlushRequest* FOLLY_NONNULL request,
+    TranscodeExtendResult* FOLLY_NONNULL result,
+    void* FOLLY_NULLABLE userData);
 
 struct TranscodePatchPoint {
   // Absolute stream offset. Used for byte counts and flush validation.
@@ -168,34 +183,44 @@ struct TranscodeCursor {
   // Active segment plus older segments with open patch points.
   size_t segmentCount;
   TranscodeSegmentRecord segmentRecords[THRIFT_TRANSCODE_MAX_SEGMENT_RECORDS];
-  int64_t error; // 0 = ok, non-zero = error code (i64 for alignment)
+  int64_t error; // 0 = ok, -1 = blocked, positive = terminal error code
 
   // Output-provider hooks. `extendFn` is required once tailroom is exhausted;
   // `flushFn` is optional when the provider does not need safe watermarks.
-  TranscodeExtendFn extendFn;
-  TranscodeFlushFn flushFn;
-  void* userData;
+  TranscodeExtendFn FOLLY_NULLABLE extendFn;
+  TranscodeFlushFn FOLLY_NULLABLE flushFn;
+  void* FOLLY_NULLABLE userData;
 };
 
 // The output provider owns segment allocation and lifetime. The cursor keeps
 // only enough metadata to preserve stream offsets and validate patch points.
 void thrift_transcode_cursor_init(
-    TranscodeCursor* cursor,
+    TranscodeCursor* FOLLY_NONNULL cursor,
     TranscodeByteRange input,
     TranscodeMutableByteRange output,
-    TranscodeExtendFn extendFn,
-    TranscodeFlushFn flushFn,
-    void* userData);
+    TranscodeExtendFn FOLLY_NULLABLE extendFn,
+    TranscodeFlushFn FOLLY_NULLABLE flushFn,
+    void* FOLLY_NULLABLE userData);
 
 // Ensure at least `needed` bytes available in write buffer.
 // May extend, relocate, or rotate the active segment.
-void thrift_transcode_cursor_ensure_write(
-    TranscodeCursor* cursor, size_t needed);
+TranscodeStatus thrift_transcode_cursor_ensure_write(
+    TranscodeCursor* FOLLY_NONNULL cursor, size_t needed);
 
-void thrift_transcode_cursor_flush(TranscodeCursor* cursor, size_t minWritable);
+TranscodeStatus thrift_transcode_cursor_flush(
+    TranscodeCursor* FOLLY_NONNULL cursor, size_t minWritable);
+
+TranscodeStatus thrift_transcode_cursor_status(
+    const TranscodeCursor* FOLLY_NONNULL cursor);
+
+// Clear a blocked cursor before re-entering the kernel. Terminal errors are not
+// cleared.
+TranscodeStatus thrift_transcode_cursor_resume(
+    TranscodeCursor* FOLLY_NONNULL cursor);
 
 // Returns the number of bytes written so far.
-size_t thrift_transcode_cursor_bytes_written(const TranscodeCursor* cursor);
+size_t thrift_transcode_cursor_bytes_written(
+    const TranscodeCursor* FOLLY_NONNULL cursor);
 
 // ─────────────────────────────────────────────────────────────────────────
 // Cursor mark/patch (for deferred header writes)
@@ -206,20 +231,24 @@ size_t thrift_transcode_cursor_bytes_written(const TranscodeCursor* cursor);
 // length for Protobuf length-delimited blocks).
 //
 // Save the current write position.
-TranscodePatchPoint thrift_transcode_cursor_mark(TranscodeCursor* cursor);
+TranscodePatchPoint thrift_transcode_cursor_mark(
+    TranscodeCursor* FOLLY_NONNULL cursor);
 
 TranscodePatchPoint thrift_transcode_cursor_offset_patch_point(
     TranscodePatchPoint mark, size_t offset);
 
 size_t thrift_transcode_cursor_bytes_since_mark(
-    const TranscodeCursor* cursor, TranscodePatchPoint mark);
+    const TranscodeCursor* FOLLY_NONNULL cursor, TranscodePatchPoint mark);
 
 // Skip N bytes at the current write position (reserves space for later patch).
-void thrift_transcode_cursor_skip(TranscodeCursor* cursor, size_t n);
+void thrift_transcode_cursor_skip(
+    TranscodeCursor* FOLLY_NONNULL cursor, size_t n);
 
 // Patch a single byte at a previously marked offset.
 void thrift_transcode_cursor_patch_byte(
-    TranscodeCursor* cursor, TranscodePatchPoint mark, uint8_t value);
+    TranscodeCursor* FOLLY_NONNULL cursor,
+    TranscodePatchPoint mark,
+    uint8_t value);
 
 // Patch a varint at a previously marked offset, into a fixed number of
 // reserved bytes (reservedBytes). The value is spread across all reservedBytes
@@ -227,32 +256,54 @@ void thrift_transcode_cursor_patch_byte(
 // occupies exactly reservedBytes — an intentionally non-canonical, fixed-width
 // varint. Returns false if the value doesn't fit in reservedBytes.
 bool thrift_transcode_cursor_patch_varint(
-    TranscodeCursor* cursor,
+    TranscodeCursor* FOLLY_NONNULL cursor,
     TranscodePatchPoint mark,
     uint64_t value,
     size_t reservedBytes);
 
 // Patch a big-endian i32 at a previously marked offset.
 void thrift_transcode_cursor_patch_i32_be(
-    TranscodeCursor* cursor, TranscodePatchPoint mark, int32_t value);
+    TranscodeCursor* FOLLY_NONNULL cursor,
+    TranscodePatchPoint mark,
+    int32_t value);
 
 } // extern "C"
 
 namespace apache::thrift::transcode::detail {
+
+inline constexpr int64_t kCursorBlocked = -1;
 
 // Latch the first cursor error. Hot intrinsics validate the bytes needed for
 // their own read or write, but they are not cancellation points for an error
 // that was already latched by an earlier intrinsic. The execution engine must
 // check `cursor->error` at its dispatch boundaries and stop before issuing
 // another protocol operation.
-inline void setError(TranscodeCursor* cursor, int64_t code) {
+inline void setError(TranscodeCursor* FOLLY_NONNULL cursor, int64_t code) {
   if (cursor->error == 0) {
     cursor->error = code;
   }
 }
 
+inline void setBlocked(TranscodeCursor* FOLLY_NONNULL cursor) {
+  if (cursor->error == 0) {
+    cursor->error = kCursorBlocked;
+  }
+}
+
+inline bool isOk(const TranscodeCursor* FOLLY_NONNULL cursor) {
+  return cursor->error == 0;
+}
+
+inline TranscodeStatus status(const TranscodeCursor* FOLLY_NONNULL cursor) {
+  if (cursor->error == 0) {
+    return TranscodeStatus::Ok;
+  }
+  return cursor->error == kCursorBlocked ? TranscodeStatus::Blocked
+                                         : TranscodeStatus::Error;
+}
+
 // Are there at least `n` readable bytes remaining?
-inline bool canRead(TranscodeCursor* cursor, size_t n) {
+inline bool canRead(TranscodeCursor* FOLLY_NONNULL cursor, size_t n) {
   if (cursor->error != 0) {
     return false;
   }
@@ -271,11 +322,21 @@ inline bool canRead(TranscodeCursor* cursor, size_t n) {
 
 namespace apache::thrift::transcode {
 
-inline void setCursorError(TranscodeCursor* cursor, int64_t code) {
+inline void setCursorError(
+    TranscodeCursor* FOLLY_NONNULL cursor, int64_t code) {
   detail::setError(cursor, code);
 }
 
-inline bool cursorCanRead(TranscodeCursor* cursor, size_t n) {
+inline void setCursorBlocked(TranscodeCursor* FOLLY_NONNULL cursor) {
+  detail::setBlocked(cursor);
+}
+
+inline TranscodeStatus cursorStatus(
+    const TranscodeCursor* FOLLY_NONNULL cursor) {
+  return detail::status(cursor);
+}
+
+inline bool cursorCanRead(TranscodeCursor* FOLLY_NONNULL cursor, size_t n) {
   return detail::canRead(cursor, n);
 }
 

@@ -15,7 +15,7 @@ async-trait = "0.1.86"
 base64 = { version = "0.22.1", features = ["alloc"] }
 bufsize = "1.0.10"
 bytes = { version = "1.12.1", features = ["serde"] }
-clap = { version = "4.6.0", features = ["derive", "env", "string", "unicode", "wrap_help"] }
+clap = { version = "4.6.2", features = ["derive", "env", "string", "unicode", "wrap_help"] }
 futures = { version = "0.3.31", features = ["async-await", "compat"] }
 ghost = "0.1.22"
 memchr = "2.8.3"

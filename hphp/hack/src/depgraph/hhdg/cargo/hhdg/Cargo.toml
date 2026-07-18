@@ -13,7 +13,7 @@ path = "../../hhdg.rs"
 
 [dependencies]
 anyhow = "1.0.103"
-clap = { version = "4.6.0", features = ["derive", "env", "string", "unicode", "wrap_help"] }
+clap = { version = "4.6.2", features = ["derive", "env", "string", "unicode", "wrap_help"] }
 depgraph_reader = { version = "0.0.0", path = "../../../cargo/depgraph_reader" }
 hash = { version = "0.0.0", path = "../../../../utils/hash" }
 human_readable_dep_map = { version = "0.0.0", path = "../../../cargo/human_readable_dep_map" }

@@ -634,9 +634,9 @@ HandlerCallbackBase::processServiceInterceptorsOnRequest(
 folly::coro::Task<void>
 HandlerCallbackBase::processServiceInterceptorsOnResponse(
     detail::ServiceInterceptorOnResponseResult resultOrActiveException) {
-  if (!shouldProcessServiceInterceptorsOnResponse()) {
-    co_return;
-  }
+  // Callers guarantee shouldProcessServiceInterceptorsOnResponse() before
+  // invoking this, so the server pointer chain below is valid.
+  DCHECK(shouldProcessServiceInterceptorsOnResponse());
   const apache::thrift::server::ServerConfigs* server =
       reqCtx_->getConnectionContext()->getWorkerContext()->getServerContext();
   DCHECK(server);

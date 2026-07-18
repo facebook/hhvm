@@ -1581,6 +1581,20 @@ enum Dtype {
   WHITEOUT = 14, // DT_WHT
 }
 
+/**
+ * Method used to warm the OS page cache after prefetch.
+ */
+enum PreloadMethod {
+  // posix_fadvise(WILLNEED) or fcntl(F_RDADVISE) on macOS
+  FADVISE = 0,
+  // readahead() (Linux only)
+  READAHEAD = 1,
+  // pread() loop; reliable on FUSE filesystems
+  READ = 2,
+  // mmap() + madvise(MADV_WILLNEED)
+  MMAP = 3,
+}
+
 struct PredictiveFetch {
   // Number of directories to glob. If not specified, a default value (predictivePrefetchProfileSize in EdenConfig.h) is used.
   1: optional i32 numTopDirectories;
@@ -1618,6 +1632,19 @@ struct PrefetchParams {
   8: bool returnPrefetchedFiles = false;
   // When true, return PrefetchStats in PrefetchResult.
   9: bool returnStats = false;
+  // When true, after prefetching blobs to hgcache, also warm the OS page cache
+  // by reading files through the mount. Without preloadProgress this is
+  // fire-and-forget: the RPC returns when prefetch completes and the preload
+  // phase continues in the background with no way to observe it.
+  10: bool preload = false;
+  // When true (and preload is true), return an operationId for progress
+  // queries via queryPreloadProgress().
+  11: bool preloadProgress = false;
+  // Method to use for page cache preloading (only used when preload is true).
+  // Defaults to READ (pread loop) which reliably populates the page cache
+  // on FUSE mounts. Advisory methods (fadvise, readahead) don't persist
+  // under memory pressure on FUSE.
+  12: PreloadMethod preloadMethod = PreloadMethod.READ;
 }
 
 struct PrefetchStats {
@@ -1647,6 +1674,49 @@ struct PrefetchStats {
 struct PrefetchResult {
   1: optional Glob prefetchedFiles;
   2: optional PrefetchStats stats;
+  // ID for a long-running preload operation.
+  // Only populated when preload=true and preloadProgress=true.
+  3: optional string operationId;
+}
+
+/**
+ * Progress for a page cache preload operation.
+ * Returned by queryPreloadProgress().
+ */
+struct PreloadProgress {
+  // Preload phase progress.
+  1: i64 processed;
+  2: i64 total;
+  3: bool isDone;
+  4: optional string error;
+  // Duration of the preload operation in milliseconds (set when isDone=true).
+  5: optional i64 durationMs;
+
+  // Prefetch phase progress (fetching blobs from network).
+  6: i64 prefetchProcessed;
+  7: i64 prefetchTotal;
+  8: bool prefetchDone;
+  9: i64 prefetchBytesProcessed;
+  10: i64 prefetchBytesTotal;
+}
+
+/** Params for queryPreloadProgress(). */
+struct PreloadProgressRequest {
+  // The operationId returned by prefetchFilesV2 when preload=true and
+  // preloadProgress=true.
+  1: string operationId;
+}
+
+/** Result for queryPreloadProgress(). */
+struct PreloadProgressResponse {
+  // False when the operationId is not known to the daemon: it was never
+  // issued, its operation completed and was already swept (completed entries
+  // are only retained briefly for late polls), or the daemon restarted (the
+  // registry is in-memory). Clients must treat found=false as "no longer
+  // observable", NOT as successful completion.
+  1: bool found;
+  // Progress for the operation. Only set when found=true.
+  2: optional PreloadProgress progress;
 }
 
 /** Params for globFiles(). */
@@ -2741,6 +2811,16 @@ service EdenService extends fb303_core.BaseService {
   PrefetchResult prefetchFilesV2(1: PrefetchParams params) throws (
     1: EdenError ex,
   );
+
+  /**
+   * Query the progress of a page cache preload operation.
+   * The operationId is returned from prefetchFilesV2 when preload=true
+   * and preloadProgress=true. Returns found=false for ids the daemon no
+   * longer (or never) tracked; see PreloadProgressResponse.
+   */
+  PreloadProgressResponse queryPreloadProgress(
+    1: PreloadProgressRequest request,
+  ) throws (1: EdenError ex);
 
   /**
    * Gets a list of a user's most accessed directories, performs

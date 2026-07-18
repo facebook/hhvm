@@ -48,21 +48,30 @@ bool dumpTCCode(folly::StringPiece filename) {
   SCOPE_EXIT{ fclose(F); };
 
   OPEN_FILE(aFile,          "_a");
+  // Preserve the three-file dump shape for consumers even though all code is
+  // stored in the sparse unified file.
   OPEN_FILE(acoldFile,      "_acold");
   OPEN_FILE(afrozenFile,    "_afrozen");
 
 #undef OPEN_FILE
 
-  // dump starting from the main region
+  // Dynamic TC sections are noncontiguous, so preserve each code block's
+  // address as an offset in the sparse unified dump.
   auto result = true;
-  auto writeBlock = [&](const CodeBlock& cb, FILE* file) {
-    if (result) {
-      auto const count = cb.used();
-      result = fwrite(cb.base(), 1, count, file) == count;
+  auto const& all = code().all();
+  auto writeBlock = [&](const CodeBlock& cb) {
+    if (!result) return;
+    assertx(all.contains(cb.base(), cb.frontier()));
+    auto const offset = cb.base() - all.base();
+    if (fseeko(aFile, offset, SEEK_SET) != 0) {
+      result = false;
+      return;
     }
+    auto const count = cb.used();
+    result = fwrite(cb.base(), 1, count, aFile) == count;
   };
 
-  writeBlock(code().all(), aFile);
+  code().forEachBlock(writeBlock);
   return result;
 }
 

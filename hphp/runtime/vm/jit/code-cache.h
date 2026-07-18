@@ -76,6 +76,19 @@ struct CodeCache {
   CodeCache();
 
   template<typename L>
+  void forEachBlock(L body) const {
+    // Each block occupies contiguous entries, one per 2MiB page, so comparing
+    // adjacent pointers visits it exactly once.
+    const CodeBlock* previous = nullptr;
+    for (auto const& entry : m_blocks) {
+      auto const block = entry.load(std::memory_order_relaxed);
+      if (block == previous) continue;
+      previous = block;
+      if (block && block->name() != kGdataName) body(*block);
+    }
+  }
+
+  template<typename L>
   void forEachSection(L body) const {
     body("main", m_main);
     body("cold", m_cold);

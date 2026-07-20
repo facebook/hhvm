@@ -228,6 +228,16 @@ bool writeScalarInt(TranscodeCursor* c, const ScalarOp& op, int64_t v) {
     case WriteFn::IntToDecimalText:
       thrift_transcode_format_decimal_int(c, v);
       break;
+    case WriteFn::EnumNameOrDecimalText:
+      if (op.enumNames != nullptr) {
+        if (const auto* name = op.enumNames->nameFor(static_cast<int32_t>(v))) {
+          thrift_transcode_format_escaped_string(
+              c, reinterpret_cast<const uint8_t*>(name->data()), name->size());
+          break;
+        }
+      }
+      thrift_transcode_format_decimal_int(c, v);
+      break;
     case WriteFn::BoolToKeyword:
       if (v != 0) {
         thrift_transcode_write_raw_bytes_checked(
@@ -246,7 +256,6 @@ bool writeScalarInt(TranscodeCursor* c, const ScalarOp& op, int64_t v) {
     case WriteFn::LengthPrefixedI32:
     case WriteFn::WriteQuotedString:
     case WriteFn::WriteBase64String:
-    case WriteFn::EnumNameOrDecimalText:
     case WriteFn::FloatToDecimalText:
     case WriteFn::StoreAtOffset:
     case WriteFn::CallTypeInfoSet:

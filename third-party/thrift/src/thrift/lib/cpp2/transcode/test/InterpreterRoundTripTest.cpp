@@ -16,9 +16,11 @@
 
 #include <thrift/lib/cpp2/transcode/TranscodeInterpreter.h>
 
+#include <thrift/lib/cpp2/protocol/Serializer.h>
 #include <thrift/lib/cpp2/transcode/CodecFactory.h>
 #include <thrift/lib/cpp2/transcode/TranscodePlan.h>
 #include <thrift/lib/cpp2/transcode/WireType.h>
+#include <thrift/lib/cpp2/transcode/test/gen-cpp2/InterpreterRoundTripFixtures_types.h>
 
 #include <gtest/gtest.h>
 
@@ -32,6 +34,8 @@
 
 namespace apache::thrift::transcode {
 namespace {
+
+namespace fixture = apache::thrift::transcode::test;
 
 using def = type_system::TypeSystemBuilder::DefinitionHelper;
 using type_system::TypeIds;
@@ -106,6 +110,15 @@ struct InterpreterRoundTripTest : ::testing::Test {
                 def::AlwaysPresent,
                 TypeIds::uri("test.Inner")),
         }));
+    builder.addType("test.Color", def::Enum({{"RED", 1}, {"BLUE", 2}}));
+    builder.addType(
+        "test.EnumSample",
+        def::Struct({
+            def::Field(
+                def::Identity(1, "color"),
+                def::AlwaysPresent,
+                TypeIds::uri("test.Color")),
+        }));
     typeSystem = std::move(builder).build();
   }
 
@@ -120,6 +133,10 @@ struct InterpreterRoundTripTest : ::testing::Test {
 
   const type_system::StructNode& outerNode() {
     return typeSystem->getUserDefinedTypeOrThrow("test.Outer").asStruct();
+  }
+
+  const type_system::StructNode& enumNode() {
+    return typeSystem->getUserDefinedTypeOrThrow("test.EnumSample").asStruct();
   }
 
   TranscodePlan fuse(const Codec& source, const Codec& target) {
@@ -286,6 +303,12 @@ std::vector<uint8_t> binaryNestedStructMessage() {
   b.push_back(kTStop);
 
   return b;
+}
+
+std::string enumBinaryMessage(fixture::Color color) {
+  fixture::EnumSample value;
+  value.color() = color;
+  return BinarySerializer::serialize<std::string>(value);
 }
 
 std::vector<uint8_t> toBytes(const folly::IOBuf& buf) {
@@ -458,6 +481,37 @@ TEST_F(InterpreterRoundTripTest, BinarySignedScalarsTranscodeToJson) {
   auto jsonBytes = toBytes(**result);
   EXPECT_EQ(
       std::string(jsonBytes.begin(), jsonBytes.end()), R"({"b":-2,"s":-1})");
+}
+
+TEST_F(InterpreterRoundTripTest, BinaryEnumTranscodesToJsonNameWhenKnown) {
+  auto binary = makeThriftBinaryCodec(enumNode());
+  auto json = makeJsonCodec(enumNode());
+  TranscodeInterpreter binaryToJson{fuse(binary, json)};
+
+  auto binary0 = enumBinaryMessage(fixture::Color::RED);
+  auto binary0Buf = folly::IOBuf::copyBuffer(binary0.data(), binary0.size());
+
+  auto result = binaryToJson.transcode(*binary0Buf);
+  ASSERT_FALSE(result.hasError()) << result.error().message;
+
+  auto jsonBytes = toBytes(**result);
+  EXPECT_EQ(
+      std::string(jsonBytes.begin(), jsonBytes.end()), R"({"color":"RED"})");
+}
+
+TEST_F(InterpreterRoundTripTest, BinaryEnumTranscodesToJsonNumberWhenUnknown) {
+  auto binary = makeThriftBinaryCodec(enumNode());
+  auto json = makeJsonCodec(enumNode());
+  TranscodeInterpreter binaryToJson{fuse(binary, json)};
+
+  auto binary0 = enumBinaryMessage(static_cast<fixture::Color>(99));
+  auto binary0Buf = folly::IOBuf::copyBuffer(binary0.data(), binary0.size());
+
+  auto result = binaryToJson.transcode(*binary0Buf);
+  ASSERT_FALSE(result.hasError()) << result.error().message;
+
+  auto jsonBytes = toBytes(**result);
+  EXPECT_EQ(std::string(jsonBytes.begin(), jsonBytes.end()), R"({"color":99})");
 }
 
 } // namespace

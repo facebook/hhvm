@@ -47,8 +47,10 @@ FailoverErrorsSettingsBase::List::List(const folly::dynamic& json) {
 
 bool FailoverErrorsSettingsBase::List::shouldFailover(
     const carbon::Result result) const {
-  if (failover_ != nullptr) {
-    return (*failover_)[static_cast<size_t>(result)];
+  const auto index = static_cast<size_t>(result);
+  if (failover_ != nullptr &&
+      index < static_cast<size_t>(carbon::Result::NUM_RESULTS)) {
+    return (*failover_)[index];
   }
   return isFailoverErrorResult(result);
 }

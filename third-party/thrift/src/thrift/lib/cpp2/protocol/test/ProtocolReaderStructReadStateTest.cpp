@@ -16,6 +16,9 @@
 
 #include <gtest/gtest.h>
 
+#include <cstdint>
+#include <limits>
+
 #include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
 #include <thrift/lib/cpp2/protocol/ProtocolReaderStructReadState.h>
@@ -27,6 +30,62 @@ using namespace apache::thrift::protocol;
 using namespace apache::thrift::detail::pm;
 
 namespace {
+
+struct NonAcceptingContext {
+  static constexpr bool kAcceptsContext = false;
+  std::int16_t fieldId;
+};
+
+class ContextAwareCompactProtocolReader : public CompactProtocolReader {
+ public:
+  template <typename Context>
+  void readI32WithContext(std::int32_t& out, Context& context) {
+    contextHookCalled = true;
+    contextFieldId = context.fieldId;
+    readI32(out);
+  }
+
+  bool contextHookCalled{false};
+  std::int16_t contextFieldId{0};
+};
+
+std::unique_ptr<folly::IOBuf> createI32Input(std::int32_t value) {
+  folly::IOBufQueue queue;
+  CompactProtocolWriter writer;
+  writer.setOutput(&queue);
+  writer.writeI32(value);
+  return queue.move();
+}
+
+TEST(ProtocolMethods, UsesProtocolContextHookWhenContextDoesNotAdvertiseIt) {
+  auto input = createI32Input(42);
+  ContextAwareCompactProtocolReader reader;
+  reader.setInput(input.get());
+  NonAcceptingContext context{17};
+  std::int32_t value = 0;
+
+  protocol_methods<type_class::integral, std::int32_t>::readWithContext(
+      reader, value, context);
+
+  EXPECT_EQ(value, 42);
+  EXPECT_TRUE(reader.contextHookCalled);
+  EXPECT_EQ(reader.contextFieldId, 17);
+}
+
+TEST(ProtocolMethods, UsesProtocolContextHookForUnsignedInteger) {
+  auto input = createI32Input(-1);
+  ContextAwareCompactProtocolReader reader;
+  reader.setInput(input.get());
+  NonAcceptingContext context{23};
+  std::uint32_t value = 0;
+
+  protocol_methods<type_class::integral, std::uint32_t>::readWithContext(
+      reader, value, context);
+
+  EXPECT_EQ(value, std::numeric_limits<std::uint32_t>::max());
+  EXPECT_TRUE(reader.contextHookCalled);
+  EXPECT_EQ(reader.contextFieldId, 23);
+}
 
 template <class ProtocolWriter>
 std::unique_ptr<folly::IOBuf> createTestInput() {

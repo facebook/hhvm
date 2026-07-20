@@ -338,7 +338,10 @@ struct protocol_methods;
   }                                                                          \
   template <typename Protocol, typename Context>                             \
   static void readWithContext(Protocol& protocol, Type& out, Context& ctx) { \
-    if constexpr (Context::kAcceptsContext) {                                \
+    constexpr bool kHasContextRead =                                         \
+        requires { protocol.read##Method##WithContext(out, ctx); };          \
+    static_assert(!Context::kAcceptsContext || kHasContextRead);             \
+    if constexpr (kHasContextRead) {                                         \
       protocol.read##Method##WithContext(out, ctx);                          \
     } else {                                                                 \
       protocol.read##Method(out);                                            \
@@ -387,7 +390,10 @@ THRIFT_PROTOCOL_METHODS_REGISTER_OVERLOAD(integral, std::int64_t, I64);
   template <typename Protocol, typename Context>                             \
   static void readWithContext(Protocol& protocol, Type& out, Context& ctx) { \
     SignedType tmp;                                                          \
-    if constexpr (Context::kAcceptsContext) {                                \
+    constexpr bool kHasContextRead =                                         \
+        requires { protocol.read##Method##WithContext(tmp, ctx); };          \
+    static_assert(!Context::kAcceptsContext || kHasContextRead);             \
+    if constexpr (kHasContextRead) {                                         \
       protocol.read##Method##WithContext(tmp, ctx);                          \
     } else {                                                                 \
       protocol.read##Method(tmp);                                            \

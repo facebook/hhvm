@@ -38,7 +38,6 @@ abstract final class ThriftUtil {
     nameof ModelActionableComponentConfig,
     nameof ModelToPerCompTypeThresholdsWrapper,
     nameof OnDemandConfig_MatchmakingSpec,
-    nameof OpsStreamEvent,
     nameof QRTModelMapping,
     nameof SignalMappingCollectionV2,
     nameof WebsiteEventContextParamStruct,

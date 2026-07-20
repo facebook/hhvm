@@ -378,7 +378,8 @@ void HTTPServer::globalDrainImpl() {
     serverSocket->stopAccepting();
   }
   if (quicServer_) {
-    quicServer_->rejectNewConnections([]() { return true; });
+    quicServer_->rejectNewConnections(
+        [](const quic::SocketAddress&) { return true; });
   }
 }
 

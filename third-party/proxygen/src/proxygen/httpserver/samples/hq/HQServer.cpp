@@ -399,7 +399,8 @@ void HQServer::stop() {
   server_->shutdown();
 }
 
-void HQServer::rejectNewConnections(std::function<bool()> rejectFn) {
+void HQServer::rejectNewConnections(
+    std::function<bool(const quic::SocketAddress&)> rejectFn) {
   server_->rejectNewConnections(std::move(rejectFn));
 }
 

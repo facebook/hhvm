@@ -1720,6 +1720,12 @@ class t_mstch_cpp2_generator : public t_whisker_generator {
       assert(parent != nullptr);
       return cpp_context_->resolver().get_native_type(field, *parent);
     });
+    // True if `cpp.use_allocator` is set on the field or its (typedef) type.
+    def.property("cpp_use_allocator?", [](const t_field& field) {
+      return field.has_unstructured_annotation("cpp.use_allocator") ||
+          !!t_typedef::get_first_unstructured_annotation_or_null(
+                 &field.type().deref(), {"cpp.use_allocator"});
+    });
     def.property("cpp_storage_name", [this](const t_field& field) {
       const t_structured* strct = context().get_field_parent(&field);
       assert(strct != nullptr);

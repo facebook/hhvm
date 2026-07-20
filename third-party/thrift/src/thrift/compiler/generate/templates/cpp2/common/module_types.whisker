@@ -60,7 +60,7 @@ class {{struct.cpp_underlying_name}};
 }}{{#if field.cpp_ref_not_boxed?}}{{#partial smart_ptr_constructor field=field}}{{!
 }}{{#else if field.boxed_ref?}}{{#partial fields.default_value field=field}}{{!
 }}{{#else if field.intern_boxed_ref?}}{{field.cpp_storage_type}}::fromStaticConstant(&::apache::thrift::op::getDefault<{{#partial fields.tag field=field struct=struct}}>()){{!
-}}{{#else if (and (not field.cpp_ref?) field.type.cpp_use_allocator?)}}__fbthrift_alloc{{!
+}}{{#else if (and (not field.cpp_ref?) field.cpp_use_allocator?)}}__fbthrift_alloc{{!
 }}{{/if field.cpp_ref_not_boxed?}}){{#if (not is_last?)}},
 {{/if (not is_last?)}}
 {{/each}}

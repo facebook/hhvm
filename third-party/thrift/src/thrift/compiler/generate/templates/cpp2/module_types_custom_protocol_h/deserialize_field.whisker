@@ -32,7 +32,7 @@ if constexpr(::apache::thrift::adapt_detail::has_inplace_toThrift<{{field.cpp_fi
   {{#partial custom_protocol.protocol_methods field=field}}::readWithContext(*iprot, {{field.cpp_first_adapter}}::toThrift({{#partial custom_protocol.member_or_ptr field=field struct=struct}}), _readState);
 } else {
     {{/if field.cpp_exactly_one_adapter?}}
-{{#if field.cpp_exactly_one_adapter?}}  {{/if field.cpp_exactly_one_adapter?}}{{field.cpp_standard_type}} tvalue{{#if (and field.type.container? field.type.cpp_use_allocator?)}}(this->get_allocator()){{/if}};
+{{#if field.cpp_exactly_one_adapter?}}  {{/if field.cpp_exactly_one_adapter?}}{{field.cpp_standard_type}} tvalue{{#if (and field.type.container? field.cpp_use_allocator?)}}(this->get_allocator()){{/if}};
 {{#if field.cpp_exactly_one_adapter?}}  {{/if field.cpp_exactly_one_adapter?}}{{#partial custom_protocol.protocol_methods field=field}}::readWithContext(*iprot, tvalue, _readState);
     {{#if field.cpp_exactly_one_adapter?}}
   {{#partial custom_protocol.member_or_ptr field=field struct=struct}} = ::apache::thrift::adapt_detail::fromThriftField<{{field.cpp_first_adapter}}, {{field.id}}>(::std::move(tvalue), *this);
@@ -42,7 +42,7 @@ if constexpr(::apache::thrift::adapt_detail::has_inplace_toThrift<{{field.cpp_fi
     {{/if field.cpp_exactly_one_adapter?}}
   {{#else}}
     {{#if (and (not field.cpp_ref?) field.type.container?)}}
-{{#partial fields.member field=field struct=struct}} = {{field.cpp_type}}({{#if field.type.cpp_use_allocator?}}this->get_allocator(){{/if}});
+{{#partial fields.member field=field struct=struct}} = {{field.cpp_type}}({{#if field.cpp_use_allocator?}}this->get_allocator(){{/if}});
     {{/if (and (not field.cpp_ref?) field.type.container?)}}
 {{#partial custom_protocol.protocol_methods field=field}}::readWithContext(*iprot, {{#partial custom_protocol.member_or_ptr field=field struct=struct}}, _readState);
   {{/if field.use_op_encode?}}

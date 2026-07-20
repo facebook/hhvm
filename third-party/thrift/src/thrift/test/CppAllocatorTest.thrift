@@ -121,9 +121,15 @@ struct YesAllocatorViaPmr {
   items = {"cpp.allocator": "::ScopedStatefulAlloc<>"},
 }
 struct HasContainerFields {
-  1: list_i32_4073 aa_list;
-  2: set_i32_8876 aa_set;
-  3: map_i32_i32_3938 aa_map;
+  @thrift.DeprecatedUnvalidatedAnnotations{items = {"cpp.use_allocator": "1"}}
+  @cpp.Type{template = "::StatefulAllocVector"}
+  1: list<i32> aa_list;
+  @thrift.DeprecatedUnvalidatedAnnotations{items = {"cpp.use_allocator": "1"}}
+  @cpp.Type{template = "::StatefulAllocSet"}
+  2: set<i32> aa_set;
+  @thrift.DeprecatedUnvalidatedAnnotations{items = {"cpp.use_allocator": "1"}}
+  @cpp.Type{template = "::StatefulAllocMap"}
+  3: map<i32, i32> aa_map;
 }
 
 @thrift.DeprecatedUnvalidatedAnnotations{
@@ -357,9 +363,6 @@ typedef list<CountingChild> list_CountingChild_2391
 @cpp.Type{template = "::AlwaysThrowVector"}
 typedef list<i32> list_i32_1528
 @thrift.DeprecatedUnvalidatedAnnotations{items = {"cpp.use_allocator": "1"}}
-@cpp.Type{template = "::StatefulAllocVector"}
-typedef list<i32> list_i32_4073
-@thrift.DeprecatedUnvalidatedAnnotations{items = {"cpp.use_allocator": "1"}}
 @cpp.Type{template = "::CountingVector"}
 typedef list<i32> list_i32_8474
 @thrift.DeprecatedUnvalidatedAnnotations{items = {"cpp.use_allocator": "1"}}
@@ -368,9 +371,6 @@ typedef list<i32> list_i32_8699
 @thrift.DeprecatedUnvalidatedAnnotations{items = {"cpp.use_allocator": "1"}}
 @cpp.Type{template = "::CountingMap"}
 typedef map<i32, i32> map_i32_i32_1496
-@thrift.DeprecatedUnvalidatedAnnotations{items = {"cpp.use_allocator": "1"}}
-@cpp.Type{template = "::StatefulAllocMap"}
-typedef map<i32, i32> map_i32_i32_3938
 @thrift.DeprecatedUnvalidatedAnnotations{items = {"cpp.use_allocator": "1"}}
 @cpp.Type{template = "::StatefulAllocSortedVectorMap"}
 typedef map<i32, i32> map_i32_i32_4068
@@ -386,9 +386,6 @@ typedef set<i32> set_i32_2716
 @thrift.DeprecatedUnvalidatedAnnotations{items = {"cpp.use_allocator": "1"}}
 @cpp.Type{template = "std::pmr::set"}
 typedef set<i32> set_i32_4098
-@thrift.DeprecatedUnvalidatedAnnotations{items = {"cpp.use_allocator": "1"}}
-@cpp.Type{template = "::StatefulAllocSet"}
-typedef set<i32> set_i32_8876
 @thrift.DeprecatedUnvalidatedAnnotations{items = {"cpp.use_allocator": "1"}}
 @cpp.Type{template = "::CountingSet"}
 typedef set<i32> set_i32_9206

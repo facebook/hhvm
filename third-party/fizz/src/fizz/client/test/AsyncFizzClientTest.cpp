@@ -845,10 +845,10 @@ TEST_F(AsyncFizzClientTest, TestEarlyHandshakeRejectedAutoResendOrder) {
   client_->setReplaySafetyCallback(&mockReplayCallback_);
 
   EXPECT_CALL(*machine_, _processEarlyAppWrite(_, _))
-      .WillOnce(Invoke([](const State&, EarlyAppWrite& write) {
+      .WillOnce([](const State&, EarlyAppWrite& write) {
         EXPECT_TRUE(IOBufEqualTo()(write.data, IOBuf::copyBuffer("aaaa")));
         return detail::actions();
-      }));
+      });
   client_->writeChain(nullptr, IOBuf::copyBuffer("aaaa"));
   auto buf = IOBuf::create(2000);
   std::memset(buf->writableData(), 'b', 2000);

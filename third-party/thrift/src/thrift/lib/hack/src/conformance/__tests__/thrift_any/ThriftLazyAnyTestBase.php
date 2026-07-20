@@ -20,7 +20,7 @@
 abstract class ThriftLazyAnyTestBase<T> extends WWWTest {
   const type TProtocolTestDetails = shape(
     'use_json_struct' => bool,
-    'serializer' => classname<TProtocolSerializer>,
+    'serializer' => class<TProtocolSerializer>,
     'protocol' => apache_thrift_type_standard_StandardProtocol,
   );
 
@@ -74,22 +74,20 @@ abstract class ThriftLazyAnyTestBase<T> extends WWWTest {
     self::TProtocolTestDetails $info,
   ): string {
     $serializer = $info['serializer'];
-    return HH_FIXME::tryClassnameToClass($serializer)
-      |> $$::serialize(
-        facebook\thrift\test\AnyTestHelper::fromShape(shape(
-          'field' => apache_thrift_type_AnyStruct::fromShape(shape(
-            'type' => ThriftTypeStructAdapter::fromTypeSpec(static::TYPE_SPEC),
-            'protocol' => apache_thrift_type_rep_ProtocolUnion::fromShape(
-              shape('standard' => $info['protocol']),
-            ),
-            'data' => HH_FIXME::tryClassnameToClass($serializer)
-              |> $$::serializeData(
-                static::getExampleValue(),
-                static::TYPE_SPEC,
-              ),
-          )),
+    return $serializer::serialize(
+      facebook\thrift\test\AnyTestHelper::fromShape(shape(
+        'field' => apache_thrift_type_AnyStruct::fromShape(shape(
+          'type' => ThriftTypeStructAdapter::fromTypeSpec(static::TYPE_SPEC),
+          'protocol' => apache_thrift_type_rep_ProtocolUnion::fromShape(
+            shape('standard' => $info['protocol']),
+          ),
+          'data' => $serializer::serializeData(
+            static::getExampleValue(),
+            static::TYPE_SPEC,
+          ),
         )),
-      );
+      )),
+    );
   }
 
   protected static function getRoundTripTestStruct(
@@ -98,7 +96,7 @@ abstract class ThriftLazyAnyTestBase<T> extends WWWTest {
     bool $force_any_deserialization = false,
   ): IThriftStruct {
     $serializer = $info['serializer'];
-    $roundtrip_struct = HH_FIXME::tryClassnameToClass($serializer)
+    $roundtrip_struct = $serializer
       |> $$::deserialize(
         $expected_serialized,
         $info['use_json_struct']
@@ -148,7 +146,7 @@ abstract class ThriftLazyAnyTestBase<T> extends WWWTest {
 
   <<__NeedsConcrete>>
   public static function getTestCases(
-  ): dict<string, (IThriftStruct, T, string, classname<TProtocolSerializer>)> {
+  ): dict<string, (IThriftStruct, T, string, class<TProtocolSerializer>)> {
     $protocol_test_set = static::getProtocolDetails();
     $test_cases = dict[];
     foreach ($protocol_test_set as $prot => $details) {
@@ -212,15 +210,14 @@ abstract class ThriftLazyAnyTestBase<T> extends WWWTest {
       $struct = static::getInitializedTestStruct($details);
       $serializer = $details['serializer'];
 
-      $deserialized_struct = HH_FIXME::tryClassnameToClass($serializer)
-        |> $$::deserialize(
-          PHP\hex2bin(static::CPP_HEX_BINARY_SERIALIZED_STRINGS[$prot]),
-          $obj,
-        );
+      $deserialized_struct = $serializer::deserialize(
+        PHP\hex2bin(static::CPP_HEX_BINARY_SERIALIZED_STRINGS[$prot]),
+        $obj,
+      );
 
       $test_cases[$prot] = tuple(
         $deserialized_struct,
-        HH_FIXME::tryClassnameToClass($serializer) |> $$::serialize($struct),
+        $serializer::serialize($struct),
         static::CPP_HEX_BINARY_SERIALIZED_STRINGS[$prot],
       );
     }
@@ -240,14 +237,10 @@ abstract class ThriftLazyAnyTestBase<T> extends WWWTest {
       $serializer = $details['serializer'];
       $serialized =
         (string)PHP\hex2bin(static::CPP_HEX_BINARY_SERIALIZED_EMPTY_ANY[$prot]);
-      $struct = HH_FIXME::tryClassnameToClass($serializer)
-        |> $$::deserialize($serialized, $obj);
+      $struct = $serializer::deserialize($serialized, $obj);
 
-      $test_cases[$prot] = tuple(
-        $struct,
-        $serialized,
-        HH_FIXME::tryClassnameToClass($serializer) |> $$::serialize($struct),
-      );
+      $test_cases[$prot] =
+        tuple($struct, $serialized, $serializer::serialize($struct));
     }
     return $test_cases;
   }
@@ -271,7 +264,7 @@ abstract class ThriftLazyAnyTestBase<T> extends WWWTest {
     IThriftStruct $test_struct,
     T $expected_value,
     string $_expected_serialized,
-    classname<TProtocolSerializer> $_serializer,
+    class<TProtocolSerializer> $_serializer,
   ): void {
     $lazy = static::getTLazyAnyFromThriftStruct($test_struct);
     expect(static::getValueFromLazyAny($lazy))
@@ -285,7 +278,7 @@ abstract class ThriftLazyAnyTestBase<T> extends WWWTest {
     IThriftStruct $test_struct,
     T $expected_value,
     string $_expected_serialized,
-    classname<TProtocolSerializer> $_serializer,
+    class<TProtocolSerializer> $_serializer,
   ): void {
     $lazy = self::getTLazyAnyFromThriftStruct($test_struct);
     expect($lazy->getNullableUntyped())
@@ -299,15 +292,14 @@ abstract class ThriftLazyAnyTestBase<T> extends WWWTest {
     IThriftStruct $test_struct,
     T $_expected_value,
     string $expected_serialized,
-    classname<TProtocolSerializer> $serializer,
+    class<TProtocolSerializer> $serializer,
   ): void {
     invariant(
       $test_struct is facebook\thrift\test\MainStruct ||
         $test_struct is facebook\thrift\test\MainStructSimpleJson,
       'Invalid object',
     );
-    expect(HH\classname_to_class($serializer) |> $$::serialize($test_struct))
-      ->toEqual($expected_serialized);
+    expect($serializer::serialize($test_struct))->toEqual($expected_serialized);
   }
 
   <<DataProvider('getTestCases')>>

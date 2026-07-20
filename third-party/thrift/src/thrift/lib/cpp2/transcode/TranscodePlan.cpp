@@ -21,6 +21,7 @@
 #include <fmt/core.h>
 
 #include <algorithm>
+#include <utility>
 
 namespace apache::thrift::transcode {
 
@@ -224,6 +225,22 @@ folly::Expected<Command, CompileError> fuseStructOps(
       [](const auto& a, const auto& b) { return a.fieldId < b.fieldId; });
 
   return Command{std::move(fused)};
+}
+
+folly::Expected<TranscodePlan, CompileError> fuseCodecs(
+    const Codec& source, const Codec& target) {
+  auto fused = fuseCommands(source.root, target.root);
+  if (fused.hasError()) {
+    return folly::makeUnexpected(fused.error());
+  }
+
+  TranscodePlan plan{
+      source.name + "_to_" + target.name,
+      std::move(*fused),
+  };
+  plan.sourceProtocol = source.protocol;
+  plan.targetProtocol = target.protocol;
+  return plan;
 }
 
 namespace {

@@ -30,6 +30,14 @@ class TypeRef;
 
 namespace apache::thrift::transcode {
 
+enum class WireProtocol : uint8_t {
+  Unknown,
+  ThriftCompact,
+  ThriftBinary,
+  ProtobufBinary,
+  Json,
+};
+
 // ─────────────────────────────────────────────────────────────────────────
 // Command-tree model for transcoding
 // ─────────────────────────────────────────────────────────────────────────
@@ -390,6 +398,16 @@ struct StructOp {
   using GetBasePtrFn = const void* (*)(const void*);
   SetIssetFn setIssetFn = nullptr;
   GetBasePtrFn getBasePtrFn = nullptr;
+};
+
+/**
+ * A Codec is a named Command tree describing how a protocol encodes a type.
+ * Produced by codec factories from schemas.
+ */
+struct Codec {
+  std::string name;
+  WireProtocol protocol = WireProtocol::Unknown;
+  Command root;
 };
 
 } // namespace apache::thrift::transcode

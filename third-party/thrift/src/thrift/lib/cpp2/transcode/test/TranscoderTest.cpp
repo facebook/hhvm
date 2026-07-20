@@ -25,6 +25,7 @@
 #include <thrift/lib/cpp2/dynamic/TypeSystemBuilder.h>
 
 #include <cstdint>
+#include <string>
 #include <vector>
 
 namespace apache::thrift::transcode {
@@ -76,10 +77,9 @@ struct TranscoderTest : ::testing::Test {
   }
 
   TranscodePlan fuse(const Codec& source, const Codec& target) {
-    auto fused = fuseStructOps(
-        std::get<StructOp>(source.root), std::get<StructOp>(target.root));
-    EXPECT_FALSE(fused.hasError()) << fused.error().message;
-    return TranscodePlan{"plan", std::move(*fused)};
+    auto plan = fuseCodecs(source, target);
+    EXPECT_FALSE(plan.hasError()) << plan.error().message;
+    return std::move(*plan);
   }
 };
 
@@ -115,6 +115,13 @@ std::vector<uint8_t> toBytes(const folly::IOBuf& buf) {
   return std::vector<uint8_t>(c.data(), c.data() + c.length());
 }
 
+TranscoderOptions allowExperimentalProtocols() {
+  TranscoderOptions options;
+  options.unsupportedPlanPolicy =
+      UnsupportedPlanPolicy::AllowExperimentalProtocols;
+  return options;
+}
+
 TEST_F(TranscoderTest, InterpreterTranscodesCompactToBinary) {
   auto compact = makeThriftCompactCodec(sampleNode());
   auto binary = makeThriftBinaryCodec(sampleNode());
@@ -148,13 +155,123 @@ TEST_F(TranscoderTest, JitEngineUnlinkedReturnsCompileError) {
       << transcoder.error().message;
 }
 
-TEST_F(TranscoderTest, JsonSourceRejectedByInterpreter) {
+TEST_F(TranscoderTest, JsonTargetRequiresIncompleteProtocolOptIn) {
+  auto compact = makeThriftCompactCodec(sampleNode());
+  auto json = makeJsonCodec(sampleNode());
+
+  auto defaultTranscoder =
+      makeTranscoder(fuse(compact, json), Engine::Interpreter);
+  ASSERT_TRUE(defaultTranscoder.hasError());
+  EXPECT_NE(
+      defaultTranscoder.error().message.find("AllowExperimentalProtocols"),
+      std::string::npos)
+      << defaultTranscoder.error().message;
+
+  auto transcoder = makeTranscoder(
+      fuse(compact, json), Engine::Interpreter, allowExperimentalProtocols());
+  ASSERT_FALSE(transcoder.hasError()) << transcoder.error().message;
+  EXPECT_EQ((*transcoder)->engine(), Engine::Interpreter);
+}
+
+TEST_F(TranscoderTest, JsonSourceRequiresIncompleteProtocolOptIn) {
   auto json = makeJsonCodec(sampleNode());
   auto compact = makeThriftCompactCodec(sampleNode());
 
-  auto transcoder = makeTranscoder(fuse(json, compact), Engine::Interpreter);
+  auto defaultTranscoder =
+      makeTranscoder(fuse(json, compact), Engine::Interpreter);
+  ASSERT_TRUE(defaultTranscoder.hasError());
+  EXPECT_NE(
+      defaultTranscoder.error().message.find("AllowExperimentalProtocols"),
+      std::string::npos)
+      << defaultTranscoder.error().message;
+
+  auto transcoder = makeTranscoder(
+      fuse(json, compact), Engine::Interpreter, allowExperimentalProtocols());
   ASSERT_TRUE(transcoder.hasError());
-  EXPECT_NE(transcoder.error().message.find("JSON"), std::string::npos)
+  EXPECT_NE(transcoder.error().message.find("JSON source"), std::string::npos)
+      << transcoder.error().message;
+}
+
+TEST_F(TranscoderTest, ProtobufRequiresIncompleteProtocolOptIn) {
+  auto protobuf = makeProtobufBinaryCodec(sampleNode());
+  auto compact = makeThriftCompactCodec(sampleNode());
+
+  auto defaultTranscoder =
+      makeTranscoder(fuse(protobuf, compact), Engine::Interpreter);
+  ASSERT_TRUE(defaultTranscoder.hasError());
+  EXPECT_NE(
+      defaultTranscoder.error().message.find("Protobuf"), std::string::npos)
+      << defaultTranscoder.error().message;
+
+  auto transcoder = makeTranscoder(
+      fuse(protobuf, compact),
+      Engine::Interpreter,
+      allowExperimentalProtocols());
+  ASSERT_FALSE(transcoder.hasError()) << transcoder.error().message;
+  EXPECT_EQ((*transcoder)->engine(), Engine::Interpreter);
+}
+
+TEST_F(TranscoderTest, JitEngineRejectedBeforeProtocolGate) {
+  auto compact = makeThriftCompactCodec(sampleNode());
+  auto json = makeJsonCodec(sampleNode());
+
+  auto defaultTranscoder = makeTranscoder(fuse(compact, json), Engine::Jit);
+  ASSERT_TRUE(defaultTranscoder.hasError());
+  EXPECT_EQ(
+      defaultTranscoder.error().message.find("AllowExperimentalProtocols"),
+      std::string::npos)
+      << defaultTranscoder.error().message;
+  EXPECT_NE(defaultTranscoder.error().message.find("JIT"), std::string::npos)
+      << defaultTranscoder.error().message;
+
+  auto transcoder = makeTranscoder(
+      fuse(compact, json), Engine::Jit, allowExperimentalProtocols());
+  ASSERT_TRUE(transcoder.hasError());
+  EXPECT_NE(transcoder.error().message.find("JIT"), std::string::npos)
+      << transcoder.error().message;
+}
+
+TEST_F(TranscoderTest, ExplicitDefaultsRejectedForNonThriftEndpoints) {
+  type_system::TypeSystemBuilder builder;
+  builder.addType(
+      "test.WithDefault",
+      def::Struct({
+          def::Field(
+              def::Identity(1, "id"),
+              def::AlwaysPresent,
+              TypeIds::I32,
+              type_system::SerializableRecord::Int32(42)),
+      }));
+  auto ts = std::move(builder).build();
+  if (ts == nullptr) {
+    ADD_FAILURE() << "failed to build type system";
+    return;
+  }
+  const auto& node =
+      ts->getUserDefinedTypeOrThrow("test.WithDefault").asStruct();
+
+  auto json = makeJsonCodec(node);
+  auto compact = makeThriftCompactCodec(node);
+
+  auto fused = fuseStructOps(
+      std::get<StructOp>(json.root), std::get<StructOp>(compact.root));
+  ASSERT_FALSE(fused.hasError()) << fused.error().message;
+  auto missingMetadata = makeTranscoder(
+      TranscodePlan{"plan", std::move(*fused)},
+      Engine::Interpreter,
+      allowExperimentalProtocols());
+  ASSERT_TRUE(missingMetadata.hasError());
+  EXPECT_NE(
+      missingMetadata.error().message.find("protocol metadata"),
+      std::string::npos)
+      << missingMetadata.error().message;
+
+  auto transcoder = makeTranscoder(
+      fuse(json, compact), Engine::Interpreter, allowExperimentalProtocols());
+  ASSERT_TRUE(transcoder.hasError());
+  EXPECT_NE(
+      transcoder.error().message.find("explicit IDL defaults"),
+      std::string::npos)
       << transcoder.error().message;
 }
 

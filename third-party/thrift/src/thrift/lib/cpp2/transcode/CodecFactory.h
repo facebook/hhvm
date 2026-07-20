@@ -18,23 +18,12 @@
 
 #include <thrift/lib/cpp2/transcode/Codec.h>
 
-#include <string>
-
 namespace apache::thrift::type_system {
 class StructNode;
 class UnionNode;
 } // namespace apache::thrift::type_system
 
 namespace apache::thrift::transcode {
-
-/**
- * A Codec is a named Command tree describing how a protocol encodes a type.
- * Produced by codec factories from schemas.
- */
-struct Codec {
-  std::string name;
-  Command root;
-};
 
 /**
  * Produce codecs for specific protocols from Thrift TypeSystem schemas.

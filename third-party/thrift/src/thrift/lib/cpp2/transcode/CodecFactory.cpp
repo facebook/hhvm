@@ -714,6 +714,7 @@ const ProtocolOps kJsonOps{
 Codec makeThriftCompactCodec(const type_system::StructNode& node) {
   Codec codec;
   codec.name = "compact_" + std::string(node.debugName());
+  codec.protocol = WireProtocol::ThriftCompact;
   codec.root = Command{makeStructOp(node, kCompactOps)};
   return codec;
 }
@@ -721,6 +722,7 @@ Codec makeThriftCompactCodec(const type_system::StructNode& node) {
 Codec makeThriftCompactCodec(const type_system::UnionNode& node) {
   Codec codec;
   codec.name = "compact_" + std::string(node.debugName());
+  codec.protocol = WireProtocol::ThriftCompact;
   codec.root = Command{makeStructOp(node, kCompactOps)};
   return codec;
 }
@@ -728,6 +730,7 @@ Codec makeThriftCompactCodec(const type_system::UnionNode& node) {
 Codec makeThriftBinaryCodec(const type_system::StructNode& node) {
   Codec codec;
   codec.name = "binary_" + std::string(node.debugName());
+  codec.protocol = WireProtocol::ThriftBinary;
   codec.root = Command{makeStructOp(node, kBinaryOps)};
   return codec;
 }
@@ -735,6 +738,7 @@ Codec makeThriftBinaryCodec(const type_system::StructNode& node) {
 Codec makeThriftBinaryCodec(const type_system::UnionNode& node) {
   Codec codec;
   codec.name = "binary_" + std::string(node.debugName());
+  codec.protocol = WireProtocol::ThriftBinary;
   codec.root = Command{makeStructOp(node, kBinaryOps)};
   return codec;
 }
@@ -742,6 +746,7 @@ Codec makeThriftBinaryCodec(const type_system::UnionNode& node) {
 Codec makeProtobufBinaryCodec(const type_system::StructNode& node) {
   Codec codec;
   codec.name = "protobuf_" + std::string(node.debugName());
+  codec.protocol = WireProtocol::ProtobufBinary;
   codec.root = Command{makeStructOp(node, kProtobufOps)};
   return codec;
 }
@@ -756,6 +761,7 @@ Codec makeProtobufBinaryCodec(const type_system::UnionNode& node) {
 Codec makeJsonCodec(const type_system::StructNode& node) {
   Codec codec;
   codec.name = "json_" + std::string(node.debugName());
+  codec.protocol = WireProtocol::Json;
   codec.root = Command{makeStructOp(node, kJsonOps)};
   return codec;
 }
@@ -763,6 +769,7 @@ Codec makeJsonCodec(const type_system::StructNode& node) {
 Codec makeJsonCodec(const type_system::UnionNode& node) {
   Codec codec;
   codec.name = "json_" + std::string(node.debugName());
+  codec.protocol = WireProtocol::Json;
   codec.root = Command{makeStructOp(node, kJsonOps)};
   return codec;
 }

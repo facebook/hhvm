@@ -31,11 +31,13 @@ namespace apache::thrift::transcode {
  * list, map, or even a bare scalar.
  *
  * Build a plan by constructing Commands directly, or use CodecFactory to
- * produce source/target codecs and fuse them.
+ * produce source/target codecs and fuse them with fuseCodecs().
  */
 struct TranscodePlan {
   std::string name;
   Command root;
+  WireProtocol sourceProtocol = WireProtocol::Unknown;
+  WireProtocol targetProtocol = WireProtocol::Unknown;
 
   // If true, kernel writes to a struct pointer (3rd arg) instead of output
   // buffer. Kernel signature: int32_t(const uint8_t* in, size_t inLen, void*)
@@ -63,6 +65,9 @@ struct TranscodePlan {
   // for benchmarking the non-inlined baseline.
   bool disableBitcodeInlining = false;
 };
+
+folly::Expected<TranscodePlan, CompileError> fuseCodecs(
+    const Codec& source, const Codec& target);
 
 /**
  * Fuse a source StructOp (read-side) with a target StructOp (write-side)

@@ -29,6 +29,15 @@ namespace apache::thrift::transcode {
 
 enum class Engine : uint8_t { Interpreter, Jit };
 
+enum class UnsupportedPlanPolicy : uint8_t {
+  Reject,
+  AllowExperimentalProtocols,
+};
+
+struct TranscoderOptions {
+  UnsupportedPlanPolicy unsupportedPlanPolicy = UnsupportedPlanPolicy::Reject;
+};
+
 // Immutable, reentrant transcoder for one fused TranscodePlan; safe to share
 // across threads.
 class ITranscoder {
@@ -42,7 +51,7 @@ class ITranscoder {
 };
 
 folly::Expected<std::unique_ptr<ITranscoder>, CompileError> makeTranscoder(
-    TranscodePlan plan, Engine engine);
+    TranscodePlan plan, Engine engine, TranscoderOptions options = {});
 
 // JIT arm registration (populated by the :jit target later, via a link_whole
 // static registrar). Declared here so :jit can register without depending on

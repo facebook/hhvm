@@ -123,10 +123,9 @@ struct InterpreterRoundTripTest : ::testing::Test {
   }
 
   TranscodePlan fuse(const Codec& source, const Codec& target) {
-    auto fused = fuseStructOps(
-        std::get<StructOp>(source.root), std::get<StructOp>(target.root));
-    EXPECT_FALSE(fused.hasError()) << fused.error().message;
-    return TranscodePlan{"plan", std::move(*fused)};
+    auto plan = fuseCodecs(source, target);
+    EXPECT_FALSE(plan.hasError()) << plan.error().message;
+    return std::move(*plan);
   }
 };
 

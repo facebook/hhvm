@@ -652,11 +652,22 @@ namespace facebook.thrift.test.fixtures.terse_write
                 {
                     return false;
                 }
+                if (_type == Type.@binary_field)
+                {
+                    return ((byte[])_value!).AsSpan().SequenceEqual(((byte[])other._value!).AsSpan());
+                }
                 return Equals(_value, other._value);
             }
 
             public override int GetHashCode()
             {
+                if (_type == Type.@binary_field)
+                {
+                    var hashCode = new HashCode();
+                    hashCode.Add(_type);
+                    hashCode.AddBytes(((byte[])_value!).AsSpan());
+                    return hashCode.ToHashCode();
+                }
                 return HashCode.Combine(_type, _value);
             }
 

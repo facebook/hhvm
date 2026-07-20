@@ -23,8 +23,6 @@ using FBThrift;
 
 namespace test.dev.fixtures.basic
 {
-    using @MyEnumAlias = @MyEnum;
-    using @MyDataItemAlias = @MyDataItem;
     /// <summary>
     /// Auto-generated enum from MyEnum
     /// </summary>
@@ -66,8 +64,8 @@ namespace test.dev.fixtures.basic
         }
 
         /// <summary>Gets or sets the MyDataField field.</summary>
-        private @MyDataItemAlias _MyDataField = new @MyDataItemAlias();
-        public @MyDataItemAlias @MyDataField
+        private @MyDataItem /* MyDataItemAlias */ _MyDataField = new @MyDataItem /* MyDataItemAlias */();
+        public @MyDataItem /* MyDataItemAlias */ @MyDataField
         {
             get => _MyDataField;
             set
@@ -116,7 +114,7 @@ namespace test.dev.fixtures.basic
         public @MyStruct()
         {
             @MyStringField = string.Empty;
-            @MyDataField = new @MyDataItemAlias();
+            @MyDataField = new @MyDataItem /* MyDataItemAlias */();
             @floatSet = new HashSet<float>();
             @no_hack_codegen_field = string.Empty;
         }
@@ -125,7 +123,7 @@ namespace test.dev.fixtures.basic
         {
             @MyIntField = default;
             @MyStringField = string.Empty;
-            @MyDataField = new @MyDataItemAlias();
+            @MyDataField = new @MyDataItem /* MyDataItemAlias */();
             @myEnum = default;
             @oneway = default;
             @readonly = default;
@@ -156,7 +154,7 @@ namespace test.dev.fixtures.basic
             // Field 2: MyStringField (string)
             writer.WriteFieldBegin(ThriftWireType.String, 2);
             writer.WriteString(@MyStringField);
-            // Field 3: MyDataField (@MyDataItemAlias)
+            // Field 3: MyDataField (@MyDataItem /* MyDataItemAlias */)
             writer.WriteFieldBegin(ThriftWireType.Struct, 3);
             writer.WriteStruct(@MyDataField);
             // Field 4: myEnum (@MyEnum)
@@ -219,7 +217,7 @@ namespace test.dev.fixtures.basic
                     case 3: // MyDataField
                         if (fieldType == ThriftWireType.Struct)
                         {
-                            @MyDataField = reader.ReadStruct<@MyDataItemAlias>();
+                            @MyDataField = reader.ReadStruct<@MyDataItem /* MyDataItemAlias */>();
                         }
                         else
                         {
@@ -724,9 +722,9 @@ namespace test.dev.fixtures.basic
             /// Setting this field clears any previously set field.
             /// Returns null if a different field is currently set.
             /// </summary>
-            public @MyEnumAlias? @myEnum
+            public @MyEnum /* MyEnumAlias */? @myEnum
             {
-                get => _type == Type.@myEnum ? (@MyEnumAlias)_value! : null;
+                get => _type == Type.@myEnum ? (@MyEnum /* MyEnumAlias */)_value! : null;
                 set
                 {
                     ThriftNullGuard.ThrowIfNullUnion(value, "myEnum");
@@ -789,7 +787,7 @@ namespace test.dev.fixtures.basic
                 {
                     case Type.@myEnum:
                             writer.WriteFieldBegin(ThriftWireType.I32, 1);
-                            writer.WriteI32((int)(@MyEnumAlias)_value!);
+                            writer.WriteI32((int)(@MyEnum /* MyEnumAlias */)_value!);
                         break;
                     case Type.@myStruct:
                             writer.WriteFieldBegin(ThriftWireType.Struct, 2);
@@ -838,7 +836,7 @@ namespace test.dev.fixtures.basic
                             if (fieldType == ThriftWireType.I32)
                             {
                                 _type = Type.@myEnum;
-                                _value = (@MyEnumAlias)reader.ReadI32();
+                                _value = (@MyEnum /* MyEnumAlias */)reader.ReadI32();
                             }
                             else
                             {

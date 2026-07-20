@@ -23,9 +23,6 @@ using FBThrift;
 
 namespace test.fixtures.constants
 {
-    using @MyCompany = @Company;
-    using @MyMapIdentifier = Dictionary<string, string>;
-    using @CompanyLocationsMap = Dictionary<@Company, List<@City>>;
     /// <summary>
     /// Auto-generated enum from EmptyEnum
     /// </summary>
@@ -1450,10 +1447,10 @@ namespace test.fixtures.constants
         public static readonly double @zeroDoubleValue = 0;
         public static readonly double @longDoubleValue = 2.59961000990301e-05;
         public static readonly byte[] @bin = new byte[] { 97, 0, 122, };
-        public static readonly @MyCompany @my_company = @MyCompany.@FACEBOOK;
+        public static readonly @Company /* MyCompany */ @my_company = @Company /* MyCompany */.@FACEBOOK;
         public static readonly string /* MyStringIdentifier */ @foo = "foo";
         public static readonly int /* MyIntIdentifier */ @bar = 42;
-        public static readonly @MyMapIdentifier @mymap = new @MyMapIdentifier()
+        public static readonly Dictionary<string, string> /* MyMapIdentifier */ @mymap = new Dictionary<string, string> /* MyMapIdentifier */()
 {
   { "keys", "values" },
 };
@@ -1482,7 +1479,7 @@ namespace test.fixtures.constants
   @City.@SEA,
   @City.@LON,
 };
-        public static readonly @CompanyLocationsMap @company_locations = new @CompanyLocationsMap()
+        public static readonly Dictionary<@Company, List<@City>> /* CompanyLocationsMap */ @company_locations = new Dictionary<@Company, List<@City>> /* CompanyLocationsMap */()
 {
   { @Company.@FACEBOOK, new List<@City>()
 {

@@ -44,3 +44,7 @@ union TypedefContainerUnion {
   1: IntList int_list_field;
   2: StringIntMap string_int_map_field;
 }
+
+union BinaryUnion {
+  1: binary data;
+}

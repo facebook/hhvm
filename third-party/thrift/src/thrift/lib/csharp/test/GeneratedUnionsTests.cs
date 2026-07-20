@@ -99,6 +99,19 @@ namespace FBThrift.Tests
         }
 
         [Test]
+        public void TestBinaryUnionEqualityUsesContents()
+        {
+            var u1 = new BinaryUnion { data = new byte[] { 1, 2, 3 } };
+            var u2 = new BinaryUnion { data = new byte[] { 1, 2, 3 } };
+
+            Assert.AreEqual(u1, u2);
+            Assert.AreEqual(u1.GetHashCode(), u2.GetHashCode());
+
+            u2.data = new byte[] { 1, 2, 4 };
+            Assert.AreNotEqual(u1, u2);
+        }
+
+        [Test]
         public void TestUnionToBeRenamed()
         {
             // Test another union type in the basic fixture

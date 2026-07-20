@@ -17,7 +17,6 @@
 {{#import "types/enum" as enum_tmpl}}
 {{#import "types/struct" as struct_tmpl}}
 {{#import "types/union" as union_tmpl}}
-{{#import "common/types" as types}}
 {{> common/file_header}}
 
 #nullable enable
@@ -34,17 +33,6 @@ using {{inc.alias}} = {{inc.csharp_namespace}};
 
 namespace {{root_program.csharp_namespace}}
 {
-{{! Generate typedef aliases INSIDE namespace - maps Thrift typedefs to C# using aliases.
-    NOTE: Skip typedefs that resolve to types incompatible with C# using aliases:
-    - binary -> byte[] (arrays not allowed in using aliases until C# 12 / .NET 8+)
-    - float/double -> C# keywords can't be used directly in using aliases
-    - other primitives -> same issue with keyword types (int, bool, etc.)
-    Once we upgrade to .NET 8+, we can use C# 12's "alias any type" feature. }}
-{{#each root_program.typedefs as |td|}}
-{{#if (and (not td.resolved.binary?) (not td.resolved.primitive?))}}
-    using {{td.csharp_name}} = {{#partial types.csharp_type type=td.resolved}};
-{{/if (and (not td.resolved.binary?) (not td.resolved.primitive?))}}
-{{/each}}
 {{#each root_program.enums as |enum|}}
     {{#partial enum_tmpl.enum_type enum=enum}}
 

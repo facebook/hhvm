@@ -186,11 +186,30 @@ public void __fbthrift_read(IThriftProtocolReader reader)
             {
                 return false;
             }
+{{#each structured.fields as |field|}}
+{{#if field.type.binary?}}
+            if (_type == Type.{{field.csharp_property_name}})
+            {
+                return ((byte[])_value!).AsSpan().SequenceEqual(((byte[])other._value!).AsSpan());
+            }
+{{/if field.type.binary?}}
+{{/each}}
             return Equals(_value, other._value);
         }
 
         public override int GetHashCode()
         {
+{{#each structured.fields as |field|}}
+{{#if field.type.binary?}}
+            if (_type == Type.{{field.csharp_property_name}})
+            {
+                var hashCode = new HashCode();
+                hashCode.Add(_type);
+                hashCode.AddBytes(((byte[])_value!).AsSpan());
+                return hashCode.ToHashCode();
+            }
+{{/if field.type.binary?}}
+{{/each}}
             return HashCode.Combine(_type, _value);
         }
 

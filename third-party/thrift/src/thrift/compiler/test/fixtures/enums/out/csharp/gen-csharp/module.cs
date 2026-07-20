@@ -24,7 +24,6 @@ using included_enum = Test.Fixtures.Enums.Included;
 
 namespace test.fixtures.enums
 {
-    using @IncludedEnumAlias = Test.Fixtures.Enums.Included.@IncludedEnum;
     /// <summary>
     /// Auto-generated enum from Metasyntactic
     /// </summary>

@@ -923,6 +923,79 @@ class CommonTests(BarebonesTests):
             ],
         )
 
+    def test_type_at_pos_batch_named(self) -> None:
+        """
+        Test hh_client --type-at-pos-batch for function types with named parameters
+        """
+        self.test_driver.start_hh_server()
+
+        self.test_driver.check_cmd(
+            [
+                '{{"position":'
+                + '{{"file":"{root}foo_named.php",'
+                + '"line":5,'
+                + '"character":4}}'
+                + ',"type":{{'
+                + '"src_pos":{{"filename":"{root}foo_named.php","line":4,"char_start":20,"char_end":59}},'
+                + '"kind":"function",'
+                + '"tparams":[],'
+                + '"params":[{{"callConvention":"normal","type":{{'
+                + '"src_pos":{{"filename":"{root}foo_named.php","line":4,"char_start":30,"char_end":32}},"kind":"primitive","name":"int"}}}},'
+                + '{{"callConvention":"normal","named":true,"name":"$tag","type":{{'
+                + '"src_pos":{{"filename":"{root}foo_named.php","line":4,"char_start":41,"char_end":46}},"kind":"primitive","name":"string"}}}}],'
+                + '"result":{{"src_pos":{{"filename":"{root}foo_named.php","line":4,"char_start":55,"char_end":58}},"kind":"primitive","name":"void"}}}}'
+                + "}}"
+            ],
+            options=["--type-at-pos-batch", "{root}foo_named.php:5:4"],
+        )
+
+    def test_type_at_pos_batch_variadic(self) -> None:
+        """
+        Test hh_client --type-at-pos-batch for function types with variadic
+        and named-variadic parameters
+        """
+        self.test_driver.start_hh_server()
+
+        self.test_driver.check_cmd(
+            [
+                '{{"position":'
+                + '{{"file":"{root}foo_variadic.php",'
+                + '"line":8,'
+                + '"character":4}}'
+                + ',"type":{{'
+                + '"src_pos":{{"filename":"{root}foo_variadic.php","line":5,"char_start":3,"char_end":34}},'
+                + '"kind":"function",'
+                + '"tparams":[],'
+                + '"params":[{{"callConvention":"normal","type":{{'
+                + '"src_pos":{{"filename":"{root}foo_variadic.php","line":5,"char_start":13,"char_end":15}},"kind":"primitive","name":"int"}}}},'
+                + '{{"callConvention":"normal","type":{{'
+                + '"src_pos":{{"filename":"{root}foo_variadic.php","line":5,"char_start":18,"char_end":23}},"kind":"primitive","name":"string"}}}}],'
+                + '"variadic":true,'
+                + '"result":{{"src_pos":{{"filename":"{root}foo_variadic.php","line":5,"char_start":30,"char_end":33}},"kind":"primitive","name":"void"}}}}'
+                + "}}",
+                '{{"position":'
+                + '{{"file":"{root}foo_variadic.php",'
+                + '"line":9,'
+                + '"character":4}}'
+                + ',"type":{{'
+                + '"src_pos":{{"filename":"{root}foo_variadic.php","line":6,"char_start":3,"char_end":38}},'
+                + '"kind":"function",'
+                + '"tparams":[],'
+                + '"params":[{{"callConvention":"normal","type":{{'
+                + '"src_pos":{{"filename":"{root}foo_variadic.php","line":6,"char_start":13,"char_end":15}},"kind":"primitive","name":"int"}}}},'
+                + '{{"callConvention":"normal","named":true,"name":"...","type":{{'
+                + '"src_pos":{{"filename":"{root}foo_variadic.php","line":6,"char_start":24,"char_end":27}},"kind":"primitive","name":"bool"}}}}],'
+                + '"named_variadic":true,'
+                + '"result":{{"src_pos":{{"filename":"{root}foo_variadic.php","line":6,"char_start":34,"char_end":37}},"kind":"primitive","name":"void"}}}}'
+                + "}}",
+            ],
+            options=[
+                "--type-at-pos-batch",
+                "{root}foo_variadic.php:8:4",
+                "{root}foo_variadic.php:9:4",
+            ],
+        )
+
     def test_ide_get_definition(self) -> None:
         """
         Test hh_client --ide-get-definition

@@ -285,22 +285,28 @@ let rec from_type : env -> show_like_ty:bool -> locl_ty -> Yojson.Safe.t =
       else
         []
     in
+    let named_param fp =
+      if get_fp_is_named fp then
+        let name_field =
+          match fp.fp_name with
+          | Some name -> [("name", `String name)]
+          | None -> []
+        in
+        ("named", `Bool true) :: name_field
+      else
+        []
+    in
     let param fp =
       obj
       @@ callconv (get_fp_mode fp)
       @ readonly_param (get_fp_readonly fp)
       @ optional_param (get_fp_is_optional fp)
+      @ named_param fp
       @ typ fp.fp_type
     in
-    let readonly_this ro =
-      if ro then
-        [("readonly_this", `Bool true)]
-      else
-        []
-    in
-    let readonly_ret ro =
-      if ro then
-        [("readonly_return", `Bool true)]
+    let member_if_true name value =
+      if value then
+        [(name, `Bool true)]
       else
         []
     in
@@ -336,10 +342,12 @@ let rec from_type : env -> show_like_ty:bool -> locl_ty -> Yojson.Safe.t =
     in
     obj
     @@ fun_kind p
-    @ readonly_this (get_ft_readonly_this ft)
+    @ member_if_true "readonly_this" (get_ft_readonly_this ft)
     @ tparams ft.ft_tparams
     @ params ft.ft_params
-    @ readonly_ret (get_ft_returns_readonly ft)
+    @ member_if_true "variadic" (get_ft_variadic ft)
+    @ member_if_true "named_variadic" (get_ft_named_variadic ft)
+    @ member_if_true "readonly_return" (get_ft_returns_readonly ft)
     @ result ft.ft_ret
     @ capability
   | (p, Tvec_or_dict (ty1, ty2)) ->
@@ -701,6 +709,20 @@ let to_locl_ty
                     ~keytrace:callconv_keytrace
               end
               >>= fun callconv ->
+              aux_get_bool_with_default "named" false param ~keytrace
+              >>= fun named ->
+              (match
+                 Hh_json_helpers.Access.get_string "name" (param, keytrace)
+               with
+              | Ok (name, _) -> Ok (Some name)
+              | Error (Hh_json_helpers.Access.Missing_key_error _) -> Ok None
+              | Error access_failure ->
+                deserialization_error
+                  ~message:
+                    (Hh_json_helpers.Access.access_failure_to_string
+                       access_failure)
+                  ~keytrace)
+              >>= fun fp_name ->
               get_obj "type" (param, keytrace)
               >>= fun (param_type, param_type_keytrace) ->
               aux param_type ~keytrace:param_type_keytrace >>= fun param_type ->
@@ -715,10 +737,9 @@ let to_locl_ty
                       ~readonly:false
                       ~ignore_readonly_error:false
                       ~splat:false
-                      ~named:false;
-                  (* Dummy values: these aren't currently serialized. *)
+                      ~named;
                   fp_pos = Pos_or_decl.none;
-                  fp_name = None;
+                  fp_name;
                   fp_def_value = None;
                 })
         in
@@ -730,8 +751,17 @@ let to_locl_ty
         >>= fun readonly_this ->
         aux_get_bool_with_default "readonly_return" false json ~keytrace
         >>= fun readonly_return ->
+        aux_get_bool_with_default "named_variadic" false json ~keytrace
+        >>= fun named_variadic ->
+        aux_get_bool_with_default "variadic" false json ~keytrace
+        >>= fun variadic ->
         aux_get_bool_with_default "instantiated" true json ~keytrace
         >>= fun ft_instantiated ->
+        let ft_flags =
+          Typing_defs_flags.Fun.default
+          |> Typing_defs_flags.Fun.set_variadic variadic
+          |> Typing_defs_flags.Fun.set_named_variadic named_variadic
+        in
         let funty =
           {
             ft_params;
@@ -740,7 +770,7 @@ let to_locl_ty
             ft_tparams;
             (* Dummy values: these aren't currently serialized. *)
             ft_where_constraints = [];
-            ft_flags = Typing_defs_flags.Fun.default;
+            ft_flags;
             ft_instantiated;
           }
         in

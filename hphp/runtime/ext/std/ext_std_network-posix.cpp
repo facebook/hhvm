@@ -170,7 +170,7 @@ static unsigned char *php_parserr(unsigned char *cp, unsigned char* end,
   char name[255 + 2];  // IETF STD 13 section 3.1; 255 bytes
   int have_v6_break = 0, in_v6_break = 0;
 
-  n = dn_expand(answer->qb2, answer->qb2+65536, cp, name, sizeof(name) - 2);
+  n = dn_expand(answer->qb2, end, cp, name, sizeof(name) - 2);
   if (n < 0) {
     return NULL;
   }
@@ -225,7 +225,7 @@ static unsigned char *php_parserr(unsigned char *cp, unsigned char* end,
     if (type == DNS_T_PTR) {
       subarray.set(s_type, s_PTR);
     }
-    n = dn_expand(answer->qb2, answer->qb2+65536, cp, name, (sizeof name) - 2);
+    n = dn_expand(answer->qb2, end, cp, name, (sizeof name) - 2);
     if (n < 0) {
       return NULL;
     }

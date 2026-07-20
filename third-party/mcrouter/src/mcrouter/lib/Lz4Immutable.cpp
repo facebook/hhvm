@@ -539,8 +539,16 @@ std::unique_ptr<folly::IOBuf> Lz4Immutable::decompress(
 
     // Get match offset
     uint16_t offset = peekLE(source);
-    size_t matchPos = dicCursor.totalLength() + (output - outputStart) - offset;
     source.advance(2);
+    size_t outputProgress = static_cast<size_t>(output - outputStart);
+    size_t window = dicCursor.totalLength() + outputProgress;
+    if (FOLLY_UNLIKELY(offset == 0 || offset > window)) {
+      return nullptr;
+    }
+    size_t matchPos = window - offset;
+    if (FOLLY_UNLIKELY(matchPos >= dicCursor.totalLength())) {
+      return nullptr;
+    }
 
     // Get match length
     size_t matchLength = token & kMlMask;
@@ -554,7 +562,9 @@ std::unique_ptr<folly::IOBuf> Lz4Immutable::decompress(
     matchLength += kMinMatch;
 
     // Copy match
-    if (FOLLY_UNLIKELY(output + matchLength > outputLimit)) {
+    if (FOLLY_UNLIKELY(
+            output + matchLength > outputLimit ||
+            matchPos + matchLength > dicCursor.totalLength())) {
       return nullptr;
     }
     match.seek(matchPos);

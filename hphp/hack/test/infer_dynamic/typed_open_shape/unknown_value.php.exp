@@ -1,0 +1,43 @@
+{ "function": "\\takes_int", "solutions": [] }
+{ "function": "\\reads_unknown_field", "solutions": [] }
+{
+  "function": "\\test_typed_tail",
+  "solutions": [
+    {
+      "name": "$d",
+      "pos": "File \"unknown_value.php\", line 12, characters 34-35:",
+      "type": "shape('a' => int, int...)"
+    }
+  ]
+}
+{ "function": "\\expects_dynamic_tail", "solutions": [] }
+{
+  "function": "\\test_dynamic_tail",
+  "solutions": [
+    {
+      "name": "$d",
+      "pos": "File \"unknown_value.php\", line 20, characters 36-37:",
+      "type": "shape('a' => int, ...)"
+    }
+  ]
+}
+{
+  "function": "\\reads_unknown_field",
+  "solutions": [
+    {
+      "name": "$s",
+      "pos": "File \"unknown_value.php\", line 6, characters 56-57:",
+      "type": "shape(?'unknown' => mixed, ...)"
+    }
+  ]
+}
+{
+  "function": "\\expects_dynamic_tail",
+  "solutions": [
+    {
+      "name": "$_",
+      "pos": "File \"unknown_value.php\", line 16, characters 61-62:",
+      "type": "mixed"
+    }
+  ]
+}

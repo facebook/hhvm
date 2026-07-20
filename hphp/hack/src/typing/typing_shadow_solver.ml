@@ -191,6 +191,7 @@ let solve ~as_data (env : Typing_env_types.env) inf_env dynamic_locals =
           Tshape
             {
               shape with
+              s_unknown_value = substitute_shadows shape.s_unknown_value;
               s_fields =
                 TShapeMap.map
                   (fun sft ->

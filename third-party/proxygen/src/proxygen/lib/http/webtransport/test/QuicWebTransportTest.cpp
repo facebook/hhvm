@@ -178,6 +178,45 @@ TEST_F(QuicWebTransportTest, ConnectionErrorHandlerDestroysTransport) {
   EXPECT_EQ(transport_, nullptr);
 }
 
+// Regression test: the handler may drop the last shared_ptr to the
+// QuicWebTransport; onNewUnidirectionalStream must not touch *this after.
+TEST_F(QuicWebTransportTest, UniStreamHandlerDestroysTransport) {
+  std::shared_ptr<QuicWebTransport> sharedTransport(transport_.release());
+  sharedTransport->setHandler(handler_.get());
+
+  bool handlerCalled = false;
+  EXPECT_CALL(*handler_, onNewUniStream(_))
+      .WillOnce([&](WebTransport::StreamReadHandle*) {
+        handlerCalled = true;
+        sharedTransport.reset();
+      });
+
+  socketDriver_.addReadEvent(2, nullptr, false);
+  eventBase_.loopOnce();
+
+  EXPECT_TRUE(handlerCalled);
+  EXPECT_EQ(sharedTransport, nullptr);
+}
+
+// Same as above but for peer-initiated bidi streams.
+TEST_F(QuicWebTransportTest, BidiStreamHandlerDestroysTransport) {
+  std::shared_ptr<QuicWebTransport> sharedTransport(transport_.release());
+  sharedTransport->setHandler(handler_.get());
+
+  bool handlerCalled = false;
+  EXPECT_CALL(*handler_, onNewBidiStream(_))
+      .WillOnce([&](WebTransport::BidiStreamHandle) {
+        handlerCalled = true;
+        sharedTransport.reset();
+      });
+
+  socketDriver_.addReadEvent(0, nullptr, false);
+  eventBase_.loopOnce();
+
+  EXPECT_TRUE(handlerCalled);
+  EXPECT_EQ(sharedTransport, nullptr);
+}
+
 TEST_F(QuicWebTransportTest, SetPriority) {
   auto handle = webTransport()->createUniStream();
   EXPECT_TRUE(handle.hasValue());

@@ -38,12 +38,11 @@ void QuicWebTransport::onNewBidirectionalStream(quic::StreamId id) noexcept {
     return;
   }
   auto handle = WebTransportImpl::onWebTransportBidiStream(id);
+  // Register before invoking the handler: the handler may synchronously
+  // destroy *this, and teardown clears the callback via the ingress map.
+  quicSocket_->setReadCallback(id, handle.readHandle);
   handler_->onNewBidiStream(WebTransport::BidiStreamHandle(
       {.readHandle = handle.readHandle, .writeHandle = handle.writeHandle}));
-  // Handler callback may have closed the session, check socket is still valid
-  if (quicSocket_) {
-    quicSocket_->setReadCallback(id, handle.readHandle);
-  }
 }
 
 void QuicWebTransport::onNewUnidirectionalStream(quic::StreamId id) noexcept {
@@ -54,11 +53,8 @@ void QuicWebTransport::onNewUnidirectionalStream(quic::StreamId id) noexcept {
     return;
   }
   auto readHandle = WebTransportImpl::onWebTransportUniStream(id);
+  quicSocket_->setReadCallback(id, readHandle);
   handler_->onNewUniStream(readHandle);
-  // Handler callback may have closed the session, check socket is still valid
-  if (quicSocket_) {
-    quicSocket_->setReadCallback(id, readHandle);
-  }
 }
 
 void QuicWebTransport::onStopSending(

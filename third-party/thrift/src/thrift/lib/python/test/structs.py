@@ -121,25 +121,39 @@ class StructTestsParameterized(unittest.TestCase):
         """
         # pyre-ignore[16]: has no attribute `test_types`
         self.StringBucket: Type[StringBucket] = self.test_types.StringBucket
+        # pyrefly: ignore [missing-attribute]
         self.OptionalFile: Type[OptionalFile] = self.test_types.OptionalFile
+        # pyrefly: ignore [missing-attribute]
         self.File: Type[File] = self.test_types.File
+        # pyrefly: ignore [missing-attribute]
         self.Kind: Type[Kind] = self.test_types.Kind
+        # pyrefly: ignore [missing-attribute]
         self.UnusedError: Type[UnusedError] = self.test_types.UnusedError
+        # pyrefly: ignore [missing-attribute]
         self.Integers: Type[Integers] = self.test_types.Integers
+        # pyrefly: ignore [missing-attribute]
         self.easy: Type[easy] = self.test_types.easy
+        # pyrefly: ignore [missing-attribute]
         self.Optionals: Type[Optionals] = self.test_types.Optionals
+        # pyrefly: ignore [missing-attribute]
         self.Runtime: Type[Runtime] = self.test_types.Runtime
+        # pyrefly: ignore [missing-attribute]
         self.Color: Type[Color] = self.test_types.Color
+        # pyrefly: ignore [missing-attribute]
         self.Reserved: Type[Reserved] = self.test_types.Reserved
         self.StructuredAnnotation: Type[StructuredAnnotation] = (
+            # pyrefly: ignore [missing-attribute]
             self.test_types.StructuredAnnotation
         )
+        # pyrefly: ignore [missing-attribute]
         self.mixed: Type[mixed] = self.test_types.mixed
+        # pyrefly: ignore [missing-attribute]
         self.is_mutable_run: bool = self.test_types.__name__.endswith(
             "thrift_mutable_types"
         )
         # pyre-ignore[8]: Intentional for test
         self._Reserved: Type[_Reserved] = (
+            # pyrefly: ignore [bad-assignment]
             _Reserved if not self.is_mutable_run else _ReservedMutable
         )
         # pyre-ignore[16]: has no attribute `serializer_module`
@@ -262,6 +276,7 @@ class StructTestsParameterized(unittest.TestCase):
                 val=1,
                 an_int=self.Integers(small=300),
                 name="foo",
+                # pyrefly: ignore [unexpected-keyword]
                 val_lists=[1, 2, 3, 4],
             )
 
@@ -282,6 +297,7 @@ class StructTestsParameterized(unittest.TestCase):
             move="Qh4xe1",
             inst="foo",
             changes="bar",
+            # pyrefly: ignore [unexpected-keyword]
             __mangled_str="secret",
             _Reserved__mangled_int=42,
         )
@@ -368,6 +384,7 @@ class StructTestsParameterized(unittest.TestCase):
             inst="foo",
             changes="bar",
             _Reserved__mangled_str="secret",
+            # pyrefly: ignore [unexpected-keyword]
             __mangled_int=42,
         )
         self.assertEqual(x.from_, "hello")
@@ -705,7 +722,9 @@ class NumericalConversionsTests(unittest.TestCase):
         """
         # pyre-ignore[16]: has no attribute `test_types`
         self.numerical: Type[numerical] = self.test_types.numerical
+        # pyrefly: ignore [missing-attribute]
         self.Kind: Type[Kind] = self.test_types.Kind
+        # pyrefly: ignore [missing-attribute]
         self.is_mutable_run: bool = self.test_types.__name__.endswith(
             "thrift_mutable_types"
         )
@@ -823,21 +842,34 @@ class StructDeepcopyTests(unittest.TestCase):
         """
         # pyre-ignore[16]: has no attribute `test_types`
         self.easy: Type[easy] = self.test_types.easy
+        # pyrefly: ignore [missing-attribute]
         self.Integers: Type[Integers] = self.test_types.Integers
+        # pyrefly: ignore [missing-attribute]
         self.customized: Type[customized] = self.test_types.customized
+        # pyrefly: ignore [missing-attribute]
         self.ComplexRef: Type[ComplexRef] = self.test_types.ComplexRef
+        # pyrefly: ignore [missing-attribute]
         self.ListTypes: Type[ListTypes] = self.test_types.ListTypes
+        # pyrefly: ignore [missing-attribute]
         self.File: Type[File] = self.test_types.File
+        # pyrefly: ignore [missing-attribute]
         self.Perm: Type[Perm] = self.test_types.Perm
+        # pyrefly: ignore [missing-attribute]
         self.Kind: Type[Kind] = self.test_types.Kind
+        # pyrefly: ignore [missing-attribute]
         self.IOBufListStruct: Type[IOBufListStruct] = self.test_types.IOBufListStruct
+        # pyrefly: ignore [missing-attribute]
         self.StringBucket: Type[StringBucket] = self.test_types.StringBucket
+        # pyrefly: ignore [missing-attribute]
         self.is_mutable_run: bool = self.test_types.__name__.endswith(
             "thrift_mutable_types"
         )
+        # pyrefly: ignore [missing-attribute]
         self.DefaultedFields: Type[DefaultedFields] = self.test_types.DefaultedFields
+        # pyrefly: ignore [missing-attribute]
         self.Nested3: Type[Nested3] = self.test_types.Nested3
         self.NestedStructContainers: Type[NestedStructContainers] = (
+            # pyrefly: ignore [missing-attribute]
             self.test_types.NestedStructContainers
         )
         # pyre-ignore[16]: has no attribute `serializer_module`
@@ -1006,6 +1038,7 @@ class StructDeepcopyTests(unittest.TestCase):
         self.assertEqual(d2.unicode_set - d1.unicode_set, set())
 
         self.assertEqual(d1.location_map[31], d2.location_map[31])
+        # pyrefly: ignore [bad-argument-type]
         self.assertEqual(len(d1.location_map[38]), 1)
         self.assertNotIn(38, d2.location_map)
         self.assertEqual(len(d1.location_map[47]), 3)
@@ -1027,7 +1060,9 @@ class StructDeepcopyTests(unittest.TestCase):
             return
 
         assert isinstance(easy_copy, mutable_test_types.easy)
+        # pyrefly: ignore [bad-assignment]
         easy_copy.name = "bar"
+        # pyrefly: ignore [bad-assignment]
         easy_copy.val = 128
 
         json_copy = json.loads(
@@ -1055,7 +1090,9 @@ class StructDeepcopyTests(unittest.TestCase):
             return
 
         assert isinstance(e_copy, mutable_test_types.easy)
+        # pyrefly: ignore [bad-assignment]
         e_copy.name = "bar"
+        # pyrefly: ignore [bad-assignment]
         e_copy.val = 128
 
         json_copy = json.loads(
@@ -1084,7 +1121,9 @@ class StructDeepcopyTests(unittest.TestCase):
             return
 
         assert isinstance(e_copy, mutable_test_types.easy)
+        # pyrefly: ignore [bad-assignment]
         e_copy.name = "bar"
+        # pyrefly: ignore [bad-assignment]
         e_copy.val = 128
 
         json_copy = json.loads(

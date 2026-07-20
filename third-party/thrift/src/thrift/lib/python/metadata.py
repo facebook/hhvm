@@ -139,7 +139,9 @@ class ThriftTypeProxy:
             val = thriftType.value
             assert isinstance(val, ThriftEnumType)
             specialType = ThriftTypeProxy(
-                thriftMeta.enums[thriftType.value.name], thriftMeta
+                # pyrefly: ignore [missing-attribute]
+                thriftMeta.enums[thriftType.value.name],
+                thriftMeta,
             )
             specialType.kind = ThriftKind.ENUM
             return specialType
@@ -150,6 +152,7 @@ class ThriftTypeProxy:
                 return ThriftStructProxy(val.name, thriftMeta)
             except KeyError as ex:  # val.name not in thriftMeta.structs
                 try:
+                    # pyrefly: ignore [bad-return]
                     return ThriftExceptionProxy(val.name, thriftMeta)
                 except Exception:
                     raise ex
@@ -361,6 +364,7 @@ class ThriftFieldProxy:
         self.id = self.thriftType.id
         self.name = self.thriftType.name
         self.is_optional = self.thriftType.is_optional
+        # pyrefly: ignore [bad-assignment]
         self.structuredAnnotations: Tuple[ThriftConstStructProxy] = tuple(
             ThriftConstStructProxy(annotation)
             for annotation in self.thriftType.structured_annotations
@@ -385,6 +389,7 @@ class ThriftStructProxy(ThriftTypeProxy):
         assert isinstance(self.thriftType, ThriftStruct)
         self.name = self.thriftType.name
         self.is_union = self.thriftType.is_union
+        # pyrefly: ignore [bad-assignment]
         self.structuredAnnotations: Tuple[ThriftConstStructProxy] = tuple(
             ThriftConstStructProxy(annotation)
             for annotation in self.thriftType.structured_annotations
@@ -427,6 +432,7 @@ class ThriftConstValueProxy:
             ThriftConstValue.Type.cv_double,
             ThriftConstValue.Type.cv_string,
         ):
+            # pyrefly: ignore [bad-assignment]
             self.type = self.thriftType.value
             if self.thriftType.type is ThriftConstValue.Type.cv_bool:
                 self.kind = ThriftConstKind.CV_BOOL
@@ -442,6 +448,7 @@ class ThriftConstValueProxy:
             self.kind = ThriftConstKind.CV_STRUCT
         if self.thriftType.type is ThriftConstValue.Type.cv_list:
             self.type = tuple(
+                # pyrefly: ignore [bad-argument-type]
                 ThriftConstValueProxy(ele)
                 # pyre-fixme[16]: Undefined attribute [16]: `None` has no attribute `__iter__`
                 for ele in self.thriftType.value
@@ -450,9 +457,12 @@ class ThriftConstValueProxy:
         if self.thriftType.type is ThriftConstValue.Type.cv_map:
             self.type = MappingProxyType(
                 {
+                    # pyrefly: ignore [missing-attribute]
                     ThriftConstValueProxy(ele.key).type: ThriftConstValueProxy(
+                        # pyrefly: ignore [missing-attribute]
                         ele.value
                     )
+                    # pyrefly: ignore [not-iterable]
                     for ele in self.thriftType.value
                 }
             )
@@ -523,6 +533,7 @@ class ThriftExceptionProxy:
         self.thriftType = thriftMeta.exceptions[name]
         self.thriftMeta = thriftMeta
         self.name = self.thriftType.name
+        # pyrefly: ignore [bad-assignment]
         self.structuredAnnotations: Tuple[ThriftConstStructProxy] = tuple(
             ThriftConstStructProxy(annotation)
             for annotation in self.thriftType.structured_annotations
@@ -549,6 +560,7 @@ class ThriftFunctionProxy:
             self.thriftType.return_type, self.thriftMeta
         )
         self.is_oneway = self.thriftType.is_oneway
+        # pyrefly: ignore [bad-assignment]
         self.structuredAnnotations: Tuple[ThriftConstStructProxy] = tuple(
             ThriftConstStructProxy(annotation)
             for annotation in self.thriftType.structured_annotations
@@ -579,6 +591,7 @@ class ThriftServiceProxy:
             if self.thriftType.parent is None
             else ThriftServiceProxy(self.thriftType.parent, self.thriftMeta)
         )
+        # pyrefly: ignore [bad-assignment]
         self.structuredAnnotations: Tuple[ThriftConstStructProxy] = tuple(
             ThriftConstStructProxy(annotation)
             for annotation in self.thriftType.structured_annotations
@@ -612,7 +625,9 @@ def gen_metadata(
     ):
         raise TypeError(f"{cls!r} is not a thrift-python type.")
 
+    # pyrefly: ignore [missing-attribute]
     meta: ThriftMetadata = cls.__get_metadata__()
+    # pyrefly: ignore [missing-attribute]
     name: str = cls.__get_thrift_name__()
 
     if issubclass(cls, StructOrUnion):
@@ -624,6 +639,7 @@ def gen_metadata(
     elif issubclass(cls, Client):
         return ThriftServiceProxy(name, meta)
     elif issubclass(cls, Enum):
+        # pyrefly: ignore [bad-return]
         return meta.enums[name]
     else:
         raise TypeError(f"unsupported thrift-python type: {cls!r}.")

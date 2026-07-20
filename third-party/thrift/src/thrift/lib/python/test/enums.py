@@ -75,15 +75,23 @@ class EnumTests(unittest.TestCase):
     def setUp(self) -> None:
         # pyre-ignore[16]: has no attribute `test_types`
         self.BadMembers: Type[BadMembers] = self.test_types.BadMembers
+        # pyrefly: ignore [missing-attribute]
         self.File: Type[File] = self.test_types.File
+        # pyrefly: ignore [missing-attribute]
         self.Kind: Type[Kind] = self.test_types.Kind
+        # pyrefly: ignore [missing-attribute]
         self.OptionalFile: Type[OptionalFile] = self.test_types.OptionalFile
+        # pyrefly: ignore [missing-attribute]
         self.ColorGroups: Type[ColorGroups] = self.test_types.ColorGroups
+        # pyrefly: ignore [missing-attribute]
         self.Color: Type[Color] = self.test_types.Color
+        # pyrefly: ignore [missing-attribute]
         self.Perm: Type[Perm] = self.test_types.Perm
         self.OptionalColorGroups: Type[OptionalColorGroups] = (
+            # pyrefly: ignore [missing-attribute]
             self.test_types.OptionalColorGroups
         )
+        # pyrefly: ignore [missing-attribute]
         self.is_mutable_run: bool = self.test_types.__name__.endswith(
             "thrift_mutable_types"
         )
@@ -388,6 +396,7 @@ class EnumTests(unittest.TestCase):
                 self.Color.blue,
                 self.Color.green,
                 self.Color._Color__pleurigloss,
+                # pyrefly: ignore [missing-attribute]
                 self.Color._Color__octarine,
             ],
             lst,
@@ -440,15 +449,23 @@ class FlagTests(unittest.TestCase):
     def setUp(self) -> None:
         # pyre-ignore[16]: has no attribute `test_types`
         self.BadMembers: Type[BadMembers] = self.test_types.BadMembers
+        # pyrefly: ignore [missing-attribute]
         self.File: Type[File] = self.test_types.File
+        # pyrefly: ignore [missing-attribute]
         self.Kind: Type[Kind] = self.test_types.Kind
+        # pyrefly: ignore [missing-attribute]
         self.OptionalFile: Type[OptionalFile] = self.test_types.OptionalFile
+        # pyrefly: ignore [missing-attribute]
         self.ColorGroups: Type[ColorGroups] = self.test_types.ColorGroups
+        # pyrefly: ignore [missing-attribute]
         self.Color: Type[Color] = self.test_types.Color
+        # pyrefly: ignore [missing-attribute]
         self.Perm: Type[Perm] = self.test_types.Perm
         self.OptionalColorGroups: Type[OptionalColorGroups] = (
+            # pyrefly: ignore [missing-attribute]
             self.test_types.OptionalColorGroups
         )
+        # pyrefly: ignore [missing-attribute]
         self.is_mutable_run: bool = self.test_types.__name__.endswith(
             "thrift_mutable_types"
         )
@@ -546,8 +563,11 @@ class EnumMetaTests(unittest.TestCase):
     def setUp(self) -> None:
         # pyre-ignore[16]: has no attribute `test_types`
         self.Color: Type[Color] = self.test_types.Color
+        # pyrefly: ignore [missing-attribute]
         self.Kind: Type[Kind] = self.test_types.Kind
+        # pyrefly: ignore [missing-attribute]
         self.Perm: Type[Perm] = self.test_types.Perm
+        # pyrefly: ignore [missing-attribute]
         self.is_mutable_run: bool = self.test_types.__name__.endswith(
             "thrift_mutable_types"
         )
@@ -656,6 +676,7 @@ class TypedefedEnumsTest(unittest.TestCase):
     def setUp(self) -> None:
         # pyre-ignore[16]: has no attribute `test_types`
         self.Color: Type[AbstractColor] = self.test_types.Color
+        # pyrefly: ignore [missing-attribute]
         self.is_mutable_run: bool = self.test_types.__name__.endswith(
             "thrift_mutable_types"
         )

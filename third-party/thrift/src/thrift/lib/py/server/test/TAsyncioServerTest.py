@@ -130,6 +130,7 @@ class TestTHeaderProtocolFactory(object):
 
 
 class TestThriftClientProtocol(ThriftHeaderClientProtocol):
+    # pyrefly: ignore [bad-override-mutable-attribute]
     THEADER_PROTOCOL_FACTORY = None
 
     def __init__(self, probe, *args, **kwargs):

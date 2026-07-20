@@ -354,6 +354,7 @@ class AnyRegistry:
         raise ValueError(f"Unsupported type: {type_name}")
 
     def _load_struct(self, any_obj: Any) -> StructOrUnionOrException:
+        # pyrefly: ignore [bad-return, bad-specialization]
         return serializer.deserialize(
             # pyre-fixme[6]: For 1st argument expected `Type[Variable[sT (bound to
             #  Union[GeneratedError, StructOrUnion])]]` but got `Type[Union[Enum,
@@ -366,6 +367,7 @@ class AnyRegistry:
         )
 
     def _load_primitive(self, any_obj: Any) -> PrimitiveType:
+        # pyrefly: ignore [bad-return, bad-specialization]
         return deserialize_primitive(
             # pyre-fixme[6]: The deserializer expects primitive, but this to_serializable_type function can give any valid type
             self._type_name_to_serializable_type(any_obj.type.name),

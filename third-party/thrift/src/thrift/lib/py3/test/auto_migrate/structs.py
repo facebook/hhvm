@@ -628,6 +628,7 @@ class NumericalConversionsTests(unittest.TestCase):
 
     def test_string_enum(self) -> None:
         bucket = StringBucket(one=MyStrEnum.A, two=MyStrEnumBad.B)
+        # pyrefly: ignore [missing-attribute]
         self.assertEqual(bucket.one, MyStrEnum.A.value)
         self.assertEqual(bucket.one, MyStrEnum.A)
         if not is_auto_migrated() or sys.version_info < (3, 11):
@@ -648,6 +649,7 @@ class TestSubSubclass(TestSubclass):
     pass
 
 
+# pyrefly: ignore [invalid-inheritance]
 class MyStrEnum(StrEnum):
     A = "a"
     B = "b"

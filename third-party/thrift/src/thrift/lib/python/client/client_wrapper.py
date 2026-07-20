@@ -37,7 +37,9 @@ class ImmutableClassAnnotations(ABCMeta):
 class Client(
     Generic[TAsyncClient, TSyncClient], ABC, metaclass=ImmutableClassAnnotations
 ):
+    # pyrefly: ignore [invalid-annotation]
     Async: ClassVar[Type[TAsyncClient]]
+    # pyrefly: ignore [invalid-annotation]
     Sync: ClassVar[Type[TSyncClient]]
 
 

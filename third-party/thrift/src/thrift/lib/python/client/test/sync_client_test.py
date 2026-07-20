@@ -154,6 +154,7 @@ class SyncClientTests(IsolatedAsyncioTestCase):
     def test_add_test_handler_with_rpc_options_should_hijack_transport_error_and_use_rpc_options(
         self,
     ) -> None:
+        # pyrefly: ignore [bad-context-manager]
         with HijackTestHelper():
             with get_sync_client(TestService, host="localhost", port=1) as client:
                 with self.assertRaises(HijackTestException) as context:
@@ -165,6 +166,7 @@ class SyncClientTests(IsolatedAsyncioTestCase):
     def test_add_test_handler_without_rpc_options_should_hijack_transport_error(
         self,
     ) -> None:
+        # pyrefly: ignore [bad-context-manager]
         with HijackTestHelper():
             with get_sync_client(TestService, host="localhost", port=1) as client:
                 with self.assertRaises(HijackTestException) as context:

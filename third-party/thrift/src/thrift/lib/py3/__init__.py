@@ -20,6 +20,7 @@
 __all__ = []
 
 try:
+    # pyrefly: ignore [missing-import]
     from thrift.py3.client import Client, get_client  # noqa: 401
 
     __all__.extend(["Client", "get_client"])
@@ -27,6 +28,7 @@ except ModuleNotFoundError:
     pass
 
 try:
+    # pyrefly: ignore [missing-import]
     from thrift.py3.server import (  # noqa: 401
         get_context,
         RequestContext,
@@ -39,6 +41,7 @@ except ModuleNotFoundError:
     pass
 
 try:
+    # pyrefly: ignore [missing-import]
     from thrift.python.types import Enum, Flag  # noqa: 401
 
     __all__.extend(["Enum", "Flag"])
@@ -46,6 +49,7 @@ except ModuleNotFoundError:
     pass
 
 try:
+    # pyrefly: ignore [missing-import]
     from thrift.py3.types import BadEnum, Struct, Union  # noqa: 401
 
     __all__.extend(["Struct", "BadEnum", "Union"])
@@ -53,6 +57,7 @@ except ModuleNotFoundError:
     pass
 
 try:
+    # pyrefly: ignore [missing-import]
     from thrift.py3.exceptions import (  # noqa: 401
         ApplicationError,
         Error,
@@ -65,6 +70,7 @@ except ModuleNotFoundError:
     pass
 
 try:
+    # pyrefly: ignore [missing-import]
     from thrift.py3.serializer import deserialize, serialize  # noqa: 401
 
     __all__.extend(["serialize", "deserialize"])
@@ -72,6 +78,7 @@ except ModuleNotFoundError:
     pass
 
 try:
+    # pyrefly: ignore [missing-import]
     from thrift.py3.common import Priority, Protocol, RpcOptions  # noqa: 401
 
     __all__.extend(["Priority", "Protocol", "RpcOptions"])

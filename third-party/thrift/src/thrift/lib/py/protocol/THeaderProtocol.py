@@ -82,6 +82,7 @@ class THeaderProtocol(TProtocolBase, THeaderProtocolAccelerate):
         self.strictRead = strictRead
         self.reset_protocol()
 
+    # pyrefly: ignore [bad-override-param-name]
     def writeMessageBegin(self, name, type, seqid):
         self.__proto.writeMessageBegin(name, type, seqid)
         if type == TMessageType.CALL or type == TMessageType.ONEWAY:
@@ -124,6 +125,7 @@ class THeaderProtocol(TProtocolBase, THeaderProtocolAccelerate):
     def writeSetEnd(self):
         self.__proto.writeSetEnd()
 
+    # pyrefly: ignore [bad-override-param-name]
     def writeBool(self, bool):
         self.__proto.writeBool(bool)
 

@@ -240,6 +240,7 @@ class SenderTransport(WrappedTransport):
 
 
 class ThriftHeaderClientProtocol(ThriftHeaderClientProtocolBase):
+    # pyrefly: ignore [bad-override]
     async def timeout_task(self, fname, seqid, delay):
         await asyncio.sleep(delay)
         self._handle_timeout(fname, seqid)

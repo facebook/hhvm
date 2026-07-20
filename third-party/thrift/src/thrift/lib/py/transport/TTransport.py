@@ -325,6 +325,7 @@ class TFramedTransport(TTransportBase, CReadableTransport):
     def cstringio_buf(self):
         return self.__rbuf
 
+    # pyrefly: ignore [bad-override-param-name]
     def cstringio_refill(self, prefix, reqlen):
         # self.__rbuf will already be empty here because fastproto doesn't
         # ask for a refill until the previous buffer is empty.  Therefore,

@@ -161,6 +161,7 @@ class ClientServerTests(unittest.IsolatedAsyncioTestCase):
     """
 
     async def test_get_context(self) -> None:
+        # pyrefly: ignore [bad-context-manager]
         async with TestServer(ip="::1") as sa:
             ip, port = sa.ip, sa.port
             assert ip and port
@@ -189,6 +190,7 @@ class ClientServerTests(unittest.IsolatedAsyncioTestCase):
             await handler.getName()
 
     async def test_rpc_headers(self) -> None:
+        # pyrefly: ignore [bad-context-manager]
         async with TestServer(ip="::1") as sa:
             ip, port = sa.ip, sa.port
             assert ip and port
@@ -201,6 +203,7 @@ class ClientServerTests(unittest.IsolatedAsyncioTestCase):
     async def test_get_client_headers(self) -> None:
         # Headers passed to get_client should be sent as persistent headers
         # on every request the client makes.
+        # pyrefly: ignore [bad-context-manager]
         async with TestServer(ip="::1") as sa:
             ip, port = sa.ip, sa.port
             assert ip and port
@@ -217,6 +220,7 @@ class ClientServerTests(unittest.IsolatedAsyncioTestCase):
     async def test_get_client_headers_resolve(self) -> None:
         # Same as above, but exercises the hostname-resolution path.
         hostname = socket.gethostname()
+        # pyrefly: ignore [bad-context-manager]
         async with TestServer() as sa:
             port = sa.port
             assert port
@@ -233,6 +237,7 @@ class ClientServerTests(unittest.IsolatedAsyncioTestCase):
     async def test_client_resolve(self) -> None:
         hostname = socket.gethostname()
 
+        # pyrefly: ignore [bad-context-manager]
         async with TestServer() as sa:
             port = sa.port
             assert port
@@ -241,6 +246,7 @@ class ClientServerTests(unittest.IsolatedAsyncioTestCase):
                 self.assertFalse(await client.invert(True))
 
     async def test_unframed_binary(self) -> None:
+        # pyrefly: ignore [bad-context-manager]
         async with TestServer(ip="::1") as sa:
             ip, port = sa.ip, sa.port
             assert ip and port
@@ -255,6 +261,7 @@ class ClientServerTests(unittest.IsolatedAsyncioTestCase):
                 self.assertFalse(await client.invert(True))
 
     async def test_framed_deprecated(self) -> None:
+        # pyrefly: ignore [bad-context-manager]
         async with TestServer(ip="::1") as sa:
             ip, port = sa.ip, sa.port
             assert ip and port
@@ -268,6 +275,7 @@ class ClientServerTests(unittest.IsolatedAsyncioTestCase):
                 self.assertFalse(await client.invert(True))
 
     async def test_framed_compact(self) -> None:
+        # pyrefly: ignore [bad-context-manager]
         async with TestServer(ip="::1") as sa:
             ip, port = sa.ip, sa.port
             assert ip and port
@@ -281,6 +289,7 @@ class ClientServerTests(unittest.IsolatedAsyncioTestCase):
                 self.assertFalse(await client.invert(True))
 
     async def test_server_localhost(self) -> None:
+        # pyrefly: ignore [bad-context-manager]
         async with TestServer(ip="::1") as sa:
             ip, port = sa.ip, sa.port
             assert ip and port
@@ -290,6 +299,7 @@ class ClientServerTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_unix_socket(self) -> None:
         with tempfile.TemporaryDirectory() as tdir:
+            # pyrefly: ignore [bad-context-manager]
             async with TestServer(path=Path(tdir) / "tserver.sock") as sa:
                 assert sa.path
                 async with get_client(TestingService, path=sa.path) as client:
@@ -297,6 +307,7 @@ class ClientServerTests(unittest.IsolatedAsyncioTestCase):
                     self.assertFalse(await client.invert(True))
 
     async def test_no_client_aexit(self) -> None:
+        # pyrefly: ignore [bad-context-manager]
         async with TestServer() as sa:
             ip, port = sa.ip, sa.port
             assert ip and port
@@ -309,6 +320,7 @@ class ClientServerTests(unittest.IsolatedAsyncioTestCase):
         """
         This actually handles the case if __aexit__ is not awaited
         """
+        # pyrefly: ignore [bad-context-manager]
         async with TestServer() as sa:
             ip, port = sa.ip, sa.port
             assert ip and port
@@ -325,6 +337,7 @@ class ClientServerTests(unittest.IsolatedAsyncioTestCase):
         """
         This covers if aenter was canceled since those two are the same really
         """
+        # pyrefly: ignore [bad-context-manager]
         async with TestServer() as sa:
             ip, port = sa.ip, sa.port
             assert ip and port
@@ -335,6 +348,7 @@ class ClientServerTests(unittest.IsolatedAsyncioTestCase):
         This tests calling methods from a derived service
         """
 
+        # pyrefly: ignore [bad-context-manager]
         async with TestServer(handler=DerivedHandler()) as sa:
             ip, port = sa.ip, sa.port
             assert ip and port
@@ -345,6 +359,7 @@ class ClientServerTests(unittest.IsolatedAsyncioTestCase):
                 )
 
     async def test_renamed_func(self) -> None:
+        # pyrefly: ignore [bad-context-manager]
         async with TestServer(ip="::1") as sa:
             ip, port = sa.ip, sa.port
             assert ip and port
@@ -363,6 +378,7 @@ class ClientServerTests(unittest.IsolatedAsyncioTestCase):
                     cancelledMessage
                 )  # Pretend that this is some await call that gets cancelled
 
+        # pyrefly: ignore [bad-context-manager]
         async with TestServer(handler=CancelHandler(), ip="::1") as sa:
             ip, port = sa.ip, sa.port
             assert ip and port
@@ -375,6 +391,7 @@ class ClientServerTests(unittest.IsolatedAsyncioTestCase):
                 )
 
     async def test_request_with_default_rpc_options(self) -> None:
+        # pyrefly: ignore [bad-context-manager]
         async with TestServer(ip="::1") as sa:
             ip, port = sa.ip, sa.port
             assert ip and port
@@ -385,6 +402,7 @@ class ClientServerTests(unittest.IsolatedAsyncioTestCase):
                 self.assertEqual(Priority(priority), Priority.N_PRIORITIES)
 
     async def test_request_with_specified_rpc_options(self) -> None:
+        # pyrefly: ignore [bad-context-manager]
         async with TestServer(ip="::1") as sa:
             ip, port = sa.ip, sa.port
             assert ip and port
@@ -400,6 +418,7 @@ class ClientServerTests(unittest.IsolatedAsyncioTestCase):
 
 class Utf8Test(unittest.IsolatedAsyncioTestCase):
     async def test_non_utf8_exception_message(self) -> None:
+        # pyrefly: ignore [bad-context-manager]
         async with TestServer(handler=CppHandler()) as sa:
             ip, port = sa.ip, sa.port
             assert ip and port
@@ -446,6 +465,7 @@ class ClientStackServerTests(unittest.IsolatedAsyncioTestCase):
     """
 
     async def test_server_localhost(self) -> None:
+        # pyrefly: ignore [bad-context-manager]
         async with TestServer(handler=StackHandler(), ip="::1") as sa:
             ip, port = sa.ip, sa.port
             assert ip and port
@@ -487,6 +507,7 @@ class ClientMetadataTestingServiceTests(unittest.IsolatedAsyncioTestCase):
     async def test_client_metadata(self) -> None:
         hostname: str = socket.gethostname()
 
+        # pyrefly: ignore [bad-context-manager]
         async with TestServer(
             handler=ClientMetadataTestingServiceHandler(), ip="::1"
         ) as sa:
@@ -513,6 +534,7 @@ class ClientMetadataTestingServiceTests(unittest.IsolatedAsyncioTestCase):
     async def test_call_get_metadata_field_with_invalid_key_should_return_empty_field(
         self,
     ) -> None:
+        # pyrefly: ignore [bad-context-manager]
         async with TestServer(
             handler=ClientMetadataTestingServiceHandler(), ip="::1"
         ) as sa:

@@ -112,9 +112,13 @@ class UnionTests(unittest.TestCase):
         """
         # pyre-ignore[16]: has no attribute `test_types`
         self.Integers: Type[Integers] = self.test_types.Integers
+        # pyrefly: ignore [missing-attribute]
         self.Digits: Type[Digits] = self.test_types.Digits
+        # pyrefly: ignore [missing-attribute]
         self.ReservedUnion: Type[ReservedUnion] = self.test_types.ReservedUnion
+        # pyrefly: ignore [missing-attribute]
         self.ComplexUnion: Type[ComplexUnion] = self.test_types.ComplexUnion
+        # pyrefly: ignore [missing-attribute]
         self.is_mutable_run: bool = self.test_types.__name__.endswith(
             "thrift_mutable_types"
         )

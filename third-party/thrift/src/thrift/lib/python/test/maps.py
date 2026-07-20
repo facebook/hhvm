@@ -108,28 +108,40 @@ class MapTests(unittest.TestCase):
         # pyre-ignore[16]: has no attribute `maps_types`
         self.StrIntMap: Type[StrIntMapType] = self.maps_types.StrIntMap
         self.AnotherStrIntMap: Type[AnotherStrIntMapType] = (
+            # pyrefly: ignore [missing-attribute]
             self.maps_types.AnotherStrIntMap
         )
         self.StrStrIntListMapMap: Type[StrStrIntListMapMapType] = (
+            # pyrefly: ignore [missing-attribute]
             self.maps_types.StrStrIntListMapMap
         )
+        # pyrefly: ignore [missing-attribute]
         self.StrStrMap: Type[StrStrMapType] = self.maps_types.StrStrMap
+        # pyrefly: ignore [missing-attribute]
         self.StrI32ListMap: Type[StrI32ListMapType] = self.maps_types.StrI32ListMap
         self.AnotherStrI32ListMap: Type[AnotherStrI32ListMapType] = (
+            # pyrefly: ignore [missing-attribute]
             self.maps_types.AnotherStrI32ListMap
         )
         self.StrAtoIValueMap: Type[StrAtoIValueMapType] = (
+            # pyrefly: ignore [missing-attribute]
             self.maps_types.StrAtoIValueMap
         )
         self.F14MapFollyString: Type[F14MapFollyStringType] = (
+            # pyrefly: ignore [missing-attribute]
             self.maps_types.F14MapFollyString
         )
+        # pyrefly: ignore [missing-attribute]
         self.StrEasyMap: Type[StrEasyMapType] = self.maps_types.StrEasyMap
+        # pyrefly: ignore [missing-attribute]
         self.easy: Type[easyType] = self.maps_types.easy
         # pyre-ignore[16]: has no attribute `containers_types`
         self.Foo: Type[FooType] = self.containers_types.Foo
+        # pyrefly: ignore [missing-attribute]
         self.Maps: Type[MapsType] = self.containers_types.Maps
+        # pyrefly: ignore [missing-attribute]
         self.Color: Type[ColorType] = self.containers_types.Color
+        # pyrefly: ignore [missing-attribute]
         self.is_mutable_run: bool = self.containers_types.__name__.endswith(
             "thrift_mutable_types"
         )
@@ -152,6 +164,7 @@ class MapTests(unittest.TestCase):
         self.assertIsInstance(int_map, self.StrIntMap)
         self.assertIsInstance(int_map, self.AnotherStrIntMap)
         self.assertTrue(issubclass(self.StrIntMap, self.AnotherStrIntMap))
+        # pyrefly: ignore [invalid-argument]
         self.assertTrue(issubclass(self.AnotherStrIntMap, self.StrIntMap))
         # Different key/value types should not match
         self.assertNotIsInstance(int_map, self.StrEasyMap)
@@ -167,6 +180,7 @@ class MapTests(unittest.TestCase):
         self.assertIsInstance(nested_map, self.StrI32ListMap)
         self.assertIsInstance(nested_map, self.AnotherStrI32ListMap)
         self.assertTrue(issubclass(self.StrI32ListMap, self.AnotherStrI32ListMap))
+        # pyrefly: ignore [invalid-argument]
         self.assertTrue(issubclass(self.AnotherStrI32ListMap, self.StrI32ListMap))
 
     def test_typedef_default_constructor(self) -> None:
@@ -274,12 +288,16 @@ class MapTests(unittest.TestCase):
         x = self.StrStrIntListMapMap({"foo": s})
         px = {}
         px["foo"] = x["foo"]
+        # pyrefly: ignore [unsupported-operation]
         px["baz"] = {"wat": [4]}
+        # pyrefly: ignore [unsupported-operation]
         px["foo"] = dict(px["foo"])
+        # pyrefly: ignore [unsupported-operation]
         px["foo"]["bar"] = px["foo"]["bar"] + [5, 7, 8]
         self.assertEqual(s["bar"], [0, 1])
         # Now turn this crazy mixed structure back to Cython
         cx = self.StrStrIntListMapMap(px)
+        # pyrefly: ignore [unsupported-operation]
         px["bar"] = {"lol": "TypeError"}
         with self.assertRaises(TypeError):
             self.StrStrIntListMapMap(px)
@@ -343,6 +361,7 @@ class MapTests(unittest.TestCase):
             ),
             # pyre-ignore[6]: TODO: Thrift-Container init
             structMap=(
+                # pyrefly: ignore [bad-argument-type]
                 to_thrift_map({})
                 if self.is_mutable_run
                 else {

@@ -31,6 +31,7 @@ class Adapter(typing.Generic[TAdaptFrom, TAdaptTo]):
         cls,
         original: TAdaptFrom,
         *,
+        # pyrefly: ignore [unknown-name]
         transitive_annotation: "typing.Optional[thrift.python.types.Struct]" = None,
         constant_uri: typing.Optional[str] = None,
     ) -> TAdaptTo: ...
@@ -39,6 +40,7 @@ class Adapter(typing.Generic[TAdaptFrom, TAdaptTo]):
         cls,
         adapted: TAdaptTo,
         *,
+        # pyrefly: ignore [unknown-name]
         transitive_annotation: "typing.Optional[thrift.python.types.Struct]" = None,
         constant_uri: typing.Optional[str] = None,
     ) -> TAdaptFrom: ...
@@ -52,8 +54,10 @@ class Adapter(typing.Generic[TAdaptFrom, TAdaptTo]):
         cls,
         original: TAdaptFrom,
         field_id: int,
+        # pyrefly: ignore [unknown-name]
         strct: "thrift.python.types.StructOrUnion",
         *,
+        # pyrefly: ignore [unknown-name]
         transitive_annotation: "typing.Optional[thrift.python.types.Struct]" = None,
     ) -> TAdaptTo: ...
     @classmethod
@@ -61,7 +65,9 @@ class Adapter(typing.Generic[TAdaptFrom, TAdaptTo]):
         cls,
         adapted: TAdaptTo,
         field_id: int,
+        # pyrefly: ignore [unknown-name]
         strct: "thrift.python.types.StructOrUnion",
         *,
+        # pyrefly: ignore [unknown-name]
         transitive_annotation: "typing.Optional[thrift.python.types.Struct]" = None,
     ) -> TAdaptFrom: ...

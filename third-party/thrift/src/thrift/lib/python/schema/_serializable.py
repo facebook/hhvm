@@ -251,6 +251,7 @@ def _iobuf_to_bytes(buf: object) -> bytes:
     to ``bytes``; tolerate a plain ``bytes`` too."""
     if isinstance(buf, (bytes, bytearray, memoryview)):
         return bytes(buf)
+    # pyrefly: ignore [bad-argument-type]
     return b"".join(buf)  # IOBuf iterates its (memoryview) chunks
 
 

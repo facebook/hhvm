@@ -24,6 +24,7 @@ from thrift_asyncio.tutorial import Calculator as AsyncCalculator
 
 
 class AsyncCalculatorHandler(AsyncCalculator.Iface):
+    # pyrefly: ignore [bad-override-param-name]
     async def add(self, n1, n2):
         return 42
 

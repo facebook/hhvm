@@ -432,6 +432,7 @@ class StreamClientTest(unittest.IsolatedAsyncioTestCase):
         eviction_done: asyncio.Event = asyncio.Event()
 
         class ContextCheckHandler(Handler):
+            # pyrefly: ignore [bad-override]
             async def returnstream(
                 self, i32_from: int, i32_to: int
             ) -> AsyncIterator[int]:

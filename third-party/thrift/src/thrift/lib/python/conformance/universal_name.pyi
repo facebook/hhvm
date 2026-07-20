@@ -18,6 +18,7 @@ import typing
 from enum import Enum
 
 class UniversalHashAlgorithm(Enum):
+    # pyrefly: ignore [invalid-annotation]
     Sha2_256: UniversalHashAlgorithm = ...
 
 # Validates that uri is a valid universal name uri of the form:

@@ -418,6 +418,7 @@ class TJSONProtocol(TJSONProtocolBase):
     def readBinary(self):
         return self.readJSONBase64()
 
+    # pyrefly: ignore [bad-override-param-name]
     def writeMessageBegin(self, name, request_type, seqid):
         self.resetWriteContext()
         self.writeJSONArrayStart()
@@ -435,6 +436,7 @@ class TJSONProtocol(TJSONProtocolBase):
     def writeStructEnd(self):
         self.writeJSONObjectEnd()
 
+    # pyrefly: ignore [bad-override-param-name]
     def writeFieldBegin(self, name, ttype, id):
         self.writeJSONNumber(id)
         self.writeJSONObjectStart()
@@ -473,23 +475,30 @@ class TJSONProtocol(TJSONProtocolBase):
     def writeSetEnd(self):
         self.writeJSONArrayEnd()
 
+    # pyrefly: ignore [bad-override-param-name]
     def writeBool(self, boolean):
         self.writeJSONNumber(1 if boolean is True else 0)
 
     def writeInteger(self, integer):
         self.writeJSONNumber(int(integer))
 
+    # pyrefly: ignore [bad-override-param-name]
     writeByte = writeInteger
+    # pyrefly: ignore [bad-override-param-name]
     writeI16 = writeInteger
+    # pyrefly: ignore [bad-override-param-name]
     writeI32 = writeInteger
+    # pyrefly: ignore [bad-override-param-name]
     writeI64 = writeInteger
 
+    # pyrefly: ignore [bad-override-param-name]
     def writeDouble(self, dbl):
         self.writeJSONNumber(dbl)
 
     def writeFloat(self, flt):
         self.writeJSONNumber(flt)
 
+    # pyrefly: ignore [bad-override-param-name]
     def writeString(self, string):
         self.writeJSONString(string)
 

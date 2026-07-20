@@ -31,6 +31,7 @@ from thrift.python.serializer import deserialize
 
 file_manager = ExitStack()
 thrift2ast = str(
+    # pyrefly: ignore [bad-argument-type]
     file_manager.enter_context(resources.path(__package__, "thrift2ast")).absolute()
 )
 

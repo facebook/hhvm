@@ -22,5 +22,7 @@ TFinalResponse = TypeVar("TFinalResponse")
 class ClientSink(Generic[TChunk, TFinalResponse]):
     def __init__(self) -> None: ...
     async def sink(
-        self, gen: AsyncGenerator[TChunk, None]
+        self,
+        gen: AsyncGenerator[TChunk, None],
+        # pyrefly: ignore [invalid-annotation]
     ) -> Generic[TFinalResponse]: ...

@@ -163,11 +163,14 @@ class BaseInterceptorTestCase(TestCase):
 class BasicServiceTestCase(BaseInterceptorTestCase):
     def setUp(self) -> None:
         self.server = TestServer(handler=Handler(), ip="::1")
+        # pyrefly: ignore [bad-assignment]
         self.client_class = BasicService
         super().setUp()
 
     async def assert_return(self, client: BasicService) -> None:
+        # pyrefly: ignore [bad-argument-type]
         self.assertEqual("", await client.toLowerSnake(""))
+        # pyrefly: ignore [bad-argument-type]
         self.assertEqual("hello_world", await client.toLowerSnake("HelloWorld"))
 
     async def test_no_interceptors_header(self) -> None:
@@ -184,11 +187,14 @@ class BasicServiceTestCase(BaseInterceptorTestCase):
 class OnewayServiceTestCase(BaseInterceptorTestCase):
     def setUp(self) -> None:
         self.server = TestServer(handler=OnewayHandler(), ip="::1")
+        # pyrefly: ignore [bad-assignment]
         self.client_class = OnewayService
         super().setUp()
 
     async def assert_return(self, client: OnewayService) -> None:
+        # pyrefly: ignore [bad-argument-type]
         self.assertIsNone(await client.toLowerSnake(""))
+        # pyrefly: ignore [bad-argument-type]
         self.assertIsNone(await client.toLowerSnake("HelloWorld"))
         # oneway client returns immediately, so need some time for the server
         # to actually process the request
@@ -208,14 +214,17 @@ class OnewayServiceTestCase(BaseInterceptorTestCase):
 class StreamingServiceTestCase(BaseInterceptorTestCase):
     def setUp(self) -> None:
         self.server = TestServer(handler=StreamHandler(), ip="::1")
+        # pyrefly: ignore [bad-assignment]
         self.client_class = StreamingService
         super().setUp()
 
     async def assert_return(self, client: StreamingService) -> None:
+        # pyrefly: ignore [bad-argument-type]
         empty_stream = await client.toLowerSnake("")
         empty_resp = [resp async for resp in empty_stream]
         self.assertEqual(empty_resp, [""])
 
+        # pyrefly: ignore [bad-argument-type]
         real_stream = await client.toLowerSnake("HelloWorld")
         real_resp = [resp async for resp in real_stream]
         self.assertEqual(real_resp, ["hello_world"])
@@ -255,99 +264,123 @@ def assert_counts_post(
 
 class CountingInterceptorBasicTest(BasicServiceTestCase):
     def setUp(self) -> None:
+        # pyrefly: ignore [bad-assignment]
         self.observer = CountingInterceptor()
         super().setUp()
 
     async def test_interceptors_header(self) -> None:
+        # pyrefly: ignore [bad-argument-type]
         assert_counts_pre(self, self.observer)
         await self.run_with_local_server(self.assert_return)
+        # pyrefly: ignore [bad-argument-type]
         assert_counts_post(self, self.observer)
 
     async def test_interceptors_rocket(self) -> None:
+        # pyrefly: ignore [bad-argument-type]
         assert_counts_pre(self, self.observer)
         await self.run_with_local_server_rocket(self.assert_return)
+        # pyrefly: ignore [bad-argument-type]
         assert_counts_post(self, self.observer, rocket=True)
 
 
 class CountingInterceptorOnewayTest(OnewayServiceTestCase):
     def setUp(self) -> None:
+        # pyrefly: ignore [bad-assignment]
         self.observer = CountingInterceptor()
         super().setUp()
 
     @property
     def counts(self) -> CountingInterceptor.Counts:
+        # pyrefly: ignore [missing-attribute]
         return self.observer.counts
 
     async def test_interceptors_header(self) -> None:
+        # pyrefly: ignore [bad-argument-type]
         assert_counts_pre(self, self.observer)
         await self.run_with_local_server(self.assert_return)
+        # pyrefly: ignore [bad-argument-type]
         assert_counts_post(self, self.observer, oneway=True)
 
     async def test_interceptors_rocket(self) -> None:
+        # pyrefly: ignore [bad-argument-type]
         assert_counts_pre(self, self.observer)
         await self.run_with_local_server_rocket(self.assert_return)
+        # pyrefly: ignore [bad-argument-type]
         assert_counts_post(self, self.observer, rocket=True, oneway=True)
 
 
 class CountingInterceptorStreamingTest(StreamingServiceTestCase):
     def setUp(self) -> None:
+        # pyrefly: ignore [bad-assignment]
         self.observer = CountingInterceptor()
         super().setUp()
 
     @property
     def counts(self) -> CountingInterceptor.Counts:
+        # pyrefly: ignore [missing-attribute]
         return self.observer.counts
 
     async def test_interceptors(self) -> None:
+        # pyrefly: ignore [bad-argument-type]
         assert_counts_pre(self, self.observer)
         # streaming only works with ROCKET, not HEADER_CLIENT_TYPE
         await self.run_with_local_server_rocket(self.assert_return)
+        # pyrefly: ignore [bad-argument-type]
         assert_counts_post(self, self.observer, rocket=True)
 
 
 class OnConnectThrowsInterceptorBasicTest(BasicServiceTestCase):
     def setUp(self) -> None:
+        # pyrefly: ignore [bad-assignment]
         self.observer = OnConnectThrowsInterceptor()
         super().setUp()
 
     async def test_interceptors_header(self) -> None:
         async def assert_basic(client: BasicService) -> None:
             with self.assertRaises(TransportError):
+                # pyrefly: ignore [bad-argument-type]
                 await client.toLowerSnake("HelloWorld")
 
         await self.run_with_local_server(assert_basic)
 
+        # pyrefly: ignore [missing-attribute]
         self.assertEqual(self.observer.on_connection_throws, 1)
 
 
 class OnConnectThrowsInterceptorOnewayTest(OnewayServiceTestCase):
     def setUp(self) -> None:
+        # pyrefly: ignore [bad-assignment]
         self.observer = OnConnectThrowsInterceptor()
         super().setUp()
 
     async def test_interceptors_header(self) -> None:
         async def assert_basic(client: BasicService) -> None:
             # client return is hard-coded to None
+            # pyrefly: ignore [bad-argument-type]
             self.assertIsNone(await client.toLowerSnake("HelloWorld"))
             time.sleep(0.5)
 
         await self.run_with_local_server(assert_basic)
 
+        # pyrefly: ignore [missing-attribute]
         self.assertEqual(self.observer.on_connection_throws, 1)
 
 
 class OnConnectThrowsInterceptorStreamingTest(StreamingServiceTestCase):
     def setUp(self) -> None:
+        # pyrefly: ignore [bad-assignment]
         self.observer = OnConnectThrowsInterceptor()
         super().setUp()
 
     async def test_interceptors_rocket(self) -> None:
         async def assert_basic(client: BasicService) -> None:
             with self.assertRaises(TransportError):
+                # pyrefly: ignore [bad-argument-type]
                 await client.toLowerSnake("HelloWorld")
 
         await self.run_with_local_server_rocket(assert_basic)
 
+        # pyrefly: ignore [missing-attribute]
         self.assertEqual(self.observer.on_connection_throws, 1)
 
 
@@ -363,6 +396,7 @@ def assert_on_request_throws_post(
 
 class OnRequestThrowsInterceptorBasicTest(BasicServiceTestCase):
     def setUp(self) -> None:
+        # pyrefly: ignore [bad-assignment]
         self.observer = OnRequestThrowsInterceptor()
         super().setUp()
 
@@ -372,29 +406,35 @@ class OnRequestThrowsInterceptorBasicTest(BasicServiceTestCase):
                 ApplicationError,
                 "OnRequestThrowsInterceptor.*Expect the unexpected",
             ):
+                # pyrefly: ignore [bad-argument-type]
                 await client.toLowerSnake("HelloWorld")
 
         await self.run_with_local_server(assert_basic)
+        # pyrefly: ignore [bad-argument-type]
         assert_on_request_throws_post(self, self.observer)
 
 
 class OnRequestThrowsInterceptorOnewayTest(OnewayServiceTestCase):
     def setUp(self) -> None:
+        # pyrefly: ignore [bad-assignment]
         self.observer = OnRequestThrowsInterceptor()
         super().setUp()
 
     async def test_interceptors_header(self) -> None:
         async def assert_basic(client: BasicService) -> None:
             # client return is hard-coded to None
+            # pyrefly: ignore [bad-argument-type]
             self.assertIsNone(await client.toLowerSnake("HelloWorld"))
             time.sleep(0.5)
 
         await self.run_with_local_server(assert_basic)
+        # pyrefly: ignore [bad-argument-type]
         assert_on_request_throws_post(self, self.observer)
 
 
 class OnRequestThrowsInterceptorStreamingTest(StreamingServiceTestCase):
     def setUp(self) -> None:
+        # pyrefly: ignore [bad-assignment]
         self.observer = OnRequestThrowsInterceptor()
         super().setUp()
 
@@ -404,14 +444,17 @@ class OnRequestThrowsInterceptorStreamingTest(StreamingServiceTestCase):
                 ApplicationError,
                 "OnRequestThrowsInterceptor.*Expect the unexpected",
             ):
+                # pyrefly: ignore [bad-argument-type]
                 await client.toLowerSnake("HelloWorld")
 
         await self.run_with_local_server_rocket(assert_basic)
+        # pyrefly: ignore [bad-argument-type]
         assert_on_request_throws_post(self, self.observer)
 
 
 class OnResponseThrowsInterceptorBasicTest(BasicServiceTestCase):
     def setUp(self) -> None:
+        # pyrefly: ignore [bad-assignment]
         self.observer = OnResponseThrowsInterceptor()
         super().setUp()
 
@@ -421,32 +464,38 @@ class OnResponseThrowsInterceptorBasicTest(BasicServiceTestCase):
                 ApplicationError,
                 "OnResponseThrowsInterceptor.*Expect the unexpected",
             ):
+                # pyrefly: ignore [bad-argument-type]
                 await client.toLowerSnake("HelloWorld")
 
         await self.run_with_local_server(assert_basic)
 
+        # pyrefly: ignore [missing-attribute]
         self.assertEqual(self.observer.on_response_throws, 1)
 
 
 class OnResponseThrowsInterceptorOnewayTest(OnewayServiceTestCase):
     def setUp(self) -> None:
+        # pyrefly: ignore [bad-assignment]
         self.observer = OnResponseThrowsInterceptor()
         super().setUp()
 
     async def test_interceptors_header(self) -> None:
         async def assert_basic(client: BasicService) -> None:
             # client return is hard-coded to None
+            # pyrefly: ignore [bad-argument-type]
             self.assertIsNone(await client.toLowerSnake("HelloWorld"))
             time.sleep(0.5)
 
         await self.run_with_local_server(assert_basic)
 
         # oneway onReponse only runs if error in onRequest interceptor
+        # pyrefly: ignore [missing-attribute]
         self.assertEqual(self.observer.on_response_throws, 0)
 
 
 class OnResponseThrowsInterceptorStreamingTest(StreamingServiceTestCase):
     def setUp(self) -> None:
+        # pyrefly: ignore [bad-assignment]
         self.observer = OnResponseThrowsInterceptor()
         super().setUp()
 
@@ -456,8 +505,10 @@ class OnResponseThrowsInterceptorStreamingTest(StreamingServiceTestCase):
                 ApplicationError,
                 "OnResponseThrowsInterceptor.*Expect the unexpected",
             ):
+                # pyrefly: ignore [bad-argument-type]
                 await client.toLowerSnake("HelloWorld")
 
         await self.run_with_local_server_rocket(assert_basic)
 
+        # pyrefly: ignore [missing-attribute]
         self.assertEqual(self.observer.on_response_throws, 1)

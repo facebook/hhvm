@@ -81,6 +81,7 @@ def get_binary_handler_type(
     Binaries: Type[BinariesImmutable] | Type[BinariesMutable],
     BinaryUnion: Type[BinaryUnionImmutable] | Type[BinaryUnionMutable],
 ) -> Type[ServiceInterface]:
+    # pyrefly: ignore [invalid-inheritance]
     class BinaryHandler(BinaryServiceInterface):
         def __init__(self, unit_test) -> None:
             self.unit_test = unit_test

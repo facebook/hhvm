@@ -191,6 +191,7 @@ def _as_bytes(raw: object) -> bytes:
     chunks to flatten it."""
     if isinstance(raw, (bytes, bytearray, memoryview)):
         return bytes(raw)
+    # pyrefly: ignore [bad-argument-type]
     return b"".join(raw)  # IOBuf: iterates its (memoryview) chunks
 
 
@@ -263,16 +264,22 @@ def _primitive_record(primitive: _ast.Primitive, value: object) -> SerializableR
     if primitive == primitives.BOOL:
         return BoolRecord(bool(value))
     if primitive == primitives.BYTE:
+        # pyrefly: ignore [bad-argument-type]
         return Int8Record(int(value))
     if primitive == primitives.I16:
+        # pyrefly: ignore [bad-argument-type]
         return Int16Record(int(value))
     if primitive == primitives.I32:
+        # pyrefly: ignore [bad-argument-type]
         return Int32Record(int(value))
     if primitive == primitives.I64:
+        # pyrefly: ignore [bad-argument-type]
         return Int64Record(int(value))
     if primitive == primitives.FLOAT:
+        # pyrefly: ignore [bad-argument-type]
         return Float32Record(float(value))
     if primitive == primitives.DOUBLE:
+        # pyrefly: ignore [bad-argument-type]
         return Float64Record(float(value))
     if primitive == primitives.STRING:
         return TextRecord(_as_text(value))
@@ -293,6 +300,7 @@ def _record_from_annotation_value(ast_ref: object, value: object) -> Serializabl
     ):
         return _field_set_from_annotation(true_ref.node, value)
     if isinstance(true_ref, _ast.EnumTypeRef):
+        # pyrefly: ignore [bad-argument-type]
         return Int32Record(int(value))
     if isinstance(true_ref, _ast.ListTypeRef):
         return ListRecord(
@@ -303,6 +311,7 @@ def _record_from_annotation_value(ast_ref: object, value: object) -> Serializabl
         )
     if isinstance(true_ref, _ast.SetTypeRef):
         return SetRecord(
+            # pyrefly: ignore [not-iterable]
             [_record_from_annotation_value(true_ref.element_type, v) for v in value]
         )
     if isinstance(true_ref, _ast.MapTypeRef):

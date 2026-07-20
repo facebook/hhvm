@@ -339,9 +339,13 @@ class MetadataTests(unittest.TestCase):
             | ThriftServiceProxy
             | ThriftMetadata
         ) = gen_metadata(test_thrift.thrift_metadata)
+        # pyrefly: ignore [missing-attribute]
         self.assertIsNotNone(meta.enums)
+        # pyrefly: ignore [missing-attribute]
         self.assertIsNotNone(meta.structs)
+        # pyrefly: ignore [missing-attribute]
         self.assertIsNotNone(meta.services)
+        # pyrefly: ignore [missing-attribute]
         self.assertIsNotNone(meta.exceptions)
 
     def test_metadata_bidirectional_streaming(self) -> None:

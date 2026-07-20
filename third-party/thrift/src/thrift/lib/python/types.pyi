@@ -48,12 +48,17 @@ class Float32TypeInfo:
     pass
 
 class FieldQualifier(enum.Enum):
+    # pyrefly: ignore [invalid-annotation]
     Unqualified: FieldQualifier = ...
+    # pyrefly: ignore [invalid-annotation]
     Optional: FieldQualifier = ...
+    # pyrefly: ignore [invalid-annotation]
     Terse: FieldQualifier = ...
 
 class cServiceHealth(Enum):
+    # pyrefly: ignore [invalid-annotation]
     cServiceHealth_OK: cServiceHealth = ...
+    # pyrefly: ignore [invalid-annotation]
     cServiceHealth_ERROR: cServiceHealth = ...
 
 # Export enum values at module level for direct import
@@ -164,6 +169,7 @@ class EnumMeta(enum.EnumMeta):
         cls: typing.Type[eT], value: typing.Union[int, typing.SupportsInt]
     ) -> eT: ...
     @property
+    # pyrefly: ignore [bad-override]
     def __members__(self: typing.Type[eT]) -> typing.Mapping[str, eT]: ...
 
     # the following methods are inherited from enum.EnumMeta:
@@ -173,6 +179,7 @@ class EnumMeta(enum.EnumMeta):
     # def __getitem__(cls: typing.Type[eT], name: str) -> eT: ...
     # def __len__(cls) -> int: ...
 
+# pyrefly: ignore [invalid-inheritance]
 class Enum(typing.SupportsInt, metaclass=EnumMeta):
     name: typing.Final[str]
     value: typing.Final[int]
@@ -262,6 +269,7 @@ class ImmutableSet(Container, typing.AbstractSet[ElemT]):
     def __rsub__(
         self, other: typing.AbstractSet[ElemT]
     ) -> typing.AbstractSet[ElemT]: ...
+    # pyrefly: ignore [bad-override]
     def __xor__(self, other: typing.AbstractSet[ElemT]) -> typing.Self: ...
     def __rxor__(
         self, other: typing.AbstractSet[ElemT]

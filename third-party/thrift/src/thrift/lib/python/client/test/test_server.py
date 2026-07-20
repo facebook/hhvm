@@ -105,6 +105,7 @@ async def _start_server_async(
     server_ready_event: synchronize.Event,
     test_done_event: synchronize.Event,
 ) -> None:
+    # pyrefly: ignore [bad-specialization]
     server = ThriftServer(LeafServiceHandler(), path=path)
     task = asyncio.create_task(server.serve())
     await server.get_address()
@@ -144,6 +145,7 @@ def server_in_another_process() -> typing.Generator[str, None, None]:
 
 @contextlib.asynccontextmanager
 async def server_in_event_loop() -> typing.AsyncGenerator[SocketAddress, None]:
+    # pyrefly: ignore [bad-specialization]
     server = ThriftServer(LeafServiceHandler(), ip="::1")
     install_http2_routing_handler(server)
     serve_task = asyncio.get_running_loop().create_task(server.serve())

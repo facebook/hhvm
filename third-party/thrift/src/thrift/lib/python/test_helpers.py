@@ -28,8 +28,11 @@ from thrift.python.mutable_types import MutableStruct, MutableUnion
 
 # pyre-ignore[21]: no pyre annotations for internal types
 from thrift.python.types import (
+    # pyrefly: ignore [missing-module-attribute]
     _fbthrift_internal_DO_NOT_USE_get_List_typeinfo,
+    # pyrefly: ignore [missing-module-attribute]
     _fbthrift_internal_DO_NOT_USE_get_Map_typeinfo,
+    # pyrefly: ignore [missing-module-attribute]
     _fbthrift_internal_DO_NOT_USE_get_Set_typeinfo,
 )
 
@@ -68,23 +71,29 @@ def round_thrift_to_float32(val: T, convert_int: bool = False) -> T:
     #
     # This is meant as a convenience function for testing and is not perf optimized
     if isinstance(val, float):
+        # pyrefly: ignore [bad-return]
         return round_float32(val)
     # must check str, bytes before Iterable because they are iterable
     if isinstance(val, (str, bytes)):
         return val
     if convert_int and isinstance(val, int):
+        # pyrefly: ignore [bad-return]
         return val if isinstance(val, (Enum, IntEnum, bool)) else round_float32(val)
 
     if isinstance(val, List):
         val_info = _fbthrift_internal_DO_NOT_USE_get_List_typeinfo(val)
+        # pyrefly: ignore [bad-argument-count, bad-return]
         return List(val_info, (round_thrift_to_float32(x) for x in val))
     if isinstance(val, Set):
         val_info = _fbthrift_internal_DO_NOT_USE_get_Set_typeinfo(val)
+        # pyrefly: ignore [bad-argument-count, bad-return]
         return Set(val_info, (round_thrift_to_float32(x) for x in val))
     if isinstance(val, Map):
         key_info, val_info = _fbthrift_internal_DO_NOT_USE_get_Map_typeinfo(val)
+        # pyrefly: ignore [bad-return]
         return Map(
             key_info,
+            # pyrefly: ignore [bad-argument-count]
             val_info,
             {
                 round_thrift_to_float32(k): round_thrift_to_float32(v)
@@ -278,7 +287,9 @@ def _assert_dataclass_almost_equal(
     type_context = format_type_context(result, field_context)
     assert_thrift_almost_equal(
         unittest,
+        # pyrefly: ignore [bad-argument-type]
         dataclass_asdict(result),
+        # pyrefly: ignore [bad-argument-type]
         dataclass_asdict(expected),
         field_context=f"{type_context}.asdict",
         **almost_equal_kwargs,
@@ -346,35 +357,69 @@ def assert_thrift_almost_equal(
 
     # convert py3 types to thrift-python. Remember, in thrift-py3, Struct is base class of Union
     if isinstance(result, (py3_Struct, py3_GeneratedError)):
+        # pyrefly: ignore [missing-attribute]
         result = result._to_python()
     if isinstance(expected, (py3_Struct, py3_GeneratedError)):
+        # pyrefly: ignore [missing-attribute]
         expected = expected._to_python()
 
     if isinstance(
         result, (Struct, GeneratedError, MutableStruct, MutableGeneratedError)
     ):
         _assert_struct_almost_equal(
-            unittest, result, expected, field_context, **almost_equal_kwargs
+            # pyrefly: ignore [bad-argument-type]
+            unittest,
+            result,
+            # pyrefly: ignore [bad-argument-type]
+            expected,
+            # pyrefly: ignore [bad-argument-type]
+            field_context,
+            **almost_equal_kwargs,
         )
 
     elif isinstance(result, (Union, MutableUnion)):
         _assert_union_almost_equal(
-            unittest, result, expected, field_context, **almost_equal_kwargs
+            # pyrefly: ignore [bad-argument-type]
+            unittest,
+            result,
+            # pyrefly: ignore [bad-argument-type]
+            expected,
+            # pyrefly: ignore [bad-argument-type]
+            field_context,
+            **almost_equal_kwargs,
         )
 
     elif isinstance(result, Mapping):
         _assert_mapping_almost_equal(
-            unittest, result, expected, field_context, **almost_equal_kwargs
+            # pyrefly: ignore [bad-argument-type]
+            unittest,
+            result,
+            expected,
+            # pyrefly: ignore [bad-argument-type]
+            field_context,
+            **almost_equal_kwargs,
         )
 
     elif isinstance(result, abcSet):
         _assert_set_almost_equal(
-            unittest, result, expected, field_context, **almost_equal_kwargs
+            # pyrefly: ignore [bad-argument-type]
+            unittest,
+            result,
+            expected,
+            # pyrefly: ignore [bad-argument-type]
+            field_context,
+            **almost_equal_kwargs,
         )
 
     elif isinstance(result, Sequence):
         _assert_sequence_almost_equal(
-            unittest, result, expected, field_context, **almost_equal_kwargs
+            # pyrefly: ignore [bad-argument-type]
+            unittest,
+            result,
+            expected,
+            # pyrefly: ignore [bad-argument-type]
+            field_context,
+            **almost_equal_kwargs,
         )
 
     elif is_dataclass(result):

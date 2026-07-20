@@ -106,11 +106,13 @@ for ch_value, mode in enumerate(JSON_CHAR_TABLE):
         continue
     if sys.version_info[0] == 3:
         JSON_CHARS_TO_ESCAPE.add(chr(ch_value).encode("ascii"))
+        # pyrefly: ignore [bad-argument-type]
         JSON_CHARS_TO_ESCAPE.add(chr(ch_value))
     else:
         JSON_CHARS_TO_ESCAPE.add(chr(ch_value))
         JSON_CHARS_TO_ESCAPE.add(chr(ch_value).encode("utf-8"))
 JSON_CHARS_TO_ESCAPE.add(JSON_BACKSLASH)
+# pyrefly: ignore [bad-argument-type]
 JSON_CHARS_TO_ESCAPE.add(JSON_BACKSLASH.decode("utf-8"))
 
 ESCAPE_CHARS = b'"\\bfnrt'
@@ -395,6 +397,7 @@ class TSimpleJSONProtocolBase(TProtocolBase, object):
             skipped += 1
         return skipped
 
+    # pyrefly: ignore [bad-override-param-name]
     def skip(self, _type):
         self.context.read(self.reader)
         self.skipWhitespace()
@@ -775,6 +778,7 @@ class TSimpleJSONProtocol(TSimpleJSONProtocolBase):
     produces a simple output format that conforms to the JSON standard.
     """
 
+    # pyrefly: ignore [bad-override-param-name]
     def writeMessageBegin(self, name, messageType, seqId):
         self.writeJSONArrayStart()
         self.context.writeNewLine(self.trans)
@@ -792,6 +796,7 @@ class TSimpleJSONProtocol(TSimpleJSONProtocolBase):
     def writeStructEnd(self):
         self.writeJSONObjectEnd()
 
+    # pyrefly: ignore [bad-override-param-name]
     def writeFieldBegin(self, name, fieldType, fieldId):
         self.context.write(self.trans)
         self.popContext()
@@ -807,6 +812,7 @@ class TSimpleJSONProtocol(TSimpleJSONProtocolBase):
     def writeFieldStop(self):
         return
 
+    # pyrefly: ignore [bad-override-param-name]
     def writeMapBegin(self, keyType, valType, size):
         self.writeJSONMapStart()
         self.context.writeNewLine(self.trans)
@@ -820,6 +826,7 @@ class TSimpleJSONProtocol(TSimpleJSONProtocolBase):
         self.popContext()
         self.writeJSONMapEnd()
 
+    # pyrefly: ignore [bad-override-param-name]
     def writeListBegin(self, elemType, size):
         self.writeJSONArrayStart()
         self.context.writeNewLine(self.trans)
@@ -827,6 +834,7 @@ class TSimpleJSONProtocol(TSimpleJSONProtocolBase):
     def writeListEnd(self):
         self.writeJSONArrayEnd()
 
+    # pyrefly: ignore [bad-override-param-name]
     def writeSetBegin(self, elemType, size):
         self.writeJSONArrayStart()
         self.context.writeNewLine(self.trans)
@@ -834,6 +842,7 @@ class TSimpleJSONProtocol(TSimpleJSONProtocolBase):
     def writeSetEnd(self):
         self.writeJSONArrayEnd()
 
+    # pyrefly: ignore [bad-override-param-name]
     def writeBool(self, val):
         self.writeJSONBool(val)
 
@@ -849,12 +858,15 @@ class TSimpleJSONProtocol(TSimpleJSONProtocolBase):
     def writeI64(self, i64):
         self.writeJSONInteger(i64)
 
+    # pyrefly: ignore [bad-override-param-name]
     def writeDouble(self, d):
         self.writeJSONDouble(d)
 
+    # pyrefly: ignore [bad-override-param-name]
     def writeFloat(self, f):
         self.writeJSONDouble(f)
 
+    # pyrefly: ignore [bad-override-param-name]
     def writeString(self, outStr):
         self.writeJSONString(outStr)
 

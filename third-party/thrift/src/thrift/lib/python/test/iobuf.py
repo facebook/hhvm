@@ -46,6 +46,7 @@ class IOBufTests(unittest.TestCase):
         """
         # pyre-ignore[16]: has no attribute `sets_types`
         self.Moo: Type[MooType] = self.test_types.Moo
+        # pyrefly: ignore [missing-attribute]
         if self.test_types is mutable_types:
             self._serialize: Callable[..., Any] = mutable_serialize_iobuf
             self._deserialize: Callable[..., Any] = mutable_deserialize

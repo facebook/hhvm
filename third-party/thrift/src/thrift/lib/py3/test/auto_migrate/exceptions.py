@@ -126,6 +126,7 @@ class ExceptionTests(unittest.TestCase):
             raise SimpleError()
 
         with self.assertRaises(Error):
+            # pyrefly: ignore [bad-argument-count]
             raise SimpleError(Color.red)
 
         with self.assertRaises(Exception):
@@ -134,6 +135,7 @@ class ExceptionTests(unittest.TestCase):
         with self.assertRaises(BaseException):
             raise SimpleError()
 
+        # pyrefly: ignore [bad-argument-count]
         x = SimpleError(Color.blue)
 
         self.assertIsInstance(x, BaseException)

@@ -61,19 +61,29 @@ class SetTests(unittest.TestCase):
     def setUp(self) -> None:
         # pyre-ignore[16]: has no attribute `sets_types`
         self.easy: Type[easy] = self.sets_types.easy
+        # pyrefly: ignore [missing-attribute]
         self.EasySet: Type[EasySet] = self.sets_types.EasySet
+        # pyrefly: ignore [missing-attribute]
         self.SetI32: Type[SetI32] = self.sets_types.SetI32
+        # pyrefly: ignore [missing-attribute]
         self.AnotherSetI32: Type[AnotherSetI32] = self.sets_types.AnotherSetI32
+        # pyrefly: ignore [missing-attribute]
         self.SetAtoIValue: Type[SetAtoIValue] = self.sets_types.SetAtoIValue
+        # pyrefly: ignore [missing-attribute]
         self.SetI32Lists: Type[SetI32Lists] = self.sets_types.SetI32Lists
         self.AnotherSetI32Lists: Type[AnotherSetI32Lists] = (
+            # pyrefly: ignore [missing-attribute]
             self.sets_types.AnotherSetI32Lists
         )
+        # pyrefly: ignore [missing-attribute]
         self.SetSetI32Lists: Type[SetSetI32Lists] = self.sets_types.SetSetI32Lists
         # pyre-ignore[16]: has no attribute `containers_types`
         self.Foo: Type[Foo] = self.containers_types.Foo
+        # pyrefly: ignore [missing-attribute]
         self.Sets: Type[Sets] = self.containers_types.Sets
+        # pyrefly: ignore [missing-attribute]
         self.Color: Type[Color] = self.containers_types.Color
+        # pyrefly: ignore [missing-attribute]
         self.is_mutable_run: bool = self.containers_types.__name__.endswith(
             "thrift_mutable_types"
         )
@@ -91,6 +101,7 @@ class SetTests(unittest.TestCase):
         self.assertIsInstance(int_set, self.SetI32)
         self.assertIsInstance(int_set, self.AnotherSetI32)
         self.assertTrue(issubclass(self.SetI32, self.AnotherSetI32))
+        # pyrefly: ignore [invalid-argument]
         self.assertTrue(issubclass(self.AnotherSetI32, self.SetI32))
         # Different element types should not match
         self.assertNotIsInstance(int_set, self.EasySet)
@@ -117,6 +128,7 @@ class SetTests(unittest.TestCase):
             self.assertIsInstance(nested_set, self.SetI32Lists)
             self.assertIsInstance(nested_set, self.AnotherSetI32Lists)
             self.assertTrue(issubclass(self.SetI32Lists, self.AnotherSetI32Lists))
+            # pyrefly: ignore [invalid-argument]
             self.assertTrue(issubclass(self.AnotherSetI32Lists, self.SetI32Lists))
 
     def test_typedef_default_constructor(self) -> None:
@@ -296,6 +308,7 @@ class SetTests(unittest.TestCase):
             iobufSet=self.to_set({IOBuf(b"foo"), IOBuf(b"bar")}),
             # pyre-ignore[6]: TODO: Thrift-Container init
             structSet=(
+                # pyrefly: ignore [bad-argument-type]
                 to_thrift_set(set())
                 if self.is_mutable_run
                 else {self.Foo(value=1), self.Foo(value=2)}

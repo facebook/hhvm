@@ -57,9 +57,11 @@ class RefTest(unittest.TestCase):
         """
         # pyre-ignore[16]: has no attribute `test_types`
         self.ComplexRef: Type[ComplexRefType] = self.test_types.ComplexRef
+        # pyrefly: ignore [missing-attribute]
         self.is_mutable_run: bool = self.test_types.__name__.endswith(
             "thrift_mutable_types"
         )
+        # pyrefly: ignore [missing-attribute]
         self.Circular: Type[Circular] = self.test_types.Circular
         # pyre-ignore[16]: has no attribute `serializer_module`
         self.serializer: types.ModuleType = self.serializer_module

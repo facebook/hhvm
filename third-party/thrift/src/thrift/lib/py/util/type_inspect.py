@@ -59,6 +59,7 @@ def get_spec(ttype, spec_args):
     return spec
 
 
+# pyrefly: ignore [missing-attribute]
 get_spec.cache = []
 
 

@@ -563,6 +563,7 @@ class NonAssociativeContainerRandomizer(CollectionTypeRandomizer):
     """Randomizer class for lists and sets"""
 
     default_constraints = dict(CollectionTypeRandomizer.default_constraints)
+    # pyrefly: ignore [no-matching-overload]
     default_constraints.update({"element": {}})
 
     def _init_subrandomizers(self):
@@ -672,6 +673,7 @@ class MapRandomizer(CollectionTypeRandomizer):
     ttype = Thrift.TType.MAP
 
     default_constraints = dict(CollectionTypeRandomizer.default_constraints)
+    # pyrefly: ignore [no-matching-overload]
     default_constraints.update({"key": {}, "value": {}})
 
     def _init_subrandomizers(self):
@@ -731,6 +733,7 @@ class StructRandomizer(BaseRandomizer):
     ttype = Thrift.TType.STRUCT
 
     default_constraints = dict(BaseRandomizer.default_constraints)
+    # pyrefly: ignore [no-matching-overload]
     default_constraints.update(
         {"p_include": 0.99, "max_recursion_depth": 3, "per_field": {}}
     )

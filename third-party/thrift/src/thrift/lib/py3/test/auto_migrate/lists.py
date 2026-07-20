@@ -70,6 +70,7 @@ class ListTests(unittest.TestCase):
     def test_isinstance(self) -> None:
         self.assertIsInstance(List__i32(range(5)), Py3List)
         self.assertTrue(issubclass(List__i32, Py3List))
+        # pyrefly: ignore [bad-argument-count]
         self.assertIsInstance(List__i32(range(5)), List__i32)
         self.assertIsInstance(easy(val_list=[1, 2, 3]).val_list, Py3List)
         self.assertTrue(
@@ -80,6 +81,7 @@ class ListTests(unittest.TestCase):
         self.assertIsInstance(I32List(range(5)), List__i32)
 
         if is_auto_migrated():
+            # pyrefly: ignore [bad-argument-count]
             self.assertIsInstance(List__i32(range(5)), PythonList)
             self.assertIsInstance(easy(val_list=[1, 2, 3]).val_list, PythonList)
             self.assertIsInstance(I32List(range(5)), PythonList)

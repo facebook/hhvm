@@ -164,7 +164,11 @@ class _MapTypedefBase(Map, metaclass=_MapTypedefMeta):
             values = {}
         # pyre-ignore[19]: Cython __init__ not visible to Pyre
         super().__init__(
-            self._fbthrift_map_key_type_info, self._fbthrift_map_val_type_info, values
+            # pyrefly: ignore [bad-argument-count]
+            self._fbthrift_map_key_type_info,
+            # pyrefly: ignore [bad-argument-count]
+            self._fbthrift_map_val_type_info,
+            values,
         )
 
     @classmethod

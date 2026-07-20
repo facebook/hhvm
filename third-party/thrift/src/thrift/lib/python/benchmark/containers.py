@@ -363,14 +363,17 @@ def benchmark_container(
     table = [
         [flavor_name(flavor)]
         + benchmark_steps(
-            import_statement(flavor),
-            import_container_wrappers(flavor),
+            import_statement(flavor),  # pyrefly: ignore [bad-argument-type]
+            import_container_wrappers(flavor),  # pyrefly: ignore [bad-argument-type]
             init_statement_func(flavor),
-            import_serializer_statement(flavor),
-            serialze_statement(flavor),
-            deserialze_statement(flavor),
+            import_serializer_statement(flavor),  # pyrefly: ignore [bad-argument-type]
+            serialze_statement(flavor),  # pyrefly: ignore [bad-argument-type]
+            deserialze_statement(flavor),  # pyrefly: ignore [bad-argument-type]
             random_access_statement_func(flavor),
-            ("RESET", deserialze_statement(flavor)),
+            (  # pyrefly: ignore [bad-argument-type]
+                "RESET",
+                deserialze_statement(flavor),
+            ),  # pyrefly: ignore [bad-argument-type]
             iterate_statement_func(flavor),
             iterate_statement_func(flavor),
         )

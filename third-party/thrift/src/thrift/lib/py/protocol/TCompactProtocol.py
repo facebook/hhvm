@@ -157,6 +157,7 @@ class TCompactProtocol(TProtocolBase):
     def __writeVarint(self, n):
         writeVarint(self.trans, n)
 
+    # pyrefly: ignore [bad-override-param-name]
     def writeMessageBegin(self, name, type, seqid):
         assert self.state == CLEAR
         self.__writeUByte(self.PROTOCOL_ID)
@@ -191,6 +192,7 @@ class TCompactProtocol(TProtocolBase):
             self.__writeI16(fid)
         self.__last_fid = fid
 
+    # pyrefly: ignore [bad-override-param-name]
     def writeFieldBegin(self, name, type, fid):
         assert self.state == FIELD_WRITE, self.state
         if type == TType.BOOL:
@@ -248,6 +250,7 @@ class TCompactProtocol(TProtocolBase):
     writeSetEnd = writeCollectionEnd
     writeListEnd = writeCollectionEnd
 
+    # pyrefly: ignore [bad-override-param-name]
     def writeBool(self, bool):
         if self.state == BOOL_WRITE:
             if bool:

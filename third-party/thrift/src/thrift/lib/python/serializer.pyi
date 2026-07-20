@@ -40,8 +40,11 @@ class JsonWriterOptions:
 JSON5_MODE: Json5ProtocolWriterOptions
 
 class KeyOrder(Enum):
+    # pyrefly: ignore [invalid-annotation]
     UNSPECIFIED: KeyOrder = ...
+    # pyrefly: ignore [invalid-annotation]
     NATIVE_ASCENDING: KeyOrder = ...
+    # pyrefly: ignore [invalid-annotation]
     STABLE_ASCENDING: KeyOrder = ...
 
 class Json5ProtocolWriterOptions:

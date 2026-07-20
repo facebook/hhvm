@@ -332,6 +332,7 @@ class TSocket(TSocketBase):
             )
         return buff
 
+    # pyrefly: ignore [bad-override-param-name]
     def write(self, buff):
         if not self.handle:
             raise TTransportException(

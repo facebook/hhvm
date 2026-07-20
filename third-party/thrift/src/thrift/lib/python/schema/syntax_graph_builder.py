@@ -165,6 +165,7 @@ class IncrementalGraphBuilder:
 @functools.cache
 def _typename_to_primitive_map() -> dict[int, Primitive]:
     _TN = _standard_types.TypeName.Type
+    # pyrefly: ignore [bad-return]
     return {
         _TN.boolType.value: Primitive.BOOL,
         _TN.byteType.value: Primitive.BYTE,
@@ -285,6 +286,7 @@ class _GraphBuilder:
         _TN = _standard_types.TypeName.Type
 
         # Check primitives
+        # pyrefly: ignore [bad-argument-type]
         prim = _typename_to_primitive_map().get(tn_type.value)
         if prim is not None:
             return PrimitiveTypeRef(prim)

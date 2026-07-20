@@ -141,46 +141,76 @@ class SerializerTests(unittest.TestCase):
         """
         # pyre-ignore[16]: has no attribute `test_types`
         self.easy: Type[easy] = self.test_types.easy
+        # pyrefly: ignore [missing-attribute]
         self.hard: Type[hard] = self.test_types.hard
+        # pyrefly: ignore [missing-attribute]
         self.Integers: Type[Integers] = self.test_types.Integers
+        # pyrefly: ignore [missing-attribute]
         self.I32List: Type[I32List] = self.test_types.I32List
+        # pyrefly: ignore [missing-attribute]
         self.StrList2D: Type[StrList2D] = self.test_types.StrList2D
+        # pyrefly: ignore [missing-attribute]
         self.StringList: Type[StringList] = self.test_types.StringList
+        # pyrefly: ignore [missing-attribute]
         self.Digits: Type[Digits] = self.test_types.Digits
+        # pyrefly: ignore [missing-attribute]
         self.ColorGroups: Type[ColorGroups] = self.test_types.ColorGroups
+        # pyrefly: ignore [missing-attribute]
         self.Color: Type[Color] = self.test_types.Color
+        # pyrefly: ignore [missing-attribute]
         self.ComplexUnion: Type[ComplexUnion] = self.test_types.ComplexUnion
+        # pyrefly: ignore [missing-attribute]
         self.Complex: Type[Complex] = self.test_types.Complex
+        # pyrefly: ignore [missing-attribute]
         self.IOBufListStruct: Type[IOBufListStruct] = self.test_types.IOBufListStruct
+        # pyrefly: ignore [missing-attribute]
         self.EasyList: Type[EasyList] = self.test_types.EasyList
+        # pyrefly: ignore [missing-attribute]
         self.EasySet: Type[EasySet] = self.test_types.EasySet
+        # pyrefly: ignore [missing-attribute]
         self.StrEasyMap: Type[StrEasyMap] = self.test_types.StrEasyMap
+        # pyrefly: ignore [missing-attribute]
         self.SetI32: Type[SetI32] = self.test_types.SetI32
+        # pyrefly: ignore [missing-attribute]
         self.SetI32Lists: Type[SetI32Lists] = self.test_types.SetI32Lists
+        # pyrefly: ignore [missing-attribute]
         self.StrStrMap: Type[StrStrMap] = self.test_types.StrStrMap
+        # pyrefly: ignore [missing-attribute]
         self.StrI32ListMap: Type[StrI32ListMap] = self.test_types.StrI32ListMap
+        # pyrefly: ignore [missing-attribute]
         self.StringBucket: Type[StringBucket] = self.test_types.StringBucket
+        # pyrefly: ignore [missing-attribute]
         self.Reserved: Type[Reserved] = self.test_types.Reserved
         # pyre-ignore[16]: has no attribute `container_types`
         self.Sets: Type[Sets] = self.container_types.Sets
+        # pyrefly: ignore [missing-attribute]
         self.Lists: Type[Lists] = self.container_types.Lists
+        # pyrefly: ignore [missing-attribute]
         self.Maps: Type[Maps] = self.container_types.Maps
         self.UnicodeContainers: Type[UnicodeContainers] = (
+            # pyrefly: ignore [missing-attribute]
             self.container_types.UnicodeContainers
         )
+        # pyrefly: ignore [missing-attribute]
         self.Foo: Type[Foo] = self.container_types.Foo
+        # pyrefly: ignore [missing-attribute]
         self.is_mutable_run: bool = self.test_types.__name__.endswith(
             "thrift_mutable_types"
         )
         # pyre-ignore[16]: has no attribute `serializer_module`
         self.serializer: types.ModuleType = self.serializer_module
+        # pyrefly: ignore [missing-attribute]
         self.SortedSets: Type[SortedSets] = self.test_types.SortedSets
+        # pyrefly: ignore [missing-attribute]
         self.SortedMaps: Type[SortedMaps] = self.test_types.SortedMaps
+        # pyrefly: ignore [missing-attribute]
         self.EmptyStruct: Type[TestEmptyStruct] = self.test_types.EmptyStruct
         self.StructDisabledFieldCache: Type[StructDisabledFieldCache] = (
+            # pyrefly: ignore [missing-attribute]
             self.test_types.StructDisabledFieldCache
         )
         self.UnionWithEmptyStructField: Type[UnionWithEmptyStructField] = (
+            # pyrefly: ignore [missing-attribute]
             self.test_types.UnionWithEmptyStructField
         )
 
@@ -420,6 +450,7 @@ class SerializerTests(unittest.TestCase):
             val_union=self.ComplexUnion(double_val=1.234),
             # pyre-ignore[6]: TODO: Thrift-Container init
             val_set=(
+                # pyrefly: ignore [bad-argument-type]
                 {easy(val=42)}
                 if not self.is_mutable_run
                 else to_thrift_set(set())  # Mutable types are not hashable.
@@ -428,6 +459,7 @@ class SerializerTests(unittest.TestCase):
             val_map=self.to_map({"foo": b"foovalue"}),
             # pyre-ignore[6]: TODO: Thrift-Container init
             val_complex_map=(
+                # pyrefly: ignore [bad-argument-type]
                 {"bar": [{self.easy(val=42), self.easy(val_list=[1, 2, 3])}]}
                 if not self.is_mutable_run
                 else to_thrift_map({})  # Mutable types are not hashable.
@@ -497,6 +529,7 @@ class SerializerTests(unittest.TestCase):
             iobufSet=self.to_set({IOBuf(b"foo"), IOBuf(b"bar")}),
             # pyre-ignore[6]: TODO: Thrift-Container init
             structSet=(
+                # pyrefly: ignore [bad-argument-type]
                 {self.Foo(value=1), self.Foo(value=2)}
                 if not self.is_mutable_run
                 else to_thrift_set(set())  # Mutable types are not hashable.
@@ -528,6 +561,7 @@ class SerializerTests(unittest.TestCase):
             ),
             # pyre-ignore[6]: TODO: Thrift-Container init
             structMap=(
+                # pyrefly: ignore [bad-argument-type]
                 {
                     self.Foo(value=1): self.Foo(value=1),
                     self.Foo(value=2): self.Foo(value=2),
@@ -850,15 +884,25 @@ class SerializerTerseWriteTests(unittest.TestCase):
             # pyre-ignore[16]: has no attribute `test_types`
             self.test_types.FieldLevelTerseStruct
         )
+        # pyrefly: ignore [missing-attribute]
         self.MyStruct: Type[MyStruct] = self.test_types.MyStruct
+        # pyrefly: ignore [missing-attribute]
         self.MyUnion: Type[MyUnion] = self.test_types.MyUnion
+        # pyrefly: ignore [missing-attribute]
         self.EmptyStruct: Type[EmptyStruct] = self.test_types.EmptyStruct
+        # pyrefly: ignore [missing-attribute]
         self.MyEnum: Type[MyEnum] = self.test_types.MyEnum
+        # pyrefly: ignore [missing-attribute]
         self.TerseStructs: Type[TerseStructs] = self.test_types.TerseStructs
+        # pyrefly: ignore [missing-attribute]
         self.TerseStructs1: Type[TerseStructs1] = self.test_types.TerseStructs1
+        # pyrefly: ignore [missing-attribute]
         self.TerseStructs2: Type[TerseStructs2] = self.test_types.TerseStructs2
+        # pyrefly: ignore [missing-attribute]
         self.TerseStructs3: Type[TerseStructs3] = self.test_types.TerseStructs3
+        # pyrefly: ignore [missing-attribute]
         self.TerseSafePatch: Type[TerseSafePatch] = self.test_types.TerseSafePatch
+        # pyrefly: ignore [missing-attribute]
         self.is_mutable_run: bool = self.test_types.__name__.endswith(
             "thrift_mutable_types"
         )
@@ -991,6 +1035,7 @@ class JsonDeserializeErrorTests(unittest.TestCase):
     def setUp(self) -> None:
         # pyre-ignore[16]: has no attribute `test_types`
         self.easy: Type[easy] = self.test_types.easy
+        # pyrefly: ignore [missing-attribute]
         self.is_mutable_run: bool = self.test_types.__name__.endswith(
             "thrift_mutable_types"
         )

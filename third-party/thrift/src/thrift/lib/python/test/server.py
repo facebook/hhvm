@@ -166,6 +166,7 @@ class ServicesTests(unittest.TestCase):
 
     async def get_address(self, handler: Optional[Handler] = None) -> SocketAddress:
         loop = asyncio.get_running_loop()
+        # pyrefly: ignore [bad-specialization]
         server = ThriftServer(Handler() if handler is None else handler, port=0)
         serve_task = loop.create_task(server.serve())
         addy = await server.get_address()
@@ -194,6 +195,7 @@ class ServicesTests(unittest.TestCase):
         SOCKET_QUEUE_TIMEOUT = 21.37
 
         with event_loop():
+            # pyrefly: ignore [bad-specialization]
             server = ThriftServer(Handler(), port=0)
             server.set_max_requests(MAX_REQUESTS)
             server.set_max_connections(MAX_CONNECTIONS)
@@ -216,6 +218,7 @@ class ServicesTests(unittest.TestCase):
 
     def test_server_get_stats(self) -> None:
         with event_loop():
+            # pyrefly: ignore [bad-specialization]
             server = ThriftServer(Handler(), port=0)
 
             active_requests = server.get_active_requests()

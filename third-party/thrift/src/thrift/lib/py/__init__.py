@@ -14,4 +14,5 @@
 
 # pyre-strict
 
+# pyrefly: ignore [bad-dunder-all]
 __all__ = ["Thrift", "TSCons"]

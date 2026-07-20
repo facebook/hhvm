@@ -46,6 +46,7 @@ class TBinaryProtocol(TProtocolBase):
         self.strictRead = strictRead
         self.strictWrite = strictWrite
 
+    # pyrefly: ignore [bad-override-param-name]
     def writeMessageBegin(self, name, type, seqid):
         if self.strictWrite:
             self.writeI32(TBinaryProtocol.VERSION_1 | type)
@@ -97,6 +98,7 @@ class TBinaryProtocol(TProtocolBase):
     def writeSetEnd(self):
         pass
 
+    # pyrefly: ignore [bad-override-param-name]
     def writeBool(self, bool):
         if bool:
             self.writeByte(1)

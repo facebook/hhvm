@@ -45,6 +45,7 @@ class TMultiplexedProcessor(TProcessor):
             for processor in self.services.values():
                 processor.setEventHandler(event_handler)
 
+    # pyrefly: ignore [bad-override-param-name]
     def process(self, iprot, oprot, server_ctx=None):
         (name, type, seqid) = iprot.readMessageBegin()
         if type != TMessageType.CALL and type != TMessageType.ONEWAY:

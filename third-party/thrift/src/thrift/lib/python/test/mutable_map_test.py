@@ -964,6 +964,7 @@ class MutableMapTest(unittest.TestCase):
         with self.assertRaisesRegex(
             TypeError, "not a <class 'int'>, is actually of type <class 'NoneType'>"
         ):
+            # pyrefly: ignore [bad-argument-type]
             mutable_map.setdefault("new-key")
 
     def test_setdefault_container_value(self) -> None:

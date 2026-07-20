@@ -84,6 +84,7 @@ class SetTests(unittest.TestCase):
     def test_isinstance(self) -> None:
         self.assertIsInstance(Set__i32({1, 2, 4}), Py3Set)
         self.assertTrue(issubclass(Set__i32, Py3Set))
+        # pyrefly: ignore [bad-argument-count]
         self.assertIsInstance(Set__i32({1, 2, 4}), Set__i32)
         color_set = {Color.red, Color.blue}
         self.assertIsInstance(ColorGroups(color_set=color_set).color_set, Py3Set)
@@ -95,10 +96,12 @@ class SetTests(unittest.TestCase):
         self.assertIsInstance(SetI32({1, 2, 4}), Set__i32)
 
         if is_auto_migrated():
+            # pyrefly: ignore [bad-argument-count]
             self.assertIsInstance(Set__i32({1, 2, 4}), PythonSet)
             self.assertIsInstance(ColorGroups(color_set=color_set).color_set, PythonSet)
             self.assertIsInstance(SetI32({1, 2, 4}), PythonSet)
 
+        # pyrefly: ignore [bad-argument-count]
         self.assertNotIsInstance(Set__i32({1, 2, 4}), Set__Color)
         self.assertNotIsInstance(Set__string({f"str_{i}" for i in range(5)}), Set__i32)
 
@@ -269,9 +272,13 @@ class SetTests(unittest.TestCase):
         self.assertIsInstance(x ^ y, expected_type)
         self.assertIsInstance(x - y, expected_type)
 
+        # pyrefly: ignore [missing-attribute]
         self.assertIsInstance(x.__rand__(y), expected_type)
+        # pyrefly: ignore [missing-attribute]
         self.assertIsInstance(x.__ror__(y), expected_type)
+        # pyrefly: ignore [missing-attribute]
         self.assertIsInstance(x.__rxor__(y), expected_type)
+        # pyrefly: ignore [missing-attribute]
         self.assertIsInstance(x.__rsub__(y), expected_type)
 
     def test_is_container(self) -> None:

@@ -138,13 +138,19 @@ class ExceptionTests(unittest.TestCase):
         """
         # pyre-ignore[16]: has no attribute `test_types`
         self.UnusedError: Type[UnusedErrorType] = self.test_types.UnusedError
+        # pyrefly: ignore [missing-attribute]
         self.HardError: Type[HardErrorType] = self.test_types.HardError
         self.UnfriendlyError: Type[UnfriendlyErrorType] = (
+            # pyrefly: ignore [missing-attribute]
             self.test_types.UnfriendlyError
         )
+        # pyrefly: ignore [missing-attribute]
         self.SimpleError: Type[SimpleErrorType] = self.test_types.SimpleError
+        # pyrefly: ignore [missing-attribute]
         self.Color: Type[ColorType] = self.test_types.Color
+        # pyrefly: ignore [missing-attribute]
         self.ValueOrError: Type[ValueOrErrorType] = self.test_types.ValueOrError
+        # pyrefly: ignore [missing-attribute]
         self.is_mutable_run: bool = self.test_types.__name__.endswith(
             "thrift_mutable_types"
         )
@@ -176,6 +182,7 @@ class ExceptionTests(unittest.TestCase):
             raise self.SimpleError()
 
         with self.assertRaises(Error):
+            # pyrefly: ignore [bad-argument-count]
             raise self.SimpleError(self.Color.red)
 
         with self.assertRaises(Exception):  # noqa: B017
@@ -184,6 +191,7 @@ class ExceptionTests(unittest.TestCase):
         with self.assertRaises(BaseException):
             raise self.SimpleError()
 
+        # pyrefly: ignore [bad-argument-count]
         x = self.SimpleError(self.Color.blue)
 
         self.assertIsInstance(x, BaseException)

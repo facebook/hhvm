@@ -375,6 +375,7 @@ class ClientServerTests(unittest.IsolatedAsyncioTestCase):
                 self.assertIsNotNone(port)
                 async with get_client(TestingService, host=ip, port=port) as client:
                     with ThrowHelper(handler):
+                        # pyrefly: ignore [bad-argument-type]
                         with self.assertRaisesRegex(ApplicationError, handler.value):
                             await client.complex_action("1", "2", 3, "4")
 

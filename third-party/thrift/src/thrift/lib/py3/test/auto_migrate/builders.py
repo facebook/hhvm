@@ -83,7 +83,9 @@ class BuilderTest(unittest.TestCase):
         self.assertIsInstance(easy_obj, _types.easy)
         an_int_value = easy_obj.an_int.value
         self.assertIsInstance(an_int_value, _types.Digits)
+        # pyrefly: ignore [bad-argument-type]
         self.assertEqual(len(an_int_value.data), 2)
+        # pyrefly: ignore [not-iterable]
         v1, v2 = an_int_value.data
         self.assertEqual(v1.value, 123)
         self.assertEqual(v2.value, 456)

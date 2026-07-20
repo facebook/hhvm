@@ -40,6 +40,7 @@ class Untruthy(Set, Sequence):
             return False
         return x >= 0 and x < self.limit
 
+    # pyrefly: ignore [bad-override]
     def __getitem__(self, item: int) -> int:
         if item in self:
             return item

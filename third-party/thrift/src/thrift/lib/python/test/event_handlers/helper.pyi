@@ -16,8 +16,11 @@
 from enum import Enum
 
 class ThrowHelperHandler(Enum):
+    # pyrefly: ignore [invalid-annotation]
     PRE_READ: ThrowHelperHandler = ...
+    # pyrefly: ignore [invalid-annotation]
     ON_READ: ThrowHelperHandler = ...
+    # pyrefly: ignore [invalid-annotation]
     POST_READ: ThrowHelperHandler = ...
 
 class ThrowHelper:

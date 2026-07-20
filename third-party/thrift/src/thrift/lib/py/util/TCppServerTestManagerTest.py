@@ -77,6 +77,7 @@ class TestTCppServerTestManager(BaseTest):
         def getRequestContext(self):
             return self.__request_context
 
+        # pyrefly: ignore [bad-override]
         def postRead(self, *args):
             if self._exceptions:
                 raise Exception("some failure")

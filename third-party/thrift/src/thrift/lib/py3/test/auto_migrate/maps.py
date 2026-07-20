@@ -71,6 +71,7 @@ class MapTests(unittest.TestCase):
         str_int_map = {"foo": 5, "bar": 4}
         self.assertIsInstance(Map__string_i64(str_int_map), Py3Map)
         self.assertTrue(issubclass(Map__string_i64, Py3Map))
+        # pyrefly: ignore [bad-argument-count]
         self.assertIsInstance(Map__string_i64(str_int_map), Map__string_i64)
         color_map = {Color.red: Color.blue, Color.green: Color.red}
         self.assertIsInstance(ColorGroups(color_map=color_map).color_map, Py3Map)
@@ -84,6 +85,7 @@ class MapTests(unittest.TestCase):
         self.assertIsInstance(StrIntMap(str_int_map), Map__string_i64)
 
         if is_auto_migrated():
+            # pyrefly: ignore [bad-argument-count]
             self.assertIsInstance(Map__string_i64(str_int_map), PythonMap)
             self.assertIsInstance(ColorGroups(color_map=color_map).color_map, PythonMap)
             self.assertIsInstance(StrIntMap(str_int_map), PythonMap)
@@ -148,7 +150,9 @@ class MapTests(unittest.TestCase):
         #  `Mapping[str, typing.Sequence[int]]`.
         px["foo"] = x["foo"]
         px["baz"] = {"wat": [4]}
+        # pyrefly: ignore [unsupported-operation]
         px["foo"] = dict(px["foo"])
+        # pyrefly: ignore [unsupported-operation]
         px["foo"]["bar"] = px["foo"]["bar"] + [5, 7, 8]
         self.assertEqual(s["bar"], [0, 1])
         # Now turn this crazy mixed structure back to Cython

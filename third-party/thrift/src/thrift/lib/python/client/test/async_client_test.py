@@ -71,6 +71,7 @@ def test_proxy_factory(
     #  `typing.Callable[([thrift.python.client.async_client.AsyncClient], ...)]` is not a
     #  valid type.
 ) -> typing.Callable[[AsyncClient], ...]:
+    # pyrefly: ignore [bad-return]
     return ThriftClientTestProxy
 
 
@@ -339,6 +340,7 @@ class AsyncClientTests(IsolatedAsyncioTestCase):
         self.assertEqual(get_proxy_factory(), None)
 
         # Should be able to assign/get a test factory
+        # pyrefly: ignore [bad-argument-type]
         install_proxy_factory(test_proxy_factory)
         self.assertEqual(get_proxy_factory(), test_proxy_factory)
         # pyre-fixme[16]: `AsyncContextManager` has no attribute `__aenter__`.
@@ -354,6 +356,7 @@ class AsyncClientTests(IsolatedAsyncioTestCase):
     async def test_add_test_handler_with_rpc_options_should_hijack_transport_error_and_use_rpc_options(
         self,
     ) -> None:
+        # pyrefly: ignore [bad-context-manager]
         with HijackTestHelper():
             async with get_client(TestService, host="localhost", port=1) as client:
                 options = RpcOptions()
@@ -365,6 +368,7 @@ class AsyncClientTests(IsolatedAsyncioTestCase):
     async def test_add_test_handler_without_rpc_options_should_hijack_transport_error(
         self,
     ) -> None:
+        # pyrefly: ignore [bad-context-manager]
         with HijackTestHelper():
             async with get_client(TestService, host="localhost", port=1) as client:
                 with self.assertRaises(HijackTestException) as context:

@@ -59,24 +59,41 @@ from thrift.python.metadata import (
 )
 
 class ThriftKind(Enum):
+    # pyrefly: ignore [invalid-annotation]
     PRIMITIVE: ThriftKind = ...
+    # pyrefly: ignore [invalid-annotation]
     LIST: ThriftKind = ...
+    # pyrefly: ignore [invalid-annotation]
     SET: ThriftKind = ...
+    # pyrefly: ignore [invalid-annotation]
     MAP: ThriftKind = ...
+    # pyrefly: ignore [invalid-annotation]
     ENUM: ThriftKind = ...
+    # pyrefly: ignore [invalid-annotation]
     STRUCT: ThriftKind = ...
+    # pyrefly: ignore [invalid-annotation]
     UNION: ThriftKind = ...
+    # pyrefly: ignore [invalid-annotation]
     TYPEDEF: ThriftKind = ...
+    # pyrefly: ignore [invalid-annotation]
     STREAM: ThriftKind = ...
+    # pyrefly: ignore [invalid-annotation]
     SINK: ThriftKind = ...
 
 class ThriftConstKind(Enum):
+    # pyrefly: ignore [invalid-annotation]
     CV_BOOL: ThriftConstKind = ...
+    # pyrefly: ignore [invalid-annotation]
     CV_INT: ThriftConstKind = ...
+    # pyrefly: ignore [invalid-annotation]
     CV_FLOAT: ThriftConstKind = ...
+    # pyrefly: ignore [invalid-annotation]
     CV_STRING: ThriftConstKind = ...
+    # pyrefly: ignore [invalid-annotation]
     CV_MAP: ThriftConstKind = ...
+    # pyrefly: ignore [invalid-annotation]
     CV_LIST: ThriftConstKind = ...
+    # pyrefly: ignore [invalid-annotation]
     CV_STRUCT: ThriftConstKind = ...
 
 class Metadata(Protocol):
@@ -108,30 +125,36 @@ class ThriftTypeProxy:
     def as_sink(self) -> ThriftSinkProxy: ...
 
 class ThriftSetProxy(ThriftTypeProxy):
+    # pyrefly: ignore [bad-override-mutable-attribute]
     thriftType: ThriftSetType
     valueType: ThriftTypeProxy
 
 class ThriftListProxy(ThriftTypeProxy):
+    # pyrefly: ignore [bad-override-mutable-attribute]
     thriftType: ThriftListType
     valueType: ThriftTypeProxy
 
 class ThriftMapProxy(ThriftTypeProxy):
+    # pyrefly: ignore [bad-override-mutable-attribute]
     thriftType: ThriftMapType
     valueType: ThriftTypeProxy
     keyType: ThriftTypeProxy
 
 class ThriftTypedefProxy(ThriftTypeProxy):
+    # pyrefly: ignore [bad-override-mutable-attribute]
     thriftType: ThriftTypedefType
     name: str
     underlyingType: ThriftTypeProxy
 
 class ThriftSinkProxy(ThriftTypeProxy):
+    # pyrefly: ignore [bad-override-mutable-attribute]
     thriftType: ThriftSinkType
     elemType: ThriftTypeProxy
     initialResponseType: Optional[ThriftTypeProxy]
     finalResponseType: Optional[ThriftTypeProxy]
 
 class ThriftStreamProxy(ThriftTypeProxy):
+    # pyrefly: ignore [bad-override-mutable-attribute]
     thriftType: ThriftStreamType
     elemType: ThriftTypeProxy
     initialResponseType: Optional[ThriftTypeProxy]
@@ -147,6 +170,7 @@ class ThriftFieldProxy(Protocol):
     structuredAnnotations: Sequence[ThriftConstStructProxy]
 
 class ThriftStructProxy(ThriftTypeProxy):
+    # pyrefly: ignore [bad-override-mutable-attribute]
     thriftType: ThriftStruct
     thriftMeta: ThriftMetadata
     name: str

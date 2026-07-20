@@ -21,13 +21,17 @@ from typing import Any, Union
 Path = Union[str, bytes, os.PathLike[str], os.PathLike[bytes]]
 
 class SSLVersion(Enum):
+    # pyrefly: ignore [invalid-annotation]
     TLSv1_2: SSLVersion = ...
     @property
     def value(self) -> int: ...
 
 class SSLVerifyOption(Enum):
+    # pyrefly: ignore [invalid-annotation]
     VERIFY: SSLVerifyOption = ...
+    # pyrefly: ignore [invalid-annotation]
     VERIFY_REQ_CLIENT_CERT: SSLVerifyOption = ...
+    # pyrefly: ignore [invalid-annotation]
     NO_VERIFY: SSLVerifyOption = ...
 
 class SSLContext:

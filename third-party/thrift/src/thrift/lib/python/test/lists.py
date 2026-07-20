@@ -84,21 +84,31 @@ class ListTests(unittest.TestCase):
     def setUp(self) -> None:
         # pyre-ignore[16]: has no attribute `lists_types`
         self.easy: Type[easy] = self.lists_types.easy
+        # pyrefly: ignore [missing-attribute]
         self.EasyList: Type[EasyList] = self.lists_types.EasyList
         # pyre-ignore[8]: Thrift List typed as Sequence but supports List ops
         self.int_list: List[int] = immutable_lists_types.int_list
+        # pyrefly: ignore [missing-attribute]
         self.I32List: Type[I32List] = self.lists_types.I32List
+        # pyrefly: ignore [missing-attribute]
         self.IdList: Type[IdList] = self.lists_types.IdList
+        # pyrefly: ignore [missing-attribute]
         self.StrList2D: Type[StrList2D] = self.lists_types.StrList2D
         self.AnotherStrList2D: Type[AnotherStrList2D] = (
+            # pyrefly: ignore [missing-attribute]
             self.lists_types.AnotherStrList2D
         )
+        # pyrefly: ignore [missing-attribute]
         self.StringList: Type[StringList] = self.lists_types.StringList
+        # pyrefly: ignore [missing-attribute]
         self.AtoIValueList: Type[AtoIValueList] = self.lists_types.AtoIValueList
         # pyre-ignore[16]: has no attribute `containers_types`
         self.Foo: Type[Foo] = self.containers_types.Foo
+        # pyrefly: ignore [missing-attribute]
         self.Lists: Type[Lists] = self.containers_types.Lists
+        # pyrefly: ignore [missing-attribute]
         self.Color: Type[Color] = self.containers_types.Color
+        # pyrefly: ignore [missing-attribute]
         self.is_mutable_run: bool = self.containers_types.__name__.endswith(
             "thrift_mutable_types"
         )
@@ -118,6 +128,7 @@ class ListTests(unittest.TestCase):
         self.assertIsInstance(int_list, self.I32List)
         self.assertIsInstance(int_list, self.IdList)
         self.assertTrue(issubclass(self.I32List, self.IdList))
+        # pyrefly: ignore [invalid-argument]
         self.assertTrue(issubclass(self.IdList, self.I32List))
         # Different element types should not match
         self.assertNotIsInstance(int_list, self.StringList)
@@ -141,9 +152,11 @@ class ListTests(unittest.TestCase):
         self.assertIsInstance(nested_list, self.StrList2D)
         self.assertIsInstance(nested_list, self.AnotherStrList2D)
         self.assertTrue(issubclass(self.StrList2D, self.AnotherStrList2D))
+        # pyrefly: ignore [invalid-argument]
         self.assertTrue(issubclass(self.AnotherStrList2D, self.StrList2D))
         # list<list<string>> should not match list<i32>
         self.assertNotIsInstance(nested_list, self.I32List)
+        # pyrefly: ignore [invalid-argument]
         self.assertFalse(issubclass(self.StrList2D, self.I32List))
 
     def test_typedef_default_constructor(self) -> None:

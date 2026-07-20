@@ -82,27 +82,36 @@ class AdapterTest(unittest.TestCase):
             # pyre-ignore[16]: `AdapterTest` has no attribute `thrift_types`
             self.thrift_types.AdaptedInt
         )
+        # pyrefly: ignore [missing-attribute]
         self.Bar: Type[Bar] | Type[BarMutable] = self.thrift_types.Bar
+        # pyrefly: ignore [missing-attribute]
         self.Baz: Type[Baz] | Type[BazMutable] = self.thrift_types.Baz
         self.Datetime: Type[Datetime] | Type[DatetimeMutable] = (
+            # pyrefly: ignore [missing-attribute]
             self.thrift_types.Datetime
         )
+        # pyrefly: ignore [missing-attribute]
         self.Foo: Type[Foo] | Type[FooMutable] = self.thrift_types.Foo
         self.NINETEEN_EIGHTY_FOUR: (
             # pyre-fixme[11]: Annotation is not defined as a type.
             Type[NINETEEN_EIGHTY_FOUR]
+            # pyrefly: ignore [bad-assignment]
         ) = immutable_types.NINETEEN_EIGHTY_FOUR
         self._fbthrift_unadapted_NINETEEN_EIGHTY_FOUR: (
             # pyre-fixme[11]: Annotation is not defined as a type.
             Type[_fbthrift_unadapted_NINETEEN_EIGHTY_FOUR]
+            # pyrefly: ignore [bad-assignment]
         ) = immutable_types._fbthrift_unadapted_NINETEEN_EIGHTY_FOUR
         self._fbthrift_unadapted_AsDatetime: (
             Type[_fbthrift_unadapted_AsDatetime]
             | Type[_fbthrift_unadapted_AsDatetime_Mutable]
+            # pyrefly: ignore [missing-attribute]
         ) = self.thrift_types._fbthrift_unadapted_AsDatetime
         self._fbthrift_unadapted_Baz: (
             Type[_fbthrift_unadapted_Baz] | Type[_fbthrift_unadapted_Baz_Mutable]
+            # pyrefly: ignore [missing-attribute]
         ) = self.thrift_types._fbthrift_unadapted_Baz
+        # pyrefly: ignore [missing-attribute]
         self.is_mutable_run: bool = self.thrift_types.__name__.endswith(
             "thrift_mutable_types"
         )

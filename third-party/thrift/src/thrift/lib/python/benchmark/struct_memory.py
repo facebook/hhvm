@@ -148,7 +148,9 @@ def immutable_default_initialize() -> None:
     lst = []
     for _ in range(1000):
         lst.append(IncludedImmutable())
+        # pyrefly: ignore [bad-argument-type]
         lst.append(MyStructImmutable())
+        # pyrefly: ignore [bad-argument-type]
         lst.append(StringBucketImmutable())
 
 
@@ -158,7 +160,9 @@ def immutable_initialize() -> None:
     for _ in range(1000):
         included, string_bucket, my_struct = _create_immutable()
         lst.append(my_struct)
+        # pyrefly: ignore [bad-argument-type]
         lst.append(string_bucket)
+        # pyrefly: ignore [bad-argument-type]
         lst.append(included)
 
 
@@ -178,7 +182,9 @@ def immutable_initialize_tracemalloc(count: int) -> None:
     for _ in range(count):
         included, string_bucket, my_struct = _create_immutable()
         lst.append(my_struct)
+        # pyrefly: ignore [bad-argument-type]
         lst.append(string_bucket)
+        # pyrefly: ignore [bad-argument-type]
         lst.append(included)
     after = tracemalloc.get_traced_memory()[0]
     tracemalloc.stop()
@@ -234,7 +240,9 @@ def mutable_default_initialize() -> None:
     lst = []
     for _ in range(1000):
         lst.append(IncludedMutable())
+        # pyrefly: ignore [bad-argument-type]
         lst.append(MyStructMutable())
+        # pyrefly: ignore [bad-argument-type]
         lst.append(StringBucketMutable())
 
 
@@ -244,7 +252,9 @@ def mutable_initialize() -> None:
     for _ in range(1000):
         included, string_bucket, my_struct = _create_mutable()
         lst.append(my_struct)
+        # pyrefly: ignore [bad-argument-type]
         lst.append(string_bucket)
+        # pyrefly: ignore [bad-argument-type]
         lst.append(included)
 
 

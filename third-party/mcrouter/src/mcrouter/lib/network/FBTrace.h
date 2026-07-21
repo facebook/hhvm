@@ -19,6 +19,10 @@ namespace mcrouter {
 // Returns true if a rate limiting check passes and tracing can proceed.
 bool traceCheckRateLimit();
 
+// Returns true if received trace context should always be echoed back on the
+// reply, independent of the rate limit (which gates only the logging path).
+bool traceShouldAlwaysEchoContext();
+
 // Returns the cumulative number of traces logged.
 uint64_t traceGetCount();
 

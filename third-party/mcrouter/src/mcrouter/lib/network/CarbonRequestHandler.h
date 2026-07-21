@@ -72,12 +72,14 @@ class CarbonRequestHandler : public facebook::memcache::CarbonMessageDispatcher<
       const facebook::memcache::CaretMessageInfo* headerInfo,
       const folly::IOBuf* reqBuf,
       std::true_type) {
-    if (FOLLY_UNLIKELY(
-            !req.traceContext().empty() &&
-            facebook::mcrouter::traceCheckRateLimit())) {
-      onRequestImplWithTracingEnabled(
-          std::move(ctx), std::move(req), headerInfo, reqBuf);
-      return;
+    if (FOLLY_UNLIKELY(!req.traceContext().empty())) {
+      const bool loggingEnabled = facebook::mcrouter::traceCheckRateLimit();
+      if (loggingEnabled ||
+          facebook::mcrouter::traceShouldAlwaysEchoContext()) {
+        onRequestImplWithTracingEnabled(
+            std::move(ctx), std::move(req), headerInfo, reqBuf, loggingEnabled);
+        return;
+      }
     }
     callOnRequest(
         std::move(ctx),
@@ -104,17 +106,29 @@ class CarbonRequestHandler : public facebook::memcache::CarbonMessageDispatcher<
       facebook::memcache::McServerRequestContext&& ctx,
       Request&& req,
       const facebook::memcache::CaretMessageInfo* headerInfo,
-      const folly::IOBuf* reqBuf) {
+      const folly::IOBuf* reqBuf,
+      [[maybe_unused]] bool loggingEnabled) {
 #ifndef LIBMC_FBTRACE_DISABLE
     folly::RequestContextScopeGuard requestContextGuard;
-    auto tracingData = facebook::mcrouter::traceRequestReceived(
-        req.traceContext(), Request::name);
-    if (tracingData != nullptr) {
-      // Mark the context as being traced by Artillery
+    if (loggingEnabled) {
+      auto tracingData = facebook::mcrouter::traceRequestReceived(
+          req.traceContext(), Request::name);
+      if (tracingData != nullptr) {
+        // Mark the context as being traced by Artillery
+        markContextAsTraced(ctx);
+        facebook::mcrouter::extractAndSetCallerIdentities(
+            *tracingData, ctx.getThriftRequestContext());
+        tracingData->startCounters();
+      }
+    } else if (facebook::mcrouter::traceEchoOnlyRequestReceived(
+                   req.traceContext())) {
+      // Echo-only: the reply will carry the received trace context back, but
+      // no cost tracking or scribe flush happens. markContextAsTraced only
+      // sets ctx.isTraced_, whose sole reader is replyImpl2 -- it stamps the
+      // echoed context onto the reply via getCurrentTracer()->sendResponse()
+      // (the tracer set up by traceEchoOnlyRequestReceived above). It has no
+      // other side effects: no counters, logging, or scribe I/O.
       markContextAsTraced(ctx);
-      facebook::mcrouter::extractAndSetCallerIdentities(
-          *tracingData, ctx.getThriftRequestContext());
-      tracingData->startCounters();
     }
 #endif
     callOnRequest(

@@ -228,6 +228,11 @@ void HTTPTransaction::onIngressHeadersComplete(
       msg->getHeaders().exists(HTTP_HEADER_CONTENT_LENGTH)) {
     stats_->recordIngressReqWithTEAndCL();
   }
+  // Omit upgrade requests (e.g. WebSocket) from the measurement: HTTP/1.1
+  // upgrades use GET and legitimately carry body bytes for the new protocol.
+  ingressGetRequest_ |= (isDownstream() && msg->isRequest() &&
+                         msg->getMethod() == HTTPMethod::GET &&
+                         !msg->getHeaders().exists(HTTP_HEADER_UPGRADE));
   if ((msg->isRequest() && msg->getMethod() != HTTPMethod::CONNECT) ||
       (msg->isResponse() && !headRequest_ &&
        !RFC2616::responseBodyMustBeEmpty(msg->getStatusCode()))) {
@@ -319,6 +324,13 @@ void HTTPTransaction::onIngressBody(unique_ptr<IOBuf> chain, uint16_t padding) {
   auto len = chain->computeChainDataLength();
   if (len == 0) {
     return;
+  }
+
+  if (ingressGetRequest_ && !recordedIngressGetRequestWithBody_) {
+    recordedIngressGetRequestWithBody_ = true;
+    if (stats_) {
+      stats_->recordIngressGetRequestWithBody();
+    }
   }
   if (!validateIngressStateTransition(IngressSmEvent::onBody)) {
     return;

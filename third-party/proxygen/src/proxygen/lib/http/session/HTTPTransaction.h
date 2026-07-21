@@ -1983,6 +1983,8 @@ class HTTPTransaction
   bool ingressErrorSeen_ : 1;
   bool priorityFallback_ : 1;
   bool headRequest_ : 1;
+  bool ingressGetRequest_ : 1 {false};
+  bool recordedIngressGetRequestWithBody_ : 1 {false};
   bool enableLastByteFlushedTracking_ : 1;
   bool wtConnectStream_ : 1;
   bool connectUdpStream_ : 1 = false;

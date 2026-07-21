@@ -105,6 +105,11 @@ class MockHTTPSessionStats : public DummyHTTPSessionStats {
     _recordIngressReqWithTEAndCL();
   }
   MOCK_METHOD(void, _recordIngressReqWithTEAndCL, (), (noexcept));
+  // NOLINTNEXTLINE(bugprone-exception-escape)
+  void recordIngressGetRequestWithBody() noexcept override {
+    _recordIngressGetRequestWithBody();
+  }
+  MOCK_METHOD(void, _recordIngressGetRequestWithBody, ());
 };
 
 class FakeSessionStats : public DummyHTTPSessionStats {

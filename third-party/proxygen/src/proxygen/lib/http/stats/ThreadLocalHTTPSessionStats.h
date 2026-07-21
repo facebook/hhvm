@@ -41,6 +41,7 @@ class TLHTTPSessionStats : public HTTPSessionStats {
   void recordPendingBufferedWriteBytes(int64_t amount) noexcept override;
   void recordEgressContentLengthMismatches() noexcept override;
   void recordIngressReqWithTEAndCL() noexcept override;
+  void recordIngressGetRequestWithBody() noexcept override;
   void recordSessionPeriodicPingProbeTimeout() noexcept override;
 
   void recordControlMsgsInInterval(int64_t quantity) noexcept override;
@@ -60,6 +61,7 @@ class TLHTTPSessionStats : public HTTPSessionStats {
   StatsWrapper::TLTimeseries txnsSessionStalled;
   StatsWrapper::TLTimeseries egressContentLengthMismatches;
   StatsWrapper::TLTimeseries ingressReqWithTEAndCL;
+  StatsWrapper::TLTimeseries ingressGetRequestWithBody;
   StatsWrapper::TLTimeseries sessionPeriodicPingProbeTimeout;
   // Time to Last Byte Ack (TTLBA)
   StatsWrapper::TLTimeseries presendIoSplit;

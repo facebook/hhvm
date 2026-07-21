@@ -1423,6 +1423,104 @@ TEST_F(HTTPDownstreamSessionTest, RequestWithOnlyTransferEncodingNotRecorded) {
   gracefulShutdown();
 }
 
+// A GET request without a body must not be counted.
+TEST_F(HTTPDownstreamSessionTest, GetRequestWithoutBodyNotRecorded) {
+  NiceMock<MockHTTPSessionStats> stats;
+  httpSession_->setSessionStats(&stats);
+  EXPECT_CALL(stats, _recordIngressGetRequestWithBody()).Times(0);
+
+  InSequence enforceOrder;
+  auto handler = addSimpleNiceHandler();
+  handler->expectHeaders();
+  handler->expectEOM([&handler]() { handler->sendReplyWithBody(200, 100); });
+
+  sendRequest();
+  flushRequestsAndLoop();
+  gracefulShutdown();
+}
+
+// A GET request that carries body bytes must be counted exactly once.
+TEST_F(HTTPDownstreamSessionTest, GetRequestWithBodyRecordedOnce) {
+  NiceMock<MockHTTPSessionStats> stats;
+  httpSession_->setSessionStats(&stats);
+  EXPECT_CALL(stats, _recordIngressGetRequestWithBody()).Times(1);
+
+  InSequence enforceOrder;
+  auto handler = addSimpleNiceHandler();
+  handler->expectHeaders();
+  handler->expectEOM([&handler]() { handler->sendReplyWithBody(200, 100); });
+
+  auto req = getGetRequest();
+  req.getHeaders().set(HTTP_HEADER_CONTENT_LENGTH, "10");
+  auto streamID = sendRequest(req, /*eom=*/false);
+  clientCodec_->generateBody(
+      requests_, streamID, makeBuf(10), HTTPCodec::NoPadding, /*eom=*/true);
+  flushRequestsAndLoop();
+  gracefulShutdown();
+}
+
+// Body split across multiple frames is still counted only once per request.
+TEST_F(HTTPDownstreamSessionTest,
+       GetRequestWithBodyMultipleFramesRecordedOnce) {
+  NiceMock<MockHTTPSessionStats> stats;
+  httpSession_->setSessionStats(&stats);
+  EXPECT_CALL(stats, _recordIngressGetRequestWithBody()).Times(1);
+
+  InSequence enforceOrder;
+  auto handler = addSimpleNiceHandler();
+  handler->expectHeaders();
+  handler->expectEOM([&handler]() { handler->sendReplyWithBody(200, 100); });
+
+  auto req = getGetRequest();
+  req.getHeaders().set(HTTP_HEADER_CONTENT_LENGTH, "20");
+  auto streamID = sendRequest(req, /*eom=*/false);
+  clientCodec_->generateBody(
+      requests_, streamID, makeBuf(10), HTTPCodec::NoPadding, /*eom=*/false);
+  clientCodec_->generateBody(
+      requests_, streamID, makeBuf(10), HTTPCodec::NoPadding, /*eom=*/true);
+  flushRequestsAndLoop();
+  gracefulShutdown();
+}
+
+// A POST request with a body is a normal request and must not be counted.
+TEST_F(HTTPDownstreamSessionTest, PostRequestWithBodyNotRecorded) {
+  NiceMock<MockHTTPSessionStats> stats;
+  httpSession_->setSessionStats(&stats);
+  EXPECT_CALL(stats, _recordIngressGetRequestWithBody()).Times(0);
+
+  InSequence enforceOrder;
+  auto handler = addSimpleNiceHandler();
+  handler->expectHeaders();
+  handler->expectEOM([&handler]() { handler->sendReplyWithBody(200, 100); });
+
+  auto req = getPostRequest(10);
+  auto streamID = sendRequest(req, /*eom=*/false);
+  clientCodec_->generateBody(
+      requests_, streamID, makeBuf(10), HTTPCodec::NoPadding, /*eom=*/true);
+  flushRequestsAndLoop();
+  gracefulShutdown();
+}
+
+// The measurement is not scoped to a protocol, so a GET request with body
+// bytes over HTTP/2 is also counted.
+TEST_F(HTTP2DownstreamSessionTest, GetRequestWithBodyRecordedForHTTP2) {
+  NiceMock<MockHTTPSessionStats> stats;
+  httpSession_->setSessionStats(&stats);
+  EXPECT_CALL(stats, _recordIngressGetRequestWithBody()).Times(1);
+
+  InSequence enforceOrder;
+  auto handler = addSimpleNiceHandler();
+  handler->expectHeaders();
+  handler->expectEOM([&handler]() { handler->sendReplyWithBody(200, 100); });
+
+  auto req = getGetRequest();
+  auto streamID = sendRequest(req, /*eom=*/false);
+  clientCodec_->generateBody(
+      requests_, streamID, makeBuf(10), HTTPCodec::NoPadding, /*eom=*/true);
+  flushRequestsAndLoop();
+  gracefulShutdown();
+}
+
 TEST_F(HTTPDownstreamSessionTest, HttpWithAckTimingPipeline) {
   // Test a real pipelining case as well.  First request is done waiting for
   // ack, then receive two pipelined requests.

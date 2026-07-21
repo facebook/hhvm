@@ -18,7 +18,7 @@
   Generates the appropriate version of get{Struct,Union,Exception}ThriftData
   function to get the internal data tuple.
 }}getThrift
-{{~ #struct:struct?}}Struct{{/struct:struct? ~}}
-{{~ #struct:exception?}}Exception{{/struct:exception? ~}}
-{{~ #struct:union?}}Union{{/struct:union? ~}}
+{{~ #if struct.struct?}}Struct
+{{~ #else if struct.exception?}}Exception
+{{~ #else if struct.union?}}Union{{/if struct.struct? ~}}
 FieldData

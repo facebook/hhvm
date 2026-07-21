@@ -14,4 +14,4 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}static const bool kUsingMarshal = {{#if struct:marshal_capi?}}true{{#else}}false{{/if}};
+}}static const bool kUsingMarshal = {{#if struct.marshal_capi?}}true{{#else}}false{{/if}};

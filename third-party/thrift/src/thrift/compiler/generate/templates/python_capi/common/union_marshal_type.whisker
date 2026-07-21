@@ -19,4 +19,4 @@
   The union_field_ref interface makes `std::unique_ptr<folly::IOBuf>` behave like
   folly::IOBuf, so use the folly::IOBuf Extractor and Constructor instead
 
-}}{{#if field:iobuf?}}folly::IOBuf{{#else}}{{field:marshal_type}}{{/if}}
+}}{{#if field.iobuf?}}folly::IOBuf{{#else}}{{field.marshal_type}}{{/if}}

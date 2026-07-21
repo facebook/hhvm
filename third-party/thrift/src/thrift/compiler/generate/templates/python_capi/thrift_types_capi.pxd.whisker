@@ -26,21 +26,21 @@ from libcpp.memory cimport unique_ptr as __unique_ptr
 from folly.iobuf cimport cIOBuf as __cIOBuf
 
 
-{{#program:structured_definitions}}
-cdef api int can_extract__{{program:capi_module_prefix}}__{{struct:py_name}}(object) except -1
+{{#each program:structured_definitions as |struct|}}
+cdef api int can_extract__{{program:capi_module_prefix}}__{{struct.py_name}}(object) except -1
 
-{{#unless struct:marshal_capi?}}
-cdef api __cIOBuf* extract__{{program:capi_module_prefix}}__{{struct:py_name}}(object) except NULL
+{{#unless struct.marshal_capi?}}
+cdef api __cIOBuf* extract__{{program:capi_module_prefix}}__{{struct.py_name}}(object) except NULL
 
-cdef api object construct__{{program:capi_module_prefix}}__{{struct:py_name}}(__unique_ptr[__cIOBuf])
-{{/unless struct:marshal_capi?}}
+cdef api object construct__{{program:capi_module_prefix}}__{{struct.py_name}}(__unique_ptr[__cIOBuf])
+{{/unless struct.marshal_capi?}}
 
-cdef api object init__{{program:capi_module_prefix}}__{{struct:py_name}}(object data)
+cdef api object init__{{program:capi_module_prefix}}__{{struct.py_name}}(object data)
 
-{{/program:structured_definitions}}
-{{#program:enums}}
-cdef api int can_extract__{{program:capi_module_prefix}}__{{enum:name}}(object) except -1
+{{/each}}
+{{#each program:enums as |enum|}}
+cdef api int can_extract__{{program:capi_module_prefix}}__{{enum.name}}(object) except -1
 
-cdef api object construct__{{program:capi_module_prefix}}__{{enum:name}}(int64_t)
+cdef api object construct__{{program:capi_module_prefix}}__{{enum.name}}(int64_t)
 
-{{/program:enums}}
+{{/each}}

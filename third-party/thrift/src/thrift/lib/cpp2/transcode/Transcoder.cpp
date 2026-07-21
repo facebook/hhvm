@@ -61,6 +61,28 @@ bool structReadsJson(const StructOp& op) {
   return op.fieldIdent == FieldIdent::ByName;
 }
 
+bool hasJsonMapTarget(const Command& cmd) {
+  if (const auto* mp = std::get_if<MapOp>(&cmd)) {
+    if (mp->writeFraming == ContainerFraming::Json) {
+      return true;
+    }
+    return (mp->key != nullptr && hasJsonMapTarget(*mp->key)) ||
+        (mp->value != nullptr && hasJsonMapTarget(*mp->value));
+  }
+  if (const auto* st = std::get_if<StructOp>(&cmd)) {
+    for (const auto& field : st->fields) {
+      if (field.command != nullptr && hasJsonMapTarget(*field.command)) {
+        return true;
+      }
+    }
+    return false;
+  }
+  if (const auto* sq = std::get_if<SeqOp>(&cmd)) {
+    return sq->element != nullptr && hasJsonMapTarget(*sq->element);
+  }
+  return false;
+}
+
 bool hasCustomDefault(const Command& cmd) {
   if (const auto* mp = std::get_if<MapOp>(&cmd)) {
     return (mp->key != nullptr && hasCustomDefault(*mp->key)) ||
@@ -132,6 +154,10 @@ std::optional<std::string> interpreterSupports(const TranscodePlan& plan) {
   if (plan.structTarget) {
     return "interpreter does not support struct-memory targets; use Engine::Jit";
   }
+  if (plan.sourceProtocol == WireProtocol::Json &&
+      plan.targetProtocol == WireProtocol::Json) {
+    return "interpreter does not yet support JSON-to-JSON plans; use Engine::Jit";
+  }
 
   bool jsonSource = false;
   if (const auto* st = std::get_if<StructOp>(&plan.root)) {
@@ -143,6 +169,9 @@ std::optional<std::string> interpreterSupports(const TranscodePlan& plan) {
   }
   if (jsonSource) {
     return "interpreter does not support a JSON source; use Engine::Jit";
+  }
+  if (hasJsonMapTarget(plan.root)) {
+    return "interpreter does not yet support JSON map targets; use Engine::Jit";
   }
   return std::nullopt;
 }

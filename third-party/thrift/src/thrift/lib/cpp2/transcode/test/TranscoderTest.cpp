@@ -192,6 +192,16 @@ TEST_F(TranscoderTest, JsonSourceRequiresIncompleteProtocolOptIn) {
       << transcoder.error().message;
 }
 
+TEST_F(TranscoderTest, JsonToJsonRejectedAfterOptIn) {
+  auto json = makeJsonCodec(sampleNode());
+
+  auto transcoder = makeTranscoder(
+      fuse(json, json), Engine::Interpreter, allowExperimentalProtocols());
+  ASSERT_TRUE(transcoder.hasError());
+  EXPECT_NE(transcoder.error().message.find("JSON-to-JSON"), std::string::npos)
+      << transcoder.error().message;
+}
+
 TEST_F(TranscoderTest, ProtobufRequiresIncompleteProtocolOptIn) {
   auto protobuf = makeProtobufBinaryCodec(sampleNode());
   auto compact = makeThriftCompactCodec(sampleNode());
@@ -229,6 +239,19 @@ TEST_F(TranscoderTest, JitEngineRejectedBeforeProtocolGate) {
   ASSERT_TRUE(transcoder.hasError());
   EXPECT_NE(transcoder.error().message.find("JIT"), std::string::npos)
       << transcoder.error().message;
+}
+
+TEST_F(TranscoderTest, JsonProtobufRequiresIncompleteProtocolOptIn) {
+  auto json = makeJsonCodec(sampleNode());
+  auto protobuf = makeProtobufBinaryCodec(sampleNode());
+
+  auto defaultTranscoder =
+      makeTranscoder(fuse(json, protobuf), Engine::Interpreter);
+  ASSERT_TRUE(defaultTranscoder.hasError());
+  EXPECT_NE(
+      defaultTranscoder.error().message.find("JSON/Protobuf"),
+      std::string::npos)
+      << defaultTranscoder.error().message;
 }
 
 TEST_F(TranscoderTest, ExplicitDefaultsRejectedForNonThriftEndpoints) {

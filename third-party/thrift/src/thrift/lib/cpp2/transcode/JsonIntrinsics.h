@@ -18,8 +18,39 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <string>
+#include <string_view>
+#include <utility>
+#include <vector>
 
 #include <thrift/lib/cpp2/transcode/Cursor.h>
+
+struct TranscodeJsonStringToken;
+
+namespace apache::thrift::transcode {
+
+// These helpers use schema metadata and are intentionally not JIT intrinsics.
+bool thrift_transcode_parse_strict_i64(std::string_view text, int64_t& value);
+bool thrift_transcode_parse_json_object_enum_key(
+    std::string_view text,
+    const std::vector<std::pair<int32_t, std::string>>* enumNames,
+    int64_t& value);
+int64_t thrift_transcode_parse_json_enum_value(
+    TranscodeCursor* cursor,
+    const std::vector<std::pair<int32_t, std::string>>* enumNames);
+void thrift_transcode_json_skip_whitespace(TranscodeCursor* cursor);
+// Does not skip whitespace. Returns 0 at EOF; delimiter callers should compare
+// against the exact byte they expect.
+uint8_t thrift_transcode_json_peek(TranscodeCursor* cursor);
+// Skips leading JSON whitespace before consuming a value-terminated `null`.
+bool thrift_transcode_json_consume_null(TranscodeCursor* cursor);
+bool thrift_transcode_json_expect_byte(TranscodeCursor* cursor, uint8_t value);
+bool thrift_transcode_read_json_object_key(
+    TranscodeCursor* cursor, std::string& key);
+std::string thrift_transcode_decode_json_string_token_to_string(
+    TranscodeCursor* cursor, const TranscodeJsonStringToken& token);
+
+} // namespace apache::thrift::transcode
 
 extern "C" {
 
@@ -52,6 +83,14 @@ uint8_t thrift_transcode_read_json_string_token(
 // Compares a token's decoded bytes with `data[0..len)`.
 uint8_t thrift_transcode_json_string_token_equals(
     const TranscodeJsonStringToken* token, const uint8_t* data, size_t len);
+
+// Computes the byte length after JSON escape decoding.
+uint8_t thrift_transcode_json_string_token_decoded_size(
+    const TranscodeJsonStringToken* token, size_t* len);
+
+// Decodes a JSON string token into a caller-provided buffer of exact size.
+uint8_t thrift_transcode_decode_json_string_token(
+    const TranscodeJsonStringToken* token, uint8_t* out, size_t len);
 
 // Writes `value` as JSON decimal text.
 void thrift_transcode_format_decimal_int(
@@ -89,8 +128,12 @@ void thrift_transcode_write_json_base64_token_i32_prefixed(
 void thrift_transcode_write_json_base64_token_varint_prefixed(
     TranscodeCursor* cursor, const TranscodeJsonStringToken* token);
 
+// Writes the original token bytes as a quoted JSON string.
+void thrift_transcode_write_json_string_token_quoted(
+    TranscodeCursor* cursor, const TranscodeJsonStringToken* token);
+
 // Recursively skips one JSON value. This is for trusted JSON only until the
 // strict scanner is added.
-void thrift_transcode_skip_json_value(TranscodeCursor* cursor);
+uint8_t thrift_transcode_skip_json_value(TranscodeCursor* cursor);
 
 } // extern "C"

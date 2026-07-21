@@ -209,6 +209,20 @@ TEST(JsonReadPrimitivesTest, ParseBoolKeyword_TrailingGarbageLatchesError) {
   }
 }
 
+TEST(
+    JsonReadPrimitivesTest,
+    ParseJsonEnumValue_UnknownNamePreservesLatchedError) {
+  CursorFixture fx(R"("missing")");
+  fx.cursor().error = 7;
+  const std::vector<std::pair<int32_t, std::string>> enumNames = {{1, "known"}};
+
+  EXPECT_EQ(
+      apache::thrift::transcode::thrift_transcode_parse_json_enum_value(
+          &fx.cursor(), &enumNames),
+      0);
+  EXPECT_EQ(fx.cursor().error, 7);
+}
+
 TEST(JsonReadPrimitivesTest, ReadJsonStringToken_NoEscapesPointsIntoInput) {
   CursorFixture fx("\"hello\"");
   TranscodeJsonStringToken token{};
@@ -262,6 +276,65 @@ TEST(JsonReadPrimitivesTest, WriteJsonStringToken_SurrogatePairEmoji) {
   ASSERT_FALSE(fx.errored());
   const std::vector<uint8_t> expected = {0xF0, 0x9F, 0x98, 0x80};
   EXPECT_EQ(fx.outputBytes(), expected);
+}
+
+TEST(JsonReadPrimitivesTest, ReadJsonObjectKey_AllowsEmptyKey) {
+  CursorFixture fx(R"("")");
+  std::string key = "unchanged";
+  EXPECT_TRUE(
+      apache::thrift::transcode::thrift_transcode_read_json_object_key(
+          &fx.cursor(), key));
+  EXPECT_FALSE(fx.errored());
+  EXPECT_TRUE(key.empty());
+}
+
+TEST(JsonReadPrimitivesTest, ReadJsonObjectKey_InvalidTokenReturnsFalse) {
+  CursorFixture fx("x");
+  std::string key = "unchanged";
+  EXPECT_FALSE(
+      apache::thrift::transcode::thrift_transcode_read_json_object_key(
+          &fx.cursor(), key));
+  EXPECT_TRUE(fx.errored());
+  EXPECT_TRUE(key.empty());
+}
+
+TEST(JsonReadPrimitivesTest, ReadJsonObjectKey_LatchedErrorClearsKey) {
+  CursorFixture fx(R"("fresh")");
+  fx.cursor().error = 7;
+  std::string key = "stale";
+  EXPECT_FALSE(
+      apache::thrift::transcode::thrift_transcode_read_json_object_key(
+          &fx.cursor(), key));
+  EXPECT_EQ(fx.cursor().error, 7);
+  EXPECT_TRUE(key.empty());
+  EXPECT_EQ(fx.consumed(), 0u);
+}
+
+TEST(JsonReadPrimitivesTest, JsonConsumeNull_RequiresValueTerminator) {
+  CursorFixture fx("nullable");
+  EXPECT_FALSE(
+      apache::thrift::transcode::thrift_transcode_json_consume_null(
+          &fx.cursor()));
+  EXPECT_TRUE(fx.errored());
+  EXPECT_EQ(fx.consumed(), 0u);
+}
+
+TEST(JsonReadPrimitivesTest, JsonExpectByte_ReturnsTrueOnMatch) {
+  CursorFixture fx(":");
+  EXPECT_TRUE(
+      apache::thrift::transcode::thrift_transcode_json_expect_byte(
+          &fx.cursor(), ':'));
+  EXPECT_FALSE(fx.errored());
+  EXPECT_EQ(fx.consumed(), 1u);
+}
+
+TEST(JsonReadPrimitivesTest, JsonExpectByte_ReturnsFalseOnMismatch) {
+  CursorFixture fx("x");
+  EXPECT_FALSE(
+      apache::thrift::transcode::thrift_transcode_json_expect_byte(
+          &fx.cursor(), ':'));
+  EXPECT_TRUE(fx.errored());
+  EXPECT_EQ(fx.consumed(), 0u);
 }
 
 TEST(
@@ -354,7 +427,7 @@ TEST(JsonReadPrimitivesTest, SkipJsonValue_ValidNestedValues) {
         R"({"a":[true,null,-1.5e+2],"b":{"c":"d"}})",
         R"([{"x":"y"},0])"}) {
     CursorFixture fx(input);
-    thrift_transcode_skip_json_value(&fx.cursor());
+    EXPECT_TRUE(thrift_transcode_skip_json_value(&fx.cursor())) << input;
     EXPECT_FALSE(fx.errored()) << input;
     EXPECT_EQ(fx.consumed(), fx.inputSize()) << input;
   }
@@ -371,7 +444,7 @@ TEST(JsonReadPrimitivesTest, SkipJsonValue_InvalidFormsLatchError) {
         R"("abc\")",
         R"("a\q")"}) {
     CursorFixture fx(input);
-    thrift_transcode_skip_json_value(&fx.cursor());
+    EXPECT_FALSE(thrift_transcode_skip_json_value(&fx.cursor())) << input;
     EXPECT_TRUE(fx.errored()) << input;
     EXPECT_LE(fx.consumed(), fx.inputSize()) << input;
   }
@@ -391,7 +464,7 @@ TEST(JsonReadPrimitivesTest, SkipJsonValue_ExcessiveDepthLatchesError) {
 
   for (const std::string& input : {arrays, objects}) {
     CursorFixture fx(input);
-    thrift_transcode_skip_json_value(&fx.cursor());
+    EXPECT_FALSE(thrift_transcode_skip_json_value(&fx.cursor())) << input;
     EXPECT_TRUE(fx.errored()) << input;
   }
 }

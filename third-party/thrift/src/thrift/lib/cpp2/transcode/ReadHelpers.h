@@ -56,6 +56,10 @@ FOLLY_ALWAYS_INLINE bool readFnIsBytes(ReadFn fn) {
   return fn == ReadFn::LengthPrefixedVarint || fn == ReadFn::LengthPrefixedI32;
 }
 
+FOLLY_ALWAYS_INLINE bool readFnIsJsonBytes(ReadFn fn) {
+  return fn == ReadFn::ParseQuotedString || fn == ReadFn::ParseBase64String;
+}
+
 FOLLY_ALWAYS_INLINE bool readScalarInt(
     TranscodeCursor* c,
     const ScalarOp& op,
@@ -103,12 +107,15 @@ FOLLY_ALWAYS_INLINE bool readScalarInt(
     case ReadFn::ParseDecimalInt:
       *value = thrift_transcode_parse_decimal_int(c);
       break;
+    case ReadFn::ParseEnumNameOrDecimalText:
+      *value = thrift_transcode_parse_json_enum_value(
+          c, op.enumNames != nullptr ? &op.enumNames->values : nullptr);
+      break;
     case ReadFn::ParseBoolKeyword:
       *value = thrift_transcode_parse_bool_keyword(c);
       break;
     case ReadFn::LengthPrefixedVarint:
     case ReadFn::LengthPrefixedI32:
-    case ReadFn::ParseEnumNameOrDecimalText:
     case ReadFn::ParseDecimalFloat:
     case ReadFn::ParseQuotedString:
     case ReadFn::ParseBase64String:

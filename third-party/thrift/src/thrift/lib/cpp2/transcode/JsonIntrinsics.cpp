@@ -19,6 +19,7 @@
 #include <thrift/lib/cpp2/transcode/IntrinsicsCommon.h>
 
 #include <array>
+#include <charconv>
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
@@ -534,6 +535,69 @@ bool json_string_token_equals_decoded_bytes(
   return matched == len;
 }
 
+bool decode_json_string_token_into(
+    const TranscodeJsonStringToken* token, uint8_t* out, size_t len) {
+  size_t decodedLen = 0;
+  if (!json_string_token_decoded_size(token, &decodedLen) ||
+      decodedLen != len) {
+    return false;
+  }
+
+  if (token->hasEscapes == 0) {
+    memcpy(out, token->begin, len);
+    return true;
+  }
+
+  const uint8_t* p = token->begin;
+  uint8_t* dst = out;
+  while (p < token->end) {
+    uint8_t c = *p++;
+    if (c != '\\') {
+      *dst++ = c;
+      continue;
+    }
+
+    if (p >= token->end) {
+      return false;
+    }
+    uint8_t escaped = *p++;
+    if (escaped != 'u') {
+      uint8_t decoded = escaped_byte(escaped);
+      if (decoded == 0) {
+        return false;
+      }
+      *dst++ = decoded;
+      continue;
+    }
+
+    char16_t hi = 0;
+    if (!parse_hex4(p, token->end, hi)) {
+      return false;
+    }
+    p += 4;
+    char32_t cp = 0;
+    if (folly::utf16_code_unit_is_high_surrogate(hi)) {
+      char16_t lo = 0;
+      if (token->end - p < 6 || p[0] != '\\' || p[1] != 'u' ||
+          !parse_hex4(p + 2, token->end, lo) ||
+          !folly::utf16_code_unit_is_low_surrogate(lo)) {
+        return false;
+      }
+      cp = folly::unicode_code_point_from_utf16_surrogate_pair(hi, lo);
+      p += 6;
+    } else if (folly::utf16_code_unit_is_low_surrogate(hi)) {
+      return false;
+    } else {
+      cp = static_cast<char32_t>(hi);
+    }
+
+    folly::unicode_code_point_utf8 utf8 = folly::unicode_code_point_to_utf8(cp);
+    memcpy(dst, utf8.data, utf8.size);
+    dst += utf8.size;
+  }
+  return static_cast<size_t>(dst - out) == len;
+}
+
 struct Base64Input {
   std::string scratch;
   std::string_view text;
@@ -686,6 +750,135 @@ void skip_json_value(TranscodeCursor* cursor, size_t depth) {
 }
 } // namespace
 
+namespace apache::thrift::transcode {
+
+bool thrift_transcode_parse_strict_i64(std::string_view text, int64_t& value) {
+  auto [ptr, ec] =
+      std::from_chars(text.data(), text.data() + text.size(), value);
+  return ec == std::errc{} && ptr == text.data() + text.size();
+}
+
+bool thrift_transcode_parse_json_object_enum_key(
+    std::string_view text,
+    const std::vector<std::pair<int32_t, std::string>>* enumNames,
+    int64_t& value) {
+  if (thrift_transcode_parse_strict_i64(text, value)) {
+    return true;
+  }
+
+  if (enumNames != nullptr) {
+    for (const auto& entry : *enumNames) {
+      if (std::string_view(entry.second) == text) {
+        value = entry.first;
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
+int64_t thrift_transcode_parse_json_enum_value(
+    TranscodeCursor* cursor,
+    const std::vector<std::pair<int32_t, std::string>>* enumNames) {
+  skip_whitespace(cursor);
+  if (cursor->readPos < cursor->readEnd && *cursor->readPos == '"') {
+    TranscodeJsonStringToken token{};
+    if (!thrift_transcode_read_json_string_token(cursor, &token)) {
+      return 0;
+    }
+    if (enumNames != nullptr) {
+      // TODO(json-enum-lookup): Build a name-to-value index if this shows up in
+      // profiles.
+      for (const auto& entry : *enumNames) {
+        if (thrift_transcode_json_string_token_equals(
+                &token,
+                reinterpret_cast<const uint8_t*>(entry.second.data()),
+                entry.second.size())) {
+          return entry.first;
+        }
+      }
+    }
+    set_json_error(cursor);
+    return 0;
+  }
+  return thrift_transcode_parse_decimal_int(cursor);
+}
+
+void thrift_transcode_json_skip_whitespace(TranscodeCursor* cursor) {
+  skip_whitespace(cursor);
+}
+
+uint8_t thrift_transcode_json_peek(TranscodeCursor* cursor) {
+  if (cursor->readPos >= cursor->readEnd) {
+    return 0;
+  }
+  return *cursor->readPos;
+}
+
+bool thrift_transcode_json_consume_null(TranscodeCursor* cursor) {
+  skip_whitespace(cursor);
+  if (cursor->readEnd - cursor->readPos >= 4 &&
+      std::memcmp(cursor->readPos, "null", 4) == 0) {
+    const uint8_t* afterNull = cursor->readPos + 4;
+    const uint8_t* savedReadPos = cursor->readPos;
+    cursor->readPos = afterNull;
+    if (!is_json_value_terminator(cursor)) {
+      cursor->readPos = savedReadPos;
+      return false;
+    }
+    return true;
+  }
+  return false;
+}
+
+bool thrift_transcode_json_expect_byte(
+    TranscodeCursor* cursor, uint8_t expected) {
+  if (cursor->readPos >= cursor->readEnd || *cursor->readPos != expected) {
+    set_json_error(cursor);
+    return false;
+  }
+  ++cursor->readPos;
+  return true;
+}
+
+bool thrift_transcode_read_json_object_key(
+    TranscodeCursor* cursor, std::string& key) {
+  key.clear();
+  if (cursor->error != 0) {
+    return false;
+  }
+  TranscodeJsonStringToken token{};
+  if (!thrift_transcode_read_json_string_token(cursor, &token)) {
+    return false;
+  }
+  key = thrift_transcode_decode_json_string_token_to_string(cursor, token);
+  if (cursor->error != 0) {
+    key.clear();
+    return false;
+  }
+  return true;
+}
+
+std::string thrift_transcode_decode_json_string_token_to_string(
+    TranscodeCursor* cursor, const TranscodeJsonStringToken& token) {
+  size_t len = 0;
+  std::string out;
+  if (thrift_transcode_json_string_token_decoded_size(&token, &len)) {
+    out.resize(len);
+    if (!thrift_transcode_decode_json_string_token(
+            &token, reinterpret_cast<uint8_t*>(out.data()), out.size())) {
+      set_json_error(cursor);
+      out.clear();
+    }
+  } else {
+    set_json_error(cursor);
+  }
+  return out;
+}
+
+} // namespace apache::thrift::transcode
+
 extern "C" {
 
 // TODO(json-primitive-unification / "B"): these read primitives reuse folly's
@@ -797,6 +990,16 @@ uint8_t thrift_transcode_json_string_token_equals(
   return json_string_token_equals_decoded_bytes(token, data, len) ? 1 : 0;
 }
 
+uint8_t thrift_transcode_json_string_token_decoded_size(
+    const TranscodeJsonStringToken* token, size_t* len) {
+  return json_string_token_decoded_size(token, len) ? 1 : 0;
+}
+
+uint8_t thrift_transcode_decode_json_string_token(
+    const TranscodeJsonStringToken* token, uint8_t* out, size_t len) {
+  return decode_json_string_token_into(token, out, len) ? 1 : 0;
+}
+
 size_t thrift_transcode_write_json_string_token(
     TranscodeCursor* cursor, const TranscodeJsonStringToken* token) {
   size_t len = 0;
@@ -900,6 +1103,14 @@ void thrift_transcode_write_json_base64_token_varint_prefixed(
     return;
   }
   cursor->writePos = reinterpret_cast<uint8_t*>(decoded.o);
+}
+
+void thrift_transcode_write_json_string_token_quoted(
+    TranscodeCursor* cursor, const TranscodeJsonStringToken* token) {
+  thrift_transcode_write_byte_checked(cursor, '"');
+  thrift_transcode_write_raw_bytes_checked(
+      cursor, token->begin, static_cast<size_t>(token->end - token->begin));
+  thrift_transcode_write_byte_checked(cursor, '"');
 }
 
 void thrift_transcode_format_decimal_int(
@@ -1020,8 +1231,9 @@ void thrift_transcode_format_base64_string(
   *cursor->writePos++ = '"';
 }
 
-void thrift_transcode_skip_json_value(TranscodeCursor* cursor) {
+uint8_t thrift_transcode_skip_json_value(TranscodeCursor* cursor) {
   skip_json_value(cursor, 0);
+  return cursor->error == 0;
 }
 
 } // extern "C"

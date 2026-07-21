@@ -1,36 +1,108 @@
-File "invalid_disjoint_check_methods_overlapping_attribute.php", line 17, characters 13-60:
-This call to 'contains' will always return the same value, because type Map<string, mixed> is disjoint from type int. (Lint[5638])
-File "invalid_disjoint_check_methods_overlapping_attribute.php", line 27, characters 10-29:
-This call to 'contains' will always return the same value, because type Foo is disjoint from type int. (Lint[5638])
-File "invalid_disjoint_check_methods_overlapping_attribute.php", line 30, characters 10-29:
-This call to 'contains' will always return the same value, because type Foo is disjoint from type int. (Lint[5638])
-File "invalid_disjoint_check_methods_overlapping_attribute.php", line 33, characters 10-29:
-This call to 'contains' will always return the same value, because type Foo is disjoint from type int. (Lint[5638])
-File "invalid_disjoint_check_methods_overlapping_attribute.php", line 36, characters 10-29:
-This call to 'contains' will always return the same value, because type Foo is disjoint from type int. (Lint[5638])
-File "invalid_disjoint_check_methods_overlapping_attribute.php", line 39, characters 10-29:
-This call to 'contains' will always return the same value, because type Foo is disjoint from type int. (Lint[5638])
-File "invalid_disjoint_check_methods_overlapping_attribute.php", line 42, characters 10-29:
-This call to 'contains' will always return the same value, because type Foo is disjoint from type int. (Lint[5638])
-File "invalid_disjoint_check_methods_overlapping_attribute.php", line 45, characters 10-29:
-This call to 'contains' will always return the same value, because type Foo is disjoint from type int. (Lint[5638])
-File "invalid_disjoint_check_methods_overlapping_attribute.php", line 48, characters 10-29:
-This call to 'contains' will always return the same value, because type Foo is disjoint from type int. (Lint[5638])
-File "invalid_disjoint_check_methods_overlapping_attribute.php", line 51, characters 10-29:
-This call to 'contains' will always return the same value, because type Foo is disjoint from type Baz. (Lint[5638])
-File "invalid_disjoint_check_methods_overlapping_attribute.php", line 54, characters 10-29:
-This call to 'contains' will always return the same value, because type Foo is disjoint from type <expr#4> as Bar. (Lint[5638])
-File "invalid_disjoint_check_methods_overlapping_attribute.php", line 57, characters 10-29:
-This call to 'contains' will always return the same value, because type Bar is disjoint from type Foo. (Lint[5638])
-File "invalid_disjoint_check_methods_overlapping_attribute.php", line 105, characters 10-29:
-This call to 'contains' will always return the same value, because type string is disjoint from type EnumInt. (Lint[5638])
-File "invalid_disjoint_check_methods_overlapping_attribute.php", line 124, characters 22-28:
-Explicit `dynamic` type usage in APIs turn off most checks the Hack type checker performs. This frequently leads to reliability issues. (Lint[5809])
-File "invalid_disjoint_check_methods_overlapping_attribute.php", line 128, characters 3-25:
-Non-dynamic calls to 'isEqual' will always return the same value, because type int is disjoint from type string. (Lint[5638])
-File "invalid_disjoint_check_methods_overlapping_attribute.php", line 134, characters 3-16:
-This call to 'isEqual' will always return the same value, because type string is disjoint from type int. (Lint[5638])
-File "invalid_disjoint_check_methods_overlapping_attribute.php", line 136, characters 3-16:
-This call to 'isEqual' will always return the same value, because type string is disjoint from type int. (Lint[5638])
-File "invalid_disjoint_check_methods_overlapping_attribute.php", line 141, characters 3-20:
-This call to 'isEqual' will always return the same value, because type vec<int> is disjoint from type bool. (Lint[5638])
+warning: Lint[5638] This call to 'contains' will always return the same value, because type Map<string, mixed> is disjoint from type int.
+   --> invalid_disjoint_check_methods_overlapping_attribute.php
+ 17 |     return !$this->contains($table_data, (int)$assoc['id1']);
+    |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+warning: Lint[5638] This call to 'contains' will always return the same value, because type Foo is disjoint from type int.
+   --> invalid_disjoint_check_methods_overlapping_attribute.php
+ 27 |   return $c->contains($x, $i);
+    |          ^^^^^^^^^^^^^^^^^^^^
+
+
+warning: Lint[5638] This call to 'contains' will always return the same value, because type Foo is disjoint from type int.
+   --> invalid_disjoint_check_methods_overlapping_attribute.php
+ 30 |   return $c->contains($x, $i);
+    |          ^^^^^^^^^^^^^^^^^^^^
+
+
+warning: Lint[5638] This call to 'contains' will always return the same value, because type Foo is disjoint from type int.
+   --> invalid_disjoint_check_methods_overlapping_attribute.php
+ 33 |   return $c->contains($x, $i);
+    |          ^^^^^^^^^^^^^^^^^^^^
+
+
+warning: Lint[5638] This call to 'contains' will always return the same value, because type Foo is disjoint from type int.
+   --> invalid_disjoint_check_methods_overlapping_attribute.php
+ 36 |   return $c->contains($x, $i);
+    |          ^^^^^^^^^^^^^^^^^^^^
+
+
+warning: Lint[5638] This call to 'contains' will always return the same value, because type Foo is disjoint from type int.
+   --> invalid_disjoint_check_methods_overlapping_attribute.php
+ 39 |   return $c->contains($x, $i);
+    |          ^^^^^^^^^^^^^^^^^^^^
+
+
+warning: Lint[5638] This call to 'contains' will always return the same value, because type Foo is disjoint from type int.
+   --> invalid_disjoint_check_methods_overlapping_attribute.php
+ 42 |   return $c->contains($x, $i);
+    |          ^^^^^^^^^^^^^^^^^^^^
+
+
+warning: Lint[5638] This call to 'contains' will always return the same value, because type Foo is disjoint from type int.
+   --> invalid_disjoint_check_methods_overlapping_attribute.php
+ 45 |   return $c->contains($x, $i);
+    |          ^^^^^^^^^^^^^^^^^^^^
+
+
+warning: Lint[5638] This call to 'contains' will always return the same value, because type Foo is disjoint from type int.
+   --> invalid_disjoint_check_methods_overlapping_attribute.php
+ 48 |   return $c->contains($x, $i);
+    |          ^^^^^^^^^^^^^^^^^^^^
+
+
+warning: Lint[5638] This call to 'contains' will always return the same value, because type Foo is disjoint from type Baz.
+   --> invalid_disjoint_check_methods_overlapping_attribute.php
+ 51 |   return $c->contains($x, $i);
+    |          ^^^^^^^^^^^^^^^^^^^^
+
+
+warning: Lint[5638] This call to 'contains' will always return the same value, because type Foo is disjoint from type <expr#4> as Bar.
+   --> invalid_disjoint_check_methods_overlapping_attribute.php
+ 54 |   return $c->contains($x, $i);
+    |          ^^^^^^^^^^^^^^^^^^^^
+
+
+warning: Lint[5638] This call to 'contains' will always return the same value, because type Bar is disjoint from type Foo.
+   --> invalid_disjoint_check_methods_overlapping_attribute.php
+ 57 |   return $c->contains($x, $i);
+    |          ^^^^^^^^^^^^^^^^^^^^
+
+
+warning: Lint[5638] This call to 'contains' will always return the same value, because type string is disjoint from type EnumInt.
+   --> invalid_disjoint_check_methods_overlapping_attribute.php
+105 |   return $c->contains($x, $y);
+    |          ^^^^^^^^^^^^^^^^^^^^
+
+
+warning: Lint[5809] Explicit `dynamic` type usage in APIs turn off most checks the Hack type checker performs. This frequently leads to reliability issues.
+   --> invalid_disjoint_check_methods_overlapping_attribute.php
+124 | function test_expect(dynamic $d):void {
+    |                      ^^^^^^^
+
+
+warning: Lint[5638] Non-dynamic calls to 'isEqual' will always return the same value, because type int is disjoint from type string.
+   --> invalid_disjoint_check_methods_overlapping_attribute.php
+128 |   expect(3)->isEqual("A");
+    |   ^^^^^^^^^^^^^^^^^^^^^^^
+
+
+warning: Lint[5638] This call to 'isEqual' will always return the same value, because type string is disjoint from type int.
+   --> invalid_disjoint_check_methods_overlapping_attribute.php
+134 |   $x->isEqual(3);
+    |   ^^^^^^^^^^^^^^
+
+
+warning: Lint[5638] This call to 'isEqual' will always return the same value, because type string is disjoint from type int.
+   --> invalid_disjoint_check_methods_overlapping_attribute.php
+136 |   $y->isEqual(3);
+    |   ^^^^^^^^^^^^^^
+
+
+warning: Lint[5638] This call to 'isEqual' will always return the same value, because type vec<int> is disjoint from type bool.
+   --> invalid_disjoint_check_methods_overlapping_attribute.php
+141 |   $z->isEqual(false);
+    |   ^^^^^^^^^^^^^^^^^^
+
+

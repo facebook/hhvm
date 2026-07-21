@@ -1,2 +1,6 @@
-File "refined_non_castable.php", line 7, characters 3-16:
-This `is` check is always `true`. The expression on the left has type `int` which is a subtype of `nonnull`. (Lint[5609])
+warning: Lint[5609] This `is` check is always `true`. The expression on the left has type `int` which is a subtype of `nonnull`.
+   --> refined_non_castable.php
+  7 |   $id is nonnull ? (string) $id : 'null',
+    |   ^^^^^^^^^^^^^^
+
+

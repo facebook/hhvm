@@ -1,2 +1,6 @@
-File "is_always_false.php", line 10, characters 7-13:
-This `is` check is always `false`. The expression on the left has type `A` which shares no values with `C`. (Lint[5610])
+warning: Lint[5610] This `is` check is always `false`. The expression on the left has type `A` which shares no values with `C`.
+   --> is_always_false.php
+ 10 |   if ($a is C) {
+    |       ^^^^^^^
+
+

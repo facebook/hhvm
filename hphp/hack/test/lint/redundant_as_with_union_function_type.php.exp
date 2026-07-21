@@ -1,6 +1,18 @@
-File "redundant_as_with_union_function_type.php", line 7, characters 6-14:
-This expression has a type lie that makes Hack type checker think it is a different type than what it inferred. It is achieved using a type assertion through `as`. This can lead to fatals or subtle and latent behaviour changes. Even if the code is correct at the moment, the type checker won't produce any signal when the prerequisites for correctness change. (Lint[5808])
-File "redundant_as_with_union_function_type.php", line 8, characters 3-11:
-This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `int` which is a subtype of `int`. (Lint[5628])
-File "redundant_as_with_union_function_type.php", line 8, characters 3-11:
-This expression has a type lie that makes Hack type checker think it is a different type than what it inferred. It is achieved using a type assertion through `as`. This can lead to fatals or subtle and latent behaviour changes. Even if the code is correct at the moment, the type checker won't produce any signal when the prerequisites for correctness change. (Lint[5808])
+warning: Lint[5808] This expression has a type lie that makes Hack type checker think it is a different type than what it inferred. It is achieved using a type assertion through `as`. This can lead to fatals or subtle and latent behaviour changes. Even if the code is correct at the moment, the type checker won't produce any signal when the prerequisites for correctness change.
+   --> redundant_as_with_union_function_type.php
+  7 |   $f($x as int); // should be no warning
+    |      ^^^^^^^^^
+
+
+warning: Lint[5628] This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `int` which is a subtype of `int`.
+   --> redundant_as_with_union_function_type.php
+  8 |   $x as int; // ensure we still get an warning here
+    |   ^^^^^^^^^
+
+
+warning: Lint[5808] This expression has a type lie that makes Hack type checker think it is a different type than what it inferred. It is achieved using a type assertion through `as`. This can lead to fatals or subtle and latent behaviour changes. Even if the code is correct at the moment, the type checker won't produce any signal when the prerequisites for correctness change.
+   --> redundant_as_with_union_function_type.php
+  8 |   $x as int; // ensure we still get an warning here
+    |   ^^^^^^^^^
+
+

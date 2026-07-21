@@ -1,6 +1,18 @@
-File "async_lambda_bad.php", line 6, characters 5-32:
-Use `async ... ==> await ...` for lambdas that directly return `Awaitable`s, so stack traces include the lambda position. (Lint[5650])
-File "async_lambda_bad.php", line 13, characters 5-44:
-Use `async ... ==> await ...` for lambdas that directly return `Awaitable`s, so stack traces include the lambda position. (Lint[5650])
-File "async_lambda_bad.php", line 20, characters 5-50:
-Use `async ... ==> await ...` for lambdas that directly return `Awaitable`s, so stack traces include the lambda position. (Lint[5650])
+warning: Lint[5650] Use `async ... ==> await ...` for lambdas that directly return `Awaitable`s, so stack traces include the lambda position.
+   --> async_lambda_bad.php
+  6 |     $x ==> async_lambda_bad1($x),
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+warning: Lint[5650] Use `async ... ==> await ...` for lambdas that directly return `Awaitable`s, so stack traces include the lambda position.
+   --> async_lambda_bad.php
+ 13 |     $x ==> { return async_lambda_bad2($x); },
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+warning: Lint[5650] Use `async ... ==> await ...` for lambdas that directly return `Awaitable`s, so stack traces include the lambda position.
+   --> async_lambda_bad.php
+ 20 |     function($x) { return async_lambda_bad3($x); }
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+

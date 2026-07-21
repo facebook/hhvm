@@ -1,12 +1,36 @@
-File "classname_sgrep.php", line 3, characters 10-13:
-test is the only function declared in classname_sgrep.php, so that file should be named test.php instead. (Lint[5564])
-File "classname_sgrep.php", line 4, characters 3-14:
-Write Foo::class instead of 'Foo' inside calls to Classes::get(), Classes::newMock(), etc. This improves the static analysis of your code. For example: Classes::newMock(ViewerContext::class) (Lint[5542])
-File "classname_sgrep.php", line 5, characters 3-5:
-This expression has a type lie that makes Hack type checker think it is a different type than what it inferred. It is achieved using an `HH_FIXME` comment. This can lead to fatals or subtle and latent behaviour changes. Even if the code is correct at the moment, the type checker won't produce any signal when the prerequisites for correctness change. (Lint[5806])
-File "classname_sgrep.php", line 5, characters 3-18:
-You are encouraged to write MyEnum::class instead of 'MyEnum' in calls to LoggerFieldDefiner::enumeration to improve static analysis. (Lint[5542])
-File "classname_sgrep.php", line 6, characters 7-15:
-You are encouraged to write MyEnum::class instead of 'MyEnum' in the constructor for EnumParam to improve static analysis. (Lint[5542])
-File "classname_sgrep.php", line 7, characters 7-20:
-You are encouraged to write MyEnum::class instead of 'MyEnum' in the constructor for EnumValueParam to improve static analysis. (Lint[5542])
+warning: Lint[5564] test is the only function declared in classname_sgrep.php, so that file should be named test.php instead.
+   --> classname_sgrep.php
+  3 | function test($y, $fd) {
+    |          ^^^^
+
+
+warning: Lint[5542] Write Foo::class instead of 'Foo' inside calls to Classes::get(), Classes::newMock(), etc. This improves the static analysis of your code. For example: Classes::newMock(ViewerContext::class)
+   --> classname_sgrep.php
+  4 |   Classes::get('clazz', $y);
+    |   ^^^^^^^^^^^^
+
+
+warning: Lint[5806] This expression has a type lie that makes Hack type checker think it is a different type than what it inferred. It is achieved using an `HH_FIXME` comment. This can lead to fatals or subtle and latent behaviour changes. Even if the code is correct at the moment, the type checker won't produce any signal when the prerequisites for correctness change.
+   --> classname_sgrep.php
+  5 |   $fd->enumeration(A, B, 'clazz', $y);
+    |   ^^^
+
+
+warning: Lint[5542] You are encouraged to write MyEnum::class instead of 'MyEnum' in calls to LoggerFieldDefiner::enumeration to improve static analysis.
+   --> classname_sgrep.php
+  5 |   $fd->enumeration(A, B, 'clazz', $y);
+    |   ^^^^^^^^^^^^^^^^
+
+
+warning: Lint[5542] You are encouraged to write MyEnum::class instead of 'MyEnum' in the constructor for EnumParam to improve static analysis.
+   --> classname_sgrep.php
+  6 |   new EnumParam('clazz');
+    |       ^^^^^^^^^
+
+
+warning: Lint[5542] You are encouraged to write MyEnum::class instead of 'MyEnum' in the constructor for EnumValueParam to improve static analysis.
+   --> classname_sgrep.php
+  7 |   new EnumValueParam('clazz');
+    |       ^^^^^^^^^^^^^^
+
+

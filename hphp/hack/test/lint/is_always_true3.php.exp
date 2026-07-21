@@ -1,2 +1,6 @@
-File "is_always_true3.php", line 9, characters 7-13:
-This `is` check is always `true`. The expression on the left has type `J` which is a subtype of `I`. (Lint[5609])
+warning: Lint[5609] This `is` check is always `true`. The expression on the left has type `J` which is a subtype of `I`.
+   --> is_always_true3.php
+  9 |   if ($j is I) {
+    |       ^^^^^^^
+
+

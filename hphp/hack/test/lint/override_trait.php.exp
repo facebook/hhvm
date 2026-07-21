@@ -1,2 +1,6 @@
-File "override_trait.php", line 18, characters 19-19:
-Method `f` is also defined on `C`, but this method is missing `<<__Override>>`. (Lint[5616])
+warning: Lint[5616] Method `f` is also defined on `C`, but this method is missing `<<__Override>>`.
+   --> override_trait.php
+ 18 |   public function f(): void {
+    |                   ^
+
+

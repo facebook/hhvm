@@ -1,4 +1,12 @@
-File "lowercase_constants.php", line 3, characters 10-10:
-f is the only function declared in lowercase_constants.php, so that file should be named f.php instead. (Lint[5564])
-File "lowercase_constants.php", line 4, characters 10-13:
-Please use `null` instead of `NULL` (Lint[5001])
+warning: Lint[5564] f is the only function declared in lowercase_constants.php, so that file should be named f.php instead.
+   --> lowercase_constants.php
+  3 | function f() {
+    |          ^
+
+
+warning: Lint[5001] Please use `null` instead of `NULL`
+   --> lowercase_constants.php
+  4 |   return NULL;
+    |          ^^^^
+
+

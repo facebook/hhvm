@@ -1,5 +1,4 @@
-File "unsurfaced_exception.bad.php", line 9, characters 33-34:
-Blindly suppressing exceptions hides regressions and makes the system more difficult to debug.
+warning: Lint[5811] Blindly suppressing exceptions hides regressions and makes the system more difficult to debug.
 
 Use standard error logging (`ope($ex, $consequence)`) to record how your program recovers from errors. Create the $consequence input with the `causes_the(...)->to(...)` syntax.
 
@@ -7,4 +6,9 @@ For example, if the `try` block was attempting to send a birthday notification, 
 
 If the exception is not an actual error, but is intentionally thrown to control the flow of your code (sometimes called "GOTO programming"), you should catch a more specific exception type here.
 
-See https://fburl.com/hacklint5811 for guidance and caveats. (Lint[5811])
+See https://fburl.com/hacklint5811 for guidance and caveats.
+   --> unsurfaced_exception.bad.php
+  9 |     } catch (ViolationException $_) {
+    |                                 ^^
+
+

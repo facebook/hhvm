@@ -1,4 +1,12 @@
-File "collection_literals_1.php", line 3, characters 10-10:
-f is the only function declared in collection_literals_1.php, so that file should be named f.php instead. (Lint[5564])
-File "collection_literals_1.php", line 4, characters 14-19:
-Use `Vector {...}` instead of `new Vector(...)` (Lint[5002])
+warning: Lint[5564] f is the only function declared in collection_literals_1.php, so that file should be named f.php instead.
+   --> collection_literals_1.php
+  3 | function f() {
+    |          ^
+
+
+warning: Lint[5002] Use `Vector {...}` instead of `new Vector(...)`
+   --> collection_literals_1.php
+  4 |   return new Vector();
+    |              ^^^^^^
+
+

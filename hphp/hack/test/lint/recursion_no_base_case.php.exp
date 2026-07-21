@@ -1,40 +1,120 @@
-File "recursion_no_base_case.php", line 4, characters 1-57:
-This is a recursive function with no base case to terminate. This will result in a Stack Overflow error. Consider adding a base case. (Lint[5645])
-File "recursion_no_base_case.php", line 7, characters 1-67:
-This is a recursive function with no base case to terminate. This will result in a Stack Overflow error. Consider adding a base case. (Lint[5645])
-File "recursion_no_base_case.php", line 11, characters 1-67:
-This is a recursive function with no base case to terminate. This will result in a Stack Overflow error. Consider adding a base case. (Lint[5645])
-File "recursion_no_base_case.php", line 15, characters 1-65:
-This is a recursive function with no base case to terminate. This will result in a Stack Overflow error. Consider adding a base case. (Lint[5645])
-File "recursion_no_base_case.php", line 21, characters 1-80:
-This is a recursive function with no base case to terminate. This will result in a Stack Overflow error. Consider adding a base case. (Lint[5645])
-File "recursion_no_base_case.php", line 25, characters 1-87:
-This is a recursive function with no base case to terminate. This will result in a Stack Overflow error. Consider adding a base case. (Lint[5645])
-File "recursion_no_base_case.php", line 46, characters 1-257:
-This is a recursive function with no base case to terminate. This will result in a Stack Overflow error. Consider adding a base case. (Lint[5645])
-File "recursion_no_base_case.php", line 73, characters 1-282:
-This is a recursive function with no base case to terminate. This will result in a Stack Overflow error. Consider adding a base case. (Lint[5645])
-File "recursion_no_base_case.php", line 92, characters 1-248:
-This is a recursive function with no base case to terminate. This will result in a Stack Overflow error. Consider adding a base case. (Lint[5645])
-File "recursion_no_base_case.php", line 122, characters 3-80:
-This is a recursive function with no base case to terminate. This will result in a Stack Overflow error. Consider adding a base case. (Lint[5645])
-File "recursion_no_base_case.php", line 125, characters 3-85:
-This is a recursive function with no base case to terminate. This will result in a Stack Overflow error. Consider adding a base case. (Lint[5645])
-File "recursion_no_base_case.php", line 128, characters 3-77:
-This is a recursive function with no base case to terminate. This will result in a Stack Overflow error. Consider adding a base case. (Lint[5645])
-File "recursion_no_base_case.php", line 131, characters 3-90:
-This is a recursive function with no base case to terminate. This will result in a Stack Overflow error. Consider adding a base case. (Lint[5645])
-File "recursion_no_base_case.php", line 134, characters 3-98:
-This is a recursive function with no base case to terminate. This will result in a Stack Overflow error. Consider adding a base case. (Lint[5645])
-File "recursion_no_base_case.php", line 137, characters 3-103:
-This is a recursive function with no base case to terminate. This will result in a Stack Overflow error. Consider adding a base case. (Lint[5645])
-File "recursion_no_base_case.php", line 141, characters 3-101:
-This is a recursive function with no base case to terminate. This will result in a Stack Overflow error. Consider adding a base case. (Lint[5645])
-File "recursion_no_base_case.php", line 144, characters 3-95:
-This is a recursive function with no base case to terminate. This will result in a Stack Overflow error. Consider adding a base case. (Lint[5645])
-File "recursion_no_base_case.php", line 148, characters 3-129:
-This is a recursive function with no base case to terminate. This will result in a Stack Overflow error. Consider adding a base case. (Lint[5645])
-File "recursion_no_base_case.php", line 158, characters 3-285:
-This is a recursive function with no base case to terminate. This will result in a Stack Overflow error. Consider adding a base case. (Lint[5645])
-File "recursion_no_base_case.php", line 186, characters 3-284:
-This is a recursive function with no base case to terminate. This will result in a Stack Overflow error. Consider adding a base case. (Lint[5645])
+warning: Lint[5645] This is a recursive function with no base case to terminate. This will result in a Stack Overflow error. Consider adding a base case.
+   --> recursion_no_base_case.php
+  4 | function foo1(): void {
+    | ^^^^^^^^^^^^^^^^^^^^^^^
+
+
+warning: Lint[5645] This is a recursive function with no base case to terminate. This will result in a Stack Overflow error. Consider adding a base case.
+   --> recursion_no_base_case.php
+  7 | function foo2(): void {
+    | ^^^^^^^^^^^^^^^^^^^^^^^
+
+
+warning: Lint[5645] This is a recursive function with no base case to terminate. This will result in a Stack Overflow error. Consider adding a base case.
+   --> recursion_no_base_case.php
+ 11 | function foo3(): void {
+    | ^^^^^^^^^^^^^^^^^^^^^^^
+
+
+warning: Lint[5645] This is a recursive function with no base case to terminate. This will result in a Stack Overflow error. Consider adding a base case.
+   --> recursion_no_base_case.php
+ 15 | function foo4(int $x): void {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+warning: Lint[5645] This is a recursive function with no base case to terminate. This will result in a Stack Overflow error. Consider adding a base case.
+   --> recursion_no_base_case.php
+ 21 | async function foo6(): Awaitable<void> {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+warning: Lint[5645] This is a recursive function with no base case to terminate. This will result in a Stack Overflow error. Consider adding a base case.
+   --> recursion_no_base_case.php
+ 25 | function test_throw_lint(): Error {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+warning: Lint[5645] This is a recursive function with no base case to terminate. This will result in a Stack Overflow error. Consider adding a base case.
+   --> recursion_no_base_case.php
+ 46 | function test_multiple_base_cases_lint(int $x): int {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+warning: Lint[5645] This is a recursive function with no base case to terminate. This will result in a Stack Overflow error. Consider adding a base case.
+   --> recursion_no_base_case.php
+ 73 | function test_multiple_base_cases_lint_throw(int $x): Error {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+warning: Lint[5645] This is a recursive function with no base case to terminate. This will result in a Stack Overflow error. Consider adding a base case.
+   --> recursion_no_base_case.php
+ 92 | function test_nested_ifs_lint(int $x): int {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+warning: Lint[5645] This is a recursive function with no base case to terminate. This will result in a Stack Overflow error. Consider adding a base case.
+   --> recursion_no_base_case.php
+122 |   public static function bar(): void {
+    |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+warning: Lint[5645] This is a recursive function with no base case to terminate. This will result in a Stack Overflow error. Consider adding a base case.
+   --> recursion_no_base_case.php
+125 |   public static function bar2(): void {
+    |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+warning: Lint[5645] This is a recursive function with no base case to terminate. This will result in a Stack Overflow error. Consider adding a base case.
+   --> recursion_no_base_case.php
+128 |   public function bar4(): void {
+    |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+warning: Lint[5645] This is a recursive function with no base case to terminate. This will result in a Stack Overflow error. Consider adding a base case.
+   --> recursion_no_base_case.php
+131 |   public static function bar5(int $x): void {
+    |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+warning: Lint[5645] This is a recursive function with no base case to terminate. This will result in a Stack Overflow error. Consider adding a base case.
+   --> recursion_no_base_case.php
+134 |   public static function returnBar(): int {
+    |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+warning: Lint[5645] This is a recursive function with no base case to terminate. This will result in a Stack Overflow error. Consider adding a base case.
+   --> recursion_no_base_case.php
+137 |   public static function returnBar2(): int {
+    |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+warning: Lint[5645] This is a recursive function with no base case to terminate. This will result in a Stack Overflow error. Consider adding a base case.
+   --> recursion_no_base_case.php
+141 |   public static function returnBar3(): int {
+    |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+warning: Lint[5645] This is a recursive function with no base case to terminate. This will result in a Stack Overflow error. Consider adding a base case.
+   --> recursion_no_base_case.php
+144 |   public function returnBar4(): int {
+    |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+warning: Lint[5645] This is a recursive function with no base case to terminate. This will result in a Stack Overflow error. Consider adding a base case.
+   --> recursion_no_base_case.php
+148 |   public async function returnAwaitExpr(): Awaitable<void> {
+    |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+warning: Lint[5645] This is a recursive function with no base case to terminate. This will result in a Stack Overflow error. Consider adding a base case.
+   --> recursion_no_base_case.php
+158 |   public function testMultipleBaseCasesLint(int $x): int {
+    |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+warning: Lint[5645] This is a recursive function with no base case to terminate. This will result in a Stack Overflow error. Consider adding a base case.
+   --> recursion_no_base_case.php
+186 |   public function testNestedIfsLint(int $x): int {
+    |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+

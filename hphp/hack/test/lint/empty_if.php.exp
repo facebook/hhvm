@@ -1,2 +1,6 @@
-File "empty_if.php", line 6, characters 7-10:
-There are no statements in the body of this `if` branch. (Lint[5556])
+warning: Lint[5556] There are no statements in the body of this `if` branch.
+   --> empty_if.php
+  6 |   if ($foo) {}
+    |       ^^^^
+
+

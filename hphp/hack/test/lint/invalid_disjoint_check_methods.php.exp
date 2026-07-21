@@ -1,28 +1,84 @@
-File "invalid_disjoint_check_methods.php", line 16, characters 13-60:
-This call to 'contains' will always return the same value, because type Map<string, mixed> is disjoint from type int. (Lint[5638])
-File "invalid_disjoint_check_methods.php", line 26, characters 10-29:
-This call to 'contains' will always return the same value, because type Foo is disjoint from type int. (Lint[5638])
-File "invalid_disjoint_check_methods.php", line 29, characters 10-29:
-This call to 'contains' will always return the same value, because type Foo is disjoint from type int. (Lint[5638])
-File "invalid_disjoint_check_methods.php", line 32, characters 10-29:
-This call to 'contains' will always return the same value, because type Foo is disjoint from type int. (Lint[5638])
-File "invalid_disjoint_check_methods.php", line 35, characters 10-29:
-This call to 'contains' will always return the same value, because type Foo is disjoint from type int. (Lint[5638])
-File "invalid_disjoint_check_methods.php", line 38, characters 10-29:
-This call to 'contains' will always return the same value, because type Foo is disjoint from type int. (Lint[5638])
-File "invalid_disjoint_check_methods.php", line 41, characters 10-29:
-This call to 'contains' will always return the same value, because type Foo is disjoint from type int. (Lint[5638])
-File "invalid_disjoint_check_methods.php", line 44, characters 10-29:
-This call to 'contains' will always return the same value, because type Foo is disjoint from type int. (Lint[5638])
-File "invalid_disjoint_check_methods.php", line 47, characters 10-29:
-This call to 'contains' will always return the same value, because type Foo is disjoint from type int. (Lint[5638])
-File "invalid_disjoint_check_methods.php", line 50, characters 10-29:
-This call to 'contains' will always return the same value, because type Foo is disjoint from type Baz. (Lint[5638])
-File "invalid_disjoint_check_methods.php", line 53, characters 10-29:
-This call to 'contains' will always return the same value, because type Foo is disjoint from type <expr#4> as Bar. (Lint[5638])
-File "invalid_disjoint_check_methods.php", line 56, characters 10-29:
-This call to 'contains' will always return the same value, because type Bar is disjoint from type Foo. (Lint[5638])
-File "invalid_disjoint_check_methods.php", line 104, characters 10-29:
-This call to 'contains' will always return the same value, because type string is disjoint from type EnumInt. (Lint[5638])
-File "invalid_disjoint_check_methods.php", line 121, characters 3-25:
-Non-dynamic calls to 'isEqual' will always return the same value, because type int is disjoint from type string. (Lint[5638])
+warning: Lint[5638] This call to 'contains' will always return the same value, because type Map<string, mixed> is disjoint from type int.
+   --> invalid_disjoint_check_methods.php
+ 16 |     return !$this->contains($table_data, (int)$assoc['id1']);
+    |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+warning: Lint[5638] This call to 'contains' will always return the same value, because type Foo is disjoint from type int.
+   --> invalid_disjoint_check_methods.php
+ 26 |   return $c->contains($x, $i);
+    |          ^^^^^^^^^^^^^^^^^^^^
+
+
+warning: Lint[5638] This call to 'contains' will always return the same value, because type Foo is disjoint from type int.
+   --> invalid_disjoint_check_methods.php
+ 29 |   return $c->contains($x, $i);
+    |          ^^^^^^^^^^^^^^^^^^^^
+
+
+warning: Lint[5638] This call to 'contains' will always return the same value, because type Foo is disjoint from type int.
+   --> invalid_disjoint_check_methods.php
+ 32 |   return $c->contains($x, $i);
+    |          ^^^^^^^^^^^^^^^^^^^^
+
+
+warning: Lint[5638] This call to 'contains' will always return the same value, because type Foo is disjoint from type int.
+   --> invalid_disjoint_check_methods.php
+ 35 |   return $c->contains($x, $i);
+    |          ^^^^^^^^^^^^^^^^^^^^
+
+
+warning: Lint[5638] This call to 'contains' will always return the same value, because type Foo is disjoint from type int.
+   --> invalid_disjoint_check_methods.php
+ 38 |   return $c->contains($x, $i);
+    |          ^^^^^^^^^^^^^^^^^^^^
+
+
+warning: Lint[5638] This call to 'contains' will always return the same value, because type Foo is disjoint from type int.
+   --> invalid_disjoint_check_methods.php
+ 41 |   return $c->contains($x, $i);
+    |          ^^^^^^^^^^^^^^^^^^^^
+
+
+warning: Lint[5638] This call to 'contains' will always return the same value, because type Foo is disjoint from type int.
+   --> invalid_disjoint_check_methods.php
+ 44 |   return $c->contains($x, $i);
+    |          ^^^^^^^^^^^^^^^^^^^^
+
+
+warning: Lint[5638] This call to 'contains' will always return the same value, because type Foo is disjoint from type int.
+   --> invalid_disjoint_check_methods.php
+ 47 |   return $c->contains($x, $i);
+    |          ^^^^^^^^^^^^^^^^^^^^
+
+
+warning: Lint[5638] This call to 'contains' will always return the same value, because type Foo is disjoint from type Baz.
+   --> invalid_disjoint_check_methods.php
+ 50 |   return $c->contains($x, $i);
+    |          ^^^^^^^^^^^^^^^^^^^^
+
+
+warning: Lint[5638] This call to 'contains' will always return the same value, because type Foo is disjoint from type <expr#4> as Bar.
+   --> invalid_disjoint_check_methods.php
+ 53 |   return $c->contains($x, $i);
+    |          ^^^^^^^^^^^^^^^^^^^^
+
+
+warning: Lint[5638] This call to 'contains' will always return the same value, because type Bar is disjoint from type Foo.
+   --> invalid_disjoint_check_methods.php
+ 56 |   return $c->contains($x, $i);
+    |          ^^^^^^^^^^^^^^^^^^^^
+
+
+warning: Lint[5638] This call to 'contains' will always return the same value, because type string is disjoint from type EnumInt.
+   --> invalid_disjoint_check_methods.php
+104 |   return $c->contains($x, $y);
+    |          ^^^^^^^^^^^^^^^^^^^^
+
+
+warning: Lint[5638] Non-dynamic calls to 'isEqual' will always return the same value, because type int is disjoint from type string.
+   --> invalid_disjoint_check_methods.php
+121 |   expect(3)->isEqual("A");
+    |   ^^^^^^^^^^^^^^^^^^^^^^^
+
+

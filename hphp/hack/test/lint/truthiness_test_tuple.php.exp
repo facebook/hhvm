@@ -1,2 +1,6 @@
-File "truthiness_test_tuple.php", line 4, characters 7-8:
-Invalid condition: a value of type `(bool, bool)` will always be truthy (Lint[5622])
+warning: Lint[5622] Invalid condition: a value of type `(bool, bool)` will always be truthy
+   --> truthiness_test_tuple.php
+  4 |   if ($x) {
+    |       ^^
+
+

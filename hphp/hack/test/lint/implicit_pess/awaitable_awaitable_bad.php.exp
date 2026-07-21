@@ -1,4 +1,12 @@
-File "awaitable_awaitable_bad.php", line 7, characters 7-47:
-This lambda returns an Awaitable of Awaitable. You probably want to use await inside this async lambda, so stack traces include the lambda position. If this is intentional, please annotate the return type. (Lint[5651])
-File "awaitable_awaitable_bad.php", line 12, characters 8-67:
-This lambda returns an Awaitable of Awaitable. You probably want to use await inside this async lambda, so stack traces include the lambda position. If this is intentional, please annotate the return type. (Lint[5651])
+warning: Lint[5651] This lambda returns an Awaitable of Awaitable. You probably want to use await inside this async lambda, so stack traces include the lambda position. If this is intentional, please annotate the return type.
+   --> awaitable_awaitable_bad.php
+  7 |       async $x ==> awaitable_awaitable_bad1($x), // should trigger rule
+    |       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+warning: Lint[5651] This lambda returns an Awaitable of Awaitable. You probably want to use await inside this async lambda, so stack traces include the lambda position. If this is intentional, please annotate the return type.
+   --> awaitable_awaitable_bad.php
+ 12 |   $f = async (int $x, int $y) ==> awaitable_awaitable_bad2($x + $y);
+    |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+

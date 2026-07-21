@@ -1,14 +1,42 @@
-File "pointless_booleans.php", line 4, characters 6-23:
-The boolean expression is pointless (Lint[5644])
-File "pointless_booleans.php", line 8, characters 6-24:
-The boolean expression is pointless (Lint[5644])
-File "pointless_booleans.php", line 12, characters 6-24:
-The boolean expression is always false (Lint[5644])
-File "pointless_booleans.php", line 16, characters 6-22:
-The boolean expression is always false (Lint[5644])
-File "pointless_booleans.php", line 20, characters 6-18:
-The boolean expression is always true (Lint[5644])
-File "pointless_booleans.php", line 24, characters 6-24:
-The boolean expression is always false (Lint[5644])
-File "pointless_booleans.php", line 32, characters 6-20:
-The boolean expression is always false (Lint[5644])
+warning: Lint[5644] The boolean expression is pointless
+   --> pointless_booleans.php
+  4 |      ($x === 1) && true; // pointless
+    |      ^^^^^^^^^^^^^^^^^^
+
+
+warning: Lint[5644] The boolean expression is pointless
+   --> pointless_booleans.php
+  8 |      ($x === 2) || false; // pointless
+    |      ^^^^^^^^^^^^^^^^^^^
+
+
+warning: Lint[5644] The boolean expression is always false
+   --> pointless_booleans.php
+ 12 |      ($x === 3) && false; // always false
+    |      ^^^^^^^^^^^^^^^^^^^
+
+
+warning: Lint[5644] The boolean expression is always false
+   --> pointless_booleans.php
+ 16 |      ($x > 3) && false; // always false
+    |      ^^^^^^^^^^^^^^^^^
+
+
+warning: Lint[5644] The boolean expression is always true
+   --> pointless_booleans.php
+ 20 |      true || false; // always true
+    |      ^^^^^^^^^^^^^
+
+
+warning: Lint[5644] The boolean expression is always false
+   --> pointless_booleans.php
+ 24 |      false && ($x === 3); // always false
+    |      ^^^^^^^^^^^^^^^^^^^
+
+
+warning: Lint[5644] The boolean expression is always false
+   --> pointless_booleans.php
+ 32 |      $x > 3 && false; // always false
+    |      ^^^^^^^^^^^^^^^
+
+

@@ -24,9 +24,6 @@ function take_full((function(int, string, named bool $b, named float...): void) 
 type NamedVariadicFn = (function(named int...): string);
 type MixedVariadicFn = (function(float, string..., named bool...): void);
 
-// Test subtyping: optional named variadic
-function take_optional_named_variadic((function(optional named int...): void) $_): void {}
-
 // Ensure regular variadic still works
 function take_regular_variadic((function(int...): void) $_): void {}
 function take_regular_variadic2((function(int, string...): void) $_): void {}

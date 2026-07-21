@@ -1,1 +1,1 @@
---config named_variadic_type=true
+--config named_variadic_type=true --config variadic_named_parameters=true

@@ -1921,11 +1921,26 @@ end = struct
       else
         Ok ()
     and named_params_err =
-      let Typing_named_params.{ extra_names; missing_names; too_optional_names }
-          =
+      let Typing_named_params.
+            {
+              extra_names;
+              missing_names;
+              too_optional_names;
+              missing_named_variadic;
+            } =
         Typing_named_params.find_names_mismatch
           ~actual_ft:ft_sub
           ~expected_ft:ft_super
+      in
+      (* If the expected type has a named-variadic parameter but the actual
+         does not, surface it as a "missing named argument: ..." error
+         (matching the naming convention used by decl_hint.ml when it lowers
+         the named-variadic to a param with fp_name = Some "..."). *)
+      let missing_names =
+        if missing_named_variadic then
+          "..." :: missing_names
+        else
+          missing_names
       in
       if
         not
@@ -1962,18 +1977,14 @@ end = struct
       else
         Ok ()
     and variadic_err =
-      let ft_sub_variadic =
-        if get_ft_variadic ft_sub then
-          List.last ft_sub.ft_params
+      let positional_variadic_of ft =
+        if Typing_defs.ft_has_positional_variadic ft then
+          List.last (Typing_defs.ft_params_without_named_variadic ft)
         else
           None
       in
-      let ft_super_variadic =
-        if get_ft_variadic ft_super then
-          List.last ft_super.ft_params
-        else
-          None
-      in
+      let ft_sub_variadic = positional_variadic_of ft_sub in
+      let ft_super_variadic = positional_variadic_of ft_super in
 
       match (ft_sub_variadic, ft_super_variadic) with
       | (Some { fp_name = None; _ }, Some { fp_name = Some _; _ }) ->
@@ -2403,6 +2414,75 @@ end = struct
               (r_sub, idx_sub + 1, fn_params_sub, variadic_sub_ty)
               (r_super, idx_super + 1, fn_params_super, variadic_super_ty)
 
+  (* Contravariant element-type subtyping for named-variadic parameters
+     between two function types. Two obligations:
+
+     1. If the actual (sub) function has a named-variadic and the expected
+        (super) function declares required named parameters that the sub
+        does not declare by name, the sub's variadic absorbs them — but
+        the super's declared param type must be a subtype of the sub's
+        variadic element type (contravariance).
+
+     2. If both sides have a named-variadic, their element types must
+        subtype contravariantly (super's element <: sub's element).
+
+     The "missing named-variadic on sub" and "extra required name on sub"
+     cases are handled in [simplify_subtype_funs_attributes] via
+     [Typing_named_params.find_names_mismatch]. *)
+  and simplify_subtype_named_variadic
+      ~subtype_env (r_sub, ft_sub) (r_super, ft_super) env =
+    let sub_var = Typing_defs.ft_named_variadic_param ft_sub in
+    let super_var = Typing_defs.ft_named_variadic_param ft_super in
+    let names_of ft =
+      List.fold
+        (Typing_defs.ft_params_without_named_variadic ft)
+        ~init:SSet.empty
+        ~f:(fun acc fp ->
+          match Typing_defs.Named_params.name_of_named_param fp with
+          | Some name -> SSet.add name acc
+          | None -> acc)
+    in
+    let sub_named_names = names_of ft_sub in
+    let contra ty_super ty_sub env =
+      let ty_super =
+        Typing_env.update_reason env ty_super ~f:(fun r_super_prj ->
+            Typing_reason.prj_fn_param
+              ~super:r_super
+              ~super_prj:r_super_prj
+              ~sub:r_sub
+              ~idx_sub:0
+              ~idx_super:0)
+      in
+      simplify
+        ~subtype_env
+        ~this_ty:None
+        ~lhs:{ sub_supportdyn = None; ty_sub = ty_super }
+        ~rhs:{ super_like = false; super_supportdyn = false; ty_super = ty_sub }
+        env
+    in
+    (* Each super-declared named param not matched by name in sub is
+       absorbed by sub's variadic (if sub has one). Check element-type
+       compatibility for each such absorption. *)
+    let (env, prop) =
+      match sub_var with
+      | None -> valid env
+      | Some { fp_type = ty_sub_var; _ } ->
+        List.fold
+          (Typing_defs.ft_params_without_named_variadic ft_super)
+          ~init:(valid env)
+          ~f:(fun (env, prop) super_fp ->
+            match Typing_defs.Named_params.name_of_named_param super_fp with
+            | Some name when not (SSet.mem name sub_named_names) ->
+              (env, prop) &&& contra super_fp.fp_type ty_sub_var
+            | _ -> (env, prop))
+    in
+    (env, prop)
+    &&&
+    match (sub_var, super_var) with
+    | (Some { fp_type = ty_sub_var; _ }, Some { fp_type = ty_super_var; _ }) ->
+      contra ty_super_var ty_sub_var
+    | _ -> (fun env -> valid env)
+
   and simplify_funs
       ~subtype_env
       ~check_return
@@ -2441,15 +2521,28 @@ end = struct
         ~subtype_env
         (r_sub, ft_sub)
         (r_super, ft_super) )
-    &&& (* Now do contravariant subtyping on parameters *)
+    &&& (* Now do contravariant subtyping on parameters. The named-variadic
+           entry (if present) is stripped here and handled separately below —
+           it is not a required parameter and must not participate in either
+           positional matching or name-by-name matching. *)
     begin
       simplify_subtype_params
         ~subtype_env
         ~arg_posl
         ~for_override
-        (r_sub, 0, ft_sub.ft_params, get_ft_variadic ft_sub)
-        (r_super, 0, ft_super.ft_params, get_ft_variadic ft_super)
+        ( r_sub,
+          0,
+          Typing_defs.ft_params_without_named_variadic ft_sub,
+          Typing_defs.ft_has_positional_variadic ft_sub )
+        ( r_super,
+          0,
+          Typing_defs.ft_params_without_named_variadic ft_super,
+          Typing_defs.ft_has_positional_variadic ft_super )
     end
+    &&& simplify_subtype_named_variadic
+          ~subtype_env
+          (r_sub, ft_sub)
+          (r_super, ft_super)
     &&& simplify_subtype_implicit_params_help
           ft_super.ft_implicit_params
           ft_sub.ft_implicit_params

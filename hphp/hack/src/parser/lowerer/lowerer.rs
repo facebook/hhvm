@@ -1199,6 +1199,13 @@ fn p_hint_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Hint_> {
                         if !c.ellipsis.is_missing() && c.type_.is_missing() {
                             raise_parsing_error(v, env, "Cannot use ... without a typehint");
                         }
+                        if !c.optional.is_missing() {
+                            raise_parsing_error(
+                                v,
+                                env,
+                                &syntax_error::no_optional_on_variadic_parameter,
+                            );
+                        }
                         let hint = Some(p_hint(&c.type_, env)?);
                         if c.named.is_missing() {
                             unnamed_variadic_hints.push(hint);

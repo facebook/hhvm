@@ -400,6 +400,7 @@ fn emit_fatal_naming_error(err: &NamingError) -> Result<Unit, Error> {
         NamingError::FieldNameAlreadyBound(_) => todo!(),
         NamingError::TypedOpenShapeDisallowed(_) => todo!(),
         NamingError::NamedVariadicTypeDisallowed(_) => todo!(),
+        NamingError::VariadicNamedParameterDisallowed(_) => todo!(),
         NamingError::PrimitiveTopLevel(_) => todo!(),
         NamingError::PrimitiveInvalidAlias { .. } => todo!(),
         NamingError::DynamicNewInStrictMode(_) => todo!(),

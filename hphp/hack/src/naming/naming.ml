@@ -66,7 +66,10 @@ let mk_env filename tcopt =
   and consistent_ctor_level =
     TypecheckerOptions.explicit_consistent_constructors tcopt
   and typed_open_shapes = TypecheckerOptions.typed_open_shapes tcopt
-  and named_variadic_type = TypecheckerOptions.named_variadic_type tcopt in
+  and named_variadic_type = TypecheckerOptions.named_variadic_type tcopt
+  and variadic_named_parameters =
+    TypecheckerOptions.variadic_named_parameters tcopt
+  in
   Env.
     {
       empty with
@@ -80,6 +83,7 @@ let mk_env filename tcopt =
       allow_ignore_readonly;
       typed_open_shapes;
       named_variadic_type;
+      variadic_named_parameters;
     }
 
 let passes =
@@ -174,6 +178,9 @@ let passes =
     (* Reject named variadic parameters in function type hints unless
        tco_named_variadic_type is enabled *)
     Naming_validate_named_variadic_type.pass on_error;
+    (* Reject variadic named parameters on function definitions (e.g.
+       `named int ...$xs`) unless tco_variadic_named_parameters is enabled *)
+    Naming_validate_variadic_named_parameter.pass on_error;
     (* Validate that return type of __clone is void *)
     Naming_validate_clone_return_hint.pass on_error;
   ]

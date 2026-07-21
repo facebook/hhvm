@@ -10,6 +10,9 @@ type mismatch = {
   extra_names: string list;
   missing_names: string list;
   too_optional_names: string list;
+  missing_named_variadic: bool;
+      (** True when the expected (super) function type has a named-variadic
+          parameter but the actual (sub) function type does not. *)
 }
 
 val find_names_mismatch :

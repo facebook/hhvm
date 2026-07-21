@@ -201,6 +201,7 @@
   naming_validate_supportdyn
   naming_validate_typed_open_shape
   naming_validate_named_variadic_type
+  naming_validate_variadic_named_parameter
   naming_validate_xhp_name
  )
  (libraries

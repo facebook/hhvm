@@ -371,6 +371,12 @@ let named_variadic_type_disallowed pos =
     )
     []
 
+let variadic_named_parameter_disallowed pos =
+  User_diagnostic.make_err
+    Error_code.(to_enum VariadicNamedParameterDisallowed)
+    (pos, "Variadic named parameters (e.g. `named int ...$xs`) are not enabled.")
+    []
+
 let primitive_top_level pos =
   User_diagnostic.make_err
     Error_code.(to_enum PrimitiveToplevel)
@@ -900,6 +906,8 @@ let to_user_diagnostic t custom_err_config =
     | Field_name_already_bound pos -> field_name_already_bound pos
     | Typed_open_shape_disallowed pos -> typed_open_shape_disallowed pos
     | Named_variadic_type_disallowed pos -> named_variadic_type_disallowed pos
+    | Variadic_named_parameter_disallowed pos ->
+      variadic_named_parameter_disallowed pos
     | Primitive_top_level pos -> primitive_top_level pos
     | Primitive_invalid_alias { pos; ty_name_used; ty_name_canon } ->
       primitive_invalid_alias pos ty_name_used ty_name_canon

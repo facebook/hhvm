@@ -502,6 +502,8 @@ let load_config (config : Config_file_common.t) (options : GlobalOptions.t) :
       (bool_opt Config_keys.Hhconfig.typed_open_shapes config)
     ?tco_named_variadic_type:
       (bool_opt Config_keys.Hhconfig.named_variadic_type config)
+    ?tco_variadic_named_parameters:
+      (bool_opt Config_keys.Hhconfig.variadic_named_parameters config)
     ?tco_silence_errors_under_dynamic:
       (bool_opt Config_keys.Hhconfig.silence_errors_under_dynamic config)
     ?tco_ignore_unsafe_cast:

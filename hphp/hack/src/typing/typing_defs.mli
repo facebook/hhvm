@@ -316,6 +316,20 @@ val this : Local_id.t
 
 val make_tany : unit -> 'a ty_
 
+(** Returns the trailing named-variadic parameter of [ft], if present.
+    Detects both the type-syntax form (where [get_ft_named_variadic ft] is
+    true) and the definition-syntax form (where [get_ft_variadic ft] is true
+    and the variadic param is itself marked named). *)
+val ft_named_variadic_param : 'a fun_type -> 'a fun_param option
+
+(** [ft.ft_params] with the trailing named-variadic entry (if any) removed. *)
+val ft_params_without_named_variadic : 'a fun_type -> 'a fun_param list
+
+(** True iff [ft] has a positional (unnamed) variadic parameter. Not the same
+    as [get_ft_variadic ft], because the [variadic] flag can be set for a
+    definition-syntax named-variadic. *)
+val ft_has_positional_variadic : 'a fun_type -> bool
+
 (* Number of required parameters. Does not include optional, variadic, or
  * type-splat parameters
  *)

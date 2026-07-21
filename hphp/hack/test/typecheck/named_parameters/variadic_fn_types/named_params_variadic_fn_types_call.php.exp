@@ -1,0 +1,16 @@
+ERROR: File "named_params_variadic_fn_types_call.php", line 31, characters 8-19:
+Invalid argument (Typing[4110])
+  File "named_params_variadic_fn_types_call.php", line 30, characters 36-38:
+  Expected `int`
+  File "named_params_variadic_fn_types_call.php", line 31, characters 8-19:
+  But got `string`
+ERROR: File "named_params_variadic_fn_types_call.php", line 36, characters 3-15:
+Too few positional arguments (required 1 but got 0) (Typing[4104])
+  File "named_params_variadic_fn_types_call.php", line 35, characters 20-57:
+  Definition is here
+ERROR: File "named_params_variadic_fn_types_call.php", line 41, characters 3-13:
+Missing required named argument: x (Typing[4499])
+  File "named_params_variadic_fn_types_call.php", line 40, characters 20-64:
+  Definition is here
+ERROR: File "named_params_variadic_fn_types_call.php", line 46, characters 3-14:
+Duplicate named argument: a (Typing[4501])

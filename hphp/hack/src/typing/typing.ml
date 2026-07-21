@@ -1795,13 +1795,19 @@ let check_arity_and_names
   in
   let check_names () : unit =
     let missing_names = SSet.diff required_names arg_names in
+    (* When the callee has a named-variadic parameter, any name the caller
+       passes is legal — the variadic absorbs it (with element-type checking
+       done separately on each argument). *)
     let extra_names =
-      let all_names =
-        ft.ft_params
-        |> List.filter_map ~f:Typing_defs.Named_params.name_of_named_param
-        |> SSet.of_list
-      in
-      SSet.diff arg_names all_names
+      if Option.is_some (Typing_defs.ft_named_variadic_param ft) then
+        SSet.empty
+      else
+        let all_names =
+          Typing_defs.ft_params_without_named_variadic ft
+          |> List.filter_map ~f:Typing_defs.Named_params.name_of_named_param
+          |> SSet.of_list
+        in
+        SSet.diff arg_names all_names
     in
     let () =
       if not (SSet.is_empty missing_names) then
@@ -7353,8 +7359,21 @@ end = struct
            *)
           let pos_def = Reason.to_pos r2 in
           let (env, ft) = Typing_exts.retype_magic_func env ft el in
+          (* Split off the named-variadic (if any) so it doesn't get treated
+             as either a positional variadic or a required named parameter.
+             Unmatched named arguments will fall through to it below. *)
+          let named_variadic_param = Typing_defs.ft_named_variadic_param ft in
+          let ft_for_positional =
+            match named_variadic_param with
+            | Some _ ->
+              {
+                ft with
+                ft_params = Typing_defs.ft_params_without_named_variadic ft;
+              }
+            | None -> ft
+          in
           let (non_variadic_or_splat_params, variadic_or_splat_param) =
-            get_variadic_or_splat_param ft
+            get_variadic_or_splat_param ft_for_positional
           in
 
           let non_variadic_non_splat_indexed =
@@ -7470,7 +7489,24 @@ end = struct
                   SMap.remove name named_params_remaining,
                   plain_params_remaining ) )
             | None ->
-              (-1, (true, None, named_params_remaining, plain_params_remaining))
+              (* No matching declared name — if the callee has a named
+                 variadic, use it so the argument's type is still checked
+                 against the variadic's element type. *)
+              (match named_variadic_param with
+              | Some param ->
+                ( (List.length non_variadic_or_splat_params
+                  +
+                  match variadic_or_splat_param with
+                  | Some _ -> 1
+                  | None -> 0),
+                  ( true,
+                    Some param,
+                    named_params_remaining,
+                    plain_params_remaining ) )
+              | None ->
+                ( -1,
+                  (true, None, named_params_remaining, plain_params_remaining)
+                ))
           in
           let ctxt = Context.{ default with attribute_check_policy } in
           let check_arg env arg opt_param ~arg_idx ~param_idx ~is_variadic =

@@ -181,6 +181,9 @@ type t = {
   tco_named_variadic_type: bool;
       (** Allow named variadic parameters in function types, e.g.
           `(function(named int...): void)` *)
+  tco_variadic_named_parameters: bool;
+      (** Allow variadic named parameters on function definitions, e.g.
+          `function f(named int ...$xs): void {}` *)
   tco_global_access_check_enabled: bool;
   tco_ignore_unsafe_cast: bool;
       (** Ignores unsafe_cast and retains the original type of the expression *)
@@ -351,6 +354,7 @@ val set :
   ?tco_skip_check_under_dynamic:bool ->
   ?tco_typed_open_shapes:bool ->
   ?tco_named_variadic_type:bool ->
+  ?tco_variadic_named_parameters:bool ->
   ?tco_global_access_check_enabled:bool ->
   ?tco_ignore_unsafe_cast:bool ->
   ?tco_enable_expression_trees:bool ->

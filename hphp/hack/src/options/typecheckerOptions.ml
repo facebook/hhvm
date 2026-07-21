@@ -127,6 +127,8 @@ let typed_open_shapes t = t.GlobalOptions.tco_typed_open_shapes
 
 let named_variadic_type t = t.GlobalOptions.tco_named_variadic_type
 
+let variadic_named_parameters t = t.GlobalOptions.tco_variadic_named_parameters
+
 let interpret_soft_types_as_like_types t =
   t.GlobalOptions.po.ParserOptions.interpret_soft_types_as_like_types
 

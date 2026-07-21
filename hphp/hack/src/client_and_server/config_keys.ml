@@ -213,6 +213,8 @@ module Hhconfig = struct
 
   let named_variadic_type = key "named_variadic_type"
 
+  let variadic_named_parameters = key "variadic_named_parameters"
+
   let strict_consistent_construct = key "strict_consistent_construct"
 
   let symbol_write_exclude_out = key "symbol_write_exclude_out"

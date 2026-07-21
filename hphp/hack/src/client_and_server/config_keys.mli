@@ -194,6 +194,8 @@ module Hhconfig : sig
 
   val named_variadic_type : string
 
+  val variadic_named_parameters : string
+
   val strict_consistent_construct : string
 
   val symbol_write_exclude_out : string

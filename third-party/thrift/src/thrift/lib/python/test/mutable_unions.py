@@ -53,28 +53,29 @@ class ThriftPython_MutableUnion_Test(unittest.TestCase):
         # `to_thrift_list()` uses reference semantics if it contains union
         # instances.
         digits = Digits(data=to_thrift_list([digit, digit]))
+        data = digits.data
+        assert data is not None
 
-        # `digit`, `digits.data[0]`, and `digits.data[1]` are the same union
+        # `digit`, `data[0]`, and `data[1]` are the same union
         # instances
         self.assertEqual(1, digit.fbthrift_current_value)
-        # pyre-ignore[16]: Optional type has no attribute `__getitem__`
-        self.assertEqual(1, digits.data[0].fbthrift_current_value)
-        self.assertEqual(1, digits.data[1].fbthrift_current_value)
+        self.assertEqual(1, data[0].fbthrift_current_value)
+        self.assertEqual(1, data[1].fbthrift_current_value)
 
-        # The variables `digit`, `digits.data[0]`  and `digits.data[1]` are
+        # The variables `digit`, `data[0]`  and `data[1]` are
         # bound to the same instance, so updating `digit` will affect the others.
         digit.small = 5
         self.assertEqual(5, digit.fbthrift_current_value)
-        self.assertEqual(5, digits.data[0].fbthrift_current_value)
-        self.assertEqual(5, digits.data[1].fbthrift_current_value)
+        self.assertEqual(5, data[0].fbthrift_current_value)
+        self.assertEqual(5, data[1].fbthrift_current_value)
 
-        # The variables `digit`, `digits.data[0]`  and `digits.data[1]` are
-        # bound to the same instance, so updating `digits.data[0]` will affect
+        # The variables `digit`, `data[0]`  and `data[1]` are
+        # bound to the same instance, so updating `data[0]` will affect
         # the others.
-        digits.data[0].medium = 10
+        data[0].medium = 10
         self.assertEqual(10, digit.fbthrift_current_value)
-        self.assertEqual(10, digits.data[0].fbthrift_current_value)
-        self.assertEqual(10, digits.data[1].fbthrift_current_value)
+        self.assertEqual(10, data[0].fbthrift_current_value)
+        self.assertEqual(10, data[1].fbthrift_current_value)
 
     def test_copy(self) -> None:
         """

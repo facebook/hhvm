@@ -360,34 +360,34 @@ class MyUnion final  {
 
   /** Glean { "field": "myString" } */
   template <typename..., typename T = ::std::string>
-  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> myString_ref() const& {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> myString_ref() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {value_.myString, fbthrift_type_, folly::to_underlying(Type::myString), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "myString" } */
   template <typename..., typename T = ::std::string>
-  FOLLY_ERASE ::apache::thrift::union_field_ref<T&> myString_ref() & {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&> myString_ref() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {value_.myString, fbthrift_type_, folly::to_underlying(Type::myString), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "myString" } */
   template <typename..., typename T = ::std::string>
-  FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> myString_ref() && {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> myString_ref() && [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {std::move(value_.myString), fbthrift_type_, folly::to_underlying(Type::myString), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "myString" } */
-  FOLLY_ERASE ::apache::thrift::union_field_ref<const ::std::string&> myString() const& {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const ::std::string&> myString() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {value_.myString, fbthrift_type_, folly::to_underlying(Type::myString), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "myString" } */
-  FOLLY_ERASE ::apache::thrift::union_field_ref<::std::string&> myString() & {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<::std::string&> myString() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {value_.myString, fbthrift_type_, folly::to_underlying(Type::myString), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "myString" } */
-  FOLLY_ERASE ::apache::thrift::union_field_ref<::std::string&&> myString() && {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<::std::string&&> myString() && [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {std::move(value_.myString), fbthrift_type_, folly::to_underlying(Type::myString), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
   Type getType() const { return static_cast<Type>(fbthrift_type_); }

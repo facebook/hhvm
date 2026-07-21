@@ -1842,66 +1842,66 @@ class MyUnion final  {
 
   /** Glean { "field": "first" } */
   template <typename..., typename T = ::test::fixtures::basic_structured_annotations::annotated_inline_string>
-  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> first_ref() const& {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> first_ref() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {value_.first, fbthrift_type_, folly::to_underlying(Type::first), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "first" } */
   template <typename..., typename T = ::test::fixtures::basic_structured_annotations::annotated_inline_string>
-  FOLLY_ERASE ::apache::thrift::union_field_ref<T&> first_ref() & {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&> first_ref() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {value_.first, fbthrift_type_, folly::to_underlying(Type::first), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "first" } */
   template <typename..., typename T = ::test::fixtures::basic_structured_annotations::annotated_inline_string>
-  FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> first_ref() && {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> first_ref() && [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {std::move(value_.first), fbthrift_type_, folly::to_underlying(Type::first), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "first" } */
-  FOLLY_ERASE ::apache::thrift::union_field_ref<const ::test::fixtures::basic_structured_annotations::annotated_inline_string&> first() const& {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const ::test::fixtures::basic_structured_annotations::annotated_inline_string&> first() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {value_.first, fbthrift_type_, folly::to_underlying(Type::first), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "first" } */
-  FOLLY_ERASE ::apache::thrift::union_field_ref<::test::fixtures::basic_structured_annotations::annotated_inline_string&> first() & {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<::test::fixtures::basic_structured_annotations::annotated_inline_string&> first() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {value_.first, fbthrift_type_, folly::to_underlying(Type::first), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "first" } */
-  FOLLY_ERASE ::apache::thrift::union_field_ref<::test::fixtures::basic_structured_annotations::annotated_inline_string&&> first() && {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<::test::fixtures::basic_structured_annotations::annotated_inline_string&&> first() && [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {std::move(value_.first), fbthrift_type_, folly::to_underlying(Type::first), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
   /** Glean { "field": "second" } */
   template <typename..., typename T = ::test::fixtures::basic_structured_annotations::annotated_inline_i64>
-  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> second_ref() const& {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> second_ref() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {value_.second, fbthrift_type_, folly::to_underlying(Type::second), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "second" } */
   template <typename..., typename T = ::test::fixtures::basic_structured_annotations::annotated_inline_i64>
-  FOLLY_ERASE ::apache::thrift::union_field_ref<T&> second_ref() & {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&> second_ref() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {value_.second, fbthrift_type_, folly::to_underlying(Type::second), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "second" } */
   template <typename..., typename T = ::test::fixtures::basic_structured_annotations::annotated_inline_i64>
-  FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> second_ref() && {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> second_ref() && [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {std::move(value_.second), fbthrift_type_, folly::to_underlying(Type::second), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "second" } */
-  FOLLY_ERASE ::apache::thrift::union_field_ref<const ::test::fixtures::basic_structured_annotations::annotated_inline_i64&> second() const& {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const ::test::fixtures::basic_structured_annotations::annotated_inline_i64&> second() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {value_.second, fbthrift_type_, folly::to_underlying(Type::second), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "second" } */
-  FOLLY_ERASE ::apache::thrift::union_field_ref<::test::fixtures::basic_structured_annotations::annotated_inline_i64&> second() & {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<::test::fixtures::basic_structured_annotations::annotated_inline_i64&> second() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {value_.second, fbthrift_type_, folly::to_underlying(Type::second), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "second" } */
-  FOLLY_ERASE ::apache::thrift::union_field_ref<::test::fixtures::basic_structured_annotations::annotated_inline_i64&&> second() && {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<::test::fixtures::basic_structured_annotations::annotated_inline_i64&&> second() && [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {std::move(value_.second), fbthrift_type_, folly::to_underlying(Type::second), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
   Type getType() const { return static_cast<Type>(fbthrift_type_); }

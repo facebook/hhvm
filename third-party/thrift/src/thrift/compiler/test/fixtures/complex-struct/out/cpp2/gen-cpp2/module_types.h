@@ -4700,194 +4700,194 @@ class MyUnion final  {
 
   /** Glean { "field": "myEnum" } */
   template <typename..., typename T = ::cpp2::MyEnum>
-  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> myEnum_ref() const& {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> myEnum_ref() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {value_.myEnum, fbthrift_type_, folly::to_underlying(Type::myEnum), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "myEnum" } */
   template <typename..., typename T = ::cpp2::MyEnum>
-  FOLLY_ERASE ::apache::thrift::union_field_ref<T&> myEnum_ref() & {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&> myEnum_ref() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {value_.myEnum, fbthrift_type_, folly::to_underlying(Type::myEnum), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "myEnum" } */
   template <typename..., typename T = ::cpp2::MyEnum>
-  FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> myEnum_ref() && {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> myEnum_ref() && [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {std::move(value_.myEnum), fbthrift_type_, folly::to_underlying(Type::myEnum), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "myEnum" } */
-  FOLLY_ERASE ::apache::thrift::union_field_ref<const ::cpp2::MyEnum&> myEnum() const& {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const ::cpp2::MyEnum&> myEnum() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {value_.myEnum, fbthrift_type_, folly::to_underlying(Type::myEnum), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "myEnum" } */
-  FOLLY_ERASE ::apache::thrift::union_field_ref<::cpp2::MyEnum&> myEnum() & {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<::cpp2::MyEnum&> myEnum() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {value_.myEnum, fbthrift_type_, folly::to_underlying(Type::myEnum), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "myEnum" } */
-  FOLLY_ERASE ::apache::thrift::union_field_ref<::cpp2::MyEnum&&> myEnum() && {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<::cpp2::MyEnum&&> myEnum() && [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {std::move(value_.myEnum), fbthrift_type_, folly::to_underlying(Type::myEnum), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
   /** Glean { "field": "myStruct" } */
   template <typename..., typename T = ::cpp2::MyStruct>
-  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> myStruct_ref() const& {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> myStruct_ref() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {value_.myStruct, fbthrift_type_, folly::to_underlying(Type::myStruct), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "myStruct" } */
   template <typename..., typename T = ::cpp2::MyStruct>
-  FOLLY_ERASE ::apache::thrift::union_field_ref<T&> myStruct_ref() & {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&> myStruct_ref() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {value_.myStruct, fbthrift_type_, folly::to_underlying(Type::myStruct), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "myStruct" } */
   template <typename..., typename T = ::cpp2::MyStruct>
-  FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> myStruct_ref() && {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> myStruct_ref() && [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {std::move(value_.myStruct), fbthrift_type_, folly::to_underlying(Type::myStruct), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "myStruct" } */
-  FOLLY_ERASE ::apache::thrift::union_field_ref<const ::cpp2::MyStruct&> myStruct() const& {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const ::cpp2::MyStruct&> myStruct() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {value_.myStruct, fbthrift_type_, folly::to_underlying(Type::myStruct), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "myStruct" } */
-  FOLLY_ERASE ::apache::thrift::union_field_ref<::cpp2::MyStruct&> myStruct() & {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<::cpp2::MyStruct&> myStruct() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {value_.myStruct, fbthrift_type_, folly::to_underlying(Type::myStruct), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "myStruct" } */
-  FOLLY_ERASE ::apache::thrift::union_field_ref<::cpp2::MyStruct&&> myStruct() && {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<::cpp2::MyStruct&&> myStruct() && [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {std::move(value_.myStruct), fbthrift_type_, folly::to_underlying(Type::myStruct), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
   /** Glean { "field": "myDataItem" } */
   template <typename..., typename T = ::cpp2::MyDataItem>
-  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> myDataItem_ref() const& {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> myDataItem_ref() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {value_.myDataItem, fbthrift_type_, folly::to_underlying(Type::myDataItem), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "myDataItem" } */
   template <typename..., typename T = ::cpp2::MyDataItem>
-  FOLLY_ERASE ::apache::thrift::union_field_ref<T&> myDataItem_ref() & {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&> myDataItem_ref() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {value_.myDataItem, fbthrift_type_, folly::to_underlying(Type::myDataItem), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "myDataItem" } */
   template <typename..., typename T = ::cpp2::MyDataItem>
-  FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> myDataItem_ref() && {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> myDataItem_ref() && [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {std::move(value_.myDataItem), fbthrift_type_, folly::to_underlying(Type::myDataItem), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "myDataItem" } */
-  FOLLY_ERASE ::apache::thrift::union_field_ref<const ::cpp2::MyDataItem&> myDataItem() const& {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const ::cpp2::MyDataItem&> myDataItem() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {value_.myDataItem, fbthrift_type_, folly::to_underlying(Type::myDataItem), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "myDataItem" } */
-  FOLLY_ERASE ::apache::thrift::union_field_ref<::cpp2::MyDataItem&> myDataItem() & {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<::cpp2::MyDataItem&> myDataItem() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {value_.myDataItem, fbthrift_type_, folly::to_underlying(Type::myDataItem), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "myDataItem" } */
-  FOLLY_ERASE ::apache::thrift::union_field_ref<::cpp2::MyDataItem&&> myDataItem() && {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<::cpp2::MyDataItem&&> myDataItem() && [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {std::move(value_.myDataItem), fbthrift_type_, folly::to_underlying(Type::myDataItem), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
   /** Glean { "field": "complexNestedStruct" } */
   template <typename..., typename T = ::cpp2::ComplexNestedStruct>
-  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> complexNestedStruct_ref() const& {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> complexNestedStruct_ref() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {value_.complexNestedStruct, fbthrift_type_, folly::to_underlying(Type::complexNestedStruct), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "complexNestedStruct" } */
   template <typename..., typename T = ::cpp2::ComplexNestedStruct>
-  FOLLY_ERASE ::apache::thrift::union_field_ref<T&> complexNestedStruct_ref() & {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&> complexNestedStruct_ref() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {value_.complexNestedStruct, fbthrift_type_, folly::to_underlying(Type::complexNestedStruct), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "complexNestedStruct" } */
   template <typename..., typename T = ::cpp2::ComplexNestedStruct>
-  FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> complexNestedStruct_ref() && {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> complexNestedStruct_ref() && [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {std::move(value_.complexNestedStruct), fbthrift_type_, folly::to_underlying(Type::complexNestedStruct), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "complexNestedStruct" } */
-  FOLLY_ERASE ::apache::thrift::union_field_ref<const ::cpp2::ComplexNestedStruct&> complexNestedStruct() const& {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const ::cpp2::ComplexNestedStruct&> complexNestedStruct() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {value_.complexNestedStruct, fbthrift_type_, folly::to_underlying(Type::complexNestedStruct), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "complexNestedStruct" } */
-  FOLLY_ERASE ::apache::thrift::union_field_ref<::cpp2::ComplexNestedStruct&> complexNestedStruct() & {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<::cpp2::ComplexNestedStruct&> complexNestedStruct() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {value_.complexNestedStruct, fbthrift_type_, folly::to_underlying(Type::complexNestedStruct), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "complexNestedStruct" } */
-  FOLLY_ERASE ::apache::thrift::union_field_ref<::cpp2::ComplexNestedStruct&&> complexNestedStruct() && {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<::cpp2::ComplexNestedStruct&&> complexNestedStruct() && [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {std::move(value_.complexNestedStruct), fbthrift_type_, folly::to_underlying(Type::complexNestedStruct), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
   /** Glean { "field": "longValue" } */
   template <typename..., typename T = ::std::int64_t>
-  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> longValue_ref() const& {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> longValue_ref() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {value_.longValue, fbthrift_type_, folly::to_underlying(Type::longValue), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "longValue" } */
   template <typename..., typename T = ::std::int64_t>
-  FOLLY_ERASE ::apache::thrift::union_field_ref<T&> longValue_ref() & {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&> longValue_ref() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {value_.longValue, fbthrift_type_, folly::to_underlying(Type::longValue), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "longValue" } */
   template <typename..., typename T = ::std::int64_t>
-  FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> longValue_ref() && {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> longValue_ref() && [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {std::move(value_.longValue), fbthrift_type_, folly::to_underlying(Type::longValue), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "longValue" } */
-  FOLLY_ERASE ::apache::thrift::union_field_ref<const ::std::int64_t&> longValue() const& {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const ::std::int64_t&> longValue() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {value_.longValue, fbthrift_type_, folly::to_underlying(Type::longValue), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "longValue" } */
-  FOLLY_ERASE ::apache::thrift::union_field_ref<::std::int64_t&> longValue() & {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<::std::int64_t&> longValue() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {value_.longValue, fbthrift_type_, folly::to_underlying(Type::longValue), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "longValue" } */
-  FOLLY_ERASE ::apache::thrift::union_field_ref<::std::int64_t&&> longValue() && {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<::std::int64_t&&> longValue() && [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {std::move(value_.longValue), fbthrift_type_, folly::to_underlying(Type::longValue), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
   /** Glean { "field": "intValue" } */
   template <typename..., typename T = ::std::int32_t>
-  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> intValue_ref() const& {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> intValue_ref() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {value_.intValue, fbthrift_type_, folly::to_underlying(Type::intValue), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "intValue" } */
   template <typename..., typename T = ::std::int32_t>
-  FOLLY_ERASE ::apache::thrift::union_field_ref<T&> intValue_ref() & {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&> intValue_ref() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {value_.intValue, fbthrift_type_, folly::to_underlying(Type::intValue), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "intValue" } */
   template <typename..., typename T = ::std::int32_t>
-  FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> intValue_ref() && {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> intValue_ref() && [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {std::move(value_.intValue), fbthrift_type_, folly::to_underlying(Type::intValue), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "intValue" } */
-  FOLLY_ERASE ::apache::thrift::union_field_ref<const ::std::int32_t&> intValue() const& {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const ::std::int32_t&> intValue() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {value_.intValue, fbthrift_type_, folly::to_underlying(Type::intValue), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "intValue" } */
-  FOLLY_ERASE ::apache::thrift::union_field_ref<::std::int32_t&> intValue() & {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<::std::int32_t&> intValue() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {value_.intValue, fbthrift_type_, folly::to_underlying(Type::intValue), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "intValue" } */
-  FOLLY_ERASE ::apache::thrift::union_field_ref<::std::int32_t&&> intValue() && {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<::std::int32_t&&> intValue() && [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {std::move(value_.intValue), fbthrift_type_, folly::to_underlying(Type::intValue), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
   Type getType() const { return static_cast<Type>(fbthrift_type_); }
@@ -7078,130 +7078,130 @@ class MyUnionFloatFieldThrowExp final  {
 
   /** Glean { "field": "myEnum" } */
   template <typename..., typename T = ::cpp2::MyEnum>
-  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> myEnum_ref() const& {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> myEnum_ref() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {value_.myEnum, fbthrift_type_, folly::to_underlying(Type::myEnum), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "myEnum" } */
   template <typename..., typename T = ::cpp2::MyEnum>
-  FOLLY_ERASE ::apache::thrift::union_field_ref<T&> myEnum_ref() & {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&> myEnum_ref() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {value_.myEnum, fbthrift_type_, folly::to_underlying(Type::myEnum), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "myEnum" } */
   template <typename..., typename T = ::cpp2::MyEnum>
-  FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> myEnum_ref() && {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> myEnum_ref() && [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {std::move(value_.myEnum), fbthrift_type_, folly::to_underlying(Type::myEnum), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "myEnum" } */
-  FOLLY_ERASE ::apache::thrift::union_field_ref<const ::cpp2::MyEnum&> myEnum() const& {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const ::cpp2::MyEnum&> myEnum() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {value_.myEnum, fbthrift_type_, folly::to_underlying(Type::myEnum), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "myEnum" } */
-  FOLLY_ERASE ::apache::thrift::union_field_ref<::cpp2::MyEnum&> myEnum() & {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<::cpp2::MyEnum&> myEnum() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {value_.myEnum, fbthrift_type_, folly::to_underlying(Type::myEnum), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "myEnum" } */
-  FOLLY_ERASE ::apache::thrift::union_field_ref<::cpp2::MyEnum&&> myEnum() && {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<::cpp2::MyEnum&&> myEnum() && [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {std::move(value_.myEnum), fbthrift_type_, folly::to_underlying(Type::myEnum), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
   /** Glean { "field": "setFloat" } */
   template <typename..., typename T = ::std::vector<::std::vector<float>>>
-  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> setFloat_ref() const& {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> setFloat_ref() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {value_.setFloat, fbthrift_type_, folly::to_underlying(Type::setFloat), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "setFloat" } */
   template <typename..., typename T = ::std::vector<::std::vector<float>>>
-  FOLLY_ERASE ::apache::thrift::union_field_ref<T&> setFloat_ref() & {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&> setFloat_ref() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {value_.setFloat, fbthrift_type_, folly::to_underlying(Type::setFloat), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "setFloat" } */
   template <typename..., typename T = ::std::vector<::std::vector<float>>>
-  FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> setFloat_ref() && {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> setFloat_ref() && [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {std::move(value_.setFloat), fbthrift_type_, folly::to_underlying(Type::setFloat), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "setFloat" } */
-  FOLLY_ERASE ::apache::thrift::union_field_ref<const ::std::vector<::std::vector<float>>&> setFloat() const& {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const ::std::vector<::std::vector<float>>&> setFloat() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {value_.setFloat, fbthrift_type_, folly::to_underlying(Type::setFloat), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "setFloat" } */
-  FOLLY_ERASE ::apache::thrift::union_field_ref<::std::vector<::std::vector<float>>&> setFloat() & {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<::std::vector<::std::vector<float>>&> setFloat() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {value_.setFloat, fbthrift_type_, folly::to_underlying(Type::setFloat), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "setFloat" } */
-  FOLLY_ERASE ::apache::thrift::union_field_ref<::std::vector<::std::vector<float>>&&> setFloat() && {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<::std::vector<::std::vector<float>>&&> setFloat() && [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {std::move(value_.setFloat), fbthrift_type_, folly::to_underlying(Type::setFloat), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
   /** Glean { "field": "myDataItem" } */
   template <typename..., typename T = ::cpp2::MyDataItem>
-  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> myDataItem_ref() const& {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> myDataItem_ref() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {value_.myDataItem, fbthrift_type_, folly::to_underlying(Type::myDataItem), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "myDataItem" } */
   template <typename..., typename T = ::cpp2::MyDataItem>
-  FOLLY_ERASE ::apache::thrift::union_field_ref<T&> myDataItem_ref() & {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&> myDataItem_ref() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {value_.myDataItem, fbthrift_type_, folly::to_underlying(Type::myDataItem), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "myDataItem" } */
   template <typename..., typename T = ::cpp2::MyDataItem>
-  FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> myDataItem_ref() && {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> myDataItem_ref() && [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {std::move(value_.myDataItem), fbthrift_type_, folly::to_underlying(Type::myDataItem), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "myDataItem" } */
-  FOLLY_ERASE ::apache::thrift::union_field_ref<const ::cpp2::MyDataItem&> myDataItem() const& {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const ::cpp2::MyDataItem&> myDataItem() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {value_.myDataItem, fbthrift_type_, folly::to_underlying(Type::myDataItem), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "myDataItem" } */
-  FOLLY_ERASE ::apache::thrift::union_field_ref<::cpp2::MyDataItem&> myDataItem() & {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<::cpp2::MyDataItem&> myDataItem() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {value_.myDataItem, fbthrift_type_, folly::to_underlying(Type::myDataItem), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "myDataItem" } */
-  FOLLY_ERASE ::apache::thrift::union_field_ref<::cpp2::MyDataItem&&> myDataItem() && {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<::cpp2::MyDataItem&&> myDataItem() && [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {std::move(value_.myDataItem), fbthrift_type_, folly::to_underlying(Type::myDataItem), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
   /** Glean { "field": "complexNestedStruct" } */
   template <typename..., typename T = ::cpp2::ComplexNestedStruct>
-  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> complexNestedStruct_ref() const& {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> complexNestedStruct_ref() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {value_.complexNestedStruct, fbthrift_type_, folly::to_underlying(Type::complexNestedStruct), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "complexNestedStruct" } */
   template <typename..., typename T = ::cpp2::ComplexNestedStruct>
-  FOLLY_ERASE ::apache::thrift::union_field_ref<T&> complexNestedStruct_ref() & {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&> complexNestedStruct_ref() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {value_.complexNestedStruct, fbthrift_type_, folly::to_underlying(Type::complexNestedStruct), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "complexNestedStruct" } */
   template <typename..., typename T = ::cpp2::ComplexNestedStruct>
-  FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> complexNestedStruct_ref() && {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> complexNestedStruct_ref() && [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {std::move(value_.complexNestedStruct), fbthrift_type_, folly::to_underlying(Type::complexNestedStruct), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "complexNestedStruct" } */
-  FOLLY_ERASE ::apache::thrift::union_field_ref<const ::cpp2::ComplexNestedStruct&> complexNestedStruct() const& {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const ::cpp2::ComplexNestedStruct&> complexNestedStruct() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {value_.complexNestedStruct, fbthrift_type_, folly::to_underlying(Type::complexNestedStruct), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "complexNestedStruct" } */
-  FOLLY_ERASE ::apache::thrift::union_field_ref<::cpp2::ComplexNestedStruct&> complexNestedStruct() & {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<::cpp2::ComplexNestedStruct&> complexNestedStruct() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {value_.complexNestedStruct, fbthrift_type_, folly::to_underlying(Type::complexNestedStruct), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "complexNestedStruct" } */
-  FOLLY_ERASE ::apache::thrift::union_field_ref<::cpp2::ComplexNestedStruct&&> complexNestedStruct() && {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<::cpp2::ComplexNestedStruct&&> complexNestedStruct() && [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {std::move(value_.complexNestedStruct), fbthrift_type_, folly::to_underlying(Type::complexNestedStruct), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
   Type getType() const { return static_cast<Type>(fbthrift_type_); }

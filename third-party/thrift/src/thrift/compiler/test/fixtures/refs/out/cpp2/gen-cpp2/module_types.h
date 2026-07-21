@@ -673,66 +673,66 @@ class MyUnion final  {
 
   /** Glean { "field": "anInteger" } */
   template <typename..., typename T = ::std::unique_ptr<::std::int32_t>>
-  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> anInteger_ref() const& {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> anInteger_ref() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {value_.anInteger, fbthrift_type_, folly::to_underlying(Type::anInteger), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "anInteger" } */
   template <typename..., typename T = ::std::unique_ptr<::std::int32_t>>
-  FOLLY_ERASE ::apache::thrift::union_field_ref<T&> anInteger_ref() & {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&> anInteger_ref() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {value_.anInteger, fbthrift_type_, folly::to_underlying(Type::anInteger), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "anInteger" } */
   template <typename..., typename T = ::std::unique_ptr<::std::int32_t>>
-  FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> anInteger_ref() && {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> anInteger_ref() && [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {std::move(value_.anInteger), fbthrift_type_, folly::to_underlying(Type::anInteger), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "anInteger" } */
-  FOLLY_ERASE ::apache::thrift::union_field_ref<const ::std::unique_ptr<::std::int32_t>&> anInteger() const& {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const ::std::unique_ptr<::std::int32_t>&> anInteger() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {value_.anInteger, fbthrift_type_, folly::to_underlying(Type::anInteger), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "anInteger" } */
-  FOLLY_ERASE ::apache::thrift::union_field_ref<::std::unique_ptr<::std::int32_t>&> anInteger() & {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<::std::unique_ptr<::std::int32_t>&> anInteger() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {value_.anInteger, fbthrift_type_, folly::to_underlying(Type::anInteger), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "anInteger" } */
-  FOLLY_ERASE ::apache::thrift::union_field_ref<::std::unique_ptr<::std::int32_t>&&> anInteger() && {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<::std::unique_ptr<::std::int32_t>&&> anInteger() && [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {std::move(value_.anInteger), fbthrift_type_, folly::to_underlying(Type::anInteger), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
   /** Glean { "field": "aString" } */
   template <typename..., typename T = ::std::unique_ptr<::std::string>>
-  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> aString_ref() const& {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> aString_ref() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {value_.aString, fbthrift_type_, folly::to_underlying(Type::aString), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "aString" } */
   template <typename..., typename T = ::std::unique_ptr<::std::string>>
-  FOLLY_ERASE ::apache::thrift::union_field_ref<T&> aString_ref() & {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&> aString_ref() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {value_.aString, fbthrift_type_, folly::to_underlying(Type::aString), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "aString" } */
   template <typename..., typename T = ::std::unique_ptr<::std::string>>
-  FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> aString_ref() && {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> aString_ref() && [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {std::move(value_.aString), fbthrift_type_, folly::to_underlying(Type::aString), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "aString" } */
-  FOLLY_ERASE ::apache::thrift::union_field_ref<const ::std::unique_ptr<::std::string>&> aString() const& {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const ::std::unique_ptr<::std::string>&> aString() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {value_.aString, fbthrift_type_, folly::to_underlying(Type::aString), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "aString" } */
-  FOLLY_ERASE ::apache::thrift::union_field_ref<::std::unique_ptr<::std::string>&> aString() & {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<::std::unique_ptr<::std::string>&> aString() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {value_.aString, fbthrift_type_, folly::to_underlying(Type::aString), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "aString" } */
-  FOLLY_ERASE ::apache::thrift::union_field_ref<::std::unique_ptr<::std::string>&&> aString() && {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<::std::unique_ptr<::std::string>&&> aString() && [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {std::move(value_.aString), fbthrift_type_, folly::to_underlying(Type::aString), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
   Type getType() const { return static_cast<Type>(fbthrift_type_); }
@@ -911,34 +911,34 @@ class NonTriviallyDestructibleUnion final  {
 
   /** Glean { "field": "int_field" } */
   template <typename..., typename T = ::std::shared_ptr<::std::int32_t>>
-  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> int_field_ref() const& {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> int_field_ref() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {value_.int_field, fbthrift_type_, folly::to_underlying(Type::int_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "int_field" } */
   template <typename..., typename T = ::std::shared_ptr<::std::int32_t>>
-  FOLLY_ERASE ::apache::thrift::union_field_ref<T&> int_field_ref() & {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&> int_field_ref() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {value_.int_field, fbthrift_type_, folly::to_underlying(Type::int_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "int_field" } */
   template <typename..., typename T = ::std::shared_ptr<::std::int32_t>>
-  FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> int_field_ref() && {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> int_field_ref() && [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {std::move(value_.int_field), fbthrift_type_, folly::to_underlying(Type::int_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "int_field" } */
-  FOLLY_ERASE ::apache::thrift::union_field_ref<const ::std::shared_ptr<::std::int32_t>&> int_field() const& {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const ::std::shared_ptr<::std::int32_t>&> int_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {value_.int_field, fbthrift_type_, folly::to_underlying(Type::int_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "int_field" } */
-  FOLLY_ERASE ::apache::thrift::union_field_ref<::std::shared_ptr<::std::int32_t>&> int_field() & {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<::std::shared_ptr<::std::int32_t>&> int_field() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {value_.int_field, fbthrift_type_, folly::to_underlying(Type::int_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "int_field" } */
-  FOLLY_ERASE ::apache::thrift::union_field_ref<::std::shared_ptr<::std::int32_t>&&> int_field() && {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<::std::shared_ptr<::std::int32_t>&&> int_field() && [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {std::move(value_.int_field), fbthrift_type_, folly::to_underlying(Type::int_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
   Type getType() const { return static_cast<Type>(fbthrift_type_); }

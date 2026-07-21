@@ -76,7 +76,8 @@
  *
  * using methods = protocol_methods<
  *    type_class::list<type_class::set<type_class::string>>,
- *    std::vector<std::set<std::string>>>
+ *    std::vector<std::set<std::string>>,
+ *    type::list<type::set<type::string_t>>>
  *
  * MyStruct struct_instance;
  * CompactProtocolReader reader;
@@ -327,9 +328,36 @@ std::size_t writeMapValueEnd(Protocol& protocol) {
 
 /*
  * Primitive Types Specialization
+ *
+ * ExpectedTag is used to diagnose cases where the duck-typed design of
+ * protocol_methods causes the behavior to diverge from the Thrift spec.
  */
-template <typename TypeClass, typename Type>
+template <typename TypeClass, typename Type, typename ExpectedTag = void>
 struct protocol_methods;
+
+template <typename ExpectedTag>
+struct expected_value_tag_or_void {
+  using type = typename ExpectedTag::value_tag;
+};
+template <>
+struct expected_value_tag_or_void<void> {
+  using type = void;
+};
+template <typename ExpectedTag>
+using expected_value_tag_or_void_t =
+    typename expected_value_tag_or_void<ExpectedTag>::type;
+
+template <typename ExpectedTag>
+struct expected_key_tag_or_void {
+  using type = typename ExpectedTag::key_tag;
+};
+template <>
+struct expected_key_tag_or_void<void> {
+  using type = void;
+};
+template <typename ExpectedTag>
+using expected_key_tag_or_void_t =
+    typename expected_key_tag_or_void<ExpectedTag>::type;
 
 #define THRIFT_PROTOCOL_METHODS_REGISTER_RW_COMMON(Class, Type, Method)      \
   template <typename Protocol>                                               \
@@ -366,8 +394,8 @@ struct protocol_methods;
 
 // stamp out specializations for primitive types
 #define THRIFT_PROTOCOL_METHODS_REGISTER_OVERLOAD(Class, Type, Method) \
-  template <>                                                          \
-  struct protocol_methods<type_class::Class, Type> {                   \
+  template <typename ExpectedTag>                                      \
+  struct protocol_methods<type_class::Class, Type, ExpectedTag> {      \
     THRIFT_PROTOCOL_METHODS_REGISTER_RW_COMMON(Class, Type, Method)    \
     THRIFT_PROTOCOL_METHODS_REGISTER_SS_COMMON(Class, Type, Method)    \
   }
@@ -412,11 +440,11 @@ THRIFT_PROTOCOL_METHODS_REGISTER_OVERLOAD(integral, std::int64_t, I64);
   }
 
 // stamp out specializations for unsigned integer primitive types
-#define THRIFT_PROTOCOL_METHODS_REGISTER_UI(Class, Type, Method) \
-  template <>                                                    \
-  struct protocol_methods<type_class::Class, Type> {             \
-    THRIFT_PROTOCOL_METHODS_REGISTER_RW_UI(Class, Type, Method)  \
-    THRIFT_PROTOCOL_METHODS_REGISTER_SS_UI(Class, Type, Method)  \
+#define THRIFT_PROTOCOL_METHODS_REGISTER_UI(Class, Type, Method)  \
+  template <typename ExpectedTag>                                 \
+  struct protocol_methods<type_class::Class, Type, ExpectedTag> { \
+    THRIFT_PROTOCOL_METHODS_REGISTER_RW_UI(Class, Type, Method)   \
+    THRIFT_PROTOCOL_METHODS_REGISTER_SS_UI(Class, Type, Method)   \
   }
 
 THRIFT_PROTOCOL_METHODS_REGISTER_UI(integral, std::uint8_t, Byte);
@@ -431,8 +459,8 @@ THRIFT_PROTOCOL_METHODS_REGISTER_UI(integral, std::uint64_t, I64);
 // std::vector<bool> isn't actually a container, so
 // define a special overload which takes its specialized
 // proxy type
-template <>
-struct protocol_methods<type_class::integral, bool> {
+template <typename ExpectedTag>
+struct protocol_methods<type_class::integral, bool, ExpectedTag> {
   THRIFT_PROTOCOL_METHODS_REGISTER_RW_COMMON(integral, bool, Bool)
   THRIFT_PROTOCOL_METHODS_REGISTER_SS_COMMON(integral, bool, Bool)
 
@@ -453,14 +481,14 @@ THRIFT_PROTOCOL_METHODS_REGISTER_OVERLOAD(floating_point, float, Float);
 
 #undef THRIFT_PROTOCOL_METHODS_REGISTER_OVERLOAD
 
-template <typename Type>
-struct protocol_methods<type_class::string, Type> {
+template <typename Type, typename ExpectedTag>
+struct protocol_methods<type_class::string, Type, ExpectedTag> {
   THRIFT_PROTOCOL_METHODS_REGISTER_RW_COMMON(string, Type, String)
   THRIFT_PROTOCOL_METHODS_REGISTER_SS_COMMON(string, Type, String)
 };
 
-template <typename Type>
-struct protocol_methods<type_class::binary, Type> {
+template <typename Type, typename ExpectedTag>
+struct protocol_methods<type_class::binary, Type, ExpectedTag> {
   THRIFT_PROTOCOL_METHODS_REGISTER_RW_COMMON(binary, Type, Binary)
 
   template <bool ZeroCopy, typename Protocol>
@@ -485,10 +513,11 @@ struct protocol_methods<type_class::binary, Type> {
 template <
     typename TypeClass,
     typename Type,
-    typename int_type = std::underlying_type_t<Type>>
+    typename IntType = std::underlying_type_t<Type>>
 struct enum_protocol_methods {
   static_assert(std::is_enum_v<Type>, "must be enum");
-  using int_methods = protocol_methods<type_class::integral, int_type>;
+  using int_methods =
+      protocol_methods<type_class::integral, IntType, type::infer_tag<IntType>>;
 
   template <typename Protocol>
   static void read(Protocol& protocol, Type& out) {
@@ -498,7 +527,7 @@ struct enum_protocol_methods {
       protocol.readEnum(out);
       return;
     }
-    int_type tmp;
+    IntType tmp;
     int_methods::read(protocol, tmp);
     out = static_cast<Type>(tmp);
   }
@@ -511,7 +540,7 @@ struct enum_protocol_methods {
       protocol.readEnumWithContext(out, ctx);
       return;
     }
-    int_type tmp;
+    IntType tmp;
     int_methods::readWithContext(protocol, tmp, ctx);
     out = static_cast<Type>(tmp);
   }
@@ -525,27 +554,27 @@ struct enum_protocol_methods {
       const char* name = ::apache::thrift::util::enumName(in);
       return protocol.writeEnum(name ? name : "", value);
     } else {
-      int_type tmp = static_cast<int_type>(in);
+      IntType tmp = static_cast<IntType>(in);
       return int_methods::template write<Protocol>(protocol, tmp);
     }
   }
 
   template <bool ZeroCopy, typename Protocol>
   static std::size_t serializedSize(Protocol& protocol, const Type& in) {
-    int_type tmp = static_cast<int_type>(in);
+    IntType tmp = static_cast<IntType>(in);
     return int_methods::template serializedSize<ZeroCopy>(protocol, tmp);
   }
 };
 
 // Thrift enums are always read as int32_t
-template <typename Type>
-struct protocol_methods<type_class::enumeration, Type>
+template <typename Type, typename ExpectedTag>
+struct protocol_methods<type_class::enumeration, Type, ExpectedTag>
     : enum_protocol_methods<type_class::enumeration, Type, std::int32_t> {};
 
 // Strong integral types keep their precision.
-template <typename Type>
+template <typename Type, typename ExpectedTag>
   requires std::is_enum_v<Type>
-struct protocol_methods<type_class::integral, Type>
+struct protocol_methods<type_class::integral, Type, ExpectedTag>
     : enum_protocol_methods<type_class::integral, Type> {};
 
 template <typename Protocol, typename = void>
@@ -590,14 +619,17 @@ static constexpr bool should_process_as_arithmetic_vector_v =
 /*
  * List Specialization
  */
-template <typename ElemClass, typename Type>
-struct protocol_methods<type_class::list<ElemClass>, Type> {
+template <typename ElemClass, typename Type, typename ExpectedTag>
+struct protocol_methods<type_class::list<ElemClass>, Type, ExpectedTag> {
   static_assert(
       !std::is_same<ElemClass, type_class::unknown>(),
       "Unable to serialize unknown list element");
 
   using elem_type = folly::remove_cvref_t<typename Type::value_type>;
-  using elem_methods = protocol_methods<ElemClass, elem_type>;
+  using elem_methods = protocol_methods<
+      ElemClass,
+      elem_type,
+      expected_value_tag_or_void_t<ExpectedTag>>;
   using elem_ttype = protocol_type<ElemClass, elem_type>;
 
  private:
@@ -740,7 +772,7 @@ struct protocol_methods<type_class::list<ElemClass>, Type> {
 /*
  * Common helper that iterates over a set-like container in the order required
  * by `Protocol`, invoking `writeElem(elem)` for each element. Used by both
- * `protocol_methods<type_class::set<...>, ...>::write` and
+ * `protocol_methods<type_class::set<...>, ..., ...>::write` and
  * `op::detail::SetEncode<Tag>`.
  */
 template <typename Tag, typename Protocol, typename Container, typename WriteFn>
@@ -781,7 +813,7 @@ void encodeSetElements(
 /*
  * Common helper that iterates over a map-like container in the order required
  * by `Protocol`, invoking `writeEntry(key, value)` for each entry. Used by
- * both `protocol_methods<type_class::map<...>, ...>::write` and
+ * both `protocol_methods<type_class::map<...>, ..., ...>::write` and
  * `op::detail::MapEncode<Key, Value>`.
  */
 template <
@@ -827,14 +859,17 @@ void encodeMapElements(
 /*
  * Set Specialization
  */
-template <typename ElemClass, typename Type>
-struct protocol_methods<type_class::set<ElemClass>, Type> {
+template <typename ElemClass, typename Type, typename ExpectedTag>
+struct protocol_methods<type_class::set<ElemClass>, Type, ExpectedTag> {
   static_assert(
       !std::is_same<ElemClass, type_class::unknown>(),
       "Unable to serialize unknown type");
 
   using elem_type = typename Type::value_type;
-  using elem_methods = protocol_methods<ElemClass, elem_type>;
+  using elem_methods = protocol_methods<
+      ElemClass,
+      elem_type,
+      expected_value_tag_or_void_t<ExpectedTag>>;
   using elem_ttype = protocol_type<ElemClass, elem_type>;
 
  private:
@@ -913,8 +948,15 @@ struct protocol_methods<type_class::set<ElemClass>, Type> {
 /*
  * Map Specialization
  */
-template <typename KeyClass, typename MappedClass, typename Type>
-struct protocol_methods<type_class::map<KeyClass, MappedClass>, Type> {
+template <
+    typename KeyClass,
+    typename MappedClass,
+    typename Type,
+    typename ExpectedTag>
+struct protocol_methods<
+    type_class::map<KeyClass, MappedClass>,
+    Type,
+    ExpectedTag> {
   static_assert(
       !std::is_same<KeyClass, type_class::unknown>(),
       "Unable to serialize unknown key type in map");
@@ -924,8 +966,14 @@ struct protocol_methods<type_class::map<KeyClass, MappedClass>, Type> {
 
   using key_type = typename Type::key_type;
   using mapped_type = typename Type::mapped_type;
-  using key_methods = protocol_methods<KeyClass, key_type>;
-  using mapped_methods = protocol_methods<MappedClass, mapped_type>;
+  using key_methods = protocol_methods<
+      KeyClass,
+      key_type,
+      expected_key_tag_or_void_t<ExpectedTag>>;
+  using mapped_methods = protocol_methods<
+      MappedClass,
+      mapped_type,
+      expected_value_tag_or_void_t<ExpectedTag>>;
   using key_ttype = protocol_type<KeyClass, key_type>;
   using mapped_ttype = protocol_type<MappedClass, mapped_type>;
 
@@ -1025,12 +1073,19 @@ struct protocol_methods<type_class::map<KeyClass, MappedClass>, Type> {
 /*
  * Struct with Indirection Specialization
  */
-template <typename ElemClass, typename Indirection, typename Type>
-struct protocol_methods<indirection_tag<ElemClass, Indirection>, Type> {
+template <
+    typename ElemClass,
+    typename Indirection,
+    typename Type,
+    typename ExpectedTag>
+struct protocol_methods<
+    indirection_tag<ElemClass, Indirection>,
+    Type,
+    ExpectedTag> {
   using indirection = Indirection;
   using elem_type =
       std::remove_reference_t<folly::invoke_result_t<indirection, Type&>>;
-  using elem_methods = protocol_methods<ElemClass, elem_type>;
+  using elem_methods = protocol_methods<ElemClass, elem_type, ExpectedTag>;
 
   template <typename Protocol>
   static void read(Protocol& protocol, Type& out) {
@@ -1057,8 +1112,8 @@ struct protocol_methods<indirection_tag<ElemClass, Indirection>, Type> {
  * Struct Specialization
  * Forwards to Cpp2Ops wrapper around member read/write/etc.
  */
-template <typename Type>
-struct protocol_methods<type_class::structure, Type> {
+template <typename Type, typename ExpectedTag>
+struct protocol_methods<type_class::structure, Type, ExpectedTag> {
   template <typename Tag>
   using Wrap = type::detail::Wrap<Type, Tag>;
   static Type& unwrap(Type& inst) { return inst; }
@@ -1098,9 +1153,9 @@ struct protocol_methods<type_class::structure, Type> {
  * Union Specialization
  * Forwards to Cpp2Ops wrapper around member read/write/etc.
  */
-template <typename Type>
-struct protocol_methods<type_class::variant, Type>
-    : protocol_methods<type_class::structure, Type> {};
+template <typename Type, typename ExpectedTag>
+struct protocol_methods<type_class::variant, Type, ExpectedTag>
+    : protocol_methods<type_class::structure, Type, ExpectedTag> {};
 
 } // namespace detail::pm
 

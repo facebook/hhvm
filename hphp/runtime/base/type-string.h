@@ -434,7 +434,7 @@ struct String {
 public:
   String() = delete;
   String(const String&) = delete;
-  String(String&&) = delete;
+  String(String&&) noexcept;
 
   explicit String(const std::string& s)
     : m_str(StringData::Make(s.data(), s.size(), CopyString),
@@ -469,6 +469,10 @@ public:
   static String assertNonNull(OptString&& opt) noexcept {
     return String{opt.detach(), NoIncRef{}};
   }
+
+  // make an empty string with cap reserve bytes, plus 1 for '\0'
+  String(size_t cap, ReserveStringMode /*mode*/)
+    : m_str(StringData::Make(cap), NoIncRef{}) {}
 
 private:
   req::ptr<StringData> m_str;
@@ -629,6 +633,8 @@ inline req::ptr<StringData> String::detach() noexcept {
   m_str = req::ptr<StringData>::attach(staticEmptyString());
   return old;
 }
+
+inline String::String(String&& o) noexcept : m_str(o.detach()) {}
 
 inline OptString::OptString(String&& src) noexcept : m_str(src.detach()) {}
 

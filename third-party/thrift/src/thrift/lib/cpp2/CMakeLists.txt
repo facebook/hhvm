@@ -52,6 +52,10 @@ get_property(record-cpp2-SOURCES GLOBAL PROPERTY record-cpp2-SOURCES)
 get_property(schema-cpp2-SOURCES GLOBAL PROPERTY schema-cpp2-SOURCES)
 get_property(type_id-cpp2-SOURCES GLOBAL PROPERTY type_id-cpp2-SOURCES)
 get_property(type_system-cpp2-SOURCES GLOBAL PROPERTY type_system-cpp2-SOURCES)
+get_property(service_catalog-cpp2-SOURCES GLOBAL PROPERTY
+  service_catalog-cpp2-SOURCES)
+get_property(thrift_catalog_service-cpp2-SOURCES GLOBAL PROPERTY
+  thrift_catalog_service-cpp2-SOURCES)
 get_property(syntax_graph-cpp2-SOURCES GLOBAL PROPERTY
   syntax_graph-cpp2-SOURCES)
 
@@ -62,6 +66,7 @@ bypass_source_check("${type_system-cpp2-SOURCES}")
 bypass_source_check("${schema-cpp2-SOURCES}")
 bypass_source_check("${record-cpp2-SOURCES}")
 bypass_source_check("${syntax_graph-cpp2-SOURCES}")
+bypass_source_check("${service_catalog-cpp2-SOURCES}")
 bypass_source_check("${metadata-cpp2-SOURCES}")
 add_library(
   thriftmetadata
@@ -91,6 +96,7 @@ add_library(
   ${schema-cpp2-SOURCES}
   ${record-cpp2-SOURCES}
   ${syntax_graph-cpp2-SOURCES}
+  ${service_catalog-cpp2-SOURCES}
 )
 add_dependencies(thriftmetadata metadata-cpp2-target
   any_rep-cpp2-target
@@ -100,7 +106,8 @@ add_dependencies(thriftmetadata metadata-cpp2-target
   type_system-cpp2-target
   schema-cpp2-target
   record-cpp2-target
-  syntax_graph-cpp2-target)
+  syntax_graph-cpp2-target
+  service_catalog-cpp2-target)
 target_link_libraries(
   thriftmetadata
   PUBLIC
@@ -144,6 +151,8 @@ add_library(
   dynamic/String.cpp
   dynamic/Struct.cpp
   dynamic/Union.cpp
+  dynamic/ServiceCatalogDigest.cpp
+  dynamic/ServiceDescriptorSerialization.cpp
   dynamic/detail/ConcreteMapAny.cpp
   dynamic/detail/ConcreteMapBinary.cpp
   dynamic/detail/ConcreteMapBool.cpp
@@ -322,6 +331,7 @@ target_link_libraries(
 
 if (THRIFT_RPC)
 bypass_source_check("${RocketUpgrade-cpp2-SOURCES}")
+bypass_source_check("${thrift_catalog_service-cpp2-SOURCES}")
 add_library(
   thriftcpp2
 
@@ -440,6 +450,7 @@ add_library(
   server/ServiceInterceptorOnDrop.cpp
   server/ServiceInterceptorOnReceived.cpp
   server/ServiceInterceptorQualifiedName.cpp
+  server/ThriftCatalogServerInterface.cpp
   server/ThriftProcessor.cpp
   server/ThriftServer.cpp
   server/ThriftServerConfig.cpp
@@ -509,11 +520,13 @@ add_library(
   util/ScopedServerThread.cpp
   visitation/visit_by_thrift_field_metadata.cpp
   ${RocketUpgrade-cpp2-SOURCES}
+  ${thrift_catalog_service-cpp2-SOURCES}
 )
 add_dependencies(
   thriftcpp2
   rpcmetadata
   RocketUpgrade-cpp2-target
+  thrift_catalog_service-cpp2-target
   thriftannotation
   thriftmetadata
   thrift_path

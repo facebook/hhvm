@@ -199,6 +199,28 @@ thrift_generate(
   THRIFT_INCLUDE_DIRECTORIES ${THRIFT_SOURCE_DIR}
 )
 
+thrift_generate(
+  "service_catalog" #file_name
+  "" #services
+  "cpp2" #language
+  "no_metadata" #options
+  "${CMAKE_CURRENT_SOURCE_DIR}" #file_path
+  "${CMAKE_CURRENT_BINARY_DIR}" #output_path
+  "thrift/lib/thrift" #include_prefix
+  THRIFT_INCLUDE_DIRECTORIES ${THRIFT_SOURCE_DIR}
+)
+
+thrift_generate(
+  "thrift_catalog_service" #file_name
+  "ThriftCatalogService" #services
+  "cpp2" #language
+  "no_metadata" #options
+  "${CMAKE_CURRENT_SOURCE_DIR}" #file_path
+  "${CMAKE_CURRENT_BINARY_DIR}" #output_path
+  "thrift/lib/thrift" #include_prefix
+  THRIFT_INCLUDE_DIRECTORIES ${THRIFT_SOURCE_DIR}
+)
+
 set_property(GLOBAL PROPERTY any_rep-cpp2-SOURCES ${any_rep-cpp2-SOURCES})
 set_property(GLOBAL PROPERTY RpcMetadata-cpp2-SOURCES
   ${RpcMetadata-cpp2-SOURCES})
@@ -212,6 +234,10 @@ set_property(GLOBAL PROPERTY schema-cpp2-SOURCES ${schema-cpp2-SOURCES})
 set_property(GLOBAL PROPERTY type_id-cpp2-SOURCES ${type_id-cpp2-SOURCES})
 set_property(GLOBAL PROPERTY
   type_system-cpp2-SOURCES ${type_system-cpp2-SOURCES})
+set_property(GLOBAL PROPERTY
+  service_catalog-cpp2-SOURCES ${service_catalog-cpp2-SOURCES})
+set_property(GLOBAL PROPERTY thrift_catalog_service-cpp2-SOURCES
+  ${thrift_catalog_service-cpp2-SOURCES})
 set_property(GLOBAL PROPERTY standard-cpp2-SOURCES ${standard-cpp2-SOURCES})
 
 set_property(GLOBAL PROPERTY type_rep-cpp2-SOURCES ${type_rep-cpp2-SOURCES})

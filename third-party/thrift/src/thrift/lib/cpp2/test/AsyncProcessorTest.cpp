@@ -23,6 +23,7 @@
 #include <folly/executors/GlobalExecutor.h>
 #include <folly/test/TestUtils.h>
 
+#include <thrift/lib/cpp2/FieldRef.h>
 #include <thrift/lib/cpp2/GeneratedCodeHelper.h>
 #include <thrift/lib/cpp2/PluggableFunction.h>
 #include <thrift/lib/cpp2/async/AsyncProcessorHelper.h>
@@ -39,8 +40,10 @@
 #include <thrift/lib/cpp2/transport/rocket/server/SetupFrameHandler.h>
 #include <thrift/lib/cpp2/util/ScopedServerInterfaceThread.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
+#include <thrift/lib/thrift/gen-cpp2/ThriftCatalogServiceAsyncClient.h>
 
 #include <thrift/lib/cpp2/test/gen-cpp2/Calculator.h>
+#include <thrift/lib/cpp2/test/gen-cpp2/CatalogTestService.h>
 #include <thrift/lib/cpp2/test/gen-cpp2/Child.h>
 #include <thrift/lib/cpp2/test/gen-cpp2/DummyControl.h>
 #include <thrift/lib/cpp2/test/gen-cpp2/DummyMonitor.h>
@@ -54,6 +57,13 @@ using MethodMetadata = AsyncProcessorFactory::MethodMetadata;
 using MethodMetadataMap = AsyncProcessorFactory::MethodMetadataMap;
 using CreateMethodMetadataResult =
     AsyncProcessorFactory::CreateMethodMetadataResult;
+using ChildClient = ::apache::thrift::Client<Child>;
+using DummyControlClient = ::apache::thrift::Client<DummyControl>;
+using DummyMonitorClient = ::apache::thrift::Client<DummyMonitor>;
+using DummySecurityClient = ::apache::thrift::Client<DummySecurity>;
+using DummyStatusClient = ::apache::thrift::Client<DummyStatus>;
+using ThriftCatalogClient =
+    ::apache::thrift::Client<::apache::thrift::catalog::ThriftCatalogService>;
 
 using TransportType = Cpp2ConnContext::TransportType;
 
@@ -335,7 +345,7 @@ TEST_P(AsyncProcessorMethodResolutionTestP, EmptyMap) {
   auto service = std::make_shared<ChildHandlerWithMetadata>(
       [](auto&&) -> MethodMetadataMap { return {}; });
   auto runner = makeServer(service);
-  auto client = makeClientFor<ChildAsyncClient>(*runner);
+  auto client = makeClientFor<ChildClient>(*runner);
 
   EXPECT_THROW(client->semifuture_parentMethod1().get(), TApplicationException);
   EXPECT_THROW(client->semifuture_childMethod2().get(), TApplicationException);
@@ -360,7 +370,7 @@ TEST_P(AsyncProcessorMethodResolutionTestP, MistypedMetadataDeathTest) {
           return result;
         });
     auto runner = makeServer(service);
-    callback(makeClientFor<ChildAsyncClient>(*runner));
+    callback(makeClientFor<ChildClient>(*runner));
   };
 
   EXPECT_DEATH(
@@ -385,7 +395,7 @@ TEST_P(AsyncProcessorMethodResolutionTestP, ParentMapDeathTest) {
               .createMethodMetadata();
         });
         auto runner = makeServer(service);
-        auto client = makeClientFor<ChildAsyncClient>(*runner);
+        auto client = makeClientFor<ChildClient>(*runner);
         client->semifuture_parentMethod1().get();
       }(),
       "Received MethodMetadata of an unknown type");
@@ -464,7 +474,7 @@ TEST_P(AsyncProcessorMethodResolutionTestP, Wildcard) {
       }
     };
     auto runner = makeServer(std::make_shared<ChildImpl>());
-    return callback(makeClientFor<ChildAsyncClient>(*runner));
+    return callback(makeClientFor<ChildClient>(*runner));
   };
 
   EXPECT_EQ(
@@ -494,7 +504,7 @@ TEST_P(AsyncProcessorMethodResolutionTestP, Interaction) {
   };
   auto service = std::make_shared<ChildWithInteraction>();
   auto runner = makeServer(service);
-  auto client = makeClientFor<ChildAsyncClient>(*runner);
+  auto client = makeClientFor<ChildClient>(*runner);
 
   auto interaction2 = client->createInteraction();
   EXPECT_EQ(interaction2.semifuture_interactionMethod().get(), 1);
@@ -537,11 +547,13 @@ TEST_P(
     server.setSecurityInterface(std::make_shared<Security>());
   });
 
-  auto client = makeClientFor<ChildAsyncClient>(*runner);
-  auto monitoringClient = makeClientFor<DummyMonitorAsyncClient>(*runner);
-  auto statusClient = makeClientFor<DummyStatusAsyncClient>(*runner);
-  auto controlClient = makeClientFor<DummyControlAsyncClient>(*runner);
-  auto securityClient = makeClientFor<DummySecurityAsyncClient>(*runner);
+  auto client = makeClientFor<ChildClient>(*runner);
+  auto monitoringClient = makeClientFor<DummyMonitorClient>(*runner);
+  auto statusClient = makeClientFor<DummyStatusClient>(*runner);
+  auto controlClient = makeClientFor<DummyControlClient>(*runner);
+  auto securityClient = makeClientFor<DummySecurityClient>(*runner);
+
+  auto catalogClient = makeClientFor<ThriftCatalogClient>(*runner);
 
   EXPECT_EQ(client->semifuture_parentMethod1().get(), 42);
   // The monitoring interface should be invoked if the user interface doesn't
@@ -556,9 +568,71 @@ TEST_P(
   // The security interface should be invoked if no handler with higher
   // precedence has the method.
   EXPECT_EQ(securityClient->semifuture_getState().get(), 4200);
+  EXPECT_THROW(
+      catalogClient->semifuture_getThriftServiceCatalog().get(),
+      ::apache::thrift::catalog::CatalogUnavailable);
+  EXPECT_THROW(
+      catalogClient->semifuture_getThriftServiceCatalogDigest().get(),
+      ::apache::thrift::catalog::CatalogUnavailable);
+  const ::apache::thrift::type_system::Uri serviceUri =
+      "facebook.com/thrift/test/Child";
+  EXPECT_THROW(
+      catalogClient->semifuture_getThriftServiceDescriptor(serviceUri).get(),
+      ::apache::thrift::catalog::NotFound);
+  EXPECT_THROW(
+      catalogClient->semifuture_getThriftServiceDescriptorDigest(serviceUri)
+          .get(),
+      ::apache::thrift::catalog::NotFound);
   // If the method is in neither user, status, or monitoring interfaces, we
   // expect an error.
   EXPECT_THROW(client->semifuture_parentMethod3().get(), TApplicationException);
+}
+
+TEST_P(AsyncProcessorMethodResolutionTestP, ThriftCatalogService) {
+  class CatalogTestHandler : public apache::thrift::ServiceHandler<
+                                 catalog_test::CatalogTestService> {
+    std::int64_t getValue() override { return 7; }
+  };
+
+  auto runner = makeServer(std::make_shared<CatalogTestHandler>());
+  auto catalogClient = makeClientFor<ThriftCatalogClient>(*runner);
+
+  const ::apache::thrift::type_system::Uri serviceUri =
+      "facebook.com/thrift/test/catalog/CatalogTestService";
+  auto descriptor =
+      catalogClient->semifuture_getThriftServiceDescriptor(serviceUri).get();
+  const auto& descriptorDigest = *descriptor.digest();
+  EXPECT_FALSE(descriptorDigest.empty());
+  const auto& descriptorCatalog = *descriptor.catalog();
+  ASSERT_TRUE(is_non_optional_field_set_manually_or_by_serializer(
+      descriptorCatalog.typesDigest()));
+  EXPECT_FALSE(descriptorCatalog.typesDigest()->empty());
+  const auto& descriptorInterfaces = *descriptorCatalog.interfaces();
+  EXPECT_NE(descriptorInterfaces.find(serviceUri), descriptorInterfaces.end());
+  EXPECT_EQ(
+      catalogClient->semifuture_getThriftServiceDescriptorDigest(serviceUri)
+          .get(),
+      descriptorDigest);
+
+  auto catalog = catalogClient->semifuture_getThriftServiceCatalog().get();
+  const auto& catalogDigest = *catalog.digest();
+  EXPECT_FALSE(catalogDigest.empty());
+  const auto& serviceCatalog = *catalog.catalog();
+  ASSERT_TRUE(is_non_optional_field_set_manually_or_by_serializer(
+      serviceCatalog.typesDigest()));
+  EXPECT_EQ(*serviceCatalog.typesDigest(), *descriptorCatalog.typesDigest());
+  const auto& catalogInterfaces = *serviceCatalog.interfaces();
+  EXPECT_NE(catalogInterfaces.find(serviceUri), catalogInterfaces.end());
+  EXPECT_EQ(
+      catalogClient->semifuture_getThriftServiceCatalogDigest().get(),
+      catalogDigest);
+
+  EXPECT_THROW(
+      catalogClient
+          ->semifuture_getThriftServiceDescriptor(
+              "facebook.com/thrift/test/catalog/Missing")
+          .get(),
+      ::apache::thrift::catalog::NotFound);
 }
 
 TEST_P(
@@ -574,7 +648,7 @@ TEST_P(
         server.setMonitoringInterface(std::make_shared<ChildMonitor>());
       });
 
-  auto client = makeClientFor<ChildAsyncClient>(*runner);
+  auto client = makeClientFor<ChildClient>(*runner);
 
   // The user method should take precedence
   EXPECT_EQ(client->semifuture_childMethod2().get(), "hello");
@@ -680,11 +754,16 @@ TEST_P(
     server.setSecurityInterface(std::make_shared<Security>());
   });
 
-  auto client = makeClientFor<ChildAsyncClient>(*runner);
-  auto monitoringClient = makeClientFor<DummyMonitorAsyncClient>(*runner);
-  auto statusClient = makeClientFor<DummyStatusAsyncClient>(*runner);
-  auto controlClient = makeClientFor<DummyControlAsyncClient>(*runner);
-  auto securityClient = makeClientFor<DummySecurityAsyncClient>(*runner);
+  auto client = makeClientFor<ChildClient>(*runner);
+  auto monitoringClient = makeClientFor<DummyMonitorClient>(*runner);
+  auto statusClient = makeClientFor<DummyStatusClient>(*runner);
+  auto controlClient = makeClientFor<DummyControlClient>(*runner);
+  auto securityClient = makeClientFor<DummySecurityClient>(*runner);
+  auto catalogClient = makeClientFor<ThriftCatalogClient>(*runner);
+
+  EXPECT_THROW(
+      catalogClient->semifuture_getThriftServiceCatalog().get(),
+      ::apache::thrift::catalog::CatalogUnavailable);
 
   EXPECT_EQ(client->semifuture_parentMethod1().get(), 42);
   // The monitoring interface should not be available
@@ -759,10 +838,10 @@ TEST(AsyncProcessorMethodResolutionTest, MultipleService) {
         server.setMonitoringInterface(std::make_shared<Monitor>());
       }};
 
-  auto client = runner.newClient<ChildAsyncClient>(
-      nullptr, RocketClientChannel::newChannel);
+  auto client =
+      runner.newClient<ChildClient>(nullptr, RocketClientChannel::newChannel);
   auto monitoringClient =
-      runner.newClient<ChildAsyncClient>(nullptr, [](auto socket) {
+      runner.newClient<ChildClient>(nullptr, [](auto socket) {
         RequestSetupMetadata setupMetadata;
         setupMetadata.interfaceKind() = InterfaceKind::MONITORING;
         return RocketClientChannel::newChannelWithMetadata(

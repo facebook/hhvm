@@ -62,6 +62,7 @@
 #include <thrift/lib/cpp2/server/ServerInstrumentation.h>
 #include <thrift/lib/cpp2/server/StandardConcurrencyController.h>
 #include <thrift/lib/cpp2/server/TMConcurrencyController.h>
+#include <thrift/lib/cpp2/server/ThriftCatalogServerInterface.h>
 #include <thrift/lib/cpp2/server/ThriftProcessor.h>
 #include <thrift/lib/cpp2/server/metrics/PendingConnectionsMetrics.h>
 #include <thrift/lib/cpp2/transport/core/ManagedConnectionIf.h>
@@ -207,6 +208,11 @@ std::unique_ptr<AsyncProcessorFactory> createDecoratedProcessorFactory(
       ? servicesToMultiplex.end()
       : servicesToMultiplex.begin();
   servicesToMultiplex.insert(userServicePosition, std::move(processorFactory));
+  auto catalogProcessorFactory =
+      apache::thrift::detail::createThriftCatalogServerInterface(
+          servicesToMultiplex);
+  servicesToMultiplex.insert(
+      servicesToMultiplex.begin(), std::move(catalogProcessorFactory));
 
   return std::make_unique<MultiplexAsyncProcessorFactory>(
       std::move(servicesToMultiplex));

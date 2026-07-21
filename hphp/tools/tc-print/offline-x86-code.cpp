@@ -34,8 +34,6 @@ using std::string;
 
 namespace HPHP { namespace jit {
 
-#if defined(__x86_64__)
-
 const char* OfflineCode::getArchNameX86() { return "X64"; }
 
 void OfflineCode::xedInit() {
@@ -222,6 +220,5 @@ TCRegionInfo OfflineCode::getRegionInfoX86(const TCRegionRec& region,
   }
   return regionInfo;
 }
-#endif
 
 } } // HPHP::jit

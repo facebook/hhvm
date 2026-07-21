@@ -1354,6 +1354,75 @@ TEST_F(HTTPDownstreamSessionTest, TestOnContentMismatch) {
   gracefulShutdown();
 }
 
+// A request carrying both Transfer-Encoding and Content-Length is counted.
+// Client codecs normalize away one of the two framing headers, so the raw
+// request is fed directly to exercise the ambiguous case.
+TEST_F(HTTPDownstreamSessionTest, RequestWithTEAndCLRecorded) {
+  NiceMock<MockHTTPSessionStats> stats;
+  httpSession_->setSessionStats(&stats);
+  EXPECT_CALL(stats, _recordIngressReqWithTEAndCL()).Times(1);
+
+  InSequence enforceOrder;
+  auto handler = addSimpleNiceHandler();
+  handler->expectHeaders();
+  handler->expectEOM([&handler]() { handler->sendReplyWithBody(200, 100); });
+
+  const std::string rawRequest =
+      "POST / HTTP/1.1\r\n"
+      "Host: localhost\r\n"
+      "Transfer-Encoding: chunked\r\n"
+      "Content-Length: 0\r\n"
+      "\r\n"
+      "0\r\n\r\n";
+  requests_.append(folly::IOBuf::copyBuffer(rawRequest));
+  flushRequestsAndLoop();
+  gracefulShutdown();
+}
+
+// A request with only Content-Length is a normal request and is not counted.
+TEST_F(HTTPDownstreamSessionTest, RequestWithOnlyContentLengthNotRecorded) {
+  NiceMock<MockHTTPSessionStats> stats;
+  httpSession_->setSessionStats(&stats);
+  EXPECT_CALL(stats, _recordIngressReqWithTEAndCL()).Times(0);
+
+  InSequence enforceOrder;
+  auto handler = addSimpleNiceHandler();
+  handler->expectHeaders();
+  handler->expectEOM([&handler]() { handler->sendReplyWithBody(200, 100); });
+
+  const std::string rawRequest =
+      "POST / HTTP/1.1\r\n"
+      "Host: localhost\r\n"
+      "Content-Length: 5\r\n"
+      "\r\n"
+      "hello";
+  requests_.append(folly::IOBuf::copyBuffer(rawRequest));
+  flushRequestsAndLoop();
+  gracefulShutdown();
+}
+
+// A request with only Transfer-Encoding is a normal request and is not counted.
+TEST_F(HTTPDownstreamSessionTest, RequestWithOnlyTransferEncodingNotRecorded) {
+  NiceMock<MockHTTPSessionStats> stats;
+  httpSession_->setSessionStats(&stats);
+  EXPECT_CALL(stats, _recordIngressReqWithTEAndCL()).Times(0);
+
+  InSequence enforceOrder;
+  auto handler = addSimpleNiceHandler();
+  handler->expectHeaders();
+  handler->expectEOM([&handler]() { handler->sendReplyWithBody(200, 100); });
+
+  const std::string rawRequest =
+      "POST / HTTP/1.1\r\n"
+      "Host: localhost\r\n"
+      "Transfer-Encoding: chunked\r\n"
+      "\r\n"
+      "0\r\n\r\n";
+  requests_.append(folly::IOBuf::copyBuffer(rawRequest));
+  flushRequestsAndLoop();
+  gracefulShutdown();
+}
+
 TEST_F(HTTPDownstreamSessionTest, HttpWithAckTimingPipeline) {
   // Test a real pipelining case as well.  First request is done waiting for
   // ack, then receive two pipelined requests.

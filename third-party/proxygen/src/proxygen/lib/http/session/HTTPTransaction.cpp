@@ -15,6 +15,7 @@
 #include <glog/logging.h>
 #include <proxygen/lib/http/HTTPHeaderSize.h>
 #include <proxygen/lib/http/RFC2616.h>
+#include <proxygen/lib/http/codec/CodecProtocol.h>
 #include <proxygen/lib/http/codec/webtransport/WebTransportFramer.h>
 #include <proxygen/lib/http/session/HTTPSessionStats.h>
 #include <proxygen/lib/http/webtransport/HTTPWebTransport.h>
@@ -217,6 +218,16 @@ void HTTPTransaction::onIngressHeadersComplete(
   }
   checkForUpgrade(*msg);
   headRequest_ |= (msg->isRequest() && msg->getMethod() == HTTPMethod::HEAD);
+  // An HTTP/1.1 request carrying both Transfer-Encoding and Content-Length has
+  // ambiguous framing and is a request-smuggling vector (RFC 9112 §6.3.3).
+  // Count each such request so we can measure how often it happens before we
+  // start rejecting it.
+  if (stats_ && isDownstream() && msg->isRequest() &&
+      isHTTP1_1CodecProtocol(transport_.getCodec().getProtocol()) &&
+      msg->getHeaders().exists(HTTP_HEADER_TRANSFER_ENCODING) &&
+      msg->getHeaders().exists(HTTP_HEADER_CONTENT_LENGTH)) {
+    stats_->recordIngressReqWithTEAndCL();
+  }
   if ((msg->isRequest() && msg->getMethod() != HTTPMethod::CONNECT) ||
       (msg->isResponse() && !headRequest_ &&
        !RFC2616::responseBodyMustBeEmpty(msg->getStatusCode()))) {

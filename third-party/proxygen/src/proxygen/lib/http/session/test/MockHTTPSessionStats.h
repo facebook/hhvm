@@ -101,6 +101,10 @@ class MockHTTPSessionStats : public DummyHTTPSessionStats {
     _recordSessionPeriodicPingProbeTimeout();
   }
   MOCK_METHOD(void, _recordSessionPeriodicPingProbeTimeout, ());
+  void recordIngressReqWithTEAndCL() noexcept override {
+    _recordIngressReqWithTEAndCL();
+  }
+  MOCK_METHOD(void, _recordIngressReqWithTEAndCL, (), (noexcept));
 };
 
 class FakeSessionStats : public DummyHTTPSessionStats {

@@ -55,24 +55,26 @@ std::atomic<JitTranscoderFactory>& jitFactory() {
   return factory;
 }
 
-bool hasJsonMapTarget(const Command& cmd) {
+bool hasJsonMapSourceAndTarget(const Command& cmd) {
   if (const auto* mp = std::get_if<MapOp>(&cmd)) {
-    if (mp->writeFraming == ContainerFraming::Json) {
+    if (mp->readFraming == ContainerFraming::Json &&
+        mp->writeFraming == ContainerFraming::Json) {
       return true;
     }
-    return (mp->key != nullptr && hasJsonMapTarget(*mp->key)) ||
-        (mp->value != nullptr && hasJsonMapTarget(*mp->value));
+    return (mp->key != nullptr && hasJsonMapSourceAndTarget(*mp->key)) ||
+        (mp->value != nullptr && hasJsonMapSourceAndTarget(*mp->value));
   }
   if (const auto* st = std::get_if<StructOp>(&cmd)) {
     for (const auto& field : st->fields) {
-      if (field.command != nullptr && hasJsonMapTarget(*field.command)) {
+      if (field.command != nullptr &&
+          hasJsonMapSourceAndTarget(*field.command)) {
         return true;
       }
     }
     return false;
   }
   if (const auto* sq = std::get_if<SeqOp>(&cmd)) {
-    return sq->element != nullptr && hasJsonMapTarget(*sq->element);
+    return sq->element != nullptr && hasJsonMapSourceAndTarget(*sq->element);
   }
   return false;
 }
@@ -152,8 +154,8 @@ std::optional<std::string> interpreterSupports(const TranscodePlan& plan) {
       plan.targetProtocol == WireProtocol::Json) {
     return "interpreter does not yet support JSON-to-JSON plans; use Engine::Jit";
   }
-  if (hasJsonMapTarget(plan.root)) {
-    return "interpreter does not yet support JSON map targets; use Engine::Jit";
+  if (hasJsonMapSourceAndTarget(plan.root)) {
+    return "interpreter does not support JSON-to-JSON map transcodes";
   }
   return std::nullopt;
 }

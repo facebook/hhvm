@@ -96,6 +96,10 @@ uint8_t thrift_transcode_decode_json_string_token(
 void thrift_transcode_format_decimal_int(
     TranscodeCursor* cursor, int64_t value);
 
+// Writes `value` as quoted JSON decimal text.
+void thrift_transcode_format_quoted_decimal_int(
+    TranscodeCursor* cursor, int64_t value);
+
 // Writes `value` as JSON decimal text, or a quoted non-finite spelling.
 void thrift_transcode_format_decimal_float(
     TranscodeCursor* cursor, double value);

@@ -1130,6 +1130,25 @@ void thrift_transcode_format_decimal_int(
   cursor->writePos += len;
 }
 
+void thrift_transcode_format_quoted_decimal_int(
+    TranscodeCursor* cursor, int64_t value) {
+  thrift_transcode_cursor_ensure_write(cursor, 22);
+  if (cursor->error != 0) {
+    return;
+  }
+
+  *cursor->writePos++ = '"';
+  auto* begin = reinterpret_cast<char*>(cursor->writePos);
+  auto* end = begin + 20;
+  auto [ptr, ec] = std::to_chars(begin, end, value);
+  if (ec != std::errc{}) {
+    cursor->error = 1;
+    return;
+  }
+  cursor->writePos = reinterpret_cast<uint8_t*>(ptr);
+  *cursor->writePos++ = '"';
+}
+
 void thrift_transcode_format_decimal_float(
     TranscodeCursor* cursor, double value) {
   thrift_transcode_cursor_ensure_write(cursor, 32);

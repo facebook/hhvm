@@ -685,11 +685,19 @@ void patchNonEmptyMapHeader(
   }
 }
 
-bool jsonMapUsesObjectForm(const MapOp& op) {
+bool jsonMapReadsObjectForm(const MapOp& op) {
   const auto* key = std::get_if<ScalarOp>(op.key.get());
   return key != nullptr &&
       ((key->valueKind == ValueKind::Bytes &&
         key->readFn == ReadFn::ParseQuotedString) ||
+       key->valueKind == ValueKind::Enum);
+}
+
+bool jsonMapWritesObjectForm(const MapOp& op) {
+  const auto* key = std::get_if<ScalarOp>(op.key.get());
+  return key != nullptr &&
+      ((key->valueKind == ValueKind::Bytes &&
+        key->writeFn == WriteFn::WriteQuotedString) ||
        key->valueKind == ValueKind::Enum);
 }
 
@@ -722,6 +730,42 @@ void writeJsonObjectMapKey(
       keyOp.writeFn,
       reinterpret_cast<const uint8_t*>(key.data()),
       key.size());
+}
+
+void writeJsonObjectEnumKey(
+    TranscodeCursor* c, const ScalarOp& keyOp, int64_t enumValue) {
+  if (!intFits(keyOp.valueKind, enumValue)) {
+    detail::setError(c, 1);
+    return;
+  }
+
+  if (keyOp.enumNames != nullptr) {
+    if (const auto* name =
+            keyOp.enumNames->nameFor(static_cast<int32_t>(enumValue))) {
+      thrift_transcode_format_escaped_string(
+          c, reinterpret_cast<const uint8_t*>(name->data()), name->size());
+      return;
+    }
+  }
+
+  thrift_transcode_format_quoted_decimal_int(c, enumValue);
+}
+
+void writeJsonObjectMapTargetKey(TranscodeCursor* c, const ScalarOp& keyOp) {
+  if (keyOp.valueKind == ValueKind::Enum) {
+    int64_t enumValue = 0;
+    if (!readScalarInt(c, keyOp, 0, &enumValue)) {
+      return;
+    }
+    writeJsonObjectEnumKey(c, keyOp, enumValue);
+    return;
+  }
+  if (keyOp.valueKind != ValueKind::Bytes ||
+      keyOp.writeFn != WriteFn::WriteQuotedString) {
+    detail::setError(c, 90);
+    return;
+  }
+  execScalar(c, keyOp, 0);
 }
 
 void execJsonObjectMap(TranscodeCursor* c, const MapOp& op) {
@@ -915,11 +959,82 @@ void execJsonKeyValueArrayMap(TranscodeCursor* c, const MapOp& op) {
       c, writeMark, op.writeFraming, count, op.writeKeyType, op.writeValueType);
 }
 
+void execJsonObjectMapTarget(
+    TranscodeCursor* c, const MapOp& op, uint32_t count) {
+  const auto* keyOp = std::get_if<ScalarOp>(op.key.get());
+  if (keyOp == nullptr) {
+    detail::setError(c, 90);
+    return;
+  }
+
+  thrift_transcode_write_byte_checked(c, '{');
+  for (uint32_t i = 0; i < count; ++i) {
+    if (c->error) {
+      return;
+    }
+    if (i != 0) {
+      thrift_transcode_write_byte_checked(c, ',');
+    }
+    writeJsonObjectMapTargetKey(c, *keyOp);
+    if (c->error) {
+      return;
+    }
+    thrift_transcode_write_byte_checked(c, ':');
+    execCommand(c, *op.value, 0);
+  }
+  thrift_transcode_write_byte_checked(c, '}');
+}
+
+void execJsonKeyValueArrayMapTarget(
+    TranscodeCursor* c, const MapOp& op, uint32_t count) {
+  thrift_transcode_write_byte_checked(c, '[');
+  for (uint32_t i = 0; i < count; ++i) {
+    if (c->error) {
+      return;
+    }
+    if (i != 0) {
+      thrift_transcode_write_byte_checked(c, ',');
+    }
+    thrift_transcode_write_raw_bytes_checked(
+        c, reinterpret_cast<const uint8_t*>("{\"key\":"), 7);
+    execCommand(c, *op.key, 0);
+    if (c->error) {
+      return;
+    }
+    thrift_transcode_write_raw_bytes_checked(
+        c, reinterpret_cast<const uint8_t*>(",\"value\":"), 9);
+    execCommand(c, *op.value, 0);
+    if (c->error) {
+      return;
+    }
+    thrift_transcode_write_byte_checked(c, '}');
+  }
+  thrift_transcode_write_byte_checked(c, ']');
+}
+
 void execJsonMap(TranscodeCursor* c, const MapOp& op) {
-  if (jsonMapUsesObjectForm(op)) {
+  if (jsonMapReadsObjectForm(op)) {
     execJsonObjectMap(c, op);
   } else {
     execJsonKeyValueArrayMap(c, op);
+  }
+}
+
+void execJsonMapTarget(TranscodeCursor* c, const MapOp& op) {
+  if (op.readFraming == ContainerFraming::Json) {
+    detail::setError(c, 90);
+    return;
+  }
+
+  uint32_t count =
+      readMapCount(c, op.readFraming, op.readKeyType, op.readValueType);
+  if (c->error) {
+    return;
+  }
+  if (jsonMapWritesObjectForm(op)) {
+    execJsonObjectMapTarget(c, op, count);
+  } else {
+    execJsonKeyValueArrayMapTarget(c, op, count);
   }
 }
 
@@ -942,7 +1057,9 @@ void execSeq(TranscodeCursor* c, const SeqOp& op) {
     }
 
     TranscodePatchPoint writeMark = thrift_transcode_cursor_mark(c);
-    if (op.writeLoopKind == LoopKind::ByBytes) {
+    if (op.writeFraming == ContainerFraming::Json) {
+      thrift_transcode_write_byte_checked(c, '[');
+    } else if (op.writeLoopKind == LoopKind::ByBytes) {
       thrift_transcode_cursor_skip(c, 5); // protobuf: 5-byte varint length
     } else if (op.writeFraming == ContainerFraming::Compact) {
       thrift_transcode_cursor_skip(c, 6); // escape byte + 5-byte varint count
@@ -952,6 +1069,9 @@ void execSeq(TranscodeCursor* c, const SeqOp& op) {
 
     uint32_t count = 0;
     while (c->readPos < c->readEnd && !c->error) {
+      if (op.writeFraming == ContainerFraming::Json && count != 0) {
+        thrift_transcode_write_byte_checked(c, ',');
+      }
       execCommand(c, *op.element, 0);
       ++count;
     }
@@ -960,7 +1080,9 @@ void execSeq(TranscodeCursor* c, const SeqOp& op) {
       return;
     }
 
-    if (op.writeLoopKind == LoopKind::ByBytes) {
+    if (op.writeFraming == ContainerFraming::Json) {
+      thrift_transcode_write_byte_checked(c, ']');
+    } else if (op.writeLoopKind == LoopKind::ByBytes) {
       size_t bodyBytes =
           thrift_transcode_cursor_bytes_since_mark(c, writeMark) - 5;
       thrift_transcode_cursor_patch_varint(c, writeMark, bodyBytes, 5);
@@ -1050,6 +1172,21 @@ void execSeq(TranscodeCursor* c, const SeqOp& op) {
   if (c->error != 0) {
     return;
   }
+  if (op.writeFraming == ContainerFraming::Json) {
+    thrift_transcode_write_byte_checked(c, '[');
+    for (uint32_t i = 0; i < count; ++i) {
+      if (c->error) {
+        return;
+      }
+      if (i != 0) {
+        thrift_transcode_write_byte_checked(c, ',');
+      }
+      execCommand(c, *op.element, 0);
+    }
+    thrift_transcode_write_byte_checked(c, ']');
+    return;
+  }
+
   writeSeqHeader(c, op.writeFraming, count, op.writeElemType);
   if (c->error != 0) {
     return;
@@ -1063,6 +1200,10 @@ void execSeq(TranscodeCursor* c, const SeqOp& op) {
 }
 
 void execMap(TranscodeCursor* c, const MapOp& op) {
+  if (op.writeFraming == ContainerFraming::Json) {
+    execJsonMapTarget(c, op);
+    return;
+  }
   if (op.readFraming == ContainerFraming::Json) {
     execJsonMap(c, op);
     return;

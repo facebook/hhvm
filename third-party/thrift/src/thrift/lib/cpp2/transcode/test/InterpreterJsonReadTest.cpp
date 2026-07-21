@@ -41,6 +41,11 @@ std::vector<uint8_t> toBytes(const folly::IOBuf& buf) {
   return std::vector<uint8_t>(c.data(), c.data() + c.length());
 }
 
+std::string toStr(const folly::IOBuf& buf) {
+  auto c = buf.cloneCoalescedAsValue();
+  return std::string(reinterpret_cast<const char*>(c.data()), c.length());
+}
+
 folly::IOBuf wrap(const std::string& s) {
   return folly::IOBuf::wrapBufferAsValue(s.data(), s.size());
 }
@@ -500,6 +505,80 @@ TEST_F(InterpreterJsonReadTest, JsonEnumValueAcceptsNameOrId) {
   EXPECT_TRUE(jsonToCompact.transcode(wrap(R"JSON({"color":"RED(1)"})JSON"))
                   .hasError());
   EXPECT_TRUE(jsonToCompact.transcode(wrap(R"({"color":"1"})")).hasError());
+}
+
+TEST_F(InterpreterJsonReadTest, JsonMapTargetWritesSpecForms) {
+  type_system::TypeSystemBuilder builder;
+  builder.addType("test.Color", def::Enum({{"RED", 1}, {"BLUE", 2}}));
+  builder.addType(
+      "test.WithMaps",
+      def::Struct({
+          def::Field(
+              def::Identity(1, "string_map"),
+              def::AlwaysPresent,
+              TypeIds::map(TypeIds::String, TypeIds::I32)),
+          def::Field(
+              def::Identity(2, "int_map"),
+              def::AlwaysPresent,
+              TypeIds::map(TypeIds::I32, TypeIds::String)),
+          def::Field(
+              def::Identity(3, "enum_map"),
+              def::AlwaysPresent,
+              TypeIds::map(TypeIds::uri("test.Color"), TypeIds::String)),
+      }));
+  auto ts = std::move(builder).build();
+  const auto& node = ts->getUserDefinedTypeOrThrow("test.WithMaps").asStruct();
+
+  auto compact = makeThriftCompactCodec(node);
+  auto json = makeJsonCodec(node);
+  TranscodeInterpreter encoder{fuse(json, compact)};
+
+  auto compactInput = encoder.transcode(wrap(
+      R"({"string_map":{"one":1},"int_map":[{"value":"two","key":2}],"enum_map":{"1":"red","BLUE":"blue","99":"unknown"}})"));
+  ASSERT_FALSE(compactInput.hasError()) << compactInput.error().message;
+
+  auto transcoder = makeTranscoder(
+      fuse(compact, json), Engine::Interpreter, allowExperimentalProtocols());
+  ASSERT_FALSE(transcoder.hasError()) << transcoder.error().message;
+
+  auto output = (*transcoder)->transcode(**compactInput);
+  ASSERT_FALSE(output.hasError()) << output.error().message;
+  EXPECT_EQ(
+      toStr(**output),
+      R"({"string_map":{"one":1},"int_map":[{"key":2,"value":"two"}],"enum_map":{"RED":"red","BLUE":"blue","99":"unknown"}})");
+}
+
+TEST_F(InterpreterJsonReadTest, PackedProtobufSequenceWritesJsonArray) {
+  type_system::TypeSystemBuilder builder;
+  builder.addType(
+      "test.WithList",
+      def::Struct({
+          def::Field(
+              def::Identity(1, "nums"),
+              def::AlwaysPresent,
+              TypeIds::list(TypeIds::I32)),
+      }));
+  auto ts = std::move(builder).build();
+  const auto& node = ts->getUserDefinedTypeOrThrow("test.WithList").asStruct();
+
+  auto protobuf = makeProtobufBinaryCodec(node);
+  auto json = makeJsonCodec(node);
+  auto transcoder = makeTranscoder(
+      fuse(protobuf, json), Engine::Interpreter, allowExperimentalProtocols());
+  ASSERT_FALSE(transcoder.hasError()) << transcoder.error().message;
+
+  const std::vector<uint8_t> input = {
+      0x0A, // field 1, length-delimited
+      0x03, // packed payload length
+      0x14, // zigzag i32 10
+      0x28, // zigzag i32 20
+      0x3C, // zigzag i32 30
+  };
+  auto inputBuf = folly::IOBuf::wrapBufferAsValue(input.data(), input.size());
+
+  auto output = (*transcoder)->transcode(inputBuf);
+  ASSERT_FALSE(output.hasError()) << output.error().message;
+  EXPECT_EQ(toStr(**output), R"({"nums":[10,20,30]})");
 }
 
 } // namespace

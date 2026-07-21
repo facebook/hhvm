@@ -518,21 +518,48 @@ TEST(GoldenTranscodeTest, PresenceShapesRoundTripSupportedProtocols) {
 
 TEST(GoldenTranscodeTest, SequenceShapesRoundTripSupportedProtocols) {
   runProtocolCases(
-      cases<fixture::SequenceShapes>().generated("sequence-shapes"),
-      kJsonOutputUnsupported);
+      cases<fixture::SequenceShapes>().generated("sequence-shapes"));
 }
 
-TEST(GoldenTranscodeTest, MapShapesRoundTripSupportedSources) {
-  runProtocolCases(
-      cases<fixture::MapShapes>().generated("map-shapes"),
-      kJsonOutputUnsupported);
+TEST(GoldenTranscodeTest, MapShapesRoundTripSupportedProtocols) {
+  runProtocolCases(cases<fixture::MapShapes>().generated("map-shapes"));
   runPreEncodedJsonSourceCases(preEncodedJsonMapCases());
 }
 
+TEST(GoldenTranscodeTest, JsonMapDuplicateKeysAreAccepted) {
+  auto jsonWire = makeJsonCodec(structNode<fixture::MapShapes>());
+  auto compactWire = makeThriftCompactCodec(structNode<fixture::MapShapes>());
+  auto transcode = makeWireTranscoder("json->compact", jsonWire, compactWire);
+
+  EXPECT_TRUE(
+      transcode(
+          R"json({"empty_string_map":{},"string_map":{"one":1,"one":2},"int_map":[],"enum_map":{}})json")
+          .has_value());
+  EXPECT_TRUE(
+      transcode(
+          R"json({"empty_string_map":{},"string_map":{},"int_map":[],"enum_map":{"Active":"active","1":"one"}})json")
+          .has_value());
+  EXPECT_TRUE(
+      transcode(
+          R"json({"empty_string_map":{},"string_map":{},"int_map":[{"key":1,"value":"one"},{"key":1,"value":"uno"}],"enum_map":{}})json")
+          .has_value());
+}
+
+TEST(GoldenTranscodeTest, JsonMapTargetsFollowSpecObjectAndPairForms) {
+  auto value = test_data::generate<fixture::MapShapes>();
+  auto compactWire = makeThriftCompactCodec(structNode<fixture::MapShapes>());
+  auto jsonWire = makeJsonCodec(structNode<fixture::MapShapes>());
+  auto transcode = makeWireTranscoder("compact->json", compactWire, jsonWire);
+
+  auto output = transcode(CompactSerializer::serialize<std::string>(value));
+  ASSERT_TRUE(output.has_value());
+  EXPECT_EQ(
+      *output,
+      R"json({"empty_string_map":{},"string_map":{"":0,"minus":-1,"one":1},"int_map":[{"key":-1,"value":"minus"},{"key":0,"value":"zero"},{"key":42,"value":"answer"}],"enum_map":{"Unknown":"unknown","Active":"active"}})json");
+}
+
 TEST(GoldenTranscodeTest, NestedShapesRoundTripSupportedProtocols) {
-  runProtocolCases(
-      cases<fixture::NestedShapes>().generated("nested-shapes"),
-      kJsonOutputUnsupported);
+  runProtocolCases(cases<fixture::NestedShapes>().generated("nested-shapes"));
 }
 
 TEST(GoldenTranscodeTest, UnionShapesRoundTripSupportedProtocols) {
@@ -567,14 +594,8 @@ TEST(GoldenTranscodeTest, JsonRejectsDuplicateKnownFields) {
       R"({"inner":{"n":1,"n":2,"label":"x"},"matrix":[],"inner_groups":[]})");
 }
 
-TEST(GoldenTranscodeTest, DISABLED_JsonMapTargetsFollowSpecObjectAndPairForms) {
-  GTEST_SKIP() << "TODO: JSON map targets need string/enum key object form and "
-                  "non-string key array-of-key-value form.";
-}
-
-TEST(GoldenTranscodeTest, DISABLED_JsonRejectsDuplicateSetAndMapEntries) {
-  GTEST_SKIP()
-      << "TODO: JSON set/map reads need duplicate element and key rejection.";
+TEST(GoldenTranscodeTest, DISABLED_JsonRejectsDuplicateSetEntries) {
+  GTEST_SKIP() << "TODO: JSON set reads need duplicate element rejection.";
 }
 
 TEST(GoldenTranscodeTest, DISABLED_JsonRejectsUnknownFieldsByDefault) {

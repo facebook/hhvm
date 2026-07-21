@@ -204,15 +204,20 @@ std::unique_ptr<AsyncProcessorFactory> createDecoratedProcessorFactory(
       apache::thrift::detail::serviceHasUnimplementedExtraInterfaces(
           *processorFactory) ==
           ThriftServer::UnimplementedExtraInterfacesResult::UNIMPLEMENTED;
+  const bool userServiceIsWildcard =
+      std::holds_alternative<AsyncProcessorFactory::WildcardMethodMetadataMap>(
+          processorFactory->createMethodMetadata());
   auto userServicePosition = shouldPlaceExtraInterfacesInFront
       ? servicesToMultiplex.end()
       : servicesToMultiplex.begin();
   servicesToMultiplex.insert(userServicePosition, std::move(processorFactory));
-  auto catalogProcessorFactory =
-      apache::thrift::detail::createThriftCatalogServerInterface(
-          servicesToMultiplex);
-  servicesToMultiplex.insert(
-      servicesToMultiplex.begin(), std::move(catalogProcessorFactory));
+  if (!userServiceIsWildcard) {
+    auto catalogProcessorFactory =
+        apache::thrift::detail::createThriftCatalogServerInterface(
+            servicesToMultiplex);
+    servicesToMultiplex.insert(
+        servicesToMultiplex.begin(), std::move(catalogProcessorFactory));
+  }
 
   return std::make_unique<MultiplexAsyncProcessorFactory>(
       std::move(servicesToMultiplex));

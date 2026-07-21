@@ -763,7 +763,7 @@ TEST_P(
 
   EXPECT_THROW(
       catalogClient->semifuture_getThriftServiceCatalog().get(),
-      ::apache::thrift::catalog::CatalogUnavailable);
+      TApplicationException);
 
   EXPECT_EQ(client->semifuture_parentMethod1().get(), 42);
   // The monitoring interface should not be available

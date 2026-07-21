@@ -257,6 +257,8 @@ def _create_saved_state(
             "worker={}".format(bins.hh_distc_worker),
             "check",
             "--use-local-execution",
+            "--trace-store-mode",
+            "local",  # avoid polluting global trace memcache
             "--root",
             repo_root.path,
             "--save-state",

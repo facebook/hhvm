@@ -26,6 +26,7 @@ from thrift.conformance.rpc.thrift_types import (
     RequestResponseUndeclaredExceptionServerTestResult,
     Response,
     RpcTestCase,
+    ServerInstruction,
     ServerTestResult,
     SinkInitialDeclaredExceptionServerTestResult,
     SinkServerDeclaredExceptionServerTestResult,
@@ -36,8 +37,8 @@ from thrift.python.server import ThriftServer
 
 class Handler(RPCConformanceServiceInterface):
     def __init__(self) -> None:
-        self.instruction = None
-        self.result = None
+        self.instruction: ServerInstruction = ServerInstruction()
+        self.result: ServerTestResult = ServerTestResult()
 
     async def sendTestCase(self, testCase: RpcTestCase) -> None:
         self.instruction = testCase.serverInstruction
@@ -55,9 +56,9 @@ class Handler(RPCConformanceServiceInterface):
         self.result = ServerTestResult.fromValue(
             RequestResponseDeclaredExceptionServerTestResult(request=req)
         )
-        raise UserException(
-            msg=self.instruction.requestResponseDeclaredException.userException.msg
-        )
+        userException = self.instruction.requestResponseDeclaredException.userException
+        assert userException is not None
+        raise UserException(msg=userException.msg)
 
     async def requestResponseUndeclaredException(self, req: Request) -> None:
         self.result = ServerTestResult.fromValue(
@@ -76,21 +77,22 @@ class Handler(RPCConformanceServiceInterface):
         self.result = ServerTestResult.fromValue(
             SinkInitialDeclaredExceptionServerTestResult(request=req)
         )
-        raise UserException(
-            msg=self.instruction.sinkInitialDeclaredException.userException.msg
-        )
+        userException = self.instruction.sinkInitialDeclaredException.userException
+        assert userException is not None
+        raise UserException(msg=userException.msg)
 
     async def sinkServerDeclaredException(self, req: Request):
         self.result = ServerTestResult.fromValue(
             SinkServerDeclaredExceptionServerTestResult(request=req)
         )
 
+        userException = self.instruction.sinkServerDeclaredException.userException
+        assert userException is not None
+
         async def callback(agen):
             async for _ in agen:
                 pass
-            raise UserException(
-                msg=self.instruction.sinkServerDeclaredException.userException.msg
-            )
+            raise UserException(msg=userException.msg)
 
         return callback
 

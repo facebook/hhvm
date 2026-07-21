@@ -518,7 +518,6 @@ add_library(
   util/SchemaToMetadata.cpp
   util/ScopedServerInterfaceThread.cpp
   util/ScopedServerThread.cpp
-  visitation/visit_by_thrift_field_metadata.cpp
   ${RocketUpgrade-cpp2-SOURCES}
   ${thrift_catalog_service-cpp2-SOURCES}
 )

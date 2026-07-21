@@ -1039,7 +1039,6 @@ class t_mstch_cpp2_generator : public t_whisker_generator {
   }
 
   void generate_sinit();
-  void generate_visitation();
   void generate_constants();
   void generate_metadata();
   void generate_structs();
@@ -2313,7 +2312,6 @@ void t_mstch_cpp2_generator::generate_program() {
     generate_out_of_line_services();
   }
   generate_metadata();
-  generate_visitation();
 }
 
 void t_mstch_cpp2_generator::generate_constants() {
@@ -2336,19 +2334,6 @@ void t_mstch_cpp2_generator::generate_metadata() {
 void t_mstch_cpp2_generator::generate_sinit() {
   render_whisker_file(
       "module_sinit.cpp", fmt::format("{}_sinit.cpp", program_->name()));
-}
-
-void t_mstch_cpp2_generator::generate_visitation() {
-  const std::string& name = program_->name();
-  render_whisker_file(
-      "module_visitation.h", fmt::format("{}_visitation.h", name));
-  render_whisker_file(
-      "module_for_each_field.h", fmt::format("{}_for_each_field.h", name));
-  render_whisker_file(
-      "module_visit_union.h", fmt::format("{}_visit_union.h", name));
-  render_whisker_file(
-      "module_visit_by_thrift_field_metadata.h",
-      fmt::format("{}_visit_by_thrift_field_metadata.h", name));
 }
 
 void t_mstch_cpp2_generator::generate_structs() {

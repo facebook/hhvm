@@ -119,8 +119,15 @@ let load_saved_state ~(env : env) ~(local_config : ServerLocalConfig.t) :
   in
   match env.replay_token with
   | None ->
+    let watchman_sockname =
+      let { ServerLocalConfig.Watchman.sockname; _ } =
+        local_config.ServerLocalConfig.watchman
+      in
+      Option.map sockname ~f:Path.make
+    in
     let watchman_opts =
-      Saved_state_loader.Watchman_options.{ root = env.root; sockname = None }
+      Saved_state_loader.Watchman_options.
+        { root = env.root; sockname = watchman_sockname }
     in
     let%lwt result =
       State_loader_lwt.load

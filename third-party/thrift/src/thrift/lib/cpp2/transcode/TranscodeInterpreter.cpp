@@ -20,7 +20,9 @@
 #include <thrift/lib/cpp2/transcode/ReadHelpers.h>
 #include <thrift/lib/cpp2/transcode/WireType.h>
 
+#include <folly/CPortability.h>
 #include <folly/CppAttributes.h>
+#include <folly/Likely.h>
 #include <folly/ScopeGuard.h>
 #include <folly/lang/Assume.h>
 
@@ -41,6 +43,10 @@ namespace wire = apache::thrift::transcode::wire;
 
 constexpr int64_t kMalformedFieldType = 1;
 constexpr int64_t kUnsupportedProtocol = 90;
+
+FOLLY_ALWAYS_INLINE bool hasError(const TranscodeCursor* c) {
+  return FOLLY_UNLIKELY(c->error != 0);
+}
 
 // Interim mapping from the numeric error codes the intrinsics latch onto the
 // cursor to the TranscodeErrc taxonomy. kUnsupportedProtocol is the
@@ -209,7 +215,7 @@ bool intFits(ValueKind kind, int64_t v) {
 }
 
 void validateInputConsumed(TranscodeCursor* c, const TranscodePlan& plan) {
-  if (c->error != 0 || plan.sourceProtocol != WireProtocol::Json) {
+  if (hasError(c) || plan.sourceProtocol != WireProtocol::Json) {
     return;
   }
   thrift_transcode_json_skip_whitespace(c);
@@ -287,7 +293,7 @@ bool writeScalarInt(TranscodeCursor* c, const ScalarOp& op, int64_t v) {
     case WriteFn::Custom:
       folly::assume_unreachable();
   }
-  return c->error == 0;
+  return !hasError(c);
 }
 
 bool writeScalarFloat(TranscodeCursor* c, WriteFn fn, double v) {
@@ -328,7 +334,7 @@ bool writeScalarFloat(TranscodeCursor* c, WriteFn fn, double v) {
     case WriteFn::Custom:
       folly::assume_unreachable();
   }
-  return c->error == 0;
+  return !hasError(c);
 }
 
 bool writeScalarBytes(
@@ -366,12 +372,12 @@ bool writeScalarBytes(
     case WriteFn::Custom:
       folly::assume_unreachable();
   }
-  return c->error == 0;
+  return !hasError(c);
 }
 
 void execJsonBytesScalar(TranscodeCursor* c, const ScalarOp& op) {
   TranscodeJsonStringToken token{};
-  if (!thrift_transcode_read_json_string_token(c, &token)) {
+  if (FOLLY_UNLIKELY(!thrift_transcode_read_json_string_token(c, &token))) {
     return;
   }
 
@@ -389,7 +395,7 @@ void execJsonBytesScalar(TranscodeCursor* c, const ScalarOp& op) {
       case WriteFn::WriteBase64String: {
         std::string bytes =
             thrift_transcode_decode_json_string_token_to_string(c, token);
-        if (c->error != 0) {
+        if (hasError(c)) {
           return;
         }
         thrift_transcode_format_base64_string(
@@ -473,7 +479,7 @@ void execScalar(TranscodeCursor* c, const ScalarOp& op, uint8_t fieldTypeInfo) {
   if (readFnIsBytes(op.readFn)) {
     const uint8_t* data = nullptr;
     size_t len = 0;
-    if (!readScalarBytes(c, op.readFn, &data, &len)) {
+    if (FOLLY_UNLIKELY(!readScalarBytes(c, op.readFn, &data, &len))) {
       return;
     }
     if (data == nullptr && len != 0) {
@@ -481,34 +487,34 @@ void execScalar(TranscodeCursor* c, const ScalarOp& op, uint8_t fieldTypeInfo) {
       return;
     }
     const uint8_t empty = 0;
-    if (!writeScalarBytes(
-            c, op.writeFn, data == nullptr ? &empty : data, len)) {
+    if (FOLLY_UNLIKELY(!writeScalarBytes(
+            c, op.writeFn, data == nullptr ? &empty : data, len))) {
       return;
     }
     return;
   }
   if (op.valueKind == ValueKind::F32 || op.valueKind == ValueKind::F64) {
     double v = 0;
-    if (!readScalarFloat(c, op.readFn, &v)) {
+    if (FOLLY_UNLIKELY(!readScalarFloat(c, op.readFn, &v))) {
       return;
     }
-    if (!writeScalarFloat(c, op.writeFn, v)) {
+    if (FOLLY_UNLIKELY(!writeScalarFloat(c, op.writeFn, v))) {
       return;
     }
     return;
   }
   int64_t v = 0;
-  if (!readScalarInt(c, op, fieldTypeInfo, &v)) {
+  if (FOLLY_UNLIKELY(!readScalarInt(c, op, fieldTypeInfo, &v))) {
     return;
   }
-  if (!intFits(op.valueKind, v)) {
+  if (FOLLY_UNLIKELY(!intFits(op.valueKind, v))) {
     detail::setError(c, 1);
     return;
   }
   // CoerceOp is a no-op for our int64 register model (WidenI32ToI64 etc. are
   // already represented as int64); float widening is handled in the F32/F64
   // path above.
-  if (!writeScalarInt(c, op, v)) {
+  if (FOLLY_UNLIKELY(!writeScalarInt(c, op, v))) {
     return;
   }
 }
@@ -531,7 +537,7 @@ void writeDefaultStruct(TranscodeCursor* c, const StructOp& op) {
 
   int16_t prevWrite = 0;
   for (const auto& field : op.fields) {
-    if (c->error != 0) {
+    if (hasError(c)) {
       return;
     }
     if (field.optional) {
@@ -595,7 +601,7 @@ void writeSeqHeader(
       break;
     case ContainerFraming::Binary:
       thrift_transcode_cursor_ensure_write(c, 5);
-      if (c->error != 0) {
+      if (hasError(c)) {
         return;
       }
       thrift_transcode_write_byte_unchecked(c, elemType);
@@ -625,7 +631,7 @@ void writeMapHeader(
       break;
     case ContainerFraming::Binary:
       thrift_transcode_cursor_ensure_write(c, 6);
-      if (c->error != 0) {
+      if (hasError(c)) {
         return;
       }
       thrift_transcode_write_byte_unchecked(c, keyType);
@@ -711,13 +717,16 @@ void writeJsonObjectMapKey(
     int64_t enumValue = 0;
     const auto* enumNames =
         keyOp.enumNames != nullptr ? &keyOp.enumNames->values : nullptr;
-    if (!thrift_transcode_parse_json_object_enum_key(
-            key, enumNames, enumValue) ||
-        !intFits(keyOp.valueKind, enumValue)) {
+    if (FOLLY_UNLIKELY(
+            !thrift_transcode_parse_json_object_enum_key(
+                key, enumNames, enumValue) ||
+            !intFits(keyOp.valueKind, enumValue))) {
       detail::setError(c, 1);
       return;
     }
-    writeScalarInt(c, keyOp, enumValue);
+    if (FOLLY_UNLIKELY(!writeScalarInt(c, keyOp, enumValue))) {
+      return;
+    }
     return;
   }
   if (keyOp.valueKind != ValueKind::Bytes ||
@@ -725,16 +734,18 @@ void writeJsonObjectMapKey(
     detail::setError(c, 90);
     return;
   }
-  writeScalarBytes(
-      c,
-      keyOp.writeFn,
-      reinterpret_cast<const uint8_t*>(key.data()),
-      key.size());
+  if (FOLLY_UNLIKELY(!writeScalarBytes(
+          c,
+          keyOp.writeFn,
+          reinterpret_cast<const uint8_t*>(key.data()),
+          key.size()))) {
+    return;
+  }
 }
 
 void writeJsonObjectEnumKey(
     TranscodeCursor* c, const ScalarOp& keyOp, int64_t enumValue) {
-  if (!intFits(keyOp.valueKind, enumValue)) {
+  if (FOLLY_UNLIKELY(!intFits(keyOp.valueKind, enumValue))) {
     detail::setError(c, 1);
     return;
   }
@@ -754,7 +765,7 @@ void writeJsonObjectEnumKey(
 void writeJsonObjectMapTargetKey(TranscodeCursor* c, const ScalarOp& keyOp) {
   if (keyOp.valueKind == ValueKind::Enum) {
     int64_t enumValue = 0;
-    if (!readScalarInt(c, keyOp, 0, &enumValue)) {
+    if (FOLLY_UNLIKELY(!readScalarInt(c, keyOp, 0, &enumValue))) {
       return;
     }
     writeJsonObjectEnumKey(c, keyOp, enumValue);
@@ -776,12 +787,12 @@ void execJsonObjectMap(TranscodeCursor* c, const MapOp& op) {
   }
 
   thrift_transcode_json_skip_whitespace(c);
-  if (!thrift_transcode_json_expect_byte(c, '{')) {
+  if (FOLLY_UNLIKELY(!thrift_transcode_json_expect_byte(c, '{'))) {
     return;
   }
   thrift_transcode_json_skip_whitespace(c);
   if (thrift_transcode_json_peek(c) == '}') {
-    if (!thrift_transcode_json_expect_byte(c, '}')) {
+    if (FOLLY_UNLIKELY(!thrift_transcode_json_expect_byte(c, '}'))) {
       return;
     }
     writeMapHeader(c, op.writeFraming, 0, op.writeKeyType, op.writeValueType);
@@ -789,7 +800,7 @@ void execJsonObjectMap(TranscodeCursor* c, const MapOp& op) {
   }
 
   TranscodePatchPoint writeMark = reserveNonEmptyMapHeader(c, op.writeFraming);
-  if (c->error) {
+  if (hasError(c)) {
     return;
   }
   uint32_t count = 0;
@@ -800,7 +811,7 @@ void execJsonObjectMap(TranscodeCursor* c, const MapOp& op) {
       break;
     }
     if (!first) {
-      if (!thrift_transcode_json_expect_byte(c, ',')) {
+      if (FOLLY_UNLIKELY(!thrift_transcode_json_expect_byte(c, ','))) {
         return;
       }
       thrift_transcode_json_skip_whitespace(c);
@@ -808,26 +819,26 @@ void execJsonObjectMap(TranscodeCursor* c, const MapOp& op) {
     first = false;
 
     std::string key;
-    if (!thrift_transcode_read_json_object_key(c, key)) {
+    if (FOLLY_UNLIKELY(!thrift_transcode_read_json_object_key(c, key))) {
       return;
     }
 
     thrift_transcode_json_skip_whitespace(c);
-    if (!thrift_transcode_json_expect_byte(c, ':')) {
+    if (FOLLY_UNLIKELY(!thrift_transcode_json_expect_byte(c, ':'))) {
       return;
     }
 
     writeJsonObjectMapKey(c, *keyOp, key);
-    if (c->error) {
+    if (hasError(c)) {
       return;
     }
     execCommand(c, *op.value, 0);
-    if (c->error) {
+    if (hasError(c)) {
       return;
     }
     ++count;
   }
-  if (!thrift_transcode_json_expect_byte(c, '}')) {
+  if (FOLLY_UNLIKELY(!thrift_transcode_json_expect_byte(c, '}'))) {
     return;
   }
   patchNonEmptyMapHeader(
@@ -835,7 +846,7 @@ void execJsonObjectMap(TranscodeCursor* c, const MapOp& op) {
 }
 
 void execJsonKeyValueArrayEntry(TranscodeCursor* c, const MapOp& op) {
-  if (!thrift_transcode_json_expect_byte(c, '{')) {
+  if (FOLLY_UNLIKELY(!thrift_transcode_json_expect_byte(c, '{'))) {
     return;
   }
 
@@ -851,7 +862,7 @@ void execJsonKeyValueArrayEntry(TranscodeCursor* c, const MapOp& op) {
       break;
     }
     if (!first) {
-      if (!thrift_transcode_json_expect_byte(c, ',')) {
+      if (FOLLY_UNLIKELY(!thrift_transcode_json_expect_byte(c, ','))) {
         return;
       }
       thrift_transcode_json_skip_whitespace(c);
@@ -859,16 +870,16 @@ void execJsonKeyValueArrayEntry(TranscodeCursor* c, const MapOp& op) {
     first = false;
 
     std::string name;
-    if (!thrift_transcode_read_json_object_key(c, name)) {
+    if (FOLLY_UNLIKELY(!thrift_transcode_read_json_object_key(c, name))) {
       return;
     }
     thrift_transcode_json_skip_whitespace(c);
-    if (!thrift_transcode_json_expect_byte(c, ':')) {
+    if (FOLLY_UNLIKELY(!thrift_transcode_json_expect_byte(c, ':'))) {
       return;
     }
 
     const uint8_t* valueBegin = c->readPos;
-    if (!thrift_transcode_skip_json_value(c)) {
+    if (FOLLY_UNLIKELY(!thrift_transcode_skip_json_value(c))) {
       return;
     }
     const uint8_t* valueFinish = c->readPos;
@@ -881,19 +892,19 @@ void execJsonKeyValueArrayEntry(TranscodeCursor* c, const MapOp& op) {
     }
   }
 
-  if (keyStart == nullptr || valueStart == nullptr) {
+  if (FOLLY_UNLIKELY(keyStart == nullptr || valueStart == nullptr)) {
     detail::setError(c, 1);
     return;
   }
 
-  if (!thrift_transcode_json_expect_byte(c, '}')) {
+  if (FOLLY_UNLIKELY(!thrift_transcode_json_expect_byte(c, '}'))) {
     return;
   }
   const uint8_t* entryEnd = c->readPos;
 
   c->readPos = keyStart;
   execCommand(c, *op.key, 0);
-  if (c->error) {
+  if (hasError(c)) {
     return;
   }
   if (c->readPos != keyEnd) {
@@ -903,7 +914,7 @@ void execJsonKeyValueArrayEntry(TranscodeCursor* c, const MapOp& op) {
 
   c->readPos = valueStart;
   execCommand(c, *op.value, 0);
-  if (c->error) {
+  if (hasError(c)) {
     return;
   }
   if (c->readPos != valueEnd) {
@@ -915,12 +926,12 @@ void execJsonKeyValueArrayEntry(TranscodeCursor* c, const MapOp& op) {
 
 void execJsonKeyValueArrayMap(TranscodeCursor* c, const MapOp& op) {
   thrift_transcode_json_skip_whitespace(c);
-  if (!thrift_transcode_json_expect_byte(c, '[')) {
+  if (FOLLY_UNLIKELY(!thrift_transcode_json_expect_byte(c, '['))) {
     return;
   }
   thrift_transcode_json_skip_whitespace(c);
   if (thrift_transcode_json_peek(c) == ']') {
-    if (!thrift_transcode_json_expect_byte(c, ']')) {
+    if (FOLLY_UNLIKELY(!thrift_transcode_json_expect_byte(c, ']'))) {
       return;
     }
     writeMapHeader(c, op.writeFraming, 0, op.writeKeyType, op.writeValueType);
@@ -928,7 +939,7 @@ void execJsonKeyValueArrayMap(TranscodeCursor* c, const MapOp& op) {
   }
 
   TranscodePatchPoint writeMark = reserveNonEmptyMapHeader(c, op.writeFraming);
-  if (c->error) {
+  if (hasError(c)) {
     return;
   }
   uint32_t count = 0;
@@ -939,7 +950,7 @@ void execJsonKeyValueArrayMap(TranscodeCursor* c, const MapOp& op) {
       break;
     }
     if (!first) {
-      if (!thrift_transcode_json_expect_byte(c, ',')) {
+      if (FOLLY_UNLIKELY(!thrift_transcode_json_expect_byte(c, ','))) {
         return;
       }
       thrift_transcode_json_skip_whitespace(c);
@@ -947,12 +958,12 @@ void execJsonKeyValueArrayMap(TranscodeCursor* c, const MapOp& op) {
     first = false;
 
     execJsonKeyValueArrayEntry(c, op);
-    if (c->error) {
+    if (hasError(c)) {
       return;
     }
     ++count;
   }
-  if (!thrift_transcode_json_expect_byte(c, ']')) {
+  if (FOLLY_UNLIKELY(!thrift_transcode_json_expect_byte(c, ']'))) {
     return;
   }
   patchNonEmptyMapHeader(
@@ -969,14 +980,14 @@ void execJsonObjectMapTarget(
 
   thrift_transcode_write_byte_checked(c, '{');
   for (uint32_t i = 0; i < count; ++i) {
-    if (c->error) {
+    if (hasError(c)) {
       return;
     }
     if (i != 0) {
       thrift_transcode_write_byte_checked(c, ',');
     }
     writeJsonObjectMapTargetKey(c, *keyOp);
-    if (c->error) {
+    if (hasError(c)) {
       return;
     }
     thrift_transcode_write_byte_checked(c, ':');
@@ -989,7 +1000,7 @@ void execJsonKeyValueArrayMapTarget(
     TranscodeCursor* c, const MapOp& op, uint32_t count) {
   thrift_transcode_write_byte_checked(c, '[');
   for (uint32_t i = 0; i < count; ++i) {
-    if (c->error) {
+    if (hasError(c)) {
       return;
     }
     if (i != 0) {
@@ -998,13 +1009,13 @@ void execJsonKeyValueArrayMapTarget(
     thrift_transcode_write_raw_bytes_checked(
         c, reinterpret_cast<const uint8_t*>("{\"key\":"), 7);
     execCommand(c, *op.key, 0);
-    if (c->error) {
+    if (hasError(c)) {
       return;
     }
     thrift_transcode_write_raw_bytes_checked(
         c, reinterpret_cast<const uint8_t*>(",\"value\":"), 9);
     execCommand(c, *op.value, 0);
-    if (c->error) {
+    if (hasError(c)) {
       return;
     }
     thrift_transcode_write_byte_checked(c, '}');
@@ -1028,7 +1039,7 @@ void execJsonMapTarget(TranscodeCursor* c, const MapOp& op) {
 
   uint32_t count =
       readMapCount(c, op.readFraming, op.readKeyType, op.readValueType);
-  if (c->error) {
+  if (hasError(c)) {
     return;
   }
   if (jsonMapWritesObjectForm(op)) {
@@ -1048,11 +1059,11 @@ void execSeq(TranscodeCursor* c, const SeqOp& op) {
     // (non-canonical but reader-compatible); see the side-effect note in
     // KernelCodegen.cpp's emitSeqOp.
     uint64_t byteLen = thrift_transcode_read_unsigned_varint(c);
-    if (c->error) {
+    if (hasError(c)) {
       return;
     }
     const uint8_t* savedReadEnd = c->readEnd;
-    if (!setReadEndFromByteLength(*c, byteLen)) {
+    if (FOLLY_UNLIKELY(!setReadEndFromByteLength(*c, byteLen))) {
       return;
     }
 
@@ -1068,7 +1079,7 @@ void execSeq(TranscodeCursor* c, const SeqOp& op) {
     }
 
     uint32_t count = 0;
-    while (c->readPos < c->readEnd && !c->error) {
+    while (c->readPos < c->readEnd && !hasError(c)) {
       if (op.writeFraming == ContainerFraming::Json && count != 0) {
         thrift_transcode_write_byte_checked(c, ',');
       }
@@ -1076,7 +1087,7 @@ void execSeq(TranscodeCursor* c, const SeqOp& op) {
       ++count;
     }
     c->readEnd = savedReadEnd;
-    if (c->error) {
+    if (hasError(c)) {
       return;
     }
 
@@ -1112,7 +1123,7 @@ void execSeq(TranscodeCursor* c, const SeqOp& op) {
     thrift_transcode_json_skip_whitespace(c);
     thrift_transcode_json_expect_byte(
         c, '['); // untrusted input: validate, unlike the JIT
-    if (c->error) {
+    if (hasError(c)) {
       return;
     }
 
@@ -1126,7 +1137,7 @@ void execSeq(TranscodeCursor* c, const SeqOp& op) {
     uint32_t count = 0;
     bool first = true;
     while (true) {
-      if (c->error) {
+      if (hasError(c)) {
         return;
       }
       thrift_transcode_json_skip_whitespace(c);
@@ -1135,7 +1146,7 @@ void execSeq(TranscodeCursor* c, const SeqOp& op) {
       }
       if (!first) {
         thrift_transcode_json_expect_byte(c, ',');
-        if (c->error) {
+        if (hasError(c)) {
           return;
         }
       }
@@ -1145,7 +1156,7 @@ void execSeq(TranscodeCursor* c, const SeqOp& op) {
     }
 
     thrift_transcode_json_expect_byte(c, ']');
-    if (c->error) {
+    if (hasError(c)) {
       return;
     }
 
@@ -1169,13 +1180,13 @@ void execSeq(TranscodeCursor* c, const SeqOp& op) {
 
   // The interpreter baseline supports ByCount framing (Compact/Binary).
   uint32_t count = readSeqCount(c, op.readFraming, op.readElemType);
-  if (c->error != 0) {
+  if (hasError(c)) {
     return;
   }
   if (op.writeFraming == ContainerFraming::Json) {
     thrift_transcode_write_byte_checked(c, '[');
     for (uint32_t i = 0; i < count; ++i) {
-      if (c->error) {
+      if (hasError(c)) {
         return;
       }
       if (i != 0) {
@@ -1188,11 +1199,11 @@ void execSeq(TranscodeCursor* c, const SeqOp& op) {
   }
 
   writeSeqHeader(c, op.writeFraming, count, op.writeElemType);
-  if (c->error != 0) {
+  if (hasError(c)) {
     return;
   }
   for (uint32_t i = 0; i < count; ++i) {
-    if (c->error) {
+    if (hasError(c)) {
       break;
     }
     execCommand(c, *op.element, 0);
@@ -1210,19 +1221,19 @@ void execMap(TranscodeCursor* c, const MapOp& op) {
   }
   uint32_t count =
       readMapCount(c, op.readFraming, op.readKeyType, op.readValueType);
-  if (c->error != 0) {
+  if (hasError(c)) {
     return;
   }
   writeMapHeader(c, op.writeFraming, count, op.writeKeyType, op.writeValueType);
-  if (c->error != 0) {
+  if (hasError(c)) {
     return;
   }
   for (uint32_t i = 0; i < count; ++i) {
-    if (c->error) {
+    if (hasError(c)) {
       break;
     }
     execCommand(c, *op.key, 0);
-    if (c->error) {
+    if (hasError(c)) {
       break;
     }
     execCommand(c, *op.value, 0);
@@ -1266,7 +1277,7 @@ void execJsonStruct(TranscodeCursor* c, const StructOp& op) {
   }
 
   thrift_transcode_json_skip_whitespace(c);
-  if (!thrift_transcode_json_expect_byte(c, '{')) {
+  if (FOLLY_UNLIKELY(!thrift_transcode_json_expect_byte(c, '{'))) {
     return;
   }
 
@@ -1275,7 +1286,7 @@ void execJsonStruct(TranscodeCursor* c, const StructOp& op) {
   bool unionMemberSeen = false;
   std::vector<uint8_t> fieldsWithInput(op.fields.size(), 0);
   while (true) {
-    if (c->error) {
+    if (hasError(c)) {
       return;
     }
     thrift_transcode_json_skip_whitespace(c);
@@ -1283,7 +1294,7 @@ void execJsonStruct(TranscodeCursor* c, const StructOp& op) {
       break;
     }
     if (!first) {
-      if (!thrift_transcode_json_expect_byte(c, ',')) {
+      if (FOLLY_UNLIKELY(!thrift_transcode_json_expect_byte(c, ','))) {
         return;
       }
       thrift_transcode_json_skip_whitespace(c);
@@ -1291,11 +1302,11 @@ void execJsonStruct(TranscodeCursor* c, const StructOp& op) {
     first = false;
 
     TranscodeJsonStringToken name{};
-    if (!thrift_transcode_read_json_string_token(c, &name)) {
+    if (FOLLY_UNLIKELY(!thrift_transcode_read_json_string_token(c, &name))) {
       return;
     }
     thrift_transcode_json_skip_whitespace(c);
-    if (!thrift_transcode_json_expect_byte(c, ':')) {
+    if (FOLLY_UNLIKELY(!thrift_transcode_json_expect_byte(c, ':'))) {
       return;
     }
     thrift_transcode_json_skip_whitespace(c);
@@ -1303,7 +1314,7 @@ void execJsonStruct(TranscodeCursor* c, const StructOp& op) {
     size_t fieldIndex = 0;
     const FieldEntry* fe = findFieldByName(op, name, &fieldIndex);
     if (fe == nullptr) {
-      if (!thrift_transcode_skip_json_value(c)) {
+      if (FOLLY_UNLIKELY(!thrift_transcode_skip_json_value(c))) {
         return;
       }
       continue;
@@ -1336,7 +1347,7 @@ void execJsonStruct(TranscodeCursor* c, const StructOp& op) {
     if (const auto* sc = std::get_if<ScalarOp>(fe->command.get());
         sc != nullptr && sc->writeFn == WriteFn::CompactBoolInType) {
       int64_t boolVal = 0;
-      if (!readScalarInt(c, *sc, 0, &boolVal)) {
+      if (FOLLY_UNLIKELY(!readScalarInt(c, *sc, 0, &boolVal))) {
         return;
       }
       thrift_transcode_compact_write_bool_field(
@@ -1351,7 +1362,7 @@ void execJsonStruct(TranscodeCursor* c, const StructOp& op) {
   }
 
   for (size_t i = 0; i < op.fields.size(); ++i) {
-    if (c->error != 0) {
+    if (hasError(c)) {
       return;
     }
     const auto& field = op.fields[i];
@@ -1369,7 +1380,7 @@ void execJsonStruct(TranscodeCursor* c, const StructOp& op) {
     writeDefaultCommand(c, *field.command);
   }
 
-  if (!thrift_transcode_json_expect_byte(c, '}')) {
+  if (FOLLY_UNLIKELY(!thrift_transcode_json_expect_byte(c, '}'))) {
     return;
   }
   if (isUnion(op) && !unionMemberSeen) {
@@ -1431,11 +1442,11 @@ void execStruct(TranscodeCursor* c, const StructOp& op) {
   bool patchWrite = false;
   if (op.readLengthDelimited) {
     uint64_t len = thrift_transcode_read_unsigned_varint(c);
-    if (c->error != 0) {
+    if (hasError(c)) {
       return;
     }
     savedReadEnd = c->readEnd;
-    if (!setReadEndFromByteLength(*c, len)) {
+    if (FOLLY_UNLIKELY(!setReadEndFromByteLength(*c, len))) {
       return;
     }
   }
@@ -1451,7 +1462,7 @@ void execStruct(TranscodeCursor* c, const StructOp& op) {
   int16_t prevWrite = 0;
   bool wroteJsonField = false;
   while (true) {
-    if (c->error) {
+    if (hasError(c)) {
       break;
     }
     int16_t fieldId = 0;
@@ -1466,7 +1477,7 @@ void execStruct(TranscodeCursor* c, const StructOp& op) {
       rf.skip(c, ttype);
       continue;
     }
-    if (!fieldTypeMatches(rp, *fe, ttype)) {
+    if (FOLLY_UNLIKELY(!fieldTypeMatches(rp, *fe, ttype))) {
       detail::setError(c, kMalformedFieldType);
       break;
     }
@@ -1495,12 +1506,12 @@ void execStruct(TranscodeCursor* c, const StructOp& op) {
     if (const auto* sc = std::get_if<ScalarOp>(fe->command.get());
         sc != nullptr && sc->writeFn == WriteFn::CompactBoolInType) {
       int64_t boolVal = 0;
-      if (!readScalarInt(c, *sc, ttype, &boolVal)) {
+      if (FOLLY_UNLIKELY(!readScalarInt(c, *sc, ttype, &boolVal))) {
         return;
       }
       thrift_transcode_compact_write_bool_field(
           c, boolVal ? 1 : 0, fieldId, prevWrite);
-      if (c->error != 0) {
+      if (hasError(c)) {
         break;
       }
       prevWrite = fieldId;
@@ -1508,7 +1519,7 @@ void execStruct(TranscodeCursor* c, const StructOp& op) {
     }
 
     wf.writeHeader(c, fe->writeTypeInfo, fieldId, prevWrite);
-    if (c->error != 0) {
+    if (hasError(c)) {
       break;
     }
     prevWrite = fieldId;
@@ -1518,7 +1529,7 @@ void execStruct(TranscodeCursor* c, const StructOp& op) {
   if (op.readLengthDelimited && savedReadEnd != nullptr) {
     c->readEnd = savedReadEnd;
   }
-  if (c->error != 0) {
+  if (hasError(c)) {
     return;
   }
 
@@ -1531,7 +1542,7 @@ void execStruct(TranscodeCursor* c, const StructOp& op) {
   } else if (!op.writeLengthDelimited) {
     wf.writeStop(c);
   }
-  if (c->error != 0) {
+  if (hasError(c)) {
     return;
   }
 
@@ -1544,7 +1555,7 @@ void execStruct(TranscodeCursor* c, const StructOp& op) {
 
 void execCommand(
     TranscodeCursor* c, const Command& cmd, uint8_t fieldTypeInfo) {
-  if (c->error != 0) {
+  if (hasError(c)) {
     return;
   }
   if (const auto* s = std::get_if<ScalarOp>(&cmd)) {

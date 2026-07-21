@@ -138,11 +138,11 @@ class Foo final  {
 
   /** Glean { "field": "value" } */
   [[deprecated("Use `FOO.value().value()` instead of `FOO.get_value()`")]]
-  const ::std::int32_t* get_value() const&;
+  const ::std::int32_t* get_value() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "value" } */
   [[deprecated("Use `FOO.value().value()` instead of `FOO.get_value()`")]]
-  ::std::int32_t* get_value() &;
+  ::std::int32_t* get_value() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::int32_t* get_value() && = delete;
 

@@ -318,7 +318,7 @@ bool& containerStruct::set_fieldA(bool fieldA_) {
   return __fbthrift_field_fieldA;
 }
 
-const ::std::map<::std::string, bool>& containerStruct::get_fieldB() const& {
+const ::std::map<::std::string, bool>& containerStruct::get_fieldB() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_fieldB;
 }
 
@@ -326,7 +326,7 @@ const ::std::map<::std::string, bool>& containerStruct::get_fieldB() const& {
   return static_cast<::std::map<::std::string, bool>&&>(__fbthrift_field_fieldB);
 }
 
-const ::std::set<::std::int32_t>& containerStruct::get_fieldC() const& {
+const ::std::set<::std::int32_t>& containerStruct::get_fieldC() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_fieldC;
 }
 
@@ -334,7 +334,7 @@ const ::std::set<::std::int32_t>& containerStruct::get_fieldC() const& {
   return static_cast<::std::set<::std::int32_t>&&>(__fbthrift_field_fieldC);
 }
 
-const ::std::vector<::std::vector<::std::vector<::std::int32_t>>>& containerStruct::get_fieldF() const& {
+const ::std::vector<::std::vector<::std::vector<::std::int32_t>>>& containerStruct::get_fieldF() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_fieldF;
 }
 
@@ -342,7 +342,7 @@ const ::std::vector<::std::vector<::std::vector<::std::int32_t>>>& containerStru
   return static_cast<::std::vector<::std::vector<::std::vector<::std::int32_t>>>&&>(__fbthrift_field_fieldF);
 }
 
-const ::std::map<::std::string, ::std::map<::std::string, ::std::map<::std::string, ::std::int32_t>>>& containerStruct::get_fieldG() const& {
+const ::std::map<::std::string, ::std::map<::std::string, ::std::map<::std::string, ::std::int32_t>>>& containerStruct::get_fieldG() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_fieldG;
 }
 
@@ -350,7 +350,7 @@ const ::std::map<::std::string, ::std::map<::std::string, ::std::map<::std::stri
   return static_cast<::std::map<::std::string, ::std::map<::std::string, ::std::map<::std::string, ::std::int32_t>>>&&>(__fbthrift_field_fieldG);
 }
 
-const ::std::vector<::std::set<::std::int32_t>>& containerStruct::get_fieldH() const& {
+const ::std::vector<::std::set<::std::int32_t>>& containerStruct::get_fieldH() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_fieldH;
 }
 
@@ -367,7 +367,7 @@ bool& containerStruct::set_fieldI(bool fieldI_) {
   return __fbthrift_field_fieldI;
 }
 
-const ::std::map<::std::string, ::std::vector<::std::int32_t>>& containerStruct::get_fieldJ() const& {
+const ::std::map<::std::string, ::std::vector<::std::int32_t>>& containerStruct::get_fieldJ() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_fieldJ;
 }
 
@@ -375,7 +375,7 @@ const ::std::map<::std::string, ::std::vector<::std::int32_t>>& containerStruct:
   return static_cast<::std::map<::std::string, ::std::vector<::std::int32_t>>&&>(__fbthrift_field_fieldJ);
 }
 
-const ::std::vector<::std::vector<::std::vector<::std::vector<::std::int32_t>>>>& containerStruct::get_fieldK() const& {
+const ::std::vector<::std::vector<::std::vector<::std::vector<::std::int32_t>>>>& containerStruct::get_fieldK() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_fieldK;
 }
 
@@ -383,7 +383,7 @@ const ::std::vector<::std::vector<::std::vector<::std::vector<::std::int32_t>>>>
   return static_cast<::std::vector<::std::vector<::std::vector<::std::vector<::std::int32_t>>>>&&>(__fbthrift_field_fieldK);
 }
 
-const ::std::set<::std::set<::std::set<bool>>>& containerStruct::get_fieldL() const& {
+const ::std::set<::std::set<::std::set<bool>>>& containerStruct::get_fieldL() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_fieldL;
 }
 
@@ -391,7 +391,7 @@ const ::std::set<::std::set<::std::set<bool>>>& containerStruct::get_fieldL() co
   return static_cast<::std::set<::std::set<::std::set<bool>>>&&>(__fbthrift_field_fieldL);
 }
 
-const ::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>>& containerStruct::get_fieldM() const& {
+const ::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>>& containerStruct::get_fieldM() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_fieldM;
 }
 

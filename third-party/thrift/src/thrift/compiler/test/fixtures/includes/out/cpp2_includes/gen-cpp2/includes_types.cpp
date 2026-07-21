@@ -67,7 +67,7 @@ std::partial_ordering Included::operator<=>([[maybe_unused]] const Included& rhs
   return __fbthrift_field_MyIntField;
 }
 
-const ::cpp2::Foo& Included::get_MyTransitiveField() const& {
+const ::cpp2::Foo& Included::get_MyTransitiveField() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_MyTransitiveField;
 }
 

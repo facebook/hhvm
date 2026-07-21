@@ -350,7 +350,7 @@ class SerializedStruct final  {
 
   /** Glean { "field": "s" } */
   [[deprecated("Use `FOO.s().value()` instead of `FOO.get_s()`")]]
-  const ::std::string& get_s() const& {
+  const ::std::string& get_s() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_s;
   }
 
@@ -378,11 +378,11 @@ class SerializedStruct final  {
 
   /** Glean { "field": "os" } */
   [[deprecated("Use `FOO.os().value()` instead of `FOO.get_os()`")]]
-  const ::std::string* get_os() const&;
+  const ::std::string* get_os() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "os" } */
   [[deprecated("Use `FOO.os().value()` instead of `FOO.get_os()`")]]
-  ::std::string* get_os() &;
+  ::std::string* get_os() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::string* get_os() && = delete;
 
@@ -396,7 +396,7 @@ class SerializedStruct final  {
 
   /** Glean { "field": "rs" } */
   [[deprecated("Use `FOO.rs().value()` instead of `FOO.get_rs()`")]]
-  const ::std::string& get_rs() const& {
+  const ::std::string& get_rs() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_rs;
   }
 
@@ -922,7 +922,7 @@ class FOLLY_EXPORT SerializedError : public virtual apache::thrift::TException {
 
   /** Glean { "field": "msg" } */
   [[deprecated("Use `FOO.msg().value()` instead of `FOO.get_msg()`")]]
-  const ::std::string& get_msg() const& {
+  const ::std::string& get_msg() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_msg;
   }
 
@@ -942,11 +942,11 @@ class FOLLY_EXPORT SerializedError : public virtual apache::thrift::TException {
 
   /** Glean { "field": "os" } */
   [[deprecated("Use `FOO.os().value()` instead of `FOO.get_os()`")]]
-  const ::std::string* get_os() const&;
+  const ::std::string* get_os() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "os" } */
   [[deprecated("Use `FOO.os().value()` instead of `FOO.get_os()`")]]
-  ::std::string* get_os() &;
+  ::std::string* get_os() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::string* get_os() && = delete;
 
@@ -960,7 +960,7 @@ class FOLLY_EXPORT SerializedError : public virtual apache::thrift::TException {
 
   /** Glean { "field": "rs" } */
   [[deprecated("Use `FOO.rs().value()` instead of `FOO.get_rs()`")]]
-  const ::std::string& get_rs() const& {
+  const ::std::string& get_rs() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_rs;
   }
 
@@ -1228,7 +1228,7 @@ class MarshalStruct final  {
 
   /** Glean { "field": "s" } */
   [[deprecated("Use `FOO.s().value()` instead of `FOO.get_s()`")]]
-  const ::std::string& get_s() const& {
+  const ::std::string& get_s() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_s;
   }
 
@@ -1256,11 +1256,11 @@ class MarshalStruct final  {
 
   /** Glean { "field": "os" } */
   [[deprecated("Use `FOO.os().value()` instead of `FOO.get_os()`")]]
-  const ::std::string* get_os() const&;
+  const ::std::string* get_os() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "os" } */
   [[deprecated("Use `FOO.os().value()` instead of `FOO.get_os()`")]]
-  ::std::string* get_os() &;
+  ::std::string* get_os() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::string* get_os() && = delete;
 
@@ -1274,7 +1274,7 @@ class MarshalStruct final  {
 
   /** Glean { "field": "rs" } */
   [[deprecated("Use `FOO.rs().value()` instead of `FOO.get_rs()`")]]
-  const ::std::string& get_rs() const& {
+  const ::std::string& get_rs() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_rs;
   }
 
@@ -1800,7 +1800,7 @@ class FOLLY_EXPORT MarshalError : public virtual apache::thrift::TException {
 
   /** Glean { "field": "msg" } */
   [[deprecated("Use `FOO.msg().value()` instead of `FOO.get_msg()`")]]
-  const ::std::string& get_msg() const& {
+  const ::std::string& get_msg() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_msg;
   }
 
@@ -1820,11 +1820,11 @@ class FOLLY_EXPORT MarshalError : public virtual apache::thrift::TException {
 
   /** Glean { "field": "os" } */
   [[deprecated("Use `FOO.os().value()` instead of `FOO.get_os()`")]]
-  const ::std::string* get_os() const&;
+  const ::std::string* get_os() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "os" } */
   [[deprecated("Use `FOO.os().value()` instead of `FOO.get_os()`")]]
-  ::std::string* get_os() &;
+  ::std::string* get_os() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::string* get_os() && = delete;
 
@@ -1838,7 +1838,7 @@ class FOLLY_EXPORT MarshalError : public virtual apache::thrift::TException {
 
   /** Glean { "field": "rs" } */
   [[deprecated("Use `FOO.rs().value()` instead of `FOO.get_rs()`")]]
-  const ::std::string& get_rs() const& {
+  const ::std::string& get_rs() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_rs;
   }
 

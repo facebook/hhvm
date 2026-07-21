@@ -777,7 +777,7 @@ class decorated_struct final  {
 
   /** Glean { "field": "field" } */
   [[deprecated("Use `FOO.field().value()` instead of `FOO.get_field()`")]]
-  const ::std::string& get_field() const& {
+  const ::std::string& get_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_field;
   }
 
@@ -1201,7 +1201,7 @@ class ContainerStruct final  {
 
   /** Glean { "field": "fieldA" } */
   [[deprecated("Use `FOO.fieldA().value()` instead of `FOO.get_fieldA()`")]]
-  const ::std::vector<::std::int32_t>& get_fieldA() const&;
+  const ::std::vector<::std::int32_t>& get_fieldA() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "fieldA" } */
   [[deprecated("Use `FOO.fieldA().value()` instead of `FOO.get_fieldA()`")]]
@@ -1217,7 +1217,7 @@ class ContainerStruct final  {
 
   /** Glean { "field": "fieldB" } */
   [[deprecated("Use `FOO.fieldB().value()` instead of `FOO.get_fieldB()`")]]
-  const std::list<::std::int32_t>& get_fieldB() const&;
+  const std::list<::std::int32_t>& get_fieldB() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "fieldB" } */
   [[deprecated("Use `FOO.fieldB().value()` instead of `FOO.get_fieldB()`")]]
@@ -1233,7 +1233,7 @@ class ContainerStruct final  {
 
   /** Glean { "field": "fieldC" } */
   [[deprecated("Use `FOO.fieldC().value()` instead of `FOO.get_fieldC()`")]]
-  const std::deque<::std::int32_t>& get_fieldC() const&;
+  const std::deque<::std::int32_t>& get_fieldC() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "fieldC" } */
   [[deprecated("Use `FOO.fieldC().value()` instead of `FOO.get_fieldC()`")]]
@@ -1249,7 +1249,7 @@ class ContainerStruct final  {
 
   /** Glean { "field": "fieldD" } */
   [[deprecated("Use `FOO.fieldD().value()` instead of `FOO.get_fieldD()`")]]
-  const folly::fbvector<::std::int32_t>& get_fieldD() const&;
+  const folly::fbvector<::std::int32_t>& get_fieldD() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "fieldD" } */
   [[deprecated("Use `FOO.fieldD().value()` instead of `FOO.get_fieldD()`")]]
@@ -1265,7 +1265,7 @@ class ContainerStruct final  {
 
   /** Glean { "field": "fieldE" } */
   [[deprecated("Use `FOO.fieldE().value()` instead of `FOO.get_fieldE()`")]]
-  const folly::small_vector<::std::int32_t>& get_fieldE() const&;
+  const folly::small_vector<::std::int32_t>& get_fieldE() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "fieldE" } */
   [[deprecated("Use `FOO.fieldE().value()` instead of `FOO.get_fieldE()`")]]
@@ -1281,7 +1281,7 @@ class ContainerStruct final  {
 
   /** Glean { "field": "fieldF" } */
   [[deprecated("Use `FOO.fieldF().value()` instead of `FOO.get_fieldF()`")]]
-  const ::apache::thrift::fixtures::types::set_i32_7194& get_fieldF() const&;
+  const ::apache::thrift::fixtures::types::set_i32_7194& get_fieldF() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "fieldF" } */
   [[deprecated("Use `FOO.fieldF().value()` instead of `FOO.get_fieldF()`")]]
@@ -1297,7 +1297,7 @@ class ContainerStruct final  {
 
   /** Glean { "field": "fieldG" } */
   [[deprecated("Use `FOO.fieldG().value()` instead of `FOO.get_fieldG()`")]]
-  const folly::sorted_vector_map<::std::int32_t, ::std::string>& get_fieldG() const&;
+  const folly::sorted_vector_map<::std::int32_t, ::std::string>& get_fieldG() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "fieldG" } */
   [[deprecated("Use `FOO.fieldG().value()` instead of `FOO.get_fieldG()`")]]
@@ -1313,7 +1313,7 @@ class ContainerStruct final  {
 
   /** Glean { "field": "fieldH" } */
   [[deprecated("Use `FOO.fieldH().value()` instead of `FOO.get_fieldH()`")]]
-  const ::apache::thrift::fixtures::types::SomeMap& get_fieldH() const&;
+  const ::apache::thrift::fixtures::types::SomeMap& get_fieldH() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "fieldH" } */
   [[deprecated("Use `FOO.fieldH().value()` instead of `FOO.get_fieldH()`")]]
@@ -1453,7 +1453,7 @@ class CppTypeStruct final  {
 
   /** Glean { "field": "fieldA" } */
   [[deprecated("Use `FOO.fieldA().value()` instead of `FOO.get_fieldA()`")]]
-  const std::list<int32_t>& get_fieldA() const&;
+  const std::list<int32_t>& get_fieldA() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "fieldA" } */
   [[deprecated("Use `FOO.fieldA().value()` instead of `FOO.get_fieldA()`")]]
@@ -2131,7 +2131,7 @@ class TrivialNestedWithDefault final  {
 
   /** Glean { "field": "n" } */
   [[deprecated("Use `FOO.n().value()` instead of `FOO.get_n()`")]]
-  const ::apache::thrift::fixtures::types::TrivialNumeric& get_n() const&;
+  const ::apache::thrift::fixtures::types::TrivialNumeric& get_n() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "n" } */
   [[deprecated("Use `FOO.n().value()` instead of `FOO.get_n()`")]]
@@ -2311,7 +2311,7 @@ class ComplexString final  {
 
   /** Glean { "field": "a" } */
   [[deprecated("Use `FOO.a().value()` instead of `FOO.get_a()`")]]
-  const ::std::string& get_a() const& {
+  const ::std::string& get_a() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_a;
   }
 
@@ -2331,7 +2331,7 @@ class ComplexString final  {
 
   /** Glean { "field": "b" } */
   [[deprecated("Use `FOO.b().value()` instead of `FOO.get_b()`")]]
-  const ::std::map<::std::string, ::std::int32_t>& get_b() const&;
+  const ::std::map<::std::string, ::std::int32_t>& get_b() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "b" } */
   [[deprecated("Use `FOO.b().value()` instead of `FOO.get_b()`")]]
@@ -2511,7 +2511,7 @@ class ComplexNestedWithDefault final  {
 
   /** Glean { "field": "z" } */
   [[deprecated("Use `FOO.z().value()` instead of `FOO.get_z()`")]]
-  const ::std::string& get_z() const& {
+  const ::std::string& get_z() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_z;
   }
 
@@ -2531,7 +2531,7 @@ class ComplexNestedWithDefault final  {
 
   /** Glean { "field": "n" } */
   [[deprecated("Use `FOO.n().value()` instead of `FOO.get_n()`")]]
-  const ::apache::thrift::fixtures::types::ComplexString& get_n() const&;
+  const ::apache::thrift::fixtures::types::ComplexString& get_n() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "n" } */
   [[deprecated("Use `FOO.n().value()` instead of `FOO.get_n()`")]]
@@ -3481,7 +3481,7 @@ class MyStruct final  {
 
   /** Glean { "field": "MyStringField" } */
   [[deprecated("Use `FOO.MyStringField().value()` instead of `FOO.get_MyStringField()`")]]
-  const ::std::string& get_MyStringField() const& {
+  const ::std::string& get_MyStringField() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_MyStringField;
   }
 
@@ -3509,7 +3509,7 @@ class MyStruct final  {
 
   /** Glean { "field": "data" } */
   [[deprecated("Use `FOO.data().value()` instead of `FOO.get_data()`")]]
-  const ::apache::thrift::fixtures::types::MyDataItem& get_data() const&;
+  const ::apache::thrift::fixtures::types::MyDataItem& get_data() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "data" } */
   [[deprecated("Use `FOO.data().value()` instead of `FOO.get_data()`")]]
@@ -3819,7 +3819,7 @@ class AnnotatedTypes final  {
 
   /** Glean { "field": "binary_field" } */
   [[deprecated("Use `FOO.binary_field().value()` instead of `FOO.get_binary_field()`")]]
-  const ::apache::thrift::fixtures::types::TBinary_8623& get_binary_field() const& {
+  const ::apache::thrift::fixtures::types::TBinary_8623& get_binary_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_binary_field;
   }
 
@@ -3839,7 +3839,7 @@ class AnnotatedTypes final  {
 
   /** Glean { "field": "list_field" } */
   [[deprecated("Use `FOO.list_field().value()` instead of `FOO.get_list_field()`")]]
-  const ::apache::thrift::fixtures::types::SomeListOfTypeMap_2468& get_list_field() const&;
+  const ::apache::thrift::fixtures::types::SomeListOfTypeMap_2468& get_list_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "list_field" } */
   [[deprecated("Use `FOO.list_field().value()` instead of `FOO.get_list_field()`")]]
@@ -4147,11 +4147,11 @@ class ForwardUsageRoot final  {
 
   /** Glean { "field": "ForwardUsageStruct" } */
   [[deprecated("Use `FOO.ForwardUsageStruct().value()` instead of `FOO.get_ForwardUsageStruct()`")]]
-  const ::apache::thrift::fixtures::types::ForwardUsageStruct* get_ForwardUsageStruct() const&;
+  const ::apache::thrift::fixtures::types::ForwardUsageStruct* get_ForwardUsageStruct() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "ForwardUsageStruct" } */
   [[deprecated("Use `FOO.ForwardUsageStruct().value()` instead of `FOO.get_ForwardUsageStruct()`")]]
-  ::apache::thrift::fixtures::types::ForwardUsageStruct* get_ForwardUsageStruct() &;
+  ::apache::thrift::fixtures::types::ForwardUsageStruct* get_ForwardUsageStruct() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::apache::thrift::fixtures::types::ForwardUsageStruct* get_ForwardUsageStruct() && = delete;
 
@@ -4414,11 +4414,11 @@ class IncompleteMap final  {
 
   /** Glean { "field": "field" } */
   [[deprecated("Use `FOO.field().value()` instead of `FOO.get_field()`")]]
-  const ::std::map<::std::int32_t, ::apache::thrift::fixtures::types::IncompleteMapDep>* get_field() const&;
+  const ::std::map<::std::int32_t, ::apache::thrift::fixtures::types::IncompleteMapDep>* get_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "field" } */
   [[deprecated("Use `FOO.field().value()` instead of `FOO.get_field()`")]]
-  ::std::map<::std::int32_t, ::apache::thrift::fixtures::types::IncompleteMapDep>* get_field() &;
+  ::std::map<::std::int32_t, ::apache::thrift::fixtures::types::IncompleteMapDep>* get_field() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::map<::std::int32_t, ::apache::thrift::fixtures::types::IncompleteMapDep>* get_field() && = delete;
 
@@ -4714,11 +4714,11 @@ class CompleteMap final  {
 
   /** Glean { "field": "field" } */
   [[deprecated("Use `FOO.field().value()` instead of `FOO.get_field()`")]]
-  const std::unordered_map<::std::int32_t, ::apache::thrift::fixtures::types::CompleteMapDep>* get_field() const&;
+  const std::unordered_map<::std::int32_t, ::apache::thrift::fixtures::types::CompleteMapDep>* get_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "field" } */
   [[deprecated("Use `FOO.field().value()` instead of `FOO.get_field()`")]]
-  std::unordered_map<::std::int32_t, ::apache::thrift::fixtures::types::CompleteMapDep>* get_field() &;
+  std::unordered_map<::std::int32_t, ::apache::thrift::fixtures::types::CompleteMapDep>* get_field() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   std::unordered_map<::std::int32_t, ::apache::thrift::fixtures::types::CompleteMapDep>* get_field() && = delete;
 
@@ -4856,11 +4856,11 @@ class IncompleteList final  {
 
   /** Glean { "field": "field" } */
   [[deprecated("Use `FOO.field().value()` instead of `FOO.get_field()`")]]
-  const ::std::list<::apache::thrift::fixtures::types::IncompleteListDep>* get_field() const&;
+  const ::std::list<::apache::thrift::fixtures::types::IncompleteListDep>* get_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "field" } */
   [[deprecated("Use `FOO.field().value()` instead of `FOO.get_field()`")]]
-  ::std::list<::apache::thrift::fixtures::types::IncompleteListDep>* get_field() &;
+  ::std::list<::apache::thrift::fixtures::types::IncompleteListDep>* get_field() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::list<::apache::thrift::fixtures::types::IncompleteListDep>* get_field() && = delete;
 
@@ -5156,11 +5156,11 @@ class CompleteList final  {
 
   /** Glean { "field": "field" } */
   [[deprecated("Use `FOO.field().value()` instead of `FOO.get_field()`")]]
-  const folly::small_vector<::apache::thrift::fixtures::types::CompleteListDep>* get_field() const&;
+  const folly::small_vector<::apache::thrift::fixtures::types::CompleteListDep>* get_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "field" } */
   [[deprecated("Use `FOO.field().value()` instead of `FOO.get_field()`")]]
-  folly::small_vector<::apache::thrift::fixtures::types::CompleteListDep>* get_field() &;
+  folly::small_vector<::apache::thrift::fixtures::types::CompleteListDep>* get_field() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   folly::small_vector<::apache::thrift::fixtures::types::CompleteListDep>* get_field() && = delete;
 
@@ -5298,11 +5298,11 @@ class AdaptedList final  {
 
   /** Glean { "field": "field" } */
   [[deprecated("Use `FOO.field().value()` instead of `FOO.get_field()`")]]
-  const ::std::vector<::apache::thrift::fixtures::types::AdaptedListDep>* get_field() const&;
+  const ::std::vector<::apache::thrift::fixtures::types::AdaptedListDep>* get_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "field" } */
   [[deprecated("Use `FOO.field().value()` instead of `FOO.get_field()`")]]
-  ::std::vector<::apache::thrift::fixtures::types::AdaptedListDep>* get_field() &;
+  ::std::vector<::apache::thrift::fixtures::types::AdaptedListDep>* get_field() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::vector<::apache::thrift::fixtures::types::AdaptedListDep>* get_field() && = delete;
 
@@ -5438,7 +5438,7 @@ class AdaptedListDep final  {
 
   /** Glean { "field": "field" } */
   [[deprecated("Use `FOO.field().value()` instead of `FOO.get_field()`")]]
-  const ::apache::thrift::fixtures::types::AdaptedList& get_field() const&;
+  const ::apache::thrift::fixtures::types::AdaptedList& get_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "field" } */
   [[deprecated("Use `FOO.field().value()` instead of `FOO.get_field()`")]]
@@ -5705,11 +5705,11 @@ class DependentAdaptedList final  {
 
   /** Glean { "field": "field" } */
   [[deprecated("Use `FOO.field().value()` instead of `FOO.get_field()`")]]
-  const ::std::vector<::apache::thrift::fixtures::types::DependentAdaptedListDep>* get_field() const&;
+  const ::std::vector<::apache::thrift::fixtures::types::DependentAdaptedListDep>* get_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "field" } */
   [[deprecated("Use `FOO.field().value()` instead of `FOO.get_field()`")]]
-  ::std::vector<::apache::thrift::fixtures::types::DependentAdaptedListDep>* get_field() &;
+  ::std::vector<::apache::thrift::fixtures::types::DependentAdaptedListDep>* get_field() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::vector<::apache::thrift::fixtures::types::DependentAdaptedListDep>* get_field() && = delete;
 
@@ -6102,7 +6102,7 @@ class AllocatorAware final  {
 
   /** Glean { "field": "aa_list" } */
   [[deprecated("Use `FOO.aa_list().value()` instead of `FOO.get_aa_list()`")]]
-  const ::apache::thrift::fixtures::types::list_i32_9187& get_aa_list() const&;
+  const ::apache::thrift::fixtures::types::list_i32_9187& get_aa_list() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "aa_list" } */
   [[deprecated("Use `FOO.aa_list().value()` instead of `FOO.get_aa_list()`")]]
@@ -6118,7 +6118,7 @@ class AllocatorAware final  {
 
   /** Glean { "field": "aa_set" } */
   [[deprecated("Use `FOO.aa_set().value()` instead of `FOO.get_aa_set()`")]]
-  const ::apache::thrift::fixtures::types::set_i32_7070& get_aa_set() const&;
+  const ::apache::thrift::fixtures::types::set_i32_7070& get_aa_set() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "aa_set" } */
   [[deprecated("Use `FOO.aa_set().value()` instead of `FOO.get_aa_set()`")]]
@@ -6134,7 +6134,7 @@ class AllocatorAware final  {
 
   /** Glean { "field": "aa_map" } */
   [[deprecated("Use `FOO.aa_map().value()` instead of `FOO.get_aa_map()`")]]
-  const ::apache::thrift::fixtures::types::map_i32_i32_9565& get_aa_map() const&;
+  const ::apache::thrift::fixtures::types::map_i32_i32_9565& get_aa_map() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "aa_map" } */
   [[deprecated("Use `FOO.aa_map().value()` instead of `FOO.get_aa_map()`")]]
@@ -6150,7 +6150,7 @@ class AllocatorAware final  {
 
   /** Glean { "field": "aa_string" } */
   [[deprecated("Use `FOO.aa_string().value()` instead of `FOO.get_aa_string()`")]]
-  const ::apache::thrift::fixtures::types::string_5252& get_aa_string() const& {
+  const ::apache::thrift::fixtures::types::string_5252& get_aa_string() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_aa_string;
   }
 

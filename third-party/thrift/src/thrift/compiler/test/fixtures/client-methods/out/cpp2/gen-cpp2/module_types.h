@@ -145,7 +145,7 @@ class EchoRequest final  {
 
   /** Glean { "field": "text" } */
   [[deprecated("Use `FOO.text().value()` instead of `FOO.get_text()`")]]
-  const ::std::string& get_text() const& {
+  const ::std::string& get_text() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_text;
   }
 
@@ -288,7 +288,7 @@ class EchoResponse final  {
 
   /** Glean { "field": "text" } */
   [[deprecated("Use `FOO.text().value()` instead of `FOO.get_text()`")]]
-  const ::std::string& get_text() const& {
+  const ::std::string& get_text() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_text;
   }
 

@@ -337,11 +337,11 @@ class Default final  {
 
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1().value()` instead of `FOO.get_field1()`")]]
-  const ::std::int32_t* get_field1() const&;
+  const ::std::int32_t* get_field1() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1().value()` instead of `FOO.get_field1()`")]]
-  ::std::int32_t* get_field1() &;
+  ::std::int32_t* get_field1() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::int32_t* get_field1() && = delete;
 
@@ -351,11 +351,11 @@ class Default final  {
 
   /** Glean { "field": "field2" } */
   [[deprecated("Use `FOO.field2().value()` instead of `FOO.get_field2()`")]]
-  const ::std::int32_t* get_field2() const&;
+  const ::std::int32_t* get_field2() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "field2" } */
   [[deprecated("Use `FOO.field2().value()` instead of `FOO.get_field2()`")]]
-  ::std::int32_t* get_field2() &;
+  ::std::int32_t* get_field2() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::int32_t* get_field2() && = delete;
 
@@ -365,11 +365,11 @@ class Default final  {
 
   /** Glean { "field": "field3" } */
   [[deprecated("Use `FOO.field3().value()` instead of `FOO.get_field3()`")]]
-  const ::std::string* get_field3() const&;
+  const ::std::string* get_field3() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "field3" } */
   [[deprecated("Use `FOO.field3().value()` instead of `FOO.get_field3()`")]]
-  ::std::string* get_field3() &;
+  ::std::string* get_field3() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::string* get_field3() && = delete;
 
@@ -383,11 +383,11 @@ class Default final  {
 
   /** Glean { "field": "field4" } */
   [[deprecated("Use `FOO.field4().value()` instead of `FOO.get_field4()`")]]
-  const double* get_field4() const&;
+  const double* get_field4() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "field4" } */
   [[deprecated("Use `FOO.field4().value()` instead of `FOO.get_field4()`")]]
-  double* get_field4() &;
+  double* get_field4() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   double* get_field4() && = delete;
 
@@ -640,11 +640,11 @@ class NonAtomic final  {
 
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1().value()` instead of `FOO.get_field1()`")]]
-  const ::std::int32_t* get_field1() const&;
+  const ::std::int32_t* get_field1() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1().value()` instead of `FOO.get_field1()`")]]
-  ::std::int32_t* get_field1() &;
+  ::std::int32_t* get_field1() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::int32_t* get_field1() && = delete;
 
@@ -654,11 +654,11 @@ class NonAtomic final  {
 
   /** Glean { "field": "field2" } */
   [[deprecated("Use `FOO.field2().value()` instead of `FOO.get_field2()`")]]
-  const ::std::int32_t* get_field2() const&;
+  const ::std::int32_t* get_field2() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "field2" } */
   [[deprecated("Use `FOO.field2().value()` instead of `FOO.get_field2()`")]]
-  ::std::int32_t* get_field2() &;
+  ::std::int32_t* get_field2() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::int32_t* get_field2() && = delete;
 
@@ -668,11 +668,11 @@ class NonAtomic final  {
 
   /** Glean { "field": "field3" } */
   [[deprecated("Use `FOO.field3().value()` instead of `FOO.get_field3()`")]]
-  const ::std::string* get_field3() const&;
+  const ::std::string* get_field3() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "field3" } */
   [[deprecated("Use `FOO.field3().value()` instead of `FOO.get_field3()`")]]
-  ::std::string* get_field3() &;
+  ::std::string* get_field3() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::string* get_field3() && = delete;
 
@@ -686,11 +686,11 @@ class NonAtomic final  {
 
   /** Glean { "field": "field4" } */
   [[deprecated("Use `FOO.field4().value()` instead of `FOO.get_field4()`")]]
-  const double* get_field4() const&;
+  const double* get_field4() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "field4" } */
   [[deprecated("Use `FOO.field4().value()` instead of `FOO.get_field4()`")]]
-  double* get_field4() &;
+  double* get_field4() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   double* get_field4() && = delete;
 
@@ -943,11 +943,11 @@ class Atomic final  {
 
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1().value()` instead of `FOO.get_field1()`")]]
-  const ::std::int32_t* get_field1() const&;
+  const ::std::int32_t* get_field1() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1().value()` instead of `FOO.get_field1()`")]]
-  ::std::int32_t* get_field1() &;
+  ::std::int32_t* get_field1() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::int32_t* get_field1() && = delete;
 
@@ -957,11 +957,11 @@ class Atomic final  {
 
   /** Glean { "field": "field2" } */
   [[deprecated("Use `FOO.field2().value()` instead of `FOO.get_field2()`")]]
-  const ::std::int32_t* get_field2() const&;
+  const ::std::int32_t* get_field2() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "field2" } */
   [[deprecated("Use `FOO.field2().value()` instead of `FOO.get_field2()`")]]
-  ::std::int32_t* get_field2() &;
+  ::std::int32_t* get_field2() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::int32_t* get_field2() && = delete;
 
@@ -971,11 +971,11 @@ class Atomic final  {
 
   /** Glean { "field": "field3" } */
   [[deprecated("Use `FOO.field3().value()` instead of `FOO.get_field3()`")]]
-  const ::std::string* get_field3() const&;
+  const ::std::string* get_field3() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "field3" } */
   [[deprecated("Use `FOO.field3().value()` instead of `FOO.get_field3()`")]]
-  ::std::string* get_field3() &;
+  ::std::string* get_field3() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::string* get_field3() && = delete;
 
@@ -989,11 +989,11 @@ class Atomic final  {
 
   /** Glean { "field": "field4" } */
   [[deprecated("Use `FOO.field4().value()` instead of `FOO.get_field4()`")]]
-  const double* get_field4() const&;
+  const double* get_field4() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "field4" } */
   [[deprecated("Use `FOO.field4().value()` instead of `FOO.get_field4()`")]]
-  double* get_field4() &;
+  double* get_field4() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   double* get_field4() && = delete;
 
@@ -1246,11 +1246,11 @@ class AtomicFoo final  {
 
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1().value()` instead of `FOO.get_field1()`")]]
-  const ::std::int32_t* get_field1() const&;
+  const ::std::int32_t* get_field1() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1().value()` instead of `FOO.get_field1()`")]]
-  ::std::int32_t* get_field1() &;
+  ::std::int32_t* get_field1() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::int32_t* get_field1() && = delete;
 
@@ -1260,11 +1260,11 @@ class AtomicFoo final  {
 
   /** Glean { "field": "field2" } */
   [[deprecated("Use `FOO.field2().value()` instead of `FOO.get_field2()`")]]
-  const ::std::int32_t* get_field2() const&;
+  const ::std::int32_t* get_field2() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "field2" } */
   [[deprecated("Use `FOO.field2().value()` instead of `FOO.get_field2()`")]]
-  ::std::int32_t* get_field2() &;
+  ::std::int32_t* get_field2() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::int32_t* get_field2() && = delete;
 
@@ -1274,11 +1274,11 @@ class AtomicFoo final  {
 
   /** Glean { "field": "field3" } */
   [[deprecated("Use `FOO.field3().value()` instead of `FOO.get_field3()`")]]
-  const ::std::string* get_field3() const&;
+  const ::std::string* get_field3() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "field3" } */
   [[deprecated("Use `FOO.field3().value()` instead of `FOO.get_field3()`")]]
-  ::std::string* get_field3() &;
+  ::std::string* get_field3() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::string* get_field3() && = delete;
 
@@ -1292,11 +1292,11 @@ class AtomicFoo final  {
 
   /** Glean { "field": "field4" } */
   [[deprecated("Use `FOO.field4().value()` instead of `FOO.get_field4()`")]]
-  const double* get_field4() const&;
+  const double* get_field4() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "field4" } */
   [[deprecated("Use `FOO.field4().value()` instead of `FOO.get_field4()`")]]
-  double* get_field4() &;
+  double* get_field4() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   double* get_field4() && = delete;
 

@@ -206,11 +206,11 @@ std::partial_ordering Internship::operator<=>([[maybe_unused]] const Internship&
   return __fbthrift_field_weeks;
 }
 
-const ::cpp2::Company* Internship::get_employer() const& {
+const ::cpp2::Company* Internship::get_employer() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return employer_ref().has_value() ? std::addressof(__fbthrift_field_employer) : nullptr;
 }
 
-::cpp2::Company* Internship::get_employer() & {
+::cpp2::Company* Internship::get_employer() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return employer_ref().has_value() ? std::addressof(__fbthrift_field_employer) : nullptr;
 }
 
@@ -219,11 +219,11 @@ const ::cpp2::Company* Internship::get_employer() const& {
   return __fbthrift_field_employer;
 }
 
-const double* Internship::get_compensation() const& {
+const double* Internship::get_compensation() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return compensation_ref().has_value() ? std::addressof(__fbthrift_field_compensation) : nullptr;
 }
 
-double* Internship::get_compensation() & {
+double* Internship::get_compensation() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return compensation_ref().has_value() ? std::addressof(__fbthrift_field_compensation) : nullptr;
 }
 
@@ -232,11 +232,11 @@ double& Internship::set_compensation(double compensation_) {
   return __fbthrift_field_compensation;
 }
 
-const ::std::string* Internship::get_school() const& {
+const ::std::string* Internship::get_school() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return school_ref().has_value() ? std::addressof(__fbthrift_field_school) : nullptr;
 }
 
-::std::string* Internship::get_school() & {
+::std::string* Internship::get_school() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return school_ref().has_value() ? std::addressof(__fbthrift_field_school) : nullptr;
 }
 
@@ -477,7 +477,7 @@ std::partial_ordering struct2::operator<=>([[maybe_unused]] const struct2& rhs) 
   return __fbthrift_field_a;
 }
 
-const ::cpp2::struct1& struct2::get_c() const& {
+const ::cpp2::struct1& struct2::get_c() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_c;
 }
 
@@ -485,7 +485,7 @@ const ::cpp2::struct1& struct2::get_c() const& {
   return static_cast<::cpp2::struct1&&>(__fbthrift_field_c);
 }
 
-const ::std::vector<::std::int32_t>& struct2::get_d() const& {
+const ::std::vector<::std::int32_t>& struct2::get_d() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_d;
 }
 
@@ -586,7 +586,7 @@ std::partial_ordering struct3::operator<=>([[maybe_unused]] const struct3& rhs) 
   return __fbthrift_field_b;
 }
 
-const ::cpp2::struct2& struct3::get_c() const& {
+const ::cpp2::struct2& struct3::get_c() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_c;
 }
 
@@ -679,11 +679,11 @@ std::partial_ordering struct4::operator<=>([[maybe_unused]] const struct4& rhs) 
   return __fbthrift_field_a;
 }
 
-const double* struct4::get_b() const& {
+const double* struct4::get_b() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return b_ref().has_value() ? std::addressof(__fbthrift_field_b) : nullptr;
 }
 
-double* struct4::get_b() & {
+double* struct4::get_b() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return b_ref().has_value() ? std::addressof(__fbthrift_field_b) : nullptr;
 }
 
@@ -692,11 +692,11 @@ double& struct4::set_b(double b_) {
   return __fbthrift_field_b;
 }
 
-const ::std::int8_t* struct4::get_c() const& {
+const ::std::int8_t* struct4::get_c() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return c_ref().has_value() ? std::addressof(__fbthrift_field_c) : nullptr;
 }
 
-::std::int8_t* struct4::get_c() & {
+::std::int8_t* struct4::get_c() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return c_ref().has_value() ? std::addressof(__fbthrift_field_c) : nullptr;
 }
 

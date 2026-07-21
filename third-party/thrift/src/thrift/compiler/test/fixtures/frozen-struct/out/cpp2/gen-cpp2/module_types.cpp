@@ -144,7 +144,7 @@ std::partial_ordering ModuleA::operator<=>([[maybe_unused]] const ModuleA& rhs) 
   return __fbthrift_field_i32Field;
 }
 
-const ::std::vector<::std::int16_t>& ModuleA::get_listField() const& {
+const ::std::vector<::std::int16_t>& ModuleA::get_listField() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_listField;
 }
 
@@ -152,7 +152,7 @@ const ::std::vector<::std::int16_t>& ModuleA::get_listField() const& {
   return static_cast<::std::vector<::std::int16_t>&&>(__fbthrift_field_listField);
 }
 
-const ::std::map<::std::string, ::std::int32_t>& ModuleA::get_mapField() const& {
+const ::std::map<::std::string, ::std::int32_t>& ModuleA::get_mapField() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_mapField;
 }
 
@@ -160,7 +160,7 @@ const ::std::map<::std::string, ::std::int32_t>& ModuleA::get_mapField() const& 
   return static_cast<::std::map<::std::string, ::std::int32_t>&&>(__fbthrift_field_mapField);
 }
 
-const ::some::ns::IncludedA& ModuleA::get_inclAField() const& {
+const ::some::ns::IncludedA& ModuleA::get_inclAField() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_inclAField;
 }
 
@@ -168,7 +168,7 @@ const ::some::ns::IncludedA& ModuleA::get_inclAField() const& {
   return static_cast<::some::ns::IncludedA&&>(__fbthrift_field_inclAField);
 }
 
-const ::some::ns::IncludedB& ModuleA::get_inclBField() const& {
+const ::some::ns::IncludedB& ModuleA::get_inclBField() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_inclBField;
 }
 

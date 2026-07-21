@@ -166,11 +166,11 @@ bool& containerStruct2::set_req_fieldA(bool req_fieldA_) {
   return __fbthrift_field_req_fieldA;
 }
 
-const bool* containerStruct2::get_opt_fieldA() const& {
+const bool* containerStruct2::get_opt_fieldA() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return opt_fieldA_ref().has_value() ? std::addressof(__fbthrift_field_opt_fieldA) : nullptr;
 }
 
-bool* containerStruct2::get_opt_fieldA() & {
+bool* containerStruct2::get_opt_fieldA() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return opt_fieldA_ref().has_value() ? std::addressof(__fbthrift_field_opt_fieldA) : nullptr;
 }
 
@@ -179,7 +179,7 @@ bool& containerStruct2::set_opt_fieldA(bool opt_fieldA_) {
   return __fbthrift_field_opt_fieldA;
 }
 
-const ::std::map<::std::string, bool>& containerStruct2::get_fieldB() const& {
+const ::std::map<::std::string, bool>& containerStruct2::get_fieldB() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_fieldB;
 }
 
@@ -187,7 +187,7 @@ const ::std::map<::std::string, bool>& containerStruct2::get_fieldB() const& {
   return static_cast<::std::map<::std::string, bool>&&>(__fbthrift_field_fieldB);
 }
 
-const ::std::map<::std::string, bool>& containerStruct2::get_req_fieldB() const& {
+const ::std::map<::std::string, bool>& containerStruct2::get_req_fieldB() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_req_fieldB;
 }
 
@@ -195,15 +195,15 @@ const ::std::map<::std::string, bool>& containerStruct2::get_req_fieldB() const&
   return static_cast<::std::map<::std::string, bool>&&>(__fbthrift_field_req_fieldB);
 }
 
-const ::std::map<::std::string, bool>* containerStruct2::get_opt_fieldB() const& {
+const ::std::map<::std::string, bool>* containerStruct2::get_opt_fieldB() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return opt_fieldB_ref().has_value() ? std::addressof(__fbthrift_field_opt_fieldB) : nullptr;
 }
 
-::std::map<::std::string, bool>* containerStruct2::get_opt_fieldB() & {
+::std::map<::std::string, bool>* containerStruct2::get_opt_fieldB() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return opt_fieldB_ref().has_value() ? std::addressof(__fbthrift_field_opt_fieldB) : nullptr;
 }
 
-const ::std::set<::std::int32_t>& containerStruct2::get_fieldC() const& {
+const ::std::set<::std::int32_t>& containerStruct2::get_fieldC() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_fieldC;
 }
 
@@ -211,7 +211,7 @@ const ::std::set<::std::int32_t>& containerStruct2::get_fieldC() const& {
   return static_cast<::std::set<::std::int32_t>&&>(__fbthrift_field_fieldC);
 }
 
-const ::std::set<::std::int32_t>& containerStruct2::get_req_fieldC() const& {
+const ::std::set<::std::int32_t>& containerStruct2::get_req_fieldC() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_req_fieldC;
 }
 
@@ -219,19 +219,19 @@ const ::std::set<::std::int32_t>& containerStruct2::get_req_fieldC() const& {
   return static_cast<::std::set<::std::int32_t>&&>(__fbthrift_field_req_fieldC);
 }
 
-const ::std::set<::std::int32_t>* containerStruct2::get_opt_fieldC() const& {
+const ::std::set<::std::int32_t>* containerStruct2::get_opt_fieldC() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return opt_fieldC_ref().has_value() ? std::addressof(__fbthrift_field_opt_fieldC) : nullptr;
 }
 
-::std::set<::std::int32_t>* containerStruct2::get_opt_fieldC() & {
+::std::set<::std::int32_t>* containerStruct2::get_opt_fieldC() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return opt_fieldC_ref().has_value() ? std::addressof(__fbthrift_field_opt_fieldC) : nullptr;
 }
 
-const ::std::string* containerStruct2::get_opt_fieldE() const& {
+const ::std::string* containerStruct2::get_opt_fieldE() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return opt_fieldE_ref().has_value() ? std::addressof(__fbthrift_field_opt_fieldE) : nullptr;
 }
 
-::std::string* containerStruct2::get_opt_fieldE() & {
+::std::string* containerStruct2::get_opt_fieldE() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return opt_fieldE_ref().has_value() ? std::addressof(__fbthrift_field_opt_fieldE) : nullptr;
 }
 

@@ -230,7 +230,7 @@ class MyStruct final  {
 
   /** Glean { "field": "MyIncludedField" } */
   [[deprecated("Use `FOO.MyIncludedField().value()` instead of `FOO.get_MyIncludedField()`")]]
-  const ::cpp2::Included& get_MyIncludedField() const&;
+  const ::cpp2::Included& get_MyIncludedField() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "MyIncludedField" } */
   [[deprecated("Use `FOO.MyIncludedField().value()` instead of `FOO.get_MyIncludedField()`")]]
@@ -246,7 +246,7 @@ class MyStruct final  {
 
   /** Glean { "field": "MyOtherIncludedField" } */
   [[deprecated("Use `FOO.MyOtherIncludedField().value()` instead of `FOO.get_MyOtherIncludedField()`")]]
-  const ::cpp2::Included& get_MyOtherIncludedField() const&;
+  const ::cpp2::Included& get_MyOtherIncludedField() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "MyOtherIncludedField" } */
   [[deprecated("Use `FOO.MyOtherIncludedField().value()` instead of `FOO.get_MyOtherIncludedField()`")]]

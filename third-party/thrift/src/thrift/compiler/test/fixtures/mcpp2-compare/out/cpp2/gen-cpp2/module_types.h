@@ -1983,7 +1983,7 @@ class MyStruct final  {
 
   /** Glean { "field": "MyStringField" } */
   [[deprecated("Use `FOO.MyStringField().value()` instead of `FOO.get_MyStringField()`")]]
-  const ::std::string& get_MyStringField() const& {
+  const ::std::string& get_MyStringField() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_MyStringField;
   }
 
@@ -2003,7 +2003,7 @@ class MyStruct final  {
 
   /** Glean { "field": "MyStringField2" } */
   [[deprecated("Use `FOO.MyStringField2().value()` instead of `FOO.get_MyStringField2()`")]]
-  const ::std::string& get_MyStringField2() const& {
+  const ::std::string& get_MyStringField2() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_MyStringField2;
   }
 
@@ -2023,7 +2023,7 @@ class MyStruct final  {
 
   /** Glean { "field": "MyBinaryField" } */
   [[deprecated("Use `FOO.MyBinaryField().value()` instead of `FOO.get_MyBinaryField()`")]]
-  const ::std::string& get_MyBinaryField() const& {
+  const ::std::string& get_MyBinaryField() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_MyBinaryField;
   }
 
@@ -2043,11 +2043,11 @@ class MyStruct final  {
 
   /** Glean { "field": "MyBinaryField2" } */
   [[deprecated("Use `FOO.MyBinaryField2().value()` instead of `FOO.get_MyBinaryField2()`")]]
-  const ::std::string* get_MyBinaryField2() const&;
+  const ::std::string* get_MyBinaryField2() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "MyBinaryField2" } */
   [[deprecated("Use `FOO.MyBinaryField2().value()` instead of `FOO.get_MyBinaryField2()`")]]
-  ::std::string* get_MyBinaryField2() &;
+  ::std::string* get_MyBinaryField2() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::string* get_MyBinaryField2() && = delete;
 
@@ -2061,7 +2061,7 @@ class MyStruct final  {
 
   /** Glean { "field": "MyBinaryField3" } */
   [[deprecated("Use `FOO.MyBinaryField3().value()` instead of `FOO.get_MyBinaryField3()`")]]
-  const ::std::string& get_MyBinaryField3() const& {
+  const ::std::string& get_MyBinaryField3() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_MyBinaryField3;
   }
 
@@ -2081,7 +2081,7 @@ class MyStruct final  {
 
   /** Glean { "field": "MyBinaryListField4" } */
   [[deprecated("Use `FOO.MyBinaryListField4().value()` instead of `FOO.get_MyBinaryListField4()`")]]
-  const ::std::vector<::std::string>& get_MyBinaryListField4() const&;
+  const ::std::vector<::std::string>& get_MyBinaryListField4() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "MyBinaryListField4" } */
   [[deprecated("Use `FOO.MyBinaryListField4().value()` instead of `FOO.get_MyBinaryListField4()`")]]
@@ -2097,7 +2097,7 @@ class MyStruct final  {
 
   /** Glean { "field": "MyMapEnumAndInt" } */
   [[deprecated("Use `FOO.MyMapEnumAndInt().value()` instead of `FOO.get_MyMapEnumAndInt()`")]]
-  const ::std::map<::some::valid::ns::MyEnumA, ::std::string>& get_MyMapEnumAndInt() const&;
+  const ::std::map<::some::valid::ns::MyEnumA, ::std::string>& get_MyMapEnumAndInt() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "MyMapEnumAndInt" } */
   [[deprecated("Use `FOO.MyMapEnumAndInt().value()` instead of `FOO.get_MyMapEnumAndInt()`")]]
@@ -3194,7 +3194,7 @@ class FOLLY_EXPORT AnException : public virtual apache::thrift::TException {
 
   /** Glean { "field": "message2" } */
   [[deprecated("Use `FOO.message2().value()` instead of `FOO.get_message2()`")]]
-  const ::std::string& get_message2() const& {
+  const ::std::string& get_message2() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_message2;
   }
 
@@ -3214,7 +3214,7 @@ class FOLLY_EXPORT AnException : public virtual apache::thrift::TException {
 
   /** Glean { "field": "req_message" } */
   [[deprecated("Use `FOO.req_message().value()` instead of `FOO.get_req_message()`")]]
-  const ::std::string& get_req_message() const& {
+  const ::std::string& get_req_message() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_req_message;
   }
 
@@ -3234,7 +3234,7 @@ class FOLLY_EXPORT AnException : public virtual apache::thrift::TException {
 
   /** Glean { "field": "exception_list" } */
   [[deprecated("Use `FOO.exception_list().value()` instead of `FOO.get_exception_list()`")]]
-  const ::std::vector<::std::int32_t>& get_exception_list() const&;
+  const ::std::vector<::std::int32_t>& get_exception_list() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "exception_list" } */
   [[deprecated("Use `FOO.exception_list().value()` instead of `FOO.get_exception_list()`")]]
@@ -3250,7 +3250,7 @@ class FOLLY_EXPORT AnException : public virtual apache::thrift::TException {
 
   /** Glean { "field": "exception_set" } */
   [[deprecated("Use `FOO.exception_set().value()` instead of `FOO.get_exception_set()`")]]
-  const ::std::set<::std::int64_t>& get_exception_set() const&;
+  const ::std::set<::std::int64_t>& get_exception_set() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "exception_set" } */
   [[deprecated("Use `FOO.exception_set().value()` instead of `FOO.get_exception_set()`")]]
@@ -3266,7 +3266,7 @@ class FOLLY_EXPORT AnException : public virtual apache::thrift::TException {
 
   /** Glean { "field": "exception_map" } */
   [[deprecated("Use `FOO.exception_map().value()` instead of `FOO.get_exception_map()`")]]
-  const ::std::map<::std::string, ::std::int32_t>& get_exception_map() const&;
+  const ::std::map<::std::string, ::std::int32_t>& get_exception_map() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "exception_map" } */
   [[deprecated("Use `FOO.exception_map().value()` instead of `FOO.get_exception_map()`")]]
@@ -3282,7 +3282,7 @@ class FOLLY_EXPORT AnException : public virtual apache::thrift::TException {
 
   /** Glean { "field": "req_exception_map" } */
   [[deprecated("Use `FOO.req_exception_map().value()` instead of `FOO.get_req_exception_map()`")]]
-  const ::std::map<::std::string, ::std::int32_t>& get_req_exception_map() const&;
+  const ::std::map<::std::string, ::std::int32_t>& get_req_exception_map() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "req_exception_map" } */
   [[deprecated("Use `FOO.req_exception_map().value()` instead of `FOO.get_req_exception_map()`")]]
@@ -3306,7 +3306,7 @@ class FOLLY_EXPORT AnException : public virtual apache::thrift::TException {
 
   /** Glean { "field": "enum_container" } */
   [[deprecated("Use `FOO.enum_container().value()` instead of `FOO.get_enum_container()`")]]
-  const ::std::vector<::some::valid::ns::MyEnumA>& get_enum_container() const&;
+  const ::std::vector<::some::valid::ns::MyEnumA>& get_enum_container() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "enum_container" } */
   [[deprecated("Use `FOO.enum_container().value()` instead of `FOO.get_enum_container()`")]]
@@ -3322,7 +3322,7 @@ class FOLLY_EXPORT AnException : public virtual apache::thrift::TException {
 
   /** Glean { "field": "a_struct" } */
   [[deprecated("Use `FOO.a_struct().value()` instead of `FOO.get_a_struct()`")]]
-  const ::some::valid::ns::MyStruct& get_a_struct() const&;
+  const ::some::valid::ns::MyStruct& get_a_struct() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "a_struct" } */
   [[deprecated("Use `FOO.a_struct().value()` instead of `FOO.get_a_struct()`")]]
@@ -3338,7 +3338,7 @@ class FOLLY_EXPORT AnException : public virtual apache::thrift::TException {
 
   /** Glean { "field": "a_set_struct" } */
   [[deprecated("Use `FOO.a_set_struct().value()` instead of `FOO.get_a_set_struct()`")]]
-  const ::std::set<::some::valid::ns::MyStruct>& get_a_set_struct() const&;
+  const ::std::set<::some::valid::ns::MyStruct>& get_a_set_struct() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "a_set_struct" } */
   [[deprecated("Use `FOO.a_set_struct().value()` instead of `FOO.get_a_set_struct()`")]]
@@ -3354,7 +3354,7 @@ class FOLLY_EXPORT AnException : public virtual apache::thrift::TException {
 
   /** Glean { "field": "a_union_list" } */
   [[deprecated("Use `FOO.a_union_list().value()` instead of `FOO.get_a_union_list()`")]]
-  const ::std::vector<::some::valid::ns::SimpleUnion>& get_a_union_list() const&;
+  const ::std::vector<::some::valid::ns::SimpleUnion>& get_a_union_list() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "a_union_list" } */
   [[deprecated("Use `FOO.a_union_list().value()` instead of `FOO.get_a_union_list()`")]]
@@ -3370,7 +3370,7 @@ class FOLLY_EXPORT AnException : public virtual apache::thrift::TException {
 
   /** Glean { "field": "union_typedef" } */
   [[deprecated("Use `FOO.union_typedef().value()` instead of `FOO.get_union_typedef()`")]]
-  const ::some::valid::ns::unionTypeDef& get_union_typedef() const&;
+  const ::some::valid::ns::unionTypeDef& get_union_typedef() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "union_typedef" } */
   [[deprecated("Use `FOO.union_typedef().value()` instead of `FOO.get_union_typedef()`")]]
@@ -3386,7 +3386,7 @@ class FOLLY_EXPORT AnException : public virtual apache::thrift::TException {
 
   /** Glean { "field": "a_union_typedef_list" } */
   [[deprecated("Use `FOO.a_union_typedef_list().value()` instead of `FOO.get_a_union_typedef_list()`")]]
-  const ::std::vector<::some::valid::ns::unionTypeDef>& get_a_union_typedef_list() const&;
+  const ::std::vector<::some::valid::ns::unionTypeDef>& get_a_union_typedef_list() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "a_union_typedef_list" } */
   [[deprecated("Use `FOO.a_union_typedef_list().value()` instead of `FOO.get_a_union_typedef_list()`")]]
@@ -6256,7 +6256,7 @@ class FOLLY_EXPORT AnotherException : public virtual apache::thrift::TException 
 
   /** Glean { "field": "message" } */
   [[deprecated("Use `FOO.message().value()` instead of `FOO.get_message()`")]]
-  const ::std::string& get_message() const& {
+  const ::std::string& get_message() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_message;
   }
 
@@ -8137,11 +8137,11 @@ class ContainerStruct final  {
 
   /** Glean { "field": "opt_fieldA" } */
   [[deprecated("Use `FOO.opt_fieldA().value()` instead of `FOO.get_opt_fieldA()`")]]
-  const bool* get_opt_fieldA() const&;
+  const bool* get_opt_fieldA() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "opt_fieldA" } */
   [[deprecated("Use `FOO.opt_fieldA().value()` instead of `FOO.get_opt_fieldA()`")]]
-  bool* get_opt_fieldA() &;
+  bool* get_opt_fieldA() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   bool* get_opt_fieldA() && = delete;
 
@@ -8151,7 +8151,7 @@ class ContainerStruct final  {
 
   /** Glean { "field": "fieldB" } */
   [[deprecated("Use `FOO.fieldB().value()` instead of `FOO.get_fieldB()`")]]
-  const ::std::map<::std::string, bool>& get_fieldB() const&;
+  const ::std::map<::std::string, bool>& get_fieldB() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "fieldB" } */
   [[deprecated("Use `FOO.fieldB().value()` instead of `FOO.get_fieldB()`")]]
@@ -8167,7 +8167,7 @@ class ContainerStruct final  {
 
   /** Glean { "field": "req_fieldB" } */
   [[deprecated("Use `FOO.req_fieldB().value()` instead of `FOO.get_req_fieldB()`")]]
-  const ::std::map<::std::string, bool>& get_req_fieldB() const&;
+  const ::std::map<::std::string, bool>& get_req_fieldB() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "req_fieldB" } */
   [[deprecated("Use `FOO.req_fieldB().value()` instead of `FOO.get_req_fieldB()`")]]
@@ -8183,11 +8183,11 @@ class ContainerStruct final  {
 
   /** Glean { "field": "opt_fieldB" } */
   [[deprecated("Use `FOO.opt_fieldB().value()` instead of `FOO.get_opt_fieldB()`")]]
-  const ::std::map<::std::string, bool>* get_opt_fieldB() const&;
+  const ::std::map<::std::string, bool>* get_opt_fieldB() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "opt_fieldB" } */
   [[deprecated("Use `FOO.opt_fieldB().value()` instead of `FOO.get_opt_fieldB()`")]]
-  ::std::map<::std::string, bool>* get_opt_fieldB() &;
+  ::std::map<::std::string, bool>* get_opt_fieldB() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::map<::std::string, bool>* get_opt_fieldB() && = delete;
 
@@ -8201,7 +8201,7 @@ class ContainerStruct final  {
 
   /** Glean { "field": "fieldC" } */
   [[deprecated("Use `FOO.fieldC().value()` instead of `FOO.get_fieldC()`")]]
-  const ::std::set<::std::int32_t>& get_fieldC() const&;
+  const ::std::set<::std::int32_t>& get_fieldC() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "fieldC" } */
   [[deprecated("Use `FOO.fieldC().value()` instead of `FOO.get_fieldC()`")]]
@@ -8217,7 +8217,7 @@ class ContainerStruct final  {
 
   /** Glean { "field": "req_fieldC" } */
   [[deprecated("Use `FOO.req_fieldC().value()` instead of `FOO.get_req_fieldC()`")]]
-  const ::std::set<::std::int32_t>& get_req_fieldC() const&;
+  const ::std::set<::std::int32_t>& get_req_fieldC() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "req_fieldC" } */
   [[deprecated("Use `FOO.req_fieldC().value()` instead of `FOO.get_req_fieldC()`")]]
@@ -8233,11 +8233,11 @@ class ContainerStruct final  {
 
   /** Glean { "field": "opt_fieldC" } */
   [[deprecated("Use `FOO.opt_fieldC().value()` instead of `FOO.get_opt_fieldC()`")]]
-  const ::std::set<::std::int32_t>* get_opt_fieldC() const&;
+  const ::std::set<::std::int32_t>* get_opt_fieldC() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "opt_fieldC" } */
   [[deprecated("Use `FOO.opt_fieldC().value()` instead of `FOO.get_opt_fieldC()`")]]
-  ::std::set<::std::int32_t>* get_opt_fieldC() &;
+  ::std::set<::std::int32_t>* get_opt_fieldC() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::set<::std::int32_t>* get_opt_fieldC() && = delete;
 
@@ -8251,7 +8251,7 @@ class ContainerStruct final  {
 
   /** Glean { "field": "fieldD" } */
   [[deprecated("Use `FOO.fieldD().value()` instead of `FOO.get_fieldD()`")]]
-  const ::std::string& get_fieldD() const& {
+  const ::std::string& get_fieldD() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_fieldD;
   }
 
@@ -8271,7 +8271,7 @@ class ContainerStruct final  {
 
   /** Glean { "field": "fieldE" } */
   [[deprecated("Use `FOO.fieldE().value()` instead of `FOO.get_fieldE()`")]]
-  const ::std::string& get_fieldE() const& {
+  const ::std::string& get_fieldE() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_fieldE;
   }
 
@@ -8291,7 +8291,7 @@ class ContainerStruct final  {
 
   /** Glean { "field": "req_fieldE" } */
   [[deprecated("Use `FOO.req_fieldE().value()` instead of `FOO.get_req_fieldE()`")]]
-  const ::std::string& get_req_fieldE() const& {
+  const ::std::string& get_req_fieldE() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_req_fieldE;
   }
 
@@ -8311,11 +8311,11 @@ class ContainerStruct final  {
 
   /** Glean { "field": "opt_fieldE" } */
   [[deprecated("Use `FOO.opt_fieldE().value()` instead of `FOO.get_opt_fieldE()`")]]
-  const ::std::string* get_opt_fieldE() const&;
+  const ::std::string* get_opt_fieldE() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "opt_fieldE" } */
   [[deprecated("Use `FOO.opt_fieldE().value()` instead of `FOO.get_opt_fieldE()`")]]
-  ::std::string* get_opt_fieldE() &;
+  ::std::string* get_opt_fieldE() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::string* get_opt_fieldE() && = delete;
 
@@ -8329,7 +8329,7 @@ class ContainerStruct final  {
 
   /** Glean { "field": "fieldF" } */
   [[deprecated("Use `FOO.fieldF().value()` instead of `FOO.get_fieldF()`")]]
-  const ::std::vector<::std::vector<::std::int32_t>>& get_fieldF() const&;
+  const ::std::vector<::std::vector<::std::int32_t>>& get_fieldF() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "fieldF" } */
   [[deprecated("Use `FOO.fieldF().value()` instead of `FOO.get_fieldF()`")]]
@@ -8345,7 +8345,7 @@ class ContainerStruct final  {
 
   /** Glean { "field": "fieldG" } */
   [[deprecated("Use `FOO.fieldG().value()` instead of `FOO.get_fieldG()`")]]
-  const ::std::map<::std::string, ::std::map<::std::string, ::std::map<::std::string, ::std::int32_t>>>& get_fieldG() const&;
+  const ::std::map<::std::string, ::std::map<::std::string, ::std::map<::std::string, ::std::int32_t>>>& get_fieldG() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "fieldG" } */
   [[deprecated("Use `FOO.fieldG().value()` instead of `FOO.get_fieldG()`")]]
@@ -8361,7 +8361,7 @@ class ContainerStruct final  {
 
   /** Glean { "field": "fieldH" } */
   [[deprecated("Use `FOO.fieldH().value()` instead of `FOO.get_fieldH()`")]]
-  const ::std::vector<::std::set<::std::int32_t>>& get_fieldH() const&;
+  const ::std::vector<::std::set<::std::int32_t>>& get_fieldH() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "fieldH" } */
   [[deprecated("Use `FOO.fieldH().value()` instead of `FOO.get_fieldH()`")]]
@@ -8385,7 +8385,7 @@ class ContainerStruct final  {
 
   /** Glean { "field": "fieldJ" } */
   [[deprecated("Use `FOO.fieldJ().value()` instead of `FOO.get_fieldJ()`")]]
-  const ::std::map<::std::string, ::std::vector<::std::int32_t>>& get_fieldJ() const&;
+  const ::std::map<::std::string, ::std::vector<::std::int32_t>>& get_fieldJ() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "fieldJ" } */
   [[deprecated("Use `FOO.fieldJ().value()` instead of `FOO.get_fieldJ()`")]]
@@ -8401,7 +8401,7 @@ class ContainerStruct final  {
 
   /** Glean { "field": "fieldK" } */
   [[deprecated("Use `FOO.fieldK().value()` instead of `FOO.get_fieldK()`")]]
-  const ::std::vector<::std::vector<::std::vector<::std::vector<::std::int32_t>>>>& get_fieldK() const&;
+  const ::std::vector<::std::vector<::std::vector<::std::vector<::std::int32_t>>>>& get_fieldK() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "fieldK" } */
   [[deprecated("Use `FOO.fieldK().value()` instead of `FOO.get_fieldK()`")]]
@@ -8417,7 +8417,7 @@ class ContainerStruct final  {
 
   /** Glean { "field": "fieldL" } */
   [[deprecated("Use `FOO.fieldL().value()` instead of `FOO.get_fieldL()`")]]
-  const ::std::set<::std::set<::std::set<bool>>>& get_fieldL() const&;
+  const ::std::set<::std::set<::std::set<bool>>>& get_fieldL() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "fieldL" } */
   [[deprecated("Use `FOO.fieldL().value()` instead of `FOO.get_fieldL()`")]]
@@ -8433,7 +8433,7 @@ class ContainerStruct final  {
 
   /** Glean { "field": "fieldM" } */
   [[deprecated("Use `FOO.fieldM().value()` instead of `FOO.get_fieldM()`")]]
-  const ::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>>& get_fieldM() const&;
+  const ::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>>& get_fieldM() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "fieldM" } */
   [[deprecated("Use `FOO.fieldM().value()` instead of `FOO.get_fieldM()`")]]
@@ -8457,7 +8457,7 @@ class ContainerStruct final  {
 
   /** Glean { "field": "fieldO" } */
   [[deprecated("Use `FOO.fieldO().value()` instead of `FOO.get_fieldO()`")]]
-  const ::some::valid::ns::complexStructTypeDef& get_fieldO() const&;
+  const ::some::valid::ns::complexStructTypeDef& get_fieldO() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "fieldO" } */
   [[deprecated("Use `FOO.fieldO().value()` instead of `FOO.get_fieldO()`")]]
@@ -8473,7 +8473,7 @@ class ContainerStruct final  {
 
   /** Glean { "field": "fieldP" } */
   [[deprecated("Use `FOO.fieldP().value()` instead of `FOO.get_fieldP()`")]]
-  const ::std::vector<::some::valid::ns::mostComplexTypeDef>& get_fieldP() const&;
+  const ::std::vector<::some::valid::ns::mostComplexTypeDef>& get_fieldP() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "fieldP" } */
   [[deprecated("Use `FOO.fieldP().value()` instead of `FOO.get_fieldP()`")]]
@@ -8513,11 +8513,11 @@ class ContainerStruct final  {
 
   /** Glean { "field": "opt_fieldR" } */
   [[deprecated("Use `FOO.opt_fieldR().value()` instead of `FOO.get_opt_fieldR()`")]]
-  const ::some::valid::ns::MyEnumA* get_opt_fieldR() const&;
+  const ::some::valid::ns::MyEnumA* get_opt_fieldR() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "opt_fieldR" } */
   [[deprecated("Use `FOO.opt_fieldR().value()` instead of `FOO.get_opt_fieldR()`")]]
-  ::some::valid::ns::MyEnumA* get_opt_fieldR() &;
+  ::some::valid::ns::MyEnumA* get_opt_fieldR() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::some::valid::ns::MyEnumA* get_opt_fieldR() && = delete;
 
@@ -8535,7 +8535,7 @@ class ContainerStruct final  {
 
   /** Glean { "field": "fieldT" } */
   [[deprecated("Use `FOO.fieldT().value()` instead of `FOO.get_fieldT()`")]]
-  const ::std::vector<::some::valid::ns::MyEnumA>& get_fieldT() const&;
+  const ::std::vector<::some::valid::ns::MyEnumA>& get_fieldT() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "fieldT" } */
   [[deprecated("Use `FOO.fieldT().value()` instead of `FOO.get_fieldT()`")]]
@@ -8551,7 +8551,7 @@ class ContainerStruct final  {
 
   /** Glean { "field": "fieldU" } */
   [[deprecated("Use `FOO.fieldU().value()` instead of `FOO.get_fieldU()`")]]
-  const ::std::vector<::some::valid::ns::MyEnumA>& get_fieldU() const&;
+  const ::std::vector<::some::valid::ns::MyEnumA>& get_fieldU() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "fieldU" } */
   [[deprecated("Use `FOO.fieldU().value()` instead of `FOO.get_fieldU()`")]]
@@ -8567,7 +8567,7 @@ class ContainerStruct final  {
 
   /** Glean { "field": "fieldV" } */
   [[deprecated("Use `FOO.fieldV().value()` instead of `FOO.get_fieldV()`")]]
-  const ::some::valid::ns::MyStruct& get_fieldV() const&;
+  const ::some::valid::ns::MyStruct& get_fieldV() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "fieldV" } */
   [[deprecated("Use `FOO.fieldV().value()` instead of `FOO.get_fieldV()`")]]
@@ -8583,7 +8583,7 @@ class ContainerStruct final  {
 
   /** Glean { "field": "req_fieldV" } */
   [[deprecated("Use `FOO.req_fieldV().value()` instead of `FOO.get_req_fieldV()`")]]
-  const ::some::valid::ns::MyStruct& get_req_fieldV() const&;
+  const ::some::valid::ns::MyStruct& get_req_fieldV() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "req_fieldV" } */
   [[deprecated("Use `FOO.req_fieldV().value()` instead of `FOO.get_req_fieldV()`")]]
@@ -8599,11 +8599,11 @@ class ContainerStruct final  {
 
   /** Glean { "field": "opt_fieldV" } */
   [[deprecated("Use `FOO.opt_fieldV().value()` instead of `FOO.get_opt_fieldV()`")]]
-  const ::some::valid::ns::MyStruct* get_opt_fieldV() const&;
+  const ::some::valid::ns::MyStruct* get_opt_fieldV() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "opt_fieldV" } */
   [[deprecated("Use `FOO.opt_fieldV().value()` instead of `FOO.get_opt_fieldV()`")]]
-  ::some::valid::ns::MyStruct* get_opt_fieldV() &;
+  ::some::valid::ns::MyStruct* get_opt_fieldV() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::some::valid::ns::MyStruct* get_opt_fieldV() && = delete;
 
@@ -8617,7 +8617,7 @@ class ContainerStruct final  {
 
   /** Glean { "field": "fieldW" } */
   [[deprecated("Use `FOO.fieldW().value()` instead of `FOO.get_fieldW()`")]]
-  const ::std::set<::some::valid::ns::MyStruct>& get_fieldW() const&;
+  const ::std::set<::some::valid::ns::MyStruct>& get_fieldW() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "fieldW" } */
   [[deprecated("Use `FOO.fieldW().value()` instead of `FOO.get_fieldW()`")]]
@@ -8633,7 +8633,7 @@ class ContainerStruct final  {
 
   /** Glean { "field": "fieldX" } */
   [[deprecated("Use `FOO.fieldX().value()` instead of `FOO.get_fieldX()`")]]
-  const ::some::valid::ns::ComplexUnion& get_fieldX() const&;
+  const ::some::valid::ns::ComplexUnion& get_fieldX() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "fieldX" } */
   [[deprecated("Use `FOO.fieldX().value()` instead of `FOO.get_fieldX()`")]]
@@ -8649,7 +8649,7 @@ class ContainerStruct final  {
 
   /** Glean { "field": "req_fieldX" } */
   [[deprecated("Use `FOO.req_fieldX().value()` instead of `FOO.get_req_fieldX()`")]]
-  const ::some::valid::ns::ComplexUnion& get_req_fieldX() const&;
+  const ::some::valid::ns::ComplexUnion& get_req_fieldX() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "req_fieldX" } */
   [[deprecated("Use `FOO.req_fieldX().value()` instead of `FOO.get_req_fieldX()`")]]
@@ -8665,11 +8665,11 @@ class ContainerStruct final  {
 
   /** Glean { "field": "opt_fieldX" } */
   [[deprecated("Use `FOO.opt_fieldX().value()` instead of `FOO.get_opt_fieldX()`")]]
-  const ::some::valid::ns::ComplexUnion* get_opt_fieldX() const&;
+  const ::some::valid::ns::ComplexUnion* get_opt_fieldX() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "opt_fieldX" } */
   [[deprecated("Use `FOO.opt_fieldX().value()` instead of `FOO.get_opt_fieldX()`")]]
-  ::some::valid::ns::ComplexUnion* get_opt_fieldX() &;
+  ::some::valid::ns::ComplexUnion* get_opt_fieldX() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::some::valid::ns::ComplexUnion* get_opt_fieldX() && = delete;
 
@@ -8683,7 +8683,7 @@ class ContainerStruct final  {
 
   /** Glean { "field": "fieldY" } */
   [[deprecated("Use `FOO.fieldY().value()` instead of `FOO.get_fieldY()`")]]
-  const ::std::vector<::some::valid::ns::ComplexUnion>& get_fieldY() const&;
+  const ::std::vector<::some::valid::ns::ComplexUnion>& get_fieldY() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "fieldY" } */
   [[deprecated("Use `FOO.fieldY().value()` instead of `FOO.get_fieldY()`")]]
@@ -8699,7 +8699,7 @@ class ContainerStruct final  {
 
   /** Glean { "field": "fieldZ" } */
   [[deprecated("Use `FOO.fieldZ().value()` instead of `FOO.get_fieldZ()`")]]
-  const ::some::valid::ns::unionTypeDef& get_fieldZ() const&;
+  const ::some::valid::ns::unionTypeDef& get_fieldZ() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "fieldZ" } */
   [[deprecated("Use `FOO.fieldZ().value()` instead of `FOO.get_fieldZ()`")]]
@@ -8715,7 +8715,7 @@ class ContainerStruct final  {
 
   /** Glean { "field": "fieldAA" } */
   [[deprecated("Use `FOO.fieldAA().value()` instead of `FOO.get_fieldAA()`")]]
-  const ::std::vector<::some::valid::ns::unionTypeDef>& get_fieldAA() const&;
+  const ::std::vector<::some::valid::ns::unionTypeDef>& get_fieldAA() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "fieldAA" } */
   [[deprecated("Use `FOO.fieldAA().value()` instead of `FOO.get_fieldAA()`")]]
@@ -8747,7 +8747,7 @@ class ContainerStruct final  {
 
   /** Glean { "field": "fieldAE" } */
   [[deprecated("Use `FOO.fieldAE().value()` instead of `FOO.get_fieldAE()`")]]
-  const ::std::map<::std::string, ::std::int32_t>& get_fieldAE() const&;
+  const ::std::map<::std::string, ::std::int32_t>& get_fieldAE() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "fieldAE" } */
   [[deprecated("Use `FOO.fieldAE().value()` instead of `FOO.get_fieldAE()`")]]
@@ -9017,7 +9017,7 @@ class MyIncludedStruct final  {
 
   /** Glean { "field": "MyIncludedStruct" } */
   [[deprecated("Use `FOO.MyIncludedStruct().value()` instead of `FOO.get_MyIncludedStruct()`")]]
-  const ::some::valid::ns::AStruct& get_MyIncludedStruct() const&;
+  const ::some::valid::ns::AStruct& get_MyIncludedStruct() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "MyIncludedStruct" } */
   [[deprecated("Use `FOO.MyIncludedStruct().value()` instead of `FOO.get_MyIncludedStruct()`")]]
@@ -9033,7 +9033,7 @@ class MyIncludedStruct final  {
 
   /** Glean { "field": "ARequiredField" } */
   [[deprecated("Use `FOO.ARequiredField().value()` instead of `FOO.get_ARequiredField()`")]]
-  const ::some::valid::ns::AStruct& get_ARequiredField() const&;
+  const ::some::valid::ns::AStruct& get_ARequiredField() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "ARequiredField" } */
   [[deprecated("Use `FOO.ARequiredField().value()` instead of `FOO.get_ARequiredField()`")]]
@@ -10664,7 +10664,7 @@ class AnnotatedStruct  {
 
   /** Glean { "field": "no_annotation" } */
   [[deprecated("Use `FOO.no_annotation().value()` instead of `FOO.get_no_annotation()`")]]
-  const ::some::valid::ns::ContainerStruct& get_no_annotation() const&;
+  const ::some::valid::ns::ContainerStruct& get_no_annotation() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "no_annotation" } */
   [[deprecated("Use `FOO.no_annotation().value()` instead of `FOO.get_no_annotation()`")]]
@@ -10688,7 +10688,7 @@ class AnnotatedStruct  {
 
   /** Glean { "field": "list_type" } */
   [[deprecated("Use `FOO.list_type().value()` instead of `FOO.get_list_type()`")]]
-  const ::some::valid::ns::FollySmallVectorI64& get_list_type() const&;
+  const ::some::valid::ns::FollySmallVectorI64& get_list_type() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "list_type" } */
   [[deprecated("Use `FOO.list_type().value()` instead of `FOO.get_list_type()`")]]
@@ -10704,7 +10704,7 @@ class AnnotatedStruct  {
 
   /** Glean { "field": "set_type" } */
   [[deprecated("Use `FOO.set_type().value()` instead of `FOO.get_set_type()`")]]
-  const ::some::valid::ns::SortedVectorSetString& get_set_type() const&;
+  const ::some::valid::ns::SortedVectorSetString& get_set_type() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "set_type" } */
   [[deprecated("Use `FOO.set_type().value()` instead of `FOO.get_set_type()`")]]
@@ -10720,7 +10720,7 @@ class AnnotatedStruct  {
 
   /** Glean { "field": "map_type" } */
   [[deprecated("Use `FOO.map_type().value()` instead of `FOO.get_map_type()`")]]
-  const ::some::valid::ns::FakeMap& get_map_type() const&;
+  const ::some::valid::ns::FakeMap& get_map_type() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "map_type" } */
   [[deprecated("Use `FOO.map_type().value()` instead of `FOO.get_map_type()`")]]
@@ -10736,7 +10736,7 @@ class AnnotatedStruct  {
 
   /** Glean { "field": "map_struct_type" } */
   [[deprecated("Use `FOO.map_struct_type().value()` instead of `FOO.get_map_struct_type()`")]]
-  const ::some::valid::ns::UnorderedMapStruct& get_map_struct_type() const&;
+  const ::some::valid::ns::UnorderedMapStruct& get_map_struct_type() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "map_struct_type" } */
   [[deprecated("Use `FOO.map_struct_type().value()` instead of `FOO.get_map_struct_type()`")]]
@@ -10752,7 +10752,7 @@ class AnnotatedStruct  {
 
   /** Glean { "field": "iobuf_type" } */
   [[deprecated("Use `FOO.iobuf_type().value()` instead of `FOO.get_iobuf_type()`")]]
-  const ::some::valid::ns::IOBuf& get_iobuf_type() const& {
+  const ::some::valid::ns::IOBuf& get_iobuf_type() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_iobuf_type;
   }
 
@@ -10772,7 +10772,7 @@ class AnnotatedStruct  {
 
   /** Glean { "field": "iobuf_ptr" } */
   [[deprecated("Use `FOO.iobuf_ptr().value()` instead of `FOO.get_iobuf_ptr()`")]]
-  const ::some::valid::ns::IOBufPtr& get_iobuf_ptr() const& {
+  const ::some::valid::ns::IOBufPtr& get_iobuf_ptr() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_iobuf_ptr;
   }
 
@@ -10792,7 +10792,7 @@ class AnnotatedStruct  {
 
   /** Glean { "field": "list_i32_template" } */
   [[deprecated("Use `FOO.list_i32_template().value()` instead of `FOO.get_list_i32_template()`")]]
-  const std::list<::std::int32_t>& get_list_i32_template() const&;
+  const std::list<::std::int32_t>& get_list_i32_template() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "list_i32_template" } */
   [[deprecated("Use `FOO.list_i32_template().value()` instead of `FOO.get_list_i32_template()`")]]
@@ -10808,7 +10808,7 @@ class AnnotatedStruct  {
 
   /** Glean { "field": "list_string_template" } */
   [[deprecated("Use `FOO.list_string_template().value()` instead of `FOO.get_list_string_template()`")]]
-  const std::deque<::std::string>& get_list_string_template() const&;
+  const std::deque<::std::string>& get_list_string_template() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "list_string_template" } */
   [[deprecated("Use `FOO.list_string_template().value()` instead of `FOO.get_list_string_template()`")]]
@@ -10824,7 +10824,7 @@ class AnnotatedStruct  {
 
   /** Glean { "field": "set_template" } */
   [[deprecated("Use `FOO.set_template().value()` instead of `FOO.get_set_template()`")]]
-  const folly::sorted_vector_set<::std::string>& get_set_template() const&;
+  const folly::sorted_vector_set<::std::string>& get_set_template() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "set_template" } */
   [[deprecated("Use `FOO.set_template().value()` instead of `FOO.get_set_template()`")]]
@@ -10840,7 +10840,7 @@ class AnnotatedStruct  {
 
   /** Glean { "field": "map_template" } */
   [[deprecated("Use `FOO.map_template().value()` instead of `FOO.get_map_template()`")]]
-  const folly::sorted_vector_map<::std::int64_t, ::std::string>& get_map_template() const&;
+  const folly::sorted_vector_map<::std::int64_t, ::std::string>& get_map_template() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "map_template" } */
   [[deprecated("Use `FOO.map_template().value()` instead of `FOO.get_map_template()`")]]
@@ -10856,7 +10856,7 @@ class AnnotatedStruct  {
 
   /** Glean { "field": "typedef_list_template" } */
   [[deprecated("Use `FOO.typedef_list_template().value()` instead of `FOO.get_typedef_list_template()`")]]
-  const ::some::valid::ns::std_list& get_typedef_list_template() const&;
+  const ::some::valid::ns::std_list& get_typedef_list_template() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "typedef_list_template" } */
   [[deprecated("Use `FOO.typedef_list_template().value()` instead of `FOO.get_typedef_list_template()`")]]
@@ -10872,7 +10872,7 @@ class AnnotatedStruct  {
 
   /** Glean { "field": "typedef_deque_template" } */
   [[deprecated("Use `FOO.typedef_deque_template().value()` instead of `FOO.get_typedef_deque_template()`")]]
-  const ::some::valid::ns::std_deque& get_typedef_deque_template() const&;
+  const ::some::valid::ns::std_deque& get_typedef_deque_template() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "typedef_deque_template" } */
   [[deprecated("Use `FOO.typedef_deque_template().value()` instead of `FOO.get_typedef_deque_template()`")]]
@@ -10888,7 +10888,7 @@ class AnnotatedStruct  {
 
   /** Glean { "field": "typedef_set_template" } */
   [[deprecated("Use `FOO.typedef_set_template().value()` instead of `FOO.get_typedef_set_template()`")]]
-  const ::some::valid::ns::folly_set& get_typedef_set_template() const&;
+  const ::some::valid::ns::folly_set& get_typedef_set_template() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "typedef_set_template" } */
   [[deprecated("Use `FOO.typedef_set_template().value()` instead of `FOO.get_typedef_set_template()`")]]
@@ -10904,7 +10904,7 @@ class AnnotatedStruct  {
 
   /** Glean { "field": "typedef_map_template" } */
   [[deprecated("Use `FOO.typedef_map_template().value()` instead of `FOO.get_typedef_map_template()`")]]
-  const ::some::valid::ns::folly_map& get_typedef_map_template() const&;
+  const ::some::valid::ns::folly_map& get_typedef_map_template() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "typedef_map_template" } */
   [[deprecated("Use `FOO.typedef_map_template().value()` instead of `FOO.get_typedef_map_template()`")]]
@@ -10920,7 +10920,7 @@ class AnnotatedStruct  {
 
   /** Glean { "field": "iobuf_type_val" } */
   [[deprecated("Use `FOO.iobuf_type_val().value()` instead of `FOO.get_iobuf_type_val()`")]]
-  const ::some::valid::ns::IOBuf& get_iobuf_type_val() const& {
+  const ::some::valid::ns::IOBuf& get_iobuf_type_val() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_iobuf_type_val;
   }
 
@@ -10940,7 +10940,7 @@ class AnnotatedStruct  {
 
   /** Glean { "field": "iobuf_ptr_val" } */
   [[deprecated("Use `FOO.iobuf_ptr_val().value()` instead of `FOO.get_iobuf_ptr_val()`")]]
-  const ::some::valid::ns::IOBufPtr& get_iobuf_ptr_val() const& {
+  const ::some::valid::ns::IOBufPtr& get_iobuf_ptr_val() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_iobuf_ptr_val;
   }
 
@@ -10960,7 +10960,7 @@ class AnnotatedStruct  {
 
   /** Glean { "field": "struct_struct" } */
   [[deprecated("Use `FOO.struct_struct().value()` instead of `FOO.get_struct_struct()`")]]
-  const ::some::valid::ns::ContainerStruct& get_struct_struct() const&;
+  const ::some::valid::ns::ContainerStruct& get_struct_struct() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "struct_struct" } */
   [[deprecated("Use `FOO.struct_struct().value()` instead of `FOO.get_struct_struct()`")]]
@@ -11139,7 +11139,7 @@ class ComplexContainerStruct final  {
 
   /** Glean { "field": "map_of_iobufs" } */
   [[deprecated("Use `FOO.map_of_iobufs().value()` instead of `FOO.get_map_of_iobufs()`")]]
-  const ::std::map<::std::string, ::some::valid::ns::IOBuf>& get_map_of_iobufs() const&;
+  const ::std::map<::std::string, ::some::valid::ns::IOBuf>& get_map_of_iobufs() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "map_of_iobufs" } */
   [[deprecated("Use `FOO.map_of_iobufs().value()` instead of `FOO.get_map_of_iobufs()`")]]
@@ -11155,7 +11155,7 @@ class ComplexContainerStruct final  {
 
   /** Glean { "field": "map_of_iobuf_ptrs" } */
   [[deprecated("Use `FOO.map_of_iobuf_ptrs().value()` instead of `FOO.get_map_of_iobuf_ptrs()`")]]
-  const ::std::map<::std::string, ::some::valid::ns::IOBufPtr>& get_map_of_iobuf_ptrs() const&;
+  const ::std::map<::std::string, ::some::valid::ns::IOBufPtr>& get_map_of_iobuf_ptrs() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "map_of_iobuf_ptrs" } */
   [[deprecated("Use `FOO.map_of_iobuf_ptrs().value()` instead of `FOO.get_map_of_iobuf_ptrs()`")]]

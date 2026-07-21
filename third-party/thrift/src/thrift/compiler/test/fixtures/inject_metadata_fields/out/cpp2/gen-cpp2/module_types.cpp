@@ -364,7 +364,7 @@ std::partial_ordering FieldsInjectedWithFieldsWithIncludedStruct::operator<=>([[
 }
 
 
-const ::cpp2::InjectedField& FieldsInjectedWithFieldsWithIncludedStruct::get_injected_field() const& {
+const ::cpp2::InjectedField& FieldsInjectedWithFieldsWithIncludedStruct::get_injected_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_injected_field;
 }
 

@@ -401,7 +401,7 @@ class Bar final  {
 
   /** Glean { "field": "list_field" } */
   [[deprecated("Use `FOO.list_field().value()` instead of `FOO.get_list_field()`")]]
-  const ::std::vector<::facebook::thrift::test::fixtures::encode::AdaptedFoo>& get_list_field() const&;
+  const ::std::vector<::facebook::thrift::test::fixtures::encode::AdaptedFoo>& get_list_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "list_field" } */
   [[deprecated("Use `FOO.list_field().value()` instead of `FOO.get_list_field()`")]]
@@ -581,7 +581,7 @@ class Baz final  {
 
   /** Glean { "field": "list_field" } */
   [[deprecated("Use `FOO.list_field().value()` instead of `FOO.get_list_field()`")]]
-  const ::std::vector<::facebook::thrift::test::fixtures::encode::AdaptedFoo>& get_list_field() const&;
+  const ::std::vector<::facebook::thrift::test::fixtures::encode::AdaptedFoo>& get_list_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "list_field" } */
   [[deprecated("Use `FOO.list_field().value()` instead of `FOO.get_list_field()`")]]
@@ -597,7 +597,7 @@ class Baz final  {
 
   /** Glean { "field": "nested_list_field" } */
   [[deprecated("Use `FOO.nested_list_field().value()` instead of `FOO.get_nested_list_field()`")]]
-  const ::std::vector<::std::vector<::facebook::thrift::test::fixtures::encode::AdaptedFoo>>& get_nested_list_field() const&;
+  const ::std::vector<::std::vector<::facebook::thrift::test::fixtures::encode::AdaptedFoo>>& get_nested_list_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "nested_list_field" } */
   [[deprecated("Use `FOO.nested_list_field().value()` instead of `FOO.get_nested_list_field()`")]]
@@ -1196,7 +1196,7 @@ class OpEncodeStruct final  {
 
   /** Glean { "field": "foo_field" } */
   [[deprecated("Use `FOO.foo_field().value()` instead of `FOO.get_foo_field()`")]]
-  const ::facebook::thrift::test::fixtures::encode::Foo& get_foo_field() const&;
+  const ::facebook::thrift::test::fixtures::encode::Foo& get_foo_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "foo_field" } */
   [[deprecated("Use `FOO.foo_field().value()` instead of `FOO.get_foo_field()`")]]
@@ -1212,7 +1212,7 @@ class OpEncodeStruct final  {
 
   /** Glean { "field": "list_field" } */
   [[deprecated("Use `FOO.list_field().value()` instead of `FOO.get_list_field()`")]]
-  const ::std::vector<::facebook::thrift::test::fixtures::encode::AdaptedFoo>& get_list_field() const&;
+  const ::std::vector<::facebook::thrift::test::fixtures::encode::AdaptedFoo>& get_list_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "list_field" } */
   [[deprecated("Use `FOO.list_field().value()` instead of `FOO.get_list_field()`")]]
@@ -1228,7 +1228,7 @@ class OpEncodeStruct final  {
 
   /** Glean { "field": "list_cpp_type_field" } */
   [[deprecated("Use `FOO.list_cpp_type_field().value()` instead of `FOO.get_list_cpp_type_field()`")]]
-  const ::std::vector<::facebook::thrift::test::fixtures::encode::AdaptedFoo>& get_list_cpp_type_field() const&;
+  const ::std::vector<::facebook::thrift::test::fixtures::encode::AdaptedFoo>& get_list_cpp_type_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "list_cpp_type_field" } */
   [[deprecated("Use `FOO.list_cpp_type_field().value()` instead of `FOO.get_list_cpp_type_field()`")]]
@@ -1244,7 +1244,7 @@ class OpEncodeStruct final  {
 
   /** Glean { "field": "set_field" } */
   [[deprecated("Use `FOO.set_field().value()` instead of `FOO.get_set_field()`")]]
-  const ::std::set<::facebook::thrift::test::fixtures::encode::AdaptedFoo>& get_set_field() const&;
+  const ::std::set<::facebook::thrift::test::fixtures::encode::AdaptedFoo>& get_set_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "set_field" } */
   [[deprecated("Use `FOO.set_field().value()` instead of `FOO.get_set_field()`")]]
@@ -1260,7 +1260,7 @@ class OpEncodeStruct final  {
 
   /** Glean { "field": "map_field" } */
   [[deprecated("Use `FOO.map_field().value()` instead of `FOO.get_map_field()`")]]
-  const ::std::map<::facebook::thrift::test::fixtures::encode::AdaptedFoo, ::facebook::thrift::test::fixtures::encode::AdaptedFoo>& get_map_field() const&;
+  const ::std::map<::facebook::thrift::test::fixtures::encode::AdaptedFoo, ::facebook::thrift::test::fixtures::encode::AdaptedFoo>& get_map_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "map_field" } */
   [[deprecated("Use `FOO.map_field().value()` instead of `FOO.get_map_field()`")]]
@@ -1276,7 +1276,7 @@ class OpEncodeStruct final  {
 
   /** Glean { "field": "nested_field" } */
   [[deprecated("Use `FOO.nested_field().value()` instead of `FOO.get_nested_field()`")]]
-  const ::std::map<::std::int32_t, ::std::vector<::facebook::thrift::test::fixtures::encode::AdaptedFoo>>& get_nested_field() const&;
+  const ::std::map<::std::int32_t, ::std::vector<::facebook::thrift::test::fixtures::encode::AdaptedFoo>>& get_nested_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "nested_field" } */
   [[deprecated("Use `FOO.nested_field().value()` instead of `FOO.get_nested_field()`")]]
@@ -1292,7 +1292,7 @@ class OpEncodeStruct final  {
 
   /** Glean { "field": "bar_field" } */
   [[deprecated("Use `FOO.bar_field().value()` instead of `FOO.get_bar_field()`")]]
-  const ::facebook::thrift::test::fixtures::encode::Bar& get_bar_field() const&;
+  const ::facebook::thrift::test::fixtures::encode::Bar& get_bar_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "bar_field" } */
   [[deprecated("Use `FOO.bar_field().value()` instead of `FOO.get_bar_field()`")]]

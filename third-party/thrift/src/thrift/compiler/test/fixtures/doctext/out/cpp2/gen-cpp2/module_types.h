@@ -636,7 +636,7 @@ class FOLLY_EXPORT Bang : public virtual apache::thrift::TException {
 
   /** Glean { "field": "message" } */
   [[deprecated("Use `FOO.message().value()` instead of `FOO.get_message()`")]]
-  const ::std::string& get_message() const& {
+  const ::std::string& get_message() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_message;
   }
 

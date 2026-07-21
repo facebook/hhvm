@@ -193,7 +193,7 @@ class Fields final  {
 
   /** Glean { "field": "injected_field" } */
   [[deprecated("Use `FOO.injected_field().value()` instead of `FOO.get_injected_field()`")]]
-  const ::std::string& get_injected_field() const& {
+  const ::std::string& get_injected_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_injected_field;
   }
 
@@ -336,7 +336,7 @@ class FieldsInjectedToEmptyStruct final  {
 
   /** Glean { "field": "injected_field" } */
   [[deprecated("Use `FOO.injected_field().value()` instead of `FOO.get_injected_field()`")]]
-  const ::std::string& get_injected_field() const& {
+  const ::std::string& get_injected_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_injected_field;
   }
 
@@ -519,7 +519,7 @@ class FieldsInjectedToStruct final  {
 
   /** Glean { "field": "string_field" } */
   [[deprecated("Use `FOO.string_field().value()` instead of `FOO.get_string_field()`")]]
-  const ::std::string& get_string_field() const& {
+  const ::std::string& get_string_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_string_field;
   }
 
@@ -539,7 +539,7 @@ class FieldsInjectedToStruct final  {
 
   /** Glean { "field": "injected_field" } */
   [[deprecated("Use `FOO.injected_field().value()` instead of `FOO.get_injected_field()`")]]
-  const ::std::string& get_injected_field() const& {
+  const ::std::string& get_injected_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_injected_field;
   }
 
@@ -802,7 +802,7 @@ class FieldsInjectedWithIncludedStruct final  {
 
   /** Glean { "field": "string_field" } */
   [[deprecated("Use `FOO.string_field().value()` instead of `FOO.get_string_field()`")]]
-  const ::std::string& get_string_field() const& {
+  const ::std::string& get_string_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_string_field;
   }
 
@@ -822,7 +822,7 @@ class FieldsInjectedWithIncludedStruct final  {
 
   /** Glean { "field": "injected_field" } */
   [[deprecated("Use `FOO.injected_field().value()` instead of `FOO.get_injected_field()`")]]
-  const ::std::string& get_injected_field() const& {
+  const ::std::string& get_injected_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_injected_field;
   }
 
@@ -1005,7 +1005,7 @@ class FieldsInjectedWithFieldsWithIncludedStruct final  {
 
   /** Glean { "field": "string_field" } */
   [[deprecated("Use `FOO.string_field().value()` instead of `FOO.get_string_field()`")]]
-  const ::std::string& get_string_field() const& {
+  const ::std::string& get_string_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_string_field;
   }
 
@@ -1025,7 +1025,7 @@ class FieldsInjectedWithFieldsWithIncludedStruct final  {
 
   /** Glean { "field": "injected_field" } */
   [[deprecated("Use `FOO.injected_field().value()` instead of `FOO.get_injected_field()`")]]
-  const ::cpp2::InjectedField& get_injected_field() const&;
+  const ::cpp2::InjectedField& get_injected_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "injected_field" } */
   [[deprecated("Use `FOO.injected_field().value()` instead of `FOO.get_injected_field()`")]]

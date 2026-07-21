@@ -105,7 +105,7 @@ std::partial_ordering Foo::operator<=>([[maybe_unused]] const Foo& rhs) const {
 }
 
 
-const ::std::vector<double>& Foo::get_field1() const& {
+const ::std::vector<double>& Foo::get_field1() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_field1;
 }
 
@@ -113,7 +113,7 @@ const ::std::vector<double>& Foo::get_field1() const& {
   return static_cast<::std::vector<double>&&>(__fbthrift_field_field1);
 }
 
-const ::std::vector<::std::int32_t>& Foo::get_field2() const& {
+const ::std::vector<::std::int32_t>& Foo::get_field2() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_field2;
 }
 
@@ -121,7 +121,7 @@ const ::std::vector<::std::int32_t>& Foo::get_field2() const& {
   return static_cast<::std::vector<::std::int32_t>&&>(__fbthrift_field_field2);
 }
 
-const ::std::vector<double>& Foo::get_field3() const& {
+const ::std::vector<double>& Foo::get_field3() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_field3;
 }
 
@@ -129,7 +129,7 @@ const ::std::vector<double>& Foo::get_field3() const& {
   return static_cast<::std::vector<double>&&>(__fbthrift_field_field3);
 }
 
-const ::std::vector<::std::int32_t>& Foo::get_field4() const& {
+const ::std::vector<::std::int32_t>& Foo::get_field4() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_field4;
 }
 
@@ -276,7 +276,7 @@ std::partial_ordering LazyFoo::operator<=>([[maybe_unused]] const LazyFoo& rhs) 
 }
 
 
-const ::std::vector<double>& LazyFoo::get_field1() const& {
+const ::std::vector<double>& LazyFoo::get_field1() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_field1;
 }
 
@@ -284,7 +284,7 @@ const ::std::vector<double>& LazyFoo::get_field1() const& {
   return static_cast<::std::vector<double>&&>(__fbthrift_field_field1);
 }
 
-const ::std::vector<::std::int32_t>& LazyFoo::get_field2() const& {
+const ::std::vector<::std::int32_t>& LazyFoo::get_field2() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_field2;
 }
 
@@ -384,35 +384,35 @@ std::partial_ordering OptionalFoo::operator<=>([[maybe_unused]] const OptionalFo
 }
 
 
-const ::std::vector<double>* OptionalFoo::get_field1() const& {
+const ::std::vector<double>* OptionalFoo::get_field1() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return field1_ref().has_value() ? std::addressof(__fbthrift_field_field1) : nullptr;
 }
 
-::std::vector<double>* OptionalFoo::get_field1() & {
+::std::vector<double>* OptionalFoo::get_field1() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return field1_ref().has_value() ? std::addressof(__fbthrift_field_field1) : nullptr;
 }
 
-const ::std::vector<::std::int32_t>* OptionalFoo::get_field2() const& {
+const ::std::vector<::std::int32_t>* OptionalFoo::get_field2() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return field2_ref().has_value() ? std::addressof(__fbthrift_field_field2) : nullptr;
 }
 
-::std::vector<::std::int32_t>* OptionalFoo::get_field2() & {
+::std::vector<::std::int32_t>* OptionalFoo::get_field2() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return field2_ref().has_value() ? std::addressof(__fbthrift_field_field2) : nullptr;
 }
 
-const ::std::vector<double>* OptionalFoo::get_field3() const& {
+const ::std::vector<double>* OptionalFoo::get_field3() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return field3_ref().has_value() ? std::addressof(__fbthrift_field_field3) : nullptr;
 }
 
-::std::vector<double>* OptionalFoo::get_field3() & {
+::std::vector<double>* OptionalFoo::get_field3() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return field3_ref().has_value() ? std::addressof(__fbthrift_field_field3) : nullptr;
 }
 
-const ::std::vector<::std::int32_t>* OptionalFoo::get_field4() const& {
+const ::std::vector<::std::int32_t>* OptionalFoo::get_field4() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return field4_ref().has_value() ? std::addressof(__fbthrift_field_field4) : nullptr;
 }
 
-::std::vector<::std::int32_t>* OptionalFoo::get_field4() & {
+::std::vector<::std::int32_t>* OptionalFoo::get_field4() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return field4_ref().has_value() ? std::addressof(__fbthrift_field_field4) : nullptr;
 }
 
@@ -558,19 +558,19 @@ std::partial_ordering OptionalLazyFoo::operator<=>([[maybe_unused]] const Option
 }
 
 
-const ::std::vector<double>* OptionalLazyFoo::get_field1() const& {
+const ::std::vector<double>* OptionalLazyFoo::get_field1() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return field1_ref().has_value() ? std::addressof(__fbthrift_field_field1) : nullptr;
 }
 
-::std::vector<double>* OptionalLazyFoo::get_field1() & {
+::std::vector<double>* OptionalLazyFoo::get_field1() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return field1_ref().has_value() ? std::addressof(__fbthrift_field_field1) : nullptr;
 }
 
-const ::std::vector<::std::int32_t>* OptionalLazyFoo::get_field2() const& {
+const ::std::vector<::std::int32_t>* OptionalLazyFoo::get_field2() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return field2_ref().has_value() ? std::addressof(__fbthrift_field_field2) : nullptr;
 }
 
-::std::vector<::std::int32_t>* OptionalLazyFoo::get_field2() & {
+::std::vector<::std::int32_t>* OptionalLazyFoo::get_field2() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return field2_ref().has_value() ? std::addressof(__fbthrift_field_field2) : nullptr;
 }
 
@@ -996,7 +996,7 @@ double& IndexedFoo::set_serialized_data_size(double serialized_data_size_) {
   return __fbthrift_field_serialized_data_size;
 }
 
-const ::std::vector<double>& IndexedFoo::get_field1() const& {
+const ::std::vector<double>& IndexedFoo::get_field1() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_field1;
 }
 
@@ -1004,7 +1004,7 @@ const ::std::vector<double>& IndexedFoo::get_field1() const& {
   return static_cast<::std::vector<double>&&>(__fbthrift_field_field1);
 }
 
-const ::std::vector<::std::int32_t>& IndexedFoo::get_field2() const& {
+const ::std::vector<::std::int32_t>& IndexedFoo::get_field2() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_field2;
 }
 
@@ -1012,7 +1012,7 @@ const ::std::vector<::std::int32_t>& IndexedFoo::get_field2() const& {
   return static_cast<::std::vector<::std::int32_t>&&>(__fbthrift_field_field2);
 }
 
-const ::std::vector<double>& IndexedFoo::get_field3() const& {
+const ::std::vector<double>& IndexedFoo::get_field3() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_field3;
 }
 
@@ -1020,7 +1020,7 @@ const ::std::vector<double>& IndexedFoo::get_field3() const& {
   return static_cast<::std::vector<double>&&>(__fbthrift_field_field3);
 }
 
-const ::std::vector<::std::int32_t>& IndexedFoo::get_field4() const& {
+const ::std::vector<::std::int32_t>& IndexedFoo::get_field4() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_field4;
 }
 
@@ -1028,7 +1028,7 @@ const ::std::vector<::std::int32_t>& IndexedFoo::get_field4() const& {
   return static_cast<::std::vector<::std::int32_t>&&>(__fbthrift_field_field4);
 }
 
-const ::std::map<::std::int16_t, ::std::int64_t>& IndexedFoo::get_field_id_to_size() const& {
+const ::std::map<::std::int16_t, ::std::int64_t>& IndexedFoo::get_field_id_to_size() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_field_id_to_size;
 }
 
@@ -1140,39 +1140,39 @@ double& OptionalIndexedFoo::set_serialized_data_size(double serialized_data_size
   return __fbthrift_field_serialized_data_size;
 }
 
-const ::std::vector<double>* OptionalIndexedFoo::get_field1() const& {
+const ::std::vector<double>* OptionalIndexedFoo::get_field1() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return field1_ref().has_value() ? std::addressof(__fbthrift_field_field1) : nullptr;
 }
 
-::std::vector<double>* OptionalIndexedFoo::get_field1() & {
+::std::vector<double>* OptionalIndexedFoo::get_field1() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return field1_ref().has_value() ? std::addressof(__fbthrift_field_field1) : nullptr;
 }
 
-const ::std::vector<::std::int32_t>* OptionalIndexedFoo::get_field2() const& {
+const ::std::vector<::std::int32_t>* OptionalIndexedFoo::get_field2() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return field2_ref().has_value() ? std::addressof(__fbthrift_field_field2) : nullptr;
 }
 
-::std::vector<::std::int32_t>* OptionalIndexedFoo::get_field2() & {
+::std::vector<::std::int32_t>* OptionalIndexedFoo::get_field2() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return field2_ref().has_value() ? std::addressof(__fbthrift_field_field2) : nullptr;
 }
 
-const ::std::vector<double>* OptionalIndexedFoo::get_field3() const& {
+const ::std::vector<double>* OptionalIndexedFoo::get_field3() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return field3_ref().has_value() ? std::addressof(__fbthrift_field_field3) : nullptr;
 }
 
-::std::vector<double>* OptionalIndexedFoo::get_field3() & {
+::std::vector<double>* OptionalIndexedFoo::get_field3() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return field3_ref().has_value() ? std::addressof(__fbthrift_field_field3) : nullptr;
 }
 
-const ::std::vector<::std::int32_t>* OptionalIndexedFoo::get_field4() const& {
+const ::std::vector<::std::int32_t>* OptionalIndexedFoo::get_field4() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return field4_ref().has_value() ? std::addressof(__fbthrift_field_field4) : nullptr;
 }
 
-::std::vector<::std::int32_t>* OptionalIndexedFoo::get_field4() & {
+::std::vector<::std::int32_t>* OptionalIndexedFoo::get_field4() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return field4_ref().has_value() ? std::addressof(__fbthrift_field_field4) : nullptr;
 }
 
-const ::std::map<::std::int16_t, ::std::int64_t>& OptionalIndexedFoo::get_field_id_to_size() const& {
+const ::std::map<::std::int16_t, ::std::int64_t>& OptionalIndexedFoo::get_field_id_to_size() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_field_id_to_size;
 }
 

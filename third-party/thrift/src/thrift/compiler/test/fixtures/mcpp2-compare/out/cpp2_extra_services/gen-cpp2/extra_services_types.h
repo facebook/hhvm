@@ -696,11 +696,11 @@ class containerStruct2 final  {
 
   /** Glean { "field": "opt_fieldA" } */
   [[deprecated("Use `FOO.opt_fieldA().value()` instead of `FOO.get_opt_fieldA()`")]]
-  const bool* get_opt_fieldA() const&;
+  const bool* get_opt_fieldA() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "opt_fieldA" } */
   [[deprecated("Use `FOO.opt_fieldA().value()` instead of `FOO.get_opt_fieldA()`")]]
-  bool* get_opt_fieldA() &;
+  bool* get_opt_fieldA() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   bool* get_opt_fieldA() && = delete;
 
@@ -710,7 +710,7 @@ class containerStruct2 final  {
 
   /** Glean { "field": "fieldB" } */
   [[deprecated("Use `FOO.fieldB().value()` instead of `FOO.get_fieldB()`")]]
-  const ::std::map<::std::string, bool>& get_fieldB() const&;
+  const ::std::map<::std::string, bool>& get_fieldB() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "fieldB" } */
   [[deprecated("Use `FOO.fieldB().value()` instead of `FOO.get_fieldB()`")]]
@@ -726,7 +726,7 @@ class containerStruct2 final  {
 
   /** Glean { "field": "req_fieldB" } */
   [[deprecated("Use `FOO.req_fieldB().value()` instead of `FOO.get_req_fieldB()`")]]
-  const ::std::map<::std::string, bool>& get_req_fieldB() const&;
+  const ::std::map<::std::string, bool>& get_req_fieldB() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "req_fieldB" } */
   [[deprecated("Use `FOO.req_fieldB().value()` instead of `FOO.get_req_fieldB()`")]]
@@ -742,11 +742,11 @@ class containerStruct2 final  {
 
   /** Glean { "field": "opt_fieldB" } */
   [[deprecated("Use `FOO.opt_fieldB().value()` instead of `FOO.get_opt_fieldB()`")]]
-  const ::std::map<::std::string, bool>* get_opt_fieldB() const&;
+  const ::std::map<::std::string, bool>* get_opt_fieldB() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "opt_fieldB" } */
   [[deprecated("Use `FOO.opt_fieldB().value()` instead of `FOO.get_opt_fieldB()`")]]
-  ::std::map<::std::string, bool>* get_opt_fieldB() &;
+  ::std::map<::std::string, bool>* get_opt_fieldB() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::map<::std::string, bool>* get_opt_fieldB() && = delete;
 
@@ -760,7 +760,7 @@ class containerStruct2 final  {
 
   /** Glean { "field": "fieldC" } */
   [[deprecated("Use `FOO.fieldC().value()` instead of `FOO.get_fieldC()`")]]
-  const ::std::set<::std::int32_t>& get_fieldC() const&;
+  const ::std::set<::std::int32_t>& get_fieldC() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "fieldC" } */
   [[deprecated("Use `FOO.fieldC().value()` instead of `FOO.get_fieldC()`")]]
@@ -776,7 +776,7 @@ class containerStruct2 final  {
 
   /** Glean { "field": "req_fieldC" } */
   [[deprecated("Use `FOO.req_fieldC().value()` instead of `FOO.get_req_fieldC()`")]]
-  const ::std::set<::std::int32_t>& get_req_fieldC() const&;
+  const ::std::set<::std::int32_t>& get_req_fieldC() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "req_fieldC" } */
   [[deprecated("Use `FOO.req_fieldC().value()` instead of `FOO.get_req_fieldC()`")]]
@@ -792,11 +792,11 @@ class containerStruct2 final  {
 
   /** Glean { "field": "opt_fieldC" } */
   [[deprecated("Use `FOO.opt_fieldC().value()` instead of `FOO.get_opt_fieldC()`")]]
-  const ::std::set<::std::int32_t>* get_opt_fieldC() const&;
+  const ::std::set<::std::int32_t>* get_opt_fieldC() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "opt_fieldC" } */
   [[deprecated("Use `FOO.opt_fieldC().value()` instead of `FOO.get_opt_fieldC()`")]]
-  ::std::set<::std::int32_t>* get_opt_fieldC() &;
+  ::std::set<::std::int32_t>* get_opt_fieldC() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::set<::std::int32_t>* get_opt_fieldC() && = delete;
 
@@ -810,7 +810,7 @@ class containerStruct2 final  {
 
   /** Glean { "field": "fieldD" } */
   [[deprecated("Use `FOO.fieldD().value()` instead of `FOO.get_fieldD()`")]]
-  const ::std::string& get_fieldD() const& {
+  const ::std::string& get_fieldD() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_fieldD;
   }
 
@@ -830,7 +830,7 @@ class containerStruct2 final  {
 
   /** Glean { "field": "fieldE" } */
   [[deprecated("Use `FOO.fieldE().value()` instead of `FOO.get_fieldE()`")]]
-  const ::std::string& get_fieldE() const& {
+  const ::std::string& get_fieldE() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_fieldE;
   }
 
@@ -850,7 +850,7 @@ class containerStruct2 final  {
 
   /** Glean { "field": "req_fieldE" } */
   [[deprecated("Use `FOO.req_fieldE().value()` instead of `FOO.get_req_fieldE()`")]]
-  const ::std::string& get_req_fieldE() const& {
+  const ::std::string& get_req_fieldE() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_req_fieldE;
   }
 
@@ -870,11 +870,11 @@ class containerStruct2 final  {
 
   /** Glean { "field": "opt_fieldE" } */
   [[deprecated("Use `FOO.opt_fieldE().value()` instead of `FOO.get_opt_fieldE()`")]]
-  const ::std::string* get_opt_fieldE() const&;
+  const ::std::string* get_opt_fieldE() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "opt_fieldE" } */
   [[deprecated("Use `FOO.opt_fieldE().value()` instead of `FOO.get_opt_fieldE()`")]]
-  ::std::string* get_opt_fieldE() &;
+  ::std::string* get_opt_fieldE() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::string* get_opt_fieldE() && = delete;
 

@@ -1627,7 +1627,7 @@ class Val final  {
 
   /** Glean { "field": "strVal" } */
   [[deprecated("Use `FOO.strVal().value()` instead of `FOO.get_strVal()`")]]
-  const ::std::string& get_strVal() const& {
+  const ::std::string& get_strVal() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_strVal;
   }
 
@@ -1655,7 +1655,7 @@ class Val final  {
 
   /** Glean { "field": "typedefValue" } */
   [[deprecated("Use `FOO.typedefValue().value()` instead of `FOO.get_typedefValue()`")]]
-  const ::cpp2::containerTypedef& get_typedefValue() const&;
+  const ::cpp2::containerTypedef& get_typedefValue() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "typedefValue" } */
   [[deprecated("Use `FOO.typedefValue().value()` instead of `FOO.get_typedefValue()`")]]

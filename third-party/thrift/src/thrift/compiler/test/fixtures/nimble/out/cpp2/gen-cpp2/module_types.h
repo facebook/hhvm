@@ -283,11 +283,11 @@ class BasicTypes final  {
 
   /** Glean { "field": "second" } */
   [[deprecated("Use `FOO.second().value()` instead of `FOO.get_second()`")]]
-  const ::std::int32_t* get_second() const&;
+  const ::std::int32_t* get_second() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "second" } */
   [[deprecated("Use `FOO.second().value()` instead of `FOO.get_second()`")]]
-  ::std::int32_t* get_second() &;
+  ::std::int32_t* get_second() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::int32_t* get_second() && = delete;
 
@@ -297,11 +297,11 @@ class BasicTypes final  {
 
   /** Glean { "field": "third" } */
   [[deprecated("Use `FOO.third().value()` instead of `FOO.get_third()`")]]
-  const ::std::int64_t* get_third() const&;
+  const ::std::int64_t* get_third() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "third" } */
   [[deprecated("Use `FOO.third().value()` instead of `FOO.get_third()`")]]
-  ::std::int64_t* get_third() &;
+  ::std::int64_t* get_third() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::int64_t* get_third() && = delete;
 

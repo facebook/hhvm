@@ -284,11 +284,11 @@ class MyStruct final  {
 
   /** Glean { "field": "opt_field" } */
   [[deprecated("Use `FOO.opt_field().value()` instead of `FOO.get_opt_field()`")]]
-  const ::std::int32_t* get_opt_field() const&;
+  const ::std::int32_t* get_opt_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "opt_field" } */
   [[deprecated("Use `FOO.opt_field().value()` instead of `FOO.get_opt_field()`")]]
-  ::std::int32_t* get_opt_field() &;
+  ::std::int32_t* get_opt_field() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::int32_t* get_opt_field() && = delete;
 

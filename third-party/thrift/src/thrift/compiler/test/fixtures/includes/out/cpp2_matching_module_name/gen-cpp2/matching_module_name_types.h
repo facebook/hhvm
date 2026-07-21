@@ -137,7 +137,7 @@ class MyStruct final  {
 
   /** Glean { "field": "OtherStructField" } */
   [[deprecated("Use `FOO.OtherStructField().value()` instead of `FOO.get_OtherStructField()`")]]
-  const ::matching_module_name::OtherStruct& get_OtherStructField() const&;
+  const ::matching_module_name::OtherStruct& get_OtherStructField() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "OtherStructField" } */
   [[deprecated("Use `FOO.OtherStructField().value()` instead of `FOO.get_OtherStructField()`")]]

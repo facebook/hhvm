@@ -424,7 +424,7 @@ class MyStruct final  {
 
   /** Glean { "field": "MyStringField" } */
   [[deprecated("Use `FOO.MyStringField().value()` instead of `FOO.get_MyStringField()`")]]
-  const ::std::string& get_MyStringField() const& {
+  const ::std::string& get_MyStringField() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_MyStringField;
   }
 
@@ -444,7 +444,7 @@ class MyStruct final  {
 
   /** Glean { "field": "MyDataField" } */
   [[deprecated("Use `FOO.MyDataField().value()` instead of `FOO.get_MyDataField()`")]]
-  const ::cpp2::MyDataItem& get_MyDataField() const&;
+  const ::cpp2::MyDataItem& get_MyDataField() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "MyDataField" } */
   [[deprecated("Use `FOO.MyDataField().value()` instead of `FOO.get_MyDataField()`")]]

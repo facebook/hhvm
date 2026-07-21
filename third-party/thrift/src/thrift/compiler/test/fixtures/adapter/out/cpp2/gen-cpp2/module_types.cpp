@@ -422,7 +422,7 @@ std::partial_ordering Foo::operator<=>([[maybe_unused]] const Foo& rhs) const {
 }
 
 
-const ::std::vector<::std::int32_t>& Foo::get_adapted_list() const& {
+const ::std::vector<::std::int32_t>& Foo::get_adapted_list() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_adapted_list;
 }
 
@@ -430,7 +430,7 @@ const ::std::vector<::std::int32_t>& Foo::get_adapted_list() const& {
   return static_cast<::std::vector<::std::int32_t>&&>(__fbthrift_field_adapted_list);
 }
 
-const ::std::set<::std::int32_t>& Foo::get_adapted_set() const& {
+const ::std::set<::std::int32_t>& Foo::get_adapted_set() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_adapted_set;
 }
 
@@ -438,7 +438,7 @@ const ::std::set<::std::int32_t>& Foo::get_adapted_set() const& {
   return static_cast<::std::set<::std::int32_t>&&>(__fbthrift_field_adapted_set);
 }
 
-const ::std::map<::std::string, ::std::int32_t>& Foo::get_adapted_map() const& {
+const ::std::map<::std::string, ::std::int32_t>& Foo::get_adapted_map() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_adapted_map;
 }
 
@@ -446,7 +446,7 @@ const ::std::map<::std::string, ::std::int32_t>& Foo::get_adapted_map() const& {
   return static_cast<::std::map<::std::string, ::std::int32_t>&&>(__fbthrift_field_adapted_map);
 }
 
-const ::std::vector<::std::vector<::std::map<::std::int32_t, ::std::int32_t>>>& Foo::get_adapted_list_nested() const& {
+const ::std::vector<::std::vector<::std::map<::std::int32_t, ::std::int32_t>>>& Foo::get_adapted_list_nested() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_adapted_list_nested;
 }
 
@@ -736,7 +736,7 @@ std::partial_ordering Bar::operator<=>([[maybe_unused]] const Bar& rhs) const {
 }
 
 
-const ::std::vector<::facebook::thrift::test::fixtures::adapter::FooWithAdapter_9317>& Bar::get_structListField() const& {
+const ::std::vector<::facebook::thrift::test::fixtures::adapter::FooWithAdapter_9317>& Bar::get_structListField() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_structListField;
 }
 
@@ -744,15 +744,15 @@ const ::std::vector<::facebook::thrift::test::fixtures::adapter::FooWithAdapter_
   return static_cast<::std::vector<::facebook::thrift::test::fixtures::adapter::FooWithAdapter_9317>&&>(__fbthrift_field_structListField);
 }
 
-const ::std::vector<::facebook::thrift::test::fixtures::adapter::FooWithAdapter_9317>* Bar::get_optionalStructListField() const& {
+const ::std::vector<::facebook::thrift::test::fixtures::adapter::FooWithAdapter_9317>* Bar::get_optionalStructListField() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return optionalStructListField_ref().has_value() ? std::addressof(__fbthrift_field_optionalStructListField) : nullptr;
 }
 
-::std::vector<::facebook::thrift::test::fixtures::adapter::FooWithAdapter_9317>* Bar::get_optionalStructListField() & {
+::std::vector<::facebook::thrift::test::fixtures::adapter::FooWithAdapter_9317>* Bar::get_optionalStructListField() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return optionalStructListField_ref().has_value() ? std::addressof(__fbthrift_field_optionalStructListField) : nullptr;
 }
 
-const ::facebook::thrift::test::fixtures::adapter::ListOfFooTypedef& Bar::get_structListFieldWithTypedef() const& {
+const ::facebook::thrift::test::fixtures::adapter::ListOfFooTypedef& Bar::get_structListFieldWithTypedef() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_structListFieldWithTypedef;
 }
 
@@ -1961,7 +1961,7 @@ std::partial_ordering AdaptTemplatedNestedTestStruct::operator<=>([[maybe_unused
 }
 
 
-const ::facebook::thrift::test::fixtures::adapter::AdaptTemplatedTestStruct& AdaptTemplatedNestedTestStruct::get_adaptedStruct() const& {
+const ::facebook::thrift::test::fixtures::adapter::AdaptTemplatedTestStruct& AdaptTemplatedNestedTestStruct::get_adaptedStruct() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_adaptedStruct;
 }
 
@@ -2373,7 +2373,7 @@ std::partial_ordering CircularAdaptee::operator<=>([[maybe_unused]] const Circul
 }
 
 
-const ::facebook::thrift::test::fixtures::adapter::CircularStruct& CircularAdaptee::get_field() const& {
+const ::facebook::thrift::test::fixtures::adapter::CircularStruct& CircularAdaptee::get_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_field;
 }
 

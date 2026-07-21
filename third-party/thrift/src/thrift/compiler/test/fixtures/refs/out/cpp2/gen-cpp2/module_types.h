@@ -1835,7 +1835,7 @@ class StructWithUnion final  {
 
   /** Glean { "field": "f" } */
   [[deprecated("Use `FOO.f().value()` instead of `FOO.get_f()`")]]
-  const ::cpp2::MyField& get_f() const&;
+  const ::cpp2::MyField& get_f() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "f" } */
   [[deprecated("Use `FOO.f().value()` instead of `FOO.get_f()`")]]
@@ -1974,11 +1974,11 @@ class RecursiveStruct final  {
 
   /** Glean { "field": "mes" } */
   [[deprecated("Use `FOO.mes().value()` instead of `FOO.get_mes()`")]]
-  const ::std::vector<::cpp2::RecursiveStruct>* get_mes() const&;
+  const ::std::vector<::cpp2::RecursiveStruct>* get_mes() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "mes" } */
   [[deprecated("Use `FOO.mes().value()` instead of `FOO.get_mes()`")]]
-  ::std::vector<::cpp2::RecursiveStruct>* get_mes() &;
+  ::std::vector<::cpp2::RecursiveStruct>* get_mes() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::vector<::cpp2::RecursiveStruct>* get_mes() && = delete;
 

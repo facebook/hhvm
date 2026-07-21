@@ -461,15 +461,15 @@ bool& MyStruct::set_MyBoolField(bool MyBoolField_) {
   return __fbthrift_field_MyIntField;
 }
 
-const ::std::string* MyStruct::get_MyBinaryField2() const& {
+const ::std::string* MyStruct::get_MyBinaryField2() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return MyBinaryField2_ref().has_value() ? std::addressof(__fbthrift_field_MyBinaryField2) : nullptr;
 }
 
-::std::string* MyStruct::get_MyBinaryField2() & {
+::std::string* MyStruct::get_MyBinaryField2() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return MyBinaryField2_ref().has_value() ? std::addressof(__fbthrift_field_MyBinaryField2) : nullptr;
 }
 
-const ::std::vector<::std::string>& MyStruct::get_MyBinaryListField4() const& {
+const ::std::vector<::std::string>& MyStruct::get_MyBinaryListField4() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_MyBinaryListField4;
 }
 
@@ -477,7 +477,7 @@ const ::std::vector<::std::string>& MyStruct::get_MyBinaryListField4() const& {
   return static_cast<::std::vector<::std::string>&&>(__fbthrift_field_MyBinaryListField4);
 }
 
-const ::std::map<::some::valid::ns::MyEnumA, ::std::string>& MyStruct::get_MyMapEnumAndInt() const& {
+const ::std::map<::some::valid::ns::MyEnumA, ::std::string>& MyStruct::get_MyMapEnumAndInt() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_MyMapEnumAndInt;
 }
 
@@ -1222,7 +1222,7 @@ std::partial_ordering AnException::operator<=>([[maybe_unused]] const AnExceptio
   return __fbthrift_field_req_code;
 }
 
-const ::std::vector<::std::int32_t>& AnException::get_exception_list() const& {
+const ::std::vector<::std::int32_t>& AnException::get_exception_list() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_exception_list;
 }
 
@@ -1230,7 +1230,7 @@ const ::std::vector<::std::int32_t>& AnException::get_exception_list() const& {
   return static_cast<::std::vector<::std::int32_t>&&>(__fbthrift_field_exception_list);
 }
 
-const ::std::set<::std::int64_t>& AnException::get_exception_set() const& {
+const ::std::set<::std::int64_t>& AnException::get_exception_set() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_exception_set;
 }
 
@@ -1238,7 +1238,7 @@ const ::std::set<::std::int64_t>& AnException::get_exception_set() const& {
   return static_cast<::std::set<::std::int64_t>&&>(__fbthrift_field_exception_set);
 }
 
-const ::std::map<::std::string, ::std::int32_t>& AnException::get_exception_map() const& {
+const ::std::map<::std::string, ::std::int32_t>& AnException::get_exception_map() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_exception_map;
 }
 
@@ -1246,7 +1246,7 @@ const ::std::map<::std::string, ::std::int32_t>& AnException::get_exception_map(
   return static_cast<::std::map<::std::string, ::std::int32_t>&&>(__fbthrift_field_exception_map);
 }
 
-const ::std::map<::std::string, ::std::int32_t>& AnException::get_req_exception_map() const& {
+const ::std::map<::std::string, ::std::int32_t>& AnException::get_req_exception_map() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_req_exception_map;
 }
 
@@ -1263,7 +1263,7 @@ const ::std::map<::std::string, ::std::int32_t>& AnException::get_req_exception_
   return __fbthrift_field_enum_field;
 }
 
-const ::std::vector<::some::valid::ns::MyEnumA>& AnException::get_enum_container() const& {
+const ::std::vector<::some::valid::ns::MyEnumA>& AnException::get_enum_container() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_enum_container;
 }
 
@@ -1271,7 +1271,7 @@ const ::std::vector<::some::valid::ns::MyEnumA>& AnException::get_enum_container
   return static_cast<::std::vector<::some::valid::ns::MyEnumA>&&>(__fbthrift_field_enum_container);
 }
 
-const ::some::valid::ns::MyStruct& AnException::get_a_struct() const& {
+const ::some::valid::ns::MyStruct& AnException::get_a_struct() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_a_struct;
 }
 
@@ -1279,7 +1279,7 @@ const ::some::valid::ns::MyStruct& AnException::get_a_struct() const& {
   return static_cast<::some::valid::ns::MyStruct&&>(__fbthrift_field_a_struct);
 }
 
-const ::std::set<::some::valid::ns::MyStruct>& AnException::get_a_set_struct() const& {
+const ::std::set<::some::valid::ns::MyStruct>& AnException::get_a_set_struct() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_a_set_struct;
 }
 
@@ -1287,7 +1287,7 @@ const ::std::set<::some::valid::ns::MyStruct>& AnException::get_a_set_struct() c
   return static_cast<::std::set<::some::valid::ns::MyStruct>&&>(__fbthrift_field_a_set_struct);
 }
 
-const ::std::vector<::some::valid::ns::SimpleUnion>& AnException::get_a_union_list() const& {
+const ::std::vector<::some::valid::ns::SimpleUnion>& AnException::get_a_union_list() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_a_union_list;
 }
 
@@ -1295,7 +1295,7 @@ const ::std::vector<::some::valid::ns::SimpleUnion>& AnException::get_a_union_li
   return static_cast<::std::vector<::some::valid::ns::SimpleUnion>&&>(__fbthrift_field_a_union_list);
 }
 
-const ::some::valid::ns::unionTypeDef& AnException::get_union_typedef() const& {
+const ::some::valid::ns::unionTypeDef& AnException::get_union_typedef() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_union_typedef;
 }
 
@@ -1303,7 +1303,7 @@ const ::some::valid::ns::unionTypeDef& AnException::get_union_typedef() const& {
   return static_cast<::some::valid::ns::unionTypeDef&&>(__fbthrift_field_union_typedef);
 }
 
-const ::std::vector<::some::valid::ns::unionTypeDef>& AnException::get_a_union_typedef_list() const& {
+const ::std::vector<::some::valid::ns::unionTypeDef>& AnException::get_a_union_typedef_list() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_a_union_typedef_list;
 }
 
@@ -1773,11 +1773,11 @@ bool& ContainerStruct::set_req_fieldA(bool req_fieldA_) {
   return __fbthrift_field_req_fieldA;
 }
 
-const bool* ContainerStruct::get_opt_fieldA() const& {
+const bool* ContainerStruct::get_opt_fieldA() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return opt_fieldA_ref().has_value() ? std::addressof(__fbthrift_field_opt_fieldA) : nullptr;
 }
 
-bool* ContainerStruct::get_opt_fieldA() & {
+bool* ContainerStruct::get_opt_fieldA() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return opt_fieldA_ref().has_value() ? std::addressof(__fbthrift_field_opt_fieldA) : nullptr;
 }
 
@@ -1786,7 +1786,7 @@ bool& ContainerStruct::set_opt_fieldA(bool opt_fieldA_) {
   return __fbthrift_field_opt_fieldA;
 }
 
-const ::std::map<::std::string, bool>& ContainerStruct::get_fieldB() const& {
+const ::std::map<::std::string, bool>& ContainerStruct::get_fieldB() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_fieldB;
 }
 
@@ -1794,7 +1794,7 @@ const ::std::map<::std::string, bool>& ContainerStruct::get_fieldB() const& {
   return static_cast<::std::map<::std::string, bool>&&>(__fbthrift_field_fieldB);
 }
 
-const ::std::map<::std::string, bool>& ContainerStruct::get_req_fieldB() const& {
+const ::std::map<::std::string, bool>& ContainerStruct::get_req_fieldB() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_req_fieldB;
 }
 
@@ -1802,15 +1802,15 @@ const ::std::map<::std::string, bool>& ContainerStruct::get_req_fieldB() const& 
   return static_cast<::std::map<::std::string, bool>&&>(__fbthrift_field_req_fieldB);
 }
 
-const ::std::map<::std::string, bool>* ContainerStruct::get_opt_fieldB() const& {
+const ::std::map<::std::string, bool>* ContainerStruct::get_opt_fieldB() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return opt_fieldB_ref().has_value() ? std::addressof(__fbthrift_field_opt_fieldB) : nullptr;
 }
 
-::std::map<::std::string, bool>* ContainerStruct::get_opt_fieldB() & {
+::std::map<::std::string, bool>* ContainerStruct::get_opt_fieldB() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return opt_fieldB_ref().has_value() ? std::addressof(__fbthrift_field_opt_fieldB) : nullptr;
 }
 
-const ::std::set<::std::int32_t>& ContainerStruct::get_fieldC() const& {
+const ::std::set<::std::int32_t>& ContainerStruct::get_fieldC() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_fieldC;
 }
 
@@ -1818,7 +1818,7 @@ const ::std::set<::std::int32_t>& ContainerStruct::get_fieldC() const& {
   return static_cast<::std::set<::std::int32_t>&&>(__fbthrift_field_fieldC);
 }
 
-const ::std::set<::std::int32_t>& ContainerStruct::get_req_fieldC() const& {
+const ::std::set<::std::int32_t>& ContainerStruct::get_req_fieldC() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_req_fieldC;
 }
 
@@ -1826,23 +1826,23 @@ const ::std::set<::std::int32_t>& ContainerStruct::get_req_fieldC() const& {
   return static_cast<::std::set<::std::int32_t>&&>(__fbthrift_field_req_fieldC);
 }
 
-const ::std::set<::std::int32_t>* ContainerStruct::get_opt_fieldC() const& {
+const ::std::set<::std::int32_t>* ContainerStruct::get_opt_fieldC() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return opt_fieldC_ref().has_value() ? std::addressof(__fbthrift_field_opt_fieldC) : nullptr;
 }
 
-::std::set<::std::int32_t>* ContainerStruct::get_opt_fieldC() & {
+::std::set<::std::int32_t>* ContainerStruct::get_opt_fieldC() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return opt_fieldC_ref().has_value() ? std::addressof(__fbthrift_field_opt_fieldC) : nullptr;
 }
 
-const ::std::string* ContainerStruct::get_opt_fieldE() const& {
+const ::std::string* ContainerStruct::get_opt_fieldE() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return opt_fieldE_ref().has_value() ? std::addressof(__fbthrift_field_opt_fieldE) : nullptr;
 }
 
-::std::string* ContainerStruct::get_opt_fieldE() & {
+::std::string* ContainerStruct::get_opt_fieldE() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return opt_fieldE_ref().has_value() ? std::addressof(__fbthrift_field_opt_fieldE) : nullptr;
 }
 
-const ::std::vector<::std::vector<::std::int32_t>>& ContainerStruct::get_fieldF() const& {
+const ::std::vector<::std::vector<::std::int32_t>>& ContainerStruct::get_fieldF() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_fieldF;
 }
 
@@ -1850,7 +1850,7 @@ const ::std::vector<::std::vector<::std::int32_t>>& ContainerStruct::get_fieldF(
   return static_cast<::std::vector<::std::vector<::std::int32_t>>&&>(__fbthrift_field_fieldF);
 }
 
-const ::std::map<::std::string, ::std::map<::std::string, ::std::map<::std::string, ::std::int32_t>>>& ContainerStruct::get_fieldG() const& {
+const ::std::map<::std::string, ::std::map<::std::string, ::std::map<::std::string, ::std::int32_t>>>& ContainerStruct::get_fieldG() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_fieldG;
 }
 
@@ -1858,7 +1858,7 @@ const ::std::map<::std::string, ::std::map<::std::string, ::std::map<::std::stri
   return static_cast<::std::map<::std::string, ::std::map<::std::string, ::std::map<::std::string, ::std::int32_t>>>&&>(__fbthrift_field_fieldG);
 }
 
-const ::std::vector<::std::set<::std::int32_t>>& ContainerStruct::get_fieldH() const& {
+const ::std::vector<::std::set<::std::int32_t>>& ContainerStruct::get_fieldH() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_fieldH;
 }
 
@@ -1875,7 +1875,7 @@ bool& ContainerStruct::set_fieldI(bool fieldI_) {
   return __fbthrift_field_fieldI;
 }
 
-const ::std::map<::std::string, ::std::vector<::std::int32_t>>& ContainerStruct::get_fieldJ() const& {
+const ::std::map<::std::string, ::std::vector<::std::int32_t>>& ContainerStruct::get_fieldJ() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_fieldJ;
 }
 
@@ -1883,7 +1883,7 @@ const ::std::map<::std::string, ::std::vector<::std::int32_t>>& ContainerStruct:
   return static_cast<::std::map<::std::string, ::std::vector<::std::int32_t>>&&>(__fbthrift_field_fieldJ);
 }
 
-const ::std::vector<::std::vector<::std::vector<::std::vector<::std::int32_t>>>>& ContainerStruct::get_fieldK() const& {
+const ::std::vector<::std::vector<::std::vector<::std::vector<::std::int32_t>>>>& ContainerStruct::get_fieldK() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_fieldK;
 }
 
@@ -1891,7 +1891,7 @@ const ::std::vector<::std::vector<::std::vector<::std::vector<::std::int32_t>>>>
   return static_cast<::std::vector<::std::vector<::std::vector<::std::vector<::std::int32_t>>>>&&>(__fbthrift_field_fieldK);
 }
 
-const ::std::set<::std::set<::std::set<bool>>>& ContainerStruct::get_fieldL() const& {
+const ::std::set<::std::set<::std::set<bool>>>& ContainerStruct::get_fieldL() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_fieldL;
 }
 
@@ -1899,7 +1899,7 @@ const ::std::set<::std::set<::std::set<bool>>>& ContainerStruct::get_fieldL() co
   return static_cast<::std::set<::std::set<::std::set<bool>>>&&>(__fbthrift_field_fieldL);
 }
 
-const ::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>>& ContainerStruct::get_fieldM() const& {
+const ::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>>& ContainerStruct::get_fieldM() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_fieldM;
 }
 
@@ -1916,7 +1916,7 @@ const ::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::ve
   return __fbthrift_field_fieldN;
 }
 
-const ::some::valid::ns::complexStructTypeDef& ContainerStruct::get_fieldO() const& {
+const ::some::valid::ns::complexStructTypeDef& ContainerStruct::get_fieldO() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_fieldO;
 }
 
@@ -1924,7 +1924,7 @@ const ::some::valid::ns::complexStructTypeDef& ContainerStruct::get_fieldO() con
   return static_cast<::some::valid::ns::complexStructTypeDef&&>(__fbthrift_field_fieldO);
 }
 
-const ::std::vector<::some::valid::ns::mostComplexTypeDef>& ContainerStruct::get_fieldP() const& {
+const ::std::vector<::some::valid::ns::mostComplexTypeDef>& ContainerStruct::get_fieldP() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_fieldP;
 }
 
@@ -1959,11 +1959,11 @@ const ::std::vector<::some::valid::ns::mostComplexTypeDef>& ContainerStruct::get
   return __fbthrift_field_req_fieldR;
 }
 
-const ::some::valid::ns::MyEnumA* ContainerStruct::get_opt_fieldR() const& {
+const ::some::valid::ns::MyEnumA* ContainerStruct::get_opt_fieldR() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return opt_fieldR_ref().has_value() ? std::addressof(__fbthrift_field_opt_fieldR) : nullptr;
 }
 
-::some::valid::ns::MyEnumA* ContainerStruct::get_opt_fieldR() & {
+::some::valid::ns::MyEnumA* ContainerStruct::get_opt_fieldR() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return opt_fieldR_ref().has_value() ? std::addressof(__fbthrift_field_opt_fieldR) : nullptr;
 }
 
@@ -1981,7 +1981,7 @@ const ::some::valid::ns::MyEnumA* ContainerStruct::get_opt_fieldR() const& {
   return __fbthrift_field_fieldS;
 }
 
-const ::std::vector<::some::valid::ns::MyEnumA>& ContainerStruct::get_fieldT() const& {
+const ::std::vector<::some::valid::ns::MyEnumA>& ContainerStruct::get_fieldT() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_fieldT;
 }
 
@@ -1989,7 +1989,7 @@ const ::std::vector<::some::valid::ns::MyEnumA>& ContainerStruct::get_fieldT() c
   return static_cast<::std::vector<::some::valid::ns::MyEnumA>&&>(__fbthrift_field_fieldT);
 }
 
-const ::std::vector<::some::valid::ns::MyEnumA>& ContainerStruct::get_fieldU() const& {
+const ::std::vector<::some::valid::ns::MyEnumA>& ContainerStruct::get_fieldU() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_fieldU;
 }
 
@@ -1997,7 +1997,7 @@ const ::std::vector<::some::valid::ns::MyEnumA>& ContainerStruct::get_fieldU() c
   return static_cast<::std::vector<::some::valid::ns::MyEnumA>&&>(__fbthrift_field_fieldU);
 }
 
-const ::some::valid::ns::MyStruct& ContainerStruct::get_fieldV() const& {
+const ::some::valid::ns::MyStruct& ContainerStruct::get_fieldV() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_fieldV;
 }
 
@@ -2005,7 +2005,7 @@ const ::some::valid::ns::MyStruct& ContainerStruct::get_fieldV() const& {
   return static_cast<::some::valid::ns::MyStruct&&>(__fbthrift_field_fieldV);
 }
 
-const ::some::valid::ns::MyStruct& ContainerStruct::get_req_fieldV() const& {
+const ::some::valid::ns::MyStruct& ContainerStruct::get_req_fieldV() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_req_fieldV;
 }
 
@@ -2013,15 +2013,15 @@ const ::some::valid::ns::MyStruct& ContainerStruct::get_req_fieldV() const& {
   return static_cast<::some::valid::ns::MyStruct&&>(__fbthrift_field_req_fieldV);
 }
 
-const ::some::valid::ns::MyStruct* ContainerStruct::get_opt_fieldV() const& {
+const ::some::valid::ns::MyStruct* ContainerStruct::get_opt_fieldV() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return opt_fieldV_ref().has_value() ? std::addressof(__fbthrift_field_opt_fieldV) : nullptr;
 }
 
-::some::valid::ns::MyStruct* ContainerStruct::get_opt_fieldV() & {
+::some::valid::ns::MyStruct* ContainerStruct::get_opt_fieldV() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return opt_fieldV_ref().has_value() ? std::addressof(__fbthrift_field_opt_fieldV) : nullptr;
 }
 
-const ::std::set<::some::valid::ns::MyStruct>& ContainerStruct::get_fieldW() const& {
+const ::std::set<::some::valid::ns::MyStruct>& ContainerStruct::get_fieldW() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_fieldW;
 }
 
@@ -2029,7 +2029,7 @@ const ::std::set<::some::valid::ns::MyStruct>& ContainerStruct::get_fieldW() con
   return static_cast<::std::set<::some::valid::ns::MyStruct>&&>(__fbthrift_field_fieldW);
 }
 
-const ::some::valid::ns::ComplexUnion& ContainerStruct::get_fieldX() const& {
+const ::some::valid::ns::ComplexUnion& ContainerStruct::get_fieldX() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_fieldX;
 }
 
@@ -2037,7 +2037,7 @@ const ::some::valid::ns::ComplexUnion& ContainerStruct::get_fieldX() const& {
   return static_cast<::some::valid::ns::ComplexUnion&&>(__fbthrift_field_fieldX);
 }
 
-const ::some::valid::ns::ComplexUnion& ContainerStruct::get_req_fieldX() const& {
+const ::some::valid::ns::ComplexUnion& ContainerStruct::get_req_fieldX() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_req_fieldX;
 }
 
@@ -2045,15 +2045,15 @@ const ::some::valid::ns::ComplexUnion& ContainerStruct::get_req_fieldX() const& 
   return static_cast<::some::valid::ns::ComplexUnion&&>(__fbthrift_field_req_fieldX);
 }
 
-const ::some::valid::ns::ComplexUnion* ContainerStruct::get_opt_fieldX() const& {
+const ::some::valid::ns::ComplexUnion* ContainerStruct::get_opt_fieldX() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return opt_fieldX_ref().has_value() ? std::addressof(__fbthrift_field_opt_fieldX) : nullptr;
 }
 
-::some::valid::ns::ComplexUnion* ContainerStruct::get_opt_fieldX() & {
+::some::valid::ns::ComplexUnion* ContainerStruct::get_opt_fieldX() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return opt_fieldX_ref().has_value() ? std::addressof(__fbthrift_field_opt_fieldX) : nullptr;
 }
 
-const ::std::vector<::some::valid::ns::ComplexUnion>& ContainerStruct::get_fieldY() const& {
+const ::std::vector<::some::valid::ns::ComplexUnion>& ContainerStruct::get_fieldY() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_fieldY;
 }
 
@@ -2061,7 +2061,7 @@ const ::std::vector<::some::valid::ns::ComplexUnion>& ContainerStruct::get_field
   return static_cast<::std::vector<::some::valid::ns::ComplexUnion>&&>(__fbthrift_field_fieldY);
 }
 
-const ::some::valid::ns::unionTypeDef& ContainerStruct::get_fieldZ() const& {
+const ::some::valid::ns::unionTypeDef& ContainerStruct::get_fieldZ() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_fieldZ;
 }
 
@@ -2069,7 +2069,7 @@ const ::some::valid::ns::unionTypeDef& ContainerStruct::get_fieldZ() const& {
   return static_cast<::some::valid::ns::unionTypeDef&&>(__fbthrift_field_fieldZ);
 }
 
-const ::std::vector<::some::valid::ns::unionTypeDef>& ContainerStruct::get_fieldAA() const& {
+const ::std::vector<::some::valid::ns::unionTypeDef>& ContainerStruct::get_fieldAA() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_fieldAA;
 }
 
@@ -2095,7 +2095,7 @@ const ::std::vector<::some::valid::ns::unionTypeDef>& ContainerStruct::get_field
   return __fbthrift_field_fieldAD;
 }
 
-const ::std::map<::std::string, ::std::int32_t>& ContainerStruct::get_fieldAE() const& {
+const ::std::map<::std::string, ::std::int32_t>& ContainerStruct::get_fieldAE() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_fieldAE;
 }
 
@@ -2308,7 +2308,7 @@ std::partial_ordering MyIncludedStruct::operator<=>([[maybe_unused]] const MyInc
   return __fbthrift_field_MyIncludedInt;
 }
 
-const ::some::valid::ns::AStruct& MyIncludedStruct::get_MyIncludedStruct() const& {
+const ::some::valid::ns::AStruct& MyIncludedStruct::get_MyIncludedStruct() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_MyIncludedStruct;
 }
 
@@ -2316,7 +2316,7 @@ const ::some::valid::ns::AStruct& MyIncludedStruct::get_MyIncludedStruct() const
   return static_cast<::some::valid::ns::AStruct&&>(__fbthrift_field_MyIncludedStruct);
 }
 
-const ::some::valid::ns::AStruct& MyIncludedStruct::get_ARequiredField() const& {
+const ::some::valid::ns::AStruct& MyIncludedStruct::get_ARequiredField() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_ARequiredField;
 }
 
@@ -2581,7 +2581,7 @@ bool AnnotatedStruct::operator==([[maybe_unused]] const AnnotatedStruct& rhs) co
 }
 
 
-const ::some::valid::ns::ContainerStruct& AnnotatedStruct::get_no_annotation() const& {
+const ::some::valid::ns::ContainerStruct& AnnotatedStruct::get_no_annotation() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_no_annotation;
 }
 
@@ -2598,7 +2598,7 @@ const ::some::valid::ns::ContainerStruct& AnnotatedStruct::get_no_annotation() c
   return __fbthrift_field_base_type;
 }
 
-const ::some::valid::ns::FollySmallVectorI64& AnnotatedStruct::get_list_type() const& {
+const ::some::valid::ns::FollySmallVectorI64& AnnotatedStruct::get_list_type() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_list_type;
 }
 
@@ -2606,7 +2606,7 @@ const ::some::valid::ns::FollySmallVectorI64& AnnotatedStruct::get_list_type() c
   return static_cast<::some::valid::ns::FollySmallVectorI64&&>(__fbthrift_field_list_type);
 }
 
-const ::some::valid::ns::SortedVectorSetString& AnnotatedStruct::get_set_type() const& {
+const ::some::valid::ns::SortedVectorSetString& AnnotatedStruct::get_set_type() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_set_type;
 }
 
@@ -2614,7 +2614,7 @@ const ::some::valid::ns::SortedVectorSetString& AnnotatedStruct::get_set_type() 
   return static_cast<::some::valid::ns::SortedVectorSetString&&>(__fbthrift_field_set_type);
 }
 
-const ::some::valid::ns::FakeMap& AnnotatedStruct::get_map_type() const& {
+const ::some::valid::ns::FakeMap& AnnotatedStruct::get_map_type() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_map_type;
 }
 
@@ -2622,7 +2622,7 @@ const ::some::valid::ns::FakeMap& AnnotatedStruct::get_map_type() const& {
   return static_cast<::some::valid::ns::FakeMap&&>(__fbthrift_field_map_type);
 }
 
-const ::some::valid::ns::UnorderedMapStruct& AnnotatedStruct::get_map_struct_type() const& {
+const ::some::valid::ns::UnorderedMapStruct& AnnotatedStruct::get_map_struct_type() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_map_struct_type;
 }
 
@@ -2630,7 +2630,7 @@ const ::some::valid::ns::UnorderedMapStruct& AnnotatedStruct::get_map_struct_typ
   return static_cast<::some::valid::ns::UnorderedMapStruct&&>(__fbthrift_field_map_struct_type);
 }
 
-const std::list<::std::int32_t>& AnnotatedStruct::get_list_i32_template() const& {
+const std::list<::std::int32_t>& AnnotatedStruct::get_list_i32_template() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_list_i32_template;
 }
 
@@ -2638,7 +2638,7 @@ std::list<::std::int32_t> AnnotatedStruct::get_list_i32_template() && {
   return static_cast<std::list<::std::int32_t>&&>(__fbthrift_field_list_i32_template);
 }
 
-const std::deque<::std::string>& AnnotatedStruct::get_list_string_template() const& {
+const std::deque<::std::string>& AnnotatedStruct::get_list_string_template() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_list_string_template;
 }
 
@@ -2646,7 +2646,7 @@ std::deque<::std::string> AnnotatedStruct::get_list_string_template() && {
   return static_cast<std::deque<::std::string>&&>(__fbthrift_field_list_string_template);
 }
 
-const folly::sorted_vector_set<::std::string>& AnnotatedStruct::get_set_template() const& {
+const folly::sorted_vector_set<::std::string>& AnnotatedStruct::get_set_template() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_set_template;
 }
 
@@ -2654,7 +2654,7 @@ folly::sorted_vector_set<::std::string> AnnotatedStruct::get_set_template() && {
   return static_cast<folly::sorted_vector_set<::std::string>&&>(__fbthrift_field_set_template);
 }
 
-const folly::sorted_vector_map<::std::int64_t, ::std::string>& AnnotatedStruct::get_map_template() const& {
+const folly::sorted_vector_map<::std::int64_t, ::std::string>& AnnotatedStruct::get_map_template() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_map_template;
 }
 
@@ -2662,7 +2662,7 @@ folly::sorted_vector_map<::std::int64_t, ::std::string> AnnotatedStruct::get_map
   return static_cast<folly::sorted_vector_map<::std::int64_t, ::std::string>&&>(__fbthrift_field_map_template);
 }
 
-const ::some::valid::ns::std_list& AnnotatedStruct::get_typedef_list_template() const& {
+const ::some::valid::ns::std_list& AnnotatedStruct::get_typedef_list_template() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_typedef_list_template;
 }
 
@@ -2670,7 +2670,7 @@ const ::some::valid::ns::std_list& AnnotatedStruct::get_typedef_list_template() 
   return static_cast<::some::valid::ns::std_list&&>(__fbthrift_field_typedef_list_template);
 }
 
-const ::some::valid::ns::std_deque& AnnotatedStruct::get_typedef_deque_template() const& {
+const ::some::valid::ns::std_deque& AnnotatedStruct::get_typedef_deque_template() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_typedef_deque_template;
 }
 
@@ -2678,7 +2678,7 @@ const ::some::valid::ns::std_deque& AnnotatedStruct::get_typedef_deque_template(
   return static_cast<::some::valid::ns::std_deque&&>(__fbthrift_field_typedef_deque_template);
 }
 
-const ::some::valid::ns::folly_set& AnnotatedStruct::get_typedef_set_template() const& {
+const ::some::valid::ns::folly_set& AnnotatedStruct::get_typedef_set_template() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_typedef_set_template;
 }
 
@@ -2686,7 +2686,7 @@ const ::some::valid::ns::folly_set& AnnotatedStruct::get_typedef_set_template() 
   return static_cast<::some::valid::ns::folly_set&&>(__fbthrift_field_typedef_set_template);
 }
 
-const ::some::valid::ns::folly_map& AnnotatedStruct::get_typedef_map_template() const& {
+const ::some::valid::ns::folly_map& AnnotatedStruct::get_typedef_map_template() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_typedef_map_template;
 }
 
@@ -2694,7 +2694,7 @@ const ::some::valid::ns::folly_map& AnnotatedStruct::get_typedef_map_template() 
   return static_cast<::some::valid::ns::folly_map&&>(__fbthrift_field_typedef_map_template);
 }
 
-const ::some::valid::ns::ContainerStruct& AnnotatedStruct::get_struct_struct() const& {
+const ::some::valid::ns::ContainerStruct& AnnotatedStruct::get_struct_struct() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_struct_struct;
 }
 
@@ -2909,7 +2909,7 @@ std::partial_ordering ComplexContainerStruct::operator<=>([[maybe_unused]] const
 }
 
 
-const ::std::map<::std::string, ::some::valid::ns::IOBuf>& ComplexContainerStruct::get_map_of_iobufs() const& {
+const ::std::map<::std::string, ::some::valid::ns::IOBuf>& ComplexContainerStruct::get_map_of_iobufs() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_map_of_iobufs;
 }
 
@@ -2917,7 +2917,7 @@ const ::std::map<::std::string, ::some::valid::ns::IOBuf>& ComplexContainerStruc
   return static_cast<::std::map<::std::string, ::some::valid::ns::IOBuf>&&>(__fbthrift_field_map_of_iobufs);
 }
 
-const ::std::map<::std::string, ::some::valid::ns::IOBufPtr>& ComplexContainerStruct::get_map_of_iobuf_ptrs() const& {
+const ::std::map<::std::string, ::some::valid::ns::IOBufPtr>& ComplexContainerStruct::get_map_of_iobuf_ptrs() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_map_of_iobuf_ptrs;
 }
 

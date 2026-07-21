@@ -184,7 +184,7 @@ class Foo final  {
 
   /** Glean { "field": "other_foo" } */
   [[deprecated("Use `FOO.other_foo().value()` instead of `FOO.get_other_foo()`")]]
-  const ::facebook::thrift::compiler::test::fixtures::aliasing::other::Foo& get_other_foo() const&;
+  const ::facebook::thrift::compiler::test::fixtures::aliasing::other::Foo& get_other_foo() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "other_foo" } */
   [[deprecated("Use `FOO.other_foo().value()` instead of `FOO.get_other_foo()`")]]
@@ -200,7 +200,7 @@ class Foo final  {
 
   /** Glean { "field": "yet_another_foo" } */
   [[deprecated("Use `FOO.yet_another_foo().value()` instead of `FOO.get_yet_another_foo()`")]]
-  const ::facebook::thrift::compiler::test::fixtures::aliasing::not_module::Foo& get_yet_another_foo() const&;
+  const ::facebook::thrift::compiler::test::fixtures::aliasing::not_module::Foo& get_yet_another_foo() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "yet_another_foo" } */
   [[deprecated("Use `FOO.yet_another_foo().value()` instead of `FOO.get_yet_another_foo()`")]]

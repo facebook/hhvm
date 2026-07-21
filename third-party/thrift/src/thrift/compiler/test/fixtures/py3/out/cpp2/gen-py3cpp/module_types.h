@@ -1102,7 +1102,7 @@ class SimpleStruct final  {
 
   /** Glean { "field": "something" } */
   [[deprecated("Use `FOO.something().value()` instead of `FOO.get_something()`")]]
-  const ::std::unordered_map<::std::int32_t, ::std::int32_t>& get_something() const&;
+  const ::std::unordered_map<::std::int32_t, ::std::int32_t>& get_something() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "something" } */
   [[deprecated("Use `FOO.something().value()` instead of `FOO.get_something()`")]]
@@ -1126,11 +1126,11 @@ class SimpleStruct final  {
 
   /** Glean { "field": "opt_default_int" } */
   [[deprecated("Use `FOO.opt_default_int().value()` instead of `FOO.get_opt_default_int()`")]]
-  const ::std::int32_t* get_opt_default_int() const&;
+  const ::std::int32_t* get_opt_default_int() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "opt_default_int" } */
   [[deprecated("Use `FOO.opt_default_int().value()` instead of `FOO.get_opt_default_int()`")]]
-  ::std::int32_t* get_opt_default_int() &;
+  ::std::int32_t* get_opt_default_int() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::int32_t* get_opt_default_int() && = delete;
 
@@ -1140,11 +1140,11 @@ class SimpleStruct final  {
 
   /** Glean { "field": "opt_default_str" } */
   [[deprecated("Use `FOO.opt_default_str().value()` instead of `FOO.get_opt_default_str()`")]]
-  const ::std::string* get_opt_default_str() const&;
+  const ::std::string* get_opt_default_str() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "opt_default_str" } */
   [[deprecated("Use `FOO.opt_default_str().value()` instead of `FOO.get_opt_default_str()`")]]
-  ::std::string* get_opt_default_str() &;
+  ::std::string* get_opt_default_str() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::string* get_opt_default_str() && = delete;
 
@@ -1158,11 +1158,11 @@ class SimpleStruct final  {
 
   /** Glean { "field": "opt_default_enum" } */
   [[deprecated("Use `FOO.opt_default_enum().value()` instead of `FOO.get_opt_default_enum()`")]]
-  const ::py3::simple::AnEnum* get_opt_default_enum() const&;
+  const ::py3::simple::AnEnum* get_opt_default_enum() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "opt_default_enum" } */
   [[deprecated("Use `FOO.opt_default_enum().value()` instead of `FOO.get_opt_default_enum()`")]]
-  ::py3::simple::AnEnum* get_opt_default_enum() &;
+  ::py3::simple::AnEnum* get_opt_default_enum() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::py3::simple::AnEnum* get_opt_default_enum() && = delete;
 
@@ -1680,11 +1680,11 @@ class OptionalRefStruct final  {
 
   /** Glean { "field": "optional_blob" } */
   [[deprecated("Use `FOO.optional_blob().value()` instead of `FOO.get_optional_blob()`")]]
-  const ::py3::simple::IOBufPtr* get_optional_blob() const&;
+  const ::py3::simple::IOBufPtr* get_optional_blob() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "optional_blob" } */
   [[deprecated("Use `FOO.optional_blob().value()` instead of `FOO.get_optional_blob()`")]]
-  ::py3::simple::IOBufPtr* get_optional_blob() &;
+  ::py3::simple::IOBufPtr* get_optional_blob() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::py3::simple::IOBufPtr* get_optional_blob() && = delete;
 
@@ -1957,7 +1957,7 @@ class Float32Struct final  {
 
   /** Glean { "field": "float_list" } */
   [[deprecated("Use `FOO.float_list().value()` instead of `FOO.get_float_list()`")]]
-  const ::std::vector<::py3::simple::DeferredTruncationFloat>& get_float_list() const&;
+  const ::std::vector<::py3::simple::DeferredTruncationFloat>& get_float_list() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "float_list" } */
   [[deprecated("Use `FOO.float_list().value()` instead of `FOO.get_float_list()`")]]
@@ -1973,7 +1973,7 @@ class Float32Struct final  {
 
   /** Glean { "field": "float_map" } */
   [[deprecated("Use `FOO.float_map().value()` instead of `FOO.get_float_map()`")]]
-  const ::std::map<::std::string, ::std::vector<::py3::simple::DeferredTruncationFloat>>& get_float_map() const&;
+  const ::std::map<::std::string, ::std::vector<::py3::simple::DeferredTruncationFloat>>& get_float_map() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "float_map" } */
   [[deprecated("Use `FOO.float_map().value()` instead of `FOO.get_float_map()`")]]
@@ -2200,11 +2200,11 @@ class IssetInspectionStruct final  {
 
   /** Glean { "field": "opt_str_field" } */
   [[deprecated("Use `FOO.opt_str_field().value()` instead of `FOO.get_opt_str_field()`")]]
-  const ::std::string* get_opt_str_field() const&;
+  const ::std::string* get_opt_str_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "opt_str_field" } */
   [[deprecated("Use `FOO.opt_str_field().value()` instead of `FOO.get_opt_str_field()`")]]
-  ::std::string* get_opt_str_field() &;
+  ::std::string* get_opt_str_field() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::string* get_opt_str_field() && = delete;
 
@@ -2429,7 +2429,7 @@ class HiddenTypeFieldsStruct final  {
 
   /** Glean { "field": "field2" } */
   [[deprecated("Use `FOO.field2().value()` instead of `FOO.get_field2()`")]]
-  const ::std::vector<::py3::simple::AdaptedTypeDef>& get_field2() const&;
+  const ::std::vector<::py3::simple::AdaptedTypeDef>& get_field2() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "field2" } */
   [[deprecated("Use `FOO.field2().value()` instead of `FOO.get_field2()`")]]
@@ -2445,7 +2445,7 @@ class HiddenTypeFieldsStruct final  {
 
   /** Glean { "field": "field3" } */
   [[deprecated("Use `FOO.field3().value()` instead of `FOO.get_field3()`")]]
-  const ::std::unordered_map<::std::int32_t, ::py3::simple::AdaptedTypeDef>& get_field3() const&;
+  const ::std::unordered_map<::std::int32_t, ::py3::simple::AdaptedTypeDef>& get_field3() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "field3" } */
   [[deprecated("Use `FOO.field3().value()` instead of `FOO.get_field3()`")]]
@@ -3045,7 +3045,7 @@ class ComplexStruct final  {
 
   /** Glean { "field": "structOne" } */
   [[deprecated("Use `FOO.structOne().value()` instead of `FOO.get_structOne()`")]]
-  const ::py3::simple::SimpleStruct& get_structOne() const&;
+  const ::py3::simple::SimpleStruct& get_structOne() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "structOne" } */
   [[deprecated("Use `FOO.structOne().value()` instead of `FOO.get_structOne()`")]]
@@ -3061,7 +3061,7 @@ class ComplexStruct final  {
 
   /** Glean { "field": "structTwo" } */
   [[deprecated("Use `FOO.structTwo().value()` instead of `FOO.get_structTwo()`")]]
-  const ::py3::simple::SimpleStruct& get_structTwo() const&;
+  const ::py3::simple::SimpleStruct& get_structTwo() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "structTwo" } */
   [[deprecated("Use `FOO.structTwo().value()` instead of `FOO.get_structTwo()`")]]
@@ -3085,7 +3085,7 @@ class ComplexStruct final  {
 
   /** Glean { "field": "name" } */
   [[deprecated("Use `FOO.name().value()` instead of `FOO.get_name()`")]]
-  const ::std::string& get_name() const& {
+  const ::std::string& get_name() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_name;
   }
 
@@ -3113,7 +3113,7 @@ class ComplexStruct final  {
 
   /** Glean { "field": "some_bytes" } */
   [[deprecated("Use `FOO.some_bytes().value()` instead of `FOO.get_some_bytes()`")]]
-  const ::std::string& get_some_bytes() const& {
+  const ::std::string& get_some_bytes() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_some_bytes;
   }
 
@@ -3133,7 +3133,7 @@ class ComplexStruct final  {
 
   /** Glean { "field": "from" } */
   [[deprecated("Use `FOO.from().value()` instead of `FOO.get_from()`")]]
-  const ::std::string& get_from() const& {
+  const ::std::string& get_from() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_from;
   }
 
@@ -3153,7 +3153,7 @@ class ComplexStruct final  {
 
   /** Glean { "field": "cdef" } */
   [[deprecated("Use `FOO.cdef().value()` instead of `FOO.get_cdef()`")]]
-  const ::std::string& get_cdef() const& {
+  const ::std::string& get_cdef() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_cdef;
   }
 
@@ -3173,7 +3173,7 @@ class ComplexStruct final  {
 
   /** Glean { "field": "bytes_with_cpp_type" } */
   [[deprecated("Use `FOO.bytes_with_cpp_type().value()` instead of `FOO.get_bytes_with_cpp_type()`")]]
-  const ::py3::simple::foo_bar& get_bytes_with_cpp_type() const& {
+  const ::py3::simple::foo_bar& get_bytes_with_cpp_type() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_bytes_with_cpp_type;
   }
 
@@ -3525,7 +3525,7 @@ class BinaryUnionStruct final  {
 
   /** Glean { "field": "u" } */
   [[deprecated("Use `FOO.u().value()` instead of `FOO.get_u()`")]]
-  const ::py3::simple::BinaryUnion& get_u() const&;
+  const ::py3::simple::BinaryUnion& get_u() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "u" } */
   [[deprecated("Use `FOO.u().value()` instead of `FOO.get_u()`")]]
@@ -4008,7 +4008,7 @@ class CustomFields final  {
 
   /** Glean { "field": "string_field" } */
   [[deprecated("Use `FOO.string_field().value()` instead of `FOO.get_string_field()`")]]
-  const ::MyType& get_string_field() const& {
+  const ::MyType& get_string_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_string_field;
   }
 
@@ -4028,7 +4028,7 @@ class CustomFields final  {
 
   /** Glean { "field": "binary_field" } */
   [[deprecated("Use `FOO.binary_field().value()` instead of `FOO.get_binary_field()`")]]
-  const ::MyType& get_binary_field() const& {
+  const ::MyType& get_binary_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_binary_field;
   }
 
@@ -4048,7 +4048,7 @@ class CustomFields final  {
 
   /** Glean { "field": "list_field" } */
   [[deprecated("Use `FOO.list_field().value()` instead of `FOO.get_list_field()`")]]
-  const ::MyType& get_list_field() const&;
+  const ::MyType& get_list_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "list_field" } */
   [[deprecated("Use `FOO.list_field().value()` instead of `FOO.get_list_field()`")]]
@@ -4064,7 +4064,7 @@ class CustomFields final  {
 
   /** Glean { "field": "set_field" } */
   [[deprecated("Use `FOO.set_field().value()` instead of `FOO.get_set_field()`")]]
-  const ::MyType& get_set_field() const&;
+  const ::MyType& get_set_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "set_field" } */
   [[deprecated("Use `FOO.set_field().value()` instead of `FOO.get_set_field()`")]]
@@ -4080,7 +4080,7 @@ class CustomFields final  {
 
   /** Glean { "field": "map_field" } */
   [[deprecated("Use `FOO.map_field().value()` instead of `FOO.get_map_field()`")]]
-  const ::MyType& get_map_field() const&;
+  const ::MyType& get_map_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "map_field" } */
   [[deprecated("Use `FOO.map_field().value()` instead of `FOO.get_map_field()`")]]
@@ -4096,7 +4096,7 @@ class CustomFields final  {
 
   /** Glean { "field": "struct_field" } */
   [[deprecated("Use `FOO.struct_field().value()` instead of `FOO.get_struct_field()`")]]
-  const ::MyType& get_struct_field() const&;
+  const ::MyType& get_struct_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "struct_field" } */
   [[deprecated("Use `FOO.struct_field().value()` instead of `FOO.get_struct_field()`")]]
@@ -4579,7 +4579,7 @@ class CustomTypedefFields final  {
 
   /** Glean { "field": "string_field" } */
   [[deprecated("Use `FOO.string_field().value()` instead of `FOO.get_string_field()`")]]
-  const ::py3::simple::CustomString& get_string_field() const& {
+  const ::py3::simple::CustomString& get_string_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_string_field;
   }
 
@@ -4599,7 +4599,7 @@ class CustomTypedefFields final  {
 
   /** Glean { "field": "binary_field" } */
   [[deprecated("Use `FOO.binary_field().value()` instead of `FOO.get_binary_field()`")]]
-  const ::py3::simple::CustomBinary& get_binary_field() const& {
+  const ::py3::simple::CustomBinary& get_binary_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_binary_field;
   }
 
@@ -4619,7 +4619,7 @@ class CustomTypedefFields final  {
 
   /** Glean { "field": "list_field" } */
   [[deprecated("Use `FOO.list_field().value()` instead of `FOO.get_list_field()`")]]
-  const ::py3::simple::CustomList& get_list_field() const&;
+  const ::py3::simple::CustomList& get_list_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "list_field" } */
   [[deprecated("Use `FOO.list_field().value()` instead of `FOO.get_list_field()`")]]
@@ -4635,7 +4635,7 @@ class CustomTypedefFields final  {
 
   /** Glean { "field": "set_field" } */
   [[deprecated("Use `FOO.set_field().value()` instead of `FOO.get_set_field()`")]]
-  const ::py3::simple::CustomSet& get_set_field() const&;
+  const ::py3::simple::CustomSet& get_set_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "set_field" } */
   [[deprecated("Use `FOO.set_field().value()` instead of `FOO.get_set_field()`")]]
@@ -4651,7 +4651,7 @@ class CustomTypedefFields final  {
 
   /** Glean { "field": "map_field" } */
   [[deprecated("Use `FOO.map_field().value()` instead of `FOO.get_map_field()`")]]
-  const ::py3::simple::CustomMap& get_map_field() const&;
+  const ::py3::simple::CustomMap& get_map_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "map_field" } */
   [[deprecated("Use `FOO.map_field().value()` instead of `FOO.get_map_field()`")]]
@@ -4667,7 +4667,7 @@ class CustomTypedefFields final  {
 
   /** Glean { "field": "struct_field" } */
   [[deprecated("Use `FOO.struct_field().value()` instead of `FOO.get_struct_field()`")]]
-  const ::py3::simple::CustomStruct& get_struct_field() const&;
+  const ::py3::simple::CustomStruct& get_struct_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "struct_field" } */
   [[deprecated("Use `FOO.struct_field().value()` instead of `FOO.get_struct_field()`")]]

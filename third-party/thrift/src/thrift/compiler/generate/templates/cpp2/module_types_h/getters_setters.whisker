@@ -20,11 +20,11 @@
 
   {{#partial glean.field_docblock field=field}}
   [[deprecated("Use `FOO.{{field.cpp_name}}().value()` instead of `FOO.get_{{field.cpp_name}}()`")]]
-  const {{field.cpp_storage_type}}* get_{{field.cpp_name}}() const&;
+  const {{field.cpp_storage_type}}* get_{{field.cpp_name}}() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   {{#partial glean.field_docblock field=field}}
   [[deprecated("Use `FOO.{{field.cpp_name}}().value()` instead of `FOO.get_{{field.cpp_name}}()`")]]
-  {{field.cpp_storage_type}}* get_{{field.cpp_name}}() &;
+  {{field.cpp_storage_type}}* get_{{field.cpp_name}}() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   {{field.cpp_storage_type}}* get_{{field.cpp_name}}() && = delete;
       {{#else if field.type.resolves_to_fixed_size?}}
@@ -36,7 +36,7 @@
 
   {{#partial glean.field_docblock field=field}}
   [[deprecated("Use `FOO.{{field.cpp_name}}().value()` instead of `FOO.get_{{field.cpp_name}}()`")]]
-  const {{field.cpp_storage_type}}& get_{{field.cpp_name}}() const&;
+  const {{field.cpp_storage_type}}& get_{{field.cpp_name}}() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   {{#partial glean.field_docblock field=field}}
   [[deprecated("Use `FOO.{{field.cpp_name}}().value()` instead of `FOO.get_{{field.cpp_name}}()`")]]
@@ -45,7 +45,7 @@
 
   {{#partial glean.field_docblock field=field}}
   [[deprecated("Use `FOO.{{field.cpp_name}}().value()` instead of `FOO.get_{{field.cpp_name}}()`")]]
-  const {{field.cpp_storage_type}}& get_{{field.cpp_name}}() const& {
+  const {{field.cpp_storage_type}}& get_{{field.cpp_name}}() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return {{field.cpp_storage_name}};
   }
 

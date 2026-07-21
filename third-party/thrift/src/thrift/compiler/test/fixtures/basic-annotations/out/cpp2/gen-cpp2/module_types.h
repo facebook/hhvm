@@ -707,7 +707,7 @@ class YourStruct final  {
 
   /** Glean { "field": "abstract" } */
   [[deprecated("Use `FOO.abstract().value()` instead of `FOO.get_abstract()`")]]
-  const ::std::string& get_abstract() const& {
+  const ::std::string& get_abstract() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_abstract;
   }
 
@@ -727,7 +727,7 @@ class YourStruct final  {
 
   /** Glean { "field": "annotation_with_quote" } */
   [[deprecated("Use `FOO.annotation_with_quote().value()` instead of `FOO.get_annotation_with_quote()`")]]
-  const ::std::string& get_annotation_with_quote() const& {
+  const ::std::string& get_annotation_with_quote() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_annotation_with_quote;
   }
 
@@ -747,7 +747,7 @@ class YourStruct final  {
 
   /** Glean { "field": "class_" } */
   [[deprecated("Use `FOO.class_().value()` instead of `FOO.get_class_()`")]]
-  const ::std::string& get_class_() const& {
+  const ::std::string& get_class_() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_class_;
   }
 
@@ -767,7 +767,7 @@ class YourStruct final  {
 
   /** Glean { "field": "annotation_with_trailing_comma" } */
   [[deprecated("Use `FOO.annotation_with_trailing_comma().value()` instead of `FOO.get_annotation_with_trailing_comma()`")]]
-  const ::std::string& get_annotation_with_trailing_comma() const& {
+  const ::std::string& get_annotation_with_trailing_comma() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_annotation_with_trailing_comma;
   }
 
@@ -787,7 +787,7 @@ class YourStruct final  {
 
   /** Glean { "field": "empty_annotations" } */
   [[deprecated("Use `FOO.empty_annotations().value()` instead of `FOO.get_empty_annotations()`")]]
-  const ::std::string& get_empty_annotations() const& {
+  const ::std::string& get_empty_annotations() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_empty_annotations;
   }
 
@@ -815,7 +815,7 @@ class YourStruct final  {
 
   /** Glean { "field": "cpp_type_annotation" } */
   [[deprecated("Use `FOO.cpp_type_annotation().value()` instead of `FOO.get_cpp_type_annotation()`")]]
-  const ::cpp2::list_string_6884& get_cpp_type_annotation() const&;
+  const ::cpp2::list_string_6884& get_cpp_type_annotation() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "cpp_type_annotation" } */
   [[deprecated("Use `FOO.cpp_type_annotation().value()` instead of `FOO.get_cpp_type_annotation()`")]]
@@ -961,7 +961,7 @@ class MyStructNestedAnnotation final  {
 
   /** Glean { "field": "name" } */
   [[deprecated("Use `FOO.name().value()` instead of `FOO.get_name()`")]]
-  const ::std::string& get_name() const& {
+  const ::std::string& get_name() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_name;
   }
 
@@ -1247,7 +1247,7 @@ class SecretStruct final  {
 
   /** Glean { "field": "password" } */
   [[deprecated("Use `FOO.password().value()` instead of `FOO.get_password()`")]]
-  const ::std::string& get_password() const& {
+  const ::std::string& get_password() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_password;
   }
 

@@ -309,7 +309,7 @@ class ComplexStruct final  {
 
   /** Glean { "field": "nested" } */
   [[deprecated("Use `FOO.nested().value()` instead of `FOO.get_nested()`")]]
-  const ::cpp2_struct_footprint::SimpleStruct& get_nested() const&;
+  const ::cpp2_struct_footprint::SimpleStruct& get_nested() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "nested" } */
   [[deprecated("Use `FOO.nested().value()` instead of `FOO.get_nested()`")]]
@@ -844,7 +844,7 @@ class FOLLY_EXPORT ExStruct : public virtual apache::thrift::TException {
 
   /** Glean { "field": "message" } */
   [[deprecated("Use `FOO.message().value()` instead of `FOO.get_message()`")]]
-  const ::std::string& get_message() const& {
+  const ::std::string& get_message() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_message;
   }
 

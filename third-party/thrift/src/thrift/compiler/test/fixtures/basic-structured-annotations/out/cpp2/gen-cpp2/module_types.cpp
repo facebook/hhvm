@@ -325,7 +325,7 @@ std::partial_ordering structured_annotation_recursive::operator<=>([[maybe_unuse
 }
 
 
-const ::test::fixtures::basic_structured_annotations::structured_annotation_forward& structured_annotation_recursive::get_forward() const& {
+const ::test::fixtures::basic_structured_annotations::structured_annotation_forward& structured_annotation_recursive::get_forward() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_forward;
 }
 
@@ -470,7 +470,7 @@ std::partial_ordering structured_annotation_nested::operator<=>([[maybe_unused]]
 }
 
 
-const ::test::fixtures::basic_structured_annotations::structured_annotation_with_default& structured_annotation_nested::get_nest() const& {
+const ::test::fixtures::basic_structured_annotations::structured_annotation_with_default& structured_annotation_nested::get_nest() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_nest;
 }
 

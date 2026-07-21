@@ -197,7 +197,7 @@ class Included final  {
 
   /** Glean { "field": "MyTransitiveField" } */
   [[deprecated("Use `FOO.MyTransitiveField().value()` instead of `FOO.get_MyTransitiveField()`")]]
-  const ::cpp2::Foo& get_MyTransitiveField() const&;
+  const ::cpp2::Foo& get_MyTransitiveField() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "MyTransitiveField" } */
   [[deprecated("Use `FOO.MyTransitiveField().value()` instead of `FOO.get_MyTransitiveField()`")]]

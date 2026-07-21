@@ -205,7 +205,7 @@ std::partial_ordering MyStruct::operator<=>([[maybe_unused]] const MyStruct& rhs
   return __fbthrift_field_inty;
 }
 
-const ::test::fixtures::python_capi::MyDataItem& MyStruct::get_myItemy() const& {
+const ::test::fixtures::python_capi::MyDataItem& MyStruct::get_myItemy() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_myItemy;
 }
 
@@ -231,7 +231,7 @@ bool& MyStruct::set_boulet(bool boulet_) {
   return __fbthrift_field_boulet;
 }
 
-const ::std::vector<float>& MyStruct::get_floatListy() const& {
+const ::std::vector<float>& MyStruct::get_floatListy() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_floatListy;
 }
 
@@ -239,7 +239,7 @@ const ::std::vector<float>& MyStruct::get_floatListy() const& {
   return static_cast<::std::vector<float>&&>(__fbthrift_field_floatListy);
 }
 
-const ::std::map<::std::string, ::std::string>& MyStruct::get_strMappy() const& {
+const ::std::map<::std::string, ::std::string>& MyStruct::get_strMappy() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_strMappy;
 }
 
@@ -247,7 +247,7 @@ const ::std::map<::std::string, ::std::string>& MyStruct::get_strMappy() const& 
   return static_cast<::std::map<::std::string, ::std::string>&&>(__fbthrift_field_strMappy);
 }
 
-const ::std::set<::std::int32_t>& MyStruct::get_intSetty() const& {
+const ::std::set<::std::int32_t>& MyStruct::get_intSetty() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_intSetty;
 }
 
@@ -788,11 +788,11 @@ uint64_t& PrimitiveStruct::set_longy(uint64_t longy_) {
   return __fbthrift_field_longy;
 }
 
-const float* PrimitiveStruct::get_floaty() const& {
+const float* PrimitiveStruct::get_floaty() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return floaty_ref().has_value() ? std::addressof(__fbthrift_field_floaty) : nullptr;
 }
 
-float* PrimitiveStruct::get_floaty() & {
+float* PrimitiveStruct::get_floaty() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return floaty_ref().has_value() ? std::addressof(__fbthrift_field_floaty) : nullptr;
 }
 
@@ -801,7 +801,7 @@ float& PrimitiveStruct::set_floaty(float floaty_) {
   return __fbthrift_field_floaty;
 }
 
-const ::test::fixtures::python_capi::MyStruct& PrimitiveStruct::get_patched_struct() const& {
+const ::test::fixtures::python_capi::MyStruct& PrimitiveStruct::get_patched_struct() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_patched_struct;
 }
 
@@ -809,7 +809,7 @@ const ::test::fixtures::python_capi::MyStruct& PrimitiveStruct::get_patched_stru
   return static_cast<::test::fixtures::python_capi::MyStruct&&>(__fbthrift_field_patched_struct);
 }
 
-const ::test::fixtures::python_capi::VapidStruct& PrimitiveStruct::get_empty_struct() const& {
+const ::test::fixtures::python_capi::VapidStruct& PrimitiveStruct::get_empty_struct() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_empty_struct;
 }
 
@@ -817,7 +817,7 @@ const ::test::fixtures::python_capi::VapidStruct& PrimitiveStruct::get_empty_str
   return static_cast<::test::fixtures::python_capi::VapidStruct&&>(__fbthrift_field_empty_struct);
 }
 
-const ::test::fixtures::python_capi::SomeError& PrimitiveStruct::get_some_error() const& {
+const ::test::fixtures::python_capi::SomeError& PrimitiveStruct::get_some_error() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_some_error;
 }
 
@@ -954,7 +954,7 @@ std::partial_ordering AdaptedFields::operator<=>([[maybe_unused]] const AdaptedF
 }
 
 
-const ::std::vector<::apache::thrift::type::FieldId>& AdaptedFields::get_list_adapted_int() const& {
+const ::std::vector<::apache::thrift::type::FieldId>& AdaptedFields::get_list_adapted_int() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_list_adapted_int;
 }
 
@@ -962,7 +962,7 @@ const ::std::vector<::apache::thrift::type::FieldId>& AdaptedFields::get_list_ad
   return static_cast<::std::vector<::apache::thrift::type::FieldId>&&>(__fbthrift_field_list_adapted_int);
 }
 
-const ::apache::thrift::type::AnnotationIds& AdaptedFields::get_set_adapted_int() const& {
+const ::apache::thrift::type::AnnotationIds& AdaptedFields::get_set_adapted_int() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_set_adapted_int;
 }
 
@@ -1074,7 +1074,7 @@ std::partial_ordering ListStruct::operator<=>([[maybe_unused]] const ListStruct&
 }
 
 
-const ::std::vector<bool>& ListStruct::get_boolz() const& {
+const ::std::vector<bool>& ListStruct::get_boolz() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_boolz;
 }
 
@@ -1082,15 +1082,15 @@ const ::std::vector<bool>& ListStruct::get_boolz() const& {
   return static_cast<::std::vector<bool>&&>(__fbthrift_field_boolz);
 }
 
-const ::std::vector<::std::int64_t>* ListStruct::get_intz() const& {
+const ::std::vector<::std::int64_t>* ListStruct::get_intz() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return intz_ref().has_value() ? std::addressof(__fbthrift_field_intz) : nullptr;
 }
 
-::std::vector<::std::int64_t>* ListStruct::get_intz() & {
+::std::vector<::std::int64_t>* ListStruct::get_intz() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return intz_ref().has_value() ? std::addressof(__fbthrift_field_intz) : nullptr;
 }
 
-const std::deque<::std::string>& ListStruct::get_encoded() const& {
+const std::deque<::std::string>& ListStruct::get_encoded() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_encoded;
 }
 
@@ -1098,7 +1098,7 @@ std::deque<::std::string> ListStruct::get_encoded() && {
   return static_cast<std::deque<::std::string>&&>(__fbthrift_field_encoded);
 }
 
-const std::deque<uint64_t>& ListStruct::get_uidz() const& {
+const std::deque<uint64_t>& ListStruct::get_uidz() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_uidz;
 }
 
@@ -1106,7 +1106,7 @@ std::deque<uint64_t> ListStruct::get_uidz() && {
   return static_cast<std::deque<uint64_t>&&>(__fbthrift_field_uidz);
 }
 
-const ::std::vector<::std::vector<double>>& ListStruct::get_matrix() const& {
+const ::std::vector<::std::vector<double>>& ListStruct::get_matrix() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_matrix;
 }
 
@@ -1114,7 +1114,7 @@ const ::std::vector<::std::vector<double>>& ListStruct::get_matrix() const& {
   return static_cast<::std::vector<::std::vector<double>>&&>(__fbthrift_field_matrix);
 }
 
-const folly::small_vector<folly::small_vector<uint8_t>>& ListStruct::get_ucharz() const& {
+const folly::small_vector<folly::small_vector<uint8_t>>& ListStruct::get_ucharz() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_ucharz;
 }
 
@@ -1122,7 +1122,7 @@ folly::small_vector<folly::small_vector<uint8_t>> ListStruct::get_ucharz() && {
   return static_cast<folly::small_vector<folly::small_vector<uint8_t>>&&>(__fbthrift_field_ucharz);
 }
 
-const folly::fbvector<folly::fbvector<folly::fbvector<uint8_t>>>& ListStruct::get_voxels() const& {
+const folly::fbvector<folly::fbvector<folly::fbvector<uint8_t>>>& ListStruct::get_voxels() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_voxels;
 }
 
@@ -1130,7 +1130,7 @@ folly::fbvector<folly::fbvector<folly::fbvector<uint8_t>>> ListStruct::get_voxel
   return static_cast<folly::fbvector<folly::fbvector<folly::fbvector<uint8_t>>>&&>(__fbthrift_field_voxels);
 }
 
-const ::std::vector<::test::fixtures::python_capi::IOBufPtr>& ListStruct::get_buf_ptrs() const& {
+const ::std::vector<::test::fixtures::python_capi::IOBufPtr>& ListStruct::get_buf_ptrs() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_buf_ptrs;
 }
 
@@ -1239,7 +1239,7 @@ std::partial_ordering SetStruct::operator<=>([[maybe_unused]] const SetStruct& r
 }
 
 
-const ::std::set<::test::fixtures::python_capi::MyEnum>& SetStruct::get_enumz() const& {
+const ::std::set<::test::fixtures::python_capi::MyEnum>& SetStruct::get_enumz() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_enumz;
 }
 
@@ -1247,15 +1247,15 @@ const ::std::set<::test::fixtures::python_capi::MyEnum>& SetStruct::get_enumz() 
   return static_cast<::std::set<::test::fixtures::python_capi::MyEnum>&&>(__fbthrift_field_enumz);
 }
 
-const ::std::set<::std::int32_t>* SetStruct::get_intz() const& {
+const ::std::set<::std::int32_t>* SetStruct::get_intz() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return intz_ref().has_value() ? std::addressof(__fbthrift_field_intz) : nullptr;
 }
 
-::std::set<::std::int32_t>* SetStruct::get_intz() & {
+::std::set<::std::int32_t>* SetStruct::get_intz() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return intz_ref().has_value() ? std::addressof(__fbthrift_field_intz) : nullptr;
 }
 
-const std::unordered_set<::std::string>& SetStruct::get_encoded() const& {
+const std::unordered_set<::std::string>& SetStruct::get_encoded() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_encoded;
 }
 
@@ -1263,7 +1263,7 @@ std::unordered_set<::std::string> SetStruct::get_encoded() && {
   return static_cast<std::unordered_set<::std::string>&&>(__fbthrift_field_encoded);
 }
 
-const std::unordered_set<uint64_t>& SetStruct::get_uidz() const& {
+const std::unordered_set<uint64_t>& SetStruct::get_uidz() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_uidz;
 }
 
@@ -1271,7 +1271,7 @@ std::unordered_set<uint64_t> SetStruct::get_uidz() && {
   return static_cast<std::unordered_set<uint64_t>&&>(__fbthrift_field_uidz);
 }
 
-const folly::F14FastSet<uint8_t>& SetStruct::get_charz() const& {
+const folly::F14FastSet<uint8_t>& SetStruct::get_charz() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_charz;
 }
 
@@ -1279,7 +1279,7 @@ folly::F14FastSet<uint8_t> SetStruct::get_charz() && {
   return static_cast<folly::F14FastSet<uint8_t>&&>(__fbthrift_field_charz);
 }
 
-const ::std::vector<::std::set<::std::int64_t>>& SetStruct::get_setz() const& {
+const ::std::vector<::std::set<::std::int64_t>>& SetStruct::get_setz() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_setz;
 }
 
@@ -1421,7 +1421,7 @@ std::partial_ordering MapStruct::operator<=>([[maybe_unused]] const MapStruct& r
 }
 
 
-const ::std::map<::test::fixtures::python_capi::MyEnum, ::std::string>& MapStruct::get_enumz() const& {
+const ::std::map<::test::fixtures::python_capi::MyEnum, ::std::string>& MapStruct::get_enumz() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_enumz;
 }
 
@@ -1429,15 +1429,15 @@ const ::std::map<::test::fixtures::python_capi::MyEnum, ::std::string>& MapStruc
   return static_cast<::std::map<::test::fixtures::python_capi::MyEnum, ::std::string>&&>(__fbthrift_field_enumz);
 }
 
-const ::std::map<::std::int32_t, ::std::string>* MapStruct::get_intz() const& {
+const ::std::map<::std::int32_t, ::std::string>* MapStruct::get_intz() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return intz_ref().has_value() ? std::addressof(__fbthrift_field_intz) : nullptr;
 }
 
-::std::map<::std::int32_t, ::std::string>* MapStruct::get_intz() & {
+::std::map<::std::int32_t, ::std::string>* MapStruct::get_intz() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return intz_ref().has_value() ? std::addressof(__fbthrift_field_intz) : nullptr;
 }
 
-const std::unordered_map<::std::string, double>& MapStruct::get_encoded() const& {
+const std::unordered_map<::std::string, double>& MapStruct::get_encoded() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_encoded;
 }
 
@@ -1445,7 +1445,7 @@ std::unordered_map<::std::string, double> MapStruct::get_encoded() && {
   return static_cast<std::unordered_map<::std::string, double>&&>(__fbthrift_field_encoded);
 }
 
-const std::unordered_map<uint64_t, float>& MapStruct::get_flotz() const& {
+const std::unordered_map<uint64_t, float>& MapStruct::get_flotz() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_flotz;
 }
 
@@ -1453,7 +1453,7 @@ std::unordered_map<uint64_t, float> MapStruct::get_flotz() && {
   return static_cast<std::unordered_map<uint64_t, float>&&>(__fbthrift_field_flotz);
 }
 
-const ::std::vector<::std::map<::std::int32_t, ::std::int64_t>>& MapStruct::get_map_list() const& {
+const ::std::vector<::std::map<::std::int32_t, ::std::int64_t>>& MapStruct::get_map_list() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_map_list;
 }
 
@@ -1461,7 +1461,7 @@ const ::std::vector<::std::map<::std::int32_t, ::std::int64_t>>& MapStruct::get_
   return static_cast<::std::vector<::std::map<::std::int32_t, ::std::int64_t>>&&>(__fbthrift_field_map_list);
 }
 
-const ::std::map<::std::int32_t, ::std::vector<::std::int64_t>>& MapStruct::get_list_map() const& {
+const ::std::map<::std::int32_t, ::std::vector<::std::int64_t>>& MapStruct::get_list_map() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_list_map;
 }
 
@@ -1469,7 +1469,7 @@ const ::std::map<::std::int32_t, ::std::vector<::std::int64_t>>& MapStruct::get_
   return static_cast<::std::map<::std::int32_t, ::std::vector<::std::int64_t>>&&>(__fbthrift_field_list_map);
 }
 
-const folly::F14FastMap<int, folly::fbvector<double>>& MapStruct::get_fast_list_map() const& {
+const folly::F14FastMap<int, folly::fbvector<double>>& MapStruct::get_fast_list_map() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_fast_list_map;
 }
 
@@ -1477,7 +1477,7 @@ folly::F14FastMap<int, folly::fbvector<double>> MapStruct::get_fast_list_map() &
   return static_cast<folly::F14FastMap<int, folly::fbvector<double>>&&>(__fbthrift_field_fast_list_map);
 }
 
-const ::std::map<::std::string, ::test::fixtures::python_capi::IOBufPtr>& MapStruct::get_buf_map() const& {
+const ::std::map<::std::string, ::test::fixtures::python_capi::IOBufPtr>& MapStruct::get_buf_map() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_buf_map;
 }
 
@@ -1485,7 +1485,7 @@ const ::std::map<::std::string, ::test::fixtures::python_capi::IOBufPtr>& MapStr
   return static_cast<::std::map<::std::string, ::test::fixtures::python_capi::IOBufPtr>&&>(__fbthrift_field_buf_map);
 }
 
-const ::std::map<::test::fixtures::python_capi::ui64, ::std::vector<::test::fixtures::python_capi::ui64>>& MapStruct::get_unsigned_list_map() const& {
+const ::std::map<::test::fixtures::python_capi::ui64, ::std::vector<::test::fixtures::python_capi::ui64>>& MapStruct::get_unsigned_list_map() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_unsigned_list_map;
 }
 
@@ -1636,7 +1636,7 @@ std::partial_ordering ComposeStruct::operator<=>([[maybe_unused]] const ComposeS
   return __fbthrift_field_renamed_;
 }
 
-const ::test::fixtures::python_capi::PrimitiveStruct& ComposeStruct::get_primitive() const& {
+const ::test::fixtures::python_capi::PrimitiveStruct& ComposeStruct::get_primitive() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_primitive;
 }
 
@@ -1644,7 +1644,7 @@ const ::test::fixtures::python_capi::PrimitiveStruct& ComposeStruct::get_primiti
   return static_cast<::test::fixtures::python_capi::PrimitiveStruct&&>(__fbthrift_field_primitive);
 }
 
-const ::test::fixtures::python_capi::DepStruct& ComposeStruct::get_xstruct() const& {
+const ::test::fixtures::python_capi::DepStruct& ComposeStruct::get_xstruct() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_xstruct;
 }
 
@@ -1661,7 +1661,7 @@ const ::test::fixtures::python_capi::DepStruct& ComposeStruct::get_xstruct() con
   return __fbthrift_field_xenum;
 }
 
-const ::test::fixtures::python_capi::SerializedStruct& ComposeStruct::get_serial_struct() const& {
+const ::test::fixtures::python_capi::SerializedStruct& ComposeStruct::get_serial_struct() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_serial_struct;
 }
 
@@ -1669,7 +1669,7 @@ const ::test::fixtures::python_capi::SerializedStruct& ComposeStruct::get_serial
   return static_cast<::test::fixtures::python_capi::SerializedStruct&&>(__fbthrift_field_serial_struct);
 }
 
-const ::std::vector<::test::fixtures::python_capi::DepStruct>& ComposeStruct::get_friends() const& {
+const ::std::vector<::test::fixtures::python_capi::DepStruct>& ComposeStruct::get_friends() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_friends;
 }
 
@@ -1677,7 +1677,7 @@ const ::std::vector<::test::fixtures::python_capi::DepStruct>& ComposeStruct::ge
   return static_cast<::std::vector<::test::fixtures::python_capi::DepStruct>&&>(__fbthrift_field_friends);
 }
 
-const ::test::fixtures::python_capi::SerializedUnion& ComposeStruct::get_serial_union() const& {
+const ::test::fixtures::python_capi::SerializedUnion& ComposeStruct::get_serial_union() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_serial_union;
 }
 
@@ -1685,7 +1685,7 @@ const ::test::fixtures::python_capi::SerializedUnion& ComposeStruct::get_serial_
   return static_cast<::test::fixtures::python_capi::SerializedUnion&&>(__fbthrift_field_serial_union);
 }
 
-const ::test::fixtures::python_capi::SerializedError& ComposeStruct::get_serial_error() const& {
+const ::test::fixtures::python_capi::SerializedError& ComposeStruct::get_serial_error() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_serial_error;
 }
 

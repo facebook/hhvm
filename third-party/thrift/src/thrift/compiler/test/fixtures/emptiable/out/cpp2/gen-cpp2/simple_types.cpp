@@ -224,11 +224,11 @@ std::partial_ordering EmptiableStruct::operator<=>([[maybe_unused]] const Emptia
 }
 
 
-const bool* EmptiableStruct::get_bool_field() const& {
+const bool* EmptiableStruct::get_bool_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return bool_field_ref().has_value() ? std::addressof(__fbthrift_field_bool_field) : nullptr;
 }
 
-bool* EmptiableStruct::get_bool_field() & {
+bool* EmptiableStruct::get_bool_field() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return bool_field_ref().has_value() ? std::addressof(__fbthrift_field_bool_field) : nullptr;
 }
 
@@ -237,11 +237,11 @@ bool& EmptiableStruct::set_bool_field(bool bool_field_) {
   return __fbthrift_field_bool_field;
 }
 
-const ::std::int8_t* EmptiableStruct::get_byte_field() const& {
+const ::std::int8_t* EmptiableStruct::get_byte_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return byte_field_ref().has_value() ? std::addressof(__fbthrift_field_byte_field) : nullptr;
 }
 
-::std::int8_t* EmptiableStruct::get_byte_field() & {
+::std::int8_t* EmptiableStruct::get_byte_field() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return byte_field_ref().has_value() ? std::addressof(__fbthrift_field_byte_field) : nullptr;
 }
 
@@ -250,11 +250,11 @@ const ::std::int8_t* EmptiableStruct::get_byte_field() const& {
   return __fbthrift_field_byte_field;
 }
 
-const ::std::int16_t* EmptiableStruct::get_short_field() const& {
+const ::std::int16_t* EmptiableStruct::get_short_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return short_field_ref().has_value() ? std::addressof(__fbthrift_field_short_field) : nullptr;
 }
 
-::std::int16_t* EmptiableStruct::get_short_field() & {
+::std::int16_t* EmptiableStruct::get_short_field() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return short_field_ref().has_value() ? std::addressof(__fbthrift_field_short_field) : nullptr;
 }
 
@@ -263,11 +263,11 @@ const ::std::int16_t* EmptiableStruct::get_short_field() const& {
   return __fbthrift_field_short_field;
 }
 
-const ::std::int32_t* EmptiableStruct::get_int_field() const& {
+const ::std::int32_t* EmptiableStruct::get_int_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return int_field_ref().has_value() ? std::addressof(__fbthrift_field_int_field) : nullptr;
 }
 
-::std::int32_t* EmptiableStruct::get_int_field() & {
+::std::int32_t* EmptiableStruct::get_int_field() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return int_field_ref().has_value() ? std::addressof(__fbthrift_field_int_field) : nullptr;
 }
 
@@ -276,11 +276,11 @@ const ::std::int32_t* EmptiableStruct::get_int_field() const& {
   return __fbthrift_field_int_field;
 }
 
-const ::std::int64_t* EmptiableStruct::get_long_field() const& {
+const ::std::int64_t* EmptiableStruct::get_long_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return long_field_ref().has_value() ? std::addressof(__fbthrift_field_long_field) : nullptr;
 }
 
-::std::int64_t* EmptiableStruct::get_long_field() & {
+::std::int64_t* EmptiableStruct::get_long_field() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return long_field_ref().has_value() ? std::addressof(__fbthrift_field_long_field) : nullptr;
 }
 
@@ -289,11 +289,11 @@ const ::std::int64_t* EmptiableStruct::get_long_field() const& {
   return __fbthrift_field_long_field;
 }
 
-const float* EmptiableStruct::get_float_field() const& {
+const float* EmptiableStruct::get_float_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return float_field_ref().has_value() ? std::addressof(__fbthrift_field_float_field) : nullptr;
 }
 
-float* EmptiableStruct::get_float_field() & {
+float* EmptiableStruct::get_float_field() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return float_field_ref().has_value() ? std::addressof(__fbthrift_field_float_field) : nullptr;
 }
 
@@ -302,11 +302,11 @@ float& EmptiableStruct::set_float_field(float float_field_) {
   return __fbthrift_field_float_field;
 }
 
-const double* EmptiableStruct::get_double_field() const& {
+const double* EmptiableStruct::get_double_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return double_field_ref().has_value() ? std::addressof(__fbthrift_field_double_field) : nullptr;
 }
 
-double* EmptiableStruct::get_double_field() & {
+double* EmptiableStruct::get_double_field() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return double_field_ref().has_value() ? std::addressof(__fbthrift_field_double_field) : nullptr;
 }
 
@@ -315,27 +315,27 @@ double& EmptiableStruct::set_double_field(double double_field_) {
   return __fbthrift_field_double_field;
 }
 
-const ::std::string* EmptiableStruct::get_string_field() const& {
+const ::std::string* EmptiableStruct::get_string_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return string_field_ref().has_value() ? std::addressof(__fbthrift_field_string_field) : nullptr;
 }
 
-::std::string* EmptiableStruct::get_string_field() & {
+::std::string* EmptiableStruct::get_string_field() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return string_field_ref().has_value() ? std::addressof(__fbthrift_field_string_field) : nullptr;
 }
 
-const ::std::string* EmptiableStruct::get_binary_field() const& {
+const ::std::string* EmptiableStruct::get_binary_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return binary_field_ref().has_value() ? std::addressof(__fbthrift_field_binary_field) : nullptr;
 }
 
-::std::string* EmptiableStruct::get_binary_field() & {
+::std::string* EmptiableStruct::get_binary_field() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return binary_field_ref().has_value() ? std::addressof(__fbthrift_field_binary_field) : nullptr;
 }
 
-const ::apache::thrift::test::MyEnum* EmptiableStruct::get_enum_field() const& {
+const ::apache::thrift::test::MyEnum* EmptiableStruct::get_enum_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return enum_field_ref().has_value() ? std::addressof(__fbthrift_field_enum_field) : nullptr;
 }
 
-::apache::thrift::test::MyEnum* EmptiableStruct::get_enum_field() & {
+::apache::thrift::test::MyEnum* EmptiableStruct::get_enum_field() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return enum_field_ref().has_value() ? std::addressof(__fbthrift_field_enum_field) : nullptr;
 }
 
@@ -344,35 +344,35 @@ const ::apache::thrift::test::MyEnum* EmptiableStruct::get_enum_field() const& {
   return __fbthrift_field_enum_field;
 }
 
-const ::std::vector<::std::int16_t>* EmptiableStruct::get_list_field() const& {
+const ::std::vector<::std::int16_t>* EmptiableStruct::get_list_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return list_field_ref().has_value() ? std::addressof(__fbthrift_field_list_field) : nullptr;
 }
 
-::std::vector<::std::int16_t>* EmptiableStruct::get_list_field() & {
+::std::vector<::std::int16_t>* EmptiableStruct::get_list_field() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return list_field_ref().has_value() ? std::addressof(__fbthrift_field_list_field) : nullptr;
 }
 
-const ::std::set<::std::int16_t>* EmptiableStruct::get_set_field() const& {
+const ::std::set<::std::int16_t>* EmptiableStruct::get_set_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return set_field_ref().has_value() ? std::addressof(__fbthrift_field_set_field) : nullptr;
 }
 
-::std::set<::std::int16_t>* EmptiableStruct::get_set_field() & {
+::std::set<::std::int16_t>* EmptiableStruct::get_set_field() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return set_field_ref().has_value() ? std::addressof(__fbthrift_field_set_field) : nullptr;
 }
 
-const ::std::map<::std::int16_t, ::std::int16_t>* EmptiableStruct::get_map_field() const& {
+const ::std::map<::std::int16_t, ::std::int16_t>* EmptiableStruct::get_map_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return map_field_ref().has_value() ? std::addressof(__fbthrift_field_map_field) : nullptr;
 }
 
-::std::map<::std::int16_t, ::std::int16_t>* EmptiableStruct::get_map_field() & {
+::std::map<::std::int16_t, ::std::int16_t>* EmptiableStruct::get_map_field() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return map_field_ref().has_value() ? std::addressof(__fbthrift_field_map_field) : nullptr;
 }
 
-const ::apache::thrift::test::MyStruct* EmptiableStruct::get_struct_field() const& {
+const ::apache::thrift::test::MyStruct* EmptiableStruct::get_struct_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return struct_field_ref().has_value() ? std::addressof(__fbthrift_field_struct_field) : nullptr;
 }
 
-::apache::thrift::test::MyStruct* EmptiableStruct::get_struct_field() & {
+::apache::thrift::test::MyStruct* EmptiableStruct::get_struct_field() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return struct_field_ref().has_value() ? std::addressof(__fbthrift_field_struct_field) : nullptr;
 }
 
@@ -719,11 +719,11 @@ bool& NotEmptiableStruct::set_bool_field(bool bool_field_) {
   return __fbthrift_field_bool_field;
 }
 
-const ::std::int8_t* NotEmptiableStruct::get_byte_field() const& {
+const ::std::int8_t* NotEmptiableStruct::get_byte_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return byte_field_ref().has_value() ? std::addressof(__fbthrift_field_byte_field) : nullptr;
 }
 
-::std::int8_t* NotEmptiableStruct::get_byte_field() & {
+::std::int8_t* NotEmptiableStruct::get_byte_field() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return byte_field_ref().has_value() ? std::addressof(__fbthrift_field_byte_field) : nullptr;
 }
 
@@ -732,11 +732,11 @@ const ::std::int8_t* NotEmptiableStruct::get_byte_field() const& {
   return __fbthrift_field_byte_field;
 }
 
-const ::std::int16_t* NotEmptiableStruct::get_short_field() const& {
+const ::std::int16_t* NotEmptiableStruct::get_short_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return short_field_ref().has_value() ? std::addressof(__fbthrift_field_short_field) : nullptr;
 }
 
-::std::int16_t* NotEmptiableStruct::get_short_field() & {
+::std::int16_t* NotEmptiableStruct::get_short_field() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return short_field_ref().has_value() ? std::addressof(__fbthrift_field_short_field) : nullptr;
 }
 
@@ -745,11 +745,11 @@ const ::std::int16_t* NotEmptiableStruct::get_short_field() const& {
   return __fbthrift_field_short_field;
 }
 
-const ::std::int32_t* NotEmptiableStruct::get_int_field() const& {
+const ::std::int32_t* NotEmptiableStruct::get_int_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return int_field_ref().has_value() ? std::addressof(__fbthrift_field_int_field) : nullptr;
 }
 
-::std::int32_t* NotEmptiableStruct::get_int_field() & {
+::std::int32_t* NotEmptiableStruct::get_int_field() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return int_field_ref().has_value() ? std::addressof(__fbthrift_field_int_field) : nullptr;
 }
 
@@ -758,11 +758,11 @@ const ::std::int32_t* NotEmptiableStruct::get_int_field() const& {
   return __fbthrift_field_int_field;
 }
 
-const ::std::int64_t* NotEmptiableStruct::get_long_field() const& {
+const ::std::int64_t* NotEmptiableStruct::get_long_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return long_field_ref().has_value() ? std::addressof(__fbthrift_field_long_field) : nullptr;
 }
 
-::std::int64_t* NotEmptiableStruct::get_long_field() & {
+::std::int64_t* NotEmptiableStruct::get_long_field() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return long_field_ref().has_value() ? std::addressof(__fbthrift_field_long_field) : nullptr;
 }
 
@@ -771,11 +771,11 @@ const ::std::int64_t* NotEmptiableStruct::get_long_field() const& {
   return __fbthrift_field_long_field;
 }
 
-const float* NotEmptiableStruct::get_float_field() const& {
+const float* NotEmptiableStruct::get_float_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return float_field_ref().has_value() ? std::addressof(__fbthrift_field_float_field) : nullptr;
 }
 
-float* NotEmptiableStruct::get_float_field() & {
+float* NotEmptiableStruct::get_float_field() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return float_field_ref().has_value() ? std::addressof(__fbthrift_field_float_field) : nullptr;
 }
 
@@ -784,11 +784,11 @@ float& NotEmptiableStruct::set_float_field(float float_field_) {
   return __fbthrift_field_float_field;
 }
 
-const double* NotEmptiableStruct::get_double_field() const& {
+const double* NotEmptiableStruct::get_double_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return double_field_ref().has_value() ? std::addressof(__fbthrift_field_double_field) : nullptr;
 }
 
-double* NotEmptiableStruct::get_double_field() & {
+double* NotEmptiableStruct::get_double_field() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return double_field_ref().has_value() ? std::addressof(__fbthrift_field_double_field) : nullptr;
 }
 
@@ -797,27 +797,27 @@ double& NotEmptiableStruct::set_double_field(double double_field_) {
   return __fbthrift_field_double_field;
 }
 
-const ::std::string* NotEmptiableStruct::get_string_field() const& {
+const ::std::string* NotEmptiableStruct::get_string_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return string_field_ref().has_value() ? std::addressof(__fbthrift_field_string_field) : nullptr;
 }
 
-::std::string* NotEmptiableStruct::get_string_field() & {
+::std::string* NotEmptiableStruct::get_string_field() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return string_field_ref().has_value() ? std::addressof(__fbthrift_field_string_field) : nullptr;
 }
 
-const ::std::string* NotEmptiableStruct::get_binary_field() const& {
+const ::std::string* NotEmptiableStruct::get_binary_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return binary_field_ref().has_value() ? std::addressof(__fbthrift_field_binary_field) : nullptr;
 }
 
-::std::string* NotEmptiableStruct::get_binary_field() & {
+::std::string* NotEmptiableStruct::get_binary_field() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return binary_field_ref().has_value() ? std::addressof(__fbthrift_field_binary_field) : nullptr;
 }
 
-const ::apache::thrift::test::MyEnum* NotEmptiableStruct::get_enum_field() const& {
+const ::apache::thrift::test::MyEnum* NotEmptiableStruct::get_enum_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return enum_field_ref().has_value() ? std::addressof(__fbthrift_field_enum_field) : nullptr;
 }
 
-::apache::thrift::test::MyEnum* NotEmptiableStruct::get_enum_field() & {
+::apache::thrift::test::MyEnum* NotEmptiableStruct::get_enum_field() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return enum_field_ref().has_value() ? std::addressof(__fbthrift_field_enum_field) : nullptr;
 }
 
@@ -826,35 +826,35 @@ const ::apache::thrift::test::MyEnum* NotEmptiableStruct::get_enum_field() const
   return __fbthrift_field_enum_field;
 }
 
-const ::std::vector<::std::int16_t>* NotEmptiableStruct::get_list_field() const& {
+const ::std::vector<::std::int16_t>* NotEmptiableStruct::get_list_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return list_field_ref().has_value() ? std::addressof(__fbthrift_field_list_field) : nullptr;
 }
 
-::std::vector<::std::int16_t>* NotEmptiableStruct::get_list_field() & {
+::std::vector<::std::int16_t>* NotEmptiableStruct::get_list_field() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return list_field_ref().has_value() ? std::addressof(__fbthrift_field_list_field) : nullptr;
 }
 
-const ::std::set<::std::int16_t>* NotEmptiableStruct::get_set_field() const& {
+const ::std::set<::std::int16_t>* NotEmptiableStruct::get_set_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return set_field_ref().has_value() ? std::addressof(__fbthrift_field_set_field) : nullptr;
 }
 
-::std::set<::std::int16_t>* NotEmptiableStruct::get_set_field() & {
+::std::set<::std::int16_t>* NotEmptiableStruct::get_set_field() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return set_field_ref().has_value() ? std::addressof(__fbthrift_field_set_field) : nullptr;
 }
 
-const ::std::map<::std::int16_t, ::std::int16_t>* NotEmptiableStruct::get_map_field() const& {
+const ::std::map<::std::int16_t, ::std::int16_t>* NotEmptiableStruct::get_map_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return map_field_ref().has_value() ? std::addressof(__fbthrift_field_map_field) : nullptr;
 }
 
-::std::map<::std::int16_t, ::std::int16_t>* NotEmptiableStruct::get_map_field() & {
+::std::map<::std::int16_t, ::std::int16_t>* NotEmptiableStruct::get_map_field() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return map_field_ref().has_value() ? std::addressof(__fbthrift_field_map_field) : nullptr;
 }
 
-const ::apache::thrift::test::MyStruct* NotEmptiableStruct::get_struct_field() const& {
+const ::apache::thrift::test::MyStruct* NotEmptiableStruct::get_struct_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return struct_field_ref().has_value() ? std::addressof(__fbthrift_field_struct_field) : nullptr;
 }
 
-::apache::thrift::test::MyStruct* NotEmptiableStruct::get_struct_field() & {
+::apache::thrift::test::MyStruct* NotEmptiableStruct::get_struct_field() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return struct_field_ref().has_value() ? std::addressof(__fbthrift_field_struct_field) : nullptr;
 }
 

@@ -103,11 +103,11 @@ std::partial_ordering Default::operator<=>([[maybe_unused]] const Default& rhs) 
 }
 
 
-const ::std::int32_t* Default::get_field1() const& {
+const ::std::int32_t* Default::get_field1() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return field1_ref().has_value() ? std::addressof(__fbthrift_field_field1) : nullptr;
 }
 
-::std::int32_t* Default::get_field1() & {
+::std::int32_t* Default::get_field1() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return field1_ref().has_value() ? std::addressof(__fbthrift_field_field1) : nullptr;
 }
 
@@ -116,11 +116,11 @@ const ::std::int32_t* Default::get_field1() const& {
   return __fbthrift_field_field1;
 }
 
-const ::std::int32_t* Default::get_field2() const& {
+const ::std::int32_t* Default::get_field2() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return field2_ref().has_value() ? std::addressof(__fbthrift_field_field2) : nullptr;
 }
 
-::std::int32_t* Default::get_field2() & {
+::std::int32_t* Default::get_field2() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return field2_ref().has_value() ? std::addressof(__fbthrift_field_field2) : nullptr;
 }
 
@@ -129,19 +129,19 @@ const ::std::int32_t* Default::get_field2() const& {
   return __fbthrift_field_field2;
 }
 
-const ::std::string* Default::get_field3() const& {
+const ::std::string* Default::get_field3() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return field3_ref().has_value() ? std::addressof(__fbthrift_field_field3) : nullptr;
 }
 
-::std::string* Default::get_field3() & {
+::std::string* Default::get_field3() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return field3_ref().has_value() ? std::addressof(__fbthrift_field_field3) : nullptr;
 }
 
-const double* Default::get_field4() const& {
+const double* Default::get_field4() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return field4_ref().has_value() ? std::addressof(__fbthrift_field_field4) : nullptr;
 }
 
-double* Default::get_field4() & {
+double* Default::get_field4() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return field4_ref().has_value() ? std::addressof(__fbthrift_field_field4) : nullptr;
 }
 
@@ -240,11 +240,11 @@ std::partial_ordering NonAtomic::operator<=>([[maybe_unused]] const NonAtomic& r
 }
 
 
-const ::std::int32_t* NonAtomic::get_field1() const& {
+const ::std::int32_t* NonAtomic::get_field1() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return field1_ref().has_value() ? std::addressof(__fbthrift_field_field1) : nullptr;
 }
 
-::std::int32_t* NonAtomic::get_field1() & {
+::std::int32_t* NonAtomic::get_field1() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return field1_ref().has_value() ? std::addressof(__fbthrift_field_field1) : nullptr;
 }
 
@@ -253,11 +253,11 @@ const ::std::int32_t* NonAtomic::get_field1() const& {
   return __fbthrift_field_field1;
 }
 
-const ::std::int32_t* NonAtomic::get_field2() const& {
+const ::std::int32_t* NonAtomic::get_field2() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return field2_ref().has_value() ? std::addressof(__fbthrift_field_field2) : nullptr;
 }
 
-::std::int32_t* NonAtomic::get_field2() & {
+::std::int32_t* NonAtomic::get_field2() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return field2_ref().has_value() ? std::addressof(__fbthrift_field_field2) : nullptr;
 }
 
@@ -266,19 +266,19 @@ const ::std::int32_t* NonAtomic::get_field2() const& {
   return __fbthrift_field_field2;
 }
 
-const ::std::string* NonAtomic::get_field3() const& {
+const ::std::string* NonAtomic::get_field3() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return field3_ref().has_value() ? std::addressof(__fbthrift_field_field3) : nullptr;
 }
 
-::std::string* NonAtomic::get_field3() & {
+::std::string* NonAtomic::get_field3() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return field3_ref().has_value() ? std::addressof(__fbthrift_field_field3) : nullptr;
 }
 
-const double* NonAtomic::get_field4() const& {
+const double* NonAtomic::get_field4() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return field4_ref().has_value() ? std::addressof(__fbthrift_field_field4) : nullptr;
 }
 
-double* NonAtomic::get_field4() & {
+double* NonAtomic::get_field4() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return field4_ref().has_value() ? std::addressof(__fbthrift_field_field4) : nullptr;
 }
 
@@ -377,11 +377,11 @@ std::partial_ordering Atomic::operator<=>([[maybe_unused]] const Atomic& rhs) co
 }
 
 
-const ::std::int32_t* Atomic::get_field1() const& {
+const ::std::int32_t* Atomic::get_field1() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return field1_ref().has_value() ? std::addressof(__fbthrift_field_field1) : nullptr;
 }
 
-::std::int32_t* Atomic::get_field1() & {
+::std::int32_t* Atomic::get_field1() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return field1_ref().has_value() ? std::addressof(__fbthrift_field_field1) : nullptr;
 }
 
@@ -390,11 +390,11 @@ const ::std::int32_t* Atomic::get_field1() const& {
   return __fbthrift_field_field1;
 }
 
-const ::std::int32_t* Atomic::get_field2() const& {
+const ::std::int32_t* Atomic::get_field2() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return field2_ref().has_value() ? std::addressof(__fbthrift_field_field2) : nullptr;
 }
 
-::std::int32_t* Atomic::get_field2() & {
+::std::int32_t* Atomic::get_field2() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return field2_ref().has_value() ? std::addressof(__fbthrift_field_field2) : nullptr;
 }
 
@@ -403,19 +403,19 @@ const ::std::int32_t* Atomic::get_field2() const& {
   return __fbthrift_field_field2;
 }
 
-const ::std::string* Atomic::get_field3() const& {
+const ::std::string* Atomic::get_field3() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return field3_ref().has_value() ? std::addressof(__fbthrift_field_field3) : nullptr;
 }
 
-::std::string* Atomic::get_field3() & {
+::std::string* Atomic::get_field3() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return field3_ref().has_value() ? std::addressof(__fbthrift_field_field3) : nullptr;
 }
 
-const double* Atomic::get_field4() const& {
+const double* Atomic::get_field4() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return field4_ref().has_value() ? std::addressof(__fbthrift_field_field4) : nullptr;
 }
 
-double* Atomic::get_field4() & {
+double* Atomic::get_field4() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return field4_ref().has_value() ? std::addressof(__fbthrift_field_field4) : nullptr;
 }
 
@@ -514,11 +514,11 @@ std::partial_ordering AtomicFoo::operator<=>([[maybe_unused]] const AtomicFoo& r
 }
 
 
-const ::std::int32_t* AtomicFoo::get_field1() const& {
+const ::std::int32_t* AtomicFoo::get_field1() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return field1_ref().has_value() ? std::addressof(__fbthrift_field_field1) : nullptr;
 }
 
-::std::int32_t* AtomicFoo::get_field1() & {
+::std::int32_t* AtomicFoo::get_field1() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return field1_ref().has_value() ? std::addressof(__fbthrift_field_field1) : nullptr;
 }
 
@@ -527,11 +527,11 @@ const ::std::int32_t* AtomicFoo::get_field1() const& {
   return __fbthrift_field_field1;
 }
 
-const ::std::int32_t* AtomicFoo::get_field2() const& {
+const ::std::int32_t* AtomicFoo::get_field2() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return field2_ref().has_value() ? std::addressof(__fbthrift_field_field2) : nullptr;
 }
 
-::std::int32_t* AtomicFoo::get_field2() & {
+::std::int32_t* AtomicFoo::get_field2() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return field2_ref().has_value() ? std::addressof(__fbthrift_field_field2) : nullptr;
 }
 
@@ -540,19 +540,19 @@ const ::std::int32_t* AtomicFoo::get_field2() const& {
   return __fbthrift_field_field2;
 }
 
-const ::std::string* AtomicFoo::get_field3() const& {
+const ::std::string* AtomicFoo::get_field3() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return field3_ref().has_value() ? std::addressof(__fbthrift_field_field3) : nullptr;
 }
 
-::std::string* AtomicFoo::get_field3() & {
+::std::string* AtomicFoo::get_field3() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return field3_ref().has_value() ? std::addressof(__fbthrift_field_field3) : nullptr;
 }
 
-const double* AtomicFoo::get_field4() const& {
+const double* AtomicFoo::get_field4() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return field4_ref().has_value() ? std::addressof(__fbthrift_field_field4) : nullptr;
 }
 
-double* AtomicFoo::get_field4() & {
+double* AtomicFoo::get_field4() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return field4_ref().has_value() ? std::addressof(__fbthrift_field_field4) : nullptr;
 }
 

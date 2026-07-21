@@ -461,7 +461,7 @@ std::partial_ordering Val::operator<=>([[maybe_unused]] const Val& rhs) const {
   return __fbthrift_field_intVal;
 }
 
-const ::cpp2::containerTypedef& Val::get_typedefValue() const& {
+const ::cpp2::containerTypedef& Val::get_typedefValue() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_typedefValue;
 }
 

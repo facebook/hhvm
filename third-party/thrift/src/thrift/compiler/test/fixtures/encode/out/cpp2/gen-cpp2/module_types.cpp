@@ -163,7 +163,7 @@ std::partial_ordering Bar::operator<=>([[maybe_unused]] const Bar& rhs) const {
 }
 
 
-const ::std::vector<::facebook::thrift::test::fixtures::encode::AdaptedFoo>& Bar::get_list_field() const& {
+const ::std::vector<::facebook::thrift::test::fixtures::encode::AdaptedFoo>& Bar::get_list_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_list_field;
 }
 
@@ -240,7 +240,7 @@ std::partial_ordering Baz::operator<=>([[maybe_unused]] const Baz& rhs) const {
 }
 
 
-const ::std::vector<::facebook::thrift::test::fixtures::encode::AdaptedFoo>& Baz::get_list_field() const& {
+const ::std::vector<::facebook::thrift::test::fixtures::encode::AdaptedFoo>& Baz::get_list_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_list_field;
 }
 
@@ -248,7 +248,7 @@ const ::std::vector<::facebook::thrift::test::fixtures::encode::AdaptedFoo>& Baz
   return static_cast<::std::vector<::facebook::thrift::test::fixtures::encode::AdaptedFoo>&&>(__fbthrift_field_list_field);
 }
 
-const ::std::vector<::std::vector<::facebook::thrift::test::fixtures::encode::AdaptedFoo>>& Baz::get_nested_list_field() const& {
+const ::std::vector<::std::vector<::facebook::thrift::test::fixtures::encode::AdaptedFoo>>& Baz::get_nested_list_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_nested_list_field;
 }
 
@@ -424,7 +424,7 @@ std::partial_ordering OpEncodeStruct::operator<=>([[maybe_unused]] const OpEncod
   return __fbthrift_field_enum_field;
 }
 
-const ::facebook::thrift::test::fixtures::encode::Foo& OpEncodeStruct::get_foo_field() const& {
+const ::facebook::thrift::test::fixtures::encode::Foo& OpEncodeStruct::get_foo_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_foo_field;
 }
 
@@ -432,7 +432,7 @@ const ::facebook::thrift::test::fixtures::encode::Foo& OpEncodeStruct::get_foo_f
   return static_cast<::facebook::thrift::test::fixtures::encode::Foo&&>(__fbthrift_field_foo_field);
 }
 
-const ::std::vector<::facebook::thrift::test::fixtures::encode::AdaptedFoo>& OpEncodeStruct::get_list_field() const& {
+const ::std::vector<::facebook::thrift::test::fixtures::encode::AdaptedFoo>& OpEncodeStruct::get_list_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_list_field;
 }
 
@@ -440,7 +440,7 @@ const ::std::vector<::facebook::thrift::test::fixtures::encode::AdaptedFoo>& OpE
   return static_cast<::std::vector<::facebook::thrift::test::fixtures::encode::AdaptedFoo>&&>(__fbthrift_field_list_field);
 }
 
-const ::std::vector<::facebook::thrift::test::fixtures::encode::AdaptedFoo>& OpEncodeStruct::get_list_cpp_type_field() const& {
+const ::std::vector<::facebook::thrift::test::fixtures::encode::AdaptedFoo>& OpEncodeStruct::get_list_cpp_type_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_list_cpp_type_field;
 }
 
@@ -448,7 +448,7 @@ const ::std::vector<::facebook::thrift::test::fixtures::encode::AdaptedFoo>& OpE
   return static_cast<::std::vector<::facebook::thrift::test::fixtures::encode::AdaptedFoo>&&>(__fbthrift_field_list_cpp_type_field);
 }
 
-const ::std::set<::facebook::thrift::test::fixtures::encode::AdaptedFoo>& OpEncodeStruct::get_set_field() const& {
+const ::std::set<::facebook::thrift::test::fixtures::encode::AdaptedFoo>& OpEncodeStruct::get_set_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_set_field;
 }
 
@@ -456,7 +456,7 @@ const ::std::set<::facebook::thrift::test::fixtures::encode::AdaptedFoo>& OpEnco
   return static_cast<::std::set<::facebook::thrift::test::fixtures::encode::AdaptedFoo>&&>(__fbthrift_field_set_field);
 }
 
-const ::std::map<::facebook::thrift::test::fixtures::encode::AdaptedFoo, ::facebook::thrift::test::fixtures::encode::AdaptedFoo>& OpEncodeStruct::get_map_field() const& {
+const ::std::map<::facebook::thrift::test::fixtures::encode::AdaptedFoo, ::facebook::thrift::test::fixtures::encode::AdaptedFoo>& OpEncodeStruct::get_map_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_map_field;
 }
 
@@ -464,7 +464,7 @@ const ::std::map<::facebook::thrift::test::fixtures::encode::AdaptedFoo, ::faceb
   return static_cast<::std::map<::facebook::thrift::test::fixtures::encode::AdaptedFoo, ::facebook::thrift::test::fixtures::encode::AdaptedFoo>&&>(__fbthrift_field_map_field);
 }
 
-const ::std::map<::std::int32_t, ::std::vector<::facebook::thrift::test::fixtures::encode::AdaptedFoo>>& OpEncodeStruct::get_nested_field() const& {
+const ::std::map<::std::int32_t, ::std::vector<::facebook::thrift::test::fixtures::encode::AdaptedFoo>>& OpEncodeStruct::get_nested_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_nested_field;
 }
 
@@ -472,7 +472,7 @@ const ::std::map<::std::int32_t, ::std::vector<::facebook::thrift::test::fixture
   return static_cast<::std::map<::std::int32_t, ::std::vector<::facebook::thrift::test::fixtures::encode::AdaptedFoo>>&&>(__fbthrift_field_nested_field);
 }
 
-const ::facebook::thrift::test::fixtures::encode::Bar& OpEncodeStruct::get_bar_field() const& {
+const ::facebook::thrift::test::fixtures::encode::Bar& OpEncodeStruct::get_bar_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_bar_field;
 }
 

@@ -71,11 +71,11 @@ std::partial_ordering MyStruct::operator<=>([[maybe_unused]] const MyStruct& rhs
   return __fbthrift_field_def_field;
 }
 
-const ::std::int32_t* MyStruct::get_opt_field() const& {
+const ::std::int32_t* MyStruct::get_opt_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return opt_field_ref().has_value() ? std::addressof(__fbthrift_field_opt_field) : nullptr;
 }
 
-::std::int32_t* MyStruct::get_opt_field() & {
+::std::int32_t* MyStruct::get_opt_field() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return opt_field_ref().has_value() ? std::addressof(__fbthrift_field_opt_field) : nullptr;
 }
 

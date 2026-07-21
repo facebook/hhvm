@@ -672,7 +672,7 @@ class MyDataItem final  {
 
   /** Glean { "field": "s" } */
   [[deprecated("Use `FOO.s().value()` instead of `FOO.get_s()`")]]
-  const ::std::string& get_s() const& {
+  const ::std::string& get_s() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_s;
   }
 
@@ -1104,7 +1104,7 @@ class MyStruct final  {
 
   /** Glean { "field": "stringy" } */
   [[deprecated("Use `FOO.stringy().value()` instead of `FOO.get_stringy()`")]]
-  const ::std::string& get_stringy() const& {
+  const ::std::string& get_stringy() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_stringy;
   }
 
@@ -1124,7 +1124,7 @@ class MyStruct final  {
 
   /** Glean { "field": "myItemy" } */
   [[deprecated("Use `FOO.myItemy().value()` instead of `FOO.get_myItemy()`")]]
-  const ::test::fixtures::python_capi::MyDataItem& get_myItemy() const&;
+  const ::test::fixtures::python_capi::MyDataItem& get_myItemy() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "myItemy" } */
   [[deprecated("Use `FOO.myItemy().value()` instead of `FOO.get_myItemy()`")]]
@@ -1156,7 +1156,7 @@ class MyStruct final  {
 
   /** Glean { "field": "floatListy" } */
   [[deprecated("Use `FOO.floatListy().value()` instead of `FOO.get_floatListy()`")]]
-  const ::std::vector<float>& get_floatListy() const&;
+  const ::std::vector<float>& get_floatListy() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "floatListy" } */
   [[deprecated("Use `FOO.floatListy().value()` instead of `FOO.get_floatListy()`")]]
@@ -1172,7 +1172,7 @@ class MyStruct final  {
 
   /** Glean { "field": "strMappy" } */
   [[deprecated("Use `FOO.strMappy().value()` instead of `FOO.get_strMappy()`")]]
-  const ::std::map<::std::string, ::std::string>& get_strMappy() const&;
+  const ::std::map<::std::string, ::std::string>& get_strMappy() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "strMappy" } */
   [[deprecated("Use `FOO.strMappy().value()` instead of `FOO.get_strMappy()`")]]
@@ -1188,7 +1188,7 @@ class MyStruct final  {
 
   /** Glean { "field": "intSetty" } */
   [[deprecated("Use `FOO.intSetty().value()` instead of `FOO.get_intSetty()`")]]
-  const ::std::set<::std::int32_t>& get_intSetty() const&;
+  const ::std::set<::std::int32_t>& get_intSetty() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "intSetty" } */
   [[deprecated("Use `FOO.intSetty().value()` instead of `FOO.get_intSetty()`")]]
@@ -1448,7 +1448,7 @@ class DoubledPair final  {
 
   /** Glean { "field": "s" } */
   [[deprecated("Use `FOO.s().value()` instead of `FOO.get_s()`")]]
-  const ::std::string& get_s() const& {
+  const ::std::string& get_s() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_s;
   }
 
@@ -1643,7 +1643,7 @@ class StringPair final  {
 
   /** Glean { "field": "normal" } */
   [[deprecated("Use `FOO.normal().value()` instead of `FOO.get_normal()`")]]
-  const ::std::string& get_normal() const& {
+  const ::std::string& get_normal() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_normal;
   }
 
@@ -2512,11 +2512,11 @@ class PrimitiveStruct final  {
 
   /** Glean { "field": "floaty" } */
   [[deprecated("Use `FOO.floaty().value()` instead of `FOO.get_floaty()`")]]
-  const float* get_floaty() const&;
+  const float* get_floaty() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "floaty" } */
   [[deprecated("Use `FOO.floaty().value()` instead of `FOO.get_floaty()`")]]
-  float* get_floaty() &;
+  float* get_floaty() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   float* get_floaty() && = delete;
 
@@ -2526,7 +2526,7 @@ class PrimitiveStruct final  {
 
   /** Glean { "field": "buffy" } */
   [[deprecated("Use `FOO.buffy().value()` instead of `FOO.get_buffy()`")]]
-  const ::test::fixtures::python_capi::IOBuf& get_buffy() const& {
+  const ::test::fixtures::python_capi::IOBuf& get_buffy() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_buffy;
   }
 
@@ -2546,7 +2546,7 @@ class PrimitiveStruct final  {
 
   /** Glean { "field": "pointbuffy" } */
   [[deprecated("Use `FOO.pointbuffy().value()` instead of `FOO.get_pointbuffy()`")]]
-  const ::test::fixtures::python_capi::IOBufPtr& get_pointbuffy() const& {
+  const ::test::fixtures::python_capi::IOBufPtr& get_pointbuffy() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_pointbuffy;
   }
 
@@ -2566,7 +2566,7 @@ class PrimitiveStruct final  {
 
   /** Glean { "field": "patched_struct" } */
   [[deprecated("Use `FOO.patched_struct().value()` instead of `FOO.get_patched_struct()`")]]
-  const ::test::fixtures::python_capi::MyStruct& get_patched_struct() const&;
+  const ::test::fixtures::python_capi::MyStruct& get_patched_struct() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "patched_struct" } */
   [[deprecated("Use `FOO.patched_struct().value()` instead of `FOO.get_patched_struct()`")]]
@@ -2582,7 +2582,7 @@ class PrimitiveStruct final  {
 
   /** Glean { "field": "empty_struct" } */
   [[deprecated("Use `FOO.empty_struct().value()` instead of `FOO.get_empty_struct()`")]]
-  const ::test::fixtures::python_capi::VapidStruct& get_empty_struct() const&;
+  const ::test::fixtures::python_capi::VapidStruct& get_empty_struct() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "empty_struct" } */
   [[deprecated("Use `FOO.empty_struct().value()` instead of `FOO.get_empty_struct()`")]]
@@ -2598,7 +2598,7 @@ class PrimitiveStruct final  {
 
   /** Glean { "field": "fbstring" } */
   [[deprecated("Use `FOO.fbstring().value()` instead of `FOO.get_fbstring()`")]]
-  const folly::fbstring& get_fbstring() const& {
+  const folly::fbstring& get_fbstring() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_fbstring;
   }
 
@@ -2618,7 +2618,7 @@ class PrimitiveStruct final  {
 
   /** Glean { "field": "managed_string_view" } */
   [[deprecated("Use `FOO.managed_string_view().value()` instead of `FOO.get_managed_string_view()`")]]
-  const ::apache::thrift::ManagedStringViewWithConversions& get_managed_string_view() const& {
+  const ::apache::thrift::ManagedStringViewWithConversions& get_managed_string_view() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_managed_string_view;
   }
 
@@ -2638,7 +2638,7 @@ class PrimitiveStruct final  {
 
   /** Glean { "field": "some_error" } */
   [[deprecated("Use `FOO.some_error().value()` instead of `FOO.get_some_error()`")]]
-  const ::test::fixtures::python_capi::SomeError& get_some_error() const&;
+  const ::test::fixtures::python_capi::SomeError& get_some_error() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "some_error" } */
   [[deprecated("Use `FOO.some_error().value()` instead of `FOO.get_some_error()`")]]
@@ -2898,7 +2898,7 @@ class AdaptedFields final  {
 
   /** Glean { "field": "list_adapted_int" } */
   [[deprecated("Use `FOO.list_adapted_int().value()` instead of `FOO.get_list_adapted_int()`")]]
-  const ::std::vector<::apache::thrift::type::FieldId>& get_list_adapted_int() const&;
+  const ::std::vector<::apache::thrift::type::FieldId>& get_list_adapted_int() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "list_adapted_int" } */
   [[deprecated("Use `FOO.list_adapted_int().value()` instead of `FOO.get_list_adapted_int()`")]]
@@ -2914,7 +2914,7 @@ class AdaptedFields final  {
 
   /** Glean { "field": "set_adapted_int" } */
   [[deprecated("Use `FOO.set_adapted_int().value()` instead of `FOO.get_set_adapted_int()`")]]
-  const ::apache::thrift::type::AnnotationIds& get_set_adapted_int() const&;
+  const ::apache::thrift::type::AnnotationIds& get_set_adapted_int() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "set_adapted_int" } */
   [[deprecated("Use `FOO.set_adapted_int().value()` instead of `FOO.get_set_adapted_int()`")]]
@@ -3372,7 +3372,7 @@ class ListStruct final  {
 
   /** Glean { "field": "boolz" } */
   [[deprecated("Use `FOO.boolz().value()` instead of `FOO.get_boolz()`")]]
-  const ::std::vector<bool>& get_boolz() const&;
+  const ::std::vector<bool>& get_boolz() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "boolz" } */
   [[deprecated("Use `FOO.boolz().value()` instead of `FOO.get_boolz()`")]]
@@ -3388,11 +3388,11 @@ class ListStruct final  {
 
   /** Glean { "field": "intz" } */
   [[deprecated("Use `FOO.intz().value()` instead of `FOO.get_intz()`")]]
-  const ::std::vector<::std::int64_t>* get_intz() const&;
+  const ::std::vector<::std::int64_t>* get_intz() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "intz" } */
   [[deprecated("Use `FOO.intz().value()` instead of `FOO.get_intz()`")]]
-  ::std::vector<::std::int64_t>* get_intz() &;
+  ::std::vector<::std::int64_t>* get_intz() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::vector<::std::int64_t>* get_intz() && = delete;
 
@@ -3406,7 +3406,7 @@ class ListStruct final  {
 
   /** Glean { "field": "encoded" } */
   [[deprecated("Use `FOO.encoded().value()` instead of `FOO.get_encoded()`")]]
-  const std::deque<::std::string>& get_encoded() const&;
+  const std::deque<::std::string>& get_encoded() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "encoded" } */
   [[deprecated("Use `FOO.encoded().value()` instead of `FOO.get_encoded()`")]]
@@ -3422,7 +3422,7 @@ class ListStruct final  {
 
   /** Glean { "field": "uidz" } */
   [[deprecated("Use `FOO.uidz().value()` instead of `FOO.get_uidz()`")]]
-  const std::deque<uint64_t>& get_uidz() const&;
+  const std::deque<uint64_t>& get_uidz() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "uidz" } */
   [[deprecated("Use `FOO.uidz().value()` instead of `FOO.get_uidz()`")]]
@@ -3438,7 +3438,7 @@ class ListStruct final  {
 
   /** Glean { "field": "matrix" } */
   [[deprecated("Use `FOO.matrix().value()` instead of `FOO.get_matrix()`")]]
-  const ::std::vector<::std::vector<double>>& get_matrix() const&;
+  const ::std::vector<::std::vector<double>>& get_matrix() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "matrix" } */
   [[deprecated("Use `FOO.matrix().value()` instead of `FOO.get_matrix()`")]]
@@ -3454,7 +3454,7 @@ class ListStruct final  {
 
   /** Glean { "field": "ucharz" } */
   [[deprecated("Use `FOO.ucharz().value()` instead of `FOO.get_ucharz()`")]]
-  const folly::small_vector<folly::small_vector<uint8_t>>& get_ucharz() const&;
+  const folly::small_vector<folly::small_vector<uint8_t>>& get_ucharz() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "ucharz" } */
   [[deprecated("Use `FOO.ucharz().value()` instead of `FOO.get_ucharz()`")]]
@@ -3470,7 +3470,7 @@ class ListStruct final  {
 
   /** Glean { "field": "voxels" } */
   [[deprecated("Use `FOO.voxels().value()` instead of `FOO.get_voxels()`")]]
-  const folly::fbvector<folly::fbvector<folly::fbvector<uint8_t>>>& get_voxels() const&;
+  const folly::fbvector<folly::fbvector<folly::fbvector<uint8_t>>>& get_voxels() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "voxels" } */
   [[deprecated("Use `FOO.voxels().value()` instead of `FOO.get_voxels()`")]]
@@ -3486,7 +3486,7 @@ class ListStruct final  {
 
   /** Glean { "field": "buf_ptrs" } */
   [[deprecated("Use `FOO.buf_ptrs().value()` instead of `FOO.get_buf_ptrs()`")]]
-  const ::std::vector<::test::fixtures::python_capi::IOBufPtr>& get_buf_ptrs() const&;
+  const ::std::vector<::test::fixtures::python_capi::IOBufPtr>& get_buf_ptrs() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "buf_ptrs" } */
   [[deprecated("Use `FOO.buf_ptrs().value()` instead of `FOO.get_buf_ptrs()`")]]
@@ -3866,7 +3866,7 @@ class SetStruct final  {
 
   /** Glean { "field": "enumz" } */
   [[deprecated("Use `FOO.enumz().value()` instead of `FOO.get_enumz()`")]]
-  const ::std::set<::test::fixtures::python_capi::MyEnum>& get_enumz() const&;
+  const ::std::set<::test::fixtures::python_capi::MyEnum>& get_enumz() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "enumz" } */
   [[deprecated("Use `FOO.enumz().value()` instead of `FOO.get_enumz()`")]]
@@ -3882,11 +3882,11 @@ class SetStruct final  {
 
   /** Glean { "field": "intz" } */
   [[deprecated("Use `FOO.intz().value()` instead of `FOO.get_intz()`")]]
-  const ::std::set<::std::int32_t>* get_intz() const&;
+  const ::std::set<::std::int32_t>* get_intz() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "intz" } */
   [[deprecated("Use `FOO.intz().value()` instead of `FOO.get_intz()`")]]
-  ::std::set<::std::int32_t>* get_intz() &;
+  ::std::set<::std::int32_t>* get_intz() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::set<::std::int32_t>* get_intz() && = delete;
 
@@ -3900,7 +3900,7 @@ class SetStruct final  {
 
   /** Glean { "field": "encoded" } */
   [[deprecated("Use `FOO.encoded().value()` instead of `FOO.get_encoded()`")]]
-  const std::unordered_set<::std::string>& get_encoded() const&;
+  const std::unordered_set<::std::string>& get_encoded() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "encoded" } */
   [[deprecated("Use `FOO.encoded().value()` instead of `FOO.get_encoded()`")]]
@@ -3916,7 +3916,7 @@ class SetStruct final  {
 
   /** Glean { "field": "uidz" } */
   [[deprecated("Use `FOO.uidz().value()` instead of `FOO.get_uidz()`")]]
-  const std::unordered_set<uint64_t>& get_uidz() const&;
+  const std::unordered_set<uint64_t>& get_uidz() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "uidz" } */
   [[deprecated("Use `FOO.uidz().value()` instead of `FOO.get_uidz()`")]]
@@ -3932,7 +3932,7 @@ class SetStruct final  {
 
   /** Glean { "field": "charz" } */
   [[deprecated("Use `FOO.charz().value()` instead of `FOO.get_charz()`")]]
-  const folly::F14FastSet<uint8_t>& get_charz() const&;
+  const folly::F14FastSet<uint8_t>& get_charz() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "charz" } */
   [[deprecated("Use `FOO.charz().value()` instead of `FOO.get_charz()`")]]
@@ -3948,7 +3948,7 @@ class SetStruct final  {
 
   /** Glean { "field": "setz" } */
   [[deprecated("Use `FOO.setz().value()` instead of `FOO.get_setz()`")]]
-  const ::std::vector<::std::set<::std::int64_t>>& get_setz() const&;
+  const ::std::vector<::std::set<::std::int64_t>>& get_setz() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "setz" } */
   [[deprecated("Use `FOO.setz().value()` instead of `FOO.get_setz()`")]]
@@ -4448,7 +4448,7 @@ class MapStruct final  {
 
   /** Glean { "field": "enumz" } */
   [[deprecated("Use `FOO.enumz().value()` instead of `FOO.get_enumz()`")]]
-  const ::std::map<::test::fixtures::python_capi::MyEnum, ::std::string>& get_enumz() const&;
+  const ::std::map<::test::fixtures::python_capi::MyEnum, ::std::string>& get_enumz() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "enumz" } */
   [[deprecated("Use `FOO.enumz().value()` instead of `FOO.get_enumz()`")]]
@@ -4464,11 +4464,11 @@ class MapStruct final  {
 
   /** Glean { "field": "intz" } */
   [[deprecated("Use `FOO.intz().value()` instead of `FOO.get_intz()`")]]
-  const ::std::map<::std::int32_t, ::std::string>* get_intz() const&;
+  const ::std::map<::std::int32_t, ::std::string>* get_intz() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "intz" } */
   [[deprecated("Use `FOO.intz().value()` instead of `FOO.get_intz()`")]]
-  ::std::map<::std::int32_t, ::std::string>* get_intz() &;
+  ::std::map<::std::int32_t, ::std::string>* get_intz() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::map<::std::int32_t, ::std::string>* get_intz() && = delete;
 
@@ -4482,7 +4482,7 @@ class MapStruct final  {
 
   /** Glean { "field": "encoded" } */
   [[deprecated("Use `FOO.encoded().value()` instead of `FOO.get_encoded()`")]]
-  const std::unordered_map<::std::string, double>& get_encoded() const&;
+  const std::unordered_map<::std::string, double>& get_encoded() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "encoded" } */
   [[deprecated("Use `FOO.encoded().value()` instead of `FOO.get_encoded()`")]]
@@ -4498,7 +4498,7 @@ class MapStruct final  {
 
   /** Glean { "field": "flotz" } */
   [[deprecated("Use `FOO.flotz().value()` instead of `FOO.get_flotz()`")]]
-  const std::unordered_map<uint64_t, float>& get_flotz() const&;
+  const std::unordered_map<uint64_t, float>& get_flotz() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "flotz" } */
   [[deprecated("Use `FOO.flotz().value()` instead of `FOO.get_flotz()`")]]
@@ -4514,7 +4514,7 @@ class MapStruct final  {
 
   /** Glean { "field": "map_list" } */
   [[deprecated("Use `FOO.map_list().value()` instead of `FOO.get_map_list()`")]]
-  const ::std::vector<::std::map<::std::int32_t, ::std::int64_t>>& get_map_list() const&;
+  const ::std::vector<::std::map<::std::int32_t, ::std::int64_t>>& get_map_list() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "map_list" } */
   [[deprecated("Use `FOO.map_list().value()` instead of `FOO.get_map_list()`")]]
@@ -4530,7 +4530,7 @@ class MapStruct final  {
 
   /** Glean { "field": "list_map" } */
   [[deprecated("Use `FOO.list_map().value()` instead of `FOO.get_list_map()`")]]
-  const ::std::map<::std::int32_t, ::std::vector<::std::int64_t>>& get_list_map() const&;
+  const ::std::map<::std::int32_t, ::std::vector<::std::int64_t>>& get_list_map() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "list_map" } */
   [[deprecated("Use `FOO.list_map().value()` instead of `FOO.get_list_map()`")]]
@@ -4546,7 +4546,7 @@ class MapStruct final  {
 
   /** Glean { "field": "fast_list_map" } */
   [[deprecated("Use `FOO.fast_list_map().value()` instead of `FOO.get_fast_list_map()`")]]
-  const folly::F14FastMap<int, folly::fbvector<double>>& get_fast_list_map() const&;
+  const folly::F14FastMap<int, folly::fbvector<double>>& get_fast_list_map() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "fast_list_map" } */
   [[deprecated("Use `FOO.fast_list_map().value()` instead of `FOO.get_fast_list_map()`")]]
@@ -4562,7 +4562,7 @@ class MapStruct final  {
 
   /** Glean { "field": "buf_map" } */
   [[deprecated("Use `FOO.buf_map().value()` instead of `FOO.get_buf_map()`")]]
-  const ::std::map<::std::string, ::test::fixtures::python_capi::IOBufPtr>& get_buf_map() const&;
+  const ::std::map<::std::string, ::test::fixtures::python_capi::IOBufPtr>& get_buf_map() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "buf_map" } */
   [[deprecated("Use `FOO.buf_map().value()` instead of `FOO.get_buf_map()`")]]
@@ -4578,7 +4578,7 @@ class MapStruct final  {
 
   /** Glean { "field": "unsigned_list_map" } */
   [[deprecated("Use `FOO.unsigned_list_map().value()` instead of `FOO.get_unsigned_list_map()`")]]
-  const ::std::map<::test::fixtures::python_capi::ui64, ::std::vector<::test::fixtures::python_capi::ui64>>& get_unsigned_list_map() const&;
+  const ::std::map<::test::fixtures::python_capi::ui64, ::std::vector<::test::fixtures::python_capi::ui64>>& get_unsigned_list_map() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "unsigned_list_map" } */
   [[deprecated("Use `FOO.unsigned_list_map().value()` instead of `FOO.get_unsigned_list_map()`")]]
@@ -5095,7 +5095,7 @@ class ComposeStruct final  {
 
   /** Glean { "field": "primitive" } */
   [[deprecated("Use `FOO.primitive().value()` instead of `FOO.get_primitive()`")]]
-  const ::test::fixtures::python_capi::PrimitiveStruct& get_primitive() const&;
+  const ::test::fixtures::python_capi::PrimitiveStruct& get_primitive() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "primitive" } */
   [[deprecated("Use `FOO.primitive().value()` instead of `FOO.get_primitive()`")]]
@@ -5111,7 +5111,7 @@ class ComposeStruct final  {
 
   /** Glean { "field": "xstruct" } */
   [[deprecated("Use `FOO.xstruct().value()` instead of `FOO.get_xstruct()`")]]
-  const ::test::fixtures::python_capi::DepStruct& get_xstruct() const&;
+  const ::test::fixtures::python_capi::DepStruct& get_xstruct() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "xstruct" } */
   [[deprecated("Use `FOO.xstruct().value()` instead of `FOO.get_xstruct()`")]]
@@ -5135,7 +5135,7 @@ class ComposeStruct final  {
 
   /** Glean { "field": "serial_struct" } */
   [[deprecated("Use `FOO.serial_struct().value()` instead of `FOO.get_serial_struct()`")]]
-  const ::test::fixtures::python_capi::SerializedStruct& get_serial_struct() const&;
+  const ::test::fixtures::python_capi::SerializedStruct& get_serial_struct() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "serial_struct" } */
   [[deprecated("Use `FOO.serial_struct().value()` instead of `FOO.get_serial_struct()`")]]
@@ -5151,7 +5151,7 @@ class ComposeStruct final  {
 
   /** Glean { "field": "friends" } */
   [[deprecated("Use `FOO.friends().value()` instead of `FOO.get_friends()`")]]
-  const ::std::vector<::test::fixtures::python_capi::DepStruct>& get_friends() const&;
+  const ::std::vector<::test::fixtures::python_capi::DepStruct>& get_friends() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "friends" } */
   [[deprecated("Use `FOO.friends().value()` instead of `FOO.get_friends()`")]]
@@ -5167,7 +5167,7 @@ class ComposeStruct final  {
 
   /** Glean { "field": "serial_union" } */
   [[deprecated("Use `FOO.serial_union().value()` instead of `FOO.get_serial_union()`")]]
-  const ::test::fixtures::python_capi::SerializedUnion& get_serial_union() const&;
+  const ::test::fixtures::python_capi::SerializedUnion& get_serial_union() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "serial_union" } */
   [[deprecated("Use `FOO.serial_union().value()` instead of `FOO.get_serial_union()`")]]
@@ -5183,7 +5183,7 @@ class ComposeStruct final  {
 
   /** Glean { "field": "serial_error" } */
   [[deprecated("Use `FOO.serial_error().value()` instead of `FOO.get_serial_error()`")]]
-  const ::test::fixtures::python_capi::SerializedError& get_serial_error() const&;
+  const ::test::fixtures::python_capi::SerializedError& get_serial_error() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "serial_error" } */
   [[deprecated("Use `FOO.serial_error().value()` instead of `FOO.get_serial_error()`")]]

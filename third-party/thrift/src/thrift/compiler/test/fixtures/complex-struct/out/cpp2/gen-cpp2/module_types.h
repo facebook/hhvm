@@ -1085,7 +1085,7 @@ class MyStructFloatFieldThrowExp final  {
 
   /** Glean { "field": "myStringField" } */
   [[deprecated("Use `FOO.myStringField().value()` instead of `FOO.get_myStringField()`")]]
-  const ::std::string& get_myStringField() const& {
+  const ::std::string& get_myStringField() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_myStringField;
   }
 
@@ -1284,7 +1284,7 @@ class MyStructMapFloatThrowExp final  {
 
   /** Glean { "field": "mapListOfFloats" } */
   [[deprecated("Use `FOO.mapListOfFloats().value()` instead of `FOO.get_mapListOfFloats()`")]]
-  const ::std::map<::std::int32_t, ::std::vector<::std::vector<::cpp2::floatTypedef>>>& get_mapListOfFloats() const&;
+  const ::std::map<::std::int32_t, ::std::vector<::std::vector<::cpp2::floatTypedef>>>& get_mapListOfFloats() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "mapListOfFloats" } */
   [[deprecated("Use `FOO.mapListOfFloats().value()` instead of `FOO.get_mapListOfFloats()`")]]
@@ -2589,7 +2589,7 @@ class MyStruct final  {
 
   /** Glean { "field": "MyStringField" } */
   [[deprecated("Use `FOO.MyStringField().value()` instead of `FOO.get_MyStringField()`")]]
-  const ::std::string& get_MyStringField() const& {
+  const ::std::string& get_MyStringField() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_MyStringField;
   }
 
@@ -2609,7 +2609,7 @@ class MyStruct final  {
 
   /** Glean { "field": "MyDataField" } */
   [[deprecated("Use `FOO.MyDataField().value()` instead of `FOO.get_MyDataField()`")]]
-  const ::cpp2::MyDataItem& get_MyDataField() const&;
+  const ::cpp2::MyDataItem& get_MyDataField() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "MyDataField" } */
   [[deprecated("Use `FOO.MyDataField().value()` instead of `FOO.get_MyDataField()`")]]
@@ -2673,7 +2673,7 @@ class MyStruct final  {
 
   /** Glean { "field": "lDouble" } */
   [[deprecated("Use `FOO.lDouble().value()` instead of `FOO.get_lDouble()`")]]
-  const ::std::vector<double>& get_lDouble() const&;
+  const ::std::vector<double>& get_lDouble() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "lDouble" } */
   [[deprecated("Use `FOO.lDouble().value()` instead of `FOO.get_lDouble()`")]]
@@ -2689,7 +2689,7 @@ class MyStruct final  {
 
   /** Glean { "field": "lShort" } */
   [[deprecated("Use `FOO.lShort().value()` instead of `FOO.get_lShort()`")]]
-  const ::std::vector<::std::int16_t>& get_lShort() const&;
+  const ::std::vector<::std::int16_t>& get_lShort() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "lShort" } */
   [[deprecated("Use `FOO.lShort().value()` instead of `FOO.get_lShort()`")]]
@@ -2705,7 +2705,7 @@ class MyStruct final  {
 
   /** Glean { "field": "lInteger" } */
   [[deprecated("Use `FOO.lInteger().value()` instead of `FOO.get_lInteger()`")]]
-  const ::std::vector<::std::int32_t>& get_lInteger() const&;
+  const ::std::vector<::std::int32_t>& get_lInteger() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "lInteger" } */
   [[deprecated("Use `FOO.lInteger().value()` instead of `FOO.get_lInteger()`")]]
@@ -2721,7 +2721,7 @@ class MyStruct final  {
 
   /** Glean { "field": "lLong" } */
   [[deprecated("Use `FOO.lLong().value()` instead of `FOO.get_lLong()`")]]
-  const ::std::vector<::std::int64_t>& get_lLong() const&;
+  const ::std::vector<::std::int64_t>& get_lLong() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "lLong" } */
   [[deprecated("Use `FOO.lLong().value()` instead of `FOO.get_lLong()`")]]
@@ -2737,7 +2737,7 @@ class MyStruct final  {
 
   /** Glean { "field": "lString" } */
   [[deprecated("Use `FOO.lString().value()` instead of `FOO.get_lString()`")]]
-  const ::std::vector<::std::string>& get_lString() const&;
+  const ::std::vector<::std::string>& get_lString() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "lString" } */
   [[deprecated("Use `FOO.lString().value()` instead of `FOO.get_lString()`")]]
@@ -2753,7 +2753,7 @@ class MyStruct final  {
 
   /** Glean { "field": "lBool" } */
   [[deprecated("Use `FOO.lBool().value()` instead of `FOO.get_lBool()`")]]
-  const ::std::vector<bool>& get_lBool() const&;
+  const ::std::vector<bool>& get_lBool() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "lBool" } */
   [[deprecated("Use `FOO.lBool().value()` instead of `FOO.get_lBool()`")]]
@@ -2769,7 +2769,7 @@ class MyStruct final  {
 
   /** Glean { "field": "lByte" } */
   [[deprecated("Use `FOO.lByte().value()` instead of `FOO.get_lByte()`")]]
-  const ::std::vector<::std::int8_t>& get_lByte() const&;
+  const ::std::vector<::std::int8_t>& get_lByte() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "lByte" } */
   [[deprecated("Use `FOO.lByte().value()` instead of `FOO.get_lByte()`")]]
@@ -2785,7 +2785,7 @@ class MyStruct final  {
 
   /** Glean { "field": "mShortString" } */
   [[deprecated("Use `FOO.mShortString().value()` instead of `FOO.get_mShortString()`")]]
-  const ::std::map<::std::int16_t, ::std::string>& get_mShortString() const&;
+  const ::std::map<::std::int16_t, ::std::string>& get_mShortString() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "mShortString" } */
   [[deprecated("Use `FOO.mShortString().value()` instead of `FOO.get_mShortString()`")]]
@@ -2801,7 +2801,7 @@ class MyStruct final  {
 
   /** Glean { "field": "mIntegerString" } */
   [[deprecated("Use `FOO.mIntegerString().value()` instead of `FOO.get_mIntegerString()`")]]
-  const ::std::map<::std::int32_t, ::std::string>& get_mIntegerString() const&;
+  const ::std::map<::std::int32_t, ::std::string>& get_mIntegerString() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "mIntegerString" } */
   [[deprecated("Use `FOO.mIntegerString().value()` instead of `FOO.get_mIntegerString()`")]]
@@ -2817,7 +2817,7 @@ class MyStruct final  {
 
   /** Glean { "field": "mStringMyStruct" } */
   [[deprecated("Use `FOO.mStringMyStruct().value()` instead of `FOO.get_mStringMyStruct()`")]]
-  const ::std::map<::std::string, ::cpp2::MyStruct>& get_mStringMyStruct() const&;
+  const ::std::map<::std::string, ::cpp2::MyStruct>& get_mStringMyStruct() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "mStringMyStruct" } */
   [[deprecated("Use `FOO.mStringMyStruct().value()` instead of `FOO.get_mStringMyStruct()`")]]
@@ -2833,7 +2833,7 @@ class MyStruct final  {
 
   /** Glean { "field": "mStringBool" } */
   [[deprecated("Use `FOO.mStringBool().value()` instead of `FOO.get_mStringBool()`")]]
-  const ::std::map<::std::string, bool>& get_mStringBool() const&;
+  const ::std::map<::std::string, bool>& get_mStringBool() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "mStringBool" } */
   [[deprecated("Use `FOO.mStringBool().value()` instead of `FOO.get_mStringBool()`")]]
@@ -2849,7 +2849,7 @@ class MyStruct final  {
 
   /** Glean { "field": "mIntegerInteger" } */
   [[deprecated("Use `FOO.mIntegerInteger().value()` instead of `FOO.get_mIntegerInteger()`")]]
-  const ::std::map<::std::int32_t, ::std::int32_t>& get_mIntegerInteger() const&;
+  const ::std::map<::std::int32_t, ::std::int32_t>& get_mIntegerInteger() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "mIntegerInteger" } */
   [[deprecated("Use `FOO.mIntegerInteger().value()` instead of `FOO.get_mIntegerInteger()`")]]
@@ -2865,7 +2865,7 @@ class MyStruct final  {
 
   /** Glean { "field": "mIntegerBool" } */
   [[deprecated("Use `FOO.mIntegerBool().value()` instead of `FOO.get_mIntegerBool()`")]]
-  const ::std::map<::std::int32_t, bool>& get_mIntegerBool() const&;
+  const ::std::map<::std::int32_t, bool>& get_mIntegerBool() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "mIntegerBool" } */
   [[deprecated("Use `FOO.mIntegerBool().value()` instead of `FOO.get_mIntegerBool()`")]]
@@ -2881,7 +2881,7 @@ class MyStruct final  {
 
   /** Glean { "field": "sShort" } */
   [[deprecated("Use `FOO.sShort().value()` instead of `FOO.get_sShort()`")]]
-  const ::std::set<::std::int16_t>& get_sShort() const&;
+  const ::std::set<::std::int16_t>& get_sShort() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "sShort" } */
   [[deprecated("Use `FOO.sShort().value()` instead of `FOO.get_sShort()`")]]
@@ -2897,7 +2897,7 @@ class MyStruct final  {
 
   /** Glean { "field": "sMyStruct" } */
   [[deprecated("Use `FOO.sMyStruct().value()` instead of `FOO.get_sMyStruct()`")]]
-  const ::std::set<::cpp2::MyStruct>& get_sMyStruct() const&;
+  const ::std::set<::cpp2::MyStruct>& get_sMyStruct() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "sMyStruct" } */
   [[deprecated("Use `FOO.sMyStruct().value()` instead of `FOO.get_sMyStruct()`")]]
@@ -2913,7 +2913,7 @@ class MyStruct final  {
 
   /** Glean { "field": "sLong" } */
   [[deprecated("Use `FOO.sLong().value()` instead of `FOO.get_sLong()`")]]
-  const ::std::set<::std::int64_t>& get_sLong() const&;
+  const ::std::set<::std::int64_t>& get_sLong() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "sLong" } */
   [[deprecated("Use `FOO.sLong().value()` instead of `FOO.get_sLong()`")]]
@@ -2929,7 +2929,7 @@ class MyStruct final  {
 
   /** Glean { "field": "sString" } */
   [[deprecated("Use `FOO.sString().value()` instead of `FOO.get_sString()`")]]
-  const ::std::set<::std::string>& get_sString() const&;
+  const ::std::set<::std::string>& get_sString() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "sString" } */
   [[deprecated("Use `FOO.sString().value()` instead of `FOO.get_sString()`")]]
@@ -2945,7 +2945,7 @@ class MyStruct final  {
 
   /** Glean { "field": "sByte" } */
   [[deprecated("Use `FOO.sByte().value()` instead of `FOO.get_sByte()`")]]
-  const ::std::set<::std::int8_t>& get_sByte() const&;
+  const ::std::set<::std::int8_t>& get_sByte() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "sByte" } */
   [[deprecated("Use `FOO.sByte().value()` instead of `FOO.get_sByte()`")]]
@@ -2961,7 +2961,7 @@ class MyStruct final  {
 
   /** Glean { "field": "mListList" } */
   [[deprecated("Use `FOO.mListList().value()` instead of `FOO.get_mListList()`")]]
-  const ::std::map<::std::vector<::std::int32_t>, ::std::vector<::std::int32_t>>& get_mListList() const&;
+  const ::std::map<::std::vector<::std::int32_t>, ::std::vector<::std::int32_t>>& get_mListList() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "mListList" } */
   [[deprecated("Use `FOO.mListList().value()` instead of `FOO.get_mListList()`")]]
@@ -3148,7 +3148,7 @@ class SimpleStruct final  {
 
   /** Glean { "field": "name" } */
   [[deprecated("Use `FOO.name().value()` instead of `FOO.get_name()`")]]
-  const ::std::string& get_name() const& {
+  const ::std::string& get_name() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_name;
   }
 
@@ -3971,7 +3971,7 @@ class ComplexNestedStruct final  {
 
   /** Glean { "field": "setOfSetOfInt" } */
   [[deprecated("Use `FOO.setOfSetOfInt().value()` instead of `FOO.get_setOfSetOfInt()`")]]
-  const ::std::set<::std::set<::std::int32_t>>& get_setOfSetOfInt() const&;
+  const ::std::set<::std::set<::std::int32_t>>& get_setOfSetOfInt() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "setOfSetOfInt" } */
   [[deprecated("Use `FOO.setOfSetOfInt().value()` instead of `FOO.get_setOfSetOfInt()`")]]
@@ -3987,7 +3987,7 @@ class ComplexNestedStruct final  {
 
   /** Glean { "field": "listofListOfListOfListOfEnum" } */
   [[deprecated("Use `FOO.listofListOfListOfListOfEnum().value()` instead of `FOO.get_listofListOfListOfListOfEnum()`")]]
-  const ::std::vector<::std::vector<::std::vector<::std::vector<::cpp2::MyEnum>>>>& get_listofListOfListOfListOfEnum() const&;
+  const ::std::vector<::std::vector<::std::vector<::std::vector<::cpp2::MyEnum>>>>& get_listofListOfListOfListOfEnum() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "listofListOfListOfListOfEnum" } */
   [[deprecated("Use `FOO.listofListOfListOfListOfEnum().value()` instead of `FOO.get_listofListOfListOfListOfEnum()`")]]
@@ -4003,7 +4003,7 @@ class ComplexNestedStruct final  {
 
   /** Glean { "field": "listOfListOfMyStruct" } */
   [[deprecated("Use `FOO.listOfListOfMyStruct().value()` instead of `FOO.get_listOfListOfMyStruct()`")]]
-  const ::std::vector<::std::vector<::cpp2::MyStruct>>& get_listOfListOfMyStruct() const&;
+  const ::std::vector<::std::vector<::cpp2::MyStruct>>& get_listOfListOfMyStruct() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "listOfListOfMyStruct" } */
   [[deprecated("Use `FOO.listOfListOfMyStruct().value()` instead of `FOO.get_listOfListOfMyStruct()`")]]
@@ -4019,7 +4019,7 @@ class ComplexNestedStruct final  {
 
   /** Glean { "field": "setOfListOfListOfLong" } */
   [[deprecated("Use `FOO.setOfListOfListOfLong().value()` instead of `FOO.get_setOfListOfListOfLong()`")]]
-  const ::std::set<::std::vector<::std::vector<::std::int64_t>>>& get_setOfListOfListOfLong() const&;
+  const ::std::set<::std::vector<::std::vector<::std::int64_t>>>& get_setOfListOfListOfLong() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "setOfListOfListOfLong" } */
   [[deprecated("Use `FOO.setOfListOfListOfLong().value()` instead of `FOO.get_setOfListOfListOfLong()`")]]
@@ -4035,7 +4035,7 @@ class ComplexNestedStruct final  {
 
   /** Glean { "field": "setOfSetOfsetOfLong" } */
   [[deprecated("Use `FOO.setOfSetOfsetOfLong().value()` instead of `FOO.get_setOfSetOfsetOfLong()`")]]
-  const ::std::set<::std::set<::std::set<::std::int64_t>>>& get_setOfSetOfsetOfLong() const&;
+  const ::std::set<::std::set<::std::set<::std::int64_t>>>& get_setOfSetOfsetOfLong() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "setOfSetOfsetOfLong" } */
   [[deprecated("Use `FOO.setOfSetOfsetOfLong().value()` instead of `FOO.get_setOfSetOfsetOfLong()`")]]
@@ -4051,7 +4051,7 @@ class ComplexNestedStruct final  {
 
   /** Glean { "field": "mapStructListOfListOfLong" } */
   [[deprecated("Use `FOO.mapStructListOfListOfLong().value()` instead of `FOO.get_mapStructListOfListOfLong()`")]]
-  const ::std::map<::std::int32_t, ::std::vector<::std::vector<::cpp2::MyStruct>>>& get_mapStructListOfListOfLong() const&;
+  const ::std::map<::std::int32_t, ::std::vector<::std::vector<::cpp2::MyStruct>>>& get_mapStructListOfListOfLong() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "mapStructListOfListOfLong" } */
   [[deprecated("Use `FOO.mapStructListOfListOfLong().value()` instead of `FOO.get_mapStructListOfListOfLong()`")]]
@@ -4067,7 +4067,7 @@ class ComplexNestedStruct final  {
 
   /** Glean { "field": "mKeyStructValInt" } */
   [[deprecated("Use `FOO.mKeyStructValInt().value()` instead of `FOO.get_mKeyStructValInt()`")]]
-  const ::std::map<::cpp2::MyStruct, ::std::int32_t>& get_mKeyStructValInt() const&;
+  const ::std::map<::cpp2::MyStruct, ::std::int32_t>& get_mKeyStructValInt() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "mKeyStructValInt" } */
   [[deprecated("Use `FOO.mKeyStructValInt().value()` instead of `FOO.get_mKeyStructValInt()`")]]
@@ -4083,7 +4083,7 @@ class ComplexNestedStruct final  {
 
   /** Glean { "field": "listOfMapKeyIntValInt" } */
   [[deprecated("Use `FOO.listOfMapKeyIntValInt().value()` instead of `FOO.get_listOfMapKeyIntValInt()`")]]
-  const ::std::vector<::std::map<::std::int32_t, ::std::int32_t>>& get_listOfMapKeyIntValInt() const&;
+  const ::std::vector<::std::map<::std::int32_t, ::std::int32_t>>& get_listOfMapKeyIntValInt() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "listOfMapKeyIntValInt" } */
   [[deprecated("Use `FOO.listOfMapKeyIntValInt().value()` instead of `FOO.get_listOfMapKeyIntValInt()`")]]
@@ -4099,7 +4099,7 @@ class ComplexNestedStruct final  {
 
   /** Glean { "field": "listOfMapKeyStrValList" } */
   [[deprecated("Use `FOO.listOfMapKeyStrValList().value()` instead of `FOO.get_listOfMapKeyStrValList()`")]]
-  const ::std::vector<::std::map<::std::string, ::std::vector<::cpp2::MyStruct>>>& get_listOfMapKeyStrValList() const&;
+  const ::std::vector<::std::map<::std::string, ::std::vector<::cpp2::MyStruct>>>& get_listOfMapKeyStrValList() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "listOfMapKeyStrValList" } */
   [[deprecated("Use `FOO.listOfMapKeyStrValList().value()` instead of `FOO.get_listOfMapKeyStrValList()`")]]
@@ -4115,7 +4115,7 @@ class ComplexNestedStruct final  {
 
   /** Glean { "field": "mapKeySetValLong" } */
   [[deprecated("Use `FOO.mapKeySetValLong().value()` instead of `FOO.get_mapKeySetValLong()`")]]
-  const ::std::map<::std::set<::std::int32_t>, ::std::int64_t>& get_mapKeySetValLong() const&;
+  const ::std::map<::std::set<::std::int32_t>, ::std::int64_t>& get_mapKeySetValLong() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "mapKeySetValLong" } */
   [[deprecated("Use `FOO.mapKeySetValLong().value()` instead of `FOO.get_mapKeySetValLong()`")]]
@@ -4131,7 +4131,7 @@ class ComplexNestedStruct final  {
 
   /** Glean { "field": "mapKeyListValLong" } */
   [[deprecated("Use `FOO.mapKeyListValLong().value()` instead of `FOO.get_mapKeyListValLong()`")]]
-  const ::std::map<::std::vector<::std::string>, ::std::int32_t>& get_mapKeyListValLong() const&;
+  const ::std::map<::std::vector<::std::string>, ::std::int32_t>& get_mapKeyListValLong() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "mapKeyListValLong" } */
   [[deprecated("Use `FOO.mapKeyListValLong().value()` instead of `FOO.get_mapKeyListValLong()`")]]
@@ -4147,7 +4147,7 @@ class ComplexNestedStruct final  {
 
   /** Glean { "field": "mapKeyMapValMap" } */
   [[deprecated("Use `FOO.mapKeyMapValMap().value()` instead of `FOO.get_mapKeyMapValMap()`")]]
-  const ::std::map<::std::map<::std::int32_t, ::std::string>, ::std::map<::std::int32_t, ::std::string>>& get_mapKeyMapValMap() const&;
+  const ::std::map<::std::map<::std::int32_t, ::std::string>, ::std::map<::std::int32_t, ::std::string>>& get_mapKeyMapValMap() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "mapKeyMapValMap" } */
   [[deprecated("Use `FOO.mapKeyMapValMap().value()` instead of `FOO.get_mapKeyMapValMap()`")]]
@@ -4163,7 +4163,7 @@ class ComplexNestedStruct final  {
 
   /** Glean { "field": "mapKeySetValMap" } */
   [[deprecated("Use `FOO.mapKeySetValMap().value()` instead of `FOO.get_mapKeySetValMap()`")]]
-  const ::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>>& get_mapKeySetValMap() const&;
+  const ::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>>& get_mapKeySetValMap() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "mapKeySetValMap" } */
   [[deprecated("Use `FOO.mapKeySetValMap().value()` instead of `FOO.get_mapKeySetValMap()`")]]
@@ -4179,7 +4179,7 @@ class ComplexNestedStruct final  {
 
   /** Glean { "field": "NestedMaps" } */
   [[deprecated("Use `FOO.NestedMaps().value()` instead of `FOO.get_NestedMaps()`")]]
-  const ::std::map<::std::map<::std::map<::std::int32_t, ::std::string>, ::std::string>, ::std::map<::std::int32_t, ::std::string>>& get_NestedMaps() const&;
+  const ::std::map<::std::map<::std::map<::std::int32_t, ::std::string>, ::std::string>, ::std::map<::std::int32_t, ::std::string>>& get_NestedMaps() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "NestedMaps" } */
   [[deprecated("Use `FOO.NestedMaps().value()` instead of `FOO.get_NestedMaps()`")]]
@@ -4195,7 +4195,7 @@ class ComplexNestedStruct final  {
 
   /** Glean { "field": "mapKeyIntValList" } */
   [[deprecated("Use `FOO.mapKeyIntValList().value()` instead of `FOO.get_mapKeyIntValList()`")]]
-  const ::std::map<::std::int32_t, ::std::vector<::cpp2::MyStruct>>& get_mapKeyIntValList() const&;
+  const ::std::map<::std::int32_t, ::std::vector<::cpp2::MyStruct>>& get_mapKeyIntValList() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "mapKeyIntValList" } */
   [[deprecated("Use `FOO.mapKeyIntValList().value()` instead of `FOO.get_mapKeyIntValList()`")]]
@@ -4211,7 +4211,7 @@ class ComplexNestedStruct final  {
 
   /** Glean { "field": "mapKeyIntValSet" } */
   [[deprecated("Use `FOO.mapKeyIntValSet().value()` instead of `FOO.get_mapKeyIntValSet()`")]]
-  const ::std::map<::std::int32_t, ::std::set<bool>>& get_mapKeyIntValSet() const&;
+  const ::std::map<::std::int32_t, ::std::set<bool>>& get_mapKeyIntValSet() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "mapKeyIntValSet" } */
   [[deprecated("Use `FOO.mapKeyIntValSet().value()` instead of `FOO.get_mapKeyIntValSet()`")]]
@@ -4227,7 +4227,7 @@ class ComplexNestedStruct final  {
 
   /** Glean { "field": "mapKeySetValInt" } */
   [[deprecated("Use `FOO.mapKeySetValInt().value()` instead of `FOO.get_mapKeySetValInt()`")]]
-  const ::std::map<::std::set<bool>, ::cpp2::MyEnum>& get_mapKeySetValInt() const&;
+  const ::std::map<::std::set<bool>, ::cpp2::MyEnum>& get_mapKeySetValInt() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "mapKeySetValInt" } */
   [[deprecated("Use `FOO.mapKeySetValInt().value()` instead of `FOO.get_mapKeySetValInt()`")]]
@@ -4243,7 +4243,7 @@ class ComplexNestedStruct final  {
 
   /** Glean { "field": "mapKeyListValSet" } */
   [[deprecated("Use `FOO.mapKeyListValSet().value()` instead of `FOO.get_mapKeyListValSet()`")]]
-  const ::std::map<::std::vector<::std::int32_t>, ::std::set<::std::map<double, ::std::string>>>& get_mapKeyListValSet() const&;
+  const ::std::map<::std::vector<::std::int32_t>, ::std::set<::std::map<double, ::std::string>>>& get_mapKeyListValSet() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "mapKeyListValSet" } */
   [[deprecated("Use `FOO.mapKeyListValSet().value()` instead of `FOO.get_mapKeyListValSet()`")]]
@@ -5892,7 +5892,7 @@ class defaultStruct final  {
 
   /** Glean { "field": "myBinaryDFset" } */
   [[deprecated("Use `FOO.myBinaryDFset().value()` instead of `FOO.get_myBinaryDFset()`")]]
-  const ::std::string& get_myBinaryDFset() const& {
+  const ::std::string& get_myBinaryDFset() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_myBinaryDFset;
   }
 
@@ -5912,7 +5912,7 @@ class defaultStruct final  {
 
   /** Glean { "field": "myBinary" } */
   [[deprecated("Use `FOO.myBinary().value()` instead of `FOO.get_myBinary()`")]]
-  const ::std::string& get_myBinary() const& {
+  const ::std::string& get_myBinary() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_myBinary;
   }
 
@@ -5972,7 +5972,7 @@ class defaultStruct final  {
 
   /** Glean { "field": "field3" } */
   [[deprecated("Use `FOO.field3().value()` instead of `FOO.get_field3()`")]]
-  const ::std::map<::std::int32_t, ::std::string>& get_field3() const&;
+  const ::std::map<::std::int32_t, ::std::string>& get_field3() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "field3" } */
   [[deprecated("Use `FOO.field3().value()` instead of `FOO.get_field3()`")]]
@@ -5988,7 +5988,7 @@ class defaultStruct final  {
 
   /** Glean { "field": "myList" } */
   [[deprecated("Use `FOO.myList().value()` instead of `FOO.get_myList()`")]]
-  const ::std::vector<::cpp2::MyEnum>& get_myList() const&;
+  const ::std::vector<::cpp2::MyEnum>& get_myList() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "myList" } */
   [[deprecated("Use `FOO.myList().value()` instead of `FOO.get_myList()`")]]
@@ -6004,7 +6004,7 @@ class defaultStruct final  {
 
   /** Glean { "field": "mySet" } */
   [[deprecated("Use `FOO.mySet().value()` instead of `FOO.get_mySet()`")]]
-  const ::std::set<::std::string>& get_mySet() const&;
+  const ::std::set<::std::string>& get_mySet() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "mySet" } */
   [[deprecated("Use `FOO.mySet().value()` instead of `FOO.get_mySet()`")]]
@@ -6020,7 +6020,7 @@ class defaultStruct final  {
 
   /** Glean { "field": "simpleStruct" } */
   [[deprecated("Use `FOO.simpleStruct().value()` instead of `FOO.get_simpleStruct()`")]]
-  const ::cpp2::SimpleStruct& get_simpleStruct() const&;
+  const ::cpp2::SimpleStruct& get_simpleStruct() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "simpleStruct" } */
   [[deprecated("Use `FOO.simpleStruct().value()` instead of `FOO.get_simpleStruct()`")]]
@@ -6036,7 +6036,7 @@ class defaultStruct final  {
 
   /** Glean { "field": "listStructDFset" } */
   [[deprecated("Use `FOO.listStructDFset().value()` instead of `FOO.get_listStructDFset()`")]]
-  const ::std::vector<::cpp2::SimpleStruct>& get_listStructDFset() const&;
+  const ::std::vector<::cpp2::SimpleStruct>& get_listStructDFset() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "listStructDFset" } */
   [[deprecated("Use `FOO.listStructDFset().value()` instead of `FOO.get_listStructDFset()`")]]
@@ -6052,7 +6052,7 @@ class defaultStruct final  {
 
   /** Glean { "field": "myUnion" } */
   [[deprecated("Use `FOO.myUnion().value()` instead of `FOO.get_myUnion()`")]]
-  const ::cpp2::MyUnion& get_myUnion() const&;
+  const ::cpp2::MyUnion& get_myUnion() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "myUnion" } */
   [[deprecated("Use `FOO.myUnion().value()` instead of `FOO.get_myUnion()`")]]
@@ -6068,7 +6068,7 @@ class defaultStruct final  {
 
   /** Glean { "field": "listUnionDFset" } */
   [[deprecated("Use `FOO.listUnionDFset().value()` instead of `FOO.get_listUnionDFset()`")]]
-  const ::std::vector<::cpp2::MyUnion>& get_listUnionDFset() const&;
+  const ::std::vector<::cpp2::MyUnion>& get_listUnionDFset() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "listUnionDFset" } */
   [[deprecated("Use `FOO.listUnionDFset().value()` instead of `FOO.get_listUnionDFset()`")]]
@@ -6084,7 +6084,7 @@ class defaultStruct final  {
 
   /** Glean { "field": "mapNestlistStructDfSet" } */
   [[deprecated("Use `FOO.mapNestlistStructDfSet().value()` instead of `FOO.get_mapNestlistStructDfSet()`")]]
-  const ::std::map<::std::int32_t, ::std::vector<::cpp2::SimpleStruct>>& get_mapNestlistStructDfSet() const&;
+  const ::std::map<::std::int32_t, ::std::vector<::cpp2::SimpleStruct>>& get_mapNestlistStructDfSet() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "mapNestlistStructDfSet" } */
   [[deprecated("Use `FOO.mapNestlistStructDfSet().value()` instead of `FOO.get_mapNestlistStructDfSet()`")]]
@@ -6100,7 +6100,7 @@ class defaultStruct final  {
 
   /** Glean { "field": "mapJavaTypeDFset" } */
   [[deprecated("Use `FOO.mapJavaTypeDFset().value()` instead of `FOO.get_mapJavaTypeDFset()`")]]
-  const ::cpp2::map_i64_string_5732& get_mapJavaTypeDFset() const&;
+  const ::cpp2::map_i64_string_5732& get_mapJavaTypeDFset() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "mapJavaTypeDFset" } */
   [[deprecated("Use `FOO.mapJavaTypeDFset().value()` instead of `FOO.get_mapJavaTypeDFset()`")]]
@@ -6116,7 +6116,7 @@ class defaultStruct final  {
 
   /** Glean { "field": "emptyMap" } */
   [[deprecated("Use `FOO.emptyMap().value()` instead of `FOO.get_emptyMap()`")]]
-  const ::std::map<::std::int64_t, ::std::int32_t>& get_emptyMap() const&;
+  const ::std::map<::std::int64_t, ::std::int32_t>& get_emptyMap() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "emptyMap" } */
   [[deprecated("Use `FOO.emptyMap().value()` instead of `FOO.get_emptyMap()`")]]
@@ -6132,7 +6132,7 @@ class defaultStruct final  {
 
   /** Glean { "field": "enumMapDFset" } */
   [[deprecated("Use `FOO.enumMapDFset().value()` instead of `FOO.get_enumMapDFset()`")]]
-  const ::std::map<::std::string, ::std::map<::std::int32_t, ::cpp2::MyEnum>>& get_enumMapDFset() const&;
+  const ::std::map<::std::string, ::std::map<::std::int32_t, ::cpp2::MyEnum>>& get_enumMapDFset() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "enumMapDFset" } */
   [[deprecated("Use `FOO.enumMapDFset().value()` instead of `FOO.get_enumMapDFset()`")]]
@@ -6607,7 +6607,7 @@ class MyStructTypeDef final  {
 
   /** Glean { "field": "myStringField" } */
   [[deprecated("Use `FOO.myStringField().value()` instead of `FOO.get_myStringField()`")]]
-  const ::std::string& get_myStringField() const& {
+  const ::std::string& get_myStringField() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_myStringField;
   }
 
@@ -6627,7 +6627,7 @@ class MyStructTypeDef final  {
 
   /** Glean { "field": "myStringTypedef" } */
   [[deprecated("Use `FOO.myStringTypedef().value()` instead of `FOO.get_myStringTypedef()`")]]
-  const ::cpp2::stringTypedef& get_myStringTypedef() const& {
+  const ::cpp2::stringTypedef& get_myStringTypedef() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_myStringTypedef;
   }
 
@@ -6647,7 +6647,7 @@ class MyStructTypeDef final  {
 
   /** Glean { "field": "myMapField" } */
   [[deprecated("Use `FOO.myMapField().value()` instead of `FOO.get_myMapField()`")]]
-  const ::std::map<::std::int16_t, ::std::string>& get_myMapField() const&;
+  const ::std::map<::std::int16_t, ::std::string>& get_myMapField() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "myMapField" } */
   [[deprecated("Use `FOO.myMapField().value()` instead of `FOO.get_myMapField()`")]]
@@ -6663,7 +6663,7 @@ class MyStructTypeDef final  {
 
   /** Glean { "field": "myMapTypedef" } */
   [[deprecated("Use `FOO.myMapTypedef().value()` instead of `FOO.get_myMapTypedef()`")]]
-  const ::cpp2::mapTypedef& get_myMapTypedef() const&;
+  const ::cpp2::mapTypedef& get_myMapTypedef() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "myMapTypedef" } */
   [[deprecated("Use `FOO.myMapTypedef().value()` instead of `FOO.get_myMapTypedef()`")]]
@@ -6679,7 +6679,7 @@ class MyStructTypeDef final  {
 
   /** Glean { "field": "myListField" } */
   [[deprecated("Use `FOO.myListField().value()` instead of `FOO.get_myListField()`")]]
-  const ::std::vector<double>& get_myListField() const&;
+  const ::std::vector<double>& get_myListField() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "myListField" } */
   [[deprecated("Use `FOO.myListField().value()` instead of `FOO.get_myListField()`")]]
@@ -6695,7 +6695,7 @@ class MyStructTypeDef final  {
 
   /** Glean { "field": "myListTypedef" } */
   [[deprecated("Use `FOO.myListTypedef().value()` instead of `FOO.get_myListTypedef()`")]]
-  const ::cpp2::listTypedef& get_myListTypedef() const&;
+  const ::cpp2::listTypedef& get_myListTypedef() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "myListTypedef" } */
   [[deprecated("Use `FOO.myListTypedef().value()` instead of `FOO.get_myListTypedef()`")]]
@@ -6711,7 +6711,7 @@ class MyStructTypeDef final  {
 
   /** Glean { "field": "myMapListOfTypeDef" } */
   [[deprecated("Use `FOO.myMapListOfTypeDef().value()` instead of `FOO.get_myMapListOfTypeDef()`")]]
-  const ::std::map<::std::int16_t, ::std::vector<::cpp2::listTypedef>>& get_myMapListOfTypeDef() const&;
+  const ::std::map<::std::int16_t, ::std::vector<::cpp2::listTypedef>>& get_myMapListOfTypeDef() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "myMapListOfTypeDef" } */
   [[deprecated("Use `FOO.myMapListOfTypeDef().value()` instead of `FOO.get_myMapListOfTypeDef()`")]]
@@ -7454,7 +7454,7 @@ class TypeRemapped final  {
 
   /** Glean { "field": "lsMap" } */
   [[deprecated("Use `FOO.lsMap().value()` instead of `FOO.get_lsMap()`")]]
-  const ::cpp2::map_i64_string_5732& get_lsMap() const&;
+  const ::cpp2::map_i64_string_5732& get_lsMap() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "lsMap" } */
   [[deprecated("Use `FOO.lsMap().value()` instead of `FOO.get_lsMap()`")]]
@@ -7470,7 +7470,7 @@ class TypeRemapped final  {
 
   /** Glean { "field": "ioMap" } */
   [[deprecated("Use `FOO.ioMap().value()` instead of `FOO.get_ioMap()`")]]
-  const ::cpp2::map_i32_FMap_6797& get_ioMap() const&;
+  const ::cpp2::map_i32_FMap_6797& get_ioMap() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "ioMap" } */
   [[deprecated("Use `FOO.ioMap().value()` instead of `FOO.get_ioMap()`")]]
@@ -7494,7 +7494,7 @@ class TypeRemapped final  {
 
   /** Glean { "field": "binaryTestBuffer" } */
   [[deprecated("Use `FOO.binaryTestBuffer().value()` instead of `FOO.get_binaryTestBuffer()`")]]
-  const ::cpp2::binary_4918& get_binaryTestBuffer() const& {
+  const ::cpp2::binary_4918& get_binaryTestBuffer() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_binaryTestBuffer;
   }
 
@@ -7772,7 +7772,7 @@ class FOLLY_EXPORT reqXcep : public virtual apache::thrift::TException {
 
   /** Glean { "field": "message" } */
   [[deprecated("Use `FOO.message().value()` instead of `FOO.get_message()`")]]
-  const ::std::string& get_message() const& {
+  const ::std::string& get_message() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_message;
   }
 
@@ -7973,11 +7973,11 @@ class FOLLY_EXPORT optXcep : public virtual apache::thrift::TException {
 
   /** Glean { "field": "message" } */
   [[deprecated("Use `FOO.message().value()` instead of `FOO.get_message()`")]]
-  const ::std::string* get_message() const&;
+  const ::std::string* get_message() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "message" } */
   [[deprecated("Use `FOO.message().value()` instead of `FOO.get_message()`")]]
-  ::std::string* get_message() &;
+  ::std::string* get_message() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::string* get_message() && = delete;
 
@@ -7991,11 +7991,11 @@ class FOLLY_EXPORT optXcep : public virtual apache::thrift::TException {
 
   /** Glean { "field": "errorCode" } */
   [[deprecated("Use `FOO.errorCode().value()` instead of `FOO.get_errorCode()`")]]
-  const ::std::int32_t* get_errorCode() const&;
+  const ::std::int32_t* get_errorCode() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "errorCode" } */
   [[deprecated("Use `FOO.errorCode().value()` instead of `FOO.get_errorCode()`")]]
-  ::std::int32_t* get_errorCode() &;
+  ::std::int32_t* get_errorCode() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::int32_t* get_errorCode() && = delete;
 
@@ -8338,7 +8338,7 @@ class FOLLY_EXPORT complexException : public virtual apache::thrift::TException 
 
   /** Glean { "field": "message" } */
   [[deprecated("Use `FOO.message().value()` instead of `FOO.get_message()`")]]
-  const ::std::string& get_message() const& {
+  const ::std::string& get_message() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_message;
   }
 
@@ -8358,7 +8358,7 @@ class FOLLY_EXPORT complexException : public virtual apache::thrift::TException 
 
   /** Glean { "field": "listStrings" } */
   [[deprecated("Use `FOO.listStrings().value()` instead of `FOO.get_listStrings()`")]]
-  const ::std::vector<::std::string>& get_listStrings() const&;
+  const ::std::vector<::std::string>& get_listStrings() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "listStrings" } */
   [[deprecated("Use `FOO.listStrings().value()` instead of `FOO.get_listStrings()`")]]
@@ -8382,11 +8382,11 @@ class FOLLY_EXPORT complexException : public virtual apache::thrift::TException 
 
   /** Glean { "field": "unionError" } */
   [[deprecated("Use `FOO.unionError().value()` instead of `FOO.get_unionError()`")]]
-  const ::cpp2::MyUnion* get_unionError() const&;
+  const ::cpp2::MyUnion* get_unionError() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "unionError" } */
   [[deprecated("Use `FOO.unionError().value()` instead of `FOO.get_unionError()`")]]
-  ::cpp2::MyUnion* get_unionError() &;
+  ::cpp2::MyUnion* get_unionError() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::cpp2::MyUnion* get_unionError() && = delete;
 
@@ -8400,7 +8400,7 @@ class FOLLY_EXPORT complexException : public virtual apache::thrift::TException 
 
   /** Glean { "field": "structError" } */
   [[deprecated("Use `FOO.structError().value()` instead of `FOO.get_structError()`")]]
-  const ::cpp2::MyStruct& get_structError() const&;
+  const ::cpp2::MyStruct& get_structError() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "structError" } */
   [[deprecated("Use `FOO.structError().value()` instead of `FOO.get_structError()`")]]
@@ -8416,7 +8416,7 @@ class FOLLY_EXPORT complexException : public virtual apache::thrift::TException 
 
   /** Glean { "field": "lsMap" } */
   [[deprecated("Use `FOO.lsMap().value()` instead of `FOO.get_lsMap()`")]]
-  const ::cpp2::map_i64_string_5732& get_lsMap() const&;
+  const ::cpp2::map_i64_string_5732& get_lsMap() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "lsMap" } */
   [[deprecated("Use `FOO.lsMap().value()` instead of `FOO.get_lsMap()`")]]
@@ -9999,7 +9999,7 @@ class Containers final  {
 
   /** Glean { "field": "struct_list" } */
   [[deprecated("Use `FOO.struct_list().value()` instead of `FOO.get_struct_list()`")]]
-  const ::std::vector<::cpp2::MyStruct>& get_struct_list() const&;
+  const ::std::vector<::cpp2::MyStruct>& get_struct_list() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "struct_list" } */
   [[deprecated("Use `FOO.struct_list().value()` instead of `FOO.get_struct_list()`")]]
@@ -10015,7 +10015,7 @@ class Containers final  {
 
   /** Glean { "field": "union_list" } */
   [[deprecated("Use `FOO.union_list().value()` instead of `FOO.get_union_list()`")]]
-  const ::std::vector<::cpp2::MyUnion>& get_union_list() const&;
+  const ::std::vector<::cpp2::MyUnion>& get_union_list() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "union_list" } */
   [[deprecated("Use `FOO.union_list().value()` instead of `FOO.get_union_list()`")]]
@@ -10031,7 +10031,7 @@ class Containers final  {
 
   /** Glean { "field": "enum_list" } */
   [[deprecated("Use `FOO.enum_list().value()` instead of `FOO.get_enum_list()`")]]
-  const ::std::vector<::cpp2::MyEnum>& get_enum_list() const&;
+  const ::std::vector<::cpp2::MyEnum>& get_enum_list() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "enum_list" } */
   [[deprecated("Use `FOO.enum_list().value()` instead of `FOO.get_enum_list()`")]]
@@ -10047,7 +10047,7 @@ class Containers final  {
 
   /** Glean { "field": "struct_set" } */
   [[deprecated("Use `FOO.struct_set().value()` instead of `FOO.get_struct_set()`")]]
-  const ::std::set<::cpp2::MyStruct>& get_struct_set() const&;
+  const ::std::set<::cpp2::MyStruct>& get_struct_set() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "struct_set" } */
   [[deprecated("Use `FOO.struct_set().value()` instead of `FOO.get_struct_set()`")]]
@@ -10063,7 +10063,7 @@ class Containers final  {
 
   /** Glean { "field": "union_set" } */
   [[deprecated("Use `FOO.union_set().value()` instead of `FOO.get_union_set()`")]]
-  const ::std::set<::cpp2::MyUnion>& get_union_set() const&;
+  const ::std::set<::cpp2::MyUnion>& get_union_set() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "union_set" } */
   [[deprecated("Use `FOO.union_set().value()` instead of `FOO.get_union_set()`")]]
@@ -10079,7 +10079,7 @@ class Containers final  {
 
   /** Glean { "field": "enum_set" } */
   [[deprecated("Use `FOO.enum_set().value()` instead of `FOO.get_enum_set()`")]]
-  const ::std::set<::cpp2::MyEnum>& get_enum_set() const&;
+  const ::std::set<::cpp2::MyEnum>& get_enum_set() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "enum_set" } */
   [[deprecated("Use `FOO.enum_set().value()` instead of `FOO.get_enum_set()`")]]
@@ -10095,7 +10095,7 @@ class Containers final  {
 
   /** Glean { "field": "struct_map" } */
   [[deprecated("Use `FOO.struct_map().value()` instead of `FOO.get_struct_map()`")]]
-  const ::std::map<::cpp2::MyStruct, ::std::int64_t>& get_struct_map() const&;
+  const ::std::map<::cpp2::MyStruct, ::std::int64_t>& get_struct_map() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "struct_map" } */
   [[deprecated("Use `FOO.struct_map().value()` instead of `FOO.get_struct_map()`")]]
@@ -10111,7 +10111,7 @@ class Containers final  {
 
   /** Glean { "field": "union_map" } */
   [[deprecated("Use `FOO.union_map().value()` instead of `FOO.get_union_map()`")]]
-  const ::std::map<::cpp2::MyUnion, ::std::int64_t>& get_union_map() const&;
+  const ::std::map<::cpp2::MyUnion, ::std::int64_t>& get_union_map() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "union_map" } */
   [[deprecated("Use `FOO.union_map().value()` instead of `FOO.get_union_map()`")]]
@@ -10127,7 +10127,7 @@ class Containers final  {
 
   /** Glean { "field": "enum_map" } */
   [[deprecated("Use `FOO.enum_map().value()` instead of `FOO.get_enum_map()`")]]
-  const ::std::map<::cpp2::MyEnum, ::std::int64_t>& get_enum_map() const&;
+  const ::std::map<::cpp2::MyEnum, ::std::int64_t>& get_enum_map() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "enum_map" } */
   [[deprecated("Use `FOO.enum_map().value()` instead of `FOO.get_enum_map()`")]]
@@ -10143,7 +10143,7 @@ class Containers final  {
 
   /** Glean { "field": "struct_map_2" } */
   [[deprecated("Use `FOO.struct_map_2().value()` instead of `FOO.get_struct_map_2()`")]]
-  const ::std::map<::std::int32_t, ::cpp2::MyStruct>& get_struct_map_2() const&;
+  const ::std::map<::std::int32_t, ::cpp2::MyStruct>& get_struct_map_2() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "struct_map_2" } */
   [[deprecated("Use `FOO.struct_map_2().value()` instead of `FOO.get_struct_map_2()`")]]
@@ -10159,7 +10159,7 @@ class Containers final  {
 
   /** Glean { "field": "union_map_2" } */
   [[deprecated("Use `FOO.union_map_2().value()` instead of `FOO.get_union_map_2()`")]]
-  const ::std::map<::std::int32_t, ::cpp2::MyUnion>& get_union_map_2() const&;
+  const ::std::map<::std::int32_t, ::cpp2::MyUnion>& get_union_map_2() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "union_map_2" } */
   [[deprecated("Use `FOO.union_map_2().value()` instead of `FOO.get_union_map_2()`")]]
@@ -10175,7 +10175,7 @@ class Containers final  {
 
   /** Glean { "field": "enum_map_2" } */
   [[deprecated("Use `FOO.enum_map_2().value()` instead of `FOO.get_enum_map_2()`")]]
-  const ::std::map<::std::int32_t, ::cpp2::MyEnum>& get_enum_map_2() const&;
+  const ::std::map<::std::int32_t, ::cpp2::MyEnum>& get_enum_map_2() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "enum_map_2" } */
   [[deprecated("Use `FOO.enum_map_2().value()` instead of `FOO.get_enum_map_2()`")]]
@@ -10191,7 +10191,7 @@ class Containers final  {
 
   /** Glean { "field": "list_map" } */
   [[deprecated("Use `FOO.list_map().value()` instead of `FOO.get_list_map()`")]]
-  const ::std::map<::std::vector<::std::int32_t>, ::std::int32_t>& get_list_map() const&;
+  const ::std::map<::std::vector<::std::int32_t>, ::std::int32_t>& get_list_map() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "list_map" } */
   [[deprecated("Use `FOO.list_map().value()` instead of `FOO.get_list_map()`")]]
@@ -10207,7 +10207,7 @@ class Containers final  {
 
   /** Glean { "field": "list_map_2" } */
   [[deprecated("Use `FOO.list_map_2().value()` instead of `FOO.get_list_map_2()`")]]
-  const ::std::map<::std::int32_t, ::std::vector<::std::int32_t>>& get_list_map_2() const&;
+  const ::std::map<::std::int32_t, ::std::vector<::std::int32_t>>& get_list_map_2() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "list_map_2" } */
   [[deprecated("Use `FOO.list_map_2().value()` instead of `FOO.get_list_map_2()`")]]
@@ -10223,7 +10223,7 @@ class Containers final  {
 
   /** Glean { "field": "set_map" } */
   [[deprecated("Use `FOO.set_map().value()` instead of `FOO.get_set_map()`")]]
-  const ::std::map<::std::set<::std::int32_t>, ::std::int32_t>& get_set_map() const&;
+  const ::std::map<::std::set<::std::int32_t>, ::std::int32_t>& get_set_map() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "set_map" } */
   [[deprecated("Use `FOO.set_map().value()` instead of `FOO.get_set_map()`")]]
@@ -10239,7 +10239,7 @@ class Containers final  {
 
   /** Glean { "field": "set_map_2" } */
   [[deprecated("Use `FOO.set_map_2().value()` instead of `FOO.get_set_map_2()`")]]
-  const ::std::map<::std::int32_t, ::std::set<::std::int32_t>>& get_set_map_2() const&;
+  const ::std::map<::std::int32_t, ::std::set<::std::int32_t>>& get_set_map_2() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "set_map_2" } */
   [[deprecated("Use `FOO.set_map_2().value()` instead of `FOO.get_set_map_2()`")]]
@@ -10255,7 +10255,7 @@ class Containers final  {
 
   /** Glean { "field": "map_map" } */
   [[deprecated("Use `FOO.map_map().value()` instead of `FOO.get_map_map()`")]]
-  const ::std::map<::std::map<::std::int32_t, ::std::int32_t>, ::std::int32_t>& get_map_map() const&;
+  const ::std::map<::std::map<::std::int32_t, ::std::int32_t>, ::std::int32_t>& get_map_map() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "map_map" } */
   [[deprecated("Use `FOO.map_map().value()` instead of `FOO.get_map_map()`")]]
@@ -10271,7 +10271,7 @@ class Containers final  {
 
   /** Glean { "field": "map_map_2" } */
   [[deprecated("Use `FOO.map_map_2().value()` instead of `FOO.get_map_map_2()`")]]
-  const ::std::map<::std::int32_t, ::std::map<::std::int32_t, ::std::int32_t>>& get_map_map_2() const&;
+  const ::std::map<::std::int32_t, ::std::map<::std::int32_t, ::std::int32_t>>& get_map_map_2() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "map_map_2" } */
   [[deprecated("Use `FOO.map_map_2().value()` instead of `FOO.get_map_map_2()`")]]
@@ -10287,7 +10287,7 @@ class Containers final  {
 
   /** Glean { "field": "list_list_i32" } */
   [[deprecated("Use `FOO.list_list_i32().value()` instead of `FOO.get_list_list_i32()`")]]
-  const ::std::vector<::std::vector<::std::int32_t>>& get_list_list_i32() const&;
+  const ::std::vector<::std::vector<::std::int32_t>>& get_list_list_i32() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "list_list_i32" } */
   [[deprecated("Use `FOO.list_list_i32().value()` instead of `FOO.get_list_list_i32()`")]]
@@ -10303,7 +10303,7 @@ class Containers final  {
 
   /** Glean { "field": "list_list_struct" } */
   [[deprecated("Use `FOO.list_list_struct().value()` instead of `FOO.get_list_list_struct()`")]]
-  const ::std::vector<::std::vector<::cpp2::MyStruct>>& get_list_list_struct() const&;
+  const ::std::vector<::std::vector<::cpp2::MyStruct>>& get_list_list_struct() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "list_list_struct" } */
   [[deprecated("Use `FOO.list_list_struct().value()` instead of `FOO.get_list_list_struct()`")]]
@@ -10319,7 +10319,7 @@ class Containers final  {
 
   /** Glean { "field": "list_set_i32" } */
   [[deprecated("Use `FOO.list_set_i32().value()` instead of `FOO.get_list_set_i32()`")]]
-  const ::std::vector<::std::set<::std::int32_t>>& get_list_set_i32() const&;
+  const ::std::vector<::std::set<::std::int32_t>>& get_list_set_i32() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "list_set_i32" } */
   [[deprecated("Use `FOO.list_set_i32().value()` instead of `FOO.get_list_set_i32()`")]]
@@ -10335,7 +10335,7 @@ class Containers final  {
 
   /** Glean { "field": "list_set_struct" } */
   [[deprecated("Use `FOO.list_set_struct().value()` instead of `FOO.get_list_set_struct()`")]]
-  const ::std::vector<::std::set<::cpp2::MyStruct>>& get_list_set_struct() const&;
+  const ::std::vector<::std::set<::cpp2::MyStruct>>& get_list_set_struct() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "list_set_struct" } */
   [[deprecated("Use `FOO.list_set_struct().value()` instead of `FOO.get_list_set_struct()`")]]
@@ -10351,7 +10351,7 @@ class Containers final  {
 
   /** Glean { "field": "list_map_i32_i32" } */
   [[deprecated("Use `FOO.list_map_i32_i32().value()` instead of `FOO.get_list_map_i32_i32()`")]]
-  const ::std::vector<::std::map<::std::int32_t, ::std::int32_t>>& get_list_map_i32_i32() const&;
+  const ::std::vector<::std::map<::std::int32_t, ::std::int32_t>>& get_list_map_i32_i32() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "list_map_i32_i32" } */
   [[deprecated("Use `FOO.list_map_i32_i32().value()` instead of `FOO.get_list_map_i32_i32()`")]]
@@ -10367,7 +10367,7 @@ class Containers final  {
 
   /** Glean { "field": "list_map_i32_struct" } */
   [[deprecated("Use `FOO.list_map_i32_struct().value()` instead of `FOO.get_list_map_i32_struct()`")]]
-  const ::std::vector<::std::map<::std::int32_t, ::cpp2::MyStruct>>& get_list_map_i32_struct() const&;
+  const ::std::vector<::std::map<::std::int32_t, ::cpp2::MyStruct>>& get_list_map_i32_struct() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "list_map_i32_struct" } */
   [[deprecated("Use `FOO.list_map_i32_struct().value()` instead of `FOO.get_list_map_i32_struct()`")]]
@@ -10383,7 +10383,7 @@ class Containers final  {
 
   /** Glean { "field": "list_map_struct_i32" } */
   [[deprecated("Use `FOO.list_map_struct_i32().value()` instead of `FOO.get_list_map_struct_i32()`")]]
-  const ::std::vector<::std::map<::cpp2::MyStruct, ::std::int32_t>>& get_list_map_struct_i32() const&;
+  const ::std::vector<::std::map<::cpp2::MyStruct, ::std::int32_t>>& get_list_map_struct_i32() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "list_map_struct_i32" } */
   [[deprecated("Use `FOO.list_map_struct_i32().value()` instead of `FOO.get_list_map_struct_i32()`")]]
@@ -10399,7 +10399,7 @@ class Containers final  {
 
   /** Glean { "field": "set_list_i32" } */
   [[deprecated("Use `FOO.set_list_i32().value()` instead of `FOO.get_set_list_i32()`")]]
-  const ::std::set<::std::vector<::std::int32_t>>& get_set_list_i32() const&;
+  const ::std::set<::std::vector<::std::int32_t>>& get_set_list_i32() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "set_list_i32" } */
   [[deprecated("Use `FOO.set_list_i32().value()` instead of `FOO.get_set_list_i32()`")]]
@@ -10415,7 +10415,7 @@ class Containers final  {
 
   /** Glean { "field": "set_list_struct" } */
   [[deprecated("Use `FOO.set_list_struct().value()` instead of `FOO.get_set_list_struct()`")]]
-  const ::std::set<::std::vector<::cpp2::MyStruct>>& get_set_list_struct() const&;
+  const ::std::set<::std::vector<::cpp2::MyStruct>>& get_set_list_struct() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "set_list_struct" } */
   [[deprecated("Use `FOO.set_list_struct().value()` instead of `FOO.get_set_list_struct()`")]]
@@ -10431,7 +10431,7 @@ class Containers final  {
 
   /** Glean { "field": "set_set_i32" } */
   [[deprecated("Use `FOO.set_set_i32().value()` instead of `FOO.get_set_set_i32()`")]]
-  const ::std::set<::std::set<::std::int32_t>>& get_set_set_i32() const&;
+  const ::std::set<::std::set<::std::int32_t>>& get_set_set_i32() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "set_set_i32" } */
   [[deprecated("Use `FOO.set_set_i32().value()` instead of `FOO.get_set_set_i32()`")]]
@@ -10447,7 +10447,7 @@ class Containers final  {
 
   /** Glean { "field": "set_set_struct" } */
   [[deprecated("Use `FOO.set_set_struct().value()` instead of `FOO.get_set_set_struct()`")]]
-  const ::std::set<::std::set<::cpp2::MyStruct>>& get_set_set_struct() const&;
+  const ::std::set<::std::set<::cpp2::MyStruct>>& get_set_set_struct() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "set_set_struct" } */
   [[deprecated("Use `FOO.set_set_struct().value()` instead of `FOO.get_set_set_struct()`")]]
@@ -10463,7 +10463,7 @@ class Containers final  {
 
   /** Glean { "field": "set_map_i32_i32" } */
   [[deprecated("Use `FOO.set_map_i32_i32().value()` instead of `FOO.get_set_map_i32_i32()`")]]
-  const ::std::set<::std::map<::std::int32_t, ::std::int32_t>>& get_set_map_i32_i32() const&;
+  const ::std::set<::std::map<::std::int32_t, ::std::int32_t>>& get_set_map_i32_i32() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "set_map_i32_i32" } */
   [[deprecated("Use `FOO.set_map_i32_i32().value()` instead of `FOO.get_set_map_i32_i32()`")]]
@@ -10479,7 +10479,7 @@ class Containers final  {
 
   /** Glean { "field": "set_map_i32_struct" } */
   [[deprecated("Use `FOO.set_map_i32_struct().value()` instead of `FOO.get_set_map_i32_struct()`")]]
-  const ::std::set<::std::map<::std::int32_t, ::cpp2::MyStruct>>& get_set_map_i32_struct() const&;
+  const ::std::set<::std::map<::std::int32_t, ::cpp2::MyStruct>>& get_set_map_i32_struct() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "set_map_i32_struct" } */
   [[deprecated("Use `FOO.set_map_i32_struct().value()` instead of `FOO.get_set_map_i32_struct()`")]]
@@ -10495,7 +10495,7 @@ class Containers final  {
 
   /** Glean { "field": "set_map_struct_i32" } */
   [[deprecated("Use `FOO.set_map_struct_i32().value()` instead of `FOO.get_set_map_struct_i32()`")]]
-  const ::std::set<::std::map<::cpp2::MyStruct, ::std::int32_t>>& get_set_map_struct_i32() const&;
+  const ::std::set<::std::map<::cpp2::MyStruct, ::std::int32_t>>& get_set_map_struct_i32() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "set_map_struct_i32" } */
   [[deprecated("Use `FOO.set_map_struct_i32().value()` instead of `FOO.get_set_map_struct_i32()`")]]
@@ -10511,7 +10511,7 @@ class Containers final  {
 
   /** Glean { "field": "map_i32_map_i32_i32" } */
   [[deprecated("Use `FOO.map_i32_map_i32_i32().value()` instead of `FOO.get_map_i32_map_i32_i32()`")]]
-  const ::std::map<::std::int32_t, ::std::map<::std::int32_t, ::std::int32_t>>& get_map_i32_map_i32_i32() const&;
+  const ::std::map<::std::int32_t, ::std::map<::std::int32_t, ::std::int32_t>>& get_map_i32_map_i32_i32() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "map_i32_map_i32_i32" } */
   [[deprecated("Use `FOO.map_i32_map_i32_i32().value()` instead of `FOO.get_map_i32_map_i32_i32()`")]]
@@ -10527,7 +10527,7 @@ class Containers final  {
 
   /** Glean { "field": "map_i32_map_struct_i32" } */
   [[deprecated("Use `FOO.map_i32_map_struct_i32().value()` instead of `FOO.get_map_i32_map_struct_i32()`")]]
-  const ::std::map<::std::int32_t, ::std::map<::cpp2::MyStruct, ::std::int32_t>>& get_map_i32_map_struct_i32() const&;
+  const ::std::map<::std::int32_t, ::std::map<::cpp2::MyStruct, ::std::int32_t>>& get_map_i32_map_struct_i32() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "map_i32_map_struct_i32" } */
   [[deprecated("Use `FOO.map_i32_map_struct_i32().value()` instead of `FOO.get_map_i32_map_struct_i32()`")]]
@@ -10543,7 +10543,7 @@ class Containers final  {
 
   /** Glean { "field": "map_i32_map_i32_struct" } */
   [[deprecated("Use `FOO.map_i32_map_i32_struct().value()` instead of `FOO.get_map_i32_map_i32_struct()`")]]
-  const ::std::map<::std::int32_t, ::std::map<::std::int32_t, ::cpp2::MyStruct>>& get_map_i32_map_i32_struct() const&;
+  const ::std::map<::std::int32_t, ::std::map<::std::int32_t, ::cpp2::MyStruct>>& get_map_i32_map_i32_struct() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "map_i32_map_i32_struct" } */
   [[deprecated("Use `FOO.map_i32_map_i32_struct().value()` instead of `FOO.get_map_i32_map_i32_struct()`")]]
@@ -10559,7 +10559,7 @@ class Containers final  {
 
   /** Glean { "field": "map_i32_map_list_i32_i32" } */
   [[deprecated("Use `FOO.map_i32_map_list_i32_i32().value()` instead of `FOO.get_map_i32_map_list_i32_i32()`")]]
-  const ::std::map<::std::int32_t, ::std::vector<::std::map<::std::int32_t, ::std::int32_t>>>& get_map_i32_map_list_i32_i32() const&;
+  const ::std::map<::std::int32_t, ::std::vector<::std::map<::std::int32_t, ::std::int32_t>>>& get_map_i32_map_list_i32_i32() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "map_i32_map_list_i32_i32" } */
   [[deprecated("Use `FOO.map_i32_map_list_i32_i32().value()` instead of `FOO.get_map_i32_map_list_i32_i32()`")]]
@@ -10575,7 +10575,7 @@ class Containers final  {
 
   /** Glean { "field": "map_i32_map_list_struct_i32" } */
   [[deprecated("Use `FOO.map_i32_map_list_struct_i32().value()` instead of `FOO.get_map_i32_map_list_struct_i32()`")]]
-  const ::std::map<::std::int32_t, ::std::vector<::std::map<::cpp2::MyStruct, ::std::int32_t>>>& get_map_i32_map_list_struct_i32() const&;
+  const ::std::map<::std::int32_t, ::std::vector<::std::map<::cpp2::MyStruct, ::std::int32_t>>>& get_map_i32_map_list_struct_i32() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "map_i32_map_list_struct_i32" } */
   [[deprecated("Use `FOO.map_i32_map_list_struct_i32().value()` instead of `FOO.get_map_i32_map_list_struct_i32()`")]]

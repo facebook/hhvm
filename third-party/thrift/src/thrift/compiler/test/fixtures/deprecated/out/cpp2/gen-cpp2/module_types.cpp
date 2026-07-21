@@ -106,19 +106,19 @@ std::partial_ordering User::operator<=>([[maybe_unused]] const User& rhs) const 
   return __fbthrift_field_id;
 }
 
-const ::std::string* User::get_email() const& {
+const ::std::string* User::get_email() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return email_ref().has_value() ? std::addressof(__fbthrift_field_email) : nullptr;
 }
 
-::std::string* User::get_email() & {
+::std::string* User::get_email() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return email_ref().has_value() ? std::addressof(__fbthrift_field_email) : nullptr;
 }
 
-const ::std::string* User::get_email_address() const& {
+const ::std::string* User::get_email_address() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return email_address_ref().has_value() ? std::addressof(__fbthrift_field_email_address) : nullptr;
 }
 
-::std::string* User::get_email_address() & {
+::std::string* User::get_email_address() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return email_address_ref().has_value() ? std::addressof(__fbthrift_field_email_address) : nullptr;
 }
 

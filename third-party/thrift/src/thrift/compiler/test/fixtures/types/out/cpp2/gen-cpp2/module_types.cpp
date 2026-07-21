@@ -366,7 +366,7 @@ std::partial_ordering ContainerStruct::operator<=>([[maybe_unused]] const Contai
 }
 
 
-const ::std::vector<::std::int32_t>& ContainerStruct::get_fieldA() const& {
+const ::std::vector<::std::int32_t>& ContainerStruct::get_fieldA() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_fieldA;
 }
 
@@ -374,7 +374,7 @@ const ::std::vector<::std::int32_t>& ContainerStruct::get_fieldA() const& {
   return static_cast<::std::vector<::std::int32_t>&&>(__fbthrift_field_fieldA);
 }
 
-const std::list<::std::int32_t>& ContainerStruct::get_fieldB() const& {
+const std::list<::std::int32_t>& ContainerStruct::get_fieldB() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_fieldB;
 }
 
@@ -382,7 +382,7 @@ std::list<::std::int32_t> ContainerStruct::get_fieldB() && {
   return static_cast<std::list<::std::int32_t>&&>(__fbthrift_field_fieldB);
 }
 
-const std::deque<::std::int32_t>& ContainerStruct::get_fieldC() const& {
+const std::deque<::std::int32_t>& ContainerStruct::get_fieldC() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_fieldC;
 }
 
@@ -390,7 +390,7 @@ std::deque<::std::int32_t> ContainerStruct::get_fieldC() && {
   return static_cast<std::deque<::std::int32_t>&&>(__fbthrift_field_fieldC);
 }
 
-const folly::fbvector<::std::int32_t>& ContainerStruct::get_fieldD() const& {
+const folly::fbvector<::std::int32_t>& ContainerStruct::get_fieldD() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_fieldD;
 }
 
@@ -398,7 +398,7 @@ folly::fbvector<::std::int32_t> ContainerStruct::get_fieldD() && {
   return static_cast<folly::fbvector<::std::int32_t>&&>(__fbthrift_field_fieldD);
 }
 
-const folly::small_vector<::std::int32_t>& ContainerStruct::get_fieldE() const& {
+const folly::small_vector<::std::int32_t>& ContainerStruct::get_fieldE() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_fieldE;
 }
 
@@ -406,7 +406,7 @@ folly::small_vector<::std::int32_t> ContainerStruct::get_fieldE() && {
   return static_cast<folly::small_vector<::std::int32_t>&&>(__fbthrift_field_fieldE);
 }
 
-const ::apache::thrift::fixtures::types::set_i32_7194& ContainerStruct::get_fieldF() const& {
+const ::apache::thrift::fixtures::types::set_i32_7194& ContainerStruct::get_fieldF() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_fieldF;
 }
 
@@ -414,7 +414,7 @@ const ::apache::thrift::fixtures::types::set_i32_7194& ContainerStruct::get_fiel
   return static_cast<::apache::thrift::fixtures::types::set_i32_7194&&>(__fbthrift_field_fieldF);
 }
 
-const folly::sorted_vector_map<::std::int32_t, ::std::string>& ContainerStruct::get_fieldG() const& {
+const folly::sorted_vector_map<::std::int32_t, ::std::string>& ContainerStruct::get_fieldG() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_fieldG;
 }
 
@@ -422,7 +422,7 @@ folly::sorted_vector_map<::std::int32_t, ::std::string> ContainerStruct::get_fie
   return static_cast<folly::sorted_vector_map<::std::int32_t, ::std::string>&&>(__fbthrift_field_fieldG);
 }
 
-const ::apache::thrift::fixtures::types::SomeMap& ContainerStruct::get_fieldH() const& {
+const ::apache::thrift::fixtures::types::SomeMap& ContainerStruct::get_fieldH() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_fieldH;
 }
 
@@ -501,7 +501,7 @@ std::partial_ordering CppTypeStruct::operator<=>([[maybe_unused]] const CppTypeS
 }
 
 
-const std::list<int32_t>& CppTypeStruct::get_fieldA() const& {
+const std::list<int32_t>& CppTypeStruct::get_fieldA() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_fieldA;
 }
 
@@ -767,7 +767,7 @@ std::partial_ordering TrivialNestedWithDefault::operator<=>([[maybe_unused]] con
   return __fbthrift_field_z;
 }
 
-const ::apache::thrift::fixtures::types::TrivialNumeric& TrivialNestedWithDefault::get_n() const& {
+const ::apache::thrift::fixtures::types::TrivialNumeric& TrivialNestedWithDefault::get_n() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_n;
 }
 
@@ -851,7 +851,7 @@ std::partial_ordering ComplexString::operator<=>([[maybe_unused]] const ComplexS
 }
 
 
-const ::std::map<::std::string, ::std::int32_t>& ComplexString::get_b() const& {
+const ::std::map<::std::string, ::std::int32_t>& ComplexString::get_b() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_b;
 }
 
@@ -931,7 +931,7 @@ std::partial_ordering ComplexNestedWithDefault::operator<=>([[maybe_unused]] con
 }
 
 
-const ::apache::thrift::fixtures::types::ComplexString& ComplexNestedWithDefault::get_n() const& {
+const ::apache::thrift::fixtures::types::ComplexString& ComplexNestedWithDefault::get_n() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_n;
 }
 
@@ -1260,7 +1260,7 @@ bool MyStruct::__fbthrift_is_empty() const {
   return __fbthrift_field_majorVer;
 }
 
-const ::apache::thrift::fixtures::types::MyDataItem& MyStruct::get_data() const& {
+const ::apache::thrift::fixtures::types::MyDataItem& MyStruct::get_data() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_data;
 }
 
@@ -1432,7 +1432,7 @@ std::partial_ordering AnnotatedTypes::operator<=>([[maybe_unused]] const Annotat
 }
 
 
-const ::apache::thrift::fixtures::types::SomeListOfTypeMap_2468& AnnotatedTypes::get_list_field() const& {
+const ::apache::thrift::fixtures::types::SomeListOfTypeMap_2468& AnnotatedTypes::get_list_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_list_field;
 }
 
@@ -1527,11 +1527,11 @@ std::partial_ordering ForwardUsageRoot::operator<=>([[maybe_unused]] const Forwa
 }
 
 
-const ::apache::thrift::fixtures::types::ForwardUsageStruct* ForwardUsageRoot::get_ForwardUsageStruct() const& {
+const ::apache::thrift::fixtures::types::ForwardUsageStruct* ForwardUsageRoot::get_ForwardUsageStruct() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return ForwardUsageStruct_ref().has_value() ? std::addressof(__fbthrift_field_ForwardUsageStruct) : nullptr;
 }
 
-::apache::thrift::fixtures::types::ForwardUsageStruct* ForwardUsageRoot::get_ForwardUsageStruct() & {
+::apache::thrift::fixtures::types::ForwardUsageStruct* ForwardUsageRoot::get_ForwardUsageStruct() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return ForwardUsageStruct_ref().has_value() ? std::addressof(__fbthrift_field_ForwardUsageStruct) : nullptr;
 }
 
@@ -1773,11 +1773,11 @@ std::partial_ordering IncompleteMap::operator<=>([[maybe_unused]] const Incomple
 }
 
 
-const ::std::map<::std::int32_t, ::apache::thrift::fixtures::types::IncompleteMapDep>* IncompleteMap::get_field() const& {
+const ::std::map<::std::int32_t, ::apache::thrift::fixtures::types::IncompleteMapDep>* IncompleteMap::get_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return field_ref().has_value() ? std::addressof(__fbthrift_field_field) : nullptr;
 }
 
-::std::map<::std::int32_t, ::apache::thrift::fixtures::types::IncompleteMapDep>* IncompleteMap::get_field() & {
+::std::map<::std::int32_t, ::apache::thrift::fixtures::types::IncompleteMapDep>* IncompleteMap::get_field() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return field_ref().has_value() ? std::addressof(__fbthrift_field_field) : nullptr;
 }
 
@@ -1894,11 +1894,11 @@ std::partial_ordering CompleteMap::operator<=>([[maybe_unused]] const CompleteMa
 }
 
 
-const std::unordered_map<::std::int32_t, ::apache::thrift::fixtures::types::CompleteMapDep>* CompleteMap::get_field() const& {
+const std::unordered_map<::std::int32_t, ::apache::thrift::fixtures::types::CompleteMapDep>* CompleteMap::get_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return field_ref().has_value() ? std::addressof(__fbthrift_field_field) : nullptr;
 }
 
-std::unordered_map<::std::int32_t, ::apache::thrift::fixtures::types::CompleteMapDep>* CompleteMap::get_field() & {
+std::unordered_map<::std::int32_t, ::apache::thrift::fixtures::types::CompleteMapDep>* CompleteMap::get_field() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return field_ref().has_value() ? std::addressof(__fbthrift_field_field) : nullptr;
 }
 
@@ -2015,11 +2015,11 @@ std::partial_ordering IncompleteList::operator<=>([[maybe_unused]] const Incompl
 }
 
 
-const ::std::list<::apache::thrift::fixtures::types::IncompleteListDep>* IncompleteList::get_field() const& {
+const ::std::list<::apache::thrift::fixtures::types::IncompleteListDep>* IncompleteList::get_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return field_ref().has_value() ? std::addressof(__fbthrift_field_field) : nullptr;
 }
 
-::std::list<::apache::thrift::fixtures::types::IncompleteListDep>* IncompleteList::get_field() & {
+::std::list<::apache::thrift::fixtures::types::IncompleteListDep>* IncompleteList::get_field() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return field_ref().has_value() ? std::addressof(__fbthrift_field_field) : nullptr;
 }
 
@@ -2136,11 +2136,11 @@ std::partial_ordering CompleteList::operator<=>([[maybe_unused]] const CompleteL
 }
 
 
-const folly::small_vector<::apache::thrift::fixtures::types::CompleteListDep>* CompleteList::get_field() const& {
+const folly::small_vector<::apache::thrift::fixtures::types::CompleteListDep>* CompleteList::get_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return field_ref().has_value() ? std::addressof(__fbthrift_field_field) : nullptr;
 }
 
-folly::small_vector<::apache::thrift::fixtures::types::CompleteListDep>* CompleteList::get_field() & {
+folly::small_vector<::apache::thrift::fixtures::types::CompleteListDep>* CompleteList::get_field() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return field_ref().has_value() ? std::addressof(__fbthrift_field_field) : nullptr;
 }
 
@@ -2257,11 +2257,11 @@ std::partial_ordering AdaptedList::operator<=>([[maybe_unused]] const AdaptedLis
 }
 
 
-const ::std::vector<::apache::thrift::fixtures::types::AdaptedListDep>* AdaptedList::get_field() const& {
+const ::std::vector<::apache::thrift::fixtures::types::AdaptedListDep>* AdaptedList::get_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return field_ref().has_value() ? std::addressof(__fbthrift_field_field) : nullptr;
 }
 
-::std::vector<::apache::thrift::fixtures::types::AdaptedListDep>* AdaptedList::get_field() & {
+::std::vector<::apache::thrift::fixtures::types::AdaptedListDep>* AdaptedList::get_field() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return field_ref().has_value() ? std::addressof(__fbthrift_field_field) : nullptr;
 }
 
@@ -2330,7 +2330,7 @@ std::partial_ordering AdaptedListDep::operator<=>([[maybe_unused]] const Adapted
 }
 
 
-const ::apache::thrift::fixtures::types::AdaptedList& AdaptedListDep::get_field() const& {
+const ::apache::thrift::fixtures::types::AdaptedList& AdaptedListDep::get_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_field;
 }
 
@@ -2414,11 +2414,11 @@ std::partial_ordering DependentAdaptedList::operator<=>([[maybe_unused]] const D
 }
 
 
-const ::std::vector<::apache::thrift::fixtures::types::DependentAdaptedListDep>* DependentAdaptedList::get_field() const& {
+const ::std::vector<::apache::thrift::fixtures::types::DependentAdaptedListDep>* DependentAdaptedList::get_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return field_ref().has_value() ? std::addressof(__fbthrift_field_field) : nullptr;
 }
 
-::std::vector<::apache::thrift::fixtures::types::DependentAdaptedListDep>* DependentAdaptedList::get_field() & {
+::std::vector<::apache::thrift::fixtures::types::DependentAdaptedListDep>* DependentAdaptedList::get_field() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return field_ref().has_value() ? std::addressof(__fbthrift_field_field) : nullptr;
 }
 
@@ -2644,7 +2644,7 @@ std::partial_ordering AllocatorAware::operator<=>([[maybe_unused]] const Allocat
 }
 
 
-const ::apache::thrift::fixtures::types::list_i32_9187& AllocatorAware::get_aa_list() const& {
+const ::apache::thrift::fixtures::types::list_i32_9187& AllocatorAware::get_aa_list() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_aa_list;
 }
 
@@ -2652,7 +2652,7 @@ const ::apache::thrift::fixtures::types::list_i32_9187& AllocatorAware::get_aa_l
   return static_cast<::apache::thrift::fixtures::types::list_i32_9187&&>(__fbthrift_field_aa_list);
 }
 
-const ::apache::thrift::fixtures::types::set_i32_7070& AllocatorAware::get_aa_set() const& {
+const ::apache::thrift::fixtures::types::set_i32_7070& AllocatorAware::get_aa_set() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_aa_set;
 }
 
@@ -2660,7 +2660,7 @@ const ::apache::thrift::fixtures::types::set_i32_7070& AllocatorAware::get_aa_se
   return static_cast<::apache::thrift::fixtures::types::set_i32_7070&&>(__fbthrift_field_aa_set);
 }
 
-const ::apache::thrift::fixtures::types::map_i32_i32_9565& AllocatorAware::get_aa_map() const& {
+const ::apache::thrift::fixtures::types::map_i32_i32_9565& AllocatorAware::get_aa_map() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_aa_map;
 }
 

@@ -260,7 +260,7 @@ class DataItem final  {
 
   /** Glean { "field": "name" } */
   [[deprecated("Use `FOO.name().value()` instead of `FOO.get_name()`")]]
-  const ::std::string& get_name() const& {
+  const ::std::string& get_name() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_name;
   }
 
@@ -466,7 +466,7 @@ class FOLLY_EXPORT NotFoundException : public virtual apache::thrift::TException
 
   /** Glean { "field": "message" } */
   [[deprecated("Use `FOO.message().value()` instead of `FOO.get_message()`")]]
-  const ::std::string& get_message() const& {
+  const ::std::string& get_message() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_message;
   }
 
@@ -660,7 +660,7 @@ class FOLLY_EXPORT PermissionDeniedException : public virtual apache::thrift::TE
 
   /** Glean { "field": "user" } */
   [[deprecated("Use `FOO.user().value()` instead of `FOO.get_user()`")]]
-  const ::std::string& get_user() const& {
+  const ::std::string& get_user() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_user;
   }
 
@@ -680,7 +680,7 @@ class FOLLY_EXPORT PermissionDeniedException : public virtual apache::thrift::TE
 
   /** Glean { "field": "reason" } */
   [[deprecated("Use `FOO.reason().value()` instead of `FOO.get_reason()`")]]
-  const ::std::string& get_reason() const& {
+  const ::std::string& get_reason() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_reason;
   }
 

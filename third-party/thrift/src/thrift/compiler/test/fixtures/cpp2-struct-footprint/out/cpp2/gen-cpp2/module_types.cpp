@@ -125,7 +125,7 @@ std::partial_ordering ComplexStruct::operator<=>([[maybe_unused]] const ComplexS
 }
 
 
-const ::cpp2_struct_footprint::SimpleStruct& ComplexStruct::get_nested() const& {
+const ::cpp2_struct_footprint::SimpleStruct& ComplexStruct::get_nested() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_nested;
 }
 

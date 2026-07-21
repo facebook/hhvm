@@ -221,7 +221,7 @@ std::partial_ordering Vehicle::operator<=>([[maybe_unused]] const Vehicle& rhs) 
 }
 
 
-const ::cpp2::Color& Vehicle::get_color() const& {
+const ::cpp2::Color& Vehicle::get_color() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_color;
 }
 
@@ -229,35 +229,35 @@ const ::cpp2::Color& Vehicle::get_color() const& {
   return static_cast<::cpp2::Color&&>(__fbthrift_field_color);
 }
 
-const ::std::string* Vehicle::get_licensePlate() const& {
+const ::std::string* Vehicle::get_licensePlate() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return licensePlate_ref().has_value() ? std::addressof(__fbthrift_field_licensePlate) : nullptr;
 }
 
-::std::string* Vehicle::get_licensePlate() & {
+::std::string* Vehicle::get_licensePlate() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return licensePlate_ref().has_value() ? std::addressof(__fbthrift_field_licensePlate) : nullptr;
 }
 
-const ::std::string* Vehicle::get_description() const& {
+const ::std::string* Vehicle::get_description() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return description_ref().has_value() ? std::addressof(__fbthrift_field_description) : nullptr;
 }
 
-::std::string* Vehicle::get_description() & {
+::std::string* Vehicle::get_description() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return description_ref().has_value() ? std::addressof(__fbthrift_field_description) : nullptr;
 }
 
-const ::std::string* Vehicle::get_name() const& {
+const ::std::string* Vehicle::get_name() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return name_ref().has_value() ? std::addressof(__fbthrift_field_name) : nullptr;
 }
 
-::std::string* Vehicle::get_name() & {
+::std::string* Vehicle::get_name() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return name_ref().has_value() ? std::addressof(__fbthrift_field_name) : nullptr;
 }
 
-const bool* Vehicle::get_hasAC() const& {
+const bool* Vehicle::get_hasAC() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return hasAC_ref().has_value() ? std::addressof(__fbthrift_field_hasAC) : nullptr;
 }
 
-bool* Vehicle::get_hasAC() & {
+bool* Vehicle::get_hasAC() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return hasAC_ref().has_value() ? std::addressof(__fbthrift_field_hasAC) : nullptr;
 }
 
@@ -398,11 +398,11 @@ std::partial_ordering Person::operator<=>([[maybe_unused]] const Person& rhs) co
   return __fbthrift_field_id;
 }
 
-const ::std::int16_t* Person::get_age() const& {
+const ::std::int16_t* Person::get_age() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return age_ref().has_value() ? std::addressof(__fbthrift_field_age) : nullptr;
 }
 
-::std::int16_t* Person::get_age() & {
+::std::int16_t* Person::get_age() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return age_ref().has_value() ? std::addressof(__fbthrift_field_age) : nullptr;
 }
 
@@ -411,35 +411,35 @@ const ::std::int16_t* Person::get_age() const& {
   return __fbthrift_field_age;
 }
 
-const ::std::string* Person::get_address() const& {
+const ::std::string* Person::get_address() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return address_ref().has_value() ? std::addressof(__fbthrift_field_address) : nullptr;
 }
 
-::std::string* Person::get_address() & {
+::std::string* Person::get_address() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return address_ref().has_value() ? std::addressof(__fbthrift_field_address) : nullptr;
 }
 
-const ::cpp2::Color* Person::get_favoriteColor() const& {
+const ::cpp2::Color* Person::get_favoriteColor() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return favoriteColor_ref().has_value() ? std::addressof(__fbthrift_field_favoriteColor) : nullptr;
 }
 
-::cpp2::Color* Person::get_favoriteColor() & {
+::cpp2::Color* Person::get_favoriteColor() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return favoriteColor_ref().has_value() ? std::addressof(__fbthrift_field_favoriteColor) : nullptr;
 }
 
-const ::std::set<::cpp2::PersonID>* Person::get_friends() const& {
+const ::std::set<::cpp2::PersonID>* Person::get_friends() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return friends_ref().has_value() ? std::addressof(__fbthrift_field_friends) : nullptr;
 }
 
-::std::set<::cpp2::PersonID>* Person::get_friends() & {
+::std::set<::cpp2::PersonID>* Person::get_friends() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return friends_ref().has_value() ? std::addressof(__fbthrift_field_friends) : nullptr;
 }
 
-const ::cpp2::PersonID* Person::get_bestFriend() const& {
+const ::cpp2::PersonID* Person::get_bestFriend() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return bestFriend_ref().has_value() ? std::addressof(__fbthrift_field_bestFriend) : nullptr;
 }
 
-::cpp2::PersonID* Person::get_bestFriend() & {
+::cpp2::PersonID* Person::get_bestFriend() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return bestFriend_ref().has_value() ? std::addressof(__fbthrift_field_bestFriend) : nullptr;
 }
 
@@ -448,19 +448,19 @@ const ::cpp2::PersonID* Person::get_bestFriend() const& {
   return __fbthrift_field_bestFriend;
 }
 
-const ::std::map<::cpp2::Animal, ::std::string>* Person::get_petNames() const& {
+const ::std::map<::cpp2::Animal, ::std::string>* Person::get_petNames() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return petNames_ref().has_value() ? std::addressof(__fbthrift_field_petNames) : nullptr;
 }
 
-::std::map<::cpp2::Animal, ::std::string>* Person::get_petNames() & {
+::std::map<::cpp2::Animal, ::std::string>* Person::get_petNames() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return petNames_ref().has_value() ? std::addressof(__fbthrift_field_petNames) : nullptr;
 }
 
-const ::cpp2::Animal* Person::get_afraidOfAnimal() const& {
+const ::cpp2::Animal* Person::get_afraidOfAnimal() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return afraidOfAnimal_ref().has_value() ? std::addressof(__fbthrift_field_afraidOfAnimal) : nullptr;
 }
 
-::cpp2::Animal* Person::get_afraidOfAnimal() & {
+::cpp2::Animal* Person::get_afraidOfAnimal() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return afraidOfAnimal_ref().has_value() ? std::addressof(__fbthrift_field_afraidOfAnimal) : nullptr;
 }
 
@@ -469,11 +469,11 @@ const ::cpp2::Animal* Person::get_afraidOfAnimal() const& {
   return __fbthrift_field_afraidOfAnimal;
 }
 
-const ::std::vector<::cpp2::Vehicle>* Person::get_vehicles() const& {
+const ::std::vector<::cpp2::Vehicle>* Person::get_vehicles() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return vehicles_ref().has_value() ? std::addressof(__fbthrift_field_vehicles) : nullptr;
 }
 
-::std::vector<::cpp2::Vehicle>* Person::get_vehicles() & {
+::std::vector<::cpp2::Vehicle>* Person::get_vehicles() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return vehicles_ref().has_value() ? std::addressof(__fbthrift_field_vehicles) : nullptr;
 }
 

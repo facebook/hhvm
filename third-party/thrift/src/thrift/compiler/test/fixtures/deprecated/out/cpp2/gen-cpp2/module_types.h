@@ -356,7 +356,7 @@ class User final  {
 
   /** Glean { "field": "name" } */
   [[deprecated("Use `FOO.name().value()` instead of `FOO.get_name()`")]]
-  const ::std::string& get_name() const& {
+  const ::std::string& get_name() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_name;
   }
 
@@ -376,7 +376,7 @@ class User final  {
 
   /** Glean { "field": "full_name" } */
   [[deprecated("Use `FOO.full_name().value()` instead of `FOO.get_full_name()`")]]
-  const ::std::string& get_full_name() const& {
+  const ::std::string& get_full_name() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_full_name;
   }
 
@@ -396,11 +396,11 @@ class User final  {
 
   /** Glean { "field": "email" } */
   [[deprecated("Use `FOO.email().value()` instead of `FOO.get_email()`")]]
-  const ::std::string* get_email() const&;
+  const ::std::string* get_email() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "email" } */
   [[deprecated("Use `FOO.email().value()` instead of `FOO.get_email()`")]]
-  ::std::string* get_email() &;
+  ::std::string* get_email() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::string* get_email() && = delete;
 
@@ -414,11 +414,11 @@ class User final  {
 
   /** Glean { "field": "email_address" } */
   [[deprecated("Use `FOO.email_address().value()` instead of `FOO.get_email_address()`")]]
-  const ::std::string* get_email_address() const&;
+  const ::std::string* get_email_address() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "email_address" } */
   [[deprecated("Use `FOO.email_address().value()` instead of `FOO.get_email_address()`")]]
-  ::std::string* get_email_address() &;
+  ::std::string* get_email_address() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::string* get_email_address() && = delete;
 

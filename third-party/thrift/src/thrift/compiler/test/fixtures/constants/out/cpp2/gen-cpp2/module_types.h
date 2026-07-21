@@ -570,7 +570,7 @@ class Internship final  {
 
   /** Glean { "field": "title" } */
   [[deprecated("Use `FOO.title().value()` instead of `FOO.get_title()`")]]
-  const ::std::string& get_title() const& {
+  const ::std::string& get_title() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_title;
   }
 
@@ -590,11 +590,11 @@ class Internship final  {
 
   /** Glean { "field": "employer" } */
   [[deprecated("Use `FOO.employer().value()` instead of `FOO.get_employer()`")]]
-  const ::cpp2::Company* get_employer() const&;
+  const ::cpp2::Company* get_employer() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "employer" } */
   [[deprecated("Use `FOO.employer().value()` instead of `FOO.get_employer()`")]]
-  ::cpp2::Company* get_employer() &;
+  ::cpp2::Company* get_employer() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::cpp2::Company* get_employer() && = delete;
 
@@ -604,11 +604,11 @@ class Internship final  {
 
   /** Glean { "field": "compensation" } */
   [[deprecated("Use `FOO.compensation().value()` instead of `FOO.get_compensation()`")]]
-  const double* get_compensation() const&;
+  const double* get_compensation() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "compensation" } */
   [[deprecated("Use `FOO.compensation().value()` instead of `FOO.get_compensation()`")]]
-  double* get_compensation() &;
+  double* get_compensation() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   double* get_compensation() && = delete;
 
@@ -618,11 +618,11 @@ class Internship final  {
 
   /** Glean { "field": "school" } */
   [[deprecated("Use `FOO.school().value()` instead of `FOO.get_school()`")]]
-  const ::std::string* get_school() const&;
+  const ::std::string* get_school() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "school" } */
   [[deprecated("Use `FOO.school().value()` instead of `FOO.get_school()`")]]
-  ::std::string* get_school() &;
+  ::std::string* get_school() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::string* get_school() && = delete;
 
@@ -983,7 +983,7 @@ class struct1 final  {
 
   /** Glean { "field": "b" } */
   [[deprecated("Use `FOO.b().value()` instead of `FOO.get_b()`")]]
-  const ::std::string& get_b() const& {
+  const ::std::string& get_b() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_b;
   }
 
@@ -1254,7 +1254,7 @@ class struct2 final  {
 
   /** Glean { "field": "b" } */
   [[deprecated("Use `FOO.b().value()` instead of `FOO.get_b()`")]]
-  const ::std::string& get_b() const& {
+  const ::std::string& get_b() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_b;
   }
 
@@ -1274,7 +1274,7 @@ class struct2 final  {
 
   /** Glean { "field": "c" } */
   [[deprecated("Use `FOO.c().value()` instead of `FOO.get_c()`")]]
-  const ::cpp2::struct1& get_c() const&;
+  const ::cpp2::struct1& get_c() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "c" } */
   [[deprecated("Use `FOO.c().value()` instead of `FOO.get_c()`")]]
@@ -1290,7 +1290,7 @@ class struct2 final  {
 
   /** Glean { "field": "d" } */
   [[deprecated("Use `FOO.d().value()` instead of `FOO.get_d()`")]]
-  const ::std::vector<::std::int32_t>& get_d() const&;
+  const ::std::vector<::std::int32_t>& get_d() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "d" } */
   [[deprecated("Use `FOO.d().value()` instead of `FOO.get_d()`")]]
@@ -1509,7 +1509,7 @@ class struct3 final  {
 
   /** Glean { "field": "a" } */
   [[deprecated("Use `FOO.a().value()` instead of `FOO.get_a()`")]]
-  const ::std::string& get_a() const& {
+  const ::std::string& get_a() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_a;
   }
 
@@ -1537,7 +1537,7 @@ class struct3 final  {
 
   /** Glean { "field": "c" } */
   [[deprecated("Use `FOO.c().value()` instead of `FOO.get_c()`")]]
-  const ::cpp2::struct2& get_c() const&;
+  const ::cpp2::struct2& get_c() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "c" } */
   [[deprecated("Use `FOO.c().value()` instead of `FOO.get_c()`")]]
@@ -1764,11 +1764,11 @@ class struct4 final  {
 
   /** Glean { "field": "b" } */
   [[deprecated("Use `FOO.b().value()` instead of `FOO.get_b()`")]]
-  const double* get_b() const&;
+  const double* get_b() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "b" } */
   [[deprecated("Use `FOO.b().value()` instead of `FOO.get_b()`")]]
-  double* get_b() &;
+  double* get_b() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   double* get_b() && = delete;
 
@@ -1778,11 +1778,11 @@ class struct4 final  {
 
   /** Glean { "field": "c" } */
   [[deprecated("Use `FOO.c().value()` instead of `FOO.get_c()`")]]
-  const ::std::int8_t* get_c() const&;
+  const ::std::int8_t* get_c() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "c" } */
   [[deprecated("Use `FOO.c().value()` instead of `FOO.get_c()`")]]
-  ::std::int8_t* get_c() &;
+  ::std::int8_t* get_c() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::int8_t* get_c() && = delete;
 

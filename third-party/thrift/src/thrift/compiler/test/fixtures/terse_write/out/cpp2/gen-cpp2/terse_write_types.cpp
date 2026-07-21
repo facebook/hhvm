@@ -835,7 +835,7 @@ double& FieldLevelTerseStruct::set_double_field(double double_field_) {
   return __fbthrift_field_enum_field;
 }
 
-const ::std::vector<::std::int16_t>& FieldLevelTerseStruct::get_list_field() const& {
+const ::std::vector<::std::int16_t>& FieldLevelTerseStruct::get_list_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_list_field;
 }
 
@@ -843,7 +843,7 @@ const ::std::vector<::std::int16_t>& FieldLevelTerseStruct::get_list_field() con
   return static_cast<::std::vector<::std::int16_t>&&>(__fbthrift_field_list_field);
 }
 
-const ::std::set<::std::int16_t>& FieldLevelTerseStruct::get_set_field() const& {
+const ::std::set<::std::int16_t>& FieldLevelTerseStruct::get_set_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_set_field;
 }
 
@@ -851,7 +851,7 @@ const ::std::set<::std::int16_t>& FieldLevelTerseStruct::get_set_field() const& 
   return static_cast<::std::set<::std::int16_t>&&>(__fbthrift_field_set_field);
 }
 
-const ::std::map<::std::int16_t, ::std::int16_t>& FieldLevelTerseStruct::get_map_field() const& {
+const ::std::map<::std::int16_t, ::std::int16_t>& FieldLevelTerseStruct::get_map_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_map_field;
 }
 
@@ -859,7 +859,7 @@ const ::std::map<::std::int16_t, ::std::int16_t>& FieldLevelTerseStruct::get_map
   return static_cast<::std::map<::std::int16_t, ::std::int16_t>&&>(__fbthrift_field_map_field);
 }
 
-const ::facebook::thrift::test::fixtures::terse_write::MyStruct& FieldLevelTerseStruct::get_struct_field() const& {
+const ::facebook::thrift::test::fixtures::terse_write::MyStruct& FieldLevelTerseStruct::get_struct_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_struct_field;
 }
 
@@ -867,7 +867,7 @@ const ::facebook::thrift::test::fixtures::terse_write::MyStruct& FieldLevelTerse
   return static_cast<::facebook::thrift::test::fixtures::terse_write::MyStruct&&>(__fbthrift_field_struct_field);
 }
 
-const ::facebook::thrift::test::fixtures::terse_write::MyUnion& FieldLevelTerseStruct::get_union_field() const& {
+const ::facebook::thrift::test::fixtures::terse_write::MyUnion& FieldLevelTerseStruct::get_union_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_union_field;
 }
 

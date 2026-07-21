@@ -108,11 +108,11 @@ std::partial_ordering SerializedStruct::operator<=>([[maybe_unused]] const Seria
   return __fbthrift_field_i;
 }
 
-const ::std::string* SerializedStruct::get_os() const& {
+const ::std::string* SerializedStruct::get_os() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return os_ref().has_value() ? std::addressof(__fbthrift_field_os) : nullptr;
 }
 
-::std::string* SerializedStruct::get_os() & {
+::std::string* SerializedStruct::get_os() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return os_ref().has_value() ? std::addressof(__fbthrift_field_os) : nullptr;
 }
 
@@ -297,11 +297,11 @@ std::partial_ordering SerializedError::operator<=>([[maybe_unused]] const Serial
 }
 
 
-const ::std::string* SerializedError::get_os() const& {
+const ::std::string* SerializedError::get_os() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return os_ref().has_value() ? std::addressof(__fbthrift_field_os) : nullptr;
 }
 
-::std::string* SerializedError::get_os() & {
+::std::string* SerializedError::get_os() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return os_ref().has_value() ? std::addressof(__fbthrift_field_os) : nullptr;
 }
 
@@ -395,11 +395,11 @@ std::partial_ordering MarshalStruct::operator<=>([[maybe_unused]] const MarshalS
   return __fbthrift_field_i;
 }
 
-const ::std::string* MarshalStruct::get_os() const& {
+const ::std::string* MarshalStruct::get_os() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return os_ref().has_value() ? std::addressof(__fbthrift_field_os) : nullptr;
 }
 
-::std::string* MarshalStruct::get_os() & {
+::std::string* MarshalStruct::get_os() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return os_ref().has_value() ? std::addressof(__fbthrift_field_os) : nullptr;
 }
 
@@ -584,11 +584,11 @@ std::partial_ordering MarshalError::operator<=>([[maybe_unused]] const MarshalEr
 }
 
 
-const ::std::string* MarshalError::get_os() const& {
+const ::std::string* MarshalError::get_os() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return os_ref().has_value() ? std::addressof(__fbthrift_field_os) : nullptr;
 }
 
-::std::string* MarshalError::get_os() & {
+::std::string* MarshalError::get_os() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return os_ref().has_value() ? std::addressof(__fbthrift_field_os) : nullptr;
 }
 

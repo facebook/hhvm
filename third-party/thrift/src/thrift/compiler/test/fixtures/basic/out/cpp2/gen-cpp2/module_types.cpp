@@ -199,7 +199,7 @@ std::partial_ordering MyStruct::operator<=>([[maybe_unused]] const MyStruct& rhs
   return __fbthrift_field_MyIntField;
 }
 
-const ::test::fixtures::basic::MyDataItemAlias& MyStruct::get_MyDataField() const& {
+const ::test::fixtures::basic::MyDataItemAlias& MyStruct::get_MyDataField() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_MyDataField;
 }
 
@@ -243,7 +243,7 @@ bool& MyStruct::set_idempotent(bool idempotent_) {
   return __fbthrift_field_idempotent;
 }
 
-const ::std::set<float>& MyStruct::get_floatSet() const& {
+const ::std::set<float>& MyStruct::get_floatSet() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_floatSet;
 }
 
@@ -339,7 +339,7 @@ std::partial_ordering Containers::operator<=>([[maybe_unused]] const Containers&
 }
 
 
-const ::std::vector<::std::int32_t>& Containers::get_I32List() const& {
+const ::std::vector<::std::int32_t>& Containers::get_I32List() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_I32List;
 }
 
@@ -347,7 +347,7 @@ const ::std::vector<::std::int32_t>& Containers::get_I32List() const& {
   return static_cast<::std::vector<::std::int32_t>&&>(__fbthrift_field_I32List);
 }
 
-const ::std::set<::std::string>& Containers::get_StringSet() const& {
+const ::std::set<::std::string>& Containers::get_StringSet() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_StringSet;
 }
 
@@ -355,7 +355,7 @@ const ::std::set<::std::string>& Containers::get_StringSet() const& {
   return static_cast<::std::set<::std::string>&&>(__fbthrift_field_StringSet);
 }
 
-const ::std::map<::std::string, ::std::int64_t>& Containers::get_StringToI64Map() const& {
+const ::std::map<::std::string, ::std::int64_t>& Containers::get_StringToI64Map() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_StringToI64Map;
 }
 
@@ -627,7 +627,7 @@ std::partial_ordering MyException::operator<=>([[maybe_unused]] const MyExceptio
   return __fbthrift_field_MyIntField;
 }
 
-const ::test::fixtures::basic::MyStruct& MyException::get_myStruct() const& {
+const ::test::fixtures::basic::MyStruct& MyException::get_myStruct() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_myStruct;
 }
 
@@ -635,7 +635,7 @@ const ::test::fixtures::basic::MyStruct& MyException::get_myStruct() const& {
   return static_cast<::test::fixtures::basic::MyStruct&&>(__fbthrift_field_myStruct);
 }
 
-const ::test::fixtures::basic::MyUnion& MyException::get_myUnion() const& {
+const ::test::fixtures::basic::MyUnion& MyException::get_myUnion() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_myUnion;
 }
 
@@ -751,7 +751,7 @@ std::partial_ordering MyExceptionWithMessage::operator<=>([[maybe_unused]] const
   return __fbthrift_field_MyIntField;
 }
 
-const ::test::fixtures::basic::MyStruct& MyExceptionWithMessage::get_myStruct() const& {
+const ::test::fixtures::basic::MyStruct& MyExceptionWithMessage::get_myStruct() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_myStruct;
 }
 
@@ -759,7 +759,7 @@ const ::test::fixtures::basic::MyStruct& MyExceptionWithMessage::get_myStruct() 
   return static_cast<::test::fixtures::basic::MyStruct&&>(__fbthrift_field_myStruct);
 }
 
-const ::test::fixtures::basic::MyUnion& MyExceptionWithMessage::get_myUnion() const& {
+const ::test::fixtures::basic::MyUnion& MyExceptionWithMessage::get_myUnion() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_myUnion;
 }
 

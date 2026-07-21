@@ -184,7 +184,7 @@ class DoSomethingResult final  {
 
   /** Glean { "field": "s_res" } */
   [[deprecated("Use `FOO.s_res().value()` instead of `FOO.get_s_res()`")]]
-  const ::std::string& get_s_res() const& {
+  const ::std::string& get_s_res() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_s_res;
   }
 

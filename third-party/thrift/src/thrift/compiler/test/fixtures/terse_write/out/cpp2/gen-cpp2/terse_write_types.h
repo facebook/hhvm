@@ -3930,7 +3930,7 @@ class FieldLevelTerseStruct final  {
 
   /** Glean { "field": "string_field" } */
   [[deprecated("Use `FOO.string_field().value()` instead of `FOO.get_string_field()`")]]
-  const ::std::string& get_string_field() const& {
+  const ::std::string& get_string_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_string_field;
   }
 
@@ -3950,7 +3950,7 @@ class FieldLevelTerseStruct final  {
 
   /** Glean { "field": "binary_field" } */
   [[deprecated("Use `FOO.binary_field().value()` instead of `FOO.get_binary_field()`")]]
-  const ::std::string& get_binary_field() const& {
+  const ::std::string& get_binary_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_binary_field;
   }
 
@@ -3978,7 +3978,7 @@ class FieldLevelTerseStruct final  {
 
   /** Glean { "field": "list_field" } */
   [[deprecated("Use `FOO.list_field().value()` instead of `FOO.get_list_field()`")]]
-  const ::std::vector<::std::int16_t>& get_list_field() const&;
+  const ::std::vector<::std::int16_t>& get_list_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "list_field" } */
   [[deprecated("Use `FOO.list_field().value()` instead of `FOO.get_list_field()`")]]
@@ -3994,7 +3994,7 @@ class FieldLevelTerseStruct final  {
 
   /** Glean { "field": "set_field" } */
   [[deprecated("Use `FOO.set_field().value()` instead of `FOO.get_set_field()`")]]
-  const ::std::set<::std::int16_t>& get_set_field() const&;
+  const ::std::set<::std::int16_t>& get_set_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "set_field" } */
   [[deprecated("Use `FOO.set_field().value()` instead of `FOO.get_set_field()`")]]
@@ -4010,7 +4010,7 @@ class FieldLevelTerseStruct final  {
 
   /** Glean { "field": "map_field" } */
   [[deprecated("Use `FOO.map_field().value()` instead of `FOO.get_map_field()`")]]
-  const ::std::map<::std::int16_t, ::std::int16_t>& get_map_field() const&;
+  const ::std::map<::std::int16_t, ::std::int16_t>& get_map_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "map_field" } */
   [[deprecated("Use `FOO.map_field().value()` instead of `FOO.get_map_field()`")]]
@@ -4026,7 +4026,7 @@ class FieldLevelTerseStruct final  {
 
   /** Glean { "field": "struct_field" } */
   [[deprecated("Use `FOO.struct_field().value()` instead of `FOO.get_struct_field()`")]]
-  const ::facebook::thrift::test::fixtures::terse_write::MyStruct& get_struct_field() const&;
+  const ::facebook::thrift::test::fixtures::terse_write::MyStruct& get_struct_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "struct_field" } */
   [[deprecated("Use `FOO.struct_field().value()` instead of `FOO.get_struct_field()`")]]
@@ -4042,7 +4042,7 @@ class FieldLevelTerseStruct final  {
 
   /** Glean { "field": "union_field" } */
   [[deprecated("Use `FOO.union_field().value()` instead of `FOO.get_union_field()`")]]
-  const ::facebook::thrift::test::fixtures::terse_write::MyUnion& get_union_field() const&;
+  const ::facebook::thrift::test::fixtures::terse_write::MyUnion& get_union_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "union_field" } */
   [[deprecated("Use `FOO.union_field().value()` instead of `FOO.get_union_field()`")]]

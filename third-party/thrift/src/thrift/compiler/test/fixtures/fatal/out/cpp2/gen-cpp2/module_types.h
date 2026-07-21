@@ -2532,7 +2532,7 @@ class structA final  {
 
   /** Glean { "field": "b" } */
   [[deprecated("Use `FOO.b().value()` instead of `FOO.get_b()`")]]
-  const ::std::string& get_b() const& {
+  const ::std::string& get_b() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_b;
   }
 
@@ -4565,7 +4565,7 @@ class structC final  {
 
   /** Glean { "field": "b" } */
   [[deprecated("Use `FOO.b().value()` instead of `FOO.get_b()`")]]
-  const ::std::string& get_b() const& {
+  const ::std::string& get_b() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_b;
   }
 
@@ -4617,7 +4617,7 @@ class structC final  {
 
   /** Glean { "field": "g" } */
   [[deprecated("Use `FOO.g().value()` instead of `FOO.get_g()`")]]
-  const ::test_cpp2::cpp_reflection::union1& get_g() const&;
+  const ::test_cpp2::cpp_reflection::union1& get_g() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "g" } */
   [[deprecated("Use `FOO.g().value()` instead of `FOO.get_g()`")]]
@@ -4633,7 +4633,7 @@ class structC final  {
 
   /** Glean { "field": "h" } */
   [[deprecated("Use `FOO.h().value()` instead of `FOO.get_h()`")]]
-  const ::test_cpp2::cpp_reflection::unionA& get_h() const&;
+  const ::test_cpp2::cpp_reflection::unionA& get_h() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "h" } */
   [[deprecated("Use `FOO.h().value()` instead of `FOO.get_h()`")]]
@@ -4649,7 +4649,7 @@ class structC final  {
 
   /** Glean { "field": "i" } */
   [[deprecated("Use `FOO.i().value()` instead of `FOO.get_i()`")]]
-  const ::test_cpp2::cpp_reflection::unionA& get_i() const&;
+  const ::test_cpp2::cpp_reflection::unionA& get_i() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "i" } */
   [[deprecated("Use `FOO.i().value()` instead of `FOO.get_i()`")]]
@@ -4665,7 +4665,7 @@ class structC final  {
 
   /** Glean { "field": "j" } */
   [[deprecated("Use `FOO.j().value()` instead of `FOO.get_j()`")]]
-  const ::std::vector<::std::int32_t>& get_j() const&;
+  const ::std::vector<::std::int32_t>& get_j() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "j" } */
   [[deprecated("Use `FOO.j().value()` instead of `FOO.get_j()`")]]
@@ -4681,7 +4681,7 @@ class structC final  {
 
   /** Glean { "field": "j1" } */
   [[deprecated("Use `FOO.j1().value()` instead of `FOO.get_j1()`")]]
-  const ::std::vector<::std::int32_t>& get_j1() const&;
+  const ::std::vector<::std::int32_t>& get_j1() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "j1" } */
   [[deprecated("Use `FOO.j1().value()` instead of `FOO.get_j1()`")]]
@@ -4697,7 +4697,7 @@ class structC final  {
 
   /** Glean { "field": "j2" } */
   [[deprecated("Use `FOO.j2().value()` instead of `FOO.get_j2()`")]]
-  const ::std::vector<::test_cpp2::cpp_reflection::enum1>& get_j2() const&;
+  const ::std::vector<::test_cpp2::cpp_reflection::enum1>& get_j2() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "j2" } */
   [[deprecated("Use `FOO.j2().value()` instead of `FOO.get_j2()`")]]
@@ -4713,7 +4713,7 @@ class structC final  {
 
   /** Glean { "field": "j3" } */
   [[deprecated("Use `FOO.j3().value()` instead of `FOO.get_j3()`")]]
-  const ::std::vector<::test_cpp2::cpp_reflection::structA>& get_j3() const&;
+  const ::std::vector<::test_cpp2::cpp_reflection::structA>& get_j3() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "j3" } */
   [[deprecated("Use `FOO.j3().value()` instead of `FOO.get_j3()`")]]
@@ -4729,7 +4729,7 @@ class structC final  {
 
   /** Glean { "field": "k" } */
   [[deprecated("Use `FOO.k().value()` instead of `FOO.get_k()`")]]
-  const ::std::set<::std::int32_t>& get_k() const&;
+  const ::std::set<::std::int32_t>& get_k() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "k" } */
   [[deprecated("Use `FOO.k().value()` instead of `FOO.get_k()`")]]
@@ -4745,7 +4745,7 @@ class structC final  {
 
   /** Glean { "field": "k1" } */
   [[deprecated("Use `FOO.k1().value()` instead of `FOO.get_k1()`")]]
-  const ::std::set<::std::int32_t>& get_k1() const&;
+  const ::std::set<::std::int32_t>& get_k1() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "k1" } */
   [[deprecated("Use `FOO.k1().value()` instead of `FOO.get_k1()`")]]
@@ -4761,7 +4761,7 @@ class structC final  {
 
   /** Glean { "field": "k2" } */
   [[deprecated("Use `FOO.k2().value()` instead of `FOO.get_k2()`")]]
-  const ::std::set<::test_cpp2::cpp_reflection::enum2>& get_k2() const&;
+  const ::std::set<::test_cpp2::cpp_reflection::enum2>& get_k2() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "k2" } */
   [[deprecated("Use `FOO.k2().value()` instead of `FOO.get_k2()`")]]
@@ -4777,7 +4777,7 @@ class structC final  {
 
   /** Glean { "field": "k3" } */
   [[deprecated("Use `FOO.k3().value()` instead of `FOO.get_k3()`")]]
-  const ::std::set<::test_cpp2::cpp_reflection::structB>& get_k3() const&;
+  const ::std::set<::test_cpp2::cpp_reflection::structB>& get_k3() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "k3" } */
   [[deprecated("Use `FOO.k3().value()` instead of `FOO.get_k3()`")]]
@@ -4793,7 +4793,7 @@ class structC final  {
 
   /** Glean { "field": "l" } */
   [[deprecated("Use `FOO.l().value()` instead of `FOO.get_l()`")]]
-  const ::std::map<::std::int32_t, ::std::int32_t>& get_l() const&;
+  const ::std::map<::std::int32_t, ::std::int32_t>& get_l() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "l" } */
   [[deprecated("Use `FOO.l().value()` instead of `FOO.get_l()`")]]
@@ -4809,7 +4809,7 @@ class structC final  {
 
   /** Glean { "field": "l1" } */
   [[deprecated("Use `FOO.l1().value()` instead of `FOO.get_l1()`")]]
-  const ::std::map<::std::int32_t, ::std::int32_t>& get_l1() const&;
+  const ::std::map<::std::int32_t, ::std::int32_t>& get_l1() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "l1" } */
   [[deprecated("Use `FOO.l1().value()` instead of `FOO.get_l1()`")]]
@@ -4825,7 +4825,7 @@ class structC final  {
 
   /** Glean { "field": "l2" } */
   [[deprecated("Use `FOO.l2().value()` instead of `FOO.get_l2()`")]]
-  const ::std::map<::std::int32_t, ::test_cpp2::cpp_reflection::enum1>& get_l2() const&;
+  const ::std::map<::std::int32_t, ::test_cpp2::cpp_reflection::enum1>& get_l2() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "l2" } */
   [[deprecated("Use `FOO.l2().value()` instead of `FOO.get_l2()`")]]
@@ -4841,7 +4841,7 @@ class structC final  {
 
   /** Glean { "field": "l3" } */
   [[deprecated("Use `FOO.l3().value()` instead of `FOO.get_l3()`")]]
-  const ::std::map<::std::int32_t, ::test_cpp2::cpp_reflection::structB>& get_l3() const&;
+  const ::std::map<::std::int32_t, ::test_cpp2::cpp_reflection::structB>& get_l3() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "l3" } */
   [[deprecated("Use `FOO.l3().value()` instead of `FOO.get_l3()`")]]
@@ -4857,7 +4857,7 @@ class structC final  {
 
   /** Glean { "field": "m1" } */
   [[deprecated("Use `FOO.m1().value()` instead of `FOO.get_m1()`")]]
-  const ::std::map<::test_cpp2::cpp_reflection::enum1, ::std::int32_t>& get_m1() const&;
+  const ::std::map<::test_cpp2::cpp_reflection::enum1, ::std::int32_t>& get_m1() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "m1" } */
   [[deprecated("Use `FOO.m1().value()` instead of `FOO.get_m1()`")]]
@@ -4873,7 +4873,7 @@ class structC final  {
 
   /** Glean { "field": "m2" } */
   [[deprecated("Use `FOO.m2().value()` instead of `FOO.get_m2()`")]]
-  const ::std::map<::test_cpp2::cpp_reflection::enum1, ::test_cpp2::cpp_reflection::enum2>& get_m2() const&;
+  const ::std::map<::test_cpp2::cpp_reflection::enum1, ::test_cpp2::cpp_reflection::enum2>& get_m2() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "m2" } */
   [[deprecated("Use `FOO.m2().value()` instead of `FOO.get_m2()`")]]
@@ -4889,7 +4889,7 @@ class structC final  {
 
   /** Glean { "field": "m3" } */
   [[deprecated("Use `FOO.m3().value()` instead of `FOO.get_m3()`")]]
-  const ::std::map<::test_cpp2::cpp_reflection::enum1, ::test_cpp2::cpp_reflection::structB>& get_m3() const&;
+  const ::std::map<::test_cpp2::cpp_reflection::enum1, ::test_cpp2::cpp_reflection::structB>& get_m3() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "m3" } */
   [[deprecated("Use `FOO.m3().value()` instead of `FOO.get_m3()`")]]
@@ -4905,7 +4905,7 @@ class structC final  {
 
   /** Glean { "field": "n1" } */
   [[deprecated("Use `FOO.n1().value()` instead of `FOO.get_n1()`")]]
-  const ::std::map<::std::string, ::std::int32_t>& get_n1() const&;
+  const ::std::map<::std::string, ::std::int32_t>& get_n1() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "n1" } */
   [[deprecated("Use `FOO.n1().value()` instead of `FOO.get_n1()`")]]
@@ -4921,7 +4921,7 @@ class structC final  {
 
   /** Glean { "field": "n2" } */
   [[deprecated("Use `FOO.n2().value()` instead of `FOO.get_n2()`")]]
-  const ::std::map<::std::string, ::test_cpp2::cpp_reflection::enum1>& get_n2() const&;
+  const ::std::map<::std::string, ::test_cpp2::cpp_reflection::enum1>& get_n2() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "n2" } */
   [[deprecated("Use `FOO.n2().value()` instead of `FOO.get_n2()`")]]
@@ -4937,7 +4937,7 @@ class structC final  {
 
   /** Glean { "field": "n3" } */
   [[deprecated("Use `FOO.n3().value()` instead of `FOO.get_n3()`")]]
-  const ::std::map<::std::string, ::test_cpp2::cpp_reflection::structB>& get_n3() const&;
+  const ::std::map<::std::string, ::test_cpp2::cpp_reflection::structB>& get_n3() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "n3" } */
   [[deprecated("Use `FOO.n3().value()` instead of `FOO.get_n3()`")]]
@@ -4953,7 +4953,7 @@ class structC final  {
 
   /** Glean { "field": "o1" } */
   [[deprecated("Use `FOO.o1().value()` instead of `FOO.get_o1()`")]]
-  const ::std::map<::test_cpp2::cpp_reflection::structA, ::std::int32_t>& get_o1() const&;
+  const ::std::map<::test_cpp2::cpp_reflection::structA, ::std::int32_t>& get_o1() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "o1" } */
   [[deprecated("Use `FOO.o1().value()` instead of `FOO.get_o1()`")]]
@@ -4969,7 +4969,7 @@ class structC final  {
 
   /** Glean { "field": "o2" } */
   [[deprecated("Use `FOO.o2().value()` instead of `FOO.get_o2()`")]]
-  const ::std::map<::test_cpp2::cpp_reflection::structA, ::test_cpp2::cpp_reflection::enum1>& get_o2() const&;
+  const ::std::map<::test_cpp2::cpp_reflection::structA, ::test_cpp2::cpp_reflection::enum1>& get_o2() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "o2" } */
   [[deprecated("Use `FOO.o2().value()` instead of `FOO.get_o2()`")]]
@@ -4985,7 +4985,7 @@ class structC final  {
 
   /** Glean { "field": "o3" } */
   [[deprecated("Use `FOO.o3().value()` instead of `FOO.get_o3()`")]]
-  const ::std::map<::test_cpp2::cpp_reflection::structA, ::test_cpp2::cpp_reflection::structB>& get_o3() const&;
+  const ::std::map<::test_cpp2::cpp_reflection::structA, ::test_cpp2::cpp_reflection::structB>& get_o3() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "o3" } */
   [[deprecated("Use `FOO.o3().value()` instead of `FOO.get_o3()`")]]
@@ -5332,11 +5332,11 @@ class struct1 final  {
 
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1().value()` instead of `FOO.get_field1()`")]]
-  const ::std::string* get_field1() const&;
+  const ::std::string* get_field1() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1().value()` instead of `FOO.get_field1()`")]]
-  ::std::string* get_field1() &;
+  ::std::string* get_field1() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::string* get_field1() && = delete;
 
@@ -5366,11 +5366,11 @@ class struct1 final  {
 
   /** Glean { "field": "field4" } */
   [[deprecated("Use `FOO.field4().value()` instead of `FOO.get_field4()`")]]
-  const ::test_cpp2::cpp_reflection::union1* get_field4() const&;
+  const ::test_cpp2::cpp_reflection::union1* get_field4() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "field4" } */
   [[deprecated("Use `FOO.field4().value()` instead of `FOO.get_field4()`")]]
-  ::test_cpp2::cpp_reflection::union1* get_field4() &;
+  ::test_cpp2::cpp_reflection::union1* get_field4() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::test_cpp2::cpp_reflection::union1* get_field4() && = delete;
 
@@ -5384,7 +5384,7 @@ class struct1 final  {
 
   /** Glean { "field": "field5" } */
   [[deprecated("Use `FOO.field5().value()` instead of `FOO.get_field5()`")]]
-  const ::test_cpp2::cpp_reflection::union2& get_field5() const&;
+  const ::test_cpp2::cpp_reflection::union2& get_field5() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "field5" } */
   [[deprecated("Use `FOO.field5().value()` instead of `FOO.get_field5()`")]]
@@ -5771,7 +5771,7 @@ class struct2 final  {
 
   /** Glean { "field": "fieldB" } */
   [[deprecated("Use `FOO.fieldB().value()` instead of `FOO.get_fieldB()`")]]
-  const ::std::string& get_fieldB() const& {
+  const ::std::string& get_fieldB() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_fieldB;
   }
 
@@ -5807,7 +5807,7 @@ class struct2 final  {
 
   /** Glean { "field": "fieldE" } */
   [[deprecated("Use `FOO.fieldE().value()` instead of `FOO.get_fieldE()`")]]
-  const ::test_cpp2::cpp_reflection::union1& get_fieldE() const&;
+  const ::test_cpp2::cpp_reflection::union1& get_fieldE() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "fieldE" } */
   [[deprecated("Use `FOO.fieldE().value()` instead of `FOO.get_fieldE()`")]]
@@ -5823,7 +5823,7 @@ class struct2 final  {
 
   /** Glean { "field": "fieldF" } */
   [[deprecated("Use `FOO.fieldF().value()` instead of `FOO.get_fieldF()`")]]
-  const ::test_cpp2::cpp_reflection::union2& get_fieldF() const&;
+  const ::test_cpp2::cpp_reflection::union2& get_fieldF() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "fieldF" } */
   [[deprecated("Use `FOO.fieldF().value()` instead of `FOO.get_fieldF()`")]]
@@ -5839,7 +5839,7 @@ class struct2 final  {
 
   /** Glean { "field": "fieldG" } */
   [[deprecated("Use `FOO.fieldG().value()` instead of `FOO.get_fieldG()`")]]
-  const ::test_cpp2::cpp_reflection::struct1& get_fieldG() const&;
+  const ::test_cpp2::cpp_reflection::struct1& get_fieldG() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "fieldG" } */
   [[deprecated("Use `FOO.fieldG().value()` instead of `FOO.get_fieldG()`")]]
@@ -6658,7 +6658,7 @@ class struct3 final  {
 
   /** Glean { "field": "fieldB" } */
   [[deprecated("Use `FOO.fieldB().value()` instead of `FOO.get_fieldB()`")]]
-  const ::std::string& get_fieldB() const& {
+  const ::std::string& get_fieldB() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_fieldB;
   }
 
@@ -6694,7 +6694,7 @@ class struct3 final  {
 
   /** Glean { "field": "fieldE" } */
   [[deprecated("Use `FOO.fieldE().value()` instead of `FOO.get_fieldE()`")]]
-  const ::test_cpp2::cpp_reflection::union1& get_fieldE() const&;
+  const ::test_cpp2::cpp_reflection::union1& get_fieldE() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "fieldE" } */
   [[deprecated("Use `FOO.fieldE().value()` instead of `FOO.get_fieldE()`")]]
@@ -6710,7 +6710,7 @@ class struct3 final  {
 
   /** Glean { "field": "fieldF" } */
   [[deprecated("Use `FOO.fieldF().value()` instead of `FOO.get_fieldF()`")]]
-  const ::test_cpp2::cpp_reflection::union2& get_fieldF() const&;
+  const ::test_cpp2::cpp_reflection::union2& get_fieldF() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "fieldF" } */
   [[deprecated("Use `FOO.fieldF().value()` instead of `FOO.get_fieldF()`")]]
@@ -6726,7 +6726,7 @@ class struct3 final  {
 
   /** Glean { "field": "fieldG" } */
   [[deprecated("Use `FOO.fieldG().value()` instead of `FOO.get_fieldG()`")]]
-  const ::test_cpp2::cpp_reflection::struct1& get_fieldG() const&;
+  const ::test_cpp2::cpp_reflection::struct1& get_fieldG() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "fieldG" } */
   [[deprecated("Use `FOO.fieldG().value()` instead of `FOO.get_fieldG()`")]]
@@ -6742,7 +6742,7 @@ class struct3 final  {
 
   /** Glean { "field": "fieldH" } */
   [[deprecated("Use `FOO.fieldH().value()` instead of `FOO.get_fieldH()`")]]
-  const ::test_cpp2::cpp_reflection::union2& get_fieldH() const&;
+  const ::test_cpp2::cpp_reflection::union2& get_fieldH() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "fieldH" } */
   [[deprecated("Use `FOO.fieldH().value()` instead of `FOO.get_fieldH()`")]]
@@ -6758,7 +6758,7 @@ class struct3 final  {
 
   /** Glean { "field": "fieldI" } */
   [[deprecated("Use `FOO.fieldI().value()` instead of `FOO.get_fieldI()`")]]
-  const ::std::vector<::std::int32_t>& get_fieldI() const&;
+  const ::std::vector<::std::int32_t>& get_fieldI() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "fieldI" } */
   [[deprecated("Use `FOO.fieldI().value()` instead of `FOO.get_fieldI()`")]]
@@ -6774,7 +6774,7 @@ class struct3 final  {
 
   /** Glean { "field": "fieldJ" } */
   [[deprecated("Use `FOO.fieldJ().value()` instead of `FOO.get_fieldJ()`")]]
-  const ::std::vector<::std::string>& get_fieldJ() const&;
+  const ::std::vector<::std::string>& get_fieldJ() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "fieldJ" } */
   [[deprecated("Use `FOO.fieldJ().value()` instead of `FOO.get_fieldJ()`")]]
@@ -6790,7 +6790,7 @@ class struct3 final  {
 
   /** Glean { "field": "fieldK" } */
   [[deprecated("Use `FOO.fieldK().value()` instead of `FOO.get_fieldK()`")]]
-  const ::std::vector<::std::string>& get_fieldK() const&;
+  const ::std::vector<::std::string>& get_fieldK() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "fieldK" } */
   [[deprecated("Use `FOO.fieldK().value()` instead of `FOO.get_fieldK()`")]]
@@ -6806,7 +6806,7 @@ class struct3 final  {
 
   /** Glean { "field": "fieldL" } */
   [[deprecated("Use `FOO.fieldL().value()` instead of `FOO.get_fieldL()`")]]
-  const ::std::vector<::test_cpp2::cpp_reflection::structA>& get_fieldL() const&;
+  const ::std::vector<::test_cpp2::cpp_reflection::structA>& get_fieldL() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "fieldL" } */
   [[deprecated("Use `FOO.fieldL().value()` instead of `FOO.get_fieldL()`")]]
@@ -6822,7 +6822,7 @@ class struct3 final  {
 
   /** Glean { "field": "fieldM" } */
   [[deprecated("Use `FOO.fieldM().value()` instead of `FOO.get_fieldM()`")]]
-  const ::std::set<::std::int32_t>& get_fieldM() const&;
+  const ::std::set<::std::int32_t>& get_fieldM() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "fieldM" } */
   [[deprecated("Use `FOO.fieldM().value()` instead of `FOO.get_fieldM()`")]]
@@ -6838,7 +6838,7 @@ class struct3 final  {
 
   /** Glean { "field": "fieldN" } */
   [[deprecated("Use `FOO.fieldN().value()` instead of `FOO.get_fieldN()`")]]
-  const ::std::set<::std::string>& get_fieldN() const&;
+  const ::std::set<::std::string>& get_fieldN() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "fieldN" } */
   [[deprecated("Use `FOO.fieldN().value()` instead of `FOO.get_fieldN()`")]]
@@ -6854,7 +6854,7 @@ class struct3 final  {
 
   /** Glean { "field": "fieldO" } */
   [[deprecated("Use `FOO.fieldO().value()` instead of `FOO.get_fieldO()`")]]
-  const ::std::set<::std::string>& get_fieldO() const&;
+  const ::std::set<::std::string>& get_fieldO() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "fieldO" } */
   [[deprecated("Use `FOO.fieldO().value()` instead of `FOO.get_fieldO()`")]]
@@ -6870,7 +6870,7 @@ class struct3 final  {
 
   /** Glean { "field": "fieldP" } */
   [[deprecated("Use `FOO.fieldP().value()` instead of `FOO.get_fieldP()`")]]
-  const ::std::set<::test_cpp2::cpp_reflection::structB>& get_fieldP() const&;
+  const ::std::set<::test_cpp2::cpp_reflection::structB>& get_fieldP() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "fieldP" } */
   [[deprecated("Use `FOO.fieldP().value()` instead of `FOO.get_fieldP()`")]]
@@ -6886,7 +6886,7 @@ class struct3 final  {
 
   /** Glean { "field": "fieldQ" } */
   [[deprecated("Use `FOO.fieldQ().value()` instead of `FOO.get_fieldQ()`")]]
-  const ::std::map<::std::string, ::test_cpp2::cpp_reflection::structA>& get_fieldQ() const&;
+  const ::std::map<::std::string, ::test_cpp2::cpp_reflection::structA>& get_fieldQ() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "fieldQ" } */
   [[deprecated("Use `FOO.fieldQ().value()` instead of `FOO.get_fieldQ()`")]]
@@ -6902,7 +6902,7 @@ class struct3 final  {
 
   /** Glean { "field": "fieldR" } */
   [[deprecated("Use `FOO.fieldR().value()` instead of `FOO.get_fieldR()`")]]
-  const ::std::map<::std::string, ::test_cpp2::cpp_reflection::structB>& get_fieldR() const&;
+  const ::std::map<::std::string, ::test_cpp2::cpp_reflection::structB>& get_fieldR() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "fieldR" } */
   [[deprecated("Use `FOO.fieldR().value()` instead of `FOO.get_fieldR()`")]]
@@ -7172,11 +7172,11 @@ class struct4 final  {
 
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1().value()` instead of `FOO.get_field1()`")]]
-  const ::std::string* get_field1() const&;
+  const ::std::string* get_field1() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1().value()` instead of `FOO.get_field1()`")]]
-  ::std::string* get_field1() &;
+  ::std::string* get_field1() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::string* get_field1() && = delete;
 
@@ -7489,11 +7489,11 @@ class struct5 final  {
 
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1().value()` instead of `FOO.get_field1()`")]]
-  const ::std::string* get_field1() const&;
+  const ::std::string* get_field1() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1().value()` instead of `FOO.get_field1()`")]]
-  ::std::string* get_field1() &;
+  ::std::string* get_field1() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::string* get_field1() && = delete;
 
@@ -7515,7 +7515,7 @@ class struct5 final  {
 
   /** Glean { "field": "field3" } */
   [[deprecated("Use `FOO.field3().value()` instead of `FOO.get_field3()`")]]
-  const ::test_cpp2::cpp_reflection::structA& get_field3() const&;
+  const ::test_cpp2::cpp_reflection::structA& get_field3() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "field3" } */
   [[deprecated("Use `FOO.field3().value()` instead of `FOO.get_field3()`")]]
@@ -7531,7 +7531,7 @@ class struct5 final  {
 
   /** Glean { "field": "field4" } */
   [[deprecated("Use `FOO.field4().value()` instead of `FOO.get_field4()`")]]
-  const ::test_cpp2::cpp_reflection::structB& get_field4() const&;
+  const ::test_cpp2::cpp_reflection::structB& get_field4() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "field4" } */
   [[deprecated("Use `FOO.field4().value()` instead of `FOO.get_field4()`")]]
@@ -7670,7 +7670,7 @@ class struct_binary final  {
 
   /** Glean { "field": "bi" } */
   [[deprecated("Use `FOO.bi().value()` instead of `FOO.get_bi()`")]]
-  const ::std::string& get_bi() const& {
+  const ::std::string& get_bi() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_bi;
   }
 
@@ -7891,7 +7891,7 @@ class dep_A_struct final  {
 
   /** Glean { "field": "b" } */
   [[deprecated("Use `FOO.b().value()` instead of `FOO.get_b()`")]]
-  const ::test_cpp2::cpp_reflection::dep_B_struct& get_b() const&;
+  const ::test_cpp2::cpp_reflection::dep_B_struct& get_b() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "b" } */
   [[deprecated("Use `FOO.b().value()` instead of `FOO.get_b()`")]]
@@ -7907,7 +7907,7 @@ class dep_A_struct final  {
 
   /** Glean { "field": "c" } */
   [[deprecated("Use `FOO.c().value()` instead of `FOO.get_c()`")]]
-  const ::test_cpp2::cpp_reflection::dep_C_struct& get_c() const&;
+  const ::test_cpp2::cpp_reflection::dep_C_struct& get_c() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "c" } */
   [[deprecated("Use `FOO.c().value()` instead of `FOO.get_c()`")]]
@@ -8132,7 +8132,7 @@ class dep_B_struct final  {
 
   /** Glean { "field": "b" } */
   [[deprecated("Use `FOO.b().value()` instead of `FOO.get_b()`")]]
-  const ::test_cpp2::cpp_reflection::dep_B_struct& get_b() const&;
+  const ::test_cpp2::cpp_reflection::dep_B_struct& get_b() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "b" } */
   [[deprecated("Use `FOO.b().value()` instead of `FOO.get_b()`")]]
@@ -8148,7 +8148,7 @@ class dep_B_struct final  {
 
   /** Glean { "field": "c" } */
   [[deprecated("Use `FOO.c().value()` instead of `FOO.get_c()`")]]
-  const ::test_cpp2::cpp_reflection::dep_C_struct& get_c() const&;
+  const ::test_cpp2::cpp_reflection::dep_C_struct& get_c() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "c" } */
   [[deprecated("Use `FOO.c().value()` instead of `FOO.get_c()`")]]

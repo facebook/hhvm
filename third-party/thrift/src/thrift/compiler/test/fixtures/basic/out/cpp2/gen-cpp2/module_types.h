@@ -773,7 +773,7 @@ class MyStruct final  {
 
   /** Glean { "field": "MyStringField" } */
   [[deprecated("Use `FOO.MyStringField().value()` instead of `FOO.get_MyStringField()`")]]
-  const ::std::string& get_MyStringField() const& {
+  const ::std::string& get_MyStringField() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_MyStringField;
   }
 
@@ -793,7 +793,7 @@ class MyStruct final  {
 
   /** Glean { "field": "MyDataField" } */
   [[deprecated("Use `FOO.MyDataField().value()` instead of `FOO.get_MyDataField()`")]]
-  const ::test::fixtures::basic::MyDataItemAlias& get_MyDataField() const&;
+  const ::test::fixtures::basic::MyDataItemAlias& get_MyDataField() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "MyDataField" } */
   [[deprecated("Use `FOO.MyDataField().value()` instead of `FOO.get_MyDataField()`")]]
@@ -841,7 +841,7 @@ class MyStruct final  {
 
   /** Glean { "field": "floatSet" } */
   [[deprecated("Use `FOO.floatSet().value()` instead of `FOO.get_floatSet()`")]]
-  const ::std::set<float>& get_floatSet() const&;
+  const ::std::set<float>& get_floatSet() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "floatSet" } */
   [[deprecated("Use `FOO.floatSet().value()` instead of `FOO.get_floatSet()`")]]
@@ -857,7 +857,7 @@ class MyStruct final  {
 
   /** Glean { "field": "no_hack_codegen_field" } */
   [[deprecated("Use `FOO.no_hack_codegen_field().value()` instead of `FOO.get_no_hack_codegen_field()`")]]
-  const ::std::string& get_no_hack_codegen_field() const& {
+  const ::std::string& get_no_hack_codegen_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_no_hack_codegen_field;
   }
 
@@ -1081,7 +1081,7 @@ class Containers final  {
 
   /** Glean { "field": "I32List" } */
   [[deprecated("Use `FOO.I32List().value()` instead of `FOO.get_I32List()`")]]
-  const ::std::vector<::std::int32_t>& get_I32List() const&;
+  const ::std::vector<::std::int32_t>& get_I32List() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "I32List" } */
   [[deprecated("Use `FOO.I32List().value()` instead of `FOO.get_I32List()`")]]
@@ -1097,7 +1097,7 @@ class Containers final  {
 
   /** Glean { "field": "StringSet" } */
   [[deprecated("Use `FOO.StringSet().value()` instead of `FOO.get_StringSet()`")]]
-  const ::std::set<::std::string>& get_StringSet() const&;
+  const ::std::set<::std::string>& get_StringSet() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "StringSet" } */
   [[deprecated("Use `FOO.StringSet().value()` instead of `FOO.get_StringSet()`")]]
@@ -1113,7 +1113,7 @@ class Containers final  {
 
   /** Glean { "field": "StringToI64Map" } */
   [[deprecated("Use `FOO.StringToI64Map().value()` instead of `FOO.get_StringToI64Map()`")]]
-  const ::std::map<::std::string, ::std::int64_t>& get_StringToI64Map() const&;
+  const ::std::map<::std::string, ::std::int64_t>& get_StringToI64Map() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "StringToI64Map" } */
   [[deprecated("Use `FOO.StringToI64Map().value()` instead of `FOO.get_StringToI64Map()`")]]
@@ -1872,7 +1872,7 @@ class FOLLY_EXPORT MyException : public virtual apache::thrift::TException {
 
   /** Glean { "field": "MyStringField" } */
   [[deprecated("Use `FOO.MyStringField().value()` instead of `FOO.get_MyStringField()`")]]
-  const ::std::string& get_MyStringField() const& {
+  const ::std::string& get_MyStringField() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_MyStringField;
   }
 
@@ -1892,7 +1892,7 @@ class FOLLY_EXPORT MyException : public virtual apache::thrift::TException {
 
   /** Glean { "field": "myStruct" } */
   [[deprecated("Use `FOO.myStruct().value()` instead of `FOO.get_myStruct()`")]]
-  const ::test::fixtures::basic::MyStruct& get_myStruct() const&;
+  const ::test::fixtures::basic::MyStruct& get_myStruct() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "myStruct" } */
   [[deprecated("Use `FOO.myStruct().value()` instead of `FOO.get_myStruct()`")]]
@@ -1908,7 +1908,7 @@ class FOLLY_EXPORT MyException : public virtual apache::thrift::TException {
 
   /** Glean { "field": "myUnion" } */
   [[deprecated("Use `FOO.myUnion().value()` instead of `FOO.get_myUnion()`")]]
-  const ::test::fixtures::basic::MyUnion& get_myUnion() const&;
+  const ::test::fixtures::basic::MyUnion& get_myUnion() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "myUnion" } */
   [[deprecated("Use `FOO.myUnion().value()` instead of `FOO.get_myUnion()`")]]
@@ -2187,7 +2187,7 @@ class FOLLY_EXPORT MyExceptionWithMessage : public virtual apache::thrift::TExce
 
   /** Glean { "field": "MyStringField" } */
   [[deprecated("Use `FOO.MyStringField().value()` instead of `FOO.get_MyStringField()`")]]
-  const ::std::string& get_MyStringField() const& {
+  const ::std::string& get_MyStringField() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_MyStringField;
   }
 
@@ -2207,7 +2207,7 @@ class FOLLY_EXPORT MyExceptionWithMessage : public virtual apache::thrift::TExce
 
   /** Glean { "field": "myStruct" } */
   [[deprecated("Use `FOO.myStruct().value()` instead of `FOO.get_myStruct()`")]]
-  const ::test::fixtures::basic::MyStruct& get_myStruct() const&;
+  const ::test::fixtures::basic::MyStruct& get_myStruct() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "myStruct" } */
   [[deprecated("Use `FOO.myStruct().value()` instead of `FOO.get_myStruct()`")]]
@@ -2223,7 +2223,7 @@ class FOLLY_EXPORT MyExceptionWithMessage : public virtual apache::thrift::TExce
 
   /** Glean { "field": "myUnion" } */
   [[deprecated("Use `FOO.myUnion().value()` instead of `FOO.get_myUnion()`")]]
-  const ::test::fixtures::basic::MyUnion& get_myUnion() const&;
+  const ::test::fixtures::basic::MyUnion& get_myUnion() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "myUnion" } */
   [[deprecated("Use `FOO.myUnion().value()` instead of `FOO.get_myUnion()`")]]

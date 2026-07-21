@@ -225,7 +225,7 @@ class NonOrderableStruct final  {
 
   /** Glean { "field": "field2" } */
   [[deprecated("Use `FOO.field2().value()` instead of `FOO.get_field2()`")]]
-  const ::std::string& get_field2() const& {
+  const ::std::string& get_field2() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_field2;
   }
 
@@ -711,7 +711,7 @@ class OrderableStruct final  {
 
   /** Glean { "field": "field2" } */
   [[deprecated("Use `FOO.field2().value()` instead of `FOO.get_field2()`")]]
-  const ::std::string& get_field2() const& {
+  const ::std::string& get_field2() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_field2;
   }
 

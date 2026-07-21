@@ -55,7 +55,7 @@ std::partial_ordering MyStruct::operator<=>([[maybe_unused]] const MyStruct& rhs
 }
 
 
-const ::matching_module_name::OtherStruct& MyStruct::get_OtherStructField() const& {
+const ::matching_module_name::OtherStruct& MyStruct::get_OtherStructField() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_OtherStructField;
 }
 

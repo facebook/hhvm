@@ -396,7 +396,7 @@ std::partial_ordering YourStruct::operator<=>([[maybe_unused]] const YourStruct&
   return __fbthrift_field_my_enum;
 }
 
-const ::cpp2::list_string_6884& YourStruct::get_cpp_type_annotation() const& {
+const ::cpp2::list_string_6884& YourStruct::get_cpp_type_annotation() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_cpp_type_annotation;
 }
 

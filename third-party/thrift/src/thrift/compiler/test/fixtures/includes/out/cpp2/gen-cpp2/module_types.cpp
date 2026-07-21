@@ -78,7 +78,7 @@ std::partial_ordering MyStruct::operator<=>([[maybe_unused]] const MyStruct& rhs
 }
 
 
-const ::cpp2::Included& MyStruct::get_MyIncludedField() const& {
+const ::cpp2::Included& MyStruct::get_MyIncludedField() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_MyIncludedField;
 }
 
@@ -86,7 +86,7 @@ const ::cpp2::Included& MyStruct::get_MyIncludedField() const& {
   return static_cast<::cpp2::Included&&>(__fbthrift_field_MyIncludedField);
 }
 
-const ::cpp2::Included& MyStruct::get_MyOtherIncludedField() const& {
+const ::cpp2::Included& MyStruct::get_MyOtherIncludedField() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_MyOtherIncludedField;
 }
 

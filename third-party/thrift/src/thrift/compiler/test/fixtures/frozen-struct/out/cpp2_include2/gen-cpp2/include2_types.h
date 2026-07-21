@@ -192,7 +192,7 @@ class IncludedB final  {
 
   /** Glean { "field": "strField" } */
   [[deprecated("Use `FOO.strField().value()` instead of `FOO.get_strField()`")]]
-  const ::std::string& get_strField() const& {
+  const ::std::string& get_strField() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_strField;
   }
 

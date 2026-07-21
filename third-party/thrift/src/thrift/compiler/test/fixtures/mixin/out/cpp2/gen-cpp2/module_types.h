@@ -174,7 +174,7 @@ class Mixin1 final  {
 
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1().value()` instead of `FOO.get_field1()`")]]
-  const ::std::string& get_field1() const& {
+  const ::std::string& get_field1() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_field1;
   }
 
@@ -369,7 +369,7 @@ class Mixin2 final  {
 
   /** Glean { "field": "m1" } */
   [[deprecated("Use `FOO.m1().value()` instead of `FOO.get_m1()`")]]
-  const ::cpp2::Mixin1& get_m1() const&;
+  const ::cpp2::Mixin1& get_m1() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "m1" } */
   [[deprecated("Use `FOO.m1().value()` instead of `FOO.get_m1()`")]]
@@ -385,11 +385,11 @@ class Mixin2 final  {
 
   /** Glean { "field": "field2" } */
   [[deprecated("Use `FOO.field2().value()` instead of `FOO.get_field2()`")]]
-  const ::std::string* get_field2() const&;
+  const ::std::string* get_field2() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "field2" } */
   [[deprecated("Use `FOO.field2().value()` instead of `FOO.get_field2()`")]]
-  ::std::string* get_field2() &;
+  ::std::string* get_field2() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::string* get_field2() && = delete;
 
@@ -526,7 +526,7 @@ class Mixin3Base final  {
 
   /** Glean { "field": "field3" } */
   [[deprecated("Use `FOO.field3().value()` instead of `FOO.get_field3()`")]]
-  const ::std::string& get_field3() const& {
+  const ::std::string& get_field3() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_field3;
   }
 
@@ -797,7 +797,7 @@ class Foo final  {
 
   /** Glean { "field": "field4" } */
   [[deprecated("Use `FOO.field4().value()` instead of `FOO.get_field4()`")]]
-  const ::std::string& get_field4() const& {
+  const ::std::string& get_field4() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_field4;
   }
 
@@ -817,7 +817,7 @@ class Foo final  {
 
   /** Glean { "field": "m2" } */
   [[deprecated("Use `FOO.m2().value()` instead of `FOO.get_m2()`")]]
-  const ::cpp2::Mixin2& get_m2() const&;
+  const ::cpp2::Mixin2& get_m2() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "m2" } */
   [[deprecated("Use `FOO.m2().value()` instead of `FOO.get_m2()`")]]
@@ -833,7 +833,7 @@ class Foo final  {
 
   /** Glean { "field": "m3" } */
   [[deprecated("Use `FOO.m3().value()` instead of `FOO.get_m3()`")]]
-  const ::cpp2::Mixin3& get_m3() const&;
+  const ::cpp2::Mixin3& get_m3() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "m3" } */
   [[deprecated("Use `FOO.m3().value()` instead of `FOO.get_m3()`")]]

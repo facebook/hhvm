@@ -1073,7 +1073,7 @@ bool& structC::set_d(bool d_) {
   return __fbthrift_field_f;
 }
 
-const ::test_cpp2::cpp_reflection::union1& structC::get_g() const& {
+const ::test_cpp2::cpp_reflection::union1& structC::get_g() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_g;
 }
 
@@ -1081,7 +1081,7 @@ const ::test_cpp2::cpp_reflection::union1& structC::get_g() const& {
   return static_cast<::test_cpp2::cpp_reflection::union1&&>(__fbthrift_field_g);
 }
 
-const ::test_cpp2::cpp_reflection::unionA& structC::get_h() const& {
+const ::test_cpp2::cpp_reflection::unionA& structC::get_h() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_h;
 }
 
@@ -1089,7 +1089,7 @@ const ::test_cpp2::cpp_reflection::unionA& structC::get_h() const& {
   return static_cast<::test_cpp2::cpp_reflection::unionA&&>(__fbthrift_field_h);
 }
 
-const ::test_cpp2::cpp_reflection::unionA& structC::get_i() const& {
+const ::test_cpp2::cpp_reflection::unionA& structC::get_i() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_i;
 }
 
@@ -1097,7 +1097,7 @@ const ::test_cpp2::cpp_reflection::unionA& structC::get_i() const& {
   return static_cast<::test_cpp2::cpp_reflection::unionA&&>(__fbthrift_field_i);
 }
 
-const ::std::vector<::std::int32_t>& structC::get_j() const& {
+const ::std::vector<::std::int32_t>& structC::get_j() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_j;
 }
 
@@ -1105,7 +1105,7 @@ const ::std::vector<::std::int32_t>& structC::get_j() const& {
   return static_cast<::std::vector<::std::int32_t>&&>(__fbthrift_field_j);
 }
 
-const ::std::vector<::std::int32_t>& structC::get_j1() const& {
+const ::std::vector<::std::int32_t>& structC::get_j1() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_j1;
 }
 
@@ -1113,7 +1113,7 @@ const ::std::vector<::std::int32_t>& structC::get_j1() const& {
   return static_cast<::std::vector<::std::int32_t>&&>(__fbthrift_field_j1);
 }
 
-const ::std::vector<::test_cpp2::cpp_reflection::enum1>& structC::get_j2() const& {
+const ::std::vector<::test_cpp2::cpp_reflection::enum1>& structC::get_j2() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_j2;
 }
 
@@ -1121,7 +1121,7 @@ const ::std::vector<::test_cpp2::cpp_reflection::enum1>& structC::get_j2() const
   return static_cast<::std::vector<::test_cpp2::cpp_reflection::enum1>&&>(__fbthrift_field_j2);
 }
 
-const ::std::vector<::test_cpp2::cpp_reflection::structA>& structC::get_j3() const& {
+const ::std::vector<::test_cpp2::cpp_reflection::structA>& structC::get_j3() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_j3;
 }
 
@@ -1129,7 +1129,7 @@ const ::std::vector<::test_cpp2::cpp_reflection::structA>& structC::get_j3() con
   return static_cast<::std::vector<::test_cpp2::cpp_reflection::structA>&&>(__fbthrift_field_j3);
 }
 
-const ::std::set<::std::int32_t>& structC::get_k() const& {
+const ::std::set<::std::int32_t>& structC::get_k() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_k;
 }
 
@@ -1137,7 +1137,7 @@ const ::std::set<::std::int32_t>& structC::get_k() const& {
   return static_cast<::std::set<::std::int32_t>&&>(__fbthrift_field_k);
 }
 
-const ::std::set<::std::int32_t>& structC::get_k1() const& {
+const ::std::set<::std::int32_t>& structC::get_k1() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_k1;
 }
 
@@ -1145,7 +1145,7 @@ const ::std::set<::std::int32_t>& structC::get_k1() const& {
   return static_cast<::std::set<::std::int32_t>&&>(__fbthrift_field_k1);
 }
 
-const ::std::set<::test_cpp2::cpp_reflection::enum2>& structC::get_k2() const& {
+const ::std::set<::test_cpp2::cpp_reflection::enum2>& structC::get_k2() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_k2;
 }
 
@@ -1153,7 +1153,7 @@ const ::std::set<::test_cpp2::cpp_reflection::enum2>& structC::get_k2() const& {
   return static_cast<::std::set<::test_cpp2::cpp_reflection::enum2>&&>(__fbthrift_field_k2);
 }
 
-const ::std::set<::test_cpp2::cpp_reflection::structB>& structC::get_k3() const& {
+const ::std::set<::test_cpp2::cpp_reflection::structB>& structC::get_k3() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_k3;
 }
 
@@ -1161,7 +1161,7 @@ const ::std::set<::test_cpp2::cpp_reflection::structB>& structC::get_k3() const&
   return static_cast<::std::set<::test_cpp2::cpp_reflection::structB>&&>(__fbthrift_field_k3);
 }
 
-const ::std::map<::std::int32_t, ::std::int32_t>& structC::get_l() const& {
+const ::std::map<::std::int32_t, ::std::int32_t>& structC::get_l() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_l;
 }
 
@@ -1169,7 +1169,7 @@ const ::std::map<::std::int32_t, ::std::int32_t>& structC::get_l() const& {
   return static_cast<::std::map<::std::int32_t, ::std::int32_t>&&>(__fbthrift_field_l);
 }
 
-const ::std::map<::std::int32_t, ::std::int32_t>& structC::get_l1() const& {
+const ::std::map<::std::int32_t, ::std::int32_t>& structC::get_l1() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_l1;
 }
 
@@ -1177,7 +1177,7 @@ const ::std::map<::std::int32_t, ::std::int32_t>& structC::get_l1() const& {
   return static_cast<::std::map<::std::int32_t, ::std::int32_t>&&>(__fbthrift_field_l1);
 }
 
-const ::std::map<::std::int32_t, ::test_cpp2::cpp_reflection::enum1>& structC::get_l2() const& {
+const ::std::map<::std::int32_t, ::test_cpp2::cpp_reflection::enum1>& structC::get_l2() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_l2;
 }
 
@@ -1185,7 +1185,7 @@ const ::std::map<::std::int32_t, ::test_cpp2::cpp_reflection::enum1>& structC::g
   return static_cast<::std::map<::std::int32_t, ::test_cpp2::cpp_reflection::enum1>&&>(__fbthrift_field_l2);
 }
 
-const ::std::map<::std::int32_t, ::test_cpp2::cpp_reflection::structB>& structC::get_l3() const& {
+const ::std::map<::std::int32_t, ::test_cpp2::cpp_reflection::structB>& structC::get_l3() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_l3;
 }
 
@@ -1193,7 +1193,7 @@ const ::std::map<::std::int32_t, ::test_cpp2::cpp_reflection::structB>& structC:
   return static_cast<::std::map<::std::int32_t, ::test_cpp2::cpp_reflection::structB>&&>(__fbthrift_field_l3);
 }
 
-const ::std::map<::test_cpp2::cpp_reflection::enum1, ::std::int32_t>& structC::get_m1() const& {
+const ::std::map<::test_cpp2::cpp_reflection::enum1, ::std::int32_t>& structC::get_m1() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_m1;
 }
 
@@ -1201,7 +1201,7 @@ const ::std::map<::test_cpp2::cpp_reflection::enum1, ::std::int32_t>& structC::g
   return static_cast<::std::map<::test_cpp2::cpp_reflection::enum1, ::std::int32_t>&&>(__fbthrift_field_m1);
 }
 
-const ::std::map<::test_cpp2::cpp_reflection::enum1, ::test_cpp2::cpp_reflection::enum2>& structC::get_m2() const& {
+const ::std::map<::test_cpp2::cpp_reflection::enum1, ::test_cpp2::cpp_reflection::enum2>& structC::get_m2() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_m2;
 }
 
@@ -1209,7 +1209,7 @@ const ::std::map<::test_cpp2::cpp_reflection::enum1, ::test_cpp2::cpp_reflection
   return static_cast<::std::map<::test_cpp2::cpp_reflection::enum1, ::test_cpp2::cpp_reflection::enum2>&&>(__fbthrift_field_m2);
 }
 
-const ::std::map<::test_cpp2::cpp_reflection::enum1, ::test_cpp2::cpp_reflection::structB>& structC::get_m3() const& {
+const ::std::map<::test_cpp2::cpp_reflection::enum1, ::test_cpp2::cpp_reflection::structB>& structC::get_m3() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_m3;
 }
 
@@ -1217,7 +1217,7 @@ const ::std::map<::test_cpp2::cpp_reflection::enum1, ::test_cpp2::cpp_reflection
   return static_cast<::std::map<::test_cpp2::cpp_reflection::enum1, ::test_cpp2::cpp_reflection::structB>&&>(__fbthrift_field_m3);
 }
 
-const ::std::map<::std::string, ::std::int32_t>& structC::get_n1() const& {
+const ::std::map<::std::string, ::std::int32_t>& structC::get_n1() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_n1;
 }
 
@@ -1225,7 +1225,7 @@ const ::std::map<::std::string, ::std::int32_t>& structC::get_n1() const& {
   return static_cast<::std::map<::std::string, ::std::int32_t>&&>(__fbthrift_field_n1);
 }
 
-const ::std::map<::std::string, ::test_cpp2::cpp_reflection::enum1>& structC::get_n2() const& {
+const ::std::map<::std::string, ::test_cpp2::cpp_reflection::enum1>& structC::get_n2() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_n2;
 }
 
@@ -1233,7 +1233,7 @@ const ::std::map<::std::string, ::test_cpp2::cpp_reflection::enum1>& structC::ge
   return static_cast<::std::map<::std::string, ::test_cpp2::cpp_reflection::enum1>&&>(__fbthrift_field_n2);
 }
 
-const ::std::map<::std::string, ::test_cpp2::cpp_reflection::structB>& structC::get_n3() const& {
+const ::std::map<::std::string, ::test_cpp2::cpp_reflection::structB>& structC::get_n3() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_n3;
 }
 
@@ -1241,7 +1241,7 @@ const ::std::map<::std::string, ::test_cpp2::cpp_reflection::structB>& structC::
   return static_cast<::std::map<::std::string, ::test_cpp2::cpp_reflection::structB>&&>(__fbthrift_field_n3);
 }
 
-const ::std::map<::test_cpp2::cpp_reflection::structA, ::std::int32_t>& structC::get_o1() const& {
+const ::std::map<::test_cpp2::cpp_reflection::structA, ::std::int32_t>& structC::get_o1() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_o1;
 }
 
@@ -1249,7 +1249,7 @@ const ::std::map<::test_cpp2::cpp_reflection::structA, ::std::int32_t>& structC:
   return static_cast<::std::map<::test_cpp2::cpp_reflection::structA, ::std::int32_t>&&>(__fbthrift_field_o1);
 }
 
-const ::std::map<::test_cpp2::cpp_reflection::structA, ::test_cpp2::cpp_reflection::enum1>& structC::get_o2() const& {
+const ::std::map<::test_cpp2::cpp_reflection::structA, ::test_cpp2::cpp_reflection::enum1>& structC::get_o2() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_o2;
 }
 
@@ -1257,7 +1257,7 @@ const ::std::map<::test_cpp2::cpp_reflection::structA, ::test_cpp2::cpp_reflecti
   return static_cast<::std::map<::test_cpp2::cpp_reflection::structA, ::test_cpp2::cpp_reflection::enum1>&&>(__fbthrift_field_o2);
 }
 
-const ::std::map<::test_cpp2::cpp_reflection::structA, ::test_cpp2::cpp_reflection::structB>& structC::get_o3() const& {
+const ::std::map<::test_cpp2::cpp_reflection::structA, ::test_cpp2::cpp_reflection::structB>& structC::get_o3() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_o3;
 }
 
@@ -1459,11 +1459,11 @@ std::partial_ordering struct1::operator<=>([[maybe_unused]] const struct1& rhs) 
   return __fbthrift_field_field0;
 }
 
-const ::std::string* struct1::get_field1() const& {
+const ::std::string* struct1::get_field1() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return field1_ref().has_value() ? std::addressof(__fbthrift_field_field1) : nullptr;
 }
 
-::std::string* struct1::get_field1() & {
+::std::string* struct1::get_field1() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return field1_ref().has_value() ? std::addressof(__fbthrift_field_field1) : nullptr;
 }
 
@@ -1485,15 +1485,15 @@ const ::std::string* struct1::get_field1() const& {
   return __fbthrift_field_field3;
 }
 
-const ::test_cpp2::cpp_reflection::union1* struct1::get_field4() const& {
+const ::test_cpp2::cpp_reflection::union1* struct1::get_field4() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return field4_ref().has_value() ? std::addressof(__fbthrift_field_field4) : nullptr;
 }
 
-::test_cpp2::cpp_reflection::union1* struct1::get_field4() & {
+::test_cpp2::cpp_reflection::union1* struct1::get_field4() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return field4_ref().has_value() ? std::addressof(__fbthrift_field_field4) : nullptr;
 }
 
-const ::test_cpp2::cpp_reflection::union2& struct1::get_field5() const& {
+const ::test_cpp2::cpp_reflection::union2& struct1::get_field5() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_field5;
 }
 
@@ -1642,7 +1642,7 @@ std::partial_ordering struct2::operator<=>([[maybe_unused]] const struct2& rhs) 
   return __fbthrift_field_fieldD;
 }
 
-const ::test_cpp2::cpp_reflection::union1& struct2::get_fieldE() const& {
+const ::test_cpp2::cpp_reflection::union1& struct2::get_fieldE() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_fieldE;
 }
 
@@ -1650,7 +1650,7 @@ const ::test_cpp2::cpp_reflection::union1& struct2::get_fieldE() const& {
   return static_cast<::test_cpp2::cpp_reflection::union1&&>(__fbthrift_field_fieldE);
 }
 
-const ::test_cpp2::cpp_reflection::union2& struct2::get_fieldF() const& {
+const ::test_cpp2::cpp_reflection::union2& struct2::get_fieldF() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_fieldF;
 }
 
@@ -1658,7 +1658,7 @@ const ::test_cpp2::cpp_reflection::union2& struct2::get_fieldF() const& {
   return static_cast<::test_cpp2::cpp_reflection::union2&&>(__fbthrift_field_fieldF);
 }
 
-const ::test_cpp2::cpp_reflection::struct1& struct2::get_fieldG() const& {
+const ::test_cpp2::cpp_reflection::struct1& struct2::get_fieldG() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_fieldG;
 }
 
@@ -1869,7 +1869,7 @@ std::partial_ordering struct3::operator<=>([[maybe_unused]] const struct3& rhs) 
   return __fbthrift_field_fieldD;
 }
 
-const ::test_cpp2::cpp_reflection::union1& struct3::get_fieldE() const& {
+const ::test_cpp2::cpp_reflection::union1& struct3::get_fieldE() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_fieldE;
 }
 
@@ -1877,7 +1877,7 @@ const ::test_cpp2::cpp_reflection::union1& struct3::get_fieldE() const& {
   return static_cast<::test_cpp2::cpp_reflection::union1&&>(__fbthrift_field_fieldE);
 }
 
-const ::test_cpp2::cpp_reflection::union2& struct3::get_fieldF() const& {
+const ::test_cpp2::cpp_reflection::union2& struct3::get_fieldF() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_fieldF;
 }
 
@@ -1885,7 +1885,7 @@ const ::test_cpp2::cpp_reflection::union2& struct3::get_fieldF() const& {
   return static_cast<::test_cpp2::cpp_reflection::union2&&>(__fbthrift_field_fieldF);
 }
 
-const ::test_cpp2::cpp_reflection::struct1& struct3::get_fieldG() const& {
+const ::test_cpp2::cpp_reflection::struct1& struct3::get_fieldG() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_fieldG;
 }
 
@@ -1893,7 +1893,7 @@ const ::test_cpp2::cpp_reflection::struct1& struct3::get_fieldG() const& {
   return static_cast<::test_cpp2::cpp_reflection::struct1&&>(__fbthrift_field_fieldG);
 }
 
-const ::test_cpp2::cpp_reflection::union2& struct3::get_fieldH() const& {
+const ::test_cpp2::cpp_reflection::union2& struct3::get_fieldH() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_fieldH;
 }
 
@@ -1901,7 +1901,7 @@ const ::test_cpp2::cpp_reflection::union2& struct3::get_fieldH() const& {
   return static_cast<::test_cpp2::cpp_reflection::union2&&>(__fbthrift_field_fieldH);
 }
 
-const ::std::vector<::std::int32_t>& struct3::get_fieldI() const& {
+const ::std::vector<::std::int32_t>& struct3::get_fieldI() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_fieldI;
 }
 
@@ -1909,7 +1909,7 @@ const ::std::vector<::std::int32_t>& struct3::get_fieldI() const& {
   return static_cast<::std::vector<::std::int32_t>&&>(__fbthrift_field_fieldI);
 }
 
-const ::std::vector<::std::string>& struct3::get_fieldJ() const& {
+const ::std::vector<::std::string>& struct3::get_fieldJ() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_fieldJ;
 }
 
@@ -1917,7 +1917,7 @@ const ::std::vector<::std::string>& struct3::get_fieldJ() const& {
   return static_cast<::std::vector<::std::string>&&>(__fbthrift_field_fieldJ);
 }
 
-const ::std::vector<::std::string>& struct3::get_fieldK() const& {
+const ::std::vector<::std::string>& struct3::get_fieldK() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_fieldK;
 }
 
@@ -1925,7 +1925,7 @@ const ::std::vector<::std::string>& struct3::get_fieldK() const& {
   return static_cast<::std::vector<::std::string>&&>(__fbthrift_field_fieldK);
 }
 
-const ::std::vector<::test_cpp2::cpp_reflection::structA>& struct3::get_fieldL() const& {
+const ::std::vector<::test_cpp2::cpp_reflection::structA>& struct3::get_fieldL() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_fieldL;
 }
 
@@ -1933,7 +1933,7 @@ const ::std::vector<::test_cpp2::cpp_reflection::structA>& struct3::get_fieldL()
   return static_cast<::std::vector<::test_cpp2::cpp_reflection::structA>&&>(__fbthrift_field_fieldL);
 }
 
-const ::std::set<::std::int32_t>& struct3::get_fieldM() const& {
+const ::std::set<::std::int32_t>& struct3::get_fieldM() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_fieldM;
 }
 
@@ -1941,7 +1941,7 @@ const ::std::set<::std::int32_t>& struct3::get_fieldM() const& {
   return static_cast<::std::set<::std::int32_t>&&>(__fbthrift_field_fieldM);
 }
 
-const ::std::set<::std::string>& struct3::get_fieldN() const& {
+const ::std::set<::std::string>& struct3::get_fieldN() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_fieldN;
 }
 
@@ -1949,7 +1949,7 @@ const ::std::set<::std::string>& struct3::get_fieldN() const& {
   return static_cast<::std::set<::std::string>&&>(__fbthrift_field_fieldN);
 }
 
-const ::std::set<::std::string>& struct3::get_fieldO() const& {
+const ::std::set<::std::string>& struct3::get_fieldO() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_fieldO;
 }
 
@@ -1957,7 +1957,7 @@ const ::std::set<::std::string>& struct3::get_fieldO() const& {
   return static_cast<::std::set<::std::string>&&>(__fbthrift_field_fieldO);
 }
 
-const ::std::set<::test_cpp2::cpp_reflection::structB>& struct3::get_fieldP() const& {
+const ::std::set<::test_cpp2::cpp_reflection::structB>& struct3::get_fieldP() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_fieldP;
 }
 
@@ -1965,7 +1965,7 @@ const ::std::set<::test_cpp2::cpp_reflection::structB>& struct3::get_fieldP() co
   return static_cast<::std::set<::test_cpp2::cpp_reflection::structB>&&>(__fbthrift_field_fieldP);
 }
 
-const ::std::map<::std::string, ::test_cpp2::cpp_reflection::structA>& struct3::get_fieldQ() const& {
+const ::std::map<::std::string, ::test_cpp2::cpp_reflection::structA>& struct3::get_fieldQ() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_fieldQ;
 }
 
@@ -1973,7 +1973,7 @@ const ::std::map<::std::string, ::test_cpp2::cpp_reflection::structA>& struct3::
   return static_cast<::std::map<::std::string, ::test_cpp2::cpp_reflection::structA>&&>(__fbthrift_field_fieldQ);
 }
 
-const ::std::map<::std::string, ::test_cpp2::cpp_reflection::structB>& struct3::get_fieldR() const& {
+const ::std::map<::std::string, ::test_cpp2::cpp_reflection::structB>& struct3::get_fieldR() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_fieldR;
 }
 
@@ -2149,11 +2149,11 @@ std::partial_ordering struct4::operator<=>([[maybe_unused]] const struct4& rhs) 
   return __fbthrift_field_field0;
 }
 
-const ::std::string* struct4::get_field1() const& {
+const ::std::string* struct4::get_field1() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return field1_ref().has_value() ? std::addressof(__fbthrift_field_field1) : nullptr;
 }
 
-::std::string* struct4::get_field1() & {
+::std::string* struct4::get_field1() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return field1_ref().has_value() ? std::addressof(__fbthrift_field_field1) : nullptr;
 }
 
@@ -2269,11 +2269,11 @@ std::partial_ordering struct5::operator<=>([[maybe_unused]] const struct5& rhs) 
   return __fbthrift_field_field0;
 }
 
-const ::std::string* struct5::get_field1() const& {
+const ::std::string* struct5::get_field1() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return field1_ref().has_value() ? std::addressof(__fbthrift_field_field1) : nullptr;
 }
 
-::std::string* struct5::get_field1() & {
+::std::string* struct5::get_field1() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return field1_ref().has_value() ? std::addressof(__fbthrift_field_field1) : nullptr;
 }
 
@@ -2286,7 +2286,7 @@ const ::std::string* struct5::get_field1() const& {
   return __fbthrift_field_field2;
 }
 
-const ::test_cpp2::cpp_reflection::structA& struct5::get_field3() const& {
+const ::test_cpp2::cpp_reflection::structA& struct5::get_field3() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_field3;
 }
 
@@ -2294,7 +2294,7 @@ const ::test_cpp2::cpp_reflection::structA& struct5::get_field3() const& {
   return static_cast<::test_cpp2::cpp_reflection::structA&&>(__fbthrift_field_field3);
 }
 
-const ::test_cpp2::cpp_reflection::structB& struct5::get_field4() const& {
+const ::test_cpp2::cpp_reflection::structB& struct5::get_field4() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_field4;
 }
 
@@ -2433,7 +2433,7 @@ std::partial_ordering dep_A_struct::operator<=>([[maybe_unused]] const dep_A_str
 }
 
 
-const ::test_cpp2::cpp_reflection::dep_B_struct& dep_A_struct::get_b() const& {
+const ::test_cpp2::cpp_reflection::dep_B_struct& dep_A_struct::get_b() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_b;
 }
 
@@ -2441,7 +2441,7 @@ const ::test_cpp2::cpp_reflection::dep_B_struct& dep_A_struct::get_b() const& {
   return static_cast<::test_cpp2::cpp_reflection::dep_B_struct&&>(__fbthrift_field_b);
 }
 
-const ::test_cpp2::cpp_reflection::dep_C_struct& dep_A_struct::get_c() const& {
+const ::test_cpp2::cpp_reflection::dep_C_struct& dep_A_struct::get_c() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_c;
 }
 
@@ -2523,7 +2523,7 @@ std::partial_ordering dep_B_struct::operator<=>([[maybe_unused]] const dep_B_str
 }
 
 
-const ::test_cpp2::cpp_reflection::dep_B_struct& dep_B_struct::get_b() const& {
+const ::test_cpp2::cpp_reflection::dep_B_struct& dep_B_struct::get_b() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_b;
 }
 
@@ -2531,7 +2531,7 @@ const ::test_cpp2::cpp_reflection::dep_B_struct& dep_B_struct::get_b() const& {
   return static_cast<::test_cpp2::cpp_reflection::dep_B_struct&&>(__fbthrift_field_b);
 }
 
-const ::test_cpp2::cpp_reflection::dep_C_struct& dep_B_struct::get_c() const& {
+const ::test_cpp2::cpp_reflection::dep_C_struct& dep_B_struct::get_c() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_c;
 }
 

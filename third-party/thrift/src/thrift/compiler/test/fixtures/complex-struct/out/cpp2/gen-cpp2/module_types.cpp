@@ -260,7 +260,7 @@ std::partial_ordering MyStructMapFloatThrowExp::operator<=>([[maybe_unused]] con
   return __fbthrift_field_myLongField;
 }
 
-const ::std::map<::std::int32_t, ::std::vector<::std::vector<::cpp2::floatTypedef>>>& MyStructMapFloatThrowExp::get_mapListOfFloats() const& {
+const ::std::map<::std::int32_t, ::std::vector<::std::vector<::cpp2::floatTypedef>>>& MyStructMapFloatThrowExp::get_mapListOfFloats() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_mapListOfFloats;
 }
 
@@ -483,7 +483,7 @@ std::partial_ordering MyStruct::operator<=>([[maybe_unused]] const MyStruct& rhs
   return __fbthrift_field_MyIntField;
 }
 
-const ::cpp2::MyDataItem& MyStruct::get_MyDataField() const& {
+const ::cpp2::MyDataItem& MyStruct::get_MyDataField() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_MyDataField;
 }
 
@@ -545,7 +545,7 @@ double& MyStruct::set_MyDoubleField(double MyDoubleField_) {
   return __fbthrift_field_MyDoubleField;
 }
 
-const ::std::vector<double>& MyStruct::get_lDouble() const& {
+const ::std::vector<double>& MyStruct::get_lDouble() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_lDouble;
 }
 
@@ -553,7 +553,7 @@ const ::std::vector<double>& MyStruct::get_lDouble() const& {
   return static_cast<::std::vector<double>&&>(__fbthrift_field_lDouble);
 }
 
-const ::std::vector<::std::int16_t>& MyStruct::get_lShort() const& {
+const ::std::vector<::std::int16_t>& MyStruct::get_lShort() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_lShort;
 }
 
@@ -561,7 +561,7 @@ const ::std::vector<::std::int16_t>& MyStruct::get_lShort() const& {
   return static_cast<::std::vector<::std::int16_t>&&>(__fbthrift_field_lShort);
 }
 
-const ::std::vector<::std::int32_t>& MyStruct::get_lInteger() const& {
+const ::std::vector<::std::int32_t>& MyStruct::get_lInteger() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_lInteger;
 }
 
@@ -569,7 +569,7 @@ const ::std::vector<::std::int32_t>& MyStruct::get_lInteger() const& {
   return static_cast<::std::vector<::std::int32_t>&&>(__fbthrift_field_lInteger);
 }
 
-const ::std::vector<::std::int64_t>& MyStruct::get_lLong() const& {
+const ::std::vector<::std::int64_t>& MyStruct::get_lLong() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_lLong;
 }
 
@@ -577,7 +577,7 @@ const ::std::vector<::std::int64_t>& MyStruct::get_lLong() const& {
   return static_cast<::std::vector<::std::int64_t>&&>(__fbthrift_field_lLong);
 }
 
-const ::std::vector<::std::string>& MyStruct::get_lString() const& {
+const ::std::vector<::std::string>& MyStruct::get_lString() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_lString;
 }
 
@@ -585,7 +585,7 @@ const ::std::vector<::std::string>& MyStruct::get_lString() const& {
   return static_cast<::std::vector<::std::string>&&>(__fbthrift_field_lString);
 }
 
-const ::std::vector<bool>& MyStruct::get_lBool() const& {
+const ::std::vector<bool>& MyStruct::get_lBool() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_lBool;
 }
 
@@ -593,7 +593,7 @@ const ::std::vector<bool>& MyStruct::get_lBool() const& {
   return static_cast<::std::vector<bool>&&>(__fbthrift_field_lBool);
 }
 
-const ::std::vector<::std::int8_t>& MyStruct::get_lByte() const& {
+const ::std::vector<::std::int8_t>& MyStruct::get_lByte() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_lByte;
 }
 
@@ -601,7 +601,7 @@ const ::std::vector<::std::int8_t>& MyStruct::get_lByte() const& {
   return static_cast<::std::vector<::std::int8_t>&&>(__fbthrift_field_lByte);
 }
 
-const ::std::map<::std::int16_t, ::std::string>& MyStruct::get_mShortString() const& {
+const ::std::map<::std::int16_t, ::std::string>& MyStruct::get_mShortString() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_mShortString;
 }
 
@@ -609,7 +609,7 @@ const ::std::map<::std::int16_t, ::std::string>& MyStruct::get_mShortString() co
   return static_cast<::std::map<::std::int16_t, ::std::string>&&>(__fbthrift_field_mShortString);
 }
 
-const ::std::map<::std::int32_t, ::std::string>& MyStruct::get_mIntegerString() const& {
+const ::std::map<::std::int32_t, ::std::string>& MyStruct::get_mIntegerString() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_mIntegerString;
 }
 
@@ -617,7 +617,7 @@ const ::std::map<::std::int32_t, ::std::string>& MyStruct::get_mIntegerString() 
   return static_cast<::std::map<::std::int32_t, ::std::string>&&>(__fbthrift_field_mIntegerString);
 }
 
-const ::std::map<::std::string, ::cpp2::MyStruct>& MyStruct::get_mStringMyStruct() const& {
+const ::std::map<::std::string, ::cpp2::MyStruct>& MyStruct::get_mStringMyStruct() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_mStringMyStruct;
 }
 
@@ -625,7 +625,7 @@ const ::std::map<::std::string, ::cpp2::MyStruct>& MyStruct::get_mStringMyStruct
   return static_cast<::std::map<::std::string, ::cpp2::MyStruct>&&>(__fbthrift_field_mStringMyStruct);
 }
 
-const ::std::map<::std::string, bool>& MyStruct::get_mStringBool() const& {
+const ::std::map<::std::string, bool>& MyStruct::get_mStringBool() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_mStringBool;
 }
 
@@ -633,7 +633,7 @@ const ::std::map<::std::string, bool>& MyStruct::get_mStringBool() const& {
   return static_cast<::std::map<::std::string, bool>&&>(__fbthrift_field_mStringBool);
 }
 
-const ::std::map<::std::int32_t, ::std::int32_t>& MyStruct::get_mIntegerInteger() const& {
+const ::std::map<::std::int32_t, ::std::int32_t>& MyStruct::get_mIntegerInteger() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_mIntegerInteger;
 }
 
@@ -641,7 +641,7 @@ const ::std::map<::std::int32_t, ::std::int32_t>& MyStruct::get_mIntegerInteger(
   return static_cast<::std::map<::std::int32_t, ::std::int32_t>&&>(__fbthrift_field_mIntegerInteger);
 }
 
-const ::std::map<::std::int32_t, bool>& MyStruct::get_mIntegerBool() const& {
+const ::std::map<::std::int32_t, bool>& MyStruct::get_mIntegerBool() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_mIntegerBool;
 }
 
@@ -649,7 +649,7 @@ const ::std::map<::std::int32_t, bool>& MyStruct::get_mIntegerBool() const& {
   return static_cast<::std::map<::std::int32_t, bool>&&>(__fbthrift_field_mIntegerBool);
 }
 
-const ::std::set<::std::int16_t>& MyStruct::get_sShort() const& {
+const ::std::set<::std::int16_t>& MyStruct::get_sShort() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_sShort;
 }
 
@@ -657,7 +657,7 @@ const ::std::set<::std::int16_t>& MyStruct::get_sShort() const& {
   return static_cast<::std::set<::std::int16_t>&&>(__fbthrift_field_sShort);
 }
 
-const ::std::set<::cpp2::MyStruct>& MyStruct::get_sMyStruct() const& {
+const ::std::set<::cpp2::MyStruct>& MyStruct::get_sMyStruct() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_sMyStruct;
 }
 
@@ -665,7 +665,7 @@ const ::std::set<::cpp2::MyStruct>& MyStruct::get_sMyStruct() const& {
   return static_cast<::std::set<::cpp2::MyStruct>&&>(__fbthrift_field_sMyStruct);
 }
 
-const ::std::set<::std::int64_t>& MyStruct::get_sLong() const& {
+const ::std::set<::std::int64_t>& MyStruct::get_sLong() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_sLong;
 }
 
@@ -673,7 +673,7 @@ const ::std::set<::std::int64_t>& MyStruct::get_sLong() const& {
   return static_cast<::std::set<::std::int64_t>&&>(__fbthrift_field_sLong);
 }
 
-const ::std::set<::std::string>& MyStruct::get_sString() const& {
+const ::std::set<::std::string>& MyStruct::get_sString() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_sString;
 }
 
@@ -681,7 +681,7 @@ const ::std::set<::std::string>& MyStruct::get_sString() const& {
   return static_cast<::std::set<::std::string>&&>(__fbthrift_field_sString);
 }
 
-const ::std::set<::std::int8_t>& MyStruct::get_sByte() const& {
+const ::std::set<::std::int8_t>& MyStruct::get_sByte() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_sByte;
 }
 
@@ -689,7 +689,7 @@ const ::std::set<::std::int8_t>& MyStruct::get_sByte() const& {
   return static_cast<::std::set<::std::int8_t>&&>(__fbthrift_field_sByte);
 }
 
-const ::std::map<::std::vector<::std::int32_t>, ::std::vector<::std::int32_t>>& MyStruct::get_mListList() const& {
+const ::std::map<::std::vector<::std::int32_t>, ::std::vector<::std::int32_t>>& MyStruct::get_mListList() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_mListList;
 }
 
@@ -1112,7 +1112,7 @@ double& defaultStruct::set_myDouble(double myDouble_) {
   return __fbthrift_field_myDouble;
 }
 
-const ::std::map<::std::int32_t, ::std::string>& defaultStruct::get_field3() const& {
+const ::std::map<::std::int32_t, ::std::string>& defaultStruct::get_field3() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_field3;
 }
 
@@ -1120,7 +1120,7 @@ const ::std::map<::std::int32_t, ::std::string>& defaultStruct::get_field3() con
   return static_cast<::std::map<::std::int32_t, ::std::string>&&>(__fbthrift_field_field3);
 }
 
-const ::std::vector<::cpp2::MyEnum>& defaultStruct::get_myList() const& {
+const ::std::vector<::cpp2::MyEnum>& defaultStruct::get_myList() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_myList;
 }
 
@@ -1128,7 +1128,7 @@ const ::std::vector<::cpp2::MyEnum>& defaultStruct::get_myList() const& {
   return static_cast<::std::vector<::cpp2::MyEnum>&&>(__fbthrift_field_myList);
 }
 
-const ::std::set<::std::string>& defaultStruct::get_mySet() const& {
+const ::std::set<::std::string>& defaultStruct::get_mySet() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_mySet;
 }
 
@@ -1136,7 +1136,7 @@ const ::std::set<::std::string>& defaultStruct::get_mySet() const& {
   return static_cast<::std::set<::std::string>&&>(__fbthrift_field_mySet);
 }
 
-const ::cpp2::SimpleStruct& defaultStruct::get_simpleStruct() const& {
+const ::cpp2::SimpleStruct& defaultStruct::get_simpleStruct() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_simpleStruct;
 }
 
@@ -1144,7 +1144,7 @@ const ::cpp2::SimpleStruct& defaultStruct::get_simpleStruct() const& {
   return static_cast<::cpp2::SimpleStruct&&>(__fbthrift_field_simpleStruct);
 }
 
-const ::std::vector<::cpp2::SimpleStruct>& defaultStruct::get_listStructDFset() const& {
+const ::std::vector<::cpp2::SimpleStruct>& defaultStruct::get_listStructDFset() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_listStructDFset;
 }
 
@@ -1152,7 +1152,7 @@ const ::std::vector<::cpp2::SimpleStruct>& defaultStruct::get_listStructDFset() 
   return static_cast<::std::vector<::cpp2::SimpleStruct>&&>(__fbthrift_field_listStructDFset);
 }
 
-const ::cpp2::MyUnion& defaultStruct::get_myUnion() const& {
+const ::cpp2::MyUnion& defaultStruct::get_myUnion() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_myUnion;
 }
 
@@ -1160,7 +1160,7 @@ const ::cpp2::MyUnion& defaultStruct::get_myUnion() const& {
   return static_cast<::cpp2::MyUnion&&>(__fbthrift_field_myUnion);
 }
 
-const ::std::vector<::cpp2::MyUnion>& defaultStruct::get_listUnionDFset() const& {
+const ::std::vector<::cpp2::MyUnion>& defaultStruct::get_listUnionDFset() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_listUnionDFset;
 }
 
@@ -1168,7 +1168,7 @@ const ::std::vector<::cpp2::MyUnion>& defaultStruct::get_listUnionDFset() const&
   return static_cast<::std::vector<::cpp2::MyUnion>&&>(__fbthrift_field_listUnionDFset);
 }
 
-const ::std::map<::std::int32_t, ::std::vector<::cpp2::SimpleStruct>>& defaultStruct::get_mapNestlistStructDfSet() const& {
+const ::std::map<::std::int32_t, ::std::vector<::cpp2::SimpleStruct>>& defaultStruct::get_mapNestlistStructDfSet() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_mapNestlistStructDfSet;
 }
 
@@ -1176,7 +1176,7 @@ const ::std::map<::std::int32_t, ::std::vector<::cpp2::SimpleStruct>>& defaultSt
   return static_cast<::std::map<::std::int32_t, ::std::vector<::cpp2::SimpleStruct>>&&>(__fbthrift_field_mapNestlistStructDfSet);
 }
 
-const ::cpp2::map_i64_string_5732& defaultStruct::get_mapJavaTypeDFset() const& {
+const ::cpp2::map_i64_string_5732& defaultStruct::get_mapJavaTypeDFset() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_mapJavaTypeDFset;
 }
 
@@ -1184,7 +1184,7 @@ const ::cpp2::map_i64_string_5732& defaultStruct::get_mapJavaTypeDFset() const& 
   return static_cast<::cpp2::map_i64_string_5732&&>(__fbthrift_field_mapJavaTypeDFset);
 }
 
-const ::std::map<::std::int64_t, ::std::int32_t>& defaultStruct::get_emptyMap() const& {
+const ::std::map<::std::int64_t, ::std::int32_t>& defaultStruct::get_emptyMap() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_emptyMap;
 }
 
@@ -1192,7 +1192,7 @@ const ::std::map<::std::int64_t, ::std::int32_t>& defaultStruct::get_emptyMap() 
   return static_cast<::std::map<::std::int64_t, ::std::int32_t>&&>(__fbthrift_field_emptyMap);
 }
 
-const ::std::map<::std::string, ::std::map<::std::int32_t, ::cpp2::MyEnum>>& defaultStruct::get_enumMapDFset() const& {
+const ::std::map<::std::string, ::std::map<::std::int32_t, ::cpp2::MyEnum>>& defaultStruct::get_enumMapDFset() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_enumMapDFset;
 }
 
@@ -1375,7 +1375,7 @@ std::partial_ordering MyStructTypeDef::operator<=>([[maybe_unused]] const MyStru
   return __fbthrift_field_myLongTypeDef;
 }
 
-const ::std::map<::std::int16_t, ::std::string>& MyStructTypeDef::get_myMapField() const& {
+const ::std::map<::std::int16_t, ::std::string>& MyStructTypeDef::get_myMapField() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_myMapField;
 }
 
@@ -1383,7 +1383,7 @@ const ::std::map<::std::int16_t, ::std::string>& MyStructTypeDef::get_myMapField
   return static_cast<::std::map<::std::int16_t, ::std::string>&&>(__fbthrift_field_myMapField);
 }
 
-const ::cpp2::mapTypedef& MyStructTypeDef::get_myMapTypedef() const& {
+const ::cpp2::mapTypedef& MyStructTypeDef::get_myMapTypedef() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_myMapTypedef;
 }
 
@@ -1391,7 +1391,7 @@ const ::cpp2::mapTypedef& MyStructTypeDef::get_myMapTypedef() const& {
   return static_cast<::cpp2::mapTypedef&&>(__fbthrift_field_myMapTypedef);
 }
 
-const ::std::vector<double>& MyStructTypeDef::get_myListField() const& {
+const ::std::vector<double>& MyStructTypeDef::get_myListField() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_myListField;
 }
 
@@ -1399,7 +1399,7 @@ const ::std::vector<double>& MyStructTypeDef::get_myListField() const& {
   return static_cast<::std::vector<double>&&>(__fbthrift_field_myListField);
 }
 
-const ::cpp2::listTypedef& MyStructTypeDef::get_myListTypedef() const& {
+const ::cpp2::listTypedef& MyStructTypeDef::get_myListTypedef() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_myListTypedef;
 }
 
@@ -1407,7 +1407,7 @@ const ::cpp2::listTypedef& MyStructTypeDef::get_myListTypedef() const& {
   return static_cast<::cpp2::listTypedef&&>(__fbthrift_field_myListTypedef);
 }
 
-const ::std::map<::std::int16_t, ::std::vector<::cpp2::listTypedef>>& MyStructTypeDef::get_myMapListOfTypeDef() const& {
+const ::std::map<::std::int16_t, ::std::vector<::cpp2::listTypedef>>& MyStructTypeDef::get_myMapListOfTypeDef() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_myMapListOfTypeDef;
 }
 
@@ -1904,7 +1904,7 @@ std::partial_ordering ComplexNestedStruct::operator<=>([[maybe_unused]] const Co
 }
 
 
-const ::std::set<::std::set<::std::int32_t>>& ComplexNestedStruct::get_setOfSetOfInt() const& {
+const ::std::set<::std::set<::std::int32_t>>& ComplexNestedStruct::get_setOfSetOfInt() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_setOfSetOfInt;
 }
 
@@ -1912,7 +1912,7 @@ const ::std::set<::std::set<::std::int32_t>>& ComplexNestedStruct::get_setOfSetO
   return static_cast<::std::set<::std::set<::std::int32_t>>&&>(__fbthrift_field_setOfSetOfInt);
 }
 
-const ::std::vector<::std::vector<::std::vector<::std::vector<::cpp2::MyEnum>>>>& ComplexNestedStruct::get_listofListOfListOfListOfEnum() const& {
+const ::std::vector<::std::vector<::std::vector<::std::vector<::cpp2::MyEnum>>>>& ComplexNestedStruct::get_listofListOfListOfListOfEnum() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_listofListOfListOfListOfEnum;
 }
 
@@ -1920,7 +1920,7 @@ const ::std::vector<::std::vector<::std::vector<::std::vector<::cpp2::MyEnum>>>>
   return static_cast<::std::vector<::std::vector<::std::vector<::std::vector<::cpp2::MyEnum>>>>&&>(__fbthrift_field_listofListOfListOfListOfEnum);
 }
 
-const ::std::vector<::std::vector<::cpp2::MyStruct>>& ComplexNestedStruct::get_listOfListOfMyStruct() const& {
+const ::std::vector<::std::vector<::cpp2::MyStruct>>& ComplexNestedStruct::get_listOfListOfMyStruct() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_listOfListOfMyStruct;
 }
 
@@ -1928,7 +1928,7 @@ const ::std::vector<::std::vector<::cpp2::MyStruct>>& ComplexNestedStruct::get_l
   return static_cast<::std::vector<::std::vector<::cpp2::MyStruct>>&&>(__fbthrift_field_listOfListOfMyStruct);
 }
 
-const ::std::set<::std::vector<::std::vector<::std::int64_t>>>& ComplexNestedStruct::get_setOfListOfListOfLong() const& {
+const ::std::set<::std::vector<::std::vector<::std::int64_t>>>& ComplexNestedStruct::get_setOfListOfListOfLong() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_setOfListOfListOfLong;
 }
 
@@ -1936,7 +1936,7 @@ const ::std::set<::std::vector<::std::vector<::std::int64_t>>>& ComplexNestedStr
   return static_cast<::std::set<::std::vector<::std::vector<::std::int64_t>>>&&>(__fbthrift_field_setOfListOfListOfLong);
 }
 
-const ::std::set<::std::set<::std::set<::std::int64_t>>>& ComplexNestedStruct::get_setOfSetOfsetOfLong() const& {
+const ::std::set<::std::set<::std::set<::std::int64_t>>>& ComplexNestedStruct::get_setOfSetOfsetOfLong() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_setOfSetOfsetOfLong;
 }
 
@@ -1944,7 +1944,7 @@ const ::std::set<::std::set<::std::set<::std::int64_t>>>& ComplexNestedStruct::g
   return static_cast<::std::set<::std::set<::std::set<::std::int64_t>>>&&>(__fbthrift_field_setOfSetOfsetOfLong);
 }
 
-const ::std::map<::std::int32_t, ::std::vector<::std::vector<::cpp2::MyStruct>>>& ComplexNestedStruct::get_mapStructListOfListOfLong() const& {
+const ::std::map<::std::int32_t, ::std::vector<::std::vector<::cpp2::MyStruct>>>& ComplexNestedStruct::get_mapStructListOfListOfLong() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_mapStructListOfListOfLong;
 }
 
@@ -1952,7 +1952,7 @@ const ::std::map<::std::int32_t, ::std::vector<::std::vector<::cpp2::MyStruct>>>
   return static_cast<::std::map<::std::int32_t, ::std::vector<::std::vector<::cpp2::MyStruct>>>&&>(__fbthrift_field_mapStructListOfListOfLong);
 }
 
-const ::std::map<::cpp2::MyStruct, ::std::int32_t>& ComplexNestedStruct::get_mKeyStructValInt() const& {
+const ::std::map<::cpp2::MyStruct, ::std::int32_t>& ComplexNestedStruct::get_mKeyStructValInt() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_mKeyStructValInt;
 }
 
@@ -1960,7 +1960,7 @@ const ::std::map<::cpp2::MyStruct, ::std::int32_t>& ComplexNestedStruct::get_mKe
   return static_cast<::std::map<::cpp2::MyStruct, ::std::int32_t>&&>(__fbthrift_field_mKeyStructValInt);
 }
 
-const ::std::vector<::std::map<::std::int32_t, ::std::int32_t>>& ComplexNestedStruct::get_listOfMapKeyIntValInt() const& {
+const ::std::vector<::std::map<::std::int32_t, ::std::int32_t>>& ComplexNestedStruct::get_listOfMapKeyIntValInt() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_listOfMapKeyIntValInt;
 }
 
@@ -1968,7 +1968,7 @@ const ::std::vector<::std::map<::std::int32_t, ::std::int32_t>>& ComplexNestedSt
   return static_cast<::std::vector<::std::map<::std::int32_t, ::std::int32_t>>&&>(__fbthrift_field_listOfMapKeyIntValInt);
 }
 
-const ::std::vector<::std::map<::std::string, ::std::vector<::cpp2::MyStruct>>>& ComplexNestedStruct::get_listOfMapKeyStrValList() const& {
+const ::std::vector<::std::map<::std::string, ::std::vector<::cpp2::MyStruct>>>& ComplexNestedStruct::get_listOfMapKeyStrValList() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_listOfMapKeyStrValList;
 }
 
@@ -1976,7 +1976,7 @@ const ::std::vector<::std::map<::std::string, ::std::vector<::cpp2::MyStruct>>>&
   return static_cast<::std::vector<::std::map<::std::string, ::std::vector<::cpp2::MyStruct>>>&&>(__fbthrift_field_listOfMapKeyStrValList);
 }
 
-const ::std::map<::std::set<::std::int32_t>, ::std::int64_t>& ComplexNestedStruct::get_mapKeySetValLong() const& {
+const ::std::map<::std::set<::std::int32_t>, ::std::int64_t>& ComplexNestedStruct::get_mapKeySetValLong() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_mapKeySetValLong;
 }
 
@@ -1984,7 +1984,7 @@ const ::std::map<::std::set<::std::int32_t>, ::std::int64_t>& ComplexNestedStruc
   return static_cast<::std::map<::std::set<::std::int32_t>, ::std::int64_t>&&>(__fbthrift_field_mapKeySetValLong);
 }
 
-const ::std::map<::std::vector<::std::string>, ::std::int32_t>& ComplexNestedStruct::get_mapKeyListValLong() const& {
+const ::std::map<::std::vector<::std::string>, ::std::int32_t>& ComplexNestedStruct::get_mapKeyListValLong() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_mapKeyListValLong;
 }
 
@@ -1992,7 +1992,7 @@ const ::std::map<::std::vector<::std::string>, ::std::int32_t>& ComplexNestedStr
   return static_cast<::std::map<::std::vector<::std::string>, ::std::int32_t>&&>(__fbthrift_field_mapKeyListValLong);
 }
 
-const ::std::map<::std::map<::std::int32_t, ::std::string>, ::std::map<::std::int32_t, ::std::string>>& ComplexNestedStruct::get_mapKeyMapValMap() const& {
+const ::std::map<::std::map<::std::int32_t, ::std::string>, ::std::map<::std::int32_t, ::std::string>>& ComplexNestedStruct::get_mapKeyMapValMap() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_mapKeyMapValMap;
 }
 
@@ -2000,7 +2000,7 @@ const ::std::map<::std::map<::std::int32_t, ::std::string>, ::std::map<::std::in
   return static_cast<::std::map<::std::map<::std::int32_t, ::std::string>, ::std::map<::std::int32_t, ::std::string>>&&>(__fbthrift_field_mapKeyMapValMap);
 }
 
-const ::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>>& ComplexNestedStruct::get_mapKeySetValMap() const& {
+const ::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>>& ComplexNestedStruct::get_mapKeySetValMap() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_mapKeySetValMap;
 }
 
@@ -2008,7 +2008,7 @@ const ::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::ve
   return static_cast<::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>>&&>(__fbthrift_field_mapKeySetValMap);
 }
 
-const ::std::map<::std::map<::std::map<::std::int32_t, ::std::string>, ::std::string>, ::std::map<::std::int32_t, ::std::string>>& ComplexNestedStruct::get_NestedMaps() const& {
+const ::std::map<::std::map<::std::map<::std::int32_t, ::std::string>, ::std::string>, ::std::map<::std::int32_t, ::std::string>>& ComplexNestedStruct::get_NestedMaps() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_NestedMaps;
 }
 
@@ -2016,7 +2016,7 @@ const ::std::map<::std::map<::std::map<::std::int32_t, ::std::string>, ::std::st
   return static_cast<::std::map<::std::map<::std::map<::std::int32_t, ::std::string>, ::std::string>, ::std::map<::std::int32_t, ::std::string>>&&>(__fbthrift_field_NestedMaps);
 }
 
-const ::std::map<::std::int32_t, ::std::vector<::cpp2::MyStruct>>& ComplexNestedStruct::get_mapKeyIntValList() const& {
+const ::std::map<::std::int32_t, ::std::vector<::cpp2::MyStruct>>& ComplexNestedStruct::get_mapKeyIntValList() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_mapKeyIntValList;
 }
 
@@ -2024,7 +2024,7 @@ const ::std::map<::std::int32_t, ::std::vector<::cpp2::MyStruct>>& ComplexNested
   return static_cast<::std::map<::std::int32_t, ::std::vector<::cpp2::MyStruct>>&&>(__fbthrift_field_mapKeyIntValList);
 }
 
-const ::std::map<::std::int32_t, ::std::set<bool>>& ComplexNestedStruct::get_mapKeyIntValSet() const& {
+const ::std::map<::std::int32_t, ::std::set<bool>>& ComplexNestedStruct::get_mapKeyIntValSet() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_mapKeyIntValSet;
 }
 
@@ -2032,7 +2032,7 @@ const ::std::map<::std::int32_t, ::std::set<bool>>& ComplexNestedStruct::get_map
   return static_cast<::std::map<::std::int32_t, ::std::set<bool>>&&>(__fbthrift_field_mapKeyIntValSet);
 }
 
-const ::std::map<::std::set<bool>, ::cpp2::MyEnum>& ComplexNestedStruct::get_mapKeySetValInt() const& {
+const ::std::map<::std::set<bool>, ::cpp2::MyEnum>& ComplexNestedStruct::get_mapKeySetValInt() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_mapKeySetValInt;
 }
 
@@ -2040,7 +2040,7 @@ const ::std::map<::std::set<bool>, ::cpp2::MyEnum>& ComplexNestedStruct::get_map
   return static_cast<::std::map<::std::set<bool>, ::cpp2::MyEnum>&&>(__fbthrift_field_mapKeySetValInt);
 }
 
-const ::std::map<::std::vector<::std::int32_t>, ::std::set<::std::map<double, ::std::string>>>& ComplexNestedStruct::get_mapKeyListValSet() const& {
+const ::std::map<::std::vector<::std::int32_t>, ::std::set<::std::map<double, ::std::string>>>& ComplexNestedStruct::get_mapKeyListValSet() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_mapKeyListValSet;
 }
 
@@ -2175,7 +2175,7 @@ std::partial_ordering TypeRemapped::operator<=>([[maybe_unused]] const TypeRemap
 }
 
 
-const ::cpp2::map_i64_string_5732& TypeRemapped::get_lsMap() const& {
+const ::cpp2::map_i64_string_5732& TypeRemapped::get_lsMap() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_lsMap;
 }
 
@@ -2183,7 +2183,7 @@ const ::cpp2::map_i64_string_5732& TypeRemapped::get_lsMap() const& {
   return static_cast<::cpp2::map_i64_string_5732&&>(__fbthrift_field_lsMap);
 }
 
-const ::cpp2::map_i32_FMap_6797& TypeRemapped::get_ioMap() const& {
+const ::cpp2::map_i32_FMap_6797& TypeRemapped::get_ioMap() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_ioMap;
 }
 
@@ -2403,19 +2403,19 @@ std::partial_ordering optXcep::operator<=>([[maybe_unused]] const optXcep& rhs) 
 }
 
 
-const ::std::string* optXcep::get_message() const& {
+const ::std::string* optXcep::get_message() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return message_ref().has_value() ? std::addressof(__fbthrift_field_message) : nullptr;
 }
 
-::std::string* optXcep::get_message() & {
+::std::string* optXcep::get_message() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return message_ref().has_value() ? std::addressof(__fbthrift_field_message) : nullptr;
 }
 
-const ::std::int32_t* optXcep::get_errorCode() const& {
+const ::std::int32_t* optXcep::get_errorCode() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return errorCode_ref().has_value() ? std::addressof(__fbthrift_field_errorCode) : nullptr;
 }
 
-::std::int32_t* optXcep::get_errorCode() & {
+::std::int32_t* optXcep::get_errorCode() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return errorCode_ref().has_value() ? std::addressof(__fbthrift_field_errorCode) : nullptr;
 }
 
@@ -2515,7 +2515,7 @@ std::partial_ordering complexException::operator<=>([[maybe_unused]] const compl
 }
 
 
-const ::std::vector<::std::string>& complexException::get_listStrings() const& {
+const ::std::vector<::std::string>& complexException::get_listStrings() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_listStrings;
 }
 
@@ -2532,15 +2532,15 @@ const ::std::vector<::std::string>& complexException::get_listStrings() const& {
   return __fbthrift_field_errorEnum;
 }
 
-const ::cpp2::MyUnion* complexException::get_unionError() const& {
+const ::cpp2::MyUnion* complexException::get_unionError() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return unionError_ref().has_value() ? std::addressof(__fbthrift_field_unionError) : nullptr;
 }
 
-::cpp2::MyUnion* complexException::get_unionError() & {
+::cpp2::MyUnion* complexException::get_unionError() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return unionError_ref().has_value() ? std::addressof(__fbthrift_field_unionError) : nullptr;
 }
 
-const ::cpp2::MyStruct& complexException::get_structError() const& {
+const ::cpp2::MyStruct& complexException::get_structError() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_structError;
 }
 
@@ -2548,7 +2548,7 @@ const ::cpp2::MyStruct& complexException::get_structError() const& {
   return static_cast<::cpp2::MyStruct&&>(__fbthrift_field_structError);
 }
 
-const ::cpp2::map_i64_string_5732& complexException::get_lsMap() const& {
+const ::cpp2::map_i64_string_5732& complexException::get_lsMap() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_lsMap;
 }
 
@@ -2817,7 +2817,7 @@ std::partial_ordering Containers::operator<=>([[maybe_unused]] const Containers&
 }
 
 
-const ::std::vector<::cpp2::MyStruct>& Containers::get_struct_list() const& {
+const ::std::vector<::cpp2::MyStruct>& Containers::get_struct_list() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_struct_list;
 }
 
@@ -2825,7 +2825,7 @@ const ::std::vector<::cpp2::MyStruct>& Containers::get_struct_list() const& {
   return static_cast<::std::vector<::cpp2::MyStruct>&&>(__fbthrift_field_struct_list);
 }
 
-const ::std::vector<::cpp2::MyUnion>& Containers::get_union_list() const& {
+const ::std::vector<::cpp2::MyUnion>& Containers::get_union_list() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_union_list;
 }
 
@@ -2833,7 +2833,7 @@ const ::std::vector<::cpp2::MyUnion>& Containers::get_union_list() const& {
   return static_cast<::std::vector<::cpp2::MyUnion>&&>(__fbthrift_field_union_list);
 }
 
-const ::std::vector<::cpp2::MyEnum>& Containers::get_enum_list() const& {
+const ::std::vector<::cpp2::MyEnum>& Containers::get_enum_list() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_enum_list;
 }
 
@@ -2841,7 +2841,7 @@ const ::std::vector<::cpp2::MyEnum>& Containers::get_enum_list() const& {
   return static_cast<::std::vector<::cpp2::MyEnum>&&>(__fbthrift_field_enum_list);
 }
 
-const ::std::set<::cpp2::MyStruct>& Containers::get_struct_set() const& {
+const ::std::set<::cpp2::MyStruct>& Containers::get_struct_set() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_struct_set;
 }
 
@@ -2849,7 +2849,7 @@ const ::std::set<::cpp2::MyStruct>& Containers::get_struct_set() const& {
   return static_cast<::std::set<::cpp2::MyStruct>&&>(__fbthrift_field_struct_set);
 }
 
-const ::std::set<::cpp2::MyUnion>& Containers::get_union_set() const& {
+const ::std::set<::cpp2::MyUnion>& Containers::get_union_set() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_union_set;
 }
 
@@ -2857,7 +2857,7 @@ const ::std::set<::cpp2::MyUnion>& Containers::get_union_set() const& {
   return static_cast<::std::set<::cpp2::MyUnion>&&>(__fbthrift_field_union_set);
 }
 
-const ::std::set<::cpp2::MyEnum>& Containers::get_enum_set() const& {
+const ::std::set<::cpp2::MyEnum>& Containers::get_enum_set() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_enum_set;
 }
 
@@ -2865,7 +2865,7 @@ const ::std::set<::cpp2::MyEnum>& Containers::get_enum_set() const& {
   return static_cast<::std::set<::cpp2::MyEnum>&&>(__fbthrift_field_enum_set);
 }
 
-const ::std::map<::cpp2::MyStruct, ::std::int64_t>& Containers::get_struct_map() const& {
+const ::std::map<::cpp2::MyStruct, ::std::int64_t>& Containers::get_struct_map() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_struct_map;
 }
 
@@ -2873,7 +2873,7 @@ const ::std::map<::cpp2::MyStruct, ::std::int64_t>& Containers::get_struct_map()
   return static_cast<::std::map<::cpp2::MyStruct, ::std::int64_t>&&>(__fbthrift_field_struct_map);
 }
 
-const ::std::map<::cpp2::MyUnion, ::std::int64_t>& Containers::get_union_map() const& {
+const ::std::map<::cpp2::MyUnion, ::std::int64_t>& Containers::get_union_map() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_union_map;
 }
 
@@ -2881,7 +2881,7 @@ const ::std::map<::cpp2::MyUnion, ::std::int64_t>& Containers::get_union_map() c
   return static_cast<::std::map<::cpp2::MyUnion, ::std::int64_t>&&>(__fbthrift_field_union_map);
 }
 
-const ::std::map<::cpp2::MyEnum, ::std::int64_t>& Containers::get_enum_map() const& {
+const ::std::map<::cpp2::MyEnum, ::std::int64_t>& Containers::get_enum_map() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_enum_map;
 }
 
@@ -2889,7 +2889,7 @@ const ::std::map<::cpp2::MyEnum, ::std::int64_t>& Containers::get_enum_map() con
   return static_cast<::std::map<::cpp2::MyEnum, ::std::int64_t>&&>(__fbthrift_field_enum_map);
 }
 
-const ::std::map<::std::int32_t, ::cpp2::MyStruct>& Containers::get_struct_map_2() const& {
+const ::std::map<::std::int32_t, ::cpp2::MyStruct>& Containers::get_struct_map_2() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_struct_map_2;
 }
 
@@ -2897,7 +2897,7 @@ const ::std::map<::std::int32_t, ::cpp2::MyStruct>& Containers::get_struct_map_2
   return static_cast<::std::map<::std::int32_t, ::cpp2::MyStruct>&&>(__fbthrift_field_struct_map_2);
 }
 
-const ::std::map<::std::int32_t, ::cpp2::MyUnion>& Containers::get_union_map_2() const& {
+const ::std::map<::std::int32_t, ::cpp2::MyUnion>& Containers::get_union_map_2() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_union_map_2;
 }
 
@@ -2905,7 +2905,7 @@ const ::std::map<::std::int32_t, ::cpp2::MyUnion>& Containers::get_union_map_2()
   return static_cast<::std::map<::std::int32_t, ::cpp2::MyUnion>&&>(__fbthrift_field_union_map_2);
 }
 
-const ::std::map<::std::int32_t, ::cpp2::MyEnum>& Containers::get_enum_map_2() const& {
+const ::std::map<::std::int32_t, ::cpp2::MyEnum>& Containers::get_enum_map_2() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_enum_map_2;
 }
 
@@ -2913,7 +2913,7 @@ const ::std::map<::std::int32_t, ::cpp2::MyEnum>& Containers::get_enum_map_2() c
   return static_cast<::std::map<::std::int32_t, ::cpp2::MyEnum>&&>(__fbthrift_field_enum_map_2);
 }
 
-const ::std::map<::std::vector<::std::int32_t>, ::std::int32_t>& Containers::get_list_map() const& {
+const ::std::map<::std::vector<::std::int32_t>, ::std::int32_t>& Containers::get_list_map() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_list_map;
 }
 
@@ -2921,7 +2921,7 @@ const ::std::map<::std::vector<::std::int32_t>, ::std::int32_t>& Containers::get
   return static_cast<::std::map<::std::vector<::std::int32_t>, ::std::int32_t>&&>(__fbthrift_field_list_map);
 }
 
-const ::std::map<::std::int32_t, ::std::vector<::std::int32_t>>& Containers::get_list_map_2() const& {
+const ::std::map<::std::int32_t, ::std::vector<::std::int32_t>>& Containers::get_list_map_2() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_list_map_2;
 }
 
@@ -2929,7 +2929,7 @@ const ::std::map<::std::int32_t, ::std::vector<::std::int32_t>>& Containers::get
   return static_cast<::std::map<::std::int32_t, ::std::vector<::std::int32_t>>&&>(__fbthrift_field_list_map_2);
 }
 
-const ::std::map<::std::set<::std::int32_t>, ::std::int32_t>& Containers::get_set_map() const& {
+const ::std::map<::std::set<::std::int32_t>, ::std::int32_t>& Containers::get_set_map() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_set_map;
 }
 
@@ -2937,7 +2937,7 @@ const ::std::map<::std::set<::std::int32_t>, ::std::int32_t>& Containers::get_se
   return static_cast<::std::map<::std::set<::std::int32_t>, ::std::int32_t>&&>(__fbthrift_field_set_map);
 }
 
-const ::std::map<::std::int32_t, ::std::set<::std::int32_t>>& Containers::get_set_map_2() const& {
+const ::std::map<::std::int32_t, ::std::set<::std::int32_t>>& Containers::get_set_map_2() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_set_map_2;
 }
 
@@ -2945,7 +2945,7 @@ const ::std::map<::std::int32_t, ::std::set<::std::int32_t>>& Containers::get_se
   return static_cast<::std::map<::std::int32_t, ::std::set<::std::int32_t>>&&>(__fbthrift_field_set_map_2);
 }
 
-const ::std::map<::std::map<::std::int32_t, ::std::int32_t>, ::std::int32_t>& Containers::get_map_map() const& {
+const ::std::map<::std::map<::std::int32_t, ::std::int32_t>, ::std::int32_t>& Containers::get_map_map() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_map_map;
 }
 
@@ -2953,7 +2953,7 @@ const ::std::map<::std::map<::std::int32_t, ::std::int32_t>, ::std::int32_t>& Co
   return static_cast<::std::map<::std::map<::std::int32_t, ::std::int32_t>, ::std::int32_t>&&>(__fbthrift_field_map_map);
 }
 
-const ::std::map<::std::int32_t, ::std::map<::std::int32_t, ::std::int32_t>>& Containers::get_map_map_2() const& {
+const ::std::map<::std::int32_t, ::std::map<::std::int32_t, ::std::int32_t>>& Containers::get_map_map_2() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_map_map_2;
 }
 
@@ -2961,7 +2961,7 @@ const ::std::map<::std::int32_t, ::std::map<::std::int32_t, ::std::int32_t>>& Co
   return static_cast<::std::map<::std::int32_t, ::std::map<::std::int32_t, ::std::int32_t>>&&>(__fbthrift_field_map_map_2);
 }
 
-const ::std::vector<::std::vector<::std::int32_t>>& Containers::get_list_list_i32() const& {
+const ::std::vector<::std::vector<::std::int32_t>>& Containers::get_list_list_i32() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_list_list_i32;
 }
 
@@ -2969,7 +2969,7 @@ const ::std::vector<::std::vector<::std::int32_t>>& Containers::get_list_list_i3
   return static_cast<::std::vector<::std::vector<::std::int32_t>>&&>(__fbthrift_field_list_list_i32);
 }
 
-const ::std::vector<::std::vector<::cpp2::MyStruct>>& Containers::get_list_list_struct() const& {
+const ::std::vector<::std::vector<::cpp2::MyStruct>>& Containers::get_list_list_struct() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_list_list_struct;
 }
 
@@ -2977,7 +2977,7 @@ const ::std::vector<::std::vector<::cpp2::MyStruct>>& Containers::get_list_list_
   return static_cast<::std::vector<::std::vector<::cpp2::MyStruct>>&&>(__fbthrift_field_list_list_struct);
 }
 
-const ::std::vector<::std::set<::std::int32_t>>& Containers::get_list_set_i32() const& {
+const ::std::vector<::std::set<::std::int32_t>>& Containers::get_list_set_i32() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_list_set_i32;
 }
 
@@ -2985,7 +2985,7 @@ const ::std::vector<::std::set<::std::int32_t>>& Containers::get_list_set_i32() 
   return static_cast<::std::vector<::std::set<::std::int32_t>>&&>(__fbthrift_field_list_set_i32);
 }
 
-const ::std::vector<::std::set<::cpp2::MyStruct>>& Containers::get_list_set_struct() const& {
+const ::std::vector<::std::set<::cpp2::MyStruct>>& Containers::get_list_set_struct() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_list_set_struct;
 }
 
@@ -2993,7 +2993,7 @@ const ::std::vector<::std::set<::cpp2::MyStruct>>& Containers::get_list_set_stru
   return static_cast<::std::vector<::std::set<::cpp2::MyStruct>>&&>(__fbthrift_field_list_set_struct);
 }
 
-const ::std::vector<::std::map<::std::int32_t, ::std::int32_t>>& Containers::get_list_map_i32_i32() const& {
+const ::std::vector<::std::map<::std::int32_t, ::std::int32_t>>& Containers::get_list_map_i32_i32() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_list_map_i32_i32;
 }
 
@@ -3001,7 +3001,7 @@ const ::std::vector<::std::map<::std::int32_t, ::std::int32_t>>& Containers::get
   return static_cast<::std::vector<::std::map<::std::int32_t, ::std::int32_t>>&&>(__fbthrift_field_list_map_i32_i32);
 }
 
-const ::std::vector<::std::map<::std::int32_t, ::cpp2::MyStruct>>& Containers::get_list_map_i32_struct() const& {
+const ::std::vector<::std::map<::std::int32_t, ::cpp2::MyStruct>>& Containers::get_list_map_i32_struct() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_list_map_i32_struct;
 }
 
@@ -3009,7 +3009,7 @@ const ::std::vector<::std::map<::std::int32_t, ::cpp2::MyStruct>>& Containers::g
   return static_cast<::std::vector<::std::map<::std::int32_t, ::cpp2::MyStruct>>&&>(__fbthrift_field_list_map_i32_struct);
 }
 
-const ::std::vector<::std::map<::cpp2::MyStruct, ::std::int32_t>>& Containers::get_list_map_struct_i32() const& {
+const ::std::vector<::std::map<::cpp2::MyStruct, ::std::int32_t>>& Containers::get_list_map_struct_i32() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_list_map_struct_i32;
 }
 
@@ -3017,7 +3017,7 @@ const ::std::vector<::std::map<::cpp2::MyStruct, ::std::int32_t>>& Containers::g
   return static_cast<::std::vector<::std::map<::cpp2::MyStruct, ::std::int32_t>>&&>(__fbthrift_field_list_map_struct_i32);
 }
 
-const ::std::set<::std::vector<::std::int32_t>>& Containers::get_set_list_i32() const& {
+const ::std::set<::std::vector<::std::int32_t>>& Containers::get_set_list_i32() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_set_list_i32;
 }
 
@@ -3025,7 +3025,7 @@ const ::std::set<::std::vector<::std::int32_t>>& Containers::get_set_list_i32() 
   return static_cast<::std::set<::std::vector<::std::int32_t>>&&>(__fbthrift_field_set_list_i32);
 }
 
-const ::std::set<::std::vector<::cpp2::MyStruct>>& Containers::get_set_list_struct() const& {
+const ::std::set<::std::vector<::cpp2::MyStruct>>& Containers::get_set_list_struct() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_set_list_struct;
 }
 
@@ -3033,7 +3033,7 @@ const ::std::set<::std::vector<::cpp2::MyStruct>>& Containers::get_set_list_stru
   return static_cast<::std::set<::std::vector<::cpp2::MyStruct>>&&>(__fbthrift_field_set_list_struct);
 }
 
-const ::std::set<::std::set<::std::int32_t>>& Containers::get_set_set_i32() const& {
+const ::std::set<::std::set<::std::int32_t>>& Containers::get_set_set_i32() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_set_set_i32;
 }
 
@@ -3041,7 +3041,7 @@ const ::std::set<::std::set<::std::int32_t>>& Containers::get_set_set_i32() cons
   return static_cast<::std::set<::std::set<::std::int32_t>>&&>(__fbthrift_field_set_set_i32);
 }
 
-const ::std::set<::std::set<::cpp2::MyStruct>>& Containers::get_set_set_struct() const& {
+const ::std::set<::std::set<::cpp2::MyStruct>>& Containers::get_set_set_struct() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_set_set_struct;
 }
 
@@ -3049,7 +3049,7 @@ const ::std::set<::std::set<::cpp2::MyStruct>>& Containers::get_set_set_struct()
   return static_cast<::std::set<::std::set<::cpp2::MyStruct>>&&>(__fbthrift_field_set_set_struct);
 }
 
-const ::std::set<::std::map<::std::int32_t, ::std::int32_t>>& Containers::get_set_map_i32_i32() const& {
+const ::std::set<::std::map<::std::int32_t, ::std::int32_t>>& Containers::get_set_map_i32_i32() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_set_map_i32_i32;
 }
 
@@ -3057,7 +3057,7 @@ const ::std::set<::std::map<::std::int32_t, ::std::int32_t>>& Containers::get_se
   return static_cast<::std::set<::std::map<::std::int32_t, ::std::int32_t>>&&>(__fbthrift_field_set_map_i32_i32);
 }
 
-const ::std::set<::std::map<::std::int32_t, ::cpp2::MyStruct>>& Containers::get_set_map_i32_struct() const& {
+const ::std::set<::std::map<::std::int32_t, ::cpp2::MyStruct>>& Containers::get_set_map_i32_struct() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_set_map_i32_struct;
 }
 
@@ -3065,7 +3065,7 @@ const ::std::set<::std::map<::std::int32_t, ::cpp2::MyStruct>>& Containers::get_
   return static_cast<::std::set<::std::map<::std::int32_t, ::cpp2::MyStruct>>&&>(__fbthrift_field_set_map_i32_struct);
 }
 
-const ::std::set<::std::map<::cpp2::MyStruct, ::std::int32_t>>& Containers::get_set_map_struct_i32() const& {
+const ::std::set<::std::map<::cpp2::MyStruct, ::std::int32_t>>& Containers::get_set_map_struct_i32() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_set_map_struct_i32;
 }
 
@@ -3073,7 +3073,7 @@ const ::std::set<::std::map<::cpp2::MyStruct, ::std::int32_t>>& Containers::get_
   return static_cast<::std::set<::std::map<::cpp2::MyStruct, ::std::int32_t>>&&>(__fbthrift_field_set_map_struct_i32);
 }
 
-const ::std::map<::std::int32_t, ::std::map<::std::int32_t, ::std::int32_t>>& Containers::get_map_i32_map_i32_i32() const& {
+const ::std::map<::std::int32_t, ::std::map<::std::int32_t, ::std::int32_t>>& Containers::get_map_i32_map_i32_i32() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_map_i32_map_i32_i32;
 }
 
@@ -3081,7 +3081,7 @@ const ::std::map<::std::int32_t, ::std::map<::std::int32_t, ::std::int32_t>>& Co
   return static_cast<::std::map<::std::int32_t, ::std::map<::std::int32_t, ::std::int32_t>>&&>(__fbthrift_field_map_i32_map_i32_i32);
 }
 
-const ::std::map<::std::int32_t, ::std::map<::cpp2::MyStruct, ::std::int32_t>>& Containers::get_map_i32_map_struct_i32() const& {
+const ::std::map<::std::int32_t, ::std::map<::cpp2::MyStruct, ::std::int32_t>>& Containers::get_map_i32_map_struct_i32() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_map_i32_map_struct_i32;
 }
 
@@ -3089,7 +3089,7 @@ const ::std::map<::std::int32_t, ::std::map<::cpp2::MyStruct, ::std::int32_t>>& 
   return static_cast<::std::map<::std::int32_t, ::std::map<::cpp2::MyStruct, ::std::int32_t>>&&>(__fbthrift_field_map_i32_map_struct_i32);
 }
 
-const ::std::map<::std::int32_t, ::std::map<::std::int32_t, ::cpp2::MyStruct>>& Containers::get_map_i32_map_i32_struct() const& {
+const ::std::map<::std::int32_t, ::std::map<::std::int32_t, ::cpp2::MyStruct>>& Containers::get_map_i32_map_i32_struct() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_map_i32_map_i32_struct;
 }
 
@@ -3097,7 +3097,7 @@ const ::std::map<::std::int32_t, ::std::map<::std::int32_t, ::cpp2::MyStruct>>& 
   return static_cast<::std::map<::std::int32_t, ::std::map<::std::int32_t, ::cpp2::MyStruct>>&&>(__fbthrift_field_map_i32_map_i32_struct);
 }
 
-const ::std::map<::std::int32_t, ::std::vector<::std::map<::std::int32_t, ::std::int32_t>>>& Containers::get_map_i32_map_list_i32_i32() const& {
+const ::std::map<::std::int32_t, ::std::vector<::std::map<::std::int32_t, ::std::int32_t>>>& Containers::get_map_i32_map_list_i32_i32() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_map_i32_map_list_i32_i32;
 }
 
@@ -3105,7 +3105,7 @@ const ::std::map<::std::int32_t, ::std::vector<::std::map<::std::int32_t, ::std:
   return static_cast<::std::map<::std::int32_t, ::std::vector<::std::map<::std::int32_t, ::std::int32_t>>>&&>(__fbthrift_field_map_i32_map_list_i32_i32);
 }
 
-const ::std::map<::std::int32_t, ::std::vector<::std::map<::cpp2::MyStruct, ::std::int32_t>>>& Containers::get_map_i32_map_list_struct_i32() const& {
+const ::std::map<::std::int32_t, ::std::vector<::std::map<::cpp2::MyStruct, ::std::int32_t>>>& Containers::get_map_i32_map_list_struct_i32() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_map_i32_map_list_struct_i32;
 }
 

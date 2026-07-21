@@ -77,11 +77,11 @@ bool A::operator==([[maybe_unused]] const A& rhs) const {
 }
 
 
-const std::unordered_map<::std::int32_t, ::apache::thrift::test::B>* A::get_some_map() const& {
+const std::unordered_map<::std::int32_t, ::apache::thrift::test::B>* A::get_some_map() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return some_map_ref().has_value() ? std::addressof(__fbthrift_field_some_map) : nullptr;
 }
 
-std::unordered_map<::std::int32_t, ::apache::thrift::test::B>* A::get_some_map() & {
+std::unordered_map<::std::int32_t, ::apache::thrift::test::B>* A::get_some_map() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return some_map_ref().has_value() ? std::addressof(__fbthrift_field_some_map) : nullptr;
 }
 
@@ -141,11 +141,11 @@ std::partial_ordering B::operator<=>([[maybe_unused]] const B& rhs) const {
 }
 
 
-const ::std::int32_t* B::get_field() const& {
+const ::std::int32_t* B::get_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return field_ref().has_value() ? std::addressof(__fbthrift_field_field) : nullptr;
 }
 
-::std::int32_t* B::get_field() & {
+::std::int32_t* B::get_field() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return field_ref().has_value() ? std::addressof(__fbthrift_field_field) : nullptr;
 }
 

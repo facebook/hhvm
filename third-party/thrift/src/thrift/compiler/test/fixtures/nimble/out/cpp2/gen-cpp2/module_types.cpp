@@ -72,11 +72,11 @@ std::partial_ordering BasicTypes::operator<=>([[maybe_unused]] const BasicTypes&
   return __fbthrift_field_first;
 }
 
-const ::std::int32_t* BasicTypes::get_second() const& {
+const ::std::int32_t* BasicTypes::get_second() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return second_ref().has_value() ? std::addressof(__fbthrift_field_second) : nullptr;
 }
 
-::std::int32_t* BasicTypes::get_second() & {
+::std::int32_t* BasicTypes::get_second() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return second_ref().has_value() ? std::addressof(__fbthrift_field_second) : nullptr;
 }
 
@@ -85,11 +85,11 @@ const ::std::int32_t* BasicTypes::get_second() const& {
   return __fbthrift_field_second;
 }
 
-const ::std::int64_t* BasicTypes::get_third() const& {
+const ::std::int64_t* BasicTypes::get_third() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return third_ref().has_value() ? std::addressof(__fbthrift_field_third) : nullptr;
 }
 
-::std::int64_t* BasicTypes::get_third() & {
+::std::int64_t* BasicTypes::get_third() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return third_ref().has_value() ? std::addressof(__fbthrift_field_third) : nullptr;
 }
 

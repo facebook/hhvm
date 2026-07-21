@@ -155,7 +155,7 @@ class MyStruct final  {
 
   /** Glean { "field": "myString" } */
   [[deprecated("Use `FOO.myString().value()` instead of `FOO.get_myString()`")]]
-  const ::std::string& get_myString() const& {
+  const ::std::string& get_myString() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_myString;
   }
 
@@ -527,7 +527,7 @@ class FOLLY_EXPORT MyException : public virtual apache::thrift::TException {
 
   /** Glean { "field": "myString" } */
   [[deprecated("Use `FOO.myString().value()` instead of `FOO.get_myString()`")]]
-  const ::std::string& get_myString() const& {
+  const ::std::string& get_myString() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_myString;
   }
 

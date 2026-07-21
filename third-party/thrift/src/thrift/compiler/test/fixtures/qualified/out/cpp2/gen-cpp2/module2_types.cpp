@@ -75,7 +75,7 @@ std::partial_ordering Struct::operator<=>([[maybe_unused]] const Struct& rhs) co
 }
 
 
-const ::module0::Struct& Struct::get_first() const& {
+const ::module0::Struct& Struct::get_first() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_first;
 }
 
@@ -83,7 +83,7 @@ const ::module0::Struct& Struct::get_first() const& {
   return static_cast<::module0::Struct&&>(__fbthrift_field_first);
 }
 
-const ::module1::Struct& Struct::get_second() const& {
+const ::module1::Struct& Struct::get_second() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_second;
 }
 
@@ -167,7 +167,7 @@ std::partial_ordering BigStruct::operator<=>([[maybe_unused]] const BigStruct& r
 }
 
 
-const ::module2::Struct& BigStruct::get_s() const& {
+const ::module2::Struct& BigStruct::get_s() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_s;
 }
 

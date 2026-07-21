@@ -153,7 +153,7 @@ class Request final  {
 
   /** Glean { "field": "id" } */
   [[deprecated("Use `FOO.id().value()` instead of `FOO.get_id()`")]]
-  const ::std::string& get_id() const& {
+  const ::std::string& get_id() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_id;
   }
 
@@ -297,7 +297,7 @@ class AdaptedRequest final  {
 
   /** Glean { "field": "id" } */
   [[deprecated("Use `FOO.id().value()` instead of `FOO.get_id()`")]]
-  const ::std::string& get_id() const& {
+  const ::std::string& get_id() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_id;
   }
 
@@ -443,7 +443,7 @@ class Response final  {
 
   /** Glean { "field": "text" } */
   [[deprecated("Use `FOO.text().value()` instead of `FOO.get_text()`")]]
-  const ::std::string& get_text() const& {
+  const ::std::string& get_text() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_text;
   }
 

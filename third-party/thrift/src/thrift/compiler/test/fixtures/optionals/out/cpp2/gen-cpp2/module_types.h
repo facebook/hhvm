@@ -717,7 +717,7 @@ class Vehicle final  {
 
   /** Glean { "field": "color" } */
   [[deprecated("Use `FOO.color().value()` instead of `FOO.get_color()`")]]
-  const ::cpp2::Color& get_color() const&;
+  const ::cpp2::Color& get_color() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "color" } */
   [[deprecated("Use `FOO.color().value()` instead of `FOO.get_color()`")]]
@@ -733,11 +733,11 @@ class Vehicle final  {
 
   /** Glean { "field": "licensePlate" } */
   [[deprecated("Use `FOO.licensePlate().value()` instead of `FOO.get_licensePlate()`")]]
-  const ::std::string* get_licensePlate() const&;
+  const ::std::string* get_licensePlate() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "licensePlate" } */
   [[deprecated("Use `FOO.licensePlate().value()` instead of `FOO.get_licensePlate()`")]]
-  ::std::string* get_licensePlate() &;
+  ::std::string* get_licensePlate() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::string* get_licensePlate() && = delete;
 
@@ -751,11 +751,11 @@ class Vehicle final  {
 
   /** Glean { "field": "description" } */
   [[deprecated("Use `FOO.description().value()` instead of `FOO.get_description()`")]]
-  const ::std::string* get_description() const&;
+  const ::std::string* get_description() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "description" } */
   [[deprecated("Use `FOO.description().value()` instead of `FOO.get_description()`")]]
-  ::std::string* get_description() &;
+  ::std::string* get_description() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::string* get_description() && = delete;
 
@@ -769,11 +769,11 @@ class Vehicle final  {
 
   /** Glean { "field": "name" } */
   [[deprecated("Use `FOO.name().value()` instead of `FOO.get_name()`")]]
-  const ::std::string* get_name() const&;
+  const ::std::string* get_name() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "name" } */
   [[deprecated("Use `FOO.name().value()` instead of `FOO.get_name()`")]]
-  ::std::string* get_name() &;
+  ::std::string* get_name() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::string* get_name() && = delete;
 
@@ -787,11 +787,11 @@ class Vehicle final  {
 
   /** Glean { "field": "hasAC" } */
   [[deprecated("Use `FOO.hasAC().value()` instead of `FOO.get_hasAC()`")]]
-  const bool* get_hasAC() const&;
+  const bool* get_hasAC() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "hasAC" } */
   [[deprecated("Use `FOO.hasAC().value()` instead of `FOO.get_hasAC()`")]]
-  bool* get_hasAC() &;
+  bool* get_hasAC() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   bool* get_hasAC() && = delete;
 
@@ -1292,7 +1292,7 @@ class Person final  {
 
   /** Glean { "field": "name" } */
   [[deprecated("Use `FOO.name().value()` instead of `FOO.get_name()`")]]
-  const ::std::string& get_name() const& {
+  const ::std::string& get_name() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_name;
   }
 
@@ -1312,11 +1312,11 @@ class Person final  {
 
   /** Glean { "field": "age" } */
   [[deprecated("Use `FOO.age().value()` instead of `FOO.get_age()`")]]
-  const ::std::int16_t* get_age() const&;
+  const ::std::int16_t* get_age() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "age" } */
   [[deprecated("Use `FOO.age().value()` instead of `FOO.get_age()`")]]
-  ::std::int16_t* get_age() &;
+  ::std::int16_t* get_age() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::int16_t* get_age() && = delete;
 
@@ -1326,11 +1326,11 @@ class Person final  {
 
   /** Glean { "field": "address" } */
   [[deprecated("Use `FOO.address().value()` instead of `FOO.get_address()`")]]
-  const ::std::string* get_address() const&;
+  const ::std::string* get_address() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "address" } */
   [[deprecated("Use `FOO.address().value()` instead of `FOO.get_address()`")]]
-  ::std::string* get_address() &;
+  ::std::string* get_address() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::string* get_address() && = delete;
 
@@ -1344,11 +1344,11 @@ class Person final  {
 
   /** Glean { "field": "favoriteColor" } */
   [[deprecated("Use `FOO.favoriteColor().value()` instead of `FOO.get_favoriteColor()`")]]
-  const ::cpp2::Color* get_favoriteColor() const&;
+  const ::cpp2::Color* get_favoriteColor() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "favoriteColor" } */
   [[deprecated("Use `FOO.favoriteColor().value()` instead of `FOO.get_favoriteColor()`")]]
-  ::cpp2::Color* get_favoriteColor() &;
+  ::cpp2::Color* get_favoriteColor() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::cpp2::Color* get_favoriteColor() && = delete;
 
@@ -1362,11 +1362,11 @@ class Person final  {
 
   /** Glean { "field": "friends" } */
   [[deprecated("Use `FOO.friends().value()` instead of `FOO.get_friends()`")]]
-  const ::std::set<::cpp2::PersonID>* get_friends() const&;
+  const ::std::set<::cpp2::PersonID>* get_friends() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "friends" } */
   [[deprecated("Use `FOO.friends().value()` instead of `FOO.get_friends()`")]]
-  ::std::set<::cpp2::PersonID>* get_friends() &;
+  ::std::set<::cpp2::PersonID>* get_friends() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::set<::cpp2::PersonID>* get_friends() && = delete;
 
@@ -1380,11 +1380,11 @@ class Person final  {
 
   /** Glean { "field": "bestFriend" } */
   [[deprecated("Use `FOO.bestFriend().value()` instead of `FOO.get_bestFriend()`")]]
-  const ::cpp2::PersonID* get_bestFriend() const&;
+  const ::cpp2::PersonID* get_bestFriend() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "bestFriend" } */
   [[deprecated("Use `FOO.bestFriend().value()` instead of `FOO.get_bestFriend()`")]]
-  ::cpp2::PersonID* get_bestFriend() &;
+  ::cpp2::PersonID* get_bestFriend() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::cpp2::PersonID* get_bestFriend() && = delete;
 
@@ -1394,11 +1394,11 @@ class Person final  {
 
   /** Glean { "field": "petNames" } */
   [[deprecated("Use `FOO.petNames().value()` instead of `FOO.get_petNames()`")]]
-  const ::std::map<::cpp2::Animal, ::std::string>* get_petNames() const&;
+  const ::std::map<::cpp2::Animal, ::std::string>* get_petNames() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "petNames" } */
   [[deprecated("Use `FOO.petNames().value()` instead of `FOO.get_petNames()`")]]
-  ::std::map<::cpp2::Animal, ::std::string>* get_petNames() &;
+  ::std::map<::cpp2::Animal, ::std::string>* get_petNames() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::map<::cpp2::Animal, ::std::string>* get_petNames() && = delete;
 
@@ -1412,11 +1412,11 @@ class Person final  {
 
   /** Glean { "field": "afraidOfAnimal" } */
   [[deprecated("Use `FOO.afraidOfAnimal().value()` instead of `FOO.get_afraidOfAnimal()`")]]
-  const ::cpp2::Animal* get_afraidOfAnimal() const&;
+  const ::cpp2::Animal* get_afraidOfAnimal() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "afraidOfAnimal" } */
   [[deprecated("Use `FOO.afraidOfAnimal().value()` instead of `FOO.get_afraidOfAnimal()`")]]
-  ::cpp2::Animal* get_afraidOfAnimal() &;
+  ::cpp2::Animal* get_afraidOfAnimal() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::cpp2::Animal* get_afraidOfAnimal() && = delete;
 
@@ -1426,11 +1426,11 @@ class Person final  {
 
   /** Glean { "field": "vehicles" } */
   [[deprecated("Use `FOO.vehicles().value()` instead of `FOO.get_vehicles()`")]]
-  const ::std::vector<::cpp2::Vehicle>* get_vehicles() const&;
+  const ::std::vector<::cpp2::Vehicle>* get_vehicles() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "vehicles" } */
   [[deprecated("Use `FOO.vehicles().value()` instead of `FOO.get_vehicles()`")]]
-  ::std::vector<::cpp2::Vehicle>* get_vehicles() &;
+  ::std::vector<::cpp2::Vehicle>* get_vehicles() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::vector<::cpp2::Vehicle>* get_vehicles() && = delete;
 

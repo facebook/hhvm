@@ -771,11 +771,11 @@ class StructWithNoCustomDefaultValues final  {
 
   /** Glean { "field": "optional_integer" } */
   [[deprecated("Use `FOO.optional_integer().value()` instead of `FOO.get_optional_integer()`")]]
-  const ::std::int32_t* get_optional_integer() const&;
+  const ::std::int32_t* get_optional_integer() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "optional_integer" } */
   [[deprecated("Use `FOO.optional_integer().value()` instead of `FOO.get_optional_integer()`")]]
-  ::std::int32_t* get_optional_integer() &;
+  ::std::int32_t* get_optional_integer() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::int32_t* get_optional_integer() && = delete;
 
@@ -793,7 +793,7 @@ class StructWithNoCustomDefaultValues final  {
 
   /** Glean { "field": "unqualified_struct" } */
   [[deprecated("Use `FOO.unqualified_struct().value()` instead of `FOO.get_unqualified_struct()`")]]
-  const ::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct& get_unqualified_struct() const&;
+  const ::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct& get_unqualified_struct() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "unqualified_struct" } */
   [[deprecated("Use `FOO.unqualified_struct().value()` instead of `FOO.get_unqualified_struct()`")]]
@@ -809,11 +809,11 @@ class StructWithNoCustomDefaultValues final  {
 
   /** Glean { "field": "optional_struct" } */
   [[deprecated("Use `FOO.optional_struct().value()` instead of `FOO.get_optional_struct()`")]]
-  const ::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct* get_optional_struct() const&;
+  const ::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct* get_optional_struct() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "optional_struct" } */
   [[deprecated("Use `FOO.optional_struct().value()` instead of `FOO.get_optional_struct()`")]]
-  ::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct* get_optional_struct() &;
+  ::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct* get_optional_struct() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct* get_optional_struct() && = delete;
 
@@ -827,7 +827,7 @@ class StructWithNoCustomDefaultValues final  {
 
   /** Glean { "field": "required_struct" } */
   [[deprecated("Use `FOO.required_struct().value()` instead of `FOO.get_required_struct()`")]]
-  const ::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct& get_required_struct() const&;
+  const ::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct& get_required_struct() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "required_struct" } */
   [[deprecated("Use `FOO.required_struct().value()` instead of `FOO.get_required_struct()`")]]
@@ -1259,11 +1259,11 @@ class StructWithCustomDefaultValues final  {
 
   /** Glean { "field": "optional_integer" } */
   [[deprecated("Use `FOO.optional_integer().value()` instead of `FOO.get_optional_integer()`")]]
-  const ::std::int32_t* get_optional_integer() const&;
+  const ::std::int32_t* get_optional_integer() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "optional_integer" } */
   [[deprecated("Use `FOO.optional_integer().value()` instead of `FOO.get_optional_integer()`")]]
-  ::std::int32_t* get_optional_integer() &;
+  ::std::int32_t* get_optional_integer() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::int32_t* get_optional_integer() && = delete;
 
@@ -1281,7 +1281,7 @@ class StructWithCustomDefaultValues final  {
 
   /** Glean { "field": "unqualified_struct" } */
   [[deprecated("Use `FOO.unqualified_struct().value()` instead of `FOO.get_unqualified_struct()`")]]
-  const ::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct& get_unqualified_struct() const&;
+  const ::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct& get_unqualified_struct() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "unqualified_struct" } */
   [[deprecated("Use `FOO.unqualified_struct().value()` instead of `FOO.get_unqualified_struct()`")]]
@@ -1297,11 +1297,11 @@ class StructWithCustomDefaultValues final  {
 
   /** Glean { "field": "optional_struct" } */
   [[deprecated("Use `FOO.optional_struct().value()` instead of `FOO.get_optional_struct()`")]]
-  const ::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct* get_optional_struct() const&;
+  const ::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct* get_optional_struct() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "optional_struct" } */
   [[deprecated("Use `FOO.optional_struct().value()` instead of `FOO.get_optional_struct()`")]]
-  ::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct* get_optional_struct() &;
+  ::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct* get_optional_struct() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct* get_optional_struct() && = delete;
 
@@ -1315,7 +1315,7 @@ class StructWithCustomDefaultValues final  {
 
   /** Glean { "field": "required_struct" } */
   [[deprecated("Use `FOO.required_struct().value()` instead of `FOO.get_required_struct()`")]]
-  const ::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct& get_required_struct() const&;
+  const ::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct& get_required_struct() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "required_struct" } */
   [[deprecated("Use `FOO.required_struct().value()` instead of `FOO.get_required_struct()`")]]
@@ -1331,7 +1331,7 @@ class StructWithCustomDefaultValues final  {
 
   /** Glean { "field": "struct_with_default_unspecified" } */
   [[deprecated("Use `FOO.struct_with_default_unspecified().value()` instead of `FOO.get_struct_with_default_unspecified()`")]]
-  const ::facebook::thrift::compiler::test::fixtures::default_values::TrivialStructWithDefault& get_struct_with_default_unspecified() const&;
+  const ::facebook::thrift::compiler::test::fixtures::default_values::TrivialStructWithDefault& get_struct_with_default_unspecified() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "struct_with_default_unspecified" } */
   [[deprecated("Use `FOO.struct_with_default_unspecified().value()` instead of `FOO.get_struct_with_default_unspecified()`")]]
@@ -1347,7 +1347,7 @@ class StructWithCustomDefaultValues final  {
 
   /** Glean { "field": "struct_with_default_specified" } */
   [[deprecated("Use `FOO.struct_with_default_specified().value()` instead of `FOO.get_struct_with_default_specified()`")]]
-  const ::facebook::thrift::compiler::test::fixtures::default_values::TrivialStructWithDefault& get_struct_with_default_specified() const&;
+  const ::facebook::thrift::compiler::test::fixtures::default_values::TrivialStructWithDefault& get_struct_with_default_specified() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "struct_with_default_specified" } */
   [[deprecated("Use `FOO.struct_with_default_specified().value()` instead of `FOO.get_struct_with_default_specified()`")]]
@@ -1687,7 +1687,7 @@ class StructWithCollectionDefaultValues final  {
 
   /** Glean { "field": "list_with_list_value" } */
   [[deprecated("Use `FOO.list_with_list_value().value()` instead of `FOO.get_list_with_list_value()`")]]
-  const ::std::vector<::std::int32_t>& get_list_with_list_value() const&;
+  const ::std::vector<::std::int32_t>& get_list_with_list_value() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "list_with_list_value" } */
   [[deprecated("Use `FOO.list_with_list_value().value()` instead of `FOO.get_list_with_list_value()`")]]
@@ -1703,7 +1703,7 @@ class StructWithCollectionDefaultValues final  {
 
   /** Glean { "field": "set_with_list_value" } */
   [[deprecated("Use `FOO.set_with_list_value().value()` instead of `FOO.get_set_with_list_value()`")]]
-  const ::std::set<::std::int32_t>& get_set_with_list_value() const&;
+  const ::std::set<::std::int32_t>& get_set_with_list_value() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "set_with_list_value" } */
   [[deprecated("Use `FOO.set_with_list_value().value()` instead of `FOO.get_set_with_list_value()`")]]
@@ -1719,7 +1719,7 @@ class StructWithCollectionDefaultValues final  {
 
   /** Glean { "field": "map_with_map_value" } */
   [[deprecated("Use `FOO.map_with_map_value().value()` instead of `FOO.get_map_with_map_value()`")]]
-  const ::std::map<::std::int32_t, ::std::int32_t>& get_map_with_map_value() const&;
+  const ::std::map<::std::int32_t, ::std::int32_t>& get_map_with_map_value() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "map_with_map_value" } */
   [[deprecated("Use `FOO.map_with_map_value().value()` instead of `FOO.get_map_with_map_value()`")]]
@@ -1735,7 +1735,7 @@ class StructWithCollectionDefaultValues final  {
 
   /** Glean { "field": "list_with_map_value" } */
   [[deprecated("Use `FOO.list_with_map_value().value()` instead of `FOO.get_list_with_map_value()`")]]
-  const ::std::vector<::std::int32_t>& get_list_with_map_value() const&;
+  const ::std::vector<::std::int32_t>& get_list_with_map_value() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "list_with_map_value" } */
   [[deprecated("Use `FOO.list_with_map_value().value()` instead of `FOO.get_list_with_map_value()`")]]
@@ -1751,7 +1751,7 @@ class StructWithCollectionDefaultValues final  {
 
   /** Glean { "field": "set_with_map_value" } */
   [[deprecated("Use `FOO.set_with_map_value().value()` instead of `FOO.get_set_with_map_value()`")]]
-  const ::std::set<::std::int32_t>& get_set_with_map_value() const&;
+  const ::std::set<::std::int32_t>& get_set_with_map_value() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "set_with_map_value" } */
   [[deprecated("Use `FOO.set_with_map_value().value()` instead of `FOO.get_set_with_map_value()`")]]
@@ -1767,7 +1767,7 @@ class StructWithCollectionDefaultValues final  {
 
   /** Glean { "field": "map_with_list_value" } */
   [[deprecated("Use `FOO.map_with_list_value().value()` instead of `FOO.get_map_with_list_value()`")]]
-  const ::std::map<::std::int32_t, ::std::int32_t>& get_map_with_list_value() const&;
+  const ::std::map<::std::int32_t, ::std::int32_t>& get_map_with_list_value() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "map_with_list_value" } */
   [[deprecated("Use `FOO.map_with_list_value().value()` instead of `FOO.get_map_with_list_value()`")]]

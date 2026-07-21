@@ -143,11 +143,11 @@ class B final  {
 
   /** Glean { "field": "field" } */
   [[deprecated("Use `FOO.field().value()` instead of `FOO.get_field()`")]]
-  const ::std::int32_t* get_field() const&;
+  const ::std::int32_t* get_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "field" } */
   [[deprecated("Use `FOO.field().value()` instead of `FOO.get_field()`")]]
-  ::std::int32_t* get_field() &;
+  ::std::int32_t* get_field() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::int32_t* get_field() && = delete;
 
@@ -280,11 +280,11 @@ class A final  {
 
   /** Glean { "field": "some_map" } */
   [[deprecated("Use `FOO.some_map().value()` instead of `FOO.get_some_map()`")]]
-  const std::unordered_map<::std::int32_t, ::apache::thrift::test::B>* get_some_map() const&;
+  const std::unordered_map<::std::int32_t, ::apache::thrift::test::B>* get_some_map() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "some_map" } */
   [[deprecated("Use `FOO.some_map().value()` instead of `FOO.get_some_map()`")]]
-  std::unordered_map<::std::int32_t, ::apache::thrift::test::B>* get_some_map() &;
+  std::unordered_map<::std::int32_t, ::apache::thrift::test::B>* get_some_map() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   std::unordered_map<::std::int32_t, ::apache::thrift::test::B>* get_some_map() && = delete;
 

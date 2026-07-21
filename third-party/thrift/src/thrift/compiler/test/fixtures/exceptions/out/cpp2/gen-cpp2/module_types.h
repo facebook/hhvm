@@ -195,7 +195,7 @@ class FOLLY_EXPORT Fiery : public virtual apache::thrift::TException {
 
   /** Glean { "field": "message" } */
   [[deprecated("Use `FOO.message().value()` instead of `FOO.get_message()`")]]
-  const ::std::string& get_message() const& {
+  const ::std::string& get_message() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_message;
   }
 
@@ -349,11 +349,11 @@ class FOLLY_EXPORT Serious : public virtual apache::thrift::TException {
 
   /** Glean { "field": "sonnet" } */
   [[deprecated("Use `FOO.sonnet().value()` instead of `FOO.get_sonnet()`")]]
-  const ::std::string* get_sonnet() const&;
+  const ::std::string* get_sonnet() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "sonnet" } */
   [[deprecated("Use `FOO.sonnet().value()` instead of `FOO.get_sonnet()`")]]
-  ::std::string* get_sonnet() &;
+  ::std::string* get_sonnet() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::string* get_sonnet() && = delete;
 
@@ -541,7 +541,7 @@ class FOLLY_EXPORT ComplexFieldNames : public virtual apache::thrift::TException
 
   /** Glean { "field": "error_message" } */
   [[deprecated("Use `FOO.error_message().value()` instead of `FOO.get_error_message()`")]]
-  const ::std::string& get_error_message() const& {
+  const ::std::string& get_error_message() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_error_message;
   }
 
@@ -561,7 +561,7 @@ class FOLLY_EXPORT ComplexFieldNames : public virtual apache::thrift::TException
 
   /** Glean { "field": "internal_error_message" } */
   [[deprecated("Use `FOO.internal_error_message().value()` instead of `FOO.get_internal_error_message()`")]]
-  const ::std::string& get_internal_error_message() const& {
+  const ::std::string& get_internal_error_message() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_internal_error_message;
   }
 
@@ -755,7 +755,7 @@ class FOLLY_EXPORT CustomFieldNames : public virtual apache::thrift::TException 
 
   /** Glean { "field": "error_message" } */
   [[deprecated("Use `FOO.error_message().value()` instead of `FOO.get_error_message()`")]]
-  const ::std::string& get_error_message() const& {
+  const ::std::string& get_error_message() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_error_message;
   }
 
@@ -775,7 +775,7 @@ class FOLLY_EXPORT CustomFieldNames : public virtual apache::thrift::TException 
 
   /** Glean { "field": "internal_error_message" } */
   [[deprecated("Use `FOO.internal_error_message().value()` instead of `FOO.get_internal_error_message()`")]]
-  const ::std::string& get_internal_error_message() const& {
+  const ::std::string& get_internal_error_message() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_internal_error_message;
   }
 
@@ -969,7 +969,7 @@ class FOLLY_EXPORT ExceptionWithPrimitiveField : public virtual apache::thrift::
 
   /** Glean { "field": "message" } */
   [[deprecated("Use `FOO.message().value()` instead of `FOO.get_message()`")]]
-  const ::std::string& get_message() const& {
+  const ::std::string& get_message() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_message;
   }
 
@@ -1171,7 +1171,7 @@ class FOLLY_EXPORT ExceptionWithStructuredAnnotation : public virtual apache::th
 
   /** Glean { "field": "message_field" } */
   [[deprecated("Use `FOO.message_field().value()` instead of `FOO.get_message_field()`")]]
-  const ::std::string& get_message_field() const& {
+  const ::std::string& get_message_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_message_field;
   }
 

@@ -633,7 +633,7 @@ std::partial_ordering StructWithUnion::operator<=>([[maybe_unused]] const Struct
 }
 
 
-const ::cpp2::MyField& StructWithUnion::get_f() const& {
+const ::cpp2::MyField& StructWithUnion::get_f() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_f;
 }
 
@@ -724,11 +724,11 @@ std::partial_ordering RecursiveStruct::operator<=>([[maybe_unused]] const Recurs
 }
 
 
-const ::std::vector<::cpp2::RecursiveStruct>* RecursiveStruct::get_mes() const& {
+const ::std::vector<::cpp2::RecursiveStruct>* RecursiveStruct::get_mes() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return mes_ref().has_value() ? std::addressof(__fbthrift_field_mes) : nullptr;
 }
 
-::std::vector<::cpp2::RecursiveStruct>* RecursiveStruct::get_mes() & {
+::std::vector<::cpp2::RecursiveStruct>* RecursiveStruct::get_mes() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return mes_ref().has_value() ? std::addressof(__fbthrift_field_mes) : nullptr;
 }
 

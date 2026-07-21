@@ -471,7 +471,7 @@ class ModuleA final  {
 
   /** Glean { "field": "strField" } */
   [[deprecated("Use `FOO.strField().value()` instead of `FOO.get_strField()`")]]
-  const ::std::string& get_strField() const& {
+  const ::std::string& get_strField() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_strField;
   }
 
@@ -491,7 +491,7 @@ class ModuleA final  {
 
   /** Glean { "field": "listField" } */
   [[deprecated("Use `FOO.listField().value()` instead of `FOO.get_listField()`")]]
-  const ::std::vector<::std::int16_t>& get_listField() const&;
+  const ::std::vector<::std::int16_t>& get_listField() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "listField" } */
   [[deprecated("Use `FOO.listField().value()` instead of `FOO.get_listField()`")]]
@@ -507,7 +507,7 @@ class ModuleA final  {
 
   /** Glean { "field": "mapField" } */
   [[deprecated("Use `FOO.mapField().value()` instead of `FOO.get_mapField()`")]]
-  const ::std::map<::std::string, ::std::int32_t>& get_mapField() const&;
+  const ::std::map<::std::string, ::std::int32_t>& get_mapField() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "mapField" } */
   [[deprecated("Use `FOO.mapField().value()` instead of `FOO.get_mapField()`")]]
@@ -523,7 +523,7 @@ class ModuleA final  {
 
   /** Glean { "field": "inclAField" } */
   [[deprecated("Use `FOO.inclAField().value()` instead of `FOO.get_inclAField()`")]]
-  const ::some::ns::IncludedA& get_inclAField() const&;
+  const ::some::ns::IncludedA& get_inclAField() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "inclAField" } */
   [[deprecated("Use `FOO.inclAField().value()` instead of `FOO.get_inclAField()`")]]
@@ -539,7 +539,7 @@ class ModuleA final  {
 
   /** Glean { "field": "inclBField" } */
   [[deprecated("Use `FOO.inclBField().value()` instead of `FOO.get_inclBField()`")]]
-  const ::some::ns::IncludedB& get_inclBField() const&;
+  const ::some::ns::IncludedB& get_inclBField() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "inclBField" } */
   [[deprecated("Use `FOO.inclBField().value()` instead of `FOO.get_inclBField()`")]]

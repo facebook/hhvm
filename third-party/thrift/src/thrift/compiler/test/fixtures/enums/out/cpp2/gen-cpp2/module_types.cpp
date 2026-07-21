@@ -324,7 +324,7 @@ std::partial_ordering SomeStruct::operator<=>([[maybe_unused]] const SomeStruct&
   return __fbthrift_field_questionable;
 }
 
-const ::std::set<::std::int32_t>& SomeStruct::get_tags() const& {
+const ::std::set<::std::int32_t>& SomeStruct::get_tags() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_tags;
 }
 

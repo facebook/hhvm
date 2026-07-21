@@ -19,11 +19,11 @@
   {{#if field.has_deprecated_accessors?}}
     {{#if field.optional?}}
 
-const {{field.cpp_storage_type}}* {{struct.cpp_underlying_name}}::get_{{field.cpp_name}}() const& {
+const {{field.cpp_storage_type}}* {{struct.cpp_underlying_name}}::get_{{field.cpp_name}}() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return {{field.cpp_name}}_ref().has_value() ? std::addressof({{field.cpp_storage_name}}) : nullptr;
 }
 
-{{field.cpp_storage_type}}* {{struct.cpp_underlying_name}}::get_{{field.cpp_name}}() & {
+{{field.cpp_storage_type}}* {{struct.cpp_underlying_name}}::get_{{field.cpp_name}}() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return {{field.cpp_name}}_ref().has_value() ? std::addressof({{field.cpp_storage_name}}) : nullptr;
 }
     {{#else if field.type.resolves_to_fixed_size?}}
@@ -33,7 +33,7 @@ const {{field.cpp_storage_type}}* {{struct.cpp_underlying_name}}::get_{{field.cp
 }
     {{#else if (or field.type.container? field.type.structured?)}}
 
-const {{field.cpp_storage_type}}& {{struct.cpp_underlying_name}}::get_{{field.cpp_name}}() const& {
+const {{field.cpp_storage_type}}& {{struct.cpp_underlying_name}}::get_{{field.cpp_name}}() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return {{field.cpp_storage_name}};
 }
 

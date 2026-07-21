@@ -992,11 +992,11 @@ class EmptiableStruct final  {
 
   /** Glean { "field": "bool_field" } */
   [[deprecated("Use `FOO.bool_field().value()` instead of `FOO.get_bool_field()`")]]
-  const bool* get_bool_field() const&;
+  const bool* get_bool_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "bool_field" } */
   [[deprecated("Use `FOO.bool_field().value()` instead of `FOO.get_bool_field()`")]]
-  bool* get_bool_field() &;
+  bool* get_bool_field() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   bool* get_bool_field() && = delete;
 
@@ -1006,11 +1006,11 @@ class EmptiableStruct final  {
 
   /** Glean { "field": "byte_field" } */
   [[deprecated("Use `FOO.byte_field().value()` instead of `FOO.get_byte_field()`")]]
-  const ::std::int8_t* get_byte_field() const&;
+  const ::std::int8_t* get_byte_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "byte_field" } */
   [[deprecated("Use `FOO.byte_field().value()` instead of `FOO.get_byte_field()`")]]
-  ::std::int8_t* get_byte_field() &;
+  ::std::int8_t* get_byte_field() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::int8_t* get_byte_field() && = delete;
 
@@ -1020,11 +1020,11 @@ class EmptiableStruct final  {
 
   /** Glean { "field": "short_field" } */
   [[deprecated("Use `FOO.short_field().value()` instead of `FOO.get_short_field()`")]]
-  const ::std::int16_t* get_short_field() const&;
+  const ::std::int16_t* get_short_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "short_field" } */
   [[deprecated("Use `FOO.short_field().value()` instead of `FOO.get_short_field()`")]]
-  ::std::int16_t* get_short_field() &;
+  ::std::int16_t* get_short_field() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::int16_t* get_short_field() && = delete;
 
@@ -1034,11 +1034,11 @@ class EmptiableStruct final  {
 
   /** Glean { "field": "int_field" } */
   [[deprecated("Use `FOO.int_field().value()` instead of `FOO.get_int_field()`")]]
-  const ::std::int32_t* get_int_field() const&;
+  const ::std::int32_t* get_int_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "int_field" } */
   [[deprecated("Use `FOO.int_field().value()` instead of `FOO.get_int_field()`")]]
-  ::std::int32_t* get_int_field() &;
+  ::std::int32_t* get_int_field() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::int32_t* get_int_field() && = delete;
 
@@ -1048,11 +1048,11 @@ class EmptiableStruct final  {
 
   /** Glean { "field": "long_field" } */
   [[deprecated("Use `FOO.long_field().value()` instead of `FOO.get_long_field()`")]]
-  const ::std::int64_t* get_long_field() const&;
+  const ::std::int64_t* get_long_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "long_field" } */
   [[deprecated("Use `FOO.long_field().value()` instead of `FOO.get_long_field()`")]]
-  ::std::int64_t* get_long_field() &;
+  ::std::int64_t* get_long_field() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::int64_t* get_long_field() && = delete;
 
@@ -1062,11 +1062,11 @@ class EmptiableStruct final  {
 
   /** Glean { "field": "float_field" } */
   [[deprecated("Use `FOO.float_field().value()` instead of `FOO.get_float_field()`")]]
-  const float* get_float_field() const&;
+  const float* get_float_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "float_field" } */
   [[deprecated("Use `FOO.float_field().value()` instead of `FOO.get_float_field()`")]]
-  float* get_float_field() &;
+  float* get_float_field() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   float* get_float_field() && = delete;
 
@@ -1076,11 +1076,11 @@ class EmptiableStruct final  {
 
   /** Glean { "field": "double_field" } */
   [[deprecated("Use `FOO.double_field().value()` instead of `FOO.get_double_field()`")]]
-  const double* get_double_field() const&;
+  const double* get_double_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "double_field" } */
   [[deprecated("Use `FOO.double_field().value()` instead of `FOO.get_double_field()`")]]
-  double* get_double_field() &;
+  double* get_double_field() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   double* get_double_field() && = delete;
 
@@ -1090,11 +1090,11 @@ class EmptiableStruct final  {
 
   /** Glean { "field": "string_field" } */
   [[deprecated("Use `FOO.string_field().value()` instead of `FOO.get_string_field()`")]]
-  const ::std::string* get_string_field() const&;
+  const ::std::string* get_string_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "string_field" } */
   [[deprecated("Use `FOO.string_field().value()` instead of `FOO.get_string_field()`")]]
-  ::std::string* get_string_field() &;
+  ::std::string* get_string_field() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::string* get_string_field() && = delete;
 
@@ -1108,11 +1108,11 @@ class EmptiableStruct final  {
 
   /** Glean { "field": "binary_field" } */
   [[deprecated("Use `FOO.binary_field().value()` instead of `FOO.get_binary_field()`")]]
-  const ::std::string* get_binary_field() const&;
+  const ::std::string* get_binary_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "binary_field" } */
   [[deprecated("Use `FOO.binary_field().value()` instead of `FOO.get_binary_field()`")]]
-  ::std::string* get_binary_field() &;
+  ::std::string* get_binary_field() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::string* get_binary_field() && = delete;
 
@@ -1126,11 +1126,11 @@ class EmptiableStruct final  {
 
   /** Glean { "field": "enum_field" } */
   [[deprecated("Use `FOO.enum_field().value()` instead of `FOO.get_enum_field()`")]]
-  const ::apache::thrift::test::MyEnum* get_enum_field() const&;
+  const ::apache::thrift::test::MyEnum* get_enum_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "enum_field" } */
   [[deprecated("Use `FOO.enum_field().value()` instead of `FOO.get_enum_field()`")]]
-  ::apache::thrift::test::MyEnum* get_enum_field() &;
+  ::apache::thrift::test::MyEnum* get_enum_field() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::apache::thrift::test::MyEnum* get_enum_field() && = delete;
 
@@ -1140,11 +1140,11 @@ class EmptiableStruct final  {
 
   /** Glean { "field": "list_field" } */
   [[deprecated("Use `FOO.list_field().value()` instead of `FOO.get_list_field()`")]]
-  const ::std::vector<::std::int16_t>* get_list_field() const&;
+  const ::std::vector<::std::int16_t>* get_list_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "list_field" } */
   [[deprecated("Use `FOO.list_field().value()` instead of `FOO.get_list_field()`")]]
-  ::std::vector<::std::int16_t>* get_list_field() &;
+  ::std::vector<::std::int16_t>* get_list_field() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::vector<::std::int16_t>* get_list_field() && = delete;
 
@@ -1158,11 +1158,11 @@ class EmptiableStruct final  {
 
   /** Glean { "field": "set_field" } */
   [[deprecated("Use `FOO.set_field().value()` instead of `FOO.get_set_field()`")]]
-  const ::std::set<::std::int16_t>* get_set_field() const&;
+  const ::std::set<::std::int16_t>* get_set_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "set_field" } */
   [[deprecated("Use `FOO.set_field().value()` instead of `FOO.get_set_field()`")]]
-  ::std::set<::std::int16_t>* get_set_field() &;
+  ::std::set<::std::int16_t>* get_set_field() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::set<::std::int16_t>* get_set_field() && = delete;
 
@@ -1176,11 +1176,11 @@ class EmptiableStruct final  {
 
   /** Glean { "field": "map_field" } */
   [[deprecated("Use `FOO.map_field().value()` instead of `FOO.get_map_field()`")]]
-  const ::std::map<::std::int16_t, ::std::int16_t>* get_map_field() const&;
+  const ::std::map<::std::int16_t, ::std::int16_t>* get_map_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "map_field" } */
   [[deprecated("Use `FOO.map_field().value()` instead of `FOO.get_map_field()`")]]
-  ::std::map<::std::int16_t, ::std::int16_t>* get_map_field() &;
+  ::std::map<::std::int16_t, ::std::int16_t>* get_map_field() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::map<::std::int16_t, ::std::int16_t>* get_map_field() && = delete;
 
@@ -1194,11 +1194,11 @@ class EmptiableStruct final  {
 
   /** Glean { "field": "struct_field" } */
   [[deprecated("Use `FOO.struct_field().value()` instead of `FOO.get_struct_field()`")]]
-  const ::apache::thrift::test::MyStruct* get_struct_field() const&;
+  const ::apache::thrift::test::MyStruct* get_struct_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "struct_field" } */
   [[deprecated("Use `FOO.struct_field().value()` instead of `FOO.get_struct_field()`")]]
-  ::apache::thrift::test::MyStruct* get_struct_field() &;
+  ::apache::thrift::test::MyStruct* get_struct_field() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::apache::thrift::test::MyStruct* get_struct_field() && = delete;
 
@@ -2504,11 +2504,11 @@ class NotEmptiableStruct final  {
 
   /** Glean { "field": "byte_field" } */
   [[deprecated("Use `FOO.byte_field().value()` instead of `FOO.get_byte_field()`")]]
-  const ::std::int8_t* get_byte_field() const&;
+  const ::std::int8_t* get_byte_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "byte_field" } */
   [[deprecated("Use `FOO.byte_field().value()` instead of `FOO.get_byte_field()`")]]
-  ::std::int8_t* get_byte_field() &;
+  ::std::int8_t* get_byte_field() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::int8_t* get_byte_field() && = delete;
 
@@ -2518,11 +2518,11 @@ class NotEmptiableStruct final  {
 
   /** Glean { "field": "short_field" } */
   [[deprecated("Use `FOO.short_field().value()` instead of `FOO.get_short_field()`")]]
-  const ::std::int16_t* get_short_field() const&;
+  const ::std::int16_t* get_short_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "short_field" } */
   [[deprecated("Use `FOO.short_field().value()` instead of `FOO.get_short_field()`")]]
-  ::std::int16_t* get_short_field() &;
+  ::std::int16_t* get_short_field() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::int16_t* get_short_field() && = delete;
 
@@ -2532,11 +2532,11 @@ class NotEmptiableStruct final  {
 
   /** Glean { "field": "int_field" } */
   [[deprecated("Use `FOO.int_field().value()` instead of `FOO.get_int_field()`")]]
-  const ::std::int32_t* get_int_field() const&;
+  const ::std::int32_t* get_int_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "int_field" } */
   [[deprecated("Use `FOO.int_field().value()` instead of `FOO.get_int_field()`")]]
-  ::std::int32_t* get_int_field() &;
+  ::std::int32_t* get_int_field() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::int32_t* get_int_field() && = delete;
 
@@ -2546,11 +2546,11 @@ class NotEmptiableStruct final  {
 
   /** Glean { "field": "long_field" } */
   [[deprecated("Use `FOO.long_field().value()` instead of `FOO.get_long_field()`")]]
-  const ::std::int64_t* get_long_field() const&;
+  const ::std::int64_t* get_long_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "long_field" } */
   [[deprecated("Use `FOO.long_field().value()` instead of `FOO.get_long_field()`")]]
-  ::std::int64_t* get_long_field() &;
+  ::std::int64_t* get_long_field() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::int64_t* get_long_field() && = delete;
 
@@ -2560,11 +2560,11 @@ class NotEmptiableStruct final  {
 
   /** Glean { "field": "float_field" } */
   [[deprecated("Use `FOO.float_field().value()` instead of `FOO.get_float_field()`")]]
-  const float* get_float_field() const&;
+  const float* get_float_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "float_field" } */
   [[deprecated("Use `FOO.float_field().value()` instead of `FOO.get_float_field()`")]]
-  float* get_float_field() &;
+  float* get_float_field() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   float* get_float_field() && = delete;
 
@@ -2574,11 +2574,11 @@ class NotEmptiableStruct final  {
 
   /** Glean { "field": "double_field" } */
   [[deprecated("Use `FOO.double_field().value()` instead of `FOO.get_double_field()`")]]
-  const double* get_double_field() const&;
+  const double* get_double_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "double_field" } */
   [[deprecated("Use `FOO.double_field().value()` instead of `FOO.get_double_field()`")]]
-  double* get_double_field() &;
+  double* get_double_field() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   double* get_double_field() && = delete;
 
@@ -2588,11 +2588,11 @@ class NotEmptiableStruct final  {
 
   /** Glean { "field": "string_field" } */
   [[deprecated("Use `FOO.string_field().value()` instead of `FOO.get_string_field()`")]]
-  const ::std::string* get_string_field() const&;
+  const ::std::string* get_string_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "string_field" } */
   [[deprecated("Use `FOO.string_field().value()` instead of `FOO.get_string_field()`")]]
-  ::std::string* get_string_field() &;
+  ::std::string* get_string_field() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::string* get_string_field() && = delete;
 
@@ -2606,11 +2606,11 @@ class NotEmptiableStruct final  {
 
   /** Glean { "field": "binary_field" } */
   [[deprecated("Use `FOO.binary_field().value()` instead of `FOO.get_binary_field()`")]]
-  const ::std::string* get_binary_field() const&;
+  const ::std::string* get_binary_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "binary_field" } */
   [[deprecated("Use `FOO.binary_field().value()` instead of `FOO.get_binary_field()`")]]
-  ::std::string* get_binary_field() &;
+  ::std::string* get_binary_field() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::string* get_binary_field() && = delete;
 
@@ -2624,11 +2624,11 @@ class NotEmptiableStruct final  {
 
   /** Glean { "field": "enum_field" } */
   [[deprecated("Use `FOO.enum_field().value()` instead of `FOO.get_enum_field()`")]]
-  const ::apache::thrift::test::MyEnum* get_enum_field() const&;
+  const ::apache::thrift::test::MyEnum* get_enum_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "enum_field" } */
   [[deprecated("Use `FOO.enum_field().value()` instead of `FOO.get_enum_field()`")]]
-  ::apache::thrift::test::MyEnum* get_enum_field() &;
+  ::apache::thrift::test::MyEnum* get_enum_field() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::apache::thrift::test::MyEnum* get_enum_field() && = delete;
 
@@ -2638,11 +2638,11 @@ class NotEmptiableStruct final  {
 
   /** Glean { "field": "list_field" } */
   [[deprecated("Use `FOO.list_field().value()` instead of `FOO.get_list_field()`")]]
-  const ::std::vector<::std::int16_t>* get_list_field() const&;
+  const ::std::vector<::std::int16_t>* get_list_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "list_field" } */
   [[deprecated("Use `FOO.list_field().value()` instead of `FOO.get_list_field()`")]]
-  ::std::vector<::std::int16_t>* get_list_field() &;
+  ::std::vector<::std::int16_t>* get_list_field() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::vector<::std::int16_t>* get_list_field() && = delete;
 
@@ -2656,11 +2656,11 @@ class NotEmptiableStruct final  {
 
   /** Glean { "field": "set_field" } */
   [[deprecated("Use `FOO.set_field().value()` instead of `FOO.get_set_field()`")]]
-  const ::std::set<::std::int16_t>* get_set_field() const&;
+  const ::std::set<::std::int16_t>* get_set_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "set_field" } */
   [[deprecated("Use `FOO.set_field().value()` instead of `FOO.get_set_field()`")]]
-  ::std::set<::std::int16_t>* get_set_field() &;
+  ::std::set<::std::int16_t>* get_set_field() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::set<::std::int16_t>* get_set_field() && = delete;
 
@@ -2674,11 +2674,11 @@ class NotEmptiableStruct final  {
 
   /** Glean { "field": "map_field" } */
   [[deprecated("Use `FOO.map_field().value()` instead of `FOO.get_map_field()`")]]
-  const ::std::map<::std::int16_t, ::std::int16_t>* get_map_field() const&;
+  const ::std::map<::std::int16_t, ::std::int16_t>* get_map_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "map_field" } */
   [[deprecated("Use `FOO.map_field().value()` instead of `FOO.get_map_field()`")]]
-  ::std::map<::std::int16_t, ::std::int16_t>* get_map_field() &;
+  ::std::map<::std::int16_t, ::std::int16_t>* get_map_field() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::map<::std::int16_t, ::std::int16_t>* get_map_field() && = delete;
 
@@ -2692,11 +2692,11 @@ class NotEmptiableStruct final  {
 
   /** Glean { "field": "struct_field" } */
   [[deprecated("Use `FOO.struct_field().value()` instead of `FOO.get_struct_field()`")]]
-  const ::apache::thrift::test::MyStruct* get_struct_field() const&;
+  const ::apache::thrift::test::MyStruct* get_struct_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "struct_field" } */
   [[deprecated("Use `FOO.struct_field().value()` instead of `FOO.get_struct_field()`")]]
-  ::apache::thrift::test::MyStruct* get_struct_field() &;
+  ::apache::thrift::test::MyStruct* get_struct_field() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::apache::thrift::test::MyStruct* get_struct_field() && = delete;
 

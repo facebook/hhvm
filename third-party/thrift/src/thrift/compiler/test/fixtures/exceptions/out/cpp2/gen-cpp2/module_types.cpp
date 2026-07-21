@@ -158,11 +158,11 @@ std::partial_ordering Serious::operator<=>([[maybe_unused]] const Serious& rhs) 
 }
 
 
-const ::std::string* Serious::get_sonnet() const& {
+const ::std::string* Serious::get_sonnet() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return sonnet_ref().has_value() ? std::addressof(__fbthrift_field_sonnet) : nullptr;
 }
 
-::std::string* Serious::get_sonnet() & {
+::std::string* Serious::get_sonnet() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return sonnet_ref().has_value() ? std::addressof(__fbthrift_field_sonnet) : nullptr;
 }
 

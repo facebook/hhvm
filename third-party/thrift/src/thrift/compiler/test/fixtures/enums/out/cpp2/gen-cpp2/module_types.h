@@ -695,7 +695,7 @@ class SomeStruct final  {
 
   /** Glean { "field": "tags" } */
   [[deprecated("Use `FOO.tags().value()` instead of `FOO.get_tags()`")]]
-  const ::std::set<::std::int32_t>& get_tags() const&;
+  const ::std::set<::std::int32_t>& get_tags() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "tags" } */
   [[deprecated("Use `FOO.tags().value()` instead of `FOO.get_tags()`")]]

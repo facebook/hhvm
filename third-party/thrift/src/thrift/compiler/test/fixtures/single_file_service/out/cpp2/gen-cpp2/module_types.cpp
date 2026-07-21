@@ -60,11 +60,11 @@ std::partial_ordering Foo::operator<=>([[maybe_unused]] const Foo& rhs) const {
 }
 
 
-const ::std::int32_t* Foo::get_value() const& {
+const ::std::int32_t* Foo::get_value() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return value_ref().has_value() ? std::addressof(__fbthrift_field_value) : nullptr;
 }
 
-::std::int32_t* Foo::get_value() & {
+::std::int32_t* Foo::get_value() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return value_ref().has_value() ? std::addressof(__fbthrift_field_value) : nullptr;
 }
 

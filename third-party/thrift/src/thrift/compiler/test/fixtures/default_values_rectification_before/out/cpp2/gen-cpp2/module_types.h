@@ -551,7 +551,7 @@ class TestStruct final  {
 
   /** Glean { "field": "unqualified_list_field" } */
   [[deprecated("Use `FOO.unqualified_list_field().value()` instead of `FOO.get_unqualified_list_field()`")]]
-  const ::std::vector<::std::int32_t>& get_unqualified_list_field() const&;
+  const ::std::vector<::std::int32_t>& get_unqualified_list_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "unqualified_list_field" } */
   [[deprecated("Use `FOO.unqualified_list_field().value()` instead of `FOO.get_unqualified_list_field()`")]]
@@ -567,7 +567,7 @@ class TestStruct final  {
 
   /** Glean { "field": "unqualified_struct_field" } */
   [[deprecated("Use `FOO.unqualified_struct_field().value()` instead of `FOO.get_unqualified_struct_field()`")]]
-  const ::facebook::thrift::compiler::test::fixtures::default_values_rectification_before::EmptyStruct& get_unqualified_struct_field() const&;
+  const ::facebook::thrift::compiler::test::fixtures::default_values_rectification_before::EmptyStruct& get_unqualified_struct_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "unqualified_struct_field" } */
   [[deprecated("Use `FOO.unqualified_struct_field().value()` instead of `FOO.get_unqualified_struct_field()`")]]
@@ -583,11 +583,11 @@ class TestStruct final  {
 
   /** Glean { "field": "optional_int_field" } */
   [[deprecated("Use `FOO.optional_int_field().value()` instead of `FOO.get_optional_int_field()`")]]
-  const ::std::int32_t* get_optional_int_field() const&;
+  const ::std::int32_t* get_optional_int_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "optional_int_field" } */
   [[deprecated("Use `FOO.optional_int_field().value()` instead of `FOO.get_optional_int_field()`")]]
-  ::std::int32_t* get_optional_int_field() &;
+  ::std::int32_t* get_optional_int_field() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::int32_t* get_optional_int_field() && = delete;
 
@@ -597,11 +597,11 @@ class TestStruct final  {
 
   /** Glean { "field": "optional_bool_field" } */
   [[deprecated("Use `FOO.optional_bool_field().value()` instead of `FOO.get_optional_bool_field()`")]]
-  const bool* get_optional_bool_field() const&;
+  const bool* get_optional_bool_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "optional_bool_field" } */
   [[deprecated("Use `FOO.optional_bool_field().value()` instead of `FOO.get_optional_bool_field()`")]]
-  bool* get_optional_bool_field() &;
+  bool* get_optional_bool_field() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   bool* get_optional_bool_field() && = delete;
 
@@ -611,11 +611,11 @@ class TestStruct final  {
 
   /** Glean { "field": "optional_list_field" } */
   [[deprecated("Use `FOO.optional_list_field().value()` instead of `FOO.get_optional_list_field()`")]]
-  const ::std::vector<::std::int32_t>* get_optional_list_field() const&;
+  const ::std::vector<::std::int32_t>* get_optional_list_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "optional_list_field" } */
   [[deprecated("Use `FOO.optional_list_field().value()` instead of `FOO.get_optional_list_field()`")]]
-  ::std::vector<::std::int32_t>* get_optional_list_field() &;
+  ::std::vector<::std::int32_t>* get_optional_list_field() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::vector<::std::int32_t>* get_optional_list_field() && = delete;
 
@@ -629,11 +629,11 @@ class TestStruct final  {
 
   /** Glean { "field": "optional_struct_field" } */
   [[deprecated("Use `FOO.optional_struct_field().value()` instead of `FOO.get_optional_struct_field()`")]]
-  const ::facebook::thrift::compiler::test::fixtures::default_values_rectification_before::EmptyStruct* get_optional_struct_field() const&;
+  const ::facebook::thrift::compiler::test::fixtures::default_values_rectification_before::EmptyStruct* get_optional_struct_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "optional_struct_field" } */
   [[deprecated("Use `FOO.optional_struct_field().value()` instead of `FOO.get_optional_struct_field()`")]]
-  ::facebook::thrift::compiler::test::fixtures::default_values_rectification_before::EmptyStruct* get_optional_struct_field() &;
+  ::facebook::thrift::compiler::test::fixtures::default_values_rectification_before::EmptyStruct* get_optional_struct_field() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::facebook::thrift::compiler::test::fixtures::default_values_rectification_before::EmptyStruct* get_optional_struct_field() && = delete;
 

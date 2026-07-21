@@ -73,7 +73,7 @@ std::partial_ordering Foo::operator<=>([[maybe_unused]] const Foo& rhs) const {
 }
 
 
-const ::facebook::thrift::compiler::test::fixtures::aliasing::other::Foo& Foo::get_other_foo() const& {
+const ::facebook::thrift::compiler::test::fixtures::aliasing::other::Foo& Foo::get_other_foo() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_other_foo;
 }
 
@@ -81,7 +81,7 @@ const ::facebook::thrift::compiler::test::fixtures::aliasing::other::Foo& Foo::g
   return static_cast<::facebook::thrift::compiler::test::fixtures::aliasing::other::Foo&&>(__fbthrift_field_other_foo);
 }
 
-const ::facebook::thrift::compiler::test::fixtures::aliasing::not_module::Foo& Foo::get_yet_another_foo() const& {
+const ::facebook::thrift::compiler::test::fixtures::aliasing::not_module::Foo& Foo::get_yet_another_foo() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_yet_another_foo;
 }
 

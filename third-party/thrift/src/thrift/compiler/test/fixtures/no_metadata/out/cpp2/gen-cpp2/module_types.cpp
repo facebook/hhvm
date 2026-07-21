@@ -132,7 +132,7 @@ std::partial_ordering MyStruct::operator<=>([[maybe_unused]] const MyStruct& rhs
   return __fbthrift_field_MyIntField;
 }
 
-const ::cpp2::MyDataItem& MyStruct::get_MyDataField() const& {
+const ::cpp2::MyDataItem& MyStruct::get_MyDataField() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_MyDataField;
 }
 

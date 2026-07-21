@@ -206,11 +206,11 @@ std::partial_ordering StructWithNoCustomDefaultValues::operator<=>([[maybe_unuse
   return __fbthrift_field_unqualified_integer;
 }
 
-const ::std::int32_t* StructWithNoCustomDefaultValues::get_optional_integer() const& {
+const ::std::int32_t* StructWithNoCustomDefaultValues::get_optional_integer() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return optional_integer_ref().has_value() ? std::addressof(__fbthrift_field_optional_integer) : nullptr;
 }
 
-::std::int32_t* StructWithNoCustomDefaultValues::get_optional_integer() & {
+::std::int32_t* StructWithNoCustomDefaultValues::get_optional_integer() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return optional_integer_ref().has_value() ? std::addressof(__fbthrift_field_optional_integer) : nullptr;
 }
 
@@ -228,7 +228,7 @@ const ::std::int32_t* StructWithNoCustomDefaultValues::get_optional_integer() co
   return __fbthrift_field_required_integer;
 }
 
-const ::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct& StructWithNoCustomDefaultValues::get_unqualified_struct() const& {
+const ::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct& StructWithNoCustomDefaultValues::get_unqualified_struct() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_unqualified_struct;
 }
 
@@ -236,15 +236,15 @@ const ::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruc
   return static_cast<::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct&&>(__fbthrift_field_unqualified_struct);
 }
 
-const ::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct* StructWithNoCustomDefaultValues::get_optional_struct() const& {
+const ::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct* StructWithNoCustomDefaultValues::get_optional_struct() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return optional_struct_ref().has_value() ? std::addressof(__fbthrift_field_optional_struct) : nullptr;
 }
 
-::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct* StructWithNoCustomDefaultValues::get_optional_struct() & {
+::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct* StructWithNoCustomDefaultValues::get_optional_struct() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return optional_struct_ref().has_value() ? std::addressof(__fbthrift_field_optional_struct) : nullptr;
 }
 
-const ::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct& StructWithNoCustomDefaultValues::get_required_struct() const& {
+const ::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct& StructWithNoCustomDefaultValues::get_required_struct() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_required_struct;
 }
 
@@ -348,11 +348,11 @@ std::partial_ordering StructWithCustomDefaultValues::operator<=>([[maybe_unused]
   return __fbthrift_field_unqualified_integer;
 }
 
-const ::std::int32_t* StructWithCustomDefaultValues::get_optional_integer() const& {
+const ::std::int32_t* StructWithCustomDefaultValues::get_optional_integer() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return optional_integer_ref().has_value() ? std::addressof(__fbthrift_field_optional_integer) : nullptr;
 }
 
-::std::int32_t* StructWithCustomDefaultValues::get_optional_integer() & {
+::std::int32_t* StructWithCustomDefaultValues::get_optional_integer() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return optional_integer_ref().has_value() ? std::addressof(__fbthrift_field_optional_integer) : nullptr;
 }
 
@@ -370,7 +370,7 @@ const ::std::int32_t* StructWithCustomDefaultValues::get_optional_integer() cons
   return __fbthrift_field_required_integer;
 }
 
-const ::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct& StructWithCustomDefaultValues::get_unqualified_struct() const& {
+const ::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct& StructWithCustomDefaultValues::get_unqualified_struct() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_unqualified_struct;
 }
 
@@ -378,15 +378,15 @@ const ::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruc
   return static_cast<::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct&&>(__fbthrift_field_unqualified_struct);
 }
 
-const ::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct* StructWithCustomDefaultValues::get_optional_struct() const& {
+const ::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct* StructWithCustomDefaultValues::get_optional_struct() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return optional_struct_ref().has_value() ? std::addressof(__fbthrift_field_optional_struct) : nullptr;
 }
 
-::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct* StructWithCustomDefaultValues::get_optional_struct() & {
+::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct* StructWithCustomDefaultValues::get_optional_struct() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return optional_struct_ref().has_value() ? std::addressof(__fbthrift_field_optional_struct) : nullptr;
 }
 
-const ::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct& StructWithCustomDefaultValues::get_required_struct() const& {
+const ::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct& StructWithCustomDefaultValues::get_required_struct() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_required_struct;
 }
 
@@ -394,7 +394,7 @@ const ::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruc
   return static_cast<::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct&&>(__fbthrift_field_required_struct);
 }
 
-const ::facebook::thrift::compiler::test::fixtures::default_values::TrivialStructWithDefault& StructWithCustomDefaultValues::get_struct_with_default_unspecified() const& {
+const ::facebook::thrift::compiler::test::fixtures::default_values::TrivialStructWithDefault& StructWithCustomDefaultValues::get_struct_with_default_unspecified() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_struct_with_default_unspecified;
 }
 
@@ -402,7 +402,7 @@ const ::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruc
   return static_cast<::facebook::thrift::compiler::test::fixtures::default_values::TrivialStructWithDefault&&>(__fbthrift_field_struct_with_default_unspecified);
 }
 
-const ::facebook::thrift::compiler::test::fixtures::default_values::TrivialStructWithDefault& StructWithCustomDefaultValues::get_struct_with_default_specified() const& {
+const ::facebook::thrift::compiler::test::fixtures::default_values::TrivialStructWithDefault& StructWithCustomDefaultValues::get_struct_with_default_specified() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_struct_with_default_specified;
 }
 
@@ -536,7 +536,7 @@ std::partial_ordering StructWithCollectionDefaultValues::operator<=>([[maybe_unu
 }
 
 
-const ::std::vector<::std::int32_t>& StructWithCollectionDefaultValues::get_list_with_list_value() const& {
+const ::std::vector<::std::int32_t>& StructWithCollectionDefaultValues::get_list_with_list_value() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_list_with_list_value;
 }
 
@@ -544,7 +544,7 @@ const ::std::vector<::std::int32_t>& StructWithCollectionDefaultValues::get_list
   return static_cast<::std::vector<::std::int32_t>&&>(__fbthrift_field_list_with_list_value);
 }
 
-const ::std::set<::std::int32_t>& StructWithCollectionDefaultValues::get_set_with_list_value() const& {
+const ::std::set<::std::int32_t>& StructWithCollectionDefaultValues::get_set_with_list_value() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_set_with_list_value;
 }
 
@@ -552,7 +552,7 @@ const ::std::set<::std::int32_t>& StructWithCollectionDefaultValues::get_set_wit
   return static_cast<::std::set<::std::int32_t>&&>(__fbthrift_field_set_with_list_value);
 }
 
-const ::std::map<::std::int32_t, ::std::int32_t>& StructWithCollectionDefaultValues::get_map_with_map_value() const& {
+const ::std::map<::std::int32_t, ::std::int32_t>& StructWithCollectionDefaultValues::get_map_with_map_value() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_map_with_map_value;
 }
 
@@ -560,7 +560,7 @@ const ::std::map<::std::int32_t, ::std::int32_t>& StructWithCollectionDefaultVal
   return static_cast<::std::map<::std::int32_t, ::std::int32_t>&&>(__fbthrift_field_map_with_map_value);
 }
 
-const ::std::vector<::std::int32_t>& StructWithCollectionDefaultValues::get_list_with_map_value() const& {
+const ::std::vector<::std::int32_t>& StructWithCollectionDefaultValues::get_list_with_map_value() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_list_with_map_value;
 }
 
@@ -568,7 +568,7 @@ const ::std::vector<::std::int32_t>& StructWithCollectionDefaultValues::get_list
   return static_cast<::std::vector<::std::int32_t>&&>(__fbthrift_field_list_with_map_value);
 }
 
-const ::std::set<::std::int32_t>& StructWithCollectionDefaultValues::get_set_with_map_value() const& {
+const ::std::set<::std::int32_t>& StructWithCollectionDefaultValues::get_set_with_map_value() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_set_with_map_value;
 }
 
@@ -576,7 +576,7 @@ const ::std::set<::std::int32_t>& StructWithCollectionDefaultValues::get_set_wit
   return static_cast<::std::set<::std::int32_t>&&>(__fbthrift_field_set_with_map_value);
 }
 
-const ::std::map<::std::int32_t, ::std::int32_t>& StructWithCollectionDefaultValues::get_map_with_list_value() const& {
+const ::std::map<::std::int32_t, ::std::int32_t>& StructWithCollectionDefaultValues::get_map_with_list_value() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_map_with_list_value;
 }
 

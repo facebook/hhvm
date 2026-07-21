@@ -149,7 +149,7 @@ std::partial_ordering Mixin2::operator<=>([[maybe_unused]] const Mixin2& rhs) co
 }
 
 
-const ::cpp2::Mixin1& Mixin2::get_m1() const& {
+const ::cpp2::Mixin1& Mixin2::get_m1() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_m1;
 }
 
@@ -157,11 +157,11 @@ const ::cpp2::Mixin1& Mixin2::get_m1() const& {
   return static_cast<::cpp2::Mixin1&&>(__fbthrift_field_m1);
 }
 
-const ::std::string* Mixin2::get_field2() const& {
+const ::std::string* Mixin2::get_field2() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return field2_ref().has_value() ? std::addressof(__fbthrift_field_field2) : nullptr;
 }
 
-::std::string* Mixin2::get_field2() & {
+::std::string* Mixin2::get_field2() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return field2_ref().has_value() ? std::addressof(__fbthrift_field_field2) : nullptr;
 }
 
@@ -310,7 +310,7 @@ std::partial_ordering Foo::operator<=>([[maybe_unused]] const Foo& rhs) const {
 }
 
 
-const ::cpp2::Mixin2& Foo::get_m2() const& {
+const ::cpp2::Mixin2& Foo::get_m2() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_m2;
 }
 
@@ -318,7 +318,7 @@ const ::cpp2::Mixin2& Foo::get_m2() const& {
   return static_cast<::cpp2::Mixin2&&>(__fbthrift_field_m2);
 }
 
-const ::cpp2::Mixin3& Foo::get_m3() const& {
+const ::cpp2::Mixin3& Foo::get_m3() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_m3;
 }
 

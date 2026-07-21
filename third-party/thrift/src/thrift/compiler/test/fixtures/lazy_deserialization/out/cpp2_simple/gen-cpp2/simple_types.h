@@ -456,7 +456,7 @@ class Foo final  {
 
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1().value()` instead of `FOO.get_field1()`")]]
-  const ::std::vector<double>& get_field1() const&;
+  const ::std::vector<double>& get_field1() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1().value()` instead of `FOO.get_field1()`")]]
@@ -472,7 +472,7 @@ class Foo final  {
 
   /** Glean { "field": "field2" } */
   [[deprecated("Use `FOO.field2().value()` instead of `FOO.get_field2()`")]]
-  const ::std::vector<::std::int32_t>& get_field2() const&;
+  const ::std::vector<::std::int32_t>& get_field2() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "field2" } */
   [[deprecated("Use `FOO.field2().value()` instead of `FOO.get_field2()`")]]
@@ -488,7 +488,7 @@ class Foo final  {
 
   /** Glean { "field": "field3" } */
   [[deprecated("Use `FOO.field3().value()` instead of `FOO.get_field3()`")]]
-  const ::std::vector<double>& get_field3() const&;
+  const ::std::vector<double>& get_field3() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "field3" } */
   [[deprecated("Use `FOO.field3().value()` instead of `FOO.get_field3()`")]]
@@ -504,7 +504,7 @@ class Foo final  {
 
   /** Glean { "field": "field4" } */
   [[deprecated("Use `FOO.field4().value()` instead of `FOO.get_field4()`")]]
-  const ::std::vector<::std::int32_t>& get_field4() const&;
+  const ::std::vector<::std::int32_t>& get_field4() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "field4" } */
   [[deprecated("Use `FOO.field4().value()` instead of `FOO.get_field4()`")]]
@@ -763,7 +763,7 @@ class LazyFoo final  {
 
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1().value()` instead of `FOO.get_field1()`")]]
-  const ::std::vector<double>& get_field1() const&;
+  const ::std::vector<double>& get_field1() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1().value()` instead of `FOO.get_field1()`")]]
@@ -779,7 +779,7 @@ class LazyFoo final  {
 
   /** Glean { "field": "field2" } */
   [[deprecated("Use `FOO.field2().value()` instead of `FOO.get_field2()`")]]
-  const ::std::vector<::std::int32_t>& get_field2() const&;
+  const ::std::vector<::std::int32_t>& get_field2() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "field2" } */
   [[deprecated("Use `FOO.field2().value()` instead of `FOO.get_field2()`")]]
@@ -1086,11 +1086,11 @@ class OptionalFoo final  {
 
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1().value()` instead of `FOO.get_field1()`")]]
-  const ::std::vector<double>* get_field1() const&;
+  const ::std::vector<double>* get_field1() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1().value()` instead of `FOO.get_field1()`")]]
-  ::std::vector<double>* get_field1() &;
+  ::std::vector<double>* get_field1() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::vector<double>* get_field1() && = delete;
 
@@ -1104,11 +1104,11 @@ class OptionalFoo final  {
 
   /** Glean { "field": "field2" } */
   [[deprecated("Use `FOO.field2().value()` instead of `FOO.get_field2()`")]]
-  const ::std::vector<::std::int32_t>* get_field2() const&;
+  const ::std::vector<::std::int32_t>* get_field2() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "field2" } */
   [[deprecated("Use `FOO.field2().value()` instead of `FOO.get_field2()`")]]
-  ::std::vector<::std::int32_t>* get_field2() &;
+  ::std::vector<::std::int32_t>* get_field2() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::vector<::std::int32_t>* get_field2() && = delete;
 
@@ -1122,11 +1122,11 @@ class OptionalFoo final  {
 
   /** Glean { "field": "field3" } */
   [[deprecated("Use `FOO.field3().value()` instead of `FOO.get_field3()`")]]
-  const ::std::vector<double>* get_field3() const&;
+  const ::std::vector<double>* get_field3() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "field3" } */
   [[deprecated("Use `FOO.field3().value()` instead of `FOO.get_field3()`")]]
-  ::std::vector<double>* get_field3() &;
+  ::std::vector<double>* get_field3() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::vector<double>* get_field3() && = delete;
 
@@ -1140,11 +1140,11 @@ class OptionalFoo final  {
 
   /** Glean { "field": "field4" } */
   [[deprecated("Use `FOO.field4().value()` instead of `FOO.get_field4()`")]]
-  const ::std::vector<::std::int32_t>* get_field4() const&;
+  const ::std::vector<::std::int32_t>* get_field4() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "field4" } */
   [[deprecated("Use `FOO.field4().value()` instead of `FOO.get_field4()`")]]
-  ::std::vector<::std::int32_t>* get_field4() &;
+  ::std::vector<::std::int32_t>* get_field4() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::vector<::std::int32_t>* get_field4() && = delete;
 
@@ -1401,11 +1401,11 @@ class OptionalLazyFoo final  {
 
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1().value()` instead of `FOO.get_field1()`")]]
-  const ::std::vector<double>* get_field1() const&;
+  const ::std::vector<double>* get_field1() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1().value()` instead of `FOO.get_field1()`")]]
-  ::std::vector<double>* get_field1() &;
+  ::std::vector<double>* get_field1() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::vector<double>* get_field1() && = delete;
 
@@ -1419,11 +1419,11 @@ class OptionalLazyFoo final  {
 
   /** Glean { "field": "field2" } */
   [[deprecated("Use `FOO.field2().value()` instead of `FOO.get_field2()`")]]
-  const ::std::vector<::std::int32_t>* get_field2() const&;
+  const ::std::vector<::std::int32_t>* get_field2() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "field2" } */
   [[deprecated("Use `FOO.field2().value()` instead of `FOO.get_field2()`")]]
-  ::std::vector<::std::int32_t>* get_field2() &;
+  ::std::vector<::std::int32_t>* get_field2() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::vector<::std::int32_t>* get_field2() && = delete;
 
@@ -2444,7 +2444,7 @@ class IndexedFoo final  {
 
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1().value()` instead of `FOO.get_field1()`")]]
-  const ::std::vector<double>& get_field1() const&;
+  const ::std::vector<double>& get_field1() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1().value()` instead of `FOO.get_field1()`")]]
@@ -2460,7 +2460,7 @@ class IndexedFoo final  {
 
   /** Glean { "field": "field2" } */
   [[deprecated("Use `FOO.field2().value()` instead of `FOO.get_field2()`")]]
-  const ::std::vector<::std::int32_t>& get_field2() const&;
+  const ::std::vector<::std::int32_t>& get_field2() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "field2" } */
   [[deprecated("Use `FOO.field2().value()` instead of `FOO.get_field2()`")]]
@@ -2476,7 +2476,7 @@ class IndexedFoo final  {
 
   /** Glean { "field": "field3" } */
   [[deprecated("Use `FOO.field3().value()` instead of `FOO.get_field3()`")]]
-  const ::std::vector<double>& get_field3() const&;
+  const ::std::vector<double>& get_field3() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "field3" } */
   [[deprecated("Use `FOO.field3().value()` instead of `FOO.get_field3()`")]]
@@ -2492,7 +2492,7 @@ class IndexedFoo final  {
 
   /** Glean { "field": "field4" } */
   [[deprecated("Use `FOO.field4().value()` instead of `FOO.get_field4()`")]]
-  const ::std::vector<::std::int32_t>& get_field4() const&;
+  const ::std::vector<::std::int32_t>& get_field4() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "field4" } */
   [[deprecated("Use `FOO.field4().value()` instead of `FOO.get_field4()`")]]
@@ -2508,7 +2508,7 @@ class IndexedFoo final  {
 
   /** Glean { "field": "field_id_to_size" } */
   [[deprecated("Use `FOO.field_id_to_size().value()` instead of `FOO.get_field_id_to_size()`")]]
-  const ::std::map<::std::int16_t, ::std::int64_t>& get_field_id_to_size() const&;
+  const ::std::map<::std::int16_t, ::std::int64_t>& get_field_id_to_size() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "field_id_to_size" } */
   [[deprecated("Use `FOO.field_id_to_size().value()` instead of `FOO.get_field_id_to_size()`")]]
@@ -2855,11 +2855,11 @@ class OptionalIndexedFoo final  {
 
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1().value()` instead of `FOO.get_field1()`")]]
-  const ::std::vector<double>* get_field1() const&;
+  const ::std::vector<double>* get_field1() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1().value()` instead of `FOO.get_field1()`")]]
-  ::std::vector<double>* get_field1() &;
+  ::std::vector<double>* get_field1() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::vector<double>* get_field1() && = delete;
 
@@ -2873,11 +2873,11 @@ class OptionalIndexedFoo final  {
 
   /** Glean { "field": "field2" } */
   [[deprecated("Use `FOO.field2().value()` instead of `FOO.get_field2()`")]]
-  const ::std::vector<::std::int32_t>* get_field2() const&;
+  const ::std::vector<::std::int32_t>* get_field2() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "field2" } */
   [[deprecated("Use `FOO.field2().value()` instead of `FOO.get_field2()`")]]
-  ::std::vector<::std::int32_t>* get_field2() &;
+  ::std::vector<::std::int32_t>* get_field2() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::vector<::std::int32_t>* get_field2() && = delete;
 
@@ -2891,11 +2891,11 @@ class OptionalIndexedFoo final  {
 
   /** Glean { "field": "field3" } */
   [[deprecated("Use `FOO.field3().value()` instead of `FOO.get_field3()`")]]
-  const ::std::vector<double>* get_field3() const&;
+  const ::std::vector<double>* get_field3() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "field3" } */
   [[deprecated("Use `FOO.field3().value()` instead of `FOO.get_field3()`")]]
-  ::std::vector<double>* get_field3() &;
+  ::std::vector<double>* get_field3() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::vector<double>* get_field3() && = delete;
 
@@ -2909,11 +2909,11 @@ class OptionalIndexedFoo final  {
 
   /** Glean { "field": "field4" } */
   [[deprecated("Use `FOO.field4().value()` instead of `FOO.get_field4()`")]]
-  const ::std::vector<::std::int32_t>* get_field4() const&;
+  const ::std::vector<::std::int32_t>* get_field4() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "field4" } */
   [[deprecated("Use `FOO.field4().value()` instead of `FOO.get_field4()`")]]
-  ::std::vector<::std::int32_t>* get_field4() &;
+  ::std::vector<::std::int32_t>* get_field4() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::vector<::std::int32_t>* get_field4() && = delete;
 
@@ -2927,7 +2927,7 @@ class OptionalIndexedFoo final  {
 
   /** Glean { "field": "field_id_to_size" } */
   [[deprecated("Use `FOO.field_id_to_size().value()` instead of `FOO.get_field_id_to_size()`")]]
-  const ::std::map<::std::int16_t, ::std::int64_t>& get_field_id_to_size() const&;
+  const ::std::map<::std::int16_t, ::std::int64_t>& get_field_id_to_size() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "field_id_to_size" } */
   [[deprecated("Use `FOO.field_id_to_size().value()` instead of `FOO.get_field_id_to_size()`")]]

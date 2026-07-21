@@ -275,11 +275,11 @@ std::partial_ordering OptionalRefStruct::operator<=>([[maybe_unused]] const Opti
 }
 
 
-const ::py3::simple::IOBufPtr* OptionalRefStruct::get_optional_blob() const& {
+const ::py3::simple::IOBufPtr* OptionalRefStruct::get_optional_blob() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return optional_blob_ref().has_value() ? std::addressof(__fbthrift_field_optional_blob) : nullptr;
 }
 
-::py3::simple::IOBufPtr* OptionalRefStruct::get_optional_blob() & {
+::py3::simple::IOBufPtr* OptionalRefStruct::get_optional_blob() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return optional_blob_ref().has_value() ? std::addressof(__fbthrift_field_optional_blob) : nullptr;
 }
 
@@ -472,7 +472,7 @@ float& SimpleStruct::set_smaller_real(float smaller_real_) {
   return __fbthrift_field_smaller_real;
 }
 
-const ::std::unordered_map<::std::int32_t, ::std::int32_t>& SimpleStruct::get_something() const& {
+const ::std::unordered_map<::std::int32_t, ::std::int32_t>& SimpleStruct::get_something() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_something;
 }
 
@@ -489,11 +489,11 @@ const ::std::unordered_map<::std::int32_t, ::std::int32_t>& SimpleStruct::get_so
   return __fbthrift_field_hidden_field;
 }
 
-const ::std::int32_t* SimpleStruct::get_opt_default_int() const& {
+const ::std::int32_t* SimpleStruct::get_opt_default_int() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return opt_default_int_ref().has_value() ? std::addressof(__fbthrift_field_opt_default_int) : nullptr;
 }
 
-::std::int32_t* SimpleStruct::get_opt_default_int() & {
+::std::int32_t* SimpleStruct::get_opt_default_int() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return opt_default_int_ref().has_value() ? std::addressof(__fbthrift_field_opt_default_int) : nullptr;
 }
 
@@ -502,19 +502,19 @@ const ::std::int32_t* SimpleStruct::get_opt_default_int() const& {
   return __fbthrift_field_opt_default_int;
 }
 
-const ::std::string* SimpleStruct::get_opt_default_str() const& {
+const ::std::string* SimpleStruct::get_opt_default_str() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return opt_default_str_ref().has_value() ? std::addressof(__fbthrift_field_opt_default_str) : nullptr;
 }
 
-::std::string* SimpleStruct::get_opt_default_str() & {
+::std::string* SimpleStruct::get_opt_default_str() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return opt_default_str_ref().has_value() ? std::addressof(__fbthrift_field_opt_default_str) : nullptr;
 }
 
-const ::py3::simple::AnEnum* SimpleStruct::get_opt_default_enum() const& {
+const ::py3::simple::AnEnum* SimpleStruct::get_opt_default_enum() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return opt_default_enum_ref().has_value() ? std::addressof(__fbthrift_field_opt_default_enum) : nullptr;
 }
 
-::py3::simple::AnEnum* SimpleStruct::get_opt_default_enum() & {
+::py3::simple::AnEnum* SimpleStruct::get_opt_default_enum() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return opt_default_enum_ref().has_value() ? std::addressof(__fbthrift_field_opt_default_enum) : nullptr;
 }
 
@@ -633,7 +633,7 @@ float& Float32Struct::set_float32(float float32_) {
   return __fbthrift_field_float64;
 }
 
-const ::std::vector<::py3::simple::DeferredTruncationFloat>& Float32Struct::get_float_list() const& {
+const ::std::vector<::py3::simple::DeferredTruncationFloat>& Float32Struct::get_float_list() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_float_list;
 }
 
@@ -641,7 +641,7 @@ const ::std::vector<::py3::simple::DeferredTruncationFloat>& Float32Struct::get_
   return static_cast<::std::vector<::py3::simple::DeferredTruncationFloat>&&>(__fbthrift_field_float_list);
 }
 
-const ::std::map<::std::string, ::std::vector<::py3::simple::DeferredTruncationFloat>>& Float32Struct::get_float_map() const& {
+const ::std::map<::std::string, ::std::vector<::py3::simple::DeferredTruncationFloat>>& Float32Struct::get_float_map() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_float_map;
 }
 
@@ -737,11 +737,11 @@ std::partial_ordering IssetInspectionStruct::operator<=>([[maybe_unused]] const 
   return __fbthrift_field_int_field;
 }
 
-const ::std::string* IssetInspectionStruct::get_opt_str_field() const& {
+const ::std::string* IssetInspectionStruct::get_opt_str_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return opt_str_field_ref().has_value() ? std::addressof(__fbthrift_field_opt_str_field) : nullptr;
 }
 
-::std::string* IssetInspectionStruct::get_opt_str_field() & {
+::std::string* IssetInspectionStruct::get_opt_str_field() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return opt_str_field_ref().has_value() ? std::addressof(__fbthrift_field_opt_str_field) : nullptr;
 }
 
@@ -842,7 +842,7 @@ bool HiddenTypeFieldsStruct::operator==([[maybe_unused]] const HiddenTypeFieldsS
 }
 
 
-const ::std::vector<::py3::simple::AdaptedTypeDef>& HiddenTypeFieldsStruct::get_field2() const& {
+const ::std::vector<::py3::simple::AdaptedTypeDef>& HiddenTypeFieldsStruct::get_field2() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_field2;
 }
 
@@ -850,7 +850,7 @@ const ::std::vector<::py3::simple::AdaptedTypeDef>& HiddenTypeFieldsStruct::get_
   return static_cast<::std::vector<::py3::simple::AdaptedTypeDef>&&>(__fbthrift_field_field2);
 }
 
-const ::std::unordered_map<::std::int32_t, ::py3::simple::AdaptedTypeDef>& HiddenTypeFieldsStruct::get_field3() const& {
+const ::std::unordered_map<::std::int32_t, ::py3::simple::AdaptedTypeDef>& HiddenTypeFieldsStruct::get_field3() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_field3;
 }
 
@@ -1137,7 +1137,7 @@ bool ComplexStruct::operator==([[maybe_unused]] const ComplexStruct& rhs) const 
 }
 
 
-const ::py3::simple::SimpleStruct& ComplexStruct::get_structOne() const& {
+const ::py3::simple::SimpleStruct& ComplexStruct::get_structOne() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_structOne;
 }
 
@@ -1145,7 +1145,7 @@ const ::py3::simple::SimpleStruct& ComplexStruct::get_structOne() const& {
   return static_cast<::py3::simple::SimpleStruct&&>(__fbthrift_field_structOne);
 }
 
-const ::py3::simple::SimpleStruct& ComplexStruct::get_structTwo() const& {
+const ::py3::simple::SimpleStruct& ComplexStruct::get_structTwo() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_structTwo;
 }
 
@@ -1332,7 +1332,7 @@ bool BinaryUnionStruct::__fbthrift_is_empty() const {
 
 
 
-const ::py3::simple::BinaryUnion& BinaryUnionStruct::get_u() const& {
+const ::py3::simple::BinaryUnion& BinaryUnionStruct::get_u() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_u;
 }
 
@@ -1476,7 +1476,7 @@ bool CustomFields::operator==([[maybe_unused]] const CustomFields& rhs) const {
   return __fbthrift_field_double_field;
 }
 
-const ::MyType& CustomFields::get_list_field() const& {
+const ::MyType& CustomFields::get_list_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_list_field;
 }
 
@@ -1484,7 +1484,7 @@ const ::MyType& CustomFields::get_list_field() const& {
   return static_cast<::MyType&&>(__fbthrift_field_list_field);
 }
 
-const ::MyType& CustomFields::get_set_field() const& {
+const ::MyType& CustomFields::get_set_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_set_field;
 }
 
@@ -1492,7 +1492,7 @@ const ::MyType& CustomFields::get_set_field() const& {
   return static_cast<::MyType&&>(__fbthrift_field_set_field);
 }
 
-const ::MyType& CustomFields::get_map_field() const& {
+const ::MyType& CustomFields::get_map_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_map_field;
 }
 
@@ -1500,7 +1500,7 @@ const ::MyType& CustomFields::get_map_field() const& {
   return static_cast<::MyType&&>(__fbthrift_field_map_field);
 }
 
-const ::MyType& CustomFields::get_struct_field() const& {
+const ::MyType& CustomFields::get_struct_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_struct_field;
 }
 
@@ -1652,7 +1652,7 @@ bool CustomTypedefFields::operator==([[maybe_unused]] const CustomTypedefFields&
   return __fbthrift_field_double_field;
 }
 
-const ::py3::simple::CustomList& CustomTypedefFields::get_list_field() const& {
+const ::py3::simple::CustomList& CustomTypedefFields::get_list_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_list_field;
 }
 
@@ -1660,7 +1660,7 @@ const ::py3::simple::CustomList& CustomTypedefFields::get_list_field() const& {
   return static_cast<::py3::simple::CustomList&&>(__fbthrift_field_list_field);
 }
 
-const ::py3::simple::CustomSet& CustomTypedefFields::get_set_field() const& {
+const ::py3::simple::CustomSet& CustomTypedefFields::get_set_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_set_field;
 }
 
@@ -1668,7 +1668,7 @@ const ::py3::simple::CustomSet& CustomTypedefFields::get_set_field() const& {
   return static_cast<::py3::simple::CustomSet&&>(__fbthrift_field_set_field);
 }
 
-const ::py3::simple::CustomMap& CustomTypedefFields::get_map_field() const& {
+const ::py3::simple::CustomMap& CustomTypedefFields::get_map_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_map_field;
 }
 
@@ -1676,7 +1676,7 @@ const ::py3::simple::CustomMap& CustomTypedefFields::get_map_field() const& {
   return static_cast<::py3::simple::CustomMap&&>(__fbthrift_field_map_field);
 }
 
-const ::py3::simple::CustomStruct& CustomTypedefFields::get_struct_field() const& {
+const ::py3::simple::CustomStruct& CustomTypedefFields::get_struct_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_struct_field;
 }
 

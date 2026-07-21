@@ -194,7 +194,7 @@ class Struct final  {
 
   /** Glean { "field": "first" } */
   [[deprecated("Use `FOO.first().value()` instead of `FOO.get_first()`")]]
-  const ::module0::Struct& get_first() const&;
+  const ::module0::Struct& get_first() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "first" } */
   [[deprecated("Use `FOO.first().value()` instead of `FOO.get_first()`")]]
@@ -210,7 +210,7 @@ class Struct final  {
 
   /** Glean { "field": "second" } */
   [[deprecated("Use `FOO.second().value()` instead of `FOO.get_second()`")]]
-  const ::module1::Struct& get_second() const&;
+  const ::module1::Struct& get_second() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "second" } */
   [[deprecated("Use `FOO.second().value()` instead of `FOO.get_second()`")]]
@@ -387,7 +387,7 @@ class BigStruct final  {
 
   /** Glean { "field": "s" } */
   [[deprecated("Use `FOO.s().value()` instead of `FOO.get_s()`")]]
-  const ::module2::Struct& get_s() const&;
+  const ::module2::Struct& get_s() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "s" } */
   [[deprecated("Use `FOO.s().value()` instead of `FOO.get_s()`")]]

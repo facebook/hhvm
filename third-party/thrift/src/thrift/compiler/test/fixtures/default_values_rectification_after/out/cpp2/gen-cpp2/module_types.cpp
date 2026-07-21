@@ -169,7 +169,7 @@ bool& TestStruct::set_unqualified_bool_field(bool unqualified_bool_field_) {
   return __fbthrift_field_unqualified_bool_field;
 }
 
-const ::std::vector<::std::int32_t>& TestStruct::get_unqualified_list_field() const& {
+const ::std::vector<::std::int32_t>& TestStruct::get_unqualified_list_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_unqualified_list_field;
 }
 
@@ -177,7 +177,7 @@ const ::std::vector<::std::int32_t>& TestStruct::get_unqualified_list_field() co
   return static_cast<::std::vector<::std::int32_t>&&>(__fbthrift_field_unqualified_list_field);
 }
 
-const ::facebook::thrift::compiler::test::fixtures::default_values_rectification_after::EmptyStruct& TestStruct::get_unqualified_struct_field() const& {
+const ::facebook::thrift::compiler::test::fixtures::default_values_rectification_after::EmptyStruct& TestStruct::get_unqualified_struct_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_unqualified_struct_field;
 }
 
@@ -185,11 +185,11 @@ const ::facebook::thrift::compiler::test::fixtures::default_values_rectification
   return static_cast<::facebook::thrift::compiler::test::fixtures::default_values_rectification_after::EmptyStruct&&>(__fbthrift_field_unqualified_struct_field);
 }
 
-const ::std::int32_t* TestStruct::get_optional_int_field() const& {
+const ::std::int32_t* TestStruct::get_optional_int_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return optional_int_field_ref().has_value() ? std::addressof(__fbthrift_field_optional_int_field) : nullptr;
 }
 
-::std::int32_t* TestStruct::get_optional_int_field() & {
+::std::int32_t* TestStruct::get_optional_int_field() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return optional_int_field_ref().has_value() ? std::addressof(__fbthrift_field_optional_int_field) : nullptr;
 }
 
@@ -198,11 +198,11 @@ const ::std::int32_t* TestStruct::get_optional_int_field() const& {
   return __fbthrift_field_optional_int_field;
 }
 
-const bool* TestStruct::get_optional_bool_field() const& {
+const bool* TestStruct::get_optional_bool_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return optional_bool_field_ref().has_value() ? std::addressof(__fbthrift_field_optional_bool_field) : nullptr;
 }
 
-bool* TestStruct::get_optional_bool_field() & {
+bool* TestStruct::get_optional_bool_field() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return optional_bool_field_ref().has_value() ? std::addressof(__fbthrift_field_optional_bool_field) : nullptr;
 }
 
@@ -211,19 +211,19 @@ bool& TestStruct::set_optional_bool_field(bool optional_bool_field_) {
   return __fbthrift_field_optional_bool_field;
 }
 
-const ::std::vector<::std::int32_t>* TestStruct::get_optional_list_field() const& {
+const ::std::vector<::std::int32_t>* TestStruct::get_optional_list_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return optional_list_field_ref().has_value() ? std::addressof(__fbthrift_field_optional_list_field) : nullptr;
 }
 
-::std::vector<::std::int32_t>* TestStruct::get_optional_list_field() & {
+::std::vector<::std::int32_t>* TestStruct::get_optional_list_field() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return optional_list_field_ref().has_value() ? std::addressof(__fbthrift_field_optional_list_field) : nullptr;
 }
 
-const ::facebook::thrift::compiler::test::fixtures::default_values_rectification_after::EmptyStruct* TestStruct::get_optional_struct_field() const& {
+const ::facebook::thrift::compiler::test::fixtures::default_values_rectification_after::EmptyStruct* TestStruct::get_optional_struct_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return optional_struct_field_ref().has_value() ? std::addressof(__fbthrift_field_optional_struct_field) : nullptr;
 }
 
-::facebook::thrift::compiler::test::fixtures::default_values_rectification_after::EmptyStruct* TestStruct::get_optional_struct_field() & {
+::facebook::thrift::compiler::test::fixtures::default_values_rectification_after::EmptyStruct* TestStruct::get_optional_struct_field() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return optional_struct_field_ref().has_value() ? std::addressof(__fbthrift_field_optional_struct_field) : nullptr;
 }
 

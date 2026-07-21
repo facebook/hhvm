@@ -1347,7 +1347,7 @@ class Foo final  {
 
   /** Glean { "field": "adapted_list" } */
   [[deprecated("Use `FOO.adapted_list().value()` instead of `FOO.get_adapted_list()`")]]
-  const ::std::vector<::std::int32_t>& get_adapted_list() const&;
+  const ::std::vector<::std::int32_t>& get_adapted_list() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "adapted_list" } */
   [[deprecated("Use `FOO.adapted_list().value()` instead of `FOO.get_adapted_list()`")]]
@@ -1363,7 +1363,7 @@ class Foo final  {
 
   /** Glean { "field": "adapted_set" } */
   [[deprecated("Use `FOO.adapted_set().value()` instead of `FOO.get_adapted_set()`")]]
-  const ::std::set<::std::int32_t>& get_adapted_set() const&;
+  const ::std::set<::std::int32_t>& get_adapted_set() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "adapted_set" } */
   [[deprecated("Use `FOO.adapted_set().value()` instead of `FOO.get_adapted_set()`")]]
@@ -1379,7 +1379,7 @@ class Foo final  {
 
   /** Glean { "field": "adapted_map" } */
   [[deprecated("Use `FOO.adapted_map().value()` instead of `FOO.get_adapted_map()`")]]
-  const ::std::map<::std::string, ::std::int32_t>& get_adapted_map() const&;
+  const ::std::map<::std::string, ::std::int32_t>& get_adapted_map() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "adapted_map" } */
   [[deprecated("Use `FOO.adapted_map().value()` instead of `FOO.get_adapted_map()`")]]
@@ -1395,7 +1395,7 @@ class Foo final  {
 
   /** Glean { "field": "adapted_list_nested" } */
   [[deprecated("Use `FOO.adapted_list_nested().value()` instead of `FOO.get_adapted_list_nested()`")]]
-  const ::std::vector<::std::vector<::std::map<::std::int32_t, ::std::int32_t>>>& get_adapted_list_nested() const&;
+  const ::std::vector<::std::vector<::std::map<::std::int32_t, ::std::int32_t>>>& get_adapted_list_nested() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "adapted_list_nested" } */
   [[deprecated("Use `FOO.adapted_list_nested().value()` instead of `FOO.get_adapted_list_nested()`")]]
@@ -2524,7 +2524,7 @@ class Bar final  {
 
   /** Glean { "field": "structListField" } */
   [[deprecated("Use `FOO.structListField().value()` instead of `FOO.get_structListField()`")]]
-  const ::std::vector<::facebook::thrift::test::fixtures::adapter::FooWithAdapter_9317>& get_structListField() const&;
+  const ::std::vector<::facebook::thrift::test::fixtures::adapter::FooWithAdapter_9317>& get_structListField() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "structListField" } */
   [[deprecated("Use `FOO.structListField().value()` instead of `FOO.get_structListField()`")]]
@@ -2540,11 +2540,11 @@ class Bar final  {
 
   /** Glean { "field": "optionalStructListField" } */
   [[deprecated("Use `FOO.optionalStructListField().value()` instead of `FOO.get_optionalStructListField()`")]]
-  const ::std::vector<::facebook::thrift::test::fixtures::adapter::FooWithAdapter_9317>* get_optionalStructListField() const&;
+  const ::std::vector<::facebook::thrift::test::fixtures::adapter::FooWithAdapter_9317>* get_optionalStructListField() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "optionalStructListField" } */
   [[deprecated("Use `FOO.optionalStructListField().value()` instead of `FOO.get_optionalStructListField()`")]]
-  ::std::vector<::facebook::thrift::test::fixtures::adapter::FooWithAdapter_9317>* get_optionalStructListField() &;
+  ::std::vector<::facebook::thrift::test::fixtures::adapter::FooWithAdapter_9317>* get_optionalStructListField() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   ::std::vector<::facebook::thrift::test::fixtures::adapter::FooWithAdapter_9317>* get_optionalStructListField() && = delete;
 
@@ -2558,7 +2558,7 @@ class Bar final  {
 
   /** Glean { "field": "structListFieldWithTypedef" } */
   [[deprecated("Use `FOO.structListFieldWithTypedef().value()` instead of `FOO.get_structListFieldWithTypedef()`")]]
-  const ::facebook::thrift::test::fixtures::adapter::ListOfFooTypedef& get_structListFieldWithTypedef() const&;
+  const ::facebook::thrift::test::fixtures::adapter::ListOfFooTypedef& get_structListFieldWithTypedef() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "structListFieldWithTypedef" } */
   [[deprecated("Use `FOO.structListFieldWithTypedef().value()` instead of `FOO.get_structListFieldWithTypedef()`")]]
@@ -3127,7 +3127,7 @@ class MyAnnotation final  {
 
   /** Glean { "field": "signature" } */
   [[deprecated("Use `FOO.signature().value()` instead of `FOO.get_signature()`")]]
-  const ::std::string& get_signature() const& {
+  const ::std::string& get_signature() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_signature;
   }
 
@@ -3985,7 +3985,7 @@ class Config final  {
 
   /** Glean { "field": "path" } */
   [[deprecated("Use `FOO.path().value()` instead of `FOO.get_path()`")]]
-  const ::std::string& get_path() const& {
+  const ::std::string& get_path() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_path;
   }
 
@@ -4661,7 +4661,7 @@ class AdaptTestStruct final  {
 
   /** Glean { "field": "meta" } */
   [[deprecated("Use `FOO.meta().value()` instead of `FOO.get_meta()`")]]
-  const ::std::string& get_meta() const& {
+  const ::std::string& get_meta() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_meta;
   }
 
@@ -5766,7 +5766,7 @@ class AdaptTemplatedNestedTestStruct final  {
 
   /** Glean { "field": "adaptedStruct" } */
   [[deprecated("Use `FOO.adaptedStruct().value()` instead of `FOO.get_adaptedStruct()`")]]
-  const ::facebook::thrift::test::fixtures::adapter::AdaptTemplatedTestStruct& get_adaptedStruct() const&;
+  const ::facebook::thrift::test::fixtures::adapter::AdaptTemplatedTestStruct& get_adaptedStruct() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "adaptedStruct" } */
   [[deprecated("Use `FOO.adaptedStruct().value()` instead of `FOO.get_adaptedStruct()`")]]
@@ -6569,7 +6569,7 @@ class CircularAdaptee final  {
 
   /** Glean { "field": "field" } */
   [[deprecated("Use `FOO.field().value()` instead of `FOO.get_field()`")]]
-  const ::facebook::thrift::test::fixtures::adapter::CircularStruct& get_field() const&;
+  const ::facebook::thrift::test::fixtures::adapter::CircularStruct& get_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "field" } */
   [[deprecated("Use `FOO.field().value()` instead of `FOO.get_field()`")]]
@@ -7875,7 +7875,7 @@ class Person final  {
 
   /** Glean { "field": "name" } */
   [[deprecated("Use `FOO.name().value()` instead of `FOO.get_name()`")]]
-  const ::std::string& get_name() const& {
+  const ::std::string& get_name() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_name;
   }
 
@@ -8019,7 +8019,7 @@ class Person2 final  {
 
   /** Glean { "field": "name" } */
   [[deprecated("Use `FOO.name().value()` instead of `FOO.get_name()`")]]
-  const ::std::string& get_name() const& {
+  const ::std::string& get_name() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_name;
   }
 

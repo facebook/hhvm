@@ -413,7 +413,7 @@ class structured_annotation_inline final  {
 
   /** Glean { "field": "name" } */
   [[deprecated("Use `FOO.name().value()` instead of `FOO.get_name()`")]]
-  const ::std::string& get_name() const& {
+  const ::std::string& get_name() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_name;
   }
 
@@ -557,7 +557,7 @@ class structured_annotation_with_default final  {
 
   /** Glean { "field": "name" } */
   [[deprecated("Use `FOO.name().value()` instead of `FOO.get_name()`")]]
-  const ::std::string& get_name() const& {
+  const ::std::string& get_name() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_name;
   }
 
@@ -914,7 +914,7 @@ class structured_annotation_recursive final  {
 
   /** Glean { "field": "name" } */
   [[deprecated("Use `FOO.name().value()` instead of `FOO.get_name()`")]]
-  const ::std::string& get_name() const& {
+  const ::std::string& get_name() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_name;
   }
 
@@ -934,7 +934,7 @@ class structured_annotation_recursive final  {
 
   /** Glean { "field": "forward" } */
   [[deprecated("Use `FOO.forward().value()` instead of `FOO.get_forward()`")]]
-  const ::test::fixtures::basic_structured_annotations::structured_annotation_forward& get_forward() const&;
+  const ::test::fixtures::basic_structured_annotations::structured_annotation_forward& get_forward() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "forward" } */
   [[deprecated("Use `FOO.forward().value()` instead of `FOO.get_forward()`")]]
@@ -1114,7 +1114,7 @@ class structured_annotation_nested final  {
 
   /** Glean { "field": "name" } */
   [[deprecated("Use `FOO.name().value()` instead of `FOO.get_name()`")]]
-  const ::std::string& get_name() const& {
+  const ::std::string& get_name() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_name;
   }
 
@@ -1134,7 +1134,7 @@ class structured_annotation_nested final  {
 
   /** Glean { "field": "nest" } */
   [[deprecated("Use `FOO.nest().value()` instead of `FOO.get_nest()`")]]
-  const ::test::fixtures::basic_structured_annotations::structured_annotation_with_default& get_nest() const&;
+  const ::test::fixtures::basic_structured_annotations::structured_annotation_with_default& get_nest() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /** Glean { "field": "nest" } */
   [[deprecated("Use `FOO.nest().value()` instead of `FOO.get_nest()`")]]
@@ -1413,7 +1413,7 @@ class MyStruct final  {
 
   /** Glean { "field": "annotated_type" } */
   [[deprecated("Use `FOO.annotated_type().value()` instead of `FOO.get_annotated_type()`")]]
-  const ::test::fixtures::basic_structured_annotations::annotated_inline_string& get_annotated_type() const& {
+  const ::test::fixtures::basic_structured_annotations::annotated_inline_string& get_annotated_type() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_annotated_type;
   }
 
@@ -1433,7 +1433,7 @@ class MyStruct final  {
 
   /** Glean { "field": "annotated_recursive" } */
   [[deprecated("Use `FOO.annotated_recursive().value()` instead of `FOO.get_annotated_recursive()`")]]
-  const ::std::string& get_annotated_recursive() const& {
+  const ::std::string& get_annotated_recursive() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_annotated_recursive;
   }
 
@@ -1591,7 +1591,7 @@ class FOLLY_EXPORT MyException : public virtual apache::thrift::TException {
 
   /** Glean { "field": "context" } */
   [[deprecated("Use `FOO.context().value()` instead of `FOO.get_context()`")]]
-  const ::std::string& get_context() const& {
+  const ::std::string& get_context() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return __fbthrift_field_context;
   }
 

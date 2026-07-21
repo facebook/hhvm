@@ -248,7 +248,7 @@ double& StructWithDefaultStruct::set_double_field(double double_field_) {
   return __fbthrift_field_enum_field;
 }
 
-const ::std::vector<::std::int16_t>& StructWithDefaultStruct::get_list_field() const& {
+const ::std::vector<::std::int16_t>& StructWithDefaultStruct::get_list_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_list_field;
 }
 
@@ -256,7 +256,7 @@ const ::std::vector<::std::int16_t>& StructWithDefaultStruct::get_list_field() c
   return static_cast<::std::vector<::std::int16_t>&&>(__fbthrift_field_list_field);
 }
 
-const ::std::set<::std::int16_t>& StructWithDefaultStruct::get_set_field() const& {
+const ::std::set<::std::int16_t>& StructWithDefaultStruct::get_set_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_set_field;
 }
 
@@ -264,7 +264,7 @@ const ::std::set<::std::int16_t>& StructWithDefaultStruct::get_set_field() const
   return static_cast<::std::set<::std::int16_t>&&>(__fbthrift_field_set_field);
 }
 
-const ::std::map<::std::int16_t, ::std::int16_t>& StructWithDefaultStruct::get_map_field() const& {
+const ::std::map<::std::int16_t, ::std::int16_t>& StructWithDefaultStruct::get_map_field() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_map_field;
 }
 

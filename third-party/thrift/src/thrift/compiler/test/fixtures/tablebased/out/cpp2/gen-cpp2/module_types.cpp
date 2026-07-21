@@ -198,11 +198,11 @@ std::partial_ordering TrivialTypesStruct::operator<=>([[maybe_unused]] const Tri
 }
 
 
-const ::std::int32_t* TrivialTypesStruct::get_fieldA() const& {
+const ::std::int32_t* TrivialTypesStruct::get_fieldA() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return fieldA_ref().has_value() ? std::addressof(__fbthrift_field_fieldA) : nullptr;
 }
 
-::std::int32_t* TrivialTypesStruct::get_fieldA() & {
+::std::int32_t* TrivialTypesStruct::get_fieldA() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return fieldA_ref().has_value() ? std::addressof(__fbthrift_field_fieldA) : nullptr;
 }
 
@@ -211,27 +211,27 @@ const ::std::int32_t* TrivialTypesStruct::get_fieldA() const& {
   return __fbthrift_field_fieldA;
 }
 
-const ::std::string* TrivialTypesStruct::get_fieldB() const& {
+const ::std::string* TrivialTypesStruct::get_fieldB() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return fieldB_ref().has_value() ? std::addressof(__fbthrift_field_fieldB) : nullptr;
 }
 
-::std::string* TrivialTypesStruct::get_fieldB() & {
+::std::string* TrivialTypesStruct::get_fieldB() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return fieldB_ref().has_value() ? std::addressof(__fbthrift_field_fieldB) : nullptr;
 }
 
-const ::std::string* TrivialTypesStruct::get_fieldC() const& {
+const ::std::string* TrivialTypesStruct::get_fieldC() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return fieldC_ref().has_value() ? std::addressof(__fbthrift_field_fieldC) : nullptr;
 }
 
-::std::string* TrivialTypesStruct::get_fieldC() & {
+::std::string* TrivialTypesStruct::get_fieldC() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return fieldC_ref().has_value() ? std::addressof(__fbthrift_field_fieldC) : nullptr;
 }
 
-const ::test::fixtures::tablebased::IOBufPtr* TrivialTypesStruct::get_fieldD() const& {
+const ::test::fixtures::tablebased::IOBufPtr* TrivialTypesStruct::get_fieldD() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return fieldD_ref().has_value() ? std::addressof(__fbthrift_field_fieldD) : nullptr;
 }
 
-::test::fixtures::tablebased::IOBufPtr* TrivialTypesStruct::get_fieldD() & {
+::test::fixtures::tablebased::IOBufPtr* TrivialTypesStruct::get_fieldD() & [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return fieldD_ref().has_value() ? std::addressof(__fbthrift_field_fieldD) : nullptr;
 }
 
@@ -393,7 +393,7 @@ bool ContainerStruct::operator==([[maybe_unused]] const ContainerStruct& rhs) co
 }
 
 
-const ::std::vector<::std::int32_t>& ContainerStruct::get_fieldA() const& {
+const ::std::vector<::std::int32_t>& ContainerStruct::get_fieldA() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_fieldA;
 }
 
@@ -401,7 +401,7 @@ const ::std::vector<::std::int32_t>& ContainerStruct::get_fieldA() const& {
   return static_cast<::std::vector<::std::int32_t>&&>(__fbthrift_field_fieldA);
 }
 
-const std::list<::std::int32_t>& ContainerStruct::get_fieldB() const& {
+const std::list<::std::int32_t>& ContainerStruct::get_fieldB() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_fieldB;
 }
 
@@ -409,7 +409,7 @@ std::list<::std::int32_t> ContainerStruct::get_fieldB() && {
   return static_cast<std::list<::std::int32_t>&&>(__fbthrift_field_fieldB);
 }
 
-const std::deque<::std::int32_t>& ContainerStruct::get_fieldC() const& {
+const std::deque<::std::int32_t>& ContainerStruct::get_fieldC() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_fieldC;
 }
 
@@ -417,7 +417,7 @@ std::deque<::std::int32_t> ContainerStruct::get_fieldC() && {
   return static_cast<std::deque<::std::int32_t>&&>(__fbthrift_field_fieldC);
 }
 
-const folly::fbvector<::std::int32_t>& ContainerStruct::get_fieldD() const& {
+const folly::fbvector<::std::int32_t>& ContainerStruct::get_fieldD() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_fieldD;
 }
 
@@ -425,7 +425,7 @@ folly::fbvector<::std::int32_t> ContainerStruct::get_fieldD() && {
   return static_cast<folly::fbvector<::std::int32_t>&&>(__fbthrift_field_fieldD);
 }
 
-const folly::small_vector<::std::int32_t>& ContainerStruct::get_fieldE() const& {
+const folly::small_vector<::std::int32_t>& ContainerStruct::get_fieldE() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_fieldE;
 }
 
@@ -433,7 +433,7 @@ folly::small_vector<::std::int32_t> ContainerStruct::get_fieldE() && {
   return static_cast<folly::small_vector<::std::int32_t>&&>(__fbthrift_field_fieldE);
 }
 
-const folly::sorted_vector_set<::std::int32_t>& ContainerStruct::get_fieldF() const& {
+const folly::sorted_vector_set<::std::int32_t>& ContainerStruct::get_fieldF() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_fieldF;
 }
 
@@ -441,7 +441,7 @@ folly::sorted_vector_set<::std::int32_t> ContainerStruct::get_fieldF() && {
   return static_cast<folly::sorted_vector_set<::std::int32_t>&&>(__fbthrift_field_fieldF);
 }
 
-const folly::sorted_vector_map<::std::int32_t, ::std::string>& ContainerStruct::get_fieldG() const& {
+const folly::sorted_vector_map<::std::int32_t, ::std::string>& ContainerStruct::get_fieldG() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_fieldG;
 }
 
@@ -449,7 +449,7 @@ folly::sorted_vector_map<::std::int32_t, ::std::string> ContainerStruct::get_fie
   return static_cast<folly::sorted_vector_map<::std::int32_t, ::std::string>&&>(__fbthrift_field_fieldG);
 }
 
-const ::std::vector<::test::fixtures::tablebased::TrivialTypesStruct>& ContainerStruct::get_fieldH() const& {
+const ::std::vector<::test::fixtures::tablebased::TrivialTypesStruct>& ContainerStruct::get_fieldH() const& [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
   return __fbthrift_field_fieldH;
 }
 

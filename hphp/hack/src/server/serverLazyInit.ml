@@ -211,6 +211,12 @@ let download_and_load_state_exn
     (ref None, ref None)
   in
   let ssopt = genv.local_config.ServerLocalConfig.saved_state in
+  let watchman_sockname =
+    let { ServerLocalConfig.Watchman.sockname; _ } =
+      genv.local_config.ServerLocalConfig.watchman
+    in
+    Option.map sockname ~f:Path.make
+  in
   let dependency_table_saved_state_future :
       (Saved_state_loader.load_result, ServerInitTypes.load_state_error) result
       Future.t =
@@ -224,7 +230,8 @@ let download_and_load_state_exn
             progress_dep_table_load
             ~other:progress_naming_table_load)
         ~watchman_opts:
-          Saved_state_loader.Watchman_options.{ root; sockname = None }
+          Saved_state_loader.Watchman_options.
+            { root; sockname = watchman_sockname }
         ~ignore_hh_version
       |> Future.with_timeout
            ~timeout:genv.local_config.SLC.load_state_natively_download_timeout

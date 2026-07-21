@@ -11,6 +11,9 @@ type saved_state_loading = {
   saved_state_manifold_api_key: string option;
       (** A string from hh.conf. The API key is used for saved state downloads
         when we call out to manifold *)
+  manifold_local_port: int option;
+      (** If set, connect to a Manifold instance on localhost using this port.
+        Useful for testing. *)
   log_saved_state_age_and_distance: bool;
       (** Collects the age of a saved state (in seconds) and distance (in globalrevs) for telemetry *)
   use_manifold_cython_client: bool;

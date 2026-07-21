@@ -425,6 +425,8 @@ module Hhconf : sig
 
   val log_saved_state_age_and_distance : string
 
+  val saved_state_manifold_local_port : string
+
   val project_metadata_w_flags : string
 
   val require_saved_state : string

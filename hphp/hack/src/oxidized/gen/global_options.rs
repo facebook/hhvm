@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<2c8f692327fe5485ec7ff936301b8621>>
+// @generated SignedSource<<6c1c4c8ee4e3a92b2fef3ae70f0d6654>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -39,6 +39,9 @@ pub struct SavedStateLoading {
     /// A string from hh.conf. The API key is used for saved state downloads
     /// when we call out to manifold
     pub saved_state_manifold_api_key: Option<String>,
+    /// If set, connect to a Manifold instance on localhost using this port.
+    /// Useful for testing.
+    pub manifold_local_port: Option<isize>,
     /// Collects the age of a saved state (in seconds) and distance (in globalrevs) for telemetry
     pub log_saved_state_age_and_distance: bool,
     /// Required for Hedwig support for saved state downloads

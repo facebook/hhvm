@@ -18,6 +18,7 @@ impl Default for SavedStateLoading {
     fn default() -> Self {
         Self {
             saved_state_manifold_api_key: None,
+            manifold_local_port: None,
             log_saved_state_age_and_distance: false,
             use_manifold_cython_client: false,
             zstd_decompress_by_file: true,

@@ -469,6 +469,9 @@ module Hhconf = struct
   let log_saved_state_age_and_distance =
     hhconf_key "log_saved_state_age_and_distance"
 
+  let saved_state_manifold_local_port =
+    hhconf_key "saved_state_manifold_local_port"
+
   let project_metadata_w_flags = hhconf_key "project_metadata_w_flags"
 
   let require_saved_state = hhconf_key "require_saved_state"

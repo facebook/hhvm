@@ -81,7 +81,7 @@ bool mapTC(uintptr_t usedBase, uintptr_t size) {
     if (errno == EEXIST) {
       if (Cfg::Server::Mode) {
         Logger::FWarning(
-          "Reducing TC sizes from {:,} to {:,}, "
+          "Reducing TC sizes from {} to {}, "
           "due to possible ASAN collision\n",
           size, size / 2
           );

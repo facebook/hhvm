@@ -485,8 +485,8 @@ TEST(References, CppRefUnionSetterGetter) {
 
   EXPECT_THROW(b.get_box_string(), bad_field_access);
   EXPECT_THROW(b.get_box_plain(), bad_field_access);
-  EXPECT_THROW(*b.get_box_self()->get_box_plain(), bad_field_access);
-  EXPECT_THROW(*b.get_box_self()->get_box_self(), bad_field_access);
+  EXPECT_THROW(b.get_box_self()->get_box_plain(), bad_field_access);
+  EXPECT_THROW(b.get_box_self()->get_box_self(), bad_field_access);
   EXPECT_EQ(*b.get_box_self()->get_box_string(), "foo");
 }
 

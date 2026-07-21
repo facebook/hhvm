@@ -394,11 +394,15 @@ bool runServerDual(
         std::make_shared<ThriftAcceptorFactory>(
             *thriftServer, std::move(aclCheckerThrift), qos));
 
-    // Set listening port for cleartext and SSL connections
-    if (standaloneOpts.thrift_port > 0) {
+    // Set listening socket for cleartext and SSL connections
+    if (standaloneOpts.thrift_listen_sock_fd >= 0) {
+      thriftServer->useExistingSocket(standaloneOpts.thrift_listen_sock_fd);
+      // A single adopted socket can only be bound by one acceptor.
+      thriftServer->setNumAcceptThreads(1);
+    } else if (standaloneOpts.thrift_port > 0) {
       thriftServer->setPort(standaloneOpts.thrift_port);
     } else {
-      LOG(ERROR) << "Must specify thrift port";
+      LOG(ERROR) << "Must specify thrift port or thrift listen socket fd";
       router->shutdown();
       freeAllRouters();
       return false;

@@ -139,6 +139,12 @@ bool areOptionsValid(
     LOG(ERROR) << "invalid ports";
     return false;
   }
+  if (standaloneOpts.use_thrift && standaloneOpts.listen_sock_fd >= 0 &&
+      standaloneOpts.thrift_listen_sock_fd >= 0 &&
+      standaloneOpts.listen_sock_fd == standaloneOpts.thrift_listen_sock_fd) {
+    LOG(ERROR) << "listen-sock-fd and thrift-listen-sock-fd must be different";
+    return false;
+  }
 
   if (opts.keepalive_idle_s <= 0 || opts.keepalive_interval_s <= 0 ||
       opts.keepalive_cnt < 0) {

@@ -285,6 +285,14 @@ MCROUTER_OPTION_INTEGER(
     no_short,
     "Thrift Port to listen on")
 
+MCROUTER_OPTION_INTEGER(
+    int,
+    thrift_listen_sock_fd,
+    -1,
+    "thrift-listen-sock-fd",
+    no_short,
+    "Thrift listen socket to take over")
+
 MCROUTER_OPTION_DOUBLE(
     double,
     core_multiplier,

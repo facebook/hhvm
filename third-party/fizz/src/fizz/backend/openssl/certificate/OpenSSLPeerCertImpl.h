@@ -9,8 +9,15 @@
 #pragma once
 
 #include <fizz/backend/openssl/crypto/signature/Signature.h>
+#include <fizz/fizz-config.h>
 #include <fizz/protocol/Certificate.h>
 #include <folly/io/async/ssl/OpenSSLTransportCertificate.h>
+
+#if FIZZ_CERTIFICATE_USE_OPENSSL_CERT
+#define FIZZ_MAYBE_OVERRIDE override
+#else
+#define FIZZ_MAYBE_OVERRIDE
+#endif
 
 namespace fizz {
 class PeerCert;
@@ -37,7 +44,7 @@ class OpenSSLPeerCertImpl : public fizz::PeerCert {
       folly::ByteRange toBeSigned,
       folly::ByteRange signature) const override;
 
-  [[nodiscard]] folly::ssl::X509UniquePtr getX509() const override;
+  [[nodiscard]] folly::ssl::X509UniquePtr getX509() const FIZZ_MAYBE_OVERRIDE;
 
  protected:
   OpenSSLPeerCertImpl(
@@ -49,5 +56,7 @@ class OpenSSLPeerCertImpl : public fizz::PeerCert {
 
 } // namespace openssl
 } // namespace fizz
+
+#undef FIZZ_MAYBE_OVERRIDE
 
 #include <fizz/backend/openssl/certificate/OpenSSLPeerCertImpl-inl.h>

@@ -19,6 +19,12 @@ namespace fizz {
 class SelfCert;
 enum class CertificateVerifyContext;
 
+#if FIZZ_CERTIFICATE_USE_OPENSSL_CERT
+#define FIZZ_MAYBE_OVERRIDE override
+#else
+#define FIZZ_MAYBE_OVERRIDE
+#endif
+
 namespace openssl {
 
 template <KeyType T>
@@ -60,7 +66,7 @@ class OpenSSLSelfCertImpl : public SelfCert,
       CertificateVerifyContext context,
       folly::ByteRange toBeSigned) const override;
 
-  [[nodiscard]] folly::ssl::X509UniquePtr getX509() const override;
+  [[nodiscard]] folly::ssl::X509UniquePtr getX509() const FIZZ_MAYBE_OVERRIDE;
 
   [[nodiscard]] std::vector<folly::ssl::X509UniquePtr> getX509Chain()
       const override;
@@ -80,5 +86,7 @@ class OpenSSLSelfCertImpl : public SelfCert,
 };
 } // namespace openssl
 } // namespace fizz
+
+#undef FIZZ_MAYBE_OVERRIDE
 
 #include <fizz/backend/openssl/certificate/OpenSSLSelfCertImpl-inl.h>

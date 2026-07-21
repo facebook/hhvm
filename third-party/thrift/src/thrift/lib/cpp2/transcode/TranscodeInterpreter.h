@@ -50,9 +50,10 @@ namespace apache::thrift::transcode {
  * single-pass and tree-free, so that win is shared and is NOT what this
  * baseline is for. (The protocol::Object / DynamicValue benches measure that.)
  *
- * Scope: this port currently supports wire↔wire transcoding between binary
- * protocols (Thrift Compact, Thrift Binary, Protobuf Binary) for scalars,
- * lists, sets, maps, and nested structs. The folly::dynamic endpoints
+ * Scope: this port supports wire↔wire transcoding between binary protocols
+ * (Thrift Compact, Thrift Binary, Protobuf Binary) for scalars, lists, sets,
+ * maps, and nested structs. A JSON *source* is also supported for objects
+ * (structs), arrays (list/set), maps, and scalars. The folly::dynamic endpoints
  * (transcodeToDynamic / transcodeFromDynamic) are deferred.
  */
 class TranscodeInterpreter {

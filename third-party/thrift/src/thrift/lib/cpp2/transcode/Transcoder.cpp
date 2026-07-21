@@ -55,12 +55,6 @@ std::atomic<JitTranscoderFactory>& jitFactory() {
   return factory;
 }
 
-// The protocol gate uses TranscodePlan metadata. This remains a command-tree
-// capability check until JSON field dispatch lands in the interpreter.
-bool structReadsJson(const StructOp& op) {
-  return op.fieldIdent == FieldIdent::ByName;
-}
-
 bool hasJsonMapTarget(const Command& cmd) {
   if (const auto* mp = std::get_if<MapOp>(&cmd)) {
     if (mp->writeFraming == ContainerFraming::Json) {
@@ -157,18 +151,6 @@ std::optional<std::string> interpreterSupports(const TranscodePlan& plan) {
   if (plan.sourceProtocol == WireProtocol::Json &&
       plan.targetProtocol == WireProtocol::Json) {
     return "interpreter does not yet support JSON-to-JSON plans; use Engine::Jit";
-  }
-
-  bool jsonSource = false;
-  if (const auto* st = std::get_if<StructOp>(&plan.root)) {
-    jsonSource = structReadsJson(*st);
-  } else if (const auto* sq = std::get_if<SeqOp>(&plan.root)) {
-    jsonSource = sq->readFraming == ContainerFraming::Json;
-  } else if (const auto* mp = std::get_if<MapOp>(&plan.root)) {
-    jsonSource = mp->readFraming == ContainerFraming::Json;
-  }
-  if (jsonSource) {
-    return "interpreter does not support a JSON source; use Engine::Jit";
   }
   if (hasJsonMapTarget(plan.root)) {
     return "interpreter does not yet support JSON map targets; use Engine::Jit";

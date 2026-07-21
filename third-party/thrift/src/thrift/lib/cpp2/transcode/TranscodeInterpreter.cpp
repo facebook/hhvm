@@ -16,9 +16,11 @@
 
 #include <thrift/lib/cpp2/transcode/TranscodeInterpreter.h>
 
+#include <thrift/lib/cpp2/dynamic/TypeSystem.h>
 #include <thrift/lib/cpp2/transcode/ReadHelpers.h>
 #include <thrift/lib/cpp2/transcode/WireType.h>
 
+#include <folly/CppAttributes.h>
 #include <folly/ScopeGuard.h>
 #include <folly/lang/Assume.h>
 
@@ -29,6 +31,7 @@
 #include <limits>
 #include <string>
 #include <variant>
+#include <vector>
 
 namespace apache::thrift::transcode {
 
@@ -148,6 +151,18 @@ Framing framingFor(FieldProto p) {
 }
 
 void execCommand(TranscodeCursor* c, const Command& cmd, uint8_t fieldTypeInfo);
+void writeDefaultCommand(TranscodeCursor* c, const Command& cmd);
+void writeSeqHeader(
+    TranscodeCursor* c,
+    ContainerFraming framing,
+    uint32_t count,
+    uint8_t elemType);
+void writeMapHeader(
+    TranscodeCursor* c,
+    ContainerFraming framing,
+    uint32_t count,
+    uint8_t keyType,
+    uint8_t valueType);
 
 bool fieldTypeMatches(
     FieldProto readProto, const FieldEntry& field, uint8_t actualTypeInfo) {
@@ -191,6 +206,16 @@ bool intFits(ValueKind kind, int64_t v) {
       folly::assume_unreachable();
   }
   return false;
+}
+
+void validateInputConsumed(TranscodeCursor* c, const TranscodePlan& plan) {
+  if (c->error != 0 || plan.sourceProtocol != WireProtocol::Json) {
+    return;
+  }
+  thrift_transcode_json_skip_whitespace(c);
+  if (c->readPos != c->readEnd) {
+    detail::setError(c, 1);
+  }
 }
 
 bool writeScalarInt(TranscodeCursor* c, const ScalarOp& op, int64_t v) {
@@ -344,7 +369,107 @@ bool writeScalarBytes(
   return c->error == 0;
 }
 
+void execJsonBytesScalar(TranscodeCursor* c, const ScalarOp& op) {
+  TranscodeJsonStringToken token{};
+  if (!thrift_transcode_read_json_string_token(c, &token)) {
+    return;
+  }
+
+  if (op.readFn == ReadFn::ParseQuotedString) {
+    switch (op.writeFn) {
+      case WriteFn::LengthPrefixedVarint:
+        thrift_transcode_write_json_string_token_varint_prefixed(c, &token);
+        return;
+      case WriteFn::LengthPrefixedI32:
+        thrift_transcode_write_json_string_token_i32_prefixed(c, &token);
+        return;
+      case WriteFn::WriteQuotedString:
+        thrift_transcode_write_json_string_token_quoted(c, &token);
+        return;
+      case WriteFn::WriteBase64String: {
+        std::string bytes =
+            thrift_transcode_decode_json_string_token_to_string(c, token);
+        if (c->error != 0) {
+          return;
+        }
+        thrift_transcode_format_base64_string(
+            c, reinterpret_cast<const uint8_t*>(bytes.data()), bytes.size());
+        return;
+      }
+      case WriteFn::ZigzagVarint:
+      case WriteFn::UnsignedVarint:
+      case WriteFn::Fixed8:
+      case WriteFn::Fixed16BE:
+      case WriteFn::Fixed32BE:
+      case WriteFn::Fixed64BE:
+      case WriteFn::Fixed32LE:
+      case WriteFn::Fixed64LE:
+      case WriteFn::CompactBoolInType:
+      case WriteFn::ByteAsBool:
+      case WriteFn::VarintAsBool:
+      case WriteFn::IntToDecimalText:
+      case WriteFn::EnumNameOrDecimalText:
+      case WriteFn::FloatToDecimalText:
+      case WriteFn::BoolToKeyword:
+      case WriteFn::StoreAtOffset:
+      case WriteFn::CallTypeInfoSet:
+      case WriteFn::Custom:
+        detail::setError(c, 90);
+        return;
+    }
+  }
+
+  switch (op.writeFn) {
+    case WriteFn::LengthPrefixedVarint:
+      thrift_transcode_write_json_base64_token_varint_prefixed(c, &token);
+      return;
+    case WriteFn::LengthPrefixedI32:
+      thrift_transcode_write_json_base64_token_i32_prefixed(c, &token);
+      return;
+    case WriteFn::WriteBase64String:
+      thrift_transcode_write_json_string_token_quoted(c, &token);
+      return;
+    case WriteFn::ZigzagVarint:
+    case WriteFn::UnsignedVarint:
+    case WriteFn::Fixed8:
+    case WriteFn::Fixed16BE:
+    case WriteFn::Fixed32BE:
+    case WriteFn::Fixed64BE:
+    case WriteFn::Fixed32LE:
+    case WriteFn::Fixed64LE:
+    case WriteFn::CompactBoolInType:
+    case WriteFn::ByteAsBool:
+    case WriteFn::VarintAsBool:
+    case WriteFn::IntToDecimalText:
+    case WriteFn::EnumNameOrDecimalText:
+    case WriteFn::FloatToDecimalText:
+    case WriteFn::WriteQuotedString:
+    case WriteFn::BoolToKeyword:
+    case WriteFn::StoreAtOffset:
+    case WriteFn::CallTypeInfoSet:
+    case WriteFn::Custom:
+      detail::setError(c, 90);
+      return;
+  }
+}
+
+void writeScalarDefault(TranscodeCursor* c, const ScalarOp& op) {
+  if (op.valueKind == ValueKind::F32 || op.valueKind == ValueKind::F64) {
+    writeScalarFloat(c, op.writeFn, 0.0);
+    return;
+  }
+  if (op.valueKind == ValueKind::Bytes) {
+    writeScalarBytes(c, op.writeFn, reinterpret_cast<const uint8_t*>(""), 0);
+    return;
+  }
+  writeScalarInt(c, op, 0);
+}
+
 void execScalar(TranscodeCursor* c, const ScalarOp& op, uint8_t fieldTypeInfo) {
+  if (readFnIsJsonBytes(op.readFn)) {
+    execJsonBytesScalar(c, op);
+    return;
+  }
   if (readFnIsBytes(op.readFn)) {
     const uint8_t* data = nullptr;
     size_t len = 0;
@@ -385,6 +510,68 @@ void execScalar(TranscodeCursor* c, const ScalarOp& op, uint8_t fieldTypeInfo) {
   // path above.
   if (!writeScalarInt(c, op, v)) {
     return;
+  }
+}
+
+void writeDefaultStruct(TranscodeCursor* c, const StructOp& op) {
+  FieldProto wp = op.writeFieldProto;
+  if (wp == FieldProto::Unsupported) {
+    detail::setError(c, 90);
+    return;
+  }
+  Framing wf = framingFor(wp);
+
+  TranscodePatchPoint writeMark{};
+  bool patchWrite = false;
+  if (op.writeLengthDelimited) {
+    writeMark = thrift_transcode_cursor_mark(c);
+    thrift_transcode_cursor_skip(c, 5);
+    patchWrite = true;
+  }
+
+  int16_t prevWrite = 0;
+  for (const auto& field : op.fields) {
+    if (c->error != 0) {
+      return;
+    }
+    if (field.optional) {
+      continue;
+    }
+    if (const auto* sc = std::get_if<ScalarOp>(field.command.get());
+        sc != nullptr && sc->writeFn == WriteFn::CompactBoolInType) {
+      thrift_transcode_compact_write_bool_field(c, 0, field.fieldId, prevWrite);
+      prevWrite = field.fieldId;
+      continue;
+    }
+    wf.writeHeader(c, field.writeTypeInfo, field.fieldId, prevWrite);
+    prevWrite = field.fieldId;
+    writeDefaultCommand(c, *field.command);
+  }
+
+  if (!op.writeLengthDelimited) {
+    wf.writeStop(c);
+  }
+
+  if (patchWrite) {
+    size_t bodyBytes =
+        thrift_transcode_cursor_bytes_since_mark(c, writeMark) - 5;
+    thrift_transcode_cursor_patch_varint(c, writeMark, bodyBytes, 5);
+  }
+}
+
+void writeDefaultCommand(TranscodeCursor* c, const Command& cmd) {
+  if (const auto* s = std::get_if<ScalarOp>(&cmd)) {
+    writeScalarDefault(c, *s);
+  } else if (const auto* sq = std::get_if<SeqOp>(&cmd)) {
+    if (sq->writeLoopKind == LoopKind::ByBytes) {
+      thrift_transcode_write_unsigned_varint(c, 0);
+    } else {
+      writeSeqHeader(c, sq->writeFraming, 0, sq->writeElemType);
+    }
+  } else if (const auto* m = std::get_if<MapOp>(&cmd)) {
+    writeMapHeader(c, m->writeFraming, 0, m->writeKeyType, m->writeValueType);
+  } else if (const auto* st = std::get_if<StructOp>(&cmd)) {
+    writeDefaultStruct(c, *st);
   }
 }
 
@@ -451,6 +638,291 @@ void writeMapHeader(
   }
 }
 
+TranscodePatchPoint reserveNonEmptyMapHeader(
+    TranscodeCursor* c, ContainerFraming framing) {
+  TranscodePatchPoint writeMark = thrift_transcode_cursor_mark(c);
+  switch (framing) {
+    case ContainerFraming::Compact:
+    case ContainerFraming::Binary:
+      thrift_transcode_cursor_skip(c, 6);
+      break;
+    case ContainerFraming::Json:
+    case ContainerFraming::None:
+      break;
+  }
+  return writeMark;
+}
+
+void patchNonEmptyMapHeader(
+    TranscodeCursor* c,
+    TranscodePatchPoint writeMark,
+    ContainerFraming framing,
+    uint32_t count,
+    uint8_t keyType,
+    uint8_t valueType) {
+  switch (framing) {
+    case ContainerFraming::Compact:
+      thrift_transcode_cursor_patch_varint(c, writeMark, count, 5);
+      thrift_transcode_cursor_patch_byte(
+          c,
+          thrift_transcode_cursor_offset_patch_point(writeMark, 5),
+          static_cast<uint8_t>((keyType << 4) | (valueType & 0x0F)));
+      break;
+    case ContainerFraming::Binary:
+      thrift_transcode_cursor_patch_byte(c, writeMark, keyType);
+      thrift_transcode_cursor_patch_byte(
+          c,
+          thrift_transcode_cursor_offset_patch_point(writeMark, 1),
+          valueType);
+      thrift_transcode_cursor_patch_i32_be(
+          c,
+          thrift_transcode_cursor_offset_patch_point(writeMark, 2),
+          static_cast<int32_t>(count));
+      break;
+    case ContainerFraming::Json:
+    case ContainerFraming::None:
+      break;
+  }
+}
+
+bool jsonMapUsesObjectForm(const MapOp& op) {
+  const auto* key = std::get_if<ScalarOp>(op.key.get());
+  return key != nullptr &&
+      ((key->valueKind == ValueKind::Bytes &&
+        key->readFn == ReadFn::ParseQuotedString) ||
+       key->valueKind == ValueKind::Enum);
+}
+
+bool isUnion(const StructOp& op) {
+  return op.schemaType != nullptr && op.schemaType->isUnion();
+}
+
+void writeJsonObjectMapKey(
+    TranscodeCursor* c, const ScalarOp& keyOp, const std::string& key) {
+  if (keyOp.valueKind == ValueKind::Enum) {
+    int64_t enumValue = 0;
+    const auto* enumNames =
+        keyOp.enumNames != nullptr ? &keyOp.enumNames->values : nullptr;
+    if (!thrift_transcode_parse_json_object_enum_key(
+            key, enumNames, enumValue) ||
+        !intFits(keyOp.valueKind, enumValue)) {
+      detail::setError(c, 1);
+      return;
+    }
+    writeScalarInt(c, keyOp, enumValue);
+    return;
+  }
+  if (keyOp.valueKind != ValueKind::Bytes ||
+      keyOp.readFn != ReadFn::ParseQuotedString) {
+    detail::setError(c, 90);
+    return;
+  }
+  writeScalarBytes(
+      c,
+      keyOp.writeFn,
+      reinterpret_cast<const uint8_t*>(key.data()),
+      key.size());
+}
+
+void execJsonObjectMap(TranscodeCursor* c, const MapOp& op) {
+  const auto* keyOp = std::get_if<ScalarOp>(op.key.get());
+  if (keyOp == nullptr) {
+    detail::setError(c, 90);
+    return;
+  }
+
+  thrift_transcode_json_skip_whitespace(c);
+  if (!thrift_transcode_json_expect_byte(c, '{')) {
+    return;
+  }
+  thrift_transcode_json_skip_whitespace(c);
+  if (thrift_transcode_json_peek(c) == '}') {
+    if (!thrift_transcode_json_expect_byte(c, '}')) {
+      return;
+    }
+    writeMapHeader(c, op.writeFraming, 0, op.writeKeyType, op.writeValueType);
+    return;
+  }
+
+  TranscodePatchPoint writeMark = reserveNonEmptyMapHeader(c, op.writeFraming);
+  if (c->error) {
+    return;
+  }
+  uint32_t count = 0;
+  bool first = true;
+  while (true) {
+    thrift_transcode_json_skip_whitespace(c);
+    if (thrift_transcode_json_peek(c) == '}') {
+      break;
+    }
+    if (!first) {
+      if (!thrift_transcode_json_expect_byte(c, ',')) {
+        return;
+      }
+      thrift_transcode_json_skip_whitespace(c);
+    }
+    first = false;
+
+    std::string key;
+    if (!thrift_transcode_read_json_object_key(c, key)) {
+      return;
+    }
+
+    thrift_transcode_json_skip_whitespace(c);
+    if (!thrift_transcode_json_expect_byte(c, ':')) {
+      return;
+    }
+
+    writeJsonObjectMapKey(c, *keyOp, key);
+    if (c->error) {
+      return;
+    }
+    execCommand(c, *op.value, 0);
+    if (c->error) {
+      return;
+    }
+    ++count;
+  }
+  if (!thrift_transcode_json_expect_byte(c, '}')) {
+    return;
+  }
+  patchNonEmptyMapHeader(
+      c, writeMark, op.writeFraming, count, op.writeKeyType, op.writeValueType);
+}
+
+void execJsonKeyValueArrayEntry(TranscodeCursor* c, const MapOp& op) {
+  if (!thrift_transcode_json_expect_byte(c, '{')) {
+    return;
+  }
+
+  const uint8_t* keyStart = nullptr;
+  const uint8_t* keyEnd = nullptr;
+  const uint8_t* valueStart = nullptr;
+  const uint8_t* valueEnd = nullptr;
+
+  bool first = true;
+  while (true) {
+    thrift_transcode_json_skip_whitespace(c);
+    if (thrift_transcode_json_peek(c) == '}') {
+      break;
+    }
+    if (!first) {
+      if (!thrift_transcode_json_expect_byte(c, ',')) {
+        return;
+      }
+      thrift_transcode_json_skip_whitespace(c);
+    }
+    first = false;
+
+    std::string name;
+    if (!thrift_transcode_read_json_object_key(c, name)) {
+      return;
+    }
+    thrift_transcode_json_skip_whitespace(c);
+    if (!thrift_transcode_json_expect_byte(c, ':')) {
+      return;
+    }
+
+    const uint8_t* valueBegin = c->readPos;
+    if (!thrift_transcode_skip_json_value(c)) {
+      return;
+    }
+    const uint8_t* valueFinish = c->readPos;
+    if (name == "key") {
+      keyStart = valueBegin;
+      keyEnd = valueFinish;
+    } else if (name == "value") {
+      valueStart = valueBegin;
+      valueEnd = valueFinish;
+    }
+  }
+
+  if (keyStart == nullptr || valueStart == nullptr) {
+    detail::setError(c, 1);
+    return;
+  }
+
+  if (!thrift_transcode_json_expect_byte(c, '}')) {
+    return;
+  }
+  const uint8_t* entryEnd = c->readPos;
+
+  c->readPos = keyStart;
+  execCommand(c, *op.key, 0);
+  if (c->error) {
+    return;
+  }
+  if (c->readPos != keyEnd) {
+    detail::setError(c, 1);
+    return;
+  }
+
+  c->readPos = valueStart;
+  execCommand(c, *op.value, 0);
+  if (c->error) {
+    return;
+  }
+  if (c->readPos != valueEnd) {
+    detail::setError(c, 1);
+    return;
+  }
+  c->readPos = entryEnd;
+}
+
+void execJsonKeyValueArrayMap(TranscodeCursor* c, const MapOp& op) {
+  thrift_transcode_json_skip_whitespace(c);
+  if (!thrift_transcode_json_expect_byte(c, '[')) {
+    return;
+  }
+  thrift_transcode_json_skip_whitespace(c);
+  if (thrift_transcode_json_peek(c) == ']') {
+    if (!thrift_transcode_json_expect_byte(c, ']')) {
+      return;
+    }
+    writeMapHeader(c, op.writeFraming, 0, op.writeKeyType, op.writeValueType);
+    return;
+  }
+
+  TranscodePatchPoint writeMark = reserveNonEmptyMapHeader(c, op.writeFraming);
+  if (c->error) {
+    return;
+  }
+  uint32_t count = 0;
+  bool first = true;
+  while (true) {
+    thrift_transcode_json_skip_whitespace(c);
+    if (thrift_transcode_json_peek(c) == ']') {
+      break;
+    }
+    if (!first) {
+      if (!thrift_transcode_json_expect_byte(c, ',')) {
+        return;
+      }
+      thrift_transcode_json_skip_whitespace(c);
+    }
+    first = false;
+
+    execJsonKeyValueArrayEntry(c, op);
+    if (c->error) {
+      return;
+    }
+    ++count;
+  }
+  if (!thrift_transcode_json_expect_byte(c, ']')) {
+    return;
+  }
+  patchNonEmptyMapHeader(
+      c, writeMark, op.writeFraming, count, op.writeKeyType, op.writeValueType);
+}
+
+void execJsonMap(TranscodeCursor* c, const MapOp& op) {
+  if (jsonMapUsesObjectForm(op)) {
+    execJsonObjectMap(c, op);
+  } else {
+    execJsonKeyValueArrayMap(c, op);
+  }
+}
+
 void execSeq(TranscodeCursor* c, const SeqOp& op) {
   if (op.readLoopKind == LoopKind::ByBytes) {
     // ByBytes (e.g. protobuf packed) read: the element count is not on the
@@ -510,6 +982,69 @@ void execSeq(TranscodeCursor* c, const SeqOp& op) {
     return;
   }
 
+  if (op.readFraming == ContainerFraming::Json) {
+    // JSON array source: '[' elem (',' elem)* ']'. The element count isn't on
+    // the wire, so reuse the ByBytes machinery — reserve the target header,
+    // count while looping, then back-patch — with the same reserve sizes and
+    // patch calls as the packed-read arm above.
+    thrift_transcode_json_skip_whitespace(c);
+    thrift_transcode_json_expect_byte(
+        c, '['); // untrusted input: validate, unlike the JIT
+    if (c->error) {
+      return;
+    }
+
+    TranscodePatchPoint writeMark = thrift_transcode_cursor_mark(c);
+    if (op.writeFraming == ContainerFraming::Compact) {
+      thrift_transcode_cursor_skip(c, 6); // escape byte + 5-byte varint count
+    } else if (op.writeFraming == ContainerFraming::Binary) {
+      thrift_transcode_cursor_skip(c, 5); // elem-type byte + i32 BE count
+    }
+
+    uint32_t count = 0;
+    bool first = true;
+    while (true) {
+      if (c->error) {
+        return;
+      }
+      thrift_transcode_json_skip_whitespace(c);
+      if (thrift_transcode_json_peek(c) == ']') {
+        break;
+      }
+      if (!first) {
+        thrift_transcode_json_expect_byte(c, ',');
+        if (c->error) {
+          return;
+        }
+      }
+      first = false;
+      execCommand(c, *op.element, 0);
+      ++count;
+    }
+
+    thrift_transcode_json_expect_byte(c, ']');
+    if (c->error) {
+      return;
+    }
+
+    if (op.writeFraming == ContainerFraming::Compact) {
+      thrift_transcode_cursor_patch_byte(
+          c, writeMark, static_cast<uint8_t>(0xF0 | op.writeElemType));
+      thrift_transcode_cursor_patch_varint(
+          c,
+          thrift_transcode_cursor_offset_patch_point(writeMark, 1),
+          count,
+          5);
+    } else if (op.writeFraming == ContainerFraming::Binary) {
+      thrift_transcode_cursor_patch_byte(c, writeMark, op.writeElemType);
+      thrift_transcode_cursor_patch_i32_be(
+          c,
+          thrift_transcode_cursor_offset_patch_point(writeMark, 1),
+          static_cast<int32_t>(count));
+    }
+    return;
+  }
+
   // The interpreter baseline supports ByCount framing (Compact/Binary).
   uint32_t count = readSeqCount(c, op.readFraming, op.readElemType);
   if (c->error != 0) {
@@ -528,6 +1063,10 @@ void execSeq(TranscodeCursor* c, const SeqOp& op) {
 }
 
 void execMap(TranscodeCursor* c, const MapOp& op) {
+  if (op.readFraming == ContainerFraming::Json) {
+    execJsonMap(c, op);
+    return;
+  }
   uint32_t count =
       readMapCount(c, op.readFraming, op.readKeyType, op.readValueType);
   if (c->error != 0) {
@@ -549,10 +1088,178 @@ void execMap(TranscodeCursor* c, const MapOp& op) {
   }
 }
 
+const FieldEntry* FOLLY_NULLABLE findFieldByName(
+    const StructOp& op, const TranscodeJsonStringToken& name, size_t* index) {
+  for (size_t i = 0; i < op.fields.size(); ++i) {
+    const auto& f = op.fields[i];
+    if (thrift_transcode_json_string_token_equals(
+            &name,
+            reinterpret_cast<const uint8_t*>(f.fieldName.data()),
+            f.fieldName.size())) {
+      *index = i;
+      return &f;
+    }
+  }
+  return nullptr;
+}
+
+// JSON object source → binary target. Mirrors KernelCodegen's emitJsonStructOp:
+// read `{`, loop over `"name": value` pairs writing the matched field through
+// the target's binary framing (skipping unknown keys), read `}`, and finish the
+// target framing. A JSON source only ever targets a binary protocol here (JSON
+// is a leaf endpoint), so the write side is always header-intrinsic framing.
+void execJsonStruct(TranscodeCursor* c, const StructOp& op) {
+  FieldProto wp = op.writeFieldProto;
+  if (wp == FieldProto::Unsupported) {
+    detail::setError(c, 90); // interpreter: unsupported protocol
+    return;
+  }
+  Framing wf = framingFor(wp);
+
+  TranscodePatchPoint writeMark{};
+  bool patchWrite = false;
+  if (op.writeLengthDelimited) {
+    writeMark = thrift_transcode_cursor_mark(c);
+    thrift_transcode_cursor_skip(c, 5);
+    patchWrite = true;
+  }
+
+  thrift_transcode_json_skip_whitespace(c);
+  if (!thrift_transcode_json_expect_byte(c, '{')) {
+    return;
+  }
+
+  int16_t prevWrite = 0;
+  bool first = true;
+  bool unionMemberSeen = false;
+  std::vector<uint8_t> fieldsWithInput(op.fields.size(), 0);
+  while (true) {
+    if (c->error) {
+      return;
+    }
+    thrift_transcode_json_skip_whitespace(c);
+    if (thrift_transcode_json_peek(c) == '}') {
+      break;
+    }
+    if (!first) {
+      if (!thrift_transcode_json_expect_byte(c, ',')) {
+        return;
+      }
+      thrift_transcode_json_skip_whitespace(c);
+    }
+    first = false;
+
+    TranscodeJsonStringToken name{};
+    if (!thrift_transcode_read_json_string_token(c, &name)) {
+      return;
+    }
+    thrift_transcode_json_skip_whitespace(c);
+    if (!thrift_transcode_json_expect_byte(c, ':')) {
+      return;
+    }
+    thrift_transcode_json_skip_whitespace(c);
+
+    size_t fieldIndex = 0;
+    const FieldEntry* fe = findFieldByName(op, name, &fieldIndex);
+    if (fe == nullptr) {
+      if (!thrift_transcode_skip_json_value(c)) {
+        return;
+      }
+      continue;
+    }
+
+    if (fieldsWithInput.at(fieldIndex) != 0) {
+      detail::setError(c, 1);
+      return;
+    }
+    fieldsWithInput.at(fieldIndex) = 1;
+
+    if (thrift_transcode_json_consume_null(c)) {
+      if (!fe->optional) {
+        detail::setError(c, 1);
+      }
+      continue;
+    }
+
+    if (isUnion(op)) {
+      if (unionMemberSeen) {
+        detail::setError(c, 1);
+        return;
+      }
+      unionMemberSeen = true;
+    }
+
+    // Deferred Compact bool: the value is encoded in the field header type
+    // byte, so it must be read before the header is written. Same handling as
+    // the binary execStruct path.
+    if (const auto* sc = std::get_if<ScalarOp>(fe->command.get());
+        sc != nullptr && sc->writeFn == WriteFn::CompactBoolInType) {
+      int64_t boolVal = 0;
+      if (!readScalarInt(c, *sc, 0, &boolVal)) {
+        return;
+      }
+      thrift_transcode_compact_write_bool_field(
+          c, boolVal ? 1 : 0, fe->fieldId, prevWrite);
+      prevWrite = fe->fieldId;
+      continue;
+    }
+
+    wf.writeHeader(c, fe->writeTypeInfo, fe->fieldId, prevWrite);
+    prevWrite = fe->fieldId;
+    execCommand(c, *fe->command, 0);
+  }
+
+  for (size_t i = 0; i < op.fields.size(); ++i) {
+    if (c->error != 0) {
+      return;
+    }
+    const auto& field = op.fields[i];
+    if (field.optional || fieldsWithInput.at(i) != 0) {
+      continue;
+    }
+    if (const auto* sc = std::get_if<ScalarOp>(field.command.get());
+        sc != nullptr && sc->writeFn == WriteFn::CompactBoolInType) {
+      thrift_transcode_compact_write_bool_field(c, 0, field.fieldId, prevWrite);
+      prevWrite = field.fieldId;
+      continue;
+    }
+    wf.writeHeader(c, field.writeTypeInfo, field.fieldId, prevWrite);
+    prevWrite = field.fieldId;
+    writeDefaultCommand(c, *field.command);
+  }
+
+  if (!thrift_transcode_json_expect_byte(c, '}')) {
+    return;
+  }
+  if (isUnion(op) && !unionMemberSeen) {
+    detail::setError(c, 1);
+    return;
+  }
+  if (!op.writeLengthDelimited) {
+    wf.writeStop(c);
+  }
+  if (c->error != 0) {
+    return;
+  }
+
+  if (patchWrite) {
+    size_t bodyBytes =
+        thrift_transcode_cursor_bytes_since_mark(c, writeMark) - 5;
+    thrift_transcode_cursor_patch_varint(c, writeMark, bodyBytes, 5);
+  }
+}
+
 void execStruct(TranscodeCursor* c, const StructOp& op) {
+  // JSON source structs are name-keyed (built with FieldIdent::ByName and an
+  // empty readFieldHeader). Route them to the dedicated JSON object reader.
+  if (op.fieldIdent == FieldIdent::ByName) {
+    execJsonStruct(c, op);
+    return;
+  }
+
   FieldProto rp = op.readFieldProto;
   if (rp == FieldProto::Unsupported) {
-    // JSON / Custom source struct framing is not implemented in the baseline.
+    // Custom source struct framing is not implemented in the baseline.
     if (c->error == 0) {
       c->error = kUnsupportedProtocol;
     }
@@ -625,6 +1332,10 @@ void execStruct(TranscodeCursor* c, const StructOp& op) {
 
     if (jsonWrite) {
       // Emit `"name": value`, with a separating comma between entries.
+      if (isUnion(op) && wroteJsonField) {
+        detail::setError(c, 1);
+        return;
+      }
       if (wroteJsonField) {
         thrift_transcode_write_byte_checked(c, ',');
       }
@@ -671,6 +1382,10 @@ void execStruct(TranscodeCursor* c, const StructOp& op) {
   }
 
   if (jsonWrite) {
+    if (isUnion(op) && !wroteJsonField) {
+      detail::setError(c, 1);
+      return;
+    }
     thrift_transcode_write_byte_checked(c, '}');
   } else if (!op.writeLengthDelimited) {
     wf.writeStop(c);
@@ -744,6 +1459,7 @@ TranscodeInterpreter::transcode(const folly::IOBuf& input) const {
       &output);
 
   execCommand(&cursor, plan_.root, 0);
+  validateInputConsumed(&cursor, plan_);
 
   if (cursor.error != 0) {
     return folly::makeUnexpected(
@@ -775,6 +1491,7 @@ folly::Expected<size_t, TranscodeError> TranscodeInterpreter::transcodeInto(
       nullptr);
 
   execCommand(&cursor, plan_.root, 0);
+  validateInputConsumed(&cursor, plan_);
 
   if (cursor.error != 0) {
     return folly::makeUnexpected(

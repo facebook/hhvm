@@ -173,7 +173,7 @@ TEST_F(TranscoderTest, JsonTargetRequiresIncompleteProtocolOptIn) {
   EXPECT_EQ((*transcoder)->engine(), Engine::Interpreter);
 }
 
-TEST_F(TranscoderTest, JsonSourceRequiresIncompleteProtocolOptIn) {
+TEST_F(TranscoderTest, JsonObjectSourceRequiresIncompleteProtocolOptIn) {
   auto json = makeJsonCodec(sampleNode());
   auto compact = makeThriftCompactCodec(sampleNode());
 
@@ -187,9 +187,8 @@ TEST_F(TranscoderTest, JsonSourceRequiresIncompleteProtocolOptIn) {
 
   auto transcoder = makeTranscoder(
       fuse(json, compact), Engine::Interpreter, allowExperimentalProtocols());
-  ASSERT_TRUE(transcoder.hasError());
-  EXPECT_NE(transcoder.error().message.find("JSON source"), std::string::npos)
-      << transcoder.error().message;
+  ASSERT_FALSE(transcoder.hasError()) << transcoder.error().message;
+  EXPECT_EQ((*transcoder)->engine(), Engine::Interpreter);
 }
 
 TEST_F(TranscoderTest, JsonToJsonRejectedAfterOptIn) {

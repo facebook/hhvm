@@ -328,7 +328,7 @@ std::size_t writeMapValueEnd(Protocol& protocol) {
 /*
  * Primitive Types Specialization
  */
-template <typename TypeClass, typename Type, typename Enable = void>
+template <typename TypeClass, typename Type>
 struct protocol_methods;
 
 #define THRIFT_PROTOCOL_METHODS_REGISTER_RW_COMMON(Class, Type, Method)      \
@@ -544,10 +544,8 @@ struct protocol_methods<type_class::enumeration, Type>
 
 // Strong integral types keep their precision.
 template <typename Type>
-struct protocol_methods<
-    type_class::integral,
-    Type,
-    std::enable_if_t<std::is_enum_v<Type>>>
+  requires std::is_enum_v<Type>
+struct protocol_methods<type_class::integral, Type>
     : enum_protocol_methods<type_class::integral, Type> {};
 
 template <typename Protocol, typename = void>

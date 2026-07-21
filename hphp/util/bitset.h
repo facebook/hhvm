@@ -19,7 +19,7 @@
 #include "hphp/util/hash.h"
 
 #include <folly/lang/Bits.h>
-#include <folly/Format.h>
+#include <fmt/core.h>
 
 #include <cstdint>
 
@@ -170,13 +170,13 @@ struct BitSet {
   constexpr size_t hash() const {
     if constexpr (M == 1) {
       return hash_int64(m_data[0]);
+    } else {
+      size_t h = hash_int64_pair(m_data[0], m_data[1]);
+      for (int i = 2; i < M; i++) {
+        h = hash_int64_pair(h, m_data[i]);
+      }
+      return h;
     }
-
-    size_t h = hash_int64_pair(m_data[0], m_data[1]);
-    for (int i = 2; i < M; i++) {
-      h = hash_int64_pair(h, m_data[i]);
-    }
-    return h;
   }
 
   /*
@@ -186,7 +186,7 @@ struct BitSet {
   std::string hexStr() const {
     std::string s = "0x";
     for (int i = M - 1; i >= 0; i--) {
-      folly::format(&s, "{:016x}", m_data[i]);
+      s += fmt::format("{:016x}", m_data[i]);
     }
     return s;
   }

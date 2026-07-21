@@ -23,10 +23,10 @@
 #include <pwd.h>
 
 #include <folly/portability/Sockets.h>
+#include <fmt/core.h>
 #include <folly/portability/SysMman.h>
 #include <folly/portability/Unistd.h>
 #include <folly/Conv.h>
-#include <folly/Format.h>
 #include <folly/ScopeGuard.h>
 #include <folly/String.h>
 
@@ -82,7 +82,7 @@ void Process::InitProcessStatics() {
 // /proc/* parsing functions
 
 std::string Process::GetCommandLine(pid_t pid) {
-  auto const name = folly::sformat("/proc/{}/cmdline", pid);
+  auto const name = fmt::format("/proc/{}/cmdline", pid);
 
   std::string cmdline;
   auto const f = fopen(name.c_str(), "r");

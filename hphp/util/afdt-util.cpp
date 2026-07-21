@@ -16,6 +16,7 @@
 #include "hphp/util/afdt-util.h"
 #include <afdt.h>
 #include <errno.h>
+#include <limits.h>
 #include <system_error>
 
 #include "hphp/util/assertions.h"

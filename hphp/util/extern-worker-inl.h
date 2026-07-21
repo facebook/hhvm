@@ -24,6 +24,7 @@
 #include "hphp/util/trace.h"
 
 #include <folly/Conv.h>
+#include <fmt/core.h>
 #include <folly/container/Foreach.h>
 #include <folly/gen/Base.h>
 
@@ -287,11 +288,11 @@ inline std::string RefId::toString() const {
   // binary data, so escape it before printing.
   switch (m_extra) {
   case kDigestSentinel:
-    return folly::sformat("{}:{}", folly::hexlify(m_id), m_size);
+    return fmt::format("{}:{}", folly::hexlify(m_id), m_size);
   case 0:
-    return folly::sformat("{}:{}", folly::humanify(m_id), m_size);
+    return fmt::format("{}:{}", folly::humanify(m_id), m_size);
   default:
-    return folly::sformat("{}:{}:{}", folly::humanify(m_id), m_extra, m_size);
+    return fmt::format("{}:{}:{}", folly::humanify(m_id), m_extra, m_size);
   }
 }
 
@@ -318,13 +319,13 @@ inline RequestId::RequestId(const char* type)
 
 inline RequestId::~RequestId() {
   m_timer->stopWithMessage(
-    [this] { return folly::sformat("{} done", tracePrefix()); }
+    [this] { return fmt::format("{} done", tracePrefix()); }
   );
   --s_active;
 }
 
 inline std::string RequestId::tracePrefix() const {
-  return folly::sformat(
+  return fmt::format(
     "[{} req #{} {} ({} active)]",
     std::chrono::duration_cast<std::chrono::microseconds>(
       std::chrono::steady_clock::now().time_since_epoch()

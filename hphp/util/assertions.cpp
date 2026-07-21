@@ -16,7 +16,7 @@
 
 #include "hphp/util/assertions.h"
 
-#include <folly/Format.h>
+#include <fmt/core.h>
 
 #include <cstdio>
 #include <string>
@@ -32,7 +32,7 @@ __thread AssertDetailImpl* AssertDetailImpl::s_head = nullptr;
 
 std::pair<std::string,std::string>
 AssertDetailImpl::log_one(const AssertDetailImpl* adi, const char* name) {
-  auto title = folly::sformat("{:-^80}\n", name);
+  auto title = fmt::format("{:-^80}\n", name);
   auto msg = adi->run();
 
   fprintf(stderr, "\n%s%s\n", title.c_str(), msg.c_str());
@@ -62,7 +62,7 @@ void assert_fail(const char* e, const char* file,
   if (s_assert_failed) std::abort();
   s_assert_failed = true;
 
-  auto const assertion = folly::sformat("{}:{}: {}: assertion `{}' failed.",
+  auto const assertion = fmt::format("{}:{}: {}: assertion `{}' failed.",
                                         file, line, func, e);
 
   fprintf(stderr, "\nAssertion failure: %s\n\n%s\n",

@@ -19,6 +19,8 @@
 #include <atomic>
 #include <type_traits>
 
+#include <folly/ScopeGuard.h>
+
 #include "hphp/util/assertions.h"
 #include "hphp/util/optional.h"
 #include "hphp/util/smalllocks.h"

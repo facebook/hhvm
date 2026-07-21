@@ -965,7 +965,8 @@ public:
   void jmp8(CodeAddress dest)  { emitJ8(instr_jmp, ssize_t(dest)); }
 
   void jmp(CodeAddress dest) {
-    always_assert_flog(dest && jmpDeltaFits(dest), "Bad Jmp: {}", dest);
+    always_assert_flog(dest && jmpDeltaFits(dest), "Bad Jmp: {}",
+                       fmt::ptr(dest));
     emitJ32(instr_jmp, ssize_t(dest));
   }
 
@@ -2307,7 +2308,8 @@ inline void X64Assembler::call(Label& l) { l.call(*this); }
  */
 inline CodeBlock& codeBlockChoose(CodeAddress addr) {
   always_assert_flog(false,
-                     "address {} was not part of any known code block", addr);
+                     "address {} was not part of any known code block",
+                     fmt::ptr(addr));
 }
 template<class... Blocks>
 CodeBlock& codeBlockChoose(CodeAddress addr, CodeBlock& a, Blocks&... as) {

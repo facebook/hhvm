@@ -987,7 +987,7 @@ hugifyText(char* from, char* to) {
     }
   }
   Logger::FInfo("Mapped text section onto hugetlb pages from {} to {}",
-                (uint64_t*)from, (uint64_t*)to);
+                fmt::ptr(from), fmt::ptr(to));
   return true;
 #endif
   return false;

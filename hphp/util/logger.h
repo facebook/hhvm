@@ -111,10 +111,10 @@ struct Logger {
   static void Verbose(ATTRIBUTE_PRINTF_STRING const char *fmt, ...)
     ATTRIBUTE_PRINTF(1,2);
 
-  template<typename... Args> static void FError(Args&&... args);
-  template<typename... Args> static void FWarning(Args&&... args);
-  template<typename... Args> static void FInfo(Args&&... args);
-  template<typename... Args> static void FVerbose(Args&&... args);
+  template<typename... Args> static void FError(fmt::format_string<Args...> fmt_str, Args&&... args);
+  template<typename... Args> static void FWarning(fmt::format_string<Args...> fmt_str, Args&&... args);
+  template<typename... Args> static void FInfo(fmt::format_string<Args...> fmt_str, Args&&... args);
+  template<typename... Args> static void FVerbose(fmt::format_string<Args...> fmt_str, Args&&... args);
 
   static void Log(LogLevelType level, const char* type, const Exception& e,
                   const char* file = nullptr, int line = 0);

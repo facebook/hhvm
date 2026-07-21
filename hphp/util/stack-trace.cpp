@@ -25,9 +25,9 @@
 #include <fcntl.h>
 
 #include <folly/Conv.h>
+#include <fmt/core.h>
 #include <folly/Demangle.h>
 #include <folly/FileUtil.h>
-#include <folly/Format.h>
 #include <folly/ScopeGuard.h>
 #include <folly/String.h>
 
@@ -372,7 +372,7 @@ bool StackTrace::PerfMap::translate(StackFrameExtra* frame) const {
 
 std::string StackFrameExtra::toString() const {
   constexpr folly::StringPiece qq{"??"};
-  return folly::sformat(
+  return fmt::format(
     "{} at {}:{}",
     funcname.empty() ? qq : folly::StringPiece{funcname},
     filename.empty() ? qq : folly::StringPiece{filename},

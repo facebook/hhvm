@@ -99,12 +99,7 @@ PackageInfo PackageInfo::fromFile(const std::filesystem::path& path) {
       for (auto& error : info.errors) {
         packageConfigErrors.push_back(error.c_str());
       }
-      auto const packageConfigError = fmt::format(
-        "Error parsing {}: {}",
-        path.c_str(),
-        folly::join("\n", packageConfigErrors)
-      );
-      Logger::FError(packageConfigError);
+      Logger::FError("Error parsing {}: {}", path.c_str(), folly::join("\n", packageConfigErrors));
     }
 
     return PackageInfo(packages, deployments);

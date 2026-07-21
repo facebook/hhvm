@@ -33,6 +33,7 @@
 #include <string>
 
 #include <folly/portability/PThread.h>
+#include <fmt/core.h>
 
 #include "hphp/util/ringbuffer.h"
 
@@ -125,7 +126,7 @@ public:
         }
       } catch (const std::exception& ) {
         std::cerr <<
-          folly::format("Ignoring invalid TRACE component: {}\n", piece);
+          fmt::format("Ignoring invalid TRACE component: {}\n", piece);
         continue;
       }
 

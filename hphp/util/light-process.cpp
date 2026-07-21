@@ -23,6 +23,7 @@
 #include <boost/thread/barrier.hpp>
 
 #include <folly/portability/SysMman.h>
+#include <fmt/core.h>
 #include <folly/portability/SysResource.h>
 #include <folly/portability/Sockets.h>
 #include <sys/types.h>
@@ -563,7 +564,7 @@ void LightProcess::Initialize(const std::string &prefix, int count,
   g_procs.reset(new LightProcess[count]);
   g_procsCount = count;
 
-  auto afdt_filename = folly::sformat("{}.{}", prefix, getpid());
+  auto afdt_filename = fmt::format("{}.{}", prefix, getpid());
 
   // remove the possible leftover
   remove(afdt_filename.c_str());

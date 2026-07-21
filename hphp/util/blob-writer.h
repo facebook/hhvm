@@ -23,6 +23,7 @@
 
 #include <fmt/format.h>
 #include <folly/FileUtil.h>
+#include <fmt/core.h>
 #include <folly/system/MemoryMapping.h>
 #include <magic_enum/magic_enum.hpp>
 

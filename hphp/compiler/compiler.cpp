@@ -891,7 +891,7 @@ std::unique_ptr<UnitIndex> computeIndex(
         auto const ret = map.emplace(name, locations);
         if (!ret.second) {
           Logger::FWarning("Duplicate {} {} in {} and {}",
-              kind, name, ret.first->first, locations->rpath
+              kind, name->data(), ret.first->first->data(), locations->rpath
           );
         }
       }

@@ -27,7 +27,7 @@
 #include <execinfo.h>
 
 #include <folly/Demangle.h>
-#include <folly/Format.h>
+#include <fmt/core.h>
 
 #include "hphp/util/functional.h"
 #include "hphp/util/compatibility.h"
@@ -138,7 +138,7 @@ std::string getNativeFunctionName(void* codeAddr) {
   free(symbols);
 #endif
 
-  if (functionName.empty()) functionName = folly::format("{}", codeAddr).str();
+  if (functionName.empty()) functionName = fmt::format("{}", codeAddr);
 
   G g(nameCacheLock);
   return nameCache[codeAddr] = functionName;

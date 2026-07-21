@@ -20,6 +20,7 @@
 #include "hphp/util/trace.h"
 
 #include <folly/FileUtil.h>
+#include <fmt/core.h>
 
 #include <fstream>
 
@@ -94,7 +95,7 @@ void SubprocessScheduler::sampleRSSData() {
       // `size resident shared text lib data dt`
       // We care about `resident`, which returns the number of allocated pages.
       std::string contents;
-      auto res = folly::readFile(folly::sformat("/proc/{}/statm", pid).c_str(),
+      auto res = folly::readFile(fmt::format("/proc/{}/statm", pid).c_str(),
                                  contents);
       if (!res) continue;
       std::vector<folly::StringPiece> tokens;

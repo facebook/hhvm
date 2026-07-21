@@ -27,6 +27,7 @@
 #include "hphp/util/zstd.h"
 
 #include <folly/FileUtil.h>
+#include <fmt/core.h>
 #include <folly/Subprocess.h>
 #include <folly/gen/Base.h>
 #include <folly/memory/UninitializedMemoryHacks.h>
@@ -161,7 +162,7 @@ struct FD {
     auto fd = folly::openNoInt(m_path.c_str(), flags);
     if (fd < 0) {
       throw Error{
-        folly::sformat(
+        fmt::format(
           "Unable to open {} [{}]",
           m_path.native(), folly::errnoStr(errno)
         )
@@ -200,14 +201,14 @@ struct FD {
     if (read == size) return data;
     if (read < 0) {
       throw Error{
-        folly::sformat(
+        fmt::format(
           "Failed reading {} bytes from {} at {} [{}]",
           size, m_path.native(), offset, folly::errnoStr(errno)
         )
       };
     }
     throw Error{
-      folly::sformat(
+      fmt::format(
         "Partial read from {} at {} (expected {}, actual {})",
         m_path.native(), offset, size, read
       )
@@ -220,7 +221,7 @@ struct FD {
     auto const written = folly::writeFull(m_fd, data.data(), data.size());
     if (written < 0) {
       throw Error{
-        folly::sformat(
+        fmt::format(
           "Failed writing {} bytes to {} [{}]",
           data.size(), m_path.native(), folly::errnoStr(errno)
         )
@@ -228,7 +229,7 @@ struct FD {
     }
     if (written != data.size()) {
       throw Error{
-        folly::sformat(
+        fmt::format(
           "Partial write to {} (expected {}, actual {})",
           m_path.native(), data.size(), written
         )
@@ -247,7 +248,7 @@ struct FD {
     auto const size = ::lseek(m_fd, 0, SEEK_END);
     if (size < 0) {
       throw Error{
-        folly::sformat(
+        fmt::format(
           "Unable to seek to end of {}",
           m_path.native()
         )
@@ -273,7 +274,7 @@ struct BlobReader {
     auto fd = folly::openNoInt(path.c_str(), O_CLOEXEC | O_RDONLY);
     if (fd < 0) {
       throw Error{
-        folly::sformat(
+        fmt::format(
           "Unable to open {} [{}]",
           path.native(), folly::errnoStr(errno)
         )
@@ -309,7 +310,7 @@ struct BlobReader {
                                        offsetAndLength.length, offsetAndLength.offset);
     if (static_cast<uint32_t>(read) != offsetAndLength.length) {
       throw Error{
-        folly::sformat(
+        fmt::format(
           "Blob failed reading {} bytes from {} at {}, actual read {} [{}]",
           offsetAndLength.length, m_fd, offsetAndLength.offset, read, folly::errnoStr(errno)
         )
@@ -323,7 +324,7 @@ struct BlobReader {
     }
     if (ZSTD_isError(decompressedSize)) {
       throw Error{
-        folly::sformat("ZSTD error {} while reading fd {}", 0 - decompressedSize, m_fd)
+        fmt::format("ZSTD error {} while reading fd {}", 0 - decompressedSize, m_fd)
       };
     }
     std::string decompressed;
@@ -342,7 +343,7 @@ struct BlobReader {
     }
     if (ZSTD_isError(decompressedSize)) {
       throw Error{
-        folly::sformat("ZSTD error while decompressing: {}",
+        fmt::format("ZSTD error while decompressing: {}",
                        0 - decompressedSize)
       };
     }
@@ -373,7 +374,7 @@ struct BlobWriter {
     auto fd = folly::openNoInt(m_path.c_str(), flags);
     if (fd < 0) {
       throw Error{
-        folly::sformat(
+        fmt::format(
           "Unable to open {} [{}]",
           m_path.native(), folly::errnoStr(errno)
         )
@@ -384,7 +385,7 @@ struct BlobWriter {
     SCOPE_FAIL { ::close(m_fd); };
     if (m_cctx == nullptr) {
       throw Error{
-        folly::sformat(
+        fmt::format(
           "Unable to create ZSTD context for {}",
           m_path.native()
         )
@@ -428,7 +429,7 @@ struct BlobWriter {
     auto const size = ::lseek(m_fd, 0, SEEK_END);
     if (size < 0) {
       throw Error{
-        folly::sformat(
+        fmt::format(
           "Unable to seek to end of {}",
           m_path.native()
         )
@@ -455,7 +456,7 @@ struct BlobWriter {
       folly::writeFull(m_fd, m_compressedBuffer.data(), m_compressedBuffer.size());
     if (written != m_compressedBuffer.size()) {
       throw Error{
-        folly::sformat(
+        fmt::format(
           "Failed writing to {} (expected {}, actual {})",
           m_path.native(), m_compressedBuffer.size(), written
         )
@@ -491,7 +492,7 @@ private:
     }
     if (ZSTD_isError(compressedSize)) {
       throw Error{
-        folly::sformat("ZSTD error while compressing: {}",
+        fmt::format("ZSTD error while compressing: {}",
                       0 - compressedSize)
       };
     }
@@ -528,7 +529,7 @@ bool readFromPipe(int fd, std::string& s) {
     if (read < 0) {
       if (errno == EAGAIN) return false;
       throw Error{
-        folly::sformat(
+        fmt::format(
           "Failed reading from pipe {} [{}]",
           fd,
           folly::errnoStr(errno)
@@ -556,7 +557,7 @@ void writeToPipe(int fd, const char* data, size_t size) {
   auto const written = folly::writeFull(fd, data, size);
   if (written < 0) {
     throw Error{
-      folly::sformat(
+      fmt::format(
         "Failed writing {} bytes to pipe {} [{}]",
         size, fd, folly::errnoStr(errno)
       )
@@ -564,7 +565,7 @@ void writeToPipe(int fd, const char* data, size_t size) {
   }
   if (written != size) {
     throw Error{
-      folly::sformat(
+      fmt::format(
         "Partial write to pipe {} (expected {}, actual {})",
         fd, size, written
       )
@@ -918,7 +919,7 @@ struct FileSink : public detail::ISink {
     // We insist on a clean output directory.
     if (!fs::create_directory(m_base)) {
       throw Error{
-        folly::sformat("Output directory {} already exists", m_base.native())
+        fmt::format("Output directory {} already exists", m_base.native())
       };
     }
   }
@@ -1005,7 +1006,7 @@ std::string readFile(const fs::path& path) {
   std::string s;
   if (!folly::readFile(path.c_str(), s)) {
     throw Error{
-      folly::sformat(
+      fmt::format(
         "Unable to read input from {} [{}]",
         path.c_str(), folly::errnoStr(errno)
       )
@@ -1018,7 +1019,7 @@ void writeFile(const fs::path& path,
                const char* ptr, size_t size) {
   if (!folly::writeFile(Adaptor{ptr, size}, path.c_str())) {
     throw Error{
-      folly::sformat(
+      fmt::format(
         "Unable to write output to {} [{}]",
         path.c_str(), folly::errnoStr(errno)
       )
@@ -1147,7 +1148,7 @@ int main(int argc, char** argv) {
       std::lock_guard<std::mutex> _{r.lock};
       auto const it = r.registry.find(name);
       if (it == r.registry.end()) {
-        throw Error{folly::sformat("No command named `{}` registered", name)};
+        throw Error{fmt::format("No command named `{}` registered", name)};
       }
       return it->second;
     }();
@@ -1164,7 +1165,7 @@ int main(int argc, char** argv) {
       size_t run = 0;
       while (!source->inputEnd()) {
         time(
-          [&] { return folly::sformat("run {}", run); },
+          [&] { return fmt::format("run {}", run); },
           [&, &source = source, &sink = sink] { worker->run(*source, *sink); }
         );
         ++run;
@@ -1617,11 +1618,11 @@ SubprocessImpl::doSubprocess(const RequestId& requestId,
   if (auto const trace = getenv("TRACE")) {
     traceFile = m_traceManager.get();
     auto const fullPath = m_fdManager->root() / *traceFile;
-    env.emplace_back(folly::sformat("TRACE={}", trace));
-    env.emplace_back(folly::sformat("HPHP_TRACE_FILE={}", fullPath.c_str()));
+    env.emplace_back(fmt::format("TRACE={}", trace));
+    env.emplace_back(fmt::format("HPHP_TRACE_FILE={}", fullPath.c_str()));
   }
   if (auto const asan_options = getenv("ASAN_OPTIONS")) {
-    env.emplace_back(folly::sformat("ASAN_OPTIONS={}", asan_options));
+    env.emplace_back(fmt::format("ASAN_OPTIONS={}", asan_options));
   }
 
   FTRACE(
@@ -1629,7 +1630,7 @@ SubprocessImpl::doSubprocess(const RequestId& requestId,
     requestId.tracePrefix(),
     command,
     traceFile
-      ? folly::sformat(" (trace-file: {}) ", traceFile->native())
+      ? fmt::format(" (trace-file: {}) ", traceFile->native())
       : "",
     inputBlob.size()
   );
@@ -1693,7 +1694,7 @@ SubprocessImpl::doSubprocess(const RequestId& requestId,
       if (written < 0) {
         if (errno == EAGAIN) return false;
         throw Error{
-          folly::sformat(
+          fmt::format(
             "Failed writing {} bytes to subprocess input for '{}' [{}]",
             toWrite, command, folly::errnoStr(errno)
           )
@@ -1754,7 +1755,7 @@ SubprocessImpl::doSubprocess(const RequestId& requestId,
 
   if (!returnCode.exited() || returnCode.exitStatus() != 0) {
     throw WorkerError{
-      folly::sformat(
+      fmt::format(
         "Execution of `{}` failed: {}\nstderr:\n{}",
         command,
         returnCode.str(),
@@ -1764,7 +1765,7 @@ SubprocessImpl::doSubprocess(const RequestId& requestId,
   }
   if (inputWritten != inputBlob.size()) {
     throw WorkerError{
-      folly::sformat(
+      fmt::format(
         "Execution of `{}` failed: Process failed to consume input\n",
         command
       )
@@ -1844,7 +1845,7 @@ fs::path SubprocessImpl::TraceFileManager::get() {
   std::scoped_lock<std::mutex> _{m_lock};
   if (m_paths.empty()) {
     auto const id = m_nextId++;
-    m_paths.push(folly::sformat("trace-{:04}.log", id));
+    m_paths.push(fmt::format("trace-{:04}.log", id));
   }
   auto path = std::move(m_paths.top());
   m_paths.pop();
@@ -1882,7 +1883,7 @@ Client::Client(folly::Executor::KeepAlive<> executor,
 }
 
 Client::~Client() {
-  Timer _{[&] { return folly::sformat("destroy impl {}", m_impl->name()); }};
+  Timer _{[&] { return fmt::format("destroy impl {}", m_impl->name()); }};
   m_impl.reset();
 }
 
@@ -2015,7 +2016,7 @@ std::string Client::Stats::toString(const std::string& phase,
 
   auto const pct = [] (size_t a, size_t b) -> std::string {
     if (!b) return "--";
-    return folly::sformat("{:.2f}%", double(a) / b * 100.0);
+    return fmt::format("{:.2f}%", double(a) / b * 100.0);
   };
 
   auto const execWorkItems_ = execWorkItems.load();
@@ -2025,17 +2026,17 @@ std::string Client::Stats::toString(const std::string& phase,
   auto const storeCalls_ = storeCalls.load();
   auto const loadCalls_ = loadCalls.load();
 
-  return folly::sformat(
+  return fmt::format(
     "  {}:{}\n"
-    "  Execs: {:,} ({:,}) total, {:,} cache-hits ({}), {:,} optimistically\n"
-    "  Files: {:,} total, {:,} read, {:,} queried, {:,} uploaded ({})\n"
-    "  Blobs: {:,} total, {:,} queried, {:,} uploaded ({})\n"
-    "  Cpu: {} usage, {:,} allocated cores ({}/core)\n"
+    "  Execs: {} ({}) total, {} cache-hits ({}), {} optimistically\n"
+    "  Files: {} total, {} read, {} queried, {} uploaded ({})\n"
+    "  Blobs: {} total, {} queried, {} uploaded ({})\n"
+    "  Cpu: {} usage, {} allocated cores ({}/core)\n"
     "  Mem: {} max used, {} reserved\n"
-    "  {:,} downloads ({}), {:,} throttles\n"
+    "  {} downloads ({}), {} throttles\n"
     "  Avg Latency: {} exec, {} store, {} load",
     phase,
-    extra.empty() ? "" : folly::sformat(" {}", extra),
+    extra.empty() ? "" : fmt::format(" {}", extra),
     execCalls_,
     execWorkItems_,
     execCacheHits.load(),

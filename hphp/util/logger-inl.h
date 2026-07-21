@@ -14,13 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
-#include <folly/Format.h>
-
-#define IMPLEMENT_LOGLEVEL(LEVEL)                       \
-  template<typename... Args>                            \
-  void Logger::F##LEVEL(Args&&... args) {               \
-    if (LogLevel < Log##LEVEL) return;                  \
-    LEVEL(folly::sformat(std::forward<Args>(args)...)); \
+#define IMPLEMENT_LOGLEVEL(LEVEL)                                        \
+  template<typename... Args>                                             \
+  void Logger::F##LEVEL(fmt::format_string<Args...> fmt_str,            \
+                        Args&&... args) {                                \
+    if (LogLevel < Log##LEVEL) return;                                   \
+    LEVEL(fmt::format(fmt_str, std::forward<Args>(args)...));            \
   }
 
 namespace HPHP {

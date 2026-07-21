@@ -22,7 +22,7 @@
 #include <vector>
 
 #include <folly/container/F14Set.h>
-#include <folly/Format.h>
+#include <fmt/core.h>
 
 #include "hphp/util/build-info.h"
 #include "hphp/util/embedded-data.h"
@@ -182,7 +182,7 @@ void init(const std::string& extractPath,
     // Find the initialization function.
     auto const init = dlsym(handle, kInitFuncName);
     if (!init) {
-      throw InitException { folly::sformat("dlsym() fails: {}", dlerror()) };
+      throw InitException { fmt::format("dlsym() fails: {}", dlerror()) };
     }
     return reinterpret_cast<init_func_t>(init);
   }();

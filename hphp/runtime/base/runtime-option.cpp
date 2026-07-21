@@ -460,19 +460,15 @@ std::string getCacheBreakerSchemaHash(std::string_view root,
       ? flags.cacheKeySha1().toString()
       : flags.getFactsCacheBreaker();
 
-  auto const logStr = fmt::format(
+  constexpr std::string_view kCacheBreakerFmt =
     "Native Facts DB cache breaker:\n"
     " Version: {}\n"
     " Root: {}\n"
-    " RepoOpts hash: {}",
-    Facts::kSchemaVersion,
-    root,
-    optsHash
-  );
+    " RepoOpts hash: {}";
   if (Cfg::Server::Mode && !is_cli_server_mode()) {
-    Logger::FInfo(logStr);
+    Logger::FInfo(kCacheBreakerFmt, Facts::kSchemaVersion, root, optsHash);
   } else {
-    Logger::FVerbose(logStr);
+    Logger::FVerbose(kCacheBreakerFmt, Facts::kSchemaVersion, root, optsHash);
   }
 
   std::string rootHash = string_sha1(root);

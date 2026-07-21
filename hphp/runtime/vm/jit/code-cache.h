@@ -136,14 +136,20 @@ struct CodeCache {
 
     auto const addr = m_base + offset;
     assert_flog(addr >= m_base && addr < m_base + kNullptrOffset,
-                "{} outside [{}, {})", addr, m_base, m_base + kNullptrOffset);
+                "{} outside [{}, {})",
+                fmt::ptr(addr),
+                fmt::ptr(m_base),
+                fmt::ptr(m_base + kNullptrOffset));
     return addr;
   }
   uint32_t toOffset(ConstCodeAddress addr) const {
     if (addr == nullptr) return kNullptrOffset;
 
     assert_flog(addr >= m_base && addr < m_base + kNullptrOffset,
-                "{} outside [{}, {})", addr, m_base, m_base + kNullptrOffset);
+                "{} outside [{}, {})",
+                static_cast<const void*>(addr),
+                static_cast<const void*>(m_base),
+                static_cast<const void*>(m_base + kNullptrOffset));
     return addr - m_base;
   }
   bool isValidCodeAddress(ConstCodeAddress addr) const;
@@ -245,7 +251,7 @@ struct CodeCache {
   }
 
   void releaseMainBlock() {
-    if (m_all.available() < DataBlock::kPageSize) return;    
+    if (m_all.available() < DataBlock::kPageSize) return;
     m_main.releaseBlock();
     m_main.ensure(*this, DataBlock::kPageSize);
   }

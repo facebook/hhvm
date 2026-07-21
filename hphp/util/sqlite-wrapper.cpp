@@ -15,6 +15,8 @@
 */
 
 #include <sqlite3.h>
+#include <fmt/core.h>
+#include <folly/Conv.h>
 
 #include "hphp/util/assertions.h"
 #include "hphp/util/sqlite-wrapper.h"
@@ -153,14 +155,14 @@ void SQLite::setBusyTimeout(int ms) noexcept {
 
 void SQLite::setJournalMode(JournalMode mode) {
   SQLiteStmt journalModeStmt{
-    *this, folly::sformat("PRAGMA journal_mode = {}", journalModeName(mode))};
+    *this, fmt::format("PRAGMA journal_mode = {}", journalModeName(mode))};
   journalModeStmt.query().step();
 }
 
 void SQLite::setSynchronousLevel(SynchronousLevel lvl) {
   SQLiteStmt stmt{
     *this,
-    folly::sformat("PRAGMA synchronous = {}", static_cast<int>(lvl))};
+    fmt::format("PRAGMA synchronous = {}", static_cast<int>(lvl))};
   stmt.query().step();
 }
 

@@ -23,6 +23,7 @@
 #include "hphp/util/text-color.h"
 
 #include <folly/portability/Syslog.h>
+#include <fmt/core.h>
 #include <folly/portability/Unistd.h>
 
 #include <typeinfo>
@@ -129,7 +130,7 @@ void Logger::Log(LogLevelType level, const char* type, const Exception& e,
   if (!IsEnabled()) return;
   auto msg = type + e.getMessage();
   if (file && file[0]) {
-    msg += folly::sformat(" in {} on line {}", file, line);
+    msg += fmt::format(" in {} on line {}", file, line);
   }
   LogImpl(level, msg, nullptr);
 }

@@ -15,6 +15,7 @@
 */
 
 #include <folly/Demangle.h>
+#include <fmt/core.h>
 #include <folly/String.h>
 
 namespace HPHP {
@@ -26,7 +27,7 @@ namespace {
 template<typename T>
 std::string type_name() {
   auto const name = folly::demangle(typeid(T));
-  return folly::format("AtomicGrowableVector<{}>", name).str();
+  return fmt::format("AtomicGrowableVector<{}>", name);
 }
 
 }

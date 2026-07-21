@@ -18,7 +18,7 @@
 
 #include <set>
 
-#include <folly/Format.h>
+#include <fmt/core.h>
 
 #include "hphp/util/hash.h"
 #include "hphp/util/trace.h"
@@ -122,7 +122,7 @@ Cluster::Cluster(const std::vector<TargetId>& ids, const TargetGraph& cg) {
 }
 
 std::string Cluster::toString() const {
-  return folly::sformat("funcs = [{}]", folly::join(", ", targets));
+  return fmt::format("funcs = [{}]", folly::join(", ", targets));
 }
 
 double Cluster::density() const {

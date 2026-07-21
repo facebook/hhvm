@@ -15,7 +15,7 @@
 */
 #include "hphp/util/asm-x64.h"
 
-#include <folly/Format.h>
+#include <fmt/core.h>
 
 #include "hphp/util/safe-cast.h"
 
@@ -387,21 +387,21 @@ static bool writeValue(uint8_t* ip, int size, int64_t v) {
 }
 
 std::string DecodedInstruction::toString() {
-  auto str = folly::format("{:08x} {:02x}",
+  auto str = fmt::format("{:08x} {:02x}",
                            (uint64_t)m_ip,
-                           m_opcode).str();
+                           m_opcode);
   if (m_flags.hasModRm) {
     auto modRm = getModRm();
-    str += folly::format(" ModRM({:02b} {} {})",
+    str += fmt::format(" ModRM({:02b} {} {})",
                          modRm >> 6,
                          (modRm >> 3) & 7,
-                         modRm & 7).str();
+                         modRm & 7);
     if (m_flags.hasSib) {
       auto sib = m_ip[m_size - m_immSz - m_offSz - 1];
-      str += folly::format(" SIB({:02b} {} {})",
+      str += fmt::format(" SIB({:02b} {} {})",
                            sib >> 6,
                            (sib >> 3) & 7,
-                           sib & 7).str();
+                           sib & 7);
     }
   }
 
@@ -409,18 +409,18 @@ std::string DecodedInstruction::toString() {
   if (m_offSz) {
     int64_t value = readValue(ip, m_offSz);
     ip += m_offSz;
-    str += folly::format(" {}{:+x}",
+    str += fmt::format(" {}{:+x}",
                          m_flags.picOff ? "rip" : "",
-                         value).str();
+                         value);
     if (m_flags.picOff) {
-      str += folly::format("({:08x})", uintptr_t(m_ip + m_size + value)).str();
+      str += fmt::format("({:08x})", uintptr_t(m_ip + m_size + value));
     }
   }
 
   if (m_immSz) {
     int64_t value = readValue(ip, m_immSz);
     ip += m_immSz;
-    str += folly::format(" #{}", value).str();
+    str += fmt::format(" #{}", value);
   }
   return str;
 }

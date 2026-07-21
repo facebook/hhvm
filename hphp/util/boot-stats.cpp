@@ -36,7 +36,7 @@ ResourceUsage ResourceUsage::sinceEpoch() {
 }
 
 std::string ResourceUsage::toString() const {
-  return folly::sformat(
+  return fmt::format(
     "{}ms wall, {}ms cpu, {} MB RSS",
     std::chrono::duration_cast<std::chrono::milliseconds>(wall()).count(),
     std::chrono::duration_cast<std::chrono::milliseconds>(cpu()).count(),

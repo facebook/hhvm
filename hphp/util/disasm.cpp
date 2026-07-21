@@ -20,7 +20,7 @@
 
 #include <boost/algorithm/string.hpp>
 
-#include <folly/Format.h>
+#include <fmt/format.h>
 
 #include "hphp/util/abi-cxx.h"
 #include "hphp/util/text-color.h"
@@ -95,7 +95,7 @@ void Disasm::disasm(std::ostream& out, uint8_t* codeStartAddr,
     xed_decoded_inst_set_input_chip(&xedd, XED_CHIP_INVALID);
     xed_error_enum_t xed_error = xed_decode(&xedd, frontier, 15);
     if (xed_error != XED_ERROR_NONE) {
-      out << folly::format("xed_decode failed at address {}\n", frontier);
+      out << fmt::format("xed_decode failed at address {}\n", fmt::ptr(frontier));
       return;
     }
 
@@ -105,8 +105,8 @@ void Disasm::disasm(std::ostream& out, uint8_t* codeStartAddr,
     if (!xed_format_context(syntax, &xedd, codeStr,
                             MAX_INSTR_ASM_LEN, ip - adjust, nullptr,
                             addressToSymbol)) {
-      out << folly::format("xed_format_context failed at address {}\n",
-                           frontier);
+      out << fmt::format("xed_format_context failed at address {}\n",
+                           fmt::ptr(frontier));
       return;
     }
     uint32_t instrLen = xed_decoded_inst_get_length(&xedd);
@@ -122,16 +122,16 @@ void Disasm::disasm(std::ostream& out, uint8_t* codeStartAddr,
                              xed_decoded_inst_get_branch_displacement(&xedd) -
                              codeBase);
         if (disp < uint64_t(codeEndAddr - codeStartAddr)) {
-          jmpComment = folly::format(" # {:#x}", disp).str();
+          jmpComment = fmt::format(" # {:#x}", disp);
         }
       }
     }
 
     out << m_opts.m_color;
     if (m_opts.m_addresses) {
-      const char* fmt = m_opts.m_relativeOffset ? "{:3x}: " : "{:#10x}: ";
-      out << folly::format(
-        fmt,
+      const char* fmtStr = m_opts.m_relativeOffset ? "{:3x}: " : "{:#10x}: ";
+      out << fmt::format(
+        fmt::runtime(fmtStr),
         m_opts.m_relativeOffset ? (ip - codeBase) : (ip - adjust)
       );
     }
@@ -139,7 +139,7 @@ void Disasm::disasm(std::ostream& out, uint8_t* codeStartAddr,
       // print encoding, like in objdump
       unsigned posi = 0;
       for (; posi < instrLen; ++posi) {
-        out << folly::format("{:02x} ", (uint8_t)frontier[posi]);
+        out << fmt::format("{:02x} ", (uint8_t)frontier[posi]);
       }
       for (; posi < 16; ++posi) {
         out << "   ";

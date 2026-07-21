@@ -1404,7 +1404,8 @@ coro::Task<bool> Package::emit(const UnitIndex& index,
     }
     for (auto const& e : ondemand.m_edges) {
       auto const sym = e.sym ? e.sym : makeStaticString("<include>");
-      Logger::FVerbose("systemlib unit {} -> {} -> {}", e.from, sym, e.to);
+      Logger::FVerbose("systemlib unit {} -> {} -> {}",
+                       e.from->data(), sym->data(), e.to->data());
     }
     localUEs.emplace_back(std::move(ue));
   }

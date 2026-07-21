@@ -38,7 +38,7 @@ final class DisposableExecutionMeasuringRunnable implements Runnable, Disposable
         runnable.run();
       } finally {
         long duration = System.nanoTime() - start;
-        t.recordExecutionTimeNanos(TimeUnit.NANOSECONDS.toMicros(duration));
+        t.recordExecutionTimeMicros(TimeUnit.NANOSECONDS.toMicros(duration));
       }
     }
   }

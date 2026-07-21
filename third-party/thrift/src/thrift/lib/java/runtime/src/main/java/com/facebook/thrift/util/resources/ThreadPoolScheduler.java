@@ -16,10 +16,11 @@
 
 package com.facebook.thrift.util.resources;
 
-import io.airlift.stats.DecayCounter;
-import io.airlift.stats.Distribution;
-import io.airlift.stats.ExponentialDecay;
-import io.netty.util.internal.PlatformDependent;
+import static com.facebook.thrift.metrics.distribution.Quantile.AVG;
+
+import com.facebook.thrift.metrics.distribution.Quantile;
+import com.facebook.thrift.metrics.distribution.SingleWindowDistribution;
+import com.facebook.thrift.metrics.rate.CompositeMovingCounter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -43,13 +44,14 @@ import reactor.core.scheduler.Schedulers;
 final class ThreadPoolScheduler extends AtomicBoolean implements ThriftScheduler {
   private static final Logger LOGGER = LoggerFactory.getLogger(ThreadPoolScheduler.class);
 
-  private final Distribution executionTime;
-  private final Map<String, Distribution> perThreadExecutionTimes;
-
-  private final Distribution poolSizeAvg;
-  private final Distribution pendingTasksAvg;
-  private final Distribution activeTasksAvg;
-  private final DecayCounter completedTasksSum;
+  private final SingleWindowDistribution executionTime;
+  private final SingleWindowDistribution poolSizeAvg;
+  private final SingleWindowDistribution pendingTasksAvg;
+  private final SingleWindowDistribution activeTasksAvg;
+  private final CompositeMovingCounter completedTasksSum;
+  // getCompletedTaskCount() is cumulative; track the previous value so we feed
+  // completedTasksSum the per-tick delta (an increment), not the running total.
+  private long lastCompletedTaskCount;
 
   private final ThreadPoolExecutor threadPoolExecutor;
   private final Worker worker;
@@ -61,19 +63,16 @@ final class ThreadPoolScheduler extends AtomicBoolean implements ThriftScheduler
       int maxNumThreads,
       int maxPendingTasks,
       int minPendingTasksBeforeNewThread) {
-    this.executionTime = new Distribution(ExponentialDecay.oneMinute());
-    this.perThreadExecutionTimes = PlatformDependent.newConcurrentHashMap();
-
-    this.poolSizeAvg = new Distribution(ExponentialDecay.oneMinute());
-    this.pendingTasksAvg = new Distribution(ExponentialDecay.oneMinute());
-    this.activeTasksAvg = new Distribution(ExponentialDecay.oneMinute());
-    this.completedTasksSum = new DecayCounter(ExponentialDecay.oneMinute());
+    this.executionTime = new SingleWindowDistribution();
+    this.poolSizeAvg = new SingleWindowDistribution();
+    this.pendingTasksAvg = new SingleWindowDistribution();
+    this.activeTasksAvg = new SingleWindowDistribution();
+    this.completedTasksSum = new CompositeMovingCounter();
 
     ThreadPoolSchedulerThreadFactory threadFactory =
         new ThreadPoolSchedulerThreadFactory(
             String.format("thrift-%s-offloop", type),
             executionTime,
-            perThreadExecutionTimes,
             (t, e) -> LOGGER.error("uncaught exception on thread {}", t.getName(), e));
 
     this.threadPoolExecutor =
@@ -138,7 +137,10 @@ final class ThreadPoolScheduler extends AtomicBoolean implements ThriftScheduler
     poolSizeAvg.add(threadPoolExecutor.getPoolSize());
     pendingTasksAvg.add(threadPoolExecutor.getQueue().size());
     activeTasksAvg.add(threadPoolExecutor.getActiveCount());
-    completedTasksSum.add(threadPoolExecutor.getCompletedTaskCount());
+
+    long completed = threadPoolExecutor.getCompletedTaskCount();
+    completedTasksSum.add(completed - lastCompletedTaskCount);
+    lastCompletedTaskCount = completed;
   }
 
   @Override
@@ -197,25 +199,17 @@ final class ThreadPoolScheduler extends AtomicBoolean implements ThriftScheduler
   public Map<String, Long> getStats() {
     Map<String, Long> stats = new HashMap<>();
 
-    double result = poolSizeAvg.getAvg();
+    stats.put("thrift_offloop.pool_size.avg.60", poolSizeAvg.getOneMinuteQuantiles().get(AVG));
     stats.put(
-        "thrift_offloop.pool_size.avg.60", Double.isInfinite(result) ? 0L : Math.round(result));
-
-    result = pendingTasksAvg.getAvg();
+        "thrift_offloop.pending_tasks.avg.60", pendingTasksAvg.getOneMinuteQuantiles().get(AVG));
     stats.put(
-        "thrift_offloop.pending_tasks.avg.60", Double.isInfinite(result) ? 0L : Math.round(result));
+        "thrift_offloop.active_tasks.avg.60", activeTasksAvg.getOneMinuteQuantiles().get(AVG));
+    stats.put("thrift_offloop.complete_tasks.sum.60", completedTasksSum.oneMinuteRate());
 
-    result = activeTasksAvg.getAvg();
-    stats.put(
-        "thrift_offloop.active_tasks.avg.60", Double.isInfinite(result) ? 0L : Math.round(result));
-
-    result = completedTasksSum.getCount();
-    stats.put(
-        "thrift_offloop.complete_tasks.sum.60",
-        Double.isInfinite(result) ? 0L : Math.round(result));
-
-    stats.put("thrift_offloop.execution_time.avg", (long) executionTime.getP50());
-    stats.put("thrift_offloop.execution_time.p90", (long) executionTime.getP90());
+    Map<Quantile, Long> quantiles = executionTime.getOneMinuteQuantiles();
+    for (Map.Entry<Quantile, Long> entry : quantiles.entrySet()) {
+      stats.put("thrift_offloop.execution_time." + entry.getKey().getKey(), entry.getValue());
+    }
 
     return stats;
   }
@@ -248,30 +242,22 @@ final class ThreadPoolScheduler extends AtomicBoolean implements ThriftScheduler
 
   private static class ThreadPoolSchedulerThreadFactory extends AtomicInteger
       implements ThreadFactory {
-    private final Distribution executionTime;
-    private final Map<String, Distribution> perThreadExecutionTimes;
+    private final SingleWindowDistribution executionTime;
     private final Thread.UncaughtExceptionHandler uncaughtExceptionHandler;
     private final String prefix;
 
     public ThreadPoolSchedulerThreadFactory(
         String prefix,
-        Distribution executionTime,
-        Map<String, Distribution> perThreadExecutionTimes,
+        SingleWindowDistribution executionTime,
         Thread.UncaughtExceptionHandler uncaughtExceptionHandler) {
       this.prefix = prefix;
       this.executionTime = executionTime;
-      this.perThreadExecutionTimes = perThreadExecutionTimes;
       this.uncaughtExceptionHandler = uncaughtExceptionHandler;
     }
 
     @Override
     public Thread newThread(Runnable r) {
-      String name = prefix + getAndDecrement();
-      Distribution perThreadExecutionTime = new Distribution(ExponentialDecay.oneMinute());
-      perThreadExecutionTimes.put(name, perThreadExecutionTime);
-
-      ExecutionRecordingThread t =
-          new ExecutionRecordingThread(r, perThreadExecutionTime, executionTime);
+      ExecutionRecordingThread t = new ExecutionRecordingThread(r, executionTime);
       t.setUncaughtExceptionHandler(uncaughtExceptionHandler);
       t.setName(prefix + getAndDecrement());
       t.setDaemon(true);

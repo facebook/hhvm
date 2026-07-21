@@ -16,7 +16,7 @@
 
 package com.facebook.thrift.util.resources;
 
-import io.airlift.stats.Distribution;
+import com.facebook.thrift.metrics.distribution.SingleWindowDistribution;
 import io.netty.util.concurrent.FastThreadLocalThread;
 
 /**
@@ -25,18 +25,14 @@ import io.netty.util.concurrent.FastThreadLocalThread;
  * duration.
  */
 final class ExecutionRecordingThread extends FastThreadLocalThread {
-  private final Distribution perThreadExecutionTime;
-  private final Distribution executionTime;
+  private final SingleWindowDistribution executionTime;
 
-  public ExecutionRecordingThread(
-      Runnable r, Distribution perThreadExecutionTime, Distribution executionTime) {
+  public ExecutionRecordingThread(Runnable r, SingleWindowDistribution executionTime) {
     super(r);
-    this.perThreadExecutionTime = perThreadExecutionTime;
     this.executionTime = executionTime;
   }
 
-  public void recordExecutionTimeNanos(long duration) {
-    perThreadExecutionTime.add(duration);
+  public void recordExecutionTimeMicros(long duration) {
     executionTime.add(duration);
   }
 }

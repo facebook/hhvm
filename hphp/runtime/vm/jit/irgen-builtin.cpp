@@ -820,32 +820,6 @@ SSATmp* opt_is_list_like(IRGS& env, const ParamPrep& params) {
   return nullptr;
 }
 
-SSATmp* opt_is_vec_or_varray(IRGS& env, const ParamPrep& params) {
-  if (params.size() != 1) return nullptr;
-  auto const type = params[0].value->type();
-
-  if (type <= TVec) {
-    return cns(env, true);
-  }
-
-  return nullptr;
-}
-
-SSATmp* opt_is_dict_or_darray(IRGS& env, const ParamPrep& params) {
-  if (params.size() != 1) return nullptr;
-  auto const type = params[0].value->type();
-
-  if (type <= TDict) {
-    return cns(env, true);
-  }
-
-  if (!type.maybe(TDict)) {
-    return cns(env, false);
-  }
-
-  return nullptr;
-}
-
 SSATmp* opt_foldable(IRGS& env,
                      const Func* func,
                      const ParamPrep& params) {
@@ -1354,8 +1328,6 @@ const hphp_fast_string_fmap<OptEmitFn> s_opt_emit_fns{
   {"HH\\type_structure_classname", opt_type_structure_classname},
   {"HH\\type_structure_class", opt_type_structure_class},
   {"HH\\is_list_like", opt_is_list_like},
-  {"HH\\is_dict_or_darray", opt_is_dict_or_darray},
-  {"HH\\is_vec_or_varray", opt_is_vec_or_varray},
   {"HH\\Lib\\_Private\\Native\\first", opt_container_first},
   {"HH\\Lib\\_Private\\Native\\last", opt_container_last},
   {"HH\\Lib\\_Private\\Native\\first_key", opt_container_first_key},

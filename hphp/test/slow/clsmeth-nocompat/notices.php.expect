@@ -2,8 +2,6 @@ is_array($m): False
 HH\is_any_array($m): False
 HH\is_varray($m): False
 HH\is_darray($m): False
-HH\is_vec_or_varray($m): False
-HH\is_dict_or_darray($m): False
 $m is arraylike: False
 $m is shape(...): False
 $m is shape(str,str): False
@@ -21,8 +19,6 @@ is_array($m): False
 HH\is_any_array($m): False
 HH\is_varray($m): False
 HH\is_darray($m): False
-HH\is_vec_or_varray($m): False
-HH\is_dict_or_darray($m): False
 $m is arraylike: False
 $m is shape(...): False
 $m is shape(str,str): False
@@ -39,4 +35,3 @@ is_a($m, KeyedContainer): False
 is_array($m): False
 HH\is_any_array($m): False
 HH\is_varray($m): False
-HH\is_vec_or_varray($m): False

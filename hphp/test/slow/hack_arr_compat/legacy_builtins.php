@@ -3,7 +3,7 @@
 function clear(inout $array) :mixed{
   shuffle(inout $array);
   $legacy = HH\is_array_marked_legacy($array);
-  $array = HH\is_vec_or_varray($array)
+  $array = HH\is_vec($array)
     ? ($legacy ? HH\array_mark_legacy(vec[]) : vec[])
     : ($legacy ? HH\array_mark_legacy(dict[]) : dict[]);
 }

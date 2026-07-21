@@ -19,8 +19,6 @@ function is_functions_static() :mixed{
   echo 'HH\is_any_array($m):' ;C(HH\is_any_array($m));
   echo 'HH\is_varray($m):'       ;C(HH\is_varray($m));
   echo 'HH\is_darray($m):'       ;C(HH\is_darray($m));
-  echo 'HH\is_vec_or_varray($m):'       ;C(HH\is_vec_or_varray($m));
-  echo 'HH\is_dict_or_darray($m):'       ;C(HH\is_dict_or_darray($m));
   echo '$m is arraylike:'     ;C($m is arraylike);
   echo '$m is shape(...):'    ;C($m is shape(...));
   echo '$m is shape(str,str):';C($m is shape(K::A=>string, K::B=>string));
@@ -45,8 +43,6 @@ function is_functions_dynamic() :mixed{
   echo 'HH\is_any_array($m):' ;C(HH\is_any_array($m));
   echo 'HH\is_varray($m):'       ;C(HH\is_varray($m));
   echo 'HH\is_darray($m):'       ;C(HH\is_darray($m));
-  echo 'HH\is_vec_or_varray($m):'       ;C(HH\is_vec_or_varray($m));
-  echo 'HH\is_dict_or_darray($m):'       ;C(HH\is_dict_or_darray($m));
   echo '$m is arraylike:'     ;C($m is arraylike);
   echo '$m is shape(...):'    ;C($m is shape(...));
   echo '$m is shape(str,str):';C($m is shape(K::A=>string, K::B=>string));
@@ -70,7 +66,6 @@ function is_functions_builtins() :mixed{
   echo 'is_array($m):'       ;C(HH\dynamic_fun(LV('is_array'))($m));
   echo 'HH\is_any_array($m):';C(HH\dynamic_fun(LV('HH\is_any_array'))($m));
   echo 'HH\is_varray($m):'   ;C(HH\dynamic_fun(LV('HH\is_varray'))($m));
-  echo 'HH\is_vec_or_varray($m):'   ;C(HH\dynamic_fun(LV('HH\is_vec_or_varray'))($m));
 }
 
 <<__EntryPoint>>

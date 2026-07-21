@@ -9,13 +9,13 @@ function hexdump(string $s): string {
 }
 
 function to_hack_arrays_recursive($value) :mixed{
-  if (HH\is_vec_or_varray($value)) {
+  if (HH\is_vec($value)) {
     $result = vec[];
     foreach ($value as $v) {
       $result[] = to_hack_arrays_recursive($v);
     }
     return $result;
-  } else if (HH\is_dict_or_darray($value)) {
+  } else if (HH\is_dict($value)) {
     $result = dict[];
     foreach ($value as $k => $v) {
       $result[$k] = to_hack_arrays_recursive($v);

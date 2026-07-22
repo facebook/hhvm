@@ -155,23 +155,32 @@ TEST_F(TranscoderTest, JitEngineUnlinkedReturnsCompileError) {
       << transcoder.error().message;
 }
 
-TEST_F(TranscoderTest, JsonTargetDoesNotRequireExperimentalProtocolOptIn) {
+TEST_F(TranscoderTest, JsonTargetsDoNotRequireExperimentalProtocolOptIn) {
   auto compact = makeThriftCompactCodec(sampleNode());
+  auto binary = makeThriftBinaryCodec(sampleNode());
   auto json = makeJsonCodec(sampleNode());
 
-  auto transcoder = makeTranscoder(fuse(compact, json), Engine::Interpreter);
-  ASSERT_FALSE(transcoder.hasError()) << transcoder.error().message;
-  EXPECT_EQ((*transcoder)->engine(), Engine::Interpreter);
+  auto compactToJson = makeTranscoder(fuse(compact, json), Engine::Interpreter);
+  ASSERT_FALSE(compactToJson.hasError()) << compactToJson.error().message;
+  EXPECT_EQ((*compactToJson)->engine(), Engine::Interpreter);
+
+  auto binaryToJson = makeTranscoder(fuse(binary, json), Engine::Interpreter);
+  ASSERT_FALSE(binaryToJson.hasError()) << binaryToJson.error().message;
+  EXPECT_EQ((*binaryToJson)->engine(), Engine::Interpreter);
 }
 
-TEST_F(
-    TranscoderTest, JsonObjectSourceDoesNotRequireExperimentalProtocolOptIn) {
+TEST_F(TranscoderTest, JsonObjectSourcesDoNotRequireExperimentalProtocolOptIn) {
   auto json = makeJsonCodec(sampleNode());
   auto compact = makeThriftCompactCodec(sampleNode());
+  auto binary = makeThriftBinaryCodec(sampleNode());
 
-  auto transcoder = makeTranscoder(fuse(json, compact), Engine::Interpreter);
-  ASSERT_FALSE(transcoder.hasError()) << transcoder.error().message;
-  EXPECT_EQ((*transcoder)->engine(), Engine::Interpreter);
+  auto jsonToCompact = makeTranscoder(fuse(json, compact), Engine::Interpreter);
+  ASSERT_FALSE(jsonToCompact.hasError()) << jsonToCompact.error().message;
+  EXPECT_EQ((*jsonToCompact)->engine(), Engine::Interpreter);
+
+  auto jsonToBinary = makeTranscoder(fuse(json, binary), Engine::Interpreter);
+  ASSERT_FALSE(jsonToBinary.hasError()) << jsonToBinary.error().message;
+  EXPECT_EQ((*jsonToBinary)->engine(), Engine::Interpreter);
 }
 
 TEST_F(TranscoderTest, JsonToJsonRejected) {

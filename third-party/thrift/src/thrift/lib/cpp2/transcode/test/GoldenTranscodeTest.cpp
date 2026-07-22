@@ -508,14 +508,25 @@ TEST(GoldenTranscodeTest, JsonSpecialFloatStringsRoundTrip) {
   auto value = test_data::generate<fixture::SpecialFloatShapes>();
   auto compactWire =
       makeThriftCompactCodec(structNode<fixture::SpecialFloatShapes>());
+  auto binaryWire =
+      makeThriftBinaryCodec(structNode<fixture::SpecialFloatShapes>());
   auto jsonWire = makeJsonCodec(structNode<fixture::SpecialFloatShapes>());
-  auto transcode = makeWireTranscoder("compact->json", compactWire, jsonWire);
+  auto compactToJson =
+      makeWireTranscoder("compact->json", compactWire, jsonWire);
+  auto binaryToJson = makeWireTranscoder("binary->json", binaryWire, jsonWire);
 
-  auto output = transcode(CompactSerializer::serialize<std::string>(value));
-  ASSERT_TRUE(output.has_value());
-  EXPECT_EQ(
-      *output,
-      R"json({"f_nan":"NaN","f_pos_inf":"Infinity","f_neg_inf":"-Infinity","d_nan":"NaN","d_pos_inf":"Infinity","d_neg_inf":"-Infinity"})json");
+  const std::string expected =
+      R"json({"f_nan":"NaN","f_pos_inf":"Infinity","f_neg_inf":"-Infinity","d_nan":"NaN","d_pos_inf":"Infinity","d_neg_inf":"-Infinity"})json";
+
+  auto compactOutput =
+      compactToJson(CompactSerializer::serialize<std::string>(value));
+  ASSERT_TRUE(compactOutput.has_value());
+  EXPECT_EQ(*compactOutput, expected);
+
+  auto binaryOutput =
+      binaryToJson(BinarySerializer::serialize<std::string>(value));
+  ASSERT_TRUE(binaryOutput.has_value());
+  EXPECT_EQ(*binaryOutput, expected);
 }
 
 TEST(GoldenTranscodeTest, NegativeFieldIdShapesRoundTripSupportedProtocols) {

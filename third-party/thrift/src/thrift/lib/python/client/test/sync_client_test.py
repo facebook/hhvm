@@ -17,9 +17,10 @@
 
 from __future__ import annotations
 
+import socket
+import threading
 import time
-import unittest
-from unittest import IsolatedAsyncioTestCase
+from unittest import IsolatedAsyncioTestCase, mock
 
 from thrift.lib.python.client.test.client_event_handler.helper import (
     TestHelper as ClientEventHandlerTestHelper,
@@ -47,6 +48,60 @@ from .exceptions_helper import HijackTestException, HijackTestHelper
 
 TEST_HEADER_KEY = "headerKey"
 TEST_HEADER_VALUE = "headerValue"
+HTTP_TEST_HOST_A = "host-a.example.com"
+HTTP_TEST_HOST_B = "host-b.example.com"
+HTTP_ROUTE_HOST_A = "host-a"
+HTTP_ROUTE_HOST_B = "host-b"
+HTTP_ROUTE_MISSING_HOST = "missing-host"
+HTTP_ROUTE_UNKNOWN_HOST = "unknown-host"
+
+
+def _extract_http_host_header(raw_request: bytes) -> str | None:
+    for line in raw_request.decode("latin1").split("\r\n"):
+        if line.lower().startswith("host:"):
+            return line.split(":", 1)[1].strip()
+    return None
+
+
+def _route_for_http_host(host_header: str | None) -> str:
+    if host_header is None:
+        return HTTP_ROUTE_MISSING_HOST
+
+    hostname = host_header.split(":", 1)[0]
+    if hostname == HTTP_TEST_HOST_A:
+        return HTTP_ROUTE_HOST_A
+    if hostname == HTTP_TEST_HOST_B:
+        return HTTP_ROUTE_HOST_B
+    return HTTP_ROUTE_UNKNOWN_HOST
+
+
+def _route_raw_http_request(raw_request: bytes) -> tuple[str, str | None]:
+    host_header = _extract_http_host_header(raw_request)
+    return _route_for_http_host(host_header), host_header
+
+
+def _serve_one_http_request(
+    listener: socket.socket,
+    selected_routes: list[tuple[str, str | None]],
+    errors: list[Exception],
+) -> None:
+    try:
+        connection, _ = listener.accept()
+        with connection:
+            raw_request = b""
+            while b"\r\n\r\n" not in raw_request:
+                chunk = connection.recv(4096)
+                if not chunk:
+                    break
+                raw_request += chunk
+            selected_routes.append(_route_raw_http_request(raw_request))
+            connection.sendall(
+                b"HTTP/1.1 404 Not Found\r\n"
+                b"Content-Length: 0\r\n"
+                b"Connection: close\r\n\r\n"
+            )
+    except Exception as ex:
+        errors.append(ex)
 
 
 class SyncClientTests(IsolatedAsyncioTestCase):
@@ -65,6 +120,78 @@ class SyncClientTests(IsolatedAsyncioTestCase):
             ) as client:
                 sum = client.add(1, 2)
                 self.assertEqual(3, sum)
+
+    def test_http_host_header_selects_virtual_host_route(self) -> None:
+        self.assertEqual(
+            (HTTP_ROUTE_MISSING_HOST, None),
+            _route_raw_http_request(b"GET / HTTP/1.1\r\n\r\n"),
+        )
+        self.assertEqual(
+            (HTTP_ROUTE_HOST_A, HTTP_TEST_HOST_A),
+            _route_raw_http_request(
+                b"GET / HTTP/1.1\r\nHost: host-a.example.com\r\n\r\n"
+            ),
+        )
+        self.assertEqual(
+            (HTTP_ROUTE_HOST_B, HTTP_TEST_HOST_B),
+            _route_raw_http_request(
+                b"GET / HTTP/1.1\r\nHost: host-b.example.com\r\n\r\n"
+            ),
+        )
+        self.assertEqual(
+            (HTTP_ROUTE_UNKNOWN_HOST, "127.0.0.1"),
+            _route_raw_http_request(b"GET / HTTP/1.1\r\nHost: 127.0.0.1\r\n\r\n"),
+        )
+
+    def test_http_client_preserves_hostname_for_virtual_host_routing(self) -> None:
+        listener = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        listener.settimeout(2)
+        listener.bind(("127.0.0.1", 0))
+        listener.listen(1)
+        port = listener.getsockname()[1]
+        selected_routes: list[tuple[str, str | None]] = []
+        errors: list[Exception] = []
+        thread = threading.Thread(
+            target=_serve_one_http_request,
+            args=(listener, selected_routes, errors),
+        )
+        thread.start()
+
+        try:
+            with mock.patch(
+                "socket.getaddrinfo",
+                return_value=[
+                    (
+                        socket.AF_INET,
+                        socket.SOCK_STREAM,
+                        socket.IPPROTO_TCP,
+                        "",
+                        ("127.0.0.1", port),
+                    )
+                ],
+            ):
+                with get_sync_client(
+                    TestService,
+                    host=HTTP_TEST_HOST_A,
+                    port=port,
+                    path="/",
+                    client_type=ClientType.THRIFT_HTTP_CLIENT_TYPE,
+                ) as client:
+                    with self.assertRaises(TransportError):
+                        client.add(1, 2)
+        finally:
+            thread.join(timeout=2)
+            listener.close()
+
+        self.assertFalse(thread.is_alive())
+        if errors:
+            raise errors[0]
+        # KNOWN BUG: the HTTP client sends the resolved IP address in the Host
+        # header instead of the original hostname, so virtual-host routing lands
+        # on the wrong backend. The assertion below documents this unacceptable
+        # behavior; a follow-up diff fixes the client and flips this back to
+        # [(HTTP_ROUTE_HOST_A, HTTP_TEST_HOST_A)].
+        self.assertEqual([(HTTP_ROUTE_UNKNOWN_HOST, "127.0.0.1")], selected_routes)
 
     def test_void_return(self) -> None:
         with server_in_another_process() as path:

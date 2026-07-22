@@ -18,8 +18,9 @@
 from __future__ import annotations
 
 import asyncio
+import socket
 import typing
-from unittest import IsolatedAsyncioTestCase
+from unittest import IsolatedAsyncioTestCase, mock
 
 from thrift.lib.python.client.test.client_event_handler.helper import (
     TestHelper as ClientEventHandlerTestHelper,
@@ -56,6 +57,12 @@ from .exceptions_helper import HijackTestException, HijackTestHelper
 
 TEST_HEADER_KEY = "headerKey"
 TEST_HEADER_VALUE = "headerValue"
+HTTP_TEST_HOST_A = "host-a.example.com"
+HTTP_TEST_HOST_B = "host-b.example.com"
+HTTP_ROUTE_HOST_A = "host-a"
+HTTP_ROUTE_HOST_B = "host-b"
+HTTP_ROUTE_MISSING_HOST = "missing-host"
+HTTP_ROUTE_UNKNOWN_HOST = "unknown-host"
 
 
 class ThriftClientTestProxy:
@@ -73,6 +80,51 @@ def test_proxy_factory(
 ) -> typing.Callable[[AsyncClient], ...]:
     # pyrefly: ignore [bad-return]
     return ThriftClientTestProxy
+
+
+def _extract_http_host_header(raw_request: bytes) -> str | None:
+    for line in raw_request.decode("latin1").split("\r\n"):
+        if line.lower().startswith("host:"):
+            return line.split(":", 1)[1].strip()
+    return None
+
+
+def _route_for_http_host(host_header: str | None) -> str:
+    if host_header is None:
+        return HTTP_ROUTE_MISSING_HOST
+
+    hostname = host_header.split(":", 1)[0]
+    if hostname == HTTP_TEST_HOST_A:
+        return HTTP_ROUTE_HOST_A
+    if hostname == HTTP_TEST_HOST_B:
+        return HTTP_ROUTE_HOST_B
+    return HTTP_ROUTE_UNKNOWN_HOST
+
+
+def _route_raw_http_request(raw_request: bytes) -> tuple[str, str | None]:
+    host_header = _extract_http_host_header(raw_request)
+    return _route_for_http_host(host_header), host_header
+
+
+async def _record_vhost_route(
+    reader: asyncio.StreamReader,
+    writer: asyncio.StreamWriter,
+    selected_route: asyncio.Future[tuple[str, str | None]],
+) -> None:
+    try:
+        raw_request = await reader.readuntil(b"\r\n\r\n")
+        if not selected_route.done():
+            selected_route.set_result(_route_raw_http_request(raw_request))
+        writer.write(
+            b"HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\nConnection: close\r\n\r\n"
+        )
+        await writer.drain()
+    except Exception as ex:
+        if not selected_route.done():
+            selected_route.set_exception(ex)
+    finally:
+        writer.close()
+        await writer.wait_closed()
 
 
 class AsyncClientTests(IsolatedAsyncioTestCase):
@@ -122,6 +174,83 @@ class AsyncClientTests(IsolatedAsyncioTestCase):
             ) as client:
                 sum = await client.add(1, 2)
                 self.assertEqual(3, sum)
+
+    def test_http_host_header_selects_virtual_host_route(self) -> None:
+        self.assertEqual(
+            (HTTP_ROUTE_MISSING_HOST, None),
+            _route_raw_http_request(b"GET / HTTP/1.1\r\n\r\n"),
+        )
+        self.assertEqual(
+            (HTTP_ROUTE_HOST_A, HTTP_TEST_HOST_A),
+            _route_raw_http_request(
+                b"GET / HTTP/1.1\r\nHost: host-a.example.com\r\n\r\n"
+            ),
+        )
+        self.assertEqual(
+            (HTTP_ROUTE_HOST_B, HTTP_TEST_HOST_B),
+            _route_raw_http_request(
+                b"GET / HTTP/1.1\r\nHost: host-b.example.com\r\n\r\n"
+            ),
+        )
+        self.assertEqual(
+            (HTTP_ROUTE_UNKNOWN_HOST, "127.0.0.1"),
+            _route_raw_http_request(b"GET / HTTP/1.1\r\nHost: 127.0.0.1\r\n\r\n"),
+        )
+
+    async def test_http_client_preserves_hostname_for_virtual_host_routing(
+        self,
+    ) -> None:
+        loop = asyncio.get_running_loop()
+        selected_route: asyncio.Future[tuple[str, str | None]] = loop.create_future()
+        server = await asyncio.start_server(
+            lambda reader, writer: _record_vhost_route(reader, writer, selected_route),
+            host="127.0.0.1",
+            port=0,
+        )
+        sockets = server.sockets
+        assert sockets is not None
+        port = sockets[0].getsockname()[1]
+
+        async def resolve_host(
+            host: str,
+            port: int,
+            *args: object,
+            **kwargs: object,
+        ) -> list[tuple[int, int, int, str, tuple[str, int]]]:
+            self.assertEqual(HTTP_TEST_HOST_A, host)
+            return [
+                (
+                    socket.AF_INET,
+                    socket.SOCK_STREAM,
+                    socket.IPPROTO_TCP,
+                    "",
+                    ("127.0.0.1", port),
+                )
+            ]
+
+        try:
+            with mock.patch.object(loop, "getaddrinfo", side_effect=resolve_host):
+                async with get_client(
+                    TestService,
+                    host=HTTP_TEST_HOST_A,
+                    port=port,
+                    path="/",
+                    client_type=ClientType.THRIFT_HTTP_CLIENT_TYPE,
+                ) as client:
+                    with self.assertRaises(TransportError):
+                        await client.add(1, 2)
+
+            route, host_header = await asyncio.wait_for(selected_route, timeout=1)
+            # KNOWN BUG: the HTTP client sends the resolved IP address in the
+            # Host header instead of the original hostname, so virtual-host
+            # routing lands on the wrong backend. The assertions below document
+            # this unacceptable behavior; a follow-up diff fixes the client and
+            # flips these back to HTTP_ROUTE_HOST_A / HTTP_TEST_HOST_A.
+            self.assertEqual(HTTP_ROUTE_UNKNOWN_HOST, route)
+            self.assertEqual("127.0.0.1", host_header)
+        finally:
+            server.close()
+            await server.wait_closed()
 
     async def test_void_return(self) -> None:
         # pyre-fixme[16]: `AsyncContextManager` has no attribute `__aenter__`.

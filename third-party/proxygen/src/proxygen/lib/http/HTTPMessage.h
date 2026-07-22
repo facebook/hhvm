@@ -9,6 +9,7 @@
 #pragma once
 
 #include <folly/Conv.h>
+#include <folly/CppAttributes.h>
 #include <folly/Optional.h>
 #include <folly/SocketAddress.h>
 #include <folly/io/IOBufQueue.h>
@@ -173,7 +174,7 @@ class HTTPMessage {
     return request().clientAddress_;
   }
 
-  const std::string& getClientIP() const {
+  const std::string& getClientIP() const [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     auto& req = request();
     if (!req.clientIPPort_ || req.clientIPPort_->ip.empty()) {
       if (req.clientAddress_.isInitialized()) {
@@ -187,7 +188,7 @@ class HTTPMessage {
     return req.clientIPPort_->ip;
   }
 
-  const std::string& getClientPort() const {
+  const std::string& getClientPort() const [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     auto& req = request();
     if (!req.clientIPPort_ || req.clientIPPort_->port.empty()) {
       if (req.clientAddress_.isInitialized()) {
@@ -221,14 +222,14 @@ class HTTPMessage {
     return dstAddress_;
   }
 
-  const std::string& getDstIP() const {
+  const std::string& getDstIP() const [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     if (dstIP_.empty() && dstAddress_.isInitialized()) {
       dstIP_ = dstAddress_.getAddressStr();
     }
     return dstIP_;
   }
 
-  const std::string& getDstPort() const {
+  const std::string& getDstPort() const [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     if (dstPort_.empty() && dstAddress_.isInitialized()) {
       dstPort_ = folly::to<std::string>(dstAddress_.getPort());
     }
@@ -242,7 +243,7 @@ class HTTPMessage {
   void setLocalIp(T&& ip) {
     localIP_ = std::forward<T>(ip);
   }
-  const std::string& getLocalIp() const {
+  const std::string& getLocalIp() const [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return localIP_;
   }
 
@@ -265,7 +266,7 @@ class HTTPMessage {
   /**
    * @Returns a string representation of the request method (fpreq)
    */
-  const std::string& getMethodString() const;
+  const std::string& getMethodString() const [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /**
    * Access the URL component (fpreq)
@@ -283,7 +284,7 @@ class HTTPMessage {
   ParseURL setURL(const char* url, bool strict = false) {
     return setURL(std::string(url), strict);
   }
-  const std::string& getURL() const {
+  const std::string& getURL() const [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return request().url_;
   }
   void rawSetURL(const std::string& url) {
@@ -296,7 +297,7 @@ class HTTPMessage {
    * getPath will lazily allocate a string object, which is generally
    * more expensive.  Prefer getPathAsStringPiece.
    */
-  const std::string& getPath() const {
+  const std::string& getPath() const [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     auto& req = request();
     if (!req.pathStr_) {
       req.pathStr_ =
@@ -315,7 +316,7 @@ class HTTPMessage {
    * getQueryString will lazily allocate a string object, which is generally
    * more expensive.  Prefer getQueryStringAsStringPiece.
    */
-  const std::string& getQueryString() const {
+  const std::string& getQueryString() const [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     auto& req = request();
     if (!req.queryStr_) {
       req.queryStr_ =
@@ -348,7 +349,8 @@ class HTTPMessage {
   void setStatusMessage(T&& msg) {
     response().statusMsg_ = std::forward<T>(msg);
   }
-  const std::string& getStatusMessage() const {
+  const std::string& getStatusMessage() const
+      [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return response().statusMsg_;
   }
   void rawSetStatusMessage(std::string msg) {
@@ -359,7 +361,8 @@ class HTTPMessage {
    * Get/Set the HTTP version string (like "1.1").
    * XXX: Note we only support X.Y format while setting version.
    */
-  const std::string& getVersionString() const {
+  const std::string& getVersionString() const
+      [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return versionStr_;
   }
   void setVersionString(const std::string& ver) {
@@ -374,10 +377,10 @@ class HTTPMessage {
   /**
    * Access the headers (fpreq, fpres)
    */
-  HTTPHeaders& getHeaders() {
+  HTTPHeaders& getHeaders() [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return headers_;
   }
-  const HTTPHeaders& getHeaders() const {
+  const HTTPHeaders& getHeaders() const [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return headers_;
   }
 
@@ -391,10 +394,10 @@ class HTTPMessage {
   /**
    * Access the trailers
    */
-  HTTPHeaders* getTrailers() {
+  HTTPHeaders* getTrailers() [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return trailers_.get();
   }
-  const HTTPHeaders* getTrailers() const {
+  const HTTPHeaders* getTrailers() const [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return trailers_.get();
   }
 
@@ -513,7 +516,8 @@ class HTTPMessage {
   void setUpgradeProtocol(std::string protocol) {
     upgradeProtocol_ = std::make_unique<std::string>(std::move(protocol));
   }
-  const std::string* getUpgradeProtocol() const {
+  const std::string* getUpgradeProtocol() const
+      [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return upgradeProtocol_.get();
   }
 
@@ -556,7 +560,8 @@ class HTTPMessage {
    * parameter with the specified name.  The returned value is only valid as
    * long as this HTTPMessage object.
    */
-  const std::string* getQueryParamPtr(const std::string& name) const;
+  const std::string* getQueryParamPtr(const std::string& name) const
+      [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /**
    * Get the query parameter with the specified name.
@@ -566,7 +571,8 @@ class HTTPMessage {
    * specified name.  The returned value is only valid as long as this
    * HTTPMessage object.
    */
-  const std::string& getQueryParam(const std::string& name) const;
+  const std::string& getQueryParam(const std::string& name) const
+      [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /**
    * Get the query parameter with the specified name as int.
@@ -598,7 +604,8 @@ class HTTPMessage {
    * value is only valid as long as this
    * HTTPMessage object.
    */
-  const HTTPQueryParamMap& getQueryParams() const;
+  const HTTPQueryParamMap& getQueryParams() const
+      [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
 
   /**
    * Set the query string to the specified value, and recreate the url_.
@@ -661,7 +668,8 @@ class HTTPMessage {
   void stripPerHopHeaders(bool stripPriority = false,
                           const HTTPHeaders* customHeaders = nullptr);
 
-  const HTTPHeaders& getStrippedPerHopHeaders() const {
+  const HTTPHeaders& getStrippedPerHopHeaders() const
+      [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     CHECK(strippedPerHopHeaders_) << "call stripPerHopHeaders first";
     return *strippedPerHopHeaders_;
   }
@@ -800,7 +808,8 @@ class HTTPMessage {
   void setIngressHeaderSize(const HTTPHeaderSize& size) {
     size_ = size;
   }
-  const HTTPHeaderSize& getIngressHeaderSize() const {
+  const HTTPHeaderSize& getIngressHeaderSize() const
+      [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     return size_;
   }
 

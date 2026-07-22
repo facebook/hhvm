@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include <folly/CppAttributes.h>
 #include <folly/FBVector.h>
 #include <folly/Range.h>
 #include <folly/String.h>
@@ -249,9 +250,10 @@ class HTTPHeaders {
    * only value under the given name. If either of these is violated, returns
    * empty_string.
    */
-  [[nodiscard]] const std::string& getSingleOrEmpty(HTTPHeaderCode code) const;
-  [[nodiscard]] const std::string& getSingleOrEmpty(
-      std::string_view name) const;
+  [[nodiscard]] const std::string& getSingleOrEmpty(HTTPHeaderCode code) const
+      [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
+  [[nodiscard]] const std::string& getSingleOrEmpty(std::string_view name) const
+      [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]];
   [[nodiscard]] const std::string rawGet(const std::string& header) const {
     return getSingleOrEmpty(header);
   }

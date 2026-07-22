@@ -10,6 +10,8 @@
 #include <fizz/crypto/Hmac.h>
 #include <fizz/util/Logging.h>
 
+#include <folly/io/Cursor.h>
+
 namespace fizz {
 
 Status Hkdf::extract(
@@ -43,32 +45,50 @@ Status Hkdf::expand(
   if (UNLIKELY(outputBytes > 255 * hlen)) {
     return err.error("Output too long");
   }
+  if (outputBytes == 0) {
+    ret = folly::IOBuf::create(0);
+    return Status::Success;
+  }
   // HDKF expansion step.
   size_t numRounds = (outputBytes + hlen - 1) / hlen;
   auto expanded = folly::IOBuf::create(numRounds * hlen);
 
-  auto in = folly::IOBuf::create(0);
-  for (size_t round = 1; round <= numRounds; ++round) {
-    in->prependChain(info.clone());
-    // We're guaranteed that the round num will fit in
-    // one byte because of the check at the beginning of
-    // the method.
-    auto roundNum = folly::IOBuf::create(1);
-    roundNum->append(1);
-    roundNum->writableData()[0] = round;
-    in->prependChain(std::move(roundNum));
+  // Every round except the first hashes T(round-1) || info || round, whose
+  // size is constant across rounds. Lay out that maximal input once and reuse
+  // it: [ T(round-1) : hlen ][ info : infoLength ][ round : 1 ]. The round num
+  // is guaranteed to fit in one byte because of the check above.
+  size_t infoLength = info.computeChainDataLength();
+  std::vector<uint8_t> in(hlen + infoLength + 1);
+  folly::io::Cursor(&info).pull(in.data() + hlen, infoLength);
+  uint8_t* roundNum = in.data() + hlen + infoLength;
+
+  // First round only hashes info || 1 (T(0) is the empty string), so it starts
+  // partway into the buffer, skipping the unused T(round-1) slot.
+  *roundNum = 1;
+  auto hmacIn =
+      folly::IOBuf::wrapBufferAsValue(in.data() + hlen, infoLength + 1);
+  FIZZ_RETURN_ON_ERROR(hmac(
+      err,
+      makeHasher_,
+      folly::range(extractedKey),
+      hmacIn,
+      {expanded->writableData(), hlen}));
+  expanded->append(hlen);
+
+  // Remaining rounds hash the full T(round-1) || info || round buffer.
+  hmacIn = folly::IOBuf::wrapBufferAsValue(in.data(), in.size());
+  for (size_t round = 2; round <= numRounds; ++round) {
+    memcpy(in.data(), expanded->data() + (round - 2) * hlen, hlen);
+    *roundNum = round;
 
     size_t outputStartIdx = (round - 1) * hlen;
     FIZZ_RETURN_ON_ERROR(hmac(
         err,
         makeHasher_,
         folly::range(extractedKey),
-        *in,
+        hmacIn,
         {expanded->writableData() + outputStartIdx, hlen}));
     expanded->append(hlen);
-
-    in = expanded->clone();
-    in->trimStart(outputStartIdx);
   }
   expanded->trimEnd(numRounds * hlen - outputBytes);
   ret = std::move(expanded);

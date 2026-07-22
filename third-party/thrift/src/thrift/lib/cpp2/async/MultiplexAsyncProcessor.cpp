@@ -31,6 +31,10 @@ namespace apache::thrift {
 
 namespace {
 
+// Well-known name for the Thrift Catalog Service, i.e. the reflection
+// interface.
+const auto kCatalogServiceName = "thrift_catalog_service.ThriftCatalogService";
+
 std::optional<std::string_view> getInteractionNameFromMethodName(
     std::string_view methodName) {
   // Interaction methods are formatted like "{interaction_name}.{method_name}"
@@ -274,18 +278,18 @@ class MultiplexAsyncProcessor final : public AsyncProcessor {
     // Our best guess would be the first service, which is likely to be most
     // relevant to the user.
     const auto& services = *actualResponse.services();
-    const auto* defaultServiceContextRef = &services.front();
-    for (const auto& service : services) {
-      if (*service.service_name() !=
-          "thrift_catalog_service.ThriftCatalogService") {
-        defaultServiceContextRef = &service;
-        break;
-      }
-    }
+    const auto primaryServiceIt =
+        std::find_if(services.begin(), services.end(), [](const auto& service) {
+          return *service.service_name() != kCatalogServiceName;
+        });
+    const auto& defaultServiceContextRef = primaryServiceIt == services.end()
+        ? services.front()
+        : *primaryServiceIt;
+
     actualResponse.context()->service_info() =
         actualResponse.metadata()->services()->at(
-            *defaultServiceContextRef->service_name());
-    actualResponse.context()->module() = *defaultServiceContextRef->module();
+            *defaultServiceContextRef.service_name());
+    actualResponse.context()->module() = *defaultServiceContextRef.module();
   }
 
   void terminateInteraction(
@@ -296,8 +300,8 @@ class MultiplexAsyncProcessor final : public AsyncProcessor {
     if (auto foundProcessor = folly::get_ptr(inflightInteractions_, id)) {
       processor = *foundProcessor;
     } else {
-      // The first processor serves the niche of being the "default" interaction
-      // creator. We don't put its IDs in the map.
+      // The first processor serves the niche of being the "default"
+      // interaction creator. We don't put its IDs in the map.
       processor = defaultInteractionProcessor_;
     }
     if (processor != nullptr) {

@@ -30,7 +30,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Build proxygen and all dependencies from the checked-out source.
 COPY . /proxygen
 WORKDIR /proxygen
-RUN ./build/fbcode_builder/getdeps.py install-system-deps --recursive proxygen
+# getdeps' install-system-deps runs `apt-get install` without an `apt-get
+# update`, so refresh the package index (cleared in the layer above) first.
+RUN apt-get update \
+    && ./build/fbcode_builder/getdeps.py install-system-deps --recursive proxygen \
+    && rm -rf /var/lib/apt/lists/*
 RUN ./build/fbcode_builder/getdeps.py build --allow-system-packages proxygen
 
 # Merge proxygen + every dependency install tree into one CMake prefix, so

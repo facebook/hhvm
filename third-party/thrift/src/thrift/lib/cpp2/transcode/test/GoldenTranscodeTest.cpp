@@ -504,6 +504,20 @@ TEST(GoldenTranscodeTest, SpecialFloatShapesRoundTripSupportedSources) {
       test_data::expectSpecialFloatShapes);
 }
 
+TEST(GoldenTranscodeTest, JsonSpecialFloatStringsRoundTrip) {
+  auto value = test_data::generate<fixture::SpecialFloatShapes>();
+  auto compactWire =
+      makeThriftCompactCodec(structNode<fixture::SpecialFloatShapes>());
+  auto jsonWire = makeJsonCodec(structNode<fixture::SpecialFloatShapes>());
+  auto transcode = makeWireTranscoder("compact->json", compactWire, jsonWire);
+
+  auto output = transcode(CompactSerializer::serialize<std::string>(value));
+  ASSERT_TRUE(output.has_value());
+  EXPECT_EQ(
+      *output,
+      R"json({"f_nan":"NaN","f_pos_inf":"Infinity","f_neg_inf":"-Infinity","d_nan":"NaN","d_pos_inf":"Infinity","d_neg_inf":"-Infinity"})json");
+}
+
 TEST(GoldenTranscodeTest, NegativeFieldIdShapesRoundTripSupportedProtocols) {
   runProtocolCases(
       cases<fixture::NegativeFieldIdShapes>().generated("negative-field-ids"));
@@ -607,11 +621,6 @@ TEST(
   GTEST_SKIP()
       << "TODO: non-Thrift endpoints need rejection coverage for required, "
          "custom-default, and terse fields.";
-}
-
-TEST(GoldenTranscodeTest, DISABLED_JsonSpecialFloatStringsRoundTrip) {
-  GTEST_SKIP()
-      << "TODO: JSON float writing needs NaN and infinity string coverage.";
 }
 
 TEST(GoldenTranscodeTest, DISABLED_ProtobufGoldenRoundTripSupportedProtocols) {

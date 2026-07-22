@@ -79,6 +79,9 @@ type feature_name =
   | ClassAliasesEverywhere
   | TestFeature
   | WithRefinementAlias
+  | ShapeSplatConcrete
+  | ShapeSplatTypeParameters
+  | ShapeSplatExpression
 [@@deriving eq, ord, show]
 
 let feature_name_map =
@@ -134,6 +137,9 @@ let feature_name_map =
       ("class_aliases_everywhere", ClassAliasesEverywhere);
       ("test_feature", TestFeature);
       ("with_refinement_alias", WithRefinementAlias);
+      ("shape_splat_concrete", ShapeSplatConcrete);
+      ("shape_splat_type_parameters", ShapeSplatTypeParameters);
+      ("shape_splat_expression", ShapeSplatExpression);
     ]
 
 let feature_name_from_string s = SMap.find_opt s feature_name_map

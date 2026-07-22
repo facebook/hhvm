@@ -79,6 +79,9 @@ type feature_name =
   | ClassAliasesEverywhere
   | TestFeature
   | WithRefinementAlias
+  | ShapeSplatConcrete
+  | ShapeSplatTypeParameters
+  | ShapeSplatExpression
 [@@deriving eq, ord, show]
 
 val feature_status_from_string : string -> feature_status option

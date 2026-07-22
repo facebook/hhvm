@@ -63,7 +63,7 @@ abstract class ThriftProcessorBase implements IThriftProcessor {
     TProtocol $input,
     string $request_name,
     mixed $handler_ctx,
-  ): dynamic {
+  ): TResult {
     $this->eventHandler_->preRead($handler_ctx, $request_name, dict[]);
     $args = $input->readRPCStruct($request_args_class);
     $input->readMessageEnd();

@@ -389,16 +389,16 @@ TEST_F(EncryptedRecordTest, TestWriteAppData) {
 TEST_F(EncryptedRecordTest, TestWriteAppDataInPlace) {
   TLSMessage msg{ContentType::application_data, getBuf("1234567890", 5, 17)};
   EXPECT_CALL(*writeAead_, _encrypt(_, _, 0, _))
-      .WillOnce(Invoke([](std::unique_ptr<IOBuf>& buf,
-                          const IOBuf*,
-                          uint64_t,
-                          Aead::AeadOptions) {
+      .WillOnce([](std::unique_ptr<IOBuf>& buf,
+                   const IOBuf*,
+                   uint64_t,
+                   Aead::AeadOptions) {
         // footer should have been written w/o chaining
         EXPECT_FALSE(buf->isChained());
         expectSame(buf, "123456789017");
         // we need to return room for the header
         return getBuf("abcd1234abcd", 5, 0);
-      }));
+      });
   Error err;
   TLSContent buf;
   EXPECT_EQ(

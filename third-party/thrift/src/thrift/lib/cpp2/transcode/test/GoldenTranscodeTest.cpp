@@ -608,19 +608,9 @@ TEST(GoldenTranscodeTest, JsonRejectsDuplicateKnownFields) {
       R"({"inner":{"n":1,"n":2,"label":"x"},"matrix":[],"inner_groups":[]})");
 }
 
-TEST(GoldenTranscodeTest, DISABLED_JsonRejectsDuplicateSetEntries) {
-  GTEST_SKIP() << "TODO: JSON set reads need duplicate element rejection.";
-}
-
-TEST(GoldenTranscodeTest, DISABLED_JsonRejectsUnknownFieldsByDefault) {
-  GTEST_SKIP() << "TODO: strict JSON mode should reject unknown field names.";
-}
-
-TEST(
-    GoldenTranscodeTest, DISABLED_NonThriftEndpointsRejectRequiredAndDefaults) {
+TEST(GoldenTranscodeTest, DISABLED_NonThriftEndpointsRejectRequiredFields) {
   GTEST_SKIP()
-      << "TODO: non-Thrift endpoints need rejection coverage for required, "
-         "custom-default, and terse fields.";
+      << "TODO: TypeSystem inputs need raw required-field qualifier metadata.";
 }
 
 TEST(GoldenTranscodeTest, DISABLED_ProtobufGoldenRoundTripSupportedProtocols) {

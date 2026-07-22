@@ -89,19 +89,8 @@ std::optional<std::string> missingProtocolReason(const TranscodePlan& plan) {
 
 std::optional<std::string> unsupportedProtocolReason(
     const TranscodePlan& plan) {
-  const bool json = plan.sourceProtocol == WireProtocol::Json ||
-      plan.targetProtocol == WireProtocol::Json;
   const bool protobuf = plan.sourceProtocol == WireProtocol::ProtobufBinary ||
       plan.targetProtocol == WireProtocol::ProtobufBinary;
-  if (json && protobuf) {
-    return "JSON/Protobuf protocol support is still in development; pass "
-           "UnsupportedPlanPolicy::"
-           "AllowExperimentalProtocols to opt in";
-  }
-  if (json) {
-    return "JSON protocol support is still in development; pass "
-           "UnsupportedPlanPolicy::AllowExperimentalProtocols to opt in";
-  }
   if (protobuf) {
     return "Protobuf protocol support is still in development; "
            "pass UnsupportedPlanPolicy::AllowExperimentalProtocols to opt in";

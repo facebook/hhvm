@@ -155,47 +155,29 @@ TEST_F(TranscoderTest, JitEngineUnlinkedReturnsCompileError) {
       << transcoder.error().message;
 }
 
-TEST_F(TranscoderTest, JsonTargetRequiresIncompleteProtocolOptIn) {
+TEST_F(TranscoderTest, JsonTargetDoesNotRequireExperimentalProtocolOptIn) {
   auto compact = makeThriftCompactCodec(sampleNode());
   auto json = makeJsonCodec(sampleNode());
 
-  auto defaultTranscoder =
-      makeTranscoder(fuse(compact, json), Engine::Interpreter);
-  ASSERT_TRUE(defaultTranscoder.hasError());
-  EXPECT_NE(
-      defaultTranscoder.error().message.find("AllowExperimentalProtocols"),
-      std::string::npos)
-      << defaultTranscoder.error().message;
-
-  auto transcoder = makeTranscoder(
-      fuse(compact, json), Engine::Interpreter, allowExperimentalProtocols());
+  auto transcoder = makeTranscoder(fuse(compact, json), Engine::Interpreter);
   ASSERT_FALSE(transcoder.hasError()) << transcoder.error().message;
   EXPECT_EQ((*transcoder)->engine(), Engine::Interpreter);
 }
 
-TEST_F(TranscoderTest, JsonObjectSourceRequiresIncompleteProtocolOptIn) {
+TEST_F(
+    TranscoderTest, JsonObjectSourceDoesNotRequireExperimentalProtocolOptIn) {
   auto json = makeJsonCodec(sampleNode());
   auto compact = makeThriftCompactCodec(sampleNode());
 
-  auto defaultTranscoder =
-      makeTranscoder(fuse(json, compact), Engine::Interpreter);
-  ASSERT_TRUE(defaultTranscoder.hasError());
-  EXPECT_NE(
-      defaultTranscoder.error().message.find("AllowExperimentalProtocols"),
-      std::string::npos)
-      << defaultTranscoder.error().message;
-
-  auto transcoder = makeTranscoder(
-      fuse(json, compact), Engine::Interpreter, allowExperimentalProtocols());
+  auto transcoder = makeTranscoder(fuse(json, compact), Engine::Interpreter);
   ASSERT_FALSE(transcoder.hasError()) << transcoder.error().message;
   EXPECT_EQ((*transcoder)->engine(), Engine::Interpreter);
 }
 
-TEST_F(TranscoderTest, JsonToJsonRejectedAfterOptIn) {
+TEST_F(TranscoderTest, JsonToJsonRejected) {
   auto json = makeJsonCodec(sampleNode());
 
-  auto transcoder = makeTranscoder(
-      fuse(json, json), Engine::Interpreter, allowExperimentalProtocols());
+  auto transcoder = makeTranscoder(fuse(json, json), Engine::Interpreter);
   ASSERT_TRUE(transcoder.hasError());
   EXPECT_NE(transcoder.error().message.find("JSON-to-JSON"), std::string::npos)
       << transcoder.error().message;
@@ -248,8 +230,7 @@ TEST_F(TranscoderTest, JsonProtobufRequiresIncompleteProtocolOptIn) {
       makeTranscoder(fuse(json, protobuf), Engine::Interpreter);
   ASSERT_TRUE(defaultTranscoder.hasError());
   EXPECT_NE(
-      defaultTranscoder.error().message.find("JSON/Protobuf"),
-      std::string::npos)
+      defaultTranscoder.error().message.find("Protobuf"), std::string::npos)
       << defaultTranscoder.error().message;
 }
 

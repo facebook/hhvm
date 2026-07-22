@@ -51,7 +51,7 @@ class RemoveFunctionParamQualifiersTest(unittest.TestCase):
                     1: required string first,
                     2: optional /* keep this comment */ i32 second,
                     3: string third,
-                  ) throws (1: optional Error error);
+                  ) throws (1: Error error);
                 }
 
                 interaction Interaction {
@@ -82,7 +82,7 @@ class RemoveFunctionParamQualifiersTest(unittest.TestCase):
                     1: string first,
                     2: /* keep this comment */ i32 second,
                     3: string third,
-                  ) throws (1: optional Error error);
+                  ) throws (1: Error error);
                 }
 
                 interaction Interaction {

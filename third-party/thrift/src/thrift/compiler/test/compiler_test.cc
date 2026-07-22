@@ -214,6 +214,18 @@ TEST(CompilerTest, params) {
   )");
 }
 
+TEST(CompilerTest, throws_qualifiers) {
+  check_compile(R"(
+    package "facebook.com/thrift/test"
+    exception Ex {}
+
+    service MyService {
+      void opt() throws (1: optional Ex ex); # expected-error: 'optional' is not permitted in a throws clause
+      void req() throws (1: required Ex ex); # expected-error: 'required' is not permitted in a throws clause
+    }
+  )");
+}
+
 TEST(CompilerTest, oneway_exception) {
   check_compile(R"(
     package "facebook.com/thrift/test"

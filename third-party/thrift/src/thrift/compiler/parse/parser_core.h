@@ -491,7 +491,7 @@ class parser_core {
 
     auto ret = parse_return_clause();
     auto name = parse_identifier();
-    auto params = parse_param_list();
+    auto params = parse_param_list(field_kind::param);
 
     auto throws = try_parse_throws();
     try_parse_deprecated_annotations(attrs);
@@ -632,7 +632,7 @@ class parser_core {
     if (!try_consume_token(tok::kw_throws)) {
       return {};
     }
-    return actions_.on_throws(parse_param_list());
+    return actions_.on_throws(parse_param_list(field_kind::throws_field));
   }
 
   // typedef:
@@ -711,6 +711,8 @@ class parser_core {
         range, std::move(attrs), safety, kind, blame, name, std::move(fields));
   }
 
+  enum class field_kind { field, param, throws_field };
+
   field_list_type parse_field_list() {
     expect_and_consume('{');
     auto fields = field_list_type();
@@ -721,17 +723,15 @@ class parser_core {
     return fields;
   }
 
-  field_list_type parse_param_list() {
+  field_list_type parse_param_list(field_kind kind) {
     expect_and_consume('(');
     auto params = field_list_type();
     while (token_.kind != ')') {
-      params.emplace_back(parse_field(field_kind::param));
+      params.emplace_back(parse_field(kind));
     }
     expect_and_consume(')');
     return params;
   }
-
-  enum class field_kind { field, param };
 
   // Parses a field or a parameter.
   //
@@ -771,6 +771,13 @@ class parser_core {
       diags_.warning(
           qual_tok.range.begin,
           "'{}' is not permitted on a parameter",
+          to_string(qual_tok.kind));
+      qual = t_field_qualifier::none;
+    } else if (
+        qual != t_field_qualifier::none && kind == field_kind::throws_field) {
+      diags_.error(
+          qual_tok.range.begin,
+          "'{}' is not permitted in a throws clause",
           to_string(qual_tok.kind));
       qual = t_field_qualifier::none;
     }

@@ -339,7 +339,6 @@ struct FieldEntry {
   bool isRepeated = false; // protobuf: same fieldId appears multiple times
   bool optional = false;
   bool required = false; // schema presence == UNQUALIFIED (for dynamic->wire)
-  bool hasCustomDefault = false;
   std::unique_ptr<Command> command;
 };
 

@@ -416,6 +416,11 @@ uint8_t protoTypeInfo(const type_system::TypeRef& typeRef) {
   throwUnsupportedTypeRef("Protobuf type info", typeRef);
 }
 
+bool isThriftWriteProtocol(WireProtocol protocol) {
+  return protocol == WireProtocol::ThriftCompact ||
+      protocol == WireProtocol::ThriftBinary;
+}
+
 bool isProtoPackable(const type_system::TypeRef& typeRef) {
   using Kind = type_system::TypeRef::Kind;
   switch (typeRef.kind()) {
@@ -451,6 +456,7 @@ using ScalarFn = ScalarOp (*)(const type_system::TypeRef&, BoolContext);
 using TypeInfoFn = uint8_t (*)(const type_system::TypeRef&);
 
 struct ProtocolOps {
+  WireProtocol protocol;
   ScalarFn scalarFn;
   TypeInfoFn typeInfoFn;
   FieldIdent fieldIdent;
@@ -501,7 +507,18 @@ StructOp makeStructOp(const Structured& node, const ProtocolOps& ops) {
         field.presence() == type_system::PresenceQualifier::OPTIONAL_;
     entry.required = !isUnion &&
         field.presence() == type_system::PresenceQualifier::UNQUALIFIED;
-    entry.hasCustomDefault = field.customDefault() != nullptr;
+    if (!isThriftWriteProtocol(ops.protocol)) {
+      if (field.customDefault() != nullptr) {
+        throw std::invalid_argument(
+            "custom defaults are not supported for non-Thrift protocol "
+            "transcoding");
+      }
+      if (field.presence() == type_system::PresenceQualifier::TERSE) {
+        throw std::invalid_argument(
+            "terse fields are not supported for non-Thrift protocol "
+            "transcoding");
+      }
+    }
 
     // Protobuf: maps and list/set of non-packable elements are encoded as
     // repeated field occurrences under the same field ID.
@@ -658,6 +675,7 @@ Command commandForType(
 // ─────────────────────────────────────────────────────────────────────────
 
 const ProtocolOps kCompactOps{
+    .protocol = WireProtocol::ThriftCompact,
     .scalarFn = compactScalarOp,
     .typeInfoFn = compactTypeInfo,
     .fieldIdent = FieldIdent::ById,
@@ -671,6 +689,7 @@ const ProtocolOps kCompactOps{
 };
 
 const ProtocolOps kProtobufOps{
+    .protocol = WireProtocol::ProtobufBinary,
     .scalarFn = protobufScalarOp,
     .typeInfoFn = protoTypeInfo,
     .fieldIdent = FieldIdent::ById,
@@ -684,6 +703,7 @@ const ProtocolOps kProtobufOps{
 };
 
 const ProtocolOps kBinaryOps{
+    .protocol = WireProtocol::ThriftBinary,
     .scalarFn = binaryScalarOp,
     .typeInfoFn = binaryTypeInfo,
     .fieldIdent = FieldIdent::ById,
@@ -697,6 +717,7 @@ const ProtocolOps kBinaryOps{
 };
 
 const ProtocolOps kJsonOps{
+    .protocol = WireProtocol::Json,
     .scalarFn = jsonScalarOp,
     .typeInfoFn = compactTypeInfo, // unused for JSON — no type bytes
     .fieldIdent = FieldIdent::ByName,

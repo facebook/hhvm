@@ -258,13 +258,12 @@ TEST(PlanFuseTest, FuseStructOps_MergesFramingAndPerFieldOps) {
   EXPECT_EQ(fused.fields[1].writeTypeInfo, 10);
 }
 
-TEST(PlanFuseTest, FuseStructOps_TakesFieldWriteMetadataFromTarget) {
+TEST(PlanFuseTest, FuseStructOps_TakesFieldWritePresenceFromTarget) {
   StructOp source;
   source.fieldIdent = FieldIdent::ById;
   auto sourceField = scalarField(
       1, "a", ValueKind::I32, ReadFn::ZigzagVarint, WriteFn::ZigzagVarint, 5);
   sourceField.optional = true;
-  sourceField.hasCustomDefault = true;
   source.fields.push_back(std::move(sourceField));
 
   StructOp target;
@@ -281,7 +280,6 @@ TEST(PlanFuseTest, FuseStructOps_TakesFieldWriteMetadataFromTarget) {
   ASSERT_EQ(fused.fields.size(), 1u);
   EXPECT_FALSE(fused.fields[0].optional);
   EXPECT_TRUE(fused.fields[0].required);
-  EXPECT_FALSE(fused.fields[0].hasCustomDefault);
 }
 
 TEST(PlanFuseTest, FuseStructOps_PreservesSourceRepeatedInGeneralPath) {

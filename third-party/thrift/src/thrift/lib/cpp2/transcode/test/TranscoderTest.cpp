@@ -253,48 +253,20 @@ TEST_F(TranscoderTest, JsonProtobufRequiresIncompleteProtocolOptIn) {
       << defaultTranscoder.error().message;
 }
 
-TEST_F(TranscoderTest, ExplicitDefaultsRejectedForNonThriftEndpoints) {
-  type_system::TypeSystemBuilder builder;
-  builder.addType(
-      "test.WithDefault",
-      def::Struct({
-          def::Field(
-              def::Identity(1, "id"),
-              def::AlwaysPresent,
-              TypeIds::I32,
-              type_system::SerializableRecord::Int32(42)),
-      }));
-  auto ts = std::move(builder).build();
-  if (ts == nullptr) {
-    ADD_FAILURE() << "failed to build type system";
-    return;
-  }
-  const auto& node =
-      ts->getUserDefinedTypeOrThrow("test.WithDefault").asStruct();
-
-  auto json = makeJsonCodec(node);
-  auto compact = makeThriftCompactCodec(node);
+TEST_F(TranscoderTest, MissingProtocolMetadataRejected) {
+  auto json = makeJsonCodec(sampleNode());
+  auto compact = makeThriftCompactCodec(sampleNode());
 
   auto fused = fuseStructOps(
       std::get<StructOp>(json.root), std::get<StructOp>(compact.root));
   ASSERT_FALSE(fused.hasError()) << fused.error().message;
   auto missingMetadata = makeTranscoder(
-      TranscodePlan{"plan", std::move(*fused)},
-      Engine::Interpreter,
-      allowExperimentalProtocols());
+      TranscodePlan{"plan", std::move(*fused)}, Engine::Interpreter);
   ASSERT_TRUE(missingMetadata.hasError());
   EXPECT_NE(
       missingMetadata.error().message.find("protocol metadata"),
       std::string::npos)
       << missingMetadata.error().message;
-
-  auto transcoder = makeTranscoder(
-      fuse(json, compact), Engine::Interpreter, allowExperimentalProtocols());
-  ASSERT_TRUE(transcoder.hasError());
-  EXPECT_NE(
-      transcoder.error().message.find("explicit IDL defaults"),
-      std::string::npos)
-      << transcoder.error().message;
 }
 
 } // namespace

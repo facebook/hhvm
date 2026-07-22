@@ -23,6 +23,8 @@
 #include <thrift/lib/cpp2/dynamic/TypeSystemBuilder.h>
 
 #include <stdexcept>
+#include <string>
+#include <string_view>
 
 namespace apache::thrift::transcode {
 namespace {
@@ -30,6 +32,17 @@ namespace {
 using def = type_system::TypeSystemBuilder::DefinitionHelper;
 using type_system::TypeId;
 using type_system::TypeIds;
+
+template <typename Fn>
+void expectInvalidArgumentMessage(Fn fn, std::string_view needle) {
+  try {
+    fn();
+    FAIL() << "expected std::invalid_argument";
+  } catch (const std::invalid_argument& ex) {
+    EXPECT_NE(std::string(ex.what()).find(needle), std::string::npos)
+        << ex.what();
+  }
+}
 
 // A two-field struct: 1: i32 id (always present), 2: string name (optional).
 struct CodecFactoryTest : ::testing::Test {
@@ -176,6 +189,55 @@ TEST(CodecFactoryStandaloneTest, UnsupportedAnyTypeThrowsForEachProtocol) {
   EXPECT_THROW({ (void)makeThriftBinaryCodec(node); }, std::invalid_argument);
   EXPECT_THROW({ (void)makeProtobufBinaryCodec(node); }, std::invalid_argument);
   EXPECT_THROW({ (void)makeJsonCodec(node); }, std::invalid_argument);
+}
+
+TEST(
+    CodecFactoryStandaloneTest,
+    NonThriftCodecsRejectCustomDefaultsDuringConstruction) {
+  type_system::TypeSystemBuilder builder;
+  builder.addType(
+      "test.WithDefault",
+      def::Struct({
+          def::Field(
+              def::Identity(1, "id"),
+              def::AlwaysPresent,
+              TypeIds::I32,
+              type_system::SerializableRecord::Int32(42)),
+      }));
+  auto ts = std::move(builder).build();
+  ASSERT_NE(ts, nullptr);
+  const auto& node =
+      ts->getUserDefinedTypeOrThrow("test.WithDefault").asStruct();
+
+  EXPECT_NO_THROW({ (void)makeThriftCompactCodec(node); });
+  EXPECT_NO_THROW({ (void)makeThriftBinaryCodec(node); });
+  expectInvalidArgumentMessage(
+      [&] { (void)makeProtobufBinaryCodec(node); }, "custom defaults");
+  expectInvalidArgumentMessage(
+      [&] { (void)makeJsonCodec(node); }, "custom defaults");
+}
+
+TEST(
+    CodecFactoryStandaloneTest,
+    NonThriftCodecsRejectTerseFieldsDuringConstruction) {
+  type_system::TypeSystemBuilder builder;
+  builder.addType(
+      "test.WithTerse",
+      def::Struct({
+          def::Field(
+              def::Identity(1, "id"),
+              type_system::PresenceQualifier::TERSE,
+              TypeIds::I32),
+      }));
+  auto ts = std::move(builder).build();
+  ASSERT_NE(ts, nullptr);
+  const auto& node = ts->getUserDefinedTypeOrThrow("test.WithTerse").asStruct();
+
+  EXPECT_NO_THROW({ (void)makeThriftCompactCodec(node); });
+  EXPECT_NO_THROW({ (void)makeThriftBinaryCodec(node); });
+  expectInvalidArgumentMessage(
+      [&] { (void)makeProtobufBinaryCodec(node); }, "terse");
+  expectInvalidArgumentMessage([&] { (void)makeJsonCodec(node); }, "terse");
 }
 
 TEST(CodecFactoryStandaloneTest, ProtobufMapFieldIsRepeatedEntry) {

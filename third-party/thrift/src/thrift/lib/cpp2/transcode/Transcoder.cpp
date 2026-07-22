@@ -79,45 +79,10 @@ bool hasJsonMapSourceAndTarget(const Command& cmd) {
   return false;
 }
 
-bool hasCustomDefault(const Command& cmd) {
-  if (const auto* mp = std::get_if<MapOp>(&cmd)) {
-    return (mp->key != nullptr && hasCustomDefault(*mp->key)) ||
-        (mp->value != nullptr && hasCustomDefault(*mp->value));
-  }
-  if (const auto* st = std::get_if<StructOp>(&cmd)) {
-    for (const auto& field : st->fields) {
-      if (field.hasCustomDefault ||
-          (field.command != nullptr && hasCustomDefault(*field.command))) {
-        return true;
-      }
-    }
-    return false;
-  }
-  if (const auto* sq = std::get_if<SeqOp>(&cmd)) {
-    return sq->element != nullptr && hasCustomDefault(*sq->element);
-  }
-  return false;
-}
-
-bool isNonThriftWireProtocol(WireProtocol protocol) {
-  return protocol == WireProtocol::Json ||
-      protocol == WireProtocol::ProtobufBinary;
-}
-
 std::optional<std::string> missingProtocolReason(const TranscodePlan& plan) {
   if (plan.sourceProtocol == WireProtocol::Unknown ||
       plan.targetProtocol == WireProtocol::Unknown) {
     return "transcode plan protocol metadata is missing";
-  }
-  return std::nullopt;
-}
-
-std::optional<std::string> unsupportedSchemaReason(const TranscodePlan& plan) {
-  if ((isNonThriftWireProtocol(plan.sourceProtocol) ||
-       isNonThriftWireProtocol(plan.targetProtocol)) &&
-      hasCustomDefault(plan.root)) {
-    return "explicit IDL defaults are not supported for non-Thrift protocol "
-           "transcoding";
   }
   return std::nullopt;
 }
@@ -171,9 +136,6 @@ folly::Expected<std::unique_ptr<ITranscoder>, CompileError> makeTranscoder(
     return folly::makeUnexpected(CompileError{"unknown engine"});
   }
   if (auto reason = missingProtocolReason(plan)) {
-    return folly::makeUnexpected(CompileError{std::move(*reason)});
-  }
-  if (auto reason = unsupportedSchemaReason(plan)) {
     return folly::makeUnexpected(CompileError{std::move(*reason)});
   }
   if (options.unsupportedPlanPolicy == UnsupportedPlanPolicy::Reject) {

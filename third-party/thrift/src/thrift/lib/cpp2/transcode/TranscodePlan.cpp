@@ -178,7 +178,6 @@ folly::Expected<Command, CompileError> fuseStructOps(
       entry.isRepeated = true;
       entry.optional = tgtField.optional;
       entry.required = tgtField.required;
-      entry.hasCustomDefault = tgtField.hasCustomDefault;
       // Store fused element command + target SeqOp's write framing info
       // The codegen will use the write framing to produce the container header.
       SeqOp fusedSeq;
@@ -213,7 +212,6 @@ folly::Expected<Command, CompileError> fuseStructOps(
     entry.isRepeated = srcField.isRepeated;
     entry.optional = tgtField.optional;
     entry.required = tgtField.required;
-    entry.hasCustomDefault = tgtField.hasCustomDefault;
     entry.command = std::make_unique<Command>(std::move(*fusedCmd));
     fused.fields.push_back(std::move(entry));
   }

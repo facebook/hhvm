@@ -70,8 +70,8 @@ void checkNotSafePatch(const Object& patch) {
 PatchOp toOp(FieldId id) {
   auto op = static_cast<PatchOp>(id);
   if (util::enumName<PatchOp>(op) == nullptr) {
-    folly::throw_exception<std::runtime_error>(
-        fmt::format("Unknown operation id found in patch object: {}", id));
+    folly::throw_exception<std::runtime_error>(fmt::format(
+        "Unknown operation id found in patch object: {}", fmt::underlying(id)));
   }
   return op;
 }

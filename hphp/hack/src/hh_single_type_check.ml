@@ -2186,9 +2186,14 @@ let handle_mode
     (* For each file in our batch, run typechecking serially.
        Reset the heaps every time in between. *)
     iter_over_files (fun filename ->
-        let oc =
-          Out_channel.create (Relative_path.to_absolute filename ^ out_extension)
-        in
+        let out_path = Relative_path.to_absolute filename ^ out_extension in
+        (* Write to a process-unique temp file and atomically rename it into
+           place. Several hh_single_type_check processes can run concurrently
+           against the same test directory - this is what happens under stress
+           runs - and a non-atomic writer would let another process observe a
+           half-written (i.e. empty) output file. *)
+        let tmp_path = Printf.sprintf "%s.%d.tmp" out_path (Unix.getpid ()) in
+        let oc = Out_channel.create tmp_path in
         (* This means builtins had errors, so lets just print those if we see them *)
         if not (Diagnostics.has_no_errors_or_warnings parse_errors) then
           (* This closes the out channel *)
@@ -2213,7 +2218,8 @@ let handle_mode
                   ~memtrace
               in
               write_error_list error_format errors oc max_errors)
-        ))
+        );
+        Sys.rename tmp_path out_path)
   | Errors ->
     (* Don't typecheck builtins *)
     let errors =

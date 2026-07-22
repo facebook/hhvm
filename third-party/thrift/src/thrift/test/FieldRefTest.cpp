@@ -786,7 +786,7 @@ TYPED_TEST(optional_field_ref_typed_test, const_accessors) {
   static_assert(is_const_ref<decltype(name.value())>());
   static_assert(is_const_ref<decltype(*name.operator->())>());
   s.opt_uptr() = std::make_unique<int>(42);
-  std::move(s).opt_uptr()->get();
+  EXPECT_EQ(*std::move(s).opt_uptr()->get(), 42);
 }
 
 TYPED_TEST(optional_field_ref_typed_test, mutable_accessors) {

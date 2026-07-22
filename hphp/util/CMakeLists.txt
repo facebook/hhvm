@@ -81,3 +81,7 @@ endif()
 
 # Allow accessing unstable zstd APIs.
 target_compile_definitions(hphp_util PUBLIC ZSTD_STATIC_LINKING_ONLY)
+
+if (TEST_BIN)
+  add_subdirectory(test)
+endif()

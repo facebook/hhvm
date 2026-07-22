@@ -3468,6 +3468,9 @@ cdef class FunctionEntry:
 def get_standard_immutable_default_value_for_type(TypeInfoBase typeinfo):
     return typeinfo.to_python_value(getStandardImmutableDefaultValuePtrForType(typeinfo.get_cTypeInfo()[0]))
 
+def get_standard_mutable_default_value_for_type(TypeInfoBase typeinfo):
+    return typeinfo.to_python_value(getStandardMutableDefaultValuePtrForType(typeinfo.get_cTypeInfo()[0]))
+
 # for fbthrift test introspection only, DO NOT USE elsewhere
 def _fbthrift__runtime_is_cinder():
     return pbool(_fbthrift_is_cinder_runtime)

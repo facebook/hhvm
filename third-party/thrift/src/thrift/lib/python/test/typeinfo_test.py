@@ -18,6 +18,10 @@ import typing
 import unittest
 
 from parameterized import parameterized
+from test_thrift.thrift_mutable_types import (
+    easy as MutableEasy,
+    Integers as MutableIntegers,
+)
 from thrift.python.mutable_typeinfos import (
     MutableListTypeInfo,
     MutableMapTypeInfo,
@@ -29,6 +33,7 @@ from thrift.python.types import (
     AdaptedTypeInfo,
     EnumTypeInfo,
     get_standard_immutable_default_value_for_type,
+    get_standard_mutable_default_value_for_type,
     IntegerTypeInfo,
     IOBufTypeInfo,
     ListTypeInfo,
@@ -170,6 +175,71 @@ class TypeInfoTests(unittest.TestCase):
         self.assertEqual(
             get_standard_immutable_default_value_for_type(
                 MapTypeInfo(typeinfo_string, typeinfo_string)
+            ),
+            {},
+        )
+
+    def test_StandardMutableDefaultValue(self) -> None:
+        self.assertEqual(
+            get_standard_mutable_default_value_for_type(typeinfo_bool), False
+        )
+        self.assertEqual(get_standard_mutable_default_value_for_type(typeinfo_byte), 0)
+        self.assertEqual(get_standard_mutable_default_value_for_type(typeinfo_i16), 0)
+        self.assertEqual(get_standard_mutable_default_value_for_type(typeinfo_i32), 0)
+        self.assertEqual(get_standard_mutable_default_value_for_type(typeinfo_i64), 0)
+        self.assertEqual(
+            get_standard_mutable_default_value_for_type(typeinfo_float), 0.0
+        )
+        self.assertEqual(
+            get_standard_mutable_default_value_for_type(typeinfo_double), 0.0
+        )
+        self.assertEqual(
+            get_standard_mutable_default_value_for_type(typeinfo_string), ""
+        )
+        self.assertEqual(
+            get_standard_mutable_default_value_for_type(typeinfo_binary), b""
+        )
+
+        self.assertEqual(
+            get_standard_mutable_default_value_for_type(
+                MutableListTypeInfo(typeinfo_string)
+            ),
+            [],
+        )
+        self.assertEqual(
+            get_standard_mutable_default_value_for_type(
+                MutableSetTypeInfo(typeinfo_string)
+            ),
+            set(),
+        )
+        self.assertEqual(
+            get_standard_mutable_default_value_for_type(
+                MutableMapTypeInfo(typeinfo_string, typeinfo_string)
+            ),
+            {},
+        )
+
+        self.assertEqual(
+            get_standard_mutable_default_value_for_type(
+                MutableStructTypeInfo(MutableEasy)
+            ),
+            MutableEasy(),
+        )
+        self.assertEqual(
+            get_standard_mutable_default_value_for_type(
+                MutableStructTypeInfo(MutableIntegers)
+            ),
+            MutableIntegers(),
+        )
+        self.assertEqual(
+            get_standard_mutable_default_value_for_type(
+                MutableListTypeInfo(MutableStructTypeInfo(MutableEasy))
+            ),
+            [],
+        )
+        self.assertEqual(
+            get_standard_mutable_default_value_for_type(
+                MutableMapTypeInfo(typeinfo_string, MutableStructTypeInfo(MutableEasy))
             ),
             {},
         )

@@ -118,6 +118,9 @@ cdef extern from "<thrift/lib/python/types.h>" namespace "::apache::thrift::pyth
     cdef object getStandardImmutableDefaultValuePtrForType(
         const cTypeInfo& typeInfo
     ) except+
+    cdef object getStandardMutableDefaultValuePtrForType(
+        const cTypeInfo& typeInfo
+    ) except+
     cdef void tag_object_as_sequence(PyTypeObject*)
     cdef void tag_object_as_mapping(PyTypeObject*)
 

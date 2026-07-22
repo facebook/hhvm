@@ -273,11 +273,19 @@ class MultiplexAsyncProcessor final : public AsyncProcessor {
     // There is no "correct" way to set context for MultiplexAsyncProcessor.
     // Our best guess would be the first service, which is likely to be most
     // relevant to the user.
-    const auto& defaultServiceContextRef = actualResponse.services()->front();
+    const auto& services = *actualResponse.services();
+    const auto* defaultServiceContextRef = &services.front();
+    for (const auto& service : services) {
+      if (*service.service_name() !=
+          "thrift_catalog_service.ThriftCatalogService") {
+        defaultServiceContextRef = &service;
+        break;
+      }
+    }
     actualResponse.context()->service_info() =
         actualResponse.metadata()->services()->at(
-            *defaultServiceContextRef.service_name());
-    actualResponse.context()->module() = *defaultServiceContextRef.module();
+            *defaultServiceContextRef->service_name());
+    actualResponse.context()->module() = *defaultServiceContextRef->module();
   }
 
   void terminateInteraction(

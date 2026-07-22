@@ -72,15 +72,15 @@ final class ResourceConfiguration {
    * Rollout flag for eager request-frame release on the header transports (legacy {@code
    * ThriftServerHandler} and reactive v2 {@code ThriftConnectionAcceptor}).
    *
-   * <p>When true, the request frame is handed to the {@code ServerRequestPayload} and the generated
-   * handler releases it as soon as the request arguments are decoded, freeing the buffer back to
-   * the allocator instead of holding it until the response completes. When false (default), the
+   * <p>When true (default), the request frame is handed to the {@code ServerRequestPayload} and the
+   * generated handler releases it as soon as the request arguments are decoded, freeing the buffer
+   * back to the allocator instead of holding it until the response completes. When false, the
    * transport keeps ownership and releases the frame at response completion -- the historical
    * lifetime. The flag is a kill-switch: it can be disabled without redeploying generated code (the
    * generated release is a no-op when the transport did not hand over the frame).
    */
   static final boolean releaseHeaderFrameAfterDecode =
-      System.getProperty("thrift.release-header-frame-after-decode", "false")
+      System.getProperty("thrift.release-header-frame-after-decode", "true")
           .equalsIgnoreCase("true");
 
   static final int maxPendingTasksForOffLoop =

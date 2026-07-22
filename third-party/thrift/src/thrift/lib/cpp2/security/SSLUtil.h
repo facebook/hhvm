@@ -38,4 +38,13 @@ template <class FizzSocket>
 folly::AsyncSocketTransport::UniquePtr toFDSocket(
     FizzSocket* socket, const std::string& securityProtocol);
 
+/*
+ * Similar to toFDSocket, but returns a wrapped AsyncTransport that preserves
+ * TLS security information (certificates, ALPN, cipher, exporter secret) via a
+ * DecoratedAsyncTransportWrapper.
+ */
+template <class FizzSocket>
+folly::AsyncTransport::UniquePtr toWrappedAsyncSocket(
+    FizzSocket* socket, const std::string& securityProtocol);
+
 } // namespace apache::thrift

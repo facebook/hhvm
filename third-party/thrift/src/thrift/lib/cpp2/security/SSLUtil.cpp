@@ -131,6 +131,79 @@ class FDTransport : public Parent {
   fizz::CipherSuite origCipherSuite_;
   std::unique_ptr<folly::IOBuf> exportedMasterSecret_{nullptr};
 };
+
+class AsyncSocketWrapper
+    : public folly::DecoratedAsyncTransportWrapper<folly::AsyncTransport> {
+ public:
+  using UniquePtr = std::unique_ptr<AsyncSocketWrapper, Destructor>;
+
+  AsyncSocketWrapper(
+      folly::AsyncSocketTransport::UniquePtr transport,
+      std::string securityProtocol,
+      std::string alpn,
+      std::shared_ptr<const fizz::Cert> selfCert,
+      std::shared_ptr<const fizz::Cert> peerCert)
+      : folly::DecoratedAsyncTransportWrapper<folly::AsyncTransport>(
+            std::move(transport)),
+        securityProtocol_(std::move(securityProtocol)),
+        alpn_(std::move(alpn)),
+        selfCert_(std::move(selfCert)),
+        peerCert_(std::move(peerCert)) {}
+
+  std::string getSecurityProtocol() const override { return securityProtocol_; }
+
+  std::string getApplicationProtocol() const noexcept override { return alpn_; }
+
+  const folly::AsyncTransportCertificate* getPeerCertificate() const override {
+    return peerCert_.get();
+  }
+
+  const folly::AsyncTransportCertificate* getSelfCertificate() const override {
+    return selfCert_.get();
+  }
+
+  void dropPeerCertificate() noexcept override { peerCert_.reset(); }
+
+  void dropSelfCertificate() noexcept override { selfCert_.reset(); }
+
+  void setCipher(fizz::CipherSuite cipher) { origCipherSuite_ = cipher; }
+
+  void setExportedMasterSecret(std::unique_ptr<folly::IOBuf> buf) {
+    exportedMasterSecret_ = std::move(buf);
+  }
+
+  std::unique_ptr<folly::IOBuf> getExportedKeyingMaterial(
+      folly::StringPiece label,
+      std::unique_ptr<folly::IOBuf> context,
+      uint16_t length) const override {
+    if (exportedMasterSecret_ == nullptr) {
+      return nullptr;
+    }
+    auto factory = ::fizz::DefaultFactory();
+    fizz::Buf ekm;
+    fizz::Error fizzErr;
+    FIZZ_THROW_ON_ERROR(
+        fizz::Exporter::getExportedKeyingMaterial(
+            ekm,
+            fizzErr,
+            factory,
+            origCipherSuite_,
+            exportedMasterSecret_->coalesce(),
+            label,
+            std::move(context),
+            length),
+        fizzErr);
+    return ekm;
+  }
+
+ private:
+  std::string securityProtocol_;
+  std::string alpn_;
+  std::shared_ptr<const fizz::Cert> selfCert_;
+  std::shared_ptr<const fizz::Cert> peerCert_;
+  std::unique_ptr<folly::IOBuf> exportedMasterSecret_{nullptr};
+  fizz::CipherSuite origCipherSuite_{};
+};
 } // namespace
 
 template <class FizzSocket>
@@ -252,4 +325,49 @@ template folly::AsyncSocketTransport::UniquePtr toFDSocket(
     fizz::client::AsyncFizzClient* socket, const std::string& securityProtocol);
 template folly::AsyncSocketTransport::UniquePtr toFDSocket(
     fizz::server::AsyncFizzServer* socket, const std::string& securityProtocol);
+
+template <class FizzSocket>
+folly::AsyncTransport::UniquePtr toWrappedAsyncSocket(
+    FizzSocket* fizzSock, const std::string& securityProtocol) {
+  if (fizzSock == nullptr) {
+    return nullptr;
+  }
+  auto [selfCert, peerCert] =
+      fizz::detail::getSelfPeerCertificateShared(*fizzSock);
+
+  auto alpn = fizzSock->getApplicationProtocol();
+  auto cipher = fizzSock->getCipher();
+  std::unique_ptr<folly::IOBuf> exportedMasterSecret{nullptr};
+  if (fizzSock->getState().exporterMasterSecret().has_value() &&
+      fizzSock->getState().exporterMasterSecret().value() != nullptr) {
+    exportedMasterSecret =
+        fizzSock->getState().exporterMasterSecret().value()->clone();
+  }
+
+  folly::AsyncTransport::UniquePtr dummySock(
+      new folly::AsyncSocket(fizzSock->getEventBase()));
+  auto sock = fizzSock->template tryExchangeUnderlyingTransport<
+      folly::AsyncSocketTransport>(dummySock);
+  DCHECK(sock);
+
+  AsyncSocketWrapper::UniquePtr asyncSocketWrapper{new AsyncSocketWrapper(
+      std::move(sock),
+      securityProtocol,
+      std::move(alpn),
+      std::move(selfCert),
+      std::move(peerCert))};
+  if (cipher.hasValue()) {
+    asyncSocketWrapper->setCipher(cipher.value());
+    asyncSocketWrapper->setExportedMasterSecret(
+        std::move(exportedMasterSecret));
+  }
+
+  return asyncSocketWrapper;
+}
+
+template folly::AsyncTransport::UniquePtr toWrappedAsyncSocket(
+    fizz::client::AsyncFizzClient* socket, const std::string& securityProtocol);
+template folly::AsyncTransport::UniquePtr toWrappedAsyncSocket(
+    fizz::server::AsyncFizzServer* socket, const std::string& securityProtocol);
+
 } // namespace apache::thrift

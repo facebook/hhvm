@@ -17,47 +17,49 @@
 }}{{!
 Renders a _ConstantSpec(value=..., thrift_type=...) for any const value.
 Context: a t_const_value (entered via scope block).
-}}{{#pragma ignore-newlines}}
+}}{{#let export partial const_value |value|}}
+{{#pragma ignore-newlines}}
 _ConstantSpec(value=
-{{#if value:bool?}}
-  {{(py_bool value:nonzero?)}}, thrift_type=_ThriftType.BOOL
-{{#else if value:integer?}}
-  {{value:integer_value}}, thrift_type={{!
-    }}{{#if value:type.byte?}}_ThriftType.BYTE{{!
-    }}{{#else if value:type.i16?}}_ThriftType.I16{{!
-    }}{{#else if value:type.i32?}}_ThriftType.I32{{!
+{{#if value.bool?}}
+  {{(py_bool value.nonzero?)}}, thrift_type=_ThriftType.BOOL
+{{#else if value.integer?}}
+  {{value.integer_value}}, thrift_type={{!
+    }}{{#if value.type.byte?}}_ThriftType.BYTE{{!
+    }}{{#else if value.type.i16?}}_ThriftType.I16{{!
+    }}{{#else if value.type.i32?}}_ThriftType.I32{{!
     }}{{#else}}_ThriftType.I64{{!
-    }}{{/if value:type.byte?}}
-{{#else if value:enum?}}
-  _ConstantEnumSpec(enum_type={{value:type.module_mangle}}.{{value:type.true_type.py_name}}, value={{value:type.module_mangle}}.{{value:type.true_type.py_name}}({{value:integer_value}})), thrift_type=_ThriftType.ENUM
-{{#else if value:double?}}
-  {{(float_to_string value:double_value)}}, thrift_type={{!
-    }}{{#if value:type.float?}}_ThriftType.FLOAT{{!
+    }}{{/if value.type.byte?}}
+{{#else if value.enum?}}
+  _ConstantEnumSpec(enum_type={{value.type.module_mangle}}.{{value.type.true_type.py_name}}, value={{value.type.module_mangle}}.{{value.type.true_type.py_name}}({{value.integer_value}})), thrift_type=_ThriftType.ENUM
+{{#else if value.double?}}
+  {{(float_to_string value.double_value)}}, thrift_type={{!
+    }}{{#if value.type.float?}}_ThriftType.FLOAT{{!
     }}{{#else}}_ThriftType.DOUBLE{{!
-    }}{{/if value:type.float?}}
-{{#else if value:string?}}
-  "{{value:string_value}}", thrift_type=_ThriftType.STRING
-{{#else if value:type.union?}}
-  _ConstantUnionSpec(union_type={{value:type.module_mangle}}.{{#value:type.true_type}}{{> structs/unadapted_name}}{{/value:type.true_type}}{{!
-  }}{{#each value:structured_elements as |elem|}}, field="{{elem.field.name}}", value={{#elem.value}}{{> reflection/const_value }}{{/elem.value}}{{/each}}{{!
+    }}{{/if value.type.float?}}
+{{#else if value.string?}}
+  "{{value.string_value}}", thrift_type=_ThriftType.STRING
+{{#else if value.type.union?}}
+  _ConstantUnionSpec(union_type={{value.type.module_mangle}}.{{#if value.type.true_type.has_adapter?}}_fbthrift_unadapted_{{/if}}{{value.type.true_type.py_name}}{{!
+  }}{{#each value.structured_elements as |elem|}}, field="{{elem.field.name}}", value={{#partial const_value value=elem.value}}{{/each}}{{!
   }}), thrift_type=_ThriftType.UNION
-{{#else if value:structured?}}
+{{#else if value.structured?}}
   {{> reflection/const_struct }}, thrift_type=_ThriftType.STRUCT
-{{#else if value:map?}}
+{{#else if value.map?}}
   _ConstantMapSpec(value={
-  {{#each value:map_elements as |map_elem|}}
-    {{#map_elem.key}}{{> reflection/const_value }}{{/map_elem.key}}: {{#map_elem.value}}{{> reflection/const_value }}{{/map_elem.value}},
+  {{#each value.map_elements as |map_elem|}}
+    {{#partial const_value value=map_elem.key}}: {{#partial const_value value=map_elem.value}},
   {{/each}}
   }), thrift_type=_ThriftType.MAP
-{{#else if value:list?}}
-  {{#if value:type.set?}}
+{{#else if value.list?}}
+  {{#if value.type.set?}}
   _ConstantSetSpec(value=[
-  {{#value:list_elements}}{{> reflection/const_value }}, {{/value:list_elements}}
+  {{#each value.list_elements as |elem|}}{{#partial const_value value=elem}}, {{/each}}
   ]), thrift_type=_ThriftType.SET
   {{#else}}
   _ConstantListSpec(value=[
-  {{#value:list_elements}}{{> reflection/const_value }}, {{/value:list_elements}}
+  {{#each value.list_elements as |elem|}}{{#partial const_value value=elem}}, {{/each}}
   ]), thrift_type=_ThriftType.LIST
-  {{/if value:type.set?}}
-{{/if value:bool?}}
+  {{/if value.type.set?}}
+{{/if value.bool?}}
 )
+{{/let partial}}

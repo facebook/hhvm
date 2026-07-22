@@ -63,10 +63,12 @@ import {{module_path}}
 {{#each program.services as |service|}}
 class {{service.name}}Interface(
   {{#if (object.notnull? service.extends)}}
-      {{#service.extends}}{{#if service:external_program?}}
-    {{service:program.module_path}}.{{> services/service_import_path}}.{{/if service:external_program?}}{{service:name}}Interface,
-      {{/service.extends}}
+    {{#if service.extends.external_program?}}
+    {{service.extends.program.module_path}}.{{> services/service_import_path}}.{{service.extends.name}}Interface,
     {{#else}}
+{{service.extends.name}}Interface,
+    {{/if service.extends.external_program?}}
+  {{#else}}
     _fbthrift_ServiceInterface,
   {{/if (object.notnull? service.extends)}}
     metaclass=ABCMeta
@@ -80,15 +82,15 @@ class {{service.name}}Interface(
         functionTable = {
         {{#each service.supported_functions as |function|}}
           {{#if function.creates_interaction?}}
-            b"{{function.name}}": _fbthrift_FunctionEntry({{#function}}{{> services/function_kind }}{{/function}}, self._fbthrift__handler_{{function.name}}, interaction=b"{{function.created_interaction.name}}", creates_interaction=True, interaction_factory=self.create{{function.created_interaction.name}}{{#function}}{{> services/returns_initial_response_kwarg }}{{/function}}),
+            b"{{function.name}}": _fbthrift_FunctionEntry({{#if function.oneway?}}RpcKind.SINGLE_REQUEST_NO_RESPONSE{{#else if function.bidirectional_stream?}}RpcKind.BIDIRECTIONAL_STREAM{{#else if function.stream?}}RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE{{#else if function.sink?}}RpcKind.SINK{{#else}}RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE{{/if function.oneway?}}, self._fbthrift__handler_{{function.name}}, interaction=b"{{function.created_interaction.name}}", creates_interaction=True, interaction_factory=self.create{{function.created_interaction.name}}{{#if (and function.returns_tuple? (not function.stream?) (not function.sink?))}}, returns_initial_response=True{{/if}}),
           {{#else}}
-            b"{{function.name}}": _fbthrift_FunctionEntry({{#function}}{{> services/function_kind }}{{/function}}, self._fbthrift__handler_{{function.name}}),
+            b"{{function.name}}": _fbthrift_FunctionEntry({{#if function.oneway?}}RpcKind.SINGLE_REQUEST_NO_RESPONSE{{#else if function.bidirectional_stream?}}RpcKind.BIDIRECTIONAL_STREAM{{#else if function.stream?}}RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE{{#else if function.sink?}}RpcKind.SINK{{#else}}RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE{{/if function.oneway?}}, self._fbthrift__handler_{{function.name}}),
           {{/if function.creates_interaction?}}
         {{/each}}
         {{#each service.interactions as |interaction|}}
           {{#each interaction.supported_functions as |function|}}
           {{#if (not function.sink?)}}{{#if (not function.bidirectional_stream?)}}
-            b"{{interaction.name}}.{{function.name}}": _fbthrift_FunctionEntry({{#function}}{{> services/function_kind }}{{/function}}, {{interaction.name}}Interface._fbthrift__handler_{{function.name}}, interaction=b"{{interaction.name}}", interaction_factory=self.create{{interaction.name}}),
+            b"{{interaction.name}}.{{function.name}}": _fbthrift_FunctionEntry({{#if function.oneway?}}RpcKind.SINGLE_REQUEST_NO_RESPONSE{{#else if function.bidirectional_stream?}}RpcKind.BIDIRECTIONAL_STREAM{{#else if function.stream?}}RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE{{#else if function.sink?}}RpcKind.SINK{{#else}}RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE{{/if function.oneway?}}, {{interaction.name}}Interface._fbthrift__handler_{{function.name}}, interaction=b"{{interaction.name}}", interaction_factory=self.create{{interaction.name}}),
           {{/if (not function.bidirectional_stream?)}}{{/if (not function.sink?)}}
           {{/each}}
         {{/each}}

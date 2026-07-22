@@ -16,7 +16,7 @@
 
 }}
   {{#if (not function.bidirectional_stream?)}}
-value = {{#unless function.stream?}}await {{/unless}}self.{{function.name}}({{#function.params.fields}}args_struct.{{field:py_name}},{{/function.params.fields}})
+value = {{#unless function.stream?}}await {{/unless}}self.{{function.name}}({{#each function.params.fields as |field|}}args_struct.{{field.py_name}},{{/each}})
     {{#if (and function.creates_interaction? function.returns_tuple?)}}
       {{#if (and (not function.stream?) (not function.sink?))}}
 {{! Factory-with-initial-response (request/response only): the handler returns
@@ -56,7 +56,7 @@ return_stream = self._fbthrift__stream_wrapper_{{function.name}}(stream, protoco
 return_sink_callback = self._fbthrift__sink_wrapper_{{function.name}}(sink_callback, protocol)
     {{/if function.sink?}}
   {{#else}}
-value = await self.{{function.name}}({{#function.params.fields}}args_struct.{{field:py_name}},{{/function.params.fields}})
+value = await self.{{function.name}}({{#each function.params.fields as |field|}}args_struct.{{field.py_name}},{{/each}})
     {{#if function.stream_has_first_response?}}
 value, bidi_callback = value
 return_struct = {{#partial m_functions.return_type service=service function=function}}(success=value)

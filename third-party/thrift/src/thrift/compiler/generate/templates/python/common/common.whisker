@@ -16,6 +16,7 @@
 
 }}
 {{#import "common/types" as m_types}}
+{{#import "types/constant_value" as constant_value}}
 
 {{#let export partial auto_generated_py}}
 #
@@ -39,14 +40,14 @@ Must capture `m_types` because the `constant_value` macro requires it.
 constant_value have a circular dependency on each other, and are used independently
 of each other.
 }}
-{{#let export partial adapter_info |node| captures |m_types|}}
+{{#let export partial adapter_info |node| captures |m_types constant_value|}}
   {{#pragma ignore-newlines}}
   {{#if node.has_adapter?}}
     {{#let adapter = node.adapter}}
 (
 {{adapter.name}}, lambda: {{!preserve trailing space}}
     {{#if (object.notnull? adapter.transitive_annotation)}}
-{{!   }}{{#adapter.transitive_annotation}}{{> types/constant_value }}{{/adapter.transitive_annotation}}
+{{!   }}{{#partial constant_value.constant_value value=adapter.transitive_annotation typeinfo=m_types.typeinfo}}
     {{#else}}
 {{!   }}None
     {{/if (object.notnull? adapter.transitive_annotation)}}

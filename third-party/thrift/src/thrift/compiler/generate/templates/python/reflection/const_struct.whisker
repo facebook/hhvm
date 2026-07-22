@@ -17,9 +17,11 @@
 }}{{!
 Renders a _ConstantStructSpec(struct_type=..., fields={...}) for a struct const value.
 Context: a t_const_value with structured? == true.
-}}{{#pragma ignore-newlines}}
-_ConstantStructSpec(struct_type={{value:type.module_mangle}}.{{#value:type.true_type}}{{> structs/unadapted_name}}{{/value:type.true_type}}, fields={
-{{#each value:structured_elements as |elem|}}
-  "{{elem.field.name}}": {{#elem.value}}{{> reflection/const_value }}{{/elem.value}},
+}}
+{{#import "reflection/const_value" as const_value}}
+{{#pragma ignore-newlines}}
+_ConstantStructSpec(struct_type={{value.type.module_mangle}}.{{#if value.type.true_type.has_adapter?}}_fbthrift_unadapted_{{/if}}{{value.type.true_type.py_name}}, fields={
+{{#each value.structured_elements as |elem|}}
+  "{{elem.field.name}}": {{#partial const_value.const_value value=elem.value}},
 {{/each}}
 })

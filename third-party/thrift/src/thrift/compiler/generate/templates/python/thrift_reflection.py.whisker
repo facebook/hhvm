@@ -21,6 +21,8 @@ library is unavailable).
 }}
 {{#import "common/common" as m_common}}
 {{#import "common/types" as m_types}}
+{{#import "reflection/const_value" as reflection_const_value}}
+{{#import "reflection/default_value" as reflection_default_value}}
 
 {{! Map a Thrift type to its ThriftType enum name }}
 {{#let partial thrift_type_name |type|}}
@@ -146,7 +148,7 @@ def get_reflection__{{struct.py_name}}():
         structured_annotations={
             {{#each struct.structured_annotations as |annotation|}}
               {{#if annotation.type.structured?}}
-            {{#annotation.value}}{{#value:type.true_type}}"{{type:program.name}}.{{> structs/unadapted_name}}"{{/value:type.true_type}}: {{> reflection/const_value }}{{/annotation.value}},
+            "{{annotation.value.type.true_type.type:program.name}}.{{#if annotation.value.type.true_type.has_adapter?}}_fbthrift_unadapted_{{/if}}{{annotation.value.type.true_type.py_name}}": {{#partial reflection_const_value.const_value value=annotation.value}},
               {{/if annotation.type.structured?}}
             {{/each}}
         },
@@ -178,7 +180,7 @@ def get_reflection__{{struct.py_name}}():
                             }}{{#partial field_container_var field=field}}{{!
                         }}{{/if field.type.typedef?}}({{!
                     }}{{/if field.type.container?}}{{!
-                    }}{{#field.default_value}}{{> reflection/default_value }}{{/field.default_value}}{{!
+                    }}{{#partial reflection_default_value.default_value value=field.default_value}}{{!
                     }}{{#if field.type.container?}}){{/if}}{{!
                 }}{{#else if field.type.bool?}}False{{!
                 }}{{#else if (or field.type.byte? field.type.i16? field.type.i32? field.type.i64?)}}0{{!
@@ -197,7 +199,7 @@ def get_reflection__{{struct.py_name}}():
             structured_annotations={
                 {{#each field.structured_annotations as |annotation|}}
                   {{#if annotation.type.structured?}}
-                {{#annotation.value}}{{#value:type.true_type}}"{{type:program.name}}.{{> structs/unadapted_name}}"{{/value:type.true_type}}: {{> reflection/const_value }}{{/annotation.value}},
+                "{{annotation.value.type.true_type.type:program.name}}.{{#if annotation.value.type.true_type.has_adapter?}}_fbthrift_unadapted_{{/if}}{{annotation.value.type.true_type.py_name}}": {{#partial reflection_const_value.const_value value=annotation.value}},
                   {{/if annotation.type.structured?}}
                 {{/each}}
             },

@@ -18,31 +18,33 @@
 Renders a raw Python default value for a field's explicit default.
 Context: a t_const_value (the field's default_value).
 Produces a value whose Python type matches the field's .type.
-}}{{#pragma ignore-newlines}}
-{{#if value:bool?}}
-  {{(py_bool value:nonzero?)}}
-{{#else if value:integer?}}
-  {{value:integer_value}}
-{{#else if value:enum?}}
-  {{value:type.module_mangle}}.{{value:type.true_type.py_name}}({{value:integer_value}})
-{{#else if value:double?}}
-  {{(float_to_string value:double_value)}}
-{{#else if value:string?}}
-  {{#if value:type.binary?}}b{{/if}}"{{value:string_value}}"
-{{#else if value:structured?}}
-  {{value:type.module_mangle}}.{{#value:type.true_type}}{{> structs/unadapted_name}}{{/value:type.true_type}}(
-  {{#each value:structured_elements as |elem|}}
-    {{elem.field.py_name}}={{#elem.value}}{{> reflection/default_value }}{{/elem.value}},
+}}{{#let export partial default_value |value|}}
+{{#pragma ignore-newlines}}
+{{#if value.bool?}}
+  {{(py_bool value.nonzero?)}}
+{{#else if value.integer?}}
+  {{value.integer_value}}
+{{#else if value.enum?}}
+  {{value.type.module_mangle}}.{{value.type.true_type.py_name}}({{value.integer_value}})
+{{#else if value.double?}}
+  {{(float_to_string value.double_value)}}
+{{#else if value.string?}}
+  {{#if value.type.binary?}}b{{/if}}"{{value.string_value}}"
+{{#else if value.structured?}}
+  {{value.type.module_mangle}}.{{#if value.type.true_type.has_adapter?}}_fbthrift_unadapted_{{/if}}{{value.type.true_type.py_name}}(
+  {{#each value.structured_elements as |elem|}}
+    {{elem.field.py_name}}={{#partial default_value value=elem.value}},
   {{/each}}
   )
-{{#else if value:map?}}
+{{#else if value.map?}}
   {
-  {{#each value:map_elements as |map_elem|}}
-    {{#map_elem.key}}{{> reflection/default_value }}{{/map_elem.key}}: {{#map_elem.value}}{{> reflection/default_value }}{{/map_elem.value}},
+  {{#each value.map_elements as |map_elem|}}
+    {{#partial default_value value=map_elem.key}}: {{#partial default_value value=map_elem.value}},
   {{/each}}
   }
-{{#else if value:list?}}
+{{#else if value.list?}}
   [
-  {{#value:list_elements}}{{> reflection/default_value }}, {{/value:list_elements}}
+  {{#each value.list_elements as |elem|}}{{#partial default_value value=elem}}, {{/each}}
   ]
-{{/if value:bool?}}
+{{/if value.bool?}}
+{{/let partial}}

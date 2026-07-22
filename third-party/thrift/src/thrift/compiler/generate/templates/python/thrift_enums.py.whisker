@@ -113,7 +113,7 @@ def _fbthrift_gen_metadata_enum_{{enum.py_name}}({{!
     structured_annotations = [
         {{#each enum.structured_annotations as |annotation|}}
           {{#if annotation.type.structured?}}
-        {{#annotation.value}}{{> metadata/const_struct }}{{/annotation.value}},
+        {{#let value = annotation.value}}{{> metadata/const_struct }},
           {{/if annotation.type.structured?}}
         {{/each}}
     ]

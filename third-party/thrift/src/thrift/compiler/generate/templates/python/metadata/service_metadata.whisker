@@ -17,8 +17,9 @@
 }}
 {{#import "common/metadata" as metadata}}
 {{#import "common/types" as m_types}}
+{{#import "metadata/recursive_call" as recursive_call}}
 
-{{#let export partial interface_metadata |program service| captures |m_types metadata|}}
+{{#let export partial interface_metadata |program service| captures |m_types metadata recursive_call|}}
 qualified_name = "{{program.name}}.{{service.name}}"
 
 if qualified_name in metadata_struct.services:
@@ -32,7 +33,7 @@ functions = [
         _fbthrift_metadata.ThriftField(id={{field.id}}, type={{#partial metadata.thrift_type type=field.type}}, name="{{field.name}}", is_optional=False, structured_annotations=[
             {{#each field.structured_annotations as |annotation|}}
               {{#if annotation.type.structured?}}
-            {{#annotation.value}}{{> metadata/const_struct }}{{/annotation.value}},
+            {{#let value = annotation.value}}{{> metadata/const_struct }},
               {{/if annotation.type.structured?}}
             {{/each}}
         ]),
@@ -42,7 +43,7 @@ functions = [
         _fbthrift_metadata.ThriftField(id={{field.id}}, type={{#partial metadata.thrift_type type=field.type}}, name="{{field.name}}", is_optional=False, structured_annotations=[
             {{#each field.structured_annotations as |annotation|}}
               {{#if annotation.type.structured?}}
-            {{#annotation.value}}{{> metadata/const_struct }}{{/annotation.value}},
+            {{#let value = annotation.value}}{{> metadata/const_struct }},
               {{/if annotation.type.structured?}}
             {{/each}}
         ]),
@@ -50,7 +51,7 @@ functions = [
     ], is_oneway={{(py_bool function.oneway?)}}, structured_annotations=[
         {{#each function.structured_annotations as |annotation|}}
           {{#if annotation.type.structured?}}
-        {{#annotation.value}}{{> metadata/const_struct }}{{/annotation.value}},
+        {{#let value = annotation.value}}{{> metadata/const_struct }},
           {{/if annotation.type.structured?}}
         {{/each}}
     ]),
@@ -64,7 +65,7 @@ service_dict = dict(metadata_struct.services)
 service_dict[qualified_name] = _fbthrift_metadata.ThriftService(name=qualified_name, functions=functions, {{#if has_parent}}parent="{{parent.program.name}}.{{parent.name}}",{{/if}} structured_annotations=[
     {{#each service.structured_annotations as |annotation|}}
       {{#if annotation.type.structured?}}
-    {{#annotation.value}}{{> metadata/const_struct }}{{/annotation.value}},
+    {{#let value = annotation.value}}{{> metadata/const_struct }},
       {{/if annotation.type.structured?}}
     {{/each}}
 ])
@@ -76,20 +77,20 @@ new_struct = {{#if parent.external_program?}}{{parent.program.module_mangle}}__t
     {{#if (not function.starts_interaction?)}}
 
       {{#each function.params.fields as |field|}}
-{{#field.type}}{{> metadata/recursive_call }}{{/field.type}} # {{field.name}}
+{{#if field.type}}{{#partial recursive_call.recursive_call type=field.type}}{{/if field.type}} # {{field.name}}
       {{/each}}
 
       {{#each function.exceptions as |field|}}
-{{#field.type}}{{> metadata/recursive_call }}{{/field.type}} # {{field.name}}
+{{#if field.type}}{{#partial recursive_call.recursive_call type=field.type}}{{/if field.type}} # {{field.name}}
       {{/each}}
 
-      {{#function.return_type}}
-{{#if (not function.sink_or_stream?)}}{{> metadata/recursive_call }}{{/if ~}}
-{{#if function.stream?}}{{#function.stream.elem_type}}{{> metadata/recursive_call }}{{/function.stream.elem_type}} # elem
-{{#if function.stream_has_first_response?}}{{> metadata/recursive_call }}{{/if}} # response {{/if function.stream?}}{{#if function.sink?}}{{#function.sink.elem_type}}{{> metadata/recursive_call }}{{/function.sink.elem_type}} # elem
-{{#function.sink.final_response_type}}{{> metadata/recursive_call }}{{/function.sink.final_response_type}} # final response
-{{#if function.sink_has_first_response?}}{{> metadata/recursive_call }}{{/if}} # first response {{/if function.sink?}} # return value
-      {{/function.return_type}}
+      {{#if function.return_type}}
+{{#if (not function.sink_or_stream?)}}{{#partial recursive_call.recursive_call type=function.return_type}}{{/if ~}}
+{{#if function.stream?}}{{#if function.stream.elem_type}}{{#partial recursive_call.recursive_call type=function.stream.elem_type}}{{/if function.stream.elem_type}} # elem
+{{#if function.stream_has_first_response?}}{{#partial recursive_call.recursive_call type=function.return_type}}{{/if}} # response {{/if function.stream?}}{{#if function.sink?}}{{#if function.sink.elem_type}}{{#partial recursive_call.recursive_call type=function.sink.elem_type}}{{/if function.sink.elem_type}} # elem
+{{#if function.sink.final_response_type}}{{#partial recursive_call.recursive_call type=function.sink.final_response_type}}{{/if function.sink.final_response_type}} # final response
+{{#if function.sink_has_first_response?}}{{#partial recursive_call.recursive_call type=function.return_type}}{{/if}} # first response {{/if function.sink?}} # return value
+      {{/if function.return_type}}
 
     {{/if (not function.starts_interaction?)}}
   {{/each}}

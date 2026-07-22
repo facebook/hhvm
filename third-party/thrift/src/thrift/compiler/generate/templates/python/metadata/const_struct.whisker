@@ -15,11 +15,12 @@
   limitations under the License.
 
 }}
+{{#import "metadata/const_value" as const_value}}
 {{#pragma ignore-newlines}}
-_fbthrift_metadata.ThriftConstStruct({{#value:type.true_type}}type=
-_fbthrift_metadata.ThriftStructType(name="{{type:program.name}}.{{> structs/unadapted_name}}"), {{/value:type.true_type}}
+_fbthrift_metadata.ThriftConstStruct(type=
+_fbthrift_metadata.ThriftStructType(name="{{value.type.true_type.type:program.name}}.{{#if value.type.true_type.has_adapter?}}_fbthrift_unadapted_{{/if}}{{value.type.true_type.py_name}}"), {{!}}
 fields= { {{!}}
-  {{#each value:structured_elements as |elem|}}
-"{{elem.field.name}}": {{#elem.value}}{{> metadata/const_value }}{{/elem.value}}, {{!}}
+  {{#each value.structured_elements as |elem|}}
+"{{elem.field.name}}": {{#partial const_value.const_value value=elem.value}}, {{!}}
   {{/each}}
  })

@@ -14,28 +14,30 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}{{#pragma ignore-newlines}}
+}}{{#let export partial const_value |value|}}
+{{#pragma ignore-newlines}}
 _fbthrift_metadata.ThriftConstValue(
-  {{#if value:bool?}}
-cv_bool={{(py_bool value:nonzero?)}}
-  {{#else if (or value:integer? value:enum?)}}
-cv_integer={{value:integer_value}}
-  {{#else if value:double?}}
-cv_double={{(float_to_string value:double_value)}}
-  {{#else if value:string?}}
-cv_string="{{value:string_value}}"
-  {{#else if value:structured?}}
+  {{#if value.bool?}}
+cv_bool={{(py_bool value.nonzero?)}}
+  {{#else if (or value.integer? value.enum?)}}
+cv_integer={{value.integer_value}}
+  {{#else if value.double?}}
+cv_double={{(float_to_string value.double_value)}}
+  {{#else if value.string?}}
+cv_string="{{value.string_value}}"
+  {{#else if value.structured?}}
 cv_struct={{> metadata/const_struct }}
-  {{#else if value:map?}}
+  {{#else if value.map?}}
 cv_map=[
-    {{#each value:map_elements as |map_elem|}}
+    {{#each value.map_elements as |map_elem|}}
 _fbthrift_metadata.ThriftConstValuePair(
-key={{#map_elem.key}}{{> metadata/const_value }}{{/map_elem.key}}, {{!}}
-value={{#map_elem.value}}{{> metadata/const_value }}{{/map_elem.value}}
+key={{#partial const_value value=map_elem.key}}, {{!}}
+value={{#partial const_value value=map_elem.value}}
 ), {{!}}
     {{/each}}
 ]
-  {{#else if value:list?}}
-cv_list=[{{#value:list_elements}}{{> metadata/const_value }}, {{/value:list_elements}}]
-  {{/if value:bool?}}
+  {{#else if value.list?}}
+cv_list=[{{#each value.list_elements as |elem|}}{{#partial const_value value=elem}}, {{/each}}]
+  {{/if value.bool?}}
 )
+{{/let partial}}

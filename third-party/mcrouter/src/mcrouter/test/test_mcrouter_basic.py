@@ -78,21 +78,21 @@ class TestMcrouterBasic(TestMcrouterBasicBase):
         args = ["detailed", "cmd-error", "servers", "suspect_servers", "count"]
         for arg in args:
             res = mcr.issue_command_and_read_all(f"stats{arg}\r\n")
-            self.assertTrue("CLIENT_ERROR" in res)
+            self.assertIn("CLIENT_ERROR", res)
             res = mcr.issue_command_and_read_all(f"stats {arg}\r\n")
-            self.assertTrue("END" in res)
+            self.assertIn("END", res)
             res = mcr.issue_command_and_read_all(f"stats {arg} \r\n")
-            self.assertTrue("END" in res)
+            self.assertIn("END", res)
             res = mcr.issue_command_and_read_all(f"stats{arg}\n")
-            self.assertTrue("CLIENT_ERROR" in res)
+            self.assertIn("CLIENT_ERROR", res)
             res = mcr.issue_command_and_read_all(f"stats {arg}\n")
-            self.assertTrue("END" in res)
+            self.assertIn("END", res)
             res = mcr.issue_command_and_read_all(f"stats {arg} \n")
-            self.assertTrue("END" in res)
+            self.assertIn("END", res)
 
         # Stats with invalid arg
         res = mcr.issue_command_and_read_all("stats invalid_option\r\n")
-        self.assertTrue("CLIENT_ERROR" in res)
+        self.assertIn("CLIENT_ERROR", res)
 
     def test_stats_deadlock(self):
         mcr = self.get_mcrouter(["--proxy-threads=8"])

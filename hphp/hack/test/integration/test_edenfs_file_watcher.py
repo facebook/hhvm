@@ -504,8 +504,38 @@ class EdenfsWatcherTestDriver(common_tests.CommonTestDriver):
 
         def kill_asserter() -> None:
             proc.kill()
+            # reap: the asserter is gone (and its EdenFS connection closed) before we return
+            proc.wait()
 
         return (wait_and_check, is_still_asserted, kill_asserter)
+
+    def check_cmd_eventually(
+        self,
+        expected_output: List[str],
+        retries: int = 30,
+        retry_delay_secs: float = 0.5,
+    ) -> None:
+        """Like check_cmd, but polls `hh check` until its output matches.
+
+        check_cmd checks exactly once, which is racy for behavior that hh only
+        reaches after observing an asynchronous EdenFS event. In particular,
+        when a state-asserting process crashes, EdenFS notices that its
+        connection closed - and hence de-asserts the state - only some time
+        later. hh stops deferring and processes the changes made in the meantime
+        only once it observes that de-assertion. We poll until that
+        eventually-consistent state is reached; if it never is, the final
+        check_cmd call fails the test with a readable diff.
+        """
+        root = self.repo_dir + os.path.sep
+        expected_lines = sorted(line.format(root=root) for line in expected_output)
+        for _ in range(retries):
+            (output, _err, _retcode) = self.run_check()
+            if sorted(output.splitlines()) == expected_lines:
+                return
+            time.sleep(retry_delay_secs)
+        # Out of retries: run check_cmd once more so the test fails with a
+        # useful expected-vs-actual diff.
+        self.check_cmd(expected_output)
 
 
 class EdenfsWatcherTests(common_tests.CommonTests):
@@ -1427,10 +1457,14 @@ function test_deprecated() : void {
             # SIGKILL the asserter while it's asserting TEST_STATE_0
             kill_asserter()
 
-            # The asserter is dead, we should not be deferring anymore
+            # The asserter is dead, we should not be deferring anymore. hh only
+            # stops deferring once it observes - asynchronously - that EdenFS
+            # de-asserted the state following the crash, so poll rather than
+            # checking exactly once.
             file = f"file{i}.php"
             self.test_driver.createNonHackFile(file)
-            self.test_driver.check_cmd(
+            # check_cmd_eventually won't be necessary once T280972039 is fixed
+            self.test_driver.check_cmd_eventually(
                 [
                     f"ERROR: {{root}}{file}:1:1,1: A .php file must begin with `<?hh`. (Parsing[1002])",
                 ]

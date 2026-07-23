@@ -846,6 +846,11 @@ module Make (Set : SET) = struct
     | Tnewtype (name, _, _)
       when String.equal name Naming_special_names.Classes.cEnumClassLabel ->
       (env, label_to_datatypes ~trail)
+    | Tnewtype (name, _, _)
+      when String.equal name Naming_special_names.Classes.cClassname
+           || String.equal name Naming_special_names.Classes.cClassOrClassname
+      ->
+      (env, Set.of_list ~reason [Tag.ClassData; Tag.StringData])
     (* RepresentableAs<T> has the same runtime data type as T *)
     | Tnewtype (name, [ty_arg], _)
       when String.equal name Naming_special_names.Classes.cRepresentableAs ->

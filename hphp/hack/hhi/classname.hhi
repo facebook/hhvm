@@ -37,12 +37,11 @@ namespace HH {
 
   /**
    * Similar to vec_or_dict, this type is a migration type to cover places that
-   * need to handle both class<T> and classname<T> without raising notices and it
-   * should generally never be used. When typechecker flag class_sub_classname=true,
-   * this type is equivalent to classname<T>.
+   * need to handle both class<T> and classname<T> without raising notices.
+   * Both class<C> and classname<C> are subtypes of class_or_classname<C>.
    */
   <<__NoAutoDynamic>>
-  type class_or_classname<T> = classname<T>;
+  newtype class_or_classname<+T> = classname<T>;
 
   /**
    * Creates a runtime KindOfClass (class pointer) from input $cn. Migration function

@@ -4421,6 +4421,23 @@ end = struct
         | (_, Tnewtype (name_sub, _, _))
           when String.equal name_sub SN.Classes.cEnumClassLabel ->
           valid env
+        (* class_or_classname<T> <D: dynamic, mirroring class<T>: valid by
+         * exposure to string when class_sub_classname is set, otherwise valid
+         * when the type argument is itself <D: dynamic. Without an explicit arm
+         * it falls through to the generic Tnewtype case below, which uses the
+         * `as nonnull` bound and so fails. *)
+        | (_, Tnewtype (name_sub, _, _))
+          when String.equal name_sub SN.Classes.cClassOrClassname
+               && subtype_env.Subtype_env.class_sub_classname ->
+          valid env
+        | (_, Tnewtype (name_sub, [ty], _))
+          when String.equal name_sub SN.Classes.cClassOrClassname ->
+          simplify
+            ~subtype_env
+            ~this_ty:None
+            ~lhs:{ sub_supportdyn = None; ty_sub = ty }
+            ~rhs:{ super_like = false; super_supportdyn = false; ty_super }
+            env
         | (r_sub, Toption ty) ->
           (match deref ty with
           (* Special case mixed <: dynamic for better error message *)
@@ -5490,6 +5507,24 @@ end = struct
       when subtype_env.Subtype_env.class_sub_classname
            && (String.equal name SN.Classes.cClassname
               || String.equal name SN.Classes.cTypename) ->
+      simplify
+        ~subtype_env
+        ~this_ty:None
+        ~lhs:{ sub_supportdyn = None; ty_sub }
+        ~rhs:{ super_like = false; super_supportdyn = false; ty_super }
+        env
+    | ((_r_sub, Tclass_ptr ty_sub), (_r_super, Tnewtype (name, [ty_super], _)))
+      when String.equal name SN.Classes.cClassOrClassname ->
+      simplify
+        ~subtype_env
+        ~this_ty:None
+        ~lhs:{ sub_supportdyn = None; ty_sub }
+        ~rhs:{ super_like = false; super_supportdyn = false; ty_super }
+        env
+    | ( (_r_sub, Tnewtype (name_sub, [ty_sub], _)),
+        (_r_super, Tnewtype (name_super, [ty_super], _)) )
+      when String.equal name_super SN.Classes.cClassOrClassname
+           && String.equal name_sub SN.Classes.cClassname ->
       simplify
         ~subtype_env
         ~this_ty:None

@@ -23,8 +23,8 @@ case type TwoClasses = class<C> | class<D>;
 // A class pointer still shares the string runtime tag during the migration.
 case type WithArraykey = arraykey | class<C>;
 
-// class_or_classname<T> is a transparent alias to classname<T> (string), so it
-// behaves like classname: disjoint from objects, but overlapping strings/class.
+// class_or_classname<T> is an opaque newtype but behaves like classname here:
+// disjoint from pure objects, but overlapping strings/class.
 case type CoCObj = C | class_or_classname<C>;
 case type CoCClass = class<C> | class_or_classname<C>;
 

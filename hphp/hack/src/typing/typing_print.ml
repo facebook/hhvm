@@ -1767,6 +1767,9 @@ module ErrorString = struct
     | Tnewtype (x, [ty], _) when String.equal x SN.Classes.cClassname ->
       let (fuel, ty_str) = ety_to_string ty in
       (fuel, "a classname string for " ^ ty_str)
+    | Tnewtype (x, [ty], _) when String.equal x SN.Classes.cClassOrClassname ->
+      let (fuel, ty_str) = ety_to_string ty in
+      (fuel, "a class or classname for " ^ ty_str)
     | Tclass_ptr ty ->
       let (fuel, ty_str) = ety_to_string ty in
       (fuel, "a class pointer for " ^ ty_str)

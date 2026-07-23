@@ -1,6 +1,6 @@
 WARN: File "classname_tyvar.php", line 20, characters 61-63:
 Indexing into a value of type `dynamic` (Warn[12040])
-  File "classname.hhi", line 51, characters 73-80:
+  File "classname.hhi", line 50, characters 73-80:
   This expression has type `dynamic` because the type of this return is implicitly a like-type due to unenforced class pointer type
 ERROR: File "classname_tyvar.php", line 14, characters 68-78:
 This shape doesn't have a field `classname` (Typing[4108])

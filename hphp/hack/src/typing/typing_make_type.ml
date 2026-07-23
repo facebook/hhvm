@@ -93,6 +93,9 @@ let typename r tyl = mk (r, Tnewtype (SN.Classes.cTypename, tyl, string r))
 let classname r tyl =
   mk (r, Tnewtype (SN.Classes.cClassname, tyl, typename r tyl))
 
+let class_or_classname r tyl =
+  mk (r, Tnewtype (SN.Classes.cClassOrClassname, tyl, mk (r, Tnonnull)))
+
 let float r = prim_type r Nast.Tfloat
 
 let num r = prim_type r Nast.Tnum

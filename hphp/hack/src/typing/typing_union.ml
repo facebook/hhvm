@@ -379,6 +379,11 @@ and simplify_non_subtype_union ~approx_cancel_neg env ty1 ty2 r =
       (* Follows newtype classname<T> equal case above *)
       let (env, ty) = union ~approx_cancel_neg env ty1 ty2 in
       (env, Some (mk (r, Tclass_ptr ty)))
+    | ((_, Tclass_ptr ty_c), (_, Tnewtype (cn, [ty_cn], _)))
+    | ((_, Tnewtype (cn, [ty_cn], _)), (_, Tclass_ptr ty_c))
+      when String.equal cn Naming_special_names.Classes.cClassOrClassname ->
+      let (env, ty) = union ~approx_cancel_neg env ty_c ty_cn in
+      (env, Some (MakeType.class_or_classname r [ty]))
     (* TODO: optional and variadic fields T201398626 T201398652 *)
     | ( ( _,
           Ttuple
@@ -920,7 +925,8 @@ let rec is_minimal env ty =
       false
   end
   | Tnewtype (name, [ty], _)
-    when String.equal name Naming_special_names.Classes.cClassname ->
+    when String.equal name Naming_special_names.Classes.cClassname
+         || String.equal name Naming_special_names.Classes.cClassOrClassname ->
     is_minimal env ty
   | Tdependent _ -> true
   | _ -> false

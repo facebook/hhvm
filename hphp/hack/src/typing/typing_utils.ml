@@ -635,7 +635,8 @@ let get_base_type ?(expand_supportdyn = true) env ty =
     in
     match get_node ty with
     | Tnewtype (classname, _, _)
-      when String.equal classname SN.Classes.cClassname ->
+      when String.equal classname SN.Classes.cClassname
+           || String.equal classname SN.Classes.cClassOrClassname ->
       (env, ty)
     | Tnewtype (n, [ty], _) when String.equal n SN.Classes.cSupportDyn ->
       let (env, ty) = loop env seen_generics ty in

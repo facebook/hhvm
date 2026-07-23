@@ -181,7 +181,7 @@ namespace HH\Facts {
    * Throws InvalidOperationException if Facts is not enabled.
    */
   function subtypes<T>(
-    classname<T> $base_type,
+    class_or_classname<T> $base_type,
     ?DeriveFilters $filters = null,
   )[]: vec<class<T>>;
 
@@ -191,7 +191,7 @@ namespace HH\Facts {
   * Throws InvalidOperationException if Facts is not enabled.
   */
   function transitive_subtypes<T>(
-    classname<T> $base_type,
+    class_or_classname<T> $base_type,
     ?DeriveFilters $filters = null,
     bool $include_interface_require_extends = false,
    )[]: vec<class<T>>;
@@ -202,7 +202,7 @@ namespace HH\Facts {
    * Throws InvalidOperationException if Facts is not enabled.
    */
   function supertypes(
-    classname<mixed> $derived_type,
+    class_or_classname<mixed> $derived_type,
     ?DeriveFilters $filters = null,
   )[]: vec<class<mixed>>;
 
@@ -212,7 +212,7 @@ namespace HH\Facts {
    * Throws InvalidOperationException if Facts is not enabled.
    */
   function types_with_attribute(
-    classname<\HH\ClassLikeAttribute> $attribute,
+    class_or_classname<\HH\ClassLikeAttribute> $attribute,
   )[]: vec<classname<mixed>>;
 
   /**

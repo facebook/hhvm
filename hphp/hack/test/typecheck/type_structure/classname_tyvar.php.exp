@@ -9,13 +9,13 @@ The two arguments to `HH\type_structure_classname()` must be:
 The type constant does not resolve to a classish type (Typing[4150])
 ERROR: File "classname_tyvar.php", line 20, characters 56-57:
 Invalid argument (Typing[4110])
-  File "classname.hhi", line 51, characters 43-63:
-  Expected `classname<_>`
+  File "classname.hhi", line 50, characters 43-63:
+  Expected `HH\class_or_classname<_>`
   File "classname_tyvar.php", line 12, characters 5-11:
   But got `dynamic`
 ERROR: File "classname_tyvar.php", line 21, characters 69-70:
 Invalid argument (Typing[4110])
-  File "classname.hhi", line 51, characters 43-63:
-  Expected `classname<_>`
+  File "classname.hhi", line 50, characters 43-63:
+  Expected `HH\class_or_classname<_>`
   File "classname_tyvar.php", line 12, characters 5-11:
   But got `dynamic`

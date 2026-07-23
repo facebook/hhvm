@@ -495,7 +495,7 @@ let ft_params_without_named_variadic (ft : _ fun_type) : _ fun_param list =
 let ft_has_positional_variadic (ft : _ fun_type) : bool =
   get_ft_variadic ft
   &&
-  match List.last ft.ft_params with
+  match List.last (ft_params_without_named_variadic ft) with
   | Some fp -> not (Typing_defs_core.get_fp_is_named fp)
   | None -> false
 

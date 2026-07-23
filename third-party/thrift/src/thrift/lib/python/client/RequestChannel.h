@@ -30,10 +30,16 @@ class ChannelFactory {
   virtual ~ChannelFactory() {}
   /**
    * Create a thrift channel by connecting to a host:port over TCP.
+   *
+   * `host` is the connect target (may be a pre-resolved IP address).
+   * `http_host` is the value used for the HTTP `Host` header when `client_t` is
+   * an HTTP client type; it should be the original hostname so virtual-host
+   * routing works even when `host` is a resolved IP.
    */
   virtual folly::Future<apache::thrift::RequestChannel::Ptr>
   createThriftChannelTCP(
       const std::string& host,
+      const std::string& http_host,
       uint16_t port,
       uint32_t connect_timeout,
       std::optional<uint32_t> channel_timeout,
@@ -44,6 +50,7 @@ class ChannelFactory {
 
   apache::thrift::RequestChannel::Ptr sync_createThriftChannelTCP(
       const std::string& host,
+      const std::string& http_host,
       uint16_t port,
       uint32_t connect_timeout,
       std::optional<uint32_t> channel_timeout,
@@ -79,6 +86,7 @@ class ChannelFactory {
   createThriftChannelSSL(
       const std::shared_ptr<folly::SSLContext>& ctx,
       const std::string& host,
+      const std::string& http_host,
       const uint16_t port,
       const uint32_t connect_timeout,
       const uint32_t ssl_timeout,
@@ -91,6 +99,7 @@ class ChannelFactory {
   apache::thrift::RequestChannel::Ptr sync_createThriftChannelSSL(
       const std::shared_ptr<folly::SSLContext>& ctx,
       const std::string& host,
+      const std::string& http_host,
       const uint16_t port,
       const uint32_t connect_timeout,
       const uint32_t ssl_timeout,
@@ -105,6 +114,7 @@ class DefaultChannelFactory : public ChannelFactory {
  public:
   folly::Future<apache::thrift::RequestChannel::Ptr> createThriftChannelTCP(
       const std::string& host,
+      const std::string& http_host,
       uint16_t port,
       uint32_t connect_timeout,
       std::optional<uint32_t> channel_timeout,
@@ -124,6 +134,7 @@ class DefaultChannelFactory : public ChannelFactory {
   folly::Future<apache::thrift::RequestChannel::Ptr> createThriftChannelSSL(
       const std::shared_ptr<folly::SSLContext>& ctx,
       const std::string& host,
+      const std::string& http_host,
       const uint16_t port,
       const uint32_t connect_timeout,
       const uint32_t ssl_timeout,

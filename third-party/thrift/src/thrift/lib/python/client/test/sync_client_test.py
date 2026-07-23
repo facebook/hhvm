@@ -186,12 +186,7 @@ class SyncClientTests(IsolatedAsyncioTestCase):
         self.assertFalse(thread.is_alive())
         if errors:
             raise errors[0]
-        # KNOWN BUG: the HTTP client sends the resolved IP address in the Host
-        # header instead of the original hostname, so virtual-host routing lands
-        # on the wrong backend. The assertion below documents this unacceptable
-        # behavior; a follow-up diff fixes the client and flips this back to
-        # [(HTTP_ROUTE_HOST_A, HTTP_TEST_HOST_A)].
-        self.assertEqual([(HTTP_ROUTE_UNKNOWN_HOST, "127.0.0.1")], selected_routes)
+        self.assertEqual([(HTTP_ROUTE_HOST_A, HTTP_TEST_HOST_A)], selected_routes)
 
     def test_void_return(self) -> None:
         with server_in_another_process() as path:

@@ -248,6 +248,7 @@ def get_client(
     if channel_timeout is not None:
         _channel_timeout_ms = <uint32_t>(channel_timeout * 1000)
     cdef string cstr
+    cdef string http_host_cstr
 
     endpoint = b''
     if client_type is cClientType.THRIFT_HTTP_CLIENT_TYPE:
@@ -294,11 +295,13 @@ def get_client(
         )
     elif ssl_context:
         cstr = <bytes> host.encode('utf-8')
+        http_host_cstr = <bytes> host.encode('utf-8')
         bridgeFutureWith[cRequestChannel_ptr](
             (<Client>client)._executor,
             channel_factory.createThriftChannelSSL(
                 ssl_context._cpp_obj,
                 move[string](cstr),
+                move[string](http_host_cstr),
                 port,
                 _timeout_ms,
                 _ssl_timeout_ms,
@@ -313,10 +316,12 @@ def get_client(
         )
     else:
         cstr = <bytes> host.encode('utf-8')
+        http_host_cstr = <bytes> host.encode('utf-8')
         bridgeFutureWith[cRequestChannel_ptr](
             (<Client>client)._executor,
             channel_factory.createThriftChannelTCP(
                 move[string](cstr),
+                move[string](http_host_cstr),
                 port,
                 _timeout_ms,
                 _channel_timeout_ms,

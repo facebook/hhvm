@@ -64,6 +64,7 @@ ConnectHandler::ConnectHandler(
     const std::shared_ptr<folly::SSLContext>& ctx,
     folly::EventBase* evb,
     const std::string& host,
+    const std::string& http_host,
     const uint16_t port,
     const uint32_t connect_timeout,
     const uint32_t ssl_timeout,
@@ -74,6 +75,7 @@ ConnectHandler::ConnectHandler(
     int32_t keep_alive_timeout_ms)
     : socket_{folly::AsyncSSLSocket::newSocket(ctx, evb)},
       host_(host),
+      http_host_(http_host),
       port_(port),
       connect_timeout_(connect_timeout),
       ssl_timeout_(ssl_timeout),
@@ -106,7 +108,7 @@ void ConnectHandler::connectSuccess() noexcept {
           std::move(socket_), proto_, channel_timeout_, keep_alive_timeout_ms_);
     }
     return createHeaderChannel(
-        std::move(socket_), client_t_, proto_, host_, endpoint_);
+        std::move(socket_), client_t_, proto_, http_host_, endpoint_);
   }());
 }
 

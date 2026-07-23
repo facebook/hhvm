@@ -45,4 +45,5 @@ cdef object get_client_with_channel_factory(
     double ssl_timeout = ?,
     channel_timeout = ?,
     int32_t keep_alive_timeout_ms = ?,
+    http_host = ?,
 )

@@ -56,6 +56,7 @@ cdef extern from "thrift/lib/python/client/RequestChannel.h" namespace "::apache
     cdef cppclass ChannelFactory "::apache::thrift::python::client::ChannelFactory":
         cFollyFuture[cRequestChannel_ptr] createThriftChannelTCP(
             const string& host,
+            const string& http_host,
             const uint16_t port,
             const uint32_t connect_timeout,
             optional[uint32_t] channel_timeout,
@@ -67,6 +68,7 @@ cdef extern from "thrift/lib/python/client/RequestChannel.h" namespace "::apache
 
         cRequestChannel_ptr sync_createThriftChannelTCP(
             const string& host,
+            const string& http_host,
             const uint16_t port,
             const uint32_t connect_timeout,
             optional[uint32_t] channel_timeout,
@@ -97,6 +99,7 @@ cdef extern from "thrift/lib/python/client/RequestChannel.h" namespace "::apache
         cFollyFuture[cRequestChannel_ptr] createThriftChannelSSL(
             shared_ptr[cSSLContext]& ctx,
             const string& host,
+            const string& http_host,
             const uint16_t port,
             const uint32_t connect_timeout,
             const uint32_t ssl_timeout,
@@ -110,6 +113,7 @@ cdef extern from "thrift/lib/python/client/RequestChannel.h" namespace "::apache
         cRequestChannel_ptr sync_createThriftChannelSSL(
             shared_ptr[cSSLContext]& ctx,
             const string& host,
+            const string& http_host,
             const uint16_t port,
             const uint32_t connect_timeout,
             const uint32_t ssl_timeout,

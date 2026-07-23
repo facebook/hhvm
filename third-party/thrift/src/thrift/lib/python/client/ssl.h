@@ -39,6 +39,7 @@ class ConnectHandler : public folly::AsyncSocket::ConnectCallback,
       const std::shared_ptr<folly::SSLContext>& ctx,
       folly::EventBase* evb,
       const std::string& host,
+      const std::string& http_host,
       const uint16_t port,
       const uint32_t connect_timeout,
       const uint32_t ssl_timeout,
@@ -58,6 +59,7 @@ class ConnectHandler : public folly::AsyncSocket::ConnectCallback,
   folly::Promise<apache::thrift::RequestChannel::Ptr> promise_;
   folly::AsyncSSLSocket::UniquePtr socket_;
   std::string host_;
+  std::string http_host_;
   const uint16_t port_;
   const uint32_t connect_timeout_;
   const uint32_t ssl_timeout_;

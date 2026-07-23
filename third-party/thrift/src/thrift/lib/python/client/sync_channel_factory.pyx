@@ -60,6 +60,9 @@ cdef RequestChannel create_channel(
         if path is not None:
             raise ValueError("Cannot set path and host/port at same time")
 
+        # Preserve the original hostname for the HTTP Host header while
+        # connecting to the resolved IP, so virtual-host routing works.
+        http_host = str(host)
         if isinstance(host, str):
             try:
                 ipaddress.ip_address(host)
@@ -72,6 +75,7 @@ cdef RequestChannel create_channel(
             return RequestChannel.create(channel_factory.sync_createThriftChannelSSL(
                 ssl_context._cpp_obj,
                 host,
+                http_host,
                 port,
                 _timeout_ms,
                 _ssl_timeout_ms,
@@ -83,7 +87,7 @@ cdef RequestChannel create_channel(
             ))
         else:
             return RequestChannel.create(channel_factory.sync_createThriftChannelTCP(
-                host, port, _timeout_ms, _channel_timeout_ms, client_type, protocol, endpoint, keep_alive_timeout_ms
+                host, http_host, port, _timeout_ms, _channel_timeout_ms, client_type, protocol, endpoint, keep_alive_timeout_ms
             ))
     elif path is not None:
         fspath = os.fsencode(path)

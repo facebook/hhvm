@@ -34,6 +34,7 @@ using namespace apache::thrift;
 folly::Future<RequestChannel::Ptr>
 DefaultChannelFactory::createThriftChannelTCP(
     const std::string& host,
+    const std::string& http_host,
     uint16_t port,
     uint32_t connect_timeout,
     std::optional<uint32_t> channel_timeout,
@@ -52,7 +53,7 @@ DefaultChannelFactory::createThriftChannelTCP(
     } else if (client_t == THRIFT_HTTP2_CLIENT_TYPE) {
 #ifndef THRIFT_NO_HTTP_CLIENT_CHANNEL
       auto chan = HTTPClientChannel::newHTTP2Channel(std::move(socket));
-      chan->setHTTPHost(host);
+      chan->setHTTPHost(http_host);
       chan->setHTTPUrl(endpoint);
       chan->setProtocolId(proto);
       return chan;
@@ -61,7 +62,7 @@ DefaultChannelFactory::createThriftChannelTCP(
 #endif
     } else {
       return createHeaderChannel(
-          std::move(socket), client_t, proto, host, endpoint);
+          std::move(socket), client_t, proto, http_host, endpoint);
     }
   });
   return future;
@@ -69,6 +70,7 @@ DefaultChannelFactory::createThriftChannelTCP(
 
 RequestChannel::Ptr ChannelFactory::sync_createThriftChannelTCP(
     const std::string& host,
+    const std::string& http_host,
     uint16_t port,
     uint32_t connect_timeout,
     std::optional<uint32_t> channel_timeout,
@@ -78,6 +80,7 @@ RequestChannel::Ptr ChannelFactory::sync_createThriftChannelTCP(
     int32_t keep_alive_timeout_ms) {
   auto future = createThriftChannelTCP(
       host,
+      http_host,
       port,
       connect_timeout,
       channel_timeout,
@@ -172,6 +175,7 @@ folly::Future<apache::thrift::RequestChannel::Ptr>
 DefaultChannelFactory::createThriftChannelSSL(
     const std::shared_ptr<folly::SSLContext>& ctx,
     const std::string& host,
+    const std::string& http_host,
     const uint16_t port,
     const uint32_t connect_timeout,
     const uint32_t ssl_timeout,
@@ -186,6 +190,7 @@ DefaultChannelFactory::createThriftChannelSSL(
       [=,
        ctx = ctx,
        host = host,
+       http_host = http_host,
        port = port,
        connect_timeout = connect_timeout,
        ssl_timeout = ssl_timeout,
@@ -195,6 +200,7 @@ DefaultChannelFactory::createThriftChannelSSL(
             ctx,
             eb,
             host,
+            http_host,
             port,
             connect_timeout,
             ssl_timeout,
@@ -218,6 +224,7 @@ DefaultChannelFactory::createThriftChannelSSL(
 apache::thrift::RequestChannel::Ptr ChannelFactory::sync_createThriftChannelSSL(
     const std::shared_ptr<folly::SSLContext>& ctx,
     const std::string& host,
+    const std::string& http_host,
     const uint16_t port,
     const uint32_t connect_timeout,
     const uint32_t ssl_timeout,
@@ -229,6 +236,7 @@ apache::thrift::RequestChannel::Ptr ChannelFactory::sync_createThriftChannelSSL(
   auto future = createThriftChannelSSL(
       ctx,
       host,
+      http_host,
       port,
       connect_timeout,
       ssl_timeout,

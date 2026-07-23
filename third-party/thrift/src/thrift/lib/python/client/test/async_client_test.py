@@ -241,13 +241,8 @@ class AsyncClientTests(IsolatedAsyncioTestCase):
                         await client.add(1, 2)
 
             route, host_header = await asyncio.wait_for(selected_route, timeout=1)
-            # KNOWN BUG: the HTTP client sends the resolved IP address in the
-            # Host header instead of the original hostname, so virtual-host
-            # routing lands on the wrong backend. The assertions below document
-            # this unacceptable behavior; a follow-up diff fixes the client and
-            # flips these back to HTTP_ROUTE_HOST_A / HTTP_TEST_HOST_A.
-            self.assertEqual(HTTP_ROUTE_UNKNOWN_HOST, route)
-            self.assertEqual("127.0.0.1", host_header)
+            self.assertEqual(HTTP_ROUTE_HOST_A, route)
+            self.assertEqual(HTTP_TEST_HOST_A, host_header)
         finally:
             server.close()
             await server.wait_closed()

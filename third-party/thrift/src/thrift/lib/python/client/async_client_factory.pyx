@@ -93,6 +93,7 @@ cdef object get_client_with_channel_factory(
     double ssl_timeout=1,
     channel_timeout=None,
     int32_t keep_alive_timeout_ms=0,
+    http_host=None,
 ):
     if not issubclass(clientKlass, Client):
         raise TypeError(f"{clientKlass} is not a thrift python client class")
@@ -141,12 +142,18 @@ cdef object get_client_with_channel_factory(
 
         if endpoint is None:
             endpoint = b""
+        # `host` may be a resolved IP (see _AsyncResolveCtxManager); `http_host`
+        # carries the original hostname for the HTTP Host header so virtual-host
+        # routing works. Fall back to `host` when the caller passed an IP.
+        if http_host is None:
+            http_host = host
         if ssl_context:
             bridgeFutureWith[cRequestChannel_ptr](
                 (<AsyncClient>client)._executor,
                 deref(channel_factory).createThriftChannelSSL(
                     ssl_context._cpp_obj,
                     host,
+                    http_host,
                     port,
                     _timeout_ms,
                     _ssl_timeout_ms,
@@ -163,7 +170,7 @@ cdef object get_client_with_channel_factory(
             bridgeFutureWith[cRequestChannel_ptr](
                 (<AsyncClient>client)._executor,
                 deref(channel_factory).createThriftChannelTCP(
-                    host, port, _timeout_ms, _channel_timeout_ms, client_type, protocol, endpoint, keep_alive_timeout_ms
+                    host, http_host, port, _timeout_ms, _channel_timeout_ms, client_type, protocol, endpoint, keep_alive_timeout_ms
                 ),
                 requestchannel_callback,
                 <PyObject *>client,
@@ -244,6 +251,8 @@ cdef class _AsyncResolveCtxManager:
             self.port,
             type=socket.SOCK_STREAM
         )
+        # Keep the original hostname for the HTTP Host header; connect to the IP.
+        http_host = self.host
         self.host = result[0][4][0]
         self.ctx = get_client_with_channel_factory(
             self.clientKlass,
@@ -258,6 +267,7 @@ cdef class _AsyncResolveCtxManager:
             ssl_timeout=self.ssl_timeout,
             channel_timeout=self.channel_timeout,
             keep_alive_timeout_ms=self.keep_alive_timeout_ms,
+            http_host=http_host,
         )
         return await self.ctx.__aenter__()
 

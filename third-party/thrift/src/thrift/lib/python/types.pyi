@@ -22,12 +22,6 @@ from typing import Never
 from folly.iobuf import IOBuf
 from thrift.python.adapter import Adapter
 from thrift.python.exceptions import GeneratedError
-from thrift.python.mutable_typeinfos import (
-    MutableListTypeInfo,
-    MutableMapTypeInfo,
-    MutableSetTypeInfo,
-    MutableStructTypeInfo,
-)
 from thrift.python.protocol import RpcKind
 from thrift.python.serializer import Protocol
 
@@ -88,17 +82,6 @@ AnyTypeInfo = typing.Union[
     ListTypeInfo,
     SetTypeInfo,
     MapTypeInfo,
-    EnumTypeInfo,
-    TypeInfo,
-    IntegerTypeInfo,
-    StringTypeInfo,
-]
-
-AnyMutableTypeInfo = typing.Union[
-    MutableStructTypeInfo,
-    MutableListTypeInfo,
-    MutableSetTypeInfo,
-    MutableMapTypeInfo,
     EnumTypeInfo,
     TypeInfo,
     IntegerTypeInfo,
@@ -349,7 +332,7 @@ def get_standard_immutable_default_value_for_type(
     type_info: AnyTypeInfo,
 ) -> _DefaultFieldValue: ...
 def get_standard_mutable_default_value_for_type(
-    type_info: AnyMutableTypeInfo,
+    type_info: object,
 ) -> _DefaultFieldValue: ...
 
 # applies 32-bit float rounding to a Python integer or float

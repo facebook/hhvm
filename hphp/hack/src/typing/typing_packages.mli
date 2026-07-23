@@ -34,6 +34,13 @@ val get_package_profile :
   Aast_defs.package_membership option ->
   Package.t option * Package.pos_id option * string
 
+(** True when the membership resolves to a package with
+    [enable_strict_isolation]. Positions that are exempt from package checks by
+    default (attributes, type references, ::class, nameof) consult this to opt
+    strict-isolation targets back into enforcement. *)
+val is_strict_isolation_target :
+  Typing_env_types.env -> Aast_defs.package_membership option -> bool
+
 val can_access_ignoring_package_override :
   env:Typing_env_types.env ->
   current_package:Package.pos_id option ->

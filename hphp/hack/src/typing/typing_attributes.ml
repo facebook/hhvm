@@ -94,6 +94,36 @@ let check_implements
     | Decl_entry.Found attr_class ->
       (* Found matching class *)
       let attr_cid = (Cls.pos attr_class, Cls.name attr_class) in
+      (* A user attribute is a reference to its attribute class. Package
+         boundaries are not otherwise enforced on attribute classes, but a
+         strict-isolation package opts them back in: using such an attribute from
+         a package that does not include it is a violation. *)
+      (if
+       Typing_packages.is_strict_isolation_target
+         env
+         (Cls.get_package attr_class)
+      then
+        match
+          Typing_visibility.check_package_access
+            ~should_check_package_boundary:
+              (`Yes Typing_error.Primary.Package.Attribute)
+            ~use_pos:attr_pos
+            ~def_pos:(Cls.pos attr_class)
+            env
+            (Cls.get_package attr_class)
+            attr_name
+        with
+        | Typing_visibility.Package_access_error err ->
+          Typing_error_utils.add_typing_error ~env err
+        | Typing_visibility.Package_access_linter_error (pos, w) ->
+          Lints_diagnostics.crosspackage_linter
+            pos
+            w.current_package
+            w.target_package
+            w.target_package_before_override
+            w.classptr_reference_warning
+            w.caller_has_package_override
+        | Typing_visibility.Package_access_ok -> ());
       if not (Cls.has_ancestor attr_class attr_interface) then (
         Typing_error_utils.add_typing_error
           ~env

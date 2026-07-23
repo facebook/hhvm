@@ -1,0 +1,40 @@
+error: Typing[4472] Cannot access attribute `IsolatedClassAttr` defined in package `isolated` which may not be available [1]
+-> `IsolatedClassAttr` is defined in attribute_class_cross_package_forbidden.php--isolated/cattr.php [2]
+-> `IsolatedClassAttr` belongs to package `isolated` by this package definition [3]
+-> package `intern` is available because the current file belongs to it by this package definition [4]
+-> `intern` includes `shared` via its definition [5]
+
+attribute_class_cross_package_forbidden.php--intern/c.php:3:3
+ 1 | <?hh
+ 2 | // `intern` does not include `isolated`; using its class attribute is a violation.
+ 3 | <<IsolatedClassAttr>>
+   |   ^^^^^^^^^^^^^^^^^ [1]
+ 4 | class UsesIsolatedClassAttr {}
+
+attribute_class_cross_package_forbidden.php--isolated/cattr.php:3:7
+ 1 | <?hh
+ 2 | // A class attribute in the strict-isolation package `isolated`.
+ 3 | class IsolatedClassAttr implements HH\ClassAttribute {
+   |       ^^^^^^^^^^^^^^^^^ [2]
+ 4 |   public function __construct() {}
+ 5 | }
+
+PACKAGES.toml:14:11
+ 4 | include_paths = ["//shared/"]
+ 5 | 
+ 6 | [packages.intern]
+   |           ^^^^^^ [4]
+ 7 | include_paths = ["//intern/"]
+ 8 | includes = ["shared"]
+   |             ^^^^^^^^ [5]
+ 9 | 
+10 | # A package that opts into strict isolation. Its presence may not be dynamically
+11 | # observed (no `package` expression / `__RequirePackage`), and
+12 | # package_exclude_patterns (e.g. __tests__) do not grant a typecheck exemption
+13 | # for references into it.
+14 | [packages.isolated]
+   |           ^^^^^^^^ [3]
+15 | include_paths = ["//isolated/"]
+16 | includes = ["intern", "shared"]
+
+1 error found

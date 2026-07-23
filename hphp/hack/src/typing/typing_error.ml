@@ -368,6 +368,7 @@ module Primary = struct
       | As_expression
       | Enforceable_type_alias
       | Enforceable_enum
+      | Attribute
     [@@deriving show]
 
     let target_symbol_spec_to_string = function
@@ -386,6 +387,7 @@ module Primary = struct
       | As_expression -> "asserted type"
       | Enforceable_type_alias -> "type alias used as an enforceable type hint"
       | Enforceable_enum -> "enum used as an enforceable type hint"
+      | Attribute -> "attribute"
 
     type t =
       | Cross_pkg_access of {

@@ -83,6 +83,16 @@ let get_package_profile
       "package override" )
   | _ -> (None, None, "")
 
+(* True when [membership] resolves to a package with strict isolation enabled.
+   Positions that are exempt from package checks by default (attributes, type
+   references, ::class, nameof) consult this to opt strict-isolation targets back
+   into enforcement. *)
+let is_strict_isolation_target env pkg_membership =
+  let (target_pkg, _, _) = get_package_profile env pkg_membership in
+  match target_pkg with
+  | Some p -> p.Package.enable_strict_isolation
+  | None -> false
+
 let package_includes current_pkg target_pkg =
   match (current_pkg, target_pkg) with
   | (Some current_pkg, Some target_pkg) ->

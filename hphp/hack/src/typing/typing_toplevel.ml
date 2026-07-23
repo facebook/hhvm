@@ -84,6 +84,10 @@ let fun_def ctx fd : Tast.fun_def Tast_with_dynamic.t option =
     let env = Env.set_env_callable_pos env pos in
     let env = Env.set_env_function_pos env f.f_span in
     let (env, restore_pos) = Env.set_inference_env_pos env (Some pos) in
+    (* Set the package membership before checking attributes so that package
+       boundary checks on attribute classes (for strict-isolation packages) see
+       the correct current package. *)
+    let env = Env.set_current_package_membership env fd.fd_package in
     let (env, user_attributes) =
       Typing.attributes_check_def env SN.AttributeKinds.fn f.f_user_attributes
     in
@@ -97,7 +101,6 @@ let fun_def ctx fd : Tast.fun_def Tast_with_dynamic.t option =
     in
     let env = Env.set_current_module env fd.fd_module in
     let env = Env.set_internal env fd.fd_internal in
-    let env = Env.set_current_package_membership env fd.fd_package in
     let env = Env.set_soft_package_from_attr env f.f_user_attributes in
     let env =
       if

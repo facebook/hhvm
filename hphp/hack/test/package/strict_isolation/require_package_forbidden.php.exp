@@ -1,0 +1,55 @@
+error: NastCheck[3110] `__RequirePackage` is not supported for package `isolated`, which has strict isolation enabled [1]
+-> `isolated` has strict isolation enabled (`enable_strict_isolation = true`); the presence of a strict-isolation package cannot be dynamically observed [2]
+
+require_package_forbidden.php--intern/hard.php:3:3
+ 1 | <?hh
+ 2 | // __RequirePackage referencing a strict-isolation package is an error.
+ 3 | <<__RequirePackage('isolated')>>
+   |   ^^^^^^^^^^^^^^^^ [1]
+ 4 | function test_require(): void {}
+
+PACKAGES.toml:14:11
+12 | # package_exclude_patterns (e.g. __tests__) do not grant a typecheck exemption
+13 | # for references into it.
+14 | [packages.isolated]
+   |           ^^^^^^^^ [2]
+15 | include_paths = ["//isolated/"]
+16 | includes = ["intern", "shared"]
+
+error: NastCheck[3110] `__SoftRequirePackage` is not supported for package `isolated`, which has strict isolation enabled [1]
+-> `isolated` has strict isolation enabled (`enable_strict_isolation = true`); the presence of a strict-isolation package cannot be dynamically observed [2]
+
+require_package_forbidden.php--intern/soft.php:3:3
+ 1 | <?hh
+ 2 | // __SoftRequirePackage is likewise forbidden for a strict-isolation package.
+ 3 | <<__SoftRequirePackage('isolated')>>
+   |   ^^^^^^^^^^^^^^^^^^^^ [1]
+ 4 | function test_soft_require(): void {}
+
+PACKAGES.toml:14:11
+12 | # package_exclude_patterns (e.g. __tests__) do not grant a typecheck exemption
+13 | # for references into it.
+14 | [packages.isolated]
+   |           ^^^^^^^^ [2]
+15 | include_paths = ["//isolated/"]
+16 | includes = ["intern", "shared"]
+
+error: NastCheck[3110] `__SoftRequirePackage` is not supported for package `isolated`, which has strict isolation enabled [1]
+-> `isolated` has strict isolation enabled (`enable_strict_isolation = true`); the presence of a strict-isolation package cannot be dynamically observed [2]
+
+require_package_forbidden.php--intern/soft_sampled.php:4:3
+ 2 | // The optional integer sampling rate must not let __SoftRequirePackage bypass
+ 3 | // the strict-isolation check.
+ 4 | <<__SoftRequirePackage('isolated', 100)>>
+   |   ^^^^^^^^^^^^^^^^^^^^ [1]
+ 5 | function test_soft_require_sampled(): void {}
+
+PACKAGES.toml:14:11
+12 | # package_exclude_patterns (e.g. __tests__) do not grant a typecheck exemption
+13 | # for references into it.
+14 | [packages.isolated]
+   |           ^^^^^^^^ [2]
+15 | include_paths = ["//isolated/"]
+16 | includes = ["intern", "shared"]
+
+3 errors found

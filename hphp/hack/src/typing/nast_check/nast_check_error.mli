@@ -12,6 +12,12 @@ type verb =
   | Vreq_implement
   | Vimplement
 
+(** The language construct that referenced a strict-isolation package and is
+    therefore unsupported. Rendered (with styling) by the error constructor. *)
+type strict_isolation_construct =
+  | Package_expression
+  | Require_package_attribute of string
+
 type t =
   | Repeated_record_field_name of {
       pos: Pos.t;
@@ -215,6 +221,12 @@ type t =
       current_pos: Pos.t;
       soft_included: bool;
       current_package_assignment_kind: string;
+    }
+  | Strict_isolation_package_not_observable of {
+      pos: Pos.t;
+      pkg: string;
+      def_pos: Pos_or_decl.t;
+      construct: strict_isolation_construct;
     }
 
 val to_user_diagnostic : t -> (Pos.t, Pos_or_decl.t) User_diagnostic.t

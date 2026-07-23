@@ -13,6 +13,12 @@ type verb =
   | Vreq_implement
   | Vimplement
 
+(** The language construct that referenced a strict-isolation package and is
+    therefore unsupported. Rendered (with styling) by the error constructor. *)
+type strict_isolation_construct =
+  | Package_expression
+  | Require_package_attribute of string
+
 type t =
   | Repeated_record_field_name of {
       pos: Pos.t;
@@ -216,6 +222,12 @@ type t =
       current_pos: Pos.t;
       soft_included: bool;
       current_package_assignment_kind: string;
+    }
+  | Strict_isolation_package_not_observable of {
+      pos: Pos.t;
+      pkg: string;
+      def_pos: Pos_or_decl.t;
+      construct: strict_isolation_construct;
     }
 
 (** Context for package strict inclusion errors *)
@@ -928,6 +940,27 @@ let package_strict_inclusion
     (pos, primary_msg)
     [(Pos_or_decl.of_raw_pos current_pos, location_msg); last_reason]
 
+let strict_isolation_package_not_observable ~pos ~pkg ~def_pos ~construct =
+  let construct =
+    match construct with
+    | Package_expression ->
+      "The " ^ Markdown_lite.md_codify "package" ^ " expression"
+    | Require_package_attribute name -> Markdown_lite.md_codify name
+  in
+  User_diagnostic.make_err
+    Error_code.(to_enum StrictIsolationPackageNotObservable)
+    ( pos,
+      Printf.sprintf
+        "%s is not supported for package `%s`, which has strict isolation enabled"
+        construct
+        pkg )
+    [
+      ( def_pos,
+        Printf.sprintf
+          "`%s` has strict isolation enabled (`enable_strict_isolation = true`); the presence of a strict-isolation package cannot be dynamically observed"
+          pkg );
+    ]
+
 (* --------------------------------------------- *)
 let to_user_diagnostic t =
   let f =
@@ -1071,5 +1104,8 @@ let to_user_diagnostic t =
         ~soft_included
         ~current_package_assignment_kind
         ~ctx:Ctx_package_expression
+    | Strict_isolation_package_not_observable { pos; pkg; def_pos; construct }
+      ->
+      strict_isolation_package_not_observable ~pos ~pkg ~def_pos ~construct
   in
   f Explanation.empty

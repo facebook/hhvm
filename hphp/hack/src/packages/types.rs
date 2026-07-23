@@ -24,6 +24,11 @@ pub struct Package {
     pub includes: Option<NameSet>,
     pub soft_includes: Option<NameSet>,
     pub include_paths: Option<NameSet>,
+    /// When true, this package opts into strict isolation (see the OCaml
+    /// `Package.t` for the enforced semantics). Defaults to false when the
+    /// `enable_strict_isolation` key is absent from the `[packages.*]` stanza.
+    #[serde(default)]
+    pub enable_strict_isolation: bool,
 }
 
 #[derive(Debug, Deserialize)]

@@ -1,0 +1,20 @@
+error: NastCheck[3110] The `package` expression is not supported for package `isolated`, which has strict isolation enabled [1]
+-> `isolated` has strict isolation enabled (`enable_strict_isolation = true`); the presence of a strict-isolation package cannot be dynamically observed [2]
+
+package_expr_forbidden.php--intern/i.php:5:15
+ 3 | // strict-isolation package.
+ 4 | function test_package_expr(): void {
+ 5 |   if (package isolated) {
+   |               ^^^^^^^^ [1]
+ 6 |   }
+ 7 | }
+
+PACKAGES.toml:14:11
+12 | # package_exclude_patterns (e.g. __tests__) do not grant a typecheck exemption
+13 | # for references into it.
+14 | [packages.isolated]
+   |           ^^^^^^^^ [2]
+15 | include_paths = ["//isolated/"]
+16 | includes = ["intern", "shared"]
+
+1 error found

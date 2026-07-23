@@ -51,6 +51,27 @@ let check_package_strict_inclusion
     emit_error ~soft_included:true ~def_pos
   | _ -> ()
 
+(* A strict-isolation package must not be dynamically observable: the `package`
+   expression and the `__RequirePackage` / `__SoftRequirePackage` attributes are
+   not supported for it. If [required_pkg] has strict isolation enabled, emit an
+   error and return [true] so the caller skips the ordinary strict-inclusion
+   check. *)
+let error_if_strict_isolation ~pos ~pkg_name ~construct required_pkg =
+  match required_pkg with
+  | Some p when p.Package.enable_strict_isolation ->
+    Diagnostics.add_diagnostic
+      Nast_check_error.(
+        to_user_diagnostic
+        @@ Strict_isolation_package_not_observable
+             {
+               pos;
+               pkg = pkg_name;
+               def_pos = Pos_or_decl.of_raw_pos (Package.get_package_pos p);
+               construct;
+             });
+    true
+  | _ -> false
+
 let require_package_strict_inclusion env attr =
   match
     Naming_attributes.find2
@@ -60,26 +81,83 @@ let require_package_strict_inclusion env attr =
   with
   | Some
       {
-        ua_params = [(_, _, String required_pkg_name)];
+        (* Match the leading package-name argument and ignore any trailing
+           arguments, e.g. __SoftRequirePackage's optional integer sampling rate,
+           so those forms don't slip past the check. *)
+        ua_params = (_, _, String required_pkg_name) :: _;
         ua_name = (name_pos, name);
       } ->
     let required_pkg = lookup_package env required_pkg_name in
-    (match (required_pkg, env.Nast_check_env.package) with
-    | (None, _) when String.equal name SN.UserAttributes.uaSoftRequirePackage ->
-      (* Emit naming error for unbound package *)
-      let custom_err_config =
-        Provider_context.get_tcopt env.Nast_check_env.ctx
-        |> TypecheckerOptions.custom_error_config
-      in
-      Diagnostics.add_diagnostic
-        (Naming_error_utils.to_user_diagnostic
-           (Naming_error.Unbound_name
-              {
-                pos = name_pos;
-                name = required_pkg_name;
-                kind = Name_context.PackageNamespace;
-              })
-           custom_err_config)
+    if
+      error_if_strict_isolation
+        ~pos:name_pos
+        ~pkg_name:required_pkg_name
+        ~construct:(Nast_check_error.Require_package_attribute name)
+        required_pkg
+    then
+      ()
+    else (
+      match (required_pkg, env.Nast_check_env.package) with
+      | (None, _) when String.equal name SN.UserAttributes.uaSoftRequirePackage
+        ->
+        (* Emit naming error for unbound package *)
+        let custom_err_config =
+          Provider_context.get_tcopt env.Nast_check_env.ctx
+          |> TypecheckerOptions.custom_error_config
+        in
+        Diagnostics.add_diagnostic
+          (Naming_error_utils.to_user_diagnostic
+             (Naming_error.Unbound_name
+                {
+                  pos = name_pos;
+                  name = required_pkg_name;
+                  kind = Name_context.PackageNamespace;
+                })
+             custom_err_config)
+      | (Some required_package, Some current_pkg_membership) ->
+        let ( current_pkg,
+              current_pkg_name,
+              current_pkg_pos,
+              current_package_assignment_kind ) =
+          get_current_package_info env current_pkg_membership
+        in
+        (match current_pkg with
+        | Some current_package ->
+          check_package_strict_inclusion
+            ~required_package
+            ~current_package
+            ~emit_error:(fun ~soft_included ~def_pos ->
+              Diagnostics.add_diagnostic
+                Nast_check_error.(
+                  to_user_diagnostic
+                  @@ Require_package_strict_inclusion
+                       {
+                         required_pos = name_pos;
+                         required = required_pkg_name;
+                         def_pos = Pos_or_decl.of_raw_pos def_pos;
+                         current = current_pkg_name;
+                         current_pos = current_pkg_pos;
+                         attribute_name = name;
+                         soft_included;
+                         current_package_assignment_kind;
+                       }))
+        | None -> ())
+      | _ -> ()
+    )
+  | _ -> ()
+
+let package_expression_strict_inclusion env (pkg_pos, pkg_name) =
+  let required_pkg = lookup_package env pkg_name in
+  if
+    error_if_strict_isolation
+      ~pos:pkg_pos
+      ~pkg_name
+      ~construct:Nast_check_error.Package_expression
+      required_pkg
+  then
+    ()
+  else
+    match (required_pkg, env.Nast_check_env.package) with
     | (Some required_package, Some current_pkg_membership) ->
       let ( current_pkg,
             current_pkg_name,
@@ -96,52 +174,18 @@ let require_package_strict_inclusion env attr =
             Diagnostics.add_diagnostic
               Nast_check_error.(
                 to_user_diagnostic
-                @@ Require_package_strict_inclusion
+                @@ Package_expression_strict_inclusion
                      {
-                       required_pos = name_pos;
-                       required = required_pkg_name;
+                       pkg_pos;
+                       pkg = pkg_name;
                        def_pos = Pos_or_decl.of_raw_pos def_pos;
                        current = current_pkg_name;
                        current_pos = current_pkg_pos;
-                       attribute_name = name;
                        soft_included;
                        current_package_assignment_kind;
                      }))
       | None -> ())
-    | _ -> ())
-  | _ -> ()
-
-let package_expression_strict_inclusion env (pkg_pos, pkg_name) =
-  let required_pkg = lookup_package env pkg_name in
-  match (required_pkg, env.Nast_check_env.package) with
-  | (Some required_package, Some current_pkg_membership) ->
-    let ( current_pkg,
-          current_pkg_name,
-          current_pkg_pos,
-          current_package_assignment_kind ) =
-      get_current_package_info env current_pkg_membership
-    in
-    (match current_pkg with
-    | Some current_package ->
-      check_package_strict_inclusion
-        ~required_package
-        ~current_package
-        ~emit_error:(fun ~soft_included ~def_pos ->
-          Diagnostics.add_diagnostic
-            Nast_check_error.(
-              to_user_diagnostic
-              @@ Package_expression_strict_inclusion
-                   {
-                     pkg_pos;
-                     pkg = pkg_name;
-                     def_pos = Pos_or_decl.of_raw_pos def_pos;
-                     current = current_pkg_name;
-                     current_pos = current_pkg_pos;
-                     soft_included;
-                     current_package_assignment_kind;
-                   }))
-    | None -> ())
-  | _ -> ()
+    | _ -> ()
 
 let handler =
   object

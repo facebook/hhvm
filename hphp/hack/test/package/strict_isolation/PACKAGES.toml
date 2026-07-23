@@ -1,0 +1,20 @@
+[packages]
+
+[packages.shared]
+include_paths = ["//shared/"]
+
+[packages.intern]
+include_paths = ["//intern/"]
+includes = ["shared"]
+
+# A package that opts into strict isolation. Its presence may not be dynamically
+# observed (no `package` expression / `__RequirePackage`), and
+# package_exclude_patterns (e.g. __tests__) do not grant a typecheck exemption
+# for references into it.
+[packages.isolated]
+include_paths = ["//isolated/"]
+includes = ["intern", "shared"]
+enable_strict_isolation = true
+
+[packages.standalone]
+include_paths = ["//standalone/"]

@@ -75,6 +75,7 @@ pub fn package_info_to_vec(
                 includes: convert_many(&package.includes),
                 soft_includes: convert_many(&package.soft_includes),
                 include_paths: convert_many(&package.include_paths),
+                enable_strict_isolation: package.enable_strict_isolation,
             }
         })
         .collect();

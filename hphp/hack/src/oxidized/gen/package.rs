@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<685e676b00eb59d4fe5eacd727dda997>>
+// @generated SignedSource<<875ec0369cecbc685a9c8b59098b5bfd>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -61,6 +61,12 @@ pub struct Package {
     pub includes: Vec<PosId>,
     pub soft_includes: Vec<PosId>,
     pub include_paths: Vec<PosId>,
+    /// When true, this package opts into strict isolation: its presence
+    /// cannot be dynamically observed (the [package] expression and the
+    /// [__RequirePackage] / [__SoftRequirePackage] attributes are rejected
+    /// for it), and [package_exclude_patterns] (e.g. [__tests__]) do not
+    /// grant a typecheck exemption for references into it.
+    pub enable_strict_isolation: bool,
 }
 
 #[derive(

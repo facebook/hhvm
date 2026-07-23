@@ -12,6 +12,10 @@ type t = {
   includes: pos_id list;
   soft_includes: pos_id list;
   include_paths: pos_id list;
+  enable_strict_isolation: bool;
+      (** When true, this package opts into strict isolation: its presence
+          cannot be dynamically observed, and [package_exclude_patterns] do not
+          grant a typecheck exemption for references into it. *)
 }
 [@@deriving eq, show]
 

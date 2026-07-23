@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d23c1c401c57c811d0afe22367fc9b59>>
+// @generated SignedSource<<06ef49c5cc2ef9aa0134b98a8b9e9db4>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -46,6 +46,31 @@ pub enum Verb {
 }
 impl TrivialDrop for Verb {}
 arena_deserializer::impl_deserialize_in_arena!(Verb);
+
+/// The language construct that referenced a strict-isolation package and is
+/// therefore unsupported. Rendered (with styling) by the error constructor.
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[repr(C, u8)]
+pub enum StrictIsolationConstruct {
+    #[rust_to_ocaml(name = "Package_expression")]
+    PackageExpression,
+    #[rust_to_ocaml(name = "Require_package_attribute")]
+    RequirePackageAttribute(String),
+}
 
 #[derive(
     Clone,
@@ -336,6 +361,13 @@ pub enum NastCheckError {
         current_pos: pos::Pos,
         soft_included: bool,
         current_package_assignment_kind: String,
+    },
+    #[rust_to_ocaml(name = "Strict_isolation_package_not_observable")]
+    StrictIsolationPackageNotObservable {
+        pos: pos::Pos,
+        pkg: String,
+        def_pos: pos_or_decl::PosOrDecl,
+        construct: StrictIsolationConstruct,
     },
 }
 

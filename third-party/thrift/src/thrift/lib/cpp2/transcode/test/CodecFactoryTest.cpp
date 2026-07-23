@@ -19,12 +19,13 @@
 
 #include <gtest/gtest.h>
 
-#include <thrift/lib/cpp2/dynamic/TypeSystem.h>
-#include <thrift/lib/cpp2/dynamic/TypeSystemBuilder.h>
-
+#include <memory>
 #include <stdexcept>
 #include <string>
 #include <string_view>
+#include <utility>
+#include <thrift/lib/cpp2/dynamic/TypeSystem.h>
+#include <thrift/lib/cpp2/dynamic/TypeSystemBuilder.h>
 
 namespace apache::thrift::transcode {
 namespace {

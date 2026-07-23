@@ -606,7 +606,7 @@ TEST(GoldenTranscodeTest, GeneratedFixtureRoundTripSupportedSources) {
 
 TEST(GoldenTranscodeTest, JsonRejectsDuplicateKnownFields) {
   expectJsonSourceRejected(
-      "duplicate-required-scalar",
+      "duplicate-unqualified-scalar",
       structNode<fixture::PresenceShapes>(),
       R"({"unqualified_i32":1,"unqualified_i32":2})");
   expectJsonSourceRejected(
@@ -617,11 +617,6 @@ TEST(GoldenTranscodeTest, JsonRejectsDuplicateKnownFields) {
       "duplicate-nested-field",
       structNode<fixture::NestedShapes>(),
       R"({"inner":{"n":1,"n":2,"label":"x"},"matrix":[],"inner_groups":[]})");
-}
-
-TEST(GoldenTranscodeTest, DISABLED_NonThriftEndpointsRejectRequiredFields) {
-  GTEST_SKIP()
-      << "TODO: TypeSystem inputs need raw required-field qualifier metadata.";
 }
 
 TEST(GoldenTranscodeTest, DISABLED_ProtobufGoldenRoundTripSupportedProtocols) {

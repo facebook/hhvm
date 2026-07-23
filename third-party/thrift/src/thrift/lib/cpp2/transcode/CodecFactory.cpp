@@ -18,10 +18,9 @@
 
 #include <thrift/lib/cpp2/transcode/WireType.h>
 
-#include <thrift/lib/cpp2/dynamic/TypeSystem.h>
-
 #include <stdexcept>
 #include <string_view>
+#include <thrift/lib/cpp2/dynamic/TypeSystem.h>
 
 namespace apache::thrift::transcode {
 

@@ -8,14 +8,16 @@
 
 #include <folly/portability/GTest.h>
 
-#include <fizz/protocol/DefaultCertificateVerifier.h>
+#include <fizz/backend/openssl/certificate/OpenSSLCertificateVerifier.h>
 #include <fizz/protocol/test/CertUtil.h>
 #include <folly/ssl/OpenSSLCertUtils.h>
+
+using namespace fizz::openssl;
 
 namespace fizz {
 namespace test {
 
-class DefaultCertificateVerifierTest : public testing::Test {
+class OpenSSLCertificateVerifierTest : public testing::Test {
  public:
   void SetUp() override {
     OpenSSL_add_all_algorithms();
@@ -26,9 +28,9 @@ class DefaultCertificateVerifierTest : public testing::Test {
         createCert("leaf", false, &rootCertAndKey_, KeyType::P256);
     ASSERT_EQ(X509_STORE_add_cert(store.get(), rootCertAndKey_.cert.get()), 1);
     Error err;
-    std::unique_ptr<DefaultCertificateVerifier> verifier;
+    std::unique_ptr<OpenSSLCertificateVerifier> verifier;
     ASSERT_EQ(
-        DefaultCertificateVerifier::create(
+        OpenSSLCertificateVerifier::create(
             verifier, err, VerificationContext::Client, std::move(store)),
         Status::Success);
     verifier_ = std::move(verifier);
@@ -47,7 +49,7 @@ class DefaultCertificateVerifierTest : public testing::Test {
  protected:
   CertAndKey rootCertAndKey_;
   CertAndKey leafCertAndKey_;
-  std::unique_ptr<DefaultCertificateVerifier> verifier_;
+  std::unique_ptr<OpenSSLCertificateVerifier> verifier_;
 };
 
 template <class F1, class F2>
@@ -72,7 +74,7 @@ static void expectThrowWithAlert(F f, AlertDescription ad) {
   });
 }
 
-TEST_F(DefaultCertificateVerifierTest, TestVerifySuccess) {
+TEST_F(OpenSSLCertificateVerifierTest, TestVerifySuccess) {
   Error err;
   std::shared_ptr<const Cert> verifiedCert;
   EXPECT_EQ(
@@ -90,7 +92,7 @@ TEST_F(DefaultCertificateVerifierTest, TestVerifySuccess) {
   EXPECT_EQ(rootCertName, "root");
 }
 
-TEST_F(DefaultCertificateVerifierTest, TestVerifyWithIntermediates) {
+TEST_F(OpenSSLCertificateVerifierTest, TestVerifyWithIntermediates) {
   auto subauth = createCert("subauth", true, &rootCertAndKey_, KeyType::P256);
   auto subleaf = createCert("subleaf", false, &subauth, KeyType::P256);
 
@@ -112,7 +114,7 @@ TEST_F(DefaultCertificateVerifierTest, TestVerifyWithIntermediates) {
   EXPECT_EQ(rootCertName, "root");
 }
 
-TEST_F(DefaultCertificateVerifierTest, TestVerifySelfSignedCert) {
+TEST_F(OpenSSLCertificateVerifierTest, TestVerifySelfSignedCert) {
   auto selfsigned = createCert("self", false, nullptr, KeyType::P256);
   expectThrowWithAlert(
       [&] {
@@ -125,10 +127,10 @@ TEST_F(DefaultCertificateVerifierTest, TestVerifySelfSignedCert) {
       AlertDescription::unknown_ca);
 }
 
-TEST_F(DefaultCertificateVerifierTest, TestVerifySelfSignedCertWithOverride) {
+TEST_F(OpenSSLCertificateVerifierTest, TestVerifySelfSignedCertWithOverride) {
   auto selfsigned = createCert("self", false, nullptr, KeyType::P256);
   verifier_->setCustomVerifyCallback(
-      &DefaultCertificateVerifierTest::allowSelfSignedLeafCertCallback);
+      &OpenSSLCertificateVerifierTest::allowSelfSignedLeafCertCallback);
   // Will not throw because the override allows for this type of error.
   Error err;
   std::shared_ptr<const Cert> verifiedCert;
@@ -146,7 +148,7 @@ TEST_F(DefaultCertificateVerifierTest, TestVerifySelfSignedCertWithOverride) {
   EXPECT_EQ(rootCertName, "self");
 }
 
-TEST_F(DefaultCertificateVerifierTest, TestVerifyWithIntermediateMissing) {
+TEST_F(OpenSSLCertificateVerifierTest, TestVerifyWithIntermediateMissing) {
   auto subauth = createCert("subauth", true, &rootCertAndKey_, KeyType::P256);
   auto subleaf = createCert("subleaf", false, &subauth, KeyType::P256);
   expectThrowWithAlert(
@@ -160,12 +162,12 @@ TEST_F(DefaultCertificateVerifierTest, TestVerifyWithIntermediateMissing) {
 }
 
 TEST_F(
-    DefaultCertificateVerifierTest,
+    OpenSSLCertificateVerifierTest,
     TestVerifyWithIntermediateMissingWithOverride) {
   auto subauth = createCert("subauth", true, &rootCertAndKey_, KeyType::P256);
   auto subleaf = createCert("subleaf", false, &subauth, KeyType::P256);
   verifier_->setCustomVerifyCallback(
-      &DefaultCertificateVerifierTest::allowSelfSignedLeafCertCallback);
+      &OpenSSLCertificateVerifierTest::allowSelfSignedLeafCertCallback);
   // The override asserts that self signed certs (chain length = 1) are
   // accepted. But since this certificate is not self signed, this override
   // should effectively be a no-op and normal certificate verification
@@ -180,7 +182,7 @@ TEST_F(
       AlertDescription::unknown_ca);
 }
 
-TEST_F(DefaultCertificateVerifierTest, TestVerifyWithBadIntermediate) {
+TEST_F(OpenSSLCertificateVerifierTest, TestVerifyWithBadIntermediate) {
   auto subauth =
       createCert("badsubauth", false, &rootCertAndKey_, KeyType::P256);
   auto subleaf = createCert("badsubleaf", false, &subauth, KeyType::P256);
@@ -194,7 +196,7 @@ TEST_F(DefaultCertificateVerifierTest, TestVerifyWithBadIntermediate) {
       AlertDescription::unknown_ca);
 }
 
-TEST_F(DefaultCertificateVerifierTest, TestVerifyWithBadRoot) {
+TEST_F(OpenSSLCertificateVerifierTest, TestVerifyWithBadRoot) {
   auto newroot = createCert("root2", true, nullptr, KeyType::P256);
   auto subauth = createCert("subauth2", true, &newroot, KeyType::P256);
   auto subleaf = createCert("leaf2", false, &subauth, KeyType::P256);
@@ -211,7 +213,7 @@ TEST_F(DefaultCertificateVerifierTest, TestVerifyWithBadRoot) {
       },
       AlertDescription::unknown_ca);
 }
-TEST_F(DefaultCertificateVerifierTest, TestVerifyWithExpiredLeafTooOld) {
+TEST_F(OpenSSLCertificateVerifierTest, TestVerifyWithExpiredLeafTooOld) {
   auto now = std::chrono::system_clock::now();
   auto newLeaf = createCert({
       .cn = "expiredLeaf",
@@ -231,7 +233,7 @@ TEST_F(DefaultCertificateVerifierTest, TestVerifyWithExpiredLeafTooOld) {
       AlertDescription::certificate_expired);
 }
 
-TEST_F(DefaultCertificateVerifierTest, TestVerifyWithExpiredLeafTooNew) {
+TEST_F(OpenSSLCertificateVerifierTest, TestVerifyWithExpiredLeafTooNew) {
   auto now = std::chrono::system_clock::now();
   auto newLeaf = createCert({
       .cn = "expiredLeaf",

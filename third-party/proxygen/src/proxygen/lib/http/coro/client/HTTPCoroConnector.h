@@ -88,10 +88,20 @@ class HTTPCoroConnector {
   }
 
   // Helpers to make a Fizz or SSL context
+  // Builds cert verifier using makeFizzCertVerifier function below.
   static FizzContextAndVerifier makeFizzClientContextAndVerifier(
       const TLSParams& params);
   static std::shared_ptr<const fizz::client::FizzClientContext>
   makeFizzClientContext(const TLSParams& params);
+  /**
+   * Constructs a Fizz certificate verifier.
+   *
+   * If `params.caPaths` is not explicitly set, then the following environment
+   * variables are tried, in order:
+   *    1. PROXYGEN_CORO_CA_PATH
+   *    2. CURL_CA_BUNDLE
+   *    3. hardcoded default
+   */
   static std::shared_ptr<const fizz::CertificateVerifier> makeFizzCertVerifier(
       const TLSParams& params);
 

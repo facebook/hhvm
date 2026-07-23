@@ -7,6 +7,7 @@
  */
 
 #include "proxygen/lib/http/coro/client/HTTPCoroConnector.h"
+#include "proxygen/lib/http/coro/client/TLS.h"
 #include <folly/logging/xlog.h>
 #include <proxygen/lib/http/codec/H3EarlyDataHandler.h>
 
@@ -18,6 +19,7 @@
 #include "proxygen/lib/http/coro/util/Transport.h"
 #include <fizz/backend/openssl/certificate/CertUtils.h>
 #include <fizz/client/AsyncFizzClient.h>
+#include <fizz/protocol/CertificateVerifier.h>
 #include <fizz/protocol/DefaultCertificateVerifier.h>
 #include <folly/FileUtil.h>
 #include <folly/SocketAddress.h>
@@ -573,6 +575,20 @@ folly::coro::Task<CoroSessionHandle> connectImpl(
   co_return session;
 }
 
+static std::vector<std::string> getDefaultCAPath() {
+  if (const char* envPath = std::getenv("PROXYGEN_CORO_CA_PATH");
+      envPath && *envPath) {
+    return {envPath};
+  } else if (const char* curlCABundle = std::getenv("CURL_CA_BUNDLE");
+             curlCABundle && *curlCABundle) {
+    return {curlCABundle};
+  } else if (const char* fallbackPath = getFallbackCAPath();
+             fallbackPath && *fallbackPath) {
+    return {fallbackPath};
+  }
+  return {};
+}
+
 } // namespace
 
 namespace proxygen::coro {
@@ -742,18 +758,24 @@ HTTPCoroConnector::makeFizzClientContext(const TLSParams& params) {
 
 std::shared_ptr<const fizz::CertificateVerifier>
 HTTPCoroConnector::makeFizzCertVerifier(const TLSParams& params) {
-  std::unique_ptr<fizz::DefaultCertificateVerifier> fizzCertVerifier;
-  if (params.caPaths.size() > 0) {
-    Error err;
-    FIZZ_THROW_ON_ERROR(fizz::DefaultCertificateVerifier::createFromCAFiles(
-                            fizzCertVerifier,
-                            err,
-                            fizz::VerificationContext::Client,
-                            params.caPaths),
-                        err);
+  std::vector<std::string> caPaths = params.caPaths;
+  if (caPaths.empty()) {
+    caPaths = getDefaultCAPath();
   }
-  return static_cast<std::shared_ptr<const fizz::CertificateVerifier>>(
-      std::move(fizzCertVerifier));
+
+  // TODO(T279682906): Enforce valid certificate verifier in proxygen.
+  if (caPaths.empty()) {
+    return std::make_shared<fizz::InsecureCertificateVerifier>(
+        fizz::VerificationContext::Client);
+  }
+
+  Error err;
+  std::unique_ptr<fizz::DefaultCertificateVerifier> verifier;
+  FIZZ_THROW_ON_ERROR(
+      fizz::DefaultCertificateVerifier::createFromCAFiles(
+          verifier, err, fizz::VerificationContext::Client, caPaths),
+      err);
+  return verifier;
 }
 
 HTTPCoroConnector::FizzContextAndVerifier

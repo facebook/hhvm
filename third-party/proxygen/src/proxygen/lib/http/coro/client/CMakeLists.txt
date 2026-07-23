@@ -34,12 +34,18 @@ proxygen_add_library(proxygen_cert_verifier
     Folly::folly_network_address
 )
 
+proxygen_add_library(proxygen_http_coro_client_tls
+  SRCS
+    TLS.cpp
+)
+
 proxygen_add_library(proxygen_http_coro_client_http_connector
   SRCS
     HTTPCoroConnector.cpp
   DEPS
     proxygen_http_codec_codec_factory
     proxygen_http_codec_h3_early_data_handler
+    proxygen_http_coro_client_tls
     proxygen_http_coro_transport_coro_ssl_transport
     proxygen_http_coro_transport_http_connect_transport
     proxygen_http_coro_util_Transport

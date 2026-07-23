@@ -33,7 +33,7 @@ template <typename T>
 const T& cr();
 
 template <typename T>
-using is_mutable_ref = folly::Conjunction<
+using is_mutable_ref = std::conjunction<
     std::is_reference<T>,
     folly::Negation<std::is_const<std::remove_reference_t<T>>>>;
 

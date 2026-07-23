@@ -1273,7 +1273,7 @@ CO_TEST_P_X(HTTPCoroSessionPoolTests, TwoWaitersOneConns) {
   EXPECT_EQ(resp->headers->getStatusCode(), 200);
   EXPECT_TRUE(resp->eom);
   auto res2 = co_await folly::coro::co_awaitTry(std::move(res2Fut));
-  EXPECT_EQ(res1->session, res2->session);
+  EXPECT_EQ(res1->session.get(), res2->session.get());
   auto get2Fut = co_withExecutor(&evb_,
                                  res2->session->sendRequest(
                                      HTTPFixedSource::makeFixedRequest("/"),
@@ -1281,7 +1281,7 @@ CO_TEST_P_X(HTTPCoroSessionPoolTests, TwoWaitersOneConns) {
                      .start();
   auto res3 = co_await folly::coro::co_awaitTry(std::move(res3Fut));
   XCHECK(res3.hasValue());
-  EXPECT_EQ(res1->session, res3->session);
+  EXPECT_EQ(res1->session.get(), res3->session.get());
 
   // maxWaiters=2 => res4Fut is cancelled
   EXPECT_TRUE(res4Fut.isReady() && res4Fut.hasException() &&
@@ -1327,7 +1327,7 @@ CO_TEST_P_X(HTTPCoroSessionPoolTests, TwoWaitersTwoConns) {
   EXPECT_EQ(resp->headers->getStatusCode(), 200);
   EXPECT_TRUE(resp->eom);
   auto res3 = co_await folly::coro::co_awaitTry(std::move(res3Fut));
-  EXPECT_EQ(res1->session, res3->session);
+  EXPECT_EQ(res1->session.get(), res3->session.get());
   auto get3Fut = co_withExecutor(&evb_,
                                  res3->session->sendRequest(
                                      HTTPFixedSource::makeFixedRequest("/"),
@@ -1340,7 +1340,7 @@ CO_TEST_P_X(HTTPCoroSessionPoolTests, TwoWaitersTwoConns) {
   EXPECT_EQ(resp->headers->getStatusCode(), 200);
   EXPECT_TRUE(resp->eom);
   auto res4 = co_await folly::coro::co_awaitTry(std::move(res4Fut));
-  EXPECT_EQ(res2->session, res4->session);
+  EXPECT_EQ(res2->session.get(), res4->session.get());
   // meh abandon get3Fut
   pool_->drain();
 }
@@ -1369,7 +1369,7 @@ CO_TEST_P_X(HTTPCoroSessionPoolTests, PoolConnect) {
   EXPECT_FALSE(res2.hasException());
   auto localPort2 = res2->session->getLocalAddress().getPort();
   // The connected session is H1, so full, expect a new top level session
-  EXPECT_NE(res1->session, res2->session);
+  EXPECT_NE(res1->session.get(), res2->session.get());
 
   if (GetParam() == TransportType::TCP) {
     // The underlying session is H1, so a new underlying session is created
@@ -1609,7 +1609,7 @@ CO_TEST_P_X(HTTPCoroSessionPoolTests, IdleSessionsTest) {
       auto res = co_await pool_->getSessionWithReservation();
       // destructing reservation will move to idle
       EXPECT_CALL(idleSessionObs, onIdleSessionsChanged(_)).Times(1);
-      session = res.session;
+      session = res.session.get();
     }
 
     EXPECT_CALL(idleSessionObs, onIdleSessionsChanged(_)).Times(1);

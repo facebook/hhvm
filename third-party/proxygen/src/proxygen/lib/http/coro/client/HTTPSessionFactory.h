@@ -21,13 +21,12 @@ class HTTPSessionFactory {
 
   struct GetSessionResult {
     HTTPCoroSession::RequestReservation reservation;
-    HTTPCoroSession* session;
-    HTTPSessionContextPtr ctx;
+    // Owning handle to the session. Holds a keepalive so callers cannot outlive
+    // the session. Use `.get()` only where a raw HTTPCoroSession* is required.
+    CoroSessionHandle session;
     GetSessionResult(HTTPCoroSession::RequestReservation res,
                      HTTPCoroSession* sess)
-        : reservation(std::move(res)),
-          session(sess),
-          ctx(sess->acquireKeepAlive()) {
+        : reservation(std::move(res)), session(CoroSessionHandle(sess)) {
     }
     GetSessionResult(GetSessionResult&&) = default;
     GetSessionResult& operator=(GetSessionResult&&) = default;

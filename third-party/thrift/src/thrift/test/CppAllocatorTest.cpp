@@ -16,6 +16,7 @@
 
 #include <thrift/test/CppAllocatorTest.h>
 
+#include <folly/ScopeGuard.h>
 #include <thrift/lib/cpp2/op/Get.h>
 #include <thrift/lib/cpp2/protocol/Serializer.h>
 #include <thrift/test/gen-cpp2/CppAllocatorTest_types.h>
@@ -193,6 +194,49 @@ TEST(CppAllocatorTest, DeserializeNested) {
   EXPECT_EQ(get_allocator(*s2.aa_map_of_set()), alloc);
   EXPECT_EQ(get_allocator(s2.aa_map_of_set()->at(42)), alloc);
 }
+
+namespace {
+template <typename Serializer, typename Struct>
+void checkDeserializePropagatesAllocator(const Struct& s1) {
+  // Set the default resource to null_memory_resource to make sure it is never
+  // used.
+  auto prev = set_default_resource(std::pmr::null_memory_resource());
+  auto guard = folly::makeGuard([&] { set_default_resource(prev); });
+
+  // A distinct resource (not s1's default) so the two allocators are
+  // distinguishable below.
+  std::pmr::monotonic_buffer_resource fieldRes(std::pmr::new_delete_resource());
+  PmrByteAlloc fieldAlloc(&fieldRes);
+  Struct s2(fieldAlloc);
+  Serializer::deserialize(Serializer::template serialize<std::string>(s1), s2);
+
+  EXPECT_EQ(s1, s2);
+  EXPECT_NE(s1.field()->get_allocator(), fieldAlloc);
+  EXPECT_EQ(s2.field()->get_allocator(), fieldAlloc);
+}
+
+// SimpleJSON is size-omitting (consume_elem path); Compact/Binary are
+// size-prefixed (deserialize_known_length_{set,map} path).
+using DeserializeSerializers = ::testing::Types<
+    apache::thrift::SimpleJSONSerializer,
+    apache::thrift::CompactSerializer,
+    apache::thrift::BinarySerializer>;
+
+template <typename Serializer>
+class CppAllocatorDeserializeTest : public ::testing::Test {};
+TYPED_TEST_SUITE(CppAllocatorDeserializeTest, DeserializeSerializers);
+
+TYPED_TEST(CppAllocatorDeserializeTest, ElementPropagatesAllocator) {
+  // kTooLong disables SSO so the element/key read allocates.
+  HasAllocatorAwareSetElement set;
+  set.field() = {kTooLong};
+  checkDeserializePropagatesAllocator<TypeParam>(set);
+
+  HasAllocatorAwareMapElement map;
+  map.field() = {{kTooLong, kTooLong}};
+  checkDeserializePropagatesAllocator<TypeParam>(map);
+}
+} // namespace
 
 TEST(CppAllocatorTest, DeserializeNestedPmr) {
   using serializer = apache::thrift::CompactSerializer;

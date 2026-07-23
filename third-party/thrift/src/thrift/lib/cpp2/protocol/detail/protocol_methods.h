@@ -875,7 +875,7 @@ struct protocol_methods<type_class::set<ElemClass>, Type, ExpectedTag> {
  private:
   template <typename Protocol>
   static void consume_elem(Protocol& protocol, Type& out) {
-    elem_type tmp;
+    auto tmp = detail::default_set_element(out);
     elem_methods::read(protocol, tmp);
     out.insert(std::move(tmp));
   }
@@ -980,9 +980,10 @@ struct protocol_methods<
  protected:
   template <typename Protocol, typename U>
   static void consume_elem(Protocol& protocol, U& out) {
-    key_type key_tmp;
-    key_methods::read(protocol, key_tmp);
-    mapped_methods::read(protocol, out[std::move(key_tmp)]);
+    deserialize_key_val_into_map(
+        out,
+        [&protocol](auto& key) { key_methods::read(protocol, key); },
+        [&protocol](auto& value) { mapped_methods::read(protocol, value); });
   }
 
  public:

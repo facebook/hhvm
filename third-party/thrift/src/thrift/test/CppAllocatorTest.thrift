@@ -206,6 +206,28 @@ struct HasNestedContainerFieldsPmr {
   2: PmrMapSet aa_map_of_set;
 }
 
+// Set whose element type is itself allocator-aware, used to test element
+// allocator propagation on deserialize.
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {"cpp.allocator": "PmrByteAlloc"},
+}
+struct HasAllocatorAwareSetElement {
+  @thrift.DeprecatedUnvalidatedAnnotations{items = {"cpp.use_allocator": "1"}}
+  @cpp.Type{template = "std::pmr::set"}
+  1: set<string_8090> field;
+}
+
+// Map whose key and value types are themselves allocator-aware, used to test
+// key/value allocator propagation on deserialize.
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {"cpp.allocator": "PmrByteAlloc"},
+}
+struct HasAllocatorAwareMapElement {
+  @thrift.DeprecatedUnvalidatedAnnotations{items = {"cpp.use_allocator": "1"}}
+  @cpp.Type{template = "std::pmr::map"}
+  1: map<string_8090, string_8090> field;
+}
+
 @thrift.DeprecatedUnvalidatedAnnotations{
   items = {"cpp.allocator": "::ScopedStatefulAlloc<>"},
 }

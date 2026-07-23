@@ -132,7 +132,7 @@ HTTPSource* makeHTTPRequestSource(
 }
 
 folly::coro::Task<void> makeRequestReadResponse(
-    HTTPCoroSession* session,
+    CoroSessionHandle session,
     HTTPCoroSession::RequestReservation reservation,
     HTTPSourceHolder reqSource,
     HTTPSourceReader reader,
@@ -226,7 +226,7 @@ HTTPCoroConnector::SessionParams HTTPClient::getSessionParams(
   return sessParams;
 }
 
-folly::coro::Task<HTTPCoroSession*> HTTPClient::getHTTPSession(
+folly::coro::Task<CoroSessionHandle> HTTPClient::getHTTPSession(
     folly::EventBase* evb,
     std::string host,
     uint16_t port,
@@ -283,8 +283,8 @@ folly::coro::Task<HTTPCoroSession*> HTTPClient::getHTTPSession(
       evb, serverAddr, connectTimeout, connParams, sessParams));
 }
 
-folly::coro::Task<HTTPCoroSession*> HTTPClient::getHTTPSessionViaProxy(
-    HTTPCoroSession* proxySession,
+folly::coro::Task<CoroSessionHandle> HTTPClient::getHTTPSessionViaProxy(
+    CoroSessionHandle proxySession,
     std::string host,
     uint16_t port,
     bool connectUnique,
@@ -329,7 +329,7 @@ folly::coro::Task<HTTPClient::Response> HTTPClient::get(
 }
 
 folly::coro::Task<HTTPClient::Response> HTTPClient::get(
-    HTTPCoroSession* session,
+    CoroSessionHandle session,
     URL url,
     std::chrono::milliseconds timeout,
     RequestHeaderMap requestHeaders) {
@@ -343,7 +343,7 @@ folly::coro::Task<HTTPClient::Response> HTTPClient::get(
 }
 
 folly::coro::Task<HTTPClient::Response> HTTPClient::get(
-    HTTPCoroSession* session,
+    CoroSessionHandle session,
     HTTPCoroSession::RequestReservation reservation,
     URL url,
     std::chrono::milliseconds timeout,
@@ -358,7 +358,7 @@ folly::coro::Task<HTTPClient::Response> HTTPClient::get(
   co_return resp;
 }
 
-folly::coro::Task<void> HTTPClient::get(HTTPCoroSession* session,
+folly::coro::Task<void> HTTPClient::get(CoroSessionHandle session,
                                         URL url,
                                         HTTPSourceReader reader,
                                         std::chrono::milliseconds timeout,
@@ -380,7 +380,7 @@ folly::coro::Task<void> HTTPClient::get(HTTPCoroSession* session,
 }
 
 folly::coro::Task<void> HTTPClient::get(
-    HTTPCoroSession* session,
+    CoroSessionHandle session,
     HTTPCoroSession::RequestReservation reservation,
     URL url,
     HTTPSourceReader reader,
@@ -445,7 +445,7 @@ folly::coro::Task<HTTPClient::Response> HTTPClient::post(
 }
 
 folly::coro::Task<HTTPClient::Response> HTTPClient::post(
-    HTTPCoroSession* session,
+    CoroSessionHandle session,
     URL url,
     std::string body,
     std::chrono::milliseconds timeout,
@@ -497,7 +497,7 @@ folly::coro::Task<void> HTTPClient::post(folly::EventBase* evb,
       timeout));
 }
 
-folly::coro::Task<void> HTTPClient::post(HTTPCoroSession* session,
+folly::coro::Task<void> HTTPClient::post(CoroSessionHandle session,
                                          URL url,
                                          std::string body,
                                          HTTPSourceReader reader,
@@ -529,13 +529,13 @@ folly::coro::Task<HTTPClient::Response> HTTPClient::readResponse(
 }
 
 folly::coro::Task<void> HTTPClient::request(
-    HTTPCoroSession* session,
+    CoroSessionHandle session,
     HTTPCoroSession::RequestReservation reservation,
     HTTPSourceHolder reqSource,
     HTTPSourceReader reader,
     std::chrono::milliseconds timeout,
     Logger::SampledLoggerPtr logger) {
-  return makeRequestReadResponse(session,
+  return makeRequestReadResponse(std::move(session),
                                  std::move(reservation),
                                  std::move(reqSource),
                                  std::move(reader),
@@ -544,7 +544,7 @@ folly::coro::Task<void> HTTPClient::request(
 }
 
 folly::coro::Task<void> HTTPClient::request(
-    HTTPCoroSession* session,
+    CoroSessionHandle session,
     HTTPCoroSession::RequestReservation reservation,
     HTTPMethod method,
     const URL& url,
@@ -554,128 +554,13 @@ folly::coro::Task<void> HTTPClient::request(
     std::chrono::milliseconds timeout,
     Logger::SampledLoggerPtr logger) {
   return makeRequestReadResponse(
-      session,
+      std::move(session),
       std::move(reservation),
       makeHTTPRequestSource(
           url, method, std::move(requestHeaders), std::move(body)),
       std::move(reader),
       timeout,
       std::move(logger));
-}
-
-// CoroSessionHandle overloads. These forward to the HTTPCoroSession* variants,
-// holding the handle by value on this coroutine frame so the session's
-// keepalive is retained for the full duration of the request.
-folly::coro::Task<HTTPClient::Response> HTTPClient::get(
-    CoroSessionHandle session,
-    URL url,
-    std::chrono::milliseconds timeout,
-    RequestHeaderMap requestHeaders) {
-  co_return co_await get(
-      session.get(), std::move(url), timeout, std::move(requestHeaders));
-}
-
-folly::coro::Task<HTTPClient::Response> HTTPClient::get(
-    CoroSessionHandle session,
-    HTTPCoroSession::RequestReservation reservation,
-    URL url,
-    std::chrono::milliseconds timeout,
-    RequestHeaderMap requestHeaders) {
-  co_return co_await get(session.get(),
-                         std::move(reservation),
-                         std::move(url),
-                         timeout,
-                         std::move(requestHeaders));
-}
-
-folly::coro::Task<void> HTTPClient::get(CoroSessionHandle session,
-                                        URL url,
-                                        HTTPSourceReader reader,
-                                        std::chrono::milliseconds timeout,
-                                        RequestHeaderMap requestHeaders) {
-  co_await get(session.get(),
-               std::move(url),
-               std::move(reader),
-               timeout,
-               std::move(requestHeaders));
-}
-
-folly::coro::Task<void> HTTPClient::get(
-    CoroSessionHandle session,
-    HTTPCoroSession::RequestReservation reservation,
-    URL url,
-    HTTPSourceReader reader,
-    std::chrono::milliseconds timeout,
-    RequestHeaderMap requestHeaders) {
-  co_await get(session.get(),
-               std::move(reservation),
-               std::move(url),
-               std::move(reader),
-               timeout,
-               std::move(requestHeaders));
-}
-
-folly::coro::Task<HTTPClient::Response> HTTPClient::post(
-    CoroSessionHandle session,
-    URL url,
-    std::string body,
-    std::chrono::milliseconds timeout,
-    RequestHeaderMap requestHeaders) {
-  co_return co_await post(session.get(),
-                          std::move(url),
-                          std::move(body),
-                          timeout,
-                          std::move(requestHeaders));
-}
-
-folly::coro::Task<void> HTTPClient::post(CoroSessionHandle session,
-                                         URL url,
-                                         std::string body,
-                                         HTTPSourceReader reader,
-                                         std::chrono::milliseconds timeout,
-                                         RequestHeaderMap requestHeaders) {
-  co_await post(session.get(),
-                std::move(url),
-                std::move(body),
-                std::move(reader),
-                timeout,
-                std::move(requestHeaders));
-}
-
-folly::coro::Task<void> HTTPClient::request(
-    CoroSessionHandle session,
-    HTTPCoroSession::RequestReservation reservation,
-    HTTPSourceHolder reqSource,
-    HTTPSourceReader reader,
-    std::chrono::milliseconds timeout,
-    Logger::SampledLoggerPtr logger) {
-  co_await request(session.get(),
-                   std::move(reservation),
-                   std::move(reqSource),
-                   std::move(reader),
-                   timeout,
-                   std::move(logger));
-}
-
-folly::coro::Task<void> HTTPClient::request(
-    CoroSessionHandle session,
-    HTTPCoroSession::RequestReservation reservation,
-    HTTPMethod method,
-    const URL& url,
-    RequestHeaderMap requestHeaders,
-    HTTPSourceReader reader,
-    std::optional<std::string> body,
-    std::chrono::milliseconds timeout,
-    Logger::SampledLoggerPtr logger) {
-  co_await request(session.get(),
-                   std::move(reservation),
-                   method,
-                   url,
-                   std::move(requestHeaders),
-                   std::move(reader),
-                   std::move(body),
-                   timeout,
-                   std::move(logger));
 }
 
 HTTPSourceReader HTTPClient::makeDefaultReader(HTTPClient::Response& response) {

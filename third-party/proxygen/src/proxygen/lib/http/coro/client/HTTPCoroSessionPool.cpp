@@ -392,7 +392,7 @@ folly::coro::Task<void> HTTPCoroSessionPool::addNewConnection() {
   XLOG(DBG4) << "Getting session, pool=" << *this;
   for (uint16_t attempt = 0; attempt < poolParams_.maxConnectionAttempts;
        attempt++) {
-    folly::Try<HTTPCoroSession*> sessionTry;
+    folly::Try<CoroSessionHandle> sessionTry;
     if (quicConnParams_) {
       sessionTry = co_await co_awaitTry(
           HTTPCoroConnector::connect(eventBase_,
@@ -449,7 +449,7 @@ folly::coro::Task<void> HTTPCoroSessionPool::addNewConnection() {
       XLOG(DBG4) << *this << ":" << serverAddress_
                  << " ++connectsInProgress_ = " << connectsInProgress_;
     } else {
-      auto session = *sessionTry;
+      auto* session = sessionTry->get();
       XLOG(DBG4) << "Got upstream, pool=" << *this << " session=" << *session;
       auto* holder = new Holder(*session, *this);
       // defaulted available since immediate local use is expected

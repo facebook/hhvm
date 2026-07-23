@@ -142,7 +142,7 @@ class HTTPConnectTransportTest : public TransportTest {
   }
 
   folly::coro::Task<std::unique_ptr<HTTPConnectTransport>> connect(
-      HTTPCoroSession* session = nullptr) {
+      CoroSessionHandle session = {}) {
     std::unique_ptr<HTTPConnectStream> connectStream;
     if (!session) {
       session = co_await HTTPCoroConnector::connect(
@@ -392,7 +392,7 @@ TEST_F(HTTPConnectTransportTest, ReadTimeout) {
 
 TEST_F(HTTPConnectTransportTest, ReadAfterReadTimeout) {
   run([&]() -> Task<> {
-    auto* sess = co_await HTTPCoroConnector::connect(
+    auto sess = co_await HTTPCoroConnector::connect(
         &evb, *srv->address(), 0ms, getConnParams());
     auto connectStream =
         co_await HTTPConnectStream::connectUnique(sess,

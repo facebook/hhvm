@@ -166,7 +166,7 @@ class HTTPCoroConnector {
     return params;
   }
 
-  static folly::coro::Task<HTTPCoroSession*> connect(
+  static folly::coro::Task<CoroSessionHandle> connect(
       folly::EventBase* evb,
       folly::SocketAddress serverAddr,
       std::chrono::milliseconds timeout,
@@ -175,7 +175,7 @@ class HTTPCoroConnector {
 
   static constexpr std::chrono::milliseconds kHappyEyeballsDelay{150};
 
-  static folly::coro::Task<HTTPCoroSession*> happyEyeballsConnect(
+  static folly::coro::Task<CoroSessionHandle> happyEyeballsConnect(
       folly::EventBase* evb,
       folly::SocketAddress primaryAddr,
       folly::SocketAddress fallbackAddr,
@@ -185,18 +185,7 @@ class HTTPCoroConnector {
       std::chrono::milliseconds happyEyeballsTimeout = kHappyEyeballsDelay);
 
   // For HTTP connections over HTTP CONNECT
-  static folly::coro::Task<HTTPCoroSession*> proxyConnect(
-      HTTPCoroSession* proxySession,
-      HTTPCoroSession::RequestReservation reservation,
-      std::string authority,
-      bool connectUnique,
-      std::chrono::milliseconds timeout,
-      const ConnectionParams& connParams = defaultConnectionParams(),
-      const SessionParams& sessionParams = defaultSessionParams());
-
-  // Same as above, but takes a CoroSessionHandle (which holds a keepalive on
-  // the proxy session for the duration of the connect).
-  static folly::coro::Task<HTTPCoroSession*> proxyConnect(
+  static folly::coro::Task<CoroSessionHandle> proxyConnect(
       CoroSessionHandle proxySession,
       HTTPCoroSession::RequestReservation reservation,
       std::string authority,
@@ -205,7 +194,7 @@ class HTTPCoroConnector {
       const ConnectionParams& connParams = defaultConnectionParams(),
       const SessionParams& sessionParams = defaultSessionParams());
 
-  static folly::coro::Task<HTTPCoroSession*> connect(
+  static folly::coro::Task<CoroSessionHandle> connect(
       folly::EventBase* evb,
       folly::SocketAddress serverAddr,
       std::chrono::milliseconds timeout,

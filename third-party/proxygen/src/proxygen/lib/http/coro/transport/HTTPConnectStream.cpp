@@ -12,10 +12,11 @@
 namespace proxygen::coro {
 
 HTTPConnectStream::HTTPConnectStream(Ownership ownership,
-                                     HTTPCoroSession* session,
+                                     CoroSessionHandle session,
                                      RequestHeaderMap connectHeaders,
                                      size_t egressBufferSize)
-    : session_(ownership == Ownership::Unique ? session : nullptr),
+    : session_(ownership == Ownership::Unique ? session
+                                              : CoroSessionHandle(nullptr)),
       eventBase_(session->getEventBase()),
       egressBufferSize_(egressBufferSize),
       egressSource_(new HTTPStreamSource(
@@ -41,7 +42,7 @@ HTTPConnectStream::~HTTPConnectStream() {
 }
 
 folly::coro::Task<std::unique_ptr<HTTPConnectStream>>
-HTTPConnectStream::connect(HTTPCoroSession* session,
+HTTPConnectStream::connect(CoroSessionHandle session,
                            HTTPCoroSession::RequestReservation reservation,
                            std::string authority,
                            std::chrono::milliseconds timeout,
@@ -55,23 +56,8 @@ HTTPConnectStream::connect(HTTPCoroSession* session,
 }
 
 folly::coro::Task<std::unique_ptr<HTTPConnectStream>>
-HTTPConnectStream::connect(CoroSessionHandle session,
-                           HTTPCoroSession::RequestReservation reservation,
-                           std::string authority,
-                           std::chrono::milliseconds timeout,
-                           RequestHeaderMap connectHeaders,
-                           size_t egressBufferSize) {
-  co_return co_await connect(session.get(),
-                             std::move(reservation),
-                             std::move(authority),
-                             timeout,
-                             std::move(connectHeaders),
-                             egressBufferSize);
-}
-
-folly::coro::Task<std::unique_ptr<HTTPConnectStream>>
 HTTPConnectStream::connectUnique(
-    HTTPCoroSession* session,
+    CoroSessionHandle session,
     HTTPCoroSession::RequestReservation reservation,
     std::string authority,
     std::chrono::milliseconds timeout,
@@ -85,7 +71,7 @@ HTTPConnectStream::connectUnique(
 }
 
 folly::coro::Task<void> HTTPConnectStream::connectImpl(
-    HTTPCoroSession* session,
+    CoroSessionHandle session,
     HTTPCoroSession::RequestReservation reservation,
     std::string authority,
     std::chrono::milliseconds timeout) {

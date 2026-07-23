@@ -144,16 +144,16 @@ class HTTPConnectIntegrationTest : public ::testing::Test {
   }
 
   // ::getProxySess should never fail, sanity checks no exception is yielded
-  folly::coro::Task<HTTPCoroSession*> getProxySess() {
+  folly::coro::Task<CoroSessionHandle> getProxySess() {
     auto proxySess = co_await co_awaitTry(HTTPCoroConnector::connect(
         &evb_, getServAddr(), kConnectTimeout, getConnParams()));
     XCHECK(!proxySess.hasException())
         << "proxySess ex=" << proxySess.exception().what();
-    co_return proxySess.value();
+    co_return std::move(proxySess.value());
   }
 
-  folly::coro::Task<HTTPCoroSession*> proxyConnect(
-      HTTPCoroSession* proxySess,
+  folly::coro::Task<CoroSessionHandle> proxyConnect(
+      CoroSessionHandle proxySess,
       std::string authority,
       HTTPCoroConnector::SessionParams sessParams =
           HTTPCoroConnector::defaultSessionParams()) {

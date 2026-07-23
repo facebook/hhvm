@@ -203,7 +203,7 @@ void setupCodec(HTTPCodec& codec,
   }
 }
 
-void setupSession(HTTPCoroSession* session,
+void setupSession(CoroSessionHandle session,
                   const HTTPCoroConnector::SessionParams& sessionParams) {
   // default conn fc window to ~32MB
   session->setConnectionFlowControl(
@@ -364,7 +364,7 @@ class QuicConnectCB
   }
 
   folly::exception_wrapper quicException;
-  HTTPCoroSession* session{nullptr};
+  CoroSessionHandle session{nullptr};
 
  private:
   void quicConnectErr(folly::exception_wrapper ex) noexcept {
@@ -409,11 +409,10 @@ class QuicConnectCB
     tinfo_.sslSetupTime = millisecondsSince(startTime_);
     // TODO: pass replaySafe_
     session = HTTPCoroSession::makeUpstreamCoroSession(
-                  std::move(quicClient_), std::move(codec), std::move(tinfo_))
-                  .get();
+        std::move(quicClient_), std::move(codec), std::move(tinfo_));
     setupSession(session, sessionParams_);
-    static_cast<HTTPQuicCoroSession*>(session)->setEarlyDataHandler(
-        std::move(earlyDataHandler_));
+    static_cast<HTTPQuicCoroSession*>(session.get())
+        ->setEarlyDataHandler(std::move(earlyDataHandler_));
     connectSuccess();
   }
   std::shared_ptr<quic::QuicClientTransport> quicClient_;
@@ -425,7 +424,7 @@ class QuicConnectCB
   std::unique_ptr<H3EarlyDataHandler> earlyDataHandler_;
 };
 
-folly::coro::Task<HTTPCoroSession*> connectQuic(
+folly::coro::Task<CoroSessionHandle> connectQuic(
     folly::EventBase* eventBase,
     folly::SocketAddress connectAddr,
     std::chrono::milliseconds timeoutMs,
@@ -507,7 +506,7 @@ folly::coro::Task<HTTPCoroSession*> connectQuic(
   co_return cb.session;
 }
 
-folly::coro::Task<HTTPCoroSession*> connectImpl(
+folly::coro::Task<CoroSessionHandle> connectImpl(
     folly::EventBase* evb,
     folly::SocketAddress serverAddr,
     std::unique_ptr<HTTPConnectStream> connectStream,
@@ -570,15 +569,15 @@ folly::coro::Task<HTTPCoroSession*> connectImpl(
   }
   auto session = HTTPCoroSession::makeUpstreamCoroSession(
       std::move(*socket), std::move(codec), std::move(tinfo));
-  setupSession(session.get(), sessionParams);
-  co_return session.get();
+  setupSession(session, sessionParams);
+  co_return session;
 }
 
 } // namespace
 
 namespace proxygen::coro {
 
-folly::coro::Task<HTTPCoroSession*> HTTPCoroConnector::connect(
+folly::coro::Task<CoroSessionHandle> HTTPCoroConnector::connect(
     folly::EventBase* evb,
     folly::SocketAddress serverAddr,
     std::chrono::milliseconds timeout,
@@ -588,7 +587,7 @@ folly::coro::Task<HTTPCoroSession*> HTTPCoroConnector::connect(
       evb, std::move(serverAddr), nullptr, timeout, connParams, sessionParams);
 }
 
-folly::coro::Task<HTTPCoroSession*> HTTPCoroConnector::happyEyeballsConnect(
+folly::coro::Task<CoroSessionHandle> HTTPCoroConnector::happyEyeballsConnect(
     folly::EventBase* evb,
     folly::SocketAddress primaryAddr,
     folly::SocketAddress fallbackAddr,
@@ -603,7 +602,7 @@ folly::coro::Task<HTTPCoroSession*> HTTPCoroConnector::happyEyeballsConnect(
                            const ConnectionParams& connParams,
                            const SessionParams& sessionParams,
                            folly::coro::SharedPromise<void>& failedConnection)
-      -> folly::coro::Task<HTTPCoroSession*> {
+      -> folly::coro::Task<CoroSessionHandle> {
     auto sessionTry =
         co_await folly::coro::co_awaitTry(HTTPCoroConnector::connect(
             evb, std::move(primaryAddr), timeout, connParams, sessionParams));
@@ -624,7 +623,7 @@ folly::coro::Task<HTTPCoroSession*> HTTPCoroConnector::happyEyeballsConnect(
          const ConnectionParams& connParams,
          const SessionParams& sessionParams,
          const folly::coro::SharedPromise<void>& failedConnection)
-      -> folly::coro::Task<HTTPCoroSession*> {
+      -> folly::coro::Task<CoroSessionHandle> {
     // Wait for happyEyeballsDelay or until the first attempt fails
     co_await folly::coro::collectAny(
         folly::coro::sleepReturnEarlyOnCancel(happyEyeballsDelay),
@@ -652,8 +651,8 @@ folly::coro::Task<HTTPCoroSession*> HTTPCoroConnector::happyEyeballsConnect(
   co_return res.second;
 }
 
-folly::coro::Task<HTTPCoroSession*> HTTPCoroConnector::proxyConnect(
-    HTTPCoroSession* proxySession,
+folly::coro::Task<CoroSessionHandle> HTTPCoroConnector::proxyConnect(
+    CoroSessionHandle proxySession,
     HTTPCoroSession::RequestReservation reservation,
     std::string authority,
     bool connectUnique,
@@ -680,24 +679,7 @@ folly::coro::Task<HTTPCoroSession*> HTTPCoroConnector::proxyConnect(
                                             sessionParams));
 }
 
-folly::coro::Task<HTTPCoroSession*> HTTPCoroConnector::proxyConnect(
-    CoroSessionHandle proxySession,
-    HTTPCoroSession::RequestReservation reservation,
-    std::string authority,
-    bool connectUnique,
-    std::chrono::milliseconds timeout,
-    const ConnectionParams& connParams,
-    const SessionParams& sessionParams) {
-  co_return co_await proxyConnect(proxySession.get(),
-                                  std::move(reservation),
-                                  std::move(authority),
-                                  connectUnique,
-                                  timeout,
-                                  connParams,
-                                  sessionParams);
-}
-
-folly::coro::Task<HTTPCoroSession*> HTTPCoroConnector::connect(
+folly::coro::Task<CoroSessionHandle> HTTPCoroConnector::connect(
     folly::EventBase* evb,
     folly::SocketAddress serverAddr,
     std::chrono::milliseconds timeout,

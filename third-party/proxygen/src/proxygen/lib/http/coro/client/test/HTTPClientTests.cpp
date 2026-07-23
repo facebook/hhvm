@@ -74,19 +74,22 @@ folly::coro::Task<HTTPCoroSession*> HTTPCoroConnector_connect(
     HTTPCoroConnector::SessionParams sessParams =
         HTTPClient::getSessionParams()) {
   if (connParams.index() == 1) {
-    return HTTPCoroConnector::connect(
-        evb,
-        addr,
-        timeout,
-        std::get<HTTPCoroConnector::QuicConnectionParams>(connParams),
-        sessParams);
+    co_return (
+        co_await HTTPCoroConnector::connect(
+            evb,
+            addr,
+            timeout,
+            std::get<HTTPCoroConnector::QuicConnectionParams>(connParams),
+            sessParams))
+        .get();
   } else {
-    return HTTPCoroConnector::connect(
-        evb,
-        addr,
-        timeout,
-        std::get<HTTPCoroConnector::ConnectionParams>(connParams),
-        sessParams);
+    co_return (co_await HTTPCoroConnector::connect(
+                   evb,
+                   addr,
+                   timeout,
+                   std::get<HTTPCoroConnector::ConnectionParams>(connParams),
+                   sessParams))
+        .get();
   }
 }
 

@@ -77,7 +77,7 @@ class SimpleHTTPSessionFactory : public HTTPSessionFactory {
     if (reservation.hasException()) {
       co_yield folly::coro::co_error(std::move(reservation.exception()));
     }
-    co_return GetSessionResult(std::move(*reservation), session);
+    co_return GetSessionResult(std::move(*reservation), session.get());
   }
 
  private:

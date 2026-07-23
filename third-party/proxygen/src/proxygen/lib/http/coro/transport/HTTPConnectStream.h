@@ -45,16 +45,6 @@ class HTTPConnectStream
    * (eg: HTTPCoroSessionPool).
    */
   static folly::coro::Task<std::unique_ptr<HTTPConnectStream>> connect(
-      HTTPCoroSession* session,
-      HTTPCoroSession::RequestReservation reservation,
-      std::string authority,
-      std::chrono::milliseconds timeout,
-      RequestHeaderMap connectHeaders = RequestHeaderMap(),
-      size_t egressBufferSize = 256 * 1024);
-
-  /* Same as above, but takes a CoroSessionHandle (which holds a keepalive on
-   * the session for the duration of the connect). */
-  static folly::coro::Task<std::unique_ptr<HTTPConnectStream>> connect(
       CoroSessionHandle session,
       HTTPCoroSession::RequestReservation reservation,
       std::string authority,
@@ -67,7 +57,7 @@ class HTTPConnectStream
    * called.
    */
   static folly::coro::Task<std::unique_ptr<HTTPConnectStream>> connectUnique(
-      HTTPCoroSession* session,
+      CoroSessionHandle session,
       HTTPCoroSession::RequestReservation reservation,
       std::string authority,
       std::chrono::milliseconds timeout,
@@ -87,7 +77,7 @@ class HTTPConnectStream
   void shutdownRead();
   void shutdownWrite();
 
-  HTTPCoroSession* session_{nullptr};
+  CoroSessionHandle session_{nullptr};
   folly::EventBase* eventBase_;
   size_t egressBufferSize_;
   HTTPStreamSource* egressSource_{nullptr};
@@ -99,19 +89,19 @@ class HTTPConnectStream
  private:
   enum class Ownership { Unique, Shared };
   HTTPConnectStream(Ownership ownership,
-                    HTTPCoroSession* session,
+                    CoroSessionHandle session,
                     RequestHeaderMap connectHeaders,
                     size_t egressBufferSize);
 
   folly::coro::Task<void> connectImpl(
-      HTTPCoroSession* session,
+      CoroSessionHandle session,
       HTTPCoroSession::RequestReservation reservation,
       std::string authority,
       std::chrono::milliseconds timeout);
 
   /* HTTPCoroSession::InfoCallback overrides */
   void onDestroy(const HTTPCoroSession& /*sess*/) override {
-    session_ = nullptr;
+    session_ = CoroSessionHandle(nullptr);
   }
 
   /* HTTPStreamSource::Callback overrides */

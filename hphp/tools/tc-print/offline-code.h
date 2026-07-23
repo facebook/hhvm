@@ -32,7 +32,9 @@
 #include <fmt/core.h>
 
 extern "C" {
+#if defined(__x86_64__)
 #include <xed-interface.h>
+#endif
 }
 
 namespace HPHP { namespace jit {
@@ -212,7 +214,9 @@ struct OfflineCode {
     TCA tcRegionBases[TCRCount] = {
       _aBase, _coldBase, _frozenBase
     };
+#if defined(__x86_64__)
     if (arch_ == DisasmArch::X64) xedInit();
+#endif
     openFiles(tcRegionBases);
     loadSymbolsMap();
   }
@@ -263,8 +267,10 @@ private:
   TCRegionRec        tcRegions[TCRCount];
   struct MmapRegion { uint8_t* addr; size_t len; };
   std::vector<MmapRegion> ownedMmaps;
+#if defined(__x86_64__)
   xed_state_t        xed_state;
   xed_syntax_enum_t  xed_syntax;
+#endif
 
   std::unordered_map<TCA, std::string> addr2SymMap;
 
@@ -358,6 +364,7 @@ private:
                                 const PerfEventsMap<TCA>& perfEvents,
                                 BCMappingInfo bcMappingInfo);
 
+#if defined(__x86_64__)
   // Arch-specific implementations (x86)
   const char* getArchNameX86();
   TCA collectJmpTargetsX86(const TCRegionRec& region,
@@ -369,6 +376,7 @@ private:
                                 uint64_t codeLen,
                                 const PerfEventsMap<TCA>& perfEvents,
                                 BCMappingInfo bcMappingInfo);
+#endif
 
   std::string getSymbolName(TCA addr);
 

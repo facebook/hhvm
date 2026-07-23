@@ -37,7 +37,12 @@ namespace HPHP { namespace jit {
 
 const char* OfflineCode::getArchName() {
   if (arch_ == DisasmArch::A64) return getArchNameArm();
+#if defined(__x86_64__)
   return getArchNameX86();
+#else
+  error("X64 disassembly not supported on this platform");
+  return "";
+#endif
 }
 
 TCA OfflineCode::collectJmpTargets(const TCRegionRec& region,
@@ -47,7 +52,12 @@ TCA OfflineCode::collectJmpTargets(const TCRegionRec& region,
   if (arch_ == DisasmArch::A64) {
     return collectJmpTargetsArm(region, codeStartAddr, codeLen, jmpTargets);
   }
+#if defined(__x86_64__)
   return collectJmpTargetsX86(region, codeStartAddr, codeLen, jmpTargets);
+#else
+  error("X64 disassembly not supported on this platform");
+  return 0;
+#endif
 }
 
 TCRegionInfo OfflineCode::getRegionInfo(const TCRegionRec& region,
@@ -59,8 +69,13 @@ TCRegionInfo OfflineCode::getRegionInfo(const TCRegionRec& region,
     return getRegionInfoArm(region, codeStartAddr, codeLen, perfEvents,
                             std::move(bcMappingInfo));
   }
+#if defined(__x86_64__)
   return getRegionInfoX86(region, codeStartAddr, codeLen, perfEvents,
                           std::move(bcMappingInfo));
+#else
+  error("X64 disassembly not supported on this platform");
+  return TCRegionInfo{bcMappingInfo.tcRegion};
+#endif
 }
 
 string TCRegionString[] = {

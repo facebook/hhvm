@@ -1,0 +1,16 @@
+ERROR: File "case_type_enum_arraykey_ambiguous.php", line 9, characters 11-26:
+Invalid case type declaration. More than one variant of `BadIntEnumString` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_enum_arraykey_ambiguous.php", line 9, characters 30-36:
+  This is the type `IntEnum`, which includes **strings** because enums are approximated as `arraykey` for case type variant disjointness — an `is` test on an enum cannot rule out other ints or strings
+  File "case_type_enum_arraykey_ambiguous.php", line 4, characters 6-12:
+    via the constraint on the enum `IntEnum`
+  File "case_type_enum_arraykey_ambiguous.php", line 9, characters 40-45:
+  It overlaps with `string`, which also includes **strings**
+ERROR: File "case_type_enum_arraykey_ambiguous.php", line 10, characters 11-23:
+Invalid case type declaration. More than one variant of `BadStrEnumInt` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_enum_arraykey_ambiguous.php", line 10, characters 27-33:
+  This is the type `StrEnum`, which includes **ints** because enums are approximated as `arraykey` for case type variant disjointness — an `is` test on an enum cannot rule out other ints or strings
+  File "case_type_enum_arraykey_ambiguous.php", line 5, characters 6-12:
+    via the constraint on the enum `StrEnum`
+  File "case_type_enum_arraykey_ambiguous.php", line 10, characters 37-39:
+  It overlaps with `int`, which also includes **ints**

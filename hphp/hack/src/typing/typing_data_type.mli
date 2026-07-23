@@ -36,6 +36,7 @@ module DataTypeReason : sig
     | Nullable
     | Nums
     | Arraykeys
+    | EnumForCaseTypeAsArraykey
     | SpecialInterface of string
     | Cyclic
 

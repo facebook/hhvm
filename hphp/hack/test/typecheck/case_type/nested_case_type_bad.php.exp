@@ -5,8 +5,6 @@ Invalid case type declaration. More than one variant of `Bad` could contain valu
   File "nested_case_type_bad.php", line 4, characters 21-23:
     via this variant of the case type `Scalars`
   File "nested_case_type_bad.php", line 6, characters 27-27:
-  It overlaps with `E`, which also includes **ints**
-  File "nested_case_type_bad.php", line 8, characters 15-15:
+  It overlaps with `E`, which also includes **ints** because enums are approximated as `arraykey` for case type variant disjointness — an `is` test on an enum cannot rule out other ints or strings
+  File "nested_case_type_bad.php", line 8, characters 6-6:
     via the constraint on the enum `E`
-  File "nested_case_type_bad.php", line 12, characters 17-19:
-    via the constraint on the enum `F`

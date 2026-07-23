@@ -6,6 +6,14 @@ File "enum_variant_gadt.php", line 33, characters 5-19:
   Color
 File "enum_variant_gadt.php", line 36, characters 5-19:
   bool
+ERROR: File "enum_variant_gadt.php", line 12, characters 11-20:
+Invalid case type declaration. More than one variant of `ColorOrInt` could contain values with the same runtime tag (Typing[4475])
+  File "enum_variant_gadt.php", line 13, characters 5-9:
+  This is the type `Color`, which includes **ints** because enums are approximated as `arraykey` for case type variant disjointness — an `is` test on an enum cannot rule out other ints or strings
+  File "enum_variant_gadt.php", line 3, characters 6-10:
+    via the constraint on the enum `Color`
+  File "enum_variant_gadt.php", line 14, characters 5-7:
+  It overlaps with `int`, which also includes **ints**
 ERROR: File "enum_variant_gadt.php", line 24, characters 7-23:
 Invalid return type (Typing[4110])
   File "enum_variant_gadt.php", line 20, characters 59-59:

@@ -1608,10 +1608,6 @@ The format can be found in hphp/tools/configs/generate_configs.rs
   1 - raise a warning
   2 - throw
 
-- bool Eval.APCSerializeFuncs = true, UNKNOWN
-
-- bool Eval.APCSerializeClsMeth = true, UNKNOWN
-
 - bool Eval.LogOnIsArrayFunction = false, UNKNOWN
 
 - uint32_t Eval.UnitPrefetcherMaxThreads = 0, UNKNOWN

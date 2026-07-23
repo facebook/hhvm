@@ -70,13 +70,7 @@ APCHandle::Pair APCHandle::Create(const_variant_ref source,
           VarNR{s_invalidMethCaller.get()}
         );
       }
-      auto const serialize_func =
-        Cfg::Eval::APCSerializeFuncs &&
-        // Right now cls_meth() can serialize as an array, and attempting to
-        // recursively serialize elements in the array will eventually attempt
-        // to serialize a method pointer.
-        !func->isMethod();
-      if (serialize_func) {
+      if (!func->isMethod()) {
         if (func->isPersistent()) {
           auto const value = new APCTypedValue(func);
           return {value->getHandle(), sizeof(APCTypedValue)};
@@ -149,17 +143,15 @@ APCHandle::Pair APCHandle::Create(const_variant_ref source,
     case KindOfEnumClassLabel:
       return APCArray::MakeSharedEmptyVec();
 
-    case KindOfClsMeth:
-      if (Cfg::Eval::APCSerializeClsMeth) {
-        auto const meth = val(cell).pclsmeth;
-        if (meth->getCls()->isPersistent()) {
-          auto const value = new APCTypedValue(meth);
-          return {value->getHandle(), sizeof(APCTypedValue)};
-        }
-        auto const value = new APCClsMeth(meth->getCls(), meth->getFunc());
-        return {value->getHandle(), sizeof(APCClsMeth)};
+    case KindOfClsMeth: {
+      auto const meth = val(cell).pclsmeth;
+      if (meth->getCls()->isPersistent()) {
+        auto const value = new APCTypedValue(meth);
+        return {value->getHandle(), sizeof(APCTypedValue)};
       }
-      [[fallthrough]];
+      auto const value = new APCClsMeth(meth->getCls(), meth->getFunc());
+      return {value->getHandle(), sizeof(APCClsMeth)};
+    }
 
     case KindOfRClsMeth:
       return APCRClsMeth::Construct(val(cell).prclsmeth);

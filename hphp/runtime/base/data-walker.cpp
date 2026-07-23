@@ -90,9 +90,6 @@ bool DataWalker::visitTypedValue(TypedValue rval,
                                  DataFeature& features,
                                  PointerSet& visited,
                                  ArrayMap* seenArrs) const {
-  auto const serialize_funcs = Cfg::Eval::APCSerializeFuncs;
-  auto const serialize_clsmeth = Cfg::Eval::APCSerializeClsMeth;
-
   if (rval.m_type == KindOfObject) {
     features.hasNonPersistable = true;
     traverseData(rval.m_data.pobj, features, visited);
@@ -103,7 +100,6 @@ bool DataWalker::visitTypedValue(TypedValue rval,
   } else if (rval.m_type == KindOfRFunc) {
     features.hasNonPersistable = true;
   } else if (rval.m_type == KindOfFunc) {
-    if (!serialize_funcs) features.hasNonPersistable = true;
     if (rval.m_data.pfunc->isMethCaller()) features.hasNonPersistable = true;
     if (!rval.m_data.pfunc->isPersistent()) features.hasNonPersistable = true;
   } else if (rval.m_type == KindOfClass) {
@@ -111,7 +107,6 @@ bool DataWalker::visitTypedValue(TypedValue rval,
       features.hasNonPersistable = true;
     }
   } else if (rval.m_type == KindOfClsMeth) {
-    if (!serialize_clsmeth) features.hasNonPersistable = true;
     if (!rval.m_data.pclsmeth->getCls()->isPersistent()) {
       features.hasNonPersistable = true;
     }

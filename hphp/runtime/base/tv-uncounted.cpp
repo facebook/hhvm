@@ -57,11 +57,8 @@ void ConvertTvToUncounted(tv_lval source, const MakeUncountedEnv& env) {
 
   switch (type) {
     case KindOfFunc:
-      if (Cfg::Eval::APCSerializeFuncs) {
-        assertx(data.pfunc->isPersistent());
-        break;
-      }
-      invalidFuncConversion("string");
+      assertx(data.pfunc->isPersistent());
+      break;
 
     case KindOfClass:
       if (data.pclass->isPersistent()) break;
@@ -87,16 +84,9 @@ void ConvertTvToUncounted(tv_lval source, const MakeUncountedEnv& env) {
       data.parr = MakeUncountedArray(data.parr, env);
       break;
 
-    case KindOfClsMeth: {
-      if (Cfg::Eval::APCSerializeClsMeth) {
-        assertx(data.pclsmeth->getCls()->isPersistent());
-        break;
-      }
-      tvCastToVecInPlace(source);
-      type = KindOfPersistentVec;
-      data.parr = MakeUncountedArray(data.parr, env);
+    case KindOfClsMeth:
+      assertx(data.pclsmeth->getCls()->isPersistent());
       break;
-    }
 
     case KindOfUninit:
       type = KindOfNull;

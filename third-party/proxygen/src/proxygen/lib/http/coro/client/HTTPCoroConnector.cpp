@@ -11,6 +11,8 @@
 #include <folly/logging/xlog.h>
 #include <proxygen/lib/http/codec/H3EarlyDataHandler.h>
 
+#include "proxygen/lib/http/coro/client/ProxygenCertVerifier.h"
+
 #include "proxygen/lib/http/coro/transport/CoroSSLTransport.h"
 #include "proxygen/lib/http/coro/transport/HTTPConnectAsyncTransport.h"
 #include "proxygen/lib/http/coro/transport/HTTPConnectStream.h"
@@ -50,14 +52,6 @@ using namespace fizz;
 using namespace fizz::client;
 using namespace proxygen;
 using namespace proxygen::coro;
-
-// if the sni is an ip addr format or an empty string, we return folly::none
-folly::Optional<std::string> getValidSni(std::string_view sni) {
-  if (sni.empty() || folly::IPAddress::validate(sni)) {
-    return folly::none;
-  }
-  return std::string(sni);
-}
 
 // default conn & stream fc are ~32MB & ~2MB respectively
 constexpr size_t kDefaultConnFlowControl = 1u << 25;
@@ -246,7 +240,30 @@ folly::coro::Task<std::unique_ptr<CoroTransportIf>> connectFizz(
       connParams.serverName.empty() ? connectAddr.getAddressStr()
                                     : connParams.serverName);
 
-  auto sni = getValidSni(connParams.serverName);
+  std::optional<ExpectedIdentity> expectedIdentity;
+  folly::Optional<std::string> sendSNI;
+  // connParams.serverName reflects the DNS hostname for this connection.
+  // If empty, client is connecting by IP address.
+  // If non empty, client is connecting by DNS hostname, and will send SNI.
+  if (connParams.serverName.empty()) {
+    expectedIdentity = ExpectedIdentity::expectIP(connectAddr.getIPAddress());
+    sendSNI = folly::none;
+  } else {
+    expectedIdentity = ExpectedIdentity::expectDNS(connParams.serverName);
+    sendSNI = connParams.serverName;
+  }
+  auto policy = connParams.insecureSkipIdentityValidation
+                    ? ValidationPolicy::Logging
+                    : ValidationPolicy::Enforcing;
+  std::shared_ptr<const fizz::CertificateVerifier> innerVerifier =
+      connParams.fizzContextAndVerifier.fizzCertVerifier;
+  // TODO(T279682906): Enforce valid certificate verifier.
+  if (!innerVerifier) {
+    innerVerifier = std::make_shared<fizz::InsecureCertificateVerifier>(
+        fizz::VerificationContext::Client);
+  }
+  auto proxygenVerifier = makeVerifier(
+      std::move(innerVerifier), std::move(expectedIdentity.value()), policy);
   if (connectStream) {
     folly::AsyncTransportWrapper::UniquePtr asyncTransport{
         new HTTPConnectAsyncTransport(std::move(connectStream))};
@@ -254,8 +271,8 @@ folly::coro::Task<std::unique_ptr<CoroTransportIf>> connectFizz(
         new AsyncFizzClient(std::move(asyncTransport),
                             connParams.fizzContextAndVerifier.fizzContext));
     fizzClient->connect(&cb,
-                        connParams.fizzContextAndVerifier.fizzCertVerifier,
-                        std::move(sni),
+                        proxygenVerifier,
+                        std::move(sendSNI),
                         pskIdentity,
                         folly::none, /* echConfigs */
                         timeoutMs /* timeout */);
@@ -264,8 +281,8 @@ folly::coro::Task<std::unique_ptr<CoroTransportIf>> connectFizz(
         eventBase, connParams.fizzContextAndVerifier.fizzContext));
     fizzClient->connect(connectAddr,
                         &cb,
-                        connParams.fizzContextAndVerifier.fizzCertVerifier,
-                        std::move(sni),
+                        proxygenVerifier,
+                        std::move(sendSNI),
                         pskIdentity,
                         timeoutMs, /* total timeout */
                         timeoutMs, /* tcpConnectTimeout */
@@ -299,7 +316,16 @@ folly::coro::Task<std::unique_ptr<CoroTransportIf>> connectTLS(
     wangle::TransportInfo& tinfo) {
 
   auto sslSession = getSslSession(connParams);
-  auto sni = getValidSni(connParams.serverName);
+  folly::Optional<std::string> sendSNI;
+  // connParams.serverName reflects the DNS hostname for this connection.
+  // If empty, client is connecting by IP address.
+  // If non empty, client is connecting by DNS hostname, and will send SNI.
+  if (connParams.serverName.empty()) {
+    sendSNI = folly::none;
+  } else {
+    sendSNI = connParams.serverName;
+  }
+
   if (connectStream) {
     auto sslTransport = std::make_unique<CoroSSLTransport>(
         std::make_unique<HTTPConnectTransport>(std::move(connectStream)),
@@ -308,7 +334,7 @@ folly::coro::Task<std::unique_ptr<CoroTransportIf>> connectTLS(
       sslTransport->setSSLSession(std::move(sslSession));
     }
 
-    co_await sslTransport->connect(std::move(sni), timeoutMs);
+    co_await sslTransport->connect(std::move(sendSNI), timeoutMs);
     co_await folly::coro::co_safe_point;
     initTransportInfoFromCoroSSLTransport(tinfo, *sslTransport);
     if (!sslTransport->getSSLSessionReused() && connParams.sslSessionManager) {
@@ -323,7 +349,9 @@ folly::coro::Task<std::unique_ptr<CoroTransportIf>> connectTLS(
 
       sslSock->setSSLSession(std::move(sslSession));
     }
-    sslSock->setServerName(std::move(sni).value_or(""));
+    if (sendSNI.hasValue()) {
+      sslSock->setServerName(std::move(sendSNI).value());
+    }
     sslSock->forceCacheAddrOnFailure(true);
     ConnectCB cb;
     sslSock->connect(&cb,

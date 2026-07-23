@@ -10,18 +10,6 @@
 
 using folly::coro::co_nothrow;
 
-namespace {
-
-// gets the sni sent by client
-using namespace proxygen::coro;
-std::string getSniOrEmpty(const HTTPSessionContextPtr& ctx) {
-  wangle::TransportInfo info;
-  ctx->getCurrentTransportInfo(&info, /*includeSetupFields=*/true);
-  return info.sslServerName ? *info.sslServerName : "";
-}
-
-} // namespace
-
 namespace proxygen::coro::test {
 
 /*static*/ HTTPServer::Config HTTPClientTests::getServerConfig(
@@ -83,11 +71,6 @@ folly::coro::Task<HTTPSourceHolder> TestHandler::handleRequest(
     folly::EventBase* evb,
     HTTPSessionContextPtr ctx,
     HTTPSourceHolder requestSource) {
-
-  // all connections are made directly with ip; expect empty sni
-  auto sni = getSniOrEmpty(ctx);
-  EXPECT_TRUE(sni.empty()) << "unexpected sni=" << sni;
-
   auto headerEvent = co_await co_nothrow(requestSource.readHeaderEvent());
 
   auto request = headerEvent.headers.get();

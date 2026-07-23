@@ -137,6 +137,10 @@ class HTTPCoroConnector {
 
     // Next protocol for plaintext (TCP) connections
     std::string plaintextProtocol;
+
+    // INSECURE: Disables identity verification on server presented end entity
+    // certificates
+    bool insecureSkipIdentityValidation{true};
   };
 
   static const ConnectionParams& defaultConnectionParams() {

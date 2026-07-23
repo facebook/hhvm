@@ -14,14 +14,21 @@
 #include "proxygen/lib/http/coro/client/test/HTTPClientTestsCommon.h"
 #include "proxygen/lib/http/coro/test/HTTPTestSources.h"
 #include "proxygen/lib/http/coro/util/test/TestHelpers.h"
+#include <fizz/protocol/test/CertUtil.h>
 #include <folly/logging/xlog.h>
 #include <quic/client/QuicClientTransport.h>
 
+#include <folly/FileUtil.h>
 #include <folly/SocketAddress.h>
 #include <folly/coro/AsyncScope.h>
 #include <folly/coro/Collect.h>
 #include <folly/coro/Timeout.h>
 #include <folly/coro/ViaIfAsync.h>
+#include <folly/portability/OpenSSL.h>
+#include <folly/ssl/OpenSSLCertUtils.h>
+#include <folly/ssl/OpenSSLKeyUtils.h>
+#include <folly/ssl/OpenSSLPtrTypes.h>
+#include <folly/testing/TestUtil.h>
 #include <quic/api/test/Mocks.h>
 #include <quic/state/test/Mocks.h>
 #include <variant>
@@ -175,6 +182,68 @@ CO_TEST_P_X(HTTPClientTests, ConnectorConnect) {
     EXPECT_EQ(*tinfo.appProtocol, transportTypeToAlpn(GetParam()));
   }
   (*sess)->dropConnection();
+}
+
+CO_TEST_P_X(HTTPClientTests, IdentityVerificationE2E) {
+  // Hostname verification is wired through the Fizz cert verifier.
+  if (GetParam() != TransportType::TLS_FIZZ) {
+    co_return;
+  }
+
+  // Generate a CA and a leaf cert (SAN "test.localhost") signed by that CA.
+  auto ca = fizz::test::createCert(
+      "Test Root CA", /*ca=*/true, /*issuer=*/nullptr, fizz::KeyType::P256);
+  auto leaf = fizz::test::createCert(
+      "test.localhost", /*ca=*/false, &ca, fizz::KeyType::P256);
+
+  folly::test::TemporaryDirectory tmpDir;
+  auto caPath = (tmpDir.path() / "ca.pem").string();
+  auto leafCertPath = (tmpDir.path() / "leaf.pem").string();
+  auto leafKeyPath = (tmpDir.path() / "leaf_key.pem").string();
+  XCHECK(folly::writeFile(folly::ssl::OpenSSLCertUtils::pemEncode(*ca.cert),
+                          caPath.c_str()));
+  XCHECK(folly::writeFile(folly::ssl::OpenSSLCertUtils::pemEncode(*leaf.cert),
+                          leafCertPath.c_str()));
+  XCHECK(folly::writeFile(
+      folly::ssl::OpenSSLKeyUtils::encodePrivateKeyAsPEM(leaf.key.get()),
+      leafKeyPath.c_str()));
+
+  // Stand up a server that presents the leaf cert.
+  auto tlsConfig = HTTPServer::getDefaultTLSConfig();
+  tlsConfig.isDefault = true;
+  tlsConfig.clientVerification =
+      folly::SSLContext::VerifyClientCertificate::DO_NOT_REQUEST;
+  tlsConfig.setNextProtocols({"h2", "http/1.1"});
+  tlsConfig.setCertificate(leafCertPath, leafKeyPath, "");
+  HTTPServer::Config serverConfig;
+  serverConfig.socketConfig.bindAddress.setFromIpPort("127.0.0.1", 0);
+  serverConfig.socketConfig.sslContextConfigs.emplace_back(
+      std::move(tlsConfig));
+  auto server = ScopedHTTPServer::start(std::move(serverConfig), testHandler_);
+  auto serverAddr = *server->address();
+
+  auto connectWithSni = [&](const std::string& sni) {
+    HTTPCoroConnector::TLSParams tlsParams;
+    tlsParams.caPaths = {caPath};
+    tlsParams.nextProtocols = {"h2", "http/1.1"};
+    HTTPCoroConnector::ConnectionParams connParams;
+    connParams.serverName = sni;
+    connParams.insecureSkipIdentityValidation = false;
+    connParams.fizzContextAndVerifier =
+        HTTPCoroConnector::makeFizzClientContextAndVerifier(tlsParams);
+    return HTTPCoroConnector_connect(
+        &evb_, serverAddr, seconds(1), std::move(connParams));
+  };
+
+  // Matching hostname => cert validates => connection succeeds.
+  auto matched = co_await co_awaitTry(connectWithSni("test.localhost"));
+  XCHECK(!matched.hasException()) << matched.exception();
+  (*matched)->dropConnection();
+
+  // Wrong hostname => verifier rejects the cert => connection is rejected.
+  auto rejected = co_await co_awaitTry(connectWithSni("wrong.example.com"));
+  EXPECT_TRUE(rejected.hasException())
+      << "wrong hostname should reject the connection";
 }
 
 CO_TEST_P_X(HTTPClientTests, ConnectWithCustomTimeout) {

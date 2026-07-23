@@ -20,6 +20,8 @@
 #include <folly/coro/BlockingWait.h>
 #include <folly/futures/Promise.h>
 #include <folly/io/IOBuf.h>
+#include <folly/io/async/EventBase.h>
+#include <folly/memory/SanitizeLeak.h>
 #include <thrift/lib/cpp/ContextStack.h>
 #include <thrift/lib/cpp/TApplicationException.h>
 #include <thrift/lib/cpp/TProcessorEventHandler.h>
@@ -130,25 +132,55 @@ std::unique_ptr<IOBufClientSink> extractClientSink(
 } // namespace
 
 OmniClient::OmniClient(RequestChannelUnique channel)
-    : channel_(std::move(channel)) {}
+    : channel_(std::move(channel)) {
+  armEventBaseLivenessProbe();
+}
 
 OmniClient::OmniClient(RequestChannelShared channel)
-    : channel_(std::move(channel)) {}
+    : channel_(std::move(channel)) {
+  armEventBaseLivenessProbe();
+}
 
 OmniClient::OmniClient(OmniClient&& other) noexcept
     : channel_(std::move(other.channel_)),
-      factoryClient_(other.factoryClient_.load()) {}
+      factoryClient_(other.factoryClient_.load()),
+      ebLivenessProbe_(std::move(other.ebLivenessProbe_)) {}
+
+void OmniClient::armEventBaseLivenessProbe() {
+  auto* eb = channel_->getEventBase();
+  if (eb == nullptr) {
+    return;
+  }
+  ebLivenessProbe_ = std::make_unique<EventBaseLivenessProbe>();
+  eb->runOnDestruction(*ebLivenessProbe_);
+}
 
 OmniClient::~OmniClient() {
+  // Resolve the probe before the early returns below: ~OnDestructionCallback
+  // fatals if destroyed while still scheduled. A false result means ~EventBase
+  // already ran the probe -- the EventBase is gone.
+  const bool ebDestroyed = ebLivenessProbe_ && !ebLivenessProbe_->cancel();
+
   if (!channel_) {
     return;
   }
 
   auto* eb = channel_->getEventBase();
-  if (eb != nullptr) {
-    folly::getKeepAliveToken(eb).add(
-        [channel = std::move(channel_)](auto&&) {});
+  if (eb == nullptr) {
+    return;
   }
+
+  if (ebDestroyed) {
+    // Can't destroy the channel on a dead EventBase; leak it. Harmless at
+    // shutdown and far preferable to a UAF.
+    folly::annotate_object_leaked(
+        new RequestChannelShared(std::move(channel_)));
+    return;
+  }
+
+  // `eb` is alive; a DelayedDestruction channel must be destroyed on its
+  // EventBase thread.
+  folly::getKeepAliveToken(eb).add([channel = std::move(channel_)](auto&&) {});
 }
 
 OmniClientResponseWithHeaders OmniClient::sync_send(

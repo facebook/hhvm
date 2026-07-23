@@ -21,6 +21,7 @@
 #include <folly/futures/Future.h>
 #include <folly/io/IOBuf.h>
 #include <folly/io/async/DelayedDestruction.h>
+#include <folly/io/async/EventBase.h>
 #include <thrift/lib/cpp/EventHandlerBase.h>
 #include <thrift/lib/cpp/transport/THeader.h>
 #include <thrift/lib/cpp2/async/ClientBufferedStream.h>
@@ -138,6 +139,15 @@ class OmniClient : public apache::thrift::TClientBase {
   std::atomic<OmniClient*> factoryClient_ = nullptr;
 
  private:
+  // Armed on the channel's EventBase at construction. In ~OmniClient, cancel()
+  // reports whether the EventBase outlived this client without dereferencing a
+  // possibly-freed pointer. The callback itself does nothing.
+  struct EventBaseLivenessProbe : folly::EventBase::OnDestructionCallback {
+    void onEventBaseDestruction() noexcept final {}
+  };
+  std::unique_ptr<EventBaseLivenessProbe> ebLivenessProbe_;
+  void armEventBaseLivenessProbe();
+
   /**
    * Sends the request to the Thrift service through the RequestChannel.
    */

@@ -36,7 +36,7 @@ CO_TEST_P_X(HTTPClientTests, BasicUpstream) {
   handler.expectDetachTransaction();
   auto req = getGetRequest();
   serverSink.sendHeadersWithEOM(req);
-  co_await serverSink.transact(sess, *sess->reserveRequest());
+  co_await serverSink.transact(sess.get(), *sess->reserveRequest());
 }
 
 CO_TEST_P_X(HTTPClientTests, UpstreamPauseBeforeEOM) {
@@ -62,7 +62,7 @@ CO_TEST_P_X(HTTPClientTests, UpstreamPauseBeforeEOM) {
             serverSink.resumeIngress();
           }))
       .start();
-  co_await serverSink.transact(sess, *sess->reserveRequest());
+  co_await serverSink.transact(sess.get(), *sess->reserveRequest());
 }
 
 CO_TEST_P_X(HTTPClientTests, FailSendUpstreamReq) {
@@ -90,7 +90,7 @@ CO_TEST_P_X(HTTPClientTests, FailSendUpstreamReq) {
     delete handler;
   });
 
-  co_await serverSink.transact(sess, std::move(*reservation));
+  co_await serverSink.transact(sess.get(), std::move(*reservation));
 }
 
 CO_TEST_P_X(HTTPClientTests, PostWithPause) {
@@ -127,7 +127,7 @@ CO_TEST_P_X(HTTPClientTests, PostWithPause) {
         handler.expectDetachTransaction();
       },
       50);
-  co_await serverSink.transact(sess, *sess->reserveRequest());
+  co_await serverSink.transact(sess.get(), *sess->reserveRequest());
 }
 
 CO_TEST_P_X(HTTPClientTests, SendAbortDuringPause) {
@@ -154,7 +154,8 @@ CO_TEST_P_X(HTTPClientTests, SendAbortDuringPause) {
   auto req = getPostRequest(length);
   serverSink.sendHeaders(req);
   serverSink.sendBody(makeBuf(length));
-  co_await co_awaitTry(serverSink.transact(sess, *sess->reserveRequest()));
+  co_await co_awaitTry(
+      serverSink.transact(sess.get(), *sess->reserveRequest()));
   co_await waitForDetach;
 }
 
@@ -188,7 +189,8 @@ CO_TEST_P_X(HTTPClientTests, DetachAndAbortIfIncomplete) {
   serverSink->sendBody(makeBuf(length));
 
   EXPECT_CALL(handler, _onEgressResumed());
-  co_await co_awaitTry(serverSink->transact(sess, *sess->reserveRequest()));
+  co_await co_awaitTry(
+      serverSink->transact(sess.get(), *sess->reserveRequest()));
 
   co_await waitUntilHeaders;
 }

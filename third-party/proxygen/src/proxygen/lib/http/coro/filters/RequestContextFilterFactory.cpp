@@ -28,7 +28,7 @@ class RequestContextFilter : public HTTPSourceFilter {
   folly::coro::Task<HTTPBodyEvent> readBodyEvent(uint32_t max) override {
     folly::RequestContextScopeGuard guard{context_};
     co_return co_await folly::coro::co_nothrow(
-        HTTPSourceFilter::readBodyEvent());
+        HTTPSourceFilter::readBodyEvent(max));
   }
 
  private:

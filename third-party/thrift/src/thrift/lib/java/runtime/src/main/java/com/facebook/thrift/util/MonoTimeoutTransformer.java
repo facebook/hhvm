@@ -228,7 +228,7 @@ import reactor.util.context.Context;
  *     scheduler's run() method detects this by attempting a CAS from TIMEOUT_MARKER to null; if the
  *     CAS fails, cancellation occurred and we skip the fallback.
  *     <h2>Fusion Optimization</h2>
- *     <p>When {@link RpcResources#enableOperatorFusion()} is enabled:
+ *     <p>Scalar sources and fallbacks are fused to skip scheduling a timer:
  *     <ul>
  *       <li><b>Source fusion:</b> If source is {@code Mono.just(v)} or {@code Mono.empty()}, emit
  *           immediately without scheduling a timer.
@@ -318,7 +318,7 @@ public final class MonoTimeoutTransformer<T> implements Function<Mono<T>, Mono<T
       // --- FUSION OPTIMIZATION START ---
       // If the source is a constant (Mono.just or Mono.empty), we don't need a timer.
       // We can resolve it immediately. This is "Macro-Fusion".
-      if (RpcResources.enableOperatorFusion() && source instanceof Fuseable.ScalarCallable) {
+      if (source instanceof Fuseable.ScalarCallable) {
         try {
           T value = ((Fuseable.ScalarCallable<T>) source).call();
           if (value == null) {
@@ -547,8 +547,8 @@ public final class MonoTimeoutTransformer<T> implements Function<Mono<T>, Mono<T
       }
 
       // --- FALLBACK FUSION OPTIMIZATION ---
-      // If fallback is a scalar value and fusion is enabled, emit immediately.
-      if (RpcResources.enableOperatorFusion() && fallback instanceof Fuseable.ScalarCallable) {
+      // If fallback is a scalar value, emit immediately.
+      if (fallback instanceof Fuseable.ScalarCallable) {
         try {
           T v = ((Fuseable.ScalarCallable<T>) fallback).call();
           if (v == null) {

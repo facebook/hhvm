@@ -58,9 +58,6 @@ final class ResourceConfiguration {
       System.getProperty("thrift.virtual-thread-limit-concurrency", "false")
           .equalsIgnoreCase("true");
 
-  static final boolean enableOperatorFusion =
-      System.getProperty("thrift.operator-fusion", "true").equalsIgnoreCase("true");
-
   static final boolean forceExecutionOffEventLoop =
       System.getProperty("thrift.force-execution-off-eventloop", "true").equalsIgnoreCase("true");
 

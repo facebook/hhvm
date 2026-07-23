@@ -255,15 +255,14 @@ folly::coro::Task<std::unique_ptr<CoroTransportIf>> connectFizz(
   auto policy = connParams.insecureSkipIdentityValidation
                     ? ValidationPolicy::Logging
                     : ValidationPolicy::Enforcing;
-  std::shared_ptr<const fizz::CertificateVerifier> innerVerifier =
-      connParams.fizzContextAndVerifier.fizzCertVerifier;
-  // TODO(T279682906): Enforce valid certificate verifier.
-  if (!innerVerifier) {
-    innerVerifier = std::make_shared<fizz::InsecureCertificateVerifier>(
-        fizz::VerificationContext::Client);
+  if (!connParams.fizzContextAndVerifier.fizzCertVerifier) {
+    throw std::invalid_argument(
+        "HTTPCoroConnector::connectFizz requires a non-null fizzCertVerifier.");
   }
-  auto proxygenVerifier = makeVerifier(
-      std::move(innerVerifier), std::move(expectedIdentity.value()), policy);
+  auto proxygenVerifier =
+      makeVerifier(connParams.fizzContextAndVerifier.fizzCertVerifier,
+                   std::move(expectedIdentity.value()),
+                   policy);
   if (connectStream) {
     folly::AsyncTransportWrapper::UniquePtr asyncTransport{
         new HTTPConnectAsyncTransport(std::move(connectStream))};
@@ -791,18 +790,23 @@ HTTPCoroConnector::makeFizzCertVerifier(const TLSParams& params) {
     caPaths = getDefaultCAPath();
   }
 
-  // TODO(T279682906): Enforce valid certificate verifier in proxygen.
+  Error err;
   if (caPaths.empty()) {
-    return std::make_shared<fizz::InsecureCertificateVerifier>(
-        fizz::VerificationContext::Client);
+    FIZZ_THROW_ON_ERROR(err.error("HTTPCoroConnector::makeFizzCertVerifier "
+                                  "could not find suitable trust anchor store"),
+                        err);
   }
 
-  Error err;
   std::unique_ptr<fizz::DefaultCertificateVerifier> verifier;
-  FIZZ_THROW_ON_ERROR(
-      fizz::DefaultCertificateVerifier::createFromCAFiles(
-          verifier, err, fizz::VerificationContext::Client, caPaths),
-      err);
+  if (auto result = fizz::DefaultCertificateVerifier::createFromCAFiles(
+          verifier, err, fizz::VerificationContext::Client, caPaths);
+      result != Status::Success) {
+    FIZZ_THROW_ON_ERROR(err.error(fmt::format(
+                            "HTTPCoroConnector::makeFizzCertVerifier failed to "
+                            "initialize TLS trust anchors: {}",
+                            err.msg())),
+                        err);
+  }
   return verifier;
 }
 

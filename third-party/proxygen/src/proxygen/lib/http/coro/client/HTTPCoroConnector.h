@@ -101,6 +101,7 @@ class HTTPCoroConnector {
    *    1. PROXYGEN_CORO_CA_PATH
    *    2. CURL_CA_BUNDLE
    *    3. hardcoded default
+   * If no ca path candidate exists, then this function will throw.
    */
   static std::shared_ptr<const fizz::CertificateVerifier> makeFizzCertVerifier(
       const TLSParams& params);

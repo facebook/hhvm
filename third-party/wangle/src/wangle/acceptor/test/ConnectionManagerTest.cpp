@@ -506,6 +506,44 @@ TEST_F(ConnectionManagerTest, testDropConnectionsRoundEdgeCases) {
   EXPECT_EQ(cm_->getNumConnections(), 0);
 }
 
+// dropToRetainFraction targets a fraction of the connection count captured when
+// draining first started -- not the live count -- and credits connections that
+// close naturally between rounds. Once natural disconnects have already brought
+// the live count to/below a round's retain target, that round is a no-op and
+// force-drops nothing (the `conns_.size() <= targetConnsNum` early return).
+// Zero dropDuration/roundInterval makes each round drop synchronously.
+TEST_F(
+    ConnectionManagerTest,
+    testDropToRetainFractionCreditsNaturalDisconnects) {
+  setConns(10);
+  EXPECT_EQ(cm_->getNumConnections(), 10);
+
+  // Round 1 captures the drain-start count (10) and retains 80% -> target 8, so
+  // it force-drops 2 (the front of the list: conns_[0], conns_[1]).
+  for (size_t i = 0; i < 2; i++) {
+    EXPECT_CALL(*conns_[i], dropConnection(_));
+  }
+  cm_->dropToRetainFraction(
+      0.8, std::chrono::milliseconds(0), std::chrono::milliseconds(0));
+  EXPECT_EQ(cm_->getNumConnections(), 8);
+
+  // Four more connections close naturally between rounds (not a forced drop),
+  // taking the live count 8 -> 4.
+  for (size_t i = 2; i < 6; i++) {
+    removeConn(conns_[i].get());
+  }
+  EXPECT_EQ(cm_->getNumConnections(), 4);
+
+  // Round 2 retains 50% of the START count (10) -> target 5. The live count (4)
+  // is already <= 5, so natural disconnects met this round's target and nothing
+  // is force-dropped: StrictMock fails on any unexpected dropConnection, so no
+  // per-connection expectation is needed, and the count stays 4. Had it keyed
+  // off the live count it would target floor(0.5 * 4) = 2 and drop 2 more.
+  cm_->dropToRetainFraction(
+      0.5, std::chrono::milliseconds(0), std::chrono::milliseconds(0));
+  EXPECT_EQ(cm_->getNumConnections(), 4);
+}
+
 TEST_F(ConnectionManagerTest, testDrainPercent) {
   InSequence enforceOrder;
   double drain_percentage = .123;

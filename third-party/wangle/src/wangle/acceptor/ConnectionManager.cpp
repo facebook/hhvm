@@ -387,6 +387,27 @@ void ConnectionManager::dropConnections(
   dropConnectionsRound(targetConnsNum, dropDuration, roundInterval);
 }
 
+void ConnectionManager::dropToRetainFraction(
+    double retainFrac,
+    std::chrono::milliseconds dropDuration,
+    std::chrono::milliseconds roundInterval) {
+  if (!shutdownDrainStarted_) {
+    shutdownDrainStartCount_ = conns_.size();
+    shutdownDrainStarted_ = true;
+  }
+  const size_t targetConnsNum =
+      shutdownDrainStartCount_ * folly::constexpr_clamp(retainFrac, 0., 1.);
+  if (conns_.size() <= targetConnsNum) {
+    // Natural disconnects already brought us to this round's target.
+    return;
+  }
+  if (dropDuration.count() <= 0 || roundInterval.count() <= 0) {
+    dropConnections(conns_.size() - targetConnsNum);
+    return;
+  }
+  dropConnectionsRound(targetConnsNum, dropDuration, roundInterval);
+}
+
 void ConnectionManager::dropConnectionsRound(
     const size_t targetConnsNum,
     std::chrono::milliseconds timeRemaining,
@@ -416,7 +437,11 @@ void ConnectionManager::dropConnectionsRound(
   const size_t connsThisRound =
       (connectionsToDrop + roundsRemaining - 1) / roundsRemaining;
 
-  // Drop connections for this round
+  // Drop connections for this round -- one inner sub-round of the current outer
+  // drain round, spreading the drop across the interval.
+  WANGLE_VLOG(3) << "drain inner sub-round: dropping " << connsThisRound
+                 << " of " << connsNum << " (target " << targetConnsNum << "), "
+                 << roundsRemaining << " sub-round(s) left";
   dropConnections(connsThisRound);
 
   // Calculate how much time was spent dropping connections

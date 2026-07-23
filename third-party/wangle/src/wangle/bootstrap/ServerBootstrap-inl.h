@@ -47,6 +47,8 @@ class AcceptorException : public std::runtime_error {
     ACCEPT_PAUSED = 8,
     ACCEPT_RESUMED = 9,
     SHUTDOWN_PENDING = 10, // A graceful shutdown has been scheduled.
+    DROP_CONN_RETAIN_FRAC =
+        11, // Drop down to a fraction of the drain-start connection count.
   };
 
   explicit AcceptorException(ExceptionType type)
@@ -61,17 +63,40 @@ class AcceptorException : public std::runtime_error {
       double pct)
       : std::runtime_error(message), type_(type), pct_(pct) {}
 
+  AcceptorException(
+      ExceptionType type,
+      const std::string& message,
+      double pct,
+      std::chrono::milliseconds dropDuration,
+      std::chrono::milliseconds roundInterval)
+      : std::runtime_error(message),
+        type_(type),
+        pct_(pct),
+        dropDuration_(dropDuration),
+        roundInterval_(roundInterval) {}
+
   ExceptionType getType() const noexcept {
     return type_;
   }
   double getPct() const noexcept {
     return pct_;
   }
+  std::chrono::milliseconds getDropDuration() const noexcept {
+    return dropDuration_;
+  }
+  std::chrono::milliseconds getRoundInterval() const noexcept {
+    return roundInterval_;
+  }
 
  protected:
   const ExceptionType type_;
   // the percentage of connections to be drained or dropped during the shutdown
+  // (for DROP_CONN_RETAIN_FRAC, the fraction of the drain-start count to
+  // retain)
   const double pct_;
+  // for the smooth (spread-over-interval) drop variants
+  const std::chrono::milliseconds dropDuration_{0};
+  const std::chrono::milliseconds roundInterval_{0};
 };
 
 template <typename Pipeline>

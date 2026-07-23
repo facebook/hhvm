@@ -715,6 +715,20 @@ void Acceptor::dropConnections(
   });
 }
 
+void Acceptor::dropToRetainFraction(
+    double retainFrac,
+    std::chrono::milliseconds dropDuration,
+    std::chrono::milliseconds roundInterval) {
+  base_->runInEventBaseThread([&, retainFrac, dropDuration, roundInterval] {
+    if (downstreamConnectionManager_) {
+      assert(base_->isInEventBaseThread());
+      forceShutdownInProgress_ = true;
+      downstreamConnectionManager_->dropToRetainFraction(
+          retainFrac, dropDuration, roundInterval);
+    }
+  });
+}
+
 void Acceptor::dropEstablishedConnections(
     double pctToDrop,
     const std::function<bool(ManagedConnection*)>& filter) {

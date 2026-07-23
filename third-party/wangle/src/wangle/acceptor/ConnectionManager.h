@@ -175,6 +175,18 @@ class ConnectionManager : public folly::DelayedDestruction,
       std::chrono::milliseconds roundInterval = std::chrono::milliseconds(0));
 
   /**
+   * Force-drop connections down to "retainFrac" (0.0 to 1.0) of the count
+   * captured when shutdown draining first started, spread over "dropDuration"
+   * with "roundInterval" intervals. The start count is captured on the first
+   * call, so repeated calls with a decreasing retainFrac drain linearly toward
+   * zero while crediting connections that close naturally between rounds.
+   */
+  void dropToRetainFraction(
+      double retainFrac,
+      std::chrono::milliseconds dropDuration,
+      std::chrono::milliseconds roundInterval);
+
+  /**
    * Drop a specific connection with the provided peer address
    */
   void dropConnection(folly::SocketAddress& peerAddress);
@@ -413,6 +425,11 @@ class ConnectionManager : public folly::DelayedDestruction,
   ConnectionIterator idleIterator_;
   DrainHelper drainHelper_;
   bool notifyPendingShutdown_{true};
+
+  // Count of managed connections captured when shutdown draining first began;
+  // dropToRetainFraction drains toward a fraction of this start count.
+  size_t shutdownDrainStartCount_{0};
+  bool shutdownDrainStarted_{false};
 
   /**
    * the default idle timeout for downstream sessions when no system resource

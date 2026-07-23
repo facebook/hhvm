@@ -324,6 +324,19 @@ class Acceptor : public folly::AsyncServerSocket::AcceptCallback,
       std::chrono::milliseconds roundInterval);
 
   /**
+   * Force-drop connections down to "retainFrac" of the count captured when
+   * draining first started, spread over "dropDuration" with "roundInterval"
+   * intervals. See ConnectionManager::dropToRetainFraction.
+   *
+   * Note: unlike dropAllConnections(),
+   * this function can be called from any thread.
+   */
+  virtual void dropToRetainFraction(
+      double retainFrac,
+      std::chrono::milliseconds dropDuration,
+      std::chrono::milliseconds roundInterval);
+
+  /**
    * Drops "pct" (0.0 to 1.0) of the connections active connections.
    * Connection will be dropped only if filter (callback) returns true
    */

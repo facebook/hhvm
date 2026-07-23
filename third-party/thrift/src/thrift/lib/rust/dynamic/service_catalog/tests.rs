@@ -24,9 +24,12 @@ use service_catalog::SerializableFunctionResponse;
 use service_catalog::SerializableRpcInterfaceDefinition;
 use service_catalog::SerializableServiceCatalog;
 use service_catalog::SerializableStreamingResponse;
+use service_catalog_digest::SERVICE_CATALOG_DIGEST_VERSION;
+use service_catalog_digest::ServiceCatalogDigest;
 use service_catalog_digest_expected_values::DIGEST_CALCULATOR;
 use service_catalog_digest_expected_values::DIGEST_RICH_DESCRIPTOR;
 use service_catalog_digest_expected_values::DIGEST_RICH_DESCRIPTOR_STRUCTURAL;
+use type_id::TypeId;
 use type_system_digest::TypeSystemDigest as _;
 
 use super::*;

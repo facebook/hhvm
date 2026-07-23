@@ -65,11 +65,22 @@ class PythonStreamElementEncoder final
           queue.append(*py_ex.buf());
           exceptionMetadata.declaredException() =
               apache::thrift::PayloadDeclaredExceptionMetadata();
+          // Populate name_utf8/what_utf8 so C++ stream consumers (e.g.
+          // ServiceRouter's logStreamError) log the real declared exception
+          // name instead of "<empty>". Mirrors C++ encode_stream_exception
+          // (thrift/lib/cpp2/GeneratedCodeHelper.h:1431-1432). For a declared
+          // exception the name is the declared thrift type name (carried by
+          // PythonUserException::type()), NOT the wrapper class name.
+          exceptionMetadataBase.name_utf8() = py_ex.type();
+          exceptionMetadataBase.what_utf8() = py_ex.reason();
         })) {
     } else {
       constexpr size_t kQueueAppenderGrowth = 4096;
       prot.setOutput(&queue, kQueueAppenderGrowth);
       apache::thrift::TApplicationException ex(e.what().toStdString());
+      // Mirror C++ encode_stream_exception: set name_utf8 from the underlying
+      // exception's class name so consumers do not log "<empty>".
+      exceptionMetadataBase.name_utf8() = e.class_name().toStdString();
       exceptionMetadataBase.what_utf8() = ex.what();
       apache::thrift::detail::serializeExceptionBody(&prot, &ex);
       apache::thrift::PayloadAppUnknownExceptionMetdata aue;

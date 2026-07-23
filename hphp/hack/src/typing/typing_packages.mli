@@ -47,8 +47,14 @@ val can_access_ignoring_package_override :
   *    - current and target are in the same file
   *    - current and target are in the same package
   *    - target is a builtin symbol from hhi
-  *    - current symbol is in a test file whose path contains __tests__
   *    - current symbol's package includes target symbol's package
+  *    - for a target package without strict isolation, either symbol is in a
+  *      file matching package_exclude_patterns (e.g. __tests__)
+  *
+  * For a strict-isolation target package, package_exclude_patterns does NOT grant
+  * an exemption (it only affects deployment): [`ExcludedPathAccess] is returned
+  * when non-excluded code references excluded-path code inside the strict-isolation
+  * package.
   *)
 val can_access_by_package_rules :
   env:Typing_env_types.env ->
@@ -59,6 +65,7 @@ val can_access_by_package_rules :
   | `YesWarning of package_warning_info
   | `PackageNotSatisfied of package_error_info
   | `PackageSoftIncludes of package_error_info
+  | `ExcludedPathAccess of package_error_info
   ]
 
 val get_package_violation :

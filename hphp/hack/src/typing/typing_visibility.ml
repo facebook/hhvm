@@ -242,6 +242,18 @@ let check_package_access
                   loaded_packages;
                   included_packages;
                 }))
+      | `ExcludedPathAccess Typing_packages.{ target_package; target_id; _ } ->
+        Package_access_error
+          (Typing_error.package
+             (Excluded_path_access
+                {
+                  pos = use_pos;
+                  decl_pos = def_pos;
+                  package = target_package;
+                  target_filename = Pos_or_decl.filename def_pos;
+                  target_id;
+                  target_symbol_spec;
+                }))
     end
   | `LintOnly -> begin
     match
@@ -255,6 +267,7 @@ let check_package_access
     | `YesWarning w -> Package_access_linter_error (use_pos, w)
     | `PackageNotSatisfied _ -> Package_access_ok
     | `PackageSoftIncludes _ -> Package_access_ok
+    | `ExcludedPathAccess _ -> Package_access_ok
   end
   | `ClassPtrLinterOnly ->
     let current_file = Env.get_file env in

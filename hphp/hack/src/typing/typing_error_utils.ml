@@ -1479,6 +1479,48 @@ end = struct
       in
       create ~code ~claim ~reasons ()
 
+    let excluded_path_access
+        (pos : Pos.t)
+        (decl_pos : Pos_or_decl.t)
+        (package : Package.pos_id option)
+        (target_filename : Relative_path.t)
+        (target_id : string)
+        (target_symbol_spec : Typing_error.Primary.Package.target_symbol_spec) =
+      let (package_name, package_pos) = get_package_pos_id package in
+      let target_filename = Relative_path.suffix target_filename in
+      let target_id = Markdown_lite.md_codify (Utils.strip_ns target_id) in
+      let open Typing_error.Primary.Package in
+      let target_symbol_spec_str =
+        target_symbol_spec_to_string target_symbol_spec
+      in
+      let claim =
+        lazy
+          ( pos,
+            Printf.sprintf
+              "Cannot access %s %s: it is defined on an excluded path of the strict-isolation %s, and code outside the excluded path may not reference it"
+              target_symbol_spec_str
+              target_id
+              package_name )
+      and reasons =
+        lazy
+          [
+            ( decl_pos,
+              Printf.sprintf
+                "%s is defined here, in %s -- an excluded path (e.g. matching `package_exclude_patterns`)"
+                target_id
+                target_filename );
+            ( Pos_or_decl.of_raw_pos package_pos,
+              Printf.sprintf
+                "%s is a strict-isolation package (declared here); code on an excluded path is deployment-only and may not be referenced from outside that path"
+                package_name );
+          ]
+      in
+      create
+        ~code:Error_code.StrictIsolationExcludedPathAccess
+        ~claim
+        ~reasons
+        ()
+
     let cross_pkg_access_with_requirepackage
         (pos : Pos.t)
         (decl_pos : Pos_or_decl.t)
@@ -1669,6 +1711,22 @@ end = struct
           loaded_packages
           included_packages
           true (* Soft *)
+      | Excluded_path_access
+          {
+            pos;
+            decl_pos;
+            package;
+            target_filename;
+            target_id;
+            target_symbol_spec;
+          } ->
+        excluded_path_access
+          pos
+          decl_pos
+          package
+          target_filename
+          target_id
+          target_symbol_spec
   end
 
   module Eval_xhp = struct

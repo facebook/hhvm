@@ -393,6 +393,14 @@ module Primary : sig
           loaded_packages: Package.pos_id list;
           included_packages: (string * string * Pos.t) list;
         }
+      | Excluded_path_access of {
+          pos: Pos.t;
+          decl_pos: Pos_or_decl.t;
+          package: Package.pos_id option;
+          target_filename: Relative_path.t;
+          target_id: string;
+          target_symbol_spec: target_symbol_spec;
+        }
     [@@deriving show]
   end
 

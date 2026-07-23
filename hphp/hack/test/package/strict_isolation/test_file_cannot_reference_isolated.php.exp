@@ -1,0 +1,37 @@
+error: Typing[4472] Cannot access global constant `ISOLATED_C` defined in package `isolated` which may not be available [1]
+-> `ISOLATED_C` is defined in test_file_cannot_reference_isolated.php--isolated/a.php [2]
+-> `ISOLATED_C` belongs to package `isolated` by this package definition [3]
+-> package `intern` is available because the current file belongs to it by this package definition [4]
+-> `intern` includes `shared` via its definition [5]
+
+test_file_cannot_reference_isolated.php--intern/__tests__/t.php:5:17
+ 3 | // packages package_exclude_patterns does not grant a typecheck exemption, so this
+ 4 | // test file cannot reference the package's symbols: cross-package violation.
+ 5 | const int T_C = ISOLATED_C;
+   |                 ^^^^^^^^^^ [1]
+
+test_file_cannot_reference_isolated.php--isolated/a.php:3:1
+ 1 | <?hh
+ 2 | // belongs to the strict-isolation package `isolated`
+ 3 | const int ISOLATED_C = 1;
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+
+PACKAGES.toml:14:11
+ 4 | include_paths = ["//shared/"]
+ 5 | 
+ 6 | [packages.intern]
+   |           ^^^^^^ [4]
+ 7 | include_paths = ["//intern/"]
+ 8 | includes = ["shared"]
+   |             ^^^^^^^^ [5]
+ 9 | 
+10 | # A package that opts into strict isolation. Its presence may not be dynamically
+11 | # observed (no `package` expression / `__RequirePackage`), and
+12 | # package_exclude_patterns (e.g. __tests__) do not grant a typecheck exemption
+13 | # for references into it.
+14 | [packages.isolated]
+   |           ^^^^^^^^ [3]
+15 | include_paths = ["//isolated/"]
+16 | includes = ["intern", "shared"]
+
+1 error found

@@ -1,0 +1,25 @@
+error: Typing[4518] Cannot access global constant `ISOLATED_TEST_HELPER`: it is defined on an excluded path of the strict-isolation package `isolated`, and code outside the excluded path may not reference it [1]
+-> `ISOLATED_TEST_HELPER` is defined here, in nontest_cannot_reference_test_code.php--isolated/__tests__/helper.php -- an excluded path (e.g. matching `package_exclude_patterns`) [2]
+-> package `isolated` is a strict-isolation package (declared here); code on an excluded path is deployment-only and may not be referenced from outside that path [3]
+
+nontest_cannot_reference_test_code.php--isolated/a.php:4:24
+ 2 | // Non-test code cannot reference test code within a strict-isolation package,
+ 3 | // even in the same package.
+ 4 | const int ISOLATED_C = ISOLATED_TEST_HELPER;
+   |                        ^^^^^^^^^^^^^^^^^^^^ [1]
+
+nontest_cannot_reference_test_code.php--isolated/__tests__/helper.php:3:1
+ 1 | <?hh
+ 2 | // Test code (an excluded path) within the strict-isolation package `isolated`.
+ 3 | const int ISOLATED_TEST_HELPER = 1;
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+
+PACKAGES.toml:14:11
+12 | # package_exclude_patterns (e.g. __tests__) do not grant a typecheck exemption
+13 | # for references into it.
+14 | [packages.isolated]
+   |           ^^^^^^^^ [3]
+15 | include_paths = ["//isolated/"]
+16 | includes = ["intern", "shared"]
+
+1 error found

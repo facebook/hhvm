@@ -161,12 +161,11 @@ let can_access_by_package_rules
       (Relative_path.suffix target_file)
   in
   let accessing_hhi = Pos_or_decl.is_hhi target_pos in
-  if
-    in_same_file
-    || accessing_hhi
-    || is_excluded env current_file
-    || is_excluded env target_file
-  then
+  (* Fast path: same-file and hhi accesses are always allowed. Keep this check
+     ahead of the package-profile and is_excluded lookups below, which are
+     comparatively expensive (env lookups and regex matching) and run on every
+     symbol access -- the same-file case is very common. *)
+  if in_same_file || accessing_hhi then
     `Yes
   else
     let current_package_membership = Env.get_current_package_membership env in
@@ -176,36 +175,67 @@ let can_access_by_package_rules
     let (target_pkg, target_package, target_package_assignment_kind) =
       get_package_profile env target_package_membership
     in
-    match get_package_violation env current_pkg target_pkg with
-    | None ->
-      (* There are no package errors, but emit a warning if this edge is only
-       * legal because of a __PackageOverride on the callee: i.e. the caller
-       * could not reach the callee's original (pre-override) package on its
-       * own, so the override is what makes the edge legal and thus keeps the
-       * callee pinned into the (bloated) target package. *)
-      (match (current_package_membership, target_package_membership) with
-      | ( Some (Aast_defs.PackageConfigAssignment _),
-          Some (Aast_defs.PackageOverride _) ) ->
-        can_access_ignoring_package_override
-          ~env
-          ~current_package
-          ~target_package
-          ~target_file
-          ~classptr_reference_warning:false
-      | _ -> `Yes)
-    | Some pkg_relationship ->
-      let err_info =
-        {
-          current_package;
-          current_package_assignment_kind;
-          target_package;
-          target_package_assignment_kind;
-          target_id;
-        }
+    let target_is_strict_isolation =
+      match target_pkg with
+      | Some p -> p.Package.enable_strict_isolation
+      | None -> false
+    in
+    let current_excluded = is_excluded env current_file in
+    let target_excluded = is_excluded env target_file in
+    let mk_err_info () =
+      {
+        current_package;
+        current_package_assignment_kind;
+        target_package;
+        target_package_assignment_kind;
+        target_id;
+      }
+    in
+    if (current_excluded || target_excluded) && not target_is_strict_isolation
+    then
+      (* Packages without strict isolation: package_exclude_patterns (e.g.
+         __tests__) fully exempts the access from package enforcement, in either
+         direction. *)
+      `Yes
+    else
+      (* Run the ordinary cross-package rules first. *)
+      let standard_result =
+        match get_package_violation env current_pkg target_pkg with
+        | None ->
+          (* No package error, but warn if this edge is only legal because of a
+           * __PackageOverride on the callee: the caller could not reach the
+           * callee's original (pre-override) package on its own, so the override
+           * is what makes the edge legal and thus keeps the callee pinned into
+           * the (bloated) target package. *)
+          (match (current_package_membership, target_package_membership) with
+          | ( Some (Aast_defs.PackageConfigAssignment _),
+              Some (Aast_defs.PackageOverride _) ) ->
+            can_access_ignoring_package_override
+              ~env
+              ~current_package
+              ~target_package
+              ~target_file
+              ~classptr_reference_warning:false
+          | _ -> `Yes)
+        | Some pkg_relationship ->
+          (match pkg_relationship with
+          | Package.Soft_includes -> `PackageSoftIncludes (mk_err_info ())
+          | Package.Unrelated -> `PackageNotSatisfied (mk_err_info ())
+          | Package.(Equal | Includes) ->
+            Utils.assert_false_log_backtrace
+              (Some "Package constraints are satisfied with equal and includes"))
       in
-      (match pkg_relationship with
-      | Package.Soft_includes -> `PackageSoftIncludes err_info
-      | Package.Unrelated -> `PackageNotSatisfied err_info
-      | Package.(Equal | Includes) ->
-        Utils.assert_false_log_backtrace
-          (Some "Package constraints are satisfied with equal and includes"))
+      (* Strict isolation adds one boundary the ordinary cross-package rules
+         cannot express: within a strict-isolation package, non-excluded code may
+         not reference the package's own excluded-path (e.g. __tests__) code. The
+         ordinary rules see both files as the same package (an Equal
+         relationship) and allow it, so upgrade that -- and only that --
+         otherwise-allowed case to an error. A genuine cross-package reference
+         keeps its standard violation. *)
+      match standard_result with
+      | `Yes
+        when target_is_strict_isolation
+             && target_excluded
+             && not current_excluded ->
+        `ExcludedPathAccess (mk_err_info ())
+      | _ -> standard_result

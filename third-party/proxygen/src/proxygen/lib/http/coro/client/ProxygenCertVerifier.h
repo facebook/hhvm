@@ -12,12 +12,25 @@
 #include <folly/IPAddress.h>
 
 #include <cstdint>
+#include <functional>
 #include <memory>
 #include <optional>
 #include <string>
 #include <variant>
 
 namespace proxygen::coro {
+// Result of the identity check. Mainly used for logging.
+enum class CertVerifyResult : std::uint8_t {
+  Success,
+  Fail,
+  SoftFail,
+};
+// converts CertVerifyResult to std::string
+std::string toString(CertVerifyResult result);
+// Callback invoked with the identity-check outcome. `error` carries the error
+// message.
+using CertVerifyLogFn =
+    std::function<void(CertVerifyResult result, const std::string& error)>;
 
 // Validation policy for the identity check.
 enum class ValidationPolicy : std::uint8_t {
@@ -55,11 +68,13 @@ struct ExpectedIdentity {
  * with `verifier` and, on top of that, verifies that the leaf certificate
  * matches `expectedIdentity`, handling a mismatch according to `policy`.
  *
- * `verifier` must not be null.
+ * `verifier` must not be null. `logFn`, if set, is invoked with
+ * CertVerifyResult and error message if applicable.
  */
 std::shared_ptr<fizz::CertificateVerifier> makeVerifier(
     std::shared_ptr<const fizz::CertificateVerifier> verifier,
     ExpectedIdentity expectedIdentity,
-    ValidationPolicy policy);
+    ValidationPolicy policy,
+    CertVerifyLogFn logFn);
 
 } // namespace proxygen::coro

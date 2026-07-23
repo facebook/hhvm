@@ -10,6 +10,7 @@
 
 #include <fmt/core.h>
 #include <folly/String.h>
+#include <folly/lang/Assume.h>
 #include <folly/portability/OpenSSL.h>
 #include <folly/ssl/OpenSSLCertUtils.h>
 
@@ -32,10 +33,12 @@ class ProxygenCertVerifier : public fizz::CertificateVerifier {
   ProxygenCertVerifier(
       std::shared_ptr<const fizz::CertificateVerifier> verifier,
       ExpectedIdentity expectedIdentity,
-      ValidationPolicy policy)
+      ValidationPolicy policy,
+      CertVerifyLogFn logFn)
       : verifier_(std::move(verifier)),
         expectedIdentity_(std::move(expectedIdentity)),
-        policy_(policy) {
+        policy_(policy),
+        logFn_(std::move(logFn)) {
     CHECK(verifier_);
   }
 
@@ -66,6 +69,12 @@ class ProxygenCertVerifier : public fizz::CertificateVerifier {
   }
 
  private:
+  void logResult(CertVerifyResult result, const std::string& error) const {
+    if (logFn_) {
+      logFn_(result, error);
+    }
+  }
+
   fizz::Status hostnameCheck(fizz::Error& err, X509* leaf) const {
     auto hostname = expectedIdentity_.getHostname();
     if (!hostname.has_value()) {
@@ -76,12 +85,16 @@ class ProxygenCertVerifier : public fizz::CertificateVerifier {
                         hostname->size(),
                         X509_CHECK_FLAG_NO_PARTIAL_WILDCARDS,
                         nullptr) == 1) {
+      logResult(CertVerifyResult::Success, "");
       return fizz::Status::Success;
     }
+    auto errorMsg = getErrorMsg(leaf, *hostname);
     if (policy_ != ValidationPolicy::Enforcing) {
+      logResult(CertVerifyResult::SoftFail, errorMsg);
       return fizz::Status::Success;
     }
-    return err.error(getErrorMsg(leaf, *hostname),
+    logResult(CertVerifyResult::Fail, errorMsg);
+    return err.error(std::move(errorMsg),
                      fizz::AlertDescription::bad_certificate,
                      fizz::Error::Category::Verifier);
   }
@@ -93,12 +106,16 @@ class ProxygenCertVerifier : public fizz::CertificateVerifier {
     }
     auto ipStr = ip->str();
     if (X509_check_ip_asc(leaf, ipStr.c_str(), 0) == 1) {
+      logResult(CertVerifyResult::Success, "");
       return fizz::Status::Success;
     }
+    auto errorMsg = getErrorMsg(leaf, ipStr);
     if (policy_ != ValidationPolicy::Enforcing) {
+      logResult(CertVerifyResult::SoftFail, errorMsg);
       return fizz::Status::Success;
     }
-    return err.error(getErrorMsg(leaf, ipStr),
+    logResult(CertVerifyResult::Fail, errorMsg);
+    return err.error(std::move(errorMsg),
                      fizz::AlertDescription::bad_certificate,
                      fizz::Error::Category::Verifier);
   }
@@ -106,8 +123,22 @@ class ProxygenCertVerifier : public fizz::CertificateVerifier {
   std::shared_ptr<const fizz::CertificateVerifier> verifier_;
   ExpectedIdentity expectedIdentity_;
   ValidationPolicy policy_;
+  CertVerifyLogFn logFn_;
 };
+
 } // namespace
+
+std::string toString(CertVerifyResult result) {
+  switch (result) {
+    case CertVerifyResult::Success:
+      return "success";
+    case CertVerifyResult::Fail:
+      return "fail";
+    case CertVerifyResult::SoftFail:
+      return "soft_fail";
+  }
+  folly::assume_unreachable();
+}
 
 ExpectedIdentity ExpectedIdentity::expectIP(folly::IPAddress ip) {
   return ExpectedIdentity{std::move(ip)};
@@ -134,8 +165,12 @@ std::optional<folly::IPAddress> ExpectedIdentity::getIp() const {
 std::shared_ptr<fizz::CertificateVerifier> makeVerifier(
     std::shared_ptr<const fizz::CertificateVerifier> verifier,
     ExpectedIdentity expectedIdentity,
-    ValidationPolicy policy) {
-  return std::make_shared<ProxygenCertVerifier>(
-      std::move(verifier), std::move(expectedIdentity), policy);
+    ValidationPolicy policy,
+    CertVerifyLogFn logFn) {
+  return std::make_shared<ProxygenCertVerifier>(std::move(verifier),
+                                                std::move(expectedIdentity),
+                                                policy,
+                                                std::move(logFn));
 }
+
 } // namespace proxygen::coro

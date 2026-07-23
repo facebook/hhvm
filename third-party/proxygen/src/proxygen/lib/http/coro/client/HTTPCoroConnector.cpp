@@ -262,7 +262,8 @@ folly::coro::Task<std::unique_ptr<CoroTransportIf>> connectFizz(
   auto proxygenVerifier =
       makeVerifier(connParams.fizzContextAndVerifier.fizzCertVerifier,
                    std::move(expectedIdentity.value()),
-                   policy);
+                   policy,
+                   connParams.certVerifyLogFn);
   if (connectStream) {
     folly::AsyncTransportWrapper::UniquePtr asyncTransport{
         new HTTPConnectAsyncTransport(std::move(connectStream))};

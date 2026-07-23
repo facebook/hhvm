@@ -47,7 +47,7 @@ class ProxygenCertVerifierTest : public testing::Test {
     std::shared_ptr<const fizz::CertificateVerifier> inner =
         std::move(innerVerifier);
     return coro::makeVerifier(
-        std::move(inner), std::move(expectedIdentity), policy);
+        std::move(inner), std::move(expectedIdentity), policy, nullptr);
   }
 
   CertAndKey rootCertAndKey_;
@@ -112,7 +112,8 @@ TEST_F(ProxygenCertVerifierTest, UnderlyingVerifierFailure) {
 TEST_F(ProxygenCertVerifierTest, NullInnerVerifierFailsAtConstruction) {
   EXPECT_DEATH(coro::makeVerifier(nullptr,
                                   ExpectedIdentity::expectDNS("example.com"),
-                                  ValidationPolicy::Logging),
+                                  ValidationPolicy::Logging,
+                                  nullptr),
                testing::_);
 }
 

@@ -37,13 +37,14 @@ proxygen_add_library(proxygen_cert_verifier
 proxygen_add_library(proxygen_http_coro_client_tls
   SRCS
     TLS.cpp
+  EXPORTED_DEPS
+    proxygen_cert_verifier
 )
 
 proxygen_add_library(proxygen_http_coro_client_http_connector
   SRCS
     HTTPCoroConnector.cpp
   DEPS
-    proxygen_cert_verifier
     proxygen_http_codec_codec_factory
     proxygen_http_codec_h3_early_data_handler
     proxygen_http_coro_client_tls
@@ -69,6 +70,7 @@ proxygen_add_library(proxygen_http_coro_client_http_connector
     Folly::folly_io_async_ssl_options
     Folly::folly_logging_logging
   EXPORTED_DEPS
+    proxygen_cert_verifier
     proxygen_coro
     proxygen_http_codec_codec_common
     proxygen_http_codec_compress_header_codec

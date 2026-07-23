@@ -24,6 +24,7 @@
 #include <string>
 
 #include "proxygen/lib/http/coro/HTTPCoroSession.h"
+#include "proxygen/lib/http/coro/client/ProxygenCertVerifier.h"
 #include <proxygen/lib/http/codec/HTTPSettings.h>
 #include <proxygen/lib/http/codec/compress/HeaderCodec.h>
 #include <proxygen/lib/sampling/Sampling.h>
@@ -142,6 +143,8 @@ class HTTPCoroConnector {
     // INSECURE: Disables identity verification on server presented end entity
     // certificates
     bool insecureSkipIdentityValidation{true};
+
+    CertVerifyLogFn certVerifyLogFn;
   };
 
   static const ConnectionParams& defaultConnectionParams() {

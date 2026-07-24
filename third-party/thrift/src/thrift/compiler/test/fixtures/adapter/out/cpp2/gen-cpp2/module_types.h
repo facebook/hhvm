@@ -1717,7 +1717,7 @@ class Baz final  {
 
 
   /** Glean { "field": "intField" } */
-  ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::facebook::thrift::test::fixtures::adapter::i32_5137, Baz> const& get_intField() const {
+  ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::facebook::thrift::test::fixtures::adapter::i32_5137, Baz> const& get_intField() const [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     if (getType() != Type::intField) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
@@ -1725,7 +1725,7 @@ class Baz final  {
   }
 
   /** Glean { "field": "setField" } */
-  ::facebook::thrift::test::fixtures::adapter::SetWithAdapter const& get_setField() const {
+  ::facebook::thrift::test::fixtures::adapter::SetWithAdapter const& get_setField() const [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     if (getType() != Type::setField) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
@@ -1733,7 +1733,7 @@ class Baz final  {
   }
 
   /** Glean { "field": "mapField" } */
-  ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter3, 6, ::facebook::thrift::test::fixtures::adapter::map_string_ListWithElemAdapter_withAdapter_8454, Baz> const& get_mapField() const {
+  ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter3, 6, ::facebook::thrift::test::fixtures::adapter::map_string_ListWithElemAdapter_withAdapter_8454, Baz> const& get_mapField() const [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     if (getType() != Type::mapField) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
@@ -1741,7 +1741,7 @@ class Baz final  {
   }
 
   /** Glean { "field": "binaryField" } */
-  ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 8, ::facebook::thrift::test::fixtures::adapter::binary_5673, Baz> const& get_binaryField() const {
+  ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 8, ::facebook::thrift::test::fixtures::adapter::binary_5673, Baz> const& get_binaryField() const [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     if (getType() != Type::binaryField) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
@@ -1749,7 +1749,7 @@ class Baz final  {
   }
 
   /** Glean { "field": "longField" } */
-  ::facebook::thrift::test::fixtures::adapter::MyI64 const& get_longField() const {
+  ::facebook::thrift::test::fixtures::adapter::MyI64 const& get_longField() const [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     if (getType() != Type::longField) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
@@ -5970,7 +5970,7 @@ class ThriftAdaptTestUnion final  {
 
 
   /** Glean { "field": "delay" } */
-  ::facebook::thrift::test::fixtures::adapter::DurationMs const& get_delay() const {
+  ::facebook::thrift::test::fixtures::adapter::DurationMs const& get_delay() const [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     if (getType() != Type::delay) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
@@ -5978,7 +5978,7 @@ class ThriftAdaptTestUnion final  {
   }
 
   /** Glean { "field": "custom" } */
-  ::facebook::thrift::test::fixtures::adapter::CustomProtocolType const& get_custom() const {
+  ::facebook::thrift::test::fixtures::adapter::CustomProtocolType const& get_custom() const [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     if (getType() != Type::custom) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
     }

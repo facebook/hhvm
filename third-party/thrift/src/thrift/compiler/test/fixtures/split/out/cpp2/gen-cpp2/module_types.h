@@ -857,7 +857,7 @@ class MyUnion final  {
   }
 
   /** Glean { "field": "myEnum" } */
-  ::cpp2::MyEnum const& get_myEnum() const {
+  ::cpp2::MyEnum const& get_myEnum() const [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     if (getType() != Type::myEnum) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
@@ -865,7 +865,7 @@ class MyUnion final  {
   }
 
   /** Glean { "field": "myStruct" } */
-  ::cpp2::MyStruct const& get_myStruct() const {
+  ::cpp2::MyStruct const& get_myStruct() const [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     if (getType() != Type::myStruct) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
@@ -873,7 +873,7 @@ class MyUnion final  {
   }
 
   /** Glean { "field": "myDataItem" } */
-  ::cpp2::MyDataItem const& get_myDataItem() const {
+  ::cpp2::MyDataItem const& get_myDataItem() const [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     if (getType() != Type::myDataItem) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
     }

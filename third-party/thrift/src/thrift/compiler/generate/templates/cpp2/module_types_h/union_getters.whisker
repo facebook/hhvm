@@ -19,7 +19,7 @@
  private:
     {{/if (not struct.legacy_api?)}}
   {{#partial glean.field_docblock field=field}}
-  {{!deprecated}}{{#if field.boxed_ref?}}{{field.cpp_type}}{{#else}}{{field.cpp_storage_type}}{{/if}} const& get_{{field.cpp_name}}() const {
+  {{!deprecated}}{{#if field.boxed_ref?}}{{field.cpp_type}}{{#else}}{{field.cpp_storage_type}}{{/if}} const& get_{{field.cpp_name}}() const [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     if (getType() != Type::{{field.cpp_name}}) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
     }

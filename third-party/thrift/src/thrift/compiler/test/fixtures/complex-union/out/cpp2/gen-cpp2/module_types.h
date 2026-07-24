@@ -486,7 +486,7 @@ class ComplexUnion final  {
   }
 
   /** Glean { "field": "intValue" } */
-  ::std::int64_t const& get_intValue() const {
+  ::std::int64_t const& get_intValue() const [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     if (getType() != Type::intValue) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
@@ -494,7 +494,7 @@ class ComplexUnion final  {
   }
 
   /** Glean { "field": "stringValue" } */
-  ::std::string const& get_stringValue() const {
+  ::std::string const& get_stringValue() const [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     if (getType() != Type::stringValue) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
@@ -502,7 +502,7 @@ class ComplexUnion final  {
   }
 
   /** Glean { "field": "intListValue" } */
-  ::std::vector<::std::int64_t> const& get_intListValue() const {
+  ::std::vector<::std::int64_t> const& get_intListValue() const [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     if (getType() != Type::intListValue) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
@@ -510,7 +510,7 @@ class ComplexUnion final  {
   }
 
   /** Glean { "field": "stringListValue" } */
-  ::std::vector<::std::string> const& get_stringListValue() const {
+  ::std::vector<::std::string> const& get_stringListValue() const [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     if (getType() != Type::stringListValue) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
@@ -518,7 +518,7 @@ class ComplexUnion final  {
   }
 
   /** Glean { "field": "typedefValue" } */
-  ::cpp2::containerTypedef const& get_typedefValue() const {
+  ::cpp2::containerTypedef const& get_typedefValue() const [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     if (getType() != Type::typedefValue) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
@@ -526,7 +526,7 @@ class ComplexUnion final  {
   }
 
   /** Glean { "field": "stringRef" } */
-  ::std::unique_ptr<::std::string> const& get_stringRef() const {
+  ::std::unique_ptr<::std::string> const& get_stringRef() const [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     if (getType() != Type::stringRef) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
@@ -1002,7 +1002,7 @@ class ListUnion final  {
   }
 
   /** Glean { "field": "intListValue" } */
-  ::std::vector<::std::int64_t> const& get_intListValue() const {
+  ::std::vector<::std::int64_t> const& get_intListValue() const [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     if (getType() != Type::intListValue) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
@@ -1010,7 +1010,7 @@ class ListUnion final  {
   }
 
   /** Glean { "field": "stringListValue" } */
-  ::std::vector<::std::string> const& get_stringListValue() const {
+  ::std::vector<::std::string> const& get_stringListValue() const [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     if (getType() != Type::stringListValue) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
@@ -1316,7 +1316,7 @@ class DataUnion final  {
 
 
   /** Glean { "field": "binaryData" } */
-  ::std::string const& get_binaryData() const {
+  ::std::string const& get_binaryData() const [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     if (getType() != Type::binaryData) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
@@ -1324,7 +1324,7 @@ class DataUnion final  {
   }
 
   /** Glean { "field": "stringData" } */
-  ::std::string const& get_stringData() const {
+  ::std::string const& get_stringData() const [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     if (getType() != Type::stringData) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
@@ -1875,7 +1875,7 @@ class ValUnion final  {
   }
 
   /** Glean { "field": "v1" } */
-  ::cpp2::Val const& get_v1() const {
+  ::cpp2::Val const& get_v1() const [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     if (getType() != Type::v1) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
@@ -1883,7 +1883,7 @@ class ValUnion final  {
   }
 
   /** Glean { "field": "v2" } */
-  ::cpp2::Val const& get_v2() const {
+  ::cpp2::Val const& get_v2() const [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     if (getType() != Type::v2) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
@@ -2189,7 +2189,7 @@ class VirtualComplexUnion  {
 
 
   /** Glean { "field": "thingOne" } */
-  ::std::string const& get_thingOne() const {
+  ::std::string const& get_thingOne() const [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     if (getType() != Type::thingOne) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
@@ -2197,7 +2197,7 @@ class VirtualComplexUnion  {
   }
 
   /** Glean { "field": "thingTwo" } */
-  ::std::string const& get_thingTwo() const {
+  ::std::string const& get_thingTwo() const [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     if (getType() != Type::thingTwo) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
@@ -2570,7 +2570,7 @@ class NonCopyableUnion final  {
   }
 
   /** Glean { "field": "s" } */
-  ::cpp2::NonCopyableStruct const& get_s() const {
+  ::cpp2::NonCopyableStruct const& get_s() const [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     if (getType() != Type::s) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
     }

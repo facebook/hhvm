@@ -646,7 +646,7 @@ class ExampleUnion final  {
 
 
   /** Glean { "field": "stringValue" } */
-  ::std::string const& get_stringValue() const {
+  ::std::string const& get_stringValue() const [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     if (getType() != Type::stringValue) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
@@ -654,7 +654,7 @@ class ExampleUnion final  {
   }
 
   /** Glean { "field": "intValue" } */
-  ::std::int32_t const& get_intValue() const {
+  ::std::int32_t const& get_intValue() const [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     if (getType() != Type::intValue) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
@@ -662,7 +662,7 @@ class ExampleUnion final  {
   }
 
   /** Glean { "field": "doubleValue" } */
-  double const& get_doubleValue() const {
+  double const& get_doubleValue() const [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     if (getType() != Type::doubleValue) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
     }

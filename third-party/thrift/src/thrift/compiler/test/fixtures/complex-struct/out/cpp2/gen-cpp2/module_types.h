@@ -4585,7 +4585,7 @@ class MyUnion final  {
 
 
   /** Glean { "field": "myEnum" } */
-  ::cpp2::MyEnum const& get_myEnum() const {
+  ::cpp2::MyEnum const& get_myEnum() const [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     if (getType() != Type::myEnum) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
@@ -4593,7 +4593,7 @@ class MyUnion final  {
   }
 
   /** Glean { "field": "myStruct" } */
-  ::cpp2::MyStruct const& get_myStruct() const {
+  ::cpp2::MyStruct const& get_myStruct() const [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     if (getType() != Type::myStruct) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
@@ -4601,7 +4601,7 @@ class MyUnion final  {
   }
 
   /** Glean { "field": "myDataItem" } */
-  ::cpp2::MyDataItem const& get_myDataItem() const {
+  ::cpp2::MyDataItem const& get_myDataItem() const [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     if (getType() != Type::myDataItem) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
@@ -4609,7 +4609,7 @@ class MyUnion final  {
   }
 
   /** Glean { "field": "complexNestedStruct" } */
-  ::cpp2::ComplexNestedStruct const& get_complexNestedStruct() const {
+  ::cpp2::ComplexNestedStruct const& get_complexNestedStruct() const [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     if (getType() != Type::complexNestedStruct) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
@@ -4617,7 +4617,7 @@ class MyUnion final  {
   }
 
   /** Glean { "field": "longValue" } */
-  ::std::int64_t const& get_longValue() const {
+  ::std::int64_t const& get_longValue() const [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     if (getType() != Type::longValue) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
@@ -4625,7 +4625,7 @@ class MyUnion final  {
   }
 
   /** Glean { "field": "intValue" } */
-  ::std::int32_t const& get_intValue() const {
+  ::std::int32_t const& get_intValue() const [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     if (getType() != Type::intValue) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
@@ -7001,7 +7001,7 @@ class MyUnionFloatFieldThrowExp final  {
   }
 
   /** Glean { "field": "myEnum" } */
-  ::cpp2::MyEnum const& get_myEnum() const {
+  ::cpp2::MyEnum const& get_myEnum() const [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     if (getType() != Type::myEnum) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
@@ -7009,7 +7009,7 @@ class MyUnionFloatFieldThrowExp final  {
   }
 
   /** Glean { "field": "setFloat" } */
-  ::std::vector<::std::vector<float>> const& get_setFloat() const {
+  ::std::vector<::std::vector<float>> const& get_setFloat() const [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     if (getType() != Type::setFloat) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
@@ -7017,7 +7017,7 @@ class MyUnionFloatFieldThrowExp final  {
   }
 
   /** Glean { "field": "myDataItem" } */
-  ::cpp2::MyDataItem const& get_myDataItem() const {
+  ::cpp2::MyDataItem const& get_myDataItem() const [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     if (getType() != Type::myDataItem) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
@@ -7025,7 +7025,7 @@ class MyUnionFloatFieldThrowExp final  {
   }
 
   /** Glean { "field": "complexNestedStruct" } */
-  ::cpp2::ComplexNestedStruct const& get_complexNestedStruct() const {
+  ::cpp2::ComplexNestedStruct const& get_complexNestedStruct() const [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     if (getType() != Type::complexNestedStruct) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
     }

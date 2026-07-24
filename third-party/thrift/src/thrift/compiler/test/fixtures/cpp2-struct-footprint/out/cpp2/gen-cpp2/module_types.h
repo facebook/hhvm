@@ -1054,7 +1054,7 @@ class TestUnion final  {
   }
 
   /** Glean { "field": "int_value" } */
-  ::std::int32_t const& get_int_value() const {
+  ::std::int32_t const& get_int_value() const [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     if (getType() != Type::int_value) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
@@ -1062,7 +1062,7 @@ class TestUnion final  {
   }
 
   /** Glean { "field": "struct_value" } */
-  ::cpp2_struct_footprint::SimpleStruct const& get_struct_value() const {
+  ::cpp2_struct_footprint::SimpleStruct const& get_struct_value() const [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     if (getType() != Type::struct_value) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
     }

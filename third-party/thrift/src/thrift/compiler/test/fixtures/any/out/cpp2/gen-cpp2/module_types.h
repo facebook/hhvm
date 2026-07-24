@@ -340,7 +340,7 @@ class MyUnion final  {
 
 
   /** Glean { "field": "myString" } */
-  ::std::string const& get_myString() const {
+  ::std::string const& get_myString() const [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     if (getType() != Type::myString) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
     }

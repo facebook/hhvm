@@ -185,7 +185,7 @@ class RefUnion final  {
   }
 
   /** Glean { "field": "field1" } */
-  ::std::shared_ptr<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::string, RefUnion>> const& get_field1() const {
+  ::std::shared_ptr<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::string, RefUnion>> const& get_field1() const [[FOLLY_ATTR_CLANG_LIFETIMEBOUND]] {
     if (getType() != Type::field1) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
     }

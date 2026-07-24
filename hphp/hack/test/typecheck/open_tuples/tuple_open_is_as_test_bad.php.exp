@@ -6,10 +6,26 @@ ERROR: File "tuple_open_is_as_test_bad.php", line 6, characters 13-34:
 Invalid `is` expression hint (Typing[4195])
   File "tuple_open_is_as_test_bad.php", line 6, characters 13-34:
   The `is` operator cannot be used with a tuple type with optional or variadic elements
+ERROR: File "tuple_open_is_as_test_bad.php", line 7, characters 12-29:
+Invalid return type (Typing[4110])
+  File "tuple_open_is_as_test_bad.php", line 4, characters 27-32:
+  Expected `string`
+  File "tuple_open_is_as_test_bad.php", line 7, characters 12-16:
+  But got `nonnull`
+  File "tuple_open_is_as_test_bad.php", line 5, characters 10-16:
+    from this definition
 ERROR: File "tuple_open_is_as_test_bad.php", line 9, characters 13-28:
 Invalid `is` expression hint (Typing[4195])
   File "tuple_open_is_as_test_bad.php", line 9, characters 13-28:
   The `is` operator cannot be used with a tuple type with optional or variadic elements
+ERROR: File "tuple_open_is_as_test_bad.php", line 10, characters 12-29:
+Invalid return type (Typing[4110])
+  File "tuple_open_is_as_test_bad.php", line 4, characters 27-32:
+  Expected `string`
+  File "tuple_open_is_as_test_bad.php", line 10, characters 12-16:
+  But got `nonnull`
+  File "tuple_open_is_as_test_bad.php", line 5, characters 10-16:
+    from this definition
 ERROR: File "tuple_open_is_as_test_bad.php", line 12, characters 9-37:
 Invalid `as` expression hint (Typing[4195])
   File "tuple_open_is_as_test_bad.php", line 12, characters 9-37:

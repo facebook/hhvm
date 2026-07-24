@@ -2366,25 +2366,6 @@ let refine_for_hint
     ty
     hint_ty
 
-let refine_for_is env tparamet ivar refinement_reason hint =
-  let (env, locl) =
-    make_a_local_of ~include_this:true env (Tast.to_nast_expr ivar)
-  in
-  match locl with
-  | Some locl_ivar ->
-    let (env, refined_ty) =
-      refine_for_hint
-        ~expr_pos:(fst locl_ivar)
-        ~refinement_reason
-        ~report_errors:false
-        env
-        tparamet
-        (fst3 ivar)
-        hint
-    in
-    set_local env locl_ivar refined_ty
-  | None -> env
-
 let refine_for_pattern ~expr_pos env tparamet ty = function
   | Aast.PVar { pv_pos = p; pv_id = _ } ->
     if tparamet then
@@ -8594,11 +8575,7 @@ end = struct
 
   and condition_dual env ((ty, p, e) as te : Tast.expr) :
       env * (env -> env) * (env -> env) =
-    let default_branch env =
-      ( env,
-        (fun env -> condition_single env true te),
-        (fun env -> condition_single env false te) )
-    in
+    let branch_without_refinement env = (env, Fn.id, Fn.id) in
     let branch_for_type_switch env ~p ~ivar ~errs ~reason ~predicate =
       match (snd predicate, ivar) with
       (* Special case: treat Shapes::idx($s, 'k') is nonnull
@@ -8624,7 +8601,7 @@ end = struct
             refine_lvalue_type env shape ~refine:(fun env shape_ty ->
                 Typing_shapes.shapes_idx_not_null env shape_ty field) )
       | _ ->
-        Option.value_or_thunk ~default:(fun () -> default_branch env)
+        Option.value_or_thunk ~default:(fun () -> branch_without_refinement env)
         @@ type_switch env ~p ~ivar ~errs ~reason ~predicate
     in
     match e with
@@ -8752,7 +8729,7 @@ end = struct
         (env, cond_false, cond_true)
       | _ -> begin
         match Result.ok @@ Typing_refinement.TyPredicate.of_ty env hint_ty with
-        | None -> default_branch env
+        | None -> branch_without_refinement env
         | Some (_, predicate) ->
           branch_for_type_switch
             env
@@ -8766,7 +8743,10 @@ end = struct
     | Aast.Unop (Ast_defs.Unot, e) ->
       let (env, cond_true, cond_false) = condition_dual env e in
       (env, cond_false, cond_true)
-    | _ -> default_branch env
+    | _ ->
+      ( env,
+        (fun env -> condition_single env true te),
+        (fun env -> condition_single env false te) )
 
   and condition_single env tparamet ((ty, p, e) : Tast.expr) =
     match e with
@@ -8809,10 +8789,6 @@ end = struct
       when String.equal class_name SN.Shapes.cShapes
            && String.equal method_name SN.Shapes.keyExists ->
       let env = key_exists env tparamet p shape field in
-      env
-    | Aast.Is (ivar, h) ->
-      let reason = Reason.is_refinement p in
-      let env = refine_for_is env tparamet ivar reason h in
       env
     | Aast.Package (pos, pkg) ->
       let status =

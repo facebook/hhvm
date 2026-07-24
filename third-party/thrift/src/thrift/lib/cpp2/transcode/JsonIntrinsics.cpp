@@ -1119,15 +1119,14 @@ void thrift_transcode_format_decimal_int(
   if (cursor->error != 0) {
     return;
   }
-  std::array<char, 21> buf{};
-  int len =
-      snprintf(buf.data(), buf.size(), "%lld", static_cast<long long>(value));
-  if (len <= 0) {
+  auto* begin = reinterpret_cast<char*>(cursor->writePos);
+  auto* end = begin + 20;
+  auto [ptr, ec] = std::to_chars(begin, end, value);
+  if (ec != std::errc{}) {
     set_json_error(cursor);
     return;
   }
-  memcpy(cursor->writePos, buf.data(), static_cast<size_t>(len));
-  cursor->writePos += len;
+  cursor->writePos = reinterpret_cast<uint8_t*>(ptr);
 }
 
 void thrift_transcode_format_quoted_decimal_int(

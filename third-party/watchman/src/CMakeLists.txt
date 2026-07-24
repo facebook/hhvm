@@ -609,6 +609,7 @@ list(APPEND watchman_sources
 watchman/ChildProcess.cpp
 watchman/Client.cpp
 watchman/Clock.cpp
+watchman/CloseRandomFds.cpp
 watchman/Command.cpp
 watchman/CommandRegistry.cpp
 watchman/Connect.cpp

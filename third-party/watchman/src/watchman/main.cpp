@@ -22,6 +22,7 @@
 #include "watchman/ChildProcess.h"
 #include "watchman/Client.h"
 #include "watchman/Clock.h"
+#include "watchman/CloseRandomFds.h"
 #include "watchman/Command.h"
 #include "watchman/Connect.h"
 #include "watchman/GroupLookup.h"
@@ -220,56 +221,6 @@ std::optional<std::string> detect_starting_command(pid_t ppid) {
     exit(0);
   }
   exit(1);
-}
-
-// close any random descriptors that we may have inherited,
-// leaving only the main stdio descriptors open, if we execute a
-// child process.
-static void close_random_fds() {
-#ifndef _WIN32
-#ifdef HAVE_CLOSE_RANGE
-  close_range(STDERR_FILENO + 1, INT_MAX, 0);
-#else
-  struct rlimit limit;
-  long open_max = 0;
-  int max_fd;
-
-  // Deduce the upper bound for number of descriptors
-  limit.rlim_cur = 0;
-#ifdef RLIMIT_NOFILE
-  if (getrlimit(RLIMIT_NOFILE, &limit) != 0) {
-    limit.rlim_cur = 0;
-  }
-#elif defined(RLIM_OFILE)
-  if (getrlimit(RLIMIT_OFILE, &limit) != 0) {
-    limit.rlim_cur = 0;
-  }
-#endif
-#ifdef _SC_OPEN_MAX
-  open_max = sysconf(_SC_OPEN_MAX);
-#endif
-  if (open_max <= 0) {
-    open_max = 36; /* POSIX_OPEN_MAX (20) + some padding */
-  }
-  if (limit.rlim_cur == RLIM_INFINITY || limit.rlim_cur > INT_MAX) {
-    // "no limit", which seems unlikely
-    limit.rlim_cur = INT_MAX;
-  }
-  // Take the larger of the two values we compute
-  if (limit.rlim_cur > (rlim_t)open_max) {
-    open_max = limit.rlim_cur;
-  }
-  // Closing too many fds can be too slow. Limit the `open_max` to avoid slow
-  // startup.
-  auto reasonable_fd_max = Configuration().getInt("reasonable_fd_max", 2500000);
-  if (open_max > reasonable_fd_max) {
-    open_max = reasonable_fd_max;
-  }
-  for (max_fd = open_max; max_fd > STDERR_FILENO; --max_fd) {
-    folly::fileops::close(max_fd);
-  }
-#endif // ndef HAVE_CLOSE_RANGE
-#endif // ndef _WIN32
 }
 
 [[noreturn]] static void run_service_in_foreground() {

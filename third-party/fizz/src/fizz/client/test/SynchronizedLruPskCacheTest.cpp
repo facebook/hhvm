@@ -6,6 +6,7 @@
  *  LICENSE file in the root directory of this source tree.
  */
 
+#include <fmt/format.h>
 #include <folly/portability/GMock.h>
 #include <folly/portability/GTest.h>
 
@@ -48,7 +49,7 @@ TEST_F(SynchronizedLruPskCacheTest, TestBasic) {
 
 TEST_F(SynchronizedLruPskCacheTest, TestEviction) {
   for (int i : {1, 2, 3}) {
-    auto pskName = folly::sformat("psk {}", i);
+    auto pskName = fmt::format("psk {}", i);
     auto psk = getCachedPsk(pskName);
     cache_->putPsk(pskName, psk);
   }

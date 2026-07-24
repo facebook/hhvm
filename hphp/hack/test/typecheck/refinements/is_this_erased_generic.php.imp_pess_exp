@@ -1,0 +1,5 @@
+File "is_this_erased_generic.php", line 6, characters 7-17:
+  (this | (nonnull & dynamic)) where this as C<T>
+File "is_this_erased_generic.php", line 8, characters 7-17:
+  ?(nonnull & not this)
+No errors

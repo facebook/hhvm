@@ -245,7 +245,10 @@ and type_tag =
   | NullTag
   | ClassTag of Ast_defs.id_ * type_tag_generic list
   | EnumTag of Ast_defs.id_
-  | GenericTag of string
+  | GenericTag of {
+      name: string;
+      from_like: bool;
+    }
 [@@oxidize.exclude]
 
 and shape_field_predicate = {
@@ -785,10 +788,14 @@ module Pp = struct
       Format.fprintf fmt "(@[<2>EnumTag@ ";
       Format.pp_print_string fmt id;
       Format.fprintf fmt "@])"
-    | GenericTag name ->
-      Format.fprintf fmt "(@[<2>GenericTag@ ";
+    | GenericTag { name; from_like } ->
+      Format.fprintf fmt "(@[<2>GenericTag {@,";
+      Format.fprintf fmt "name =@ ";
       Format.pp_print_string fmt name;
-      Format.fprintf fmt "@])"
+      Format.fprintf fmt ";@ ";
+      Format.fprintf fmt "from_like =@ ";
+      Format.pp_print_bool fmt from_like;
+      Format.fprintf fmt "@,}@])"
 
   and pp_type_predicate fmt predicate = pp_type_predicate_ fmt (snd predicate)
 
@@ -1188,7 +1195,9 @@ and compare_type_tag tag1 tag2 =
     chain_compare (String.compare id1 id2) (fun _ ->
         List.compare compare_type_tag_generic args1 args2)
   | (EnumTag id1, EnumTag id2) -> String.compare id1 id2
-  | (GenericTag n1, GenericTag n2) -> String.compare n1 n2
+  | ( GenericTag { name = n1; from_like = b1 },
+      GenericTag { name = n2; from_like = b2 } ) ->
+    chain_compare (String.compare n1 n2) (fun _ -> Bool.compare b1 b2)
   | _ -> type_tag_con_ordinal tag1 - type_tag_con_ordinal tag2
 
 and compare_tuple_predicate tp1 tp2 =

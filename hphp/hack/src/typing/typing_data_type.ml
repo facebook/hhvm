@@ -761,7 +761,7 @@ module Make (Set : SET) = struct
            result yields [mixed] — the safe over-approximation needed by the
            [Tneg]-based [fromTy] path. *)
         (env, enum_to_datatypes ~trail id)
-      | GenericTag name ->
+      | GenericTag { name; from_like = _ } ->
         (* Same imprecise-tag treatment as [EnumData]: relates as [none] with
            everything, complement yields [mixed]. *)
         (env, generic_to_datatypes ~trail name)

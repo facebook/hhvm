@@ -227,10 +227,18 @@ and type_tag =
   | NullTag
   | ClassTag of Ast_defs.id_ * type_tag_generic list
   | EnumTag of Ast_defs.id_
-  | GenericTag of string
+  | GenericTag of {
+      name: string;
+      from_like: bool;
+    }
       (** The name of a runtime-checkable rigid type variable: a reified
           generic parameter (e.g. ["T"]), an enforceable abstract type
-          constant access (e.g. ["this::TC"]), or [this] itself. *)
+          constant access (e.g. ["this::TC"]), or [this] itself.
+
+          [from_like] is [true] iff the predicate came from a [~this] hint
+          (i.e. [TyPredicate.of_ty] collapsed [Tunion [dynamic; this]]
+          back into this tag). [TyPredicate.to_ty] uses it to reconstruct
+          the like-wrapped form. *)
 
 and shape_field_predicate = {
   sfp_optional: bool;

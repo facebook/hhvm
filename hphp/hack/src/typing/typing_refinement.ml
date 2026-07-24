@@ -13,6 +13,7 @@ open Common
 module Cls = Folded_class
 module Env = Typing_env
 module DataType = Typing_atomic_data_types
+module SN = Naming_special_names
 
 (* given [a..z] *)
 (* return [(a, [b..z]); (b, [a;c..z]); (c, [a..b;d..z]); ... (z, [b..z])] *)
@@ -59,6 +60,17 @@ module TyPredicate = struct
           false)
        || Env.get_enforceable env name
        || Typing_defs.DependentKind.is_generic_dep_ty name)
+
+  (* Recognize the [dynamic] half and the [this] half of a localized [~this].
+     [dyn_ty] must be a [Tdynamic _] and [this_ty] must be the runtime-checkable
+     [Tgeneric "this"] (i.e. it would already produce a [GenericTag] predicate
+     with [name = "this"] on its own). *)
+  let is_like_this env dyn_ty this_ty =
+    match (get_node dyn_ty, get_node this_ty) with
+    | (Tdynamic _, Tgeneric name) ->
+      String.equal name SN.Typehints.this
+      && is_runtime_checkable_generic env name
+    | _ -> false
 
   let rec of_ty env next_wildcard_id (ty : locl_ty) :
       (int * type_predicate, string) Result.t =
@@ -184,8 +196,19 @@ module TyPredicate = struct
     end
     | Tfun _ -> Result.Error "fun"
     | Tgeneric name when is_runtime_checkable_generic env name ->
-      Result.Ok (next_wildcard_id, IsTag (GenericTag name))
+      Result.Ok
+        (next_wildcard_id, IsTag (GenericTag { name; from_like = false }))
     | Tgeneric _ -> Result.Error "generic"
+    | Tunion [ty1; ty2]
+      when is_like_this env ty1 ty2 || is_like_this env ty2 ty1 ->
+      (* Recognize [Tunion [dynamic; this]] (in either order) and treat it
+         as the [this] predicate, tagged so that [to_ty] can reconstruct
+         the [~this] form. This is the localized shape of an [is ~this]
+         refinement produced for non-final/generic classes under Sound
+         Dynamic; see [Typing_phase.localize] [Tthis] arm. *)
+      Result.Ok
+        ( next_wildcard_id,
+          IsTag (GenericTag { name = SN.Typehints.this; from_like = true }) )
     | Tunion tys -> begin
       match
         List.fold_result tys ~init:(next_wildcard_id, []) ~f:(fun acc ty ->
@@ -392,7 +415,11 @@ module TyPredicate = struct
             ]
         else
           enum_ty
-      | GenericTag name -> Typing_make_type.generic reason name
+      | GenericTag { name; from_like = false } ->
+        Typing_make_type.generic reason name
+      | GenericTag { name; from_like = true } ->
+        (* Reconstruct the [~this] form that [of_ty] collapsed into this tag. *)
+        Typing_make_type.locl_like reason (Typing_make_type.generic reason name)
     in
     match predicate with
     | (reason, IsTag tag) -> tag_to_ty reason tag
@@ -1165,7 +1192,8 @@ and split_ty
       (env, TyPartition.mk_span ~env ~predicate ty)
     | Tgeneric name
       when match snd predicate with
-           | IsTag (GenericTag pred_name) -> String.equal name pred_name
+           | IsTag (GenericTag { name = pred_name; from_like = _ }) ->
+             String.equal name pred_name
            | _ -> false ->
       (* [T] trivially satisfies [is T]; without this short-circuit the general
        * Tgeneric case below recurses on upper bounds, where [GenericTag]'s

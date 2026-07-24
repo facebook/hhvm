@@ -205,7 +205,7 @@ let rec from_type : env -> show_like_ty:bool -> locl_ty -> Yojson.Safe.t =
           let args_json = List.map args ~f:generic_json in
           name s @ [("args", `List args_json)]
       | EnumTag s -> name s
-      | GenericTag s -> name s
+      | GenericTag { name = s; from_like = _ } -> name s
     and predicate_json predicate =
       match snd predicate with
       | IsTag tag -> tag_json tag

@@ -470,7 +470,15 @@ bool json_string_token_equals_decoded_bytes(
     const TranscodeJsonStringToken* token, const uint8_t* data, size_t len) {
   if (token->hasEscapes == 0) {
     size_t tokenLen = static_cast<size_t>(token->end - token->begin);
-    return tokenLen == len && memcmp(token->begin, data, len) == 0;
+    if (tokenLen != len) {
+      return false;
+    }
+    if (tokenLen == 0) {
+      return true;
+    }
+    return token->begin[0] == data[0] &&
+        token->begin[tokenLen - 1] == data[len - 1] &&
+        memcmp(token->begin, data, len) == 0;
   }
 
   size_t matched = 0;

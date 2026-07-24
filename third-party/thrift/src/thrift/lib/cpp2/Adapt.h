@@ -35,7 +35,7 @@ const T& cr();
 template <typename T>
 using is_mutable_ref = std::conjunction<
     std::is_reference<T>,
-    folly::Negation<std::is_const<std::remove_reference_t<T>>>>;
+    std::negation<std::is_const<std::remove_reference_t<T>>>>;
 
 // The type returned by the adapter for the given Thrift type.
 template <typename Adapter, typename ThriftT>

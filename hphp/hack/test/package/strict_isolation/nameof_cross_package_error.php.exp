@@ -1,0 +1,38 @@
+error: Typing[4472] Cannot access class `IsolatedNameof` defined in package `isolated` which may not be available [1]
+-> `IsolatedNameof` is defined in nameof_cross_package_error.php--isolated/c.php [2]
+-> `IsolatedNameof` belongs to package `isolated` by this package definition [3]
+-> package `intern` is available because the current file belongs to it by this package definition [4]
+-> `intern` includes `shared` via its definition [5]
+
+nameof_cross_package_error.php--intern/use.php:6:15
+ 4 | // referenced from outside, so this is a hard package-boundary error.
+ 5 | function use_isolated_nameof(): void {
+ 6 |   $_ = nameof IsolatedNameof;
+   |               ^^^^^^^^^^^^^^ [1]
+ 7 | }
+
+nameof_cross_package_error.php--isolated/c.php:3:7
+ 1 | <?hh
+ 2 | // A class in the strict-isolation package `isolated`.
+ 3 | class IsolatedNameof {}
+   |       ^^^^^^^^^^^^^^ [2]
+
+PACKAGES.toml:14:11
+ 4 | include_paths = ["//shared/"]
+ 5 | 
+ 6 | [packages.intern]
+   |           ^^^^^^ [4]
+ 7 | include_paths = ["//intern/"]
+ 8 | includes = ["shared"]
+   |             ^^^^^^^^ [5]
+ 9 | 
+10 | # A package that opts into strict isolation. Its presence may not be dynamically
+11 | # observed (no `package` expression / `__RequirePackage`), and
+12 | # package_exclude_patterns (e.g. __tests__) do not grant a typecheck exemption
+13 | # for references into it.
+14 | [packages.isolated]
+   |           ^^^^^^^^ [3]
+15 | include_paths = ["//isolated/"]
+16 | includes = ["intern", "shared"]
+
+1 error found

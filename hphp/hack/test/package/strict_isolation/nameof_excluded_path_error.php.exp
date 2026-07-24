@@ -1,0 +1,26 @@
+error: Typing[4518] Cannot access class `IsolatedTestOnlyNameof`: it is defined on an excluded path of the strict-isolation package `isolated`, and code outside the excluded path may not reference it [1]
+-> `IsolatedTestOnlyNameof` is defined here, in nameof_excluded_path_error.php--isolated/__tests__/helper.php -- an excluded path (e.g. matching `package_exclude_patterns`) [2]
+-> package `isolated` is a strict-isolation package (declared here); code on an excluded path is deployment-only and may not be referenced from outside that path [3]
+
+nameof_excluded_path_error.php--isolated/use.php:7:15
+ 5 | // `ExcludedPathAccess` branch of the nameof check.
+ 6 | function use_isolated_excluded_nameof(): void {
+ 7 |   $_ = nameof IsolatedTestOnlyNameof;
+   |               ^^^^^^^^^^^^^^^^^^^^^^ [1]
+ 8 | }
+
+nameof_excluded_path_error.php--isolated/__tests__/helper.php:4:7
+ 2 | // A class on an excluded path (__tests__) within the strict-isolation package
+ 3 | // `isolated`.
+ 4 | class IsolatedTestOnlyNameof {}
+   |       ^^^^^^^^^^^^^^^^^^^^^^ [2]
+
+PACKAGES.toml:14:11
+12 | # package_exclude_patterns (e.g. __tests__) do not grant a typecheck exemption
+13 | # for references into it.
+14 | [packages.isolated]
+   |           ^^^^^^^^ [3]
+15 | include_paths = ["//isolated/"]
+16 | includes = ["intern", "shared"]
+
+1 error found

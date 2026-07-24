@@ -1,0 +1,39 @@
+error: Typing[4472] Cannot access class `IsolatedException` defined in package `isolated` which may not be available [1]
+-> `IsolatedException` is defined in catch_cross_package_forbidden.php--isolated/exn.php [2]
+-> `IsolatedException` belongs to package `isolated` by this package definition [3]
+-> package `intern` is available because the current file belongs to it by this package definition [4]
+-> `intern` includes `shared` via its definition [5]
+
+catch_cross_package_forbidden.php--intern/use.php:6:12
+ 4 | function use_isolated_catch(): void {
+ 5 |   try {
+ 6 |   } catch (IsolatedException $_e) {
+   |            ^^^^^^^^^^^^^^^^^ [1]
+ 7 |   }
+ 8 | }
+
+catch_cross_package_forbidden.php--isolated/exn.php:3:7
+ 1 | <?hh
+ 2 | // An exception class in the strict-isolation package `isolated`.
+ 3 | class IsolatedException extends Exception {}
+   |       ^^^^^^^^^^^^^^^^^ [2]
+
+PACKAGES.toml:14:11
+ 4 | include_paths = ["//shared/"]
+ 5 | 
+ 6 | [packages.intern]
+   |           ^^^^^^ [4]
+ 7 | include_paths = ["//intern/"]
+ 8 | includes = ["shared"]
+   |             ^^^^^^^^ [5]
+ 9 | 
+10 | # A package that opts into strict isolation. Its presence may not be dynamically
+11 | # observed (no `package` expression / `__RequirePackage`), and
+12 | # package_exclude_patterns (e.g. __tests__) do not grant a typecheck exemption
+13 | # for references into it.
+14 | [packages.isolated]
+   |           ^^^^^^^^ [3]
+15 | include_paths = ["//isolated/"]
+16 | includes = ["intern", "shared"]
+
+1 error found

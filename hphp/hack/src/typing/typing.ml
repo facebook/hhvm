@@ -11952,16 +11952,35 @@ end = struct
         | Expr.Check_all
         | Expr.Skip_package ->
           let should_check_package_boundary =
+            (* Some reference contexts are exempt from the package boundary check
+               by default (nameof, catch, ::class), but a strict-isolation target
+               opts them back in: its classes must not be statically referenced
+               from outside its package. Reuses the already-fetched decl, so no
+               extra heap access. *)
+            let exempt_unless_strict_isolation spec =
+              if
+                Typing_packages.is_strict_isolation_target
+                  env
+                  (Cls.get_package class_)
+              then
+                `Yes spec
+              else
+                `No
+            in
             if
-              inside_nameof
-              || is_attribute
-              || is_catch
+              is_attribute
               ||
               match attribute_check_policy with
               | Expr.Skip_package -> true
               | _ -> false
             then
               `No
+            else if is_catch then
+              (* `catch (C $e)` references the exception class C. *)
+              exempt_unless_strict_isolation Typing_error.Primary.Package.Class
+            else if inside_nameof then
+              (* `nameof C` yields C's name without loading its package. *)
+              exempt_unless_strict_isolation Typing_error.Primary.Package.Class
             else if is_const then begin
               if Env.package_allow_classconst_violations env then
                 if is_classptr then

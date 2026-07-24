@@ -1558,17 +1558,22 @@ void execCommand(
   if (hasError(c)) {
     return;
   }
-  if (const auto* s = std::get_if<ScalarOp>(&cmd)) {
-    execScalar(c, *s, fieldTypeInfo);
-  } else if (const auto* sq = std::get_if<SeqOp>(&cmd)) {
-    execSeq(c, *sq);
-  } else if (const auto* m = std::get_if<MapOp>(&cmd)) {
-    execMap(c, *m);
-  } else if (const auto* st = std::get_if<StructOp>(&cmd)) {
-    execStruct(c, *st);
-  } else {
-    detail::setError(c, kUnsupportedProtocol);
-  }
+  std::visit(
+      [c, fieldTypeInfo](const auto& op) {
+        using T = std::decay_t<decltype(op)>;
+        if constexpr (std::is_same_v<T, ScalarOp>) {
+          execScalar(c, op, fieldTypeInfo);
+        } else if constexpr (std::is_same_v<T, SeqOp>) {
+          execSeq(c, op);
+        } else if constexpr (std::is_same_v<T, MapOp>) {
+          execMap(c, op);
+        } else if constexpr (std::is_same_v<T, StructOp>) {
+          execStruct(c, op);
+        } else {
+          detail::setError(c, kUnsupportedProtocol);
+        }
+      },
+      cmd);
 }
 
 } // namespace

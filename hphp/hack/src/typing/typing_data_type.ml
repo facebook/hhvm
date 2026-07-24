@@ -21,6 +21,11 @@ module Tag = struct
 
   type ctx = Typing_env_types.env
 
+  (* Forward ref for; set after [DataType] is defined *)
+  let derive_generic_relation_ref :
+      (Typing_env_types.env -> string -> t -> SetRelation.t) ref =
+    ref (fun _env _name _tag -> SetRelation.none)
+
   let is_fresh_generic ty =
     match get_node ty with
     | Tgeneric name -> Env.is_fresh_generic_parameter name
@@ -98,6 +103,7 @@ module Tag = struct
     | LabelData -> "enum class labels"
     | BuiltInData -> "built-in values"
     | EnumData name -> Printf.sprintf "values of the enum %s" @@ strip_ns name
+    | GenericData name -> Printf.sprintf "values of the generic %s" name
 
   (* Given [(T1a, T1b), (T2a, T2b)...],
      what is the relationship between Foo<T1a, T2a, ...> and Foo<T1b, T2b, ...>
@@ -160,6 +166,11 @@ module Tag = struct
     | (EnumData _, _)
     | (_, EnumData _) ->
       SetRelation.disjoint
+    | (GenericData g1, GenericData g2) when String.equal g1 g2 ->
+      SetRelation.equivalent
+    | (GenericData g, other) -> !derive_generic_relation_ref env g other
+    | (other, GenericData g) ->
+      SetRelation.flip (!derive_generic_relation_ref env g other)
     | (tag1, tag2) when equal tag1 tag2 -> SetRelation.equivalent
     | (ObjectData, InstanceOf _) -> SetRelation.superset
     | (InstanceOf _, ObjectData) -> SetRelation.subset
@@ -477,6 +488,11 @@ module Make (Set : SET) = struct
       ~reason:DataTypeReason.(make NoSubreason trail)
       (Tag.EnumData name)
 
+  let generic_to_datatypes ~trail name : t =
+    Set.singleton
+      ~reason:DataTypeReason.(make NoSubreason trail)
+      (Tag.GenericData name)
+
   module Class : sig
     val to_datatypes :
       safe_for_are_disjoint:bool ->
@@ -745,6 +761,10 @@ module Make (Set : SET) = struct
            result yields [mixed] — the safe over-approximation needed by the
            [Tneg]-based [fromTy] path. *)
         (env, enum_to_datatypes ~trail id)
+      | GenericTag name ->
+        (* Same imprecise-tag treatment as [EnumData]: relates as [none] with
+           everything, complement yields [mixed]. *)
+        (env, generic_to_datatypes ~trail name)
     in
     match snd predicate with
     | IsTag tag -> from_tag tag
@@ -1011,6 +1031,8 @@ module DataType = struct
 
   let enum_to_datatypes name = enum_to_datatypes ~trail name
 
+  let generic_to_datatypes name = generic_to_datatypes ~trail name
+
   let mixed = mixed ~reason:DataTypeReason.(make NoSubreason trail)
 
   module Class = struct
@@ -1018,3 +1040,25 @@ module DataType = struct
       Class.to_datatypes ~safe_for_are_disjoint ~trail env cls generics
   end
 end
+
+(* Wire up the [GenericData] relation derivation, now that [DataType] is in
+   scope. The rule: convert the generic's upper bound into a data-type set
+   via [DataType.fromTy], then ask the set algebra whether that
+   upper-bound set is disjoint from / a subset of [{other_tag}]. Anything
+   else stays uncertain ([SetRelation.none]). *)
+let () =
+  Tag.derive_generic_relation_ref :=
+    fun env g other ->
+      let g_ty = Typing_make_type.generic Typing_reason.none g in
+      let (_env, g_dt) = DataType.fromTy ~safe_for_are_disjoint:true env g_ty in
+      let other_dt =
+        DataType.Set.singleton
+          ~reason:DataTypeReason.(make NoSubreason make_trail)
+          other
+      in
+      if DataType.Set.are_disjoint env g_dt other_dt then
+        SetRelation.disjoint
+      else if DataType.Set.is_subset env g_dt other_dt then
+        SetRelation.subset
+      else
+        SetRelation.none

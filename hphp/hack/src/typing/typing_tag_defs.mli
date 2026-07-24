@@ -43,6 +43,7 @@ type t =
   | LabelData
   | BuiltInData
   | EnumData of string
+  | GenericData of string
 
 val equal : t -> t -> bool
 

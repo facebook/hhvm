@@ -1,0 +1,6 @@
+ERROR: File "is_t.php", line 14, characters 12-23:
+Invalid return type (Typing[4110])
+  File "is_t.php", line 10, characters 4-7:
+  Expected `Tret`
+  File "is_t.php", line 14, characters 16-21:
+  But got `MyBool`

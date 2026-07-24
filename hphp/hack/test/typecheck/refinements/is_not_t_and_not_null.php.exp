@@ -1,0 +1,5 @@
+File "is_not_t_and_not_null.php", line 8, characters 7-17:
+  (not T & null)
+File "is_not_t_and_not_null.php", line 10, characters 7-17:
+  (not T & nonnull)
+No errors

@@ -66,6 +66,13 @@ type t =
           exposed in the type system. Used primarily for soundly representing
           the mixed type *)
   | EnumData of string  (** An enum value of the given enum *)
+  | GenericData of string
+      (** A value matching a runtime-checkable rigid generic (a reified type
+          parameter, [this::TC] with [<<__Enforceable>>], or [this]). Carries
+          the localized generic identifier. Treated imprecisely: relations
+          with all other tags default to [SetRelation.none]. Excluded from
+          [all_tags] for the same complement-yields-mixed reason as
+          [EnumData]. *)
 [@@deriving eq]
 
 (* Pad with Erased because for Foo<T>, Foo and Foo<_> should be the same;

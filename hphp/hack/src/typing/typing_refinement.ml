@@ -50,6 +50,16 @@ let match_pessimized_enum_intersection env tys =
   | _ -> None
 
 module TyPredicate = struct
+  let is_runtime_checkable_generic env name =
+    (not (Env.is_fresh_generic_parameter name))
+    && ((match Env.get_reified env name with
+        | Aast.Reified -> true
+        | Aast.SoftReified
+        | Aast.Erased ->
+          false)
+       || Env.get_enforceable env name
+       || Typing_defs.DependentKind.is_generic_dep_ty name)
+
   let rec of_ty env next_wildcard_id (ty : locl_ty) :
       (int * type_predicate, string) Result.t =
     let (_is_supportdyn, env, ty) = Typing_utils.strip_supportdyn env ty in
@@ -173,6 +183,8 @@ module TyPredicate = struct
       |> Result.map_error ~f:(fun err -> "option-" ^ err)
     end
     | Tfun _ -> Result.Error "fun"
+    | Tgeneric name when is_runtime_checkable_generic env name ->
+      Result.Ok (next_wildcard_id, IsTag (GenericTag name))
     | Tgeneric _ -> Result.Error "generic"
     | Tunion tys -> begin
       match
@@ -225,7 +237,8 @@ module TyPredicate = struct
     | NumTag
     | ResourceTag
     | NullTag
-    | EnumTag _ ->
+    | EnumTag _
+    | GenericTag _ ->
       (env, IMap.empty)
     | ClassTag (id, generics) ->
       let (env, new_tparams) =
@@ -379,6 +392,7 @@ module TyPredicate = struct
             ]
         else
           enum_ty
+      | GenericTag name -> Typing_make_type.generic reason name
     in
     match predicate with
     | (reason, IsTag tag) -> tag_to_ty reason tag
@@ -1149,6 +1163,14 @@ and split_ty
     | Tnewtype (name, _, _)
       when SSet.mem name expansions ->
       (env, TyPartition.mk_span ~env ~predicate ty)
+    | Tgeneric name
+      when match snd predicate with
+           | IsTag (GenericTag pred_name) -> String.equal name pred_name
+           | _ -> false ->
+      (* [T] trivially satisfies [is T]; without this short-circuit the general
+       * Tgeneric case below recurses on upper bounds, where [GenericTag]'s
+       * over-approximate DataType collapses the result to [mk_span]. *)
+      (env, TyPartition.mk_left ~env ~predicate ty)
     | Tgeneric name ->
       let expansions = SSet.add name expansions in
       let upper_bounds = Env.get_upper_bounds env name |> Typing_set.elements in

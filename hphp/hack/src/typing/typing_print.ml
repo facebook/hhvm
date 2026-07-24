@@ -1301,6 +1301,7 @@ module Full = struct
         in
         (fuel, to_doc s ^^ targs_doc)
       | EnumTag s -> (fuel, to_doc s)
+      | GenericTag name -> (fuel, to_doc name)
     in
     let rec predicate_doc fuel predicate =
       Fuel.provide fuel (fun ~fuel ->
@@ -1805,6 +1806,7 @@ module ErrorString = struct
         | NullTag -> "null"
         | ClassTag (s, _) -> "a " ^ strip_ns s
         | EnumTag s -> "a " ^ strip_ns s
+        | GenericTag name -> "a " ^ name
       in
       let rec str predicate =
         match predicate with

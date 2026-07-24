@@ -358,7 +358,8 @@ class virtual ['a] locl_type_visitor : ['a] locl_type_visitor_type =
         | NumTag
         | ResourceTag
         | NullTag
-        | EnumTag _ ->
+        | EnumTag _
+        | GenericTag _ ->
           acc
       in
       match snd neg_ty with

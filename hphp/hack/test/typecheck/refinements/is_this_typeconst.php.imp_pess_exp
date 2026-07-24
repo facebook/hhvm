@@ -1,0 +1,10 @@
+File "is_this_typeconst.php", line 9, characters 7-17:
+  this::TC as C::TC
+File "is_this_typeconst.php", line 11, characters 7-17:
+  ?(nonnull & not this::TC)
+File "is_this_typeconst.php", line 17, characters 7-17:
+  this::TC as C::TC
+File "is_this_typeconst.php", line 19, characters 7-17:
+  nothing
+WARN: File "is_this_typeconst.php", line 16, characters 9-22:
+This `is` check is always `true`. The expression on the left has type `this::TC` which is a subtype of `this::TC`. (Warn[12009])

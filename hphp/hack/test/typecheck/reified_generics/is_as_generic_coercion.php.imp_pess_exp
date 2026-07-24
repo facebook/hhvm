@@ -4,5 +4,5 @@ Invalid argument (Typing[4110])
   Expected `T`
   File "is_as_generic_coercion.php", line 17, characters 21-21:
     via this generic `T`
-  File "is_as_generic_coercion.php", line 9, characters 5-46:
-  But got `mixed` because of this statement
+  File "is_as_generic_coercion.php", line 8, characters 27-31:
+  But got `not T`

@@ -227,6 +227,10 @@ and type_tag =
   | NullTag
   | ClassTag of Ast_defs.id_ * type_tag_generic list
   | EnumTag of Ast_defs.id_
+  | GenericTag of string
+      (** The name of a runtime-checkable rigid type variable: a reified
+          generic parameter (e.g. ["T"]), an enforceable abstract type
+          constant access (e.g. ["this::TC"]), or [this] itself. *)
 
 and shape_field_predicate = {
   sfp_optional: bool;

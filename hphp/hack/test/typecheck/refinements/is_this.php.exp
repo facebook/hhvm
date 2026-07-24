@@ -1,0 +1,10 @@
+File "is_this.php", line 6, characters 7-17:
+  this as C
+File "is_this.php", line 8, characters 7-17:
+  ?not this
+File "is_this.php", line 14, characters 7-17:
+  this as C
+File "is_this.php", line 16, characters 7-17:
+  nothing
+WARN: File "is_this.php", line 13, characters 9-18:
+This `is` check is always `true`. The expression on the left has type `this` which is a subtype of `this`. (Warn[12009])

@@ -327,21 +327,33 @@ and check_type_integrity
     match Env.get_class_or_typedef env cid with
     | Decl_entry.Found (Env.ClassResult class_info) ->
       let should_check_package_boundary =
-        match should_check_package_boundary with
-        (* Class/interface are covered by the class-name access check, so carve
-           them out (and enums too when enum violations are allowed). *)
-        | `Yes Typing_error.Primary.Package.Enforceable_type_alias
-          when Env.package_allow_enforceable_enum_violations env
-               || Ast_defs.is_c_class (Cls.kind class_info)
-               || Ast_defs.is_c_interface (Cls.kind class_info) ->
-          `No
-        (* An enum is enforced by its base type, not its name, so the class-name
-           check does not cover it; report it specifically. Any other kind (e.g.
-           a trait or enum class reaching here) keeps the generic diagnostic. *)
-        | `Yes Typing_error.Primary.Package.Enforceable_type_alias
-          when Ast_defs.is_c_enum (Cls.kind class_info) ->
-          `Yes Typing_error.Primary.Package.Enforceable_enum
-        | other -> other
+        if
+          Typing_packages.is_strict_isolation_target
+            env
+            (Cls.get_package class_info)
+        then
+          (* A strict-isolation package is enforced at every type position,
+             including ones the rollout carve-outs normally skip (bare
+             class/interface hints, nested type arguments, function-type
+             parameters, refinement members). *)
+          `Yes Typing_error.Primary.Package.Type_hint
+        else
+          match should_check_package_boundary with
+          (* Class/interface are covered by the class-name access check, so carve
+             them out (and enums too when enum violations are allowed). *)
+          | `Yes Typing_error.Primary.Package.Enforceable_type_alias
+            when Env.package_allow_enforceable_enum_violations env
+                 || Ast_defs.is_c_class (Cls.kind class_info)
+                 || Ast_defs.is_c_interface (Cls.kind class_info) ->
+            `No
+          (* An enum is enforced by its base type, not its name, so the
+             class-name check does not cover it; report it specifically. Any
+             other kind (e.g. a trait or enum class reaching here) keeps the
+             generic diagnostic. *)
+          | `Yes Typing_error.Primary.Package.Enforceable_type_alias
+            when Ast_defs.is_c_enum (Cls.kind class_info) ->
+            `Yes Typing_error.Primary.Package.Enforceable_enum
+          | other -> other
       in
       (let (errs, linter_errs) =
          Typing_visibility.check_top_level_access
@@ -373,11 +385,15 @@ and check_type_integrity
       check_targs_integrity ~in_signature (Cls.pos class_info) argl tparams
     | Decl_entry.Found (Env.TypedefResult typedef) ->
       let should_check_package_boundary =
-        match should_check_package_boundary with
-        | `Yes Typing_error.Primary.Package.Enforceable_type_alias
-          when typedef_resolves_to_class_like env typedef ->
-          `No
-        | other -> other
+        if Typing_packages.is_strict_isolation_target env typedef.td_package
+        then
+          `Yes Typing_error.Primary.Package.Type_hint
+        else
+          match should_check_package_boundary with
+          | `Yes Typing_error.Primary.Package.Enforceable_type_alias
+            when typedef_resolves_to_class_like env typedef ->
+            `No
+          | other -> other
       in
       (let (errs, linter_errs) =
          Typing_visibility.check_top_level_access

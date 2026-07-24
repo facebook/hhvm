@@ -345,6 +345,7 @@ module Primary : sig
       | Enforceable_type_alias
       | Enforceable_enum
       | Attribute
+      | Type_hint
     [@@deriving show]
 
     val target_symbol_spec_to_string : target_symbol_spec -> string

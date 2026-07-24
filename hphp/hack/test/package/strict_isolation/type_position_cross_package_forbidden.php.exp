@@ -1,0 +1,115 @@
+error: Typing[4472] Cannot access type `IsolatedType` defined in package `isolated` which may not be available [1]
+-> `IsolatedType` is defined in type_position_cross_package_forbidden.php--isolated/c.php [2]
+-> `IsolatedType` belongs to package `isolated` by this package definition [3]
+-> package `intern` is available because the current file belongs to it by this package definition [4]
+-> `intern` includes `shared` via its definition [5]
+
+type_position_cross_package_forbidden.php--intern/use.php:5:25
+ 3 | // is a violation for a strict-isolation package -- including nested positions
+ 4 | // (type arguments) that the rollout carve-outs normally skip.
+ 5 | function takes_isolated(IsolatedType $x): void {}
+   |                         ^^^^^^^^^^^^ [1]
+ 6 | function returns_isolated(): ?IsolatedType {
+ 7 |   return null;
+
+type_position_cross_package_forbidden.php--isolated/c.php:3:7
+ 1 | <?hh
+ 2 | // A class in the strict-isolation package `isolated`.
+ 3 | class IsolatedType {}
+   |       ^^^^^^^^^^^^ [2]
+
+PACKAGES.toml:14:11
+ 4 | include_paths = ["//shared/"]
+ 5 | 
+ 6 | [packages.intern]
+   |           ^^^^^^ [4]
+ 7 | include_paths = ["//intern/"]
+ 8 | includes = ["shared"]
+   |             ^^^^^^^^ [5]
+ 9 | 
+10 | # A package that opts into strict isolation. Its presence may not be dynamically
+11 | # observed (no `package` expression / `__RequirePackage`), and
+12 | # package_exclude_patterns (e.g. __tests__) do not grant a typecheck exemption
+13 | # for references into it.
+14 | [packages.isolated]
+   |           ^^^^^^^^ [3]
+15 | include_paths = ["//isolated/"]
+16 | includes = ["intern", "shared"]
+
+error: Typing[4472] Cannot access type `IsolatedType` defined in package `isolated` which may not be available [1]
+-> `IsolatedType` is defined in type_position_cross_package_forbidden.php--isolated/c.php [2]
+-> `IsolatedType` belongs to package `isolated` by this package definition [3]
+-> package `intern` is available because the current file belongs to it by this package definition [4]
+-> `intern` includes `shared` via its definition [5]
+
+type_position_cross_package_forbidden.php--intern/use.php:6:31
+ 4 | // (type arguments) that the rollout carve-outs normally skip.
+ 5 | function takes_isolated(IsolatedType $x): void {}
+ 6 | function returns_isolated(): ?IsolatedType {
+   |                               ^^^^^^^^^^^^ [1]
+ 7 |   return null;
+ 8 | }
+
+type_position_cross_package_forbidden.php--isolated/c.php:3:7
+ 1 | <?hh
+ 2 | // A class in the strict-isolation package `isolated`.
+ 3 | class IsolatedType {}
+   |       ^^^^^^^^^^^^ [2]
+
+PACKAGES.toml:14:11
+ 4 | include_paths = ["//shared/"]
+ 5 | 
+ 6 | [packages.intern]
+   |           ^^^^^^ [4]
+ 7 | include_paths = ["//intern/"]
+ 8 | includes = ["shared"]
+   |             ^^^^^^^^ [5]
+ 9 | 
+10 | # A package that opts into strict isolation. Its presence may not be dynamically
+11 | # observed (no `package` expression / `__RequirePackage`), and
+12 | # package_exclude_patterns (e.g. __tests__) do not grant a typecheck exemption
+13 | # for references into it.
+14 | [packages.isolated]
+   |           ^^^^^^^^ [3]
+15 | include_paths = ["//isolated/"]
+16 | includes = ["intern", "shared"]
+
+error: Typing[4472] Cannot access type `IsolatedType` defined in package `isolated` which may not be available [1]
+-> `IsolatedType` is defined in type_position_cross_package_forbidden.php--isolated/c.php [2]
+-> `IsolatedType` belongs to package `isolated` by this package definition [3]
+-> package `intern` is available because the current file belongs to it by this package definition [4]
+-> `intern` includes `shared` via its definition [5]
+
+type_position_cross_package_forbidden.php--intern/use.php:9:33
+ 7 |   return null;
+ 8 | }
+ 9 | function nested_isolated(): vec<IsolatedType> {
+   |                                 ^^^^^^^^^^^^ [1]
+10 |   return vec[];
+11 | }
+
+type_position_cross_package_forbidden.php--isolated/c.php:3:7
+ 1 | <?hh
+ 2 | // A class in the strict-isolation package `isolated`.
+ 3 | class IsolatedType {}
+   |       ^^^^^^^^^^^^ [2]
+
+PACKAGES.toml:14:11
+ 4 | include_paths = ["//shared/"]
+ 5 | 
+ 6 | [packages.intern]
+   |           ^^^^^^ [4]
+ 7 | include_paths = ["//intern/"]
+ 8 | includes = ["shared"]
+   |             ^^^^^^^^ [5]
+ 9 | 
+10 | # A package that opts into strict isolation. Its presence may not be dynamically
+11 | # observed (no `package` expression / `__RequirePackage`), and
+12 | # package_exclude_patterns (e.g. __tests__) do not grant a typecheck exemption
+13 | # for references into it.
+14 | [packages.isolated]
+   |           ^^^^^^^^ [3]
+15 | include_paths = ["//isolated/"]
+16 | includes = ["intern", "shared"]
+
+3 errors found

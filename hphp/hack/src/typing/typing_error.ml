@@ -369,6 +369,7 @@ module Primary = struct
       | Enforceable_type_alias
       | Enforceable_enum
       | Attribute
+      | Type_hint
     [@@deriving show]
 
     let target_symbol_spec_to_string = function
@@ -388,6 +389,7 @@ module Primary = struct
       | Enforceable_type_alias -> "type alias used as an enforceable type hint"
       | Enforceable_enum -> "enum used as an enforceable type hint"
       | Attribute -> "attribute"
+      | Type_hint -> "type"
 
     type t =
       | Cross_pkg_access of {

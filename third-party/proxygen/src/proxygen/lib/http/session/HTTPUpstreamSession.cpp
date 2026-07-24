@@ -29,11 +29,8 @@ HTTPUpstreamSession::HTTPUpstreamSession(
                   std::move(codec),
                   tinfo,
                   infoCallback) {
-  if (sock_) {
-    auto asyncSocket = sock_->getUnderlyingTransport<folly::AsyncSocket>();
-    if (asyncSocket) {
-      asyncSocket->setBufferCallback(this);
-    }
+  if (auto* s = sock_->getUnderlyingTransport<folly::AsyncSocket>()) {
+    s->setBufferCallback(this);
   }
   CHECK_EQ(codec_->getTransportDirection(), TransportDirection::UPSTREAM);
 }

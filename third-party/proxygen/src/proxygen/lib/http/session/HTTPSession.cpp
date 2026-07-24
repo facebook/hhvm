@@ -151,7 +151,7 @@ void HTTPSession::setupCodec() {
     connFlowControl_ = new FlowControlFilter(*this, writeBuf_, codec_.call());
     codec_.addFilters(std::unique_ptr<FlowControlFilter>(connFlowControl_));
   }
-  if (codec_->supportsParallelRequests() && sock_ && isDownstream()) {
+  if (codec_->supportsParallelRequests() && isDownstream()) {
     auto rateLimitFilter = std::make_unique<RateLimitFilter>(
         &getEventBase()->timer(), sessionStats_);
     rateLimitFilter->addRateLimiter(RateLimiter::Type::HEADERS);
@@ -390,7 +390,7 @@ void HTTPSession::immediateShutdown() {
 
 void HTTPSession::dropConnection(const std::string& errorMsg) {
   VLOG(4) << "dropping " << *this;
-  if (!sock_ || (readsShutdown() && writesShutdown())) {
+  if (readsShutdown() && writesShutdown()) {
     VLOG(4) << *this << " already shutdown";
     DCHECK(!shutdownTransportCb_) << "Why is there a shutdownTransportCb_?";
     if (isLoopCallbackScheduled()) {
@@ -2680,7 +2680,7 @@ void HTTPSession::onTxnByteEventWrittenToBuf(const ByteEvent& event) noexcept {
 }
 
 bool HTTPSession::isDetachable(bool checkSocket) const {
-  if (checkSocket && sock_ && !sock_->isDetachable()) {
+  if (checkSocket && !sock_->isDetachable()) {
     return false;
   }
   return transactions_.size() == 0 && getNumIncomingStreams() == 0 &&

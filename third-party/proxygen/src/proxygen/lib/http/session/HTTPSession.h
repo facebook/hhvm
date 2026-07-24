@@ -73,10 +73,7 @@ class HTTPSession
   }
 
   folly::EventBase* getEventBase() const override {
-    if (sock_) {
-      return sock_->getEventBase();
-    }
-    return nullptr;
+    return sock_->getEventBase();
   }
 
   const folly::AsyncTransport* getTransport() const override {

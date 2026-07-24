@@ -11965,7 +11965,17 @@ end = struct
             else if is_const then begin
               if Env.package_allow_classconst_violations env then
                 if is_classptr then
-                  `ClassPtrLinterOnly
+                  (* `Foo::class` is normally only a migration-era classptr lint,
+                     but a strict-isolation target makes it a hard package
+                     violation. *)
+                  if
+                    Typing_packages.is_strict_isolation_target
+                      env
+                      (Cls.get_package class_)
+                  then
+                    `Yes Typing_error.Primary.Package.Class
+                  else
+                    `ClassPtrLinterOnly
                 else
                   (* Non-::class constants: skip the class-level check
                      here and let class_const handle it *)

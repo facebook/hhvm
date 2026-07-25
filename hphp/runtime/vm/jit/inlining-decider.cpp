@@ -39,6 +39,7 @@
 
 #include "hphp/zend/zend-strtod.h"
 
+#include <fmt/format.h>
 #include <folly/Synchronized.h>
 #include <cmath>
 #include <vector>
@@ -54,7 +55,7 @@ namespace {
 
 std::string nameAndReason(int bcOff, std::string caller, std::string callee,
                           std::string why) {
-  return folly::sformat("BC {}: {} -> {}: {}\n", bcOff, caller, callee, why);
+  return fmt::format("BC {}: {} -> {}: {}\n", bcOff, caller, callee, why);
 }
 
 bool traceRefusal(SrcKey callerSk, const Func* callee, std::string why,
@@ -572,7 +573,7 @@ bool shouldInline(const irgen::IRGS& irgs,
 
   if (!hasRet) {
     return refuse(
-      folly::sformat("region has no returns: callee BC instrs = {} : {}",
+      fmt::format("region has no returns: callee BC instrs = {} : {}",
                      region.instrSize(), show(region)));
   }
 
@@ -597,11 +598,11 @@ bool shouldInline(const irgen::IRGS& irgs,
   // inlined calls for a given caller---just the cost of each nested stack.)
   cost = costOfInlining(callerSk, callee, regionAndUnit, annotationsPtr);
   if (cost <= Cfg::HHIR::AlwaysInlineVasmCostLimit) {
-    return accept(folly::sformat("cost={} within always-inline limit", cost));
+    return accept(fmt::format("cost={} within always-inline limit", cost));
   }
 
   if (region.instrSize() > irgs.budgetBCInstrs) {
-    return refuse(folly::sformat(
+    return refuse(fmt::format(
       "exhausted bytecode budget: budgetBCInstrs={}, regionSize={}",
       irgs.budgetBCInstrs, region.instrSize()));
   }
@@ -615,13 +616,13 @@ bool shouldInline(const irgen::IRGS& irgs,
   const auto calleeProfCount = irgen::calleeProfCount(irgs, region);
   if (cost > maxCost) {
     auto const depth = inlineDepth(irgs);
-    return refuse(folly::sformat(
+    return refuse(fmt::format(
       "too expensive: cost={} : maxCost={} : "
       "baseProfCount={} : callerProfCount={} : calleeProfCount={} : depth={}",
       cost, maxCost, baseProfCount, callerProfCount, calleeProfCount, depth));
   }
 
-  return accept(folly::sformat("small region with return: cost={} : "
+  return accept(fmt::format("small region with return: cost={} : "
                                "maxTotalCost={} : maxCost={} : baseProfCount={}"
                                " : callerProfCount={} : calleeProfCount={}",
                                cost, maxTotalCost, maxCost, baseProfCount,

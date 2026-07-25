@@ -14,6 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
+#include <fmt/format.h>
+
 #include "hphp/runtime/vm/jit/fixup.h"
 
 #include "hphp/runtime/base/stats.h"
@@ -60,12 +62,12 @@ ActRec* findVMFrameForDebug(uintptr_t start) {
 std::string Fixup::show() const {
   if (!isValid()) return "invalid";
   if (isIndirect()) {
-    return folly::sformat("indirect ripOff={} extraSpOff={}",
+    return fmt::format("indirect ripOff={} extraSpOff={}",
                           ripOffset(), spOffset().offset);
   } else if (isAsioStub()) {
-    return folly::sformat("asio stub spOff={}", spOffset().offset);
+    return fmt::format("asio stub spOff={}", spOffset().offset);
   } else {
-    return folly::sformat("direct pcOff={} spOff={}",
+    return fmt::format("direct pcOff={} spOff={}",
                           pcOffset(), spOffset().offset);
   }
 }

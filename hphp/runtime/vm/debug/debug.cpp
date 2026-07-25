@@ -25,6 +25,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include <fmt/format.h>
 #include <folly/debugging/symbolizer/Symbolizer.h>
 
 #include <folly/portability/Unistd.h>
@@ -55,7 +56,7 @@ DebugInfo* DebugInfo::Get() {
 }
 
 DebugInfo::DebugInfo() {
-  m_perfMapName = folly::sformat("/tmp/perf-{}.map", getpid());
+  m_perfMapName = fmt::format("/tmp/perf-{}.map", getpid());
   if (Cfg::Eval::PerfPidMap) {
     m_perfMapEnabled = true;
     // When running with ROAR, ROAR owns the pid-map file, and HHVM writes to it
@@ -68,7 +69,7 @@ DebugInfo::DebugInfo() {
   if (Cfg::Eval::PerfJitDump) {
     initPerfJitDump();
   }
-  m_dataMapName = folly::sformat("/tmp/perf-data-{}.map", getpid());
+  m_dataMapName = fmt::format("/tmp/perf-data-{}.map", getpid());
   if (Cfg::Eval::PerfDataMap) {
     m_dataMap = fopen(m_dataMapName.c_str(), "w");
   }

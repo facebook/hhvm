@@ -22,6 +22,7 @@
 
 #include <variant>
 
+#include <fmt/format.h>
 #include <folly/String.h>
 
 #include "hphp/runtime/base/repo-auth-type.h"
@@ -93,7 +94,7 @@ void indented(Output& out, Func f) {
 
 template<class T>
 std::string format_line_pair(T* ptr) {
-  return folly::sformat(" ({},{})", ptr->line1(), ptr->line2());
+  return fmt::format(" ({},{})", ptr->line1(), ptr->line2());
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -304,11 +305,11 @@ void print_instr(Output& out, const FuncInfo& finfo, PC pc) {
 
   auto const print_nla = [&](const NamedLocal& nla) {
     auto const locName = loc_name(finfo, nla.id);
-    if (nla.name == kInvalidLocalName) return folly::sformat("{};_", locName);
+    if (nla.name == kInvalidLocalName) return fmt::format("{};_", locName);
     auto const sd = finfo.func->localVarName(nla.name);
-    if (!sd) return folly::sformat("{};_", locName);
+    if (!sd) return fmt::format("{};_", locName);
     auto const name = folly::cEscape<std::string>(sd->slice());
-    return folly::sformat("{};\"{}\"", locName, name);
+    return fmt::format("{};\"{}\"", locName, name);
   };
 
 #define IMM_BLA    print_switch();
@@ -433,7 +434,7 @@ void print_func_directives(Output& out, const FuncInfo& finfo) {
 
 std::string get_srcloc_str(SourceLoc loc) {
   if (!loc.valid()) return "-1:-1,-1:-1";
-  return folly::sformat("{}:{},{}:{}",
+  return fmt::format("{}:{},{}:{}",
                         loc.line0, loc.char0, loc.line1, loc.char1);
 }
 
@@ -546,12 +547,12 @@ std::string type_info(const StringData* userType,
 std::string opt_attrs(AttrContext ctx, Attr attrs,
                       const UserAttributeMap* userAttrs = nullptr,
                       bool needPrefix = true) {
-  auto str = folly::trimWhitespace(folly::sformat(
+  auto str = folly::trimWhitespace(fmt::format(
                "{} {}",
                attrs_to_string(ctx, attrs),
                user_attrs(userAttrs))).str();
   if (!str.empty()) {
-    str = folly::sformat("{}[{}]", needPrefix ? " " : "", str);
+    str = fmt::format("{}[{}]", needPrefix ? " " : "", str);
   }
   return str;
 }
@@ -622,7 +623,7 @@ std::string func_tparam_names(const Func* func) {
 
   return names.empty()
     ? ""
-    : folly::sformat("[{}]", folly::join(" ", names));
+    : fmt::format("[{}]", folly::join(" ", names));
 }
 
 void print_func(Output& out, const Func* func) {
@@ -717,7 +718,7 @@ std::string cls_tparam_names(const PreClass* preCls) {
   for (auto const& name : preCls->typeParamNames()) {
     names.emplace_back(escaped(name));
   }
-  return folly::sformat(" [{}]", folly::join(" ", names));
+  return fmt::format(" [{}]", folly::join(" ", names));
 }
 
 void print_method(Output& out, const Func* func) {

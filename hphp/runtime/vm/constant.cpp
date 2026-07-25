@@ -14,6 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
+#include <fmt/format.h>
+
 #include "hphp/runtime/vm/constant.h"
 
 #include "hphp/runtime/base/autoload-handler.h"
@@ -74,18 +76,18 @@ const StringData* Constant::nameFromFuncName(const StringData* func_name) {
     return nullptr;
   }
   slice = slice.subpiece(8, slice.size() - prefix_len);
-  return makeStaticString(folly::sformat("{}{}", ns_slice, slice));
+  return makeStaticString(fmt::format("{}{}", ns_slice, slice));
 }
 
 const StringData* Constant::funcNameFromName(const StringData* name) {
   auto slice = name->slice();
   auto ns_pos = slice.rfind('\\');
   if (ns_pos < 0) {
-    return makeStaticString(folly::sformat("86cinit_{}", slice));
+    return makeStaticString(fmt::format("86cinit_{}", slice));
   }
   auto ns_slice = slice.subpiece(0, ns_pos + 1);
   slice = slice.subpiece(ns_pos + 1, slice.size() - ns_pos - 1);
-  return makeStaticString(folly::sformat("{}86cinit_{}", ns_slice, slice));
+  return makeStaticString(fmt::format("{}86cinit_{}", ns_slice, slice));
 }
 
 TypedValue Constant::lookup(const StringData* cnsName) {

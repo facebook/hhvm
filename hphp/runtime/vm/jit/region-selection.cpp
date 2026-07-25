@@ -20,6 +20,7 @@
 #include <exception>
 #include <utility>
 
+#include <fmt/format.h>
 #include <folly/Memory.h>
 #include <folly/Conv.h>
 #include <folly/String.h>
@@ -1067,7 +1068,7 @@ bool check(const RegionDesc& region, std::string& error) {
     auto bid = b->id();
     // 2) Each block in the region has a different id.
     if (blockSet.contains(bid)) {
-      return bad(folly::sformat("many blocks with id {}", bid));
+      return bad(fmt::format("many blocks with id {}", bid));
     }
     blockSet.insert(bid);
   }
@@ -1083,13 +1084,13 @@ bool check(const RegionDesc& region, std::string& error) {
 
       // 3) All arcs involve blocks within the region.
       if (!blockSet.contains(succ)) {
-        return bad(folly::sformat("arc with dst not in the region: {} -> {}",
+        return bad(fmt::format("arc with dst not in the region: {} -> {}",
                                   bid, succ));
       }
 
       // 11) Successors and predecessors sets are consistent.
       if (!region.preds(succ).contains(bid)) {
-        return bad(folly::sformat("arc missing in succ's pred set: {} -> {}",
+        return bad(fmt::format("arc missing in succ's pred set: {} -> {}",
                                   bid, succ));
       }
 
@@ -1101,26 +1102,26 @@ bool check(const RegionDesc& region, std::string& error) {
       // 4) For each arc, the bytecode offset of the dst block must
       //    possibly follow the execution of the src block.
       if (!validSuccSrcKeys.contains(succSk)) {
-        return bad(folly::sformat("arc with impossible control flow: {} -> {}",
+        return bad(fmt::format("arc with impossible control flow: {} -> {}",
                                   bid, succ));
       }
 
       // 5) Each block contains at most one successor corresponding to a
       //    given SrcKey.
       if (succSrcKeys.contains(succSk)) {
-        return bad(folly::sformat("block {} has multiple successors with SK {}",
+        return bad(fmt::format("block {} has multiple successors with SK {}",
                                   bid, show(succSk)));
       }
       succSrcKeys.insert(succSk);
     }
     for (auto pred : region.preds(bid)) {
       if (!blockSet.contains(pred)) {
-        return bad(folly::sformat("arc with src not in the region: {} -> {}",
+        return bad(fmt::format("arc with src not in the region: {} -> {}",
                                   pred, bid));
       }
       // 11) Successors and predecessors sets are consistent.
       if (!region.succs(pred).contains(bid)) {
-        return bad(folly::sformat("arc missing in pred's succ set: {} -> {}",
+        return bad(fmt::format("arc missing in pred's succ set: {} -> {}",
                                   pred, bid));
       }
     }
@@ -1148,7 +1149,7 @@ bool check(const RegionDesc& region, std::string& error) {
     // 8) For each block, there must be a path from the entry to it that
     //    includes only earlier blocks in the region.
     if (nVisited == 0 && i != 0) {
-      return bad(folly::sformat("block {} appears before all its predecessors",
+      return bad(fmt::format("block {} appears before all its predecessors",
                                 bid));
     }
     visited.insert(bid);
@@ -1162,7 +1163,7 @@ bool check(const RegionDesc& region, std::string& error) {
       auto nextRetransId = nextRetrans.value();
       auto nextPrevId = region.prevRetrans(nextRetransId);
       if (!nextPrevId || nextPrevId.value() != bid) {
-        return bad(folly::sformat("block {}'s nextRetrans (block {}) has non-"
+        return bad(fmt::format("block {}'s nextRetrans (block {}) has non-"
                                   "matching prevRetrans", bid, nextRetransId));
       }
     }
@@ -1171,7 +1172,7 @@ bool check(const RegionDesc& region, std::string& error) {
       auto prevRetransId = prevRetrans.value();
       auto prevNextId = region.nextRetrans(prevRetransId);
       if (!prevNextId || prevNextId.value() != bid) {
-        return bad(folly::sformat("block {}'s prevRetrans (block {}) has non-"
+        return bad(fmt::format("block {}'s prevRetrans (block {}) has non-"
                                   "matching nextRetrans", bid, prevRetransId));
       }
     }
@@ -1185,7 +1186,7 @@ bool check(const RegionDesc& region, std::string& error) {
     while (auto next = region.nextRetrans(bid)) {
       auto nextId = next.value();
       if (chainSet.contains(nextId)) {
-        return bad(folly::sformat("cyclic retranslation chain for block {}",
+        return bad(fmt::format("cyclic retranslation chain for block {}",
                                   bid));
       }
       chainSet.insert(nextId);
@@ -1277,7 +1278,7 @@ std::string show(const RegionDesc::Block& b) {
 }
 
 std::string show(const RegionDesc& region) {
-  std::string ret{folly::sformat("Region ({} blocks):\n",
+  std::string ret{fmt::format("Region ({} blocks):\n",
                                  region.blocks().size())};
 
   auto profData = jit::profData();

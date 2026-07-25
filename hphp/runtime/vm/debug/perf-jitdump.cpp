@@ -28,6 +28,7 @@
 #include "hphp/util/cycles.h"
 #include "hphp/util/logger.h"
 
+#include <fmt/format.h>
 #include <folly/portability/SysSyscall.h>
 #include <folly/portability/Time.h>
 #include <folly/portability/Unistd.h>
@@ -108,9 +109,9 @@ void DebugInfo::initPerfJitDump() {
   auto const jitdump_dir = Cfg::Eval::PerfJitDumpDir.data();
 
   if (checkJitdumpDir(jitdump_dir)) {
-    m_perfJitDumpName = folly::sformat("{}/jit-{}.dump", jitdump_dir, getpid());
+    m_perfJitDumpName = fmt::format("{}/jit-{}.dump", jitdump_dir, getpid());
   } else {
-    m_perfJitDumpName = folly::sformat("/tmp/jit-{}.dump", getpid());
+    m_perfJitDumpName = fmt::format("/tmp/jit-{}.dump", getpid());
   }
   Logger::Info("jitdump file: %s", m_perfJitDumpName.c_str());
 

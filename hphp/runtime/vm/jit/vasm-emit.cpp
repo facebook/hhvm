@@ -14,6 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
+#include <fmt/format.h>
+
 #include "hphp/runtime/vm/jit/vasm-emit.h"
 
 #include "hphp/runtime/vm/jit/align.h"
@@ -246,7 +248,7 @@ void emitVunit(Vunit& vunit, const IRUnit* unit,
     if (uploadUnit) {
       BlobStore::Key k;
       std::ostringstream str;
-      k.name = folly::sformat(
+      k.name = fmt::format(
         "{}:{}:{}",
         func->fullName()->slice(),
         unit->initSrcKey().lineNumber(),

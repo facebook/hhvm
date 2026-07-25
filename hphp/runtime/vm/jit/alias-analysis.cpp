@@ -13,6 +13,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#include <fmt/format.h>
+
 #include "hphp/runtime/vm/jit/alias-analysis.h"
 
 #include <utility>
@@ -680,7 +682,7 @@ std::string show(const AliasAnalysis& ainfo) {
   );
   std::vector<std::string> tmp;
   for (auto& kv : ainfo.loc_expand_map) {
-    tmp.push_back(folly::sformat(" ex {: <17}       : {}\n",
+    tmp.push_back(fmt::format(" ex {: <17}       : {}\n",
                                  show(kv.first),
                                  show(kv.second)));
   }
@@ -690,7 +692,7 @@ std::string show(const AliasAnalysis& ainfo) {
   folly::format(&ret, " {: <20}       : {}\n",
      "all iter",  show(ainfo.all_iter));
   for (auto& kv : ainfo.iter_expand_map) {
-    tmp.push_back(folly::sformat(" ex {: <17}       : {}\n",
+    tmp.push_back(fmt::format(" ex {: <17}       : {}\n",
                                  show(kv.first),
                                  show(kv.second)));
   }
@@ -700,7 +702,7 @@ std::string show(const AliasAnalysis& ainfo) {
   folly::format(&ret, " {: <20}       : {}\n",
      "all stack",  show(ainfo.all_stack));
   for (auto& kv : ainfo.stk_expand_map) {
-    tmp.push_back(folly::sformat(" ex {: <17}       : {}\n",
+    tmp.push_back(fmt::format(" ex {: <17}       : {}\n",
                                  show(kv.first),
                                  show(kv.second)));
   }

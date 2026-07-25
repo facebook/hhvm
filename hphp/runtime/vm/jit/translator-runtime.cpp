@@ -14,6 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
+#include <fmt/format.h>
+
 #include "hphp/runtime/vm/jit/translator-runtime.h"
 
 #include "hphp/runtime/base/array-common.h"
@@ -179,7 +181,7 @@ void throwUndefPropException(ObjectData* base, const StringData* name) {
 void throwUndefVariable(StringData* nm) {
   SCOPE_EXIT { decRefStr(nm); };
   SystemLib::throwUndefinedVariableExceptionObject(
-    folly::sformat("Undefined variable: {}", nm->data()));
+    fmt::format("Undefined variable: {}", nm->data()));
 }
 
 void raise_error_sd(const StringData *msg) {
@@ -298,7 +300,7 @@ void VerifyReifiedLocalTypeImpl(TypedValue value, ArrayData* ts,
     return;
   }
   raise_reified_typehint_error(
-    folly::sformat(
+    fmt::format(
       "Argument {} passed to {}() must be an instance of {}, {} given",
       paramId + 1,
       func->fullName()->data(),
@@ -317,7 +319,7 @@ void VerifyReifiedReturnTypeImpl(TypedValue value, ArrayData* ts,
     return;
   }
   raise_reified_typehint_error(
-    folly::sformat(
+    fmt::format(
       "Value returned from function {}() must be of type {}, {} given",
       func->fullName()->data(),
       TypeStructure::toString(ArrNR(ts),

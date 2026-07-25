@@ -18,6 +18,7 @@
 #include <iterator>
 #include <string>
 
+#include <fmt/format.h>
 #include <folly/Format.h>
 #include <folly/ScopeGuard.h>
 
@@ -259,7 +260,7 @@ struct TrackedStore {
     else if (pending()) type = "Pending";
     else if (processed()) type = "Processed";
     else type = "XXX";
-    return folly::sformat("{}:0x{:x}",type, uintptr_t(m_ptr.ptr()));
+    return fmt::format("{}:0x{:x}",type, uintptr_t(m_ptr.ptr()));
   }
  private:
   Kind kind() const { return m_ptr.tag(); }
@@ -374,10 +375,10 @@ const char* show(StoreKey::Where w) {
 std::string show(TrackedStore ts) {
   if (ts.isUnseen()) return "U";
   if (ts.isBad()) return "B";
-  if (auto i = ts.instruction()) return folly::sformat("I{}", i->id());
-  if (auto i = ts.processed()) return folly::sformat("I*{}", i->id());
-  if (auto b = ts.block()) return folly::sformat("P{}", b->id());
-  if (auto b = ts.pending()) return folly::sformat("P*{}", b->id());
+  if (auto i = ts.instruction()) return fmt::format("I{}", i->id());
+  if (auto i = ts.processed()) return fmt::format("I*{}", i->id());
+  if (auto b = ts.block()) return fmt::format("P{}", b->id());
+  if (auto b = ts.pending()) return fmt::format("P*{}", b->id());
   not_reached();
 }
 

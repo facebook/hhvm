@@ -29,6 +29,7 @@
 #include "hphp/util/trace.h"
 
 #include <boost/algorithm/string/trim.hpp>
+#include <fmt/format.h>
 
 #include <folly/Conv.h>
 #include <folly/Format.h>
@@ -194,7 +195,7 @@ static std::string show(PtrLocation ptr) {
   if (PtrLocation::name <= ptr) parts.emplace_back(#name);
   PTR_LOCATION_PRIMITIVE(PTRT)
 #undef PTRT
-  return folly::sformat("{{{}}}", folly::join('|', parts));
+  return fmt::format("{{{}}}", folly::join('|', parts));
 }
 
 static const jit::fast_map<Type, const char*> s_typeNames{
@@ -225,15 +226,15 @@ std::string Type::toString() const {
 
   if (m_hasConstVal) {
     if (*this <= TCls) {
-      return folly::sformat("Cls={}", m_clsVal->name()->data());
+      return fmt::format("Cls={}", m_clsVal->name()->data());
     }
     if (*this <= TLazyCls) {
-      return folly::sformat("LazyCls={}", m_lclsVal.name()->data());
+      return fmt::format("LazyCls={}", m_lclsVal.name()->data());
     }
     if (*this <= TEnumClassLabel) {
-      return folly::sformat("EnumClassLabel={}", m_strVal->data());
+      return fmt::format("EnumClassLabel={}", m_strVal->data());
     }
-    return folly::sformat("{}<{}>",
+    return fmt::format("{}<{}>",
                           dropConstVal().toString(), constValString());
   }
 
@@ -322,7 +323,7 @@ std::string Type::toString() const {
 
   assertx(!parts.empty());
   if (parts.size() == 1) return parts.front();
-  return folly::sformat("{{{}}}", folly::join('|', parts));
+  return fmt::format("{{{}}}", folly::join('|', parts));
 }
 
 std::string Type::debugString(Type t) {

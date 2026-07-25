@@ -18,6 +18,7 @@
 #include <limits>
 #include <algorithm>
 
+#include <fmt/format.h>
 #include <folly/Format.h>
 
 #include "hphp/runtime/base/string-data.h"
@@ -875,7 +876,7 @@ std::string show(AliasClass acls) {
     folly::format(&ret, "St {}{}",
       acls.m_stack.low.offset == std::numeric_limits<int32_t>::min()
         ? "<"
-        : folly::sformat("{}:", acls.m_stack.low.offset),
+        : fmt::format("{}:", acls.m_stack.low.offset),
       acls.m_stack.high.offset
     );
     break;

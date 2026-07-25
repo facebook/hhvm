@@ -14,6 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
+#include <fmt/format.h>
+
 #include "hphp/runtime/base/stats.h"
 
 #include "hphp/runtime/base/file-util.h"
@@ -364,7 +366,7 @@ void emitCastVec(IRGS& env) {
       ThrowInvalidOperation,
       cns(
         env,
-        makeStaticString(folly::sformat("{} to vec conversion", type))
+        makeStaticString(fmt::format("{} to vec conversion", type))
       )
     );
     return cns(env, TBottom);
@@ -398,7 +400,7 @@ void emitCastDict(IRGS& env) {
       ThrowInvalidOperation,
       cns(
         env,
-        makeStaticString(folly::sformat("{} to dict conversion", type))
+        makeStaticString(fmt::format("{} to dict conversion", type))
       )
     );
     return cns(env, TBottom);
@@ -432,7 +434,7 @@ void emitCastKeyset(IRGS& env) {
       ThrowInvalidOperation,
       cns(
         env,
-        makeStaticString(folly::sformat("{} to keyset conversion", type))
+        makeStaticString(fmt::format("{} to keyset conversion", type))
       )
     );
     return cns(env, TBottom);

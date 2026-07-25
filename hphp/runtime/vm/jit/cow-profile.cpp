@@ -14,6 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
+#include <fmt/format.h>
+
 #include "hphp/runtime/vm/jit/cow-profile.h"
 
 #include "hphp/runtime/base/array-data.h"
@@ -25,7 +27,7 @@ namespace HPHP::jit {
 ///////////////////////////////////////////////////////////////////////////////
 
 std::string COWProfile::toString() const {
-  return folly::sformat(
+  return fmt::format(
     "nocow:{}({:.1f}%),total:{}",
     m_nocow,
     m_total > 0 ? (100.0 * (m_nocow / (double)m_total)) : 0.0,

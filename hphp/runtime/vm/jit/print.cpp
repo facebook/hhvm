@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/vm/jit/print.h"
 
+#include <fmt/format.h>
 #include <folly/json/dynamic.h>
 
 #include <iostream>
@@ -281,8 +282,8 @@ dynamic getTCRange(const AreaIndex area,
                    uint64_t offset) {
   std::ostringstream disasmStr;
   disasmRange(disasmStr, kind, range.begin(), range.end(), offset);
-  auto const startStr = folly::sformat("{}", static_cast<void*>(range.begin()));
-  auto const endStr = folly::sformat("{}", static_cast<void*>(range.end()));
+  auto const startStr = fmt::format("{}", static_cast<void*>(range.begin()));
+  auto const endStr = fmt::format("{}", static_cast<void*>(range.end()));
   return dynamic::object("area", areaAsString(area))
                         ("start", startStr)
                         ("end", endStr)

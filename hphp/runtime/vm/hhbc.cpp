@@ -14,6 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
+#include <fmt/format.h>
+
 #include "hphp/runtime/vm/hhbc.h"
 
 #include <type_traits>
@@ -699,9 +701,9 @@ std::string instrToString(PC it, Either<const Func*, const FuncEmitter*> f, Eith
   };
 
   auto showOffset = [&](Offset offset) {
-    if (f == nullptr) return folly::sformat("{}", offset);
+    if (f == nullptr) return fmt::format("{}", offset);
     auto const unitOff = offsetOf(iStart + offset);
-    return folly::sformat("{} ({})", offset, unitOff);
+    return fmt::format("{} ({})", offset, unitOff);
   };
 
   switch (op) {
@@ -1161,14 +1163,14 @@ std::string show(const IterArgs& ita, PrintLocal print_local) {
     if (has_flag(ita.flags, IterArgs::Flags::WithKeys)) {
       parts.push_back("WithKeys");
     }
-    return folly::sformat("<{}>", folly::join(' ', parts));
+    return fmt::format("<{}>", folly::join(' ', parts));
   }();
 
-  return folly::sformat("{} {}", flags, ita.iterId);
+  return fmt::format("{} {}", flags, ita.iterId);
 }
 
 std::string show(const LocalRange& range) {
-  return folly::sformat(
+  return fmt::format(
     "L:{}+{}", range.first, range.count
   );
 }
@@ -1196,9 +1198,9 @@ std::string show(const FCallArgsBase& fca, const uint8_t* inoutArgs,
   if (fca.enforceMutableReturn()) flags.push_back("EnforceMutableReturn");
   if (fca.enforceReadonlyThis()) flags.push_back("EnforceReadonlyThis");
   auto formatId = [&] (Id id) {
-    return id == kInvalidId ? "$" : folly::sformat("@A_{}", id);
+    return id == kInvalidId ? "$" : fmt::format("@A_{}", id);
   };
-  return folly::sformat(
+  return fmt::format(
     "<{}> {} {} \"{}\" \"{}\" {} {} \"{}\"",
     folly::join(' ', flags), fca.numArgs, fca.numRets,
     show(fca.numArgs, inoutArgs),

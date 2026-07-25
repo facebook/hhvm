@@ -13,6 +13,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#include <fmt/format.h>
+
 #include "hphp/runtime/vm/jit/memory-effects.h"
 
 #include "hphp/util/configs/debugger.h"
@@ -2419,7 +2421,7 @@ std::string show(const MemEffects& effects) {
   return match<std::string>(
     effects,
     [&] (const GeneralEffects& x) {
-      return sformat("mlsmkib({} ; {} ; {} ; {} ; {} ; {})",
+      return fmt::format("mlsmkib({} ; {} ; {} ; {} ; {} ; {})",
         show(x.loads),
         show(x.stores),
         show(x.moves),
@@ -2429,20 +2431,20 @@ std::string show(const MemEffects& effects) {
       );
     },
     [&] (const ExitEffects& x) {
-      return sformat("exit({} ; {}; {})",
+      return fmt::format("exit({} ; {}; {})",
         show(x.live),
         show(x.kills),
         show(x.uninits)
       );
     },
     [&] (const PureInlineCall& x) {
-      return sformat("inline_call({} ; {})",
+      return fmt::format("inline_call({} ; {})",
         show(x.base),
         show(x.actrec)
       );
     },
     [&] (const CallEffects& x) {
-      return sformat("call({} ; {} ; {} ; {} ; {} ; {})",
+      return fmt::format("call({} ; {} ; {} ; {} ; {} ; {})",
         show(x.kills),
         show(x.uninits),
         show(x.inputs),
@@ -2451,10 +2453,10 @@ std::string show(const MemEffects& effects) {
         show(x.backtrace)
       );
     },
-    [&] (const PureLoad& x)        { return sformat("ld({})", show(x.src)); },
-    [&] (const PureStore& x)       { return sformat("st({})", show(x.dst)); },
+    [&] (const PureLoad& x)        { return fmt::format("ld({})", show(x.src)); },
+    [&] (const PureStore& x)       { return fmt::format("st({})", show(x.dst)); },
     [&] (const ReturnEffects& x) {
-      return sformat("return({})", show(x.kills));
+      return fmt::format("return({})", show(x.kills));
     },
     [&] (const IrrelevantEffects&) { return "IrrelevantEffects"; },
     [&] (const UnknownEffects&)    { return "UnknownEffects"; }

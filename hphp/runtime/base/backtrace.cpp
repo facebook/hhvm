@@ -34,6 +34,7 @@
 #include "hphp/util/struct-log.h"
 #include "hphp/runtime/base/req-hash-set.h"
 
+#include <fmt/format.h>
 #include <folly/small_vector.h>
 
 namespace HPHP {
@@ -580,7 +581,7 @@ void addBacktraceToStructLog(const Array& bt, StructuredLogEntry& cols) {
     files.emplace_back(addVariant(frame[s_file]));
     if (frame.exists(s_class)) {
       functions.emplace_back(
-        addString(folly::sformat("{}{}{}",
+        addString(fmt::format("{}{}{}",
                                  frame[s_class].toString().data(),
                                  frame[s_type].toString().data(),
                                  frame[s_function].toString().data()

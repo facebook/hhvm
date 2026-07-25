@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/vm/jit/bc-marker.h"
 
+#include <fmt/format.h>
 #include <folly/Format.h>
 #include <folly/Conv.h>
 
@@ -38,7 +39,7 @@ std::string BCMarker::show() const {
     m_bcSPOff.offset,
     m_profTransIDs.empty()
       ? ""
-      : folly::sformat(" [profTrans={}]", folly::join(',', m_profTransIDs))
+      : fmt::format(" [profTrans={}]", folly::join(',', m_profTransIDs))
   ).str();
 }
 

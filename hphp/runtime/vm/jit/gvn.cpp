@@ -31,6 +31,7 @@
 #include "hphp/util/dataflow-worklist.h"
 
 #include <sstream>
+#include <fmt/format.h>
 #include <folly/small_vector.h>
 
 namespace HPHP::jit {
@@ -558,7 +559,7 @@ std::string show(const PrcState::Bits& bits) {
 }
 
 std::string show(const PrcState& state) {
-  return folly::sformat(
+  return fmt::format(
     "   pantIn  : {}\n"
     "   orig    : {}\n"
     "   local   : {}\n"

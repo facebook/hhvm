@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <fmt/format.h>
 #include <folly/json/dynamic.h>
 #include <folly/Format.h>
 
@@ -51,7 +52,7 @@ struct IncRefProfile {
   }
 
   std::string toString() const {
-    return folly::sformat(
+    return fmt::format(
       "total: {:4}\n uncounted: {:4} ({:.1f}%),\n persistent: {:4} ({:.1f}%),\n"
       " incremented: {:4} ({:.1f}%)",
       total,

@@ -39,6 +39,7 @@
 #include "hphp/util/timer.h"
 #include "hphp/util/trace.h"
 
+#include <fmt/format.h>
 #include <folly/gen/Base.h>
 #include <folly/json/json.h>
 
@@ -82,7 +83,7 @@ buildCodeSizeCounters() {
   auto codeCounterInit =
     [&] (const char* name,
          const std::vector<ServiceData::StatsType>& stats) {
-      auto counterName = folly::sformat("jit.code.{}.used", name);
+      auto counterName = fmt::format("jit.code.{}.used", name);
       counters[name] = ServiceData::createTimeSeries(
           counterName, stats,
           {std::chrono::seconds(Cfg::Jit::WarmupRateSeconds),
@@ -191,9 +192,9 @@ void recordTranslationSizes(const TransRec& tr) {
     default:
       return;
   }
-  auto mainCounter   = s_used_counters.at(folly::sformat("{}.main", kindName));
-  auto coldCounter   = s_used_counters.at(folly::sformat("{}.cold", kindName));
-  auto frozenCounter = s_used_counters.at(folly::sformat("{}.frozen", kindName));
+  auto mainCounter   = s_used_counters.at(fmt::format("{}.main", kindName));
+  auto coldCounter   = s_used_counters.at(fmt::format("{}.cold", kindName));
+  auto frozenCounter = s_used_counters.at(fmt::format("{}.frozen", kindName));
   mainCounter->addValue(tr.aLen);
   coldCounter->addValue(tr.acoldLen);
   frozenCounter->addValue(tr.afrozenLen);
@@ -400,8 +401,8 @@ static void logFrame(const Vunit& unit, const size_t frame) {
   size_t exclusive = 0;
   for (uint8_t idx = 0; idx < kNumAreas; ++idx) {
     auto const aidx = static_cast<AreaIndex>(idx);
-    auto const inm = folly::sformat("{}_inclusive_bytes", areaAsString(aidx));
-    auto const enm = folly::sformat("{}_exclusive_bytes", areaAsString(aidx));
+    auto const inm = fmt::format("{}_inclusive_bytes", areaAsString(aidx));
+    auto const enm = fmt::format("{}_exclusive_bytes", areaAsString(aidx));
     auto const ibytes = unit.frames[frame].sections[idx].inclusive;
     auto const ebytes = unit.frames[frame].sections[idx].exclusive;
     ent.setInt(inm, ibytes);
@@ -540,13 +541,13 @@ std::string warmupStatusString() {
     if (!series) return "initializing";
     auto const codeSize = series->getSum();
     if (codeSize < maxSize / Cfg::Jit::WarmupMinFillFactor) {
-      return folly::sformat("Code.{} is still to small to be considered warm. "
+      return fmt::format("Code.{} is still to small to be considered warm. "
                             "({} of max {})\n", name, codeSize, maxSize);
     }
     auto const codeSizeRate = series->getRateByDuration(
         std::chrono::seconds(Cfg::Jit::WarmupRateSeconds));
     if (codeSizeRate > Cfg::Jit::WarmupMaxCodeGenRate) {
-      return folly::sformat("Code.{} is still increasing at a rate of {}\n",
+      return fmt::format("Code.{} is still increasing at a rate of {}\n",
                             name, codeSizeRate);
     }
     return "";

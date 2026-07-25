@@ -14,6 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
+#include <fmt/format.h>
+
 #include "hphp/runtime/vm/jit/vasm-print.h"
 
 #include <sstream>
@@ -258,7 +260,7 @@ std::string show(const VregSet& s) {
 
 std::string show(const VregList& l) {
   using namespace folly::gen;
-  return folly::sformat(
+  return fmt::format(
     "[{}]",
     from(l)
     | map([] (Vreg r) { return show(r); })

@@ -31,6 +31,7 @@
 #include "hphp/util/dataflow-worklist.h"
 #include "hphp/util/trace.h"
 
+#include <fmt/format.h>
 #include <folly/Format.h>
 
 #include <algorithm>
@@ -168,11 +169,11 @@ struct Env {
 ///////////////////////////////////////////////////////////////////////////////
 
 DEBUG_ONLY std::string show(PhysExpr x) {
-  return folly::sformat("{} + {}", show(x.base), x.disp);
+  return fmt::format("{} + {}", show(x.base), x.disp);
 }
 
 DEBUG_ONLY std::string show(const DefInfo& x) {
-  return folly::sformat(
+  return fmt::format(
     "{} + {}{}{}{}",
     show(x.base), x.disp,
     x.copy.isValid() ? " [" : "",

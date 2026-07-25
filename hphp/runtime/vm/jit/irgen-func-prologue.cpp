@@ -14,6 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
+#include <fmt/format.h>
+
 #include "hphp/runtime/vm/jit/irgen-func-prologue.h"
 
 #include "hphp/runtime/base/array-iterator.h"
@@ -266,7 +268,7 @@ void emitCalleeGenericsChecks(IRGS& env, const Func* callee,
         return;
       }
 
-      auto const errMsg = makeStaticString(folly::sformat(
+      auto const errMsg = makeStaticString(fmt::format(
         "Generic at index 0 to Function {} must be reified, erased given",
         callee->fullName()->data()));
       gen(env, RaiseWarning, cns(env, errMsg));

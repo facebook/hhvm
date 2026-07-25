@@ -80,6 +80,7 @@
 #include "hphp/util/numa.h"
 #include "hphp/util/struct-log.h"
 
+#include <fmt/format.h>
 #include <folly/portability/Unistd.h>
 #include <folly/String.h>
 
@@ -1402,7 +1403,7 @@ void renameFile(const std::string& src, const std::string& dst) {
   if (::rename(src.c_str(), dst.c_str()) != -1) return;
 
   auto const msg =
-    folly::sformat("Failed to rename {} to {}, {}",
+    fmt::format("Failed to rename {} to {}, {}",
                    src, dst, folly::errnoStr(errno));
   Logger::Error(msg);
   throw std::runtime_error(msg);
@@ -1430,7 +1431,7 @@ ProfDataSerializer::ProfDataSerializer(const std::string& name, FileMode mode)
   auto const check = [] (int ret, const std::string& file) {
     if (ret != -1) return;
     auto const msg =
-      folly::sformat("Failed to open file for write {}, {}", file,
+      fmt::format("Failed to open file for write {}, {}", file,
                      folly::errnoStr(errno));
     Logger::Error(msg);
     throw std::runtime_error(msg);
@@ -1757,7 +1758,7 @@ void write_string(ProfDataSerializer& ser, const std::string_view& str) {
   ITRACE(2, "cpp string>\n");
   uint64_t size = str.size();
   if (size > kMaxCppStringLen) {
-    throw std::runtime_error(folly::sformat("string too long {} > {}", size, kMaxCppStringLen));
+    throw std::runtime_error(fmt::format("string too long {} > {}", size, kMaxCppStringLen));
   }
   write_raw(ser, safe_cast<uint32_t>(size));
   write_raw(ser, str.data(), size);
@@ -1775,7 +1776,7 @@ std::string read_cpp_string(ProfDataDeserializer& ser) {
   ITRACE(2, "cpp string>\n");
   auto const size = read_raw<uint32_t>(ser);
   if (size > kMaxCppStringLen) {
-    throw std::runtime_error(folly::sformat("string too long {} > {}, likely corrupt", size, kMaxCppStringLen));
+    throw std::runtime_error(fmt::format("string too long {} > {}, likely corrupt", size, kMaxCppStringLen));
   }
   std::string res;
   res.resize(size);
@@ -2264,7 +2265,7 @@ std::string serializeProfData(const std::string& filename) {
 
     return "";
   } catch (std::runtime_error& err) {
-    return folly::sformat("Failed to serialize profile data: {}", err.what());
+    return fmt::format("Failed to serialize profile data: {}", err.what());
   }
 }
 
@@ -2290,7 +2291,7 @@ std::string serializeOptProfData(const std::string& filename) {
 
     return "";
   } catch (std::runtime_error& err) {
-    return folly::sformat("Failed serializeOptProfData: {}", err.what());
+    return fmt::format("Failed serializeOptProfData: {}", err.what());
   }
 }
 
@@ -2350,7 +2351,7 @@ std::string serializeSBProfData(const std::string& root,
     ser.finalize();
     return "Serialization of profile data successful\n";
   } catch (std::runtime_error& err) {
-    return folly::sformat("Serialization failed: {}", err.what());
+    return fmt::format("Serialization failed: {}", err.what());
   }
 }
 
@@ -2406,7 +2407,7 @@ std::string deserializeProfData(const std::string& filename,
     read_raw(ser, &schema[0], size);
     if (schema != repoSchemaId()) {
       auto const msg =
-        folly::sformat("Mismatched repo-schema (expected schema_id '{}', got '{}')",
+        fmt::format("Mismatched repo-schema (expected schema_id '{}', got '{}')",
           repoSchemaId(), schema);
 
       throw std::runtime_error(msg);
@@ -2430,7 +2431,7 @@ std::string deserializeProfData(const std::string& filename,
           "Stale profile data (check Eval.ProfDataTTLHours)");
     } else if (buildTime > currTime) {
       throw std::runtime_error(
-          folly::sformat("profile data build timestame: {}, currTime: {}",
+          fmt::format("profile data build timestame: {}, currTime: {}",
                          buildTime, currTime).c_str());
     }
 
@@ -2462,7 +2463,7 @@ std::string deserializeProfData(const std::string& filename,
     ExtensionRegistry::deserialize(ser);
 
     if (preload_only) {
-      return folly::sformat("Mismatched repo signature "
+      return fmt::format("Mismatched repo signature "
                             "(expected '{}', got '{}'), preloading only",
                             RepoFile::globalData().Signature, signature);
     }
@@ -2539,7 +2540,7 @@ std::string deserializeProfData(const std::string& filename,
 
     return "";
   } catch (std::runtime_error& err) {
-    return folly::sformat("Failed to deserialize profile data {}: {}",
+    return fmt::format("Failed to deserialize profile data {}: {}",
                           filename, err.what());
   }
 }
@@ -2668,14 +2669,14 @@ std::string deserializeSBProfData(const std::string& root,
       auto const preload = !!(flags & SBWarmupFlags::Preload);
       auto const jit = !!(flags & SBWarmupFlags::Jit);
       auto const apc = !!(flags & SBWarmupFlags::Apc);
-      errMsg = folly::sformat(
+      errMsg = fmt::format(
         "Deserialization of profile data successful "
         "(preload={}, jit={}, apc={})\n", preload, jit, apc);
     } catch (Exception& ex) {
-      errMsg = folly::sformat("Deser failed {}: {}\n", profFileName,
+      errMsg = fmt::format("Deser failed {}: {}\n", profFileName,
                               ex.what());
     } catch (std::exception& ex) {
-      errMsg = folly::sformat("Deser failed {}: {}\n", profFileName,
+      errMsg = fmt::format("Deser failed {}: {}\n", profFileName,
                               ex.what());
     }
   }).run();

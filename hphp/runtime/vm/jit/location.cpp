@@ -18,6 +18,7 @@
 
 #include "hphp/util/assertions.h"
 
+#include <fmt/format.h>
 #include <folly/Format.h>
 #include <folly/Hash.h>
 
@@ -28,9 +29,9 @@ namespace HPHP::jit {
 std::string show(Location loc) {
   switch (loc.tag()) {
     case LTag::Local:
-      return folly::sformat("Local{{{}}}", loc.localId());
+      return fmt::format("Local{{{}}}", loc.localId());
     case LTag::Stack:
-      return folly::sformat("Stack{{{}}}", loc.stackIdx().offset);
+      return fmt::format("Stack{{{}}}", loc.stackIdx().offset);
     case LTag::MBase:
       return "MBase{}";
   }

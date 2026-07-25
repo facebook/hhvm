@@ -13,6 +13,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#include <fmt/format.h>
+
 #include "hphp/runtime/vm/coeffects.h"
 
 #include "hphp/runtime/vm/jit/coeffect-fun-param-profile.h"
@@ -100,7 +102,7 @@ SSATmp* emitCCParam(IRGS& env, const Func* f, uint32_t numArgsInclUnpack,
     [&] {
       hint(env, Block::Hint::Unlikely);
       auto const msg =
-        folly::sformat("Coeffect rule requires parameter at position "
+        fmt::format("Coeffect rule requires parameter at position "
                        "{} to be an object or null",
                        paramIdx + 1);
       gen(env, RaiseError, cns(env, makeStaticString(msg)));
@@ -202,7 +204,7 @@ void annotCoeffectFunParamProfile(
 
   std::string orderStr;
   for (int i = 0; i < order.size(); ++i) {
-    orderStr += folly::sformat("{}:{},", i+1, orderToName(order[i]));
+    orderStr += fmt::format("{}:{},", i+1, orderToName(order[i]));
   }
 
   env.unit.annotationData->add(

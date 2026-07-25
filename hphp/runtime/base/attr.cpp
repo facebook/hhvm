@@ -3,6 +3,7 @@
 #include "hphp/runtime/base/attr.h"
 
 #include <vector>
+#include <fmt/format.h>
 #include <folly/Format.h>
 
 #include "hphp/util/assertions.h"
@@ -20,7 +21,7 @@ std::string show(const Attr attrs) {
   #undef ATTR
   assertx(!parts.empty());
   if (parts.size() == 1) return parts.front();
-  return folly::sformat("{{{}}}", folly::join('|', parts));
+  return fmt::format("{{{}}}", folly::join('|', parts));
 }
 
 } // namespace HPHP

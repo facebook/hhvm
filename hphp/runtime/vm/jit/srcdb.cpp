@@ -14,6 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
+#include <fmt/format.h>
+
 #include "hphp/runtime/vm/jit/srcdb.h"
 
 #include "hphp/runtime/vm/func-cleanup.h"
@@ -100,7 +102,7 @@ std::string IncomingBranch::show() const {
     }
     always_assert(false);
   }();
-  return folly::sformat("{}@{}", typeStr, toSmash());
+  return fmt::format("{}@{}", typeStr, fmt::ptr(toSmash()));
 }
 
 TCA TransLoc::entry() const {

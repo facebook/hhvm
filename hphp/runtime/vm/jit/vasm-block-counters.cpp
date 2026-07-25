@@ -14,6 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
+#include <fmt/format.h>
+
 #include "hphp/runtime/vm/jit/vasm-block-counters.h"
 
 #include "hphp/runtime/vm/jit/abi.h"
@@ -111,7 +113,7 @@ std::string checkProfile(const Vunit& unit,
   auto const kind = unit.context
     ? unit.context->kind == TransKind::OptPrologue ? "prologue" : "region"
     : "unique stub";
-  if (counters.size() == 0) return folly::sformat("no profile for this {}", kind);
+  if (counters.size() == 0) return fmt::format("no profile for this {}", kind);
 
   std::string errorMsg;
   size_t opcodeMismatches=0;
@@ -135,7 +137,7 @@ std::string checkProfile(const Vunit& unit,
     auto& block = unit.blocks[b];
     if (index >= counters.size()) {
       report();
-      auto const msg = folly::sformat(
+      auto const msg = fmt::format(
         "missing block counter for B{} (index = {}, counters.size() = {})\n",
         size_t{b}, index, counters.size());
       FTRACE(1, "VasmBlockCounters::checkProfile: {}", msg);
@@ -152,7 +154,7 @@ std::string checkProfile(const Vunit& unit,
     auto const op_prof = opcodes[index];
     if (op_prof != op_opti) {
       report();
-      auto const msg = folly::sformat(
+      auto const msg = fmt::format(
         "mismatch opcode for B{} (index = {}): "
         "profile was {} optimized is {}\n",
         size_t{b}, index, vinst_names[op_prof], vinst_names[op_opti]);

@@ -14,6 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
+#include <fmt/format.h>
+
 #include "hphp/runtime/vm/jit/trans-rec.h"
 
 #include "hphp/runtime/vm/jit/translator-inline.h"
@@ -86,7 +88,7 @@ void TransRec::optimizeForMemory() {
           saved.fileName = saved.fileName.substr(pos+1);
         }
         auto newAnnotation =
-          folly::sformat(
+          fmt::format(
             "file:{}:{}:{}",
             saved.fileName, saved.offset, saved.length);
         std::swap(annotation.second, newAnnotation);
@@ -101,7 +103,7 @@ TransRec::SavedAnnotation
 TransRec::writeAnnotation(const Annotation& annotation, bool compress) {
   static jit::fast_map<std::string, size_t> fileWritten;
   SavedAnnotation saved = {
-    folly::sformat("{}/tc_annotations.txt{}",
+    fmt::format("{}/tc_annotations.txt{}",
                    Cfg::Eval::DumpTCPath,
                    compress ? ".gz" : ""),
     0,

@@ -20,6 +20,7 @@
 
 #include "hphp/util/abi-cxx.h"
 
+#include <fmt/format.h>
 #include <folly/Range.h>
 
 namespace HPHP::jit {
@@ -82,7 +83,7 @@ bool CallSpec::verifySignature(const CallDest& dest,
   auto fail = [&](auto&&... fmt) {
     auto const why = folly::sformat(std::forward<decltype(fmt)>(fmt)...);
     auto const func = getNativeFunctionName(this->address());
-    auto msg = folly::sformat(
+    auto msg = fmt::format(
       "Failed to verify signature for call to {}: {}\n\n", func, why
     );
     folly::format(

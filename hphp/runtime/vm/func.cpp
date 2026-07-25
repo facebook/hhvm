@@ -14,6 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
+#include <fmt/format.h>
+
 #include "hphp/runtime/vm/func.h"
 
 #include "hphp/runtime/base/attr.h"
@@ -348,7 +350,7 @@ bool Func::isMemoizeImplName(const StringData* name) {
 }
 
 const StringData* Func::genMemoizeImplName(const StringData* origName) {
-  return makeStaticString(folly::sformat("{}$memoize_impl", origName->data()));
+  return makeStaticString(fmt::format("{}$memoize_impl", origName->data()));
 }
 
 std::pair<const StringData*, const StringData*> Func::getMethCallerNames(

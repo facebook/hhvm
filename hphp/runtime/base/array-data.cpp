@@ -16,6 +16,7 @@
 #include "hphp/runtime/base/array-data.h"
 
 #include <array>
+#include <fmt/format.h>
 #include <tbb/concurrent_unordered_set.h>
 
 #include "hphp/runtime/base/array-common.h"
@@ -801,7 +802,7 @@ std::string describeKeyValue(TypedValue tv) {
   switch (tv.m_type) {
   case KindOfPersistentString:
   case KindOfString:
-    return folly::sformat("\"{}\"", tv.m_data.pstr->data());
+    return fmt::format("\"{}\"", tv.m_data.pstr->data());
   case KindOfInt64:
     return folly::to<std::string>(tv.m_data.num);
   case KindOfUninit:
@@ -840,7 +841,7 @@ void throwInvalidArrayKeyException(const TypedValue* key, const ArrayData* ad) {
     return std::make_pair("keyset", "int or string");
   }();
   SystemLib::throwInvalidArgumentExceptionObject(
-    folly::sformat(
+    fmt::format(
       "Invalid {} key: expected a key of type {}, {} given",
       kind_type.first, kind_type.second, describe_actual_type(key)
     )
@@ -854,13 +855,13 @@ void throwInvalidArrayKeyException(const StringData* key, const ArrayData* ad) {
 
 void throwFalseyPromoteException(const char* type) {
   SystemLib::throwOutOfBoundsExceptionObject(
-    folly::sformat("Promoting {} to array", type)
+    fmt::format("Promoting {} to array", type)
   );
 }
 
 void throwOOBArrayKeyException(TypedValue key, const ArrayData* ad) {
   SystemLib::throwOutOfBoundsExceptionObject(
-    folly::sformat(
+    fmt::format(
       "Out of bounds {} access: invalid index {}",
       getDataTypeString(ad->toDataType(), ad->isLegacyArray()).data(),
       describeKeyValue(key)

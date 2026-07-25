@@ -14,6 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
+#include <fmt/format.h>
+
 #include "hphp/runtime/vm/jit/array-access-profile.h"
 
 #include "hphp/runtime/base/array-data.h"
@@ -65,7 +67,7 @@ static std::string actionString(ArrayAccessProfile::Action action) {
 }
 
 std::string ArrayAccessProfile::Result::toString() const {
-  return folly::sformat("offset={}({}) empty={} missing={} nocow={}",
+  return fmt::format("offset={}({}) empty={} missing={} nocow={}",
                         actionString(offset.first), offset.second,
                         actionString(empty),
                         actionString(missing),

@@ -13,6 +13,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#include <fmt/format.h>
+
 #include "hphp/runtime/vm/jit/irgen-call.h"
 
 #include "hphp/runtime/base/stats.h"
@@ -470,7 +472,7 @@ void callProfiledFunc(IRGS& env, SSATmp* callee, SSATmp* objOrClass,
     auto const fnName = curFunc(env)->fullName()->data();
     env.unit.annotationData->add(
       "CallTargets",
-      folly::sformat("BC={} FN={}: {}\n", bcOff(env), fnName, data.toString())
+      fmt::format("BC={} FN={}: {}\n", bcOff(env), fnName, data.toString())
     );
   }
   auto choices = [&]() {

@@ -28,6 +28,7 @@
 
 #include "hphp/runtime/base/bespoke-array.h"
 
+#include <fmt/format.h>
 #include <folly/Format.h>
 
 #include <string>
@@ -67,7 +68,7 @@ DEBUG_ONLY static int numBlockParams(Block* b) {
  * 8. Every instruction's BCMarker must point to a valid bytecode instruction.
  */
 bool checkBlock(Block* b) {
-  SCOPE_ASSERT_DETAIL("checkBlock") { return folly::sformat("B{}", b->id()); };
+  SCOPE_ASSERT_DETAIL("checkBlock") { return fmt::format("B{}", b->id()); };
   auto it = b->begin();
   auto end = b->end();
   always_assert(!b->empty());

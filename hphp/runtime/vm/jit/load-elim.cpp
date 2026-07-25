@@ -19,6 +19,7 @@
 
 #include <utility>
 #include <variant>
+#include <fmt/format.h>
 #include <folly/ScopeGuard.h>
 
 #include "hphp/util/bitset-utils.h"
@@ -218,12 +219,12 @@ std::string show(ValueInfo vi) {
   if (vi == nullptr) return "<>";
   return vi.match(
     [&] (SSATmp* t) { return t->toString(); },
-    [&] (Block* b) { return folly::sformat("phi@B{}", b->id()); }
+    [&] (Block* b) { return fmt::format("phi@B{}", b->id()); }
   );
 }
 
 std::string show(TrackedLoc li) {
-  return folly::sformat(
+  return fmt::format(
     "{: >12} | {}",
     li.knownType.toString(),
     show(li.knownValue)

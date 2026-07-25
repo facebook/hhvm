@@ -22,6 +22,7 @@
 
 #include "hphp/util/assertions.h"
 
+#include <fmt/format.h>
 #include <folly/Format.h>
 
 #include <string>
@@ -132,13 +133,13 @@ void MethProfile::reduce(MethProfile& a, const MethProfile& b) {
 
 std::string MethProfile::toString() const {
   if (auto cls = uniqueClass()) {
-    return folly::sformat("uniqueClass {}", cls->name()->data());
+    return fmt::format("uniqueClass {}", cls->name()->data());
   } else if (auto meth = uniqueMeth()) {
-    return folly::sformat("uniqueMeth {}", meth->fullName()->data());
+    return fmt::format("uniqueMeth {}", meth->fullName()->data());
   } else if (auto meth = baseMeth()) {
-    return folly::sformat("baseMeth {}", meth->fullName()->data());
+    return fmt::format("baseMeth {}", meth->fullName()->data());
   } else if (auto meth = interfaceMeth()) {
-    return folly::sformat("interfaceMeth {}", meth->fullName()->data());
+    return fmt::format("interfaceMeth {}", meth->fullName()->data());
   }
   return std::string("none");
 }

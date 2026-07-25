@@ -14,6 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
+#include <fmt/format.h>
+
 #include "hphp/runtime/vm/jit/mutation.h"
 
 #include "hphp/runtime/vm/jit/cfg.h"
@@ -730,7 +732,7 @@ struct RefineTmps {
     std::string toString() const {
       return to.match(
         [] (SSATmp* s) { return s->toString(); },
-        [] (Block* b) { return folly::sformat("Phi B{}", b->id()); }
+        [] (Block* b) { return fmt::format("Phi B{}", b->id()); }
       );
     }
 

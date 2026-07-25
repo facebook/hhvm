@@ -74,6 +74,7 @@
 #include "hphp/util/roar.h"
 #include "hphp/util/trace.h"
 
+#include <fmt/format.h>
 #include <folly/Format.h>
 
 #include <algorithm>
@@ -1641,20 +1642,20 @@ void UniqueStubs::add(const char* name,
     auto const isCold = code.inCold(start);
     if (!Cfg::Jit::NoGdb) {
       dbg.recordStub(Debug::TCRange(start, end, isCold),
-                     folly::sformat("HHVM::{}", name));
+                     fmt::format("HHVM::{}", name));
     }
     if (Cfg::Jit::UseVtuneAPI) {
-      reportHelperToVtune(folly::sformat("HHVM::{}", name).c_str(),
+      reportHelperToVtune(fmt::format("HHVM::{}", name).c_str(),
                           start,
                           end);
     }
     if (Cfg::Eval::PerfPidMap) {
       dbg.recordPerfMap(Debug::TCRange(start, end, isCold),
                         SrcKey{},
-                        folly::sformat("HHVM::{}", name));
+                        fmt::format("HHVM::{}", name));
     }
 
-    registerNativeFunctionName(start, folly::sformat("HHVM::{}", name));
+    registerNativeFunctionName(start, fmt::format("HHVM::{}", name));
 
     auto const newStub = StubRange{name, start, end};
     auto lower = std::lower_bound(m_ranges.begin(), m_ranges.end(), newStub);
@@ -1672,7 +1673,7 @@ void UniqueStubs::add(const char* name,
 }
 
 std::string UniqueStubs::describe(TCA address) const {
-  auto raw = [address] { return folly::sformat("{}", address); };
+  auto raw = [address] { return fmt::format("{}", fmt::ptr(address)); };
   if (m_ranges.empty()) return raw();
 
   auto const dummy = StubRange{"", address, nullptr};

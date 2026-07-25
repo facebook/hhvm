@@ -17,6 +17,7 @@
 #include "hphp/runtime/vm/jit/trans-cfg.h"
 #include <algorithm>
 
+#include <fmt/format.h>
 #include <folly/MapUtil.h>
 
 #include "hphp/runtime/vm/jit/prof-data.h"
@@ -289,7 +290,7 @@ void TransCFG::print(std::ostream& out, FuncId funcId,
     auto const bcStart = rec->srcKey().printableOffset();
     auto const bcStop  = rec->lastSrcKey().printableOffset();
     auto const shape = "box";
-    out << folly::sformat(
+    out << fmt::format(
       "t{} [shape={},label=\"T: {}\\np: {}\\n"
       "bc: [{}-{})\",style=filled,fillcolor=\"#ff{:02x}{:02x}\"];\n",
       tid, shape, tid, w, bcStart, bcStop, coldness, coldness);
@@ -299,7 +300,7 @@ void TransCFG::print(std::ostream& out, FuncId funcId,
   for (auto srcId : nodes()) {
     for (auto arc : outArcs(srcId)) {
       auto const w = arc->weight();
-      out << folly::sformat("t{} -> t{} [color=\"{}\",label=\"{}\"] ;\n",
+      out << fmt::format("t{} -> t{} [color=\"{}\",label=\"{}\"] ;\n",
                             srcId,
                             arc->dst(),
                             arc->guessed() ? "red" : "green4",

@@ -31,6 +31,7 @@
 #include "hphp/util/tribool.h"
 
 #include <boost/range/adaptor/reversed.hpp>
+#include <fmt/format.h>
 
 TRACE_SET_MOD(vasm_graph_color)
 
@@ -323,14 +324,14 @@ std::string show(Color c) {
     c,
     [] (None)            { return "-"; },
     [] (PhysReg r)       { return show(r); },
-    [] (SpillSlot s)     { return folly::sformat("S{}", s.slot); },
-    [] (SpillSlotWide s) { return folly::sformat("SW{}", s.slot); }
+    [] (SpillSlot s)     { return fmt::format("S{}", s.slot); },
+    [] (SpillSlotWide s) { return fmt::format("SW{}", s.slot); }
   );
 }
 
 std::string show(const BlockVector& v) {
   using namespace folly::gen;
-  return folly::sformat(
+  return fmt::format(
     "[{}]",
     from(v)
       | map([] (Vlabel b) { return folly::sformat("{}", b); })
@@ -343,11 +344,11 @@ std::string show(const WeightMap& w) {
   std::sort(sorted.begin(), sorted.end());
 
   using namespace folly::gen;
-  return folly::sformat(
+  return fmt::format(
     "{{{}}}",
     from(sorted)
       | map([] (const std::pair<Vreg, uint64_t>& p) {
-          return folly::sformat("{} -> {}", show(p.first), p.second);
+          return fmt::format("{} -> {}", show(p.first), p.second);
         })
       | unsplit<std::string>(", ")
   );
@@ -355,7 +356,7 @@ std::string show(const WeightMap& w) {
 
 std::string show(const PhiWeightVector& v) {
   using namespace folly::gen;
-  return folly::sformat(
+  return fmt::format(
     "[{}]",
     from(v)
       | map([] (const Optional<uint64_t>& w) -> std::string {
@@ -372,9 +373,9 @@ std::string show(const PenaltyVector& v) {
   for (auto const r : v) {
     if (!first) out += ", ";
     first = false;
-    out += folly::sformat("{}: {}", show(r), v[r]);
+    out += fmt::format("{}: {}", show(r), v[r]);
   }
-  return folly::sformat("[{}]", out);
+  return fmt::format("[{}]", out);
 }
 
 std::string show(const Vunit& unit, const RematInfo& remat) {
@@ -382,7 +383,7 @@ std::string show(const Vunit& unit, const RematInfo& remat) {
 }
 
 std::string show(const Vunit& unit, const RegInfo& info) {
-  return folly::sformat(
+  return fmt::format(
     "Class: {:10}, Color: {:6}, Penalty: {:3}, Mat: ({})",
     show(info.regClass),
     show(info.color),
@@ -393,7 +394,7 @@ std::string show(const Vunit& unit, const RegInfo& info) {
 
 std::string show(const LoopInfo& info) {
   using namespace folly::gen;
-  return folly::sformat(
+  return fmt::format(
     "Depth: {:2}, Uses: {}, Blocks: {}",
     info.depth,
     show(info.uses),
@@ -417,7 +418,7 @@ std::string show(const State& state) {
     return str;
   };
 
-  return folly::sformat(
+  return fmt::format(
     "GP Unreserved:        {}\n"
     "SIMD Unreserved:      {}\n"
     "Reserved Regs:        {}\n"
@@ -447,11 +448,11 @@ std::string show(const State& state) {
     show(state.rpo),
     [&]{
       using namespace folly::gen;
-      return folly::sformat(
+      return fmt::format(
         "{{{}}}",
         from(state.spillColors)
         | map([] (std::pair<Vreg, Color> p) {
-            return folly::sformat("{}: {}", show(p.first), show(p.second));
+            return fmt::format("{}: {}", show(p.first), show(p.second));
           })
         | orderBy([] (const std::string& p) {
             return p;
@@ -477,7 +478,7 @@ std::string show(const State& state) {
       for (size_t i = 0; i < state.regInfo.size(); ++i) {
         auto const& info = state.regInfo[i];
         if (!info) continue;
-        str += folly::sformat(
+        str += fmt::format(
           "  {:6} -> {}\n",
           show(Vreg{i}),
           show(state.unit, *info)
@@ -511,7 +512,7 @@ std::string show(const State& state) {
       std::string str;
       for (size_t i = 1; i < state.penalties.size(); ++i) {
         auto const& v = state.penalties[i];
-        str += folly::sformat("  {:3} -> {}\n", i, show(v));
+        str += fmt::format("  {:3} -> {}\n", i, show(v));
       }
       return str;
     }()
@@ -4983,7 +4984,7 @@ struct SpillerState {
   }
 
   std::string toString() const {
-    return folly::sformat(
+    return fmt::format(
       "GP: [Reg: {} Mem: {}] SIMD: [Reg: {} Mem: {}]",
       show(gp.inReg), show(gp.inMem),
       show(simd.inReg), show(simd.inMem)
@@ -5040,7 +5041,7 @@ struct SpillerResults {
   BlockSet changed;
 
   std::string toString(const State& state) const {
-    auto ret = folly::sformat(
+    auto ret = fmt::format(
       "SSAize: {}\nRematerialized: {}\n",
       show(ssaize),
       show(rematerialized)
@@ -5053,7 +5054,7 @@ struct SpillerResults {
         auto first = true;
         for (size_t i = 0; i < per.inPhi->size(); ++i) {
           if (!first) inPhi += ", ";
-          inPhi += folly::sformat("{}:{}", i, (*per.inPhi)[i] ? "reg" : "mem");
+          inPhi += fmt::format("{}:{}", i, (*per.inPhi)[i] ? "reg" : "mem");
           first = false;
         }
       } else {
@@ -5064,7 +5065,7 @@ struct SpillerResults {
         for (size_t i = 0; i < per.outPhi->size(); ++i) {
           if (!first) outPhi += ", ";
           outPhi +=
-            folly::sformat("{}:{}", i, (*per.outPhi)[i] ? "reg" : "mem");
+            fmt::format("{}:{}", i, (*per.outPhi)[i] ? "reg" : "mem");
           first = false;
         }
       } else {
@@ -10126,11 +10127,11 @@ struct FreeRegs {
   const RegSet& freeRegs() const { return regs; }
 
   std::string toString() const {
-    auto str = folly::sformat("Free: {}, Occupied: [", show(regs));
+    auto str = fmt::format("Free: {}, Occupied: [", show(regs));
     auto first = true;
     for (auto const r : occupied) {
       if (!occupied[r].isValid()) continue;
-      str += folly::sformat(
+      str += fmt::format(
         "{}{} -> {}",
         first ? "" : ", ",
         show(r),

@@ -22,6 +22,7 @@
 
 #include "hphp/util/assertions.h"
 
+#include <fmt/format.h>
 #include <folly/Format.h>
 
 #include <string>
@@ -70,7 +71,7 @@ void ClsCnsProfile::reduce(ClsCnsProfile& a, const ClsCnsProfile& b) {
 std::string ClsCnsProfile::toString() const {
   if (!m_curSlot) return "empty";
   if (m_curSlot == kInvalidSlot) return "InvalidSlot";
-  return folly::sformat("Slot {}", getSlot());
+  return fmt::format("Slot {}", getSlot());
 }
 
 folly::dynamic ClsCnsProfile::toDynamic() const {

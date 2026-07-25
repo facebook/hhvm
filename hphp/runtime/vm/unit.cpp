@@ -26,6 +26,7 @@
 #include <vector>
 
 #include <boost/algorithm/string/predicate.hpp>
+#include <fmt/format.h>
 
 #include <folly/Format.h>
 
@@ -1010,7 +1011,7 @@ std::string mangleReifiedGenericsName(const ArrayData* tsList) {
       l.emplace_back(str);
     }
   );
-  return folly::sformat("<{}>", folly::join(",", l));
+  return fmt::format("<{}>", folly::join(",", l));
 }
 
 }

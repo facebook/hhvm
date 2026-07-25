@@ -25,6 +25,7 @@
 #include <stdio.h>
 #include <signal.h>
 
+#include <fmt/format.h>
 #include <folly/portability/SysTime.h>
 #include <folly/Likely.h>
 
@@ -181,7 +182,7 @@ void checkOldest(Optional<StateGuard>& guard, bool force) {
   auto const request = getRequestToAbort();
   if (!request) return;
 
-  auto const msg = folly::sformat(
+  auto const msg = fmt::format(
     "Oldest request ({}, {}, {}) has been running for {} "
     "seconds. Aborting the server.",
     request->requestInfo ? request->requestInfo->m_id.toString() : "none",
@@ -410,7 +411,7 @@ std::string dumpActiveRequestInfo() {
           Clock::now() - req.startTime
         ).count(),
         req.requestInfo
-          ? folly::sformat(
+          ? fmt::format(
             " (timeout {}s)",
             req.requestInfo->m_reqInjectionData.getTimeout()
           )

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <fmt/format.h>
+
 #include "hphp/util/assertions.h"
 
 namespace debug_parser {
@@ -62,7 +64,7 @@ template<> class FormatValue<debug_parser::GlobalOff> {
 
   template<typename Callback>
   void format(FormatArg& arg, Callback& cb) const {
-    format_value::formatString(folly::sformat("{}:{}",
+    format_value::formatString(fmt::format("{}:{}",
                                               m_val.offset(),
                                               m_val.isInfo() ? 1 : 0),
                                arg, cb);

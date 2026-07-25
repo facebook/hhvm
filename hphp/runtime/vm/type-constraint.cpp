@@ -18,6 +18,7 @@
 
 #include <variant>
 
+#include <fmt/format.h>
 #include <folly/Format.h>
 #include <folly/MapUtil.h>
 #include <folly/Random.h>
@@ -880,20 +881,20 @@ std::string TypeConstraint::debugName() const {
     if (auto pcls = m_u.union_.m_classes) {
       for (auto& cls : pcls->m_list) {
         if (!classes.empty()) classes.append(", ");
-        classes.append(folly::sformat("{{cls:{}, tn:{}}}",
+        classes.append(fmt::format("{{cls:{}, tn:{}}}",
                                       show(cls.m_clsName),
                                       show(cls.m_typeName)));
       }
     }
 
-    return folly::sformat(
+    return fmt::format(
       "TypeConstraint{{flags:{}, typeName:{}, mask:{}, classes:[{}]}}",
       flags,
       tn,
       showUnionTypeMask(m_u.union_.m_mask),
       classes);
   } else {
-    return folly::sformat(
+    return fmt::format(
       "TypeConstraint{{flags:{}, type:{}, clsName:{}, typeName:{}}}",
       flags,
       show(m_u.single.type),
@@ -1783,7 +1784,7 @@ std::string describe_actual_type(tv_rval val) {
       auto const name = cls->name()->toCppString();
       if (!cls->hasReifiedGenerics()) return name;
       auto const generics = getClsReifiedGenericsProp(cls, obj);
-      return folly::sformat("{}{}", name, mangleReifiedGenericsName(generics));
+      return fmt::format("{}{}", name, mangleReifiedGenericsName(generics));
     }
   }
   not_reached();

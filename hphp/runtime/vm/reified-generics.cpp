@@ -14,6 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
+#include <fmt/format.h>
+
 #include "hphp/runtime/vm/reified-generics.h"
 
 #include "hphp/runtime/base/array-iterator.h"
@@ -143,7 +145,7 @@ void checkReifiedGenericMismatchHelper(
       }
     }
     SystemLib::throwBadMethodCallExceptionObject(
-      folly::sformat("{} {} requires {} generics but {} given",
+      fmt::format("{} {} requires {} generics but {} given",
                      fun ? "Function" : "Class",
                      name->data(),
                      len,
@@ -159,7 +161,7 @@ void checkReifiedGenericMismatchHelper(
       if (isWildCard(v.m_data.parr) && it->m_isReified) {
         if (!it->m_isSoft) {
           SystemLib::throwBadMethodCallExceptionObject(
-            folly::sformat("{} {} expects a reified generic at index {}",
+            fmt::format("{} {} expects a reified generic at index {}",
                            fun ? "Function" : "Class",
                            name->data(),
                            i));

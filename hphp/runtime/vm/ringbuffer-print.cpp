@@ -17,6 +17,7 @@
 
 #include <iostream>
 
+#include <fmt/format.h>
 #include <folly/Format.h>
 
 #include "hphp/runtime/vm/jit/service-requests.h"
@@ -67,7 +68,7 @@ void dumpEntry(const RingBufferEntry* e) {
       indentDepth -= e->type == RBTypeFuncExit;
       if (indentDepth < 0) indentDepth = 0;
       auto const indentedName =
-        folly::sformat("{}{}", std::string(indentDepth * 4, ' '), info.msg);
+        fmt::format("{}{}", std::string(indentDepth * 4, ' '), info.msg);
       std::cerr << folly::format(msgFormat,
                                  indentedName, info.truncatedRip);
       indentDepth += e->type == RBTypeFuncEntry;

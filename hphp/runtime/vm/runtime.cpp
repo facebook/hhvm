@@ -28,6 +28,7 @@
 #include "hphp/util/trace.h"
 #include "hphp/util/text-util.h"
 
+#include <fmt/format.h>
 #include <usdt/usdt.h>
 #include <folly/Random.h>
 
@@ -211,12 +212,12 @@ void throwMustBeValueTypeException(const Class* cls, const StringData* propName)
 std::string formatParamInOutMismatch(const char* fname, uint32_t index,
                                    bool funcByRef) {
   if (funcByRef) {
-    return folly::sformat(
+    return fmt::format(
       "{}() expects parameter {} to be inout, but the call was "
       "not annotated with 'inout'", fname, index + 1
     );
   } else {
-    return folly::sformat(
+    return fmt::format(
       "{}() does not expect parameter {} to be inout, but the call was "
       "annotated with 'inout'", fname, index + 1
     );
@@ -239,21 +240,21 @@ void checkInOutMismatch(const Func* func, uint32_t numArgs,
 }
 
 std::string formatParamReadonlyMismatch(const char* fname, uint32_t index) {
-  return folly::sformat(
+  return fmt::format(
     "{}() does not allow for parameter {} to be passed readonly, but the argument "
     "was annotated with 'readonly'", fname, index + 1
   );
 }
 
 std::string formatReturnReadonlyMismatch(const char* fname) {
-  return folly::sformat(
+  return fmt::format(
     "{}() returns readonly, but the caller expects a mutable value",
     fname
   );
 }
 
 std::string formatReadonlyThisMismatch(const char* fname) {
-  return folly::sformat(
+  return fmt::format(
     "{}() modifies the instance, but the caller has a readonly instance",
     fname
   );
@@ -425,7 +426,7 @@ void raiseCoeffectsCallViolation(const Func* callee,
 void raiseCoeffectsFunParamTypeViolation(TypedValue tv,
                                          int32_t paramIdx) {
   auto const errMsg =
-    folly::sformat("Coeffect rule requires parameter at position {} to be a "
+    fmt::format("Coeffect rule requires parameter at position {} to be a "
                    "closure object, function/method pointer or null but "
                    "{} given",
                    paramIdx + 1, describe_actual_type(&tv));

@@ -28,6 +28,7 @@
 #include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/preclass-emitter.h"
 
+#include <fmt/format.h>
 #include <folly/Range.h>
 
 #include <cstdio>
@@ -1663,7 +1664,7 @@ FuncChecker::slotsToString(const boost::dynamic_bitset<>& slots) const {
 }
 
 std::string FuncChecker::stateToString(const State& cur) const {
-  return folly::sformat(
+  return fmt::format(
     "{}{}",
     iterToString(cur),
     stkToString(cur.stklen, cur.stk)

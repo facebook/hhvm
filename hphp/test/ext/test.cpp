@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/comparisons.h"
 
+#include <fmt/format.h>
 #include <folly/Format.h>
 
 using namespace HPHP;
@@ -93,16 +94,16 @@ bool Test::logTestResults(std::string name, std::string details, int pass,
   long useconds = finish.tv_usec - start.tv_usec;
   long mseconds = ((seconds) * 1000 + useconds / 1000.0) + 0.5; // round up
 
-  auto summary = folly::sformat("PASSED ({})", pass);
+  auto summary = fmt::format("PASSED ({})", pass);
   const char* status = "passed";
 
   if (skip > 0) {
-    summary += folly::sformat(",SKIPPED ({})", skip);
+    summary += fmt::format(",SKIPPED ({})", skip);
   }
 
   if (fail > 0) {
     status = "failed";
-    summary += folly::sformat("FAILED ({})", fail);
+    summary += fmt::format("FAILED ({})", fail);
   }
 
   DictInit data(8);

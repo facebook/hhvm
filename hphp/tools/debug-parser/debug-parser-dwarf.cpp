@@ -16,6 +16,7 @@
 
 #if defined(__linux__) 
 
+#include <fmt/format.h>
 #include <folly/Demangle.h>
 #include <folly/Format.h>
 #include <folly/Memory.h>
@@ -292,7 +293,7 @@ ObjectTypeName Scope::name() const {
   ++iter;
   for (; iter != m_scope.end(); ++iter) {
     if (str.empty()) str = iter->name.name;
-    else str = folly::sformat("{}::{}", str, iter->name.name);
+    else str = fmt::format("{}::{}", str, iter->name.name);
   }
   return ObjectTypeName{std::move(str), linkage()};
 }
@@ -903,7 +904,7 @@ void TypeParserImpl::genNames(Env& env,
             if (!first_member.empty()) break;
           }
           if (!first_member.empty()) {
-            return folly::sformat(
+            return fmt::format(
               "(unnamed {} containing '{}')", type, first_member
             );
           }
@@ -934,7 +935,7 @@ void TypeParserImpl::genNames(Env& env,
         if (!scope.isInNamespaceScope()) {
           scope.incUnnamedTypeCount();
           return std::make_tuple(
-            folly::sformat(
+            fmt::format(
               "(unnamed {} #{})",
               type_name(),
               scope.unnamedTypeCount()
@@ -945,7 +946,7 @@ void TypeParserImpl::genNames(Env& env,
         }
 
         return std::make_tuple(
-          folly::sformat("(unnamed {})", type_name()),
+          fmt::format("(unnamed {})", type_name()),
           true,
           incomplete
         );
@@ -1228,7 +1229,7 @@ Object TypeParserImpl::genObject(const DieContext& dieContext,
       size = 0;
     } else {
       throw Exception{
-        folly::sformat(
+        fmt::format(
           "Object type '{}' at offset {} is a complete definition, "
           "but has no size!",
           name.name,
@@ -1385,7 +1386,7 @@ Type TypeParserImpl::genType(const DieContext& dieContext) {
     case llvm::dwarf::DW_TAG_reference_type: {
       if (!type_offset) {
         throw Exception{
-          folly::sformat(
+          fmt::format(
             "Encountered reference to void at offset {}",
             die.getOffset()
           )
@@ -1396,7 +1397,7 @@ Type TypeParserImpl::genType(const DieContext& dieContext) {
     case llvm::dwarf::DW_TAG_rvalue_reference_type: {
       if (!type_offset) {
         throw Exception{
-          folly::sformat(
+          fmt::format(
             "Encountered rvalue reference to void at offset {}",
             die.getOffset()
           )
@@ -1407,7 +1408,7 @@ Type TypeParserImpl::genType(const DieContext& dieContext) {
     case llvm::dwarf::DW_TAG_array_type: {
       if (!type_offset) {
         throw Exception{
-          folly::sformat(
+          fmt::format(
             "Encountered array of voids at offset {}",
             die.getOffset()
           )
@@ -1431,7 +1432,7 @@ Type TypeParserImpl::genType(const DieContext& dieContext) {
     case llvm::dwarf::DW_TAG_ptr_to_member_type: {
       if (!containing_type_offset) {
         throw Exception{
-          folly::sformat(
+          fmt::format(
             "Encountered ptr-to-member at offset {} without a "
             "containing object",
             die.getOffset()
@@ -1446,7 +1447,7 @@ Type TypeParserImpl::genType(const DieContext& dieContext) {
         };
       } else {
         throw Exception{
-          folly::sformat(
+          fmt::format(
             "Encountered ptr-to-member at offset {} with a "
             "containing object of type '{}'",
             die.getOffset(),
@@ -1457,7 +1458,7 @@ Type TypeParserImpl::genType(const DieContext& dieContext) {
     }
     default:
       throw Exception{
-        folly::sformat(
+        fmt::format(
           "Encountered non-type tag '{}' at offset {} while "
           "traversing type description",
           die.getTag(),
@@ -1509,7 +1510,7 @@ Object::Member TypeParserImpl::genMember(const DieContext& dieContext,
   if (!die_offset) {
     // No DW_AT_type means "void", but you can't have void members!
     throw Exception{
-      folly::sformat(
+      fmt::format(
         "Encountered member (name: '{}') of type void "
         "in object type '{}' at offset {}",
         name,
@@ -1542,8 +1543,8 @@ Object::Member TypeParserImpl::genMember(const DieContext& dieContext,
 
   if (name.empty()) {
     name = is_static
-      ? folly::sformat("(unnamed static member of type '{}')", type.toString())
-      : folly::sformat("(unnamed member of type '{}')", type.toString());
+      ? fmt::format("(unnamed static member of type '{}')", type.toString())
+      : fmt::format("(unnamed member of type '{}')", type.toString());
   }
 
   return Object::Member{
@@ -1714,7 +1715,7 @@ Object::Base TypeParserImpl::genBase(const DieContext& dieContext,
 
   if (!die_offset) {
     throw Exception{
-      folly::sformat(
+      fmt::format(
         "Encountered base '{}' of object type '{}' without "
         "type information at offset {}",
         name,
@@ -1732,7 +1733,7 @@ Object::Base TypeParserImpl::genBase(const DieContext& dieContext,
     return Object::Base{*obj, offset};
   } else {
     throw Exception{
-      folly::sformat(
+      fmt::format(
         "Encountered base '{}' of object type '{}' of "
         "non-object type '{}' at offset {}",
         name,
@@ -1815,7 +1816,7 @@ void TypeParserImpl::fillFuncArgs(const DieContext& dieContext, FuncType& func) 
 
         if (!type_offset) {
           throw Exception{
-            folly::sformat(
+            fmt::format(
               "Encountered function at offset {} taking a void parameter",
               dieContext.die.getOffset()
             )
@@ -1933,7 +1934,7 @@ template<> class FormatValue<llvm::dwarf::Tag> {
 
   template<typename Callback>
   void format(FormatArg& arg, Callback& cb) const {
-    format_value::formatString(folly::sformat("{}", m_tag), arg, cb);
+    format_value::formatString(fmt::format("{}", m_tag), arg, cb);
   }
 
  private:

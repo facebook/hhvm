@@ -22,6 +22,7 @@
 #include <string>
 #include <vector>
 
+#include <fmt/format.h>
 #include <folly/compression/Zstd.h>
 #include <folly/json/DynamicConverter.h>
 #include <folly/FileUtil.h>
@@ -290,7 +291,7 @@ private:
 CompilerAbort::CompilerAbort(const std::string& filename,
                              const std::string& error)
   : std::runtime_error{
-      folly::sformat(
+      fmt::format(
         "Encountered an internal error while processing HHAS for {}, "
         "bailing because Eval.AbortBuildOnCompilerError is set\n\n{}",
         filename, error
@@ -311,7 +312,7 @@ ParseFactsResult extract_facts(
   const auto f = w->open(StrNR(filename), "r", 0, nullptr);
   if (!f) { 
     throwErrno(
-      folly::sformat(
+      fmt::format(
         "Failed to extract facts: Could not read source code for {}", 
         filename
       ).c_str());
@@ -321,7 +322,7 @@ ParseFactsResult extract_facts(
   auto actual_sha1 = string_sha1(source_text);
   if (!expect_sha1.empty()) {
     if (actual_sha1 != expect_sha1) {
-      return folly::sformat(
+      return fmt::format(
           "Unexpected SHA1: {} != {}", actual_sha1, expect_sha1
       );
     }

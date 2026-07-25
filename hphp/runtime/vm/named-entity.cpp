@@ -28,6 +28,7 @@
 
 #include "hphp/util/configs/eval.h"
 
+#include <fmt/format.h>
 #include <folly/AtomicHashMap.h>
 
 #include <atomic>
@@ -282,7 +283,7 @@ ServiceData::CounterCallback s_counters(
     // avoid duplicating code for now. When we actually clean up the admin
     // port, we can just inline namedEntityStats()
     for (const auto& pair : namedEntityStats()) {
-      counters[folly::sformat("admin.named_entities_{}", pair.first)] = pair.second;
+      counters[fmt::format("admin.named_entities_{}", pair.first)] = pair.second;
     }
   },
   "admin.named_entities_"

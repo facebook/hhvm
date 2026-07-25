@@ -20,6 +20,7 @@
 #include <sstream>
 #include <stdio.h>
 
+#include <fmt/format.h>
 #include <folly/Format.h>
 
 #include "hphp/runtime/vm/preclass-emitter.h"
@@ -238,7 +239,7 @@ void verify_error(const UnitEmitter* unit,
   va_start(args, fmt);
   vsnprintf(buf, sizeof buf, fmt, args);
   va_end(args);
-  auto out = folly::sformat(
+  auto out = fmt::format(
     "Verification Error (unit {}{}{}{}{}): {}",
     unit->m_filepath->data(),
     func ? " func " : "",

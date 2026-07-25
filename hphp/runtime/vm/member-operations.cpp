@@ -28,6 +28,7 @@
 
 #include "hphp/util/configs/eval.h"
 
+#include <fmt/format.h>
 #include <folly/Random.h>
 
 #include <type_traits>
@@ -66,7 +67,7 @@ void logDynamicPropAccess(TypedValue base, TypedValue key) {
     }
   }();
 
-  raise_notice(folly::sformat("Dynamic property access {}->{}", cls, prop));
+  raise_notice(fmt::format("Dynamic property access {}->{}", cls, prop));
 }
 
 void unknownBaseType(DataType type) {

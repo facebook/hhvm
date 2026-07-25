@@ -863,11 +863,17 @@ where
                             }
                             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
                                 tracing::debug!(?exn, method="PubSubStreamingService.streamthrows", "Streaming declared exception");
+                                let declared_exception_name = ::fbthrift::ExceptionInfo::exn_name(&exn).to_owned();
+                                let declared_exception_what = ::fbthrift::ExceptionInfo::exn_value(&exn);
                                 let payload = ::fbthrift::help::serialize_stream_item::<P, crate::services::pub_sub_streaming_service::StreamthrowsStreamExn>(
                                     ::std::result::Result::Err(exn),
                                     "streamthrows",
                                 );
-                                ::fbthrift::SerializedStreamElement::DeclaredException(payload)
+                                ::fbthrift::SerializedStreamElement::DeclaredException {
+                                    payload,
+                                    ex_name: declared_exception_name,
+                                    ex_what: declared_exception_what,
+                                }
                             }
                             ::std::result::Result::Err(exn) => {
                                 tracing::error!(?exn, method="PubSubStreamingService.streamthrows", "Streaming unwind");
@@ -1171,11 +1177,17 @@ where
                             }
                             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
                                 tracing::debug!(?exn, method="PubSubStreamingService.boththrows", "Streaming declared exception");
+                                let declared_exception_name = ::fbthrift::ExceptionInfo::exn_name(&exn).to_owned();
+                                let declared_exception_what = ::fbthrift::ExceptionInfo::exn_value(&exn);
                                 let payload = ::fbthrift::help::serialize_stream_item::<P, crate::services::pub_sub_streaming_service::BoththrowsStreamExn>(
                                     ::std::result::Result::Err(exn),
                                     "boththrows",
                                 );
-                                ::fbthrift::SerializedStreamElement::DeclaredException(payload)
+                                ::fbthrift::SerializedStreamElement::DeclaredException {
+                                    payload,
+                                    ex_name: declared_exception_name,
+                                    ex_what: declared_exception_what,
+                                }
                             }
                             ::std::result::Result::Err(exn) => {
                                 tracing::error!(?exn, method="PubSubStreamingService.boththrows", "Streaming unwind");
@@ -1279,11 +1291,17 @@ where
                             }
                             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
                                 tracing::debug!(?exn, method="PubSubStreamingService.responseandstreamstreamthrows", "Streaming declared exception");
+                                let declared_exception_name = ::fbthrift::ExceptionInfo::exn_name(&exn).to_owned();
+                                let declared_exception_what = ::fbthrift::ExceptionInfo::exn_value(&exn);
                                 let payload = ::fbthrift::help::serialize_stream_item::<P, crate::services::pub_sub_streaming_service::ResponseandstreamstreamthrowsStreamExn>(
                                     ::std::result::Result::Err(exn),
                                     "responseandstreamstreamthrows",
                                 );
-                                ::fbthrift::SerializedStreamElement::DeclaredException(payload)
+                                ::fbthrift::SerializedStreamElement::DeclaredException {
+                                    payload,
+                                    ex_name: declared_exception_name,
+                                    ex_what: declared_exception_what,
+                                }
                             }
                             ::std::result::Result::Err(exn) => {
                                 tracing::error!(?exn, method="PubSubStreamingService.responseandstreamstreamthrows", "Streaming unwind");
@@ -1487,11 +1505,17 @@ where
                             }
                             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
                                 tracing::debug!(?exn, method="PubSubStreamingService.responseandstreamboththrows", "Streaming declared exception");
+                                let declared_exception_name = ::fbthrift::ExceptionInfo::exn_name(&exn).to_owned();
+                                let declared_exception_what = ::fbthrift::ExceptionInfo::exn_value(&exn);
                                 let payload = ::fbthrift::help::serialize_stream_item::<P, crate::services::pub_sub_streaming_service::ResponseandstreamboththrowsStreamExn>(
                                     ::std::result::Result::Err(exn),
                                     "responseandstreamboththrows",
                                 );
-                                ::fbthrift::SerializedStreamElement::DeclaredException(payload)
+                                ::fbthrift::SerializedStreamElement::DeclaredException {
+                                    payload,
+                                    ex_name: declared_exception_name,
+                                    ex_what: declared_exception_what,
+                                }
                             }
                             ::std::result::Result::Err(exn) => {
                                 tracing::error!(?exn, method="PubSubStreamingService.responseandstreamboththrows", "Streaming unwind");

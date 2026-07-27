@@ -35,13 +35,17 @@ class InterpretedTranscoder final : public ITranscoder {
       : interp_(std::move(plan)) {}
 
   folly::Expected<std::unique_ptr<folly::IOBuf>, TranscodeError> transcode(
-      const folly::IOBuf& input) const override {
-    return interp_.transcode(input);
+      const folly::IOBuf& input,
+      ScalarFieldOverrides topLevelScalarOverrides) const override {
+    return interp_.transcode(input, topLevelScalarOverrides);
   }
 
   folly::Expected<size_t, TranscodeError> transcodeInto(
-      const folly::IOBuf& input, uint8_t* out, size_t cap) const override {
-    return interp_.transcodeInto(input, out, cap);
+      const folly::IOBuf& input,
+      uint8_t* out,
+      size_t cap,
+      ScalarFieldOverrides topLevelScalarOverrides) const override {
+    return interp_.transcodeInto(input, out, cap, topLevelScalarOverrides);
   }
 
   Engine engine() const override { return Engine::Interpreter; }

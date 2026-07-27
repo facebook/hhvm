@@ -17,6 +17,7 @@
 #pragma once
 
 #include <thrift/lib/cpp2/transcode/Intrinsics.h>
+#include <thrift/lib/cpp2/transcode/TranscodeInput.h>
 #include <thrift/lib/cpp2/transcode/TranscodePlan.h>
 
 #include <folly/Expected.h>
@@ -65,7 +66,8 @@ class TranscodeInterpreter {
    * Mirrors TranscodeKernel::transcode so benchmarks compare like-for-like.
    */
   folly::Expected<std::unique_ptr<folly::IOBuf>, TranscodeError> transcode(
-      const folly::IOBuf& input) const;
+      const folly::IOBuf& input,
+      ScalarFieldOverrides topLevelScalarOverrides = {}) const;
 
   /**
    * Transcode into a caller-provided buffer. No allocation; fails if too small.
@@ -73,7 +75,10 @@ class TranscodeInterpreter {
    * TranscodeKernel::transcodeInto.
    */
   folly::Expected<size_t, TranscodeError> transcodeInto(
-      const folly::IOBuf& input, uint8_t* output, size_t outputCapacity) const;
+      const folly::IOBuf& input,
+      uint8_t* output,
+      size_t outputCapacity,
+      ScalarFieldOverrides topLevelScalarOverrides = {}) const;
 
   const TranscodePlan& plan() const { return plan_; }
 

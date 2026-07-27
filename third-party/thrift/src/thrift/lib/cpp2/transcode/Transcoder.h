@@ -17,6 +17,7 @@
 #pragma once
 
 #include <thrift/lib/cpp2/transcode/TranscodeErrc.h>
+#include <thrift/lib/cpp2/transcode/TranscodeInput.h>
 #include <thrift/lib/cpp2/transcode/TranscodePlan.h>
 
 #include <folly/Expected.h>
@@ -44,9 +45,14 @@ class ITranscoder {
  public:
   virtual ~ITranscoder() = default;
   virtual folly::Expected<std::unique_ptr<folly::IOBuf>, TranscodeError>
-  transcode(const folly::IOBuf& input) const = 0;
+  transcode(
+      const folly::IOBuf& input,
+      ScalarFieldOverrides topLevelScalarOverrides = {}) const = 0;
   virtual folly::Expected<size_t, TranscodeError> transcodeInto(
-      const folly::IOBuf& input, uint8_t* out, size_t cap) const = 0;
+      const folly::IOBuf& input,
+      uint8_t* out,
+      size_t cap,
+      ScalarFieldOverrides topLevelScalarOverrides = {}) const = 0;
   virtual Engine engine() const = 0;
 };
 

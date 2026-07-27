@@ -25,7 +25,9 @@
 #include <thrift/lib/cpp2/dynamic/TypeSystemBuilder.h>
 
 #include <cstdint>
+#include <limits>
 #include <string>
+#include <string_view>
 #include <vector>
 
 namespace apache::thrift::transcode {
@@ -39,6 +41,8 @@ constexpr uint8_t kTStop = 0;
 constexpr uint8_t kTI32 = 8;
 constexpr uint8_t kTString = 11;
 constexpr uint8_t kTList = 15;
+constexpr uint8_t kCompactStop = 0;
+constexpr uint8_t kCompactI32 = 5;
 
 void putI16BE(std::vector<uint8_t>& out, int16_t v) {
   out.push_back(static_cast<uint8_t>((v >> 8) & 0xFF));
@@ -115,6 +119,20 @@ std::vector<uint8_t> toBytes(const folly::IOBuf& buf) {
   return std::vector<uint8_t>(c.data(), c.data() + c.length());
 }
 
+folly::IOBuf wrapString(std::string_view value) {
+  return folly::IOBuf::wrapBufferAsValue(value.data(), value.size());
+}
+
+folly::ByteRange byteRange(const std::string& value) {
+  const auto* begin = reinterpret_cast<const unsigned char*>(value.data());
+  return {begin, begin + value.size()};
+}
+
+ScalarFieldOverrides overrideRange(
+    const std::vector<ScalarFieldOverride>& overrides) {
+  return {overrides.data(), overrides.data() + overrides.size()};
+}
+
 TranscoderOptions allowExperimentalProtocols() {
   TranscoderOptions options;
   options.unsupportedPlanPolicy =
@@ -181,6 +199,89 @@ TEST_F(TranscoderTest, JsonObjectSourcesDoNotRequireExperimentalProtocolOptIn) {
   auto jsonToBinary = makeTranscoder(fuse(json, binary), Engine::Interpreter);
   ASSERT_FALSE(jsonToBinary.hasError()) << jsonToBinary.error().message;
   EXPECT_EQ((*jsonToBinary)->engine(), Engine::Interpreter);
+}
+
+TEST_F(TranscoderTest, JsonSourceAppliesTopLevelScalarOverrides) {
+  auto json = makeCodec(WireProtocol::Json, sampleNode());
+  auto compact = makeCodec(WireProtocol::ThriftCompact, sampleNode());
+
+  auto transcoder = makeTranscoder(fuse(json, compact), Engine::Interpreter);
+  ASSERT_FALSE(transcoder.hasError()) << transcoder.error().message;
+
+  std::string name = "hi";
+  std::vector<ScalarFieldOverride> overrides{
+      {2, ScalarOverrideValue::fromByteRange(byteRange(name))},
+  };
+
+  auto partialJson = wrapString(R"({"id":7})");
+  auto actual = (*transcoder)->transcode(partialJson, overrideRange(overrides));
+  ASSERT_FALSE(actual.hasError()) << actual.error().message;
+
+  auto fullJson = wrapString(R"({"id":7,"name":"hi"})");
+  auto expected = (*transcoder)->transcode(fullJson);
+  ASSERT_FALSE(expected.hasError()) << expected.error().message;
+  EXPECT_EQ(toBytes(**actual), toBytes(**expected));
+}
+
+TEST_F(TranscoderTest, ScalarOverrideCanFollowBodyField) {
+  auto json = makeCodec(WireProtocol::Json, sampleNode());
+  auto compact = makeCodec(WireProtocol::ThriftCompact, sampleNode());
+
+  auto jsonToCompact = makeTranscoder(fuse(json, compact), Engine::Interpreter);
+  ASSERT_FALSE(jsonToCompact.hasError()) << jsonToCompact.error().message;
+
+  std::vector<ScalarFieldOverride> overrides{
+      {1, ScalarOverrideValue::fromInt64(8)}};
+
+  auto jsonBody = wrapString(R"({"id":7,"name":"hi","nums":[10,20,30]})");
+  auto actual = (*jsonToCompact)->transcode(jsonBody, overrideRange(overrides));
+  ASSERT_FALSE(actual.hasError()) << actual.error().message;
+
+  auto expected = (*jsonToCompact)->transcode(jsonBody);
+  ASSERT_FALSE(expected.hasError()) << expected.error().message;
+  auto expectedBytes = toBytes(**expected);
+  ASSERT_FALSE(expectedBytes.empty());
+  ASSERT_EQ(expectedBytes.back(), kCompactStop);
+  expectedBytes.pop_back();
+  expectedBytes.push_back(kCompactI32);
+  expectedBytes.push_back(0x02);
+  expectedBytes.push_back(0x10);
+  expectedBytes.push_back(kCompactStop);
+  EXPECT_EQ(toBytes(**actual), expectedBytes);
+}
+
+TEST_F(TranscoderTest, ScalarOverrideRejectsNonScalarField) {
+  auto json = makeCodec(WireProtocol::Json, sampleNode());
+  auto compact = makeCodec(WireProtocol::ThriftCompact, sampleNode());
+
+  auto transcoder = makeTranscoder(fuse(json, compact), Engine::Interpreter);
+  ASSERT_FALSE(transcoder.hasError()) << transcoder.error().message;
+
+  std::vector<ScalarFieldOverride> overrides{
+      {3, ScalarOverrideValue::fromInt64(1)}};
+
+  auto jsonBody = wrapString(R"({"id":7,"name":"hi"})");
+  auto actual = (*transcoder)->transcode(jsonBody, overrideRange(overrides));
+  ASSERT_TRUE(actual.hasError());
+  EXPECT_EQ(actual.error().code, TranscodeErrc::Malformed);
+}
+
+TEST_F(TranscoderTest, ScalarOverrideRejectsOutOfRangeInteger) {
+  auto json = makeCodec(WireProtocol::Json, sampleNode());
+  auto compact = makeCodec(WireProtocol::ThriftCompact, sampleNode());
+
+  auto transcoder = makeTranscoder(fuse(json, compact), Engine::Interpreter);
+  ASSERT_FALSE(transcoder.hasError()) << transcoder.error().message;
+
+  std::vector<ScalarFieldOverride> overrides{
+      {1,
+       ScalarOverrideValue::fromInt64(
+           static_cast<int64_t>(std::numeric_limits<int32_t>::max()) + 1)}};
+
+  auto jsonBody = wrapString(R"({"name":"hi","nums":[10,20,30]})");
+  auto actual = (*transcoder)->transcode(jsonBody, overrideRange(overrides));
+  ASSERT_TRUE(actual.hasError());
+  EXPECT_EQ(actual.error().code, TranscodeErrc::Malformed);
 }
 
 TEST_F(TranscoderTest, JsonToJsonRejected) {

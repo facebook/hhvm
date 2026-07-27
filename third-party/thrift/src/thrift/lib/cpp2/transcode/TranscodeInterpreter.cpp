@@ -157,7 +157,6 @@ Framing framingFor(FieldProto p) {
 }
 
 void execCommand(TranscodeCursor* c, const Command& cmd, uint8_t fieldTypeInfo);
-void writeDefaultCommand(TranscodeCursor* c, const Command& cmd);
 void writeSeqHeader(
     TranscodeCursor* c,
     ContainerFraming framing,
@@ -375,6 +374,58 @@ bool writeScalarBytes(
   return !hasError(c);
 }
 
+void getIntegerOverride(const ScalarOverrideValue& value, int64_t& out) {
+  out = value.as<int64_t>();
+}
+
+bool getBoolOverride(
+    TranscodeCursor* c, const ScalarOverrideValue& value, int64_t& out) {
+  getIntegerOverride(value, out);
+  if (out != 0 && out != 1) {
+    detail::setError(c, kMalformedFieldType);
+    return false;
+  }
+  return true;
+}
+
+bool writeScalarValue(
+    TranscodeCursor* c, const ScalarOp& op, const ScalarOverrideValue& value) {
+  switch (op.valueKind) {
+    case ValueKind::Bool: {
+      int64_t v = 0;
+      if (FOLLY_UNLIKELY(!getBoolOverride(c, value, v))) {
+        return false;
+      }
+      return writeScalarInt(c, op, v);
+    }
+    case ValueKind::I8:
+    case ValueKind::I16:
+    case ValueKind::I32:
+    case ValueKind::I64:
+    case ValueKind::Enum: {
+      int64_t v = 0;
+      getIntegerOverride(value, v);
+      if (FOLLY_UNLIKELY(!intFits(op.valueKind, v))) {
+        detail::setError(c, kMalformedFieldType);
+        return false;
+      }
+      return writeScalarInt(c, op, v);
+    }
+    case ValueKind::F32:
+    case ValueKind::F64: {
+      return writeScalarFloat(c, op.writeFn, value.as<double>());
+    }
+    case ValueKind::Bytes: {
+      const auto bytes = value.as<folly::ByteRange>();
+      const uint8_t empty = 0;
+      const auto* data = reinterpret_cast<const uint8_t*>(bytes.data());
+      return writeScalarBytes(
+          c, op.writeFn, data == nullptr ? &empty : data, bytes.size());
+    }
+  }
+  folly::assume_unreachable();
+}
+
 void execJsonBytesScalar(TranscodeCursor* c, const ScalarOp& op) {
   TranscodeJsonStringToken token{};
   if (FOLLY_UNLIKELY(!thrift_transcode_read_json_string_token(c, &token))) {
@@ -459,18 +510,6 @@ void execJsonBytesScalar(TranscodeCursor* c, const ScalarOp& op) {
   }
 }
 
-void writeScalarDefault(TranscodeCursor* c, const ScalarOp& op) {
-  if (op.valueKind == ValueKind::F32 || op.valueKind == ValueKind::F64) {
-    writeScalarFloat(c, op.writeFn, 0.0);
-    return;
-  }
-  if (op.valueKind == ValueKind::Bytes) {
-    writeScalarBytes(c, op.writeFn, reinterpret_cast<const uint8_t*>(""), 0);
-    return;
-  }
-  writeScalarInt(c, op, 0);
-}
-
 void execScalar(TranscodeCursor* c, const ScalarOp& op, uint8_t fieldTypeInfo) {
   if (readFnIsJsonBytes(op.readFn)) {
     execJsonBytesScalar(c, op);
@@ -516,68 +555,6 @@ void execScalar(TranscodeCursor* c, const ScalarOp& op, uint8_t fieldTypeInfo) {
   // path above.
   if (FOLLY_UNLIKELY(!writeScalarInt(c, op, v))) {
     return;
-  }
-}
-
-void writeDefaultStruct(TranscodeCursor* c, const StructOp& op) {
-  FieldProto wp = op.writeFieldProto;
-  if (wp == FieldProto::Unsupported) {
-    detail::setError(c, 90);
-    return;
-  }
-  Framing wf = framingFor(wp);
-
-  TranscodePatchPoint writeMark{};
-  bool patchWrite = false;
-  if (op.writeLengthDelimited) {
-    writeMark = thrift_transcode_cursor_mark(c);
-    thrift_transcode_cursor_skip(c, 5);
-    patchWrite = true;
-  }
-
-  int16_t prevWrite = 0;
-  for (const auto& field : op.fields) {
-    if (hasError(c)) {
-      return;
-    }
-    if (field.optional) {
-      continue;
-    }
-    if (const auto* sc = std::get_if<ScalarOp>(field.command.get());
-        sc != nullptr && sc->writeFn == WriteFn::CompactBoolInType) {
-      thrift_transcode_compact_write_bool_field(c, 0, field.fieldId, prevWrite);
-      prevWrite = field.fieldId;
-      continue;
-    }
-    wf.writeHeader(c, field.writeTypeInfo, field.fieldId, prevWrite);
-    prevWrite = field.fieldId;
-    writeDefaultCommand(c, *field.command);
-  }
-
-  if (!op.writeLengthDelimited) {
-    wf.writeStop(c);
-  }
-
-  if (patchWrite) {
-    size_t bodyBytes =
-        thrift_transcode_cursor_bytes_since_mark(c, writeMark) - 5;
-    thrift_transcode_cursor_patch_varint(c, writeMark, bodyBytes, 5);
-  }
-}
-
-void writeDefaultCommand(TranscodeCursor* c, const Command& cmd) {
-  if (const auto* s = std::get_if<ScalarOp>(&cmd)) {
-    writeScalarDefault(c, *s);
-  } else if (const auto* sq = std::get_if<SeqOp>(&cmd)) {
-    if (sq->writeLoopKind == LoopKind::ByBytes) {
-      thrift_transcode_write_unsigned_varint(c, 0);
-    } else {
-      writeSeqHeader(c, sq->writeFraming, 0, sq->writeElemType);
-    }
-  } else if (const auto* m = std::get_if<MapOp>(&cmd)) {
-    writeMapHeader(c, m->writeFraming, 0, m->writeKeyType, m->writeValueType);
-  } else if (const auto* st = std::get_if<StructOp>(&cmd)) {
-    writeDefaultStruct(c, *st);
   }
 }
 
@@ -705,10 +682,6 @@ bool jsonMapWritesObjectForm(const MapOp& op) {
       ((key->valueKind == ValueKind::Bytes &&
         key->writeFn == WriteFn::WriteQuotedString) ||
        key->valueKind == ValueKind::Enum);
-}
-
-bool isUnion(const StructOp& op) {
-  return op.schemaType.has_value() && op.schemaType->isUnion();
 }
 
 void writeJsonObjectMapKey(
@@ -1240,27 +1213,139 @@ void execMap(TranscodeCursor* c, const MapOp& op) {
   }
 }
 
-const FieldEntry* FOLLY_NULLABLE findFieldByName(
-    const StructOp& op, const TranscodeJsonStringToken& name, size_t* index) {
+const FieldEntry* FOLLY_NULLABLE
+findFieldByName(const StructOp& op, const TranscodeJsonStringToken& name) {
   for (size_t i = 0; i < op.fields.size(); ++i) {
     const auto& f = op.fields[i];
     if (thrift_transcode_json_string_token_equals(
             &name,
             reinterpret_cast<const uint8_t*>(f.fieldName.data()),
             f.fieldName.size())) {
-      *index = i;
       return &f;
     }
   }
   return nullptr;
 }
 
-// JSON object source → binary target. Mirrors KernelCodegen's emitJsonStructOp:
+const FieldEntry* FOLLY_NULLABLE
+findFieldById(const StructOp& op, int16_t fieldId) {
+  auto it = std::lower_bound(
+      op.fields.begin(),
+      op.fields.end(),
+      fieldId,
+      [](const FieldEntry& field, int16_t id) { return field.fieldId < id; });
+  if (it == op.fields.end() || it->fieldId != fieldId) {
+    return nullptr;
+  }
+  return &*it;
+}
+
+bool isUnion(const StructOp& op) {
+  return op.schemaType.has_value() && op.schemaType->isUnion();
+}
+
+bool noteUnionMember(
+    TranscodeCursor* c, bool unionStruct, bool& unionMemberSeen) {
+  if (!unionStruct) {
+    return true;
+  }
+  if (unionMemberSeen) {
+    detail::setError(c, kMalformedFieldType);
+    return false;
+  }
+  unionMemberSeen = true;
+  return true;
+}
+
+bool finishUnion(TranscodeCursor* c, bool unionStruct, bool unionMemberSeen) {
+  if (unionStruct && !unionMemberSeen) {
+    detail::setError(c, kMalformedFieldType);
+    return false;
+  }
+  return true;
+}
+
+bool resolveScalarOverrideField(
+    TranscodeCursor* c,
+    const StructOp& op,
+    const ScalarFieldOverride& override,
+    const FieldEntry*& field,
+    const ScalarOp*& scalar) {
+  field = findFieldById(op, override.fieldId);
+  if (field == nullptr) {
+    detail::setError(c, kMalformedFieldType);
+    return false;
+  }
+  if (field->isRepeated) {
+    detail::setError(c, kMalformedFieldType);
+    return false;
+  }
+  scalar = std::get_if<ScalarOp>(field->command.get());
+  if (scalar == nullptr) {
+    detail::setError(c, kMalformedFieldType);
+    return false;
+  }
+  return true;
+}
+
+bool writeFieldFramedScalarValue(
+    TranscodeCursor* c,
+    const Framing& wf,
+    const FieldEntry& field,
+    const ScalarOp& scalar,
+    const ScalarOverrideValue& value,
+    int16_t& prevWrite) {
+  if (scalar.writeFn == WriteFn::CompactBoolInType) {
+    int64_t boolVal = 0;
+    if (FOLLY_UNLIKELY(!getBoolOverride(c, value, boolVal))) {
+      return false;
+    }
+    thrift_transcode_compact_write_bool_field(
+        c, boolVal ? 1 : 0, field.fieldId, prevWrite);
+    prevWrite = field.fieldId;
+    return !hasError(c);
+  }
+
+  wf.writeHeader(c, field.writeTypeInfo, field.fieldId, prevWrite);
+  if (hasError(c)) {
+    return false;
+  }
+  prevWrite = field.fieldId;
+  return writeScalarValue(c, scalar, value);
+}
+
+bool writeJsonScalarValue(
+    TranscodeCursor* c,
+    const FieldEntry& field,
+    const ScalarOp& scalar,
+    const ScalarOverrideValue& value,
+    bool& wroteJsonField) {
+  if (wroteJsonField) {
+    thrift_transcode_write_byte_checked(c, ',');
+  }
+  if (hasError(c)) {
+    return false;
+  }
+  wroteJsonField = true;
+  thrift_transcode_format_escaped_string(
+      c,
+      reinterpret_cast<const uint8_t*>(field.fieldName.data()),
+      field.fieldName.size());
+  thrift_transcode_write_byte_checked(c, ':');
+  if (hasError(c)) {
+    return false;
+  }
+  return writeScalarValue(c, scalar, value);
+}
+
+// JSON object source → field-framed target.
 // read `{`, loop over `"name": value` pairs writing the matched field through
-// the target's binary framing (skipping unknown keys), read `}`, and finish the
-// target framing. A JSON source only ever targets a binary protocol here (JSON
-// is a leaf endpoint), so the write side is always header-intrinsic framing.
-void execJsonStruct(TranscodeCursor* c, const StructOp& op) {
+// the target's numeric field headers, skip unknown keys, read `}`, and finish
+// the target framing.
+void execJsonStruct(
+    TranscodeCursor* c,
+    const StructOp& op,
+    ScalarFieldOverrides fieldOverrides = {}) {
   FieldProto wp = op.writeFieldProto;
   if (wp == FieldProto::Unsupported) {
     detail::setError(c, 90); // interpreter: unsupported protocol
@@ -1283,8 +1368,8 @@ void execJsonStruct(TranscodeCursor* c, const StructOp& op) {
 
   int16_t prevWrite = 0;
   bool first = true;
+  const bool unionStruct = isUnion(op);
   bool unionMemberSeen = false;
-  std::vector<uint8_t> fieldsWithInput(op.fields.size(), 0);
   while (true) {
     if (hasError(c)) {
       return;
@@ -1311,8 +1396,7 @@ void execJsonStruct(TranscodeCursor* c, const StructOp& op) {
     }
     thrift_transcode_json_skip_whitespace(c);
 
-    size_t fieldIndex = 0;
-    const FieldEntry* fe = findFieldByName(op, name, &fieldIndex);
+    const FieldEntry* fe = findFieldByName(op, name);
     if (fe == nullptr) {
       if (FOLLY_UNLIKELY(!thrift_transcode_skip_json_value(c))) {
         return;
@@ -1320,30 +1404,20 @@ void execJsonStruct(TranscodeCursor* c, const StructOp& op) {
       continue;
     }
 
-    if (fieldsWithInput.at(fieldIndex) != 0) {
-      detail::setError(c, 1);
-      return;
-    }
-    fieldsWithInput.at(fieldIndex) = 1;
-
     if (thrift_transcode_json_consume_null(c)) {
       if (!fe->optional) {
-        detail::setError(c, 1);
+        detail::setError(c, kMalformedFieldType);
       }
       continue;
     }
 
-    if (isUnion(op)) {
-      if (unionMemberSeen) {
-        detail::setError(c, 1);
-        return;
-      }
-      unionMemberSeen = true;
+    if (FOLLY_UNLIKELY(!noteUnionMember(c, unionStruct, unionMemberSeen))) {
+      return;
     }
 
     // Deferred Compact bool: the value is encoded in the field header type
     // byte, so it must be read before the header is written. Same handling as
-    // the binary execStruct path.
+    // the field-framed struct path.
     if (const auto* sc = std::get_if<ScalarOp>(fe->command.get());
         sc != nullptr && sc->writeFn == WriteFn::CompactBoolInType) {
       int64_t boolVal = 0;
@@ -1361,30 +1435,26 @@ void execJsonStruct(TranscodeCursor* c, const StructOp& op) {
     execCommand(c, *fe->command, 0);
   }
 
-  for (size_t i = 0; i < op.fields.size(); ++i) {
-    if (hasError(c)) {
+  for (const auto& override : fieldOverrides) {
+    const FieldEntry* field = nullptr;
+    const ScalarOp* scalar = nullptr;
+    if (FOLLY_UNLIKELY(
+            !resolveScalarOverrideField(c, op, override, field, scalar))) {
       return;
     }
-    const auto& field = op.fields[i];
-    if (field.optional || fieldsWithInput.at(i) != 0) {
-      continue;
+    if (FOLLY_UNLIKELY(!noteUnionMember(c, unionStruct, unionMemberSeen))) {
+      return;
     }
-    if (const auto* sc = std::get_if<ScalarOp>(field.command.get());
-        sc != nullptr && sc->writeFn == WriteFn::CompactBoolInType) {
-      thrift_transcode_compact_write_bool_field(c, 0, field.fieldId, prevWrite);
-      prevWrite = field.fieldId;
-      continue;
+    if (FOLLY_UNLIKELY(!writeFieldFramedScalarValue(
+            c, wf, *field, *scalar, override.value, prevWrite))) {
+      return;
     }
-    wf.writeHeader(c, field.writeTypeInfo, field.fieldId, prevWrite);
-    prevWrite = field.fieldId;
-    writeDefaultCommand(c, *field.command);
   }
 
   if (FOLLY_UNLIKELY(!thrift_transcode_json_expect_byte(c, '}'))) {
     return;
   }
-  if (isUnion(op) && !unionMemberSeen) {
-    detail::setError(c, 1);
+  if (FOLLY_UNLIKELY(!finishUnion(c, unionStruct, unionMemberSeen))) {
     return;
   }
   if (!op.writeLengthDelimited) {
@@ -1401,156 +1471,246 @@ void execJsonStruct(TranscodeCursor* c, const StructOp& op) {
   }
 }
 
-void execStruct(TranscodeCursor* c, const StructOp& op) {
-  // JSON source structs are name-keyed (built with FieldIdent::ByName and an
-  // empty readFieldHeader). Route them to the dedicated JSON object reader.
-  if (op.fieldIdent == FieldIdent::ByName) {
-    execJsonStruct(c, op);
-    return;
-  }
+struct IdFieldMatch {
+  int16_t fieldId = 0;
+  uint8_t typeInfo = 0;
+  const FieldEntry* field = nullptr;
+};
 
-  FieldProto rp = op.readFieldProto;
-  if (rp == FieldProto::Unsupported) {
-    // Custom source struct framing is not implemented in the baseline.
-    if (c->error == 0) {
-      c->error = kUnsupportedProtocol;
+bool enterIdStructRead(
+    TranscodeCursor* c, const StructOp& op, const uint8_t*& savedReadEnd) {
+  savedReadEnd = nullptr;
+  if (!op.readLengthDelimited) {
+    return true;
+  }
+  uint64_t len = thrift_transcode_read_unsigned_varint(c);
+  if (hasError(c)) {
+    return false;
+  }
+  savedReadEnd = c->readEnd;
+  return setReadEndFromByteLength(*c, len);
+}
+
+void restoreIdStructReadEnd(
+    TranscodeCursor* c,
+    const StructOp& op,
+    const uint8_t* FOLLY_NULLABLE savedReadEnd) {
+  if (op.readLengthDelimited && savedReadEnd != nullptr) {
+    c->readEnd = savedReadEnd;
+  }
+}
+
+bool readNextIdField(
+    TranscodeCursor* c,
+    const StructOp& op,
+    FieldProto readProto,
+    const Framing& rf,
+    int16_t& prevRead,
+    IdFieldMatch& match) {
+  while (true) {
+    int16_t fieldId = 0;
+    uint8_t typeInfo = rf.readHeader(c, &fieldId, prevRead);
+    if (typeInfo == 0 || hasError(c)) {
+      return false;
     }
-    return;
-  }
-  Framing rf = framingFor(rp);
+    prevRead = fieldId;
 
-  // The write side is either a binary protocol (header intrinsics) or JSON
-  // (inline object framing: '{' "name": value , ... '}'). JSON write framing is
-  // selected by writeFieldIdent so a Compact(ById) read can target
-  // JSON(ByName).
-  const bool jsonWrite = op.writeFieldIdent == FieldIdent::ByName;
-  Framing wf{};
-  if (!jsonWrite) {
-    FieldProto wp = op.writeFieldProto;
-    if (wp == FieldProto::Unsupported) {
-      if (c->error == 0) {
-        c->error = kUnsupportedProtocol;
+    const FieldEntry* field = findFieldById(op, fieldId);
+    if (field == nullptr) {
+      rf.skip(c, typeInfo);
+      if (hasError(c)) {
+        return false;
       }
-      return;
+      continue;
     }
-    wf = framingFor(wp);
+    if (FOLLY_UNLIKELY(!fieldTypeMatches(readProto, *field, typeInfo))) {
+      detail::setError(c, kMalformedFieldType);
+      return false;
+    }
+    match = IdFieldMatch{fieldId, typeInfo, field};
+    return true;
+  }
+}
+
+void patchDelimitedStruct(
+    TranscodeCursor* c, const StructOp& op, TranscodePatchPoint writeMark) {
+  if (!op.writeLengthDelimited || hasError(c)) {
+    return;
+  }
+  size_t bodyBytes = thrift_transcode_cursor_bytes_since_mark(c, writeMark) - 5;
+  thrift_transcode_cursor_patch_varint(c, writeMark, bodyBytes, 5);
+}
+
+void execIdStructToFieldFramed(
+    TranscodeCursor* c,
+    const StructOp& op,
+    FieldProto readProto,
+    const Framing& rf,
+    ScalarFieldOverrides fieldOverrides) {
+  FieldProto writeProto = op.writeFieldProto;
+  if (writeProto == FieldProto::Unsupported) {
+    detail::setError(c, kUnsupportedProtocol);
+    return;
+  }
+  Framing wf = framingFor(writeProto);
+
+  const uint8_t* savedReadEnd = nullptr;
+  if (FOLLY_UNLIKELY(!enterIdStructRead(c, op, savedReadEnd))) {
+    return;
   }
 
-  // Protobuf nested structs are length-delimited blocks.
-  const uint8_t* savedReadEnd = nullptr;
   TranscodePatchPoint writeMark{};
-  bool patchWrite = false;
-  if (op.readLengthDelimited) {
-    uint64_t len = thrift_transcode_read_unsigned_varint(c);
-    if (hasError(c)) {
-      return;
-    }
-    savedReadEnd = c->readEnd;
-    if (FOLLY_UNLIKELY(!setReadEndFromByteLength(*c, len))) {
-      return;
-    }
-  }
-  if (jsonWrite) {
-    thrift_transcode_write_byte_checked(c, '{');
-  } else if (op.writeLengthDelimited) {
+  if (op.writeLengthDelimited) {
     writeMark = thrift_transcode_cursor_mark(c);
-    thrift_transcode_cursor_skip(c, 5); // reserve varint length prefix
-    patchWrite = true;
+    thrift_transcode_cursor_skip(c, 5);
   }
 
   int16_t prevRead = 0;
   int16_t prevWrite = 0;
-  bool wroteJsonField = false;
-  while (true) {
-    if (hasError(c)) {
+  const bool unionStruct = isUnion(op);
+  bool unionMemberSeen = false;
+  while (!hasError(c)) {
+    IdFieldMatch match;
+    if (!readNextIdField(c, op, readProto, rf, prevRead, match)) {
       break;
     }
-    int16_t fieldId = 0;
-    uint8_t ttype = rf.readHeader(c, &fieldId, prevRead);
-    if (ttype == 0) {
-      break; // STOP / end of message
-    }
-    prevRead = fieldId;
-
-    const FieldEntry* fe = findField(op, fieldId);
-    if (fe == nullptr) {
-      rf.skip(c, ttype);
-      continue;
-    }
-    if (FOLLY_UNLIKELY(!fieldTypeMatches(rp, *fe, ttype))) {
-      detail::setError(c, kMalformedFieldType);
-      break;
+    if (FOLLY_UNLIKELY(!noteUnionMember(c, unionStruct, unionMemberSeen))) {
+      return;
     }
 
-    if (jsonWrite) {
-      // Emit `"name": value`, with a separating comma between entries.
-      if (isUnion(op) && wroteJsonField) {
-        detail::setError(c, 1);
-        return;
-      }
-      if (wroteJsonField) {
-        thrift_transcode_write_byte_checked(c, ',');
-      }
-      wroteJsonField = true;
-      thrift_transcode_format_escaped_string(
-          c,
-          reinterpret_cast<const uint8_t*>(fe->fieldName.data()),
-          fe->fieldName.size());
-      thrift_transcode_write_byte_checked(c, ':');
-      execCommand(c, *fe->command, ttype);
-      continue;
-    }
-
-    // Deferred Compact bool: the value lives in the field header type byte, so
-    // we must know it before writing the header.
-    if (const auto* sc = std::get_if<ScalarOp>(fe->command.get());
+    if (const auto* sc = std::get_if<ScalarOp>(match.field->command.get());
         sc != nullptr && sc->writeFn == WriteFn::CompactBoolInType) {
       int64_t boolVal = 0;
-      if (FOLLY_UNLIKELY(!readScalarInt(c, *sc, ttype, &boolVal))) {
+      if (FOLLY_UNLIKELY(!readScalarInt(c, *sc, match.typeInfo, &boolVal))) {
         return;
       }
       thrift_transcode_compact_write_bool_field(
-          c, boolVal ? 1 : 0, fieldId, prevWrite);
-      if (hasError(c)) {
-        break;
-      }
-      prevWrite = fieldId;
+          c, boolVal ? 1 : 0, match.fieldId, prevWrite);
+      prevWrite = match.fieldId;
       continue;
     }
 
-    wf.writeHeader(c, fe->writeTypeInfo, fieldId, prevWrite);
+    wf.writeHeader(c, match.field->writeTypeInfo, match.fieldId, prevWrite);
     if (hasError(c)) {
       break;
     }
-    prevWrite = fieldId;
-    execCommand(c, *fe->command, ttype);
+    prevWrite = match.fieldId;
+    execCommand(c, *match.field->command, match.typeInfo);
   }
 
-  if (op.readLengthDelimited && savedReadEnd != nullptr) {
-    c->readEnd = savedReadEnd;
-  }
+  restoreIdStructReadEnd(c, op, savedReadEnd);
   if (hasError(c)) {
     return;
   }
 
-  if (jsonWrite) {
-    if (isUnion(op) && !wroteJsonField) {
-      detail::setError(c, 1);
+  for (const auto& override : fieldOverrides) {
+    const FieldEntry* field = nullptr;
+    const ScalarOp* scalar = nullptr;
+    if (FOLLY_UNLIKELY(
+            !resolveScalarOverrideField(c, op, override, field, scalar))) {
       return;
     }
-    thrift_transcode_write_byte_checked(c, '}');
-  } else if (!op.writeLengthDelimited) {
+    if (FOLLY_UNLIKELY(!noteUnionMember(c, unionStruct, unionMemberSeen))) {
+      return;
+    }
+    if (FOLLY_UNLIKELY(!writeFieldFramedScalarValue(
+            c, wf, *field, *scalar, override.value, prevWrite))) {
+      return;
+    }
+  }
+
+  if (FOLLY_UNLIKELY(!finishUnion(c, unionStruct, unionMemberSeen))) {
+    return;
+  }
+  if (!op.writeLengthDelimited) {
     wf.writeStop(c);
   }
+  patchDelimitedStruct(c, op, writeMark);
+}
+
+void execIdStructToJson(
+    TranscodeCursor* c,
+    const StructOp& op,
+    FieldProto readProto,
+    const Framing& rf,
+    ScalarFieldOverrides fieldOverrides) {
+  const uint8_t* savedReadEnd = nullptr;
+  if (FOLLY_UNLIKELY(!enterIdStructRead(c, op, savedReadEnd))) {
+    return;
+  }
+
+  thrift_transcode_write_byte_checked(c, '{');
+  int16_t prevRead = 0;
+  bool wroteJsonField = false;
+  const bool unionStruct = isUnion(op);
+  bool unionMemberSeen = false;
+  while (!hasError(c)) {
+    IdFieldMatch match;
+    if (!readNextIdField(c, op, readProto, rf, prevRead, match)) {
+      break;
+    }
+    if (FOLLY_UNLIKELY(!noteUnionMember(c, unionStruct, unionMemberSeen))) {
+      return;
+    }
+    if (wroteJsonField) {
+      thrift_transcode_write_byte_checked(c, ',');
+    }
+    wroteJsonField = true;
+    thrift_transcode_format_escaped_string(
+        c,
+        reinterpret_cast<const uint8_t*>(match.field->fieldName.data()),
+        match.field->fieldName.size());
+    thrift_transcode_write_byte_checked(c, ':');
+    execCommand(c, *match.field->command, match.typeInfo);
+  }
+
+  restoreIdStructReadEnd(c, op, savedReadEnd);
   if (hasError(c)) {
     return;
   }
 
-  if (patchWrite) {
-    size_t bodyBytes =
-        thrift_transcode_cursor_bytes_since_mark(c, writeMark) - 5;
-    thrift_transcode_cursor_patch_varint(c, writeMark, bodyBytes, 5);
+  for (const auto& override : fieldOverrides) {
+    const FieldEntry* field = nullptr;
+    const ScalarOp* scalar = nullptr;
+    if (FOLLY_UNLIKELY(
+            !resolveScalarOverrideField(c, op, override, field, scalar))) {
+      return;
+    }
+    if (FOLLY_UNLIKELY(!noteUnionMember(c, unionStruct, unionMemberSeen))) {
+      return;
+    }
+    if (FOLLY_UNLIKELY(!writeJsonScalarValue(
+            c, *field, *scalar, override.value, wroteJsonField))) {
+      return;
+    }
   }
+
+  if (FOLLY_UNLIKELY(!finishUnion(c, unionStruct, unionMemberSeen))) {
+    return;
+  }
+  thrift_transcode_write_byte_checked(c, '}');
+}
+
+void execStruct(
+    TranscodeCursor* c,
+    const StructOp& op,
+    ScalarFieldOverrides fieldOverrides = {}) {
+  if (op.fieldIdent == FieldIdent::ByName) {
+    execJsonStruct(c, op, fieldOverrides);
+    return;
+  }
+
+  FieldProto readProto = op.readFieldProto;
+  if (readProto == FieldProto::Unsupported) {
+    detail::setError(c, kUnsupportedProtocol);
+    return;
+  }
+  Framing rf = framingFor(readProto);
+  if (op.writeFieldIdent == FieldIdent::ByName) {
+    execIdStructToJson(c, op, readProto, rf, fieldOverrides);
+    return;
+  }
+  execIdStructToFieldFramed(c, op, readProto, rf, fieldOverrides);
 }
 
 void execCommand(
@@ -1576,13 +1736,31 @@ void execCommand(
       cmd);
 }
 
+void execRootCommand(
+    TranscodeCursor* c,
+    const Command& cmd,
+    ScalarFieldOverrides topLevelScalarOverrides) {
+  if (topLevelScalarOverrides.empty()) {
+    execCommand(c, cmd, 0);
+    return;
+  }
+  const auto* st = std::get_if<StructOp>(&cmd);
+  if (st == nullptr) {
+    detail::setError(c, kMalformedFieldType);
+    return;
+  }
+  execStruct(c, *st, topLevelScalarOverrides);
+}
+
 } // namespace
 
 TranscodeInterpreter::TranscodeInterpreter(TranscodePlan plan)
     : plan_(std::move(plan)) {}
 
 folly::Expected<std::unique_ptr<folly::IOBuf>, TranscodeError>
-TranscodeInterpreter::transcode(const folly::IOBuf& input) const {
+TranscodeInterpreter::transcode(
+    const folly::IOBuf& input,
+    ScalarFieldOverrides topLevelScalarOverrides) const {
   // TODO @sadroeck - Support chained input buffers without coalescing
   // Note: this is part of the "streaming" input support.
   auto coalesced = input.isChained()
@@ -1615,7 +1793,7 @@ TranscodeInterpreter::transcode(const folly::IOBuf& input) const {
       nullptr,
       &output);
 
-  execCommand(&cursor, plan_.root, 0);
+  execRootCommand(&cursor, plan_.root, topLevelScalarOverrides);
   validateInputConsumed(&cursor, plan_);
 
   if (cursor.error != 0) {
@@ -1631,7 +1809,10 @@ TranscodeInterpreter::transcode(const folly::IOBuf& input) const {
 }
 
 folly::Expected<size_t, TranscodeError> TranscodeInterpreter::transcodeInto(
-    const folly::IOBuf& input, uint8_t* output, size_t outputCapacity) const {
+    const folly::IOBuf& input,
+    uint8_t* output,
+    size_t outputCapacity,
+    ScalarFieldOverrides topLevelScalarOverrides) const {
   auto coalesced = input.isChained()
       ? input.cloneCoalescedAsValue()
       : folly::IOBuf::wrapBufferAsValue(input.data(), input.length());
@@ -1647,7 +1828,7 @@ folly::Expected<size_t, TranscodeError> TranscodeInterpreter::transcodeInto(
       nullptr,
       nullptr);
 
-  execCommand(&cursor, plan_.root, 0);
+  execRootCommand(&cursor, plan_.root, topLevelScalarOverrides);
   validateInputConsumed(&cursor, plan_);
 
   if (cursor.error != 0) {

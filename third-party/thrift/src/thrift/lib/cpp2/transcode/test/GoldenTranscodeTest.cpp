@@ -415,18 +415,23 @@ void runPreEncodedJsonSourceCases(
   runPreEncodedJsonSourceCases(std::move(cases), expectEqual<T>());
 }
 
-void expectJsonSourceRejected(
-    std::string_view caseName,
-    const type_system::StructNode& node,
-    std::string_view jsonInput) {
-  SCOPED_TRACE(::testing::Message() << "json reject / " << caseName);
-  auto jsonWire = makeCodec(WireProtocol::Json, node);
-  auto compactWire = makeCodec(WireProtocol::ThriftCompact, node);
+template <typename T>
+void expectJsonSourceAcceptedAs(
+    std::string_view caseName, std::string_view jsonInput, const T& expected) {
+  SCOPED_TRACE(::testing::Message() << "json accepted / " << caseName);
+  auto jsonWire = makeCodec(WireProtocol::Json, structNode<T>());
+  auto compactWire = makeCodec(WireProtocol::ThriftCompact, structNode<T>());
   TranscodeInterpreter interpreter{fuseOrThrow(jsonWire, compactWire)};
 
   std::string input{jsonInput};
   auto result = interpreter.transcode(wrap(input));
-  EXPECT_TRUE(result.hasError());
+  ASSERT_FALSE(result.hasError()) << result.error().message;
+
+  auto output = toString(**result);
+  T actual;
+  auto consumed = CompactSerializer::deserialize(output, actual);
+  EXPECT_EQ(static_cast<std::size_t>(consumed), output.size());
+  EXPECT_EQ(actual, expected);
 }
 
 GoldenCases<test_data::PreEncodedJson<fixture::MapShapes>>
@@ -609,19 +614,32 @@ TEST(GoldenTranscodeTest, GeneratedFixtureRoundTripSupportedSources) {
       kJsonOutputUnsupported);
 }
 
-TEST(GoldenTranscodeTest, JsonRejectsDuplicateKnownFields) {
-  expectJsonSourceRejected(
+TEST(GoldenTranscodeTest, JsonDuplicateKnownFieldsUseLastValue) {
+  fixture::PresenceShapes duplicateUnqualified;
+  duplicateUnqualified.unqualified_i32() = 2;
+  expectJsonSourceAcceptedAs(
       "duplicate-unqualified-scalar",
-      structNode<fixture::PresenceShapes>(),
-      R"({"unqualified_i32":1,"unqualified_i32":2})");
-  expectJsonSourceRejected(
+      R"({"unqualified_i32":1,"unqualified_i32":2})",
+      duplicateUnqualified);
+
+  fixture::PresenceShapes duplicateOptional;
+  duplicateOptional.maybe_i32() = 1;
+  expectJsonSourceAcceptedAs(
       "duplicate-optional-null",
-      structNode<fixture::PresenceShapes>(),
-      R"({"maybe_i32":null,"maybe_i32":1})");
-  expectJsonSourceRejected(
+      R"({"maybe_i32":null,"maybe_i32":1})",
+      duplicateOptional);
+
+  fixture::GoldenInner inner;
+  inner.n() = 2;
+  inner.label() = "x";
+  fixture::NestedShapes duplicateNested;
+  duplicateNested.inner() = std::move(inner);
+  duplicateNested.matrix() = {};
+  duplicateNested.inner_groups() = {};
+  expectJsonSourceAcceptedAs(
       "duplicate-nested-field",
-      structNode<fixture::NestedShapes>(),
-      R"({"inner":{"n":1,"n":2,"label":"x"},"matrix":[],"inner_groups":[]})");
+      R"({"inner":{"n":1,"n":2,"label":"x"},"matrix":[],"inner_groups":[]})",
+      duplicateNested);
 }
 
 TEST(GoldenTranscodeTest, DISABLED_ProtobufGoldenRoundTripSupportedProtocols) {

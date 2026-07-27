@@ -309,25 +309,14 @@ TEST_F(InterpreterJsonReadTest, NullForAlwaysPresentFieldErrors) {
   EXPECT_TRUE(result.hasError());
 }
 
-TEST_F(InterpreterJsonReadTest, MissingAlwaysPresentFieldsUseStandardDefaults) {
+TEST_F(InterpreterJsonReadTest, MissingFieldsAreOmitted) {
   auto compact = makeCodec(WireProtocol::ThriftCompact, sampleNode());
-  auto binary = makeCodec(WireProtocol::ThriftBinary, sampleNode());
   auto json = makeCodec(WireProtocol::Json, sampleNode());
   TranscodeInterpreter jsonToCompact{fuse(json, compact)};
-  TranscodeInterpreter compactToBinary{fuse(compact, binary)};
 
   auto compact0 = jsonToCompact.transcode(wrap("{}"));
   ASSERT_FALSE(compact0.hasError()) << compact0.error().message;
-
-  auto compact1 = jsonToCompact.transcode(
-      wrap(R"({"id":0,"name":"","flag":false,"nested":{"n":0},"nums":[]})"));
-  ASSERT_FALSE(compact1.hasError()) << compact1.error().message;
-
-  auto binary0 = compactToBinary.transcode(**compact0);
-  ASSERT_FALSE(binary0.hasError()) << binary0.error().message;
-  auto binary1 = compactToBinary.transcode(**compact1);
-  ASSERT_FALSE(binary1.hasError()) << binary1.error().message;
-  EXPECT_EQ(toBytes(**binary0), toBytes(**binary1));
+  EXPECT_EQ(toBytes(**compact0), std::vector<uint8_t>({0}));
 }
 
 TEST_F(InterpreterJsonReadTest, NarrowIntegerOutOfRangeErrors) {
@@ -348,7 +337,7 @@ TEST_F(InterpreterJsonReadTest, NarrowIntegerOutOfRangeErrors) {
   EXPECT_TRUE(result.hasError());
 }
 
-TEST_F(InterpreterJsonReadTest, JsonUnionRequiresExactlyOneKnownMember) {
+TEST_F(InterpreterJsonReadTest, JsonUnionRequiresExactlyOneMember) {
   type_system::TypeSystemBuilder builder;
   builder.addType(
       "test.Choice",
@@ -366,9 +355,11 @@ TEST_F(InterpreterJsonReadTest, JsonUnionRequiresExactlyOneKnownMember) {
   auto compact0 = jsonToCompact.transcode(wrap(R"({"id":7})"));
   ASSERT_FALSE(compact0.hasError()) << compact0.error().message;
 
-  EXPECT_TRUE(jsonToCompact.transcode(wrap("{}")).hasError());
-  EXPECT_TRUE(
-      jsonToCompact.transcode(wrap(R"({"id":7,"name":"x"})")).hasError());
+  auto compact1 = jsonToCompact.transcode(wrap("{}"));
+  EXPECT_TRUE(compact1.hasError());
+
+  auto compact2 = jsonToCompact.transcode(wrap(R"({"id":7,"name":"x"})"));
+  EXPECT_TRUE(compact2.hasError());
 }
 
 TEST_F(InterpreterJsonReadTest, JsonMapSourceTranscodesWithOptIn) {

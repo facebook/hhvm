@@ -20,6 +20,7 @@ package "facebook.com/thrift/fast_thrift/thrift/test"
 
 namespace cpp2 apache.thrift.fast_thrift.thrift.test
 
+@cpp.FastServer
 @cpp.FastClient
 service TestFastService {
   string echo(1: string message);

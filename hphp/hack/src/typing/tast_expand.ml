@@ -51,7 +51,30 @@ let expand_ty ?var_hook ?pos env ty =
       | (p, Tshape (Shape_simple s)) ->
         mk (p, Tshape (Shape_simple (exp_shape_type s)))
       | (p, Tshape (Shape_splat { ss_elems })) ->
-        mk (p, Tshape (Shape_splat { ss_elems = exp_tys ss_elems }))
+        let expanded = exp_tys ss_elems in
+        let Equal = Tast_env.eq_typing_env in
+        let (_env, _errs, result) =
+          Typing_shape_normalize.merge ~on_error:None expanded env
+        in
+        let (ty, sd) =
+          match result with
+          | Full (ty, sd) -> (ty, sd)
+          | Empty_shape sd ->
+            let shape =
+              {
+                s_origin = Missing_origin;
+                s_unknown_value = Typing_make_type.nothing p;
+                s_fields = TShapeMap.empty;
+              }
+            in
+            (mk (p, Tshape (Shape_simple shape)), sd)
+          | Partial (ss_elems, sd) ->
+            (mk (p, Tshape (Shape_splat { ss_elems })), sd)
+        in
+        if sd then
+          Typing_make_type.supportdyn (get_reason ty) ty
+        else
+          ty
       | (p, Tvec_or_dict (ty1, ty2)) ->
         mk (p, Tvec_or_dict (exp_ty ty1, exp_ty ty2))
       | (p, Tvar v) ->

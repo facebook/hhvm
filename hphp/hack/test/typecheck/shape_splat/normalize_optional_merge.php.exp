@@ -1,0 +1,10 @@
+File "normalize_optional_merge.php", line 31, characters 3-13:
+  shape('x' => bool)
+File "normalize_optional_merge.php", line 36, characters 3-13:
+  shape('x' => (int | bool))
+File "normalize_optional_merge.php", line 42, characters 3-13:
+  shape('x' => bool)
+File "normalize_optional_merge.php", line 47, characters 3-13:
+  shape(?'x' => (int | bool))
+ERROR: File "normalize_optional_merge.php", line 38, characters 13-24:
+Cannot use unstable feature: `union_intersection_type_hints` (Parsing[1002])

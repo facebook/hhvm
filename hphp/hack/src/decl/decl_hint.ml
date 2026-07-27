@@ -15,6 +15,11 @@ open Aast
 open Typing_defs
 module SN = Naming_special_names
 
+let has_splats nsi_field_map =
+  List.exists nsi_field_map ~f:(function
+      | SE_splat _ -> true
+      | SE_field _ -> false)
+
 let make_decl_ty env p ty_ =
   mk (Typing_reason.hint (Decl_env.make_decl_pos env p), ty_)
 
@@ -360,6 +365,101 @@ and hint_ p env = function
   | Hintersection hl ->
     let tyl = List.map hl ~f:(hint env) in
     Tintersection tyl
+  | Hshape { nsi_allows_unknown_fields; nsi_field_map; nsi_unknown_fields_type }
+    when has_splats nsi_field_map ->
+    (* The shape's openness: a typed open (`T...`) contributes its type, a bare
+       `...` contributes `mixed`, and a closed shape contributes nothing. *)
+    let open_unknown =
+      if nsi_allows_unknown_fields then
+        match nsi_unknown_fields_type with
+        | Some type_hint -> Some (hint env type_hint)
+        | None -> Some (hint env (p, Hmixed))
+      else
+        None
+    in
+    (* A field-run, a sequence of contiguous fields, carries the openness itself
+       so its own explicit fields keep their declared types i.e.
+       `shape(..., 'y' => string, ...)`
+       means
+       `shape(..., ...shape('y' => string, ...))`.
+       A closed shape uses `nothing`. *)
+    let field_run_kind =
+      match open_unknown with
+      | Some ty -> ty
+      | None -> hint env (p, Hnothing)
+    in
+    (* In a shape with fields and splats, adjacent fields not interspersed with
+       splats are sugar for a simple shape *)
+    let make_simple_from_fields fields =
+      let fdm =
+        List.fold_left
+          ~f:(fun acc i ->
+            TShapeMap.add
+              (TShapeField.of_ast (Decl_env.make_decl_pos env) i.sfi_name)
+              (shape_field_info_to_shape_field_type env i)
+              acc)
+          ~init:TShapeMap.empty
+          fields
+      in
+      make_decl_ty
+        env
+        p
+        (Tshape
+           (Shape_simple
+              {
+                s_origin = Missing_origin;
+                s_unknown_value = field_run_kind;
+                s_fields = fdm;
+              }))
+    in
+    (* Fold over the elements and accumulate fields; when we encounter a splat
+       we lift the fields into a simple shape. [made_field_run] records whether
+       any field-run was created, i.e. whether the openness has been captured. *)
+    let (elems, pending_fields, made_field_run) =
+      List.fold_left
+        nsi_field_map
+        ~init:([], [], false)
+        ~f:(fun (elems, pending, made_field_run) -> function
+        | SE_field sfi -> (elems, sfi :: pending, made_field_run)
+        | SE_splat h ->
+          let (elems, made_field_run) =
+            if List.is_empty pending then
+              (elems, made_field_run)
+            else
+              (make_simple_from_fields (List.rev pending) :: elems, true)
+          in
+          let splat_ty = hint env h in
+          (splat_ty :: elems, [], made_field_run))
+    in
+    let (elems, made_field_run) =
+      if List.is_empty pending_fields then
+        (elems, made_field_run)
+      else
+        (make_simple_from_fields (List.rev pending_fields) :: elems, true)
+    in
+    (* If the shape is open but no field-run captured the openness (it consists
+       only of splats, e.g. `shape(...Base, ...)`), the trailing `...` / `T...`
+       would otherwise be lost. Represent it as a standalone open-empty element
+       (i.e. `shape(...Base, ...shape(...))`), placed rightmost. *)
+    let elems =
+      match open_unknown with
+      | Some unknown_value when not made_field_run ->
+        let open_empty =
+          make_decl_ty
+            env
+            p
+            (Tshape
+               (Shape_simple
+                  {
+                    s_origin = Missing_origin;
+                    s_unknown_value = unknown_value;
+                    s_fields = TShapeMap.empty;
+                  }))
+        in
+        open_empty :: elems
+      | _ -> elems
+    in
+    Tshape (Shape_splat { ss_elems = List.rev elems })
   | Hshape { nsi_allows_unknown_fields; nsi_field_map; nsi_unknown_fields_type }
     ->
     let shape_kind =

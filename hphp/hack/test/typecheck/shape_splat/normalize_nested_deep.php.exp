@@ -1,0 +1,4 @@
+File "normalize_nested_deep.php", line 15, characters 3-13:
+  shape(...shape('x' => int, 'y' => bool), ...T1, ...shape('u' => float, 'z' => string), ...T2)
+   where T1 as shape(...), T2 as shape(...)
+No errors

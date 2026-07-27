@@ -1,0 +1,8 @@
+ERROR: File "error_splat_union.php", line 7, characters 12-42:
+Invalid type hint (Typing[4419])
+  File "error_splat_union.php", line 7, characters 21-29:
+  Only shapes can be unpacked with `...` inside a shape type
+ERROR: File "error_splat_union.php", line 9, characters 15-17:
+Invalid type hint (Typing[4419])
+  File "error_splat_union.php", line 7, characters 21-29:
+  Only shapes can be unpacked with `...` inside a shape type

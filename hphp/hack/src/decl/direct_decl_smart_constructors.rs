@@ -74,6 +74,7 @@ use oxidized::typing_defs::RefinedConstBounds;
 use oxidized::typing_defs::ShapeFieldType;
 use oxidized::typing_defs::ShapeType;
 use oxidized::typing_defs::ShapeTypeSimple;
+use oxidized::typing_defs::ShapeTypeSplat;
 use oxidized::typing_defs::TaccessType;
 use oxidized::typing_defs::Tparam;
 use oxidized::typing_defs::TshapeFieldName;
@@ -977,6 +978,7 @@ pub enum Node {
     TypeParameter(Box<TypeParameterDecl>),
     TypeConstraint(ConstraintKind, Box<Node>),
     ShapeFieldSpecifier(Box<ShapeFieldNode>),
+    ShapeSplatSpecifier(Box<Node>),
     NamespaceUseClause(Box<NamespaceUseClause>),
     Expr(Box<nast::Expr>),
     TypeParameters(Vec<Tparam>),
@@ -2329,8 +2331,12 @@ impl<'o, 't> DirectDeclSmartConstructors<'o, 't> {
                     fields: converted_fields,
                 }))
             }
-            Ty_::Tshape(ShapeType::ShapeSplat(_)) => {
-                panic!("Shape_splat not yet supported")
+            Ty_::Tshape(ShapeType::ShapeSplat(ShapeTypeSplat { ss_elems })) => {
+                let ss_elems = ss_elems
+                    .into_iter()
+                    .map(|ty| self.convert_tapply_to_tgeneric(ty))
+                    .collect();
+                Ty_::Tshape(ShapeType::ShapeSplat(ShapeTypeSplat { ss_elems }))
             }
             Ty_::TvecOrDict(tk, tv) => Ty_::TvecOrDict(
                 self.convert_tapply_to_tgeneric(tk),
@@ -5583,36 +5589,138 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
         open: Self::Output,
         rparen: Self::Output,
     ) -> Self::Output {
-        // In case of duplicate names, we want the last (K,V) pair.
-        // BTreeMap::insert() would only replace V on duplicates.
-        let mut fields = TShapeMap::new();
-        for node in fields_in.into_iter() {
-            if let Node::ShapeFieldSpecifier(box ShapeFieldNode { name, type_ }) = node {
-                // Implementation of Ord for TShapeField ignores position
-                // https://doc.rust-lang.org/std/collections/index.html#insert-and-complex-keys
-                let key = self.make_t_shape_field_name(name);
-                if fields.contains_key(&key) {
-                    fields.remove(&key);
+        let has_splats = fields_in
+            .iter()
+            .any(|n| matches!(n, Node::ShapeSplatSpecifier(_)));
+        if has_splats {
+            let pos = self.merge_positions(&shape, &rparen);
+            // The shape's openness: a typed open (`T...`) contributes its type, a
+            // bare `...` contributes `mixed`, and a closed shape contributes
+            // nothing.
+            let open_unknown = match self.node_to_ty(ellipsis_type) {
+                Some(ty) => Some(ty),
+                None if matches!(open.token_kind(), Some(TokenKind::DotDotDot)) => {
+                    Some(self.make_variadic_type(&open))
                 }
-                fields.insert(key, type_);
+                None => None,
+            };
+            // A field-run, a sequence of contiguous fields, carries the openness
+            // itself so its own explicit fields keep their declared types i.e.
+            // `shape(..., 'y' => string, ...)`
+            //  means
+            // `shape(..., ...shape('y' => string, ...))`.
+            // A closed shape uses `nothing`.
+            let field_run_kind = open_unknown.clone().unwrap_or_else(|| {
+                Ty(
+                    Reason::FromWitnessDecl(WitnessDecl::Hint(pos.clone())),
+                    Box::new(Ty_::Tunion(vec![])),
+                )
+            });
+            let mut elems = Vec::new();
+            let mut pending_fields = TShapeMap::new();
+            let mut made_field_run = false;
+            // Rewrite adjacent fields not interspersed by splats to simple shapes
+            for node in fields_in.into_iter() {
+                match node {
+                    Node::ShapeFieldSpecifier(box ShapeFieldNode { name, type_ }) => {
+                        let key = self.make_t_shape_field_name(name);
+                        if pending_fields.contains_key(&key) {
+                            pending_fields.remove(&key);
+                        }
+                        pending_fields.insert(key, type_);
+                    }
+                    Node::ShapeSplatSpecifier(box splat_node) => {
+                        if !pending_fields.is_empty() {
+                            let simple = self.hint_ty(
+                                pos.clone(),
+                                Ty_::Tshape(ShapeType::ShapeSimple(ShapeTypeSimple {
+                                    origin: TypeOrigin::MissingOrigin,
+                                    unknown_value: field_run_kind.clone(),
+                                    fields: std::mem::take(&mut pending_fields),
+                                })),
+                            );
+                            if let Some(ty) = self.node_to_ty(simple) {
+                                elems.push(ty);
+                                made_field_run = true;
+                            }
+                        }
+                        // Always contribute a splat element, mirroring
+                        // `decl_hint.ml` where `hint` is total. If the inner
+                        // hint fails to convert, fall back to a placeholder so
+                        // the element isn't silently dropped.
+                        let splat_ty = self
+                            .node_to_ty(splat_node)
+                            .unwrap_or_else(|| self.tany_with_pos(pos.clone()));
+                        elems.push(splat_ty);
+                    }
+                    _ => {}
+                }
             }
+            if !pending_fields.is_empty() {
+                let simple = self.hint_ty(
+                    pos.clone(),
+                    Ty_::Tshape(ShapeType::ShapeSimple(ShapeTypeSimple {
+                        origin: TypeOrigin::MissingOrigin,
+                        unknown_value: field_run_kind,
+                        fields: pending_fields,
+                    })),
+                );
+                if let Some(ty) = self.node_to_ty(simple) {
+                    elems.push(ty);
+                    made_field_run = true;
+                }
+            }
+            // If the shape is open but no field-run captured the openness (it
+            // consists only of splats, e.g. `shape(...Base, ...)`), the trailing
+            // `...` / `T...` would otherwise be lost. Represent it as a standalone
+            // open-empty element (i.e. `shape(...Base, ...shape(...))`).
+            if let Some(unknown_value) = open_unknown {
+                if !made_field_run {
+                    let open_empty = self.hint_ty(
+                        pos.clone(),
+                        Ty_::Tshape(ShapeType::ShapeSimple(ShapeTypeSimple {
+                            origin: TypeOrigin::MissingOrigin,
+                            unknown_value,
+                            fields: TShapeMap::new(),
+                        })),
+                    );
+                    if let Some(ty) = self.node_to_ty(open_empty) {
+                        elems.push(ty);
+                    }
+                }
+            }
+            self.hint_ty(
+                pos,
+                Ty_::Tshape(ShapeType::ShapeSplat(ShapeTypeSplat { ss_elems: elems })),
+            )
+        } else {
+            let mut fields = TShapeMap::new();
+            for node in fields_in.into_iter() {
+                if let Node::ShapeFieldSpecifier(box ShapeFieldNode { name, type_ }) = node {
+                    let key = self.make_t_shape_field_name(name);
+                    if fields.contains_key(&key) {
+                        fields.remove(&key);
+                    }
+                    fields.insert(key, type_);
+                }
+            }
+            // If a typed ellipsis was provided (e.g. `string...`), use its type
+            // for unknown fields. Otherwise fall back to the bare `...` handling.
+            let kind = match self.node_to_ty(ellipsis_type) {
+                Some(ty) => ty,
+                None => self.make_variadic_type(&open),
+            };
+            let pos = self.merge_positions(&shape, &rparen);
+            let origin = TypeOrigin::MissingOrigin;
+            self.hint_ty(
+                pos,
+                Ty_::Tshape(ShapeType::ShapeSimple(ShapeTypeSimple {
+                    origin,
+                    unknown_value: kind,
+                    fields,
+                })),
+            )
         }
-        // If a typed ellipsis was provided (e.g. `string...`), use its type
-        // for unknown fields. Otherwise fall back to the bare `...` handling.
-        let kind = match self.node_to_ty(ellipsis_type) {
-            Some(ty) => ty,
-            None => self.make_variadic_type(&open),
-        };
-        let pos = self.merge_positions(&shape, &rparen);
-        let origin = TypeOrigin::MissingOrigin;
-        self.hint_ty(
-            pos,
-            Ty_::Tshape(ShapeType::ShapeSimple(ShapeTypeSimple {
-                origin,
-                unknown_value: kind,
-                fields,
-            })),
-        )
     }
 
     fn make_classname_type_specifier(
@@ -5776,6 +5884,14 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
             name: ShapeField(name),
             type_: ShapeFieldType { optional: true, ty },
         }))
+    }
+
+    fn make_shape_splat_specifier(
+        &mut self,
+        _ellipsis: Self::Output,
+        type_: Self::Output,
+    ) -> Self::Output {
+        Node::ShapeSplatSpecifier(Box::new(type_))
     }
 
     fn make_field_initializer(

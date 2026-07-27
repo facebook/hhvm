@@ -254,7 +254,10 @@ let rec from_type : env -> show_like_ty:bool -> locl_ty -> Yojson.Safe.t =
     @ is_array false
     @ [("fields_known", `Bool fields_known)]
     @ fields (TShapeMap.bindings fl)
-  | (_, Tshape (Shape_splat _)) -> failwith "Shape_splat unexpected"
+  | (p, Tshape (Shape_splat { ss_elems })) ->
+    obj
+    @@ kind p "shape_splat"
+    @ [("elems", `List (List.map ~f:(from_type env ~show_like_ty) ss_elems))]
   | (p, Tunion []) -> obj @@ kind p "nothing"
   | (_, Tunion [ty]) -> from_type env ~show_like_ty ty
   | (p, Tunion tyl) ->

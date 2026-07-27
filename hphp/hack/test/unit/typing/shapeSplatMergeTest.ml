@@ -1,0 +1,407 @@
+(*
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
+ *
+ *)
+
+(* Unit tests for the shape-splat merge (Typing_shape_normalize), the OCaml
+ * reference for the runtime/HHBBC resolvers. The case table here is kept
+ * aligned with the C++ unit test
+ * (hphp/runtime/test/type-structure-splat.cpp) so both engines are verified
+ * against the same semantics. *)
+
+open Hh_prelude
+open OUnit2
+open Typing_defs
+module Env = Typing_env
+module MakeType = Typing_make_type
+module Reason = Typing_reason
+module Norm = Typing_shape_normalize
+
+let dummy_env =
+  let () = Typing_subtype.set_fun_refs () in
+  let ctx =
+    Provider_context.empty_for_test
+      ~popt:ParserOptions.default
+      ~tcopt:TypecheckerOptions.default
+      ~deps_mode:(Typing_deps_mode.InMemoryMode None)
+  in
+  let env = Typing_env_types.empty ctx Relative_path.default ~droot:None in
+  let dummy_file = Relative_path.from_root ~suffix:"test.php" in
+  let dummy_pos = Pos.make dummy_file (Lexing.from_string "") in
+  let (env, _restore) = Env.set_inference_env_pos env (Some dummy_pos) in
+  env
+
+let r = Reason.none
+
+let tint = MakeType.int r
+
+let tbool = MakeType.bool r
+
+let tfloat = MakeType.float r
+
+let tnothing = MakeType.nothing r
+
+let tmixed = MakeType.mixed r
+
+let tdynamic = MakeType.dynamic r
+
+let field ?(optional = false) ty = { sft_optional = optional; sft_ty = ty }
+
+let key name = TSFlit_str (Pos_or_decl.none, name)
+
+let mk_fields kvs =
+  List.fold kvs ~init:TShapeMap.empty ~f:(fun acc (k, v) ->
+      TShapeMap.add (key k) v acc)
+
+let simple ?(unknown = tnothing) kvs =
+  {
+    s_origin = Missing_origin;
+    s_unknown_value = unknown;
+    s_fields = mk_fields kvs;
+  }
+
+let shape_ty s = mk (r, Tshape (Shape_simple s))
+
+let get_field s name = TShapeMap.find_opt (key name) s.s_fields
+
+let is_nothing ty =
+  match get_node ty with
+  | Tunion [] -> true
+  | _ -> false
+
+let is_dynamic ty =
+  match get_node ty with
+  | Tdynamic _ -> true
+  | _ -> false
+
+let assert_required name fd_opt =
+  match fd_opt with
+  | Some fd -> assert_bool (name ^ " should be required") (not fd.sft_optional)
+  | None -> assert_failure ("missing field " ^ name)
+
+let assert_prim name expected fd_opt =
+  match fd_opt with
+  | Some fd ->
+    (match get_node fd.sft_ty with
+    | Tprim p when Aast.equal_tprim p expected -> ()
+    | _ -> assert_failure (name ^ " has unexpected type"))
+  | None -> assert_failure ("missing field " ^ name)
+
+(* shape('x' => int) + shape('y' => string) -> both required, closed. *)
+let disjoint_closed _ =
+  let (_, merged) =
+    Norm.merge_shapes_simple
+      ~shape_left:(simple [("x", field tint)])
+      ~shape_right:(simple [("y", field tbool)])
+      dummy_env
+  in
+  assert_required "x" (get_field merged "x");
+  assert_required "y" (get_field merged "y");
+  assert_prim "x" Aast.Tint (get_field merged "x");
+  assert_prim "y" Aast.Tbool (get_field merged "y");
+  assert_bool "result should be closed" (is_nothing merged.s_unknown_value)
+
+(* Rightmost wins: shape('a' => int) + shape('a' => string) -> a: string. *)
+let rightmost_wins _ =
+  let (_, merged) =
+    Norm.merge_shapes_simple
+      ~shape_left:(simple [("a", field tint)])
+      ~shape_right:(simple [("a", field tbool)])
+      dummy_env
+  in
+  assert_required "a" (get_field merged "a");
+  assert_prim "a" Aast.Tbool (get_field merged "a")
+
+(* Required left, optional right -> required (union of types). *)
+let required_optional_union _ =
+  let (_, merged) =
+    Norm.merge_shapes_simple
+      ~shape_left:(simple [("a", field tint)])
+      ~shape_right:(simple [("a", field ~optional:true tbool)])
+      dummy_env
+  in
+  assert_required "a" (get_field merged "a")
+
+(* A field only on the left, open shape on the right -> unioned with the right's
+   unknown (mixed) and absorbed; result is open. *)
+let open_right_absorbs _ =
+  let (_, merged) =
+    Norm.merge_shapes_simple
+      ~shape_left:(simple [("a", field tint)])
+      ~shape_right:(simple ~unknown:tmixed [])
+      dummy_env
+  in
+  assert_required "a" (get_field merged "a");
+  assert_bool "result should be open" (not (is_nothing merged.s_unknown_value))
+
+(* Spreading nothing yields the bottom row, collapsing the whole shape. *)
+let bottom_absorbs _ =
+  let (_, _, result) =
+    Norm.merge
+      ~on_error:None
+      [shape_ty (simple [("a", field tint)]); tnothing]
+      dummy_env
+  in
+  match result with
+  | Norm.Full (ty, _) ->
+    assert_bool "bottom should collapse to nothing" (is_nothing ty)
+  | Norm.Empty_shape _ ->
+    assert_failure "expected Full nothing, got empty shape"
+  | Norm.Partial _ -> assert_failure "expected Full nothing, got residual"
+
+(* A residual operand (type variable) cannot be flattened: a residual list. *)
+let residual_tyvar _ =
+  let (env, tv) =
+    Env.fresh_type_reason dummy_env Pos.none (fun _ -> Reason.none)
+  in
+  let (_, _, result) =
+    Norm.merge ~on_error:None [shape_ty (simple [("a", field tint)]); tv] env
+  in
+  match result with
+  | Norm.Partial _ -> ()
+  | Norm.Full _
+  | Norm.Empty_shape _ ->
+    assert_failure "expected residual list for a free type variable"
+
+(* -- Property tests -----------------------------------------------------------
+   The examples above pin specific cases; the properties below check the
+   algebraic laws over a small enumerated space of shapes. The space is every
+   combination of two fields (each absent / required / optional, int or bool)
+   with a closed or open (mixed) unknown value: 5 * 5 * 2 = 50 shapes. Pairwise
+   properties therefore range over 2500 merges, which is plenty to catch a law
+   violation without a generator dependency. *)
+
+let splat elems = mk (r, Tshape (Shape_splat { ss_elems = elems }))
+
+let empty_closed = simple []
+
+let prim_of ty =
+  match get_node ty with
+  | Tprim p -> Some p
+  | _ -> None
+
+let ty_prim_equal t1 t2 =
+  match (prim_of t1, prim_of t2) with
+  | (Some p1, Some p2) -> Aast.equal_tprim p1 p2
+  | _ -> false
+
+let field_eq f1 f2 =
+  Bool.equal f1.sft_optional f2.sft_optional
+  && ty_prim_equal f1.sft_ty f2.sft_ty
+
+(* Coarse comparison of the unknown-value upper bound: closed (nothing) vs open
+   (anything else). Enough to distinguish the two we generate. *)
+let unknown_eq u1 u2 = Bool.equal (is_nothing u1) (is_nothing u2)
+
+let field_names = ["a"; "b"; "c"]
+
+let shape_struct_eq s1 s2 =
+  List.for_all field_names ~f:(fun k ->
+      match (get_field s1 k, get_field s2 k) with
+      | (None, None) -> true
+      | (Some f1, Some f2) -> field_eq f1 f2
+      | _ -> false)
+  && unknown_eq s1.s_unknown_value s2.s_unknown_value
+
+let all_field_states =
+  [
+    None;
+    Some (field tint);
+    Some (field tbool);
+    Some (field tfloat);
+    Some (field ~optional:true tint);
+    Some (field ~optional:true tbool);
+    Some (field ~optional:true tfloat);
+  ]
+
+(* Every combination of the three fields (each absent / required / optional, of
+   int, bool, or float) with a closed or open unknown value:
+   7 fields-states ^ 3 fields * 2 unknowns = 686 shapes. *)
+let all_shapes =
+  List.concat_map all_field_states ~f:(fun fa ->
+      List.concat_map all_field_states ~f:(fun fb ->
+          List.concat_map all_field_states ~f:(fun fc ->
+              List.map [tnothing; tmixed] ~f:(fun unknown ->
+                  let kvs =
+                    List.filter_map
+                      [("a", fa); ("b", fb); ("c", fc)]
+                      ~f:(fun (k, o) -> Option.map o ~f:(fun fd -> (k, fd)))
+                  in
+                  simple ~unknown kvs))))
+
+(* The pairwise (n^2) properties below use a two-field projection to keep the
+   cross product tractable (7^2 * 2 = 98 shapes -> ~9.6k merges per property).
+   Rightmost-wins and key-union are per-field / per-operand-set properties, so
+   two fields already exercise every presence/absence and requiredness x type
+   combination that matters. *)
+let pair_shapes =
+  List.concat_map all_field_states ~f:(fun fa ->
+      List.concat_map all_field_states ~f:(fun fb ->
+          List.map [tnothing; tmixed] ~f:(fun unknown ->
+              let kvs =
+                List.filter_map
+                  [("a", fa); ("b", fb)]
+                  ~f:(fun (k, o) -> Option.map o ~f:(fun fd -> (k, fd)))
+              in
+              simple ~unknown kvs)))
+
+let full_shape label = function
+  | (_, _, Norm.Full (ty, _)) ->
+    (match get_node ty with
+    | Tshape (Shape_simple s) -> s
+    | _ -> assert_failure (label ^ ": expected a simple shape"))
+  (* An all-identity merge collapses to the empty closed shape (the unit). *)
+  | (_, _, Norm.Empty_shape _) -> empty_closed
+  | (_, _, Norm.Partial _) ->
+    assert_failure (label ^ ": expected Full/Empty_shape, got residual")
+
+(* Rightmost wins: any field required in the right operand appears required with
+   the right operand's exact type in the merge. *)
+let prop_rightmost_wins _ =
+  List.iter pair_shapes ~f:(fun sl ->
+      List.iter pair_shapes ~f:(fun sr ->
+          let (_, merged) =
+            Norm.merge_shapes_simple ~shape_left:sl ~shape_right:sr dummy_env
+          in
+          List.iter field_names ~f:(fun k ->
+              match get_field sr k with
+              | Some fd_r when not fd_r.sft_optional ->
+                (match get_field merged k with
+                | Some fd ->
+                  assert_bool
+                    (k ^ " should stay required (rightmost wins)")
+                    (not fd.sft_optional);
+                  assert_bool
+                    (k ^ " should keep the right operand's type")
+                    (ty_prim_equal fd.sft_ty fd_r.sft_ty)
+                | None -> assert_failure (k ^ " missing after rightmost-wins"))
+              | _ -> ())))
+
+(* The merged field set is exactly the union of the operands' field sets. *)
+let prop_keys_union _ =
+  List.iter pair_shapes ~f:(fun sl ->
+      List.iter pair_shapes ~f:(fun sr ->
+          let (_, merged) =
+            Norm.merge_shapes_simple ~shape_left:sl ~shape_right:sr dummy_env
+          in
+          List.iter field_names ~f:(fun k ->
+              let in_l = Option.is_some (get_field sl k) in
+              let in_r = Option.is_some (get_field sr k) in
+              let in_m = Option.is_some (get_field merged k) in
+              assert_bool
+                (k ^ " should be present iff present in an operand")
+                (Bool.equal in_m (in_l || in_r)))))
+
+(* A [nothing] operand collapses the whole merge to [nothing], in either
+   position. *)
+let prop_bottom_absorbs _ =
+  List.iter all_shapes ~f:(fun s ->
+      let check label elems =
+        match Norm.merge ~on_error:None elems dummy_env with
+        | (_, _, Norm.Full (ty, _)) ->
+          assert_bool (label ^ ": should collapse to nothing") (is_nothing ty)
+        | (_, _, (Norm.Empty_shape _ | Norm.Partial _)) ->
+          assert_failure (label ^ ": expected Full nothing")
+      in
+      check "s,nothing" [shape_ty s; tnothing];
+      check "nothing,s" [tnothing; shape_ty s])
+
+(* The empty closed shape is a unit for merge, in either position. *)
+let prop_empty_identity _ =
+  List.iter all_shapes ~f:(fun s ->
+      let left =
+        full_shape
+          "s,empty"
+          (Norm.merge
+             ~on_error:None
+             [shape_ty s; shape_ty empty_closed]
+             dummy_env)
+      in
+      let right =
+        full_shape
+          "empty,s"
+          (Norm.merge
+             ~on_error:None
+             [shape_ty empty_closed; shape_ty s]
+             dummy_env)
+      in
+      assert_bool
+        "empty shape should be a left/right unit"
+        (shape_struct_eq left s);
+      assert_bool
+        "empty shape should be a left/right unit"
+        (shape_struct_eq right s))
+
+(* A splat wrapping a single shape flattens to that shape. *)
+let prop_flatten_singleton _ =
+  List.iter all_shapes ~f:(fun s ->
+      let via_splat =
+        full_shape
+          "splat"
+          (Norm.merge ~on_error:None [splat [shape_ty s]] dummy_env)
+      in
+      let direct =
+        full_shape "direct" (Norm.merge ~on_error:None [shape_ty s] dummy_env)
+      in
+      assert_bool
+        "singleton splat should flatten"
+        (shape_struct_eq via_splat direct))
+
+(* Spreading dynamic on the right opens the row with dynamic as the unknown-field
+   bound and unions a left field with dynamic:
+   shape('a' => int) + dynamic -> a: (int | dynamic), open (unknown = dynamic). *)
+let dynamic_on_right_unions _ =
+  let s =
+    full_shape
+      "dyn_right"
+      (Norm.merge
+         ~on_error:None
+         [shape_ty (simple [("a", field tint)]); tdynamic]
+         dummy_env)
+  in
+  assert_required "a" (get_field s "a");
+  assert_bool "unknown should be dynamic" (is_dynamic s.s_unknown_value);
+  match get_field s "a" with
+  | Some fd ->
+    assert_bool
+      "a should be unioned with dynamic (no longer plain int)"
+      (not (ty_prim_equal fd.sft_ty tint))
+  | None -> assert_failure "missing a"
+
+(* Spreading dynamic on the left leaves a rightmost concrete field unchanged but
+   still opens the row with dynamic:
+   dynamic + shape('a' => int) -> a: int (required), open (unknown = dynamic). *)
+let dynamic_on_left_field_wins _ =
+  let s =
+    full_shape
+      "dyn_left"
+      (Norm.merge
+         ~on_error:None
+         [tdynamic; shape_ty (simple [("a", field tint)])]
+         dummy_env)
+  in
+  assert_required "a" (get_field s "a");
+  assert_bool "unknown should be dynamic" (is_dynamic s.s_unknown_value);
+  assert_prim "a" Aast.Tint (get_field s "a")
+
+let () =
+  "shapeSplatMergeTest"
+  >::: [
+         "disjoint_closed" >:: disjoint_closed;
+         "rightmost_wins" >:: rightmost_wins;
+         "required_optional_union" >:: required_optional_union;
+         "open_right_absorbs" >:: open_right_absorbs;
+         "bottom_absorbs" >:: bottom_absorbs;
+         "residual_tyvar" >:: residual_tyvar;
+         "dynamic_on_right_unions" >:: dynamic_on_right_unions;
+         "dynamic_on_left_field_wins" >:: dynamic_on_left_field_wins;
+         "prop_rightmost_wins" >:: prop_rightmost_wins;
+         "prop_keys_union" >:: prop_keys_union;
+         "prop_bottom_absorbs" >:: prop_bottom_absorbs;
+         "prop_empty_identity" >:: prop_empty_identity;
+         "prop_flatten_singleton" >:: prop_flatten_singleton;
+       ]
+  |> run_test_tt_main

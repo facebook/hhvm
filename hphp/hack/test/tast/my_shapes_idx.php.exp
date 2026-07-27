@@ -131,7 +131,7 @@
                  (Assign (((~null), [9:3-5], (Lvar ([9:3-5], $x))), None,
                     ((~?nothing), [9:8-18],
                      (Call
-                        { func = (((function<Tv>(shape(?'a' => nothing) $_): ~?nothing)), [9:8-14], (Id ([9:8-14], "\\my_idx"))); 
+                        { func = (((function<Tv>(shape(absent 'a') $_): ~?nothing)), [9:8-14], (Id ([9:8-14], "\\my_idx"))); 
                           targs = [((nothing), ([9:8-14], Hwildcard))]; 
                           args = [(Anormal ((dynamic), [9:15-17], (Lvar ([9:15-17], $s))))]; 
                           unpacked_arg = None }))

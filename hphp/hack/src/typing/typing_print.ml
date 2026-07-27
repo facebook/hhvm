@@ -568,29 +568,42 @@ module Full = struct
     let open_mixed = is_open_mixed penv shape_kind in
     let (fuel, fields_doc) =
       let f_field (shape_map_key, { sft_optional; sft_ty }) ~fuel =
+        let is_nothing = Typing_defs.is_nothing sft_ty in
         let key_delim =
           match shape_map_key with
           | Typing_defs.TSFlit_str _ -> text "'"
           | _ -> Nothing
         in
-        let (fuel, sft_ty_doc) = k ~fuel sft_ty in
-        let field_doc =
-          Concat
-            [
-              (if sft_optional then
-                text "?"
-              else
-                Nothing);
-              key_delim;
-              to_doc (Typing_defs.TShapeField.name shape_map_key);
-              key_delim;
-              Space;
-              text "=>";
-              Space;
-              sft_ty_doc;
-            ]
-        in
-        (fuel, field_doc)
+        if sft_optional && is_nothing then
+          let field_doc =
+            Concat
+              [
+                text "absent ";
+                key_delim;
+                to_doc (Typing_defs.TShapeField.name shape_map_key);
+                key_delim;
+              ]
+          in
+          (fuel, field_doc)
+        else
+          let (fuel, sft_ty_doc) = k ~fuel sft_ty in
+          let field_doc =
+            Concat
+              [
+                (if sft_optional then
+                  text "?"
+                else
+                  Nothing);
+                key_delim;
+                to_doc (Typing_defs.TShapeField.name shape_map_key);
+                key_delim;
+                Space;
+                text "=>";
+                Space;
+                sft_ty_doc;
+              ]
+          in
+          (fuel, field_doc)
       in
       shape_map ~fuel fdm f_field
     in
@@ -929,7 +942,19 @@ module Full = struct
         tyl
         ")"
     | Tshape (Shape_simple s) -> tshape ~fuel k to_doc penv s is_open_mixed_decl
-    | Tshape (Shape_splat _) -> failwith "Shape_splat unexpected"
+    | Tshape (Shape_splat { ss_elems }) ->
+      let (fuel, elems_docs) =
+        List.fold_left ss_elems ~init:(fuel, []) ~f:(fun (fuel, acc) ty ->
+            let (fuel, doc) = k ~fuel ty in
+            (fuel, (text "..." ^^ doc) :: acc))
+      in
+      ( fuel,
+        Concat
+          [
+            text "shape(";
+            Concat (List.intersperse ~sep:(text ", ") (List.rev elems_docs));
+            text ")";
+          ] )
     | Tclass_ptr x ->
       let (fuel, ty_doc) = k ~fuel x in
       let class_ptr_doc = Concat [text "class<"; ty_doc; text ">"] in
@@ -1258,7 +1283,113 @@ module Full = struct
         tyl
         ")"
     | Tshape (Shape_simple s) -> tshape ~fuel k to_doc env s is_open_mixed
-    | Tshape (Shape_splat _) -> failwith "Shape_splat unexpected"
+    | Tshape (Shape_splat { ss_elems }) ->
+      (* Expand tvars and try to normalize *)
+      let expanded =
+        List.map ss_elems ~f:(fun ty ->
+            snd (Typing_inference_env.expand_type env.inference_env ty))
+      in
+      let all_simple =
+        List.for_all expanded ~f:(fun ty ->
+            match get_node ty with
+            | Tshape (Shape_simple _) -> true
+            | _ -> false)
+      in
+      if all_simple then
+        (* Expand before checking: a field type may be a solved type variable
+           that resolves to nothing (e.g. an Opt fresh var from super-right
+           decomposition). nothing is the union identity, so drop it. *)
+        let is_nothing ty =
+          let ty =
+            snd (Typing_inference_env.expand_type env.inference_env ty)
+          in
+          match get_node ty with
+          | Tunion [] -> true
+          | _ -> false
+        in
+        let smart_union r tys =
+          let tys = List.filter tys ~f:(fun ty -> not (is_nothing ty)) in
+          match tys with
+          | [] -> mk (r, Tunion [])
+          | [ty] -> ty
+          | _ -> mk (r, Tunion tys)
+        in
+        let merged =
+          List.fold_left
+            expanded
+            ~init:
+              {
+                s_origin = Missing_origin;
+                s_unknown_value = mk (Reason.none, Tunion []);
+                s_fields = TShapeMap.empty;
+              }
+            ~f:(fun acc ty ->
+              match get_node ty with
+              | Tshape (Shape_simple right) ->
+                let all_keys =
+                  TShapeMap.fold
+                    (fun k2 _ a -> TShapeSet.add k2 a)
+                    acc.s_fields
+                    TShapeSet.empty
+                  |> TShapeMap.fold
+                       (fun k2 _ a -> TShapeSet.add k2 a)
+                       right.s_fields
+                in
+                let proj fields unk key =
+                  match TShapeMap.find_opt key fields with
+                  | Some fd -> fd
+                  | None -> { sft_optional = true; sft_ty = unk }
+                in
+                let merged_fields =
+                  TShapeSet.fold
+                    (fun key m ->
+                      let l = proj acc.s_fields acc.s_unknown_value key in
+                      let r = proj right.s_fields right.s_unknown_value key in
+                      let merged_fd =
+                        match (l.sft_optional, r.sft_optional) with
+                        | (_, false) ->
+                          { sft_optional = false; sft_ty = r.sft_ty }
+                        | (false, true) ->
+                          {
+                            sft_optional = false;
+                            sft_ty =
+                              smart_union Reason.none [l.sft_ty; r.sft_ty];
+                          }
+                        | (true, true) ->
+                          {
+                            sft_optional = true;
+                            sft_ty =
+                              smart_union Reason.none [l.sft_ty; r.sft_ty];
+                          }
+                      in
+                      TShapeMap.add key merged_fd m)
+                    all_keys
+                    TShapeMap.empty
+                in
+                {
+                  s_origin = Missing_origin;
+                  s_unknown_value =
+                    smart_union
+                      Reason.none
+                      [acc.s_unknown_value; right.s_unknown_value];
+                  s_fields = merged_fields;
+                }
+              | _ -> acc)
+        in
+        tshape ~fuel k to_doc env merged is_open_mixed
+      else
+        let (fuel, elems_docs) =
+          List.fold_left expanded ~init:(fuel, []) ~f:(fun (fuel, acc) ty ->
+              let (fuel, doc) = k ~fuel ty in
+              (fuel, (text "..." ^^ doc) :: acc))
+        in
+        ( fuel,
+          Concat
+            [
+              text "shape(";
+              Concat (List.intersperse ~sep:(text ", ") (List.rev elems_docs));
+              text ")";
+            ] )
     | Taccess (root_ty, id) ->
       let (fuel, root_ty_doc) = k ~fuel root_ty in
       let access_doc = Concat [root_ty_doc; text "::"; to_doc (snd id)] in

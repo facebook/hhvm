@@ -688,7 +688,60 @@ and localize_ ~(ety_env : expand_env) env (dty : decl_ty) :
                  s_unknown_value = shape_kind;
                  s_fields = tym;
                }) ) )
-  | Tshape (Shape_splat _) -> failwith "Shape_splat unexpected"
+  | Tshape (Shape_splat { ss_elems }) ->
+    let ety_env_targ = { ety_env with under_type_constructor = true } in
+    let ((env, ty_err_opt, all_cycles), localized_elems) =
+      List.fold_left
+        ss_elems
+        ~init:((env, None, []), [])
+        ~f:(fun ((env, ty_err_acc, cycles_acc), acc) elem ->
+          let ((env, ty_err_opt, cycles), elem_ty) =
+            localize ~ety_env:ety_env_targ env elem
+          in
+          let ty_err_acc =
+            Option.merge ty_err_acc ty_err_opt ~f:Typing_error.both
+          in
+          ((env, ty_err_acc, List.rev_append cycles cycles_acc), elem_ty :: acc))
+    in
+    let localized_elems = List.rev localized_elems in
+    let (env, norm_err_opt, normalized) =
+      Typing_shape_normalize.merge
+        ~on_error:ety_env.on_error
+        localized_elems
+        env
+    in
+    let ty_err_opt =
+      match (ty_err_opt, norm_err_opt) with
+      | (Some t1, Some t2) -> Some (Typing_error.both t1 t2)
+      | (Some t, _)
+      | (_, Some t) ->
+        Some t
+      | _ -> None
+    in
+    let (ty, sd) =
+      match normalized with
+      | Full (ty, sd) -> (ty, sd)
+      | Empty_shape sd ->
+        let shape =
+          {
+            s_origin = Missing_origin;
+            s_unknown_value = MakeType.nothing r;
+            s_fields = TShapeMap.empty;
+          }
+        in
+        (mk (r, Tshape (Shape_simple shape)), sd)
+      | Partial (ss_elems, sd) -> (mk (r, Tshape (Shape_splat { ss_elems })), sd)
+    in
+    (* If any element was [supportdyn<...>] (e.g. an open shape under sound
+       dynamic), the stripped, normalized result must be re-wrapped to stay
+       sound. [supportdyn] is idempotent so this is a no-op otherwise. *)
+    let ty =
+      if sd then
+        MakeType.supportdyn (get_reason ty) ty
+      else
+        ty
+    in
+    ((env, ty_err_opt, all_cycles), ty)
   | Tclass_ptr ty ->
     let ((env, ty_err_opt, cycles), ty) =
       localize ~ety_env:{ ety_env with under_type_constructor = true } env ty

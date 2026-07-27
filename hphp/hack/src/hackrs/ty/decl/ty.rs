@@ -345,7 +345,14 @@ walkable!(ShapeFieldType<R> => [ty]);
 
 #[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
 #[serde(bound = "R: Reason")]
-pub struct ShapeType<R: Reason>(pub Ty<R>, pub BTreeMap<TshapeFieldName, ShapeFieldType<R>>);
+pub struct ShapeTypeSimple<R: Reason>(pub Ty<R>, pub BTreeMap<TshapeFieldName, ShapeFieldType<R>>);
+
+#[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
+#[serde(bound = "R: Reason")]
+pub enum ShapeType<R: Reason> {
+    Simple(ShapeTypeSimple<R>),
+    Splat(Vec<Ty<R>>),
+}
 
 #[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
 #[serde(bound = "R: Reason")]
@@ -357,7 +364,11 @@ pub enum TupleExtra<R: Reason> {
     Tsplat(Ty<R>),
     Tvariadic(Ty<R>),
 }
-walkable!(ShapeType<R> => [0, 1]);
+walkable!(ShapeTypeSimple<R> => [0, 1]);
+walkable!(ShapeType<R> => {
+    Self::Simple(inner) => [inner],
+    Self::Splat(elems) => [elems],
+});
 
 #[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
 #[serde(bound = "R: Reason")]
@@ -475,10 +486,14 @@ impl<R: Reason> crate::visitor::Walkable<R> for Ty_<R> {
                 optional.accept(v);
                 extra.accept(v)
             }
-            Tshape(kind_and_fields) => {
-                let ShapeType(_, fields) = &**kind_and_fields;
-                fields.accept(v)
-            }
+            Tshape(kind_and_fields) => match &**kind_and_fields {
+                ShapeType::Simple(ShapeTypeSimple(_, fields)) => fields.accept(v),
+                ShapeType::Splat(elems) => {
+                    for elem in elems {
+                        elem.accept(v);
+                    }
+                }
+            },
             TvecOrDict(key_and_val_tys) => {
                 let (kty, vty) = &**key_and_val_tys;
                 kty.accept(v);

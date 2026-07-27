@@ -119,8 +119,7 @@
                 ((~?nothing), [6:3-23],
                  (Call
                     { func =
-                      (((function<Tv>(?shape(?'x' => nothing, ...) $shape, arraykey $index)[]: null)), [6:3-14],
-                       (Class_const (((Shapes), [6:3-9], (CI ([6:3-9], "\\HH\\Shapes"))), ([6:11-14], "idx"))));
+                      (((function<Tv>(?shape(absent 'x', ...) $shape, arraykey $index)[]: null)), [6:3-14], (Class_const (((Shapes), [6:3-9], (CI ([6:3-9], "\\HH\\Shapes"))), ([6:11-14], "idx"))));
                       targs = [((nothing), ([6:11-14], Hwildcard))]; 
                       args = [(Anormal ((dynamic), [6:15-17], (Lvar ([6:15-17], $p)))); (Anormal ((string), [6:19-22], (String "x")))]; 
                       unpacked_arg = None }))));

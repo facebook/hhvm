@@ -261,31 +261,45 @@ impl<R: Reason> ToOcamlRep for ShapeFieldType<R> {
 
 impl<R: Reason> ToOcamlRep for ShapeType<R> {
     fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&'a self, alloc: &'a A) -> ocamlrep::Value<'a> {
-        let Self(shape_kind, shape_field_type_map) = &self;
-        let map = if shape_field_type_map.is_empty() {
-            ocamlrep::Value::int(0)
-        } else {
-            let len = shape_field_type_map.len();
-            let mut iter = shape_field_type_map.iter().map(|(k, v)| {
-                let k = shape_field_name_to_ocamlrep(alloc, k, &v.field_name_pos);
-                (k, v.to_ocamlrep(alloc))
-            });
-            let (map, _) = ocamlrep::sorted_iter_to_ocaml_map(&mut iter, alloc, len);
-            map
-        };
+        match self {
+            ShapeType::Simple(ShapeTypeSimple(shape_kind, shape_field_type_map)) => {
+                let map = if shape_field_type_map.is_empty() {
+                    ocamlrep::Value::int(0)
+                } else {
+                    let len = shape_field_type_map.len();
+                    let mut iter = shape_field_type_map.iter().map(|(k, v)| {
+                        let k = shape_field_name_to_ocamlrep(alloc, k, &v.field_name_pos);
+                        (k, v.to_ocamlrep(alloc))
+                    });
+                    let (map, _) = ocamlrep::sorted_iter_to_ocaml_map(&mut iter, alloc, len);
+                    map
+                };
 
-        // Build the ShapeTypeSimple record (3 fields: origin, unknown_value, fields)
-        let mut simple_block = alloc.block_with_size(3);
-        // Note: we always set decl shapes to Missing_origin (0) as it is only for type aliases
-        alloc.set_field(&mut simple_block, 0, ocamlrep::Value::int(0));
-        alloc.set_field(&mut simple_block, 1, alloc.add(shape_kind));
-        alloc.set_field(&mut simple_block, 2, map);
-        let simple = simple_block.build();
+                // Build the ShapeTypeSimple record (3 fields: origin, unknown_value, fields)
+                let mut simple_block = alloc.block_with_size(3);
+                // Note: we always set decl shapes to Missing_origin (0) as it is only for type aliases
+                alloc.set_field(&mut simple_block, 0, ocamlrep::Value::int(0));
+                alloc.set_field(&mut simple_block, 1, alloc.add(shape_kind));
+                alloc.set_field(&mut simple_block, 2, map);
+                let simple = simple_block.build();
 
-        // Wrap in Shape_simple variant (tag 0)
-        let mut variant_block = alloc.block_with_size_and_tag(1usize, 0u8);
-        alloc.set_field(&mut variant_block, 0, simple);
-        variant_block.build()
+                // Wrap in Shape_simple variant (tag 0)
+                let mut variant_block = alloc.block_with_size_and_tag(1usize, 0u8);
+                alloc.set_field(&mut variant_block, 0, simple);
+                variant_block.build()
+            }
+            ShapeType::Splat(elems) => {
+                // Build the ShapeTypeSplat record (1 field: ss_elems)
+                let mut splat_record = alloc.block_with_size(1);
+                alloc.set_field(&mut splat_record, 0, alloc.add(elems));
+                let splat = splat_record.build();
+
+                // Wrap in Shape_splat variant (tag 1)
+                let mut variant_block = alloc.block_with_size_and_tag(1usize, 1u8);
+                alloc.set_field(&mut variant_block, 0, splat);
+                variant_block.build()
+            }
+        }
     }
 }
 
@@ -299,7 +313,7 @@ impl<R: Reason> FromOcamlRep for ShapeType<R> {
                 ocamlrep::from::expect_block_size(variant_block, 1)?;
                 let inner: ocamlrep::Value<'_> = variant_block[0];
                 let block = ocamlrep::from::expect_tuple(inner, 3)?;
-                Ok(ShapeType(
+                Ok(ShapeType::Simple(ShapeTypeSimple(
                     ocamlrep::from::field(block, 1)?,
                     ocamlrep::vec_from_ocaml_map(block[2])?
                         .into_iter()
@@ -333,10 +347,14 @@ impl<R: Reason> FromOcamlRep for ShapeType<R> {
                             ),
                         })
                         .collect(),
-                ))
+                )))
             }
             1 => {
-                panic!("Shape_splat not yet supported")
+                // Shape_splat(ShapeTypeSplat { ss_elems })
+                ocamlrep::from::expect_block_size(variant_block, 1)?;
+                let inner: ocamlrep::Value<'_> = variant_block[0];
+                let block = ocamlrep::from::expect_tuple(inner, 1)?;
+                Ok(ShapeType::Splat(ocamlrep::from::field(block, 0)?))
             }
             t => Err(ocamlrep::FromError::BlockTagOutOfRange { max: 1, actual: t }),
         }

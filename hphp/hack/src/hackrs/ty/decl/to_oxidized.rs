@@ -162,23 +162,29 @@ impl<R: Reason> ToOxidized for Ty_<R> {
                     extra,
                 })
             }
-            Ty_::Tshape(shape) => {
-                let mut shape_fields = TShapeMap::new();
-                let box ShapeType(shape_kind, shape_field_type_map) = shape;
-                for (k, v) in shape_field_type_map.into_iter() {
-                    let k = oxidize_shape_field_name(k, v.field_name_pos.clone());
-                    shape_fields.insert(TShapeField(k), v.to_oxidized());
+            Ty_::Tshape(shape) => match *shape {
+                ShapeType::Simple(ShapeTypeSimple(shape_kind, shape_field_type_map)) => {
+                    let mut shape_fields = TShapeMap::new();
+                    for (k, v) in shape_field_type_map.into_iter() {
+                        let k = oxidize_shape_field_name(k, v.field_name_pos.clone());
+                        shape_fields.insert(TShapeField(k), v.to_oxidized());
+                    }
+                    let shape_kind = shape_kind.to_oxidized();
+                    let shape_origin = typing_defs::TypeOrigin::MissingOrigin;
+                    typing_defs::Ty_::Tshape(typing_defs::ShapeType::ShapeSimple(
+                        typing_defs::ShapeTypeSimple {
+                            origin: shape_origin,
+                            unknown_value: shape_kind,
+                            fields: shape_fields,
+                        },
+                    ))
                 }
-                let shape_kind = shape_kind.to_oxidized();
-                let shape_origin = typing_defs::TypeOrigin::MissingOrigin;
-                typing_defs::Ty_::Tshape(typing_defs::ShapeType::ShapeSimple(
-                    typing_defs::ShapeTypeSimple {
-                        origin: shape_origin,
-                        unknown_value: shape_kind,
-                        fields: shape_fields,
-                    },
-                ))
-            }
+                ShapeType::Splat(elems) => typing_defs::Ty_::Tshape(
+                    typing_defs::ShapeType::ShapeSplat(typing_defs::ShapeTypeSplat {
+                        ss_elems: elems.into_iter().map(|t| t.to_oxidized()).collect(),
+                    }),
+                ),
+            },
             Ty_::Tgeneric(name) => typing_defs::Ty_::Tgeneric(name.to_oxidized()),
             Ty_::Tunion(x) => typing_defs::Ty_::Tunion(x.to_oxidized()),
             Ty_::Tintersection(x) => typing_defs::Ty_::Tintersection(x.to_oxidized()),

@@ -1,0 +1,3 @@
+File "normalize_nested_generic.php", line 11, characters 3-13:
+  shape(...shape('x' => int, 'y' => bool), ...T) where T as shape(...)
+No errors

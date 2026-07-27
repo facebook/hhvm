@@ -1,0 +1,8 @@
+ERROR: File "error_sole_splat_missing.php", line 5, characters 18-19:
+Invalid type hint (Typing[4419])
+ERROR: File "error_sole_splat_missing.php", line 5, characters 36-37:
+Invalid type hint (Typing[4419])
+ERROR: File "error_sole_splat_missing.php", line 10, characters 14-15:
+Invalid type hint (Typing[4419])
+ERROR: File "error_sole_splat_missing.php", line 10, characters 32-33:
+Invalid type hint (Typing[4419])

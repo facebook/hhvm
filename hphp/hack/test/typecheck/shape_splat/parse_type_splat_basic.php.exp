@@ -1,3 +1,3 @@
 File "parse_type_splat_basic.php", line 8, characters 3-13:
-  shape('z' => bool)
+  shape('x' => int, 'y' => string, 'z' => bool)
 No errors

@@ -176,7 +176,8 @@ and instantiate_ subst x =
            (* TODO(shapes) s_unknown_value should likely be instantiated *)
            s_fields = fdm;
          })
-  | Tshape (Shape_splat _) -> failwith "Shape_splat unexpected"
+  | Tshape (Shape_splat { ss_elems }) ->
+    Tshape (Shape_splat { ss_elems = List.map ss_elems ~f:(instantiate subst) })
   | Tclass_ptr ty -> Tclass_ptr (instantiate subst ty)
 
 and instantiate_tuple_extra subst e =

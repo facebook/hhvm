@@ -1,0 +1,16 @@
+ERROR: File "error_splat_recursive.php", line 5, characters 6-9:
+Cyclic type definition (Typing[4014])
+  File "error_splat_recursive.php", line 5, characters 22-25:
+  Cyclic use is here
+ERROR: File "error_splat_recursive.php", line 5, characters 13-38:
+Invalid type hint (Typing[4419])
+  File "error_splat_recursive.php", line 5, characters 22-25:
+  Only shapes can be unpacked with `...` inside a shape type
+ERROR: File "error_splat_recursive.php", line 5, characters 22-25:
+Invalid type hint (Typing[4419])
+  File "error_splat_recursive.php", line 5, characters 22-25:
+  Only shapes can be unpacked with `...` inside a shape type
+ERROR: File "error_splat_recursive.php", line 7, characters 15-18:
+Invalid type hint (Typing[4419])
+  File "error_splat_recursive.php", line 5, characters 22-25:
+  Only shapes can be unpacked with `...` inside a shape type

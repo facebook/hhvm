@@ -1957,6 +1957,7 @@ and Secondary : sig
         parent_pos: Pos_or_decl.t;
       }
     | Unsupported_refinement of Pos_or_decl.t
+    | Splat_not_a_shape of Pos_or_decl.t
     | Missing_class_constant of {
         pos: Pos_or_decl.t;
         class_name: string;
@@ -2290,6 +2291,7 @@ end = struct
         parent_pos: Pos_or_decl.t;
       }
     | Unsupported_refinement of Pos_or_decl.t
+    | Splat_not_a_shape of Pos_or_decl.t
     | Missing_class_constant of {
         pos: Pos_or_decl.t;
         class_name: string;

@@ -4550,7 +4550,16 @@ end = struct
                 ~this_ty:None
                 ~lhs:{ sub_supportdyn; ty_sub = unknown_fields_type }
                 ~rhs:{ super_like = false; super_supportdyn = false; ty_super }
-        | (_, Tshape (Shape_splat _)) -> failwith "Shape_splat unexpected"
+        | (_, Tshape (Shape_splat _)) ->
+          (* A residual shape splat survives localization only when it cannot be
+             flattened into a simple shape (splatting a type parameter), which
+             requires the still-experimental shape-splat subtyping not present on
+             this commit. We don't support deciding such propositions here, so
+             rather than crashing we declare the proposition invalid. The only
+             caller exercising this path is the [supportdyn] membership test in
+             [make_supportdyn], which uses the boolean result to decide whether to
+             wrap the type and reports no error of its own. *)
+          invalid ~fail env
         (* class<T> <D: dynamic by exposure to string *)
         | (_, Tclass_ptr _) when subtype_env.Subtype_env.class_sub_classname ->
           valid env

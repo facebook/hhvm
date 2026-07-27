@@ -54,7 +54,21 @@ impl<R: Reason> Display for Ty_<R> {
             Toption(ty) => write!(f, "?{}", ty),
             Taccess(ta) => write!(f, "{}::{}", ta.ty, ta.type_const.id()),
             Tfun(ft) => write!(f, "{}", ft),
-            Tshape(params) => tshape(f, &params.0, &params.1),
+            Tshape(params) => match &**params {
+                ShapeType::Simple(ShapeTypeSimple(kind, fields)) => tshape(f, kind, fields),
+                ShapeType::Splat(elems) => {
+                    write!(f, "shape(")?;
+                    let mut is_first = true;
+                    for elem in elems {
+                        if !is_first {
+                            write!(f, ", ")?;
+                        }
+                        is_first = false;
+                        write!(f, "...{}", elem)?;
+                    }
+                    write!(f, ")")
+                }
+            },
             Ttuple(tup) => ttuple(f, &tup.0, &tup.1, &tup.2),
             Trefinement(r) => {
                 write!(f, "({} with ", r.ty)?;

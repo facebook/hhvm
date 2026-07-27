@@ -1,0 +1,9 @@
+File "decl_lowering_consistency.php", line 21, characters 3-33:
+  shape('a' => mixed, 'y' => string, ...)
+File "decl_lowering_consistency.php", line 32, characters 3-27:
+  shape('a' => mixed, ...)
+File "decl_lowering_consistency.php", line 41, characters 3-35:
+  shape('a' => mixed, 'y' => string, ...)
+File "decl_lowering_consistency.php", line 52, characters 3-37:
+  shape('a' => int, 'y' => string)
+No errors

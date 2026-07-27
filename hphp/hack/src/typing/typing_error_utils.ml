@@ -6795,6 +6795,12 @@ end = struct
     in
     create ~code:Error_code.UnsupportedRefinement ~reasons ()
 
+  let splat_not_a_shape pos =
+    let reasons =
+      lazy [(pos, "Only shapes can be unpacked with `...` inside a shape type")]
+    in
+    create ~code:Error_code.InvalidTypeHint ~reasons ()
+
   let missing_class_constant pos class_name const_name =
     let reasons =
       lazy
@@ -7115,6 +7121,7 @@ end = struct
       Eval_result.single (override_no_default_typeconst pos parent_pos)
     | Unsupported_refinement pos ->
       Eval_result.single (unsupported_refinement pos)
+    | Splat_not_a_shape pos -> Eval_result.single (splat_not_a_shape pos)
     | Missing_class_constant { pos; class_name; const_name } ->
       Eval_result.single (missing_class_constant pos class_name const_name)
     | Invalid_refined_const_kind

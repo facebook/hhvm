@@ -1,0 +1,9 @@
+File "dynamic_splat.php", line 8, characters 3-13:
+  shape(dynamic...)
+File "dynamic_splat.php", line 13, characters 3-13:
+  shape('x' => int, dynamic...)
+File "dynamic_splat.php", line 19, characters 3-13:
+  shape('x' => ~int, dynamic...)
+File "dynamic_splat.php", line 26, characters 3-13:
+  shape('x' => ~int, 'y' => ~string, dynamic...)
+No errors

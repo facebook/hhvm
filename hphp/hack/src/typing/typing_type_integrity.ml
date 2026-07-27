@@ -322,7 +322,18 @@ and check_type_integrity
     TShapeMap.iter
       (fun _ sft -> check ~should_check_package_boundary sft.sft_ty)
       map
-  | Tshape (Shape_splat _) -> failwith "Shape_splat unexpected"
+  | Tshape (Shape_splat { ss_elems }) ->
+    (* Splat elements are shapes whose field types are runtime-enforced under
+       `as` just like simple shapes, so propagate the boundary reason the same
+       way (see the `Shape_simple` case above) to keep the same guarantees. *)
+    let should_check_package_boundary =
+      match should_check_package_boundary with
+      | `Yes Typing_error.Primary.Package.As_expression
+      | `LintOnly ->
+        should_check_package_boundary
+      | _ -> `No
+    in
+    List.iter ss_elems ~f:(check ~should_check_package_boundary)
   | Tfun ({ ft_params; ft_ret; _ } : _ fun_type) ->
     (* FIXME shall we inspect tparams and where_constraints? *)
     check ~should_check_package_boundary:`No ft_ret;

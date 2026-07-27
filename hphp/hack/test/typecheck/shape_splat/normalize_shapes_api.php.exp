@@ -1,0 +1,12 @@
+File "normalize_shapes_api.php", line 9, characters 3-13:
+  ?int
+File "normalize_shapes_api.php", line 14, characters 3-13:
+  int
+File "normalize_shapes_api.php", line 19, characters 3-13:
+  shape('y' => string, 'z' => bool)
+File "normalize_shapes_api.php", line 24, characters 3-13:
+  dict<string, (int | bool | string)>
+ERROR: File "normalize_shapes_api.php", line 18, characters 9-40:
+You are using the return value of a `void` function (Typing[4119])
+  File "Shapes.hhi", line 65, characters 10-13:
+  A `void` function doesn't return a value.

@@ -24,6 +24,7 @@ use ty::decl::Typeconst;
 use ty::decl::WhereConstraint;
 use ty::decl::subst::Subst;
 use ty::decl::ty::ShapeType;
+use ty::decl::ty::ShapeTypeSimple;
 use ty::decl::ty::TupleExtra;
 use ty::decl::ty::TupleType;
 use ty::reason::Reason;
@@ -173,24 +174,31 @@ impl<'a, R: Reason> Substitution<'a, R> {
                         .collect::<Box<[_]>>(),
                 )))
             }
-            Ty_::Tshape(params) => {
-                let ShapeType(ref shape_kind, ref fdm) = **params;
-                let shape_kind = self.instantiate(shape_kind);
-                let fdm = fdm
-                    .iter()
-                    .map(|(f, sft)| {
-                        (
-                            *f,
-                            ShapeFieldType {
-                                field_name_pos: sft.field_name_pos.clone(),
-                                ty: self.instantiate(&sft.ty),
-                                optional: sft.optional,
-                            },
-                        )
-                    })
-                    .collect::<BTreeMap<_, _>>();
-                Ty_::Tshape(Box::new(ShapeType(shape_kind, fdm)))
-            }
+            Ty_::Tshape(params) => match &**params {
+                ShapeType::Simple(ShapeTypeSimple(shape_kind, fdm)) => {
+                    let shape_kind = self.instantiate(shape_kind);
+                    let fdm = fdm
+                        .iter()
+                        .map(|(f, sft)| {
+                            (
+                                *f,
+                                ShapeFieldType {
+                                    field_name_pos: sft.field_name_pos.clone(),
+                                    ty: self.instantiate(&sft.ty),
+                                    optional: sft.optional,
+                                },
+                            )
+                        })
+                        .collect::<BTreeMap<_, _>>();
+                    Ty_::Tshape(Box::new(ShapeType::Simple(ShapeTypeSimple(
+                        shape_kind, fdm,
+                    ))))
+                }
+                ShapeType::Splat(elems) => {
+                    let elems = elems.iter().map(|ty| self.instantiate(ty)).collect();
+                    Ty_::Tshape(Box::new(ShapeType::Splat(elems)))
+                }
+            },
             Ty_::Trefinement(tr) => Ty_::Trefinement(Box::new(TrefinementType {
                 ty: self.instantiate(&tr.ty),
                 refinement: ClassRefinement {

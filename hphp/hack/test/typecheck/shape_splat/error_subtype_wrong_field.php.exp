@@ -1,0 +1,6 @@
+ERROR: File "error_subtype_wrong_field.php", line 11, characters 15-16:
+Invalid argument (Typing[4110])
+  File "error_subtype_wrong_field.php", line 8, characters 35-40:
+  Expected `string`
+  File "error_subtype_wrong_field.php", line 4, characters 27-29:
+  But got `int`

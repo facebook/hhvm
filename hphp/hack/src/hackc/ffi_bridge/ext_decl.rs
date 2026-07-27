@@ -28,6 +28,7 @@ use oxidized::typing_defs::TypedefTypeAssignment;
 use oxidized::typing_defs_core::FunParams;
 use oxidized::typing_defs_core::ShapeType;
 use oxidized::typing_defs_core::ShapeTypeSimple;
+use oxidized::typing_defs_core::ShapeTypeSplat;
 use oxidized::typing_defs_core::Tparam;
 use oxidized::typing_defs_core::TshapeFieldName;
 use oxidized::typing_defs_core::TupleType;
@@ -791,8 +792,17 @@ fn build_type_structure(outer_ty: &Ty) -> ExtDeclTypeStructure {
                 subtypes: shape_fields,
             }
         }
-        Ty_::Tshape(ShapeType::ShapeSplat(_)) => {
-            panic!("Shape_splat not yet supported")
+        Ty_::Tshape(ShapeType::ShapeSplat(ShapeTypeSplat { ss_elems })) => {
+            let subtypes = ss_elems
+                .iter()
+                .map(build_unnamed_type_structure_subtype)
+                .collect();
+            ExtDeclTypeStructure {
+                type_: extract_type_name(outer_ty),
+                kind: String::from("shape"),
+                nullable: false,
+                subtypes,
+            }
         }
         Ty_::TvecOrDict(tk, tv) => ExtDeclTypeStructure {
             type_: extract_type_name(outer_ty),

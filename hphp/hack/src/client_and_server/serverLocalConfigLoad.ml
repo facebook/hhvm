@@ -827,6 +827,9 @@ let load_
   let manifold_local_port =
     int_opt Config_keys.Hhconf.saved_state_manifold_local_port config
   in
+  let database_shard_name =
+    string_opt Config_keys.Hhconf.saved_state_database_shard_name config
+  in
   let rust_provider_backend =
     bool_if_min_version
       Config_keys.Hhconf.rust_provider_backend
@@ -1045,6 +1048,7 @@ let load_
           {
             GlobalOptions.saved_state_manifold_api_key;
             manifold_local_port;
+            database_shard_name;
             log_saved_state_age_and_distance;
             use_manifold_cython_client;
             zstd_decompress_by_file;

@@ -54,7 +54,6 @@
 
 namespace HPHP {
 
-static char s_hugePath[256];
 constexpr size_t maxErrorMsgLen = 512;
 static char s_errorMsg[maxErrorMsgLen];
 
@@ -92,68 +91,6 @@ static void record_err_msg(const char* msg = nullptr) {
   strerror_r(errno, s_errorMsg + len, maxErrorMsgLen - len);
 #endif
 #endif
-}
-
-const char* get_hugetlb_err_msg() {
-  return s_errorMsg;
-}
-
-// Return the page size for hugetlbfs mount point, or 0 if anything goes wrong:
-// e.g., mount point doesn't exist, mount point isn't hugetlbfs.
-static size_t get_hugepage_size(const char* path) {
-#ifdef __linux__
-  struct statfs64 sb;
-  if (statfs64(path, &sb) == 0) {
-    // Magic number defined in Linux kernel: include/uapi/linux/magic.h
-    auto constexpr HUGETLBFS_MAGIC = 0x958458f6;
-    if (sb.f_type == HUGETLBFS_MAGIC) {
-      return sb.f_bsize;
-    } else {
-      snprintf(s_errorMsg, maxErrorMsgLen,
-               "path %s isn't mounted as hugetlbfs", path);
-    }
-  } else {
-    snprintf(s_errorMsg, maxErrorMsgLen,
-             "statfs64() for %s failed: ", path);
-    record_err_msg();
-  }
-#endif
-  return 0;
-}
-
-bool set_hugetlbfs_path(const char* path) {
-  if (get_hugepage_size(path) != size1g) return false;
-  size_t len = strlen(path);
-  if (len + 8 >= sizeof(s_hugePath)) return false;
-  memcpy(s_hugePath, path, len);
-  *reinterpret_cast<int*>(s_hugePath + len) = 0;
-  if (s_hugePath[len - 1] != '/') {
-    s_hugePath[len] = '/';
-  }
-  return true;
-}
-
-bool find_hugetlbfs_path() {
-#ifdef __linux__
-  auto mounts = fopen("/proc/mounts", "r");
-  if (!mounts) return false;
-  // Search the file for lines like the following
-  // none /dev/hugepages hugetlbfs seclabel,relatime...
-  char line[4096];
-  char path[4096];
-  char option[4096];
-  while (fgets(line, sizeof(line), mounts)) {
-    if (sscanf(line, "%*s %s hugetlbfs %s", path, option) == 2) {
-      // It matches hugetlbfs, check page size and save results.
-      if (set_hugetlbfs_path(path)) {
-        fclose(mounts);
-        return true;
-      }
-    }
-  }
-  fclose(mounts);
-#endif
-  return false;
 }
 
 HugePageInfo read_hugepage_info(size_t pagesize, int node /* = -1 */) {
@@ -256,29 +193,6 @@ HugePageInfo get_huge2m_info(int node /* = -1 */) {
   return read_hugepage_info(size2m, node);
 }
 
-bool auto_mount_hugetlbfs() {
-#ifdef __linux__
-  auto const info = get_huge1g_info();
-  if (info.nr_hugepages <= 0) return false; // No page reserved.
-
-  const char* hugePath = "/tmp/huge1g";
-  if (mkdir(hugePath, 0777)) {
-    if (errno != EEXIST) {
-      snprintf(s_errorMsg, maxErrorMsgLen, "Failed to mkdir %s: ", hugePath);
-      record_err_msg();
-      return false;
-    }
-  }
-  if (mount("none", hugePath, "hugetlbfs", 0, "pagesize=1G,mode=0777")) {
-    record_err_msg("Failed to mount hugetlbfs with 1G page size: ");
-    return false;
-  }
-  return set_hugetlbfs_path(hugePath);
-#else
-  return false;
-#endif
-}
-
 #ifdef __linux__
 // Beware that MAP_FIXED overrides existing mapping silently.  If the specified
 // memory was mapped in, it may no longer be after this function fails.
@@ -317,60 +231,12 @@ NEVER_INLINE void* mmap_2m_impl(void* addr, bool fixed) {
 }
 
 inline void* mmap_1g_impl(void* addr, bool map_fixed) {
-  void* ret = MAP_FAILED;
-  if (s_hugePath[0] != 0) {
-    int fd = -1;
-    size_t dirNameLen = strlen(s_hugePath);
-    assert(dirNameLen > 0 && s_hugePath[dirNameLen - 1] == '/');
-    for (char i = '0'; i <= '9'; ++i) {
-      s_hugePath[dirNameLen] = i;
-      // We don't put code on 1G huge pages, so no execute permission.
-      fd = open(s_hugePath, O_CREAT | O_EXCL | O_RDWR, 0666);
-      // Retry a few times if the file already exists.
-      if (fd < 0) {
-        if (errno == EEXIST) {
-          errno = 0;
-          continue;
-        } else {
-          snprintf(s_errorMsg, maxErrorMsgLen,
-                   "Failed to create hugetlbfs file %s: ", s_hugePath);
-          record_err_msg();
-          s_hugePath[dirNameLen] = 0;
-          return nullptr;
-        }
-      } else {
-        unlink(s_hugePath);
-      }
-      break;
-    }
-
-    s_hugePath[dirNameLen] = 0;
-    if (fd < 0) {
-      snprintf(s_errorMsg, maxErrorMsgLen,
-               "Failed to create a hugetlbfs file in %s: "
-               "it seems already full of files", s_hugePath);
-      return nullptr;
-    }
-
-    ret = mmap(addr, size1g, PROT_READ | PROT_WRITE,
-               MAP_SHARED | (map_fixed ? MAP_FIXED : 0),
-               fd, 0);
-    if (ret == MAP_FAILED) {
-      snprintf(s_errorMsg, maxErrorMsgLen,
-               "mmap() for hugetlbfs file failed: ");
-      record_err_msg();
-    }
-    close(fd);
-  }
-
+  int flags = MAP_SHARED | MAP_ANONYMOUS | MAP_HUGETLB | MAP_HUGE_1GB |
+    (map_fixed ? MAP_FIXED : 0);
+  void* ret = mmap(addr, size1g, PROT_READ | PROT_WRITE, flags, -1, 0);
   if (ret == MAP_FAILED) {
-    int flags = MAP_SHARED | MAP_ANONYMOUS | MAP_HUGETLB | MAP_HUGE_1GB |
-      (map_fixed ? MAP_FIXED : 0);
-    ret = mmap(addr, size1g, PROT_READ | PROT_WRITE, flags, -1, 0);
-    if (ret == MAP_FAILED) {
-      record_err_msg("mmap() with MAP_HUGE_1GB failed: ");
-      return nullptr;
-    }
+    record_err_msg("mmap() with MAP_HUGE_1GB failed: ");
+    return nullptr;
   }
 
   // Didn't get the desired address.  This can happen is map_fixed is false.

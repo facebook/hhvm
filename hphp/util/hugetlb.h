@@ -28,19 +28,6 @@ constexpr size_t size4k = 1ul << 12;
 // thread-safe.  They should execute during program initialization where only
 // one thread is running.
 
-// Specify the mount point of hugetlbfs with 1G page size.  Returns whether the
-// operation succeeded, i.e., the specified path is accessible, and is on a
-// hugetlbfs with 1G page size.
-bool set_hugetlbfs_path(const char* path);
-
-// Try to find a mount point for the 1G hugetlbfs automatically.  Return whether
-// we found one.
-bool find_hugetlbfs_path();
-
-// Try to create a temporary directory and mount a hugetlbfs with 1G page size
-// there.  Return whether the operation succeeded.
-bool auto_mount_hugetlbfs();
-
 // Get a huge page from NUMA node `node`, and return the mapped address
 // specified by `addr` or nullptr on failure.  If `addr` is nullptr, the system
 // will choose a proper address.  If the address range [addr, addr+1G) already
@@ -75,9 +62,6 @@ struct HugePageInfo {
 // nodes.
 HugePageInfo get_huge1g_info(int node = -1);
 HugePageInfo get_huge2m_info(int node = -1);
-
-// Get error message for hugetlb mapping.
-const char* get_hugetlb_err_msg();
 
 // Get number of huge pages that has been mapped in this process.
 unsigned num_1g_pages();

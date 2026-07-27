@@ -680,13 +680,6 @@ struct JEMallocInitializer {
     auto const origLow1G = low_1g_pages;
     if (remaining == 0) {
       low_1g_pages = high_1g_pages = 0;
-    } else if (low_1g_pages > 0 || high_1g_pages > 0) {
-      KernelVersion version;
-      if (version.m_major < 3 ||
-          (version.m_major == 3 && version.m_minor < 9)) {
-        // Older kernels need an explicit hugetlbfs mount point.
-        find_hugetlbfs_path() || auto_mount_hugetlbfs();
-      }
     }
 
     if (low_1g_pages > 0) {

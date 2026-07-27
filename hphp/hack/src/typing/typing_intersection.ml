@@ -374,18 +374,20 @@ and intersect_ env (rec_tracker : Recursion_tracker.t) ~r ty1 ty2 =
                   ]
               | ( ( _,
                     Tshape
-                      {
-                        s_origin = _;
-                        s_unknown_value = shape_kind1;
-                        s_fields = fdm1;
-                      } ),
+                      (Shape_simple
+                        {
+                          s_origin = _;
+                          s_unknown_value = shape_kind1;
+                          s_fields = fdm1;
+                        }) ),
                   ( _,
                     Tshape
-                      {
-                        s_origin = _;
-                        s_unknown_value = shape_kind2;
-                        s_fields = fdm2;
-                      } ) ) ->
+                      (Shape_simple
+                        {
+                          s_origin = _;
+                          s_unknown_value = shape_kind2;
+                          s_fields = fdm2;
+                        }) ) ) ->
                 let (env, shape_kind, fdm) =
                   intersect_shapes
                     env
@@ -398,11 +400,15 @@ and intersect_ env (rec_tracker : Recursion_tracker.t) ~r ty1 ty2 =
                   mk
                     ( r,
                       Tshape
-                        {
-                          s_origin = Missing_origin;
-                          s_unknown_value = shape_kind;
-                          s_fields = fdm;
-                        } ) )
+                        (Shape_simple
+                           {
+                             s_origin = Missing_origin;
+                             s_unknown_value = shape_kind;
+                             s_fields = fdm;
+                           }) ) )
+              | ((_, Tshape (Shape_splat _)), _)
+              | (_, (_, Tshape (Shape_splat _))) ->
+                (env, mk (r, Tintersection [ty1; ty2]))
               | ((_, Tclass_ptr ty_c1), (_, Tclass_ptr ty_c2)) ->
                 let (env, ty) = intersect ~r env rec_tracker ty_c1 ty_c2 in
                 (env, mk (r, Tclass_ptr ty))

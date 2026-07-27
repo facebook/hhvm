@@ -243,8 +243,12 @@ and union_ env ?reason ~approx_cancel_neg ty1 ty2 =
        cases correctly. Open shapes need subtype checks for canonical
        representation. *)
     match (get_node ty1, get_node ty2) with
-    | ( Tshape { s_origin = _; s_unknown_value = sk1; s_fields = fdm1 },
-        Tshape { s_origin = _; s_unknown_value = sk2; s_fields = fdm2 } )
+    | ( Tshape
+          (Shape_simple
+            { s_origin = _; s_unknown_value = sk1; s_fields = fdm1 }),
+        Tshape
+          (Shape_simple
+            { s_origin = _; s_unknown_value = sk2; s_fields = fdm2 }) )
       when is_nothing sk1 && is_nothing sk2 ->
       let r =
         match reason with
@@ -424,11 +428,14 @@ and simplify_non_subtype_union ~approx_cancel_neg env ty1 ty2 r =
         (env, None)
     | ( ( r1,
           Tshape
-            { s_origin = _; s_unknown_value = shape_kind1; s_fields = fdm1 } ),
+            (Shape_simple
+              { s_origin = _; s_unknown_value = shape_kind1; s_fields = fdm1 })
+        ),
         ( r2,
           Tshape
-            { s_origin = _; s_unknown_value = shape_kind2; s_fields = fdm2 } )
-      ) ->
+            (Shape_simple
+              { s_origin = _; s_unknown_value = shape_kind2; s_fields = fdm2 })
+        ) ) ->
       let (env, ty) =
         union_shapes
           ~approx_cancel_neg
@@ -749,11 +756,12 @@ and union_shapes
     (* Fast path: physically identical field maps need no per-field work *)
     ( env,
       Tshape
-        {
-          s_origin = Missing_origin;
-          s_unknown_value = shape_kind;
-          s_fields = fdm1;
-        } )
+        (Shape_simple
+           {
+             s_origin = Missing_origin;
+             s_unknown_value = shape_kind;
+             s_fields = fdm1;
+           }) )
   else
     (* Use TShapeMap.merge (Stdlib.Map.merge) instead of the list-based
        merge_env. This avoids O(n log n) overhead from bindings + find_opt
@@ -816,11 +824,12 @@ and union_shapes
     in
     ( !env_ref,
       Tshape
-        {
-          s_origin = Missing_origin;
-          s_unknown_value = shape_kind;
-          s_fields = fdm;
-        } )
+        (Shape_simple
+           {
+             s_origin = Missing_origin;
+             s_unknown_value = shape_kind;
+             s_fields = fdm;
+           }) )
 
 and union_shape_kind ~approx_cancel_neg env shape_kind1 shape_kind2 =
   union ~approx_cancel_neg env shape_kind1 shape_kind2

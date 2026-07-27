@@ -80,8 +80,9 @@ let rec walk_shapes
     ~(on_shape : shape_info -> unit) : unit =
   let (_, ety) = Tast_env.expand_type env ty in
   match Typing_defs.get_node ety with
-  | Tshape { s_fields; s_unknown_value; _ } ->
+  | Tshape (Shape_simple { s_fields; s_unknown_value; _ }) ->
     on_shape (extract_shape_info s_fields s_unknown_value)
+  | Tshape (Shape_splat _) -> ()
   | Tdynamic _ -> ()
   | Tunion [] -> ()
   | Tunion tyl -> List.iter tyl ~f:(fun ty -> walk_shapes env ty ~on_shape)

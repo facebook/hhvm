@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<51e5d95db99f3adbb48518b3999b196d>>
+// @generated SignedSource<<6832c2c386add6ec08a062614407f612>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -775,11 +775,56 @@ pub struct RefinedConstBounds {
 #[rust_to_ocaml(and)]
 #[rust_to_ocaml(prefix = "s_")]
 #[repr(C)]
-pub struct ShapeType {
+pub struct ShapeTypeSimple {
     #[rust_to_ocaml(attr = "transform.opaque")]
     pub origin: TypeOrigin,
     pub unknown_value: Ty,
     pub fields: t_shape_map::TShapeMap<ShapeFieldType>,
+}
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(and)]
+#[repr(C)]
+pub struct ShapeTypeSplat {
+    pub ss_elems: Vec<Ty>,
+}
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(and)]
+#[repr(C, u8)]
+pub enum ShapeType {
+    #[rust_to_ocaml(name = "Shape_simple")]
+    ShapeSimple(ShapeTypeSimple),
+    #[rust_to_ocaml(name = "Shape_splat")]
+    ShapeSplat(ShapeTypeSplat),
 }
 
 /// Required and extra components of a tuple. Extra components

@@ -342,11 +342,17 @@ and 'phase refined_const_bounds = {
   tr_upper: 'phase ty list;
 }
 
-and 'phase shape_type = {
+and 'phase shape_type_simple = {
   s_origin: type_origin; [@transform.opaque]
   s_unknown_value: 'phase ty;
   s_fields: 'phase shape_field_type TShapeMap.t;
 }
+
+and 'phase shape_type_splat = { ss_elems: 'phase ty list }
+
+and 'phase shape_type =
+  | Shape_simple of 'phase shape_type_simple
+  | Shape_splat of 'phase shape_type_splat
 
 and 'phase tuple_type = {
   t_required: 'phase ty list;
@@ -651,24 +657,34 @@ module Pp = struct
     Format.fprintf fmt "@ }@]"
 
   and pp_shape_type : type a. Format.formatter -> a shape_type -> unit =
-   fun fmt { s_origin; s_fields; s_unknown_value } ->
-    Format.fprintf fmt "@[<2>{ ";
+   fun fmt -> function
+    | Shape_splat { ss_elems } ->
+      Format.fprintf fmt "@[<2>Shape_splat { ";
+      Format.fprintf fmt "@[%s =@ " "ss_elems";
+      Format.fprintf fmt "@[<2>[";
+      List.iter ss_elems ~f:(fun ty ->
+          Format.fprintf fmt "@ ";
+          pp_ty fmt ty);
+      Format.fprintf fmt "@]@ ]@]";
+      Format.fprintf fmt "@ }@]"
+    | Shape_simple { s_origin; s_fields; s_unknown_value } ->
+      Format.fprintf fmt "@[<2>{ ";
 
-    Format.fprintf fmt "@[%s =@ " "s_origin";
-    pp_type_origin fmt s_origin;
-    Format.fprintf fmt "@]";
-    Format.fprintf fmt ";@ ";
+      Format.fprintf fmt "@[%s =@ " "s_origin";
+      pp_type_origin fmt s_origin;
+      Format.fprintf fmt "@]";
+      Format.fprintf fmt ";@ ";
 
-    Format.fprintf fmt "@[%s =@ " "s_fields";
-    TShapeMap.pp pp_shape_field_type fmt s_fields;
-    Format.fprintf fmt "@]";
-    Format.fprintf fmt ";@ ";
+      Format.fprintf fmt "@[%s =@ " "s_fields";
+      TShapeMap.pp pp_shape_field_type fmt s_fields;
+      Format.fprintf fmt "@]";
+      Format.fprintf fmt ";@ ";
 
-    Format.fprintf fmt "@[%s =@ " "s_unknown_value";
-    pp_ty fmt s_unknown_value;
-    Format.fprintf fmt "@]";
+      Format.fprintf fmt "@[%s =@ " "s_unknown_value";
+      pp_ty fmt s_unknown_value;
+      Format.fprintf fmt "@]";
 
-    Format.fprintf fmt "@ }@]"
+      Format.fprintf fmt "@ }@]"
 
   and pp_tuple_extra : type a. Format.formatter -> a tuple_extra -> unit =
    fun fmt extra ->
@@ -983,32 +999,35 @@ let rec ty__compare : type a. ?normalize_lists:bool -> a ty_ -> a ty_ -> int =
           Bool.compare optional1 optional2)
   and shape_type_compare : type a. a shape_type -> a shape_type -> int =
    fun s1 s2 ->
-    let {
-      s_origin = shape_origin1;
-      s_unknown_value = unknown_fields_type1;
-      s_fields = fields1;
-    } =
-      s1
-    in
-    let {
-      s_origin = shape_origin2;
-      s_unknown_value = unknown_fields_type2;
-      s_fields = fields2;
-    } =
-      s2
-    in
-    if same_type_origin shape_origin1 shape_origin2 then
-      0
-    else if phys_equal fields1 fields2 then
-      if phys_equal unknown_fields_type1 unknown_fields_type2 then
+    match (s1, s2) with
+    | (Shape_simple _, Shape_splat _) -> -1
+    | (Shape_splat _, Shape_simple _) -> 1
+    | (Shape_splat { ss_elems = e1 }, Shape_splat { ss_elems = e2 }) ->
+      tyl_compare ~sort:false e1 e2
+    | ( Shape_simple
+          {
+            s_origin = shape_origin1;
+            s_unknown_value = unknown_fields_type1;
+            s_fields = fields1;
+          },
+        Shape_simple
+          {
+            s_origin = shape_origin2;
+            s_unknown_value = unknown_fields_type2;
+            s_fields = fields2;
+          } ) ->
+      if same_type_origin shape_origin1 shape_origin2 then
         0
-      else
-        ty_compare unknown_fields_type1 unknown_fields_type2
-    else begin
-      chain_compare
-        (ty_compare unknown_fields_type1 unknown_fields_type2)
-        (fun _ -> TShapeMap.compare shape_field_type_compare fields1 fields2)
-    end
+      else if phys_equal fields1 fields2 then
+        if phys_equal unknown_fields_type1 unknown_fields_type2 then
+          0
+        else
+          ty_compare unknown_fields_type1 unknown_fields_type2
+      else begin
+        chain_compare
+          (ty_compare unknown_fields_type1 unknown_fields_type2)
+          (fun _ -> TShapeMap.compare shape_field_type_compare fields1 fields2)
+      end
   and tuple_extra_compare : type a. a tuple_extra -> a tuple_extra -> int =
    fun t1 t2 ->
     match (t1, t2) with
@@ -1485,13 +1504,20 @@ module Locl_subst = struct
       cstr_kind,
       apply_ty ty2 ~subst ~combine_reasons )
 
-  and apply_shape
-      { s_origin; s_unknown_value; s_fields } ~subst ~combine_reasons =
-    let s_unknown_value = apply_ty s_unknown_value ~subst ~combine_reasons
-    and s_fields =
-      TShapeMap.map (apply_shape_field ~subst ~combine_reasons) s_fields
-    in
-    { s_origin; s_unknown_value; s_fields }
+  and apply_shape st ~subst ~combine_reasons =
+    match st with
+    | Shape_splat { ss_elems } ->
+      Shape_splat
+        {
+          ss_elems =
+            List.map ss_elems ~f:(fun ty -> apply_ty ty ~subst ~combine_reasons);
+        }
+    | Shape_simple { s_origin; s_unknown_value; s_fields } ->
+      let s_unknown_value = apply_ty s_unknown_value ~subst ~combine_reasons
+      and s_fields =
+        TShapeMap.map (apply_shape_field ~subst ~combine_reasons) s_fields
+      in
+      Shape_simple { s_origin; s_unknown_value; s_fields }
 
   and apply_shape_field { sft_optional; sft_ty } ~subst ~combine_reasons =
     let sft_ty = apply_ty sft_ty ~subst ~combine_reasons in
@@ -1664,10 +1690,14 @@ module Find_locl = struct
     | None -> find_ty ty2 ~p
     | res -> res
 
-  and find_shape { s_unknown_value; s_fields; _ } ~p =
-    match find_ty s_unknown_value ~p with
-    | None -> find_first_shape_field (TShapeMap.bindings s_fields) ~p
-    | res -> res
+  and find_shape st ~p =
+    match st with
+    | Shape_splat { ss_elems } ->
+      List.find_map ss_elems ~f:(fun ty -> find_ty ty ~p)
+    | Shape_simple { s_unknown_value; s_fields; _ } ->
+      (match find_ty s_unknown_value ~p with
+      | None -> find_first_shape_field (TShapeMap.bindings s_fields) ~p
+      | res -> res)
 
   and find_first_shape_field fields ~p =
     match fields with
@@ -1837,17 +1867,25 @@ module Transform_top_down_decl = struct
     in
     { t_required; t_optional; t_extra }
 
-  and traverse_shape_ty
-      { s_origin; s_unknown_value; s_fields } ~on_ty ~on_rc_bound ~ctx =
-    let s_unknown_value = transform s_unknown_value ~on_ty ~on_rc_bound ~ctx
-    and s_fields =
-      TShapeMap.map
-        (fun { sft_optional; sft_ty } ->
-          let sft_ty = transform sft_ty ~on_ty ~on_rc_bound ~ctx in
-          { sft_optional; sft_ty })
-        s_fields
-    in
-    { s_origin; s_unknown_value; s_fields }
+  and traverse_shape_ty st ~on_ty ~on_rc_bound ~ctx =
+    match st with
+    | Shape_splat { ss_elems } ->
+      Shape_splat
+        {
+          ss_elems =
+            List.map ss_elems ~f:(fun ty ->
+                transform ty ~on_ty ~on_rc_bound ~ctx);
+        }
+    | Shape_simple { s_origin; s_unknown_value; s_fields } ->
+      let s_unknown_value = transform s_unknown_value ~on_ty ~on_rc_bound ~ctx
+      and s_fields =
+        TShapeMap.map
+          (fun { sft_optional; sft_ty } ->
+            let sft_ty = transform sft_ty ~on_ty ~on_rc_bound ~ctx in
+            { sft_optional; sft_ty })
+          s_fields
+      in
+      Shape_simple { s_origin; s_unknown_value; s_fields }
 end
 
 let transform_top_down_decl_ty decl_ty ~on_ty ~on_rc_bound ~ctx =

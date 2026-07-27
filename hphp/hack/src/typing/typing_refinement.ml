@@ -106,7 +106,7 @@ module TyPredicate = struct
         Result.Ok
           (next_wildcard_id, IsTupleOf { tp_required = List.rev predicates })
     end
-    | Tshape { s_origin = _; s_unknown_value; s_fields } -> begin
+    | Tshape (Shape_simple { s_origin = _; s_unknown_value; s_fields }) -> begin
       match
         TShapeMap.fold
           (fun key s_field acc ->
@@ -148,6 +148,7 @@ module TyPredicate = struct
                 { sp_allows_unknown_fields; sp_fields = TShapeMap.of_list elts }
             ))
     end
+    | Tshape (Shape_splat _) -> Result.Error "shape_splat"
     | Tclass (_, Exact, _) -> Result.Error "exact class"
     | Tclass ((_, name), Nonexact _, args) ->
       let (next_wildcard_id, generics) =
@@ -830,7 +831,7 @@ and split_ty_by_shape
     (sp_fields : shape_field_predicate TShapeMap.t)
     (predicate : type_predicate) : env * TyPartition.t =
   match deref ty with
-  | (_, Tshape { s_origin = _; s_unknown_value; s_fields }) ->
+  | (_, Tshape (Shape_simple { s_origin = _; s_unknown_value; s_fields })) ->
     let has_class_const_field map =
       TShapeMap.exists
         (fun field _val ->
@@ -1098,7 +1099,7 @@ and split_ty
       partition_f DataType.(of_ty ~safe_for_are_disjoint:false env Nonnull)
     | Ttuple _ ->
       partition_f DataType.(of_ty ~safe_for_are_disjoint:false env Tuple)
-    | Tshape _ ->
+    | Tshape (Shape_simple _ | Shape_splat _) ->
       partition_f DataType.(of_ty ~safe_for_are_disjoint:false env Shape)
     | Tlabel _ ->
       partition_f DataType.(of_ty ~safe_for_are_disjoint:false env Label)

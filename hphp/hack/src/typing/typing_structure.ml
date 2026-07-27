@@ -172,18 +172,23 @@ let rec transform_shapemap ?(nullable = false) env pos ty shape =
           _,
           ( r,
             Tshape
-              { s_origin = _; s_unknown_value = shape_kind; s_fields = fields }
-          ) ) ->
+              (Shape_simple
+                {
+                  s_origin = _;
+                  s_unknown_value = shape_kind;
+                  s_fields = fields;
+                }) ) ) ->
         let (env, fields) = ShapeFieldMap.map_env make_ts env fields in
         let ty =
           mk
             ( r,
               Tshape
-                {
-                  s_origin = Missing_origin;
-                  s_unknown_value = shape_kind;
-                  s_fields = fields;
-                } )
+                (Shape_simple
+                   {
+                     s_origin = Missing_origin;
+                     s_unknown_value = shape_kind;
+                     s_fields = fields;
+                   }) )
         in
         let ty =
           if supportdyn then

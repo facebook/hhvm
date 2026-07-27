@@ -386,11 +386,12 @@ and hint_ p env = function
         fields
     in
     Tshape
-      {
-        s_origin = Missing_origin;
-        s_unknown_value = shape_kind;
-        s_fields = fdm;
-      }
+      (Shape_simple
+         {
+           s_origin = Missing_origin;
+           s_unknown_value = shape_kind;
+           s_fields = fdm;
+         })
   | Hsoft (p, h_) -> hint_ p env h_
   | Hfun_context _
   | Hvar _ ->

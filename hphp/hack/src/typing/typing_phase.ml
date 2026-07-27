@@ -295,11 +295,12 @@ and localize_ ~(ety_env : expand_env) env (dty : decl_ty) :
     match deref lty with
     | ( r,
         Tshape
-          {
-            s_origin = _;
-            s_unknown_value = shape_kind;
-            s_fields = shape_fields;
-          } ) -> begin
+          (Shape_simple
+            {
+              s_origin = _;
+              s_unknown_value = shape_kind;
+              s_fields = shape_fields;
+            }) ) -> begin
       match origin_opt with
       | None -> lty
       | Some origin ->
@@ -307,11 +308,12 @@ and localize_ ~(ety_env : expand_env) env (dty : decl_ty) :
           mk
             ( r,
               Tshape
-                {
-                  s_origin = From_alias (origin, decl_pos_opt);
-                  s_unknown_value = shape_kind;
-                  s_fields = shape_fields;
-                } )
+                (Shape_simple
+                   {
+                     s_origin = From_alias (origin, decl_pos_opt);
+                     s_unknown_value = shape_kind;
+                     s_fields = shape_fields;
+                   }) )
         in
         if cache_result () then !locl_cache_add env origin lty;
         lty
@@ -323,7 +325,8 @@ and localize_ ~(ety_env : expand_env) env (dty : decl_ty) :
     match deref stripped_lty with
     | ( r,
         Tshape
-          { s_origin = origin; s_unknown_value = ty; s_fields = shape_fields }
+          (Shape_simple
+            { s_origin = origin; s_unknown_value = ty; s_fields = shape_fields })
       )
       when is_supportdyn ->
       MakeType.supportdyn
@@ -331,11 +334,12 @@ and localize_ ~(ety_env : expand_env) env (dty : decl_ty) :
         (mk
            ( r,
              Tshape
-               {
-                 s_origin = origin;
-                 s_unknown_value = MakeType.supportdyn r ty;
-                 s_fields = shape_fields;
-               } ))
+               (Shape_simple
+                  {
+                    s_origin = origin;
+                    s_unknown_value = MakeType.supportdyn r ty;
+                    s_fields = shape_fields;
+                  }) ))
     | _ -> lty
   in
   let r = get_reason dty |> Typing_reason.localize in
@@ -653,7 +657,9 @@ and localize_ ~(ety_env : expand_env) env (dty : decl_ty) :
       in
       let ty = map_reason ty ~f:elaborate_reason in
       ((env, ty_err_opt, cycles_root @ cycles_tconst), ty))
-  | Tshape { s_origin = _; s_unknown_value = shape_kind; s_fields = tym } ->
+  | Tshape
+      (Shape_simple
+        { s_origin = _; s_unknown_value = shape_kind; s_fields = tym }) ->
     let ety_env_targ = { ety_env with under_type_constructor = true } in
     let (((env, cycles_shape), ty_err_opt1), tym) =
       ShapeFieldMap.map_env_ty_err_opt
@@ -676,11 +682,13 @@ and localize_ ~(ety_env : expand_env) env (dty : decl_ty) :
       mk
         ( r,
           Tshape
-            {
-              s_origin = Missing_origin;
-              s_unknown_value = shape_kind;
-              s_fields = tym;
-            } ) )
+            (Shape_simple
+               {
+                 s_origin = Missing_origin;
+                 s_unknown_value = shape_kind;
+                 s_fields = tym;
+               }) ) )
+  | Tshape (Shape_splat _) -> failwith "Shape_splat unexpected"
   | Tclass_ptr ty ->
     let ((env, ty_err_opt, cycles), ty) =
       localize ~ety_env:{ ety_env with under_type_constructor = true } env ty

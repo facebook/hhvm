@@ -234,7 +234,10 @@ let rec try_push_like env ty =
         Some (mk (r, Tfun { ft with ft_ret = ret_ty }))
       else
         None )
-  | (r, Tshape { s_origin = _; s_unknown_value = kind; s_fields = fields }) ->
+  | ( r,
+      Tshape
+        (Shape_simple
+          { s_origin = _; s_unknown_value = kind; s_fields = fields }) ) ->
     let add_like_to_shape_field changed _name { sft_optional; sft_ty } =
       let (changed, sft_ty) = make_like env changed sft_ty in
       (changed, { sft_optional; sft_ty })
@@ -248,11 +251,12 @@ let rec try_push_like env ty =
           (mk
              ( r,
                Tshape
-                 {
-                   s_origin = Missing_origin;
-                   s_unknown_value = kind;
-                   s_fields = fields;
-                 } ))
+                 (Shape_simple
+                    {
+                      s_origin = Missing_origin;
+                      s_unknown_value = kind;
+                      s_fields = fields;
+                    }) ))
       else
         None )
   | (r, Tnewtype (n, tyl, bound)) ->
@@ -318,7 +322,10 @@ let rec strip_covariant_like env ty =
     | (r, Tfun ft) ->
       let (env, ret_ty) = strip_covariant_like env ft.ft_ret in
       (env, mk (r, Tfun { ft with ft_ret = ret_ty }))
-    | (r, Tshape { s_origin = _; s_unknown_value = kind; s_fields = fields }) ->
+    | ( r,
+        Tshape
+          (Shape_simple
+            { s_origin = _; s_unknown_value = kind; s_fields = fields }) ) ->
       let strip_shape_field env _name { sft_optional; sft_ty } =
         let (env, sft_ty) = strip_covariant_like env sft_ty in
         (env, { sft_optional; sft_ty })
@@ -328,11 +335,12 @@ let rec strip_covariant_like env ty =
         mk
           ( r,
             Tshape
-              {
-                s_origin = Missing_origin;
-                s_unknown_value = kind;
-                s_fields = fields;
-              } ) )
+              (Shape_simple
+                 {
+                   s_origin = Missing_origin;
+                   s_unknown_value = kind;
+                   s_fields = fields;
+                 }) ) )
     | (r, Tnewtype (n, tyl, bound)) ->
       let tparams = Env.get_class_or_typedef_tparams env n in
       let (env, tyl) = strip_covariant_like_tyargs env tyl tparams in

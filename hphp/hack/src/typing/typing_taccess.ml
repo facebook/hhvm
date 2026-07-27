@@ -727,7 +727,7 @@ let rec expand ctx env root =
     | Taccess _
     | Tnonnull
     | Tprim _
-    | Tshape _
+    | Tshape (Shape_simple _ | Shape_splat _)
     | Ttuple _
     | Tvec_or_dict _
     | Tfun _

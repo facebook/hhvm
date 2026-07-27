@@ -4528,11 +4528,12 @@ end = struct
             (extras @ t_required)
         | ( _,
             Tshape
-              {
-                s_origin = _;
-                s_unknown_value = unknown_fields_type;
-                s_fields = sftl;
-              } ) ->
+              (Shape_simple
+                {
+                  s_origin = _;
+                  s_unknown_value = unknown_fields_type;
+                  s_fields = sftl;
+                }) ) ->
           List.fold_left
             ~init:(env, TL.valid)
             ~f:(fun res sft ->
@@ -4549,6 +4550,7 @@ end = struct
                 ~this_ty:None
                 ~lhs:{ sub_supportdyn; ty_sub = unknown_fields_type }
                 ~rhs:{ super_like = false; super_supportdyn = false; ty_super }
+        | (_, Tshape (Shape_splat _)) -> failwith "Shape_splat unexpected"
         (* class<T> <D: dynamic by exposure to string *)
         | (_, Tclass_ptr _) when subtype_env.Subtype_env.class_sub_classname ->
           valid env
@@ -5121,18 +5123,20 @@ end = struct
         env
     | ( ( r_sub,
           Tshape
-            {
-              s_origin = origin_sub;
-              s_unknown_value = shape_kind_sub;
-              s_fields = fdm_sub;
-            } ),
+            (Shape_simple
+              {
+                s_origin = origin_sub;
+                s_unknown_value = shape_kind_sub;
+                s_fields = fdm_sub;
+              }) ),
         ( r_super,
           Tshape
-            {
-              s_origin = origin_super;
-              s_unknown_value = shape_kind_super;
-              s_fields = fdm_super;
-            } ) ) ->
+            (Shape_simple
+              {
+                s_origin = origin_super;
+                s_unknown_value = shape_kind_super;
+                s_fields = fdm_super;
+              }) ) ) ->
       if same_type_origin origin_super origin_sub then
         (* Fast path for shape types: if they have the same origin,
          * they are equal type. *)
@@ -5146,6 +5150,9 @@ end = struct
           ~super_like
           (sub_supportdyn, r_sub, shape_kind_sub, fdm_sub)
           (super_supportdyn, r_super, shape_kind_super, fdm_super)
+    | ((_, Tshape _), (_, Tshape (Shape_splat _)))
+    | ((_, Tshape (Shape_splat _)), (_, Tshape _)) ->
+      failwith "Shape_splat unexpected"
     | ( ( _,
           ( Tany _ | Tunion _ | Toption _ | Tintersection _ | Tfun _
           | Tgeneric _ | Taccess _ | Tprim _ | Tnonnull | Tclass _
@@ -5375,7 +5382,7 @@ end = struct
               ~lhs:{ sub_supportdyn; ty_sub }
               ~rhs:
                 { super_like; super_supportdyn = false; ty_super = lty_inner }
-      | (r_sub, Tshape { s_fields; s_unknown_value; _ }) ->
+      | (r_sub, Tshape (Shape_simple { s_fields; s_unknown_value; _ })) ->
         (* shape('a' => T1, 'b' => T2, ...) <: RepresentableAs<U>
            when dict<key, V1 | V2 | ... | Vn> <: U
            OR   shape('a' => T1, 'b' => T2, ...) <: U
@@ -7224,7 +7231,8 @@ end = struct
       do_tuple_basic tup
     | (_r_sub, Ttuple { t_required; t_optional; t_extra }) ->
       do_tuple_general t_required t_optional t_extra
-    | (r_sub, Tshape ts) -> do_shape r_sub ts
+    | (r_sub, Tshape (Shape_simple ts)) -> do_shape r_sub ts
+    | (_, Tshape (Shape_splat _)) -> failwith "Shape_splat unexpected"
     | (r_sub, Tgeneric _generic_nm) ->
       let get_transitive_upper_bounds env ty =
         let rec iter seen env acc tyl =
@@ -7274,8 +7282,9 @@ end = struct
       (match deref ty_newtype with
       | ( r,
           Tshape
-            { s_origin = _; s_unknown_value = shape_kind; s_fields = fields } )
-        ->
+            (Shape_simple
+              { s_origin = _; s_unknown_value = shape_kind; s_fields = fields })
+        ) ->
         let (env, fields) =
           Typing_structure.transform_shapemap
             env
@@ -7287,11 +7296,12 @@ end = struct
           mk
             ( r,
               Tshape
-                {
-                  s_origin = Missing_origin;
-                  s_unknown_value = shape_kind;
-                  s_fields = fields;
-                } )
+                (Shape_simple
+                   {
+                     s_origin = Missing_origin;
+                     s_unknown_value = shape_kind;
+                     s_fields = fields;
+                   }) )
         in
         simplify_
           ~subtype_env
@@ -7622,8 +7632,9 @@ end = struct
         | _ -> fail Reason.URtuple_access
       end
     | ( r_sub,
-        Tshape { s_origin = _; s_unknown_value = shape_kind; s_fields = fdm } )
-      ->
+        Tshape
+          (Shape_simple
+            { s_origin = _; s_unknown_value = shape_kind; s_fields = fdm }) ) ->
       (match
          Typing_shapes.tshape_field_name_with_ty_err env cia.cia_index_expr
        with
@@ -7649,13 +7660,15 @@ end = struct
           mk
             ( r_sub,
               Tshape
-                {
-                  s_origin = Missing_origin;
-                  s_unknown_value = shape_kind;
-                  s_fields = fdm';
-                } )
+                (Shape_simple
+                   {
+                     s_origin = Missing_origin;
+                     s_unknown_value = shape_kind;
+                     s_fields = fdm';
+                   }) )
         in
         simplify_val ty env)
+    | (_, Tshape (Shape_splat _)) -> failwith "Shape_splat unexpected"
     | (_, Tclass ((_, n), _, _))
       when String.equal n SN.Collections.cAnyArray
            && Tast.is_under_dynamic_assumptions env.Typing_env_types.checked ->

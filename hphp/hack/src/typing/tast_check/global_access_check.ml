@@ -546,10 +546,11 @@ let rec has_no_object_ref_ty env (seen : SSet.t) ty =
   | Tprim _ -> true
   (* Open shapes can technically have objects in them, but as long as the current fields don't have objects in them
      we will allow you to call the function. Note that the function fails at runtime if any shape fields are objects. *)
-  | Tshape { s_fields = fields; _ } ->
+  | Tshape (Shape_simple { s_fields = fields; _ }) ->
     TShapeMap.for_all
       (fun _k v -> has_no_object_ref_ty env seen v.sft_ty)
       fields
+  | Tshape (Shape_splat _) -> false
   (* If it's a Tclass it's an array type by is_value_collection *)
   | Tintersection tyl ->
     List.exists tyl ~f:(fun l -> has_no_object_ref_ty env seen l)

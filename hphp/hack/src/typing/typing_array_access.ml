@@ -760,7 +760,9 @@ let assign_array_get ~array_pos ~expr_pos ur env ty1 (key : Nast.expr) tkey ty2
           | _ ->
             fail (Error (tkey, MakeType.int Reason.none)) Reason.URtuple_access
         end
-      | Tshape { s_origin = _; s_unknown_value = shape_kind; s_fields = fdm } ->
+      | Tshape
+          (Shape_simple
+            { s_origin = _; s_unknown_value = shape_kind; s_fields = fdm }) ->
         Typing_shapes.do_with_field_expr
           env
           key
@@ -785,11 +787,12 @@ let assign_array_get ~array_pos ~expr_pos ur env ty1 (key : Nast.expr) tkey ty2
           mk
             ( r,
               Tshape
-                {
-                  s_origin = Missing_origin;
-                  s_unknown_value = shape_kind;
-                  s_fields = fdm';
-                } )
+                (Shape_simple
+                   {
+                     s_origin = Missing_origin;
+                     s_unknown_value = shape_kind;
+                     s_fields = fdm';
+                   }) )
         in
         (env, (ty, Ok ty, Ok tkey, Ok ty2))
       | Tnewtype (cid, _, _bound) when String.equal cid SN.Classes.cSupportDyn
@@ -800,6 +803,7 @@ let assign_array_get ~array_pos ~expr_pos ur env ty1 (key : Nast.expr) tkey ty2
            we applied an implicit upcast to dynamic
         *)
         (env, (ety1, Ok ety1, Ok tkey, Ok ty2))
+      | Tshape _
       | Toption _
       | Tnonnull
       | Tprim _

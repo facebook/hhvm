@@ -222,8 +222,9 @@ let rec is_safe_mut_ty env (seen : SSet.t) ty =
   | Tprim _ -> true
   (* Open shapes can technically have objects in them, but as long as the current fields don't have objects in them
      we will allow you to call the function. Note that the function fails at runtime if any shape fields are objects. *)
-  | Tshape { s_fields = fields; _ } ->
+  | Tshape (Shape_simple { s_fields = fields; _ }) ->
     TShapeMap.for_all (fun _k v -> is_safe_mut_ty env seen v.sft_ty) fields
+  | Tshape (Shape_splat _) -> false
   (* Nullable types: check the inner type. ?vec<string> is safe, ?Foo is not. *)
   | Toption ty_inner -> is_safe_mut_ty env seen ty_inner
   (* For newtypes (including supportdyn<T>), check through the bound.

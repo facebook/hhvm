@@ -121,7 +121,9 @@ let rec freshen_inside_ty env ty :
     in
     Some (env, mk (r, Ttuple { t_required; t_optional; t_extra }))
   (* Shape data is covariant *)
-  | Tshape { s_origin = _; s_unknown_value = shape_kind; s_fields = fdm } ->
+  | Tshape
+      (Shape_simple
+        { s_origin = _; s_unknown_value = shape_kind; s_fields = fdm }) ->
     let (env, fdm) = ShapeFieldMap.map_env freshen_ty env fdm in
     (* TODO(shapes) should freshening impact unknown type? *)
     Some
@@ -129,11 +131,15 @@ let rec freshen_inside_ty env ty :
         mk
           ( r,
             Tshape
-              {
-                s_origin = Missing_origin;
-                s_unknown_value = shape_kind;
-                s_fields = fdm;
-              } ) )
+              (Shape_simple
+                 {
+                   s_origin = Missing_origin;
+                   s_unknown_value = shape_kind;
+                   s_fields = fdm;
+                 }) ) )
+  | Tshape (Shape_splat { ss_elems }) ->
+    let (env, ss_elems) = List.map_env env ss_elems ~f:freshen_ty in
+    Some (env, mk (r, Tshape (Shape_splat { ss_elems })))
   (* Functions are covariant in return type, contravariant in parameter types *)
   | Tfun ft ->
     let (env, ft_ret) = freshen_ty env ft.ft_ret in
@@ -405,9 +411,13 @@ let ty_equal_shallow env ty1 ty2 =
       && exact_equal exact_sub exact_super
     | (Tfun fty1, Tfun fty2) ->
       Typing_defs_flags.Fun.equal fty1.ft_flags fty2.ft_flags
-    | ( Tshape { s_origin = _; s_unknown_value = shape_kind1; s_fields = fdm1 },
-        Tshape { s_origin = _; s_unknown_value = shape_kind2; s_fields = fdm2 }
-      ) ->
+    | ( Tshape
+          (Shape_simple
+            { s_origin = _; s_unknown_value = shape_kind1; s_fields = fdm1 }),
+        Tshape
+          (Shape_simple
+            { s_origin = _; s_unknown_value = shape_kind2; s_fields = fdm2 }) )
+      ->
       Bool.equal
         (TUtils.is_nothing env shape_kind1)
         (TUtils.is_nothing env shape_kind2)

@@ -159,11 +159,14 @@ class virtual ['a] decl_type_visitor : ['a] decl_type_visitor_type =
     method on_tintersection acc _ tyl =
       List.fold_left tyl ~f:this#on_type ~init:acc
 
-    method on_tshape
-        acc _ { s_origin = _; s_unknown_value = kind; s_fields = fdm } =
-      let acc = this#on_type acc kind in
-      let f _ { sft_ty; _ } acc = this#on_type acc sft_ty in
-      TShapeMap.fold f fdm acc
+    method on_tshape acc _ shape_ty =
+      match shape_ty with
+      | Shape_simple { s_origin = _; s_unknown_value = kind; s_fields = fdm } ->
+        let acc = this#on_type acc kind in
+        let f _ { sft_ty; _ } acc = this#on_type acc sft_ty in
+        TShapeMap.fold f fdm acc
+      | Shape_splat { ss_elems } ->
+        List.fold_left ss_elems ~f:this#on_type ~init:acc
 
     method on_tclass_ptr acc _ ty = this#on_type acc ty
 
@@ -308,11 +311,14 @@ class virtual ['a] locl_type_visitor : ['a] locl_type_visitor_type =
     method on_tintersection acc _ tyl =
       List.fold_left tyl ~f:this#on_type ~init:acc
 
-    method on_tshape
-        acc _ { s_origin = _; s_unknown_value = kind; s_fields = fdm } =
-      let acc = this#on_type acc kind in
-      let f _ { sft_ty; _ } acc = this#on_type acc sft_ty in
-      TShapeMap.fold f fdm acc
+    method on_tshape acc _ shape_ty =
+      match shape_ty with
+      | Shape_simple { s_origin = _; s_unknown_value = kind; s_fields = fdm } ->
+        let acc = this#on_type acc kind in
+        let f _ { sft_ty; _ } acc = this#on_type acc sft_ty in
+        TShapeMap.fold f fdm acc
+      | Shape_splat { ss_elems } ->
+        List.fold_left ss_elems ~f:this#on_type ~init:acc
 
     method on_tclass acc _ _ exact tyl =
       let acc =

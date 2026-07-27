@@ -48,7 +48,10 @@ let expand_ty ?var_hook ?pos env ty =
       | (p, Tnewtype (n, tyl, ty)) ->
         mk (p, Tnewtype (n, exp_tys tyl, exp_ty ty))
       | (p, Tdependent (n, ty)) -> mk (p, Tdependent (n, exp_ty ty))
-      | (p, Tshape s) -> mk (p, Tshape (exp_shape_type s))
+      | (p, Tshape (Shape_simple s)) ->
+        mk (p, Tshape (Shape_simple (exp_shape_type s)))
+      | (p, Tshape (Shape_splat { ss_elems })) ->
+        mk (p, Tshape (Shape_splat { ss_elems = exp_tys ss_elems }))
       | (p, Tvec_or_dict (ty1, ty2)) ->
         mk (p, Tvec_or_dict (exp_ty ty1, exp_ty ty2))
       | (p, Tvar v) ->

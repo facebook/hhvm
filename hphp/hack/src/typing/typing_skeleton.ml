@@ -97,7 +97,9 @@ let rec of_decl_ty (ty : decl_ty) : string =
   | Ttuple { t_required; t_optional = _; t_extra = _ } ->
     let args = List.map t_required ~f:of_decl_ty in
     Printf.sprintf "(%s)" (String.concat ~sep:", " args)
-  | Tshape { s_origin = _; s_fields = fields; s_unknown_value = kind } ->
+  | Tshape
+      (Shape_simple { s_origin = _; s_fields = fields; s_unknown_value = kind })
+    ->
     let fields =
       TShapeMap.fold (fun key ty acc -> of_shape_field key ty :: acc) fields []
     in
@@ -109,6 +111,9 @@ let rec of_decl_ty (ty : decl_ty) : string =
         fields @ ["..."]
     in
     Printf.sprintf "shape(%s)" (String.concat ~sep:", " fields_with_ellipsis)
+  | Tshape (Shape_splat { ss_elems }) ->
+    let fields = List.map ss_elems ~f:(fun ty -> "..." ^ of_decl_ty ty) in
+    Printf.sprintf "shape(%s)" (String.concat ~sep:", " fields)
   | Tunion [] -> "nothing"
   | Tunion _ -> "mixed"
   | Tintersection _ -> "mixed"

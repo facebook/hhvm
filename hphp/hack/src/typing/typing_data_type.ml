@@ -817,7 +817,7 @@ module Make (Set : SET) = struct
      * validate what are all the data types that are valid callables *)
     | Tfun _ -> (env, fun_to_datatypes ~trail)
     | Ttuple _ -> (env, tuple_to_datatypes ~trail)
-    | Tshape _ -> (env, shape_to_datatypes ~trail)
+    | Tshape (Shape_simple _ | Shape_splat _) -> (env, shape_to_datatypes ~trail)
     | Tlabel _ -> (env, label_to_datatypes ~trail)
     | Tvar _ -> (env, mixed ~reason)
     | Tgeneric name ->

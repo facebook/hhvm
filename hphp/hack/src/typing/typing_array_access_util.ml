@@ -95,7 +95,10 @@ let widen_for_array_get_ci
     | _ -> (env, None)
   end
   (* Whatever the lower bound, construct an open, singleton shape type. *)
-  | (r, Tshape { s_fields = fdm; s_origin = _; s_unknown_value = _ }) ->
+  | ( r,
+      Tshape
+        (Shape_simple { s_fields = fdm; s_origin = _; s_unknown_value = _ }) )
+    ->
     Typing_shapes.do_with_field_expr env index_expr ~with_error:(env, None)
     @@ fun field_name ->
     (match TShapeMap.find_opt field_name fdm with

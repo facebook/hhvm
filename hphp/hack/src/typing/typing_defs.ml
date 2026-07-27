@@ -584,10 +584,13 @@ let rec is_denotable ty =
     && tuple_extra_is_denotable t_extra
   | Tvec_or_dict (tk, tv) -> is_denotable tk && is_denotable tv
   | Taccess (ty, _) -> is_denotable ty
-  | Tshape { s_origin = _; s_unknown_value = unknown_field_type; s_fields = sm }
+  | Tshape
+      (Shape_simple
+        { s_origin = _; s_unknown_value = unknown_field_type; s_fields = sm })
     ->
     TShapeMap.for_all (fun _ { sft_ty; _ } -> is_denotable sft_ty) sm
     && unknown_field_type_is_denotable unknown_field_type
+  | Tshape (Shape_splat _) -> false
   | Tfun { ft_params; ft_ret; _ } ->
     is_denotable ft_ret
     && List.for_all ft_params ~f:(fun { fp_type; _ } -> is_denotable fp_type)

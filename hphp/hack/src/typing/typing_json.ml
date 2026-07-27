@@ -244,13 +244,17 @@ let rec from_type : env -> show_like_ty:bool -> locl_ty -> Yojson.Safe.t =
       obj @@ kind p "primitive" @ name "string"
     else
       obj @@ kind p "class" @ name cid @ args tys @ refs e
-  | (p, Tshape { s_origin = _; s_unknown_value = shape_kind; s_fields = fl }) ->
+  | ( p,
+      Tshape
+        (Shape_simple
+          { s_origin = _; s_unknown_value = shape_kind; s_fields = fl }) ) ->
     let fields_known = is_nothing shape_kind in
     obj
     @@ kind p "shape"
     @ is_array false
     @ [("fields_known", `Bool fields_known)]
     @ fields (TShapeMap.bindings fl)
+  | (_, Tshape (Shape_splat _)) -> failwith "Shape_splat unexpected"
   | (p, Tunion []) -> obj @@ kind p "nothing"
   | (_, Tunion [ty]) -> from_type env ~show_like_ty ty
   | (p, Tunion tyl) ->
@@ -655,11 +659,12 @@ let to_locl_ty
           in
           ty
             (Tshape
-               {
-                 s_origin = Missing_origin;
-                 s_fields = fields;
-                 s_unknown_value = shape_kind;
-               })
+               (Shape_simple
+                  {
+                    s_origin = Missing_origin;
+                    s_fields = fields;
+                    s_unknown_value = shape_kind;
+                  }))
       | "union" ->
         get_array "args" (json, keytrace) >>= fun (args, keytrace) ->
         aux_args args ~keytrace >>= fun tyl -> ty (Tunion tyl)

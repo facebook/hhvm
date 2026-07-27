@@ -78,13 +78,15 @@ let check_param : env -> Nast.fun_param -> unit =
         | Tintersection tyl ->
           List.iter tyl ~f:(check_memoizable env)
         | Tvec_or_dict (_, ty) -> check_memoizable env ty
-        | Tshape { s_fields = fdm; _ } ->
+        | Tshape (Shape_simple { s_fields = fdm; _ }) ->
           (* TODO(shapes) should unknown type affect memoizability? *)
           TShapeMap.iter
             begin
               (fun _ { sft_ty; _ } -> check_memoizable env sft_ty)
             end
             fdm
+        | Tshape (Shape_splat { ss_elems }) ->
+          List.iter ss_elems ~f:(check_memoizable env)
         | Tclass ((_, id), _, _)
           when String.equal Naming_special_names.Classes.cString id ->
           ()

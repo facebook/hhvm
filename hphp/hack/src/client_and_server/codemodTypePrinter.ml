@@ -68,7 +68,9 @@ let rec print_ty_exn ?(allow_nothing = false) ty =
       | Tsplat t_splat -> ["..." ^ print_ty_exn t_splat]
     in
     "(" ^ String.concat ~sep:", " (required @ optional @ extra) ^ ")"
-  | Tshape { s_origin = _; s_unknown_value = shape_kind; s_fields = fdm } ->
+  | Tshape
+      (Shape_simple
+        { s_origin = _; s_unknown_value = shape_kind; s_fields = fdm }) ->
     let fields = List.map (TShapeMap.elements fdm) ~f:print_shape_field_exn in
     let fields =
       if is_nothing shape_kind then
@@ -76,6 +78,9 @@ let rec print_ty_exn ?(allow_nothing = false) ty =
       else
         fields @ ["..."]
     in
+    Printf.sprintf "shape(%s)" (String.concat ~sep:", " fields)
+  | Tshape (Shape_splat { ss_elems }) ->
+    let fields = List.map ss_elems ~f:(fun ty -> "..." ^ print_ty_exn ty) in
     Printf.sprintf "shape(%s)" (String.concat ~sep:", " fields)
   | Tnewtype (name, [], _) -> Utils.strip_ns name
   | Tnewtype (name, tyl, _) ->

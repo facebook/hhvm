@@ -61,7 +61,9 @@ struct
     | Trefinement (root_ty, rs) ->
       let rs = Class_refinement.map ty rs in
       Trefinement (ty root_ty, rs)
-    | Tshape s -> Tshape (shape_type s)
+    | Tshape (Shape_simple s) -> Tshape (Shape_simple (shape_type s))
+    | Tshape (Shape_splat { ss_elems }) ->
+      Tshape (Shape_splat { ss_elems = List.map ss_elems ~f:ty })
     | Tclass_ptr x -> Tclass_ptr (ty x)
 
   and tuple_extra e =

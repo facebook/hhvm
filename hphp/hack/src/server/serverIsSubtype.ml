@@ -81,11 +81,14 @@ let rec validate_free_type env locl_ty =
   | Tfun tfun ->
     validate_l env (List.map tfun.ft_params ~f:(fun fp -> fp.fp_type))
     @ validate_free_type env tfun.ft_ret
-  | Tshape { s_origin = _origin; s_unknown_value = _kind; s_fields = fm } ->
+  | Tshape
+      (Shape_simple
+        { s_origin = _origin; s_unknown_value = _kind; s_fields = fm }) ->
     let field_tys =
       List.map (TShapeMap.values fm) ~f:(fun field -> field.sft_ty)
     in
     validate_l env field_tys
+  | Tshape (Shape_splat { ss_elems }) -> validate_l env ss_elems
   | Tnewtype (_name, tyargs, _) -> validate_l env tyargs
   | Tclass_ptr ty -> validate_free_type env ty
   (* These aren't even created by Typing_json.to_locl_ty *)

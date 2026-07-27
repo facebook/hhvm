@@ -112,7 +112,7 @@ let rec get_enforced_type env class_def_opt ty =
   | Tintersection tys ->
     let tys = List.map tys ~f:(get_enforced_type env class_def_opt) in
     MakeType.intersection (get_reason ty) tys
-  | Tshape _
+  | Tshape (Shape_simple _ | Shape_splat _)
   | Ttuple _ ->
     MakeType.nonnull Reason.none
   | Tprim _

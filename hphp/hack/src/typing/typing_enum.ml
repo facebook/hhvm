@@ -142,8 +142,9 @@ let enum_class_check_type env (pos : Pos_or_decl.t) ur ty_interface ty _on_error
     | Tclass (_, _, ltys) -> List.for_all ~f:is_valid_base ltys
     | Tunion [ty1; ty2] when is_dynamic ty1 -> is_valid_base ty2
     | Tunion [ty1; ty2] when is_dynamic ty2 -> is_valid_base ty1
-    | Tshape { s_fields = shapemap; _ } ->
+    | Tshape (Shape_simple { s_fields = shapemap; _ }) ->
       TShapeMap.for_all (fun _name sfty -> is_valid_base sfty.sft_ty) shapemap
+    | Tshape (Shape_splat _) -> false
     | Tany _
     | Tdynamic _
     | Tfun _

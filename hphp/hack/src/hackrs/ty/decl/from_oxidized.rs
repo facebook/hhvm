@@ -187,11 +187,13 @@ impl<R: Reason> From<o::typing_defs::Ty> for Ty<R> {
                     extra,
                 )))
             }
-            typing_defs_core::Ty_::Tshape(typing_defs_core::ShapeType {
-                origin: _,
-                unknown_value: kind,
-                fields,
-            }) => Tshape(Box::new(ty::ShapeType(
+            typing_defs_core::Ty_::Tshape(typing_defs_core::ShapeType::ShapeSimple(
+                typing_defs_core::ShapeTypeSimple {
+                    origin: _,
+                    unknown_value: kind,
+                    fields,
+                },
+            )) => Tshape(Box::new(ty::ShapeType(
                 kind.into(),
                 fields
                     .into_iter()
@@ -201,6 +203,9 @@ impl<R: Reason> From<o::typing_defs::Ty> for Ty<R> {
                     })
                     .collect(),
             ))),
+            typing_defs_core::Ty_::Tshape(typing_defs_core::ShapeType::ShapeSplat(_)) => {
+                panic!("Shape_splat not yet supported")
+            }
             typing_defs_core::Ty_::Trefinement(ty, cr) => {
                 Trefinement(Box::new(decl::TrefinementType {
                     ty: ty.into(),

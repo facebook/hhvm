@@ -154,8 +154,9 @@ let rec is_enforced hint_ty =
   | Tclass (_, _, [])
   | Tprim _ ->
     true
-  | Tshape { s_fields = expected_fdm; _ } ->
+  | Tshape (Shape_simple { s_fields = expected_fdm; _ }) ->
     TShapeMap.for_all (fun _name ty -> is_enforced ty.sft_ty) expected_fdm
+  | Tshape (Shape_splat _) -> false
   | _ -> false
 
 (** [refine_and_simplify_intersection env p reason ivar_pos ty hint_ty]

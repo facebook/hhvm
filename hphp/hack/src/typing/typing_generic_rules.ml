@@ -55,7 +55,8 @@ let get_transitive_upper_bounds env ty =
  *)
 let is_shape t =
   match get_node t with
-  | Tshape _ -> true
+  | Tshape (Shape_simple _) -> true
+  | Tshape (Shape_splat _) -> true
   | _ -> false
 
 let fold_errs errs =

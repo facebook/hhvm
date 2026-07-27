@@ -160,8 +160,10 @@ end = struct
     | Tfun fun_ty -> find_fun_ty fun_ty ~var ~update ~is_invariant ~acc ~env
     | Ttuple tuple_ty ->
       find_tuple_ty tuple_ty ~var ~update ~is_invariant ~acc ~env
-    | Tshape shape_ty ->
+    | Tshape (Shape_simple shape_ty) ->
       find_shape_ty shape_ty ~var ~update ~is_invariant ~acc ~env
+    | Tshape (Shape_splat { ss_elems }) ->
+      find_list ss_elems ~var ~update ~is_invariant ~acc ~env
     | Tapply ((_, class_name), tys) -> begin
       let variances =
         match Typing_env.get_class_or_typedef_tparams env class_name with
@@ -368,7 +370,7 @@ end = struct
     | Trefinement _
     | Tfun _
     | Ttuple _
-    | Tshape _
+    | Tshape (Shape_simple _ | Shape_splat _)
     | Tapply _ ->
       acc
 
@@ -477,7 +479,7 @@ end = struct
     | Trefinement _
     | Tfun _
     | Ttuple _
-    | Tshape _
+    | Tshape (Shape_simple _ | Shape_splat _)
     | Tapply _ ->
       acc
 

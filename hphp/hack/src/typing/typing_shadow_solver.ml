@@ -56,14 +56,15 @@ let solve ~as_data (env : Typing_env_types.env) inf_env dynamic_locals =
                 (mk
                    ( r,
                      Tshape
-                       {
-                         s_origin = Missing_origin;
-                         s_unknown_value = open_shape_unknown_value;
-                         s_fields =
-                           TShapeMap.singleton
-                             field_name
-                             { sft_optional = is_optional; sft_ty };
-                       } ))
+                       (Shape_simple
+                          {
+                            s_origin = Missing_origin;
+                            s_unknown_value = open_shape_unknown_value;
+                            s_fields =
+                              TShapeMap.singleton
+                                field_name
+                                { sft_optional = is_optional; sft_ty };
+                          }) ))
             | Aast.Int _ -> Some (Typing_make_type.vec r val_ty)
             | _ -> None
           else
@@ -88,14 +89,15 @@ let solve ~as_data (env : Typing_env_types.env) inf_env dynamic_locals =
                 (mk
                    ( r,
                      Tshape
-                       {
-                         s_origin = Missing_origin;
-                         s_unknown_value = open_shape_unknown_value;
-                         s_fields =
-                           TShapeMap.singleton
-                             field_name
-                             { sft_optional = false; sft_ty = val_ty };
-                       } ))
+                       (Shape_simple
+                          {
+                            s_origin = Missing_origin;
+                            s_unknown_value = open_shape_unknown_value;
+                            s_fields =
+                              TShapeMap.singleton
+                                field_name
+                                { sft_optional = false; sft_ty = val_ty };
+                          }) ))
             | Aast.Int _ -> Some (Typing_make_type.vec r val_ty)
             | _ -> None
           else
@@ -185,19 +187,26 @@ let solve ~as_data (env : Typing_env_types.env) inf_env dynamic_locals =
                     { p with fp_type = substitute_shadows p.fp_type });
               ft_ret = substitute_shadows ft.ft_ret;
             } )
-    | Tshape shape ->
+    | Tshape (Shape_simple shape) ->
       mk
         ( get_reason ty,
           Tshape
-            {
-              shape with
-              s_unknown_value = substitute_shadows shape.s_unknown_value;
-              s_fields =
-                TShapeMap.map
-                  (fun sft ->
-                    { sft with sft_ty = substitute_shadows sft.sft_ty })
-                  shape.s_fields;
-            } )
+            (Shape_simple
+               {
+                 shape with
+                 s_unknown_value = substitute_shadows shape.s_unknown_value;
+                 s_fields =
+                   TShapeMap.map
+                     (fun sft ->
+                       { sft with sft_ty = substitute_shadows sft.sft_ty })
+                     shape.s_fields;
+               }) )
+    | Tshape (Shape_splat { ss_elems }) ->
+      mk
+        ( get_reason ty,
+          Tshape
+            (Shape_splat { ss_elems = List.map ss_elems ~f:substitute_shadows })
+        )
     | Tclass (name, exact, tyl) ->
       mk
         (get_reason ty, Tclass (name, exact, List.map tyl ~f:substitute_shadows))

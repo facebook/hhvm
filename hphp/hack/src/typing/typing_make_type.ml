@@ -172,7 +172,9 @@ let shape r kind map =
   mk
     ( r,
       Tshape
-        { s_origin = Missing_origin; s_unknown_value = kind; s_fields = map } )
+        (Shape_simple
+           { s_origin = Missing_origin; s_unknown_value = kind; s_fields = map })
+    )
 
 let closed_shape r map = shape r (nothing r) map
 

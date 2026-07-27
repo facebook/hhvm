@@ -108,18 +108,24 @@ class ['env] shallow_type_mapper : ['env] type_mapper_type =
 
     method on_tclass env r x e tyl = (env, mk (r, Tclass (x, e, tyl)))
 
-    method on_tshape
-        env r { s_origin = _; s_unknown_value = shape_kind; s_fields = fdm } =
-      ( env,
-        mk
-          ( r,
-            Tshape
-              {
-                (* TODO(shapes) Should this reset the origin? *)
-                s_origin = Missing_origin;
-                s_unknown_value = shape_kind;
-                s_fields = fdm;
-              } ) )
+    method on_tshape env r (shape_ty : locl_phase shape_type) =
+      match shape_ty with
+      | Shape_simple
+          { s_origin = _; s_unknown_value = shape_kind; s_fields = fdm } ->
+        ( env,
+          mk
+            ( r,
+              Tshape
+                (Shape_simple
+                   {
+                     (* TODO(shapes) Should this reset the origin? *)
+                     s_origin = Missing_origin;
+                     s_unknown_value = shape_kind;
+                     s_fields = fdm;
+                   }) ) )
+      | Shape_splat { ss_elems } ->
+        let (env, ss_elems) = List.map_env env ss_elems ~f:this#on_type in
+        (env, mk (r, Tshape (Shape_splat { ss_elems })))
 
     method on_tvec_or_dict env r ty1 ty2 = (env, mk (r, Tvec_or_dict (ty1, ty2)))
 
@@ -299,13 +305,17 @@ class ['env] deep_type_mapper =
       (env, sft)
 
     method! on_tshape env r sh =
-      let { s_origin; s_unknown_value; s_fields } = sh in
-      let (env, s_unknown_value) = this#on_type env s_unknown_value in
-      let (env, s_fields) =
-        TShapeMap.map_env this#on_shape_field_type env s_fields
-      in
-      let sh = { s_origin; s_unknown_value; s_fields } in
-      (env, mk (r, Tshape sh))
+      match sh with
+      | Shape_simple { s_origin; s_unknown_value; s_fields } ->
+        let (env, s_unknown_value) = this#on_type env s_unknown_value in
+        let (env, s_fields) =
+          TShapeMap.map_env this#on_shape_field_type env s_fields
+        in
+        let sh = Shape_simple { s_origin; s_unknown_value; s_fields } in
+        (env, mk (r, Tshape sh))
+      | Shape_splat { ss_elems } ->
+        let (env, ss_elems) = List.map_env env ss_elems ~f:this#on_type in
+        (env, mk (r, Tshape (Shape_splat { ss_elems })))
 
     method! on_tvec_or_dict env r ty1 ty2 =
       let (env, ty1) = this#on_type env ty1 in

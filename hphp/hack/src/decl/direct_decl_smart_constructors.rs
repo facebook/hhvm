@@ -73,6 +73,7 @@ use oxidized::typing_defs::RefinedConstBound;
 use oxidized::typing_defs::RefinedConstBounds;
 use oxidized::typing_defs::ShapeFieldType;
 use oxidized::typing_defs::ShapeType;
+use oxidized::typing_defs::ShapeTypeSimple;
 use oxidized::typing_defs::TaccessType;
 use oxidized::typing_defs::Tparam;
 use oxidized::typing_defs::TshapeFieldName;
@@ -2306,11 +2307,11 @@ impl<'o, 't> DirectDeclSmartConstructors<'o, 't> {
                     ..fun_type
                 })
             }
-            Ty_::Tshape(ShapeType {
+            Ty_::Tshape(ShapeType::ShapeSimple(ShapeTypeSimple {
                 origin: _,
                 unknown_value: kind,
                 fields,
-            }) => {
+            })) => {
                 let mut converted_fields = TShapeMap::new();
                 for (name, ty) in fields.into_iter() {
                     converted_fields.insert(
@@ -2322,11 +2323,14 @@ impl<'o, 't> DirectDeclSmartConstructors<'o, 't> {
                     );
                 }
                 let origin = TypeOrigin::MissingOrigin;
-                Ty_::Tshape(ShapeType {
+                Ty_::Tshape(ShapeType::ShapeSimple(ShapeTypeSimple {
                     origin,
                     unknown_value: kind,
                     fields: converted_fields,
-                })
+                }))
+            }
+            Ty_::Tshape(ShapeType::ShapeSplat(_)) => {
+                panic!("Shape_splat not yet supported")
             }
             Ty_::TvecOrDict(tk, tv) => Ty_::TvecOrDict(
                 self.convert_tapply_to_tgeneric(tk),
@@ -5603,11 +5607,11 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
         let origin = TypeOrigin::MissingOrigin;
         self.hint_ty(
             pos,
-            Ty_::Tshape(ShapeType {
+            Ty_::Tshape(ShapeType::ShapeSimple(ShapeTypeSimple {
                 origin,
                 unknown_value: kind,
                 fields,
-            }),
+            })),
         )
     }
 

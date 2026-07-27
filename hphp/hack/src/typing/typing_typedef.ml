@@ -126,7 +126,7 @@ let check_invalid_recursive_case_type
     | Tfun _
     | Ttuple _
     | Tclass_ptr _
-    | Tshape _
+    | Tshape (Shape_simple _ | Shape_splat _)
     | Tnonnull
     | Tvec_or_dict _
     | Tdynamic _

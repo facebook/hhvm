@@ -163,16 +163,20 @@ and instantiate_ subst x =
   | Tapply (x, tyl) ->
     let tyl = List.map tyl ~f:(instantiate subst) in
     Tapply (x, tyl)
-  | Tshape { s_origin = _; s_unknown_value = shape_kind; s_fields = fdm } ->
+  | Tshape
+      (Shape_simple
+        { s_origin = _; s_unknown_value = shape_kind; s_fields = fdm }) ->
     let fdm = ShapeFieldMap.map (instantiate subst) fdm in
     (* TODO(shapes) Should this be changing s_origin? *)
     Tshape
-      {
-        s_origin = Missing_origin;
-        s_unknown_value = shape_kind;
-        (* TODO(shapes) s_unknown_value should likely be instantiated *)
-        s_fields = fdm;
-      }
+      (Shape_simple
+         {
+           s_origin = Missing_origin;
+           s_unknown_value = shape_kind;
+           (* TODO(shapes) s_unknown_value should likely be instantiated *)
+           s_fields = fdm;
+         })
+  | Tshape (Shape_splat _) -> failwith "Shape_splat unexpected"
   | Tclass_ptr ty -> Tclass_ptr (instantiate subst ty)
 
 and instantiate_tuple_extra subst e =

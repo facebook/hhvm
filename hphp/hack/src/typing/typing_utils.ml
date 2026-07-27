@@ -841,12 +841,13 @@ let rec is_supportdyn ~visited_tyvars ~visited_typarams env ty =
     List.for_all t_required ~f:recurse
     && List.for_all t_optional ~f:recurse
     && recurse t_vs
-  | Tshape { s_origin = _; s_unknown_value; s_fields } ->
+  | Tshape (Shape_simple { s_origin = _; s_unknown_value; s_fields }) ->
     recurse s_unknown_value
     && TShapeMap.fold
          (fun _ { sft_ty; _ } d -> d && recurse sft_ty)
          s_fields
          true
+  | Tshape (Shape_splat _) -> false
   | Tvec_or_dict (ty1, ty2) -> recurse ty1 && recurse ty2
   | Tnewtype (n, [_], _) when String.equal n SN.Classes.cSupportDyn -> true
   | Tnewtype (n, tyl, _) ->

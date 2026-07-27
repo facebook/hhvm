@@ -187,25 +187,38 @@ let validator =
         (* HHVM doesn't currently support is/as on type splats, so let's reject it in Hack *)
         this#invalid acc r @@ "a tuple type with a splat element"
 
-    method! on_tshape acc _r { s_fields = fdm; s_unknown_value; _ } =
-      let tyl = TShapeMap.values fdm |> List.map ~f:(fun s -> s.sft_ty) in
-      let acc = List.fold_left tyl ~init:acc ~f:this#on_type in
-      let rec is_nothing_or_mixed ty =
-        match get_node ty with
-        | Tmixed
-        | Tunion [] ->
-          true
-        | Tapply ((_, name), [ty])
-          when String.equal name Naming_special_names.Classes.cSupportDyn ->
-          is_nothing_or_mixed ty
-        | _ -> false
-      in
-      (* HHVM doesn't currently support is/as on typed open shapes, so let's reject it in Hack *)
-      if is_nothing_or_mixed s_unknown_value then
-        this#check_for_wildcards acc tyl "shape"
-      else
-        this#invalid acc (get_reason s_unknown_value)
-        @@ "a shape type with a typed variadic element"
+    method! on_tshape acc r st =
+      match st with
+      | Shape_splat _ ->
+        (* Reject is/as on shape splats. HHVM's is/as matcher
+           (runtime/base/type-structure-helpers.cpp) only understands a
+           *resolved* shape type structure: it reads the [fields] dict and has
+           no awareness of a splat's [splat_elem_types]. To accept it, HHVM
+           would first have to resolve the splat into a plain shape via the
+           rightmost-wins merge ([TypeStructure::mergeResolvedShapeSplat]) and
+           match against that, and reject any operand it cannot resolve at
+           runtime (e.g. an erased generic, whose type structure is not
+           available). Until that machinery exists we forbid it statically. *)
+        this#invalid acc r @@ "a shape type with a splat element"
+      | Shape_simple { s_fields = fdm; s_unknown_value; _ } ->
+        let tyl = TShapeMap.values fdm |> List.map ~f:(fun s -> s.sft_ty) in
+        let acc = List.fold_left tyl ~init:acc ~f:this#on_type in
+        let rec is_nothing_or_mixed ty =
+          match get_node ty with
+          | Tmixed
+          | Tunion [] ->
+            true
+          | Tapply ((_, name), [ty])
+            when String.equal name Naming_special_names.Classes.cSupportDyn ->
+            is_nothing_or_mixed ty
+          | _ -> false
+        in
+        (* HHVM doesn't currently support is/as on typed open shapes, so let's reject it in Hack *)
+        if is_nothing_or_mixed s_unknown_value then
+          this#check_for_wildcards acc tyl "shape"
+        else
+          this#invalid acc (get_reason s_unknown_value)
+          @@ "a shape type with a typed variadic element"
 
     method! on_tclass_ptr acc r _ty =
       (* TODO(T199611023) allow when we enforce inner type *)

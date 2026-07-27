@@ -453,11 +453,17 @@ and 'phase refined_const_bounds = {
 
 (** Whether all fields of this shape are known, types of each of the
  * known arms. *)
-and 'phase shape_type = {
+and 'phase shape_type_simple = {
   s_origin: type_origin; [@transform.opaque]
   s_unknown_value: 'phase ty;
   s_fields: 'phase shape_field_type TShapeMap.t;
 }
+
+and 'phase shape_type_splat = { ss_elems: 'phase ty list }
+
+and 'phase shape_type =
+  | Shape_simple of 'phase shape_type_simple
+  | Shape_splat of 'phase shape_type_splat
 
 (**
   Required and extra components of a tuple. Extra components

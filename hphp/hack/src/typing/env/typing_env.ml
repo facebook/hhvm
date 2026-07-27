@@ -1697,11 +1697,16 @@ module M = struct
           tyl
           ~init:(env, Tvid.Set.empty, Tvid.Set.empty)
           ~f:get_tyvars_union
-      | Tshape { s_fields = m; _ } ->
+      | Tshape (Shape_simple { s_fields = m; _ }) ->
         TShapeMap.fold
           (fun _ { sft_ty; _ } res -> get_tyvars_union res sft_ty)
           m
           (env, Tvid.Set.empty, Tvid.Set.empty)
+      | Tshape (Shape_splat { ss_elems }) ->
+        List.fold_left
+          ss_elems
+          ~init:(env, Tvid.Set.empty, Tvid.Set.empty)
+          ~f:get_tyvars_union
       | Tfun ft ->
         let (env, params_positive, params_negative) =
           List.fold_left

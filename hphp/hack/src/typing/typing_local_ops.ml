@@ -135,7 +135,7 @@ let rec is_byval_collection_or_string_or_any_type env ty =
       || String.equal x SN.Classes.cString
     | Tvec_or_dict _
     | Ttuple _
-    | Tshape _
+    | Tshape (Shape_simple _ | Shape_splat _)
     | Tdynamic _
     | Tany _ ->
       true

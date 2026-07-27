@@ -123,15 +123,21 @@ module Locl_Inst = struct
     | Tclass (x, exact, tyl) ->
       let tyl = List.map tyl ~f:(instantiate subst) in
       Tclass (x, exact, tyl)
-    | Tshape { s_origin = _; s_unknown_value = kind; s_fields = fdm } ->
+    | Tshape
+        (Shape_simple { s_origin = _; s_unknown_value = kind; s_fields = fdm })
+      ->
       let fdm = ShapeFieldMap.map (instantiate subst) fdm in
       Tshape
-        {
-          s_origin = Missing_origin;
-          s_unknown_value = kind;
-          (* TODO(shapes) instantiate s_unknown_value *)
-          s_fields = fdm;
-        }
+        (Shape_simple
+           {
+             s_origin = Missing_origin;
+             s_unknown_value = kind;
+             (* TODO(shapes) instantiate s_unknown_value *)
+             s_fields = fdm;
+           })
+    | Tshape (Shape_splat { ss_elems }) ->
+      let ss_elems = List.map ss_elems ~f:(instantiate subst) in
+      Tshape (Shape_splat { ss_elems })
     | Tdependent (dep, ty) ->
       let ty = instantiate subst ty in
       Tdependent (dep, ty)
@@ -302,7 +308,7 @@ and check_type_integrity
        HHVM enforces only the base class at runtime. Skip package checks on
        the refinement members entirely. *)
     Class_refinement.iter (check ~should_check_package_boundary:`No) rs
-  | Tshape { s_fields = map; _ } ->
+  | Tshape (Shape_simple { s_fields = map; _ }) ->
     (* Shape field types are runtime-enforced under `as` (modulo `enforce_deep`),
        so propagate the boundary reason for as-expression contexts. Other
        contexts continue to skip field-type checking to preserve prior behavior. *)
@@ -316,6 +322,7 @@ and check_type_integrity
     TShapeMap.iter
       (fun _ sft -> check ~should_check_package_boundary sft.sft_ty)
       map
+  | Tshape (Shape_splat _) -> failwith "Shape_splat unexpected"
   | Tfun ({ ft_params; ft_ret; _ } : _ fun_type) ->
     (* FIXME shall we inspect tparams and where_constraints? *)
     check ~should_check_package_boundary:`No ft_ret;

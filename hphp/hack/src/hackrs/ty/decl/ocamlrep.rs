@@ -274,53 +274,72 @@ impl<R: Reason> ToOcamlRep for ShapeType<R> {
             map
         };
 
-        let mut block = alloc.block_with_size(3);
+        // Build the ShapeTypeSimple record (3 fields: origin, unknown_value, fields)
+        let mut simple_block = alloc.block_with_size(3);
         // Note: we always set decl shapes to Missing_origin (0) as it is only for type aliases
-        alloc.set_field(&mut block, 0, ocamlrep::Value::int(0));
-        alloc.set_field(&mut block, 1, alloc.add(shape_kind));
-        alloc.set_field(&mut block, 2, map);
-        block.build()
+        alloc.set_field(&mut simple_block, 0, ocamlrep::Value::int(0));
+        alloc.set_field(&mut simple_block, 1, alloc.add(shape_kind));
+        alloc.set_field(&mut simple_block, 2, map);
+        let simple = simple_block.build();
+
+        // Wrap in Shape_simple variant (tag 0)
+        let mut variant_block = alloc.block_with_size_and_tag(1usize, 0u8);
+        alloc.set_field(&mut variant_block, 0, simple);
+        variant_block.build()
     }
 }
 
 impl<R: Reason> FromOcamlRep for ShapeType<R> {
     fn from_ocamlrep(value: ocamlrep::Value<'_>) -> Result<Self, ocamlrep::FromError> {
-        let block = ocamlrep::from::expect_tuple(value, 3)?;
-        Ok(ShapeType(
-            ocamlrep::from::field(block, 1)?,
-            ocamlrep::vec_from_ocaml_map(block[2])?
-                .into_iter()
-                .map(|(k, (optional, ty))| match k {
-                    OcamlShapeFieldName::RegexGroup(pos_id) => (
-                        TshapeFieldName::TSFregexGroup(pos_id.id()),
-                        ShapeFieldType {
-                            optional,
-                            ty,
-                            field_name_pos: ShapeFieldNamePos::Simple(pos_id.into_pos()),
-                        },
-                    ),
-                    OcamlShapeFieldName::Str(pos_id) => (
-                        TshapeFieldName::TSFlitStr(pos_id.id()),
-                        ShapeFieldType {
-                            optional,
-                            ty,
-                            field_name_pos: ShapeFieldNamePos::Simple(pos_id.into_pos()),
-                        },
-                    ),
-                    OcamlShapeFieldName::ClassConst(cls_id, const_id) => (
-                        TshapeFieldName::TSFclassConst(cls_id.id(), const_id.id()),
-                        ShapeFieldType {
-                            optional,
-                            ty,
-                            field_name_pos: ShapeFieldNamePos::ClassConst(
-                                cls_id.into_pos(),
-                                const_id.into_pos(),
+        // ShapeType is now an enum: Shape_simple (tag 0) | Shape_splat (tag 1)
+        let variant_block = ocamlrep::from::expect_block(value)?;
+        match variant_block.tag() {
+            0 => {
+                // Shape_simple(ShapeTypeSimple { origin, unknown_value, fields })
+                ocamlrep::from::expect_block_size(variant_block, 1)?;
+                let inner: ocamlrep::Value<'_> = variant_block[0];
+                let block = ocamlrep::from::expect_tuple(inner, 3)?;
+                Ok(ShapeType(
+                    ocamlrep::from::field(block, 1)?,
+                    ocamlrep::vec_from_ocaml_map(block[2])?
+                        .into_iter()
+                        .map(|(k, (optional, ty))| match k {
+                            OcamlShapeFieldName::RegexGroup(pos_id) => (
+                                TshapeFieldName::TSFregexGroup(pos_id.id()),
+                                ShapeFieldType {
+                                    optional,
+                                    ty,
+                                    field_name_pos: ShapeFieldNamePos::Simple(pos_id.into_pos()),
+                                },
                             ),
-                        },
-                    ),
-                })
-                .collect(),
-        ))
+                            OcamlShapeFieldName::Str(pos_id) => (
+                                TshapeFieldName::TSFlitStr(pos_id.id()),
+                                ShapeFieldType {
+                                    optional,
+                                    ty,
+                                    field_name_pos: ShapeFieldNamePos::Simple(pos_id.into_pos()),
+                                },
+                            ),
+                            OcamlShapeFieldName::ClassConst(cls_id, const_id) => (
+                                TshapeFieldName::TSFclassConst(cls_id.id(), const_id.id()),
+                                ShapeFieldType {
+                                    optional,
+                                    ty,
+                                    field_name_pos: ShapeFieldNamePos::ClassConst(
+                                        cls_id.into_pos(),
+                                        const_id.into_pos(),
+                                    ),
+                                },
+                            ),
+                        })
+                        .collect(),
+                ))
+            }
+            1 => {
+                panic!("Shape_splat not yet supported")
+            }
+            t => Err(ocamlrep::FromError::BlockTagOutOfRange { max: 1, actual: t }),
+        }
     }
 }
 

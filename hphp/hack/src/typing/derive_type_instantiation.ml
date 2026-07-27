@@ -85,9 +85,12 @@ let derive_instantiation
       | (Tsplat lty, Tsplat rty) -> derive_instantiation lty rty (env, subst_acc)
       | (_, (Tvariadic _ | Tsplat _)) -> (env, subst_acc))
     | ( Tshape
-          ({ s_origin = _; s_unknown_value = lty; s_fields = lfields } :
-            _ shape_type),
-        Tshape { s_origin = _; s_unknown_value = rty; s_fields = rfields } ) ->
+          (Shape_simple
+            ({ s_origin = _; s_unknown_value = lty; s_fields = lfields } :
+              _ shape_type_simple)),
+        Tshape
+          (Shape_simple
+            { s_origin = _; s_unknown_value = rty; s_fields = rfields }) ) ->
       (env, subst_acc)
       |> derive_instantiation lty rty
       |> TShapeMap.fold

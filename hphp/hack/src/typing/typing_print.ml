@@ -928,7 +928,8 @@ module Full = struct
         k
         tyl
         ")"
-    | Tshape s -> tshape ~fuel k to_doc penv s is_open_mixed_decl
+    | Tshape (Shape_simple s) -> tshape ~fuel k to_doc penv s is_open_mixed_decl
+    | Tshape (Shape_splat _) -> failwith "Shape_splat unexpected"
     | Tclass_ptr x ->
       let (fuel, ty_doc) = k ~fuel x in
       let class_ptr_doc = Concat [text "class<"; ty_doc; text ">"] in
@@ -1256,7 +1257,8 @@ module Full = struct
         k
         tyl
         ")"
-    | Tshape s -> tshape ~fuel k to_doc env s is_open_mixed
+    | Tshape (Shape_simple s) -> tshape ~fuel k to_doc env s is_open_mixed
+    | Tshape (Shape_splat _) -> failwith "Shape_splat unexpected"
     | Taccess (root_ty, id) ->
       let (fuel, root_ty_doc) = k ~fuel root_ty in
       let access_doc = Concat [root_ty_doc; text "::"; to_doc (snd id)] in

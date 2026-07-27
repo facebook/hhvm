@@ -29,7 +29,10 @@ let widen_for_refine_shape ~expr_pos field_name env ty =
           env
           [Log_head ("widen_for_refine_shape", [Log_type ("ty", ty)])]));
   match deref ty with
-  | (r, Tshape { s_origin = _; s_unknown_value = shape_kind; s_fields = fields })
+  | ( r,
+      Tshape
+        (Shape_simple
+          { s_origin = _; s_unknown_value = shape_kind; s_fields = fields }) )
     -> begin
     match TShapeMap.find_opt field_name fields with
     | None ->
@@ -40,11 +43,12 @@ let widen_for_refine_shape ~expr_pos field_name env ty =
           (mk
              ( r,
                Tshape
-                 {
-                   s_origin = Missing_origin;
-                   s_unknown_value = shape_kind;
-                   s_fields = TShapeMap.add field_name sft fields;
-                 } )) )
+                 (Shape_simple
+                    {
+                      s_origin = Missing_origin;
+                      s_unknown_value = shape_kind;
+                      s_fields = TShapeMap.add field_name sft fields;
+                    }) )) )
     | Some _ -> (env, Some ty)
   end
   | _ -> (env, None)
@@ -217,8 +221,9 @@ let refine_handle_unions_dyn pos refine_f env ~shape_ty field_name :
     in
     let supportdyn = supportdyn || supportdyn2 in
     match get_node stripped_shape with
-    | Tshape { s_origin = _; s_unknown_value = shape_kind; s_fields = fields }
-      ->
+    | Tshape
+        (Shape_simple
+          { s_origin = _; s_unknown_value = shape_kind; s_fields = fields }) ->
       let result = refine_f stripped_shape shape_kind fields field_name in
       ( (env, e1),
         if supportdyn then
@@ -267,7 +272,9 @@ let remove_key pos env shape_ty field =
   mk
     ( Reason.witness pos,
       Tshape
-        { s_origin = Missing_origin; s_unknown_value = shape_kind; s_fields } )
+        (Shape_simple
+           { s_origin = Missing_origin; s_unknown_value = shape_kind; s_fields })
+    )
 
 (** Refine the type of a shape knowing that a call to Shapes::idx is not null.
   This means that the shape now has the field, and that the type for this
@@ -292,8 +299,9 @@ let shapes_idx_not_null_with_ty_err field_p env ~shape_ty field =
         match deref shape_ty with
         | ( r,
             Tshape
-              { s_origin = _; s_fields = ftm; s_unknown_value = shape_kind } )
-          ->
+              (Shape_simple
+                { s_origin = _; s_fields = ftm; s_unknown_value = shape_kind })
+          ) ->
           let (env, field_type) =
             let sft_ty =
               match TShapeMap.find_opt field ftm with
@@ -313,11 +321,12 @@ let shapes_idx_not_null_with_ty_err field_p env ~shape_ty field =
             mk
               ( r,
                 Tshape
-                  {
-                    s_origin = Missing_origin;
-                    s_fields = ftm;
-                    s_unknown_value = shape_kind;
-                  } ) )
+                  (Shape_simple
+                     {
+                       s_origin = Missing_origin;
+                       s_fields = ftm;
+                       s_unknown_value = shape_kind;
+                     }) ) )
         | _ ->
           (* This should be an error, but it is already raised when
              typechecking the call to Shapes::idx *)
@@ -413,73 +422,74 @@ let to_collection env pos shape_ty res return_type =
       inherit Type_mapper.tvar_expanding_type_mapper as super
 
       method! on_tshape env r s =
-        let { s_origin = _; s_unknown_value = shape_kind; s_fields = fdm } =
-          s
-        in
-        (* The key type is the union of the types of the known fields,
-         * or arraykey if there may be unknown fields (open shape)
-         *)
-        let (env, key) =
-          if not (TUtils.is_nothing env shape_kind) then
-            (env, MakeType.arraykey r)
-          else
-            let keys = TShapeMap.keys fdm in
-            let (env, keys) =
-              List.map_env env keys ~f:(fun env key ->
-                  match key with
-                  | Typing_defs.TSFregex_group (p, _) ->
-                    (env, MakeType.int (Reason.witness_from_decl p))
-                  | Typing_defs.TSFlit_str (p, _) ->
-                    (env, MakeType.string (Reason.witness_from_decl p))
-                  | Typing_defs.TSFclass_const ((_, cid), (_, mid)) -> begin
-                    match Env.get_class env cid with
-                    | Decl_entry.Found class_ -> begin
-                      match Env.get_const env class_ mid with
-                      | Some const ->
-                        let ((env, ty_err_opt), lty) =
-                          Typing_phase.localize_no_subst
-                            env
-                            ~ignore_errors:true
-                            const.cc_type
-                        in
-                        Option.iter
-                          ~f:(Typing_error_utils.add_typing_error ~env)
-                          ty_err_opt;
-                        (env, lty)
-                      | None -> Env.fresh_type_error env pos
-                    end
-                    | Decl_entry.DoesNotExist
-                    | Decl_entry.NotYetAvailable ->
-                      Env.fresh_type_error env pos
-                  end)
-            in
-            Typing_union.union_list env r keys
-        in
-        (* The value type is the union of the types of the known fields together
-         * with the type of the unknown fields (open shape, typically mixed or supportdyn<mixed>)
-         *)
-        let (env, value) =
-          (* If the unknown fields have type mixed then that's the type of values: no need for union *)
-          if TUtils.is_mixed env shape_kind then
-            (env, shape_kind)
-          else
-            (* Otherwise first filter out subtypes (common case,
-             * as unknown fields are likely supportdyn<mixed>)
-             * and then construct the union.
-             *)
-            let values = TShapeMap.values fdm in
-            let values =
-              List.filter_map
-                ~f:(fun { sft_ty; _ } ->
-                  if TUtils.is_sub_type env sft_ty shape_kind then
-                    None
-                  else
-                    Some sft_ty)
-                values
-            in
-            Typing_union.union_list env r (shape_kind :: values)
-        in
-        return_type env (get_reason res) key value
+        match s with
+        | Shape_splat _ -> failwith "Shape_splat unexpected"
+        | Shape_simple
+            { s_origin = _; s_unknown_value = shape_kind; s_fields = fdm } ->
+          (* The key type is the union of the types of the known fields,
+           * or arraykey if there may be unknown fields (open shape)
+           *)
+          let (env, key) =
+            if not (TUtils.is_nothing env shape_kind) then
+              (env, MakeType.arraykey r)
+            else
+              let keys = TShapeMap.keys fdm in
+              let (env, keys) =
+                List.map_env env keys ~f:(fun env key ->
+                    match key with
+                    | Typing_defs.TSFregex_group (p, _) ->
+                      (env, MakeType.int (Reason.witness_from_decl p))
+                    | Typing_defs.TSFlit_str (p, _) ->
+                      (env, MakeType.string (Reason.witness_from_decl p))
+                    | Typing_defs.TSFclass_const ((_, cid), (_, mid)) -> begin
+                      match Env.get_class env cid with
+                      | Decl_entry.Found class_ -> begin
+                        match Env.get_const env class_ mid with
+                        | Some const ->
+                          let ((env, ty_err_opt), lty) =
+                            Typing_phase.localize_no_subst
+                              env
+                              ~ignore_errors:true
+                              const.cc_type
+                          in
+                          Option.iter
+                            ~f:(Typing_error_utils.add_typing_error ~env)
+                            ty_err_opt;
+                          (env, lty)
+                        | None -> Env.fresh_type_error env pos
+                      end
+                      | Decl_entry.DoesNotExist
+                      | Decl_entry.NotYetAvailable ->
+                        Env.fresh_type_error env pos
+                    end)
+              in
+              Typing_union.union_list env r keys
+          in
+          (* The value type is the union of the types of the known fields together
+           * with the type of the unknown fields (open shape, typically mixed or supportdyn<mixed>)
+           *)
+          let (env, value) =
+            (* If the unknown fields have type mixed then that's the type of values: no need for union *)
+            if TUtils.is_mixed env shape_kind then
+              (env, shape_kind)
+            else
+              (* Otherwise first filter out subtypes (common case,
+               * as unknown fields are likely supportdyn<mixed>)
+               * and then construct the union.
+               *)
+              let values = TShapeMap.values fdm in
+              let values =
+                List.filter_map
+                  ~f:(fun { sft_ty; _ } ->
+                    if TUtils.is_sub_type env sft_ty shape_kind then
+                      None
+                    else
+                      Some sft_ty)
+                  values
+              in
+              Typing_union.union_list env r (shape_kind :: values)
+          in
+          return_type env (get_reason res) key value
 
       method! on_tunion env r tyl =
         let (env, tyl) = List.fold_map tyl ~init:env ~f:self#on_type in

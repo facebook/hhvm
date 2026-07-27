@@ -4919,8 +4919,14 @@ end = struct
             env
             expected
         with
-        | (env, Some (pos, ur, _, _, Tshape { s_fields = expected_fdm; _ }, _))
-          ->
+        | ( env,
+            Some
+              ( pos,
+                ur,
+                _,
+                _,
+                Tshape (Shape_simple { s_fields = expected_fdm; _ }),
+                _ ) ) ->
           List.map_env
             env
             ~f:(fun env ((k, _) as ke) ->

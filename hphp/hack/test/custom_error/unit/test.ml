@@ -241,20 +241,21 @@ let test_patt_tysub _ =
   let shp =
     Ty.(
       Tshape
-        {
-          s_origin = Missing_origin;
-          s_unknown_value = mk_ty (Tdynamic None);
-          s_fields =
-            TShapeMap.of_list
-              [
-                ( TSFlit_str (pod_none, "c"),
-                  { sft_optional = false; sft_ty = mk_ty (Tdynamic None) } );
-                ( TSFlit_str (pod_none, "a"),
-                  { sft_optional = false; sft_ty = mk_ty (Tdynamic None) } );
-                ( TSFlit_str (pod_none, "b"),
-                  { sft_optional = false; sft_ty = mk_ty (Tdynamic None) } );
-              ];
-        })
+        (Shape_simple
+           {
+             s_origin = Missing_origin;
+             s_unknown_value = mk_ty (Tdynamic None);
+             s_fields =
+               TShapeMap.of_list
+                 [
+                   ( TSFlit_str (pod_none, "c"),
+                     { sft_optional = false; sft_ty = mk_ty (Tdynamic None) } );
+                   ( TSFlit_str (pod_none, "a"),
+                     { sft_optional = false; sft_ty = mk_ty (Tdynamic None) } );
+                   ( TSFlit_str (pod_none, "b"),
+                     { sft_optional = false; sft_ty = mk_ty (Tdynamic None) } );
+                 ];
+           }))
   in
   let ty_locl_sub =
     Ty.Tclass ((pod_none, "\\" ^ class_name), Ty.nonexact, [mk_ty shp])
@@ -345,20 +346,21 @@ let test_patt_tysub_or_pattern _ =
   let shp =
     Ty.(
       Tshape
-        {
-          s_origin = Missing_origin;
-          s_unknown_value = mk_ty (Tdynamic None);
-          s_fields =
-            TShapeMap.of_list
-              [
-                ( TSFlit_str (pod_none, "c"),
-                  { sft_optional = false; sft_ty = mk_ty (Tdynamic None) } );
-                ( TSFlit_str (pod_none, "a"),
-                  { sft_optional = false; sft_ty = mk_ty (Tdynamic None) } );
-                ( TSFlit_str (pod_none, "b"),
-                  { sft_optional = false; sft_ty = mk_ty (Tdynamic None) } );
-              ];
-        })
+        (Shape_simple
+           {
+             s_origin = Missing_origin;
+             s_unknown_value = mk_ty (Tdynamic None);
+             s_fields =
+               TShapeMap.of_list
+                 [
+                   ( TSFlit_str (pod_none, "c"),
+                     { sft_optional = false; sft_ty = mk_ty (Tdynamic None) } );
+                   ( TSFlit_str (pod_none, "a"),
+                     { sft_optional = false; sft_ty = mk_ty (Tdynamic None) } );
+                   ( TSFlit_str (pod_none, "b"),
+                     { sft_optional = false; sft_ty = mk_ty (Tdynamic None) } );
+                 ];
+           }))
   in
   let ty_locl_sub =
     Ty.Tclass ((pod_none, "\\" ^ class_name), Ty.nonexact, [mk_ty shp])

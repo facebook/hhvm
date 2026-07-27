@@ -91,7 +91,7 @@ let overload_extract_from_awaitable_with_ty_err env ~p opt_ty_maybe =
     | Tdependent _
     | Tclass _
     | Ttuple _
-    | Tshape _
+    | Tshape (Shape_simple _ | Shape_splat _)
     | Taccess _
     | Tlabel _
     | Tneg _
@@ -120,7 +120,7 @@ let overload_extract_from_awaitable_with_ty_err env ~p opt_ty_maybe =
         | Tintersection _
         | Toption _
         | Tunion _
-        | Tshape _
+        | Tshape (Shape_simple _ | Shape_splat _)
         | Taccess _
         | Tlabel _
         | Tneg _

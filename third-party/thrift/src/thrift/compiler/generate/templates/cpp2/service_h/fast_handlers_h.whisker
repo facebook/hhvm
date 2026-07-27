@@ -16,11 +16,11 @@
 
 }}
 {{#import "common/server" as server}}
-{{#import "types/schema_association" as schema_association}}
-namespace apache::thrift::detail {
-{{#partial schema_association.declaration node=service}}
-} // namespace apache::thrift::detail
-
+{{!
+  TSchemaAssociation<service> is now emitted by the legacy service_interface
+  template (always present under additive @cpp.FastServer). Re-emitting here
+  caused a redefinition error in the generated header.
+}}
 namespace apache::thrift {
 
 /**

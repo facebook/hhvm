@@ -23,14 +23,352 @@ namespace apache { namespace thrift {
   namespace transport { class THeader; }
 }}
 
-namespace apache::thrift::detail {
+namespace cpp2::test {
+class BasicService;
+class BasicServiceAsyncProcessor;
+
+class BasicServiceServiceInfoHolder : public apache::thrift::ServiceInfoHolder {
+  public:
+   apache::thrift::ServiceRequestInfoMap const& requestInfoMap() const override;
+   static apache::thrift::ServiceRequestInfoMap staticRequestInfoMap();
+};
+} // namespace cpp2::test
+
+namespace apache::thrift {
+template <>
+class ServiceHandler<::cpp2::test::BasicService> : public apache::thrift::ServerInterface {
+  static_assert(!folly::is_detected_v<::apache::thrift::detail::st::detect_complete, ::cpp2::test::BasicService>, "Definition collision with service tag. Either rename the Thrift service using @cpp.Name annotation or rename the conflicting C++ type.");
+
+ public:
+  std::string_view getGeneratedName() const override { return "BasicService"; }
+
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "meta.com/thrift/test/fixtures/fast_server/BasicService";
+
+  typedef ::cpp2::test::BasicServiceAsyncProcessor ProcessorType;
+  std::unique_ptr<apache::thrift::AsyncProcessor> getProcessor() override;
+  CreateMethodMetadataResult createMethodMetadata() override;
+  bool isThriftGenerated() const override final { return true; }
+ private:
+  std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const>> getServiceRequestInfoMap() const;
+ public:
+  virtual void sync_ping();
+  [[deprecated("Use sync_ping instead")]] virtual void ping();
+  virtual folly::Future<folly::Unit> future_ping();
+  virtual folly::SemiFuture<folly::Unit> semifuture_ping();
+#if FOLLY_HAS_COROUTINES
+  virtual folly::coro::Task<void> co_ping();
+  virtual folly::coro::Task<void> co_ping(apache::thrift::RequestParams params);
+#endif
+  virtual void async_tm_ping(apache::thrift::HandlerCallbackPtr<void> callback);
+  virtual ::std::int32_t sync_add(::std::int32_t /*a*/, ::std::int32_t /*b*/);
+  [[deprecated("Use sync_add instead")]] virtual ::std::int32_t add(::std::int32_t /*a*/, ::std::int32_t /*b*/);
+  virtual folly::Future<::std::int32_t> future_add(::std::int32_t p_a, ::std::int32_t p_b);
+  virtual folly::SemiFuture<::std::int32_t> semifuture_add(::std::int32_t p_a, ::std::int32_t p_b);
+#if FOLLY_HAS_COROUTINES
+  virtual folly::coro::Task<::std::int32_t> co_add(::std::int32_t p_a, ::std::int32_t p_b);
+  virtual folly::coro::Task<::std::int32_t> co_add(apache::thrift::RequestParams params, ::std::int32_t p_a, ::std::int32_t p_b);
+#endif
+  virtual void async_tm_add(apache::thrift::HandlerCallbackPtr<::std::int32_t> callback, ::std::int32_t p_a, ::std::int32_t p_b);
+  virtual void sync_buildItem(::cpp2::test::DataItem& /*_return*/, std::unique_ptr<::cpp2::test::DataItem> /*template_*/, ::std::int32_t /*id*/);
+  [[deprecated("Use sync_buildItem instead")]] virtual void buildItem(::cpp2::test::DataItem& /*_return*/, std::unique_ptr<::cpp2::test::DataItem> /*template_*/, ::std::int32_t /*id*/);
+  virtual folly::Future<std::unique_ptr<::cpp2::test::DataItem>> future_buildItem(std::unique_ptr<::cpp2::test::DataItem> p_template_, ::std::int32_t p_id);
+  virtual folly::SemiFuture<std::unique_ptr<::cpp2::test::DataItem>> semifuture_buildItem(std::unique_ptr<::cpp2::test::DataItem> p_template_, ::std::int32_t p_id);
+#if FOLLY_HAS_COROUTINES
+  virtual folly::coro::Task<std::unique_ptr<::cpp2::test::DataItem>> co_buildItem(std::unique_ptr<::cpp2::test::DataItem> p_template_, ::std::int32_t p_id);
+  virtual folly::coro::Task<std::unique_ptr<::cpp2::test::DataItem>> co_buildItem(apache::thrift::RequestParams params, std::unique_ptr<::cpp2::test::DataItem> p_template_, ::std::int32_t p_id);
+#endif
+  virtual void async_tm_buildItem(apache::thrift::HandlerCallbackPtr<std::unique_ptr<::cpp2::test::DataItem>> callback, std::unique_ptr<::cpp2::test::DataItem> p_template_, ::std::int32_t p_id);
+  virtual void sync_lookup(::cpp2::test::DataItem& /*_return*/, ::std::int32_t /*id*/);
+  [[deprecated("Use sync_lookup instead")]] virtual void lookup(::cpp2::test::DataItem& /*_return*/, ::std::int32_t /*id*/);
+  virtual folly::Future<std::unique_ptr<::cpp2::test::DataItem>> future_lookup(::std::int32_t p_id);
+  virtual folly::SemiFuture<std::unique_ptr<::cpp2::test::DataItem>> semifuture_lookup(::std::int32_t p_id);
+#if FOLLY_HAS_COROUTINES
+  virtual folly::coro::Task<std::unique_ptr<::cpp2::test::DataItem>> co_lookup(::std::int32_t p_id);
+  virtual folly::coro::Task<std::unique_ptr<::cpp2::test::DataItem>> co_lookup(apache::thrift::RequestParams params, ::std::int32_t p_id);
+#endif
+  virtual void async_tm_lookup(apache::thrift::HandlerCallbackPtr<std::unique_ptr<::cpp2::test::DataItem>> callback, ::std::int32_t p_id);
+  virtual void sync_secureLookup(::cpp2::test::DataItem& /*_return*/, ::std::int32_t /*id*/, std::unique_ptr<::std::string> /*user*/);
+  [[deprecated("Use sync_secureLookup instead")]] virtual void secureLookup(::cpp2::test::DataItem& /*_return*/, ::std::int32_t /*id*/, std::unique_ptr<::std::string> /*user*/);
+  virtual folly::Future<std::unique_ptr<::cpp2::test::DataItem>> future_secureLookup(::std::int32_t p_id, std::unique_ptr<::std::string> p_user);
+  virtual folly::SemiFuture<std::unique_ptr<::cpp2::test::DataItem>> semifuture_secureLookup(::std::int32_t p_id, std::unique_ptr<::std::string> p_user);
+#if FOLLY_HAS_COROUTINES
+  virtual folly::coro::Task<std::unique_ptr<::cpp2::test::DataItem>> co_secureLookup(::std::int32_t p_id, std::unique_ptr<::std::string> p_user);
+  virtual folly::coro::Task<std::unique_ptr<::cpp2::test::DataItem>> co_secureLookup(apache::thrift::RequestParams params, ::std::int32_t p_id, std::unique_ptr<::std::string> p_user);
+#endif
+  virtual void async_tm_secureLookup(apache::thrift::HandlerCallbackPtr<std::unique_ptr<::cpp2::test::DataItem>> callback, ::std::int32_t p_id, std::unique_ptr<::std::string> p_user);
+  virtual void sync_fireAndForget(std::unique_ptr<::std::string> /*event*/);
+  [[deprecated("Use sync_fireAndForget instead")]] virtual void fireAndForget(std::unique_ptr<::std::string> /*event*/);
+  virtual folly::Future<folly::Unit> future_fireAndForget(std::unique_ptr<::std::string> p_event);
+  virtual folly::SemiFuture<folly::Unit> semifuture_fireAndForget(std::unique_ptr<::std::string> p_event);
+#if FOLLY_HAS_COROUTINES
+  virtual folly::coro::Task<void> co_fireAndForget(std::unique_ptr<::std::string> p_event);
+  virtual folly::coro::Task<void> co_fireAndForget(apache::thrift::RequestParams params, std::unique_ptr<::std::string> p_event);
+#endif
+  virtual void async_tm_fireAndForget(apache::thrift::HandlerCallbackOneWay::Ptr callback, std::unique_ptr<::std::string> p_event);
+ private:
+  static ::cpp2::test::BasicServiceServiceInfoHolder __fbthrift_serviceInfoHolder;
+  std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_ping{apache::thrift::detail::si::InvocationType::AsyncTm};
+  std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_add{apache::thrift::detail::si::InvocationType::AsyncTm};
+  std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_buildItem{apache::thrift::detail::si::InvocationType::AsyncTm};
+  std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_lookup{apache::thrift::detail::si::InvocationType::AsyncTm};
+  std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_secureLookup{apache::thrift::detail::si::InvocationType::AsyncTm};
+  std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_fireAndForget{apache::thrift::detail::si::InvocationType::AsyncTm};
+ public:
+
+  virtual void fbthrift_execute_decorators_before_ping(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  virtual void fbthrift_execute_decorators_after_ping(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  static void fbthrift_invoke_decorator_after_ping(void* iface, apache::thrift::Cpp2RequestContext* ctx) {
+    static_cast<ServiceHandler<::cpp2::test::BasicService>*>(iface)->fbthrift_execute_decorators_after_ping(*ctx);
+  }
+  virtual void fbthrift_execute_decorators_before_add(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::int32_t>::type /*p_a*/, apache::thrift::detail::DecoratorArgType<::std::int32_t>::type /*p_b*/) {}
+  virtual void fbthrift_execute_decorators_after_add(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::std::int32_t>::type /*result*/) {}
+  static void fbthrift_invoke_decorator_after_add(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::std::int32_t>::type result) {
+    static_cast<ServiceHandler<::cpp2::test::BasicService>*>(iface)->fbthrift_execute_decorators_after_add(*ctx, result);
+  }
+  virtual void fbthrift_execute_decorators_before_buildItem(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::cpp2::test::DataItem>::type /*p_template_*/, apache::thrift::detail::DecoratorArgType<::std::int32_t>::type /*p_id*/) {}
+  virtual void fbthrift_execute_decorators_after_buildItem(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::cpp2::test::DataItem>::type /*result*/) {}
+  static void fbthrift_invoke_decorator_after_buildItem(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::cpp2::test::DataItem>::type result) {
+    static_cast<ServiceHandler<::cpp2::test::BasicService>*>(iface)->fbthrift_execute_decorators_after_buildItem(*ctx, result);
+  }
+  virtual void fbthrift_execute_decorators_before_lookup(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::int32_t>::type /*p_id*/) {}
+  virtual void fbthrift_execute_decorators_after_lookup(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::cpp2::test::DataItem>::type /*result*/) {}
+  static void fbthrift_invoke_decorator_after_lookup(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::cpp2::test::DataItem>::type result) {
+    static_cast<ServiceHandler<::cpp2::test::BasicService>*>(iface)->fbthrift_execute_decorators_after_lookup(*ctx, result);
+  }
+  virtual void fbthrift_execute_decorators_before_secureLookup(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::int32_t>::type /*p_id*/, apache::thrift::detail::DecoratorArgType<::std::string>::type /*p_user*/) {}
+  virtual void fbthrift_execute_decorators_after_secureLookup(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::cpp2::test::DataItem>::type /*result*/) {}
+  static void fbthrift_invoke_decorator_after_secureLookup(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::cpp2::test::DataItem>::type result) {
+    static_cast<ServiceHandler<::cpp2::test::BasicService>*>(iface)->fbthrift_execute_decorators_after_secureLookup(*ctx, result);
+  }
+  virtual void fbthrift_execute_decorators_before_fireAndForget(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::string>::type /*p_event*/) {}
+  virtual void fbthrift_execute_decorators_after_fireAndForget(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  static void fbthrift_invoke_decorator_after_fireAndForget(void* iface, apache::thrift::Cpp2RequestContext* ctx) {
+    static_cast<ServiceHandler<::cpp2::test::BasicService>*>(iface)->fbthrift_execute_decorators_after_fireAndForget(*ctx);
+  }
+};
+
+namespace detail {
 template <> struct TSchemaAssociation<::cpp2::test::BasicService, false> {
   static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = -4328462459938241469;
   static constexpr ::std::string_view definitionKey = {"\x04\x3f\x8c\x84\x82\xa4\x1b\x33\x79\xa6\x80\x56\x33\x20\x0c\x86", 16};
 };
-} // namespace apache::thrift::detail
+}
+} // namespace apache::thrift
 
+namespace cpp2::test {
+using BasicServiceSvIf [[deprecated("Use apache::thrift::ServiceHandler<BasicService> instead")]] = ::apache::thrift::ServiceHandler<BasicService>;
+} // namespace cpp2::test
+
+namespace cpp2::test {
+class BasicServiceSvNull : public ::apache::thrift::ServiceHandler<BasicService> {
+ public:
+  void ping() override;
+  ::std::int32_t add(::std::int32_t /*a*/, ::std::int32_t /*b*/) override;
+  void buildItem(::cpp2::test::DataItem& /*_return*/, std::unique_ptr<::cpp2::test::DataItem> /*template_*/, ::std::int32_t /*id*/) override;
+  void lookup(::cpp2::test::DataItem& /*_return*/, ::std::int32_t /*id*/) override;
+  void secureLookup(::cpp2::test::DataItem& /*_return*/, ::std::int32_t /*id*/, std::unique_ptr<::std::string> /*user*/) override;
+  void fireAndForget(std::unique_ptr<::std::string> /*event*/) override;
+};
+
+class BasicServiceAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcessorBase {
+ public:
+  std::string_view getServiceName() override;
+  void getServiceMetadata(apache::thrift::metadata::ThriftServiceMetadataResponse& response) override;
+  using BaseAsyncProcessor = void;
+ protected:
+  ::apache::thrift::ServiceHandler<::cpp2::test::BasicService>* iface_;
+ public:
+  void processSerializedCompressedRequestWithMetadata(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, const apache::thrift::AsyncProcessorFactory::MethodMetadata& methodMetadata, apache::thrift::protocol::PROTOCOL_TYPES protType, apache::thrift::Cpp2RequestContext* context, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) override;
+  void executeRequest(apache::thrift::ServerRequest&& serverRequest, const apache::thrift::AsyncProcessorFactory::MethodMetadata& methodMetadata) override;
+ public:
+  using ProcessFuncs = GeneratedAsyncProcessorBase::ProcessFuncs<BasicServiceAsyncProcessor>;
+  using ProcessMap = GeneratedAsyncProcessorBase::ProcessMap<ProcessFuncs>;
+  static const BasicServiceAsyncProcessor::ProcessMap& getOwnProcessMap();
+ private:
+  static const BasicServiceAsyncProcessor::ProcessMap kOwnProcessMap_;
+ private:
+  //
+  // Service Methods
+  //
+
+  //
+  // Method 'ping'
+  //
+  template <typename ProtocolIn_, typename ProtocolOut_>
+  void setUpAndProcess_ping(
+      apache::thrift::ResponseChannelRequest::UniquePtr req,
+      apache::thrift::SerializedCompressedRequest&& serializedRequest,
+      apache::thrift::Cpp2RequestContext* ctx,
+      folly::EventBase* eb,
+      apache::thrift::concurrency::ThreadManager* tm);
+
+  template <typename ProtocolIn_, typename ProtocolOut_>
+  void executeRequest_ping(apache::thrift::ServerRequest&& serverRequest);
+
+  template <class ProtocolIn_, class ProtocolOut_>
+  static apache::thrift::SerializedResponse return_ping(
+      apache::thrift::ContextStack* ctx);
+
+  template <class ProtocolIn_, class ProtocolOut_>
+  static void throw_wrapped_ping(
+      apache::thrift::ResponseChannelRequest::UniquePtr req,
+      int32_t protoSeqId,
+      apache::thrift::ContextStack* ctx,
+      folly::exception_wrapper ew,
+      apache::thrift::Cpp2RequestContext* reqCtx);
+  //
+  // End of Method 'ping'
+  //
+
+  //
+  // Method 'add'
+  //
+  template <typename ProtocolIn_, typename ProtocolOut_>
+  void setUpAndProcess_add(
+      apache::thrift::ResponseChannelRequest::UniquePtr req,
+      apache::thrift::SerializedCompressedRequest&& serializedRequest,
+      apache::thrift::Cpp2RequestContext* ctx,
+      folly::EventBase* eb,
+      apache::thrift::concurrency::ThreadManager* tm);
+
+  template <typename ProtocolIn_, typename ProtocolOut_>
+  void executeRequest_add(apache::thrift::ServerRequest&& serverRequest);
+
+  template <class ProtocolIn_, class ProtocolOut_>
+  static apache::thrift::SerializedResponse return_add(
+      apache::thrift::ContextStack* ctx,
+      ::std::int32_t const& _return);
+
+  template <class ProtocolIn_, class ProtocolOut_>
+  static void throw_wrapped_add(
+      apache::thrift::ResponseChannelRequest::UniquePtr req,
+      int32_t protoSeqId,
+      apache::thrift::ContextStack* ctx,
+      folly::exception_wrapper ew,
+      apache::thrift::Cpp2RequestContext* reqCtx);
+  //
+  // End of Method 'add'
+  //
+
+  //
+  // Method 'buildItem'
+  //
+  template <typename ProtocolIn_, typename ProtocolOut_>
+  void setUpAndProcess_buildItem(
+      apache::thrift::ResponseChannelRequest::UniquePtr req,
+      apache::thrift::SerializedCompressedRequest&& serializedRequest,
+      apache::thrift::Cpp2RequestContext* ctx,
+      folly::EventBase* eb,
+      apache::thrift::concurrency::ThreadManager* tm);
+
+  template <typename ProtocolIn_, typename ProtocolOut_>
+  void executeRequest_buildItem(apache::thrift::ServerRequest&& serverRequest);
+
+  template <class ProtocolIn_, class ProtocolOut_>
+  static apache::thrift::SerializedResponse return_buildItem(
+      apache::thrift::ContextStack* ctx,
+      ::cpp2::test::DataItem const& _return);
+
+  template <class ProtocolIn_, class ProtocolOut_>
+  static void throw_wrapped_buildItem(
+      apache::thrift::ResponseChannelRequest::UniquePtr req,
+      int32_t protoSeqId,
+      apache::thrift::ContextStack* ctx,
+      folly::exception_wrapper ew,
+      apache::thrift::Cpp2RequestContext* reqCtx);
+  //
+  // End of Method 'buildItem'
+  //
+
+  //
+  // Method 'lookup'
+  //
+  template <typename ProtocolIn_, typename ProtocolOut_>
+  void setUpAndProcess_lookup(
+      apache::thrift::ResponseChannelRequest::UniquePtr req,
+      apache::thrift::SerializedCompressedRequest&& serializedRequest,
+      apache::thrift::Cpp2RequestContext* ctx,
+      folly::EventBase* eb,
+      apache::thrift::concurrency::ThreadManager* tm);
+
+  template <typename ProtocolIn_, typename ProtocolOut_>
+  void executeRequest_lookup(apache::thrift::ServerRequest&& serverRequest);
+
+  template <class ProtocolIn_, class ProtocolOut_>
+  static apache::thrift::SerializedResponse return_lookup(
+      apache::thrift::ContextStack* ctx,
+      ::cpp2::test::DataItem const& _return);
+
+  template <class ProtocolIn_, class ProtocolOut_>
+  static void throw_wrapped_lookup(
+      apache::thrift::ResponseChannelRequest::UniquePtr req,
+      int32_t protoSeqId,
+      apache::thrift::ContextStack* ctx,
+      folly::exception_wrapper ew,
+      apache::thrift::Cpp2RequestContext* reqCtx);
+  //
+  // End of Method 'lookup'
+  //
+
+  //
+  // Method 'secureLookup'
+  //
+  template <typename ProtocolIn_, typename ProtocolOut_>
+  void setUpAndProcess_secureLookup(
+      apache::thrift::ResponseChannelRequest::UniquePtr req,
+      apache::thrift::SerializedCompressedRequest&& serializedRequest,
+      apache::thrift::Cpp2RequestContext* ctx,
+      folly::EventBase* eb,
+      apache::thrift::concurrency::ThreadManager* tm);
+
+  template <typename ProtocolIn_, typename ProtocolOut_>
+  void executeRequest_secureLookup(apache::thrift::ServerRequest&& serverRequest);
+
+  template <class ProtocolIn_, class ProtocolOut_>
+  static apache::thrift::SerializedResponse return_secureLookup(
+      apache::thrift::ContextStack* ctx,
+      ::cpp2::test::DataItem const& _return);
+
+  template <class ProtocolIn_, class ProtocolOut_>
+  static void throw_wrapped_secureLookup(
+      apache::thrift::ResponseChannelRequest::UniquePtr req,
+      int32_t protoSeqId,
+      apache::thrift::ContextStack* ctx,
+      folly::exception_wrapper ew,
+      apache::thrift::Cpp2RequestContext* reqCtx);
+  //
+  // End of Method 'secureLookup'
+  //
+
+  //
+  // Method 'fireAndForget'
+  //
+  template <typename ProtocolIn_, typename ProtocolOut_>
+  void setUpAndProcess_fireAndForget(
+      apache::thrift::ResponseChannelRequest::UniquePtr req,
+      apache::thrift::SerializedCompressedRequest&& serializedRequest,
+      apache::thrift::Cpp2RequestContext* ctx,
+      folly::EventBase* eb,
+      apache::thrift::concurrency::ThreadManager* tm);
+
+  template <typename ProtocolIn_, typename ProtocolOut_>
+  void executeRequest_fireAndForget(apache::thrift::ServerRequest&& serverRequest);
+
+  //
+  // End of Method 'fireAndForget'
+  //
+
+  //
+  // End of Service Methods
+  //
+ public:
+  BasicServiceAsyncProcessor(::apache::thrift::ServiceHandler<::cpp2::test::BasicService>* iface) :
+      iface_(iface) {}
+  ~BasicServiceAsyncProcessor() override {}
+};
+
+} // namespace cpp2::test
 namespace apache::thrift {
 
 /**

@@ -30,8 +30,13 @@ void {{interface.cpp_name}}AppAdapter::process_{{function.cpp_name}}_impl(
     std::unique_ptr<folly::IOBuf> data,
     std::unique_ptr<::apache::thrift::fast_thrift::thrift::ThriftRequestContext>
         requestContext) noexcept {
-  // Local args storage so the user handler can take ownership of complex
-  // values (move-semantics) and primitives by value.
+  // Local args storage. Storage form must match the handler virtual's
+  // parameter type so the dispatcher passes a compatible argument:
+  //   - stack_arguments services (e.g. @cpp.ProcessInEbThreadUnsafe):
+  //       handler takes `const T&` — store complex args by value.
+  //   - default services:
+  //       handler takes `std::unique_ptr<T>` — store complex args as
+  //       unique_ptr so we can std::move() them at dispatch.
   struct ArgsState {
     {{#each function.params.fields as |param|}}
       {{#if (not param.type.resolves_to_complex_return?)}}
@@ -40,6 +45,8 @@ void {{interface.cpp_name}}AppAdapter::process_{{function.cpp_name}}_impl(
         {{#else}}
     {{param.type.cpp_type}} uarg_{{param.cpp_name}}{0};
         {{/if param.type.enum?}}
+      {{#else if function.stack_arguments?}}
+    {{param.type.cpp_type}} uarg_{{param.cpp_name}};
       {{#else}}
     std::unique_ptr<{{param.type.cpp_type}}> uarg_{{param.cpp_name}} =
         std::make_unique<{{param.type.cpp_type}}>();
@@ -49,11 +56,11 @@ void {{interface.cpp_name}}AppAdapter::process_{{function.cpp_name}}_impl(
     ::{{interface.cpp_qualified_namespace}}::{{interface.cpp_name}}_{{function.prefixed_name}}_pargs pargs() {
       ::{{interface.cpp_qualified_namespace}}::{{interface.cpp_name}}_{{function.prefixed_name}}_pargs args;
       {{#each (array.enumerate function.params.fields) as |param_index param|}}
-        {{#if param.type.resolves_to_complex_return?}}
+        {{#if (and param.type.resolves_to_complex_return? (not function.stack_arguments?))}}
       args.template get<{{param_index}}>().value = uarg_{{param.cpp_name}}.get();
         {{#else}}
       args.template get<{{param_index}}>().value = &uarg_{{param.cpp_name}};
-        {{/if param.type.resolves_to_complex_return?}}
+        {{/if (and param.type.resolves_to_complex_return? (not function.stack_arguments?))}}
       {{/each}}
       return args;
     }

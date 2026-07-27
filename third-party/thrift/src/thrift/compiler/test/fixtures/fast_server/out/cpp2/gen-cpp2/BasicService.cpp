@@ -10,6 +10,1053 @@
 #include "thrift/compiler/test/fixtures/fast_server/gen-cpp2/module_types.h"
 #include <thrift/lib/cpp2/gen/service_cpp.h>
 
+std::unique_ptr<apache::thrift::AsyncProcessor> apache::thrift::ServiceHandler<::cpp2::test::BasicService>::getProcessor() {
+  return std::make_unique<::cpp2::test::BasicServiceAsyncProcessor>(this);
+}
+
+apache::thrift::ServiceHandler<::cpp2::test::BasicService>::CreateMethodMetadataResult apache::thrift::ServiceHandler<::cpp2::test::BasicService>::createMethodMetadata() {
+  return ::apache::thrift::detail::ap::createMethodMetadataMap<::cpp2::test::BasicServiceAsyncProcessor>(getServiceRequestInfoMap().value().get());
+}
+
+
+std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const>> apache::thrift::ServiceHandler<::cpp2::test::BasicService>::getServiceRequestInfoMap() const {
+  return __fbthrift_serviceInfoHolder.requestInfoMap();
+}
+
+::cpp2::test::BasicServiceServiceInfoHolder apache::thrift::ServiceHandler<::cpp2::test::BasicService>::__fbthrift_serviceInfoHolder;
+
+//
+// Service Methods
+//
+
+//
+// Method 'ping'
+//
+
+void apache::thrift::ServiceHandler<::cpp2::test::BasicService>::ping() {
+  apache::thrift::detail::si::throw_app_exn_unimplemented("ping");
+}
+
+void apache::thrift::ServiceHandler<::cpp2::test::BasicService>::sync_ping() {
+  return ping();
+}
+
+folly::SemiFuture<folly::Unit>
+apache::thrift::ServiceHandler<::cpp2::test::BasicService>::semifuture_ping() {
+  auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
+  __fbthrift_invocation_ping.compare_exchange_strong(
+      expected,
+      apache::thrift::detail::si::InvocationType::Sync,
+      std::memory_order_relaxed);
+  sync_ping();
+  return folly::makeSemiFuture();
+}
+
+folly::Future<folly::Unit>
+apache::thrift::ServiceHandler<::cpp2::test::BasicService>::future_ping() {
+  auto expected{apache::thrift::detail::si::InvocationType::Future};
+  __fbthrift_invocation_ping.compare_exchange_strong(
+      expected,
+      apache::thrift::detail::si::InvocationType::SemiFuture,
+      std::memory_order_relaxed);
+  return apache::thrift::detail::si::future(
+      semifuture_ping(),
+      getInternalKeepAlive());
+}
+
+#if FOLLY_HAS_COROUTINES
+folly::coro::Task<void>
+apache::thrift::ServiceHandler<::cpp2::test::BasicService>::co_ping() {
+  auto expected{apache::thrift::detail::si::InvocationType::Coro};
+  __fbthrift_invocation_ping.compare_exchange_strong(
+      expected,
+      apache::thrift::detail::si::InvocationType::Future,
+      std::memory_order_relaxed);
+  folly::throw_exception(apache::thrift::detail::si::UnimplementedCoroMethod::
+                             withCapturedArgs<>());
+}
+
+folly::coro::Task<void> apache::thrift::ServiceHandler<::cpp2::test::BasicService>::co_ping(
+    apache::thrift::RequestParams /* params */) {
+  auto expected{apache::thrift::detail::si::InvocationType::CoroParam};
+  __fbthrift_invocation_ping.compare_exchange_strong(
+      expected,
+      apache::thrift::detail::si::InvocationType::Coro,
+      std::memory_order_relaxed);
+  return co_ping();
+}
+#endif // FOLLY_HAS_COROUTINES
+
+void apache::thrift::ServiceHandler<::cpp2::test::BasicService>::async_tm_ping(
+    apache::thrift::HandlerCallbackPtr<void> callback) {
+  // It's possible the coroutine versions will delegate to a future-based
+  // version. If that happens, we need the RequestParams arguments to be
+  // available to the future through the thread-local backchannel, so we create
+  // a RAII object that sets up RequestParams and clears them on destruction.
+  apache::thrift::detail::si::AsyncTmPrep asyncTmPrep(this, callback.get());
+#if FOLLY_HAS_COROUTINES
+determineInvocationType:
+#endif // FOLLY_HAS_COROUTINES
+  auto invocationType =
+      __fbthrift_invocation_ping.load(std::memory_order_relaxed);
+  try {
+    switch (invocationType) {
+      case apache::thrift::detail::si::InvocationType::AsyncTm: {
+#if FOLLY_HAS_COROUTINES
+        __fbthrift_invocation_ping.compare_exchange_strong(
+            invocationType,
+            apache::thrift::detail::si::InvocationType::CoroParam,
+            std::memory_order_relaxed);
+        apache::thrift::RequestParams params{
+            callback->getRequestContext(),
+            callback->getThreadManager_deprecated(),
+            callback->getEventBase(),
+            callback->getHandlerExecutor()};
+        auto task = co_ping(params);
+        apache::thrift::detail::si::async_tm_coro(
+            std::move(callback), std::move(task));
+        return;
+#else // FOLLY_HAS_COROUTINES
+        __fbthrift_invocation_ping.compare_exchange_strong(
+            invocationType,
+            apache::thrift::detail::si::InvocationType::Future,
+            std::memory_order_relaxed);
+        [[fallthrough]];
+#endif // FOLLY_HAS_COROUTINES
+      }
+      case apache::thrift::detail::si::InvocationType::Future: {
+        auto fut = future_ping();
+        apache::thrift::detail::si::async_tm_future(
+            std::move(callback), std::move(fut));
+        return;
+      }
+      case apache::thrift::detail::si::InvocationType::SemiFuture: {
+        auto fut = semifuture_ping();
+        apache::thrift::detail::si::async_tm_semifuture(
+            std::move(callback), std::move(fut));
+        return;
+      }
+#if FOLLY_HAS_COROUTINES
+      case apache::thrift::detail::si::InvocationType::CoroParam: {
+        apache::thrift::RequestParams params{
+            callback->getRequestContext(),
+            callback->getThreadManager_deprecated(),
+            callback->getEventBase(),
+            callback->getHandlerExecutor()};
+        auto task = co_ping(params);
+        apache::thrift::detail::si::async_tm_coro(
+            std::move(callback), std::move(task));
+        return;
+      }
+      case apache::thrift::detail::si::InvocationType::Coro: {
+        auto task = co_ping();
+        apache::thrift::detail::si::async_tm_coro(
+            std::move(callback), std::move(task));
+        return;
+      }
+#endif // FOLLY_HAS_COROUTINES
+      case apache::thrift::detail::si::InvocationType::Sync: {
+        sync_ping();
+        callback->done();
+        return;
+      }
+      default: {
+        folly::assume_unreachable();
+      }
+    }
+#if FOLLY_HAS_COROUTINES
+  } catch (apache::thrift::detail::si::UnimplementedCoroMethod& ex) {
+    std::tie() = std::move(ex).restoreArgs<>();
+    goto determineInvocationType;
+#endif // FOLLY_HAS_COROUTINES
+  } catch (...) {
+    callback->exception(std::current_exception());
+  }
+}
+//
+// End of Method 'ping'
+//
+
+//
+// Method 'add'
+//
+
+::std::int32_t apache::thrift::ServiceHandler<::cpp2::test::BasicService>::add(::std::int32_t /*a*/, ::std::int32_t /*b*/) {
+  apache::thrift::detail::si::throw_app_exn_unimplemented("add");
+}
+
+::std::int32_t apache::thrift::ServiceHandler<::cpp2::test::BasicService>::sync_add(::std::int32_t p_a, ::std::int32_t p_b) {
+  return add(p_a, p_b);
+}
+
+folly::SemiFuture<::std::int32_t>
+apache::thrift::ServiceHandler<::cpp2::test::BasicService>::semifuture_add(::std::int32_t p_a, ::std::int32_t p_b) {
+  auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
+  __fbthrift_invocation_add.compare_exchange_strong(
+      expected,
+      apache::thrift::detail::si::InvocationType::Sync,
+      std::memory_order_relaxed);
+  return sync_add(p_a, p_b);
+}
+
+folly::Future<::std::int32_t>
+apache::thrift::ServiceHandler<::cpp2::test::BasicService>::future_add(::std::int32_t p_a, ::std::int32_t p_b) {
+  auto expected{apache::thrift::detail::si::InvocationType::Future};
+  __fbthrift_invocation_add.compare_exchange_strong(
+      expected,
+      apache::thrift::detail::si::InvocationType::SemiFuture,
+      std::memory_order_relaxed);
+  return apache::thrift::detail::si::future(
+      semifuture_add(p_a, p_b),
+      getInternalKeepAlive());
+}
+
+#if FOLLY_HAS_COROUTINES
+folly::coro::Task<::std::int32_t>
+apache::thrift::ServiceHandler<::cpp2::test::BasicService>::co_add(::std::int32_t p_a, ::std::int32_t p_b) {
+  auto expected{apache::thrift::detail::si::InvocationType::Coro};
+  __fbthrift_invocation_add.compare_exchange_strong(
+      expected,
+      apache::thrift::detail::si::InvocationType::Future,
+      std::memory_order_relaxed);
+  folly::throw_exception(apache::thrift::detail::si::UnimplementedCoroMethod::
+                             withCapturedArgs<::std::int32_t /*a*/, ::std::int32_t /*b*/>(p_a, p_b));
+}
+
+folly::coro::Task<::std::int32_t> apache::thrift::ServiceHandler<::cpp2::test::BasicService>::co_add(
+    apache::thrift::RequestParams /* params */, ::std::int32_t p_a, ::std::int32_t p_b) {
+  auto expected{apache::thrift::detail::si::InvocationType::CoroParam};
+  __fbthrift_invocation_add.compare_exchange_strong(
+      expected,
+      apache::thrift::detail::si::InvocationType::Coro,
+      std::memory_order_relaxed);
+  return co_add(p_a, p_b);
+}
+#endif // FOLLY_HAS_COROUTINES
+
+void apache::thrift::ServiceHandler<::cpp2::test::BasicService>::async_tm_add(
+    apache::thrift::HandlerCallbackPtr<::std::int32_t> callback, ::std::int32_t p_a, ::std::int32_t p_b) {
+  // It's possible the coroutine versions will delegate to a future-based
+  // version. If that happens, we need the RequestParams arguments to be
+  // available to the future through the thread-local backchannel, so we create
+  // a RAII object that sets up RequestParams and clears them on destruction.
+  apache::thrift::detail::si::AsyncTmPrep asyncTmPrep(this, callback.get());
+#if FOLLY_HAS_COROUTINES
+determineInvocationType:
+#endif // FOLLY_HAS_COROUTINES
+  auto invocationType =
+      __fbthrift_invocation_add.load(std::memory_order_relaxed);
+  try {
+    switch (invocationType) {
+      case apache::thrift::detail::si::InvocationType::AsyncTm: {
+#if FOLLY_HAS_COROUTINES
+        __fbthrift_invocation_add.compare_exchange_strong(
+            invocationType,
+            apache::thrift::detail::si::InvocationType::CoroParam,
+            std::memory_order_relaxed);
+        apache::thrift::RequestParams params{
+            callback->getRequestContext(),
+            callback->getThreadManager_deprecated(),
+            callback->getEventBase(),
+            callback->getHandlerExecutor()};
+        auto task = co_add(params, p_a, p_b);
+        apache::thrift::detail::si::async_tm_coro(
+            std::move(callback), std::move(task));
+        return;
+#else // FOLLY_HAS_COROUTINES
+        __fbthrift_invocation_add.compare_exchange_strong(
+            invocationType,
+            apache::thrift::detail::si::InvocationType::Future,
+            std::memory_order_relaxed);
+        [[fallthrough]];
+#endif // FOLLY_HAS_COROUTINES
+      }
+      case apache::thrift::detail::si::InvocationType::Future: {
+        auto fut = future_add(p_a, p_b);
+        apache::thrift::detail::si::async_tm_future(
+            std::move(callback), std::move(fut));
+        return;
+      }
+      case apache::thrift::detail::si::InvocationType::SemiFuture: {
+        auto fut = semifuture_add(p_a, p_b);
+        apache::thrift::detail::si::async_tm_semifuture(
+            std::move(callback), std::move(fut));
+        return;
+      }
+#if FOLLY_HAS_COROUTINES
+      case apache::thrift::detail::si::InvocationType::CoroParam: {
+        apache::thrift::RequestParams params{
+            callback->getRequestContext(),
+            callback->getThreadManager_deprecated(),
+            callback->getEventBase(),
+            callback->getHandlerExecutor()};
+        auto task = co_add(params, p_a, p_b);
+        apache::thrift::detail::si::async_tm_coro(
+            std::move(callback), std::move(task));
+        return;
+      }
+      case apache::thrift::detail::si::InvocationType::Coro: {
+        auto task = co_add(p_a, p_b);
+        apache::thrift::detail::si::async_tm_coro(
+            std::move(callback), std::move(task));
+        return;
+      }
+#endif // FOLLY_HAS_COROUTINES
+      case apache::thrift::detail::si::InvocationType::Sync: {
+        callback->result(sync_add(p_a, p_b));
+        return;
+      }
+      default: {
+        folly::assume_unreachable();
+      }
+    }
+#if FOLLY_HAS_COROUTINES
+  } catch (apache::thrift::detail::si::UnimplementedCoroMethod& ex) {
+    std::tie(p_a, p_b) = std::move(ex).restoreArgs<::std::int32_t /*a*/, ::std::int32_t /*b*/>();
+    goto determineInvocationType;
+#endif // FOLLY_HAS_COROUTINES
+  } catch (...) {
+    callback->exception(std::current_exception());
+  }
+}
+//
+// End of Method 'add'
+//
+
+//
+// Method 'buildItem'
+//
+
+void apache::thrift::ServiceHandler<::cpp2::test::BasicService>::buildItem(::cpp2::test::DataItem& /*_return*/, std::unique_ptr<::cpp2::test::DataItem> /*template_*/, ::std::int32_t /*id*/) {
+  apache::thrift::detail::si::throw_app_exn_unimplemented("buildItem");
+}
+
+void apache::thrift::ServiceHandler<::cpp2::test::BasicService>::sync_buildItem(::cpp2::test::DataItem& _return, std::unique_ptr<::cpp2::test::DataItem> p_template_, ::std::int32_t p_id) {
+  return buildItem(_return, std::move(p_template_), p_id);
+}
+
+folly::SemiFuture<std::unique_ptr<::cpp2::test::DataItem>>
+apache::thrift::ServiceHandler<::cpp2::test::BasicService>::semifuture_buildItem(std::unique_ptr<::cpp2::test::DataItem> p_template_, ::std::int32_t p_id) {
+  auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
+  __fbthrift_invocation_buildItem.compare_exchange_strong(
+      expected,
+      apache::thrift::detail::si::InvocationType::Sync,
+      std::memory_order_relaxed);
+  auto ret = std::make_unique<::cpp2::test::DataItem>();
+  sync_buildItem(*ret, std::move(p_template_), p_id);
+  return folly::makeSemiFuture(std::move(ret));
+}
+
+folly::Future<std::unique_ptr<::cpp2::test::DataItem>>
+apache::thrift::ServiceHandler<::cpp2::test::BasicService>::future_buildItem(std::unique_ptr<::cpp2::test::DataItem> p_template_, ::std::int32_t p_id) {
+  auto expected{apache::thrift::detail::si::InvocationType::Future};
+  __fbthrift_invocation_buildItem.compare_exchange_strong(
+      expected,
+      apache::thrift::detail::si::InvocationType::SemiFuture,
+      std::memory_order_relaxed);
+  return apache::thrift::detail::si::future(
+      semifuture_buildItem(std::move(p_template_), p_id),
+      getInternalKeepAlive());
+}
+
+#if FOLLY_HAS_COROUTINES
+folly::coro::Task<std::unique_ptr<::cpp2::test::DataItem>>
+apache::thrift::ServiceHandler<::cpp2::test::BasicService>::co_buildItem(std::unique_ptr<::cpp2::test::DataItem> p_template_, ::std::int32_t p_id) {
+  auto expected{apache::thrift::detail::si::InvocationType::Coro};
+  __fbthrift_invocation_buildItem.compare_exchange_strong(
+      expected,
+      apache::thrift::detail::si::InvocationType::Future,
+      std::memory_order_relaxed);
+  folly::throw_exception(apache::thrift::detail::si::UnimplementedCoroMethod::
+                             withCapturedArgs<std::unique_ptr<::cpp2::test::DataItem> /*template_*/, ::std::int32_t /*id*/>(std::move(p_template_), p_id));
+}
+
+folly::coro::Task<std::unique_ptr<::cpp2::test::DataItem>> apache::thrift::ServiceHandler<::cpp2::test::BasicService>::co_buildItem(
+    apache::thrift::RequestParams /* params */, std::unique_ptr<::cpp2::test::DataItem> p_template_, ::std::int32_t p_id) {
+  auto expected{apache::thrift::detail::si::InvocationType::CoroParam};
+  __fbthrift_invocation_buildItem.compare_exchange_strong(
+      expected,
+      apache::thrift::detail::si::InvocationType::Coro,
+      std::memory_order_relaxed);
+  return co_buildItem(std::move(p_template_), p_id);
+}
+#endif // FOLLY_HAS_COROUTINES
+
+void apache::thrift::ServiceHandler<::cpp2::test::BasicService>::async_tm_buildItem(
+    apache::thrift::HandlerCallbackPtr<std::unique_ptr<::cpp2::test::DataItem>> callback, std::unique_ptr<::cpp2::test::DataItem> p_template_, ::std::int32_t p_id) {
+  // It's possible the coroutine versions will delegate to a future-based
+  // version. If that happens, we need the RequestParams arguments to be
+  // available to the future through the thread-local backchannel, so we create
+  // a RAII object that sets up RequestParams and clears them on destruction.
+  apache::thrift::detail::si::AsyncTmPrep asyncTmPrep(this, callback.get());
+#if FOLLY_HAS_COROUTINES
+determineInvocationType:
+#endif // FOLLY_HAS_COROUTINES
+  auto invocationType =
+      __fbthrift_invocation_buildItem.load(std::memory_order_relaxed);
+  try {
+    switch (invocationType) {
+      case apache::thrift::detail::si::InvocationType::AsyncTm: {
+#if FOLLY_HAS_COROUTINES
+        __fbthrift_invocation_buildItem.compare_exchange_strong(
+            invocationType,
+            apache::thrift::detail::si::InvocationType::CoroParam,
+            std::memory_order_relaxed);
+        apache::thrift::RequestParams params{
+            callback->getRequestContext(),
+            callback->getThreadManager_deprecated(),
+            callback->getEventBase(),
+            callback->getHandlerExecutor()};
+        auto task = co_buildItem(params, std::move(p_template_), p_id);
+        apache::thrift::detail::si::async_tm_coro(
+            std::move(callback), std::move(task));
+        return;
+#else // FOLLY_HAS_COROUTINES
+        __fbthrift_invocation_buildItem.compare_exchange_strong(
+            invocationType,
+            apache::thrift::detail::si::InvocationType::Future,
+            std::memory_order_relaxed);
+        [[fallthrough]];
+#endif // FOLLY_HAS_COROUTINES
+      }
+      case apache::thrift::detail::si::InvocationType::Future: {
+        auto fut = future_buildItem(std::move(p_template_), p_id);
+        apache::thrift::detail::si::async_tm_future(
+            std::move(callback), std::move(fut));
+        return;
+      }
+      case apache::thrift::detail::si::InvocationType::SemiFuture: {
+        auto fut = semifuture_buildItem(std::move(p_template_), p_id);
+        apache::thrift::detail::si::async_tm_semifuture(
+            std::move(callback), std::move(fut));
+        return;
+      }
+#if FOLLY_HAS_COROUTINES
+      case apache::thrift::detail::si::InvocationType::CoroParam: {
+        apache::thrift::RequestParams params{
+            callback->getRequestContext(),
+            callback->getThreadManager_deprecated(),
+            callback->getEventBase(),
+            callback->getHandlerExecutor()};
+        auto task = co_buildItem(params, std::move(p_template_), p_id);
+        apache::thrift::detail::si::async_tm_coro(
+            std::move(callback), std::move(task));
+        return;
+      }
+      case apache::thrift::detail::si::InvocationType::Coro: {
+        auto task = co_buildItem(std::move(p_template_), p_id);
+        apache::thrift::detail::si::async_tm_coro(
+            std::move(callback), std::move(task));
+        return;
+      }
+#endif // FOLLY_HAS_COROUTINES
+      case apache::thrift::detail::si::InvocationType::Sync: {
+        ::cpp2::test::DataItem _return;
+        sync_buildItem(_return, std::move(p_template_), p_id);
+        callback->result(std::move(_return));
+        return;
+      }
+      default: {
+        folly::assume_unreachable();
+      }
+    }
+#if FOLLY_HAS_COROUTINES
+  } catch (apache::thrift::detail::si::UnimplementedCoroMethod& ex) {
+    std::tie(p_template_, p_id) = std::move(ex).restoreArgs<std::unique_ptr<::cpp2::test::DataItem> /*template_*/, ::std::int32_t /*id*/>();
+    goto determineInvocationType;
+#endif // FOLLY_HAS_COROUTINES
+  } catch (...) {
+    callback->exception(std::current_exception());
+  }
+}
+//
+// End of Method 'buildItem'
+//
+
+//
+// Method 'lookup'
+//
+
+void apache::thrift::ServiceHandler<::cpp2::test::BasicService>::lookup(::cpp2::test::DataItem& /*_return*/, ::std::int32_t /*id*/) {
+  apache::thrift::detail::si::throw_app_exn_unimplemented("lookup");
+}
+
+void apache::thrift::ServiceHandler<::cpp2::test::BasicService>::sync_lookup(::cpp2::test::DataItem& _return, ::std::int32_t p_id) {
+  return lookup(_return, p_id);
+}
+
+folly::SemiFuture<std::unique_ptr<::cpp2::test::DataItem>>
+apache::thrift::ServiceHandler<::cpp2::test::BasicService>::semifuture_lookup(::std::int32_t p_id) {
+  auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
+  __fbthrift_invocation_lookup.compare_exchange_strong(
+      expected,
+      apache::thrift::detail::si::InvocationType::Sync,
+      std::memory_order_relaxed);
+  auto ret = std::make_unique<::cpp2::test::DataItem>();
+  sync_lookup(*ret, p_id);
+  return folly::makeSemiFuture(std::move(ret));
+}
+
+folly::Future<std::unique_ptr<::cpp2::test::DataItem>>
+apache::thrift::ServiceHandler<::cpp2::test::BasicService>::future_lookup(::std::int32_t p_id) {
+  auto expected{apache::thrift::detail::si::InvocationType::Future};
+  __fbthrift_invocation_lookup.compare_exchange_strong(
+      expected,
+      apache::thrift::detail::si::InvocationType::SemiFuture,
+      std::memory_order_relaxed);
+  return apache::thrift::detail::si::future(
+      semifuture_lookup(p_id),
+      getInternalKeepAlive());
+}
+
+#if FOLLY_HAS_COROUTINES
+folly::coro::Task<std::unique_ptr<::cpp2::test::DataItem>>
+apache::thrift::ServiceHandler<::cpp2::test::BasicService>::co_lookup(::std::int32_t p_id) {
+  auto expected{apache::thrift::detail::si::InvocationType::Coro};
+  __fbthrift_invocation_lookup.compare_exchange_strong(
+      expected,
+      apache::thrift::detail::si::InvocationType::Future,
+      std::memory_order_relaxed);
+  folly::throw_exception(apache::thrift::detail::si::UnimplementedCoroMethod::
+                             withCapturedArgs<::std::int32_t /*id*/>(p_id));
+}
+
+folly::coro::Task<std::unique_ptr<::cpp2::test::DataItem>> apache::thrift::ServiceHandler<::cpp2::test::BasicService>::co_lookup(
+    apache::thrift::RequestParams /* params */, ::std::int32_t p_id) {
+  auto expected{apache::thrift::detail::si::InvocationType::CoroParam};
+  __fbthrift_invocation_lookup.compare_exchange_strong(
+      expected,
+      apache::thrift::detail::si::InvocationType::Coro,
+      std::memory_order_relaxed);
+  return co_lookup(p_id);
+}
+#endif // FOLLY_HAS_COROUTINES
+
+void apache::thrift::ServiceHandler<::cpp2::test::BasicService>::async_tm_lookup(
+    apache::thrift::HandlerCallbackPtr<std::unique_ptr<::cpp2::test::DataItem>> callback, ::std::int32_t p_id) {
+  // It's possible the coroutine versions will delegate to a future-based
+  // version. If that happens, we need the RequestParams arguments to be
+  // available to the future through the thread-local backchannel, so we create
+  // a RAII object that sets up RequestParams and clears them on destruction.
+  apache::thrift::detail::si::AsyncTmPrep asyncTmPrep(this, callback.get());
+#if FOLLY_HAS_COROUTINES
+determineInvocationType:
+#endif // FOLLY_HAS_COROUTINES
+  auto invocationType =
+      __fbthrift_invocation_lookup.load(std::memory_order_relaxed);
+  try {
+    switch (invocationType) {
+      case apache::thrift::detail::si::InvocationType::AsyncTm: {
+#if FOLLY_HAS_COROUTINES
+        __fbthrift_invocation_lookup.compare_exchange_strong(
+            invocationType,
+            apache::thrift::detail::si::InvocationType::CoroParam,
+            std::memory_order_relaxed);
+        apache::thrift::RequestParams params{
+            callback->getRequestContext(),
+            callback->getThreadManager_deprecated(),
+            callback->getEventBase(),
+            callback->getHandlerExecutor()};
+        auto task = co_lookup(params, p_id);
+        apache::thrift::detail::si::async_tm_coro(
+            std::move(callback), std::move(task));
+        return;
+#else // FOLLY_HAS_COROUTINES
+        __fbthrift_invocation_lookup.compare_exchange_strong(
+            invocationType,
+            apache::thrift::detail::si::InvocationType::Future,
+            std::memory_order_relaxed);
+        [[fallthrough]];
+#endif // FOLLY_HAS_COROUTINES
+      }
+      case apache::thrift::detail::si::InvocationType::Future: {
+        auto fut = future_lookup(p_id);
+        apache::thrift::detail::si::async_tm_future(
+            std::move(callback), std::move(fut));
+        return;
+      }
+      case apache::thrift::detail::si::InvocationType::SemiFuture: {
+        auto fut = semifuture_lookup(p_id);
+        apache::thrift::detail::si::async_tm_semifuture(
+            std::move(callback), std::move(fut));
+        return;
+      }
+#if FOLLY_HAS_COROUTINES
+      case apache::thrift::detail::si::InvocationType::CoroParam: {
+        apache::thrift::RequestParams params{
+            callback->getRequestContext(),
+            callback->getThreadManager_deprecated(),
+            callback->getEventBase(),
+            callback->getHandlerExecutor()};
+        auto task = co_lookup(params, p_id);
+        apache::thrift::detail::si::async_tm_coro(
+            std::move(callback), std::move(task));
+        return;
+      }
+      case apache::thrift::detail::si::InvocationType::Coro: {
+        auto task = co_lookup(p_id);
+        apache::thrift::detail::si::async_tm_coro(
+            std::move(callback), std::move(task));
+        return;
+      }
+#endif // FOLLY_HAS_COROUTINES
+      case apache::thrift::detail::si::InvocationType::Sync: {
+        ::cpp2::test::DataItem _return;
+        sync_lookup(_return, p_id);
+        callback->result(std::move(_return));
+        return;
+      }
+      default: {
+        folly::assume_unreachable();
+      }
+    }
+#if FOLLY_HAS_COROUTINES
+  } catch (apache::thrift::detail::si::UnimplementedCoroMethod& ex) {
+    std::tie(p_id) = std::move(ex).restoreArgs<::std::int32_t /*id*/>();
+    goto determineInvocationType;
+#endif // FOLLY_HAS_COROUTINES
+  } catch (...) {
+    callback->exception(std::current_exception());
+  }
+}
+//
+// End of Method 'lookup'
+//
+
+//
+// Method 'secureLookup'
+//
+
+void apache::thrift::ServiceHandler<::cpp2::test::BasicService>::secureLookup(::cpp2::test::DataItem& /*_return*/, ::std::int32_t /*id*/, std::unique_ptr<::std::string> /*user*/) {
+  apache::thrift::detail::si::throw_app_exn_unimplemented("secureLookup");
+}
+
+void apache::thrift::ServiceHandler<::cpp2::test::BasicService>::sync_secureLookup(::cpp2::test::DataItem& _return, ::std::int32_t p_id, std::unique_ptr<::std::string> p_user) {
+  return secureLookup(_return, p_id, std::move(p_user));
+}
+
+folly::SemiFuture<std::unique_ptr<::cpp2::test::DataItem>>
+apache::thrift::ServiceHandler<::cpp2::test::BasicService>::semifuture_secureLookup(::std::int32_t p_id, std::unique_ptr<::std::string> p_user) {
+  auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
+  __fbthrift_invocation_secureLookup.compare_exchange_strong(
+      expected,
+      apache::thrift::detail::si::InvocationType::Sync,
+      std::memory_order_relaxed);
+  auto ret = std::make_unique<::cpp2::test::DataItem>();
+  sync_secureLookup(*ret, p_id, std::move(p_user));
+  return folly::makeSemiFuture(std::move(ret));
+}
+
+folly::Future<std::unique_ptr<::cpp2::test::DataItem>>
+apache::thrift::ServiceHandler<::cpp2::test::BasicService>::future_secureLookup(::std::int32_t p_id, std::unique_ptr<::std::string> p_user) {
+  auto expected{apache::thrift::detail::si::InvocationType::Future};
+  __fbthrift_invocation_secureLookup.compare_exchange_strong(
+      expected,
+      apache::thrift::detail::si::InvocationType::SemiFuture,
+      std::memory_order_relaxed);
+  return apache::thrift::detail::si::future(
+      semifuture_secureLookup(p_id, std::move(p_user)),
+      getInternalKeepAlive());
+}
+
+#if FOLLY_HAS_COROUTINES
+folly::coro::Task<std::unique_ptr<::cpp2::test::DataItem>>
+apache::thrift::ServiceHandler<::cpp2::test::BasicService>::co_secureLookup(::std::int32_t p_id, std::unique_ptr<::std::string> p_user) {
+  auto expected{apache::thrift::detail::si::InvocationType::Coro};
+  __fbthrift_invocation_secureLookup.compare_exchange_strong(
+      expected,
+      apache::thrift::detail::si::InvocationType::Future,
+      std::memory_order_relaxed);
+  folly::throw_exception(apache::thrift::detail::si::UnimplementedCoroMethod::
+                             withCapturedArgs<::std::int32_t /*id*/, std::unique_ptr<::std::string> /*user*/>(p_id, std::move(p_user)));
+}
+
+folly::coro::Task<std::unique_ptr<::cpp2::test::DataItem>> apache::thrift::ServiceHandler<::cpp2::test::BasicService>::co_secureLookup(
+    apache::thrift::RequestParams /* params */, ::std::int32_t p_id, std::unique_ptr<::std::string> p_user) {
+  auto expected{apache::thrift::detail::si::InvocationType::CoroParam};
+  __fbthrift_invocation_secureLookup.compare_exchange_strong(
+      expected,
+      apache::thrift::detail::si::InvocationType::Coro,
+      std::memory_order_relaxed);
+  return co_secureLookup(p_id, std::move(p_user));
+}
+#endif // FOLLY_HAS_COROUTINES
+
+void apache::thrift::ServiceHandler<::cpp2::test::BasicService>::async_tm_secureLookup(
+    apache::thrift::HandlerCallbackPtr<std::unique_ptr<::cpp2::test::DataItem>> callback, ::std::int32_t p_id, std::unique_ptr<::std::string> p_user) {
+  // It's possible the coroutine versions will delegate to a future-based
+  // version. If that happens, we need the RequestParams arguments to be
+  // available to the future through the thread-local backchannel, so we create
+  // a RAII object that sets up RequestParams and clears them on destruction.
+  apache::thrift::detail::si::AsyncTmPrep asyncTmPrep(this, callback.get());
+#if FOLLY_HAS_COROUTINES
+determineInvocationType:
+#endif // FOLLY_HAS_COROUTINES
+  auto invocationType =
+      __fbthrift_invocation_secureLookup.load(std::memory_order_relaxed);
+  try {
+    switch (invocationType) {
+      case apache::thrift::detail::si::InvocationType::AsyncTm: {
+#if FOLLY_HAS_COROUTINES
+        __fbthrift_invocation_secureLookup.compare_exchange_strong(
+            invocationType,
+            apache::thrift::detail::si::InvocationType::CoroParam,
+            std::memory_order_relaxed);
+        apache::thrift::RequestParams params{
+            callback->getRequestContext(),
+            callback->getThreadManager_deprecated(),
+            callback->getEventBase(),
+            callback->getHandlerExecutor()};
+        auto task = co_secureLookup(params, p_id, std::move(p_user));
+        apache::thrift::detail::si::async_tm_coro(
+            std::move(callback), std::move(task));
+        return;
+#else // FOLLY_HAS_COROUTINES
+        __fbthrift_invocation_secureLookup.compare_exchange_strong(
+            invocationType,
+            apache::thrift::detail::si::InvocationType::Future,
+            std::memory_order_relaxed);
+        [[fallthrough]];
+#endif // FOLLY_HAS_COROUTINES
+      }
+      case apache::thrift::detail::si::InvocationType::Future: {
+        auto fut = future_secureLookup(p_id, std::move(p_user));
+        apache::thrift::detail::si::async_tm_future(
+            std::move(callback), std::move(fut));
+        return;
+      }
+      case apache::thrift::detail::si::InvocationType::SemiFuture: {
+        auto fut = semifuture_secureLookup(p_id, std::move(p_user));
+        apache::thrift::detail::si::async_tm_semifuture(
+            std::move(callback), std::move(fut));
+        return;
+      }
+#if FOLLY_HAS_COROUTINES
+      case apache::thrift::detail::si::InvocationType::CoroParam: {
+        apache::thrift::RequestParams params{
+            callback->getRequestContext(),
+            callback->getThreadManager_deprecated(),
+            callback->getEventBase(),
+            callback->getHandlerExecutor()};
+        auto task = co_secureLookup(params, p_id, std::move(p_user));
+        apache::thrift::detail::si::async_tm_coro(
+            std::move(callback), std::move(task));
+        return;
+      }
+      case apache::thrift::detail::si::InvocationType::Coro: {
+        auto task = co_secureLookup(p_id, std::move(p_user));
+        apache::thrift::detail::si::async_tm_coro(
+            std::move(callback), std::move(task));
+        return;
+      }
+#endif // FOLLY_HAS_COROUTINES
+      case apache::thrift::detail::si::InvocationType::Sync: {
+        ::cpp2::test::DataItem _return;
+        sync_secureLookup(_return, p_id, std::move(p_user));
+        callback->result(std::move(_return));
+        return;
+      }
+      default: {
+        folly::assume_unreachable();
+      }
+    }
+#if FOLLY_HAS_COROUTINES
+  } catch (apache::thrift::detail::si::UnimplementedCoroMethod& ex) {
+    std::tie(p_id, p_user) = std::move(ex).restoreArgs<::std::int32_t /*id*/, std::unique_ptr<::std::string> /*user*/>();
+    goto determineInvocationType;
+#endif // FOLLY_HAS_COROUTINES
+  } catch (...) {
+    callback->exception(std::current_exception());
+  }
+}
+//
+// End of Method 'secureLookup'
+//
+
+//
+// Method 'fireAndForget'
+//
+
+void apache::thrift::ServiceHandler<::cpp2::test::BasicService>::fireAndForget(std::unique_ptr<::std::string> /*event*/) {
+  apache::thrift::detail::si::throw_app_exn_unimplemented("fireAndForget");
+}
+
+void apache::thrift::ServiceHandler<::cpp2::test::BasicService>::sync_fireAndForget(std::unique_ptr<::std::string> p_event) {
+  return fireAndForget(std::move(p_event));
+}
+
+folly::SemiFuture<folly::Unit>
+apache::thrift::ServiceHandler<::cpp2::test::BasicService>::semifuture_fireAndForget(std::unique_ptr<::std::string> p_event) {
+  auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
+  __fbthrift_invocation_fireAndForget.compare_exchange_strong(
+      expected,
+      apache::thrift::detail::si::InvocationType::Sync,
+      std::memory_order_relaxed);
+  sync_fireAndForget(std::move(p_event));
+  return folly::makeSemiFuture();
+}
+
+folly::Future<folly::Unit>
+apache::thrift::ServiceHandler<::cpp2::test::BasicService>::future_fireAndForget(std::unique_ptr<::std::string> p_event) {
+  auto expected{apache::thrift::detail::si::InvocationType::Future};
+  __fbthrift_invocation_fireAndForget.compare_exchange_strong(
+      expected,
+      apache::thrift::detail::si::InvocationType::SemiFuture,
+      std::memory_order_relaxed);
+  return apache::thrift::detail::si::future(
+      semifuture_fireAndForget(std::move(p_event)),
+      getInternalKeepAlive());
+}
+
+#if FOLLY_HAS_COROUTINES
+folly::coro::Task<void>
+apache::thrift::ServiceHandler<::cpp2::test::BasicService>::co_fireAndForget(std::unique_ptr<::std::string> p_event) {
+  auto expected{apache::thrift::detail::si::InvocationType::Coro};
+  __fbthrift_invocation_fireAndForget.compare_exchange_strong(
+      expected,
+      apache::thrift::detail::si::InvocationType::Future,
+      std::memory_order_relaxed);
+  folly::throw_exception(apache::thrift::detail::si::UnimplementedCoroMethod::
+                             withCapturedArgs<std::unique_ptr<::std::string> /*event*/>(std::move(p_event)));
+}
+
+folly::coro::Task<void> apache::thrift::ServiceHandler<::cpp2::test::BasicService>::co_fireAndForget(
+    apache::thrift::RequestParams /* params */, std::unique_ptr<::std::string> p_event) {
+  auto expected{apache::thrift::detail::si::InvocationType::CoroParam};
+  __fbthrift_invocation_fireAndForget.compare_exchange_strong(
+      expected,
+      apache::thrift::detail::si::InvocationType::Coro,
+      std::memory_order_relaxed);
+  return co_fireAndForget(std::move(p_event));
+}
+#endif // FOLLY_HAS_COROUTINES
+
+void apache::thrift::ServiceHandler<::cpp2::test::BasicService>::async_tm_fireAndForget(
+    apache::thrift::HandlerCallbackOneWay::Ptr callback, std::unique_ptr<::std::string> p_event) {
+  // It's possible the coroutine versions will delegate to a future-based
+  // version. If that happens, we need the RequestParams arguments to be
+  // available to the future through the thread-local backchannel, so we create
+  // a RAII object that sets up RequestParams and clears them on destruction.
+  apache::thrift::detail::si::AsyncTmPrep asyncTmPrep(this, callback.get());
+#if FOLLY_HAS_COROUTINES
+determineInvocationType:
+#endif // FOLLY_HAS_COROUTINES
+  auto invocationType =
+      __fbthrift_invocation_fireAndForget.load(std::memory_order_relaxed);
+  try {
+    switch (invocationType) {
+      case apache::thrift::detail::si::InvocationType::AsyncTm: {
+#if FOLLY_HAS_COROUTINES
+        __fbthrift_invocation_fireAndForget.compare_exchange_strong(
+            invocationType,
+            apache::thrift::detail::si::InvocationType::CoroParam,
+            std::memory_order_relaxed);
+        apache::thrift::RequestParams params{
+            callback->getRequestContext(),
+            callback->getThreadManager_deprecated(),
+            callback->getEventBase(),
+            callback->getHandlerExecutor()};
+        auto task = co_fireAndForget(params, std::move(p_event));
+        apache::thrift::detail::si::async_tm_coro(
+            std::move(callback), std::move(task));
+        return;
+#else // FOLLY_HAS_COROUTINES
+        __fbthrift_invocation_fireAndForget.compare_exchange_strong(
+            invocationType,
+            apache::thrift::detail::si::InvocationType::Future,
+            std::memory_order_relaxed);
+        [[fallthrough]];
+#endif // FOLLY_HAS_COROUTINES
+      }
+      case apache::thrift::detail::si::InvocationType::Future: {
+        auto fut = future_fireAndForget(std::move(p_event));
+        apache::thrift::detail::si::async_tm_future(
+            std::move(callback), std::move(fut));
+        return;
+      }
+      case apache::thrift::detail::si::InvocationType::SemiFuture: {
+        auto fut = semifuture_fireAndForget(std::move(p_event));
+        apache::thrift::detail::si::async_tm_semifuture(
+            std::move(callback), std::move(fut));
+        return;
+      }
+#if FOLLY_HAS_COROUTINES
+      case apache::thrift::detail::si::InvocationType::CoroParam: {
+        apache::thrift::RequestParams params{
+            callback->getRequestContext(),
+            callback->getThreadManager_deprecated(),
+            callback->getEventBase(),
+            callback->getHandlerExecutor()};
+        auto task = co_fireAndForget(params, std::move(p_event));
+        apache::thrift::detail::si::async_tm_coro(
+            std::move(callback), std::move(task));
+        return;
+      }
+      case apache::thrift::detail::si::InvocationType::Coro: {
+        auto task = co_fireAndForget(std::move(p_event));
+        apache::thrift::detail::si::async_tm_coro(
+            std::move(callback), std::move(task));
+        return;
+      }
+#endif // FOLLY_HAS_COROUTINES
+      case apache::thrift::detail::si::InvocationType::Sync: {
+        sync_fireAndForget(std::move(p_event));
+        return;
+      }
+      default: {
+        folly::assume_unreachable();
+      }
+    }
+#if FOLLY_HAS_COROUTINES
+  } catch (apache::thrift::detail::si::UnimplementedCoroMethod& ex) {
+    std::tie(p_event) = std::move(ex).restoreArgs<std::unique_ptr<::std::string> /*event*/>();
+    goto determineInvocationType;
+#endif // FOLLY_HAS_COROUTINES
+  } catch (...) {
+    callback->exception(std::current_exception());
+  }
+}
+//
+// End of Method 'fireAndForget'
+//
+
+//
+// End of Service Methods
+//
+
+
+namespace cpp2::test {
+
+void BasicServiceSvNull::ping() {
+}
+
+::std::int32_t BasicServiceSvNull::add(::std::int32_t /*a*/, ::std::int32_t /*b*/) {
+  return 0;
+}
+
+void BasicServiceSvNull::buildItem(::cpp2::test::DataItem& /*_return*/, std::unique_ptr<::cpp2::test::DataItem> /*template_*/, ::std::int32_t /*id*/) {}
+
+void BasicServiceSvNull::lookup(::cpp2::test::DataItem& /*_return*/, ::std::int32_t /*id*/) {}
+
+void BasicServiceSvNull::secureLookup(::cpp2::test::DataItem& /*_return*/, ::std::int32_t /*id*/, std::unique_ptr<::std::string> /*user*/) {}
+
+void BasicServiceSvNull::fireAndForget(std::unique_ptr<::std::string> /*event*/) {
+}
+
+
+std::string_view BasicServiceAsyncProcessor::getServiceName() {
+  return "BasicService";
+}
+
+void BasicServiceAsyncProcessor::getServiceMetadata(apache::thrift::metadata::ThriftServiceMetadataResponse& response) {
+  ::apache::thrift::detail::md::ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::test::BasicService>>::gen(response);
+}
+
+void BasicServiceAsyncProcessor::processSerializedCompressedRequestWithMetadata(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, const apache::thrift::AsyncProcessorFactory::MethodMetadata& methodMetadata, apache::thrift::protocol::PROTOCOL_TYPES protType, apache::thrift::Cpp2RequestContext* context, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
+  apache::thrift::detail::ap::process(this, iface_, std::move(req), std::move(serializedRequest), methodMetadata, protType, context, eb, tm);
+}
+
+void BasicServiceAsyncProcessor::executeRequest(apache::thrift::ServerRequest&& request, const apache::thrift::AsyncProcessorFactory::MethodMetadata& methodMetadata) {
+  apache::thrift::detail::ap::execute(this, std::move(request), apache::thrift::detail::ServerRequestHelper::protocol(request), methodMetadata);
+}
+
+const BasicServiceAsyncProcessor::ProcessMap& BasicServiceAsyncProcessor::getOwnProcessMap() {
+  return kOwnProcessMap_;
+}
+
+const BasicServiceAsyncProcessor::ProcessMap BasicServiceAsyncProcessor::kOwnProcessMap_ {
+  {"ping",
+    {&BasicServiceAsyncProcessor::setUpAndProcess_ping<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>,
+     &BasicServiceAsyncProcessor::setUpAndProcess_ping<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>,
+     &BasicServiceAsyncProcessor::executeRequest_ping<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>,
+     &BasicServiceAsyncProcessor::executeRequest_ping<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>}},
+  {"add",
+    {&BasicServiceAsyncProcessor::setUpAndProcess_add<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>,
+     &BasicServiceAsyncProcessor::setUpAndProcess_add<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>,
+     &BasicServiceAsyncProcessor::executeRequest_add<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>,
+     &BasicServiceAsyncProcessor::executeRequest_add<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>}},
+  {"buildItem",
+    {&BasicServiceAsyncProcessor::setUpAndProcess_buildItem<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>,
+     &BasicServiceAsyncProcessor::setUpAndProcess_buildItem<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>,
+     &BasicServiceAsyncProcessor::executeRequest_buildItem<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>,
+     &BasicServiceAsyncProcessor::executeRequest_buildItem<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>}},
+  {"lookup",
+    {&BasicServiceAsyncProcessor::setUpAndProcess_lookup<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>,
+     &BasicServiceAsyncProcessor::setUpAndProcess_lookup<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>,
+     &BasicServiceAsyncProcessor::executeRequest_lookup<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>,
+     &BasicServiceAsyncProcessor::executeRequest_lookup<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>}},
+  {"secureLookup",
+    {&BasicServiceAsyncProcessor::setUpAndProcess_secureLookup<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>,
+     &BasicServiceAsyncProcessor::setUpAndProcess_secureLookup<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>,
+     &BasicServiceAsyncProcessor::executeRequest_secureLookup<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>,
+     &BasicServiceAsyncProcessor::executeRequest_secureLookup<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>}},
+  {"fireAndForget",
+    {&BasicServiceAsyncProcessor::setUpAndProcess_fireAndForget<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>,
+     &BasicServiceAsyncProcessor::setUpAndProcess_fireAndForget<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>,
+     &BasicServiceAsyncProcessor::executeRequest_fireAndForget<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>,
+     &BasicServiceAsyncProcessor::executeRequest_fireAndForget<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>}},
+};
+
+apache::thrift::ServiceRequestInfoMap const& BasicServiceServiceInfoHolder::requestInfoMap() const {
+  static folly::Indestructible<apache::thrift::ServiceRequestInfoMap> requestInfoMap{staticRequestInfoMap()};
+  return *requestInfoMap;
+}
+
+apache::thrift::ServiceRequestInfoMap BasicServiceServiceInfoHolder::staticRequestInfoMap() {
+  apache::thrift::ServiceRequestInfoMap requestInfoMap = {
+  {"ping",
+    { false,
+     apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
+     "BasicService.ping",
+     std::nullopt,
+     apache::thrift::concurrency::NORMAL,
+     std::nullopt,
+     ::apache::thrift::detail::getFunctionNode<::cpp2::test::BasicService>("ping")}},
+  {"add",
+    { false,
+     apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
+     "BasicService.add",
+     std::nullopt,
+     apache::thrift::concurrency::NORMAL,
+     std::nullopt,
+     ::apache::thrift::detail::getFunctionNode<::cpp2::test::BasicService>("add")}},
+  {"buildItem",
+    { false,
+     apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
+     "BasicService.buildItem",
+     std::nullopt,
+     apache::thrift::concurrency::NORMAL,
+     std::nullopt,
+     ::apache::thrift::detail::getFunctionNode<::cpp2::test::BasicService>("buildItem")}},
+  {"lookup",
+    { false,
+     apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
+     "BasicService.lookup",
+     std::nullopt,
+     apache::thrift::concurrency::NORMAL,
+     std::nullopt,
+     ::apache::thrift::detail::getFunctionNode<::cpp2::test::BasicService>("lookup")}},
+  {"secureLookup",
+    { false,
+     apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
+     "BasicService.secureLookup",
+     std::nullopt,
+     apache::thrift::concurrency::NORMAL,
+     std::nullopt,
+     ::apache::thrift::detail::getFunctionNode<::cpp2::test::BasicService>("secureLookup")}},
+  {"fireAndForget",
+    { false,
+     apache::thrift::RpcKind::SINGLE_REQUEST_NO_RESPONSE,
+     "BasicService.fireAndForget",
+     std::nullopt,
+     apache::thrift::concurrency::NORMAL,
+     std::nullopt,
+     ::apache::thrift::detail::getFunctionNode<::cpp2::test::BasicService>("fireAndForget")}},
+  };
+
+  return requestInfoMap;
+}
+} // namespace cpp2::test
 namespace apache::thrift {
 
 std::unique_ptr<

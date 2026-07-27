@@ -63,8 +63,8 @@ namespace apache { namespace thrift {
   namespace transport { class THeader; }
 }}
 
-{{#if service.is_fast_server?}}
-{{> service_h/fast_handlers_h}}
-{{#else}}
 {{> service_h/handlers_h}}
+{{#if service.is_fast_server?}}
+
+{{> service_h/fast_handlers_h}}
 {{/if service.is_fast_server?}}

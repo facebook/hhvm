@@ -155,6 +155,15 @@ mod tests {
     use std::collections::HashMap;
     use std::sync::Arc;
 
+    use digest_expected_values::DIGEST_EMPTY;
+    use digest_expected_values::DIGEST_ENUM;
+    use digest_expected_values::DIGEST_MULTIPLE_TYPES;
+    use digest_expected_values::DIGEST_SINGLE_EMPTY_STRUCT;
+    use digest_expected_values::DIGEST_STRUCT_WITH_FIELDS;
+    use digest_expected_values::DIGEST_TYPE_ID_BOOL;
+    use digest_expected_values::DIGEST_TYPE_ID_I32;
+    use digest_expected_values::DIGEST_TYPE_ID_STRING;
+    use digest_expected_values::DIGEST_TYPE_ID_URI;
     use type_system_digest::TypeSystemDigest;
 
     use crate::field::AnnotationsMap;
@@ -290,20 +299,14 @@ mod tests {
     #[test]
     fn cross_language_empty_type_system() {
         let ts = make_ts(vec![]);
-        assert_eq!(
-            hex_digest(&ts),
-            "dbc1b4c900ffe48d575b5da5c638040125f65db0fe3e24494b76ea986457d986",
-        );
+        assert_eq!(hex_digest(&ts), DIGEST_EMPTY);
     }
 
     #[test]
     fn cross_language_single_empty_struct() {
         let s = make_struct("meta.com/test/Empty", vec![], false);
         let ts = make_ts(vec![("meta.com/test/Empty", DefinitionNode::Struct(s))]);
-        assert_eq!(
-            hex_digest(&ts),
-            "dde072c26c1b88f6a1d9f53a6e8232e4707bb55d1b5880f4e04791d13dc8c313",
-        );
+        assert_eq!(hex_digest(&ts), DIGEST_SINGLE_EMPTY_STRUCT);
     }
 
     #[test]
@@ -317,10 +320,7 @@ mod tests {
             false,
         );
         let ts = make_ts(vec![("meta.com/test/Person", DefinitionNode::Struct(s))]);
-        assert_eq!(
-            hex_digest(&ts),
-            "32ddd3926cbca4e2b25f751a56c9c7a4dc217c45b56637ffec0af2adb6fbccc8",
-        );
+        assert_eq!(hex_digest(&ts), DIGEST_STRUCT_WITH_FIELDS);
     }
 
     #[test]
@@ -330,10 +330,7 @@ mod tests {
             vec![("ACTIVE", 1), ("INACTIVE", 2), ("PENDING", 3)],
         );
         let ts = make_ts(vec![("meta.com/test/Status", DefinitionNode::Enum(e))]);
-        assert_eq!(
-            hex_digest(&ts),
-            "26828b801c942b25ef863505af365b0e6a583de1c509c855d671970b0ef5052c",
-        );
+        assert_eq!(hex_digest(&ts), DIGEST_ENUM);
     }
 
     #[test]
@@ -356,46 +353,31 @@ mod tests {
             ("meta.com/test/multi/Status", DefinitionNode::Enum(e)),
             ("meta.com/test/multi/UserId", DefinitionNode::OpaqueAlias(a)),
         ]);
-        assert_eq!(
-            hex_digest(&ts),
-            "8da9b088c9e75fbdf0532e1816a52c8b46109d0381e453a07b0c28fbbafd3db2",
-        );
+        assert_eq!(hex_digest(&ts), DIGEST_MULTIPLE_TYPES);
     }
 
     #[test]
     fn cross_language_type_id_bool() {
         let tid = type_id::TypeId::boolType(Default::default());
-        assert_eq!(
-            hex_digest(&tid),
-            "67abdd721024f0ff4e0b3f4c2fc13bc5bad42d0b7851d456d88d203d15aaa450",
-        );
+        assert_eq!(hex_digest(&tid), DIGEST_TYPE_ID_BOOL);
     }
 
     #[test]
     fn cross_language_type_id_i32() {
         let tid = type_id::TypeId::i32Type(Default::default());
-        assert_eq!(
-            hex_digest(&tid),
-            "fb5e512425fc9449316ec95969ebe71e2d576dbab833d61e2a5b9330fd70ee02",
-        );
+        assert_eq!(hex_digest(&tid), DIGEST_TYPE_ID_I32);
     }
 
     #[test]
     fn cross_language_type_id_string() {
         let tid = type_id::TypeId::stringType(Default::default());
-        assert_eq!(
-            hex_digest(&tid),
-            "dc765660b06ee03dd16fd7ca5b957e8c805161ac2c4af28c5a100ab2ab432ca1",
-        );
+        assert_eq!(hex_digest(&tid), DIGEST_TYPE_ID_STRING);
     }
 
     #[test]
     fn cross_language_type_id_uri() {
         let tid = type_id::TypeId::userDefinedType("meta.com/test/MyStruct".to_owned());
-        assert_eq!(
-            hex_digest(&tid),
-            "7b366d852e328a4ca0cc6f000f41f3ca1c0540e08fd0a73fd6fc7458f0042b1b",
-        );
+        assert_eq!(hex_digest(&tid), DIGEST_TYPE_ID_URI);
     }
 
     #[test]

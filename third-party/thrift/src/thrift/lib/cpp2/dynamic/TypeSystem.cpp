@@ -88,6 +88,7 @@ TypeId MapTypeRef::id() const {
 } // namespace detail
 
 StructuredNode::StructuredNode(
+    StructuredTypeKind structuredTypeKind,
     Uri uri,
     std::vector<FieldDefinition> fields,
     bool isSealed,
@@ -95,6 +96,7 @@ StructuredNode::StructuredNode(
     std::string debugName)
     : DefinitionNode(std::move(uri), std::move(debugName)),
       fields_(std::move(fields)),
+      structuredTypeKind_(structuredTypeKind),
       isSealed_(isSealed),
       annotations_(std::move(annotations)) {
   std::uint16_t ordinal = 1;
@@ -124,6 +126,11 @@ StructuredNode::StructuredNode(
   }
 }
 
+TypeRef StructuredNode::asRef() const noexcept {
+  return isUnion() ? TypeRef(static_cast<const UnionNode&>(*this))
+                   : TypeRef(static_cast<const StructNode&>(*this));
+}
+
 StructNode::StructNode(
     Uri uri,
     std::vector<FieldDefinition> fields,
@@ -131,6 +138,7 @@ StructNode::StructNode(
     AnnotationsMap annotations,
     std::string debugName)
     : StructuredNode(
+          StructuredTypeKind::STRUCT,
           std::move(uri),
           std::move(fields),
           isSealed,
@@ -144,6 +152,7 @@ UnionNode::UnionNode(
     AnnotationsMap annotations,
     std::string debugName)
     : StructuredNode(
+          StructuredTypeKind::UNION,
           std::move(uri),
           std::move(fields),
           isSealed,

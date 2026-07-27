@@ -123,8 +123,8 @@ TranscoderOptions allowExperimentalProtocols() {
 }
 
 TEST_F(TranscoderTest, InterpreterTranscodesCompactToBinary) {
-  auto compact = makeThriftCompactCodec(sampleNode());
-  auto binary = makeThriftBinaryCodec(sampleNode());
+  auto compact = makeCodec(WireProtocol::ThriftCompact, sampleNode());
+  auto binary = makeCodec(WireProtocol::ThriftBinary, sampleNode());
 
   // Derive a golden Compact buffer from the hand-built Binary message.
   auto seed = makeTranscoder(fuse(binary, compact), Engine::Interpreter);
@@ -146,8 +146,8 @@ TEST_F(TranscoderTest, InterpreterTranscodesCompactToBinary) {
 }
 
 TEST_F(TranscoderTest, JitEngineUnlinkedReturnsCompileError) {
-  auto compact = makeThriftCompactCodec(sampleNode());
-  auto binary = makeThriftBinaryCodec(sampleNode());
+  auto compact = makeCodec(WireProtocol::ThriftCompact, sampleNode());
+  auto binary = makeCodec(WireProtocol::ThriftBinary, sampleNode());
 
   auto transcoder = makeTranscoder(fuse(compact, binary), Engine::Jit);
   ASSERT_TRUE(transcoder.hasError());
@@ -156,9 +156,9 @@ TEST_F(TranscoderTest, JitEngineUnlinkedReturnsCompileError) {
 }
 
 TEST_F(TranscoderTest, JsonTargetsDoNotRequireExperimentalProtocolOptIn) {
-  auto compact = makeThriftCompactCodec(sampleNode());
-  auto binary = makeThriftBinaryCodec(sampleNode());
-  auto json = makeJsonCodec(sampleNode());
+  auto compact = makeCodec(WireProtocol::ThriftCompact, sampleNode());
+  auto binary = makeCodec(WireProtocol::ThriftBinary, sampleNode());
+  auto json = makeCodec(WireProtocol::Json, sampleNode());
 
   auto compactToJson = makeTranscoder(fuse(compact, json), Engine::Interpreter);
   ASSERT_FALSE(compactToJson.hasError()) << compactToJson.error().message;
@@ -170,9 +170,9 @@ TEST_F(TranscoderTest, JsonTargetsDoNotRequireExperimentalProtocolOptIn) {
 }
 
 TEST_F(TranscoderTest, JsonObjectSourcesDoNotRequireExperimentalProtocolOptIn) {
-  auto json = makeJsonCodec(sampleNode());
-  auto compact = makeThriftCompactCodec(sampleNode());
-  auto binary = makeThriftBinaryCodec(sampleNode());
+  auto json = makeCodec(WireProtocol::Json, sampleNode());
+  auto compact = makeCodec(WireProtocol::ThriftCompact, sampleNode());
+  auto binary = makeCodec(WireProtocol::ThriftBinary, sampleNode());
 
   auto jsonToCompact = makeTranscoder(fuse(json, compact), Engine::Interpreter);
   ASSERT_FALSE(jsonToCompact.hasError()) << jsonToCompact.error().message;
@@ -184,7 +184,7 @@ TEST_F(TranscoderTest, JsonObjectSourcesDoNotRequireExperimentalProtocolOptIn) {
 }
 
 TEST_F(TranscoderTest, JsonToJsonRejected) {
-  auto json = makeJsonCodec(sampleNode());
+  auto json = makeCodec(WireProtocol::Json, sampleNode());
 
   auto transcoder = makeTranscoder(fuse(json, json), Engine::Interpreter);
   ASSERT_TRUE(transcoder.hasError());
@@ -193,8 +193,8 @@ TEST_F(TranscoderTest, JsonToJsonRejected) {
 }
 
 TEST_F(TranscoderTest, ProtobufRequiresIncompleteProtocolOptIn) {
-  auto protobuf = makeProtobufBinaryCodec(sampleNode());
-  auto compact = makeThriftCompactCodec(sampleNode());
+  auto protobuf = makeCodec(WireProtocol::ProtobufBinary, sampleNode());
+  auto compact = makeCodec(WireProtocol::ThriftCompact, sampleNode());
 
   auto defaultTranscoder =
       makeTranscoder(fuse(protobuf, compact), Engine::Interpreter);
@@ -212,8 +212,8 @@ TEST_F(TranscoderTest, ProtobufRequiresIncompleteProtocolOptIn) {
 }
 
 TEST_F(TranscoderTest, JitEngineRejectedBeforeProtocolGate) {
-  auto compact = makeThriftCompactCodec(sampleNode());
-  auto json = makeJsonCodec(sampleNode());
+  auto compact = makeCodec(WireProtocol::ThriftCompact, sampleNode());
+  auto json = makeCodec(WireProtocol::Json, sampleNode());
 
   auto defaultTranscoder = makeTranscoder(fuse(compact, json), Engine::Jit);
   ASSERT_TRUE(defaultTranscoder.hasError());
@@ -232,8 +232,8 @@ TEST_F(TranscoderTest, JitEngineRejectedBeforeProtocolGate) {
 }
 
 TEST_F(TranscoderTest, JsonProtobufRequiresIncompleteProtocolOptIn) {
-  auto json = makeJsonCodec(sampleNode());
-  auto protobuf = makeProtobufBinaryCodec(sampleNode());
+  auto json = makeCodec(WireProtocol::Json, sampleNode());
+  auto protobuf = makeCodec(WireProtocol::ProtobufBinary, sampleNode());
 
   auto defaultTranscoder =
       makeTranscoder(fuse(json, protobuf), Engine::Interpreter);
@@ -244,8 +244,8 @@ TEST_F(TranscoderTest, JsonProtobufRequiresIncompleteProtocolOptIn) {
 }
 
 TEST_F(TranscoderTest, MissingProtocolMetadataRejected) {
-  auto json = makeJsonCodec(sampleNode());
-  auto compact = makeThriftCompactCodec(sampleNode());
+  auto json = makeCodec(WireProtocol::Json, sampleNode());
+  auto compact = makeCodec(WireProtocol::ThriftCompact, sampleNode());
 
   auto fused = fuseStructOps(
       std::get<StructOp>(json.root), std::get<StructOp>(compact.root));

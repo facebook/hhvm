@@ -23,34 +23,14 @@
 #include <span>
 #include <string_view>
 
-namespace apache::thrift::type_system {
-class StructNode;
-class UnionNode;
-} // namespace apache::thrift::type_system
-
 namespace apache::thrift::transcode {
 
 /**
  * Produce codecs for specific protocols from Thrift TypeSystem schemas.
  */
-Codec makeThriftCompactCodec(const type_system::StructNode& node);
-Codec makeThriftCompactCodec(const type_system::UnionNode& node);
-Codec makeThriftCompactCodec(
-    std::string_view name,
-    std::span<const type_system::FieldDefinition> fields);
-Codec makeThriftBinaryCodec(const type_system::StructNode& node);
-Codec makeThriftBinaryCodec(const type_system::UnionNode& node);
-Codec makeThriftBinaryCodec(
-    std::string_view name,
-    std::span<const type_system::FieldDefinition> fields);
-Codec makeProtobufBinaryCodec(const type_system::StructNode& node);
-Codec makeProtobufBinaryCodec(const type_system::UnionNode& node);
-Codec makeProtobufBinaryCodec(
-    std::string_view name,
-    std::span<const type_system::FieldDefinition> fields);
-Codec makeJsonCodec(const type_system::StructNode& node);
-Codec makeJsonCodec(const type_system::UnionNode& node);
-Codec makeJsonCodec(
+Codec makeCodec(WireProtocol protocol, const type_system::StructuredNode& node);
+Codec makeCodec(
+    WireProtocol protocol,
     std::string_view name,
     std::span<const type_system::FieldDefinition> fields);
 

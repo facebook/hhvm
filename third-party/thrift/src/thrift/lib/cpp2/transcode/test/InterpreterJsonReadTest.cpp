@@ -107,8 +107,8 @@ struct InterpreterJsonReadTest : ::testing::Test {
 };
 
 TEST_F(InterpreterJsonReadTest, JsonToCompactProducesStableBytes) {
-  auto compact = makeThriftCompactCodec(sampleNode());
-  auto json = makeJsonCodec(sampleNode());
+  auto compact = makeCodec(WireProtocol::ThriftCompact, sampleNode());
+  auto json = makeCodec(WireProtocol::Json, sampleNode());
 
   TranscodeInterpreter jsonToCompact{fuse(json, compact)};
 
@@ -127,8 +127,8 @@ TEST_F(InterpreterJsonReadTest, JsonToCompactProducesStableBytes) {
 
 // An empty JSON array must produce an empty Compact list (count 0).
 TEST_F(InterpreterJsonReadTest, EmptyArrayProducesStableBytes) {
-  auto compact = makeThriftCompactCodec(sampleNode());
-  auto json = makeJsonCodec(sampleNode());
+  auto compact = makeCodec(WireProtocol::ThriftCompact, sampleNode());
+  auto json = makeCodec(WireProtocol::Json, sampleNode());
   TranscodeInterpreter jsonToCompact{fuse(json, compact)};
 
   const std::string json0 =
@@ -146,8 +146,8 @@ TEST_F(InterpreterJsonReadTest, EmptyArrayProducesStableBytes) {
 // An extra unknown key must be skipped via skip_json_value and not disturb the
 // surrounding fields (unknown object value nested here to exercise recursion).
 TEST_F(InterpreterJsonReadTest, UnknownFieldIsSkipped) {
-  auto compact = makeThriftCompactCodec(sampleNode());
-  auto json = makeJsonCodec(sampleNode());
+  auto compact = makeCodec(WireProtocol::ThriftCompact, sampleNode());
+  auto json = makeCodec(WireProtocol::Json, sampleNode());
   TranscodeInterpreter jsonToCompact{fuse(json, compact)};
 
   const std::string withUnknown =
@@ -166,8 +166,8 @@ TEST_F(InterpreterJsonReadTest, UnknownFieldIsSkipped) {
 // A string value with \n and \uXXXX escapes must decode to the right bytes
 // (the JSON reader uses the escape-aware string intrinsic).
 TEST_F(InterpreterJsonReadTest, EscapedStringValueRoundTrips) {
-  auto compact = makeThriftCompactCodec(sampleNode());
-  auto json = makeJsonCodec(sampleNode());
+  auto compact = makeCodec(WireProtocol::ThriftCompact, sampleNode());
+  auto json = makeCodec(WireProtocol::Json, sampleNode());
   TranscodeInterpreter jsonToCompact{fuse(json, compact)};
 
   // Non-raw literal so the JSON reader gets real JSON escapes: a 6-char unicode
@@ -197,8 +197,8 @@ TEST_F(InterpreterJsonReadTest, EscapedStringValueRoundTrips) {
 
 // A JSON object missing its closing brace must error, not crash or read OOB.
 TEST_F(InterpreterJsonReadTest, MalformedMissingCloseBraceErrors) {
-  auto compact = makeThriftCompactCodec(sampleNode());
-  auto json = makeJsonCodec(sampleNode());
+  auto compact = makeCodec(WireProtocol::ThriftCompact, sampleNode());
+  auto json = makeCodec(WireProtocol::Json, sampleNode());
   TranscodeInterpreter jsonToCompact{fuse(json, compact)};
 
   const std::string bad =
@@ -211,8 +211,8 @@ TEST_F(InterpreterJsonReadTest, MalformedMissingCloseBraceErrors) {
 
 // A bad separator (missing ':') must error rather than misparse.
 TEST_F(InterpreterJsonReadTest, MalformedMissingColonErrors) {
-  auto compact = makeThriftCompactCodec(sampleNode());
-  auto json = makeJsonCodec(sampleNode());
+  auto compact = makeCodec(WireProtocol::ThriftCompact, sampleNode());
+  auto json = makeCodec(WireProtocol::Json, sampleNode());
   TranscodeInterpreter jsonToCompact{fuse(json, compact)};
 
   const std::string bad = R"({"id" 7})"; // missing ':'
@@ -222,8 +222,8 @@ TEST_F(InterpreterJsonReadTest, MalformedMissingColonErrors) {
 }
 
 TEST_F(InterpreterJsonReadTest, TrailingRootTokenErrors) {
-  auto compact = makeThriftCompactCodec(sampleNode());
-  auto json = makeJsonCodec(sampleNode());
+  auto compact = makeCodec(WireProtocol::ThriftCompact, sampleNode());
+  auto json = makeCodec(WireProtocol::Json, sampleNode());
   TranscodeInterpreter jsonToCompact{fuse(json, compact)};
 
   const std::string bad =
@@ -234,8 +234,8 @@ TEST_F(InterpreterJsonReadTest, TrailingRootTokenErrors) {
 }
 
 TEST_F(InterpreterJsonReadTest, TrailingRootWhitespaceIsAccepted) {
-  auto compact = makeThriftCompactCodec(sampleNode());
-  auto json = makeJsonCodec(sampleNode());
+  auto compact = makeCodec(WireProtocol::ThriftCompact, sampleNode());
+  auto json = makeCodec(WireProtocol::Json, sampleNode());
   TranscodeInterpreter jsonToCompact{fuse(json, compact)};
 
   const std::string input =
@@ -257,8 +257,8 @@ TEST_F(InterpreterJsonReadTest, BinaryFieldUsesBase64JsonString) {
   const auto& node =
       ts->getUserDefinedTypeOrThrow("test.WithBinary").asStruct();
 
-  auto compact = makeThriftCompactCodec(node);
-  auto json = makeJsonCodec(node);
+  auto compact = makeCodec(WireProtocol::ThriftCompact, node);
+  auto json = makeCodec(WireProtocol::Json, node);
   TranscodeInterpreter jsonToCompact{fuse(json, compact)};
 
   auto compact0 = jsonToCompact.transcode(wrap(R"({"data":"aGk="})"));
@@ -288,8 +288,8 @@ TEST_F(InterpreterJsonReadTest, OptionalFieldNullIsOmitted) {
   const auto& node =
       ts->getUserDefinedTypeOrThrow("test.WithOptional").asStruct();
 
-  auto compact = makeThriftCompactCodec(node);
-  auto json = makeJsonCodec(node);
+  auto compact = makeCodec(WireProtocol::ThriftCompact, node);
+  auto json = makeCodec(WireProtocol::Json, node);
   TranscodeInterpreter jsonToCompact{fuse(json, compact)};
 
   auto compact0 = jsonToCompact.transcode(wrap(R"({"id":7,"name":null})"));
@@ -301,8 +301,8 @@ TEST_F(InterpreterJsonReadTest, OptionalFieldNullIsOmitted) {
 }
 
 TEST_F(InterpreterJsonReadTest, NullForAlwaysPresentFieldErrors) {
-  auto compact = makeThriftCompactCodec(sampleNode());
-  auto json = makeJsonCodec(sampleNode());
+  auto compact = makeCodec(WireProtocol::ThriftCompact, sampleNode());
+  auto json = makeCodec(WireProtocol::Json, sampleNode());
   TranscodeInterpreter jsonToCompact{fuse(json, compact)};
 
   auto result = jsonToCompact.transcode(wrap(R"({"id":null})"));
@@ -310,9 +310,9 @@ TEST_F(InterpreterJsonReadTest, NullForAlwaysPresentFieldErrors) {
 }
 
 TEST_F(InterpreterJsonReadTest, MissingAlwaysPresentFieldsUseStandardDefaults) {
-  auto compact = makeThriftCompactCodec(sampleNode());
-  auto binary = makeThriftBinaryCodec(sampleNode());
-  auto json = makeJsonCodec(sampleNode());
+  auto compact = makeCodec(WireProtocol::ThriftCompact, sampleNode());
+  auto binary = makeCodec(WireProtocol::ThriftBinary, sampleNode());
+  auto json = makeCodec(WireProtocol::Json, sampleNode());
   TranscodeInterpreter jsonToCompact{fuse(json, compact)};
   TranscodeInterpreter compactToBinary{fuse(compact, binary)};
 
@@ -340,8 +340,8 @@ TEST_F(InterpreterJsonReadTest, NarrowIntegerOutOfRangeErrors) {
   auto ts = std::move(builder).build();
   const auto& node = ts->getUserDefinedTypeOrThrow("test.WithByte").asStruct();
 
-  auto compact = makeThriftCompactCodec(node);
-  auto json = makeJsonCodec(node);
+  auto compact = makeCodec(WireProtocol::ThriftCompact, node);
+  auto json = makeCodec(WireProtocol::Json, node);
   TranscodeInterpreter jsonToCompact{fuse(json, compact)};
 
   auto result = jsonToCompact.transcode(wrap(R"({"b":128})"));
@@ -359,8 +359,8 @@ TEST_F(InterpreterJsonReadTest, JsonUnionRequiresExactlyOneKnownMember) {
   auto ts = std::move(builder).build();
   const auto& node = ts->getUserDefinedTypeOrThrow("test.Choice").asUnion();
 
-  auto compact = makeThriftCompactCodec(node);
-  auto json = makeJsonCodec(node);
+  auto compact = makeCodec(WireProtocol::ThriftCompact, node);
+  auto json = makeCodec(WireProtocol::Json, node);
   TranscodeInterpreter jsonToCompact{fuse(json, compact)};
 
   auto compact0 = jsonToCompact.transcode(wrap(R"({"id":7})"));
@@ -384,8 +384,8 @@ TEST_F(InterpreterJsonReadTest, JsonMapSourceTranscodesWithOptIn) {
   auto ts = std::move(builder).build();
   const auto& node = ts->getUserDefinedTypeOrThrow("test.WithMap").asStruct();
 
-  auto json = makeJsonCodec(node);
-  auto compact = makeThriftCompactCodec(node);
+  auto json = makeCodec(WireProtocol::Json, node);
+  auto compact = makeCodec(WireProtocol::ThriftCompact, node);
 
   auto transcoder = makeTranscoder(
       fuse(json, compact), Engine::Interpreter, allowExperimentalProtocols());
@@ -408,8 +408,8 @@ TEST_F(InterpreterJsonReadTest, JsonMapKeyValueArrayAcceptsValueBeforeKey) {
   auto ts = std::move(builder).build();
   const auto& node = ts->getUserDefinedTypeOrThrow("test.WithMap").asStruct();
 
-  auto json = makeJsonCodec(node);
-  auto compact = makeThriftCompactCodec(node);
+  auto json = makeCodec(WireProtocol::Json, node);
+  auto compact = makeCodec(WireProtocol::ThriftCompact, node);
   TranscodeInterpreter jsonToCompact{fuse(json, compact)};
 
   auto expected = jsonToCompact.transcode(
@@ -437,8 +437,8 @@ TEST_F(
   auto ts = std::move(builder).build();
   const auto& node = ts->getUserDefinedTypeOrThrow("test.WithMap").asStruct();
 
-  auto json = makeJsonCodec(node);
-  auto compact = makeThriftCompactCodec(node);
+  auto json = makeCodec(WireProtocol::Json, node);
+  auto compact = makeCodec(WireProtocol::ThriftCompact, node);
   TranscodeInterpreter jsonToCompact{fuse(json, compact)};
 
   auto expected =
@@ -465,8 +465,8 @@ TEST_F(InterpreterJsonReadTest, JsonEnumMapObjectKeyAcceptsNameOrId) {
   auto ts = std::move(builder).build();
   const auto& node = ts->getUserDefinedTypeOrThrow("test.WithMap").asStruct();
 
-  auto json = makeJsonCodec(node);
-  auto compact = makeThriftCompactCodec(node);
+  auto json = makeCodec(WireProtocol::Json, node);
+  auto compact = makeCodec(WireProtocol::ThriftCompact, node);
   TranscodeInterpreter jsonToCompact{fuse(json, compact)};
 
   EXPECT_FALSE(jsonToCompact.transcode(wrap(R"({"m":{"RED":7}})")).hasError());
@@ -491,8 +491,8 @@ TEST_F(InterpreterJsonReadTest, JsonEnumValueAcceptsNameOrId) {
   auto ts = std::move(builder).build();
   const auto& node = ts->getUserDefinedTypeOrThrow("test.WithEnum").asStruct();
 
-  auto json = makeJsonCodec(node);
-  auto compact = makeThriftCompactCodec(node);
+  auto json = makeCodec(WireProtocol::Json, node);
+  auto compact = makeCodec(WireProtocol::ThriftCompact, node);
   TranscodeInterpreter jsonToCompact{fuse(json, compact)};
 
   auto byName = jsonToCompact.transcode(wrap(R"({"color":"RED"})"));
@@ -529,8 +529,8 @@ TEST_F(InterpreterJsonReadTest, JsonMapTargetWritesSpecForms) {
   auto ts = std::move(builder).build();
   const auto& node = ts->getUserDefinedTypeOrThrow("test.WithMaps").asStruct();
 
-  auto compact = makeThriftCompactCodec(node);
-  auto json = makeJsonCodec(node);
+  auto compact = makeCodec(WireProtocol::ThriftCompact, node);
+  auto json = makeCodec(WireProtocol::Json, node);
   TranscodeInterpreter encoder{fuse(json, compact)};
 
   auto compactInput = encoder.transcode(wrap(
@@ -561,8 +561,8 @@ TEST_F(InterpreterJsonReadTest, PackedProtobufSequenceWritesJsonArray) {
   auto ts = std::move(builder).build();
   const auto& node = ts->getUserDefinedTypeOrThrow("test.WithList").asStruct();
 
-  auto protobuf = makeProtobufBinaryCodec(node);
-  auto json = makeJsonCodec(node);
+  auto protobuf = makeCodec(WireProtocol::ProtobufBinary, node);
+  auto json = makeCodec(WireProtocol::Json, node);
   auto transcoder = makeTranscoder(
       fuse(protobuf, json), Engine::Interpreter, allowExperimentalProtocols());
   ASSERT_FALSE(transcoder.hasError()) << transcoder.error().message;

@@ -75,16 +75,21 @@ TEST_F(CodecFactoryTest, ProducesStructRootForEachProtocol) {
 
   // Every factory should hand back a struct-rooted codec for a struct schema.
   EXPECT_TRUE(
-      std::holds_alternative<StructOp>(makeThriftCompactCodec(node).root));
+      std::holds_alternative<StructOp>(
+          makeCodec(WireProtocol::ThriftCompact, node).root));
   EXPECT_TRUE(
-      std::holds_alternative<StructOp>(makeThriftBinaryCodec(node).root));
+      std::holds_alternative<StructOp>(
+          makeCodec(WireProtocol::ThriftBinary, node).root));
   EXPECT_TRUE(
-      std::holds_alternative<StructOp>(makeProtobufBinaryCodec(node).root));
-  EXPECT_TRUE(std::holds_alternative<StructOp>(makeJsonCodec(node).root));
+      std::holds_alternative<StructOp>(
+          makeCodec(WireProtocol::ProtobufBinary, node).root));
+  EXPECT_TRUE(
+      std::holds_alternative<StructOp>(
+          makeCodec(WireProtocol::Json, node).root));
 }
 
 TEST_F(CodecFactoryTest, CompactCodecCarriesBothSchemaFields) {
-  auto codec = makeThriftCompactCodec(personNode());
+  auto codec = makeCodec(WireProtocol::ThriftCompact, personNode());
   const auto& root = std::get<StructOp>(codec.root);
 
   ASSERT_EQ(root.fields.size(), 2u);
@@ -111,7 +116,7 @@ TEST(CodecFactoryStandaloneTest, AdHocStructFieldsProduceStructCodec) {
       std::nullopt,
       type_system::AnnotationsMap{});
 
-  auto codec = makeJsonCodec("RequestEnvelope", fields);
+  auto codec = makeCodec(WireProtocol::Json, "RequestEnvelope", fields);
   const auto& root = std::get<StructOp>(codec.root);
 
   EXPECT_EQ(codec.name, "json_RequestEnvelope");
@@ -140,7 +145,7 @@ TEST(CodecFactoryStandaloneTest, ProtobufSignedIntegersUseZigzagVarints) {
   const auto& node =
       ts->getUserDefinedTypeOrThrow("test.SignedNumbers").asStruct();
 
-  auto codec = makeProtobufBinaryCodec(node);
+  auto codec = makeCodec(WireProtocol::ProtobufBinary, node);
   const auto& root = std::get<StructOp>(codec.root);
   ASSERT_EQ(root.fields.size(), 4u);
 
@@ -167,7 +172,7 @@ TEST(CodecFactoryStandaloneTest, JsonBinaryUsesBase64String) {
   const auto& node =
       ts->getUserDefinedTypeOrThrow("test.WithBinary").asStruct();
 
-  auto codec = makeJsonCodec(node);
+  auto codec = makeCodec(WireProtocol::Json, node);
   const auto& root = std::get<StructOp>(codec.root);
   ASSERT_EQ(root.fields.size(), 1u);
   ASSERT_NE(root.fields[0].command, nullptr);
@@ -194,7 +199,7 @@ TEST(CodecFactoryStandaloneTest, OpaqueAliasUsesTargetScalarCodec) {
   ASSERT_NE(ts, nullptr);
   const auto& node = ts->getUserDefinedTypeOrThrow("test.WithAlias").asStruct();
 
-  auto codec = makeThriftBinaryCodec(node);
+  auto codec = makeCodec(WireProtocol::ThriftBinary, node);
   const auto& root = std::get<StructOp>(codec.root);
   ASSERT_EQ(root.fields.size(), 1u);
   ASSERT_NE(root.fields[0].command, nullptr);
@@ -218,10 +223,17 @@ TEST(CodecFactoryStandaloneTest, UnsupportedAnyTypeThrowsForEachProtocol) {
   ASSERT_NE(ts, nullptr);
   const auto& node = ts->getUserDefinedTypeOrThrow("test.WithAny").asStruct();
 
-  EXPECT_THROW({ (void)makeThriftCompactCodec(node); }, std::invalid_argument);
-  EXPECT_THROW({ (void)makeThriftBinaryCodec(node); }, std::invalid_argument);
-  EXPECT_THROW({ (void)makeProtobufBinaryCodec(node); }, std::invalid_argument);
-  EXPECT_THROW({ (void)makeJsonCodec(node); }, std::invalid_argument);
+  EXPECT_THROW(
+      { (void)makeCodec(WireProtocol::ThriftCompact, node); },
+      std::invalid_argument);
+  EXPECT_THROW(
+      { (void)makeCodec(WireProtocol::ThriftBinary, node); },
+      std::invalid_argument);
+  EXPECT_THROW(
+      { (void)makeCodec(WireProtocol::ProtobufBinary, node); },
+      std::invalid_argument);
+  EXPECT_THROW(
+      { (void)makeCodec(WireProtocol::Json, node); }, std::invalid_argument);
 }
 
 TEST(
@@ -242,12 +254,13 @@ TEST(
   const auto& node =
       ts->getUserDefinedTypeOrThrow("test.WithDefault").asStruct();
 
-  EXPECT_NO_THROW({ (void)makeThriftCompactCodec(node); });
-  EXPECT_NO_THROW({ (void)makeThriftBinaryCodec(node); });
+  EXPECT_NO_THROW({ (void)makeCodec(WireProtocol::ThriftCompact, node); });
+  EXPECT_NO_THROW({ (void)makeCodec(WireProtocol::ThriftBinary, node); });
   expectInvalidArgumentMessage(
-      [&] { (void)makeProtobufBinaryCodec(node); }, "custom defaults");
+      [&] { (void)makeCodec(WireProtocol::ProtobufBinary, node); },
+      "custom defaults");
   expectInvalidArgumentMessage(
-      [&] { (void)makeJsonCodec(node); }, "custom defaults");
+      [&] { (void)makeCodec(WireProtocol::Json, node); }, "custom defaults");
 }
 
 TEST(
@@ -266,11 +279,12 @@ TEST(
   ASSERT_NE(ts, nullptr);
   const auto& node = ts->getUserDefinedTypeOrThrow("test.WithTerse").asStruct();
 
-  EXPECT_NO_THROW({ (void)makeThriftCompactCodec(node); });
-  EXPECT_NO_THROW({ (void)makeThriftBinaryCodec(node); });
+  EXPECT_NO_THROW({ (void)makeCodec(WireProtocol::ThriftCompact, node); });
+  EXPECT_NO_THROW({ (void)makeCodec(WireProtocol::ThriftBinary, node); });
   expectInvalidArgumentMessage(
-      [&] { (void)makeProtobufBinaryCodec(node); }, "terse");
-  expectInvalidArgumentMessage([&] { (void)makeJsonCodec(node); }, "terse");
+      [&] { (void)makeCodec(WireProtocol::ProtobufBinary, node); }, "terse");
+  expectInvalidArgumentMessage(
+      [&] { (void)makeCodec(WireProtocol::Json, node); }, "terse");
 }
 
 TEST(CodecFactoryStandaloneTest, ProtobufMapFieldIsRepeatedEntry) {
@@ -288,7 +302,7 @@ TEST(CodecFactoryStandaloneTest, ProtobufMapFieldIsRepeatedEntry) {
   const auto& node =
       ts->getUserDefinedTypeOrThrow("test.Scoreboard").asStruct();
 
-  auto codec = makeProtobufBinaryCodec(node);
+  auto codec = makeCodec(WireProtocol::ProtobufBinary, node);
   const auto& root = std::get<StructOp>(codec.root);
   ASSERT_EQ(root.fields.size(), 1u);
   EXPECT_TRUE(root.fields[0].isRepeated);
@@ -315,7 +329,7 @@ TEST(CodecFactoryStandaloneTest, ProtobufUnionCodecCarriesOptionalFields) {
   ASSERT_NE(ts, nullptr);
   const auto& node = ts->getUserDefinedTypeOrThrow("test.Choice").asUnion();
 
-  auto codec = makeProtobufBinaryCodec(node);
+  auto codec = makeCodec(WireProtocol::ProtobufBinary, node);
   const auto& root = std::get<StructOp>(codec.root);
   ASSERT_EQ(root.fields.size(), 2u);
 
@@ -327,8 +341,8 @@ TEST(CodecFactoryStandaloneTest, ProtobufUnionCodecCarriesOptionalFields) {
 
 TEST_F(CodecFactoryTest, FuseJsonSourceWithCompactTarget) {
   // REST -> Thrift direction: read JSON, write Compact.
-  auto jsonCodec = makeJsonCodec(personNode());
-  auto compactCodec = makeThriftCompactCodec(personNode());
+  auto jsonCodec = makeCodec(WireProtocol::Json, personNode());
+  auto compactCodec = makeCodec(WireProtocol::ThriftCompact, personNode());
 
   const auto& jsonRoot = std::get<StructOp>(jsonCodec.root);
   const auto& compactRoot = std::get<StructOp>(compactCodec.root);

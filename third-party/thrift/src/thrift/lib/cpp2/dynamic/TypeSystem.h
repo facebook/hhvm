@@ -1011,6 +1011,11 @@ struct FastFieldHandle {
   }
 };
 
+enum class StructuredTypeKind {
+  STRUCT,
+  UNION,
+};
+
 class DefinitionNode {
  public:
   /**
@@ -1039,6 +1044,17 @@ class DefinitionNode {
 
 class StructuredNode : public DefinitionNode {
  public:
+  StructuredTypeKind structuredTypeKind() const noexcept {
+    return structuredTypeKind_;
+  }
+  bool isStruct() const noexcept {
+    return structuredTypeKind_ == StructuredTypeKind::STRUCT;
+  }
+  bool isUnion() const noexcept {
+    return structuredTypeKind_ == StructuredTypeKind::UNION;
+  }
+  TypeRef asRef() const noexcept;
+
   std::span<const FieldDefinition> fields() const noexcept { return fields_; }
   bool isSealed() const noexcept { return isSealed_; }
 
@@ -1117,10 +1133,12 @@ class StructuredNode : public DefinitionNode {
   std::vector<FieldDefinition> fields_;
   folly::F14FastMap<FieldId, FastFieldHandle> fieldHandleById_;
   folly::F14FastMap<std::string_view, FastFieldHandle> fieldHandleByName_;
+  StructuredTypeKind structuredTypeKind_;
   bool isSealed_;
   AnnotationsMap annotations_;
 
   StructuredNode(
+      StructuredTypeKind structuredTypeKind,
       Uri uri,
       std::vector<FieldDefinition> fields,
       bool isSealed,

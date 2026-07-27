@@ -457,6 +457,7 @@ using TypeInfoFn = uint8_t (*)(const type_system::TypeRef&);
 
 struct ProtocolOps {
   WireProtocol protocol;
+  std::string_view namePrefix;
   ScalarFn scalarFn;
   TypeInfoFn typeInfoFn;
   FieldIdent fieldIdent;
@@ -550,8 +551,8 @@ void addStructField(
   op.fields.push_back(std::move(entry));
 }
 
-template <typename Structured>
-StructOp makeStructOp(const Structured& node, const ProtocolOps& ops) {
+StructOp makeStructOp(
+    const type_system::StructuredNode& node, const ProtocolOps& ops) {
   StructOp op = makeStructOpBase(ops);
   auto schemaType = node.asRef();
   op.schemaType = schemaType;
@@ -699,6 +700,7 @@ Command commandForType(
 
 const ProtocolOps kCompactOps{
     .protocol = WireProtocol::ThriftCompact,
+    .namePrefix = "compact_",
     .scalarFn = compactScalarOp,
     .typeInfoFn = compactTypeInfo,
     .fieldIdent = FieldIdent::ById,
@@ -713,6 +715,7 @@ const ProtocolOps kCompactOps{
 
 const ProtocolOps kProtobufOps{
     .protocol = WireProtocol::ProtobufBinary,
+    .namePrefix = "protobuf_",
     .scalarFn = protobufScalarOp,
     .typeInfoFn = protoTypeInfo,
     .fieldIdent = FieldIdent::ById,
@@ -727,6 +730,7 @@ const ProtocolOps kProtobufOps{
 
 const ProtocolOps kBinaryOps{
     .protocol = WireProtocol::ThriftBinary,
+    .namePrefix = "binary_",
     .scalarFn = binaryScalarOp,
     .typeInfoFn = binaryTypeInfo,
     .fieldIdent = FieldIdent::ById,
@@ -741,6 +745,7 @@ const ProtocolOps kBinaryOps{
 
 const ProtocolOps kJsonOps{
     .protocol = WireProtocol::Json,
+    .namePrefix = "json_",
     .scalarFn = jsonScalarOp,
     .typeInfoFn = compactTypeInfo, // unused for JSON — no type bytes
     .fieldIdent = FieldIdent::ByName,
@@ -753,108 +758,43 @@ const ProtocolOps kJsonOps{
     .containerFraming = ContainerFraming::Json,
 };
 
+const ProtocolOps& protocolOps(WireProtocol protocol) {
+  switch (protocol) {
+    case WireProtocol::ThriftCompact:
+      return kCompactOps;
+    case WireProtocol::ThriftBinary:
+      return kBinaryOps;
+    case WireProtocol::ProtobufBinary:
+      return kProtobufOps;
+    case WireProtocol::Json:
+      return kJsonOps;
+    case WireProtocol::Unknown:
+      break;
+  }
+  throw std::invalid_argument("unsupported wire protocol for codec factory");
+}
+
 } // namespace
 
-Codec makeThriftCompactCodec(const type_system::StructNode& node) {
+Codec makeCodec(
+    WireProtocol protocol, const type_system::StructuredNode& node) {
+  const auto& ops = protocolOps(protocol);
   Codec codec;
-  codec.name = "compact_" + std::string(node.debugName());
-  codec.protocol = WireProtocol::ThriftCompact;
-  codec.root = Command{makeStructOp(node, kCompactOps)};
+  codec.name = std::string(ops.namePrefix) + std::string(node.debugName());
+  codec.protocol = protocol;
+  codec.root = Command{makeStructOp(node, ops)};
   return codec;
 }
 
-Codec makeThriftCompactCodec(const type_system::UnionNode& node) {
-  Codec codec;
-  codec.name = "compact_" + std::string(node.debugName());
-  codec.protocol = WireProtocol::ThriftCompact;
-  codec.root = Command{makeStructOp(node, kCompactOps)};
-  return codec;
-}
-
-Codec makeThriftCompactCodec(
+Codec makeCodec(
+    WireProtocol protocol,
     std::string_view name,
     std::span<const type_system::FieldDefinition> fields) {
+  const auto& ops = protocolOps(protocol);
   Codec codec;
-  codec.name = "compact_" + std::string(name);
-  codec.protocol = WireProtocol::ThriftCompact;
-  codec.root = Command{makeStructOp(fields, kCompactOps)};
-  return codec;
-}
-
-Codec makeThriftBinaryCodec(const type_system::StructNode& node) {
-  Codec codec;
-  codec.name = "binary_" + std::string(node.debugName());
-  codec.protocol = WireProtocol::ThriftBinary;
-  codec.root = Command{makeStructOp(node, kBinaryOps)};
-  return codec;
-}
-
-Codec makeThriftBinaryCodec(const type_system::UnionNode& node) {
-  Codec codec;
-  codec.name = "binary_" + std::string(node.debugName());
-  codec.protocol = WireProtocol::ThriftBinary;
-  codec.root = Command{makeStructOp(node, kBinaryOps)};
-  return codec;
-}
-
-Codec makeThriftBinaryCodec(
-    std::string_view name,
-    std::span<const type_system::FieldDefinition> fields) {
-  Codec codec;
-  codec.name = "binary_" + std::string(name);
-  codec.protocol = WireProtocol::ThriftBinary;
-  codec.root = Command{makeStructOp(fields, kBinaryOps)};
-  return codec;
-}
-
-Codec makeProtobufBinaryCodec(const type_system::StructNode& node) {
-  Codec codec;
-  codec.name = "protobuf_" + std::string(node.debugName());
-  codec.protocol = WireProtocol::ProtobufBinary;
-  codec.root = Command{makeStructOp(node, kProtobufOps)};
-  return codec;
-}
-
-Codec makeProtobufBinaryCodec(const type_system::UnionNode& node) {
-  Codec codec;
-  codec.name = "protobuf_" + std::string(node.debugName());
-  codec.root = Command{makeStructOp(node, kProtobufOps)};
-  return codec;
-}
-
-Codec makeProtobufBinaryCodec(
-    std::string_view name,
-    std::span<const type_system::FieldDefinition> fields) {
-  Codec codec;
-  codec.name = "protobuf_" + std::string(name);
-  codec.protocol = WireProtocol::ProtobufBinary;
-  codec.root = Command{makeStructOp(fields, kProtobufOps)};
-  return codec;
-}
-
-Codec makeJsonCodec(const type_system::StructNode& node) {
-  Codec codec;
-  codec.name = "json_" + std::string(node.debugName());
-  codec.protocol = WireProtocol::Json;
-  codec.root = Command{makeStructOp(node, kJsonOps)};
-  return codec;
-}
-
-Codec makeJsonCodec(const type_system::UnionNode& node) {
-  Codec codec;
-  codec.name = "json_" + std::string(node.debugName());
-  codec.protocol = WireProtocol::Json;
-  codec.root = Command{makeStructOp(node, kJsonOps)};
-  return codec;
-}
-
-Codec makeJsonCodec(
-    std::string_view name,
-    std::span<const type_system::FieldDefinition> fields) {
-  Codec codec;
-  codec.name = "json_" + std::string(name);
-  codec.protocol = WireProtocol::Json;
-  codec.root = Command{makeStructOp(fields, kJsonOps)};
+  codec.name = std::string(ops.namePrefix) + std::string(name);
+  codec.protocol = protocol;
+  codec.root = Command{makeStructOp(fields, ops)};
   return codec;
 }
 

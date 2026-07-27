@@ -66,17 +66,15 @@ constexpr std::size_t pathIndex(ProtocolKey source, ProtocolKey target) {
   return protocolIndex(source) * kProtocolCount + protocolIndex(target);
 }
 
-using CodecFactory = Codec (*)(const type_system::StructNode&);
-
 struct ProtocolSpec {
   ProtocolKey key;
-  CodecFactory makeCodec;
+  WireProtocol wireProtocol;
 };
 
 const std::array<ProtocolSpec, kProtocolCount> kProtocolSpecs{{
-    {kCompact, makeThriftCompactCodec},
-    {kBinary, makeThriftBinaryCodec},
-    {kJson, makeJsonCodec},
+    {kCompact, WireProtocol::ThriftCompact},
+    {kBinary, WireProtocol::ThriftBinary},
+    {kJson, WireProtocol::Json},
 }};
 
 struct ProtocolPair {
@@ -141,7 +139,7 @@ struct BenchFixture {
       : type_(SchemaRegistry::get().getTypeSystemNode<T>().asRef()) {
     const auto& node = type_.asStruct();
     for (const auto& spec : kProtocolSpecs) {
-      codecs_[protocolIndex(spec.key)] = spec.makeCodec(node);
+      codecs_[protocolIndex(spec.key)] = makeCodec(spec.wireProtocol, node);
       inputs_[protocolIndex(spec.key)] = serializeInput(spec.key, value);
     }
     for (const auto& pair : protocolPairs()) {

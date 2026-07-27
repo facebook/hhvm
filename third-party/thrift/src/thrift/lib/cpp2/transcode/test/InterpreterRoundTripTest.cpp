@@ -317,8 +317,8 @@ std::vector<uint8_t> toBytes(const folly::IOBuf& buf) {
 }
 
 TEST_F(InterpreterRoundTripTest, CompactBinaryRoundTripIsIdentity) {
-  auto compact = makeThriftCompactCodec(sampleNode());
-  auto binary = makeThriftBinaryCodec(sampleNode());
+  auto compact = makeCodec(WireProtocol::ThriftCompact, sampleNode());
+  auto binary = makeCodec(WireProtocol::ThriftBinary, sampleNode());
 
   TranscodeInterpreter binaryToCompact{fuse(binary, compact)};
   TranscodeInterpreter compactToBinary{fuse(compact, binary)};
@@ -343,8 +343,8 @@ TEST_F(InterpreterRoundTripTest, CompactBinaryRoundTripIsIdentity) {
 }
 
 TEST_F(InterpreterRoundTripTest, DispatchesFieldsByIdWhenWireOrderDiffers) {
-  auto compact = makeThriftCompactCodec(sampleNode());
-  auto binary = makeThriftBinaryCodec(sampleNode());
+  auto compact = makeCodec(WireProtocol::ThriftCompact, sampleNode());
+  auto binary = makeCodec(WireProtocol::ThriftBinary, sampleNode());
 
   TranscodeInterpreter binaryToCompact{fuse(binary, compact)};
   TranscodeInterpreter compactToBinary{fuse(compact, binary)};
@@ -362,8 +362,8 @@ TEST_F(InterpreterRoundTripTest, DispatchesFieldsByIdWhenWireOrderDiffers) {
 }
 
 TEST_F(InterpreterRoundTripTest, TruncatedInputYieldsError) {
-  auto compact = makeThriftCompactCodec(sampleNode());
-  auto binary = makeThriftBinaryCodec(sampleNode());
+  auto compact = makeCodec(WireProtocol::ThriftCompact, sampleNode());
+  auto binary = makeCodec(WireProtocol::ThriftBinary, sampleNode());
   TranscodeInterpreter binaryToCompact{fuse(binary, compact)};
 
   // Chop the message mid-value: keep field 1's header + only 2 of its 4 i32
@@ -382,8 +382,8 @@ TEST_F(InterpreterRoundTripTest, TruncatedInputYieldsError) {
 }
 
 TEST_F(InterpreterRoundTripTest, WrongFieldTypeYieldsError) {
-  auto compact = makeThriftCompactCodec(sampleNode());
-  auto binary = makeThriftBinaryCodec(sampleNode());
+  auto compact = makeCodec(WireProtocol::ThriftCompact, sampleNode());
+  auto binary = makeCodec(WireProtocol::ThriftBinary, sampleNode());
   TranscodeInterpreter binaryToCompact{fuse(binary, compact)};
 
   auto input = binaryWrongTypeMessage();
@@ -394,8 +394,8 @@ TEST_F(InterpreterRoundTripTest, WrongFieldTypeYieldsError) {
 }
 
 TEST_F(InterpreterRoundTripTest, NegativeBinaryContainerCountYieldsError) {
-  auto compact = makeThriftCompactCodec(sampleNode());
-  auto binary = makeThriftBinaryCodec(sampleNode());
+  auto compact = makeCodec(WireProtocol::ThriftCompact, sampleNode());
+  auto binary = makeCodec(WireProtocol::ThriftBinary, sampleNode());
   TranscodeInterpreter binaryToCompact{fuse(binary, compact)};
 
   auto input = binaryNegativeListCountMessage();
@@ -406,8 +406,8 @@ TEST_F(InterpreterRoundTripTest, NegativeBinaryContainerCountYieldsError) {
 }
 
 TEST_F(InterpreterRoundTripTest, WrongBinaryListElementTypeYieldsError) {
-  auto compact = makeThriftCompactCodec(sampleNode());
-  auto binary = makeThriftBinaryCodec(sampleNode());
+  auto compact = makeCodec(WireProtocol::ThriftCompact, sampleNode());
+  auto binary = makeCodec(WireProtocol::ThriftBinary, sampleNode());
   TranscodeInterpreter binaryToCompact{fuse(binary, compact)};
 
   auto input = binaryWrongListElementTypeMessage();
@@ -418,8 +418,8 @@ TEST_F(InterpreterRoundTripTest, WrongBinaryListElementTypeYieldsError) {
 }
 
 TEST_F(InterpreterRoundTripTest, OversizedCompactContainerCountYieldsError) {
-  auto compact = makeThriftCompactCodec(sampleNode());
-  auto binary = makeThriftBinaryCodec(sampleNode());
+  auto compact = makeCodec(WireProtocol::ThriftCompact, sampleNode());
+  auto binary = makeCodec(WireProtocol::ThriftBinary, sampleNode());
   TranscodeInterpreter compactToBinary{fuse(compact, binary)};
 
   auto input = compactOversizedListCountMessage();
@@ -430,8 +430,8 @@ TEST_F(InterpreterRoundTripTest, OversizedCompactContainerCountYieldsError) {
 }
 
 TEST_F(InterpreterRoundTripTest, ProtobufPackedLengthOverrunYieldsError) {
-  auto protobuf = makeProtobufBinaryCodec(sampleNode());
-  auto binary = makeThriftBinaryCodec(sampleNode());
+  auto protobuf = makeCodec(WireProtocol::ProtobufBinary, sampleNode());
+  auto binary = makeCodec(WireProtocol::ThriftBinary, sampleNode());
   TranscodeInterpreter protobufToBinary{fuse(protobuf, binary)};
 
   auto input = protobufPackedListLengthOverrunMessage();
@@ -442,8 +442,8 @@ TEST_F(InterpreterRoundTripTest, ProtobufPackedLengthOverrunYieldsError) {
 }
 
 TEST_F(InterpreterRoundTripTest, ProtobufNestedLengthOverrunYieldsError) {
-  auto protobuf = makeProtobufBinaryCodec(outerNode());
-  auto binary = makeThriftBinaryCodec(outerNode());
+  auto protobuf = makeCodec(WireProtocol::ProtobufBinary, outerNode());
+  auto binary = makeCodec(WireProtocol::ThriftBinary, outerNode());
   TranscodeInterpreter protobufToBinary{fuse(protobuf, binary)};
 
   auto input = protobufNestedStructLengthOverrunMessage();
@@ -454,8 +454,8 @@ TEST_F(InterpreterRoundTripTest, ProtobufNestedLengthOverrunYieldsError) {
 }
 
 TEST_F(InterpreterRoundTripTest, ProtobufNestedStructWritesThriftStop) {
-  auto protobuf = makeProtobufBinaryCodec(outerNode());
-  auto binary = makeThriftBinaryCodec(outerNode());
+  auto protobuf = makeCodec(WireProtocol::ProtobufBinary, outerNode());
+  auto binary = makeCodec(WireProtocol::ThriftBinary, outerNode());
   TranscodeInterpreter protobufToBinary{fuse(protobuf, binary)};
 
   auto input = protobufNestedStructMessage();
@@ -467,8 +467,8 @@ TEST_F(InterpreterRoundTripTest, ProtobufNestedStructWritesThriftStop) {
 }
 
 TEST_F(InterpreterRoundTripTest, BinarySignedScalarsTranscodeToJson) {
-  auto binary = makeThriftBinaryCodec(scalarNode());
-  auto json = makeJsonCodec(scalarNode());
+  auto binary = makeCodec(WireProtocol::ThriftBinary, scalarNode());
+  auto json = makeCodec(WireProtocol::Json, scalarNode());
   TranscodeInterpreter binaryToJson{fuse(binary, json)};
 
   const std::vector<uint8_t> binary0 = scalarBinaryMessage();
@@ -484,8 +484,8 @@ TEST_F(InterpreterRoundTripTest, BinarySignedScalarsTranscodeToJson) {
 }
 
 TEST_F(InterpreterRoundTripTest, BinaryEnumTranscodesToJsonNameWhenKnown) {
-  auto binary = makeThriftBinaryCodec(enumNode());
-  auto json = makeJsonCodec(enumNode());
+  auto binary = makeCodec(WireProtocol::ThriftBinary, enumNode());
+  auto json = makeCodec(WireProtocol::Json, enumNode());
   TranscodeInterpreter binaryToJson{fuse(binary, json)};
 
   auto binary0 = enumBinaryMessage(fixture::Color::RED);
@@ -500,8 +500,8 @@ TEST_F(InterpreterRoundTripTest, BinaryEnumTranscodesToJsonNameWhenKnown) {
 }
 
 TEST_F(InterpreterRoundTripTest, BinaryEnumTranscodesToJsonNumberWhenUnknown) {
-  auto binary = makeThriftBinaryCodec(enumNode());
-  auto json = makeJsonCodec(enumNode());
+  auto binary = makeCodec(WireProtocol::ThriftBinary, enumNode());
+  auto json = makeCodec(WireProtocol::Json, enumNode());
   TranscodeInterpreter binaryToJson{fuse(binary, json)};
 
   auto binary0 = enumBinaryMessage(static_cast<fixture::Color>(99));

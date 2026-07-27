@@ -208,9 +208,9 @@ std::vector<TranscodePipeline<T, T>> makeProtocolPipelines(
     const type_system::StructNode& node,
     PipelineSupportMask support = kAllPipelineSupport,
     std::function<void(const T&, const T&)> expectOutput = expectEqual<T>()) {
-  auto compactWire = makeThriftCompactCodec(node);
-  auto binaryWire = makeThriftBinaryCodec(node);
-  auto jsonWire = makeJsonCodec(node);
+  auto compactWire = makeCodec(WireProtocol::ThriftCompact, node);
+  auto binaryWire = makeCodec(WireProtocol::ThriftBinary, node);
+  auto jsonWire = makeCodec(WireProtocol::Json, node);
   auto compactMaterialized =
       makeMaterializedCodec<T, CompactSerializer>("compact");
   auto binaryMaterialized =
@@ -297,9 +297,9 @@ makePreEncodedJsonSourcePipelines(
     const std::function<void(const T&, const T&)>& expectOutput =
         expectEqual<T>()) {
   using PreEncodedJson = test_data::PreEncodedJson<T>;
-  auto jsonWire = makeJsonCodec(node);
-  auto compactWire = makeThriftCompactCodec(node);
-  auto binaryWire = makeThriftBinaryCodec(node);
+  auto jsonWire = makeCodec(WireProtocol::Json, node);
+  auto compactWire = makeCodec(WireProtocol::ThriftCompact, node);
+  auto binaryWire = makeCodec(WireProtocol::ThriftBinary, node);
   auto jsonMaterialized = makePreEncodedJsonMaterializedCodec<T>();
   auto compactMaterialized =
       makeMaterializedCodec<T, CompactSerializer>("compact");
@@ -420,8 +420,8 @@ void expectJsonSourceRejected(
     const type_system::StructNode& node,
     std::string_view jsonInput) {
   SCOPED_TRACE(::testing::Message() << "json reject / " << caseName);
-  auto jsonWire = makeJsonCodec(node);
-  auto compactWire = makeThriftCompactCodec(node);
+  auto jsonWire = makeCodec(WireProtocol::Json, node);
+  auto compactWire = makeCodec(WireProtocol::ThriftCompact, node);
   TranscodeInterpreter interpreter{fuseOrThrow(jsonWire, compactWire)};
 
   std::string input{jsonInput};
@@ -506,11 +506,12 @@ TEST(GoldenTranscodeTest, SpecialFloatShapesRoundTripSupportedSources) {
 
 TEST(GoldenTranscodeTest, JsonSpecialFloatStringsRoundTrip) {
   auto value = test_data::generate<fixture::SpecialFloatShapes>();
-  auto compactWire =
-      makeThriftCompactCodec(structNode<fixture::SpecialFloatShapes>());
-  auto binaryWire =
-      makeThriftBinaryCodec(structNode<fixture::SpecialFloatShapes>());
-  auto jsonWire = makeJsonCodec(structNode<fixture::SpecialFloatShapes>());
+  auto compactWire = makeCodec(
+      WireProtocol::ThriftCompact, structNode<fixture::SpecialFloatShapes>());
+  auto binaryWire = makeCodec(
+      WireProtocol::ThriftBinary, structNode<fixture::SpecialFloatShapes>());
+  auto jsonWire =
+      makeCodec(WireProtocol::Json, structNode<fixture::SpecialFloatShapes>());
   auto compactToJson =
       makeWireTranscoder("compact->json", compactWire, jsonWire);
   auto binaryToJson = makeWireTranscoder("binary->json", binaryWire, jsonWire);
@@ -552,8 +553,10 @@ TEST(GoldenTranscodeTest, MapShapesRoundTripSupportedProtocols) {
 }
 
 TEST(GoldenTranscodeTest, JsonMapDuplicateKeysAreAccepted) {
-  auto jsonWire = makeJsonCodec(structNode<fixture::MapShapes>());
-  auto compactWire = makeThriftCompactCodec(structNode<fixture::MapShapes>());
+  auto jsonWire =
+      makeCodec(WireProtocol::Json, structNode<fixture::MapShapes>());
+  auto compactWire =
+      makeCodec(WireProtocol::ThriftCompact, structNode<fixture::MapShapes>());
   auto transcode = makeWireTranscoder("json->compact", jsonWire, compactWire);
 
   EXPECT_TRUE(
@@ -572,8 +575,10 @@ TEST(GoldenTranscodeTest, JsonMapDuplicateKeysAreAccepted) {
 
 TEST(GoldenTranscodeTest, JsonMapTargetsFollowSpecObjectAndPairForms) {
   auto value = test_data::generate<fixture::MapShapes>();
-  auto compactWire = makeThriftCompactCodec(structNode<fixture::MapShapes>());
-  auto jsonWire = makeJsonCodec(structNode<fixture::MapShapes>());
+  auto compactWire =
+      makeCodec(WireProtocol::ThriftCompact, structNode<fixture::MapShapes>());
+  auto jsonWire =
+      makeCodec(WireProtocol::Json, structNode<fixture::MapShapes>());
   auto transcode = makeWireTranscoder("compact->json", compactWire, jsonWire);
 
   auto output = transcode(CompactSerializer::serialize<std::string>(value));

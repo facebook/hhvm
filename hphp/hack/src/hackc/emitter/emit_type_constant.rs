@@ -194,6 +194,122 @@ fn shape_allows_unknown_fields(si: &NastShapeInfo) -> Option<DictEntry> {
     }
 }
 
+fn has_shape_splats(si: &NastShapeInfo) -> bool {
+    si.field_map
+        .iter()
+        .any(|elem| matches!(elem, ShapeElement::SESplat(_)))
+}
+
+// Build a `T_shape` type-structure dict from a run of literal shape fields. When
+// [open] is `Some`, the shape carries the unknown-fields marker (`...` / `T...`):
+// the field-run itself is open, so its own explicit fields keep their declared
+// types (they are not widened by a separate trailing open element).
+fn shape_fields_to_ts(
+    opts: &Options,
+    tparams: &[&str],
+    targ_map: &BTreeMap<&str, i64>,
+    type_refinement_in_hint: TypeRefinementInHint,
+    fields: &[&ShapeFieldInfo],
+    open: Option<&NastShapeInfo>,
+) -> Result<TypedValue> {
+    let entries = fields
+        .iter()
+        .map(|&sfi| shape_field_to_entry(opts, tparams, targ_map, type_refinement_in_hint, sfi))
+        .collect::<Result<Vec<_>>>()?;
+    let mut r = vec![];
+    if open.is_some() {
+        r.push(encode_entry(
+            "allows_unknown_fields",
+            TypedValue::Bool(true),
+        ));
+    }
+    r.push(encode_kind(TypeStructureKind::T_shape));
+    r.push(encode_entry("fields", TypedValue::dict(entries)));
+    if let Some(si) = open {
+        if let Some(ty) = &si.unknown_fields_type {
+            if !is_mixed_hint(tparams, ty) {
+                r.push(encode_entry(
+                    "variadic_type",
+                    hint_to_type_constant(opts, tparams, targ_map, ty, type_refinement_in_hint)?,
+                ));
+            }
+        }
+    }
+    Ok(TypedValue::dict(r))
+}
+
+// Emit a shape with splats as an ordered list of shape type-structures to be
+// merged left-to-right at resolution time. hackc performs NO merging: it cannot
+// expand the alias/generic operands. Contiguous literal fields are grouped into
+// one shape element; each splat operand becomes its own element. The openness
+// (`allows_unknown_fields`) is folded into a field-run when there is one -- so
+// `shape(..., 'y' => string, ...)` behaves as `shape(..., ...shape('y' => string,
+// ...))` and `'y'` is not widened by the open tail -- and only becomes a
+// standalone trailing open element when the shape is all splats (e.g.
+// `shape(...Base, ...)`). Mirrors the decl lowering in
+// `direct_decl_smart_constructors`.
+fn shape_splat_to_typed_value(
+    opts: &Options,
+    tparams: &[&str],
+    targ_map: &BTreeMap<&str, i64>,
+    type_refinement_in_hint: TypeRefinementInHint,
+    si: &NastShapeInfo,
+) -> Result<TypedValue> {
+    let open = if si.allows_unknown_fields {
+        Some(si)
+    } else {
+        None
+    };
+    let mut elems: Vec<TypedValue> = vec![];
+    let mut pending: Vec<&ShapeFieldInfo> = vec![];
+    let flush = |pending: &mut Vec<&ShapeFieldInfo>, elems: &mut Vec<TypedValue>| -> Result<bool> {
+        if pending.is_empty() {
+            return Ok(false);
+        }
+        elems.push(shape_fields_to_ts(
+            opts,
+            tparams,
+            targ_map,
+            type_refinement_in_hint,
+            pending,
+            open,
+        )?);
+        pending.clear();
+        Ok(true)
+    };
+    let mut made_field_run = false;
+    for elem in si.field_map.iter() {
+        match elem {
+            ShapeElement::SEField(sfi) => pending.push(sfi),
+            ShapeElement::SESplat(h) => {
+                made_field_run |= flush(&mut pending, &mut elems)?;
+                elems.push(hint_to_type_constant(
+                    opts,
+                    tparams,
+                    targ_map,
+                    h,
+                    type_refinement_in_hint,
+                )?);
+            }
+        }
+    }
+    made_field_run |= flush(&mut pending, &mut elems)?;
+    // If the shape is open but no field-run captured the openness (it consists
+    // only of splats), append a standalone open-empty element so the openness is
+    // not lost (`shape(...Base, ...)` becomes `shape(...Base, ...shape(...))`).
+    if open.is_some() && !made_field_run {
+        elems.push(shape_fields_to_ts(
+            opts,
+            tparams,
+            targ_map,
+            type_refinement_in_hint,
+            &[],
+            open,
+        )?);
+    }
+    Ok(TypedValue::vec(elems))
+}
+
 fn type_constant_access_list(ids: &[aast::Sid]) -> TypedValue {
     let ids: Vec<_> = ids
         .iter()
@@ -448,6 +564,23 @@ fn hint_to_type_constant_list(
                 r.push(c);
             }
             r
+        }
+        Hint_::Hshape(si) if has_shape_splats(si) => {
+            // Shape with splats: emit the ordered element list for the runtime
+            // to merge at resolution time. See `shape_splat_to_typed_value`.
+            vec![
+                encode_kind(TypeStructureKind::T_shape),
+                encode_entry(
+                    "splat_elem_types",
+                    shape_splat_to_typed_value(
+                        opts,
+                        tparams,
+                        targ_map,
+                        type_refinement_in_hint,
+                        si,
+                    )?,
+                ),
+            ]
         }
         Hint_::Hshape(si) => {
             let mut r = vec![];

@@ -61,7 +61,7 @@ std::shared_ptr<TracingData> traceRequestReceived(
 // path (no cost counters, no scribe flush). Stores the tracer under the
 // response-context key so getCurrentTracer()/replyImpl echoes it back. Returns
 // true if a tracer was set up.
-// NOTE: this function does not exist if LIBMC_FBTRACE_DISABLE is defined.
+// When LIBMC_FBTRACE_DISABLE is defined, the inline stub above returns false.
 bool traceEchoOnlyRequestReceived(const std::string& traceContext);
 
 #endif

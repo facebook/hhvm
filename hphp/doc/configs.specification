@@ -83,6 +83,10 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
 - int Server.HugeThreadCount = 0, UNKNOWN
 
+  Number of worker threads with stack partially on huge pages
+
+- int Server.HugeStackSizeKb = 384, UNKNOWN
+
 - int Server.RequestFanoutLimit = INT_MAX, yichenzhou
 
   Maximum number of concurrent total xbox threads (including those spawn recursively)
@@ -114,9 +118,6 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 - std::string Server.SecondaryType = "", UNKNOWN
 - int Server.SecondaryPort = 0, UNKNOWN
 
-  Number of worker threads with stack partially on huge pages
-
-- int Server.HugeStackSizeKb = 384, UNKNOWN
 - uint32_t Server.LoopSampleRate = 0, UNKNOWN
 
   Sampling rate for the Proxygen IO event loop observer. When non-zero,
@@ -1187,8 +1188,6 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 - uint32_t Eval.Num1GPagesForReqHeap = 0, UNKNOWN
 
 - uint32_t Eval.Num2MPagesForReqHeap = 0, UNKNOWN
-
-- uint32_t Eval.NumReservedSlabs = 0, UNKNOWN
 
 - uint32_t Eval.NumReservedMBForSlabs = 0, UNKNOWN
 

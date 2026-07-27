@@ -1303,13 +1303,6 @@ static int start_server(const std::string &username) {
     Cfg::Eval::Num2MPagesForReqHeap
   };
   unsigned nSlabs = Cfg::Eval::NumReservedMBForSlabs * (1ull << 20) / kSlabSize;
-  if (nSlabs == 0) {
-    // We are in the process of migrating from Eval.NumReservedSlabs to
-    // Eval.NumReservedMBForSlabs. Currently, when NumReservedMBForSlabs is set,
-    // we ignore NumReservedSlabs; otherwise, we adjust NumReservedSlabs, which
-    // is needed because the option assumes 2M slab size.
-    nSlabs = Cfg::Eval::NumReservedSlabs * (2ull << 20) / kSlabSize;
-  }
   setup_local_arenas(reqHeapSpec, nSlabs);
 
   if (Cfg::Repo::Authoritative) {

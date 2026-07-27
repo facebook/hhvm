@@ -77,26 +77,4 @@ const TypedValue container_as_tv(const Variant& container) {
 }
 
 //////////////////////////////////////////////////////////////////////
-
-/*
- * clsmeth compact container helpers.
- */
-inline bool isClsMethCompactContainer(const TypedValue c) {
-  return isContainer(c);
-}
-
-inline bool isClsMethCompactContainer(const Variant& v) {
- return isClsMethCompactContainer(*v.asTypedValue());
-}
-
-inline size_t getClsMethCompactContainerSize(const TypedValue c) {
-  assertx(!isClsMethType(c.m_type));
-  return isClsMethType(c.m_type) ? 2 : getContainerSize(c);
-}
-
-inline size_t getClsMethCompactContainerSize(const Variant& v) {
-  return getClsMethCompactContainerSize(*v.asTypedValue());
-}
-
-//////////////////////////////////////////////////////////////////////
 }

@@ -126,7 +126,7 @@ TypedValue HHVM_FUNCTION(array_chunk,
                          int64_t chunkSize,
                          bool preserve_keys /* = false */) {
   const auto& cellInput = *input.asTypedValue();
-  if (UNLIKELY(!isClsMethCompactContainer(cellInput))) {
+  if (UNLIKELY(!isContainer(cellInput))) {
     raise_warning("Invalid operand type was used: %s expects "
                   "an array or collection as argument 1", __FUNCTION__+2);
     return make_tv<KindOfNull>();
@@ -137,7 +137,7 @@ TypedValue HHVM_FUNCTION(array_chunk,
     return make_tv<KindOfNull>();
   }
 
-  const size_t inputSize = getClsMethCompactContainerSize(cellInput);
+  const size_t inputSize = getContainerSize(cellInput);
   VecInit ret((inputSize + chunkSize - 1) / chunkSize);
   Array chunk;
   int current = 0;
@@ -243,14 +243,13 @@ TypedValue HHVM_FUNCTION(array_combine,
                          const Variant& values) {
   const auto& cell_keys = *keys.asTypedValue();
   const auto& cell_values = *values.asTypedValue();
-  if (UNLIKELY(!isClsMethCompactContainer(cell_keys) ||
-    !isClsMethCompactContainer(cell_values))) {
+  if (UNLIKELY(!isContainer(cell_keys) || !isContainer(cell_values))) {
     raise_warning("Invalid operand type was used: array_combine expects "
                   "arrays or collections");
     return make_tv<KindOfNull>();
   }
-  auto keys_size = getClsMethCompactContainerSize(cell_keys);
-  if (UNLIKELY(keys_size != getClsMethCompactContainerSize(cell_values))) {
+  auto keys_size = getContainerSize(cell_keys);
+  if (UNLIKELY(keys_size != getContainerSize(cell_values))) {
     raise_warning("array_combine(): Both parameters should have an equal "
                   "number of elements");
     return make_tv<KindOfBoolean>(false);
@@ -271,7 +270,7 @@ TypedValue HHVM_FUNCTION(array_combine,
 
 TypedValue HHVM_FUNCTION(array_count_values,
                          const Variant& input) {
-  if (!isClsMethCompactContainer(input)) {
+  if (!isContainer(input)) {
     raise_warning("array_count_values() expects parameter 1 to be array, "
                   "%s given",
                   getDataTypeString(input.getType()).c_str());
@@ -352,13 +351,13 @@ TypedValue HHVM_FUNCTION(array_fill,
 TypedValue HHVM_FUNCTION(array_flip,
                          const Variant& trans) {
   auto const& transCell = *trans.asTypedValue();
-  if (UNLIKELY(!isClsMethCompactContainer(transCell))) {
+  if (UNLIKELY(!isContainer(transCell))) {
     raise_warning("Invalid operand type was used: %s expects "
                   "an array or collection", __FUNCTION__+2);
     return make_tv<KindOfNull>();
   }
 
-  DictInit ret(getClsMethCompactContainerSize(transCell));
+  DictInit ret(getContainerSize(transCell));
   for (ArrayIter iter(transCell); iter; ++iter) {
     auto const inner = iter.secondValPlus();
     if (isIntType(type(inner)) || isStringType(type(inner))) {
@@ -443,13 +442,13 @@ bool HHVM_FUNCTION(key_exists,
 
 TypedValue HHVM_FUNCTION(array_keys,
                          TypedValue input) {
-  if (UNLIKELY(!isClsMethCompactContainer(input))) {
+  if (UNLIKELY(!isContainer(input))) {
     raise_warning("array_keys() expects parameter 1 to be an array "
                   "or collection");
     return make_tv<KindOfNull>();
   }
 
-  VecInit ai(getClsMethCompactContainerSize(input));
+  VecInit ai(getContainerSize(input));
   IterateKV(input, [&](TypedValue k, TypedValue) {
     ai.append(k);
   });
@@ -494,7 +493,7 @@ TypedValue HHVM_FUNCTION(array_map,
     vm_decode_function(callback, ctx);
   }
   const auto& cell_arr1 = *arr1.asTypedValue();
-  if (UNLIKELY(!isClsMethCompactContainer(cell_arr1))) {
+  if (UNLIKELY(!isContainer(cell_arr1))) {
     raise_warning("array_map(): Argument #2 should be an array or collection");
     return make_tv<KindOfNull>();
   }
@@ -896,7 +895,7 @@ TypedValue HHVM_FUNCTION(array_slice,
                          int64_t offset,
                          const Variant& length /* = uninit_variant */,
                          bool preserve_keys /* = false */) {
-  if (UNLIKELY(!isClsMethCompactContainer(cell_input))) {
+  if (UNLIKELY(!isContainer(cell_input))) {
     raise_warning("Invalid operand type was used: %s expects "
                   "an array or collection as argument 1",
                   __FUNCTION__+2);
@@ -904,7 +903,7 @@ TypedValue HHVM_FUNCTION(array_slice,
   }
   int64_t len = length.isNull() ? 0x7FFFFFFF : length.toInt64();
 
-  const int64_t num_in = getClsMethCompactContainerSize(cell_input);
+  const int64_t num_in = getContainerSize(cell_input);
   if (offset > num_in) {
     offset = num_in;
   } else if (offset < 0 && (offset = (num_in + offset)) < 0) {

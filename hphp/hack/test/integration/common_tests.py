@@ -40,6 +40,16 @@ class CommonTestDriver(TestDriver):
     bin_dir: ClassVar[str]
 
     @classmethod
+    def get_repo_dir_relative_path(cls) -> str:
+        """Return the location of repo_dir relative to base_tmp_dir.
+
+        Override this to customize the layout of the test workspace being created in setUpClass, and
+        how cls.repo_dir is defined. This function may be overridden in child classes, but should
+        only ever be called by setUpClass.
+        """
+        return "repo"
+
+    @classmethod
     def setUpClass(cls, template_repo: str) -> None:
         print("running CommonTestDriver.setUpClass")
         cls.template_repo = template_repo
@@ -48,7 +58,10 @@ class CommonTestDriver(TestDriver):
         # we don't create repo_dir using mkdtemp() because we want to create
         # it with copytree(). copytree() will fail if the directory already
         # exists.
-        cls.repo_dir = os.path.join(cls.base_tmp_dir, "repo")
+        cls.repo_dir = os.path.join(
+            cls.base_tmp_dir,
+            cls.get_repo_dir_relative_path(),
+        )
         # Where the hhi files, socket, etc get extracted
         cls.hh_tmp_dir = tempfile.mkdtemp()
         cls.bin_dir = tempfile.mkdtemp()

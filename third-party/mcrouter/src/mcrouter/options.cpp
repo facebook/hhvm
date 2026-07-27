@@ -90,7 +90,7 @@ to(const string& s) {
     string key;
     string value;
     facebook::memcache::checkLogic(
-        folly::split(':', it, key, value),
+        folly::split<false>(':', it, key, value) && !key.empty(),
         "Invalid string map pair: '{}'. Expected name:value.",
         it);
     result.emplace(std::move(key), std::move(value));

@@ -56,3 +56,32 @@ TEST(OptionsSetFromDictTest, sanity) {
   EXPECT_TRUE(e.empty());
   EXPECT_TRUE(opts.enable_tw_crash_config_backup_path);
 }
+
+TEST(OptionsSetFromDictTest, StringMapValueMayContainColons) {
+  McrouterOptions opts;
+  const unordered_map<string, string> dict{
+      {"config_params", "proc-name:ray::RayTrainWorker,environment:prod"}};
+
+  const auto errors = opts.updateFromDict(dict);
+
+  EXPECT_TRUE(errors.empty());
+  EXPECT_EQ(opts.config_params.at("proc-name"), "ray::RayTrainWorker");
+  EXPECT_EQ(opts.config_params.at("environment"), "prod");
+}
+
+TEST(OptionsSetFromDictTest, StringMapRejectsMalformedPairs) {
+  for (const auto& value : {"missing-delimiter", ":missing-name"}) {
+    McrouterOptions opts;
+    opts.config_params = {{"existing", "value"}};
+    const unordered_map<string, string> dict{{"config_params", value}};
+
+    const auto errors = opts.updateFromDict(dict);
+
+    ASSERT_EQ(errors.size(), 1);
+    EXPECT_EQ(errors[0].requestedName, "config_params");
+    EXPECT_EQ(errors[0].requestedValue, value);
+    EXPECT_EQ(
+        opts.config_params,
+        (unordered_map<string, string>{{"existing", "value"}}));
+  }
+}

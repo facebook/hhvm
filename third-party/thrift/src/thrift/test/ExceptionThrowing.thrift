@@ -29,7 +29,7 @@ exception SimpleException {
 }
 
 service ExceptionThrowingService {
-  string echo(1: required string req);
+  string echo(1: string req);
 
   void throwException(1: string msg) throws (1: SimpleException e);
 }

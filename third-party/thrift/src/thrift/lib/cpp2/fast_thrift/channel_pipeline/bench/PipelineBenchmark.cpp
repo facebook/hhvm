@@ -23,6 +23,7 @@
 
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Backpressure.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Common.h>
+#include <thrift/lib/cpp2/fast_thrift/channel_pipeline/ContextHandle.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/HandlerTag.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineBuilder.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineImpl.h>
@@ -45,6 +46,7 @@ namespace {
 
 // Handler tags for benchmarks
 HANDLER_TAG(bench_passthrough);
+HANDLER_TAG(bench_context_handle);
 HANDLER_TAG(bench_multifire);
 HANDLER_TAG(bench_echo);
 HANDLER_TAG(bench_backpressure);
@@ -421,6 +423,36 @@ BENCHMARK(IOBuf_Clone, iters) {
     auto cloned = template_buf->clone();
     folly::doNotOptimizeAway(cloned);
   }
+}
+
+BENCHMARK_DRAW_LINE();
+
+// =============================================================================
+// ContextHandle one-shot EventBase handoff
+// =============================================================================
+
+BENCHMARK(ContextHandle_FireReadHandoff, iters) {
+  folly::BenchmarkSuspender susp;
+  folly::EventBase evb;
+  BenchTransportHandler transport;
+  BenchAppHandler app;
+  BenchAllocator allocator;
+  auto pipeline =
+      PipelineBuilder<BenchTransportHandler, BenchAppHandler, BenchAllocator>()
+          .setEventBase(&evb)
+          .setHead(&transport)
+          .setTail(&app)
+          .setAllocator(&allocator)
+          .addNextDuplex<PassthroughHandler>(bench_context_handle_tag)
+          .build();
+  auto* context = pipeline->context(bench_context_handle_tag);
+
+  susp.dismiss();
+  for (size_t i = 0; i < iters; ++i) {
+    ContextHandle{*context}.fireRead(TypeErasedBox(static_cast<int>(i)));
+    evb.loopOnce();
+  }
+  folly::doNotOptimizeAway(app.read_count);
 }
 
 BENCHMARK_DRAW_LINE();

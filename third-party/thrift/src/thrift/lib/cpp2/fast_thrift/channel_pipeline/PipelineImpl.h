@@ -241,6 +241,9 @@ class PipelineImpl : public folly::DelayedDestruction {
    */
   folly::EventBase* eventBase() const noexcept { return eventBase_; }
 
+  /** Return whether the pipeline has completed handler removal. */
+  bool isClosed() const noexcept { return state_ == State::Closed; }
+
   /**
    * Get the number of handlers in the pipeline.
    */

@@ -93,7 +93,47 @@ handler types without requiring them to share a common interface.
 
 ### Asynchronous Message Passing
 
-Async code inside pipelines is handled through message passing.
+`channel_pipeline` does not impose a future or coroutine abstraction. A handler
+can move its message and a one-shot `ContextHandle{ctx}` into asynchronous work.
+When that work completes on any thread, consuming the handle with `fireRead`,
+`fireWrite`, or `fireException` always enqueues the corresponding context call on
+the pipeline's EventBase.
+
+```cpp
+ContextHandle handle{ctx};
+startAsync([handle = std::move(handle), msg = std::move(msg)]() mutable {
+  // This completion may run on any thread.
+  std::move(handle).fireRead(std::move(msg));
+});
+```
+
+The handle retains the pipeline with its existing `DestructorGuard` until the
+queued context call completes. It is non-copyable, move-constructible-only, and
+single-use. Pipelines that do not construct a handle pay no runtime cost.
+
+Coroutine users can opt into the separate composition adapter:
+
+```cpp
+coro::ContextHandle handle{ctx};
+co_await doAsyncWork();
+Result result =
+    co_await std::move(handle).co_fireRead(std::move(msg));
+```
+
+`co_fireRead` and `co_fireWrite` complete after the EventBase context call has
+finished and return its actual downstream `Result`. `co_fireException` completes
+after exception propagation. The adapter uses direct awaitables stored in the
+awaiting coroutine frame, with no Promise/Future shared-state allocation.
+
+When the await begins inside the running pipeline EventBase loop, the operation
+completes inline without suspending or adding another EventBase task. Calls from
+other threads, including calls made while a non-strict EventBase is idle, enqueue
+the pipeline operation on the EventBase. The awaitables implement Folly's
+`viaIfAsync` contract directly, so an asynchronously completing `folly::coro::Task`
+continues on its bound executor without the generic `ViaIfAsyncAwaitable` wrapper.
+A raw coroutine that directly awaits the adapter resumes where the adapter
+completes. The coroutine adapter lives in a separate target, so the base pipeline
+and `ContextHandle` do not acquire coroutine dependencies.
 
 ### Compile-Time Finite State Machines
 
@@ -147,9 +187,8 @@ Channel Pipeline is built on top of **folly**, Meta's foundational C++ library:
 |-----------|-------|
 | `folly::EventBase` | Event loop for async I/O — accessed via `ctx.eventBase()` |
 | `folly::IOBuf` | Zero-copy buffer chains — `BytesPtr = std::unique_ptr<folly::IOBuf>` |
-| `folly::DelayedDestructionBase` | Safe async cleanup for Pipeline and Context |
+| `folly::DelayedDestructionBase` | Keeps the Pipeline and its owned Contexts alive during callbacks and ContextHandle handoffs |
 | `folly::exception_wrapper` | Type-erased exception propagation |
-| `folly::coro::Task` | Coroutine support for async operations |
 
 Future transport integration will use:
 - `folly::AsyncSocket` — socket abstraction

@@ -1832,6 +1832,15 @@ where
         Self::make(syntax, value)
     }
 
+    fn make_absent_field_specifier(ctx: &C, keyword: Self, name: Self) -> Self {
+        let syntax = SyntaxVariant::AbsentFieldSpecifier(ctx.get_arena().alloc(AbsentFieldSpecifierChildren {
+            keyword,
+            name,
+        }));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
+        Self::make(syntax, value)
+    }
+
     fn make_field_initializer(ctx: &C, name: Self, arrow: Self, value: Self) -> Self {
         let syntax = SyntaxVariant::FieldInitializer(ctx.get_arena().alloc(FieldInitializerChildren {
             name,

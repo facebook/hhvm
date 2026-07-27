@@ -226,6 +226,7 @@ module WithToken (Token : TokenType) = struct
       | ClassnameTypeSpecifier _ -> SyntaxKind.ClassnameTypeSpecifier
       | ClassPtrTypeSpecifier _ -> SyntaxKind.ClassPtrTypeSpecifier
       | FieldSpecifier _ -> SyntaxKind.FieldSpecifier
+      | AbsentFieldSpecifier _ -> SyntaxKind.AbsentFieldSpecifier
       | FieldInitializer _ -> SyntaxKind.FieldInitializer
       | ShapeTypeSpecifier _ -> SyntaxKind.ShapeTypeSpecifier
       | ShapeSplatSpecifier _ -> SyntaxKind.ShapeSplatSpecifier
@@ -621,6 +622,8 @@ module WithToken (Token : TokenType) = struct
     let is_class_ptr_type_specifier = has_kind SyntaxKind.ClassPtrTypeSpecifier
 
     let is_field_specifier = has_kind SyntaxKind.FieldSpecifier
+
+    let is_absent_field_specifier = has_kind SyntaxKind.AbsentFieldSpecifier
 
     let is_field_initializer = has_kind SyntaxKind.FieldInitializer
 
@@ -2492,6 +2495,10 @@ module WithToken (Token : TokenType) = struct
         let acc = f acc field_arrow in
         let acc = f acc field_type in
         acc
+      | AbsentFieldSpecifier { absent_field_keyword; absent_field_name } ->
+        let acc = f acc absent_field_keyword in
+        let acc = f acc absent_field_name in
+        acc
       | FieldInitializer
           {
             field_initializer_name;
@@ -4317,6 +4324,8 @@ module WithToken (Token : TokenType) = struct
       | FieldSpecifier { field_question; field_name; field_arrow; field_type }
         ->
         [field_question; field_name; field_arrow; field_type]
+      | AbsentFieldSpecifier { absent_field_keyword; absent_field_name } ->
+        [absent_field_keyword; absent_field_name]
       | FieldInitializer
           {
             field_initializer_name;
@@ -6152,6 +6161,8 @@ module WithToken (Token : TokenType) = struct
       | FieldSpecifier { field_question; field_name; field_arrow; field_type }
         ->
         ["field_question"; "field_name"; "field_arrow"; "field_type"]
+      | AbsentFieldSpecifier { absent_field_keyword; absent_field_name } ->
+        ["absent_field_keyword"; "absent_field_name"]
       | FieldInitializer
           {
             field_initializer_name;
@@ -8203,6 +8214,9 @@ module WithToken (Token : TokenType) = struct
       | ( SyntaxKind.FieldSpecifier,
           [field_question; field_name; field_arrow; field_type] ) ->
         FieldSpecifier { field_question; field_name; field_arrow; field_type }
+      | ( SyntaxKind.AbsentFieldSpecifier,
+          [absent_field_keyword; absent_field_name] ) ->
+        AbsentFieldSpecifier { absent_field_keyword; absent_field_name }
       | ( SyntaxKind.FieldInitializer,
           [
             field_initializer_name;
@@ -10775,6 +10789,13 @@ module WithToken (Token : TokenType) = struct
           =
         let syntax =
           FieldSpecifier { field_question; field_name; field_arrow; field_type }
+        in
+        let value = ValueBuilder.value_from_syntax syntax in
+        make syntax value
+
+      let make_absent_field_specifier absent_field_keyword absent_field_name =
+        let syntax =
+          AbsentFieldSpecifier { absent_field_keyword; absent_field_name }
         in
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value

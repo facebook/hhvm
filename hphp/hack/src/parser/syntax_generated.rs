@@ -1826,6 +1826,15 @@ where
         Self::make(syntax, value)
     }
 
+    fn make_absent_field_specifier(_: &C, absent_field_keyword: Self, absent_field_name: Self) -> Self {
+        let syntax = SyntaxVariant::AbsentFieldSpecifier(Box::new(AbsentFieldSpecifierChildren {
+            absent_field_keyword,
+            absent_field_name,
+        }));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
+        Self::make(syntax, value)
+    }
+
     fn make_field_initializer(_: &C, field_initializer_name: Self, field_initializer_arrow: Self, field_initializer_value: Self) -> Self {
         let syntax = SyntaxVariant::FieldInitializer(Box::new(FieldInitializerChildren {
             field_initializer_name,
@@ -3375,6 +3384,12 @@ where
                 let acc = f(field_type, acc);
                 acc
             },
+            SyntaxVariant::AbsentFieldSpecifier(x) => {
+                let AbsentFieldSpecifierChildren { absent_field_keyword, absent_field_name } = *x;
+                let acc = f(absent_field_keyword, acc);
+                let acc = f(absent_field_name, acc);
+                acc
+            },
             SyntaxVariant::FieldInitializer(x) => {
                 let FieldInitializerChildren { field_initializer_name, field_initializer_arrow, field_initializer_value } = *x;
                 let acc = f(field_initializer_name, acc);
@@ -3692,6 +3707,7 @@ where
             SyntaxVariant::ClassnameTypeSpecifier {..} => SyntaxKind::ClassnameTypeSpecifier,
             SyntaxVariant::ClassPtrTypeSpecifier {..} => SyntaxKind::ClassPtrTypeSpecifier,
             SyntaxVariant::FieldSpecifier {..} => SyntaxKind::FieldSpecifier,
+            SyntaxVariant::AbsentFieldSpecifier {..} => SyntaxKind::AbsentFieldSpecifier,
             SyntaxVariant::FieldInitializer {..} => SyntaxKind::FieldInitializer,
             SyntaxVariant::ShapeTypeSpecifier {..} => SyntaxKind::ShapeTypeSpecifier,
             SyntaxVariant::ShapeSplatSpecifier {..} => SyntaxKind::ShapeSplatSpecifier,
@@ -4875,6 +4891,11 @@ where
                  field_question: ts.pop().unwrap(),
                  
              })),
+             (SyntaxKind::AbsentFieldSpecifier, 2) => SyntaxVariant::AbsentFieldSpecifier(Box::new(AbsentFieldSpecifierChildren {
+                 absent_field_name: ts.pop().unwrap(),
+                 absent_field_keyword: ts.pop().unwrap(),
+                 
+             })),
              (SyntaxKind::FieldInitializer, 3) => SyntaxVariant::FieldInitializer(Box::new(FieldInitializerChildren {
                  field_initializer_value: ts.pop().unwrap(),
                  field_initializer_arrow: ts.pop().unwrap(),
@@ -5171,6 +5192,7 @@ where
             SyntaxVariant::ClassnameTypeSpecifier(x) => unsafe { std::slice::from_raw_parts(&x.classname_keyword, 5) },
             SyntaxVariant::ClassPtrTypeSpecifier(x) => unsafe { std::slice::from_raw_parts(&x.class_ptr_keyword, 5) },
             SyntaxVariant::FieldSpecifier(x) => unsafe { std::slice::from_raw_parts(&x.field_question, 4) },
+            SyntaxVariant::AbsentFieldSpecifier(x) => unsafe { std::slice::from_raw_parts(&x.absent_field_keyword, 2) },
             SyntaxVariant::FieldInitializer(x) => unsafe { std::slice::from_raw_parts(&x.field_initializer_name, 3) },
             SyntaxVariant::ShapeTypeSpecifier(x) => unsafe { std::slice::from_raw_parts(&x.shape_type_keyword, 6) },
             SyntaxVariant::ShapeSplatSpecifier(x) => unsafe { std::slice::from_raw_parts(&x.shape_splat_ellipsis, 2) },
@@ -5361,6 +5383,7 @@ where
             SyntaxVariant::ClassnameTypeSpecifier(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.classname_keyword, 5) },
             SyntaxVariant::ClassPtrTypeSpecifier(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.class_ptr_keyword, 5) },
             SyntaxVariant::FieldSpecifier(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.field_question, 4) },
+            SyntaxVariant::AbsentFieldSpecifier(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.absent_field_keyword, 2) },
             SyntaxVariant::FieldInitializer(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.field_initializer_name, 3) },
             SyntaxVariant::ShapeTypeSpecifier(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.shape_type_keyword, 6) },
             SyntaxVariant::ShapeSplatSpecifier(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.shape_splat_ellipsis, 2) },
@@ -6865,6 +6888,13 @@ pub struct FieldSpecifierChildren<T, V> {
 
 #[derive(Debug, Clone)]
 #[repr(C)]
+pub struct AbsentFieldSpecifierChildren<T, V> {
+    pub absent_field_keyword: Syntax<T, V>,
+    pub absent_field_name: Syntax<T, V>,
+}
+
+#[derive(Debug, Clone)]
+#[repr(C)]
 pub struct FieldInitializerChildren<T, V> {
     pub field_initializer_name: Syntax<T, V>,
     pub field_initializer_arrow: Syntax<T, V>,
@@ -7198,6 +7228,7 @@ pub enum SyntaxVariant<T, V> {
     ClassnameTypeSpecifier(Box<ClassnameTypeSpecifierChildren<T, V>>),
     ClassPtrTypeSpecifier(Box<ClassPtrTypeSpecifierChildren<T, V>>),
     FieldSpecifier(Box<FieldSpecifierChildren<T, V>>),
+    AbsentFieldSpecifier(Box<AbsentFieldSpecifierChildren<T, V>>),
     FieldInitializer(Box<FieldInitializerChildren<T, V>>),
     ShapeTypeSpecifier(Box<ShapeTypeSpecifierChildren<T, V>>),
     ShapeSplatSpecifier(Box<ShapeSplatSpecifierChildren<T, V>>),
@@ -8877,6 +8908,14 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                     1 => Some(&x.field_name),
                     2 => Some(&x.field_arrow),
                     3 => Some(&x.field_type),
+                        _ => None,
+                    }
+                })
+            },
+            AbsentFieldSpecifier(x) => {
+                get_index(2).and_then(|index| { match index {
+                        0 => Some(&x.absent_field_keyword),
+                    1 => Some(&x.absent_field_name),
                         _ => None,
                     }
                 })

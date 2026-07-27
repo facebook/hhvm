@@ -2343,6 +2343,15 @@ let schema : schema_node list =
         ];
     };
     {
+      kind_name = "AbsentFieldSpecifier";
+      type_name = "absent_field_specifier";
+      func_name = "absent_field_specifier";
+      description = "absent_field_specifier";
+      prefix = "absent_field";
+      aggregates = [ShapeElement];
+      fields = [("keyword", Token); ("name", Aggregate Expression)];
+    };
+    {
       kind_name = "FieldInitializer";
       type_name = "field_initializer";
       func_name = "field_initializer";

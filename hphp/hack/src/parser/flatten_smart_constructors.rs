@@ -1335,6 +1335,14 @@ pub trait FlattenSmartConstructors: SmartConstructors
         }
     }
 
+    fn make_absent_field_specifier(&mut self, arg0: Self::Output, arg1: Self::Output) -> Self::Output {
+        if Self::is_zero(&arg0) && Self::is_zero(&arg1) {
+          Self::zero(SyntaxKind::AbsentFieldSpecifier)
+        } else {
+          self.flatten(SyntaxKind::AbsentFieldSpecifier, vec!(arg0, arg1))
+        }
+    }
+
     fn make_field_initializer(&mut self, arg0: Self::Output, arg1: Self::Output, arg2: Self::Output) -> Self::Output {
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) {
           Self::zero(SyntaxKind::FieldInitializer)

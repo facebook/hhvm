@@ -1203,6 +1203,16 @@ where
             .make_field_specifier(question, name, arrow, field_type)
     }
 
+    fn parse_absent_field_specifier(&mut self) -> S::Output {
+        // SPEC
+        // absent-field-specifier:
+        //   absent  field-name
+        // Sugar for `?field-name => nothing`; desugared in the lowerer.
+        let keyword = self.assert_token(TokenKind::Absent);
+        let name = self.parse_expression();
+        self.sc_mut().make_absent_field_specifier(keyword, name)
+    }
+
     fn parse_shape_specifier(&mut self) -> S::Output {
         // SPEC
         // shape-specifier:
@@ -1262,7 +1272,11 @@ where
                 ellipsis_type = self.parse_type_specifier(false, true);
                 break;
             } else {
-                let item = self.parse_field_specifier();
+                let item = if kind == TokenKind::Absent {
+                    self.parse_absent_field_specifier()
+                } else {
+                    self.parse_field_specifier()
+                };
                 if !self.finish_shape_element(item, &mut items) {
                     break;
                 }

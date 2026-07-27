@@ -182,6 +182,7 @@ type t =
   | ClassnameTypeSpecifier
   | ClassPtrTypeSpecifier
   | FieldSpecifier
+  | AbsentFieldSpecifier
   | FieldInitializer
   | ShapeTypeSpecifier
   | ShapeSplatSpecifier
@@ -372,6 +373,7 @@ let to_string kind =
   | ClassnameTypeSpecifier -> "classname_type_specifier"
   | ClassPtrTypeSpecifier -> "class_ptr_type_specifier"
   | FieldSpecifier -> "field_specifier"
+  | AbsentFieldSpecifier -> "absent_field_specifier"
   | FieldInitializer -> "field_initializer"
   | ShapeTypeSpecifier -> "shape_type_specifier"
   | ShapeSplatSpecifier -> "shape_splat_specifier"

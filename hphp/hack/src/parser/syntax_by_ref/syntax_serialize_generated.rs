@@ -1520,6 +1520,13 @@ ss.serialize_field("field_arrow", &self.with(arrow))?;
 ss.serialize_field("field_type", &self.with(type_))?;
       ss.end()
 } 
+SyntaxVariant::AbsentFieldSpecifier (AbsentFieldSpecifierChildren{keyword,name} ) => {
+      let mut ss = s.serialize_struct("", 3)?;
+      ss.serialize_field("kind", "absent_field_specifier")?;
+      ss.serialize_field("absent_field_keyword", &self.with(keyword))?;
+ss.serialize_field("absent_field_name", &self.with(name))?;
+      ss.end()
+} 
 SyntaxVariant::FieldInitializer (FieldInitializerChildren{name,arrow,value} ) => {
       let mut ss = s.serialize_struct("", 4)?;
       ss.serialize_field("kind", "field_initializer")?;

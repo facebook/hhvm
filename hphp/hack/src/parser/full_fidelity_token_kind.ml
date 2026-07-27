@@ -205,6 +205,7 @@ type t =
   | Package
   | Let
   | Optional
+  | Absent
   (* Variable text tokens *)
   | ErrorToken
   | Name
@@ -421,6 +422,7 @@ let from_string keyword ~only_reserved =
   | "package" -> Some Package
   | "let" when not only_reserved -> Some Let
   | "optional" when not only_reserved -> Some Optional
+  | "absent" when not only_reserved -> Some Absent
   | _ -> None
 
 let to_string kind =
@@ -612,6 +614,7 @@ let to_string kind =
   | Package -> "package"
   | Let -> "let"
   | Optional -> "optional"
+  | Absent -> "absent"
   (* Variable text tokens *)
   | ErrorToken -> "error_token"
   | Name -> "name"

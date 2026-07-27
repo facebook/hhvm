@@ -181,6 +181,7 @@ pub trait SyntaxType<C>: SyntaxTypeBase<C>
     fn make_classname_type_specifier(ctx: &C, classname_keyword: Self, classname_left_angle: Self, classname_type: Self, classname_trailing_comma: Self, classname_right_angle: Self) -> Self;
     fn make_class_ptr_type_specifier(ctx: &C, class_ptr_keyword: Self, class_ptr_left_angle: Self, class_ptr_type: Self, class_ptr_trailing_comma: Self, class_ptr_right_angle: Self) -> Self;
     fn make_field_specifier(ctx: &C, field_question: Self, field_name: Self, field_arrow: Self, field_type: Self) -> Self;
+    fn make_absent_field_specifier(ctx: &C, absent_field_keyword: Self, absent_field_name: Self) -> Self;
     fn make_field_initializer(ctx: &C, field_initializer_name: Self, field_initializer_arrow: Self, field_initializer_value: Self) -> Self;
     fn make_shape_type_specifier(ctx: &C, shape_type_keyword: Self, shape_type_left_paren: Self, shape_type_fields: Self, shape_type_ellipsis_type: Self, shape_type_ellipsis: Self, shape_type_right_paren: Self) -> Self;
     fn make_shape_splat_specifier(ctx: &C, shape_splat_ellipsis: Self, shape_splat_type: Self) -> Self;

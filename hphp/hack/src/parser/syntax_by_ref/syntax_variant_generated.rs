@@ -187,6 +187,7 @@ pub enum SyntaxVariant<'a, T, V> {
     ClassnameTypeSpecifier(&'a ClassnameTypeSpecifierChildren<'a, T, V>),
     ClassPtrTypeSpecifier(&'a ClassPtrTypeSpecifierChildren<'a, T, V>),
     FieldSpecifier(&'a FieldSpecifierChildren<'a, T, V>),
+    AbsentFieldSpecifier(&'a AbsentFieldSpecifierChildren<'a, T, V>),
     FieldInitializer(&'a FieldInitializerChildren<'a, T, V>),
     ShapeTypeSpecifier(&'a ShapeTypeSpecifierChildren<'a, T, V>),
     ShapeSplatSpecifier(&'a ShapeSplatSpecifierChildren<'a, T, V>),
@@ -1524,6 +1525,12 @@ pub struct FieldSpecifierChildren<'a, T, V> {
     pub name: Syntax<'a, T, V>,
     pub arrow: Syntax<'a, T, V>,
     pub type_: Syntax<'a, T, V>,
+}
+
+#[derive(Debug, Clone)]
+pub struct AbsentFieldSpecifierChildren<'a, T, V> {
+    pub keyword: Syntax<'a, T, V>,
+    pub name: Syntax<'a, T, V>,
 }
 
 #[derive(Debug, Clone)]

@@ -1682,6 +1682,14 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                     }
                 })
             },
+            AbsentFieldSpecifier(x) => {
+                get_index(2).and_then(|index| { match index {
+                        0 => Some(&x.keyword),
+                    1 => Some(&x.name),
+                        _ => None,
+                    }
+                })
+            },
             FieldInitializer(x) => {
                 get_index(3).and_then(|index| { match index {
                         0 => Some(&x.name),

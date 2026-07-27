@@ -5826,6 +5826,11 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                     ],
                 );
             }
+            AbsentFieldSpecifier(_) => {
+                // `absent 'x'` is sugar for `?'x' => nothing`; it is part of the
+                // concrete shape normal form, gated by the concrete feature.
+                self.check_can_use_feature(node, &FeatureName::ShapeSplatConcrete);
+            }
             Token(t)
                 if t.kind() == TokenKind::Name
                     && self.env.parser_options.enable_intrinsics_extension

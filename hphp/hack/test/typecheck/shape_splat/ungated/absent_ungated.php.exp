@@ -1,0 +1,2 @@
+ERROR: File "absent_ungated.php", line 4, characters 37-46:
+Cannot use unstable feature: `shape_splat_concrete` (Parsing[1002])

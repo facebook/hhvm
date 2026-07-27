@@ -710,6 +710,10 @@ impl<'o, 't> SmartConstructors for DirectDeclSmartConstructors<'o, 't> {
         <Self as FlattenSmartConstructors>::make_field_specifier(self, question, name, arrow, type_)
     }
 
+    fn make_absent_field_specifier(&mut self, keyword: Self::Output, name: Self::Output) -> Self::Output {
+        <Self as FlattenSmartConstructors>::make_absent_field_specifier(self, keyword, name)
+    }
+
     fn make_field_initializer(&mut self, name: Self::Output, arrow: Self::Output, value: Self::Output) -> Self::Output {
         <Self as FlattenSmartConstructors>::make_field_initializer(self, name, arrow, value)
     }

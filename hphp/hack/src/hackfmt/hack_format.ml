@@ -2468,6 +2468,9 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
         } ->
       Concat
         [t env question; transform_mapish_entry env name arrow_kw field_type]
+    | Syntax.AbsentFieldSpecifier
+        { absent_field_keyword = keyword; absent_field_name = name } ->
+      Concat [t env keyword; Space; t env name]
     | Syntax.FieldInitializer
         {
           field_initializer_name = name;

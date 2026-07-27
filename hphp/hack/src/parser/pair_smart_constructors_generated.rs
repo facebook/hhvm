@@ -724,6 +724,10 @@ where
         Node(self.0.make_field_specifier(question.0, name.0, arrow.0, type_.0), self.1.make_field_specifier(question.1, name.1, arrow.1, type_.1))
     }
 
+    fn make_absent_field_specifier(&mut self, keyword: Self::Output, name: Self::Output) -> Self::Output {
+        Node(self.0.make_absent_field_specifier(keyword.0, name.0), self.1.make_absent_field_specifier(keyword.1, name.1))
+    }
+
     fn make_field_initializer(&mut self, name: Self::Output, arrow: Self::Output, value: Self::Output) -> Self::Output {
         Node(self.0.make_field_initializer(name.0, arrow.0, value.0), self.1.make_field_initializer(name.1, arrow.1, value.1))
     }

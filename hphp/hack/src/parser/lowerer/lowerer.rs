@@ -922,6 +922,18 @@ fn p_shape_field<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::ShapeFieldIn
                 name,
             })
         }
+        AbsentFieldSpecifier(c) => {
+            // `absent 'x'` desugars to an optional field of type `nothing`
+            // (i.e. `?'x' => nothing`): the field is definitely not present.
+            let name = p_shape_field_name(&c.name, env)?;
+            let pos = p_pos(node, env);
+            let hint = ast::Hint::new(pos, ast::Hint_::Hnothing);
+            Ok(ast::ShapeFieldInfo {
+                optional: true,
+                hint,
+                name,
+            })
+        }
         ShapeSplatSpecifier(_c) => {
             raise_parsing_error(
                 node,

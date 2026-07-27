@@ -1145,6 +1145,10 @@ struct
         field_arrow: t;
         field_type: t;
       }
+    | AbsentFieldSpecifier of {
+        absent_field_keyword: t;
+        absent_field_name: t;
+      }
     | FieldInitializer of {
         field_initializer_name: t;
         field_initializer_arrow: t;

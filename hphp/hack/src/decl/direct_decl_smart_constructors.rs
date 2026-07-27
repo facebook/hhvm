@@ -3027,6 +3027,7 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
             | TokenKind::Internal
             | TokenKind::Global
             | TokenKind::Optional
+            | TokenKind::Absent
             | TokenKind::Named
             | TokenKind::Nameof => Node::Token(FixedWidthToken::new(kind, token.start_offset())),
             TokenKind::Attribute
@@ -5747,6 +5748,29 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
         Node::ShapeFieldSpecifier(Box::new(ShapeFieldNode {
             name: ShapeField(name),
             type_: ShapeFieldType { optional, ty },
+        }))
+    }
+
+    fn make_absent_field_specifier(
+        &mut self,
+        keyword: Self::Output,
+        name: Self::Output,
+    ) -> Self::Output {
+        // `absent 'x'` is surface sugar for `?'x' => nothing`.
+        // Span the keyword and the name so the synthetic `nothing`'s witness
+        // position matches the lowerer, which uses the whole field node's span.
+        let pos = self.merge_positions(&keyword, &name);
+        let name = match self.make_shape_field_name(name) {
+            Some(name) => name,
+            None => return Node::Ignored(SK::AbsentFieldSpecifier),
+        };
+        let ty = Ty(
+            Reason::FromWitnessDecl(WitnessDecl::Hint(pos)),
+            Box::new(Ty_::Tunion(vec![])),
+        );
+        Node::ShapeFieldSpecifier(Box::new(ShapeFieldNode {
+            name: ShapeField(name),
+            type_: ShapeFieldType { optional: true, ty },
         }))
     }
 

@@ -1010,6 +1010,10 @@ module type Syntax_S = sig
         field_arrow: t;
         field_type: t;
       }
+    | AbsentFieldSpecifier of {
+        absent_field_keyword: t;
+        absent_field_name: t;
+      }
     | FieldInitializer of {
         field_initializer_name: t;
         field_initializer_arrow: t;
@@ -1506,6 +1510,8 @@ module type Syntax_S = sig
 
   val make_field_specifier : t -> t -> t -> t -> t
 
+  val make_absent_field_specifier : t -> t -> t
+
   val make_field_initializer : t -> t -> t -> t
 
   val make_shape_type_specifier : t -> t -> t -> t -> t -> t -> t
@@ -1877,6 +1883,8 @@ module type Syntax_S = sig
   val is_class_ptr_type_specifier : t -> bool
 
   val is_field_specifier : t -> bool
+
+  val is_absent_field_specifier : t -> bool
 
   val is_field_initializer : t -> bool
 

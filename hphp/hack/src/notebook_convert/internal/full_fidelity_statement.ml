@@ -174,6 +174,7 @@ let is_statement =
     | ClassnameTypeSpecifier _
     | ClassPtrTypeSpecifier _
     | FieldSpecifier _
+    | AbsentFieldSpecifier _
     | FieldInitializer _
     | ShapeTypeSpecifier _
     | ShapeExpression _

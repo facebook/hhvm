@@ -16,7 +16,7 @@ namespace proxygen {
 HTTP2PriorityQueue::Node* HTTP2PriorityQueue::nodeFromBaseNode(
     HTTP2PriorityQueue::BaseNode* bnode) {
   return
-#if DEBUG
+#if defined(DEBUG) && DEBUG
       CHECK_NOTNULL(dynamic_cast<HTTP2PriorityQueue::Node*>(bnode));
 #else
       static_cast<HTTP2PriorityQueue::Node*>(bnode);

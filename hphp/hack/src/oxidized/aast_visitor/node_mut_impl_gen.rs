@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<eec31ae7149da5ed8d556b62d9b5bcb5>>
+// @generated SignedSource<<272c622e028963077f68542ad6ad76d5>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -2160,6 +2160,25 @@ impl<P: Params> NodeMut<P> for RequireKind {
             RequireKind::RequireImplements => Ok(()),
             RequireKind::RequireClass => Ok(()),
             RequireKind::RequireThisAs => Ok(()),
+        }
+    }
+}
+impl<P: Params> NodeMut<P> for ShapeElement {
+    fn accept<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_shape_element(c, self)
+    }
+    fn recurse<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        match self {
+            ShapeElement::SEField(a0) => a0.accept(c, v),
+            ShapeElement::SESplat(a0) => a0.accept(c, v),
         }
     }
 }

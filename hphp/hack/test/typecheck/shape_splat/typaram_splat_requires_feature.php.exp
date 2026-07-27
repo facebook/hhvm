@@ -1,0 +1,2 @@
+ERROR: File "typaram_splat_requires_feature.php", line 15, characters 50-50:
+`T` requires the unstable feature `shape_splat_type_parameters`. Add `<<file: __EnableUnstableFeatures('shape_splat_type_parameters')>>` to use it. (Typing[4509])

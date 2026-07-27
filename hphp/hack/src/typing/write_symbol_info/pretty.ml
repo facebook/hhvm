@@ -175,18 +175,23 @@ let hint_to_string_and_symbols ~is_ctx (hint : Aast.hint) =
           @ opt_map cr_upper ~f:(fun x -> [(`U, x)])
       in
       parse_gen_seq ~sep:" " ~f:(parse_bound ~is_ctx:true) bounds
-  and parse_shape open_ hs unknown_fields_type =
-    (match hs with
+  and parse_shape open_ nsi_field_map unknown_fields_type =
+    let fields =
+      List.filter_map nsi_field_map ~f:(function
+          | Aast.SE_field sfi -> Some sfi
+          | Aast.SE_splat _ -> None)
+    in
+    (match fields with
     | [] -> ()
-    | _ -> parse_gen_seq ~sep:", " ~f:parse_shape_field hs);
+    | _ -> parse_gen_seq ~sep:", " ~f:parse_shape_field fields);
     match unknown_fields_type with
     | Some h ->
-      if not (List.is_empty hs) then append ", ";
+      if not (List.is_empty fields) then append ", ";
       parse ~is_ctx:false h;
       append "..."
     | None ->
       if open_ then begin
-        if not (List.is_empty hs) then append ", ";
+        if not (List.is_empty fields) then append ", ";
         append "..."
       end
   and parse_shape_field Aast.{ sfi_optional; sfi_name; sfi_hint } =
@@ -331,7 +336,12 @@ let rec hint_to_angle h =
           opt = sfi_optional;
         }
     in
-    let map_ = List.map ~f nsi_field_map in
+    let fields =
+      List.filter_map nsi_field_map ~f:(function
+          | Aast_defs.SE_field sfi -> Some sfi
+          | Aast_defs.SE_splat _ -> None)
+    in
+    let map_ = List.map ~f fields in
     Hint.(Key (Shape { open_ = nsi_allows_unknown_fields; map_ }))
   | Happly ((_file_pos, cn), hints) ->
     let values = List.map hints ~f:hint_to_angle in

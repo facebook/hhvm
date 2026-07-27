@@ -162,7 +162,12 @@ and check_shape
     Aast.
       { nsi_allows_unknown_fields = _; nsi_field_map; nsi_unknown_fields_type }
     =
-  List.iter ~f:(fun v -> check_hint env v.Aast.sfi_hint) nsi_field_map;
+  (* Check instantiability of both field hints and the operand of each splat,
+     so a splat of a non-instantiable type (abstract-final class, trait) is
+     still reported. A splat of a bare type parameter is a no-op here. *)
+  List.iter nsi_field_map ~f:(function
+      | Aast.SE_field sfi -> check_hint env sfi.Aast.sfi_hint
+      | Aast.SE_splat h -> check_hint env h);
   Option.iter nsi_unknown_fields_type ~f:(check_hint env)
 
 (* Need to skip the root of the Haccess element *)

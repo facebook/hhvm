@@ -20,6 +20,7 @@ use oxidized::aast_defs::Hint;
 use oxidized::aast_defs::Hint_;
 use oxidized::aast_defs::NastShapeInfo;
 use oxidized::aast_defs::Refinement;
+use oxidized::aast_defs::ShapeElement;
 use oxidized::aast_defs::ShapeFieldInfo;
 use oxidized::aast_defs::TupleExtra;
 use oxidized::aast_defs::TupleExtraInfo;
@@ -156,6 +157,10 @@ fn shape_info_to_typed_value(
     let info = si
         .field_map
         .iter()
+        .filter_map(|elem| match elem {
+            ShapeElement::SEField(sfi) => Some(sfi),
+            ShapeElement::SESplat(_) => None,
+        })
         .map(|sfi| shape_field_to_entry(opts, tparams, targ_map, type_refinement_in_hint, sfi))
         .collect::<Result<Vec<_>>>()?;
     Ok(TypedValue::dict(info))

@@ -22,6 +22,7 @@ use oxidized::aast_defs::Hint;
 use oxidized::aast_defs::Hint_;
 use oxidized::aast_defs::Hint_::*;
 use oxidized::aast_defs::NastShapeInfo;
+use oxidized::aast_defs::ShapeElement;
 use oxidized::aast_defs::ShapeFieldInfo;
 use oxidized::aast_defs::Tprim;
 use oxidized::aast_defs::TupleInfo;
@@ -151,6 +152,10 @@ pub fn fmt_hint(tparams: &[&str], strip_tparams: bool, hint: &Hint) -> Result<St
             };
             let shape_fields = field_map
                 .iter()
+                .filter_map(|elem| match elem {
+                    ShapeElement::SEField(sfi) => Some(sfi),
+                    ShapeElement::SESplat(_) => None,
+                })
                 .map(fmt_field)
                 .collect::<Result<Vec<_>>>()
                 .map(|v| v.join(", "))?;

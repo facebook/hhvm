@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<fc728531e7e108ac61d09f90cf8982e6>>
+// @generated SignedSource<<9587ec2b80a936fc13a59bf75457df75>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -4598,6 +4598,62 @@ impl CtxRefinement {
     pub fn as_crloose_into(self) -> Option<CtxRefinementBounds> {
         match self {
             CtxRefinement::CRloose(p0) => Some(p0),
+            _ => None,
+        }
+    }
+}
+impl ShapeElement {
+    pub fn mk_sefield(p0: ShapeFieldInfo) -> Self {
+        ShapeElement::SEField(p0)
+    }
+    pub fn mk_sesplat(p0: Hint) -> Self {
+        ShapeElement::SESplat(p0)
+    }
+    pub fn is_sefield(&self) -> bool {
+        match self {
+            ShapeElement::SEField(..) => true,
+            _ => false,
+        }
+    }
+    pub fn is_sesplat(&self) -> bool {
+        match self {
+            ShapeElement::SESplat(..) => true,
+            _ => false,
+        }
+    }
+    pub fn as_sefield(&self) -> Option<&ShapeFieldInfo> {
+        match self {
+            ShapeElement::SEField(p0) => Some(p0),
+            _ => None,
+        }
+    }
+    pub fn as_sesplat(&self) -> Option<&Hint> {
+        match self {
+            ShapeElement::SESplat(p0) => Some(p0),
+            _ => None,
+        }
+    }
+    pub fn as_sefield_mut(&mut self) -> Option<&mut ShapeFieldInfo> {
+        match self {
+            ShapeElement::SEField(p0) => Some(p0),
+            _ => None,
+        }
+    }
+    pub fn as_sesplat_mut(&mut self) -> Option<&mut Hint> {
+        match self {
+            ShapeElement::SESplat(p0) => Some(p0),
+            _ => None,
+        }
+    }
+    pub fn as_sefield_into(self) -> Option<ShapeFieldInfo> {
+        match self {
+            ShapeElement::SEField(p0) => Some(p0),
+            _ => None,
+        }
+    }
+    pub fn as_sesplat_into(self) -> Option<Hint> {
+        match self {
+            ShapeElement::SESplat(p0) => Some(p0),
             _ => None,
         }
     }

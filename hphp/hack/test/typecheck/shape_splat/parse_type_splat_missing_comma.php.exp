@@ -1,7 +1,5 @@
 File "parse_type_splat_missing_comma.php", line 11, characters 3-13:
   shape()
-ERROR: File "parse_type_splat_missing_comma.php", line 8, characters 18-21:
-Shape splat types are not yet supported in this position (Parsing[1002])
 ERROR: File "parse_type_splat_missing_comma.php", line 8, characters 23-23:
 A comma `,` is expected here. (Parsing[1002])
 ERROR: File "parse_type_splat_missing_comma.php", line 8, characters 23-25:

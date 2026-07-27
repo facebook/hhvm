@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<664e1fdb78d147c0b4e0c1cc08d3637e>>
+// @generated SignedSource<<4bf51c2ca1bc102dc19334842e8efb91>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -664,6 +664,13 @@ pub trait VisitorMut<'node> {
         &mut self,
         c: &mut <Self::Params as Params>::Context,
         p: &'node mut RequireKind,
+    ) -> Result<(), <Self::Params as Params>::Error> {
+        p.recurse(c, self.object())
+    }
+    fn visit_shape_element(
+        &mut self,
+        c: &mut <Self::Params as Params>::Context,
+        p: &'node mut ShapeElement,
     ) -> Result<(), <Self::Params as Params>::Error> {
         p.recurse(c, self.object())
     }

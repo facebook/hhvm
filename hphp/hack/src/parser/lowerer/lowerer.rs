@@ -910,17 +910,17 @@ fn p_shape_field_name<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::ShapeFi
     }
 }
 
-fn p_shape_field<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::ShapeFieldInfo> {
+fn p_shape_field<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::ShapeElement> {
     match &node.children {
         FieldSpecifier(c) => {
             let optional = !c.question.is_missing();
             let name = p_shape_field_name(&c.name, env)?;
             let hint = p_hint(&c.type_, env)?;
-            Ok(ast::ShapeFieldInfo {
+            Ok(ast::ShapeElement::SEField(ast::ShapeFieldInfo {
                 optional,
                 hint,
                 name,
-            })
+            }))
         }
         AbsentFieldSpecifier(c) => {
             // `absent 'x'` desugars to an optional field of type `nothing`
@@ -928,27 +928,23 @@ fn p_shape_field<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::ShapeFieldIn
             let name = p_shape_field_name(&c.name, env)?;
             let pos = p_pos(node, env);
             let hint = ast::Hint::new(pos, ast::Hint_::Hnothing);
-            Ok(ast::ShapeFieldInfo {
+            Ok(ast::ShapeElement::SEField(ast::ShapeFieldInfo {
                 optional: true,
                 hint,
                 name,
-            })
+            }))
         }
-        ShapeSplatSpecifier(_c) => {
-            raise_parsing_error(
-                node,
-                env,
-                "Shape splat types are not yet supported in this position",
-            );
-            missing_syntax("field specifier", node, env)
+        ShapeSplatSpecifier(c) => {
+            let hint = p_hint(&c.type_, env)?;
+            Ok(ast::ShapeElement::SESplat(hint))
         }
         _ => {
             let (name, hint) = map_shape_expression_field(node, env, p_hint)?;
-            Ok(ast::ShapeFieldInfo {
+            Ok(ast::ShapeElement::SEField(ast::ShapeFieldInfo {
                 optional: false,
                 name,
                 hint,
-            })
+            }))
         }
     }
 }
@@ -1033,7 +1029,11 @@ fn p_hint_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Hint_> {
 
             let field_map = could_map(&c.fields, env, p_shape_field)?;
             let mut set = HashSet::default();
-            for f in field_map.iter() {
+            for elem in field_map.iter() {
+                let f = match elem {
+                    ast::ShapeElement::SEField(f) => f,
+                    ast::ShapeElement::SESplat(_) => continue,
+                };
                 use ast::ShapeFieldName::*;
                 use bstr::BStr;
                 // This check is sketchy. It considers only the const names in class const case

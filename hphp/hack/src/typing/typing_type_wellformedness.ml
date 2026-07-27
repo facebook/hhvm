@@ -273,25 +273,58 @@ and hint_ ~in_signature env p h_ =
   | Hshape
       { nsi_allows_unknown_fields = _; nsi_field_map; nsi_unknown_fields_type }
     ->
+    let fields =
+      List.filter_map nsi_field_map ~f:(function
+          | SE_field sfi -> Some sfi
+          | SE_splat _ -> None)
+    in
+    (* A splat of a type parameter (`...T`) cannot be flattened into a concrete
+       normal form, so it leaves a residual shape splat that relies on the
+       (still experimental) shape-splat subtyping. It is therefore gated by
+       `shape_splat_type_parameters`, distinct from concrete splats, which are
+       admitted at parse time by `shape_splat_concrete`. *)
+    let splat_feature_errors =
+      if
+        TypecheckerOptions.is_unstable_feature_enabled
+          env.tenv.genv.tcopt
+          "shape_splat_type_parameters"
+      then
+        []
+      else
+        List.filter_map nsi_field_map ~f:(function
+            | SE_splat (pos, Habstr name) ->
+              Some
+                Typing_error.(
+                  primary
+                  @@ Primary.Gated_by_feature_flag
+                       { pos; name; feature = "shape_splat_type_parameters" })
+            | SE_field _
+            | SE_splat _ ->
+              None)
+    in
     let (tenv, errors) =
       let get_name sfi = sfi.sfi_name in
       Typing_shapes.check_shape_keys_validity
         env.tenv
-        (List.map ~f:get_name nsi_field_map)
+        (List.map ~f:get_name fields)
     in
     let env = { env with tenv } in
     let rec_errors =
-      let compute_hint_for_shape_field_info { sfi_hint; _ } =
-        hint env sfi_hint
-      in
-      List.concat_map ~f:compute_hint_for_shape_field_info nsi_field_map
+      (* Recursively well-formedness-check both field hints and the operand of
+         each splat, so an ill-formed hint inside a splat (undefined class,
+         wrong alias arity, unknown generic, ...) is still reported. A splat of
+         a bare type parameter (`Habstr`) yields no error here and is instead
+         gated above via [splat_feature_errors]. *)
+      List.concat_map nsi_field_map ~f:(function
+          | SE_field { sfi_hint; _ } -> hint env sfi_hint
+          | SE_splat h -> hint env h)
     in
     let unknown_fields_errors =
       match nsi_unknown_fields_type with
       | Some h -> hint env h
       | None -> []
     in
-    errors @ rec_errors @ unknown_fields_errors
+    errors @ rec_errors @ unknown_fields_errors @ splat_feature_errors
   | Hfun_context _ ->
     (* TODO(coeffects): check if arg is a function type in the locals? *)
     []

@@ -1449,9 +1449,13 @@ and shape_field_info = {
   sfi_name: Ast_defs.shape_field_name; [@transform.opaque]
 }
 
+and shape_element =
+  | SE_field of shape_field_info
+  | SE_splat of hint
+
 and nast_shape_info = {
   nsi_allows_unknown_fields: bool;
-  nsi_field_map: shape_field_info list;
+  nsi_field_map: shape_element list;
   nsi_unknown_fields_type: hint option;
 }
 

@@ -651,10 +651,10 @@ let rec hint : Env.t -> variance -> Aast_defs.hint -> unit =
   | Hshape
       { nsi_allows_unknown_fields = _; nsi_field_map; nsi_unknown_fields_type }
     ->
-    List.iter
-      nsi_field_map
-      ~f:(fun { sfi_hint; sfi_optional = _; sfi_name = _ } ->
-        hint env variance sfi_hint);
+    List.iter nsi_field_map ~f:(function
+        | SE_field { sfi_hint; sfi_optional = _; sfi_name = _ } ->
+          hint env variance sfi_hint
+        | SE_splat h -> hint env variance h);
     Option.iter nsi_unknown_fields_type ~f:(hint env variance)
   | Hrefinement (h, members) ->
     List.iter members ~f:(refinement_member env variance);

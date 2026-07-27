@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<55bb370a47ef2cd55d7edb08d05e533e>>
+// @generated SignedSource<<9251aef23bf4136b839c6ab11544f3de>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -3176,11 +3176,34 @@ pub struct ShapeFieldInfo {
     ToOcamlRep
 )]
 #[rust_to_ocaml(and)]
+#[repr(C, u8)]
+pub enum ShapeElement {
+    #[rust_to_ocaml(name = "SE_field")]
+    SEField(ShapeFieldInfo),
+    #[rust_to_ocaml(name = "SE_splat")]
+    SESplat(Hint),
+}
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(and)]
 #[rust_to_ocaml(prefix = "nsi_")]
 #[repr(C)]
 pub struct NastShapeInfo {
     pub allows_unknown_fields: bool,
-    pub field_map: Vec<ShapeFieldInfo>,
+    pub field_map: Vec<ShapeElement>,
     pub unknown_fields_type: Option<Hint>,
 }
 

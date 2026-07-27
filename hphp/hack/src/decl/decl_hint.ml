@@ -370,6 +370,11 @@ and hint_ p env = function
       else
         hint env (p, Hnothing)
     in
+    let fields =
+      List.filter_map nsi_field_map ~f:(function
+          | SE_field sfi -> Some sfi
+          | SE_splat _ -> None)
+    in
     let fdm =
       List.fold_left
         ~f:(fun acc i ->
@@ -378,7 +383,7 @@ and hint_ p env = function
             (shape_field_info_to_shape_field_type env i)
             acc)
         ~init:TShapeMap.empty
-        nsi_field_map
+        fields
     in
     Tshape
       {

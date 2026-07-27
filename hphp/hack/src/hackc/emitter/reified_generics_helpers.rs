@@ -212,6 +212,7 @@ pub(crate) fn remove_erased_generics<'a>(env: &Env<'a>, h: aast::Hint) -> aast::
     use aast::Hint;
     use aast::Hint_;
     use aast::NastShapeInfo;
+    use aast::ShapeElement;
     use aast::ShapeFieldInfo;
     use aast::TupleExtra;
     use aast::TupleExtraInfo;
@@ -254,9 +255,12 @@ pub(crate) fn remove_erased_generics<'a>(env: &Env<'a>, h: aast::Hint) -> aast::
             }) => {
                 let field_map = field_map
                     .into_iter()
-                    .map(|sfi: ShapeFieldInfo| ShapeFieldInfo {
-                        hint: rec(env, sfi.hint),
-                        ..sfi
+                    .map(|elem| match elem {
+                        ShapeElement::SEField(sfi) => ShapeElement::SEField(ShapeFieldInfo {
+                            hint: rec(env, sfi.hint),
+                            ..sfi
+                        }),
+                        ShapeElement::SESplat(h) => ShapeElement::SESplat(rec(env, h)),
                     })
                     .collect();
                 let unknown_fields_type = unknown_fields_type.map(|h| rec(env, h));

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<145695245f6e23dc4d4e263f0deba44b>>
+// @generated SignedSource<<916388fea3b5865e5dde6df82a30bd60>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -1412,6 +1412,22 @@ pub trait Pass: PassClone {
         &mut self,
         env: &Env,
         elem: &mut ShapeFieldInfo,
+    ) -> ControlFlow<()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_shape_element_top_down(
+        &mut self,
+        env: &Env,
+        elem: &mut ShapeElement,
+    ) -> ControlFlow<()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_shape_element_bottom_up(
+        &mut self,
+        env: &Env,
+        elem: &mut ShapeElement,
     ) -> ControlFlow<()> {
         Continue(())
     }
@@ -3562,6 +3578,28 @@ impl Pass for Passes {
     ) -> ControlFlow<()> {
         for pass in &mut self.passes {
             pass.on_ty_shape_field_info_bottom_up(env, elem)?;
+        }
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_shape_element_top_down(
+        &mut self,
+        env: &Env,
+        elem: &mut ShapeElement,
+    ) -> ControlFlow<()> {
+        for pass in &mut self.passes {
+            pass.on_ty_shape_element_top_down(env, elem)?;
+        }
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_shape_element_bottom_up(
+        &mut self,
+        env: &Env,
+        elem: &mut ShapeElement,
+    ) -> ControlFlow<()> {
+        for pass in &mut self.passes {
+            pass.on_ty_shape_element_bottom_up(env, elem)?;
         }
         Continue(())
     }

@@ -1,0 +1,12 @@
+ERROR: File "splat_operand_illformed.php", line 14, characters 27-30:
+You can only use the `void` type as the return type of a function or method (Naming[2063])
+ERROR: File "splat_operand_illformed.php", line 15, characters 24-28:
+Unbound name: `Tuple` (Naming[2049])
+ERROR: File "splat_operand_illformed.php", line 13, characters 24-30:
+`MyTrait` is uninstantiable (Typing[4002])
+  File "splat_operand_illformed.php", line 11, characters 7-13:
+  Declaration is here
+ERROR: File "splat_operand_illformed.php", line 14, characters 26-30:
+`?void` is a nonsensical typehint; a function cannot both only return implicitly and return null. (Typing[4066])
+ERROR: File "splat_operand_illformed.php", line 15, characters 24-28:
+Did you want a *tuple*? Try `(X,Y)`, not `tuple<X,Y>` (Typing[4100])

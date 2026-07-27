@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<f0b699faa577754bbd5548bd8ffe5548>>
+// @generated SignedSource<<381df4e426435c24cc3a34becf4c399a>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -2160,6 +2160,25 @@ impl<P: Params> Node<P> for RequireKind {
             RequireKind::RequireImplements => Ok(()),
             RequireKind::RequireClass => Ok(()),
             RequireKind::RequireThisAs => Ok(()),
+        }
+    }
+}
+impl<P: Params> Node<P> for ShapeElement {
+    fn accept<'node>(
+        &'node self,
+        c: &mut P::Context,
+        v: &mut dyn Visitor<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_shape_element(c, self)
+    }
+    fn recurse<'node>(
+        &'node self,
+        c: &mut P::Context,
+        v: &mut dyn Visitor<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        match self {
+            ShapeElement::SEField(a0) => a0.accept(c, v),
+            ShapeElement::SESplat(a0) => a0.accept(c, v),
         }
     }
 }

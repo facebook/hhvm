@@ -210,9 +210,14 @@ let rec pp_hint ~is_ctx ppf (pos, hint_) =
     Fmt.(
       prefix (const string "shape")
       @@ parens
-      @@ pair ~sep:nop (list ~sep:comma pp_shape_field) pp_ellipsis)
+      @@ pair ~sep:nop (list ~sep:comma pp_shape_element) pp_ellipsis)
       ppf
       (nsi_field_map, ())
+
+and pp_shape_element ppf = function
+  | Aast.SE_field sfi -> pp_shape_field ppf sfi
+  | Aast.SE_splat h ->
+    Fmt.(prefix (const string "...") @@ pp_hint ~is_ctx:false) ppf h
 
 and pp_shape_field ppf Aast.{ sfi_optional; sfi_name; sfi_hint } =
   Fmt.(

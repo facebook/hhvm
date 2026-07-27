@@ -42,8 +42,8 @@ struct MyString {
 
 namespace detail::pm {
 
-template <>
-struct protocol_methods<type_class::integral, test::MyInt> {
+template <typename ExpectedTag>
+struct protocol_methods<type_class::integral, test::MyInt, ExpectedTag> {
   template <typename Protocol>
   static void read(Protocol& protocol, test::MyInt& out) {
     protocol.readI32(out.value);
@@ -65,8 +65,8 @@ struct protocol_methods<type_class::integral, test::MyInt> {
   }
 };
 
-template <>
-struct protocol_methods<type_class::string, test::MyString> {
+template <typename ExpectedTag>
+struct protocol_methods<type_class::string, test::MyString, ExpectedTag> {
   template <typename Protocol>
   static void read(Protocol& protocol, test::MyString& out) {
     protocol.readString(out.value);

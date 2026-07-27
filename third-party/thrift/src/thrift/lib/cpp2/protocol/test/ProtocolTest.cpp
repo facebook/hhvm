@@ -214,11 +214,15 @@ void runBigListTest(
           ::apache::thrift::detail::pm::protocol_methods<
               ::apache::thrift::type_class::list<
                   ::apache::thrift::type_class::integral>,
-              ::std::vector<ArithmeticType>>;
+              ::std::vector<ArithmeticType>,
+              ::apache::thrift::type::list<
+                  ::apache::thrift::type::infer_tag<ArithmeticType>>>;
       using prot_method_float = ::apache::thrift::detail::pm::protocol_methods<
           ::apache::thrift::type_class::list<
               ::apache::thrift::type_class::floating_point>,
-          ::std::vector<ArithmeticType>>;
+          ::std::vector<ArithmeticType>,
+          ::apache::thrift::type::list<
+              ::apache::thrift::type::infer_tag<ArithmeticType>>>;
 
       if constexpr (std::is_floating_point_v<ArithmeticType>) {
         prot_method_float::write(w, intList);

@@ -324,7 +324,8 @@ struct SerializedSize<ZeroCopy, type::enum_t<T>> {
   uint32_t operator()(Protocol& prot, const T& s) const {
     return apache::thrift::detail::pm::protocol_methods<
         type_class::enumeration,
-        T>::template serializedSize<ZeroCopy>(prot, s);
+        T,
+        type::enum_t<T>>::template serializedSize<ZeroCopy>(prot, s);
   }
 };
 
@@ -644,7 +645,8 @@ struct Encode<type::enum_t<T>> {
   template <typename Protocol>
   uint32_t operator()(Protocol& prot, const T& s) const {
     return apache::thrift::detail::pm::
-        protocol_methods<type_class::enumeration, T>::write(prot, s);
+        protocol_methods<type_class::enumeration, T, type::enum_t<T>>::write(
+            prot, s);
   }
 };
 
@@ -751,15 +753,18 @@ struct CppTypeEncode {
   }
 
   using TC = type_class::from_type_tag_t<Tag>;
+  using ExpectedTag = type::cpp_type<T, Tag>;
   template <class Protocol, class U>
   uint32_t operator()(Protocol& prot, const U& m) const
     requires(
         requires {
-          apache::thrift::detail::pm::protocol_methods<TC, T>::write(prot, m);
+          apache::thrift::detail::pm::protocol_methods<TC, T, ExpectedTag>::
+              write(prot, m);
         } && !std::convertible_to<U, type::standard_type<Tag>> &&
         !directlyEncodable<Protocol, U>)
   {
-    return apache::thrift::detail::pm::protocol_methods<TC, T>::write(prot, m);
+    return apache::thrift::detail::pm::protocol_methods<TC, T, ExpectedTag>::
+        write(prot, m);
   }
 };
 
@@ -965,8 +970,9 @@ template <typename T>
 struct Decode<type::enum_t<T>> {
   template <typename Protocol>
   void operator()(Protocol& prot, T& t) const {
-    apache::thrift::detail::pm::protocol_methods<type_class::enumeration, T>::
-        read(prot, t);
+    apache::thrift::detail::pm::
+        protocol_methods<type_class::enumeration, T, type::enum_t<T>>::read(
+            prot, t);
   }
 };
 

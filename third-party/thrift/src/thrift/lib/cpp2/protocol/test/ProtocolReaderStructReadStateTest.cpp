@@ -64,8 +64,10 @@ TEST(ProtocolMethods, UsesProtocolContextHookWhenContextDoesNotAdvertiseIt) {
   NonAcceptingContext context{17};
   std::int32_t value = 0;
 
-  protocol_methods<type_class::integral, std::int32_t>::readWithContext(
-      reader, value, context);
+  protocol_methods<
+      type_class::integral,
+      std::int32_t,
+      type::infer_tag<std::int32_t>>::readWithContext(reader, value, context);
 
   EXPECT_EQ(value, 42);
   EXPECT_TRUE(reader.contextHookCalled);
@@ -79,8 +81,10 @@ TEST(ProtocolMethods, UsesProtocolContextHookForUnsignedInteger) {
   NonAcceptingContext context{23};
   std::uint32_t value = 0;
 
-  protocol_methods<type_class::integral, std::uint32_t>::readWithContext(
-      reader, value, context);
+  protocol_methods<
+      type_class::integral,
+      std::uint32_t,
+      type::infer_tag<std::uint32_t>>::readWithContext(reader, value, context);
 
   EXPECT_EQ(value, std::numeric_limits<std::uint32_t>::max());
   EXPECT_TRUE(reader.contextHookCalled);
@@ -127,8 +131,8 @@ std::unique_ptr<folly::IOBuf> createTestInput() {
 
 template <typename Protocol, typename State, typename T>
 void readFieldContents(Protocol& protocol, State& state, T& out) {
-  protocol_methods<type_class::integral, T>::readWithContext(
-      protocol, out, state);
+  protocol_methods<type_class::integral, T, type::infer_tag<T>>::
+      readWithContext(protocol, out, state);
 }
 
 template <class ProtocolReader>

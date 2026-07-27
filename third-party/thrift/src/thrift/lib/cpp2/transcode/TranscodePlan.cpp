@@ -122,7 +122,7 @@ folly::Expected<Command, CompileError> fuseStructOps(
   fused.readLengthDelimited = source.readLengthDelimited;
   fused.writeLengthDelimited = target.writeLengthDelimited;
   fused.schemaType =
-      source.schemaType != nullptr ? source.schemaType : target.schemaType;
+      source.schemaType.has_value() ? source.schemaType : target.schemaType;
   fused.setIssetFn = target.setIssetFn;
   fused.getBasePtrFn = target.getBasePtrFn;
 

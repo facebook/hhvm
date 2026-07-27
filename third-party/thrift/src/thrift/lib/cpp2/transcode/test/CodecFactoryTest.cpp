@@ -115,7 +115,7 @@ TEST(CodecFactoryStandaloneTest, AdHocStructFieldsProduceStructCodec) {
   const auto& root = std::get<StructOp>(codec.root);
 
   EXPECT_EQ(codec.name, "json_RequestEnvelope");
-  EXPECT_EQ(root.schemaType, nullptr);
+  EXPECT_FALSE(root.schemaType.has_value());
   ASSERT_EQ(root.fields.size(), 2u);
   EXPECT_EQ(root.fields[0].fieldId, 1);
   EXPECT_EQ(root.fields[0].fieldName, "id");

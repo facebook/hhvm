@@ -500,7 +500,7 @@ void addStructField(
   using Kind = type_system::TypeRef::Kind;
   const auto& type = field.type();
   const auto& fieldType = resolveOpaqueAlias(type);
-  const bool isUnion = op.schemaType != nullptr && op.schemaType->isUnion();
+  const bool isUnion = op.schemaType.has_value() && op.schemaType->isUnion();
   FieldEntry entry;
   entry.fieldId = folly::to_underlying(field.identity().id());
   entry.fieldName = std::string(field.identity().name());
@@ -554,7 +554,7 @@ template <typename Structured>
 StructOp makeStructOp(const Structured& node, const ProtocolOps& ops) {
   StructOp op = makeStructOpBase(ops);
   auto schemaType = node.asRef();
-  op.schemaType = std::make_shared<type_system::TypeRef>(schemaType);
+  op.schemaType = schemaType;
 
   for (const auto& field : node.fields()) {
     addStructField(op, ops, field);

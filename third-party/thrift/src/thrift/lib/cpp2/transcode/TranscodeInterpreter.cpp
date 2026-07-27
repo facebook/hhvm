@@ -708,7 +708,7 @@ bool jsonMapWritesObjectForm(const MapOp& op) {
 }
 
 bool isUnion(const StructOp& op) {
-  return op.schemaType != nullptr && op.schemaType->isUnion();
+  return op.schemaType.has_value() && op.schemaType->isUnion();
 }
 
 void writeJsonObjectMapKey(

@@ -16,17 +16,16 @@
 
 #pragma once
 
+#include <thrift/lib/cpp2/dynamic/TypeSystem.h>
+
 #include <cstdint>
 #include <memory>
+#include <optional>
 #include <string>
 #include <string_view>
 #include <utility>
 #include <variant>
 #include <vector>
-
-namespace apache::thrift::type_system {
-class TypeRef;
-} // namespace apache::thrift::type_system
 
 namespace apache::thrift::transcode {
 
@@ -387,7 +386,7 @@ struct StructOp {
   //   Write: mark → skip(5) → fields → patch varint length
   bool readLengthDelimited = false;
   bool writeLengthDelimited = false;
-  std::shared_ptr<const type_system::TypeRef> schemaType;
+  std::optional<type_system::TypeRef> schemaType;
 
   // Per-field commands, sorted by fieldId
   std::vector<FieldEntry> fields;

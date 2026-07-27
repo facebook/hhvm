@@ -37,6 +37,8 @@ let print_load_error (load_error : Saved_state_loader.LoadError.t) : unit =
         ( "error",
           `String
             (Saved_state_loader.LoadError.debug_details_of_error load_error) );
+        ( "error_category",
+          `String (Saved_state_loader.LoadError.category_of_error load_error) );
       ]
   in
   Hh_json_helpers.Out.pretty_to_channel stdout json

@@ -359,6 +359,10 @@ template <typename ExpectedTag>
 using expected_key_tag_or_void_t =
     typename expected_key_tag_or_void<ExpectedTag>::type;
 
+template <typename ExpectedTag, typename WireTag>
+inline constexpr bool matches_integral_wire_tag_v =
+    std::is_base_of_v<WireTag, ExpectedTag>;
+
 #define THRIFT_PROTOCOL_METHODS_REGISTER_RW_COMMON(Class, Type, Method)      \
   template <typename Protocol>                                               \
   static void read(Protocol& protocol, Type& out) {                          \
@@ -400,10 +404,27 @@ using expected_key_tag_or_void_t =
     THRIFT_PROTOCOL_METHODS_REGISTER_SS_COMMON(Class, Type, Method)    \
   }
 
-THRIFT_PROTOCOL_METHODS_REGISTER_OVERLOAD(integral, std::int8_t, Byte);
-THRIFT_PROTOCOL_METHODS_REGISTER_OVERLOAD(integral, std::int16_t, I16);
-THRIFT_PROTOCOL_METHODS_REGISTER_OVERLOAD(integral, std::int32_t, I32);
-THRIFT_PROTOCOL_METHODS_REGISTER_OVERLOAD(integral, std::int64_t, I64);
+#define THRIFT_PROTOCOL_METHODS_REGISTER_INTEGRAL_OVERLOAD(            \
+    Type, Method, WireTag)                                             \
+  template <typename ExpectedTag>                                      \
+  struct protocol_methods<type_class::integral, Type, ExpectedTag> {   \
+    static_assert(                                                     \
+        matches_integral_wire_tag_v<ExpectedTag, WireTag>,             \
+        "ExpectedTag does not match the selected integral overload");  \
+    THRIFT_PROTOCOL_METHODS_REGISTER_RW_COMMON(integral, Type, Method) \
+    THRIFT_PROTOCOL_METHODS_REGISTER_SS_COMMON(integral, Type, Method) \
+  }
+
+THRIFT_PROTOCOL_METHODS_REGISTER_INTEGRAL_OVERLOAD(
+    std::int8_t, Byte, type::byte_t);
+THRIFT_PROTOCOL_METHODS_REGISTER_INTEGRAL_OVERLOAD(
+    std::int16_t, I16, type::i16_t);
+THRIFT_PROTOCOL_METHODS_REGISTER_INTEGRAL_OVERLOAD(
+    std::int32_t, I32, type::i32_t);
+THRIFT_PROTOCOL_METHODS_REGISTER_INTEGRAL_OVERLOAD(
+    std::int64_t, I64, type::i64_t);
+
+#undef THRIFT_PROTOCOL_METHODS_REGISTER_INTEGRAL_OVERLOAD
 
 // Macros for defining protocol_methods for unsigned integers
 // Need special macros due to the casts needed
@@ -440,17 +461,20 @@ THRIFT_PROTOCOL_METHODS_REGISTER_OVERLOAD(integral, std::int64_t, I64);
   }
 
 // stamp out specializations for unsigned integer primitive types
-#define THRIFT_PROTOCOL_METHODS_REGISTER_UI(Class, Type, Method)  \
-  template <typename ExpectedTag>                                 \
-  struct protocol_methods<type_class::Class, Type, ExpectedTag> { \
-    THRIFT_PROTOCOL_METHODS_REGISTER_RW_UI(Class, Type, Method)   \
-    THRIFT_PROTOCOL_METHODS_REGISTER_SS_UI(Class, Type, Method)   \
+#define THRIFT_PROTOCOL_METHODS_REGISTER_UI(Class, Type, Method, WireTag) \
+  template <typename ExpectedTag>                                         \
+  struct protocol_methods<type_class::Class, Type, ExpectedTag> {         \
+    static_assert(                                                        \
+        matches_integral_wire_tag_v<ExpectedTag, WireTag>,                \
+        "ExpectedTag does not match the selected integral overload");     \
+    THRIFT_PROTOCOL_METHODS_REGISTER_RW_UI(Class, Type, Method)           \
+    THRIFT_PROTOCOL_METHODS_REGISTER_SS_UI(Class, Type, Method)           \
   }
 
-THRIFT_PROTOCOL_METHODS_REGISTER_UI(integral, std::uint8_t, Byte);
-THRIFT_PROTOCOL_METHODS_REGISTER_UI(integral, std::uint16_t, I16);
-THRIFT_PROTOCOL_METHODS_REGISTER_UI(integral, std::uint32_t, I32);
-THRIFT_PROTOCOL_METHODS_REGISTER_UI(integral, std::uint64_t, I64);
+THRIFT_PROTOCOL_METHODS_REGISTER_UI(integral, std::uint8_t, Byte, type::byte_t);
+THRIFT_PROTOCOL_METHODS_REGISTER_UI(integral, std::uint16_t, I16, type::i16_t);
+THRIFT_PROTOCOL_METHODS_REGISTER_UI(integral, std::uint32_t, I32, type::i32_t);
+THRIFT_PROTOCOL_METHODS_REGISTER_UI(integral, std::uint64_t, I64, type::i64_t);
 
 #undef THRIFT_PROTOCOL_METHODS_REGISTER_UI
 #undef THRIFT_PROTOCOL_METHODS_REGISTER_RW_UI
@@ -461,6 +485,9 @@ THRIFT_PROTOCOL_METHODS_REGISTER_UI(integral, std::uint64_t, I64);
 // proxy type
 template <typename ExpectedTag>
 struct protocol_methods<type_class::integral, bool, ExpectedTag> {
+  static_assert(
+      matches_integral_wire_tag_v<ExpectedTag, type::bool_t>,
+      "ExpectedTag does not match the selected integral overload");
   THRIFT_PROTOCOL_METHODS_REGISTER_RW_COMMON(integral, bool, Bool)
   THRIFT_PROTOCOL_METHODS_REGISTER_SS_COMMON(integral, bool, Bool)
 

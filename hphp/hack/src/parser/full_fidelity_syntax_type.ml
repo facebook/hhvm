@@ -1158,6 +1158,10 @@ struct
         shape_type_ellipsis: t;
         shape_type_right_paren: t;
       }
+    | ShapeSplatSpecifier of {
+        shape_splat_ellipsis: t;
+        shape_splat_type: t;
+      }
     | ShapeExpression of {
         shape_expression_keyword: t;
         shape_expression_left_paren: t;

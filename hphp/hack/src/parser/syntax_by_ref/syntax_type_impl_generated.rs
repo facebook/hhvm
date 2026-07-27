@@ -1855,6 +1855,15 @@ where
         Self::make(syntax, value)
     }
 
+    fn make_shape_splat_specifier(ctx: &C, ellipsis: Self, type_: Self) -> Self {
+        let syntax = SyntaxVariant::ShapeSplatSpecifier(ctx.get_arena().alloc(ShapeSplatSpecifierChildren {
+            ellipsis,
+            type_,
+        }));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
+        Self::make(syntax, value)
+    }
+
     fn make_shape_expression(ctx: &C, keyword: Self, left_paren: Self, fields: Self, ellipsis: Self, right_paren: Self) -> Self {
         let syntax = SyntaxVariant::ShapeExpression(ctx.get_arena().alloc(ShapeExpressionChildren {
             keyword,

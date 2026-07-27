@@ -731,6 +731,10 @@ where
         <Self as SyntaxSmartConstructors<S, TF, St>>::make_shape_type_specifier(self, arg0, arg1, arg2, arg3, arg4, arg5)
     }
 
+    fn make_shape_splat_specifier(&mut self, arg0: Self::Output, arg1: Self::Output) -> Self::Output {
+        <Self as SyntaxSmartConstructors<S, TF, St>>::make_shape_splat_specifier(self, arg0, arg1)
+    }
+
     fn make_shape_expression(&mut self, arg0: Self::Output, arg1: Self::Output, arg2: Self::Output, arg3: Self::Output, arg4: Self::Output) -> Self::Output {
         <Self as SyntaxSmartConstructors<S, TF, St>>::make_shape_expression(self, arg0, arg1, arg2, arg3, arg4)
     }

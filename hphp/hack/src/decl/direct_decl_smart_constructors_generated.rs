@@ -718,6 +718,10 @@ impl<'o, 't> SmartConstructors for DirectDeclSmartConstructors<'o, 't> {
         <Self as FlattenSmartConstructors>::make_shape_type_specifier(self, keyword, left_paren, fields, ellipsis_type, ellipsis, right_paren)
     }
 
+    fn make_shape_splat_specifier(&mut self, ellipsis: Self::Output, type_: Self::Output) -> Self::Output {
+        <Self as FlattenSmartConstructors>::make_shape_splat_specifier(self, ellipsis, type_)
+    }
+
     fn make_shape_expression(&mut self, keyword: Self::Output, left_paren: Self::Output, fields: Self::Output, ellipsis: Self::Output, right_paren: Self::Output) -> Self::Output {
         <Self as FlattenSmartConstructors>::make_shape_expression(self, keyword, left_paren, fields, ellipsis, right_paren)
     }

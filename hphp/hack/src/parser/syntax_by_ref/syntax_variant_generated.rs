@@ -189,6 +189,7 @@ pub enum SyntaxVariant<'a, T, V> {
     FieldSpecifier(&'a FieldSpecifierChildren<'a, T, V>),
     FieldInitializer(&'a FieldInitializerChildren<'a, T, V>),
     ShapeTypeSpecifier(&'a ShapeTypeSpecifierChildren<'a, T, V>),
+    ShapeSplatSpecifier(&'a ShapeSplatSpecifierChildren<'a, T, V>),
     ShapeExpression(&'a ShapeExpressionChildren<'a, T, V>),
     TupleExpression(&'a TupleExpressionChildren<'a, T, V>),
     GenericTypeSpecifier(&'a GenericTypeSpecifierChildren<'a, T, V>),
@@ -1540,6 +1541,12 @@ pub struct ShapeTypeSpecifierChildren<'a, T, V> {
     pub ellipsis_type: Syntax<'a, T, V>,
     pub ellipsis: Syntax<'a, T, V>,
     pub right_paren: Syntax<'a, T, V>,
+}
+
+#[derive(Debug, Clone)]
+pub struct ShapeSplatSpecifierChildren<'a, T, V> {
+    pub ellipsis: Syntax<'a, T, V>,
+    pub type_: Syntax<'a, T, V>,
 }
 
 #[derive(Debug, Clone)]

@@ -16,4 +16,4 @@
  **
  *
  */
-pub const VERSION: &str = "2026-06-05-0001";
+pub const VERSION: &str = "2026-06-08-0001";

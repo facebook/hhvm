@@ -184,6 +184,7 @@ type t =
   | FieldSpecifier
   | FieldInitializer
   | ShapeTypeSpecifier
+  | ShapeSplatSpecifier
   | ShapeExpression
   | TupleExpression
   | GenericTypeSpecifier
@@ -373,6 +374,7 @@ let to_string kind =
   | FieldSpecifier -> "field_specifier"
   | FieldInitializer -> "field_initializer"
   | ShapeTypeSpecifier -> "shape_type_specifier"
+  | ShapeSplatSpecifier -> "shape_splat_specifier"
   | ShapeExpression -> "shape_expression"
   | TupleExpression -> "tuple_expression"
   | GenericTypeSpecifier -> "generic_type_specifier"

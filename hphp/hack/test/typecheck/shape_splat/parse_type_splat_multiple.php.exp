@@ -1,0 +1,4 @@
+File "parse_type_splat_multiple.php", line 9, characters 3-13:
+  shape('z' => bool)
+ERROR: File "parse_type_splat_multiple.php", line 6, characters 16-19:
+Shape splat types are not yet supported in this position (Parsing[1002])

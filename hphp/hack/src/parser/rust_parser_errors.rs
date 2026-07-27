@@ -1319,6 +1319,25 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         self.errors = errors;
     }
 
+    // Accept `node` if *any* of `features` is enabled. If none is, report the
+    // first (primary) feature as the one that must be enabled. Used where a
+    // single syntactic form is admitted by more than one feature (e.g. a
+    // type-level shape splat is allowed under either the concrete or the
+    // type-parameter feature; a finer semantic check distinguishes them later).
+    fn check_can_use_any_feature(&mut self, node: S<'a>, features: &[FeatureName]) {
+        let enabled = features.iter().any(|feature| {
+            feature.can_use(
+                &self.env.parser_options,
+                &self.env.context.active_experimental_features,
+            )
+        });
+        if !enabled {
+            if let Some(primary) = features.first() {
+                self.check_can_use_feature(node, primary);
+            }
+        }
+    }
+
     fn attr_name(&self, node: S<'a>) -> Option<&'a str> {
         if let ConstructorCall(x) = attr_constructor_call(node) {
             Some(self.text(&x.type_))
@@ -5793,6 +5812,19 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             }
             ClassPtrTypeSpecifier(_) => {
                 self.check_can_use_feature(node, &FeatureName::ClassType);
+            }
+            ShapeSplatSpecifier(_) => {
+                // The type-level splat syntax `...T` is admitted by either the
+                // concrete feature or the type-parameter feature. Whether `T` is
+                // a type parameter (requiring `shape_splat_type_parameters`) is
+                // a semantic question resolved after naming, in an elab pass.
+                self.check_can_use_any_feature(
+                    node,
+                    &[
+                        FeatureName::ShapeSplatConcrete,
+                        FeatureName::ShapeSplatTypeParameters,
+                    ],
+                );
             }
             Token(t)
                 if t.kind() == TokenKind::Name

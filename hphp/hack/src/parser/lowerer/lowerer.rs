@@ -922,6 +922,14 @@ fn p_shape_field<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::ShapeFieldIn
                 name,
             })
         }
+        ShapeSplatSpecifier(_c) => {
+            raise_parsing_error(
+                node,
+                env,
+                "Shape splat types are not yet supported in this position",
+            );
+            missing_syntax("field specifier", node, env)
+        }
         _ => {
             let (name, hint) = map_shape_expression_field(node, env, p_hint)?;
             Ok(ast::ShapeFieldInfo {

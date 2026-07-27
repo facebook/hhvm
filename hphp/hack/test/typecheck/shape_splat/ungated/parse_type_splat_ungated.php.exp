@@ -1,0 +1,4 @@
+ERROR: File "parse_type_splat_ungated.php", line 5, characters 24-31:
+Cannot use unstable feature: `shape_splat_concrete` (Parsing[1002])
+ERROR: File "parse_type_splat_ungated.php", line 5, characters 24-31:
+Shape splat types are not yet supported in this position (Parsing[1002])

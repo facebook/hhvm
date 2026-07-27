@@ -1539,6 +1539,13 @@ ss.serialize_field("shape_type_ellipsis", &self.with(ellipsis))?;
 ss.serialize_field("shape_type_right_paren", &self.with(right_paren))?;
       ss.end()
 } 
+SyntaxVariant::ShapeSplatSpecifier (ShapeSplatSpecifierChildren{ellipsis,type_} ) => {
+      let mut ss = s.serialize_struct("", 3)?;
+      ss.serialize_field("kind", "shape_splat_specifier")?;
+      ss.serialize_field("shape_splat_ellipsis", &self.with(ellipsis))?;
+ss.serialize_field("shape_splat_type", &self.with(type_))?;
+      ss.end()
+} 
 SyntaxVariant::ShapeExpression (ShapeExpressionChildren{keyword,left_paren,fields,ellipsis,right_paren} ) => {
       let mut ss = s.serialize_struct("", 6)?;
       ss.serialize_field("kind", "shape_expression")?;

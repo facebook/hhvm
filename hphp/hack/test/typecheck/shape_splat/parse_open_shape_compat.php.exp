@@ -1,0 +1,5 @@
+File "parse_open_shape_compat.php", line 9, characters 3-13:
+  shape('x' => int, ...)
+File "parse_open_shape_compat.php", line 13, characters 3-13:
+  shape('y' => string)
+No errors

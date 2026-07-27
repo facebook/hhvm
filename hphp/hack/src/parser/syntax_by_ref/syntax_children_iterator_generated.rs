@@ -1703,6 +1703,14 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                     }
                 })
             },
+            ShapeSplatSpecifier(x) => {
+                get_index(2).and_then(|index| { match index {
+                        0 => Some(&x.ellipsis),
+                    1 => Some(&x.type_),
+                        _ => None,
+                    }
+                })
+            },
             ShapeExpression(x) => {
                 get_index(5).and_then(|index| { match index {
                         0 => Some(&x.keyword),

@@ -25,6 +25,7 @@ type aggregate_type =
   | Pattern
   | TODO
   | Name
+  | ShapeElement
 
 type child_spec =
   | Token (* Special case, since it's so common, synonym of `Just "Token"` *)
@@ -2332,7 +2333,7 @@ let schema : schema_node list =
       func_name = "field_specifier";
       description = "field_specifier";
       prefix = "field";
-      aggregates = [Specifier];
+      aggregates = [Specifier; ShapeElement];
       fields =
         [
           ("question", ZeroOrOne Token);
@@ -2366,11 +2367,20 @@ let schema : schema_node list =
         [
           ("keyword", Token);
           ("left_paren", Token);
-          ("fields", ZeroOrMore (Just "FieldSpecifier"));
+          ("fields", ZeroOrMore (Aggregate ShapeElement));
           ("ellipsis_type", ZeroOrOne (Aggregate Specifier));
           ("ellipsis", ZeroOrOne Token);
           ("right_paren", Token);
         ];
+    };
+    {
+      kind_name = "ShapeSplatSpecifier";
+      type_name = "shape_splat_specifier";
+      func_name = "shape_splat_specifier";
+      description = "shape_splat_specifier";
+      prefix = "shape_splat";
+      aggregates = [Specifier; ShapeElement];
+      fields = [("ellipsis", Token); ("type", Aggregate Specifier)];
     };
     {
       kind_name = "ShapeExpression";
@@ -2624,6 +2634,7 @@ let generated_aggregate_types =
     ObjectCreationWhat;
     TODO;
     Name;
+    ShapeElement;
   ]
 
 let string_of_aggregate_type = function
@@ -2644,6 +2655,7 @@ let string_of_aggregate_type = function
   | Pattern -> "Pattern"
   | TODO -> "TODO"
   | Name -> "Name"
+  | ShapeElement -> "ShapeElement"
 
 module AggregateKey = struct
   type t = aggregate_type
@@ -2704,6 +2716,9 @@ let aggregation_of_todo_aggregate =
 let aggregation_of_name_aggregate =
   List.filter (fun x -> List.mem Name x.aggregates) schema
 
+let aggregation_of_shape_element =
+  List.filter (fun x -> List.mem ShapeElement x.aggregates) schema
+
 let aggregation_of = function
   | TopLevelDeclaration -> aggregation_of_top_level_declaration
   | Expression -> aggregation_of_expression
@@ -2722,6 +2737,7 @@ let aggregation_of = function
   | Pattern -> aggregation_of_pattern
   | TODO -> aggregation_of_todo_aggregate
   | Name -> aggregation_of_name_aggregate
+  | ShapeElement -> aggregation_of_shape_element
 
 let aggregate_type_name = function
   | TopLevelDeclaration -> "top_level_declaration"
@@ -2741,6 +2757,7 @@ let aggregate_type_name = function
   | Pattern -> "pattern"
   | TODO -> "todo_aggregate"
   | Name -> "name_aggregate"
+  | ShapeElement -> "shape_element"
 
 let aggregate_type_pfx_trim = function
   | TopLevelDeclaration -> ("TLD", "\\(Declaration\\|Statement\\)$")
@@ -2760,6 +2777,7 @@ let aggregate_type_pfx_trim = function
   | Pattern -> ("Patt", "Pattern$")
   | TODO -> ("TODO", "")
   | Name -> ("Name", "")
+  | ShapeElement -> ("ShapeEl", "Specifier$")
 
 (******************************************************************************(
  * Useful for debugging / schema alterations

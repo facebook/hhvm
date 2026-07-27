@@ -188,6 +188,7 @@ impl<T: LexableToken, V> Syntax<'_, T, V> {
             SyntaxVariant::FieldSpecifier {..} => SyntaxKind::FieldSpecifier,
             SyntaxVariant::FieldInitializer {..} => SyntaxKind::FieldInitializer,
             SyntaxVariant::ShapeTypeSpecifier {..} => SyntaxKind::ShapeTypeSpecifier,
+            SyntaxVariant::ShapeSplatSpecifier {..} => SyntaxKind::ShapeSplatSpecifier,
             SyntaxVariant::ShapeExpression {..} => SyntaxKind::ShapeExpression,
             SyntaxVariant::TupleExpression {..} => SyntaxKind::TupleExpression,
             SyntaxVariant::GenericTypeSpecifier {..} => SyntaxKind::GenericTypeSpecifier,

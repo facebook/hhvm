@@ -119,7 +119,9 @@ class ThriftPicklingTest(unittest.TestCase):
             # pyre-ignore[6]:expected `Optional[Mapping[py3_types.easy_pickle, py3_types.easy_pickle]]`
             # but got `Dict[Union[py3_types.easy_pickle, python_types.easy_pickle], Union[py3_types.easy_pickle, python_types.easy_pickle]]`
             map_easy_easy={
+                # pyrefly: ignore [bad-assignment]
                 py3_types.easy_pickle(): python_types.easy_pickle(),
+                # pyrefly: ignore [bad-assignment]
                 python_types.easy_pickle(): py3_types.easy_pickle(),
             },
             # pyre-ignore[6]:expected `Optional[Sequence[Sequence[py3_types.easy_pickle]]]`
@@ -137,12 +139,15 @@ class ThriftPicklingTest(unittest.TestCase):
             # pyre-ignore[6]:expected `Optional[Sequence[Mapping[py3_types.easy_pickle, py3_types.easy_pickle]]]`
             # but got `List[Union[Dict[py3_types.easy_pickle, python_types.easy_pickle], Dict[python_types.easy_pickle, py3_types.easy_pickle]]]`
             list_map_easy_easy=[
+                # pyrefly: ignore [bad-assignment]
                 {py3_types.easy_pickle(val=1): python_types.easy_pickle(val=2)},
+                # pyrefly: ignore [bad-assignment]
                 {python_types.easy_pickle(val=2): py3_types.easy_pickle(val=1)},
             ],
             # pyre-ignore[6]:expected `Optional[Sequence[Mapping[str, py3_types.easy_pickle]]]`
             # but got `List[Union[Dict[str, py3_types.easy_pickle], Dict[str, python_types.easy_pickle]]]`
             list_map_str_easy=[
+                # pyrefly: ignore [bad-assignment]
                 {"1": python_types.easy_pickle(val=2)},
                 {"2": py3_types.easy_pickle(val=1)},
             ],
@@ -150,12 +155,14 @@ class ThriftPicklingTest(unittest.TestCase):
             # but got `List[Union[Dict[py3_types.easy_pickle, str], Dict[python_types.easy_pickle, str]]]`
             list_map_easy_str=[
                 {py3_types.easy_pickle(val=1): "1"},
+                # pyrefly: ignore [bad-assignment]
                 {python_types.easy_pickle(val=2): "2"},
             ],
             # pyre-ignore[6]:expected `Optional[Sequence[Mapping[py3_types.easy_pickle, Sequence[str]]]]`
             # but got `List[Union[Dict[py3_types.easy_pickle, List[str]], Dict[python_types.easy_pickle, List[str]]]]
             list_map_easy_list_str=[
                 {py3_types.easy_pickle(val=1): ["1", "2"]},
+                # pyrefly: ignore [bad-assignment]
                 {python_types.easy_pickle(val=2): ["2", "1"]},
             ],
         )
@@ -170,7 +177,9 @@ class ThriftPicklingTest(unittest.TestCase):
             # pyre-ignore[6]:expected `Optional[Mapping[python_types.easy_pickle, python_types.easy_pickle]]`
             # but got `Dict[Union[py3_types.easy_pickle, python_types.easy_pickle], Union[py3_types.easy_pickle, python_types.easy_pickle]]`
             map_easy_easy={
+                # pyrefly: ignore [bad-assignment]
                 py3_types.easy_pickle(): python_types.easy_pickle(),
+                # pyrefly: ignore [bad-assignment]
                 python_types.easy_pickle(): py3_types.easy_pickle(),
             },
             # pyre-ignore[6]:expected `Optional[Sequence[Sequence[python_types.easy_pickle]]]`
@@ -188,24 +197,29 @@ class ThriftPicklingTest(unittest.TestCase):
             # pyre-ignore[6]:expected `Optional[Sequence[Mapping[python_types.easy_pickle, python_types.easy_pickle]]]`
             # but got `List[Union[Dict[py3_types.easy_pickle, python_types.easy_pickle], Dict[python_types.easy_pickle, py3_types.easy_pickle]]]`
             list_map_easy_easy=[
+                # pyrefly: ignore [bad-assignment]
                 {py3_types.easy_pickle(val=1): python_types.easy_pickle(val=2)},
+                # pyrefly: ignore [bad-assignment]
                 {python_types.easy_pickle(val=2): py3_types.easy_pickle(val=1)},
             ],
             # pyre-ignore[6]: expected `Optional[Sequence[Mapping[str, python_types.easy_pickle]]]`
             # but got `List[Union[Dict[str, py3_types.easy_pickle], Dict[str, python_types.easy_pickle]]]`
             list_map_str_easy=[
                 {"1": python_types.easy_pickle(val=2)},
+                # pyrefly: ignore [bad-assignment]
                 {"2": py3_types.easy_pickle(val=1)},
             ],
             # pyre-ignore[6]:expected `Optional[Sequence[Mapping[python_types.easy_pickle, str]]]`
             # but got `List[Union[Dict[py3_types.easy_pickle, str], Dict[python_types.easy_pickle, str]]]`
             list_map_easy_str=[
+                # pyrefly: ignore [bad-assignment]
                 {py3_types.easy_pickle(val=1): "1"},
                 {python_types.easy_pickle(val=2): "2"},
             ],
             # pyre-ignore[6]:expected `Optional[Sequence[Mapping[python_types.easy_pickle, Sequence[str]]]]`
             # but got `List[Union[Dict[py3_types.easy_pickle, List[str]], Dict[python_types.easy_pickle, List[str]]]]`
             list_map_easy_list_str=[
+                # pyrefly: ignore [bad-assignment]
                 {py3_types.easy_pickle(val=1): ["1", "2"]},
                 {python_types.easy_pickle(val=2): ["2", "1"]},
             ],

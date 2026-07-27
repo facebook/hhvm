@@ -167,14 +167,23 @@ def _typename_to_primitive_map() -> dict[int, Primitive]:
     _TN = _standard_types.TypeName.Type
     # pyrefly: ignore [bad-return]
     return {
+        # pyrefly: ignore [bad-assignment]
         _TN.boolType.value: Primitive.BOOL,
+        # pyrefly: ignore [bad-assignment]
         _TN.byteType.value: Primitive.BYTE,
+        # pyrefly: ignore [bad-assignment]
         _TN.i16Type.value: Primitive.I16,
+        # pyrefly: ignore [bad-assignment]
         _TN.i32Type.value: Primitive.I32,
+        # pyrefly: ignore [bad-assignment]
         _TN.i64Type.value: Primitive.I64,
+        # pyrefly: ignore [bad-assignment]
         _TN.floatType.value: Primitive.FLOAT,
+        # pyrefly: ignore [bad-assignment]
         _TN.doubleType.value: Primitive.DOUBLE,
+        # pyrefly: ignore [bad-assignment]
         _TN.stringType.value: Primitive.STRING,
+        # pyrefly: ignore [bad-assignment]
         _TN.binaryType.value: Primitive.BINARY,
     }
 

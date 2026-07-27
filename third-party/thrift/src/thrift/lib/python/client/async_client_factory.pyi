@@ -43,8 +43,10 @@ def get_client(
     keep_alive_timeout_ms: int = ...,
 ) -> TAsyncClient: ...
 def install_proxy_factory(
+    # pyrefly: ignore [invalid-annotation]
     factory: typing.Optional[typing.Callable[[typing.Type[AsyncClient]], ...]],
 ) -> None: ...
 def get_proxy_factory() -> typing.Optional[
+    # pyrefly: ignore [invalid-annotation]
     typing.Callable[[typing.Type[AsyncClient]], ...]
 ]: ...

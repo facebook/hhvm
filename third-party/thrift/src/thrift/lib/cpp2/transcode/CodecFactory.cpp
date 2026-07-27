@@ -16,11 +16,12 @@
 
 #include <thrift/lib/cpp2/transcode/CodecFactory.h>
 
+#include <thrift/lib/cpp2/dynamic/TypeSystem.h>
 #include <thrift/lib/cpp2/transcode/WireType.h>
 
+#include <span>
 #include <stdexcept>
 #include <string_view>
-#include <thrift/lib/cpp2/dynamic/TypeSystem.h>
 
 namespace apache::thrift::transcode {
 
@@ -478,8 +479,7 @@ Command commandForType(
     const ProtocolOps& ops,
     BoolContext boolCtx);
 
-template <typename Structured>
-StructOp makeStructOp(const Structured& node, const ProtocolOps& ops) {
+StructOp makeStructOpBase(const ProtocolOps& ops) {
   StructOp op;
   op.fieldIdent = ops.fieldIdent;
   op.writeFieldIdent = ops.fieldIdent;
@@ -490,60 +490,84 @@ StructOp makeStructOp(const Structured& node, const ProtocolOps& ops) {
   op.readEnd = ops.readStructEnd;
   op.writeEnd = ops.writeStructEnd;
   op.skipField = ops.skipField;
+  return op;
+}
+
+void addStructField(
+    StructOp& op,
+    const ProtocolOps& ops,
+    const type_system::FieldDefinition& field) {
+  using Kind = type_system::TypeRef::Kind;
+  const auto& type = field.type();
+  const auto& fieldType = resolveOpaqueAlias(type);
+  const bool isUnion = op.schemaType != nullptr && op.schemaType->isUnion();
+  FieldEntry entry;
+  entry.fieldId = folly::to_underlying(field.identity().id());
+  entry.fieldName = std::string(field.identity().name());
+  entry.readTypeInfo = ops.typeInfoFn(type);
+  entry.writeTypeInfo = ops.typeInfoFn(type);
+  entry.optional =
+      field.presence() == type_system::PresenceQualifier::OPTIONAL_;
+  entry.required = !isUnion &&
+      field.presence() == type_system::PresenceQualifier::UNQUALIFIED;
+  if (!isThriftWriteProtocol(ops.protocol)) {
+    if (field.customDefault() != nullptr) {
+      throw std::invalid_argument(
+          "custom defaults are not supported for non-Thrift protocol "
+          "transcoding");
+    }
+    if (field.presence() == type_system::PresenceQualifier::TERSE) {
+      throw std::invalid_argument(
+          "terse fields are not supported for non-Thrift protocol "
+          "transcoding");
+    }
+  }
+
+  // Protobuf: maps and list/set of non-packable elements are encoded as
+  // repeated field occurrences under the same field ID.
+  if (ops.containerFraming == ContainerFraming::None) {
+    auto kind = fieldType.kind();
+    if (kind == Kind::LIST || kind == Kind::SET) {
+      auto elemType = (kind == Kind::LIST) ? fieldType.asList().elementType()
+                                           : fieldType.asSet().elementType();
+      if (!isProtoPackable(elemType)) {
+        entry.isRepeated = true;
+        // For unpacked repeated: the command is the ELEMENT command,
+        // not a SeqOp. The struct loop handles iteration via the
+        // repeated-field state machine.
+        entry.command = std::make_unique<Command>(
+            commandForType(elemType, ops, BoolContext::Container));
+        op.fields.push_back(std::move(entry));
+        return;
+      }
+    } else if (kind == Kind::MAP) {
+      entry.isRepeated = true;
+    }
+  }
+
+  entry.command = std::make_unique<Command>(
+      commandForType(type, ops, BoolContext::StructField));
+  op.fields.push_back(std::move(entry));
+}
+
+template <typename Structured>
+StructOp makeStructOp(const Structured& node, const ProtocolOps& ops) {
+  StructOp op = makeStructOpBase(ops);
   auto schemaType = node.asRef();
   op.schemaType = std::make_shared<type_system::TypeRef>(schemaType);
-  const bool isUnion = schemaType.isUnion();
 
   for (const auto& field : node.fields()) {
-    using Kind = type_system::TypeRef::Kind;
-    const auto& fieldType = resolveOpaqueAlias(field.type());
-    FieldEntry entry;
-    entry.fieldId = folly::to_underlying(field.identity().id());
-    entry.fieldName = std::string(field.identity().name());
-    entry.readTypeInfo = ops.typeInfoFn(field.type());
-    entry.writeTypeInfo = ops.typeInfoFn(field.type());
-    entry.optional =
-        field.presence() == type_system::PresenceQualifier::OPTIONAL_;
-    entry.required = !isUnion &&
-        field.presence() == type_system::PresenceQualifier::UNQUALIFIED;
-    if (!isThriftWriteProtocol(ops.protocol)) {
-      if (field.customDefault() != nullptr) {
-        throw std::invalid_argument(
-            "custom defaults are not supported for non-Thrift protocol "
-            "transcoding");
-      }
-      if (field.presence() == type_system::PresenceQualifier::TERSE) {
-        throw std::invalid_argument(
-            "terse fields are not supported for non-Thrift protocol "
-            "transcoding");
-      }
-    }
+    addStructField(op, ops, field);
+  }
+  return op;
+}
 
-    // Protobuf: maps and list/set of non-packable elements are encoded as
-    // repeated field occurrences under the same field ID.
-    if (ops.containerFraming == ContainerFraming::None) {
-      auto kind = fieldType.kind();
-      if (kind == Kind::LIST || kind == Kind::SET) {
-        auto elemType = (kind == Kind::LIST) ? fieldType.asList().elementType()
-                                             : fieldType.asSet().elementType();
-        if (!isProtoPackable(elemType)) {
-          entry.isRepeated = true;
-          // For unpacked repeated: the command is the ELEMENT command,
-          // not a SeqOp. The struct loop handles iteration via the
-          // repeated-field state machine.
-          entry.command = std::make_unique<Command>(
-              commandForType(elemType, ops, BoolContext::Container));
-          op.fields.push_back(std::move(entry));
-          continue; // skip the default commandForType below
-        }
-      } else if (kind == Kind::MAP) {
-        entry.isRepeated = true;
-      }
-    }
-
-    entry.command = std::make_unique<Command>(
-        commandForType(field.type(), ops, BoolContext::StructField));
-    op.fields.push_back(std::move(entry));
+StructOp makeStructOp(
+    std::span<const type_system::FieldDefinition> fields,
+    const ProtocolOps& ops) {
+  StructOp op = makeStructOpBase(ops);
+  for (const auto& field : fields) {
+    addStructField(op, ops, field);
   }
   return op;
 }
@@ -747,6 +771,16 @@ Codec makeThriftCompactCodec(const type_system::UnionNode& node) {
   return codec;
 }
 
+Codec makeThriftCompactCodec(
+    std::string_view name,
+    std::span<const type_system::FieldDefinition> fields) {
+  Codec codec;
+  codec.name = "compact_" + std::string(name);
+  codec.protocol = WireProtocol::ThriftCompact;
+  codec.root = Command{makeStructOp(fields, kCompactOps)};
+  return codec;
+}
+
 Codec makeThriftBinaryCodec(const type_system::StructNode& node) {
   Codec codec;
   codec.name = "binary_" + std::string(node.debugName());
@@ -760,6 +794,16 @@ Codec makeThriftBinaryCodec(const type_system::UnionNode& node) {
   codec.name = "binary_" + std::string(node.debugName());
   codec.protocol = WireProtocol::ThriftBinary;
   codec.root = Command{makeStructOp(node, kBinaryOps)};
+  return codec;
+}
+
+Codec makeThriftBinaryCodec(
+    std::string_view name,
+    std::span<const type_system::FieldDefinition> fields) {
+  Codec codec;
+  codec.name = "binary_" + std::string(name);
+  codec.protocol = WireProtocol::ThriftBinary;
+  codec.root = Command{makeStructOp(fields, kBinaryOps)};
   return codec;
 }
 
@@ -778,6 +822,16 @@ Codec makeProtobufBinaryCodec(const type_system::UnionNode& node) {
   return codec;
 }
 
+Codec makeProtobufBinaryCodec(
+    std::string_view name,
+    std::span<const type_system::FieldDefinition> fields) {
+  Codec codec;
+  codec.name = "protobuf_" + std::string(name);
+  codec.protocol = WireProtocol::ProtobufBinary;
+  codec.root = Command{makeStructOp(fields, kProtobufOps)};
+  return codec;
+}
+
 Codec makeJsonCodec(const type_system::StructNode& node) {
   Codec codec;
   codec.name = "json_" + std::string(node.debugName());
@@ -791,6 +845,16 @@ Codec makeJsonCodec(const type_system::UnionNode& node) {
   codec.name = "json_" + std::string(node.debugName());
   codec.protocol = WireProtocol::Json;
   codec.root = Command{makeStructOp(node, kJsonOps)};
+  return codec;
+}
+
+Codec makeJsonCodec(
+    std::string_view name,
+    std::span<const type_system::FieldDefinition> fields) {
+  Codec codec;
+  codec.name = "json_" + std::string(name);
+  codec.protocol = WireProtocol::Json;
+  codec.root = Command{makeStructOp(fields, kJsonOps)};
   return codec;
 }
 

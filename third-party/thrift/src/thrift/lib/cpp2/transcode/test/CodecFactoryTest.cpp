@@ -19,13 +19,16 @@
 
 #include <gtest/gtest.h>
 
+#include <thrift/lib/cpp2/dynamic/TypeSystem.h>
+#include <thrift/lib/cpp2/dynamic/TypeSystemBuilder.h>
+
 #include <memory>
+#include <optional>
 #include <stdexcept>
 #include <string>
 #include <string_view>
 #include <utility>
-#include <thrift/lib/cpp2/dynamic/TypeSystem.h>
-#include <thrift/lib/cpp2/dynamic/TypeSystemBuilder.h>
+#include <vector>
 
 namespace apache::thrift::transcode {
 namespace {
@@ -91,6 +94,35 @@ TEST_F(CodecFactoryTest, CompactCodecCarriesBothSchemaFields) {
   EXPECT_EQ(root.fields[1].fieldId, 2);
   EXPECT_EQ(root.fields[1].fieldName, "name");
   EXPECT_FALSE(root.fields[1].required);
+}
+
+TEST(CodecFactoryStandaloneTest, AdHocStructFieldsProduceStructCodec) {
+  std::vector<type_system::FieldDefinition> fields;
+  fields.emplace_back(
+      def::Identity(1, "id"),
+      type_system::PresenceQualifier::UNQUALIFIED,
+      type_system::TypeSystem::I32(),
+      std::nullopt,
+      type_system::AnnotationsMap{});
+  fields.emplace_back(
+      def::Identity(2, "name"),
+      type_system::PresenceQualifier::OPTIONAL_,
+      type_system::TypeSystem::String(),
+      std::nullopt,
+      type_system::AnnotationsMap{});
+
+  auto codec = makeJsonCodec("RequestEnvelope", fields);
+  const auto& root = std::get<StructOp>(codec.root);
+
+  EXPECT_EQ(codec.name, "json_RequestEnvelope");
+  EXPECT_EQ(root.schemaType, nullptr);
+  ASSERT_EQ(root.fields.size(), 2u);
+  EXPECT_EQ(root.fields[0].fieldId, 1);
+  EXPECT_EQ(root.fields[0].fieldName, "id");
+  EXPECT_TRUE(root.fields[0].required);
+  EXPECT_EQ(root.fields[1].fieldId, 2);
+  EXPECT_EQ(root.fields[1].fieldName, "name");
+  EXPECT_TRUE(root.fields[1].optional);
 }
 
 TEST(CodecFactoryStandaloneTest, ProtobufSignedIntegersUseZigzagVarints) {

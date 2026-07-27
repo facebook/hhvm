@@ -30,7 +30,7 @@ private:
   typedef std::map<int64_t, Unit*> CacheType;
 
   CacheType unitCache;
-  bool hasRepo;
+  bool m_hasRepo;
 
   RepoWrapper(const RepoWrapper& other);
   RepoWrapper& operator=(RepoWrapper other);
@@ -42,6 +42,7 @@ public:
               const bool shouldPrint = true);
   ~RepoWrapper();
 
+  bool hasRepo() const { return m_hasRepo; }
   void addUnit(Unit* u);
   Unit* getUnit(int64_t sn);
   Func* getFunc(int64_t sn, Id funcSn);

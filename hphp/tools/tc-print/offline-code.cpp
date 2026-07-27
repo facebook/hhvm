@@ -363,7 +363,7 @@ void OfflineCode::printRangeInfo(std::ostream& os,
     if (sk.valid()) {
       os << std::setw(4) << sk.printableOffset() << ": "
          << sk.showInst() << std::endl;
-    } else {
+    } else if (g_repo->hasRepo()) {
       auto const currSha1 = rangeInfo.sha1
         ? rangeInfo.sha1->toString() : "\"missing SHA1\"";
       os << fmt::format(

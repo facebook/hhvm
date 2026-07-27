@@ -51,8 +51,8 @@ RepoWrapper::RepoWrapper(const char* repoSchema,
   IniSetting::Map ini = IniSetting::Map::object;
   RuntimeOption::Load(ini, config);
 
-  hasRepo = !repoFileName.empty();
-  if (hasRepo) RepoFile::init(repoFileName);
+  m_hasRepo = !repoFileName.empty();
+  if (m_hasRepo) RepoFile::init(repoFileName);
 
   Cfg::Server::AlwaysUseRelativePath = false;
   Cfg::Server::SafeFileAccess = false;
@@ -62,7 +62,7 @@ RepoWrapper::RepoWrapper(const char* repoSchema,
   Cfg::Eval::LowStaticArrays = false; // save some low mem
   Cfg::Eval::VerifySystemLibHasNativeImpl = false;
 
-  if (hasRepo) {
+  if (m_hasRepo) {
     RepoFile::loadGlobalTables();
     RepoFile::globalData().load();
   }
@@ -80,7 +80,7 @@ void RepoWrapper::addUnit(Unit* unit) {
 }
 
 Unit* RepoWrapper::getUnit(int64_t sn) {
-  if (!hasRepo) return nullptr;
+  if (!hasRepo()) return nullptr;
 
   CacheType::const_iterator it = unitCache.find(sn);
   if (it != unitCache.end()) return it->second;
@@ -99,7 +99,7 @@ Unit* RepoWrapper::getUnit(int64_t sn) {
 }
 
 Func* RepoWrapper::getFunc(int64_t sn, Id funcSn) {
-  if (!hasRepo) return nullptr;
+  if (!hasRepo()) return nullptr;
 
   auto const unit = getUnit(sn);
   if (!unit) {

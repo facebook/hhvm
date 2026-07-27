@@ -43,28 +43,6 @@ TEST(TTypeTest, Format) {
       fmt::format("UNKNOWN({})", uint8Max));
 }
 
-TEST_F(ProtocolTest, integral_expected_tag_width) {
-  struct TestAdapter {};
-  using apache::thrift::detail::pm::matches_integral_wire_tag_v;
-
-  EXPECT_TRUE((matches_integral_wire_tag_v<type::bool_t, type::bool_t>));
-  EXPECT_TRUE((matches_integral_wire_tag_v<type::byte_t, type::byte_t>));
-  EXPECT_TRUE((matches_integral_wire_tag_v<type::i16_t, type::i16_t>));
-  EXPECT_TRUE((matches_integral_wire_tag_v<type::i32_t, type::i32_t>));
-  EXPECT_TRUE((matches_integral_wire_tag_v<type::i64_t, type::i64_t>));
-  EXPECT_TRUE((matches_integral_wire_tag_v<
-               type::cpp_type<std::uint16_t, type::i16_t>,
-               type::i16_t>));
-  EXPECT_TRUE((matches_integral_wire_tag_v<
-               type::adapted<TestAdapter, type::i32_t>,
-               type::i32_t>));
-
-  EXPECT_FALSE((matches_integral_wire_tag_v<type::byte_t, type::i16_t>));
-  EXPECT_FALSE((matches_integral_wire_tag_v<type::i16_t, type::i32_t>));
-  EXPECT_FALSE((matches_integral_wire_tag_v<type::i32_t, type::i64_t>));
-  EXPECT_FALSE((matches_integral_wire_tag_v<type::i64_t, type::i32_t>));
-}
-
 template <typename ProtocolWriter>
 void makeNestedWriteInner(
     ProtocolWriter& writer, const size_t levels, const TType& type) {

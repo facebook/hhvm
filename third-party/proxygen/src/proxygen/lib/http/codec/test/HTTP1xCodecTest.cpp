@@ -781,6 +781,95 @@ TEST(HTTP1xCodecTest, WebsocketUpgrade) {
   EXPECT_NE(ws_accept_header, empty_string);
 }
 
+// A rejected (non-101) response to an HTTP/1.1 Upgrade request closes the
+// connection so trailing upgraded-protocol bytes are never reparsed as a
+// pipelined request.
+TEST(HTTP1xCodecTest, Http11UpgradeRequestRejectHasConnectionClose) {
+  HTTP1xCodec codec(TransportDirection::DOWNSTREAM);
+  HTTP1xCodecCallback callbacks;
+  codec.setCallback(&callbacks);
+  auto txnID = codec.createStream();
+
+  auto reqBuf =
+      folly::IOBuf::copyBuffer(string("GET /foo HTTP/1.1\r\n"
+                                      "Host: localhost\r\n"
+                                      "Upgrade: blarf\r\n"
+                                      "Connection: upgrade\r\n"
+                                      "\r\n"));
+  codec.onIngress(*reqBuf);
+  EXPECT_EQ(callbacks.headersComplete, 1);
+
+  HTTPMessage resp;
+  resp.setHTTPVersion(1, 1);
+  resp.setStatusCode(200);
+  resp.setStatusMessage("OK");
+  resp.getHeaders().set(HTTP_HEADER_CONTENT_LENGTH, "0");
+  folly::IOBufQueue respBuf(folly::IOBufQueue::cacheChainLength());
+  codec.generateHeader(respBuf, txnID, resp, true);
+
+  auto respStr = respBuf.move()->moveToFbString();
+  EXPECT_NE(respStr.find("Connection: close"), string::npos);
+  EXPECT_FALSE(codec.isReusable());
+}
+
+// A genuine websocket upgrade accept is a real protocol switch: it must keep
+// its Connection: upgrade token and must NOT be forced to close.
+TEST(HTTP1xCodecTest, Http11WebsocketUpgradeAcceptKeepsConnectionUpgrade) {
+  HTTP1xCodec upstreamCodec(TransportDirection::UPSTREAM);
+  HTTP1xCodec downstreamCodec(TransportDirection::DOWNSTREAM);
+  HTTP1xCodecCallback downstreamCallbacks;
+  downstreamCodec.setCallback(&downstreamCallbacks);
+
+  HTTPMessage req;
+  req.setHTTPVersion(1, 1);
+  req.setURL("/websocket");
+  req.setEgressWebsocketUpgrade();
+  folly::IOBufQueue buf;
+  auto streamID = upstreamCodec.createStream();
+  upstreamCodec.generateHeader(buf, streamID, req);
+  downstreamCodec.onIngress(*buf.front());
+  ASSERT_TRUE(downstreamCallbacks.msg_->isIngressWebsocketUpgrade());
+
+  HTTPMessage resp;
+  resp.setHTTPVersion(1, 1);
+  resp.setStatusCode(101);
+  resp.setEgressWebsocketUpgrade();
+  buf.reset();
+  downstreamCodec.generateHeader(buf, streamID, resp);
+
+  auto respStr = buf.move()->moveToFbString();
+  EXPECT_NE(respStr.find("Connection: Upgrade"), string::npos);
+  EXPECT_EQ(respStr.find("close"), string::npos);
+}
+
+// A normal (non-upgrade) request is unaffected: its response keeps the default
+// keep-alive and the connection stays reusable.
+TEST(HTTP1xCodecTest, Http11NonUpgradeRequestNoForcedClose) {
+  HTTP1xCodec codec(TransportDirection::DOWNSTREAM);
+  HTTP1xCodecCallback callbacks;
+  codec.setCallback(&callbacks);
+  auto txnID = codec.createStream();
+
+  auto reqBuf =
+      folly::IOBuf::copyBuffer(string("GET /foo HTTP/1.1\r\n"
+                                      "Host: localhost\r\n"
+                                      "\r\n"));
+  codec.onIngress(*reqBuf);
+  EXPECT_EQ(callbacks.headersComplete, 1);
+
+  HTTPMessage resp;
+  resp.setHTTPVersion(1, 1);
+  resp.setStatusCode(200);
+  resp.setStatusMessage("OK");
+  resp.getHeaders().set(HTTP_HEADER_CONTENT_LENGTH, "0");
+  folly::IOBufQueue respBuf(folly::IOBufQueue::cacheChainLength());
+  codec.generateHeader(respBuf, txnID, resp, true);
+
+  auto respStr = respBuf.move()->moveToFbString();
+  EXPECT_NE(respStr.find("Connection: keep-alive"), string::npos);
+  EXPECT_TRUE(codec.isReusable());
+}
+
 TEST(HTTP1xCodecTest, WebsocketUpgradeKeyError) {
   HTTP1xCodec codec(TransportDirection::UPSTREAM);
   HTTP1xCodecCallback callbacks;

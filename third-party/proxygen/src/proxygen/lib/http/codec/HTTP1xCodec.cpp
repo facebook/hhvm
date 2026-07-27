@@ -1086,6 +1086,9 @@ int HTTP1xCodec::onHeadersComplete(size_t len) {
   msg_->setIsUpgraded(ingressUpgrade_);
 
   const std::string& upgrade = hdrs.getSingleOrEmpty(HTTP_HEADER_UPGRADE);
+  // disable keepalive for upgraded connections
+  keepalive_ &= upgrade.empty();
+  keepalive_ &= !connectRequest_;
   if (kUpgradeToken.equals(upgrade, folly::AsciiCaseInsensitive())) {
     msg_->setIngressWebsocketUpgrade();
     if (isUpstream(transportDirection_)) {

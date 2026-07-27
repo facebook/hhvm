@@ -332,7 +332,7 @@ std::size_t writeMapValueEnd(Protocol& protocol) {
  * ExpectedTag is used to diagnose cases where the duck-typed design of
  * protocol_methods causes the behavior to diverge from the Thrift spec.
  */
-template <typename TypeClass, typename Type, typename ExpectedTag = void>
+template <typename TypeClass, typename Type, typename ExpectedTag>
 struct protocol_methods;
 
 template <typename ExpectedTag>

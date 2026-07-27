@@ -37,7 +37,7 @@ void EchoRequest::readNoXfer(Protocol_* iprot) {
   }
 _readField_text:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, this->__fbthrift_field_text, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::readWithContext(*iprot, this->__fbthrift_field_text, _readState);
   }
  this->__isset.set(0, true);
 
@@ -91,7 +91,7 @@ uint32_t EchoRequest::serializedSize(Protocol_ const* prot_) const {
   xfer += prot_->serializedStructSize("EchoRequest");
   {
     xfer += prot_->serializedFieldSize("text", apache::thrift::protocol::TType::T_STRING, 1);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::serializedSize<false>(*prot_, this->__fbthrift_field_text);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::serializedSize<false>(*prot_, this->__fbthrift_field_text);
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -103,7 +103,7 @@ uint32_t EchoRequest::serializedSizeZC(Protocol_ const* prot_) const {
   xfer += prot_->serializedStructSize("EchoRequest");
   {
     xfer += prot_->serializedFieldSize("text", apache::thrift::protocol::TType::T_STRING, 1);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::serializedSize<false>(*prot_, this->__fbthrift_field_text);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::serializedSize<false>(*prot_, this->__fbthrift_field_text);
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -126,7 +126,7 @@ uint32_t EchoRequest::write(Protocol_* prot_) const {
     constexpr int16_t kPrevFieldId = 0;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::TType::T_STRING, 1, kPrevFieldId>(*prot_, "text", previousFieldHasValue);
     previousFieldHasValue = true;
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::write(*prot_, this->__fbthrift_field_text);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::write(*prot_, this->__fbthrift_field_text);
     xfer += prot_->writeFieldEnd();
   }
   xfer += prot_->writeFieldStop();
@@ -162,7 +162,7 @@ void EchoResponse::readNoXfer(Protocol_* iprot) {
   }
 _readField_text:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, this->__fbthrift_field_text, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::readWithContext(*iprot, this->__fbthrift_field_text, _readState);
   }
  this->__isset.set(0, true);
 
@@ -216,7 +216,7 @@ uint32_t EchoResponse::serializedSize(Protocol_ const* prot_) const {
   xfer += prot_->serializedStructSize("EchoResponse");
   {
     xfer += prot_->serializedFieldSize("text", apache::thrift::protocol::TType::T_STRING, 1);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::serializedSize<false>(*prot_, this->__fbthrift_field_text);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::serializedSize<false>(*prot_, this->__fbthrift_field_text);
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -228,7 +228,7 @@ uint32_t EchoResponse::serializedSizeZC(Protocol_ const* prot_) const {
   xfer += prot_->serializedStructSize("EchoResponse");
   {
     xfer += prot_->serializedFieldSize("text", apache::thrift::protocol::TType::T_STRING, 1);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::serializedSize<false>(*prot_, this->__fbthrift_field_text);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::serializedSize<false>(*prot_, this->__fbthrift_field_text);
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -251,7 +251,7 @@ uint32_t EchoResponse::write(Protocol_* prot_) const {
     constexpr int16_t kPrevFieldId = 0;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::TType::T_STRING, 1, kPrevFieldId>(*prot_, "text", previousFieldHasValue);
     previousFieldHasValue = true;
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::write(*prot_, this->__fbthrift_field_text);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string, ::apache::thrift::type::string_t>::write(*prot_, this->__fbthrift_field_text);
     xfer += prot_->writeFieldEnd();
   }
   xfer += prot_->writeFieldStop();

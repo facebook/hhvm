@@ -124,7 +124,7 @@ void TestStruct::readNoXfer(Protocol_* iprot) {
   }
 _readField_unqualified_int_field:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t>::readWithContext(*iprot, this->__fbthrift_field_unqualified_int_field, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t, ::apache::thrift::type::i32_t>::readWithContext(*iprot, this->__fbthrift_field_unqualified_int_field, _readState);
   }
  this->__isset.set(0, true);
 
@@ -137,7 +137,7 @@ _readField_unqualified_int_field:
   }
 _readField_unqualified_bool_field:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, bool>::readWithContext(*iprot, this->__fbthrift_field_unqualified_bool_field, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, bool, ::apache::thrift::type::bool_t>::readWithContext(*iprot, this->__fbthrift_field_unqualified_bool_field, _readState);
   }
  this->__isset.set(1, true);
 
@@ -152,7 +152,7 @@ _readField_unqualified_list_field:
   {
     _readState.beforeSubobject(iprot);
     this->__fbthrift_field_unqualified_list_field = ::std::vector<::std::int32_t>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::integral>, ::std::vector<::std::int32_t>>::readWithContext(*iprot, this->__fbthrift_field_unqualified_list_field, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::integral>, ::std::vector<::std::int32_t>, ::apache::thrift::type::list<::apache::thrift::type::i32_t>>::readWithContext(*iprot, this->__fbthrift_field_unqualified_list_field, _readState);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(2, true);
@@ -167,7 +167,7 @@ _readField_unqualified_list_field:
 _readField_unqualified_struct_field:
   {
     _readState.beforeSubobject(iprot);
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::compiler::test::fixtures::default_values_rectification_after::EmptyStruct>::readWithContext(*iprot, this->__fbthrift_field_unqualified_struct_field, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::compiler::test::fixtures::default_values_rectification_after::EmptyStruct, ::apache::thrift::type::struct_t<::facebook::thrift::compiler::test::fixtures::default_values_rectification_after::EmptyStruct>>::readWithContext(*iprot, this->__fbthrift_field_unqualified_struct_field, _readState);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(3, true);
@@ -181,7 +181,7 @@ _readField_unqualified_struct_field:
   }
 _readField_optional_int_field:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t>::readWithContext(*iprot, this->__fbthrift_field_optional_int_field, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t, ::apache::thrift::type::i32_t>::readWithContext(*iprot, this->__fbthrift_field_optional_int_field, _readState);
   }
  this->__isset.set(4, true);
 
@@ -194,7 +194,7 @@ _readField_optional_int_field:
   }
 _readField_optional_bool_field:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, bool>::readWithContext(*iprot, this->__fbthrift_field_optional_bool_field, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, bool, ::apache::thrift::type::bool_t>::readWithContext(*iprot, this->__fbthrift_field_optional_bool_field, _readState);
   }
  this->__isset.set(5, true);
 
@@ -209,7 +209,7 @@ _readField_optional_list_field:
   {
     _readState.beforeSubobject(iprot);
     this->__fbthrift_field_optional_list_field = ::std::vector<::std::int32_t>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::integral>, ::std::vector<::std::int32_t>>::readWithContext(*iprot, this->__fbthrift_field_optional_list_field, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::integral>, ::std::vector<::std::int32_t>, ::apache::thrift::type::list<::apache::thrift::type::i32_t>>::readWithContext(*iprot, this->__fbthrift_field_optional_list_field, _readState);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(6, true);
@@ -224,7 +224,7 @@ _readField_optional_list_field:
 _readField_optional_struct_field:
   {
     _readState.beforeSubobject(iprot);
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::compiler::test::fixtures::default_values_rectification_after::EmptyStruct>::readWithContext(*iprot, this->__fbthrift_field_optional_struct_field, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::compiler::test::fixtures::default_values_rectification_after::EmptyStruct, ::apache::thrift::type::struct_t<::facebook::thrift::compiler::test::fixtures::default_values_rectification_after::EmptyStruct>>::readWithContext(*iprot, this->__fbthrift_field_optional_struct_field, _readState);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(7, true);
@@ -335,35 +335,35 @@ uint32_t TestStruct::serializedSize(Protocol_ const* prot_) const {
   xfer += prot_->serializedStructSize("TestStruct");
   {
     xfer += prot_->serializedFieldSize("unqualified_int_field", apache::thrift::protocol::TType::T_I32, 1);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t>::serializedSize<false>(*prot_, this->__fbthrift_field_unqualified_int_field);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t, ::apache::thrift::type::i32_t>::serializedSize<false>(*prot_, this->__fbthrift_field_unqualified_int_field);
   }
   {
     xfer += prot_->serializedFieldSize("unqualified_bool_field", apache::thrift::protocol::TType::T_BOOL, 2);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, bool>::serializedSize<false>(*prot_, this->__fbthrift_field_unqualified_bool_field);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, bool, ::apache::thrift::type::bool_t>::serializedSize<false>(*prot_, this->__fbthrift_field_unqualified_bool_field);
   }
   {
     xfer += prot_->serializedFieldSize("unqualified_list_field", apache::thrift::protocol::TType::T_LIST, 3);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::integral>, ::std::vector<::std::int32_t>>::serializedSize<false>(*prot_, this->__fbthrift_field_unqualified_list_field);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::integral>, ::std::vector<::std::int32_t>, ::apache::thrift::type::list<::apache::thrift::type::i32_t>>::serializedSize<false>(*prot_, this->__fbthrift_field_unqualified_list_field);
   }
   {
     xfer += prot_->serializedFieldSize("unqualified_struct_field", apache::thrift::protocol::TType::T_STRUCT, 4);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::compiler::test::fixtures::default_values_rectification_after::EmptyStruct>::serializedSize<false>(*prot_, this->__fbthrift_field_unqualified_struct_field);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::compiler::test::fixtures::default_values_rectification_after::EmptyStruct, ::apache::thrift::type::struct_t<::facebook::thrift::compiler::test::fixtures::default_values_rectification_after::EmptyStruct>>::serializedSize<false>(*prot_, this->__fbthrift_field_unqualified_struct_field);
   }
   if (this->__isset.get(4)) {
     xfer += prot_->serializedFieldSize("optional_int_field", apache::thrift::protocol::TType::T_I32, 5);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t>::serializedSize<false>(*prot_, this->__fbthrift_field_optional_int_field);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t, ::apache::thrift::type::i32_t>::serializedSize<false>(*prot_, this->__fbthrift_field_optional_int_field);
   }
   if (this->__isset.get(5)) {
     xfer += prot_->serializedFieldSize("optional_bool_field", apache::thrift::protocol::TType::T_BOOL, 6);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, bool>::serializedSize<false>(*prot_, this->__fbthrift_field_optional_bool_field);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, bool, ::apache::thrift::type::bool_t>::serializedSize<false>(*prot_, this->__fbthrift_field_optional_bool_field);
   }
   if (this->__isset.get(6)) {
     xfer += prot_->serializedFieldSize("optional_list_field", apache::thrift::protocol::TType::T_LIST, 7);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::integral>, ::std::vector<::std::int32_t>>::serializedSize<false>(*prot_, this->__fbthrift_field_optional_list_field);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::integral>, ::std::vector<::std::int32_t>, ::apache::thrift::type::list<::apache::thrift::type::i32_t>>::serializedSize<false>(*prot_, this->__fbthrift_field_optional_list_field);
   }
   if (this->__isset.get(7)) {
     xfer += prot_->serializedFieldSize("optional_struct_field", apache::thrift::protocol::TType::T_STRUCT, 8);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::compiler::test::fixtures::default_values_rectification_after::EmptyStruct>::serializedSize<false>(*prot_, this->__fbthrift_field_optional_struct_field);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::compiler::test::fixtures::default_values_rectification_after::EmptyStruct, ::apache::thrift::type::struct_t<::facebook::thrift::compiler::test::fixtures::default_values_rectification_after::EmptyStruct>>::serializedSize<false>(*prot_, this->__fbthrift_field_optional_struct_field);
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -375,35 +375,35 @@ uint32_t TestStruct::serializedSizeZC(Protocol_ const* prot_) const {
   xfer += prot_->serializedStructSize("TestStruct");
   {
     xfer += prot_->serializedFieldSize("unqualified_int_field", apache::thrift::protocol::TType::T_I32, 1);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t>::serializedSize<false>(*prot_, this->__fbthrift_field_unqualified_int_field);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t, ::apache::thrift::type::i32_t>::serializedSize<false>(*prot_, this->__fbthrift_field_unqualified_int_field);
   }
   {
     xfer += prot_->serializedFieldSize("unqualified_bool_field", apache::thrift::protocol::TType::T_BOOL, 2);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, bool>::serializedSize<false>(*prot_, this->__fbthrift_field_unqualified_bool_field);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, bool, ::apache::thrift::type::bool_t>::serializedSize<false>(*prot_, this->__fbthrift_field_unqualified_bool_field);
   }
   {
     xfer += prot_->serializedFieldSize("unqualified_list_field", apache::thrift::protocol::TType::T_LIST, 3);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::integral>, ::std::vector<::std::int32_t>>::serializedSize<false>(*prot_, this->__fbthrift_field_unqualified_list_field);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::integral>, ::std::vector<::std::int32_t>, ::apache::thrift::type::list<::apache::thrift::type::i32_t>>::serializedSize<false>(*prot_, this->__fbthrift_field_unqualified_list_field);
   }
   {
     xfer += prot_->serializedFieldSize("unqualified_struct_field", apache::thrift::protocol::TType::T_STRUCT, 4);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::compiler::test::fixtures::default_values_rectification_after::EmptyStruct>::serializedSize<true>(*prot_, this->__fbthrift_field_unqualified_struct_field);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::compiler::test::fixtures::default_values_rectification_after::EmptyStruct, ::apache::thrift::type::struct_t<::facebook::thrift::compiler::test::fixtures::default_values_rectification_after::EmptyStruct>>::serializedSize<true>(*prot_, this->__fbthrift_field_unqualified_struct_field);
   }
   if (this->__isset.get(4)) {
     xfer += prot_->serializedFieldSize("optional_int_field", apache::thrift::protocol::TType::T_I32, 5);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t>::serializedSize<false>(*prot_, this->__fbthrift_field_optional_int_field);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t, ::apache::thrift::type::i32_t>::serializedSize<false>(*prot_, this->__fbthrift_field_optional_int_field);
   }
   if (this->__isset.get(5)) {
     xfer += prot_->serializedFieldSize("optional_bool_field", apache::thrift::protocol::TType::T_BOOL, 6);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, bool>::serializedSize<false>(*prot_, this->__fbthrift_field_optional_bool_field);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, bool, ::apache::thrift::type::bool_t>::serializedSize<false>(*prot_, this->__fbthrift_field_optional_bool_field);
   }
   if (this->__isset.get(6)) {
     xfer += prot_->serializedFieldSize("optional_list_field", apache::thrift::protocol::TType::T_LIST, 7);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::integral>, ::std::vector<::std::int32_t>>::serializedSize<false>(*prot_, this->__fbthrift_field_optional_list_field);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::integral>, ::std::vector<::std::int32_t>, ::apache::thrift::type::list<::apache::thrift::type::i32_t>>::serializedSize<false>(*prot_, this->__fbthrift_field_optional_list_field);
   }
   if (this->__isset.get(7)) {
     xfer += prot_->serializedFieldSize("optional_struct_field", apache::thrift::protocol::TType::T_STRUCT, 8);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::compiler::test::fixtures::default_values_rectification_after::EmptyStruct>::serializedSize<true>(*prot_, this->__fbthrift_field_optional_struct_field);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::compiler::test::fixtures::default_values_rectification_after::EmptyStruct, ::apache::thrift::type::struct_t<::facebook::thrift::compiler::test::fixtures::default_values_rectification_after::EmptyStruct>>::serializedSize<true>(*prot_, this->__fbthrift_field_optional_struct_field);
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -426,35 +426,35 @@ uint32_t TestStruct::write(Protocol_* prot_) const {
     constexpr int16_t kPrevFieldId = 0;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::TType::T_I32, 1, kPrevFieldId>(*prot_, "unqualified_int_field", previousFieldHasValue);
     previousFieldHasValue = true;
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t>::write(*prot_, this->__fbthrift_field_unqualified_int_field);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t, ::apache::thrift::type::i32_t>::write(*prot_, this->__fbthrift_field_unqualified_int_field);
     xfer += prot_->writeFieldEnd();
   }
   {
     constexpr int16_t kPrevFieldId = 1;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::TType::T_BOOL, 2, kPrevFieldId>(*prot_, "unqualified_bool_field", previousFieldHasValue);
     previousFieldHasValue = true;
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, bool>::write(*prot_, this->__fbthrift_field_unqualified_bool_field);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, bool, ::apache::thrift::type::bool_t>::write(*prot_, this->__fbthrift_field_unqualified_bool_field);
     xfer += prot_->writeFieldEnd();
   }
   {
     constexpr int16_t kPrevFieldId = 2;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::TType::T_LIST, 3, kPrevFieldId>(*prot_, "unqualified_list_field", previousFieldHasValue);
     previousFieldHasValue = true;
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::integral>, ::std::vector<::std::int32_t>>::write(*prot_, this->__fbthrift_field_unqualified_list_field);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::integral>, ::std::vector<::std::int32_t>, ::apache::thrift::type::list<::apache::thrift::type::i32_t>>::write(*prot_, this->__fbthrift_field_unqualified_list_field);
     xfer += prot_->writeFieldEnd();
   }
   {
     constexpr int16_t kPrevFieldId = 3;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::TType::T_STRUCT, 4, kPrevFieldId>(*prot_, "unqualified_struct_field", previousFieldHasValue);
     previousFieldHasValue = true;
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::compiler::test::fixtures::default_values_rectification_after::EmptyStruct>::write(*prot_, this->__fbthrift_field_unqualified_struct_field);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::compiler::test::fixtures::default_values_rectification_after::EmptyStruct, ::apache::thrift::type::struct_t<::facebook::thrift::compiler::test::fixtures::default_values_rectification_after::EmptyStruct>>::write(*prot_, this->__fbthrift_field_unqualified_struct_field);
     xfer += prot_->writeFieldEnd();
   }
   if (this->__isset.get(4)) {
     constexpr int16_t kPrevFieldId = 4;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::TType::T_I32, 5, kPrevFieldId>(*prot_, "optional_int_field", previousFieldHasValue);
     previousFieldHasValue = true;
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t>::write(*prot_, this->__fbthrift_field_optional_int_field);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t, ::apache::thrift::type::i32_t>::write(*prot_, this->__fbthrift_field_optional_int_field);
     xfer += prot_->writeFieldEnd();
   } else {
     previousFieldHasValue = false;
@@ -463,7 +463,7 @@ uint32_t TestStruct::write(Protocol_* prot_) const {
     constexpr int16_t kPrevFieldId = 5;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::TType::T_BOOL, 6, kPrevFieldId>(*prot_, "optional_bool_field", previousFieldHasValue);
     previousFieldHasValue = true;
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, bool>::write(*prot_, this->__fbthrift_field_optional_bool_field);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, bool, ::apache::thrift::type::bool_t>::write(*prot_, this->__fbthrift_field_optional_bool_field);
     xfer += prot_->writeFieldEnd();
   } else {
     previousFieldHasValue = false;
@@ -472,7 +472,7 @@ uint32_t TestStruct::write(Protocol_* prot_) const {
     constexpr int16_t kPrevFieldId = 6;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::TType::T_LIST, 7, kPrevFieldId>(*prot_, "optional_list_field", previousFieldHasValue);
     previousFieldHasValue = true;
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::integral>, ::std::vector<::std::int32_t>>::write(*prot_, this->__fbthrift_field_optional_list_field);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::integral>, ::std::vector<::std::int32_t>, ::apache::thrift::type::list<::apache::thrift::type::i32_t>>::write(*prot_, this->__fbthrift_field_optional_list_field);
     xfer += prot_->writeFieldEnd();
   } else {
     previousFieldHasValue = false;
@@ -481,7 +481,7 @@ uint32_t TestStruct::write(Protocol_* prot_) const {
     constexpr int16_t kPrevFieldId = 7;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::TType::T_STRUCT, 8, kPrevFieldId>(*prot_, "optional_struct_field", previousFieldHasValue);
     previousFieldHasValue = true;
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::compiler::test::fixtures::default_values_rectification_after::EmptyStruct>::write(*prot_, this->__fbthrift_field_optional_struct_field);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::compiler::test::fixtures::default_values_rectification_after::EmptyStruct, ::apache::thrift::type::struct_t<::facebook::thrift::compiler::test::fixtures::default_values_rectification_after::EmptyStruct>>::write(*prot_, this->__fbthrift_field_optional_struct_field);
     xfer += prot_->writeFieldEnd();
   } else {
     previousFieldHasValue = false;

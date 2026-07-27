@@ -38,7 +38,7 @@ void SomeStruct::readNoXfer(Protocol_* iprot) {
   }
 _readField_reasonable:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::enums::Metasyntactic>::readWithContext(*iprot, this->__fbthrift_field_reasonable, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::enums::Metasyntactic, ::apache::thrift::type::enum_t<::test::fixtures::enums::Metasyntactic>>::readWithContext(*iprot, this->__fbthrift_field_reasonable, _readState);
   }
  this->__isset.set(0, true);
 
@@ -51,7 +51,7 @@ _readField_reasonable:
   }
 _readField_fine:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::enums::Metasyntactic>::readWithContext(*iprot, this->__fbthrift_field_fine, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::enums::Metasyntactic, ::apache::thrift::type::enum_t<::test::fixtures::enums::Metasyntactic>>::readWithContext(*iprot, this->__fbthrift_field_fine, _readState);
   }
  this->__isset.set(1, true);
 
@@ -64,7 +64,7 @@ _readField_fine:
   }
 _readField_questionable:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::enums::Metasyntactic>::readWithContext(*iprot, this->__fbthrift_field_questionable, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::enums::Metasyntactic, ::apache::thrift::type::enum_t<::test::fixtures::enums::Metasyntactic>>::readWithContext(*iprot, this->__fbthrift_field_questionable, _readState);
   }
  this->__isset.set(2, true);
 
@@ -79,7 +79,7 @@ _readField_tags:
   {
     _readState.beforeSubobject(iprot);
     this->__fbthrift_field_tags = ::std::set<::std::int32_t>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::integral>, ::std::set<::std::int32_t>>::readWithContext(*iprot, this->__fbthrift_field_tags, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::integral>, ::std::set<::std::int32_t>, ::apache::thrift::type::set<::apache::thrift::type::i32_t>>::readWithContext(*iprot, this->__fbthrift_field_tags, _readState);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(3, true);
@@ -158,19 +158,19 @@ uint32_t SomeStruct::serializedSize(Protocol_ const* prot_) const {
   xfer += prot_->serializedStructSize("SomeStruct");
   {
     xfer += prot_->serializedFieldSize("reasonable", apache::thrift::protocol::TType::T_I32, 1);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::enums::Metasyntactic>::serializedSize<false>(*prot_, this->__fbthrift_field_reasonable);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::enums::Metasyntactic, ::apache::thrift::type::enum_t<::test::fixtures::enums::Metasyntactic>>::serializedSize<false>(*prot_, this->__fbthrift_field_reasonable);
   }
   {
     xfer += prot_->serializedFieldSize("fine", apache::thrift::protocol::TType::T_I32, 2);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::enums::Metasyntactic>::serializedSize<false>(*prot_, this->__fbthrift_field_fine);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::enums::Metasyntactic, ::apache::thrift::type::enum_t<::test::fixtures::enums::Metasyntactic>>::serializedSize<false>(*prot_, this->__fbthrift_field_fine);
   }
   {
     xfer += prot_->serializedFieldSize("questionable", apache::thrift::protocol::TType::T_I32, 3);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::enums::Metasyntactic>::serializedSize<false>(*prot_, this->__fbthrift_field_questionable);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::enums::Metasyntactic, ::apache::thrift::type::enum_t<::test::fixtures::enums::Metasyntactic>>::serializedSize<false>(*prot_, this->__fbthrift_field_questionable);
   }
   {
     xfer += prot_->serializedFieldSize("tags", apache::thrift::protocol::TType::T_SET, 4);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::integral>, ::std::set<::std::int32_t>>::serializedSize<false>(*prot_, this->__fbthrift_field_tags);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::integral>, ::std::set<::std::int32_t>, ::apache::thrift::type::set<::apache::thrift::type::i32_t>>::serializedSize<false>(*prot_, this->__fbthrift_field_tags);
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -182,19 +182,19 @@ uint32_t SomeStruct::serializedSizeZC(Protocol_ const* prot_) const {
   xfer += prot_->serializedStructSize("SomeStruct");
   {
     xfer += prot_->serializedFieldSize("reasonable", apache::thrift::protocol::TType::T_I32, 1);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::enums::Metasyntactic>::serializedSize<false>(*prot_, this->__fbthrift_field_reasonable);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::enums::Metasyntactic, ::apache::thrift::type::enum_t<::test::fixtures::enums::Metasyntactic>>::serializedSize<false>(*prot_, this->__fbthrift_field_reasonable);
   }
   {
     xfer += prot_->serializedFieldSize("fine", apache::thrift::protocol::TType::T_I32, 2);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::enums::Metasyntactic>::serializedSize<false>(*prot_, this->__fbthrift_field_fine);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::enums::Metasyntactic, ::apache::thrift::type::enum_t<::test::fixtures::enums::Metasyntactic>>::serializedSize<false>(*prot_, this->__fbthrift_field_fine);
   }
   {
     xfer += prot_->serializedFieldSize("questionable", apache::thrift::protocol::TType::T_I32, 3);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::enums::Metasyntactic>::serializedSize<false>(*prot_, this->__fbthrift_field_questionable);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::enums::Metasyntactic, ::apache::thrift::type::enum_t<::test::fixtures::enums::Metasyntactic>>::serializedSize<false>(*prot_, this->__fbthrift_field_questionable);
   }
   {
     xfer += prot_->serializedFieldSize("tags", apache::thrift::protocol::TType::T_SET, 4);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::integral>, ::std::set<::std::int32_t>>::serializedSize<false>(*prot_, this->__fbthrift_field_tags);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::integral>, ::std::set<::std::int32_t>, ::apache::thrift::type::set<::apache::thrift::type::i32_t>>::serializedSize<false>(*prot_, this->__fbthrift_field_tags);
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -217,28 +217,28 @@ uint32_t SomeStruct::write(Protocol_* prot_) const {
     constexpr int16_t kPrevFieldId = 0;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::TType::T_I32, 1, kPrevFieldId>(*prot_, "reasonable", previousFieldHasValue);
     previousFieldHasValue = true;
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::enums::Metasyntactic>::write(*prot_, this->__fbthrift_field_reasonable);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::enums::Metasyntactic, ::apache::thrift::type::enum_t<::test::fixtures::enums::Metasyntactic>>::write(*prot_, this->__fbthrift_field_reasonable);
     xfer += prot_->writeFieldEnd();
   }
   {
     constexpr int16_t kPrevFieldId = 1;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::TType::T_I32, 2, kPrevFieldId>(*prot_, "fine", previousFieldHasValue);
     previousFieldHasValue = true;
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::enums::Metasyntactic>::write(*prot_, this->__fbthrift_field_fine);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::enums::Metasyntactic, ::apache::thrift::type::enum_t<::test::fixtures::enums::Metasyntactic>>::write(*prot_, this->__fbthrift_field_fine);
     xfer += prot_->writeFieldEnd();
   }
   {
     constexpr int16_t kPrevFieldId = 2;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::TType::T_I32, 3, kPrevFieldId>(*prot_, "questionable", previousFieldHasValue);
     previousFieldHasValue = true;
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::enums::Metasyntactic>::write(*prot_, this->__fbthrift_field_questionable);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::enums::Metasyntactic, ::apache::thrift::type::enum_t<::test::fixtures::enums::Metasyntactic>>::write(*prot_, this->__fbthrift_field_questionable);
     xfer += prot_->writeFieldEnd();
   }
   {
     constexpr int16_t kPrevFieldId = 3;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::TType::T_SET, 4, kPrevFieldId>(*prot_, "tags", previousFieldHasValue);
     previousFieldHasValue = true;
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::integral>, ::std::set<::std::int32_t>>::write(*prot_, this->__fbthrift_field_tags);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::integral>, ::std::set<::std::int32_t>, ::apache::thrift::type::set<::apache::thrift::type::i32_t>>::write(*prot_, this->__fbthrift_field_tags);
     xfer += prot_->writeFieldEnd();
   }
   xfer += prot_->writeFieldStop();
@@ -274,7 +274,7 @@ void MyStruct::readNoXfer(Protocol_* iprot) {
   }
 _readField_me2_3:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::enums::MyEnum2>::readWithContext(*iprot, this->__fbthrift_field_me2_3, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::enums::MyEnum2, ::apache::thrift::type::enum_t<::test::fixtures::enums::MyEnum2>>::readWithContext(*iprot, this->__fbthrift_field_me2_3, _readState);
   }
  this->__isset.set(0, true);
 
@@ -287,7 +287,7 @@ _readField_me2_3:
   }
 _readField_me3_n3:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::enums::MyEnum3>::readWithContext(*iprot, this->__fbthrift_field_me3_n3, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::enums::MyEnum3, ::apache::thrift::type::enum_t<::test::fixtures::enums::MyEnum3>>::readWithContext(*iprot, this->__fbthrift_field_me3_n3, _readState);
   }
  this->__isset.set(1, true);
 
@@ -300,7 +300,7 @@ _readField_me3_n3:
   }
 _readField_me1_t1:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::enums::MyEnum1>::readWithContext(*iprot, this->__fbthrift_field_me1_t1, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::enums::MyEnum1, ::apache::thrift::type::enum_t<::test::fixtures::enums::MyEnum1>>::readWithContext(*iprot, this->__fbthrift_field_me1_t1, _readState);
   }
  this->__isset.set(2, true);
 
@@ -313,7 +313,7 @@ _readField_me1_t1:
   }
 _readField_me1_t2:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::enums::MyEnum1>::readWithContext(*iprot, this->__fbthrift_field_me1_t2, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::enums::MyEnum1, ::apache::thrift::type::enum_t<::test::fixtures::enums::MyEnum1>>::readWithContext(*iprot, this->__fbthrift_field_me1_t2, _readState);
   }
  this->__isset.set(3, true);
 
@@ -391,19 +391,19 @@ uint32_t MyStruct::serializedSize(Protocol_ const* prot_) const {
   xfer += prot_->serializedStructSize("MyStruct");
   {
     xfer += prot_->serializedFieldSize("me2_3", apache::thrift::protocol::TType::T_I32, 1);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::enums::MyEnum2>::serializedSize<false>(*prot_, this->__fbthrift_field_me2_3);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::enums::MyEnum2, ::apache::thrift::type::enum_t<::test::fixtures::enums::MyEnum2>>::serializedSize<false>(*prot_, this->__fbthrift_field_me2_3);
   }
   {
     xfer += prot_->serializedFieldSize("me3_n3", apache::thrift::protocol::TType::T_I32, 2);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::enums::MyEnum3>::serializedSize<false>(*prot_, this->__fbthrift_field_me3_n3);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::enums::MyEnum3, ::apache::thrift::type::enum_t<::test::fixtures::enums::MyEnum3>>::serializedSize<false>(*prot_, this->__fbthrift_field_me3_n3);
   }
   {
     xfer += prot_->serializedFieldSize("me1_t1", apache::thrift::protocol::TType::T_I32, 4);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::enums::MyEnum1>::serializedSize<false>(*prot_, this->__fbthrift_field_me1_t1);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::enums::MyEnum1, ::apache::thrift::type::enum_t<::test::fixtures::enums::MyEnum1>>::serializedSize<false>(*prot_, this->__fbthrift_field_me1_t1);
   }
   {
     xfer += prot_->serializedFieldSize("me1_t2", apache::thrift::protocol::TType::T_I32, 6);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::enums::MyEnum1>::serializedSize<false>(*prot_, this->__fbthrift_field_me1_t2);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::enums::MyEnum1, ::apache::thrift::type::enum_t<::test::fixtures::enums::MyEnum1>>::serializedSize<false>(*prot_, this->__fbthrift_field_me1_t2);
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -415,19 +415,19 @@ uint32_t MyStruct::serializedSizeZC(Protocol_ const* prot_) const {
   xfer += prot_->serializedStructSize("MyStruct");
   {
     xfer += prot_->serializedFieldSize("me2_3", apache::thrift::protocol::TType::T_I32, 1);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::enums::MyEnum2>::serializedSize<false>(*prot_, this->__fbthrift_field_me2_3);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::enums::MyEnum2, ::apache::thrift::type::enum_t<::test::fixtures::enums::MyEnum2>>::serializedSize<false>(*prot_, this->__fbthrift_field_me2_3);
   }
   {
     xfer += prot_->serializedFieldSize("me3_n3", apache::thrift::protocol::TType::T_I32, 2);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::enums::MyEnum3>::serializedSize<false>(*prot_, this->__fbthrift_field_me3_n3);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::enums::MyEnum3, ::apache::thrift::type::enum_t<::test::fixtures::enums::MyEnum3>>::serializedSize<false>(*prot_, this->__fbthrift_field_me3_n3);
   }
   {
     xfer += prot_->serializedFieldSize("me1_t1", apache::thrift::protocol::TType::T_I32, 4);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::enums::MyEnum1>::serializedSize<false>(*prot_, this->__fbthrift_field_me1_t1);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::enums::MyEnum1, ::apache::thrift::type::enum_t<::test::fixtures::enums::MyEnum1>>::serializedSize<false>(*prot_, this->__fbthrift_field_me1_t1);
   }
   {
     xfer += prot_->serializedFieldSize("me1_t2", apache::thrift::protocol::TType::T_I32, 6);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::enums::MyEnum1>::serializedSize<false>(*prot_, this->__fbthrift_field_me1_t2);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::enums::MyEnum1, ::apache::thrift::type::enum_t<::test::fixtures::enums::MyEnum1>>::serializedSize<false>(*prot_, this->__fbthrift_field_me1_t2);
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -450,28 +450,28 @@ uint32_t MyStruct::write(Protocol_* prot_) const {
     constexpr int16_t kPrevFieldId = 0;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::TType::T_I32, 1, kPrevFieldId>(*prot_, "me2_3", previousFieldHasValue);
     previousFieldHasValue = true;
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::enums::MyEnum2>::write(*prot_, this->__fbthrift_field_me2_3);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::enums::MyEnum2, ::apache::thrift::type::enum_t<::test::fixtures::enums::MyEnum2>>::write(*prot_, this->__fbthrift_field_me2_3);
     xfer += prot_->writeFieldEnd();
   }
   {
     constexpr int16_t kPrevFieldId = 1;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::TType::T_I32, 2, kPrevFieldId>(*prot_, "me3_n3", previousFieldHasValue);
     previousFieldHasValue = true;
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::enums::MyEnum3>::write(*prot_, this->__fbthrift_field_me3_n3);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::enums::MyEnum3, ::apache::thrift::type::enum_t<::test::fixtures::enums::MyEnum3>>::write(*prot_, this->__fbthrift_field_me3_n3);
     xfer += prot_->writeFieldEnd();
   }
   {
     constexpr int16_t kPrevFieldId = 2;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::TType::T_I32, 4, kPrevFieldId>(*prot_, "me1_t1", previousFieldHasValue);
     previousFieldHasValue = true;
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::enums::MyEnum1>::write(*prot_, this->__fbthrift_field_me1_t1);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::enums::MyEnum1, ::apache::thrift::type::enum_t<::test::fixtures::enums::MyEnum1>>::write(*prot_, this->__fbthrift_field_me1_t1);
     xfer += prot_->writeFieldEnd();
   }
   {
     constexpr int16_t kPrevFieldId = 4;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::TType::T_I32, 6, kPrevFieldId>(*prot_, "me1_t2", previousFieldHasValue);
     previousFieldHasValue = true;
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::enums::MyEnum1>::write(*prot_, this->__fbthrift_field_me1_t2);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::enums::MyEnum1, ::apache::thrift::type::enum_t<::test::fixtures::enums::MyEnum1>>::write(*prot_, this->__fbthrift_field_me1_t2);
     xfer += prot_->writeFieldEnd();
   }
   xfer += prot_->writeFieldStop();

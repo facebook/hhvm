@@ -35,7 +35,7 @@ ptr.mut()
 {{! The instance of protocol methods to use. }}
 {{#let export partial protocol_methods |field|}}
 {{#pragma ignore-newlines}}
-::apache::thrift::detail::pm::protocol_methods<{{field.type.type_class}}, {{field.cpp_standard_type}}>
+::apache::thrift::detail::pm::protocol_methods<{{field.type.type_class}}, {{field.cpp_standard_type}}, {{field.type_tag}}>
 {{/let partial}}
 
 {{! The field value to use with protocol methods. }}

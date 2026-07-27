@@ -39,7 +39,7 @@ void MyStruct::readNoXfer(Protocol_* iprot) {
 _readField_MyIncludedField:
   {
     _readState.beforeSubobject(iprot);
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::Included>::readWithContext(*iprot, this->__fbthrift_field_MyIncludedField, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::Included, ::apache::thrift::type::struct_t<::cpp2::Included>>::readWithContext(*iprot, this->__fbthrift_field_MyIncludedField, _readState);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(0, true);
@@ -54,7 +54,7 @@ _readField_MyIncludedField:
 _readField_MyOtherIncludedField:
   {
     _readState.beforeSubobject(iprot);
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::Included>::readWithContext(*iprot, this->__fbthrift_field_MyOtherIncludedField, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::Included, ::apache::thrift::type::struct_t<::cpp2::Included>>::readWithContext(*iprot, this->__fbthrift_field_MyOtherIncludedField, _readState);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(1, true);
@@ -68,7 +68,7 @@ _readField_MyOtherIncludedField:
   }
 _readField_MyIncludedInt:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::cpp2::IncludedInt64>::readWithContext(*iprot, this->__fbthrift_field_MyIncludedInt, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::cpp2::IncludedInt64, ::apache::thrift::type::i64_t>::readWithContext(*iprot, this->__fbthrift_field_MyIncludedInt, _readState);
   }
  this->__isset.set(2, true);
 
@@ -138,15 +138,15 @@ uint32_t MyStruct::serializedSize(Protocol_ const* prot_) const {
   xfer += prot_->serializedStructSize("MyStruct");
   {
     xfer += prot_->serializedFieldSize("MyIncludedField", apache::thrift::protocol::TType::T_STRUCT, 1);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::Included>::serializedSize<false>(*prot_, this->__fbthrift_field_MyIncludedField);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::Included, ::apache::thrift::type::struct_t<::cpp2::Included>>::serializedSize<false>(*prot_, this->__fbthrift_field_MyIncludedField);
   }
   {
     xfer += prot_->serializedFieldSize("MyOtherIncludedField", apache::thrift::protocol::TType::T_STRUCT, 2);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::Included>::serializedSize<false>(*prot_, this->__fbthrift_field_MyOtherIncludedField);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::Included, ::apache::thrift::type::struct_t<::cpp2::Included>>::serializedSize<false>(*prot_, this->__fbthrift_field_MyOtherIncludedField);
   }
   {
     xfer += prot_->serializedFieldSize("MyIncludedInt", apache::thrift::protocol::TType::T_I64, 3);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::cpp2::IncludedInt64>::serializedSize<false>(*prot_, this->__fbthrift_field_MyIncludedInt);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::cpp2::IncludedInt64, ::apache::thrift::type::i64_t>::serializedSize<false>(*prot_, this->__fbthrift_field_MyIncludedInt);
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -158,15 +158,15 @@ uint32_t MyStruct::serializedSizeZC(Protocol_ const* prot_) const {
   xfer += prot_->serializedStructSize("MyStruct");
   {
     xfer += prot_->serializedFieldSize("MyIncludedField", apache::thrift::protocol::TType::T_STRUCT, 1);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::Included>::serializedSize<true>(*prot_, this->__fbthrift_field_MyIncludedField);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::Included, ::apache::thrift::type::struct_t<::cpp2::Included>>::serializedSize<true>(*prot_, this->__fbthrift_field_MyIncludedField);
   }
   {
     xfer += prot_->serializedFieldSize("MyOtherIncludedField", apache::thrift::protocol::TType::T_STRUCT, 2);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::Included>::serializedSize<true>(*prot_, this->__fbthrift_field_MyOtherIncludedField);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::Included, ::apache::thrift::type::struct_t<::cpp2::Included>>::serializedSize<true>(*prot_, this->__fbthrift_field_MyOtherIncludedField);
   }
   {
     xfer += prot_->serializedFieldSize("MyIncludedInt", apache::thrift::protocol::TType::T_I64, 3);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::cpp2::IncludedInt64>::serializedSize<false>(*prot_, this->__fbthrift_field_MyIncludedInt);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::cpp2::IncludedInt64, ::apache::thrift::type::i64_t>::serializedSize<false>(*prot_, this->__fbthrift_field_MyIncludedInt);
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -189,21 +189,21 @@ uint32_t MyStruct::write(Protocol_* prot_) const {
     constexpr int16_t kPrevFieldId = 0;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::TType::T_STRUCT, 1, kPrevFieldId>(*prot_, "MyIncludedField", previousFieldHasValue);
     previousFieldHasValue = true;
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::Included>::write(*prot_, this->__fbthrift_field_MyIncludedField);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::Included, ::apache::thrift::type::struct_t<::cpp2::Included>>::write(*prot_, this->__fbthrift_field_MyIncludedField);
     xfer += prot_->writeFieldEnd();
   }
   {
     constexpr int16_t kPrevFieldId = 1;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::TType::T_STRUCT, 2, kPrevFieldId>(*prot_, "MyOtherIncludedField", previousFieldHasValue);
     previousFieldHasValue = true;
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::Included>::write(*prot_, this->__fbthrift_field_MyOtherIncludedField);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::Included, ::apache::thrift::type::struct_t<::cpp2::Included>>::write(*prot_, this->__fbthrift_field_MyOtherIncludedField);
     xfer += prot_->writeFieldEnd();
   }
   {
     constexpr int16_t kPrevFieldId = 2;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::TType::T_I64, 3, kPrevFieldId>(*prot_, "MyIncludedInt", previousFieldHasValue);
     previousFieldHasValue = true;
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::cpp2::IncludedInt64>::write(*prot_, this->__fbthrift_field_MyIncludedInt);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::cpp2::IncludedInt64, ::apache::thrift::type::i64_t>::write(*prot_, this->__fbthrift_field_MyIncludedInt);
     xfer += prot_->writeFieldEnd();
   }
   xfer += prot_->writeFieldStop();

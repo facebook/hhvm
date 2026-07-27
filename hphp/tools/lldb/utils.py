@@ -1247,6 +1247,7 @@ def arch_regs(target: lldb.SBTarget) -> typing.Dict[str, str]:
             "fp": "fp",
             "sp": "sp",
             "ip": "pc",
+            # pyrefly: ignore [bad-assignment]
             "cross_jit_save": [
                 "x19",
                 "x20",
@@ -1275,6 +1276,7 @@ def arch_regs(target: lldb.SBTarget) -> typing.Dict[str, str]:
             "fp": "rbp",
             "sp": "rsp",
             "ip": "rip",
+            # pyrefly: ignore [bad-assignment]
             "cross_jit_save": ["rbx", "r12", "r13", "r14", "r15"],
         }
 

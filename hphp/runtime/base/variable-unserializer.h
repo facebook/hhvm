@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "hphp/runtime/base/contiguous-source.h"
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/util/compact-tagged-ptrs.h"
@@ -34,8 +35,13 @@ enum class UnserializeMode {
 struct InvalidAllowedClassesException : Exception {
 };
 
-struct VariableUnserializer {
-
+/*
+ * Source-independent state and types shared by every VariableUnserializerImpl
+ * instantiation. Keeping Type here (rather than in the template) makes it a
+ * single enum type across all byte sources, so e.g. VariableUnserializer::Type
+ * and ZStdVariableUnserializer::Type are the same type and interchangeable.
+ */
+struct VariableUnserializerBase {
   /*
    * Supported unserialization formats.
    */
@@ -46,6 +52,17 @@ struct VariableUnserializer {
     DebuggerSerialize,
     Last
   };
+};
+
+/*
+ * Unserializes a serialized string into a Variant. Templated on the byte Source
+ * so the common in-memory path (ContiguousSource) is a fully monomorphic
+ * instantiation with zero per-byte dispatch overhead, while the streaming
+ * zstd-decompression path (ZStdDecompressSource) is a separate instantiation
+ * selected at the call site. Neither instantiation pays for the other.
+ */
+template <class Source>
+struct VariableUnserializerImpl : VariableUnserializerBase {
 
   /*
    * Construct an unserializer, with an optional whitelist of classes to
@@ -53,7 +70,7 @@ struct VariableUnserializer {
    * null_array means allow any classes.  We default to null_array since
    * serialization is not limited inside the VM.
    */
-  VariableUnserializer(
+  VariableUnserializerImpl(
     const char* str,
     size_t len,
     Type type,
@@ -69,13 +86,6 @@ struct VariableUnserializer {
    * Main API; unserialize the buffer and return as a Variant.
    */
   Variant unserialize();
-
-  const char* head() const;
-
-  /*
-   * Set the beginning and end of internal buffer.
-   */
-  void set(const char* buf, const char* end);
 
   void setUnitFilename(const StringData* name) {
     assertx(name->isStatic());
@@ -102,7 +112,7 @@ struct VariableUnserializer {
   double readDouble();
   char readChar();
 
-  // Return a StringPiece of up to n characters pointing into m_buf
+  // Return a StringPiece of up to n characters pointing into the source window
   folly::StringPiece readStr(unsigned n);
 
   /*
@@ -113,6 +123,7 @@ struct VariableUnserializer {
   /*
    * Attempt to consume a serialized string with content matching str.
    * Return false and rewind stream on non-standard format or content mismatch.
+   * Only available for a contiguous source; a no-op returning false otherwise.
    */
   bool matchString(folly::StringPiece str);
 
@@ -121,11 +132,9 @@ struct VariableUnserializer {
    */
   Type type() const;
   bool allowUnknownSerializableClass() const;
-  const char* begin() const;
-  const char* end() const;
-  char peek() const;
-  char peekBack() const;
-  bool endOfBuffer() const;
+  char peek();
+  char peekBack();
+  bool endOfBuffer();
 
   /*
    * True if clsName is allowed to be unserialized.
@@ -155,18 +164,17 @@ struct VariableUnserializer {
   void addSleepingObject(const Object&);
 
 private:
-  void check() const;
-  void checkElemTermination() const;
+  void checkElemTermination();
 
   Type m_type;
   bool m_readOnly;
-  const char* m_buf;
-  const char* m_end;
+  // Owns the byte cursor. ContiguousSource is a zero-overhead view over an
+  // in-memory buffer; ZStdDecompressSource streams from a compressed frame.
+  Source m_source;
   req::vector<tv_rval> m_refs;
   bool m_unknownSerializable;
   const Array& m_options; // e.g. classes allowed to be unserialized
   req::vector<Object> m_sleepingObjects;
-  const char* const m_begin;
   bool m_forceDArrays;
   bool m_markLegacyArrays;
   bool m_pure{false};            // should we call the pure callbacks?
@@ -203,4 +211,8 @@ private:
                                  bool& hasSerializedNativeData);
 };
 
+// Unserialization always reads from a contiguous in-memory buffer.
+using VariableUnserializer = VariableUnserializerImpl<ContiguousSource>;
+
+///////////////////////////////////////////////////////////////////////////////
 }

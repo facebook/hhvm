@@ -35,6 +35,7 @@
 #include "hphp/runtime/base/struct-log-util.h"
 #include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/vanilla-keyset.h"
+#include "hphp/runtime/base/contiguous-source.h"
 #include "hphp/runtime/base/variable-serializer.h"
 
 #include "hphp/runtime/ext/collections/ext_collections-map.h"
@@ -181,11 +182,6 @@ void throwColRefKey() {
 }
 
 [[noreturn]] NEVER_INLINE
-void throwUnexpectedEOB() {
-  throw Exception("Unexpected end of buffer during unserialization");
-}
-
-[[noreturn]] NEVER_INLINE
 void throwVecRefValue() {
   throw Exception("Vecs cannot contain references");
 }
@@ -232,7 +228,8 @@ const StaticString
 const StaticString s_force_darrays{"force_darrays"};
 const StaticString s_mark_legacy_arrays{"mark_legacy_arrays"};
 
-VariableUnserializer::VariableUnserializer(
+template <class Source>
+VariableUnserializerImpl<Source>::VariableUnserializerImpl(
   const char* str,
   size_t len,
   Type type,
@@ -240,54 +237,45 @@ VariableUnserializer::VariableUnserializer(
   const Array& options)
     : m_type(type)
     , m_readOnly(false)
-    , m_buf(str)
-    , m_end(str + len)
+    , m_source(str, len)
     , m_unknownSerializable(allowUnknownSerializableClass)
     , m_options(options)
-    , m_begin(str)
     , m_forceDArrays{m_options[s_force_darrays].toBoolean()}
     , m_markLegacyArrays{m_options[s_mark_legacy_arrays].toBoolean()}
 {}
 
-VariableUnserializer::Type VariableUnserializer::type() const {
+template <class Source>
+VariableUnserializerImpl<Source>::Type VariableUnserializerImpl<Source>::type() const {
   return m_type;
 }
 
-bool VariableUnserializer::allowUnknownSerializableClass() const {
+template <class Source>
+bool VariableUnserializerImpl<Source>::allowUnknownSerializableClass() const {
   return m_unknownSerializable;
 }
 
-const char* VariableUnserializer::head() const {
-  return m_buf;
+template <class Source>
+char VariableUnserializerImpl<Source>::peek() {
+  return m_source.peek();
 }
 
-const char* VariableUnserializer::begin() const {
-  return m_begin;
+template <class Source>
+char VariableUnserializerImpl<Source>::peekBack() {
+  return m_source.peekBack();
 }
 
-const char* VariableUnserializer::end() const {
-  return m_end;
+template <class Source>
+bool VariableUnserializerImpl<Source>::endOfBuffer() {
+  return m_source.endOfBuffer();
 }
 
-char VariableUnserializer::peek() const {
-  check();
-  return *m_buf;
+template <class Source>
+char VariableUnserializerImpl<Source>::readChar() {
+  return m_source.readChar();
 }
 
-char VariableUnserializer::peekBack() const {
-  return m_buf[-1];
-}
-
-bool VariableUnserializer::endOfBuffer() const {
-  return m_buf >= m_end;
-}
-
-char VariableUnserializer::readChar() {
-  check();
-  return *(m_buf++);
-}
-
-void VariableUnserializer::add(tv_lval v, UnserializeMode mode) {
+template <class Source>
+void VariableUnserializerImpl<Source>::add(tv_lval v, UnserializeMode mode) {
   switch (mode) {
     case UnserializeMode::Value:  m_refs.emplace_back(v); break;
     // We don't support refs to collection keys; use nullptr as a sentinel.
@@ -296,7 +284,8 @@ void VariableUnserializer::add(tv_lval v, UnserializeMode mode) {
   }
 }
 
-void VariableUnserializer::reserveForAdd(size_t count) {
+template <class Source>
+void VariableUnserializerImpl<Source>::reserveForAdd(size_t count) {
   // If the array is large, the space for the backrefs could be
   // significant, so we need to check for OOM beforehand. To do this,
   // we need to do some guess work to estimate what memory the vector
@@ -306,7 +295,7 @@ void VariableUnserializer::reserveForAdd(size_t count) {
   auto const capacity = m_refs.capacity();
   if (newSize <= capacity) return;
   auto const total =
-    folly::nextPowTwo(newSize) * sizeof(decltype(m_refs)::value_type);
+    folly::nextPowTwo(newSize) * sizeof(typename decltype(m_refs)::value_type);
   if (UNLIKELY(total > kMaxSmallSize && tl_heap->preAllocOOM(total))) {
     check_non_safepoint_surprise();
   }
@@ -314,34 +303,34 @@ void VariableUnserializer::reserveForAdd(size_t count) {
   check_non_safepoint_surprise();
 }
 
-TypedValue VariableUnserializer::getByVal(int id) {
+template <class Source>
+TypedValue VariableUnserializerImpl<Source>::getByVal(int id) {
   if (id <= 0 || id > m_refs.size()) throwOutOfRange(id);
   auto const result = m_refs[id - 1];
   if (!result) throwColRKey();
   return result.tv();
 }
 
-void VariableUnserializer::check() const {
-  if (m_buf >= m_end) throwUnexpectedEOB();
-}
-
-void VariableUnserializer::checkElemTermination() const {
+template <class Source>
+void VariableUnserializerImpl<Source>::checkElemTermination() {
   auto const ch = peekBack();
   if (ch != ';' && ch != '}') throwUnterminatedElement();
 }
 
-void VariableUnserializer::set(const char* buf, const char* end) {
-  m_buf = buf;
-  m_end = end;
-}
-
-Variant VariableUnserializer::unserialize() {
+template <class Source>
+Variant VariableUnserializerImpl<Source>::unserialize() {
   Variant v;
   unserializeVariant(v.asTypedValue());
-  if (UNLIKELY(StructuredLog::coinflip(Cfg::Eval::SerDesSampleRate))) {
-    OptString ser(m_begin, m_end - m_begin, CopyString);
-    auto const fmt = fmt::format("VU{}", (int)m_type);
-    StructuredLog::logSerDes(fmt.c_str(), "des", ser, v);
+  // SerDes sampling reads back the whole serialized span, which only a
+  // contiguous source exposes; the streaming source has no such span, so
+  // sampling is skipped there (restoring it for streaming is a follow-up).
+  if constexpr (Source::contiguous) {
+    if (UNLIKELY(StructuredLog::coinflip(Cfg::Eval::SerDesSampleRate))) {
+      OptString ser(m_source.begin(), m_source.end() - m_source.begin(),
+                    CopyString);
+      auto const fmt = fmt::format("VU{}", (int)m_type);
+      StructuredLog::logSerDes(fmt.c_str(), "des", ser, v);
+    }
   }
 
   auto const providedCoeffects =
@@ -353,53 +342,24 @@ Variant VariableUnserializer::unserialize() {
   return v;
 }
 
-namespace {
-std::pair<int64_t,const char*> hh_strtoll_base10(const char* p) {
-  int64_t x = 0;
-  bool neg = false;
-  if (*p == '-') {
-    neg = true;
-    ++p;
-  }
-  while (*p >= '0' && *p <= '9') {
-    x = (x * 10) + ('0' - *p);
-    ++p;
-  }
-  if (!neg) {
-    x = -x;
-  }
-  return std::pair<int64_t,const char*>(x, p);
-}
+template <class Source>
+int64_t VariableUnserializerImpl<Source>::readInt() {
+  return m_source.readInt();
 }
 
-int64_t VariableUnserializer::readInt() {
-  check();
-  auto r = hh_strtoll_base10(m_buf);
-  m_buf = r.second;
-  return r.first;
+template <class Source>
+double VariableUnserializerImpl<Source>::readDouble() {
+  return m_source.readDouble();
 }
 
-double VariableUnserializer::readDouble() {
-  check();
-  const char* newBuf;
-  double r = zend_strtod(m_buf, &newBuf);
-  m_buf = newBuf;
-  return r;
+template <class Source>
+folly::StringPiece VariableUnserializerImpl<Source>::readStr(unsigned n) {
+  return m_source.readStr(n);
 }
 
-folly::StringPiece VariableUnserializer::readStr(unsigned n) {
-  check();
-  auto const bufferLimit = std::min(size_t(m_end - m_buf), size_t(n));
-  auto str = folly::StringPiece(m_buf, bufferLimit);
-  m_buf += bufferLimit;
-  return str;
-}
-
-void VariableUnserializer::expectChar(char expected) {
-  char ch = readChar();
-  if (UNLIKELY(ch != expected)) {
-    throwUnexpectedSep(expected, ch);
-  }
+template <class Source>
+void VariableUnserializerImpl<Source>::expectChar(char expected) {
+  m_source.expectChar(expected);
 }
 
 namespace {
@@ -423,7 +383,8 @@ const StaticString s_throw("throw");
 const StaticString s_allowed_classes("allowed_classes");
 const StaticString s_include_subclasses("include_subclasses");
 
-bool VariableUnserializer::whitelistCheck(const OptString& clsName) const {
+template <class Source>
+bool VariableUnserializerImpl<Source>::whitelistCheck(const OptString& clsName) const {
   if (m_type != Type::Serialize || m_options.isNull()) {
     return true;
   }
@@ -482,53 +443,65 @@ bool VariableUnserializer::whitelistCheck(const OptString& clsName) const {
   }
 }
 
-void VariableUnserializer::addSleepingObject(const Object& o) {
+template <class Source>
+void VariableUnserializerImpl<Source>::addSleepingObject(const Object& o) {
   m_sleepingObjects.emplace_back(o);
 }
 
-bool VariableUnserializer::matchString(folly::StringPiece str) {
-  const char* p = m_buf;
-  assertx(p <= m_end);
-  int total = 0;
-  if (*p == 'S' && type() == VariableUnserializer::Type::APCSerialize) {
-    total = 2 + 8 + 1;
-    if (p + total > m_end) return false;
-    p++;
-    if (*p++ != ':') return false;
-    auto const sd = *reinterpret_cast<StringData*const*>(p);
-    assertx(sd->isStatic());
-    if (str.compare(sd->slice()) != 0) return false;
-    p += size_t(8);
+template <class Source>
+bool VariableUnserializerImpl<Source>::matchString(folly::StringPiece str) {
+  // The speculative match/rewind cannot be expressed against the streaming
+  // window (no backward seek). Returning false without consuming is the correct
+  // "no match, parse normally" fallback, so streaming just skips the fast path.
+  if constexpr (!Source::contiguous) {
+    return false;
   } else {
-    const auto ss = str.size();
-    if (ss >= 100) return false;
-    int digits = ss >= 10 ? 2 : 1;
-    total = 2 + digits + 2 + ss + 2;
-    if (p + total > m_end) return false;
-    if (*p++ != 's') return false;
-    if (*p++ != ':') return false;
-    if (digits == 2) {
-      if (*p++ != '0' + ss/10) return false;
-      if (*p++ != '0' + ss%10) return false;
+    auto const bufStart = m_source.head();
+    auto const end = m_source.end();
+    const char* p = bufStart;
+    assertx(p <= end);
+    int total = 0;
+    if (*p == 'S' && type() == Type::APCSerialize) {
+      total = 2 + 8 + 1;
+      if (p + total > end) return false;
+      p++;
+      if (*p++ != ':') return false;
+      auto const sd = *reinterpret_cast<StringData*const*>(p);
+      assertx(sd->isStatic());
+      if (str.compare(sd->slice()) != 0) return false;
+      p += size_t(8);
     } else {
-      if (*p++ != '0' + ss) return false;
+      const auto ss = str.size();
+      if (ss >= 100) return false;
+      int digits = ss >= 10 ? 2 : 1;
+      total = 2 + digits + 2 + ss + 2;
+      if (p + total > end) return false;
+      if (*p++ != 's') return false;
+      if (*p++ != ':') return false;
+      if (digits == 2) {
+        if (*p++ != '0' + ss/10) return false;
+        if (*p++ != '0' + ss%10) return false;
+      } else {
+        if (*p++ != '0' + ss) return false;
+      }
+      if (*p++ != ':') return false;
+      if (*p++ != '\"') return false;
+      if (memcmp(p, str.data(), ss)) return false;
+      p += ss;
+      if (*p++ != '\"') return false;
     }
-    if (*p++ != ':') return false;
-    if (*p++ != '\"') return false;
-    if (memcmp(p, str.data(), ss)) return false;
-    p += ss;
-    if (*p++ != '\"') return false;
+    if (*p++ != ';') return false;
+    assertx(bufStart + total == p);
+    m_source.setHead(p);
+    return true;
   }
-  if (*p++ != ';') return false;
-  assertx(m_buf + total == p);
-  m_buf = p;
-  return true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 // remainingProps should include the current property being unserialized.
-void VariableUnserializer::unserializePropertyValue(tv_lval v,
+template <class Source>
+void VariableUnserializerImpl<Source>::unserializePropertyValue(tv_lval v,
                                                     int remainingProps) {
   assertx(remainingProps > 0);
   unserializeVariant(v);
@@ -541,8 +514,9 @@ void VariableUnserializer::unserializePropertyValue(tv_lval v,
 }
 
 // nProp should include the current property being unserialized.
+template <class Source>
 NEVER_INLINE
-void VariableUnserializer::unserializeProp(ObjectData* obj,
+void VariableUnserializerImpl<Source>::unserializeProp(ObjectData* obj,
                                            const OptString& key,
                                            Class* ctx,
                                            const OptString& realKey,
@@ -590,8 +564,9 @@ void VariableUnserializer::unserializeProp(ObjectData* obj,
 }
 
 
+template <class Source>
 NEVER_INLINE
-void VariableUnserializer::unserializeRemainingProps(
+void VariableUnserializerImpl<Source>::unserializeRemainingProps(
   Object& obj,
   int remainingProps,
   Variant& serializedNativeData,
@@ -750,8 +725,9 @@ static StringData* readStringData(const char*& cur, const char* const end,
 }
 }
 
+template <class Source>
 NEVER_INLINE
-void VariableUnserializer::unserializeVariant(
+void VariableUnserializerImpl<Source>::unserializeVariant(
     tv_lval self,
     UnserializeMode mode /* = UnserializeMode::Value */) {
 
@@ -858,7 +834,7 @@ void VariableUnserializer::unserializeVariant(
     }
     return;
   case 'S':
-    if (this->type() == VariableUnserializer::Type::APCSerialize) {
+    if (this->type() == VariableUnserializerImpl<Source>::Type::APCSerialize) {
       auto str = readStr(8);
       assertx(str.size() == 8);
       auto const sd = *reinterpret_cast<StringData*const*>(&str[0]);
@@ -1159,7 +1135,7 @@ void VariableUnserializer::unserializeVariant(
 
       if (cls &&
           cls->lookupMethod(s___wakeup.get()) &&
-          (this->type() != VariableUnserializer::Type::DebuggerSerialize ||
+          (this->type() != VariableUnserializerImpl<Source>::Type::DebuggerSerialize ||
            (cls->instanceCtor() && cls->isCppSerializable()))) {
         // Don't call wakeup when unserializing for the debugger, except for
         // natively implemented classes.
@@ -1171,7 +1147,7 @@ void VariableUnserializer::unserializeVariant(
     return; // object has '}' terminating
   case 'C':
     {
-      if (this->type() == VariableUnserializer::Type::DebuggerSerialize) {
+      if (this->type() == VariableUnserializerImpl<Source>::Type::DebuggerSerialize) {
         raise_error("Debugger shouldn't call custom unserialize method");
       }
       OptString clsName = unserializeString();
@@ -1217,21 +1193,21 @@ void VariableUnserializer::unserializeVariant(
     }
     return; // object has '}' terminating
   case 'c': // Class
-    if (m_type == VariableUnserializer::Type::DebuggerSerialize) {
+    if (m_type == VariableUnserializerImpl<Source>::Type::DebuggerSerialize) {
       tvMove(make_tv<KindOfClass>(Class::load(unserializeString().get())), self);
       break;
     } else {
       throwUnknownType(type);
     }
   case 'f': // Func
-    if (m_type == VariableUnserializer::Type::DebuggerSerialize) {
+    if (m_type == VariableUnserializerImpl<Source>::Type::DebuggerSerialize) {
       tvMove(make_tv<KindOfFunc>(Func::load(unserializeString().get())), self);
       break;
     } else {
       throwUnknownType(type);
     }
   case 'm': // ClsMeth
-    if (m_type == VariableUnserializer::Type::DebuggerSerialize || m_type == VariableUnserializer::Type::Internal) {
+    if (m_type == VariableUnserializerImpl<Source>::Type::DebuggerSerialize || m_type == VariableUnserializerImpl<Source>::Type::Internal) {
       const auto cls{Class::load(unserializeString().get())};
       expectChar(':');
       const auto func{cls->lookupMethod(unserializeString().get())};
@@ -1252,7 +1228,8 @@ void VariableUnserializer::unserializeVariant(
   expectChar(';');
 }
 
-Array VariableUnserializer::unserializeArray() {
+template <class Source>
+Array VariableUnserializerImpl<Source>::unserializeArray() {
   int64_t size = readInt();
   expectChar(':');
   expectChar('{');
@@ -1293,9 +1270,10 @@ Array VariableUnserializer::unserializeArray() {
   return arr;
 }
 
-void VariableUnserializer::unserializeProvenanceTag() {
-  if (type() != VariableUnserializer::Type::Internal &&
-      type() != VariableUnserializer::Type::Serialize) {
+template <class Source>
+void VariableUnserializerImpl<Source>::unserializeProvenanceTag() {
+  if (type() != VariableUnserializerImpl<Source>::Type::Internal &&
+      type() != VariableUnserializerImpl<Source>::Type::Serialize) {
     return;
   }
 
@@ -1341,7 +1319,8 @@ void VariableUnserializer::unserializeProvenanceTag() {
   }
 }
 
-Array VariableUnserializer::unserializeDict() {
+template <class Source>
+Array VariableUnserializerImpl<Source>::unserializeDict() {
   int64_t size = readInt();
   expectChar(':');
   expectChar('{');
@@ -1377,7 +1356,8 @@ Array VariableUnserializer::unserializeDict() {
   return arr;
 }
 
-Array VariableUnserializer::unserializeVec() {
+template <class Source>
+Array VariableUnserializerImpl<Source>::unserializeVec() {
   int64_t size = readInt();
   expectChar(':');
   expectChar('{');
@@ -1412,7 +1392,8 @@ Array VariableUnserializer::unserializeVec() {
   return arr;
 }
 
-Array VariableUnserializer::unserializeVArray() {
+template <class Source>
+Array VariableUnserializerImpl<Source>::unserializeVArray() {
   int64_t size = readInt();
   expectChar(':');
   expectChar('{');
@@ -1467,7 +1448,8 @@ Array VariableUnserializer::unserializeVArray() {
   return arr;
 }
 
-Array VariableUnserializer::unserializeDArray() {
+template <class Source>
+Array VariableUnserializerImpl<Source>::unserializeDArray() {
   int64_t size = readInt();
   expectChar(':');
   expectChar('{');
@@ -1505,7 +1487,8 @@ Array VariableUnserializer::unserializeDArray() {
   return arr;
 }
 
-Array VariableUnserializer::unserializeKeyset() {
+template <class Source>
+Array VariableUnserializerImpl<Source>::unserializeKeyset() {
   int64_t size = readInt();
   expectChar(':');
   expectChar('{');
@@ -1549,7 +1532,8 @@ Array VariableUnserializer::unserializeKeyset() {
   return init.toArray();
 }
 
-Array VariableUnserializer::unserializeBespokeTypeStructure() {
+template <class Source>
+Array VariableUnserializerImpl<Source>::unserializeBespokeTypeStructure() {
   assertx(Cfg::Eval::EmitBespokeTypeStructures);
 
   auto arr = unserializeDict();
@@ -1558,8 +1542,9 @@ Array VariableUnserializer::unserializeBespokeTypeStructure() {
   return arr;
 }
 
+template <class Source>
 folly::StringPiece
-VariableUnserializer::unserializeStringPiece(char delimiter0, char delimiter1) {
+VariableUnserializerImpl<Source>::unserializeStringPiece(char delimiter0, char delimiter1) {
   int64_t size = readInt();
   if (size >= Cfg::ErrorHandling::MaxSerializedStringSize) {
     throwLargeStringSize(size);
@@ -1574,7 +1559,8 @@ VariableUnserializer::unserializeStringPiece(char delimiter0, char delimiter1) {
   return piece;
 }
 
-OptString VariableUnserializer::unserializeString(char delimiter0,
+template <class Source>
+OptString VariableUnserializerImpl<Source>::unserializeString(char delimiter0,
                                                   char delimiter1) {
   auto const piece = unserializeStringPiece(delimiter0, delimiter1);
   return OptString::attach(readOnly() ?
@@ -1582,7 +1568,8 @@ OptString VariableUnserializer::unserializeString(char delimiter0,
                            StringData::Make(piece, CopyString));
 }
 
-void VariableUnserializer::unserializeCollection(ObjectData* obj, int64_t sz,
+template <class Source>
+void VariableUnserializerImpl<Source>::unserializeCollection(ObjectData* obj, int64_t sz,
                                                  char type) {
   switch (obj->collectionType()) {
     case CollectionType::Pair:
@@ -1603,7 +1590,8 @@ void VariableUnserializer::unserializeCollection(ObjectData* obj, int64_t sz,
   }
 }
 
-void VariableUnserializer::unserializeVector(ObjectData* obj, int64_t sz,
+template <class Source>
+void VariableUnserializerImpl<Source>::unserializeVector(ObjectData* obj, int64_t sz,
                                              char type) {
   if (type != 'V') throwBadFormat(obj, type);
 
@@ -1629,56 +1617,65 @@ void VariableUnserializer::unserializeVector(ObjectData* obj, int64_t sz,
  * Returns false and leaves both 'map' and 'uns' untouched on failure, including
  * unexpected types and possibly legal, but uncommon, encodings.
  */
+template <class Source>
 NEVER_INLINE
-bool VariableUnserializer::tryUnserializeStrIntMap(BaseMap* map, int64_t sz) {
-  auto b = head();
-  /*
-   * For efficiency, we don't add the keys/values to m_refs, so don't support
-   * back-references appearing after this point. For simplicity, we thus require
-   * this map to be the root object being unserialized.
-   */
-  if (folly::StringPiece(begin(), b) !=
-      folly::to<std::string>("K:6:\"HH\\Map\":", sz, ":{")) {
+bool VariableUnserializerImpl<Source>::tryUnserializeStrIntMap(BaseMap* map, int64_t sz) {
+  // This fast path reads raw contiguous spans via head()/begin()/end()/set(),
+  // which are not available over the streaming window; fall back to the normal
+  // map path.
+  if constexpr (!Source::contiguous) {
     return false;
-  }
-  auto const end = this->end();
-  auto const maxKeyLen = Cfg::ErrorHandling::MaxSerializedStringSize;
-  /*
-   * First, parse the entire input and allocate the keys (accessing lots of
-   * data, but mostly sequentially).
-   */
-  auto checkPoint = map->batchInsertBegin(sz);
-  int64_t i = 0;
-  for (; i < sz; ++i) {
-    auto sd = readStringData(b, end, maxKeyLen);
-    if (!sd) break;
-    OptString key = OptString::attach(sd);
-    auto tv = map->batchInsert(key.get());
-    tv->m_type = KindOfNull;
-    if (*b == 'i') {
-      if (!readInt64(b, end, tv->m_data.num)) break;
-      tv->m_type = KindOfInt64;
-    } else if (*b == 's') {
+  } else {
+    auto b = m_source.head();
+    /*
+     * For efficiency, we don't add the keys/values to m_refs, so don't support
+     * back-references appearing after this point. For simplicity, we thus
+     * require this map to be the root object being unserialized.
+     */
+    if (folly::StringPiece(m_source.begin(), b) !=
+        folly::to<std::string>("K:6:\"HH\\Map\":", sz, ":{")) {
+      return false;
+    }
+    auto const end = m_source.end();
+    auto const maxKeyLen = Cfg::ErrorHandling::MaxSerializedStringSize;
+    /*
+     * First, parse the entire input and allocate the keys (accessing lots of
+     * data, but mostly sequentially).
+     */
+    auto checkPoint = map->batchInsertBegin(sz);
+    int64_t i = 0;
+    for (; i < sz; ++i) {
       auto sd = readStringData(b, end, maxKeyLen);
       if (!sd) break;
-      tv->m_data.pstr = sd;
-      tv->m_type = KindOfString;
-    } else {
-      break;
+      OptString key = OptString::attach(sd);
+      auto tv = map->batchInsert(key.get());
+      tv->m_type = KindOfNull;
+      if (*b == 'i') {
+        if (!readInt64(b, end, tv->m_data.num)) break;
+        tv->m_type = KindOfInt64;
+      } else if (*b == 's') {
+        auto sd = readStringData(b, end, maxKeyLen);
+        if (!sd) break;
+        tv->m_data.pstr = sd;
+        tv->m_type = KindOfString;
+      } else {
+        break;
+      }
     }
+    /*
+     * On success, finalize the hash table insertion (very random access).
+     */
+    if (i == sz && map->tryBatchInsertEnd(checkPoint)) {
+      m_source.set(b, end);
+      return true;
+    }
+    map->batchInsertAbort(checkPoint);
+    return false;
   }
-  /*
-   * On success, finalize the hash table insertion (very random access).
-   */
-  if (i == sz && map->tryBatchInsertEnd(checkPoint)) {
-    set(b, end);
-    return true;
-  }
-  map->batchInsertAbort(checkPoint);
-  return false;
 }
 
-void VariableUnserializer::unserializeMap(ObjectData* obj, int64_t sz,
+template <class Source>
+void VariableUnserializerImpl<Source>::unserializeMap(ObjectData* obj, int64_t sz,
                                           char type) {
   if (type != 'K') throwBadFormat(obj, type);
 
@@ -1725,7 +1722,8 @@ do_unserialize:
   }
 }
 
-void VariableUnserializer::unserializeSet(ObjectData* obj, int64_t sz,
+template <class Source>
+void VariableUnserializerImpl<Source>::unserializeSet(ObjectData* obj, int64_t sz,
                                           char type) {
   if (type != 'V') throwBadFormat(obj, type);
 
@@ -1755,7 +1753,8 @@ void VariableUnserializer::unserializeSet(ObjectData* obj, int64_t sz,
   }
 }
 
-void VariableUnserializer::unserializePair(ObjectData* obj, int64_t sz,
+template <class Source>
+void VariableUnserializerImpl<Source>::unserializePair(ObjectData* obj, int64_t sz,
                                            char type) {
   assertx(sz == 2);
   if (type != 'V') throwBadFormat(obj, type);
@@ -1763,5 +1762,7 @@ void VariableUnserializer::unserializePair(ObjectData* obj, int64_t sz,
   unserializeVariant(pair->at(0));
   unserializeVariant(pair->at(1));
 }
+
+template struct VariableUnserializerImpl<ContiguousSource>;
 
 }

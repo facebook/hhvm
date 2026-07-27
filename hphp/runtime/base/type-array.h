@@ -31,7 +31,9 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct ArrayIter;
-struct VariableUnserializer;
+template <class> struct VariableUnserializerImpl;
+struct ContiguousSource;
+using VariableUnserializer = VariableUnserializerImpl<ContiguousSource>;
 
 ////////////////////////////////////////////////////////////////////////////////
 

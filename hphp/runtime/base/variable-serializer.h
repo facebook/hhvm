@@ -36,7 +36,7 @@ namespace HPHP {
  * Maintaining states during serialization of a variable. We use this single
  * class to uniformly serialize variables according to different formats.
  */
-struct VariableSerializer {
+struct VariableSerializerBase {
   /**
    * Supported formats.
    */
@@ -55,19 +55,32 @@ struct VariableSerializer {
     Last = PHPOutput,
   };
 
-  /**
-   * Constructor and destructor.
-   */
-  explicit VariableSerializer(Type type, int option = 0, int maxRecur = 3);
-  ~VariableSerializer();
-  VariableSerializer(const VariableSerializer&) = delete;
-  VariableSerializer& operator=(const VariableSerializer&) = delete;
+  // MarkedVArray and MarkedDArray are used for serialization formats, which
+  // can distinguish between all 3 possible array states (unmarked varray,
+  // unmarked vec, marked varray/vec). Now corresponds to marked vec/dict.
+  enum class ArrayKind { PHP, Dict, Vec, Keyset, VArray, DArray,
+                         MarkedVArray, MarkedDArray, BespokeTypeStructure };
 
   // Use UnlimitSerializationScope to suspend this temporarily.
   struct SerializationLimitWrapper {
     int64_t value = StringData::MaxSize;
   };
   static RDS_LOCAL(SerializationLimitWrapper, serializationSizeLimit);
+};
+
+/**
+ * Maintaining states during serialization of a variable. We use this single
+ * class to uniformly serialize variables according to different formats.
+ */
+template <class Buffer>
+struct VariableSerializerImpl : VariableSerializerBase {
+  /**
+   * Constructor and destructor.
+   */
+  explicit VariableSerializerImpl(Type type, int option = 0, int maxRecur = 3);
+  ~VariableSerializerImpl();
+  VariableSerializerImpl(const VariableSerializerImpl&) = delete;
+  VariableSerializerImpl& operator=(const VariableSerializerImpl&) = delete;
 
   /**
    * Top level entry function called by native builtins.
@@ -138,12 +151,6 @@ struct VariableSerializer {
   // Should we be calling the pure callbacks
   void setPure() { m_pure = true; }
 
-  // MarkedVArray and MarkedDArray are used for serialization formats, which
-  // can distinguish between all 3 possible array states (unmarked varray,
-  // unmarked vec, marked varray/vec). Now corresponds to marked vec/dict.
-  enum class ArrayKind { PHP, Dict, Vec, Keyset, VArray, DArray,
-                         MarkedVArray, MarkedDArray, BespokeTypeStructure };
-
   void setUnitFilename(const StringData* name) {
     assertx(name->isStatic());
     assertx(getType() == Type::Internal);
@@ -200,6 +207,8 @@ private:
   void popResourceInfo();
 
   ArrayKind getKind(const ArrayData* arr) const;
+
+  Buffer makeOutputBuffer();
 
   // The func parameter will be invoked only if there is no overflow.
   // Otherwise, writeOverflow will be invoked instead.
@@ -280,7 +289,7 @@ private:
 private:
   Type m_type;
   int m_option;                  // type specific extra options
-  StringBuffer *m_buf{nullptr};
+  Buffer* m_buf{nullptr};
   int m_indent{0};
   SavedRefMap m_refs;            // reference ids and counts for objs/arrays
   int m_valueCount{0};           // current ref index
@@ -345,6 +354,9 @@ private:
    * compress the provenance tag */
   const StringData* m_unitFilename{nullptr};
 };
+
+// Serialization always targets a plain StringBuffer.
+using VariableSerializer = VariableSerializerImpl<StringBuffer>;
 
 inline OptString internal_serialize(const Variant& v) {
   VariableSerializer vs{VariableSerializer::Type::Internal};

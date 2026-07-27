@@ -39,8 +39,12 @@ template<auto> struct AbiShim;
 //////////////////////////////////////////////////////////////////////
 
 struct VarNR;
-struct VariableSerializer;
-struct VariableUnserializer;
+template <class> struct VariableSerializerImpl;
+struct StringBuffer;
+using VariableSerializer = VariableSerializerImpl<StringBuffer>;
+template <class> struct VariableUnserializerImpl;
+struct ContiguousSource;
+using VariableUnserializer = VariableUnserializerImpl<ContiguousSource>;
 
 // reserve space for buffer that will be filled in by client.
 enum ReserveStringMode { ReserveString };

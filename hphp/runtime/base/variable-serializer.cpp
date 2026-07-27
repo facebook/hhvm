@@ -69,17 +69,21 @@ static void throwNestingException() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-VariableSerializer::SavedRefMap::~SavedRefMap() {
+template <class Buffer>
+VariableSerializerImpl<Buffer>::SavedRefMap::~SavedRefMap() {
   for (auto& i : m_mapping) {
     tvDecRefGen(const_cast<TypedValue*>(&i.first));
   }
 }
 
-VariableSerializer::~VariableSerializer() {
+template <class Buffer>
+VariableSerializerImpl<Buffer>::~VariableSerializerImpl() {
 }
 
-VariableSerializer::VariableSerializer(Type type, int option /* = 0 */,
-                                       int maxRecur /* = 3 */)
+template <class Buffer>
+VariableSerializerImpl<Buffer>::VariableSerializerImpl(Type type,
+                                                       int option /* = 0 */,
+                                                       int maxRecur /* = 3 */)
   : m_type(type)
   , m_option(option)
   , m_keepDVArrays{type != Type::Serialize}
@@ -90,8 +94,9 @@ VariableSerializer::VariableSerializer(Type type, int option /* = 0 */,
   }
 }
 
-VariableSerializer::ArrayKind
-VariableSerializer::getKind(const ArrayData* arr) const {
+template <class Buffer>
+VariableSerializerBase::ArrayKind
+VariableSerializerImpl<Buffer>::getKind(const ArrayData* arr) const {
   if (UNLIKELY(m_forcePHPArrays)) {
     return VariableSerializer::ArrayKind::PHP;
   } else if (UNLIKELY(m_forceHackArrays)) {
@@ -158,7 +163,8 @@ VariableSerializer::getKind(const ArrayData* arr) const {
   return VariableSerializer::ArrayKind::Keyset;
 }
 
-void VariableSerializer::pushObjectInfo(const OptString& objClass, char objCode) {
+template <class Buffer>
+void VariableSerializerImpl<Buffer>::pushObjectInfo(const OptString& objClass, char objCode) {
   assertx(objCode == 'O' || objCode == 'V' || objCode == 'K');
   m_objectInfos.emplace_back(
     ObjectInfo { m_objClass, m_objCode, m_rsrcName, m_rsrcId }
@@ -169,7 +175,8 @@ void VariableSerializer::pushObjectInfo(const OptString& objClass, char objCode)
   m_rsrcId = 0;
 }
 
-void VariableSerializer::pushResourceInfo(const OptString& rsrcName, int rsrcId) {
+template <class Buffer>
+void VariableSerializerImpl<Buffer>::pushResourceInfo(const OptString& rsrcName, int rsrcId) {
   m_objectInfos.emplace_back(
     ObjectInfo { m_objClass, m_objCode, m_rsrcName, m_rsrcId }
   );
@@ -179,7 +186,8 @@ void VariableSerializer::pushResourceInfo(const OptString& rsrcName, int rsrcId)
   m_rsrcId = rsrcId;
 }
 
-void VariableSerializer::popObjectInfo() {
+template <class Buffer>
+void VariableSerializerImpl<Buffer>::popObjectInfo() {
   ObjectInfo &info = m_objectInfos.back();
   m_objClass = info.objClass;
   m_objCode = info.objCode;
@@ -188,16 +196,23 @@ void VariableSerializer::popObjectInfo() {
   m_objectInfos.pop_back();
 }
 
-RDS_LOCAL(VariableSerializer::SerializationLimitWrapper,
-    VariableSerializer::serializationSizeLimit);
+RDS_LOCAL(VariableSerializerBase::SerializationLimitWrapper,
+    VariableSerializerBase::serializationSizeLimit);
 
-void VariableSerializer::popResourceInfo() {
+template <class Buffer>
+void VariableSerializerImpl<Buffer>::popResourceInfo() {
   popObjectInfo();
 }
 
-OptString VariableSerializer::serialize(const_variant_ref v, bool ret,
-                                        bool keepCount /* = false */) {
-  StringBuffer buf;
+template <class Buffer>
+Buffer VariableSerializerImpl<Buffer>::makeOutputBuffer() {
+  return Buffer{};
+}
+
+template <class Buffer>
+OptString VariableSerializerImpl<Buffer>::serialize(const_variant_ref v, bool ret,
+                                                    bool keepCount /* = false */) {
+  Buffer buf = makeOutputBuffer();
   m_buf = &buf;
   if (ret) {
     if (m_ignoreStringSizeLimit) {
@@ -222,8 +237,9 @@ OptString VariableSerializer::serialize(const_variant_ref v, bool ret,
   return OptString();
 }
 
-OptString VariableSerializer::serializeValue(const Variant& v, bool limit) {
-  StringBuffer buf;
+template <class Buffer>
+OptString VariableSerializerImpl<Buffer>::serializeValue(const Variant& v, bool limit) {
+  Buffer buf = makeOutputBuffer();
   m_buf = &buf;
   if (limit) {
     buf.setOutputLimit(serializationSizeLimit->value);
@@ -233,14 +249,15 @@ OptString VariableSerializer::serializeValue(const Variant& v, bool limit) {
   return m_buf->detach();
 }
 
-OptString VariableSerializer::serializeWithLimit(const Variant& v, int limit) {
+template <class Buffer>
+OptString VariableSerializerImpl<Buffer>::serializeWithLimit(const Variant& v, int limit) {
   if (m_type == Type::Serialize || m_type == Type::Internal ||
       m_type == Type::JSON || m_type == Type::APCSerialize ||
       m_type == Type::DebuggerSerialize) {
     assertx(false);
     return OptString();
   }
-  StringBuffer buf;
+  Buffer buf = makeOutputBuffer();
   m_buf = &buf;
   if (serializationSizeLimit->value > 0 &&
       (limit <= 0 || limit > serializationSizeLimit->value)) {
@@ -258,7 +275,8 @@ OptString VariableSerializer::serializeWithLimit(const Variant& v, int limit) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void VariableSerializer::write(bool v) {
+template <class Buffer>
+void VariableSerializerImpl<Buffer>::write(bool v) {
   switch (m_type) {
   case Type::PrintR:
     if (v) m_buf->append(1);
@@ -288,7 +306,8 @@ void VariableSerializer::write(bool v) {
   }
 }
 
-void VariableSerializer::write(int64_t v) {
+template <class Buffer>
+void VariableSerializerImpl<Buffer>::write(int64_t v) {
   switch (m_type) {
   case Type::PrintR:
   case Type::VarExport:
@@ -325,7 +344,8 @@ void VariableSerializer::write(int64_t v) {
   }
 }
 
-void VariableSerializer::write(double v) {
+template <class Buffer>
+void VariableSerializerImpl<Buffer>::write(double v) {
   auto const serde_precision = 17;
   auto const precision = m_fullFloatPrecision ? serde_precision : 14;
 
@@ -425,7 +445,8 @@ static const bool jsonNoEscape[128] = {
   true,  true,  true,  true,  true,  true,  true,  true,
 };
 
-static void appendJsonEscape(StringBuffer& sb,
+template <class Buffer>
+static void appendJsonEscape(Buffer& sb,
                              const char *s,
                              int len,
                              int options) {
@@ -550,9 +571,10 @@ utf8_decode:
   }
 }
 
-void VariableSerializer::write(const char *v, int len /* = -1 */,
-                               bool isArrayKey /* = false */,
-                               bool noQuotes /* = false */) {
+template <class Buffer>
+void VariableSerializerImpl<Buffer>::write(const char *v, int len /* = -1 */,
+                                           bool isArrayKey /* = false */,
+                                           bool noQuotes /* = false */) {
   if (v == nullptr) v = "";
   if (len < 0) len = strlen(v);
 
@@ -651,7 +673,8 @@ void VariableSerializer::write(const char *v, int len /* = -1 */,
   }
 }
 
-void VariableSerializer::write(const OptString& v) {
+template <class Buffer>
+void VariableSerializerImpl<Buffer>::write(const OptString& v) {
   if (m_type == Type::APCSerialize && !v.isNull() && v.get()->isStatic()) {
     union {
       char buf[8];
@@ -672,7 +695,8 @@ const StaticString
   s_disallowedCollectionSerde("Cannot serialize collection due to options"),
   s_disallowedObjectSerde("Cannot serialize object due to options");
 
-void VariableSerializer::write(const Object& v) {
+template <class Buffer>
+void VariableSerializerImpl<Buffer>::write(const Object& v) {
   if (!v.isNull() && m_type == Type::JSON) {
     if (Cfg::Eval::ForbidMethCallerHelperSerialize &&
         v.get()->getVMClass() == SystemLib::getMethCallerHelperClass()) {
@@ -727,8 +751,9 @@ void VariableSerializer::write(const Object& v) {
   }
 }
 
-void VariableSerializer::preventOverflow(const Object& v,
-                                         const std::function<void()>& func) {
+template <class Buffer>
+void VariableSerializerImpl<Buffer>::preventOverflow(const Object& v,
+                                                     const std::function<void()>& func) {
   TypedValue tv = make_tv<KindOfObject>(const_cast<ObjectData*>(v.get()));
   if (incNestedLevel(&tv)) {
     writeOverflow(&tv);
@@ -738,7 +763,8 @@ void VariableSerializer::preventOverflow(const Object& v,
   decNestedLevel(&tv);
 }
 
-void VariableSerializer::write(const_variant_ref v, bool isArrayKey) {
+template <class Buffer>
+void VariableSerializerImpl<Buffer>::write(const_variant_ref v, bool isArrayKey) {
   if (m_type == Type::DebugDump) {
     setRefCount(v.getRefCount());
   }
@@ -749,7 +775,8 @@ void VariableSerializer::write(const_variant_ref v, bool isArrayKey) {
   serializeVariant(v.rval(), isArrayKey);
 }
 
-void VariableSerializer::writeNull() {
+template <class Buffer>
+void VariableSerializerImpl<Buffer>::writeNull() {
   switch (m_type) {
   case Type::PrintR:
     // do nothing
@@ -781,7 +808,8 @@ void VariableSerializer::writeNull() {
   }
 }
 
-void VariableSerializer::writeOverflow(tv_rval tv) {
+template <class Buffer>
+void VariableSerializerImpl<Buffer>::writeOverflow(tv_rval tv) {
   switch (m_type) {
   case Type::PrintR:
     if (!m_objClass.empty()) {
@@ -834,7 +862,8 @@ void VariableSerializer::writeOverflow(tv_rval tv) {
   }
 }
 
-void VariableSerializer::writeRefCount() {
+template <class Buffer>
+void VariableSerializerImpl<Buffer>::writeRefCount() {
   if (m_type != Type::DebugDump) return;
 
   if (m_refCount >= 0) {
@@ -850,8 +879,9 @@ void VariableSerializer::writeRefCount() {
   m_refCount = OneReference;
 }
 
-void VariableSerializer::writeArrayHeader(int size, bool isVectorData,
-                                          VariableSerializer::ArrayKind kind) {
+template <class Buffer>
+void VariableSerializerImpl<Buffer>::writeArrayHeader(int size, bool isVectorData,
+                                                      VariableSerializer::ArrayKind kind) {
   m_arrayInfos.push_back(ArrayInfo());
   ArrayInfo &info = m_arrayInfos.back();
   info.first_element = true;
@@ -1109,7 +1139,8 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData,
   }
 }
 
-void VariableSerializer::writePropertyKey(const OptString& prop) {
+template <class Buffer>
+void VariableSerializerImpl<Buffer>::writePropertyKey(const OptString& prop) {
   const char *key = prop.data();
   int kl = prop.size();
   if (!*key && kl) {
@@ -1138,7 +1169,8 @@ void VariableSerializer::writePropertyKey(const OptString& prop) {
 }
 
 /* key MUST be a non-reference string or int */
-void VariableSerializer::writeArrayKey(
+template <class Buffer>
+void VariableSerializerImpl<Buffer>::writeArrayKey(
   const Variant& key,
   VariableSerializer::ArrayKind kind
 ) {
@@ -1252,7 +1284,8 @@ void VariableSerializer::writeArrayKey(
   }
 }
 
-void VariableSerializer::writeCollectionKey(
+template <class Buffer>
+void VariableSerializerImpl<Buffer>::writeCollectionKey(
   const Variant& key,
   VariableSerializer::ArrayKind kind
 ) {
@@ -1265,7 +1298,8 @@ void VariableSerializer::writeCollectionKey(
   writeArrayKey(key, kind);
 }
 
-void VariableSerializer::writeArrayValue(
+template <class Buffer>
+void VariableSerializerImpl<Buffer>::writeArrayValue(
   const Variant& value,
   VariableSerializer::ArrayKind kind
 ) {
@@ -1331,7 +1365,8 @@ void VariableSerializer::writeArrayValue(
   last_info.first_element = false;
 }
 
-void VariableSerializer::writeArrayFooter(
+template <class Buffer>
+void VariableSerializerImpl<Buffer>::writeArrayFooter(
   VariableSerializer::ArrayKind kind
 ) {
   ArrayInfo &info = m_arrayInfos.back();
@@ -1417,8 +1452,9 @@ void VariableSerializer::writeArrayFooter(
   m_arrayInfos.pop_back();
 }
 
-void VariableSerializer::writeSerializableObject(const OptString& clsname,
-                                                 const OptString& serialized) {
+template <class Buffer>
+void VariableSerializerImpl<Buffer>::writeSerializableObject(const OptString& clsname,
+                                                             const OptString& serialized) {
   m_buf->append("C:");
   m_buf->append(clsname.size());
   m_buf->append(":\"");
@@ -1432,13 +1468,15 @@ void VariableSerializer::writeSerializableObject(const OptString& clsname,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void VariableSerializer::indent() {
+template <class Buffer>
+void VariableSerializerImpl<Buffer>::indent() {
   for (int i = 0; i < m_indent; i++) {
     m_buf->append(' ');
   }
 }
 
-bool VariableSerializer::incNestedLevel(tv_rval tv) {
+template <class Buffer>
+bool VariableSerializerImpl<Buffer>::incNestedLevel(tv_rval tv) {
   ++m_currentDepth;
 
   switch (m_type) {
@@ -1480,7 +1518,8 @@ bool VariableSerializer::incNestedLevel(tv_rval tv) {
   return false;
 }
 
-void VariableSerializer::decNestedLevel(tv_rval tv) {
+template <class Buffer>
+void VariableSerializerImpl<Buffer>::decNestedLevel(tv_rval tv) {
   --m_currentDepth;
   --m_refs[tv].m_count;
   if (m_type == Type::DebuggerSerialize && m_maxLevelDebugger > 0) {
@@ -1488,7 +1527,8 @@ void VariableSerializer::decNestedLevel(tv_rval tv) {
   }
 }
 
-void VariableSerializer::serializeRFunc(const RFuncData* rfunc) {
+template <class Buffer>
+void VariableSerializerImpl<Buffer>::serializeRFunc(const RFuncData* rfunc) {
   switch (getType()) {
     case Type::PrintR:
     case Type::DebuggerDump:
@@ -1536,7 +1576,8 @@ void VariableSerializer::serializeRFunc(const RFuncData* rfunc) {
   }
 }
 
-void VariableSerializer::serializeFunc(const Func* func) {
+template <class Buffer>
+void VariableSerializerImpl<Buffer>::serializeFunc(const Func* func) {
   auto const name = func->fullName();
   switch (getType()) {
     case Type::VarExport:
@@ -1595,7 +1636,8 @@ void VariableSerializer::serializeFunc(const Func* func) {
   }
 }
 
-void VariableSerializer::serializeClass(const Class* cls) {
+template <class Buffer>
+void VariableSerializerImpl<Buffer>::serializeClass(const Class* cls) {
   switch (getType()) {
     case Type::VarExport:
     case Type::PHPOutput:
@@ -1658,7 +1700,8 @@ void VariableSerializer::serializeClass(const Class* cls) {
   }
 }
 
-void VariableSerializer::serializeLazyClass(LazyClassData lcls) {
+template <class Buffer>
+void VariableSerializerImpl<Buffer>::serializeLazyClass(LazyClassData lcls) {
   switch (getType()) {
     case Type::VarExport:
     case Type::PHPOutput:
@@ -1715,7 +1758,8 @@ void VariableSerializer::serializeLazyClass(LazyClassData lcls) {
   }
 }
 
-void VariableSerializer::serializeEnumClassLabel(const StringData* label) {
+template <class Buffer>
+void VariableSerializerImpl<Buffer>::serializeEnumClassLabel(const StringData* label) {
   switch (getType()) {
     case Type::VarExport:
     case Type::PHPOutput:
@@ -1747,7 +1791,8 @@ void VariableSerializer::serializeEnumClassLabel(const StringData* label) {
   }
 }
 
-void VariableSerializer::serializeClsMeth(
+template <class Buffer>
+void VariableSerializerImpl<Buffer>::serializeClsMeth(
   ClsMethDataRef clsMeth, bool skipNestCheck /* = false */) {
   auto const clsName = clsMeth->getCls()->name();
   auto const funcName = clsMeth->getFunc()->name();
@@ -1829,7 +1874,8 @@ void VariableSerializer::serializeClsMeth(
   }
 }
 
-void VariableSerializer::serializeRClsMeth(RClsMethData* rclsMeth) {
+template <class Buffer>
+void VariableSerializerImpl<Buffer>::serializeRClsMeth(RClsMethData* rclsMeth) {
   switch (getType()) {
     case Type::PrintR:
     case Type::DebuggerDump:
@@ -1884,11 +1930,12 @@ void VariableSerializer::serializeRClsMeth(RClsMethData* rclsMeth) {
   }
 }
 
+template <class Buffer>
 NEVER_INLINE
-void VariableSerializer::serializeVariant(tv_rval tv,
-                                          bool isArrayKey /* = false */,
-                                          bool skipNestCheck /* = false */,
-                                          bool noQuotes /* = false */) {
+void VariableSerializerImpl<Buffer>::serializeVariant(tv_rval tv,
+                                                      bool isArrayKey /* = false */,
+                                                      bool skipNestCheck /* = false */,
+                                                      bool noQuotes /* = false */) {
   switch (type(tv)) {
     case KindOfUninit:
     case KindOfNull:
@@ -1973,13 +2020,15 @@ void VariableSerializer::serializeVariant(tv_rval tv,
   not_reached();
 }
 
-void VariableSerializer::serializeResourceImpl(const ResourceData* res) {
+template <class Buffer>
+void VariableSerializerImpl<Buffer>::serializeResourceImpl(const ResourceData* res) {
   pushResourceInfo(res->o_getResourceName(), res->getId());
   serializeArray(ArrayData::CreateDict());
   popResourceInfo();
 }
 
-void VariableSerializer::serializeResource(const ResourceData* res) {
+template <class Buffer>
+void VariableSerializerImpl<Buffer>::serializeResource(const ResourceData* res) {
   TypedValue tv = make_tv<KindOfResource>(const_cast<ResourceHdr*>(res->hdr()));
   if (UNLIKELY(incNestedLevel(&tv))) {
     writeOverflow(&tv);
@@ -1995,7 +2044,8 @@ void VariableSerializer::serializeResource(const ResourceData* res) {
   decNestedLevel(&tv);
 }
 
-void VariableSerializer::serializeString(const OptString& str) {
+template <class Buffer>
+void VariableSerializerImpl<Buffer>::serializeString(const OptString& str) {
   if (str) {
     write(str.data(), str.size());
   } else {
@@ -2024,8 +2074,9 @@ void sortTvPairs(req::vector<std::pair<TypedValue, TypedValue>>& elems) {
   });
 }
 
-void VariableSerializer::serializeArrayImpl(const ArrayData* arr,
-                                            bool isVectorData) {
+template <class Buffer>
+void VariableSerializerImpl<Buffer>::serializeArrayImpl(const ArrayData* arr,
+                                                        bool isVectorData) {
   using AK = VariableSerializer::ArrayKind;
   AK kind = getKind(arr);
   writeArrayHeader(arr->size(), isVectorData, kind);
@@ -2057,8 +2108,9 @@ void VariableSerializer::serializeArrayImpl(const ArrayData* arr,
   writeArrayFooter(kind);
 }
 
-void VariableSerializer::serializeArray(const ArrayData* arr,
-                                        bool skipNestCheck /* = false */) {
+template <class Buffer>
+void VariableSerializerImpl<Buffer>::serializeArray(const ArrayData* arr,
+                                                    bool skipNestCheck /* = false */) {
   if (UNLIKELY(Cfg::Eval::HackArrCompatSerializeNotices)) {
     if (UNLIKELY(m_hackWarn && !m_hasHackWarned)) {
       raise_hack_arr_compat_serialize_notice(arr);
@@ -2097,7 +2149,8 @@ void VariableSerializer::serializeArray(const ArrayData* arr,
   }
 }
 
-void VariableSerializer::serializeObjProps(Array& arr) {
+template <class Buffer>
+void VariableSerializerImpl<Buffer>::serializeObjProps(Array& arr) {
   if (arr.isNull()) {
     writeNull();
     return;
@@ -2110,7 +2163,8 @@ void VariableSerializer::serializeObjProps(Array& arr) {
   decRefArr(dict);
 }
 
-void VariableSerializer::writeCollectionKVSorted(ObjectData* obj) {
+template <class Buffer>
+void VariableSerializerImpl<Buffer>::writeCollectionKVSorted(ObjectData* obj) {
   using AK = VariableSerializer::ArrayKind;
   using KVPair = std::pair<TypedValue, TypedValue>;
   req::vector<KVPair> elems;
@@ -2124,7 +2178,8 @@ void VariableSerializer::writeCollectionKVSorted(ObjectData* obj) {
   }
 }
 
-void VariableSerializer::serializeCollection(ObjectData* obj) {
+template <class Buffer>
+void VariableSerializerImpl<Buffer>::serializeCollection(ObjectData* obj) {
   using AK = VariableSerializer::ArrayKind;
   int64_t sz = collections::getSize(obj);
   auto type = obj->collectionType();
@@ -2204,7 +2259,8 @@ void VariableSerializer::serializeCollection(ObjectData* obj) {
  * exports a __debugInfo() magic method.
  * In which case, call that and use the array it returns.
  */
-Array VariableSerializer::getSerializeProps(const ObjectData* obj) const {
+template <class Buffer>
+Array VariableSerializerImpl<Buffer>::getSerializeProps(const ObjectData* obj) const {
   if (getType() == VariableSerializer::Type::VarExport) {
     Array props = Array::CreateDict();
     for (ArrayIter iter(obj->toArray(false, true)); iter; ++iter) {
@@ -2270,7 +2326,8 @@ Array VariableSerializer::getSerializeProps(const ObjectData* obj) const {
   not_reached();
 }
 
-void VariableSerializer::serializeObjectImpl(const ObjectData* obj) {
+template <class Buffer>
+void VariableSerializerImpl<Buffer>::serializeObjectImpl(const ObjectData* obj) {
   bool handleSleep = false;
   Variant serializableNativeData = init_null();
   Variant ret;
@@ -2534,7 +2591,8 @@ void VariableSerializer::serializeObjectImpl(const ObjectData* obj) {
   }
 }
 
-void VariableSerializer::serializeObject(const ObjectData* obj) {
+template <class Buffer>
+void VariableSerializerImpl<Buffer>::serializeObject(const ObjectData* obj) {
   TypedValue tv = make_tv<KindOfObject>(const_cast<ObjectData*>(obj));
   if (UNLIKELY(incNestedLevel(&tv))) {
     writeOverflow(&tv);
@@ -2544,12 +2602,15 @@ void VariableSerializer::serializeObject(const ObjectData* obj) {
   decNestedLevel(&tv);
 }
 
-void VariableSerializer::serializeObject(const Object& obj) {
+template <class Buffer>
+void VariableSerializerImpl<Buffer>::serializeObject(const Object& obj) {
   if (obj) {
     serializeObject(obj.get());
   } else {
     writeNull();
   }
 }
+
+template struct VariableSerializerImpl<StringBuffer>;
 
 }

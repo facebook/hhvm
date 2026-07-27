@@ -48,6 +48,19 @@ class ServiceCatalog {
   virtual std::vector<std::string_view> serviceUris() const = 0;
 
   /**
+   * Exposes descriptor enumeration for callers that do not need URI keys.
+   */
+  virtual std::vector<const ServiceDescriptor*> services() const = 0;
+
+  /**
+   * Finds a service by the generated Thrift service name.
+   *
+   * This is a convenience for application code that starts from service names;
+   * URI lookup remains the catalog identity for unambiguous keys.
+   */
+  const ServiceDescriptor* getServiceByName(std::string_view name) const;
+
+  /**
    * Like `getService`, but throws `std::out_of_range` when the URI is absent.
    */
   const ServiceDescriptor& getServiceOrThrow(std::string_view uri) const {

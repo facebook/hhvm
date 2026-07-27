@@ -77,12 +77,24 @@ class ServiceDescriptor {
     std::vector<Exception> serverExceptions;
   };
 
+  struct RpcStruct {
+    std::vector<type_system::FieldDefinition> fields;
+  };
+
   struct Function {
     std::string name;
     std::string uri;
     std::vector<Param> params;
     std::optional<type_system::TypeRef> responseType;
     std::vector<Exception> exceptions;
+
+    // Headerless RPC request payload shape for generic protocol adapters:
+    // one unqualified field per declared function parameter.
+    RpcStruct requestEnvelope() const;
+    // Headerless RPC response payload shape for generic protocol adapters:
+    // optional success field 0, when present, plus declared exceptions.
+    RpcStruct responseEnvelope() const;
+
     // Both stream and sink are set for bidirectional-streaming methods.
     std::optional<Stream> stream;
     std::optional<Sink> sink;

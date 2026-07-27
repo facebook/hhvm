@@ -1642,6 +1642,15 @@ class ServiceCatalogFacade final : public dynamic::ServiceCatalog {
     return uris;
   }
 
+  std::vector<const dynamic::ServiceDescriptor*> services() const override {
+    std::vector<const dynamic::ServiceDescriptor*> services;
+    services.reserve(services_.size());
+    for (const auto& service : services_) {
+      services.push_back(service.get());
+    }
+    return services;
+  }
+
  private:
   std::vector<std::unique_ptr<ServiceDescriptorFacade>> services_;
   folly::F14FastMap<std::string_view, const ServiceDescriptorFacade*> byUri_;

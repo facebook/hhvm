@@ -16,7 +16,63 @@
 
 #include <thrift/lib/cpp2/dynamic/ServiceDescriptor.h>
 
+#include <thrift/lib/cpp2/dynamic/ServiceCatalog.h>
+
+#include <optional>
+#include <stdexcept>
+#include <string>
+#include <string_view>
+#include <vector>
+
 namespace apache::thrift::dynamic {
+
+const ServiceDescriptor* FOLLY_NULLABLE
+ServiceCatalog::getServiceByName(std::string_view name) const {
+  for (const ServiceDescriptor* service : services()) {
+    if (service != nullptr && service->serviceName() == name) {
+      return service;
+    }
+  }
+  return nullptr;
+}
+
+ServiceDescriptor::RpcStruct ServiceDescriptor::Function::requestEnvelope()
+    const {
+  RpcStruct envelope;
+  envelope.fields.reserve(params.size());
+  for (const auto& param : params) {
+    envelope.fields.emplace_back(
+        type_system::FieldIdentity{param.id, param.name},
+        type_system::PresenceQualifier::UNQUALIFIED,
+        param.type,
+        std::nullopt,
+        type_system::AnnotationsMap{});
+  }
+  return envelope;
+}
+
+ServiceDescriptor::RpcStruct ServiceDescriptor::Function::responseEnvelope()
+    const {
+  RpcStruct envelope;
+  envelope.fields.reserve(exceptions.size() + (responseType ? 1 : 0));
+  if (responseType.has_value()) {
+    envelope.fields.emplace_back(
+        type_system::FieldIdentity{FieldId{0}, "success"},
+        type_system::PresenceQualifier::OPTIONAL_,
+        *responseType,
+        std::nullopt,
+        type_system::AnnotationsMap{});
+  }
+  for (const auto& ex : exceptions) {
+    envelope.fields.emplace_back(
+        type_system::FieldIdentity{ex.id, ex.name},
+        type_system::PresenceQualifier::OPTIONAL_,
+        ex.type,
+        std::nullopt,
+        type_system::AnnotationsMap{});
+  }
+  return envelope;
+}
 
 const ServiceDescriptor::Function& ServiceDescriptor::getFunction(
     std::string_view uri) const {

@@ -2442,11 +2442,12 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
             # pyre-ignore[8]: Intentional for test
             s_default.unqualified_enum = None
 
-    def test_fbthrift_copy_from(self) -> None:
+    def test_fbthrift_shallow_copy_i_know_what_im_doing(self) -> None:
         """
-        `lhs.fbthrift_copy_from(rhs)` copies the content of the `rhs` struct
-        into the lhs struct. It is semantically equivalent to assigning each
-        field of `rhs` to `lhs`."
+        `lhs.fbthrift_shallow_copy_I_KNOW_WHAT_IM_DOING(rhs)` shallow-copies the
+        content of the `rhs` struct into the lhs struct. It is semantically
+        equivalent to assigning each field of `rhs` to `lhs` (reference
+        semantics for nested structs and containers).
         """
         # Struct with primitive fields
         s1 = TestStructAllThriftPrimitiveTypesMutable(
@@ -2462,7 +2463,7 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
 
         s2 = TestStructAllThriftPrimitiveTypesMutable()
         self.assertNotEqual(s1, s2)
-        s2.fbthrift_copy_from(s1)
+        s2.fbthrift_shallow_copy_I_KNOW_WHAT_IM_DOING(s1)
         self.assertEqual(s1, s2)
 
         # Struct with container fields
@@ -2474,10 +2475,10 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
 
         s4 = TestStructAllThriftContainerTypesMutable()
         self.assertNotEqual(s3, s4)
-        s4.fbthrift_copy_from(s3)
+        s4.fbthrift_shallow_copy_I_KNOW_WHAT_IM_DOING(s3)
         self.assertEqual(s3, s4)
 
-        # Container assignment is refernce semantics, after `fbthrift_copy_from()`
+        # Container assignment is refernce semantics, after `fbthrift_shallow_copy_I_KNOW_WHAT_IM_DOING()`
         # s3 and s4 container fields are the "same" containers.
         self.assertEqual([1, 2, 3], s3.unqualified_list_i32)
         self.assertEqual([1, 2, 3], s4.unqualified_list_i32)
@@ -2494,10 +2495,10 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
 
         s6 = TestStructNested_0_Mutable()
         self.assertNotEqual(s5, s6)
-        s6.fbthrift_copy_from(s5)
+        s6.fbthrift_shallow_copy_I_KNOW_WHAT_IM_DOING(s5)
         self.assertEqual(s5, s6)
 
-        # Struct assignment is refernce semantics, after `fbthrift_copy_from()`
+        # Struct assignment is refernce semantics, after `fbthrift_shallow_copy_I_KNOW_WHAT_IM_DOING()`
         # s5 and s4 struct fields are the "same" structs.
         self.assertEqual(3, s5.nested_1.i32_field)
         self.assertEqual(3, s6.nested_1.i32_field)
@@ -2514,4 +2515,219 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
             "Cannot copy from.*TestStructAllThriftContainerTypes.*to"
             ".*TestStructAllThriftPrimitiveTypes",
         ):
-            s7.fbthrift_copy_from(TestStructAllThriftContainerTypesMutable())
+            s7.fbthrift_shallow_copy_I_KNOW_WHAT_IM_DOING(
+                TestStructAllThriftContainerTypesMutable()
+            )
+
+    def _assert_wire_matches_access(self, obj: MutableStructOrUnion) -> None:
+        """The serialize->deserialize view must equal the in-memory view.
+
+        Attribute access may return a value from `_fbthrift_field_cache`, while
+        serialization reads `_fbthrift_data`. If the two ever diverge, the
+        round-tripped struct will differ from `obj` (whose `__eq__` reads through
+        the cached-access path), catching a cache/data desync.
+        """
+        encoded = mutable_serializer.serialize(
+            obj, protocol=mutable_serializer.Protocol.BINARY
+        )
+        decoded = mutable_serializer.deserialize(
+            type(obj), encoded, protocol=mutable_serializer.Protocol.BINARY
+        )
+        self.assertEqual(obj, decoded)
+
+    def test_fbthrift_shallow_copy_nested_instance_present_before_copy(
+        self,
+    ) -> None:
+        """Scenario 1: the nested struct instance is appended to the internal
+        data list *before* the copy (here, both by explicit construction and by
+        accessing `src.nested_1` first). The same instance is therefore present
+        in the data slice that the shallow copy shares, so source and
+        destination must resolve `nested_1` to the *same* object.
+        """
+        n1 = TestStructNested_1_Mutable(
+            i32_field=3, nested_2=TestStructNested_2_Mutable(i32_field=2)
+        )
+        src = TestStructNested_0_Mutable(i32_field=5, nested_1=n1)
+
+        # Access before the copy: appends the instance / populates src's cache.
+        self.assertEqual(3, src.nested_1.i32_field)
+
+        dst = TestStructNested_0_Mutable()
+        dst.fbthrift_shallow_copy_I_KNOW_WHAT_IM_DOING(src)
+
+        # Access via the destination too, populating dst's field cache with the
+        # nested instance. Both aliases resolve to the very same object, because
+        # that instance lives at `nested_data[-1]` in the shared data slice.
+        self.assertIs(src.nested_1, dst.nested_1)
+        self.assertIs(src.nested_1.nested_2, dst.nested_1.nested_2)
+
+        # With dst's cache populated, mutate through the *source* and read back
+        # through dst's cache: dst is not stale because its cached value is the
+        # shared nested instance, not a snapshot of its fields.
+        src.nested_1.i32_field = 77
+        self.assertEqual(77, dst.nested_1.i32_field)
+
+        # Mutate the shared nested struct through the destination as well.
+        dst.nested_1.i32_field = 33
+        dst.nested_1.nested_2.i32_field = 22
+
+        # Visible through the source's (pre-populated) cached view.
+        self.assertEqual(33, src.nested_1.i32_field)
+        self.assertEqual(22, src.nested_1.nested_2.i32_field)
+
+        # Attribute access agrees with the serialized bytes for both.
+        self._assert_wire_matches_access(src)
+        self._assert_wire_matches_access(dst)
+
+    def test_fbthrift_shallow_copy_nested_instance_created_after_copy(
+        self,
+    ) -> None:
+        """Scenario 2: the nested field is default-constructed and never accessed
+        before the copy, so *no* nested instance exists in the shared data slice
+        at copy time. The instance is lazily created and appended on first access
+        *after* the copy. Because the underlying data list is shared, whichever
+        alias is accessed first must append into the shared list so the other
+        alias sees the same instance. Verified for both first-access orderings.
+        """
+        # First access through the destination.
+        src = TestStructNested_0_Mutable(i32_field=5)
+        dst = TestStructNested_0_Mutable()
+        dst.fbthrift_shallow_copy_I_KNOW_WHAT_IM_DOING(src)
+
+        # No instance appended yet on either side; first touch is via dst.
+        dst.nested_1.i32_field = 33
+        dst.nested_1.nested_2.i32_field = 22
+
+        self.assertIs(src.nested_1, dst.nested_1)
+        self.assertEqual(33, src.nested_1.i32_field)
+        self.assertEqual(22, src.nested_1.nested_2.i32_field)
+        self._assert_wire_matches_access(src)
+        self._assert_wire_matches_access(dst)
+
+        # First access through the source (reverse ordering).
+        src2 = TestStructNested_0_Mutable(i32_field=5)
+        dst2 = TestStructNested_0_Mutable()
+        dst2.fbthrift_shallow_copy_I_KNOW_WHAT_IM_DOING(src2)
+
+        src2.nested_1.i32_field = 44
+        self.assertIs(src2.nested_1, dst2.nested_1)
+        self.assertEqual(44, dst2.nested_1.i32_field)
+        self._assert_wire_matches_access(src2)
+        self._assert_wire_matches_access(dst2)
+
+    def test_fbthrift_shallow_copy_wire_matches_access_after_container_mutation(
+        self,
+    ) -> None:
+        """Mutating a shared container keeps the cache and `_fbthrift_data` in
+        sync, verified against the wire in both directions."""
+        src = TestStructAllThriftContainerTypesMutable(
+            unqualified_list_i32=to_thrift_list([1, 2, 3]),
+            unqualified_map_string_i32=to_thrift_map({"a": 1}),
+        )
+
+        # Populate src's field cache before the copy.
+        self.assertEqual([1, 2, 3], src.unqualified_list_i32)
+        self.assertEqual({"a": 1}, src.unqualified_map_string_i32)
+
+        dst = TestStructAllThriftContainerTypesMutable()
+        dst.fbthrift_shallow_copy_I_KNOW_WHAT_IM_DOING(src)
+
+        # Mutate through the destination; observe through the source.
+        dst.unqualified_list_i32.append(4)
+        dst.unqualified_map_string_i32["b"] = 2
+        self.assertEqual([1, 2, 3, 4], src.unqualified_list_i32)
+        self.assertEqual({"a": 1, "b": 2}, src.unqualified_map_string_i32)
+
+        # Mutate through the source; observe through the destination.
+        src.unqualified_list_i32.append(5)
+        self.assertEqual([1, 2, 3, 4, 5], dst.unqualified_list_i32)
+
+        self._assert_wire_matches_access(src)
+        self._assert_wire_matches_access(dst)
+
+    def test_fbthrift_shallow_copy_wire_matches_access_list_of_struct(
+        self,
+    ) -> None:
+        """`list<struct>` combines container sharing with struct-instance
+        sharing: mutating a struct element through one alias must be visible
+        through the other and stay consistent with the wire."""
+        element = TestStructAsListElementMutable(
+            string_field="a", list_int=to_thrift_list([1, 2])
+        )
+        src = TestStructContainerAssignmentMutable(
+            list_struct=to_thrift_list([element])
+        )
+
+        # Populate src's field cache (list wrapper + element instance) first.
+        self.assertEqual("a", src.list_struct[0].string_field)
+
+        dst = TestStructContainerAssignmentMutable()
+        dst.fbthrift_shallow_copy_I_KNOW_WHAT_IM_DOING(src)
+
+        # The list wrapper is a distinct instance per struct (each caches its
+        # own MutableList), but both wrap the same underlying internal list, and
+        # a struct element resolves to the *same* anchored instance on both.
+        self.assertIsNot(src.list_struct, dst.list_struct)
+        self.assertIs(src.list_struct[0], dst.list_struct[0])
+
+        # With dst's element instance cached (via the assertIs access above),
+        # mutate a sub-field through the *source* and read back through dst:
+        # dst is not stale because the element it holds is the shared instance.
+        src.list_struct[0].string_field = "src-mutated"
+        self.assertEqual("src-mutated", dst.list_struct[0].string_field)
+
+        # Mutate a struct element (and its own nested list) through the copy.
+        dst.list_struct[0].string_field = "z"
+        dst.list_struct[0].list_int.append(3)
+
+        # Element mutations are visible through the source alias.
+        self.assertEqual("z", src.list_struct[0].string_field)
+        self.assertEqual([1, 2, 3], src.list_struct[0].list_int)
+
+        # Appending a new element through the source is visible on the copy.
+        src.list_struct.append(TestStructAsListElementMutable(string_field="b"))
+        self.assertEqual(2, len(dst.list_struct))
+        self.assertEqual("b", dst.list_struct[1].string_field)
+
+        self._assert_wire_matches_access(src)
+        self._assert_wire_matches_access(dst)
+
+    def test_fbthrift_shallow_copy_adapted_field_wire_matches_access(
+        self,
+    ) -> None:
+        """Adapted fields cache the *adapted* Python value (not a view bound to
+        `_fbthrift_data`), so verify the copy's cached-access value agrees with
+        the wire, and that field reassignment stays isolated."""
+        src = TestStructAdaptedTypesMutable(
+            unqualified_adapted_i32_to_datetime=datetime.fromtimestamp(1000),
+            # Set the optional adapted field too: accessing an unset optional
+            # adapted field invokes the adapter with `None` (orthogonal to this
+            # test), so populate it to keep the round-trip focused on the copy.
+            optional_adapted_i32_to_datetime=datetime.fromtimestamp(2000),
+            unqualified_adapted_string_to_i32=123,
+        )
+
+        # Populate src's adapter cache before the copy.
+        self.assertEqual(
+            datetime.fromtimestamp(1000), src.unqualified_adapted_i32_to_datetime
+        )
+        self.assertEqual(123, src.unqualified_adapted_string_to_i32)
+
+        dst = TestStructAdaptedTypesMutable()
+        dst.fbthrift_shallow_copy_I_KNOW_WHAT_IM_DOING(src)
+
+        # The copy's freshly-computed adapter values match both the source and
+        # the serialized bytes.
+        self.assertEqual(
+            datetime.fromtimestamp(1000), dst.unqualified_adapted_i32_to_datetime
+        )
+        self.assertEqual(123, dst.unqualified_adapted_string_to_i32)
+        self._assert_wire_matches_access(dst)
+
+        # Reassigning an adapted field is field-level (not aliased): the source
+        # is unchanged, and both remain wire-consistent.
+        dst.unqualified_adapted_string_to_i32 = 456
+        self.assertEqual(456, dst.unqualified_adapted_string_to_i32)
+        self.assertEqual(123, src.unqualified_adapted_string_to_i32)
+        self._assert_wire_matches_access(src)
+        self._assert_wire_matches_access(dst)

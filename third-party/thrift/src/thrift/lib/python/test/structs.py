@@ -33,7 +33,7 @@ import thrift.python.mutable_serializer as mutable_serializer
 import thrift.python.serializer as immutable_serializer
 import thrift.python.types
 from folly.iobuf import IOBuf
-from parameterized import parameterized_class
+from parameterized import parameterized, parameterized_class
 from test_thrift.thrift_mutable_types import (
     _Reserved as _ReservedMutable,
     DefaultedFields as MutableDefaultedFields,
@@ -87,6 +87,32 @@ ListT = TypeVar("ListT")
 SetT = TypeVar("SetT")
 MapKey = TypeVar("MapKey")
 MapValue = TypeVar("MapValue")
+CopyT = TypeVar("CopyT")
+
+
+def _deepcopy_struct(src: CopyT, is_mutable_run: bool) -> CopyT:
+    return copy.deepcopy(src)
+
+
+def _shallow_copy_struct(src: CopyT, is_mutable_run: bool) -> CopyT:
+    """Copy via the shallow-copy API. Unlike deepcopy, the result aliases `src`'s
+    internal data (shared nested structs/containers). The API is mutable-only;
+    for the immutable run this degrades to `copy.copy` (which returns `src`
+    itself, since immutable structs are their own copies)."""
+    if not is_mutable_run:
+        return copy.copy(src)
+    dst = type(src)()
+    # pyre-ignore[16]: mutable-struct-only method
+    dst.fbthrift_shallow_copy_I_KNOW_WHAT_IM_DOING(src)
+    return dst
+
+
+# (label, copy_fn, shares_reference) — deepcopy is independent; the shallow-copy
+# API aliases the source (only meaningful on the mutable run).
+_COPY_FUNCS: list[tuple[str, object, bool]] = [
+    ("deepcopy", _deepcopy_struct, False),
+    ("shallow_copy", _shallow_copy_struct, True),
+]
 
 
 def _get_nested_container_typedef_field(s: customized) -> StrList2D:
@@ -1046,18 +1072,26 @@ class StructDeepcopyTests(unittest.TestCase):
         self.assertNotEqual(d1.location_map[47][0].lat, d2.location_map[47][0].lat)
         self.assertEqual(d1.location_map[47][0].lon, d2.location_map[47][0].lon)
 
-    def test_nested_struct_deepcopy(self) -> None:
+    @parameterized.expand(_COPY_FUNCS)
+    def test_nested_struct_copy(
+        self, _label: str, copy_fn: object, shares_reference: bool
+    ) -> None:
         n = self.Nested3(c=self.easy(name="foo", val=42))
 
-        n_copy = copy.deepcopy(n)
+        # pyre-ignore[29]: copy_fn is callable
+        n_copy = copy_fn(n, self.is_mutable_run)
         easy_copy = n_copy.c
         self.assertEqual(n.c, easy_copy)
 
-        if self.is_mutable_run:
-            self.assertIsNot(n.c, easy_copy)
-        else:
+        if not self.is_mutable_run:
             self.assertIs(n, n_copy)
             return
+
+        # deepcopy is independent; the shallow-copy API aliases the source.
+        if shares_reference:
+            self.assertIs(n.c, easy_copy)
+        else:
+            self.assertIsNot(n.c, easy_copy)
 
         assert isinstance(easy_copy, mutable_test_types.easy)
         # pyrefly: ignore [bad-assignment]
@@ -1068,26 +1102,73 @@ class StructDeepcopyTests(unittest.TestCase):
         json_copy = json.loads(
             self.serializer.serialize(n_copy, protocol=Protocol.JSON).decode()
         )
+        # Mutation of the nested struct must be visible on both attribute access
+        # and serialization (regression for the D78775824 serialization drop).
         self.assertEqual(n_copy.c.name, "bar")
         self.assertEqual(n_copy.c.val, 128)
         self.assertEqual(json_copy["c"]["name"], "bar")
         self.assertEqual(json_copy["c"]["val"], 128)
 
-    def test_nested_struct_list_deepcopy(self) -> None:
+    @parameterized.expand(_COPY_FUNCS)
+    def test_nested_struct_reassign_after_copy(
+        self, _label: str, copy_fn: object, _shares_reference: bool
+    ) -> None:
+        n = self.Nested3(c=self.easy(name="foo", val=42))
+
+        # pyre-ignore[29]: copy_fn is callable
+        n_copy = copy_fn(n, self.is_mutable_run)
+
+        if not self.is_mutable_run:
+            self.assertIs(n, n_copy)
+            return
+
+        # Reassigning the field rebinds only the copy's own slot. Even when the
+        # shallow-copy API aliases the source's internal data (shared nested
+        # struct), reassignment does not leak back to the source -- only
+        # in-place mutation of the shared instance does.
+        # pyrefly: ignore [bad-assignment]
+        n_copy.c = self.easy(name="bar", val=128)
+
+        self.assertIsNot(n.c, n_copy.c)
+        self.assertEqual(n.c.name, "foo")
+        self.assertEqual(n.c.val, 42)
+        self.assertEqual(n_copy.c.name, "bar")
+        self.assertEqual(n_copy.c.val, 128)
+
+        # Attribute access and serialization must agree on both structs.
+        src_json = json.loads(
+            self.serializer.serialize(n, protocol=Protocol.JSON).decode()
+        )
+        copy_json = json.loads(
+            self.serializer.serialize(n_copy, protocol=Protocol.JSON).decode()
+        )
+        self.assertEqual(src_json["c"]["name"], "foo")
+        self.assertEqual(src_json["c"]["val"], 42)
+        self.assertEqual(copy_json["c"]["name"], "bar")
+        self.assertEqual(copy_json["c"]["val"], 128)
+
+    @parameterized.expand(_COPY_FUNCS)
+    def test_nested_struct_list_copy(
+        self, _label: str, copy_fn: object, shares_reference: bool
+    ) -> None:
         n = self.NestedStructContainers(
             # pyre-ignore[6]: need to make ThriftListWrapper a Sequence
             easy_list=self.to_list([self.easy(name="foo", val=42)])
         )
 
-        n_copy = copy.deepcopy(n)
+        # pyre-ignore[29]: copy_fn is callable
+        n_copy = copy_fn(n, self.is_mutable_run)
         e_copy = n_copy.easy_list[0]
         self.assertEqual(n.easy_list[0], e_copy)
 
-        if self.is_mutable_run:
-            self.assertIsNot(n.easy_list[0], e_copy)
-        else:
+        if not self.is_mutable_run:
             self.assertIs(n, n_copy)
             return
+
+        if shares_reference:
+            self.assertIs(n.easy_list[0], e_copy)
+        else:
+            self.assertIsNot(n.easy_list[0], e_copy)
 
         assert isinstance(e_copy, mutable_test_types.easy)
         # pyrefly: ignore [bad-assignment]
@@ -1100,25 +1181,31 @@ class StructDeepcopyTests(unittest.TestCase):
         )
         self.assertEqual(n_copy.easy_list[0].name, "bar")
         self.assertEqual(n_copy.easy_list[0].val, 128)
-        # BAD: the serialized values don't match the mutated python values
         self.assertEqual(json_copy["easy_list"][0]["name"], "bar")
         self.assertEqual(json_copy["easy_list"][0]["val"], 128)
 
-    def test_nested_struct_map_deepcopy(self) -> None:
+    @parameterized.expand(_COPY_FUNCS)
+    def test_nested_struct_map_copy(
+        self, _label: str, copy_fn: object, shares_reference: bool
+    ) -> None:
         n = self.NestedStructContainers(
             # pyre-ignore[6]: need to make ThriftListWrapper a Sequence
             easy_map=self.to_map({"baz": self.easy(name="foo", val=42)})
         )
 
-        n_copy = copy.deepcopy(n)
+        # pyre-ignore[29]: copy_fn is callable
+        n_copy = copy_fn(n, self.is_mutable_run)
         e_copy = n_copy.easy_map["baz"]
         self.assertEqual(n.easy_map["baz"], e_copy)
 
-        if self.is_mutable_run:
-            self.assertIsNot(n.easy_map["baz"], e_copy)
-        else:
+        if not self.is_mutable_run:
             self.assertIs(n, n_copy)
             return
+
+        if shares_reference:
+            self.assertIs(n.easy_map["baz"], e_copy)
+        else:
+            self.assertIsNot(n.easy_map["baz"], e_copy)
 
         assert isinstance(e_copy, mutable_test_types.easy)
         # pyrefly: ignore [bad-assignment]
@@ -1131,6 +1218,5 @@ class StructDeepcopyTests(unittest.TestCase):
         )
         self.assertEqual(n_copy.easy_map["baz"].name, "bar")
         self.assertEqual(n_copy.easy_map["baz"].val, 128)
-        # NOTE: after landing a mitigation, these work as expected
         self.assertEqual(json_copy["easy_map"]["baz"]["name"], "bar")
         self.assertEqual(json_copy["easy_map"]["baz"]["val"], 128)

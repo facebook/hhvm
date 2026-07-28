@@ -563,7 +563,7 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         self.assertEqual(41, s_mutable.nested_1.i32_field)
         self.assertEqual(40, s_mutable.nested_1.nested_2.i32_field)
 
-    def test_fbthrift_copy_from(self) -> None:
+    def test_fbthrift_shallow_copy_i_know_what_im_doing(self) -> None:
         """
         struct TestStructNested_2 { 1: i32 i32_field; }
         struct TestStructNested_1 { 1: i32 i32_field; 2: TestStructNested_2 nested_2; }
@@ -578,22 +578,36 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         )
         dst = TestStructNested_0_Mutable(i32_field=1)
 
-        dst.fbthrift_copy_from(src)
+        dst.fbthrift_shallow_copy_I_KNOW_WHAT_IM_DOING(src)
 
         self.assertEqual(42, dst.i32_field)
         self.assertEqual(41, dst.nested_1.i32_field)
         self.assertEqual(40, dst.nested_1.nested_2.i32_field)
         self.assertEqual(src, dst)
 
-        # `fbthrift_copy_from` is a shallow copy: the nested struct field is
-        # shared by reference, so mutating it through `src` is visible through
-        # `dst`.
+        # `fbthrift_shallow_copy_I_KNOW_WHAT_IM_DOING` is a shallow copy: the
+        # nested struct field is shared by reference, so mutating it through
+        # `src` is visible through `dst`.
         src.nested_1.i32_field = 100
         self.assertEqual(100, dst.nested_1.i32_field)
 
+        # After the aliased mutation, attribute access (which may read from the
+        # per-instance `_fbthrift_field_cache`) must still agree with what
+        # serialization reads from `_fbthrift_data`, for both structs.
+        for obj in (src, dst):
+            encoded = mutable_serializer.serialize(
+                obj, protocol=mutable_serializer.Protocol.BINARY
+            )
+            decoded = mutable_serializer.deserialize(
+                type(obj), encoded, protocol=mutable_serializer.Protocol.BINARY
+            )
+            self.assertEqual(obj, decoded)
+
         # Copying from a different type raises.
         with self.assertRaisesRegex(TypeError, "Cannot copy from"):
-            dst.fbthrift_copy_from(TestStruct(unqualified_string="x"))
+            dst.fbthrift_shallow_copy_I_KNOW_WHAT_IM_DOING(
+                TestStruct(unqualified_string="x")
+            )
 
     def test_conversion_nested_containers(self) -> None:
         s = TestStructWithNestedContainersImmutable(

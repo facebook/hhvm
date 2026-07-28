@@ -350,12 +350,16 @@ cdef class MutableStruct(MutableStructOrUnion):
     def __replace__(self, **kwargs):
         return self(**kwargs)
 
-    def fbthrift_copy_from(self, other):
+    def fbthrift_shallow_copy_I_KNOW_WHAT_IM_DOING(self, other):
         """
-        Copies the content of `other` into the current struct.
+        Shallow-copies the content of `other` into the current struct.
 
-        It resets the current struct and then it assigns each field of `other`
-        to `self`.
+        WARNING: this is a SHALLOW copy. It assigns `other`'s internal data
+        slice directly, so `self` and `other` share references to nested structs
+        and containers. Mutating a nested struct/container through one is visible
+        through the other. This is fast but aliasing; prefer `copy.deepcopy` for
+        an independent copy. The explicit name is intentional: callers must
+        acknowledge the aliasing semantics.
         """
         if type(self) is not type(other):
             raise TypeError(f"Cannot copy from {type(other)} to {type(self)}")

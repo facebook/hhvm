@@ -208,8 +208,8 @@ TEST(CompilerTest, params) {
     service MyService {
       void good(1: i32 i);
       void semi(1: i32 i;); # expected-warning: unexpected ';'
-      void opt(1: optional i32 i); # expected-warning: 'optional' is not permitted on a parameter
-      void req(1: required i32 i); # expected-warning: 'required' is not permitted on a parameter
+      void opt(1: optional i32 i); # expected-error: 'optional' is not permitted on a parameter
+      void req(1: required i32 i); # expected-error: 'required' is not permitted on a parameter
     }
   )");
 }

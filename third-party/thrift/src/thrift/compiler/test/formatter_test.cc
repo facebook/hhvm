@@ -1503,24 +1503,6 @@ enum RackGroupType {
 )");
 }
 
-TEST(FormatterTest, preservesExplicitOptionalFunctionParams) {
-  expect_format(
-      R"(service Foo {
-  void getSceneObjects(
-    1: string session_id,
-    2: optional ObjectQuery query,
-  ) throws (1: PerceptionException e);
-}
-)",
-      R"(service Foo {
-  void getSceneObjects(
-    1: string session_id,
-    2: optional ObjectQuery query,
-  ) throws (1: PerceptionException e);
-}
-)");
-}
-
 TEST(FormatterTest, preservesSourceInlineAnnotationValues) {
   expect_format(
       R"THRIFT(@hack.Attributes{

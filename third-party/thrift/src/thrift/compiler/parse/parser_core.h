@@ -768,7 +768,7 @@ class parser_core {
       qual = t_field_qualifier::required;
     }
     if (qual != t_field_qualifier::none && kind == field_kind::param) {
-      diags_.warning(
+      diags_.error(
           qual_tok.range.begin,
           "'{}' is not permitted on a parameter",
           to_string(qual_tok.kind));

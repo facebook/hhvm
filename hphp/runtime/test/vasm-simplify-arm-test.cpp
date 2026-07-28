@@ -211,6 +211,40 @@ void testArmLeaLowering() {
   EXPECT_NE(scaledDisp.find("0x10"), std::string::npos);
 }
 
+void testArmLeaChainSimplification() {
+  auto const base = Vreg64{arm::rarg(2)};
+  auto const index = Vreg64{arm::rarg(3)};
+  auto const check = [] (const char* name, Vptr first, int32_t secondDisp,
+                         Vptr expected) {
+    SCOPED_TRACE(name);
+
+    Vunit unit;
+    unit.entry = unit.makeBlock(AreaIndex::Main, 1);
+    Vout v(unit, unit.entry);
+
+    auto const tmp = Vreg64{v.makeReg()};
+    auto const dst = Vreg64{v.makeReg()};
+    v << lea{first, tmp};
+    v << lea{tmp[secondDisp], dst};
+
+    simplify(unit);
+
+    auto const& code = unit.blocks[unit.entry].code;
+    ASSERT_EQ(code.size(), 1);
+    ASSERT_EQ(code[0].op, Vinstr::lea);
+    EXPECT_EQ(code[0].lea_.s, expected);
+    EXPECT_EQ(code[0].lea_.d, dst);
+  };
+
+  // Test ARM chained leas that fold into addresses valid for lea emission even
+  // though they would be invalid memory operands:
+  //   lea base[index * 8], tmp; lea tmp[16], dst => lea base[index * 8 + 16], dst
+  //   lea base[256], tmp; lea tmp[272], dst => lea base[528], dst
+  check("index and displacement", Vptr{base, index, 8, 0}, 16,
+        Vptr{base, index, 8, 16});
+  check("large base displacement", Vptr{base, 256}, 272, Vptr{base, 528});
+}
+
 void testArmStoreOffsetNoMaterialize() {
   // A store to a constant offset that fits the 64-bit scaled-imm12 addressing
   // form (528 = 0x210, a multiple of 8 below 32760) must fold the offset into
@@ -1157,6 +1191,10 @@ void testArmFoldTestJccNonAdjacentRejectsClobber() {
 
 TEST(Vasm, ArmLeaLowering) {
   testArmLeaLowering();
+}
+
+TEST(Vasm, ArmLeaChainSimplification) {
+  testArmLeaChainSimplification();
 }
 
 TEST(Vasm, ArmStoreOffsetNoMaterialize) {

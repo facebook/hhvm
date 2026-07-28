@@ -692,8 +692,7 @@ bool simplify(Env& env, const addq& vadd, Vlabel b, size_t i) {
 //
 // first, try to simplify lea (%r1), %r2 into copy %r1,%r2
 bool simplify(Env& env, const lea& vlea, Vlabel b, size_t i) {
-  if (vlea.s.disp == 0 && !vlea.s.index.isValid() &&
-      !arch::any<arch::ARM>() && vlea.s.base.isValid()) {
+  if (vlea.s.disp == 0 && !vlea.s.index.isValid() && vlea.s.base.isValid()) {
     simplify_impl(env, b, i, copy { vlea.s.base, vlea.d });
     return true;
   }
@@ -742,17 +741,6 @@ bool simplify(Env& env, const lea& vlea, Vlabel b, size_t i) {
   const auto newDisp = (int64_t)(vlea.s.disp) + (int64_t)(disp2);
 
   if (!deltaFits(newDisp, sz::dword)) return false;
-
-  // On ARM, we're careful lowering Vptrs upfront, and we need to make sure we
-  // don't recreate Vptrs that can't be emitted.  See lowerVptr() for validity
-  // conditions.
-  if (arch::any<arch::ARM>()) {
-    // We can't have both a disp and an index.
-    if (newDisp != 0 && vlea.s.index.isValid()) return false;
-
-    // Furthermore, if we have a base, the disp has to be within [-256..255].
-    if (vlea.s.base.isValid() && (newDisp < -256 || newDisp > 255)) return false;
-  }
 
   simplify_impl(env, b, i, lea { vlea.s + disp2, xinst.lea_.d });
   // update uses and delete the inst

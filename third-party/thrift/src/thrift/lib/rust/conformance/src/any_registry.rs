@@ -204,7 +204,7 @@ mod tests {
             \"facebook.com/thrift/test/testset/struct_map_string_i32\": \"d4252c01f98d688ebb155e0a0a316763\",\n    \
             \"facebook.com/thrift/test/testset/union_map_string_i32\": \"35f8820d6ded47c7d1611dd76a002040\",\n\
             }";
-        assert_eq!(format!("{:#?}", &registry), expected);
+        assert_eq!(format!("{:#?}", registry), expected);
         Ok(())
     }
 

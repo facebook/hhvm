@@ -105,7 +105,6 @@ class TestServer {
     std::string certPath = getDefaultCertPath();
     std::string keyPath = getDefaultKeyPath();
     bool requirePeerCerts = true;
-    bool tlsPreferOcbCipher = false;
     std::function<void(McServerSession&)> onConnectionAcceptedAdditionalCb;
     size_t tcpZeroCopyThresholdBytes = 0;
     bool useKtls12 = false;
@@ -177,7 +176,6 @@ struct SSLTestPaths {
   std::string sslKeyPath;
   std::string sslCaPath;
   SecurityMech mech{SecurityMech::TLS};
-  bool useOcbCipher{false};
 };
 
 // valid Client SSL Certs

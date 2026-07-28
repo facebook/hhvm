@@ -46,12 +46,6 @@ folly::Optional<SSLTestPaths> getFizzSSL() {
   return res;
 }
 
-folly::Optional<SSLTestPaths> getFizzSSLWithOCB() {
-  auto res = getFizzSSL();
-  res->useOcbCipher = true;
-  return res;
-}
-
 folly::Optional<SSLTestPaths> getKtlsSSL() {
   auto res = validClientSsl();
   res.mech = SecurityMech::KTLS12;
@@ -67,9 +61,6 @@ class AsyncMcClientSimpleTest
       const folly::Optional<SSLTestPaths>& ssl,
       TestServer::Config& config) {
     config.useSsl = ssl.has_value();
-    if (config.useSsl) {
-      config.tlsPreferOcbCipher = ssl->useOcbCipher;
-    }
   }
 };
 
@@ -112,12 +103,6 @@ TEST_P(AsyncMcClientSimpleTest, serverShutdownTest) {
     auto fizzTransport =
         transport->getUnderlyingTransport<fizz::client::AsyncFizzClient>();
     EXPECT_NE(fizzTransport, nullptr);
-    if (ssl->useOcbCipher) {
-      const auto cipher = fizzTransport->getCipher();
-      EXPECT_TRUE(cipher.has_value());
-      EXPECT_EQ(
-          fizz::CipherSuite::TLS_AES_128_OCB_SHA256_EXPERIMENTAL, *cipher);
-    }
   }
 
   server->join();
@@ -271,7 +256,6 @@ INSTANTIATE_TEST_CASE_P(
         validClientSsl(),
         getTlsToPtSSL(),
         getFizzSSL(),
-        getFizzSSLWithOCB(),
         getKtlsSSL()));
 
 void testCerts(

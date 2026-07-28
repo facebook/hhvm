@@ -101,11 +101,6 @@ class AsyncMcServer {
     bool sslRequirePeerCerts{false};
 
     /**
-     * Prefer AES-OCB cipher suite if available.
-     */
-    bool tlsPreferOcbCipher{false};
-
-    /**
      * Path to JSON file containing old, current, and new seeds used for TLS
      * ticket key generation.
      */

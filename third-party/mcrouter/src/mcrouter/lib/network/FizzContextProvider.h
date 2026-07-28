@@ -32,8 +32,7 @@ using FizzContextAndVerifier = std::pair<
 FizzContextAndVerifier createClientFizzContextAndVerifier(
     std::string certData,
     std::string keyData,
-    folly::StringPiece pemCaPath,
-    bool preferOcbCipher);
+    folly::StringPiece pemCaPath);
 
 std::shared_ptr<fizz::server::FizzServerContext> createFizzServerContext(
     folly::StringPiece pemCertPath,
@@ -42,7 +41,6 @@ std::shared_ptr<fizz::server::FizzServerContext> createFizzServerContext(
     folly::StringPiece keyData,
     folly::StringPiece pemCaPath,
     bool requireClientVerification,
-    bool preferOcbCipher,
     wangle::TLSTicketKeySeeds* ticketKeySeeds);
 } // namespace memcache
 } // namespace facebook

@@ -433,8 +433,7 @@ class McServerThread {
             opts.pemKeyPath,
             opts.pemCaPath,
             opts.sslRequirePeerCerts,
-            std::move(ticketKeySeeds),
-            opts.tlsPreferOcbCipher);
+            std::move(ticketKeySeeds));
 
         if (contextPair.first) {
           mcServerThread_->worker_.addSecureClientSocket(

@@ -324,7 +324,6 @@ void ProxyDestination<Transport>::initializeTransport() {
     options.securityOpts.sslAuthorizationEnforce =
         opts.ssl_service_identity_authorization_enforce;
     options.securityOpts.tfoEnabledForSsl = opts.enable_ssl_tfo;
-    options.securityOpts.tlsPreferOcbCipher = opts.tls_prefer_ocb_cipher;
   }
 
   auto client = std::unique_ptr<Transport, typename Transport::Destructor>(

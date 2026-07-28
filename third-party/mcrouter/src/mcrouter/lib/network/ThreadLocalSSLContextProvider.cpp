@@ -452,10 +452,7 @@ FizzContextAndVerifier getFizzClientConfig(
     auto certData = readFile(opts.sslPemCertPath);
     auto keyData = readFile(opts.sslPemKeyPath);
     auto fizzData = createClientFizzContextAndVerifier(
-        std::move(certData),
-        std::move(keyData),
-        opts.sslPemCaPath,
-        opts.tlsPreferOcbCipher);
+        std::move(certData), std::move(keyData), opts.sslPemCaPath);
     info.setFizzData(std::move(fizzData), now);
   }
   return info.fizzData;
@@ -488,8 +485,7 @@ ServerContextPair getServerContexts(
     folly::StringPiece pemKeyPath,
     folly::StringPiece pemCaPath,
     bool requireClientCerts,
-    folly::Optional<wangle::TLSTicketKeySeeds> seeds,
-    bool preferOcbCipher) {
+    folly::Optional<wangle::TLSTicketKeySeeds> seeds) {
   auto& info = getServerContextInfo(
       evb, pemCertPath, pemKeyPath, pemCaPath, requireClientCerts);
   auto now = std::chrono::steady_clock::now();
@@ -511,7 +507,6 @@ ServerContextPair getServerContexts(
         keyData,
         pemCaPath,
         requireClientCerts,
-        preferOcbCipher,
         seeds.get_pointer());
     info.setContexts(std::move(ctx), std::move(fizzCtx), now);
   }

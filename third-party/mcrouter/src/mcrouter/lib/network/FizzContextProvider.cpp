@@ -33,8 +33,7 @@ constexpr size_t kHandshakeValidity = 604800;
 FizzContextAndVerifier createClientFizzContextAndVerifier(
     std::string certData,
     std::string keyData,
-    folly::StringPiece pemCaPath,
-    bool preferOcbCipher) {
+    folly::StringPiece pemCaPath) {
   // global session cache
   static auto SESSION_CACHE =
       std::make_shared<fizz::client::SynchronizedLruPskCache>(100);
@@ -68,16 +67,6 @@ FizzContextAndVerifier createClientFizzContextAndVerifier(
     verifier = std::move(verifierUniq);
   }
 
-  if (preferOcbCipher) {
-#if !defined(OPENSSL_NO_OCB)
-    auto ciphers = folly::copy(ctx->getSupportedCiphers());
-    ciphers.insert(
-        ciphers.begin(),
-        fizz::CipherSuite::TLS_AES_128_OCB_SHA256_EXPERIMENTAL);
-    ctx->setSupportedCiphers(std::move(ciphers));
-#endif
-  }
-
   return FizzContextAndVerifier(std::move(ctx), std::move(verifier));
 }
 
@@ -88,7 +77,6 @@ std::shared_ptr<fizz::server::FizzServerContext> createFizzServerContext(
     folly::StringPiece keyData,
     folly::StringPiece pemCaPath,
     bool requireClientVerification,
-    bool preferOcbCipher,
     wangle::TLSTicketKeySeeds* ticketKeySeeds) {
   auto certMgr = std::make_shared<fizz::server::DefaultCertManager>();
   try {
@@ -130,18 +118,6 @@ std::shared_ptr<fizz::server::FizzServerContext> createFizzServerContext(
   if (requireClientVerification) {
     ctx->setClientAuthMode(fizz::server::ClientAuthMode::Required);
   }
-  if (preferOcbCipher) {
-#if !defined(OPENSSL_NO_OCB)
-    auto serverCiphers = folly::copy(ctx->getSupportedCiphers());
-    serverCiphers.insert(
-        serverCiphers.begin(),
-        {
-            fizz::CipherSuite::TLS_AES_128_OCB_SHA256_EXPERIMENTAL,
-        });
-    ctx->setSupportedCiphers(std::move(serverCiphers));
-#endif
-  }
-
   // set ticket seeds
   if (ticketKeySeeds) {
     std::vector<folly::ByteRange> ticketSecrets;

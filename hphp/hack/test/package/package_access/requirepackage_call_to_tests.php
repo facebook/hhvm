@@ -16,10 +16,9 @@ class C {
 }
 
 
-//// foo.php
+//// pkg4/foo.php
 <?hh
-// package pkg4
-<<file: __PackageOverride('pkg4')>>
+// package pkg4 by path (pkg4 does not include pkg1)
 // all these should be an error as pkg4 does not include pkg1
 function test(): void {
   bar(); // but ok because calls to __tests__ are allowed

@@ -18,7 +18,7 @@ function test(): void {
    $d = new D(); // error
 }
 
-//// d.php
+//// pkg4/d.php
 <?hh
-<<file: __PackageOverride('pkg4')>> // package pkg4
+// package pkg4 by path
 class D {}

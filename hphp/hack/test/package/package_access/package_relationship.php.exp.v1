@@ -1,6 +1,6 @@
 error: Typing[4472] Cannot access class `D` defined in package `pkg4` which may not be available [1]
--> `D` is defined in package_relationship.php--d.php [2]
--> `D` belongs to package `pkg4` by this package override [3]
+-> `D` is defined in package_relationship.php--pkg4/d.php [2]
+-> `D` belongs to package `pkg4` by this package definition [3]
 -> package `pkg3` is available because the current file belongs to it by this package override [4]
 -> `pkg3` includes `pkg2` via its definition [5]
 -> `pkg3` includes `pkg2_soft` via its definition [6]
@@ -18,14 +18,13 @@ package_relationship.php--c.php:7:13
    |             ^ [1]
  8 | }
 
-package_relationship.php--d.php:3:7
+package_relationship.php--pkg4/d.php:3:7
  1 | <?hh
- 2 | <<file: __PackageOverride('pkg4')>> // package pkg4
-   |                           ^^^^^^ [3]
+ 2 | // package pkg4 by path
  3 | class D {}
    |       ^ [2]
 
-PACKAGES.toml:18:13
+PACKAGES.toml:20:11
 16 | 
 17 | [packages.pkg3]
 18 | includes = ["pkg2", "pkg2_soft", "pkg1"]
@@ -34,5 +33,8 @@ PACKAGES.toml:18:13
    |                                  ^^^^^^ [7]
 19 | 
 20 | [packages.pkg4]
+   |           ^^^^ [3]
+21 | include_paths=["//pkg4/"]
+22 | 
 
 1 error found

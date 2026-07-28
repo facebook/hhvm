@@ -1,9 +1,7 @@
-//// foo.php
+//// pkg4/foo.php
 <?hh
-<<file:__PackageOverride('pkg4')>>
-// package pkg4
-// since pkg4 includes no paths we are sure that bar.php
-// is not in the same package by accident
+// package pkg4 by path; bar.php lives elsewhere so it is not in the same
+// package by accident
 function foo(): void {}
 
 //// /__tests__/bar.php

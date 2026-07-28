@@ -1,8 +1,7 @@
-//// foo.php
+//// pkg4/foo.php
 <?hh
 
-// package pkg4 (disjoint from pkg1)
-<<file: __PackageOverride('pkg4')>>
+// package pkg4 (disjoint from pkg1) by path
 
 abstract enum class C : I {}
 

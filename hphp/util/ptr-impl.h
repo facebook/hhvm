@@ -26,10 +26,6 @@
 
 namespace HPHP {
 
-#ifdef LOW_BUMP_ALLOCATOR
-extern void* low_bump_start_addr();
-#endif
-
 namespace ptrimpl {
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -85,19 +81,8 @@ struct UInt32Packed {
   template <typename T>
   static void validatePtr(const T* px) {
     DEBUG_ONLY auto ptr = reinterpret_cast<uintptr_t>(px);
-#ifdef LOW_BUMP_ALLOCATOR
-    DEBUG_ONLY auto start = reinterpret_cast<uintptr_t>(low_bump_start_addr());
-    assert_flog(ptr == 0 || ptr >= start, "ptr {} is too small {}",
-      reinterpret_cast<const void*>(px),
-      reinterpret_cast<const void*>(start));
-    DEBUG_ONLY auto end = start + (1ull << bits);
-    assert_flog(ptr < end, "ptr {} is too large {}",
-      reinterpret_cast<const void*>(px),
-      reinterpret_cast<const void*>(end));
-#else
     assert_flog(ptr < (1ull << bits), "ptr {} is too large",
       reinterpret_cast<const void*>(px));
-#endif
     assert_flog((ptr & ((1ull << 3) - 1)) == 0, "ptr {} is not 8 byte aligned", ptr);
   }
 
@@ -105,18 +90,12 @@ struct UInt32Packed {
   static ALWAYS_INLINE storage_type toStorage(T* px) {
     if constexpr (debug) validatePtr(px);
     auto ptr = reinterpret_cast<uintptr_t>(px);
-#ifdef LOW_BUMP_ALLOCATOR
-    ptr -= (ptr != 0) ? (reinterpret_cast<uintptr_t>(low_bump_start_addr())) : 0;
-#endif
     return (storage_type)(ptr >> 3);
   }
 
   template <typename T>
   static ALWAYS_INLINE T* fromStorage(storage_type mem) {
     uintptr_t ptr = uintptr_t(mem) << 3;
-#ifdef LOW_BUMP_ALLOCATOR
-    ptr += (ptr != 0) ? (reinterpret_cast<uintptr_t>(low_bump_start_addr())) : 0;
-#endif
     T* px = reinterpret_cast<T*>(ptr);
     if constexpr (debug) validatePtr(px);
     return px;

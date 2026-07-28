@@ -22,6 +22,10 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#ifdef FOLLY_SANITIZE_ADDRESS
+#include <sanitizer/asan_interface.h>
+#endif
+
 #include <folly/portability/SysMman.h>
 #include <folly/portability/SysResource.h>
 
@@ -544,42 +548,87 @@ void shutdown_slab_managers() {
 namespace {
 
 struct LowArena {
-  void* base;
-  std::atomic<size_t> offset = 0;
+  LowArena(uintptr_t minAddr, uintptr_t maxAddr)
+    : m_nextAddr(minAddr)
+    , m_maxAddr(maxAddr) {
+    auto const addr = mmap(
+      reinterpret_cast<void*>(minAddr),
+      maxAddr - minAddr,
+      PROT_READ | PROT_WRITE,
+      MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED | MAP_NORESERVE,
+      -1,
+      0
+    );
+    always_assert_flog(
+      addr == reinterpret_cast<void*>(minAddr),
+      "mmap failed: {}", folly::errnoStr(errno)
+    );
+  }
+
+  void* alloc(size_t size) {
+    // Align all allocations to 16 bytes.
+    size = (size + 15) & ~15;
+    auto const addr = m_nextAddr.fetch_add(size, std::memory_order_relaxed);
+    if (addr + size > m_maxAddr) return nullptr;
+    return reinterpret_cast<void*>(addr);
+  }
+
+private:
+  std::atomic<uintptr_t> m_nextAddr;
+  const uintptr_t m_maxAddr;
 };
 
-LowArena& getLowArena() {
-  static LowArena lowArena;
-  return lowArena;
-}
-
-const size_t kArenaMax = 32ull << 30; // 30 GB
+std::unique_ptr<LowArena> s_lowArena;
 
 void setup_low_arena() {
-  always_assert(getLowArena().base == nullptr);
-  always_assert(getLowArena().offset == 0);
-  getLowArena().base = mmap(nullptr, kArenaMax,
-                    PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS,
-                    -1, 0);
-  always_assert_flog(getLowArena().base != MAP_FAILED, "mmap failed: {}",
-                     folly::errnoStr(errno));
-  always_assert_flog((reinterpret_cast<uintptr_t>(getLowArena().base) & ((1ull << 3) - 1)) == 0,
-                     "mmap returned non 8 bit aligned address: {}", getLowArena().base);
+#ifdef FOLLY_SANITIZE_ADDRESS
+  // Query the sanitizer for its shadow mapping:
+  //   shadow = (addr >> scale) + offset
+  size_t shadowScale;
+  size_t shadowOffset;
+  __asan_get_shadow_mapping(&shadowScale, &shadowOffset);
+
+  // In ASAN builds, we pick a subset of the space between 4GB and 32GB such
+  // that its shadow space lies between 2GB and 4GB.
+  always_assert(shadowOffset <= kLowArenaMaxAddr);
+  auto constexpr kMinAddr = kLowArenaMaxAddr;
+  auto const kMaxAddr = (kLowArenaMaxAddr - shadowOffset) << shadowScale;
+  always_assert(kLowArenaMinAddr <= kMinAddr);
+  always_assert(kMinAddr < kMaxAddr);
+  always_assert(kMaxAddr <= kMidArenaMaxAddr);
+#else
+  auto constexpr kMinAddr = kLowArenaMinAddr;
+  auto constexpr kMaxAddr = kMidArenaMaxAddr;
+#endif
+
+  always_assert(!s_lowArena);
+  s_lowArena = std::make_unique<LowArena>(kMinAddr, kMaxAddr);
+
+#ifdef FOLLY_SANITIZE_ADDRESS
+  // Map zero-initialized read only shadow space for ASAN.
+  auto const kShadowMinAddr = (kMinAddr >> shadowScale) + shadowOffset;
+  auto const kShadowMaxAddr = (kMaxAddr >> shadowScale) + shadowOffset;
+  always_assert(kShadowMinAddr < kShadowMaxAddr);
+  always_assert(kShadowMaxAddr == kMinAddr);
+  UNUSED auto const shadow = mmap(
+    reinterpret_cast<void*>(kShadowMinAddr),
+    kShadowMaxAddr - kShadowMinAddr,
+    PROT_READ,
+    MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED | MAP_NORESERVE,
+    -1,
+    0
+  );
+  always_assert_flog(
+    shadow == reinterpret_cast<void*>(kShadowMinAddr),
+    "mmap failed: {}", folly::errnoStr(errno)
+  );
+#endif
 }
 
-}
-
-void* low_bump_start_addr() {
-  assertx(getLowArena().base != nullptr);
-  return getLowArena().base;
 }
 
 void* low_bump_malloc(size_t size) {
-  // 16 byte align the size which means that the pointer will be 16 byte aligned
-  size = (size + 15) & ~15;
-  auto const offset = getLowArena().offset.fetch_add(size, std::memory_order_relaxed);
-  if (offset + size > kArenaMax) return nullptr;
-  return static_cast<char*>(getLowArena().base) + offset;
+  return s_lowArena->alloc(size);
 }
 
 void* low_bump_realloc(void* ptr, size_t size) {
@@ -796,6 +845,6 @@ extern "C" {
     "check_initialization_order=1:detect_invalid_pointer_pairs=1:detect_leaks=0:"
     "detect_odr_violation=1:detect_stack_use_after_return=0:handle_segv=0:"
     "print_scariness=1:print_suppressions=0:strict_init_order=1:"
-    "allow_user_segv_handler=1:alloc_dealloc_mismatch=0";
+    "allow_user_segv_handler=1:alloc_dealloc_mismatch=0:protect_shadow_gap=0";
 #endif
 }

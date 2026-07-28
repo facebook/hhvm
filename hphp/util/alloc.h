@@ -138,7 +138,6 @@ void arenas_thread_exit();
 
 #else
 
-void* low_bump_start_addr();
 void* low_bump_malloc(size_t size);
 void* low_bump_realloc(void* ptr, size_t size);
 void low_bump_free(void* ptr);

@@ -56,21 +56,20 @@ namespace HPHP {
 // 64 GB
 // --------------------------------------------------------------------------
 //
-// Low arenas are in [lowArenaMinAddr(), 4G), and high arena are in
-// [4G, kUncountedMaxAddr).
+// Low arenas are in [2G, 4G), and high arena are in [4G, kUncountedMaxAddr).
 // LOW_PTR builds won't work if low arena overflows. High arena overflow would
 // result in a crash, so size it large enough to make sure we run out of memory
 // before it overflows. These constants are only meaningful when
 // addr_encodes_persistency is true. We make them available for all modes to
 // avoid having ifdefs everywhere.
-extern uintptr_t lowArenaMinAddr();
 #ifdef LOW_BUMP_ALLOCATOR
 extern void* low_bump_start_addr();
 #endif
 
 constexpr size_t kLowEmergencySize = 128 << 20;
 
-constexpr uintptr_t kLowArenaMaxAddr = 1ull << 32;
+constexpr uintptr_t kLowArenaMinAddr = 2ull << 30;
+constexpr uintptr_t kLowArenaMaxAddr = 4ull << 30;
 constexpr uintptr_t kMidArenaMaxAddr = 32ull << 30;
 constexpr size_t kLowSmallArenaSize = 128 << 20;
 

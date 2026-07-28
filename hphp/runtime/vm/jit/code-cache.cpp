@@ -105,17 +105,16 @@ uintptr_t getTCMaxExtent(uintptr_t usedBase) {
 #if USE_JEMALLOC
   // When we have a low arena, TC must fit below lowArenaMinAddr(). If it
   // doesn't, we shrink things to make it so.
-  auto const lowArenaStart = lowArenaMinAddr();
   if (Cfg::Server::Mode) {
-    Logger::Info("lowArenaMinAddr(): 0x%lx", lowArenaStart);
+    Logger::Info("kLowArenaMinAddr: 0x%lx", kLowArenaMinAddr);
   }
   always_assert_flog(
-    usedBase + (32u << 20) <= lowArenaStart,
-    "brk is too big for LOWPTR build (usedBase = {}, lowArenaStart = {})",
-    usedBase, lowArenaStart
+    usedBase + (32u << 20) <= kLowArenaMinAddr,
+    "brk is too big (usedBase = {}, kLowArenaMinAddr = {})",
+    usedBase, kLowArenaMinAddr
   );
 
-  return std::min(lowArenaStart, 2ul << 30);
+  return std::min(kLowArenaMinAddr, 2ul << 30);
 #endif
 
   return 2ul << 30;
@@ -426,7 +425,7 @@ void CodeCache::SectionImpl<name, code, overAllocate, forwardAllocation, pageSiz
   auto block = std::make_unique<DataBlock>(cc.m_all.allocChild(std::max(size, minBlockSize),
                                            name, forwardAllocation && Cfg::Jit::DynamicTCSections,
                                            pageSize));
-  if (m_hugePageBudget && block->size() >= size2m && 
+  if (m_hugePageBudget && block->size() >= size2m &&
       (uintptr_t(block->frontier()) & (size2m - 1)) == 0) {
     auto const huge = std::min(m_hugePageBudget, block->size() >> 20);
     enhugen(block->frontier(), huge);

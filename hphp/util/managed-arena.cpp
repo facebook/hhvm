@@ -49,7 +49,7 @@ NEVER_INLINE RangeState& getRange(AddrRangeClass index) {
     }
     if (!result->high()) {
       new (&(g_ranges[AddrRangeClass::Low]))
-        RangeState(lowArenaMinAddr(), kLowArenaMaxAddr - kLowEmergencySize - kLowSmallArenaSize);
+        RangeState(kLowArenaMinAddr, kLowArenaMaxAddr - kLowEmergencySize - kLowSmallArenaSize);
       new (&(g_ranges[AddrRangeClass::LowSmall]))
         RangeState(kLowArenaMaxAddr - kLowEmergencySize - kLowSmallArenaSize, kLowArenaMaxAddr - kLowEmergencySize);
       new (&(g_ranges[AddrRangeClass::LowEmergency]))

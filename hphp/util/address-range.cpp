@@ -27,20 +27,6 @@
 
 namespace HPHP {
 
-uintptr_t lowArenaMinAddr() {
-  const char* str = getenv("HHVM_LOW_ARENA_START");
-  if (str == nullptr) {
-    // 2GB
-    return 2ull << 30;
-  }
-
-  uintptr_t start = 0;
-  if (sscanf(str, "0x%lx", &start) == 1) return start;
-  if (sscanf(str, "%lu", &start) == 1) return start;
-  fprintf(stderr, "Bad environment variable HHVM_LOW_ARENA_START: %s\n", str);
-  abort();
-}
-
 namespace alloc {
 
 void RangeState::reserve() {

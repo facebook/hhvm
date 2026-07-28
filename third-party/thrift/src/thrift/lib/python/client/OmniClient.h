@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include <atomic>
+
 #include <folly/Expected.h>
 #include <folly/Try.h>
 #include <folly/futures/Future.h>
@@ -139,11 +141,17 @@ class OmniClient : public apache::thrift::TClientBase {
   std::atomic<OmniClient*> factoryClient_ = nullptr;
 
  private:
-  // Armed on the channel's EventBase at construction. In ~OmniClient, cancel()
-  // reports whether the EventBase outlived this client without dereferencing a
-  // possibly-freed pointer. The callback itself does nothing.
+  // Armed on the channel's EventBase at construction. `destroyed` flips to true
+  // when the EventBase is destroyed, letting the send path fail fast instead of
+  // dereferencing a freed EventBase. In ~OmniClient, cancel() reports whether
+  // the EventBase outlived this client without dereferencing a possibly-freed
+  // pointer. The flag lives inside the probe so it moves with it in the move
+  // constructor.
   struct EventBaseLivenessProbe : folly::EventBase::OnDestructionCallback {
-    void onEventBaseDestruction() noexcept final {}
+    std::atomic<bool> destroyed{false};
+    void onEventBaseDestruction() noexcept final {
+      destroyed.store(true, std::memory_order_release);
+    }
   };
   std::unique_ptr<EventBaseLivenessProbe> ebLivenessProbe_;
   void armEventBaseLivenessProbe();

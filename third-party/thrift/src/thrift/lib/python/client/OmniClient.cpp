@@ -27,6 +27,7 @@
 #include <thrift/lib/cpp/TProcessorEventHandler.h>
 #include <thrift/lib/cpp/protocol/TProtocolTypes.h>
 #include <thrift/lib/cpp/transport/THeader.h>
+#include <thrift/lib/cpp/transport/TTransportException.h>
 #include <thrift/lib/cpp2/async/ClientInterceptorStorage.h>
 #include <thrift/lib/cpp2/async/FutureRequest.h>
 #include <thrift/lib/cpp2/async/InterceptorFlags.h>
@@ -421,6 +422,21 @@ void OmniClient::sendImpl(
     std::unique_ptr<RequestCallback> callback,
     const apache::thrift::RpcKind rpcKind,
     apache::thrift::MethodMetadata::Data&& metadata) {
+  // The channel's EventBase can be destroyed before this client at shutdown
+  // (see ~OmniClient). Dispatching then would hop onto a freed EventBase via
+  // sendRequestAsync -> EventBase::runInEventBaseThread -> use-after-free. The
+  // IO thread is gone, so the request cannot be sent; fail fast and cleanly.
+  // This narrows but cannot fully close a concurrent destroy-during-send race,
+  // which is inherent to a raw EventBase pointer -- same limitation as the
+  // death probe in ~OmniClient.
+  if (ebLivenessProbe_ &&
+      ebLivenessProbe_->destroyed.load(std::memory_order_acquire)) {
+    throw apache::thrift::transport::TTransportException(
+        apache::thrift::transport::TTransportException::NOT_OPEN,
+        "OmniClient: the channel's EventBase has been destroyed; the client "
+        "outlived its IO executor (used during or after shutdown)");
+  }
+
   // Get protocol ID once, throws if channel_->getProtocolId() fails
   auto protocolId = getChannelProtocolId().value();
 

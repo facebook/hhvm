@@ -21,9 +21,11 @@
 #include <folly/Singleton.h>
 #include <folly/executors/GlobalExecutor.h>
 #include <folly/executors/IOThreadPoolExecutor.h>
+#include <folly/io/IOBuf.h>
 #include <folly/io/async/AsyncSocket.h>
 #include <folly/io/async/EventBase.h>
 
+#include <thrift/lib/cpp/transport/TTransportException.h>
 #include <thrift/lib/cpp2/async/RocketClientChannel.h>
 #include <thrift/lib/python/client/OmniClient.h> // @manual=//thrift/lib/python/client:omni_client__cython-lib
 
@@ -61,6 +63,53 @@ TEST(OmniClientShutdownTest, EventBaseDestroyedByItsExecutorBeforeClient) {
   }
 
   EXPECT_NO_FATAL_FAILURE(client.reset());
+}
+
+// Send-path counterpart of the UAF above. Rather than destroying the client on
+// a freed EventBase, we issue a request through it: sync_send -> sendImpl ->
+// RequestChannel::sendRequestAsync hops onto the channel's EventBase via
+// EventBase::runInEventBaseThread, dereferencing the freed pointer -- the exact
+// prod SIGSEGV stack. The death probe guards ~OmniClient, not this path.
+// Hermetic (local executor, crash happens during the EventBase hop before any
+// network I/O), so it is registered before the irreversible destroyInstances()
+// case below.
+TEST(OmniClientShutdownTest, SendAfterEventBaseDestroyed) {
+  std::unique_ptr<OmniClient> client;
+  {
+    auto io = std::make_unique<folly::IOThreadPoolExecutor>(1);
+    folly::EventBase* eb = io->getEventBase();
+
+    // A DelayedDestruction channel must be built on its EventBase thread.
+    RocketClientChannel::Ptr channel;
+    eb->runInEventBaseThreadAndWait([&] {
+      channel = RocketClientChannel::newChannel(
+          folly::AsyncSocket::UniquePtr(new folly::AsyncSocket(eb)));
+    });
+    client =
+        std::make_unique<OmniClient>(RequestChannelUnique(std::move(channel)));
+
+    // Destroying `io` joins its worker thread and frees `eb`; `client` is left
+    // holding a channel bound to a dead `eb`.
+  }
+
+  // Issuing a request would dispatch onto the freed EventBase
+  // (sendRequestAsync -> EventBase::runInEventBaseThread -> UAF). The death
+  // probe now detects the dead EventBase and sync_send fails fast with a
+  // TTransportException instead of crashing.
+  auto resp = client->sync_send(
+      "SomeService",
+      "someMethod",
+      folly::IOBuf::copyBuffer(""),
+      apache::thrift::MethodMetadata::Data(
+          "someMethod", apache::thrift::FunctionQualifier::Unspecified),
+      {},
+      apache::thrift::RpcOptions());
+  ASSERT_TRUE(resp.buf.hasError());
+  EXPECT_TRUE(resp.buf.error()
+                  .is_compatible_with<
+                      apache::thrift::transport::TTransportException>());
+
+  client.reset();
 }
 
 // The global IO executor's EventBase is freed before the client, matching the

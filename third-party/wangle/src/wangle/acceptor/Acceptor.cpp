@@ -80,7 +80,6 @@ void Acceptor::init(
       peeker->setContext(std::move(context));
       peeker->options().setHandshakeRecordAlignedReads(
           accConfig_->fizzConfig.preferKTLS);
-      peeker->options().setPreferIoUringSocket(accConfig_->preferIoUring);
       securityProtocolCtxManager_.addPeeker(peeker);
     } else {
       securityProtocolCtxManager_.addPeeker(&defaultPeekingCallback_);

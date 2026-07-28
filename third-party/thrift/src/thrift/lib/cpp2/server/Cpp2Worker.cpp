@@ -19,7 +19,6 @@
 #include <vector>
 
 #include <folly/GLog.h>
-#include <folly/io/async/AsyncIoUringSocketFactory.h>
 #include <folly/io/async/AsyncSSLSocket.h>
 #include <folly/io/async/AsyncSocket.h>
 #include <folly/io/async/EventBaseLocal.h>
@@ -162,14 +161,6 @@ void Cpp2Worker::onNewConnectionThatMayThrow(
   switch (secureTransportType) {
     // If no security, peek into the socket to determine type
     case wangle::SecureTransportType::NONE: {
-      if (server_->preferIoUring() &&
-          folly::AsyncIoUringSocketFactory::supports(sock->getEventBase())) {
-        sock = folly::AsyncIoUringSocketFactory::create<
-            folly::AsyncTransport::UniquePtr>(std::move(sock));
-        if (func) {
-          sock->setZeroCopyEnableFunc(func);
-        }
-      }
       // Need an AsyncSocketTransport so we can reset the bytes the
       // TransportPeekingManager might peek at
       folly::AsyncSocketTransport::UniquePtr plaintextSocket{

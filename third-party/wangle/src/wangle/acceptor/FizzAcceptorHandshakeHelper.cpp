@@ -70,27 +70,21 @@ AsyncFizzServer::UniquePtr FizzAcceptorHandshakeHelper::createFizzServer(
     const std::shared_ptr<fizz::ServerExtensions>& extensions,
     fizz::AsyncFizzBase::TransportOptions options) {
   folly::AsyncTransport::UniquePtr asyncTransport;
-  if (preferIoUringSocket_ &&
-      folly::AsyncIoUringSocketFactory::supports(sslSock->getEventBase())) {
-    asyncTransport = folly::AsyncIoUringSocketFactory::create<
-        folly::AsyncTransport::UniquePtr>(std::move(sslSock));
-  } else {
 #if !defined(_WIN32)
-    folly::SocketAddress addr;
-    sslSock->getPeerAddress(&addr);
+  folly::SocketAddress addr;
+  sslSock->getPeerAddress(&addr);
 #endif
-    folly::AsyncSocket::UniquePtr asyncSock(
+  folly::AsyncSocket::UniquePtr asyncSock(
 #if !defined(_WIN32)
-        addr.getFamily() == AF_UNIX
-            ? new folly::AsyncFdSocket(
-                  folly::AsyncFdSocket::DoesNotMoveFdSocketState{},
-                  std::move(sslSock))
-            :
+      addr.getFamily() == AF_UNIX
+          ? new folly::AsyncFdSocket(
+                folly::AsyncFdSocket::DoesNotMoveFdSocketState{},
+                std::move(sslSock))
+          :
 #endif
-            new folly::AsyncSocket(std::move(sslSock)));
-    asyncSock->cacheAddresses();
-    asyncTransport = folly::AsyncTransport::UniquePtr(std::move(asyncSock));
-  }
+          new folly::AsyncSocket(std::move(sslSock)));
+  asyncSock->cacheAddresses();
+  asyncTransport = folly::AsyncTransport::UniquePtr(std::move(asyncSock));
   AsyncFizzServer::UniquePtr fizzServer(new AsyncFizzServer(
       std::move(asyncTransport), fizzContext, extensions, options));
   fizzServer->setHandshakeRecordAlignedReads(handshakeRecordAlignedReads_);

@@ -1963,8 +1963,6 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
   // not be useful, e.g. non-C++ languages.
   bool allowCheckUnimplementedExtraInterfaces_ = true;
 
-  bool preferIoUring_ = false;
-
   std::weak_ptr<folly::ShutdownSocketSet> wShutdownSocketSet_;
 
   //! Listen socket
@@ -2625,14 +2623,6 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
 
   void updateTLSCert();
 
-  void setPreferIoUring(bool b) { preferIoUring_ = b; }
-
-  bool preferIoUring() const { return preferIoUring_; }
-
-  void setPreferAsyncIoUringSocket(bool b) { preferIoUring_ = b; }
-
-  bool preferAsyncIoUringSocket() const { return preferIoUring_; }
-
   /**
    * Tells the thrift server to update ticket seeds with the contents of the
    * file ticketPath when modified and initialized the seeds with the contents
@@ -2707,7 +2697,6 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
       config->setSocketOptions(socketOptions_);
     }
     config->useZeroCopy = !!zeroCopyEnableFunc_;
-    config->preferIoUring = preferIoUring_;
     return config;
   }
 

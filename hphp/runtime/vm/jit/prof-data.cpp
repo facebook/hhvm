@@ -164,10 +164,13 @@ void ProfData::addTransProfPrologue(TransID transID, SrcKey sk, uint32_t nArgs,
                                     uint32_t asmSize) {
   auto prologueID = PrologueID{sk.funcID(), nArgs};
   FuncCleanup::addProfDataPrologueID(prologueID);
-  m_proflogueDB.emplace(prologueID, transID);
 
-  std::unique_lock lock{m_transLock};
-  m_transRecs[transID].reset(new ProfTransRec(sk, nArgs, asmSize));
+  {
+    std::unique_lock lock{m_transLock};
+    m_transRecs[transID].reset(new ProfTransRec(sk, nArgs, asmSize));
+  }
+
+  m_proflogueDB.emplace(prologueID, transID);
 }
 
 void ProfData::addProfTrans(TransID transID,

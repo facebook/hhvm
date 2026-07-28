@@ -86,12 +86,6 @@ inline void reset_field<::facebook::thrift::annotation::hack::NamePrefix>(
       obj.prefix_ref().copy_from(default_inst<::facebook::thrift::annotation::hack::NamePrefix>().prefix_ref());
       return;
     case 1:
-      obj.apply_on_getName_ref().copy_from(default_inst<::facebook::thrift::annotation::hack::NamePrefix>().apply_on_getName_ref());
-      return;
-    case 2:
-      obj.skip_services_ref().copy_from(default_inst<::facebook::thrift::annotation::hack::NamePrefix>().skip_services_ref());
-      return;
-    case 3:
       obj.apply_to_services_ref().copy_from(default_inst<::facebook::thrift::annotation::hack::NamePrefix>().apply_to_services_ref());
       return;
   }

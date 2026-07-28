@@ -124,16 +124,9 @@ struct Name {
 struct NamePrefix {
   /// Prefix to apply to names within the module.
   1: string prefix;
-  /// Set to false when you want getName() to keep returning the IDL name.
-  2: bool apply_on_getName = true;
-  /// When true, types generated from services (interfaces, clients,
-  /// processors, helper structs like args/result) are not prefixed.
-  /// When false (default), all types including service-generated types
-  /// are prefixed.
-  3: bool skip_services = false;
   /// When true, the prefix will be applied to types generated for services
   /// (processor, client, helpers, etc).
-  4: bool apply_to_services = false;
+  2: bool apply_to_services = false;
 }
 
 /// Omit module-wide name prefix from the name string returned by `getName()`

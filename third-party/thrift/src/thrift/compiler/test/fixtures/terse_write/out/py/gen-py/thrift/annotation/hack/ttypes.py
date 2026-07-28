@@ -766,11 +766,6 @@ class NamePrefix:
   
   Attributes:
    - prefix: Prefix to apply to names within the module.
-   - apply_on_getName: Set to false when you want getName() to keep returning the IDL name.
-   - skip_services: When true, types generated from services (interfaces, clients,
-  processors, helper structs like args/result) are not prefixed.
-  When false (default), all types including service-generated types
-  are prefixed.
    - apply_to_services: When true, the prefix will be applied to types generated for services
   (processor, client, helpers, etc).
   """
@@ -802,16 +797,6 @@ class NamePrefix:
           iprot.skip(ftype)
       elif fid == 2:
         if ftype == TType.BOOL:
-          self.apply_on_getName = iprot.readBool()
-        else:
-          iprot.skip(ftype)
-      elif fid == 3:
-        if ftype == TType.BOOL:
-          self.skip_services = iprot.readBool()
-        else:
-          iprot.skip(ftype)
-      elif fid == 4:
-        if ftype == TType.BOOL:
           self.apply_to_services = iprot.readBool()
         else:
           iprot.skip(ftype)
@@ -832,16 +817,8 @@ class NamePrefix:
       oprot.writeFieldBegin('prefix', TType.STRING, 1)
       oprot.writeString(self.prefix.encode('utf-8')) if UTF8STRINGS and not isinstance(self.prefix, bytes) else oprot.writeString(self.prefix)
       oprot.writeFieldEnd()
-    if self.apply_on_getName != None:
-      oprot.writeFieldBegin('apply_on_getName', TType.BOOL, 2)
-      oprot.writeBool(self.apply_on_getName)
-      oprot.writeFieldEnd()
-    if self.skip_services != None:
-      oprot.writeFieldBegin('skip_services', TType.BOOL, 3)
-      oprot.writeBool(self.skip_services)
-      oprot.writeFieldEnd()
     if self.apply_to_services != None:
-      oprot.writeFieldBegin('apply_to_services', TType.BOOL, 4)
+      oprot.writeFieldBegin('apply_to_services', TType.BOOL, 2)
       oprot.writeBool(self.apply_to_services)
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -867,10 +844,6 @@ class NamePrefix:
       json_obj = loads(json)
     if 'prefix' in json_obj and json_obj['prefix'] is not None:
       self.prefix = json_obj['prefix']
-    if 'apply_on_getName' in json_obj and json_obj['apply_on_getName'] is not None:
-      self.apply_on_getName = json_obj['apply_on_getName']
-    if 'skip_services' in json_obj and json_obj['skip_services'] is not None:
-      self.skip_services = json_obj['skip_services']
     if 'apply_to_services' in json_obj and json_obj['apply_to_services'] is not None:
       self.apply_to_services = json_obj['apply_to_services']
 
@@ -881,14 +854,6 @@ class NamePrefix:
       value = pprint.pformat(self.prefix, indent=0)
       value = padding.join(value.splitlines(True))
       L.append('    prefix=%s' % (value))
-    if self.apply_on_getName is not None:
-      value = pprint.pformat(self.apply_on_getName, indent=0)
-      value = padding.join(value.splitlines(True))
-      L.append('    apply_on_getName=%s' % (value))
-    if self.skip_services is not None:
-      value = pprint.pformat(self.skip_services, indent=0)
-      value = padding.join(value.splitlines(True))
-      L.append('    skip_services=%s' % (value))
     if self.apply_to_services is not None:
       value = pprint.pformat(self.apply_to_services, indent=0)
       value = padding.join(value.splitlines(True))
@@ -907,8 +872,6 @@ class NamePrefix:
   def __dir__(self):
     return (
       'prefix',
-      'apply_on_getName',
-      'skip_services',
       'apply_to_services',
     )
 
@@ -2553,9 +2516,7 @@ Name.__setstate__ = Name__setstate__
 all_structs.append(NamePrefix)
 NamePrefix.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.STRING, 'prefix', True, None, 2, ), # 1
-  (2, TType.BOOL, 'apply_on_getName', None, True, 2, ), # 2
-  (3, TType.BOOL, 'skip_services', None, False, 2, ), # 3
-  (4, TType.BOOL, 'apply_to_services', None, False, 2, ), # 4
+  (2, TType.BOOL, 'apply_to_services', None, False, 2, ), # 2
 )))
 
 NamePrefix.thrift_struct_annotations = {
@@ -2563,18 +2524,14 @@ NamePrefix.thrift_struct_annotations = {
 NamePrefix.thrift_field_annotations = {
 }
 
-def NamePrefix__init__(self, prefix=None, apply_on_getName=NamePrefix.thrift_spec[2][4], skip_services=NamePrefix.thrift_spec[3][4], apply_to_services=NamePrefix.thrift_spec[4][4],):
+def NamePrefix__init__(self, prefix=None, apply_to_services=NamePrefix.thrift_spec[2][4],):
   self.prefix = prefix
-  self.apply_on_getName = apply_on_getName
-  self.skip_services = skip_services
   self.apply_to_services = apply_to_services
 
 NamePrefix.__init__ = NamePrefix__init__
 
 def NamePrefix__setstate__(self, state):
   state.setdefault('prefix', None)
-  state.setdefault('apply_on_getName', True)
-  state.setdefault('skip_services', False)
   state.setdefault('apply_to_services', False)
   self.__dict__ = state
 

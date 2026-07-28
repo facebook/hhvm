@@ -30,43 +30,24 @@ import com.facebook.thrift.protocol.*;
 public class NamePrefix implements TBase, java.io.Serializable, Cloneable {
   private static final TStruct STRUCT_DESC = new TStruct("NamePrefix");
   private static final TField PREFIX_FIELD_DESC = new TField("prefix", TType.STRING, (short)1);
-  private static final TField APPLY_ON_GET_NAME_FIELD_DESC = new TField("apply_on_getName", TType.BOOL, (short)2);
-  private static final TField SKIP_SERVICES_FIELD_DESC = new TField("skip_services", TType.BOOL, (short)3);
-  private static final TField APPLY_TO_SERVICES_FIELD_DESC = new TField("apply_to_services", TType.BOOL, (short)4);
+  private static final TField APPLY_TO_SERVICES_FIELD_DESC = new TField("apply_to_services", TType.BOOL, (short)2);
 
   /**
    * Prefix to apply to names within the module.
    */
   public final String prefix;
   /**
-   * Set to false when you want getName() to keep returning the IDL name.
-   */
-  public final Boolean apply_on_getName;
-  /**
-   * When true, types generated from services (interfaces, clients,
-   * processors, helper structs like args/result) are not prefixed.
-   * When false (default), all types including service-generated types
-   * are prefixed.
-   */
-  public final Boolean skip_services;
-  /**
    * When true, the prefix will be applied to types generated for services
    * (processor, client, helpers, etc).
    */
   public final Boolean apply_to_services;
   public static final int PREFIX = 1;
-  public static final int APPLY_ON_GETNAME = 2;
-  public static final int SKIP_SERVICES = 3;
-  public static final int APPLY_TO_SERVICES = 4;
+  public static final int APPLY_TO_SERVICES = 2;
 
   public NamePrefix(
       String prefix,
-      Boolean apply_on_getName,
-      Boolean skip_services,
       Boolean apply_to_services) {
     this.prefix = prefix;
-    this.apply_on_getName = apply_on_getName;
-    this.skip_services = skip_services;
     this.apply_to_services = apply_to_services;
   }
 
@@ -78,16 +59,6 @@ public class NamePrefix implements TBase, java.io.Serializable, Cloneable {
       this.prefix = TBaseHelper.deepCopy(other.prefix);
     } else {
       this.prefix = null;
-    }
-    if (other.isSetApply_on_getName()) {
-      this.apply_on_getName = TBaseHelper.deepCopy(other.apply_on_getName);
-    } else {
-      this.apply_on_getName = null;
-    }
-    if (other.isSetSkip_services()) {
-      this.skip_services = TBaseHelper.deepCopy(other.skip_services);
-    } else {
-      this.skip_services = null;
     }
     if (other.isSetApply_to_services()) {
       this.apply_to_services = TBaseHelper.deepCopy(other.apply_to_services);
@@ -110,33 +81,6 @@ public class NamePrefix implements TBase, java.io.Serializable, Cloneable {
   // Returns true if field prefix is set (has been assigned a value) and false otherwise
   public boolean isSetPrefix() {
     return this.prefix != null;
-  }
-
-  /**
-   * Set to false when you want getName() to keep returning the IDL name.
-   */
-  public Boolean isApply_on_getName() {
-    return this.apply_on_getName;
-  }
-
-  // Returns true if field apply_on_getName is set (has been assigned a value) and false otherwise
-  public boolean isSetApply_on_getName() {
-    return this.apply_on_getName != null;
-  }
-
-  /**
-   * When true, types generated from services (interfaces, clients,
-   * processors, helper structs like args/result) are not prefixed.
-   * When false (default), all types including service-generated types
-   * are prefixed.
-   */
-  public Boolean isSkip_services() {
-    return this.skip_services;
-  }
-
-  // Returns true if field skip_services is set (has been assigned a value) and false otherwise
-  public boolean isSetSkip_services() {
-    return this.skip_services != null;
   }
 
   /**
@@ -164,10 +108,6 @@ public class NamePrefix implements TBase, java.io.Serializable, Cloneable {
 
     if (!TBaseHelper.equalsNobinary(this.isSetPrefix(), that.isSetPrefix(), this.prefix, that.prefix)) { return false; }
 
-    if (!TBaseHelper.equalsNobinary(this.isSetApply_on_getName(), that.isSetApply_on_getName(), this.apply_on_getName, that.apply_on_getName)) { return false; }
-
-    if (!TBaseHelper.equalsNobinary(this.isSetSkip_services(), that.isSetSkip_services(), this.skip_services, that.skip_services)) { return false; }
-
     if (!TBaseHelper.equalsNobinary(this.isSetApply_to_services(), that.isSetApply_to_services(), this.apply_to_services, that.apply_to_services)) { return false; }
 
     return true;
@@ -175,7 +115,7 @@ public class NamePrefix implements TBase, java.io.Serializable, Cloneable {
 
   @Override
   public int hashCode() {
-    return Arrays.deepHashCode(new Object[] {prefix, apply_on_getName, skip_services, apply_to_services});
+    return Arrays.deepHashCode(new Object[] {prefix, apply_to_services});
   }
 
   // This is required to satisfy the TBase interface, but can't be implemented on immutable struture.
@@ -185,8 +125,6 @@ public class NamePrefix implements TBase, java.io.Serializable, Cloneable {
 
   public static NamePrefix deserialize(TProtocol iprot) throws TException {
     String tmp_prefix = null;
-    Boolean tmp_apply_on_getName = null;
-    Boolean tmp_skip_services = null;
     Boolean tmp_apply_to_services = null;
     TField __field;
     iprot.readStructBegin();
@@ -201,20 +139,6 @@ public class NamePrefix implements TBase, java.io.Serializable, Cloneable {
         case PREFIX:
           if (__field.type == TType.STRING) {
             tmp_prefix = iprot.readString();
-          } else {
-            TProtocolUtil.skip(iprot, __field.type);
-          }
-          break;
-        case APPLY_ON_GETNAME:
-          if (__field.type == TType.BOOL) {
-            tmp_apply_on_getName = iprot.readBool();
-          } else {
-            TProtocolUtil.skip(iprot, __field.type);
-          }
-          break;
-        case SKIP_SERVICES:
-          if (__field.type == TType.BOOL) {
-            tmp_skip_services = iprot.readBool();
           } else {
             TProtocolUtil.skip(iprot, __field.type);
           }
@@ -237,8 +161,6 @@ public class NamePrefix implements TBase, java.io.Serializable, Cloneable {
     NamePrefix _that;
     _that = new NamePrefix(
       tmp_prefix
-      ,tmp_apply_on_getName
-      ,tmp_skip_services
       ,tmp_apply_to_services
     );
     _that.validate();
@@ -252,16 +174,6 @@ public class NamePrefix implements TBase, java.io.Serializable, Cloneable {
     if (this.prefix != null) {
       oprot.writeFieldBegin(PREFIX_FIELD_DESC);
       oprot.writeString(this.prefix);
-      oprot.writeFieldEnd();
-    }
-    if (this.apply_on_getName != null) {
-      oprot.writeFieldBegin(APPLY_ON_GET_NAME_FIELD_DESC);
-      oprot.writeBool(this.apply_on_getName);
-      oprot.writeFieldEnd();
-    }
-    if (this.skip_services != null) {
-      oprot.writeFieldBegin(SKIP_SERVICES_FIELD_DESC);
-      oprot.writeBool(this.skip_services);
       oprot.writeFieldEnd();
     }
     if (this.apply_to_services != null) {

@@ -746,40 +746,26 @@ class NamePrefix implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrift
       'type' => \TType::STRING,
     ),
     2 => shape(
-      'var' => 'apply_on_getName',
-      'type' => \TType::BOOL,
-    ),
-    3 => shape(
-      'var' => 'skip_services',
-      'type' => \TType::BOOL,
-    ),
-    4 => shape(
       'var' => 'apply_to_services',
       'type' => \TType::BOOL,
     ),
   ];
   const dict<string, int> FIELDMAP = dict[
     'prefix' => 1,
-    'apply_on_getName' => 2,
-    'skip_services' => 3,
-    'apply_to_services' => 4,
+    'apply_to_services' => 2,
   ];
 
   const type TConstructorShape = shape(
     ?'prefix' => ?string,
-    ?'apply_on_getName' => ?bool,
-    ?'skip_services' => ?bool,
     ?'apply_to_services' => ?bool,
   );
 
   const type TShape = shape(
     'prefix' => string,
-    'apply_on_getName' => bool,
-    'skip_services' => bool,
     'apply_to_services' => bool,
     ...
   );
-  const int STRUCTURAL_ID = 4447979253020581803;
+  const int STRUCTURAL_ID = 9218285441367247874;
   /**
    * Prefix to apply to names within the module.
    * 
@@ -788,35 +774,16 @@ class NamePrefix implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrift
    */
   public string $prefix;
   /**
-   * Set to false when you want getName() to keep returning the IDL name.
-   * 
-   * Original thrift field:-
-   * 2: bool apply_on_getName
-   */
-  public bool $apply_on_getName;
-  /**
-   * When true, types generated from services (interfaces, clients,
-   * processors, helper structs like args/result) are not prefixed.
-   * When false (default), all types including service-generated types
-   * are prefixed.
-   * 
-   * Original thrift field:-
-   * 3: bool skip_services
-   */
-  public bool $skip_services;
-  /**
    * When true, the prefix will be applied to types generated for services
    * (processor, client, helpers, etc).
    * 
    * Original thrift field:-
-   * 4: bool apply_to_services
+   * 2: bool apply_to_services
    */
   public bool $apply_to_services;
 
-  public function __construct(?string $prefix = null, ?bool $apply_on_getName = null, ?bool $skip_services = null, ?bool $apply_to_services = null)[] {
+  public function __construct(?string $prefix = null, ?bool $apply_to_services = null)[] {
     $this->prefix = $prefix ?? '';
-    $this->apply_on_getName = $apply_on_getName ?? true;
-    $this->skip_services = $skip_services ?? false;
     $this->apply_to_services = $apply_to_services ?? false;
   }
 
@@ -827,8 +794,6 @@ class NamePrefix implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrift
   public static function fromShape(self::TConstructorShape $shape)[]: this {
     return new static(
       Shapes::idx($shape, 'prefix'),
-      Shapes::idx($shape, 'apply_on_getName'),
-      Shapes::idx($shape, 'skip_services'),
       Shapes::idx($shape, 'apply_to_services'),
     );
   }
@@ -861,28 +826,6 @@ class NamePrefix implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrift
                   "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_BOOL_TYPE,
                 )
               ),
-              "name" => "apply_on_getName",
-            )
-          ),
-          \tmeta_ThriftField::fromShape(
-            shape(
-              "id" => 3,
-              "type" => \tmeta_ThriftType::fromShape(
-                shape(
-                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_BOOL_TYPE,
-                )
-              ),
-              "name" => "skip_services",
-            )
-          ),
-          \tmeta_ThriftField::fromShape(
-            shape(
-              "id" => 4,
-              "type" => \tmeta_ThriftType::fromShape(
-                shape(
-                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_BOOL_TYPE,
-                )
-              ),
               "name" => "apply_to_services",
             )
           ),
@@ -905,8 +848,6 @@ class NamePrefix implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrift
   public static function __fromShape(self::TShape $shape)[]: this {
     return new static(
       $shape['prefix'],
-      $shape['apply_on_getName'],
-      $shape['skip_services'],
       $shape['apply_to_services'],
     );
   }
@@ -914,8 +855,6 @@ class NamePrefix implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrift
   public function __toShape()[]: self::TShape {
     return shape(
       'prefix' => $this->prefix,
-      'apply_on_getName' => $this->apply_on_getName,
-      'skip_services' => $this->skip_services,
       'apply_to_services' => $this->apply_to_services,
     );
   }
@@ -932,12 +871,6 @@ class NamePrefix implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrift
 
     if (idx($parsed, 'prefix') !== null) {
       $this->prefix = HH\FIXME\UNSAFE_CAST<mixed, string>($parsed['prefix']);
-    }
-    if (idx($parsed, 'apply_on_getName') !== null) {
-      $this->apply_on_getName = HH\FIXME\UNSAFE_CAST<mixed, bool>($parsed['apply_on_getName']);
-    }
-    if (idx($parsed, 'skip_services') !== null) {
-      $this->skip_services = HH\FIXME\UNSAFE_CAST<mixed, bool>($parsed['skip_services']);
     }
     if (idx($parsed, 'apply_to_services') !== null) {
       $this->apply_to_services = HH\FIXME\UNSAFE_CAST<mixed, bool>($parsed['apply_to_services']);

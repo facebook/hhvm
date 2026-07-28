@@ -250,8 +250,6 @@ public struct Name: ThriftSerializable, Hashable {
 /// Auto-generated from NamePrefix
 public struct NamePrefix: ThriftSerializable, Hashable {
     public var prefix: String = ""
-    public var apply_on_getName: Bool = true
-    public var skip_services: Bool = false
     public var apply_to_services: Bool = false
 
     public init() {}
@@ -261,8 +259,6 @@ public struct NamePrefix: ThriftSerializable, Hashable {
     /// IDL defaults: optional fields become nil, others their type's zero value.
     public mutating func clear() {
         self.prefix = ""
-        self.apply_on_getName = false
-        self.skip_services = false
         self.apply_to_services = false
     }
 
@@ -270,10 +266,6 @@ public struct NamePrefix: ThriftSerializable, Hashable {
         writer.writeFieldBegin(.string, 1)
         self.prefix.thriftWrite(to: writer)
         writer.writeFieldBegin(.bool, 2)
-        self.apply_on_getName.thriftWrite(to: writer)
-        writer.writeFieldBegin(.bool, 3)
-        self.skip_services.thriftWrite(to: writer)
-        writer.writeFieldBegin(.bool, 4)
         self.apply_to_services.thriftWrite(to: writer)
         writer.writeFieldStop()
     }
@@ -293,18 +285,6 @@ public struct NamePrefix: ThriftSerializable, Hashable {
                     try reader.skip(fieldType)
                 }
             case 2:
-                if fieldType == .bool {
-                    self.apply_on_getName = try Bool.thriftRead(from: reader)
-                } else {
-                    try reader.skip(fieldType)
-                }
-            case 3:
-                if fieldType == .bool {
-                    self.skip_services = try Bool.thriftRead(from: reader)
-                } else {
-                    try reader.skip(fieldType)
-                }
-            case 4:
                 if fieldType == .bool {
                     self.apply_to_services = try Bool.thriftRead(from: reader)
                 } else {

@@ -665,36 +665,24 @@ namespace facebook.thrift.annotation.hack
             }
         }
 
-        /// <summary>Gets or sets the apply_on_getName field.</summary>
-        public bool @apply_on_getName { get; set; } = true;
-
-        /// <summary>Gets or sets the skip_services field.</summary>
-        public bool @skip_services { get; set; } = false;
-
         /// <summary>Gets or sets the apply_to_services field.</summary>
         public bool @apply_to_services { get; set; } = false;
 
         public @NamePrefix()
         {
             @prefix = string.Empty;
-            @apply_on_getName = true;
-            @skip_services = false;
             @apply_to_services = false;
         }
 
         public void __fbthrift_clear()
         {
             @prefix = string.Empty;
-            @apply_on_getName = default;
-            @skip_services = default;
             @apply_to_services = default;
         }
 
         public bool __fbthrift_is_empty()
         {
             if (@prefix != null && @prefix.Length != 0) { return false; }
-            if (@apply_on_getName != default) { return false; }
-            if (@skip_services != default) { return false; }
             if (@apply_to_services != default) { return false; }
             return true;
         }
@@ -704,14 +692,8 @@ namespace facebook.thrift.annotation.hack
             // Field 1: prefix (string)
             writer.WriteFieldBegin(ThriftWireType.String, 1);
             writer.WriteString(@prefix);
-            // Field 2: apply_on_getName (bool)
+            // Field 2: apply_to_services (bool)
             writer.WriteFieldBegin(ThriftWireType.Bool, 2);
-            writer.WriteBool(@apply_on_getName);
-            // Field 3: skip_services (bool)
-            writer.WriteFieldBegin(ThriftWireType.Bool, 3);
-            writer.WriteBool(@skip_services);
-            // Field 4: apply_to_services (bool)
-            writer.WriteFieldBegin(ThriftWireType.Bool, 4);
             writer.WriteBool(@apply_to_services);
             writer.WriteFieldStop();
         }
@@ -738,27 +720,7 @@ namespace facebook.thrift.annotation.hack
                             reader.Skip(fieldType);
                         }
                         break;
-                    case 2: // apply_on_getName
-                        if (fieldType == ThriftWireType.Bool)
-                        {
-                            @apply_on_getName = reader.ReadBool();
-                        }
-                        else
-                        {
-                            reader.Skip(fieldType);
-                        }
-                        break;
-                    case 3: // skip_services
-                        if (fieldType == ThriftWireType.Bool)
-                        {
-                            @skip_services = reader.ReadBool();
-                        }
-                        else
-                        {
-                            reader.Skip(fieldType);
-                        }
-                        break;
-                    case 4: // apply_to_services
+                    case 2: // apply_to_services
                         if (fieldType == ThriftWireType.Bool)
                         {
                             @apply_to_services = reader.ReadBool();
@@ -785,14 +747,6 @@ namespace facebook.thrift.annotation.hack
             {
                 return false;
             }
-            if (!Equals(@apply_on_getName, other.@apply_on_getName))
-            {
-                return false;
-            }
-            if (!Equals(@skip_services, other.@skip_services))
-            {
-                return false;
-            }
             if (!Equals(@apply_to_services, other.@apply_to_services))
             {
                 return false;
@@ -804,8 +758,6 @@ namespace facebook.thrift.annotation.hack
         {
             var hashCode = new HashCode();
             hashCode.Add(@prefix);
-            hashCode.Add(@apply_on_getName);
-            hashCode.Add(@skip_services);
             hashCode.Add(@apply_to_services);
             return hashCode.ToHashCode();
         }
@@ -816,12 +768,6 @@ namespace facebook.thrift.annotation.hack
             sb.Append("NamePrefix(");
             sb.Append("prefix=");
             sb.Append(@prefix);
-            sb.Append(", ");
-            sb.Append("apply_on_getName=");
-            sb.Append(@apply_on_getName);
-            sb.Append(", ");
-            sb.Append("skip_services=");
-            sb.Append(@skip_services);
             sb.Append(", ");
             sb.Append("apply_to_services=");
             sb.Append(@apply_to_services);

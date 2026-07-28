@@ -19,7 +19,7 @@ include "thrift/annotation/hack.thrift"
 // Program-level prefix with apply_on_getName=false and skip_services=true.
 // Non-service generated class names are prefixed, but getName() returns the
 // unprefixed base name. Service-generated types are not prefixed at all.
-@hack.NamePrefix{prefix = "TMyPrefix_", apply_on_getName = false}
+@hack.NamePrefix{prefix = "TMyPrefix_"}
 @hack.LegacyOmitPrefixInNameString
 package "facebook.com/thrift/test/fixtures/hack_name_prefix_omit_from_name_string"
 

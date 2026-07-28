@@ -17,10 +17,14 @@
 import copy
 import unittest
 
+import thrift.python.mutable_serializer as mutable_serializer
+from pyre_extensions import none_throws
 from test_thrift.thrift_mutable_types import Digits, Integers
 from thrift.python.mutable_types import to_thrift_list, to_thrift_map, to_thrift_set
+from thrift.python.serializer import Protocol
 from thrift.test.thrift_python.union_test.thrift_mutable_types import (
     TestStruct,
+    TestStructNested,
     TestUnion,
     TestUnionContainerTypes,
 )
@@ -152,6 +156,74 @@ class ThriftPython_MutableUnion_Test(unittest.TestCase):
             TestStruct(unqualified_string="Hello World!"),
             u2_copy.fbthrift_current_value,
         )
+
+    def test_fbthrift_shallow_copy_i_know_what_im_doing(self) -> None:
+        """
+        struct TestStructNested {
+          1: i32 nested_int;
+        }
+
+        struct TestStruct {
+          1: string unqualified_string;
+          2: optional string optional_string;
+          3: optional TestStructNested nested_struct;
+        }
+
+        union TestUnion {
+          1: string string_field;
+          2: i32 int_field;
+          3: TestStruct struct_field;
+        }
+        """
+        src = TestUnion(int_field=42)
+        dst = TestUnion(string_field="Hello")
+
+        dst.fbthrift_shallow_copy_I_KNOW_WHAT_IM_DOING(src)
+
+        self.assertEqual(
+            TestUnion.FbThriftUnionFieldEnum.int_field, dst.fbthrift_current_field
+        )
+        self.assertEqual(42, dst.fbthrift_current_value)
+        self.assertEqual(src, dst)
+
+        # `fbthrift_shallow_copy_I_KNOW_WHAT_IM_DOING` is a shallow copy: the
+        # active field's value is shared by reference, so mutating a nested
+        # struct through `src2` after the copy is visible through `dst2`, at
+        # both the Python-readable field level and the serialized-data level.
+        src2 = TestUnion(
+            struct_field=TestStruct(
+                unqualified_string="Hello",
+                nested_struct=TestStructNested(nested_int=1),
+            )
+        )
+        dst2 = TestUnion(int_field=1)
+
+        dst2.fbthrift_shallow_copy_I_KNOW_WHAT_IM_DOING(src2)
+        self.assertEqual(
+            TestUnion.FbThriftUnionFieldEnum.struct_field, dst2.fbthrift_current_field
+        )
+        self.assertEqual("Hello", dst2.struct_field.unqualified_string)
+        self.assertEqual(1, none_throws(dst2.struct_field.nested_struct).nested_int)
+        self.assertEqual(src2, dst2)
+
+        src2.struct_field.unqualified_string = "Hello World!"
+        none_throws(src2.struct_field.nested_struct).nested_int = 100
+
+        # Shared by reference: mutations through `src2` are visible on `dst2`.
+        self.assertEqual("Hello World!", dst2.struct_field.unqualified_string)
+        self.assertEqual(100, none_throws(dst2.struct_field.nested_struct).nested_int)
+        self.assertEqual(src2, dst2)
+
+        # Attribute access agrees with the serialized bytes.
+        self.assertEqual(
+            mutable_serializer.serialize(src2, Protocol.BINARY),
+            mutable_serializer.serialize(dst2, Protocol.BINARY),
+        )
+
+        with self.assertRaisesRegex(TypeError, "Cannot copy from"):
+            dst.fbthrift_shallow_copy_I_KNOW_WHAT_IM_DOING(
+                TestStruct(unqualified_string="x")
+            )
 
     def test_deepcopy(self) -> None:
         """

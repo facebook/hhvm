@@ -45,6 +45,7 @@ class MutableStruct(
 
 class MutableUnion(MutableStructOrUnion, metaclass=MutableUnionMeta):
     def _to_python(self) -> Union: ...
+    def fbthrift_shallow_copy_I_KNOW_WHAT_IM_DOING(self, other: object) -> None: ...
 
     fbthrift_current_value: object
     fbthrift_current_field: enum.Enum

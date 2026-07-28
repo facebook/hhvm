@@ -914,6 +914,24 @@ cdef class MutableUnion(MutableStructOrUnion):
         """
         self._fbthrift_set_mutable_union_value(field_id=0, field_python_value=None)
 
+    def fbthrift_shallow_copy_I_KNOW_WHAT_IM_DOING(self, other):
+        """
+        Shallow-copies the content of `other` into this union.
+
+        WARNING: this is a SHALLOW copy. It assigns `other`'s internal data
+        directly, so `self` and `other` share a reference to the active field's
+        value. Mutating a nested struct/container through one is visible through
+        the other. This is fast but aliasing; prefer `copy.deepcopy` for an
+        independent copy. The explicit name is intentional: callers must
+        acknowledge the aliasing semantics.
+        """
+        if type(self) is not type(other):
+            raise TypeError(f"Cannot copy from {type(other)} to {type(self)}")
+
+        self._fbthrift_data[0] = (<MutableUnion>other)._fbthrift_data[0]
+        self._fbthrift_data[1] = (<MutableUnion>other)._fbthrift_data[1]
+        self._fbthrift_update_current_field_attributes()
+
     cdef void _fbthrift_set_mutable_union_value(
         self, int field_id, object field_python_value
     ) except *:

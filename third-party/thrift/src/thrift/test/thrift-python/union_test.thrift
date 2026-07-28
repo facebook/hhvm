@@ -22,9 +22,14 @@ package;
 
 namespace py3 thrift.test.thrift_python
 
+struct TestStructNested {
+  1: i32 nested_int;
+}
+
 struct TestStruct {
   1: string unqualified_string;
   2: optional string optional_string;
+  3: optional TestStructNested nested_struct;
 }
 
 union TestUnion {

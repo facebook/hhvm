@@ -25,43 +25,28 @@ namespace HPHP {
 
 // Address ranges for managed arenas.
 //
-// Depending if we are running in LowPtr, PackedPtr or FullPtr mode we allocate
-// memory differently. We have 3 main arenas Lower, Low and Small. The number in
-// the table is which chunk we allocate memory from first.
+// We have 5 main arenas: Low, LowSmall, High, HighCold and Local. The number
+// in the table is which chunk we allocate memory from first.
 //
-// LowPtr mode
+// Start of address range     Low       LowSmall  High      HighCold  Local
 // --------------------------------------------------------------------------
-// Start Addr                           Low         Small
-// --------------------------------------------------------------------------
-// 1 GB                                 1           1
-// 4 GB - Emergency                     2           2
-// 4 GB
-// --------------------------------------------------------------------------
-//
-// PackedPtr mode                       Lower       Small
-// --------------------------------------------------------------------------
-// 1 GB                                 1           1
-// 4 GB - Emergency - Small             3           2
-// 4 GB - Emergency                     4           3
-// 4 GB                                 2
-// 32 GB
+// 0 GB                             Reserved for HHVM binary + TC
+// 2 GB                       1         1
+// 4 GB - Emergency - Small   3         2
+// 4 GB - Emergency           4         3
+// 4 GB                       2
+// 32 GB                                          1         2
+// 256 GB - HighColdCap                                     1
+// 256 GB
+// 1024 GB                                                            1
+// 2048 GB                          Reserved for jemalloc auto arena
 // --------------------------------------------------------------------------
 //
-// FullPtr mode
-// --------------------------------------------------------------------------
-// Start Addr                           Lower       Small
-// --------------------------------------------------------------------------
-// 1 GB                                 1           1
-// 64 GB - Emergency                    2           2
-// 64 GB
-// --------------------------------------------------------------------------
-//
-// Low arenas are in [2G, 4G), and high arena are in [4G, kUncountedMaxAddr).
-// LOW_PTR builds won't work if low arena overflows. High arena overflow would
-// result in a crash, so size it large enough to make sure we run out of memory
-// before it overflows. These constants are only meaningful when
-// addr_encodes_persistency is true. We make them available for all modes to
-// avoid having ifdefs everywhere.
+// Overflow of any arena will cause a crash, so size them large enough to make
+// sure we run out of memory before they overflow. These constants are only
+// meaningful when we have control over the virtual address space, i.e. when
+// USE_JEMALLOC is defined. We make them available for all modes to avoid having
+// ifdefs everywhere.
 #ifdef LOW_BUMP_ALLOCATOR
 extern void* low_bump_start_addr();
 #endif

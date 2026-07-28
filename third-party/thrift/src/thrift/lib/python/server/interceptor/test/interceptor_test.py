@@ -22,6 +22,7 @@ from typing import AsyncIterator, Awaitable, Callable, cast, Type
 from later.unittest import TestCase
 from thrift.lib.python.server.interceptor.test.interceptors import (
     CountingInterceptor,
+    OnConnectionClosedThrowsInterceptor,
     OnConnectThrowsInterceptor,
     OnRequestThrowsInterceptor,
     OnResponseThrowsInterceptor,
@@ -512,3 +513,26 @@ class OnResponseThrowsInterceptorStreamingTest(StreamingServiceTestCase):
 
         # pyrefly: ignore [missing-attribute]
         self.assertEqual(self.observer.on_response_throws, 1)
+
+
+class OnConnectionClosedThrowsInterceptorBasicTest(BasicServiceTestCase):
+    def setUp(self) -> None:
+        # pyrefly: ignore [bad-assignment]
+        self.observer = OnConnectionClosedThrowsInterceptor()
+        super().setUp()
+
+    async def test_interceptors_header(self) -> None:
+        # onConnectionClosed is a noexcept, best-effort teardown callback that
+        # runs after the response is sent. A raising callback must be swallowed:
+        # the request still succeeds, nothing surfaces to the client, and the
+        # server keeps running (a crash here would abort the whole process).
+        await self.run_with_local_server(self.assert_return)
+
+        # pyrefly: ignore [missing-attribute]
+        self.assertGreaterEqual(self.observer.on_connection_closed_throws, 1)
+
+    async def test_interceptors_rocket(self) -> None:
+        await self.run_with_local_server_rocket(self.assert_return)
+
+        # pyrefly: ignore [missing-attribute]
+        self.assertGreaterEqual(self.observer.on_connection_closed_throws, 1)

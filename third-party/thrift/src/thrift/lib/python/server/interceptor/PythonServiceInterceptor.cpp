@@ -106,12 +106,15 @@ void ObservableServiceInterceptor::onConnectionClosed(
   PyObject* result =
       call_on_connect_closed_callback(pyWrapper_, pyConnState, pyConnInfo);
   if (!result) {
-    // clear Python error and terminate
+    // onConnectionClosed is a noexcept, best-effort cleanup notification: a
+    // failing Python callback must not escape into the noexcept C++ boundary
+    // (which would std::terminate the whole server). Clear the Python error,
+    // log it, and continue.
     try {
       folly::python::handlePythonError(
-          "ObservableServiceInterceptor::onRequest Python callback error: ");
+          "ObservableServiceInterceptor::onConnectionClosed Python callback error: ");
     } catch (const std::exception& e) {
-      LOG(FATAL)
+      LOG(ERROR)
           << "Python error encountered in `noexcept` method `onConnectionClosed`: "
           << e.what();
     }

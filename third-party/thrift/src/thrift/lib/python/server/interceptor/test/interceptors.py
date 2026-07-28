@@ -155,3 +155,16 @@ class OnResponseThrowsInterceptor(
     ) -> None:
         self.on_response_throws += 1
         raise RuntimeError("Expect the unexpected")
+
+
+class OnConnectionClosedThrowsInterceptor(
+    AbstractServiceInterceptor[ConnectionState, RequestState]
+):
+    def __init__(self) -> None:
+        self.on_connection_closed_throws: int = 0
+
+    def onConnectionClosed(
+        self, connection_state: ConnectionState, connection_info: ConnectionInfo
+    ) -> None:
+        self.on_connection_closed_throws += 1
+        raise RuntimeError("Expect the unexpected")

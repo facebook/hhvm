@@ -13,7 +13,6 @@ namespace fizz {
 Status getHashFunction(HashFunction& ret, Error& err, CipherSuite cipher) {
   switch (cipher) {
     case CipherSuite::TLS_AES_128_GCM_SHA256:
-    case CipherSuite::TLS_AES_128_OCB_SHA256_EXPERIMENTAL:
     case CipherSuite::TLS_CHACHA20_POLY1305_SHA256:
     case CipherSuite::TLS_AEGIS_128L_SHA256:
       ret = HashFunction::Sha256;

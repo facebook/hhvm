@@ -743,13 +743,6 @@ INSTANTIATE_TEST_SUITE_P(
     ::testing::ValuesIn(kChaChaPoly1305Params));
 #endif
 
-#if !defined(OPENSSL_NO_OCB)
-INSTANTIATE_TEST_SUITE_P(
-    OCBTestVectors,
-    EVPCipherTest,
-    ::testing::ValuesIn(kAesOcbParams));
-#endif
-
 #if FIZZ_HAVE_LIBAEGIS
 INSTANTIATE_TEST_SUITE_P(
     AEGIS128LTestVectors,

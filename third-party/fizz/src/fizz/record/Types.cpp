@@ -192,8 +192,6 @@ std::string toString(CipherSuite cipher) {
       return "TLS_AES_256_GCM_SHA384";
     case CipherSuite::TLS_CHACHA20_POLY1305_SHA256:
       return "TLS_CHACHA20_POLY1305_SHA256";
-    case CipherSuite::TLS_AES_128_OCB_SHA256_EXPERIMENTAL:
-      return "TLS_AES_128_OCB_SHA256_EXPERIMENTAL";
     case CipherSuite::TLS_AEGIS_256_SHA512:
       return "TLS_AEGIS_256_SHA512";
     case CipherSuite::TLS_AEGIS_128L_SHA256:

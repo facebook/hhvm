@@ -55,7 +55,7 @@ TEST_F(KTLSTest, TestSockoptFormat) {
   // An unsupported ktls cipher suite should not work
   {
     KTLSCryptoParams params{};
-    params.ciphersuite = CipherSuite::TLS_AES_128_OCB_SHA256_EXPERIMENTAL;
+    params.ciphersuite = CipherSuite::TLS_AEGIS_128L_SHA256;
     params.key = kAES128TrafficKey.clone();
     params.recordSeq = 12;
 

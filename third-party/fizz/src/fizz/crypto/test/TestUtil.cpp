@@ -91,10 +91,6 @@ std::unique_ptr<Aead> getCipher(CipherSuite suite) {
           openssl::OpenSSLEVPCipher::makeCipher<ChaCha20Poly1305>(cipher, err),
           err);
       break;
-    case CipherSuite::TLS_AES_128_OCB_SHA256_EXPERIMENTAL:
-      FIZZ_THROW_ON_ERROR(
-          openssl::OpenSSLEVPCipher::makeCipher<AESOCB128>(cipher, err), err);
-      break;
 #if FIZZ_HAVE_LIBAEGIS
     case CipherSuite::TLS_AEGIS_128L_SHA256:
       FIZZ_THROW_ON_ERROR(

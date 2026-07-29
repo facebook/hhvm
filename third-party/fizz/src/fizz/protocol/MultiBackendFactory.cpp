@@ -91,10 +91,6 @@ Status MultiBackendFactory::makeAead(
       FIZZ_RETURN_ON_ERROR(
           openssl::OpenSSLEVPCipher::makeCipher<fizz::AESGCM256>(ret, err));
       return Status::Success;
-    case CipherSuite::TLS_AES_128_OCB_SHA256_EXPERIMENTAL:
-      FIZZ_RETURN_ON_ERROR(
-          openssl::OpenSSLEVPCipher::makeCipher<fizz::AESOCB128>(ret, err));
-      return Status::Success;
 #if FIZZ_HAVE_LIBAEGIS
     case CipherSuite::TLS_AEGIS_256_SHA512:
       return libaegis::makeCipher<fizz::AEGIS256>(ret, err);

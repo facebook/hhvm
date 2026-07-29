@@ -131,6 +131,7 @@ enum class CipherSuite : uint16_t {
   TLS_AEGIS_128L_SHA256 = 0x1307,
   // experimental cipher suites
   TLS_AEGIS_128X2_SHA256 = 0xFF01,
+  TLS_AEGIS_128X4_SHA256 = 0xFF03,
 };
 
 std::string toString(CipherSuite);

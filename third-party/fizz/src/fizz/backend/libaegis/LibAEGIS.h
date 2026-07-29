@@ -24,5 +24,7 @@ template <>
 Status makeCipher<fizz::AEGIS256>(std::unique_ptr<Aead>& ret, Error& err);
 template <>
 Status makeCipher<fizz::AEGIS128X2>(std::unique_ptr<Aead>& ret, Error& err);
+template <>
+Status makeCipher<fizz::AEGIS128X4>(std::unique_ptr<Aead>& ret, Error& err);
 } // namespace fizz::libaegis
 #endif

@@ -756,6 +756,10 @@ INSTANTIATE_TEST_SUITE_P(
     AEGIS128X2TestVectors,
     EVPCipherTest,
     ::testing::ValuesIn(kAegis128X2Params));
+INSTANTIATE_TEST_SUITE_P(
+    AEGIS128X4TestVectors,
+    EVPCipherTest,
+    ::testing::ValuesIn(kAegis128X4Params));
 #endif
 } // namespace test
 } // namespace openssl

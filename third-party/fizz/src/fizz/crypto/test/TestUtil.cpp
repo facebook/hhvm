@@ -104,6 +104,10 @@ std::unique_ptr<Aead> getCipher(CipherSuite suite) {
       FIZZ_THROW_ON_ERROR(
           libaegis::makeCipher<fizz::AEGIS128X2>(cipher, err), err);
       break;
+    case CipherSuite::TLS_AEGIS_128X4_SHA256:
+      FIZZ_THROW_ON_ERROR(
+          libaegis::makeCipher<fizz::AEGIS128X4>(cipher, err), err);
+      break;
 #endif
     default:
       throw std::runtime_error("Invalid cipher");

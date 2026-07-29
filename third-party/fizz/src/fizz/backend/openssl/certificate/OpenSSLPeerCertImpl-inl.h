@@ -69,5 +69,10 @@ folly::ssl::X509UniquePtr OpenSSLPeerCertImpl<T>::getX509() const {
   X509_up_ref(cert_.get());
   return folly::ssl::X509UniquePtr(cert_.get());
 }
+
+template <KeyType T>
+std::optional<std::string> OpenSSLPeerCertImpl<T>::getDER() const {
+  return CertUtils::getDER(cert_.get());
+}
 } // namespace openssl
 } // namespace fizz

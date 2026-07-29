@@ -340,6 +340,33 @@ Status CertUtils::makeSelfCert(
   return err.error("unknown self cert type");
 }
 
+std::optional<std::string> CertUtils::getDER(const X509* x) {
+  if (!x) {
+    return std::nullopt;
+  }
+#if FOLLY_OPENSSL_IS_3X
+  using X509_TYPE = const X509*;
+#else
+  // OpenSSL 1.1.1 requires non-const arguments, but internally does not
+  // modify the argument.
+  using X509_TYPE = X509*;
+#endif
+
+  int len = i2d_X509(const_cast<X509_TYPE>(x), nullptr);
+  if (len < 0) {
+    return std::nullopt;
+  }
+
+  std::string der(len, '\0');
+  auto derPtr = reinterpret_cast<unsigned char*>(der.data());
+
+  if (i2d_X509(const_cast<X509_TYPE>(x), &derPtr) < 0) {
+    return std::nullopt;
+  }
+
+  return der;
+}
+
 CompressedCertificate CertUtils::cloneCompressedCert(
     const CompressedCertificate& src) {
   CompressedCertificate ret;

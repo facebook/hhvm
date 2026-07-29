@@ -68,6 +68,8 @@ class OpenSSLSelfCertImpl : public SelfCert,
 
   [[nodiscard]] folly::ssl::X509UniquePtr getX509() const FIZZ_MAYBE_OVERRIDE;
 
+  std::optional<std::string> getDER() const override;
+
   [[nodiscard]] std::vector<folly::ssl::X509UniquePtr> getX509Chain()
       const override;
 

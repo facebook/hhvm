@@ -186,6 +186,11 @@ folly::ssl::X509UniquePtr OpenSSLSelfCertImpl<T>::getX509() const {
 }
 
 template <KeyType T>
+std::optional<std::string> OpenSSLSelfCertImpl<T>::getDER() const {
+  return CertUtils::getDER(certs_.front().get());
+}
+
+template <KeyType T>
 std::vector<folly::ssl::X509UniquePtr> OpenSSLSelfCertImpl<T>::getX509Chain()
     const {
   std::vector<folly::ssl::X509UniquePtr> ret;

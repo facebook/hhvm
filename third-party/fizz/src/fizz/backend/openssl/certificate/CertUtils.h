@@ -115,6 +115,8 @@ class CertUtils {
       CertificateVerifyContext context,
       folly::ByteRange toBeSigned,
       folly::ByteRange signature);
+
+  static std::optional<std::string> getDER(const X509* x);
 };
 
 const CertificateSerialization& certificateSerializer();

@@ -46,6 +46,8 @@ class OpenSSLPeerCertImpl : public fizz::PeerCert {
 
   [[nodiscard]] folly::ssl::X509UniquePtr getX509() const FIZZ_MAYBE_OVERRIDE;
 
+  std::optional<std::string> getDER() const override;
+
  protected:
   OpenSSLPeerCertImpl(
       OpenSSLSignature<T> signature,

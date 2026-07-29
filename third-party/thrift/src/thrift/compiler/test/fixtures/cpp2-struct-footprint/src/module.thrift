@@ -106,7 +106,7 @@ service FootprintTestService {
   Struct1, stream<SimpleStruct> streamWithSinkInitial(1: i32 input);
 
   Struct1, stream<SimpleStruct> streamWithSinkException(1: i32 input) throws (
-    ExStruct ex,
+    -1: ExStruct ex,
   );
 }
 

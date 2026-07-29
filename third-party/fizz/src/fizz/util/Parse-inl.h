@@ -18,6 +18,7 @@ inline Status parse(CipherSuite& ret, Error& err, folly::StringPiece s) {
       {"TLS_CHACHA20_POLY1305_SHA256",
        CipherSuite::TLS_CHACHA20_POLY1305_SHA256},
       {"TLS_AEGIS_128L_SHA256", CipherSuite::TLS_AEGIS_128L_SHA256},
+      {"TLS_AEGIS_128X2_SHA256", CipherSuite::TLS_AEGIS_128X2_SHA256},
       {"TLS_AEGIS_256_SHA512", CipherSuite::TLS_AEGIS_256_SHA512}};
 
   auto location = stringToCiphers.find(s);

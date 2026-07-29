@@ -196,6 +196,8 @@ std::string toString(CipherSuite cipher) {
       return "TLS_AEGIS_256_SHA512";
     case CipherSuite::TLS_AEGIS_128L_SHA256:
       return "TLS_AEGIS_128L_SHA256";
+    case CipherSuite::TLS_AEGIS_128X2_SHA256:
+      return "TLS_AEGIS_128X2_SHA256";
   }
   return enumToHex(cipher);
 }

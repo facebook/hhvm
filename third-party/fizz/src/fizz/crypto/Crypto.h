@@ -52,6 +52,12 @@ struct AEGIS256 {
   static constexpr size_t kTagLength{16};
 };
 
+struct AEGIS128X2 {
+  static constexpr size_t kKeyLength{16};
+  static constexpr size_t kIVLength{16};
+  static constexpr size_t kTagLength{16};
+};
+
 enum class HashFunction { Sha256, Sha384, Sha512 };
 inline folly::StringPiece toString(HashFunction hash) {
   switch (hash) {

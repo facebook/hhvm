@@ -15,6 +15,7 @@ Status getHashFunction(HashFunction& ret, Error& err, CipherSuite cipher) {
     case CipherSuite::TLS_AES_128_GCM_SHA256:
     case CipherSuite::TLS_CHACHA20_POLY1305_SHA256:
     case CipherSuite::TLS_AEGIS_128L_SHA256:
+    case CipherSuite::TLS_AEGIS_128X2_SHA256:
       ret = HashFunction::Sha256;
       return Status::Success;
     case CipherSuite::TLS_AES_256_GCM_SHA384:

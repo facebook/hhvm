@@ -69,6 +69,7 @@ class LibAegisCipher : public LibAegisCipherBase {
 
 DEFINE_LIBAEGIS_CIPHER(AEGIS128L, aegis128l)
 DEFINE_LIBAEGIS_CIPHER(AEGIS256, aegis256)
+DEFINE_LIBAEGIS_CIPHER(AEGIS128X2, aegis128x2)
 
 class AEGISCipher : public Aead {
  public:
@@ -513,6 +514,14 @@ Status makeCipher<fizz::AEGIS256>(std::unique_ptr<Aead>& ret, Error& err) {
       std::unique_ptr<LibAegisCipherBase>(new LibAegisCipher<AEGIS256>());
   return AEGISCipher::create(
       ret, err, std::move(impl), aegis256_KEYBYTES, aegis256_NPUBBYTES);
+}
+
+template <>
+Status makeCipher<fizz::AEGIS128X2>(std::unique_ptr<Aead>& ret, Error& err) {
+  auto impl =
+      std::unique_ptr<LibAegisCipherBase>(new LibAegisCipher<AEGIS128X2>());
+  return AEGISCipher::create(
+      ret, err, std::move(impl), aegis128x2_KEYBYTES, aegis128x2_NPUBBYTES);
 }
 } // namespace fizz::libaegis
 #endif

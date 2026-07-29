@@ -272,15 +272,15 @@ BENCHMARK_NAMED_PARAM(encryptOCB, 8000, 8000);
 #endif
 
 #if FIZZ_HAVE_LIBAEGIS
-void encryptAEGIS(uint32_t n, size_t size) {
+template <typename Cipher>
+void encryptAEGISImpl(uint32_t n, size_t size) {
   std::unique_ptr<Aead> aead;
   std::vector<fizz::TLSMessage> msgs;
   EncryptedWriteRecordLayer write{EncryptionLevel::AppTraffic};
   BENCHMARK_SUSPEND {
     Error makeCipherErr;
     FIZZ_THROW_ON_ERROR(
-        fizz::libaegis::makeCipher<fizz::AEGIS128L>(aead, makeCipherErr),
-        makeCipherErr);
+        fizz::libaegis::makeCipher<Cipher>(aead, makeCipherErr), makeCipherErr);
     Error err;
     FIZZ_THROW_ON_ERROR(aead->setKey(err, getAegisKey()), err);
     FIZZ_THROW_ON_ERROR(
@@ -300,7 +300,20 @@ void encryptAEGIS(uint32_t n, size_t size) {
   folly::doNotOptimizeAway(content);
 }
 
-void decryptAEGIS(uint32_t n, size_t size) {
+void encryptAEGIS128L(uint32_t n, size_t size) {
+  encryptAEGISImpl<fizz::AEGIS128L>(n, size);
+}
+
+void encryptAEGIS128LX2(uint32_t n, size_t size) {
+  encryptAEGISImpl<fizz::AEGIS128X2>(n, size);
+}
+
+void encryptAEGIS128LX4(uint32_t n, size_t size) {
+  encryptAEGISImpl<fizz::AEGIS128X4>(n, size);
+}
+
+template <typename Cipher>
+void decryptAEGISImpl(uint32_t n, size_t size) {
   std::vector<folly::IOBufQueue> contents;
   EncryptedReadRecordLayer read{EncryptionLevel::AppTraffic};
   BENCHMARK_SUSPEND {
@@ -310,10 +323,10 @@ void decryptAEGIS(uint32_t n, size_t size) {
     {
       Error makeCipherErr;
       FIZZ_THROW_ON_ERROR(
-          fizz::libaegis::makeCipher<fizz::AEGIS128L>(writeAead, makeCipherErr),
+          fizz::libaegis::makeCipher<Cipher>(writeAead, makeCipherErr),
           makeCipherErr);
       FIZZ_THROW_ON_ERROR(
-          fizz::libaegis::makeCipher<fizz::AEGIS128L>(readAead, makeCipherErr),
+          fizz::libaegis::makeCipher<Cipher>(readAead, makeCipherErr),
           makeCipherErr);
     }
     Error err;
@@ -343,17 +356,55 @@ void decryptAEGIS(uint32_t n, size_t size) {
   folly::doNotOptimizeAway(msg);
 }
 
+void decryptAEGIS128L(uint32_t n, size_t size) {
+  decryptAEGISImpl<fizz::AEGIS128L>(n, size);
+}
+
+void decryptAEGIS128LX2(uint32_t n, size_t size) {
+  decryptAEGISImpl<fizz::AEGIS128X2>(n, size);
+}
+
+void decryptAEGIS128LX4(uint32_t n, size_t size) {
+  decryptAEGISImpl<fizz::AEGIS128X4>(n, size);
+}
+
 // Because AEGIS currently has not implemented
 // optimization, we will compare aegis vs gcm without optimization
-BENCHMARK_PARAM(encryptAEGIS, 10);
-BENCHMARK_PARAM(encryptAEGIS, 100);
-BENCHMARK_PARAM(encryptAEGIS, 1000);
-BENCHMARK_PARAM(encryptAEGIS, 4000);
-BENCHMARK_PARAM(encryptAEGIS, 8000);
+BENCHMARK_PARAM(encryptAEGIS128L, 10);
+BENCHMARK_PARAM(encryptAEGIS128L, 100);
+BENCHMARK_PARAM(encryptAEGIS128L, 1000);
+BENCHMARK_PARAM(encryptAEGIS128L, 4000);
+BENCHMARK_PARAM(encryptAEGIS128L, 8000);
 
-BENCHMARK_PARAM(decryptAEGIS, 10);
-BENCHMARK_PARAM(decryptAEGIS, 1000);
-BENCHMARK_PARAM(decryptAEGIS, 8000);
+BENCHMARK_PARAM(decryptAEGIS128L, 10);
+BENCHMARK_PARAM(decryptAEGIS128L, 100);
+BENCHMARK_PARAM(decryptAEGIS128L, 1000);
+BENCHMARK_PARAM(decryptAEGIS128L, 4000);
+BENCHMARK_PARAM(decryptAEGIS128L, 8000);
+
+BENCHMARK_PARAM(encryptAEGIS128LX2, 10);
+BENCHMARK_PARAM(encryptAEGIS128LX2, 100);
+BENCHMARK_PARAM(encryptAEGIS128LX2, 1000);
+BENCHMARK_PARAM(encryptAEGIS128LX2, 4000);
+BENCHMARK_PARAM(encryptAEGIS128LX2, 8000);
+
+BENCHMARK_PARAM(decryptAEGIS128LX2, 10);
+BENCHMARK_PARAM(decryptAEGIS128LX2, 100);
+BENCHMARK_PARAM(decryptAEGIS128LX2, 1000);
+BENCHMARK_PARAM(decryptAEGIS128LX2, 4000);
+BENCHMARK_PARAM(decryptAEGIS128LX2, 8000);
+
+BENCHMARK_PARAM(encryptAEGIS128LX4, 10);
+BENCHMARK_PARAM(encryptAEGIS128LX4, 100);
+BENCHMARK_PARAM(encryptAEGIS128LX4, 1000);
+BENCHMARK_PARAM(encryptAEGIS128LX4, 4000);
+BENCHMARK_PARAM(encryptAEGIS128LX4, 8000);
+
+BENCHMARK_PARAM(decryptAEGIS128LX4, 10);
+BENCHMARK_PARAM(decryptAEGIS128LX4, 100);
+BENCHMARK_PARAM(decryptAEGIS128LX4, 1000);
+BENCHMARK_PARAM(decryptAEGIS128LX4, 4000);
+BENCHMARK_PARAM(decryptAEGIS128LX4, 8000);
 
 BENCHMARK_DRAW_LINE();
 

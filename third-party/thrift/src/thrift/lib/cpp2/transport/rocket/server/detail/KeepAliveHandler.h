@@ -40,7 +40,8 @@ class KeepAliveHandler {
     KeepAliveFrame keepAliveFrame{std::move(frame)};
 
     if (keepAliveFrame.hasRespondFlag()) {
-      connection_->sendFrame(std::move(keepAliveFrame));
+      connection_->sendFrame(
+          KeepAliveFrame{Flags(), std::move(keepAliveFrame).data()});
     }
     return true;
   }

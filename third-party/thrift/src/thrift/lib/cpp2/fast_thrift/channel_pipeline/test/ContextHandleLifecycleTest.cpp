@@ -214,6 +214,10 @@ TEST_F(
 
   resume.post();
   EXPECT_EQ(std::move(completion).get(), Result::Success);
+  // Drain EventBase: ContextHandle destruction via DelayedDestruction is
+  // dispatched back to the EventBase thread after the coro future resolves,
+  // so callHandlerRemovedImpl runs on T1 concurrently with this read.
+  eventBase_->runInEventBaseThreadAndWait([] {});
   EXPECT_EQ(removedCount.load(), 1);
   EXPECT_EQ(tail_.readCount(), 1);
 }

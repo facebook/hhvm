@@ -59,6 +59,9 @@ void ContextImpl::close() noexcept {
 }
 
 void ContextImpl::awaitWriteReady() noexcept {
+  if (pipeline_->isClosed()) {
+    return;
+  }
   auto* hook = pipeline_->handlerWriteReadyHook(handlerIndex_);
   if (hook && !hook->hook.is_linked()) {
     pipeline_->writeReadyList().push_back(*hook);
@@ -78,6 +81,9 @@ bool ContextImpl::isAwaitingWriteReady() const noexcept {
 }
 
 void ContextImpl::awaitReadReady() noexcept {
+  if (pipeline_->isClosed()) {
+    return;
+  }
   auto* hook = pipeline_->handlerReadReadyHook(handlerIndex_);
   if (hook && !hook->hook.is_linked()) {
     pipeline_->readReadyList().push_back(*hook);

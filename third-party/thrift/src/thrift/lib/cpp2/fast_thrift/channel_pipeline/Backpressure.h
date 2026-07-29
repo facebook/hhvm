@@ -53,6 +53,7 @@ namespace apache::thrift::fast_thrift::channel_pipeline {
 struct WriteReadyHook {
   folly::IntrusiveListHook hook;
   size_t handlerIndex{0}; // Set by PipelineImpl during initialization
+  std::size_t lastNotifiedGeneration{0};
 };
 
 /**
@@ -64,6 +65,7 @@ struct WriteReadyHook {
 struct ReadReadyHook {
   folly::IntrusiveListHook hook;
   size_t handlerIndex{0}; // Set by PipelineImpl during initialization
+  std::size_t lastNotifiedGeneration{0};
 };
 
 /**

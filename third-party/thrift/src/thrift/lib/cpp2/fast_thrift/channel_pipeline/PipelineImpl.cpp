@@ -468,18 +468,25 @@ PIPELINE_HOT_PATH void PipelineImpl::onWriteReady() noexcept {
     return;
   }
 
-  // Walk the intrusive list and notify each handler.
-  // Use safe iteration since handlers may unlink themselves during callback.
+  // A callback may unlink and re-arm its hook. Mark each hook before dispatch
+  // and skip hooks already delivered in this generation, preventing same-pass
+  // reentrant delivery without allocating or changing native linked semantics.
+  const auto generation = ++writeReadyGeneration_;
   auto it = writeReadyList_.begin();
   while (it != writeReadyList_.end()) {
     auto& hook = *it;
-    ++it; // Advance before callback in case handler unlinks
-
-    // O(1) lookup using handlerIndex stored in hook
+    ++it;
+    if (hook.lastNotifiedGeneration == generation) {
+      continue;
+    }
+    hook.lastNotifiedGeneration = generation;
     size_t i = hook.handlerIndex;
     DCHECK(handlers_[i].onWriteReadyFn);
     DCHECK_LT(i, contexts_.size());
     handlers_[i].onWriteReadyFn(handlers_[i].handlerPtr, contexts_[i]);
+    if (state_ == State::Closed) {
+      break;
+    }
   }
 
   // Notify the tail endpoint that writes can resume.
@@ -493,17 +500,25 @@ void PipelineImpl::onReadReady() noexcept {
     return;
   }
 
-  // Walk the intrusive list and notify each handler.
-  // Use safe iteration since handlers may unlink themselves during callback.
+  // A callback may unlink and re-arm its hook. Mark each hook before dispatch
+  // and skip hooks already delivered in this generation, preventing same-pass
+  // reentrant delivery without allocating or changing native linked semantics.
+  const auto generation = ++readReadyGeneration_;
   auto it = readReadyList_.begin();
   while (it != readReadyList_.end()) {
     auto& hook = *it;
     ++it;
-
+    if (hook.lastNotifiedGeneration == generation) {
+      continue;
+    }
+    hook.lastNotifiedGeneration = generation;
     size_t i = hook.handlerIndex;
     DCHECK(handlers_[i].onReadReadyFn);
     DCHECK_LT(i, contexts_.size());
     handlers_[i].onReadReadyFn(handlers_[i].handlerPtr, contexts_[i]);
+    if (state_ == State::Closed) {
+      break;
+    }
   }
 
   // Notify the head endpoint that reads can resume.

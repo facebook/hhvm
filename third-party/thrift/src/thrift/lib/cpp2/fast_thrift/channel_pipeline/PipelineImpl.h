@@ -319,9 +319,13 @@ class PipelineImpl : public folly::DelayedDestruction {
     if (delayed && !getDestroyPending()) {
       return;
     }
-    // Call handlerRemoved directly without DestructorGuard to avoid recursion
+    // Unlink intrusive hooks before their handler owners or list sentinels are
+    // destroyed. Call handlerRemoved directly to avoid DestructorGuard
+    // recursion.
     if (state_ != State::Closed) {
       state_ = State::Closed;
+      writeReadyList_.clear();
+      readReadyList_.clear();
       clearEventLists();
       callHandlerRemovedImpl();
     }
@@ -425,6 +429,8 @@ class PipelineImpl : public folly::DelayedDestruction {
   // Handlers self-register via ctx.awaitWriteReady()/ctx.awaitReadReady().
   WriteReadyList writeReadyList_;
   ReadReadyList readReadyList_;
+  std::size_t writeReadyGeneration_{0};
+  std::size_t readReadyGeneration_{0};
 
   // One intrusive list of subscribers per event type, indexed by event id.
   // Sized to the event enum's Count at construction; the array stays null and

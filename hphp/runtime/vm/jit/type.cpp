@@ -1234,19 +1234,17 @@ Type typeFromSBProfType(const SBProfType& ty) {
 //////////////////////////////////////////////////////////////////////
 
 Type negativeCheckType(Type srcType, Type typeParam) {
-  if (srcType <= typeParam)      return TBottom;
-  if (!srcType.maybe(typeParam)) return srcType;
   // Checks relating to StaticStr and StaticArr are not, in general, precise.
   // They may reject some Statics in some situations, where we only guard using
   // the type tag and not by loading the count field.
-  auto tmp = srcType - typeParam;
-  if (typeParam.maybe(TPersistent)) {
-    if (tmp.maybe(TCountedStr)) tmp |= TStr;
-    if (tmp.maybe(TCountedVec)) tmp |= TVec;
-    if (tmp.maybe(TCountedDict)) tmp |= TDict;
-    if (tmp.maybe(TCountedKeyset)) tmp |= TKeyset;
-  }
-  return tmp & srcType;
+  if (!typeParam.maybe(TCountedStr)) typeParam -= TStr;
+  if (!typeParam.maybe(TCountedVec)) typeParam -= TVec;
+  if (!typeParam.maybe(TCountedDict)) typeParam -= TDict;
+  if (!typeParam.maybe(TCountedKeyset)) typeParam -= TKeyset;
+
+  if (srcType <= typeParam)      return TBottom;
+  if (!srcType.maybe(typeParam)) return srcType;
+  return srcType - typeParam;
 }
 
 //////////////////////////////////////////////////////////////////////

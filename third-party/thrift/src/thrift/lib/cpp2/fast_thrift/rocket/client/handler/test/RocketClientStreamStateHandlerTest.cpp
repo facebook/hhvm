@@ -171,10 +171,15 @@ std::unique_ptr<folly::IOBuf> buildFrame(
   size_t headerSize = desc.headerSize > 0
       ? desc.headerSize
       : apache::thrift::fast_thrift::frame::kBaseHeaderSize;
+  const size_t setupMimeLengthsSize =
+      type == apache::thrift::fast_thrift::frame::FrameType::SETUP
+      ? 2 * sizeof(uint8_t)
+      : 0;
+  const size_t totalSize = headerSize + setupMimeLengthsSize;
 
-  auto buf = folly::IOBuf::create(headerSize);
+  auto buf = folly::IOBuf::create(totalSize);
   auto* data = buf->writableData();
-  std::memset(data, 0, headerSize);
+  std::memset(data, 0, totalSize);
 
   // Write streamId (big-endian)
   data[0] = static_cast<uint8_t>((streamId >> 24) & 0xFF);
@@ -190,7 +195,7 @@ std::unique_ptr<folly::IOBuf> buildFrame(
   data[4] = static_cast<uint8_t>((typeAndFlags >> 8) & 0xFF);
   data[5] = static_cast<uint8_t>(typeAndFlags & 0xFF);
 
-  buf->append(headerSize);
+  buf->append(totalSize);
   return buf;
 }
 

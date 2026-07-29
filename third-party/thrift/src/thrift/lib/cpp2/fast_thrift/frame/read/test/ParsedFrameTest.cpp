@@ -307,6 +307,36 @@ TEST(ParsedFrameTest, IsTerminalFrameReturnsFalseForNonTerminalFrameTypes) {
 }
 
 // =============================================================================
+// extractMetadata Tests
+// =============================================================================
+
+TEST(ParsedFrameTest, ExtractMetadataMovesBoundedChainedPayload) {
+  auto header = folly::IOBuf::copyBuffer("header");
+  auto metadata = folly::IOBuf::copyBuffer("meta");
+  const auto* expectedMetadata = metadata->data();
+  metadata->appendToChain(folly::IOBuf::copyBuffer("data"));
+  header->appendToChain(std::move(metadata));
+  header->appendToChain(folly::IOBuf::copyBuffer("payload"));
+
+  ParsedFrame frame;
+  frame.metadata.descriptor = &getDescriptor(FrameType::SETUP);
+  frame.metadata.payloadOffset = 6;
+  frame.metadata.metadataSize = 8;
+  frame.metadata.payloadSize = 15;
+  frame.buffer = std::move(header);
+
+  auto extracted = std::move(frame).extractMetadata();
+
+  ASSERT_NE(extracted, nullptr);
+  EXPECT_EQ(extracted->data(), expectedMetadata);
+  EXPECT_EQ(extracted->computeChainDataLength(), 8);
+  const auto bytes = extracted->coalesce();
+  EXPECT_EQ(
+      std::string(reinterpret_cast<const char*>(bytes.data()), bytes.size()),
+      "metadata");
+}
+
+// =============================================================================
 // extractData Tests
 // =============================================================================
 

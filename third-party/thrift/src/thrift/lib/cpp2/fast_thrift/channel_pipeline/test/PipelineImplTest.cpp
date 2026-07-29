@@ -546,13 +546,16 @@ TEST_F(PipelineImplTest, FireDisconnectAfterCloseIsNoop) {
   createHandlers();
   auto pipeline = buildPipeline();
 
+  // close() on an active pipeline deactivates first (honoring the
+  // deactivate-before-close contract), so onPipelineInactive fires exactly
+  // once. A subsequent explicit deactivate() after close is a no-op.
   pipeline->activate();
   pipeline->close();
   pipeline->deactivate();
 
-  EXPECT_EQ(head_ptr_->pipelineDeactivatedCount(), 0);
-  EXPECT_EQ(middle_ptr_->pipelineDeactivatedCount(), 0);
-  EXPECT_EQ(tail_ptr_->pipelineDeactivatedCount(), 0);
+  EXPECT_EQ(head_ptr_->pipelineDeactivatedCount(), 1);
+  EXPECT_EQ(middle_ptr_->pipelineDeactivatedCount(), 1);
+  EXPECT_EQ(tail_ptr_->pipelineDeactivatedCount(), 1);
 }
 
 TEST_F(PipelineImplTest, FireDisconnectIsIdempotent) {

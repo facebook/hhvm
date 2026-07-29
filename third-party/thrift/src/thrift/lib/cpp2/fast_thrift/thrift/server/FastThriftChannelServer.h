@@ -24,6 +24,7 @@
 #include <folly/SocketAddress.h>
 #include <folly/Synchronized.h>
 #include <folly/executors/IOThreadPoolExecutor.h>
+#include <folly/io/IOBuf.h>
 #include <folly/synchronization/Baton.h>
 #include <thrift/lib/cpp2/async/AsyncProcessor.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/BufferAllocator.h>
@@ -34,6 +35,7 @@
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerSetupFrameHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/security/FizzServerCertConfig.h>
 #include <thrift/lib/cpp2/fast_thrift/security/ThriftTlsConfig.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/SetupResponseBuilder.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/ThriftServerChannel.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/adapter/ThriftServerTransportAdapter.h>
 
@@ -453,8 +455,12 @@ ThriftServerChannelConnection FastThriftServerT<Stats>::buildConnection(
       evb,
       rocketConn->transportHandler.get(),
       rocketConn->appAdapter.get(),
-      [channelPtr](const rocket::server::handler::SetupParameters& p) noexcept {
+      [channelPtr](
+          const rocket::server::handler::SetupParameters& p,
+          std::unique_ptr<folly::IOBuf> setupMetadata) noexcept {
         channelPtr->setMetadataProtocol(p.metadataProtocol);
+        return makeSetupResponseResult(
+            std::move(setupMetadata), p.metadataProtocol);
       },
       stats);
   rocketConn->appAdapter->setPipeline(rocketConn->pipeline.get());

@@ -127,8 +127,8 @@ constexpr uint8_t kExtHeaderSize =
     kBaseHeaderSize + 4; // base + extFrameType (4)
 constexpr uint8_t kKeepAliveHeaderSize =
     kBaseHeaderSize + 8; // base + lastPosition (8)
-constexpr uint8_t kSetupHeaderSize = kBaseHeaderSize +
-    14; // base + version(4) + keepalive(4) + lifetime(4) + resumeTokenLen(2)
+constexpr uint8_t kSetupHeaderSize =
+    kBaseHeaderSize + 12; // base + version(4) + keepalive(4) + lifetime(4)
 } // namespace detail
 
 /**

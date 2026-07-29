@@ -20,6 +20,8 @@
 
 #include <gtest/gtest.h>
 
+#include <stdexcept>
+
 namespace apache::thrift::fast_thrift::frame::read {
 namespace {
 
@@ -734,6 +736,33 @@ TEST(SetupViewTest, BasicSetupFrame) {
   EXPECT_FALSE(view.hasResumeToken());
 }
 
+TEST(SetupViewTest, ReadsMetadataMimeTypeWithoutResumeToken) {
+  std::vector<uint8_t> extraHeader = {
+      0, 1, 0, 0, 0, 0, 0x75, 0x30, 0, 0, 0xEA, 0x60};
+  const std::string metadataMime = "application/x-rocket-metadata+compact";
+  const std::string dataMime = "application/x-rocket-payload";
+  extraHeader.push_back(static_cast<uint8_t>(metadataMime.size()));
+  extraHeader.insert(
+      extraHeader.end(), metadataMime.begin(), metadataMime.end());
+  extraHeader.push_back(static_cast<uint8_t>(dataMime.size()));
+  extraHeader.insert(extraHeader.end(), dataMime.begin(), dataMime.end());
+  extraHeader.insert(extraHeader.end(), {0, 0, 4});
+
+  const std::string metadata = "meta";
+  const std::string data = "setup data";
+  std::vector<uint8_t> payload(metadata.begin(), metadata.end());
+  payload.insert(payload.end(), data.begin(), data.end());
+  auto frame = createParsedFrame(
+      0,
+      FrameType::SETUP,
+      ::apache::thrift::fast_thrift::frame::detail::kMetadataBit,
+      extraHeader,
+      payload);
+
+  SetupView view(frame);
+  EXPECT_EQ(view.readMetadataMimeType(), metadataMime);
+}
+
 TEST(SetupViewTest, WithLeaseFlag) {
   std::vector<uint8_t> extraHeader = {
       0,
@@ -762,32 +791,28 @@ TEST(SetupViewTest, WithLeaseFlag) {
   EXPECT_TRUE(view.hasLease());
 }
 
-TEST(SetupViewTest, WithResumeTokenFlag) {
+TEST(SetupViewTest, ReadsMetadataMimeTypeWithResumeToken) {
   std::vector<uint8_t> extraHeader = {
-      0,
-      1, // Major version = 1
-      0,
-      0, // Minor version = 0
-      0,
-      0,
-      0x75,
-      0x30, // Keepalive time = 30000
-      0,
-      0,
-      0xEA,
-      0x60, // Max lifetime = 60000
-  };
+      0, 1, 0, 0, 0, 0, 0x75, 0x30, 0, 0, 0xEA, 0x60};
+  const std::string resumeToken = "resume";
+  extraHeader.push_back(0);
+  extraHeader.push_back(static_cast<uint8_t>(resumeToken.size()));
+  extraHeader.insert(extraHeader.end(), resumeToken.begin(), resumeToken.end());
+  extraHeader.insert(extraHeader.end(), {1, 'm', 1, 'd', 0, 0, 5});
 
-  // Resume token flag is bit 7 (same position as follows)
+  const std::string metadata = "setup";
   auto frame = createParsedFrame(
       0,
       FrameType::SETUP,
-      ::apache::thrift::fast_thrift::frame::detail::kResumeTokenBit,
-      extraHeader);
+      ::apache::thrift::fast_thrift::frame::detail::kMetadataBit |
+          ::apache::thrift::fast_thrift::frame::detail::kResumeTokenBit,
+      extraHeader,
+      std::vector<uint8_t>(metadata.begin(), metadata.end()));
 
   SetupView view(frame);
 
   EXPECT_TRUE(view.hasResumeToken());
+  EXPECT_EQ(view.readMetadataMimeType(), "m");
 }
 
 TEST(SetupViewTest, RocketTypicalValues) {

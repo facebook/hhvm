@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
+#include <chrono>
+
 #include <gtest/gtest.h>
 
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/test/common/TestServerConnection.h>
 
 #include <folly/Synchronized.h>
 #include <folly/executors/IOThreadPoolExecutor.h>
+#include <folly/io/IOBuf.h>
 #include <folly/io/async/AsyncSocket.h>
 #include <folly/io/async/ScopedEventBaseThread.h>
 #include <folly/synchronization/Baton.h>
@@ -42,6 +45,7 @@
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerRequestResponseHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerSetupFrameHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerStreamStateHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/SetupResponseBuilder.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/ThriftServerChannel.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/adapter/ThriftServerTransportAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/test/if/gen-cpp2/BackwardsCompatibilityTestService.h>
@@ -49,6 +53,7 @@
 #include <thrift/lib/cpp2/fast_thrift/transport/TransportHandler.h>
 
 THRIFT_FLAG_DECLARE_bool(rocket_client_binary_rpc_metadata_encoding);
+THRIFT_FLAG_DECLARE_int64(rocket_client_max_version);
 
 namespace apache::thrift::fast_thrift::thrift::server::test {
 
@@ -204,9 +209,12 @@ class ThriftServerBackwardsCompatibilityE2ETest : public ::testing::Test {
                 server_setup_frame_handler_tag,
                 [channel, transportAdapterPtr](
                     const apache::thrift::fast_thrift::rocket::server::handler::
-                        SetupParameters& p) noexcept {
+                        SetupParameters& p,
+                    std::unique_ptr<folly::IOBuf> setupMetadata) noexcept {
                   channel->setMetadataProtocol(p.metadataProtocol);
                   transportAdapterPtr->setMetadataProtocol(p.metadataProtocol);
+                  return makeSetupResponseResult(
+                      std::move(setupMetadata), p.metadataProtocol);
                 })
             .addNextDuplex<apache::thrift::fast_thrift::rocket::server::
                                handler::RocketServerStreamStateHandler>(
@@ -329,6 +337,34 @@ TEST_F(ThriftServerBackwardsCompatibilityE2ETest, EchoRequestResponse) {
 
   baton.wait();
   EXPECT_EQ(result, "hello world");
+
+  destroyClientOnEvb(client);
+}
+
+// A client whose version range does not overlap the server's [8, 10] must be
+// rejected during SETUP. The server must reject and close the connection
+// cleanly (the request fails) rather than crash.
+TEST_F(ThriftServerBackwardsCompatibilityE2ETest, IncompatibleVersionRejected) {
+  // Force the client to advertise a max version below the server floor.
+  THRIFT_FLAG_SET_MOCK(rocket_client_max_version, 7);
+
+  auto client = createStandardThriftClient();
+
+  folly::Baton<> baton;
+  bool failed = false;
+
+  clientThread_->getEventBase()->runInEventBaseThread([&] {
+    client->semifuture_ping()
+        .via(clientThread_->getEventBase())
+        .thenValue([&](auto&&) { baton.post(); })
+        .thenError([&](const folly::exception_wrapper& ew) {
+          LOG(INFO) << "ping rejected as expected: " << folly::exceptionStr(ew);
+          failed = true;
+          baton.post();
+        });
+  });
+  ASSERT_TRUE(baton.try_wait_for(std::chrono::seconds(5)));
+  EXPECT_TRUE(failed);
 
   destroyClientOnEvb(client);
 }

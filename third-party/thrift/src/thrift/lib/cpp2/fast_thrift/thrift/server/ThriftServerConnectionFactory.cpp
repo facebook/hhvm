@@ -16,8 +16,10 @@
 
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/ThriftServerConnectionFactory.h>
 
+#include <memory>
 #include <utility>
 
+#include <folly/io/IOBuf.h>
 #include <folly/logging/xlog.h>
 
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/HandlerTag.h>
@@ -32,6 +34,7 @@
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerMessageMarshalHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerRequestResponseHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerStreamStateHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/SetupResponseBuilder.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/adapter/MetadataAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/adapter/ThriftServerCompositeAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/Event.h>
@@ -195,8 +198,11 @@ ThriftServerConnection ThriftServerConnectionFactory::buildConnectionImpl(
       transportHandler.get(),
       rocketConn.appAdapter.get(),
       [transportAdapterPtr](
-          const rocket::server::handler::SetupParameters& p) noexcept {
+          const rocket::server::handler::SetupParameters& p,
+          std::unique_ptr<folly::IOBuf> setupMetadata) noexcept {
         transportAdapterPtr->setMetadataProtocol(p.metadataProtocol);
+        return makeSetupResponseResult(
+            std::move(setupMetadata), p.metadataProtocol);
       });
   rocketConn.appAdapter->setPipeline(rocketPipeline.get());
   transportHandler->setPipeline(rocketPipeline.get());

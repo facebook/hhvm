@@ -93,7 +93,11 @@ std::unique_ptr<folly::IOBuf> buildFrame(
   size_t headerSize = desc.headerSize > 0
       ? desc.headerSize
       : apache::thrift::fast_thrift::frame::kBaseHeaderSize;
-  size_t totalSize = headerSize + errorMessage.size();
+  const size_t setupMimeLengthsSize =
+      type == apache::thrift::fast_thrift::frame::FrameType::SETUP
+      ? 2 * sizeof(uint8_t)
+      : 0;
+  size_t totalSize = headerSize + setupMimeLengthsSize + errorMessage.size();
 
   auto buf = folly::IOBuf::create(totalSize);
   auto* data = buf->writableData();
@@ -125,7 +129,10 @@ std::unique_ptr<folly::IOBuf> buildFrame(
 
   // Append error message payload after header
   if (!errorMessage.empty()) {
-    std::memcpy(data + headerSize, errorMessage.data(), errorMessage.size());
+    std::memcpy(
+        data + headerSize + setupMimeLengthsSize,
+        errorMessage.data(),
+        errorMessage.size());
   }
 
   buf->append(totalSize);

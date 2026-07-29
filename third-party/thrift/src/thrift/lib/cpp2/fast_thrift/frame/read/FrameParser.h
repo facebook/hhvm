@@ -36,6 +36,31 @@ inline size_t readFrameOrMetadataSize(folly::io::Cursor& cursor) {
       (static_cast<size_t>(bytes[1]) << 8) | static_cast<size_t>(bytes[2]);
 }
 
+struct SetupPayloadMetadata {
+  uint32_t offset;
+  uint16_t size;
+};
+
+inline SetupPayloadMetadata parseSetupPayloadMetadata(
+    folly::io::Cursor& cursor, uint16_t flags) {
+  if (flags & ::apache::thrift::fast_thrift::frame::detail::kResumeTokenBit) {
+    cursor.skip(cursor.readBE<uint16_t>());
+  }
+
+  cursor.skip(cursor.read<uint8_t>()); // metadata MIME
+  cursor.skip(cursor.read<uint8_t>()); // data MIME
+
+  uint16_t metadataSize = 0;
+  if (flags & ::apache::thrift::fast_thrift::frame::detail::kMetadataBit) {
+    metadataSize = static_cast<uint16_t>(readFrameOrMetadataSize(cursor));
+  }
+
+  return SetupPayloadMetadata{
+      .offset = static_cast<uint32_t>(cursor.getCurrentPosition()),
+      .size = metadataSize,
+  };
+}
+
 /**
  * Read the frame type and flags from a cursor.
  *
@@ -105,23 +130,21 @@ inline ParsedFrame parseFrame(std::unique_ptr<folly::IOBuf> buffer) {
   size_t extraHeaderBytes = desc.headerSize - kBaseHeaderSize;
   cursor.skip(extraHeaderBytes);
 
-  // Parse metadata size if present (3-byte big-endian)
-  // Note: METADATA_PUSH frames have the M flag set but do NOT have a 3-byte
-  // metadata length prefix. The entire payload is metadata, so we skip reading
-  // the size and calculate it from the payload size instead.
   uint16_t metadataSize = 0;
-  if ((flags & ::apache::thrift::fast_thrift::frame::detail::kMetadataBit) &&
-      frameType != FrameType::METADATA_PUSH) {
-    metadataSize =
-        static_cast<uint16_t>(detail::readFrameOrMetadataSize(cursor));
+  uint32_t payloadOffset;
+  if (frameType == FrameType::SETUP) {
+    const auto metadata = detail::parseSetupPayloadMetadata(cursor, flags);
+    metadataSize = metadata.size;
+    payloadOffset = metadata.offset;
+  } else {
+    // METADATA_PUSH has no length prefix; its entire payload is metadata.
+    if ((flags & ::apache::thrift::fast_thrift::frame::detail::kMetadataBit) &&
+        frameType != FrameType::METADATA_PUSH) {
+      metadataSize =
+          static_cast<uint16_t>(detail::readFrameOrMetadataSize(cursor));
+    }
+    payloadOffset = static_cast<uint32_t>(cursor.getCurrentPosition());
   }
-
-  // Calculate payload offset and size
-  // Note: getCurrentPosition() returns the position in the current IOBuf,
-  // which for typical single-buffer frames equals the total bytes read.
-  // For chained IOBufs with header in first buffer, this still works
-  // correctly.
-  auto payloadOffset = static_cast<uint32_t>(cursor.getCurrentPosition());
   auto totalSize = static_cast<uint32_t>(buffer->computeChainDataLength());
   uint32_t payloadSize = totalSize - payloadOffset;
 

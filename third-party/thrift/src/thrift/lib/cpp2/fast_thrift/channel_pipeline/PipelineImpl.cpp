@@ -380,6 +380,11 @@ void PipelineImpl::close() noexcept {
   if (state_ == State::Closed) {
     return;
   }
+  // Honor the deactivate-before-close contract even when close() is invoked
+  // directly on an active pipeline (e.g. a setup-time rejection). deactivate()
+  // is a no-op once the pipeline is already Inactive, so the normal
+  // transport-close path (which deactivates first) is unaffected.
+  deactivate();
   state_ = State::Closed;
 
   // Clear ready lists - handlers should not receive callbacks after close

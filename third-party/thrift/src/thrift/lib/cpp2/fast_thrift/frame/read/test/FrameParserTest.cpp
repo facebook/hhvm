@@ -229,34 +229,28 @@ TEST(FrameParserTest, ParseKeepAliveFrame) {
 TEST(FrameParserTest, ParseSetupFrame) {
   std::vector<uint8_t> data;
 
-  // Stream ID = 0 (connection-level)
   writeU32BE(data, 0);
-
-  // TypeAndFlags: SETUP (0x01), metadata flag (bit 8)
-  uint16_t flags = 1 << 8;
-  writeU16BE(data, makeTypeAndFlags(FrameType::SETUP, flags));
-
-  // Version: major=1, minor=0
-  writeU16BE(data, 1); // major
-  writeU16BE(data, 0); // minor
-
-  // Keepalive: 30000ms
+  writeU16BE(
+      data,
+      makeTypeAndFlags(
+          FrameType::SETUP,
+          ::apache::thrift::fast_thrift::frame::detail::kMetadataBit));
+  writeU16BE(data, 1);
+  writeU16BE(data, 0);
   writeU32BE(data, 30000);
-
-  // Max lifetime: 60000ms
   writeU32BE(data, 60000);
 
-  // Resume token length = 0 (no resume token)
-  writeU16BE(data, 0);
+  const std::string metadataMime = "application/x-rocket-metadata+compact";
+  const std::string dataMime = "application/x-rocket-payload";
+  data.push_back(static_cast<uint8_t>(metadataMime.size()));
+  data.insert(data.end(), metadataMime.begin(), metadataMime.end());
+  data.push_back(static_cast<uint8_t>(dataMime.size()));
+  data.insert(data.end(), dataMime.begin(), dataMime.end());
 
-  // Metadata size (3 bytes)
-  writeU24BE(data, 5);
-
-  // Metadata: "meta1"
   const std::string metadata = "meta1";
+  writeU24BE(data, static_cast<uint32_t>(metadata.size()));
   data.insert(data.end(), metadata.begin(), metadata.end());
 
-  // Data: "setup data"
   const std::string payload = "setup data";
   data.insert(data.end(), payload.begin(), payload.end());
 
@@ -264,11 +258,52 @@ TEST(FrameParserTest, ParseSetupFrame) {
 
   EXPECT_TRUE(frame.isValid());
   EXPECT_EQ(frame.type(), FrameType::SETUP);
-  EXPECT_EQ(frame.typeName(), std::string("SETUP"));
   EXPECT_EQ(frame.streamId(), 0);
   EXPECT_TRUE(frame.hasMetadata());
-  EXPECT_EQ(frame.metadataSize(), 5);
-  EXPECT_EQ(frame.dataSize(), 10);
+  EXPECT_EQ(frame.metadataSize(), metadata.size());
+  EXPECT_EQ(frame.payloadSize(), metadata.size() + payload.size());
+  EXPECT_EQ(frame.dataSize(), payload.size());
+  EXPECT_EQ(frame.metadataCursor().readFixedString(metadata.size()), metadata);
+  EXPECT_EQ(frame.dataCursor().readFixedString(payload.size()), payload);
+}
+
+TEST(FrameParserTest, ParseSetupFrameWithResumeToken) {
+  std::vector<uint8_t> data;
+
+  writeU32BE(data, 0);
+  writeU16BE(
+      data,
+      makeTypeAndFlags(
+          FrameType::SETUP,
+          ::apache::thrift::fast_thrift::frame::detail::kMetadataBit |
+              ::apache::thrift::fast_thrift::frame::detail::kResumeTokenBit));
+  writeU16BE(data, 1);
+  writeU16BE(data, 0);
+  writeU32BE(data, 30000);
+  writeU32BE(data, 60000);
+
+  const std::string resumeToken = "resume";
+  writeU16BE(data, resumeToken.size());
+  data.insert(data.end(), resumeToken.begin(), resumeToken.end());
+
+  const std::string metadataMime = "m";
+  const std::string dataMime = "d";
+  data.push_back(static_cast<uint8_t>(metadataMime.size()));
+  data.insert(data.end(), metadataMime.begin(), metadataMime.end());
+  data.push_back(static_cast<uint8_t>(dataMime.size()));
+  data.insert(data.end(), dataMime.begin(), dataMime.end());
+
+  const std::string metadata = "setup metadata";
+  writeU24BE(data, static_cast<uint32_t>(metadata.size()));
+  data.insert(data.end(), metadata.begin(), metadata.end());
+
+  auto frame = parseFrame(makeFrameBuffer(data));
+
+  EXPECT_TRUE(frame.metadata.hasResumeToken());
+  EXPECT_EQ(frame.metadataSize(), metadata.size());
+  EXPECT_EQ(frame.payloadSize(), metadata.size());
+  EXPECT_EQ(frame.dataSize(), 0);
+  EXPECT_EQ(frame.metadataCursor().readFixedString(metadata.size()), metadata);
 }
 
 TEST(FrameParserTest, ParseMetadataPushFrame) {

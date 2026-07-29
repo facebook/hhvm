@@ -18,9 +18,12 @@
 
 #include <cstdint>
 #include <cstring>
+#include <memory>
+#include <optional>
 #include <string>
 
 #include <folly/Function.h>
+#include <folly/io/IOBuf.h>
 #include <folly/lang/Hint.h>
 #include <folly/logging/xlog.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Common.h>
@@ -44,6 +47,16 @@ struct SetupParameters {
   // Wire encoding for per-connection RpcMetadata, negotiated via the SETUP
   // frame's metadata MIME type. Defaults to Binary (matches today's behavior).
   MetadataProtocol metadataProtocol{MetadataProtocol::BINARY};
+};
+
+// Outcome of the SETUP-completion callback. The thrift layer parses the
+// client's setup metadata and returns either the compact-serialized
+// ServerPushMetadata to push back to the client (metadataPush) or a rejection
+// error code. Stays thrift-free: only opaque bytes and a frame-layer error
+// code cross the rocket boundary.
+struct SetupResponseResult {
+  std::unique_ptr<folly::IOBuf> metadataPush;
+  std::optional<apache::thrift::fast_thrift::frame::ErrorCode> reject;
 };
 
 /**
@@ -70,11 +83,13 @@ class RocketServerSetupFrameHandler {
   static constexpr uint16_t kRSocketMajorVersion = 1;
   static constexpr uint16_t kRSocketMinorVersion = 0;
 
-  // Invoked once when SETUP completes successfully. Consumers wire whatever
-  // per-connection state they need (e.g., publishing the negotiated
-  // metadata protocol to the app adapter).
-  using OnSetupCompleteFn =
-      folly::Function<void(const SetupParameters&) noexcept>;
+  // Invoked once when the SETUP frame passes RSocket-level validation. Receives
+  // the negotiated parameters and the client's raw setup-metadata IOBuf (may be
+  // null), and returns the SETUP response to emit (or a rejection). The thrift
+  // layer wires this to parse RequestSetupMetadata, negotiate the version, and
+  // build the ServerPushMetadata bytes; the rocket layer stays thrift-free.
+  using OnSetupCompleteFn = folly::Function<SetupResponseResult(
+      const SetupParameters&, std::unique_ptr<folly::IOBuf>) noexcept>;
 
   RocketServerSetupFrameHandler() = default;
 
@@ -109,7 +124,7 @@ class RocketServerSetupFrameHandler {
     auto& frame = request.frame;
 
     if (FOLLY_UNLIKELY(!setupComplete_)) {
-      return handleAwaitingSetup(ctx, frame);
+      return handleAwaitingSetup(ctx, std::move(frame));
     }
 
     if (FOLLY_UNLIKELY(
@@ -156,8 +171,7 @@ class RocketServerSetupFrameHandler {
   template <typename Context>
   apache::thrift::fast_thrift::channel_pipeline::Result handleAwaitingSetup(
       Context& ctx,
-      const apache::thrift::fast_thrift::frame::read::ParsedFrame&
-          frame) noexcept {
+      apache::thrift::fast_thrift::frame::read::ParsedFrame&& frame) noexcept {
     if (frame.type() != apache::thrift::fast_thrift::frame::FrameType::SETUP) {
       XLOG(ERR) << "Expected SETUP frame, got " << frame.typeName();
       return sendError(
@@ -222,15 +236,76 @@ class RocketServerSetupFrameHandler {
     params_.hasLease = view.hasLease();
     params_.metadataProtocol = metadataProtocolFromMimeType(mime);
 
-    if (onSetupComplete_) {
-      onSetupComplete_(params_);
+    if (frame.metadataSize() > frame.payloadSize()) {
+      XLOG(ERR) << "SETUP frame has invalid metadata payload";
+      return sendError(
+          ctx,
+          apache::thrift::fast_thrift::frame::ErrorCode::INVALID_SETUP,
+          "Invalid setup metadata");
     }
 
-    setupComplete_ = true;
+    SetupResponseResult response;
+    if (onSetupComplete_) {
+      response = onSetupComplete_(params_, std::move(frame).extractMetadata());
+    }
+
+    if (response.reject.has_value()) {
+      return sendError(ctx, *response.reject, "SETUP negotiation rejected");
+    }
+
+    if (response.metadataPush) {
+      auto writeResult =
+          emitMetadataPush(ctx, std::move(response.metadataPush));
+      if (writeResult ==
+          apache::thrift::fast_thrift::channel_pipeline::Result::Error) {
+        return sendError(
+            ctx,
+            apache::thrift::fast_thrift::frame::ErrorCode::INVALID_SETUP,
+            "SETUP response write failed");
+      }
+      setupComplete_ = true;
+      if (writeResult ==
+          apache::thrift::fast_thrift::channel_pipeline::Result::Backpressure) {
+        return writeResult;
+      }
+    } else {
+      setupComplete_ = true;
+    }
 
     // SETUP is a connection-level protocol frame consumed by this handler.
     // It is not forwarded to downstream handlers.
     return apache::thrift::fast_thrift::channel_pipeline::Result::Success;
+  }
+
+  // Emits the SETUP response as a connection-level METADATA_PUSH (streamId 0).
+  // Fired via ctx.fireWrite from inside the setup handler so it travels toward
+  // the codec/transport without passing through the downstream stream-state
+  // handler (which would drop a streamId-0 frame). Guarded like sendError.
+  template <typename Context>
+  apache::thrift::fast_thrift::channel_pipeline::Result emitMetadataPush(
+      Context& ctx, std::unique_ptr<folly::IOBuf> metadata) noexcept {
+    try {
+      RocketResponseMessage response{
+          .frame =
+              apache::thrift::fast_thrift::frame::ComposedFrame{
+                  .frameType = apache::thrift::fast_thrift::frame::FrameType::
+                      METADATA_PUSH,
+                  .streamId = 0,
+                  .metadata = std::move(metadata),
+              },
+      };
+      auto writeResult = ctx.fireWrite(
+          apache::thrift::fast_thrift::channel_pipeline::erase_and_box(
+              std::move(response)));
+      if (writeResult ==
+          apache::thrift::fast_thrift::channel_pipeline::Result::Error) {
+        XLOG(WARN) << "Failed to deliver SETUP response METADATA_PUSH frame";
+      }
+      return writeResult;
+    } catch (...) {
+      XLOG(ERR) << "Exception while delivering SETUP response METADATA_PUSH";
+      return apache::thrift::fast_thrift::channel_pipeline::Result::Error;
+    }
   }
 
   template <typename Context>

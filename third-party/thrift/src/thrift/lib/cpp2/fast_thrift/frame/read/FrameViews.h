@@ -20,6 +20,8 @@
 
 #include <folly/io/Cursor.h>
 
+#include <string>
+
 namespace apache::thrift::fast_thrift::frame::read {
 
 /**
@@ -205,10 +207,11 @@ class KeepAliveView : public FrameView {
  *   [18-19] Token Length (if R flag) + Resume Identification Token (variable)
  *   [+1]    MIME Length + Metadata Encoding MIME Type (variable)
  *   [+1]    MIME Length + Data Encoding MIME Type (variable)
+ *   [+3]    Metadata Length (if M flag)
  *   [+N]    Setup Payload (metadata + data)
  *
- * Note: The base header size in FrameDescriptor is 20 bytes, which accounts
- * for the fixed portion up to and including Max Lifetime.
+ * Note: The base header size in FrameDescriptor is 18 bytes, which accounts
+ * for the fixed portion up to Max Lifetime; variable-length fields follow it.
  */
 class SetupView : public FrameView {
  public:

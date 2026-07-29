@@ -152,6 +152,46 @@ struct ParsedFrame {
   }
 
   /**
+   * Extract just the metadata portion of the payload as an IOBuf (zero-copy).
+   *
+   * This consumes the frame, trims the header, and discards any data after the
+   * metadata. Returns nullptr when the frame has no metadata bytes.
+   */
+  std::unique_ptr<folly::IOBuf> extractMetadata() && {
+    if (metadata.metadataSize == 0 ||
+        metadata.metadataSize > metadata.payloadSize) {
+      return nullptr;
+    }
+
+    auto buf = std::move(buffer);
+    auto toTrim = metadata.payloadOffset;
+    while (toTrim > 0 && buf) {
+      if (buf->length() > toTrim) {
+        buf->trimStart(toTrim);
+        break;
+      }
+      toTrim -= buf->length();
+      buf = buf->pop();
+    }
+
+    if (!buf) {
+      return nullptr;
+    }
+
+    size_t remaining = metadata.metadataSize;
+    auto* tail = buf.get();
+    while (remaining > tail->length()) {
+      remaining -= tail->length();
+      tail = tail->next();
+    }
+    tail->trimEnd(tail->length() - remaining);
+    if (tail->next() != buf.get()) {
+      tail->separateChain(tail->next(), buf->prev());
+    }
+    return buf;
+  }
+
+  /**
    * Extract just the data portion of the payload as an IOBuf (zero-copy).
    *
    * This moves ownership of the buffer and trims the header and metadata,

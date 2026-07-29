@@ -6,12 +6,14 @@
  *  LICENSE file in the root directory of this source tree.
  */
 
+#include <folly/portability/GMock.h>
 #include <folly/portability/GTest.h>
 
 #include <fizz/backend/openssl/certificate/OpenSSLCertificateVerifier.h>
 #include <fizz/protocol/test/CertUtil.h>
 #include <folly/ssl/OpenSSLCertUtils.h>
 
+using namespace testing;
 using namespace fizz::openssl;
 
 namespace fizz {
@@ -252,5 +254,40 @@ TEST_F(OpenSSLCertificateVerifierTest, TestVerifyWithExpiredLeafTooNew) {
       },
       AlertDescription::certificate_expired);
 }
+
+#if !FIZZ_CERTIFICATE_USE_OPENSSL_CERT
+TEST_F(OpenSSLCertificateVerifierTest, VerifyWithForeignPeerCertImpl) {
+  // Under this configuration, `getX509()` is not guaranteed to be part of the
+  // fizz::PeerCert interface. OpenSSLCertificateVerifier currently only
+  // supports fizz::openssl::OpenSSLPeerCertImpl instances. Anything else
+  // should be an error.
+
+  class ForeignPeerCert : public fizz::PeerCert {
+    std::string getIdentity() const override {
+      return "foreign";
+    }
+    std::optional<std::string> getDER() const override {
+      return std::nullopt;
+    }
+
+    virtual Status verify(
+        Error& err,
+        SignatureScheme scheme,
+        CertificateVerifyContext context,
+        folly::ByteRange tbs,
+        folly::ByteRange signature) const override {
+      return Status::Success;
+    }
+  };
+  std::vector<std::shared_ptr<const fizz::PeerCert>> certs;
+  certs.push_back(std::make_shared<ForeignPeerCert>());
+
+  Error err;
+  std::shared_ptr<const Cert> verifiedCert;
+  EXPECT_EQ(verifier_->verify(verifiedCert, err, certs), Status::Fail);
+  EXPECT_THAT(
+      std::string(err.msg()), HasSubstr("unsupported peer certificate type"));
+}
+#endif
 } // namespace test
 } // namespace fizz

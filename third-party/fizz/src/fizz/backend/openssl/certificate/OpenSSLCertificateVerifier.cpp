@@ -7,6 +7,7 @@
  */
 
 #include <fizz/backend/openssl/certificate/OpenSSLCertificateVerifier.h>
+#include <fizz/backend/openssl/certificate/OpenSSLPeerCertImpl.h>
 #include <folly/FileUtil.h>
 #include <folly/ssl/OpenSSLCertUtils.h>
 #include <folly/synchronization/CallOnce.h>
@@ -108,6 +109,34 @@ Status OpenSSLCertificateVerifier::verify(
   return Status::Success;
 }
 
+static Status getX509(
+    folly::ssl::X509UniquePtr& ret,
+    Error& err,
+    const fizz::PeerCert* peer) {
+#if FIZZ_CERTIFICATE_USE_OPENSSL_CERT
+  // We know that `getX509()` is available on the fizz::PeerCert interface,
+  // so this is straightforward:
+  (void)err;
+  ret = peer->getX509();
+  return Status::Success;
+#else
+  // fizz::PeerCert does not have getX509(). There are two cases:
+  //
+  // (1) If the PeerCert is actually an OpenSSLPeerCertBase
+  if (auto opensslPeerCert = dynamic_cast<const OpenSSLPeerCertBase*>(peer)) {
+    ret = opensslPeerCert->getX509();
+    return Status::Success;
+  }
+
+  // (2) Otherwise, this is some generic certificate. For now, we treat this
+  // as an error. (Theoretically we could use `getDER()` which would allow
+  // OpenSSLCertificateVerifier to be used with any arbitrary certificate
+  // representation, but this is potentially expensive)
+  return err.error(
+      "unsupported peer certificate type given in OpenSSLCertificateVerifier");
+#endif
+}
+
 Status OpenSSLCertificateVerifier::verifyWithX509StoreCtx(
     folly::ssl::X509StoreCtxUniquePtr& ret,
     Error& err,
@@ -116,16 +145,23 @@ Status OpenSSLCertificateVerifier::verifyWithX509StoreCtx(
     return err.error("no certificates to verify");
   }
 
-  auto leafCert = certs.front()->getX509();
+  std::vector<folly::ssl::X509UniquePtr> x509s;
+  x509s.reserve(certs.size());
+  for (const auto& peerCert : certs) {
+    folly::ssl::X509UniquePtr x509;
+    FIZZ_RETURN_ON_ERROR(getX509(x509, err, peerCert.get()));
+    x509s.push_back(std::move(x509));
+  }
 
+  // Lifetime safety: `x509s` outlives `certChainStack`.
   auto certChainStack = std::unique_ptr<STACK_OF(X509), STACK_OF_X509_deleter>(
       sk_X509_new_null());
   if (!certChainStack) {
     return err.error("", folly::none, Error::Category::StdBadAlloc);
   }
 
-  for (size_t i = 1; i < certs.size(); i++) {
-    sk_X509_push(certChainStack.get(), certs[i]->getX509().get());
+  for (size_t i = 1; i < x509s.size(); i++) {
+    sk_X509_push(certChainStack.get(), x509s[i].get());
   }
 
   auto ctx = folly::ssl::X509StoreCtxUniquePtr(X509_STORE_CTX_new());
@@ -140,7 +176,7 @@ Status OpenSSLCertificateVerifier::verifyWithX509StoreCtx(
     FIZZ_RETURN_ON_ERROR(getDefaultX509Store(storePtr, err));
   }
   if (X509_STORE_CTX_init(
-          ctx.get(), storePtr, leafCert.get(), certChainStack.get()) != 1) {
+          ctx.get(), storePtr, x509s[0].get(), certChainStack.get()) != 1) {
     return err.error("failed to initialize store context");
   }
 

@@ -1222,12 +1222,7 @@ void validate_function_param_id(sema_context& ctx, const t_field& node) {
   }
 }
 
-void validate_field_id(sema_context& ctx, const t_field& node) {
-  ctx.check(
-      node.explicit_id() == node.id(),
-      "No field id specified for `{}`",
-      node.name());
-
+void validate_field_id_value(sema_context& ctx, const t_field& node) {
   ctx.check(
       node.id() != 0 ||
           node.has_unstructured_annotation(
@@ -1240,6 +1235,14 @@ void validate_field_id(sema_context& ctx, const t_field& node) {
       "Reserved field id ({}) cannot be used for `{}`.",
       node.id(),
       node.name());
+}
+
+void validate_field_id(sema_context& ctx, const t_field& node) {
+  ctx.check(
+      node.explicit_id() == node.id(),
+      "No field id specified for `{}`",
+      node.name());
+  validate_field_id_value(ctx, node);
 }
 
 void validate_ref_annotation(sema_context& ctx, const t_field& node) {
@@ -2528,6 +2531,7 @@ ast_validator standard_validator() {
   validator.add_interaction_visitor(&validate_interaction_annotations);
 
   validator.add_thrown_exception_visitor(&validate_throws_exceptions);
+  validator.add_thrown_exception_visitor(&validate_field_id_value);
   validator.add_thrown_exception_visitor(
       &detail::validate_annotation_scopes<
           detail::scope_check_type::thrown_exception>);
@@ -2592,6 +2596,7 @@ ast_validator standard_validator() {
       &detail::validate_annotation_scopes<
           detail::scope_check_type::function_parameter>);
   validator.add_function_param_visitor(&validate_function_param_id);
+  validator.add_function_param_visitor(&validate_field_id_value);
 
   validator.add_typedef_visitor(&validate_cpp_type_annotation<t_typedef>);
   validator.add_typedef_visitor(&validate_cpp_type_integer_width<t_typedef>);

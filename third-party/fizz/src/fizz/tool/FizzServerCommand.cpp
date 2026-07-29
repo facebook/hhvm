@@ -350,6 +350,8 @@ class FizzExampleServer : public AsyncFizzServer::HandshakeCallback,
 
   void printHandshakeSuccess() {
     FIZZ_LOG(INFO) << "Fizz handshake succeeded.";
+    FIZZ_LOG(INFO) << "  Bytes sent: " << transport_->getRawBytesWritten()
+                   << ", bytes received: " << transport_->getRawBytesReceived();
     for (const auto& line : handshakeSuccessLog()) {
       FIZZ_LOG(INFO) << line;
     }

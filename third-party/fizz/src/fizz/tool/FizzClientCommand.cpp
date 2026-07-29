@@ -276,6 +276,8 @@ class Connection : public AsyncSocket::ConnectCallback,
     auto clientCert = state.clientCert();
     FIZZ_LOG(INFO) << (willResume_ ? "Initial handshake" : "Handshake")
                    << " succeeded.";
+    FIZZ_LOG(INFO) << "  Bytes sent: " << transport_->getRawBytesWritten()
+                   << ", bytes received: " << transport_->getRawBytesReceived();
     FIZZ_LOG(INFO) << "  TLS Version: " << toString(*state.version());
     FIZZ_LOG(INFO) << "  Cipher Suite:  " << toString(*state.cipher());
     FIZZ_LOG(INFO) << "  Named Group: "

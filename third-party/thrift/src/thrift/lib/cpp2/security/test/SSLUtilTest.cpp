@@ -22,11 +22,8 @@
 #include <fizz/server/AsyncFizzServer.h>
 #include <fizz/server/FizzServerContext.h>
 #include <folly/io/IOBuf.h>
-#include <folly/io/async/AsyncIoUringSocket.h>
-#include <folly/io/async/AsyncIoUringSocketFactory.h>
 #include <folly/io/async/AsyncSocket.h>
 #include <folly/io/async/EventBase.h>
-#include <folly/io/async/IoUringBackend.h>
 #include <thrift/lib/cpp2/security/SSLUtil.h>
 
 using namespace apache::thrift;
@@ -135,54 +132,20 @@ TEST_F(ToFDSocketZeroCopyTest, NullInputReturnsNull) {
   EXPECT_EQ(result, nullptr);
 }
 
-using ToWrappedSocketTestParams = std::tuple<bool, bool, bool>;
-// tuple order: isClient, useIoUring, enableZeroCopy
+using ToWrappedSocketTestParams = std::tuple<bool, bool>;
+// tuple order: isClient, enableZeroCopy
 
 namespace {
 std::string paramToString(const ToWrappedSocketTestParams& p) {
   bool isClient = std::get<0>(p);
-  bool useIoUring = std::get<1>(p);
-  bool enableZeroCopy = std::get<2>(p);
+  bool enableZeroCopy = std::get<1>(p);
   return std::string(isClient ? "Client" : "Server") +
-      std::string(useIoUring ? "IoUring" : "AsyncSocket") +
       std::string(enableZeroCopy ? "Zc" : "NoZc");
 }
 
-std::unique_ptr<folly::EventBase> makeEventBase(bool wantIoUring) {
-  if (!wantIoUring) {
-    return std::make_unique<folly::EventBase>();
-  }
-#if !FOLLY_HAS_LIBURING
-  return nullptr;
-#else
-  try {
-    auto eb = std::make_unique<folly::EventBase>(
-        folly::EventBase::Options().setBackendFactory(
-            []() -> std::unique_ptr<folly::EventBaseBackendBase> {
-              folly::IoUringBackend::Options opts;
-              // Need buffer provider for AsyncIoUringSocket::supports()
-              opts.setInitialProvidedBuffers(2048, 1000).setCapacity(16384);
-              return std::make_unique<folly::IoUringBackend>(std::move(opts));
-            }));
-    if (!folly::AsyncIoUringSocketFactory::supports(eb.get())) {
-      return nullptr;
-    }
-    return eb;
-  } catch (const folly::IoUringBackend::NotAvailable&) {
-    return nullptr;
-  }
-#endif
-}
-
 folly::AsyncSocketTransport::UniquePtr createUnderlyingTransport(
-    folly::EventBase* evb, folly::NetworkSocket& fd, bool useIoUring) {
-  folly::AsyncSocketTransport::UniquePtr transport;
-  if (useIoUring) {
-    transport = folly::AsyncIoUringSocketFactory::create<
-        folly::AsyncSocketTransport::UniquePtr>(evb, fd);
-  } else {
-    transport = folly::AsyncSocket::newSocket(evb, fd);
-  }
+    folly::EventBase* evb, folly::NetworkSocket& fd) {
+  auto transport = folly::AsyncSocket::newSocket(evb, fd);
   fd = folly::NetworkSocket(); // ownership transferred
   return transport;
 }
@@ -241,14 +204,9 @@ class ToWrappedAsyncSocketTest
 TEST_P(ToWrappedAsyncSocketTest, PreservesSecurityAndZeroCopy) {
   const auto& param = GetParam();
   bool isClient = std::get<0>(param);
-  bool useIoUring = std::get<1>(param);
-  bool enableZeroCopy = std::get<2>(param);
+  bool enableZeroCopy = std::get<1>(param);
 
-  auto evbPtr = makeEventBase(useIoUring);
-  if (useIoUring && !evbPtr) {
-    GTEST_SKIP() << "IoUring backend not available";
-  }
-  folly::EventBase* evb = evbPtr ? evbPtr.get() : &evb_;
+  folly::EventBase* evb = &evb_;
 
   folly::NetworkSocket fd = isClient ? clientFd_ : serverFd_;
   // Prevent double-close in TearDown after we move fd.
@@ -258,21 +216,11 @@ TEST_P(ToWrappedAsyncSocketTest, PreservesSecurityAndZeroCopy) {
     serverFd_ = folly::NetworkSocket();
   }
 
-  auto underlying = createUnderlyingTransport(evb, fd, useIoUring);
+  auto underlying = createUnderlyingTransport(evb, fd);
   ASSERT_NE(underlying, nullptr);
 
-#if FOLLY_HAS_LIBURING
-  if (useIoUring) {
-    ASSERT_NE(
-        underlying->getUnderlyingTransport<folly::AsyncIoUringSocket>(),
-        nullptr)
-        << "Expected AsyncIoUringSocket underlying transport";
-  } else
-#endif
-  {
-    ASSERT_NE(underlying->getUnderlyingTransport<folly::AsyncSocket>(), nullptr)
-        << "Expected AsyncSocket underlying transport";
-  }
+  ASSERT_NE(underlying->getUnderlyingTransport<folly::AsyncSocket>(), nullptr)
+      << "Expected AsyncSocket underlying transport";
 
   if (enableZeroCopy) {
     underlying->setZeroCopy(true);
@@ -356,15 +304,7 @@ TEST_P(ToWrappedAsyncSocketTest, PreservesSecurityAndZeroCopy) {
 
   const auto* inner = wrappedResult->getWrappedTransport();
   ASSERT_NE(inner, nullptr);
-#if FOLLY_HAS_LIBURING
-  if (useIoUring) {
-    EXPECT_NE(
-        inner->getUnderlyingTransport<folly::AsyncIoUringSocket>(), nullptr);
-  } else
-#endif
-  {
-    EXPECT_NE(inner->getUnderlyingTransport<folly::AsyncSocket>(), nullptr);
-  }
+  EXPECT_NE(inner->getUnderlyingTransport<folly::AsyncSocket>(), nullptr);
 }
 
 INSTANTIATE_TEST_SUITE_P(
@@ -372,11 +312,6 @@ INSTANTIATE_TEST_SUITE_P(
     ToWrappedAsyncSocketTest,
     ::testing::Combine(
         ::testing::Bool(), // isClient
-#if FOLLY_HAS_LIBURING
-        ::testing::Bool(), // useIoUring
-#else
-        ::testing::Values(false),
-#endif
         ::testing::Bool() // enableZeroCopy
         ),
     [](const ::testing::TestParamInfo<ToWrappedSocketTestParams>& info) {

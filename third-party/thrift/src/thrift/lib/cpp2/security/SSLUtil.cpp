@@ -16,7 +16,6 @@
 
 #include <thrift/lib/cpp2/security/SSLUtil.h>
 
-#include <folly/io/async/AsyncIoUringSocketFactory.h>
 #include <folly/io/async/fdsock/AsyncFdSocket.h>
 #include <folly/io/async/ssl/BasicTransportCertificate.h>
 
@@ -226,94 +225,68 @@ folly::AsyncSocketTransport::UniquePtr toFDSocket(
   auto sock = fizzSock->template getUnderlyingTransport<folly::AsyncSocket>();
   // Query the underlying AsyncSocket directly — AsyncFizzBase doesn't
   // override getZeroCopy(), so fizzSock->getZeroCopy() always returns false.
-  const bool hadZeroCopy = sock && sock->getZeroCopy();
-  folly::AsyncSocketTransport::UniquePtr ret;
-#if defined(__linux__) && __has_include(<liburing.h>)
-  if (!sock &&
-      fizzSock->template getUnderlyingTransport<folly::AsyncIoUringSocket>()) {
-    // `AsyncFdSocket` currently lacks uring support, so hardcode `AsyncSocket`
-    auto fdTransport = new FDTransport<folly::AsyncSocket>(
-        fizzSock->getEventBase(), selfCert, peerCert);
-    if (cipher.hasValue()) {
-      fdTransport->setCipher(cipher.value());
-      fdTransport->setExportedMasterSecret(std::move(exportedMasterSecret));
-    }
-    fdTransport->setSecurityProtocol(securityProtocol);
-    auto newSocket = folly::AsyncTransport::UniquePtr(fdTransport);
-    folly::AsyncIoUringSocket::UniquePtr io =
-        fizzSock->template tryExchangeUnderlyingTransport<
-            folly::AsyncIoUringSocket>(newSocket);
-    if (io) {
-      io->setReadCB(nullptr);
-      io->setApplicationProtocol(fizzSock->getApplicationProtocol());
-      io->setSelfCertificate(selfCert);
-      io->setPeerCertificate(peerCert);
-      ret = std::move(io);
-    }
-  }
-#endif
-  if (!ret) {
-    DCHECK(sock);
-    auto eb = sock->getEventBase();
-    auto fd = sock->detachNetworkSocket();
-    auto zcId = sock->getZeroCopyBufId();
+  DCHECK(sock);
+  auto hadZeroCopy = sock->getZeroCopy();
+  auto eb = sock->getEventBase();
+  auto fd = sock->detachNetworkSocket();
+  auto zcId = sock->getZeroCopyBufId();
 
-    // Create new socket from old, make sure not to throw
-    auto populate = [&](auto socket) -> folly::AsyncSocket* {
-      socket->setApplicationProtocol(fizzSock->getApplicationProtocol());
-      if (cipher.hasValue()) {
-        socket->setCipher(cipher.value());
-        socket->setExportedMasterSecret(std::move(exportedMasterSecret));
-      }
-      socket->setSecurityProtocol(securityProtocol);
-      return socket;
-    };
-#if !defined(_WIN32) // No FD-passing on Windows, don't try to make it build.
-    folly::SocketAddress addr;
-    sock->getPeerAddress(&addr);
-    if (addr.getFamily() == AF_UNIX) {
-      DCHECK_EQ(0, zcId) << "Zero-copy not supported on AF_UNIX sockets";
-      auto newFdSock =
-          new FDTransport<folly::AsyncFdSocket>(eb, fd, selfCert, peerCert);
-      if (auto oldFdSock =
-              fizzSock
-                  ->template getUnderlyingTransport<folly::AsyncFdSocket>()) {
-        newFdSock->swapFdReadStateWith(oldFdSock);
-      } else if (
-          dynamic_cast<fizz::server::AsyncFizzServer*>(fizzSock) != nullptr) {
-        // If the handshake was NOT negotiated over an `AsyncFdSocket`, then
-        // the following race condition could happen:
-        //  - Server closes TLS.
-        //  - Client succeeds at `toFDSocket`, sends an FD-bearing request
-        //  - Server receives the data of the FD-bearing request on the
-        //    `FizzSocket` because `toFDSocket` has not yet succeeded.
-        //    The FDs are lost (or leaked), because the `recvmsg` in
-        //    `AsyncSocket` does not know to read them from the received
-        //    ancillary data.
-        //  - In `ThriftFizzAcceptorHandshakeHelper::stopTLSSuccess` (more docs
-        //    there), server finished `toFDSocket` and moves the
-        //    previously received request data to the new `AsyncFdSocket`.
-        //  - Rocket parses a request that expects FDs, but fails to pop
-        //    them from the `AsyncFdSocket` because it never got FDs.
-        LOG(DFATAL) << "For AF_UNIX, AsyncFizzServer must always be backed by "
-                    << "an underlying AsyncFdSocket";
-      }
-      ret.reset(populate(newFdSock));
-    } else
-#endif
-    {
-      auto* newSock =
-          new FDTransport<folly::AsyncSocket>(eb, fd, zcId, selfCert, peerCert);
-      if (hadZeroCopy) {
-        // detachNetworkSocket() above carried over only the zeroCopyBufId_
-        // counter, not the outstanding id->buffer maps. The fd may still have
-        // in-flight MSG_ZEROCOPY completions issued on the old socket; move
-        // their bookkeeping so the new fd owner reaps them instead of aborting
-        // in AsyncSocket::releaseZeroCopyBuf.
-        newSock->moveZeroCopyStateFrom(*sock);
-      }
-      ret.reset(populate(newSock));
+  // Create new socket from old, make sure not to throw
+  auto populate = [&](auto socket) -> folly::AsyncSocket* {
+    socket->setApplicationProtocol(fizzSock->getApplicationProtocol());
+    if (cipher.hasValue()) {
+      socket->setCipher(cipher.value());
+      socket->setExportedMasterSecret(std::move(exportedMasterSecret));
     }
+    socket->setSecurityProtocol(securityProtocol);
+    return socket;
+  };
+
+  folly::AsyncSocketTransport::UniquePtr ret;
+#if !defined(_WIN32) // No FD-passing on Windows, don't try to make it build.
+  folly::SocketAddress addr;
+  sock->getPeerAddress(&addr);
+  if (addr.getFamily() == AF_UNIX) {
+    DCHECK_EQ(0, zcId) << "Zero-copy not supported on AF_UNIX sockets";
+    auto newFdSock =
+        new FDTransport<folly::AsyncFdSocket>(eb, fd, selfCert, peerCert);
+    if (auto oldFdSock =
+            fizzSock->template getUnderlyingTransport<folly::AsyncFdSocket>()) {
+      newFdSock->swapFdReadStateWith(oldFdSock);
+    } else if (
+        dynamic_cast<fizz::server::AsyncFizzServer*>(fizzSock) != nullptr) {
+      // If the handshake was NOT negotiated over an `AsyncFdSocket`, then
+      // the following race condition could happen:
+      //  - Server closes TLS.
+      //  - Client succeeds at `toFDSocket`, sends an FD-bearing request
+      //  - Server receives the data of the FD-bearing request on the
+      //    `FizzSocket` because `toFDSocket` has not yet succeeded.
+      //    The FDs are lost (or leaked), because the `recvmsg` in
+      //    `AsyncSocket` does not know to read them from the received
+      //    ancillary data.
+      //  - In `ThriftFizzAcceptorHandshakeHelper::stopTLSSuccess` (more docs
+      //    there), server finished `toFDSocket` and moves the
+      //    previously received request data to the new `AsyncFdSocket`.
+      //  - Rocket parses a request that expects FDs, but fails to pop
+      //    them from the `AsyncFdSocket` because it never got FDs.
+      LOG(DFATAL) << "For AF_UNIX, AsyncFizzServer must always be backed by "
+                  << "an underlying AsyncFdSocket";
+    }
+    ret.reset(populate(newFdSock));
+  } else
+#endif
+  {
+    auto* newSock =
+        new FDTransport<folly::AsyncSocket>(eb, fd, zcId, selfCert, peerCert);
+    if (hadZeroCopy) {
+      // detachNetworkSocket() above carried over only the zeroCopyBufId_
+      // counter, not the outstanding id->buffer maps. The fd may still have
+      // in-flight MSG_ZEROCOPY completions issued on the old socket; move
+      // their bookkeeping so the new fd owner reaps them instead of aborting
+      // in AsyncSocket::releaseZeroCopyBuf.
+      newSock->moveZeroCopyStateFrom(*sock);
+    }
+    ret.reset(populate(newSock));
   }
 
   if (ret && hadZeroCopy) {

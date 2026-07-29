@@ -1,0 +1,265 @@
+/*
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+//! Borrowed, callback-scoped access to the synchronous C++ pipeline context.
+
+use std::marker::PhantomData;
+use std::pin::Pin;
+use std::rc::Rc;
+
+use crate::adapter::BytesPtr;
+use crate::adapter::RustMessageAdapter;
+use crate::ffi::ffi::FfiCallbackContext;
+use crate::handler::HandlerResult;
+
+/// Borrowed, callback-scoped view of the live C++ pipeline context.
+///
+/// Each data or lifecycle callback receives an exclusive mutable reference to a
+/// `CallbackContext` bound to the current FFI stack frame. The reference cannot
+/// escape the callback: the lifetime `'callback` prevents storing it, and the
+/// structural `!Send`/`!Sync` markers (via `PhantomData<Rc<()>>`) prevent
+/// moving it to another thread or sharing a reference across threads.
+///
+/// # Why `!Send` and `!Sync`
+///
+/// The pipeline is single-threaded: all `fire_read`, `fire_write`, and
+/// lifecycle calls must originate on the pipeline's EventBase thread. If
+/// `CallbackContext` were `Send` or `Sync`, Rust code could invoke pipeline
+/// operations from another thread, silently violating that invariant and
+/// corrupting pipeline state. `PhantomData<Rc<()>>` makes both auto-traits
+/// unimplementable at compile time, producing a hard error if any code
+/// attempts to send or share a `CallbackContext`.
+///
+/// # Lifecycle state machine
+///
+/// States driven by `PipelineImpl` (see
+/// `channel_pipeline/PipelineImpl.h`):
+///
+/// 1. **Added** — `handler_added` called in build order (head→tail).
+///    `handler_id()` is stable and non-zero; pipeline is live.
+/// 2. **Active** — `on_pipeline_active` called in same order. Data path
+///    (`fire_read` / `fire_write`) is valid.
+/// 3. **Inactive** — `on_pipeline_inactive` called in reverse order
+///    (tail→head). The C++ shim cancels both readiness hooks before invoking
+///    Rust; no readiness callback can enter Rust after the inactive transition.
+/// 4. **Closing** — any `close()` call is idempotent and terminal: clears
+///    readiness lists, event lists, and queues `handler_removed` in LIFO
+///    order. Within the same callback that called `close()`,
+///    `fire_read`/`fire_write` still forward to the tail/head endpoints.
+/// 5. **Removed** — `handler_removed` called in LIFO order, once. No
+///    callback may enter Rust after removal; the C++ shim cancels hooks in
+///    `on_pipeline_inactive` and `handler_removed`.
+///
+/// # One-shot forwarding
+///
+/// `fire_read` and `fire_write` are guarded by a `forwarded_` flag in the C++
+/// `CallbackContext`: the message box can be forwarded at most once per
+/// callback invocation. A second call — or a call with a null message or null
+/// box — returns `HandlerResult::Error` without side effects.
+///
+/// # Panic containment
+///
+/// Any Rust panic is caught at the FFI boundary via `catch_unwind` before
+/// reaching C++. Data-path panics map to `HandlerResult::Error`. Lifecycle and
+/// readiness panics are swallowed silently; the C++ shim continues execution.
+pub struct CallbackContext<'callback> {
+    inner: Pin<&'callback mut FfiCallbackContext>,
+    _not_send_or_sync: PhantomData<Rc<()>>,
+}
+
+impl<'callback> CallbackContext<'callback> {
+    pub(crate) fn new(inner: Pin<&'callback mut FfiCallbackContext>) -> Self {
+        Self {
+            inner,
+            _not_send_or_sync: PhantomData,
+        }
+    }
+
+    /// Forward the inbound buffer downstream and return the result.
+    ///
+    /// The buffer is moved into the C++ message box and forwarded via
+    /// `context_.fireRead`. This is a one-shot operation: a second call within
+    /// the same callback, or a call after the pipeline is closed, returns
+    /// `HandlerResult::Error` without side effects (guarded by the C++
+    /// `forwarded_` flag).
+    pub fn fire_read(&mut self, message: BytesPtr) -> HandlerResult {
+        HandlerResult::from_ffi(self.inner.as_mut().fire_read(message.into_cpp()))
+    }
+
+    /// Forward the outbound buffer upstream and return the result.
+    ///
+    /// Symmetric to `fire_read` but for the outbound direction. Subject to the
+    /// same one-shot and null-rejection guards.
+    pub fn fire_write(&mut self, message: BytesPtr) -> HandlerResult {
+        HandlerResult::from_ffi(self.inner.as_mut().fire_write(message.into_cpp()))
+    }
+
+    /// Arm the native one-shot inbound readiness hook.
+    ///
+    /// When the transport signals that it is readable again, the C++ shim
+    /// cancels the hook and then calls [`RustHandler::on_read_ready`]. The hook
+    /// is one-shot per arm: it fires once and must be re-armed inside
+    /// `on_read_ready` if further notifications are needed. Idempotent: calling
+    /// while already armed is a no-op.
+    pub fn await_read_ready(&mut self) {
+        self.inner.as_mut().await_read_ready();
+    }
+
+    /// Idempotently cancel the native inbound readiness hook.
+    ///
+    /// Safe to call regardless of whether the hook is currently armed.
+    pub fn cancel_read_ready(&mut self) {
+        self.inner.as_mut().cancel_read_ready();
+    }
+
+    /// Return whether the native inbound readiness hook is armed.
+    pub fn is_awaiting_read_ready(&self) -> bool {
+        self.inner.as_ref().get_ref().is_awaiting_read_ready()
+    }
+
+    /// Arm the native one-shot outbound readiness hook.
+    ///
+    /// When the transport signals write readiness, the C++ shim cancels the
+    /// hook and calls [`RustHandler::on_write_ready`]. Semantics mirror
+    /// `await_read_ready`.
+    pub fn await_write_ready(&mut self) {
+        self.inner.as_mut().await_write_ready();
+    }
+
+    /// Idempotently cancel the native outbound readiness hook.
+    ///
+    /// Safe to call regardless of whether the hook is currently armed.
+    pub fn cancel_write_ready(&mut self) {
+        self.inner.as_mut().cancel_write_ready();
+    }
+
+    /// Return whether the native outbound readiness hook is armed.
+    pub fn is_awaiting_write_ready(&self) -> bool {
+        self.inner.as_ref().get_ref().is_awaiting_write_ready()
+    }
+
+    /// Return the stable handler identity for this context.
+    ///
+    /// This is an FNV-64 hash of the handler tag registered at build time,
+    /// computed once during pipeline initialization. It is non-zero for any
+    /// valid installed handler; zero indicates an error path (e.g., exception
+    /// handler invocation without a context). The value never changes for the
+    /// lifetime of the handler.
+    pub fn handler_id(&self) -> u64 {
+        self.inner.as_ref().handler_id()
+    }
+
+    /// Allocate a buffer using the pipeline's allocator, with a `IOBuf::create`
+    /// fallback.
+    ///
+    /// Returns `None` if allocation fails. A size of 0 is valid and returns an
+    /// empty IOBuf chain. The call is `noexcept` on the C++ side.
+    pub fn allocate(&mut self, size: usize) -> Option<BytesPtr> {
+        let ptr = self.inner.as_mut().allocate(size);
+        if ptr.is_null() {
+            None
+        } else {
+            Some(BytesPtr::new(ptr))
+        }
+    }
+
+    /// Deep-copy the given bytes into a new single-node IOBuf (allocation + memcpy).
+    ///
+    /// An empty slice produces an empty IOBuf. Returns `None` on allocation
+    /// failure. This bypasses the pipeline allocator and always uses
+    /// `folly::IOBuf::copyBuffer`. Use `allocate` when you want the pipeline
+    /// allocator; use this when you need to materialize a byte slice into an
+    /// owned buffer.
+    pub fn copy_from_slice(&mut self, data: &[u8]) -> Option<BytesPtr> {
+        let (ptr, len) = if data.is_empty() {
+            (std::ptr::null(), 0usize)
+        } else {
+            (data.as_ptr(), data.len())
+        };
+        // SAFETY:
+        // (1) When `data` is non-empty, `ptr = data.as_ptr()` is valid for
+        //     `data.len()` bytes because `data` is a shared reference that
+        //     lives for at least this synchronous call frame.
+        // (2) When `data` is empty, `ptr` is null and `len` is 0; the C++
+        //     `copyBuffer` implementation treats null+0 as "create empty
+        //     IOBuf" (see CallbackContext.cpp:96-97) without dereferencing.
+        // (3) The C++ function copies the pointed-to bytes immediately and
+        //     does not retain the pointer past the call.
+        let out = unsafe { self.inner.as_mut().copy_buffer_from_slice(ptr, len) };
+        if out.is_null() {
+            None
+        } else {
+            Some(BytesPtr::new(out))
+        }
+    }
+
+    /// Shallow-clone the entire chain via `IOBuf::clone` (refcount increment, no data copy).
+    ///
+    /// Returns `None` if `buffer` is null or allocation fails.
+    pub fn clone_chain(&mut self, buffer: &BytesPtr) -> Option<BytesPtr> {
+        let inner_ref = buffer.as_iobuf_ref()?;
+        let ptr = self.inner.as_mut().clone_buffer_chain(inner_ref);
+        if ptr.is_null() {
+            None
+        } else {
+            Some(BytesPtr::new(ptr))
+        }
+    }
+
+    /// Shallow-clone the first node only via `IOBuf::cloneOne` (refcount increment, no data copy).
+    ///
+    /// Returns `None` if `buffer` is null or allocation fails.
+    pub fn clone_one(&mut self, buffer: &BytesPtr) -> Option<BytesPtr> {
+        let inner_ref = buffer.as_iobuf_ref()?;
+        let ptr = self.inner.as_mut().clone_one(inner_ref);
+        if ptr.is_null() {
+            None
+        } else {
+            Some(BytesPtr::new(ptr))
+        }
+    }
+
+    /// Deep-copy the entire chain into a single contiguous IOBuf (allocation + memcpy of chain length).
+    ///
+    /// Use when a contiguous byte view is required and refcount sharing is
+    /// insufficient. Returns `None` if `buffer` is null or allocation fails.
+    /// Empty chains produce an empty IOBuf.
+    pub fn coalesced_copy(&mut self, buffer: &BytesPtr) -> Option<BytesPtr> {
+        let inner_ref = buffer.as_iobuf_ref()?;
+        let ptr = self.inner.as_mut().coalesced_copy(inner_ref);
+        if ptr.is_null() {
+            None
+        } else {
+            Some(BytesPtr::new(ptr))
+        }
+    }
+
+    /// Idempotently close the pipeline (terminal operation).
+    ///
+    /// Clears readiness lists and event lists, then fires `handler_removed` in
+    /// LIFO order. After `close()`, `is_closed()` returns `true`. Within the
+    /// same callback that called `close()`, `fire_read`/`fire_write` still
+    /// forward to the tail/head endpoints. Subsequent pipeline calls return
+    /// `Result::Error`. This call is `noexcept` on the C++ side.
+    pub fn close(&mut self) {
+        self.inner.as_mut().close();
+    }
+
+    /// Return `true` if the pipeline is closed or the owning pipeline pointer is null.
+    pub fn is_closed(&self) -> bool {
+        self.inner.as_ref().is_closed()
+    }
+}

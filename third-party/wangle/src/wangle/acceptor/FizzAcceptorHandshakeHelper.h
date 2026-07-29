@@ -19,7 +19,6 @@
 #include <fizz/extensions/tokenbinding/TokenBindingContext.h>
 #include <fizz/extensions/tokenbinding/TokenBindingServerExtension.h>
 #include <fizz/server/AsyncFizzServer.h>
-#include <folly/io/async/AsyncIoUringSocket.h>
 #include <wangle/acceptor/AcceptorHandshakeManager.h>
 #include <wangle/acceptor/PeekingAcceptorHandshakeHelper.h>
 #include <wangle/util/Logging.h>
@@ -211,8 +210,7 @@ class SSLContextManager;
 class FizzAcceptorHandshakeHelper
     : public wangle::AcceptorHandshakeHelper,
       public fizz::server::AsyncFizzServer::HandshakeCallback,
-      public folly::AsyncSSLSocket::HandshakeCB,
-      public folly::AsyncDetachFdCallback {
+      public folly::AsyncSSLSocket::HandshakeCB {
  public:
   using ExtendedFallbackStatePolicy = std::function<bool()>;
   FizzAcceptorHandshakeHelper(
@@ -283,12 +281,6 @@ class FizzAcceptorHandshakeHelper
   void handshakeErr(
       folly::AsyncSSLSocket* sock,
       const folly::AsyncSocketException& ex) noexcept override;
-
-  // AsyncIoUringSocket::AsyncDetachFdCallback
-  void fdDetached(
-      folly::NetworkSocket ns,
-      std::unique_ptr<folly::IOBuf> unread) noexcept override;
-  void fdDetachFail(const folly::AsyncSocketException& ex) noexcept override;
 
   /**
    * Handles SSLContext selection for TLS handshake fallback logic.

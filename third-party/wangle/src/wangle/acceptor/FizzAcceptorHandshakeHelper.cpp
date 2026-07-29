@@ -16,7 +16,6 @@
 
 #include <fizz/record/Types.h>
 #include <fizz/server/State.h>
-#include <folly/io/async/AsyncIoUringSocketFactory.h>
 #if !defined(_WIN32) // No FD-passing on Windows, don't try to make it build.
 #include <folly/io/async/fdsock/AsyncFdSocket.h>
 #endif
@@ -174,34 +173,6 @@ void FizzAcceptorHandshakeHelper::fizzHandshakeError(
       transport_.get(), std::move(handshakeException), sslError_);
 }
 
-// AsyncIoUringSocket::AsyncDetachFdCallback
-void FizzAcceptorHandshakeHelper::fdDetached(
-    folly::NetworkSocket ns,
-    std::unique_ptr<folly::IOBuf> unread) noexcept {
-  if (!fallback_.clientHello) {
-    fallback_.clientHello = std::move(unread);
-  } else if (unread) {
-    fallback_.clientHello->appendToChain(std::move(unread));
-  }
-
-  auto context = selectSSLCtx(fallback_.sni);
-  sslSocket_ = folly::AsyncSSLSocket::UniquePtr(
-      new folly::AsyncSSLSocket(context, transport_->getEventBase(), ns));
-  transport_.reset();
-
-  sslSocket_->setPreReceivedData(std::move(fallback_.clientHello));
-  sslSocket_->enableClientHelloParsing();
-  sslSocket_->forceCacheAddrOnFailure(true);
-  sslSocket_->sslAccept(this);
-}
-
-void FizzAcceptorHandshakeHelper::fdDetachFail(
-    const folly::AsyncSocketException& ex) noexcept {
-  fizzHandshakeError(
-      transport_.get(),
-      folly::make_exception_wrapper<folly::AsyncSocketException>(ex));
-}
-
 std::shared_ptr<folly::SSLContext> FizzAcceptorHandshakeHelper::selectSSLCtx(
     const folly::Optional<std::string>& sni) const {
   if (sni) {
@@ -230,10 +201,6 @@ void FizzAcceptorHandshakeHelper::fizzHandshakeAttemptFallback(
 
   folly::AsyncSocket* socket =
       transport_->getUnderlyingTransport<folly::AsyncSocket>();
-  if (!socket &&
-      folly::AsyncIoUringSocketFactory::asyncDetachFd(*transport_, this)) {
-    return;
-  }
 
   auto context = selectSSLCtx(fallback_.sni);
   sslSocket_ = folly::AsyncSSLSocket::UniquePtr(

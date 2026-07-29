@@ -45,6 +45,11 @@ namespace fizz {
 namespace tool {
 namespace {
 
+// Fixed identity used to key the resumption PSK cache. The fizz client talks to
+// a single server per invocation, so a constant is sufficient and keeps
+// resumption working even when the SNI extension is omitted (see -no_sni).
+constexpr folly::StringPiece kPskIdentity{"fizz_client_tool"};
+
 void printUsage() {
   // clang-format off
   std::cerr
@@ -68,6 +73,7 @@ void printUsage() {
     << " -psk_load file           (given file that contains a serialized psk, deserialize psk and open a connection with it)\n"
     << " -keylog file             (dump TLS secrets to a NSS key log file; for debugging purpose only)\n"
     << " -servername name         (server name to send in SNI. Default: same as host)\n"
+    << " -no_sni                  (omit the SNI extension entirely; sends no server name. Default: false)\n"
     << " -alpn alpn1:...          (colon-separated list of ALPNs to send. Default: none)\n"
     << " -ciphers c1:...          (colon-separated list of ciphers in preference order. Default:\n"
     << "                           TLS_AES_128_GCM_SHA256,TLS_AES_256_GCM_SHA384,TLS_CHACHA20_POLY1305_SHA256)\n"
@@ -110,7 +116,7 @@ class Connection : public AsyncSocket::ConnectCallback,
       folly::Optional<std::vector<ech::ParsedECHConfig>> echConfigs)
       : evb_(evb),
         clientContext_(clientContext),
-        sni_(sni),
+        sni_(std::move(sni)),
         verifier_(std::move(verifier)),
         willResume_(willResume),
         proxyTarget_(proxyTarget),
@@ -164,7 +170,8 @@ class Connection : public AsyncSocket::ConnectCallback,
         std::move(transportOpts)));
     transport_->setSecretCallback(this);
     auto echConfigs = echConfigs_;
-    transport_->connect(this, verifier_, sni_, sni_, std::move(echConfigs));
+    transport_->connect(
+        this, verifier_, sni_, kPskIdentity.str(), std::move(echConfigs));
   }
 
   void fizzHandshakeSuccess(AsyncFizzClient* /*client*/) noexcept override {
@@ -533,6 +540,7 @@ int fizzClientCommand(const std::vector<std::string>& args) {
   std::string keyLogFile;
   bool reconnect = false;
   std::string customSNI;
+  bool noSni = false;
   std::vector<std::string> alpns;
   folly::Optional<std::vector<CertificateCompressionAlgorithm>> compAlgos;
   bool early = false;
@@ -591,6 +599,9 @@ int fizzClientCommand(const std::vector<std::string>& args) {
     {"-servername", {true, [&customSNI](const std::string& arg) {
         customSNI = arg;
     }}},
+    {"-no_sni", {false, [&noSni](const std::string&) {
+        noSni = true;
+    }}},
     {"-alpn", {true, [&alpns](const std::string& arg) {
         alpns.clear();
         folly::split(',', arg, alpns);
@@ -648,6 +659,10 @@ int fizzClientCommand(const std::vector<std::string>& args) {
   // Sanity check input.
   if (certPath.empty() != keyPath.empty()) {
     FIZZ_LOG(ERROR) << "-cert and -key are both required when specified";
+    return 1;
+  }
+  if (noSni && !customSNI.empty()) {
+    FIZZ_LOG(ERROR) << "-no_sni and -servername are mutually exclusive";
     return 1;
   }
 
@@ -819,7 +834,10 @@ int fizzClientCommand(const std::vector<std::string>& args) {
   }
 
   try {
-    auto sni = customSNI.empty() ? host : customSNI;
+    folly::Optional<std::string> sni;
+    if (!noSni) {
+      sni = customSNI.empty() ? host : customSNI;
+    }
     auto connectHost = proxyHost.empty() ? host : proxyHost;
     auto connectPort = proxyHost.empty() ? port : proxyPort;
     auto proxiedHost = proxyHost.empty()

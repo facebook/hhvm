@@ -345,7 +345,8 @@ int32_t CarbonRouterInstanceBase::getStatsEnabledPoolIndex(
 
 struct PreprocessedConfigDumpTag;
 
-void CarbonRouterInstanceBase::dumpPreprocessedConfigToDisk() {
+void CarbonRouterInstanceBase::dumpPreprocessedConfigToDisk(
+    std::optional<int64_t> timestampMsOverride) {
   if (!isDumpPreprocessedConfigEnabled(opts_)) {
     return;
   }
@@ -383,10 +384,10 @@ void CarbonRouterInstanceBase::dumpPreprocessedConfigToDisk() {
         // Create timestamped backup only if max_preprocessed_config_history > 0
         if (opts_.max_preprocessed_config_history > 0) {
           try {
-            auto timestampMs =
+            auto timestampMs = timestampMsOverride.value_or(
                 std::chrono::duration_cast<std::chrono::milliseconds>(
                     std::chrono::system_clock::now().time_since_epoch())
-                    .count();
+                    .count());
             auto timestampFilename = getPpcFilename(
                 opts_.service_name, opts_.flavor_name, timestampMs);
             auto timestampFilePath = (directory / timestampFilename).string();

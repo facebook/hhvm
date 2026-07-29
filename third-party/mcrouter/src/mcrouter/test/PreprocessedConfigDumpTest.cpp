@@ -486,6 +486,11 @@ TEST_F(PreprocessedConfigDumpTest, TimestampedFilesCleanupWorksCorrectly) {
 
   TestableRouterInstance instance(std::move(opts), std::move(mockConfigApi));
 
+  // Backups are named ppc_<ms>.json. Pass an explicit, increasing timestamp per
+  // dump so each writes a distinct file deterministically, without relying on
+  // wall-clock spacing between rapid dumps.
+  constexpr int64_t kBaseTimestampMs = 1700000000000;
+
   // Create 5 different configs to trigger 5 timestamped files
   for (int i = 0; i < 5; ++i) {
     std::string config = fmt::format(
@@ -508,7 +513,7 @@ TEST_F(PreprocessedConfigDumpTest, TimestampedFilesCleanupWorksCorrectly) {
                 ::testing::SetArgReferee<1>("test_config_path"),
                 ::testing::Return(true)));
 
-    instance.dumpPreprocessedConfigToDiskForTesting();
+    instance.dumpPreprocessedConfigToDiskForTesting(kBaseTimestampMs + i);
   }
 
   // Should only have 3 timestamped files (oldest 2 should be deleted)

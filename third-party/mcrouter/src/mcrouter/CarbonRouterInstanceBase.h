@@ -9,7 +9,9 @@
 
 #include <atomic>
 #include <chrono>
+#include <cstdint>
 #include <memory>
+#include <optional>
 #include <unordered_map>
 
 #include <folly/Synchronized.h>
@@ -283,8 +285,10 @@ class CarbonRouterInstanceBase {
    */
   void deregisterForStatsUpdates();
 
-  // Dumps preprocessed config to disk on reconfiguration
-  void dumpPreprocessedConfigToDisk();
+  // Dumps preprocessed config to disk on reconfiguration. timestampMsOverride
+  // is a test-only seam to fix the backup filename timestamp; unset in prod.
+  void dumpPreprocessedConfigToDisk(
+      std::optional<int64_t> timestampMsOverride = std::nullopt);
 
   const McrouterOptions opts_;
   const pid_t pid_;
@@ -349,6 +353,10 @@ class CarbonRouterInstanceBase {
  public:
   void dumpPreprocessedConfigToDiskForTesting() {
     dumpPreprocessedConfigToDisk();
+  }
+
+  void dumpPreprocessedConfigToDiskForTesting(int64_t timestampMs) {
+    dumpPreprocessedConfigToDisk(timestampMs);
   }
 
  private:

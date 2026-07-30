@@ -141,3 +141,20 @@ HPHP::s_thriftWorker
 # Thread-local 64-bit RNG for faster folly::Random::oneIn() calls (D94603647)
 HPHP::threadLocalRng64()::tl_rng
 guard variable for HPHP::threadLocalRng64()::tl_rng
+
+# Per-thread lmdb handle maps: MDB_env/MDB_txn/MDB_cursor are not safe to share
+# across threads, so ext_lmdb keeps a `static thread_local` map per handle type.
+# clang emits both the TLS variable and its one-time init guard.
+HPHP::lmdb::LmdbObjectMap<MDB_cursor>::get()::map
+HPHP::lmdb::LmdbObjectMap<MDB_env>::get()::map
+HPHP::lmdb::LmdbObjectMap<MDB_txn>::get()::map
+guard variable for HPHP::lmdb::LmdbObjectMap<MDB_cursor>::get()::map
+guard variable for HPHP::lmdb::LmdbObjectMap<MDB_env>::get()::map
+guard variable for HPHP::lmdb::LmdbObjectMap<MDB_txn>::get()::map
+
+# JIT translation-cache per-thread state (sibling to jit::tc::tl_is_jitting).
+HPHP::jit::tc::tl_liveStreak
+HPHP::jit::tc::tl_threadIsFull
+
+# sbcc cache per-thread "am I inside a request" flag for request-scoped stats.
+HPHP::(anonymous namespace)::s_in_request

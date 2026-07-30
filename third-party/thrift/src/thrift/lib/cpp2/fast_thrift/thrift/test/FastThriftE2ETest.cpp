@@ -27,6 +27,7 @@
 #include <folly/io/async/AsyncSocket.h>
 #include <folly/io/async/ScopedEventBaseThread.h>
 #include <folly/synchronization/Baton.h>
+#include <thrift/lib/cpp2/async/RpcOptions.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/BufferAllocator.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/HandlerTag.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineBuilder.h>
@@ -158,6 +159,11 @@ class FastThriftE2ETest : public ::testing::Test {
     ftt::FastThriftServerConfig config;
     config.address = folly::SocketAddress("::1", 0);
     config.numIOThreads = 1;
+    // Validate request checksums and echo a response checksum. enableChecksum
+    // requires enableRequestContext (the response algorithm rides the
+    // per-request ThriftRequestContext).
+    config.enableRequestContext = true;
+    config.enableChecksum = true;
 
     server_ = std::make_unique<ftt::FastThriftServer>(std::move(config));
     server_->setInterface(handler_);
@@ -277,7 +283,7 @@ class FastThriftE2ETest : public ::testing::Test {
               .addNextInbound<
                   thrift::client::handler::ThriftClientMetadataPushHandler>(
                   thrift_client_metadata_push_handler_tag)
-              .addNextOutbound<
+              .addNextDuplex<
                   thrift::client::handler::ThriftClientChecksumHandler>(
                   thrift_client_checksum_handler_tag)
               .build();
@@ -454,6 +460,24 @@ TEST_F(FastThriftE2ETest, SendResponse) {
   auto cbResult = std::move(cbFuture).get();
   EXPECT_EQ(cbResult.size(), kResponseSize);
   EXPECT_EQ(cbResult, std::string(kResponseSize, 'x'));
+
+  destroyFastClientOnEvb(client);
+}
+
+// Full both-direction checksum round-trip. A successful call proves the client
+// sent a real XXH3 checksum, the server validated the request, the server
+// echoed a checksum, and the client validated the echo — any broken link
+// surfaces as a CHECKSUM_MISMATCH RPC error.
+TEST_F(FastThriftE2ETest, ChecksumRoundTrip) {
+  auto client = createFastClient();
+  auto* evb = clientThread_->getEventBase();
+
+  apache::thrift::RpcOptions opts;
+  opts.setChecksum(apache::thrift::RpcOptions::Checksum::XXH3_64);
+
+  auto result = folly::coro::blockingWait(
+      folly::coro::co_withExecutor(evb, client->co_echo(opts, "checksummed")));
+  EXPECT_EQ(result, "checksummed");
 
   destroyFastClientOnEvb(client);
 }

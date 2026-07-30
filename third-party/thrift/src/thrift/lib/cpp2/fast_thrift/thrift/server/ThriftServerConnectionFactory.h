@@ -67,6 +67,12 @@ struct ThriftServerConnectionFactoryConfig {
   // (RequestRpcMetadata.otherMetadata). Requires enableRequestContext.
   bool enableRequestHeaders{false};
 
+  // When true, insert ThriftServerChecksumHandler to validate the inbound
+  // request checksum and, when the request carried one, fill a matching
+  // checksum on the response. Requires enableRequestContext (the response
+  // algorithm is carried on the per-request ThriftRequestContext).
+  bool enableChecksum{false};
+
   // When true, insert WriteBufferBackpressureHandler into the thrift
   // pipeline to absorb outbound Backpressure: responses queue in a FIFO
   // when downstream is saturated and drain on onWriteReady; inbound reads

@@ -38,6 +38,7 @@
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/adapter/MetadataAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/adapter/ThriftServerCompositeAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/Event.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/handler/ThriftServerChecksumHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/handler/ThriftServerConnectionCloseHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/handler/ThriftServerConnectionContextHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/handler/ThriftServerRequestContextHandler.h>
@@ -64,6 +65,7 @@ HANDLER_TAG(server_stream_state_handler);
 HANDLER_TAG(thrift_server_request_context_handler);
 HANDLER_TAG(thrift_server_connection_context_handler);
 HANDLER_TAG(thrift_server_request_headers_handler);
+HANDLER_TAG(thrift_server_checksum_handler);
 HANDLER_TAG(thrift_server_connection_close_handler);
 HANDLER_TAG(write_buffer_backpressure_handler);
 } // namespace
@@ -229,6 +231,8 @@ ThriftServerConnection ThriftServerConnectionFactory::buildConnectionImpl(
       channel_pipeline::detail::ContextImpl>;
   using ReqHeadersHandler =
       ThriftServerRequestHeadersHandler<channel_pipeline::detail::ContextImpl>;
+  using ChecksumHandler =
+      ThriftServerChecksumHandler<channel_pipeline::detail::ContextImpl>;
   using CloseHandler =
       ThriftServerConnectionCloseHandler<channel_pipeline::detail::ContextImpl>;
   using WriteBufferHandler =
@@ -260,6 +264,17 @@ ThriftServerConnection ThriftServerConnectionFactory::buildConnectionImpl(
       thriftPipelineBuilder.template addNextInbound<ReqHeadersHandler>(
           thrift_server_request_headers_handler_tag);
     }
+  }
+  // Validates the inbound request checksum and fills the response checksum.
+  // Added after the context handlers so inbound it runs once the per-request
+  // ThriftRequestContext exists (it records the algorithm there for the
+  // response to echo).
+  CHECK(!config_.enableChecksum || config_.enableRequestContext)
+      << "enableChecksum requires enableRequestContext; the checksum handler "
+         "records the response algorithm on the per-request context";
+  if (config_.enableChecksum) {
+    thriftPipelineBuilder.template addNextDuplex<ChecksumHandler>(
+        thrift_server_checksum_handler_tag);
   }
   // Connection-close handler sits immediately upstream of the tail.
   // ThriftServerConnection::close() fires

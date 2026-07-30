@@ -272,6 +272,7 @@ void FastThriftServer::start() {
       .zeroCopyThreshold = config_.zeroCopyThreshold,
       .enableRequestContext = config_.enableRequestContext,
       .enableRequestHeaders = config_.enableRequestHeaders,
+      .enableChecksum = config_.enableChecksum,
       .enableWriteBufferBackpressure = config_.enableWriteBufferBackpressure,
       .batchingConfig = config_.batchingConfig,
       .drainTimeout = config_.drainTimeout,

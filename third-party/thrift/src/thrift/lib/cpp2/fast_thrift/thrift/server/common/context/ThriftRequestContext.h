@@ -25,6 +25,7 @@
 #include <folly/container/F14Map.h>
 
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/context/ThriftConnContext.h>
+#include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
 namespace apache::thrift::fast_thrift::thrift {
 
@@ -70,9 +71,23 @@ class ThriftRequestContext {
     return it == headers_.end() ? nullptr : &it->second;
   }
 
+  // Checksum algorithm the response must echo, captured from the inbound
+  // request's checksum by ThriftServerChecksumHandler. NONE when the request
+  // carried no checksum, so the response is left unchecksummed.
+  void setChecksumAlgorithm(
+      apache::thrift::ChecksumAlgorithm algorithm) noexcept {
+    checksumAlgorithm_ = algorithm;
+  }
+
+  apache::thrift::ChecksumAlgorithm getChecksumAlgorithm() const noexcept {
+    return checksumAlgorithm_;
+  }
+
  private:
   boost::intrusive_ptr<ThriftConnContext> connContext_;
   HeaderMap headers_;
+  apache::thrift::ChecksumAlgorithm checksumAlgorithm_{
+      apache::thrift::ChecksumAlgorithm::NONE};
 };
 
 } // namespace apache::thrift::fast_thrift::thrift

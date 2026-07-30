@@ -46,7 +46,15 @@ RecordingAdapter& asRecorder(ThriftServerAppAdapter* p) {
   return *static_cast<RecordingAdapter*>(p);
 }
 
-void onResult(ThriftServerAppAdapter* a, uint32_t streamId, int value) {
+// Impersonates the codegen result thunk: records the invocation instead of
+// building/writing a response. The extra requestContext param matches the
+// ResultFn signature (the real thunk rides it onto the message); the fake
+// ignores it.
+void onResult(
+    ThriftServerAppAdapter* a,
+    uint32_t streamId,
+    std::unique_ptr<ThriftRequestContext> /*requestContext*/,
+    int value) {
   auto& r = asRecorder(a);
   r.resultCount++;
   r.lastStreamId = streamId;
@@ -62,7 +70,10 @@ void onException(
   r.lastExceptionMessage = ew.what().toStdString();
 }
 
-void onDone(ThriftServerAppAdapter* a, uint32_t streamId) {
+void onDone(
+    ThriftServerAppAdapter* a,
+    uint32_t streamId,
+    std::unique_ptr<ThriftRequestContext> /*requestContext*/) {
   auto& r = asRecorder(a);
   r.doneCount++;
   r.lastStreamId = streamId;

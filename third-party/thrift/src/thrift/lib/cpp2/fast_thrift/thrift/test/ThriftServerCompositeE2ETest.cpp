@@ -39,10 +39,12 @@
 #include <folly/synchronization/Baton.h>
 
 #include <thrift/lib/cpp2/Flags.h>
+#include <thrift/lib/cpp2/async/RpcOptions.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/BufferAllocator.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/HandlerTag.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineBuilder.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineImpl.h>
+#include <thrift/lib/cpp2/fast_thrift/channel_pipeline/detail/ContextImpl.h>
 #include <thrift/lib/cpp2/fast_thrift/connection/ConnectionHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/connection/ConnectionManager.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/handler/FrameCodecHandler.h>
@@ -72,6 +74,8 @@
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/adapter/ThriftServerAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/adapter/ThriftServerCompositeAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/adapter/ThriftServerTransportAdapter.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/handler/ThriftServerChecksumHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/handler/ThriftServerRequestContextHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/test/if/gen-cpp2/CompositeE2EPrimaryService.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/test/if/gen-cpp2/CompositeE2EPrimaryService.tcc>
 #include <thrift/lib/cpp2/fast_thrift/thrift/test/if/gen-cpp2/CompositeE2ESecondaryService.h>
@@ -100,6 +104,8 @@ HANDLER_TAG(rocket_server_message_marshal_handler);
 HANDLER_TAG(rocket_server_setup_frame_handler);
 HANDLER_TAG(rocket_server_stream_state_handler);
 HANDLER_TAG(rocket_server_request_response_handler);
+HANDLER_TAG(thrift_server_request_context_handler);
+HANDLER_TAG(thrift_server_checksum_handler);
 
 // Client handler tags
 HANDLER_TAG(client_frame_length_parser_handler);
@@ -381,15 +387,28 @@ class ThriftServerCompositeE2ETest : public ::testing::Test {
         std::make_unique<thrift::server::ThriftServerTransportAdapter>(
             std::move(rocketConn));
 
-    ctx.thriftPipeline = PipelineBuilder<
-                             thrift::server::ThriftServerTransportAdapter,
-                             thrift::ThriftServerCompositeAppAdapter,
-                             SimpleBufferAllocator>()
-                             .setEventBase(evb)
-                             .setHead(ctx.transportAdapter.get())
-                             .setTail(ctx.composite.get())
-                             .setAllocator(ctx.thriftAllocator.get())
-                             .build();
+    PipelineBuilder<
+        thrift::server::ThriftServerTransportAdapter,
+        thrift::ThriftServerCompositeAppAdapter,
+        SimpleBufferAllocator>
+        serverBuilder;
+    serverBuilder.setEventBase(evb)
+        .setHead(ctx.transportAdapter.get())
+        .setTail(ctx.composite.get())
+        .setAllocator(ctx.thriftAllocator.get());
+    if (enableChecksum_) {
+      // Request-context handler creates the per-request context the checksum
+      // handler records the response algorithm on; checksum handler validates
+      // the request checksum and drives the response echo.
+      serverBuilder
+          .addNextInbound<thrift::ThriftServerRequestContextHandler<
+              channel_pipeline::detail::ContextImpl>>(
+              thrift_server_request_context_handler_tag)
+          .addNextDuplex<thrift::ThriftServerChecksumHandler<
+              channel_pipeline::detail::ContextImpl>>(
+              thrift_server_checksum_handler_tag);
+    }
+    ctx.thriftPipeline = serverBuilder.build();
 
     ctx.transportAdapter->setPipeline(ctx.thriftPipeline.get());
     // composite's setPipeline fans out to both children so their
@@ -568,7 +587,7 @@ class ThriftServerCompositeE2ETest : public ::testing::Test {
               .addNextInbound<
                   thrift::client::handler::ThriftClientMetadataPushHandler>(
                   thrift_client_metadata_push_handler_tag)
-              .addNextOutbound<
+              .addNextDuplex<
                   thrift::client::handler::ThriftClientChecksumHandler>(
                   thrift_client_checksum_handler_tag)
               .build();
@@ -595,6 +614,7 @@ class ThriftServerCompositeE2ETest : public ::testing::Test {
   std::vector<ClientConnectionResources> clientConnections_;
   std::vector<std::function<void()>> clientDestroyers_;
   std::vector<std::unique_ptr<ConnectCallback>> connectCallbacks_;
+  bool enableChecksum_{false};
 };
 
 // =============================================================================
@@ -651,4 +671,38 @@ TEST_F(ThriftServerCompositeE2ETest, BothServicesRouteCorrectly) {
   // other's methods.
   EXPECT_EQ(primaryHandler_->pingCount.load(), 0);
   EXPECT_EQ(secondaryHandler_->pingCount.load(), 0);
+}
+
+// ---------------------------------------------------------------------------
+// Checksum round-trip — server validates the request checksum and echoes one
+// the client validates. Exercises ThriftServerChecksumHandler + the
+// FastHandlerCallback response stamp against a native FastClient.
+// ---------------------------------------------------------------------------
+
+class ThriftServerCompositeChecksumE2ETest
+    : public ThriftServerCompositeE2ETest {
+ protected:
+  void SetUp() override {
+    enableChecksum_ = true;
+    ThriftServerCompositeE2ETest::SetUp();
+  }
+};
+
+TEST_F(
+    ThriftServerCompositeChecksumE2ETest,
+    XXH3RoundTripValidatesBothDirections) {
+  auto* primary = createClient<PrimaryClient>();
+
+  apache::thrift::RpcOptions options;
+  options.setChecksum(apache::thrift::RpcOptions::Checksum::XXH3_64);
+
+  // A successful call proves the full chain: the client sent a real XXH3
+  // checksum, the server handler validated the request, the server echoed a
+  // checksum, and the client handler validated the echo. Any broken link
+  // surfaces as an RPC error (CHECKSUM_MISMATCH) and fails the call.
+  auto echoed = folly::coro::blockingWait(
+      primary->co_primaryEcho(options, "checksummed"));
+
+  EXPECT_EQ(echoed, "checksummed_primary");
+  EXPECT_EQ(primaryHandler_->echoCount.load(), 1);
 }

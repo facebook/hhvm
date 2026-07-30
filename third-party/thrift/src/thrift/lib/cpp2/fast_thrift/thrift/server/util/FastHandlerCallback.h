@@ -74,7 +74,11 @@ inline void writeExceptionCascade(
 template <typename T>
 class FastHandlerCallback : public folly::DelayedDestruction {
  public:
-  using ResultFn = void (*)(ThriftServerAppAdapter*, uint32_t, T);
+  using ResultFn = void (*)(
+      ThriftServerAppAdapter*,
+      uint32_t,
+      std::unique_ptr<ThriftRequestContext>,
+      T);
   using ExceptionFn =
       void (*)(ThriftServerAppAdapter*, uint32_t, folly::exception_wrapper);
 
@@ -103,7 +107,11 @@ class FastHandlerCallback : public folly::DelayedDestruction {
   // DG keeps the adapter alive, writeResponse drops on pipelineActive_.
   void result(T value) {
     completed_ = true;
-    resultFn_(handler_, streamId_, std::move(value));
+    // Hand the per-request context to the thunk so it rides onto the response
+    // message; write-side handlers (e.g. checksum) read request-derived state
+    // off the message. The callback itself stays request/response-agnostic.
+    resultFn_(
+        handler_, streamId_, std::move(requestContext_), std::move(value));
   }
 
   void exception(folly::exception_wrapper ew) {
@@ -130,7 +138,10 @@ class FastHandlerCallback : public folly::DelayedDestruction {
 
   template <typename Presult, typename ProtocolWriter>
   static void writeSuccess(
-      ThriftServerAppAdapter* a, uint32_t sid, T value) noexcept {
+      ThriftServerAppAdapter* a,
+      uint32_t sid,
+      std::unique_ptr<ThriftRequestContext> requestContext,
+      T value) noexcept {
     Presult presult;
     if constexpr (detail::IsUniquePtr<T>::value) {
       presult.template get<0>().value = value.get();
@@ -138,7 +149,9 @@ class FastHandlerCallback : public folly::DelayedDestruction {
       presult.template get<0>().value = &value;
     }
     presult.setIsSet(0, true);
-    a->writeResponse(makeSuccessResponseMessage<ProtocolWriter>(sid, presult));
+    auto message = makeSuccessResponseMessage<ProtocolWriter>(sid, presult);
+    message.requestContext = std::move(requestContext);
+    a->writeResponse(std::move(message));
   }
 
   template <typename Presult, typename ProtocolWriter>
@@ -185,7 +198,8 @@ class FastHandlerCallback : public folly::DelayedDestruction {
 template <>
 class FastHandlerCallback<void> : public folly::DelayedDestruction {
  public:
-  using DoneFn = void (*)(ThriftServerAppAdapter*, uint32_t);
+  using DoneFn = void (*)(
+      ThriftServerAppAdapter*, uint32_t, std::unique_ptr<ThriftRequestContext>);
   using ExceptionFn =
       void (*)(ThriftServerAppAdapter*, uint32_t, folly::exception_wrapper);
 
@@ -213,7 +227,9 @@ class FastHandlerCallback<void> : public folly::DelayedDestruction {
   // EVB hop.
   void done() {
     completed_ = true;
-    doneFn_(handler_, streamId_);
+    // See FastHandlerCallback<T>::result — context rides onto the response via
+    // the thunk; the callback stays request/response-agnostic.
+    doneFn_(handler_, streamId_, std::move(requestContext_));
   }
 
   void exception(folly::exception_wrapper ew) {
@@ -235,9 +251,14 @@ class FastHandlerCallback<void> : public folly::DelayedDestruction {
   // ---- Codegen-targeted static helpers (void return) ----
 
   template <typename Presult, typename ProtocolWriter>
-  static void writeDone(ThriftServerAppAdapter* a, uint32_t sid) noexcept {
+  static void writeDone(
+      ThriftServerAppAdapter* a,
+      uint32_t sid,
+      std::unique_ptr<ThriftRequestContext> requestContext) noexcept {
     Presult presult;
-    a->writeResponse(makeSuccessResponseMessage<ProtocolWriter>(sid, presult));
+    auto message = makeSuccessResponseMessage<ProtocolWriter>(sid, presult);
+    message.requestContext = std::move(requestContext);
+    a->writeResponse(std::move(message));
   }
 
   template <typename Presult, typename ProtocolWriter>

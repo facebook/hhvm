@@ -31,6 +31,7 @@
 
 #include <thrift/lib/cpp2/Flags.h>
 #include <thrift/lib/cpp2/async/RocketClientChannel.h>
+#include <thrift/lib/cpp2/async/RpcOptions.h>
 #include <thrift/lib/cpp2/fast_thrift/security/FizzServerCertConfig.h>
 #include <thrift/lib/cpp2/fast_thrift/security/test/TestCert.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/FastThriftServer.h>
@@ -286,6 +287,12 @@ class FastThriftServerTest : public ::testing::Test {
     ftt::FastThriftServerConfig config;
     config.address = folly::SocketAddress("::1", 0);
     config.numIOThreads = 1;
+    if (enableChecksum_) {
+      // The checksum handler records the response algorithm on the per-request
+      // context, so it requires request-context wiring.
+      config.enableRequestContext = true;
+      config.enableChecksum = true;
+    }
 
     server_ = std::make_unique<ftt::FastThriftServer>(std::move(config));
     server_->setInterface(handler_);
@@ -395,6 +402,7 @@ class FastThriftServerTest : public ::testing::Test {
   std::shared_ptr<TestHandler> handler_;
   std::unique_ptr<ftt::FastThriftServer> server_;
   std::unique_ptr<folly::ScopedEventBaseThread> clientThread_;
+  bool enableChecksum_{false};
 };
 
 // ---------------------------------------------------------------------------
@@ -439,6 +447,39 @@ TEST_F(FastThriftServerTest, SecureLookupSecondExceptionPropagates) {
   syncCallExpectException<PermissionDeniedException>([&] {
     return client->semifuture_secureLookup(/*id=*/5, std::string("alice"));
   });
+  destroyClientOnEvb(client);
+}
+
+// ---------------------------------------------------------------------------
+// Checksum handler wired into the real server pipeline (enableChecksum).
+// ---------------------------------------------------------------------------
+
+class FastThriftServerChecksumTest : public FastThriftServerTest {
+ protected:
+  void SetUp() override {
+    enableChecksum_ = true;
+    FastThriftServerTest::SetUp();
+  }
+};
+
+// With the checksum handler in the pipeline, ordinary (no-checksum) requests
+// must still round-trip untouched.
+TEST_F(FastThriftServerChecksumTest, NonChecksumTrafficRoundTrips) {
+  auto client = createClient();
+  auto resp = syncCall([&] { return client->semifuture_echo("plain"); });
+  EXPECT_EQ(*resp.message(), "echoed:plain");
+  destroyClientOnEvb(client);
+}
+
+// A request carrying an XXH3_64 checksum is validated by the server handler and
+// the response echoes a checksum the client accepts — a full round-trip.
+TEST_F(FastThriftServerChecksumTest, XXH3ChecksumRequestRoundTrips) {
+  auto client = createClient();
+  apache::thrift::RpcOptions options;
+  options.setChecksum(apache::thrift::RpcOptions::Checksum::XXH3_64);
+  auto resp =
+      syncCall([&] { return client->semifuture_echo(options, "checksummed"); });
+  EXPECT_EQ(*resp.message(), "echoed:checksummed");
   destroyClientOnEvb(client);
 }
 

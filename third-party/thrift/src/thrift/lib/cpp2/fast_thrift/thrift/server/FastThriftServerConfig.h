@@ -61,6 +61,12 @@ struct FastThriftServerConfig {
   // when that flag is off. Only takes effect on FastThriftServer.
   bool enableRequestHeaders{false};
 
+  // When true, insert ThriftServerChecksumHandler to validate the inbound
+  // request checksum and echo a matching checksum on the response. Requires
+  // enableRequestContext (the response algorithm is carried on the per-request
+  // ThriftRequestContext); ignored when that flag is off.
+  bool enableChecksum{false};
+
   // When true, insert WriteBufferBackpressureHandler into the thrift
   // pipeline. The handler buffers outbound responses when the downstream
   // pipeline returns Result::Backpressure (e.g. transport write buffer

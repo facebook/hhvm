@@ -236,7 +236,7 @@ class ast_builder : public parser_actions {
     if (program_.program_scope().is_ambiguous_enum_value(name)) {
       const auto possible_enums =
           program_.program_scope().find_ambiguous_enum_values(name);
-      diags_.warning(
+      diags_.error(
           loc,
           "The ambiguous enum `{}` is defined in more than one place. "
           "Please refer to this enum using ENUM_NAME.ENUM_VALUE.{}",

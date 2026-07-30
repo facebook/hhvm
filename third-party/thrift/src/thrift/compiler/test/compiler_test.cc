@@ -74,6 +74,20 @@ TEST(CompilerTest, redefinition) {
   )");
 }
 
+TEST(CompilerTest, ambiguous_enum_value) {
+  check_compile(R"(
+    package "facebook.com/thrift/test"
+    enum First {
+      VALUE = 1,
+    }
+    enum Second {
+      VALUE = 2,
+    }
+    const First ambiguous = VALUE;
+      # expected-error@-1: The ambiguous enum `VALUE` is defined in more than one place. Please refer to this enum using ENUM_NAME.ENUM_VALUE. Possible options: First.VALUE, Second.VALUE
+  )");
+}
+
 TEST(CompilerTest, zero_as_field_id) {
   check_compile(R"(
     package "facebook.com/thrift/test"

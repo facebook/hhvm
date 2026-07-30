@@ -30,7 +30,8 @@ namespace {
 // There are 2^32 possible float bit patterns. To avoid test timeout, we split
 // them into kNumShards interleaved shards: shard i tests bit patterns
 // i, i + kNumShards, i + 2*kNumShards, ..., collectively covering all 2^32.
-constexpr std::uint32_t kNumShards = folly::kIsDebug ? 1000 : 100;
+constexpr std::uint32_t kNumShards =
+    folly::kIsSanitize ? 10000 : (folly::kIsDebug ? 1000 : 100);
 
 class FloatRoundTripTest : public ::testing::TestWithParam<std::uint32_t> {};
 

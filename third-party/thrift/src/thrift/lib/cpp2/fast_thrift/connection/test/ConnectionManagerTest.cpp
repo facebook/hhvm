@@ -138,7 +138,7 @@ class ConnectionManagerTest : public ::testing::Test {
       void connectErr(const folly::AsyncSocketException&) noexcept override {}
     };
 
-    const size_t before = acceptCount_.load();
+    const size_t before = connectionManager_->connectionCount();
 
     folly::Baton<> connected;
     ConnectCb cb(connected);
@@ -153,11 +153,13 @@ class ConnectionManagerTest : public ::testing::Test {
 
     const auto deadline =
         std::chrono::steady_clock::now() + std::chrono::seconds{5};
-    while (acceptCount_.load() == before) {
+    while (connectionManager_->connectionCount() == before) {
       ASSERT_LT(std::chrono::steady_clock::now(), deadline)
           << "timed out waiting for server to accept connection";
       // Short poll; server-side accept is asynchronous and has no synchronous
-      // hand-off, so we wait on its observable side-effect (acceptCount_).
+      // hand-off. The accept callback fires before the installer registers the
+      // connection, so we wait on connectionCount() — the same installed
+      // signal the assertions check — rather than acceptCount_.
       // NOLINTNEXTLINE(facebook-hte-BadCall-sleep_for)
       std::this_thread::sleep_for(std::chrono::milliseconds{5});
     }

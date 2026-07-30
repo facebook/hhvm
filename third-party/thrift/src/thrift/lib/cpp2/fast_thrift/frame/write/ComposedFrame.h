@@ -109,7 +109,6 @@ struct ComposedFrame {
       default:
         DCHECK(false) << "Unknown FrameType: "
                       << static_cast<uint8_t>(frameType);
-        break;
     }
     return false;
   }
@@ -141,7 +140,6 @@ struct ComposedFrame {
       default:
         DCHECK(false) << "Unknown FrameType: "
                       << static_cast<uint8_t>(frameType);
-        break;
     }
     return false;
   }
@@ -232,7 +230,6 @@ struct ComposedFrame {
       default:
         DCHECK(false) << "Unknown FrameType: "
                       << static_cast<uint8_t>(frameType);
-        break;
     }
     return nullptr;
   }

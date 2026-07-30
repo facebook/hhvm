@@ -547,15 +547,16 @@ void shutdown_slab_managers() {
 
 namespace {
 
-struct LowArena {
-  LowArena(uintptr_t minAddr, uintptr_t maxAddr)
+struct BumpAllocatedArena {
+  BumpAllocatedArena(uintptr_t minAddr, uintptr_t maxAddr, bool noReplace)
     : m_nextAddr(minAddr)
     , m_maxAddr(maxAddr) {
+    auto const mapFixed = noReplace ? MAP_FIXED_NOREPLACE : MAP_FIXED;
     auto const addr = mmap(
       reinterpret_cast<void*>(minAddr),
       maxAddr - minAddr,
       PROT_READ | PROT_WRITE,
-      MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED | MAP_NORESERVE,
+      MAP_PRIVATE | MAP_ANONYMOUS | MAP_NORESERVE | mapFixed,
       -1,
       0
     );
@@ -578,9 +579,10 @@ private:
   const uintptr_t m_maxAddr;
 };
 
-std::unique_ptr<LowArena> s_lowArena;
+std::unique_ptr<BumpAllocatedArena> s_lowArena;
+std::unique_ptr<BumpAllocatedArena> s_uncountedArena;
 
-void setup_low_arena() {
+void setup_arenas() {
 #ifdef FOLLY_SANITIZE_ADDRESS
   // Query the sanitizer for its shadow mapping:
   //   shadow = (addr >> scale) + offset
@@ -589,40 +591,82 @@ void setup_low_arena() {
   __asan_get_shadow_mapping(&shadowScale, &shadowOffset);
 
   // In ASAN builds, we pick a subset of the space between 4GB and 32GB such
-  // that its shadow space lies between 2GB and 4GB.
+  // that its shadow space lies between 2GB and 4GB. Default ASAN config
+  // makes this range 4G..~16GB.
   always_assert(shadowOffset <= kLowArenaMaxAddr);
-  auto constexpr kMinAddr = kLowArenaMaxAddr;
-  auto const kMaxAddr = (kLowArenaMaxAddr - shadowOffset) << shadowScale;
-  always_assert(kLowArenaMinAddr <= kMinAddr);
-  always_assert(kMinAddr < kMaxAddr);
-  always_assert(kMaxAddr <= kMidArenaMaxAddr);
+  auto constexpr lowMinAddr = kLowArenaMaxAddr;
+  auto const lowMaxAddr = (kLowArenaMaxAddr - shadowOffset) << shadowScale;
+  always_assert(kLowArenaMinAddr <= lowMinAddr);
+  always_assert(lowMinAddr < lowMaxAddr);
+  always_assert(lowMaxAddr <= kMidArenaMaxAddr);
+
+  // For uncounted range, pick all space under 256GB that doesn't overlap with
+  // its own shadow space and its shadow space doesn't overlap with low range.
+  // Default ASAN confnig makes this range ~112GB..256GB.
+  auto const uncountedMinAddr = std::max(
+    (kUncountedMaxAddr >> shadowScale) + shadowOffset,  // ~32GB
+    (lowMaxAddr - shadowOffset) << shadowScale          // ~112GB
+  );
+  auto constexpr uncountedMaxAddr = kUncountedMaxAddr;
+
+  // ASAN already mapped this as PROT_NONE.
+  auto constexpr noReplace = false;
 #else
-  auto constexpr kMinAddr = kLowArenaMinAddr;
-  auto constexpr kMaxAddr = kMidArenaMaxAddr;
+  auto constexpr lowMinAddr = kLowArenaMinAddr;
+  auto constexpr lowMaxAddr = kMidArenaMaxAddr;
+  auto constexpr uncountedMinAddr = kMidArenaMaxAddr;
+  auto constexpr uncountedMaxAddr = kUncountedMaxAddr;
+  auto constexpr noReplace = true;
 #endif
 
   always_assert(!s_lowArena);
-  s_lowArena = std::make_unique<LowArena>(kMinAddr, kMaxAddr);
+  always_assert(!s_uncountedArena);
+  s_lowArena = std::make_unique<BumpAllocatedArena>(
+    lowMinAddr, lowMaxAddr, noReplace);
+  s_uncountedArena = std::make_unique<BumpAllocatedArena>(
+    uncountedMinAddr, uncountedMaxAddr, noReplace);
 
 #ifdef FOLLY_SANITIZE_ADDRESS
   // Map zero-initialized read only shadow space for ASAN.
-  auto const kShadowMinAddr = (kMinAddr >> shadowScale) + shadowOffset;
-  auto const kShadowMaxAddr = (kMaxAddr >> shadowScale) + shadowOffset;
-  always_assert(kShadowMinAddr < kShadowMaxAddr);
-  always_assert(kShadowMaxAddr == kMinAddr);
-  UNUSED auto const shadow = mmap(
-    reinterpret_cast<void*>(kShadowMinAddr),
-    kShadowMaxAddr - kShadowMinAddr,
-    PROT_READ,
-    MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED | MAP_NORESERVE,
-    -1,
-    0
-  );
-  always_assert_flog(
-    shadow == reinterpret_cast<void*>(kShadowMinAddr),
-    "mmap failed: {}", folly::errnoStr(errno)
-  );
+  auto const lowShadowMinAddr = (lowMinAddr >> shadowScale) + shadowOffset;
+  auto const lowShadowMaxAddr = (lowMaxAddr >> shadowScale) + shadowOffset;
+  auto const uncountedShadowMinAddr =
+    (uncountedMinAddr >> shadowScale) + shadowOffset;
+  auto const uncountedShadowMaxAddr =
+    (uncountedMaxAddr >> shadowScale) + shadowOffset;
+  always_assert(lowShadowMinAddr < lowShadowMaxAddr);
+  always_assert(lowShadowMaxAddr == lowMinAddr);
+  always_assert(lowMaxAddr <= uncountedShadowMinAddr);
+  always_assert(uncountedShadowMinAddr < uncountedShadowMaxAddr);
+  always_assert(uncountedShadowMaxAddr <= uncountedMinAddr);
+
+  auto const allocShadow = [](uintptr_t minAddr, uintptr_t maxAddr) {
+    UNUSED auto const shadow = mmap(
+      reinterpret_cast<void*>(minAddr),
+      maxAddr - minAddr,
+      PROT_READ,
+      MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED | MAP_NORESERVE,
+      -1,
+      0
+    );
+    always_assert_flog(
+      shadow == reinterpret_cast<void*>(minAddr),
+      "mmap failed: {}", folly::errnoStr(errno)
+    );
+  };
+
+  allocShadow(lowShadowMinAddr, lowShadowMaxAddr);
+  allocShadow(uncountedShadowMinAddr, uncountedShadowMaxAddr);
 #endif
+
+  if (debug) {
+    auto const ptr1 = malloc(1);
+    auto const ptr2 = malloc(1 << 20);
+    assertx(reinterpret_cast<uintptr_t>(ptr1) >= kUncountedMaxAddr);
+    assertx(reinterpret_cast<uintptr_t>(ptr2) >= kUncountedMaxAddr);
+    free(ptr1);
+    free(ptr2);
+  }
 }
 
 }
@@ -639,6 +683,22 @@ void* low_bump_realloc(void* ptr, size_t size) {
 }
 
 void low_bump_free(void* ptr) {
+  // Do nothing. It is very very rare that we actually try to free something
+  // and if we do just have it leak
+}
+
+void* uncounted_bump_malloc(size_t size) {
+  return s_uncountedArena->alloc(size);
+}
+
+void* uncounted_bump_realloc(void* ptr, size_t size) {
+  auto newptr = uncounted_malloc(size);
+  if (newptr == nullptr) return nullptr;
+  memcpy(newptr, ptr, size);
+  return newptr;
+}
+
+void uncounted_bump_free(void* ptr) {
   // Do nothing. It is very very rare that we actually try to free something
   // and if we do just have it leak
 }
@@ -775,7 +835,7 @@ struct JEMallocInitializer {
     // Initialize global mibs
     init_mallctl_mibs();
 #else
-    setup_low_arena();
+    setup_arenas();
 #endif
   }
 };

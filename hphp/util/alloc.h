@@ -142,6 +142,10 @@ void* low_bump_malloc(size_t size);
 void* low_bump_realloc(void* ptr, size_t size);
 void low_bump_free(void* ptr);
 
+void* uncounted_bump_malloc(size_t size);
+void* uncounted_bump_realloc(void* ptr, size_t size);
+void uncounted_bump_free(void* ptr);
+
 #endif // USE_JEMALLOC
 
 /**
@@ -350,6 +354,9 @@ struct WrapAllocator {
 #define DEF_LOW_ALLOC_FUNCS(prefix, flag, upper_prefix)         \
   DEF_ALLOC_FUNCS(prefix, flag, upper_prefix)
 
+#define DEF_UNCOUNTED_ALLOC_FUNCS(prefix, flag, upper_prefix)   \
+  DEF_ALLOC_FUNCS(prefix, flag, upper_prefix)
+
 #define DEF_HIGH_ALLOC_FUNCS(prefix, flag, upper_prefix)        \
   DEF_ALLOC_FUNCS(prefix, flag, upper_prefix)
 
@@ -370,6 +377,27 @@ struct WrapAllocator {
   inline void prefix##_sized_free(void* ptr, size_t size) {     \
     assert(ptr != nullptr);                                     \
     return low_bump_free(ptr);                                  \
+  }                                                             \
+                                                                \
+  template<typename T> using upper_prefix##Allocator =          \
+    WrapAllocator<prefix##_malloc, prefix##_sized_free, T>;
+
+#define DEF_UNCOUNTED_ALLOC_FUNCS(prefix, flag, upper_prefix)   \
+  inline void* prefix##_malloc(size_t size) {                   \
+    assert(size != 0);                                          \
+    return uncounted_bump_malloc(size);                         \
+  }                                                             \
+  inline void prefix##_free(void* ptr) {                        \
+    assert(ptr != nullptr);                                     \
+    return uncounted_bump_free(ptr);                            \
+  }                                                             \
+  inline void* prefix##_realloc(void* ptr, size_t size) {       \
+    assert(size != 0);                                          \
+    return uncounted_bump_realloc(ptr, size);                   \
+  }                                                             \
+  inline void prefix##_sized_free(void* ptr, size_t size) {     \
+    assert(ptr != nullptr);                                     \
+    return uncounted_bump_free(ptr);                            \
   }                                                             \
                                                                 \
   template<typename T> using upper_prefix##Allocator =          \
@@ -403,10 +431,9 @@ struct WrapAllocator {
 DEF_HIGH_ALLOC_FUNCS(vm, HIGH_ARENA_FLAGS, VM)
 DEF_HIGH_ALLOC_FUNCS(vm_cold, high_cold_arena_flags, VMCold)
 
-// Allocations that are guaranteed to live below kUncountedMaxAddr when
-// USE_JEMALLOC. This provides a new way to check for countedness
-// for arrays and strings.
-DEF_HIGH_ALLOC_FUNCS(uncounted, HIGH_ARENA_FLAGS, Uncounted)
+// Allocations that are guaranteed to live below kUncountedMaxAddr.
+// This provides a new way to check for countedness for arrays and strings.
+DEF_UNCOUNTED_ALLOC_FUNCS(uncounted, HIGH_ARENA_FLAGS, Uncounted)
 
 // Allocations for the APC but do not necessarily live below kUncountedMaxAddr,
 // e.g., APCObject, or the hash table. Currently they live below

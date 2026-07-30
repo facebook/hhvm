@@ -7,6 +7,8 @@
 
 #include "mcrouter/lib/network/McAsciiParser.h"
 
+#include <limits>
+
 #include "mcrouter/lib/mc/msg.h"
 #include "mcrouter/lib/network/gen/MemcacheMessages.h"
 #include "mcrouter/lib/network/gen/MemcacheRoutingGroups.h"
@@ -109,6 +111,18 @@ multi_token = (print+ -- ( '\r' | '\n' )) >key_start %key_end %{
 
 # Unsigned integer value.
 uint = digit+ > { currentUInt_ = 0; } ${
+  // `digit+` is unbounded; without this guard the accumulator wraps modulo
+  // 2^64 and a 20+-digit field decodes to an attacker-chosen value (e.g. a
+  // value_bytes count that then slips past the maxValueBytes check).
+  if (FOLLY_UNLIKELY(
+          currentUInt_ >
+          (std::numeric_limits<uint64_t>::max() -
+           static_cast<uint64_t>(fc - '0')) /
+              10)) {
+    state_ = State::ERROR;
+    currentErrorDescription_ = "Integer field overflows uint64.";
+    fbreak;
+  }
   currentUInt_ = currentUInt_ * 10 + (fc - '0');
 };
 
@@ -1243,6 +1257,14 @@ McAsciiParserBase::State McServerAsciiParser::consume(folly::IOBuf& buffer) {
     // If we're parsing a key, append current piece of buffer to it.
     if (keyPieceStart_ != nullptr) {
       appendKeyPiece(buffer, currentKey_, keyPieceStart_, p_);
+    }
+
+    // A parser action may set State::ERROR directly (e.g. integer-field
+    // overflow) on grammatically valid input, without driving the machine to
+    // errorCs_. Honor it here so the request is rejected now, before a later
+    // finishReq() resets state_ and the truncated request is dispatched.
+    if (state_ == State::ERROR) {
+      break;
     }
 
     if (savedCs_ == errorCs_) {

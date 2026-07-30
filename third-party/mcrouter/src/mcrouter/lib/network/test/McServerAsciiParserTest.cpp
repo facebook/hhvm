@@ -406,6 +406,14 @@ void setLikeTest(std::string opCmd) {
       strlen(kTestValue),
       kTestValue);
 
+  // A value-size field that overflows uint64 must be rejected rather than
+  // wrapping to a small size and truncating the value (which would let the
+  // trailing bytes be reparsed as a second, smuggled command).
+  TestRunner().expectError().run(
+      "{} test:stepan:1 123 651342 18446744073709551616\r\n{}\r\n",
+      opCmd,
+      kTestValue);
+
   // Test noreply.
   TestRunner()
       .expectNext(
@@ -478,6 +486,11 @@ void arithmeticTest(std::string opCmd) {
       .run(opCmd + " test:stepan:1 noreply\r\n")
       .run(opCmd + "     test:stepan:1       noreply  \r\n")
       .run(opCmd + " test:stepan:1   noreply \r\n");
+
+  // A delta that overflows uint64 must be rejected, not silently truncated to
+  // a wrapped value and dispatched.
+  TestRunner().expectError().run(
+      opCmd + " test:stepan:1 18446744073709551616\r\n");
 }
 
 } // namespace

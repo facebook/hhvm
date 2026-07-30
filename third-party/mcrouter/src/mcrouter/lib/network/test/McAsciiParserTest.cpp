@@ -270,6 +270,25 @@ TYPED_TEST(McAsciiParserTestGet, GetHit_Error) {
   h.runTest(1);
 }
 
+// A value-size field of exactly 2^64 overflows the uint64 accumulator. Before
+// the overflow guard it wrapped to 0 and the reply parsed as an empty value;
+// the parser must now reject it as a protocol error.
+TYPED_TEST(McAsciiParserTestGet, GetHit_ValueBytesOverflow_Error) {
+  McAsciiParserHarness h("VALUE test 10 18446744073709551616\r\n\r\nEND\r\n");
+  h.expectNext<TypeParam>(ReplyT<TypeParam>(), true);
+  h.runTest(1);
+}
+
+// The largest in-range uint64 (2^64 - 1) must still parse, confirming the
+// overflow guard rejects only genuine overflow and not the boundary value.
+TYPED_TEST(McAsciiParserTestGet, GetHit_MaxUint64Flags) {
+  McAsciiParserHarness h("VALUE test 18446744073709551615 2\r\nte\r\nEND\r\n");
+  h.expectNext<TypeParam>(setFlags(
+      setValue(ReplyT<TypeParam>(carbon::Result::FOUND), "te"),
+      18446744073709551615ULL));
+  h.runTest(1);
+}
+
 TYPED_TEST(McAsciiParserTestGet, GetMiss) {
   McAsciiParserHarness h("END\r\n");
   h.expectNext<TypeParam>(ReplyT<TypeParam>(carbon::Result::NOTFOUND));

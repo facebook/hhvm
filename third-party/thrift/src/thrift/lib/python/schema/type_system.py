@@ -691,6 +691,16 @@ class TypeSystem(ABC):
         """Resolve a URI to its ``DefinitionNode``, or ``None`` if unknown."""
         raise NotImplementedError
 
+    def contains(self, uri: str) -> bool:
+        """Whether ``uri`` resolves to a user-defined type."""
+        return self.get_user_defined_type(uri) is not None
+
+    @abstractmethod
+    def get_known_uris(self) -> frozenset[str] | None:
+        """The exact set of known URIs, or ``None`` when the type system is not
+        finitely enumerable (e.g. the lazy registry)."""
+        raise NotImplementedError
+
     def get_user_defined_type_or_throw(self, uri: str) -> DefinitionNode:
         """Like ``get_user_defined_type`` but raises ``InvalidTypeError`` on a
         miss."""
@@ -698,12 +708,6 @@ class TypeSystem(ABC):
         if node is None:
             raise InvalidTypeError(f"Unknown user-defined type URI: {uri!r}")
         return node
-
-    @abstractmethod
-    def get_known_uris(self) -> frozenset[str] | None:
-        """The exact set of known URIs, or ``None`` when the type system is not
-        finitely enumerable (e.g. the lazy registry)."""
-        raise NotImplementedError
 
     @abstractmethod
     def get_user_defined_type_by_source_identifier(

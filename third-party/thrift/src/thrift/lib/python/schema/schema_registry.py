@@ -29,15 +29,18 @@ import sys
 import types
 from collections.abc import Callable, Mapping, Sequence
 from importlib import resources
-from typing import Any, TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from thrift.lib.python.schema.type_system_digest import DigestMode
+from typing import Any
 
 import zstandard  # @manual=fbsource//third-party/pypi/zstandard:zstandard
 from apache.thrift.type.schema import thrift_types as _schema_types
+from apache.thrift.type_system.type_system.thrift_types import SerializableTypeSystem
+from thrift.lib.python.schema._digest_common import DigestMode
 from thrift.lib.python.schema.syntax_graph import Definition, SyntaxGraph
-from thrift.lib.python.schema.type_system import DefinitionNode, TypeSystem
+from thrift.lib.python.schema.type_system import (
+    DefinitionNode,
+    PruneOptions,
+    TypeSystem,
+)
 from thrift.lib.python.schema.type_system_bridge import SyntaxGraphBridge
 from thrift.python.serializer import deserialize, Protocol
 
@@ -270,7 +273,7 @@ class SchemaRegistry(TypeSystem):
         (typedefs/constants/services/interactions are excluded)."""
         return self._ts_bridge.get_user_defined_type(uri)
 
-    def get_known_uris(self) -> None:
+    def get_known_uris(self) -> frozenset[str] | None:
         """``None`` -- the registry is lazy/module-discovery based and cannot
         enumerate all URIs up front."""
         return None
@@ -280,6 +283,7 @@ class SchemaRegistry(TypeSystem):
     ) -> DefinitionNode | None:
         """``None`` -- the registry is lazy/module-discovery based and cannot
         build a source-identifier index up front."""
+        del locator, name
         return None
 
     def get_user_defined_types_at_location(
@@ -287,7 +291,20 @@ class SchemaRegistry(TypeSystem):
     ) -> Mapping[str, DefinitionNode]:
         """``{}`` -- the registry is lazy/module-discovery based and cannot
         enumerate the types at a source location up front."""
+        del locator
         return {}
+
+    def to_serializable_type_system(
+        self,
+        root_uris: Sequence[str],
+        options: PruneOptions | None = None,
+    ) -> SerializableTypeSystem:
+        """The canonical serializable type system rooted at ``root_uris``."""
+        from thrift.lib.python.schema._serializable import (
+            build_serializable_type_system,
+        )
+
+        return build_serializable_type_system(self, root_uris, options)
 
     def type_system_digest(
         self, root_uris: Sequence[str], mode: DigestMode | None = None
@@ -301,16 +318,13 @@ class SchemaRegistry(TypeSystem):
 
         ``mode`` selects the coverage; see :class:`DigestMode` (default
         ``FULL``; ``STRUCTURAL`` skips annotations and custom default values)."""
-        from thrift.lib.python.schema._serializable import (
-            build_serializable_type_system,
-        )
         from thrift.lib.python.schema.type_system_digest import (
             DigestMode,
             type_system_digest,
         )
 
         return type_system_digest(
-            build_serializable_type_system(self, root_uris),
+            self.to_serializable_type_system(root_uris),
             mode if mode is not None else DigestMode.FULL,
         )
 

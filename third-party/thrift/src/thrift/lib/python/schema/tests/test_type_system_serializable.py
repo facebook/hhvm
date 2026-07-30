@@ -112,6 +112,7 @@ from thrift.lib.python.schema.type_system_builder import (
     TypeInput,
     TypeSystemBuilder,
 )
+from thrift.lib.python.schema.type_system_digest import type_system_digest
 
 
 def _field(
@@ -387,6 +388,17 @@ class BuildSerializableTest(unittest.TestCase):
         sts = build_serializable_type_system(registry, [outer])
         # `Outer` references `Inner` (directly, via typedef, and in a list).
         self.assertEqual(set(sts.types.keys()), {outer, inner})
+
+    def test_registry_type_system_facade_exports_serializable_view(self) -> None:
+        SchemaRegistry._reset()
+        registry = SchemaRegistry()
+        outer = f"{_BRIDGE_URI}/Outer"
+        inner = f"{_BRIDGE_URI}/Inner"
+
+        sts = registry.to_serializable_type_system([outer])
+
+        self.assertEqual(set(sts.types.keys()), {outer, inner})
+        self.assertEqual(registry.type_system_digest([outer]), type_system_digest(sts))
 
     def test_root_absent_raises(self) -> None:
         source = (

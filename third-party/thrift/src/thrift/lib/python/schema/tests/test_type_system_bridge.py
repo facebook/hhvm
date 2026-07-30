@@ -95,6 +95,7 @@ class TypeSystemBridgeTest(unittest.TestCase):
 
     def test_unknown_uri_returns_none(self) -> None:
         self.assertIsNone(self.registry.get_user_defined_type("does.not/Exist"))
+        self.assertFalse(self.registry.contains("does.not/Exist"))
 
     # -- Typedef erasure ----------------------------------------------------
 

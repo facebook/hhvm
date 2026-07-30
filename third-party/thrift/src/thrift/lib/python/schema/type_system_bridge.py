@@ -394,17 +394,19 @@ class SyntaxGraphBridge(TypeSystem):
                 self._cache.pop(key, None)
             raise
 
-    def get_known_uris(self) -> None:
+    def get_known_uris(self) -> frozenset[str] | None:
         return None
 
     def get_user_defined_type_by_source_identifier(
         self, locator: str, name: str
     ) -> DefinitionNode | None:
+        del locator, name
         return None
 
     def get_user_defined_types_at_location(
         self, locator: str
     ) -> Mapping[str, DefinitionNode]:
+        del locator
         return {}
 
     # -- internal -----------------------------------------------------------

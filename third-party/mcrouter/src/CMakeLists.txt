@@ -573,9 +573,90 @@ install(
 # =============================================================================
 if(BUILD_TESTS)
   enable_testing()
-  find_package(GTest CONFIG REQUIRED)
+  include(FBPythonBinary)
 
-  # Add test subdirectories when ready
-  # add_subdirectory(mcrouter/lib/test)
-  # add_subdirectory(mcrouter/test)
+  set(MCROUTER_TEST_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/python")
+  file(MAKE_DIRECTORY "${MCROUTER_TEST_CONFIG_DIR}")
+  configure_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/CMake/mcrouter_test_config.py.in"
+    "${MCROUTER_TEST_CONFIG_DIR}/config.py"
+    @ONLY
+  )
+
+  add_fb_python_library(
+    mcrouter_test_config
+    BASE_DIR "${MCROUTER_TEST_CONFIG_DIR}"
+    NAMESPACE "mcrouter.test"
+    SOURCES "${MCROUTER_TEST_CONFIG_DIR}/config.py"
+  )
+
+  # JSON fixtures required by test_validate_config.py are referenced via
+  # relative path "mcrouter/test/*.json" with WORKING_DIRECTORY set below.
+  # In fbcode layout canonical JSONs live at fbcode/mcrouter/test/ (../test
+  # from public_tld); in OSS after shipit they live at mcrouter/test/ in the
+  # source tree. We copy them to binary dir only (no source-tree mutation)
+  # and run tests with WORKING_DIRECTORY = binary dir so
+  # "mcrouter/test/*.json" resolves in sandboxed/OSS executions.
+  file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/mcrouter/test")
+  # fbcode layout: fbcode/mcrouter/test/ (../test from public_tld).
+  set(_fbcode_test_dir "${CMAKE_CURRENT_SOURCE_DIR}/../test")
+  # OSS layout (after shipit): fixtures vendored under mcrouter/test/.
+  set(_oss_test_dir "${CMAKE_CURRENT_SOURCE_DIR}/mcrouter/test")
+  if(EXISTS "${_fbcode_test_dir}/test_ascii.json"
+     AND EXISTS "${_fbcode_test_dir}/invalid_config.json")
+    file(
+      COPY
+        "${_fbcode_test_dir}/test_ascii.json"
+        "${_fbcode_test_dir}/invalid_config.json"
+      DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/mcrouter/test"
+    )
+  elseif(EXISTS "${_oss_test_dir}/test_ascii.json"
+         AND EXISTS "${_oss_test_dir}/invalid_config.json")
+    file(
+      COPY
+        "${_oss_test_dir}/test_ascii.json"
+        "${_oss_test_dir}/invalid_config.json"
+      DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/mcrouter/test"
+    )
+  else()
+    message(WARNING
+      "mcrouter test JSON fixtures (test_ascii.json, invalid_config.json) were "
+      "not found under ../test or mcrouter/test. test_validate_config.py will "
+      "fail with FileNotFoundError at runtime. Only test_validate_config.py "
+      "depends on these fixtures; test_bad_params.py and test_linenumbers.py "
+      "do not."
+    )
+  endif()
+
+  add_fb_python_unittest(
+    mcrouter_oss_python_tests
+    BASE_DIR "${CMAKE_CURRENT_SOURCE_DIR}"
+    NAMESPACE ""
+    WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+    SOURCES
+      mcrouter/test/test_bad_params.py
+      mcrouter/test/test_linenumbers.py
+      mcrouter/test/test_validate_config.py
+    DEPENDS mcrouter_test_config
+  )
+
+  # Ensure mcrouter binary exists before Python tests that spawn it.
+  # We avoid depending on the internal "${TARGET}.GEN_PY_EXE" name from
+  # FBPythonBinary.cmake – it is an implementation detail that can change
+  # across fbcode_builder revisions. Instead, make the
+  # mcrouter_test_config.py_sources_built target (which add_fb_python_library
+  # creates and which chains into the unittest exe build) depend on
+  # mcrouter_server. That way ctest only runs after the server binary is
+  # present. This target name is still an FBPythonBinary internal, so guard
+  # on its existence too and fall back to a warning if the contract changes.
+  if(TARGET mcrouter_server AND TARGET mcrouter_test_config.py_sources_built)
+    add_dependencies(mcrouter_test_config.py_sources_built mcrouter_server)
+  elseif(TARGET mcrouter_server)
+    message(WARNING
+      "Expected FBPythonBinary target mcrouter_test_config.py_sources_built "
+      "was not found; cannot order the mcrouter_server build before the "
+      "Python tests. Tests that spawn mcrouter may race the binary build if "
+      "FBPythonBinary's internal target naming has changed."
+    )
+  endif()
 endif()

@@ -7,6 +7,26 @@ noinst_PROGRAMS = mock_mc_server
 noinst_LIBRARIES = libtest_util.a
 check_PROGRAMS = mcrouter_network_test
 
+FBTHRIFT_STATIC_LIBS = \
+	-Wl,--start-group \
+	-lthriftcpp2 \
+	-lserverdbginfo \
+	-ltransport \
+	-lthriftanyrep \
+	-lthriftannotation \
+	-lthrifttype \
+	-lthrifttyperep \
+	-lthrift_dynamic_value \
+	-lrpcmetadata \
+	-lthriftprotocol \
+	-lthriftmetadata \
+	-lasync \
+	-lconcurrency \
+	-lruntime \
+	-lthrift-core \
+	-lcommon \
+	-Wl,--end-group
+
 mock_mc_server_SOURCES = \
   MockMc.cpp \
   MockMc.h \
@@ -16,20 +36,7 @@ mock_mc_server_CPPFLAGS = -I$(top_srcdir)/..
 # Link order matters.
 mock_mc_server_LDADD = \
 	$(top_builddir)/lib/libmcrouter.a \
-	-lthriftcpp2 \
-	-lserverdbginfo \
-	-ltransport \
-	-lthriftanyrep \
-	-lthrifttype \
-	-lthrifttyperep \
-	-lthriftprotocol \
-	-lrpcmetadata \
-	-lthriftmetadata \
-	-lasync \
-	-lconcurrency \
-	-lruntime \
-	-lthrift-core \
-	-lcommon \
+	$(FBTHRIFT_STATIC_LIBS) \
 	-lfmt \
 	-lfizz \
 	-lwangle \
@@ -44,14 +51,7 @@ mock_mc_thrift_server_CPPFLAGS = -I$(top_srcdir)/..
 # Link order matters.
 mock_mc_thrift_server_LDADD = \
 	$(top_builddir)/lib/libmcrouter.a \
-	-lthriftcpp2 \
-	-ltransport \
-	-lthriftprotocol \
-	-lrpcmetadata \
-	-lasync \
-	-lconcurrency \
-	-lthrift-core \
-	-lcommon \
+	$(FBTHRIFT_STATIC_LIBS) \
 	-lfmt \
 	-lfizz \
 	-lwangle \
@@ -66,14 +66,11 @@ mock_mc_server_dual_CPPFLAGS = -I$(top_srcdir)/..
 # Link order matters.
 mock_mc_server_dual_LDADD = \
 	$(top_builddir)/lib/libmcrouter.a \
-	-lthriftcpp2 \
-	-ltransport \
-	-lthriftprotocol \
-	-lrpcmetadata \
-	-lasync \
-	-lconcurrency \
-	-lthrift-core \
-	-lcommon
+	$(FBTHRIFT_STATIC_LIBS) \
+	-lfmt \
+	-lfizz \
+	-lwangle \
+	-lfolly
 
 libtest_util_a_SOURCES = \
   ClientSocket.cpp \
@@ -110,8 +107,4 @@ mcrouter_network_test_LDADD = \
   $(top_builddir)/lib/libmcrouter.a \
   $(top_builddir)/lib/libtestmain.la \
   $(top_builddir)/lib/network/libtest_util.a \
-  -lthriftcpp2 \
-  -lthriftprotocol \
-  -lrpcmetadata \
-  -ltransport \
-  -lcommon
+  $(FBTHRIFT_STATIC_LIBS)

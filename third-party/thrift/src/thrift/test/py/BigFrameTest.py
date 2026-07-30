@@ -44,7 +44,7 @@ def create_server():
     server.setPort(port)
 
     t = Thread(name="test_tcpp_server", target=server.serve)
-    t.setDaemon(True)
+    t.daemon = True
     t.start()
 
     time.sleep(2)

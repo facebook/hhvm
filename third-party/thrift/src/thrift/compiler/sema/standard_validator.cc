@@ -1222,6 +1222,13 @@ void validate_function_param_id(sema_context& ctx, const t_field& node) {
   }
 }
 
+void validate_thrown_exception_id(sema_context& ctx, const t_field& node) {
+  ctx.check(
+      node.explicit_id() == node.id(),
+      "No throws id specified for `{}`",
+      node.name());
+}
+
 void validate_field_id_value(sema_context& ctx, const t_field& node) {
   ctx.check(
       node.id() != 0 ||
@@ -2531,6 +2538,7 @@ ast_validator standard_validator() {
   validator.add_interaction_visitor(&validate_interaction_annotations);
 
   validator.add_thrown_exception_visitor(&validate_throws_exceptions);
+  validator.add_thrown_exception_visitor(&validate_thrown_exception_id);
   validator.add_thrown_exception_visitor(&validate_field_id_value);
   validator.add_thrown_exception_visitor(
       &detail::validate_annotation_scopes<

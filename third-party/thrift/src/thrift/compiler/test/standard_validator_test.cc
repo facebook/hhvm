@@ -381,6 +381,20 @@ TEST(StandardValidatorTest, ValidateFunctionParamAndThrowsIdValues) {
   )");
 }
 
+TEST(StandardValidatorTest, ValidateThrownExceptionId) {
+  check_compile(R"(
+    package "facebook.com/thrift/test"
+
+    exception Error {}
+
+    service MyService {
+      void explicitId() throws (1: Error error);
+      void implicitId() throws (Error error);
+      # expected-error@-1: No throws id specified for `error`
+    }
+  )");
+}
+
 TEST(StandardValidatorTest, CppTypeIntegerWidthMismatch) {
   check_compile(R"(
     package "facebook.com/thrift/test"

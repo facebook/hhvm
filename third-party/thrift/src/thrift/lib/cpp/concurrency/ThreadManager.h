@@ -400,6 +400,16 @@ class PriorityThreadManager : public ThreadManager {
   static std::shared_ptr<PriorityThreadManager> newPriorityThreadManager(
       size_t normalThreadsCount = folly::available_concurrency());
 
+  /**
+   * Returns the per-priority pool sizes that newPriorityThreadManager(size_t)
+   * would use: @p normalThreadsCount threads for NORMAL and an
+   * implementation-defined number for every other priority. Exposed so callers
+   * that only want to override a subset of pool sizes can start from the same
+   * defaults rather than duplicating them.
+   */
+  static std::array<size_t, N_PRIORITIES> defaultThreadCounts(
+      size_t normalThreadsCount = folly::available_concurrency());
+
   class PriorityImpl;
 };
 

@@ -1753,9 +1753,15 @@ PriorityThreadManager::newPriorityThreadManager(
   return newPriorityThreadManager(factories);
 }
 
+std::array<size_t, N_PRIORITIES> PriorityThreadManager::defaultThreadCounts(
+    size_t normalThreadsCount) {
+  static_assert(N_PRIORITIES == 5, "Implementation is out-of-date");
+  return {{2, 2, 2, normalThreadsCount, 2}};
+}
+
 std::shared_ptr<PriorityThreadManager>
 PriorityThreadManager::newPriorityThreadManager(size_t normalThreadsCount) {
-  return newPriorityThreadManager({{2, 2, 2, normalThreadsCount, 2}});
+  return newPriorityThreadManager(defaultThreadCounts(normalThreadsCount));
 }
 
 } // namespace apache::thrift::concurrency

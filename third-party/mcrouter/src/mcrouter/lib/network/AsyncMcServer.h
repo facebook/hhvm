@@ -175,19 +175,19 @@ class AsyncMcServer {
    * Args are threadId (0 to numThreads - 1), eventBase and the thread's worker
    * The user is responsible for calling eventBase.loop() or similar.
    */
-  typedef std::function<
-      void(size_t, folly::EventBase&, facebook::memcache::AsyncMcServerWorker&)>
-      LoopFn;
+  using LoopFn = std::function<void(
+      size_t,
+      folly::EventBase&,
+      facebook::memcache::AsyncMcServerWorker&)>;
 
   /**
    * User-defined init function to be used in Virtual Event Base mode.
    * Args are threadId (0 to numThreads - 1), eventBase and the thread's worker
    */
-  typedef std::function<void(
+  using InitFn = std::function<void(
       size_t,
       folly::VirtualEventBase&,
-      facebook::memcache::AsyncMcServerWorker&)>
-      InitFn;
+      facebook::memcache::AsyncMcServerWorker&)>;
 
   explicit AsyncMcServer(Options opts);
   ~AsyncMcServer();

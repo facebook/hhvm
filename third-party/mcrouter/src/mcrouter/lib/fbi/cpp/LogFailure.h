@@ -63,15 +63,14 @@ class Category {
   Category() {}
 };
 
-typedef std::function<void(
+using HandlerFunc = std::function<void(
     folly::StringPiece file,
     int line,
     folly::StringPiece service,
     folly::StringPiece category,
     folly::StringPiece msg,
     const std::map<std::string, std::string>& contexts,
-    bool skipRateLimit)>
-    HandlerFunc;
+    bool skipRateLimit)>;
 
 namespace handlers {
 

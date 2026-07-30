@@ -1,7 +1,6 @@
-//// bar.php
+//// pkg2/bar.php
 <?hh
 // package pkg2
-<<file: __PackageOverride('pkg2')>>
 class MyInternClass {
   const type MyInternType = int;
 }

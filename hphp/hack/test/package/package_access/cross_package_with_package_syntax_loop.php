@@ -1,16 +1,13 @@
-//// pkg7.php
+//// pkg7/pkg7.php
 <?hh
-<<file: __PackageOverride('pkg7')>>
 function pkg7_call(): void {}
 
-//// pkg2.php
+//// pkg2/pkg2.php
 <?hh
-<<file: __PackageOverride('pkg2')>>
 function pkg2_call(): void {}
 
-//// pkg3.php
+//// pkg3/pkg3.php
 <?hh
-<<file: __PackageOverride('pkg3')>>
 function pkg3_call(): void {}
 
 function test_do_while() : void {

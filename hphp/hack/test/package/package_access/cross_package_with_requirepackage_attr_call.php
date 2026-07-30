@@ -1,7 +1,6 @@
-//// a.php
+//// pkg2/a.php
 <?hh
 // package pkg2
-<<file: __PackageOverride('pkg2')>>
 
 class A {
   public function test() : void {

@@ -10,10 +10,9 @@ enum EFoo: int {
 
 final class CFoo implements HH\ClassAttribute {}
 
-//// bar.php
+//// pkg2/bar.php
 <?hh
 // package pkg2
-<<file: __PackageOverride('pkg2')>>
 
 type A = shape(
   'bar' => string,

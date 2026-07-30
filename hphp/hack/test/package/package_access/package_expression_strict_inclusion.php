@@ -1,7 +1,6 @@
-//// a.php
+//// pkg2/a.php
 <?hh
 // package pkg2
-<<file: __PackageOverride('pkg2')>>
 
 function test_in_pkg2(): void {
   // Error: pkg1 does not strictly include pkg2 (pkg2 includes pkg1, not vice versa)
@@ -36,10 +35,9 @@ function test_in_pkg1(): void {
   }
 }
 
-//// c.php
+//// pkg2/c.php
 <?hh
 // package pkg2
-<<file: __PackageOverride('pkg2')>>
 
 function test_soft_includes(): void {
   // Error: pkg2 soft-includes pkg2_soft

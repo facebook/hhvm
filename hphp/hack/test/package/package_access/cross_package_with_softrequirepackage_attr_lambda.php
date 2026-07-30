@@ -1,12 +1,10 @@
-//// b.php
+//// pkg2/b.php
 <?hh
-<<file: __PackageOverride('pkg2')>>
 
 function pkg2_call(): void {}
 
-//// c.php
+//// pkg3/c.php
 <?hh
-<<file: __PackageOverride('pkg3')>>
 function pkg3_call(): void {}
 
 //// a.php

@@ -1,16 +1,13 @@
-//// pkg7.php
+//// pkg7/pkg7.php
 <?hh
-<<file: __PackageOverride('pkg7')>>
 function pkg7_call(): void {}
 
-//// pkg8.php
+//// pkg8/pkg8.php
 <?hh
-<<file: __PackageOverride('pkg8')>>
 function pkg8_call(): void {}
 
-//// pkg3.php  (all packages are disjoint)
+//// pkg3/pkg3.php  (all packages are disjoint)
 <?hh
-<<file: __PackageOverride('pkg3')>>
 function test(): void {
   if (package pkg7 && package pkg8) {
     // both are allowed

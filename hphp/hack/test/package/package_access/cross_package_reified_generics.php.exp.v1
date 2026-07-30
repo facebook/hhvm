@@ -1,6 +1,6 @@
 error: Typing[4472] Cannot access reified generic `TFoo` defined in package `pkg2` which may not be available [1]
--> `TFoo` is defined in cross_package_reified_generics.php--foo.php [2]
--> `TFoo` belongs to package `pkg2` by this package override [3]
+-> `TFoo` is defined in cross_package_reified_generics.php--pkg2/foo.php [2]
+-> `TFoo` belongs to package `pkg2` by this package definition [3]
 -> package `pkg1` is available because the current file belongs to it by this package definition [4]
 
 cross_package_reified_generics.php--bar.php:9:7
@@ -11,26 +11,28 @@ cross_package_reified_generics.php--bar.php:9:7
 10 |   bar<Foo>();
 11 |   $_ = new Bar<TFoo>();
 
-cross_package_reified_generics.php--foo.php:4:6
+cross_package_reified_generics.php--pkg2/foo.php:3:6
  1 | <?hh
  2 | // package pkg2
- 3 | <<file: __PackageOverride('pkg2')>>
-   |                           ^^^^^^ [3]
- 4 | type TFoo = int;
+ 3 | type TFoo = int;
    |      ^^^^ [2]
- 5 | class Foo {}
+ 4 | class Foo {}
 
-PACKAGES.toml:3:11
+PACKAGES.toml:6:11
  1 | [packages]
  2 | 
  3 | [packages.pkg1]
    |           ^^^^ [4]
  4 | include_paths=["//"]
  5 | 
+ 6 | [packages.pkg2]
+   |           ^^^^ [3]
+ 7 | include_paths=[
+ 8 |     "//cross_package_access_internal1_foo.php",
 
 error: Typing[4472] Cannot access reified generic `Foo` defined in package `pkg2` which may not be available [1]
--> `Foo` is defined in cross_package_reified_generics.php--foo.php [2]
--> `Foo` belongs to package `pkg2` by this package override [3]
+-> `Foo` is defined in cross_package_reified_generics.php--pkg2/foo.php [2]
+-> `Foo` belongs to package `pkg2` by this package definition [3]
 -> package `pkg1` is available because the current file belongs to it by this package definition [4]
 
 cross_package_reified_generics.php--bar.php:10:7
@@ -41,26 +43,27 @@ cross_package_reified_generics.php--bar.php:10:7
 11 |   $_ = new Bar<TFoo>();
 12 |   $_ = new Bar<Foo>();
 
-cross_package_reified_generics.php--foo.php:5:7
- 1 | <?hh
+cross_package_reified_generics.php--pkg2/foo.php:4:7
  2 | // package pkg2
- 3 | <<file: __PackageOverride('pkg2')>>
-   |                           ^^^^^^ [3]
- 4 | type TFoo = int;
- 5 | class Foo {}
+ 3 | type TFoo = int;
+ 4 | class Foo {}
    |       ^^^ [2]
 
-PACKAGES.toml:3:11
+PACKAGES.toml:6:11
  1 | [packages]
  2 | 
  3 | [packages.pkg1]
    |           ^^^^ [4]
  4 | include_paths=["//"]
  5 | 
+ 6 | [packages.pkg2]
+   |           ^^^^ [3]
+ 7 | include_paths=[
+ 8 |     "//cross_package_access_internal1_foo.php",
 
 error: Typing[4472] Cannot access reified generic `TFoo` defined in package `pkg2` which may not be available [1]
--> `TFoo` is defined in cross_package_reified_generics.php--foo.php [2]
--> `TFoo` belongs to package `pkg2` by this package override [3]
+-> `TFoo` is defined in cross_package_reified_generics.php--pkg2/foo.php [2]
+-> `TFoo` belongs to package `pkg2` by this package definition [3]
 -> package `pkg1` is available because the current file belongs to it by this package definition [4]
 
 cross_package_reified_generics.php--bar.php:11:16
@@ -71,26 +74,28 @@ cross_package_reified_generics.php--bar.php:11:16
 12 |   $_ = new Bar<Foo>();
 13 | }
 
-cross_package_reified_generics.php--foo.php:4:6
+cross_package_reified_generics.php--pkg2/foo.php:3:6
  1 | <?hh
  2 | // package pkg2
- 3 | <<file: __PackageOverride('pkg2')>>
-   |                           ^^^^^^ [3]
- 4 | type TFoo = int;
+ 3 | type TFoo = int;
    |      ^^^^ [2]
- 5 | class Foo {}
+ 4 | class Foo {}
 
-PACKAGES.toml:3:11
+PACKAGES.toml:6:11
  1 | [packages]
  2 | 
  3 | [packages.pkg1]
    |           ^^^^ [4]
  4 | include_paths=["//"]
  5 | 
+ 6 | [packages.pkg2]
+   |           ^^^^ [3]
+ 7 | include_paths=[
+ 8 |     "//cross_package_access_internal1_foo.php",
 
 error: Typing[4472] Cannot access reified generic `Foo` defined in package `pkg2` which may not be available [1]
--> `Foo` is defined in cross_package_reified_generics.php--foo.php [2]
--> `Foo` belongs to package `pkg2` by this package override [3]
+-> `Foo` is defined in cross_package_reified_generics.php--pkg2/foo.php [2]
+-> `Foo` belongs to package `pkg2` by this package definition [3]
 -> package `pkg1` is available because the current file belongs to it by this package definition [4]
 
 cross_package_reified_generics.php--bar.php:12:16
@@ -100,21 +105,22 @@ cross_package_reified_generics.php--bar.php:12:16
    |                ^^^ [1]
 13 | }
 
-cross_package_reified_generics.php--foo.php:5:7
- 1 | <?hh
+cross_package_reified_generics.php--pkg2/foo.php:4:7
  2 | // package pkg2
- 3 | <<file: __PackageOverride('pkg2')>>
-   |                           ^^^^^^ [3]
- 4 | type TFoo = int;
- 5 | class Foo {}
+ 3 | type TFoo = int;
+ 4 | class Foo {}
    |       ^^^ [2]
 
-PACKAGES.toml:3:11
+PACKAGES.toml:6:11
  1 | [packages]
  2 | 
  3 | [packages.pkg1]
    |           ^^^^ [4]
  4 | include_paths=["//"]
  5 | 
+ 6 | [packages.pkg2]
+   |           ^^^^ [3]
+ 7 | include_paths=[
+ 8 |     "//cross_package_access_internal1_foo.php",
 
 4 errors found

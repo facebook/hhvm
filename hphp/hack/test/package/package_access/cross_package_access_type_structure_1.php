@@ -6,10 +6,9 @@ function test(): void {
   type_structure(B::class, 'T');
 }
 
-//// b.php
+//// pkg2/b.php
 <?hh
 // package pkg2
-<<file: __PackageOverride('pkg2')>>
 
 class B {
   const type T = int;

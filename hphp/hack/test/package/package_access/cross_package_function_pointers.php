@@ -6,10 +6,9 @@ function main(): void {
   bar<>;
 }
 
-//// bar.php
+//// pkg2/bar.php
 <?hh
 // package pkg2
-<<file: __PackageOverride('pkg2')>>
 class C {
   public static function foo(): void {}
 }

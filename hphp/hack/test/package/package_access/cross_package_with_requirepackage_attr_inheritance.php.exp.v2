@@ -38,29 +38,22 @@ cross_package_with_requirepackage_attr_inheritance.php--a.php:23:19
 25 | 
 
 error: NastCheck[3107] Invalid __RequirePackage [1]
--> This function is defined in package `pkg2` by this package override [2]
--> `pkg2` soft-includes the required package `pkg2_soft`, so this requirement is not allowed [3]
+-> This function is defined in package `pkg2` by this package config assignment [2]
+-> `pkg2` soft-includes the required package `pkg2_soft`, so this requirement is not allowed [2]
 
-cross_package_with_requirepackage_attr_inheritance.php--b.php:9:5
- 1 | <?hh
- 2 | // package pkg2
- 3 | <<file: __PackageOverride('pkg2')>>
-   |                           ^^^^^^ [2]
- 4 | 
- 5 | // package pkg2 includes pkg1, so this is okay
- 6 | class D extends A {
- 7 |   public function test(): void {}
- 8 | 
- 9 |   <<__RequirePackage("pkg2_soft")>> // err, pkg2 soft-includes pkg2_soft
+cross_package_with_requirepackage_attr_inheritance.php--pkg2/b.php:8:5
+ 6 |   public function test(): void {}
+ 7 | 
+ 8 |   <<__RequirePackage("pkg2_soft")>> // err, pkg2 soft-includes pkg2_soft
    |     ^^^^^^^^^^^^^^^^ [1]
-10 |   public function test2(): void {
-11 | 
+ 9 |   public function test2(): void {
+10 | 
 
 PACKAGES.toml:6:11
  4 | include_paths=["//"]
  5 | 
  6 | [packages.pkg2]
-   |           ^^^^ [3]
+   |           ^^^^ [2]
  7 | include_paths=[
  8 |     "//cross_package_access_internal1_foo.php",
 
@@ -70,15 +63,15 @@ error: Typing[4341] The method `test2` is not compatible with the overridden met
 -> It cannot override a method that requires package `pkg1` [3]
 -> Because `pkg1` does not include `pkg2_soft` [4]
 
-cross_package_with_requirepackage_attr_inheritance.php--b.php:10:19
- 7 |   public function test(): void {}
- 8 | 
- 9 |   <<__RequirePackage("pkg2_soft")>> // err, pkg2 soft-includes pkg2_soft
+cross_package_with_requirepackage_attr_inheritance.php--pkg2/b.php:9:19
+ 6 |   public function test(): void {}
+ 7 | 
+ 8 |   <<__RequirePackage("pkg2_soft")>> // err, pkg2 soft-includes pkg2_soft
    |                      ^^^^^^^^^^^ [2]
-10 |   public function test2(): void {
+ 9 |   public function test2(): void {
    |                   ^^^^^ [1]
-11 | 
-12 |   }
+10 | 
+11 |   }
 
 cross_package_with_requirepackage_attr_inheritance.php--a.php:13:22
 11 |   public function test() : void {

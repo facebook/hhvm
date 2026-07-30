@@ -1,8 +1,7 @@
-//// foo.php
+//// pkg7/foo.php
 <?hh
 
 // package pkg7 (includes pkg1)
-<<file: __PackageOverride('pkg7')>>
 
 function foo(): void {}
 

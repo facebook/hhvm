@@ -1,10 +1,8 @@
-//// foo.php
+//// pkg6/foo.php
 <?hh
-// package pkg2
-<<file: __PackageOverride('pkg2')>>
+<<file: __PackageOverride('pkg1')>>
 type TFoo = int;
 
-//// bar.php
+//// pkg4/bar.php
 <?hh
-// package pkg1
 type TBar = TFoo;

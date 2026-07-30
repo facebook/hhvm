@@ -1,13 +1,11 @@
-//// foo.php
+//// pkg6/foo.php
 <?hh
-// package pkg2
-<<file: __PackageOverride('pkg2')>>
+<<file: __PackageOverride('pkg1')>>
 class Foo {}
 
-//// bar.php
+//// pkg6/bar.php
 <?hh
-// package pkg2
-<<file: __PackageOverride('pkg2')>>
+<<file: __PackageOverride('pkg1')>>
 function bar(): void {
   $foo = new Foo();
 }

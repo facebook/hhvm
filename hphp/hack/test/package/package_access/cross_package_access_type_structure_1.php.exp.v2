@@ -1,6 +1,6 @@
 error: Typing[4472] Cannot access class `B` defined in package `pkg2` which may not be available [1]
--> `B` is defined in cross_package_access_type_structure_1.php--b.php [2]
--> `B` belongs to package `pkg2` by this package override [3]
+-> `B` is defined in cross_package_access_type_structure_1.php--pkg2/b.php [2]
+-> `B` belongs to package `pkg2` by this package definition [3]
 -> package `pkg1` is available because the current file belongs to it by this package definition [4]
 
 cross_package_access_type_structure_1.php--a.php:5:18
@@ -10,23 +10,24 @@ cross_package_access_type_structure_1.php--a.php:5:18
   |                  ^ [1]
 6 | }
 
-cross_package_access_type_structure_1.php--b.php:5:7
-1 | <?hh
+cross_package_access_type_structure_1.php--pkg2/b.php:4:7
 2 | // package pkg2
-3 | <<file: __PackageOverride('pkg2')>>
-  |                           ^^^^^^ [3]
-4 | 
-5 | class B {
+3 | 
+4 | class B {
   |       ^ [2]
-6 |   const type T = int;
-7 | }
+5 |   const type T = int;
+6 | }
 
-PACKAGES.toml:3:11
+PACKAGES.toml:6:11
 1 | [packages]
 2 | 
 3 | [packages.pkg1]
   |           ^^^^ [4]
 4 | include_paths=["//"]
 5 | 
+6 | [packages.pkg2]
+  |           ^^^^ [3]
+7 | include_paths=[
+8 |     "//cross_package_access_internal1_foo.php",
 
 1 error found

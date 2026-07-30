@@ -35,10 +35,9 @@ class F implements IA  {
   }
 }
 
-//// b.php
+//// pkg2/b.php
 <?hh
 // package pkg2
-<<file: __PackageOverride('pkg2')>>
 
 // package pkg2 includes pkg1, so this is okay
 class D extends A {

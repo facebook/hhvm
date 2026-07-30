@@ -5,8 +5,7 @@ function test(): void {
    $b = B1::class; // error when package_allow_classconst_violations is off
 }
 
-//// b.php
+//// pkg2/b.php
 <?hh
 // package pkg2
-<<file: __PackageOverride('pkg2')>>
 class B1 {}

@@ -18,10 +18,9 @@ function test(): void {
   }
 }
 
-//// b.php
+//// pkg2/b.php
 <?hh
 // package pkg2
-<<file: __PackageOverride('pkg2')>>
 
 class B extends A { // ok because pkg2 includes pkg1
   <<__RequirePackage("pkg1")>> // package requirements must strictly include the file package

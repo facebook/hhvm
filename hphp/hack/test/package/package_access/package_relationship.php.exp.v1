@@ -1,22 +1,17 @@
 error: Typing[4472] Cannot access class `D` defined in package `pkg4` which may not be available [1]
 -> `D` is defined in package_relationship.php--pkg4/d.php [2]
 -> `D` belongs to package `pkg4` by this package definition [3]
--> package `pkg3` is available because the current file belongs to it by this package override [4]
+-> package `pkg3` is available because the current file belongs to it by this package definition [4]
 -> `pkg3` includes `pkg2` via its definition [5]
 -> `pkg3` includes `pkg2_soft` via its definition [6]
 -> `pkg3` includes `pkg1` via its definition [7]
 
-package_relationship.php--c.php:7:13
- 1 | <?hh
- 2 | <<file: __PackageOverride('pkg3')>> // package pkg3 (include pkg2)
-   |                           ^^^^^^ [4]
- 3 | <<__EntryPoint>>
- 4 | function test(): void {
- 5 |    $b = new B(); // ok
- 6 |    $a = new A(); // ok by transitive inclusion
- 7 |    $d = new D(); // error
+package_relationship.php--pkg3/c.php:6:13
+ 4 |    $b = new B(); // ok
+ 5 |    $a = new A(); // ok by transitive inclusion
+ 6 |    $d = new D(); // error
    |             ^ [1]
- 8 | }
+ 7 | }
 
 package_relationship.php--pkg4/d.php:3:7
  1 | <?hh
@@ -24,17 +19,20 @@ package_relationship.php--pkg4/d.php:3:7
  3 | class D {}
    |       ^ [2]
 
-PACKAGES.toml:20:11
-16 | 
-17 | [packages.pkg3]
-18 | includes = ["pkg2", "pkg2_soft", "pkg1"]
+PACKAGES.toml:22:11
+16 | includes=["pkg2", "pkg1"]
+17 | 
+18 | [packages.pkg3]
+   |           ^^^^ [4]
+19 | include_paths=["//pkg3/"]
+20 | includes = ["pkg2", "pkg2_soft", "pkg1"]
    |             ^^^^^^ [5]
    |                     ^^^^^^^^^^^ [6]
    |                                  ^^^^^^ [7]
-19 | 
-20 | [packages.pkg4]
+21 | 
+22 | [packages.pkg4]
    |           ^^^^ [3]
-21 | include_paths=["//pkg4/"]
-22 | 
+23 | include_paths=["//pkg4/"]
+24 | 
 
 1 error found

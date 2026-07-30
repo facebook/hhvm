@@ -1,11 +1,11 @@
-//// foo.php
+//// pkg6/foo.php
 <?hh
-// package pkg2
-<<file: __PackageOverride('pkg2')>>
+// both files override down into pkg1 (valid: pkg6 includes pkg1), so they end
+// up in the same package
+<<file: __PackageOverride('pkg1')>>
 type TFoo = int;
 
-//// bar.php
+//// pkg6/bar.php
 <?hh
-// package pkg2
-<<file: __PackageOverride('pkg2')>>
+<<file: __PackageOverride('pkg1')>>
 type TBar = TFoo;

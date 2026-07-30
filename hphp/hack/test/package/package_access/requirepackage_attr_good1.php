@@ -1,6 +1,5 @@
-//// a.php
+//// pkg3/a.php
 <?hh
-<<file: __PackageOverride('pkg3')>>
 
 type AInt = int;
 function f(): void {}

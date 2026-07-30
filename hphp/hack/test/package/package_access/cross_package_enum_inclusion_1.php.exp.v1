@@ -24,11 +24,11 @@ PACKAGES.toml:3:11
  4 | include_paths=["//"]
  5 | 
    :
-18 | includes = ["pkg2", "pkg2_soft", "pkg1"]
-19 | 
-20 | [packages.pkg4]
+20 | includes = ["pkg2", "pkg2_soft", "pkg1"]
+21 | 
+22 | [packages.pkg4]
    |           ^^^^ [4]
-21 | include_paths=["//pkg4/"]
-22 | 
+23 | include_paths=["//pkg4/"]
+24 | 
 
 1 error found

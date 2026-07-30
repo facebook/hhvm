@@ -1,6 +1,6 @@
 error: Typing[4472] Cannot access `BarImpl` defined in package `pkg2`, which may not be available, within a type constant [1]
--> `BarImpl` is defined in cross_package_type_consts.php--foo.php [2]
--> `BarImpl` belongs to package `pkg2` by this package override [3]
+-> `BarImpl` is defined in cross_package_type_consts.php--pkg2/foo.php [2]
+-> `BarImpl` belongs to package `pkg2` by this package definition [3]
 -> package `pkg1` is available because the current file belongs to it by this package definition [4]
 
 cross_package_type_consts.php--bar.php:5:19
@@ -11,27 +11,29 @@ cross_package_type_consts.php--bar.php:5:19
 6 |   const type T2 = TFoo1;
 7 |   const type T3 = TFoo2;
 
-cross_package_type_consts.php--foo.php:4:7
+cross_package_type_consts.php--pkg2/foo.php:3:7
 1 | <?hh
 2 | // package pkg2
-3 | <<file: __PackageOverride('pkg2')>>
-  |                           ^^^^^^ [3]
-4 | class BarImpl {};
+3 | class BarImpl {};
   |       ^^^^^^^ [2]
-5 | type TFoo1 = int;
-6 | newtype TFoo2 = string;
+4 | type TFoo1 = int;
+5 | newtype TFoo2 = string;
 
-PACKAGES.toml:3:11
+PACKAGES.toml:6:11
 1 | [packages]
 2 | 
 3 | [packages.pkg1]
   |           ^^^^ [4]
 4 | include_paths=["//"]
 5 | 
+6 | [packages.pkg2]
+  |           ^^^^ [3]
+7 | include_paths=[
+8 |     "//cross_package_access_internal1_foo.php",
 
 error: Typing[4472] Cannot access `TFoo1` defined in package `pkg2`, which may not be available, within a type constant [1]
--> `TFoo1` is defined in cross_package_type_consts.php--foo.php [2]
--> `TFoo1` belongs to package `pkg2` by this package override [3]
+-> `TFoo1` is defined in cross_package_type_consts.php--pkg2/foo.php [2]
+-> `TFoo1` belongs to package `pkg2` by this package definition [3]
 -> package `pkg1` is available because the current file belongs to it by this package definition [4]
 
 cross_package_type_consts.php--bar.php:6:19
@@ -42,27 +44,28 @@ cross_package_type_consts.php--bar.php:6:19
 7 |   const type T3 = TFoo2;
 8 | }
 
-cross_package_type_consts.php--foo.php:5:6
-1 | <?hh
+cross_package_type_consts.php--pkg2/foo.php:4:6
 2 | // package pkg2
-3 | <<file: __PackageOverride('pkg2')>>
-  |                           ^^^^^^ [3]
-4 | class BarImpl {};
-5 | type TFoo1 = int;
+3 | class BarImpl {};
+4 | type TFoo1 = int;
   |      ^^^^^ [2]
-6 | newtype TFoo2 = string;
+5 | newtype TFoo2 = string;
 
-PACKAGES.toml:3:11
+PACKAGES.toml:6:11
 1 | [packages]
 2 | 
 3 | [packages.pkg1]
   |           ^^^^ [4]
 4 | include_paths=["//"]
 5 | 
+6 | [packages.pkg2]
+  |           ^^^^ [3]
+7 | include_paths=[
+8 |     "//cross_package_access_internal1_foo.php",
 
 error: Typing[4472] Cannot access `TFoo2` defined in package `pkg2`, which may not be available, within a type constant [1]
--> `TFoo2` is defined in cross_package_type_consts.php--foo.php [2]
--> `TFoo2` belongs to package `pkg2` by this package override [3]
+-> `TFoo2` is defined in cross_package_type_consts.php--pkg2/foo.php [2]
+-> `TFoo2` belongs to package `pkg2` by this package definition [3]
 -> package `pkg1` is available because the current file belongs to it by this package definition [4]
 
 cross_package_type_consts.php--bar.php:7:19
@@ -72,22 +75,22 @@ cross_package_type_consts.php--bar.php:7:19
   |                   ^^^^^ [1]
 8 | }
 
-cross_package_type_consts.php--foo.php:6:9
-1 | <?hh
-2 | // package pkg2
-3 | <<file: __PackageOverride('pkg2')>>
-  |                           ^^^^^^ [3]
-4 | class BarImpl {};
-5 | type TFoo1 = int;
-6 | newtype TFoo2 = string;
+cross_package_type_consts.php--pkg2/foo.php:5:9
+3 | class BarImpl {};
+4 | type TFoo1 = int;
+5 | newtype TFoo2 = string;
   |         ^^^^^ [2]
 
-PACKAGES.toml:3:11
+PACKAGES.toml:6:11
 1 | [packages]
 2 | 
 3 | [packages.pkg1]
   |           ^^^^ [4]
 4 | include_paths=["//"]
 5 | 
+6 | [packages.pkg2]
+  |           ^^^^ [3]
+7 | include_paths=[
+8 |     "//cross_package_access_internal1_foo.php",
 
 3 errors found

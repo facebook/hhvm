@@ -1,29 +1,28 @@
-error: Typing[4472] Cannot access class `Foo` defined in package `pkg2` which may not be available [1]
--> `Foo` is defined in illegal_cross_package_with_package_override3.php--foo.php [2]
--> `Foo` belongs to package `pkg2` by this package override [3]
--> package `pkg1` is available because the current file belongs to it by this package definition [4]
+error: Typing[4472] Cannot access class `Foo` defined in package `pkg1` which may not be available [1]
+-> `Foo` is defined in illegal_cross_package_with_package_override3.php--pkg6/foo.php [2]
+-> `Foo` belongs to package `pkg1` by this package override [3]
+-> package `pkg4` is available because the current file belongs to it by this package definition [4]
 
-illegal_cross_package_with_package_override3.php--bar.php:4:14
-2 | // package pkg1
-3 | function bar(): void {
-4 |   $foo = new Foo();
-  |              ^^^ [1]
-5 | }
+illegal_cross_package_with_package_override3.php--pkg4/bar.php:3:14
+ 1 | <?hh
+ 2 | function bar(): void {
+ 3 |   $foo = new Foo();
+   |              ^^^ [1]
+ 4 | }
 
-illegal_cross_package_with_package_override3.php--foo.php:4:7
-1 | <?hh
-2 | // package pkg2
-3 | <<file: __PackageOverride('pkg2')>>
-  |                           ^^^^^^ [3]
-4 | class Foo {}
-  |       ^^^ [2]
+illegal_cross_package_with_package_override3.php--pkg6/foo.php:3:7
+ 1 | <?hh
+ 2 | <<file: __PackageOverride('pkg1')>>
+   |                           ^^^^^^ [3]
+ 3 | class Foo {}
+   |       ^^^ [2]
 
-PACKAGES.toml:3:11
-1 | [packages]
-2 | 
-3 | [packages.pkg1]
-  |           ^^^^ [4]
-4 | include_paths=["//"]
-5 | 
+PACKAGES.toml:22:11
+20 | includes = ["pkg2", "pkg2_soft", "pkg1"]
+21 | 
+22 | [packages.pkg4]
+   |           ^^^^ [4]
+23 | include_paths=["//pkg4/"]
+24 | 
 
 1 error found

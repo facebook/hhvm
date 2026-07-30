@@ -7,6 +7,7 @@ include_paths=["//"]
 include_paths=[
     "//cross_package_access_internal1_foo.php",
     "//cross_package_basic_foo.php",
+    "//pkg2/",
 ]
 includes = ["pkg1"]
 soft_includes=["pkg2_soft"]
@@ -15,6 +16,7 @@ soft_includes=["pkg2_soft"]
 includes=["pkg2", "pkg1"]
 
 [packages.pkg3]
+include_paths=["//pkg3/"]
 includes = ["pkg2", "pkg2_soft", "pkg1"]
 
 [packages.pkg4]
@@ -28,8 +30,9 @@ include_paths=["//pkg6/"]
 includes = ["pkg1"]
 
 [packages.pkg7]
+include_paths=["//pkg7/"]
 includes = ["pkg3", "pkg2", "pkg2_soft", "pkg1"]
 
 [packages.pkg8]
+include_paths=["//pkg8/"]
 includes = ["pkg3", "pkg2", "pkg2_soft", "pkg1"]
-

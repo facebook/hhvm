@@ -1,7 +1,6 @@
-//// foo.php
+//// pkg2/foo.php
 <?hh
 // package pkg2
-<<file: __PackageOverride('pkg2')>>
 
 class C {}
 class G<T> {}

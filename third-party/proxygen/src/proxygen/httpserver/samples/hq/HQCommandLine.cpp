@@ -135,6 +135,17 @@ DEFINE_int32(
     quic_experiment,
     0,
     "Opaque experiment ID sent as a transport parameter to the server");
+DEFINE_string(timestamp_frame_mode,
+              "disabled",
+              "Ordinary QUIC TIMESTAMP mode: disabled, receive, send, or both. "
+              "Receive advertises support to the peer; send reserves TIMESTAMP "
+              "space before stream/datagram output after the peer advertises "
+              "support, but never displaces the carrier, ACK/control, or "
+              "rebuilt clone contents.");
+DEFINE_uint32(timestamp_frame_exponent,
+              quic::kDefaultTimestampFrameTimestampExponent,
+              "Ordinary QUIC TIMESTAMP exponent; one encoded tick represents "
+              "2^exponent microseconds.");
 DEFINE_bool(use_ack_receive_timestamps,
             false,
             "Request the peer to attach receive timestamps to outgoing ACKs. "
@@ -352,6 +363,25 @@ void initializeTransportSettings(HQToolParams& hqUberParams) {
     hqParams.transportSettings.quicExperimentId =
         static_cast<uint16_t>(FLAGS_quic_experiment);
   }
+  CHECK(FLAGS_timestamp_frame_mode == "disabled" ||
+        FLAGS_timestamp_frame_mode == "receive" ||
+        FLAGS_timestamp_frame_mode == "send" ||
+        FLAGS_timestamp_frame_mode == "both")
+      << "--timestamp_frame_mode must be disabled, receive, send, or both";
+  CHECK_LE(FLAGS_timestamp_frame_exponent,
+           quic::kMaxTimestampFrameTimestampExponent)
+      << "--timestamp_frame_exponent must not exceed "
+      << quic::kMaxTimestampFrameTimestampExponent;
+  hqParams.transportSettings.advertisedTimestampFrameSupport =
+      FLAGS_timestamp_frame_mode == "receive" ||
+      FLAGS_timestamp_frame_mode == "both";
+  hqParams.transportSettings.oneRttTimestampFrameWriteMode =
+      FLAGS_timestamp_frame_mode == "send" ||
+              FLAGS_timestamp_frame_mode == "both"
+          ? quic::TimestampFrameWriteMode::Prioritized
+          : quic::TimestampFrameWriteMode::Disabled;
+  hqParams.transportSettings.timestampFrameTimestampExponent =
+      FLAGS_timestamp_frame_exponent;
   hqParams.transportSettings.maxRecvBatchSize = 32;
   hqParams.transportSettings.shouldUseRecvmmsgForBatchRecv =
       FLAGS_use_recvmmsg_for_batch_recv;

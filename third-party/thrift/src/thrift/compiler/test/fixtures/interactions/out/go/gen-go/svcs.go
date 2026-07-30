@@ -250,8 +250,7 @@ func (p *procFuncMyInteractionFrobnicate) RunContext(ctx context.Context, reqStr
             result.Ex = v
             return result, nil
         default:
-            internalErr := fmt.Errorf("Internal error processing frobnicate: %w", err)
-            return nil, internalErr
+            return nil, err
         }
     }
 
@@ -303,8 +302,7 @@ func (p *procFuncMyInteractionTruthify) RunStreamContext(
     firstResponse := newRespMyInteractionTruthify()
     elemProducerFunc, initialErr := p.handler.Truthify(ctx)
     if initialErr != nil {
-        internalErr := fmt.Errorf("Internal error processing truthify: %w", initialErr)
-        onFirstResponse(nil, internalErr)
+        onFirstResponse(nil, initialErr)
         onStreamComplete()
         return
     }
@@ -329,8 +327,7 @@ func (p *procFuncMyInteractionTruthify) RunStreamContext(
     close(fbthriftElemChan)
     senderWg.Wait()
     if streamErr != nil {
-        internalErr := fmt.Errorf("Internal stream handler error truthify: %w", streamErr)
-        onStreamNext(nil, internalErr)
+        onStreamNext(nil, streamErr)
     }
     onStreamComplete()
 }
@@ -364,8 +361,7 @@ func (p *procFuncMyInteractionEncode) RunSinkContext(
     firstResponse := newRespMyInteractionEncode()
     retval, elemConsumerFunc, initialErr := p.handler.Encode(ctx)
     if initialErr != nil {
-        internalErr := fmt.Errorf("Internal error processing encode: %w", initialErr)
-        onFirstResponse(nil, internalErr)
+        onFirstResponse(nil, initialErr)
         return
     }
 
@@ -389,8 +385,7 @@ func (p *procFuncMyInteractionEncode) RunSinkContext(
 
     finalResponse := newRespFinalMyInteractionEncode()
     if finalErr != nil {
-        internalErr := fmt.Errorf("Internal sink handler error encode: %w", finalErr)
-        onFinalResponse(nil, internalErr)
+        onFinalResponse(nil, finalErr)
         return
     }
 
@@ -620,8 +615,7 @@ func (p *procFuncMyInteractionFastFrobnicate) RunContext(ctx context.Context, re
     result := newRespMyInteractionFastFrobnicate()
     retval, err := p.handler.Frobnicate(ctx)
     if err != nil {
-        internalErr := fmt.Errorf("Internal error processing frobnicate: %w", err)
-        return nil, internalErr
+        return nil, err
     }
 
     result.Success = &retval
@@ -672,8 +666,7 @@ func (p *procFuncMyInteractionFastTruthify) RunStreamContext(
     firstResponse := newRespMyInteractionFastTruthify()
     elemProducerFunc, initialErr := p.handler.Truthify(ctx)
     if initialErr != nil {
-        internalErr := fmt.Errorf("Internal error processing truthify: %w", initialErr)
-        onFirstResponse(nil, internalErr)
+        onFirstResponse(nil, initialErr)
         onStreamComplete()
         return
     }
@@ -698,8 +691,7 @@ func (p *procFuncMyInteractionFastTruthify) RunStreamContext(
     close(fbthriftElemChan)
     senderWg.Wait()
     if streamErr != nil {
-        internalErr := fmt.Errorf("Internal stream handler error truthify: %w", streamErr)
-        onStreamNext(nil, internalErr)
+        onStreamNext(nil, streamErr)
     }
     onStreamComplete()
 }
@@ -733,8 +725,7 @@ func (p *procFuncMyInteractionFastEncode) RunSinkContext(
     firstResponse := newRespMyInteractionFastEncode()
     retval, elemConsumerFunc, initialErr := p.handler.Encode(ctx)
     if initialErr != nil {
-        internalErr := fmt.Errorf("Internal error processing encode: %w", initialErr)
-        onFirstResponse(nil, internalErr)
+        onFirstResponse(nil, initialErr)
         return
     }
 
@@ -758,8 +749,7 @@ func (p *procFuncMyInteractionFastEncode) RunSinkContext(
 
     finalResponse := newRespFinalMyInteractionFastEncode()
     if finalErr != nil {
-        internalErr := fmt.Errorf("Internal sink handler error encode: %w", finalErr)
-        onFinalResponse(nil, internalErr)
+        onFinalResponse(nil, finalErr)
         return
     }
 
@@ -883,8 +873,7 @@ func (p *procFuncSerialInteractionFrobnicate) RunContext(ctx context.Context, re
     result := newRespSerialInteractionFrobnicate()
     err := p.handler.Frobnicate(ctx)
     if err != nil {
-        internalErr := fmt.Errorf("Internal error processing frobnicate: %w", err)
-        return nil, internalErr
+        return nil, err
     }
 
     return result, nil
@@ -1006,8 +995,7 @@ func (p *procFuncBoxedInteractionGetABox) RunContext(ctx context.Context, reqStr
     result := newRespBoxedInteractionGetABox()
     retval, err := p.handler.GetABox(ctx)
     if err != nil {
-        internalErr := fmt.Errorf("Internal error processing getABox: %w", err)
-        return nil, internalErr
+        return nil, err
     }
 
     result.Success = retval
@@ -1229,8 +1217,7 @@ func (p *procFuncMyServiceFoo) RunContext(ctx context.Context, reqStruct thrift.
     result := newRespMyServiceFoo()
     err := p.handler.Foo(ctx)
     if err != nil {
-        internalErr := fmt.Errorf("Internal error processing foo: %w", err)
-        return nil, internalErr
+        return nil, err
     }
 
     return result, nil
@@ -1251,8 +1238,7 @@ func (p *procFuncMyServiceInteract) RunContext(ctx context.Context, reqStruct th
     result := newRespMyServiceInteract()
     fbthriftInteraction, err := p.handler.Interact(ctx, args.Arg)
     if err != nil {
-        internalErr := fmt.Errorf("Internal error processing interact: %w", err)
-        return nil, internalErr
+        return nil, err
     }
 
     thrift.SetInteractionCreateProcessor(ctx, fbthriftInteraction)
@@ -1273,8 +1259,7 @@ func (p *procFuncMyServiceInteractFast) RunContext(ctx context.Context, reqStruc
     result := newRespMyServiceInteractFast()
     fbthriftInteraction, retval, err := p.handler.InteractFast(ctx)
     if err != nil {
-        internalErr := fmt.Errorf("Internal error processing interactFast: %w", err)
-        return nil, internalErr
+        return nil, err
     }
 
     thrift.SetInteractionCreateProcessor(ctx, fbthriftInteraction)
@@ -1306,8 +1291,7 @@ func (p *procFuncMyServiceSerialize) RunStreamContext(
     firstResponse := newRespMyServiceSerialize()
     fbthriftInteraction, retval, elemProducerFunc, initialErr := p.handler.Serialize(ctx)
     if initialErr != nil {
-        internalErr := fmt.Errorf("Internal error processing serialize: %w", initialErr)
-        onFirstResponse(nil, internalErr)
+        onFirstResponse(nil, initialErr)
         onStreamComplete()
         return
     }
@@ -1334,8 +1318,7 @@ func (p *procFuncMyServiceSerialize) RunStreamContext(
     close(fbthriftElemChan)
     senderWg.Wait()
     if streamErr != nil {
-        internalErr := fmt.Errorf("Internal stream handler error serialize: %w", streamErr)
-        onStreamNext(nil, internalErr)
+        onStreamNext(nil, streamErr)
     }
     onStreamComplete()
 }
@@ -1547,8 +1530,7 @@ func (p *procFuncFactoriesFoo) RunContext(ctx context.Context, reqStruct thrift.
     result := newRespFactoriesFoo()
     err := p.handler.Foo(ctx)
     if err != nil {
-        internalErr := fmt.Errorf("Internal error processing foo: %w", err)
-        return nil, internalErr
+        return nil, err
     }
 
     return result, nil
@@ -1569,8 +1551,7 @@ func (p *procFuncFactoriesInteract) RunContext(ctx context.Context, reqStruct th
     result := newRespFactoriesInteract()
     fbthriftInteraction, err := p.handler.Interact(ctx, args.Arg)
     if err != nil {
-        internalErr := fmt.Errorf("Internal error processing interact: %w", err)
-        return nil, internalErr
+        return nil, err
     }
 
     thrift.SetInteractionCreateProcessor(ctx, fbthriftInteraction)
@@ -1591,8 +1572,7 @@ func (p *procFuncFactoriesInteractFast) RunContext(ctx context.Context, reqStruc
     result := newRespFactoriesInteractFast()
     fbthriftInteraction, retval, err := p.handler.InteractFast(ctx)
     if err != nil {
-        internalErr := fmt.Errorf("Internal error processing interactFast: %w", err)
-        return nil, internalErr
+        return nil, err
     }
 
     thrift.SetInteractionCreateProcessor(ctx, fbthriftInteraction)
@@ -1624,8 +1604,7 @@ func (p *procFuncFactoriesSerialize) RunStreamContext(
     firstResponse := newRespFactoriesSerialize()
     fbthriftInteraction, retval, elemProducerFunc, initialErr := p.handler.Serialize(ctx)
     if initialErr != nil {
-        internalErr := fmt.Errorf("Internal error processing serialize: %w", initialErr)
-        onFirstResponse(nil, internalErr)
+        onFirstResponse(nil, initialErr)
         onStreamComplete()
         return
     }
@@ -1652,8 +1631,7 @@ func (p *procFuncFactoriesSerialize) RunStreamContext(
     close(fbthriftElemChan)
     senderWg.Wait()
     if streamErr != nil {
-        internalErr := fmt.Errorf("Internal stream handler error serialize: %w", streamErr)
-        onStreamNext(nil, internalErr)
+        onStreamNext(nil, streamErr)
     }
     onStreamComplete()
 }
@@ -1771,8 +1749,7 @@ func (p *procFuncPerformFoo) RunContext(ctx context.Context, reqStruct thrift.Re
     result := newRespPerformFoo()
     err := p.handler.Foo(ctx)
     if err != nil {
-        internalErr := fmt.Errorf("Internal error processing foo: %w", err)
-        return nil, internalErr
+        return nil, err
     }
 
     return result, nil
@@ -1890,8 +1867,7 @@ func (p *procFuncInteractWithSharedDoSomeSimilarThings) RunContext(ctx context.C
     result := newRespInteractWithSharedDoSomeSimilarThings()
     retval, err := p.handler.DoSomeSimilarThings(ctx)
     if err != nil {
-        internalErr := fmt.Errorf("Internal error processing do_some_similar_things: %w", err)
-        return nil, internalErr
+        return nil, err
     }
 
     result.Success = retval
@@ -2012,8 +1988,7 @@ func (p *procFuncBoxServiceGetABoxSession) RunContext(ctx context.Context, reqSt
     result := newRespBoxServiceGetABoxSession()
     fbthriftInteraction, retval, err := p.handler.GetABoxSession(ctx, args.Req)
     if err != nil {
-        internalErr := fmt.Errorf("Internal error processing getABoxSession: %w", err)
-        return nil, internalErr
+        return nil, err
     }
 
     thrift.SetInteractionCreateProcessor(ctx, fbthriftInteraction)

@@ -481,8 +481,7 @@ func (p *procFuncSinkServiceMethod) RunSinkContext(
     firstResponse := newRespSinkServiceMethod()
     elemConsumerFunc, initialErr := p.handler.Method(ctx)
     if initialErr != nil {
-        internalErr := fmt.Errorf("Internal error processing method: %w", initialErr)
-        onFirstResponse(nil, internalErr)
+        onFirstResponse(nil, initialErr)
         return
     }
 
@@ -505,8 +504,7 @@ func (p *procFuncSinkServiceMethod) RunSinkContext(
 
     finalResponse := newRespFinalSinkServiceMethod()
     if finalErr != nil {
-        internalErr := fmt.Errorf("Internal sink handler error method: %w", finalErr)
-        onFinalResponse(nil, internalErr)
+        onFinalResponse(nil, finalErr)
         return
     }
 
@@ -543,8 +541,7 @@ func (p *procFuncSinkServiceMethodAndReponse) RunSinkContext(
     firstResponse := newRespSinkServiceMethodAndReponse()
     retval, elemConsumerFunc, initialErr := p.handler.MethodAndReponse(ctx)
     if initialErr != nil {
-        internalErr := fmt.Errorf("Internal error processing methodAndReponse: %w", initialErr)
-        onFirstResponse(nil, internalErr)
+        onFirstResponse(nil, initialErr)
         return
     }
 
@@ -568,8 +565,7 @@ func (p *procFuncSinkServiceMethodAndReponse) RunSinkContext(
 
     finalResponse := newRespFinalSinkServiceMethodAndReponse()
     if finalErr != nil {
-        internalErr := fmt.Errorf("Internal sink handler error methodAndReponse: %w", finalErr)
-        onFinalResponse(nil, internalErr)
+        onFinalResponse(nil, finalErr)
         return
     }
 
@@ -611,8 +607,7 @@ func (p *procFuncSinkServiceMethodThrow) RunSinkContext(
             firstResponse.Ex = v
             onFirstResponse(firstResponse, nil)
         default:
-            internalErr := fmt.Errorf("Internal error processing methodThrow: %w", initialErr)
-            onFirstResponse(nil, internalErr)
+            onFirstResponse(nil, initialErr)
         }
         return
     }
@@ -636,8 +631,7 @@ func (p *procFuncSinkServiceMethodThrow) RunSinkContext(
 
     finalResponse := newRespFinalSinkServiceMethodThrow()
     if finalErr != nil {
-        internalErr := fmt.Errorf("Internal sink handler error methodThrow: %w", finalErr)
-        onFinalResponse(nil, internalErr)
+        onFinalResponse(nil, finalErr)
         return
     }
 
@@ -674,8 +668,7 @@ func (p *procFuncSinkServiceMethodSinkThrow) RunSinkContext(
     firstResponse := newRespSinkServiceMethodSinkThrow()
     elemConsumerFunc, initialErr := p.handler.MethodSinkThrow(ctx)
     if initialErr != nil {
-        internalErr := fmt.Errorf("Internal error processing methodSinkThrow: %w", initialErr)
-        onFirstResponse(nil, internalErr)
+        onFirstResponse(nil, initialErr)
         return
     }
 
@@ -698,8 +691,7 @@ func (p *procFuncSinkServiceMethodSinkThrow) RunSinkContext(
 
     finalResponse := newRespFinalSinkServiceMethodSinkThrow()
     if finalErr != nil {
-        internalErr := fmt.Errorf("Internal sink handler error methodSinkThrow: %w", finalErr)
-        onFinalResponse(nil, internalErr)
+        onFinalResponse(nil, finalErr)
         return
     }
 
@@ -736,8 +728,7 @@ func (p *procFuncSinkServiceMethodFinalThrow) RunSinkContext(
     firstResponse := newRespSinkServiceMethodFinalThrow()
     elemConsumerFunc, initialErr := p.handler.MethodFinalThrow(ctx)
     if initialErr != nil {
-        internalErr := fmt.Errorf("Internal error processing methodFinalThrow: %w", initialErr)
-        onFirstResponse(nil, internalErr)
+        onFirstResponse(nil, initialErr)
         return
     }
 
@@ -765,8 +756,7 @@ func (p *procFuncSinkServiceMethodFinalThrow) RunSinkContext(
             finalResponse.Ex = v
             onFinalResponse(finalResponse, nil)
         default:
-            internalErr := fmt.Errorf("Internal sink handler error methodFinalThrow: %w", finalErr)
-            onFinalResponse(nil, internalErr)
+            onFinalResponse(nil, finalErr)
         }
         return
     }
@@ -804,8 +794,7 @@ func (p *procFuncSinkServiceMethodBothThrow) RunSinkContext(
     firstResponse := newRespSinkServiceMethodBothThrow()
     elemConsumerFunc, initialErr := p.handler.MethodBothThrow(ctx)
     if initialErr != nil {
-        internalErr := fmt.Errorf("Internal error processing methodBothThrow: %w", initialErr)
-        onFirstResponse(nil, internalErr)
+        onFirstResponse(nil, initialErr)
         return
     }
 
@@ -833,8 +822,7 @@ func (p *procFuncSinkServiceMethodBothThrow) RunSinkContext(
             finalResponse.Ex = v
             onFinalResponse(finalResponse, nil)
         default:
-            internalErr := fmt.Errorf("Internal sink handler error methodBothThrow: %w", finalErr)
-            onFinalResponse(nil, internalErr)
+            onFinalResponse(nil, finalErr)
         }
         return
     }
@@ -872,8 +860,7 @@ func (p *procFuncSinkServiceMethodFast) RunSinkContext(
     firstResponse := newRespSinkServiceMethodFast()
     elemConsumerFunc, initialErr := p.handler.MethodFast(ctx)
     if initialErr != nil {
-        internalErr := fmt.Errorf("Internal error processing methodFast: %w", initialErr)
-        onFirstResponse(nil, internalErr)
+        onFirstResponse(nil, initialErr)
         return
     }
 
@@ -896,8 +883,7 @@ func (p *procFuncSinkServiceMethodFast) RunSinkContext(
 
     finalResponse := newRespFinalSinkServiceMethodFast()
     if finalErr != nil {
-        internalErr := fmt.Errorf("Internal sink handler error methodFast: %w", finalErr)
-        onFinalResponse(nil, internalErr)
+        onFinalResponse(nil, finalErr)
         return
     }
 

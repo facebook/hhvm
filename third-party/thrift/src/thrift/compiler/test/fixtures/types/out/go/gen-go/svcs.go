@@ -164,8 +164,7 @@ func (p *procFuncSomeServiceBounceMap) RunContext(ctx context.Context, reqStruct
     result := newRespSomeServiceBounceMap()
     retval, err := p.handler.BounceMap(ctx, args.M)
     if err != nil {
-        internalErr := fmt.Errorf("Internal error processing bounce_map: %w", err)
-        return nil, internalErr
+        return nil, err
     }
 
     result.Success = retval
@@ -187,8 +186,7 @@ func (p *procFuncSomeServiceBinaryKeyedMap) RunContext(ctx context.Context, reqS
     result := newRespSomeServiceBinaryKeyedMap()
     retval, err := p.handler.BinaryKeyedMap(ctx, args.R)
     if err != nil {
-        internalErr := fmt.Errorf("Internal error processing binary_keyed_map: %w", err)
-        return nil, internalErr
+        return nil, err
     }
 
     result.Success = retval

@@ -751,7 +751,7 @@ func TestProcessorScenarios(t *testing.T) {
 		require.Error(t, err)
 		var appEx *types.ApplicationException
 		require.ErrorAs(t, err, &appEx)
-		require.EqualError(t, appEx, "Internal error processing GetUndeclaredException: undeclared exception")
+		require.EqualError(t, appEx, "undeclared exception")
 	})
 	t.Run("declared_exception", func(t *testing.T) {
 		client := dummyif.NewDummyChannelClient(channel)

@@ -211,8 +211,7 @@ func (p *procFuncCF) RunContext(ctx context.Context, reqStruct thrift.ReadableSt
     result := newRespCF()
     err := p.handler.F(ctx)
     if err != nil {
-        internalErr := fmt.Errorf("Internal error processing f: %w", err)
-        return nil, internalErr
+        return nil, err
     }
 
     return result, nil
@@ -242,8 +241,7 @@ func (p *procFuncCNumbers) RunStreamContext(
     firstResponse := newRespCNumbers()
     elemProducerFunc, initialErr := p.handler.Numbers(ctx)
     if initialErr != nil {
-        internalErr := fmt.Errorf("Internal error processing numbers: %w", initialErr)
-        onFirstResponse(nil, internalErr)
+        onFirstResponse(nil, initialErr)
         onStreamComplete()
         return
     }
@@ -268,8 +266,7 @@ func (p *procFuncCNumbers) RunStreamContext(
     close(fbthriftElemChan)
     senderWg.Wait()
     if streamErr != nil {
-        internalErr := fmt.Errorf("Internal stream handler error numbers: %w", streamErr)
-        onStreamNext(nil, internalErr)
+        onStreamNext(nil, streamErr)
     }
     onStreamComplete()
 }
@@ -294,8 +291,7 @@ func (p *procFuncCThing) RunContext(ctx context.Context, reqStruct thrift.Readab
             result.Bang = v
             return result, nil
         default:
-            internalErr := fmt.Errorf("Internal error processing thing: %w", err)
-            return nil, internalErr
+            return nil, err
         }
     }
 

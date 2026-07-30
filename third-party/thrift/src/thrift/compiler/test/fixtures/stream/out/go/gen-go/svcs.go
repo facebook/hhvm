@@ -565,8 +565,7 @@ func (p *procFuncPubSubStreamingServiceReturnstream) RunStreamContext(
     firstResponse := newRespPubSubStreamingServiceReturnstream()
     elemProducerFunc, initialErr := p.handler.Returnstream(ctx, args.I32From, args.I32To)
     if initialErr != nil {
-        internalErr := fmt.Errorf("Internal error processing returnstream: %w", initialErr)
-        onFirstResponse(nil, internalErr)
+        onFirstResponse(nil, initialErr)
         onStreamComplete()
         return
     }
@@ -591,8 +590,7 @@ func (p *procFuncPubSubStreamingServiceReturnstream) RunStreamContext(
     close(fbthriftElemChan)
     senderWg.Wait()
     if streamErr != nil {
-        internalErr := fmt.Errorf("Internal stream handler error returnstream: %w", streamErr)
-        onStreamNext(nil, internalErr)
+        onStreamNext(nil, streamErr)
     }
     onStreamComplete()
 }
@@ -622,8 +620,7 @@ func (p *procFuncPubSubStreamingServiceStreamthrows) RunStreamContext(
     firstResponse := newRespPubSubStreamingServiceStreamthrows()
     elemProducerFunc, initialErr := p.handler.Streamthrows(ctx, args.Foo)
     if initialErr != nil {
-        internalErr := fmt.Errorf("Internal error processing streamthrows: %w", initialErr)
-        onFirstResponse(nil, internalErr)
+        onFirstResponse(nil, initialErr)
         onStreamComplete()
         return
     }
@@ -654,8 +651,7 @@ func (p *procFuncPubSubStreamingServiceStreamthrows) RunStreamContext(
             streamWrapStruct.E = v
             onStreamNext(streamWrapStruct, nil)
         default:
-            internalErr := fmt.Errorf("Internal stream handler error streamthrows: %w", streamErr)
-            onStreamNext(nil, internalErr)
+            onStreamNext(nil, streamErr)
         }
     }
     onStreamComplete()
@@ -691,8 +687,7 @@ func (p *procFuncPubSubStreamingServiceServicethrows) RunStreamContext(
             firstResponse.E = v
             onFirstResponse(firstResponse, nil)
         default:
-            internalErr := fmt.Errorf("Internal error processing servicethrows: %w", initialErr)
-            onFirstResponse(nil, internalErr)
+            onFirstResponse(nil, initialErr)
         }
         onStreamComplete()
         return
@@ -718,8 +713,7 @@ func (p *procFuncPubSubStreamingServiceServicethrows) RunStreamContext(
     close(fbthriftElemChan)
     senderWg.Wait()
     if streamErr != nil {
-        internalErr := fmt.Errorf("Internal stream handler error servicethrows: %w", streamErr)
-        onStreamNext(nil, internalErr)
+        onStreamNext(nil, streamErr)
     }
     onStreamComplete()
 }
@@ -757,8 +751,7 @@ func (p *procFuncPubSubStreamingServiceServicethrows2) RunStreamContext(
             firstResponse.E2 = v
             onFirstResponse(firstResponse, nil)
         default:
-            internalErr := fmt.Errorf("Internal error processing servicethrows2: %w", initialErr)
-            onFirstResponse(nil, internalErr)
+            onFirstResponse(nil, initialErr)
         }
         onStreamComplete()
         return
@@ -784,8 +777,7 @@ func (p *procFuncPubSubStreamingServiceServicethrows2) RunStreamContext(
     close(fbthriftElemChan)
     senderWg.Wait()
     if streamErr != nil {
-        internalErr := fmt.Errorf("Internal stream handler error servicethrows2: %w", streamErr)
-        onStreamNext(nil, internalErr)
+        onStreamNext(nil, streamErr)
     }
     onStreamComplete()
 }
@@ -820,8 +812,7 @@ func (p *procFuncPubSubStreamingServiceBoththrows) RunStreamContext(
             firstResponse.E = v
             onFirstResponse(firstResponse, nil)
         default:
-            internalErr := fmt.Errorf("Internal error processing boththrows: %w", initialErr)
-            onFirstResponse(nil, internalErr)
+            onFirstResponse(nil, initialErr)
         }
         onStreamComplete()
         return
@@ -853,8 +844,7 @@ func (p *procFuncPubSubStreamingServiceBoththrows) RunStreamContext(
             streamWrapStruct.E = v
             onStreamNext(streamWrapStruct, nil)
         default:
-            internalErr := fmt.Errorf("Internal stream handler error boththrows: %w", streamErr)
-            onStreamNext(nil, internalErr)
+            onStreamNext(nil, streamErr)
         }
     }
     onStreamComplete()
@@ -885,8 +875,7 @@ func (p *procFuncPubSubStreamingServiceResponseandstreamstreamthrows) RunStreamC
     firstResponse := newRespPubSubStreamingServiceResponseandstreamstreamthrows()
     retval, elemProducerFunc, initialErr := p.handler.Responseandstreamstreamthrows(ctx, args.Foo)
     if initialErr != nil {
-        internalErr := fmt.Errorf("Internal error processing responseandstreamstreamthrows: %w", initialErr)
-        onFirstResponse(nil, internalErr)
+        onFirstResponse(nil, initialErr)
         onStreamComplete()
         return
     }
@@ -918,8 +907,7 @@ func (p *procFuncPubSubStreamingServiceResponseandstreamstreamthrows) RunStreamC
             streamWrapStruct.E = v
             onStreamNext(streamWrapStruct, nil)
         default:
-            internalErr := fmt.Errorf("Internal stream handler error responseandstreamstreamthrows: %w", streamErr)
-            onStreamNext(nil, internalErr)
+            onStreamNext(nil, streamErr)
         }
     }
     onStreamComplete()
@@ -955,8 +943,7 @@ func (p *procFuncPubSubStreamingServiceResponseandstreamservicethrows) RunStream
             firstResponse.E = v
             onFirstResponse(firstResponse, nil)
         default:
-            internalErr := fmt.Errorf("Internal error processing responseandstreamservicethrows: %w", initialErr)
-            onFirstResponse(nil, internalErr)
+            onFirstResponse(nil, initialErr)
         }
         onStreamComplete()
         return
@@ -983,8 +970,7 @@ func (p *procFuncPubSubStreamingServiceResponseandstreamservicethrows) RunStream
     close(fbthriftElemChan)
     senderWg.Wait()
     if streamErr != nil {
-        internalErr := fmt.Errorf("Internal stream handler error responseandstreamservicethrows: %w", streamErr)
-        onStreamNext(nil, internalErr)
+        onStreamNext(nil, streamErr)
     }
     onStreamComplete()
 }
@@ -1019,8 +1005,7 @@ func (p *procFuncPubSubStreamingServiceResponseandstreamboththrows) RunStreamCon
             firstResponse.E = v
             onFirstResponse(firstResponse, nil)
         default:
-            internalErr := fmt.Errorf("Internal error processing responseandstreamboththrows: %w", initialErr)
-            onFirstResponse(nil, internalErr)
+            onFirstResponse(nil, initialErr)
         }
         onStreamComplete()
         return
@@ -1053,8 +1038,7 @@ func (p *procFuncPubSubStreamingServiceResponseandstreamboththrows) RunStreamCon
             streamWrapStruct.E = v
             onStreamNext(streamWrapStruct, nil)
         default:
-            internalErr := fmt.Errorf("Internal stream handler error responseandstreamboththrows: %w", streamErr)
-            onStreamNext(nil, internalErr)
+            onStreamNext(nil, streamErr)
         }
     }
     onStreamComplete()
@@ -1085,8 +1069,7 @@ func (p *procFuncPubSubStreamingServiceReturnstreamFast) RunStreamContext(
     firstResponse := newRespPubSubStreamingServiceReturnstreamFast()
     elemProducerFunc, initialErr := p.handler.ReturnstreamFast(ctx, args.I32From, args.I32To)
     if initialErr != nil {
-        internalErr := fmt.Errorf("Internal error processing returnstreamFast: %w", initialErr)
-        onFirstResponse(nil, internalErr)
+        onFirstResponse(nil, initialErr)
         onStreamComplete()
         return
     }
@@ -1111,8 +1094,7 @@ func (p *procFuncPubSubStreamingServiceReturnstreamFast) RunStreamContext(
     close(fbthriftElemChan)
     senderWg.Wait()
     if streamErr != nil {
-        internalErr := fmt.Errorf("Internal stream handler error returnstreamFast: %w", streamErr)
-        onStreamNext(nil, internalErr)
+        onStreamNext(nil, streamErr)
     }
     onStreamComplete()
 }

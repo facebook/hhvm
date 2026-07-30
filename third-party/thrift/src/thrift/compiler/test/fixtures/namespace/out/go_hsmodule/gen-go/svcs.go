@@ -140,8 +140,7 @@ func (p *procFuncHsTestServiceInit) RunContext(ctx context.Context, reqStruct th
     result := newRespHsTestServiceInit()
     retval, err := p.handler.Init(ctx, args.Int1)
     if err != nil {
-        internalErr := fmt.Errorf("Internal error processing init: %w", err)
-        return nil, internalErr
+        return nil, err
     }
 
     result.Success = &retval

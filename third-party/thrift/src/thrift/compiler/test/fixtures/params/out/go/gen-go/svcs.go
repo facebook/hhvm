@@ -228,8 +228,7 @@ func (p *procFuncNestedContainersMapList) RunContext(ctx context.Context, reqStr
     result := newRespNestedContainersMapList()
     err := p.handler.MapList(ctx, args.Foo)
     if err != nil {
-        internalErr := fmt.Errorf("Internal error processing mapList: %w", err)
-        return nil, internalErr
+        return nil, err
     }
 
     return result, nil
@@ -250,8 +249,7 @@ func (p *procFuncNestedContainersMapSet) RunContext(ctx context.Context, reqStru
     result := newRespNestedContainersMapSet()
     err := p.handler.MapSet(ctx, args.Foo)
     if err != nil {
-        internalErr := fmt.Errorf("Internal error processing mapSet: %w", err)
-        return nil, internalErr
+        return nil, err
     }
 
     return result, nil
@@ -272,8 +270,7 @@ func (p *procFuncNestedContainersListMap) RunContext(ctx context.Context, reqStr
     result := newRespNestedContainersListMap()
     err := p.handler.ListMap(ctx, args.Foo)
     if err != nil {
-        internalErr := fmt.Errorf("Internal error processing listMap: %w", err)
-        return nil, internalErr
+        return nil, err
     }
 
     return result, nil
@@ -294,8 +291,7 @@ func (p *procFuncNestedContainersListSet) RunContext(ctx context.Context, reqStr
     result := newRespNestedContainersListSet()
     err := p.handler.ListSet(ctx, args.Foo)
     if err != nil {
-        internalErr := fmt.Errorf("Internal error processing listSet: %w", err)
-        return nil, internalErr
+        return nil, err
     }
 
     return result, nil
@@ -316,8 +312,7 @@ func (p *procFuncNestedContainersTurtles) RunContext(ctx context.Context, reqStr
     result := newRespNestedContainersTurtles()
     err := p.handler.Turtles(ctx, args.Foo)
     if err != nil {
-        internalErr := fmt.Errorf("Internal error processing turtles: %w", err)
-        return nil, internalErr
+        return nil, err
     }
 
     return result, nil

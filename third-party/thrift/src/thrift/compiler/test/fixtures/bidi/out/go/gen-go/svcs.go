@@ -313,8 +313,7 @@ func (p *procFuncBiDiServiceSimple) RunBiDiContext(
     firstResponse := newRespBiDiServiceSimple()
     sinkConsumerFunc, streamProducerFunc, initialErr := p.handler.Simple(ctx)
     if initialErr != nil {
-        internalErr := fmt.Errorf("Internal error processing simple: %w", initialErr)
-        onFirstResponse(nil, internalErr)
+        onFirstResponse(nil, initialErr)
         onStreamComplete()
         return
     }
@@ -359,8 +358,7 @@ func (p *procFuncBiDiServiceSimple) RunBiDiContext(
     close(fbthriftStreamChan)
     senderWg.Wait()
     if streamErr != nil {
-        internalErr := fmt.Errorf("Internal stream handler error simple: %w", streamErr)
-        onStreamNext(nil, internalErr)
+        onStreamNext(nil, streamErr)
     }
     // Wait for sink consumer to finish before completing the stream.
     sinkWg.Wait()
@@ -396,8 +394,7 @@ func (p *procFuncBiDiServiceResponse) RunBiDiContext(
     firstResponse := newRespBiDiServiceResponse()
     retval, sinkConsumerFunc, streamProducerFunc, initialErr := p.handler.Response(ctx)
     if initialErr != nil {
-        internalErr := fmt.Errorf("Internal error processing response: %w", initialErr)
-        onFirstResponse(nil, internalErr)
+        onFirstResponse(nil, initialErr)
         onStreamComplete()
         return
     }
@@ -443,8 +440,7 @@ func (p *procFuncBiDiServiceResponse) RunBiDiContext(
     close(fbthriftStreamChan)
     senderWg.Wait()
     if streamErr != nil {
-        internalErr := fmt.Errorf("Internal stream handler error response: %w", streamErr)
-        onStreamNext(nil, internalErr)
+        onStreamNext(nil, streamErr)
     }
     // Wait for sink consumer to finish before completing the stream.
     sinkWg.Wait()
@@ -485,8 +481,7 @@ func (p *procFuncBiDiServiceCanThrow) RunBiDiContext(
             firstResponse.Ex = v
             onFirstResponse(firstResponse, nil)
         default:
-            internalErr := fmt.Errorf("Internal error processing canThrow: %w", initialErr)
-            onFirstResponse(nil, internalErr)
+            onFirstResponse(nil, initialErr)
         }
         onStreamComplete()
         return
@@ -538,8 +533,7 @@ func (p *procFuncBiDiServiceCanThrow) RunBiDiContext(
             streamWrapStruct.Ex = v
             onStreamNext(streamWrapStruct, nil)
         default:
-            internalErr := fmt.Errorf("Internal stream handler error canThrow: %w", streamErr)
-            onStreamNext(nil, internalErr)
+            onStreamNext(nil, streamErr)
         }
     }
     // Wait for sink consumer to finish before completing the stream.

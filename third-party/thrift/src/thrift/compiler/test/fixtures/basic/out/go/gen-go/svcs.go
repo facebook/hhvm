@@ -138,8 +138,7 @@ func (p *procFuncFooServiceSimpleRPC) RunContext(ctx context.Context, reqStruct 
     result := newRespFooServiceSimpleRPC()
     err := p.handler.SimpleRPC(ctx)
     if err != nil {
-        internalErr := fmt.Errorf("Internal error processing simple_rpc: %w", err)
-        return nil, internalErr
+        return nil, err
     }
 
     return result, nil
@@ -256,8 +255,7 @@ func (p *procFuncFB303ServiceSimpleRPC) RunContext(ctx context.Context, reqStruc
     result := newRespFB303ServiceSimpleRPC()
     retval, err := p.handler.SimpleRPC(ctx, args.IntParameter)
     if err != nil {
-        internalErr := fmt.Errorf("Internal error processing simple_rpc: %w", err)
-        return nil, internalErr
+        return nil, err
     }
 
     result.Success = retval
@@ -559,8 +557,7 @@ func (p *procFuncMyServicePing) RunContext(ctx context.Context, reqStruct thrift
     result := newRespMyServicePing()
     err := p.handler.Ping(ctx)
     if err != nil {
-        internalErr := fmt.Errorf("Internal error processing ping: %w", err)
-        return nil, internalErr
+        return nil, err
     }
 
     return result, nil
@@ -580,8 +577,7 @@ func (p *procFuncMyServiceGetRandomData) RunContext(ctx context.Context, reqStru
     result := newRespMyServiceGetRandomData()
     retval, err := p.handler.GetRandomData(ctx)
     if err != nil {
-        internalErr := fmt.Errorf("Internal error processing getRandomData: %w", err)
-        return nil, internalErr
+        return nil, err
     }
 
     result.Success = &retval
@@ -603,8 +599,7 @@ func (p *procFuncMyServiceSink) RunContext(ctx context.Context, reqStruct thrift
     result := newRespMyServiceSink()
     err := p.handler.Sink(ctx, args.Sink)
     if err != nil {
-        internalErr := fmt.Errorf("Internal error processing sink: %w", err)
-        return nil, internalErr
+        return nil, err
     }
 
     return result, nil
@@ -625,8 +620,7 @@ func (p *procFuncMyServicePutDataById) RunContext(ctx context.Context, reqStruct
     result := newRespMyServicePutDataById()
     err := p.handler.PutDataById(ctx, args.Id, args.Data)
     if err != nil {
-        internalErr := fmt.Errorf("Internal error processing putDataById: %w", err)
-        return nil, internalErr
+        return nil, err
     }
 
     return result, nil
@@ -647,8 +641,7 @@ func (p *procFuncMyServiceHasDataById) RunContext(ctx context.Context, reqStruct
     result := newRespMyServiceHasDataById()
     retval, err := p.handler.HasDataById(ctx, args.Id)
     if err != nil {
-        internalErr := fmt.Errorf("Internal error processing hasDataById: %w", err)
-        return nil, internalErr
+        return nil, err
     }
 
     result.Success = &retval
@@ -670,8 +663,7 @@ func (p *procFuncMyServiceGetDataById) RunContext(ctx context.Context, reqStruct
     result := newRespMyServiceGetDataById()
     retval, err := p.handler.GetDataById(ctx, args.Id)
     if err != nil {
-        internalErr := fmt.Errorf("Internal error processing getDataById: %w", err)
-        return nil, internalErr
+        return nil, err
     }
 
     result.Success = &retval
@@ -693,8 +685,7 @@ func (p *procFuncMyServiceDeleteDataById) RunContext(ctx context.Context, reqStr
     result := newRespMyServiceDeleteDataById()
     err := p.handler.DeleteDataById(ctx, args.Id)
     if err != nil {
-        internalErr := fmt.Errorf("Internal error processing deleteDataById: %w", err)
-        return nil, internalErr
+        return nil, err
     }
 
     return result, nil
@@ -735,8 +726,7 @@ func (p *procFuncMyServiceInvalidReturnForHack) RunContext(ctx context.Context, 
     result := newRespMyServiceInvalidReturnForHack()
     retval, err := p.handler.InvalidReturnForHack(ctx)
     if err != nil {
-        internalErr := fmt.Errorf("Internal error processing invalid_return_for_hack: %w", err)
-        return nil, internalErr
+        return nil, err
     }
 
     result.Success = retval
@@ -757,8 +747,7 @@ func (p *procFuncMyServiceRpcSkippedCodegen) RunContext(ctx context.Context, req
     result := newRespMyServiceRpcSkippedCodegen()
     err := p.handler.RpcSkippedCodegen(ctx)
     if err != nil {
-        internalErr := fmt.Errorf("Internal error processing rpc_skipped_codegen: %w", err)
-        return nil, internalErr
+        return nil, err
     }
 
     return result, nil
@@ -897,8 +886,7 @@ func (p *procFuncDbMixedStackArgumentsGetDataByKey0) RunContext(ctx context.Cont
     result := newRespDbMixedStackArgumentsGetDataByKey0()
     retval, err := p.handler.GetDataByKey0(ctx, args.Key)
     if err != nil {
-        internalErr := fmt.Errorf("Internal error processing getDataByKey0: %w", err)
-        return nil, internalErr
+        return nil, err
     }
 
     result.Success = retval
@@ -920,8 +908,7 @@ func (p *procFuncDbMixedStackArgumentsGetDataByKey1) RunContext(ctx context.Cont
     result := newRespDbMixedStackArgumentsGetDataByKey1()
     retval, err := p.handler.GetDataByKey1(ctx, args.Key)
     if err != nil {
-        internalErr := fmt.Errorf("Internal error processing getDataByKey1: %w", err)
-        return nil, internalErr
+        return nil, err
     }
 
     result.Success = retval

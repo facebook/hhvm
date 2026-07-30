@@ -51,13 +51,11 @@ func (p *procFunc{{svc.go_name}}{{func.go_name}}) RunStreamContext(
             onFirstResponse(firstResponse, nil)
         {{/each}}
         default:
-            internalErr := fmt.Errorf("Internal error processing {{func.name}}: %w", initialErr)
-            onFirstResponse(nil, internalErr)
+            onFirstResponse(nil, initialErr)
         }
         {{/if func.exceptions?}}
         {{#if (not func.exceptions?)}}
-        internalErr := fmt.Errorf("Internal error processing {{func.name}}: %w", initialErr)
-        onFirstResponse(nil, internalErr)
+        onFirstResponse(nil, initialErr)
         {{/if (not func.exceptions?)}}
         onStreamComplete()
         return
@@ -98,13 +96,11 @@ func (p *procFunc{{svc.go_name}}{{func.go_name}}) RunStreamContext(
             onStreamNext(streamWrapStruct, nil)
         {{/each}}
         default:
-            internalErr := fmt.Errorf("Internal stream handler error {{func.name}}: %w", streamErr)
-            onStreamNext(nil, internalErr)
+            onStreamNext(nil, streamErr)
         }
         {{/if func.stream_exceptions?}}
         {{#if (not func.stream_exceptions?)}}
-        internalErr := fmt.Errorf("Internal stream handler error {{func.name}}: %w", streamErr)
-        onStreamNext(nil, internalErr)
+        onStreamNext(nil, streamErr)
         {{/if (not func.stream_exceptions?)}}
     }
     onStreamComplete()
@@ -131,13 +127,11 @@ func (p *procFunc{{svc.go_name}}{{func.go_name}}) RunContext(ctx context.Context
             return result, nil
         {{/each}}
         default:
-            internalErr := fmt.Errorf("Internal error processing {{func.name}}: %w", err)
-            return nil, internalErr
+            return nil, err
         }
         {{/if func.exceptions?}}
         {{#if (not func.exceptions?)}}
-        internalErr := fmt.Errorf("Internal error processing {{func.name}}: %w", err)
-        return nil, internalErr
+        return nil, err
         {{/if (not func.exceptions?)}}
     }
 
@@ -196,13 +190,11 @@ func (p *procFunc{{svc.go_name}}{{func.go_name}}) RunSinkContext(
             onFirstResponse(firstResponse, nil)
         {{/each}}
         default:
-            internalErr := fmt.Errorf("Internal error processing {{func.name}}: %w", initialErr)
-            onFirstResponse(nil, internalErr)
+            onFirstResponse(nil, initialErr)
         }
         {{/if func.exceptions?}}
         {{#if (not func.exceptions?)}}
-        internalErr := fmt.Errorf("Internal error processing {{func.name}}: %w", initialErr)
-        onFirstResponse(nil, internalErr)
+        onFirstResponse(nil, initialErr)
         {{/if (not func.exceptions?)}}
         return
     }
@@ -240,13 +232,11 @@ func (p *procFunc{{svc.go_name}}{{func.go_name}}) RunSinkContext(
             onFinalResponse(finalResponse, nil)
         {{/each}}
         default:
-            internalErr := fmt.Errorf("Internal sink handler error {{func.name}}: %w", finalErr)
-            onFinalResponse(nil, internalErr)
+            onFinalResponse(nil, finalErr)
         }
         {{/if func.sink_final_response_exceptions?}}
         {{#if (not func.sink_final_response_exceptions?)}}
-        internalErr := fmt.Errorf("Internal sink handler error {{func.name}}: %w", finalErr)
-        onFinalResponse(nil, internalErr)
+        onFinalResponse(nil, finalErr)
         {{/if (not func.sink_final_response_exceptions?)}}
         return
     }
@@ -289,13 +279,11 @@ func (p *procFunc{{svc.go_name}}{{func.go_name}}) RunBiDiContext(
             onFirstResponse(firstResponse, nil)
         {{/each}}
         default:
-            internalErr := fmt.Errorf("Internal error processing {{func.name}}: %w", initialErr)
-            onFirstResponse(nil, internalErr)
+            onFirstResponse(nil, initialErr)
         }
         {{/if func.exceptions?}}
         {{#if (not func.exceptions?)}}
-        internalErr := fmt.Errorf("Internal error processing {{func.name}}: %w", initialErr)
-        onFirstResponse(nil, internalErr)
+        onFirstResponse(nil, initialErr)
         {{/if (not func.exceptions?)}}
         onStreamComplete()
         return
@@ -356,13 +344,11 @@ func (p *procFunc{{svc.go_name}}{{func.go_name}}) RunBiDiContext(
             onStreamNext(streamWrapStruct, nil)
         {{/each}}
         default:
-            internalErr := fmt.Errorf("Internal stream handler error {{func.name}}: %w", streamErr)
-            onStreamNext(nil, internalErr)
+            onStreamNext(nil, streamErr)
         }
         {{/if func.stream_exceptions?}}
         {{#if (not func.stream_exceptions?)}}
-        internalErr := fmt.Errorf("Internal stream handler error {{func.name}}: %w", streamErr)
-        onStreamNext(nil, internalErr)
+        onStreamNext(nil, streamErr)
         {{/if (not func.stream_exceptions?)}}
     }
     // Wait for sink consumer to finish before completing the stream.

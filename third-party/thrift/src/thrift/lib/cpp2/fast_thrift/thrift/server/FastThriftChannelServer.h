@@ -364,6 +364,7 @@ using FastThriftChannelServer = FastThriftServerT<NoStats>;
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/FrameFragmentationHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/FrameLengthEncoderHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/common/handler/RocketMetricsHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerKeepAliveHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerMessageMarshalHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerRequestResponseHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerSetupFrameHandler.h>
@@ -384,6 +385,7 @@ HANDLER_TAG(frame_defragmentation_handler);
 HANDLER_TAG(frame_fragmentation_handler);
 HANDLER_TAG(rocket_server_message_marshal_handler);
 HANDLER_TAG(server_setup_frame_handler);
+HANDLER_TAG(server_keepalive_handler);
 HANDLER_TAG(server_request_response_frame_handler);
 HANDLER_TAG(server_stream_state_handler);
 
@@ -576,6 +578,8 @@ FastThriftServerT<Stats>::buildRocketPipeline(
             rocket_server_message_marshal_handler_tag)
         .addNextDuplex<rocket::server::handler::RocketServerSetupFrameHandler>(
             server_setup_frame_handler_tag, std::move(onSetupComplete))
+        .addNextDuplex<rocket::server::handler::RocketServerKeepAliveHandler>(
+            server_keepalive_handler_tag)
         .addNextDuplex<rocket::server::handler::RocketServerStreamStateHandler>(
             server_stream_state_handler_tag)
         .addNextDuplex<
@@ -611,6 +615,8 @@ FastThriftServerT<Stats>::buildRocketPipeline(
             rocket_server_message_marshal_handler_tag)
         .addNextDuplex<rocket::server::handler::RocketServerSetupFrameHandler>(
             server_setup_frame_handler_tag, std::move(onSetupComplete))
+        .addNextDuplex<rocket::server::handler::RocketServerKeepAliveHandler>(
+            server_keepalive_handler_tag)
         .addNextDuplex<rocket::server::handler::RocketServerStreamStateHandler>(
             server_stream_state_handler_tag)
         .addNextDuplex<

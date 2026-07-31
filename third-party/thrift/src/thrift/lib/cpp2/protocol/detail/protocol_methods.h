@@ -363,6 +363,10 @@ template <typename ExpectedTag, typename WireTag>
 inline constexpr bool matches_integral_wire_tag_v =
     std::is_base_of_v<WireTag, ExpectedTag>;
 
+template <typename ExpectedTag, typename WireTag>
+inline constexpr bool matches_floating_point_wire_tag_v =
+    std::is_base_of_v<WireTag, ExpectedTag>;
+
 #define THRIFT_PROTOCOL_METHODS_REGISTER_RW_COMMON(Class, Type, Method)      \
   template <typename Protocol>                                               \
   static void read(Protocol& protocol, Type& out) {                          \
@@ -397,13 +401,6 @@ inline constexpr bool matches_integral_wire_tag_v =
   }
 
 // stamp out specializations for primitive types
-#define THRIFT_PROTOCOL_METHODS_REGISTER_OVERLOAD(Class, Type, Method) \
-  template <typename ExpectedTag>                                      \
-  struct protocol_methods<type_class::Class, Type, ExpectedTag> {      \
-    THRIFT_PROTOCOL_METHODS_REGISTER_RW_COMMON(Class, Type, Method)    \
-    THRIFT_PROTOCOL_METHODS_REGISTER_SS_COMMON(Class, Type, Method)    \
-  }
-
 #define THRIFT_PROTOCOL_METHODS_REGISTER_INTEGRAL_OVERLOAD(            \
     Type, Method, WireTag)                                             \
   template <typename ExpectedTag>                                      \
@@ -503,10 +500,23 @@ struct protocol_methods<type_class::integral, bool, ExpectedTag> {
   }
 };
 
-THRIFT_PROTOCOL_METHODS_REGISTER_OVERLOAD(floating_point, double, Double);
-THRIFT_PROTOCOL_METHODS_REGISTER_OVERLOAD(floating_point, float, Float);
+#define THRIFT_PROTOCOL_METHODS_REGISTER_FLOATING_POINT_OVERLOAD(            \
+    Type, Method, WireTag)                                                   \
+  template <typename ExpectedTag>                                            \
+  struct protocol_methods<type_class::floating_point, Type, ExpectedTag> {   \
+    static_assert(                                                           \
+        matches_floating_point_wire_tag_v<ExpectedTag, WireTag>,             \
+        "ExpectedTag does not match the selected floating-point overload");  \
+    THRIFT_PROTOCOL_METHODS_REGISTER_RW_COMMON(floating_point, Type, Method) \
+    THRIFT_PROTOCOL_METHODS_REGISTER_SS_COMMON(floating_point, Type, Method) \
+  }
 
-#undef THRIFT_PROTOCOL_METHODS_REGISTER_OVERLOAD
+THRIFT_PROTOCOL_METHODS_REGISTER_FLOATING_POINT_OVERLOAD(
+    double, Double, type::double_t);
+THRIFT_PROTOCOL_METHODS_REGISTER_FLOATING_POINT_OVERLOAD(
+    float, Float, type::float_t);
+
+#undef THRIFT_PROTOCOL_METHODS_REGISTER_FLOATING_POINT_OVERLOAD
 
 template <typename Type, typename ExpectedTag>
 struct protocol_methods<type_class::string, Type, ExpectedTag> {

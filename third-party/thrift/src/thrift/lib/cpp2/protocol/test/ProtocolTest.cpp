@@ -86,6 +86,23 @@ TEST_F(ProtocolTest, floating_point_expected_tag_width) {
       (matches_floating_point_wire_tag_v<type::double_t, type::float_t>));
 }
 
+TEST_F(ProtocolTest, string_and_binary_expected_tag) {
+  struct TestAdapter {};
+  using apache::thrift::detail::pm::matches_wire_tag_v;
+
+  EXPECT_TRUE((matches_wire_tag_v<type::string_t, type::string_t>));
+  EXPECT_TRUE((matches_wire_tag_v<type::binary_t, type::binary_t>));
+  EXPECT_TRUE((matches_wire_tag_v<
+               type::cpp_type<folly::fbstring, type::string_t>,
+               type::string_t>));
+  EXPECT_TRUE((matches_wire_tag_v<
+               type::adapted<TestAdapter, type::binary_t>,
+               type::binary_t>));
+
+  EXPECT_FALSE((matches_wire_tag_v<type::string_t, type::binary_t>));
+  EXPECT_FALSE((matches_wire_tag_v<type::binary_t, type::string_t>));
+}
+
 template <typename ProtocolWriter>
 void makeNestedWriteInner(
     ProtocolWriter& writer, const size_t levels, const TType& type) {

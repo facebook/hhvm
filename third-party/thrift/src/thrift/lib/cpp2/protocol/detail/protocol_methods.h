@@ -360,12 +360,16 @@ using expected_key_tag_or_void_t =
     typename expected_key_tag_or_void<ExpectedTag>::type;
 
 template <typename ExpectedTag, typename WireTag>
-inline constexpr bool matches_integral_wire_tag_v =
+inline constexpr bool matches_wire_tag_v =
     std::is_base_of_v<WireTag, ExpectedTag>;
 
 template <typename ExpectedTag, typename WireTag>
+inline constexpr bool matches_integral_wire_tag_v =
+    matches_wire_tag_v<ExpectedTag, WireTag>;
+
+template <typename ExpectedTag, typename WireTag>
 inline constexpr bool matches_floating_point_wire_tag_v =
-    std::is_base_of_v<WireTag, ExpectedTag>;
+    matches_wire_tag_v<ExpectedTag, WireTag>;
 
 #define THRIFT_PROTOCOL_METHODS_REGISTER_RW_COMMON(Class, Type, Method)      \
   template <typename Protocol>                                               \
@@ -520,12 +524,18 @@ THRIFT_PROTOCOL_METHODS_REGISTER_FLOATING_POINT_OVERLOAD(
 
 template <typename Type, typename ExpectedTag>
 struct protocol_methods<type_class::string, Type, ExpectedTag> {
+  static_assert(
+      matches_wire_tag_v<ExpectedTag, type::string_t>,
+      "ExpectedTag does not match the string wire tag");
   THRIFT_PROTOCOL_METHODS_REGISTER_RW_COMMON(string, Type, String)
   THRIFT_PROTOCOL_METHODS_REGISTER_SS_COMMON(string, Type, String)
 };
 
 template <typename Type, typename ExpectedTag>
 struct protocol_methods<type_class::binary, Type, ExpectedTag> {
+  static_assert(
+      matches_wire_tag_v<ExpectedTag, type::binary_t>,
+      "ExpectedTag does not match the binary wire tag");
   THRIFT_PROTOCOL_METHODS_REGISTER_RW_COMMON(binary, Type, Binary)
 
   template <bool ZeroCopy, typename Protocol>

@@ -716,7 +716,11 @@ end
 
 let save_async naming_table ~init_id ~root ~destination_path =
   Hh_logger.log "Saving naming table to %s" destination_path;
-  let blob_dir = Tempfile.mkdtemp_with_dir (Path.make GlobalConfig.tmp_dir) in
+  let blob_dir =
+    Tempfile.mkdtemp_with_dir
+      ~skip_mocking:false
+      (Path.make GlobalConfig.tmp_dir)
+  in
   let blob_path = Path.(to_string (concat blob_dir "naming_bin")) in
   let chan = Stdlib.open_out_bin blob_path in
   Marshal.to_channel chan naming_table [];

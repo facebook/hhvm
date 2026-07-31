@@ -19,4 +19,4 @@ val mkdtemp : skip_mocking:bool -> Path.t
 
 val with_real_tempdir : (Path.t -> 'a Lwt.t) -> 'a Lwt.t
 
-val with_tempdir : (Path.t -> 'a Lwt.t) -> 'a Lwt.t
+val with_tempdir : ?parent:Path.t -> (Path.t -> 'a Lwt.t) -> 'a Lwt.t

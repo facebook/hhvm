@@ -77,3 +77,6 @@ let server_receipt_to_monitor_file (pid : int) : string =
 
 let saved_state_download_dir () =
   Filename.concat (get_tmp ()) "hh_saved_states_sql"
+
+let saved_state_staging_dir () =
+  Filename.concat (get_tmp ()) "hh_saved_states_staging"

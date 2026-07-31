@@ -1003,6 +1003,12 @@ int HTTP1xCodec::onHeadersComplete(size_t len) {
   if (!validateTransferEncoding(hdrs)) {
     return -1;
   }
+  if (isDownstream(transportDirection_) &&
+      hdrs.exists(HTTP_HEADER_TRANSFER_ENCODING) &&
+      hdrs.exists(HTTP_HEADER_CONTENT_LENGTH)) {
+    VLOG(4) << "Rejecting ingress HTTP/1.1 request with both TE and CL Headers";
+    return -1;
+  }
 
   // Update the HTTPMessage with the values parsed from the header
   msg_->setHTTPVersion(parser_.http_major, parser_.http_minor);

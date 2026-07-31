@@ -7,6 +7,7 @@
 
 #include <cpptoml.h>
 #include <fmt/core.h>
+#include <folly/FBString.h>
 #include <folly/ScopeGuard.h>
 #include <folly/String.h>
 #include <folly/futures/Future.h>
@@ -92,10 +93,10 @@ SyncBehavior getSyncBehavior() {
 namespace watchman {
 namespace {
 struct NameAndDType {
-  std::string name;
+  folly::fbstring name;
   DType dtype;
 
-  explicit NameAndDType(std::string name, DType dtype = DType::Unknown)
+  explicit NameAndDType(folly::fbstring name, DType dtype = DType::Unknown)
       : name(std::move(name)), dtype(dtype) {}
 };
 
@@ -649,7 +650,7 @@ void appendGlobResultToNameAndDTypeVec(
     // our DType enum is declared in terms of those bits
     auto dtype = i < numDTypes ? static_cast<DType>(glob.dtypes().value()[i])
                                : DType::Unknown;
-    results.emplace_back(std::move(name), dtype);
+    results.emplace_back(std::move(name).intoFbString(), dtype);
     ++i;
   }
 }
@@ -1285,7 +1286,7 @@ class EdenView final : public QueryableView {
   struct GetAllChangesSinceResult {
     ClockTicks ticks;
     std::vector<NameAndDType> fileInfo;
-    std::unordered_set<std::string> createdFileNames;
+    std::unordered_set<folly::fbstring> createdFileNames;
   };
 
   /**

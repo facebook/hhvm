@@ -11,6 +11,8 @@ include "thrift/annotation/cpp.thrift"
 include "thrift/annotation/rust.thrift"
 include "thrift/annotation/thrift.thrift"
 
+cpp_include "eden/fs/utils/GlobPath.h"
+
 @thrift.AllowLegacyMissingUris
 package;
 
@@ -1765,6 +1767,7 @@ struct Glob {
    * sorted. However, no duplicates may have the same originCommits (note this
    * is not true should the input GlobParams contain duplicate revisions) .
    */
+  @cpp.Type{name = "::facebook::eden::GlobPathList"}
   1: list<PathString> matchingFiles;
   2: list<OsDtype> dtypes;
   /**

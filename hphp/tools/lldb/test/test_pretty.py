@@ -53,7 +53,7 @@ class PrettyPrintTypedValuesTestCase(base.TestHHVMTypesBinary):
             "Resource": r"\(HPHP::TypedValue\) tv = \{ Resource, \(hdr = 0x.*, data = 0x.*\) *\}",
             "RFunc": r'\(HPHP::TypedValue\) tv = \{ RFunc, \(HPHP::RFuncData \*\) prfunc = 0x.* \("Exception::__construct"\) \}',
             "RClsMeth": r'\(HPHP::TypedValue\) tv = \{ RClsMeth, \(HPHP::RClsMethData \*\) prclsmeth = 0x.* \("InvalidArgumentException::Exception::__construct"\) \}',
-            "ClsMeth": r'\(HPHP::TypedValue\) tv = \{ ClsMeth, \(HPHP::ClsMethData\) \*m_data = \(m_cls = "InvalidArgumentException", m_func = "Exception::__construct"\) \("InvalidArgumentException::Exception::__construct"\) }',
+            "ClsMeth": r'\(HPHP::TypedValue\) tv = \{ ClsMeth, \(HPHP::ClsMethData::cls_meth_t\) m_data = \(m_cls = "InvalidArgumentException", m_func = "Exception::__construct"\) \("InvalidArgumentException::Exception::__construct"\) }',
             "Boolean": r"\(HPHP::TypedValue\) tv = \{ Boolean, True \}",
             "Int64": r"\(HPHP::TypedValue\) tv = \{ Int64, 42 \}",
             "Double": r"\(HPHP::TypedValue\) tv = \{ Double, 3.1415 \}",

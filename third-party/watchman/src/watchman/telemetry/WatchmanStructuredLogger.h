@@ -7,10 +7,16 @@
 
 #pragma once
 
+#include <memory>
+
 #include "eden/common/telemetry/ScribeLogger.h"
 #include "eden/common/telemetry/ScubaStructuredLogger.h"
 #include "eden/common/telemetry/SessionInfo.h"
 #include "eden/common/telemetry/StructuredLogger.h"
+
+namespace facebook::eden {
+class IXplatLogger;
+} // namespace facebook::eden
 
 namespace watchman {
 
@@ -33,5 +39,15 @@ class WatchmanStructuredLogger : public ScubaStructuredLogger {
 };
 
 std::shared_ptr<StructuredLogger> getLogger();
+
+#ifdef WATCHMAN_FACEBOOK_INTERNAL
+/// StructuredLogger adapter used when the XplatLogger path is enabled. Reuses
+/// WatchmanStructuredLogger identity population (populateDefaultFields) and
+/// forwards each fully-populated event to @p xplatLogger under the
+/// watchman_events category. Exposed for testing with a fake IXplatLogger.
+std::shared_ptr<StructuredLogger> makeWatchmanXplatStructuredLogger(
+    SessionInfo sessionInfo,
+    std::shared_ptr<facebook::eden::IXplatLogger> xplatLogger);
+#endif
 
 } // namespace watchman

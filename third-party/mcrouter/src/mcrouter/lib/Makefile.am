@@ -208,6 +208,8 @@ libmcrouter_a_SOURCES = \
   network/gen/gen-cpp2/Common_types_custom_protocol.h \
   network/gen/gen-cpp2/Common_data.cpp \
   network/gen/gen-cpp2/Common_data.h \
+  network/gen/gen-cpp2/Common_constants.cpp \
+  network/gen/gen-cpp2/Common_constants.h \
   network/gen/gen-cpp2/MemcacheAsyncClient.cpp \
   network/gen/gen-cpp2/MemcacheAsyncClient.h \
   network/gen/gen-cpp2/MemcacheService_constants.cpp \
@@ -228,6 +230,8 @@ libmcrouter_a_SOURCES = \
   network/gen/gen-cpp2/Memcache_types_custom_protocol.h \
   network/gen/gen-cpp2/Memcache_data.cpp \
   network/gen/gen-cpp2/Memcache_data.h \
+  network/gen/gen-cpp2/Memcache_constants.cpp \
+  network/gen/gen-cpp2/Memcache_constants.h \
   network/FizzContextProvider.cpp \
   network/FizzContextProvider.h \
   network/McAsciiParser-gen.cpp \

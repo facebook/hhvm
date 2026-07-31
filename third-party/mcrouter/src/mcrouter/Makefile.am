@@ -235,6 +235,7 @@ libmcroutercore_a_SOURCES = \
 
 mcrouter_SOURCES = \
   main.cpp \
+  Server.cpp \
   Server-inl.h \
   Server.h \
   ServerOnRequest.h \
@@ -250,31 +251,18 @@ mcrouter_SOURCES = \
 libmcroutercore_a_CPPFLAGS = -I..
 
 # Link order matters.
+mcrouter_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 mcrouter_LDADD = \
   libmcroutercore.a \
   lib/libmcrouter.a \
-  -lthriftcpp2 \
-  -lserverdbginfo \
-  -ltransport \
-  -lthriftanyrep \
-  -lthrifttype \
-  -lthrifttyperep \
-  -lthriftprotocol \
-  -lrpcmetadata \
-  -lthriftannotation \
-  -lthriftmetadata \
-  -lasync \
-  -lconcurrency \
-  -lruntime \
-  -lthrift-core \
-  -lcommon
+  $(FBTHRIFT_STATIC_LIBS)
 
 mcrouter_CPPFLAGS = -I..
 
 clean-local:
-	-rm -rf lib/network/gen-cpp2/ \
+	-rm -rf lib/network/gen/gen-cpp2/ \
 	        lib/carbon/gen-cpp2/
 
 distclean-local:
-	-rm -rf lib/network/gen-cpp2/ \
+	-rm -rf lib/network/gen/gen-cpp2/ \
 		lib/carbon/gen-cpp2/

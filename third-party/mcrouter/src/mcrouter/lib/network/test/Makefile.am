@@ -3,33 +3,14 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+SUBDIRS = gen
+
 noinst_PROGRAMS = mock_mc_server
 noinst_LIBRARIES = libtest_util.a
 check_PROGRAMS = mcrouter_network_test
 
-# Keep the group delimiters in LDADD so they surround the static libraries.
-# Splitting the driver prefix prevents Automake from misclassifying them as
-# target LDFLAGS, which would be emitted before LDADD and break the grouping.
-FBTHRIFT_LINKER_DRIVER_FLAG = -Wl
-FBTHRIFT_STATIC_LIBS = \
-	$(FBTHRIFT_LINKER_DRIVER_FLAG),--start-group \
-	-lthriftcpp2 \
-	-lserverdbginfo \
-	-ltransport \
-	-lthriftanyrep \
-	-lthriftannotation \
-	-lthrifttype \
-	-lthrifttyperep \
-	-lthrift_dynamic_value \
-	-lrpcmetadata \
-	-lthriftprotocol \
-	-lthriftmetadata \
-	-lasync \
-	-lconcurrency \
-	-lruntime \
-	-lthrift-core \
-	-lcommon \
-	$(FBTHRIFT_LINKER_DRIVER_FLAG),--end-group
+# FBTHRIFT_STATIC_LIBS comes from configure so that Automake treats it as an
+# opaque substitution; see the comment on AC_SUBST in configure.ac.
 
 mock_mc_server_SOURCES = \
   MockMc.cpp \
@@ -37,6 +18,7 @@ mock_mc_server_SOURCES = \
   MockMcOnRequest.h \
   MockMcServer.cpp
 mock_mc_server_CPPFLAGS = -I$(top_srcdir)/..
+mock_mc_server_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 # Link order matters.
 mock_mc_server_LDADD = \
 	$(top_builddir)/lib/libmcrouter.a \
@@ -90,6 +72,13 @@ mcrouter_network_test_SOURCES = \
   CarbonMockMcTest.cpp \
   CarbonQueueAppenderTest.cpp \
   gen/CarbonTestMessages.cpp \
+  gen/CarbonTestMessagesThrift.cpp \
+  gen/gen-cpp2/CarbonTest_types.cpp \
+  gen/gen-cpp2/CarbonTest_types_binary.cpp \
+  gen/gen-cpp2/CarbonTest_types_compact.cpp \
+  gen/gen-cpp2/CarbonTest_types_serialization.cpp \
+  gen/gen-cpp2/CarbonTest_data.cpp \
+  gen/gen-cpp2/CarbonTest_constants.cpp \
   McAsciiParserTest.cpp \
   McParserTest.cpp \
   McServerAsciiParserTest.cpp \
@@ -110,5 +99,5 @@ mcrouter_network_test_CPPFLAGS = \
 mcrouter_network_test_LDADD = \
   $(top_builddir)/lib/libmcrouter.a \
   $(top_builddir)/lib/libtestmain.la \
-  $(top_builddir)/lib/network/libtest_util.a \
+  libtest_util.a \
   $(FBTHRIFT_STATIC_LIBS)

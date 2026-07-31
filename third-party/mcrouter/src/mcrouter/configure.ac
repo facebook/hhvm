@@ -25,6 +25,14 @@ AC_SUBST([FBTHRIFT])
 
 AC_SUBST([INSTALL_DIR], [$INSTALL_DIR])
 
+# fbthrift's static libraries are mutually recursive, so they have to be linked
+# inside a --start-group/--end-group pair. This lives in configure.ac rather
+# than Makefile.am because Automake inspects LDADD contents it can see: it
+# rejects literal -Wl tokens there, and turns anything it cannot classify into a
+# make prerequisite. A configure substitution is opaque to both checks.
+AC_SUBST([FBTHRIFT_STATIC_LIBS],
+         ["-Wl,--start-group -lthriftcpp2 -lserverdbginfo -ltransport -lthriftanyrep -lthriftannotation -lthrifttype -lthrifttyperep -lthrift_dynamic_value -lthrift_path -lrpcmetadata -lthriftprotocol -lthriftmetadata -lasync -lconcurrency -lruntime -lthrift-core -lcommon -Wl,--end-group"])
+
 AC_DEFINE_UNQUOTED([MCROUTER_PACKAGE_STRING], ["AC_PACKAGE_VERSION AC_PACKAGE_NAME"], [Full name and version of this package, with version coming first for libmemcached compatibility])
 
 AC_CONFIG_SRCDIR([CarbonRouterInstance.h])
@@ -218,6 +226,7 @@ AC_CONFIG_FILES([Makefile
                  lib/fbi/cpp/test/Makefile
                  lib/network/gen/Makefile
                  lib/network/test/Makefile
+                 lib/network/test/gen/Makefile
                  routes/Makefile
                  routes/test/Makefile
                  test/Makefile

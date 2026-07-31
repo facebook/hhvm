@@ -11,7 +11,6 @@
 #include "mcrouter/PoolFactory.h"
 #include "mcrouter/Proxy.h"
 #include "mcrouter/lib/config/RouteHandleFactory.h"
-#include "mcrouter/lib/network/gen/MemcacheMessages.h"
 #include "mcrouter/lib/network/gen/MemcacheRouterInfo.h"
 #include "mcrouter/options.h"
 #include "mcrouter/routes/McRouteHandleProvider.h"

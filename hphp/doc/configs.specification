@@ -2129,7 +2129,7 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 - uint64_t Jit.PGOThreshold, UNKNOWN
 - bool Jit.PGOOnly = false, UNKNOWN
 - bool Jit.PGOUsePostConditions = true, UNKNOWN
-- bool Jit.PGOUseAddrCountedCheck = false, UNKNOWN, postprocess
+- bool Jit.PGOUseAddrCountedCheck = false, UNKNOWN
 - uint32_t Jit.PGOUnlikelyIncRefCountedPercent = 2, UNKNOWN
 - uint32_t Jit.PGOUnlikelyIncRefIncrementPercent = 5, UNKNOWN
 - uint32_t Jit.PGOUnlikelyDecRefReleasePercent = 5, UNKNOWN

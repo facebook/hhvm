@@ -58,17 +58,6 @@ constexpr bool use_low_bump_allocator =
 #endif
   ;
 
-// When we have control over the virtual address space for the heap, all
-// static/uncounted strings/arrays have addresses lower than kUncountedMaxAddr,
-// and all counted HeapObjects have higher addresses.
-constexpr bool addr_encodes_persistency =
-#if USE_JEMALLOC && defined(__x86_64__) && defined(__linux__)
-  true
-#else
-  false
-#endif
-  ;
-
 // ASAN modifies the generated code in ways that cause abnormally high C++
 // stack usage.
 constexpr size_t kStackSizeMinimum =

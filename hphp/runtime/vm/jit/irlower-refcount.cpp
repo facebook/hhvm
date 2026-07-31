@@ -143,11 +143,6 @@ void incrementProfile(Vout& v, const TargetProfile<IncRefProfile>& profile,
   v << addlm{incr, rvmtl()[profile.handle() + offset], v.makeReg()};
 }
 
-inline bool useAddrForCountedCheck() {
-  return addr_encodes_persistency &&
-    Cfg::Jit::PGOUseAddrCountedCheck;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 }
@@ -196,7 +191,7 @@ void cgIncRef(IRLS& env, const IRInstruction* inst) {
     }
   }
 
-  if (useAddrForCountedCheck() &&
+  if (Cfg::Jit::PGOUseAddrCountedCheck &&
       !unlikelyCounted && unlikelyIncrement &&
       ty <= (TCounted | TPersistent) && ty.maybe(TPersistent)) {
     assertx(profile.optimizing());
@@ -592,7 +587,7 @@ void cgDecRef(IRLS& env, const IRInstruction *inst) {
     implDecRef(v, env, inst, t, profile);
   };
 
-  if (useAddrForCountedCheck() && profile.optimizing() &&
+  if (Cfg::Jit::PGOUseAddrCountedCheck && profile.optimizing() &&
       ty <= (TCounted | TPersistent) && ty.maybe(TPersistent)) {
     // Need to check countedness, and we do it by looking at the pointer.
     auto const data = profile.data();
@@ -738,7 +733,7 @@ void cgDecRefNZ(IRLS& env, const IRInstruction* inst) {
   emitIncStat(v, Stats::TC_DecRef_NZ);
   emitDecRefTypeStat(v, env, inst);
 
-  if (useAddrForCountedCheck() &&
+  if (Cfg::Jit::PGOUseAddrCountedCheck &&
       !unlikelyCounted && unlikelyDecrement &&
       ty <= (TCounted | TPersistent) && ty.maybe(TPersistent)) {
     assertx(profile.optimizing());

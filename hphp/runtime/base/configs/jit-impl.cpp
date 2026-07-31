@@ -140,10 +140,6 @@ uint8_t JitLoader::ProfileThresholdDefault() {
   return Cfg::Server::Mode ? 200 : 0;
 }
 
-void JitLoader::PGOUseAddrCountedCheckPostProcess(bool& val) {
-  val &= addr_encodes_persistency;
-}
-
 bool JitLoader::AlignMacroFusionPairsDefault() {
   switch (getProcessorFamily()) {
     case ProcessorFamily::Intel_SandyBridge:

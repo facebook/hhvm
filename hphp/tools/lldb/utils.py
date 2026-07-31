@@ -435,6 +435,13 @@ def Value(name: str, target: lldb.SBTarget) -> lldb.SBValue:
 def atomic_get(atomic: lldb.SBValue) -> lldb.SBValue:
     inner = rawtype(atomic.type).GetTemplateArgumentType(0)
 
+    # Newer lldb/libc++abi toolchains (clang 21) ship a synthetic child
+    # provider for std::atomic<T>. Its synthetic view only exposes the
+    # std::__atomic_base<T> base class as a child, so looking up the raw
+    # storage member (_M_i / _M_b) by name fails. Drop to the non-synthetic
+    # value so we can reach the underlying std::__atomic_base members.
+    atomic = atomic.GetNonSyntheticValue()
+
     if inner.IsPointerType():
         return get(atomic, "_M_b", "_M_p")
     else:
@@ -616,7 +623,9 @@ def rawptr(val: lldb.SBValue) -> typing.Optional[lldb.SBValue]:
         ptr = get(val, "m_s")
         debug_print(f"rawptr(val=0x{ptr.unsigned:x}) template {storage} {formatting}")
         if storage == "HPHP::ptrimpl::Atomic":
-            ptr = get(ptr, "_M_i")
+            # m_s is a std::atomic<T>; use atomic_get so we correctly read the
+            # raw storage even when lldb provides a synthetic std::atomic view.
+            ptr = atomic_get(ptr)
             debug_print(f"rawptr(val=0x{ptr.unsigned:x}) read atomic")
 
         if formatting == "HPHP::ptrimpl::UInt32Packed":
@@ -748,8 +757,11 @@ def _full_func_name(func: lldb.SBValue) -> str:
     if attrs.unsigned & Enum("HPHP::Attr", "AttrIsMethCaller", func.target).unsigned:
         cls = ""
     else:
-        cls = atomic_get(get(func, "m_u", "m_cls", "m_impl", "m_s"))
-        if cls.unsigned == 0:
+        # m_impl is an AtomicPackedPtr<Class>; use rawptr so the packed
+        # storage is unpacked (shifted) into a real Class pointer, rather than
+        # atomic_get which would only return the raw packed storage value.
+        cls = rawptr(get(func, "m_u", "m_cls", "m_impl"))
+        if cls is None or cls.unsigned == 0:
             cls = ""
         else:
             cls = (
@@ -790,7 +802,14 @@ def nameof(val: lldb.SBValue) -> typing.Optional[str]:
         sd = get(val, "m_fullName")
         v = rawptr(sd)
         assert v is not None
-        if v.unsigned == 1:
+        # When the full name still needs to be computed from the class and
+        # method names, m_fullName holds the kNeedsFullName sentinel. Since
+        # D-"Make kNeedsFullName less magical", that sentinel is the max value
+        # of the packed storage (uint32_t all-ones); AtomicPackedPtr stores it
+        # raw and rawptr() surfaces it shifted left by the packed pointer shift
+        # of 3 (see UInt32Packed in hphp/util/ptr-impl.h). Older non-packed
+        # builds used a raw sentinel value of 1.
+        if v.unsigned == 1 or (v.unsigned >> 3) == 0xFFFFFFFF:
             return _full_func_name(val)
     elif t == "HPHP::Class":
         pre_class = deref(get(val, "m_preClass"))
@@ -952,7 +971,9 @@ def strinfo(s: lldb.SBValue, keep_case: bool = True) -> typing.Dict[str, typing.
     else:
         sd = deref(s)
         ty_name = rawtype(sd.type).name
-        if ty_name in ("HPHP::String", "HPHP::StaticString"):
+        if ty_name in ("HPHP::String", "HPHP::StaticString", "HPHP::OptString"):
+            # HPHP::OptString is the base of HPHP::String and holds the same
+            # m_str (req::ptr<StringData>) member.
             sd = rawptr(get(sd, "m_str"))
             assert sd is not None
             sd = deref(sd)

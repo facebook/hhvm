@@ -249,7 +249,7 @@ def pp_StringData(val_obj: lldb.SBValue, _internal_dict) -> str:
         raise FormatError(str(e))
 
 
-@format("^HPHP::(Static)?String$", regex=True)
+@format("^HPHP::(Static|Opt)?String$", regex=True)
 def pp_String(val_obj: lldb.SBValue, _internal_dict) -> str:
     # Note: SBValue.GetChildMemberWithName(), used by utils.get(),
     # will get the members of both pointers and the pointed-to values themselves

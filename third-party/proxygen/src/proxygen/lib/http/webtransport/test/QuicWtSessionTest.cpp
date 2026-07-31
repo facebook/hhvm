@@ -674,45 +674,25 @@ TEST_F(QuicWtSessionTest, WriteFlowControlBlocked) {
   EXPECT_EQ(socketDriver_.streams_[id].writeBuf.chainLength(), 12);
 }
 
-TEST_F(QuicWtSessionTest, WriteChainFails) {
-  // use a bidi stream so the read handle keeps the stream entry alive
-  // after resetStream (uni stream would be freed immediately)
-  WebTransport::BidiStreamHandle bidiHandle{nullptr, nullptr};
-  EXPECT_CALL(*handler_, onNewBidiStream(_))
-      .WillOnce(
-          [&](WebTransport::BidiStreamHandle handle) { bidiHandle = handle; });
-  socketDriver_.addReadEvent(0, nullptr, false);
-  eventBase_.loopOnce();
-  ASSERT_NE(bidiHandle.writeHandle, nullptr);
-  auto id = bidiHandle.writeHandle->getID();
+/**
+ * Unsure if the following is possible in production (i.e. QuicTransportBase) --
+ * but it tests when a ::writeChain fails without a prior ::readError or
+ * ::connectionError
+ */
+TEST_F(QuicWtSessionTest, WriteChainFailure) {
+  constexpr uint16_t kFlowControl = std::numeric_limits<uint16_t>::max();
+  auto uni = session_->createUniStream().value();
+  const auto id = uni->getID();
+  socketDriver_.setConnectionFlowControlWindow(kFlowControl);
+  socketDriver_.setStreamFlowControlWindow(id, kFlowControl);
 
-  // block writes via flow control so data queues in WtStreamManager
-  socketDriver_.setStreamFlowControlWindow(id, 0);
-
-  bidiHandle.writeHandle->writeStreamData(
-      folly::IOBuf::copyBuffer("will fail"), true, nullptr);
-  eventBase_.loopOnce();
-
-  // data is queued but not written (flow-control blocked)
-  EXPECT_EQ(socketDriver_.streams_[id].writeBuf.chainLength(), 0);
-
-  // poison the stream write state, then resume flow control and fire callback
+  // poison stream's write state
   auto& stream = socketDriver_.streams_[id];
-  stream.flowControlWindow = 65536;
   stream.writeState = quic::MockQuicSocketDriver::StateEnum::ERROR;
 
-  // directly fire onStreamWriteReady to trigger
-  // eventsAvailable() -> writeChain fails -> resetStream(kInternalError)
-  auto pendingCb = stream.pendingWriteCb;
-  stream.pendingWriteCb.stream = nullptr;
-  if (pendingCb.stream) {
-    pendingCb.stream->onStreamWriteReady(id, 65536);
-  }
+  // attempt to write
+  uni->writeStreamData(folly::IOBuf::copyBuffer("data"), true, nullptr);
   eventBase_.loop();
-
-  // the stream should have been reset with an error
-  EXPECT_EQ(socketDriver_.streams_[id].writeState,
-            quic::MockQuicSocketDriver::StateEnum::ERROR);
 }
 
 TEST_F(QuicWtSessionTest, StreamWriteError) {

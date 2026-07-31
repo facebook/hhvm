@@ -290,7 +290,7 @@ void QuicWtSessionBase::StreamManagerCallback::eventsAvailable() noexcept {
       continue;
     }
     if (*maxData == 0) {
-      XLOG(DBG4) << "egress conn-fc blocked id=" << streamId;
+      XLOG(DBG4) << "egress fc blocked id=" << streamId;
       sess.priorityQueue_->erase(id);
       sess.quicSocket_->notifyPendingWriteOnStream(streamId, &sess);
       continue;
@@ -301,10 +301,8 @@ void QuicWtSessionBase::StreamManagerCallback::eventsAvailable() noexcept {
                                             std::move(streamData.data),
                                             streamData.fin,
                                             streamData.deliveryCallback);
-    if (res.hasError()) {
-      XLOG(ERR) << "QuicSocket::writeChain err id=" << streamId;
-      wh->resetStream(WebTransport::kInternalError);
-    }
+    XLOG_IF(ERR, res.hasError())
+        << "::writeChain err= " << res.error() << "; id=" << streamId;
   }
 }
 

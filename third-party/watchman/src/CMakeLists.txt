@@ -592,6 +592,7 @@ if (ENABLE_EDEN_SUPPORT)
       EdenService
     DEPENDS
       eden_config_thrift
+      edencommon::edencommon_utils
       fb303::fb303_thrift_cpp
   )
   add_fbthrift_cpp_library(

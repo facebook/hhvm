@@ -71,6 +71,7 @@ class TestWatchdog {
 };
 
 struct RejectedAdapter {};
+
 static_assert(!RustMessageAdapterConcept<RejectedAdapter>);
 
 TEST(AdapterTest, BytesPtrAdapterConforms) {
@@ -93,6 +94,31 @@ TEST(AdapterTest, BytesPtrAdapterConforms) {
   EXPECT_EQ(recovered->get(), originalPtr);
   EXPECT_EQ((*recovered)->length(), 10);
   EXPECT_EQ((*recovered)->data()[0], 0xAB);
+}
+
+TEST(AdapterTest, BytesPtrAdapterRestoresOriginalBox) {
+  TestWatchdog watchdog{"BytesPtr adapter original-box restoration"};
+  TypeErasedBox box;
+  auto iobuf = folly::IOBuf::create(4);
+  ASSERT_NE(iobuf, nullptr);
+  iobuf->append(4);
+  auto* originalPtr = iobuf.get();
+
+  EXPECT_TRUE(RustMessageAdapter<BytesPtr>::tryRestore(box, std::move(iobuf)));
+  EXPECT_EQ(box.get<BytesPtr>().get(), originalPtr);
+
+  auto replacement = folly::IOBuf::create(1);
+  ASSERT_NE(replacement, nullptr);
+  replacement->append(1);
+  EXPECT_FALSE(
+      RustMessageAdapter<BytesPtr>::tryRestore(box, std::move(replacement)));
+}
+
+TEST(AdapterTest, BytesPtrAdapterRejectsNullRestore) {
+  TestWatchdog watchdog{"null BytesPtr original-box restoration failure"};
+  TypeErasedBox box;
+  EXPECT_FALSE(RustMessageAdapter<BytesPtr>::tryRestore(box, nullptr));
+  EXPECT_TRUE(box.empty());
 }
 
 TEST(AdapterTest, BytesPtrAdapterPreservesChain) {
@@ -135,21 +161,6 @@ TEST(AdapterTest, WrongMessageTypeReportsAdapterFailure) {
 TEST(AdapterTest, NullBytesReportsConversionFailure) {
   TestWatchdog watchdog{"null BytesPtr conversion failure"};
   EXPECT_FALSE(RustMessageAdapter<BytesPtr>::tryBox(nullptr).has_value());
-}
-
-TEST(AdapterTest, UnregisteredTypeIdIsRejected) {
-  TestWatchdog watchdog{"unregistered type ID rejection"};
-  EXPECT_TRUE(isRegisteredRustMessageTypeId(1));
-  EXPECT_FALSE(isRegisteredRustMessageTypeId(0));
-  EXPECT_FALSE(isRegisteredRustMessageTypeId(2));
-}
-
-TEST(AdapterTest, BytesPtrTypeIdStable) {
-  TestWatchdog watchdog{"BytesPtr type ID stability"};
-  EXPECT_EQ(
-      static_cast<uint32_t>(RustMessageAdapter<BytesPtr>::kTypeId),
-      static_cast<uint32_t>(RustMessageTypeId::kBytesPtr));
-  EXPECT_EQ(static_cast<uint32_t>(RustMessageTypeId::kBytesPtr), 1u);
 }
 
 } // namespace

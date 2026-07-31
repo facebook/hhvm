@@ -22,13 +22,14 @@
 //! single-message-type-per-layer rule — `TypeErasedBox` itself never crosses
 //! the FFI boundary.
 //!
-//! # Registered adapters
+//! # Type-erased — the type is the identity, no registry
 //!
-//! Only [`BytesPtr`] (`unique_ptr<folly::IOBuf>`, ID=1) is registered today.
-//! The C++ `isRegisteredRustMessageTypeId` rejects any other numeric ID before
-//! invoking Rust. Native C++ pipelines that use a second message type
-//! (`ParsedFrame`/`ComposedFrame` at the framing layer) have no synchronous
-//! Rust handler consumer, so no second adapter is added now.
+//! An adapter is any type that implements [`RustMessageAdapter`]. The message
+//! type itself is the identity: there is no numeric type-id and no central
+//! enum listing supported types. [`BytesPtr`] (`unique_ptr<folly::IOBuf>`) is
+//! the production adapter; a new message type is added purely by implementing
+//! the trait, exactly like a new `RustMessageAdapter<T>` specialization on the
+//! C++ side.
 //!
 //! # Extension patterns (when a concrete Rust consumer appears)
 //!
@@ -40,38 +41,13 @@
 //! - **Stable C-compatible POD**: declare an intentionally stable `#[repr(C)]`
 //!   shared type and keep the value within `TypeErasedBox`'s 120-byte,
 //!   pointer-align, nothrow-move constraints.
-//!
-//! # Stable type IDs
-//!
-//! [`RustMessageTypeId`] values are append-only: existing IDs must never be
-//! reused or reordered. This mirrors the C++ `EventEnum` append-only contract.
-//! The Rust `BytesPtr=1` and C++ `kBytesPtr=1` must remain identical.
 
 use cxx::UniquePtr;
 use iobuf::folly::IOBuf;
 
-/// Stable numeric type IDs for Rust-registered pipeline message types.
-///
-/// These values cross the FFI boundary and **must remain stable across
-/// builds**. The C++ mirror (`RustMessageTypeId` in `RustMessageAdapter.h`)
-/// carries identical numeric values and the C++ `isRegisteredRustMessageTypeId`
-/// rejects any unregistered ID before the bridge is invoked.
-///
-/// The contract is **append-only**: new variants must be added at the end;
-/// existing variants must never be reordered or reused. This mirrors the
-/// pipeline's `EventEnum` append-only stability contract (the `Count` sentinel
-/// gives storage size on both sides).
-///
-/// Currently only [`BytesPtr`] is registered (`kBytesPtr = 1` in C++).
-#[repr(u32)]
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum RustMessageTypeId {
-    BytesPtr = 1,
-}
-
 /// Owned handle to a `folly::IOBuf` chain crossing the FFI boundary.
 ///
-/// `BytesPtr` is the only registered Rust message adapter for this bridge.
+/// `BytesPtr` is the production Rust message adapter for this bridge.
 /// It represents a `std::unique_ptr<folly::IOBuf>` transferred by move from
 /// C++ to Rust (in `on_read`/`on_write`) or from Rust back to C++ (via
 /// [`CallbackContext::fire_read`] / [`CallbackContext::fire_write`]).
@@ -185,14 +161,13 @@ impl BytesPtr {
 
 /// Adapter trait — types implementing this can cross the FFI boundary.
 ///
-/// Each conforming type provides a stable [`RustMessageTypeId`], a C++
-/// representation type (`CppType`), and lossless round-trip conversion
-/// functions. The conversion is always a **move** — no copying occurs on the
-/// registered `BytesPtr` path.
+/// Each conforming type provides a C++ representation type (`CppRepr`) and
+/// lossless round-trip conversion functions. The conversion is always a
+/// **move** — no copying occurs on the `BytesPtr` path. The type itself is the
+/// identity; there is no numeric type id and no central registry.
 ///
 /// See the module-level documentation for extension patterns.
 pub trait RustMessageAdapter: Sized {
-    const TYPE_ID: RustMessageTypeId;
     type CppRepr;
 
     /// Take ownership from C++ side (called from C++ adapter).
@@ -203,7 +178,6 @@ pub trait RustMessageAdapter: Sized {
 }
 
 impl RustMessageAdapter for BytesPtr {
-    const TYPE_ID: RustMessageTypeId = RustMessageTypeId::BytesPtr;
     type CppRepr = UniquePtr<IOBuf>;
 
     fn from_cpp(cpp_repr: Self::CppRepr) -> Self {
@@ -212,23 +186,5 @@ impl RustMessageAdapter for BytesPtr {
 
     fn into_cpp(self) -> Self::CppRepr {
         self.into_inner()
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn bytes_ptr_type_id() {
-        assert_eq!(BytesPtr::TYPE_ID as u32, 1);
-    }
-
-    #[test]
-    fn bytes_ptr_newtype_prevents_mixing() {
-        // This test verifies the newtype exists and has correct type ID.
-        // Actual round-trip tested in integration tests with C++.
-        let type_id = BytesPtr::TYPE_ID;
-        assert_eq!(type_id, RustMessageTypeId::BytesPtr);
     }
 }

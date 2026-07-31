@@ -1182,11 +1182,11 @@ ReentrancyResult run_reentrancy_test() noexcept {
 // ── Phase 6: adapter extensibility + event noop isolation ─────────────────
 
 AdapterExtResult run_adapter_ext_test() noexcept {
-  TestWatchdog watchdog{"adapter extensibility stable and fallible"};
+  TestWatchdog watchdog{"adapter extensibility - BytesPtr only"};
   rust_handler_reset_test_counts();
 
   uint32_t passed = 0;
-  uint32_t expected = 6;
+  uint32_t expected = 5;
 
   // 1) BytesPtr round-trip preserving pointer identity via makeBytes +
   // erase_and_box + get<BytesPtr>. Zero-copy forward path.
@@ -1236,27 +1236,7 @@ AdapterExtResult run_adapter_ext_test() noexcept {
     }
   }
 
-  // 5) Stable ID registration: only kBytesPtr=1 registered, others rejected.
-  // Also document ParsedFrame (~40B) fits 120-byte inline TypeErasedBox but not
-  // added as Rust adapter because no Rust codec exists yet per audit.
-  bool stable_id_only = false;
-  {
-    bool id1 = isRegisteredRustMessageTypeId(
-        static_cast<uint32_t>(RustMessageTypeId::kBytesPtr));
-    bool id0 = isRegisteredRustMessageTypeId(0);
-    bool id2 = isRegisteredRustMessageTypeId(2);
-    bool idMax = isRegisteredRustMessageTypeId(0xFFFFFFFFu);
-    // ParsedFrame (frame/read/ParsedFrame.h:52-58) is 32B metadata + IOBuf
-    // unique_ptr ~40B < 120B TypeErasedBox inline capacity
-    // (TypeErasedBox.h:127-136), but no Rust codec yet — intentionally not
-    // registered as Rust adapter. This test only checks BytesPtr=1 path.
-    if (id1 && !id0 && !id2 && !idMax) {
-      stable_id_only = true;
-      ++passed;
-    }
-  }
-
-  // 6) Chain independence: IOBuf chain preserved through adapter round-trip,
+  // 5) Chain independence: IOBuf chain preserved through adapter round-trip,
   // zero allocation path, edge case: multi-element chain.
   bool chain_independence = false;
   {
@@ -1285,7 +1265,6 @@ AdapterExtResult run_adapter_ext_test() noexcept {
       .null_rejected = null_rejected,
       .wrong_type_rejected = wrong_type_rejected,
       .empty_rejected = empty_rejected,
-      .stable_id_only = stable_id_only,
       .chain_independence = chain_independence,
       .checks_passed = passed,
       .expected_checks = expected,
@@ -1448,17 +1427,59 @@ EventNoopResult run_event_noop_test() noexcept {
     pipeline.reset();
   }
 
-  // 4) ParsedFrame (~40B) fits 120-byte TypeErasedBox inline capacity but not
-  // added as Rust adapter — documented in comment inside
-  // run_adapter_ext_test above per audit /tmp/phase6-audit.md. Zero-cost
-  // NoEvent verified via no_event_is_noop.
-
   return EventNoopResult{
       .no_event_is_noop = no_event_is_noop,
       .out_of_range_noop = out_of_range_noop,
       .empty_payload_delivered = empty_payload_delivered,
       .subscriber_count_for_A = subscriber_count_for_A,
   };
+}
+
+// Proves forward-unknown via RustTypeErasedBox: a Rust handler forwards the
+// message downstream WITHOUT taking/inspecting it (pass-through), so the
+// inbound reaches the tail and the outbound reaches the head unchanged.
+ForwardUnknownResult run_forward_unknown_test() noexcept {
+  TestWatchdog watchdog{"forward via RustTypeErasedBox pass-through"};
+  folly::EventBase eventBase;
+  MockHeadHandler head;
+  MockTailHandler tail;
+  TestAllocator allocator;
+
+  using ProductionRustHandler = RustHandler<detail::ContextImpl>;
+  auto rustHandler = std::make_unique<ProductionRustHandler>(
+      rust_handler_new_forwarding_test());
+  auto pipeline =
+      PipelineBuilder<MockHeadHandler, MockTailHandler, TestAllocator>()
+          .setEventBase(&eventBase)
+          .setHead(&head)
+          .setTail(&tail)
+          .setAllocator(&allocator)
+          .addNextDuplex<ProductionRustHandler>(
+              rust_middle_tag, std::move(rustHandler))
+          .build();
+  CHECK(pipeline);
+  pipeline->activate();
+  eventBase.loopOnce();
+
+  const auto readResult = pipeline->fireRead(erase_and_box(makeBytes(7, 0xab)));
+  eventBase.loopOnce();
+  const auto writeResult =
+      pipeline->fireWrite(erase_and_box(makeBytes(3, 0xcd)));
+  eventBase.loopOnce();
+
+  using apache::thrift::fast_thrift::channel_pipeline::Result;
+  ForwardUnknownResult result{
+      .tail_reads = static_cast<uint32_t>(tail.readCount()),
+      .head_writes = static_cast<uint32_t>(head.writeCount()),
+      .read_is_error = (readResult == Result::Error),
+      .write_is_error = (writeResult == Result::Error),
+  };
+
+  pipeline->deactivate();
+  eventBase.loopOnce();
+  pipeline.reset();
+  eventBase.loopOnce();
+  return result;
 }
 
 } // namespace channel_pipeline_rust::test

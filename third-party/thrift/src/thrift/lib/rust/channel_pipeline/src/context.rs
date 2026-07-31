@@ -107,6 +107,24 @@ impl<'callback> CallbackContext<'callback> {
         HandlerResult::from_ffi(self.inner.as_mut().fire_write(message.into_cpp()))
     }
 
+    /// Forward the inbound message downstream UNCHANGED, without recovering its
+    /// type ("forward what you don't understand" — the Netty pass-through). The
+    /// whole [`RustTypeErasedBox`] is moved on, so the handler need not (and
+    /// does not) `take` it. Consuming `_msg` releases its borrow and prevents a
+    /// later `take`; the box is forwarded via the context's own reference to it.
+    /// One-shot like [`fire_read`].
+    ///
+    /// [`fire_read`]: CallbackContext::fire_read
+    /// [`RustTypeErasedBox`]: crate::erased::RustTypeErasedBox
+    pub fn forward_read(&mut self, _msg: crate::erased::RustTypeErasedBox<'_>) -> HandlerResult {
+        HandlerResult::from_ffi(self.inner.as_mut().forward_read())
+    }
+
+    /// Symmetric outbound pass-through of the whole message box.
+    pub fn forward_write(&mut self, _msg: crate::erased::RustTypeErasedBox<'_>) -> HandlerResult {
+        HandlerResult::from_ffi(self.inner.as_mut().forward_write())
+    }
+
     /// Arm the native one-shot inbound readiness hook.
     ///
     /// When the transport signals that it is readable again, the C++ shim

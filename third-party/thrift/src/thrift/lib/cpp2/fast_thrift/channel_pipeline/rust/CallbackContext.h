@@ -38,6 +38,13 @@ namespace channel_pipeline_rust {
  *
  * Methods are noexcept, retain nothing, and may forward the original box once.
  *
+ * The Rust handler now receives the borrowed `TypeErasedBox` and recovers the
+ * concrete message itself via `RustTypeErasedBox::take`, which leaves the box
+ * empty. `fireRead`/`fireWrite` therefore restore the returned message into
+ * that same empty box via `RustMessageAdapter<BytesPtr>::tryRestore`,
+ * preserving the same-box fast path. `forwardRead`/`forwardWrite` move the box
+ * on untouched for handlers that never recover the type.
+ *
  * Phase 3 additions:
  * - handlerId(): stable FNV-64 identity set at build time. Never 0 for a valid
  *   installed handler; 0 is the error sentinel for exception paths.
@@ -75,6 +82,14 @@ class CallbackContext final {
 
   int32_t fireRead(std::unique_ptr<folly::IOBuf> message) noexcept;
   int32_t fireWrite(std::unique_ptr<folly::IOBuf> message) noexcept;
+
+  // Forward the message downstream UNCHANGED, without recovering its type.
+  // This is the "forward what you don't understand" (Netty pass-through)
+  // primitive: the whole TypeErasedBox is moved on, so the handler need not
+  // know the concrete type. One-shot, guarded by `forwarded_`, like fireRead.
+  int32_t forwardRead() noexcept;
+  int32_t forwardWrite() noexcept;
+
   void awaitReadReady() noexcept;
   void cancelReadReady() noexcept;
   bool isAwaitingReadReady() const noexcept;

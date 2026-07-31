@@ -16,8 +16,6 @@
 
 #pragma once
 
-#include <memory>
-
 #include <folly/io/IOBuf.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Common.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Handler.h>
@@ -84,9 +82,11 @@ namespace channel_pipeline_rust {
  *
  * ## Supported message type
  *
- * `BytesPtr` (`std::unique_ptr<folly::IOBuf>`) is the only registered
- * zero-copy message adapter. Empty boxes and null IOBufs are rejected before
- * invoking Rust, returning `Result::Error`.
+ * The inbound `TypeErasedBox` is handed to Rust borrowed; the Rust handler
+ * recovers the concrete message itself via `RustTypeErasedBox::take` (the
+ * message type is the identity -- no numeric type id, no registry), or
+ * forwards the box whole without ever inspecting it. Empty boxes are rejected
+ * before invoking Rust, returning `Result::Error`.
  *
  * ## Composition
  *
@@ -131,22 +131,17 @@ class RustHandler {
       Context& ctx,
       apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox&&
           msg) noexcept {
-    using apache::thrift::fast_thrift::channel_pipeline::BytesPtr;
     using apache::thrift::fast_thrift::channel_pipeline::Result;
     try {
       if (msg.empty()) {
-        return Result::Error;
-      }
-      auto bytes = std::move(msg.get<BytesPtr>());
-      if (!bytes) {
         return Result::Error;
       }
       CallbackContext callbackContext{
           static_cast<apache::thrift::fast_thrift::channel_pipeline::detail::
                           ContextImpl&>(ctx),
           msg};
-      auto result = static_cast<Result>(rust_handler_on_read(
-          *rust_handler_, callbackContext, std::move(bytes)));
+      auto result = static_cast<Result>(
+          rust_handler_on_read(*rust_handler_, callbackContext, msg));
       if (result == Result::Backpressure) {
         ctx.awaitReadReady();
       }
@@ -160,24 +155,17 @@ class RustHandler {
       Context& ctx,
       apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox&&
           msg) noexcept {
-    using apache::thrift::fast_thrift::channel_pipeline::BytesPtr;
     using apache::thrift::fast_thrift::channel_pipeline::Result;
     try {
       if (msg.empty()) {
-        return Result::Error;
-      }
-      // Keep the BytesPtr object alive in the box. CallbackContext restores its
-      // ownership by move-assignment before forwarding this same box.
-      auto bytes = std::move(msg.get<BytesPtr>());
-      if (!bytes) {
         return Result::Error;
       }
       CallbackContext callbackContext{
           static_cast<apache::thrift::fast_thrift::channel_pipeline::detail::
                           ContextImpl&>(ctx),
           msg};
-      auto result = static_cast<Result>(rust_handler_on_write(
-          *rust_handler_, callbackContext, std::move(bytes)));
+      auto result = static_cast<Result>(
+          rust_handler_on_write(*rust_handler_, callbackContext, msg));
       if (result == Result::Backpressure) {
         ctx.awaitWriteReady();
       }

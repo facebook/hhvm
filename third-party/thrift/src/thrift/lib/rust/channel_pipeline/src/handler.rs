@@ -23,6 +23,7 @@ use std::sync::atomic::Ordering;
 
 use crate::adapter::BytesPtr;
 use crate::context::CallbackContext;
+use crate::erased::RustTypeErasedBox;
 
 /// FFI-stable result type mirroring C++ `channel_pipeline::Result`.
 ///
@@ -108,11 +109,21 @@ impl HandlerResult {
 /// them. A future extension would add append-only event enum support while
 /// preserving the `CallbackContext` `!Send` invariant.
 pub trait RustHandler: Send + 'static {
-    fn on_read(&mut self, ctx: &mut CallbackContext<'_>, msg: BytesPtr) -> HandlerResult {
-        ctx.fire_read(msg)
+    fn on_read(
+        &mut self,
+        ctx: &mut CallbackContext<'_>,
+        mut msg: RustTypeErasedBox<'_>,
+    ) -> HandlerResult {
+        let m = msg.take::<BytesPtr>();
+        ctx.fire_read(m)
     }
-    fn on_write(&mut self, ctx: &mut CallbackContext<'_>, msg: BytesPtr) -> HandlerResult {
-        ctx.fire_write(msg)
+    fn on_write(
+        &mut self,
+        ctx: &mut CallbackContext<'_>,
+        mut msg: RustTypeErasedBox<'_>,
+    ) -> HandlerResult {
+        let m = msg.take::<BytesPtr>();
+        ctx.fire_write(m)
     }
     fn on_exception(&mut self, _ctx: &mut CallbackContext<'_>) {}
     fn on_read_ready(&mut self, _ctx: &mut CallbackContext<'_>) {}
@@ -149,50 +160,112 @@ pub(crate) struct BackpressureTestHandler;
 pub(crate) struct ErrorTestHandler;
 pub(crate) struct PanickingTestHandler;
 pub(crate) struct LifecycleTestHandler;
+pub(crate) struct ForwardingTestHandler;
 
 impl RustHandler for CountingTestHandler {
-    fn on_read(&mut self, ctx: &mut CallbackContext<'_>, msg: BytesPtr) -> HandlerResult {
+    fn on_read(
+        &mut self,
+        ctx: &mut CallbackContext<'_>,
+        mut msg: RustTypeErasedBox<'_>,
+    ) -> HandlerResult {
+        let m = msg.take::<BytesPtr>();
         READS.fetch_add(1, Ordering::Relaxed);
-        ctx.fire_read(msg)
+        ctx.fire_read(m)
     }
-    fn on_write(&mut self, ctx: &mut CallbackContext<'_>, msg: BytesPtr) -> HandlerResult {
+    fn on_write(
+        &mut self,
+        ctx: &mut CallbackContext<'_>,
+        mut msg: RustTypeErasedBox<'_>,
+    ) -> HandlerResult {
+        let m = msg.take::<BytesPtr>();
         WRITES.fetch_add(1, Ordering::Relaxed);
-        ctx.fire_write(msg)
+        ctx.fire_write(m)
+    }
+}
+
+impl RustHandler for ForwardingTestHandler {
+    // Forwards the message downstream WITHOUT taking/inspecting it — the
+    // "forward what you don't understand" pass-through, via RustTypeErasedBox.
+    fn on_read(
+        &mut self,
+        ctx: &mut CallbackContext<'_>,
+        msg: RustTypeErasedBox<'_>,
+    ) -> HandlerResult {
+        ctx.forward_read(msg)
+    }
+    fn on_write(
+        &mut self,
+        ctx: &mut CallbackContext<'_>,
+        msg: RustTypeErasedBox<'_>,
+    ) -> HandlerResult {
+        ctx.forward_write(msg)
     }
 }
 
 impl RustHandler for BackpressureTestHandler {
-    fn on_read(&mut self, _ctx: &mut CallbackContext<'_>, _msg: BytesPtr) -> HandlerResult {
+    fn on_read(
+        &mut self,
+        _ctx: &mut CallbackContext<'_>,
+        _msg: RustTypeErasedBox<'_>,
+    ) -> HandlerResult {
         HandlerResult::Backpressure
     }
-    fn on_write(&mut self, _ctx: &mut CallbackContext<'_>, _msg: BytesPtr) -> HandlerResult {
+    fn on_write(
+        &mut self,
+        _ctx: &mut CallbackContext<'_>,
+        _msg: RustTypeErasedBox<'_>,
+    ) -> HandlerResult {
         HandlerResult::Backpressure
     }
 }
 
 impl RustHandler for ErrorTestHandler {
-    fn on_read(&mut self, _ctx: &mut CallbackContext<'_>, _msg: BytesPtr) -> HandlerResult {
+    fn on_read(
+        &mut self,
+        _ctx: &mut CallbackContext<'_>,
+        _msg: RustTypeErasedBox<'_>,
+    ) -> HandlerResult {
         HandlerResult::Error
     }
-    fn on_write(&mut self, _ctx: &mut CallbackContext<'_>, _msg: BytesPtr) -> HandlerResult {
+    fn on_write(
+        &mut self,
+        _ctx: &mut CallbackContext<'_>,
+        _msg: RustTypeErasedBox<'_>,
+    ) -> HandlerResult {
         HandlerResult::Error
     }
 }
 
 impl RustHandler for PanickingTestHandler {
-    fn on_read(&mut self, _ctx: &mut CallbackContext<'_>, _msg: BytesPtr) -> HandlerResult {
+    fn on_read(
+        &mut self,
+        _ctx: &mut CallbackContext<'_>,
+        _msg: RustTypeErasedBox<'_>,
+    ) -> HandlerResult {
         panic!("intentional Rust handler read panic")
     }
-    fn on_write(&mut self, _ctx: &mut CallbackContext<'_>, _msg: BytesPtr) -> HandlerResult {
+    fn on_write(
+        &mut self,
+        _ctx: &mut CallbackContext<'_>,
+        _msg: RustTypeErasedBox<'_>,
+    ) -> HandlerResult {
         panic!("intentional Rust handler write panic")
     }
 }
 
 impl RustHandler for LifecycleTestHandler {
-    fn on_read(&mut self, _ctx: &mut CallbackContext<'_>, _msg: BytesPtr) -> HandlerResult {
+    fn on_read(
+        &mut self,
+        _ctx: &mut CallbackContext<'_>,
+        _msg: RustTypeErasedBox<'_>,
+    ) -> HandlerResult {
         HandlerResult::Backpressure
     }
-    fn on_write(&mut self, _ctx: &mut CallbackContext<'_>, _msg: BytesPtr) -> HandlerResult {
+    fn on_write(
+        &mut self,
+        _ctx: &mut CallbackContext<'_>,
+        _msg: RustTypeErasedBox<'_>,
+    ) -> HandlerResult {
         HandlerResult::Backpressure
     }
     fn on_exception(&mut self, _ctx: &mut CallbackContext<'_>) {
@@ -246,13 +319,23 @@ pub(crate) struct LifecycleOrderHandler {
 }
 
 impl RustHandler for LifecycleOrderHandler {
-    fn on_read(&mut self, ctx: &mut CallbackContext<'_>, msg: BytesPtr) -> HandlerResult {
+    fn on_read(
+        &mut self,
+        ctx: &mut CallbackContext<'_>,
+        mut msg: RustTypeErasedBox<'_>,
+    ) -> HandlerResult {
+        let m = msg.take::<BytesPtr>();
         record("read", self.id);
-        ctx.fire_read(msg)
+        ctx.fire_read(m)
     }
-    fn on_write(&mut self, ctx: &mut CallbackContext<'_>, msg: BytesPtr) -> HandlerResult {
+    fn on_write(
+        &mut self,
+        ctx: &mut CallbackContext<'_>,
+        mut msg: RustTypeErasedBox<'_>,
+    ) -> HandlerResult {
+        let m = msg.take::<BytesPtr>();
         record("write", self.id);
-        ctx.fire_write(msg)
+        ctx.fire_write(m)
     }
     fn on_exception(&mut self, _ctx: &mut CallbackContext<'_>) {
         record("exception", self.id);
@@ -276,13 +359,18 @@ pub(crate) struct RecoveringReadHandler {
 }
 
 impl RustHandler for RecoveringReadHandler {
-    fn on_read(&mut self, ctx: &mut CallbackContext<'_>, msg: BytesPtr) -> HandlerResult {
+    fn on_read(
+        &mut self,
+        ctx: &mut CallbackContext<'_>,
+        mut msg: RustTypeErasedBox<'_>,
+    ) -> HandlerResult {
+        let m = msg.take::<BytesPtr>();
         if self.blocked {
             record_event("read_bp");
             return HandlerResult::Backpressure;
         }
         record_event("read_ok");
-        ctx.fire_read(msg)
+        ctx.fire_read(m)
     }
     fn on_read_ready(&mut self, _ctx: &mut CallbackContext<'_>) {
         record_event("read_ready");
@@ -298,13 +386,18 @@ pub(crate) struct RecoveringWriteHandler {
 }
 
 impl RustHandler for RecoveringWriteHandler {
-    fn on_write(&mut self, ctx: &mut CallbackContext<'_>, msg: BytesPtr) -> HandlerResult {
+    fn on_write(
+        &mut self,
+        ctx: &mut CallbackContext<'_>,
+        mut msg: RustTypeErasedBox<'_>,
+    ) -> HandlerResult {
+        let m = msg.take::<BytesPtr>();
         if self.blocked {
             record_event("write_bp");
             return HandlerResult::Backpressure;
         }
         record_event("write_ok");
-        ctx.fire_write(msg)
+        ctx.fire_write(m)
     }
     fn on_write_ready(&mut self, _ctx: &mut CallbackContext<'_>) {
         record_event("write_ready");
@@ -321,17 +414,27 @@ pub(crate) struct BidirectionalHandler {
 }
 
 impl RustHandler for BidirectionalHandler {
-    fn on_read(&mut self, ctx: &mut CallbackContext<'_>, msg: BytesPtr) -> HandlerResult {
+    fn on_read(
+        &mut self,
+        ctx: &mut CallbackContext<'_>,
+        mut msg: RustTypeErasedBox<'_>,
+    ) -> HandlerResult {
+        let m = msg.take::<BytesPtr>();
         if self.read_blocked {
             return HandlerResult::Backpressure;
         }
-        ctx.fire_read(msg)
+        ctx.fire_read(m)
     }
-    fn on_write(&mut self, ctx: &mut CallbackContext<'_>, msg: BytesPtr) -> HandlerResult {
+    fn on_write(
+        &mut self,
+        ctx: &mut CallbackContext<'_>,
+        mut msg: RustTypeErasedBox<'_>,
+    ) -> HandlerResult {
+        let m = msg.take::<BytesPtr>();
         if self.write_blocked {
             return HandlerResult::Backpressure;
         }
-        ctx.fire_write(msg)
+        ctx.fire_write(m)
     }
     fn on_read_ready(&mut self, _ctx: &mut CallbackContext<'_>) {
         record_event("read_ready");
@@ -348,7 +451,11 @@ pub(crate) struct ReadRearmHandler {
 }
 
 impl RustHandler for ReadRearmHandler {
-    fn on_read(&mut self, _ctx: &mut CallbackContext<'_>, _msg: BytesPtr) -> HandlerResult {
+    fn on_read(
+        &mut self,
+        _ctx: &mut CallbackContext<'_>,
+        _msg: RustTypeErasedBox<'_>,
+    ) -> HandlerResult {
         HandlerResult::Backpressure
     }
     fn on_read_ready(&mut self, ctx: &mut CallbackContext<'_>) {
@@ -363,7 +470,11 @@ impl RustHandler for ReadRearmHandler {
 pub(crate) struct ReadinessProbeHandler;
 
 impl RustHandler for ReadinessProbeHandler {
-    fn on_read(&mut self, ctx: &mut CallbackContext<'_>, _msg: BytesPtr) -> HandlerResult {
+    fn on_read(
+        &mut self,
+        ctx: &mut CallbackContext<'_>,
+        _msg: RustTypeErasedBox<'_>,
+    ) -> HandlerResult {
         let mut checks = 0u32;
         if !ctx.is_awaiting_read_ready() {
             checks += 1;
@@ -412,10 +523,18 @@ pub(crate) const READINESS_PROBE_CHECK_COUNT: u32 = 10;
 pub(crate) struct ReadyRearmBenchHandler;
 
 impl RustHandler for ReadyRearmBenchHandler {
-    fn on_read(&mut self, _ctx: &mut CallbackContext<'_>, _msg: BytesPtr) -> HandlerResult {
+    fn on_read(
+        &mut self,
+        _ctx: &mut CallbackContext<'_>,
+        _msg: RustTypeErasedBox<'_>,
+    ) -> HandlerResult {
         HandlerResult::Backpressure
     }
-    fn on_write(&mut self, _ctx: &mut CallbackContext<'_>, _msg: BytesPtr) -> HandlerResult {
+    fn on_write(
+        &mut self,
+        _ctx: &mut CallbackContext<'_>,
+        _msg: RustTypeErasedBox<'_>,
+    ) -> HandlerResult {
         HandlerResult::Backpressure
     }
     fn on_read_ready(&mut self, ctx: &mut CallbackContext<'_>) {
@@ -431,10 +550,18 @@ pub(crate) struct PanickingLifecycleHandler;
 pub(crate) struct RearmOnRemovedHandler;
 
 impl RustHandler for RearmOnRemovedHandler {
-    fn on_read(&mut self, _ctx: &mut CallbackContext<'_>, _msg: BytesPtr) -> HandlerResult {
+    fn on_read(
+        &mut self,
+        _ctx: &mut CallbackContext<'_>,
+        _msg: RustTypeErasedBox<'_>,
+    ) -> HandlerResult {
         HandlerResult::Backpressure
     }
-    fn on_write(&mut self, _ctx: &mut CallbackContext<'_>, _msg: BytesPtr) -> HandlerResult {
+    fn on_write(
+        &mut self,
+        _ctx: &mut CallbackContext<'_>,
+        _msg: RustTypeErasedBox<'_>,
+    ) -> HandlerResult {
         HandlerResult::Backpressure
     }
     fn handler_removed(&mut self, ctx: &mut CallbackContext<'_>) {
@@ -445,10 +572,18 @@ impl RustHandler for RearmOnRemovedHandler {
 }
 
 impl RustHandler for PanickingLifecycleHandler {
-    fn on_read(&mut self, _ctx: &mut CallbackContext<'_>, _msg: BytesPtr) -> HandlerResult {
+    fn on_read(
+        &mut self,
+        _ctx: &mut CallbackContext<'_>,
+        _msg: RustTypeErasedBox<'_>,
+    ) -> HandlerResult {
         HandlerResult::Backpressure
     }
-    fn on_write(&mut self, _ctx: &mut CallbackContext<'_>, _msg: BytesPtr) -> HandlerResult {
+    fn on_write(
+        &mut self,
+        _ctx: &mut CallbackContext<'_>,
+        _msg: RustTypeErasedBox<'_>,
+    ) -> HandlerResult {
         HandlerResult::Backpressure
     }
     fn on_read_ready(&mut self, _ctx: &mut CallbackContext<'_>) {
@@ -482,11 +617,20 @@ static PHASE3_CLOSE_CHECKS: AtomicU32 = AtomicU32::new(0);
 pub(crate) struct IdentityHandler;
 
 impl RustHandler for IdentityHandler {
-    fn on_read(&mut self, ctx: &mut CallbackContext<'_>, msg: BytesPtr) -> HandlerResult {
+    fn on_read(
+        &mut self,
+        ctx: &mut CallbackContext<'_>,
+        mut msg: RustTypeErasedBox<'_>,
+    ) -> HandlerResult {
+        let m = msg.take::<BytesPtr>();
         PHASE3_HANDLER_ID.store(ctx.handler_id(), Ordering::Relaxed);
-        ctx.fire_read(msg)
+        ctx.fire_read(m)
     }
-    fn on_write(&mut self, ctx: &mut CallbackContext<'_>, _msg: BytesPtr) -> HandlerResult {
+    fn on_write(
+        &mut self,
+        ctx: &mut CallbackContext<'_>,
+        _msg: RustTypeErasedBox<'_>,
+    ) -> HandlerResult {
         PHASE3_HANDLER_ID.store(ctx.handler_id(), Ordering::Relaxed);
         HandlerResult::Success
     }
@@ -498,7 +642,11 @@ impl RustHandler for IdentityHandler {
 pub(crate) struct AllocationProbeHandler;
 
 impl RustHandler for AllocationProbeHandler {
-    fn on_read(&mut self, ctx: &mut CallbackContext<'_>, _msg: BytesPtr) -> HandlerResult {
+    fn on_read(
+        &mut self,
+        ctx: &mut CallbackContext<'_>,
+        _msg: RustTypeErasedBox<'_>,
+    ) -> HandlerResult {
         let mut ok = 0u32;
         if let Some(buf) = ctx.allocate(0) {
             let _ = buf.chain_data_len();
@@ -533,9 +681,14 @@ pub(crate) const ALLOCATION_PROBE_CHECK_COUNT: u32 = 6;
 pub(crate) struct CopyProbeHandler;
 
 impl RustHandler for CopyProbeHandler {
-    fn on_read(&mut self, ctx: &mut CallbackContext<'_>, msg: BytesPtr) -> HandlerResult {
+    fn on_read(
+        &mut self,
+        ctx: &mut CallbackContext<'_>,
+        mut msg: RustTypeErasedBox<'_>,
+    ) -> HandlerResult {
+        let m = msg.take::<BytesPtr>();
         let mut ok = 0u32;
-        let inbound_len = msg.chain_data_len();
+        let inbound_len = m.chain_data_len();
         if inbound_len > 0 {
             ok += 1;
         }
@@ -577,7 +730,7 @@ impl RustHandler for CopyProbeHandler {
             ok += 1;
         }
         PHASE3_COPY_CHECKS.store(ok, Ordering::Relaxed);
-        ctx.fire_read(msg)
+        ctx.fire_read(m)
     }
 }
 pub(crate) const COPY_PROBE_CHECK_COUNT: u32 = 9;
@@ -585,7 +738,12 @@ pub(crate) const COPY_PROBE_CHECK_COUNT: u32 = 9;
 pub(crate) struct CloseProbeHandler;
 
 impl RustHandler for CloseProbeHandler {
-    fn on_read(&mut self, ctx: &mut CallbackContext<'_>, msg: BytesPtr) -> HandlerResult {
+    fn on_read(
+        &mut self,
+        ctx: &mut CallbackContext<'_>,
+        mut msg: RustTypeErasedBox<'_>,
+    ) -> HandlerResult {
+        let m = msg.take::<BytesPtr>();
         let mut ok = 0u32;
         if !ctx.is_closed() {
             ok += 1;
@@ -610,7 +768,7 @@ impl RustHandler for CloseProbeHandler {
         if ctx.is_closed() {
             ok += 1;
         }
-        let fw = ctx.fire_read(msg);
+        let fw = ctx.fire_read(m);
         if fw == HandlerResult::Success {
             ok += 1;
         }
@@ -665,10 +823,15 @@ impl RustHandler for StateMachineHandler {
         PHASE5_P5_ACTIVE.fetch_add(1, Ordering::Relaxed);
         p5_record("active", self.id);
     }
-    fn on_read(&mut self, ctx: &mut CallbackContext<'_>, msg: BytesPtr) -> HandlerResult {
+    fn on_read(
+        &mut self,
+        ctx: &mut CallbackContext<'_>,
+        mut msg: RustTypeErasedBox<'_>,
+    ) -> HandlerResult {
+        let m = msg.take::<BytesPtr>();
         PHASE5_P5_READ.fetch_add(1, Ordering::Relaxed);
         p5_record("read", self.id);
-        let r = ctx.fire_read(msg);
+        let r = ctx.fire_read(m);
         if r == HandlerResult::Success {
             if let Ok(mut bits) = PHASE5_STATE.lock() {
                 *bits |= 4;
@@ -676,10 +839,15 @@ impl RustHandler for StateMachineHandler {
         }
         HandlerResult::Success
     }
-    fn on_write(&mut self, ctx: &mut CallbackContext<'_>, msg: BytesPtr) -> HandlerResult {
+    fn on_write(
+        &mut self,
+        ctx: &mut CallbackContext<'_>,
+        mut msg: RustTypeErasedBox<'_>,
+    ) -> HandlerResult {
+        let m = msg.take::<BytesPtr>();
         PHASE5_P5_WRITE.fetch_add(1, Ordering::Relaxed);
         p5_record("write", self.id);
-        let r = ctx.fire_write(msg);
+        let r = ctx.fire_write(m);
         if r == HandlerResult::Success {
             if let Ok(mut bits) = PHASE5_STATE.lock() {
                 *bits |= 8;
@@ -707,10 +875,18 @@ pub(crate) const STATE_MACHINE_STAGE_COUNT: u32 = 6;
 pub(crate) struct PanicRetentionHandler;
 
 impl RustHandler for PanicRetentionHandler {
-    fn on_read(&mut self, _ctx: &mut CallbackContext<'_>, _msg: BytesPtr) -> HandlerResult {
+    fn on_read(
+        &mut self,
+        _ctx: &mut CallbackContext<'_>,
+        _msg: RustTypeErasedBox<'_>,
+    ) -> HandlerResult {
         panic!("intentional read panic with borrowed ctx")
     }
-    fn on_write(&mut self, _ctx: &mut CallbackContext<'_>, _msg: BytesPtr) -> HandlerResult {
+    fn on_write(
+        &mut self,
+        _ctx: &mut CallbackContext<'_>,
+        _msg: RustTypeErasedBox<'_>,
+    ) -> HandlerResult {
         panic!("intentional write panic with borrowed ctx")
     }
     // Lifecycle panics contained via contain_with_context — prove non-escape.
@@ -734,8 +910,13 @@ impl RustHandler for PanicRetentionHandler {
 pub(crate) struct ExceptionPreserveHandler;
 
 impl RustHandler for ExceptionPreserveHandler {
-    fn on_read(&mut self, ctx: &mut CallbackContext<'_>, msg: BytesPtr) -> HandlerResult {
-        ctx.fire_read(msg)
+    fn on_read(
+        &mut self,
+        ctx: &mut CallbackContext<'_>,
+        mut msg: RustTypeErasedBox<'_>,
+    ) -> HandlerResult {
+        let m = msg.take::<BytesPtr>();
+        ctx.fire_read(m)
     }
     fn on_exception(&mut self, _ctx: &mut CallbackContext<'_>) {
         PHASE5_EXCEPTION_PRESERVED.fetch_add(1, Ordering::Relaxed);
@@ -749,15 +930,25 @@ impl RustHandler for ReentrancyHandler {
         PHASE5_REENTRANCY.fetch_add(1, Ordering::Relaxed);
         PHASE5_P5_ADDED.fetch_add(1, Ordering::Relaxed);
     }
-    fn on_read(&mut self, ctx: &mut CallbackContext<'_>, msg: BytesPtr) -> HandlerResult {
+    fn on_read(
+        &mut self,
+        ctx: &mut CallbackContext<'_>,
+        mut msg: RustTypeErasedBox<'_>,
+    ) -> HandlerResult {
+        let m = msg.take::<BytesPtr>();
         PHASE5_REENTRANCY.fetch_add(1, Ordering::Relaxed);
         PHASE5_P5_READ.fetch_add(1, Ordering::Relaxed);
-        ctx.fire_read(msg)
+        ctx.fire_read(m)
     }
-    fn on_write(&mut self, ctx: &mut CallbackContext<'_>, msg: BytesPtr) -> HandlerResult {
+    fn on_write(
+        &mut self,
+        ctx: &mut CallbackContext<'_>,
+        mut msg: RustTypeErasedBox<'_>,
+    ) -> HandlerResult {
+        let m = msg.take::<BytesPtr>();
         PHASE5_REENTRANCY.fetch_add(1, Ordering::Relaxed);
         PHASE5_P5_WRITE.fetch_add(1, Ordering::Relaxed);
-        ctx.fire_write(msg)
+        ctx.fire_write(m)
     }
     fn on_read_ready(&mut self, ctx: &mut CallbackContext<'_>) {
         // Reentrant re-arm inside ready callback — must stay alloc-free, one-shot per gen.

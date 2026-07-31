@@ -16,10 +16,18 @@
 
 //! Synchronous Rust handler bridge for the `fast_thrift` channel pipeline.
 //!
+//! # Status: experimental prototype
+//!
+//! This is an **experimental, prototype** Rust integration into
+//! `channel_pipeline`, built and owned by the **Thrift team** (oncall:
+//! `thrift`). It is a research/experiment effort, not a supported product:
+//! the API may change or be removed without notice. Do not depend on it in
+//! production.
+//!
 //! # Overview
 //!
 //! This crate provides a pay-for-use, opt-in Rust integration for the
-//! `channel_pipeline` framework (oncall: `rust_thrift`). It lets you write a
+//! `channel_pipeline` framework. It lets you write a
 //! pipeline handler in Rust that participates synchronously in a C++ pipeline.
 //! All callbacks arrive on the pipeline's EventBase thread with a borrowed,
 //! non-escapable [`CallbackContext`] that is structurally `!Send`/`!Sync`.
@@ -38,14 +46,15 @@
 //! # Quick start
 //!
 //! ```rust,ignore
-//! use channel_pipeline::{BytesPtr, CallbackContext, HandlerResult, RustHandler};
+//! use channel_pipeline::{BytesPtr, CallbackContext, HandlerResult, RustHandler, RustTypeErasedBox};
 //!
 //! pub struct MyHandler;
 //!
 //! impl RustHandler for MyHandler {
-//!     fn on_read(&mut self, ctx: &mut CallbackContext<'_>, msg: BytesPtr) -> HandlerResult {
-//!         // Inspect or transform `msg`, then forward downstream.
-//!         ctx.fire_read(msg)
+//!     fn on_read(&mut self, ctx: &mut CallbackContext<'_>, mut msg: RustTypeErasedBox<'_>) -> HandlerResult {
+//!         let m = msg.take::<BytesPtr>(); // recover the concrete type (dev-checked)
+//!         // Inspect or transform `m`, then forward downstream.
+//!         ctx.fire_read(m)
 //!     }
 //! }
 //! ```
@@ -65,7 +74,6 @@
 //! | [`BytesPtr`] | Zero-copy `unique_ptr<folly::IOBuf>` adapter |
 //! | [`HandlerResult`] | FFI-stable return value (`Success`, `Backpressure`, `Error`) |
 //! | [`RustMessageAdapter`] | Trait describing how a message type crosses the FFI boundary |
-//! | [`RustMessageTypeId`] | Stable numeric IDs for registered adapter types |
 //! | [`NoopHandler`] | Pass-through handler for testing and composition |
 //!
 //! # Opt-in: zero cost for native pipelines
@@ -120,9 +128,10 @@
 //!
 //! # Message adapter extension
 //!
-//! Only [`BytesPtr`] (`unique_ptr<folly::IOBuf>`, ID=1) is registered today.
-//! Type IDs are append-only. A future Rust handler at the framing layer that
-//! needs `ParsedFrame`/`ComposedFrame` should use an opaque
+//! Any type implementing [`RustMessageAdapter`] can flow through a Rust
+//! handler; the message type itself is the identity, so there is no numeric
+//! type id and no central registry. A future Rust handler at the framing layer
+//! that needs `ParsedFrame`/`ComposedFrame` should use an opaque
 //! `UniquePtr<ParsedFrame>` boxed via CXX methods (never mirror the C++ layout)
 //! or serialize via `cxx-thrift-utils`. The single-message-type-per-layer
 //! invariant is preserved: adapters convert at the handler boundary;
@@ -142,13 +151,15 @@
 
 pub mod adapter;
 pub mod context;
+pub mod erased;
 pub mod ffi;
 pub mod handler;
 
 pub use adapter::BytesPtr;
 pub use adapter::RustMessageAdapter;
-pub use adapter::RustMessageTypeId;
 pub use context::CallbackContext;
+pub use erased::ErasedCheck;
+pub use erased::RustTypeErasedBox;
 pub use handler::HandlerResult;
 pub use handler::NoopHandler;
 pub use handler::RustHandler;

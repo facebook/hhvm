@@ -40,6 +40,7 @@ struct ExceptionPreserveResult;
 struct ReentrancyResult;
 struct AdapterExtResult;
 struct EventNoopResult;
+struct ForwardUnknownResult;
 
 PipelineTestResult run_pipeline_test() noexcept;
 BehaviorTestResult run_behavior_test() noexcept;
@@ -69,14 +70,8 @@ PanicRetentionResult run_panic_retention_test() noexcept;
 ExceptionPreserveResult run_exception_preserve_test() noexcept;
 ReentrancyResult run_reentrancy_test() noexcept;
 
-// ── Phase 6: adapter extensibility + event noop ────────────────────────────
-// PHASE6_* counters — dedicated atomics isolated from Phase3/Phase5 SEQUENCE.
-// Structs fully defined in Rust cxx::bridge (integration_test.rs); forward
-// declare here so generated.h provides the definition, avoiding redefinition.
-struct AdapterExtResult;
-struct EventNoopResult;
-
 AdapterExtResult run_adapter_ext_test() noexcept;
 EventNoopResult run_event_noop_test() noexcept;
+ForwardUnknownResult run_forward_unknown_test() noexcept;
 
 } // namespace channel_pipeline_rust::test

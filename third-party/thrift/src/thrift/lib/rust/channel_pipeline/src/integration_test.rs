@@ -180,14 +180,13 @@ mod ffi {
         completed: bool,
     }
 
-    // ── Phase 6: adapter extensibility + event noop ────────────────────────
+    // ── Phase 6: adapter extensibility + event noop ──────────────────────
 
     struct AdapterExtResult {
         pointer_identity: bool,
         null_rejected: bool,
         wrong_type_rejected: bool,
         empty_rejected: bool,
-        stable_id_only: bool,
         chain_independence: bool,
         checks_passed: u32,
         expected_checks: u32,
@@ -198,6 +197,13 @@ mod ffi {
         out_of_range_noop: bool,
         empty_payload_delivered: bool,
         subscriber_count_for_A: u32,
+    }
+
+    struct ForwardUnknownResult {
+        tail_reads: u32,
+        head_writes: u32,
+        read_is_error: bool,
+        write_is_error: bool,
     }
 
     unsafe extern "C++" {
@@ -229,6 +235,7 @@ mod ffi {
         fn run_reentrancy_test() -> ReentrancyResult;
         fn run_adapter_ext_test() -> AdapterExtResult;
         fn run_event_noop_test() -> EventNoopResult;
+        fn run_forward_unknown_test() -> ForwardUnknownResult;
     }
 }
 
@@ -495,7 +502,7 @@ fn reentrancy_and_rearm_deterministic() {
     assert_eq!(result.tail_reads, 1);
 }
 
-// ── Phase 6: adapter extensibility stable & fallible + event noop ──────────
+// ── Phase 6: adapter extensibility + event noop ───────────────────────────
 
 #[test]
 fn adapter_extensibility_stable_and_fallible() {
@@ -512,10 +519,6 @@ fn adapter_extensibility_stable_and_fallible() {
     assert!(
         result.empty_rejected,
         "empty TypeErasedBox -> tryTake must -> nullopt"
-    );
-    assert!(
-        result.stable_id_only,
-        "only kBytesPtr=1 registered, others rejected; ParsedFrame (~40B) fits 120B but not added (no Rust codec per audit)"
     );
     assert!(
         result.chain_independence,
@@ -547,5 +550,30 @@ fn event_subsystem_noop_and_const_ref() {
         result.subscriber_count_for_A >= 2,
         "Alpha subscriber count proof of dispatch: empty + typed payload, got {}",
         result.subscriber_count_for_A
+    );
+}
+
+#[test]
+fn handler_forwards_message_via_erased_box_without_taking() {
+    // Forward-unknown: the Rust handler forwards the RustTypeErasedBox
+    // downstream WITHOUT calling take (it never inspects the concrete type).
+    // The inbound message reaches the tail and the outbound reaches the head,
+    // unchanged and without error.
+    let result = ffi::run_forward_unknown_test();
+    assert_eq!(
+        result.tail_reads, 1,
+        "forwarded inbound message reaches the tail"
+    );
+    assert_eq!(
+        result.head_writes, 1,
+        "forwarded outbound message reaches the head"
+    );
+    assert!(
+        !result.read_is_error,
+        "pass-through forward is not an error"
+    );
+    assert!(
+        !result.write_is_error,
+        "pass-through forward is not an error"
     );
 }

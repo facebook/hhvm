@@ -18,6 +18,8 @@
 
 #include <cstring>
 
+#include <thrift/lib/cpp2/fast_thrift/channel_pipeline/rust/RustMessageAdapter.h>
+
 namespace channel_pipeline_rust {
 namespace {
 
@@ -36,7 +38,12 @@ int32_t CallbackContext::fireRead(
     return toInt(Result::Error);
   }
   forwarded_ = true;
-  message_->get<BytesPtr>() = std::move(message);
+  // The Rust handler took the value out of the box, leaving it empty; restore
+  // the returned message into that same box to keep the same-box fast path.
+  if (!RustMessageAdapter<BytesPtr>::tryRestore(
+          *message_, std::move(message))) {
+    return toInt(Result::Error);
+  }
   return toInt(context_.fireRead(std::move(*message_)));
 }
 
@@ -46,7 +53,26 @@ int32_t CallbackContext::fireWrite(
     return toInt(Result::Error);
   }
   forwarded_ = true;
-  message_->get<BytesPtr>() = std::move(message);
+  if (!RustMessageAdapter<BytesPtr>::tryRestore(
+          *message_, std::move(message))) {
+    return toInt(Result::Error);
+  }
+  return toInt(context_.fireWrite(std::move(*message_)));
+}
+
+int32_t CallbackContext::forwardRead() noexcept {
+  if (!message_ || forwarded_ || message_->empty()) {
+    return toInt(Result::Error);
+  }
+  forwarded_ = true;
+  return toInt(context_.fireRead(std::move(*message_)));
+}
+
+int32_t CallbackContext::forwardWrite() noexcept {
+  if (!message_ || forwarded_ || message_->empty()) {
+    return toInt(Result::Error);
+  }
+  forwarded_ = true;
   return toInt(context_.fireWrite(std::move(*message_)));
 }
 

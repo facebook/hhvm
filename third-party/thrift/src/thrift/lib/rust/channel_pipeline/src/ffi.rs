@@ -31,6 +31,7 @@ pub(crate) mod ffi {
 
         fn rust_handler_new_noop() -> Box<RustHandlerOpaque>;
         fn rust_handler_new_counting_test() -> Box<RustHandlerOpaque>;
+        fn rust_handler_new_forwarding_test() -> Box<RustHandlerOpaque>;
         fn rust_handler_new_backpressure_test() -> Box<RustHandlerOpaque>;
         fn rust_handler_new_error_test() -> Box<RustHandlerOpaque>;
         fn rust_handler_new_panicking_test() -> Box<RustHandlerOpaque>;
@@ -82,12 +83,12 @@ pub(crate) mod ffi {
         fn rust_handler_on_read(
             handler: &mut RustHandlerOpaque,
             context: Pin<&mut FfiCallbackContext>,
-            message: UniquePtr<IOBuf>,
+            msg: Pin<&mut TypeErasedBox>,
         ) -> i32;
         fn rust_handler_on_write(
             handler: &mut RustHandlerOpaque,
             context: Pin<&mut FfiCallbackContext>,
-            message: UniquePtr<IOBuf>,
+            msg: Pin<&mut TypeErasedBox>,
         ) -> i32;
         fn rust_handler_on_exception(
             handler: &mut RustHandlerOpaque,
@@ -130,6 +131,11 @@ pub(crate) mod ffi {
 
         #[cxx_name = "fireWrite"]
         fn fire_write(self: Pin<&mut FfiCallbackContext>, message: UniquePtr<IOBuf>) -> i32;
+
+        #[cxx_name = "forwardRead"]
+        fn forward_read(self: Pin<&mut FfiCallbackContext>) -> i32;
+        #[cxx_name = "forwardWrite"]
+        fn forward_write(self: Pin<&mut FfiCallbackContext>) -> i32;
 
         #[cxx_name = "awaitReadReady"]
         fn await_read_ready(self: Pin<&mut FfiCallbackContext>);
@@ -174,13 +180,30 @@ pub(crate) mod ffi {
         include!("folly/io/IOBuf.h");
         type IOBuf = iobuf::IOBuf;
     }
+
+    unsafe extern "C++" {
+        include!("thrift/lib/cpp2/fast_thrift/channel_pipeline/rust/RustTypeErasedBox.h");
+
+        /// Opaque C++ `TypeErasedBox`, borrowed by Rust as `Pin<&mut ..>` (it
+        /// lives on the stack; Rust never owns or heap-allocates it). The typed
+        /// take is a zero-copy `unsafe` relocate done entirely on the Rust side
+        /// (see `RustTypeErasedBox::take`); `reset` flips it to empty afterward.
+        #[namespace = "apache::thrift::fast_thrift::channel_pipeline"]
+        type TypeErasedBox;
+
+        fn rust_teb_reset(teb: Pin<&mut TypeErasedBox>);
+        fn rust_teb_is_empty(teb: &TypeErasedBox) -> bool;
+        fn rust_teb_holds_bytes(teb: &TypeErasedBox) -> bool;
+    }
 }
 
-use crate::adapter::BytesPtr;
 use crate::context::CallbackContext;
+use crate::erased::RustTypeErasedBox;
+use crate::ffi::ffi::TypeErasedBox;
 use crate::handler::BackpressureTestHandler;
 use crate::handler::CountingTestHandler;
 use crate::handler::ErrorTestHandler;
+use crate::handler::ForwardingTestHandler;
 use crate::handler::HandlerResult;
 use crate::handler::LifecycleTestHandler;
 use crate::handler::NoopHandler;
@@ -211,6 +234,9 @@ pub fn rust_handler_new_noop() -> Box<RustHandlerOpaque> {
 }
 pub fn rust_handler_new_counting_test() -> Box<RustHandlerOpaque> {
     boxed(CountingTestHandler)
+}
+pub fn rust_handler_new_forwarding_test() -> Box<RustHandlerOpaque> {
+    boxed(ForwardingTestHandler)
 }
 pub fn rust_handler_new_backpressure_test() -> Box<RustHandlerOpaque> {
     boxed(BackpressureTestHandler)
@@ -354,13 +380,18 @@ pub fn rust_handler_state_machine_stage_count() -> u32 {
     crate::handler::STATE_MACHINE_STAGE_COUNT
 }
 
-fn dispatch(
+fn dispatch_erased(
     handler: &mut RustHandlerOpaque,
     context: std::pin::Pin<&mut ffi::FfiCallbackContext>,
-    message: cxx::UniquePtr<iobuf::folly::IOBuf>,
-    callback: impl FnOnce(&mut dyn RustHandler, &mut CallbackContext<'_>, BytesPtr) -> HandlerResult,
+    msg: std::pin::Pin<&mut TypeErasedBox>,
+    callback: impl FnOnce(
+        &mut dyn RustHandler,
+        &mut CallbackContext<'_>,
+        RustTypeErasedBox<'_>,
+    ) -> HandlerResult,
 ) -> i32 {
-    if message.is_null() {
+    // Empty box → Error (mirrors prior null check + empty check in C++ shim).
+    if ffi::rust_teb_is_empty(msg.as_ref().get_ref()) {
         return HandlerResult::Error as i32;
     }
     // SAFETY: `AssertUnwindSafe` is sound here because:
@@ -370,15 +401,16 @@ fn dispatch(
     //     the pipeline immediately returns `Error` to C++ and does not
     //     re-invoke the handler with that intermediate state, so no memory-
     //     safety invariant is violated.
-    // (3) `context` is a stack-scoped `Pin<&mut>` that is not accessed after
-    //     the closure exits (whether by normal return or by panic).
-    // (4) `message` is moved into the closure and is either consumed by the
-    //     callback or dropped when the closure unwinds; no dangling reference.
+    // (3) `context` and `msg` are stack-scoped `Pin<&mut>` borrows that are
+    //     not accessed after the closure exits (whether by normal return or
+    //     by panic).
+    // (4) `msg` borrow is consumed by the callback (take empties it); if the
+    //     closure unwinds the box retains its original state.
     std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
         callback(
             handler.inner.as_mut(),
             &mut CallbackContext::new(context),
-            BytesPtr::new(message),
+            RustTypeErasedBox::new(msg),
         ) as i32
     }))
     .unwrap_or(HandlerResult::Error as i32)
@@ -387,19 +419,19 @@ fn dispatch(
 pub fn rust_handler_on_read(
     handler: &mut RustHandlerOpaque,
     context: std::pin::Pin<&mut ffi::FfiCallbackContext>,
-    message: cxx::UniquePtr<iobuf::folly::IOBuf>,
+    msg: std::pin::Pin<&mut TypeErasedBox>,
 ) -> i32 {
-    dispatch(handler, context, message, |handler, context, message| {
-        handler.on_read(context, message)
+    dispatch_erased(handler, context, msg, |handler, context, msg| {
+        handler.on_read(context, msg)
     })
 }
 pub fn rust_handler_on_write(
     handler: &mut RustHandlerOpaque,
     context: std::pin::Pin<&mut ffi::FfiCallbackContext>,
-    message: cxx::UniquePtr<iobuf::folly::IOBuf>,
+    msg: std::pin::Pin<&mut TypeErasedBox>,
 ) -> i32 {
-    dispatch(handler, context, message, |handler, context, message| {
-        handler.on_write(context, message)
+    dispatch_erased(handler, context, msg, |handler, context, msg| {
+        handler.on_write(context, msg)
     })
 }
 

@@ -16,7 +16,6 @@
 
 #pragma once
 
-#include <cstdint>
 #include <memory>
 #include <optional>
 #include <type_traits>
@@ -27,60 +26,27 @@
 namespace channel_pipeline_rust {
 
 /**
- * Stable numeric type IDs for Rust-supported message types.
- *
- * These IDs cross the FFI boundary and must remain stable across versions.
- * New IDs must be added at the end (append-only); never reuse or reorder
- * existing IDs. This preserves wire compatibility for Rust/C++ interop and
- * mirrors the native EventEnum append-only contract (Count sentinel gives
- * storage size).
- *
- * Phase 6 audit (/tmp/phase6-audit.md): native pipelines DO use a second
- * message type ParsedFrame/ComposedFrame via FrameCodecHandler, but no
- * concrete synchronous Rust handler in the repo consumes it. Rust bridge
- * tests, benches, and production handlers only exercise BytesPtr. Therefore
- * only BytesPtr=1 is registered; second adapter intentionally not added now.
- * BytesPtr remains the zero-copy sole production adapter.
- */
-enum class RustMessageTypeId : uint32_t {
-  kBytesPtr = 1,
-};
-
-/**
- * Whether a numeric type ID is registered for Rust interop.
- *
- * Only BytesPtr=1 is registered today. Unregistered IDs are rejected
- * (return false) — fallible conversion path, no runtime registry, O(1)
- * compile-time check. Mirrors Rust side RustMessageTypeId::BytesPtr=1.
- */
-constexpr bool isRegisteredRustMessageTypeId(uint32_t typeId) noexcept {
-  return typeId == static_cast<uint32_t>(RustMessageTypeId::kBytesPtr);
-}
-
-/**
  * RustMessageAdapter concept — defines how a C++ pipeline message type
  * moves across the FFI boundary to Rust and back.
  *
- * Each Rust-supported message type must specialize this template with:
- * - kTypeId: stable numeric ID exposed to Rust (append-only, never reuse)
+ * The message type itself is the identity — there is NO numeric type id and
+ * NO central enum. Each Rust-supported message type must specialize this
+ * template with:
  * - CppType: the C++ pipeline message type
- * - tryTake(TypeErasedBox&&) -> optional<CppType>: fallible via
- *   std::optional, catches TypeErasedBox mismatch (empty/wrong-type) via
- *   try/catch and returns nullopt, plus null check for BytesPtr
- * - tryBox(CppType&&) -> optional<TypeErasedBox>: fallible, null rejection
- *   returns nullopt; non-null path boxes via erase_and_box (zero-copy move)
- * - box(CppType&&) -> TypeErasedBox: infallible helper DCHECKs non-null
+ * - tryTake(TypeErasedBox&&) -> optional<CppType>: fallible ownership transfer
+ * - tryRestore(TypeErasedBox&, CppType&&) -> bool: restore the original box
+ *   after Rust returns the original message representation
+ * - tryBox(CppType&&) -> optional<TypeErasedBox>: box a replacement or
+ *   fan-out message
+ * - box(CppType&&) -> TypeErasedBox: infallible boxing (DCHECK non-null)
  *
- * Design invariants (Phase 6, Step3):
- * - Stable IDs append-only: new IDs added at end, never reordered/reused.
- * - Only BytesPtr=1 registered today; isRegisteredRustMessageTypeId rejects
- *   unregistered IDs — no runtime registry on native paths.
+ * Design invariants:
  * - tryTake fallible via optional catching TypeErasedBox mismatch (empty box
  *   or wrong type) — mirrors debug-mode TypeMismatch exception, opt builds
  *   rely on single-message-type-per-layer invariant.
  * - tryBox null rejection: null UniquePtr -> nullopt, prevents null crossing.
- * - Concept RustMessageAdapterConcept enforces kTypeId convertible to
- *   RustMessageTypeId, tryTake/tryBox signatures.
+ * - RustMessageAdapterConcept enforces a CppType satisfying TypeErasedBox's
+ *   inline contract and exact tryTake/tryRestore/tryBox signatures.
  * - No runtime registry: compile-time template specialization per type, zero
  *   cost for native C++ pipelines (pipeline_impl has no Rust/CXX edge).
  * - Single-message-type-per-layer preserved: adapters convert at handler
@@ -97,7 +63,6 @@ struct RustMessageAdapter;
 template <>
 struct RustMessageAdapter<
     apache::thrift::fast_thrift::channel_pipeline::BytesPtr> {
-  static constexpr RustMessageTypeId kTypeId = RustMessageTypeId::kBytesPtr;
   using CppType = apache::thrift::fast_thrift::channel_pipeline::BytesPtr;
   // Rust side uses cxx::UniquePtr<folly::IOBuf> via folly/rust/iobuf crate
   // The actual Rust type is opaque; C++ side just passes UniquePtr through.
@@ -116,6 +81,17 @@ struct RustMessageAdapter<
     } catch (...) {
       return std::nullopt;
     }
+  }
+
+  static bool tryRestore(
+      apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox& box,
+      CppType&& value) noexcept {
+    if (!value || !box.empty()) {
+      return false;
+    }
+    box = apache::thrift::fast_thrift::channel_pipeline::erase_and_box(
+        std::move(value));
+    return true;
   }
 
   static apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox box(
@@ -139,18 +115,25 @@ struct RustMessageAdapter<
  * Concept check for conforming adapters.
  */
 template <typename Adapter>
-concept RustMessageAdapterConcept = requires(
-    apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox&& box,
-    typename Adapter::CppType&& cpp_value) {
-  { Adapter::kTypeId } -> std::convertible_to<RustMessageTypeId>;
-  {
-    Adapter::tryTake(std::move(box))
-  } -> std::same_as<std::optional<typename Adapter::CppType>>;
-  {
-    Adapter::tryBox(std::move(cpp_value))
-  } -> std::same_as<std::optional<
-      apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox>>;
-};
+concept RustMessageAdapterConcept =
+    requires {
+      typename Adapter::CppType;
+      typename Adapter::CppType;
+    } &&
+    apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox::fits_inline<
+        typename Adapter::CppType>() &&
+    requires(
+        apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox& box,
+        typename Adapter::CppType&& cxx_value) {
+      {
+        Adapter::tryTake(std::move(box))
+      } -> std::same_as<std::optional<typename Adapter::CppType>>;
+      { Adapter::tryRestore(box, std::move(cxx_value)) } -> std::same_as<bool>;
+      {
+        Adapter::tryBox(std::move(cxx_value))
+      } -> std::same_as<std::optional<
+          apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox>>;
+    };
 
 static_assert(RustMessageAdapterConcept<RustMessageAdapter<
                   apache::thrift::fast_thrift::channel_pipeline::BytesPtr>>);

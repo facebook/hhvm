@@ -48,9 +48,14 @@ class UtilsGivenTargetTestCase(base.TestHHVMBinary):
         self.assertEqual(raw.name, "void (*)(HPHP::ObjectData *)")
 
     def test_template_type(self) -> None:
-        if utils.get_llvm_version(self.target) == utils.LLVMVersion.LLVM15:
+        # The exact spelling of a nested template argument in DWARF depends on
+        # the toolchain: clang 17/19 emitted the unqualified `ParamInfo`, while
+        # clang 15 and clang 21 emit the fully-qualified `HPHP::Func::ParamInfo`.
+        # Try the qualified name first and fall back to the unqualified one so
+        # the test is robust across compiler versions.
+        try:
             ty = utils.Type("HPHP::VMFixedVector<HPHP::Func::ParamInfo>", self.target)
-        else:
+        except AssertionError:
             ty = utils.Type("HPHP::VMFixedVector<ParamInfo>", self.target)
         self.assertTrue(ty.IsTypedefType())
         template = utils.template_type(ty)

@@ -146,6 +146,10 @@ uint32_t writeWTStreamPrefaceToSock(
   }
   return *res;
 }
+
+const auto kBufferedRejectedErr = static_cast<proxygen::HTTP3::ErrorCode>(
+    proxygen::WebTransport::toHTTPErrorCode(
+        proxygen::WebTransport::kBufferedStreamRejected));
 } // namespace
 
 using namespace proxygen::hq;
@@ -190,7 +194,7 @@ void HQSession::onNewBidirectionalStream(quic::StreamId id) noexcept {
 
   // Reject all bidirectional, server-initiated streams, unless WT is supported
   if (id == kMaxClientBidiStreamId ||
-      (isUpstream(direction_) && !supportsWebTransport())) {
+      (isUpstream(direction_) && !mayAcceptWTStreams())) {
     abortStream(HTTPException::Direction::INGRESS_AND_EGRESS,
                 id,
                 HTTP3::ErrorCode::HTTP_STREAM_CREATION_ERROR);
@@ -198,7 +202,7 @@ void HQSession::onNewBidirectionalStream(quic::StreamId id) noexcept {
   }
   auto hqStream = findNonDetachedStream(id);
   DCHECK(!hqStream);
-  if (supportsWebTransport()) {
+  if (advertisedWebTransport()) {
     bidirectionalReadDispatcher_.takeTemporaryOwnership(id);
     sock_->setPeekCallback(id, &bidirectionalReadDispatcher_);
   } else {
@@ -270,7 +274,7 @@ void HQSession::onStopSending(quic::StreamId id,
   auto stream = findStream(id);
   if (stream) {
     handleWriteError(stream, error);
-  } else if (supportsWebTransport() &&
+  } else if (advertisedWebTransport() &&
              // TODO: is it valid to STOP_SENDING WebTransport streams with
              // error codes outside this range (eg: REJECTED)?
              WebTransport::isEncodedApplicationErrorCode(error)) {
@@ -1353,7 +1357,7 @@ folly::Optional<UnidirectionalStreamType> HQSession::parseUniStreamPreface(
       -> folly::Optional<UnidirectionalStreamType> { return type; };
   auto res = hq::withType(preface, parse);
   if (res && *res == hq::UnidirectionalStreamType::WEBTRANSPORT &&
-      !supportsWebTransport()) {
+      !mayAcceptWTStreams()) {
     LOG(ERROR) << "WT stream when it is unsupported sess=" << *this;
     return folly::none;
   }
@@ -1423,15 +1427,16 @@ void HQSession::dispatchControlStream(quic::StreamId id,
 }
 
 void HQSession::rejectStream(quic::StreamId id) {
+  rejectStream(id, HTTP3::ErrorCode::HTTP_STREAM_CREATION_ERROR);
+}
+
+void HQSession::rejectStream(quic::StreamId id, HTTP3::ErrorCode err) {
   if (!sock_) {
     return;
   }
-  // Do not read data for unknown unidirectional stream types.  Send
-  // STOP_SENDING and rely on the peer sending a RESET to clear the stream in
-  // the transport, or the transport to detect if the peer has sent everything.
-  VLOG(4) << "rejectStream id=" << id;
-  sock_->stopSending(id, HTTP3::ErrorCode::HTTP_STREAM_CREATION_ERROR);
-  sock_->resetStream(id, HTTP3::ErrorCode::HTTP_STREAM_CREATION_ERROR);
+  VLOG(4) << "rejectStream id=" << id << " err=" << toString(err);
+  sock_->stopSending(id, err);
+  sock_->resetStream(id, err);
   sock_->setReadCallback(id, nullptr, std::nullopt);
   sock_->setPeekCallback(id, nullptr);
 }
@@ -1450,6 +1455,13 @@ size_t HQSession::cleanupPendingStreams() {
   // Clean up the streams by detaching all callbacks
   for (auto pendingStreamId : streamsToCleanup) {
     clearStreamCallbacks(pendingStreamId);
+  }
+
+  auto pending = std::move(pendingWTStreams_);
+  for (const auto& [_, entry] : pending) {
+    for (auto id : entry->streams) {
+      rejectStream(id, kBufferedRejectedErr);
+    }
   }
 
   return streamsToCleanup.size();
@@ -1596,6 +1608,15 @@ void HQSession::onSettings(const SettingsList& settings) {
     infoCallback_->onSettings(*this, settings);
   }
   receivedSettings_ = true;
+
+  if (!peerAdvertisedWebTransport()) {
+    auto pending = std::move(pendingWTStreams_);
+    for (const auto& [_, entry] : pending) {
+      for (auto id : entry->streams) {
+        rejectStream(id, HTTP3::ErrorCode::HTTP_STREAM_CREATION_ERROR);
+      }
+    }
+  }
 }
 
 void HQSession::applySettings(const SettingsList& settings) {
@@ -2719,6 +2740,7 @@ void HQSession::HQStreamTransportBase::onHeadersComplete(
     ingressPushId_ = folly::none;
   } else {
     txn_.onIngressHeadersComplete(std::move(msg));
+    maybeScheduleWTStreamDrain();
   }
   if (auto httpSessionActivityTracker =
           session_.getHTTPSessionActivityTracker()) {
@@ -2957,6 +2979,7 @@ void HQSession::HQStreamTransportBase::sendHeaders(HTTPTransaction* txn,
   }
 
   tryWtSession(*txn, headers, includeEOM);
+  maybeScheduleWTStreamDrain();
   if (!upstream && headers.isResponse()) {
     onResponse();
   }
@@ -3506,22 +3529,34 @@ void HQSession::HQStreamTransportBase::onPushMessageBegin(HTTPCodec::StreamID,
   // http/3 push in proxygen/lib is not supported
 }
 
-HQSession::HQStreamTransportBase* HQSession::findWTSessionOrAbort(
-    quic::StreamId sessionID, quic::StreamId streamID) {
-  CHECK(supportsWebTransport());
+HQSession::HQStreamTransportBase* HQSession::findEligibleWTSession(
+    quic::StreamId sessionID) {
+  CHECK(advertisedWebTransport());
   auto* connectStream = findNonDetachedStream(sessionID);
-  const bool ok =
-      connectStream && connectStream->txn_.isWebTransportConnectStream();
-  if (!ok) {
-    LOG(ERROR) << "invalid wt connect id=" << sessionID
-               << " stream id=" << streamID;
-    // need to error stopSending/reset this stream
-    abortStream(HTTPException::Direction::INGRESS_AND_EGRESS,
-                streamID,
-                HTTP3::ErrorCode::HTTP_GENERAL_PROTOCOL_ERROR);
+  if (!connectStream || !connectStream->txn_.isWebTransportConnectStream() ||
+      !connectStream->txn_.isUpgradeComplete()) {
     return nullptr;
   }
   return connectStream;
+}
+
+void HQSession::deliverWTStream(HQStreamTransportBase* connectStream,
+                                quic::StreamId streamID) {
+  DCHECK(connectStream);
+  if (connectStream->wtSess_) {
+    if (!connectStream->wtSess_->acquireIngressStream(streamID)) {
+      rejectStream(streamID);
+    }
+    return;
+  }
+  connectStream->txn_.getWebTransport(); // lazy-init webTransportImpl_
+  if (sock_->isBidirectionalStream(streamID)) {
+    auto handle = connectStream->txn_.onWebTransportBidiStream(streamID);
+    sock_->setReadCallback(streamID, handle.readHandle);
+  } else {
+    auto* handle = connectStream->txn_.onWebTransportUniStream(streamID);
+    sock_->setReadCallback(streamID, handle);
+  }
 }
 
 // Peer initiated Uni WT streams
@@ -3533,18 +3568,12 @@ void HQSession::dispatchUniWTStream(quic::StreamId streamID,
   CHECK(!consumeRes.hasError()) << "Unexpected error consuming bytes";
   VLOG(6) << __func__ << " sess=" << *this << " id=" << streamID
           << " wt-sess-id=" << sessionID;
-  auto* connectStream = findWTSessionOrAbort(sessionID, streamID);
+  auto* connectStream = findEligibleWTSession(sessionID);
   if (!connectStream) {
+    bufferPendingWTStream(sessionID, streamID);
     return;
   }
-  if (connectStream->wtSess_) {
-    if (!connectStream->wtSess_->acquireIngressStream(streamID)) {
-      rejectStream(streamID);
-    }
-  } else {
-    auto* handle = connectStream->txn_.onWebTransportUniStream(streamID);
-    sock_->setReadCallback(streamID, handle);
-  }
+  deliverWTStream(connectStream, streamID);
 }
 
 // Peer initiated Bidi WT streams
@@ -3556,17 +3585,69 @@ void HQSession::dispatchBidiWTStream(HTTPCodec::StreamID streamID,
   CHECK(!consumeRes.hasError()) << "Unexpected error consuming bytes";
   VLOG(6) << __func__ << " sess=" << *this << " id=" << streamID
           << " wt-sess-id=" << sessionID;
-  auto* connectStream = findWTSessionOrAbort(sessionID, streamID);
+  auto* connectStream = findEligibleWTSession(sessionID);
   if (!connectStream) {
+    bufferPendingWTStream(sessionID, streamID);
     return;
   }
-  if (connectStream->wtSess_) {
-    if (!connectStream->wtSess_->acquireIngressStream(streamID)) {
-      rejectStream(streamID);
+  deliverWTStream(connectStream, streamID);
+}
+
+void HQSession::PendingWTSession::timeoutExpired() noexcept {
+  session_.expirePendingWTStreams(sessionID_);
+}
+
+void HQSession::bufferPendingWTStream(quic::StreamId sessionID,
+                                      quic::StreamId streamID) {
+  auto [it, inserted] = pendingWTStreams_.try_emplace(sessionID);
+  if (inserted) {
+    it->second = std::make_unique<PendingWTSession>(*this, sessionID);
+    getEventBase()->timer().scheduleTimeout(it->second.get(),
+                                            wtStreamBufferTimeout_);
+  }
+  it->second->streams.push_back(streamID);
+  VLOG(4) << "buffered WT stream id=" << streamID << " wt-sess-id=" << sessionID
+          << " sess=" << *this;
+}
+
+void HQSession::deliverPendingWTStreams(quic::StreamId sessionID) noexcept {
+  auto it = pendingWTStreams_.find(sessionID);
+  if (it == pendingWTStreams_.end()) {
+    return;
+  }
+  auto entry = std::move(it->second);
+  pendingWTStreams_.erase(it);
+  entry->cancelTimeout();
+  auto* connectStream = findEligibleWTSession(sessionID);
+  if (!connectStream) {
+    // CONNECT torn down between schedule and drain (abort / peer reset /
+    // wtFilter_ dropped).
+    VLOG(4) << "WT connect stream gone before drain wt-sess-id=" << sessionID
+            << " sess=" << *this;
+    for (auto id : entry->streams) {
+      rejectStream(id, kBufferedRejectedErr);
     }
-  } else {
-    auto handle = connectStream->txn_.onWebTransportBidiStream(streamID);
-    sock_->setReadCallback(streamID, handle.readHandle);
+    return;
+  }
+  VLOG(4) << "delivering " << entry->streams.size()
+          << " buffered WT streams wt-sess-id=" << sessionID
+          << " sess=" << *this;
+  for (auto id : entry->streams) {
+    deliverWTStream(connectStream, id);
+  }
+}
+
+void HQSession::expirePendingWTStreams(quic::StreamId sessionID) noexcept {
+  auto it = pendingWTStreams_.find(sessionID);
+  if (it == pendingWTStreams_.end()) {
+    return;
+  }
+  auto entry = std::move(it->second);
+  pendingWTStreams_.erase(it);
+  LOG(ERROR) << "WT stream buffer timeout wt-sess-id=" << sessionID
+             << " count=" << entry->streams.size() << " sess=" << *this;
+  for (auto id : entry->streams) {
+    rejectStream(id, kBufferedRejectedErr);
   }
 }
 
@@ -3956,6 +4037,21 @@ bool HQSession::HQStreamTransportBase::tryWtSession(HTTPTransaction& txn,
   // alias shared_ptr
   wtSess_ = std::shared_ptr<H3WtSession>(wtSess, &wtSess->getH3WtSession());
   return true;
+}
+
+void HQSession::HQStreamTransportBase::maybeScheduleWTStreamDrain() {
+  if (!txn_.isWebTransportConnectStream() || !txn_.isUpgradeComplete()) {
+    return;
+  }
+  if (!session_.pendingWTStreams_.contains(getStreamId())) {
+    return;
+  }
+  session_.getEventBase()->runInLoop(
+      [&session = session_,
+       sid = getStreamId(),
+       dg = HQSession::DestructorGuard(&session_)] {
+        session.deliverPendingWTStreams(sid);
+      });
 }
 
 void HQSession::HQStreamTransportBase::onResponse() noexcept {

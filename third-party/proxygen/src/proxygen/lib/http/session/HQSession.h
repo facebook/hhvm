@@ -9,10 +9,12 @@
 #pragma once
 
 #include <folly/container/EvictingCacheMap.h>
+#include <folly/container/F14Map.h>
 #include <folly/io/IOBufQueue.h>
 #include <folly/io/async/AsyncSocket.h>
 #include <folly/io/async/DelayedDestructionBase.h>
 #include <folly/io/async/EventBase.h>
+#include <folly/io/async/HHWheelTimer.h>
 #include <folly/lang/Assume.h>
 #include <memory>
 #include <proxygen/lib/http/codec/HQControlCodec.h>
@@ -82,6 +84,7 @@ constexpr uint8_t kDefaultMaxBufferedDatagrams = 5;
 constexpr uint8_t kMaxStreamsWithBufferedDatagrams = 10;
 // Maximum number of priority updates received when stream is not available
 constexpr uint8_t kMaxBufferedPriorityUpdates = 10;
+constexpr std::chrono::milliseconds kDefaultWTStreamBufferTimeout{1000};
 
 class HQSession
     : public quic::QuicSocket::ConnectionSetupCallback
@@ -178,6 +181,10 @@ class HQSession
   }
   void setStrictValidation(bool strictValidation) {
     strictValidation_ = strictValidation;
+  }
+
+  void setWTStreamBufferTimeout(std::chrono::milliseconds t) {
+    wtStreamBufferTimeout_ = t;
   }
 
   void setEnableEgressPrioritization(bool enableEgressPrioritization) {
@@ -355,6 +362,16 @@ class HQSession
 
   [[nodiscard]] bool supportsWebTransport() const noexcept final {
     return supportsWebTransport_.all();
+  }
+
+  [[nodiscard]] bool advertisedWebTransport() const noexcept {
+    return supportsWebTransport_.test(
+        folly::to_underlying(SettingEnabled::SELF));
+  }
+
+  [[nodiscard]] bool peerAdvertisedWebTransport() const noexcept {
+    return supportsWebTransport_.test(
+        folly::to_underlying(SettingEnabled::PEER));
   }
 
   WebTransportFilter* getWebTransportFilter() const {
@@ -651,7 +668,7 @@ class HQSession
       uint64_t preface) override {
     if (preface ==
         folly::to_underlying(hq::BidirectionalStreamType::WEBTRANSPORT)) {
-      if (supportsWebTransport()) {
+      if (mayAcceptWTStreams()) {
         return hq::BidirectionalStreamType::WEBTRANSPORT;
       } else {
         LOG(ERROR) << "WT stream when it is unsupported sess=" << *this;
@@ -665,7 +682,7 @@ class HQSession
   }
 
   HQStreamTransportBase* FOLLY_NULLABLE
-  findWTSessionOrAbort(quic::StreamId sessionID, quic::StreamId streamId);
+  findEligibleWTSession(quic::StreamId sessionID);
 
   /**
    * HQSession is an HTTPSessionBase that uses QUIC as the underlying transport
@@ -783,6 +800,11 @@ class HQSession
   bool enableEgressPrioritization_{true};
 
  private:
+  [[nodiscard]] bool mayAcceptWTStreams() const noexcept {
+    return advertisedWebTransport() &&
+           (!receivedSettings_ || peerAdvertisedWebTransport());
+  }
+
   std::unique_ptr<HTTPCodec> createStreamCodec(quic::StreamId streamId);
 
   // Creates a request stream. All streams that are not control streams
@@ -1808,6 +1830,8 @@ class HQSession
       }
       void deliverBufferedDatagrams() noexcept;
     } datagramScheduler_{*this};
+
+    void maybeScheduleWTStreamDrain();
   }; // HQStreamTransportBase
 
   void dispatchUniWTStream(quic::StreamId /* streamId */,
@@ -2077,6 +2101,34 @@ class HQSession
   // Buffer for priority updates without an active stream
   folly::EvictingCacheMap<quic::StreamId, HTTPPriority> priorityUpdatesBuffer_{
       kMaxBufferedPriorityUpdates};
+
+  // Buffer for peer-initiated WebTransport streams that arrived before the
+  // matching CONNECT stream became a valid WT session (see WT-over-H3 §4.6).
+  class PendingWTSession : public folly::HHWheelTimer::Callback {
+   public:
+    PendingWTSession(HQSession& session, quic::StreamId sessionID)
+        : session_(session), sessionID_(sessionID) {
+    }
+    void timeoutExpired() noexcept override;
+    void callbackCanceled() noexcept override {
+    }
+    std::vector<quic::StreamId> streams;
+
+   private:
+    HQSession& session_;
+    quic::StreamId sessionID_;
+  };
+  folly::F14FastMap<quic::StreamId, std::unique_ptr<PendingWTSession>>
+      pendingWTStreams_;
+  std::chrono::milliseconds wtStreamBufferTimeout_{
+      kDefaultWTStreamBufferTimeout};
+
+  void bufferPendingWTStream(quic::StreamId sessionID, quic::StreamId streamID);
+  void deliverPendingWTStreams(quic::StreamId sessionID) noexcept;
+  void expirePendingWTStreams(quic::StreamId sessionID) noexcept;
+  void deliverWTStream(HQStreamTransportBase* connectStream,
+                       quic::StreamId streamID);
+  void rejectStream(quic::StreamId id, HTTP3::ErrorCode err);
 
   // Lookup maps for matching PushIds to StreamIds
   folly::F14FastMap<hq::PushId, quic::StreamId> pushIdToStreamId_;

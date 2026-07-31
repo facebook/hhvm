@@ -2702,6 +2702,216 @@ INSTANTIATE_TEST_SUITE_P(HQUpstreamSessionTest,
                            return tp;
                          }()),
                          paramsToTestName);
+
+// Fixture without the HQUpstreamSessionTestWebTransport auto-SetUp, so tests
+// can inject events between sending CONNECT and receiving the 200 response.
+class HQUpstreamSessionTestWebTransportBuffered
+    : public HQUpstreamSessionTest {};
+
+// Peer bidi WT stream that arrives before the CONNECT 200 response must be
+// buffered — delivering it now would dereference an uninitialized
+// webTransportImpl_ (only set when wtFilter_ is installed at 200).
+TEST_P(HQUpstreamSessionTestWebTransportBuffered,
+       PeerBidiStreamBeforeResponse) {
+  auto handler = std::make_unique<StrictMock<MockHTTPHandler>>();
+  EXPECT_CALL(*handler, _setTransaction(_))
+      .Times(2)
+      .WillOnce(SaveArg<0>(&handler->txn_))
+      .WillOnce(DoDefault());
+  hqSession_->newTransaction(handler.get());
+
+  HTTPMessage req;
+  req.setHTTPVersion(1, 1);
+  req.setUpgradeProtocol("webtransport");
+  req.setMethod(HTTPMethod::CONNECT);
+  req.setURL("/webtransport");
+  req.getHeaders().set(HTTP_HEADER_HOST, "www.facebook.com");
+  handler->txn_->sendHeaders(req);
+  const quic::StreamId sessionId = handler->txn_->getID();
+  flushAndLoopN(1);
+
+  // Server sends a WT bidi stream (first server-initiated bidi = 1) before
+  // 200. Without the wtFilter_ readiness gate this would crash.
+  const quic::StreamId wtStreamId = 1;
+  folly::IOBufQueue wtStreamBuf{folly::IOBufQueue::cacheChainLength()};
+  hq::writeWTStreamPreface(
+      wtStreamBuf, hq::WebTransportStreamType::BIDI, sessionId);
+  socketDriver_->addReadEvent(
+      wtStreamId, wtStreamBuf.move(), std::chrono::milliseconds(0));
+  flushAndLoopN(1);
+  EXPECT_FALSE(socketDriver_->streams_[wtStreamId].error.has_value());
+
+  // Now the 200 response arrives.  wtFilter_ is installed and the buffered
+  // stream is delivered to the handler.
+  handler->expectHeaders();
+  EXPECT_CALL(*handler, onWebTransportBidiStream(_, _)).Times(1);
+  HTTPMessage resp;
+  resp.setHTTPVersion(1, 1);
+  resp.setStatusCode(200);
+  sendResponse(sessionId, resp, nullptr, false);
+  flushAndLoopN(2);
+
+  handler->expectDetachTransaction();
+  handler->txn_->sendAbort();
+  hqSession_->dropConnection();
+  flushAndLoop();
+}
+
+INSTANTIATE_TEST_SUITE_P(HQUpstreamSessionTest,
+                         HQUpstreamSessionTestWebTransportBuffered,
+                         Values([] {
+                           TestParams tp;
+                           tp.alpn_ = "h3";
+                           tp.webTransport_ = true;
+                           return tp;
+                         }()),
+                         paramsToTestName);
+
+class HQUpstreamSessionTestWebTransportPreSettings
+    : public HQUpstreamSessionTest {};
+
+// Peer WT uni stream arriving before peer SETTINGS must be buffered, not
+// rejected by parseUniStreamPreface with "WT stream when it is unsupported".
+TEST_P(HQUpstreamSessionTestWebTransportPreSettings,
+       PeerUniStreamBeforeSettings) {
+  auto handler = std::make_unique<StrictMock<MockHTTPHandler>>();
+  EXPECT_CALL(*handler, _setTransaction(_))
+      .Times(2)
+      .WillOnce(SaveArg<0>(&handler->txn_))
+      .WillOnce(DoDefault());
+  hqSession_->newTransaction(handler.get());
+
+  HTTPMessage req;
+  req.setHTTPVersion(1, 1);
+  req.setUpgradeProtocol("webtransport");
+  req.setMethod(HTTPMethod::CONNECT);
+  req.setURL("/webtransport");
+  req.getHeaders().set(HTTP_HEADER_HOST, "www.facebook.com");
+  handler->txn_->sendHeaders(req);
+  const quic::StreamId sessionId = handler->txn_->getID();
+  flushAndLoopN(1);
+
+  const quic::StreamId wtStreamId = 15;
+  folly::IOBufQueue wtStreamBuf{folly::IOBufQueue::cacheChainLength()};
+  hq::writeWTStreamPreface(
+      wtStreamBuf, hq::WebTransportStreamType::UNI, sessionId);
+  socketDriver_->addReadEvent(
+      wtStreamId, wtStreamBuf.move(), std::chrono::milliseconds(0));
+  flushAndLoopN(1);
+  EXPECT_FALSE(socketDriver_->streams_[wtStreamId].error.has_value());
+
+  sendSettings();
+  handler->expectHeaders();
+  EXPECT_CALL(*handler, onWebTransportUniStream(wtStreamId, _)).Times(1);
+  HTTPMessage resp;
+  resp.setHTTPVersion(1, 1);
+  resp.setStatusCode(200);
+  sendResponse(sessionId, resp, nullptr, false);
+  flushAndLoopN(3);
+
+  handler->expectDetachTransaction();
+  handler->txn_->sendAbort();
+  hqSession_->dropConnection();
+  flushAndLoop();
+}
+
+// Peer WT uni stream buffered before peer SETTINGS arrive is rejected
+// with HTTP_STREAM_CREATION_ERROR once SETTINGS confirm no WT support.
+TEST_P(HQUpstreamSessionTestWebTransportPreSettings,
+       PeerUniStreamRejectedWhenPeerSettingsLackWT) {
+  auto handler = std::make_unique<StrictMock<MockHTTPHandler>>();
+  EXPECT_CALL(*handler, _setTransaction(_))
+      .WillOnce(SaveArg<0>(&handler->txn_));
+  hqSession_->newTransaction(handler.get());
+
+  HTTPMessage req;
+  req.setHTTPVersion(1, 1);
+  req.setUpgradeProtocol("webtransport");
+  req.setMethod(HTTPMethod::CONNECT);
+  req.setURL("/webtransport");
+  req.getHeaders().set(HTTP_HEADER_HOST, "www.facebook.com");
+  handler->txn_->sendHeaders(req);
+  const quic::StreamId sessionId = handler->txn_->getID();
+  flushAndLoopN(1);
+
+  const quic::StreamId wtStreamId = 15;
+  folly::IOBufQueue wtStreamBuf{folly::IOBufQueue::cacheChainLength()};
+  hq::writeWTStreamPreface(
+      wtStreamBuf, hq::WebTransportStreamType::UNI, sessionId);
+  socketDriver_->addReadEvent(
+      wtStreamId, wtStreamBuf.move(), std::chrono::milliseconds(0));
+  flushAndLoopN(1);
+  EXPECT_FALSE(socketDriver_->streams_[wtStreamId].error.has_value());
+
+  egressSettings_.unsetSetting(proxygen::SettingsId::ENABLE_WEBTRANSPORT);
+  egressSettings_.unsetSetting(proxygen::SettingsId::H3_WT_ENABLED);
+  egressSettings_.unsetSetting(proxygen::SettingsId::WT_INITIAL_MAX_DATA);
+  sendSettings();
+  flushAndLoopN(1);
+
+  ASSERT_TRUE(socketDriver_->streams_[wtStreamId].error.has_value());
+  EXPECT_EQ(*socketDriver_->streams_[wtStreamId].error,
+            HTTP3::ErrorCode::HTTP_STREAM_CREATION_ERROR);
+
+  handler->expectError();
+  handler->expectDetachTransaction();
+  hqSession_->dropConnection();
+  flushAndLoop();
+}
+
+// Peer WT uni stream arriving after SETTINGS-without-WT is rejected
+// immediately with HTTP_STREAM_CREATION_ERROR, not buffered.
+TEST_P(HQUpstreamSessionTestWebTransportPreSettings,
+       PeerUniStreamRejectedAfterPeerSettingsLackWT) {
+  auto handler = std::make_unique<StrictMock<MockHTTPHandler>>();
+  EXPECT_CALL(*handler, _setTransaction(_))
+      .WillOnce(SaveArg<0>(&handler->txn_));
+  hqSession_->newTransaction(handler.get());
+
+  HTTPMessage req;
+  req.setHTTPVersion(1, 1);
+  req.setUpgradeProtocol("webtransport");
+  req.setMethod(HTTPMethod::CONNECT);
+  req.setURL("/webtransport");
+  req.getHeaders().set(HTTP_HEADER_HOST, "www.facebook.com");
+  handler->txn_->sendHeaders(req);
+  flushAndLoopN(1);
+
+  egressSettings_.unsetSetting(proxygen::SettingsId::ENABLE_WEBTRANSPORT);
+  egressSettings_.unsetSetting(proxygen::SettingsId::H3_WT_ENABLED);
+  egressSettings_.unsetSetting(proxygen::SettingsId::WT_INITIAL_MAX_DATA);
+  sendSettings();
+  flushAndLoopN(1);
+
+  const quic::StreamId sessionId = handler->txn_->getID();
+  const quic::StreamId wtStreamId = 15;
+  folly::IOBufQueue wtStreamBuf{folly::IOBufQueue::cacheChainLength()};
+  hq::writeWTStreamPreface(
+      wtStreamBuf, hq::WebTransportStreamType::UNI, sessionId);
+  socketDriver_->addReadEvent(
+      wtStreamId, wtStreamBuf.move(), std::chrono::milliseconds(0));
+  flushAndLoopN(1);
+
+  ASSERT_TRUE(socketDriver_->streams_[wtStreamId].error.has_value());
+  EXPECT_EQ(*socketDriver_->streams_[wtStreamId].error,
+            HTTP3::ErrorCode::HTTP_STREAM_CREATION_ERROR);
+
+  handler->expectError();
+  handler->expectDetachTransaction();
+  hqSession_->dropConnection();
+  flushAndLoop();
+}
+
+INSTANTIATE_TEST_SUITE_P(HQUpstreamSessionTest,
+                         HQUpstreamSessionTestWebTransportPreSettings,
+                         Values([] {
+                           TestParams tp;
+                           tp.alpn_ = "h3";
+                           tp.webTransport_ = true;
+                           tp.shouldSendSettings_ = false;
+                           return tp;
+                         }()),
+                         paramsToTestName);
 INSTANTIATE_TEST_SUITE_P(HQUpstreamSessionTest,
                          H3WtUpstreamTest,
                          Values([] {

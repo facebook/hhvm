@@ -19,6 +19,7 @@
 #include <proxygen/lib/http/session/test/HTTPTransactionMocks.h>
 #include <proxygen/lib/http/session/test/MockQuicSocketDriver.h>
 #include <proxygen/lib/http/session/test/MockSessionObserver.h>
+#include <proxygen/lib/http/webtransport/test/Mocks.h>
 #include <quic/api/test/MockQuicSocket.h>
 #include <quic/priority/HTTPPriorityQueue.h>
 #include <wangle/acceptor/ConnectionManager.h>
@@ -3684,6 +3685,204 @@ TEST_P(HQDownstreamSessionTestWebTransport, WTRequestNegotiates) {
   socketDriver_->addReadEOF(sessionId, std::chrono::milliseconds(0));
   hqSession_->closeWhenIdle();
   flushRequestsAndLoop();
+}
+
+namespace {
+// Build a WebTransport uni-stream preface (stream-type + session-id varint) and
+// queue it on the mock socket driver for the given stream id.
+void queuePeerWTUniStream(MockQuicSocketDriver* driver,
+                          quic::StreamId wtStreamId,
+                          quic::StreamId sessionId) {
+  folly::IOBufQueue buf{folly::IOBufQueue::cacheChainLength()};
+  generateStreamPreface(buf, hq::UnidirectionalStreamType::WEBTRANSPORT);
+  folly::io::QueueAppender appender(&buf, 8);
+  encodeQuicIntegerWithAtLeast(sessionId, 1, appender);
+  driver->addReadEvent(wtStreamId, buf.move(), std::chrono::milliseconds(0));
+}
+} // namespace
+
+// A WT uni-stream that arrives before the matching CONNECT is buffered by the
+// session and delivered to the WT handler once the 200 response promotes the
+// CONNECT stream into a WT session.
+TEST_P(HQDownstreamSessionTestWebTransport, BufferedWTUniStreamDelivered) {
+  const quic::StreamId sessionId = 0;
+  const quic::StreamId wtStreamId = 14;
+
+  // Peer must advertise WT support so the dispatcher accepts WT streams.
+  sendSettings();
+  queuePeerWTUniStream(socketDriver_.get(), wtStreamId, sessionId);
+  flushRequestsAndLoopN(1);
+  EXPECT_FALSE(socketDriver_->streams_[wtStreamId].error.has_value());
+
+  HTTPMessage req;
+  req.setHTTPVersion(1, 1);
+  req.setUpgradeProtocol("webtransport");
+  req.setMethod(HTTPMethod::CONNECT);
+  req.setURL("/webtransport");
+  req.getHeaders().set(HTTP_HEADER_HOST, "www.facebook.com");
+  auto actualSessionId = sendRequest(req, /*eom=*/false);
+  ASSERT_EQ(actualSessionId, sessionId);
+
+  auto wtHandler = proxygen::test::DummyWtHandler::make();
+  auto wtCtx = wtHandler->ctx;
+  auto handler = addSimpleStrictHandler();
+  handler->expectHeaders([&]() {
+    HTTPMessage resp;
+    resp.setStatusCode(200);
+    handler->txn_->sendWtHeaders(resp, std::move(wtHandler));
+  });
+  handler->expectDetachTransaction();
+  flushRequestsAndLoopN(3);
+
+  // Buffered stream delivered to the DummyWtHandler via wtSess_ acquisition.
+  EXPECT_EQ(wtCtx->peerStreams.size(), 1);
+  EXPECT_FALSE(socketDriver_->streams_[wtStreamId].error.has_value());
+
+  socketDriver_->addReadEOF(sessionId, std::chrono::milliseconds(0));
+  hqSession_->closeWhenIdle();
+  flushRequestsAndLoop();
+}
+
+// Server responds via plain sendHeaders(200) (no WT handler in wtCtx, so
+// tryWtSession does not create wtSess_).  Buffered stream must still be
+// delivered via the txn's onWebTransportUniStream fallback path.
+TEST_P(HQDownstreamSessionTestWebTransport,
+       BufferedWTUniStreamDeliveredPlainSendHeaders) {
+  const quic::StreamId sessionId = 0;
+  const quic::StreamId wtStreamId = 14;
+
+  sendSettings();
+  queuePeerWTUniStream(socketDriver_.get(), wtStreamId, sessionId);
+  flushRequestsAndLoopN(1);
+  EXPECT_FALSE(socketDriver_->streams_[wtStreamId].error.has_value());
+
+  HTTPMessage req;
+  req.setHTTPVersion(1, 1);
+  req.setUpgradeProtocol("webtransport");
+  req.setMethod(HTTPMethod::CONNECT);
+  req.setURL("/webtransport");
+  req.getHeaders().set(HTTP_HEADER_HOST, "www.facebook.com");
+  auto actualSessionId = sendRequest(req, /*eom=*/false);
+  ASSERT_EQ(actualSessionId, sessionId);
+
+  auto handler = addSimpleStrictHandler();
+  handler->expectHeaders([&]() {
+    HTTPMessage resp;
+    resp.setStatusCode(200);
+    handler->txn_->sendHeaders(resp);
+    EXPECT_NE(handler->txn_->getWebTransport(), nullptr);
+  });
+  EXPECT_CALL(*handler, onWebTransportUniStream(wtStreamId, _)).Times(1);
+  flushRequestsAndLoopN(3);
+  EXPECT_FALSE(socketDriver_->streams_[wtStreamId].error.has_value());
+
+  handler->expectDetachTransaction();
+  handler->txn_->sendAbort();
+  hqSession_->dropConnection();
+  flushRequestsAndLoop();
+}
+
+// Server defers sendHeaders(200) past the CONNECT-request ingress callback.
+// Buffered streams must remain held (not rejected) until the app egresses the
+// 2xx, then get delivered.
+TEST_P(HQDownstreamSessionTestWebTransport,
+       BufferedWTUniStreamAsyncSendHeaders) {
+  const quic::StreamId sessionId = 0;
+  const quic::StreamId wtStreamId = 14;
+
+  sendSettings();
+  queuePeerWTUniStream(socketDriver_.get(), wtStreamId, sessionId);
+  flushRequestsAndLoopN(1);
+  EXPECT_FALSE(socketDriver_->streams_[wtStreamId].error.has_value());
+
+  HTTPMessage req;
+  req.setHTTPVersion(1, 1);
+  req.setUpgradeProtocol("webtransport");
+  req.setMethod(HTTPMethod::CONNECT);
+  req.setURL("/webtransport");
+  req.getHeaders().set(HTTP_HEADER_HOST, "www.facebook.com");
+  auto actualSessionId = sendRequest(req, /*eom=*/false);
+  ASSERT_EQ(actualSessionId, sessionId);
+
+  auto handler = addSimpleStrictHandler();
+  handler->expectHeaders();
+  flushRequestsAndLoopN(2);
+  EXPECT_FALSE(socketDriver_->streams_[wtStreamId].error.has_value());
+
+  HTTPMessage resp;
+  resp.setStatusCode(200);
+  EXPECT_CALL(*handler, onWebTransportUniStream(wtStreamId, _)).Times(1);
+  handler->txn_->sendHeaders(resp);
+  EXPECT_NE(handler->txn_->getWebTransport(), nullptr);
+  flushRequestsAndLoopN(2);
+  EXPECT_FALSE(socketDriver_->streams_[wtStreamId].error.has_value());
+
+  handler->expectDetachTransaction();
+  handler->txn_->sendAbort();
+  hqSession_->dropConnection();
+  flushRequestsAndLoop();
+}
+
+// If the CONNECT txn is torn down between the drain being scheduled and the
+// drain callback firing, buffered streams are rejected instead of crashing.
+TEST_P(HQDownstreamSessionTestWebTransport,
+       BufferedWTStreamConnectAbortedBeforeDrain) {
+  const quic::StreamId sessionId = 0;
+  const quic::StreamId wtStreamId = 14;
+
+  sendSettings();
+  queuePeerWTUniStream(socketDriver_.get(), wtStreamId, sessionId);
+  flushRequestsAndLoopN(1);
+  EXPECT_FALSE(socketDriver_->streams_[wtStreamId].error.has_value());
+
+  HTTPMessage req;
+  req.setHTTPVersion(1, 1);
+  req.setUpgradeProtocol("webtransport");
+  req.setMethod(HTTPMethod::CONNECT);
+  req.setURL("/webtransport");
+  req.getHeaders().set(HTTP_HEADER_HOST, "www.facebook.com");
+  auto actualSessionId = sendRequest(req, /*eom=*/false);
+  ASSERT_EQ(actualSessionId, sessionId);
+
+  auto handler = addSimpleStrictHandler();
+  handler->expectHeaders([&]() {
+    HTTPMessage resp;
+    resp.setStatusCode(200);
+    handler->txn_->sendHeaders(resp);
+    handler->txn_->sendAbort();
+  });
+  handler->expectDetachTransaction();
+  EXPECT_CALL(*handler, onWebTransportUniStream(_, _)).Times(0);
+  flushRequestsAndLoopN(3);
+
+  const uint64_t bufferedRejectedErr =
+      WebTransport::toHTTPErrorCode(WebTransport::kBufferedStreamRejected);
+  ASSERT_TRUE(socketDriver_->streams_[wtStreamId].error.has_value());
+  EXPECT_EQ(*socketDriver_->streams_[wtStreamId].error, bufferedRejectedErr);
+
+  hqSession_->dropConnection();
+  flushRequestsAndLoop();
+}
+
+// When the session closes with WT streams still buffered awaiting a session,
+// they are rejected with WT_BUFFERED_STREAM_REJECTED and any pending timers
+// are canceled cleanly.
+TEST_P(HQDownstreamSessionTestWebTransport, BufferedWTStreamRejectedOnClose) {
+  const quic::StreamId sessionId = 0;
+  const quic::StreamId wtStreamId = 14;
+  sendSettings();
+  queuePeerWTUniStream(socketDriver_.get(), wtStreamId, sessionId);
+  flushRequestsAndLoopN(1);
+
+  EXPECT_FALSE(socketDriver_->streams_[wtStreamId].error.has_value());
+
+  hqSession_->closeWhenIdle();
+  flushRequestsAndLoop();
+
+  const uint64_t bufferedRejectedErr =
+      WebTransport::toHTTPErrorCode(WebTransport::kBufferedStreamRejected);
+  ASSERT_TRUE(socketDriver_->streams_[wtStreamId].error.has_value());
+  EXPECT_EQ(*socketDriver_->streams_[wtStreamId].error, bufferedRejectedErr);
 }
 
 INSTANTIATE_TEST_SUITE_P(HQDownstreamSessionTest,

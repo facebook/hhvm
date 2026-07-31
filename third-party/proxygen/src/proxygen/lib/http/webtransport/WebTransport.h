@@ -53,6 +53,7 @@ class WebTransport {
   static constexpr uint64_t kFirstErrorCode = 0x52e4a40fa8db;
   static constexpr uint64_t kLastErrorCode = 0x52e5ac983162;
   static constexpr uint32_t kSessionGone = 0x170d7b68;
+  static constexpr uint32_t kBufferedStreamRejected = 0x3994bd84;
   static constexpr uint32_t kInternalError =
       std::numeric_limits<uint32_t>::max();
 

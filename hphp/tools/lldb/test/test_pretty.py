@@ -168,15 +168,17 @@ class PrettyPrintOtherValuesTestCase(base.TestHHVMTypesBinary):
             self.assertRegex(output.strip(), expected_output)
 
         with self.subTest("String"):
+            # main.cpp's takeString now takes an HPHP::OptString (the base of
+            # HPHP::String), so the debugger reports the value's type as OptString.
             self.run_until_breakpoint("takeString")
             _, output = self.run_commands(["frame variable v"])
-            expected_output = '(HPHP::String) v = "hello"'
+            expected_output = '(HPHP::OptString) v = "hello"'
             self.assertEqual(output.strip(), expected_output)
 
         with self.subTest("String *"):
             self.run_until_breakpoint("takePtrToString")
             _, output = self.run_commands(["frame variable v"])
-            expected_output = r'\(HPHP::String \*\) v = 0x.* "hello"'
+            expected_output = r'\(HPHP::OptString \*\) v = 0x.* "hello"'
             self.assertRegex(output.strip(), expected_output)
 
         with self.subTest("StaticString"):
@@ -223,26 +225,32 @@ class PrettyPrintOtherValuesTestCase(base.TestHHVMTypesBinary):
             self.run_until_breakpoint("takeOptional")
             _, output = self.run_commands(["frame variable v"])
             expected_output = (
-                '(HPHP::Optional<HPHP::String>) v = (HPHP::String) Value = "hello"'
+                "(HPHP::Optional<HPHP::OptString>) v = "
+                '(HPHP::OptString) Value = "hello"'
             )
             self.assertEqual(output.strip(), expected_output)
 
         with self.subTest("HPHP::Optional (None)"):
             self.run_until_breakpoint("takeOptional")
             _, output = self.run_commands(["frame variable v"])
-            expected_output = "(HPHP::Optional<HPHP::String>) v = None"
+            expected_output = "(HPHP::Optional<HPHP::OptString>) v = None"
             self.assertEqual(output.strip(), expected_output)
 
         with self.subTest("HPHP::PackedPtr"):
+            # clang 21 with enable_simple_template_names=False emits the
+            # fully-qualified template argument HPHP::Class (older toolchains
+            # emitted the unqualified Class).
             self.run_until_breakpoint("takePackedPtr")
             _, output = self.run_commands(["frame variable v"])
-            expected_output = '(HPHP::PackedPtr<Class>) v = "InvalidArgumentException"'
+            expected_output = (
+                '(HPHP::PackedPtr<HPHP::Class>) v = "InvalidArgumentException"'
+            )
             self.assertEqual(output.strip(), expected_output)
 
         with self.subTest("HPHP::PackedPtr &"):
             self.run_until_breakpoint("takePackedPtrRef")
             _, output = self.run_commands(["frame variable v"])
-            expected_output = r'\(const HPHP::PackedPtr<Class> &\) v = 0x.* "InvalidArgumentException"'
+            expected_output = r'\(const HPHP::PackedPtr<HPHP::Class> &\) v = 0x.* "InvalidArgumentException"'
             # LLDB always prints the raw contents of references, so just check the first line
             self.assertRegex(output.split("\n")[0].strip(), expected_output)
 

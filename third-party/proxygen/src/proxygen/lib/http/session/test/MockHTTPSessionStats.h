@@ -101,10 +101,6 @@ class MockHTTPSessionStats : public DummyHTTPSessionStats {
     _recordSessionPeriodicPingProbeTimeout();
   }
   MOCK_METHOD(void, _recordSessionPeriodicPingProbeTimeout, ());
-  void recordIngressReqWithTEAndCL() noexcept override {
-    _recordIngressReqWithTEAndCL();
-  }
-  MOCK_METHOD(void, _recordIngressReqWithTEAndCL, (), (noexcept));
   // NOLINTNEXTLINE(bugprone-exception-escape)
   void recordIngressGetRequestWithBody() noexcept override {
     _recordIngressGetRequestWithBody();

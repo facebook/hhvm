@@ -37,11 +37,6 @@ class HTTPSessionStats : public TTLBAStats {
   }
   virtual void recordEgressContentLengthMismatches() noexcept = 0;
 
-  // Records receipt of an ingress HTTP/1.1 request that carried both a
-  // Transfer-Encoding and a Content-Length header.
-  virtual void recordIngressReqWithTEAndCL() noexcept {
-  }
-
   virtual void recordIngressGetRequestWithBody() noexcept {
   }
 

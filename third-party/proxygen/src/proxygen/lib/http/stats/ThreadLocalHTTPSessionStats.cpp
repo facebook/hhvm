@@ -21,8 +21,6 @@ TLHTTPSessionStats::TLHTTPSessionStats(const std::string& prefix)
       txnsSessionStalled(prefix + "_txn_session_stall", facebook::fb303::SUM),
       egressContentLengthMismatches(
           prefix + "_egress_content_length_mismatches", facebook::fb303::SUM),
-      ingressReqWithTEAndCL(prefix + "_ingress_req_with_te_and_cl",
-                            facebook::fb303::SUM),
       ingressGetRequestWithBody(prefix + "_ingress_get_request_with_body",
                                 facebook::fb303::SUM),
       sessionPeriodicPingProbeTimeout(
@@ -177,10 +175,6 @@ void TLHTTPSessionStats::recordSessionStalled() noexcept {
 
 void TLHTTPSessionStats::recordEgressContentLengthMismatches() noexcept {
   egressContentLengthMismatches.add(1);
-}
-
-void TLHTTPSessionStats::recordIngressReqWithTEAndCL() noexcept {
-  ingressReqWithTEAndCL.add(1);
 }
 
 void TLHTTPSessionStats::recordIngressGetRequestWithBody() noexcept {

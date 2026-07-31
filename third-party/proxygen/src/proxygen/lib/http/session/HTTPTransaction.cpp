@@ -218,16 +218,6 @@ void HTTPTransaction::onIngressHeadersComplete(
   }
   checkForUpgrade(*msg);
   headRequest_ |= (msg->isRequest() && msg->getMethod() == HTTPMethod::HEAD);
-  // An HTTP/1.1 request carrying both Transfer-Encoding and Content-Length has
-  // ambiguous framing and is a request-smuggling vector (RFC 9112 §6.3.3).
-  // Count each such request so we can measure how often it happens before we
-  // start rejecting it.
-  if (stats_ && isDownstream() && msg->isRequest() &&
-      isHTTP1_1CodecProtocol(transport_.getCodec().getProtocol()) &&
-      msg->getHeaders().exists(HTTP_HEADER_TRANSFER_ENCODING) &&
-      msg->getHeaders().exists(HTTP_HEADER_CONTENT_LENGTH)) {
-    stats_->recordIngressReqWithTEAndCL();
-  }
   // Omit upgrade requests (e.g. WebSocket) from the measurement: HTTP/1.1
   // upgrades use GET and legitimately carry body bytes for the new protocol.
   ingressGetRequest_ |= (isDownstream() && msg->isRequest() &&

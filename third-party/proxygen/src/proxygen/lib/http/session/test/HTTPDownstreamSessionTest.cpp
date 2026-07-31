@@ -1378,50 +1378,6 @@ TEST_F(HTTPDownstreamSessionTest, RequestWithTEAndCLRejected) {
   expectDetachSession();
 }
 
-// A request with only Content-Length is a normal request and is not counted.
-TEST_F(HTTPDownstreamSessionTest, RequestWithOnlyContentLengthNotRecorded) {
-  NiceMock<MockHTTPSessionStats> stats;
-  httpSession_->setSessionStats(&stats);
-  EXPECT_CALL(stats, _recordIngressReqWithTEAndCL()).Times(0);
-
-  InSequence enforceOrder;
-  auto handler = addSimpleNiceHandler();
-  handler->expectHeaders();
-  handler->expectEOM([&handler]() { handler->sendReplyWithBody(200, 100); });
-
-  const std::string rawRequest =
-      "POST / HTTP/1.1\r\n"
-      "Host: localhost\r\n"
-      "Content-Length: 5\r\n"
-      "\r\n"
-      "hello";
-  requests_.append(folly::IOBuf::copyBuffer(rawRequest));
-  flushRequestsAndLoop();
-  gracefulShutdown();
-}
-
-// A request with only Transfer-Encoding is a normal request and is not counted.
-TEST_F(HTTPDownstreamSessionTest, RequestWithOnlyTransferEncodingNotRecorded) {
-  NiceMock<MockHTTPSessionStats> stats;
-  httpSession_->setSessionStats(&stats);
-  EXPECT_CALL(stats, _recordIngressReqWithTEAndCL()).Times(0);
-
-  InSequence enforceOrder;
-  auto handler = addSimpleNiceHandler();
-  handler->expectHeaders();
-  handler->expectEOM([&handler]() { handler->sendReplyWithBody(200, 100); });
-
-  const std::string rawRequest =
-      "POST / HTTP/1.1\r\n"
-      "Host: localhost\r\n"
-      "Transfer-Encoding: chunked\r\n"
-      "\r\n"
-      "0\r\n\r\n";
-  requests_.append(folly::IOBuf::copyBuffer(rawRequest));
-  flushRequestsAndLoop();
-  gracefulShutdown();
-}
-
 // A GET request without a body must not be counted.
 TEST_F(HTTPDownstreamSessionTest, GetRequestWithoutBodyNotRecorded) {
   NiceMock<MockHTTPSessionStats> stats;

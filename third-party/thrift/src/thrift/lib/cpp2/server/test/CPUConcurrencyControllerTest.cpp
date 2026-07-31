@@ -431,6 +431,44 @@ TEST_F(CPUConcurrencyControllerTest, getLoadClampsValues) {
   EXPECT_EQ(getCPUConcurrencyController().getLoad(), 0);
 }
 
+TEST_F(CPUConcurrencyControllerTest, getLoadReturnsCachedValueWhenEnabled) {
+  constexpr int64_t kTargetLoad = 73;
+  auto eventHandler = std::make_shared<::testing::NiceMock<MockEventHandler>>();
+  folly::Baton<> cycled;
+
+  // cachedLoad_ is stored right before onCycle() is invoked in cycleOnce(), so
+  // once a cycle observes our target load, getLoad() must return that value.
+  // Wait for the target load specifically to skip the first cycle, which
+  // EMA-seeds at 0 regardless of the reading.
+  ON_CALL(*eventHandler, onCycle(::testing::_, ::testing::_, ::testing::_))
+      .WillByDefault(
+          ::testing::Invoke([&cycled](int64_t, int64_t, int64_t load) {
+            if (load == kTargetLoad) {
+              cycled.post();
+            }
+          }));
+
+  getCPUConcurrencyController().setEventHandler(eventHandler);
+
+  setCPULoad(kTargetLoad);
+  setConfig(
+      CPUConcurrencyController::Config{
+          .mode = CPUConcurrencyController::Mode::ENABLED,
+          .collectionSampleSize = 0,
+          .concurrencyUpperBound = 100});
+
+  ASSERT_TRUE(cycled.try_wait_for(1s));
+
+  // With the controller enabled, getLoad() returns the value cached by the
+  // control loop rather than a fresh reading.
+  EXPECT_EQ(getCPUConcurrencyController().getLoad(), kTargetLoad);
+
+  // Stop the scheduler before the fixture tears down.
+  setConfig(
+      CPUConcurrencyController::Config{
+          .mode = CPUConcurrencyController::Mode::DISABLED});
+}
+
 // ---------------------------------------------------------------------------
 // Custom LoadFunc tests
 // ---------------------------------------------------------------------------

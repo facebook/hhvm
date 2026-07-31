@@ -231,7 +231,7 @@ class CPUConcurrencyController {
     return isRefractoryPeriodInternal(config());
   }
 
-  int64_t getLoad() const { return getLoadInternal(config()); }
+  int64_t getLoad() const;
 
   uint32_t getConcurrencyUpperBound() const {
     return getConcurrencyUpperBoundInternal(config());
@@ -289,6 +289,10 @@ class CPUConcurrencyController {
 
   std::vector<uint32_t> stableConcurrencySamples_;
   std::atomic<int64_t> stableEstimate_{-1};
+
+  // While enabled, cache the last load calculated in cycleOnce().
+  // Will be smoothed (if enabled) and up to one cycle stale.
+  folly::relaxed_atomic<int64_t> cachedLoad_{0};
 
   // EMA-smoothed CPU load. Negative value means uninitialized (first sample
   // will seed it at zero). Only accessed from the control loop thread.

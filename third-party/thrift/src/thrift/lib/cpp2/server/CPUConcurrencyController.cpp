@@ -144,6 +144,8 @@ void CPUConcurrencyController::cycleOnce() {
     load = rawLoad;
   }
 
+  cachedLoad_.store(load);
+
   if (eventHandler) {
     eventHandler->onCycle(limit, currentLimitUsage, load);
   }
@@ -388,6 +390,13 @@ bool CPUConcurrencyController::isRefractoryPeriodInternal(
     const std::shared_ptr<const Config>& config) const {
   return (std::chrono::steady_clock::now() - lastOverloadStart_.load()) <=
       std::chrono::milliseconds(config->refractoryPeriodMs);
+}
+
+int64_t CPUConcurrencyController::getLoad() const {
+  if (enabled_fast()) {
+    return cachedLoad_.load();
+  }
+  return getLoadInternal(config());
 }
 
 int64_t CPUConcurrencyController::getLoadInternal(

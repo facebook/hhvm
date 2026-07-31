@@ -7,8 +7,12 @@ noinst_PROGRAMS = mock_mc_server
 noinst_LIBRARIES = libtest_util.a
 check_PROGRAMS = mcrouter_network_test
 
+# Keep the group delimiters in LDADD so they surround the static libraries.
+# Splitting the driver prefix prevents Automake from misclassifying them as
+# target LDFLAGS, which would be emitted before LDADD and break the grouping.
+FBTHRIFT_LINKER_DRIVER_FLAG = -Wl
 FBTHRIFT_STATIC_LIBS = \
-	-Wl,--start-group \
+	$(FBTHRIFT_LINKER_DRIVER_FLAG),--start-group \
 	-lthriftcpp2 \
 	-lserverdbginfo \
 	-ltransport \
@@ -25,7 +29,7 @@ FBTHRIFT_STATIC_LIBS = \
 	-lruntime \
 	-lthrift-core \
 	-lcommon \
-	-Wl,--end-group
+	$(FBTHRIFT_LINKER_DRIVER_FLAG),--end-group
 
 mock_mc_server_SOURCES = \
   MockMc.cpp \

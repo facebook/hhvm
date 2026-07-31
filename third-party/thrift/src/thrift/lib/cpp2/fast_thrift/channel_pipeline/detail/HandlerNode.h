@@ -22,11 +22,13 @@
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Event.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Handler.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/detail/ContextImpl.h>
+#include <thrift/lib/cpp2/fast_thrift/channel_pipeline/detail/TypedContext.h>
 
 #include <array>
 #include <cstddef>
 #include <cstdint>
 #include <memory>
+#include <tuple>
 #include <utility>
 
 namespace apache::thrift::fast_thrift::channel_pipeline::detail {
@@ -229,8 +231,18 @@ inline constexpr auto kHandlerSubscriptions =
  * @param handler Unique pointer to the handler instance
  * @return A fully initialized HandlerNode
  */
-template <typename H, EventEnum E = NoEvent>
+template <typename H, EventEnum E = NoEvent, typename StateTuple = std::tuple<>>
 HandlerNode makeHandlerNode(HandlerId handlerId, std::unique_ptr<H> handler) {
+  // The context a handler receives in every callback: the bare ContextImpl for
+  // a stateless pipeline (zero overhead, unchanged), otherwise the
+  // pipeline-stable TypedContext<StateTuple> that exposes the
+  // compile-time-typed state<T>(). Concept checks are evaluated against this
+  // type. `contextFor` returns a stable reference in both cases (the typed view
+  // is a persistent per-context object, not a per-call temporary), so state is
+  // reachable from every callback and a handler may cache the reference (e.g.
+  // in handlerAdded) for deferred use.
+  using Ctx = ContextFor<StateTuple>;
+
   HandlerNode node;
   node.handlerId = handlerId;
   node.handlerPtr = handler.get();
@@ -248,31 +260,37 @@ HandlerNode makeHandlerNode(HandlerId handlerId, std::unique_ptr<H> handler) {
 
   // Lifecycle methods - always present (required by HandlerLifecycle concept)
   node.handlerAddedFn = [](void* h, ContextImpl& ctx) noexcept {
-    static_cast<H*>(h)->handlerAdded(ctx);
+    decltype(auto) c = contextFor<StateTuple>(ctx);
+    static_cast<H*>(h)->handlerAdded(c);
   };
 
   node.handlerRemovedFn = [](void* h, ContextImpl& ctx) noexcept {
-    static_cast<H*>(h)->handlerRemoved(ctx);
+    decltype(auto) c = contextFor<StateTuple>(ctx);
+    static_cast<H*>(h)->handlerRemoved(c);
   };
 
   // Inbound methods - check if handler satisfies InboundHandler
-  if constexpr (InboundHandler<H, ContextImpl>) {
+  if constexpr (InboundHandler<H, Ctx>) {
     node.onPipelineActiveFn = [](void* h, ContextImpl& ctx) noexcept {
-      static_cast<H*>(h)->onPipelineActive(ctx);
+      decltype(auto) c = contextFor<StateTuple>(ctx);
+      static_cast<H*>(h)->onPipelineActive(c);
     };
 
     node.onReadFn =
         [](void* h, ContextImpl& ctx, TypeErasedBox&& msg) noexcept -> Result {
-      return static_cast<H*>(h)->onRead(ctx, std::move(msg));
+      decltype(auto) c = contextFor<StateTuple>(ctx);
+      return static_cast<H*>(h)->onRead(c, std::move(msg));
     };
 
     node.onReadReadyFn = [](void* h, ContextImpl& ctx) noexcept {
-      static_cast<H*>(h)->onReadReady(ctx);
+      decltype(auto) c = contextFor<StateTuple>(ctx);
+      static_cast<H*>(h)->onReadReady(c);
     };
 
     node.onExceptionFn =
         [](void* h, ContextImpl& ctx, folly::exception_wrapper&& e) noexcept {
-          static_cast<H*>(h)->onException(ctx, std::move(e));
+          decltype(auto) c = contextFor<StateTuple>(ctx);
+          static_cast<H*>(h)->onException(c, std::move(e));
         };
   } else {
     // Passthrough for non-inbound handlers
@@ -296,18 +314,21 @@ HandlerNode makeHandlerNode(HandlerId handlerId, std::unique_ptr<H> handler) {
   }
 
   // Outbound methods - check if handler satisfies OutboundHandler
-  if constexpr (OutboundHandler<H, ContextImpl>) {
+  if constexpr (OutboundHandler<H, Ctx>) {
     node.onWriteFn =
         [](void* h, ContextImpl& ctx, TypeErasedBox&& msg) noexcept -> Result {
-      return static_cast<H*>(h)->onWrite(ctx, std::move(msg));
+      decltype(auto) c = contextFor<StateTuple>(ctx);
+      return static_cast<H*>(h)->onWrite(c, std::move(msg));
     };
 
     node.onWriteReadyFn = [](void* h, ContextImpl& ctx) noexcept {
-      static_cast<H*>(h)->onWriteReady(ctx);
+      decltype(auto) c = contextFor<StateTuple>(ctx);
+      static_cast<H*>(h)->onWriteReady(c);
     };
 
     node.onPipelineInactiveFn = [](void* h, ContextImpl& ctx) noexcept {
-      static_cast<H*>(h)->onPipelineInactive(ctx);
+      decltype(auto) c = contextFor<StateTuple>(ctx);
+      static_cast<H*>(h)->onPipelineInactive(c);
     };
   } else {
     // Passthrough for non-outbound handlers

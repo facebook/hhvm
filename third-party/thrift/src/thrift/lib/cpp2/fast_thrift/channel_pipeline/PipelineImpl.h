@@ -365,6 +365,7 @@ class PipelineImpl : public folly::DelayedDestruction {
   // Helper to call handlerRemoved without DestructorGuard.
   // Used by both callHandlerRemoved() and onDelayedDestroy().
   void callHandlerRemovedImpl() noexcept;
+  void propagatePipelineState() noexcept;
 
   folly::EventBase* eventBase_;
   std::vector<detail::HandlerNode> handlers_;
@@ -440,12 +441,17 @@ class PipelineImpl : public folly::DelayedDestruction {
   std::unique_ptr<EventList[]> eventLists_;
   std::uint32_t eventListCount_{0};
 
+  // Pipeline-level state — type-erased, owned by the pipeline.
+  void* pipelineState_{nullptr};
+  void (*pipelineStateDeleter_)(void*) noexcept {nullptr};
+
   // PipelineBuilder needs access to set up the pipeline
   template <
       typename HeadHandler,
       typename TailHandler,
       typename Allocator,
-      typename EventEnumT>
+      typename EventEnumT,
+      typename StateTuple>
   friend class PipelineBuilder;
 
   // ContextImpl needs access to ready lists for registration

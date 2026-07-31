@@ -243,6 +243,16 @@ class ContextImpl {
    */
   size_t handlerIndex() const noexcept { return handlerIndex_; }
 
+  /**
+   * Raw storage for this context's persistent TypedContext view (see
+   * TypedContext.h). A TypedContext is a reference wrapper, so its size and
+   * alignment are independent of the registered state types — a pointer-sized,
+   * pointer-aligned slot holds any of them. Populated once by the builder for
+   * state-using pipelines (after contexts are finalized), left untouched
+   * otherwise. Used only by the TypedContext helpers.
+   */
+  void* typedViewStorage() noexcept { return &typedViewStorage_; }
+
  private:
   // Non-templated, out-of-line forward for fireEvent: the public typed overload
   // casts the event enum to its id and calls this, which hands off to the
@@ -254,6 +264,10 @@ class ContextImpl {
   PipelineImpl* pipeline_;
   folly::EventBase* eventBase_;
   void* allocator_; // Type-erased BufferAllocator
+  void* pipelineState_{nullptr}; // Type-erased pipeline-level state
+  // Storage for the per-context TypedContext view (constructed by the builder
+  // for state-using pipelines). Sized/aligned for a reference wrapper.
+  alignas(void*) unsigned char typedViewStorage_[sizeof(void*)];
   size_t handlerIndex_;
   HandlerId handlerId_;
 
@@ -285,6 +299,11 @@ class ContextImpl {
   std::uint32_t eventHookCount_{0};
 
   friend class ::apache::thrift::fast_thrift::channel_pipeline::PipelineImpl;
+
+  // TypedContext reads pipelineState_ to expose the compile-time-typed
+  // state<T>() accessor.
+  template <typename StateTuple>
+  friend class TypedContext;
 };
 
 } // namespace detail

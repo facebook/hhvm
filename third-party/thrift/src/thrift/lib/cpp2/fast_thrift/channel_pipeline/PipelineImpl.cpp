@@ -67,7 +67,11 @@ void tailHandlerExceptionFn(
 
 namespace apache::thrift::fast_thrift::channel_pipeline {
 
-PipelineImpl::~PipelineImpl() = default;
+PipelineImpl::~PipelineImpl() {
+  if (pipelineStateDeleter_) {
+    pipelineStateDeleter_(pipelineState_);
+  }
+}
 
 PipelineImpl::PipelineImpl(
     folly::EventBase* eventBase,
@@ -234,6 +238,12 @@ void PipelineImpl::callHandlerAdded() noexcept {
     handlers_[i].handlerAddedFn(handlers_[i].handlerPtr, contexts_[i]);
   }
   tailHandlerAddedFn_(tailHandler_);
+}
+
+void PipelineImpl::propagatePipelineState() noexcept {
+  for (auto& ctx : contexts_) {
+    ctx.pipelineState_ = pipelineState_;
+  }
 }
 
 void PipelineImpl::callHandlerRemovedImpl() noexcept {

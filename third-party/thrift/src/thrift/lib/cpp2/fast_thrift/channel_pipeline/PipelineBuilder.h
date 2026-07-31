@@ -23,12 +23,22 @@
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/HandlerTag.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineImpl.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/detail/HandlerNode.h>
+#include <thrift/lib/cpp2/fast_thrift/channel_pipeline/detail/TypedContext.h>
 
 #include <memory>
+#include <tuple>
+#include <type_traits>
 #include <utility>
 #include <vector>
 
 namespace apache::thrift::fast_thrift::channel_pipeline {
+
+namespace detail {
+// Shared tag for PipelineBuilder's private rebind constructor. Defined at
+// namespace scope (not nested) so every PipelineBuilder instantiation names the
+// same type — addState constructs a sibling instantiation through it.
+struct PipelineBuilderRebindTag {};
+} // namespace detail
 
 /**
  * PipelineBuilder provides a fluent API for constructing pipelines.
@@ -65,7 +75,8 @@ template <
     typename HeadHandler,
     typename TailHandler,
     typename Allocator = SimpleBufferAllocator,
-    typename EventEnumT = NoEvent>
+    typename EventEnumT = NoEvent,
+    typename StateTuple = std::tuple<>>
 class PipelineBuilder {
   static_assert(
       ValidEndpointPair<HeadHandler, TailHandler>,
@@ -78,6 +89,17 @@ class PipelineBuilder {
       EventEnum<EventEnumT>,
       "EventEnum must be NoEvent (events disabled) or a uint32_t-backed enum "
       "class exposing a Count sentinel as its last value");
+
+  // The context type handlers receive: bare ContextImpl for a stateless
+  // pipeline, otherwise a TypedContext<StateTuple>. Handler concepts are
+  // checked against this type so a handler that uses ctx.state<T>() is
+  // validated against the compile-time-typed context.
+  using Ctx = detail::ContextFor<StateTuple>;
+
+  // Sibling instantiations (produced by addState) construct one another
+  // through the private rebind constructor.
+  template <typename, typename, typename, typename, typename>
+  friend class PipelineBuilder;
 
  public:
   PipelineBuilder() = default;
@@ -136,8 +158,7 @@ class PipelineBuilder {
   template <typename H, HandlerId Id, typename... Args>
   PipelineBuilder& addNextInbound(HandlerTag<Id> tag, Args&&... args) {
     static_assert(
-        InboundHandler<H, detail::ContextImpl>,
-        "Handler must satisfy InboundHandler concept");
+        InboundHandler<H, Ctx>, "Handler must satisfy InboundHandler concept");
     return addHandler<H>(tag.id, std::forward<Args>(args)...);
   }
 
@@ -153,8 +174,7 @@ class PipelineBuilder {
   PipelineBuilder& addNextInbound(
       HandlerTag<Id> tag, std::unique_ptr<H> handler) {
     static_assert(
-        InboundHandler<H, detail::ContextImpl>,
-        "Handler must satisfy InboundHandler concept");
+        InboundHandler<H, Ctx>, "Handler must satisfy InboundHandler concept");
     return addHandler<H>(tag.id, std::move(handler));
   }
 
@@ -169,7 +189,7 @@ class PipelineBuilder {
   template <typename H, HandlerId Id, typename... Args>
   PipelineBuilder& addNextOutbound(HandlerTag<Id> tag, Args&&... args) {
     static_assert(
-        OutboundHandler<H, detail::ContextImpl>,
+        OutboundHandler<H, Ctx>,
         "Handler must satisfy OutboundHandler concept");
     return addHandler<H>(tag.id, std::forward<Args>(args)...);
   }
@@ -186,7 +206,7 @@ class PipelineBuilder {
   PipelineBuilder& addNextOutbound(
       HandlerTag<Id> tag, std::unique_ptr<H> handler) {
     static_assert(
-        OutboundHandler<H, detail::ContextImpl>,
+        OutboundHandler<H, Ctx>,
         "Handler must satisfy OutboundHandler concept");
     return addHandler<H>(tag.id, std::move(handler));
   }
@@ -202,8 +222,7 @@ class PipelineBuilder {
   template <typename H, HandlerId Id, typename... Args>
   PipelineBuilder& addNextDuplex(HandlerTag<Id> tag, Args&&... args) {
     static_assert(
-        DuplexHandler<H, detail::ContextImpl>,
-        "Handler must satisfy DuplexHandler concept");
+        DuplexHandler<H, Ctx>, "Handler must satisfy DuplexHandler concept");
     return addHandler<H>(tag.id, std::forward<Args>(args)...);
   }
 
@@ -219,9 +238,70 @@ class PipelineBuilder {
   PipelineBuilder& addNextDuplex(
       HandlerTag<Id> tag, std::unique_ptr<H> handler) {
     static_assert(
-        DuplexHandler<H, detail::ContextImpl>,
-        "Handler must satisfy DuplexHandler concept");
+        DuplexHandler<H, Ctx>, "Handler must satisfy DuplexHandler concept");
     return addHandler<H>(tag.id, std::move(handler));
+  }
+
+  /**
+   * Register a pipeline-level state object of type T, accessible by all
+   * handlers via ctx.state<T>(). The object is constructed in place from
+   * `args` and lives at pipeline scope (per-connection). Multiple distinct
+   * state types can be registered by chaining addState calls; each is a
+   * separate slot keyed by its type. Registering the same type twice is a
+   * usage error (ctx.state<T>() would be ambiguous).
+   *
+   * Returns a rebound builder whose type carries the accumulated state types,
+   * so the handler context becomes TypedContext<std::tuple<...>>.
+   *
+   * All state must be registered before any handler is added: every handler is
+   * wired against the final registered state set, so interleaving addState with
+   * addNext* is rejected (throws). Register state up front, then add handlers.
+   *
+   * `T` must be move-constructible — the registered object is moved into the
+   * pipeline-owned allocation at build().
+   *
+   * Because it extends the state type list, addState rebinds the builder: it
+   * returns a *new* builder of the extended type and moves-from this one. Use
+   * it fluently on the builder expression
+   * (`PipelineBuilder<...>().addState<A>().addState<B>()...`); the pre-addState
+   * builder is left moved-from and must not be reused.
+   *
+   * @param args Constructor arguments forwarded to T
+   * @return A builder carrying the extended state type list
+   */
+  template <typename T, typename... Args>
+  auto addState(Args&&... args) {
+    static_assert(
+        std::is_move_constructible_v<T>,
+        "addState<T>(): T must be move-constructible — the state object is "
+        "moved into the pipeline at build()");
+    static_assert(
+        !detail::TupleHasType<StateTuple, T>::value,
+        "addState<T>(): T is already registered — each pipeline-level state "
+        "type may be registered at most once (ctx.state<T>() would be "
+        "ambiguous)");
+    if (!handlers_.empty()) {
+      throw std::runtime_error(
+          "PipelineBuilder: addState<T>() must be called before any handler; "
+          "register all pipeline-level state before addNext*");
+    }
+    using NewStateTuple = decltype(std::tuple_cat(
+        std::declval<StateTuple&&>(), std::declval<std::tuple<T>>()));
+    return PipelineBuilder<
+        HeadHandler,
+        TailHandler,
+        Allocator,
+        EventEnumT,
+        NewStateTuple>(
+        detail::PipelineBuilderRebindTag{},
+        eventBase_,
+        headHandler_,
+        tailHandler_,
+        allocator_,
+        std::move(handlers_),
+        std::tuple_cat(
+            std::move(stateTuple_),
+            std::tuple<T>(T(std::forward<Args>(args)...))));
   }
 
   /**
@@ -255,6 +335,27 @@ class PipelineBuilder {
     // subscribe too). No-op when events are disabled.
     if constexpr (kEventsEnabled<EventEnumT>) {
       pipeline->linkEventLists();
+    }
+
+    // Wire pipeline-level state. A stateless pipeline (empty tuple) does none
+    // of this: it allocates nothing, leaves each context's state pointer at its
+    // null default, and passes the bare ContextImpl through unchanged.
+    if constexpr (std::tuple_size_v<StateTuple> > 0) {
+      // Move the accumulated state tuple into a pipeline-owned, type-erased
+      // allocation and propagate the pointer to all handler contexts.
+      pipeline->pipelineState_ = new StateTuple(std::move(stateTuple_));
+      pipeline->pipelineStateDeleter_ = [](void* p) noexcept {
+        delete static_cast<StateTuple*>(p);
+      };
+      pipeline->propagatePipelineState();
+
+      // Construct each context's persistent typed view now that contexts are
+      // finalized (the same stability point nextCtx_/prevCtx_ rely on).
+      // Handlers then receive a stable TypedContext<StateTuple>& in every
+      // callback, including lifecycle.
+      for (auto& ctx : pipeline->contexts_) {
+        detail::initTypedView<StateTuple>(ctx);
+      }
     }
 
     pipeline->callHandlerAdded();
@@ -355,22 +456,43 @@ class PipelineBuilder {
   PipelineBuilder& addHandler(HandlerId id, Args&&... args) {
     auto handler = std::make_unique<H>(std::forward<Args>(args)...);
     handlers_.push_back(
-        detail::makeHandlerNode<H, EventEnumT>(id, std::move(handler)));
+        detail::makeHandlerNode<H, EventEnumT, StateTuple>(
+            id, std::move(handler)));
     return *this;
   }
 
   template <typename H>
   PipelineBuilder& addHandler(HandlerId id, std::unique_ptr<H> handler) {
     handlers_.push_back(
-        detail::makeHandlerNode<H, EventEnumT>(id, std::move(handler)));
+        detail::makeHandlerNode<H, EventEnumT, StateTuple>(
+            id, std::move(handler)));
     return *this;
   }
+
+  // Private rebind constructor used by addState to transfer the in-progress
+  // build state into a sibling instantiation with an extended state type list.
+  PipelineBuilder(
+      detail::PipelineBuilderRebindTag,
+      folly::EventBase* eventBase,
+      HeadHandler* headHandler,
+      TailHandler* tailHandler,
+      Allocator* allocator,
+      std::vector<detail::HandlerNode>&& handlers,
+      StateTuple&&
+          stateTuple) noexcept(std::is_nothrow_move_constructible_v<StateTuple>)
+      : eventBase_(eventBase),
+        headHandler_(headHandler),
+        tailHandler_(tailHandler),
+        allocator_(allocator),
+        handlers_(std::move(handlers)),
+        stateTuple_(std::move(stateTuple)) {}
 
   folly::EventBase* eventBase_{nullptr};
   HeadHandler* headHandler_{nullptr};
   TailHandler* tailHandler_{nullptr};
   Allocator* allocator_{nullptr};
   std::vector<detail::HandlerNode> handlers_;
+  StateTuple stateTuple_{};
 };
 
 } // namespace apache::thrift::fast_thrift::channel_pipeline

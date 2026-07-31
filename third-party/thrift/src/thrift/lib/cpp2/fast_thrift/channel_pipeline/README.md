@@ -444,6 +444,7 @@ A handler's view into the pipeline.
 | `handlerId()` | This handler's ID |
 | `allocate(size)` | Allocate buffer using pipeline's allocator |
 | `eventBase()` | Get the EventBase this pipeline runs on |
+| `state<T>()` | Reference to pipeline-level state of type `T` (see Pipeline-Level State) |
 | `close()` | Close pipeline |
 
 ### Handlers
@@ -970,6 +971,85 @@ delivered as `const&`; payload-less events fire an empty box.
 
 ---
 
+## Pipeline-Level State
+
+Handlers own their per-connection state as member variables (see [Handlers as
+Actors](#handlers-as-actors)). When several handlers must share the **same**
+per-connection state — without each keeping its own copy or reaching across
+handler boundaries — register it once as **pipeline-level state**. A single
+shared stream map consumed by the stream handlers is the motivating example: one
+map registered on the pipeline replaces a private map per handler.
+
+### Registering State
+
+`PipelineBuilder::addState<T>(args...)` constructs a `T` in place, owned by the
+pipeline for the connection's lifetime. Chain calls to register several distinct
+types; each is a separate slot keyed by its type:
+
+```cpp
+auto pipeline = PipelineBuilder<Head, Tail, Allocator>()
+    .setEventBase(evb).setHead(&head).setTail(&tail).setAllocator(&alloc)
+    .addState<StreamStates>()          // register before the handlers that use it
+    .addState<ConnectionConfig>(cfg)   // multiple distinct types allowed
+    .addNextDuplex<StreamHandler>(stream_tag)
+    .build();
+```
+
+All state must be registered **before** any handler is added: every handler is
+wired against the final registered state set, so interleaving `addState` with
+`addNext*` is rejected (the builder throws). Register all state up front, then
+add handlers.
+
+`T` must be **move-constructible** — the registered object is moved into the
+pipeline-owned allocation at `build()`.
+
+### Accessing State
+
+Handlers reach registered state through the context on the message path:
+
+```cpp
+Result onRead(Context& ctx, TypeErasedBox&& msg) noexcept {
+  auto& streams = ctx.state<StreamStates>();  // reference to the shared object
+  // ... read/write shared state ...
+  return ctx.fireRead(std::move(msg));
+}
+```
+
+`ctx.state<T>()` is **type-safe at compile time**: it is well-formed only for a
+`T` registered via `addState<T>()`. Accessing an unregistered type is a build
+error, not a silent reinterpretation of memory.
+
+### Where `state<T>()` Is Available
+
+State is a pipeline property fixed before any handler is added, so `ctx.state<T>()`
+is available in **every** handler callback — the message path (`onRead`,
+`onWrite`, `onException`) *and* the lifecycle/ready callbacks (`handlerAdded`,
+`handlerRemoved`, `onPipelineActive`, `onPipelineInactive`, `onReadReady`,
+`onWriteReady`). The context handed to a handler is a **pipeline-stable** typed
+view (one persistent object per context, not a per-call temporary), so a handler
+may also cache the reference — e.g. in `handlerAdded` for use from a deferred
+`LoopCallback` — without it dangling.
+
+### Cost When Unused
+
+Pipeline-level state is fully opt-in. A pipeline that never calls `addState`
+registers nothing, allocates nothing for state, and every handler receives the
+bare `ContextImpl` exactly as before — the dispatch path and per-message cost are
+unchanged. The one fixed cost is on `ContextImpl` itself: it unconditionally
+carries a state pointer plus a pointer-sized slot for the typed view (~16 bytes
+per context), whether or not a pipeline uses state. These fields sit off the hot
+read/write dispatch fields and stay untouched (null / unused) for stateless
+pipelines; keeping them unconditional avoids splitting `ContextImpl` into a
+polymorphic hierarchy, which would reintroduce the indirection this framework
+exists to avoid.
+
+| Method | Description |
+|--------|-------------|
+| `PipelineBuilder::addState<T>(args...)` | Register a pipeline-scoped `T` (chain for multiple distinct types; `T` must be move-constructible) |
+| `ctx.state<T>()` | Reference to the registered `T` (available in every handler callback) |
+
+---
+
 ## Handler Lifecycle
 
 ```
@@ -1046,9 +1126,12 @@ Each handler in the pipeline acts like an **actor**:
 └──────────────────────────────────────────────────────────────────┘
 ```
 
-This design avoids the need for per-pipeline user context storage. If a handler
-needs connection-level state, it stores it as member variables. If another handler
-needs that state, it can look up the handler via `ctx.pipeline()->context(id)`.
+If a handler needs connection-level state, it stores it as member variables. If
+another handler needs to read that state, it can look up the owning handler via
+`ctx.pipeline()->context(id)`. When several handlers must **share** the same
+per-connection state, register it once as [Pipeline-Level
+State](#pipeline-level-state) and reach it through `ctx.state<T>()` instead of
+each keeping its own copy.
 
 ### Example: Handler with Connection State
 

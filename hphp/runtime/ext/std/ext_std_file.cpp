@@ -1419,12 +1419,16 @@ static bool do_chown(const OptString& filename,
   if (user.isString()) {
     OptString suser = user.toString();
     auto buf = PasswdBuffer{};
-    struct passwd *pw;
-    if (getpwnam_r(suser.data(), &buf.ent, buf.data.get(), buf.size, &pw)) {
-      // failed to read user info
-      return false;
+    struct passwd *pw = nullptr;
+    int err;
+    // getpwnam_r returns the error number directly; grow the buffer on ERANGE.
+    while ((err = getpwnam_r(suser.data(), &buf.ent, buf.data.get(),
+                             buf.size, &pw)) == ERANGE) {
+      buf.resize();
     }
-    if (!pw) {
+    // A non-zero return or a null result both mean the user could not be
+    // resolved; match PHP semantics by emitting a warning in either case.
+    if (err != 0 || !pw) {
       Logger::Verbose("%s/%d: Unable to find uid for %s",
         __FUNCTION__, __LINE__, suser.data());
       raise_warning("%s(): Unable to find uid for %s", funcName,
@@ -1480,24 +1484,17 @@ static bool do_chgrp(const OptString& filename,
   if (group.isString()) {
     OptString sgroup = group.toString();
     auto buf = GroupBuffer{};
-    struct group *gr;
-
-    while (true) {
-      if (getgrnam_r(sgroup.data(), &buf.ent, buf.data.get(), buf.size, &gr)) {
-        if (errno == ERANGE) {
-          buf.resize();
-          continue;
-        } else if (errno == ENOENT || errno == ESRCH) {
-          gr = nullptr;
-          break;
-        }
-        // failed to read group info
-        return false;
-      }
-      break;
+    struct group *gr = nullptr;
+    int err;
+    // getgrnam_r returns the error number directly (it does not set errno);
+    // grow the buffer on ERANGE.
+    while ((err = getgrnam_r(sgroup.data(), &buf.ent, buf.data.get(),
+                             buf.size, &gr)) == ERANGE) {
+      buf.resize();
     }
-
-    if (!gr) {
+    // A non-zero return or a null result both mean the group could not be
+    // resolved; match PHP semantics by emitting a warning in either case.
+    if (err != 0 || !gr) {
       Logger::Verbose("%s/%d: Unable to find gid for %s",
         __FUNCTION__, __LINE__, sgroup.data());
       raise_warning("%s(): Unable to find gid for %s", funcName,

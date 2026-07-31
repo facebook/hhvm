@@ -326,9 +326,7 @@ void QuicWtSessionBase::onStreamWriteReady(quic::StreamId streamId,
 void QuicWtSessionBase::onStreamWriteError(quic::StreamId id,
                                            QuicError error) noexcept {
   XLOG(ERR) << __func__ << "; id=" << id << "; err=" << error;
-  if (auto* wh = sm_.getBidiHandle(id).writeHandle) {
-    wh->resetStream(WebTransport::kInternalError);
-  }
+  // either transport closed or egress is closed; nothing to do
 }
 
 void QuicWtSessionBase::maybePauseIngress(

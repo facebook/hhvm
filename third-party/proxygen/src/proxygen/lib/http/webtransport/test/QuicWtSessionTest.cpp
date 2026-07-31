@@ -336,6 +336,34 @@ TEST_F(QuicWtSessionTest, ResetStream) {
   EXPECT_EQ(socketDriver_.streams_[id].error, WT_ERROR_1);
 }
 
+TEST_F(QuicWtSessionTest, QuicStreamWriteError) {
+  auto handle = session_->createUniStream().value();
+  const auto id = handle->getID();
+  bool cancellationRequested = false;
+  folly::CancellationCallback cancelCb{handle->getCancelToken(), [&]() {
+                                         cancellationRequested = true;
+                                         handle->resetStream(0x00);
+                                       }};
+
+  // block writes => QuicWtSession will install StreamWriteCallback on next
+  // ::writeStreamData
+  socketDriver_.setStreamFlowControlWindow(id, 0);
+  handle->writeStreamData(folly::IOBuf::copyBuffer("data"), false, nullptr);
+  eventBase_.loopOnce();
+
+  // data should not have been written to the socket
+  auto& stream = socketDriver_.streams_[id];
+  EXPECT_EQ(stream.writeBuf.chainLength(), 0);
+  EXPECT_TRUE(stream.pendingWriteCb.stream);
+
+  // ::onStreamWriteError should not cancel callback
+  stream.pendingWriteCb.stream->onStreamWriteError(
+      id, quic::QuicError{quic::ApplicationErrorCode(WT_ERROR_1)});
+  EXPECT_FALSE(cancellationRequested);
+
+  eventBase_.loop();
+}
+
 TEST_F(QuicWtSessionTest, SetPriority) {
   auto handle = session_->createUniStream();
   ASSERT_TRUE(handle.hasValue());

@@ -509,9 +509,21 @@ std::unique_ptr<folly::IOBuf> Lz4Immutable::decompress(
   IovecCursor source(iov, iovcnt);
   IovecCursor match = dicCursor;
 
+  // The compressed stream is untrusted (it can originate from a remote
+  // backend). IovecCursor pushes bounds-checking onto its caller, so every read
+  // below must be guarded against the end of the source: an encoded length that
+  // exceeds the bytes actually present would otherwise drive the cursor past
+  // the source iovec and read out of bounds.
+  const auto sourceBytesLeft = [&source] {
+    return source.totalLength() - source.tell();
+  };
+
   // Main loop
   while (true) {
     // LZ4 token
+    if (FOLLY_UNLIKELY(sourceBytesLeft() < sizeof(uint8_t))) {
+      return nullptr;
+    }
     size_t token = source.read<uint8_t>();
 
     // Get literal length
@@ -519,12 +531,18 @@ std::unique_ptr<folly::IOBuf> Lz4Immutable::decompress(
     if (literalLength == kRunMask) {
       size_t s;
       do {
+        if (FOLLY_UNLIKELY(sourceBytesLeft() < sizeof(uint8_t))) {
+          return nullptr;
+        }
         s = source.read<uint8_t>();
         literalLength += s;
       } while (FOLLY_LIKELY(s == 255));
     }
 
     // Copy literals
+    if (FOLLY_UNLIKELY(literalLength > sourceBytesLeft())) {
+      return nullptr;
+    }
     uint8_t* cpy = output + literalLength;
     if (cpy > outputLimit - kCopyLength) {
       if (cpy != outputLimit) {
@@ -538,6 +556,9 @@ std::unique_ptr<folly::IOBuf> Lz4Immutable::decompress(
     output = cpy;
 
     // Get match offset
+    if (FOLLY_UNLIKELY(sourceBytesLeft() < sizeof(uint16_t))) {
+      return nullptr;
+    }
     uint16_t offset = peekLE(source);
     source.advance(2);
     size_t outputProgress = static_cast<size_t>(output - outputStart);
@@ -555,6 +576,9 @@ std::unique_ptr<folly::IOBuf> Lz4Immutable::decompress(
     if (matchLength == kMlMask) {
       size_t s;
       do {
+        if (FOLLY_UNLIKELY(sourceBytesLeft() < sizeof(uint8_t))) {
+          return nullptr;
+        }
         s = source.read<uint8_t>();
         matchLength += s;
       } while (s == 255);

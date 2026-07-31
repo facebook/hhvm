@@ -240,6 +240,26 @@ TEST(Lz4Immutable, error_checks) {
   EXPECT_THROW(compressor.compress(&iov, 1), std::invalid_argument);
 }
 
+// Regression test for T267530293: a malformed compressed stream whose token
+// declares more literal bytes than the source actually contains used to drive
+// IovecCursor past the end of the source iovec (out-of-bounds read). A correct
+// decompressor must reject the stream and return nullptr instead of reading
+// past the source. Under ASAN this over-read would otherwise be a detectable
+// heap-buffer-overflow.
+TEST(Lz4Immutable, decompress_truncated_source) {
+  auto dictionary = getAsciiDictionary();
+  Lz4Immutable compressor(dictionary->clone());
+
+  // Single LZ4 token byte: literal length 5, match length 0, but zero literal
+  // bytes follow. A large declared output size keeps the output-bounds check
+  // from firing first, so the literal copy is reached with an exhausted source.
+  const uint8_t token = 0x50;
+  iovec iov = {const_cast<uint8_t*>(&token), sizeof(token)};
+
+  EXPECT_EQ(
+      compressor.decompress(&iov, 1, /* uncompressedSize */ 4096), nullptr);
+}
+
 TEST(Lz4Immutable, largeData_ascii) {
   auto dictionary = getAsciiDictionary();
   Lz4Immutable compressor(dictionary->clone());

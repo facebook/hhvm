@@ -60,10 +60,17 @@ void IovecCursor::seek(size_t pos) {
 }
 
 void IovecCursor::peekInto(uint8_t* dest, size_t size) const {
-  const uint8_t* cur =
-      reinterpret_cast<uint8_t*>(iov_[iovIndex_].iov_base) + curBufPos_;
-  size_t curLen = curBufLen_;
+  // Defense-in-depth: callers are contractually required to guarantee that
+  // "size" bytes are available, but a precondition violation must degrade to a
+  // short read rather than dereferencing iov_ past its end (out-of-bounds
+  // read). Compliant callers never trip these guards.
   size_t i = iovIndex_;
+  if (FOLLY_UNLIKELY(i >= iovLength_)) {
+    return;
+  }
+  const uint8_t* cur =
+      reinterpret_cast<uint8_t*>(iov_[i].iov_base) + curBufPos_;
+  size_t curLen = curBufLen_;
 
   while (size > 0) {
     size_t toCopy = std::min(size, curLen);
@@ -71,7 +78,9 @@ void IovecCursor::peekInto(uint8_t* dest, size_t size) const {
     dest += toCopy;
     size -= toCopy;
     if (size > 0) {
-      ++i;
+      if (FOLLY_UNLIKELY(++i >= iovLength_)) {
+        return;
+      }
       cur = reinterpret_cast<uint8_t*>(iov_[i].iov_base);
       curLen = iov_[i].iov_len;
     }

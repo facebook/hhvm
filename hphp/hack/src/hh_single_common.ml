@@ -11,7 +11,7 @@ open Hh_prelude
 (** Finds an arbitrary naming-table within the saved-states directory,
 or fails if none can be found. *)
 let find_naming_table_or_fail () : string =
-  let dir = ServerFiles.saved_state_download_dir in
+  let dir = ServerFiles.saved_state_download_dir () in
   let candidates =
     Disk.readdir dir
     |> Array.to_list

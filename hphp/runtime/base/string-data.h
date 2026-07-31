@@ -495,11 +495,11 @@ struct StringData final : MaybeCountable,
 
 private:
   template<bool trueStatic>
-  static MemBlock AllocateShared(folly::StringPiece sl);
+  static MemBlock AllocatePersistent(folly::StringPiece sl);
   template<bool trueStatic>
-  static StringData* MakeShared(folly::StringPiece sl);
+  static StringData* MakePersistent(folly::StringPiece sl);
   template<bool trueStatic>
-  static StringData* MakeSharedAt(folly::StringPiece sl, MemBlock range);
+  static StringData* MakePersistentAt(folly::StringPiece sl, MemBlock range);
 
   /*
    * Initialize a static string on a pre-allocated range of memory. This is

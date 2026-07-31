@@ -133,7 +133,7 @@ void StringData::setColor(uint16_t color) {
 // of the string. Static are alive for the lifetime of the process.
 // Uncounted are not ref counted but will be deleted at some point.
 template <bool trueStatic> ALWAYS_INLINE
-MemBlock StringData::AllocateShared(folly::StringPiece sl) {
+MemBlock StringData::AllocatePersistent(folly::StringPiece sl) {
   if (UNLIKELY(sl.size() > StringData::MaxSize)) {
     raiseStringLengthExceededError(sl.size());
   }
@@ -145,7 +145,7 @@ MemBlock StringData::AllocateShared(folly::StringPiece sl) {
 }
 
 template <bool trueStatic> ALWAYS_INLINE
-StringData* StringData::MakeSharedAt(folly::StringPiece sl, MemBlock range) {
+StringData* StringData::MakePersistentAt(folly::StringPiece sl, MemBlock range) {
   auto const extra = trueStatic ? sizeof(SymbolPrefix) : 0;
   assertx(range.size >= sl.size() + kStringOverhead + extra);
 
@@ -180,18 +180,18 @@ StringData* StringData::MakeSharedAt(folly::StringPiece sl, MemBlock range) {
 }
 
 template <bool trueStatic> ALWAYS_INLINE
-StringData* StringData::MakeShared(folly::StringPiece sl) {
+StringData* StringData::MakePersistent(folly::StringPiece sl) {
   assertx(IMPLIES(trueStatic, StaticString::s_globalInit));
-  auto range = AllocateShared<trueStatic>(sl);
-  return MakeSharedAt<trueStatic>(sl, range);
+  auto range = AllocatePersistent<trueStatic>(sl);
+  return MakePersistentAt<trueStatic>(sl, range);
 }
 
 StringData* StringData::MakeStatic(folly::StringPiece sl) {
-  return MakeShared<true>(sl);
+  return MakePersistent<true>(sl);
 }
 
 StringData* StringData::MakeUncounted(folly::StringPiece sl) {
-  return MakeShared<false>(sl);
+  return MakePersistent<false>(sl);
 }
 
 StringData* StringData::MakeEmpty() {
@@ -202,7 +202,7 @@ StringData* StringData::MakeEmpty() {
     return s_theEmptyStringDynamic;
   }
 #endif
-  return MakeSharedAt<true>(folly::StringPiece{""},
+  return MakePersistentAt<true>(folly::StringPiece{""},
                             MemBlock{&s_theEmptyStringFixed, sizeof(s_theEmptyStringFixed)});
 #else
   s_theEmptyStringDynamic = MakeStatic(folly::StringPiece{""});

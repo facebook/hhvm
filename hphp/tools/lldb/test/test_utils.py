@@ -115,7 +115,8 @@ class UtilsGivenFrameTestCase(base.TestHHVMBinary):
         raw_ptr = utils.rawptr(smart_ptr)
         self.assertIsNotNone(raw_ptr)
         self.assertTrue(raw_ptr.type.IsPointerType())
-        self.assertEqual(raw_ptr.unsigned, 1)
+        packed = utils.atomic_get(utils.get(smart_ptr, "m_s")).unsigned
+        self.assertEqual(raw_ptr.unsigned, packed << 3)
 
     def test_rawptr_std_unique_ptr(self) -> None:
         self.run_until_breakpoint("lookupObjMethod")

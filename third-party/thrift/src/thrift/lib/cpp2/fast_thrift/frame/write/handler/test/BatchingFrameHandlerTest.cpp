@@ -51,6 +51,21 @@ apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox wrapFrame(
       std::move(buf));
 }
 
+// Drains a flush list the way a caller-owned poller does: move the list out so
+// re-armed callbacks land on a fresh list, then pop-and-run each entry.
+// Returns the number of batchers flushed.
+size_t drainFlushList(BatchingFrameHandler::FlushList& list) {
+  size_t drained = 0;
+  auto callbacks = std::move(list);
+  while (!callbacks.empty()) {
+    auto& cb = callbacks.front();
+    callbacks.pop_front();
+    cb.runLoopCallback();
+    ++drained;
+  }
+  return drained;
+}
+
 // ============================================================================
 // Mock Context
 // ============================================================================
@@ -497,6 +512,188 @@ TEST_F(BatchingFrameHandlerTest, WriteReadyErrorFiresException) {
 
   EXPECT_EQ(ctx_->exceptionCount(), 1);
   EXPECT_TRUE(bool(ctx_->lastException()));
+}
+
+// ============================================================================
+// Flush List Tests
+// ============================================================================
+
+// With a flush list set, a below-threshold write enqueues onto the caller's
+// list instead of the EventBase: the loop tick does nothing, and only draining
+// the list flushes the batch.
+TEST_F(BatchingFrameHandlerTest, FlushListRedirectsDeferredFlush) {
+  BatchingHandlerConfig config{
+      .maxPendingBytes = 64 * 1024,
+      .maxPendingFrames = 32,
+  };
+  BatchingFrameHandler handler(config);
+  handler.handlerAdded(*ctx_);
+
+  BatchingFrameHandler::FlushList flushList;
+  handler.setFlushList(&flushList);
+
+  (void)handler.onWrite(*ctx_, wrapFrame(makePayload(100)));
+
+  // Enqueued on the caller's list, not the EventBase.
+  EXPECT_TRUE(handler.isScheduled());
+  EXPECT_FALSE(flushList.empty());
+
+  // The EventBase has nothing scheduled — the loop tick must not flush.
+  runEventBaseLoop();
+  EXPECT_EQ(ctx_->writtenBatches().size(), 0);
+  EXPECT_TRUE(handler.hasPendingData());
+
+  // Draining the list runs the deferred flush.
+  EXPECT_EQ(drainFlushList(flushList), 1);
+  EXPECT_FALSE(handler.isScheduled());
+  EXPECT_FALSE(handler.hasPendingData());
+  ASSERT_EQ(ctx_->writtenBatches().size(), 1);
+  EXPECT_EQ(ctx_->totalBytesWritten(), 100);
+}
+
+// A threshold flush fires inline even when a flush list is set, and unlinks the
+// batcher so no stale entry is left behind for the drain.
+TEST_F(BatchingFrameHandlerTest, FlushListThresholdFlushUnlinks) {
+  BatchingHandlerConfig config{
+      .maxPendingBytes = 1024 * 1024,
+      .maxPendingFrames = 3,
+  };
+  BatchingFrameHandler handler(config);
+  handler.handlerAdded(*ctx_);
+
+  BatchingFrameHandler::FlushList flushList;
+  handler.setFlushList(&flushList);
+
+  // First two writes defer onto the list.
+  (void)handler.onWrite(*ctx_, wrapFrame(makePayload(10)));
+  (void)handler.onWrite(*ctx_, wrapFrame(makePayload(10)));
+  EXPECT_FALSE(flushList.empty());
+
+  // Third write crosses the frame threshold and flushes inline.
+  (void)handler.onWrite(*ctx_, wrapFrame(makePayload(10)));
+  ASSERT_EQ(ctx_->writtenBatches().size(), 1);
+  EXPECT_EQ(ctx_->totalBytesWritten(), 30);
+
+  // The entry was removed from the list by the inline flush.
+  EXPECT_TRUE(flushList.empty());
+  EXPECT_FALSE(handler.isScheduled());
+  EXPECT_EQ(drainFlushList(flushList), 0);
+}
+
+// A single flush list drives multiple batchers: one entry per batcher, and one
+// drain flushes them all.
+TEST_F(BatchingFrameHandlerTest, FlushListSharedAcrossBatchers) {
+  BatchingHandlerConfig config{
+      .maxPendingBytes = 64 * 1024,
+      .maxPendingFrames = 32,
+  };
+  BatchingFrameHandler::FlushList flushList;
+
+  BatchingFrameHandler handlerA(config);
+  BatchingFrameHandler handlerB(config);
+  handlerA.handlerAdded(*ctx_);
+  MockContext ctxB(evb_.get());
+  handlerB.handlerAdded(ctxB);
+  handlerA.setFlushList(&flushList);
+  handlerB.setFlushList(&flushList);
+
+  (void)handlerA.onWrite(*ctx_, wrapFrame(makePayload(100)));
+  (void)handlerB.onWrite(ctxB, wrapFrame(makePayload(200)));
+
+  EXPECT_EQ(drainFlushList(flushList), 2);
+  ASSERT_EQ(ctx_->writtenBatches().size(), 1);
+  EXPECT_EQ(ctx_->totalBytesWritten(), 100);
+  ASSERT_EQ(ctxB.writtenBatches().size(), 1);
+  EXPECT_EQ(ctxB.totalBytesWritten(), 200);
+}
+
+TEST_F(BatchingFrameHandlerTest, FlushListSwitchUnlinksPreviousList) {
+  BatchingHandlerConfig config{
+      .maxPendingBytes = 64 * 1024,
+      .maxPendingFrames = 32,
+  };
+  BatchingFrameHandler handler(config);
+  handler.handlerAdded(*ctx_);
+
+  BatchingFrameHandler::FlushList flushListA;
+  BatchingFrameHandler::FlushList flushListB;
+  handler.setFlushList(&flushListA);
+
+  (void)handler.onWrite(*ctx_, wrapFrame(makePayload(100)));
+  ASSERT_FALSE(flushListA.empty());
+
+  handler.setFlushList(&flushListB);
+
+  EXPECT_TRUE(flushListA.empty());
+  EXPECT_FALSE(flushListB.empty());
+  EXPECT_TRUE(handler.isScheduled());
+  EXPECT_EQ(drainFlushList(flushListA), 0);
+  EXPECT_EQ(drainFlushList(flushListB), 1);
+  ASSERT_EQ(ctx_->writtenBatches().size(), 1);
+  EXPECT_EQ(ctx_->totalBytesWritten(), 100);
+}
+
+TEST_F(BatchingFrameHandlerTest, FlushListClearReschedulesOnEventBase) {
+  BatchingHandlerConfig config{
+      .maxPendingBytes = 64 * 1024,
+      .maxPendingFrames = 32,
+  };
+  BatchingFrameHandler handler(config);
+  handler.handlerAdded(*ctx_);
+
+  BatchingFrameHandler::FlushList flushList;
+  handler.setFlushList(&flushList);
+  (void)handler.onWrite(*ctx_, wrapFrame(makePayload(100)));
+  ASSERT_FALSE(flushList.empty());
+
+  handler.setFlushList(nullptr);
+
+  EXPECT_TRUE(flushList.empty());
+  EXPECT_TRUE(handler.isScheduled());
+  runEventBaseLoop();
+  EXPECT_FALSE(handler.isScheduled());
+  ASSERT_EQ(ctx_->writtenBatches().size(), 1);
+  EXPECT_EQ(ctx_->totalBytesWritten(), 100);
+}
+
+TEST_F(BatchingFrameHandlerTest, HandlerRemovedUnlinksFlushList) {
+  BatchingHandlerConfig config{
+      .maxPendingBytes = 64 * 1024,
+      .maxPendingFrames = 32,
+  };
+  BatchingFrameHandler handler(config);
+  handler.handlerAdded(*ctx_);
+
+  BatchingFrameHandler::FlushList flushList;
+  handler.setFlushList(&flushList);
+  (void)handler.onWrite(*ctx_, wrapFrame(makePayload(100)));
+  ASSERT_FALSE(flushList.empty());
+
+  handler.handlerRemoved(*ctx_);
+
+  EXPECT_TRUE(flushList.empty());
+  EXPECT_FALSE(handler.isScheduled());
+  EXPECT_EQ(drainFlushList(flushList), 0);
+}
+
+// A batcher destroyed while enqueued unlinks itself, leaving the caller's list
+// safe to drain.
+TEST_F(BatchingFrameHandlerTest, FlushListUnlinksOnHandlerTeardown) {
+  BatchingHandlerConfig config{
+      .maxPendingBytes = 64 * 1024,
+      .maxPendingFrames = 32,
+  };
+  BatchingFrameHandler::FlushList flushList;
+
+  {
+    BatchingFrameHandler handler(config);
+    handler.handlerAdded(*ctx_);
+    handler.setFlushList(&flushList);
+    (void)handler.onWrite(*ctx_, wrapFrame(makePayload(100)));
+    EXPECT_FALSE(flushList.empty());
+  }
+
+  EXPECT_TRUE(flushList.empty());
 }
 
 } // namespace

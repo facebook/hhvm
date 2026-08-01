@@ -38,8 +38,6 @@
 #include <folly/io/IOBuf.h>
 #include <folly/io/IOBufQueue.h>
 #include <folly/io/async/EventBase.h>
-#include <folly/io/async/HHWheelTimer.h>
-
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Backpressure.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Common.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Handler.h>
@@ -47,6 +45,7 @@
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/TypeErasedBox.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/IntervalBatchingHandlerConfig.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/WriteCompletionTracker.h>
+#include <thrift/lib/cpp2/fast_thrift/frame/write/util/BatchFlushScheduler.h>
 
 #include <functional>
 #include <stdexcept>
@@ -54,20 +53,18 @@
 namespace apache::thrift::fast_thrift::frame::write::handler {
 
 template <WriteCompletionTracker Tracker = NoOpWriteCompletionTracker>
-class IntervalBatchingFrameHandlerT : private folly::EventBase::LoopCallback,
-                                      private folly::HHWheelTimer::Callback {
+class IntervalBatchingFrameHandlerT {
  public:
   // Detected by makeHandlerNode; pipeline drives onWriteReady through this.
   channel_pipeline::WriteReadyHook writeReadyHook_;
 
   explicit IntervalBatchingFrameHandlerT(
       IntervalBatchingHandlerConfig config = {}) noexcept
-      : config_(std::move(config)) {}
+      : config_(std::move(config)),
+        scheduler_(
+            util::BatchFlushScheduler::DeferredFlushMode::EndOfCurrentLoop) {}
 
-  ~IntervalBatchingFrameHandlerT() override {
-    cancelLoopCallbackIfScheduled();
-    cancelTimeout();
-  }
+  ~IntervalBatchingFrameHandlerT() { scheduler_.cancelAll(); }
 
   IntervalBatchingFrameHandlerT(const IntervalBatchingFrameHandlerT&) = delete;
   IntervalBatchingFrameHandlerT& operator=(
@@ -82,15 +79,17 @@ class IntervalBatchingFrameHandlerT : private folly::EventBase::LoopCallback,
 
   template <typename Context>
   void handlerAdded(Context& ctx) noexcept {
-    eventBase_ = ctx.eventBase();
-    flushFn_ = [this, &ctx]() { flushAndPropagateErrors(ctx); };
+    scheduler_.setEventBase(ctx.eventBase());
+    scheduler_.setFlushFunction(
+        [this, &ctx]() { flushAndPropagateErrors(ctx); });
   }
 
   template <typename Context>
   void handlerRemoved(Context& /*ctx*/) noexcept {
     clearPendingState();
-    eventBase_ = nullptr;
-    flushFn_ = nullptr;
+    scheduler_.setEventBase(nullptr);
+    scheduler_.clearFlushFunction();
+    scheduler_.setFlushList(nullptr);
   }
 
   // ===========================================================================
@@ -169,9 +168,37 @@ class IntervalBatchingFrameHandlerT : private folly::EventBase::LoopCallback,
     if (bufferedWritesQueue_.empty()) {
       return;
     }
-    cancelLoopCallbackIfScheduled();
-    cancelTimeout();
-    flushPendingWrites();
+    scheduler_.cancelAll();
+    scheduler_.flushNow();
+  }
+
+  // ===========================================================================
+  // Flush list
+  // ===========================================================================
+
+  // An intrusive list of deferred flush callbacks. Each handler enqueues at
+  // most one scheduler-owned entry.
+  using FlushList = util::BatchFlushScheduler::FlushList;
+
+  // Redirects the deferred (end-of-loop) flush from the EventBase to a
+  // caller-owned list.
+  //
+  // By default the batcher schedules its deferred flush on the EventBase, which
+  // runs it at the end of the current loop iteration. When a flush list is
+  // provided, the batcher enqueues onto that list instead of self-scheduling,
+  // handing the caller control over when the buffered writes are flushed (the
+  // caller drains the list). Frame and byte threshold flushes use the same
+  // deferred path and are redirected to the list; the interval timer flush is
+  // unaffected.
+  //
+  // The list must outlive this handler. Pass nullptr to restore EventBase
+  // scheduling.
+  void setFlushList(FlushList* flushList) noexcept {
+    bool shouldScheduleDeferredFlush = needsDeferredFlush();
+    scheduler_.setFlushList(flushList);
+    if (shouldScheduleDeferredFlush) {
+      scheduleDeferredFlush();
+    }
   }
 
   // ===========================================================================
@@ -186,27 +213,23 @@ class IntervalBatchingFrameHandlerT : private folly::EventBase::LoopCallback,
 
  private:
   // ===========================================================================
-  // LoopCallback
-  // ===========================================================================
-
-  void runLoopCallback() noexcept final { flushPendingWrites(); }
-
-  // ===========================================================================
-  // HHWheelTimer::Callback
-  // ===========================================================================
-
-  void timeoutExpired() noexcept final { flushPendingWrites(); }
-
-  // ===========================================================================
   // Internals
   // ===========================================================================
 
   void scheduleFlush() noexcept {
-    if (config_.batchingInterval != std::chrono::milliseconds::zero()) {
-      eventBase_->timer().scheduleTimeout(this, config_.batchingInterval);
-    } else {
-      eventBase_->runInLoop(this, true);
+    scheduler_.scheduleTimeout(config_.batchingInterval);
+  }
+
+  // Enqueues the deferred flush onto the caller-owned list when one is set,
+  // otherwise self-schedules on the EventBase.
+  void scheduleDeferredFlush() noexcept { scheduler_.scheduleDeferredFlush(); }
+
+  bool needsDeferredFlush() const noexcept {
+    if (bufferedWritesQueue_.empty() || backpressured_) {
+      return false;
     }
+    return config_.batchingInterval == std::chrono::milliseconds::zero() ||
+        scheduler_.hasScheduledDeferredFlush();
   }
 
   bool shouldEarlyFlush() const noexcept {
@@ -218,20 +241,7 @@ class IntervalBatchingFrameHandlerT : private folly::EventBase::LoopCallback,
          totalBytesBuffered_ >= config_.batchingByteSize);
   }
 
-  void earlyFlush() noexcept {
-    if (earlyFlushRequested_) {
-      return;
-    }
-    earlyFlushRequested_ = true;
-    cancelTimeout();
-    eventBase_->runInLoop(this, true);
-  }
-
-  void flushPendingWrites() noexcept {
-    if (flushFn_) {
-      flushFn_();
-    }
-  }
+  void earlyFlush() noexcept { scheduler_.scheduleEarlyFlush(); }
 
   template <typename Context>
   void flushAndPropagateErrors(Context& ctx) noexcept {
@@ -251,7 +261,6 @@ class IntervalBatchingFrameHandlerT : private folly::EventBase::LoopCallback,
 
     bufferedWritesCount_ = 0;
     totalBytesBuffered_ = 0;
-    earlyFlushRequested_ = false;
     tracker_.onFlush();
 
     auto result =
@@ -265,32 +274,25 @@ class IntervalBatchingFrameHandlerT : private folly::EventBase::LoopCallback,
     return result;
   }
 
-  void cancelLoopCallbackIfScheduled() noexcept {
-    if (isLoopCallbackScheduled()) {
-      cancelLoopCallback();
-    }
-  }
-
   void clearPendingState() noexcept {
-    cancelLoopCallbackIfScheduled();
-    cancelTimeout();
+    scheduler_.cancelAll();
     bufferedWritesQueue_.move(); // discard
     bufferedWritesCount_ = 0;
     totalBytesBuffered_ = 0;
-    earlyFlushRequested_ = false;
     backpressured_ = false;
   }
 
   IntervalBatchingHandlerConfig config_;
-  folly::EventBase* eventBase_{nullptr};
+  util::BatchFlushScheduler scheduler_;
+
+  // When set, deferred flushes enqueue here instead of on the EventBase.
+  // Non-owning; the list outlives this handler (reset in handlerRemoved).
+  FlushList* flushList_{nullptr};
 
   folly::IOBufQueue bufferedWritesQueue_{folly::IOBufQueue::cacheChainLength()};
   size_t bufferedWritesCount_{0};
   size_t totalBytesBuffered_{0};
-  bool earlyFlushRequested_{false};
   bool backpressured_{false};
-
-  std::function<void()> flushFn_;
 
   // Per-write tracker mixin; NoOp by default.
   [[no_unique_address]] Tracker tracker_{};

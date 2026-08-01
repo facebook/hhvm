@@ -42,6 +42,21 @@ channel_pipeline::TypeErasedBox wrapFrame(std::unique_ptr<folly::IOBuf> buf) {
   return channel_pipeline::TypeErasedBox(std::move(buf));
 }
 
+// Drains a flush list the way a caller-owned poller does: move the list out so
+// re-armed callbacks land on a fresh list, then pop-and-run each entry.
+// Returns the number of batchers flushed.
+size_t drainFlushList(LoopBatchingFrameHandler::FlushList& list) {
+  size_t drained = 0;
+  auto callbacks = std::move(list);
+  while (!callbacks.empty()) {
+    auto& cb = callbacks.front();
+    callbacks.pop_front();
+    cb.runLoopCallback();
+    ++drained;
+  }
+  return drained;
+}
+
 // ============================================================================
 // Mock Context
 // ============================================================================
@@ -323,6 +338,115 @@ TEST_F(LoopBatchingFrameHandlerTest, LoopTickErrorFiresException) {
 
   EXPECT_EQ(ctx_->exceptionCount(), 1);
   EXPECT_TRUE(bool(ctx_->lastException()));
+}
+
+// ============================================================================
+// Flush List Tests
+// ============================================================================
+
+// With a flush list set, a write enqueues onto the caller's list instead of the
+// EventBase: the loop ticks do nothing, and a single drain flushes directly
+// (no double-scheduling).
+TEST_F(
+    LoopBatchingFrameHandlerTest, FlushListRedirectsAndFlushesOnSingleDrain) {
+  LoopBatchingFrameHandler handler;
+  handler.handlerAdded(*ctx_);
+
+  LoopBatchingFrameHandler::FlushList flushList;
+  handler.setFlushList(&flushList);
+
+  (void)handler.onWrite(*ctx_, wrapFrame(makePayload(100)));
+  EXPECT_TRUE(handler.isScheduled());
+  EXPECT_FALSE(flushList.empty());
+
+  // Nothing is scheduled on the EventBase, so loop ticks must not flush.
+  runEventBaseLoop();
+  runEventBaseLoop();
+  EXPECT_EQ(ctx_->writtenBatches().size(), 0);
+  EXPECT_FALSE(handler.empty());
+
+  // A single drain flushes directly — the double-schedule is disabled.
+  EXPECT_EQ(drainFlushList(flushList), 1);
+  EXPECT_FALSE(handler.isScheduled());
+  EXPECT_TRUE(handler.empty());
+  ASSERT_EQ(ctx_->writtenBatches().size(), 1);
+  EXPECT_EQ(ctx_->totalBytesWritten(), 100);
+}
+
+// A single flush list drives multiple batchers: one entry per batcher, and one
+// drain flushes them all.
+TEST_F(LoopBatchingFrameHandlerTest, FlushListSharedAcrossBatchers) {
+  LoopBatchingFrameHandler::FlushList flushList;
+
+  LoopBatchingFrameHandler handlerA;
+  LoopBatchingFrameHandler handlerB;
+  handlerA.handlerAdded(*ctx_);
+  MockContext ctxB(evb_.get());
+  handlerB.handlerAdded(ctxB);
+  handlerA.setFlushList(&flushList);
+  handlerB.setFlushList(&flushList);
+
+  (void)handlerA.onWrite(*ctx_, wrapFrame(makePayload(100)));
+  (void)handlerB.onWrite(ctxB, wrapFrame(makePayload(200)));
+
+  EXPECT_EQ(drainFlushList(flushList), 2);
+  ASSERT_EQ(ctx_->writtenBatches().size(), 1);
+  EXPECT_EQ(ctx_->totalBytesWritten(), 100);
+  ASSERT_EQ(ctxB.writtenBatches().size(), 1);
+  EXPECT_EQ(ctxB.totalBytesWritten(), 200);
+}
+
+TEST_F(LoopBatchingFrameHandlerTest, FlushListSwitchCancelsEventBaseCallback) {
+  LoopBatchingFrameHandler handler;
+  handler.handlerAdded(*ctx_);
+
+  (void)handler.onWrite(*ctx_, wrapFrame(makePayload(100)));
+  ASSERT_TRUE(handler.isScheduled());
+
+  LoopBatchingFrameHandler::FlushList flushList;
+  handler.setFlushList(&flushList);
+
+  EXPECT_FALSE(flushList.empty());
+  runEventBaseLoop();
+  EXPECT_FALSE(handler.empty());
+  EXPECT_EQ(ctx_->writtenBatches().size(), 0);
+
+  EXPECT_EQ(drainFlushList(flushList), 1);
+  EXPECT_TRUE(handler.empty());
+  ASSERT_EQ(ctx_->writtenBatches().size(), 1);
+  EXPECT_EQ(ctx_->totalBytesWritten(), 100);
+}
+
+TEST_F(LoopBatchingFrameHandlerTest, HandlerRemovedUnlinksFlushList) {
+  LoopBatchingFrameHandler handler;
+  handler.handlerAdded(*ctx_);
+
+  LoopBatchingFrameHandler::FlushList flushList;
+  handler.setFlushList(&flushList);
+  (void)handler.onWrite(*ctx_, wrapFrame(makePayload(100)));
+  ASSERT_FALSE(flushList.empty());
+
+  handler.handlerRemoved(*ctx_);
+
+  EXPECT_TRUE(flushList.empty());
+  EXPECT_FALSE(handler.isScheduled());
+  EXPECT_EQ(drainFlushList(flushList), 0);
+}
+
+// A batcher destroyed while enqueued unlinks itself, leaving the caller's list
+// safe to drain.
+TEST_F(LoopBatchingFrameHandlerTest, FlushListUnlinksOnHandlerTeardown) {
+  LoopBatchingFrameHandler::FlushList flushList;
+
+  {
+    LoopBatchingFrameHandler handler;
+    handler.handlerAdded(*ctx_);
+    handler.setFlushList(&flushList);
+    (void)handler.onWrite(*ctx_, wrapFrame(makePayload(100)));
+    EXPECT_FALSE(flushList.empty());
+  }
+
+  EXPECT_TRUE(flushList.empty());
 }
 
 } // namespace

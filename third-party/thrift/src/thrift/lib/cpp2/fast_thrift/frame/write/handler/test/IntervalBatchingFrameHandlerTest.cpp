@@ -43,6 +43,21 @@ channel_pipeline::TypeErasedBox wrapFrame(std::unique_ptr<folly::IOBuf> buf) {
   return channel_pipeline::TypeErasedBox(std::move(buf));
 }
 
+// Drains a flush list the way a caller-owned poller does: move the list out so
+// re-armed callbacks land on a fresh list, then pop-and-run each entry.
+// Returns the number of batchers flushed.
+size_t drainFlushList(IntervalBatchingFrameHandler::FlushList& list) {
+  size_t drained = 0;
+  auto callbacks = std::move(list);
+  while (!callbacks.empty()) {
+    auto& cb = callbacks.front();
+    callbacks.pop_front();
+    cb.runLoopCallback();
+    ++drained;
+  }
+  return drained;
+}
+
 // ============================================================================
 // Mock Context
 // ============================================================================
@@ -574,6 +589,188 @@ TEST_F(IntervalBatchingFrameHandlerTest, Error_MessageIdentifiesHandler) {
       std::string(ctx_->firedException()->what())
           .find("IntervalBatchingFrameHandler: downstream write failed"),
       std::string::npos);
+}
+
+// ============================================================================
+// Flush List Tests
+// ============================================================================
+
+// Zero-interval (loop mode): a write enqueues onto the caller's list instead of
+// the EventBase; the loop tick does nothing, and draining flushes the batch.
+TEST_F(IntervalBatchingFrameHandlerTest, FlushListRedirectsZeroInterval) {
+  IntervalBatchingHandlerConfig config{};
+  IntervalBatchingFrameHandler handler(config);
+  handler.handlerAdded(*ctx_);
+
+  IntervalBatchingFrameHandler::FlushList flushList;
+  handler.setFlushList(&flushList);
+
+  (void)handler.onWrite(*ctx_, wrapFrame(makePayload(100)));
+  EXPECT_FALSE(flushList.empty());
+
+  // Nothing scheduled on the EventBase — the loop tick must not flush.
+  runEventBaseLoop();
+  EXPECT_EQ(ctx_->writtenBatches().size(), 0);
+  EXPECT_FALSE(handler.empty());
+
+  EXPECT_EQ(drainFlushList(flushList), 1);
+  EXPECT_TRUE(handler.empty());
+  ASSERT_EQ(ctx_->writtenBatches().size(), 1);
+  EXPECT_EQ(ctx_->totalBytesWritten(), 100);
+}
+
+// An early flush (byte/frame threshold under a non-zero interval) is redirected
+// onto the caller's list rather than the EventBase, and the interval timer is
+// cancelled so the batch flushes exactly once on drain.
+TEST_F(IntervalBatchingFrameHandlerTest, FlushListRedirectsEarlyFlush) {
+  IntervalBatchingHandlerConfig config{
+      .batchingInterval = std::chrono::milliseconds(100),
+      .batchingSize = 3,
+      .batchingByteSize = 1024 * 1024,
+  };
+  IntervalBatchingFrameHandler handler(config);
+  handler.handlerAdded(*ctx_);
+
+  IntervalBatchingFrameHandler::FlushList flushList;
+  handler.setFlushList(&flushList);
+
+  (void)handler.onWrite(*ctx_, wrapFrame(makePayload(10)));
+  (void)handler.onWrite(*ctx_, wrapFrame(makePayload(10)));
+  // Third frame hits the size threshold → early flush enqueued on the list.
+  (void)handler.onWrite(*ctx_, wrapFrame(makePayload(10)));
+  EXPECT_FALSE(flushList.empty());
+  EXPECT_EQ(ctx_->writtenBatches().size(), 0);
+
+  EXPECT_EQ(drainFlushList(flushList), 1);
+  ASSERT_EQ(ctx_->writtenBatches().size(), 1);
+  EXPECT_EQ(ctx_->totalBytesWritten(), 30);
+
+  // The timer was cancelled by the early flush — running the loop does not
+  // produce a second batch.
+  evb_->loop();
+  EXPECT_EQ(ctx_->writtenBatches().size(), 1);
+}
+
+// The interval timer flush is independent of the flush list: a below-threshold
+// write under a non-zero interval schedules the timer, not the list.
+TEST_F(
+    IntervalBatchingFrameHandlerTest, FlushListLeavesIntervalTimerUnaffected) {
+  IntervalBatchingHandlerConfig config{
+      .batchingInterval = std::chrono::milliseconds(10),
+      .batchingSize = 1000,
+      .batchingByteSize = 1024 * 1024,
+  };
+  IntervalBatchingFrameHandler handler(config);
+  handler.handlerAdded(*ctx_);
+
+  IntervalBatchingFrameHandler::FlushList flushList;
+  handler.setFlushList(&flushList);
+
+  (void)handler.onWrite(*ctx_, wrapFrame(makePayload(100)));
+
+  // Scheduled on the timer, not the flush list.
+  EXPECT_TRUE(flushList.empty());
+
+  // The timer fires and flushes without any drain.
+  evb_->loop();
+  EXPECT_TRUE(handler.empty());
+  ASSERT_EQ(ctx_->writtenBatches().size(), 1);
+  EXPECT_EQ(ctx_->totalBytesWritten(), 100);
+}
+
+TEST_F(IntervalBatchingFrameHandlerTest, FlushListSwitchUnlinksPreviousList) {
+  IntervalBatchingHandlerConfig config{};
+  IntervalBatchingFrameHandler handler(config);
+  handler.handlerAdded(*ctx_);
+
+  IntervalBatchingFrameHandler::FlushList flushListA;
+  IntervalBatchingFrameHandler::FlushList flushListB;
+  handler.setFlushList(&flushListA);
+  (void)handler.onWrite(*ctx_, wrapFrame(makePayload(100)));
+  ASSERT_FALSE(flushListA.empty());
+
+  handler.setFlushList(&flushListB);
+
+  EXPECT_TRUE(flushListA.empty());
+  EXPECT_FALSE(flushListB.empty());
+  EXPECT_EQ(drainFlushList(flushListA), 0);
+  EXPECT_EQ(drainFlushList(flushListB), 1);
+  ASSERT_EQ(ctx_->writtenBatches().size(), 1);
+  EXPECT_EQ(ctx_->totalBytesWritten(), 100);
+}
+
+TEST_F(IntervalBatchingFrameHandlerTest, FlushListClearReschedulesOnEventBase) {
+  IntervalBatchingHandlerConfig config{};
+  IntervalBatchingFrameHandler handler(config);
+  handler.handlerAdded(*ctx_);
+
+  IntervalBatchingFrameHandler::FlushList flushList;
+  handler.setFlushList(&flushList);
+  (void)handler.onWrite(*ctx_, wrapFrame(makePayload(100)));
+  ASSERT_FALSE(flushList.empty());
+
+  handler.setFlushList(nullptr);
+
+  EXPECT_TRUE(flushList.empty());
+  runEventBaseLoop();
+  EXPECT_TRUE(handler.empty());
+  ASSERT_EQ(ctx_->writtenBatches().size(), 1);
+  EXPECT_EQ(ctx_->totalBytesWritten(), 100);
+}
+
+TEST_F(IntervalBatchingFrameHandlerTest, HandlerRemovedUnlinksFlushList) {
+  IntervalBatchingHandlerConfig config{};
+  IntervalBatchingFrameHandler handler(config);
+  handler.handlerAdded(*ctx_);
+
+  IntervalBatchingFrameHandler::FlushList flushList;
+  handler.setFlushList(&flushList);
+  (void)handler.onWrite(*ctx_, wrapFrame(makePayload(100)));
+  ASSERT_FALSE(flushList.empty());
+
+  handler.handlerRemoved(*ctx_);
+
+  EXPECT_TRUE(flushList.empty());
+  EXPECT_EQ(drainFlushList(flushList), 0);
+}
+
+TEST_F(IntervalBatchingFrameHandlerTest, EarlyFlushSchedulesDeferredOnce) {
+  IntervalBatchingHandlerConfig config{
+      .batchingInterval = std::chrono::milliseconds(100),
+      .batchingSize = 3,
+      .batchingByteSize = 1024 * 1024,
+  };
+  IntervalBatchingFrameHandler handler(config);
+  handler.handlerAdded(*ctx_);
+
+  (void)handler.onWrite(*ctx_, wrapFrame(makePayload(10)));
+  (void)handler.onWrite(*ctx_, wrapFrame(makePayload(10)));
+  (void)handler.onWrite(*ctx_, wrapFrame(makePayload(10)));
+  (void)handler.onWrite(*ctx_, wrapFrame(makePayload(10)));
+
+  runEventBaseLoop();
+  ASSERT_EQ(ctx_->writtenBatches().size(), 1);
+  EXPECT_EQ(ctx_->totalBytesWritten(), 40);
+
+  runEventBaseLoop();
+  EXPECT_EQ(ctx_->writtenBatches().size(), 1);
+}
+
+// A batcher destroyed while enqueued unlinks itself, leaving the caller's list
+// safe to drain.
+TEST_F(IntervalBatchingFrameHandlerTest, FlushListUnlinksOnHandlerTeardown) {
+  IntervalBatchingFrameHandler::FlushList flushList;
+
+  {
+    IntervalBatchingHandlerConfig config{};
+    IntervalBatchingFrameHandler handler(config);
+    handler.handlerAdded(*ctx_);
+    handler.setFlushList(&flushList);
+    (void)handler.onWrite(*ctx_, wrapFrame(makePayload(100)));
+    EXPECT_FALSE(flushList.empty());
+  }
+
+  EXPECT_TRUE(flushList.empty());
 }
 
 } // namespace

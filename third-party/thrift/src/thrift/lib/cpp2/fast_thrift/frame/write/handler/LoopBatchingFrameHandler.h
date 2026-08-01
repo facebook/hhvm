@@ -38,6 +38,7 @@
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Common.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/TypeErasedBox.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/WriteCompletionTracker.h>
+#include <thrift/lib/cpp2/fast_thrift/frame/write/util/BatchFlushScheduler.h>
 
 #include <functional>
 #include <stdexcept>
@@ -45,11 +46,13 @@
 namespace apache::thrift::fast_thrift::frame::write::handler {
 
 template <WriteCompletionTracker Tracker = NoOpWriteCompletionTracker>
-class LoopBatchingFrameHandlerT : public folly::EventBase::LoopCallback {
+class LoopBatchingFrameHandlerT {
  public:
-  LoopBatchingFrameHandlerT() noexcept = default;
+  LoopBatchingFrameHandlerT() noexcept
+      : scheduler_(
+            util::BatchFlushScheduler::DeferredFlushMode::EndOfNextLoop) {}
 
-  ~LoopBatchingFrameHandlerT() override { cancelLoopCallbackIfScheduled(); }
+  ~LoopBatchingFrameHandlerT() { scheduler_.cancelAll(); }
 
   LoopBatchingFrameHandlerT(const LoopBatchingFrameHandlerT&) = delete;
   LoopBatchingFrameHandlerT& operator=(const LoopBatchingFrameHandlerT&) =
@@ -63,15 +66,17 @@ class LoopBatchingFrameHandlerT : public folly::EventBase::LoopCallback {
 
   template <typename Context>
   void handlerAdded(Context& ctx) noexcept {
-    eventBase_ = ctx.eventBase();
-    flushFn_ = [this, &ctx]() { flushAndPropagateErrors(ctx); };
+    scheduler_.setEventBase(ctx.eventBase());
+    scheduler_.setFlushFunction(
+        [this, &ctx]() { flushAndPropagateErrors(ctx); });
   }
 
   template <typename Context>
   void handlerRemoved(Context& /*ctx*/) noexcept {
     clearPendingState();
-    eventBase_ = nullptr;
-    flushFn_ = nullptr;
+    scheduler_.setEventBase(nullptr);
+    scheduler_.clearFlushFunction();
+    scheduler_.setFlushList(nullptr);
   }
 
   // ===========================================================================
@@ -127,46 +132,49 @@ class LoopBatchingFrameHandlerT : public folly::EventBase::LoopCallback {
       return;
     }
     cancelLoopCallbackIfScheduled();
-    flushPendingWrites();
+    scheduler_.flushNow();
   }
 
   // ===========================================================================
-  // LoopCallback
+  // Flush list
   // ===========================================================================
 
-  void runLoopCallback() noexcept override {
-    if (!std::exchange(rescheduled_, true)) {
-      eventBase_->runInLoop(this, true);
-      return;
-    }
+  // An intrusive list of deferred flush callbacks. Each handler enqueues at
+  // most one scheduler-owned entry.
+  using FlushList = util::BatchFlushScheduler::FlushList;
 
-    rescheduled_ = false;
-    scheduled_ = false;
-    flushPendingWrites();
+  // Redirects the end-of-loop flush from the EventBase to a caller-owned list.
+  //
+  // By default the batcher schedules its deferred flush on the EventBase and
+  // flushes at the end of the loop iteration (double-scheduled to capture the
+  // whole iteration). When a flush list is provided, the batcher enqueues onto
+  // that list instead of self-scheduling, and the caller's drain point defines
+  // the flush boundary, so the buffered writes flush directly on drain.
+  //
+  // The list must outlive this handler. Pass nullptr to restore EventBase
+  // scheduling.
+  void setFlushList(FlushList* flushList) noexcept {
+    scheduler_.setFlushList(flushList);
+    if (!bufferedWritesQueue_.empty()) {
+      scheduleFlushIfNeeded();
+    }
   }
 
   // ===========================================================================
   // Accessors (for testing)
   // ===========================================================================
 
-  bool isScheduled() const noexcept { return scheduled_; }
+  bool isScheduled() const noexcept {
+    return scheduler_.hasScheduledDeferredFlush();
+  }
   bool empty() const noexcept { return bufferedWritesQueue_.empty(); }
   Tracker& tracker() noexcept { return tracker_; }
 
  private:
-  void scheduleFlushIfNeeded() noexcept {
-    if (!scheduled_ && eventBase_) {
-      eventBase_->runInLoop(this, true);
-      scheduled_ = true;
-    }
-  }
+  void scheduleFlushIfNeeded() noexcept { scheduler_.scheduleDeferredFlush(); }
 
   void cancelLoopCallbackIfScheduled() noexcept {
-    if (scheduled_) {
-      this->cancelLoopCallback();
-      scheduled_ = false;
-      rescheduled_ = false;
-    }
+    scheduler_.cancelDeferredFlush();
   }
 
   void clearPendingState() noexcept {
@@ -195,20 +203,9 @@ class LoopBatchingFrameHandlerT : public folly::EventBase::LoopCallback {
         channel_pipeline::TypeErasedBox(std::move(batchToSend)));
   }
 
-  void flushPendingWrites() noexcept {
-    if (flushFn_) {
-      flushFn_();
-    }
-  }
-
-  folly::EventBase* eventBase_{nullptr};
-
-  bool scheduled_{false};
-  bool rescheduled_{false};
+  util::BatchFlushScheduler scheduler_;
 
   folly::IOBufQueue bufferedWritesQueue_{folly::IOBufQueue::cacheChainLength()};
-
-  std::function<void()> flushFn_;
 
   // Per-write tracker mixin; NoOp by default.
   [[no_unique_address]] Tracker tracker_{};

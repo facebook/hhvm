@@ -431,6 +431,10 @@ if (ENABLE_MCROUTER)
   find_package(mcrouter CONFIG REQUIRED)
 endif()
 
+if (TEST_BIN)
+  find_package(GTest REQUIRED)
+endif()
+
 include_directories(${HPHP_HOME}/hphp)
 
 macro(hphp_link target)

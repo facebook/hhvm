@@ -187,12 +187,12 @@ ArrayData* EmptyMonotypeDict::EscalateToVanilla(
   auto const legacy = ad->isLegacyArray();
   return legacy ? staticEmptyMarkedDictArray() : staticEmptyDictArray();
 }
-void EmptyMonotypeDict::ConvertToUncounted(
+void EmptyMonotypeDict::ConvertToShared(
     Self*, const MakeSharedEnv&) {
   // All EmptyMonotypeDicts are static, so we should never make them uncounted.
   always_assert(false);
 }
-void EmptyMonotypeDict::ReleaseUncounted(Self*) {
+void EmptyMonotypeDict::ReleaseShared(Self*) {
   // All EmptyMonotypeDicts are static, so we should never release them.
   always_assert(false);
 }
@@ -1125,7 +1125,7 @@ ArrayData* MonotypeDict<Key>::EscalateToVanilla(
 }
 
 template <typename Key>
-void MonotypeDict<Key>::ConvertToUncounted(
+void MonotypeDict<Key>::ConvertToShared(
     Self* mad, const MakeSharedEnv& env) {
   auto const dt = mad->type();
 
@@ -1144,7 +1144,7 @@ void MonotypeDict<Key>::ConvertToUncounted(
 }
 
 template <typename Key>
-void MonotypeDict<Key>::ReleaseUncounted(Self* mad) {
+void MonotypeDict<Key>::ReleaseShared(Self* mad) {
   auto const dt = mad->type();
 
   mad->forEachElm([&](auto /*i*/, auto elm) {

@@ -560,7 +560,7 @@ ArrayData* StructDict::escalateWithCapacity(size_t capacity,
   return ad;
 }
 
-void StructDict::ConvertToUncounted(
+void StructDict::ConvertToShared(
     StructDict* sad, const MakeSharedEnv& env) {
   auto const size = sad->size();
   auto const fn = [&]<typename PosType>() {
@@ -574,7 +574,7 @@ void StructDict::ConvertToUncounted(
     fn.template operator()<uint16_t>() : fn.template operator()<uint8_t>();
 }
 
-void StructDict::ReleaseUncounted(StructDict* sad) {
+void StructDict::ReleaseShared(StructDict* sad) {
   auto const size = sad->size();
   auto const fn = [&]<typename PosType>() {
     for (auto pos = 0; pos < size; pos++) {

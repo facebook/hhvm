@@ -413,14 +413,14 @@ NEVER_INLINE VanillaDict* VanillaDict::copyMixed() const {
 
 //////////////////////////////////////////////////////////////////////
 
-ArrayData* VanillaDict::MakeUncounted(
+ArrayData* VanillaDict::MakeShared(
     ArrayData* array, const MakeSharedEnv& env, bool hasApcTv) {
   auto a = as(array);
   assertx(!a->empty());
   assertx(a->isRefCounted());
 
-  auto const extra = uncountedAllocExtra(array, hasApcTv);
-  auto const ad = uncountedAlloc(a->scale(), extra);
+  auto const extra = sharedAllocExtra(array, hasApcTv);
+  auto const ad = sharedAlloc(a->scale(), extra);
   auto const used = a->m_used;
 
   // Do a raw copy first, without worrying about counted types or refcount
@@ -522,7 +522,7 @@ void VanillaDict::Release(ArrayData* in) {
 }
 
 NEVER_INLINE
-void VanillaDict::ReleaseUncounted(ArrayData* in) {
+void VanillaDict::ReleaseShared(ArrayData* in) {
   assertx(!in->sharedCowCheck());
   auto const ad = as(in);
 
@@ -536,7 +536,7 @@ void VanillaDict::ReleaseUncounted(ArrayData* in) {
       DecRefShared(ptr->data);
     }
   }
-  auto const extra = uncountedAllocExtra(ad, ad->hasApcTv());
+  auto const extra = sharedAllocExtra(ad, ad->hasApcTv());
   FreeShared(reinterpret_cast<char*>(ad) - extra,
                 computeAllocBytes(ad->scale()) + extra);
 }

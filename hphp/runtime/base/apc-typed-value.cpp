@@ -171,7 +171,7 @@ void APCTypedValue::deleteUncounted() {
   assertx(m_handle.isShared());
   static_assert(std::is_trivially_destructible<APCTypedValue>::value,
                 "APCTypedValue must be trivially destructible - "
-                "*Array::ReleaseUncounted() frees the memory without "
+                "*Array::ReleaseShared() frees the memory without "
                 "destroying it");
 
   switch (m_handle.kind()) {

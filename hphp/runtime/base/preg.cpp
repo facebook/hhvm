@@ -500,7 +500,7 @@ void PCRECache::insert(
         }
         auto const cache = m_staticCache.load(std::memory_order_acquire);
         auto const key = !regex->persistentIncRef()
-          ? StringData::MakeUncounted(regex->slice())
+          ? StringData::MakeShared(regex->slice())
           : regex;
         auto pair = cache->insert(StaticCachePair(key, ent));
         if (pair.second) {

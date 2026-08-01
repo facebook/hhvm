@@ -342,12 +342,12 @@ const ArrayFunctions g_array_funcs = {
   DISPATCH(Release)
 
   /*
-   * void ReleaseUncounted(ArrayData*)
+   * void ReleaseShared(ArrayData*)
    *
    *   Free the memory associated with an uncounted array. Generally called
    *   when the reference count on the array drops to "uncounted zero".
    */
-  DISPATCH(ReleaseUncounted)
+  DISPATCH(ReleaseShared)
 
   /*
    * TypedValue NvGetInt(const ArrayData*, int64_t key)
@@ -606,14 +606,14 @@ const ArrayFunctions g_array_funcs = {
   DISPATCH(OnSetEvalScalar)
 
   /*
-   * void MakeUncounted(ArrayData*, DataWalker::PointerMap*, bool hasApcTv)
+   * void MakeShared(ArrayData*, DataWalker::PointerMap*, bool hasApcTv)
    *
    *   Return a copy of the array where all its contents are converted to
    *   uncounted values. The caller must confirm that its contents can all be
    *   converted, e.g. by using DataWalker. If hasApcTv is true, this method
    *   will colocate an ApcTypedValue right before the array.
    */
-  DISPATCH(MakeUncounted)
+  DISPATCH(MakeShared)
 
   /*
    * ArrayData* Copy(ArrayData*)

@@ -330,13 +330,13 @@ LoggingArray* LoggingArray::MakeStatic(ArrayData* ad, LoggingProfile* profile) {
   return lad;
 }
 
-LoggingArray* LoggingArray::MakeUncounted(
+LoggingArray* LoggingArray::MakeShared(
     ArrayData* ad, LoggingProfile* profile, bool hasApcTv) {
   assertx(ad->isVanilla());
   assertx(ad->isStatic() || ad->isShared());
 
   auto const bytes = sizeof(LoggingArray);
-  auto const extra = uncountedAllocExtra(ad, hasApcTv);
+  auto const extra = sharedAllocExtra(ad, hasApcTv);
   auto const mem = static_cast<char*>(AllocShared(bytes + extra));
   auto const lad = reinterpret_cast<LoggingArray*>(mem + extra);
 
@@ -397,14 +397,14 @@ ArrayData* LoggingArray::EscalateToVanilla(
   return wrapped;
 }
 
-void LoggingArray::ConvertToUncounted(
+void LoggingArray::ConvertToShared(
     LoggingArray* lad, const MakeSharedEnv& env) {
-  logEvent(lad, ArrayOp::ConvertToUncounted);
+  logEvent(lad, ArrayOp::ConvertToShared);
   lad->wrapped = MakeSharedArray(lad->wrapped, env);
 }
 
-void LoggingArray::ReleaseUncounted(LoggingArray* lad) {
-  logEvent(lad, ArrayOp::ReleaseUncounted);
+void LoggingArray::ReleaseShared(LoggingArray* lad) {
+  logEvent(lad, ArrayOp::ReleaseShared);
   DecRefSharedArray(lad->wrapped);
 }
 

@@ -120,7 +120,7 @@ struct ArrayData : MaybeCountable {
   static auto constexpr kBespokeKindMask = uint8_t{0x01};
 
   /*
-   * For uncounted Packed, Mixed, Dict and Vec, indicates that the
+   * For shared Packed, Mixed, Dict and Vec, indicates that the
    * array was co-allocated with an APCTypedValue (at apctv+1).
    */
   static auto constexpr kHasApcTv = 1;
@@ -184,12 +184,12 @@ public:
    * Return the array to the request heap or the global heap.
    *
    * The counted variant is called when the refcount goes to zero (e.g. from
-   * the JIT or from a helper like decRefArr). The uncounted variant is called
-   * when the refcount goes to "uncounted zero", from DecRefShared.
+   * the JIT or from a helper like decRefArr). The shared variant is called
+   * when the refcount goes to "shared zero", from DecRefShared.
    */
   void release() DEBUG_NOEXCEPT;
   void releaseShallow() DEBUG_NOEXCEPT;
-  void releaseUncounted();
+  void releaseShared();
 
   /*
    * Decref the array and release() it if its refcount goes to zero.
@@ -247,7 +247,7 @@ public:
   static bool bothVanilla(const ArrayData*, const ArrayData*);
 
   /*
-   * Only used for uncounted arrays. Indicates that there's a
+   * Only used for shared arrays. Indicates that there's a
    * co-allocated APCTypedValue preceding this array.
    */
   bool hasApcTv() const;
@@ -502,7 +502,7 @@ public:
   static int64_t Compare(const ArrayData*, const ArrayData*);
 
   /////////////////////////////////////////////////////////////////////////////
-  // Shared arrays: static and uncounted.
+  // Persistent arrays: static and shared.
 
   /*
    * If `arr' points to a static array, do nothing.  Otherwise, make a static
@@ -525,10 +525,10 @@ public:
   void onSetEvalScalar();
 
   /*
-   * Return a new uncounted version of the given array. The array must be a
+   * Return a new shared version of the given array. The array must be a
    * refcounted array - otherwise, we should call persistentIncRef() instead.
    */
-  ArrayData* makeUncounted(const MakeSharedEnv& env, bool hasApcTv);
+  ArrayData* makeShared(const MakeSharedEnv& env, bool hasApcTv);
 
   ArrayData* copy() const;
 
@@ -770,7 +770,7 @@ struct ArrayFunctions {
   static auto const NK = size_t{ArrayData::kNumKinds};
 
   void (*release[NK])(ArrayData*);
-  void (*releaseUncounted[NK])(ArrayData*);
+  void (*releaseShared[NK])(ArrayData*);
   TypedValue (*nvGetInt[NK])(const ArrayData*, int64_t k);
   TypedValue (*nvGetStr[NK])(const ArrayData*, const StringData* k);
   TypedValue (*getPosKey[NK])(const ArrayData*, ssize_t pos);
@@ -802,7 +802,7 @@ struct ArrayFunctions {
   ArrayData* (*appendMove[NK])(ArrayData*, TypedValue v);
   ArrayData* (*popMove[NK])(ArrayData*, Variant& value);
   void (*onSetEvalScalar[NK])(ArrayData*);
-  ArrayData* (*makeUncounted[NK])(
+  ArrayData* (*makeShared[NK])(
     ArrayData*, const MakeSharedEnv& env, bool hasApcTv);
   ArrayData* (*copy[NK])(const ArrayData*);
 };

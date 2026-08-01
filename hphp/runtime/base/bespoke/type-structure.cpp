@@ -606,7 +606,7 @@ ArrayData* TypeStructure::EscalateToVanilla(
   return tad->escalateWithCapacity(tad->size(), reason);
 }
 
-void TypeStructure::ConvertToUncounted(
+void TypeStructure::ConvertToShared(
     TypeStructure* tad, const MakeSharedEnv& env) {
   if (tad->m_alias) MakeSharedString(tad->m_alias, env);
   if (tad->m_typevars) MakeSharedString(tad->m_typevars, env);
@@ -615,7 +615,7 @@ void TypeStructure::ConvertToUncounted(
   switch (tad->typeKind()) {
 #define X(Name, Type) \
   case Kind::T_##Name: \
-    Type::convertToUncounted(reinterpret_cast<Type*>(tad), env); \
+    Type::convertToShared(reinterpret_cast<Type*>(tad), env); \
     break;
 TYPE_STRUCTURE_CHILDREN_KINDS
 #undef X
@@ -624,7 +624,7 @@ TYPE_STRUCTURE_CHILDREN_KINDS
   }
 }
 
-void TypeStructure::ReleaseUncounted(TypeStructure* tad) {
+void TypeStructure::ReleaseShared(TypeStructure* tad) {
   if (tad->m_alias) DecRefSharedString(tad->m_alias);
   if (tad->m_typevars) DecRefSharedString(tad->m_typevars);
   if (tad->m_typevar_types) DecRefSharedArray(tad->m_typevar_types);
@@ -632,7 +632,7 @@ void TypeStructure::ReleaseUncounted(TypeStructure* tad) {
   switch (tad->typeKind()) {
 #define X(Name, Type) \
   case Kind::T_##Name: \
-    Type::releaseUncounted(reinterpret_cast<Type*>(tad)); \
+    Type::releaseShared(reinterpret_cast<Type*>(tad)); \
     break;
 TYPE_STRUCTURE_CHILDREN_KINDS
 #undef X
@@ -901,23 +901,23 @@ ArrayData* TypeStructure::SetLegacyArray(
 
 namespace {
 
-template<class T> void tsMakeUncounted(T, const MakeSharedEnv&) {}
+template<class T> void tsMakeShared(T, const MakeSharedEnv&) {}
 template<>
-void tsMakeUncounted<StringData*>(StringData* field, const MakeSharedEnv& env) {
+void tsMakeShared<StringData*>(StringData* field, const MakeSharedEnv& env) {
   if (field) MakeSharedString(field, env);
 }
 template<>
-void tsMakeUncounted<ArrayData*>(ArrayData* field, const MakeSharedEnv& env) {
+void tsMakeShared<ArrayData*>(ArrayData* field, const MakeSharedEnv& env) {
   if (field) MakeSharedArray(field, env);
 }
 
-template<class T> void tsDecRefUncounted(T) {}
+template<class T> void tsDecRefShared(T) {}
 template<>
-void tsDecRefUncounted<StringData*>(StringData* field) {
+void tsDecRefShared<StringData*>(StringData* field) {
   if (field) DecRefSharedString(field);
 }
 template<>
-void tsDecRefUncounted<ArrayData*>(ArrayData* field) {
+void tsDecRefShared<ArrayData*>(ArrayData* field) {
   if (field) DecRefSharedArray(field);
 }
 
@@ -992,11 +992,11 @@ void setEvalScalar(ArrayData*& field) {
 #define CONTAINS_FIELD(Field, Type, ...)                                    \
   if (s_##Field.same(k)) return true;
 
-#define CONVERT_TO_UNCOUNTED(Field, Type, ...)                              \
-  tsMakeUncounted<Type>(tad->m_##Field, env);
+#define CONVERT_TO_SHARED(Field, Type, ...)                              \
+  tsMakeShared<Type>(tad->m_##Field, env);
 
-#define RELEASE_UNCOUNTED(Field, Type, ...)                                 \
-  tsDecRefUncounted<Type>(tad->m_##Field);
+#define RELEASE_SHARED(Field, Type, ...)                                 \
+  tsDecRefShared<Type>(tad->m_##Field);
 
 #define INITIALIZE_FIELD(Field, Type, ...) initializeField<Type&>(tad->m_##Field);
 #define SCAN_FIELD(Field, Type, ...) scanField<Type>(tad->m_##Field, scanner);
@@ -1026,11 +1026,11 @@ TypedValue ChildStruct::tsNvGetStr(const ChildStruct* tad, const StringData* k) 
   FieldsMacro(MAKE_TV_FIELD)                                                \
   return make_tv<KindOfUninit>();                                           \
 }                                                                           \
-void ChildStruct::convertToUncounted(ChildStruct* tad, const MakeSharedEnv& env) { \
-  FieldsMacro(CONVERT_TO_UNCOUNTED)                                         \
+void ChildStruct::convertToShared(ChildStruct* tad, const MakeSharedEnv& env) { \
+  FieldsMacro(CONVERT_TO_SHARED)                                         \
 }                                                                           \
-void ChildStruct::releaseUncounted(ChildStruct* tad) {                      \
-  FieldsMacro(RELEASE_UNCOUNTED)                                            \
+void ChildStruct::releaseShared(ChildStruct* tad) {                      \
+  FieldsMacro(RELEASE_SHARED)                                            \
 }                                                                           \
 void ChildStruct::initializeFields(ChildStruct* tad) {                      \
   FieldsMacro(INITIALIZE_FIELD)                                             \
@@ -1079,8 +1079,8 @@ O(TSWithGenericTypes, TSGENERIC_FIELDS)
 #undef O
 
 #undef MAKE_TV_FIELD
-#undef CONVERT_TO_UNCOUNTED
-#undef RELEASE_UNCOUNTED
+#undef CONVERT_TO_SHARED
+#undef RELEASE_SHARED
 #undef INITIALIZE_FIELD
 #undef SCAN_FIELD
 #undef INC_REF_FIELD

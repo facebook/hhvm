@@ -103,7 +103,7 @@ APCHandle::Pair APCHandle::Create(const_variant_ref source,
         auto const value = new APCTypedValue(APCTypedValue::StaticStr{}, st);
         return {value->getHandle(), sizeof(APCTypedValue)};
       }
-      auto const st = StringData::MakeUncounted(s->slice());
+      auto const st = StringData::MakeShared(s->slice());
       auto const value = new APCTypedValue(APCTypedValue::UncountedStr{}, st);
       return {value->getHandle(), st->size() + sizeof(APCTypedValue)};
     }

@@ -39,7 +39,7 @@ struct LoggingArray : BespokeArray {
   static LoggingArray* Make(ArrayData* ad, LoggingProfile* profile,
                             EntryTypes ms, const KeyOrder& ko);
   static LoggingArray* MakeStatic(ArrayData* ad, LoggingProfile* profile);
-  static LoggingArray* MakeUncounted(
+  static LoggingArray* MakeShared(
       ArrayData* ad, LoggingProfile* profile, bool hasApcTv);
 
   static void ZombieRelease(LoggingArray* lad);

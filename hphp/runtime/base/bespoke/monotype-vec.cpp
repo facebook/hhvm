@@ -164,13 +164,13 @@ ArrayData* EmptyMonotypeVec::EscalateToVanilla(const EmptyMonotypeVec* ead,
   return legacy ? staticEmptyMarkedVec() : staticEmptyVec();
 }
 
-void EmptyMonotypeVec::ConvertToUncounted(
+void EmptyMonotypeVec::ConvertToShared(
     EmptyMonotypeVec*, const MakeSharedEnv&) {
   // All EmptyMonotypeVecs are static, so we should never make them uncounted.
   always_assert(false);
 }
 
-void EmptyMonotypeVec::ReleaseUncounted(EmptyMonotypeVec*) {
+void EmptyMonotypeVec::ReleaseShared(EmptyMonotypeVec*) {
   // All EmptyMonotypeVecs are static, so we should never release them.
   always_assert(false);
 }
@@ -507,7 +507,7 @@ ArrayData* MonotypeVec::EscalateToVanilla(const MonotypeVec* mad,
   return mad->escalateWithCapacity(mad->size(), reason);
 }
 
-void MonotypeVec::ConvertToUncounted(
+void MonotypeVec::ConvertToShared(
     MonotypeVec* madIn, const MakeSharedEnv& env) {
   auto const oldType = madIn->type();
   for (uint32_t i = 0; i < madIn->size(); i++) {
@@ -522,7 +522,7 @@ void MonotypeVec::ConvertToUncounted(
   madIn->setLayoutIndex(getLayoutIndex(newType));
 }
 
-void MonotypeVec::ReleaseUncounted(MonotypeVec* mad) {
+void MonotypeVec::ReleaseShared(MonotypeVec* mad) {
   for (uint32_t i = 0; i < mad->size(); i++) {
     auto const tv = mad->typedValueUnchecked(i);
     DecRefShared(tv);

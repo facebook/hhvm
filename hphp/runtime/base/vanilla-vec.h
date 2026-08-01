@@ -76,7 +76,7 @@ struct VanillaVec final : type_scan::MarkCollectable<VanillaVec> {
                 "Size index must fit into 8-bits");
 
   static void Release(ArrayData*);
-  static void ReleaseUncounted(ArrayData*);
+  static void ReleaseShared(ArrayData*);
   static TypedValue NvGetInt(const ArrayData*, int64_t ki);
   static TypedValue NvGetStr(const ArrayData*, const StringData*);
   static TypedValue GetPosKey(const ArrayData*, ssize_t pos);
@@ -169,7 +169,7 @@ struct VanillaVec final : type_scan::MarkCollectable<VanillaVec> {
 
   static ArrayData* MakeUninitializedVec(uint32_t size);
 
-  static ArrayData* MakeUncounted(
+  static ArrayData* MakeShared(
       ArrayData* array, const MakeSharedEnv& env, bool hasApcTv);
 
   static ArrayData* MakeVecFromAPC(const APCArray* apc, bool pure, bool isLegacy = false);

@@ -75,9 +75,9 @@ arr_lval VanillaDict::addLvalImpl(K k) {
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Extra space that gets prepended to uncounted arrays.
+ * Extra space that gets prepended to shared arrays.
  */
-ALWAYS_INLINE size_t uncountedAllocExtra(const ArrayData* ad, bool apc_tv) {
+ALWAYS_INLINE size_t sharedAllocExtra(const ArrayData* ad, bool apc_tv) {
   auto const extra = (apc_tv ? sizeof(APCTypedValue) : 0) +
                      (ad->hasStrKeyTable() ? sizeof(StrKeyTable) : 0);
   return (extra + 15) & ~15ull;

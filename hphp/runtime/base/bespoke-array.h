@@ -123,9 +123,9 @@ public:
   static ArrayData* ToVanilla(const ArrayData* ad, const char* reason);
 
   // Bespoke arrays can be converted to uncounted values for APC.
-  static ArrayData* MakeUncounted(
+  static ArrayData* MakeShared(
       ArrayData* array, const MakeSharedEnv& env, bool hasApcTv);
-  static void ReleaseUncounted(ArrayData*);
+  static void ReleaseShared(ArrayData*);
 
 private:
   template <typename T, typename ... Args>

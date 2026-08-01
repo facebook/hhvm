@@ -76,8 +76,8 @@ BespokeArray* maybeStructify(ArrayData* ad, const LoggingProfile* profile);
 #define BESPOKE_LAYOUT_FUNCTIONS(T) \
   X(void, Scan, const T* ad, type_scan::Scanner& scanner) \
   X(ArrayData*, EscalateToVanilla, const T*, const char* reason) \
-  X(void, ConvertToUncounted, T*, const MakeSharedEnv& env) \
-  X(void, ReleaseUncounted, T*) \
+  X(void, ConvertToShared, T*, const MakeSharedEnv& env) \
+  X(void, ReleaseShared, T*) \
   X(void, Release, T*) \
   X(bool, IsVectorData, const T*) \
   X(TypedValue, NvGetInt, const T*, int64_t) \
@@ -155,11 +155,11 @@ struct LayoutFunctionDispatcher {
   static ArrayData* EscalateToVanilla(const ArrayData* ad, const char* reason) {
     return Array::EscalateToVanilla(Cast(ad, __func__), reason);
   }
-  static void ConvertToUncounted(ArrayData* ad, const MakeSharedEnv& env) {
-    return Array::ConvertToUncounted(Cast(ad, __func__), env);
+  static void ConvertToShared(ArrayData* ad, const MakeSharedEnv& env) {
+    return Array::ConvertToShared(Cast(ad, __func__), env);
   }
-  static void ReleaseUncounted(ArrayData* ad) {
-    return Array::ReleaseUncounted(Cast(ad, __func__));
+  static void ReleaseShared(ArrayData* ad) {
+    return Array::ReleaseShared(Cast(ad, __func__));
   }
   static void Release(ArrayData* ad) {
     return Array::Release(Cast(ad, __func__));

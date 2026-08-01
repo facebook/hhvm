@@ -184,12 +184,12 @@ struct APCStats {
     m_keySize->addValue(-len);
   }
 
-  // Only call this method from ::MakeUncounted()
+  // Only call this method from ::MakeShared()
   void addAPCUncountedBlock() {
     m_uncountedBlocks->increment();
   }
 
-  // Only call this method from ::ReleaseUncounted()
+  // Only call this method from ::ReleaseShared()
   void removeAPCUncountedBlock() {
     m_uncountedBlocks->decrement();
   }

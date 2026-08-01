@@ -184,11 +184,11 @@ public:
    * If withApcTypedValue is true, space for an APCTypedValue will be
    * allocated in front of the returned pointer.
    */
-  static ArrayData* MakeUncounted(
+  static ArrayData* MakeShared(
       ArrayData* array, const MakeSharedEnv& env, bool hasApcTv);
 
   static void Release(ArrayData*);
-  static void ReleaseUncounted(ArrayData*);
+  static void ReleaseShared(ArrayData*);
 
   /*
    * Safe downcast helpers.

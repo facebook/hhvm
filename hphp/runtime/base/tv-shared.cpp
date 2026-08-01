@@ -135,8 +135,8 @@ ArrayData* MakeSharedArray(
     }
   }
 
-  auto const result = in->makeUncounted(env, hasApcTv);
-  // NOTE: We may have mutated env.seen in makeUncounted, so we must redo
+  auto const result = in->makeShared(env, hasApcTv);
+  // NOTE: We may have mutated env.seen in makeShared, so we must redo
   // the hash table lookup here. We only use seenArr to test for presence.
   if (seenArr) (*env.seenArrays)[in] = result;
   return result;
@@ -157,7 +157,7 @@ StringData* MakeSharedString(StringData* in, const MakeSharedEnv& env) {
 
   auto st = lookupStaticString(in);
   if (!st) {
-    st = StringData::MakeUncounted(in->slice());
+    st = StringData::MakeShared(in->slice());
   }
 
   if (env.seenStrings) env.seenStrings->insert(st);
@@ -176,7 +176,7 @@ void DecRefSharedArray(ArrayData* ad) {
   assertx(!ad->isRefCounted());
   if (ad->isShared() && ad->sharedDecRef()) {
     ad->sharedFixCountForRelease();
-    ad->releaseUncounted();
+    ad->releaseShared();
   }
 }
 
@@ -184,7 +184,7 @@ void DecRefSharedString(StringData* sd) {
   assertx(!sd->isRefCounted());
   if (sd->isShared() && sd->sharedDecRef()) {
     sd->sharedFixCountForRelease();
-    StringData::ReleaseUncounted(sd);
+    StringData::ReleaseShared(sd);
   }
 }
 

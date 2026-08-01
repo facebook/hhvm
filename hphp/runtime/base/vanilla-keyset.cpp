@@ -140,7 +140,7 @@ ArrayData* VanillaKeyset::MakeSet(uint32_t size, const TypedValue* values) {
   return ad;
 }
 
-ArrayData* VanillaKeyset::MakeUncounted(
+ArrayData* VanillaKeyset::MakeShared(
     ArrayData* array, const MakeSharedEnv& env, bool hasApcTv) {
   auto src = asSet(array);
   assertx(!src->empty());
@@ -149,7 +149,7 @@ ArrayData* VanillaKeyset::MakeUncounted(
   auto const scale = src->scale();
   auto const used = src->m_used;
   auto const extra = hasApcTv ? sizeof(APCTypedValue) : 0;
-  auto const dest = uncountedAlloc(scale, extra);
+  auto const dest = sharedAlloc(scale, extra);
 
   assertx(reinterpret_cast<uintptr_t>(dest) % 16 == 0);
   assertx(reinterpret_cast<uintptr_t>(src) % 16 == 0);
@@ -272,7 +272,7 @@ void VanillaKeyset::Release(ArrayData* in) {
   AARCH64_WALKABLE_FRAME();
 }
 
-void VanillaKeyset::ReleaseUncounted(ArrayData* in) {
+void VanillaKeyset::ReleaseShared(ArrayData* in) {
   assertx(!in->sharedCowCheck());
   auto const ad = asSet(in);
 
@@ -287,7 +287,7 @@ void VanillaKeyset::ReleaseUncounted(ArrayData* in) {
     }
   }
 
-  auto const extra = uncountedAllocExtra(ad, ad->hasApcTv());
+  auto const extra = sharedAllocExtra(ad, ad->hasApcTv());
   FreeShared(reinterpret_cast<char*>(ad) - extra,
                 computeAllocBytes(ad->scale()) + extra);
 }

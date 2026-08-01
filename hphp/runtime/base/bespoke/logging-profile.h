@@ -42,8 +42,8 @@ struct LoggingArray;
 #define ARRAY_OPS \
   X(Scan,               true)  \
   X(EscalateToVanilla,  true)  \
-  X(ConvertToUncounted, true)  \
-  X(ReleaseUncounted,   true)  \
+  X(ConvertToShared,    true)  \
+  X(ReleaseShared,      true)  \
   X(Release,            true)  \
   X(IsVectorData,       true)  \
   X(GetInt,             true)  \

@@ -38,8 +38,8 @@ inline bool ArrayData::notCyclic(TypedValue v) const {
   return !tvIsArrayLike(v) || v.m_data.parr != this;
 }
 
-inline void ArrayData::releaseUncounted() {
-  g_array_funcs.releaseUncounted[kind()](this);
+inline void ArrayData::releaseShared() {
+  g_array_funcs.releaseShared[kind()](this);
 }
 
 inline ArrayData* ArrayData::copyStatic() const {
@@ -177,9 +177,9 @@ inline void ArrayData::onSetEvalScalar() {
   return g_array_funcs.onSetEvalScalar[kind()](this);
 }
 
-inline ArrayData* ArrayData::makeUncounted(
+inline ArrayData* ArrayData::makeShared(
     const MakeSharedEnv& env, bool hasApcTv) {
-  return g_array_funcs.makeUncounted[kind()](this, env, hasApcTv);
+  return g_array_funcs.makeShared[kind()](this, env, hasApcTv);
 }
 
 inline ArrayData* ArrayData::copy() const {

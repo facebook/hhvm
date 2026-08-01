@@ -142,9 +142,9 @@ struct StringData final : MaybeCountable,
   /*
    * Same as MakeStatic but the string allocated will *not* be in the static
    * string table, will not be in low-memory, and should be deleted using
-   * ReleaseUncounted once the root goes out of scope.
+   * ReleaseShared once the root goes out of scope.
    */
-  static StringData* MakeUncounted(folly::StringPiece);
+  static StringData* MakeShared(folly::StringPiece);
 
   /*
    * Same as MakeStatic but initializes the empty string in aligned storage.
@@ -179,12 +179,12 @@ struct StringData final : MaybeCountable,
   void destructStatic();
 
   /*
-   * StringData objects allocated with MakeUncounted should be freed
+   * StringData objects allocated with MakeShared should be freed
    * using this function. It will remove a reference via
    * sharedDecRef, and if necessary destroy the StringData and
    * return true.
    */
-  static void ReleaseUncounted(StringData*);
+  static void ReleaseShared(StringData*);
 
   /*
    * Reference-counting related.
@@ -214,7 +214,7 @@ struct StringData final : MaybeCountable,
    * Reserve space for a string of length `maxLen' (not counting null
    * terminator).
    *
-   * May not be called for strings created with MakeUncounted or
+   * May not be called for strings created with MakeShared or
    * MakeStatic.
    *
    * Returns: possibly a new StringData, if we had to reallocate.  The new
@@ -225,7 +225,7 @@ struct StringData final : MaybeCountable,
   /*
    * Shrink a string down to length `len` (not counting null terminator).
    *
-   * May not be called for strings created with MakeUncounted or
+   * May not be called for strings created with MakeShared or
    * MakeStatic.
    *
    * Returns: a new StringData with reference count 1

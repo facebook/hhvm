@@ -157,8 +157,8 @@ using Kind = HPHP::TypeStructure::Kind;
   static void scan(const T* tad, type_scan::Scanner& scanner);          \
   static void initializeFields(T* tad);                                 \
   static bool setField(T* tad, StringData* k, TypedValue v, bool nested); \
-  static void convertToUncounted(T* tad, const MakeSharedEnv& env);  \
-  static void releaseUncounted(T* tad);                                 \
+  static void convertToShared(T* tad, const MakeSharedEnv& env);  \
+  static void releaseShared(T* tad);                                 \
   static TypedValue getKeyFromPositionValue(const T* tad, int value);   \
   static TypedValue getValFromPositionValue(const T* tad, int value);   \
   static size_t getFieldOffset(const StringData* k);                    \

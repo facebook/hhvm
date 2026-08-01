@@ -251,7 +251,7 @@ public:
    * If withApcTypedValue is true, space for an APCTypedValue will be
    * allocated in front of the returned pointer.
    */
-  static ArrayData* MakeUncounted(
+  static ArrayData* MakeShared(
       ArrayData* array, const MakeSharedEnv& env, bool hasApcTv);
 
   static ArrayData* MakeDictFromAPC(const APCArray* apc, bool pure, bool isLegacy = false);
@@ -311,7 +311,7 @@ public:
 
   static void OnSetEvalScalar(ArrayData*);
   static void Release(ArrayData*);
-  static void ReleaseUncounted(ArrayData*);
+  static void ReleaseShared(ArrayData*);
 
   static ArrayData* EscalateForSort(ArrayData* ad, SortFunction sf);
   static void Ksort(ArrayData*, int sort_flags, bool ascending);

@@ -190,7 +190,7 @@ StringData* StringData::MakeStatic(folly::StringPiece sl) {
   return MakePersistent<true>(sl);
 }
 
-StringData* StringData::MakeUncounted(folly::StringPiece sl) {
+StringData* StringData::MakeShared(folly::StringPiece sl) {
   return MakePersistent<false>(sl);
 }
 
@@ -220,7 +220,7 @@ void StringData::destructStatic() {
   }
 }
 
-void StringData::ReleaseUncounted(StringData* str) {
+void StringData::ReleaseShared(StringData* str) {
   assertx(str->checkSane());
   assertx(!str->sharedCowCheck());
   FreeShared(str, str->size() + kStringOverhead);

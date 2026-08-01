@@ -148,7 +148,7 @@ void Extension::deserialize(BlobDecoder& sd) {
       if (Trace::moduleEnabledRelease(Trace::apc_warmup, 1)) {
         Trace::ftraceRelease("Extension::deserialize [{}]: key '{}'\n", m_name, sv);
       }
-      auto sd = StringData::MakeUncounted(sv);
+      auto sd = StringData::MakeShared(sv);
       v.append(make_tv<KindOfPersistentString>(sd));
     });
   auto d = init.toArray();
@@ -156,7 +156,7 @@ void Extension::deserialize(BlobDecoder& sd) {
     Trace::ftraceRelease("Extension::deserialize [{}]: {} warmup keys\n", m_name, d.size());
   }
   MakeSharedEnv env {nullptr, nullptr};
-  setWarmupData(d->makeUncounted(env, false));
+  setWarmupData(d->makeShared(env, false));
 }
 
 /////////////////////////////////////////////////////////////////////////////

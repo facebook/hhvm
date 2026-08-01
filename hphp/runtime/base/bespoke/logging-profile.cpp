@@ -362,7 +362,7 @@ void LoggingProfile::logEventImpl(const EventKey& key) {
   if (Trace::moduleEnabled(Trace::bespoke, 6)) {
     DEBUG_ONLY auto const op = key.getOp();
     DEBUG_ONLY auto const has_sink =
-      op != ArrayOp::Release && op != ArrayOp::ReleaseUncounted;
+      op != ArrayOp::Release && op != ArrayOp::ReleaseShared;
     DEBUG_ONLY auto const sink = has_sink ? getSrcKey() : SrcKey{};
     FTRACE(6, "{} -> {}: {} [count={}]\n", key.toString(),
            (sink.valid() ? sink.getSymbol() : "<unknown>"),
@@ -1098,7 +1098,7 @@ void waitOnExportProfiles() {
 namespace {
 void freeStaticArray(ArrayData* ad) {
   assertx(ad->isStatic());
-  auto const extra = uncountedAllocExtra(ad, /*apc_tv=*/false);
+  auto const extra = sharedAllocExtra(ad, /*apc_tv=*/false);
   auto const alloc = reinterpret_cast<char*>(ad) - extra;
   ArrayData::FreeStatic(alloc);
 }

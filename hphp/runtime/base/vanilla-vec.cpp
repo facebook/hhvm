@@ -443,7 +443,7 @@ void VanillaVec::Release(ArrayData* ad) {
 }
 
 NEVER_INLINE
-void VanillaVec::ReleaseUncounted(ArrayData* ad) {
+void VanillaVec::ReleaseShared(ArrayData* ad) {
   assertx(checkInvariants(ad));
   assertx(!ad->sharedCowCheck());
 
@@ -451,7 +451,7 @@ void VanillaVec::ReleaseUncounted(ArrayData* ad) {
     DecRefShared(*LvalUncheckedInt(ad, i));
   }
 
-  auto const extra = uncountedAllocExtra(ad, ad->hasApcTv());
+  auto const extra = sharedAllocExtra(ad, ad->hasApcTv());
   auto const bytes = VanillaVec::capacityToSizeBytes(ad->m_size);
   FreeShared(reinterpret_cast<char*>(ad) - extra, extra + bytes);
 }
@@ -729,7 +729,7 @@ bool VanillaVec::Uasort(ArrayData* ad, const Variant&) {
   always_assert(false);
 }
 
-ArrayData* VanillaVec::MakeUncounted(
+ArrayData* VanillaVec::MakeShared(
     ArrayData* array, const MakeSharedEnv& env, bool hasApcTv) {
   assertx(!array->empty());
   assertx(array->isRefCounted());

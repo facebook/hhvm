@@ -220,7 +220,7 @@ struct HashTable : HashTableCommon {
   }
 
   static ALWAYS_INLINE
-  ArrayType* uncountedAlloc(uint32_t scale, size_t extra = 0) {
+  ArrayType* sharedAlloc(uint32_t scale, size_t extra = 0) {
     auto const size = computeAllocBytes(scale) + extra;
     auto const mem = AllocShared(size);
     return reinterpret_cast<ArrayType*>(reinterpret_cast<char*>(mem) + extra);

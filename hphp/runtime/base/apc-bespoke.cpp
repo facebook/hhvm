@@ -200,7 +200,7 @@ ArrayData* implAPCBespoke(APCBespokeEnv& env, ArrayData* ain,
   auto const make_or_reuse_vanilla_result = [&]() -> ArrayData* {
     if (copy) {
       if (copy->empty()) return GetEmptyArray<Array>(copy->isLegacyArray());
-      return Array::MakeUncounted(copy, mue, hasApcTv);
+      return Array::MakeShared(copy, mue, hasApcTv);
     }
     assertx(vin->isStatic() || vin->isShared());
     if (ain == vin) return nullptr;
@@ -219,7 +219,7 @@ ArrayData* implAPCBespoke(APCBespokeEnv& env, ArrayData* ain,
     auto const vad = [&]{
       if (copy) {
         if (copy->empty()) return GetEmptyArray<Array>(copy->isLegacyArray());
-        return Array::MakeUncounted(copy, mue, false);
+        return Array::MakeShared(copy, mue, false);
       }
       assertx(vin->isStatic() || vin->isShared());
       vin->persistentIncRef();
@@ -229,7 +229,7 @@ ArrayData* implAPCBespoke(APCBespokeEnv& env, ArrayData* ain,
       tvIsString(k) ? profile->logEvent(ArrayOp::APCInitStr, val(k).pstr, v)
                     : profile->logEvent(ArrayOp::APCInitInt, val(k).num, v);
     });
-    auto const lad = LoggingArray::MakeUncounted(vad, profile, hasApcTv);
+    auto const lad = LoggingArray::MakeShared(vad, profile, hasApcTv);
     profile->logEntryTypes(lad->entryTypes, lad->entryTypes);
     profile->logKeyOrders(lad->keyOrder);
     env.logging.push_back(lad->profile->data.get());
@@ -242,7 +242,7 @@ ArrayData* implAPCBespoke(APCBespokeEnv& env, ArrayData* ain,
   auto const bad = layout.bespokeLayout()->coerce(vad);
   if (!bad) return make_or_reuse_vanilla_result();
   if (!bad->isRefCounted()) return bad;
-  auto const uad = BespokeArray::MakeUncounted(bad, mue, hasApcTv);
+  auto const uad = BespokeArray::MakeShared(bad, mue, hasApcTv);
   assertx(bad->hasExactlyOneRef());
   BespokeArray::Release(bad);
   return uad;

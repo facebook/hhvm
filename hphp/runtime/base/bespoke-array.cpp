@@ -80,10 +80,10 @@ bool BespokeArray::checkInvariants() const {
 
 //////////////////////////////////////////////////////////////////////////////
 
-ArrayData* BespokeArray::MakeUncounted(
+ArrayData* BespokeArray::MakeShared(
     ArrayData* ad, const MakeSharedEnv& env, bool hasApcTv) {
   assertx(ad->isRefCounted());
-  auto const extra = uncountedAllocExtra(ad, hasApcTv);
+  auto const extra = sharedAllocExtra(ad, hasApcTv);
   auto const bytes = ad->heapSize();
   assertx(extra % 16 == 0);
 
@@ -97,18 +97,18 @@ ArrayData* BespokeArray::MakeUncounted(
   assertx(asBespoke(result)->layoutIndex() == asBespoke(ad)->layoutIndex());
 
   auto const vindex = getVtableIndex(ad);
-  g_layout_funcs.fnConvertToUncounted[vindex](result, env);
+  g_layout_funcs.fnConvertToShared[vindex](result, env);
 
   return result;
 }
 
-void BespokeArray::ReleaseUncounted(ArrayData* ad) {
+void BespokeArray::ReleaseShared(ArrayData* ad) {
   assertx(!ad->sharedCowCheck());
   auto const vindex = getVtableIndex(ad);
-  g_layout_funcs.fnReleaseUncounted[vindex](ad);
+  g_layout_funcs.fnReleaseShared[vindex](ad);
 
   auto const bytes = ad->heapSize();
-  auto const extra = uncountedAllocExtra(ad, ad->hasApcTv());
+  auto const extra = sharedAllocExtra(ad, ad->hasApcTv());
   FreeShared(reinterpret_cast<char*>(ad) - extra, bytes + extra);
 }
 

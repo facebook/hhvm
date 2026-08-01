@@ -48,10 +48,10 @@ enum class APCKind: uint8_t {
   StaticArray,
   StaticBespoke,
   StaticString,
-  SharedVec, SharedLegacyVec,
-  SharedDict, SharedLegacyDict,
-  SharedKeyset,
-  SharedObject, SharedCollection,
+  CopiedVec, CopiedLegacyVec,
+  CopiedDict, CopiedLegacyDict,
+  CopiedKeyset,
+  CopiedObject, CopiedCollection,
   SerializedVec,
   SerializedDict,
   SerializedKeyset,
@@ -110,13 +110,13 @@ enum class APCKind: uint8_t {
  *  UncountedArray    APCTypedValue   (a persistent array type)
  *  UncountedBespoke  APCTypedValue   (a persistent array type)
  *  UncountedString   APCTypedValue   KindOfPersistentString
- *  SharedVec         APCArray        kInvalidDataType
- *  SharedLegacyVec   APCArray        kInvalidDataType
- *  SharedDict        APCArray        kInvalidDataType
- *  SharedLegacyDict  APCArray        kInvalidDataType
- *  SharedKeyset      APCArray        kInvalidDataType
- *  SharedObject      APCObject       kInvalidDataType
- *  SharedCollection  APCObject       kInvalidDataType
+ *  CopiedVec         APCArray        kInvalidDataType
+ *  CopiedLegacyVec   APCArray        kInvalidDataType
+ *  CopiedDict        APCArray        kInvalidDataType
+ *  CopiedLegacyDict  APCArray        kInvalidDataType
+ *  CopiedKeyset      APCArray        kInvalidDataType
+ *  CopiedObject      APCObject       kInvalidDataType
+ *  CopiedCollection  APCObject       kInvalidDataType
  *  SerializedArray   APCString       kInvalidDataType
  *  SerializedVec     APCString       kInvalidDataType
  *  SerializedDict    APCString       kInvalidDataType
@@ -223,14 +223,14 @@ struct APCHandle {
    */
   bool objAttempted() const {
     assertx(m_kind == APCKind::SerializedObject ||
-           m_kind == APCKind::SharedObject ||
-           m_kind == APCKind::SharedCollection);
+           m_kind == APCKind::CopiedObject ||
+           m_kind == APCKind::CopiedCollection);
     return m_obj_attempted.load(std::memory_order_acquire);
   }
   void setObjAttempted() {
     assertx(m_kind == APCKind::SerializedObject ||
-           m_kind == APCKind::SharedObject ||
-           m_kind == APCKind::SharedCollection);
+           m_kind == APCKind::CopiedObject ||
+           m_kind == APCKind::CopiedCollection);
     m_obj_attempted.store(true, std::memory_order_release);
   }
 
@@ -265,7 +265,7 @@ struct APCHandle {
 private:
   void atomicIncRef() const;
   void atomicDecRef() const;
-  void deleteShared();
+  void deleteCopied();
 
 private:
   const DataType m_type;

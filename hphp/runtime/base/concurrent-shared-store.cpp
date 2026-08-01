@@ -131,18 +131,18 @@ EntryInfo::Type EntryInfo::getAPCType(const APCHandle* handle) {
       return EntryInfo::Type::SerializedDict;
     case APCKind::SerializedKeyset:
       return EntryInfo::Type::SerializedKeyset;
-    case APCKind::SharedVec:
-    case APCKind::SharedLegacyVec:
+    case APCKind::CopiedVec:
+    case APCKind::CopiedLegacyVec:
       return EntryInfo::Type::APCVec;
-    case APCKind::SharedDict:
-    case APCKind::SharedLegacyDict:
+    case APCKind::CopiedDict:
+    case APCKind::CopiedLegacyDict:
       return EntryInfo::Type::APCDict;
-    case APCKind::SharedKeyset:
+    case APCKind::CopiedKeyset:
       return EntryInfo::Type::APCKeyset;
     case APCKind::SerializedObject:
       return EntryInfo::Type::SerializedObject;
-    case APCKind::SharedObject:
-    case APCKind::SharedCollection:
+    case APCKind::CopiedObject:
+    case APCKind::CopiedCollection:
       return EntryInfo::Type::APCObject;
     case APCKind::RFunc:
       return EntryInfo::Type::APCRFunc;
@@ -611,8 +611,8 @@ bool ConcurrentTableSharedStore::get(const OptString& keyStr, Variant& value, bo
     APCKind kind = sval->getKind();
     if (apcExtension::AllowObj &&
         (kind == APCKind::SerializedObject ||
-         kind == APCKind::SharedObject ||
-         kind == APCKind::SharedCollection) &&
+         kind == APCKind::CopiedObject ||
+         kind == APCKind::CopiedCollection) &&
         !svar->objAttempted()) {
       // Hold ref here for later promoting the object
       svar->referenceNonRoot();

@@ -18,7 +18,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-APCHandle::Pair APCString::MakeSharedString(APCKind kind, StringData* data) {
+APCHandle::Pair APCString::MakeSerializedString(APCKind kind, StringData* data) {
   auto const len    = static_cast<uint32_t>(data->size());
   auto const size   = len + 1 + sizeof(APCString);
   auto const mem    = uncounted_malloc(size);

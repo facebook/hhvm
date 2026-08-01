@@ -31,19 +31,19 @@ namespace HPHP {
 struct APCString {
 
   static APCHandle::Pair MakeSerializedVec(StringData* str) {
-    return MakeSharedString(APCKind::SerializedVec, str);
+    return MakeSerializedString(APCKind::SerializedVec, str);
   }
 
   static APCHandle::Pair MakeSerializedDict(StringData* str) {
-    return MakeSharedString(APCKind::SerializedDict, str);
+    return MakeSerializedString(APCKind::SerializedDict, str);
   }
 
   static APCHandle::Pair MakeSerializedKeyset(StringData* str) {
-    return MakeSharedString(APCKind::SerializedKeyset, str);
+    return MakeSerializedString(APCKind::SerializedKeyset, str);
   }
 
   static APCHandle::Pair MakeSerializedObject(const OptString& str) {
-    return MakeSharedString(APCKind::SerializedObject, str.get());
+    return MakeSerializedString(APCKind::SerializedObject, str.get());
   }
 
   static void Delete(APCString* s) {
@@ -78,7 +78,7 @@ struct APCString {
     return reinterpret_cast<const APCString*>(handle);
   }
 
-  // When a request references a shared APCString, we enqueue it in a
+  // When a request references an APCString, we enqueue it in a
   // request-local list; when the request is over, unreference them all.
   void reference() const;
   static void cleanup();
@@ -92,7 +92,7 @@ struct APCString {
   }
 
 private:
-  static APCHandle::Pair MakeSharedString(APCKind, StringData*);
+  static APCHandle::Pair MakeSerializedString(APCKind, StringData*);
   explicit APCString(APCKind kind) : m_handle(kind) {}
   ~APCString() {}
   APCString(const APCString&) = delete;

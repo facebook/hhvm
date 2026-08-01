@@ -97,18 +97,18 @@ size_t getMemSize(const APCHandle* handle) {
       return sizeof(APCTypedValue) + getMemSize(ad);
     }
 
-    case APCKind::SharedVec:
-    case APCKind::SharedLegacyVec:
-    case APCKind::SharedDict:
-    case APCKind::SharedLegacyDict:
-    case APCKind::SharedKeyset:
+    case APCKind::CopiedVec:
+    case APCKind::CopiedLegacyVec:
+    case APCKind::CopiedDict:
+    case APCKind::CopiedLegacyDict:
+    case APCKind::CopiedKeyset:
       return getMemSize(APCArray::fromHandle(handle));
 
     case APCKind::SerializedObject:
       return getMemSize(APCString::fromHandle(handle));
 
-    case APCKind::SharedObject:
-    case APCKind::SharedCollection:
+    case APCKind::CopiedObject:
+    case APCKind::CopiedCollection:
       return getMemSize(APCObject::fromHandle(handle));
 
     case APCKind::RFunc:
@@ -548,22 +548,22 @@ APCDetailedStats::counterFor(const APCHandle* handle) {
     case APCKind::SerializedKeyset:
       return m_serKeyset;
 
-    case APCKind::SharedVec:
-    case APCKind::SharedLegacyVec:
+    case APCKind::CopiedVec:
+    case APCKind::CopiedLegacyVec:
       return m_apcVec;
 
-    case APCKind::SharedDict:
-    case APCKind::SharedLegacyDict:
+    case APCKind::CopiedDict:
+    case APCKind::CopiedLegacyDict:
       return m_apcDict;
 
-    case APCKind::SharedKeyset:
+    case APCKind::CopiedKeyset:
       return m_apcKeyset;
 
     case APCKind::SerializedObject:
       return m_serObject;
 
-    case APCKind::SharedObject:
-    case APCKind::SharedCollection:
+    case APCKind::CopiedObject:
+    case APCKind::CopiedCollection:
       return m_apcObject;
 
     case APCKind::RFunc:

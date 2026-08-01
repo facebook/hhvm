@@ -34,8 +34,8 @@ inline void APCHandle::unreferenceNonRoot() const {
 }
 
 inline bool APCHandle::isAtomicCounted() const {
-  assertx(m_kind < APCKind::SharedVec || m_type == kInvalidDataType);
-  return m_kind >= APCKind::SharedVec;
+  assertx(m_kind < APCKind::CopiedVec || m_type == kInvalidDataType);
+  return m_kind >= APCKind::CopiedVec;
 }
 
 inline void APCHandle::atomicIncRef() const {
@@ -50,7 +50,7 @@ inline void APCHandle::atomicDecRef() const {
     if (--m_count) return;
   }
   assertx(isSingletonKind() || m_unref_root_count == 1);
-  const_cast<APCHandle*>(this)->deleteShared();
+  const_cast<APCHandle*>(this)->deleteCopied();
 }
 
 //////////////////////////////////////////////////////////////////////

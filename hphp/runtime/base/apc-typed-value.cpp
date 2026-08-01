@@ -148,13 +148,13 @@ bool APCTypedValue::checkInvariants() const {
     case APCKind::ClsMeth:
     case APCKind::RFunc:
     case APCKind::RClsMeth:
-    case APCKind::SharedObject:
-    case APCKind::SharedCollection:
-    case APCKind::SharedVec:
-    case APCKind::SharedLegacyVec:
-    case APCKind::SharedDict:
-    case APCKind::SharedLegacyDict:
-    case APCKind::SharedKeyset:
+    case APCKind::CopiedObject:
+    case APCKind::CopiedCollection:
+    case APCKind::CopiedVec:
+    case APCKind::CopiedLegacyVec:
+    case APCKind::CopiedDict:
+    case APCKind::CopiedLegacyDict:
+    case APCKind::CopiedKeyset:
     case APCKind::SerializedObject:
     case APCKind::SerializedVec:
     case APCKind::SerializedDict:

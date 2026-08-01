@@ -112,21 +112,21 @@ APCHandle::Pair APCHandle::Create(const_variant_ref source,
     case KindOfVec: {
       auto const ad = val(cell).parr;
       assertx(ad->isVecType());
-      return APCArray::MakeSharedVec(ad, level, unserializeObj, pure);
+      return APCArray::MakeCopiedVec(ad, level, unserializeObj, pure);
     }
 
     case KindOfPersistentDict:
     case KindOfDict: {
       auto const ad = val(cell).parr;
       assertx(ad->isDictType());
-      return APCArray::MakeSharedDict(ad, level, unserializeObj, pure);
+      return APCArray::MakeCopiedDict(ad, level, unserializeObj, pure);
     }
 
     case KindOfPersistentKeyset:
     case KindOfKeyset: {
       auto const ad = val(cell).parr;
       assertx(ad->isKeysetType());
-      return APCArray::MakeSharedKeyset(ad, level, unserializeObj);
+      return APCArray::MakeCopiedKeyset(ad, level, unserializeObj);
     }
 
     case KindOfObject:
@@ -141,7 +141,7 @@ APCHandle::Pair APCHandle::Create(const_variant_ref source,
 
     case KindOfResource:
     case KindOfEnumClassLabel:
-      return APCArray::MakeSharedEmptyVec();
+      return APCArray::MakeCopiedEmptyVec();
 
     case KindOfClsMeth: {
       auto const meth = val(cell).pclsmeth;
@@ -203,23 +203,23 @@ Variant APCHandle::toLocalHelper(bool pure) const {
       assertx(v.isKeyset());
       return v;
     }
-    case APCKind::SharedVec:
+    case APCKind::CopiedVec:
       return Variant::attach(
         APCArray::fromHandle(this)->toLocalVec(pure)
       );
-    case APCKind::SharedLegacyVec:
+    case APCKind::CopiedLegacyVec:
       return Variant::attach(
         APCArray::fromHandle(this)->toLocalLegacyVec(pure)
       );
-    case APCKind::SharedDict:
+    case APCKind::CopiedDict:
       return Variant::attach(
         APCArray::fromHandle(this)->toLocalDict(pure)
       );
-    case APCKind::SharedLegacyDict:
+    case APCKind::CopiedLegacyDict:
       return Variant::attach(
         APCArray::fromHandle(this)->toLocalLegacyDict(pure)
       );
-    case APCKind::SharedKeyset:
+    case APCKind::CopiedKeyset:
       return Variant::attach(
         APCArray::fromHandle(this)->toLocalKeyset()
       );
@@ -227,9 +227,9 @@ Variant APCHandle::toLocalHelper(bool pure) const {
       auto const serObj = APCString::fromHandle(this)->getStringData();
       return apc_unserialize(serObj->data(), serObj->size(), pure);
     }
-    case APCKind::SharedCollection:
+    case APCKind::CopiedCollection:
       return APCCollection::fromHandle(this)->createObject(pure);
-    case APCKind::SharedObject:
+    case APCKind::CopiedObject:
       return APCObject::MakeLocalObject(this, pure);
     case APCKind::RFunc:
       return APCRFunc::Make(this);
@@ -268,23 +268,23 @@ bool APCHandle::toLocalMayRaise() const {
     case APCKind::RClsMeth:
       return true;
 
-    case APCKind::SharedVec:
-    case APCKind::SharedLegacyVec:
-    case APCKind::SharedDict:
-    case APCKind::SharedLegacyDict:
-    case APCKind::SharedKeyset:
+    case APCKind::CopiedVec:
+    case APCKind::CopiedLegacyVec:
+    case APCKind::CopiedDict:
+    case APCKind::CopiedLegacyDict:
+    case APCKind::CopiedKeyset:
       return APCArray::fromHandle(this)->toLocalMayRaise();
 
-    case APCKind::SharedCollection:
+    case APCKind::CopiedCollection:
       return APCCollection::fromHandle(this)->toLocalMayRaise();
 
-    case APCKind::SharedObject:
+    case APCKind::CopiedObject:
       return APCObject::fromHandle(this)->toLocalMayRaise();
   }
   not_reached();
 }
 
-void APCHandle::deleteShared() {
+void APCHandle::deleteCopied() {
   assertx(checkInvariants());
   switch (m_kind) {
     case APCKind::Uninit:
@@ -317,19 +317,19 @@ void APCHandle::deleteShared() {
       APCString::Delete(APCString::fromHandle(this));
       return;
 
-    case APCKind::SharedVec:
-    case APCKind::SharedLegacyVec:
-    case APCKind::SharedDict:
-    case APCKind::SharedLegacyDict:
-    case APCKind::SharedKeyset:
+    case APCKind::CopiedVec:
+    case APCKind::CopiedLegacyVec:
+    case APCKind::CopiedDict:
+    case APCKind::CopiedLegacyDict:
+    case APCKind::CopiedKeyset:
       APCArray::Delete(this);
       return;
 
-    case APCKind::SharedObject:
+    case APCKind::CopiedObject:
       APCObject::Delete(this);
       return;
 
-    case APCKind::SharedCollection:
+    case APCKind::CopiedCollection:
       APCCollection::Delete(this);
       return;
 
@@ -399,13 +399,13 @@ bool APCHandle::checkInvariants() const {
     case APCKind::ClsMeth:
     case APCKind::RFunc:
     case APCKind::RClsMeth:
-    case APCKind::SharedVec:
-    case APCKind::SharedLegacyVec:
-    case APCKind::SharedDict:
-    case APCKind::SharedLegacyDict:
-    case APCKind::SharedKeyset:
-    case APCKind::SharedObject:
-    case APCKind::SharedCollection:
+    case APCKind::CopiedVec:
+    case APCKind::CopiedLegacyVec:
+    case APCKind::CopiedDict:
+    case APCKind::CopiedLegacyDict:
+    case APCKind::CopiedKeyset:
+    case APCKind::CopiedObject:
+    case APCKind::CopiedCollection:
     case APCKind::SerializedVec:
     case APCKind::SerializedDict:
     case APCKind::SerializedKeyset:

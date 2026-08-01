@@ -29,15 +29,15 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
 struct APCArray {
-  static APCHandle::Pair MakeSharedVec(ArrayData* data,
+  static APCHandle::Pair MakeCopiedVec(ArrayData* data,
                                        APCHandleLevel level,
                                        bool unserializeObj,
                                        bool pure);
-  static APCHandle::Pair MakeSharedDict(ArrayData* data,
+  static APCHandle::Pair MakeCopiedDict(ArrayData* data,
                                         APCHandleLevel level,
                                         bool unserializeObj,
                                         bool pure);
-  static APCHandle::Pair MakeSharedKeyset(ArrayData* data,
+  static APCHandle::Pair MakeCopiedKeyset(ArrayData* data,
                                           APCHandleLevel level,
                                           bool unserializeObj);
 
@@ -45,27 +45,27 @@ struct APCArray {
       ArrayData* ad, MakeUncountedEnv::ArrayMap* seen,
       MakeUncountedEnv::StringSet* seenStrings);
 
-  static APCHandle::Pair MakeSharedEmptyVec();
+  static APCHandle::Pair MakeCopiedEmptyVec();
   static void Delete(APCHandle* handle);
 
   static APCArray* fromHandle(APCHandle* handle) {
     assertx(handle->checkInvariants());
-    assertx(handle->kind() == APCKind::SharedVec ||
-            handle->kind() == APCKind::SharedLegacyVec ||
-            handle->kind() == APCKind::SharedDict ||
-            handle->kind() == APCKind::SharedLegacyDict ||
-            handle->kind() == APCKind::SharedKeyset);
+    assertx(handle->kind() == APCKind::CopiedVec ||
+            handle->kind() == APCKind::CopiedLegacyVec ||
+            handle->kind() == APCKind::CopiedDict ||
+            handle->kind() == APCKind::CopiedLegacyDict ||
+            handle->kind() == APCKind::CopiedKeyset);
     static_assert(offsetof(APCArray, m_handle) == 0, "");
     return reinterpret_cast<APCArray*>(handle);
   }
 
   static const APCArray* fromHandle(const APCHandle* handle) {
     assertx(handle->checkInvariants());
-    assertx(handle->kind() == APCKind::SharedVec ||
-            handle->kind() == APCKind::SharedLegacyVec ||
-            handle->kind() == APCKind::SharedDict ||
-            handle->kind() == APCKind::SharedLegacyDict ||
-            handle->kind() == APCKind::SharedKeyset);
+    assertx(handle->kind() == APCKind::CopiedVec ||
+            handle->kind() == APCKind::CopiedLegacyVec ||
+            handle->kind() == APCKind::CopiedDict ||
+            handle->kind() == APCKind::CopiedLegacyDict ||
+            handle->kind() == APCKind::CopiedKeyset);
     static_assert(offsetof(APCArray, m_handle) == 0, "");
     return reinterpret_cast<const APCArray*>(handle);
   }
@@ -114,28 +114,28 @@ struct APCArray {
 
   bool isPacked() const {
     auto const k = m_handle.kind();
-    return k == APCKind::SharedVec ||
-           k == APCKind::SharedLegacyVec ||
-           k == APCKind::SharedKeyset;
+    return k == APCKind::CopiedVec ||
+           k == APCKind::CopiedLegacyVec ||
+           k == APCKind::CopiedKeyset;
   }
 
   bool isHashed() const {
     auto const k = m_handle.kind();
-    return k == APCKind::SharedDict || k == APCKind::SharedLegacyDict;
+    return k == APCKind::CopiedDict || k == APCKind::CopiedLegacyDict;
   }
 
   bool isVec() const {
-    return m_handle.kind() == APCKind::SharedVec ||
-           m_handle.kind() == APCKind::SharedLegacyVec;
+    return m_handle.kind() == APCKind::CopiedVec ||
+           m_handle.kind() == APCKind::CopiedLegacyVec;
   }
 
   bool isDict() const {
-    return m_handle.kind() == APCKind::SharedDict ||
-           m_handle.kind() == APCKind::SharedLegacyDict;
+    return m_handle.kind() == APCKind::CopiedDict ||
+           m_handle.kind() == APCKind::CopiedLegacyDict;
   }
 
   bool isKeyset() const {
-    return m_handle.kind() == APCKind::SharedKeyset;
+    return m_handle.kind() == APCKind::CopiedKeyset;
   }
 
   bool toLocalMayRaise() const {
@@ -161,7 +161,7 @@ private:
 
 private:
   template <typename A, typename B>
-  static APCHandle::Pair MakeSharedImpl(ArrayData*, APCHandleLevel, A, B, bool);
+  static APCHandle::Pair MakeCopiedImpl(ArrayData*, APCHandleLevel, A, B, bool);
 
   static APCHandle::Pair MakeHash(ArrayData* data, APCKind kind,
                                   bool unserializeObj, bool pure);

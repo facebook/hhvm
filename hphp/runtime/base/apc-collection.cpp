@@ -120,8 +120,8 @@ APCHandle::Pair APCCollection::Make(const ObjectData* obj,
   }
 
   auto const arr = isVectorCollection(obj->collectionType())
-    ? APCArray::MakeSharedVec(ad, level, unserializeObj, pure)
-    : APCArray::MakeSharedDict(ad, level, unserializeObj, pure);
+    ? APCArray::MakeCopiedVec(ad, level, unserializeObj, pure)
+    : APCArray::MakeCopiedDict(ad, level, unserializeObj, pure);
   return WrapArray(arr, obj->collectionType());
 }
 
@@ -131,7 +131,7 @@ void APCCollection::Delete(APCHandle* h) {
 }
 
 APCCollection::APCCollection()
-  : m_handle(APCKind::SharedCollection)
+  : m_handle(APCKind::CopiedCollection)
 {}
 
 APCCollection::~APCCollection() {

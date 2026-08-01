@@ -46,8 +46,8 @@ size_t getMemSize(MakeUncountedEnv::ArrayMap* seenArrs) {
 template <typename A, typename B>
 ALWAYS_INLINE
 APCHandle::Pair
-APCArray::MakeSharedImpl(ArrayData* arr, APCHandleLevel level,
-                         A shared, B serialized, bool pure) {
+APCArray::MakeCopiedImpl(ArrayData* arr, APCHandleLevel level,
+                         A copied, B serialized, bool pure) {
   if (level == APCHandleLevel::Outer || level == APCHandleLevel::OuterAcyclic) {
     auto const seenArrays = apcExtension::ShareUncounted ?
       req::make_unique<MakeUncountedEnv::ArrayMap>() : nullptr;
@@ -84,22 +84,22 @@ APCArray::MakeSharedImpl(ArrayData* arr, APCHandleLevel level,
     }
   }
 
-  return shared();
+  return copied();
 }
 
 APCHandle::Pair
-APCArray::MakeSharedVec(ArrayData* vec, APCHandleLevel level,
+APCArray::MakeCopiedVec(ArrayData* vec, APCHandleLevel level,
                         bool unserializeObj, bool pure) {
   assertx(vec->isVecType());
   if (auto const value = APCTypedValue::HandlePersistent(vec)) {
     return value;
   }
-  return MakeSharedImpl(
+  return MakeCopiedImpl(
     vec,
     level,
     [&] {
-      auto const kind = vec->isLegacyArray() ? APCKind::SharedLegacyVec
-                                             : APCKind::SharedVec;
+      auto const kind = vec->isLegacyArray() ? APCKind::CopiedLegacyVec
+                                             : APCKind::CopiedVec;
       return MakePacked(vec, kind, unserializeObj, pure);
     },
     [&](StringData* s) { return APCString::MakeSerializedVec(s); },
@@ -108,18 +108,18 @@ APCArray::MakeSharedVec(ArrayData* vec, APCHandleLevel level,
 }
 
 APCHandle::Pair
-APCArray::MakeSharedDict(ArrayData* dict, APCHandleLevel level,
+APCArray::MakeCopiedDict(ArrayData* dict, APCHandleLevel level,
                          bool unserializeObj, bool pure) {
   assertx(dict->isDictType());
   if (auto const value = APCTypedValue::HandlePersistent(dict)) {
     return value;
   }
-  return MakeSharedImpl(
+  return MakeCopiedImpl(
     dict,
     level,
     [&] {
-      auto const kind = dict->isLegacyArray() ? APCKind::SharedLegacyDict
-                                              : APCKind::SharedDict;
+      auto const kind = dict->isLegacyArray() ? APCKind::CopiedLegacyDict
+                                              : APCKind::CopiedDict;
       return MakeHash(dict, kind, unserializeObj, pure);
     },
     [&](StringData* s) { return APCString::MakeSerializedDict(s); },
@@ -128,17 +128,17 @@ APCArray::MakeSharedDict(ArrayData* dict, APCHandleLevel level,
 }
 
 APCHandle::Pair
-APCArray::MakeSharedKeyset(ArrayData* keyset, APCHandleLevel level,
+APCArray::MakeCopiedKeyset(ArrayData* keyset, APCHandleLevel level,
                            bool unserializeObj) {
   assertx(keyset->isKeysetType());
   if (auto const value = APCTypedValue::HandlePersistent(keyset)) {
     return value;
   }
-  return MakeSharedImpl(
+  return MakeCopiedImpl(
     keyset,
     level,
     [&]() {
-      return MakePacked(keyset, APCKind::SharedKeyset,
+      return MakePacked(keyset, APCKind::CopiedKeyset,
               unserializeObj, true /* pure irrelevant for arraykeys */);
     },
     [&](StringData* s) { return APCString::MakeSerializedKeyset(s); },
@@ -146,9 +146,9 @@ APCArray::MakeSharedKeyset(ArrayData* keyset, APCHandleLevel level,
   );
 }
 
-APCHandle::Pair APCArray::MakeSharedEmptyVec() {
+APCHandle::Pair APCArray::MakeCopiedEmptyVec() {
   void* p = apc_malloc(sizeof(APCArray));
-  APCArray* arr = new (p) APCArray(PackedCtor{}, APCKind::SharedVec, 0);
+  APCArray* arr = new (p) APCArray(PackedCtor{}, APCKind::CopiedVec, 0);
   return {arr->getHandle(), sizeof(APCArray)};
 }
 

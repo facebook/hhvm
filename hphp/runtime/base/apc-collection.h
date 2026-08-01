@@ -33,7 +33,7 @@ struct APCCollection {
 
   static const APCCollection* fromHandle(const APCHandle* handle) {
     assertx(handle->checkInvariants());
-    assertx(handle->kind() == APCKind::SharedCollection);
+    assertx(handle->kind() == APCKind::CopiedCollection);
     static_assert(offsetof(APCCollection, m_handle) == 0, "");
     return reinterpret_cast<const APCCollection*>(handle);
   }

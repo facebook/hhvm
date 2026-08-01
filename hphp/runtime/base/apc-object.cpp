@@ -45,7 +45,7 @@ const StaticString s___wakeup("__wakeup");
 
 ALWAYS_INLINE
 APCObject::APCObject(ClassOrName cls, uint32_t propCount)
-  : m_handle(APCKind::SharedObject)
+  : m_handle(APCKind::CopiedObject)
   , m_cls{cls}
   , m_propCount{propCount}
   , m_persistent{0}
@@ -304,7 +304,7 @@ Object APCObject::createObject(bool pure) const {
   if (UNLIKELY(numProps < m_propCount)) {
     auto dynProps = apcProp[numProps];
     assertx(dynProps->type() == KindOfPersistentDict ||
-            dynProps->kind() == APCKind::SharedDict);
+            dynProps->kind() == APCKind::CopiedDict);
     obj->setDynProps(dynProps->toLocal(pure).asCArrRef());
   }
 
@@ -347,7 +347,7 @@ Object APCObject::createObjectLazy(bool pure) const {
   if (UNLIKELY(numProps < m_propCount)) {
     auto dynProps = apcProp[numProps];
     assertx(dynProps->type() == KindOfPersistentDict ||
-            dynProps->kind() == APCKind::SharedDict);
+            dynProps->kind() == APCKind::CopiedDict);
     obj->setDynProps(dynProps->toLocal(pure).asCArrRef());
   }
 

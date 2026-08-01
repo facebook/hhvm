@@ -163,6 +163,135 @@ TEST_F(TranscoderTest, InterpreterTranscodesCompactToBinary) {
   EXPECT_EQ(toBytes(**binary1), binary0);
 }
 
+TEST_F(TranscoderTest, FlattenedCompactStructWritesActiveFieldValue) {
+  auto compact = makeCodec(WireProtocol::ThriftCompact, sampleNode());
+  auto json = makeCodec(WireProtocol::Json, sampleNode());
+  auto plan = fuse(compact, json);
+  std::get<StructOp>(plan.root).outputMode = StructOutputMode::Flattened;
+  auto transcoder = makeTranscoder(std::move(plan), Engine::Interpreter);
+  ASSERT_FALSE(transcoder.hasError()) << transcoder.error().message;
+
+  const std::vector<uint8_t> input = {0x15, 0x0E, kCompactStop};
+  auto inputBuf = folly::IOBuf::wrapBufferAsValue(input.data(), input.size());
+  auto output = (*transcoder)->transcode(inputBuf);
+
+  ASSERT_FALSE(output.hasError()) << output.error().message;
+  const std::vector<uint8_t> expected = {'7'};
+  EXPECT_EQ(toBytes(**output), expected);
+}
+
+TEST_F(TranscoderTest, FlattenedJsonStructWritesActiveFieldValue) {
+  auto json = makeCodec(WireProtocol::Json, sampleNode());
+  auto compact = makeCodec(WireProtocol::ThriftCompact, sampleNode());
+  auto plan = fuse(json, compact);
+  std::get<StructOp>(plan.root).outputMode = StructOutputMode::Flattened;
+  auto transcoder = makeTranscoder(std::move(plan), Engine::Interpreter);
+  ASSERT_FALSE(transcoder.hasError()) << transcoder.error().message;
+
+  auto output = (*transcoder)->transcode(wrapString(R"({"id":7})"));
+
+  ASSERT_FALSE(output.hasError()) << output.error().message;
+  const std::vector<uint8_t> expected = {0x0E};
+  EXPECT_EQ(toBytes(**output), expected);
+}
+
+TEST_F(TranscoderTest, FlattenedCompactStructRejectsEmptyInput) {
+  auto compact = makeCodec(WireProtocol::ThriftCompact, sampleNode());
+  auto json = makeCodec(WireProtocol::Json, sampleNode());
+  auto plan = fuse(compact, json);
+  std::get<StructOp>(plan.root).outputMode = StructOutputMode::Flattened;
+  auto transcoder = makeTranscoder(std::move(plan), Engine::Interpreter);
+  ASSERT_FALSE(transcoder.hasError()) << transcoder.error().message;
+
+  const std::vector<uint8_t> input = {kCompactStop};
+  auto inputBuf = folly::IOBuf::wrapBufferAsValue(input.data(), input.size());
+  auto output = (*transcoder)->transcode(inputBuf);
+
+  ASSERT_TRUE(output.hasError());
+  EXPECT_EQ(output.error().code, TranscodeErrc::Malformed);
+}
+
+TEST_F(TranscoderTest, FlattenedJsonStructRejectsEmptyInput) {
+  auto json = makeCodec(WireProtocol::Json, sampleNode());
+  auto compact = makeCodec(WireProtocol::ThriftCompact, sampleNode());
+  auto plan = fuse(json, compact);
+  std::get<StructOp>(plan.root).outputMode = StructOutputMode::Flattened;
+  auto transcoder = makeTranscoder(std::move(plan), Engine::Interpreter);
+  ASSERT_FALSE(transcoder.hasError()) << transcoder.error().message;
+
+  auto output = (*transcoder)->transcode(wrapString("{}"));
+
+  ASSERT_TRUE(output.hasError());
+  EXPECT_EQ(output.error().code, TranscodeErrc::Malformed);
+}
+
+TEST_F(TranscoderTest, FlattenedStructRejectsMultipleFields) {
+  auto compact = makeCodec(WireProtocol::ThriftCompact, sampleNode());
+  auto json = makeCodec(WireProtocol::Json, sampleNode());
+  auto plan = fuse(compact, json);
+  std::get<StructOp>(plan.root).outputMode = StructOutputMode::Flattened;
+  auto transcoder = makeTranscoder(std::move(plan), Engine::Interpreter);
+  ASSERT_FALSE(transcoder.hasError()) << transcoder.error().message;
+
+  const std::vector<uint8_t> input = {
+      0x15, 0x0E, 0x18, 0x02, 'h', 'i', kCompactStop};
+  auto inputBuf = folly::IOBuf::wrapBufferAsValue(input.data(), input.size());
+  auto output = (*transcoder)->transcode(inputBuf);
+
+  ASSERT_TRUE(output.hasError());
+  EXPECT_EQ(output.error().code, TranscodeErrc::Malformed);
+}
+
+TEST_F(TranscoderTest, FlattenedStructRejectsUnknownField) {
+  auto compact = makeCodec(WireProtocol::ThriftCompact, sampleNode());
+  auto json = makeCodec(WireProtocol::Json, sampleNode());
+  auto plan = fuse(compact, json);
+  std::get<StructOp>(plan.root).outputMode = StructOutputMode::Flattened;
+  auto transcoder = makeTranscoder(std::move(plan), Engine::Interpreter);
+  ASSERT_FALSE(transcoder.hasError()) << transcoder.error().message;
+
+  const std::vector<uint8_t> input = {0x45, 0x0E, kCompactStop};
+  auto inputBuf = folly::IOBuf::wrapBufferAsValue(input.data(), input.size());
+  auto output = (*transcoder)->transcode(inputBuf);
+
+  ASSERT_TRUE(output.hasError());
+  EXPECT_EQ(output.error().code, TranscodeErrc::Malformed);
+}
+
+TEST_F(TranscoderTest, FlattenedCompactStructRejectsMismatchedWireType) {
+  auto compact = makeCodec(WireProtocol::ThriftCompact, sampleNode());
+  auto json = makeCodec(WireProtocol::Json, sampleNode());
+  auto plan = fuse(compact, json);
+  std::get<StructOp>(plan.root).outputMode = StructOutputMode::Flattened;
+  auto transcoder = makeTranscoder(std::move(plan), Engine::Interpreter);
+  ASSERT_FALSE(transcoder.hasError()) << transcoder.error().message;
+
+  const std::vector<uint8_t> input = {0x18, 0x01, 'x', kCompactStop};
+  auto inputBuf = folly::IOBuf::wrapBufferAsValue(input.data(), input.size());
+  auto output = (*transcoder)->transcode(inputBuf);
+
+  ASSERT_TRUE(output.hasError());
+  EXPECT_EQ(output.error().code, TranscodeErrc::Malformed);
+}
+
+TEST_F(TranscoderTest, FlattenedCompactStructRejectsMissingFieldCommand) {
+  auto compact = makeCodec(WireProtocol::ThriftCompact, sampleNode());
+  auto json = makeCodec(WireProtocol::Json, sampleNode());
+  auto plan = fuse(compact, json);
+  auto& op = std::get<StructOp>(plan.root);
+  op.outputMode = StructOutputMode::Flattened;
+  op.fields.front().command.reset();
+  auto transcoder = makeTranscoder(std::move(plan), Engine::Interpreter);
+  ASSERT_FALSE(transcoder.hasError()) << transcoder.error().message;
+
+  const std::vector<uint8_t> input = {0x15, 0x0E, kCompactStop};
+  auto inputBuf = folly::IOBuf::wrapBufferAsValue(input.data(), input.size());
+  auto output = (*transcoder)->transcode(inputBuf);
+
+  ASSERT_TRUE(output.hasError());
+  EXPECT_EQ(output.error().code, TranscodeErrc::Malformed);
+}
+
 TEST_F(TranscoderTest, JitEngineUnlinkedReturnsCompileError) {
   auto compact = makeCodec(WireProtocol::ThriftCompact, sampleNode());
   auto binary = makeCodec(WireProtocol::ThriftBinary, sampleNode());

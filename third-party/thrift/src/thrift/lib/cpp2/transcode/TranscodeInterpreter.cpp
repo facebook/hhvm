@@ -170,13 +170,18 @@ void writeMapHeader(
     uint8_t valueType);
 
 bool fieldTypeMatches(
-    FieldProto readProto, const FieldEntry& field, uint8_t actualTypeInfo) {
+    FieldProto readProto, uint8_t expectedTypeInfo, uint8_t actualTypeInfo) {
   if (readProto == FieldProto::Compact &&
-      field.readTypeInfo == wire::kCompactBooleanTrue) {
+      expectedTypeInfo == wire::kCompactBooleanTrue) {
     return actualTypeInfo == wire::kCompactBooleanTrue ||
         actualTypeInfo == wire::kCompactBooleanFalse;
   }
-  return actualTypeInfo == field.readTypeInfo;
+  return actualTypeInfo == expectedTypeInfo;
+}
+
+bool fieldTypeMatches(
+    FieldProto readProto, const FieldEntry& field, uint8_t actualTypeInfo) {
+  return fieldTypeMatches(readProto, field.readTypeInfo, actualTypeInfo);
 }
 
 bool setReadEndFromByteLength(TranscodeCursor& c, uint64_t byteLen) {
@@ -1244,25 +1249,36 @@ bool isUnion(const StructOp& op) {
   return op.schemaType.has_value() && op.schemaType->isUnion();
 }
 
+bool noteSingleField(TranscodeCursor* c, bool& fieldSeen) {
+  if (fieldSeen) {
+    detail::setError(c, kMalformedFieldType);
+    return false;
+  }
+  fieldSeen = true;
+  return true;
+}
+
+bool finishSingleField(TranscodeCursor* c, bool fieldSeen) {
+  if (!fieldSeen) {
+    detail::setError(c, kMalformedFieldType);
+    return false;
+  }
+  return true;
+}
+
 bool noteUnionMember(
     TranscodeCursor* c, bool unionStruct, bool& unionMemberSeen) {
   if (!unionStruct) {
     return true;
   }
-  if (unionMemberSeen) {
-    detail::setError(c, kMalformedFieldType);
-    return false;
-  }
-  unionMemberSeen = true;
-  return true;
+  return noteSingleField(c, unionMemberSeen);
 }
 
 bool finishUnion(TranscodeCursor* c, bool unionStruct, bool unionMemberSeen) {
-  if (unionStruct && !unionMemberSeen) {
-    detail::setError(c, kMalformedFieldType);
-    return false;
+  if (!unionStruct) {
+    return true;
   }
-  return true;
+  return finishSingleField(c, unionMemberSeen);
 }
 
 bool resolveScalarOverrideField(
@@ -1477,6 +1493,11 @@ struct IdFieldMatch {
   const FieldEntry* field = nullptr;
 };
 
+enum class UnknownFieldMode : uint8_t {
+  Skip,
+  Reject,
+};
+
 bool enterIdStructRead(
     TranscodeCursor* c, const StructOp& op, const uint8_t*& savedReadEnd) {
   savedReadEnd = nullptr;
@@ -1500,13 +1521,15 @@ void restoreIdStructReadEnd(
   }
 }
 
+// A successful match has a command and a schema-compatible wire type.
 bool readNextIdField(
     TranscodeCursor* c,
     const StructOp& op,
     FieldProto readProto,
     const Framing& rf,
     int16_t& prevRead,
-    IdFieldMatch& match) {
+    IdFieldMatch& match,
+    UnknownFieldMode unknownFieldMode = UnknownFieldMode::Skip) {
   while (true) {
     int16_t fieldId = 0;
     uint8_t typeInfo = rf.readHeader(c, &fieldId, prevRead);
@@ -1517,13 +1540,19 @@ bool readNextIdField(
 
     const FieldEntry* field = findFieldById(op, fieldId);
     if (field == nullptr) {
+      if (unknownFieldMode == UnknownFieldMode::Reject) {
+        detail::setError(c, kMalformedFieldType);
+        return false;
+      }
       rf.skip(c, typeInfo);
       if (hasError(c)) {
         return false;
       }
       continue;
     }
-    if (FOLLY_UNLIKELY(!fieldTypeMatches(readProto, *field, typeInfo))) {
+    if (FOLLY_UNLIKELY(
+            field->command == nullptr ||
+            !fieldTypeMatches(readProto, *field, typeInfo))) {
       detail::setError(c, kMalformedFieldType);
       return false;
     }
@@ -1691,10 +1720,125 @@ void execIdStructToJson(
   thrift_transcode_write_byte_checked(c, '}');
 }
 
+bool execFlattenedField(
+    TranscodeCursor* c,
+    const FieldEntry& field,
+    uint8_t typeInfo,
+    bool& fieldSeen) {
+  if (FOLLY_UNLIKELY(!noteSingleField(c, fieldSeen))) {
+    return false;
+  }
+  execCommand(c, *field.command, typeInfo);
+  return !hasError(c);
+}
+
+void execJsonStructFlattened(TranscodeCursor* c, const StructOp& op) {
+  thrift_transcode_json_skip_whitespace(c);
+  if (FOLLY_UNLIKELY(!thrift_transcode_json_expect_byte(c, '{'))) {
+    return;
+  }
+
+  bool first = true;
+  bool fieldSeen = false;
+  while (true) {
+    if (hasError(c)) {
+      return;
+    }
+    thrift_transcode_json_skip_whitespace(c);
+    if (thrift_transcode_json_peek(c) == '}') {
+      break;
+    }
+    if (!first) {
+      if (FOLLY_UNLIKELY(!thrift_transcode_json_expect_byte(c, ','))) {
+        return;
+      }
+      thrift_transcode_json_skip_whitespace(c);
+    }
+    first = false;
+
+    TranscodeJsonStringToken name{};
+    if (FOLLY_UNLIKELY(!thrift_transcode_read_json_string_token(c, &name))) {
+      return;
+    }
+    thrift_transcode_json_skip_whitespace(c);
+    if (FOLLY_UNLIKELY(!thrift_transcode_json_expect_byte(c, ':'))) {
+      return;
+    }
+    thrift_transcode_json_skip_whitespace(c);
+
+    const FieldEntry* field = findFieldByName(op, name);
+    if (field == nullptr || field->command == nullptr) {
+      detail::setError(c, kMalformedFieldType);
+      return;
+    }
+
+    if (FOLLY_UNLIKELY(!execFlattenedField(c, *field, 0, fieldSeen))) {
+      return;
+    }
+  }
+
+  if (FOLLY_UNLIKELY(!thrift_transcode_json_expect_byte(c, '}'))) {
+    return;
+  }
+  if (FOLLY_UNLIKELY(!finishSingleField(c, fieldSeen))) {
+    return;
+  }
+}
+
+void execIdStructFlattened(
+    TranscodeCursor* c,
+    const StructOp& op,
+    FieldProto readProto,
+    const Framing& rf) {
+  const uint8_t* savedReadEnd = nullptr;
+  if (FOLLY_UNLIKELY(!enterIdStructRead(c, op, savedReadEnd))) {
+    return;
+  }
+  auto restoreReadEnd =
+      folly::makeGuard([&] { restoreIdStructReadEnd(c, op, savedReadEnd); });
+
+  int16_t prevRead = 0;
+  bool fieldSeen = false;
+  while (!hasError(c)) {
+    IdFieldMatch match;
+    if (!readNextIdField(
+            c, op, readProto, rf, prevRead, match, UnknownFieldMode::Reject)) {
+      break;
+    }
+    if (FOLLY_UNLIKELY(
+            !execFlattenedField(c, *match.field, match.typeInfo, fieldSeen))) {
+      return;
+    }
+  }
+  if (!hasError(c)) {
+    if (FOLLY_UNLIKELY(!finishSingleField(c, fieldSeen))) {
+      return;
+    }
+  }
+}
+
 void execStruct(
     TranscodeCursor* c,
     const StructOp& op,
     ScalarFieldOverrides fieldOverrides = {}) {
+  if (op.outputMode == StructOutputMode::Flattened) {
+    if (!fieldOverrides.empty()) {
+      detail::setError(c, kMalformedFieldType);
+      return;
+    }
+    if (op.fieldIdent == FieldIdent::ByName) {
+      execJsonStructFlattened(c, op);
+      return;
+    }
+    FieldProto readProto = op.readFieldProto;
+    if (readProto == FieldProto::Unsupported) {
+      detail::setError(c, kUnsupportedProtocol);
+      return;
+    }
+    execIdStructFlattened(c, op, readProto, framingFor(readProto));
+    return;
+  }
+
   if (op.fieldIdent == FieldIdent::ByName) {
     execJsonStruct(c, op, fieldOverrides);
     return;

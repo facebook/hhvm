@@ -356,6 +356,14 @@ enum class FieldProto : uint8_t {
   Unsupported,
 };
 
+enum class StructOutputMode : uint8_t {
+  // Write the struct as a struct in the target protocol.
+  Normal,
+  // Require exactly one field, which must be known, and write only its value,
+  // omitting the enclosing struct wrapper.
+  Flattened,
+};
+
 /**
  * Transcode a struct: read field headers → dispatch by ID/name → per-field
  * commands.
@@ -390,6 +398,11 @@ struct StructOp {
 
   // Per-field commands, sorted by fieldId
   std::vector<FieldEntry> fields;
+
+  // For enum-like wrapper structs, require exactly one field, which must be
+  // known, and emit its value without writing the enclosing struct's field
+  // header or end marker.
+  StructOutputMode outputMode = StructOutputMode::Normal;
 
   // For struct memory target: isset management
   using SetIssetFn = void (*)(void*, ptrdiff_t, bool);

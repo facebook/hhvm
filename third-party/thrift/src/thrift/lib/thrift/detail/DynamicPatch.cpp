@@ -21,6 +21,7 @@
 #include <folly/Overload.h>
 #include <folly/ScopeGuard.h>
 #include <folly/portability/GFlags.h>
+#include <thrift/lib/cpp/protocol/TProtocolException.h>
 #include <thrift/lib/cpp2/op/Clear.h>
 #include <thrift/lib/cpp2/op/Patch.h>
 #include <thrift/lib/cpp2/protocol/Patch.h>
@@ -2504,11 +2505,40 @@ class MinSafePatchVersionVisitor {
 DynamicPatch DynamicPatch::fromSafePatch(const type::AnyStruct& any) {
   DynamicPatch patch;
   DynamicSafePatch safePatch;
-  // TODO: Add SafePatch check based on Uri
+  if (!apache::thrift::is_non_optional_field_set_manually_or_by_serializer(
+          any.type()) ||
+      !apache::thrift::is_non_optional_field_set_manually_or_by_serializer(
+          any.protocol()) ||
+      !apache::thrift::is_non_optional_field_set_manually_or_by_serializer(
+          any.data())) {
+    throw TProtocolException(
+        TProtocolException::MISSING_REQUIRED_FIELD,
+        "Missing required SafePatch Any field");
+  }
+  if (!any.type()->isValid()) {
+    throw std::runtime_error("Invalid SafePatch type");
+  }
+  // Parse and validate the canonical SafePatch URI as a struct patch. The
+  // reconstructed target type is not otherwise needed here.
+  (void)fromSafePatchType(*any.type(), false /* isUnion */);
   if (any.protocol() == type::StandardProtocol::Binary) {
-    safePatch.decode<apache::thrift::BinaryProtocolReader>(*any.data());
+    apache::thrift::BinaryProtocolReader reader;
+    reader.setInput(&*any.data());
+    safePatch.decode(reader);
+    if (!reader.getCursor().isAtEnd()) {
+      throw TProtocolException(
+          TProtocolException::INVALID_DATA,
+          "Trailing data after SafePatch envelope");
+    }
   } else if (any.protocol() == type::StandardProtocol::Compact) {
-    safePatch.decode<apache::thrift::CompactProtocolReader>(*any.data());
+    apache::thrift::CompactProtocolReader reader;
+    reader.setInput(&*any.data());
+    safePatch.decode(reader);
+    if (!reader.getCursor().isAtEnd()) {
+      throw TProtocolException(
+          TProtocolException::INVALID_DATA,
+          "Trailing data after SafePatch envelope");
+    }
   } else {
     folly::throw_exception<std::runtime_error>(
         "Unsupported protocol when parsing SafePatch.");
@@ -2520,7 +2550,14 @@ DynamicPatch DynamicPatch::fromSafePatch(const type::AnyStruct& any) {
     throw std::runtime_error(
         fmt::format("Unsupported patch version: {}", safePatch.version()));
   }
-  patch.decode<apache::thrift::CompactProtocolReader>(*safePatch.data());
+  apache::thrift::CompactProtocolReader patchReader;
+  patchReader.setInput(&*safePatch.data());
+  patch.decode(patchReader);
+  if (!patchReader.getCursor().isAtEnd()) {
+    throw TProtocolException(
+        TProtocolException::INVALID_DATA,
+        "Trailing data after DynamicPatch payload");
+  }
   return patch;
 }
 type::AnyStruct DynamicPatch::toSafePatch(type::Type type) const {

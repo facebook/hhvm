@@ -1414,11 +1414,27 @@ TEST(DynamicPatch, DynamicSafePatch) {
 }
 
 TEST(DynamicPatch, DynamicSafePatchInvalid) {
-  MyUnionSafePatch safePatch;
-  safePatch.version() = 42;
+  MyUnionPatch patch;
+  patch.patchIfSet<ident::s>() = "hello";
+  auto safePatchAny = type::AnyData::toAny(patch.toSafePatch()).toThrift();
+  auto envelope = parseObject<CompactProtocolReader>(*safePatchAny.data());
+  envelope[FieldId{1}].emplace_i32(42);
+  safePatchAny.data() =
+      std::move(*serializeObject<CompactProtocolWriter>(envelope));
 
-  // store SafePatch in Thrift Any
-  type::AnyStruct safePatchAny = type::AnyData::toAny(safePatch).toThrift();
+  EXPECT_THROW(
+      (void)DynamicPatch::fromSafePatch(safePatchAny), std::runtime_error);
+}
+
+TEST(DynamicPatch, MissingInnerPatchDataIsRejected) {
+  MyUnionPatch patch;
+  patch.patchIfSet<ident::s>() = "hello";
+  auto safePatchAny = type::AnyData::toAny(patch.toSafePatch()).toThrift();
+
+  Object envelope;
+  envelope[FieldId{1}].emplace_i32(1);
+  safePatchAny.data() =
+      std::move(*serializeObject<CompactProtocolWriter>(envelope));
 
   EXPECT_THROW(
       (void)DynamicPatch::fromSafePatch(safePatchAny), std::runtime_error);
@@ -1429,8 +1445,125 @@ TEST(DynamicPatch, DynamicSafePatchMissingEnvelopeFields) {
   safePatchAny.protocol() = type::StandardProtocol::Compact;
   safePatchAny.data() = *folly::IOBuf::copyBuffer("\0", 1);
 
+  EXPECT_THROW((void)DynamicPatch::fromSafePatch(safePatchAny), std::exception);
+}
+
+class DynamicSafePatchInvalidVersionTest
+    : public testing::TestWithParam<int32_t> {};
+
+TEST_P(DynamicSafePatchInvalidVersionTest, IsRejected) {
+  MyUnionPatch patch;
+  patch.patchIfSet<ident::s>() = "hello";
+  auto safePatchAny = type::AnyData::toAny(patch.toSafePatch()).toThrift();
+
+  auto envelope = parseObject<CompactProtocolReader>(*safePatchAny.data());
+  envelope[FieldId{1}].emplace_i32(GetParam());
+  safePatchAny.data() =
+      std::move(*serializeObject<CompactProtocolWriter>(envelope));
+
   EXPECT_THROW(
       (void)DynamicPatch::fromSafePatch(safePatchAny), std::runtime_error);
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    InvalidVersions,
+    DynamicSafePatchInvalidVersionTest,
+    testing::Values(0, -1));
+
+TEST(DynamicPatch, MissingSafePatchVersionIsRejected) {
+  MyUnionPatch patch;
+  patch.patchIfSet<ident::s>() = "hello";
+  auto safePatchAny = type::AnyData::toAny(patch.toSafePatch()).toThrift();
+
+  auto envelope = parseObject<CompactProtocolReader>(*safePatchAny.data());
+  envelope.erase(FieldId{1});
+  safePatchAny.data() =
+      std::move(*serializeObject<CompactProtocolWriter>(envelope));
+
+  EXPECT_THROW(
+      (void)DynamicPatch::fromSafePatch(safePatchAny), std::runtime_error);
+}
+
+enum class MissingSafePatchField { Type, Protocol, Envelope };
+
+class MissingSafePatchFieldTest
+    : public testing::TestWithParam<MissingSafePatchField> {};
+
+TEST_P(MissingSafePatchFieldTest, IsRejected) {
+  MyUnionPatch patch;
+  patch.patchIfSet<ident::s>() = "hello";
+  auto validSafePatch = type::AnyData::toAny(patch.toSafePatch()).toThrift();
+
+  type::AnyStruct safePatchAny;
+  switch (GetParam()) {
+    case MissingSafePatchField::Type:
+      safePatchAny.protocol() = *validSafePatch.protocol();
+      safePatchAny.data() = std::move(*validSafePatch.data()->clone());
+      break;
+    case MissingSafePatchField::Protocol:
+      safePatchAny.type() = *validSafePatch.type();
+      safePatchAny.data() = std::move(*validSafePatch.data()->clone());
+      break;
+    case MissingSafePatchField::Envelope:
+      safePatchAny.type() = *validSafePatch.type();
+      safePatchAny.protocol() = *validSafePatch.protocol();
+      break;
+  }
+
+  EXPECT_THROW(
+      (void)DynamicPatch::fromSafePatch(safePatchAny), TProtocolException);
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    RequiredFields,
+    MissingSafePatchFieldTest,
+    testing::Values(
+        MissingSafePatchField::Type,
+        MissingSafePatchField::Protocol,
+        MissingSafePatchField::Envelope));
+
+TEST(DynamicPatch, NonSafePatchTypeIsRejected) {
+  MyUnionPatch patch;
+  patch.patchIfSet<ident::s>() = "hello";
+  auto safePatchAny = type::AnyData::toAny(patch.toSafePatch()).toThrift();
+  safePatchAny.type() = type::Type::get<type::union_t<MyUnion>>();
+
+  EXPECT_THROW(
+      (void)DynamicPatch::fromSafePatch(safePatchAny), std::runtime_error);
+}
+
+TEST(DynamicPatch, NonSafePatchUriIsRejected) {
+  MyUnionPatch patch;
+  patch.patchIfSet<ident::s>() = "hello";
+  auto safePatchAny = type::AnyData::toAny(patch.toSafePatch()).toThrift();
+  safePatchAny.type() = type::Type::get<type::struct_t<MyStruct>>();
+
+  EXPECT_THROW(
+      (void)DynamicPatch::fromSafePatch(safePatchAny), std::invalid_argument);
+}
+
+TEST(DynamicPatch, SafePatchEnvelopeTrailingDataIsRejected) {
+  MyUnionPatch patch;
+  patch.patchIfSet<ident::s>() = "hello";
+  auto safePatchAny = type::AnyData::toAny(patch.toSafePatch()).toThrift();
+  safePatchAny.data()->appendToChain(folly::IOBuf::copyBuffer("x"));
+
+  EXPECT_THROW(
+      (void)DynamicPatch::fromSafePatch(safePatchAny), TProtocolException);
+}
+
+TEST(DynamicPatch, DynamicPatchTrailingDataIsRejected) {
+  MyUnionPatch patch;
+  patch.patchIfSet<ident::s>() = "hello";
+  auto safePatchAny = type::AnyData::toAny(patch.toSafePatch()).toThrift();
+
+  auto envelope = parseObject<CompactProtocolReader>(*safePatchAny.data());
+  envelope[FieldId{2}].as_binary().appendToChain(folly::IOBuf::copyBuffer("x"));
+  safePatchAny.data() =
+      std::move(*serializeObject<CompactProtocolWriter>(envelope));
+
+  EXPECT_THROW(
+      (void)DynamicPatch::fromSafePatch(safePatchAny), TProtocolException);
 }
 
 TEST(DynamicPatch, DynamicSafePatchV2) {

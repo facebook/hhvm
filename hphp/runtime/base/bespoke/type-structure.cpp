@@ -607,10 +607,10 @@ ArrayData* TypeStructure::EscalateToVanilla(
 }
 
 void TypeStructure::ConvertToUncounted(
-    TypeStructure* tad, const MakeUncountedEnv& env) {
-  if (tad->m_alias) MakeUncountedString(tad->m_alias, env);
-  if (tad->m_typevars) MakeUncountedString(tad->m_typevars, env);
-  if (tad->m_typevar_types) MakeUncountedArray(tad->m_typevar_types, env);
+    TypeStructure* tad, const MakeSharedEnv& env) {
+  if (tad->m_alias) MakeSharedString(tad->m_alias, env);
+  if (tad->m_typevars) MakeSharedString(tad->m_typevars, env);
+  if (tad->m_typevar_types) MakeSharedArray(tad->m_typevar_types, env);
 
   switch (tad->typeKind()) {
 #define X(Name, Type) \
@@ -625,9 +625,9 @@ TYPE_STRUCTURE_CHILDREN_KINDS
 }
 
 void TypeStructure::ReleaseUncounted(TypeStructure* tad) {
-  if (tad->m_alias) DecRefUncountedString(tad->m_alias);
-  if (tad->m_typevars) DecRefUncountedString(tad->m_typevars);
-  if (tad->m_typevar_types) DecRefUncountedArray(tad->m_typevar_types);
+  if (tad->m_alias) DecRefSharedString(tad->m_alias);
+  if (tad->m_typevars) DecRefSharedString(tad->m_typevars);
+  if (tad->m_typevar_types) DecRefSharedArray(tad->m_typevar_types);
 
   switch (tad->typeKind()) {
 #define X(Name, Type) \
@@ -901,24 +901,24 @@ ArrayData* TypeStructure::SetLegacyArray(
 
 namespace {
 
-template<class T> void tsMakeUncounted(T, const MakeUncountedEnv&) {}
+template<class T> void tsMakeUncounted(T, const MakeSharedEnv&) {}
 template<>
-void tsMakeUncounted<StringData*>(StringData* field, const MakeUncountedEnv& env) {
-  if (field) MakeUncountedString(field, env);
+void tsMakeUncounted<StringData*>(StringData* field, const MakeSharedEnv& env) {
+  if (field) MakeSharedString(field, env);
 }
 template<>
-void tsMakeUncounted<ArrayData*>(ArrayData* field, const MakeUncountedEnv& env) {
-  if (field) MakeUncountedArray(field, env);
+void tsMakeUncounted<ArrayData*>(ArrayData* field, const MakeSharedEnv& env) {
+  if (field) MakeSharedArray(field, env);
 }
 
 template<class T> void tsDecRefUncounted(T) {}
 template<>
 void tsDecRefUncounted<StringData*>(StringData* field) {
-  if (field) DecRefUncountedString(field);
+  if (field) DecRefSharedString(field);
 }
 template<>
 void tsDecRefUncounted<ArrayData*>(ArrayData* field) {
-  if (field) DecRefUncountedArray(field);
+  if (field) DecRefSharedArray(field);
 }
 
 template<class T> void initializeField(T) {}
@@ -1026,7 +1026,7 @@ TypedValue ChildStruct::tsNvGetStr(const ChildStruct* tad, const StringData* k) 
   FieldsMacro(MAKE_TV_FIELD)                                                \
   return make_tv<KindOfUninit>();                                           \
 }                                                                           \
-void ChildStruct::convertToUncounted(ChildStruct* tad, const MakeUncountedEnv& env) { \
+void ChildStruct::convertToUncounted(ChildStruct* tad, const MakeSharedEnv& env) { \
   FieldsMacro(CONVERT_TO_UNCOUNTED)                                         \
 }                                                                           \
 void ChildStruct::releaseUncounted(ChildStruct* tad) {                      \

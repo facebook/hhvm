@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/tv-uncounted.h"
+#include "hphp/runtime/base/tv-shared.h"
 
 #include "hphp/runtime/base/apc-stats.h"
 #include "hphp/runtime/base/array-data.h"
@@ -28,21 +28,21 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////////////
 
-void* AllocUncounted(size_t bytes) {
+void* AllocShared(size_t bytes) {
   if (APCStats::IsCreated()) {
     APCStats::getAPCStats().addAPCUncountedBlock();
   }
   return uncounted_malloc(bytes);
 }
 
-void FreeUncounted(void* ptr) {
+void FreeShared(void* ptr) {
   if (APCStats::IsCreated()) {
     APCStats::getAPCStats().removeAPCUncountedBlock();
   }
   return uncounted_free(ptr);
 }
 
-void FreeUncounted(void* ptr, size_t bytes) {
+void FreeShared(void* ptr, size_t bytes) {
   if (APCStats::IsCreated()) {
     APCStats::getAPCStats().removeAPCUncountedBlock();
   }
@@ -51,7 +51,7 @@ void FreeUncounted(void* ptr, size_t bytes) {
 
 //////////////////////////////////////////////////////////////////////////////
 
-void ConvertTvToUncounted(tv_lval source, const MakeUncountedEnv& env) {
+void ConvertTvToShared(tv_lval source, const MakeSharedEnv& env) {
   auto& data = source.val();
   auto& type = source.type();
 
@@ -70,7 +70,7 @@ void ConvertTvToUncounted(tv_lval source, const MakeUncountedEnv& env) {
       type = KindOfPersistentString;
       [[fallthrough]];
     case KindOfPersistentString:
-      data.pstr = MakeUncountedString(data.pstr, env);
+      data.pstr = MakeSharedString(data.pstr, env);
       break;
 
     case KindOfVec:
@@ -81,7 +81,7 @@ void ConvertTvToUncounted(tv_lval source, const MakeUncountedEnv& env) {
     case KindOfPersistentVec:
     case KindOfPersistentDict:
     case KindOfPersistentKeyset:
-      data.parr = MakeUncountedArray(data.parr, env);
+      data.parr = MakeSharedArray(data.parr, env);
       break;
 
     case KindOfClsMeth:
@@ -111,8 +111,8 @@ void ConvertTvToUncounted(tv_lval source, const MakeUncountedEnv& env) {
 
 //////////////////////////////////////////////////////////////////////////////
 
-ArrayData* MakeUncountedArray(
-    ArrayData* in, const MakeUncountedEnv& env, bool hasApcTv) {
+ArrayData* MakeSharedArray(
+    ArrayData* in, const MakeSharedEnv& env, bool hasApcTv) {
   if (in->persistentIncRef()) return in;
 
   if (in->empty()) {
@@ -142,7 +142,7 @@ ArrayData* MakeUncountedArray(
   return result;
 }
 
-StringData* MakeUncountedString(StringData* in, const MakeUncountedEnv& env) {
+StringData* MakeSharedString(StringData* in, const MakeSharedEnv& env) {
   if (in->persistentIncRef()) return in;
   if (in->empty()) return staticEmptyString();
 
@@ -166,13 +166,13 @@ StringData* MakeUncountedString(StringData* in, const MakeUncountedEnv& env) {
 
 //////////////////////////////////////////////////////////////////////////////
 
-void DecRefUncounted(TypedValue tv) {
-  if (tvIsString(tv)) return DecRefUncountedString(val(tv).pstr);
-  if (tvIsArrayLike(tv)) return DecRefUncountedArray(val(tv).parr);
+void DecRefShared(TypedValue tv) {
+  if (tvIsString(tv)) return DecRefSharedString(val(tv).pstr);
+  if (tvIsArrayLike(tv)) return DecRefSharedArray(val(tv).parr);
   assertx(!isRefcountedType(type(tv)));
 }
 
-void DecRefUncountedArray(ArrayData* ad) {
+void DecRefSharedArray(ArrayData* ad) {
   assertx(!ad->isRefCounted());
   if (ad->isShared() && ad->sharedDecRef()) {
     ad->sharedFixCountForRelease();
@@ -180,7 +180,7 @@ void DecRefUncountedArray(ArrayData* ad) {
   }
 }
 
-void DecRefUncountedString(StringData* sd) {
+void DecRefSharedString(StringData* sd) {
   assertx(!sd->isRefCounted());
   if (sd->isShared() && sd->sharedDecRef()) {
     sd->sharedFixCountForRelease();

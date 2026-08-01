@@ -23,14 +23,14 @@
 #include "hphp/runtime/base/apc-typed-value.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/data-walker.h"
-#include "hphp/runtime/base/tv-uncounted.h"
+#include "hphp/runtime/base/tv-shared.h"
 #include "hphp/runtime/ext/apc/ext_apc.h"
 
 namespace HPHP {
 
 namespace {
 
-size_t getMemSize(MakeUncountedEnv::ArrayMap* seenArrs) {
+size_t getMemSize(MakeSharedEnv::ArrayMap* seenArrs) {
   always_assert(!use_jemalloc);
   size_t total = 0;
   for (auto kv : *seenArrs) {
@@ -50,7 +50,7 @@ APCArray::MakeCopiedImpl(ArrayData* arr, APCHandleLevel level,
                          A copied, B serialized, bool pure) {
   if (level == APCHandleLevel::Outer || level == APCHandleLevel::OuterAcyclic) {
     auto const seenArrays = apcExtension::ShareUncounted ?
-      req::make_unique<MakeUncountedEnv::ArrayMap>() : nullptr;
+      req::make_unique<MakeSharedEnv::ArrayMap>() : nullptr;
 
     DataWalker::DataFeature features {};
     if (level == APCHandleLevel::Outer) {
@@ -70,14 +70,14 @@ APCArray::MakeCopiedImpl(ArrayData* arr, APCHandleLevel level,
         ::HPHP::getMemSize(arr, true);
       auto const uncounted_arr = [&]() {
         auto const seenStrings = apcExtension::ShareUncounted ?
-          req::make_unique<MakeUncountedEnv::StringSet>() : nullptr;
-        return MakeUncountedArray(arr, seenArrays.get(), seenStrings.get());
+          req::make_unique<MakeSharedEnv::StringSet>() : nullptr;
+        return MakeSharedArray(arr, seenArrays.get(), seenStrings.get());
       }();
       auto size = use_jemalloc ?
         tl_heap->getAllocated() - tl_heap->getDeallocated() - base_size :
         base_size;
       // FIXME: the MemoryManager logic is not reliable, especially when
-      // Bespoke logic in MakeUncountedArray() may even free stuff
+      // Bespoke logic in MakeSharedArray() may even free stuff
       if (static_cast<int64_t>(size) <= 0) size = 1;
       assertx(size > 0);
       return {uncounted_arr, size + sizeof(APCTypedValue)};
@@ -190,12 +190,12 @@ APCHandle::Pair APCArray::MakeHash(ArrayData* arr, APCKind kind,
   return {ret->getHandle(), size};
 }
 
-APCHandle* APCArray::MakeUncountedArray(
-    ArrayData* ad, MakeUncountedEnv::ArrayMap* seenArrays,
-    MakeUncountedEnv::StringSet* seenStrings) {
+APCHandle* APCArray::MakeSharedArray(
+    ArrayData* ad, MakeSharedEnv::ArrayMap* seenArrays,
+    MakeSharedEnv::StringSet* seenStrings) {
   assertx(apcExtension::UseUncounted);
-  auto const env = MakeUncountedEnv { seenArrays, seenStrings };
-  auto const data = ::HPHP::MakeUncountedArray(ad, env, true);
+  auto const env = MakeSharedEnv { seenArrays, seenStrings };
+  auto const data = ::HPHP::MakeSharedArray(ad, env, true);
   return APCTypedValue::ForArray(data)->getHandle();
 }
 

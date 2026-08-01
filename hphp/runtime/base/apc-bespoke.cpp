@@ -196,7 +196,7 @@ ArrayData* implAPCBespoke(APCBespokeEnv& env, ArrayData* ain,
 
   // To make a vanilla result, either make `copy` uncounted or use `vin`.
   // If we are targeting a vanilla layout, tag the array as being sampled.
-  auto const mue = MakeUncountedEnv { /*seen=*/nullptr };
+  auto const mue = MakeSharedEnv { /*seen=*/nullptr };
   auto const make_or_reuse_vanilla_result = [&]() -> ArrayData* {
     if (copy) {
       if (copy->empty()) return GetEmptyArray<Array>(copy->isLegacyArray());
@@ -331,7 +331,7 @@ APCBespoke initAPCBespoke(ArrayData* ad) {
     auto env = APCBespokeEnv { APCBespokeMode::Bespoke };
     auto const result = makeAPCBespoke(env, ad, true);
     if (result == nullptr) return { ad, nullptr };
-    DecRefUncountedArray(ad);
+    DecRefSharedArray(ad);
     return { result, nullptr };
   }
 
@@ -341,7 +341,7 @@ APCBespoke initAPCBespoke(ArrayData* ad) {
     auto env = APCBespokeEnv { APCBespokeMode::Vanilla };
     auto const result = makeAPCBespoke(env, ad, false);
     if (result == nullptr) return ad;
-    DecRefUncountedArray(ad);
+    DecRefSharedArray(ad);
     return result;
   }();
   if (!Cfg::Eval::EmitAPCBespokeArrays) return { ad, nullptr };
@@ -390,15 +390,15 @@ ArrayData* readAPCBespoke(const APCTypedValue* tv) {
     }();
     ArrayData* expected = nullptr;
     if (!data->array.compare_exchange_strong(expected, result)) {
-      DecRefUncountedArray(result);
+      DecRefSharedArray(result);
       return expected;
     }
     // Clean up after ourselves: treadmill the vanilla and logging arrays.
     auto const lad = data->logging_result;
     const_cast<APCTypedValue*>(tv)->setArrayData(result);
     Treadmill::enqueue([vad, lad]{
-      DecRefUncountedArray(vad);
-      DecRefUncountedArray(lad);
+      DecRefSharedArray(vad);
+      DecRefSharedArray(lad);
     });
     return result;
   }
@@ -423,10 +423,10 @@ ArrayData* readAPCBespoke(const APCTypedValue* tv) {
 void freeAPCBespoke(APCTypedValue* tv) {
   auto const data = reinterpret_cast<APCBespokeData*>(tv);
   if (auto const ad = data->array.load(std::memory_order_acquire)) {
-    DecRefUncountedArray(ad);
+    DecRefSharedArray(ad);
   } else {
-    DecRefUncountedArray(tv->getArrayData());
-    DecRefUncountedArray(data->logging_result);
+    DecRefSharedArray(tv->getArrayData());
+    DecRefSharedArray(data->logging_result);
   }
   free(data);
 }

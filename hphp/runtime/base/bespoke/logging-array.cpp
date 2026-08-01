@@ -22,7 +22,7 @@
 #include "hphp/runtime/base/bespoke/logging-profile.h"
 #include "hphp/runtime/base/bespoke-runtime.h"
 #include "hphp/runtime/base/memory-manager.h"
-#include "hphp/runtime/base/tv-uncounted.h"
+#include "hphp/runtime/base/tv-shared.h"
 #include "hphp/runtime/base/vanilla-dict-defs.h"
 #include "hphp/runtime/vm/jit/irgen.h"
 
@@ -337,7 +337,7 @@ LoggingArray* LoggingArray::MakeUncounted(
 
   auto const bytes = sizeof(LoggingArray);
   auto const extra = uncountedAllocExtra(ad, hasApcTv);
-  auto const mem = static_cast<char*>(AllocUncounted(bytes + extra));
+  auto const mem = static_cast<char*>(AllocShared(bytes + extra));
   auto const lad = reinterpret_cast<LoggingArray*>(mem + extra);
 
   auto const flags = (ad->isLegacyArray() ? kLegacyArray : 0) |
@@ -398,14 +398,14 @@ ArrayData* LoggingArray::EscalateToVanilla(
 }
 
 void LoggingArray::ConvertToUncounted(
-    LoggingArray* lad, const MakeUncountedEnv& env) {
+    LoggingArray* lad, const MakeSharedEnv& env) {
   logEvent(lad, ArrayOp::ConvertToUncounted);
-  lad->wrapped = MakeUncountedArray(lad->wrapped, env);
+  lad->wrapped = MakeSharedArray(lad->wrapped, env);
 }
 
 void LoggingArray::ReleaseUncounted(LoggingArray* lad) {
   logEvent(lad, ArrayOp::ReleaseUncounted);
-  DecRefUncountedArray(lad->wrapped);
+  DecRefSharedArray(lad->wrapped);
 }
 
 void LoggingArray::Release(LoggingArray* lad) {

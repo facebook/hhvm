@@ -23,7 +23,7 @@
 #include "hphp/runtime/base/bespoke/escalation-logging.h"
 #include "hphp/runtime/base/bespoke/monotype-dict-x64.h"
 #include "hphp/runtime/base/memory-manager.h"
-#include "hphp/runtime/base/tv-uncounted.h"
+#include "hphp/runtime/base/tv-shared.h"
 
 #include "hphp/runtime/vm/jit/type.h"
 
@@ -188,7 +188,7 @@ ArrayData* EmptyMonotypeDict::EscalateToVanilla(
   return legacy ? staticEmptyMarkedDictArray() : staticEmptyDictArray();
 }
 void EmptyMonotypeDict::ConvertToUncounted(
-    Self*, const MakeUncountedEnv&) {
+    Self*, const MakeSharedEnv&) {
   // All EmptyMonotypeDicts are static, so we should never make them uncounted.
   always_assert(false);
 }
@@ -1126,16 +1126,16 @@ ArrayData* MonotypeDict<Key>::EscalateToVanilla(
 
 template <typename Key>
 void MonotypeDict<Key>::ConvertToUncounted(
-    Self* mad, const MakeUncountedEnv& env) {
+    Self* mad, const MakeSharedEnv& env) {
   auto const dt = mad->type();
 
   mad->forEachElm([&](auto /*i*/, auto elm) {
     auto const elm_mut = const_cast<Elm*>(elm);
     if constexpr (std::is_same<Key, StringData*>::value) {
-      elm_mut->key = MakeUncountedString(elm_mut->key, env);
+      elm_mut->key = MakeSharedString(elm_mut->key, env);
     }
     auto dt_mut = dt;
-    ConvertTvToUncounted(tv_lval(&dt_mut, &elm_mut->val), env);
+    ConvertTvToShared(tv_lval(&dt_mut, &elm_mut->val), env);
     assertx(equivDataTypes(dt_mut, dt));
   });
 
@@ -1149,10 +1149,10 @@ void MonotypeDict<Key>::ReleaseUncounted(Self* mad) {
 
   mad->forEachElm([&](auto /*i*/, auto elm) {
     if constexpr (std::is_same<Key, StringData*>::value) {
-      DecRefUncountedString(elm->key);
+      DecRefSharedString(elm->key);
     }
     auto const tv = make_tv_of_type(elm->val, dt);
-    DecRefUncounted(tv);
+    DecRefShared(tv);
   });
 }
 

@@ -24,7 +24,7 @@
 #include "hphp/runtime/base/str-key-table.h"
 #include "hphp/runtime/base/tv-comparisons.h"
 #include "hphp/runtime/base/tv-refcount.h"
-#include "hphp/runtime/base/tv-uncounted.h"
+#include "hphp/runtime/base/tv-shared.h"
 #include "hphp/runtime/base/tv-val.h"
 
 #include "hphp/util/configs/eval.h"
@@ -414,7 +414,7 @@ NEVER_INLINE VanillaDict* VanillaDict::copyMixed() const {
 //////////////////////////////////////////////////////////////////////
 
 ArrayData* VanillaDict::MakeUncounted(
-    ArrayData* array, const MakeUncountedEnv& env, bool hasApcTv) {
+    ArrayData* array, const MakeSharedEnv& env, bool hasApcTv) {
   auto a = as(array);
   assertx(!a->empty());
   assertx(a->isRefCounted());
@@ -447,10 +447,10 @@ ArrayData* VanillaDict::MakeUncounted(
     auto const type = te.data.m_type;
     if (UNLIKELY(isTombstone(type))) continue;
     if (te.hasStrKey()) {
-      te.skey = MakeUncountedString(te.skey, env);
+      te.skey = MakeSharedString(te.skey, env);
       if (!te.skey->isStatic()) ad->mutableKeyTypes()->recordNonStaticStr();
     }
-    ConvertTvToUncounted(&te.data, env);
+    ConvertTvToShared(&te.data, env);
   }
 
   assertx(ad->checkInvariants());
@@ -532,12 +532,12 @@ void VanillaDict::ReleaseUncounted(ArrayData* in) {
 
     for (auto ptr = data; ptr != stop; ++ptr) {
       if (isTombstone(ptr->data.m_type)) continue;
-      if (ptr->hasStrKey()) DecRefUncountedString(ptr->skey);
-      DecRefUncounted(ptr->data);
+      if (ptr->hasStrKey()) DecRefSharedString(ptr->skey);
+      DecRefShared(ptr->data);
     }
   }
   auto const extra = uncountedAllocExtra(ad, ad->hasApcTv());
-  FreeUncounted(reinterpret_cast<char*>(ad) - extra,
+  FreeShared(reinterpret_cast<char*>(ad) - extra,
                 computeAllocBytes(ad->scale()) + extra);
 }
 

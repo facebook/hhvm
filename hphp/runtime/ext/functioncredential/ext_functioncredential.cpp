@@ -24,7 +24,7 @@
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/tv-uncounted.h"
+#include "hphp/runtime/base/tv-shared.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/vm/func.h"

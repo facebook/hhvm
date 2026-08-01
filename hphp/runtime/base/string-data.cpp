@@ -23,7 +23,7 @@
 #include "hphp/util/alloc.h"
 
 #include "hphp/runtime/base/runtime-error.h"
-#include "hphp/runtime/base/tv-uncounted.h"
+#include "hphp/runtime/base/tv-shared.h"
 #include "hphp/runtime/base/zend-functions.h"
 
 #include "hphp/runtime/vm/unit-emitter.h"
@@ -140,7 +140,7 @@ MemBlock StringData::AllocatePersistent(folly::StringPiece sl) {
 
   auto const extra = trueStatic ? sizeof(SymbolPrefix) : 0;
   auto const bytes = sl.size() + kStringOverhead + extra;
-  auto const ptr = trueStatic ? low_malloc(bytes) : AllocUncounted(bytes);
+  auto const ptr = trueStatic ? low_malloc(bytes) : AllocShared(bytes);
   return MemBlock{ptr, bytes};
 }
 
@@ -223,7 +223,7 @@ void StringData::destructStatic() {
 void StringData::ReleaseUncounted(StringData* str) {
   assertx(str->checkSane());
   assertx(!str->sharedCowCheck());
-  FreeUncounted(str, str->size() + kStringOverhead);
+  FreeShared(str, str->size() + kStringOverhead);
 }
 
 //////////////////////////////////////////////////////////////////////

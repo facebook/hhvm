@@ -124,7 +124,7 @@ public:
 
   // Bespoke arrays can be converted to uncounted values for APC.
   static ArrayData* MakeUncounted(
-      ArrayData* array, const MakeUncountedEnv& env, bool hasApcTv);
+      ArrayData* array, const MakeSharedEnv& env, bool hasApcTv);
   static void ReleaseUncounted(ArrayData*);
 
 private:

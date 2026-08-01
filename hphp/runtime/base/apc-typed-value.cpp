@@ -16,7 +16,7 @@
 #include "hphp/runtime/base/apc-typed-value.h"
 
 #include "hphp/runtime/base/apc-bespoke.h"
-#include "hphp/runtime/base/tv-uncounted.h"
+#include "hphp/runtime/base/tv-shared.h"
 #include "hphp/runtime/ext/apc/ext_apc.h"
 
 namespace HPHP {
@@ -43,7 +43,7 @@ void APCTypedValue::FreeHazardPointers() {
 
   if (!UseStringHazardPointers()) return;
   for (auto const hp : *s_string_hazard_pointers) {
-    DecRefUncountedString(hp.raw);
+    DecRefSharedString(hp.raw);
   }
   s_string_hazard_pointers->clear();
 }
@@ -177,7 +177,7 @@ void APCTypedValue::deleteUncounted() {
   switch (m_handle.kind()) {
     case APCKind::UncountedArray: {
       auto const ad = m_data.arr.load(std::memory_order_acquire);
-      DecRefUncountedArray(ad);
+      DecRefSharedArray(ad);
       if (ad != static_cast<void*>(this + 1)) {
         delete this;
       }
@@ -189,7 +189,7 @@ void APCTypedValue::deleteUncounted() {
       return;
 
     case APCKind::UncountedString:
-      DecRefUncountedString(m_data.str);
+      DecRefSharedString(m_data.str);
       delete this;
       return;
 

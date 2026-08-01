@@ -26,10 +26,10 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////////////
 
 /*
- * Global parameters for ConvertTvToUncounted and friends. Only one for now.
- * If `seen` is provided, we'll use it to de-dupe new uncounted arrays.
+ * Global parameters for ConvertTvToShared and friends. Only one for now.
+ * If `seen` is provided, we'll use it to de-dupe new shared arrays.
  */
-struct MakeUncountedEnv {
+struct MakeSharedEnv {
   using ArrayMap = req::fast_map<ArrayData*, ArrayData*, pointer_hash<ArrayData>>;
   using StringSet = req::fast_set<StringData*, string_data_hash, string_data_same>;
 
@@ -40,37 +40,37 @@ struct MakeUncountedEnv {
 /*
  * Wrappers around uncounted_malloc, etc. that update APC stats.
  */
-void* AllocUncounted(size_t bytes);
-void FreeUncounted(void* ptr);
-void FreeUncounted(void* ptr, size_t bytes);
+void* AllocShared(size_t bytes);
+void FreeShared(void* ptr);
+void FreeShared(void* ptr, size_t bytes);
 
 /*
- * Converts TypedValue `tv` to an uncounted form, so that it can be shared
- * across requests. The result is either a primitive, a static value, or an
- * uncounted value. Does not dec-ref the input.
+ * Converts TypedValue `tv` to a shared form, so that it can be shared
+ * across requests. The result is either a primitive, a static value, or
+ * a shared value. Does not dec-ref the input.
  *
- * For refcounted and uncounted inputs, this operation produces a net increase
- * of one "uncounted refcount". For refcounted inputs, it creates a new value
- * with uncounted refcount 1, and for uncounted, it does an sharedIncRef().
+ * For refcounted and shared inputs, this operation produces a net increase
+ * of one "shared refcount". For refcounted inputs, it creates a new value
+ * with shared refcount 1, and for shared, it does an sharedIncRef().
  * (Primitives and statics are not refcounted in any way.)
  *
  * "hasApcTv" is a request to leave space for an APCTypedValue just before the
- * new uncounted array. We may not honor this request. For instance, if we can
+ * new shared array. We may not honor this request. For instance, if we can
  * reuse an existing persistent array, or use a static empty one, we'll do so.
  */
-void ConvertTvToUncounted(tv_lval in, const MakeUncountedEnv& env);
-ArrayData* MakeUncountedArray(ArrayData* in, const MakeUncountedEnv& env,
+void ConvertTvToShared(tv_lval in, const MakeSharedEnv& env);
+ArrayData* MakeSharedArray(ArrayData* in, const MakeSharedEnv& env,
                               bool hasApcTv = false);
-StringData* MakeUncountedString(StringData* in, const MakeUncountedEnv& env);
+StringData* MakeSharedString(StringData* in, const MakeSharedEnv& env);
 
 /*
- * The analogue of decRefAndRelease for an uncounted value. These helpers all
- * handle both static and uncounted values correctly. It's safe to call them
- * on any key or value of an uncounted array.
+ * The analogue of decRefAndRelease for a shared value. These helpers all
+ * handle both static and shared values correctly. It's safe to call them
+ * on any key or value of a shared array.
  */
-void DecRefUncounted(TypedValue tv);
-void DecRefUncountedArray(ArrayData* ad);
-void DecRefUncountedString(StringData* sd);
+void DecRefShared(TypedValue tv);
+void DecRefSharedArray(ArrayData* ad);
+void DecRefSharedString(StringData* sd);
 
 //////////////////////////////////////////////////////////////////////////////
 

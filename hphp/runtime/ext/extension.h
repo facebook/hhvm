@@ -77,7 +77,7 @@ public:
                      const char oncall[]);
   virtual ~Extension() {
     if (m_warmupData != nullptr) {
-      DecRefUncountedArray(m_warmupData);
+      DecRefSharedArray(m_warmupData);
       m_warmupData = nullptr;
     }
   }

@@ -21,7 +21,7 @@
 #include "hphp/runtime/base/bespoke/escalation-logging.h"
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/bespoke/struct-data-layout.h"
-#include "hphp/runtime/base/tv-uncounted.h"
+#include "hphp/runtime/base/tv-shared.h"
 #include "hphp/runtime/base/vanilla-dict-defs.h"
 #include "hphp/runtime/base/vanilla-dict.h"
 
@@ -561,13 +561,13 @@ ArrayData* StructDict::escalateWithCapacity(size_t capacity,
 }
 
 void StructDict::ConvertToUncounted(
-    StructDict* sad, const MakeUncountedEnv& env) {
+    StructDict* sad, const MakeSharedEnv& env) {
   auto const size = sad->size();
   auto const fn = [&]<typename PosType>() {
     for (auto pos = 0; pos < size; pos++) {
       auto const slot = sad->getSlotInPos<PosType>(pos);
       auto const lval = sad->lvalUnchecked(slot);
-      ConvertTvToUncounted(lval, env);
+      ConvertTvToShared(lval, env);
     }
   };
   sad->isBigStruct() ?
@@ -579,7 +579,7 @@ void StructDict::ReleaseUncounted(StructDict* sad) {
   auto const fn = [&]<typename PosType>() {
     for (auto pos = 0; pos < size; pos++) {
       auto const slot = sad->getSlotInPos<PosType>(pos);
-      DecRefUncounted(sad->rvalUnchecked(slot).tv());
+      DecRefShared(sad->rvalUnchecked(slot).tv());
     }
   };
   sad->isBigStruct() ?

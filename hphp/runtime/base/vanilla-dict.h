@@ -252,7 +252,7 @@ public:
    * allocated in front of the returned pointer.
    */
   static ArrayData* MakeUncounted(
-      ArrayData* array, const MakeUncountedEnv& env, bool hasApcTv);
+      ArrayData* array, const MakeSharedEnv& env, bool hasApcTv);
 
   static ArrayData* MakeDictFromAPC(const APCArray* apc, bool pure, bool isLegacy = false);
 

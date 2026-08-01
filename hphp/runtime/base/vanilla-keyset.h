@@ -185,7 +185,7 @@ public:
    * allocated in front of the returned pointer.
    */
   static ArrayData* MakeUncounted(
-      ArrayData* array, const MakeUncountedEnv& env, bool hasApcTv);
+      ArrayData* array, const MakeSharedEnv& env, bool hasApcTv);
 
   static void Release(ArrayData*);
   static void ReleaseUncounted(ArrayData*);

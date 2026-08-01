@@ -26,7 +26,7 @@
 #include "hphp/runtime/base/tv-comparisons.h"
 #include "hphp/runtime/base/tv-mutate.h"
 #include "hphp/runtime/base/tv-refcount.h"
-#include "hphp/runtime/base/tv-uncounted.h"
+#include "hphp/runtime/base/tv-shared.h"
 #include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/base/tv-variant.h"
 #include "hphp/runtime/base/vanilla-dict.h"
@@ -448,12 +448,12 @@ void VanillaVec::ReleaseUncounted(ArrayData* ad) {
   assertx(!ad->sharedCowCheck());
 
   for (uint32_t i = 0; i < ad->m_size; ++i) {
-    DecRefUncounted(*LvalUncheckedInt(ad, i));
+    DecRefShared(*LvalUncheckedInt(ad, i));
   }
 
   auto const extra = uncountedAllocExtra(ad, ad->hasApcTv());
   auto const bytes = VanillaVec::capacityToSizeBytes(ad->m_size);
-  FreeUncounted(reinterpret_cast<char*>(ad) - extra, extra + bytes);
+  FreeShared(reinterpret_cast<char*>(ad) - extra, extra + bytes);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -730,7 +730,7 @@ bool VanillaVec::Uasort(ArrayData* ad, const Variant&) {
 }
 
 ArrayData* VanillaVec::MakeUncounted(
-    ArrayData* array, const MakeUncountedEnv& env, bool hasApcTv) {
+    ArrayData* array, const MakeSharedEnv& env, bool hasApcTv) {
   assertx(!array->empty());
   assertx(array->isRefCounted());
   assertx(checkInvariants(array));
@@ -741,7 +741,7 @@ ArrayData* VanillaVec::MakeUncounted(
   auto const sizeIndex = MemoryManager::size2Index(bytes);
   assertx(sizeIndex <= VanillaVec::MaxSizeIndex);
 
-  auto const mem = static_cast<char*>(AllocUncounted(bytes + extra));
+  auto const mem = static_cast<char*>(AllocShared(bytes + extra));
   auto ad = reinterpret_cast<ArrayData*>(mem + extra);
   ad->initHeader_16(
     array->m_kind,
@@ -757,7 +757,7 @@ ArrayData* VanillaVec::MakeUncounted(
   // array and convert refcounted objects to their uncounted types.
   memcpy16_inline(ad + 1, array + 1, bytes - sizeof(ArrayData));
   for (uint32_t i = 0; i < size; i++) {
-    ConvertTvToUncounted(LvalUncheckedInt(ad, i), env);
+    ConvertTvToShared(LvalUncheckedInt(ad, i), env);
   }
 
   assertx(ad->kind() == array->kind());

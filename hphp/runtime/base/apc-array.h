@@ -41,9 +41,9 @@ struct APCArray {
                                           APCHandleLevel level,
                                           bool unserializeObj);
 
-  static APCHandle* MakeUncountedArray(
-      ArrayData* ad, MakeUncountedEnv::ArrayMap* seen,
-      MakeUncountedEnv::StringSet* seenStrings);
+  static APCHandle* MakeSharedArray(
+      ArrayData* ad, MakeSharedEnv::ArrayMap* seen,
+      MakeSharedEnv::StringSet* seenStrings);
 
   static APCHandle::Pair MakeCopiedEmptyVec();
   static void Delete(APCHandle* handle);

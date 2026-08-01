@@ -21,7 +21,7 @@
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/tv-refcount.h"
-#include "hphp/runtime/base/tv-uncounted.h"
+#include "hphp/runtime/base/tv-shared.h"
 #include "hphp/runtime/base/vanilla-dict-defs.h"
 
 #include "hphp/util/alloc.h"
@@ -141,7 +141,7 @@ ArrayData* VanillaKeyset::MakeSet(uint32_t size, const TypedValue* values) {
 }
 
 ArrayData* VanillaKeyset::MakeUncounted(
-    ArrayData* array, const MakeUncountedEnv& env, bool hasApcTv) {
+    ArrayData* array, const MakeSharedEnv& env, bool hasApcTv) {
   auto src = asSet(array);
   assertx(!src->empty());
   assertx(src->isRefCounted());
@@ -170,7 +170,7 @@ ArrayData* VanillaKeyset::MakeUncounted(
     if (elm.hasStrKey()) {
       elm.tv.m_type = KindOfPersistentString;
       auto& skey = elm.tv.m_data.pstr;
-      skey = MakeUncountedString(skey, env);
+      skey = MakeSharedString(skey, env);
     }
   }
 
@@ -283,12 +283,12 @@ void VanillaKeyset::ReleaseUncounted(ArrayData* in) {
       auto& elm = elms[i];
       if (UNLIKELY(elm.isTombstone())) continue;
       assertx(!elm.isEmpty());
-      if (elm.hasStrKey()) DecRefUncountedString(elm.strKey());
+      if (elm.hasStrKey()) DecRefSharedString(elm.strKey());
     }
   }
 
   auto const extra = uncountedAllocExtra(ad, ad->hasApcTv());
-  FreeUncounted(reinterpret_cast<char*>(ad) - extra,
+  FreeShared(reinterpret_cast<char*>(ad) - extra,
                 computeAllocBytes(ad->scale()) + extra);
 }
 

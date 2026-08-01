@@ -76,7 +76,7 @@ BespokeArray* maybeStructify(ArrayData* ad, const LoggingProfile* profile);
 #define BESPOKE_LAYOUT_FUNCTIONS(T) \
   X(void, Scan, const T* ad, type_scan::Scanner& scanner) \
   X(ArrayData*, EscalateToVanilla, const T*, const char* reason) \
-  X(void, ConvertToUncounted, T*, const MakeUncountedEnv& env) \
+  X(void, ConvertToUncounted, T*, const MakeSharedEnv& env) \
   X(void, ReleaseUncounted, T*) \
   X(void, Release, T*) \
   X(bool, IsVectorData, const T*) \
@@ -155,7 +155,7 @@ struct LayoutFunctionDispatcher {
   static ArrayData* EscalateToVanilla(const ArrayData* ad, const char* reason) {
     return Array::EscalateToVanilla(Cast(ad, __func__), reason);
   }
-  static void ConvertToUncounted(ArrayData* ad, const MakeUncountedEnv& env) {
+  static void ConvertToUncounted(ArrayData* ad, const MakeSharedEnv& env) {
     return Array::ConvertToUncounted(Cast(ad, __func__), env);
   }
   static void ReleaseUncounted(ArrayData* ad) {

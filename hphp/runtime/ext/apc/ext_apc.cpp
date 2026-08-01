@@ -38,7 +38,7 @@
 #include "hphp/runtime/base/config.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/program-functions.h"
-#include "hphp/runtime/base/tv-uncounted.h"
+#include "hphp/runtime/base/tv-shared.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/server/cli-server.h"
 #include "hphp/runtime/server/upload.h"

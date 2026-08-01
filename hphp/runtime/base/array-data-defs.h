@@ -178,7 +178,7 @@ inline void ArrayData::onSetEvalScalar() {
 }
 
 inline ArrayData* ArrayData::makeUncounted(
-    const MakeUncountedEnv& env, bool hasApcTv) {
+    const MakeSharedEnv& env, bool hasApcTv) {
   return g_array_funcs.makeUncounted[kind()](this, env, hasApcTv);
 }
 

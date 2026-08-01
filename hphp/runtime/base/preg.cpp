@@ -29,7 +29,7 @@
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/container-functions.h"
-#include "hphp/runtime/base/tv-uncounted.h"
+#include "hphp/runtime/base/tv-shared.h"
 #include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/vm/debug/debug.h"
 
@@ -397,7 +397,7 @@ void PCRECache::DestroyStatic(StaticCache* cache) {
                              string_data_hash, ahm_string_data_same>>::value,
       "StaticCache must be an AtomicHashArray or this destructor is wrong.");
   for (auto& it : *cache) {
-    DecRefUncountedString(it.first);
+    DecRefSharedString(it.first);
     delete it.second;
   }
   StaticCache::destroy(cache);
@@ -508,7 +508,7 @@ void PCRECache::insert(
           accessor = ent;
         } else {
           // Not inserted, caller needs to own the pointer
-          DecRefUncountedString(key);
+          DecRefSharedString(key);
           accessor = EntryPtr(ent);
         }
       }

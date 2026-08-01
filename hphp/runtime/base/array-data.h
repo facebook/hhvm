@@ -39,7 +39,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct Array;
-struct MakeUncountedEnv;
+struct MakeSharedEnv;
 struct OptString;
 struct StringData;
 struct Unit;
@@ -185,7 +185,7 @@ public:
    *
    * The counted variant is called when the refcount goes to zero (e.g. from
    * the JIT or from a helper like decRefArr). The uncounted variant is called
-   * when the refcount goes to "uncounted zero", from DecRefUncounted.
+   * when the refcount goes to "uncounted zero", from DecRefShared.
    */
   void release() DEBUG_NOEXCEPT;
   void releaseShallow() DEBUG_NOEXCEPT;
@@ -528,7 +528,7 @@ public:
    * Return a new uncounted version of the given array. The array must be a
    * refcounted array - otherwise, we should call persistentIncRef() instead.
    */
-  ArrayData* makeUncounted(const MakeUncountedEnv& env, bool hasApcTv);
+  ArrayData* makeUncounted(const MakeSharedEnv& env, bool hasApcTv);
 
   ArrayData* copy() const;
 
@@ -803,7 +803,7 @@ struct ArrayFunctions {
   ArrayData* (*popMove[NK])(ArrayData*, Variant& value);
   void (*onSetEvalScalar[NK])(ArrayData*);
   ArrayData* (*makeUncounted[NK])(
-    ArrayData*, const MakeUncountedEnv& env, bool hasApcTv);
+    ArrayData*, const MakeSharedEnv& env, bool hasApcTv);
   ArrayData* (*copy[NK])(const ArrayData*);
 };
 

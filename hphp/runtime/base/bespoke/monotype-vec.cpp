@@ -24,7 +24,7 @@
 #include "hphp/runtime/base/bespoke/escalation-logging.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/tv-refcount.h"
-#include "hphp/runtime/base/tv-uncounted.h"
+#include "hphp/runtime/base/tv-shared.h"
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/vanilla-dict-defs.h"
 
@@ -165,7 +165,7 @@ ArrayData* EmptyMonotypeVec::EscalateToVanilla(const EmptyMonotypeVec* ead,
 }
 
 void EmptyMonotypeVec::ConvertToUncounted(
-    EmptyMonotypeVec*, const MakeUncountedEnv&) {
+    EmptyMonotypeVec*, const MakeSharedEnv&) {
   // All EmptyMonotypeVecs are static, so we should never make them uncounted.
   always_assert(false);
 }
@@ -508,12 +508,12 @@ ArrayData* MonotypeVec::EscalateToVanilla(const MonotypeVec* mad,
 }
 
 void MonotypeVec::ConvertToUncounted(
-    MonotypeVec* madIn, const MakeUncountedEnv& env) {
+    MonotypeVec* madIn, const MakeSharedEnv& env) {
   auto const oldType = madIn->type();
   for (uint32_t i = 0; i < madIn->size(); i++) {
     DataType dt = oldType;
     auto const lval = tv_lval(&dt, &madIn->rawData()[i]);
-    ConvertTvToUncounted(lval, env);
+    ConvertTvToShared(lval, env);
     assertx(equivDataTypes(dt, madIn->type()));
   }
   auto const newType = hasPersistentFlavor(oldType)
@@ -525,7 +525,7 @@ void MonotypeVec::ConvertToUncounted(
 void MonotypeVec::ReleaseUncounted(MonotypeVec* mad) {
   for (uint32_t i = 0; i < mad->size(); i++) {
     auto const tv = mad->typedValueUnchecked(i);
-    DecRefUncounted(tv);
+    DecRefShared(tv);
   }
 }
 

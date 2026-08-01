@@ -17,7 +17,7 @@
 #include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/bespoke/layout.h"
 #include "hphp/runtime/base/sort-flags.h"
-#include "hphp/runtime/base/tv-uncounted.h"
+#include "hphp/runtime/base/tv-shared.h"
 #include "hphp/runtime/base/vanilla-dict-defs.h"
 
 namespace HPHP {
@@ -81,14 +81,14 @@ bool BespokeArray::checkInvariants() const {
 //////////////////////////////////////////////////////////////////////////////
 
 ArrayData* BespokeArray::MakeUncounted(
-    ArrayData* ad, const MakeUncountedEnv& env, bool hasApcTv) {
+    ArrayData* ad, const MakeSharedEnv& env, bool hasApcTv) {
   assertx(ad->isRefCounted());
   auto const extra = uncountedAllocExtra(ad, hasApcTv);
   auto const bytes = ad->heapSize();
   assertx(extra % 16 == 0);
 
-  // "Help" out by copying the array's raw bytes to an uncounted allocation.
-  auto const mem = static_cast<char*>(AllocUncounted(bytes + extra));
+  // "Help" out by copying the array's raw bytes to a shared allocation.
+  auto const mem = static_cast<char*>(AllocShared(bytes + extra));
   auto const result = reinterpret_cast<ArrayData*>(mem + extra);
   memcpy8(reinterpret_cast<char*>(result),
           reinterpret_cast<char*>(ad), bytes);
@@ -109,7 +109,7 @@ void BespokeArray::ReleaseUncounted(ArrayData* ad) {
 
   auto const bytes = ad->heapSize();
   auto const extra = uncountedAllocExtra(ad, ad->hasApcTv());
-  FreeUncounted(reinterpret_cast<char*>(ad) - extra, bytes + extra);
+  FreeShared(reinterpret_cast<char*>(ad) - extra, bytes + extra);
 }
 
 //////////////////////////////////////////////////////////////////////////////

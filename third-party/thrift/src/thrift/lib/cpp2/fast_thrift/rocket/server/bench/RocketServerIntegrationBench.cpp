@@ -48,6 +48,7 @@
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/FrameFragmentationHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/FrameLengthEncoderHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/bench/BenchContext.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/common/RocketStreamContext.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/Messages.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/adapter/RocketServerAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerMessageMarshalHandler.h>
@@ -175,33 +176,36 @@ struct BenchmarkFixture {
         },
         [](folly::exception_wrapper&& /*e*/) noexcept {});
 
-    pipeline = PipelineBuilder<
-                   apache::thrift::fast_thrift::transport::TransportHandler,
-                   AppAdapter,
-                   TestAllocator>()
-                   .setEventBase(&evb)
-                   .setHead(transportHandler.get())
-                   .setTail(appAdapter.get())
-                   .setAllocator(&allocator)
-                   .addNextInbound<FrameLengthParserHandler>(
-                       frame_length_parser_handler_tag)
-                   .addNextOutbound<FrameLengthEncoderHandler>(
-                       frame_length_encoder_handler_tag)
-                   .addNextDuplex<FrameCodecHandler>(frame_codec_handler_tag)
-                   .addNextInbound<FrameDefragmentationHandler>(
-                       frame_defragmentation_handler_tag)
-                   .addNextOutbound<FrameFragmentationHandler>(
-                       frame_fragmentation_handler_tag,
-                       frame::write::FragmentationHandlerConfig{})
-                   .addNextDuplex<RocketServerMessageMarshalHandler>(
-                       rocket_server_message_marshal_handler_tag)
-                   .addNextDuplex<RocketServerSetupFrameHandler>(
-                       rocket_server_setup_handler_tag)
-                   .addNextDuplex<RocketServerStreamStateHandler>(
-                       rocket_server_stream_state_handler_tag)
-                   .addNextDuplex<RocketServerRequestResponseHandler>(
-                       rocket_server_request_response_handler_tag)
-                   .build();
+    pipeline =
+        PipelineBuilder<
+            apache::thrift::fast_thrift::transport::TransportHandler,
+            AppAdapter,
+            TestAllocator>()
+            .setEventBase(&evb)
+            .setHead(transportHandler.get())
+            .setTail(appAdapter.get())
+            .setAllocator(&allocator)
+            .addState<
+                apache::thrift::fast_thrift::rocket::RocketStreamContexts>()
+            .addNextInbound<FrameLengthParserHandler>(
+                frame_length_parser_handler_tag)
+            .addNextOutbound<FrameLengthEncoderHandler>(
+                frame_length_encoder_handler_tag)
+            .addNextDuplex<FrameCodecHandler>(frame_codec_handler_tag)
+            .addNextInbound<FrameDefragmentationHandler>(
+                frame_defragmentation_handler_tag)
+            .addNextOutbound<FrameFragmentationHandler>(
+                frame_fragmentation_handler_tag,
+                frame::write::FragmentationHandlerConfig{})
+            .addNextDuplex<RocketServerMessageMarshalHandler>(
+                rocket_server_message_marshal_handler_tag)
+            .addNextDuplex<RocketServerSetupFrameHandler>(
+                rocket_server_setup_handler_tag)
+            .addNextDuplex<RocketServerStreamStateHandler>(
+                rocket_server_stream_state_handler_tag)
+            .addNextDuplex<RocketServerRequestResponseHandler>(
+                rocket_server_request_response_handler_tag)
+            .build();
 
     appAdapter->setPipeline(pipeline.get());
     transportHandler->setPipeline(pipeline.get());
@@ -364,6 +368,8 @@ BENCHMARK(Rocket_Server_SetupFrame, iters) {
             .setHead(fixture.transportHandler.get())
             .setTail(fixture.appAdapter.get())
             .setAllocator(&fixture.allocator)
+            .addState<
+                apache::thrift::fast_thrift::rocket::RocketStreamContexts>()
             .addNextInbound<FrameLengthParserHandler>(
                 frame_length_parser_handler_tag)
             .addNextOutbound<FrameLengthEncoderHandler>(

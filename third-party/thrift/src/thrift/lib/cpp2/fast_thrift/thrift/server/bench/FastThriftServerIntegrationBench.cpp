@@ -63,6 +63,7 @@
 #include <thrift/lib/cpp2/fast_thrift/frame/write/FrameWriter.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/FrameFragmentationHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/FrameLengthEncoderHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/common/RocketStreamContext.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/Messages.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/adapter/RocketServerAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/common/RocketServerConnection.h>
@@ -280,6 +281,7 @@ std::unique_ptr<rocket::server::RocketServerConnection> buildRocketConnection(
           .setHead(rocketConn->transportHandler.get())
           .setTail(rocketConn->appAdapter.get())
           .setAllocator(&rocketConn->allocator)
+          .addState<apache::thrift::fast_thrift::rocket::RocketStreamContexts>()
           .addNextInbound<FrameLengthParserHandler>(
               frame_length_parser_handler_tag)
           .addNextOutbound<FrameLengthEncoderHandler>(

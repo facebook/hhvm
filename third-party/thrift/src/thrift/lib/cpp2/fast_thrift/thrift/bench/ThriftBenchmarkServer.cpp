@@ -48,6 +48,7 @@
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/BatchingFrameHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/FrameFragmentationHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/FrameLengthEncoderHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/common/RocketStreamContext.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerMessageMarshalHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerRequestResponseHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerSetupFrameHandler.h>
@@ -192,6 +193,8 @@ class FastThriftBenchmarkServer {
             .setHead(transportHandler.get())
             .setTail(serverChannel.get())
             .setAllocator(&allocator_)
+            .addState<
+                apache::thrift::fast_thrift::rocket::RocketStreamContexts>()
             .addNextOutbound<frame::write::handler::BatchingFrameHandler>(
                 batching_frame_handler_tag)
             .addNextInbound<frame::read::handler::FrameLengthParserHandler>(

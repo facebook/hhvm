@@ -58,6 +58,7 @@
 #include <thrift/lib/cpp2/fast_thrift/frame/write/FrameWriter.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/FrameFragmentationHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/FrameLengthEncoderHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/common/RocketStreamContext.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/Messages.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/adapter/RocketServerAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerMessageMarshalHandler.h>
@@ -141,35 +142,38 @@ class RocketServerIntegrationTest : public ::testing::Test {
           exception_ = std::move(e);
         });
 
-    pipeline_ = PipelineBuilder<
-                    apache::thrift::fast_thrift::transport::TransportHandler,
-                    rocket::server::RocketServerAppAdapter,
-                    TestAllocator>()
-                    .setEventBase(&evb_)
-                    .setHead(transportHandler_.get())
-                    .setTail(appAdapter_.get())
-                    .setAllocator(&allocator_)
-                    .addNextInbound<apache::thrift::fast_thrift::frame::read::
-                                        handler::FrameLengthParserHandler>(
-                        frame_length_parser_handler_tag)
-                    .addNextOutbound<apache::thrift::fast_thrift::frame::write::
-                                         handler::FrameLengthEncoderHandler>(
-                        frame_length_encoder_handler_tag)
-                    .addNextDuplex<FrameCodecHandler>(frame_codec_handler_tag)
-                    .addNextInbound<FrameDefragmentationHandler>(
-                        frame_defragmentation_handler_tag)
-                    .addNextOutbound<FrameFragmentationHandler>(
-                        frame_fragmentation_handler_tag,
-                        frame::write::FragmentationHandlerConfig{})
-                    .addNextDuplex<RocketServerMessageMarshalHandler>(
-                        rocket_server_message_marshal_handler_tag)
-                    .addNextDuplex<RocketServerSetupFrameHandler>(
-                        rocket_server_setup_handler_tag)
-                    .addNextDuplex<RocketServerStreamStateHandler>(
-                        rocket_server_stream_state_handler_tag)
-                    .addNextDuplex<RocketServerRequestResponseHandler>(
-                        rocket_server_request_response_handler_tag)
-                    .build();
+    pipeline_ =
+        PipelineBuilder<
+            apache::thrift::fast_thrift::transport::TransportHandler,
+            rocket::server::RocketServerAppAdapter,
+            TestAllocator>()
+            .setEventBase(&evb_)
+            .setHead(transportHandler_.get())
+            .setTail(appAdapter_.get())
+            .setAllocator(&allocator_)
+            .addState<
+                apache::thrift::fast_thrift::rocket::RocketStreamContexts>()
+            .addNextInbound<apache::thrift::fast_thrift::frame::read::handler::
+                                FrameLengthParserHandler>(
+                frame_length_parser_handler_tag)
+            .addNextOutbound<apache::thrift::fast_thrift::frame::write::
+                                 handler::FrameLengthEncoderHandler>(
+                frame_length_encoder_handler_tag)
+            .addNextDuplex<FrameCodecHandler>(frame_codec_handler_tag)
+            .addNextInbound<FrameDefragmentationHandler>(
+                frame_defragmentation_handler_tag)
+            .addNextOutbound<FrameFragmentationHandler>(
+                frame_fragmentation_handler_tag,
+                frame::write::FragmentationHandlerConfig{})
+            .addNextDuplex<RocketServerMessageMarshalHandler>(
+                rocket_server_message_marshal_handler_tag)
+            .addNextDuplex<RocketServerSetupFrameHandler>(
+                rocket_server_setup_handler_tag)
+            .addNextDuplex<RocketServerStreamStateHandler>(
+                rocket_server_stream_state_handler_tag)
+            .addNextDuplex<RocketServerRequestResponseHandler>(
+                rocket_server_request_response_handler_tag)
+            .build();
 
     appAdapter_->setPipeline(pipeline_.get());
     transportHandler_->setPipeline(pipeline_.get());

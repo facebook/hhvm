@@ -53,6 +53,7 @@
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientRequestResponseHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientSetupFrameHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientStreamStateHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/common/RocketStreamContext.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/Messages.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/adapter/RocketServerAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerMessageMarshalHandler.h>
@@ -246,6 +247,8 @@ class RocketE2ETest : public ::testing::Test {
               .setHead(serverTransport_.get())
               .setTail(serverAppAdapter_.get())
               .setAllocator(&serverAllocator_)
+              .addState<
+                  apache::thrift::fast_thrift::rocket::RocketStreamContexts>()
               .addNextOutbound<frame::write::handler::BatchingFrameHandler>(
                   s_batching_tag)
               .addNextInbound<frame::read::handler::FrameLengthParserHandler>(

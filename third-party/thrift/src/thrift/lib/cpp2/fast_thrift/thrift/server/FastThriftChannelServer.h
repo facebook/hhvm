@@ -363,6 +363,7 @@ using FastThriftChannelServer = FastThriftServerT<NoStats>;
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/BatchingFrameHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/FrameFragmentationHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/FrameLengthEncoderHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/common/RocketStreamContext.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/common/handler/RocketMetricsHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerKeepAliveHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerMessageMarshalHandler.h>
@@ -560,6 +561,7 @@ FastThriftServerT<Stats>::buildRocketPipeline(
         .setHead(transportHandler)
         .setTail(appAdapter)
         .setAllocator(&rocketAllocator_)
+        .addState<rocket::RocketStreamContexts>()
         .addNextInbound<frame::read::handler::FrameLengthParserHandler>(
             frame_length_parser_handler_tag)
         .addNextOutbound<frame::write::handler::BatchingFrameHandler>(
@@ -597,6 +599,7 @@ FastThriftServerT<Stats>::buildRocketPipeline(
         .setHead(transportHandler)
         .setTail(appAdapter)
         .setAllocator(&rocketAllocator_)
+        .addState<rocket::RocketStreamContexts>()
         .addNextInbound<frame::read::handler::FrameLengthParserHandler>(
             frame_length_parser_handler_tag)
         .addNextOutbound<frame::write::handler::BatchingFrameHandler>(

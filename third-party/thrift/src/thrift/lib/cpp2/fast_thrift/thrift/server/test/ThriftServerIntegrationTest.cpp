@@ -58,6 +58,7 @@
 #include <thrift/lib/cpp2/fast_thrift/frame/write/FrameWriter.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/FrameFragmentationHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/FrameLengthEncoderHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/common/RocketStreamContext.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/Messages.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/adapter/RocketServerAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerMessageMarshalHandler.h>
@@ -302,6 +303,8 @@ class ThriftServerIntegrationTest : public ::testing::Test {
             .setHead(rocketConn->transportHandler.get())
             .setTail(rocketConn->appAdapter.get())
             .setAllocator(&rocketAllocator_)
+            .addState<
+                apache::thrift::fast_thrift::rocket::RocketStreamContexts>()
             .addNextInbound<apache::thrift::fast_thrift::frame::read::handler::
                                 FrameLengthParserHandler>(
                 frame_length_parser_handler_tag)
@@ -885,6 +888,8 @@ class ThriftServerAppAdapterIntegrationTest : public ::testing::Test {
             .setHead(transportHandler_.get())
             .setTail(adapter_.get())
             .setAllocator(&allocator_)
+            .addState<
+                apache::thrift::fast_thrift::rocket::RocketStreamContexts>()
             .addNextInbound<apache::thrift::fast_thrift::frame::read::handler::
                                 FrameLengthParserHandler>(
                 frame_length_parser_handler_tag)
@@ -1261,6 +1266,8 @@ class ThriftRequestContextIntegrationTest
             .setHead(transportHandler_.get())
             .setTail(adapter_.get())
             .setAllocator(&allocator_)
+            .addState<
+                apache::thrift::fast_thrift::rocket::RocketStreamContexts>()
             .addNextInbound<apache::thrift::fast_thrift::frame::read::handler::
                                 FrameLengthParserHandler>(
                 frame_length_parser_handler_tag)

@@ -25,6 +25,7 @@
 #include <thrift/lib/cpp2/fast_thrift/frame/FrameType.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/read/FrameParser.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/read/FrameViews.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/common/RocketStreamContext.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/Messages.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerStreamStateHandler.h>
 
@@ -55,10 +56,26 @@ apache::thrift::fast_thrift::channel_pipeline::BytesPtr copyBuffer(
  * MockStreamContext for testing RocketServerStreamStateHandler.
  *
  * Captures frames and messages fired via fireRead() and fireWrite(),
- * and exceptions via fireException().
+ * and exceptions via fireException(). Owns the pipeline-level
+ * RocketStreamContexts state that the handler reaches through state<T>(), so
+ * tests observe per-stream state directly on the context (hasActiveStream /
+ * activeStreamCount) rather than on the handler.
  */
 class MockStreamContext {
  public:
+  // Stands in for the pipeline-level state accessor. The handler only ever
+  // requests RocketStreamContexts.
+  template <typename T>
+  T& state() noexcept {
+    return contexts_;
+  }
+
+  bool hasActiveStream(uint32_t streamId) const {
+    return contexts_.streams.contains(streamId);
+  }
+
+  size_t activeStreamCount() const { return contexts_.streams.size(); }
+
   Result fireRead(TypeErasedBox&& msg) noexcept {
     if (returnError_) {
       return Result::Error;
@@ -115,6 +132,7 @@ class MockStreamContext {
   }
 
  private:
+  RocketStreamContexts contexts_;
   std::vector<TypeErasedBox> readMessages_;
   std::vector<TypeErasedBox> writeMessages_;
   folly::exception_wrapper exception_;
@@ -213,8 +231,8 @@ TEST_F(
       view.type(),
       apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE);
 
-  EXPECT_TRUE(handler_.hasActiveStream(1));
-  EXPECT_EQ(handler_.activeStreamCount(), 1);
+  EXPECT_TRUE(ctx_.hasActiveStream(1));
+  EXPECT_EQ(ctx_.activeStreamCount(), 1);
 }
 
 TEST_F(ServerStreamStateHandlerTest, MultipleRequestsCreateSeparateStreams) {
@@ -226,10 +244,10 @@ TEST_F(ServerStreamStateHandlerTest, MultipleRequestsCreateSeparateStreams) {
       apache::thrift::fast_thrift::frame::FrameType::REQUEST_STREAM, 5));
 
   EXPECT_EQ(ctx_.readMessages().size(), 3);
-  EXPECT_EQ(handler_.activeStreamCount(), 3);
-  EXPECT_TRUE(handler_.hasActiveStream(1));
-  EXPECT_TRUE(handler_.hasActiveStream(3));
-  EXPECT_TRUE(handler_.hasActiveStream(5));
+  EXPECT_EQ(ctx_.activeStreamCount(), 3);
+  EXPECT_TRUE(ctx_.hasActiveStream(1));
+  EXPECT_TRUE(ctx_.hasActiveStream(3));
+  EXPECT_TRUE(ctx_.hasActiveStream(5));
 }
 
 // =============================================================================
@@ -240,14 +258,14 @@ TEST_F(ServerStreamStateHandlerTest, DuplicateStreamIdReturnsError) {
   auto result = callOnRead(parseTestFrame(
       apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE, 1));
   EXPECT_EQ(result, Result::Success);
-  EXPECT_TRUE(handler_.hasActiveStream(1));
+  EXPECT_TRUE(ctx_.hasActiveStream(1));
 
   result = callOnRead(parseTestFrame(
       apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE, 1));
   EXPECT_EQ(result, Result::Error);
 
-  EXPECT_TRUE(handler_.hasActiveStream(1));
-  EXPECT_EQ(handler_.activeStreamCount(), 1);
+  EXPECT_TRUE(ctx_.hasActiveStream(1));
+  EXPECT_EQ(ctx_.activeStreamCount(), 1);
 }
 
 // =============================================================================
@@ -257,7 +275,7 @@ TEST_F(ServerStreamStateHandlerTest, DuplicateStreamIdReturnsError) {
 TEST_F(ServerStreamStateHandlerTest, CancelRemovesActiveStreamAndFiresToApp) {
   (void)callOnRead(parseTestFrame(
       apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE, 1));
-  EXPECT_TRUE(handler_.hasActiveStream(1));
+  EXPECT_TRUE(ctx_.hasActiveStream(1));
 
   ctx_.reset();
 
@@ -278,8 +296,8 @@ TEST_F(ServerStreamStateHandlerTest, CancelRemovesActiveStreamAndFiresToApp) {
   apache::thrift::fast_thrift::frame::read::FrameView view(request.frame);
   EXPECT_EQ(view.type(), apache::thrift::fast_thrift::frame::FrameType::CANCEL);
 
-  EXPECT_FALSE(handler_.hasActiveStream(1));
-  EXPECT_EQ(handler_.activeStreamCount(), 0);
+  EXPECT_FALSE(ctx_.hasActiveStream(1));
+  EXPECT_EQ(ctx_.activeStreamCount(), 0);
 }
 
 TEST_F(ServerStreamStateHandlerTest, CancelForUnknownStreamIsDropped) {
@@ -297,7 +315,7 @@ TEST_F(ServerStreamStateHandlerTest, CancelForUnknownStreamIsDropped) {
 TEST_F(ServerStreamStateHandlerTest, RequestNPassesThroughForActiveStream) {
   (void)callOnRead(parseTestFrame(
       apache::thrift::fast_thrift::frame::FrameType::REQUEST_STREAM, 1));
-  EXPECT_TRUE(handler_.hasActiveStream(1));
+  EXPECT_TRUE(ctx_.hasActiveStream(1));
 
   ctx_.reset();
 
@@ -314,7 +332,7 @@ TEST_F(ServerStreamStateHandlerTest, RequestNPassesThroughForActiveStream) {
   EXPECT_EQ(
       request.streamType,
       apache::thrift::fast_thrift::frame::FrameType::REQUEST_STREAM);
-  EXPECT_TRUE(handler_.hasActiveStream(1));
+  EXPECT_TRUE(ctx_.hasActiveStream(1));
 }
 
 TEST_F(ServerStreamStateHandlerTest, NonRequestFrameForUnknownStreamIsDropped) {
@@ -336,7 +354,7 @@ TEST_F(ServerStreamStateHandlerTest, ConnectionLevelFrameIsConsumed) {
   EXPECT_EQ(result, Result::Success);
   // Connection-level frames are consumed, not forwarded to the app
   EXPECT_EQ(ctx_.readMessages().size(), 0);
-  EXPECT_EQ(handler_.activeStreamCount(), 0);
+  EXPECT_EQ(ctx_.activeStreamCount(), 0);
 }
 
 // =============================================================================
@@ -348,7 +366,7 @@ TEST_F(
     CompleteResponseProducesStreamMessageAndCleansUp) {
   (void)callOnRead(parseTestFrame(
       apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE, 1));
-  EXPECT_TRUE(handler_.hasActiveStream(1));
+  EXPECT_TRUE(ctx_.hasActiveStream(1));
 
   ctx_.reset();
 
@@ -376,14 +394,14 @@ TEST_F(
   EXPECT_EQ(wireMsg.frame.streamId, 1u);
   EXPECT_NE(wireMsg.frame.data, nullptr);
 
-  EXPECT_FALSE(handler_.hasActiveStream(1));
-  EXPECT_EQ(handler_.activeStreamCount(), 0);
+  EXPECT_FALSE(ctx_.hasActiveStream(1));
+  EXPECT_EQ(ctx_.activeStreamCount(), 0);
 }
 
 TEST_F(ServerStreamStateHandlerTest, IncompleteResponseKeepsStreamActive) {
   (void)callOnRead(parseTestFrame(
       apache::thrift::fast_thrift::frame::FrameType::REQUEST_STREAM, 1));
-  EXPECT_TRUE(handler_.hasActiveStream(1));
+  EXPECT_TRUE(ctx_.hasActiveStream(1));
 
   ctx_.reset();
 
@@ -410,7 +428,7 @@ TEST_F(ServerStreamStateHandlerTest, IncompleteResponseKeepsStreamActive) {
       apache::thrift::fast_thrift::frame::FrameType::PAYLOAD);
   EXPECT_EQ(wireMsg.frame.streamId, 1u);
 
-  EXPECT_TRUE(handler_.hasActiveStream(1));
+  EXPECT_TRUE(ctx_.hasActiveStream(1));
 }
 
 TEST_F(ServerStreamStateHandlerTest, ResponseForUnknownStreamReturnsError) {
@@ -436,17 +454,20 @@ TEST_F(ServerStreamStateHandlerTest, ResponseForUnknownStreamReturnsError) {
 // Handler Lifecycle Tests
 // =============================================================================
 
-TEST_F(ServerStreamStateHandlerTest, HandlerRemovedClearsState) {
+TEST_F(
+    ServerStreamStateHandlerTest, HandlerRemovedLeavesSharedStateToPipeline) {
   (void)callOnRead(parseTestFrame(
       apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE, 1));
   (void)callOnRead(parseTestFrame(
       apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE, 3));
 
-  EXPECT_EQ(handler_.activeStreamCount(), 2);
+  EXPECT_EQ(ctx_.activeStreamCount(), 2);
 
+  // The shared stream map is owned by the pipeline (destroyed with it), so
+  // handlerRemoved does not clear it.
   handler_.handlerRemoved(ctx_);
 
-  EXPECT_EQ(handler_.activeStreamCount(), 0);
+  EXPECT_EQ(ctx_.activeStreamCount(), 2);
 }
 
 TEST_F(ServerStreamStateHandlerTest, OnDisconnectIsNoOp) {
@@ -469,7 +490,7 @@ TEST_F(ServerStreamStateHandlerTest, OnExceptionFailsAllActiveStreams) {
   (void)callOnRead(parseTestFrame(
       apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE, 3));
 
-  EXPECT_EQ(handler_.activeStreamCount(), 2);
+  EXPECT_EQ(ctx_.activeStreamCount(), 2);
 
   ctx_.reset();
 
@@ -477,13 +498,13 @@ TEST_F(ServerStreamStateHandlerTest, OnExceptionFailsAllActiveStreams) {
   handler_.onException(ctx_, std::move(ex));
 
   EXPECT_TRUE(ctx_.hasException());
-  EXPECT_EQ(handler_.activeStreamCount(), 0);
+  EXPECT_EQ(ctx_.activeStreamCount(), 0);
   // onException clears streams and propagates exception, no per-stream messages
   EXPECT_EQ(ctx_.readMessages().size(), 0);
 }
 
 TEST_F(ServerStreamStateHandlerTest, OnExceptionWithNoActiveStreams) {
-  EXPECT_EQ(handler_.activeStreamCount(), 0);
+  EXPECT_EQ(ctx_.activeStreamCount(), 0);
 
   auto ex = folly::make_exception_wrapper<std::runtime_error>("test error");
   handler_.onException(ctx_, std::move(ex));
@@ -504,7 +525,7 @@ TEST_F(ServerStreamStateHandlerTest, BackpressureFromDownstreamOnRead) {
 
   EXPECT_EQ(result, Result::Backpressure);
   // Backpressure means the request was accepted - stream should remain active
-  EXPECT_TRUE(handler_.hasActiveStream(1));
+  EXPECT_TRUE(ctx_.hasActiveStream(1));
 }
 
 TEST_F(ServerStreamStateHandlerTest, ErrorFromDownstreamOnReadRollsBack) {
@@ -515,13 +536,13 @@ TEST_F(ServerStreamStateHandlerTest, ErrorFromDownstreamOnReadRollsBack) {
 
   EXPECT_EQ(result, Result::Error);
   // Stream should be rolled back since app didn't receive the request
-  EXPECT_FALSE(handler_.hasActiveStream(1));
+  EXPECT_FALSE(ctx_.hasActiveStream(1));
 }
 
 TEST_F(ServerStreamStateHandlerTest, CancelWithDownstreamErrorRemovesStream) {
   (void)callOnRead(parseTestFrame(
       apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE, 1));
-  EXPECT_TRUE(handler_.hasActiveStream(1));
+  EXPECT_TRUE(ctx_.hasActiveStream(1));
 
   ctx_.reset();
   ctx_.setReturnError(true);
@@ -533,7 +554,7 @@ TEST_F(ServerStreamStateHandlerTest, CancelWithDownstreamErrorRemovesStream) {
   EXPECT_EQ(result, Result::Error);
   // Stream is removed even on failure. There is no retry mechanism for
   // terminal events, and re-adding would create orphaned state.
-  EXPECT_FALSE(handler_.hasActiveStream(1));
+  EXPECT_FALSE(ctx_.hasActiveStream(1));
 }
 
 TEST_F(ServerStreamStateHandlerTest, ErrorFromDownstreamOnWrite) {
@@ -559,7 +580,7 @@ TEST_F(ServerStreamStateHandlerTest, ErrorFromDownstreamOnWrite) {
 
   EXPECT_EQ(result, Result::Error);
   // Stream is dropped on write failure — no retry
-  EXPECT_FALSE(handler_.hasActiveStream(1));
+  EXPECT_FALSE(ctx_.hasActiveStream(1));
 }
 
 TEST_F(ServerStreamStateHandlerTest, BackpressureFromDownstreamOnWrite) {
@@ -585,7 +606,7 @@ TEST_F(ServerStreamStateHandlerTest, BackpressureFromDownstreamOnWrite) {
 
   EXPECT_EQ(result, Result::Backpressure);
   // Backpressure means the write was accepted - stream should remain removed
-  EXPECT_FALSE(handler_.hasActiveStream(1));
+  EXPECT_FALSE(ctx_.hasActiveStream(1));
 }
 
 TEST_F(
@@ -613,7 +634,7 @@ TEST_F(
 
   EXPECT_EQ(result, Result::Error);
   // Stream was not removed (complete=false), so it should still be active
-  EXPECT_TRUE(handler_.hasActiveStream(1));
+  EXPECT_TRUE(ctx_.hasActiveStream(1));
 }
 
 } // namespace apache::thrift::fast_thrift::rocket::server::handler

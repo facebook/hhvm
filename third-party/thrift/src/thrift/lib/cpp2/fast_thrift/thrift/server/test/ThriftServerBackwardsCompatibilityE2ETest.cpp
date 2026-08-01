@@ -40,6 +40,7 @@
 #include <thrift/lib/cpp2/fast_thrift/frame/write/FragmentationHandlerConfig.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/FrameFragmentationHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/FrameLengthEncoderHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/common/RocketStreamContext.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/adapter/RocketServerAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerMessageMarshalHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerRequestResponseHandler.h>
@@ -184,6 +185,8 @@ class ThriftServerBackwardsCompatibilityE2ETest : public ::testing::Test {
             .setHead(rocketConnRef.transportHandler.get())
             .setTail(rocketConnRef.appAdapter.get())
             .setAllocator(&rocketAllocator_)
+            .addState<
+                apache::thrift::fast_thrift::rocket::RocketStreamContexts>()
             .addNextInbound<apache::thrift::fast_thrift::frame::read::handler::
                                 FrameLengthParserHandler>(
                 frame_length_parser_handler_tag)

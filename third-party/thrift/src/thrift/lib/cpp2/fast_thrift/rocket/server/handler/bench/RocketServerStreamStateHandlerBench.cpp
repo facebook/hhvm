@@ -39,6 +39,7 @@
 #include <thrift/lib/cpp2/fast_thrift/frame/read/FrameParser.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/FrameWriter.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/bench/BenchContext.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/common/RocketStreamContext.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/Messages.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerStreamStateHandler.h>
 
@@ -75,6 +76,16 @@ BytesPtr copyBuffer(folly::StringPiece s) {
 // =============================================================================
 
 using apache::thrift::fast_thrift::rocket::bench::BenchContext;
+
+// Extends the shared bench context with the pipeline-level RocketStreamContexts
+// the handler now reaches through state<T>(), owned per context.
+struct StreamBenchContext : BenchContext {
+  template <typename T>
+  T& state() noexcept {
+    return contexts_;
+  }
+  rocket::RocketStreamContexts contexts_;
+};
 
 // =============================================================================
 // Frame Builders
@@ -157,7 +168,7 @@ BENCHMARK(Read_StreamState_NewStream, iters) {
   suspender.dismiss();
 
   RocketServerStreamStateHandler handler;
-  BenchContext ctx;
+  StreamBenchContext ctx;
 
   for (size_t i = 0; i < iters; ++i) {
     auto result = handler.onRead(ctx, erase_and_box(std::move(frames[i])));
@@ -168,7 +179,7 @@ BENCHMARK(Read_StreamState_NewStream, iters) {
 BENCHMARK(Read_StreamState_TerminalCancel, iters) {
   BenchmarkSuspender suspender;
   RocketServerStreamStateHandler handler;
-  BenchContext ctx;
+  StreamBenchContext ctx;
 
   // Register streams
   for (size_t i = 0; i < iters; ++i) {
@@ -197,7 +208,7 @@ BENCHMARK(Read_StreamState_TerminalCancel, iters) {
 BENCHMARK(Read_StreamState_ConnectionFrame, iters) {
   BenchmarkSuspender suspender;
   RocketServerStreamStateHandler handler;
-  BenchContext ctx;
+  StreamBenchContext ctx;
 
   // Connection-level frames have streamId=0 (e.g., SETUP)
   std::vector<RocketRequestMessage> frames;
@@ -223,7 +234,7 @@ BENCHMARK_DRAW_LINE();
 BENCHMARK(Write_StreamState_CompleteResponse, iters) {
   BenchmarkSuspender suspender;
   RocketServerStreamStateHandler handler;
-  BenchContext ctx;
+  StreamBenchContext ctx;
 
   // Register streams
   for (size_t i = 0; i < iters; ++i) {
@@ -262,7 +273,7 @@ BENCHMARK(Write_StreamState_CompleteResponse, iters) {
 BENCHMARK(Write_StreamState_PartialResponse, iters) {
   BenchmarkSuspender suspender;
   RocketServerStreamStateHandler handler;
-  BenchContext ctx;
+  StreamBenchContext ctx;
 
   // Register a single stream for partial responses
   auto frame = makeRequestResponseFrame(1);
@@ -305,7 +316,7 @@ BENCHMARK_DRAW_LINE();
 BENCHMARK(Read_StreamState_NewStream_ManyActive, iters) {
   BenchmarkSuspender suspender;
   RocketServerStreamStateHandler handler;
-  BenchContext ctx;
+  StreamBenchContext ctx;
 
   // Pre-populate with 1000 active streams
   for (uint32_t i = 0; i < 1000; ++i) {

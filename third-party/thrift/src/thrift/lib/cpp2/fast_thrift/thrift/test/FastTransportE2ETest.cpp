@@ -49,6 +49,7 @@
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientRequestResponseHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientSetupFrameHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientStreamStateHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/common/RocketStreamContext.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/adapter/RocketServerAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerMessageMarshalHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerRequestResponseHandler.h>
@@ -237,6 +238,8 @@ class FastTransportE2ETest : public ::testing::Test {
             .setHead(rocketConn->transportHandler.get())
             .setTail(rocketConn->appAdapter.get())
             .setAllocator(&serverRocketAllocator_)
+            .addState<
+                apache::thrift::fast_thrift::rocket::RocketStreamContexts>()
             .addNextInbound<apache::thrift::fast_thrift::frame::read::handler::
                                 FrameLengthParserHandler>(
                 server_frame_length_parser_handler_tag)

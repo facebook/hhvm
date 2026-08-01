@@ -11,7 +11,7 @@
 #include <folly/futures/Future.h>
 #include <folly/io/async/EventBaseManager.h>
 #include <folly/system/ThreadName.h>
-#include <mysql.h>
+#include <mysql/server/include/mysql.h>
 
 #include "squangle/logger/DBEventLogger.h"
 #include "squangle/mysql_client/AsyncMysqlClient.h"

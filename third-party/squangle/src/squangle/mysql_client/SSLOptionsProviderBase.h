@@ -10,7 +10,7 @@
 
 #include <folly/ssl/OpenSSLPtrTypes.h>
 #include <folly/ssl/SSLSession.h>
-#include <mysql.h>
+#include <mysql/server/include/mysql.h>
 
 namespace folly {
 class SSLContext;

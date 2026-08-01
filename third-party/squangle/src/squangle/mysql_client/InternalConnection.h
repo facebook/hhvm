@@ -11,7 +11,7 @@
 #include <folly/coro/Task.h>
 #include <folly/io/async/EventHandler.h>
 #include <folly/ssl/OpenSSLPtrTypes.h>
-#include <mysql.h> // @manual
+#include <mysql/server/include/mysql.h> // @manual
 #include <optional>
 
 #include "squangle/base/Base.h"

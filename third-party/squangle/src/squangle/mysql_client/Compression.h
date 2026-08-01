@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include <mysql.h> // @manual
+#include <mysql/server/include/mysql.h> // @manual
 #include <optional>
 #include <string>
 

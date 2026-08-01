@@ -82,7 +82,7 @@
 
 #include <glog/logging.h>
 
-#include <mysql.h>
+#include <mysql/server/include/mysql.h>
 
 #include <functional>
 #include <optional>

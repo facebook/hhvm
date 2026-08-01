@@ -23,6 +23,7 @@ import (
 	"net"
 	"os"
 	"runtime"
+	"sync"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -104,6 +105,94 @@ func TestRocketClientUnix(t *testing.T) {
 
 	cancel()
 	<-errChan
+}
+
+// requestRecordingInterceptor is a server-side interceptor that records the
+// method name of every request that reaches the server. Used to assert that a
+// request never left the client.
+type requestRecordingInterceptor struct {
+	BaseServiceInterceptor
+	mu      sync.Mutex
+	methods []string
+}
+
+func (i *requestRecordingInterceptor) OnRequest(
+	ctx context.Context,
+	_ types.ReadableStruct,
+	_ any,
+) (context.Context, error) {
+	i.mu.Lock()
+	i.methods = append(i.methods, GetRequestContext(ctx).MethodName)
+	i.mu.Unlock()
+	return ctx, nil
+}
+
+func (i *requestRecordingInterceptor) recordedMethods() []string {
+	i.mu.Lock()
+	defer i.mu.Unlock()
+	return append([]string(nil), i.methods...)
+}
+
+// Check that an already-expired context short-circuits every RPC kind on the
+// client, so no request is ever dispatched to the server. A server-side
+// interceptor records any request it sees; it must see none.
+func TestRocketClientExpiredContextNoRequest(t *testing.T) {
+	listener, err := net.Listen("tcp", ":0")
+	require.NoError(t, err)
+
+	interceptor := &requestRecordingInterceptor{}
+	processor := dummyif.NewDummyProcessor(&dummy.DummyHandler{})
+	server := NewServer(processor, listener, TransportIDRocket, WithServiceInterceptor(interceptor))
+
+	serverCtx, serverCancel := context.WithCancel(t.Context())
+	var serverEG errgroup.Group
+	serverEG.Go(func() error {
+		return server.ServeContext(serverCtx)
+	})
+
+	addr := listener.Addr()
+
+	client, err := NewClientV2[dummyif.DummyClient](
+		WithRocket(),
+		WithDialer(func() (net.Conn, error) {
+			return net.DialTimeout(addr.Network(), addr.String(), 5*time.Second)
+		}),
+	)
+	require.NoError(t, err)
+	defer client.Close()
+
+	expiredCtx, cancelExpired := context.WithDeadline(t.Context(), time.Now().Add(-time.Hour))
+	defer cancelExpired()
+	require.Error(t, expiredCtx.Err())
+
+	// Every RPC kind must fail client-side without dispatching to the server.
+	t.Run("RequestResponse", func(t *testing.T) {
+		err := client.Ping(expiredCtx)
+		require.Error(t, err)
+	})
+	t.Run("Oneway", func(t *testing.T) {
+		err := client.OnewayRPC(expiredCtx, "hello")
+		require.Error(t, err)
+	})
+	t.Run("Stream", func(t *testing.T) {
+		_, err := client.StreamOnly(expiredCtx, 0, 10)
+		require.Error(t, err)
+	})
+	t.Run("Sink", func(t *testing.T) {
+		_, err := client.SinkOnly(expiredCtx)
+		require.Error(t, err)
+	})
+	t.Run("BiDi", func(t *testing.T) {
+		_, _, err := client.BiDiBasic(expiredCtx)
+		require.Error(t, err)
+	})
+
+	require.Empty(t, interceptor.recordedMethods(),
+		"server received requests despite an already-expired context")
+
+	serverCancel()
+	err = serverEG.Wait()
+	require.ErrorIs(t, err, context.Canceled)
 }
 
 func TestFDRelease(t *testing.T) {

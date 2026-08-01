@@ -180,6 +180,9 @@ func (r *rsocketClient) RequestResponse(
 	headers map[string]string,
 	dataBytes []byte,
 ) (map[string]string, []byte, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, nil, err
+	}
 	r.resetDeadline()
 	request, err := rocket.EncodeRequestPayload(
 		ctx,
@@ -206,6 +209,9 @@ func (r *rsocketClient) RequestResponse(
 }
 
 func (r *rsocketClient) FireAndForget(ctx context.Context, messageName string, headers map[string]string, dataBytes []byte) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
 	r.resetDeadline()
 	request, err := rocket.EncodeRequestPayload(
 		ctx,
@@ -230,6 +236,9 @@ func (r *rsocketClient) RequestStream(
 	dataBytes []byte,
 	newStreamElemFn func() ReadableResult,
 ) (map[string]string, []byte, iter.Seq2[ReadableStruct, error], error) {
+	if err := ctx.Err(); err != nil {
+		return nil, nil, nil, err
+	}
 	r.resetDeadline()
 
 	request, err := rocket.EncodeRequestPayload(
@@ -326,6 +335,9 @@ func (r *rsocketClient) RequestSink(
 	headers map[string]string,
 	dataBytes []byte,
 ) (map[string]string, []byte, func(sinkSeq iter.Seq2[WritableResult, error], finalResponse ReadableStruct) error, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, nil, nil, err
+	}
 	r.resetDeadline()
 
 	request, err := rocket.EncodeRequestPayload(
@@ -472,6 +484,9 @@ func (r *rsocketClient) RequestBiDiStream(
 	dataBytes []byte,
 	newStreamElemFn func() ReadableResult,
 ) (map[string]string, []byte, func(sinkSeq iter.Seq2[WritableResult, error]), iter.Seq2[ReadableStruct, error], error) {
+	if err := ctx.Err(); err != nil {
+		return nil, nil, nil, nil, err
+	}
 	r.resetDeadline()
 
 	request, err := rocket.EncodeRequestPayload(

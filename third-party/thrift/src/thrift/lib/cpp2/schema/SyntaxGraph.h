@@ -825,13 +825,28 @@ class ExceptionNode final : folly::MoveOnly,
       const detail::Resolver& resolver,
       const apache::thrift::type::DefinitionKey& definitionKey,
       std::string_view uri,
-      std::vector<FieldNode> fields)
-      : StructuredNode(resolver, definitionKey, uri, std::move(fields)) {}
+      std::vector<FieldNode> fields,
+      type::ErrorSafety safety,
+      type::ErrorKind kind,
+      type::ErrorBlame blame)
+      : StructuredNode(resolver, definitionKey, uri, std::move(fields)),
+        safety_(safety),
+        kind_(kind),
+        blame_(blame) {}
+
+  type::ErrorSafety safety() const { return safety_; }
+  type::ErrorKind kind() const { return kind_; }
+  type::ErrorBlame blame() const { return blame_; }
 
   TypeRef asRef() const;
 
   void printTo(
       tree_printer::scope& scope, detail::VisitationTracker& visited) const;
+
+ private:
+  type::ErrorSafety safety_;
+  type::ErrorKind kind_;
+  type::ErrorBlame blame_;
 };
 
 class EnumNode final : folly::MoveOnly,

@@ -766,7 +766,13 @@ ExceptionNode SchemaIndex::createException(
     fields.emplace_back(createField(definitionKey, field, schema));
   }
   return ExceptionNode(
-      resolver_, definitionKey, *exceptionDef.uri(), std::move(fields));
+      resolver_,
+      definitionKey,
+      *exceptionDef.uri(),
+      std::move(fields),
+      *exceptionDef.safety(),
+      *exceptionDef.kind(),
+      *exceptionDef.blame());
 }
 
 FieldNode SchemaIndex::createField(

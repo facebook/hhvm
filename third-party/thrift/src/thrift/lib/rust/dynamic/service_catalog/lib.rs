@@ -27,6 +27,9 @@ mod digest;
 mod tests;
 
 use record::SerializableRecord;
+pub use schema::ErrorBlame;
+pub use schema::ErrorKind;
+pub use schema::ErrorSafety;
 pub use service_catalog::FunctionQualifier;
 pub use service_catalog::RpcKind;
 use type_id::TypeId;
@@ -134,6 +137,9 @@ pub struct Exception {
     pub name: String,
     pub type_id: TypeId,
     pub annotations: AnnotationsMap,
+    pub safety: ErrorSafety,
+    pub kind: ErrorKind,
+    pub blame: ErrorBlame,
 }
 
 #[derive(Clone, Debug, PartialEq)]

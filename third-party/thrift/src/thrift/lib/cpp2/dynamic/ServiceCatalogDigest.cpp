@@ -37,6 +37,7 @@
 #include <thrift/lib/cpp2/dynamic/Struct.h>
 #include <thrift/lib/cpp2/dynamic/Union.h>
 #include <thrift/lib/cpp2/dynamic/detail/DigestHasher.h>
+#include <thrift/lib/cpp2/dynamic/detail/ServiceCatalogEnumConversion.h>
 #include <thrift/lib/thrift/gen-cpp2/record_types.h>
 #include <thrift/lib/thrift/gen-cpp2/service_catalog_types.h>
 
@@ -657,6 +658,9 @@ void Hasher::hash(const type_system::SerializableException& ex) {
   hash(std::string_view{ex.identity()->name()});
   hash(*ex.type());
   hash(*ex.annotations());
+  hash(*ex.safety());
+  hash(*ex.kind());
+  hash(*ex.blame());
 }
 
 void Hasher::hash(const ServiceDescriptor::Exception& ex) {
@@ -664,6 +668,9 @@ void Hasher::hash(const ServiceDescriptor::Exception& ex) {
   hash(std::string_view{ex.name});
   hash(ex.type.id());
   hashAnnotations(ex.annotations);
+  hash(detail::toSerializableSafety(ex.safety));
+  hash(detail::toSerializableKind(ex.kind));
+  hash(detail::toSerializableBlame(ex.blame));
 }
 
 void Hasher::hash(const type_system::SerializableStream& stream) {

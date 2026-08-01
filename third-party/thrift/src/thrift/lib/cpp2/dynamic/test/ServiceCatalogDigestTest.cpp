@@ -257,7 +257,16 @@ std::unique_ptr<ServiceDescriptor> makeRichDescriptor() {
   builder.addFunction("upload")
       .setSink(
           type_system::TypeSystem::I32(), type_system::TypeSystem::String())
-      .addException("appError", FieldId{1}, type_system::TypeSystem::String());
+      .addException(
+          ServiceDescriptor::Exception{
+              .name = "appError",
+              .id = FieldId{1},
+              .type = type_system::TypeSystem::String(),
+              .annotations = {},
+              .safety = type::ErrorSafety::Safe,
+              .kind = type::ErrorKind::Transient,
+              .blame = type::ErrorBlame::Server,
+          });
   builder.addFunction("notify").setOneWay();
 
   auto& interaction = builder.addInteraction(
@@ -304,7 +313,7 @@ void expectGoldenDigest(
 }
 
 TEST(ServiceCatalogDigestTest, VersionConstantExists) {
-  EXPECT_EQ(kServiceCatalogDigestVersion, 1);
+  EXPECT_EQ(kServiceCatalogDigestVersion, 2);
 }
 
 TEST(ServiceCatalogDigestTest, ToSerializableSetsTypeDigest) {

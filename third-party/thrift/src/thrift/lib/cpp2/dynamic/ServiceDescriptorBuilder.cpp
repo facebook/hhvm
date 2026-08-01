@@ -98,9 +98,19 @@ ServiceDescriptorBuilder::FunctionBuilder::addException(
     FieldId id,
     type_system::TypeRef type,
     std::vector<DynamicValue> annotations) {
-  exceptions_.push_back(
+  return addException(
       ServiceDescriptor::Exception{
-          std::move(name), id, type, std::move(annotations)});
+          .name = std::move(name),
+          .id = id,
+          .type = type,
+          .annotations = std::move(annotations),
+      });
+}
+
+ServiceDescriptorBuilder::FunctionBuilder&
+ServiceDescriptorBuilder::FunctionBuilder::addException(
+    ServiceDescriptor::Exception exception) {
+  exceptions_.push_back(std::move(exception));
   return *this;
 }
 

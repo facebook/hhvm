@@ -23,6 +23,6 @@ namespace cpp2 apache.thrift.dynamic.test.service_catalog_digest_expected_values
 namespace rust service_catalog_digest_expected_values
 namespace py3 apache.thrift.dynamic.test
 
-const string DIGEST_CALCULATOR = "27cdfb8a5219162b0d4bd1b2ece90288ed6e8fdbc6e3cddc95564a1ca690f392";
-const string DIGEST_RICH_DESCRIPTOR = "41a87f696c8081a5ad1f70ef568bb87b58b29ac7451dffaaacd6f2c125c0929d";
-const string DIGEST_RICH_DESCRIPTOR_STRUCTURAL = "ea1d78f1adfa87752b68c2965443e09b697df769fa5b01a851897c9d48ffc725";
+const string DIGEST_CALCULATOR = "d2f1219d575bd10be82fe8240c734f5ef53f681f36fea970bcfe963808f1ad71";
+const string DIGEST_RICH_DESCRIPTOR = "ef2d88a5b0d925cfc7a3ba6e7cf6e1eb342ed5902803a9af22f797f5a5d27811";
+const string DIGEST_RICH_DESCRIPTOR_STRUCTURAL = "f2d9fd7f360829b24795a7deb256eeef5c8ad11d059bd4f6fb67b0ebce2f7d6a";

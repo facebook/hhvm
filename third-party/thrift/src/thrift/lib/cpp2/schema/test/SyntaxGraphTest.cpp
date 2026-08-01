@@ -381,6 +381,9 @@ TEST_F(ServiceSchemaTest, Exception) {
   EXPECT_EQ(e.uri(), "meta.com/thrift_test/TestException");
 
   EXPECT_EQ(e.fields().size(), 2);
+  EXPECT_EQ(e.safety(), type::ErrorSafety::Safe);
+  EXPECT_EQ(e.kind(), type::ErrorKind::Permanent);
+  EXPECT_EQ(e.blame(), type::ErrorBlame::Client);
 
   EXPECT_EQ(e.fields()[0].id(), FieldId{1});
   EXPECT_EQ(e.fields()[0].name(), "blob");
@@ -394,7 +397,7 @@ TEST_F(ServiceSchemaTest, Exception) {
 
   EXPECT_EQ(
       e.toDebugString(),
-      "ExceptionNode 'TestException'\n"
+      "ExceptionNode 'TestException' (safety=Safe, kind=Permanent, blame=Client)\n"
       "├─ FieldNode (id=1, presence=UNQUALIFIED, name='blob')\n"
       "│  ╰─ type = BINARY\n"
       "╰─ FieldNode (id=2, presence=UNQUALIFIED, name='s')\n"
@@ -580,7 +583,7 @@ TEST_F(ServiceSchemaTest, Service) {
       "      │  │     ╰─ type = I32\n"
       "      │  ╰─ exceptions\n"
       "      │     ╰─ FunctionNode::Exception (id=1, name='ex')\n"
-      "      │        ╰─ type = ExceptionNode 'TestException'\n"
+      "      │        ╰─ type = ExceptionNode 'TestException' (safety=Safe, kind=Permanent, blame=Client)\n"
       "      │           ├─ FieldNode (id=1, presence=UNQUALIFIED, name='blob')\n"
       "      │           │  ╰─ type = BINARY\n"
       "      │           ╰─ FieldNode (id=2, presence=UNQUALIFIED, name='s')\n"
@@ -600,7 +603,7 @@ TEST_F(ServiceSchemaTest, Service) {
       "      │              │     ╰─ type = StructNode 'TestRecursiveStruct'\n"
       "      │              ╰─ exceptions\n"
       "      │                 ╰─ FunctionNode::Exception (id=1, name='ex')\n"
-      "      │                    ╰─ type = ExceptionNode 'TestException'\n"
+      "      │                    ╰─ type = ExceptionNode 'TestException' (safety=Safe, kind=Permanent, blame=Client)\n"
       "      ├─ FunctionNode (name='createStream')\n"
       "      │  ╰─ FunctionNode::Response\n"
       "      │     ├─ returnType = I32\n"
@@ -660,7 +663,7 @@ TEST_F(ServiceSchemaTest, Interaction) {
       "      │           ╰─ type = StructNode 'TestRecursiveStruct'\n"
       "      ╰─ exceptions\n"
       "         ╰─ FunctionNode::Exception (id=1, name='ex')\n"
-      "            ╰─ type = ExceptionNode 'TestException'\n"
+      "            ╰─ type = ExceptionNode 'TestException' (safety=Safe, kind=Permanent, blame=Client)\n"
       "               ├─ FieldNode (id=1, presence=UNQUALIFIED, name='blob')\n"
       "               │  ╰─ type = BINARY\n"
       "               ╰─ FieldNode (id=2, presence=UNQUALIFIED, name='s')\n"

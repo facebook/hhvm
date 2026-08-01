@@ -16,7 +16,7 @@
 
 package "facebook.com/thrift/service_descriptor_test"
 
-exception TestException {
+safe permanent client exception TestException {
   1: string message;
 }
 

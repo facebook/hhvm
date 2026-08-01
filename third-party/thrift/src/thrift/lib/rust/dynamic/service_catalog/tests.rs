@@ -171,6 +171,9 @@ fn exception(id: i16, name: &str, type_id: TypeId) -> Exception {
         name: name.to_owned(),
         type_id,
         annotations: AnnotationsMap::new(),
+        safety: ErrorSafety::Safe,
+        kind: ErrorKind::Transient,
+        blame: ErrorBlame::Server,
     }
 }
 
@@ -369,6 +372,9 @@ fn to_serializable_function(function: &Function) -> service_catalog::Serializabl
                 },
                 r#type: ex.type_id.clone(),
                 annotations: ex.annotations.clone(),
+                safety: service_catalog::ExceptionSafety(ex.safety.0),
+                kind: service_catalog::ExceptionKind(ex.kind.0),
+                blame: service_catalog::ExceptionBlame(ex.blame.0),
                 ..Default::default()
             })
             .collect(),
@@ -444,13 +450,16 @@ fn to_serializable_exception(ex: &Exception) -> service_catalog::SerializableExc
         },
         r#type: ex.type_id.clone(),
         annotations: ex.annotations.clone(),
+        safety: service_catalog::ExceptionSafety(ex.safety.0),
+        kind: service_catalog::ExceptionKind(ex.kind.0),
+        blame: service_catalog::ExceptionBlame(ex.blame.0),
         ..Default::default()
     }
 }
 
 #[test]
 fn version_constant_exists() {
-    assert_eq!(SERVICE_CATALOG_DIGEST_VERSION, 1);
+    assert_eq!(SERVICE_CATALOG_DIGEST_VERSION, 2);
 }
 
 #[test]

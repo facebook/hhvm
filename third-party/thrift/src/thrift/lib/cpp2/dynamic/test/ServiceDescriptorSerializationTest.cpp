@@ -228,6 +228,9 @@ TEST_F(ServiceDescriptorSerializationTest, SyntaxGraphRoundTrip) {
   EXPECT_EQ(greet.exceptions[0].name, "e");
   EXPECT_TRUE(greet.exceptions[0].type.isStruct());
 
+  EXPECT_EQ(greet.exceptions[0].safety, type::ErrorSafety::Safe);
+  EXPECT_EQ(greet.exceptions[0].kind, type::ErrorKind::Permanent);
+  EXPECT_EQ(greet.exceptions[0].blame, type::ErrorBlame::Client);
   const auto& streamFn = deserialized->getFunctionByName("streamNames");
   ASSERT_TRUE(streamFn.stream.has_value());
   EXPECT_TRUE(streamFn.stream->payloadType.isString());

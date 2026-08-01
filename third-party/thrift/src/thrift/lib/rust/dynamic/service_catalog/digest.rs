@@ -115,6 +115,9 @@ impl ServiceCatalogDigest for Exception {
         h.hash(self.name.as_str());
         h.hash(&self.type_id);
         h.hash(&self.annotations);
+        h.hash(&self.safety.0);
+        h.hash(&self.kind.0);
+        h.hash(&self.blame.0);
     }
 }
 

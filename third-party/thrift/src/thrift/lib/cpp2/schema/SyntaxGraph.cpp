@@ -608,7 +608,12 @@ void UnionNode::printTo(
 
 void ExceptionNode::printTo(
     tree_printer::scope& scope, detail::VisitationTracker& visited) const {
-  scope.print("ExceptionNode '{}'", definition().name());
+  scope.print(
+      "ExceptionNode '{}' (safety={}, kind={}, blame={})",
+      definition().name(),
+      enumNameSafe(safety()),
+      enumNameSafe(kind()),
+      enumNameSafe(blame()));
   if (visited.mark(definition()).already) {
     return;
   }
@@ -1385,14 +1390,17 @@ std::vector<dynamic::DynamicValue> convertSvcAnnotations(
 
 ServiceDescriptor::Exception makeSvcException(
     const FunctionException& ex, const SyntaxGraph& syntaxGraph) {
+  const auto& exception = ex.type().asException();
   return ServiceDescriptor::Exception{
       .name = std::string(ex.name()),
       .id = ex.id(),
       .type = type_system::TypeRef(
-          syntaxGraph
-              .asTypeSystemDefinitionRef(ex.type().asException().definition())
+          syntaxGraph.asTypeSystemDefinitionRef(exception.definition())
               .asStruct()),
       .annotations = convertSvcAnnotations(ex.annotations(), syntaxGraph),
+      .safety = exception.safety(),
+      .kind = exception.kind(),
+      .blame = exception.blame(),
   };
 }
 

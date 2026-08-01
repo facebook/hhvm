@@ -35,7 +35,7 @@ using ServiceDescriptorDigest = ServiceCatalogDigest;
 
 // Current hash algorithm version.
 // This allows us to introduce backwards-incompatible changes in the future.
-inline constexpr uint8_t kServiceCatalogDigestVersion = 1;
+inline constexpr uint8_t kServiceCatalogDigestVersion = 2;
 
 /**
  * Compute a canonical & deterministic SHA-256 digest of a

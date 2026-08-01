@@ -177,6 +177,9 @@ impl ServiceCatalogDigest for SerializableException {
         h.hash(self.identity.name.as_str());
         h.hash(&self.r#type);
         h.hash(&self.annotations);
+        h.hash(&self.safety.0);
+        h.hash(&self.kind.0);
+        h.hash(&self.blame.0);
     }
 }
 

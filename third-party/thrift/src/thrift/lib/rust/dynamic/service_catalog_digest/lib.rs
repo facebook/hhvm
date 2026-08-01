@@ -31,7 +31,7 @@ mod impls;
 use crate::hasher::Hasher;
 
 /// Current hash algorithm version.
-pub const SERVICE_CATALOG_DIGEST_VERSION: u8 = 1;
+pub const SERVICE_CATALOG_DIGEST_VERSION: u8 = 2;
 
 // TODO(sadroeck): Derive these from Rust Thrift reflection once generated
 // Rust exposes union field metadata.

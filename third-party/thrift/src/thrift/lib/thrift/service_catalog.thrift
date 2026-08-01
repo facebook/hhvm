@@ -48,6 +48,27 @@ enum RpcKind {
   BidirectionalStream = 4,
 }
 
+/** Whether retrying an exception is safe. */
+enum ExceptionSafety {
+  Unspecified = 0,
+  Safe = 1,
+}
+
+/** How long the condition represented by an exception is expected to last. */
+enum ExceptionKind {
+  Unspecified = 0,
+  Transient = 1,
+  Stateful = 2,
+  Permanent = 3,
+}
+
+/** Which side of an RPC is responsible for an exception. */
+enum ExceptionBlame {
+  Unspecified = 0,
+  Server = 1,
+  Client = 2,
+}
+
 /**
  * Parameters form the request payload as a struct whose fields carry these
  * identities.
@@ -73,6 +94,9 @@ struct SerializableException {
    */
   @cpp.Type{template = "folly::F14FastMap"}
   3: map<type_id.Uri, record.SerializableRecord> annotations;
+  4: ExceptionSafety safety;
+  5: ExceptionKind kind;
+  6: ExceptionBlame blame;
 }
 
 /** A stream of values returned to the client after the initial response. */

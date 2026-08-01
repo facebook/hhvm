@@ -92,6 +92,17 @@ TEST(ServiceCatalogTest, MissingName) {
   EXPECT_EQ(catalog.getServiceByName("NotAService"), nullptr);
 }
 
+TEST(ServiceCatalogTest, ExceptionClassification) {
+  auto graph = buildGraph();
+  const ServiceCatalog& catalog = graph->asServiceCatalog();
+  const auto& greet = findTestService(catalog).getFunctionByName("greet");
+
+  ASSERT_EQ(greet.exceptions.size(), 1);
+  EXPECT_EQ(greet.exceptions[0].safety, type::ErrorSafety::Safe);
+  EXPECT_EQ(greet.exceptions[0].kind, type::ErrorKind::Permanent);
+  EXPECT_EQ(greet.exceptions[0].blame, type::ErrorBlame::Client);
+}
+
 TEST(ServiceCatalogTest, FunctionExposesRpcEnvelopeShapes) {
   auto graph = buildGraph();
   const ServiceCatalog& catalog = graph->asServiceCatalog();

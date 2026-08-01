@@ -83,14 +83,17 @@ std::vector<DynamicValue> convertAnnotations(
 
 ServiceDescriptor::Exception makeException(
     const syntax_graph::FunctionException& ex, const SyntaxGraph& syntaxGraph) {
+  const auto& exception = ex.type().asException();
   return ServiceDescriptor::Exception{
       .name = std::string(ex.name()),
       .id = ex.id(),
       .type = type_system::TypeRef(
-          syntaxGraph
-              .asTypeSystemDefinitionRef(ex.type().asException().definition())
+          syntaxGraph.asTypeSystemDefinitionRef(exception.definition())
               .asStruct()),
       .annotations = convertAnnotations(ex.annotations(), syntaxGraph),
+      .safety = exception.safety(),
+      .kind = exception.kind(),
+      .blame = exception.blame(),
   };
 }
 

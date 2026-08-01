@@ -37,6 +37,7 @@ class ServiceDescriptorBuilder {
         FieldId id,
         type_system::TypeRef type,
         std::vector<DynamicValue> annotations = {});
+    FunctionBuilder& addException(ServiceDescriptor::Exception exception);
     FunctionBuilder& setStream(type_system::TypeRef payloadType);
     FunctionBuilder& setSink(
         type_system::TypeRef payloadType,

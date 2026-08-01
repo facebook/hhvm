@@ -24,6 +24,7 @@
 
 #include <folly/container/span.h>
 #include <thrift/lib/cpp2/dynamic/DynamicValue.h>
+#include <thrift/lib/thrift/gen-cpp2/schema_types.h>
 
 namespace apache::thrift::type_system {
 class SerializableServiceCatalog;
@@ -63,6 +64,9 @@ class ServiceDescriptor {
     // Structured annotations as schema-typed values; each value's type() is the
     // annotation's struct type.
     std::vector<DynamicValue> annotations;
+    type::ErrorSafety safety = type::ErrorSafety::Unspecified;
+    type::ErrorKind kind = type::ErrorKind::Unspecified;
+    type::ErrorBlame blame = type::ErrorBlame::Unspecified;
   };
 
   struct Stream {

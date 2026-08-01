@@ -95,7 +95,7 @@ struct TestStructuredAnnotationWithoutUri {
 @thrift.Uri{value = "meta.com/thrift_test/TestException"}
 @TestStructuredAnnotationWithoutUri{field1 = 3}
 @TestStructuredAnnotation{field1 = 4}
-exception TestException {
+safe permanent client exception TestException {
   @TestStructuredAnnotation
   1: binary blob;
   @TestStructuredAnnotation

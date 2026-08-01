@@ -97,6 +97,9 @@ TEST_F(SyntaxGraphServiceDescriptorTest, FunctionWithException) {
   EXPECT_EQ(fn.params[0].name, "name");
   ASSERT_EQ(fn.exceptions.size(), 1);
   EXPECT_EQ(fn.exceptions[0].name, "e");
+  EXPECT_EQ(fn.exceptions[0].safety, type::ErrorSafety::Safe);
+  EXPECT_EQ(fn.exceptions[0].kind, type::ErrorKind::Permanent);
+  EXPECT_EQ(fn.exceptions[0].blame, type::ErrorBlame::Client);
 }
 
 TEST_F(SyntaxGraphServiceDescriptorTest, StreamFunction) {
@@ -402,10 +405,15 @@ TEST_F(ServiceDescriptorBuilderTest, BuildWithAnnotations) {
           type_system::TypeSystem::I32(),
           {DynamicValue::makeString("param.anno")})
       .addException(
-          "e",
-          FieldId{2},
-          type_system::TypeSystem::I32(),
-          {DynamicValue::makeString("ex.anno")})
+          ServiceDescriptor::Exception{
+              .name = "e",
+              .id = FieldId{2},
+              .type = type_system::TypeSystem::I32(),
+              .annotations = {DynamicValue::makeString("ex.anno")},
+              .safety = type::ErrorSafety::Safe,
+              .kind = type::ErrorKind::Transient,
+              .blame = type::ErrorBlame::Server,
+          })
       .setResponseType(type_system::TypeSystem::I32());
 
   auto catalog = builder.build();
@@ -421,6 +429,9 @@ TEST_F(ServiceDescriptorBuilderTest, BuildWithAnnotations) {
   ASSERT_EQ(fn.exceptions[0].annotations.size(), 1);
   EXPECT_EQ(
       fn.exceptions[0].annotations[0], DynamicValue::makeString("ex.anno"));
+  EXPECT_EQ(fn.exceptions[0].safety, type::ErrorSafety::Safe);
+  EXPECT_EQ(fn.exceptions[0].kind, type::ErrorKind::Transient);
+  EXPECT_EQ(fn.exceptions[0].blame, type::ErrorBlame::Server);
 }
 
 } // namespace

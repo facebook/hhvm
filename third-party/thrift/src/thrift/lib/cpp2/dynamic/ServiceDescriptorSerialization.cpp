@@ -21,6 +21,7 @@
 #include <thrift/lib/cpp2/dynamic/SerializableTypeSystemBuilder.h>
 #include <thrift/lib/cpp2/dynamic/TypeSystemBuilder.h>
 #include <thrift/lib/cpp2/dynamic/TypeSystemDigest.h>
+#include <thrift/lib/cpp2/dynamic/detail/ServiceCatalogEnumConversion.h>
 
 namespace apache::thrift::dynamic {
 
@@ -245,6 +246,9 @@ type_system::SerializableException toSerializableException(
   result.identity() = FieldIdentity{ex.id, std::string(ex.name)};
   result.type() = ex.type.id();
   result.annotations() = serializeAnnotations(ex.annotations);
+  result.safety() = detail::toSerializableSafety(ex.safety);
+  result.kind() = detail::toSerializableKind(ex.kind);
+  result.blame() = detail::toSerializableBlame(ex.blame);
   return result;
 }
 
@@ -324,6 +328,9 @@ ServiceDescriptor::Exception fromSerializableException(
       .id = ex.identity()->id(),
       .type = typeSystem.resolveTypeId(*ex.type()),
       .annotations = deserializeAnnotations(*ex.annotations(), typeSystem),
+      .safety = detail::fromSerializableSafety(*ex.safety()),
+      .kind = detail::fromSerializableKind(*ex.kind()),
+      .blame = detail::fromSerializableBlame(*ex.blame()),
   };
 }
 

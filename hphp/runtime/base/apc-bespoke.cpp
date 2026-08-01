@@ -99,8 +99,8 @@ ArrayData* makeAPCBespoke(APCBespokeEnv& env, ArrayData* ad, bool hasApcTv);
 template <typename Array, size_t Seed>
 ArrayData* implAPCBespoke(APCBespokeEnv& env, ArrayData* ain,
                           ArrayData* vin, bool hasApcTv) {
-  assertx(ain->isStatic() || ain->isUncounted());
-  assertx(vin->isStatic() || vin->isUncounted() || vin->hasExactlyOneRef());
+  assertx(ain->isStatic() || ain->isShared());
+  assertx(vin->isStatic() || vin->isShared() || vin->hasExactlyOneRef());
   assertx(vin->toDataType() == ain->toDataType());
   assertx(vin->isVanilla());
   FTRACE(2, "  Converting {}-element {} {} {} to {}:\n",
@@ -118,7 +118,7 @@ ArrayData* implAPCBespoke(APCBespokeEnv& env, ArrayData* ain,
     assertx(IMPLIES(!copy, subarrays.empty()));
     if (!copy) return;
     for (auto const sub : subarrays) {
-      DEBUG_ONLY auto const free = sub->isUncounted() && sub->uncountedDecRef();
+      DEBUG_ONLY auto const free = sub->isShared() && sub->sharedDecRef();
       assertx(!free);
     }
     assertx(copy->hasExactlyOneRef());
@@ -139,16 +139,16 @@ ArrayData* implAPCBespoke(APCBespokeEnv& env, ArrayData* ain,
 
     if (!tvIsArrayLike(val)) continue;
     auto const old_arr = val.val().parr;
-    assertx(old_arr->isStatic() ^ old_arr->isUncounted());
+    assertx(old_arr->isStatic() ^ old_arr->isShared());
     auto const new_arr = makeAPCBespoke(env, old_arr, false);
     if (new_arr == nullptr) continue;
 
-    assertx(new_arr->isStatic() ^ new_arr->isUncounted());
+    assertx(new_arr->isStatic() ^ new_arr->isShared());
     copy = copy ? copy : vin->isRefCounted() ? vin : Array::Copy(vin);
     assertx(copy->hasExactlyOneRef());
     assertx(Array::IterEnd(copy) == Array::IterEnd(vin));
     LvalAtIterPos<Array>(copy, pos).val().parr = new_arr;
-    if (new_arr->isUncounted()) subarrays.push_back(new_arr);
+    if (new_arr->isShared()) subarrays.push_back(new_arr);
   }
 
   // Determine what layout we should apply to the result.
@@ -181,7 +181,7 @@ ArrayData* implAPCBespoke(APCBespokeEnv& env, ArrayData* ain,
   if (!copy && layout == ArrayLayout::FromArray(ain)) {
     assertx(IMPLIES(vin->isRefCounted(), vin->hasExactlyOneRef()));
     if (vin->isRefCounted()) Array::Release(vin);
-    if (vanilla && ain->isUncounted()) ain->setSampledArrayInPlace();
+    if (vanilla && ain->isShared()) ain->setSampledArrayInPlace();
     return nullptr;
   }
 
@@ -202,14 +202,14 @@ ArrayData* implAPCBespoke(APCBespokeEnv& env, ArrayData* ain,
       if (copy->empty()) return GetEmptyArray<Array>(copy->isLegacyArray());
       return Array::MakeUncounted(copy, mue, hasApcTv);
     }
-    assertx(vin->isStatic() || vin->isUncounted());
+    assertx(vin->isStatic() || vin->isShared());
     if (ain == vin) return nullptr;
     vin->persistentIncRef();
     return vin;
   };
   if (layout.vanilla()) {
     auto const vad = make_or_reuse_vanilla_result();
-    if (vanilla && vad->isUncounted()) vad->setSampledArrayInPlace();
+    if (vanilla && vad->isShared()) vad->setSampledArrayInPlace();
     return vad;
   }
 
@@ -221,7 +221,7 @@ ArrayData* implAPCBespoke(APCBespokeEnv& env, ArrayData* ain,
         if (copy->empty()) return GetEmptyArray<Array>(copy->isLegacyArray());
         return Array::MakeUncounted(copy, mue, false);
       }
-      assertx(vin->isStatic() || vin->isUncounted());
+      assertx(vin->isStatic() || vin->isShared());
       vin->persistentIncRef();
       return vin;
     }();
@@ -260,7 +260,7 @@ ArrayData* implAPCBespoke(APCBespokeEnv& env, ArrayData* ain,
  * returns a non-null result, then it produces an uncounted refcount on it.
  */
 ArrayData* makeAPCBespoke(APCBespokeEnv& env, ArrayData* ain, bool hasApcTv) {
-  assertx(ain->isStatic() || ain->isUncounted());
+  assertx(ain->isStatic() || ain->isShared());
 
   // Escalate bespoke inputs to vanilla. Don't log it as an escalation for the
   // input, though - doing so would pessimize all sources going into APC.

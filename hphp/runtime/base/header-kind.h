@@ -82,8 +82,8 @@ static_assert((uint8_t)CollectionType::ImmSet == (uint8_t)HeaderKind::ImmSet);
  * The sign bit flags a reference count as persistent. If a reference count is
  * persistent, it means we should never increment or decrement it: the object
  * lives across requests and may be accessed by multiple threads. Persistent
- * objects can be static or uncounted; static objects have process lifetime,
- * while uncounted objects are freed using the treadmill. Using 8-bit values
+ * objects can be static or shared; static objects have process lifetime,
+ * while shared objects are freed using the treadmill. Using 8-bit values
  * generates shorter cmp instructions while still being far enough from 0 to be
  * safe.
  */
@@ -93,11 +93,11 @@ enum RefCount : int32_t {
   // something above RefCountMaxRealistic to trip asserts.
   MultiReference = 0x40000000,
 
-  // Uncounted refcounts count down from UncountedValue to INT_MIN. A count
-  // of UncountedZero is not a valid count - it indicates we must release the
-  // memory of the uncounted object.
-  UncountedValue = -128,
-  UncountedZero  = -127,
+  // Shared refcounts count down from SharedValue to INT_MIN. A count
+  // of SharedZero is not a valid count - it indicates we must release the
+  // memory of the shared object.
+  SharedValue = -128,
+  SharedZero  = -127,
   StaticValue    = -126,
 
   RefCountMaxRealistic = (1 << 30) - 1,
@@ -122,7 +122,7 @@ enum class GCBits : uint8_t {};
  * [ cnt | kind | marks | heapSize:16              ] Resource (ResourceHdr)
  * [ cnt | kind | marks | Attribute    |           ] Object..ImmSet (ObjectData)
  * 0       32     40      48             63
- * [ cnt | kind | marks | color:1      | isSymbol  ] String (cnt = StaticValue | UncountedValue)
+ * [ cnt | kind | marks | color:1      | isSymbol  ] String (cnt = StaticValue | SharedValue)
  *
  * Note: arrBits includes several flags, mostly from the Hack array migration:
  *  - 1 bit for hasAPCTypedValue

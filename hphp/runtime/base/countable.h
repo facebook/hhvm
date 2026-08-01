@@ -55,7 +55,7 @@ auto constexpr noop_decref = false;
 extern __thread bool tl_sweeping;
 
 /*
- * refcounted objects that have count == Uncounted/StaticValue when persistent
+ * refcounted objects that have count == Shared/StaticValue when persistent
  */
 struct MaybeCountable : HeapObject {
   RefCount count() const { return m_count; } // only for debugging & profiling
@@ -66,7 +66,7 @@ struct MaybeCountable : HeapObject {
   bool hasExactlyOneRef() const;
   bool hasZeroRefs() const;
   bool isStatic() const;
-  bool isUncounted() const;
+  bool isShared() const;
   void incRefCount() const;
   void rawIncRefCount() const;
   void decRefCount() const;
@@ -76,43 +76,43 @@ struct MaybeCountable : HeapObject {
   void fixCountForRelease();            // set count to 1 if it was 0
   bool cowCheck() const;
   /*
-   * Uncounted types still record how many references there are to
-   * them from apc, or other uncounted types. Generally, there will
+   * Shared types still record how many references there are to
+   * them from apc, or other shared types. Generally, there will
    * only be one thing manipulating their refcounts at any given time,
-   * but if e.g. multiple threads store the same uncounted array in APC
+   * but if e.g. multiple threads store the same shared array in APC
    * at the same time, it might happen.
    *
-   * uncountedIncRef() will increment this count, and uncountedDecRef()
-   * will decrement this count. uncountedDecRef() will return true if
-   * we've dec-ref-ed this value to "uncounted zero" - i.e. it's time
-   * to release the memory. Even if uncountedDecRef() returns false,
-   * the caller must not do anything further with the uncounted object,
+   * sharedIncRef() will increment this count, and sharedDecRef()
+   * will decrement this count. sharedDecRef() will return true if
+   * we've dec-ref-ed this value to "shared zero" - i.e. it's time
+   * to release the memory. Even if sharedDecRef() returns false,
+   * the caller must not do anything further with the shared object,
    * because another thread may destroy it in the meantime.
    *
-   * Note uncountedIncRef actually subtracts one from the refcount,
-   * and uncountedDecRef adds one to it; but callers shouldn't care.
+   * Note sharedIncRef actually subtracts one from the refcount,
+   * and sharedDecRef adds one to it; but callers shouldn't care.
    */
-  void uncountedIncRef() const;
-  bool uncountedDecRef() const;
+  void sharedIncRef() const;
+  bool sharedDecRef() const;
   /*
-   * Like cowCheck(), but for uncounted values. Returns true if the count
-   * for this value is anything other than "uncounted one".
+   * Like cowCheck(), but for shared values. Returns true if the count
+   * for this value is anything other than "shared one".
    *
-   * If a caller is going to use this check to mutate an uncounted value,
+   * If a caller is going to use this check to mutate a shared value,
    * it must know that no other thread has a copy of this value and may
    * mutate the result. An example of when we can use this check is in APC:
-   * if we're going to store a value there, and !uncountedCowCheck, then we
+   * if we're going to store a value there, and !sharedCowCheck, then we
    * can modify the object freely before publishing it.
    */
-  bool uncountedCowCheck() const;
+  bool sharedCowCheck() const;
   /*
-   * In debug mode, we call this prior to releasing an uncounted array or
+   * In debug mode, we call this prior to releasing a shared array or
    * string in order to undo the last dec-ref and make the count valid again.
    */
-  void uncountedFixCountForRelease() const;
+  void sharedFixCountForRelease() const;
   /*
-   * Returns true if the value is persistent (static or uncounted). If it is
-   * uncounted, does an uncountedIncRef() before returning.
+   * Returns true if the value is persistent (static or shared). If it is
+   * shared, does an sharedIncRef() before returning.
    */
   bool persistentIncRef() const;
 };
@@ -127,7 +127,7 @@ struct Countable : MaybeCountable {
   bool hasMultipleRefs() const;
   bool hasExactlyOneRef() const;
   bool isStatic() const;
-  bool isUncounted() const;
+  bool isShared() const;
   void incRefCount() const;
   void rawIncRefCount() const;
   void decRefCount() const;
@@ -136,41 +136,41 @@ struct Countable : MaybeCountable {
   bool cowCheck() const;
 };
 
-ALWAYS_INLINE void MaybeCountable::uncountedIncRef() const {
-  assertx(isUncounted());
+ALWAYS_INLINE void MaybeCountable::sharedIncRef() const {
+  assertx(isShared());
   auto& count = m_atomic_count;
   auto const DEBUG_ONLY val = count.fetch_sub(1, std::memory_order_acq_rel);
-  assertx(val <= UncountedValue);
+  assertx(val <= SharedValue);
 }
 
-ALWAYS_INLINE bool MaybeCountable::uncountedDecRef() const {
-  assertx(isUncounted());
+ALWAYS_INLINE bool MaybeCountable::sharedDecRef() const {
+  assertx(isShared());
   auto const val = m_atomic_count.fetch_add(1, std::memory_order_acq_rel);
-  return val == UncountedValue;
+  return val == SharedValue;
 }
 
-ALWAYS_INLINE bool MaybeCountable::uncountedCowCheck() const {
+ALWAYS_INLINE bool MaybeCountable::sharedCowCheck() const {
   assertx(!isRefCounted());
   auto const val = m_atomic_count.load(std::memory_order_acquire);
-  return val != UncountedValue;
+  return val != SharedValue;
 }
 
-ALWAYS_INLINE void MaybeCountable::uncountedFixCountForRelease() const {
-  assertx(m_count == UncountedZero);
+ALWAYS_INLINE void MaybeCountable::sharedFixCountForRelease() const {
+  assertx(m_count == SharedZero);
   if (debug) m_atomic_count--;
 }
 
 ALWAYS_INLINE bool MaybeCountable::persistentIncRef() const {
   if (isRefCounted()) return false;
   if (isStatic()) return true;
-  uncountedIncRef();
+  sharedIncRef();
   return true;
 }
 
 ALWAYS_INLINE bool MaybeCountable::checkCount() const {
   // If this assertion fails, it indicates a double-free. Check it separately.
   assertx(m_count < RefCountMaxRealistic);
-  return m_count >= 1 || m_count <= UncountedValue || m_count == StaticValue;
+  return m_count >= 1 || m_count <= SharedValue || m_count == StaticValue;
 }
 
 ALWAYS_INLINE bool MaybeCountable::checkCountZ() const {
@@ -196,7 +196,7 @@ ALWAYS_INLINE bool Countable::isRefCounted() const {
 }
 
 ALWAYS_INLINE bool MaybeCountable::hasMultipleRefs() const {
-  return uint32_t(m_count) > 1; // treat Static/Uncounted as large counts
+  return uint32_t(m_count) > 1; // treat Static/Shared as large counts
 }
 
 ALWAYS_INLINE bool Countable::hasMultipleRefs() const {
@@ -303,12 +303,12 @@ ALWAYS_INLINE bool Countable::isStatic() const {
   return false;
 }
 
-ALWAYS_INLINE bool MaybeCountable::isUncounted() const {
+ALWAYS_INLINE bool MaybeCountable::isShared() const {
   assertx(checkCount());
-  return m_count <= UncountedValue;
+  return m_count <= SharedValue;
 }
 
-ALWAYS_INLINE bool Countable::isUncounted() const {
+ALWAYS_INLINE bool Countable::isShared() const {
   assertx(checkCount());
   return false;
 }

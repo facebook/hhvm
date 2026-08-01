@@ -235,10 +235,10 @@ struct APCHandle {
   }
 
   /*
-   * If true, this APCHandle is an APCTypedValue holding an "uncounted"
+   * If true, this APCHandle is an APCTypedValue holding a "shared"
    * array-like or string (not a static or refcounted value).
    */
-  bool isUncounted() const {
+  bool isShared() const {
     return m_kind == APCKind::UncountedArray ||
            m_kind == APCKind::UncountedBespoke ||
            m_kind == APCKind::UncountedString;

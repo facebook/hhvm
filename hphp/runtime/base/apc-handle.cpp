@@ -419,7 +419,7 @@ bool APCHandle::checkInvariants() const {
 
 void APCHandle::unreferenceRoot(size_t size) {
   assertx(isSingletonKind() || m_unref_root_count++ == 0);
-  if (!isUncounted()) {
+  if (!isShared()) {
     atomicDecRef();
   } else if (APCTypedValue::UseStringHazardPointers()) {
     APCTypedValue::fromHandle(this)->deleteUncounted();

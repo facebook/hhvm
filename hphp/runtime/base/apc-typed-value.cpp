@@ -76,8 +76,8 @@ APCTypedValue* APCTypedValue::ForArray(ArrayData* ad) {
                                    : APCKind::UncountedArray;
 
   // Check if the "co-allocate array and APCTypedValue" optimization hit.
-  // It hit if we a) made a new uncounted array and b) its flag is set.
-  if (ad->uncountedCowCheck() || !ad->hasApcTv()) {
+  // It hit if we a) made a new shared array and b) its flag is set.
+  if (ad->sharedCowCheck() || !ad->hasApcTv()) {
     return new APCTypedValue(ad, kind, dt);
   }
 
@@ -125,7 +125,7 @@ bool APCTypedValue::checkInvariants() const {
     case APCKind::PersistentClsMeth:
       assertx(m_data.pclsmeth->getCls()->isPersistent()); break;
     case APCKind::StaticString: assertx(m_data.str->isStatic()); break;
-    case APCKind::UncountedString: assertx(m_data.str->isUncounted()); break;
+    case APCKind::UncountedString: assertx(m_data.str->isShared()); break;
     case APCKind::LazyClass: assertx(m_data.str->isStatic()); break;
 
     case APCKind::StaticArray:
@@ -139,7 +139,7 @@ bool APCTypedValue::checkInvariants() const {
     case APCKind::UncountedArray:
     case APCKind::UncountedBespoke: {
       DEBUG_ONLY auto const ad = m_data.arr.load(std::memory_order_acquire);
-      assertx(ad->isUncounted());
+      assertx(ad->isShared());
       assertx(ad->toPersistentDataType() == m_handle.type());
       break;
     }
@@ -168,7 +168,7 @@ bool APCTypedValue::checkInvariants() const {
 //////////////////////////////////////////////////////////////////////
 
 void APCTypedValue::deleteUncounted() {
-  assertx(m_handle.isUncounted());
+  assertx(m_handle.isShared());
   static_assert(std::is_trivially_destructible<APCTypedValue>::value,
                 "APCTypedValue must be trivially destructible - "
                 "*Array::ReleaseUncounted() frees the memory without "
@@ -215,7 +215,7 @@ TypedValue APCTypedValue::toTypedValue() const {
   auto const kind = m_handle.kind();
   if (UseStringHazardPointers() && kind == APCKind::UncountedString) {
     s_string_hazard_pointers->push_back({m_data.str});
-    m_data.str->uncountedIncRef();
+    m_data.str->sharedIncRef();
     tv.m_data.pstr = m_data.str;
   } else if (kind == APCKind::UncountedBespoke) {
     tv.m_data.parr = readAPCBespoke(this);

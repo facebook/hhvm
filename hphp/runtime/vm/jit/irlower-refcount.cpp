@@ -101,7 +101,7 @@ void ifNonPersistent(Vout& v, Vout& vtaken, Type ty, Vloc loc, Then then) {
   }
 
   auto const sf = emitCmpRefCount(v, 0, loc.reg());
-  static_assert(UncountedValue < 0 && StaticValue < 0, "");
+  static_assert(SharedValue < 0 && StaticValue < 0, "");
   unlikelyIfThen(v, vtaken, CC_GE, sf, then);
 }
 

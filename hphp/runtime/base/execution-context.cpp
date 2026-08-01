@@ -1979,7 +1979,7 @@ void ExecutionContext::enqueueAPCDeferredExpire(const OptString& key) {
 }
 
 void ExecutionContext::enqueueAPCHandle(APCHandle* handle, size_t size) {
-  assertx(handle->isUncounted());
+  assertx(handle->isShared());
   m_apcHandles.push_back(handle);
   m_apcMemSize += size;
 }

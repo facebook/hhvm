@@ -431,8 +431,8 @@ static std::string toStringElm(TypedValue tv) {
   auto print_count = [&] {
     if (tv.m_data.pcnt->isStatic()) {
       os << ":c(static)";
-    } else if (tv.m_data.pcnt->isUncounted()) {
-      os << ":c(uncounted)";
+    } else if (tv.m_data.pcnt->isShared()) {
+      os << ":c(shared)";
     } else {
       os << ":c(" << tvGetCount(tv) << ")";
     }

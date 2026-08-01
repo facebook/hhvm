@@ -171,7 +171,7 @@ the Hack level).
   Int            | `int64_t` (64-bit two's complement binary integer)
   Dbl            | `double` (IEEE 754 64-bit binary floating point)
   StaticStr      | `StringData*` where `isStatic() == true`
-  UncountedStr   | `StringData*` where `isUncounted() == true`
+  UncountedStr   | `StringData*` where `isShared() == true`
   PersistentStr  | `StringData*` `{StaticStr+UncountedStr}`
   CountedStr     | `StringData*` where `isRefCounted() == true`
   Str            | `StringData*` `{PersistentStr+CountedStr}`

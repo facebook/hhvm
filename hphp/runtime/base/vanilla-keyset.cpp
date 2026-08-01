@@ -159,7 +159,7 @@ ArrayData* VanillaKeyset::MakeUncounted(
 
   auto const index = computeIndexFromScale(scale);
   auto const aux = packSizeIndexAndAuxBits(index, hasApcTv ? kHasApcTv : 0);
-  dest->initHeader_16(HeaderKind::Keyset, UncountedValue, aux);
+  dest->initHeader_16(HeaderKind::Keyset, SharedValue, aux);
 
   // Make sure all strings are uncounted.
   auto const elms = dest->data();
@@ -273,7 +273,7 @@ void VanillaKeyset::Release(ArrayData* in) {
 }
 
 void VanillaKeyset::ReleaseUncounted(ArrayData* in) {
-  assertx(!in->uncountedCowCheck());
+  assertx(!in->sharedCowCheck());
   auto const ad = asSet(in);
 
   if (!ad->isZombie()) {

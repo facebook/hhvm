@@ -154,7 +154,7 @@ StringData* StringData::MakePersistentAt(folly::StringPiece sl, MemBlock range) 
   );
   auto const data = reinterpret_cast<char*>(sd + 1);
 
-  auto const count = trueStatic ? StaticValue : UncountedValue;
+  auto const count = trueStatic ? StaticValue : SharedValue;
   if (trueStatic) {
     auto constexpr aux = kIsSymbolMask << 8 | kInvalidColor;
     sd->initHeader_16(HeaderKind::String, count, aux);
@@ -173,7 +173,7 @@ StringData* StringData::MakePersistentAt(folly::StringPiece sl, MemBlock range) 
   ret->preCompute();                    // get m_hash right
 
   assertx(ret == sd);
-  assertx(trueStatic ? ret->isStatic() : ret->isUncounted());
+  assertx(trueStatic ? ret->isStatic() : ret->isShared());
   assertx(ret->isSymbol() == trueStatic);
   assertx(ret->checkSane());
   return ret;
@@ -222,7 +222,7 @@ void StringData::destructStatic() {
 
 void StringData::ReleaseUncounted(StringData* str) {
   assertx(str->checkSane());
-  assertx(!str->uncountedCowCheck());
+  assertx(!str->sharedCowCheck());
   FreeUncounted(str, str->size() + kStringOverhead);
 }
 
@@ -526,7 +526,7 @@ void StringData::dump() const {
 
   printf("StringData(%d) (%s%s%d): [", m_count,
          isStatic() ? "static " : "",
-         isUncounted() ? "uncounted " : "",
+         isShared() ? "shared " : "",
          static_cast<int>(s.size()));
   for (uint32_t i = 0; i < s.size(); i++) {
     char ch = s.data()[i];

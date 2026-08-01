@@ -22,13 +22,13 @@
 namespace HPHP {
 
 inline void APCHandle::referenceNonRoot() const {
-  if (!isUncounted()) {
+  if (!isShared()) {
     atomicIncRef();
   }
 }
 
 inline void APCHandle::unreferenceNonRoot() const {
-  if (!isUncounted()) {
+  if (!isShared()) {
     atomicDecRef();
   }
 }

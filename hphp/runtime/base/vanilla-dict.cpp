@@ -430,7 +430,7 @@ ArrayData* VanillaDict::MakeUncounted(
   // multiple of 16 bytes and extra is also a multiple of 16.
   assertx((extra & 0xf) == 0);
   bcopy32_inline(ad, a, sizeof(VanillaDict) + sizeof(Elm) * used + 24);
-  ad->m_count = UncountedValue; // after bcopy, update count
+  ad->m_count = SharedValue; // after bcopy, update count
   if (hasApcTv) {
     ad->m_aux16 |= kHasApcTv;
   } else {
@@ -523,7 +523,7 @@ void VanillaDict::Release(ArrayData* in) {
 
 NEVER_INLINE
 void VanillaDict::ReleaseUncounted(ArrayData* in) {
-  assertx(!in->uncountedCowCheck());
+  assertx(!in->sharedCowCheck());
   auto const ad = as(in);
 
   if (!ad->isZombie()) {

@@ -130,7 +130,7 @@ ArrayData* MakeUncountedArray(
     seenArr = &(*env.seenArrays)[in];
     auto arr = *seenArr;
     if (arr) {
-      arr->uncountedIncRef();
+      arr->sharedIncRef();
       return arr;
     }
   }
@@ -174,16 +174,16 @@ void DecRefUncounted(TypedValue tv) {
 
 void DecRefUncountedArray(ArrayData* ad) {
   assertx(!ad->isRefCounted());
-  if (ad->isUncounted() && ad->uncountedDecRef()) {
-    ad->uncountedFixCountForRelease();
+  if (ad->isShared() && ad->sharedDecRef()) {
+    ad->sharedFixCountForRelease();
     ad->releaseUncounted();
   }
 }
 
 void DecRefUncountedString(StringData* sd) {
   assertx(!sd->isRefCounted());
-  if (sd->isUncounted() && sd->uncountedDecRef()) {
-    sd->uncountedFixCountForRelease();
+  if (sd->isShared() && sd->sharedDecRef()) {
+    sd->sharedFixCountForRelease();
     StringData::ReleaseUncounted(sd);
   }
 }

@@ -251,7 +251,7 @@ struct HotCache {
                                         KeyConverter>;
 
   static bool supportedKind(const APCHandle* h) {
-    return h->isSingletonKind() || h->isUncounted();
+    return h->isSingletonKind() || h->isShared();
   }
 
   bool clearValueIdx(Idx idx);

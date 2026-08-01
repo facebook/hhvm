@@ -333,7 +333,7 @@ LoggingArray* LoggingArray::MakeStatic(ArrayData* ad, LoggingProfile* profile) {
 LoggingArray* LoggingArray::MakeUncounted(
     ArrayData* ad, LoggingProfile* profile, bool hasApcTv) {
   assertx(ad->isVanilla());
-  assertx(ad->isStatic() || ad->isUncounted());
+  assertx(ad->isStatic() || ad->isShared());
 
   auto const bytes = sizeof(LoggingArray);
   auto const extra = uncountedAllocExtra(ad, hasApcTv);

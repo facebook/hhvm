@@ -181,7 +181,7 @@ struct StringData final : MaybeCountable,
   /*
    * StringData objects allocated with MakeUncounted should be freed
    * using this function. It will remove a reference via
-   * uncountedDecRef, and if necessary destroy the StringData and
+   * sharedDecRef, and if necessary destroy the StringData and
    * return true.
    */
   static void ReleaseUncounted(StringData*);

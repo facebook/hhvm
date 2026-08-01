@@ -79,7 +79,7 @@ struct APCTypedValue {
   enum class UncountedStr {};
   APCTypedValue(UncountedStr, StringData* data)
     : m_handle(APCKind::UncountedString, KindOfPersistentString) {
-    assertx(data->isUncounted());
+    assertx(data->isShared());
     m_data.str = data;
     assertx(checkInvariants());
   }
@@ -160,7 +160,7 @@ struct APCTypedValue {
       auto const value = new APCTypedValue(StaticStr{}, data);
       return {value->getHandle(), sizeof(APCTypedValue)};
     }
-    data->uncountedIncRef();
+    data->sharedIncRef();
     auto const value = new APCTypedValue(UncountedStr{}, data);
     return {value->getHandle(), sizeof(APCTypedValue)};
   }

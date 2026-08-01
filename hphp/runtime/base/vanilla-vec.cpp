@@ -445,7 +445,7 @@ void VanillaVec::Release(ArrayData* ad) {
 NEVER_INLINE
 void VanillaVec::ReleaseUncounted(ArrayData* ad) {
   assertx(checkInvariants(ad));
-  assertx(!ad->uncountedCowCheck());
+  assertx(!ad->sharedCowCheck());
 
   for (uint32_t i = 0; i < ad->m_size; ++i) {
     DecRefUncounted(*LvalUncheckedInt(ad, i));
@@ -745,7 +745,7 @@ ArrayData* VanillaVec::MakeUncounted(
   auto ad = reinterpret_cast<ArrayData*>(mem + extra);
   ad->initHeader_16(
     array->m_kind,
-    UncountedValue,
+    SharedValue,
     packSizeIndexAndAuxBits(sizeIndex, array->auxBits()) |
     (hasApcTv ? ArrayData::kHasApcTv : 0)
   );
@@ -764,7 +764,7 @@ ArrayData* VanillaVec::MakeUncounted(
   assertx(capacity(ad) >= size);
   assertx(ad->m_size == size);
   assertx(ad->m_layout_index == array->m_layout_index);
-  assertx(ad->isUncounted());
+  assertx(ad->isShared());
   assertx(checkInvariants(ad));
   return ad;
 }

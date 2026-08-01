@@ -200,7 +200,7 @@ struct APCStats {
   void addAPCValue(APCHandle* handle, size_t size) {
     assertx(handle && size > 0);
     m_valueSize->addValue(size);
-    if (handle->isUncounted()) {
+    if (handle->isShared()) {
       m_uncountedEntries->increment();
     }
     if (m_detailedStats) {
@@ -230,7 +230,7 @@ struct APCStats {
                       bool expired) {
     assertx(size > 0);
     m_valueSize->addValue(-size);
-    if (handle->isUncounted()) {
+    if (handle->isShared()) {
       m_uncountedEntries->decrement();
     }
     if (m_detailedStats) {

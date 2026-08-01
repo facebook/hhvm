@@ -51,7 +51,7 @@ void FreeUncounted(void* ptr, size_t bytes);
  *
  * For refcounted and uncounted inputs, this operation produces a net increase
  * of one "uncounted refcount". For refcounted inputs, it creates a new value
- * with uncounted refcount 1, and for uncounted, it does an uncountedIncRef().
+ * with uncounted refcount 1, and for uncounted, it does an sharedIncRef().
  * (Primitives and statics are not refcounted in any way.)
  *
  * "hasApcTv" is a request to leave space for an APCTypedValue just before the

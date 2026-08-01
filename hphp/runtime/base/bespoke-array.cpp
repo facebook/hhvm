@@ -93,7 +93,7 @@ ArrayData* BespokeArray::MakeUncounted(
   memcpy8(reinterpret_cast<char*>(result),
           reinterpret_cast<char*>(ad), bytes);
   auto const aux = ad->m_aux16 | (hasApcTv ? ArrayData::kHasApcTv : 0);
-  result->initHeader_16(HeaderKind(ad->kind()), UncountedValue, aux);
+  result->initHeader_16(HeaderKind(ad->kind()), SharedValue, aux);
   assertx(asBespoke(result)->layoutIndex() == asBespoke(ad)->layoutIndex());
 
   auto const vindex = getVtableIndex(ad);
@@ -103,7 +103,7 @@ ArrayData* BespokeArray::MakeUncounted(
 }
 
 void BespokeArray::ReleaseUncounted(ArrayData* ad) {
-  assertx(!ad->uncountedCowCheck());
+  assertx(!ad->sharedCowCheck());
   auto const vindex = getVtableIndex(ad);
   g_layout_funcs.fnReleaseUncounted[vindex](ad);
 

@@ -2414,7 +2414,7 @@ std::uint32_t DynamicPatch::DynamicSafePatch::encode(Protocol& prot) const {
 
 template <typename Protocol>
 void DynamicPatch::DynamicSafePatch::decode(Protocol& prot) {
-  std::int32_t version;
+  std::int32_t version = 0;
   std::unique_ptr<folly::IOBuf> data;
 
   std::string name;
@@ -2512,6 +2512,9 @@ DynamicPatch DynamicPatch::fromSafePatch(const type::AnyStruct& any) {
   } else {
     folly::throw_exception<std::runtime_error>(
         "Unsupported protocol when parsing SafePatch.");
+  }
+  if (safePatch.version() <= 0 || !safePatch.data()) {
+    throw std::runtime_error("Missing required SafePatch envelope fields");
   }
   if (safePatch.version() > op::detail::kThriftDynamicPatchVersion) {
     throw std::runtime_error(

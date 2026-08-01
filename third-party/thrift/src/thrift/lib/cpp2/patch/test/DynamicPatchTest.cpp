@@ -1424,6 +1424,15 @@ TEST(DynamicPatch, DynamicSafePatchInvalid) {
       (void)DynamicPatch::fromSafePatch(safePatchAny), std::runtime_error);
 }
 
+TEST(DynamicPatch, DynamicSafePatchMissingEnvelopeFields) {
+  type::AnyStruct safePatchAny;
+  safePatchAny.protocol() = type::StandardProtocol::Compact;
+  safePatchAny.data() = *folly::IOBuf::copyBuffer("\0", 1);
+
+  EXPECT_THROW(
+      (void)DynamicPatch::fromSafePatch(safePatchAny), std::runtime_error);
+}
+
 TEST(DynamicPatch, DynamicSafePatchV2) {
   {
     op::AnyPatch anyPatch;

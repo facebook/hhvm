@@ -133,6 +133,25 @@ TEST_F(QuicWebTransportTest, Datagram) {
   eventBase_.loop();
 }
 
+// Two datagrams are delivered in a single onDatagramsAvailable() callback. The
+// handler closes the session while processing the first one (mirroring
+// MoQSession::onDatagram() calling close() on a protocol violation), which
+// clears handler_ mid-loop. The loop must drop the remaining datagram rather
+// than dispatch it to the cleared handler_, which previously caused a
+// remotely-triggerable null-deref / use-after-free crash.
+TEST_F(QuicWebTransportTest, DatagramHandlerClosesSessionMidLoop) {
+  socketDriver_.addDatagram(folly::IOBuf::copyBuffer("first"));
+  socketDriver_.addDatagram(folly::IOBuf::copyBuffer("second"));
+  // onDatagram must be invoked exactly once: processing the first datagram
+  // tears down the session, so the second must not be delivered.
+  EXPECT_CALL(*handler_, onDatagram(_))
+      .WillOnce([this](std::unique_ptr<folly::IOBuf>) {
+        webTransport()->closeSession();
+      });
+  socketDriver_.addDatagramsAvailableReadEvent();
+  eventBase_.loop();
+}
+
 TEST_F(QuicWebTransportTest, OnStopSending) {
   auto handle = webTransport()->createUniStream();
   EXPECT_TRUE(handle.hasValue());

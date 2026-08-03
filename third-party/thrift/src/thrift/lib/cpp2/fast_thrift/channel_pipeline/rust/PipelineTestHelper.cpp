@@ -1445,7 +1445,6 @@ ForwardUnknownResult run_forward_unknown_test() noexcept {
   MockTailHandler tail;
   TestAllocator allocator;
 
-  using ProductionRustHandler = RustHandler<detail::ContextImpl>;
   auto rustHandler = std::make_unique<ProductionRustHandler>(
       rust_handler_new_forwarding_test());
   auto pipeline =

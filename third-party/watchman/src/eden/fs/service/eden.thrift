@@ -162,6 +162,12 @@ enum EdenErrorType {
   * the higher bits of the error code can be utilized to disambiguate.
   */
   NETWORK_ERROR = 11,
+  /**
+   * The current EdenFS Thrift service is intentionally shutting down, so the
+   * request or stream cannot continue. Clients should reconnect to the
+   * recovered or replacement service. errorCode will not be set.
+   */
+  SHUTTING_DOWN = 12,
 }
 
 exception EdenError {

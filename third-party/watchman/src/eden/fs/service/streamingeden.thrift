@@ -141,9 +141,9 @@ service StreamingEdenService extends eden.EdenService {
    * subscribeStreamTemporary is deprecated. Please use streamJournalChanged.
    */
   @thrift.DeprecatedUnvalidatedAnnotations{items = {"deprecated": "1"}}
-  stream<eden.JournalPosition> subscribeStreamTemporary(
-    1: eden.PathString mountPoint,
-  );
+  stream<
+    eden.JournalPosition throws (1: eden.EdenError ex)
+  > subscribeStreamTemporary(1: eden.PathString mountPoint);
 
   /**
    *
@@ -155,11 +155,13 @@ service StreamingEdenService extends eden.EdenService {
    * unblock future notifications on this subscription. If the subscriber
    * never calls changesSinceV2 or getCurrentJournalPosition in
    * response to a notification on this stream, future notifications may not
-   * arrive.
+   * arrive. The stream completes with SHUTTING_DOWN when the current Thrift
+   * service stops, including during takeover. Clients should reconnect even if
+   * the EdenFS process recovers from a failed takeover.
    */
-  stream<eden.JournalPosition> streamJournalChanged(
-    1: eden.PathString mountPoint,
-  );
+  stream<
+    eden.JournalPosition throws (1: eden.EdenError ex)
+  > streamJournalChanged(1: eden.PathString mountPoint);
 
   /**
    * Returns, in order, a stream of FUSE or PrjFS requests and responses for

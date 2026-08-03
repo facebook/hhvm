@@ -104,7 +104,7 @@ APCHandle::Pair APCHandle::Create(const_variant_ref source,
         return {value->getHandle(), sizeof(APCTypedValue)};
       }
       auto const st = StringData::MakeShared(s->slice());
-      auto const value = new APCTypedValue(APCTypedValue::UncountedStr{}, st);
+      auto const value = new APCTypedValue(APCTypedValue::SharedStr{}, st);
       return {value->getHandle(), st->size() + sizeof(APCTypedValue)};
     }
 
@@ -174,9 +174,9 @@ Variant APCHandle::toLocalHelper(bool pure) const {
     case APCKind::StaticArray:
     case APCKind::StaticBespoke:
     case APCKind::StaticString:
-    case APCKind::UncountedArray:
-    case APCKind::UncountedBespoke:
-    case APCKind::UncountedString:
+    case APCKind::SharedArray:
+    case APCKind::SharedBespoke:
+    case APCKind::SharedString:
       not_reached();
 
     case APCKind::FuncEntity:
@@ -253,9 +253,9 @@ bool APCHandle::toLocalMayRaise() const {
     case APCKind::StaticArray:
     case APCKind::StaticBespoke:
     case APCKind::StaticString:
-    case APCKind::UncountedArray:
-    case APCKind::UncountedBespoke:
-    case APCKind::UncountedString:
+    case APCKind::SharedArray:
+    case APCKind::SharedBespoke:
+    case APCKind::SharedString:
       return false;
 
     case APCKind::FuncEntity:
@@ -345,9 +345,9 @@ void APCHandle::deleteCopied() {
       freeAPCBespoke(APCTypedValue::fromHandle(this));
       return;
 
-    case APCKind::UncountedArray:
-    case APCKind::UncountedBespoke:
-    case APCKind::UncountedString:
+    case APCKind::SharedArray:
+    case APCKind::SharedBespoke:
+    case APCKind::SharedString:
       assertx(false);
       return;
   }
@@ -384,13 +384,13 @@ bool APCHandle::checkInvariants() const {
       assertx(m_type == KindOfClsMeth);
       return true;
     case APCKind::StaticString:
-    case APCKind::UncountedString:
+    case APCKind::SharedString:
       assertx(m_type == KindOfPersistentString);
       return true;
     case APCKind::StaticArray:
     case APCKind::StaticBespoke:
-    case APCKind::UncountedArray:
-    case APCKind::UncountedBespoke:
+    case APCKind::SharedArray:
+    case APCKind::SharedBespoke:
       assertx(m_type == KindOfPersistentVec ||
               m_type == KindOfPersistentDict ||
               m_type == KindOfPersistentKeyset);
@@ -422,7 +422,7 @@ void APCHandle::unreferenceRoot(size_t size) {
   if (!isShared()) {
     atomicDecRef();
   } else if (APCTypedValue::UseStringHazardPointers()) {
-    APCTypedValue::fromHandle(this)->deleteUncounted();
+    APCTypedValue::fromHandle(this)->deleteShared();
   } else {
     g_context->enqueueAPCHandle(this, size);
   }

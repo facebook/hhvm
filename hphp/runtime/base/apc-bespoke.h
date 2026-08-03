@@ -33,7 +33,7 @@ struct APCTypedValue;
  * The `tv` field will be non-nullptr if and only if we made an APCBespoke -
  * that is, a wrapper around APCTypedValue that profiles lookups on this APC
  * stored value. In this case, the allocation is managed by us, and the caller
- * should init `tv` with an APCKind of StaticBespoke / UncountedBespoke.
+ * should init `tv` with an APCKind of StaticBespoke / SharedBespoke.
  */
 struct APCBespoke {
   ArrayData* ad = nullptr;

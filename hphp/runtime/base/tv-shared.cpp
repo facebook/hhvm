@@ -30,21 +30,21 @@ namespace HPHP {
 
 void* AllocShared(size_t bytes) {
   if (APCStats::IsCreated()) {
-    APCStats::getAPCStats().addAPCUncountedBlock();
+    APCStats::getAPCStats().addAPCSharedBlock();
   }
   return uncounted_malloc(bytes);
 }
 
 void FreeShared(void* ptr) {
   if (APCStats::IsCreated()) {
-    APCStats::getAPCStats().removeAPCUncountedBlock();
+    APCStats::getAPCStats().removeAPCSharedBlock();
   }
   return uncounted_free(ptr);
 }
 
 void FreeShared(void* ptr, size_t bytes) {
   if (APCStats::IsCreated()) {
-    APCStats::getAPCStats().removeAPCUncountedBlock();
+    APCStats::getAPCStats().removeAPCSharedBlock();
   }
   return uncounted_sized_free(ptr, bytes);
 }

@@ -296,7 +296,7 @@ namespace {
  * so we'll never create them on jumpstart consumers.
  *
  * This structure contains an APCTypedValue with APCKind "StaticBespoke" or
- * "UncountedBespoke". The array in that profile is (recursively) composed
+ * "SharedBespoke". The array in that profile is (recursively) composed
  * entirely of vanilla arrays. We'll return this array if we decide not to
  * log a given fetch.
  *

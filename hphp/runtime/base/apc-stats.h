@@ -76,7 +76,7 @@ struct APCDetailedStats {
   void collectStats(std::map<const StringData*, int64_t>& stats) const;
 
   // A new value was added to APC. This is a fresh value not replacing
-  // an existing value. 
+  // an existing value.
   void addAPCValue(APCHandle* handle);
   // A new value replaces an existing one
   void updateAPCValue(APCHandle* handle, APCHandle* oldHandle, bool expired);
@@ -98,9 +98,9 @@ private:
   ServiceData::ExportedCounter* m_uncounted;
   // Number of APC strings
   ServiceData::ExportedCounter* m_apcString;
-  // Number of uncounted strings. Uncounted strings are kind of
+  // Number of shared strings. Shared strings are kind of
   // static strings whose lifetime is controlled by the treadmill
-  ServiceData::ExportedCounter* m_uncString;
+  ServiceData::ExportedCounter* m_sharedString;
   // Number of serialized vecs
   ServiceData::ExportedCounter* m_serVec;
   // Number of serialized dicts
@@ -113,15 +113,15 @@ private:
   ServiceData::ExportedCounter* m_apcDict;
   // Number of APC keysets
   ServiceData::ExportedCounter* m_apcKeyset;
-  // Number of uncounted vecs. Uncounted vecs are kind of
+  // Number of shared vecs. Shared vecs are kind of
   // static vecs whose lifetime is controlled by the treadmill
-  ServiceData::ExportedCounter* m_uncVec;
-  // Number of uncounted dicts. Uncounted dicts are kind of
+  ServiceData::ExportedCounter* m_sharedVec;
+  // Number of shared dicts. Shared dicts are kind of
   // static dicts whose lifetime is controlled by the treadmill
-  ServiceData::ExportedCounter* m_uncDict;
-  // Number of uncounted keysets. Uncounted keysets are kind of
+  ServiceData::ExportedCounter* m_sharedDict;
+  // Number of shared keysets. Shared keysets are kind of
   // static keysets whose lifetime is controlled by the treadmill
-  ServiceData::ExportedCounter* m_uncKeyset;
+  ServiceData::ExportedCounter* m_sharedKeyset;
   // Number of serialized objects
   ServiceData::ExportedCounter* m_serObject;
   // Number of APC objects
@@ -185,13 +185,13 @@ struct APCStats {
   }
 
   // Only call this method from ::MakeShared()
-  void addAPCUncountedBlock() {
-    m_uncountedBlocks->increment();
+  void addAPCSharedBlock() {
+    m_sharedBlocks->increment();
   }
 
   // Only call this method from ::ReleaseShared()
-  void removeAPCUncountedBlock() {
-    m_uncountedBlocks->decrement();
+  void removeAPCSharedBlock() {
+    m_sharedBlocks->decrement();
   }
 
   // A new value was added to APC. This is a fresh value not replacing
@@ -201,7 +201,7 @@ struct APCStats {
     assertx(handle && size > 0);
     m_valueSize->addValue(size);
     if (handle->isShared()) {
-      m_uncountedEntries->increment();
+      m_sharedEntries->increment();
     }
     if (m_detailedStats) {
       m_detailedStats->addAPCValue(handle);
@@ -231,7 +231,7 @@ struct APCStats {
     assertx(size > 0);
     m_valueSize->addValue(-size);
     if (handle->isShared()) {
-      m_uncountedEntries->decrement();
+      m_sharedEntries->decrement();
     }
     if (m_detailedStats) {
       m_detailedStats->removeAPCValue(handle, expired);
@@ -280,10 +280,10 @@ private:
 
   // Number of entries (keys)
   ServiceData::ExportedCounter* m_entries;
-  // Number of uncounted entries
-  ServiceData::ExportedCounter* m_uncountedEntries;
-  // Number of uncounted blocks
-  ServiceData::ExportedCounter* m_uncountedBlocks;
+  // Number of shared entries
+  ServiceData::ExportedCounter* m_sharedEntries;
+  // Number of shared blocks
+  ServiceData::ExportedCounter* m_sharedBlocks;
 
   // detailed info
   APCDetailedStats* m_detailedStats;

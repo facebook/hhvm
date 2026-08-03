@@ -68,7 +68,7 @@ APCArray::MakeCopiedImpl(ArrayData* arr, APCHandleLevel level,
         tl_heap->getAllocated() - tl_heap->getDeallocated() :
         seenArrays.get() ? getMemSize(seenArrays.get()) :
         ::HPHP::getMemSize(arr, true);
-      auto const uncounted_arr = [&]() {
+      auto const shared_arr = [&]() {
         auto const seenStrings = apcExtension::ShareUncounted ?
           req::make_unique<MakeSharedEnv::StringSet>() : nullptr;
         return MakeSharedArray(arr, seenArrays.get(), seenStrings.get());
@@ -80,7 +80,7 @@ APCArray::MakeCopiedImpl(ArrayData* arr, APCHandleLevel level,
       // Bespoke logic in MakeSharedArray() may even free stuff
       if (static_cast<int64_t>(size) <= 0) size = 1;
       assertx(size > 0);
-      return {uncounted_arr, size + sizeof(APCTypedValue)};
+      return {shared_arr, size + sizeof(APCTypedValue)};
     }
   }
 

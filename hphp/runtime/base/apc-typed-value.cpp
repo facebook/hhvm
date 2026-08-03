@@ -67,13 +67,13 @@ APCTypedValue* APCTypedValue::ForArray(ArrayData* ad) {
   // If we made an APCBespoke, it'll always be part of a joint allocation.
   if (result.tv) {
     auto const kind = ad->isStatic() ? APCKind::StaticBespoke
-                                     : APCKind::UncountedBespoke;
+                                     : APCKind::SharedBespoke;
     return new (result.tv) APCTypedValue(ad, kind, dt);
   }
 
   // We didn't make an APCBespoke. Just use a regular persistent array.
   auto const kind = ad->isStatic() ? APCKind::StaticArray
-                                   : APCKind::UncountedArray;
+                                   : APCKind::SharedArray;
 
   // Check if the "co-allocate array and APCTypedValue" optimization hit.
   // It hit if we a) made a new shared array and b) its flag is set.
@@ -125,7 +125,7 @@ bool APCTypedValue::checkInvariants() const {
     case APCKind::PersistentClsMeth:
       assertx(m_data.pclsmeth->getCls()->isPersistent()); break;
     case APCKind::StaticString: assertx(m_data.str->isStatic()); break;
-    case APCKind::UncountedString: assertx(m_data.str->isShared()); break;
+    case APCKind::SharedString: assertx(m_data.str->isShared()); break;
     case APCKind::LazyClass: assertx(m_data.str->isStatic()); break;
 
     case APCKind::StaticArray:
@@ -136,8 +136,8 @@ bool APCTypedValue::checkInvariants() const {
       break;
     }
 
-    case APCKind::UncountedArray:
-    case APCKind::UncountedBespoke: {
+    case APCKind::SharedArray:
+    case APCKind::SharedBespoke: {
       DEBUG_ONLY auto const ad = m_data.arr.load(std::memory_order_acquire);
       assertx(ad->isShared());
       assertx(ad->toPersistentDataType() == m_handle.type());
@@ -167,7 +167,7 @@ bool APCTypedValue::checkInvariants() const {
 
 //////////////////////////////////////////////////////////////////////
 
-void APCTypedValue::deleteUncounted() {
+void APCTypedValue::deleteShared() {
   assertx(m_handle.isShared());
   static_assert(std::is_trivially_destructible<APCTypedValue>::value,
                 "APCTypedValue must be trivially destructible - "
@@ -175,7 +175,7 @@ void APCTypedValue::deleteUncounted() {
                 "destroying it");
 
   switch (m_handle.kind()) {
-    case APCKind::UncountedArray: {
+    case APCKind::SharedArray: {
       auto const ad = m_data.arr.load(std::memory_order_acquire);
       DecRefSharedArray(ad);
       if (ad != static_cast<void*>(this + 1)) {
@@ -184,11 +184,11 @@ void APCTypedValue::deleteUncounted() {
       return;
     }
 
-    case APCKind::UncountedBespoke:
+    case APCKind::SharedBespoke:
       freeAPCBespoke(this);
       return;
 
-    case APCKind::UncountedString:
+    case APCKind::SharedString:
       DecRefSharedString(m_data.str);
       delete this;
       return;
@@ -213,11 +213,11 @@ TypedValue APCTypedValue::toTypedValue() const {
   TypedValue tv;
   tv.m_type = m_handle.type();
   auto const kind = m_handle.kind();
-  if (UseStringHazardPointers() && kind == APCKind::UncountedString) {
+  if (UseStringHazardPointers() && kind == APCKind::SharedString) {
     s_string_hazard_pointers->push_back({m_data.str});
     m_data.str->sharedIncRef();
     tv.m_data.pstr = m_data.str;
-  } else if (kind == APCKind::UncountedBespoke) {
+  } else if (kind == APCKind::SharedBespoke) {
     tv.m_data.parr = readAPCBespoke(this);
   } else {
     tv.m_data.num = m_data.num;

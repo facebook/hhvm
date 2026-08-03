@@ -42,9 +42,9 @@ enum class APCKind: uint8_t {
   PersistentClass,
   LazyClass,
   PersistentClsMeth,
-  UncountedArray,
-  UncountedBespoke,
-  UncountedString,
+  SharedArray,
+  SharedBespoke,
+  SharedString,
   StaticArray,
   StaticBespoke,
   StaticString,
@@ -107,9 +107,9 @@ enum class APCKind: uint8_t {
  *  StaticArray       APCTypedValue   (a persistent array type)
  *  StaticBespoke     APCTypedValue   (a persistent array type)
  *  StaticString      APCTypedValue   KindOfPersistentString
- *  UncountedArray    APCTypedValue   (a persistent array type)
- *  UncountedBespoke  APCTypedValue   (a persistent array type)
- *  UncountedString   APCTypedValue   KindOfPersistentString
+ *  SharedArray       APCTypedValue   (a persistent array type)
+ *  SharedBespoke     APCTypedValue   (a persistent array type)
+ *  SharedString      APCTypedValue   KindOfPersistentString
  *  CopiedVec         APCArray        kInvalidDataType
  *  CopiedLegacyVec   APCArray        kInvalidDataType
  *  CopiedDict        APCArray        kInvalidDataType
@@ -239,9 +239,9 @@ struct APCHandle {
    * array-like or string (not a static or refcounted value).
    */
   bool isShared() const {
-    return m_kind == APCKind::UncountedArray ||
-           m_kind == APCKind::UncountedBespoke ||
-           m_kind == APCKind::UncountedString;
+    return m_kind == APCKind::SharedArray ||
+           m_kind == APCKind::SharedBespoke ||
+           m_kind == APCKind::SharedString;
   }
 
   bool isTypedValue() const {

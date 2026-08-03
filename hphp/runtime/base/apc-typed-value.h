@@ -76,9 +76,9 @@ struct APCTypedValue {
     assertx(checkInvariants());
   }
 
-  enum class UncountedStr {};
-  APCTypedValue(UncountedStr, StringData* data)
-    : m_handle(APCKind::UncountedString, KindOfPersistentString) {
+  enum class SharedStr {};
+  APCTypedValue(SharedStr, StringData* data)
+    : m_handle(APCKind::SharedString, KindOfPersistentString) {
     assertx(data->isShared());
     m_data.str = data;
     assertx(checkInvariants());
@@ -124,7 +124,7 @@ struct APCTypedValue {
   StringData* getStringData() const {
     assertx(checkInvariants());
     assertx(m_handle.kind() == APCKind::StaticString ||
-           m_handle.kind() == APCKind::UncountedString);
+           m_handle.kind() == APCKind::SharedString);
     return m_data.str;
   }
 
@@ -144,7 +144,7 @@ struct APCTypedValue {
   static void PushHazardPointer(const APCHandle* handle);
   static bool UseStringHazardPointers();
 
-  void deleteUncounted();
+  void deleteShared();
 
   static APCHandle::Pair HandlePersistent(ArrayData* data) {
     if (!data->persistentIncRef()) return {nullptr, 0};
@@ -161,7 +161,7 @@ struct APCTypedValue {
       return {value->getHandle(), sizeof(APCTypedValue)};
     }
     data->sharedIncRef();
-    auto const value = new APCTypedValue(UncountedStr{}, data);
+    auto const value = new APCTypedValue(SharedStr{}, data);
     return {value->getHandle(), sizeof(APCTypedValue)};
   }
 

@@ -1992,7 +1992,7 @@ struct FreedAPCHandle {
   {}
   void operator()() {
     for (auto handle : m_apcHandles) {
-      APCTypedValue::fromHandle(handle)->deleteUncounted();
+      APCTypedValue::fromHandle(handle)->deleteShared();
     }
     APCStats::getAPCStats().removePendingDelete(m_memSize);
   }

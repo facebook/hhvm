@@ -82,7 +82,7 @@ size_t getMemSize(const APCHandle* handle) {
     case APCKind::StaticString:
       return sizeof(APCHandle);
 
-    case APCKind::UncountedString:
+    case APCKind::SharedString:
       return sizeof(APCTypedValue) +
              getMemSize(APCTypedValue::fromHandle(handle)->getStringData());
 
@@ -91,8 +91,8 @@ size_t getMemSize(const APCHandle* handle) {
     case APCKind::SerializedKeyset:
       return getMemSize(APCString::fromHandle(handle));
 
-    case APCKind::UncountedArray:
-    case APCKind::UncountedBespoke: {
+    case APCKind::SharedArray:
+    case APCKind::SharedBespoke: {
       auto const ad = APCTypedValue::fromHandle(handle)->getArrayData();
       return sizeof(APCTypedValue) + getMemSize(ad);
     }
@@ -237,16 +237,16 @@ APCStats::APCStats() : m_valueSize(nullptr)
                      , m_keySize(nullptr)
                      , m_pendingDeleteSize(nullptr)
                      , m_entries(nullptr)
-                     , m_uncountedEntries(nullptr)
-                     , m_uncountedBlocks(nullptr)
+                     , m_sharedEntries(nullptr)
+                     , m_sharedBlocks(nullptr)
                      , m_detailedStats(nullptr) {
   m_valueSize = ServiceData::createCounter("apc.value_size.sum");
   m_keySize = ServiceData::createCounter("apc.key_size.sum");
   m_pendingDeleteSize =
     ServiceData::createCounter("apc.pending_delete_size.sum");
   m_entries = ServiceData::createCounter("apc.entries");
-  m_uncountedEntries = ServiceData::createCounter("apc.uncounted_entries");
-  m_uncountedBlocks =
+  m_sharedEntries = ServiceData::createCounter("apc.uncounted_entries");
+  m_sharedBlocks =
     ServiceData::createCounter("apc.uncounted_blocks.mayNotBeAPCValues");
   if (Cfg::Stats::APC) {
     m_detailedStats = new APCDetailedStats();
@@ -265,9 +265,9 @@ std::string APCStats::getStatsInfo() const {
           "\nEntries count: " +
           std::to_string(m_entries->getValue()) +
           "\nIn total uncounted entries count: " +
-          std::to_string(m_uncountedEntries->getValue()) +
+          std::to_string(m_sharedEntries->getValue()) +
           "\nIn memory uncounted blocks: " +
-          std::to_string(m_uncountedBlocks->getValue());
+          std::to_string(m_sharedBlocks->getValue());
   if (apcExtension::UseUncounted) {
     info += "\nPending deletes via treadmill size: " +
             std::to_string(m_pendingDeleteSize->getValue());
@@ -282,19 +282,19 @@ const StaticString s_num_entries("num_entries");
 const StaticString s_valuesSize("values_size");
 const StaticString s_keysSize("keys_size");
 const StaticString s_pendingDeleteSize("pending_delete_size");
-const StaticString s_uncountedEntries("uncounted_entries");
-const StaticString s_uncountedBlocks("uncounted_blocks");
+const StaticString s_sharedEntries("uncounted_entries");
+const StaticString s_sharedBlocks("uncounted_blocks");
 
 void APCStats::collectStats(std::map<const StringData*, int64_t>& stats) const {
   stats.insert(
       std::pair<const StringData*, int64_t>(s_num_entries.get(),
                                             m_entries->getValue()));
   stats.insert(
-      std::pair<const StringData*, int64_t>( s_uncountedEntries.get(),
-                                            m_uncountedEntries->getValue()));
+      std::pair<const StringData*, int64_t>( s_sharedEntries.get(),
+                                            m_sharedEntries->getValue()));
   stats.insert(
-    std::pair<const StringData*, int64_t> ( s_uncountedBlocks.get(),
-                                      m_uncountedBlocks->getValue()));
+    std::pair<const StringData*, int64_t> ( s_sharedBlocks.get(),
+                                      m_sharedBlocks->getValue()));
   stats.insert(
       std::pair<const StringData*, int64_t>(s_valuesSize.get(),
                                             m_valueSize->getValue()));
@@ -311,16 +311,16 @@ void APCStats::collectStats(std::map<const StringData*, int64_t>& stats) const {
 
 APCDetailedStats::APCDetailedStats() : m_uncounted(nullptr)
                                      , m_apcString(nullptr)
-                                     , m_uncString(nullptr)
+                                     , m_sharedString(nullptr)
                                      , m_serVec(nullptr)
                                      , m_serDict(nullptr)
                                      , m_serKeyset(nullptr)
                                      , m_apcVec(nullptr)
                                      , m_apcDict(nullptr)
                                      , m_apcKeyset(nullptr)
-                                     , m_uncVec(nullptr)
-                                     , m_uncDict(nullptr)
-                                     , m_uncKeyset(nullptr)
+                                     , m_sharedVec(nullptr)
+                                     , m_sharedDict(nullptr)
+                                     , m_sharedKeyset(nullptr)
                                      , m_serObject(nullptr)
                                      , m_apcObject(nullptr)
                                      , m_apcRFunc(nullptr)
@@ -331,16 +331,16 @@ APCDetailedStats::APCDetailedStats() : m_uncounted(nullptr)
                                      , m_expValues(nullptr) {
   m_uncounted = ServiceData::createCounter("apc.type_uncounted");
   m_apcString = ServiceData::createCounter("apc.type_apc_string");
-  m_uncString = ServiceData::createCounter("apc.type_unc_string");
+  m_sharedString = ServiceData::createCounter("apc.type_unc_string");
   m_serVec = ServiceData::createCounter("apc.type_ser_vec");
   m_serDict = ServiceData::createCounter("apc.type_ser_dict");
   m_serKeyset = ServiceData::createCounter("apc.type_ser_keyset");
   m_apcVec = ServiceData::createCounter("apc.type_apc_vec");
   m_apcDict = ServiceData::createCounter("apc.type_apc_dict");
   m_apcKeyset = ServiceData::createCounter("apc.type_apc_keyset");
-  m_uncVec = ServiceData::createCounter("apc.type_unc_vec");
-  m_uncDict = ServiceData::createCounter("apc.type_unc_dict");
-  m_uncKeyset = ServiceData::createCounter("apc.type_unc_keyset");
+  m_sharedVec = ServiceData::createCounter("apc.type_unc_vec");
+  m_sharedDict = ServiceData::createCounter("apc.type_unc_dict");
+  m_sharedKeyset = ServiceData::createCounter("apc.type_unc_keyset");
   m_serObject = ServiceData::createCounter("apc.type_ser_object");
   m_apcObject = ServiceData::createCounter("apc.type_apc_object");
   m_apcRFunc = ServiceData::createCounter("apc.type_apc_rfunc");
@@ -352,18 +352,18 @@ APCDetailedStats::APCDetailedStats() : m_uncounted(nullptr)
   m_expValues = ServiceData::createCounter("apc.expired_values");
 }
 
-const StaticString s_typeUncounted("type_uncounted");
+const StaticString s_typeShared("type_uncounted");
 const StaticString s_typeAPCString("type_apc_string");
-const StaticString s_typeUncountedString("type_unc_string");
+const StaticString s_typeSharedString("type_unc_string");
 const StaticString s_typeSerVec("type_ser_vec");
 const StaticString s_typeSerDict("type_ser_dict");
 const StaticString s_typeSerKeyset("type_ser_keyset");
 const StaticString s_typeAPCVec("type_apc_vec");
 const StaticString s_typeAPCDict("type_apc_dict");
 const StaticString s_typeAPCKeyset("type_apc_keyset");
-const StaticString s_typUncountedVec("type_unc_vec");
-const StaticString s_typUncountedDict("type_unc_dict");
-const StaticString s_typUncountedKeyset("type_unc_keyset");
+const StaticString s_typSharedVec("type_unc_vec");
+const StaticString s_typSharedDict("type_unc_dict");
+const StaticString s_typSharedKeyset("type_unc_keyset");
 const StaticString s_typeSerObject("type_ser_object");
 const StaticString s_typeAPCObject("type_apc_object");
 const StaticString s_typeAPCRFunc("type_apc_rfunc");
@@ -378,8 +378,8 @@ std::string APCDetailedStats::getStatsInfo() const {
          std::to_string(m_uncounted->getValue()) +
          "\nAPC strings count: " +
          std::to_string(m_apcString->getValue()) +
-         "\nUncounted strings count: " +
-         std::to_string(m_uncString->getValue()) +
+         "\nShared strings count: " +
+         std::to_string(m_sharedString->getValue()) +
          "\nSerialized vec count: " +
          std::to_string(m_serVec->getValue()) +
          "\nSerialized dict count: " +
@@ -392,12 +392,12 @@ std::string APCDetailedStats::getStatsInfo() const {
          std::to_string(m_apcDict->getValue()) +
          "\nAPC keyset count: " +
          std::to_string(m_apcKeyset->getValue()) +
-         "\nUncounted vec count: " +
-         std::to_string(m_uncVec->getValue()) +
-         "\nUncounted dict count: " +
-         std::to_string(m_uncDict->getValue()) +
-         "\nUncounted keyset count: " +
-         std::to_string(m_uncKeyset->getValue()) +
+         "\nShared vec count: " +
+         std::to_string(m_sharedVec->getValue()) +
+         "\nShared dict count: " +
+         std::to_string(m_sharedDict->getValue()) +
+         "\nShared keyset count: " +
+         std::to_string(m_sharedKeyset->getValue()) +
          "\nSerialized object count: " +
          std::to_string(m_serObject->getValue()) +
          "\nAPC object count: " +
@@ -420,14 +420,14 @@ std::string APCDetailedStats::getStatsInfo() const {
 void APCDetailedStats::collectStats(
     std::map<const StringData*, int64_t>& stats) const {
   stats.insert(
-        std::pair<const StringData*, int64_t>(s_typeUncounted.get(),
+        std::pair<const StringData*, int64_t>(s_typeShared.get(),
                                               m_uncounted->getValue()));
   stats.insert(
         std::pair<const StringData*, int64_t>(s_typeAPCString.get(),
                                               m_apcString->getValue()));
   stats.insert(
-        std::pair<const StringData*, int64_t>(s_typeUncountedString.get(),
-                                              m_uncString->getValue()));
+        std::pair<const StringData*, int64_t>(s_typeSharedString.get(),
+                                              m_sharedString->getValue()));
   stats.insert(
         std::pair<const StringData*, int64_t>(s_typeSerVec.get(),
                                               m_serVec->getValue()));
@@ -447,14 +447,14 @@ void APCDetailedStats::collectStats(
         std::pair<const StringData*, int64_t>(s_typeAPCKeyset.get(),
                                               m_apcKeyset->getValue()));
   stats.insert(
-        std::pair<const StringData*, int64_t>(s_typUncountedVec.get(),
-                                              m_uncVec->getValue()));
+        std::pair<const StringData*, int64_t>(s_typSharedVec.get(),
+                                              m_sharedVec->getValue()));
   stats.insert(
-        std::pair<const StringData*, int64_t>(s_typUncountedDict.get(),
-                                              m_uncDict->getValue()));
+        std::pair<const StringData*, int64_t>(s_typSharedDict.get(),
+                                              m_sharedDict->getValue()));
   stats.insert(
-        std::pair<const StringData*, int64_t>(s_typUncountedKeyset.get(),
-                                              m_uncKeyset->getValue()));
+        std::pair<const StringData*, int64_t>(s_typSharedKeyset.get(),
+                                              m_sharedKeyset->getValue()));
   stats.insert(
         std::pair<const StringData*, int64_t>(s_typeSerObject.get(),
                                               m_serObject->getValue()));
@@ -526,15 +526,15 @@ APCDetailedStats::counterFor(const APCHandle* handle) {
     case APCKind::StaticString:
       return m_uncounted;
 
-    case APCKind::UncountedString:
-      return m_uncString;
+    case APCKind::SharedString:
+      return m_sharedString;
 
-    case APCKind::UncountedArray:
-    case APCKind::UncountedBespoke: {
+    case APCKind::SharedArray:
+    case APCKind::SharedBespoke: {
       switch (handle->type()) {
-        case KindOfPersistentVec:    return m_uncVec;
-        case KindOfPersistentDict:   return m_uncDict;
-        case KindOfPersistentKeyset: return m_uncKeyset;
+        case KindOfPersistentVec:    return m_sharedVec;
+        case KindOfPersistentDict:   return m_sharedDict;
+        case KindOfPersistentKeyset: return m_sharedKeyset;
         default: always_assert(false);
       }
     }

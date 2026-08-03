@@ -43,6 +43,8 @@ class FastClientBase {
   explicit FastClientBase(typename AppAdapter::Ptr adapter)
       : adapter_(std::move(adapter)) {}
 
+  AppAdapter* getAppAdapter() const noexcept { return adapter_.get(); }
+
  protected:
   folly::coro::Task<std::unique_ptr<folly::IOBuf>> co_sendRequestResponse(
       const apache::thrift::RpcOptions& rpcOptions,

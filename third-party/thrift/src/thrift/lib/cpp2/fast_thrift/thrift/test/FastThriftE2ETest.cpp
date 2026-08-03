@@ -42,6 +42,7 @@
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientSetupFrameHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientStreamStateHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/ThriftClientAppAdapter.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/client/adapter/BorrowedClientAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/adapter/ThriftClientTransportAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/handler/ThriftClientChecksumHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/handler/ThriftClientMetadataPushHandler.h>
@@ -182,7 +183,8 @@ class FastThriftE2ETest : public ::testing::Test {
     server_.reset();
   }
 
-  std::unique_ptr<FastClientType> createFastClient() {
+  std::unique_ptr<FastClientType> createFastClient(
+      thrift::ThriftClientAppAdapter** appAdapterOut = nullptr) {
     auto* evb = clientThread_->getEventBase();
     folly::Baton<> connectBaton;
     bool connected = false;
@@ -191,6 +193,9 @@ class FastThriftE2ETest : public ::testing::Test {
         new thrift::ThriftClientAppAdapter(
             static_cast<uint16_t>(
                 apache::thrift::protocol::T_COMPACT_PROTOCOL)));
+    if (appAdapterOut != nullptr) {
+      *appAdapterOut = appAdapter.get();
+    }
 
     evb->runInEventBaseThreadAndWait([&] {
       auto socket = folly::AsyncSocket::newSocket(evb);
@@ -326,6 +331,24 @@ class FastThriftE2ETest : public ::testing::Test {
 // =============================================================================
 // Test Cases
 // =============================================================================
+
+TEST_F(FastThriftE2ETest, ReuseAppAdapterWithNewClient) {
+  using BorrowedAppAdapter =
+      thrift::client::BorrowedClientAppAdapter<thrift::ThriftClientAppAdapter>;
+  using ReusedFastClientType =
+      apache::thrift::FastClient<TestFastService, BorrowedAppAdapter>;
+
+  auto client = createFastClient();
+  BorrowedAppAdapter::Ptr appAdapter(
+      new BorrowedAppAdapter(client->getAppAdapter()));
+  auto reusedClient =
+      std::make_unique<ReusedFastClientType>(std::move(appAdapter));
+
+  reusedClient->sync_ping();
+
+  reusedClient.reset();
+  destroyFastClientOnEvb(client);
+}
 
 TEST_F(FastThriftE2ETest, Ping) {
   auto client = createFastClient();

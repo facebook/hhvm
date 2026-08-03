@@ -108,22 +108,37 @@ static bool get_const_int(Env& env, reg_type op, uint64_t &Val) {
   return true;
 }
 
+Optional<uint32_t> get_shrqi_shift(const shrqi& inst) {
+  auto const shift = inst.s0.ul();
+  if (shift >= 64) return {};
+  return shift;
+}
+
+// Live flag requirements are populated between ARM's simplify passes, so
+// folds with flag consumers wait for the post-annotation pass.
+bool test_uses_only_z_flag(Env& env, VregSF sf, Vflags fl) {
+  if (env.use_counts[sf] == 0) return true;
+  return fl == static_cast<Vflags>(StatusFlags::Z);
+}
+
 bool simplify(Env& env, const shrqi& inst, Vlabel b, size_t i) {
+  auto const shift = get_shrqi_shift(inst);
   if (env.use_counts[inst.d] != 1 || env.use_counts[inst.sf] ||
-      inst.s0.l() > 32) return false;
+      !shift) return false;
 
   return if_inst<Vinstr::testl>(env, b, i + 1, [&] (const testl& tstl) {
-    if (tstl.s1 != inst.d || env.use_counts[tstl.sf] != 1) return false;
+    if (tstl.s0 != inst.d && tstl.s1 != inst.d) return false;
+    if (!test_uses_only_z_flag(env, tstl.sf, tstl.fl)) return false;
 
-    uint64_t Val;
-    if (!get_const_int(env, tstl.s0, Val) || folly::popcount(Val) != 1) {
-      return false;
-    }
+    auto const maskReg = tstl.s0 == inst.d ? tstl.s1 : tstl.s0;
+    uint64_t value;
+    if (!get_const_int(env, maskReg, value)) return false;
+    auto const mask = static_cast<uint32_t>(value);
+    auto const newMask = uint64_t{mask} << *shift;
+    if (!vixl::Assembler::IsImmLogical(newMask, vixl::kXRegSize)) return false;
 
-    auto shift_amt = inst.s0.l();
     return simplify_impl(env, b, i, [&] (Vout& v) {
-      uint64_t NewVal = Val << shift_amt;
-      v << testq{env.unit.makeConst(NewVal), inst.s1, tstl.sf, tstl.fl};
+      v << testq{env.unit.makeConst(newMask), inst.s1, tstl.sf, tstl.fl};
       return 2;
     });
   });
@@ -173,8 +188,9 @@ struct ShiftedExtract {
 bool get_shifted_extract(Env& env,
                          const shrqi& inst,
                          ShiftedExtract& out) {
-  if (inst.fl != 0 || env.use_counts[inst.sf] != 0) return false;
-  out.shift = inst.s0.l();
+  auto const shift = get_shrqi_shift(inst);
+  if (inst.fl != 0 || env.use_counts[inst.sf] != 0 || !shift) return false;
+  out.shift = *shift;
   out.src = inst.s1;
   out.dst = inst.d;
   return true;
@@ -209,11 +225,6 @@ uint64_t get_test_imm(const testli& inst) { return inst.s0.ul(); }
 uint64_t get_test_imm(const testqi& inst) { return inst.s0.ul(); }
 uint64_t get_test_imm(const testqi64& inst) {
   return static_cast<uint64_t>(inst.s0.q());
-}
-
-bool test_uses_only_z_flag(Env& env, VregSF sf, Vflags fl) {
-  if (env.use_counts[sf] == 0) return true;
-  return fl == static_cast<Vflags>(StatusFlags::Z);
 }
 
 struct TestInfo {

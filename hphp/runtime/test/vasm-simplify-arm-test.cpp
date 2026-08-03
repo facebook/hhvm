@@ -271,6 +271,107 @@ void testArmStoreOffsetNoMaterialize() {
   EXPECT_NE(out.find("+ 0x210]"), std::string::npos) << out;
 }
 
+template<class Load, class Dst>
+void expectArmExtendingLoad(const Load& load, Vptr8 ptr, Dst dst) {
+  EXPECT_EQ(load.s, ptr);
+  EXPECT_EQ(load.d, dst);
+}
+
+template<class Emit>
+void checkArmSimplifiedBlock(const char* name, Emit emit) {
+  SCOPED_TRACE(name);
+
+  Vunit unit;
+  unit.entry = unit.makeBlock(AreaIndex::Main, 1);
+  Vout v(unit, unit.entry);
+
+  auto check = emit(unit, v);
+  simplify(unit);
+  check(unit.blocks[unit.entry].code);
+}
+
+template<class Dst, class EmitExt, class ExpectLoad>
+void checkArmLoadExtMapping(const char* name,
+                            int32_t disp,
+                            EmitExt emitExt,
+                            ExpectLoad expectLoad) {
+  checkArmSimplifiedBlock(name, [=] (Vunit&, Vout& v) {
+    auto const base = Vreg64{Reg64{0}};
+    auto const ptr = Vptr8{base[disp]};
+    auto const loaded = Vreg8{v.makeReg()};
+    auto const dst = Dst{v.makeReg()};
+
+    v << loadb{ptr, loaded};
+    emitExt(v, loaded, dst);
+
+    return [=] (auto const& code) {
+      ASSERT_EQ(code.size(), 1);
+      expectLoad(code[0], ptr, dst);
+    };
+  });
+}
+
+void testArmLoadExtFoldMappings() {
+  checkArmLoadExtMapping<Vreg32>(
+    "loadzbl",
+    8,
+    [] (Vout& v, Vreg8 loaded, Vreg32 dst) { v << movzbl{loaded, dst}; },
+    [] (const Vinstr& inst, Vptr8 ptr, Vreg32 dst) {
+      ASSERT_EQ(inst.op, Vinstr::loadzbl);
+      expectArmExtendingLoad(inst.loadzbl_, ptr, dst);
+    });
+
+  checkArmLoadExtMapping<Vreg64>(
+    "loadzbq",
+    16,
+    [] (Vout& v, Vreg8 loaded, Vreg64 dst) { v << movzbq{loaded, dst}; },
+    [] (const Vinstr& inst, Vptr8 ptr, Vreg64 dst) {
+      ASSERT_EQ(inst.op, Vinstr::loadzbq);
+      expectArmExtendingLoad(inst.loadzbq_, ptr, dst);
+    });
+
+  checkArmLoadExtMapping<Vreg32>(
+    "loadsbl",
+    -8,
+    [] (Vout& v, Vreg8 loaded, Vreg32 dst) { v << movsbl{loaded, dst}; },
+    [] (const Vinstr& inst, Vptr8 ptr, Vreg32 dst) {
+      ASSERT_EQ(inst.op, Vinstr::loadsbl);
+      expectArmExtendingLoad(inst.loadsbl_, ptr, dst);
+    });
+
+  checkArmLoadExtMapping<Vreg64>(
+    "loadsbq",
+    -16,
+    [] (Vout& v, Vreg8 loaded, Vreg64 dst) { v << movsbq{loaded, dst}; },
+    [] (const Vinstr& inst, Vptr8 ptr, Vreg64 dst) {
+      ASSERT_EQ(inst.op, Vinstr::loadsbq);
+      expectArmExtendingLoad(inst.loadsbq_, ptr, dst);
+    });
+}
+
+void testArmLoadExtRejectsMultipleUses() {
+  checkArmSimplifiedBlock(
+    "loaded byte has another use", [] (Vunit&, Vout& v) {
+      auto const base = Vreg64{Reg64{0}};
+      auto const loadPtr = Vptr8{base[0]};
+      auto const storePtr = Vptr8{base[8]};
+      auto const loaded = Vreg8{v.makeReg()};
+      auto const dst = Vreg64{v.makeReg()};
+
+      v << loadb{loadPtr, loaded};
+      v << movzbq{loaded, dst};
+      v << storeb{loaded, storePtr};
+
+      return [=] (auto const& code) {
+        ASSERT_EQ(code.size(), 3);
+        EXPECT_EQ(code[0].op, Vinstr::loadb);
+        EXPECT_EQ(code[1].op, Vinstr::movzbq);
+        EXPECT_EQ(code[2].op, Vinstr::storeb);
+      };
+    }
+  );
+}
+
 void testArmShiftedBitTestFromShrqi() {
   Vunit unit;
   unit.entry = unit.makeBlock(AreaIndex::Main, 1);
@@ -309,7 +410,102 @@ void testArmShiftedBitTestFromShrqi() {
   EXPECT_EQ(code[2].testqi64_.sf, testSf);
 }
 
+template<Vinstr::Opcode testOp>
+void checkArmShrqiTestlFold(const char* name,
+                            int32_t shift,
+                            uint32_t mask,
+                            bool maskFirst,
+                            bool addSecondFlagUse = false) {
+  SCOPED_TRACE(name);
+
+  Vunit unit;
+  unit.entry = unit.makeBlock(AreaIndex::Main, 1);
+  auto const taken = unit.makeBlock(AreaIndex::Main, 1);
+  auto const next = unit.makeBlock(AreaIndex::Main, 1);
+
+  Vout v(unit, unit.entry);
+  Vout vt(unit, taken);
+  Vout vn(unit, next);
+
+  auto const src = Vreg64{Reg64{0}};
+  auto const shifted = Vreg64{v.makeReg()};
+  auto const shiftSf = v.makeReg();
+  auto const testSf = v.makeReg();
+  auto const maskReg = Vreg32{unit.makeConst(mask)};
+  auto const shiftedReg = Vreg32{Vreg{shifted}};
+
+  v << shrqi{Immed{shift}, src, shifted, shiftSf, Vflags{}};
+  v << testl{
+    maskFirst ? maskReg : shiftedReg,
+    maskFirst ? shiftedReg : maskReg,
+    testSf,
+    Vflags{}
+  };
+  if (addSecondFlagUse) {
+    v << setcc{CC_NE, testSf, Vreg8{v.makeReg()}};
+  }
+  v << jcc{CC_E, testSf, {taken, next}, StringTag{}};
+  vt << ret{};
+  vn << ret{};
+
+  annotateSFUses(unit);
+  simplify(unit);
+
+  auto const& code = unit.blocks[unit.entry].code;
+  ASSERT_EQ(code.size(), addSecondFlagUse ? 3 : 2);
+  ASSERT_EQ(code[0].op, testOp) << stripWhitespace(show(unit));
+  auto const& test = code[0].template get<testOp>();
+  auto const constIt = unit.regToConst.find(test.s0);
+  ASSERT_NE(constIt, unit.regToConst.end());
+  EXPECT_EQ(constIt->second.val, uint64_t{mask} << shift);
+  EXPECT_EQ(Vreg{test.s1}, Vreg{src});
+  EXPECT_EQ(test.sf, testSf);
+
+  if (addSecondFlagUse) {
+    ASSERT_EQ(code[1].op, Vinstr::setcc);
+    EXPECT_EQ(code[1].setcc_.cc, CC_NE);
+    EXPECT_EQ(code[1].setcc_.sf, testSf);
+  }
+  ASSERT_EQ(code.back().op, Vinstr::jcc);
+  EXPECT_EQ(code.back().jcc_.cc, CC_E);
+  EXPECT_EQ(code.back().jcc_.sf, testSf);
+}
+
 void testArmShiftedBitTestFromShrqiWithoutXor() {
+  checkArmShrqiTestlFold<Vinstr::testb>("single-bit mask first", 5, 4, true);
+}
+
+void testArmShrqiTestlFoldsFlippedOperands() {
+  checkArmShrqiTestlFold<Vinstr::testb>("shifted value first", 5, 4, false);
+}
+
+void testArmShrqiTestlFoldsMultipleZUses() {
+  checkArmShrqiTestlFold<Vinstr::testb>(
+    "two Z-only flag consumers", 5, 4, true, true
+  );
+}
+
+void testArmShrqiTestlFoldsEncodableMultiBitMasks() {
+  checkArmShrqiTestlFold<Vinstr::testb>(
+    "two contiguous bits", 5, 0b11, true
+  );
+  checkArmShrqiTestlFold<Vinstr::testq>(
+    "two contiguous high bits", 32, uint32_t{0b11} << 30, true
+  );
+  checkArmShrqiTestlFold<Vinstr::testq>(
+    "shift above 32 drops mask bits beyond the source width",
+    40,
+    (uint32_t{1} << 31) | 1,
+    true
+  );
+}
+
+void checkArmShrqiTestlNotFolded(const char* name,
+                                 int32_t shift,
+                                 uint64_t mask,
+                                 ConditionCode cc) {
+  SCOPED_TRACE(name);
+
   Vunit unit;
   unit.entry = unit.makeBlock(AreaIndex::Main, 1);
   auto const taken = unit.makeBlock(AreaIndex::Main, 1);
@@ -324,29 +520,51 @@ void testArmShiftedBitTestFromShrqiWithoutXor() {
   auto const shiftSf = v.makeReg();
   auto const testSf = v.makeReg();
 
-  v << shrqi{Immed{5}, src, shifted, shiftSf, Vflags{}};
-  v << testl{Vreg32{unit.makeConst(uint32_t{4})},
+  v << shrqi{Immed{shift}, src, shifted, shiftSf, Vflags{}};
+  v << testl{Vreg32{unit.makeConst(mask)},
              Vreg32{Vreg{shifted}},
              testSf,
              Vflags{}};
-  v << jcc{CC_E, testSf, {taken, next}, StringTag{}};
+  v << jcc{cc, testSf, {taken, next}, StringTag{}};
   vt << ret{};
   vn << ret{};
 
+  annotateSFUses(unit);
   simplify(unit);
 
   auto const& code = unit.blocks[unit.entry].code;
-  ASSERT_EQ(code.size(), 2);
-  ASSERT_EQ(code[0].op, Vinstr::testb) << stripWhitespace(show(unit));
-  auto const constIt = unit.regToConst.find(code[0].testb_.s0);
-  ASSERT_NE(constIt, unit.regToConst.end());
-  EXPECT_EQ(constIt->second.val, 0x80);
-  EXPECT_EQ(code[0].testb_.s1, Vreg8{Vreg{src}});
-  EXPECT_EQ(code[0].testb_.sf, testSf);
+  ASSERT_EQ(code.size(), 3) << stripWhitespace(show(unit));
+  EXPECT_EQ(code[0].op, Vinstr::shrqi);
+  EXPECT_EQ(code[1].op, Vinstr::testl);
+  EXPECT_EQ(code[2].op, Vinstr::jcc);
+  EXPECT_EQ(code[2].jcc_.cc, cc);
+}
 
-  ASSERT_EQ(code[1].op, Vinstr::jcc);
-  EXPECT_EQ(code[1].jcc_.cc, CC_E);
-  EXPECT_EQ(code[1].jcc_.sf, testSf);
+void testArmShrqiTestlRejectsUnsafeFolds() {
+  checkArmShrqiTestlNotFolded(
+    "sign flag is not preserved when widening", 1, uint64_t{1} << 31, CC_S
+  );
+  checkArmShrqiTestlNotFolded(
+    "bits above testl width are ignored", 1, uint64_t{1} << 40, CC_E
+  );
+}
+
+void testArmShrqiTestlRejectsNonEncodableMultiBitMasks() {
+  checkArmShrqiTestlNotFolded(
+    "non-contiguous bits", 1, 0b1011, CC_E
+  );
+  checkArmShrqiTestlNotFolded(
+    "repeated 32-bit pattern is not a 64-bit logical immediate",
+    1,
+    0x00ff00ff,
+    CC_E
+  );
+}
+
+void testArmShrqiTestlRejectsOutOfRangeShift() {
+  checkArmShrqiTestlNotFolded(
+    "shift equals source width", 64, 1, CC_E
+  );
 }
 
 void testArmShiftedBitTestRejectsOutOfRangeMask() {
@@ -1201,12 +1419,44 @@ TEST(Vasm, ArmStoreOffsetNoMaterialize) {
   testArmStoreOffsetNoMaterialize();
 }
 
+TEST(Vasm, ArmLoadExtFoldMappings) {
+  testArmLoadExtFoldMappings();
+}
+
+TEST(Vasm, ArmLoadExtRejectsMultipleUses) {
+  testArmLoadExtRejectsMultipleUses();
+}
+
 TEST(Vasm, ArmShiftedBitTestFromShrqi) {
   testArmShiftedBitTestFromShrqi();
 }
 
 TEST(Vasm, ArmShiftedBitTestFromShrqiWithoutXor) {
   testArmShiftedBitTestFromShrqiWithoutXor();
+}
+
+TEST(Vasm, ArmShrqiTestlFoldsFlippedOperands) {
+  testArmShrqiTestlFoldsFlippedOperands();
+}
+
+TEST(Vasm, ArmShrqiTestlFoldsMultipleZUses) {
+  testArmShrqiTestlFoldsMultipleZUses();
+}
+
+TEST(Vasm, ArmShrqiTestlFoldsEncodableMultiBitMasks) {
+  testArmShrqiTestlFoldsEncodableMultiBitMasks();
+}
+
+TEST(Vasm, ArmShrqiTestlRejectsUnsafeFolds) {
+  testArmShrqiTestlRejectsUnsafeFolds();
+}
+
+TEST(Vasm, ArmShrqiTestlRejectsNonEncodableMultiBitMasks) {
+  testArmShrqiTestlRejectsNonEncodableMultiBitMasks();
+}
+
+TEST(Vasm, ArmShrqiTestlRejectsOutOfRangeShift) {
+  testArmShrqiTestlRejectsOutOfRangeShift();
 }
 
 TEST(Vasm, ArmShiftedBitTestRejectsOutOfRangeMask) {

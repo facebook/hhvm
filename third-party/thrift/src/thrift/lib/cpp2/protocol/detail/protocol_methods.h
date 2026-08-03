@@ -669,6 +669,9 @@ static constexpr bool should_process_as_arithmetic_vector_v =
 template <typename ElemClass, typename Type, typename ExpectedTag>
 struct protocol_methods<type_class::list<ElemClass>, Type, ExpectedTag> {
   static_assert(
+      matches_wire_tag_v<ExpectedTag, type::list_c>,
+      "ExpectedTag does not match the list container type");
+  static_assert(
       !std::is_same<ElemClass, type_class::unknown>(),
       "Unable to serialize unknown list element");
 
@@ -909,6 +912,9 @@ void encodeMapElements(
 template <typename ElemClass, typename Type, typename ExpectedTag>
 struct protocol_methods<type_class::set<ElemClass>, Type, ExpectedTag> {
   static_assert(
+      matches_wire_tag_v<ExpectedTag, type::set_c>,
+      "ExpectedTag does not match the set container type");
+  static_assert(
       !std::is_same<ElemClass, type_class::unknown>(),
       "Unable to serialize unknown type");
 
@@ -1004,6 +1010,9 @@ struct protocol_methods<
     type_class::map<KeyClass, MappedClass>,
     Type,
     ExpectedTag> {
+  static_assert(
+      matches_wire_tag_v<ExpectedTag, type::map_c>,
+      "ExpectedTag does not match the map container type");
   static_assert(
       !std::is_same<KeyClass, type_class::unknown>(),
       "Unable to serialize unknown key type in map");

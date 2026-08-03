@@ -103,6 +103,29 @@ TEST_F(ProtocolTest, string_and_binary_expected_tag) {
   EXPECT_FALSE((matches_wire_tag_v<type::binary_t, type::string_t>));
 }
 
+TEST_F(ProtocolTest, container_expected_tag) {
+  struct TestAdapter {};
+  using apache::thrift::detail::pm::matches_wire_tag_v;
+
+  EXPECT_TRUE((matches_wire_tag_v<type::list<type::i32_t>, type::list_c>));
+  EXPECT_TRUE((matches_wire_tag_v<type::set<type::string_t>, type::set_c>));
+  EXPECT_TRUE(
+      (matches_wire_tag_v<type::map<type::i16_t, type::bool_t>, type::map_c>));
+  EXPECT_TRUE(
+      (matches_wire_tag_v<
+          type::cpp_type<std::vector<std::int32_t>, type::list<type::i32_t>>,
+          type::list_c>));
+  EXPECT_TRUE((matches_wire_tag_v<
+               type::adapted<TestAdapter, type::set<type::double_t>>,
+               type::set_c>));
+
+  EXPECT_FALSE((matches_wire_tag_v<type::list<type::i32_t>, type::set_c>));
+  EXPECT_FALSE((matches_wire_tag_v<type::set<type::i32_t>, type::map_c>));
+  EXPECT_FALSE((matches_wire_tag_v<
+                type::map<type::i32_t, type::string_t>,
+                type::list_c>));
+}
+
 template <typename ProtocolWriter>
 void makeNestedWriteInner(
     ProtocolWriter& writer, const size_t levels, const TType& type) {

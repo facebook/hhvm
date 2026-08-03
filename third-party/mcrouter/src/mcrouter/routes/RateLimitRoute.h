@@ -27,6 +27,17 @@ class RouteHandleFactory;
 
 namespace mcrouter {
 
+namespace detail {
+
+template <class T>
+concept RouterInfoLike = requires {
+  typename T::RouteHandleIf;
+  typename T::RouteHandlePtr;
+  typename T::RoutableRequests;
+};
+
+} // namespace detail
+
 /**
  * Requests sent through this route will be rate limited according
  * to settings in the RateLimiter passed to the constructor.
@@ -87,6 +98,7 @@ std::shared_ptr<RouteHandleIf> createRateLimitRoute(
 }
 
 template <class RouteHandleIf>
+  requires(!detail::RouterInfoLike<RouteHandleIf>)
 std::shared_ptr<RouteHandleIf> makeRateLimitRoute(
     RouteHandleFactory<RouteHandleIf>& factory,
     const folly::dynamic& json) {
@@ -105,6 +117,13 @@ std::shared_ptr<RouteHandleIf> makeRateLimitRoute(
   }
   return createRateLimitRoute(
       std::move(target), RateLimiter(*jrates), std::move(fallback));
+}
+
+template <detail::RouterInfoLike RouterInfo>
+typename RouterInfo::RouteHandlePtr makeRateLimitRoute(
+    RouteHandleFactory<typename RouterInfo::RouteHandleIf>& factory,
+    const folly::dynamic& json) {
+  return makeRateLimitRoute<typename RouterInfo::RouteHandleIf>(factory, json);
 }
 
 } // namespace mcrouter

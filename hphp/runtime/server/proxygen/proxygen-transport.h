@@ -210,16 +210,6 @@ struct ProxygenTransport final
    */
   void onSendEndImpl() override;
 
-  bool supportsServerPush() override;
-
-  int64_t pushResource(const char *host, const char *path,
-                       uint8_t priority, const Array &promiseHeaders,
-                       const Array &responseHeaders,
-                       const void *data, int size, bool eom) override;
-
-  void pushResourceBody(int64_t id,
-                        const void *data, int size, bool eom) override;
-
   /**
    * Need this implementation to break keep-alive connections.
    */

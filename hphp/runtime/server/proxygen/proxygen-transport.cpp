@@ -728,24 +728,6 @@ void ProxygenTransport::onSendEndImpl() {
   }
 }
 
-bool ProxygenTransport::supportsServerPush() {
-  return false;
-}
-
-int64_t ProxygenTransport::pushResource(const char *host, const char *path,
-                                        uint8_t priority,
-                                        const Array &promiseHeaders,
-                                        const Array &responseHeaders,
-                                        const void *data, int size,
-                                        bool eom) {
-    return 0;
-}
-
-void ProxygenTransport::pushResourceBody(int64_t id, const void *data,
-                                         int size, bool eom) {
-  return;
-}
-
 void ProxygenTransport::beginPartialPostEcho() {
   VLOG(2) << "Beginning partial post";
   if (!bufferRequest() || m_reposting || !m_clientTxn || m_egressError

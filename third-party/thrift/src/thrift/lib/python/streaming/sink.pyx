@@ -79,8 +79,12 @@ cdef class ClientSink:
         cancellation_source = cFollyCancellationSource()
         loop = asyncio.get_event_loop()
         future = loop.create_future()
+        # Retain `self` for the detached coroutine's lifetime (bridgeCoroTask
+        # holds user_data until completion): native sink() dereferences the C++
+        # ClientSink across suspensions, so it must outlive the coroutine.
         user_data = (
             future, self._sink_final_resp_cls, self._sink_elem_cls, self._protocol,
+            self,
         )
 
         handled_agen = self._sink_elem_cls._fbthrift__sink_elem_handler(
@@ -136,7 +140,7 @@ cdef void sink_final_resp_callback(
     cFollyTry[unique_ptr[cIOBuf]]&& res,
     PyObject* user_data,
 ) noexcept:
-    future, final_resp_cls, sink_elem_cls, protocol = <object> user_data
+    future, final_resp_cls, sink_elem_cls, protocol, _sink = <object> user_data
     
     try:
         # Note: need to check result exception, even in BiDi streams,

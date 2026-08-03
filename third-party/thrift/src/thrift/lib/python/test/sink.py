@@ -18,6 +18,7 @@
 from __future__ import annotations
 
 import asyncio
+import gc
 import time
 import unittest
 from typing import AsyncGenerator, Awaitable, Callable, Tuple
@@ -107,6 +108,43 @@ class SinkTests(IsolatedAsyncioTestCase):
                     await asyncio.wait_for(sink.sink(range_gen(begin, stop, 0.1)), 0.2)
                 # ensure no weird segfault
                 await asyncio.sleep(1)
+
+    async def test_sink_cancel_after_client_dropped_no_uaf(self) -> None:
+        # Cancel the sink task and drop the wrapper + client while the native
+        # sink coroutine is still suspended. UAF under ASAN if the bridge does
+        # not keep the wrapper alive for the detached coroutine's lifetime.
+        async with local_server() as sa:
+            ip, port = sa.ip, sa.port
+            assert ip and port
+            async with get_client(
+                TestSinkService,
+                host=ip,
+                port=port,
+                client_type=ClientType.THRIFT_ROCKET_CLIENT_TYPE,
+            ) as client:
+                sink = await client.range_(0, 1000)
+                self.assertIsInstance(sink, ClientSink)
+                req_block = asyncio.Event()
+
+                async def blocked_gen() -> AsyncIntGenerator:
+                    yield 0
+                    await req_block.wait()  # park so the native sink suspends
+
+                sink_task = asyncio.ensure_future(sink.sink(blocked_gen()))
+                await asyncio.sleep(0.2)  # let the sink start and suspend
+                sink_task.cancel()
+                del sink
+            # Drop the client (and its ClientSink wrapper) while suspended.
+            del client
+            gc.collect()
+            try:
+                await sink_task
+            except (asyncio.CancelledError, Exception):
+                pass
+            for _ in range(50):
+                await asyncio.sleep(0)
+            await asyncio.sleep(1)  # window for a post-free executor resume
+            self.assertTrue(sink_task.done())
 
     async def test_sink_service_range_throw(self) -> None:
         async with local_server() as sa:

@@ -18,7 +18,6 @@ namespace cpp2 test_cpp2.cpp_compat
 namespace d test_d.cpp_compat
 namespace java test_java.cpp_compat
 namespace java.swift test_swift.cpp_compat
-namespace php test_php.cpp_compat
 namespace py3 test_py.cpp_compat
 
 cpp_include "thrift/test/reflection/fatal_custom_types.h"

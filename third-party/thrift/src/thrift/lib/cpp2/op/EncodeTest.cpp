@@ -139,6 +139,27 @@ void testSerializedSizeBasicTypes() {
 }
 
 template <conformance::StandardProtocol Protocol>
+void testSerializedSizeUnsignedTypes() {
+  SCOPED_TRACE(apache::thrift::util::enumNameSafe(Protocol));
+  testSerializedSize<
+      Protocol,
+      type::cpp_type<uint8_t, type::byte_t>,
+      type_class::integral>(uint8_t{128});
+  testSerializedSize<
+      Protocol,
+      type::cpp_type<uint16_t, type::i16_t>,
+      type_class::integral>(uint16_t{32768});
+  testSerializedSize<
+      Protocol,
+      type::cpp_type<uint32_t, type::i32_t>,
+      type_class::integral>(uint32_t{2147483648});
+  testSerializedSize<
+      Protocol,
+      type::cpp_type<uint64_t, type::i64_t>,
+      type_class::integral>(uint64_t{9223372036854775808ULL});
+}
+
+template <conformance::StandardProtocol Protocol>
 void testSerializedSizeContainers() {
   SCOPED_TRACE(apache::thrift::util::enumNameSafe(Protocol));
   testSerializedSize<
@@ -274,6 +295,11 @@ void testSerializedSizeAdapted() {
 TEST(SerializedSizeTest, SerializedSizeBasicTypes) {
   testSerializedSizeBasicTypes<conformance::StandardProtocol::Binary>();
   testSerializedSizeBasicTypes<conformance::StandardProtocol::Compact>();
+}
+
+TEST(SerializedSizeTest, SerializedSizeUnsignedTypes) {
+  testSerializedSizeUnsignedTypes<conformance::StandardProtocol::Binary>();
+  testSerializedSizeUnsignedTypes<conformance::StandardProtocol::Compact>();
 }
 
 TEST(SerializedSizeTest, SerializedSizeContainers) {
@@ -753,8 +779,8 @@ TEST(DecodeTest, DecodeBasicTypes) {
 }
 
 TEST(DecodeTest, DecodeUnsignedTypes) {
-  testDecodeBasicTypes<conformance::StandardProtocol::Binary>();
-  testDecodeBasicTypes<conformance::StandardProtocol::Compact>();
+  testDecodeUnsignedTypes<conformance::StandardProtocol::Binary>();
+  testDecodeUnsignedTypes<conformance::StandardProtocol::Compact>();
 }
 
 TEST(DecodeTest, DecodeContainers) {
